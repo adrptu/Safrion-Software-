@@ -196,7 +196,7 @@ Uma função `veredito` dá o texto e a cor do `<span role="status">`, com cor e
 | # | Condição | Cor | Texto (executado, v2calc `base.js`, `cen.js`, `janela.js`) |
 |---|---|---|---|
 | R0 | nenhum cultivo com plano | — | o bloco não aparece; nota e "Aplicar plano em N cultivos" (safra.js:892, como hoje) |
-| R1 | nenhuma ocorrência desta safra no calendário | cinza | S2526: "Capacidade não calculada: as 21 ocorrências desta safra ficam fora do calendário do protótipo (set/26 – ago/27)." |
+| R1 | nenhuma ocorrência desta safra no calendário dentro do período dela | cinza | Todas fora do calendário, S2526: "Capacidade não calculada: as 21 ocorrências desta safra ficam fora do calendário do protótipo (set/26 – ago/27)." Senão, o motivo sai das etiquetas (verificação SAF-C02), S27SF com período em ago/27: "Capacidade não calculada: nenhuma ocorrência desta safra cai no período dela (01/08/2027 a 31/08/2027). Fora da conta: 14 ocorrências antes do início da safra (01/08/2027)."; com alguma fora do calendário, acrescenta "dentro do calendário do protótipo (…)" |
 | R2 | alguma célula com demanda desta safra tem necessárias > unidades (§3.3) | vermelho | LG2627: "Falta recurso: Operadores e equipe precisam de 127 em nov/26 e você tem 8 (9 meses); Tratores, 10 em out/26 e você tem 4 (4 meses). Inclui 56 ocorrências ainda sem alocação. Fora da conta: 75 ocorrências antes do início da safra (01/09/2026)." |
 | R3 | pendência sem falta de recurso: sem conjunto, sem rendimento, janela, sequência ou tarifa desconhecida | âmbar | S2627 com janela de 50 h na Colheita: "Cálculo incompleto: Colheita de grãos com 48 ha sem conjunto (as janelas não comportam toda a área). Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano." |
 | R4 | algo fora da conta | âmbar | S2627: "Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta: T4, T3, P1 e P2 (475 ha), sem plano. Prazo por talhão não verificado: 17 de 17 atividades sem janela." |
@@ -239,16 +239,18 @@ Uma função `veredito` dá o texto e a cor do `<span role="status">`, com cor e
 | Recurso | "Colhedoras" | presa; no estreito, até 45 % |
 | Maior uso | "81 %"; "1.584 %" em vermelho | maior ocupação entre as células com demanda desta safra; vermelho com texto se a linha tem falta; "não calculável" se toda célula com demanda tem capacidade 0; "—" sem demanda |
 | Mês | "fev/27" | mês do maior uso, como data tipada; empate: o 1º |
-| meses do período da safra | "27 %", "<1 %", "(6 %)", "precisa 127", "—" | meses do calendário dentro do período (dados2.py:15-17), mais mês com demanda desta safra fora dele. Sem interseção (S2526), o calendário inteiro. S2627 e LG2627: 12 meses; S27SF: fev/27 a jul/27 |
+| meses do período da safra | "27 %", "<1 %", "(6 %)", "precisa 127", "—" | meses do calendário dentro do período gravado (`capMeses`, em tempo de execução: editar o período pela tela acrescenta ou tira meses; toda `g_cap` nasce com o calendário inteiro). Sem interseção (S2526), o calendário inteiro. S2627 e LG2627: 12 meses; S27SF: fev/27 a jul/27 |
 
 **Conta (bloco CAPACIDADE, uma fonte para tela, filtro, chips, prévia e espelho):**
 - **Capacidade** do grupo k no mês = unidades × horas de uma unidade. Horas de uma unidade = dias úteis × jornada × turnos × disponibilidade; para pessoas, × (1 − absenteísmo) e turnos = 1. É a mesma aritmética de safra.js:755-760.
 - **`cargaRec(i, k)`** = Σ por configuração j da ocorrência de `x.nh × rc_j[k]`. `x.nh = x.h + x.fh` é o necessário (safra.js:273): atendido mais o que falta, inclusive o de "sem recurso na fazenda".
-  - Área sem horas calculáveis (sem rendimento, sem conjunto, partes abaixo de 100 %) não entra. Marca a célula com "≥", e o `aria-label` diz "mais N ha sem horas calculáveis".
+  - Área sem horas calculáveis (sem rendimento, sem conjunto, partes abaixo de 100 %) não entra. Marca a célula com "≥", e o `aria-label` diz "mais N ha sem horas calculáveis". Vale também para a ocorrência elegível de outra safra: a mesma marca nas duas vistas (verificação SAF-C02).
   - Base: PRD 53.2, "inclui demanda atribuída ao recurso ainda sem alocação factível… não truncar déficit" (PRD.md:8308).
 - **Demanda da célula** = Σ `cargaRec` das ocorrências desta safra no mês + as de `outrasSafras(self, saf)`.
   - `outrasSafras` usa o predicado de safra.js:344: outra safra, não encerrada (`!r.ro`), da mesma fazenda. É a mesma regra do estoque; espelho em dados2.py:806-809.
   - A LG2627 (outra fazenda) e a S2526 (encerrada) não entram na S2627.
+  - **Elegibilidade pela safra de origem (SAF-C02, 09/10/2026):** a etiqueta de cada ocorrência (antes do início, depois do fim, fora), desta e das outras safras, sai do período da safra dela, qualquer que seja a aberta; a carga das outras que fica fora vai ao "Fora da conta" do veredito (número, motivo e horas, nos meses com demanda desta safra), à linha do filtro e ao `aria-label`. Dano evitado: o mesmo mês dar falta de recurso numa safra e folga na outra só pela navegação.
+  - **Mesma soma em toda vista** (verificação SAF-C02): a célula soma as parcelas de cada safra em ordem crescente, então 3 ou mais safras dão o mesmo número, bit a bit, e o mesmo texto ("5 %" e não "4 %" conforme a aberta). `capSaf` exige `cls` nas ocorrências desta safra e `ini`/`fim` (nulos = sem período) em cada outra; sem eles, erro explícito em vez de conta errada em silêncio.
 - **Ocupação** = demanda ÷ capacidade. Capacidade 0 com demanda: "não calculável" (53.2); nunca divide por zero.
 - **Necessárias** = max(teto(demanda ÷ horas de uma unidade), maior `rc[k]` de uma configuração com área necessária no mês). É o "postos simultâneos" do PRD 44.4 e a mesma regra do motivo de safra.js:65.
 - **Falta** quando necessárias > unidades.

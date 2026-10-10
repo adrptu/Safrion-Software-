@@ -254,6 +254,67 @@ function cenApImp(k) { const n = x => (x === undefined || x === null || x === ''
 function cenApDupTxt(l) { return l.map(a => 'dia ' + a.dia + ', ' + cenNum(a.ha) + ' ha ' + (a.origem === 'app' ? 'pelo app' + (a.quem ? ' (' + a.quem + ')' : '') : 'pela web')).join('; '); }
 function cenSeloAp(c, id) { const o = c.ordens[id]; if (!o) return; const t = 'Apontamento em conferência';
   o.selos = (o.selos || []).filter(s => s.t !== t); if ((o.ap || []).some(a => a.st === CEN_AP_DUP)) o.selos.push({ t, c: 'yellow' }); }
+// ---------- Divergência de consumo/dose no apontamento (B-R8; PRD 41: dose é decisão agronômica; aprovar ≠ executar conforme) ----------
+// Planejado do trecho = dose × área pela regra única (cenQtdTrecho); informado = o fato do apontamento (o que veio editado, não a sugestão).
+// Precisão: a da regra de quantidade, centésimo da unidade em decimal meio para cima (cenQtd(x, 1)); nenhuma tolerância. O texto mostra o
+// informado nessas mesmas casas (9,995 L = 10,00 L = planejado 10 L: não diverge). LIM_DISP (20 %) é alçada de área dispensada e o
+// ×1,5/×0,5 do ajuste é aviso de digitação de dose: nenhum dos dois é tolerância de consumo, por isso não são usados aqui.
+// Divergente: o consumo fica como informado (nada é forçado à dose), o apontamento guarda planejado × informado por produto (ap.div), a O.S.
+// ganha o selo e o agrônomo revisa: aceita com motivo ou registra a correção/reaplicação; encerrar exige a revisão feita (cenPodeEncerrar).
+// Produto da ordem fora da requisição: nada esteve com o operador, o 0 é fato (cenApontar marca como informado) e diverge do planejado.
+// Dano evitado: subdose ou superdose aplicada sem decisão do agrônomo passar como execução conforme (resultado técnico e receituário).
+const CEN_DIV = 'Divergência de consumo/dose';
+function cenC2(x) { return Math.round(cenQtd(Number(x) || 0, 1) * 100); }   // centésimos pela regra de quantidade (decimal, meio para cima)
+function cenDivUn(c, o, p) { const x = (o.ins || []).find(i => i.p === p); if (x && x.un) return x.un;   // fora da ordem: a unidade do item ou do lote
+  const r = c && o.req && c.reqs[o.req]; const it = r && r.itens.find(i => i.prod === p); if (it && it.un) return it.un;
+  const l = c && c.lotes ? cenLote(c, p) : null; return (l && l.un) || ''; }
+// acumulado antes do apontamento (planejado do trecho): o gravado no apontamento; nos antigos, a soma dos dias somados anteriores
+function cenApAntes(o, ap) { return ap.ant !== undefined ? ap.ant : (o.ap || []).filter(a => a !== ap && a.dia < ap.dia && cenApSomado(a)).reduce((s, a) => s + (a.ha || 0), 0); }
+function cenApDiv(o, ap, antes, c) {
+  const inf = ap.inf || {}, cons = ap.cons || {}, out = [];
+  (o.ins || []).forEach(x => { if (!inf[x.p] || cons[x.p] === undefined) return; const plan = cenQtdTrecho(x.dose, antes, ap.ha), q = Number(cons[x.p]);
+    if (cenC2(q) !== cenC2(plan)) out.push({ p: x.p, un: x.un, plan, inf: q }); });
+  Object.keys(inf).forEach(p => { if (!(o.ins || []).some(x => x.p === p) && cenC2(cons[p]) > 0) out.push({ p, un: cenDivUn(c, o, p), plan: 0, inf: Number(cons[p]) }); });   // fora da ordem: planejado 0
+  return out; }
+function cenDivTxt(d) { const u = d.un ? ' ' + d.un : ''; const q = x => cenNum(cenC2(x) / 100);
+  if (d.rec) return d.p + ' planejado ' + q(d.plan) + u + ' × baixado ' + q(d.inf) + u + ' (informado ' + q(d.rec.rel) + u + ', relato ' + d.rec.conf + ' recusado no Estoque)';
+  return d.p + ' planejado ' + q(d.plan) + u + ' × informado ' + q(d.inf) + u; }
+function cenDivAbertas(o) { return (o.ap || []).filter(a => cenApSomado(a) && (a.div || []).length && !a.rev); }   // só o que somou: retido ou no aparelho ainda não conta
+function cenSeloDiv(c, id) { const o = c.ordens[id]; if (!o) return; o.selos = (o.selos || []).filter(s => String(s.t).indexOf(CEN_DIV) !== 0);
+  const ab = cenDivAbertas(o); if (!ab.length) return; const ps = [];
+  ab.forEach(a => a.div.forEach(d => { if (ps.indexOf(d.p) < 0) ps.push(d.p); })); o.selos.push({ t: CEN_DIV + ' · ' + ps.join(', '), c: 'red' }); }
+function cenDivMsg(ap) { return (ap && (ap.div || []).length) ? ' ' + CEN_DIV + ': ' + ap.div.map(cenDivTxt).join('; ') + ' · revisão técnica de ' + g2quem('agronomo') + '.' : ''; }
+// revisão técnica (agrônomo): dec 'aceitar' (com motivo) ou 'corrigir' (correção/reaplicação decidida, descrita). O consumo informado fica.
+// Mesma decisão de novo = já registrada (nada muda); outra decisão no mesmo dia = conflito (ENG-021).
+function cenDivRever(c, id, dia, dec, texto, ator) {
+  const quem = cenExige(ator, 'agronomo', 'Revisar a divergência de consumo/dose do dia ' + dia + ' da ' + id);
+  const o = c.ordens[id]; const ap = o && (o.ap || []).find(a => a.dia === dia && (a.div || []).length && cenApSomado(a));
+  if (!ap) throw new Error('O dia ' + dia + ' da ' + id + ' não tem divergência de consumo/dose em revisão.');
+  if (['aceitar', 'corrigir'].indexOf(dec) < 0) throw new Error('Decisão desconhecida: ' + dec + '.');
+  const txt = String(texto || '').trim(); const D = dec === 'aceitar' ? 'Aceita' : 'Correção decidida';
+  if (ap.rev) { if (ap.rev.dec === D && ap.rev.txt === txt) return { msg: 'Divergência do dia ' + dia + ' da ' + id + ' já revisada (' + ap.rev.dec.toLowerCase() + ' por ' + ap.rev.quem + ' às ' + ap.rev.at + '): nada foi gravado de novo.', repetido: true };
+    throw new Error('A divergência do dia ' + dia + ' da ' + id + ' já foi revisada (' + ap.rev.dec.toLowerCase() + ' por ' + ap.rev.quem + ' às ' + ap.rev.at + '): outra decisão é conflito, nada gravado.'); }
+  if (!txt) throw new Error((dec === 'aceitar' ? 'Informe o motivo para aceitar a divergência do dia ' : 'Descreva a correção ou reaplicação decidida para o dia ') + dia + ' da ' + id + '. Nada foi alterado.');
+  ap.rev = { dec: D, txt, quem, at: cenAgora() }; const rp = cenRevisao(ator, ap.quem, 'apontou'); if (rp) ap.rev.rp = rp;
+  cenSeloDiv(c, id); const t1 = txt.replace(/[.\s]+$/, '');
+  return { msg: (dec === 'aceitar' ? 'Divergência de consumo/dose do dia ' + dia + ' da ' + id + ' aceita por ' + quem + ': ' + t1 + '. O consumo informado fica como está.'
+    : 'Correção registrada por ' + quem + ' para o dia ' + dia + ' da ' + id + ': ' + t1 + '. O consumo informado fica como está.') + (rp ? ' Fica ' + rp + '.' : '') }; }
+// relato recusado no Estoque (CMD-50): nada daquele produto foi baixado no dia, então o que vale é 0 contra o planejado do trecho. A divergência
+// do dia passa a dizer isso (planejado × baixado, com o informado recusado) e, se já estava revisada sobre o informado, a revisão é reaberta
+// (a anterior fica no histórico). Dano evitado: o agrônomo decidir sobre um consumo que o Estoque declarou inexistente.
+function cenDivRecusa(c, k, quem) {
+  const o = c.ordens[k.os]; const ap = o && (o.ap || []).find(a => a.dia === k.dia && cenApSomado(a)); if (!ap) return '';
+  const x = (o.ins || []).find(i => i.p === k.prod); const plan = x ? cenQtdTrecho(x.dose, cenApAntes(o, ap), ap.ha) : 0; const old = ap.div || [];
+  const div = old.filter(d => d.p !== k.prod);
+  if (cenC2(plan) !== 0) div.push({ p: k.prod, un: k.un || cenDivUn(c, o, k.prod), plan, inf: 0, rec: { rel: k.relatado, conf: k.id, por: quem } });
+  const ord = p => { const i = (o.ins || []).findIndex(y => y.p === p); return i < 0 ? 1e9 : i; }; div.sort((a, b) => ord(a.p) - ord(b.p));
+  if (JSON.stringify(old) === JSON.stringify(div)) return '';
+  if (div.length) ap.div = div; else delete ap.div;
+  let re = ''; if (ap.rev) { ap.revAnt = (ap.revAnt || []).concat([Object.assign({}, ap.rev, { div: old, reaberta: 'relato ' + k.id + ' recusado no Estoque por ' + quem })]); delete ap.rev; re = ' A revisão anterior fica no histórico e a do dia é reaberta.'; }
+  cenSeloDiv(c, o.id);
+  const nd = div.find(d => d.p === k.prod);
+  return nd ? ' ' + CEN_DIV + ' do dia ' + k.dia + ' da ' + k.os + ': ' + cenDivTxt(nd) + ' · revisão técnica de ' + g2quem('agronomo') + '.' + re
+    : ' O dia ' + k.dia + ' da ' + k.os + ' fica sem divergência de consumo/dose de ' + k.prod + '.' + (re ? ' A revisão anterior fica no histórico.' : ''); }
 // baixa do consumo do apontamento, uma vez: até a custódia baixa; acima vira conferência com o almoxarife (CONC-07; CMD-50)
 function cenApBaixa(c, o, ap) {
   const r = o.req && c.reqs[o.req]; const cons = ap.cons = ap.cons || {}; const inf = ap.inf || {}; const conf = {};
@@ -282,7 +343,7 @@ function cenApEntra(c, o, ap, baixado) {
       cenSeloConf(c, o.id); }
     cenSeloAp(c, o.id); return { ap, ks: [], dup }; }
   const ks = baixado ? [] : cenApBaixa(c, o, ap);
-  o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha);
+  o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); cenSeloDiv(c, o.id);   // divergência de dose: revisão abre quando o apontamento soma (B-R8)
   return { ap, ks, dup: [] }; }
 function cenApontar(c, k) {
   const o = c.ordens[k.os]; if (!o) throw new Error('Ordem não encontrada.');
@@ -296,8 +357,11 @@ function cenApontar(c, k) {
   if (ha > o.saldo - pend + 1e-9) throw new Error('Máximo ' + cenNum(Math.max(0, o.saldo - pend)) + ' ha: é o saldo da ordem' + (pend ? ' descontando ' + cenNum(pend) + ' ha ainda no aparelho.' : '.'));
   const cons = {}, es = k.est || [], inf = {};
   Object.keys(k.cons || {}).forEach(p => { const q = k.cons[p]; if (q === undefined || q === null) return; cons[p] = q; if (es.indexOf(p) < 0) inf[p] = true; });
-  const r = o.req && c.reqs[o.req];   // não informado: dose × área do trecho para o que está com o operador; fora da requisição, 0 (como no MB-03)
-  (o.ins || []).forEach(x => { if (cons[x.p] === undefined) cons[x.p] = (r && r.itens.some(i => i.prod === x.p)) ? cenQtdTrecho(x.dose, (o.realizado || 0) + pend, ha) : 0; });   // regra única (SINT-C03)
+  const r = o.req && c.reqs[o.req];   // não informado: dose × área do trecho para o que está com o operador (regra única, SINT-C03)
+  // fora da requisição nada esteve com o operador: o 0 (vazio ou sugestão não editada, como no MB-03) é fato, não estimativa, e entra na
+  // comparação com o planejado (B-R8; revisão DOM achado 1: 100 % de subdose do produto não requisitado passava sem revisão)
+  (o.ins || []).forEach(x => { if (!(r && r.itens.some(i => i.prod === x.p))) { if (!inf[x.p]) { cons[x.p] = 0; inf[x.p] = true; } return; }
+    if (cons[x.p] === undefined) cons[x.p] = cenQtdTrecho(x.dose, (o.realizado || 0) + pend, ha); });
   if (r) for (const it of r.itens) { const q = cons[it.prod] || 0; if (q > it.custodia + 1e-9 && !inf[it.prod]) throw new Error('Consumo de ' + it.prod + ' (' + cenNum(q) + ' ' + it.un + ') acima do que está '
     + (k.origem === 'app' ? 'com você (' + cenNum(it.custodia) + ' ' + it.un + '). Confira a retirada.' : 'em custódia (' + cenNum(it.custodia) + ' ' + it.un + '). '
     + (k.cons ? 'Informe quanto foi usado ou confira a entrega no Estoque.' : 'Aponte pela O.S., informando quanto foi usado, ou confira a entrega no Estoque.'))); }
@@ -306,6 +370,7 @@ function cenApontar(c, k) {
   // previstos são plano, não fato: a web mantém os próximos dias (renumerados) e o app não os guarda — o que cada tela já fazia
   const ap = { d: k.d, dia, ha, h: k.h || null, parc: k.parc || null, st: 'Provisório', cons, inf, obs: k.obs || '', origem: k.origem || 'web', quem,
     chave: k.chave || ((k.origem === 'app' ? 'TU-' : 'W-') + k.os + '-dia' + dia), imp: cenApImp(k), at: cenAgora(), sinc: k.origem === 'app' ? cenOnline(c) : true };
+  { ap.ant = (o.realizado || 0) + pend; const dv = cenApDiv(o, ap, ap.ant, c); if (dv.length) ap.div = dv; }   // B-R8: antes da baixa (que tira a linha 0 de ap.cons); ant = base do planejado
   const reter = ap.sinc && cenApDup(o, ap).length > 0;   // previsto só sai quando o apontamento soma
   const prev = k.origem === 'app' ? [] : (o.ap || []).filter(a => a.st === 'Previsto').slice(reter ? 0 : 1).map((x, i) => Object.assign({}, x, { dia: dia + 1 + i }));
   o.ap = feitos.concat([ap]).concat(prev);
@@ -331,7 +396,7 @@ function cenApDecidir(c, id, dia, modo, ator, us) {
   if (modo !== 'somar' && !viv.length) throw new Error('O dia ' + de0 + ' já não vale (estornado ou guardado): o dia ' + dia + ' só pode ser somado como outro turno.');
   if (modo === 'anterior') {
     ap.dec = { modo, quem, at: cenAgora() }; guarda(ap, 'Mesmo turno do dia ' + de + ': guardado como duplicidade, nada baixado.');
-    ag.forEach(k => { k.estado = 'Recusado'; k.decisao = 'mesmo turno do dia ' + de; k.por = quem; }); cenSeloAp(c, id); cenSeloConf(c, id);
+    ag.forEach(k => { k.estado = 'Recusado'; k.decisao = 'mesmo turno do dia ' + de; k.por = quem; }); cenSeloAp(c, id); cenSeloConf(c, id); cenSeloDiv(c, id);
     return { msg: 'Dia ' + dia + ' guardado como duplicidade do dia ' + de + ': nada foi somado nem baixado; o relato fica no histórico.' }; }
   const K = modo === 'este' ? (viv.length === 1 && cenApSomado(viv[0]) ? viv[0] : null) : null;
   if (modo === 'este') { if (!K) throw new Error('"Vale este" só contra um apontamento já somado: decida antes o dia ' + (de || de0) + '.');
@@ -348,8 +413,9 @@ function cenApDecidir(c, id, dia, modo, ator, us) {
     o.realizado -= K.ha; o.saldo += K.ha; K.dec = { modo: 'estornado', quem, at: ap.dec.at, vale: dia };
     guarda(K, 'Estornado: mesmo turno do dia ' + dia + ', que ficou valendo.'); est = ' O dia ' + K.dia + ' foi estornado e fica guardado como duplicidade.'; }
   ap.st = 'Provisório'; ag.forEach(k => { k.estado = 'Em conferência'; }); ap.cons = dc.cons; ap.inf = dc.inf;
+  { ap.ant = b.real + b.pend; const dv = cenApDiv(o, ap, ap.ant, c); if (dv.length) ap.div = dv; else delete ap.div; }   // B-R8: o usado informado na conferência também é fato
   const ks = cenApBaixa(c, o, ap); const m0 = mvOf(ap); if (m0) m0.obs = (K ? 'Mesmo turno: vale este dia' : 'Somado como outro turno') + ' · ' + quem + '.';
-  o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); cenSeloAp(c, id); cenSeloConf(c, id);
+  o.realizado += ap.ha; o.saldo = Math.max(0, o.saldo - ap.ha); cenSeloAp(c, id); cenSeloConf(c, id); cenSeloDiv(c, id);
   if (!(o.saldo > 1e-9)) o.ap = o.ap.filter(a => a.st !== 'Previsto');
   return { msg: 'Dia ' + dia + (K ? ' vale como o turno de ' + ap.d + ': ' : ' somado como outro turno: ') + cenNum(ap.ha) + ' ha · saldo ' + cenNum(o.saldo) + ' ha.' + est
     + (ks.length || ag.length ? ' Consumo em conferência: ' + cenConcQuem(c, ks.concat(ag)) + '.' : '') }; }
@@ -363,7 +429,7 @@ function cenFecharTurno(c, ha, horas, consumo, obs, est) {
   if (R.repetido) return { msg: 'Turno já registrado como dia ' + ap.dia + ' (' + cenNum(ap.ha, 1) + ' ha): nada foi somado de novo.' };
   if (R.dup.length) return { msg: 'Turno fechado: ' + cenNum(ha, 1) + ' ha em ' + cenNum(horas, 1) + ' h, em conferência: já há ' + cenApDupTxt(R.dup) + ' em ' + ap.d
     + '. Nada foi somado nem baixado; ' + CEN_CONF_AP + ' decide se é outro turno.' };
-  return { msg: 'Turno fechado: ' + cenNum(ha, 1) + ' ha em ' + cenNum(horas, 1) + ' h' + (ap.sinc ? '.' : ' · salvo no aparelho, envia quando houver sinal.') + ' A ordem continua em execução.'
+  return { msg: 'Turno fechado: ' + cenNum(ha, 1) + ' ha em ' + cenNum(horas, 1) + ' h' + (ap.sinc ? '.' : ' · salvo no aparelho, envia quando houver sinal.') + ' A ordem continua em execução.' + cenDivMsg(ap)
     + (R.ks.length ? ' Consumo em conferência: ' + R.ks.map(k => cenConfTxt(k, c)).join('; ') + ' · ' + cenConcQuem(c, R.ks) + '.' : '') };
 }
 // Conciliar o consumo em conferência (CMD-50, almoxarife). Prévia = efeito: aceitar baixa o relatado uma vez; o que passa da custódia
@@ -391,8 +457,8 @@ function cenConciliar(c, id, aceitar, motivo, ator) {
   // dano evitado: custódia baixada como consumo sem conferência). Recusar não mexe no saldo: aberto, com autor
   const quem = (aceitar && !p.erro && p.falta > 1e-9) ? cenExige(ator, 'gestor', 'Aceitar ' + cenNum(p.falta) + ' ' + k.un + ' acima da custódia (' + k.id + ')')
     : aceitar ? cenExigeUm(ator, ['almoxarife', 'gestor'], 'Aceitar o relato ' + k.id) : cenQuem(ator, 'almoxarife', 'Recusar o relato ' + k.id);
-  if (!aceitar) { k.estado = 'Recusado'; k.decisao = motivo || 'registro sem fato físico'; k.por = quem; cenSeloConf(c, k.os);
-    return { msg: k.id + ' recusado (' + k.decisao + '): ' + k.prod + ' ' + cenNum(k.relatado) + ' ' + k.un + ' sem efeito no saldo' + (it && it.custodia > 1e-9 ? '; ' + cenNum(it.custodia) + ' ' + it.un + cenPl(it.custodia, ' segue', ' seguem') + ' em custódia com ' + k.quem + '.' : '.') }; }
+  if (!aceitar) { k.estado = 'Recusado'; k.decisao = motivo || 'registro sem fato físico'; k.por = quem; cenSeloConf(c, k.os); const dv = cenDivRecusa(c, k, quem);   // B-R8: a divergência segue o que vale
+    return { msg: k.id + ' recusado (' + k.decisao + '): ' + k.prod + ' ' + cenNum(k.relatado) + ' ' + k.un + ' sem efeito no saldo' + (it && it.custodia > 1e-9 ? '; ' + cenNum(it.custodia) + ' ' + it.un + cenPl(it.custodia, ' segue', ' seguem') + ' em custódia com ' + k.quem + '.' : '.') + dv }; }
   if (p.erro) throw new Error(p.erro);
   const falta = p.falta;
   if (falta > 1e-9) {
@@ -426,7 +492,7 @@ function cenSinal(c, online) {
   c.app.fila = []; return { msg: (n ? (n + (n > 1 ? ' registros enviados' : ' registro enviado') + ' ao voltar o sinal.') : 'Sinal de volta. Nada pendente.')
     + (ret.length ? ' Em conferência de duplicidade: ' + ret.join('; ') + '. Nada foi somado; ' + CEN_CONF_AP + ' decide.' : '') };
 }
-// Encerrar exige apontamentos enviados e nada em custódia (sobra devolvida).
+// Encerrar exige apontamentos enviados, nada em custódia (sobra devolvida) e a divergência de dose revisada pelo agrônomo (B-R8).
 function cenPodeEncerrar(c, id) { const o = c.ordens[id]; const r = o.req && c.reqs[o.req];
   if ((o.ap || []).some(a => a.sinc === false)) return 'Há apontamentos no aparelho aguardando sinal.';
   const dp = (o.ap || []).filter(a => a.st === CEN_AP_DUP); if (dp.length) return 'Apontamento em conferência de duplicidade: ' + dp.map(a => 'dia ' + a.dia + ' (' + a.d + ', ' + cenNum(a.ha) + ' ha)').join(', ') + '. ' + CEN_CONF_AP + ' decide se é outro turno.';
@@ -435,5 +501,6 @@ function cenPodeEncerrar(c, id) { const o = c.ordens[id]; const r = o.req && c.r
   const rs = Object.values(c.reqs || {}).filter(x => x.os === id && x !== r); if (r) rs.unshift(r);
   const cust = []; rs.forEach(x => x.itens.forEach(i => { if (i.custodia > 0.001) cust.push(i.prod + ' ' + cenNum(i.custodia) + ' ' + i.un + (rs.length > 1 ? ' (' + x.id + ' · ' + i.lote + ')' : '')); }));
   if (cust.length) return 'Sobra em custódia: ' + cust.join(', ') + '. Receba a devolução no Estoque.';
+  const dv = cenDivAbertas(o); if (dv.length) return CEN_DIV + ' em revisão técnica: ' + dv.map(a => 'dia ' + a.dia + ' · ' + a.div.map(cenDivTxt).join('; ')).join(' | ') + '. ' + g2quem('agronomo') + ' aceita com motivo ou registra a correção na linha do apontamento.';   // B-R8
   if (typeof prPodeEncerrar === 'function') { const pm = prPodeEncerrar(c, id); if (pm) return pm; }   // colheita: nenhuma carga a pesar ou sem sinal (R-18)
   return ''; }

@@ -146,8 +146,8 @@ SEM_INS={'OS-0419':'Água · 10,81 mm em 1 passada · sem almoxarifado.','OS-042
          'OS-0423':'Água · 4,0 mm por gotejo em 2 h · sem almoxarifado.','OB-0104':'Ordem de processo: entradas e saídas por etapa do beneficiamento, sem dose por hectare.'}
 # impedimento que segura o próximo passo da fase atual: o quê, quem resolve e onde
 BLOQ={
- 'OS-0431':dict(acao='liberar',t='Liberar bloqueado: Trator T1 em manutenção (OM-0233).',q='PCP confirma a máquina substituta antes de 24/09 06:00.'),
- 'OS-0420':dict(acao='apontar',t='Apontamento pausado: Trator T1 bloqueado (OM-0233).',q='O Trator 02 assume a partir de 24/09.',h='CA-01x-os0420.dc.html',hl='Abrir a ordem completa'),
+ 'OS-0431':dict(acao='liberar',aid='a01',t='Liberar bloqueado: Trator T1 bloqueado (OM-0233).',q='PCP confirma a máquina substituta antes de 24/09 06:00.'),   # aid: condição única (c.man), S3
+ 'OS-0420':dict(acao='apontar',aid='a01',t='Apontamento pausado: Trator T1 bloqueado (OM-0233).',q='O Trator 02 assume a partir de 24/09.',h='CA-01x-os0420.dc.html',hl='Abrir a ordem completa'),
  'OS-0422':dict(acao='liberar',tone='yellow',t='Definir janela: as 2 passadas ainda não têm horário.',q='João (irrigante) define a janela na Irrigação.',h='IR-02.dc.html',hl='Definir janela'),
  'OS-0423':dict(acao='liberar',tone='red',t='Resolver conflito: a parada da bomba B3 (14:00–15:00) cai na janela.',q='Caio (PCP) resolve o conflito na Irrigação.',h='IR-02.dc.html',hl='Resolver conflito'),
 }
@@ -237,6 +237,8 @@ function osMerge(b,co,c){ if(!co) return b;
   if(x.aj&&x.aj.length){ o.area=co.area; o.ajv=x.aj[x.aj.length-1].v; o.orig=(b.orig||[]).concat(x.aj.map(a=>a.t));
     o.ins=(co.ins||[]).map(y=>{ const i=(b.ins||[]).find(z=>z.p===y.p); return Object.assign({g:y.g||''},i||{},{p:y.p,dose:y.dose,un:y.un,tot:y.tot}); }); }
   if(x.ev&&x.ev.length) o.orig=(o.orig||[]).concat(x.ev.map(e=>e.t));   // aprovação (CMD-42) e liberação (CMD-06) na Origem
+  (co.ap||[]).forEach(a=>{ (a.revAnt||[]).forEach(r=>{ o.orig=(o.orig||[]).concat(['Dia '+a.dia+' · '+CEN_DIV+' '+r.dec.toLowerCase()+' por '+r.quem+' às '+r.at+': '+r.txt+' · reaberta: '+r.reaberta]); });
+    if(a.rev) o.orig=(o.orig||[]).concat(['Dia '+a.dia+' · '+CEN_DIV+' '+a.rev.dec.toLowerCase()+' por '+a.rev.quem+' às '+a.rev.at+': '+a.rev.txt]); });   // B-R8 (revisão reaberta fica no histórico)
   if(b.area){ o.realizado=co.realizado||0; o.saldo=co.saldo||0; }
   if(co.etapa!==b.etapa){ o.cond=osCondGen(o); o.dono=co.etapa==='Em conferência'?o.resp:''; o.prazo=co.etapa==='Em conferência'?'conferir':''; }
   if(mine){ o.cond=x.cond; o.dono=x.dono||''; o.prazo=x.prazo||''; }
@@ -248,12 +250,14 @@ function osMerge(b,co,c){ if(!co) return b;
     const fz=((co.saldo||0)-osApPend(co)>0.001)&&cenIniFalta(co,r);   // componente esgotado com área a fazer (regra única de início)
     if(fz&&fz.k==='rever'){ o.selos=o.selos.concat([{t:'Insumo esgotado · '+fz.its.map(i=>i.prod).join(', '),c:'red'}]); o.dono=OS_AGRO; o.prazo='decidir a área restante';
       o.esg={acao:'apontar',t:'Apontar bloqueado: '+fz.t,q:fz.q}; }
-    const dpx=(co.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dpx.length){ o.dono=CEN_CONF_AP; o.prazo='decidir se o dia '+dpx.map(a=>a.dia).join(', ')+' é outro turno'; } }   // duplicidade retida: decide a conferência (CMD-09)
+    const dpx=(co.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dpx.length){ o.dono=CEN_CONF_AP; o.prazo='decidir se o dia '+dpx.map(a=>a.dia).join(', ')+' é outro turno'; }   // duplicidade retida: decide a conferência (CMD-09)
+    else if(!o.esg&&cenDivAbertas(co).length){ o.dono=OS_AGRO; o.prazo='revisar a divergência de dose do dia '+cenDivAbertas(co).map(a=>a.dia).join(', '); } }   // B-R8: revisão técnica pendente
   // conferência: o encerramento depende do cenário (apontamento aguardando sinal ou sobra em custódia)
   if(co.etapa==='Em conferência'){ o.encM=cenPodeEncerrar(c,co.id);
     if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
     else if(/^Carga a pesar/.test(o.encM)){ const t='Carga a pesar';   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Produção › Recebimento e beneficiamento (Cargas) */
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]); o.dono=(typeof prRec==='function'?prRec(prFazDaOS(c,co)):'Recebimento'); o.prazo='pesar e receber a carga'; }
+    else if(o.encM.indexOf(CEN_DIV)===0){ o.dono=OS_AGRO; o.prazo='revisar a divergência de dose'; }   /* B-R8: o selo vem do cenário (cenSeloDiv) */
     else { const sin=/sinal/.test(o.encM); const t=sin?'Aguardando sinal do app':(/duplicidade/.test(o.encM)?'Apontamento em conferência':'Sobras a receber');  // o bloqueio também na lista e no Kanban
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]);
       if(sin){ o.dono=o.resp; o.prazo='reconectar o app'; } else if(/duplicidade/.test(o.encM)){ o.dono=CEN_CONF_AP; o.prazo='decidir a duplicidade'; } else if(!/almoxarife/.test(o.dono||'')){ o.dono='Rui (almoxarife)'; o.prazo='receber a devolução'; } } }
@@ -271,7 +275,19 @@ function osMerge(b,co,c){ if(!co) return b;
       o.dono='Suprimentos'; o.prazo='receber o insumo no Estoque';
       o.cond=String(o.cond||'').replace('Próximo passo: liberar para execução.','A liberação aguarda '+(pr||'o insumo')+' no Estoque.'); } }
   carMerge(o,co,c);   // carência e destino (MAPA-CARENCIA-LMR-20261003 · dados_carencia.JS)
+  osManCond(o,b,c);   /* condição única do ativo (PCM simplificado S3): o bloqueio da máquina vem de c.man, o mesmo da Manutenção e do CD-03 */
   return o; }
+/* S3 · F107/F108: ordem que depende de um ativo da Manutenção (bloq.aid) lê a condição única do cenário; bloqueado → impedimento com o dono e o
+   link para a OM que trata (MA#om=); apto (CMD-19) → o impedimento sai e a ordem volta à reprogramação do PCP (impedimento derivado: PCMS-A05, Bloco 2) */
+function osManCond(o,b,c){ if(!b||!b.bloq||!b.bloq.aid) return; const a=((c&&c.man&&c.man.ativos)||{})[b.bloq.aid]; if(!a) return;
+  if(a.cond==='Bloqueado'){ const om=a.condInfo&&a.condInfo.om; o.bloq=Object.assign({},b.bloq,{t:String(b.bloq.t).replace(/\(OM-\d+\)/,'('+(om||'sem ordem que trate')+')')},
+      b.bloq.h?{}:{h:'MA.dc.html#'+(om?'om='+om:'ativo='+a.id),hl:om?('Acompanhar '+om):('Abrir '+a.nome+' na Manutenção')}); return; }   /* o link próprio do bloqueio (ex.: ordem completa) fica */
+  o.bloq=null; o.selos=(o.selos||[]).filter(s=>!/bloquead|Falta máquina/i.test(s.t));
+  /* revisão 09/10 (A5): com a máquina apta sai só o impedimento; o dono volta ao normal da fase. A reprogramação pelo PCP vale uma vez, antes de liberar
+     (A liberar); em execução, conferência ou encerrada a ordem segue com o dono da fase (dano evitado: ordem em andamento "com o PCP" para sempre) */
+  const h=(a.condHist||[]).slice(-1)[0]||{}; const desde=a.nome+' '+a.cond.toLowerCase()+' desde '+String(h.em||'').split('-').reverse().slice(0,2).join('/')+(h.om?' ('+h.om+')':'');
+  if(o.etapa==='A liberar'){ o.cond=desde+' · o PCP reprograma a máquina da ordem (O.S. › Recursos); depois '+OS_AGRO+' confere e libera. Próximo passo: liberar para execução.'; o.dono='PCP'; o.prazo='reprogramar antes de liberar'; return; }
+  o.cond=osCondGen(Object.assign({},o,{cond:desde+'.'})); o.dono=o.etapa==='Em conferência'?o.resp:''; o.prazo=o.etapa==='Em conferência'?'conferir':''; }
 function osCondGen(o){ const pend=(o.ap||[]).filter(a=>a.sinc===false).length;
   if(o.etapa==='Liberadas') return 'Liberada'+(o.req?' · '+o.req+' reservou os insumos no Estoque':'')+'. Próximo passo: iniciar na janela '+o.janela+'.';
   if(o.etapa==='Em execução') return 'Em execução · '+nf(o.realizado)+' de '+nf(o.area)+' ha'+(pend?' · '+pend+(pend>1?' apontamentos':' apontamento')+' no aparelho aguardando sinal':'')+'. Registre o apontamento de cada turno.';
@@ -304,6 +320,8 @@ function osTrilha(o,it){ if(!it||o.etapa==='Canceladas'||(!o.reservado&&!(it.ent
 function osLibErro(o,c0){ const c=c0||cenGet(); if(!c.ordens[o.id]) return ''; const k=cenClone(c);
   try { osc_libEfeito(k,o.id,false,o.janela); return ''; } catch (e) { return String(e.message||e); } }   /* o motivo do Estoque, da lei ou da carência; não o perfil */
 function osEncBloq(o){ const m=o.encM;
+  if(String(m).indexOf(CEN_DIV)===0) return {acao:'encerrar',t:'Encerrar bloqueado: divergência de consumo/dose em revisão técnica · '+cenDivAbertas(o).map(a=>'dia '+a.dia+' · '+a.div.map(cenDivTxt).join('; ')).join(' | ')+'.',
+    q:OS_AGRO+', na linha do apontamento: aceita com motivo ou registra a correção ou reaplicação.'};   /* B-R8 */
   if(/^Carga a pesar/.test(m)){ const g=(/CG-\d+/.exec(m)||[''])[0]; return {acao:'encerrar',t:'Encerrar bloqueado: '+m.replace(/\.$/,'')+'.',q:(o.dono||'Recebimento')+' pesa e recebe a carga (registrada por engano: descarta com motivo na mesma tela); a produção do talhão só fecha com ela.',h:'CARGA.dc.html'+(g?'#'+g:''),hl:'Pesar a carga'}; }   /* colheita (R-18) */
   if(/^Carga no aparelho/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m.replace(/\.$/,'')+'.',q:(typeof prResp==='function'?prResp(o):o.resp)+' reconecta o app; a carga entra uma vez e vai para a pesagem.'};   /* colheita sem sinal (revisão A-11): não é o recebimento que resolve */
   if(/sinal/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: há apontamentos no aparelho aguardando sinal.',q:o.resp+' reconecta o app; o envio é automático e não duplica.'};
@@ -422,7 +440,7 @@ function osc_apontar(c,id,d,ha,cons,est,chave){ const R=cenApontar(c,{os:id,d,ha
   if(R.repetido) return {msg:'Apontamento do dia '+ap.dia+' já registrado ('+nd(ap.ha)+' ha): nada foi somado de novo.'};
   if(R.dup.length) return {msg:'Apontamento do dia '+ap.dia+' ('+nd(ha)+' ha em '+d+') em conferência: já há '+cenApDupTxt(R.dup)+' nesta data. Nada foi somado nem baixado; '+CEN_CONF_AP+' decide se é outro turno.'};
   const un=p=>((o.ins||[]).find(x=>x.p===p)||{}).un||''; const ins=Object.keys(ap.cons||{}).map(p=>p+' '+nd(ap.cons[p])+' '+un(p)).join(', ');
-  return {msg:'Apontamento do dia '+ap.dia+': '+nd(ha)+' ha (provisório)'+(ins?' · usado: '+ins:'')+'. Saldo '+nf(o.saldo)+' ha; a ordem continua em execução.'
+  return {msg:'Apontamento do dia '+ap.dia+': '+nd(ha)+' ha (provisório)'+(ins?' · usado: '+ins:'')+'. Saldo '+nf(o.saldo)+' ha; a ordem continua em execução.'+cenDivMsg(ap)
     +(R.ks.length?' Consumo em conferência: '+R.ks.map(k=>cenConfTxt(k,c)).join('; ')+' · '+cenConcQuem(c,R.ks)+'.':'')}; }
 function osc_apDecidir(c,id,dia,modo,us,ator){ return cenApDecidir(c,id,dia,modo,ator,us); }   /* CMD-09 (quem confere): 'anterior' | 'este' | 'somar'; us = usado informado na conferência */
 // linhas de consumo do formulário (O.S. e Mapa), a mesma regra do MB-03: com o operador, sugere dose × área do trecho (editável, estimativa);
@@ -441,7 +459,7 @@ function osApColeta(L){ const cons={},est=[]; let erro='';
 function osApDupAviso(c,o,d){ const co=c.ordens[o.id]; if(!co||!/^\d\d\/\d\d$/.test(d||'')) return '';
   const l=cenApDup(co,{d,parc:null,chave:'?',origem:'web'}); return l.length?'Já há '+cenApDupTxt(l)+' em '+d+'. Se for outro turno, salve: ele fica em conferência com '+CEN_CONF_AP+' e só soma depois da decisão.':''; }
 function osc_conferencia(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em execução') throw new Error(id+' não está em execução.');
-  if(o.area&&o.saldo>0.001) throw new Error('Ainda há '+cenNum(o.saldo)+' ha de saldo.'); o.etapa='Em conferência'; o.selos=[];
+  if(o.area&&o.saldo>0.001) throw new Error('Ainda há '+cenNum(o.saldo)+' ha de saldo.'); o.etapa='Em conferência'; o.selos=[]; cenSeloDiv(c,id);   /* B-R8: a revisão pendente segue visível */
   return {msg:id+' enviada para conferência.'}; }
 // encerrar: só com apontamentos enviados e nada em custódia (cenPodeEncerrar); os apontamentos passam a conferidos
 function osc_encerrar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em conferência') throw new Error(id+' não está em conferência.');
@@ -515,7 +533,7 @@ function dotSt(c){ const cc=G2C[c]||G2C.gray; return 'width:6px;height:6px;borde
 // ===== O.S. × cenário compartilhado (cenario.js, o mesmo estado do Estoque e do App) =====
 // Fase, realizado/saldo, apontamentos, requisição e insumos vêm de cenGet(); o que o cenário não tem vem de OSD (registro).
 // Gancho de teste/inspeção (o script da tela roda isolado): os testes os_* leem e mudam o cenário na própria página.
-try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar, osc_apontar, osc_dispensar, osc_cancelar, osc_apDecidir }; } catch (e) {}
+try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar, osc_apontar, osc_dispensar, osc_cancelar, osc_apDecidir, osc_conferencia, cenDivRever }; } catch (e) {}
 // filtros do topo (Fazenda e Safra): lista, Kanban, chips de fase e selo do cabeçalho mostram só as ordens do recorte
 function mfFaz(self){ return self.state.mf_faz||'Santa Rita'; }
 function mfSaf(self){ return self.state.mf_saf||'Todas'; }
@@ -746,7 +764,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
     osRun(self,c=>osc_dispensar(c,o.id,n,mot,g2perfil()),{pa:null}); };
 }
 function EXTRAVALS(self,v){
-  self.g2perfilFecha={pa:null};   /* trocar o perfil fecha a confirmação e os formulários de decisão (liberar, ajustar, dispensar, cancelar) */
+  self.g2perfilFecha={pa:null,dvr:null};   /* trocar o perfil fecha a confirmação e os formulários de decisão (liberar, ajustar, dispensar, cancelar, revisão de dose) */
   const st=self.state, all=ords(self), os=vis(self);
   // OS.dc.html#OS-0420 (vindo do Mapa ou de outra tela): abre a ordem na tela de trabalho, uma vez
   // #OS-0430:ajustar (vindo do Mapa) abre o formulário de ajuste; ordem de outra fazenda troca o filtro Fazenda para a dela
@@ -854,13 +872,27 @@ function EXTRAVALS(self,v){
     const usOf=(dia)=>{ const u=apus[dia]||{}; const r={}; Object.keys(u).forEach(p=>{ const n=g2num(u[p]); if(String(u[p]).trim()!==''&&!isNaN(n)) r[p]=n; }); return r; };
     const apDec=(dia,modo)=>osRun(self,c=>osc_apDecidir(c,o.id,dia,modo,usOf(dia),g2perfil()),{apus:null},(e)=>self.setState({g2toast:e}));
     const CONF=g2papel(g2perfil(),'conferente');   /* CMD-09: as três saídas só para quem confere (CTL-3 · ATOR) */
+    /* B-R8: divergência de consumo/dose na linha do apontamento; a revisão técnica (aceitar com motivo ou registrar a correção) só com o papel agronomo */
+    const AGRd=g2papel(g2perfil(),'agronomo'); const dvr=(st.dvr&&st.dvr.id===o.id)?st.dvr:{id:o.id};
+    const dvSet=(dia,patch)=>{ const cur=(self.state.dvr&&self.state.dvr.id===o.id)?self.state.dvr:{id:o.id}; self.setState({dvr:Object.assign({},cur,{[dia]:Object.assign({},cur[dia]||{},patch)})}); };
+    /* DOM-REV-20261009-01 (S3): gravar a revisão de um dia limpa só o rascunho desse dia; o dos outros dias da mesma ordem fica,
+       e o foco vai para o próximo dia ainda em revisão (quem usa o teclado continua de onde estava) */
+    const dvGo=(dia,dec)=>{ const cur=(self.state.dvr&&self.state.dvr.id===o.id)?self.state.dvr:{id:o.id}; const t=(cur[dia]||{}).t||'';
+      const resto=Object.assign({},cur); delete resto[dia];
+      const r=osRun(self,c=>cenDivRever(c,o.id,dia,dec,t,g2perfil()),{dvr:resto},(e)=>dvSet(dia,{err:e}));
+      if(!r.erro) setTimeout(()=>{ const el=document.querySelector('aside[role=dialog] textarea[id^="dv_"]'); if(el) el.focus(); },60); };
     let ac=0; v.pan_ap=(o.ap||[]).map(x=>{ const prev=x.st==='Previsto'; const sem=x.sinc===false; const som=!prev&&cenApSomado(x); if(som) ac+=x.ha; const s=sem?'Aguardando sinal':x.st;
       const dup=x.st===CEN_AP_DUP&&!!cgo; const viv=dup?cenApDupVivos(cgo,x):[]; const de=viv.map(a=>a.dia).join(', ');
       const K=viv.length===1&&cenApSomado(viv[0])?viv[0]:null; const uso=K?cenApUsoK(cg,cgo,K):'';
       const fal=dup?cenApDecCons(cgo,x,cenApDecBase(cg,cgo,null),null).falta:[];
       const usx=fal.map(f=>({lab:'Usado de '+f.p+' ('+f.un+')',v:(apus[x.dia]||{})[f.p]||'',hint:'Estimativa '+nd(f.q)+' '+f.un+' passa da custódia ('+nd(f.cust)+' '+f.un+'): informe o usado'+(x.quem?' com '+x.quem:''),
         set:(e)=>{ const cur=self.state.apus&&self.state.apus.id===o.id?self.state.apus:{id:o.id}; self.setState({apus:Object.assign({},cur,{[x.dia]:Object.assign({},cur[x.dia]||{},{[f.p]:e.target.value})})}); }}));
-      return {d:x.d,dia:'Dia '+x.dia+(x.origem==='app'?' · app':''),ha:(prev?'prev. ':'')+nf(x.ha)+' ha'+(x.h?' · '+nd(x.h,1)+' h':''),ac:(prev?'—':(!som?'não somado':nf(ac)+' / '+nf(o.area)+' ha')),t:s,st:chipSt(STCOR[s]),dot:dotSt(STCOR[s]),rst:prev?'color:#8A968E;':'',
+      const dv=!prev&&x.st!==CEN_AP_DESC&&(x.div||[]).length>0, dvAb=dv&&som&&!x.rev, dvS=dvr[x.dia]||{};   /* guardado como duplicidade nunca soma: sem divergência (revisão DOM achado 6) */
+      const dvQ=(dvAb&&!AGRd)?'Revisão técnica pendente: decisão de '+g2quem('agronomo')+' (aceitar com motivo ou registrar a correção).':((dv&&!som&&!x.rev)?'A revisão técnica abre quando o apontamento somar.':'');
+      return {div:dv,divT:dv?CEN_DIV+' · '+x.div.map(cenDivTxt).join('; '):'',hasRev:dv&&!!x.rev,revT:x.rev?'Revisão técnica: '+x.rev.dec.toLowerCase()+' por '+x.rev.quem+' às '+x.rev.at+' · '+x.rev.txt+(x.rev.rp?' · '+x.rev.rp:''):'',
+        divQ:dvQ,hasDivQ:!!dvQ,dvPode:dvAb&&AGRd,dvfid:'dv_'+x.dia,dvlab:'Motivo ou correção decidida · dia '+x.dia,dvv:dvS.t||'',dverr:dvS.err||'',hasDverr:!!dvS.err,
+        dvset:(e)=>dvSet(x.dia,{t:e.target.value,err:''}),dvAc:()=>dvGo(x.dia,'aceitar'),dvCo:()=>dvGo(x.dia,'corrigir'),
+        d:x.d,dia:'Dia '+x.dia+(x.origem==='app'?' · app':''),ha:(prev?'prev. ':'')+nf(x.ha)+' ha'+(x.h?' · '+nd(x.h,1)+' h':''),ac:(prev?'—':(!som?'não somado':nf(ac)+' / '+nf(o.area)+' ha')),t:s,st:chipSt(STCOR[s]),dot:dotSt(STCOR[s]),rst:prev?'color:#8A968E;':'',
         dup,dupT:!dup?'':(viv.length?'Mesma data e talhão do dia '+de+'. É outro turno? Quem decide: '+CEN_CONF_AP+'.':'O dia '+(x.dupDe||[]).join(', ')+' já não vale: este só pode ser somado como outro turno. Quem decide: '+CEN_CONF_AP+'.')
           +(uso?' "Vale este" indisponível: '+uso+'.':''),
         vant:'Mesmo turno: vale o dia '+de,hasAnt:viv.length>0,hasEste:!!K&&!uso,usx,hasUs:CONF&&usx.length>0,pode:CONF,
@@ -1006,7 +1038,17 @@ def _painel():
            f'<sc-if value="{H("a.pode")}" hint-placeholder-val="{T()}"><div style="display: flex; gap: 6px; flex-wrap: wrap;">'
            f'<sc-if value="{H("a.hasAnt")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("a.ant")}" style="{_MINI}">{H("a.vant")}</button></sc-if>'
            f'<sc-if value="{H("a.hasEste")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("a.este")}" style="{_MINI}">Mesmo turno: vale este</button></sc-if>'
-           f'<button type="button" onClick="{H("a.somar")}" style="{_MINI}">Outro turno: somar</button></div></sc-if></div></sc-if>')
+           f'<button type="button" onClick="{H("a.somar")}" style="{_MINI}">Outro turno: somar</button></div></sc-if></div></sc-if>'
+           # B-R8: divergência de consumo/dose (planejado × informado) e a revisão técnica do agrônomo na mesma linha
+           f'<sc-if value="{H("a.div")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Revisão técnica da dose" style="display: flex; flex-direction: column; gap: 6px; padding: 0 0 8px;">'
+           f'<span style="font-size: 12.5px; color: {RED}; font-weight: 700; line-height: 1.4;">{H("a.divT")}</span>'
+           f'<sc-if value="{H("a.hasRev")}" hint-placeholder-val="{F()}"><span style="font-size: 12.5px; color: {MUTED}; line-height: 1.4;">{H("a.revT")}</span></sc-if>'
+           f'<sc-if value="{H("a.hasDivQ")}" hint-placeholder-val="{F()}"><span style="font-size: 12.5px; color: #8A5A00; font-weight: 600; line-height: 1.4;">{H("a.divQ")}</span></sc-if>'
+           f'<sc-if value="{H("a.dvPode")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-direction: column; gap: 6px;">'
+           f'<textarea id="{H("a.dvfid")}" aria-label="{H("a.dvlab")}" placeholder="Motivo para aceitar, ou a correção/reaplicação decidida" value="{H("a.dvv")}" onChange="{H("a.dvset")}" style="font-family: inherit; font-size: 13px; padding: 7px 9px; border-radius: 8px; border: 1px solid {LINE}; min-height: 48px; resize: vertical; box-sizing: border-box; width: 100%;"></textarea>'
+           f'<sc-if value="{H("a.hasDverr")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H("a.dverr")}</span></sc-if>'
+           f'<div style="display: flex; gap: 6px; flex-wrap: wrap;"><button type="button" onClick="{H("a.dvAc")}" style="{_MINI}">Aceitar com motivo</button>'
+           f'<button type="button" onClick="{H("a.dvCo")}" style="{_MINI}">Registrar correção</button></div></div></sc-if></div></sc-if>')
     aphead=(f'<div style="display: grid; grid-template-columns: 64px 84px 1fr 1.3fr auto; gap: 8px; padding: 4px 0; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; color: {MUTED}; text-transform: uppercase;">'
             f'<span>Data</span><span>Turno</span><span style="text-align: right;">Realizado</span><span style="text-align: right;">Acumulado</span><span>Situação</span></div>')
     IC='minmax(0,1.6fr) 96px 110px 110px minmax(0,1.5fr)'

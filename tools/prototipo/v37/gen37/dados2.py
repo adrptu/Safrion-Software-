@@ -733,11 +733,11 @@ def carga_itens(o):
             if u<=0: continue
             out.append(dict(k=k,j=j,u=u,h=float(x.get('nh') or 0)*u,ha=float(x.get('h') or 0)*u,sim=u if float(x.get('nq') or 0)>1e-12 else 0,semRec=bool(x.get('semRec'))))
     return out
-def cap_rec(r):
-    pes=r['id']=='oper' or 'abs' in r
+def cap_rec(r,meses=None,dias=None):
+    pes=r['pes'] if 'pes' in r else (r['id']=='oper' or 'abs' in r)
     pc=lambda x: min(100,max(0,float(x or 0)))/100
     un=float(r['un'] or 0); J=float(r['jornada'] or 0); T=1 if pes else float(r.get('turnos') or 0); DP=(1-pc(r.get('abs'))) if pes else pc(r.get('disp'))
-    por=[DIAS_UTEIS.get(m,0)*J*T*DP for m,_ in MESES]
+    por=[(DIAS_UTEIS if dias is None else dias).get(m,0)*J*T*DP for m,_ in (MESES if meses is None else meses)]
     return dict(id=r['id'],nome=r['nome'],pes=pes,un=un,porUn=por,cap=[un*p for p in por])
 def outras_safras(safra):
     me=next((s for s in SAFRAS if s['id']==safra),None)
@@ -751,14 +751,33 @@ def classe_oc(dt,mi,ini,fim):
     if mi<0: return 'fora'
     return 'cal'
 def capacidade(safra,recursos=None,planos=None,cfg_override=None):
+    """Espelho do capCalc + capSaf (safra.js): ocorrências desta safra com a etiqueta do período dela e as das outras safras abertas da
+    mesma fazenda com o período de cada uma (SAF-C02); a conta é a do cap_saf."""
+    recs=recursos or RECURSOS; me=next((s for s in SAFRAS if s['id']==safra),{})
+    oc=[dict(o,cls=classe_oc(o['dt'],o['mi'],me.get('ini'),me.get('fim'))) for o in ocorr_op(safra,planos,cfg_override,recs)]
+    outras=[dict(id=s['id'],nome=s['nome'],ini=s.get('ini'),fim=s.get('fim'),oc=ocorr_op(s['id'],None,None,recs)) for sid in outras_safras(safra) for s in SAFRAS if s['id']==sid]
+    return cap_saf(oc,outras,recs)
+def cap_saf(oc,outras,recs,meses=None,dias=None):
     """Espelho do capSaf (safra.js · bloco CAPACIDADE): por grupo de recursos e mês, demanda desta safra e das outras safras abertas da mesma
-    fazenda (x.nh × rc, inclui o necessário sem alocação), capacidade, ocupação (None = não calculável), necessárias e falta."""
-    recs=recursos or RECURSOS; M=len(MESES); G={}
-    for r in recs: g=cap_rec(r); g.update(dThis=[0.0]*M,dThisAt=[0.0]*M,dOth=[0.0]*M,oth={},sim=[0]*M,semH=[0.0]*M,pendSR=[0]*M); G[r['id']]=g
-    oc=ocorr_op(safra,planos,cfg_override,recs); me=next((s for s in SAFRAS if s['id']==safra),{})
-    def add(o,own,sid):
-        # ocorrência desta safra com etiqueta do calendário conta no custo e não na capacidade (espelho do capSaf; revisão SAF, S3.1)
-        if o['mi']<0 or (own and classe_oc(o['dt'],o['mi'],me.get('ini'),me.get('fim'))!='cal'): return
+    fazenda (x.nh × rc, inclui o necessário sem alocação), capacidade, ocupação (None = não calculável), necessárias e falta. oc = desta safra,
+    com 'cls'; outras = [dict(id, nome, ini, fim, oc)]. A etiqueta de cada ocorrência sai do período da safra de ORIGEM (SAF-C02): com
+    etiqueta (antes, depois, fora) conta no custo e não na capacidade, e a carga vai para g['fora'] (sid None = desta safra).
+    Contrato (capContrato): 'cls' em cada ocorrência desta safra e 'ini' e 'fim' em cada outra; a célula soma as parcelas de cada safra em
+    ordem crescente, com laço explícito (o sum() do Python 3.12+ compensa o arredondamento e sairia do JS)."""
+    for o in oc or []:
+        if 'cls' not in o: raise ValueError('cap_saf: ocorrência desta safra sem a etiqueta cls do período dela')
+    for s in outras or []:
+        if 'ini' not in s or 'fim' not in s: raise ValueError('cap_saf: a safra %s chegou sem o período (ini e fim)' % s.get('id'))
+    meses=MESES if meses is None else meses; M=len(meses); G={}; n=[0]
+    for r in recs: g=cap_rec(r,meses,dias); g.update(dThis=[0.0]*M,dThisAt=[0.0]*M,dOth=[0.0]*M,oth={},sim=[0]*M,semH=[0.0]*M,pendSR=[0]*M,fora=[]); G[r['id']]=g
+    def add(o,own,s):
+        sid=None if own else s['id']; ix=n[0]; n[0]+=1
+        if o['mi']<0: return
+        cl=o.get('cls') if own else classe_oc(o['dt'],o['mi'],s.get('ini'),s.get('fim'))
+        if cl and cl!='cal':
+            for c in carga_itens(o):
+                if c['k'] in G and c['h']>0: G[c['k']]['fora'].append(dict(sid=sid,cls=cl,mi=o['mi'],h=c['h'],n=ix))
+            return
         cs=carga_itens(o)
         for c in cs:
             g=G.get(c['k'])
@@ -769,16 +788,18 @@ def capacidade(safra,recursos=None,planos=None,cfg_override=None):
             else:
                 g['dOth'][o['mi']]+=c['h']; g['oth'].setdefault(sid,[0.0]*M)[o['mi']]+=c['h']
             g['sim'][o['mi']]=max(g['sim'][o['mi']],c['sim'])
-        if own and o['rp']['falta']['semHoras']>1e-9:
+        if o['rp']['falta']['semHoras']>1e-9:   # "≥" com a área sem horas de qualquer safra elegível (a mesma marca nas duas vistas)
             for k in {c['k'] for c in cs}:
                 if k in G: G[k]['semH'][o['mi']]+=o['rp']['falta']['semHoras']
     for o in oc: add(o,True,None)
-    for sid in outras_safras(safra):
-        for o in ocorr_op(sid,None,None,recs): add(o,False,sid)
+    for s in outras:
+        for o in s['oc']: add(o,False,s)
     for g in G.values():
         cells=[]
-        for mi,(m,lab) in enumerate(MESES):
-            d=g['dThis'][mi]+g['dOth'][mi]; cap=g['cap'][mi]; pu=g['porUn'][mi]
+        for mi,(m,lab) in enumerate(meses):
+            d=0.0
+            for x in sorted([g['dThis'][mi]]+[v[mi] for v in g['oth'].values()]): d+=x
+            cap=g['cap'][mi]; pu=g['porUn'][mi]
             nc=lambda h: (max(_math.ceil(h/pu-1e-9),g['sim'][mi]) if pu>0 else -1) if h>1e-4 else 0
             nec=nc(d); nt=nc(g['dThis'][mi]); falta=lambda n: n<0 or n>g['un']; red=d>1e-4 and falta(nec)
             cells.append(dict(mi=mi,mes=lab,d=d,dThis=g['dThis'][mi],dOth=g['dOth'][mi],cap=cap,porUn=pu,ocup=(None if cap<=0 else 100*d/cap) if d>1e-4 else 0,

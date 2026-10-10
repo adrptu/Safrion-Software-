@@ -49,7 +49,7 @@ Todas são **mudança de decisão anterior a pedido de 05/10**. Pedido literal: 
 | D-17 | Cartões: Sem ordem 3, Ordens 4, Ativos 4, Planos 0. "A liberar" sai da PCMS §7 (o chip já conta); KPI-SUP-06 fica em Ordens | PRD l.8505; alinhado à PCMS §7 (juiz 2) | KPI-SUP-06 só no Estoque ("ordem") | — |
 | D-18 | Horas de oficina obrigatórias: chip "Previsto (x h)" ou digitadas | "vazio = previsto" (DM:421) é valor implícito; custo e MTTR dependem disso | manter o vazio | voltar ao vazio = previsto |
 | D-19 | Abastecimento: lote pré-escolhido só se for o único elegível; operador da alocação do ativo no dia (AL), corrigível, e sem pré-escolha se não houver; `por` gravado à parte; data corrigível | não é "último valor"; quem transcreve ≠ quem abasteceu (PCMS-G01); tíquete atrasado tem data própria | operador = Ver como ("papel") | — |
-| D-20 | Ver como (simulação): Otávio · Zé · Ana, com a matriz papel × comando (ESPECIFICACAO §3.1); reaproveita o componente da SUP §2.2 ou do CTL-3; Otávio entra no CD-04 no S1 | uma solução por problema (AGENTS §3.4); sem papel, a tela mistura PCM e mecânico | perfil fixo "Ana · Gestora" (UI:258) | — |
+| D-20 | Ver como (simulação): Otávio · Zé · Ana, com a matriz papel × comando (ESPECIFICACAO §3.1); reaproveita o componente da SUP §2.2 ou do CTL-3; Otávio entra no CD-04 no S1. **Revisão de 09/10 (D-55): entra João (irrigante, eletricista NR-10).** | uma solução por problema (AGENTS §3.4); sem papel, a tela mistura PCM e mecânico | perfil fixo "Ana · Gestora" (UI:258) | — |
 | D-21 | Ordem única: S1 → S2 → 1a → S3 → 1b → 1c → S4 | o S1 reduz o 1a de 6 telas para 1; o 1b reescreve o painel uma vez só; passos pequenos | consolidar junto com o 1b ("ordem"); consolidação como "novo 1a" ("papel") | Codex reordena; cada passo é independente |
 | D-22 | Até o 1b/1c, o painel mantém "Solicitar compra", "Registrar recebimento", "Resolver sobras", "Liberar mesmo assim" e "Mover mesmo assim". Habilitados para Otávio, com o rótulo "(simulado · Compras recebe no 1c)" ou "(simulado · papel do Almoxarifado)", e a mensagem diz isso | sem eles, a OM com falta de peça ou sobra fica sem saída (juiz 2); sem papel habilitado, a saída sumia (PCM-R01) | tirar tudo no S1; pôr Rui no Ver como até o 1b | — |
 | D-23 | "Marcar pendentes como feitas" sai já no S1 | PRD 54.2 l.8371 (nunca pré-marcar); AUD §6 | esperar o 1b | — |
@@ -131,4 +131,75 @@ Funções que os juízes apontaram como perdidas e onde ficaram:
 | D-46 | Versão do registro = `o.rv`; `o.ver` continua a versão do plano | colisão de nomes vinda da PCMS §3.1 (R17); `ma_planos_test:69-70` depende de `o.ver` | renomear a versão do plano | — |
 | D-47 | Estado `v=3` no S1 e `v=4` no S2; `c.achados` substitui `c.ach`; estado antigo volta ao seed (DM:272) | estado salvo `v=2` quebraria a leitura de `c.achados` (R08) | migração campo a campo | — |
 | D-48 | Prefixo por origem: Relato e Alerta → SM; Inspeção → INSP; Não conforme do checklist da OM → NC; número = maior do prefixo + 1 | "o prefixo da origem" não estava definido, e um contador ingênuo repetia INSP-105 (R25) | um prefixo só | — |
-| D-49 | Responsável técnico nos dados de manutenção do ativo (DM), semeado do `RESP` de M:126 (a01, a02, a05 → Zé; a11, a15, a12 → Equipe elétrica; demais → Otávio); editável no painel Condição; só leitura no CD-03 (S3) | a fonte era um mapa local da tela que sai (PCM-R17) | campo no CD-03 já no S1 (amplia o escopo) | mover para o CD-03 no S3 |
+| D-49 | Responsável técnico nos dados de manutenção do ativo (DM), semeado do `RESP` de M:126 (a01, a02, a05 → Zé; a11, a15, a12 → Equipe elétrica, **João desde a revisão de 09/10, D-55**; demais → Otávio); editável no painel Condição; só leitura no CD-03 (S3) | a fonte era um mapa local da tela que sai (PCM-R17) | campo no CD-03 já no S1 (amplia o escopo) | mover para o CD-03 no S3 |
+
+## 7. Implementação (executado, 05/10 a 09/10/2026) e próximos passos
+
+Rótulo desta seção: **executado** na branch `claude/v44-pcm` (base `99537ca`; junções com `claude/prototipo-v44` em `ecc8b00` e `cdc185f`). Autor Claude; revisão do Codex sem bloquear (AGENTS §3.5).
+
+**Passos feitos, na ordem da §7.2 (o 1b e o 1c ficam para depois, ver abaixo):**
+
+| Passo | Commit | O que ficou no protótipo |
+|---|---|---|
+| S1 + S2 + 1a | `f9ea51a`, `eba72ba` | menu com 1 item; tela `MA` com 4 visões; painel único da OM; redirecionamentos (D-24); estado `v=4` da manutenção dentro do cenário único (`c.man`, sem a chave `talhao-os-manutencao-v1`) |
+| S3 | `a89a05d` | CD-03 e O.S. leem condição, responsável técnico e leitura de `c.man` |
+| S4 | `5f4ff11` | MB-01 (Minha fila do Zé), MB-09, MB-09det e MB-04 → achado, com Ver como Marcos · Zé e sem sinal |
+| testes | `a88d51f`, `0725404`, `0c68f18` e o da retomada de 09/10 | testes antigos no endereço novo; `ma_unica`, `ma_rastreio` (F01–F111), `ma_atrito`, `ma_app`; item 12 e horímetro único em `ma_regras`; na retomada, `ma_unica` ganha recusa e repetição a 390 px (reserva uma vez) e espera o redirecionamento em vez de 1,3 s fixos |
+
+**Decisões tomadas na implementação (delegadas; o Codex revisa):**
+
+| ID | O quê | Por quê | Como reverter |
+|---|---|---|---|
+| D-50 | Portões da §0.2 que dependiam do Codex: adotados os padrões já registrados e seguido, por ordem do proprietário ("concluir à noite", 05/10): Ver como pelo `G2_PERFIS`/`g2perfil` da frente D (CTL-3), com Otávio como 6º perfil; Aprovar e liberar (PEND-OS-01) fica no 1b, como a §3.3 manda | sem o registro, o S1 não entraria; o dono pediu a entrega | — |
+| D-51 | O perfil injetado nos testes antigos "Otávio · Gestor" passou a "Gil · Gestor" | Otávio passou a ser o responsável de manutenção no `G2_PERFIS`; o nome repetido misturaria papéis | voltar o nome quando o teste não usar mais o cadastro |
+| D-52 | "Propor substituto (simulado · o PCP decide)" fica como ponte no bloco Janela e equipe da OM que trata o ativo bloqueado, só para Otávio | a §0.1 tira a função só com a PCMS-M09b (1b); sem a ponte, a OM-0233 ficava sem saída para a produção | sai no 1b, com "Pedir decisão da gerência" |
+| D-53 | Na junção com a Colheita, o estado do cenário passa a `v=5`, com `c.man` e `c.producao` | as duas frentes tinham subido para `v=4` com conteúdos diferentes; um salvo `v=4` de qualquer uma quebraria a outra | — |
+| D-54 | A 390 px, cartões e "sem plano" vão para depois da grade; o conteúdo do painel rola e o rodapé com a primária fica à vista | AC-PCM-22 (5 linhas acima da dobra e primária sem rolar) | — |
+
+**Item 12 (Codex 6064114787 §2, S2: "receber, aplicar, devolver e estornar material da manutenção geram movimentos na fonte única, sem saldo ou custo duplicado"):**
+- **O 1a garante (executado, `ma_regras_test` caso "Item 12"):**
+  - um estado: a manutenção vive em `CEN0.man`;
+  - um saldo por item: nenhum item da manutenção tem lote em `c.lotes`;
+  - um custo: `manCusto`, contado uma vez no período;
+  - conservação no ciclo da OM-0235 pelas pontes: saldo final = inicial + recebido − aplicado; reservado volta ao inicial;
+  - receber, liberar e devolver de novo não somam de novo.
+- **O 1a não fecha (dito sem disfarce):** o saldo da manutenção ainda é próprio (`c.man.itens`, fora do Estoque). Receber, aplicar e devolver ainda não gravam movimento em `c.movs`, e o Estoque não vê as peças da oficina. É o "estoque paralelo" do achado. Não diverge de outro saldo porque o item só existe num lugar, mas o Estoque e o custo geral ainda não o enxergam.
+- **Fecha no 1b** (PCMS §11.2; depende de `cenMudar(cmd)`, que nasce no SUP-2a, e do SUP-2b):
+  - lotes do Almox. oficina em `c.lotes` e REQ com `dom:'man'`;
+  - recebimento, entrega, consumo, devolução e estorno de reserva como movimentos em `c.movs` (PCMS §3.2), com chave e versão;
+  - saem `ITENS.saldo` e `ITENS.reservado` e as pontes "Registrar recebimento", "Resolver sobras" e "Solicitar compra".
+  - **Aceite:** `pcm_sup_test` mais o caso "Item 12" adaptado: o saldo passa a ser a soma dos lotes, com as mesmas igualdades.
+
+**Horímetro único e "Gerar ordem" sem repetição (CTL-01 PLANO (d); Codex 6064114787 §3), confirmados:**
+- **No código:**
+  - `manLeitura` é a única entrada de leitura (abastecimento, achado, leitura avulsa e conclusão), com histórico em `c.leituras`;
+  - o CD-03 só lê;
+  - "Gerar" existe só em Sem ordem (lote), no painel do vencimento e no painel do achado, pela mesma regra (`manGerar`).
+- **Nos testes:** `ma_regras_test` (casos AC-PCM-15 e "CTL-01 (d)"), `cada_cd03_test` e `ma_rastreio_test` (F73, F74, F97, F107 e F108).
+
+**Próximos passos (nesta ordem, Codex 6064114787 §3):**
+1. SUP-1 → SUP-2a → SUP-2b (outra frente).
+2. PCM 1b: um estoque, aprovar, Aprovar e liberar, conflito pela gerência e Canceladas.
+3. PCM 1c: compra e recebimento reais; C2 e C11 completos.
+4. Depois: PCMS Blocos 2 a 7.
+
+**Fora desta frente:** o retorno visual na troca de tela e de etapa ("flash" de mudança de contexto, pedido do proprietário) é da frente DS, no estilo comum do engine. A tela `MA` não tem estilo próprio para isso e herda o padrão quando ele entrar.
+
+## 8. Revisão adversarial de 09/10 (Codex, branch `claude/v44-pcm` @ 21c0e51): correções executadas
+
+Achados: 1 S1, 3 S2, 6 S3 e S4. Todos os S1, S2 e S3 foram corrigidos, e também os S4 de custo baixo. Cada um tem teste de regressão, executado: `ma_regras_test` (com `ma_os_unit.js`), `ma_app_test`, `ma_revisao_test` (navegador), `ma_app_fluxo_test` e `ma_unica_test`. Decisões tomadas na correção (delegadas; o Codex revisa):
+
+| ID | Decisão | Dano evitado | Achado |
+|---|---|---|---|
+| D-50 | A condição do ativo é uma **lista de motivos**, cada um com o seu achado e a sua OM. O principal fica em `condInfo` e os outros em `condInfo.mais`. "Registrar e bloquear" num ativo já bloqueado ou restrito acrescenta um motivo. "Declarar apto" encerra só o motivo da OM e o ativo só volta a Apto quando não sobra nenhum motivo. Se ainda houver motivo aberto, o comando se chama "Encerrar o motivo da OM-xxxx · <ativo> segue bloqueado" e responde "Falta: INSP-106 · OM-0235". **Não recusa**, porque cada OM esperaria pela outra e nenhuma poderia ser encerrada. | Máquina ir a campo com um defeito bloqueante registrado (freio) | A1 (S1) |
+| D-51 | Somar a uma repetição eleva a criticidade e a condição sugerida para a mais grave e guarda a criticidade, a sugestão e o autor de cada ocorrência (`ocd`). A repetição avisa quando a ocorrência nova é mais grave. Quem tem a competência ganha "Somar ao X e bloquear". | Perder a gravidade relatada e vincular o achado a uma preventiva distante | A2 (S2) |
+| D-52 | O estorno marca como Estornada a leitura do lançamento estornado. Se era a leitura atual, volta a última confirmada anterior. O consumo pelo método tanque cheio soma todos os lançamentos não estornados do intervalo (cheio anterior, este cheio]. A unidade segue o contador do ativo: horímetro em L/h, odômetro em km/L, com a unidade na célula. | Leitura errada deslocar o histórico como "troca de contador"; consumo −50 % e unidade errada | A3, A4 (S2), A10 |
+| D-53 | Na O.S., com a máquina apta sai só o impedimento e o dono volta ao normal da fase. A reprogramação pelo PCP vale uma vez, em A liberar, e o texto diz a sequência (o PCP reprograma, depois a agrônoma confere e libera). | Ordem em execução ou em conferência "com o PCP" para sempre | A5 |
+| D-54 | A fila do app sem sinal guarda a versão do servidor do 1º registro da OM. Na volta, compara com essa versão e depois com a que os registros da própria fila deixaram. O registro seguinte de uma OM em conflito também vira conflito. O painel da OM na web confere a versão lida ao abrir (`manRv`) em todo comando. Se a OM mudou, aparece "Mudou desde que você abriu…", nada grava, e o toque seguinte, já com o estado novo, confirma. | Resposta do campo aplicada em silêncio numa OM que mudou no escritório | A7, A11 |
+| D-55 | **João** (irrigante, eletricista NR-10) entra em `G2_PERFIS`, no Ver como da MA e no app. Executa as OMs de eletricista e é o responsável técnico das motobombas e do pivô (a11, a15, a12). A lista de responsável técnico vem das pessoas do CD-04, e "Equipe elétrica" deixa de existir. No app, o operador do abastecimento é quem opera a máquina: o próprio usuário, se for operador; senão, o operador da alocação, corrigível, e nunca o mecânico por padrão. | OM de eletricista sem executor possível, com a bomba presa em Restrito; operador falso no lançamento | A8, S4 |
+| D-56 | Encerrar exige resolver os registros do app "A resolver". Iniciar, solicitar compra, registrar recebimento, resolver sobras e mudar a criticidade gravam o autor. "Mover mesmo assim" grava o conflito do dia novo como aceito. Bloquear não promete impedir as O.S.: mostra as O.S. alocadas ao ativo como aviso ao PCP, e o impedimento derivado é o Bloco 2 (PCMS-A05). | Encerrar com fato do campo pendente; decisão sem autor; aviso falso | S4, A9 |
+
+**Fica de fora, com motivo:**
+- **Custo da OM-0233 na Gestão** (R$ 18.400, de nota de oficina terceira, `gestao.py`) diferente do custo calculado na MA (R$ 6.180 estimados): o dado é anterior ao PCM e é da Gestão. Vai para a frente de custos do 1b/1c (custo único `manCusto` lido pela Gestão).
+- **"T1 bloqueado" fixo em cerca de 40 páginas** que não leem o cenário: dado anterior ao PCM. Sai quando cada tela passar a ler a condição única (PCMS Bloco 2). As telas da manutenção, o CD-03, a O.S. e o app já leem a condição única.
+- **`ma_rastreio`:** 13 funções ainda são conferidas só pelo texto do HTML gerado (F06/07, F68/69/78, F76, F79/92, F103/104, F107/108, F110). A F22 passou a ter teste de comportamento (`ma_revisao_test`). As F79/92 e F107/108 são cobertas pelas regras (`ma_regras_unit`, `ma_os_unit`).

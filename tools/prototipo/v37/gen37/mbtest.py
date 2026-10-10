@@ -17,7 +17,9 @@ srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','
 c=Chrome(port=free()); J=c.js; FAIL=[]
 PARTES=[x for x in sys.argv[1:] if x in ('a','b','c','d')] or ['a','b','c','d']
 def parte(x): return x in PARTES
-OCULTAS={'MB-01':{f'MB-{n:02d}.dc.html' for n in (8,9)},'MB-02':{'MB-08.dc.html'},'MB-05':{'MB-05det.dc.html','SU-03det.dc.html'}}   # MB-07 e MB-10 no estado (06/10): o MB-01 leva a eles
+# PCM S4 (§3.7): o MB-01 passa a levar ao MB-09 "Máquina" (ligado ao cenário, grava e funciona sem sinal); colheita (06/10): MB-07 e MB-10
+# no estado, o MB-01 leva a eles; só o MB-08 segue fora
+OCULTAS={'MB-01':{'MB-08.dc.html'},'MB-02':{'MB-08.dc.html'},'MB-05':{'MB-05det.dc.html','SU-03det.dc.html'}}
 SETV="""((sel,val)=>{const i=document.querySelector(sel); const P=i.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,val); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})"""
 CLK="""((t)=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...document.querySelectorAll('button,a')].filter(e=>e.offsetParent!==null); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
 T=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')")
@@ -65,7 +67,7 @@ try:
       ok(clk('Reconhecer').startswith('NÃO ACHEI'),'botão Reconhecer some após ciência')
       print('DEMO-11 · sem sinal → fila do aparelho → reenviar sem duplicar')
       open_('MB-03'); ok(FOOT()=='Iniciar turno · OS-0421' and 'Nenhum turno aberto' in BODY(),'MB-03 sem turno: primário Iniciar turno')
-      open_('MB-04'); clk('Sem sinal'); J(f"({SETV})('#oc_txt','Bico da seção 3 entupido; troquei e segui.')"); time.sleep(.2); clk('Registrar ocorrência')
+      open_('MB-04'); clk('Sem sinal'); clk('Falha de aplicação'); J(f"({SETV})('#oc_txt','Bico da seção 3 entupido; troquei e segui.')"); time.sleep(.2); clk('Registrar ocorrência')   # PCM S4: Equipamento pede a máquina
       ok('No aparelho · aguardando sinal' in BODY() and '1 registro aguardando sinal' in BODY(),'ocorrência sem sinal fica no aparelho')
       open_('MB-03x-recibo'); ok(FOOT()=='Reenviar pendentes' and 'REC-7741' in BODY(),'recibos: 1 pendente e histórico REC-7741')
       clk('Reenviar pendentes'); ok('sem cópia' in T() and '1 registro aguardando sinal' in BODY(),'reenviar sem sinal não duplica')
@@ -97,7 +99,12 @@ try:
       print('Confirmações de detalhe')
       for tela,bt,exp in [('MB-05det','Confirmar recebimento','DV-0912'),('MB-09det','Concluir serviço','Em conferência'),('MB-04','Registrar ocorrência','registrada')]:
           open_(tela)
-          if tela=='MB-04': J(f"({SETV})('#oc_txt','Vento acima de 10 km/h; parei a barra.')"); time.sleep(.2)
+          # PCM S4: Equipamento (o tipo de entrada) pede a máquina e vira achado; o texto do vento é do tipo Clima, que segue como ocorrência da O.S.
+          if tela=='MB-04': clk('Clima'); J(f"({SETV})('#oc_txt','Vento acima de 10 km/h; parei a barra.')"); time.sleep(.2)
+          # PCM S4: o MB-09det grava pela regra única da OM (executante Zé, teste aprovado, leitura e horas) em vez de só mudar a tela
+          if tela=='MB-09det':
+              J("window.__cen.cenMudar(null,c=>{ c.app.usuario='Zé'; return {msg:''}; })"); open_('MB-09det')
+              clk('Aprovado'); clk('Anexar foto e registrar Aprovado'); J(f"({SETV})('#dp-leit','4320')"); clk('Previsto (6,5 h)')
           clk(bt); ok(exp in BODY() or exp in HDR(),f'{tela}: {bt} → {exp}')
           ok(clk(bt).startswith('NÃO ACHEI'),f'{tela}: primário não repete a ação')
     for t in (TELAS if parte('d') else []):

@@ -64,7 +64,7 @@ def catalogo():
     import dados_manutencao as DM
     at = {a['id']: dict(nome=a['nome'], kgh=a.get('kgh'), custo_h=a.get('custo_h')) for a in DC.ATIVOS if a['id'] in ('a13',)}
     return dict(rotas=ROTAS, cx=dict(item=CX, massa=CXD['massa'], tara=CXD['tara'], un=CXD['un'], emb=EMB_CX, fonte=CXD['fonte'], preco=DC.PRECO_EXTRA.get(CX)),
-                ativos=at, cond0={k: v['cond'] for k, v in DM.ATIVOS.items() if k in at}, manKey='talhao-os-manutencao-v1',
+                ativos=at, cond0={k: v['cond'] for k, v in DM.ATIVOS.items() if k in at},   # condição ao vivo: c.man do cenário único (PCM 1a)
                 quem=dict(prod=QUEM_PROD, qual=QUEM_QUAL), local=LOCAL, emb=EMBAL,
                 # onde cada linha roda (BEN-D18): a ordem fica no local da linha; a Packing linha 1 é a do Packing da Santa Rita (l8). O CD-03
                 # guarda o local da máquina em texto livre ("Armazém Sede", também Santa Rita); linha nova por fazenda entra pelo CD-03

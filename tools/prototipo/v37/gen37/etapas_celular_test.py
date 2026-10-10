@@ -101,10 +101,10 @@ def chk(nome,cond,info=''):
 p,srv=serve(os.path.join(HERE,'_render')); srv2=None; time.sleep(.6)
 c=None
 NOMES={'CMP':['Escolha a safra','Confira a demanda','Solicite cotações','Compare propostas','Aprove a compra','Acompanhe a entrega'],
-       'SAF':['Escolha a safra'],'PA':['Escolha o plano'],'EST':['Confira recebimentos'],'IR-02':['Confira a necessidade','Programe a irrigação'],'MA-01':['Confira os ativos']}
+       'SAF':['Escolha a safra'],'PA':['Escolha o plano'],'EST':['Confira recebimentos'],'IR-02':['Confira a necessidade','Programe a irrigação']}   # PCM simplificado (S1): MA-01 sai das faixas (tela única MA, sem etapas)
 GUIADO=('CMP','SAF','PA')   # progresso informativo; EST, IR e MA são telas/seções de trabalho paralelo (navegação, sem número de etapa)
-ATUAL={'CMP':(1,6),'SAF':(1,4),'PA':(1,3),'EST':(1,6),'IR-02':(2,4),'MA-01':(1,5)}
-P8=['CMP','SAF','PA','EST','OS','IR-02','MA-01','AG-07']
+ATUAL={'CMP':(1,6),'SAF':(1,4),'PA':(1,3),'EST':(1,6),'IR-02':(2,4)}
+P8=['CMP','SAF','PA','EST','OS','IR-02','MA','AG-07']   # MA: a tela única da Manutenção (sem faixa) segue nos itens 3 e 4
 CLK="""((t,root)=>{const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ'; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a,label')].filter(e=>e.getClientRects().length); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
 try:
     c=ChromeAnexo(); J=c.js; c.call('Page.addScriptToEvaluateOnNewDocument',{'source':ERRS})
@@ -120,7 +120,7 @@ try:
         med={}
         for pg in P8: med[pg]=abre(pg); shot(f'{pg}_390')
         et=[pg for pg in P8 if med[pg]['temEtapas']]
-        chk('1 390 px · nenhuma etapa sobrepõe ou vaza (CMP, SAF, PA, EST, IR-02, MA-01)', all(med[g]['sobrepoe']==0 and not med[g]['vazam'] for g in et), {g:(med[g]['sobrepoe'],med[g]['vazam']) for g in et})
+        chk('1 390 px · nenhuma etapa sobrepõe ou vaza (CMP, SAF, PA, EST, IR-02)', all(med[g]['sobrepoe']==0 and not med[g]['vazam'] for g in et), {g:(med[g]['sobrepoe'],med[g]['vazam']) for g in et})
         exp={g:(f'Etapa {ATUAL[g][0]} de {ATUAL[g][1]} · {NOMES[g][ATUAL[g][0]-1]}' if g in GUIADO else NOMES[g][ATUAL[g][0]-1]) for g in et}
         chk('2 390 px · processo guiado com "Etapa i de n · Nome" e telas/seções com o nome da atual; lista recolhida; nenhuma seta ‹ › (UX-ACAO-UNICA)', all(med[g]['progresso'].startswith(exp[g]) and med[g]['etapasVis']==0 and not med[g]['setas'] for g in et), {g:(med[g]['progresso'],med[g]['etapasVis'],med[g]['setas']) for g in et})
         chk('3 390 px · título inteiro, situação e comando principal na tela, sem rolagem horizontal da página (8 telas)', all(not med[g]['h1Cortado'] and not med[g]['headerFora'] and not med[g]['hscroll'] for g in P8), {g:(med[g]['h1Cortado'],med[g]['headerFora']) for g in P8})
@@ -139,8 +139,8 @@ try:
         chk('6 390 px · com "aberto" guardado começa recolhido (68 px); aberto pelo botão passa por cima (conteúdo continua com 322 px) e o botão de recolher fica alcançável', ini==68 and a==[232,68,322,True] and b[:3]==[68,68,322], [ini,a,b])
         # 7-8 · zoom de 200 % (1440 px a 2×): menu recolhido nas seis telas com etapas e aberto em CMP e SAF
         z={}
-        for pg in ['CMP','SAF','PA','EST','IR-02','MA-01']: z[pg]=abre(pg,720,450,2); shot(f'{pg}_zoom200')
-        chk('7 zoom 200 % · sem sobreposição, etapa atual legível e comando principal na tela (6 telas)', all(z[g]['sobrepoe']==0 and not z[g]['vazam'] and not z[g]['headerFora'] and not z[g]['h1Cortado'] for g in z), {g:(z[g]['sobrepoe'],z[g]['vazam'],z[g]['progresso'],z[g]['headerFora']) for g in z})
+        for pg in ['CMP','SAF','PA','EST','IR-02']: z[pg]=abre(pg,720,450,2); shot(f'{pg}_zoom200')
+        chk('7 zoom 200 % · sem sobreposição, etapa atual legível e comando principal na tela (5 telas)', all(z[g]['sobrepoe']==0 and not z[g]['vazam'] and not z[g]['headerFora'] and not z[g]['h1Cortado'] for g in z), {g:(z[g]['sobrepoe'],z[g]['vazam'],z[g]['progresso'],z[g]['headerFora']) for g in z})
         def abre_menu(pg): abre(pg,720,450,2,rec='0'); J("document.querySelector('.menu-lat.rec')&&document.querySelector('.ml-tog').click()"); time.sleep(.4); return J(MEDIR)
         za={pg:abre_menu(pg) for pg in ['CMP','SAF']}; zw=J("Math.round(document.querySelector('.menu-lat').getBoundingClientRect().width)"); shot('SAF_zoom200_menu_aberto')
         chk('8 zoom 200 % com menu aberto (pelo botão) · CMP e SAF sem sobreposição', zw==232 and all(za[g]['sobrepoe']==0 and not za[g]['vazam'] and za[g]['progresso'] for g in za), [zw,{g:(za[g]['sobrepoe'],za[g]['vazam'],za[g]['progresso']) for g in za}])
@@ -214,12 +214,12 @@ try:
         chk('17 lista da tela alcançável (O.S. e AG-07 em 390 px e zoom de 200 %, EST em 320 px): caixa não espremida e última linha tocável rolando a tela',
             all(r and r['alt']>=min(r['cont'],200)-1 and r['ultNaJanela'] and r['ultTocavel'] for r in res.values()), res)
         # 18 · título de bloco com ação em 390 px (bloco em DIV): comandos dentro da largura, sem rolar o conteúdo de lado
-        alvo={'MA-01':['Tarefa'],'CO-01':['Coletar contagem','Publicar versão']}   # MA-01 sem "Ver agenda" (PL-04 oculta e fixa · CTL-1, Frente F) · IR-02 da v43: o bloco "Agenda por captação" não tem ação própria (deriva do teste, não da tela)
+        alvo={'CO-01':['Coletar contagem','Publicar versão']}   # PCM simplificado (S1): o seletor "Tarefa" do MA-01 saiu com os elegíveis (F40, D-25)   # MA-01 sem "Ver agenda" (PL-04 oculta e fixa · CTL-1, Frente F) · IR-02 da v43: o bloco "Agenda por captação" não tem ação própria (deriva do teste, não da tela)
         res={}
         for pg,t in alvo.items(): abre(pg); res[pg]=J(f"({ALC})({json.dumps(t)})")
         abre('IR-02'); lin=J("(()=>{const e=[...document.querySelectorAll('main *')].find(x=>x.children.length===0&&x.innerText.trim()==='Agenda por captação'); const lh=parseFloat(getComputedStyle(e).lineHeight)||19; return Math.round(e.getBoundingClientRect().height/lh);})()")
-        shot('MA-01_390_titulo_bloco')
-        chk('18 390 px · título de bloco com ação (MA-01, CO-01): seletor e comandos dentro da largura e tocáveis; título "Agenda por captação" (IR-02) em até 2 linhas',
+        shot('CO-01_390_titulo_bloco')
+        chk('18 390 px · título de bloco com ação (CO-01): seletor e comandos dentro da largura e tocáveis; título "Agenda por captação" (IR-02) em até 2 linhas',
             all(all(v=='ok' for k,v in r.items() if k!='_lado') and not r['_lado'] for r in res.values()) and lin<=2, [res,lin])
         # 19 · CD-07 (regressão do patch anterior): comandos da área de dados aparecem e respondem ao toque em 390 e 600 px
         res={}
@@ -230,12 +230,12 @@ try:
         # 20 · tela baixa (celular deitado): a folha de etapas cabe e a última etapa é tocável; IR-02 com área útil e comando principal alcançável
         res={}
         for w,h in ((800,360),(568,320)):
-            for pg in ('CMP','SAF','EST','MA-01'):
+            for pg in ('CMP','SAF','EST'):
                 abre(pg,w,h); J("(()=>{const a=document.querySelector('.etp-atual'); a&&a.getClientRects().length&&a.click();})()"); time.sleep(.25); res[f'{pg} {w}x{h}']=J(FOLHA)
-        shot('MA-01_568x320_folha')
+        shot('EST_568x320_folha')
         abre('IR-02',800,360); u=J(UTIL); pr=J("(()=>{const e=[...document.querySelectorAll('header a,header button')].find(x=>x.innerText.trim()==='Programar irrigação'); e.scrollIntoView({block:'center'}); const r=e.getBoundingClientRect(); const h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2); return r.bottom<=innerHeight&&!!h&&e.contains(h);})()")
         shot('IR-02_800x360')
-        chk('20 tela baixa (800×360 e 568×320) · folha com a última etapa à vista (CMP, SAF: só informa) ou tocável (EST, MA-01: telas); IR-02 com ≥ 280 px úteis (cabeçalho rola, faixa fica) e "Programar irrigação" alcançável',
+        chk('20 tela baixa (800×360 e 568×320) · folha com a última etapa à vista (CMP, SAF: só informa) ou tocável (EST: seções); IR-02 com ≥ 280 px úteis (cabeçalho rola, faixa fica) e "Programar irrigação" alcançável',
             all(r['aberta'] and r['folha'] and (r['ultTocavel'] or (k.split()[0] in GUIADO and r['ultVisivel'])) for k,r in res.items()) and u['rolaColuna'] and u['util']>=280 and pr, [res,u,pr])
         # 21 · zoom de 200 % nas telas de cabeçalho alto (antes 95–111 px de conteúdo)
         res={}

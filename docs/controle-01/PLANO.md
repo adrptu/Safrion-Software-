@@ -55,6 +55,9 @@ Os números de teste de cada frente vêm das execuções dos desenhos em `ctl/`.
   - O CTL-3 tira o texto do HEAD, mas o histórico continua.
   - O Codex confere com o proprietário antes de qualquer publicação.
 - **G3 · B-R8.** Fechamento com dose efetiva abaixo da aprovada. Carrega o resto do dano da B e está "severidade a classificar". Se o Codex classificar como S2, vira o CTL-11, antes da homologação.
+  - Classificada S2 pelo Codex (6064114787 §2). Feita no protótipo em 09/10 (`e2d1040`, `f0a0cd8`, `dbc1acc`, branch `claude/v44-dom`): o consumo fica como informado; o apontamento e a O.S. ganham o selo "Divergência de consumo/dose" (planejado × informado por produto, com unidade); a revisão técnica do agrônomo (aceitar com motivo ou registrar a correção) é exigida antes do encerramento. Precisão: centésimo da unidade (`cenQtd`), sem tolerância; `LIM_DISP` (20 %) é alçada de área dispensada, não tolerância de consumo.
+  - Revisão adversarial (09/10, "DOM: correções da revisão"): produto da ordem fora da requisição conta como 0 informado e abre a divergência; a comparação usa o decimal meio para cima de `cenQtd` (9,995 L = 10,00 L), não o arredondamento do float; relato recusado no Estoque refaz a divergência do dia como "planejado × baixado" e reabre a revisão já feita (a anterior fica no histórico).
+  - Próxima fatia (registrado, não feito): emitir a O.S. de reaplicação a partir da "Correção decidida". Hoje o formulário Nova ordem recusa uma 2ª ordem da mesma atividade no mesmo cultivo, e a especificação (Codex 6064114787 §2) proíbe forçar a reaplicação. Por isso a correção fica registrada na linha do apontamento e na Origem, e a mensagem não promete mais a ordem automática.
 - **G4 · CTL-7.** Precisa estar integrado antes da homologação (motivo no §2, CTL-7).
 
 **Regra de pilha:**

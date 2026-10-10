@@ -302,11 +302,11 @@ Todas as funções abaixo existem uma vez, em `ocupacao.js`/`ocupacao.py` (ENG-0
 **R-14 · Trava (impede salvar; nada é gravado).** Dano evitado: insumo e O.S. emitidos para área fisicamente ocupada (dinheiro e estoque), ou operação sobre lavoura já confirmada no campo. Só entra o que é certo:
 - **Núcleo** = [plantio, fim certo]. Fim certo: perene, sem fim; Observado, a colheita real; senão, o menor entre Ocupa até e plantio + **ciclo mínimo da cultura** − 1 (menor ciclo das cultivares no CD-02: soja 112, milho 140, feijão 90). Cultura sem ciclo: só o dia do plantio. O ciclo mínimo é decisão técnica que o Codex revisa e não substitui a colheita informada.
 - **T-área (regra de hoje, `safra.js:527-537`):** Σ das áreas desta safra no talhão > área + 0,005 ha.
-- **T-faixa:** mesma faixa ou talhão inteiro, núcleos cruzados contando a folga (`[plantio, núcleo + folga)`), e pelo menos uma das duas com plano aplicado ou perene.
-- **T-soma:** faixas diferentes, num mesmo dia, Σ das áreas em núcleo > área + 0,005 ha, com plano em alguma. Conferida em todos os dias, sem horizonte: a varredura vai de evento em evento (plantio, fim do núcleo, início e liberação), e uma perene ou ocupação antiga no talhão não a encurta (SAF-C01; a pendência de soma da R-15 usa a mesma varredura).
+- **T-faixa:** mesma faixa ou talhão inteiro, núcleos cruzados contando a folga (`[plantio, núcleo + folga)`, sempre com o dia do plantio: cultura sem ciclo com folga 0 ocupa o dia), e pelo menos uma das duas com plano aplicado ou perene.
+- **T-soma:** num mesmo dia, a área física em núcleo > área + 0,005 ha, com plano em alguma. Área física: na mesma faixa conta a maior área; talhão inteiro cobre o talhão. Conferida em todos os dias, sem horizonte: a varredura vai de evento em evento (plantio, fim do núcleo, início e liberação), e uma perene ou ocupação antiga no talhão não a encurta, nem um par antigo na mesma faixa (dado antigo). O dia só sai da soma do cultivo quando ele mesmo está na mesma área de outra ocupação em núcleo com plano (a T-faixa cobre esse par). SAF-C01; a pendência de soma da R-15 usa a mesma varredura e a mesma área física.
 - **T-observado:** atividade da nova antes da colheita real registrada da outra, na mesma faixa.
 - Onde roda: salvar Planejar e Vincular; editar área, plantio, plano ou colheita; Dividir; Aplicar plano (linha e lote). Excluir não trava.
-- Mensagem: fato, dano e saída (§7.3). Período citado = interseção dos dois períodos (máx dos inícios a mín dos Ocupa até); "Máximo X ha" = área − ocupação de fora no pior dia dessa interseção. Sem fim (só perenes na interseção): "A partir de dd/mm/aaaa, …" (SAF-C01).
+- Mensagem: fato, dano e saída (§7.3). Pior dia = nos dias de núcleo do cultivo, o de maior área física dos outros em núcleo (o critério da T-soma). Período citado = do maior início ao menor Ocupa até entre o cultivo e quem está no pior dia (com duas ocupações, a interseção dos dois períodos). "Máximo X ha" = área − ocupação no pior dia; com a T-área, também o que sobra desta safra; arredondado para baixo, e regravar com ele não trava pela área. Sem fim (só perenes): "A partir de dd/mm/aaaa, …" (SAF-C01 e verificação de 09/10/2026: com três ocupações o período saía invertido e o máximo não destravava).
 
 **R-15 · Pendência e aviso (salva).** Previsões que se cruzam não travam (PRD 39.4, PRD.md:6683-6685; SAFRA-08, PRD.md:6731).
 - **Sobreposição prevista:** os períodos `[início, liberacao(est))` se cruzam na mesma faixa (ou a soma diária prevista passa da área) e os núcleos não. O plano é aplicado, o cultivo entra na demanda e a linha fica A conferir com "Sobreposição prevista: N dias (<atividade> dd/mm × <cultura> até dd/mm)".
@@ -327,7 +327,7 @@ Todas as funções abaixo existem uma vez, em `ocupacao.js`/`ocupacao.py` (ENG-0
 
 **R-18 · Perene.** Perene de outra safra não tem Planejar; tem **Vincular ciclo ›** nas condições da R-24, senão a linha fica sem ação. Na safra dele, o perene é editável como hoje (plano, meta, ajustes), sem simular novo plantio (PRD.md:6662).
 
-**R-19 · Parcela.** Área igual à do talhão gera talhão inteiro; menor, parcela. Nome sugerido: a faixa de fora que libera exatamente essa área no dia de Livre a partir de (T1-B depois do c2); senão `nextNome` (`safra.js:319`). Editável. Dividir continua como hoje (DEC-2609-01, PRD.md:12216), com R-14 por parcela.
+**R-19 · Parcela.** Área igual à do talhão gera talhão inteiro; menor, parcela. Nome sugerido: a faixa de fora que libera exatamente essa área no dia de Livre a partir de (T1-B depois do c2); senão `nextNome`, sem repetir as faixas desta safra nem as do talhão ainda ocupadas no início dela, inclusive as de ocupações futuras (SAF-C01: um café numa safra de 2020 não recebe a parcela da soja de 2027). Editável. Dividir continua como hoje (DEC-2609-01, PRD.md:12216), com R-14 por parcela e a capacidade do serviço: área − maior área física de fora em núcleo nos dias de núcleo das parcelas. Resumo ("outras safras N ha"), selo, "+ Adicionar parcela" (nome e área), "Distribuir área igualmente" e a recusa de área (agregada: quem ocupa, soma das parcelas e máximo) saem dela. A área livre do aviso depois de gravar ou dividir é a da coluna Área livre (R-09), a mesma do painel.
 
 **R-20 · Safra encerrada.** Consulta só dos cultivos dela: sem linha de talhão, sem Planejar, sem Dividir (`safra.js:296`); Situação, Área livre e Livre a partir de "—"; Plantio, Ocupa até, Fim por e Safra preenchidos.
 
@@ -560,6 +560,8 @@ OS-0421, 0431, 0420 e 0415 com datas que contradizem o plano; OS-0417, 0418, 041
 - **P1 (pendência):** "P2: sobreposição prevista de 11 dias. A dessecação da Soja alta tecnologia cai em 05/11/2026 e o Milho AG 8700 (Safra 2025/26) está previsto até 15/11/2026. Mude o plantio para 06/12/2026 ou depois, ou confirme a colheita do milho."
 - **P2 (pendência entre safras):** "T1-A: a colheita prevista da Soja passa para 25/02/2027, depois do plantio do Milho da Safrinha 2027 (20/02/2027). Sobreposição prevista de 6 dias."
 - **P3 (sem janela):** "P2 tem Milho da Safrinha 2027 a partir de 24/03/2027. Para a soja com Soja alta tecnologia começar depois do milho anterior (16/11/2026), replaneje esse milho para 04/04/2027 ou depois."
+- **P3 com perene nova** (replanejar a sucessora não resolve): "O café é perene e não libera B1-A: use outra parcela (ex.: B1-B)."
+- **Pista "Plantio a partir de" sem janela por causa da área:** "reduza a área: máximo 18 ha" (o mesmo máximo da M1), em vez de "sem janela antes do fim da safra".
 
 ---
 

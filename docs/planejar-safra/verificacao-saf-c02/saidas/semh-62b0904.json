@@ -1,0 +1,18 @@
+[
+ {
+  "view": "A",
+  "d": 140,
+  "ocup": 87.5,
+  "ge": false,
+  "R": "R5",
+  "txt": "Na estimativa mensal, cabe com o que você tem."
+ },
+ {
+  "view": "B",
+  "d": 140,
+  "ocup": 87.5,
+  "ge": true,
+  "R": "R5",
+  "txt": "Na estimativa mensal, cabe com o que você tem."
+ }
+]

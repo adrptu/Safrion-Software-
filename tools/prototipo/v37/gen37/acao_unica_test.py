@@ -160,10 +160,13 @@ try:
         chk('11 PA · Novo plano secundário (etapa 1 sem primária); etapa 2: "Incluir atividade" secundário, nenhum "Revisar e publicar" fora da área, avanço "Ver versões e cultivos ›"; etapa 3 sem rascunho: só retorno e a nota "Nada a publicar"',
             p1['prims']==[] and novo=='rgb(255, 255, 255)' and p2['etapa']==2 and inc==['rgb(255, 255, 255)'] and rp==0 and p2['prims']==['Ver versões e cultivos ›'] and p3['etapa']==3 and p3['prims']==[] and any('Nada a publicar' in a for a in p3['area']),
             [p1,novo,p2,inc,rp,p3])
-        # 12 · PM: mesma regra (Novo plano secundário; avanço e retorno na área)
-        abre('PM'); m1=est(); r=J("(()=>{const b=[...document.querySelectorAll('main button[aria-label]')].find(b=>/^Abrir /.test(b.getAttribute('aria-label'))); if(!b) return 'sem cartão'; b.click(); return b.getAttribute('aria-label');})()"); time.sleep(.5); m2=est(); shot('pm_etapa2')
-        chk('12 PM · etapa 1 sem primária (Novo plano secundário); plano aberto: etapa 2 com retorno "‹ Biblioteca de planos" e um avanço; no máximo uma primária',
-            m1['prims']==[] and m2['etapa']==2 and m2['avancos']==1 and any(a.startswith('voltar:‹ Biblioteca de planos') for a in m2['area']) and len(m2['prims'])<=1, [m1,r,m2])
+        # 12 · Planos (PCM simplificado S1: PM.dc.html virou a visão Planos da tela MA, ESPECIFICACAO §3.5 "primária: Novo plano"): uma primária na visão;
+        #      plano aberto: retorno "‹ Planos", sem etapas e no máximo uma primária ("Publicar vN" só com rascunho)
+        abre('MA',hash='#vis=planos'); J("localStorage.setItem('safrion.perfilDemo','Otávio')"); c.goto('about:blank',.2); c.goto(f'http://127.0.0.1:{p}/MA.dc.html#vis=planos',.8); m1=est()   # Ver como Otávio (o comando é dele)
+        r=J("(()=>{const r=[...document.querySelectorAll('main [role=row][data-rid]')].find(r=>r.getAttribute('data-rid')==='PM-01'); if(!r) return 'sem linha'; (r.querySelector('.g2pw')||r).click(); return 'PM-01';})()"); time.sleep(.6); m2=est(); shot('ma_plano')
+        vt=J("[...document.querySelectorAll('main button,main a')].filter(e=>e.getClientRects().length).map(e=>e.innerText.trim()).filter(t=>t.startsWith('‹'))")
+        chk('12 Planos (tela MA) · visão com uma primária "Novo plano"; plano aberto: retorno "‹ Planos", sem etapas e no máximo uma primária',
+            m1['prims']==['Novo plano'] and m1['etapa']==0 and r=='PM-01' and m2['etapa']==0 and '‹ Planos' in vt and len(m2['prims'])<=1, [m1,r,m2,vt])
         # 13 · EST: trabalho paralelo → seções (navegação em qualquer ordem), sem número de etapa e sem setas; seção sem trabalho não ganha "ir para a próxima"
         abre('EST'); s0=J(r"""(()=>{const n=document.querySelector('nav[aria-label="Seções do estoque"]'); const bs=n?[...n.querySelectorAll('.etp-itens>button')]:[]; return {n:bs.length, nums:bs.filter(b=>/^\d/.test(b.innerText.trim())).length, cur:(n&&n.querySelector('[aria-current=true]')||{innerText:''}).innerText.trim(), setas:document.querySelectorAll('[aria-label^="Etapa anterior"],[aria-label^="Próxima etapa"]').length, ind:!!document.querySelector('.etp-ind')};})()""")
         clk('Faça contagens','nav[aria-label="Seções do estoque"]'); s5=est(); clk('Confira saldos','nav[aria-label="Seções do estoque"]'); s4=est(); cur4=J("(document.querySelector('nav.etp-sec [aria-current=true]')||{innerText:''}).innerText.trim()"); shot('est_secoes')
@@ -171,12 +174,12 @@ try:
             s0['n']==6 and s0['nums']==0 and s0['setas']==0 and not s0['ind'] and s0['cur']=='Confira recebimentos' and len(s5['prims'])<=1 and s4['prims']==[] and cur4=='Confira saldos', [s0,s5,s4,cur4])
         # 14 · IR e MA: telas irmãs (navegação, aria-current=page), sem setas e sem número; pendência escrita
         tel={}
-        for pg,lab,n in (('IR-02','Telas da irrigação',4),('MA-03','Telas da manutenção',5)):
+        for pg,lab,n in (('IR-02','Telas da irrigação',4),('MA','Telas da manutenção',5)):   # PCM simplificado (S1, D-05): a faixa da Manutenção sai (tela única MA)
             abre(pg); tel[pg]=J(f"""(()=>{{const n=document.querySelector('nav[aria-label="{lab}"]'); const as=n?[...n.querySelectorAll('.etp-itens>a')]:[]; return [as.length, as.filter(a=>a.getAttribute('aria-current')==='page').map(a=>a.innerText.replace(/\\s+/g,' ').trim()), as.filter(a=>/^\\d/.test(a.innerText.trim())).length, document.querySelectorAll('[aria-label^="Etapa anterior"],[aria-label^="Próxima etapa"]').length, as.map(a=>a.innerText.replace(/\\s+/g,' ').trim()).join(' | ')];}})()""")
         shot('ma03_telas')
-        chk('14 IR e MA · faixa de telas irmãs ("Telas da irrigação" 4, "Telas da manutenção" 5): links com aria-current="page", sem número de etapa e sem setas; pendência escrita (ex.: "1 conflito")',
+        chk('14 IR · faixa de telas irmãs ("Telas da irrigação" 4): links com aria-current="page", sem número de etapa e sem setas; pendência escrita (ex.: "1 conflito"); MA sem a faixa "Telas da manutenção" (D-05: o seletor de visão a substitui)',
             tel['IR-02'][0]==4 and tel['IR-02'][1][:1] and tel['IR-02'][1][0].startswith('Programe a irrigação') and tel['IR-02'][2]==0 and tel['IR-02'][3]==0 and 'conflito' in tel['IR-02'][4]
-            and tel['MA-03'][0]==5 and tel['MA-03'][1][0].startswith('Programe as preventivas') and tel['MA-03'][2]==0 and tel['MA-03'][3]==0, tel)
+            and tel['MA'][0]==0, tel)
         # 15 · O.S.: Lista e Kanban com o mesmo filtro (reproduzido antes: 2 × 10); Recursos explica a granularidade; fase não muda por clique
         abre('OS'); o0=est(); clk('Liberadas','[aria-label="Filtrar por fase"]'); lis=J("[...document.querySelectorAll('main [role=row].g2ed')].filter(e=>e.getClientRects().length).map(r=>r.innerText.split('\\n')[0].trim())")
         clk('Kanban','[aria-label="Visão das ordens"]'); kb=J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].filter(e=>e.getClientRects().length).map(b=>b.getAttribute('aria-label').split(' ')[1])")

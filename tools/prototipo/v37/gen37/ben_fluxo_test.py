@@ -39,13 +39,16 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T; o cenário come
            caixas entregues, a falta da OB-0112 não manda receber a "devolução" da OB-0113; em execução ela guarda as caixas que ainda
            pode usar e "Pedir mais caixas" sem nota nem sobra não manda cancelar; com tudo registrado a sobra (69 un) vira a saída da
            OB-0112, o Rui a recebe pelo atalho e a OB-0113 fecha os 12.300 kg com diferença 0.
-Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular|revisao|roteiro|roteiro390|complemento|lotes|duplo|criada|teclado|cancelar|faixa390|cadeia|cadeia390]
+  manutencao integração COMP (PCM × BEN): a condição da Packing linha 1 no painel da ordem vem do cenário único (c.man, onde a
+           Manutenção grava desde o PCM 1a), não da chave antiga 'talhao-os-manutencao-v1' que ninguém grava mais; bloqueada na
+           Manutenção, a OB-0110 mostra "Bloqueado na Manutenção" e "Ver na Manutenção" abre o ativo na tela única (MA.dc.html#ativo=a13).
+Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular|revisao|roteiro|roteiro390|complemento|lotes|duplo|criada|teclado|cancelar|faixa390|cadeia|cadeia390|manutencao]
 Capturas em _probe/ben_*.png. Dados sintéticos (SAFRION_DADOS=sintetico)."""
 import sys, os, time, json
 os.environ.setdefault('SAFRION_DADOS', 'sintetico')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cadc_lib import T
-TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'lotes', 'duplo', 'criada', 'teclado', 'cancelar', 'faixa390', 'cadeia', 'cadeia390')
+TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'lotes', 'duplo', 'criada', 'teclado', 'cancelar', 'faixa390', 'cadeia', 'cadeia390', 'manutencao')
 MODOS = [a for a in sys.argv[1:] if a in TODOS] or list(TODOS)
 PR = os.path.join(HERE, '_probe'); os.makedirs(PR, exist_ok=True)
 t = T(); J = t.J
@@ -682,6 +685,29 @@ try:
         tamanho(1440, 1000)
     if 'cadeia' in MODOS: cadeia(1440)
     if 'cadeia390' in MODOS: cadeia(390)
+    if 'manutencao' in MODOS:
+        # integração COMP (PCM × BEN): o PCM 1a levou a Manutenção para o cenário único (c.man) e aposentou a chave 'talhao-os-manutencao-v1';
+        # o painel da ordem lia a chave antiga e mostrava a condição da semente ("Apto") com a linha bloqueada na Manutenção, e o atalho
+        # apontava a MA-01 (redirecionamento). Dano evitado: a ordem de beneficiamento dizer "Apto" de uma linha que a Manutenção bloqueou
+        print('== manutencao · a condição da linha no painel da ordem é a da Manutenção (cenário único) e o atalho abre o ativo na MA')
+        tamanho(1440, 1000); ir('Main.dc.html', limpa=True); ir('BEN.dc.html#OB-0110'); time.sleep(.3); p0 = pan(); i0 = p0.find('RECURSOS')
+        t.chk('M1 · OB-0110: a Packing linha 1 aparece "Apto na Manutenção", sem atalho (nada a ver na Manutenção)',
+              'Packing linha 1' in p0 and 'Apto na Manutenção' in p0 and 'Ver na Manutenção' not in p0, p0[i0:i0 + 300])
+        ir('MA.dc.html'); r = J("(()=>{ const r=window.__man.manMudar(null,(m)=>window.__man.manCondicao(m,'a13','bloquear',{motivo:'Esteira da embaladora travada'})); return r.erro?('ERRO '+r.erro):(r.msg||''); })()")
+        cm = cen("c.man&&c.man.ativos&&c.man.ativos.a13&&c.man.ativos.a13.cond")
+        ir('BEN.dc.html#OB-0110'); time.sleep(.3); p1 = pan(); i1 = p1.find('RECURSOS')
+        t.chk('M2 · bloqueada na Manutenção (CMD-18, gravado no cenário único), a OB-0110 mostra "Bloqueado na Manutenção" e o atalho "Ver na Manutenção"',
+              cm == 'Bloqueado' and 'Bloqueado na Manutenção' in p1 and 'Apto na Manutenção' not in p1 and 'Ver na Manutenção' in p1, [r, cm, p1[i1:i1 + 300]])
+        hr = J("(()=>{ const a=[...document.querySelectorAll('aside[role=dialog] a')].filter(VIS).find(x=>N(x.innerText).startsWith('Ver na Manutenção')); return a?a.getAttribute('href'):''; })()")
+        clk('Ver na Manutenção', 'aside[role=dialog]', w=1.2)
+        for _ in range(30):
+            if J("location.pathname.endsWith('/MA.dc.html') && document.readyState==='complete' && document.body.innerText.length>50"): break
+            time.sleep(.1)
+        time.sleep(.6); lib(); loc = J("location.pathname.split('/').pop()+location.hash"); b = J("N(document.body.innerText)") or ''
+        t.chk('M3 · "Ver na Manutenção" abre a Packing linha 1 na tela única da Manutenção (MA.dc.html#ativo=a13), com o bloqueio à vista',
+              hr == 'MA.dc.html#ativo=a13' and loc == 'MA.dc.html#ativo=a13' and 'Packing linha 1' in b and 'Esteira da embaladora travada' in b, [hr, loc, b[:300]])
+        shot('manutencao')
+        t.chk('manutencao sem erro de JS', not t.errs(), t.errs())
 finally:
     t.fim()
 sys.exit(0 if all(t.ok) else 1)   # juízo pela linha RESULTADO e pelo código de saída

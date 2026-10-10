@@ -77,13 +77,21 @@ def seed():
         reqs[rid] = dict(id=rid, os=oid, estado=('Reservada' if fe == 0 else 'Entregue'), itens=itens)
     # v=2 (01/10, O.S. sem revisão): descarta o cenário salvo no navegador que ainda tinha aprov, selos de aprovação e recibo APV-
     # v=3 (04/10, SINT-C03 + PRE-REV-20261004): quantidades da semente pela regra única; o salvo com a regra antiga travaria o apontamento
+    # v=4 (1a · PCMS-M01, PCM simplificado §7.2): a manutenção entra no cenário único (c.man, com achados, leituras e recibos); a
+    # chave própria da manutenção sai. O.S., Estoque, App, CD-03 e a tela MA leem e gravam o mesmo estado.
     # v=4 (06/10, colheita de ponta a ponta · docs/colheita): o estado ganha c.producao (contagens, previsões, cargas, lotes de produto,
     # pedidos, reservas e movimentos MP-); o salvo sem ele é descartado (D-18)
     # v=5 (06/10, beneficiamento BEN-1 · docs/beneficiamento): ordens de processo OB-0110 e OB-0112 (fam BEN) em c.ordens, REQ-030 e o lote
     # de caixas CX26-01; no estado da Produção, os lotes do packing, o PV-031 e as inspeções (c.producao.ben); o salvo sem eles é descartado
+    # v=5 (09/10, junção PCM × Colheita na frente PCM, D-53): c.man e c.producao juntos
+    # v=6 (10/10, junção PCM × BEN-1 na branch única): as duas frentes subiram para v=5 com conteúdos diferentes (BEN-1: ordens OB-,
+    # REQ-030, CX26-01 e c.producao.ben; PCM: c.man, app.usuario e app.manFila); o salvo v=5 de qualquer uma volta ao seed (cenGet)
+    import dados_manutencao as DM
     import dados_producao, dados_ben
-    est = dict(v=5, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
-               app=dict(online=True, fila=[], turno=None, operador='Marcos'), producao=dados_producao.seed())
+    est = dict(v=6, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
+               # S4 (PCM §3.7): usuario = Ver como do app (Marcos · Zé, simulação); manFila = comandos da manutenção feitos sem sinal
+               app=dict(online=True, fila=[], turno=None, operador='Marcos', usuario='Marcos', manFila=[]),
+               man=DM.seed(), producao=dados_producao.seed())
     return dados_ben.semear(est)
 
 

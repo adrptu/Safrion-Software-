@@ -13,4 +13,4 @@ Pedido do proprietário (05/10/2026): "PCM /manutenção também tem telas e men
   - Anexo com os 48 achados da revisão v1 → v2.
 - **`DECISOES.md`:** decisões tomadas sem o proprietário, com destaque para as que mudam as dele sobre o menu (01/10, 02/10, 03/10). Inclui os enxertos dos juízes, as pendências e as decisões D-33 a D-49 da revisão.
 - **`FORA-DE-ESCOPO.md`:** o que ficou fora, cada item com a condição de retorno.
-- **Estado:** **especificado, não executado**. Autor Claude, revisor Codex. Base das linhas: `cd01b46`; os arquivos que mudaram com o CTL-2 estão em `9c617c4`.
+- **Estado (09/10/2026):** S1, S2, 1a, S3 e S4 **executados** no protótipo (branch `claude/v44-pcm`; DECISOES §7). A revisão adversarial do Codex de 09/10 foi corrigida, com teste de regressão por achado (DECISOES §8, D-50 a D-56). O 1b e o 1c ficam para depois do SUP-2a/2b. Autor Claude, revisor Codex. Base das linhas da especificação: `cd01b46`; os arquivos que mudaram com o CTL-2 estão em `9c617c4`.
