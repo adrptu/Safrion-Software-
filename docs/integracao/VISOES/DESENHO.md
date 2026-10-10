@@ -8,6 +8,7 @@
   - frentes não integradas: DS `sp-ds` @ `943433c`, TABR `sp-tabr` @ `8f19e0d`, NAV1 `sp-nav` @ `a7023ca`, PCM `sp-pcm` @ `ba03515`, CADUX `sp-cadux` @ `5d533a8`, SUP `sp-sup` @ `6ccd050`, DOM `sp-dom` @ `c764de9`;
   - software real `Safrion-Software-` @ `b8d6f84`.
 - **Rótulo:** tudo aqui é **especificado**. Executado: só leitura de código, `grep` e `git log/diff`. Nenhum build, teste ou navegador; nada publicado; nenhum custo.
+- **Revisão do Codex (VISOES-REV-20261010-01, PR #47 comentário 6093255041, 10/10):** 5 achados de especificação (S3) aplicados neste arquivo; os trechos mudados dizem "rev. Codex 01". Decisão de produto do Codex: onde mora a Atividade planejada (1.4). Ainda especificado; as provas executadas dos contraexemplos vão no pacote `docs/integracao/VISOES-1/`.
 - **Revisão crítica (completude e minimalismo, 10/10):** aplicada neste arquivo; os trechos mudados dizem "revisão crítica". Também só leitura, sem build nem teste.
 - **Caminhos:** relativos a `tools/prototipo/v37/gen37/` do `sp-proto`, salvo prefixo (`sp-comp:`, `sp-ds:`, `sp-cadux:`). `PRD:n` é a linha de `docs/PRD.md` @ `b8d6f84`. As linhas de `processo_os.py` mudam depois da composição e da DS.
 
@@ -20,7 +21,7 @@
 5. **Nenhum arrastar nas 5 fatias do protótipo.** No Kanban, a fase só muda por comando com efeito (aprovação, reserva) e sem desfazer. No Calendário, ainda não existe validador único de janela. O pedido exige "com desfazer": **o Kanban fica sem arraste também no software real**, e o Calendário só arrasta onde há desfazer legítimo (2.10).
 6. **Fatia 5 (Matriz, Árvore, Galeria): nada a implementar hoje.** Nenhuma listagem cumpre a regra. Os critérios de entrada ficam nos testes.
 7. **Software real: especificar para a transferência, não aplicar agora** (seção 5).
-8. **Uma pergunta ao proprietário:** o Mapa dentro da O.S. reabre a decisão de 26/09 que trocou "Mapa" por "Recursos" (DEC-2609-09)?
+8. **O Mapa da O.S. fica no IN-04** (rev. Codex 01, delegação de 09/10): a DEC-2609-09 não é reaberta e não há pergunta pendente ao proprietário. Só um pedido dele reabre.
 9. **Mapa é um componente só** (revisão crítica): a visão Mapa reusa o mapa que já existe (IN-04 ou CD-01 da CADUX), com a geometria de fonte única. Nada de `mapa_visao()` novo. Onde a camada do IN-04 já responde à mesma pergunta sem filtro próprio da lista, a visão não entra (Setor de irrigação).
 10. **Cortes por minimalismo** (revisão crítica): Irrigação IR-03 (Kanban e Carga), Setor IR-01 (Mapa) e Vistoria (Calendário) saem; Manutenção (Calendário) e Pedido de compra (Calendário) ficam ⏸. Motivos em 1.4.
 
@@ -34,7 +35,7 @@ Legenda: ✓ entra (fatia) · ✗ não entra (motivo em 1.4) · ⏸ o dado suste
 
 | Entidade | Tela / grade | Lista | Agrupada | Kanban | Calendário | Timeline | Mapa | Carga | Matriz | Árvore | Galeria |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| Ordem de serviço | OS · `g_os` (`areas/processo_os.py:1220`) | ✓ F1 | ✓ F1 | ✓ F1 migra · F2 | ✓ F2 | ✗ | ⏸ | ✓ F1 migra · F4 | ✗ | ✗ | ✗ |
+| Ordem de serviço | OS · `g_os` (`areas/processo_os.py:1220`) | ✓ F1 | ✓ F1 | ✓ F1 migra · F2 | ✓ F2 | ✗ | ✗ | ✓ F1 migra · F4 | ✗ | ✗ | ✗ |
 | Ordem de beneficiamento | BEN · `g_ob` (`areas/processo_beneficiamento.py:18`) | ✓ | ✗ | ✓ F2 migra | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Ordem de manutenção | MA › Ordens · `g_om` (`sp-comp:areas/maquinas.py:296`) | ✓ | ✗ | ✓ F2b migra | ⏸ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
 | Vistoria (MIP/MID) | AG-01 · `g_vis` (`areas/agronomia.py:831`) | ✓ | ✗ | ✗ | ✗ | ✗ | ✓ F3 | ✗ | ✗ | ✗ | ✗ |
@@ -42,7 +43,7 @@ Legenda: ✓ entra (fatia) · ✗ não entra (motivo em 1.4) · ⏸ o dado suste
 | Cultivo (ocupação do talhão) | SAF · `g_cult_{k}` (`areas/processo_safra.py:84`) | ✓ | ✗ | ✗ | ✗ | ✓ F4 | ✗ | ✗ | ✗ | = L | ✗ |
 | Máquina / ativo | MA › Ativos (PCM); CD-03 `g_atv` fica só Lista | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✓ F4 | ✗ | ✗ | ✗ |
 | Pedido de compra | CMP etapa 6 · `g_ent` (`areas/processo_compras.py:103`) | ✓ (árvore) | = L | ✗ | ⏸ | ✗ | ✗ | ✗ | ✗ | = L | ✗ |
-| Atividade planejada | SAF etapa 3 · `g_op` (`areas/processo_safra.py:180`) | ✓ (árvore) | = L | ✗ | ⏸ | ✗ | ✗ | ✗ | ⏸ | = L | ✗ |
+| Atividade planejada | SAF etapa consolidada · `g_op` (`areas/processo_safra.py:180`) | ✓ (árvore) | = L | ✗ | ⏸ | ✗ | ✗ | ✗ | ✗ | = L | ✗ |
 
 Enquanto uma linha só tiver Lista e ⏸, ela não ganha seletor (Pedido de compra e Atividade planejada hoje).
 
@@ -87,9 +88,9 @@ Enquanto uma linha só tiver Lista e ⏸, ela não ganha seletor (Pedido de comp
 |---|---|---|
 | Talhão · Árvore "fazenda › setor › talhão" | Corta | O setor é a bomba ou o sistema de irrigação: atributo opcional, não nível (`dados_cad.py:21-22`; PRD:7258). Como pai, deixaria órfão o talhão de sequeiro. A Lista já é árvore fazenda › talhão com subtotal (`areas/cad_fazendas.py:258`), e a parcela por safra fica no detalhe CD-01det (`:507`) |
 | Safra · Timeline | Corta | Ver 1.3. A linha do tempo útil é a da ocupação dos cultivos, que entra como linha própria (Cultivo) |
-| O.S. · Mapa | Suspensa (⏸) | O dado existe (talhões com geometria), mas DEC-2609-06 e DEC-2609-09 (PRD:9516, 12474, 12477) puseram o mapa das ordens no IN-04 e deram à O.S. "Recursos" no lugar de "Mapa". Só o proprietário reabre. Se reabrir, a visão reusa a função "Ordens de serviço" do IN-04 (PRD:3002-3010), leva a Safra (o Mapa só filtra Fazenda, PRD:12479) e mostra contagem quando há várias ordens por talhão (PRD:3008) |
+| O.S. · Mapa | Fica no IN-04 (rev. Codex 01) | Tarefa já atendida: DEC-2609-06 e DEC-2609-09 (PRD:9516, 12474, 12477) puseram o mapa das ordens no IN-04 e deram à O.S. "Recursos" no lugar de "Mapa". Não reabre sem pedido do proprietário. Se ele pedir, a visão reusa a função "Ordens de serviço" do IN-04 (PRD:3002-3010), leva a Safra (o Mapa só filtra Fazenda, PRD:12479) e mostra contagem quando há várias ordens por talhão (PRD:3008) |
 | O.S. · Tabela agrupada | Acrescenta | Já existe ("Agrupar por talhão"); vira a visão |
-| Atividade/Aplicação · Lista, Calendário, Matriz, Mapa | Lista ✓ (existe); Calendário e Matriz ⏸; Mapa ✗ | A listagem real é a do planejado: Planejar safra etapa 3, `g_op` (operação › atividade › talhão, com Data e Horas, `areas/processo_safra.py:180`). A matriz recurso × mês já existe ao lado (`g_cap`, `:184-194`; PRD:7338 e 10616) e responde outra pergunta (capacidade), então fica grade própria e não visão. Calendário (data projetada, PRD:6772) e Matriz talhão × semana ficam ⏸ até a etapa única 3-4-5 do Planejar safra integrar e o Codex decidir onde a Atividade mora. O realizado são O.S. com apontamentos (`cenario.py:58`): Calendário e Mapa seriam os da O.S., uma segunda fonte (PRD:2856) |
+| Atividade/Aplicação · Lista, Calendário, Matriz, Mapa | Lista ✓ (existe); Calendário ⏸ (apto depois da integração SAF); Matriz e Mapa ✗ por ora | **Decisão de produto do Codex (rev. Codex 01):** a Atividade planejada mora em Planejar safra, na etapa consolidada de operações e recursos, como ocorrência ligada a safra, cultivo, talhão ou parcela e versão do plano; `g_op` (`areas/processo_safra.py:180`) é a entrada canônica, sem menu "Atividades", cadastro ou tela paralela. O detalhe mostra gatilho e data projetada (ou a pendência da âncora), área, quantidade e unidade, recursos, custo, vínculo e saldo da O.S.; o próximo verbo segue o estado (completar ou revisar a programação, gerar ordem quando elegível, abrir a ordem existente), e gerar O.S. não duplica demanda nem libera execução. O realizado vem dos apontamentos da O.S. (PRD 44.1). O Calendário entra depois da etapa consolidada como outra leitura das **mesmas** ocorrências, com projeção ou intervalo e "Aguardando marco" visíveis, só leitura, sem inventar data sem âncora (PRD 39.4). A Matriz talhão × semana só entra se responder uma comparação que a Lista e o Calendário não resolvem, com quantidade distribuída sem duplicação; a matriz de capacidade recurso × mês (`g_cap`) continua no contexto de recursos. Mapa: seria o da O.S., segunda fonte (PRD:2856) |
 | Insumo/Estoque · Tabela agrupada | Corta como visão | Ver 1.3 |
 | Máquina · Mapa | Corta | O local é texto, sem coordenada (`dados_cad.py:63-64`); PRD:7505 proíbe inventar posição |
 | Vistoria/Ocorrência · Galeria | Corta | Não há imagem: a vistoria só conta fotos (`areas/agronomia.py:865`), os cartões são marcadores (`:914`) e no app a foto é simulada (`areas/mobile.py:599-624`). A decisão vem da contagem contra o nível de controle |
@@ -198,7 +199,7 @@ barra, corpo = visoes('g_os', 'os', {
 
 - **Formato:** `OS.dc.html?view=agrupada#OS-0420`.
   - Valores ASCII sem acento: `lista, agrupada, kanban, calendario, timeline, mapa, carga, matriz, arvore, galeria`.
-  - `lista` tira o parâmetro.
+  - **Toda escolha explícita grava `?view=<k>`, inclusive `lista`** (rev. Codex 01, achado 1). O fallback "Ver em lista" também grava `?view=lista`, sem mudar a preferência. Assim, com preferência Kanban, escolher Lista e dar F5 continua na Lista. A ausência do parâmetro significa "preferência" só na entrada sem escolha.
   - Grava com `history.replaceState(history.state,'',pathname+'?'+params+location.hash)`, nunca `pushState`: o Voltar sai da tela, não percorre visões.
   - Lê por `URLSearchParams(location.search)` e preserva os outros parâmetros: o runtime já lê `?theme=` (`support.js`, `URLSearchParams(location.search).get("theme")`).
   - O hash não muda. Endereços vivos que a visão não pode quebrar, conferidos no código: O.S. `#OS-0420`, `#OS-0430:ajustar`, `#tal=Faz|T1`, `#nova:c:a:AAAA-MM-DD` (`areas/processo_os.py:751-763`, regex ancorada); SAF `#saf=S2627&passo=cultivos&cult=c5` (`safra.js:1276-1325`; `ocupacao_test.py:19`); CMP `#sol=…&saf=…` (`areas/processo_compras.py:198`); PCM `MA.dc.html#vis=ordens&modo=kanban&om=OM-0233` (`sp-comp:areas/maquinas.py:14,81-96`); AG-01 `#VIS-012[:decidir|programar]`; CD-01 `#talhao=ID&aba=…`; IN-04 `#car`, `#car:T1`, `#desenhar=ID`, `#importar`; GE `[?&#]caso=`; NAV1 `PA.dc.html#plano=ID`. O `g2keep` usa só o `pathname` (`g2lib.js:17`).
@@ -261,7 +262,8 @@ Um contrato comum, `g2visaoEstado(self,gid,k)` → `{tipo, texto, acao}`, desenh
 | Vazio de filtro | O recorte zerou | "Nenhuma ordem no filtro: fase Liberadas · talhão T4." + **Limpar filtros** (o mesmo `os_limpar`), igual em toda visão |
 | Vazio por regra da visão | O recorte só tem itens que a visão não mostra por regra (ex.: fase Canceladas no Kanban, PRD:2984) | "Canceladas ficam fora do quadro: 2 ordens no filtro." + **Ver em lista** (troca sem gravar a preferência). Nunca 5 colunas "Nenhuma ordem nesta fase" sem motivo |
 | Parcial | Itens sem o atributo da visão | Faixa própria, mostrada quando n > 0: **Sem data (n)** no Calendário, **Sem localização (n)** no Mapa (OB-0104, do armazém), **Sem alocação (n)** na Carga. O item abre o mesmo detalhe. Na O.S. não há caso de "Sem data" no cenário (toda O.S. agrícola tem janela; a OS-0422 é de água, 1.2): a faixa é provada na unidade com uma ordem sintética sem janela |
-| Erro | A visão não montou (cenário ilegível, geometria ausente) | "Não foi possível mostrar o calendário: <motivo>." + **Ver em lista** (troca sem gravar a preferência) |
+| Erro da visão | O desenho da visão falhou (ex.: exceção no render do Calendário) | "Não foi possível mostrar o calendário: <motivo>." + **Ver em lista** (grava `?view=lista`, sem mudar a preferência); a Lista é provada funcional nesse caso. Registro sem geometria **não** é erro: vai para **Sem localização (n)** (rev. Codex 01, achado 5) |
+| Cenário ilegível | O estado salvo não pode ser lido (afeta também a Lista) | Recuperação sem apagar dados: frase com o motivo e a ação de recuperação já existente da tela; nunca "Ver em lista" para uma Lista que também falharia, nunca limpar o `localStorage` em silêncio (rev. Codex 01, achado 5) |
 | Carregando | Dado assíncrono | O protótipo não chega a esse estado: os dados vêm embutidos e as visões não usam rede (o MapLibre fica fora da listagem). O contrato vale para o software real (`aria-busy`, esqueleto) e é testado lá. Declarado, não fingido |
 
 ### 2.9 Ação primária: única e fixa
@@ -285,7 +287,7 @@ Um contrato comum, `g2visaoEstado(self,gid,k)` → `{tipo, texto, acao}`, desenh
 - **Depois do desenho:** restaurar a da nova visão no `setTimeout`, como faz `g2etapa` (`g2lib.js:382-387`). Hoje o `sc-if` desmonta a visão oculta e a rolagem se perde.
 - **Entre páginas:** `sessionStorage['g2rol:<arquivo>:<gid>:<k>']`, restaurado só na navegação de volta (`performance.getEntriesByType('navigation')[0].type === 'back_forward'`), no padrão da NAV1 (`sp-nav:areas/processo_planos.py:129-131,452-453`).
 - **Na O.S.**, o painel é modal sobre a lista montada, então visão, filtros e rolagem já ficam. A página de detalhe aberta pelo link do painel (`ostest.py:60`, CA-01det) é o caso que exige URL, `g2keep` e rolagem.
-- **A volta da persona é o link "Voltar"/trilha, não o botão do navegador.** O link do detalhe (`PARENT37`) é navegação nova (`type === 'navigate'`): sem `?view`, sem restaurar rolagem, e só com os filtros que o `g2keep` guarda. Regra: na página de detalhe de uma lista com seletor, o "Voltar" faz `history.back()` quando o `document.referrer` é a mesma lista (mesma origem e `pathname`); senão, segue o link com o `?view=` da visão em que a lista estava (guardada no `sessionStorage` junto com a rolagem, ao abrir o detalhe). O E3 testa os dois caminhos.
+- **A volta da persona é o link "Voltar"/trilha, não o botão do navegador.** O link do detalhe (`PARENT37`) é navegação nova (`type === 'navigate'`): sem `?view`, sem restaurar rolagem, e só com os filtros que o `g2keep` guarda. **Regra (rev. Codex 01, achado 2):** ao abrir o detalhe a partir da lista, grava-se um **contexto de retorno** no `sessionStorage` (arquivo e `pathname` da lista, entidade, `?view`, filtros do `g2keep`, rolagem e id do item para o foco), e a lista marca a própria entrada em `history.state`. No detalhe, o "Voltar" valida o contexto (mesma origem, mesmo arquivo e mesma entidade). Só usa `history.back()` quando há entrada de histórico comprovada (marca em `history.state` da entrada anterior, conferida por `history.length > 1` e pela marca gravada). Nos demais casos (nova aba, link direto, contexto ausente ou inválido) navega ao destino canônico da lista, com o `?view` e a restauração de filtros, rolagem e foco. `document.referrer` nunca decide sozinho. O E3 testa voltar pelo link, por `history.back()`, em nova aba e por link direto.
 
 ---
 
@@ -296,7 +298,7 @@ Um contrato comum, `g2visaoEstado(self,gid,k)` → `{tipo, texto, acao}`, desenh
 ```text
 ID / resultado útil / persona: VISOES-1 · trocar a O.S. entre Lista, Tabela agrupada, Kanban e Carga por recurso por ícone, sem perder filtro, e voltar onde estava · PCP (Caio) e gestora (Ana), no computador e no celular
 Requisitos do PRD e fora do escopo: PRD 4.2/4.3, 297, 2972-2996, DS-36 (74.5.10), DS-57, SEL-02, BOT-01/BOT-09, VIS-02/VIS-04; pedido de 10/10. Fora: Calendário, Mapa, Timeline, arrastar, software real
-Autor / revisor / integrador: Claude / Codex (revisão sem bloqueio, §3.5) / Claude, na branch única
+Autor / revisor / integrador: Claude (autor) / Codex (revisão sem bloqueio, §3.5) / Claude junta na branch única do protótipo pelo regime leve §3.5. Não é aprovação nem integração de PR: no software real, PR é integrado pelo revisor (DEC-0910-02)
 Base / arquivos: claude/prototipo-v44 depois da composição (int/comp) e da DS · visoes.py (novo), engine.py, g2lib.js, LICENSES/lucide-ISC.txt, areas/processo_os.py, comp_lib.py e os testes listados abaixo
 Aceite e comando de verificação: "Pronto quando" da F1; bateria no fim desta seção (worktree de rascunho, trava cdpV)
 Estado / impedimento / próximo passo: especificado · impedimento: composição e DS não integradas · próximo: revisão deste desenho pelo Codex
@@ -339,7 +341,7 @@ Estado / impedimento / próximo passo: especificado · impedimento: composição
 | U2 | `?view=mapa` fora das válidas cai para a preferência, com aviso e sem repetir o valor cru |
 | U3–U4 | Preferência antiga ou inválida, ou nenhuma, abre `lista` |
 | U5 | Lixo (`KANBAN`, `kanbán`, `<x>`) é inválido |
-| U6 | `g2visaoUrl` preserva `#OS-0420`, `#tal=Santa Rita\|T1` e outros parâmetros; `lista` remove `view`; ida e volta sem perda |
+| U6 | `g2visaoUrl` preserva `#OS-0420`, `#tal=Santa Rita\|T1` e outros parâmetros; toda escolha grava `view` (inclusive `lista`); ida e volta sem perda (rev. Codex 01) |
 | U7 | ← → com volta, Home e End; ↑ ↓ não movem (no "mais", ↓ abre o menu); Enter, Espaço e outras teclas devolvem nulo (seta não ativa) |
 | U8 | Chave por perfil × entidade com o prefixo `safrion.pref.visao:`; storage que lança abre `lista` sem erro |
 | U9 | Celular: até 3 visões, todas; 4 ou mais, 3 + "mais"; ativa no "mais" marcada; uma só, nada |
@@ -363,13 +365,14 @@ Estado / impedimento / próximo passo: especificado · impedimento: composição
 - **Ponta a ponta** (`visoes_test.py e2e`, em 1440 × 900 **e** 390 × 844):
   - E1: filtro (fase Em execução e talhão T1) → Agrupada, uma rodada por clique e outra por teclado. Chips e talhão iguais, subtotal só do recorte, `?view=agrupada`, hash intacto.
   - E2: abrir uma O.S. do grupo → painel → Esc → o foco volta à linha.
-  - E3: Fazenda Lagoa Grande + filtro → link do painel para o detalhe (CA-01det) → volta pelo link "Voltar"/trilha da página **e**, noutra rodada, por `history.back()` → Agrupada, Fazenda, Safra, filtros (`g2keep`) e rolagem com ±4 px (`rolagem()`, `acao_unica_test.py:54`).
+  - E3: Fazenda Lagoa Grande + filtro → link do painel para o detalhe (CA-01det) → volta pelo link "Voltar"/trilha da página **e**, noutra rodada, por `history.back()`; e ainda o detalhe aberto em **nova aba** e por **link direto** (sem histórico: o "Voltar" vai ao destino canônico com `?view`, filtros, rolagem e foco; rev. Codex 01) → Agrupada, Fazenda, Safra, filtros (`g2keep`) e rolagem com ±4 px (`rolagem()`, `acao_unica_test.py:54`).
   - E3b: fase "Canceladas" → Kanban → frase com o motivo e **Ver em lista** (nunca 5 colunas vazias sem motivo); a preferência não muda.
   - E4: precedência na entrada:
     - sem `?view` abre a preferência;
     - `?view=lista` vence a preferência;
     - `?view=xyz` abre a preferência com aviso;
-    - trocar o perfil usa a preferência do outro perfil;
+    - trocar o perfil **não** muda a visão aberta; a preferência do outro perfil vale na próxima entrada sem `?view`, preservando rascunho e permissões (rev. Codex 01, achado 4);
+    - preferência Kanban → escolher Lista → F5 → continua na Lista, com `?view=lista` (rev. Codex 01, achado 1);
     - `localStorage` limpo abre a Lista.
   - E5: trocar de visão não muda `localStorage['talhao-os-cenario-v1']`, byte a byte.
   - E6: entrada por `OS.dc.html?view=kanban#OS-0418` continua abrindo a ordem; `OS.dc.html#OS-0430:ajustar` e `?theme=dark&view=agrupada#tal=Santa Rita|T1` também (hash e outros parâmetros intactos).
@@ -539,8 +542,8 @@ A trava `cdpV` é própria: `cdp9333`, `cdpB` a `cdpI` e `cdpDS` são de outras 
 | Barra (`toolbar`) com `aria-pressed` × DS-57 ("visões alternativas são abas", PRD:14541) | Técnica (agentes; Codex revisa). O segmentado é variante válida da DS-36 (PRD:14304) e é o que o pedido diz | DECISIONS |
 | Ativo tonal × verde cheio do PRD 74.5.10 | Técnica. Mantém o BOT-01 e o caso 29 | DECISIONS |
 | "Recursos" → "Carga por recurso" | Rótulo pelo pedido de 10/10; a DEC-2609-09 continua | STATUS |
-| Mapa dentro da O.S. × DEC-2609-09 | **Proprietário** | Pergunta da seção 0 |
-| Onde a Atividade mora | Produto (Codex) | Rodada |
+| Mapa dentro da O.S. × DEC-2609-09 | Decidido (rev. Codex 01): fica no IN-04 | Seção 0, item 8. Só um pedido do proprietário reabre |
+| Onde a Atividade mora | Decidido pelo Codex (rev. Codex 01): Planejar safra, etapa consolidada | 1.4 |
 | Arraste no Kanban com confirmação no lugar do desfazer (PRD:2996 permite; o pedido de 10/10 exige desfazer) | **Proprietário**, só se ele pedir arraste no Kanban | Hoje: sem arraste no protótipo e no real (2.10) |
 | Calendário da Manutenção no lugar da rotina "Esta semana" | Autor da PCM (técnica) | Rodada; sem acordo, fica ⏸ |
 | Mapa único: `_mapsvg` do IN-04 ou mapa da CADUX | Autor da CADUX e Claude (técnica) | F3.0 |
@@ -554,7 +557,7 @@ A trava `cdpV` é própria: `cdp9333`, `cdpB` a `cdpI` e `cdpDS` são de outras 
 5. **"Por usuário" no protótipo é o perfil de demonstração;** no software real, o usuário autenticado.
 6. **A troca de visão não abre o `#OS-…`** (abrir o painel não grava hash, `areas/processo_os.py:754-763`). O E6 confere.
 7. **As linhas citadas são do `0139898`;** a composição e a DS deslocam `processo_os.py`.
-8. **Volume do cenário representa a decisão** (revisão crítica): os cortes por minimalismo da IR-03 (4 ordens) e da Vistoria (1 programada) partem do cenário sintético e da regra de cada módulo (água liberada pela prontidão, ritmo do MIP calculado). Se a fazenda real tiver dezenas de ordens de água por dia, o Kanban da IR-03 volta à mesa com esse dado.
+8. **Motivo dos cortes é a tarefa redundante ou o atributo ausente, não o volume** (rev. Codex 01). Poucas linhas sintéticas não provam que a necessidade real não existe. IR-03: a decisão da água é de horário e bomba, já respondida pela IR-02 (Agenda por captação), e a janela é texto. Vistoria: a data dominante é a da coleta (fato) e as previstas já aparecem na Lista. Se a fazenda real mostrar uma tarefa que essas telas não respondem, a visão volta à mesa com esse dado.
 9. **A "Nova ordem" exige o início da janela** (`nv_jan` entre os campos validados, `areas/processo_os.py:892`): lido, não executado. Se não exigir, a faixa "Sem data" da O.S. ganha caso real no e2e.
 10. **O host do artefato preserva `?theme=`** além de `?view=`; o runtime lê os dois da mesma query.
 
@@ -562,10 +565,10 @@ A trava `cdpV` é própria: `cdp9333`, `cdpB` a `cdpI` e `cdpDS` são de outras 
 
 ## 5. Software real: especificar para a transferência (não aplicar agora)
 
-**Decisão:** especificar e transferir depois que a F1 for validada no protótipo, numa fatia própria do software real. A primeira candidata é `/estoque`, que já sustenta Lista e Agrupada (abaixo).
+**Decisão (rev. Codex 01, achado 3):** especificar agora; transferir ao software real **só depois que todo o conjunto vigente do protótipo estiver concluído e validado** (FOCO v2). A VISOES-1, parcial, não aciona transferência, auditoria integral nem revisão do PRD. Quando a transferência vier, a primeira candidata é `/estoque`, que já sustenta Lista e Agrupada (abaixo).
 
 **Motivos:**
-1. **O FOCO v2 manda validar no protótipo** e só depois passar tela, domínio, banco e homologação (`docs/decisoes-delegadas/FOCO-v2-confronto.md`, fonte: issue #1, comentário 5974888468).
+1. **O FOCO v2 manda concluir e validar o protótipo vigente inteiro** e só depois passar tela, domínio, banco e homologação (`docs/decisoes-delegadas/FOCO-v2-confronto.md`, fonte: issue #1, comentário 5974888468).
 2. **Correção da revisão crítica:** `/estoque` **já sustenta duas visões pela regra do pedido**: Produto é agrupável e Utilizável e Físico são somáveis na mesma unidade (`apps/web/src/estoque/lista.ts:13-20`). O agrupamento já é estado da tabela: `agrupar` no `EstadoG2` (`apps/web/src/tabela/logica.ts:52,55`), na URL (`:251`, `:284`), escolhido no menu da coluna (`Tabela.tsx:537-541`). Para não haver dois estados, na transferência a Agrupada **não** ganha campo próprio: `visao === 'agrupada'` ⇔ `agrupar !== null`. O botão Agrupada liga o agrupamento padrão da entidade (Produto), a Lista o desliga, e o menu da coluna continua escolhendo a chave. `/cadastros/produtos` (agrupável só por Unidade, sem valor somável) fica só Lista.
 3. **Faltam peças que são decisão técnica da transferência:**
    - ícones: `lucide-react` não é dependência; fixar a versão em `docs/architecture/versions.md`, ou copiar o SVG com o aviso ISC;
@@ -586,4 +589,4 @@ A trava `cdpV` é própria: `cdp9333`, `cdpB` a `cdpI` e `cdpDS` são de outras 
 - **Kanban real:** sem arraste, como no protótipo: o pedido exige desfazer, e CMD-06 e CMD-10 não têm desfazer legítimo. Trocar o desfazer por confirmação é decisão do proprietário (2.10).
 - **Ambiente [a verificar]:** o node desta máquina é v22 e o repositório pede ≥ 24.21. O `pnpm run check` pode recusar aqui.
 
-**Próximo passo:** o Codex revisa este desenho por contraexemplo. Depois que a composição e a DS forem integradas, começa a F1 com o acordo curto acima.
+**Próximo passo:** revisão do Codex recebida e aplicada (rev. Codex 01). A F1 está em implementação na branch `claude/v44-visoes` (base composição + DS mesclada localmente) e entra na branch única depois da composição e da DS, com as provas dos contraexemplos no pacote `docs/integracao/VISOES-1/`.
