@@ -4,15 +4,16 @@ data, embalagem estruturada, controle em um campo, situação Ativo/Inativo, uni
 capacidade só em tanque e silo; o cabeçalho mostra pendência do cadastro (não do Estoque)."""
 # TABELAS-FOCO (06/10/2026): natureza, unidade, embalagem e capacidade em colunas próprias (o ativo de origem do silo fica no painel do local)
 from cadc_lib import T
-import time
+import time, json
 t=T(); J=t.J
 try:
     t.goto('CD-06.dc.html'); body=J("document.body.innerText")
     t.chk('abre com a pendência do cadastro no cabeçalho e sem fatos do Estoque (quarentena, pedido)',
           '1 item sem preço' in t.header() and 'Cadastrar item' in t.bloco() and 'quarentena' not in body and 'PC-088' not in body and not t.errs(), t.header())
-    r=t.rowtxt(0,'KCl 60%'); t.openrow(0,'KCl 60%'); dk=t.dlg(); t.cancel()
-    t.chk('item mostra unidade + embalagem, controle e preço com data; o saldo fica no painel com "Ver saldo no Estoque"',
-          all(x in r for x in ['kg big bag de 1.000 kg','Só lote','R$ 2,40/kg','15/09/2026']) and 'Ver saldo no Estoque' in dk and 'Saldo: 50.000 kg' in dk, [r,dk[-200:]])
+    r=t.rowtxt(0,'KCl 60%'); t.openrow(0,'KCl 60%'); dk=t.dlg(); ck=t.fv('ctrl'); t.cancel()
+    # revisão TABR (09/10/2026, A1): o controle (lote e validade) sai da grade para o painel do item; a Situação fica à vista sem rolar
+    t.chk('item mostra unidade + embalagem e preço com data; controle e saldo no painel com "Ver saldo no Estoque"',
+          all(x in r for x in ['kg big bag de 1.000 kg','R$ 2,40/kg','15/09/2026']) and ck=='Só lote' and 'Ver saldo no Estoque' in dk and 'Saldo: 50.000 kg' in dk, [r,ck,dk[-200:]])
     t.openrow(0,'Herbicidas 5 itens'); ti=t.title(); nat=t.fv('nat')
     t.fset('nat','3.1.01 · Fertilizantes e corretivos'); t.btn('Salvar')
     t.chk('linha do grupo abre nome e natureza; a natureza salva aparece no grupo',
@@ -47,9 +48,12 @@ try:
     t.cancel()
     t.aba('Locais')   # 01/10: locais numa aba própria do mesmo bloco (tabela 0 da aba); cabeçalho em caixa normal
     hd=J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/\\s+/g,' ').trim().toUpperCase())")
-    t.chk('locais: fazenda na tabela, sem coluna Controle; capacidade só no tanque e no silo (do ativo)',
-          any('FAZENDA' in h for h in hd) and not any('CONTROLE' in h for h in hd) and '15.000 L' in (t.rowtxt(0,'Tanque Sede') or '') and '60.000 sc de 60 kg' in (t.rowtxt(0,'Silo 01') or '')
-          and '—' in (t.rowtxt(0,'Galpão 1') or ''), [hd,t.rowtxt(0,'Silo 01'),t.rowtxt(0,'Galpão 1')])
+    # revisão TABR (09/10/2026, A4): L (tanque) e sc de 60 kg (silo) são grandezas diferentes; a Capacidade entra com o filtro Tanque ou Silo
+    qt=lambda x: (J(f"[...document.querySelectorAll('[role=group][aria-label^=\"Filtro rápido\"] button')].filter(b=>b.offsetParent).find(b=>b.innerText.trim().startsWith({json.dumps(x)})).click()"), time.sleep(.5))
+    qt('Tanque'); tq=t.rowtxt(0,'Tanque Sede'); qt('Silo'); si=t.rowtxt(0,'Silo 01'); qt('Todos')
+    t.chk('locais: fazenda na tabela, sem coluna Controle; capacidade só no tanque e no silo (do ativo), com o filtro do tipo',
+          any('FAZENDA' in h for h in hd) and not any('CONTROLE' in h for h in hd) and not any('CAPACIDADE' in h for h in hd) and '15.000 L' in (tq or '') and '60.000 sc de 60 kg' in (si or ''),
+          [hd,tq,si])
     t.chk('"Cadastrar local" é a ação da aba Locais (sem "+ Novo local")', J("document.body.innerText.indexOf('Novo local')<0") and t.clk('Cadastrar local')=='ok' and t.title()=='Cadastrar local', t.title())
     t.fset('nome','Galpão BV 2'); t.fset('faz','Boa Vista'); t.fset('tipo','Galpão'); t.btn('Salvar'); time.sleep(.2)
     t.chk('local novo na Boa Vista', 'Boa Vista' in (t.rowtxt(0,'Galpão BV 2') or '') and not t.errs(), [t.rowtxt(0,'Galpão BV 2'),t.errs()])

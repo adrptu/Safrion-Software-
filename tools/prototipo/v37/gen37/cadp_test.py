@@ -49,8 +49,9 @@ try:
     al=AL(); chk('5 cliente: produtos e validade do limite obrigatórios', ABERTO() and 'Escolha ao menos uma opção.' in al and 'Informe a validade da análise de crédito.' in al, al)
     CAN('Mamão Formosa classe A'); SETK('limv','2027-03-31'); SETK('entrega','CD Salvador/BA · seg–sex 05–10h'); time.sleep(.2); BTN('Salvar'); time.sleep(.2)
     t=LIN('Hortifruti Serra Azul')
-    # TABELAS-FOCO (06/10/2026): limite, validade e situação do papel em colunas próprias (antes "Limite R$ 50.000 até 31/03/2027" numa célula só)
-    chk('6 cliente salvo com limite e contagem', not ABERTO() and 'R$ 50.000 31/03/2027 Limite vigente' in t and 'Clientes 8' in FILS(), f'{t} · {ST()}')
+    # TABELAS-FOCO (06/10/2026): limite, validade e situação do papel em colunas próprias (antes "Limite R$ 50.000 até 31/03/2027" numa célula só);
+    # revisão TABR (09/10/2026, A1): a situação do papel vem logo depois do parceiro
+    chk('6 cliente salvo com limite e contagem', not ABERTO() and t.startswith('Hortifruti Serra Azul Limite vigente') and 'R$ 50.000 31/03/2027' in t and 'Clientes 8' in FILS(), f'{t} · {ST()}')
     # ---- cadastrar parceiro de crédito ----
     FIL('Parceiros de crédito'); NOVO(); SETK('cnpj','52.119.804/0001-08'); SETK('nome','Cooperativa Cerrado Crédito'); CAN('Parceiro de crédito')
     lb=LABS()

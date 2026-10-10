@@ -85,8 +85,9 @@ def cd06():
         tree.append(dict(id=gid,v=dict(item=g),s={},p={},kids=grupos.get(g,[])))
     # item numa linha, uma variável por coluna (TABELAS-FOCO, 04/10/2026): natureza de custo (do grupo), unidade-base, embalagem, controle,
     # preço com a unidade ("R$ 22,00/L", ordena pelo número), data do preço e situação; garantia ou densidade e saldo no painel do item
-    gi=grid([dict(k='item',l='Grupo › item',w=220),dict(k='nat',l='Natureza de custo',w=210),dict(k='un',l='Unidade'),dict(k='embt',l='Embalagem',w=150),
-             dict(k='ctrl',l='Controle'),dict(k='preco',l='Preço de referência',t='num',a='r',w=140),dict(k='pdata',l='Data do preço',t='date'),dict(k='est',l='Situação',w=200)],
+    # revisão TABR (A1, 09/10): a Situação logo depois do item, à vista sem rolar; o controle (lote e validade) no painel do item
+    gi=grid([dict(k='item',l='Grupo › item',w=220),dict(k='est',l='Situação',w=200),dict(k='nat',l='Natureza de custo',w=170),dict(k='un',l='Unidade'),dict(k='embt',l='Embalagem',w=130),
+             dict(k='preco',l='Preço de referência',t='num',a='r',w=140),dict(k='pdata',l='Data do preço',t='date')],
         tree,gid='g_itm',tree=True,dele=False,total=False,frame=False,x0={r['id']:True for r in tree},
         tools=qf_chips('g_itm')+prim('g_itm_new','Cadastrar item'),
         edit=dict(m='form',title='Item',newTitle='Cadastrar item',
@@ -116,8 +117,9 @@ def cd06():
             a=next((a for a in DC.ATIVOS if a['nome']==n and a.get('cap_sc')),None)
             if a: v['capa']=f'{fmt(a["cap_sc"])} sc 60 kg · ativo {a["nome"]}'; v['capsc']=a['cap_sc']
         lrows.append(R(i,v))
-    # capacidade como número (ordena) com a unidade na célula: tanque em L, silo em sc de 60 kg (o ativo de origem fica no painel do local)
-    gl=grid([dict(k='nome',l='Local'),dict(k='faz',l='Fazenda'),dict(k='tipo',l='Tipo'),dict(k='capn',l='Capacidade',t='num',a='r'),dict(k='itens',l='Itens com este local padrão',t='num',a='r')],
+    # capacidade como número (ordena) com a unidade na célula: tanque em L, silo em sc de 60 kg (o ativo de origem fica no painel do local).
+    # Revisão TABR (A4, 09/10): L e sc são grandezas diferentes; a coluna entra quando o filtro de Tipo escolhe Tanque ou Silo
+    gl=grid([dict(k='nome',l='Local'),dict(k='faz',l='Fazenda'),dict(k='tipo',l='Tipo'),dict(k='itens',l='Itens com este local padrão',t='num',a='r')],
         lrows,gid='g_loc',qf=dict(k='tipo',todas='Todos'),dele=False,total=False,search=True,frame=False,tools=prim('g_loc_new','Cadastrar local'),
         edit=dict(m='form',title='Local',newTitle='Cadastrar local',sub='Altere o local de estoque. Local com itens não pode ser excluído.',
             fields=[txt('nome','Nome do local'),sel('faz','Fazenda',[f['nome'] for f in DC.FAZENDAS],**{'def':'Santa Rita'}),
@@ -150,11 +152,10 @@ function PREVALS(self,v){ cadActsIni(self); const grps=RW(self,'g_grp'); const i
   c6pais(self).forEach(p=>{ const g=grps.find(x=>x.id===p.id); if(!g) return; const G=g.v; const ks=p.kids||[]; p.dr='c6g_'+p.id; p.v.item=G.nome;
     const nat=c6custo(G.nat)?G.nat:'Receita'; p.p.item=[{k:'b',t:G.nome},{k:'mut',t:ks.length+(ks.length===1?' item':' itens')}]; p.s.item=G.nome;
     p.p.nat=[{k:'txt',t:nat}]; p.s.nat=nat;
-    ['un','embt','ctrl','preco','pdata','est'].forEach(k=>{ p.p[k]=[{k:'mut',t:''}]; p.s[k]=''; });
+    ['un','embt','preco','pdata','est'].forEach(k=>{ p.p[k]=[{k:'mut',t:''}]; p.s[k]=''; });
     ks.forEach(r=>{ const V=r.v; V.grupo=G.nome; V.custo=c6custo(G.nat); its.push(r); r.dr='c6i_'+r.id;
       r.p.item=[{k:'b',t:V.item||''}]; r.s.item=V.item||''; r.p.nat=[{k:'mut',t:nat}]; r.s.nat=nat;   // natureza do grupo (o filtro vale no item)
       const e=c6emb(V); r.p.un=[{k:'txt',t:V.un||'—'}]; r.s.un=V.un||''; r.p.embt=[e?{k:'txt',t:e}:{k:'mut',t:'—'}]; r.s.embt=e||'';
-      r.p.ctrl=[{k:(V.ctrl==='Sem lote'?'mut':'txt'),t:V.ctrl||'—'}]; r.s.ctrl=V.ctrl||'';
       const pr=isnum(V.preco)&&String(V.preco)!==''; r.p.preco=pr?[{k:'txt',t:'R$ '+nf(V.preco,2)+'/'+V.un}]:[{k:'mut',t:'—'}]; r.s.preco=pr?'R$ '+nf(V.preco,2)+'/'+V.un:'';
       r.p.pdata=[pr&&V.pdata?{k:'txt',t:br(V.pdata)}:{k:'mut',t:'—'}]; r.s.pdata=pr&&V.pdata?br(V.pdata):'';
       const S=c6sit(V); r.p.est=S.p; r.s.est=S.t; }); });
@@ -166,8 +167,10 @@ function PREVALS(self,v){ cadActsIni(self); const grps=RW(self,'g_grp'); const i
   const dl=locs.find(l=>l.id===C6.defl); cadcPadrao('g_itm','local',dl?dl.v.nome:'');
   locs.forEach(r=>{ const V=r.v; const n=its.filter(i=>i.v.local===V.nome).length; V.itens=n; r.nd=n?'com itens':''; r.p.nome=[{k:'b',t:V.nome||''}]; r.s.nome=V.nome||'';
     const tq=V.tipo==='Tanque'&&isnum(V.cap)&&String(V.cap)!==''; const si=V.tipo==='Silo'&&isnum(V.capsc)&&String(V.capsc)!=='';
-    V.capn=tq?Number(V.cap):(si?Number(V.capsc):''); const cap=tq?nf(V.cap)+' L':(si?nf(V.capsc)+' sc de 60 kg':'');
-    r.p.capn=cap?[{k:'txt',t:cap}]:[{k:'mut',t:'—'}]; r.s.capn=cap; }); }
+    V.capn=tq?Number(V.cap):(si?Number(V.capsc):''); const cap=tq?nf(V.cap):(si?nf(V.capsc):'');
+    r.p.capn=cap?[{k:'txt',t:cap}]:[{k:'mut',t:'—'}]; r.s.capn=cap; });   /* a coluna põe a unidade do tipo */
+  const sl=GR('g_loc'); if(!sl.colsAll) sl.colsAll=sl.cols.slice(); const qv=g2st(self,'g_loc').qv||''; const un={'Tanque':'L','Silo':'sc de 60 kg'}[qv];
+  sl.cols=un?sl.colsAll.slice(0,3).concat([{k:'capn',l:'Capacidade',t:'num',a:'r',un:un}],sl.colsAll.slice(3)):sl.colsAll; v.c6l_ncol=sl.cols.length; }
 function EXTRAVALS(self,v){
   const its=leaves(RW(self,'g_itm')).filter(r=>!/^GR/.test(r.id));
   const semP=its.filter(r=>r.v.sit!=='Inativo'&&r.v.custo&&!isnum(r.v.preco)).length, semE=its.filter(r=>r.v.sit!=='Inativo'&&!c6emb(r.v)).length;
@@ -224,6 +227,8 @@ function EXTRAVALS(self,v){
     HEIGHTS37[fname]=1000   # sem rolagem de página: só a tabela da aba rola
     shell37('CD-06','Produtos, unidades e locais',corpo,fname=fname,status=None,primary_html=None,search=False)
     estado_cab(fname,'Produtos, unidades e locais','c6e')
+    from areas.cadastros import ncol_dinamico
+    ncol_dinamico(fname,[None,'c6l_ncol'])   # a capacidade dos locais entra com o filtro Tanque ou Silo
 
 # ================= CD-07 · Estrutura gerencial =================
 TRAD=['Conta do ERP','Dimensão própria']
@@ -262,14 +267,17 @@ def cd07():
     tree=[dict(id=f'DM{i}',ro=True,v=dict(cod=d),s={},p={},kids=kids[d]) for i,d in enumerate(DC.DIMS,1)]
     # árvore dimensão › código, uma variável por coluna (TABELAS-FOCO, 04/10/2026): nome, origem, início e fim da vigência (datas que ordenam),
     # vínculos, conta e TOP no ERP, situação (chip) e o que muda no rascunho; o código superior fica no painel
-    g=grid([dict(k='cod',l='Dimensão › código',w=170),dict(k='nome',l='Nome',w=230),dict(k='orig',l='Origem',w=170),dict(k='ini',l='Início da vigência',t='date'),
-            dict(k='fim',l='Fim da vigência',t='date'),dict(k='vinc',l='Vínculos',w=220),dict(k='conta',l='Conta no ERP (Sankhya)',w=150),dict(k='top',l='TOP no ERP'),
-            dict(k='est',l='Situação',w=170),dict(k='rasc',l='No rascunho',w=110)],
+    # revisão TABR (09/10): a Situação logo depois do código (A1); origem, vínculos e TOP no painel do código; "No rascunho" só entra quando há
+    # rascunho (A8: depois de publicar ela ficava vazia em todas as linhas)
+    g=grid([dict(k='cod',l='Dimensão › código',w=170),dict(k='est',l='Situação',w=170),dict(k='nome',l='Nome',w=170),dict(k='ini',l='Início da vigência',t='date'),
+            dict(k='fim',l='Fim da vigência',t='date'),dict(k='conta',l='Conta no ERP (Sankhya)',w=150),dict(k='rasc',l='No rascunho',w=110)],
         tree,gid='g_dim',tree=True,dele=False,total=False,frame=False,x0={r['id']:True for r in tree},
         tools=qf_chips('g_dim')+secbtn('c7imp','Importar do ERP','Simulação: mostra a prévia antes de trazer qualquer código')+prim('g_dim_new','Cadastrar código'),
         edit=dict(m='form',title='Código',newTitle='Cadastrar código',leafOnly=True,
             sub='Altere o código e a tradução. A mudança entra no rascunho e vale para novos lançamentos depois de publicada; fatos já gravados mantêm as dimensões da época.',
             fields=[txt('cod','Código'),txt('nome','Nome'),sel('dim','Dimensão',DIMS_MANUAIS,**{'def':'Natureza'},help='Cada código em uma dimensão: nunca combine fazenda, cultura e processo num único centro.'),
+                    dict(k='origT',l='Origem',ro=True,cond=dict(k='origT',ne=''),help='Onde o código nasce; código de Culturas ou Operações se altera lá.'),
+                    dict(k='vincT',l='Vínculos',ro=True,cond=dict(k='vincT',ne='')),
                     txt('sup','Código superior',req=False,help='Soma no total do superior (ex.: 3.1.01 em 3.1).'),
                     sel('rat','Direcionador de rateio',DC.RATEIO,cond=cond('dim','Centro de responsabilidade'),**{'def':DC.RATEIO[0]},help='Como o custo deste centro chega às culturas, em vez de ratear tudo por hectare.'),
                     dict(k='grp',l='Grupos de insumo',ro=True,cond=cond('dim','Natureza'),help='Vêm de Produtos, unidades e locais; troque a natureza no grupo.'),
@@ -321,20 +329,22 @@ function PREVALS(self,v){ cadActsIni(self); const mud=c7mud(self); const cods=c7
     p.p.cod=[{k:'b',t:p.v.cod},{k:'mut',t:ks.length+(ks.length===1?' código':' códigos')}]; p.s.cod=p.v.cod; });
   c7cods(self).forEach(r=>{ const V=r.v;
     r.p.cod=[{k:'b',t:V.cod||''}]; r.s.cod=V.cod||''; r.p.nome=[{k:'txt',t:V.nome||''}]; r.s.nome=V.nome||'';
-    const og=V.orig||'Estrutura gerencial'; r.p.orig=[{k:V.orig?'txt':'mut',t:og}]; r.s.orig=og;
+    const og=V.orig||'Estrutura gerencial'; V.origT=og;   /* origem no painel do código */
     r.p.ini=[V.ini?{k:'txt',t:br(V.ini)}:{k:'mut',t:'—'}]; r.s.ini=V.ini?br(V.ini):''; r.p.fim=[V.fim?{k:'txt',t:br(V.fim)}:{k:'mut',t:'—'}]; r.s.fim=V.fim?br(V.fim):'';
     let vi='';
     if(V.dim==='Natureza'){ const fil=cods.filter(x=>x.v.dim==='Natureza'&&x.v.sup===V.cod).length; vi=fil?'soma '+fil+(fil===1?' natureza':' naturezas'):(V.grp?'grupos '+V.grp:''); }
     else if(V.dim==='Processo') vi=V.ops?'operações '+V.ops:'';
     else if(V.dim==='Cultura') vi=V.cvs?V.cvs+(Number(V.cvs)===1?' cultivar':' cultivares'):'';
     else if(V.dim==='Centro de responsabilidade') vi=V.rat?'rateio por '+String(V.rat).toLowerCase():'';
-    r.p.vinc=vi?[{k:'txt',t:vi}]:[{k:'mut',t:'—'}]; r.s.vinc=vi;
+    V.vincT=vi;   /* vínculos no painel do código */
     const prop=V.trad==='Dimensão própria';
     // dimensão própria não tem conta fixa (a Situação diz "Dimensão própria": é traduzida na integração)
     r.p.conta=[!prop&&V.conta?{k:'txt',t:V.conta}:{k:'mut',t:'—'}]; r.s.conta=!prop&&V.conta?V.conta:''; r.p.top=[!prop&&V.top?{k:'txt',t:V.top}:{k:'mut',t:'—'}]; r.s.top=!prop&&V.top?V.top:'';
     const S=c7sit(self,r); r.p.est=S.p; r.s.est=S.t;
     const m=mud[r.id]; const mt=m?m.charAt(0).toUpperCase()+m.slice(1):''; r.p.rasc=[m?chipc(mt,m==='excluído'?'gray':'blue'):{k:'mut',t:'—'}]; r.s.rasc=mt; });
-  RW(self,'g_dim').forEach(p=>{ ['nome','orig','ini','fim','vinc','conta','top','est','rasc'].forEach(k=>{ p.p[k]=[{k:'mut',t:''}]; p.s[k]=''; }); });
+  RW(self,'g_dim').forEach(p=>{ ['nome','ini','fim','conta','est','rasc'].forEach(k=>{ p.p[k]=[{k:'mut',t:''}]; p.s[k]=''; }); });
+  // "No rascunho" só com rascunho aberto (sem coluna sempre vazia)
+  const sd=GR('g_dim'); if(!sd.colsAll) sd.colsAll=sd.cols.slice(); sd.cols=Object.keys(mud).length?sd.colsAll:sd.colsAll.filter(c=>c.k!=='rasc'); v.c7_ncol=sd.cols.length;
   const nv=c7ver(self)+1;
   cadQf(self,v,'g_dim','c7qf',[{k:'alt',t:'No rascunho v'+nv,f:r=>!!mud[r.id]},{k:'res',t:'A resolver',f:r=>!!c7sit(self,r).res}]); }
 function EXTRAVALS(self,v){ const ver=c7ver(self), mud=c7mud(self), n=Object.keys(mud).length, pend=c7pend(self).length;
@@ -388,3 +398,5 @@ function EXTRAVALS(self,v){ const ver=c7ver(self), mud=c7mud(self), n=Object.key
     HEIGHTS37[fname]=1000   # sem rolagem de página: só a árvore rola
     shell37('CD-07','Estrutura gerencial',corpo,fname=fname,status=None,primary_html=None,search=False)
     estado_cab(fname,'Estrutura gerencial','c7e')
+    from areas.cadastros import ncol_dinamico
+    ncol_dinamico(fname,['c7_ncol'])   # "No rascunho" entra e sai com o rascunho

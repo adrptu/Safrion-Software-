@@ -63,8 +63,9 @@ def cd02():
         tree.append(dict(id=cid,v=dict(nome=nome),s={},p={},kids=kids))
     # uma variável por coluna (TABELAS-FOCO, 04/10/2026): a linha da cultura mostra o tipo de ciclo e a unidade de produtividade (DEC-0510-03);
     # a da cultivar, o ciclo em dias, a semente, os cultivos (número) e a situação
-    cv=grid([dict(k='nome',l='Cultura › cultivar',w=200),dict(k='tipo',l='Tipo de ciclo'),dict(k='unid',l='Unidade de produtividade',w=170),
-             dict(k='dias',l='Ciclo',t='num',a='r',un='dias'),dict(k='sem',l='Item de semente',w=220),dict(k='uso',l='Cultivos',t='num',a='r'),dict(k='est',l='Situação',w=230)],
+    # revisão TABR (A1, 09/10): a Situação logo depois da identificação, à vista sem rolar
+    cv=grid([dict(k='nome',l='Cultura › cultivar',w=200),dict(k='est',l='Situação',w=230),dict(k='tipo',l='Tipo de ciclo'),dict(k='unid',l='Unidade de produtividade',w=170),
+             dict(k='dias',l='Ciclo',t='num',a='r',un='dias'),dict(k='sem',l='Item de semente',w=220),dict(k='uso',l='Cultivos',t='num',a='r')],
         tree,gid='g_cv',tree=True,dele=False,total=False,frame=False,x0={r['id']:True for r in tree},
         tools=qf_chips('g_cv')+prim('g_cv_new','Cadastrar cultivar'),
         edit=dict(m='form',title='Cultivar',newTitle='Cadastrar cultivar',sub='Registro no RNC é referência, não prova de adaptação local; cultivar em uso não se exclui, inative.',
@@ -102,12 +103,11 @@ def cd02():
             ch=D2.custo_h(c); v.update(custo_h=round(ch,2),custo_ha=round(ch/c['rend'],2))
             kids.append(R(c['id'],v))
         rtree.append(dict(id=oid,v=dict(nome=op),s={},p={},kids=kids))
-    # mesmo desenho da etapa 3 do Planejar safra: processo na linha da operação; modo, largura, velocidade e eficiência em colunas próprias na do
-    # conjunto; custos "Custo R$/h" e "Custo R$/ha" com a unidade na célula (proprietário, 05/10/2026)
-    rend=grid([dict(k='nome',l='Operação › conjunto',w=300),dict(k='proc',l='Processo',w=140),dict(k='cult',l='Cultura'),dict(k='modo',l='Modo',w=150),
-               dict(k='larg',l='Largura',t='num',a='r',un='m'),dict(k='vel',l='Velocidade',t='num',a='r',un='km/h'),dict(k='efic',l='Eficiência',t='num',a='r',un='%'),
-               dict(k='rend',l='Rendimento',t='num',a='r',un='ha/h',d=2),dict(k='custo_h',l='R$/h',t='num',a='r',d=2),dict(k='custo_ha',l='R$/ha',t='num',a='r',d=2),
-               dict(k='fonte',l='Fonte',w=200)],rtree,gid='g_rend',tree=True,dele=False,total=False,frame=False,x0={r['id']:True for r in rtree},
+    # processo na linha da operação; custos "Custo R$/h" e "Custo R$/ha" com a unidade na célula (proprietário, 05/10/2026). Revisão TABR (A1,
+    # 09/10): a fonte do dado (a premissa a validar é a pendência, com o verbo) logo depois do conjunto; modo, largura, velocidade e eficiência,
+    # que formam o rendimento, ficam no painel (o mesmo formulário do Planejar safra), e a grade cabe sem rolar a 1440 px
+    rend=grid([dict(k='nome',l='Operação › conjunto',w=300),dict(k='fonte',l='Fonte',w=200),dict(k='proc',l='Processo',w=140),dict(k='cult',l='Cultura'),
+               dict(k='rend',l='Rendimento',t='num',a='r',un='ha/h',d=2),dict(k='custo_h',l='R$/h',t='num',a='r',d=2),dict(k='custo_ha',l='R$/ha',t='num',a='r',d=2)],rtree,gid='g_rend',tree=True,dele=False,total=False,frame=False,x0={r['id']:True for r in rtree},
         tools=qf_chips('g_rend')+secbtn('sim_cmp','Comparar com o realizado','Compara o padrão com os apontamentos de campo')+prim('g_rend_new','Cadastrar rendimento'),
         edit=dict(m='form',title='Rendimento',newTitle='Cadastrar rendimento',
             sub='Informe como o conjunto trabalha e quanto custa por hora; rendimento e custo por hectare são recalculados. Planejar safra parte deste padrão.',
@@ -145,7 +145,8 @@ function c2pais(self,gid){ return RW(self,gid).filter(p=>/^(CU|OP)/.test(p.id));
 function cvFalta(V){ return V.tipo==='Anual'&&V.sit!=='Inativa'&&(!V.sem||V.sem===CRIAR); }
 function cvSit(V){ if(V.sit==='Inativa') return {t:'Inativa',p:[chipc('Inativa','gray')]}; if(cvFalta(V)) return {t:'Sem semente',p:sitX('Sem semente','yellow','Vincular semente'),res:true};
   return {t:'Em dia',p:sitOk('Em dia')}; }
-function rdSit(V){ if(V.fonte==='Premissa a validar') return {t:'Premissa a validar',p:sitX('Premissa a validar','yellow','Validar'),res:true}; return {t:V.fonte||'—',p:sitOk(V.fonte||'—')}; }
+// a fonte do dado é texto; só a premissa a validar é pendência (chip com o verbo). Antes a fonte saía em chip verde de estado (revisão TABR A11)
+function rdSit(V){ if(V.fonte==='Premissa a validar') return {t:'Premissa a validar',p:sitX('Premissa a validar','yellow','Validar'),res:true}; return {t:V.fonte||'—',p:[V.fonte?{k:'txt',t:V.fonte}:{k:'mut',t:'—'}]}; }
 CAD_ACTS.g_cv=(self,r)=>{ const n=Number(r.v.uso)||0; return [cadExcluir(self,'g_cv',r,'cultivar',n?('usada em '+n+(n>1?' cultivos':' cultivo')+'; inative em vez de excluir'):'')]; };
 function PREVALS(self,v){ cadActsIni(self);
   const cul=RW(self,'g_cult'); const dc=cul.find(c=>c.id===C2.defc); cadcPadrao('g_cv','cult',dc?dc.v.nome:'');
@@ -168,11 +169,10 @@ function PREVALS(self,v){ cadActsIni(self);
   RW(self,'g_rend').forEach(p=>{ const o=ops.find(x=>x.id===p.id); if(!o) return; const O=o.v; const ks=p.kids||[]; p.dr='c2oo_'+p.id; p.v.nome=O.nome;
     p.p.nome=[{k:'b',t:O.nome},{k:'mut',t:ks.length+(ks.length===1?' conjunto':' conjuntos')}]; p.s.nome=O.nome;
     p.p.proc=[O.proc?{k:'txt',t:O.proc}:{k:'mut',t:'sem processo'}]; p.s.proc=O.proc||'';
-    ['cult','modo','larg','vel','efic','rend','custo_h','custo_ha','fonte'].forEach(k=>{ p.p[k]=[{k:'mut',t:''}]; p.s[k]=''; });
+    ['cult','rend','custo_h','custo_ha','fonte'].forEach(k=>{ p.p[k]=[{k:'mut',t:''}]; p.s[k]=''; });
     ks.forEach(r=>{ const V=r.v; V.op=O.nome; V.nome=V.conj;
       r.p.nome=[{k:'b',t:V.conj||''}]; r.s.nome=V.conj||''; r.p.proc=[{k:'mut',t:O.proc||'—'}]; r.s.proc=O.proc||'';   // processo da operação (filtro vale no conjunto)
-      const inf=V.modo==='Informado'; r.p.modo=[{k:'txt',t:V.modo||'—'}]; r.s.modo=V.modo||'';
-      ['larg','vel','efic'].forEach(k=>{ const ok=!inf&&isnum(V[k])&&String(V[k])!==''; r.p[k]=[ok?{k:'txt',t:nfa(V[k])}:{k:'mut',t:'—'}]; r.s[k]=ok?nfa(V[k]):''; });
+      /* modo, largura, velocidade e eficiência ficam no painel (formulário do rendimento) */
       const cu=V.cult||'Todas'; r.p.cult=[cu==='Todas'?{k:'mut',t:'Todas'}:{k:'txt',t:cu}]; r.s.cult=cu;
       r.p.custo_h=[{k:'txt',t:nf(V.custo_h,2)}]; r.s.custo_h=nf(V.custo_h,2);   // a coluna põe "R$ …/h" (unidade na célula)
       const S=rdSit(V); r.p.fonte=S.p; r.s.fonte=V.fonte||''; }); });

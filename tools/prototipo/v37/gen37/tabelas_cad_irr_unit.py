@@ -6,6 +6,10 @@
 (C) Funções JS das páginas geradas, no node: documento e situação do ponto de água (sem a data na situação), situação de cada papel do
     parceiro, cultura × estádio do setor, o instante ISO que ordena "ontem/hoje/amanhã" e a Pendência sem repetir a Situação.
     (B4: cada grandeza da fonte de clima/sensor com a sua unidade; B5: a unidade do sensor novo vem da grandeza, sem campo no formulário.)
+    Revisão TABR (09/10): C7–C9 pendência com o tipo no chip e o detalhe na dica, sem selo de ordem encerrada, com a ordem quando é outra
+    (A11, A6, A2); C10–C11 motivo e verbo da pessoa não alocável e a validade que vence primeiro (A3, M-i); C12–C13 calibração a vencer
+    no chip e capacidade só com uma grandeza (A10, A4); B6 versão do estado salvo da irrigação (A9); B7 parcelas da lista = do detalhe
+    (PV01 da Lagoa Grande, pré-existente); C14 duração da passada = fim − início da mesma linha (IR-03det, pré-existente).
 Uso: python3 tabelas_cad_irr_unit.py   (sai com 1 se alguma regra falhar)"""
 import os, re, sys, json, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); os.chdir(HERE)
@@ -65,11 +69,27 @@ AUS = lambda nome: (lambda *a: (_ for _ in ()).throw(AttributeError(nome + ' aus
 casos = [('180 m³/h', 180.0), ('1,0 L/s', 3.6), ('0,5 L/s', 1.8), ('—', ''), ('', '')]
 r = [(t, tenta(getattr(CF, '_vazao_m3h', AUS('_vazao_m3h')), t)) for t, _ in casos]
 chk('B1 vazão do documento em m³/h para ordenar: 180 m³/h → 180; 1,0 L/s → 3,6; "—" → vazio', all(abs(a - b) < 1e-9 if isinstance(b, float) and isinstance(a, float) else a == b for (_, a), (_, b) in zip(r, casos)), r)
+# B1b (revisão TABR, mutante M-a): na grade publicada, a chave que ordena a vazão em L/s é o valor × 3,6 (na tela, os L/s do cenário ficam
+# abaixo de 8 m³/h com ou sem conversão, então a ordem sozinha não mostra o erro)
+ga = {g['id']: g for g in grids(page('CD-01'))}.get('g_agua') or {}
+ls = [(r['v'].get('vazao'), r['v'].get('vazn')) for r in ga.get('rows', []) if str(r['v'].get('vazao', '')).endswith('L/s')]
+chk('B1b vazão em L/s da grade publicada ordena pelo valor em m³/h (0,5 L/s → 1,8; 1,0 L/s → 3,6)', ls and all(abs(float(t.split()[0].replace(',', '.')) * 3.6 - float(k)) < 1e-6 for t, k in ls), ls)
 r = [tenta(getattr(CF, '_doc_agua', AUS('_doc_agua')), x) for x in ('Outorga', 'Outorga estadual', 'Certidão de uso insignificante', '')]
 chk('B2 documento do ponto de água: Outorga × Certidão (de uso insignificante); sem tipo fica vazio', r == ['Outorga', 'Outorga', 'Certidão', ''], r)
 pr = tenta(getattr(CF, '_parc_rows', AUS('_parc_rows')), ['T1'], 'Santa Rita')
 safras = [g['v']['safra'] for g in pr[0]] if isinstance(pr, tuple) else [pr]
 chk('B3 parcelas do T1 (Santa Rita) só com safras da Santa Rita (sem a Safra Mamão da Lagoa Grande)', isinstance(pr, tuple) and safras and not any('Mamão' in x for x in safras), safras)
+# B7 (revisão TABR, pré-existente): a lista (CD-01, "Parcelas na safra") e o detalhe do talhão (CD-01det) contam as mesmas parcelas em todo
+# talhão; o PV01 da Lagoa Grande tinha 1 parcela na lista e nenhuma no detalhe (o local do cultivo é o nome do pivô, "Pivô 1")
+import dados_lagoa_safra as DL
+try:
+    npc = CF._nparc(); div = []
+    for t in CF._tal_rows():
+        rr, _ = CF._parc_rows([t['id']], t['v']['faz']); k = sum(len(g['kids']) for g in rr if g['v']['sid'] in (CF.SAF_ATUAL['id'], DL.SAFRA['id']))
+        if k != npc.get(t['id'], 0): div.append((t['id'], k, npc.get(t['id'], 0)))
+    pv = CF._parc_rows(['PV01'], 'Lagoa Grande')[0]; pv01 = [(k['v']['parc'], k['v']['area']) for g in pv for k in g['kids']]
+except Exception as e: div, pv01 = [repr(e)], []
+chk('B7 parcelas da lista = parcelas do detalhe em todo talhão (PV01: Pivô 1 com 29,92 ha na Safra Mamão)', not div and pv01 == [('Pivô 1', 29.92)], (div[:4], pv01))
 
 # ---------------- (C) funções JS das páginas, no node ----------------
 def func(html, nome):
@@ -116,12 +136,56 @@ chk('C5 instante ISO ordena no tempo (19/09 < ontem < hoje < amanhã < 25/09) e 
     m0 is not None and len(iso) == 6 and iso == sorted(iso) and iso[0] == '2026-09-19 14:00' and iso[3] == '2026-09-23 20:00' and txt[1:5] == ['ontem 20:00', 'hoje 14:00', 'hoje 20:00', 'amanhã 10:31'] and ui.get('vazio') == '', (iso, txt))
 chk('C6 pelo texto a ordem sairia errada ("amanhã" < "hoje" < "ontem"): por isso o valor que ordena é o ISO', len(txt) == 6 and sorted(txt[1:5]) != txt[1:5], sorted(txt[1:5]))
 jsp = func(hi, 'irrPend') + '\n' + func(hi, 'irrPendFert') + r"""
-console.log(JSON.stringify({p:irrPend([{t:'Impedida · bomba parada',c:'red'},{t:'Falta insumo · Ureia 45%',c:'red'},{t:'Conflito · parada da B3',c:'red'},{t:'Janela a definir',c:'yellow'}]).map(x=>[x.t,x.c]),
-  f:irrPendFert({t:'Impedida · bomba parada',dono:'Manutenção'}).map(x=>x.t), n:irrPendFert(null)}));"""
+const P=(a,ref)=>irrPend(a,ref).map(x=>[x.t,x.c,x.dica]);
+console.log(JSON.stringify({p:P([{t:'Impedida · bomba parada',c:'red'},{t:'Falta insumo · Ureia 45%',c:'red'},{t:'Conflito · parada da B3',c:'red',h:'14:00–15:00'},{t:'Janela a definir',c:'yellow'}]),
+  f:irrPendFert({t:'Impedida · bomba parada',dono:'Manutenção'}).map(x=>x.t), n:irrPendFert(null),
+  mut:P([{t:'Encerrada automaticamente',c:'gray',mut:true}]), ref:P([{t:'Divergência · −3,8 %',c:'yellow'}],'OS-0394')}));"""
 up = node(jsp) or {}
-chk('C7 Pendência sem repetir a Situação: "Impedida · bomba parada" → "Bomba parada" (cor mantida); falta insumo, conflito e janela ficam como estão; sem bloqueio = lista vazia',
-    up.get('p') == [['Bomba parada', 'red'], ['Falta insumo · Ureia 45%', 'red'], ['Conflito · parada da B3', 'red'], ['Janela a definir', 'yellow']] and up.get('f') == ['Bomba parada'] and up.get('n') == [], up)
+# revisão TABR (09/10), A11: uma variável por chip (o tipo no chip, o detalhe na dica); A6: selo informativo de ordem encerrada (mut) não é
+# pendência; A2: pendência de outra ordem diz qual é ("Divergência na OS-0394" ao lado da OS-0419)
+chk('C7 Pendência: o tipo no chip e o detalhe na dica ("Falta insumo" + "Ureia 45%"; "Conflito" + "parada da B3 · 14:00–15:00"), sem repetir "Impedida"; sem bloqueio = lista vazia',
+    up.get('p') == [['Bomba parada', 'red', ''], ['Falta insumo', 'red', 'Ureia 45%'], ['Conflito', 'red', 'parada da B3 · 14:00–15:00'], ['Janela a definir', 'yellow', '']] and up.get('f') == ['Bomba parada'] and up.get('n') == [], up)
+chk('C8 (A6) selo informativo de ordem encerrada ("Encerrada automaticamente", mut) não entra na Pendência', up.get('mut') == [], up.get('mut'))
+chk('C9 (A2) pendência de outra ordem diz qual é: "Divergência na OS-0394" (dica −3,8 %)', up.get('ref') == [['Divergência na OS-0394', 'yellow', '−3,8 %']], up.get('ref'))
+# CD-04 (A3): não alocável diz o motivo (dica) e o próximo passo com verbo; M-i: a validade que vale é a mais próxima entre as exigidas
+h4p = page('CD-04'); ia = h4p.find('const AL='); AL = json.JSONDecoder().raw_decode(h4p[ia + 9:])[0] if ia >= 0 else {}
+js4 = "const HOJE='2026-09-23'; const AL=" + json.dumps(AL, ensure_ascii=False) + ";\n" + '\n'.join(func(h4p, f) for f in ('ml', 'br', 'ddiff', 'chipc', 'sitOk', 'sitX', 'habExig', 'alocavel', 'c4passo', 'c4sit', 'c4val')) + r"""
+const S=(V)=>{ const x=c4sit(Object.assign({sit:'Ativa'},V)); return [x.t, x.p.map(p=>p.t).join(' | '), (x.p[0]||{}).dica||'']; };
+console.log(JSON.stringify({ate:S({hab:'Operar trator',v31:'2027-08-31',ate:'2026-09-01'}),venc:S({hab:'Operar trator',v31:'2026-08-15'}),pend:S({hab:'Operar trator'}),
+  adm:S({hab:'Conferir',adm:'2026-10-15'}),ok:S({hab:'Operar trator',v31:'2027-08-31'}),
+  val:c4val(alocavel({hab:'Operar trator; Irrigar',v31:'2027-08-31',v10:'2026-12-10'}))}));"""
+u4 = node(js4) or {}
+chk('C10 (A3) CD-04 não alocável: o chip diz a consequência, a dica o motivo e o verbo o que resolver (contrato encerrado → Renovar contrato; NR-31 vencida → Renovar NR-31; pendente → Registrar NR-31; admissão futura → Aguardar admissão)',
+    u4.get('ate') == ['Não alocável', 'Não alocável em O.S. | Renovar contrato ›', 'Contrato encerrado em 01/09/2026'] and u4.get('venc') == ['Não alocável', 'Não alocável em O.S. | Renovar NR-31 ›', 'NR-31 vencida em 15/08/2026']
+    and u4.get('pend') == ['Não alocável', 'Não alocável em O.S. | Registrar NR-31 ›', 'NR-31 pendente'] and u4.get('adm', [''])[1] == 'Não alocável em O.S. | Aguardar admissão em 15/10/2026 ›' and u4.get('ok') == ['Alocável', 'Alocável', ''], u4)
+chk('C11 (M-i) CD-04: com duas habilitações datadas, a validade que vale é a que vence primeiro (NR-10 10/12/2026, não NR-31 31/08/2027)', u4.get('val') == '2026-12-10', u4.get('val'))
+# CD-03 (A10, A4): calibração a vencer diz isso no chip (a cor da data não é o único sinal); a capacidade só tem coluna com uma grandeza
+h3 = page('CD-03'); ic = h3.find('const C3='); C3 = json.JSONDecoder().raw_decode(h3[ic + 9:])[0] if ic >= 0 else {}
+js3 = "const HOJE='2026-09-23'; const C3=" + json.dumps(C3, ensure_ascii=False) + ";\n" + '\n'.join(func(h3, f) for f in ('br', 'ddiff', 'addd', 'chipc', 'sitOk', 'sitX', 'c3cond', 'c3calib', 'c3sit', 'c3capCol')) + r"""
+const SP={id:'g_atv',cols:[{k:'nome'},{k:'est'},{k:'classe'},{k:'custo_h'},{k:'ncj'},{k:'calv'}]}; const GR=()=>SP; const ST={}; const g2st=()=>ST;
+const K=(f)=>{ ST.f={classe:f}; c3capCol({}); const c=SP.cols.find(x=>x.k==='capn'); return c?[SP.cols.indexOf(c),c.l,c.un,c.t]:null; };
+const sit=(V)=>{ const x=c3sit({id:'z',v:Object.assign({sit:'Ativo',exige:'Sim',interv:30},V)}); return [x.t,x.p.map(p=>p.t).join(' | '),!!x.res]; };
+console.log(JSON.stringify({cap:{todas:K([]),irr:K(['Irrigação']),tr:K(['Trator']),mist:K(['Trator','Pulverizador']),kgh:K(['Tratamento de sementes','Beneficiamento']),col:K(['Colhedora'])},
+  vence:sit({calib:'2026-09-01'}),emdia:sit({calib:'2026-09-20'}),vencida:sit({calib:'2026-08-01'})}));"""
+u3 = node(js3) or {}; cp = u3.get('cap') or {}
+chk('C12 (A10) CD-03: calibração que vence em 15 dias = chip "Calibração a vencer" com "Registrar calibração" (fora do "A resolver"); em dia = Apta; vencida = Calibração vencida',
+    u3.get('vence') == ['Calibração a vencer', 'Calibração a vencer | Registrar calibração ›', False] and u3.get('emdia') == ['Apta', 'Apta', False] and (u3.get('vencida') or [''])[0] == 'Calibração vencida', u3)
+chk('C13 (A4) CD-03: capacidade só com uma grandeza no filtro de Classe, com rótulo e unidade dela (Irrigação → Vazão m³/h; Trator → Potência cv; Trator + Pulverizador → sem coluna; sementes + beneficiamento → Capacidade kg/h)',
+    cp.get('todas') is None and cp.get('irr') == [3, 'Vazão', 'm³/h', 'num'] and cp.get('tr') == [3, 'Potência', 'cv', 'num'] and cp.get('mist') is None
+    and cp.get('kgh') == [3, 'Capacidade', 'kg/h', 'num'] and cp.get('col') is None, cp)
+# C14 (revisão TABR, pré-existente): no IR-03det a Duração é a da janela mostrada na linha (Início e Fim reais → real; previstos → prevista)
+hd = page('IR-03det')
+jsd = '\n'.join(func(hd, f) for f in ('irrPausaMin', 'irrFimP', 'irrDurP')) + r"""
+const o={exec:{pausas:[{n:2,ini:1000,fim:1030}]}};
+console.log(JSON.stringify([irrDurP(o,{n:1,ini:1200,dur:870,iniReal:1200,fimReal:1326}), irrDurP(o,{n:1,ini:1200,dur:870}), irrDurP(o,{n:1,ini:null,dur:870}),
+  irrDurP(o,{n:2,ini:900,dur:600,iniReal:905})]));"""
+ud = node(jsd)
+chk('C14 IR-03det: Duração = Fim − Início da mesma linha (feita 20:00–22:06 → 126 min, não os 870 previstos; programada → 870; sem início → 870; em execução com pausa de 30 min → 630)',
+    ud == [126, 870, 870, 630], ud)
 import dados_irrigacao as DI
+# A9: a semente da irrigação mudou (grandezas e unidades por item, a881cbe/ecc8fce): versão nova descarta o estado salvo com a semente antiga
+ie = open(os.path.join(HERE, 'irrigacao_estado.js'), encoding='utf-8').read()
+chk('B6 (A9) estado salvo da irrigação com outra versão é descartado: semente v=3 e a leitura só aceita a mesma versão', DI.seed()['v'] == 3 and 'p.v === IRR0.v' in ie, DI.seed()['v'])
 desc = [(k, f['gr'], f['un']) for k, f in DI.FONTES.items() if len(f['gr'].split(' / ')) != len(f['un'].split(' · '))]
 chk('B4 cada grandeza da fonte tem a sua unidade, na mesma ordem (a estação: ET₀, chuva e vento → mm/dia, mm e km/h)', not desc, desc)
 # B5: "Cadastrar sensor" não pede a unidade; ela vem da grandeza (UN_GR) e é a mesma da semente para a mesma grandeza (antes: Volume | % vol.)

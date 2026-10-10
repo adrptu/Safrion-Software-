@@ -3,7 +3,7 @@
 parcelas em consulta com origem no Planejar safra (antes eram editadas aqui), resumo por safra pela área cultivável (312 ha, não o
 polígono de 312,4 ha), "Dividir em parcelas" leva ao SAF e a área cultivável não fica abaixo do alocado. Mais: "Definir polígono"
 (prévia, motivo acima de 1 %, nova versão preservando a anterior) e seletor de talhão no cabeçalho. ≤ 15 verificações."""
-import sys, os, time, subprocess, json
+import re, sys, os, time, subprocess, json
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
 from journeys import free
@@ -59,7 +59,8 @@ try:
     # ---------- seletor: outro talhão, sem misturar linhas ----------
     J(f"({SETV})('header select','T4')"); time.sleep(.35); m=main()
     # Área e Livre em colunas próprias (TABELAS-FOCO): Safra 2026/27 204 ha alocados e 0 livre; Safrinha 2027 0 alocado e 204 ha livres
-    chk('11 seletor troca para T4: só as safras do T4 e a primária do T4', 'T1-A' not in m and 'Safra 2026/27 204 ha 0 ha' in m and 'Safrinha 2027 0 ha 204 ha' in m and 'T4 · 204 ha' in head() and 'Planejar T4 na safra' in m, [m[:400],head()])
+    # revisão TABR (09/10/2026, A1): a Situação da safra vem logo depois do nome ("Safra 2026/27 <situação> … 204 ha 0 ha")
+    chk('11 seletor troca para T4: só as safras do T4 e a primária do T4', 'T1-A' not in m and re.search(r'Safra 2026/27 [^0-9]{0,60}204 ha 0 ha', m) and re.search(r'Safrinha 2027 [^0-9]{0,60}0 ha 204 ha', m) and 'T4 · 204 ha' in head() and 'Planejar T4 na safra' in m, [m[:400],head()])
     J(f"({SETV})('header select','B1')"); time.sleep(.35); aba('Geometria'); J(f"({CLK})('Definir polígono do B1','main button')"); time.sleep(.3)
     J(f"({BTN})('Gerar prévia')"); time.sleep(.2); J(f"({BTN})('Cancelar')"); time.sleep(.2); w=alerts()
     J(f"({BTN})('Continuar editando')"); time.sleep(.2); J(f"({BTN})('Salvar polígono')"); time.sleep(.4)

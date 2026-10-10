@@ -93,6 +93,9 @@ OPS=list(dict.fromkeys(c['op'] for c in D2.CONJ))
 OPHAB={'Pulverização':['Operar trator','Operar pulverizador'],'Plantio':['Operar trator','Operar plantadeira'],'Adubação a lanço':['Operar trator'],
        'Tratamento de sementes':[],'Colheita de grãos':['Operar colhedora'],'Colheita de café':[],'Poda':['Operar trator'],'Fertirrigação':['Irrigar']}
 SEM_IMPL='Sem implemento'
+# capacidade principal por classe (rótulo, unidade), a mesma de c3capn(): a coluna só aparece quando o filtro de Classe deixa uma grandeza
+CAPCOL={'Trator':('Potência','cv'),'Pulverizador':('Tanque útil','L'),'Plantadeira':('Linhas','linhas'),'Distribuidor':('Carga','kg'),
+        'Irrigação':('Vazão','m³/h'),'Armazenagem':('Capacidade','sc de 60 kg'),'Tratamento de sementes':('Capacidade','kg/h'),'Beneficiamento':('Capacidade','kg/h')}
 # subtítulo do formulário: no cadastro a classe vem primeiro; na edição ela fica fixa
 SUB_NEW='Escolha a classe para abrir a capacidade dela.'
 SUB_EDIT='Altere capacidade, custo por hora e calibração; inative em vez de excluir, o histórico continua.'
@@ -132,11 +135,12 @@ def _linhas_ativo():
 
 def cd03():
     fname='CD-03.dc.html'; E._reset_screen(fname)
-    # uma variável por coluna (TABELAS-FOCO, 04/10/2026): modelo, capacidade principal da classe (potência, tanque, linhas, carga, vazão…; ordena
-    # pelo número), largura de trabalho e próxima calibração em colunas próprias; espaçamento e plataforma no painel; "Custo R$/h" (05/10/2026)
-    g=grid([dict(k='nome',l='Máquina ou instalação',w=190),dict(k='modelo',l='Modelo',w=150),dict(k='classe',l='Classe',w=150),dict(k='capn',l='Capacidade',t='num',a='r',w=140),
-            dict(k='largn',l='Largura de trabalho',t='num',a='r',un='m'),dict(k='custo_h',l='R$/h',t='num',a='r',d=2),dict(k='ncj',l='Conjuntos',t='num',a='r'),
-            dict(k='calv',l='Próxima calibração',t='date'),dict(k='est',l='Situação',w=230)],
+    # uma variável por coluna (TABELAS-FOCO, 04/10/2026): classe, "Custo R$/h" (05/10/2026), conjuntos e próxima calibração em colunas próprias.
+    # Revisão TABR (09/10): a Situação logo depois da máquina (A1); modelo, largura de trabalho, espaçamento e plataforma no painel. A capacidade
+    # principal muda de grandeza com a classe (potência em cv, tanque em L, vazão em m³/h…), então não fica numa coluna só (A4: ordenava cv
+    # com L): a coluna entra quando o filtro de Classe deixa uma só grandeza, com o rótulo e a unidade dela, e ordena pelo número
+    g=grid([dict(k='nome',l='Máquina ou instalação',w=190),dict(k='est',l='Situação',w=230),dict(k='classe',l='Classe',w=150),
+            dict(k='custo_h',l='R$/h',t='num',a='r',d=2),dict(k='ncj',l='Conjuntos',t='num',a='r'),dict(k='calv',l='Próxima calibração',t='date')],
         _linhas_ativo(),gid='g_atv',total=False,frame=False,
         tools=qf_chips('g_atv')+prim('g_atv_new','Cadastrar máquina ou instalação'),
         edit=dict(m='form',title='Máquina',newTitle='Cadastrar máquina ou instalação',
@@ -156,7 +160,7 @@ def cd03():
     acoes_form('g_atv'); acoes_form('g_cj'); cadx_css()
     p1=(barra(f'<span style="font-size: 12px; font-weight: 600; color: {MUTED};">{H("c3_ncj")}</span>',prim('g_cj_new','Montar conjunto'))+cartoes('c3_cjs','Conjuntos'))
     corpo=bloco_cad(abas('c3t',['Máquinas e instalações','Conjuntos'],'Cadastros de máquinas'),pane('c3t',0,faixa('c3_fx0')+g)+pane('c3t',1,p1),'Máquinas, instalações e setores')
-    dados=dict(cod=COD,impl=IMPL,calib=CALIB_CLS,sem=SEM_IMPL,ophab=OPHAB,subnew=SUB_NEW,
+    dados=dict(cod=COD,impl=IMPL,calib=CALIB_CLS,sem=SEM_IMPL,ophab=OPHAB,subnew=SUB_NEW,capcol=CAPCOL,
                cond={k:dict(t=c['t'],m=c['om']+' · '+c['det'],ordens=c['ordens'],om=c['om']) for k,c in DC.CONDICAO.items()},
                pes=[dict(v,id=pid) for pid,v in pessoas()])
     js({},ALOC_JS+'const C3='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
@@ -207,7 +211,14 @@ function c3sit(r){ const V=r.v; const C=c3cond(r), K=c3calib(V);
   if(C.t==='Em manutenção') return {t:'Em manutenção',p:sitX('Em manutenção','red','Ver ordens afetadas','OS.dc.html'),res:'man'};
   if(K.s==='Vencida') return {t:'Calibração vencida',p:sitX('Calibração vencida','red','Registrar calibração'),res:'cal'};
   if(K.s==='Aferir') return {t:'Sem aferição',p:sitX('Sem aferição','yellow','Registrar aferição'),res:'cal'};
-  return {t:'Apta',p:sitOk('Apta')}; }   // calibração que vence em 15 dias: a data fica em Próxima calibração, em amarelo
+  // calibração que vence em 15 dias: o chip diz isso (a cor da data não é o único sinal, revisão TABR A10); continua apta, fora do "A resolver"
+  if(K.s==='Vence') return {t:'Calibração a vencer',p:sitX('Calibração a vencer','yellow','Registrar calibração')};
+  return {t:'Apta',p:sitOk('Apta')}; }
+// coluna da capacidade: só com o filtro de Classe numa grandeza (rótulo e unidade da classe); sem isso a grade não mistura grandezas
+function c3capCol(self){ const sp=GR('g_atv'); if(!sp.colsAll) sp.colsAll=sp.cols.slice(); const fc=((g2st(self,'g_atv').f||{}).classe)||[];
+  const ks=[...new Set(fc.map(c=>C3.capcol[c]?C3.capcol[c].join('|'):'').filter(Boolean))];
+  const ok=fc.length&&fc.every(c=>C3.capcol[c])&&ks.length===1; const cc=ok?{k:'capn',l:C3.capcol[fc[0]][0],t:'num',a:'r',un:C3.capcol[fc[0]][1],w:140}:null;
+  sp.cols=cc?sp.colsAll.slice(0,3).concat([cc],sp.colsAll.slice(3)):sp.colsAll; return sp.cols.length; }
 function c3usos(self){ const u={}; RW(self,'g_cj').forEach(r=>{ [r.v.maq,r.v.impl].forEach(n=>{ if(n&&n!==C3.sem) (u[n]=u[n]||[]).push(r); }); }); return u; }
 function c3temR(V){ return isnum(V.rend)&&String(V.rend)!==''; }
 // painel da máquina: os conjuntos que a usam (cada um abre o conjunto); painel do conjunto: rendimento e exclusão
@@ -216,12 +227,11 @@ CAD_ACTS.g_atv=(self,r,fm)=>{ if(g2dirty(fm)) return []; const us=(c3usos(self)[
     return {t:(o?o+' · ':'')+(ml(c.v.ops).join(', ')||'conjunto')+' ›',h:i===us.length-1?(us.length>1?'Conjuntos que usam esta máquina.':'Conjunto que usa esta máquina.'):'',go:()=>{ g2set(self,'g_atv',{fm:null}); g2open(self,GR('g_cj'),c.id,null); }}; }); };
 CAD_ACTS.g_cj=(self,r)=>[c3temR(r.v)?null:{t:'Cadastrar rendimento ›',h:'Sem rendimento o planejamento não calcula horas nem custo deste conjunto.',go:()=>{ location.href='CD-02.dc.html#aba=operacoes'; }},
   cadExcluir(self,'g_cj',r,'conjunto',r.nd?'tem rendimento em Culturas e operações; troque o conjunto lá antes':'')];
-function PREVALS(self,v){ cadActsIni(self); const atv=RW(self,'g_atv'); self._c3nomes=self._c3nomes||{}; const usos=c3usos(self);
+function PREVALS(self,v){ cadActsIni(self); const atv=RW(self,'g_atv'); self._c3nomes=self._c3nomes||{}; const usos=c3usos(self); v.c3_ncol=c3capCol(self);
   atv.forEach(r=>{ const V=r.v; self._c3nomes[r.id]=V.nome; const C=c3cond(r);
     r.p.nome=[{k:'b',t:V.nome||''}]; r.s.nome=V.nome||''; r.p.modelo=[V.modelo?{k:'txt',t:V.modelo}:{k:'mut',t:'—'}]; r.s.modelo=V.modelo||'';
     r.p.classe=[{k:'txt',t:V.classe||'—'}]; r.s.classe=V.classe||'';
-    const CP=c3capn(V); V.capn=CP?CP.n:''; r.p.capn=[CP?{k:'txt',t:CP.t}:{k:'mut',t:'—'}]; r.s.capn=CP?CP.t:'';
-    const lg=c3larg(V); V.largn=lg===null?'':lg; r.p.largn=[lg===null?{k:'mut',t:'—'}:{k:'txt',t:nfa(lg)}]; r.s.largn=lg===null?'':nfa(lg);
+    const CP=c3capn(V); V.capn=CP?CP.n:''; r.p.capn=[CP?{k:'txt',t:nfa(CP.n)}:{k:'mut',t:'—'}]; r.s.capn=CP?nfa(CP.n):'';   /* a coluna põe a unidade da classe */
     const K=c3calib(V); V.calv=K.venc||''; r.p.calv=[K.venc?(K.s==='Em dia'?{k:'txt',t:br(K.venc)}:{k:'cn',t:br(K.venc),c:K.s==='Vencida'?'red':'yellow'}):{k:'mut',t:'—'}]; r.s.calv=K.venc?br(K.venc):'';
     V.cond_t=C.m?C.t+' · '+C.m:C.t; r.o=C.x?[{t:'Ver ordens afetadas · '+C.x.ordens.join(' e '),h:'OS.dc.html'},{t:'Abrir '+C.x.om+' na Manutenção',h:'MA-04det.dc.html'}]:null;
     const ch=isnum(V.custo_h)&&String(V.custo_h)!==''; r.p.custo_h=ch?[{k:'txt',t:nf(V.custo_h,2)}]:[{k:'mut',t:'—'}]; r.s.custo_h=ch?nf(V.custo_h,2):'';   // a coluna põe "R$ …/h"
@@ -290,6 +300,8 @@ function EXTRAVALS(self,v){
     HEIGHTS37[fname]=1000   # sem rolagem de página: só a tabela ou os cartões da aba rolam
     shell37('CD-03','Máquinas, instalações e setores',corpo,fname=fname,status=None,primary_html=None,search=False)
     estado_cab(fname,'Máquinas, instalações e setores','c3e')
+    from areas.cadastros import ncol_dinamico
+    ncol_dinamico(fname,['c3_ncol'])   # a coluna da capacidade entra e sai com o filtro de Classe
 
 # ================= CD-04 · Pessoas e equipes =================
 QF=[('ope','Operadores'),('cal','Caldeiros'),('irr','Irrigantes'),('alm','Almoxarifes'),('agr','Agrônomos'),('nao','Não alocáveis')]
@@ -308,9 +320,11 @@ def cd04():
     # pessoa numa linha, uma variável por coluna (TABELAS-FOCO, 04/10/2026): equipe, habilidades (filtro por habilidade), vínculo, disponível até,
     # "Custo R$/h", habilitação exigida e a validade que vence primeiro, calendário (o da equipe ou o próprio) e acesso ao app (a ficha de campo
     # depende dele); situação (alocável em O.S. ou não)
-    gp=grid([dict(k='nome',l='Pessoa',w=140),dict(k='equipe',l='Equipe',w=120),dict(k='habs',l='Habilidades',multi=True,w=240),dict(k='vinc',l='Vínculo',w=100),
-             dict(k='ate',l='Disponível até',t='date'),dict(k='custo',l='R$/h',t='num',a='r',d=2),dict(k='habx',l='Habilitação',multi=True),
-             dict(k='habv',l='Validade da habilitação',t='date'),dict(k='cal',l='Calendário',w=150),dict(k='acesso',l='Acesso ao app',w=140),dict(k='est',l='Situação',w=200)],
+    # revisão TABR (09/10): a Situação logo depois da pessoa (A1), com o motivo e o próximo passo quando não alocável (A3); calendário e acesso
+    # ao app no painel da pessoa (campos do formulário)
+    gp=grid([dict(k='nome',l='Pessoa',w=140),dict(k='est',l='Situação',w=185),dict(k='equipe',l='Equipe',w=120),dict(k='habs',l='Habilidades',multi=True,w=160),
+             dict(k='vinc',l='Vínculo',w=100),dict(k='ate',l='Disponível até',t='date'),dict(k='custo',l='R$/h',t='num',a='r',d=2),dict(k='habx',l='Habilitação',multi=True),
+             dict(k='habv',l='Validade da habilitação',t='date')],
         [R(pid,v) for pid,v in pes],gid='g_pes',total=False,frame=False,
         tools=qf_chips('g_pes')+filtro_sel('c4fun','Função')+prim('g_pes_new','Cadastrar pessoa'),
         edit=dict(m='form',title='Pessoa',newTitle='Cadastrar pessoa',
@@ -333,9 +347,12 @@ function c4qf(k,V,A){ const h=ml(V.hab);
 function c4eqcal(self){ const o={}; RW(self,'g_eq').forEach(e=>{ o[e.v.nome]=e.v.cal; }); return o; }
 // situação da pessoa: um só cálculo para a linha, o filtro "A resolver", a faixa, o ponto da aba e o estado do cabeçalho
 // a habilitação e a validade têm colunas próprias; a Situação é só o estado (chip) e o próximo passo
+// não alocável: o chip diz a consequência e a dica diz o motivo; o verbo nomeia o que resolver (revisão TABR A3: o motivo tinha saído da linha)
+function c4passo(V,A){ const h=A.t.find(y=>y.s==='venc'||y.s==='pend'); if(h) return (h.s==='pend'?'Registrar ':'Renovar ')+h.x;
+  if(V.ate&&V.ate<HOJE) return 'Renovar contrato'; if(V.adm&&V.adm>HOJE) return 'Aguardar admissão em '+br(V.adm); return 'Regularizar'; }
 function c4sit(V){ const A=alocavel(V);
   if(A.inat) return {t:'Inativa',p:[chipc('Inativa','gray')]};
-  if(!A.ok) return {t:'Não alocável',p:[chipc('Não alocável em O.S.','red')],res:'nao'};
+  if(!A.ok){ const m=A.m.charAt(0).toUpperCase()+A.m.slice(1); return {t:'Não alocável',p:[Object.assign(chipc('Não alocável em O.S.','red'),{dica:m}),{k:'b',t:c4passo(V,A)+' ›'}],res:'nao'}; }
   if(A.vence) return {t:'Vence em 30 dias',p:sitX('Vence em 30 dias','yellow','Renovar'),res:'ven'};
   return {t:'Alocável',p:sitOk('Alocável')}; }
 // validade que vale para alocar: a mais próxima entre as habilitações exigidas (pendente fica sem data)
@@ -346,13 +363,12 @@ function PREVALS(self,v){ cadActsIni(self); const ps=RW(self,'g_pes'); const eqc
     r.p.nome=[{k:'b',t:V.nome||''}]; r.s.nome=V.nome||''; r.p.equipe=[{k:'txt',t:V.equipe||'—'}]; r.s.equipe=V.equipe||'';
     const hs=ml(V.hab); r.m=Object.assign({},r.m||{},{habs:hs.map(h=>({id:h,l:h}))}); r.p.habs=[hs.length?{k:'txt',t:hs.join(', ')}:{k:'mut',t:'—'}]; r.s.habs=hs.join(', ');
     r.p.vinc=[{k:'txt',t:V.vinc||'—'}]; r.s.vinc=V.vinc||'';
+    // disponível até: contrato encerrado em vermelho (o chip da Situação diz o motivo)
+    r.p.ate=[V.ate?(V.ate<HOJE?{k:'cn',t:br(V.ate),c:'red'}:{k:'txt',t:br(V.ate)}):{k:'mut',t:'—'}]; r.s.ate=V.ate?br(V.ate):'';
     const cu=isnum(V.custo)&&String(V.custo)!==''; r.p.custo=[cu?{k:'txt',t:nf(V.custo,2)}:{k:'mut',t:'—'}]; r.s.custo=cu?nf(V.custo,2):'';   // a coluna põe "R$ …/h"
     const A=alocavel(V); const ex=habExig(V.hab); r.m.habx=ex.map(x=>({id:x,l:x})); r.p.habx=[ex.length?{k:'txt',t:ex.join(', ')}:{k:'mut',t:'—'}]; r.s.habx=ex.join(', ');
     const hv=c4val(A); V.habv=hv; const pend=A.t.some(y=>y.s==='pend'); const hvc=A.t.some(y=>y.s==='venc')?'red':(A.vence?'yellow':'');
     r.p.habv=[hv?(hvc?{k:'cn',t:br(hv),c:hvc}:{k:'txt',t:br(hv)}):(pend?{k:'cn',t:'pendente',c:'red'}:{k:'mut',t:'—'})]; r.s.habv=hv?br(hv):(pend?'pendente':'');
-    // calendário: o da equipe (apagado) ou o próprio, que é a exceção; acesso ao app: sem login ou pedido em aberto ficam à vista
-    const herd=!V.cal||V.cal==='Da equipe'; r.p.cal=[herd?{k:'mut',t:'Da equipe'}:{k:'txt',t:V.cal}]; r.s.cal=herd?'Da equipe':V.cal;
-    const ac=V.acesso||'Sem login'; r.p.acesso=[{k:ac==='Com login'?'mut':'txt',t:ac}]; r.s.acesso=ac;
     const S=c4sit(V); r.p.est=S.p; r.s.est=S.t; });
   // filtro do bloco: estado (Todas · A resolver) e função (lista), que valem juntos
   const fun=cadSel(self,v,'c4fun',[{v:'',t:'Todas'}].concat(C4.qf.filter(([k])=>k!=='nao').map(([k,t])=>({v:k,t:t+' ('+ps.filter(r=>c4qf(k,r.v,alocavel(r.v))).length+')'}))));

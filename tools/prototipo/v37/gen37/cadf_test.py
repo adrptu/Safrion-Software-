@@ -14,6 +14,8 @@ BTN="""((t)=>{const b=[...document.querySelectorAll('aside[role=dialog] button')
 CLK="""((t,sc)=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...document.querySelectorAll(sc||'button,a')]; const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
 def ROW(ti,txt): return f"[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(txt)})>=0)"
 def openrow(ti,txt): J(f"(()=>{{const r={ROW(ti,txt)}; (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.35)
+# revisão TABR (09/10/2026, A1): a Situação vem logo depois do talhão ("T1 Em dia Sequeiro …"); a linha é achada pelo código na 1ª célula
+def openrow1(ti,cod): J(f"""(()=>{{const r=[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>{{const c=r.querySelector('[role=cell]'); return c&&c.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim()==={json.dumps(cod)};}}); (r.querySelector('[role=cell] span')||r).click();}})()"""); time.sleep(.35)
 def rowtxt(ti,txt): return J(f"(()=>{{const r={ROW(ti,txt)}; return r?r.innerText.replace(/\\s+/g,' '):null;}})()")
 def fv(k): return J(f"(()=>{{const i=document.querySelector('aside[role=dialog] [id$=\"_{k}\"]'); return i?i.value:null;}})()")
 def fset(k,val): J(f"({SETV})('aside[role=dialog] [id$=\"_{k}\"]',{json.dumps(val)})"); time.sleep(.2)
@@ -61,17 +63,17 @@ try:
     chk('9 volta ao talhão com a fazenda nova escolhida e o preenchido mantido', 'Ao salvar, você volta ao talhão X9' in sub and fv('t')=='X9' and fv('decl')=='50' and fv('faz')=='Serra Azul', [fv('t'),fv('decl'),fv('faz')])
     save(); chk('10 talhão X9 salvo na Serra Azul', '50,0 ha' in (rowtxt(0,'Serra Azul 1 talhão') or ''), rowtxt(0,'Serra Azul'))
     # ---------- inativar sem excluir ----------
-    openrow(0,'T1 Sequeiro'); fset('sit','Inativo'); save(); al=alerts()
+    openrow1(0,'T1'); fset('sit','Inativo'); save(); al=alerts()
     chk('11 T1 com parcelas na safra não inativa', 'T1 tem parcelas na Safra 2026/27 e na Safrinha 2027' in al, al)
     J(f"({BTN})('Cancelar')"); time.sleep(.2); J(f"({BTN})('Descartar alterações')"); time.sleep(.2)
-    openrow(0,'B1 Sequeiro'); fset('sit','Inativo'); save()
+    openrow1(0,'B1'); fset('sit','Inativo'); save()
     b1=rowtxt(0,'B1'); bv=rowtxt(0,'Boa Vista')
     chk('12 B1 inativo: continua na lista com chip e sai do subtotal', not aberto() and 'Inativo' in (b1 or '') and '0,0 ha' in (bv or '') and 'sem talhão ativo' in (bv or ''), [b1,bv])
     aba('Fazendas'); opencard('Boa Vista'); fset('sit','Inativa'); save()
     chk('13 fazenda sem talhão ativo inativa sem excluir', not aberto() and 'Inativa' in (cardtxt('Boa Vista') or ''), cardtxt('Boa Vista'))
     aba('Talhões')
     # ---------- abrir o detalhe de outro talhão ----------
-    openrow(0,'T2 Sequeiro'); J(f"({BTN})('Abrir talhão ›')"); time.sleep(2.2)
+    openrow1(0,'T2'); J(f"({BTN})('Abrir talhão ›')"); time.sleep(2.2)
     for _ in range(8):
         if J("document.readyState")=='complete' and J("!!document.querySelector('header select')"): break
         time.sleep(.4)

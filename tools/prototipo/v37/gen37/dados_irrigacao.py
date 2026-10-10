@@ -180,7 +180,8 @@ PARADAS = [dict(bomba='B3', ini=m(0, '14:00'), fim=m(0, '15:00'), txt='parada da
 
 def seed():
     # v=2 (04/10, PRE-REV-20261004): base das fertirrigações = realizado semeado; descarta o estado salvo com a base antiga
-    st = dict(v=2, rev=0, hoje='2026-09-23', agora=AGORA, ponta=[18 * 60, 21 * 60], tol=3, faz=FAZ, capt=CAPT, fontes=FONTES,
+    # v=3 (09/10, revisão TABR A9): sensores com uma grandeza e uma unidade por item (a881cbe, ecc8fce); descarta o estado salvo com a semente antiga
+    st = dict(v=3, rev=0, hoje='2026-09-23', agora=AGORA, ponta=[18 * 60, 21 * 60], tol=3, faz=FAZ, capt=CAPT, fontes=FONTES,
               setores=dict(_sr(), **_lg()), ordens=_ordens(), fert=FERT, paradas=PARADAS, ger=False,
               seq=dict(os=600, lib=2300, ex=5121, au=3101))
     return st

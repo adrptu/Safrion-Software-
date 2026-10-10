@@ -34,8 +34,9 @@ try:
     t.aba('Locais'); n0=t.rowtxt(0,'Galpão 1') or ''
     t.openrow(0,'Galpão 1'); t.fset('nome','Galpão Norte'); t.btn('Salvar'); time.sleep(.2); n1=t.rowtxt(0,'Galpão Norte') or ''
     t.openrow(0,'Galpão Norte'); dn=t.dlg(); t.cancel()
+    # só o nome do local muda (1ª ocorrência): sem a coluna Capacidade (revisão TABR A4) o fim da linha "Galpão | 1" (tipo e itens) também lê "Galpão 1"
     t.chk('renomear o local leva os itens junto e o local segue protegido contra exclusão (causa no painel)',
-          n0.replace('Galpão 1','Galpão Norte')==n1 and 'tem itens com este local padrão' in dn, [n0,n1,dn[-160:]])
+          n0.replace('Galpão 1','Galpão Norte',1)==n1 and 'tem itens com este local padrão' in dn, [n0,n1,dn[-160:]])
     t.aba('Itens'); t.openrow(0,'NPK 20-05-20'); lv=t.fv('local'); ops=t.fopts('local') or []; t.cancel()
     t.chk('NPK 20-05-20 (em Galpão 1) passa a Galpão Norte e a lista não oferece mais Galpão 1', lv=='Galpão Norte' and 'Galpão 1' not in ops and 'Galpão Norte' in ops, [lv,ops])
     t.clk('Cadastrar item'); lv=t.fv('local'); t.cancel()

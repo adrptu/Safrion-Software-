@@ -8,15 +8,18 @@ t=T(); J=t.J
 try:
     t.goto('CD-02.dc.html'); t.clk('Operações e rendimentos')
     t.chk('CD-02 sem erro JS', not t.errs(), t.errs())
-    # TABELAS-FOCO (06/10/2026): uma variável por coluna (11 colunas, antes 7 com "largura · velocidade · eficiência" numa célula); a página
-    # não rola de lado a 1440 px e a grade rola dentro da própria caixa com a 1ª coluna à vista (item 6, mesmo critério de ostest e est_fix1)
-    sw=J("(()=>{const t=document.querySelectorAll('[role=table]')[0]; const sc=t.closest('.g2rola')||t.parentElement; const R=sc.getBoundingClientRect(); const h=t.querySelector('[role=columnheader]').getBoundingClientRect(); const ox=getComputedStyle(sc).overflowX; return [document.documentElement.scrollWidth<=innerWidth+1, sc.scrollWidth<=sc.clientWidth+1||ox==='auto'||ox==='scroll', h.left>=R.left-1&&h.right<=R.right+1];})()")
-    t.chk('rendimentos: a página não rola de lado a 1440 px; a grade cabe ou rola dentro da caixa, com a 1ª coluna à vista', all(sw), sw)
+    # TABELAS-FOCO (06/10/2026): uma variável por coluna. Revisão TABR (09/10/2026, A1): voltam os critérios de antes ("sem rolagem lateral a
+    # 1440 px" e "no máximo 7 colunas"): modo, largura, velocidade e eficiência, que formam o rendimento, ficam no painel do rendimento
+    sw=J("(()=>{const s=document.querySelectorAll('[role=table]')[0].closest('.g2rola')||document.querySelectorAll('[role=table]')[0].parentElement; return [s.scrollWidth,s.clientWidth];})()")
+    t.chk('rendimentos sem rolagem lateral a 1440 px', sw[0]<=sw[1]+1, sw)
+    t.chk('no máximo 7 colunas', J("document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=columnheader]').length")<=7)
     hs=J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=columnheader]')].map(h=>h.textContent.replace(/[⇅▾▴▼▲]/g,'').replace(/\\s+/g,' ').trim())")
-    t.chk('colunas com uma variável cada', hs==['Operação › conjunto','Processo','Cultura','Modo','Largura','Velocidade','Eficiência','Rendimento','Custo R$/h','Custo R$/ha','Fonte'], hs)
-    r=t.rowtxt(0,'PJ-3030'); t.chk('linha mostra largura, velocidade e eficiência em colunas próprias', '36 m 8 km/h 75 %' in r, r)
-    t.chk('linha mostra custo por hora e por hectare', 'R$ 313,00' in r and 'R$ 14,49' in r, r)
-    r=t.rowtxt(0,'Máquina TSI'); t.chk('rendimento informado sinalizado na coluna Modo (largura, velocidade e eficiência vazias)', 'Informado — — —' in r, r)
+    t.chk('colunas com uma variável cada', hs==['Operação › conjunto','Fonte','Processo','Cultura','Rendimento','Custo R$/h','Custo R$/ha'], hs)
+    r=t.rowtxt(0,'PJ-3030'); t.chk('linha mostra custo por hora e por hectare', 'R$ 313,00' in r and 'R$ 14,49' in r, r)
+    t.openrow(0,'Máquina TSI'); t.chk('rendimento informado sinalizado no painel (Modo "Informado", largura, velocidade e eficiência vazias)', t.fv('modo')=='Informado' and not t.fv('larg') and not t.fv('vel') and not t.fv('efic'), [t.fv(k) for k in ('modo','larg','vel','efic')])
+    t.clk('Cancelar')
+    t.openrow(0,'PJ-3030'); t.chk('painel mostra largura, velocidade e eficiência (36 m · 8 km/h · 75 %)', [t.fv(k) for k in ('larg','vel','efic')]==['36','8','75'], [t.fv(k) for k in ('larg','vel','efic')])
+    t.clk('Cancelar')
     t.openrow(0,'PJ-3030'); L=t.labels()
     t.chk('formulário abre', len(L)>0, L)
     t.chk('mesmos rótulos do Planejar safra (+ Cultura do cadastro)', L==['Operação','Conjunto ou equipe','Cultura','Como obter o rendimento','Largura de trabalho','Velocidade de trabalho','Eficiência de campo',

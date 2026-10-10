@@ -144,12 +144,15 @@ _ID=[dict(k='nome',l='Parceiro',w=180),dict(k='cnpj',l='CPF/CNPJ',w=150)]
 _CT=[dict(k='cont',l='Contato',w=140),dict(k='whats',l='WhatsApp',w=130),dict(k='email',l='E-mail',w=220),dict(k='canais',l='Canais autorizados',multi=True,w=150)]
 _SIT=dict(k='papel',l='Situação do papel',multi=True,w=220)
 _PAP=dict(k='papeis',l='Papéis',multi=True,w=170)
-COLS_T=_ID+[_PAP]+_CT+[_SIT]
-COLS_P={'Fornecedor':_ID+[dict(k='grupos',l='Grupos homologados',multi=True,w=260)]+_CT+[dict(k='homol',l='Homologado',w=130)],
-        'Cliente':_ID+[_PAP]+_CT+[dict(k='lim',l='Limite de crédito',t='num',a='r',un='R$',d=0),dict(k='limv',l='Validade da análise de crédito',t='date'),_SIT],
-        'Parceiro de crédito':_ID+[_PAP]+_CT+[dict(k='linhas',l='Linhas de crédito',multi=True,w=220),dict(k='gar',l='Garantias aceitas',multi=True,w=240),_SIT],
-        'Transportador':_ID+[_PAP]+_CT+[dict(k='rntrc',l='RNTRC'),dict(k='veic',l='Veículos',multi=True,w=260),_SIT],
-        'Prestador':_ID+[_PAP]+_CT+[dict(k='ops',l='Operações que presta',multi=True,w=220),_SIT]}
+# revisão TABR (A1, 09/10): a situação do papel (em Fornecedores, a homologação) logo depois do parceiro, à vista sem rolar; depois CPF/CNPJ,
+# papéis, as colunas do papel filtrado e os contatos
+_P,_C=_ID[0],_ID[1]
+COLS_T=[_P,_SIT,_C,_PAP]+_CT
+COLS_P={'Fornecedor':[_P,dict(k='homol',l='Homologado',w=130),_C,dict(k='grupos',l='Grupos homologados',multi=True,w=260)]+_CT,
+        'Cliente':[_P,_SIT,_C,_PAP,dict(k='lim',l='Limite de crédito',t='num',a='r',un='R$',d=0),dict(k='limv',l='Validade da análise de crédito',t='date')]+_CT,
+        'Parceiro de crédito':[_P,_SIT,_C,_PAP,dict(k='linhas',l='Linhas de crédito',multi=True,w=220),dict(k='gar',l='Garantias aceitas',multi=True,w=240)]+_CT,
+        'Transportador':[_P,_SIT,_C,_PAP,dict(k='rntrc',l='RNTRC'),dict(k='veic',l='Veículos',multi=True,w=260)]+_CT,
+        'Prestador':[_P,_SIT,_C,_PAP,dict(k='ops',l='Operações que presta',multi=True,w=220)]+_CT}
 COL_MOT=dict(k='motivo',l='Motivo da suspensão',w=220)
 FILTROS=[('','Todos'),('Fornecedor','Fornecedores'),('Cliente','Clientes'),('Parceiro de crédito','Parceiros de crédito'),('Transportador','Transportadores'),('Prestador','Prestadores')]
 
@@ -218,7 +221,7 @@ function trocaPapel(self,k,st){ if(k===(self.state.cd5_p||'')){ if(st) self.setS
   g2set(self,'g_forn',{f:f,fmc:null}); self.setState(Object.assign({cd5_p:k},st||{})); }
 function cotaveis(rows){ return rows.filter(r=>ml(r.v.papeis).indexOf('Fornecedor')>=0&&r.v.sit!=='Suspenso'&&r.v.homol==='Sim'&&r.v.email&&ml(r.v.canais).indexOf('E-mail')>=0); }
 function PREVALS(self,v){ const rows=RW(self,'g_forn'); const fp=self.state.cd5_p||''; const cb=(fp&&COLS_P[fp])||COLS_T; const susp=rows.some(r=>r.v.sit==='Suspenso'&&(!fp||ml(r.v.papeis).indexOf(fp)>=0));
-  GR('g_forn').cols=susp?cb.concat([COL_MOT]):cb; v.cd5_ncol=GR('g_forn').cols.length;
+  GR('g_forn').cols=susp?cb.slice(0,2).concat([COL_MOT],cb.slice(2)):cb; v.cd5_ncol=GR('g_forn').cols.length;   /* o motivo logo depois da situação */
   rows.forEach(r=>{ const V=r.v; const pp=ml(V.papeis); Object.assign(V,rpFlags(pp)); if(!V.sit) V.sit='Ativo';
     const forn=pp.indexOf('Fornecedor')>=0, hom=V.homol==='Sim', gg=ml(V.grupos), susp=V.sit==='Suspenso';
     r.p.nome=[{k:'b',t:V.nome||''}]; r.s.nome=V.nome||''; r.p.cnpj=[V.cnpj?{k:'txt',t:V.cnpj}:{k:'mut',t:'—'}]; r.s.cnpj=V.cnpj||'';
@@ -289,7 +292,9 @@ function EXTRAVALS(self,v){ const sp=GR('g_forn'); const F=v.g_forn_F; v.cd5_sus
   const fc=sp.cols.find(c=>c.k===g2st(self,'g_forn').fmc), FM=v.g_forn_fm;
   // (colunas multivaloradas contam cada item da lista, como o g2lib; valor sem linha no filtro de papel não aparece, mesmo marcado por padrão)
   if(fc&&FM&&FM.open){ const cnt={}; RW(self,'g_forn').forEach(r=>{ if(r.sh===OCULTO) return; g2fkeys(r,fc).forEach(t=>{ cnt[t]=(cnt[t]||0)+1; }); });
-    FM.vals=FM.vals.filter(x=>cnt[x.t]).map(x=>Object.assign(x,{n:cnt[x.t]})); }
+    /* valor do filtro APLICADO na coluna fica no menu mesmo sem linha no papel, com 0 (revisão TABR A5); sem filtro aplicado tudo vem marcado
+       por padrão e o valor sem linha no papel continua fora (cadp_fix_test 9) */
+    const apl=((g2st(self,'g_forn').f||{})[fc.k])||[]; FM.vals=FM.vals.filter(x=>cnt[x.t]||apl.indexOf(x.t)>=0).map(x=>Object.assign(x,{n:cnt[x.t]||0})); }
   if(F&&F.open&&F.isRec){ const fm=g2st(self,'g_forn').fm; const d=fm.draft;
     if(fm.rid){ const r=g2find(RW(self,'g_forn'),fm.rid); if(r) F.title='Parceiro · '+r.v.nome; }
     if(fm.orig.sit==='Suspenso') F.sub='Suspenso: fora de cotação, oferta e crédito; o histórico continua.';
@@ -323,4 +328,4 @@ function EXTRAVALS(self,v){ const sp=GR('g_forn'); const F=v.g_forn_F; v.cd5_sus
     shell37('CD-05','Parceiros e fornecedores',corpo,fname=fname,status=None,primary_html=None,search=False)
     estado_cab(fname,'Parceiros e fornecedores','cd5e')
     from areas.cadastros import ncol_dinamico
-    ncol_dinamico(fname,['cd5_ncol'])   # as colunas do papel mudam a quantidade de colunas (8 ou 9)
+    ncol_dinamico(fname,['cd5_ncol'])   # as colunas do papel e o motivo da suspensão mudam a quantidade de colunas

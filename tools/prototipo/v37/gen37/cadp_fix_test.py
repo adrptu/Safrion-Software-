@@ -59,7 +59,8 @@ try:
     ABRE('Casa do Adubo'); BTN('Suspender parceiro'); SETK('motivo','Entrega fora do prazo'); BTN('Salvar')
     t=LIN('Casa do Adubo'); chk('4 suspenso com motivo na linha', not ABERTO() and 'Suspenso Entrega fora do prazo' in t, t)
     ABRE('Casa do Adubo'); BTN('Reativar parceiro'); BTN('Salvar')
-    t=LIN('Casa do Adubo'); chk('5 reativado: linha volta a Homologado, sem o motivo', not ABERTO() and t.endswith('Homologado') and 'Entrega fora do prazo' not in t, t)
+    # revisão TABR (09/10/2026, A1): a situação do papel vem logo depois do parceiro
+    t=LIN('Casa do Adubo'); chk('5 reativado: linha volta a Homologado, sem o motivo', not ABERTO() and t.startswith('Casa do Adubo Homologado') and 'Entrega fora do prazo' not in t, t)
     ABRE('Casa do Adubo'); BTN('Suspender parceiro')
     mv=J("document.getElementById('fx_g_forn_motivo').value"); hp=J("document.getElementById('fx_g_forn_motivo').parentElement.parentElement.innerText.replace(/\\s+/g,' ')")
     chk('6 nova suspensão começa com motivo vazio e a ajuda não promete histórico', mv=='' and 'Aparece na listagem enquanto durar a suspensão.' in hp and 'histórico' not in hp, f'{mv!r} · {hp}')

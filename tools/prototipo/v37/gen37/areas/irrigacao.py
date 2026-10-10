@@ -154,27 +154,35 @@ function irrColsFaz(gid,fz,v,hole){ const sp=IRG(gid); if(!sp.colsAll) sp.colsAl
 // célula de texto (vazio = "—"), de lista (filtro por item: r.m) e de instante
 function irrTxt(r,k,t,b){ r.p[k]=[t?{k:b?'b':'txt',t:t}:{k:'mut',t:'—'}]; r.s[k]=t||''; }
 function irrLst(r,k,a,kind){ r.m=r.m||{}; r.m[k]=a.map(x=>({id:x.t,l:x.t})); r.s[k]=a.map(x=>x.t).join(', ');
-  r.p[k]=!a.length?[{k:'mut',t:'—'}]:(kind==='chip'?a.map(x=>({k:'chip',t:x.t,c:x.c||'gray'})):[{k:'txt',t:r.s[k]}]); }
-// coluna Pendência: o que segura a ordem, sem repetir "Impedida" (já é a Situação/Etapa ao lado): "Impedida · bomba parada" → "Bomba parada"
-function irrPend(a){ return (a||[]).map(x=>{ const t=String(x.t||'').replace(/^Impedida · /,''); return Object.assign({},x,{t:t.charAt(0).toUpperCase()+t.slice(1)}); }); }
-function irrPendFert(fb){ return irrPend(fb?[{t:fb.t,c:'red'}]:[]); }
+  r.p[k]=!a.length?[{k:'mut',t:'—'}]:(kind==='chip'?a.map(x=>({k:'chip',t:x.t,c:x.c||'gray',dica:x.dica||''})):[{k:'txt',t:r.s[k]}]); }
+// coluna Pendência: o que segura a ordem, uma variável por chip (revisão TABR A11): o tipo no chip ("Divergência", "Falta insumo", "Conflito")
+// e o detalhe na dica e no detalhe da ordem ("−3,8 %", "Ureia 45%", "parada da B3 · 14:00–15:00"); sem repetir "Impedida" (já é a
+// Situação/Etapa ao lado) e sem os selos informativos de ordem encerrada (mut, revisão A6: "Encerrada automaticamente" não segura nada).
+// ref: a ordem da pendência quando ela não é a da coluna Ordem da linha (revisão A2: "Divergência na OS-0394" ao lado da OS-0419)
+function irrPend(a,ref){ return (a||[]).filter(x=>!x.mut).map(x=>{ const t=String(x.t||'').replace(/^Impedida · /,''); const i=t.indexOf(' · ');
+  const cat=i>0?t.slice(0,i):t, det=i>0?t.slice(i+3):''; return Object.assign({},x,{t:cat.charAt(0).toUpperCase()+cat.slice(1)+(ref?' na '+ref:''),dica:[det,x.h].filter(Boolean).join(' · ')}); }); }
+function irrPendFert(fb,ref){ return irrPend(fb?[{t:fb.t,c:'red'}]:[],ref); }
+// Responsável: só a pessoa ("Caio"); a função ("· PCP") fica no cadastro de pessoas (revisão A11)
+function irrQuem(d){ return String(d||'').split(' · ')[0]; }
+// duração da passada na linha do detalhe: o intervalo entre o Início e o Fim da mesma linha (reais quando a passada já rodou, previstos quando
+// não); sem início, a duração prevista. Antes a coluna mostrava a prevista ao lado do horário real (OS-0394: 14,5 h ao lado de 20:00–22:06)
+function irrDurP(o,p){ const temI=p.ini!==null&&p.ini!==undefined; if(!temI) return p.dur; const i0=(p.iniReal!==undefined&&p.iniReal!==null)?p.iniReal:p.ini; const f=irrFimP(o,p); return f===null?p.dur:f-i0; }
 function irrQ(r,k,m,vazio){ r.v[k]=irrIsoM(m); r.p[k]=[m===null||m===undefined?{k:'mut',t:vazio||'—'}:{k:'txt',t:irrQuando(m)}]; r.s[k]=m===null||m===undefined?(vazio||''):irrQuando(m); }
 '''
 
 # =====================================================================================
 def ir01():
     fname='IR-01.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000
-    # uma variável por coluna (TABELAS-FOCO, 04/10/2026): cultura, estádio, área, déficit (≈ quando estimado) e a fonte dele, necessidade bruta,
-    # passadas (a lâmina acima do limite por passada vira passadas iguais), a ordem que cobre, quanto cobre e quanto resta, situação (chip), a
-    # pendência que explica a situação (falta insumo, bomba parada, conflito, pausada…), a próxima passada (instante), próximo passo e responsável.
+    # uma variável por coluna (TABELAS-FOCO, 04/10/2026). Revisão TABR (A1, 09/10): estado e próximo passo logo depois do setor, para ficarem
+    # à vista sem rolar; depois a necessidade (déficit, lâmina bruta), a ordem que cobre, quanto cobre e a próxima passada dela. O secundário
+    # vai para o painel do setor: fonte do déficit, cultura e estádio, área, passadas necessárias, o que resta e o responsável.
     # Fazenda só com "Todas" no topo
-    g_set=grid([dict(k='setor',l='Setor',w=100),dict(k='faz',l='Fazenda',w=110),dict(k='cult',l='Cultura',w=110),dict(k='estd',l='Estádio',w=120),dict(k='ha',l='Área',t='num',a='r',un='ha'),
-                dict(k='def',l='Déficit hoje',t='num',a='r',un='mm',d=1),dict(k='fon',l='Fonte do déficit',w=140),dict(k='nec',l='Necessidade bruta',t='num',a='r',un='mm',d=2,dmin=1),
-                dict(k='np',l='Passadas',t='num',a='r'),dict(k='ord',l='Ordem',w=90),dict(k='cob',l='Cobertura',t='num',a='r',un='%'),dict(k='resta',l='Resta',t='num',a='r',un='mm',d=1),
-                dict(k='sit',l='Situação',w=150),dict(k='pend',l='Pendência',multi=True,w=200),dict(k='pps',l='Próxima passada',t='date',w=130),
-                dict(k='prox',l='Próximo passo',w=170),dict(k='dono',l='Responsável',w=120)],[],
+    g_set=grid([dict(k='setor',l='Setor',w=100),dict(k='faz',l='Fazenda',w=110),dict(k='sit',l='Situação',w=150),dict(k='pend',l='Pendência',multi=True,w=190),
+                dict(k='prox',l='Próximo passo',w=150),dict(k='def',l='Déficit hoje',t='num',a='r',un='mm',d=1),dict(k='nec',l='Necessidade bruta',t='num',a='r',un='mm',d=2,dmin=1),
+                dict(k='ord',l='Ordem',w=90),dict(k='cob',l='Cobertura',t='num',a='r',un='%'),dict(k='pps',l='Próxima passada',t='date',w=130)],[],
                edit=dict(m='form',title='Setor',sub='Os limites valem para a próxima programação; ordens liberadas não mudam.',
-                   fields=[dict(k='defT',l='Déficit hoje',ro=True),dict(k='necT',l='Necessidade',ro=True),dict(k='eqT',l='Equipamento',ro=True),
+                   fields=[dict(k='defT',l='Déficit hoje',ro=True),dict(k='necT',l='Necessidade',ro=True),dict(k='ordT',l='Ordem que cobre',ro=True),
+                           dict(k='donoT',l='Responsável pelo próximo passo',ro=True),dict(k='cultT',l='Cultura e estádio',ro=True),dict(k='eqT',l='Equipamento',ro=True),
                            dict(k='lmax',l='Lâmina máxima por passada',t='num',req=True,min=1,max=40,u='mm'),dict(k='imin',l='Intervalo mínimo entre inícios',t='num',req=True,min=6,max=96,u='h'),
                            dict(k='efic',l='Eficiência do sistema',t='num',req=True,min=50,max=100,u='%')]),
                gid='g_set',total=False,qf=dict(k='sit',l='Situação',todas='Todos'))
@@ -190,8 +198,10 @@ function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(sel
   const rows=sids.map(k=>{ const x=s.setores[k]; const si=irrSituacao(s,k); const n=si.n; const top=si.top; const o=top&&top.o; const F=s.faz[x.faz]; const CE=irrCultEst(x);
     const temD=si.d!==null; const def=temD?[{k:'b',t:(si.est?'≈':'')+irrN(si.d,1)+' mm'}]:[{k:'mut',t:'—'}];
     const fon=!temD?'':(si.est?'Estimativa por ET':(F.demo?'Demonstrativo':'Medido'));
-    const temN=!!(n&&n.liq>0.05); const oa=temN?((si.ords||[]).find(z=>z.etapa!=='Em conferência')||o):null; const cb=oa?irrCobre(s,oa):null;
-    const ordId=temN?(oa?oa.id:(top&&top.fert?top.fert:'')):''; const cobN=cb&&cb.cob!==null?Math.round(cb.cob):''; const restaN=cobN===''?'':(cb.resta>0.05?Math.round(cb.resta*10)/10:0);
+    // ordem da linha (coluna Ordem): a aberta que vai cobrir o déficit (fora da conferência); senão a da situação; senão a fertirrigação da O.S.
+    // Cobertura e Próxima passada são dessa mesma ordem; a pendência de outra ordem diz qual é (revisão TABR A2)
+    const temN=!!(n&&n.liq>0.05); const oa=((si.ords||[]).find(z=>z.etapa!=='Em conferência'))||o||null; const cb=(temN&&oa)?irrCobre(s,oa):null;
+    const ordId=oa?oa.id:(top&&top.fert?top.fert:''); const cobN=cb&&cb.cob!==null?Math.round(cb.cob):''; const restaN=cobN===''?'':(cb.resta>0.05?Math.round(cb.resta*10)/10:0);
     const b=x.bal; const o2=[];
     if(b){ const net=irrCreditos(s,k).gov;
       o2.push(F.demo?('Memória (demonstrativa): déficit 0 na reposição de '+irrDdmm(irrDiaN(b.repos))+' + ETc de '+b.dias+(b.dias>1?' dias':' dia')+' (ETo 5,5 × Kc '+irrN(x.kc,2)+') = '+irrN(si.d,1)+' mm')
@@ -204,21 +214,25 @@ function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(sel
     const so=irrSonda(s,x); o2.push({t:'Fontes: '+(F.demo?'ETo de referência (demonstrativa)':'Estação Santa Rita')+(so?' · '+so.nome+' '+so.st.toLowerCase()+(so.motivo?' ('+so.motivo+')':''):''),h:'IR-04.dc.html'});
     const eq=(x.tipo==='gotejo'?'Gotejo':'Pivô')+' · '+irrN(x.ha)+' ha · '+irrN(x.vazao)+' L/s · '+x.bnome+' · '+((s.capt[x.capt]||{}).nome||'');
     const r={id:k,rk:RK[si.sit]||9,ro:!b,ac:si.acao,acId:(o?o.id:(top&&top.fert&&!/^Programar/.test((si.acao||[''])[0])?top.fert:x.nome)),fe:!!(top&&top.fert),o:o2.map(z=>typeof z==='string'?{t:z}:z),
-      v:{ha:x.ha,def:temD?si.d:'',nec:temN?n.br:'',np:temN?n.np:'',cob:cobN,resta:restaN,lmax:x.lmax,imin:x.imin,efic:x.efic,defT:si.d===null?'—':((si.est?'≈':'')+irrN(si.d,1)+' mm · '+si.fon),necT:temN?('líquida '+irrN(n.liq,1)+' mm · bruta '+irrMm(n.br)+' mm · '+n.np+(n.np>1?' passadas de ':' passada de ')+irrMm(n.por)+' mm'):'sem lâmina hoje',eqT:eq},
+      v:{def:temD?si.d:'',nec:temN?n.br:'',cob:cobN,lmax:x.lmax,imin:x.imin,efic:x.efic,defT:si.d===null?'—':((si.est?'≈':'')+irrN(si.d,1)+' mm · '+(si.fon||fon)),
+         necT:temN?('líquida '+irrN(n.liq,1)+' mm · bruta '+irrMm(n.br)+' mm · '+n.np+(n.np>1?' passadas necessárias de ':' passada necessária de ')+irrMm(n.por)+' mm'):'sem lâmina hoje',
+         ordT:ordId?(ordId+(cobN!==''?' · cobre '+cobN+' %'+(restaN>0?' · resta '+irrN(restaN,1)+' mm':''):(cb&&cb.prox?' · próximo ciclo':''))):'sem ordem',
+         donoT:si.acao?(si.dono||'—'):'—',cultT:CE.c+(CE.e?' · '+CE.e:''),eqT:eq},
       s:{},p:{def}};
-    irrTxt(r,'setor',x.nome,true); irrTxt(r,'faz',F.nome); irrTxt(r,'cult',CE.c); irrTxt(r,'estd',CE.e); r.s.def=temD?(si.est?'≈':'')+irrN(si.d,1)+' mm':''; irrTxt(r,'fon',fon);
-    r.p.ha=[{k:'txt',t:irrN(x.ha,2,0)}]; r.s.ha=irrN(x.ha,2,0);
-    r.p.nec=[temN?{k:'txt',t:irrMm(n.br)}:{k:'mut',t:'—'}]; r.s.nec=temN?irrMm(n.br):''; irrTxt(r,'np',temN?String(n.np):''); irrTxt(r,'ord',ordId);
+    irrTxt(r,'setor',x.nome,true); irrTxt(r,'faz',F.nome); r.s.def=temD?(si.est?'≈':'')+irrN(si.d,1)+' mm':'';
+    r.p.nec=[temN?{k:'txt',t:irrMm(n.br)}:{k:'mut',t:'—'}]; r.s.nec=temN?irrMm(n.br):''; irrTxt(r,'ord',ordId);
     // cobertura da ordem sobre o déficit de hoje; ordem do próximo ciclo não cobre o de hoje (a célula diz isso)
     r.p.cob=[cobN!==''?{k:'txt',t:String(cobN)}:(cb&&cb.prox?{k:'mut',t:'próximo ciclo'}:{k:'mut',t:'—'})]; r.s.cob=cobN!==''?String(cobN):(cb&&cb.prox?'próximo ciclo':'');
-    r.p.resta=[restaN!==''?{k:'txt',t:irrN(restaN,1)}:{k:'mut',t:'—'}]; r.s.resta=restaN!==''?irrN(restaN,1):'';
     r.p.sit=[{k:'chip',t:si.sit,c:SITC[si.c]||'gray'}]; r.s.sit=si.sit;
-    // pendência e próxima passada do mesmo item que dá a situação e o próximo passo (ordem de água ou fertirrigação da O.S.)
+    // pendência do item que dá a situação e o próximo passo; se ele não é a ordem da linha, a pendência diz qual ordem é
+    const pid=top?(top.o?top.o.id:(top.fert||'')):''; const ref=(pid&&pid!==ordId)?pid:'';
     let pen=[], pps=null, ppsV='—';
-    if(top&&top.o){ pen=irrPend(irrSelos(s,top.o)); const pp=irrPassProx(top.o); if(pp){ pps=pp.ini; ppsV='a definir'; } }
-    else if(top&&top.fert){ pen=irrPendFert(irrFertBloq(top.fert)); const f=s.fert[top.fert]; const e2=irrFertEtapa(top.fert); if(f&&f.ini&&(e2==='A liberar'||e2==='Liberadas')) pps=f.ini; }
+    if(top&&top.o) pen=irrPend(irrSelos(s,top.o),ref); else if(top&&top.fert) pen=irrPendFert(irrFertBloq(top.fert),ref);
+    // próxima passada da ordem da coluna Ordem (antes vinha da ordem da situação e misturava duas ordens na linha)
+    if(oa){ const pp=irrPassProx(oa); if(pp){ pps=pp.ini; ppsV='a definir'; } }
+    else if(ordId&&s.fert[ordId]){ const f=s.fert[ordId]; const e2=irrFertEtapa(ordId); if(f.ini&&(e2==='A liberar'||e2==='Liberadas')) pps=f.ini; }
     irrLst(r,'pend',pen,'chip'); irrQ(r,'pps',pps,ppsV);
-    r.p.prox=si.acao?[{k:'link',t:si.acao[0],h:si.acao[1]}]:[{k:'mut',t:'—'}]; r.s.prox=si.acao?si.acao[0]:''; irrTxt(r,'dono',si.acao?(si.dono||''):'');
+    r.p.prox=si.acao?[{k:'link',t:si.acao[0],h:si.acao[1]}]:[{k:'mut',t:'—'}]; r.s.prox=si.acao?si.acao[0]:'';
     return r; });
   rows.sort((a,b)=>(a.rk-b.rk)||((a.fe?1:0)-(b.fe?1:0))||String(a.id).localeCompare(String(b.id),'pt-BR',{numeric:true}));
   IRG('g_set').rows=rows;
@@ -246,13 +260,13 @@ function EXTRAVALS(self,v){ irrVista(self,'g_set');
 def ir02():
     fname='IR-02.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000
     x0={'c-'+k:True for k in DI.CAPT}
-    # árvore captação › ordem, uma variável por coluna (TABELAS-FOCO, 04/10/2026): tipo, setor, bomba, vazão (na captação: o pico de hoje), início
-    # e fim (ordenam como data), lâmina, passadas, etapa, pendência, próximo passo, responsável e avisos. A outorga (situação, limites e uso do
-    # dia) fica em Clima e sensores; a renovação da outorga volta como aviso da ordem
-    g_ag=grid([dict(k='item',l='Captação › ordem',w=150),dict(k='tipo',l='Tipo',w=120),dict(k='setor',l='Setor',w=90),dict(k='bomba',l='Bomba',w=120),
-               dict(k='ls',l='Vazão',t='num',a='r',un='L/s'),dict(k='ini',l='Início',t='date',w=110),dict(k='fim',l='Fim',t='date',w=110),
-               dict(k='lam',l='Lâmina',t='num',a='r',un='mm',d=2,dmin=1),dict(k='np',l='Passadas',t='num',a='r'),dict(k='etapa',l='Etapa',w=110),
-               dict(k='pend',l='Pendência',multi=True,w=180),dict(k='prox',l='Próximo passo',w=170),dict(k='dono',l='Responsável',w=120),dict(k='avs',l='Avisos',multi=True,w=200)],[],
+    # árvore captação › ordem, uma variável por coluna (TABELAS-FOCO, 04/10/2026). Revisão TABR (A1, A4, 09/10): etapa, pendência e próximo
+    # passo logo depois da ordem; depois setor, início e fim (ordenam como data), lâmina e avisos. Tipo, bomba, vazão do setor, passadas e
+    # responsável ficam no detalhe da ordem (IR-03det). A linha da captação não põe o pico do dia numa coluna de vazão das ordens (seriam duas
+    # grandezas na mesma coluna): o pico e a outorga em renovação são avisos da captação, e o pico acima da outorga é pendência dela
+    g_ag=grid([dict(k='item',l='Captação › ordem',w=150),dict(k='etapa',l='Etapa',w=110),dict(k='pend',l='Pendência',multi=True,w=190),dict(k='prox',l='Próximo passo',w=140),
+               dict(k='setor',l='Setor',w=90),dict(k='ini',l='Início',t='date',w=110),dict(k='fim',l='Fim',t='date',w=110),
+               dict(k='lam',l='Lâmina',t='num',a='r',un='mm',d=2,dmin=1),dict(k='avs',l='Avisos',multi=True,w=200)],[],
               edit=dict(m='ro',title='Programação',leafOnly=True,fields=[]),gid='g_ag',total=False,tree=True,x0=x0,search=False)
     pg_corpo=(campo('Setor','pg_sel',f'<select id="pg_sel" value="{H("pg_sid")}" onChange="{H("pg_setsid")}" style="{INP}"><sc-for list="{H("pg_opts")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select>','pg_err')
               + kvfor('pg_kv',2) + checks('pg_ck')
@@ -272,27 +286,31 @@ function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(sel
   const caps=Object.keys(s.capt).filter(cid=>sids.some(k=>s.setores[k].capt===cid));
   const rows=caps.map(cid=>{ const cp=s.capt[cid]; const kids=[];
     Object.values(s.ordens).filter(o=>s.setores[o.setor].capt===cid&&['A liberar','Liberadas','Em execução'].indexOf(irrEtapa(s,o))>=0).sort((a,b)=>(irrIni(a)===null?1e9:irrIni(a))-(irrIni(b)===null?1e9:irrIni(b))).forEach(o=>{
-      const x=s.setores[o.setor]; const et=irrEtapa(s,o); const sel=irrSelos(s,o); const av=irrAvisos(s,o); const p=irrProx(s,o);
+      const x=s.setores[o.setor]; const et=irrEtapa(s,o); const sel=irrSelos(s,o); const av=irrAvisos(s,o).filter(a=>a.k!=='renov'); const p=irrProx(s,o);   /* outorga em renovação: aviso da captação */
       // início da 1ª passada e fim da última; passada sem janela deixa o fim "a definir" (a janela de cada passada fica no detalhe da ordem)
       const ps=o.passadas; const def=ps.every(q=>q.ini!==null&&q.ini!==undefined); const fim=def?Math.max.apply(null,ps.map(q=>irrFimP(o,q))):null;
-      const r={id:o.id,dr:'go_'+o.id,v:{ls:x.vazao,lam:o.lam,np:ps.length,href:'IR-03det.dc.html#'+o.id},s:{},p:{}};
-      irrTxt(r,'item',o.id,true); irrTxt(r,'tipo',o.fert?'Fertirrigação':'Água'); irrTxt(r,'setor',x.nome); irrTxt(r,'bomba',x.bnome);
+      const r={id:o.id,dr:'go_'+o.id,v:{lam:o.lam,href:'IR-03det.dc.html#'+o.id},s:{},p:{}};
+      irrTxt(r,'item',o.id,true); irrTxt(r,'setor',x.nome);
       irrQ(r,'ini',irrIni(o),'a definir'); irrQ(r,'fim',fim,'a definir');
       r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',irrPend(sel),'chip');
-      irrTxt(r,'prox',p?p.t:'',true); irrTxt(r,'dono',p?(p.dono||''):''); irrLst(r,'avs',av);
+      irrTxt(r,'prox',p?p.t:'',true); irrLst(r,'avs',av);
       kids.push(r); });
     Object.keys(s.fert).filter(k=>!s.ordens[k]&&s.setores[s.fert[k].setor].capt===cid).forEach(k=>{ const f=s.fert[k]; const et=irrFertEtapa(k); if(!et||['Encerradas','Canceladas'].indexOf(et)>=0) return; const x=s.setores[f.setor]; const fb=irrFertBloq(k);
-      const r={id:k,dr:'go_'+k,v:{ls:x.vazao,lam:f.lam||'',np:'',href:'OS.dc.html#'+k},s:{},p:{}};
-      irrTxt(r,'item',k,true); irrTxt(r,'tipo','Fertirrigação'); irrTxt(r,'setor',x.nome); irrTxt(r,'bomba',x.bnome);
+      const r={id:k,dr:'go_'+k,v:{lam:f.lam||'',href:'OS.dc.html#'+k},s:{},p:{}};
+      irrTxt(r,'item',k,true); irrTxt(r,'setor',x.nome);
       irrQ(r,'ini',f.ini?f.ini:null); irrQ(r,'fim',f.ini?f.fim:null);
       r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',irrPendFert(fb),'chip');
-      irrTxt(r,'prox',fb?fb.passo:(et==='A liberar'?'Liberar na O.S.':'Abrir na O.S.'),true); irrTxt(r,'dono',fb?fb.dono:(et==='A liberar'?'Ana (agrônoma)':(irrFertResp(k)||''))); irrLst(r,'avs',[]);
+      irrTxt(r,'prox',fb?fb.passo:(et==='A liberar'?'Liberar na O.S.':'Abrir na O.S.'),true); irrLst(r,'avs',[]);
       kids.push(r); });
     const u=irrUsoDia(s,cid,0);
-    // linha da captação: o nome, quantas ordens e o pico de vazão de hoje (vermelho acima da vazão outorgada)
-    const g={id:'c-'+cid,v:{ls:Math.round(u.pico)},s:{item:cp.nome,ls:irrN(u.pico)},kids,p:{item:[{k:'b',t:cp.nome},{k:'mut',t:kids.length+(kids.length===1?' ordem':' ordens')}],
-      ls:[u.pico>cp.ls+1e-9?{k:'cn',t:irrN(u.pico)+' L/s',c:'red'}:{k:'txt',t:irrN(u.pico)}]}};
-    ['tipo','setor','bomba','ini','fim','lam','np','etapa','pend','prox','dono','avs'].forEach(z=>{ g.p[z]=[{k:'mut',t:''}]; g.s[z]=''; });
+    // linha da captação: o nome e quantas ordens; o pico de vazão de hoje e a outorga em renovação são avisos dela (o pico acima da vazão
+    // outorgada é pendência); as colunas das ordens ficam vazias
+    const g={id:'c-'+cid,v:{},s:{item:cp.nome},kids,p:{item:[{k:'b',t:cp.nome},{k:'mut',t:kids.length+(kids.length===1?' ordem':' ordens')}]}};
+    ['setor','ini','fim','lam','etapa','prox'].forEach(z=>{ g.p[z]=[{k:'mut',t:''}]; g.s[z]=''; });
+    const acima=u.pico>cp.ls+1e-9;
+    irrLst(g,'pend',acima?[{t:'Pico acima da outorga',c:'red',dica:irrN(u.pico)+' de '+irrN(cp.ls)+' L/s'}]:[],'chip');
+    irrLst(g,'avs',(u.pico>0?[{t:'Pico hoje '+irrN(u.pico)+' de '+irrN(cp.ls)+' L/s'}]:[]).concat(cp.st==='Em renovação'?[{t:'Outorga em renovação'}]:[]));
+    if(!acima){ g.p.pend=[{k:'mut',t:''}]; }
     return g; });
   IRG('g_ag').rows=rows;
   const t=[]; if(c.conf) t.push(c.conf+(c.conf>1?' conflitos':' conflito')); if(c.jan) t.push(c.jan+(c.jan>1?' janelas a definir':' janela a definir'));
@@ -336,34 +354,34 @@ function EXTRAVALS(self,v){ const s=irrGet(); const fz=irrFazK(self);
 # =====================================================================================
 def ir03():
     fname='IR-03.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000
-    # uma variável por coluna (TABELAS-FOCO, 04/10/2026): tipo, setor, cultura, início e fim (ordenam como data), lâmina, passadas, etapa (as 5
-    # fases), pendência, avisos, próximo passo e responsável; medido e área coberta no detalhe da ordem. Fazenda só com "Todas" no topo
-    g_os=grid([dict(k='ordem',l='Ordem',w=90),dict(k='tipo',l='Tipo',w=120),dict(k='faz',l='Fazenda',w=110),dict(k='setor',l='Setor',w=90),dict(k='cult',l='Cultura',w=100),
-               dict(k='ini',l='Início',t='date',w=110),dict(k='fim',l='Fim',t='date',w=110),dict(k='lam',l='Lâmina',t='num',a='r',un='mm',d=2,dmin=1),
-               dict(k='np',l='Passadas',t='num',a='r'),dict(k='etapa',l='Etapa',w=120),dict(k='pend',l='Pendência',multi=True,w=180),
-               dict(k='avs',l='Avisos',multi=True,w=180),dict(k='prox',l='Próximo passo',w=170),dict(k='dono',l='Responsável',w=120)],[],
+    # uma variável por coluna (TABELAS-FOCO, 04/10/2026). Revisão TABR (A1, 09/10): etapa (as 5 fases), pendência, próximo passo e responsável
+    # logo depois da ordem; depois tipo, setor, início e fim (ordenam como data) e lâmina. Cultura, passadas, avisos, medido e área coberta
+    # ficam no detalhe da ordem. Fazenda só com "Todas" no topo
+    g_os=grid([dict(k='ordem',l='Ordem',w=90),dict(k='faz',l='Fazenda',w=110),dict(k='etapa',l='Etapa',w=120),dict(k='pend',l='Pendência',multi=True,w=190),
+               dict(k='prox',l='Próximo passo',w=150),dict(k='dono',l='Responsável',w=110),dict(k='tipo',l='Tipo',w=120),dict(k='setor',l='Setor',w=90),
+               dict(k='ini',l='Início',t='date',w=110),dict(k='fim',l='Fim',t='date',w=110),dict(k='lam',l='Lâmina',t='num',a='r',un='mm',d=2,dmin=1)],[],
               edit=dict(m='ro',title='Ordem',fields=[]),gid='g_os',total=False,qf=dict(k='etapa',l='Etapa',todas='Todas'))
     EXTRAJS[0]=prefixo()+JS_COMUM+r"""
 const ORD=['A liberar','Em conferência','Em execução','Liberadas','Encerradas','Canceladas'];
 function PREVALS(self,v){ irrOuvir(self); const s=irrGet(); const fz=irrFazK(self); irrFazVals(self,v); irrFaixa(v,s,fz);
   irrColsFaz('g_os',fz,v,'os_ncol');
   const rows=[];
-  Object.values(s.ordens).filter(o=>!fz||o.faz===fz).forEach(o=>{ const x=s.setores[o.setor]; const et=irrEtapa(s,o); const sel=irrSelos(s,o); const av=irrAvisos(s,o); const p=irrProx(s,o);
+  Object.values(s.ordens).filter(o=>!fz||o.faz===fz).forEach(o=>{ const x=s.setores[o.setor]; const et=irrEtapa(s,o); const sel=irrSelos(s,o); const p=irrProx(s,o);
     const ps=o.passadas; const i0=(q)=>(q.iniReal!==undefined&&q.iniReal!==null)?q.iniReal:q.ini; const def=ps.every(q=>q.ini!==null&&q.ini!==undefined);
     const ini=ps.filter(q=>q.ini!==null&&q.ini!==undefined).map(i0); const fim=def?Math.max.apply(null,ps.map(q=>irrFimP(o,q))):null;
-    const r={id:o.id,dr:'go_'+o.id,rk:ORD.indexOf(et),q:irrIni(o),v:{lam:o.lam,np:ps.length,href:'IR-03det.dc.html#'+o.id},s:{},p:{}};
-    irrTxt(r,'ordem',o.id,true); irrTxt(r,'tipo',o.fert?'Fertirrigação':'Água'); irrTxt(r,'faz',s.faz[x.faz].nome); irrTxt(r,'setor',x.nome); irrTxt(r,'cult',irrCultEst(x).c);
+    const r={id:o.id,dr:'go_'+o.id,rk:ORD.indexOf(et),q:irrIni(o),v:{lam:o.lam,href:'IR-03det.dc.html#'+o.id},s:{},p:{}};
+    irrTxt(r,'ordem',o.id,true); irrTxt(r,'tipo',o.fert?'Fertirrigação':'Água'); irrTxt(r,'faz',s.faz[x.faz].nome); irrTxt(r,'setor',x.nome);
     irrQ(r,'ini',ini.length?Math.min.apply(null,ini):null,'a definir'); irrQ(r,'fim',fim,'a definir');
-    r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',irrPend(sel),'chip'); irrLst(r,'avs',av);
-    irrTxt(r,'prox',p?p.t:'',true); irrTxt(r,'dono',p?(p.dono||''):''); rows.push(r); });
+    r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',irrPend(sel),'chip');
+    irrTxt(r,'prox',p?p.t:'',true); irrTxt(r,'dono',p?irrQuem(p.dono):''); rows.push(r); });
   // fertirrigações da O.S. (cenário compartilhado): só leitura aqui
   Object.keys(s.fert).filter(k=>!s.ordens[k]&&(!fz||s.setores[s.fert[k].setor].faz===fz)).forEach(k=>{ const f=s.fert[k]; const et=irrFertEtapa(k)||'—'; const x=s.setores[f.setor]; const fb=irrFertBloq(k);
     const px=fb?[fb.passo,fb.dono]:(et==='A liberar'?['Liberar na O.S.','Ana (agrônoma)']:['Abrir na O.S.',irrFertResp(k)||'']);
-    const r={id:k,dr:'go_'+k,rk:ORD.indexOf(et),q:f.ini,v:{lam:f.lam||'',np:'',href:'OS.dc.html#'+k},s:{},p:{}};
-    irrTxt(r,'ordem',k,true); irrTxt(r,'tipo','Fertirrigação'); irrTxt(r,'faz',s.faz[x.faz].nome); irrTxt(r,'setor',x.nome); irrTxt(r,'cult',irrCultEst(x).c);
+    const r={id:k,dr:'go_'+k,rk:ORD.indexOf(et),q:f.ini,v:{lam:f.lam||'',href:'OS.dc.html#'+k},s:{},p:{}};
+    irrTxt(r,'ordem',k,true); irrTxt(r,'tipo','Fertirrigação'); irrTxt(r,'faz',s.faz[x.faz].nome); irrTxt(r,'setor',x.nome);
     irrQ(r,'ini',f.ini?f.ini:null); irrQ(r,'fim',f.ini?f.fim:null);
-    r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',irrPendFert(fb),'chip'); irrLst(r,'avs',[]);
-    irrTxt(r,'prox',px[0],true); irrTxt(r,'dono',px[1]); rows.push(r); });
+    r.p.etapa=[{k:'chip',t:et,c:IRR_COR[et]||'gray'}]; r.s.etapa=et; irrLst(r,'pend',irrPendFert(fb),'chip');
+    irrTxt(r,'prox',px[0],true); irrTxt(r,'dono',irrQuem(px[1])); rows.push(r); });
   rows.sort((a,b)=>(a.rk-b.rk)||((a.q===null||a.q===undefined?1e9:a.q)-(b.q===null||b.q===undefined?1e9:b.q)));
   IRG('g_os').rows=rows;
   const conf=rows.filter(r=>r.s.etapa==='Em conferência').length, lib=rows.filter(r=>r.s.etapa==='A liberar').length;
@@ -466,9 +484,10 @@ function PREVALS(self,v){ irrOuvir(self);
   IRG('g_pas').rows=o.passadas.map(p=>{ const temI=p.ini!==null&&p.ini!==undefined; const i0=temI?((p.iniReal!==undefined&&p.iniReal!==null)?p.iniReal:p.ini):null;
     const sv=(o.fert&&p.st==='Programada')?['Na O.S. · v2','yellow']:(p.st==='Parcial'&&o.fert&&o.fert.exec&&o.fert.v1===p.cob?['Parcial · v1','yellow']:[p.st,{'Programada':'gray','Em execução':'green','Feita':'gray','Parcial':'yellow'}[p.st]||'gray']);
     const tc=p.cob!==null&&p.cob!==undefined, tv=p.vol!==null&&p.vol!==undefined;
-    const r={id:'p'+p.n,v:{n:p.n,lam:p.lam,dur:Math.round(p.dur/6)/10,cob:tc?p.cob:'',vol:tv?p.vol:''},s:{n:p.n+'ª',st:sv[0]},p:{n:[{k:'txt',t:p.n+'ª'}],st:[{k:'chip',t:sv[0],c:sv[1]}]}};
+    const dm=irrDurP(o,p);   /* Início, Fim e Duração da mesma janela */
+    const r={id:'p'+p.n,v:{n:p.n,lam:p.lam,dur:Math.round(dm/6)/10,cob:tc?p.cob:'',vol:tv?p.vol:''},s:{n:p.n+'ª',st:sv[0]},p:{n:[{k:'txt',t:p.n+'ª'}],st:[{k:'chip',t:sv[0],c:sv[1]}]}};
     irrQ(r,'ini',i0,'a definir'); irrQ(r,'fim',temI?irrFimP(o,p):null,'a definir');
-    r.p.dur=[{k:'txt',t:irrN(p.dur/60,1)}]; r.s.dur=irrN(p.dur/60,1);
+    r.p.dur=[{k:'txt',t:irrN(dm/60,1)}]; r.s.dur=irrN(dm/60,1);
     r.p.cob=[tc?{k:'txt',t:irrN(p.cob,2,1)}:{k:'mut',t:'—'}]; r.s.cob=tc?irrN(p.cob,2,1):''; r.p.vol=[tv?{k:'txt',t:irrN(p.vol)}:{k:'mut',t:'—'}]; r.s.vol=tv?irrN(p.vol):'';
     return r; });
   // execução e conferência
@@ -598,17 +617,18 @@ def ir04():
     fname='IR-04.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000
     # uma variável por coluna (TABELAS-FOCO, 04/10/2026): grandezas e unidades da fonte (listas na mesma ordem: a estação mede ET₀, chuva e vento), atualização (ordena como data), calibração (chip) e a
     # validade dela (data), cobertura, estado (chip; o motivo da suspeita vai para o painel) e efeito no balanço. Fazenda só com "Todas"
-    g_src=grid([dict(k='nome',l='Fonte',w=200),dict(k='faz',l='Fazenda',w=110),dict(k='gr',l='Grandeza',multi=True,w=150),dict(k='un',l='Unidade',multi=True,w=110),dict(k='at',l='Atualização',t='date',w=110),
-                dict(k='calst',l='Calibração',w=120),dict(k='cal',l='Validade da calibração',t='date'),dict(k='cob',l='Cobertura',w=100),
-                dict(k='estado',l='Estado',w=120),dict(k='efe',l='Efeito no balanço',w=190)],[],
+    # revisão TABR (A1, 09/10): o estado logo depois da fonte (à vista sem rolar)
+    g_src=grid([dict(k='nome',l='Fonte',w=130),dict(k='faz',l='Fazenda',w=110),dict(k='estado',l='Estado',w=120),dict(k='gr',l='Grandeza',multi=True,w=110),dict(k='un',l='Unidade',multi=True,w=90),
+                dict(k='at',l='Atualização',t='date',w=110),dict(k='calst',l='Calibração',w=120),dict(k='cal',l='Validade da calibração',t='date'),dict(k='cob',l='Cobertura',w=100),
+                dict(k='efe',l='Efeito no balanço',w=110)],[],
                edit=dict(m='form',title='Fonte',newTitle='Cadastrar sensor',sub='O estado vem das leituras validadas.',
                    fields=[dict(k='nome',l='Nome',t='txt',req=True),dict(k='gr',l='Grandeza',t='sel',req=True,newOnly=True,opts=['Umidade do solo','Volume','ET₀ / chuva / vento'],**{'def':'Umidade do solo'}),
                            dict(k='cob',l='Cobertura',t='sel',req=True,newOnly=True,opts=['Pivô 1','Pivô 2','Gotejo T7','Fazenda'],**{'def':'Pivô 2'}),
                            dict(k='cal',l='Próxima calibração',t='date')]),
                gid='g_src',total=False,add='Cadastrar sensor',search=False)
     # captação: outorga, vazão outorgada (L/s) e regime (h/dia), vencimento, situação, volume de hoje (m³) e uso do dia (%), setores ligados (lista)
-    g_cap=grid([dict(k='nome',l='Captação',w=200),dict(k='faz',l='Fazenda',w=110),dict(k='outorga',l='Outorga',w=130),dict(k='ls',l='Vazão outorgada',t='num',a='r',un='L/s'),
-                dict(k='h',l='Regime',t='num',a='r',un='h/dia'),dict(k='venc',l='Vencimento',t='date'),dict(k='st',l='Situação',w=120),
+    g_cap=grid([dict(k='nome',l='Captação',w=200),dict(k='faz',l='Fazenda',w=110),dict(k='st',l='Situação',w=120),dict(k='outorga',l='Outorga',w=130),dict(k='ls',l='Vazão outorgada',t='num',a='r',un='L/s'),
+                dict(k='h',l='Regime',t='num',a='r',un='h/dia'),dict(k='venc',l='Vencimento',t='date'),
                 dict(k='vol',l='Volume hoje',t='num',a='r',un='m³'),dict(k='pct',l='Uso do dia',t='num',a='r',un='%'),dict(k='set',l='Setores ligados',multi=True,w=150)],[],
                edit=dict(m='ro',title='Captação',fields=[dict(k='nome',l='Captação',ro=True),dict(k='outT',l='Outorga',ro=True),dict(k='obs',l='Observação',ro=True)]),gid='g_cap',total=False,search=False)
     # desempenho: cultura em coluna própria; a variação da eficiência sobre a quinzena anterior é número (%); a sonda sem dado aparece em Fontes

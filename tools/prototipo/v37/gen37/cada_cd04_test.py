@@ -44,9 +44,11 @@ try:
     t.openrow(0,'Beto'); he=help_('Equipe'); ops=t.fopts('acesso')
     t.chk('calendário herdado da equipe aparece no campo Equipe; acesso ao app oferece "Solicitar acesso ao app"',
           'Calendário da equipe: seg–sáb · 06–15h · 9 h/dia' in he and ops==['Sem login','Solicitar acesso ao app'] and t.fv('cal')=='Da equipe', [he,ops,t.fv('cal')])
-    t.fset('acesso','Solicitar acesso ao app'); t.fset('cal','escala 6×2 · 8h'); t.btn('Salvar'); time.sleep(.2); b=t.rowtxt(0,'Beto') or ''; ts=t.toast()
-    t.chk('"Solicitar acesso ao app" (simulado) grava o pedido e a exceção de calendário aparece na linha',
-          'escala 6×2 · 8h Acesso solicitado' in b and 'pedido de acesso ao app enviado ao administrador (simulado)' in ts, [b,ts])
+    t.fset('acesso','Solicitar acesso ao app'); t.fset('cal','escala 6×2 · 8h'); t.btn('Salvar'); time.sleep(.2); ts=t.toast()
+    # revisão TABR (09/10/2026, A1): calendário e acesso ao app ficam no painel da pessoa (a Situação vem logo depois do nome, à vista sem rolar)
+    t.openrow(0,'Beto'); b=[t.fv('cal'),t.fv('acesso')]; t.cancel()
+    t.chk('"Solicitar acesso ao app" (simulado) grava o pedido e a exceção de calendário fica na pessoa (painel)',
+          b==['escala 6×2 · 8h','Acesso solicitado'] and 'pedido de acesso ao app enviado ao administrador (simulado)' in ts, [b,ts])
     t.openrow(0,'Ana'); acd=t.fdis('acesso'); t.cancel()
     t.chk('quem já tem login vê o acesso só em consulta', acd is True, acd)
     t.clk('Cadastrar pessoa')

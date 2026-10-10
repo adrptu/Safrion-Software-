@@ -259,9 +259,10 @@ def cd01():
         edit=dict(m='form',title='Fazenda',newTitle='Cadastrar fazenda',sub=SUB_FAZ,fields=CAMPOS_FAZ))
     # talhões: árvore fazenda › talhão, uma linha por talhão; uma variável por coluna (TABELAS-FOCO, 04/10/2026): o sistema sai da célula do
     # talhão para a coluna Sistema (o pivô ou setor fica no painel), a ocupação da safra vira o número de parcelas (ordena pelo número)
-    gt=grid([dict(k='t',l='Fazenda › talhão',w=200),dict(k='sis',l='Sistema',w=130),dict(k='decl',l='Área cultivável',t='num',a='r',un='ha',d=1),
+    # revisão TABR (A1, 09/10): a Situação logo depois da identificação, à vista sem rolar (como nas demais grades do protótipo)
+    gt=grid([dict(k='t',l='Fazenda › talhão',w=200),dict(k='est',l='Situação',w=260),dict(k='sis',l='Sistema',w=130),dict(k='decl',l='Área cultivável',t='num',a='r',un='ha',d=1),
              dict(k='calc',l='Polígono',t='num',a='r',un='ha',d=1),dict(k='difp',l='Diferença',t='num',a='r',un='%',d=1),
-             dict(k='parc',l='Parcelas na '+SAF_ATUAL['nome'].lower(),t='num',a='r'),dict(k='est',l='Situação',w=260)],
+             dict(k='parc',l='Parcelas na '+SAF_ATUAL['nome'].lower(),t='num',a='r')],
         grupos,gid='g_tal',tree=True,search=True,total=False,frame=False,x0={g['id']:True for g in grupos},
         tools=qf_chips('g_tal')+seg('cdv',['Lista','Mapa'],'Visualização dos talhões')+prim('g_tal_new','Cadastrar talhão'),
         edit=dict(m='form',title='Talhão',newTitle='Cadastrar talhão',leafOnly=True,sub=SUB_TAL,fields=campos_tal(list(nome.values())+[NOVA_FAZ])))
@@ -286,8 +287,8 @@ def cd01():
                            vazn=_vazao_m3h(a['vazao']),regime=a['regime'],fin=a['fin'],venc=a['venc'],renov=a['renov'],desc=a['desc'],coord=f"{a['lat']:.6f}; {a['lon']:.6f}".replace('.',','))) for a in DC.LG_AGUA]
     for r in ag_rows: r['o']=[dict(t=DC.LG_FONTE)]
     # uma variável por coluna (TABELAS-FOCO): a vazão ordena pelo número em m³/h (a célula mostra a unidade do documento: m³/h ou L/s)
-    gw=grid([dict(k='nome',l='Ponto de água',w=230),dict(k='faz',l='Fazenda'),dict(k='doc',l='Documento'),dict(k='modo',l='Uso',w=170),dict(k='curso',l='Curso d’água',w=180),
-             dict(k='vazn',l='Vazão',t='num',a='r'),dict(k='venc',l='Vencimento',t='date'),dict(k='est',l='Situação',w=230)],
+    gw=grid([dict(k='nome',l='Ponto de água',w=215),dict(k='est',l='Situação',w=230),dict(k='faz',l='Fazenda'),dict(k='doc',l='Documento'),dict(k='modo',l='Uso',w=160),
+             dict(k='curso',l='Curso d’água',w=140),dict(k='vazn',l='Vazão',t='num',a='r'),dict(k='venc',l='Vencimento',t='date')],
         ag_rows,gid='g_agua',total=False,frame=False,tools=qf_chips('g_agua'),
         edit=dict(m='origin',title='Ponto de água',fields=[txt('nome','Nome no KML',ro=True),txt('tipo','Documento',ro=True),txt('num','Número',ro=True),
             txt('proc','Processo',ro=True),txt('modo','Modo de uso',ro=True),txt('curso','Curso d’água',ro=True),txt('vazao','Vazão',ro=True),txt('regime','Regime',ro=True),
@@ -465,13 +466,18 @@ function EXTRAVALS(self,v){ simv(self,v); const fz=RW(self,'g_faz'), ts=tals(RW(
     estado_cab(fname,'Fazendas, áreas e talhões','cd'); _rolagem(fname)
 
 # ================= CD-01det · detalhe de qualquer talhão =================
+def _tal_cultivo(c,s):
+    """talhão do cultivo: na Santa Rita o prefixo do local ("T1-B" → T1); na Safra Mamão da Lagoa Grande o local é o nome do pivô ("Pivô 1"
+    → PV01), o mesmo mapa que conta as parcelas da lista (_nparc). Revisão TABR (09/10): o detalhe do PV01 mostrava a safra sem a parcela."""
+    import dados_lagoa_safra as DL
+    return DL.PID_DE.get(c['local'],'') if s['id']==DL.SAFRA['id'] else _tal_de(c['local'])
 def _parc_rows(tal_ids,faz):
     """grupos por talhão × safra (safra com cultivo do talhão ou safra aberta DA FAZENDA do talhão) com as parcelas do Planejar safra, em consulta."""
     rows=[]; x0={}
     for t in tal_ids:
         for s in D2.SAFRAS:
             if s.get('fazenda',faz)!=faz: continue   # safra de outra fazenda (ex.: Safra Mamão da Lagoa Grande) não é do talhão da Santa Rita
-            cs=[c for c in D2.CULTIVOS[s['id']] if _tal_de(c['local'])==t]
+            cs=[c for c in D2.CULTIVOS[s['id']] if _tal_cultivo(c,s)==t]
             if not cs and s['ro']: continue
             kids=[]
             for c in cs:
@@ -513,6 +519,8 @@ def cd01det():
     fname='CD-01det.dc.html'; E._reset_screen(fname); PARENT37[fname]='CD-01.dc.html'
     fr=_faz_rows(); tr=_tal_rows(); fazs=[r['v']['nome'] for r in fr]
     prow,px0=_parc_rows([r['id'] for r in tr if r['v']['faz']=='Santa Rita'],'Santa Rita')
+    # Lagoa Grande: os pivôs com as parcelas da Safra Mamão (a lista conta 1 parcela no PV01; o detalhe mostra a mesma)
+    lrow,lx0=_parc_rows([r['id'] for r in tr if r['v']['faz']=='Lagoa Grande'],'Lagoa Grande'); prow+=lrow; px0.update(lx0)
     # ficha do talhão: uma linha (o registro aberto), sem filtro nem ordem (eles valem na lista do CD-01); uma variável por coluna (TABELAS-FOCO):
     # setor de irrigação, versão do polígono e diferença em ha e em % em colunas próprias; município e fuso ficam no cadastro da fazenda, o motivo no painel
     gi=grid([dict(k='faz',l='Fazenda',w=160),dict(k='sis',l='Sistema',w=130),dict(k='setor',l='Setor de irrigação',w=150),dict(k='decl',l='Área cultivável',t='num',a='r',un='ha',d=1),
@@ -523,8 +531,8 @@ def cd01det():
     plan=se('det_ativo',f'<span class="cadx-prim"><a href="SAF.dc.html" style="{PRIM_ST} text-decoration: none; display: inline-block;">{H("det_plan")}</a></span>')
     # árvore safra › parcela: cada linha mostra a sua entidade (safra: área alocada, livre e estado; parcela: tipo, cultura, cultivar, área, plantio
     # e polígono); a área livre é número (negativo = excede), a cor diz se confere
-    gp=grid([dict(k='parc',l='Safra › parcela',w=190),dict(k='tipo',l='Tipo'),dict(k='cult',l='Cultura'),dict(k='var',l='Cultivar'),dict(k='area',l='Área',t='num',a='r',un='ha',d=1),
-             dict(k='livre',l='Livre',t='num',a='r',un='ha',d=1),dict(k='plantio',l='Plantio',t='date'),dict(k='est',l='Situação',w=180)],
+    gp=grid([dict(k='parc',l='Safra › parcela',w=190),dict(k='est',l='Situação',w=180),dict(k='tipo',l='Tipo'),dict(k='cult',l='Cultura'),dict(k='var',l='Cultivar'),
+             dict(k='area',l='Área',t='num',a='r',un='ha',d=1),dict(k='livre',l='Livre',t='num',a='r',un='ha',d=1),dict(k='plantio',l='Plantio',t='date')],
         prow,gid='g_parc',tree=True,search=False,total=False,x0=px0,frame=False,tools=plan,
         edit=dict(m='origin',title='Parcela',leafOnly=True,
             fields=[txt('parc','Parcela',ro=True),txt('safra','Safra',ro=True),txt('cult','Cultura',ro=True),txt('var','Cultivar',ro=True),num('area','Área','ha',ro=True),

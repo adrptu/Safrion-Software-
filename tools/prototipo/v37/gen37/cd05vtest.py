@@ -22,9 +22,14 @@ def chk(nome,cond,extra=''):
 def novo(nome,doc,papel='Cliente',canais=()):
     J("[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Cadastrar parceiro').click()"); time.sleep(.4)
     J(f"({SETV})('#{FID('nome')}',{json.dumps(nome)})"); J(f"({SETV})('#{FID('cnpj')}',{json.dumps(doc)})"); time.sleep(.2)
-    J(f"{CAN(papel)}.click()")
+    J(f"{CAN(papel)}.click()"); time.sleep(.2)
+    # cliente exige ao menos um produto de interesse (regra do Comercial, posterior a este teste): marca o primeiro, se o grupo existir
+    if papel=='Cliente': J("(()=>{const l=[...document.querySelectorAll('aside[role=dialog] label')].find(l=>l.innerText.trim()==='Soja em grão'&&l.querySelector('input[type=checkbox]')); if(l&&!l.querySelector('input').checked) l.querySelector('input').click();})()")
     for cn in canais: J(f"{CAN(cn)}.click()")
-    J(f"({SETV})('#{FID('homol')}','Não')"); time.sleep(.2); J(f"({BTN})('Salvar')"); time.sleep(.5)
+    # "Homologado" só existe no formulário quando o papel é Fornecedor (antes o teste quebrava aqui, já na base 24da80b: o campo não existe para Cliente)
+    fh=FID('homol')
+    if fh: J(f"({SETV})('#{fh}','Não')"); time.sleep(.2)
+    J(f"({BTN})('Salvar')"); time.sleep(.5)
 def descartar():
     J(f"({BTN})('Cancelar')"); time.sleep(.2); J(f"({BTN})('Descartar alterações')"); time.sleep(.3)
 try:
