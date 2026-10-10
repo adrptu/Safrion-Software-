@@ -195,7 +195,7 @@ try:
         ctl=J("(()=>{const d=document.querySelector('aside[role=dialog]'); if(!d) return -1; return [...d.querySelectorAll('button,a,[role=button]')].filter(b=>/^(A liberar|Liberadas|Em execução|Em conferência|Encerradas)$/.test(b.innerText.trim())).length;})()")
         o1=est()
         chk('15 O.S. · Lista e Kanban com o mesmo filtro de fase (Liberadas: 2 = 2, antes 2 × 10), Kanban diz o filtro e oferece "Limpar filtros" (volta a 10), Recursos segue o mesmo recorte e diz qual (TABELAS-FOCO); "Nova ordem" a única primária; no painel a fase é texto, não comando',
-            sorted(lis)==sorted(kb) and len(kb)==2 and 'Filtro da lista aplicado: fase Liberadas' in nota and 'só os blocos das ordens no filtro da lista (fase Liberadas)' in rc and kb2==10 and o0['prims']==['Nova ordem'] and fase0 and ctl==0 and len(o1['prims'])<=1, [lis,kb,nota,rc,kb2,o0['prims'],fase0,ctl,o1['prims']])
+            sorted(lis)==sorted(kb) and len(kb)==2 and 'Filtro da lista aplicado: fase Liberadas' in nota and 'só os blocos das ordens de Santa Rita no filtro da lista (fase Liberadas)' in rc and kb2==10 and o0['prims']==['Nova ordem'] and fase0 and ctl==0 and len(o1['prims'])<=1, [lis,kb,nota,rc,kb2,o0['prims'],fase0,ctl,o1['prims']])
         # 15b · O.S. "Ajustar antes de liberar" (360×800, toque): rodapé do formulário preso ao pé do painel, Voltar à esquerda e a
         #       primária à direita, alcançável sem rolar até o fim e sem cobrir o campo focado
         abre('OS',360,800,3,True); aj='sem ordem'
