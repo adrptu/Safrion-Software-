@@ -54,9 +54,9 @@ try:
     print('  abrir compra:', clk('Abrir compra'), T())
     chk('etapa 2 · demanda', cur().startswith('2 Confira a demanda'))
     # CTL-4 (demanda única): as O.S. entram na demanda (antes R$ 379.580,00 e MAP 62.500 kg); Fungicida A e Adjuvante saem da SOL; a Ureia da OS-0418 entra
-    b=body(); chk('SOL-2026-07 e total igual ao Planejar safra', 'SOL-2026-07' in b and 'R$ 430.255,00' in b and '430.255,00' in J("[...document.querySelectorAll('.g2tot')].map(x=>x.innerText).join(' ')"))
+    b=body(); chk('SOL-2026-07 e total igual ao Planejar safra', 'SOL-2026-07' in b and 'R$ 428.305,00' in b and '428.305,00' in J("[...document.querySelectorAll('.g2tot')].map(x=>x.innerText).join(' ')"))
     clk('Expandir tudo'); b=body()
-    chk('MAP 11-52 80.000 e KCl coberto com quarentena', '80.000' in b and 'em quarentena não contam' in b)
+    chk('MAP 11-52 79.500 (500 kg da OS-0417 em custódia contam) e KCl coberto com quarentena', '79.500' in b and 'em quarentena não contam' in b)
     row('MAP 11-52'); a=aside(); chk('origem do insumo abre (consulta)', 'T1-A' in a and 'Ver no Planejar safra' in a, a[:80]); clk('Fechar','aside[role=dialog]')
     # compras-estoque-01 · etapa 2: falta a partir de (demanda datada × estoque apto + pedidos previstos)
     chk('coluna Falta a partir de', 'falta a partir de' in body().lower())
@@ -76,7 +76,7 @@ try:
     print('  convite Casa do Adubo (Fertilizantes):', kid('Fertilizantes','Casa do Adubo',True))
     o=opts('canal'); s=sub(); print('  canais:', o, '| sub:', s[:200])
     chk('Casa do Adubo só com E-mail autorizado', o==['E-mail'], o)
-    chk('subtítulo mostra destinatário e itens do convite', 'Destinatário: e-mail vendas@casadoadubo.com.br' in s and 'Itens do convite (Fertilizantes)' in s and 'MAP 11-52 · 80.000 kg' in s and 'simulado' in s, s)
+    chk('subtítulo mostra destinatário e itens do convite', 'Destinatário: e-mail vendas@casadoadubo.com.br' in s and 'Itens do convite (Fertilizantes)' in s and 'MAP 11-52 · 79.500 kg' in s and 'simulado' in s, s)
     chk('ajuda explica o canal único', 'único canal autorizado' in aside(), aside()[:300])
     clk('Cancelar','aside[role=dialog]')
     print('  editar convite Coop. Vale (Fertilizantes):', row('Coop. Vale'))
@@ -103,7 +103,7 @@ try:
     row('MAP 11-52'); chk('form da escolha abre', 'Proposta escolhida' in aside())
     setv('#'+fid('ped'),'90000'); clk('Salvar','aside[role=dialog]')
     chk('valida ≤ necessidade', 'Máximo' in aside(), J("[...document.querySelectorAll('aside [role=alert]')].map(x=>x.innerText).join(' | ')"))
-    setv('#'+fid('ped'),'40000'); clk('Salvar','aside[role=dialog]'); chk('quantidade parcial salva', 'de 80.000 kg' in body(), T())
+    setv('#'+fid('ped'),'40000'); clk('Salvar','aside[role=dialog]'); chk('quantidade parcial salva', 'de 79.500 kg' in body(), T())
     # vencedor que não é o menor: clicar na proposta da Santa Rita Insumos para o Inoculante
     clk('Expandir tudo')
     r=J("""(()=>{const rows=[...document.querySelectorAll('[role=row].g2ed')]; const i=rows.findIndex(r=>/Inoculante líquido/.test(r.innerText)); const k=rows.slice(i+1).find(r=>/Santa Rita Insumos/.test(r.innerText)); if(!k) return 'sem proposta'; k.querySelector('[role=cell] span').click(); return 'ok';})()"""); time.sleep(.4)
@@ -128,7 +128,7 @@ try:
     chk('DEM-08 Ureia: padrão Casa do Adubo "Chega primeiro" + "Chega depois da falta (24/09)", sem "Justificativa pendente"; resumo "1 escolha chega depois da falta" e nenhuma sem justificativa',
         'Casa do Adubo' in t and 'Chega primeiro' in t and 'Chega depois da falta (24/09)' in t and 'Justificativa pendente' not in t and '1 escolha chega depois da falta' in k4b and 'sem justificativa' not in k4b, (t,k4b))
     # etapa 5 · Direção (total acima de 300 mil?) → depende da quantidade; primeiro volta MAP ao total
-    row('MAP 11-52'); setv('#'+fid('ped'),'80000'); clk('Salvar','aside[role=dialog]')
+    row('MAP 11-52'); setv('#'+fid('ped'),'79500'); clk('Salvar','aside[role=dialog]')
     clk('Revisar aprovação'); chk('etapa 5', cur().startswith('5 '))
     b=body(); chk('alçada: Direção exigida', 'Exigida para' in b and 'Acima da sua alçada' in b, J("document.body.innerText.match(/Valor da compra[^\\n]+/)"))
     chk('prévia de pedidos PC-101…', 'PC-101 (prévia)' in b)

@@ -550,7 +550,7 @@ function demanda(self,saf){ const safRows=g2rows(self,GR('g_saf')); const me=saf
     area:o.area,dt:o.dt||'',nome:o.a.nome,prods:o.prods}));   // área com até 2 casas na conta escrita (PRE-REV R5)
   add(saf); safRows.forEach(r=>{ if(r.id===saf||r.ro||(r.v.faz||'Santa Rita')!==faz||vistos[sk(r.id)]) return; vistos[sk(r.id)]=1; add(r.id); });
   const X=cenDemEntradas(cenGet(),{saf,faz,hoje:D2.hoje,viavel:D2.viavel,ordem,nomes,occ},{osb:D2.osb,est:D2.estb}); const m=demFazenda(X);   // ordens e estoque do mesmo cenário (revisão, achado 1)
-  Object.values(m).forEach(d=>{ d.quar=(X.quar||{})[d.nome]||0; d.memo=cal01Memo(d.cal,{un:d.un,res:d.res,quar:d.quar}); });
+  Object.values(m).forEach(d=>{ d.quar=(X.quar||{})[d.nome]||0; d.memo=cal01Memo(d.cal,{un:d.un,res:d.res,quar:d.quar,cust:d.cust,custT:d.custT}); });
   // partes fixas desta conta (plano da tela, sem ordens e estoque): a versão da SOL as guarda e a Compra refaz a conta com o cenário de agora
   const ent={saf,faz,hoje:D2.hoje,viavel:D2.viavel,ordem,nomes,occ:occ.map(o=>Object.assign({},o,{prods:(o.prods||[]).map(p=>({nome:p.nome,grupo:p.grupo,un:p.un,preco:p.preco,dose:p.dose,q:p.q}))}))};
   Object.defineProperty(m,'_ent',{value:ent,enumerable:false}); return m; }
@@ -1497,7 +1497,7 @@ function enviar(self){ const saf=self.state.saf; const safObj=g2rows(self,GR('g_
   // grava quem agiu (perfil de demonstração) e quando; sem o papel, recusa e nada muda (dano: compra reduzida ou aumentada em nome de quem não decidiu)
   const quem=(acao)=>{ try{ return cenExigeUm(g2perfil(),['gestor','agronomo'],acao); }catch(e){ self.setState({g2toast:String(e.message||e)}); return ''; } };
   // registro único da solicitação: o que a Compra de insumos mostra (mesmos itens, quantidades, valores e memória CAL-01)
-  const det=Object.values(dm).map(d=>({nome:d.nome,grupo:d.grupo,un:d.un,preco:d.preco,bruta:d.bruta,est:d.est,res:d.res,rec:d.rec,liq:d.liq,valor:d.valor,falta:d.falta,uso:d.uso,quar:d.quar,evs:d.evs}));
+  const det=Object.values(dm).map(d=>({nome:d.nome,grupo:d.grupo,un:d.un,preco:d.preco,bruta:d.bruta,est:d.est,cust:d.cust||0,custT:d.custT||[],res:d.res,rec:d.rec,liq:d.liq,valor:d.valor,falta:d.falta,uso:d.uso,quar:d.quar,evs:d.evs}));
   const EM='23/09/2026 11:05';   // horário do cenário de demonstração (a SOL-2026-07 inicial é de 10:40)
   const base={safra:saf,nome:safObj.v.nome,faz:safObj.v.faz||'Santa Rita',estado:'Enviada · a cotar',
     origem:{t:'Planejar safra · '+safObj.v.nome+' · demanda de insumos',h:'SAF.dc.html#saf='+encodeURIComponent(saf)+'&passo=demanda'},det,ent:dm._ent};

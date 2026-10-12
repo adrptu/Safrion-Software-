@@ -954,6 +954,20 @@ def os_base():
                 for x in a['prods']: cat.setdefault(x['prod'],dict(g=x['grupo'],preco=x['preco'],un=x['un']))
         _OSB[0]=dict(ords=ords,safs=[dict(id=s_['id'],faz=s_['fazenda'],nome=s_['nome']) for s_ in SAFRAS if not s_['ro']],cat=cat,hoje=HOJE_ISO)
     return _OSB[0]
+def _os_sup(c,co,r=None):
+    """Espelho de cenOsSup (revisão do 853a6a8, achado 1): por insumo, bruto (o que falta aplicar; fora de A liberar/Liberadas/Em execução 0),
+    cust (custódia da requisição), need = máx(0, bruto − cust) e sobra = máx(0, cust − bruto) — custódia sem uso, suprimento."""
+    import quantidade as Q
+    out={}
+    if not co: return out
+    r=r if r is not None else (c.get('reqs') or {}).get(co.get('req') or '')
+    P=lambda p: out.setdefault(p,dict(bruto=0.0,cust=0.0,need=0.0,sobra=0.0))
+    if co['etapa'] in OS_FASES_PEND:
+        real=co.get('realizado') or 0; saldo=(co.get('saldo') or 0) if real else (co.get('area') or 0)
+        for i in co.get('ins') or []: P(i['p'])['bruto']+=Q.qtd(i['dose'],saldo) if real else (i.get('tot') or 0)
+    for it in (r or {}).get('itens') or []: P(it['prod'])['cust']+=it.get('custodia') or 0
+    for x in out.values(): x['need']=max(0.0,Q.qtd(x['bruto']-x['cust'],1)); x['sobra']=max(0.0,Q.qtd(x['cust']-x['bruto'],1))
+    return out
 _OSD=[None]
 def os_dem(cen=None):
     """DEM-02 · espelho de cenOsDem: o que cada O.S. ainda tira do almoxarifado, na semente do cenário (ou no estado cen). A liberar, Liberadas
@@ -966,11 +980,10 @@ def os_dem(cen=None):
         if not co or co['etapa']=='Canceladas': return
         r=(c.get('reqs') or {}).get(co.get('req') or '') or {'itens':[]}; itens=[]
         if co['etapa'] in OS_FASES_PEND:
-            real=co.get('realizado') or 0; saldo=(co.get('saldo') or 0) if real else (co.get('area') or 0)
+            real=co.get('realizado') or 0; saldo=(co.get('saldo') or 0) if real else (co.get('area') or 0); S=_os_sup(c,co)
             for i in co.get('ins') or []:
-                cust=sum(y.get('custodia') or 0 for y in r['itens'] if y['prod']==i['p'])
-                bruto=Q.qtd(i['dose'],saldo) if real else (i.get('tot') or 0); k=b['cat'].get(i['p'],{})
-                itens.append(dict(p=i['p'],q=max(0.0,Q.qtd(bruto-cust,1)),un=i['un'],g=k.get('g',''),preco=k.get('preco',0),
+                s_=S.get(i['p']) or dict(need=0.0,cust=0.0,bruto=0.0); cust=min(s_['cust'],s_['bruto']); k=b['cat'].get(i['p'],{})
+                itens.append(dict(p=i['p'],q=s_['need'],un=i['un'],g=k.get('g',''),preco=k.get('preco',0),
                                   calc=f"{_nf(i['dose'],2)} {i['un']}/ha × {_nfa(saldo)} ha"+(f" − {_nfa(cust)} {i['un']} em custódia" if cust>0 else '')))
         if not x['chaves'] and not any(i['q']>0 for i in itens): return
         out.append(dict(id=x['id'],faz=x['faz'],saf=x['saf'],chaves=list(x['chaves']),area=co.get('area') or 0,dt=(x['ini'] if x['ini'] and x['ini']>b['hoje'] else b['hoje']),
@@ -1004,18 +1017,32 @@ def _res_propria(c,rid,it,l):
     if s0 and s0['estado']=='Reservada': tot_=next((i['solicitado'] for i in s0['itens'] if i['prod']==it['prod']),0)
     else: tot_=sum(m.get('qtd') or 0 for m in (c.get('movs') or []) if m.get('tipo')=='reserva' and m.get('req')==rid and m.get('prod')==it['prod'])
     return max(0,min(l.get('reservado') or 0,tot_-(it.get('entregue') or 0)))
+def os_faz(cen=None):
+    """Espelho de cenOsFaz: fazenda de cada O.S. (registro e ordens emitidas no cenário)."""
+    c=_seed() if cen is None else cen; f={x['id']:x['faz'] for x in os_base()['ords']}
+    for k,co in (c.get('ordens') or {}).items():
+        no=((co or {}).get('osc') or {}).get('novo')
+        if no and k not in f: f[k]=no.get('faz') or 'Santa Rita'
+    return f
 def est_dem(cen=None,faz='Santa Rita',osd=None):
-    """Espelho de cenEstDem: {fisico, quar, reservas, recebDt} da fazenda no cenário cen (None = semente). osd: os_dem do mesmo cenário."""
-    c=_seed() if cen is None else cen; b=est_base(); osd=os_dem(cen) if osd is None else osd; hoje=b['hoje']
+    """Espelho de cenEstDem: {fisico, quar, reservas, recebDt, sobra} da fazenda no cenário cen (None = semente). osd: os_dem do mesmo cenário."""
+    c=_seed() if cen is None else cen; b=est_base(); osd=os_dem(cen) if osd is None else osd; hoje=b['hoje']; ofaz=os_faz(cen)
     fz=lambda l: b['locFaz'].get(l['local']) or b['faz0']; lotes=c.get('lotes') or {}
-    fisico={}; quar={}; reservas=[]; receb=[]
+    fisico={}; quar={}; reservas=[]; receb=[]; sobra=[]
     for l in lotes.values():
         if fz(l)!=faz: continue
         fisico[l['prod']]=fisico.get(l['prod'],0)+(l.get('fisico') or 0)-(l.get('quarentena') or 0)
         if (l.get('quarentena') or 0)>0: quar[l['prod']]=quar.get(l['prod'],0)+l['quarentena']
     for rid,r in (c.get('reqs') or {}).items():
         o=(c.get('ordens') or {}).get(r['os'])
-        if not o or r.get('estado')=='Cancelada' or o['etapa'] not in OS_FASES_PEND: continue
+        if not o: continue
+        l0=next((lotes[it['prod']+'|'+it['lote']] for it in r.get('itens') or [] if (it['prod']+'|'+it['lote']) in lotes),None)
+        fo=ofaz.get(r['os']) or (fz(l0) if l0 else b['faz0'])
+        if fo==faz:
+            et=o['etapa']; rot='cancelada' if et=='Canceladas' else ('sobra da ordem' if et in OS_FASES_PEND else et.lower())
+            for p_,x in _os_sup(c,o,r).items():
+                if x['sobra']>1e-9: sobra.append(dict(item=p_,q=x['sobra'],t=f"{rid} · {r['os']} ({rot})",chave=r['os'],faz=faz))
+        if r.get('estado')=='Cancelada' or o['etapa'] not in OS_FASES_PEND: continue
         od=next((x for x in osd if x['id']==r['os']),None)
         for it in r.get('itens') or []:
             l=lotes.get(it['prod']+'|'+it['lote'])
@@ -1033,7 +1060,7 @@ def est_dem(cen=None,faz='Santa Rita',osd=None):
         if r['faz']!=faz: continue
         q=max(0,r['q']-(rc.get(r['ref'],0) if r['ref'] else 0))
         if q>1e-9: receb.append(dict(r,q=q))
-    return dict(fisico=fisico,quar=quar,reservas=reservas,recebDt=receb)
+    return dict(fisico=fisico,quar=quar,reservas=reservas,recebDt=receb,sobra=sobra)
 def _tal_de(c):
     import ocupacao_cen as _OC
     return _OC.tal_de(c['local'],c['tipo'])
@@ -1062,7 +1089,7 @@ def dem_entradas(safra,ajustes=None,planos_extra=None,cen=None):
                 occ=occ_faz(safra,ajustes,planos_extra)),**est_dem(cen,faz))
 def dem_fixas(safra):
     """Partes fixas da demanda da safra, sem ordens e sem estoque: as telas juntam o cenário vivo (cenDemEntradas) — Mapa › Insumos e Compra."""
-    return {k:v for k,v in dem_entradas(safra).items() if k not in ('fisico','quar','reservas','recebDt')}
+    return {k:v for k,v in dem_entradas(safra).items() if k not in ('fisico','quar','reservas','recebDt','sobra')}
 def dem_restante(osd,occ):
     """DEM-01 · espelho de demRestante: {chave: {f: fração do plano sem O.S., txt}} pelo escopo da O.S. (atividade × talhões × safra dela)."""
     cob={}; txt={}
@@ -1126,7 +1153,8 @@ def dem_fazenda(x):
         d['evs']+=[dict(dt=r['dt'],q=r['q'],tipo='res',own=False,ord=0,chave=r['chave'],t=r['t']) for r in x['reservas'] if da(r)]
         d['evs']+=[dict(dt=r['dt'],q=r['q'],tipo='rec',own=False,ord=0,ref=r['ref'],t=r['t']) for r in x['recebDt'] if da(r)]
         d['res']=sum(r['q'] for r in x['reservas'] if da(r)); d['rec']=sum(r['q'] for r in x['recebDt'] if da(r)); d['est']=x['fisico'].get(d['nome'],0)
-        r=cal01(d['est'],d['evs'],0.0,x['hoje'],x['viavel'])
+        cs=[r for r in x.get('sobra') or [] if da(r)]; d['cust']=sum(r['q'] for r in cs); d['custT']=[f"{_nfa(r['q'])} {d['un']} · {r['t']}" for r in cs]   # custódia sem uso (suprimento)
+        r=cal01(d['est']+d['cust'],d['evs'],0.0,x['hoje'],x['viavel'])
         lq=_r2(r['liq'])   # a quantidade a comprar é a que a solicitação leva (0,01 da unidade) e o valor sai dela: Planejar safra = Compra (calR2)
         d.update(liq=lq,falta=r['falta'],antes=r['antes'],tarde=r['tarde'],valor=lq*d['preco'],bruta=r['bruta'],real=r['real'],rup=r['rupRec'],cob=r['cob'],
                  uso=min([e['dt'] for e in d['evs'] if e['tipo']=='dem' and e.get('own') and e['dt'] and e['dt']>=x['hoje']] or ['']))

@@ -23,7 +23,7 @@ try:
     c.size(1440,1000)
     # ---- PT-02det ----
     go('PT-02det.dc.html')
-    ok('pt02det total inicial', '362.796,49' in body(), body()[:0])   # CTL-4: a SOL-2026-07 leva MAP 80.000 kg e Ureia 1.140 kg (era 293.166,01 com MAP 62.500 e sem Ureia)
+    ok('pt02det total inicial', '360.904,99' in body(), body()[:0])   # CTL-4: a SOL-2026-07 leva MAP 79.500 kg (80.000 − 500 kg em custódia da OS-0417, revisão do 853a6a8) e Ureia 1.140 kg (era 293.166,01 com MAP 62.500 e sem Ureia)
     ok('prim sem mudança avisa', clk('Submeter proposta v2')=='ok' and 'Nada mudou' in T(), T())
     openrow('O frete CIF'); ok('esclarecimento abre form', 'Sua resposta' in dialog())
     clk('Salvar','aside[role=dialog]'); ok('valida resposta vazia', 'Informe' in dialog(), dialog()[:200])
@@ -32,7 +32,7 @@ try:
     openfirst('MAP 11-52'); ok('item abre form preço', 'Preço' in dialog())
     setv('[id$=_preco]','3,70'); clk('Salvar','aside[role=dialog]')
     row=J("[...document.querySelectorAll('[role=row]')].find(r=>{const c=r.querySelector('[role=cell]'); return c&&c.innerText.trim()==='MAP 11-52';}).innerText.replace(/\\s+/g,' ')")
-    ok('total da linha recalculado', '296.000,00' in row, row)   # CTL-4: 80.000 kg × R$ 3,70 (era 62.500 kg)
+    ok('total da linha recalculado', '294.150,00' in row, row)   # CTL-4: 79.500 kg × R$ 3,70 (era 80.000 kg antes da revisão do 853a6a8; 62.500 kg antes da CTL-4)
     ok('prim submete v2', clk('Submeter proposta v2')=='ok' and 'v2 submetida' in T() and 'v1 fica preservada' in T(), T())
     ok('prim vira v3 sem duplicar', 'Submeter proposta v3' in body())
     clk('Submeter proposta v3'); ok('v3 sem mudança avisa', 'Nada mudou desde a v2' in T(), T())

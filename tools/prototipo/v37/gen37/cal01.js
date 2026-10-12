@@ -44,7 +44,9 @@ function cal01Memo(r, o){ o=o||{}; const u=' '+(o.un||'');
   const n=(x)=>Number(x||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:1});
   const n1=(x)=>Number(x||0).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1});
   const d=(s)=>s?String(s).slice(8,10)+'/'+String(s).slice(5,7)+'/'+String(s).slice(0,4):'—';
-  const out=['Estoque apto hoje: '+n(r.fis)+u+(o.res?' (inclui '+n(o.res)+u+' reservados)':'')+(o.quar?' · '+n(o.quar)+u+' em quarentena não contam até o laudo':'')];
+  const cu=Number(o.cust)||0;   // custódia sem uso nas O.S. (revisão do 853a6a8, achado 1): suprimento que volta na devolução
+  const out=['Estoque apto hoje: '+n(r.fis-cu)+u+(o.res?' (inclui '+n(o.res)+u+' reservados)':'')+(cu>1e-9?' + '+n(cu)+u+' em custódia sem uso nas O.S., a devolver ao Estoque ('+(o.custT||[]).join('; ')+') = '+n(r.fis)+u:'')
+    +(o.quar?' · '+n(o.quar)+u+' em quarentena não contam até o laudo':'')];
   if(r.real>1e-9) out.push('Antes de '+d(r.hoje)+' sem O.S. · '+r.nreal+(r.nreal>1?' usos':' uso')+' · '+n(r.real)+u+' · fora da demanda (histórico do plano; se ainda vai acontecer, emita a O.S.)');   // DEM-06 (RN-003)
   r.linhas.filter(l=>l.ate).forEach(l=>{ const sx=' → saldo '+n(l.saldo)+u; const t=d(l.dt)+' · '+(l.t||'Uso')+' · ';
     if(l.tipo==='rec') out.push(t+'+'+n1(l.q)+u+sx+(l.cobre>1e-9?' · cobre a ruptura':''));
@@ -90,7 +92,8 @@ function demOsEvs(osd, prod, saf, ordem, talProd){ const out=[]; const tp=talPro
 // DEM-05/06/07 · demanda por insumo da safra x.saf na fazenda x.faz: o plano sem a parte coberta por O.S. (DEM-01), as O.S. pelo pendente
 // (DEM-02/03), as outras safras abertas da fazenda (agregadas por data, também sem a parte coberta), reservas, recebimentos e o físico apto
 // da PRÓPRIA fazenda (DEM-07: estoque de outra fazenda não cobre; dano evitado: Glifosato 293 L a menos na Lagoa Grande).
-// x: {saf, faz, hoje, viavel, ordem:{safra:índice}, nomes:{safra:nome}, occ, osd, reservas, recebDt, fisico:{insumo: físico apto da fazenda}}
+// x: {saf, faz, hoje, viavel, ordem:{safra:índice}, nomes:{safra:nome}, occ, osd, reservas, recebDt, fisico:{insumo: físico apto da fazenda},
+//    sobra:[{item,q,t,faz}] custódia sem uso nas O.S. da fazenda (cenEstDem): entra no saldo inicial junto do físico apto (revisão do 853a6a8, achado 1)}
 // occ: ocorrências das safras abertas da fazenda, na ordem cultivo → atividade: [{saf,k,a,local,tal,area,dt,nome,prods:[{nome,grupo,un,preco,dose,q}]}]
 function demFazenda(x){ const m={}; const ord=(s)=>{ const i=(x.ordem||{})[s]; return i===undefined?99:i; };
   const occ=x.occ||[]; const osd=(x.osd||[]).filter(o=>o.faz===x.faz); const fr=demRestante(osd,occ); const tp={};
@@ -112,7 +115,8 @@ function demFazenda(x){ const m={}; const ord=(s)=>{ const i=(x.ordem||{})[s]; r
     (x.recebDt||[]).forEach(r=>{ if(daFaz(r)) d.evs.push({dt:r.dt,q:r.q,tipo:'rec',own:false,ord:0,ref:r.ref,t:r.t}); });
     d.res=(x.reservas||[]).filter(daFaz).reduce((a,r)=>a+r.q,0); d.rec=(x.recebDt||[]).filter(daFaz).reduce((a,r)=>a+r.q,0);
     d.est=Number((x.fisico||{})[d.nome])||0;
-    const c=cal01(d.est,d.evs,0,{hoje:x.hoje,viavel:x.viavel}); d.cal=c;
+    const cs=(x.sobra||[]).filter(daFaz); d.cust=cs.reduce((a,r)=>a+r.q,0); d.custT=cs.map(r=>calNfa(r.q)+' '+d.un+' · '+r.t);   // custódia sem uso (suprimento)
+    const c=cal01(d.est+d.cust,d.evs,0,{hoje:x.hoje,viavel:x.viavel}); d.cal=c;
     d.liq=calR2(c.liq); d.falta=c.falta; d.antes=c.antes; d.tarde=c.tarde; d.valor=d.liq*d.preco; d.bruta=c.bruta; d.real=c.real; d.rup=c.rupRec; d.cob=c.cob;
     d.uso=d.evs.filter(e=>e.tipo==='dem'&&e.own&&e.dt&&e.dt>=(x.hoje||'')).map(e=>e.dt).sort()[0]||''; });   // 1º uso desta safra de hoje em diante
   return m; }
@@ -121,9 +125,9 @@ function demFazenda(x){ const m={}; const ord=(s)=>{ const i=(x.ordem||{})[s]; r
 // diante no período. Devolve {insumo: [rótulo, cor ('red'|'yellow'|'ok'), detalhe]}.
 function demSituacao(m, lim, hoje, viavel){ const st={}; const dm=(s)=>s?s.slice(8,10)+'/'+s.slice(5,7):''; const d4=(s)=>s?dm(s)+'/'+s.slice(0,4):'';
   Object.values(m||{}).forEach(d=>{ const evs=lim?d.evs.filter(e=>e.dt<=lim):d.evs; const own=evs.filter(e=>e.tipo==='dem'&&e.own&&e.dt>=hoje); if(!own.length) return;
-    const r=cal01(d.est,evs,0,{hoje,viavel}), r0=cal01(d.est,evs.filter(e=>e.tipo!=='rec'),0,{hoje,viavel}); const u=' '+d.un;
+    const s0=d.est+(Number(d.cust)||0); const r=cal01(s0,evs,0,{hoje,viavel}), r0=cal01(s0,evs.filter(e=>e.tipo!=='rec'),0,{hoje,viavel}); const u=' '+d.un;
     const rc=evs.filter(e=>e.tipo==='rec').sort((a,b)=>a.dt<b.dt?-1:(a.dt>b.dt?1:0))[0]; const ar=evs.filter(e=>e.tipo==='rec').reduce((a,e)=>a+e.q,0);
-    const base='precisa de '+calNf(own.reduce((a,e)=>a+e.q,0))+u+' · estoque apto '+calNf(d.est)+u;
+    const base='precisa de '+calNf(own.reduce((a,e)=>a+e.q,0))+u+' · estoque apto '+calNf(d.est)+u+((d.cust||0)>1e-9?' + '+calNf(d.cust)+u+' em custódia a devolver':'');
     if(r.liq>1e-9) st[d.nome]=['Falta '+calNf(r.liq)+u,'red',base+' · falta a partir de '+d4(r.falta)+' · Suprimentos compra na Compra de insumos'];
     else if(r0.liq>1e-9||r0.rupRec>1e-9) st[d.nome]=['Pedido a receber'+(rc?(rc.ref?' · '+rc.ref:'')+' · '+dm(rc.dt):''),'yellow',base+' · a receber '+calNf(ar)+u];
     else st[d.nome]=['Estoque cobre','ok',base]; });

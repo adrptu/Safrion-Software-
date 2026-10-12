@@ -43,7 +43,7 @@ def _cd():
     for i,x in enumerate(itens): x['i']=i
     quar={l['item']:l['quarentena'] for l in D2.LOTES if l['quarentena']}
     # entradas e resultado do CAL-01 por insumo (cal01.js refaz a memória e a data da falta na tela, com as previsões reprogramadas)
-    dm=[dict(nome=n,grupo=o['grupo'],un=o['un'],preco=o['preco'],bruta=o['bruta'],real=o['real'],est=o['estoque'],res=o['reservado'],rec=o['receb'],liq=o['liq'],valor=o['valor'],
+    dm=[dict(nome=n,grupo=o['grupo'],un=o['un'],preco=o['preco'],bruta=o['bruta'],real=o['real'],est=o['estoque'],cust=o.get('cust',0),custT=o.get('custT',[]),res=o['reservado'],rec=o['receb'],liq=o['liq'],valor=o['valor'],
              falta=o['falta'],quar=quar.get(n,0),evs=o['evs']) for n,o in dem.items()]
     ref=sum(x['nec']*x['preco'] for x in itens)
     safras=[]
@@ -192,7 +192,7 @@ function acimaCh(nome,un){ const a=ACIMA[nome]; return a?[CH('Acima da demanda �
 function solAtu(x){ return x.sol.atu?' · atualizada em '+x.sol.atu.em+' por '+x.sol.atu.por:''; }
 // memória CAL-01 do insumo (a mesma função do Planejar safra)
 const OPT={hoje:CD.hojeIso,viavel:CD.viavel};   // uso antes de hoje = realizado; compra nova chega a partir da data viável
-function calDe(d){ return cal01(d.est,d.evs||[],0,OPT); }
+function calDe(d){ return cal01(d.est+(Number(d.cust)||0),d.evs||[],0,OPT); }   // custódia sem uso nas O.S. entra no saldo (revisão do 853a6a8)
 // cada safra guarda o próprio andamento da compra (convites, escolhas, aprovação, entregas); trocar de safra não mistura processos.
 // O andamento também fica no registro compartilhado (talhao-os-compras-v1 · proc[safra]), ligado à versão da solicitação: recarregar ou ir
 // à origem e voltar não perde a compra, e o Planejar safra mostra o estado.
@@ -222,7 +222,7 @@ function dm(iso){ return iso?iso.slice(8,10)+'/'+iso.slice(5,7):'—'; }
 // e pedidos em aberto na data prevista (a previsão reprogramada na etapa 6 vale; excl = pedido a desconsiderar; pedidos novos desta solicitação nunca entram)
 function faltaDe(st,nome,excl){ const d=(SX?SX.dem:[]).find(x=>x.nome===nome); if(!d||!d.evs) return null; const px=st.pcx||{};
   const evs=d.evs.filter(e=>!(e.tipo==='rec'&&e.ref&&e.ref===excl)).map(e=>(e.tipo==='rec'&&e.ref&&px[e.ref]&&px[e.ref].prev)?Object.assign({},e,{dt:px[e.ref].prev}):e);
-  return cal01(d.est,evs,0,OPT).falta; }
+  return cal01(d.est+(Number(d.cust)||0),evs,0,OPT).falta; }
 // respostas simuladas chegando uma a uma (um único relógio por tela)
 function tickResp(self){ if(self._tk) return; self._tk=true;
   const tick=()=>{ const s=self.state; if(!s.env){ self._tk=false; return; } const n=(s.nresp||0)+1; if(n>s.env.ordem.length){ self._tk=false; return; } const done=(n===s.env.ordem.length);
@@ -334,7 +334,7 @@ function PREVALS(self,v){
           p:{bruta:[T(nf(d.bruta,dc))].concat(c.real>0.001?[BR(),MU('antes de hoje sem O.S.: '+nf(c.real,dc))]:[]),est:[T(nf(d.est,dc))].concat((d.liq>0.001&&c.antes>0.001)?[BR(),MU('usado antes: '+nf(c.antes,dc))]:(d.res?[BR(),MU('res. '+nf(d.res,dc))]:[])),
              rec:[T(nf(d.rec,dc))].concat(d.liq>0.001&&c.tarde>0.001?[BR(),MU(nf(c.tarde,dc)+' após a falta')]:[]),
              liq:[B(nf(d.liq,dc))],falta:fa?[(d.liq>0.001?B(brd(fa)):CH(brd(fa),'red'))]:[MU('—')],sit},
-          o:cal01Memo(c,{un:d.un,res:d.res,quar:d.quar}).map(t=>({t})).concat([{t:'Ver no Planejar safra · demanda de insumos',h:SX.origem.h}])}; })}; });
+          o:cal01Memo(c,{un:d.un,res:d.res,quar:d.quar,cust:d.cust,custT:d.custT}).map(t=>({t})).concat([{t:'Ver no Planejar safra · demanda de insumos',h:SX.origem.h}])}; })}; });
   GR('g_dem').x0=Object.fromEntries(GR('g_dem').rows.map(r=>[r.id,true]));
   // ---- etapa 3 · convites ----
   GR('g_conv').rows=m.G.map((g,gi)=>{ const cs=Object.values(m.conv).filter(c=>c.gi===gi); const its=m.items.filter(x=>x.gi===gi);

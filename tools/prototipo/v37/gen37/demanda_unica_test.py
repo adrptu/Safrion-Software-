@@ -32,16 +32,16 @@ print('== A · dano (compra em dobro, compra a menos, Mapa com outra conta)')
 caso('A1 compra em dobro: Fungicida A da Safra 2026/27 = 0 L (nunca 145,2 L · R$ 21.054); a OS-0421 já tem 160 L entregues e 65 L em custódia',
      lambda: (L(d,'Fungicida A')==0.0,L(d,'Fungicida A')))
 caso('A2 compra em dobro: Adjuvante espalhante = 0 L (nunca 2,5 L) — a OS-0421 já leva o adjuvante',lambda: (L(d,'Adjuvante espalhante')==0.0,L(d,'Adjuvante espalhante')))
-caso('A3 compra a menos: MAP 11-52 = 80.000 kg a partir de 18/10/2026 (nunca 62.500): a OS-0420 (T4, 70 ha de saldo) pede 17.500 kg',
-     lambda: (L(d,'MAP 11-52')==80000.0 and d['MAP 11-52']['falta']=='2026-10-18',(L(d,'MAP 11-52'),d['MAP 11-52']['falta'])))
+caso('A3 compra a menos: MAP 11-52 = 79.500 kg a partir de 18/10/2026 (nunca 62.500): a OS-0420 (T4, 70 ha de saldo) pede 17.500 kg; os 500 kg em custódia da OS-0417 (em conferência) são suprimento (revisão do 853a6a8)',
+     lambda: (L(d,'MAP 11-52')==79500.0 and d['MAP 11-52']['falta']=='2026-10-18',(L(d,'MAP 11-52'),d['MAP 11-52']['falta'])))
 caso('A4 compra a menos: Ureia 45% = 1.140 kg a partir de 24/09/2026 (a OS-0418 pede e o estoque é 0)',
      lambda: ('Ureia 45%' in d and L(d,'Ureia 45%')==1140.0 and d['Ureia 45%']['falta']=='2026-09-24',(L(d,'Ureia 45%'),(d.get('Ureia 45%') or {}).get('falta'))))
 caso('A5 compra a menos na Lagoa Grande: Glifosato 480 = 293,34 L a partir de 30/09/2026, estoque apto 0 (o lote G26-14 é da Santa Rita)',
      lambda: (L(lg,'Glifosato 480')==293.34 and lg['Glifosato 480']['falta']=='2026-09-30' and lg['Glifosato 480']['estoque']==0,(L(lg,'Glifosato 480'),lg['Glifosato 480']['falta'],lg['Glifosato 480']['estoque'])))
 caso('A6 estoque da própria fazenda: Óleo mineral LG 630,03 L (630,025 L a comprar com 0,01 L, como a Compra; nunca 292,81) · Nitrato de cálcio LG 25.756,8 kg e Santa Rita 680 kg',
      lambda: (L(lg,'Óleo mineral')==630.03 and L(lg,'Nitrato de cálcio')==25756.8 and L(d,'Nitrato de cálcio')==680.0,(L(lg,'Óleo mineral'),L(lg,'Nitrato de cálcio'),L(d,'Nitrato de cálcio'))))
-caso('A7 totais: S2627 14 insumos · R$ 430.255,00; S27SF 8 · R$ 1.094.947,10; LG2627 13 · R$ 1.614.202,84 (valor = quantidade a comprar com 0,01 da unidade × preço, o mesmo da Compra)',
-     lambda: (nins(d)==14 and perto(tot(d),430255.00,0.005) and nins(s27)==8 and perto(tot(s27),1094947.10,0.005) and nins(lg)==13 and perto(tot(lg),1614202.84,0.005),
+caso('A7 totais: S2627 14 insumos · R$ 428.305,00 (MAP −500 kg da custódia sem uso da OS-0417); S27SF 8 · R$ 1.094.947,10; LG2627 13 · R$ 1.614.202,84 (valor = quantidade a comprar com 0,01 da unidade × preço, o mesmo da Compra)',
+     lambda: (nins(d)==14 and perto(tot(d),428305.00,0.005) and nins(s27)==8 and perto(tot(s27),1094947.10,0.005) and nins(lg)==13 and perto(tot(lg),1614202.84,0.005),
               ((nins(d),round(tot(d),2)),(nins(s27),round(tot(s27),2)),(nins(lg),round(tot(lg),2)))))
 # Mapa › Insumos: a página leva as entradas da mesma conta (MDATA.dem) e calcula com demFazenda/demSituacao (cal01.js) sobre o cenário vivo
 import cenario
@@ -62,8 +62,8 @@ def a8():
     else: sr=dict(I.FAZST['Safra toda']); lgs={}   # base ecc8b00: conta própria do Mapa (inicio._fazst), as duas fazendas juntas
     num=lambda t: float(t.split(' ')[1].replace('.','').replace(',','.'))   # "Falta 1.140 kg" → 1140 (o Mapa mostra inteiro)
     dif={p:(v[0],round(L(d,p) or 0,2)) for p,v in sr.items() if (v[1]=='red')!=((L(d,p) or 0)>0.001) or (v[1]=='red' and (not v[0].endswith(' '+d[p]['un']) or abs(num(v[0])-d[p]['liq'])>0.5+1e-9))}
-    return (not dif and sr['Fungicida A'][0]=='Estoque cobre' and sr['MAP 11-52'][0]=='Falta 80.000 kg',dif)
-caso('A8 Mapa › Insumos lê a mesma demanda da Compra: Santa Rita, safra toda, "Falta X" = necessidade líquida de dados2.demanda em todo insumo (na base: Fungicida A "Falta 130 L" × 145,2 L; Óleo mineral "Falta 903 L" × 210 L); Fungicida A "Estoque cobre", MAP "Falta 80.000 kg"',a8)
+    return (not dif and sr['Fungicida A'][0]=='Estoque cobre' and sr['MAP 11-52'][0]=='Falta 79.500 kg',dif)
+caso('A8 Mapa › Insumos lê a mesma demanda da Compra: Santa Rita, safra toda, "Falta X" = necessidade líquida de dados2.demanda em todo insumo (na base: Fungicida A "Falta 130 L" × 145,2 L; Óleo mineral "Falta 903 L" × 210 L); Fungicida A "Estoque cobre", MAP "Falta 79.500 kg"',a8)
 # ---------------- B · regras (positivos e negativos) ----------------
 print('== B · regras DEM-01..07')
 def osd_mod(fn,cen=None):
@@ -79,12 +79,12 @@ caso('B2 DEM-04 reserva REQ-039 e OS-0424 (64 L) contadas uma vez: saldo de 466 
 caso('B3 DEM-01 escopo: c1, c2 e c3|a6 com 0,42623 sem O.S. (OS-0421 cobre 350 de 610 ha, rateados pela área); c3|a3 0,65772 (OS-0431 102 de 298 ha); c1|a1 e c9|k1 0',
      lambda: (lambda fr: (all(abs(fr[k]['f']-(1-350/610))<1e-9 for k in ('c1|a6','c2|a6','c3|a6')) and abs(fr['c3|a3']['f']-(1-102/298))<1e-9 and fr['c1|a1']['f']==0 and fr['c9|k1']['f']==0
                           and fr['c1|a6']['txt']=='OS-0421 cobre 350 de 610 ha, rateados pela área' and fr['c3|a3']['txt']=='OS-0431 cobre 102 de 298 ha',fr))(D2.dem_restante(D2.os_dem(),D2.occ_faz('S2627'))))
-caso('B4 N1 a O.S. cobre só a parte dela: com a chave inteira o MAP cairia para 31.000 kg; a regra exige 80.000',
-     lambda: (lambda dx: (L(dx,'MAP 11-52')==31000.0,L(dx,'MAP 11-52')))(D2.demanda('S2627',osd=osd_mod(lambda o:[x.update(area=10**6) for x in o if x['id']=='OS-0431']))))
+caso('B4 N1 a O.S. cobre só a parte dela: com a chave inteira o MAP cairia para 30.500 kg; a regra exige 79.500',
+     lambda: (lambda dx: (L(dx,'MAP 11-52')==30500.0,L(dx,'MAP 11-52')))(D2.demanda('S2627',osd=osd_mod(lambda o:[x.update(area=10**6) for x in o if x['id']=='OS-0431']))))
 def b5():
     dx=D2.demanda('S2627',osd=osd_mod(lambda o:o.__setitem__(slice(None),[x for x in o if x['id']!='OS-0431'])))
-    return (L(dx,'MAP 11-52')==80000.0 and any(e.get('chave')=='c3|a3' and abs(e['q']-74500)<1e-6 for e in dx['MAP 11-52']['evs']),[(e.get('chave'),e['q']) for e in dx['MAP 11-52']['evs'] if e['tipo']=='dem'])
-caso('B5 N2 OS-0431 cancelada: c3|a3 volta inteira ao plano (74.500 kg) e o MAP segue 80.000 kg (o pendente dela sai junto)',b5)
+    return (L(dx,'MAP 11-52')==79500.0 and any(e.get('chave')=='c3|a3' and abs(e['q']-74500)<1e-6 for e in dx['MAP 11-52']['evs']),[(e.get('chave'),e['q']) for e in dx['MAP 11-52']['evs'] if e['tipo']=='dem'])
+caso('B5 N2 OS-0431 cancelada: c3|a3 volta inteira ao plano (74.500 kg) e o MAP segue 79.500 kg (o pendente dela sai junto)',b5)
 def b6():
     c=copy.deepcopy(cenario.seed()); c['ordens']['OS-0421']['etapa']='Em conferência'; dx=D2.demanda('S2627',osd=D2.os_dem(c)); fa=[e for e in dx['Fungicida A']['evs'] if e['tipo']=='dem' and e.get('own')]
     return (not any(e.get('chave')=='OS-0421' for e in fa) and round(sum(e['q'] for e in fa if str(e.get('chave','')).endswith('|a6')),2)==136.48,[(e.get('chave'),round(e['q'],2)) for e in fa])
@@ -104,8 +104,8 @@ caso('B11 escopo por safra: a O.S. da Safra 2026/27 não cobre a mesma atividade
 def b12():
     PX={'c4':'SOJA-AT','c5':'SOJA-AT','c6':'SOJA-AT','c7':'SOJA-AT'}; dp=D2.demanda('S2627',planos_extra=PX)
     t4=sum(e['q'] for e in dp['MAP 11-52']['evs'] if e['tipo']=='dem' and e.get('own') and 'T4' in e['t'])
-    return (t4==43500 and L(dp,'MAP 11-52')==173750.0 and perto(tot(dp),1205542.10,0.01),(t4,L(dp,'MAP 11-52'),round(tot(dp),2)))
-caso('B12 N12 "Aplicar plano em 4 cultivos": MAP do T4 = 26.000 (104 ha sem O.S.) + 17.500 (OS-0420, chave c4|a3) = 43.500, nunca 68.500 · MAP 173.750 kg · R$ 1.205.542,10',b12)
+    return (t4==43500 and L(dp,'MAP 11-52')==173250.0 and perto(tot(dp),1203592.10,0.01),(t4,L(dp,'MAP 11-52'),round(tot(dp),2)))
+caso('B12 N12 "Aplicar plano em 4 cultivos": MAP do T4 = 26.000 (104 ha sem O.S.) + 17.500 (OS-0420, chave c4|a3) = 43.500, nunca 68.500 · MAP 173.250 kg · R$ 1.203.592,10',b12)
 def b13():
     dx=D2.demanda('S2627',planos_extra={'c7':'SOJA-AT'}); ev=[e for e in dx['Fungicida A']['evs'] if e['tipo']=='dem' and e.get('chave')=='OS-0424']
     return (L(dx,'Fungicida A')==55.48 and len(ev)==1 and 'sem vínculo com o plano do talhão' in ev[0]['t'],(L(dx,'Fungicida A'),[e['t'] for e in ev]))
@@ -130,8 +130,8 @@ caso('B17 OS-0420 com a chave de origem c4|a3 (processo_os: "REC-014 v2 · Plant
      lambda: (next(x for x in D2.os_dem() if x['id']=='OS-0420')['chaves']==['c4|a3'],))
 def b18():
     c=copy.deepcopy(cenario.seed()); c['ordens']['OS-0418']['etapa']='Canceladas'; dx=D2.demanda('S2627',osd=D2.os_dem(c))
-    return ('Ureia 45%' not in dx and nins(dx)==13 and perto(tot(dx),426721.00,0.005),(nins(dx),round(tot(dx),2)))
-caso('B18 O.S. cancelada no cenário (OS-0418): a Ureia sai da demanda · 13 insumos · R$ 426.721,00',b18)
+    return ('Ureia 45%' not in dx and nins(dx)==13 and perto(tot(dx),424771.00,0.005),(nins(dx),round(tot(dx),2)))
+caso('B18 O.S. cancelada no cenário (OS-0418): a Ureia sai da demanda · 13 insumos · R$ 424.771,00',b18)
 NOVA=dict(id='OS-0440',novo=True,jan='2026-10-01',keys=['c1|a7'],tipo='Pulverização · Fungicida 2ª aplicação + inseticida',talhao='T1-A',area=160,etapa='A liberar',
           faz='Santa Rita',saf='2026/27',atv=dict(nome='Fungicida 2ª aplicação + inseticida'))
 def cen_nova():
@@ -155,10 +155,10 @@ console.log(JSON.stringify({{p0,p1,p2,p3,st1,rep:!!R2.repetido,real:o.realizado,
     return (js['p1']==js['p0'] and js['st1']=='Duplicidade a conferir' and js['real']==200 and js['saldo']==150 and js['cust']==60 and js['fis']==545
             and js['p2']['Fungicida A']==[15,'0,50 L/ha × 150 ha − 60 L em custódia'] and js['p2']['Adjuvante espalhante']==[37.5,'0,25 L/ha × 150 ha']
             and js['rep'] and js['p3']==js['p2'] and py==js['p2'] and L(dx,'Fungicida A')==0.0 and perto(dx['Adjuvante espalhante']['bruta'],d['Adjuvante espalhante']['bruta']-2.5)
-            and perto(tot(dx),430255.00,0.005),(js,py,round(tot(dx),2)))
+            and perto(tot(dx),428305.00,0.005),(js,py,round(tot(dx),2)))
 caso('B20 realizado (pedido do Codex, 6064114787 §3): apontar 10 ha na OS-0421 retido como duplicidade não muda nada; somado por Paula, realizado 200 ha e saldo 150 ha — '
      'Fungicida A continua 15 L (0,50 × 150 − 60 L em custódia: os 5 L aplicados saíram da custódia, não são recomprados nem contados duas vezes; físico 545 L), '
-     'Adjuvante 40 → 37,5 L (os 10 ha feitos saem da demanda); reenvio com a mesma chave não muda; Python = JS; total R$ 430.255,00',b20)
+     'Adjuvante 40 → 37,5 L (os 10 ha feitos saem da demanda); reenvio com a mesma chave não muda; Python = JS; total R$ 428.305,00',b20)
 # ---------------- C · paridade JS × Python (a mesma conta nos dois lados) ----------------
 print('== C · paridade cal01.js/cenario.js × dados2')
 def c1():
@@ -218,14 +218,14 @@ def e2():
             for x in its: tot_[x['p']]=tot_.get(x['p'],0)+x['q']
         bad+=[(f,p,q,m[f]['own'].get(p)) for p,q in tot_.items() if abs(q-m[f]['own'].get(p,0))>1e-6]
     sr=m['Santa Rita']['nec']; t4=sum(x['q'] for x in sr.get('T4',[]) if x['p']=='MAP 11-52'); pv=sum(x['q'] for x in m['Lagoa Grande']['nec'].get('PV13',[]) if x['p']=='Glifosato 480')
-    return (not bad and t4==17500 and round(pv,2)==147.93 and m['Santa Rita']['st']['Próximos 30 dias']['MAP 11-52'][0]=='Falta 42.000 kg' and m['Lagoa Grande']['st']['Safra toda']['Glifosato 480'][0]=='Falta 293 L',
+    return (not bad and t4==17500 and round(pv,2)==147.93 and m['Santa Rita']['st']['Próximos 30 dias']['MAP 11-52'][0]=='Falta 41.500 kg' and m['Lagoa Grande']['st']['Safra toda']['Glifosato 480'][0]=='Falta 293 L',
             (bad[:3],t4,pv,m['Santa Rita']['st']['Próximos 30 dias'].get('MAP 11-52'),m['Lagoa Grande']['st']['Safra toda'].get('Glifosato 480')))
-caso('E2 por talhão: soma dos talhões = fazenda em todo insumo (O.S. de vários talhões rateada pela área); T4 MAP 17.500 kg; PV13 Glifosato 147,93 L e "Falta 293 L"; MAP nos próximos 30 dias "Falta 42.000 kg"',e2)
+caso('E2 por talhão: soma dos talhões = fazenda em todo insumo (O.S. de vários talhões rateada pela área); T4 MAP 17.500 kg; PV13 Glifosato 147,93 L e "Falta 293 L"; MAP nos próximos 30 dias "Falta 41.500 kg" (500 kg da custódia sem uso da OS-0417 cobrem)',e2)
 def e3():
     m=MP or _mapa(); st=m['Santa Rita']['st']['Safra toda']
-    return (st['MAP 11-52'][2]=='precisa de 170.000 kg · estoque apto 90.000 kg · falta a partir de 18/10/2026 · Suprimentos compra na Compra de insumos'
+    return (st['MAP 11-52'][2]=='precisa de 170.000 kg · estoque apto 90.000 kg + 500 kg em custódia a devolver · falta a partir de 18/10/2026 · Suprimentos compra na Compra de insumos'
             and st['KCl 60%'][0]=='Pedido a receber · PC-088 · 02/10',(st.get('MAP 11-52'),st.get('KCl 60%')))
-caso('E3 detalhe do MAP: "precisa de 170.000 kg · estoque apto 90.000 kg · falta a partir de 18/10/2026 …"; KCl "Pedido a receber · PC-088 · 02/10"',e3)
+caso('E3 detalhe do MAP: "precisa de 170.000 kg · estoque apto 90.000 kg + 500 kg em custódia a devolver · falta a partir de 18/10/2026 …"; KCl "Pedido a receber · PC-088 · 02/10"',e3)
 # ---------------- F · solicitação já enviada × demanda de agora (DEM-09) ----------------
 print('== F · SOL enviada × demanda de agora (DEM-09)')
 def f1():
@@ -292,14 +292,14 @@ const R={{c}}; Object.keys(XS).forEach(s=>{{ const m=demFazenda(ENT(c,XS[s]));
 console.log(JSON.stringify(R));""")
 G0=viva('')
 def g0():
-    r=G0; return (r['S2627']['tot']==430255.00 and r['S27SF']['tot']==1094947.10 and r['LG2627']['tot']==1614202.84 and r['S2627']['liq']['NPK 20-05-20']==14800,
+    r=G0; return (r['S2627']['tot']==428305.00 and r['S27SF']['tot']==1094947.10 and r['LG2627']['tot']==1614202.84 and r['S2627']['liq']['NPK 20-05-20']==14800,
                   {s:(r[s]['tot'],r[s]['liq'].get('NPK 20-05-20')) for s in GX})
-caso('G0 semente: as telas dão os mesmos totais de dados2 (R$ 430.255,00 · R$ 1.094.947,10 · R$ 1.614.202,84) e NPK 14.800 kg',g0)
+caso('G0 semente: as telas dão os mesmos totais de dados2 (R$ 428.305,00 · R$ 1.094.947,10 · R$ 1.614.202,84) e NPK 14.800 kg',g0)
 def g1():
     r=viva("cenEntregar(c,'REQ-040','NPK 20-05-20',8000,'Carlos',{k:'Paula'});"); s=r['S2627']; lt=r['c']['lotes']['NPK 20-05-20|N26-03']
-    return (lt['fisico']==0 and lt['reservado']==0 and s['liq']['NPK 20-05-20']==14800 and s['est']['NPK 20-05-20']==0 and s['tot']==430255.00,
+    return (lt['fisico']==0 and lt['reservado']==0 and s['liq']['NPK 20-05-20']==14800 and s['est']['NPK 20-05-20']==0 and s['tot']==428305.00,
             (lt['fisico'],lt['reservado'],s['liq'].get('NPK 20-05-20'),s['est'].get('NPK 20-05-20'),s['tot']))
-caso('G1 entrega comum no Estoque: 8.000 kg de NPK da REQ-040 (OS-0425) saem do lote para a custódia e a compra não muda — NPK 14.800 kg, estoque apto 0, R$ 430.255,00 (na base: 6.800 kg, a primária cortava 8.000 kg · R$ 27.200)',g1)
+caso('G1 entrega comum no Estoque: 8.000 kg de NPK da REQ-040 (OS-0425) saem do lote para a custódia e a compra não muda — NPK 14.800 kg, estoque apto 0, R$ 428.305,00 (na base: 6.800 kg, a primária cortava 8.000 kg · R$ 27.200)',g1)
 def g2():
     r=viva("cenDevolver(c,'REQ-035','Fungicida A',30,true,{k:'Paula'});"); return (r['S27SF']['liq']['Fungicida A']==22.98 and r['S27SF']['tot']==1094947.10 and r['S2627']['liq']['Fungicida A']==0,
                                                                               (r['S27SF']['liq'].get('Fungicida A'),r['S27SF']['tot'],r['S2627']['liq'].get('Fungicida A')))
@@ -374,5 +374,77 @@ def h5():
 console.log(JSON.stringify([R(c=>{{}}),R(c=>{{ c.reqs['REQ-039'].estado='Cancelada'; }}),R(c=>{{ c.ordens['OS-0424'].etapa='Em conferência'; }}),R(c=>{{ c.ordens['OS-0424'].etapa='Canceladas'; }})]));""")
     return (r==[['OS-0424','OS-0425'],['OS-0425'],['OS-0425'],['OS-0425']],r)
 caso('H5 reserva só de requisição ativa (E3): com o lote ainda marcando 65 L, a REQ-039 cancelada, ou a OS-0424 em conferência ou cancelada, não conta como reserva (sobra a da OS-0425)',h5)
+# ---------------- I · revisão do 853a6a8 (lente estado): o motor com os comandos reais do cenário e da tela O.S. ----------------
+# Vermelho no 853a6a8 (reproduções da revisão, ACHADOS-v1). Comandos reais: cenEntregar/cenDevolver/cenApontar (cenario.js) e osc_* extraídas da
+# tela O.S. (areas.processo_os), como o Estoque e a O.S. chamam. D(c) = a demanda das 3 safras abertas que as telas mostram (cenDemEntradas).
+print('== I · revisão do 853a6a8: custódia, quarentena, reservas e turno sem sinal')
+def _osc_js():
+    import areas.processo_os as _PO
+    src=_PO.JS_NUCLEO+_PO.JS; out=[]
+    def fn(name):
+        i=src.find('function '+name+'(')
+        if i<0: return ''
+        j=src.index('{',i); dd=0; k=j
+        while True:
+            ch=src[k]
+            if ch=='{': dd+=1
+            elif ch=='}':
+                dd-=1
+                if dd==0: return src[i:k+1]
+            k+=1
+    for n in ('osc_o','osc_txt','osCargasVivas','osc_cancTxt','osc_cancelar','osc_conferencia','osc_encerrar','osApPend','cortaPrev','nd','nf','osc_dispensar'):
+        out.append(fn(n))
+    return '\n'.join(out)+"\nconst LIM_DISP=0.20;\n"
+def motor(corpo):
+    """corpo: JS que usa c (cópia de CEN0), D(c) e devolve um objeto em OUT; roda no node com o motor real."""
+    return runjs(cenario.perfis_js()+PRE+'\n'+CAL+'\n'+_osc_js()+f"""
+const XS={json.dumps(GX,ensure_ascii=False)}, B={json.dumps(GB,ensure_ascii=False)}, EB={json.dumps(GE,ensure_ascii=False)};
+const ENT=(c,x)=>typeof cenDemEntradas==='function'?cenDemEntradas(c,x,{{osb:B,est:EB}}):Object.assign({{}},x,{{osd:cenOsDem(c,B)}});
+const D=(c)=>{{ const R={{}}; Object.keys(XS).forEach(s=>{{ const m=demFazenda(ENT(c,XS[s]));
+  R[s]={{tot:Math.round(Object.values(m).reduce((a,d)=>a+d.valor,0)*100)/100,liq:Object.fromEntries(Object.values(m).filter(d=>d.liq>0.001).map(d=>[d.nome,d.liq])),
+    cond:Object.fromEntries(Object.values(m).filter(d=>(d.cond||0)>0.001).map(d=>[d.nome,d.cond]))}}; }}); return R; }};
+const IG=(a,b)=>JSON.stringify(a)===JSON.stringify(b); const CL=(x)=>JSON.parse(JSON.stringify(x));
+const ANA={{k:'Ana'}}, PAULA={{k:'Paula'}}; let c=CL(CEN0); const OUT={{}};
+{corpo}
+console.log(JSON.stringify(OUT));""")
+def i1():
+    r=motor("""OUT.d0=D(c); cenEntregar(c,'REQ-040','NPK 20-05-20',8000,'Carlos',PAULA); OUT.d1=D(c);
+osc_cancelar(c,'OS-0425','talhão replanejado',['','',''],ANA); OUT.d2=D(c); OUT.c2=CL(c);
+cenDevolver(c,'REQ-040','NPK 20-05-20',8000,true,PAULA); OUT.d3=D(c);""")
+    n='NPK 20-05-20'; py=D2.demanda('S2627',cen=r['c2'])
+    return (all(r[k]['S2627']['liq'].get(n)==14800 and r[k]==r['d0'] for k in ('d1','d2','d3')) and L(py,n)==14800 and perto(tot(py),r['d2']['S2627']['tot'],0.005),
+            [(k,r[k]['S2627']['liq'].get(n),r[k]['S2627']['tot']) for k in ('d0','d1','d2','d3')]+[('py',L(py,n))])
+caso('I1 custódia é suprimento (achado 1, S2): entregar 8.000 kg de NPK à OS-0425, cancelar a OS-0425 e receber a devolução — NPK 14.800 kg e o total iguais em todos os passos, nas 3 safras; Python = JS (no 853a6a8: 22.800 kg, +R$ 27.200 depois do cancelamento)',i1)
+def i2():
+    r=motor("""OUT.d0=D(c); const sol=OUT.d0.S2627.liq['MAP 11-52']; cenDevolver(c,'REQ-031','MAP 11-52',500,true,PAULA); OUT.d1=D(c);
+OUT.sit=demSolSit({liq:OUT.d1.S2627.liq['MAP 11-52']||0},sol,true,false).t;""")
+    return (r['d1']==r['d0'] and r['d0']['S2627']['liq']['MAP 11-52']==79500 and r['sit']=='Em cotação',(r['d0']['S2627']['liq'].get('MAP 11-52'),r['d1']['S2627']['liq'].get('MAP 11-52'),r['sit']))
+caso('I2 devolver a sobra não muda a compra: os 500 kg de MAP com a OS-0417 (em conferência) já contam como suprimento — MAP 79.500 kg antes e depois da devolução, sem "Acima da demanda" (no 853a6a8: 80.000 → 79.500 e aviso de 500 kg)',i2)
+def i3():
+    r=motor("""OUT.d0=D(c); cenApontar(c,{os:'OS-0421',d:'26/09',ha:150,cons:{'Fungicida A':20,'Adjuvante espalhante':0},est:[],origem:'web',chave:'W-I3'}); OUT.d1=D(c);
+cenDevolver(c,'REQ-035','Fungicida A',40,true,PAULA); OUT.d2=D(c); OUT.cust=c.reqs['REQ-035'].itens[0].custodia;""")
+    f=lambda k: r[k]['S27SF']['liq'].get('Fungicida A',0)
+    return (f('d0')==22.98 and f('d1')==0 and r['d2']==r['d1'] and r['cust']==5,(f('d0'),f('d1'),f('d2'),r['cust']))
+caso('I3 sobra antecipada (A11): a OS-0421 aponta 150 ha usando 20 L e fica com 45 L para 10 ha (5 L) — os 40 L a mais cobrem a Safrinha 2027 já no apontamento (22,98 → 0 L) e devolvê-los não muda nada (no 853a6a8: 7,98 L até a devolução)',i3)
+def i4():
+    # propriedade em tabela, com sorteio fixo (LCG): (a) entregar q e cancelar = cancelar sem entregar; (b) devolver k de qualquer custódia não muda a
+    # compra; (c) apontar h ha na dose, consumindo da custódia, não muda o Fungicida A em nenhuma safra (o realizado sai da demanda sem recomprar, B20)
+    r=motor("""let sd=20261012; const rnd=()=>{ sd=(sd*1103515245+12345)%2147483648; return sd/2147483648; }; const q2=(x)=>Math.max(0.01,Math.round(x*100)/100);
+const ruim=[]; let n=0;
+const ITS=[['OS-0425','REQ-040','NPK 20-05-20'],['OS-0424','REQ-039','Fungicida A']];
+for(let k=0;k<12;k++){ const [oid,rid,p]=ITS[k%2]; const it0=CEN0.reqs[rid].itens[0]; const mx=Math.min(cenSaldoEntregar(it0),Object.values(CEN0.lotes).find(l=>l.prod===p&&l.lote===it0.lote).fisico);
+  const q=q2(mx*rnd()); const a=CL(CEN0); osc_cancelar(a,oid,'teste',['','',''],ANA); const b=CL(CEN0); cenEntregar(b,rid,p,q,'X',PAULA); osc_cancelar(b,oid,'teste',['','',''],ANA);
+  n++; if(!IG(D(a),D(b))) ruim.push(['a',oid,q]);
+  // (b) devolver uma parte da custódia (apta) depois do cancelamento
+  const it=b.reqs[rid].itens[0]; const kq=q2(it.custodia*rnd()); const d0=D(b); cenDevolver(b,rid,p,kq,true,PAULA); n++; if(!IG(d0,D(b))) ruim.push(['b-canc',oid,q,kq]); }
+// (b) custódias da semente: REQ-031 (em conferência), REQ-035 (em execução), Lagoa Grande REQ-022/023/024
+Object.keys(CEN0.reqs).forEach(rid=>CEN0.reqs[rid].itens.forEach(it=>{ if(!(it.custodia>0)) return; for(let j=0;j<2;j++){ const x=CL(CEN0); const kq=q2(it.custodia*(j?1:rnd())); const d0=D(x);
+  cenDevolver(x,rid,it.prod,Math.min(kq,it.custodia),true,PAULA); n++; if(!IG(d0,D(x))) ruim.push(['b',rid,it.prod,kq]); } }));
+// (c) apontar na dose consumindo da custódia
+for(let k=0;k<6;k++){ const x=CL(CEN0); const h=Math.max(1,Math.round(129*rnd())); const fa=(d)=>Object.keys(d).map(s=>d[s].liq['Fungicida A']||0); const d0=D(x);
+  cenApontar(x,{os:'OS-0421',d:'26/09',ha:h,origem:'web',chave:'W-P'+k}); n++; if(!IG(fa(d0),fa(D(x)))) ruim.push(['c',h,fa(d0),fa(D(x))]); }
+OUT.ruim=ruim; OUT.n=n;""")
+    return (not r['ruim'] and r['n']>=40,(r['n'],r['ruim'][:4]))
+caso('I4 propriedade (sorteio fixo, ≥ 40 casos): (a) entregar qualquer quantidade e cancelar = cancelar sem entregar; (b) devolver qualquer parte de qualquer custódia (cancelada, em conferência, em execução, Lagoa Grande) não muda a compra; (c) apontar na dose consumindo da custódia não muda o Fungicida A',i4)
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas'); [print('  -',f) for f in FAIL]
 sys.exit(1 if FAIL else 0)
