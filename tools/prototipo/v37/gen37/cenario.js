@@ -66,12 +66,16 @@ function cenDisp(l) { return Math.max(0, (l.fisico || 0) - (l.quarentena || 0) -
 // entregue que a ordem não vai usar (O.S. cancelada, em conferência, encerrada, ou excedente da ativa) — é suprimento, está com o operador e volta
 // ao Estoque na devolução. Dano evitado: cancelar a OS-0425 com 8.000 kg entregues comprava 8.000 kg de NPK de novo (R$ 27.200) e devolver a sobra
 // mudava a compra (MAP −500 kg da OS-0417). r = a requisição (padrão: a da ordem).
+// Revisão do 853a6a8 (achado 4, S3): turno fechado no app sem sinal já baixou a custódia no aparelho, mas o realizado e o saldo só mudam no envio;
+// a custódia aqui é a que a O.S. mostra (osReqVis: a baixa do aparelho volta até o envio), e a demanda não muda até o sinal (dano evitado: a
+// Safrinha passava de 23,0 para 47,5 L de Fungicida A e a Safra 2026/27 pedia complemento enquanto o celular estava sem sinal).
 const CEN_FASES_PEND = ['A liberar', 'Liberadas', 'Em execução'];
 function cenOsSup(c, co, r) { const out = {}; if (!co) return out; r = r || ((c && c.reqs) || {})[co.req || ''] || null;
   const P = (p) => out[p] || (out[p] = { bruto: 0, cust: 0, need: 0, sobra: 0 });
   if (CEN_FASES_PEND.indexOf(co.etapa) >= 0) { const real = co.realizado || 0; const saldo = real ? (co.saldo || 0) : (co.area || 0);
     (co.ins || []).forEach(i => { P(i.p).bruto += real ? cenQtd(i.dose, saldo) : (i.tot || 0); }); }
-  ((r && r.itens) || []).forEach(it => { P(it.prod).cust += (it.custodia || 0); });
+  const dev = {}; (co.ap || []).forEach(a => { if (a.sinc === false) Object.keys(a.cons || {}).forEach(p => { dev[p] = (dev[p] || 0) + (Number(a.cons[p]) || 0); }); });
+  ((r && r.itens) || []).forEach(it => { const pd = Math.min(dev[it.prod] || 0, it.consumido || 0); dev[it.prod] = (dev[it.prod] || 0) - pd; P(it.prod).cust += (it.custodia || 0) + pd; });
   Object.values(out).forEach(x => { x.need = Math.max(0, cenQtd(x.bruto - x.cust, 1)); x.sobra = Math.max(0, cenQtd(x.cust - x.bruto, 1)); });
   return out; }
 // ---------- CTL-4 · o que cada O.S. ainda tira do almoxarifado (DEM-02), lido do cenário vivo: Planejar safra (etapa 4) e Mapa › Insumos usam

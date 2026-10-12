@@ -486,5 +486,15 @@ def i7():
     return (all(a[s]['liq']==b[s]['liq'] and a[s]['tot']==b[s]['tot'] for s in a) and (b['S2627']['cond'].get('Fungicida A',0)>0 or b['S27SF']['cond'].get('Fungicida A',0)>0),
             {s:(a[s]['liq'].get('Fungicida A'),b[s]['liq'].get('Fungicida A'),b[s]['cond']) for s in a})
 caso('I7 devolução bloqueada (D3): 30 L de Fungicida A da OS-0421 voltam em quarentena — nenhuma safra passa a comprar (no 853a6a8: 5,5 L na Safra 2026/27 e 47,5 L na Safrinha); a parte coberta só por eles fica "Qualidade pendente"',i7)
+def i8():
+    # turno fechado no app sem sinal: a demanda segue a custódia que a O.S. mostra (a baixa do aparelho volta até o envio); com o sinal, o mesmo
+    # resultado de um apontamento que chegou direto ao servidor
+    r=motor("""OUT.d0=D(c); cenSinal(c,false); cenIniciarTurno(c,'OS-0421'); OUT.msg=cenFecharTurno(c,50,4,{'Fungicida A':25,'Adjuvante espalhante':0},'',[]).msg; OUT.d1=D(c); OUT.c1=CL(c);
+OUT.os1=cenOsDem(c,B).find(x=>x.id==='OS-0421').itens.find(i=>i.p==='Fungicida A'); cenSinal(c,true); OUT.d2=D(c);
+const w=CL(CEN0); cenApontar(w,{os:'OS-0421',d:'26/09',ha:50,cons:{'Fungicida A':25,'Adjuvante espalhante':0},est:[],origem:'app',quem:'Marcos',chave:'TU-X'}); OUT.dw=D(w);""")
+    py=D2.demanda('S27SF',cen=r['c1'])
+    return (r['d1']==r['d0'] and r['d2']==r['dw'] and r['os1']['calc']=='0,50 L/ha × 160 ha − 65 L em custódia' and 'aparelho' in r['msg'] and L(py,'Fungicida A')==r['d1']['S27SF']['liq'].get('Fungicida A'),
+            (r['msg'][:80],{s:(r['d0'][s]['liq'].get('Fungicida A'),r['d1'][s]['liq'].get('Fungicida A'),r['d2'][s]['liq'].get('Fungicida A'),r['dw'][s]['liq'].get('Fungicida A')) for s in r['d0']},r['os1'],L(py,'Fungicida A')))
+caso('I8 turno sem sinal (achado 4, S3): fechar 50 ha com 25 L no app sem sinal não muda a compra (a OS-0421 segue "0,50 L/ha × 160 ha − 65 L em custódia", a custódia que a tela O.S. mostra); com o sinal, a demanda é a mesma de um apontamento que chegou direto (no 853a6a8: Safrinha 23,0 → 47,5 L e Safra 2026/27 0,48 L até o envio)',i8)
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas'); [print('  -',f) for f in FAIL]
 sys.exit(1 if FAIL else 0)

@@ -965,7 +965,12 @@ def _os_sup(c,co,r=None):
     if co['etapa'] in OS_FASES_PEND:
         real=co.get('realizado') or 0; saldo=(co.get('saldo') or 0) if real else (co.get('area') or 0)
         for i in co.get('ins') or []: P(i['p'])['bruto']+=Q.qtd(i['dose'],saldo) if real else (i.get('tot') or 0)
-    for it in (r or {}).get('itens') or []: P(it['prod'])['cust']+=it.get('custodia') or 0
+    dev={}   # turno no aparelho, sem sinal: a baixa volta à custódia até o envio (a mesma da tela O.S.; revisão do 853a6a8, achado 4)
+    for a in co.get('ap') or []:
+        if a.get('sinc') is False:
+            for p_,q in (a.get('cons') or {}).items(): dev[p_]=dev.get(p_,0)+(q or 0)
+    for it in (r or {}).get('itens') or []:
+        pd=min(dev.get(it['prod'],0),it.get('consumido') or 0); dev[it['prod']]=dev.get(it['prod'],0)-pd; P(it['prod'])['cust']+=(it.get('custodia') or 0)+pd
     for x in out.values(): x['need']=max(0.0,Q.qtd(x['bruto']-x['cust'],1)); x['sobra']=max(0.0,Q.qtd(x['cust']-x['bruto'],1))
     return out
 _OSD=[None]

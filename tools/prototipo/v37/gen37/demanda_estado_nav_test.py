@@ -10,6 +10,7 @@ Cada caso repete pela tela a reprodução da revisão (ACHADOS-v1) e falha no 85
        com a decisão à vista, sem entrar no total a comprar nem trocar a primária (no 853a6a8: 15.456 kg Complemento, +R$ 146.832, "Enviar para cotação")
   Q2 · laudo reprovado no Estoque ("Reprovar com o laudo", com o motivo): aí sim vira falta firme, com o motivo na memória
   Q3 · laudo liberado: coberto, sem qualidade pendente
+  A7 · turno fechado no app sem sinal (50 ha, 25 L na OS-0421) não muda a compra até o envio: a demanda usa a custódia que a O.S. mostra (65 L)
 Uso: python3 demanda_estado_nav_test.py   (depois do build e do montar_render; capturas q_ctl4e_*.png em _probe/)"""
 import sys, os, time, subprocess, json
 HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
@@ -122,6 +123,14 @@ try:
     nf4533(); rl,tl=laudo('Liberar com o laudo','LAB-1'); g3=safler([SEM])
     chk('Q3 laudo liberado: coberto pelo estoque (32.000 kg aptos), sem qualidade pendente e com o total da semente',
         rl=='ok' and 'liberados com o laudo LAB-1' in tl and g3[SEM][0]=='0 kg' and g3[SEM][1]=='32.000 kg' and 'Coberto' in g3[SEM][2] and g3['total']==g0['total'],(tl,g3))
+    # ================= A7 · turno do app sem sinal =================
+    J("localStorage.clear(); sessionStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana')")
+    f0=safler(['Fungicida A'],'S27SF'); h0=safler(['Fungicida A'])
+    ir('OS.dc.html',w=1.6); ra=J("(()=>{ const X=window.__cen; const r=X.cenMudar(null,c=>{ X.cenSinal(c,false); X.cenIniciarTurno(c,'OS-0421'); return X.cenFecharTurno(c,50,4,{'Fungicida A':25,'Adjuvante espalhante':0},'',[]); }); return r.erro||r.msg; })()") or ''
+    f1=safler(['Fungicida A'],'S27SF'); foto('a7_saf_semsinal'); h1=safler(['Fungicida A']); mfa=memo('Fungicida A')
+    ir('OS.dc.html',w=1.6); rs=J("(()=>{ const X=window.__cen; const r=X.cenMudar(null,c=>X.cenSinal(c,true)); return r.erro||r.msg; })()") or ''; f2=safler(['Fungicida A'],'S27SF')
+    chk('A7 turno fechado no app sem sinal (achado 4, S3): Safrinha 2027 e Safra 2026/27 com o mesmo Fungicida A, total e primária antes e depois; a memória da OS-0421 usa os 65 L em custódia que a O.S. mostra; com o sinal, a Safrinha segue igual (no 853a6a8: 23,0 → 47,5 L e a Safra 2026/27 pedia 0,5 L)',
+        'aparelho' in ra and f1==f0 and h1==h0 and any('OS-0421' in x and '− 65 L em custódia' in x for x in mfa) and 'enviado' in rs and f2['Fungicida A'][0]==f0['Fungicida A'][0],(ra,f0,f1,h0,h1,[x for x in mfa if 'OS-0421' in x][:2],rs,f2))
     col(); chk('E1 sem erro JS nas telas abertas (Planejar safra, Estoque, O.S., Compra, Mapa)',ERR==[],ERR[:5])
 finally:
     c.close(); srv.terminate()
