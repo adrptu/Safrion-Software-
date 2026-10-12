@@ -94,7 +94,7 @@ OPT=json.dumps(dict(hoje=D2.HOJE_ISO,viavel=D2.VIAVEL))
 # Revisão do 853a6a8 (achado 1): a custódia sem uso nas O.S. entra no saldo (os 500 kg de MAP da OS-0417, em conferência): S2627 R$ 428.305,00
 for saf,(n_esp,v_esp) in {'S2627':(14,428305.00),'S27SF':(8,1094947.10),'LG2627':(13,1614202.84)}.items():
     dm=D2.demanda(saf); its=sorted(dm)
-    rr=json.loads(runjs(cal+'\nconst R=[];\n'+''.join(f"R.push(cal01({dm[n]['estoque']+dm[n].get('cust',0)},{json.dumps(dm[n]['evs'],ensure_ascii=False)},0,{OPT}));\n" for n in its)+'__OUT__(JSON.stringify(R.map(r=>[calR2(r.liq),r.falta])));').strip())   # a demanda leva a quantidade a comprar com 0,01 da unidade (calR2)
+    rr=json.loads(runjs(cal+'\nconst R=[];\n'+''.join(f"R.push(cal01({dm[n]['estoque']+dm[n].get('cust',0)+dm[n].get('quarC',0)},{json.dumps(dm[n]['evs'],ensure_ascii=False)},0,{OPT}));\n" for n in its)+'__OUT__(JSON.stringify(R.map(r=>[calR2(r.liq),r.falta])));').strip())   # a demanda leva a quantidade a comprar com 0,01 da unidade (calR2)
     dif=[(n,dm[n]['liq'],dm[n]['falta'],r) for n,r in zip(its,rr) if not (perto(r[0],dm[n]['liq']) and r[1]==dm[n]['falta'])]
     tot=sum(o['valor'] for o in dm.values()); n=sum(1 for o in dm.values() if o['liq']>0.001)
     chk(f'paridade {saf}: {len(its)} insumos, JS = Python (necessidade e data da falta)',not dif,dif[:3])

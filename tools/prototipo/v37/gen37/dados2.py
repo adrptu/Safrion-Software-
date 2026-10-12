@@ -1028,11 +1028,16 @@ def est_dem(cen=None,faz='Santa Rita',osd=None):
     """Espelho de cenEstDem: {fisico, quar, reservas, recebDt, sobra} da fazenda no cenário cen (None = semente). osd: os_dem do mesmo cenário."""
     c=_seed() if cen is None else cen; b=est_base(); osd=os_dem(cen) if osd is None else osd; hoje=b['hoje']; ofaz=os_faz(cen)
     fz=lambda l: b['locFaz'].get(l['local']) or b['faz0']; lotes=c.get('lotes') or {}
-    fisico={}; quar={}; reservas=[]; receb=[]; sobra=[]
+    fisico={}; quar={}; quar_rep={}; quar_ref=[]; reservas=[]; receb=[]; sobra=[]
     for l in lotes.values():
         if fz(l)!=faz: continue
         fisico[l['prod']]=fisico.get(l['prod'],0)+(l.get('fisico') or 0)-(l.get('quarentena') or 0)
-        if (l.get('quarentena') or 0)>0: quar[l['prod']]=quar.get(l['prod'],0)+l['quarentena']
+        qr=min(l.get('quarentena') or 0,l.get('quarRep') or 0); qp=(l.get('quarentena') or 0)-qr   # laudo pendente (condicionada) × reprovada (revisão do 853a6a8, achado 2)
+        docs=[('devolução da '+str(m.get('req'))) if m.get('tipo')=='devolucao' else m.get('doc') for m in (c.get('movs') or [])
+              if m.get('prod')==l['prod'] and m.get('lote')==l['lote'] and not m.get('apto') and m.get('tipo') in ('recebimento-nf','devolucao')]
+        doc=([x for x in docs if x] or [''])[-1]
+        if qp>1e-9: quar[l['prod']]=quar.get(l['prod'],0)+qp; quar_ref.append(dict(item=l['prod'],q=qp,lote=l['lote'],doc=doc,rep=None))
+        if qr>1e-9: quar_rep[l['prod']]=quar_rep.get(l['prod'],0)+qr; quar_ref.append(dict(item=l['prod'],q=qr,lote=l['lote'],doc=doc,rep=l.get('rep') or {}))
     for rid,r in (c.get('reqs') or {}).items():
         o=(c.get('ordens') or {}).get(r['os'])
         if not o: continue
@@ -1060,7 +1065,7 @@ def est_dem(cen=None,faz='Santa Rita',osd=None):
         if r['faz']!=faz: continue
         q=max(0,r['q']-(rc.get(r['ref'],0) if r['ref'] else 0))
         if q>1e-9: receb.append(dict(r,q=q))
-    return dict(fisico=fisico,quar=quar,reservas=reservas,recebDt=receb,sobra=sobra)
+    return dict(fisico=fisico,quar=quar,quarRep=quar_rep,quarRef=quar_ref,reservas=reservas,recebDt=receb,sobra=sobra)
 def _tal_de(c):
     import ocupacao_cen as _OC
     return _OC.tal_de(c['local'],c['tipo'])
@@ -1089,7 +1094,7 @@ def dem_entradas(safra,ajustes=None,planos_extra=None,cen=None):
                 occ=occ_faz(safra,ajustes,planos_extra)),**est_dem(cen,faz))
 def dem_fixas(safra):
     """Partes fixas da demanda da safra, sem ordens e sem estoque: as telas juntam o cenário vivo (cenDemEntradas) — Mapa › Insumos e Compra."""
-    return {k:v for k,v in dem_entradas(safra).items() if k not in ('fisico','quar','reservas','recebDt','sobra')}
+    return {k:v for k,v in dem_entradas(safra).items() if k not in ('fisico','quar','quarRep','quarRef','reservas','recebDt','sobra')}
 def dem_restante(osd,occ):
     """DEM-01 · espelho de demRestante: {chave: {f: fração do plano sem O.S., txt}} pelo escopo da O.S. (atividade × talhões × safra dela)."""
     cob={}; txt={}
@@ -1154,7 +1159,11 @@ def dem_fazenda(x):
         d['evs']+=[dict(dt=r['dt'],q=r['q'],tipo='rec',own=False,ord=0,ref=r['ref'],t=r['t']) for r in x['recebDt'] if da(r)]
         d['res']=sum(r['q'] for r in x['reservas'] if da(r)); d['rec']=sum(r['q'] for r in x['recebDt'] if da(r)); d['est']=x['fisico'].get(d['nome'],0)
         cs=[r for r in x.get('sobra') or [] if da(r)]; d['cust']=sum(r['q'] for r in cs); d['custT']=[f"{_nfa(r['q'])} {d['un']} · {r['t']}" for r in cs]   # custódia sem uso (suprimento)
-        r=cal01(d['est']+d['cust'],d['evs'],0.0,x['hoje'],x['viavel'])
+        # quarentena com laudo pendente: cobertura condicionada (liq com ela; cond = falta só se o laudo reprovar); reprovada não cobre (revisão do 853a6a8, achado 2)
+        d['quarC']=(x.get('quar') or {}).get(d['nome'],0) or 0; d['quarRep']=(x.get('quarRep') or {}).get(d['nome'],0) or 0; d['quarRef']=[q for q in x.get('quarRef') or [] if q['item']==d['nome']]
+        rF=cal01(d['est']+d['cust'],d['evs'],0.0,x['hoje'],x['viavel'])
+        r=cal01(d['est']+d['cust']+d['quarC'],d['evs'],0.0,x['hoje'],x['viavel']) if d['quarC']>1e-9 else rF
+        d['cond']=max(0.0,_r2(_r2(rF['liq'])-_r2(r['liq']))) if d['quarC']>1e-9 else 0; d['condFalta']=(rF['falta'] or '') if d['cond']>0.001 else ''
         lq=_r2(r['liq'])   # a quantidade a comprar é a que a solicitação leva (0,01 da unidade) e o valor sai dela: Planejar safra = Compra (calR2)
         d.update(liq=lq,falta=r['falta'],antes=r['antes'],tarde=r['tarde'],valor=lq*d['preco'],bruta=r['bruta'],real=r['real'],rup=r['rupRec'],cob=r['cob'],
                  uso=min([e['dt'] for e in d['evs'] if e['tipo']=='dem' and e.get('own') and e['dt'] and e['dt']>=x['hoje']] or ['']))

@@ -6,6 +6,10 @@ Cada caso repete pela tela a reprodução da revisão (ACHADOS-v1) e falha no 85
   K2 · devolver a sobra (500 kg de MAP da OS-0417, em conferência) não muda a compra nem cria "Acima da demanda" na Compra
   K3 · cancelar com material entregue não diz "nada tinha sido entregue": o aviso, a confirmação e o painel da O.S. cancelada mostram a custódia com
        quem recebeu e o próximo passo "Receber devolução" (Estoque); depois da devolução o aviso some
+  Q1 · NF 4533 (PC-090) conferida inteira em quarentena: a Semente de soja 58 W fica "Qualidade pendente · 15.456 kg" no Planejar safra e na Compra,
+       com a decisão à vista, sem entrar no total a comprar nem trocar a primária (no 853a6a8: 15.456 kg Complemento, +R$ 146.832, "Enviar para cotação")
+  Q2 · laudo reprovado no Estoque ("Reprovar com o laudo", com o motivo): aí sim vira falta firme, com o motivo na memória
+  Q3 · laudo liberado: coberto, sem qualidade pendente
 Uso: python3 demanda_estado_nav_test.py   (depois do build e do montar_render; capturas q_ctl4e_*.png em _probe/)"""
 import sys, os, time, subprocess, json
 HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
@@ -95,6 +99,29 @@ try:
         e4=='ok' and 'devolvidos' in t4 and d0['MAP 11-52'][0]=='79.500 kg' and d1['MAP 11-52'][0]=='79.500 kg' and d1['total']==d0['total'] and d1['prim']==d0['prim']
         and d0['MAP 11-52'][1]=='90.000 kg' and d1['MAP 11-52'][1]=='90.500 kg' and any('500 kg em custódia sem uso' in x for x in mm)
         and 'Acima' not in d1['MAP 11-52'][2] and 'acima da demanda' not in cm['k2'] and 'Acima da demanda' not in cm['row'],(t4,d0,d1,mm[:8],cm))
+    # ================= Q1–Q3 · NF 4533 em quarentena: falta condicionada à qualidade (PRD 65.4; CAL-01 "Qualidade pendente"; DEMO-02) =================
+    SEM='Semente de soja 58 W'
+    def nf4533():
+        est_secao(1); a=clk('Conferir NF 4533',w=.6)
+        for k,v in (('#fx_g_rec_conf','20000'),('#fx_g_rec_apto','0'),('#fx_g_rec_quar','20000'),('#fx_g_rec_val','06/2027'),('#fx_g_rec_obs','Aguarda laudo de germinação (teste CTL-4)')): setv(k,v)
+        clk('Salvar','aside[role=dialog]',w=.9); return a,T()
+    def laudo(acao,num,mot=''):
+        est_secao(4); J(f"(()=>{{const r=({FIND})(['S58-0926']); if(!r) return; const b=[...r.querySelectorAll('button')].find(b=>/Liberar após inspeção/.test(b.innerText)); b&&b.click();}})()"); time.sleep(.5)
+        setv('#est-laudo',num); setv('#est-laudo-mot',mot); r=clk(acao,'[role=group][aria-label="Liberar quarentena com laudo"]',w=.8); return r,T()
+    J("localStorage.clear(); sessionStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana')")
+    g0=safler([SEM]); qa,tq=nf4533(); g1=safler([SEM]); mq=memo(SEM); foto('q1_saf_qualidade_pendente'); cq=cmp_ler(SEM); foto('q1_cmp_qualidade_pendente')
+    chk('Q1 NF 4533 inteira em quarentena (achado 2, S2): Planejar safra Semente de soja 58 W "0 kg" com "Qualidade pendente · 15.456 kg", total e primária iguais; a memória diz a falta condicionada e a decisão; a Compra mostra a mesma qualidade pendente sem compra (no 853a6a8: 15.456 kg · Complemento · +R$ 146.832 · "Enviar para cotação")',
+        qa=='ok' and 'quarentena' in tq and g1[SEM][0]=='0 kg' and 'Qualidade pendente · 15.456 kg' in g1[SEM][2] and g1['total'].startswith(g0['total']) and g1['prim']==g0['prim']=='Abrir Compra de insumos ›'
+        and '1 insumo com qualidade pendente' in g1['total'] and any(x.startswith('Falta condicionada à qualidade: 15.456 kg') for x in mq)
+        and 'Qualidade pendente · 15.456 kg' in cq['row'] and 'qualidade pendente: Semente de soja 58 W 15.456 kg' in cq['k2'],(tq,g0,g1,[x for x in mq if 'condicionada' in x or 'quarentena' in x][:3],cq))
+    rr,tr=laudo('Reprovar com o laudo','LAB-2','germinação 71%'); g2=safler([SEM]); mr=memo(SEM); foto('q2_saf_reprovado')
+    chk('Q2 laudo reprovado com o motivo: aí sim a Semente de soja 58 W vira falta firme de 15.456 kg ("Complemento") e a primária pede o envio; a memória diz "Reprovado: 20.000 kg do lote S58-0926 … laudo LAB-2: germinação 71%"',
+        rr=='ok' and 'reprovados com o laudo LAB-2' in tr and g2[SEM][0]=='15.456 kg' and 'Complemento' in g2[SEM][2] and g2['prim']=='Enviar para cotação'
+        and any(x.startswith('Reprovado: 20.000 kg do lote S58-0926') and 'germinação 71%' in x for x in mr),(tr,g2,[x for x in mr if 'Reprov' in x]))
+    J("localStorage.clear(); sessionStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana')")
+    nf4533(); rl,tl=laudo('Liberar com o laudo','LAB-1'); g3=safler([SEM])
+    chk('Q3 laudo liberado: coberto pelo estoque (32.000 kg aptos), sem qualidade pendente e com o total da semente',
+        rl=='ok' and 'liberados com o laudo LAB-1' in tl and g3[SEM][0]=='0 kg' and g3[SEM][1]=='32.000 kg' and 'Coberto' in g3[SEM][2] and g3['total']==g0['total'],(tl,g3))
     col(); chk('E1 sem erro JS nas telas abertas (Planejar safra, Estoque, O.S., Compra, Mapa)',ERR==[],ERR[:5])
 finally:
     c.close(); srv.terminate()

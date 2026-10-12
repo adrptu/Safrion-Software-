@@ -43,7 +43,7 @@ def _cd():
     for i,x in enumerate(itens): x['i']=i
     quar={l['item']:l['quarentena'] for l in D2.LOTES if l['quarentena']}
     # entradas e resultado do CAL-01 por insumo (cal01.js refaz a memória e a data da falta na tela, com as previsões reprogramadas)
-    dm=[dict(nome=n,grupo=o['grupo'],un=o['un'],preco=o['preco'],bruta=o['bruta'],real=o['real'],est=o['estoque'],cust=o.get('cust',0),custT=o.get('custT',[]),res=o['reservado'],rec=o['receb'],liq=o['liq'],valor=o['valor'],
+    dm=[dict(nome=n,grupo=o['grupo'],un=o['un'],preco=o['preco'],bruta=o['bruta'],real=o['real'],est=o['estoque'],cust=o.get('cust',0),custT=o.get('custT',[]),quarC=o.get('quarC',0),quarRef=o.get('quarRef',[]),cond=o.get('cond',0),condFalta=o.get('condFalta',''),res=o['reservado'],rec=o['receb'],liq=o['liq'],valor=o['valor'],
              falta=o['falta'],quar=quar.get(n,0),evs=o['evs']) for n,o in dem.items()]
     ref=sum(x['nec']*x['preco'] for x in itens)
     safras=[]
@@ -182,9 +182,16 @@ function sx(self){ SX=solDe(self.state.saf||null); return SX; }
 // cenário vivo, cenDemEntradas) e a mesma regra (demSolAcima, cal01.js). Só avisa: quem atualiza a SOL é o Planejar safra. ACIMA: {insumo: {dif, liq}}
 let ACIMA={};
 // plano: o da versão da SOL (ent, gravado pelo Planejar safra com os ajustes da tela) ou, na SOL da semente, o da semente (dem_fixas)
-function acimaDe(saf){ if(!SX||SX.safra!==saf) return {}; const X=SX.ent||((CD.viva||{}).x||{})[saf]; if(!X) return {};
-  let raw=''; try{ raw=localStorage.getItem(CEN_KEY)||''; }catch(e){} const k=raw+'|'+saf+'|'+SX.key; if(acimaDe._k===k) return acimaDe._v;
-  const v=demSolAcima(demFazenda(cenDemEntradas(cenGet(),X,CD.viva.b)),SX.itens); acimaDe._k=k; acimaDe._v=v; return v; }
+function vivaDe(saf){ if(!SX||SX.safra!==saf) return null; const X=SX.ent||((CD.viva||{}).x||{})[saf]; if(!X) return null;
+  let raw=''; try{ raw=localStorage.getItem(CEN_KEY)||''; }catch(e){} const k=raw+'|'+saf+'|'+SX.key; if(vivaDe._k===k) return vivaDe._v;
+  const m=demFazenda(cenDemEntradas(cenGet(),X,CD.viva.b)); const qual={};
+  // falta condicionada à qualidade (revisão do 853a6a8, achado 2; PRD 65.4; CAL-01 "Qualidade pendente"; DEMO-02): a mesma conta do Planejar safra;
+  // a Compra mostra a decisão (laudo no Estoque) e não compra a parcela — nenhuma trava, nenhuma proposta automática
+  Object.values(m).forEach(d=>{ if((d.cond||0)>0.001) qual[d.nome]={q:d.cond,un:d.un,falta:d.condFalta||'',lotes:(d.quarRef||[]).filter(x=>!x.rep).map(x=>'lote '+x.lote+(x.doc?' · '+x.doc:'')).join('; ')}; });
+  const v={acima:demSolAcima(m,SX.itens),qual}; vivaDe._k=k; vivaDe._v=v; return v; }
+function acimaDe(saf){ const v=vivaDe(saf); return v?v.acima:{}; }
+let QUAL={};
+function qualCh(nome){ const q=QUAL[nome]; return q?[CH('Qualidade pendente · '+qt(q.q,q.un),'yellow'),MU('condicionada ao laudo'+(q.lotes?' ('+q.lotes+')':'')+' · o gestor libera ou reprova no Estoque · sem nova compra automática')]:[]; }
 // com pedido emitido (desta versão ou de uma anterior, pedEmit) a SOL não baixa (DEM-09): o aviso diz para onde vai o excedente
 let ACIMA_PED=false;
 function acimaTxt(){ return ACIMA_PED?'pedido já emitido: o excedente entra no estoque':'o Planejar safra atualiza a '+SX.sol.id; }
@@ -192,7 +199,7 @@ function acimaCh(nome,un){ const a=ACIMA[nome]; return a?[CH('Acima da demanda �
 function solAtu(x){ return x.sol.atu?' · atualizada em '+x.sol.atu.em+' por '+x.sol.atu.por:''; }
 // memória CAL-01 do insumo (a mesma função do Planejar safra)
 const OPT={hoje:CD.hojeIso,viavel:CD.viavel};   // uso antes de hoje = realizado; compra nova chega a partir da data viável
-function calDe(d){ return cal01(d.est+(Number(d.cust)||0),d.evs||[],0,OPT); }   // custódia sem uso nas O.S. entra no saldo (revisão do 853a6a8)
+function calDe(d){ return cal01(d.est+(Number(d.cust)||0)+(Number(d.quarC)||0),d.evs||[],0,OPT); }   // custódia sem uso e quarentena com laudo pendente (condicionada) entram no saldo (revisão do 853a6a8)
 // cada safra guarda o próprio andamento da compra (convites, escolhas, aprovação, entregas); trocar de safra não mistura processos.
 // O andamento também fica no registro compartilhado (talhao-os-compras-v1 · proc[safra]), ligado à versão da solicitação: recarregar ou ir
 // à origem e voltar não perde a compra, e o Planejar safra mostra o estado.
@@ -222,7 +229,7 @@ function dm(iso){ return iso?iso.slice(8,10)+'/'+iso.slice(5,7):'—'; }
 // e pedidos em aberto na data prevista (a previsão reprogramada na etapa 6 vale; excl = pedido a desconsiderar; pedidos novos desta solicitação nunca entram)
 function faltaDe(st,nome,excl){ const d=(SX?SX.dem:[]).find(x=>x.nome===nome); if(!d||!d.evs) return null; const px=st.pcx||{};
   const evs=d.evs.filter(e=>!(e.tipo==='rec'&&e.ref&&e.ref===excl)).map(e=>(e.tipo==='rec'&&e.ref&&px[e.ref]&&px[e.ref].prev)?Object.assign({},e,{dt:px[e.ref].prev}):e);
-  return cal01(d.est+(Number(d.cust)||0),evs,0,OPT).falta; }
+  return cal01(d.est+(Number(d.cust)||0)+(Number(d.quarC)||0),evs,0,OPT).falta; }
 // respostas simuladas chegando uma a uma (um único relógio por tela)
 function tickResp(self){ if(self._tk) return; self._tk=true;
   const tick=()=>{ const s=self.state; if(!s.env){ self._tk=false; return; } const n=(s.nresp||0)+1; if(n>s.env.ordem.length){ self._tk=false; return; } const done=(n===s.env.ordem.length);
@@ -284,7 +291,7 @@ function sitDem(self,m,d,fa){ const apr=aprOf(self.state);
   if(m.env) return [CH('Em cotação','blue'),MU(it.props.length+(it.props.length===1?' proposta':' propostas'))];
   return [CH('A cotar','gray')]; }
 function PREVALS(self,v){
-  const st=self.state; const saf=st.saf||null; sx(self); const m=M(self); self._m=m; const apr=aprOf(st); cenOuvir(self); ACIMA=acimaDe(saf); ACIMA_PED=!!(apr||(SX&&SX.sol.pedEmit));
+  const st=self.state; const saf=st.saf||null; sx(self); const m=M(self); self._m=m; const apr=aprOf(st); cenOuvir(self); ACIMA=acimaDe(saf); QUAL=(vivaDe(saf)||{}).qual||{}; ACIMA_PED=!!(apr||(SX&&SX.sol.pedEmit));
   // ---- etapa 1 · safras ----
   GR('g_saf').rows=safras().map(s=>{ const on=(saf===s.id); const r={id:s.id,ro:true,v:{nome:s.nome},s:{nome:s.nome},p:{}};
     r.p.nome=[B(s.nome),MU(s.periodo)].concat(on?[CH('Selecionada','blue')]:[]);
@@ -329,12 +336,12 @@ function PREVALS(self,v){
   GR('g_dem').rows=Object.keys(byG).sort(pt).map((g,gi)=>{ const its=byG[g].slice().sort((a,b)=>pt(a.nome,b.nome)); const val=its.reduce((a,d)=>a+d.valor,0);
     const fas=its.map(d=>faltaDe(st,d.nome,null)); const fg=fas.filter(Boolean).sort()[0]||'';
     return {id:'DG'+gi,v:{ins:g,valor:val,falta:fg},s:{ins:g},p:{ins:[B(g),MU(its.length+(its.length>1?' insumos':' insumo'))],falta:fg?[MU(brd(fg))]:[MU('')]},
-      kids:its.map((d,ix)=>{ const dc=d.un==='L'?1:0; const fa=fas[ix]; const sit=acimaCh(d.nome,d.un).concat(sitDem(self,m,d,fa)); const c=calDe(d);
+      kids:its.map((d,ix)=>{ const dc=d.un==='L'?1:0; const fa=fas[ix]; const sit=acimaCh(d.nome,d.un).concat(qualCh(d.nome)).concat(sitDem(self,m,d,fa)); const c=calDe(d);
         return {id:'DG'+gi+'_'+ix,ro:true,v:{ins:d.nome,bruta:d.bruta,est:d.est,rec:d.rec,liq:d.liq,un:d.un,falta:fa||'',preco:d.preco,valor:d.valor},s:{sit:sit.map(x=>x.t).join(' ')},
           p:{bruta:[T(nf(d.bruta,dc))].concat(c.real>0.001?[BR(),MU('antes de hoje sem O.S.: '+nf(c.real,dc))]:[]),est:[T(nf(d.est,dc))].concat((d.liq>0.001&&c.antes>0.001)?[BR(),MU('usado antes: '+nf(c.antes,dc))]:(d.res?[BR(),MU('res. '+nf(d.res,dc))]:[])),
              rec:[T(nf(d.rec,dc))].concat(d.liq>0.001&&c.tarde>0.001?[BR(),MU(nf(c.tarde,dc)+' após a falta')]:[]),
              liq:[B(nf(d.liq,dc))],falta:fa?[(d.liq>0.001?B(brd(fa)):CH(brd(fa),'red'))]:[MU('—')],sit},
-          o:cal01Memo(c,{un:d.un,res:d.res,quar:d.quar,cust:d.cust,custT:d.custT}).map(t=>({t})).concat([{t:'Ver no Planejar safra · demanda de insumos',h:SX.origem.h}])}; })}; });
+          o:cal01Memo(c,{un:d.un,res:d.res,quar:d.quar,cust:d.cust,custT:d.custT,quarC:d.quarC,quarRef:d.quarRef,cond:d.cond,condFalta:d.condFalta}).map(t=>({t})).concat([{t:'Ver no Planejar safra · demanda de insumos',h:SX.origem.h}])}; })}; });
   GR('g_dem').x0=Object.fromEntries(GR('g_dem').rows.map(r=>[r.id,true]));
   // ---- etapa 3 · convites ----
   GR('g_conv').rows=m.G.map((g,gi)=>{ const cs=Object.values(m.conv).filter(c=>c.gi===gi); const its=m.items.filter(x=>x.gi===gi);
@@ -526,9 +533,10 @@ function EXTRAVALS(self,v){ hooks(self);
   // resumos por etapa
   const MUT='color:#65736A;'; const WARN='color:#8A5A00;font-weight:700;'; const BAD='color:#B42318;font-weight:700;'; const OK='color:#1E7A4C;font-weight:700;';
   const ncob=SX?SX.dem.filter(d=>d.liq<=0.001).length:0;
-  const nac=Object.keys(ACIMA).length;
+  const nac=Object.keys(ACIMA).length; const nql=Object.keys(QUAL).length;
   v.k2=SX?(SX.sol.id+' · '+SX.nome+' · enviada em '+SX.sol.enviada+' por '+SX.sol.por+solAtu(SX)+' · '+SX.itens.length+' insumos a comprar · '+rs(SX.ref)+' a preço de referência · '+ncob+' insumos cobertos por estoque e pedidos'
-    +(nac?' · '+nac+(nac>1?' insumos':' insumo')+' acima da demanda de agora: '+acimaTxt():'')):''; v.k2st=MUT;
+    +(nac?' · '+nac+(nac>1?' insumos':' insumo')+' acima da demanda de agora: '+acimaTxt():'')
+    +(nql?' · qualidade pendente: '+Object.keys(QUAL).map(n=>n+' '+qt(QUAL[n].q,QUAL[n].un)).join(', ')+' condicionados ao laudo (o gestor decide no Estoque; sem nova compra automática)':'')):''; v.k2st=MUT;
   if(m.env){ const fim=m.nresp>=m.esperadas; v.k3='Convites simulados: nenhuma mensagem real foi enviada · enviados em '+m.env.em+(m.env.adic?(' · '+m.env.adic+(m.env.adic>1?' adicionais':' adicional')):'')+' · '+m.nresp+' de '+m.env.n+' convites responderam'+(fim?'':' · respostas chegando…')+(m.nadic?(' · '+m.nadic+(m.nadic>1?' convites adicionais a enviar':' convite adicional a enviar')):''); v.k3st=WARN; }
   else { v.k3=m.nconv+' convites prontos em '+(m.G.length-m.semForn.length)+' grupos'+(m.semForn.length?(' · sem fornecedor homologado: '+m.semForn.join(', ')+' (ficam sem cotação)'):'')
       +' · só fornecedores homologados do grupo podem ser convidados · o envio é simulado'; v.k3st=m.semForn.length?WARN:MUT; }

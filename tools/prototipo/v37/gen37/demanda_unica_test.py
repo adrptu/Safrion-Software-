@@ -104,8 +104,8 @@ caso('B11 escopo por safra: a O.S. da Safra 2026/27 não cobre a mesma atividade
 def b12():
     PX={'c4':'SOJA-AT','c5':'SOJA-AT','c6':'SOJA-AT','c7':'SOJA-AT'}; dp=D2.demanda('S2627',planos_extra=PX)
     t4=sum(e['q'] for e in dp['MAP 11-52']['evs'] if e['tipo']=='dem' and e.get('own') and 'T4' in e['t'])
-    return (t4==43500 and L(dp,'MAP 11-52')==173250.0 and perto(tot(dp),1203592.10,0.01),(t4,L(dp,'MAP 11-52'),round(tot(dp),2)))
-caso('B12 N12 "Aplicar plano em 4 cultivos": MAP do T4 = 26.000 (104 ha sem O.S.) + 17.500 (OS-0420, chave c4|a3) = 43.500, nunca 68.500 · MAP 173.250 kg · R$ 1.203.592,10',b12)
+    return (t4==43500 and L(dp,'MAP 11-52')==173250.0 and perto(tot(dp),1179592.10,0.01) and dp['KCl 60%']['cond']==10000,(t4,L(dp,'MAP 11-52'),round(tot(dp),2)))
+caso('B12 N12 "Aplicar plano em 4 cultivos": MAP do T4 = 26.000 (104 ha sem O.S.) + 17.500 (OS-0420, chave c4|a3) = 43.500, nunca 68.500 · MAP 173.250 kg · R$ 1.179.592,10 (os 10.000 kg de KCl em quarentena são falta condicionada à qualidade, fora da compra: −R$ 24.000)',b12)
 def b13():
     dx=D2.demanda('S2627',planos_extra={'c7':'SOJA-AT'}); ev=[e for e in dx['Fungicida A']['evs'] if e['tipo']=='dem' and e.get('chave')=='OS-0424']
     return (L(dx,'Fungicida A')==55.48 and len(ev)==1 and 'sem vínculo com o plano do talhão' in ev[0]['t'],(L(dx,'Fungicida A'),[e['t'] for e in ev]))
@@ -316,9 +316,9 @@ caso('G4 recebimento da NF 4533 (PC-090, 20.000 kg de Semente de soja 58 W aptos
 def g5():
     rq=viva(NF4533.format(q=20000,apto='false',qa=0,qq=20000)); rl=viva(NF4533.format(q=20000,apto='false',qa=0,qq=20000)+" cenLiberarQuarentena(c,'Semente de soja 58 W|S58-0926','LAB-77',{k:'Ana'});")
     b=G0['S2627']; n='Semente de soja 58 W'
-    return (rq['S2627']['liq'][n]>b['liq'][n]+1e-6 and rq['S2627']['est'][n]==12000 and rl['S2627']['liq']==b['liq'] and rl['S2627']['tot']==b['tot'],
+    return (rq['S2627']['liq']==b['liq'] and rq['S2627']['tot']==b['tot'] and rq['S2627']['est'][n]==12000 and rl['S2627']['liq']==b['liq'] and rl['S2627']['tot']==b['tot'],
             (b['liq'].get(n),rq['S2627']['liq'].get(n),rq['S2627']['est'].get(n),rl['S2627']['liq'].get(n)))
-caso('G5 a mesma nota inteira em quarentena: os 20.000 kg saem do pedido e não entram no estoque apto até o laudo (CAL-01: quarentena não conta); liberada com o laudo, a compra volta à da semente',g5)
+caso('G5 a mesma nota inteira em quarentena: os 20.000 kg saem do pedido e não entram no estoque apto até o laudo; contam como cobertura condicionada à qualidade (PRD 65.4, revisão do 853a6a8) — a compra não muda; liberada com o laudo, igual à da semente',g5)
 def g6():
     if not hasattr(D2,'est_dem'): return (False,'dados2.est_dem não existe (base)')
     dif=[]
@@ -459,5 +459,32 @@ const b=CL(CEN0); cenEntregar(b,'REQ-040','NPK 20-05-20',3000,'Carlos',PAULA); c
         and 'nada tinha sido entregue' not in r['dev'] and 'já tinha voltado ao Estoque' in r['dev'])
     return (ok,r)
 caso('I5 cancelar com material entregue (achado 7, S3): o aviso e a condição gravada dizem "8.000 kg de NPK 20-05-20 entregue segue em custódia com Carlos: receba a devolução no Estoque", com dono Rui (almoxarife) e prazo "receber a devolução"; sem entrega o texto da tela continua; entregue e devolvido não diz "nada entregue" (no 853a6a8: "nada tinha sido entregue")',i5)
+NFQ=NF4533.format(q=20000,apto='false',qa=0,qq=20000); SEM='Semente de soja 58 W'; LOTEQ='Semente de soja 58 W|S58-0926'
+def i6():
+    # quarentena = fornecimento condicionado à qualidade (PRD 65.4; CAL-01 "Qualidade pendente"; DEMO-02): fora da compra, visível com a decisão;
+    # laudo liberado → coberto; laudo reprovado → falta firme com o motivo
+    if 'cenReprovarQuarentena' not in open(os.path.join(HERE,'cenario.js'),encoding='utf-8').read(): return (False,'cenReprovarQuarentena não existe (853a6a8)')
+    r=motor(f"""OUT.d0=D(c); const sol=OUT.d0.S2627.liq; {NFQ} OUT.dq=D(c); OUT.cq=CL(c);
+const X=ENT(c,XS.S2627); const m=demFazenda(X); const s=m['{SEM}']; OUT.sit=demSolSit(s,sol['{SEM}']||0,true,false); OUT.memo=cal01Memo(s.cal,{{un:s.un,quarC:s.quarC,quarRef:s.quarRef,cond:s.cond,condFalta:s.condFalta}});
+OUT.mapa=demSituacao(m,null,X.hoje,X.viavel)['{SEM}'];
+const a=CL(c); cenLiberarQuarentena(a,'{LOTEQ}','LAB-1',ANA); OUT.dl=D(a);
+const b=CL(c); OUT.rmsg=cenReprovarQuarentena(b,'{LOTEQ}','LAB-2','germinação 71%',ANA).msg; OUT.dr=D(b); OUT.cr=CL(b); const mr=demFazenda(ENT(b,XS.S2627))['{SEM}'];
+OUT.memoR=cal01Memo(mr.cal,{{un:mr.un,quarC:mr.quarC,quarRef:mr.quarRef,cond:mr.cond,condFalta:mr.condFalta}}); OUT.sitR=demSolSit(mr,0,true,false).t;
+try{{ cenLiberarQuarentena(b,'{LOTEQ}','LAB-3',ANA); OUT.lib2='liberou'; }}catch(e){{ OUT.lib2=e.message; }}""")
+    pq=D2.demanda('S2627',cen=r['cq']); pr=D2.demanda('S2627',cen=r['cr'])
+    d0,dq,dl,dr=r['d0']['S2627'],r['dq']['S2627'],r['dl']['S2627'],r['dr']['S2627']
+    ok=(dq['liq']==d0['liq'] and dq['tot']==d0['tot'] and dq['cond'].get(SEM)==15456 and r['sit']['t']=='Qualidade pendente' and r['sit']['pend'] is False
+        and any(l.startswith('Falta condicionada à qualidade: 15.456 kg') and 'sem nova compra automática' in l for l in r['memo']) and r['mapa'][0]=='Qualidade pendente · 15.456 kg'
+        and dl['liq']==d0['liq'] and dl['cond']=={} and dr['liq'].get(SEM)==15456 and dr['cond']=={} and dr['tot']>d0['tot'] and r['sitR']=='Complemento'
+        and any(l.startswith('Reprovado: 20.000 kg do lote S58-0926') and 'germinação 71%' in l for l in r['memoR']) and 'reprovado' in r['lib2']
+        and L(pq,SEM)==0 and pq[SEM]['cond']==15456 and L(pr,SEM)==15456 and pr[SEM]['cond']==0)
+    return (ok,dict(dq=(dq['liq'].get(SEM),dq['cond'],dq['tot']),sit=r['sit'],mapa=r['mapa'],dl=dl['cond'],dr=(dr['liq'].get(SEM),dr['tot']),memo=r['memo'][:2],memoR=[l for l in r['memoR'] if 'Reprov' in l],lib2=r['lib2'],py=(L(pq,SEM),pq[SEM]['cond'],L(pr,SEM))))
+caso('I6 NF 4533 inteira em quarentena (achado 2, S2): Semente de soja 58 W fica 0 kg a comprar com "Qualidade pendente · 15.456 kg" (falta condicionada, sem trocar a compra nem o total; memória e Mapa dizem a decisão); laudo liberado → coberto; laudo reprovado → 15.456 kg de falta firme com o motivo ("germinação 71%") e o lote não volta ao disponível; Python = JS (no 853a6a8: 15.456 kg · R$ 146.832 a comprar)',i6)
+def i7():
+    r=motor("""OUT.d0=D(c); cenDevolver(c,'REQ-035','Fungicida A',30,false,PAULA); OUT.d1=D(c);""")
+    a,b=r['d0'],r['d1']
+    return (all(a[s]['liq']==b[s]['liq'] and a[s]['tot']==b[s]['tot'] for s in a) and (b['S2627']['cond'].get('Fungicida A',0)>0 or b['S27SF']['cond'].get('Fungicida A',0)>0),
+            {s:(a[s]['liq'].get('Fungicida A'),b[s]['liq'].get('Fungicida A'),b[s]['cond']) for s in a})
+caso('I7 devolução bloqueada (D3): 30 L de Fungicida A da OS-0421 voltam em quarentena — nenhuma safra passa a comprar (no 853a6a8: 5,5 L na Safra 2026/27 e 47,5 L na Safrinha); a parte coberta só por eles fica "Qualidade pendente"',i7)
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas'); [print('  -',f) for f in FAIL]
 sys.exit(1 if FAIL else 0)

@@ -134,7 +134,9 @@ def build():
           f'<span style="font-size: 13px; font-weight: 600; flex: 1 1 280px;">{H("lib_t")}</span>'
           f'<label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: {MUTED};">Nº do laudo ou relatório de inspeção'
           f'<input id="est-laudo" value="{H("lib_laudo")}" onChange="{H("lib_setlaudo")}" style="font-family: inherit; font-size: 14px; padding: 7px 9px; border-radius: 8px; border: 1px solid {LINE}; width: 220px;"></label>'
-          f'<button type="button" onClick="{H("lib_ok")}" style="{_MINIP}">Liberar com o laudo</button><button type="button" onClick="{H("libno")}" style="{_MINI}">Manter bloqueado</button>'
+          f'<label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: {MUTED};">Motivo, se o laudo reprovar'
+          f'<input id="est-laudo-mot" value="{H("lib_mot")}" onChange="{H("lib_setmot")}" placeholder="ex.: germinação abaixo do padrão" style="font-family: inherit; font-size: 14px; padding: 7px 9px; border-radius: 8px; border: 1px solid {LINE}; width: 240px;"></label>'
+          f'<button type="button" onClick="{H("lib_ok")}" style="{_MINIP}">Liberar com o laudo</button><button type="button" onClick="{H("lib_rep")}" style="{_MINI}">Reprovar com o laudo</button><button type="button" onClick="{H("libno")}" style="{_MINI}">Manter bloqueado</button>'
           f'<sc-if value="{H("lib_hasErr")}" hint-placeholder-val="{F()}"><span role="alert" style="flex-basis: 100%; font-size: 12px; font-weight: 700; color: {RED};">{H("lib_err")}</span></sc-if></div></sc-if>')
     s4=kline('k4')+libq+bloco('Saldos por lote e local','Confira físico, reservado, bloqueado e disponível; clique num lote para ver os movimentos.',g_lot,acao=acao_bloco)
     s5=kline('k5')+bloco('Contagens','Conte sem ver o saldo; a diferença vira ajuste para o gestor aprovar.',g_cnt,acao=acao_bloco)
@@ -156,7 +158,7 @@ JS=r'''
 // ===== Processo · Estoque (6 etapas numa só tela; lê e muda o cenário compartilhado com O.S. e App) =====
 function GR(id){ return GRIDS.find(g=>g.id===id); }
 // Gancho de teste/inspeção (o script da tela roda isolado): os testes est_* leem e mudam o cenário na própria página.
-try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenReceber, cenLiberarQuarentena, cenContar, cenAprovarAjuste, cenConfirmarRecebimento, cenIniciarTurno, cenFecharTurno, cenSinal, cenPodeEncerrar, cenConciliar }; } catch (e) {}
+try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenReceber, cenLiberarQuarentena, cenReprovarQuarentena, cenContar, cenAprovarAjuste, cenConfirmarRecebimento, cenIniciarTurno, cenFecharTurno, cenSinal, cenPodeEncerrar, cenConciliar }; } catch (e) {}
 function nf(n,d){ return Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:d||0,maximumFractionDigits:d||0}); }
 function eq(n,un){ n=Number(n)||0; const d=Math.abs(n-Math.round(n))<1e-6?0:(Math.abs(n*10-Math.round(n*10))<1e-6?1:2); return nf(n,d)+(un?' '+un:''); }
 function esig(n,un){ return (n>0?'+':(n<0?'−':''))+eq(Math.abs(n),un); }
@@ -226,7 +228,7 @@ function eajuste(c,rec){ return rec&&rec.aj?((c.ajustes||[]).find(a=>a.id===rec.
 function econtou(rec){ return !!rec&&rec.cont!==null&&rec.cont!==undefined&&rec.cont!==''; }
 function enovoInv(c){ let n=2612; const ids=einvs(c).map(x=>x.id); while(ids.indexOf('INV-'+n)>=0) n++; return 'INV-'+n; }
 const MTIPO={'reserva':'Reserva','entrega':'Entrega','recebimento':'Recebimento confirmado no app','consumo':'Consumo apontado no app','devolucao':'Devolução',
-  'recebimento-nf':'Recebimento de nota','inspecao':'Quarentena liberada','contagem':'Contagem sem diferença','ajuste':'Ajuste de inventário'};
+  'recebimento-nf':'Recebimento de nota','inspecao':'Quarentena liberada','inspecao-reprovada':'Qualidade reprovada','contagem':'Contagem sem diferença','ajuste':'Ajuste de inventário'};
 function emovQtd(m){ const u=m.un||''; switch(m.tipo){ case 'entrega': return '−'+eq(m.qtd,u); case 'devolucao': case 'recebimento-nf': return '+'+eq(m.qtd,u);
   case 'ajuste': return esig(m.qtd,u); case 'reserva': return eq(m.qtd,u)+' reservados'; case 'inspecao': return eq(m.qtd,u)+' liberados'; default: return ''; } }
 function emovTxt(m){ const u=m.un||'';
@@ -235,6 +237,7 @@ function emovTxt(m){ const u=m.un||'';
   if(m.tipo==='devolucao') return 'devolução '+m.req+' ('+m.os+'): +'+eq(m.qtd,u)+(m.apto?' apta':' bloqueada para inspeção');
   if(m.tipo==='recebimento-nf') return 'recebimento '+m.doc+': +'+eq(m.qtd,u)+(m.apto?' apto':' em quarentena')+(m.val&&m.val!=='—'?' · validade '+m.val:'');
   if(m.tipo==='inspecao') return 'quarentena liberada '+(m.doc?'com o laudo '+m.doc+' por '+m.quem:'após inspeção')+': '+eq(m.qtd,u)+' passam a disponível'+(m.rev?' · '+m.rev:'');
+  if(m.tipo==='inspecao-reprovada') return 'qualidade reprovada com o laudo '+(m.doc||'—')+' por '+m.quem+(m.motivo?' ('+m.motivo+')':'')+': '+eq(m.qtd,u)+' segregados para devolução ao fornecedor';
   if(m.tipo==='contagem') return 'contagem '+(m.doc?m.doc+' ':'')+'sem diferença';
   if(m.tipo==='ajuste') return 'ajuste de inventário '+(m.doc?m.doc+' ':'')+'aprovado por '+(m.quem||'gestor')+': '+esig(m.qtd,u)+(m.rev?' · '+m.rev:'');
   return emovTipo(m); }
@@ -374,7 +377,9 @@ function elotRow(c,l,ask,INV,GEST){ const un=l.un; const venc=evenc(l);
   const mv=(c.movs||[]).filter(m=>m.prod===l.prod&&m.lote===l.lote).map(m=>({t:m.at+' · '+emovTxt(m)}));
   const pend=INV.filter(x=>x.key===l.key&&econtou(x)&&Math.abs(x.cont-x.sis)>1e-9&&!(eajuste(c,x)&&eajuste(c,x).estado==='Aprovado')).map(x=>({t:'Ajuste '+x.id+' '+esig(x.cont-x.sis,un)+' aguardando aprovação · não aplicado ao saldo'}));
   // lote vencido não volta ao disponível: sem "Liberar após inspeção"
-  const blq=l.quarentena>1e-9?[{k:'chip',t:eq(l.quarentena,un),c:'yellow'}].concat(venc?[]:(!GEST?[{k:'mut',t:'aguarda laudo · '+g2quem('gestor')+' libera'}]:(ask===l.key?[{k:'mut',t:'informe o laudo acima'},{k:'act',t:'Manter',fn:'libno:x'}]:[{k:'act',t:'Liberar após inspeção',fn:'libq:'+l.key}]))):[{k:'mut',t:'—'}];
+  const qrep=Math.min(l.quarentena||0,l.quarRep||0), qpen=(l.quarentena||0)-qrep;   // reprovado: segregado para devolução ao fornecedor (revisão do 853a6a8, achado 2)
+  const blq=l.quarentena>1e-9?[{k:'chip',t:eq(l.quarentena,un),c:'yellow'}].concat(qrep>1e-9?[{k:'chip',t:'Reprovado · '+eq(qrep,un)+' · laudo '+((l.rep||{}).laudo||'—'),c:'red'}]:[])
+    .concat((venc||!(qpen>1e-9))?[]:(!GEST?[{k:'mut',t:'aguarda laudo · '+g2quem('gestor')+' libera ou reprova'}]:(ask===l.key?[{k:'mut',t:'informe o laudo acima'},{k:'act',t:'Manter',fn:'libno:x'}]:[{k:'act',t:'Liberar após inspeção',fn:'libq:'+l.key}]))):[{k:'mut',t:'—'}];
   return {id:'L|'+l.key,ro:true,v:{nome:l.lote,prod:l.prod,un,local:l.local,fis:l.fisico,res:l.reservado,blq:l.quarentena,disp:cenDisp(l),expo:'',cust:'',cos:'',val:l.validade,vali:eym(l.validade),sitl:(venc?'Vencido':(l.quarentena>1e-9?'Em quarentena':'Disponível'))},
     s:{nome:l.lote,prod:l.prod,un,vali:(l.validade&&l.validade!=='—'?l.validade:''),sitl:(venc?'Vencido':(l.quarentena>1e-9?'Em quarentena':'Disponível'))},
     p:{prod:[{k:'mut',t:l.prod}],fis:[{k:'txt',t:eq(l.fisico,un)}],res:l.reservado>1e-9?[{k:'txt',t:eq(l.reservado,un)}]:[{k:'mut',t:'—'}],blq,disp:[{k:'b',t:eq(cenDisp(l),un)}],expo:[{k:'mut',t:''}],cust:[{k:'mut',t:''}],cos:[{k:'mut',t:''}],
@@ -566,7 +571,11 @@ function EXTRAVALS(self,v){
   // liberar quarentena do lote após inspeção (confirmação na linha; repetir não soma de novo)
   // (gestor, com o nº do laudo; sem laudo ou sem papel nada muda e o erro fica no painel, com o laudo digitado preservado)
   const lk=st.libask; const lq=lk&&C.lotes[lk]; v.lib_on=!!(lq&&lq.quarentena>1e-9)&&g2papel(g2perfil(),'gestor');   /* aberto por outro perfil: não aparece (achado 1) */
-  v.lib_t=v.lib_on?('Liberar '+eq(lq.quarentena,lq.un)+' do lote '+lq.lote+' ('+lq.prod+'): informe o laudo que aprova o material.'):'';
+  const lqp=lq?(lq.quarentena||0)-Math.min(lq.quarentena||0,lq.quarRep||0):0;
+  v.lib_t=v.lib_on?(eq(lqp,lq.un)+' do lote '+lq.lote+' ('+lq.prod+') aguardam o laudo: informe o nº e libere, ou reprove (o material fica segregado para devolução ao fornecedor e a falta deixa de ser condicionada).'):'';
+  v.lib_mot=st.lib_mot||''; v.lib_setmot=(e)=>self.setState({lib_mot:e.target.value,lib_err:''});
+  v.lib_rep=()=>{ const k=self.state.libask; const r=cenMudar(null,c=>cenReprovarQuarentena(c,k,self.state.lib_laudo,self.state.lib_mot,g2perfil()));
+    if(r.erro){ self.setState({lib_err:r.erro}); return; } self.setState({libask:null,lib_laudo:'',lib_mot:'',lib_err:'',cenrev:Date.now(),g2toast:r.msg}); };
   v.lib_laudo=st.lib_laudo||''; v.lib_setlaudo=(e)=>self.setState({lib_laudo:e.target.value,lib_err:''}); v.lib_err=st.lib_err||''; v.lib_hasErr=!!st.lib_err;
   v.libq=(k)=>{ self.setState({libask:k,lib_laudo:'',lib_err:''}); setTimeout(()=>{ const e=document.getElementById('est-laudo'); if(e) e.focus(); },0); };
   v.libno=()=>self.setState({libask:null,lib_laudo:'',lib_err:''});

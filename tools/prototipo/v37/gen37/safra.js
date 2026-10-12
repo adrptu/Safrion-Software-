@@ -550,7 +550,7 @@ function demanda(self,saf){ const safRows=g2rows(self,GR('g_saf')); const me=saf
     area:o.area,dt:o.dt||'',nome:o.a.nome,prods:o.prods}));   // área com até 2 casas na conta escrita (PRE-REV R5)
   add(saf); safRows.forEach(r=>{ if(r.id===saf||r.ro||(r.v.faz||'Santa Rita')!==faz||vistos[sk(r.id)]) return; vistos[sk(r.id)]=1; add(r.id); });
   const X=cenDemEntradas(cenGet(),{saf,faz,hoje:D2.hoje,viavel:D2.viavel,ordem,nomes,occ},{osb:D2.osb,est:D2.estb}); const m=demFazenda(X);   // ordens e estoque do mesmo cenário (revisão, achado 1)
-  Object.values(m).forEach(d=>{ d.quar=(X.quar||{})[d.nome]||0; d.memo=cal01Memo(d.cal,{un:d.un,res:d.res,quar:d.quar,cust:d.cust,custT:d.custT}); });
+  Object.values(m).forEach(d=>{ d.quar=(X.quar||{})[d.nome]||0; d.memo=cal01Memo(d.cal,{un:d.un,res:d.res,quar:d.quar,cust:d.cust,custT:d.custT,quarC:d.quarC,quarRef:d.quarRef,cond:d.cond,condFalta:d.condFalta}); });
   // partes fixas desta conta (plano da tela, sem ordens e estoque): a versão da SOL as guarda e a Compra refaz a conta com o cenário de agora
   const ent={saf,faz,hoje:D2.hoje,viavel:D2.viavel,ordem,nomes,occ:occ.map(o=>Object.assign({},o,{prods:(o.prods||[]).map(p=>({nome:p.nome,grupo:p.grupo,un:p.un,preco:p.preco,dose:p.dose,q:p.q}))}))};
   Object.defineProperty(m,'_ent',{value:ent,enumerable:false}); return m; }
@@ -1209,7 +1209,7 @@ function PREVALS(self,v){ compRend(self,self.state.saf||null);
   const dm=demanda(self,saf); const sol=solMap(self)[saf]; const grupos={}; const est=sol?solEstado(saf,sol):''; const pedEmit=solPedEmit(saf,sol);
   const dmx=Object.assign({},dm); if(sol&&sol.itens) Object.keys(sol.itens).forEach(n=>{ if(!dmx[n]&&(Number(sol.itens[n])||0)>0.01) dmx[n]=demFora(self,saf,n,sol); });
   Object.values(dmx).forEach(d=>{ (grupos[d.grupo]||(grupos[d.grupo]=[])).push(d); });
-  let tot=0, nliq=0, npend=0, nexc=0, ncomp=0;
+  let tot=0, nliq=0, npend=0, nexc=0, ncomp=0, nqual=0, vqual=0;
   GR('g_dem').rows=Object.keys(grupos).sort((a,b)=>a.localeCompare(b,'pt-BR')).map((g,gi)=>{ const its=grupos[g].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
     const val=its.reduce((a,d)=>a+d.valor,0); tot+=val; const uso=its.map(d=>d.uso).filter(Boolean).sort()[0]||'';
     // TABELAS-FOCO (5983172395): uma variável por coluna — grupo, insumo, quantidades (com a unidade junto), datas, situação, solicitação e complemento próprios
@@ -1218,7 +1218,10 @@ function PREVALS(self,v){ compRend(self,self.state.saf||null);
         // decisão do proprietário (05/10/2026): a unidade fica junto do valor ("62.500 kg"); o valor tipado (v) continua número para ordenar e filtrar
         const qt=(x)=>nf(x,dec)+' '+d.un, q=(x)=>[{k:'txt',t:qt(x)}], z=(x)=>x>0.001?[{k:'txt',t:qt(x)}]:[{k:'mut',t:'—'}];
         // situação pela regra única (DEM-09, cal01.js): a SOL que pede mais do que a demanda de agora fica "Acima da demanda · <diferença>"
-        const ss=demSolSit(d,sent,!!sol,pedEmit); const exc=ss.t==='Acima da demanda'; const sit={k:'chip',t:exc?ss.t+' · '+qt(ss.dif):ss.t,c:ss.c}; const sid=ss.sol?sol.id:'';
+        const ss=demSolSit(d,sent,!!sol,pedEmit); const exc=ss.t==='Acima da demanda'; const qual=ss.t==='Qualidade pendente'; const sid=ss.sol?sol.id:'';
+        const sit={k:'chip',t:exc?ss.t+' · '+qt(ss.dif):(qual?ss.t+' · '+qt(d.cond):ss.t),c:ss.c};
+        // falta condicionada à qualidade (revisão do 853a6a8, achado 2; PRD 65.4): visível com a decisão, fora do total e da primária
+        const condCh=(!qual&&(d.cond||0)>0.001)?[{k:'chip',t:'Qualidade pendente · '+qt(d.cond),c:'yellow'}]:[]; if((d.cond||0)>0.001){ nqual++; vqual+=d.cond*d.preco; }
         if(ss.pend) npend++; if(exc) nexc++; else if(ss.pend) ncomp++;
         const memoSol=exc?[sol.id+' pede '+qt(sent)+'; a necessidade líquida agora é '+qt(d.liq)+': '+qt(ss.dif)+' acima da demanda.',
           pedEmit?'Pedido já emitido: a solicitação não muda e o excedente entra no estoque (cancelar o pedido é decisão da Compra).':'Atualize a solicitação para não comprar a mais.']:[];
@@ -1227,19 +1230,21 @@ function PREVALS(self,v){ compRend(self,self.state.saf||null);
           p:{grp:[{k:'mut',t:d.grupo}],bruta:q(d.bruta),real:z(d.real),est:q(d.est),antes:z(d.liq>0.001?d.antes:0),res:z((d.liq>0.001&&d.antes>0.001)?0:d.res),rec:q(d.rec),
              tarde:z(((d.liq>0.001||d.rup>0.001)&&d.tarde>0.001)?d.tarde:0),liq:[{k:'b',t:qt(d.liq)}],sit:[sit],sol:sid?[{k:'txt',t:sid}]:[{k:'mut',t:'—'}],
              comp:sit.t==='Complemento'?q(d.liq-sent):[{k:'mut',t:'—'}],preco:[{k:'txt',t:rs(d.preco)+'/'+d.un}]},
-          o:memoSol.concat(d.memo).map(t=>({t})).concat(sol?[{t:'Ver '+sol.id+' na Compra de insumos',h:solHref(saf,sol)}]:[]) }; dcol(kr,'uso',d.uso);
+          o:memoSol.concat(d.memo).map(t=>({t})).concat((d.cond||0)>0.001?[{t:'Decidir a qualidade no Estoque (o gestor libera ou reprova com o laudo)',h:'EST.dc.html'}]:[]).concat(sol?[{t:'Ver '+sol.id+' na Compra de insumos',h:solHref(saf,sol)}]:[]) }; dcol(kr,'uso',d.uso);
+        if(condCh.length) kr.p.sit=kr.p.sit.concat(condCh);
         // filtro e busca leem o mesmo texto da célula (com a unidade)
         ['bruta','real','est','antes','res','rec','tarde','liq','comp','preco'].forEach(f=>{ const c=kr.p[f]&&kr.p[f][0]; kr.s[f]=(c&&c.t!=='—')?c.t:''; });
         // falta: quando o estoque acaba (com necessidade líquida ou só ruptura coberta por recebimento); coberta em: o recebimento que cobre a ruptura
         dcol(kr,'falta',(d.liq>0.001||d.rup>0.001)?d.falta:''); if(kr.s.falta) kr.p.falta=[{k:'cn',t:kr.s.falta,c:'red'}]; dcol(kr,'cob',(d.liq<=0.001&&d.rup>0.001)?d.cob:''); return kr; })};
     // situação do grupo: contagem por situação dos insumos (o que falta enviar primeiro)
     const cnt={}; gr.kids.forEach(k=>{ const t=String(k.s.sit||'').replace(/ · .*/,'').replace(/^Complemento.*/,'Complemento'); cnt[t]=(cnt[t]||0)+1; });
-    const ord=['Acima da demanda','A enviar','Complemento','Em cotação','Coberto pelo recebimento','Coberto pelo estoque']; const cor={'Acima da demanda':'red','A enviar':'gray','Complemento':'yellow','Em cotação':'blue','Coberto pelo recebimento':'yellow','Coberto pelo estoque':'green'};
+    const ord=['Acima da demanda','A enviar','Complemento','Em cotação','Qualidade pendente','Coberto pelo recebimento','Coberto pelo estoque']; const cor={'Acima da demanda':'red','A enviar':'gray','Complemento':'yellow','Em cotação':'blue','Qualidade pendente':'yellow','Coberto pelo recebimento':'yellow','Coberto pelo estoque':'green'};
     gr.p.sit=ord.filter(t=>cnt[t]).map(t=>({k:'chip',t:cnt[t]+' '+(t==='Coberto pelo estoque'?'coberto'+(cnt[t]>1?'s':''):(t==='Coberto pelo recebimento'?'coberto'+(cnt[t]>1?'s':'')+' pelo recebimento':t.toLowerCase())),c:cor[t]})); gr.s.sit='';
     ['bruta','real','est','antes','res','rec','tarde','liq','falta','cob','preco','sol','comp'].forEach(f=>{ gr.p[f]=[{k:'mut',t:''}]; gr.s[f]=''; });
     dcol(gr,'uso',uso); return gr; });
   v.k6='Valor da necessidade líquida '+rs(tot)+' · '+nliq+' insumos a comprar'+(sol?(' · solicitação '+sol.id+(est?' · '+est:' em cotação')+(sol.comp?' (+'+sol.comp+' complemento'+(sol.comp>1?'s':'')+')':'')):' · ainda não enviada')
-    +(nexc?' · '+nexc+(nexc>1?' insumos':' insumo')+' acima da demanda':'');
+    +(nexc?' · '+nexc+(nexc>1?' insumos':' insumo')+' acima da demanda':'')
+    +(nqual?' · '+nqual+(nqual>1?' insumos':' insumo')+' com qualidade pendente ('+rs(vqual)+' condicionados ao laudo, fora da compra)':'');
   v.k6pend=npend; v.k6exc=nexc&&!pedEmit; v.k6comp=ncomp; v.sol_link=!!sol; v.sol_id=sol?sol.id:''; v.sol_href=sol?solHref(saf,sol):'CMP.dc.html';
 }
 function EXTRAVALS(self,v){ try{ window.__safSelf=self; }catch(e){}   // testes leem o estado (OC-13)
@@ -1497,7 +1502,7 @@ function enviar(self){ const saf=self.state.saf; const safObj=g2rows(self,GR('g_
   // grava quem agiu (perfil de demonstração) e quando; sem o papel, recusa e nada muda (dano: compra reduzida ou aumentada em nome de quem não decidiu)
   const quem=(acao)=>{ try{ return cenExigeUm(g2perfil(),['gestor','agronomo'],acao); }catch(e){ self.setState({g2toast:String(e.message||e)}); return ''; } };
   // registro único da solicitação: o que a Compra de insumos mostra (mesmos itens, quantidades, valores e memória CAL-01)
-  const det=Object.values(dm).map(d=>({nome:d.nome,grupo:d.grupo,un:d.un,preco:d.preco,bruta:d.bruta,est:d.est,cust:d.cust||0,custT:d.custT||[],res:d.res,rec:d.rec,liq:d.liq,valor:d.valor,falta:d.falta,uso:d.uso,quar:d.quar,evs:d.evs}));
+  const det=Object.values(dm).map(d=>({nome:d.nome,grupo:d.grupo,un:d.un,preco:d.preco,bruta:d.bruta,est:d.est,cust:d.cust||0,custT:d.custT||[],quarC:d.quarC||0,quarRef:d.quarRef||[],cond:d.cond||0,condFalta:d.condFalta||'',res:d.res,rec:d.rec,liq:d.liq,valor:d.valor,falta:d.falta,uso:d.uso,quar:d.quar,evs:d.evs}));
   const EM='23/09/2026 11:05';   // horário do cenário de demonstração (a SOL-2026-07 inicial é de 10:40)
   const base={safra:saf,nome:safObj.v.nome,faz:safObj.v.faz||'Santa Rita',estado:'Enviada · a cotar',
     origem:{t:'Planejar safra · '+safObj.v.nome+' · demanda de insumos',h:'SAF.dc.html#saf='+encodeURIComponent(saf)+'&passo=demanda'},det,ent:dm._ent};
