@@ -1,0 +1,6 @@
+# HML-SECRET-05 (decisão técnica do Codex sob a delegação de 09/10, PR #51, comentário 6091898499): falso positivo
+# já identificado. Nome da chave de localStorage da manutenção do protótipo ('talhao-os-manutencao-v1', o mesmo
+# literal da HML-SECRET-04), numa linha removida do diff copiado no pacote de revisão da PCM. Não é credencial.
+# Só este achado exato: commit, arquivo, regra e linha. A mesma linha em outro commit, outro valor ou outro arquivo
+# continua reprovando. Não amplia o .gitleaks.toml.
+7d38e5d50083a96b03d5a1247c31cd7518803b09:docs/integracao/PCM/diff-cdc185f-ba03515.patch:generic-api-key:3922
