@@ -496,5 +496,16 @@ const w=CL(CEN0); cenApontar(w,{os:'OS-0421',d:'26/09',ha:50,cons:{'Fungicida A'
     return (r['d1']==r['d0'] and r['d2']==r['dw'] and r['os1']['calc']=='0,50 L/ha × 160 ha − 65 L em custódia' and 'aparelho' in r['msg'] and L(py,'Fungicida A')==r['d1']['S27SF']['liq'].get('Fungicida A'),
             (r['msg'][:80],{s:(r['d0'][s]['liq'].get('Fungicida A'),r['d1'][s]['liq'].get('Fungicida A'),r['d2'][s]['liq'].get('Fungicida A'),r['dw'][s]['liq'].get('Fungicida A')) for s in r['d0']},r['os1'],L(py,'Fungicida A')))
 caso('I8 turno sem sinal (achado 4, S3): fechar 50 ha com 25 L no app sem sinal não muda a compra (a OS-0421 segue "0,50 L/ha × 160 ha − 65 L em custódia", a custódia que a tela O.S. mostra); com o sinal, a demanda é a mesma de um apontamento que chegou direto (no 853a6a8: Safrinha 23,0 → 47,5 L e Safra 2026/27 0,48 L até o envio)',i8)
+def i9():
+    # reserva que a ordem já não usa não é demanda (achado 5): a OS-0430 libera 320 L de Glifosato, recebe 160 L e aponta os 160 ha usando os 160 L
+    r=motor("""OUT.d0=D(c); const o=c.ordens['OS-0430']; const r0=o.req&&c.reqs[o.req]; if(r0&&!o.reservado){ r0.itens=r0.itens.filter(i=>i.entregue>0); r0.estado='Reservada'; }
+cenLiberar(c,'OS-0430'); OUT.d1=D(c); const rid=c.ordens['OS-0430'].req; ['Glifosato 480','2,4-D 806'].forEach(p=>cenEntregar(c,rid,p,160,'Marcos',PAULA)); cenEntregar(c,rid,'Óleo mineral',80,'Marcos',PAULA); OUT.d2=D(c);
+c.ordens['OS-0430'].etapa='Em execução'; cenApontar(c,{os:'OS-0430',d:'26/09',ha:160,cons:{'Glifosato 480':160,'2,4-D 806':160,'Óleo mineral':80},est:[],origem:'web',chave:'W-I9'}); OUT.d3=D(c); OUT.c3=CL(c);
+OUT.res=c.lotes[Object.keys(c.lotes).find(k=>k.indexOf('Glifosato 480|')===0)].reservado; osc_conferencia(c,'OS-0430'); OUT.d4=D(c);
+const e=CL(CEN0); OUT.e0=D(e); cenEntregar(e,'REQ-039','Fungicida A',64,'Marcos',PAULA); OUT.e1=D(e);""")
+    g=lambda k: r[k]['S2627']['liq'].get('Glifosato 480',0); py=D2.demanda('S2627',cen=r['c3'])
+    return (g('d0')==20 and g('d1')==20 and g('d2')==20 and g('d3')==0 and r['d4']==r['d3'] and r['res']>=160-1e-6 and r['e1']==r['e0'] and L(py,'Glifosato 480') in (0,None),
+            (g('d0'),g('d1'),g('d2'),g('d3'),g('d4'),r['res'],r['e0']['S27SF']['liq'].get('Fungicida A'),r['e1']['S27SF']['liq'].get('Fungicida A'),L(py,'Glifosato 480')))
+caso('I9 reserva remanescente (achado 5, S3): a OS-0430 aponta os 160 ha com os 160 L entregues e os outros 160 L reservados deixam de ser demanda já no apontamento (Glifosato 20 → 0 L), sem esperar a conferência; entregar 64 L à OS-0424 (REQ-039 pede 65) não muda a Safrinha (no 853a6a8: 20 L até a conferência; Fungicida A 22,98 → 23,98 L)',i9)
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas'); [print('  -',f) for f in FAIL]
 sys.exit(1 if FAIL else 0)

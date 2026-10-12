@@ -954,14 +954,14 @@ def os_base():
                 for x in a['prods']: cat.setdefault(x['prod'],dict(g=x['grupo'],preco=x['preco'],un=x['un']))
         _OSB[0]=dict(ords=ords,safs=[dict(id=s_['id'],faz=s_['fazenda'],nome=s_['nome']) for s_ in SAFRAS if not s_['ro']],cat=cat,hoje=HOJE_ISO)
     return _OSB[0]
-def _os_sup(c,co,r=None):
+def _os_sup(c,co,r=None,fz=None,fo=None):
     """Espelho de cenOsSup (revisão do 853a6a8, achado 1): por insumo, bruto (o que falta aplicar; fora de A liberar/Liberadas/Em execução 0),
     cust (custódia da requisição), need = máx(0, bruto − cust) e sobra = máx(0, cust − bruto) — custódia sem uso, suprimento."""
     import quantidade as Q
     out={}
     if not co: return out
     r=r if r is not None else (c.get('reqs') or {}).get(co.get('req') or '')
-    P=lambda p: out.setdefault(p,dict(bruto=0.0,cust=0.0,need=0.0,sobra=0.0))
+    P=lambda p: out.setdefault(p,dict(bruto=0.0,cust=0.0,need=0.0,sobra=0.0,res=[]))
     if co['etapa'] in OS_FASES_PEND:
         real=co.get('realizado') or 0; saldo=(co.get('saldo') or 0) if real else (co.get('area') or 0)
         for i in co.get('ins') or []: P(i['p'])['bruto']+=Q.qtd(i['dose'],saldo) if real else (i.get('tot') or 0)
@@ -972,6 +972,18 @@ def _os_sup(c,co,r=None):
     for it in (r or {}).get('itens') or []:
         pd=min(dev.get(it['prod'],0),it.get('consumido') or 0); dev[it['prod']]=dev.get(it['prod'],0)-pd; P(it['prod'])['cust']+=(it.get('custodia') or 0)+pd
     for x in out.values(): x['need']=max(0.0,Q.qtd(x['bruto']-x['cust'],1)); x['sobra']=max(0.0,Q.qtd(x['cust']-x['bruto'],1))
+    # reservas presas no lote com a parte útil ef (até o need; com fz/fo, primeiro os lotes da fazenda da ordem) — revisão do 853a6a8, achado 5
+    if r and r.get('estado')!='Cancelada' and co['etapa'] in OS_FASES_PEND:
+        lotes=c.get('lotes') or {}; rs=[]
+        for it in r.get('itens') or []:
+            l=lotes.get(it['prod']+'|'+it['lote'])
+            if not l: continue
+            q=_res_propria(c,r.get('id'),it,l)
+            if q>1e-9: rs.append(dict(it=it,l=l,q=q,ef=0.0))
+        rem={p_:x['need'] for p_,x in out.items()}
+        for y in ([y for y in rs if fz(y['l'])==fo]+[y for y in rs if fz(y['l'])!=fo]) if fz else rs:
+            p_=y['it']['prod']; y['ef']=min(y['q'],max(0.0,rem.get(p_,0))); rem[p_]=rem.get(p_,0)-y['ef']
+        for y in rs: P(y['it']['prod'])['res'].append(y)
     return out
 _OSD=[None]
 def os_dem(cen=None):
@@ -1053,13 +1065,15 @@ def est_dem(cen=None,faz='Santa Rita',osd=None):
             for p_,x in _os_sup(c,o,r).items():
                 if x['sobra']>1e-9: sobra.append(dict(item=p_,q=x['sobra'],t=f"{rid} · {r['os']} ({rot})",chave=r['os'],faz=faz))
         if r.get('estado')=='Cancelada' or o['etapa'] not in OS_FASES_PEND: continue
-        od=next((x for x in osd if x['id']==r['os']),None)
+        od=next((x for x in osd if x['id']==r['os']),None); S=_os_sup(c,o,r)
         for it in r.get('itens') or []:
             l=lotes.get(it['prod']+'|'+it['lote'])
             if not l or fz(l)!=faz: continue
-            q=_res_propria(c,rid,it,l)
-            if not q>1e-9: continue
-            reservas.append(dict(item=it['prod'],q=q,dt=od['dt'] if od else hoje,t=f"Reserva {rid} · {r['os']}"+(f" ({o['talhao']})" if o.get('talhao') else ''),chave=r['os'],faz=faz))
+            y=next((z for z in (S.get(it['prod']) or {}).get('res') or [] if z['it'] is it),None)
+            if not y or not y['ef']>1e-9: continue   # a ordem já não precisa desta reserva (revisão do 853a6a8, achado 5)
+            mesma=fo==faz and od is not None
+            reservas.append(dict(item=it['prod'],q=y['q'] if mesma else y['ef'],dt=od['dt'] if od else hoje,
+                                 t=f"Reserva {rid} · {r['os']}"+(f" ({o['talhao']})" if o.get('talhao') else ''),chave=r['os'],faz=faz))
     rc={}; vis=set()
     for m in c.get('movs') or []:
         e=m.get('estRec') if m.get('tipo')=='recebimento-nf' else None
