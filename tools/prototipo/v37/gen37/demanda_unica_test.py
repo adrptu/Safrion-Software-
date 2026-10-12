@@ -392,7 +392,7 @@ def _osc_js():
                 dd-=1
                 if dd==0: return src[i:k+1]
             k+=1
-    for n in ('osc_o','osc_txt','osCargasVivas','osc_cancTxt','osc_cancelar','osc_conferencia','osc_encerrar','osApPend','cortaPrev','nd','nf','osc_dispensar'):
+    for n in ('osc_o','osc_txt','osCargasVivas','osc_cancCust','osc_cancTxt','osc_cancelar','osc_conferencia','osc_encerrar','osApPend','cortaPrev','nd','nf','osc_dispensar'):
         out.append(fn(n))
     return '\n'.join(out)+"\nconst LIM_DISP=0.20;\n"
 def motor(corpo):
@@ -446,5 +446,18 @@ for(let k=0;k<6;k++){ const x=CL(CEN0); const h=Math.max(1,Math.round(129*rnd())
 OUT.ruim=ruim; OUT.n=n;""")
     return (not r['ruim'] and r['n']>=40,(r['n'],r['ruim'][:4]))
 caso('I4 propriedade (sorteio fixo, ≥ 40 casos): (a) entregar qualquer quantidade e cancelar = cancelar sem entregar; (b) devolver qualquer parte de qualquer custódia (cancelada, em conferência, em execução, Lagoa Grande) não muda a compra; (c) apontar na dose consumindo da custódia não muda o Fungicida A',i4)
+def i5():
+    # o texto do cancelamento vem da requisição: com material entregue, a custódia fica com destino (receber a devolução), nunca "nada tinha sido entregue"
+    cx=["Cancela a requisição REQ-040; nada foi entregue.","Requisição REQ-040 cancelada; nada tinha sido entregue.","REQ-040 cancelada · nada entregue"]   # CANC['OS-0425'] da tela
+    r=motor(f"""const CX={json.dumps(cx,ensure_ascii=False)};
+const a=CL(CEN0); OUT.semEnt=osc_cancelar(a,'OS-0425','replanejado',CX,ANA).msg;
+cenEntregar(c,'REQ-040','NPK 20-05-20',8000,'Carlos',PAULA); OUT.msg=osc_cancelar(c,'OS-0425','replanejado',CX,ANA).msg; const x=c.ordens['OS-0425'].osc;
+OUT.cond=x.cond; OUT.dono=x.dono; OUT.prazo=x.prazo; OUT.insx=x.insx; OUT.cust=c.reqs['REQ-040'].itens[0].custodia;
+const b=CL(CEN0); cenEntregar(b,'REQ-040','NPK 20-05-20',3000,'Carlos',PAULA); cenDevolver(b,'REQ-040','NPK 20-05-20',3000,true,PAULA); OUT.dev=osc_cancelar(b,'OS-0425','replanejado',CX,ANA).msg;""")
+    ok=('nada tinha sido entregue' in r['semEnt'] and 'nada tinha sido entregue' not in r['msg'] and '8.000 kg de NPK 20-05-20 entregue segue em custódia com Carlos: receba a devolução no Estoque' in r['msg']
+        and 'em custódia com Carlos' in r['cond'] and r['dono']=='Rui (almoxarife)' and r['prazo']=='receber a devolução' and 'em custódia' in r['insx'] and r['cust']==8000
+        and 'nada tinha sido entregue' not in r['dev'] and 'já tinha voltado ao Estoque' in r['dev'])
+    return (ok,r)
+caso('I5 cancelar com material entregue (achado 7, S3): o aviso e a condição gravada dizem "8.000 kg de NPK 20-05-20 entregue segue em custódia com Carlos: receba a devolução no Estoque", com dono Rui (almoxarife) e prazo "receber a devolução"; sem entrega o texto da tela continua; entregue e devolvido não diz "nada entregue" (no 853a6a8: "nada tinha sido entregue")',i5)
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas'); [print('  -',f) for f in FAIL]
 sys.exit(1 if FAIL else 0)

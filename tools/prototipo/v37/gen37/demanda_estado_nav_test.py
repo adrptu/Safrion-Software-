@@ -4,6 +4,8 @@ Cada caso repete pela tela a reprodução da revisão (ACHADOS-v1) e falha no 85
   K1 · custódia é suprimento: entregar 8.000 kg de NPK à OS-0425 (Estoque), cancelar a OS-0425 (O.S.) e receber a devolução (Estoque) não mudam
        o NPK do Planejar safra (14.800 kg), o total nem a primária; o Mapa segue "Falta 14.800 kg" (no 853a6a8: 22.800 kg, +R$ 27.200)
   K2 · devolver a sobra (500 kg de MAP da OS-0417, em conferência) não muda a compra nem cria "Acima da demanda" na Compra
+  K3 · cancelar com material entregue não diz "nada tinha sido entregue": o aviso, a confirmação e o painel da O.S. cancelada mostram a custódia com
+       quem recebeu e o próximo passo "Receber devolução" (Estoque); depois da devolução o aviso some
 Uso: python3 demanda_estado_nav_test.py   (depois do build e do montar_render; capturas q_ctl4e_*.png em _probe/)"""
 import sys, os, time, subprocess, json
 HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
@@ -60,6 +62,9 @@ try:
     def os_painel(oid):
         ir('OS.dc.html',w=1.6)
         J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(oid)})); r&&r.click();}})()"); time.sleep(.6)
+    def os_cancelada(oid):   # O.S. cancelada fica fora do quadro: o chip "Canceladas" mostra a linha
+        ir('OS.dc.html',w=1.6); clk('Canceladas',w=.6)
+        J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(oid)})); r&&r.click();}})()"); time.sleep(.6)
     def motivo(txt):
         J(f"(()=>{{const i=document.querySelector('textarea[aria-label=\"Motivo do cancelamento\"]'); if(!i) return; const P=HTMLTextAreaElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,{json.dumps(txt)}); i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"); time.sleep(.3)
     painel=lambda: (J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText") or '').replace('\n',' · ')
@@ -68,21 +73,27 @@ try:
     n0=safler(['NPK 20-05-20']); m0=mapa('C1')
     est_secao(2); e1=est_row('REQ-040','NPK 20-05-20'); clk('Salvar','aside[role=dialog]',w=.8); te=T()
     n1=safler(['NPK 20-05-20'])
-    os_painel('OS-0425'); cc=clk('Cancelar sem execução','aside[role=dialog]'); motivo('talhão replanejado (teste CTL-4)'); cf=clk('Confirmar cancelamento','aside[role=dialog]',w=.8); tc=T()
+    os_painel('OS-0425'); cc=clk('Cancelar sem execução','aside[role=dialog]'); cct=painel(); motivo('talhão replanejado (teste CTL-4)'); cf=clk('Confirmar cancelamento','aside[role=dialog]',w=.8); tc=T()
     n2=safler(['NPK 20-05-20']); foto('k1_saf_cancelada'); m2=mapa('C1')
+    os_cancelada('OS-0425'); pc=painel(); lk=J("[...document.querySelectorAll('aside[role=dialog] a')].map(a=>a.innerText.trim()+'>'+a.getAttribute('href')).join(' | ')") or ''; foto('k3_os_cancelada_custodia')
     est_secao(3); e3=est_row('REQ-040','NPK 20-05-20'); setv('#fx_g_dev_qtd','8000'); clk('Salvar','aside[role=dialog]',w=.8); td=T()
-    n3=safler(['NPK 20-05-20'])
+    n3=safler(['NPK 20-05-20']); os_cancelada('OS-0425'); pc2=painel()
     chk('K1 custódia é suprimento: entregar 8.000 kg de NPK à OS-0425, cancelar a OS-0425 e receber a devolução — Planejar safra NPK "14.800 kg", o total e a primária iguais em todos os passos; Mapa C1 "Falta 14.800 kg" (no 853a6a8: 22.800 kg, +R$ 27.200)',
         e1=='ok' and 'entregues' in te and cc=='ok' and cf=='ok' and 'cancelada' in tc and e3=='ok' and 'devolvidos' in td
         and all(x['NPK 20-05-20'][0]=='14.800 kg' and x['total']==n0['total'] and x['prim']==n0['prim'] for x in (n1,n2,n3)) and 'Falta 14.800 kg' in m0 and 'Falta 14.800 kg' in m2,
         (te,tc,td,n0,n1,n2,n3,m2[:200]))
+    chk('K3 cancelar com material entregue (achado 7): a confirmação diz que os 8.000 kg ficam em custódia, o aviso não diz "nada tinha sido entregue", e o painel da OS-0425 cancelada mostra "Custódia a devolver: 8.000 kg de NPK 20-05-20" com o link "Receber devolução" (Estoque); depois da devolução o aviso some',
+        'em custódia' in cct and 'nada foi entregue' not in cct and 'nada tinha sido entregue' not in tc and 'em custódia com' in tc and 'Custódia a devolver: 8.000 kg de NPK 20-05-20' in pc
+        and 'Receber devolução' in lk and '>EST.dc.html' in lk and 'Custódia a devolver' not in pc2,
+        dict(cct='em custódia' in cct and 'nada foi entregue' not in cct,tc='nada tinha sido entregue' not in tc and 'em custódia com' in tc,pc='Custódia a devolver: 8.000 kg de NPK 20-05-20' in pc,lk=lk,pc2='Custódia a devolver' not in pc2,toast=tc[-300:]))
     # ================= K2 · devolver a sobra da OS-0417 (em conferência) =================
     J("localStorage.clear(); sessionStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana')")
     d0=safler(['MAP 11-52']); mm=memo('MAP 11-52')
     est_secao(3); e4=est_row('REQ-031','MAP 11-52'); setv('#fx_g_dev_qtd','500'); clk('Salvar','aside[role=dialog]',w=.8); t4=T()
     d1=safler(['MAP 11-52']); cm=cmp_ler('MAP 11-52'); foto('k2_cmp_devolucao')
     chk('K2 devolver a sobra não muda a compra: os 500 kg de MAP com a OS-0417 (em conferência) já contam ("+ 500 kg em custódia sem uso" na memória) — MAP "79.500 kg" antes e depois, total igual, sem "Acima da demanda" no Planejar safra nem na Compra (no 853a6a8: 80.000 → 79.500 e aviso de 500 kg)',
-        e4=='ok' and 'devolvidos' in t4 and d0['MAP 11-52'][0]=='79.500 kg' and d1==d0 and any('500 kg em custódia sem uso' in x for x in mm)
+        e4=='ok' and 'devolvidos' in t4 and d0['MAP 11-52'][0]=='79.500 kg' and d1['MAP 11-52'][0]=='79.500 kg' and d1['total']==d0['total'] and d1['prim']==d0['prim']
+        and d0['MAP 11-52'][1]=='90.000 kg' and d1['MAP 11-52'][1]=='90.500 kg' and any('500 kg em custódia sem uso' in x for x in mm)
         and 'Acima' not in d1['MAP 11-52'][2] and 'acima da demanda' not in cm['k2'] and 'Acima da demanda' not in cm['row'],(t4,d0,d1,mm[:8],cm))
     col(); chk('E1 sem erro JS nas telas abertas (Planejar safra, Estoque, O.S., Compra, Mapa)',ERR==[],ERR[:5])
 finally:

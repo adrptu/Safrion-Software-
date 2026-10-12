@@ -242,6 +242,9 @@ function osMerge(b,co,c){ if(!co) return b;
   if(mine){ o.cond=x.cond; o.dono=x.dono||''; o.prazo=x.prazo||''; }
   if(x.disp) o.disp=x.disp;
   if(co.etapa==='Canceladas'&&x.insx) o.insx=x.insx;
+  if(co.etapa==='Canceladas'){ const cu=r?r.itens.filter(i=>(i.custodia||0)>1e-6):[];   // custódia de ordem cancelada: some só com a devolução no Estoque
+    if(cu.length){ o.dono=CEN_CONC_RESP; o.prazo='receber a devolução'; o.selos=(o.selos||[]).filter(s=>s.t!=='Custódia a devolver').concat([{t:'Custódia a devolver',c:'yellow'}]); }
+    else if(mine&&x.dono===CEN_CONC_RESP){ o.dono=''; o.prazo=''; o.selos=(o.selos||[]).filter(s=>s.t!=='Custódia a devolver'); } }
   // execução com turno no aparelho: o mesmo selo da conferência na lista e no Kanban (o painel e o Mapa dizem "aguardando sinal")
   if(co.etapa==='Em execução'){ o.selos=o.selos.filter(s=>!/^Aguardando sinal/.test(s.t));
     if((co.ap||[]).some(a=>a.sinc===false)) o.selos=o.selos.concat([{t:'Aguardando sinal do app',c:'yellow'}]);
@@ -282,7 +285,10 @@ function osCondGen(o){ const pend=(o.ap||[]).filter(a=>a.sinc===false).length;
 function osPk(q,emb){ const m=/^(.*?)\s*(\d[\d.]*)\s*(kg|L)\b/.exec(String(emb||'')); if(!m||!(q>1e-9)) return ''; const n=Number(m[2].replace(/\./g,'')); const k=q/n;
   return (n>0&&Math.abs(k-Math.round(k))<1e-6)?Math.round(k)+' × '+emb:''; }
 // situação do insumo (uma frase) e trilha reservado → entregue → confirmado no app → consumido → em custódia → devolvido
-function osInsSit(o,x,it){ if(o.etapa==='Canceladas') return o.insx||x.sit;
+function osInsSit(o,x,it){ if(o.etapa==='Canceladas'){ const ic=o.r&&o.r.itens.find(i=>i.prod===x.p);
+    if(ic&&ic.custodia>1e-6) return 'Ordem cancelada · '+nd(ic.custodia)+' '+ic.un+' em custódia com '+(ic.quem||o.resp)+' · receber devolução no Estoque';
+    if(ic&&ic.devolvido>0&&ic.entregue>0) return 'Ordem cancelada · '+nd(ic.devolvido)+' '+ic.un+' devolvidos ao Estoque';
+    return o.insx||x.sit; }
   if(!it||(!o.reservado&&!(it.entregue>0))) return x.sit;
   const un=it.un;
   if(!(it.entregue>0)) return 'Reservado no Estoque · lote '+it.lote+' · '+o.req+(it.solicitado<x.tot-1e-6?' · faltam '+nd(x.tot-it.solicitado)+' '+un:'');
@@ -451,12 +457,26 @@ function osc_encerrar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em conferência'
 // cancelar sem execução: a reserva ainda não entregue volta ao disponível do lote e a requisição fica cancelada
 // CMD-46 (AL-04: responsável do domínio, o gestor; revisão do CTL-3, achado 4): grava quem cancelou e a hora. Dano evitado: ordem aprovada e
 // liberada desfeita, com a reserva solta, sem decisão competente e sem autor
+// textos do cancelamento lidos da requisição (revisão do 853a6a8, achado 7, S3): com material entregue e ainda não devolvido, nunca "nada tinha sido
+// entregue" — a custódia fica com quem recebeu, visível na O.S., e o próximo passo é receber a devolução no Estoque (a demanda já a conta como
+// suprimento, cenOsSup). Sem custódia, o texto da tela (cx: confirmação, aviso final, situação do insumo) vale como antes.
+function osc_cancCust(c,id){ const o=c.ordens[id]; const r=o&&o.req&&c.reqs[o.req]; return r?r.itens.filter(i=>(i.custodia||0)>1e-6):[]; }
+function osc_cancTxt(c,id,cx){ cx=cx||['','','']; const o=c.ordens[id]; const r=o&&o.req&&c.reqs[o.req]; const cu=osc_cancCust(c,id);
+  if(!cu.length){ const dv=r?r.itens.filter(i=>(i.entregue||0)>1e-6):[]; if(!dv.length) return cx;   // entregue e já devolvido: o texto não diz "nada entregue"
+    const t=dv.map(i=>cenNum(i.entregue)+' '+i.un+' de '+i.prod).join(', ');
+    return ['Cancela a requisição '+r.id+'; o que foi entregue ('+t+') já voltou ao Estoque.','Requisição '+r.id+' cancelada; o que foi entregue ('+t+') já tinha voltado ao Estoque.',r.id+' cancelada · entregue e devolvido']; }
+  const quem=cu.map(i=>i.quem||o.resp).filter((v,k,a)=>v&&a.indexOf(v)===k).join(', ')||'o operador';
+  const ct=cu.map(i=>cenNum(i.custodia)+' '+i.un+' de '+i.prod).join(', '); const um=cu.length===1;
+  const sl=o.reservado?r.itens.map(i=>{ const l=c.lotes[i.prod+'|'+i.lote]; const q=l?Math.min(l.reservado||0,Math.max(0,i.solicitado-i.entregue)):0; return q>1e-6?cenNum(q)+' '+i.un+' de '+i.prod:''; }).filter(Boolean).join(', '):'';
+  return ['Cancela a requisição '+r.id+(sl?' e libera a reserva não entregue ('+sl+')':'')+'. '+ct+(um?' já entregue fica':' já entregues ficam')+' em custódia com '+quem+' até a devolução no Estoque.',
+    'Requisição '+r.id+' cancelada'+(sl?'; reserva não entregue liberada ('+sl+')':'')+'. '+ct+(um?' entregue segue':' entregues seguem')+' em custódia com '+quem+': receba a devolução no Estoque.',
+    r.id+' cancelada · '+ct+' em custódia · receber devolução']; }
 function osc_cancelar(c,id,mot,cx,ator){ const o=osc_o(c,id); const quem=cenExige(ator,'gestor','Cancelar a '+id+' sem execução (CMD-46)');
   if((o.realizado||0)>0||['A liberar','Liberadas'].indexOf(o.etapa)<0) throw new Error('Só ordem sem realizado, em A liberar ou Liberadas, é cancelada sem execução.');
   { const cg=osCargasVivas(c,id); if(cg.length) throw new Error('Cancelar recusado: a '+id+' tem carga '+cg.map(g=>g.id+' '+String(g.st).toLowerCase()).join(', ')+'. Colheita com carga é fato executado: estorne a carga recebida ou descarte a carga a pesar (com motivo) em Produção › Cargas e recebimento antes de cancelar.'); }
-  const r=o.req&&c.reqs[o.req];
+  cx=osc_cancTxt(c,id,cx); const cust=osc_cancCust(c,id).length>0; const r=o.req&&c.reqs[o.req];
   if(r){ if(o.reservado) r.itens.forEach(it=>{ const l=c.lotes[it.prod+'|'+it.lote]; const res=Math.max(0,it.solicitado-it.entregue); if(l&&res>0) l.reservado=Math.max(0,l.reservado-res); }); r.estado='Cancelada'; }
-  const hr=cenAgora(); o.etapa='Canceladas'; o.reservado=false; o.selos=[]; osc_txt(o,{canPor:quem,canEm:hr,cond:'Cancelada sem execução por '+quem+' às '+hr+': '+mot+'. '+cx[1],dono:'',prazo:'',insx:cx[2]});
+  const hr=cenAgora(); o.etapa='Canceladas'; o.reservado=false; o.selos=[]; osc_txt(o,{canPor:quem,canEm:hr,cond:'Cancelada sem execução por '+quem+' às '+hr+': '+mot+'. '+cx[1],dono:cust?CEN_CONC_RESP:'',prazo:cust?'receber a devolução':'',insx:cx[2]});
   return {msg:(id+' cancelada sem execução. '+cx[1]).trim()+' Cancelada por '+quem+'.'}; }
 /* cargas da O.S. de colheita que ainda contam (revisão A-04): a pesar (com ou sem sinal) ou recebidas; estornada e descartada não */
 function osCargasVivas(c,id){ return (typeof prCargasOS==='function')?prCargasOS(c,id).filter(g=>g.st==='A pesar'||g.st==='Recebida'):[]; }
@@ -498,6 +518,9 @@ function osProx(o,PF){
   if(!b&&P.fn==='liberar'&&!o.agua){ const e=o.libErr||''; if(e) b=o.legal?{acao:'liberar',t:'Liberar bloqueado: '+e,q:OS_AGRO+', ajustando produto ou dose antes de liberar.',legal:true}:o.total0?{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Ana (agrônoma), ajustando a dose ou a área antes de liberar.',total0:true}
       :{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Suprimentos, recebendo o insumo no Estoque.',h:'EST.dc.html',hl:'Ver saldos no Estoque'}; }
   if(!b&&P.fn==='encerrar'&&o.encM) b=osEncBloq(o);
+  if(!b&&o.etapa==='Canceladas'){ const cu=o.r?o.r.itens.filter(i=>(i.custodia||0)>1e-6):[];   /* revisão do 853a6a8, achado 7: a custódia não fica sem destino */
+    if(cu.length) b={acao:'',tone:'yellow',h:'EST.dc.html',hl:'Receber devolução',t:'Custódia a devolver: '+cu.map(i=>nd(i.custodia)+' '+i.un+' de '+i.prod+' com '+(i.quem||o.resp)).join(', ')+'.',
+      q:CEN_CONC_RESP+' recebe a devolução no Estoque; até lá o material conta como suprimento na demanda de insumos.'}; }
   if(!b&&P.fn==='iniciar'&&!o.agua) b=osIniErro(o,o.r);
   if(!b&&P.fn==='apontar'&&o.esg) b=o.esg;   // componente esgotado: Dispensar saldo segue no painel
   if(!b&&(P.fn==='liberar'||P.fn==='iniciar')&&o.carB) b=Object.assign({},o.carB,{acao:P.fn});   // carência (MAPA-CARENCIA-LMR-20261003)
@@ -731,7 +754,8 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   v.pan_disgo=()=>self.setState({pa:{id:o.id,fn:'dispensar',ha:String(apMax).replace('.',','),motivo:'',err:''}});
   // (confirmação, aviso final, nova situação do insumo): a seção Insumos acompanha o que o aviso diz
   const cx=o.canc||((o.reservado&&insTxt)?['Libera a reserva no Estoque: '+insTxt+'.','Reserva liberada no Estoque: '+insTxt+'.','Reserva liberada no Estoque']:((o.ins||[]).length?['Nenhum insumo foi reservado.','Nenhum insumo estava reservado.','Nada reservado · ordem cancelada']:['','','']));
-  v.pan_cct='Cancelar '+o.id+' sem execução: a ordem sai do quadro e fica em Canceladas. '+cx[0];
+  const cxv=osc_cancTxt(cenGet(),o.id,cx);   /* com material entregue: a confirmação diz o que fica em custódia (revisão do 853a6a8, achado 7) */
+  v.pan_cct='Cancelar '+o.id+' sem execução: a ordem sai do quadro e fica em Canceladas. '+cxv[0];
   v.pan_cansave=()=>{ const cur=self.state.pa; const mot=String(cur.motivo||'').trim();
     if(!mot){ self.setState({pa:Object.assign({},cur,{err:'Informe o motivo do cancelamento.'})}); return; }
     osRun(self,c=>osc_cancelar(c,o.id,mot,cx,g2perfil()),{pa:null}); };
