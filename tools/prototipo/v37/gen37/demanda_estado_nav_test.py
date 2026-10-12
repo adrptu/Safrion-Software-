@@ -12,6 +12,7 @@ Cada caso repete pela tela a reprodução da revisão (ACHADOS-v1) e falha no 85
   Q3 · laudo liberado: coberto, sem qualidade pendente
   A7 · turno fechado no app sem sinal (50 ha, 25 L na OS-0421) não muda a compra até o envio: a demanda usa a custódia que a O.S. mostra (65 L)
   R1 · entregar 64 L à OS-0424 (a REQ-039 reservou 65 L) não muda a Safrinha: a reserva que sobra não é demanda de ninguém
+  F1 · liberar a OS-0501 (Lagoa Grande) com lotes da Santa Rita conta a reserva uma vez em cada fazenda e a entrega não muda nenhuma das duas
 Uso: python3 demanda_estado_nav_test.py   (depois do build e do montar_render; capturas q_ctl4e_*.png em _probe/)"""
 import sys, os, time, subprocess, json
 HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
@@ -137,6 +138,18 @@ try:
     r0=safler(['Fungicida A'],'S27SF'); est_secao(2); er=est_row('REQ-039','Fungicida A'); setv('#fx_g_ent_qtd','64'); clk('Salvar','aside[role=dialog]',w=.8); tr1=T(); r1=safler(['Fungicida A'],'S27SF')
     chk('R1 reserva que sobra (achado 5, S3): entregar 64 L à OS-0424 (REQ-039 reservou 65 L) não muda a Safrinha 2027 — Fungicida A, total e primária iguais (no 853a6a8: 22,98 → 23,98 L, +R$ 145)',
         er=='ok' and '64 L de Fungicida A entregues' in tr1 and r1==r0,(tr1,r0,r1))
+    # ================= F1 · reserva entre fazendas: OS-0501 (Lagoa Grande) liberada com lotes da Santa Rita =================
+    J("localStorage.clear(); sessionStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana')")
+    GL=['Glifosato 480','Óleo mineral']; num=lambda t: float(t.split(' ')[0].replace('.','').replace(',','.')) if t and t[0].isdigit() else 0.0
+    a0=safler(GL); b0=safler(GL,'LG2627')
+    ir('OS.dc.html',w=1.6); rl5=J("(()=>{ const X=window.__cen; const r=X.cenMudar(null,c=>X.osc_liberar(c,'OS-0501',false,null,{k:'Ana'})); return r.erro||r.msg; })()") or ''
+    a1=safler(GL); b1=safler(GL,'LG2627'); foto('f1_saf_lg_liberada')
+    est_secao(2); est_row('OS-0501','Glifosato 480'); clk('Salvar','aside[role=dialog]',w=.8); tg=T(); est_row('OS-0501','Óleo mineral'); clk('Salvar','aside[role=dialog]',w=.8); to=T()
+    a2=safler(GL); b2=safler(GL,'LG2627')
+    soma=lambda a,b,n: round(num(a[n][0])+num(b[n][0]),1)
+    chk('F1 reserva entre fazendas (achado 3, S3): liberar a OS-0501 (Lagoa Grande) com lotes do Almox. defensivos da Santa Rita move a compra entre as fazendas sem contar duas vezes (Glifosato SR 20,0 → 167,9 L e LG 293,3 → 145,4 L; a soma não muda) e entregar não muda nenhuma das duas (no 853a6a8: LG não mudava na liberação e baixava na entrega)',
+        'liberada' in rl5 and 'entregues' in tg and 'entregues' in to and a1['Glifosato 480'][0]=='167,9 L' and b1['Glifosato 480'][0]=='145,4 L'
+        and all(soma(a1,b1,n)==soma(a0,b0,n) for n in GL) and a2==a1 and b2==b1,(rl5,a0,b0,a1,b1,a2,b2))
     col(); chk('E1 sem erro JS nas telas abertas (Planejar safra, Estoque, O.S., Compra, Mapa)',ERR==[],ERR[:5])
 finally:
     c.close(); srv.terminate()

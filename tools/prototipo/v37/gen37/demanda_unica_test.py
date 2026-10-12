@@ -507,5 +507,17 @@ const e=CL(CEN0); OUT.e0=D(e); cenEntregar(e,'REQ-039','Fungicida A',64,'Marcos'
     return (g('d0')==20 and g('d1')==20 and g('d2')==20 and g('d3')==0 and r['d4']==r['d3'] and r['res']>=160-1e-6 and r['e1']==r['e0'] and L(py,'Glifosato 480') in (0,None),
             (g('d0'),g('d1'),g('d2'),g('d3'),g('d4'),r['res'],r['e0']['S27SF']['liq'].get('Fungicida A'),r['e1']['S27SF']['liq'].get('Fungicida A'),L(py,'Glifosato 480')))
 caso('I9 reserva remanescente (achado 5, S3): a OS-0430 aponta os 160 ha com os 160 L entregues e os outros 160 L reservados deixam de ser demanda já no apontamento (Glifosato 20 → 0 L), sem esperar a conferência; entregar 64 L à OS-0424 (REQ-039 pede 65) não muda a Safrinha (no 853a6a8: 20 L até a conferência; Fungicida A 22,98 → 23,98 L)',i9)
+def i10():
+    # reserva entre fazendas conta uma vez em cada (achado 3): a OS-0501 (Lagoa Grande) reserva Glifosato e Óleo no Almox. defensivos da Santa Rita
+    r=motor("""OUT.d0=D(c); cenLiberar(c,'OS-0501'); OUT.d1=D(c); OUT.c1=CL(c); const rid=c.ordens['OS-0501'].req; OUT.lot=c.reqs[rid].itens.map(i=>c.lotes[i.prod+'|'+i.lote].local);
+cenEntregar(c,rid,'Glifosato 480',147.93,'João',PAULA); cenEntregar(c,rid,'Óleo mineral',24.66,'João',PAULA); OUT.d2=D(c);""")
+    g=lambda k,s,n: r[k][s]['liq'].get(n,0); sm=lambda k,n: round(g(k,'S2627',n)+g(k,'LG2627',n),2)
+    py=D2.demanda('LG2627',cen=r['c1']); pys=D2.demanda('S2627',cen=r['c1'])
+    ok=(set(r['lot'])=={'Almox. defensivos'} and r['d2']==r['d1'] and all(sm('d1',n)==sm('d0',n) for n in ('Glifosato 480','Óleo mineral'))
+        and g('d1','LG2627','Glifosato 480')==145.41 and g('d1','S2627','Glifosato 480')==167.93 and L(py,'Glifosato 480')==145.41 and L(pys,'Glifosato 480')==167.93
+        and any(i['calc'].endswith('− 147,93 L reservados em Almox. defensivos (Santa Rita)') and i['q']==0 for o in D2.os_dem(r['c1']) if o['id']=='OS-0501' for i in o['itens'] if i['p']=='Glifosato 480'))
+    return (ok,dict(lot=r['lot'],sr=(g('d0','S2627','Glifosato 480'),g('d1','S2627','Glifosato 480'),g('d2','S2627','Glifosato 480')),lg=(g('d0','LG2627','Glifosato 480'),g('d1','LG2627','Glifosato 480'),g('d2','LG2627','Glifosato 480')),
+                    soma=(sm('d0','Glifosato 480'),sm('d1','Glifosato 480')),py=(L(py,'Glifosato 480'),L(pys,'Glifosato 480'))))
+caso('I10 reserva entre fazendas (achado 3, S3): liberar a OS-0501 (Lagoa Grande) com lotes da Santa Rita move a compra de uma fazenda para a outra sem contar duas vezes (Glifosato SR 20 → 167,93 L, LG 293,34 → 145,41 L; a soma não muda) e a entrega não muda nenhuma das duas; a conta da OS-0501 diz "− 147,93 L reservados em Almox. defensivos (Santa Rita)"; Python = JS (no 853a6a8: os 147,93 L contavam nas duas e a entrega baixava a LG)',i10)
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas'); [print('  -',f) for f in FAIL]
 sys.exit(1 if FAIL else 0)

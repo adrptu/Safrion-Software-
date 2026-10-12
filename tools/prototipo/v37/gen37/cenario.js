@@ -70,9 +70,9 @@ function cenDisp(l) { return Math.max(0, (l.fisico || 0) - (l.quarentena || 0) -
 // a custódia aqui é a que a O.S. mostra (osReqVis: a baixa do aparelho volta até o envio), e a demanda não muda até o sinal (dano evitado: a
 // Safrinha passava de 23,0 para 47,5 L de Fungicida A e a Safra 2026/27 pedia complemento enquanto o celular estava sem sinal).
 const CEN_FASES_PEND = ['A liberar', 'Liberadas', 'Em execução'];
-// Revisão do 853a6a8 (achado 5, S3) · res: reservas ainda presas no lote para a requisição (cenResPropria), com a parte útil ef = até o need
-// (fz: lote → fazenda e fo: fazenda da ordem, opcionais, põem os lotes da fazenda da ordem primeiro). Reserva acima do need (a ordem já não
-// precisa) não é demanda de ninguém.
+// Revisão do 853a6a8 (achados 3 e 5, S3) · res: reservas ainda presas no lote para a requisição (cenResPropria), com a parte útil ef = até o need,
+// primeiro os lotes da fazenda da ordem (fz: lote → fazenda; fo: fazenda da ordem). Reserva acima do need (a ordem já não precisa) não é demanda de
+// ninguém; reserva em lote de outra fazenda cobre a ordem na fazenda dela e é demanda na fazenda do lote (conta uma vez em cada).
 function cenOsSup(c, co, r, fz, fo) { const out = {}; if (!co) return out; r = r || ((c && c.reqs) || {})[co.req || ''] || null;
   const P = (p) => out[p] || (out[p] = { bruto: 0, cust: 0, need: 0, sobra: 0, res: [] });
   if (CEN_FASES_PEND.indexOf(co.etapa) >= 0) { const real = co.realizado || 0; const saldo = real ? (co.saldo || 0) : (co.area || 0);
@@ -96,12 +96,15 @@ function cenOsDem(c, b) { b = b || {}; const out = []; const vistos = {}; const 
   const n2 = (x) => Number(x || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const na = (x) => Number(x || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
   const safDe = (faz, lab) => ((b.safs || []).find(s => s.faz === faz && String(s.nome).endsWith(String(lab || ''))) || {}).id || '';
+  const lf = b.locFaz || null; const fzL = lf ? (l => lf[l.local] || b.faz0 || 'Santa Rita') : null;   // local do lote → fazenda (dados2.os_base)
   const um = (x, co) => { if (!co || co.etapa === 'Canceladas') return;
     const itens = [];
-    if (CEN_FASES_PEND.indexOf(co.etapa) >= 0) { const real = co.realizado || 0; const saldo = real ? (co.saldo || 0) : (co.area || 0); const S = cenOsSup(c, co);
-      (co.ins || []).forEach(i => { const s = S[i.p] || { need: 0, cust: 0, bruto: 0 }; const cust = Math.min(s.cust, s.bruto); const k = cat[i.p] || {};
-        itens.push({ p: i.p, q: s.need, un: i.un, g: k.g || '', preco: k.preco || 0,
-          calc: n2(i.dose) + ' ' + i.un + '/ha × ' + na(saldo) + ' ha' + (cust > 0 ? ' − ' + na(cust) + ' ' + i.un + ' em custódia' : '') }); }); }
+    if (CEN_FASES_PEND.indexOf(co.etapa) >= 0) { const real = co.realizado || 0; const saldo = real ? (co.saldo || 0) : (co.area || 0); const S = cenOsSup(c, co, null, fzL, x.faz);
+      (co.ins || []).forEach(i => { const s = S[i.p] || { need: 0, cust: 0, bruto: 0, res: [] }; const cust = Math.min(s.cust, s.bruto); const k = cat[i.p] || {};
+        const ox = fzL ? s.res.filter(y => fzL(y.l) !== x.faz && y.ef > 1e-9) : []; const rx = ox.reduce((a, y) => a + y.ef, 0);   // reservado para ela em lote de outra fazenda
+        itens.push({ p: i.p, q: Math.max(0, cenQtd(s.need - rx, 1)), un: i.un, g: k.g || '', preco: k.preco || 0,
+          calc: n2(i.dose) + ' ' + i.un + '/ha × ' + na(saldo) + ' ha' + (cust > 0 ? ' − ' + na(cust) + ' ' + i.un + ' em custódia' : '')
+            + (rx > 1e-9 ? ' − ' + na(rx) + ' ' + i.un + ' reservados em ' + ox.map(y => y.l.local + ' (' + fzL(y.l) + ')').filter((v, j, a) => a.indexOf(v) === j).join(', ') : '') }); }); }
     if (!(x.chaves || []).length && !itens.some(i => i.q > 0)) return;
     out.push({ id: x.id, faz: x.faz, saf: x.saf, chaves: (x.chaves || []).slice(), area: co.area || 0, dt: (x.ini && x.ini > hoje) ? x.ini : hoje, etapa: co.etapa, t: x.t, loc: (x.loc || []).slice(), itens }); };
   (b.ords || []).forEach(x => { vistos[x.id] = 1; um(x, ((c && c.ordens) || {})[x.id]); });
@@ -140,12 +143,12 @@ function cenEstDem(c, faz, b, osd) { b = b || {}; const lf = b.locFaz || {}; con
     const l0 = (r.itens || []).map(it => lotes[it.prod + '|' + it.lote]).find(Boolean); const fo = (b.ofaz || {})[r.os] || (l0 ? fz(l0) : (b.faz0 || 'Santa Rita'));
     if (fo === faz) { const S = cenOsSup(c, o, r);
       Object.keys(S).forEach(p => { if (S[p].sobra > 1e-9) sobra.push({ item: p, q: S[p].sobra, t: rid + ' · ' + r.os + ' (' + (o.etapa === 'Canceladas' ? 'cancelada' : (CEN_FASES_PEND.indexOf(o.etapa) >= 0 ? 'sobra da ordem' : o.etapa.toLowerCase())) + ')', chave: r.os, faz }); }); }
-    if (r.estado === 'Cancelada' || CEN_FASES_PEND.indexOf(o.etapa) < 0) return; const od = (osd || []).find(x => x.id === r.os); const S = cenOsSup(c, o, r);
-    // revisão do 853a6a8: a reserva conta pela parte útil (ef: até o que a ordem ainda tira; achado 5). Da mesma fazenda e na demanda: conta uma vez
-    // com a ordem (DEM-04)
+    if (r.estado === 'Cancelada' || CEN_FASES_PEND.indexOf(o.etapa) < 0) return; const od = (osd || []).find(x => x.id === r.os); const S = cenOsSup(c, o, r, fz, fo);
+    // revisão do 853a6a8: a reserva conta pela parte útil (ef: até o que a ordem ainda tira; achado 5) e a de uma ordem de outra fazenda conta só aqui,
+    // na fazenda do lote — lá ela já cobre a ordem (cenOsDem; achado 3). Da mesma fazenda e na demanda: conta uma vez com a ordem (DEM-04)
     (r.itens || []).forEach(it => { const l = lotes[it.prod + '|' + it.lote]; if (!l || fz(l) !== faz) return; const y = ((S[it.prod] || {}).res || []).find(z => z.it === it);
       if (!y || !(y.ef > 1e-9)) return; const mesma = fo === faz && !!od;
-      reservas.push({ item: it.prod, q: mesma ? y.q : y.ef, dt: od ? od.dt : (b.hoje || ''), t: 'Reserva ' + rid + ' · ' + r.os + (o.talhao ? ' (' + o.talhao + ')' : ''), chave: r.os, faz }); }); });
+      reservas.push({ item: it.prod, q: mesma ? y.q : y.ef, dt: od ? od.dt : (b.hoje || ''), t: 'Reserva ' + rid + ' · ' + r.os + (o.talhao ? ' (' + o.talhao + ')' : '') + (fo !== faz ? ' · ' + fo : ''), chave: r.os, faz }); }); });
   const rc = {}, vis = {};
   ((c && c.movs) || []).forEach(m => { const e = m.tipo === 'recebimento-nf' && m.estRec; if (!e || vis[e.id]) return; vis[e.id] = 1;
     const p = String(e.ped || '').split(' · ')[0].trim(); if (p) rc[p] = (rc[p] || 0) + (Number(e.conf) || 0); });
