@@ -13,6 +13,8 @@ Cada caso repete pela tela a reprodução da revisão (ACHADOS-v1) e falha no 85
   A7 · turno fechado no app sem sinal (50 ha, 25 L na OS-0421) não muda a compra até o envio: a demanda usa a custódia que a O.S. mostra (65 L)
   R1 · entregar 64 L à OS-0424 (a REQ-039 reservou 65 L) não muda a Safrinha: a reserva que sobra não é demanda de ninguém
   F1 · liberar a OS-0501 (Lagoa Grande) com lotes da Santa Rita conta a reserva uma vez em cada fazenda e a entrega não muda nenhuma das duas
+  D3 · SU-03det e MB-05 leem a mesma demanda viva do Planejar safra: devolução bloqueada (qualidade pendente) e laudo reprovado (pendência de compra,
+       conflito e "Registrar divergência") aparecem nas três telas com o mesmo número; nunca "sem pendência de compra" com a demanda pedindo complemento
 Uso: python3 demanda_estado_nav_test.py   (depois do build e do montar_render; capturas q_ctl4e_*.png em _probe/)"""
 import sys, os, time, subprocess, json
 HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
@@ -23,7 +25,7 @@ R=os.path.join(HERE,'_render'); OUT=os.path.join(HERE,'_probe'); os.makedirs(OUT
 p=free(); srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(0.8)
 OK=[]; FAIL=[]
 def chk(nome,cond,det=''):
-    (OK if cond else FAIL).append(nome); print(('OK    · ' if cond else 'FALHA · ')+nome+('' if cond else f' · {str(det)[:600]}'),flush=True)
+    (OK if cond else FAIL).append(nome); print(('OK    · ' if cond else 'FALHA · ')+nome+('' if cond else f' · {str(det)[:2500]}'),flush=True)
 c=Chrome(port=free()); J=c.js; B=f'http://127.0.0.1:{p}/'
 c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__err=[];addEventListener('error',e=>window.__err.push(String(e.message)));addEventListener('unhandledrejection',e=>window.__err.push(String(e.reason)));"})
 ERR=[]
@@ -75,6 +77,7 @@ try:
     def motivo(txt):
         J(f"(()=>{{const i=document.querySelector('textarea[aria-label=\"Motivo do cancelamento\"]'); if(!i) return; const P=HTMLTextAreaElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,{json.dumps(txt)}); i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"); time.sleep(.3)
     painel=lambda: (J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText") or '').replace('\n',' · ')
+    sem_est=lambda x: {k:([v[0],v[2]] if isinstance(v,list) else v) for k,v in x.items()}   # a entrega muda o estoque apto do almoxarifado, não a compra
     c.size(1440,1000); ir('SAF.dc.html'); J("localStorage.clear(); sessionStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana')")
     # ================= K1 · custódia é suprimento: entrega, cancelamento e devolução da OS-0425 =================
     n0=safler(['NPK 20-05-20']); m0=mapa('C1')
@@ -137,7 +140,7 @@ try:
     J("localStorage.clear(); sessionStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana')")
     r0=safler(['Fungicida A'],'S27SF'); est_secao(2); er=est_row('REQ-039','Fungicida A'); setv('#fx_g_ent_qtd','64'); clk('Salvar','aside[role=dialog]',w=.8); tr1=T(); r1=safler(['Fungicida A'],'S27SF')
     chk('R1 reserva que sobra (achado 5, S3): entregar 64 L à OS-0424 (REQ-039 reservou 65 L) não muda a Safrinha 2027 — Fungicida A, total e primária iguais (no 853a6a8: 22,98 → 23,98 L, +R$ 145)',
-        er=='ok' and '64 L de Fungicida A entregues' in tr1 and r1==r0,(tr1,r0,r1))
+        er=='ok' and '64 L de Fungicida A entregues' in tr1 and sem_est(r1)==sem_est(r0),(tr1,r0,r1))
     # ================= F1 · reserva entre fazendas: OS-0501 (Lagoa Grande) liberada com lotes da Santa Rita =================
     J("localStorage.clear(); sessionStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana')")
     GL=['Glifosato 480','Óleo mineral']; num=lambda t: float(t.split(' ')[0].replace('.','').replace(',','.')) if t and t[0].isdigit() else 0.0
@@ -149,7 +152,27 @@ try:
     soma=lambda a,b,n: round(num(a[n][0])+num(b[n][0]),1)
     chk('F1 reserva entre fazendas (achado 3, S3): liberar a OS-0501 (Lagoa Grande) com lotes do Almox. defensivos da Santa Rita move a compra entre as fazendas sem contar duas vezes (Glifosato SR 20,0 → 167,9 L e LG 293,3 → 145,4 L; a soma não muda) e entregar não muda nenhuma das duas (no 853a6a8: LG não mudava na liberação e baixava na entrega)',
         'liberada' in rl5 and 'entregues' in tg and 'entregues' in to and a1['Glifosato 480'][0]=='167,9 L' and b1['Glifosato 480'][0]=='145,4 L'
-        and all(soma(a1,b1,n)==soma(a0,b0,n) for n in GL) and a2==a1 and b2==b1,(rl5,a0,b0,a1,b1,a2,b2))
+        and all(abs(soma(a1,b1,n)-soma(a0,b0,n))<=0.15 for n in GL) and sem_est(a2)==sem_est(a1) and sem_est(b2)==sem_est(b1),(rl5,tg,to,a0,b0,a1,b1,a2,b2))   # a tela arredonda a 0,1 L cada fazenda
+    # ================= D3 · SU-03det e MB-05 da mesma fonte =================
+    J("localStorage.clear(); sessionStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana')")
+    def su03det(): ir('SU-03det.dc.html',w=1.6); return (J("document.body.innerText") or '').replace('\n',' · ')
+    def mb05(): ir('MB-05.dc.html',w=1.6); clk('Almoxarife',w=.6); return (J("document.body.innerText") or '').replace('\n',' · ')
+    su0=su03det(); mb0=mb05()
+    est_secao(3); ed=est_row('REQ-035','Fungicida A'); setv('#fx_g_dev_qtd','30'); setv('#fx_g_dev_cond','Bloqueada para inspeção · vai para quarentena'); setv('#fx_g_dev_obs','Galão sem lacre (teste CTL-4)'); clk('Salvar','aside[role=dialog]',w=.8); tdv=T()
+    s1=safler(['Fungicida A']); su1=su03det(); foto('d3_su03det_qualidade'); mb1=mb05(); foto('d3_mb05_qualidade')
+    import re as _re
+    cq=(_re.search(r'Qualidade pendente · ([\d.,]+ L)',s1['Fungicida A'][2]) or [None,''])[1]
+    est_secao(4); J(f"(()=>{{const r=({FIND})(['F26-02']); if(!r) return; const b=[...r.querySelectorAll('button')].find(b=>/Liberar após inspeção/.test(b.innerText)); b&&b.click();}})()"); time.sleep(.5)
+    setv('#est-laudo','LAB-9'); setv('#est-laudo-mot','lacre violado'); rr3=clk('Reprovar com o laudo','[role=group][aria-label="Liberar quarentena com laudo"]',w=.8); trp=T()
+    s2=safler(['Fungicida A']); su2=su03det(); foto('d3_su03det_pendencia'); mb2=mb05(); foto('d3_mb05_conflito')
+    lq=s2['Fungicida A'][0]
+    chk('D3 SU-03det e MB-05 da mesma fonte (achado 6, S3): na semente "Sem pendência de compra" nas duas; com a devolução bloqueada as duas mostram "Qualidade pendente · '+(cq or '?')+'" como o Planejar safra; com o laudo reprovado, "Pendência de compra · '+lq+'" no SU-03det e "Conflito de reserva" com "Registrar divergência" no MB-05, o mesmo número do Planejar safra (no 853a6a8: "sem pendência de compra" fixo da semente)',
+        'Sem pendência de compra' in su0 and 'Sem pendência de compra' in mb0 and 'devolvidos e bloqueados' in tdv and cq and 'Qualidade pendente · '+cq in su1 and 'Qualidade pendente · '+cq in mb1
+        and 'Sem pendência de compra' not in su1 and rr3=='ok' and 'reprovados' in trp and 'Complemento' in s2['Fungicida A'][2] and lq!='0,0 L' and 'Pendência de compra · '+lq in su2
+        and 'Sem pendência de compra' not in su2 and 'Conflito de reserva' in mb2 and 'Registrar divergência' in mb2 and 'pendência de compra de '+lq in mb2,
+        dict(ok=['Qualidade pendente · '+cq in su1,'Qualidade pendente · '+cq in mb1,'Sem pendência de compra' not in su1,'Pendência de compra · '+lq in su2,'Sem pendência de compra' not in su2,'Conflito de reserva' in mb2,'Registrar divergência' in mb2,'pendência de compra de '+lq in mb2,rr3],
+             su0='Sem pendência de compra' in su0,mb0='Sem pendência de compra' in mb0,tdv=tdv,s1=s1,su1=[x for x in su1.split(' · ') if 'pend' in x.lower()][:4],mb1=[x for x in mb1.split(' · ') if 'pend' in x.lower()][:4],
+             trp=trp,s2=s2,su2=[x for x in su2.split(' · ') if 'pend' in x.lower()][:4],mb2=[x for x in mb2.split(' · ') if 'onflito' in x or 'pend' in x.lower()][:5]))
     col(); chk('E1 sem erro JS nas telas abertas (Planejar safra, Estoque, O.S., Compra, Mapa)',ERR==[],ERR[:5])
 finally:
     c.close(); srv.terminate()

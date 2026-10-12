@@ -66,8 +66,7 @@ REQ=next(r for r in D2.REQUISICOES if r['id']=='REQ-031')
 R38=next(r for r in D2.REQUISICOES if r['id']=='REQ-038')
 F02=next(l for l in D2.LOTES if l['lote']=='F26-02')
 F02_LIVRE=F02['fisico']-F02['quarentena']-F02['reservado']                            # 480 L
-_DFA=D2.demanda('S2627')['Fungicida A']   # CTL-4: a mesma demanda da Compra (plano sem a parte das O.S. + pendente das O.S.), nunca número fixo
-PLAN_FA=round(_DFA['bruta'],1); PEND_FA=round(_DFA['liq'],1)                          # uso da safra de hoje em diante · pendência na SOL-2026-07
+
 EQ421='Marcos · Pulverizador PJ-3030 + Trator 03'
 CALDA=dict(litros='2.000', vazao='120 L/ha', dose='0,5 L/ha de Fungicida A', cobre='16,7 ha', por_tanque='8,3 L')
 P,POL=D.PIVO,D.POLITICA_AGUA
@@ -292,12 +291,12 @@ def ffield(label,fid,val,setfn,err,hint='',big=False,area=False,ph=''):
             + (IF(err+'_has',f'<span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H(err)}</span>') if err else '') + '</div>')
 
 _PRIM_RE=re.compile(r'(<div style="padding: 12px 20px 28px;[^"]*">)<a href="[^"]*" style="([^"]*)">.*?</a>(</div>)',re.S)
-def emit(fid,title,sub,status,primary,body,H_=900,fname=None,back='MB-01.dc.html',primary_href=None,js='',dyn_status=False,prim=None,cen=False,dyn_head=None,sem_prim=False):
+def emit(fid,title,sub,status,primary,body,H_=900,fname=None,back='MB-01.dc.html',primary_href=None,js='',dyn_status=False,prim=None,cen=False,dyn_head=None,sem_prim=False,pre_extra=''):
     """Gera a tela. dyn_status: selo do cabeçalho vem de v.hdr_* (JS). prim: variantes do botão primário
     [(condição|None,'a'|'b'|'ac',rótulo,href|função|(href,função))] — link navega, botão executa na própria tela, 'ac' = link que também
     executa (ex.: escolher a ordem antes de abrir o detalhe). cen: tela ligada ao cenário compartilhado (cenario.js_prefixo() + JS do app).
     dyn_head: título do <title> quando título e subtítulo do cabeçalho vêm de v.hdr_ttl / v.hdr_sub."""
-    pre=(cenario.js_prefixo()+JS_BASE+MBAPP_JS) if cen else JS_BASE
+    pre=((cenario.js_prefixo()+JS_BASE+MBAPP_JS) if cen else JS_BASE)+pre_extra   # pre_extra: ex. a demanda viva (dados2.js_dem_viva) no MB-05
     head=' cenOuvir(self); const c=cenGet(); mbSig(self,v,c);' if cen else ''
     EXTRAJS[0]=pre+'const M='+json.dumps(MS,ensure_ascii=False)+';\nfunction EXTRAVALS(self,v){ const s=self.state; SAY(self,v,M);'+head+'\n'+js+'\n}'
     MS.clear()
@@ -669,17 +668,26 @@ const ocd=done&&(c.ocorr||[]).find(x=>x.id===done); DCH(v,'hdr',done?(ocd&&!ocd.
           kv('Produto',f'{R38["item"]} · {nf(R38["solicitado"])} kg (12 kg/ha × 95 ha)'),
           chips(chip('Aguardando liberação da O.S.','yellow'),chip('Saldo apto 0 kg','red')),
           btns(say('Conferir e entregar · bloqueado',f'Bloqueado: a {R38["os"]} aguarda a liberação por Ana (agrônoma) e a {R38["item"]} não tem saldo apto (0 kg) — nada foi separado.','alert','Ver por que não pode entregar'))],state='yellow')
-      + card(f'{"Conflito de reserva" if PEND_FA>0.05 else "Reserva da safra"} · lote {F02["lote"]} · {F02["item"]}',[
-          kv('Saldo',f'{nf(F02["fisico"])} L físicos · {F02["reservado"]} L reservados (OS-0424) · <b>{nf(F02_LIVRE)} L livres</b>'),
-          kv('Conflito',f'reserva planejada da safra pediu {nf(PLAN_FA,1)} L → nada reservado · pendência de {nf(PEND_FA,1)} L na SOL-2026-07') if PEND_FA>0.05 else
-          kv('Safra',f'uso de hoje em diante {nf(PLAN_FA,1)} L (O.S. abertas pelo pendente + plano sem O.S.) · sem pendência na SOL-2026-07: o estoque apto cobre'),
-          chips(chip('Conflito · decide o planejamento','red') if PEND_FA>0.05 else chip('Sem pendência de compra','green'))]
-          # revisão do CTL-4 (S4): sem pendência não há conflito a registrar; congelar reservas sem conflito travaria a entrega da OS-0424 à toa
-          +([btns(say('Registrar divergência','Divergência registrada com dono (planejamento) e prazo · reservas congeladas até a decisão — nada foi entregue.','alert','Registrar a divergência física do lote'))] if PEND_FA>0.05 else []),
-          state='red' if PEND_FA>0.05 else 'green')
+      # revisão do 853a6a8 (achado 6, S3): lote, uso da safra e pendência de compra AO VIVO, da mesma demanda do Planejar safra e da Compra
+      # (dados2.js_dem_viva) — nunca "sem pendência" da semente com a demanda pedindo complemento. Sem pendência não há conflito a registrar
+      # (revisão do CTL-4, S4: congelar reservas sem conflito travaria a entrega da OS-0424 à toa).
+      + IF('mbfa_conf',card(f'Conflito de reserva · lote {F02["lote"]} · {F02["item"]}',[
+          kv('Saldo',H('mbfa_saldo')),
+          kv('Conflito','a demanda da safra pede '+H('mbfa_plan')+' de hoje em diante · pendência de compra de '+H('mbfa_pend')+' (complemento no Planejar safra)'),
+          chips(chip('Conflito · decide o planejamento','red')),
+          btns(say('Registrar divergência','Divergência registrada com dono (planejamento) e prazo · reservas congeladas até a decisão — nada foi entregue.','alert','Registrar a divergência física do lote'))],state='red'))
+      + IF('mbfa_ok',card(f'Reserva da safra · lote {F02["lote"]} · {F02["item"]}',[
+          kv('Saldo',H('mbfa_saldo')),
+          kv('Safra','uso de hoje em diante '+H('mbfa_plan')+' (O.S. abertas pelo pendente + plano sem O.S.) · '+H('mbfa_okt')),
+          chips(IF('mbfa_cond',chip(H('mbfa_condt'),'yellow'))+IF('mbfa_semp',chip('Sem pendência de compra','green')))],state='green'))
       + note(f'<b style="color:{INK};">{O419["id"]} · água</b> não aparece aqui: água só-água não cria fila nem documento de movimentação de produtos.'))
     corpo=tabs+IF('r0',operador)+IF('r1',almox)
     js=f'''const r0=(s.role||0)===0; v.r0=r0; v.r1=!r0;
+{{ const fa=demViva('Fungicida A')||{{liq:0,cond:0,bruta:0}}; const lf=c.lotes['Fungicida A|F26-02']||{{fisico:0,reservado:0,quarentena:0}};   /* a mesma demanda do Planejar safra e da Compra, viva */
+  const n1=(x)=>Number(x||0).toLocaleString('pt-BR',{{minimumFractionDigits:1,maximumFractionDigits:1}})+' L';   /* o mesmo formato do Planejar safra e do SU-03det */
+  v.mbfa_conf=fa.liq>0.05; v.mbfa_ok=!v.mbfa_conf; v.mbfa_cond=fa.cond>0.05; v.mbfa_semp=!v.mbfa_cond; v.mbfa_plan=n1(fa.bruta); v.mbfa_pend=n1(fa.liq); v.mbfa_condq=n1(fa.cond); v.mbfa_condt='Qualidade pendente · '+n1(fa.cond);
+  v.mbfa_okt=v.mbfa_cond?(n1(fa.cond)+' dependem do laudo da quarentena; sem nova compra automática'):'sem pendência de compra: o estoque apto cobre';
+  v.mbfa_saldo=cenNum(lf.fisico)+' L físicos · '+cenNum(lf.reservado)+' L reservados'+(lf.quarentena>1e-9?' · '+cenNum(lf.quarentena)+' L em quarentena':'')+' · '+cenNum(cenDisp(lf))+' L livres'; }}
 [0,1].forEach(i=>{{ v['role'+i]=()=>self.setState({{role:i}}); v['rs'+i]='font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 0; cursor: pointer; white-space: nowrap; '+(((s.role||0)===i)?'background: {SURF}; color: {INK}; box-shadow: 0 1px 2px rgba(21,32,26,.12);':'background: transparent; color: {MUTED};'); }});
 // vindo do passo de uma ordem (MB-01 · MB-05.dc.html#OS-…): essa ordem vem primeiro e o selo a nomeia; sem âncora, a fila de sempre (AÇÃO v3.1)
 const foco=(typeof location!=='undefined'&&/^#OS-[0-9]+$/.test(location.hash||''))?location.hash.slice(1):''; const fila0=mbFila(c);
@@ -700,7 +708,7 @@ v.pc_go=()=>{{ if(pend[0]) cenMudar(self,c=>cenConfirmarRecebimento(c,pend[0].id
 if(r0) DCH(v,'hdr',(foco&&c.ordens[foco]?foco+' · ':'')+(pend.length?pend.length+(pend.length>1?' entregas a confirmar':' entrega a confirmar'):(cust.length?'insumos com você':'nada a confirmar')),pend.length?'yellow':'green');
 else DCH(v,'hdr','1 devolução hoje','yellow');'''
     emit('MB-05','Almoxarifado móvel','retiradas do operador e tarefas do almoxarife · por lote e embalagem',None,
-         'Confirmar recebimento',corpo,H_=1220,back='MB-01.dc.html',js=js,dyn_status=True,cen=True,
+         'Confirmar recebimento',corpo,H_=1220,back='MB-01.dc.html',js=js,dyn_status=True,cen=True,pre_extra=D2.js_dem_viva('S2627'),
          prim=[('p_conf','b',H('pc_lab'),'pc_go'),('p_back','a','Voltar à fila','MB-01.dc.html')])
 
     # ---- MB-05det · tarefa-âncora: receber devolução REQ-031 ----

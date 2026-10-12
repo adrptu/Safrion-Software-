@@ -1119,6 +1119,14 @@ def dem_entradas(safra,ajustes=None,planos_extra=None,cen=None):
 def dem_fixas(safra):
     """Partes fixas da demanda da safra, sem ordens e sem estoque: as telas juntam o cenário vivo (cenDemEntradas) — Mapa › Insumos e Compra."""
     return {k:v for k,v in dem_entradas(safra).items() if k not in ('fisico','quar','quarRep','quarRef','reservas','recebDt','sobra')}
+def js_dem_viva(safra):
+    """Revisão do 853a6a8 (achado 6, S3): telas que afirmam algo sobre a compra (SU-03det, MB-05) leem a MESMA demanda do Planejar safra e da
+    Compra — cal01.js + as partes fixas da safra (DEMV.x) + ordens e estoque do cenário vivo (cenDemEntradas(cenGet(), DEMV.x, DEMV.b)). Antes liam
+    dados2.demanda('S2627') da semente no build ("sem pendência de compra" com a demanda pedindo complemento)."""
+    import json as _j, os as _os
+    return ('\n'+open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'cal01.js'),encoding='utf-8').read()+'\nconst DEMV = '
+            +_j.dumps(dict(x=dem_fixas(safra),b=dict(osb=os_base(),est=est_base())),ensure_ascii=False).replace('</','<\\/')+';\n'
+            +"function demViva(nome){ const m=demFazenda(cenDemEntradas(cenGet(),DEMV.x,DEMV.b)); return m[nome]||null; }\n")
 def dem_restante(osd,occ):
     """DEM-01 · espelho de demRestante: {chave: {f: fração do plano sem O.S., txt}} pelo escopo da O.S. (atividade × talhões × safra dela)."""
     cob={}; txt={}

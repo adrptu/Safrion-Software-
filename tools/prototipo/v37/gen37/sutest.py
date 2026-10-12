@@ -79,7 +79,8 @@ try:
     # (antes: "pendência 0 L" com "Reservar 480 L com pendência"); a tela mostra a reserva da OS-0424 e o uso da safra que o lote cobre
     go('SU-03det.dc.html')
     hdr=J("document.querySelector('h1').parentElement.innerText"); bd=J("document.body.innerText")
-    ok('Sem conflito' in hdr and 'Uso da safra 2026/27 de hoje em diante' in bd and 'Sem pendência na SOL-2026-07' in bd,'SU-03det sem conflito: selo, uso da safra e sem pendência')
+    # revisão do 853a6a8 (achado 6): a pendência vem da demanda única viva (a mesma do Planejar safra e da Compra), não da semente no build
+    ok('Sem conflito' in hdr and 'Uso da safra 2026/27 de hoje em diante' in bd and 'Sem pendência de compra' in bd,'SU-03det sem conflito: selo, uso da safra e sem pendência')
     ok('com pendência' not in bd and 'Aguardar a compra' not in bd and 'pendência 0' not in bd,'SU-03det sem decisão de conflito inexistente')
     # ---------- SU-03 ----------
     go('SU-03.dc.html')
