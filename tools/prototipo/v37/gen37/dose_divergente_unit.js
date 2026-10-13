@@ -116,8 +116,10 @@ const IT = (c, rid, p) => c.reqs[rid].itens.find(i => i.prod === p);
      && pb.b && pb.b.t === 'Encerrar bloqueado: divergência de consumo/dose em revisão técnica · dia 1 · 2,4-D 806 planejado 160 L × informado 100 L.'
      && pb.b.q === 'Ana (agrônoma), na linha do apontamento: aceita com motivo ou registra a correção ou reaplicação.', [m.selos, m.dono, m.prazo, pb.b]);
   const rv = REVER(c, id, 1, 'aceitar', 'Subdose de 2,4-D compensada pelo glifosato; sem rebrote na vistoria', 'Ana');
+  // CONTROLE-02: revisão agronômica não substitui conferência diária por Paula.
+  const diario=MUD(c,x=>cdConferir(x,id,1,'conferir','Execução e evidência técnica conferidas',cdReferencia(x,id,1),'Paula'));
   const en2 = MUD(c, x => osc_encerrar(x, id));
-  ok('D07d revisada, o encerramento passa e o apontamento fica Conferido com a revisão', !rv.erro && !en2.erro && c.ordens[id].etapa === 'Encerradas'
+  ok('D07d revisada, o encerramento passa e o apontamento fica Conferido com a revisão', !rv.erro && !diario.erro && !en2.erro && c.ordens[id].etapa === 'Encerradas'
      && c.ordens[id].ap.find(a => a.dia === 1).st === 'Conferido' && c.ordens[id].ap.find(a => a.dia === 1).rev.dec === 'Aceita', [rv, en2, c.ordens[id].etapa]); }
 
 // ---- D08 · sem sinal: a divergência fica no apontamento do aparelho; selo e revisão só quando chega ao servidor, uma vez ----

@@ -253,10 +253,11 @@ function osMerge(b,co,c){ if(!co) return b;
       o.esg={acao:'apontar',t:'Apontar bloqueado: '+fz.t,q:fz.q}; esp=true; }
     const dpx=(co.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dpx.length){ o.dono=CEN_CONF_AP; o.prazo='decidir se o dia '+dpx.map(a=>a.dia).join(', ')+' é outro turno'; esp=true; }   // duplicidade retida: decide a conferência (CMD-09)
     else if(!o.esg&&cenDivAbertas(co).length){ o.dono=OS_AGRO; o.prazo='revisar a divergência de dose do dia '+cenDivAbertas(co).map(a=>a.dia).join(', '); esp=true; } }   // B-R8: revisão técnica pendente
+  if(['Em execução','Em conferência'].includes(co.etapa)&&(co.ap||[]).some(a=>a.conferenciaDia?.caso?.estado==='Em conferência')) o.selos=o.selos.filter(s=>s.t!=='Divergência diária pendente').concat([{t:'Divergência diária pendente',c:'yellow'}]);
   // conferência: o encerramento depende do cenário (apontamento aguardando sinal ou sobra em custódia)
-  if(co.etapa==='Em conferência'){ o.encM=cdPendente(c,co.id)||cenPodeEncerrar(c,co.id); esp=!!o.encM;   /* bloqueio do encerramento: carga, divergência, sinal, duplicidade ou sobra */
+  if(co.etapa==='Em conferência'){ o.encM=cenPodeEncerrar(c,co.id)||cdPendente(c,co.id); esp=!!o.encM;   /* bloqueio do encerramento: carga, divergência, sinal, duplicidade ou sobra */
     if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal|Conferência diária pendente/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
-    else if(/^Reveja a conferência diária/.test(o.encM)){ o.dono=CEN_CONF_AP; o.prazo='rever a conferência diária'; o.selos=o.selos.filter(s=>s.t!=='Conferência diária pendente').concat([{t:'Conferência diária pendente',c:'yellow'}]); }
+    else if(/^Conferência diária pendente/.test(o.encM)){ o.dono=CEN_CONF_AP; o.prazo='rever a conferência diária'; o.selos=o.selos.filter(s=>s.t!=='Conferência diária pendente').concat([{t:'Conferência diária pendente',c:'yellow'}]); }
     else if(/^Carga a pesar/.test(o.encM)){ const t='Carga a pesar';   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Produção › Recebimento e beneficiamento (Cargas) */
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]); o.dono=(typeof prRec==='function'?prRec(prFazDaOS(c,co)):'Recebimento'); o.prazo='pesar e receber a carga'; }
     else if(o.encM.indexOf(CEN_DIV)===0){ o.dono=OS_AGRO; o.prazo='revisar a divergência de dose'; }   /* B-R8: o selo vem do cenário (cenSeloDiv) */
@@ -330,7 +331,7 @@ function osTrilha(o,it){ if(!it||o.etapa==='Canceladas'||(!o.reservado&&!(it.ent
 function osLibErro(o,c0){ const c=c0||cenGet(); if(!c.ordens[o.id]) return ''; const k=cenClone(c);
   try { osc_libEfeito(k,o.id,false,o.janela); return ''; } catch (e) { return String(e.message||e); } }   /* o motivo do Estoque, da lei ou da carência; não o perfil */
 function osEncBloq(o){ const m=o.encM;
-  if(/^Reveja a conferência diária/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m,q:CEN_CONF_AP+' resolve na conferência do dia, abaixo em Apontamentos.'};
+  if(/^Conferência diária pendente/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m,q:CEN_CONF_AP+' resolve na conferência do dia, nos Apontamentos da O.S.'};
   if(String(m).indexOf(CEN_DIV)===0) return {acao:'encerrar',t:'Encerrar bloqueado: divergência de consumo/dose em revisão técnica · '+cenDivAbertas(o).map(a=>'dia '+a.dia+' · '+a.div.map(cenDivTxt).join('; ')).join(' | ')+'.',
     q:OS_AGRO+', na linha do apontamento: aceita com motivo ou registra a correção ou reaplicação.'};   /* B-R8 */
   if(/^Carga a pesar/.test(m)){ const g=(/CG-\d+/.exec(m)||[''])[0]; return {acao:'encerrar',t:'Encerrar bloqueado: '+m.replace(/\.$/,'')+'.',q:(o.dono||'Recebimento')+' pesa e recebe a carga (registrada por engano: descarta com motivo na mesma tela); a produção do talhão só fecha com ela.',h:'CARGA.dc.html'+(g?'#'+g:''),hl:'Pesar a carga'}; }   /* colheita (R-18) */
@@ -474,7 +475,7 @@ function osc_conferencia(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em execução
   return {msg:id+' enviada para conferência.'}; }
 // encerrar: só com apontamentos enviados e nada em custódia (cenPodeEncerrar); os apontamentos passam a conferidos
 function osc_encerrar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em conferência') throw new Error(id+' não está em conferência.');
-  const m=cdPendente(c,id)||cenPodeEncerrar(c,id); if(m) throw new Error('Encerrar bloqueado: '+m);
+  const m=cenPodeEncerrar(c,id)||cdPendente(c,id); if(m) throw new Error('Encerrar bloqueado: '+m);
   o.etapa='Encerradas'; o.selos=[]; (o.ap||[]).forEach(a=>{ if(a.st==='Provisório') a.st='Conferido'; });
   return {msg:id+' encerrada.'}; }
 // cancelar sem execução: a reserva ainda não entregue volta ao disponível do lote e a requisição fica cancelada

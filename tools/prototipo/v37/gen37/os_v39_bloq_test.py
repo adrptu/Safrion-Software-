@@ -4,6 +4,7 @@ sobra em custódia (OS-0430) mostram selo e dono fora do painel; rótulo único 
 import sys, os, time, json, datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from os_lib import Os
+from conferencia_diaria_nav_helpers import conferir_dias
 T = Os(); J = T.J; OS = 'OS-0430'
 VERM = 'rgb(180, 35, 24)'; AMAR = 'rgb(138, 90, 0)'
 def card(id_): return J(f"(()=>{{const k=[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].find(k=>k.innerText.trim().startsWith('{id_}')); return k?k.innerText.replace(/\\s+/g,' '):'';}})()") or ''
@@ -39,6 +40,8 @@ try:
     T.ok('Sobras a receber' not in l and 'Divergência de consumo/dose · Glifosato 480' in l and T.cel(OS, 'Quem resolve') == 'Ana (agrônoma)' and T.cel(OS, 'Próxima ação') == 'revisar a divergência de dose',
          'devolução recebida: selo de sobra sai; fica a divergência de dose com Ana (agrônoma)', l)
     T.mudar(f"return cenDivRever(c,'{OS}',1,'aceitar','Bordadura sem aplicação; vistoria sem rebrote','Ana');"); l = T.linha(OS)
+    T.ok(T.cel(OS,'Quem resolve')=='Paula (conferência)' and 'Conferência diária pendente' in l,'Após revisão técnica, conferência diária tem dona Paula',l)
+    T.ordem(OS);conferir_dias(T.J,OS,[1]);T.fechar();l=T.linha(OS)
     T.ok('Divergência de consumo/dose' not in l and T.cel(OS, 'Quem resolve') == 'Marcos' and T.cel(OS, 'Próxima ação') == 'conferir e encerrar', 'revisão aceita por Ana: selo sai e o dono volta a ser Marcos', l)
     T.ordem(OS); T.btn('Conferir e encerrar'); T.btn('Confirmar encerramento'); T.fechar()
     # CTL-2 · A (AP-02): o turno do app grava a data operacional (CEN_DIA_OP = 26/09), não o relógio do aparelho → o período fecha em 26/09

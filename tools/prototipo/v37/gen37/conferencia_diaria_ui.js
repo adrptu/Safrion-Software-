@@ -8,25 +8,29 @@ function cdLinha(self, o, ap) {
   const foco = suffix => setTimeout(() => {const el=document.getElementById(fid+suffix);if(el)el.focus();}, 0);
   const rec = ap.conferenciaDia, mudou = !!rec && rec.fato !== cdFato(c,o.id,ap.dia);
   const caso=rec&&rec.caso, resolver=!!rec&&rec.estado==='Não conforme';
+  const arquivar=resolver&&ap.st===CEN_AP_DESC;
   const referencia=()=>resolver?cdCasoReferencia(cenGet(),o.id,ap.dia):cdReferencia(cenGet(),o.id,ap.dia);
   const impedimento = cdImpedimento(c,o.id,ap.dia);
   const estado = ap.st===CEN_AP_DESC ? 'Fora do acumulado · histórico preservado' : mudou ? 'Reabrir conferência: dados alterados' : rec ? rec.estado : ap.st==='Conferido' ? 'Conferido · registro anterior sem recibo detalhado' : 'Conferência pendente';
-  const recibo = rec ? rec.estado+' por '+rec.por+' · '+rec.at+(rec.motivo?' · '+rec.motivo:'')+(rec.revisaoPosterior?' · '+rec.revisaoPosterior:'') : '';
+  const recibo = rec ? rec.estado+' por '+rec.por+' · '+new Date(rec.at).toLocaleString('pt-BR')+(rec.motivo?' · '+rec.motivo:'')+(rec.revisaoPosterior?' · '+rec.revisaoPosterior:'') : '';
   const abrir = () => {
     const anterior=(self.state.cdRascunhos||{})[k];
     if (!anterior) set({decisao:'conferir',motivo:'',referencia:referencia(),erro:''});
     self.setState({cdAtivo:k}); foco(resolver?'_mot':'_dec');
   };
+  let enviando=false;
   const salvar = () => {
+    if(enviando)return;enviando=true;
     const d=(self.state.cdRascunhos||{})[k]||{};
-    const r=osRun(self,atual=>resolver?cdResolverRelato(atual,o.id,ap.dia,'vincular',d.motivo,d.referencia,g2perfil()):cdConferir(atual,o.id,ap.dia,d.decisao,d.motivo,d.referencia,g2perfil()),{},e=>set({erro:e}));
+    const r=osRun(self,atual=>resolver?cdResolverRelato(atual,o.id,ap.dia,arquivar?'arquivar':'vincular',d.motivo,d.referencia,g2perfil()):cdConferir(atual,o.id,ap.dia,d.decisao,d.motivo,d.referencia,g2perfil()),{},e=>set({erro:e}));
     if (!r.erro) {const ds=Object.assign({},self.state.cdRascunhos||{});delete ds[k];self.setState({cdRascunhos:ds,cdAtivo:null});foco('_open');}
-    else foco('_erro');
+    else {enviando=false;foco('_erro');}
   };
-  return {cdVisivel:ap.st!=='Previsto',cdAberto:aberto,cdFechado:!aberto,cdId:fid,cdDecId:fid+'_dec',cdMotId:fid+'_mot',cdErrId:fid+'_erro',cdOpenId:fid+'_open',
-    cdNormal:!resolver,cdResolver:resolver,cdAcao:resolver?'Vincular evidência e conferir dia':'Registrar conferência',cdAbrirNome:resolver?'Resolver divergência':'Conferir dia',
+  return {cdVisivel:ap.st!=='Previsto',cdAberto:aberto,cdFechado:!aberto&&!impedimento,cdId:fid,cdDecId:fid+'_dec',cdMotId:fid+'_mot',cdErrId:fid+'_erro',cdOpenId:fid+'_open',
+    cdNormal:!resolver,cdResolver:resolver,cdArquivar:arquivar,cdVincular:resolver&&!arquivar,cdAcao:arquivar?'Arquivar caso substituído':resolver?'Vincular evidência e conferir dia':'Registrar conferência',cdAbrirNome:arquivar?'Arquivar caso substituído':resolver?'Resolver divergência':'Conferir dia',
     cdCaso:caso?'Caso '+caso.id+' · '+caso.estado+' · '+caso.motivo:'Caso sem identificação; requer reavaliação.',
-    cdTemCaso:!!caso,cdMotLabel:resolver?'Motivo e evidência do vínculo — obrigatório':'Motivo — obrigatório para divergência',
+    cdTemCaso:!!caso,cdMotLabel:arquivar?'Motivo do arquivamento — obrigatório':resolver?'Motivo e evidência do vínculo — obrigatório':'Motivo — obrigatório para divergência',
+    cdAvisoRevisao:cenRevisao(g2perfil(),ap.quem,'apontou')||'',cdTemAvisoRevisao:!!cenRevisao(g2perfil(),ap.quem,'apontou'),
     cdTitulo:o.id+' · '+o.talhao+' · dia '+ap.dia+' · '+ap.d,
     cdEstado:estado,cdRecibo:recibo+(caso?' · Caso '+caso.id+': '+caso.estado:'' ),cdTemRecibo:!!rec,cdQuem:g2quem('conferente'),cdPode:g2papel(g2perfil(),'conferente')&&!impedimento,
     cdContexto:'Apontado por '+(ap.quem||'responsável não informado')+' · '+(ap.origem||'web')+' · '+(ap.sinc===false?'aguarda envio':'sincronizado'),
