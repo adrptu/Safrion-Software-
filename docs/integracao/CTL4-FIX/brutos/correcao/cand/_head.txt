@@ -1,0 +1,1 @@
+78711bb CTL-4: vermelhos novos da bateria (saf_cmp_continuidade e esttest)

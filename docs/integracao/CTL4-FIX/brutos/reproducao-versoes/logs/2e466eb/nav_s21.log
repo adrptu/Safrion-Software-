@@ -1,0 +1,39 @@
+versão: 2e466eb GEN= /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ctl4-recorte/wt-2e466eb/tools/prototipo/v37/gen37
+### D1 devolução da sobra da OS-0417 (500 kg de MAP 11-52 em custódia, REQ-031)
+cenário antes: {"os": "Em conferência", "req": [["MAP 11-52", 5000, 500, 3500]]}
+SAF antes: {"total": "Valor da necessidade líquida R$ 379.580,00 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação", "prim": "Abrir Compra de insumos ›", "MAP 11-52": ["62.500 kg", "90.000 kg", "Em cotação", "Fertilizantes MAP 11-52 15/10/2026 62.500 kg 18/10/2026 R$ 243.750,00 Em cotação SOL-2026-07 — 152.500 kg — 90.000 kg — — 0 kg — — R$ 3,90/kg"]}
+colunas SAF: ["GRUPO", "INSUMO", "1º USO", "NECESSIDADE LÍQUIDA", "FALTA EM", "VALOR", "SITUAÇÃO", "SOLICITAÇÃO", "A COMPLEMENTAR", "DEMANDA BRUTA", "JÁ REALIZADO", "ESTOQUE APTO", "USADO ANTES DA COMPRA", "RESERVADO", "RECEBIMENTOS PREVISTOS", "RECEBIDO APÓS A FALTA", "COBERTA EM", "PREÇO"]
+Compra antes: {"tot": "Total R$ 379.580,00", "row": "MAP 11-52 152.500 90.000 0 62.500 kg 18/10/2026 3,90 R$ 243.750,00 A cotar", "k2": "SOL-2026-07 · 15 insumos", "prim": "Solicitar cotações ›"}
+Mapa T4 antes: T4 · 204 ha · Soja 58 W · 30 de 204 ha plantados (DAP 1–2) · Santa Rita · falta MAP 11-52 · × · INSUMOS · Perí … MAP 11-52 · 17.500 kg · Falta 80.000 kg · a partir de 23/09 · OS-0420 · Plantio e adubação de base · fazenda precisa de 170.000 kg · estoque 90.000 · a receber 0 kg · REQ-036 · OS-0420 · Semente de so
+Portal PT-02det antes: {"total": "Total R$ 293.166,01", "row": "MAP 11-52 62.500 kg R$ 3,783/kg R$ 236.437,50"}
+linha REQ-031: ok
+setv: ok
+toast devolução: 500 kg de MAP 11-52 devolvidos ao disponível. Custódia de MAP 11-52 na OS-0417: 500 kg → 0 kg · encerramento liberado.
+cenário depois: {"req": [["MAP 11-52", 5000, 0, 3500]], "lotes": [["M26-07", 90500, 0, 0]]}
+SAF depois: {"total": "Valor da necessidade líquida R$ 379.580,00 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação", "prim": "Abrir Compra de insumos ›", "MAP 11-52": ["62.500 kg", "90.000 kg", "Em cotação", "Fertilizantes MAP 11-52 15/10/2026 62.500 kg 18/10/2026 R$ 243.750,00 Em cotação SOL-2026-07 — 152.500 kg — 90.000 kg — — 0 kg — — R$ 3,90/kg"]}
+Compra depois: {"tot": "Total R$ 379.580,00", "row": "MAP 11-52 152.500 90.000 0 62.500 kg 18/10/2026 3,90 R$ 243.750,00 A cotar", "k2": "SOL-2026-07 · 15 insumos", "prim": "Solicitar cotações ›"}
+Mapa T4 depois: T4 · 204 ha · Soja 58 W · 30 de 204 ha plantados (DAP 1–2) · Santa Rita · falta MAP 11-52 · × · INSUMOS · Perí … MAP 11-52 · 17.500 kg · Falta 80.000 kg · a partir de 23/09 · OS-0420 · Plantio e adubação de base · fazenda precisa de 170.000 kg · estoque 90.000 · a receber 0 kg · REQ-036 · OS-0420 · Semente de so
+Portal PT-02det depois: {"total": "Total R$ 293.166,01", "row": "MAP 11-52 62.500 kg R$ 3,783/kg R$ 236.437,50"}
+### C4 entrega 8.000 kg NPK (REQ-040/OS-0425) + cancelamento da OS-0425 + devolução
+SAF semente: {"total": "Valor da necessidade líquida R$ 379.580,00 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação", "prim": "Abrir Compra de insumos ›", "NPK 20-05-20": ["14.800 kg", "8.000 kg", "Em cotação", "Fertilizantes NPK 20-05-20 15/10/2026 14.800 kg 15/10/2026 R$ 50.320,00 Em cotação SOL-2026-07 — 22.800 kg — 8.000 kg — — 0 kg — — R$ 3,40/kg"]}
+Compra semente: {"tot": "Total R$ 379.580,00", "row": "NPK 20-05-20 22.800 8.000 0 14.800 kg 15/10/2026 3,40 R$ 50.320,00 A cotar", "k2": "SOL-2026-07 · 15 insumos", "prim": "Solicitar cotações ›"}
+Mapa C1 semente: C1 · 38 ha · Café Catuaí 144 · 7 anos e 8 meses · granação · Santa Rita · falta NPK 20-05-20 +1 · × · INSUMOS  … NPK 20-05-20 · 22.800 kg · Falta 14.800 kg · a partir de 15/10 · C1 · Adubação 1ª parcela +1 · fazenda precisa de 22.800 kg · estoque 8.000 · a receber 0 kg · Fungicida C · 30,4 L · Falta 30 L · a par
+linha REQ-040: ok
+qtd padrão: 8000
+toast entrega: 8.000 kg de NPK 20-05-20 entregues a Paula (OS-0425). Aguarda confirmação no app.
+cenário após entrega: {"etapa": "Liberadas", "req": "Entregue", "it": [["NPK 20-05-20", 8000, 8000]], "lote": {"prod": "NPK 20-05-20", "lote": "N26-03", "local": "Galpão 1", "un": "kg", "fisico": 0, "quarentena": 0, "reservado": 0, "validade": "—"}}
+SAF após entrega: {"total": "Valor da necessidade líquida R$ 379.580,00 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação", "prim": "Abrir Compra de insumos ›", "NPK 20-05-20": ["14.800 kg", "8.000 kg", "Em cotação", "Fertilizantes NPK 20-05-20 15/10/2026 14.800 kg 15/10/2026 R$ 50.320,00 Em cotação SOL-2026-07 — 22.800 kg — 8.000 kg — — 0 kg — — R$ 3,40/kg"]}
+cancelar: ok
+confirmar: ok
+toast cancel: OS-0425 cancelada sem execução. Requisição REQ-040 cancelada; nada tinha sido entregue. Cancelada por Ana (gestora).
+cenário após cancelar: {"etapa": "Canceladas", "req": "Cancelada", "it": [["NPK 20-05-20", 8000, 8000]], "lote": {"prod": "NPK 20-05-20", "lote": "N26-03", "local": "Galpão 1", "un": "kg", "fisico": 0, "quarentena": 0, "reservado": 0, "validade": "—"}}
+SAF após cancelar: {"total": "Valor da necessidade líquida R$ 379.580,00 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação", "prim": "Abrir Compra de insumos ›", "NPK 20-05-20": ["14.800 kg", "8.000 kg", "Em cotação", "Fertilizantes NPK 20-05-20 15/10/2026 14.800 kg 15/10/2026 R$ 50.320,00 Em cotação SOL-2026-07 — 22.800 kg — 8.000 kg — — 0 kg — — R$ 3,40/kg"]}
+Mapa C1 após cancelar: C1 · 38 ha · Café Catuaí 144 · 7 anos e 8 meses · granação · Santa Rita · falta NPK 20-05-20 +1 · × · INSUMOS  … NPK 20-05-20 · 22.800 kg · Falta 14.800 kg · a partir de 15/10 · C1 · Adubação 1ª parcela +1 · fazenda precisa de 22.800 kg · estoque 8.000 · a receber 0 kg · Fungicida C · 30,4 L · Falta 30 L · a par
+Compra após cancelar: {"tot": "Total R$ 379.580,00", "row": "NPK 20-05-20 22.800 8.000 0 14.800 kg 15/10/2026 3,40 R$ 50.320,00 A cotar", "k2": "SOL-2026-07 · 15 insumos", "prim": "Solicitar cotações ›"}
+linha dev REQ-040: ok
+setv: ok
+toast devolução: 8.000 kg de NPK 20-05-20 devolvidos ao disponível. Custódia de NPK 20-05-20 na OS-0425: 8.000 kg → 0 kg.
+cenário após devolver: {"it": [["NPK 20-05-20", 8000, 0]], "lote": {"prod": "NPK 20-05-20", "lote": "N26-03", "local": "Galpão 1", "un": "kg", "fisico": 8000, "quarentena": 0, "reservado": 0, "validade": "—"}}
+SAF após devolver: {"total": "Valor da necessidade líquida R$ 379.580,00 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação", "prim": "Abrir Compra de insumos ›", "NPK 20-05-20": ["14.800 kg", "8.000 kg", "Em cotação", "Fertilizantes NPK 20-05-20 15/10/2026 14.800 kg 15/10/2026 R$ 50.320,00 Em cotação SOL-2026-07 — 22.800 kg — 8.000 kg — — 0 kg — — R$ 3,40/kg"]}
+Compra após devolver: {"tot": "Total R$ 379.580,00", "row": "NPK 20-05-20 22.800 8.000 0 14.800 kg 15/10/2026 3,40 R$ 50.320,00 A cotar", "k2": "SOL-2026-07 · 15 insumos", "prim": "Solicitar cotações ›"}
+erros JS: []
