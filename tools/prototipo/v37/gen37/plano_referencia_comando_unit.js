@@ -69,4 +69,23 @@ teste('consulta lê versão gravada pelo comando no contexto selecionado, por c�
  s.state.prPainel.publicadas[0].por='Outro';assert.equal(estado(),antes);
  const outro=self();outro.state.saf='S27SF';planoRefAbrir(outro,null);assert.deepEqual(outro.state.prPainel.publicadas,[]);
 });
-console.log(`RESULTADO ${n-fail}/${n} · transação real com adaptador de domínio de teste; UI/agronomia não executadas`);if(fail)process.exitCode=1;
+// UI com adaptador explicitamente sintético; não é aceite agronômico.
+const uiSelf=()=>{global.document={getElementById:()=>null};global.requestAnimationFrame=()=>{};const s=self();planoRefAbrir(s,null);return s;};
+teste('UI sem adaptador continua consulta sem ação de publicação',()=>{
+ delete global.safImpedimentosRef;const s=uiSelf(),v={};planoRefVals(s,v);assert.equal(v.pr_publicacao,false);assert.equal(v.pr_voltarPrim,true);const antes=estado();planoRefPreparar(s);assert.equal(s.state.prPainel.pub,undefined);assert.equal(estado(),antes);
+});
+teste('UI prévia não escreve e exibe avisos; confirmação dupla grava uma versão',()=>{
+ global.safImpedimentosRef=()=>({impedimentos:[],avisos:['1 cultivo fora da referência']});
+ const s=uiSelf(),antes=estado();planoRefPreparar(s);assert.equal(estado(),antes);assert.equal(s.state.prPainel.pub.avisos.length,1);
+ planoRefConfirmar(s);const salvo=estado();planoRefConfirmar(s);assert.equal(estado(),salvo);assert.equal(hist().versoes.length,1);
+ const v={};planoRefVals(s,v);assert.match(v.pr_nota,/Registro #/);assert.ok(!v.pr_nota.includes('undefined'));assert.equal(v.pr_previa,false);assert.equal(v.pr_voltarPrim,true);
+});
+teste('UI bloqueia impedimento e troca de perfil entre prévia e confirmação',()=>{
+ global.safImpedimentosRef=()=>({impedimentos:['Sobreposição'],avisos:[]});const s=uiSelf();planoRefPreparar(s);const antes=estado();planoRefConfirmar(s);assert.equal(estado(),antes);
+ global.safImpedimentosRef=()=>({impedimentos:[],avisos:[]});planoRefPreparar(s);localStorage.setItem(G2_PERFIL_KEY,'Rui');const trocado=estado();planoRefConfirmar(s);assert.match(s.state.prPainel.pub.erro,/perfil mudou/);assert.equal(estado(),trocado);localStorage.removeItem(G2_PERFIL_KEY);
+});
+teste('UI cota falha sem sucesso; retry conserva intenção e só então mostra recibo',()=>{
+ global.safImpedimentosRef=()=>({impedimentos:[],avisos:[]});const s=uiSelf();planoRefPreparar(s);const chave=s.state.prPainel.pub.pedido.chave;__cota=true;planoRefConfirmar(s);assert.ok(s.state.prPainel.pub.erro);assert.equal(s.state.prPainel.pub.resultado,null);assert.equal(s.state.prPainel.pub.pedido.chave,chave);
+ __cota=false;planoRefConfirmar(s);assert.equal(s.state.prPainel.pub.resultado.versao.id,'R1');assert.equal(s.state.prPainel.pub.pedido.chave,chave);delete global.safImpedimentosRef;
+});
+console.log(`RESULTADO ${n-fail}/${n} · transação real com adaptador de domínio de teste; navegador/agronomia não executados neste executor`);if(fail)process.exitCode=1;
