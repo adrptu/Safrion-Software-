@@ -248,7 +248,9 @@ def perfil_pill(perfil):
             f'<span style="width: 26px; height: 26px; border-radius: 999px; background: {ACC}; color: #fff; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: center;">{ini}</span>'
             f'<span class="ml-txt" style="display: flex; flex-direction: column; line-height: 1.2;"><span style="font-weight: 700; color: #fff;">{esc(perfil)}</span><span style="color: {SIDE_MUTED}; font-size: 11.5px;">Trocar perfil de demonstração ▾</span></span></div>')
 
-# Filtros do topo por tela: 'filtro' = seletor que muda os dados da tela; 'contexto' = só leitura (escolhido no próprio processo).
+# Filtros de fazenda e safra por tela: 'filtro' = seletor que muda os dados da tela; 'contexto' = só leitura (escolhido no próprio processo).
+# 13/10/2026 (proprietário: "tire o macro filtro fazenda e safra do topo e coloque nas telas para evitar confusão"): saem da barra do topo e
+# ficam na própria tela, numa faixa "Filtros desta tela" acima dos dados que filtram (shell37); as ligações (mf_*) não mudam.
 MACRO = {
     'IN-04.dc.html': dict(faz='filtro'),
     'OS.dc.html': dict(faz='filtro', saf='filtro'),
@@ -261,7 +263,7 @@ MACRO = {
 }
 FAZENDAS = ['Lagoa Grande', 'Santa Rita', 'Boa Vista']
 SAFRAS_MF = ['2026/27', 'Safrinha 2027', '2025/26']
-def _macro_html(fname, ctx):
+def _macro_html(fname, ctx, sep=True):
     cfg = MACRO.get(fname)
     sel = ('font-family: inherit; font-size: 12px; font-weight: 700; padding: 4px 26px 4px 10px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer;')
     lab = f'display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: {GRAYS}; font-weight: 700; font-size: 11.5px;'
@@ -281,7 +283,7 @@ def _macro_html(fname, ctx):
     elif cfg.get('saf') == 'contexto':
         out += (f'<span style="{lab}">{ctx[1] if ctx and len(ctx) > 1 and ctx[1] else ""}</span>'
                 f'<button type="button" onClick="{{{{mf_trocar}}}}" title="Voltar à etapa 1 para escolher outra safra" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">Trocar safra</button>')
-    return out + f'<span style="width: 1px; height: 18px; background: {LINE};"></span>'
+    return out + (f'<span style="width: 1px; height: 18px; background: {LINE};"></span>' if sep else '')
 
 # Faixa de cobrança (PLAT-01, R11): só nas telas web da organização (fora de BO, ON e PT; não no próprio CF-05, que já mostra o estado e a
 # primária). Amarela em atraso (nada restrito), vermelha inadimplente (ampliar a área suspenso). "Pagar fatura" é link de texto para o CF-05,
@@ -318,7 +320,14 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
         ctxp=''.join(f'<span style="font-size: 11.5px; color: {MUTED}; font-weight: 600;">{esc(c)}</span>' for c in (tuple(ctx)+('Módulo oculto no menu · preservado',)) if c)
         ctxp+=f'<span style="width: 1px; height: 18px; background: {LINE};"></span>'
     else:
-        ctxp=_macro_html(fname,ctx)
+        ctxp=''   # Fazenda e Safra não ficam mais no topo (13/10/2026): vão para a tela, junto dos dados
+        mf=_macro_html(fname,ctx,sep=False)
+        if mf:
+            _filtra='filtro' in (MACRO.get(fname) or {}).values()   # só contexto (Planejar safra, Compra): a faixa diz onde se trabalha, não "filtros"
+            _rot='Filtros desta tela' if _filtra else 'Trabalhando em'
+            body=(f'<div class="mf-tela" role="group" aria-label="{_rot}" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex-shrink: 0; '
+                  f'padding: 8px 14px; border: 1px solid {LINE}; border-radius: 12px; background: {SURF};">'
+                  f'<span style="font-size: 11.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: {MUTED};">{_rot}</span>{mf}</div>') + body
         search=False
     st=chip(status[0],status[1]) if status else ''
     srch=(f'<span style="flex-grow: 1;"></span><span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid {LINE}; border-radius: 999px; background: {SURF}; color: {MUTED}; font-size: 12.5px; min-width: 220px;">'
