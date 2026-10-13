@@ -3,6 +3,7 @@
 Uso nas áreas: EXTRAJS[0] = cenario.js_prefixo() + <js da tela>; a tela chama cenOuvir(self) e lê cenGet()."""
 import json, os
 import dados2 as D2
+from dados_config import DIA_OP
 import dados_lagoa_safra as DL
 import quantidade as _QTD   # regra única de quantidade (SINT-C03)
 
@@ -92,7 +93,7 @@ def seed():
     # as vendas do Comercial) voltam ao seed
     import dados_manutencao as DM
     import dados_producao, dados_ben, dados_comercial
-    est = dict(v=7, rev=0, diaOperacional='-'.join(reversed(D2.HOJE.split('/'))), ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
+    est = dict(v=7, rev=0, diaOperacional=DIA_OP, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
                # S4 (PCM §3.7): usuario = Ver como do app (Marcos · Zé, simulação); manFila = comandos da manutenção feitos sem sinal
                app=dict(online=True, fila=[], turno=None, operador='Marcos', usuario='Marcos', manFila=[]),
                man=DM.seed(), producao=dados_producao.seed())

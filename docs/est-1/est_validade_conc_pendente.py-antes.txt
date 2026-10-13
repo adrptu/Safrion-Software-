@@ -1,0 +1,5 @@
+{"falta":2,"reserva":2,"livre":0,"erroPrevia":"","erroComando":"","fisicoAntes":1199,"fisicoDepois":1197,"estado":"Aceito"}
+FALHA conciliação não retira lote vencido por reserva antiga
+RESULTADO 0/1
+
+EXIT=1

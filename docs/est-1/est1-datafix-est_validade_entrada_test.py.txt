@@ -1,0 +1,15 @@
+OK recebimento vencido recusa parte apta 5 sem escrita parcial
+OK recebimento vencido recusa parte apta 2 sem escrita parcial
+OK data futura informada não libera lote existente vencido
+OK recebimento vencido em quarentena conserva físico e replay
+OK devolução vencida apta é recusada sem baixar custódia
+OK devolução vencida em quarentena recupera físico e baixa custódia
+OK formulário da devolução explica quarentena sem apagar rascunho
+OK limite mensal 31/12/2026 validade 12/2026
+OK limite mensal 01/01/2027 validade 12/2026
+OK limite mensal 29/02/2028 validade 02/2028
+OK limite mensal 01/03/2028 validade 02/2028
+RESULTADO 11/11
+RESULTADO 11/11
+
+EXIT=0

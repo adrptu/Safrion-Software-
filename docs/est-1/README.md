@@ -2,7 +2,7 @@
 
 Codex autor; Claude revisor/integrador. Base de reprodução `2cbef389e76f63f630fea05fffaa0ef258316d33` (`claude/v44-v59`). Autoria central liberada pelo Claude real no recibo6156041752: cenLote/cenDisp/cenEntregar0, helper e data operacional em cenario.py; Estoque já liberado em6153002100. ACK e fronteira CTL4 em6156123675. O histórico anterior está em historico-30ea08d.md e nos brutos preservados.
 
-O motor exclui lote vencido da seleção/reserva, zera seu disponível sem apagar físico ou reservas e recusa entrega de reserva vencida antes da movimentação. A tela reutiliza a mesma regra mensal. Entrada/devolução apta vencida seguem bloqueadas; quarentena permite recuperação no mesmo contexto. Data operacional deriva de D2.HOJE, sem relógio do navegador. Validade MM/AAAA inclusiva até o fim do mês; ausência/— mantém regra existente.
+O motor exclui lote vencido da seleção/reserva, zera seu disponível sem apagar físico ou reservas e recusa entrega de reserva vencida antes da movimentação. A tela reutiliza a mesma regra mensal. Entrada/devolução apta vencida seguem bloqueadas; quarentena permite recuperação no mesmo contexto. Data operacional vem de dados_config.DIA_OP, preservando 26/09/2026 no cenário e no Estoque, sem relógio do navegador. Validade MM/AAAA inclusiva até o fim do mês; ausência/— mantém regra existente.
 
 ## Verificação executada nesta base
 
@@ -30,3 +30,12 @@ Brutos `est1-final-*.txt`. Chrome isolado/localhost; teclado/recuperação/rascu
 O delta delimitado está entregue para revisão; EST-1 completo e publicação dependem da composição, revisão crítica do Claude e checks pertinentes. Não aprovar/integrar o próprio PR. Sem homologação real, produção, auditoria integral ou gatilho do PRD final.
 
 Aplicado: guardas no comando, estado/motivo/recuperação no mesmo detalhe, uma regra de validade. Fora: FEFO, isolamento por fazenda (IDs próprios), cadastro/validade diária e composição não liberada. Cortado: comparação mensal duplicada da UI e variável sem uso; nenhuma etapa de controle. Suposição: mês/ano já é o contrato do protótipo.
+
+
+## Correção após revisão automática 5510649280 (13/10)
+
+O head329e466 usava indevidamente a data de planejamento D2.HOJE23/09 para novos registros; corrigido para dados_config.DIA_OP26/09, igual à Produção. E2.hoje lê a mesma fonte, preservando uma regra de validade. Contraprova est_validade_data_test.py0/3 antes →3/3 depois; verifica fontes independentes e novo turno/apontamento. Primeiro executor tentou ler chave do turno após encerrá-lo (null); corrigido antes da reprodução válida, ambos brutos preservados. Registros antigos não são reescritos.
+
+Regressões do delta: validade11/11, entrada11/11, alçadas103/103, A453/53; ap_unico unit80/80. A parte navegador desse agregador esbarrou no sandbox de localhost; foi executada separadamente com autorização: 23/23, exit0, bruto próprio. Build focado/render exit0.
+
+Novo caminho pendente, discussão4264599742: cenConcPrevia aceita reserva própria vencida como origem física para excedente. Contraprova original0/1; est_validade_conc_pendente.py ampliada2/3 (custódia já entregue e recusa passam): reservado cobre falta2L, erro vazio, cenConciliar aceita e físico1199→1197. Cenário legítimo liberaOS0430, entrega1L/item, inicia turno e relata3L do primeiro produto. Pedida extensão de autoria6156373350, sem alterar cenConcPrevia/cenConciliar antes do ACK. Solução deve bloquear apenas retirada complementar vencida, preservar conciliação do já entregue em custódia e recusa sem efeito; CTL4 continua pendente separado. Não integrar/publicar o PR antes dos caminhos e revisão resolvidos.
