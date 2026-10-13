@@ -129,5 +129,17 @@ const PlanoReferencia = (() => {
     if (usados.size) add('calendario', 'capacidade', {meses: D2.meses.map(m => m[0]).sort(cmp), diasUteis: D2.dias});
     return retrato({fazenda, safra}, entidades);
   }
-  return Object.freeze({retrato, comparar, bytes, projetar});
+  // Pré-condições de contexto. O futuro comando deve chamá-las de novo DENTRO da gravação
+  // compartilhada; este resultado não é autorização permanente nem validação agronômica.
+  function validarContexto(self, safra, ator, previa) {
+    const responsavel=cenExige(ator,'gestor','Publicar referência do plano');
+    const s=safById(self,safra);
+    if(!s || self.state.saf!==safra) throw new Error('Escolha a safra da prévia antes de publicar. Nada foi alterado.');
+    if(s.ro || s.v.estado==='Encerrada') throw new Error('Safra encerrada: as versões ficam disponíveis somente para consulta. Nada foi alterado.');
+    if(!previa) throw new Error('Confira a prévia do plano antes de publicar. Nada foi alterado.');
+    const atual=projetar(self,safra);
+    if(bytes(previa)!==bytes(atual)) throw new Error('O plano mudou depois da prévia. Confira as diferenças e tente novamente; seu rascunho foi preservado.');
+    return fixa({responsavel,atual});
+  }
+  return Object.freeze({retrato, comparar, bytes, projetar, validarContexto});
 })();

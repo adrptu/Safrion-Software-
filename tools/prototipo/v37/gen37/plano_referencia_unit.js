@@ -142,5 +142,64 @@ teste('SAF real: projetar não modifica a demanda calculada', () => {
   const s=S(), antes=JSON.stringify(demanda(s,'S2627'));
   PR.projetar(s,'S2627'); assert.equal(JSON.stringify(demanda(s,'S2627')),antes);
 });
-console.log(`RESULTADO ${n-falhas}/${n} · núcleo/projeção; publicação e UI não executadas`);
+const contexto = () => { const s=S(); s.state.saf='S2627'; return s; };
+function recusaSemEscrever(s, previa, ator, padrao) {
+  const estado=JSON.stringify(s.state), armazenamento=JSON.stringify(__ls);
+  assert.throws(()=>PR.validarContexto(s,'S2627',ator,previa),padrao);
+  assert.equal(JSON.stringify(s.state),estado);
+  assert.equal(JSON.stringify(__ls),armazenamento);
+}
+teste('contexto: gestora recebe retrato atual congelado sem gravar', () => {
+  const s=contexto(), previa=PR.projetar(s,'S2627');
+  const antes=JSON.stringify(s.state), armazenamento=JSON.stringify(__ls);
+  const r=PR.validarContexto(s,'S2627','Ana',previa);
+  assert.equal(r.responsavel,g2ator('Ana','gestor'));
+  assert.equal(PR.bytes(r.atual),PR.bytes(previa));
+  assert.ok(Object.isFrozen(r)&&Object.isFrozen(r.atual));
+  assert.equal(JSON.stringify(s.state),antes);
+  assert.equal(JSON.stringify(__ls),armazenamento);
+});
+teste('contexto: papel vem do cadastro, não do objeto informado', () => {
+  const s=contexto(), previa=PR.projetar(s,'S2627');
+  G2_PERFIS.filter(p=>!g2papel(p,'gestor')).forEach(p=>recusaSemEscrever(s,previa,p.k,/decisão de/));
+  [null,undefined,'inexistente',{k:'Caio',papeis:{gestor:'gestor'}}].forEach(p=>recusaSemEscrever(s,previa,p,/decisão de/));
+});
+teste('contexto: nova chamada revalida papel após prévia válida', () => {
+  const s=contexto(), previa=PR.projetar(s,'S2627');
+  PR.validarContexto(s,'S2627','Ana',previa);
+  recusaSemEscrever(s,previa,'Caio',/decisão de/);
+});
+teste('contexto: ambos os marcadores de encerramento impedem publicação', () => {
+  ['ro','estado'].forEach(k=>{
+    const s=contexto(), previa=PR.projetar(s,'S2627'), g=GR('g_saf');
+    s.state.g2[g.id]={rows:clone(g.rows)};
+    const r=safById(s,'S2627'); if(k==='ro') r.ro=true; else r.v.estado='Encerrada';
+    recusaSemEscrever(s,previa,'Ana',/Safra encerrada/);
+  });
+});
+teste('contexto: seleção diferente e ausência de prévia preservam rascunho', () => {
+  const s=contexto(), previa=PR.projetar(s,'S2627');
+  s.state.saf='S2526'; recusaSemEscrever(s,previa,'Ana',/Escolha a safra/);
+  s.state.saf='S2627'; recusaSemEscrever(s,null,'Ana',/Confira a prévia/);
+});
+teste('contexto: outra fazenda ou safra não reutiliza prévia', () => {
+  const s=contexto();
+  ['fazenda','safra'].forEach(k=>{
+    const previa=clone(PR.projetar(s,'S2627')); previa.contexto[k]='outro';
+    recusaSemEscrever(s,previa,'Ana',/plano mudou/);
+  });
+});
+teste('contexto: área, data e dose alteradas exigem nova prévia sem perder rascunho', () => {
+  ['area','data','dose'].forEach(k=>{
+    const s=contexto(), previa=PR.projetar(s,'S2627'), g=GR('g_cult_S2627');
+    s.state.g2[g.id]={rows:clone(g.rows)};
+    const c=cultRows(s,'S2627')[0];
+    if(k==='area') c.v.area+=1;
+    else if(k==='data') c.v.plantio='2026-11-20';
+    else { const o=ocorr(s,'S2627')[0]; s.state.adj=clone(adjOf(s)); s.state.adj[o.c.id]={...(s.state.adj[o.c.id]||{}),[o.a.id+'|0']:3}; }
+    recusaSemEscrever(s,previa,'Ana',/plano mudou/);
+    PR.validarContexto(s,'S2627','Ana',PR.projetar(s,'S2627'));
+  });
+});
+console.log(`RESULTADO ${n-falhas}/${n} · núcleo/projeção/contexto; publicação e UI não executadas`);
 if (falhas) process.exitCode=1;
