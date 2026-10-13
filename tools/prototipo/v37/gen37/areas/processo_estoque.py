@@ -254,6 +254,9 @@ function emovTipo(m){ if(m.tipo==='consumo'&&m.origem!=='app') return typeof m.c
 // lote vencido: validade (mês/ano) anterior ao mês de hoje; entra todo em quarentena e não volta ao disponível
 function evenc(l){ return cenLoteVencido(l,eiso(E2.hoje)); }
 function estValidadeEntradaErro(l){ return evenc(l)?'Lote '+l.lote+' vencido em '+l.validade+': receba em quarentena, sem quantidade apta para uso.':''; }
+// Um mesmo lote não pode misturar entradas com validades diferentes, nem pela quarentena.
+function estValidadeConflito(l,val){ if(!l) return ''; const normal=v=>String(v||'').trim().replace(/^—$/,'');
+  const atual=normal(l.validade), recebida=normal(val); return atual===recebida?'':'A validade informada difere da registrada no lote '+l.lote+' ('+(atual||'sem validade')+'). Confira o lote e a validade no documento antes de receber; o estoque foi preservado.'; }
 function estValidadeErro(l){ return evenc(l)?'Lote '+l.lote+' vencido em '+l.validade+': não pode ser entregue. Revise a reserva com o responsável pela O.S.; o físico permanece no estoque.':''; }
 // consumo apontado no app: "Glifosato 480 10, 2,4-D 806 5" (cenFecharTurno) → itens com a unidade da requisição ou da O.S.
 function econsDet(c,m){ const r=m.req&&c.reqs[m.req]; const o=c.ordens[m.os]||{};
@@ -293,6 +296,7 @@ function estReceber(c,d,ator,chave){
 function estReceber0(c,d,ator){   /* ator: quem confere (perfil); o movimento grava quem agiu (revisão do CTL-3, achado 4) */ const n0=c.movs.length; const antes=eitemDisp(c,d.item);
   const validadeErro=estValidadeEntradaErro({lote:d.lote,validade:d.val})||estValidadeEntradaErro(c.lotes[d.item+'|'+d.lote]);
   if(d.apto>0&&validadeErro) throw new Error(validadeErro);
+  const conflito=estValidadeConflito(c.lotes[d.item+'|'+d.lote],d.val); if(conflito) throw new Error(conflito);
   if(d.apto>0) cenReceber(c,d.item,d.lote,d.apto,d.un,d.local,d.val,d.nf,true,ator);
   if(d.quar>0) cenReceber(c,d.item,d.lote,d.quar,d.un,d.local,d.val,d.nf,false,ator);
   if(c.movs.length===n0) throw new Error('Nada conferido para entrar no estoque.');
@@ -364,6 +368,7 @@ ESTV.g_rec=(self,fm)=>{ const C=cenGet(); const e={}, d=fm.draft; const n=(k)=>g
     else if(!/^(0[1-9]|1[0-2])\/\d{4}$/.test(vv)) e.val='Use mês/ano com 4 dígitos no ano (ex.: 06/2027).';
     else if(evenc({validade:vv})){ if(!isNaN(apto)&&apto>1e-9) e.apto=estValidadeEntradaErro({lote:lt,validade:vv});
       if(!String(d.obs||'').trim()) e.obs='Informe o motivo (lote vencido em '+vv+').'; } }
+  const conflito=p&&estValidadeConflito(C.lotes[p.item+'|'+lt],d.val); if(conflito&&!e.val) e.val=conflito;
   return e; };
 ESTV.g_ent=(self,fm)=>{ const e={}; const x=eitens(cenGet()).find(y=>y.id===fm.rid); if(!x) return e; const n=g2num(fm.draft.qtd); if(isNaN(n)) return e;
   if(n>x.pend+1e-9) e.qtd='Acima do saldo a entregar: '+eq(x.pend,x.un)+' ('+econta(x)+').';
