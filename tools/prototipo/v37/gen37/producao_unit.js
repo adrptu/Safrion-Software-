@@ -389,7 +389,7 @@ ok('R19 "semana 2" lida em 26/09/2026 = 2027-W02; "semana 39" = 2026-W39; janela
   const so = Object.keys(PRDC.cult).find(k => PRDC.cult[k].cultura === 'Soja' && !PRDC.cult[k].semanal); const ks = PRDC.cult[so];
   PRDC.cult.tu2 = Object.assign({}, ks, { id: 'tu2', area: 10, meta: 25, un_meta: 'sc/ha', prod: true }); PRDC.osCult['OS-0973'] = 'tu2';
   const c = cenClone(CEN0); OSX(c, 'OS-0973', ks.local, 'Em execução', [['25/09', 10]], 'Colheita de grãos');
-  const g = MUD(c, x => prReceber(x, { os: 'OS-0973', ticket: 'TK-U73', bruto: 30000, tara: 15000, u: '14', imp: '1', cond: 'Íntegra', dcol: '2026-09-25' }));
+  const g = MUD(c, x => prReceber(x, { quem: 'Rui', os: 'OS-0973', ticket: 'TK-U73', bruto: 30000, tara: 15000, u: '14', imp: '1', cond: 'Íntegra', dcol: '2026-09-25' }));
   const D = (m, u) => { PRDC.cult.tu2.meta = m; PRDC.cult.tu2.un_meta = u; return T(() => prResultado(c, 'tu2').desv); };
   const d1 = D(25, 'sc/ha'), d2 = D(1.5, 't/ha'), d3 = D(1200, 'kg/ha'); delete PRDC.cult.tu2; delete PRDC.osCult['OS-0973'];
   ok('U21b R-U09 desvio com a unidade gravada na meta: 1.500 kg/ha contra 25 sc/ha, 1,5 t/ha e 1.200 kg/ha = 0 %, 0 % e +25 % (a base dava +1.566,7 % com 1,5 t/ha)',
@@ -453,7 +453,7 @@ ok('R19 "semana 2" lida em 26/09/2026 = 2027-W02; "semana 39" = 2026-W39; janela
   ok('U20e2 estimativa: origem com participação estimada leva " · estimativa" junto do número (D-U15)', TX('Soja', { kg: 60000, area: 10, estim: true }, 'kg') === '6.000,00 kg/ha · estimativa', TX('Soja', { kg: 60000, area: 10, estim: true }, 'kg'));
   // AC-f · K-U09: café da roça em L; com o fruto pesado, kg/t/sc60 eq. do fruto (nunca como beneficiado); sem peso, só L/ha; não há fator L→kg
   const CF = (area, semPeso) => { const c = cenClone(CEN0); OSX(c, 'OS-0930', 'C1', 'Em execução', area ? [['25/09', area]] : [], 'Colheita de café');
-    MUD(c, x => prReceber(x, { os: 'OS-0930', ticket: 'TK-CF1', bruto: 9200, tara: 3200, litros: 12000, cond: 'Íntegra', dcol: '2026-09-25' }));
+    MUD(c, x => prReceber(x, { quem: 'Rui', os: 'OS-0930', ticket: 'TK-CF1', bruto: 9200, tara: 3200, litros: 12000, cond: 'Íntegra', dcol: '2026-09-25' }));
     if (semPeso) Object.values(c.producao.cargas).filter(g => g.cultura === 'Café').forEach(g => g.origem.forEach(x => { x.kg = 0; }));
     return prResultado(c, 'c9'); };
   const F = CF(5), FS = CF(5, true), F0 = CF(0); const iS = prUnpInd('Café', FS, 'kg');
@@ -472,8 +472,8 @@ ok('R19 "semana 2" lida em 26/09/2026 = 2027-W02; "semana 39" = 2026-W39; janela
   PRDC.cult.tu1 = Object.assign({}, ks, { id: 'tu1', area: 10, meta: 25, un_meta: 'sc/ha', prod: true });
   const c = cenClone(CEN0); OSX(c, 'OS-0971', ks.local, 'Em execução', [['25/09', 10]], 'Colheita de grãos'); OSX(c, 'OS-0972', ks.local, 'Em execução', [['26/09', 10]], 'Colheita de grãos');
   PRDC.osCult['OS-0971'] = 'tu1'; PRDC.osCult['OS-0972'] = 'tu1';
-  const g1 = MUD(c, x => prReceber(x, { os: 'OS-0971', ticket: 'TK-U71', bruto: 25000, tara: 15000, u: '14', imp: '1', cond: 'Íntegra', dcol: '2026-09-25' }));
-  const g2 = MUD(c, x => prReceber(x, { os: 'OS-0972', ticket: 'TK-U72', bruto: 20000, tara: 15000, u: '14', imp: '1', cond: 'Íntegra', dcol: '2026-09-26' }));
+  const g1 = MUD(c, x => prReceber(x, { quem: 'Rui', os: 'OS-0971', ticket: 'TK-U71', bruto: 25000, tara: 15000, u: '14', imp: '1', cond: 'Íntegra', dcol: '2026-09-25' }));
+  const g2 = MUD(c, x => prReceber(x, { quem: 'Rui', os: 'OS-0972', ticket: 'TK-U72', bruto: 20000, tara: 15000, u: '14', imp: '1', cond: 'Íntegra', dcol: '2026-09-26' }));
   const RT = prResultado(c, 'tu1'); const errado = prUnpDiv(RT.kg, prSoma(RT.passes.map(p => p.area)), 1);
   delete PRDC.cult.tu1; delete PRDC.osCult['OS-0971']; delete PRDC.osCult['OS-0972'];
   ok('U20i1 K-U07 mesmo cultivo de 10 ha, duas passagens nos mesmos 10 ha (10.000 + 5.000 kg): 1.500 kg/ha = 1,5 t/ha = 25 sc/ha (não 750 kg/ha somando 20 ha)',
