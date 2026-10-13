@@ -255,7 +255,10 @@ function g2vals(self,sp,v,mask){
   const xe=st.x||sp.x0||{}; const xtodos=xids.length>0&&xids.every(k=>xe[k]);
   v[id+'_xlab']=xtodos?'Recolher tudo':'Expandir tudo'; v[id+'_xtog']=xtodos?v[id+'_colall']:v[id+'_expall']; v[id+'_xup']=xtodos; v[id+'_xdown']=!xtodos;
   v[id+'_xhas']=rows.some(r=>(r.kids||[]).length>0);   // sem grupo na tela, sem botão de expandir
-  if(total){ v[id+'_tot']=sp.cols.map((c,ci)=>{ const s=c.agg?g2sum(sp,flat,c):null; return {t:(ci===0?'Total':(s===null?'':g2fmt(s,c))), cls:(ci===0?'g2c0':''), st:'padding:8px 10px;font-weight:800;'+(ci===0?'position:sticky;left:0;z-index:1;background:#F4F6F3;':'')+(c.a==='r'?'text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;':'')}; });
+  // sp.totf (opcional, posto pela tela em tempo de execução): total vindo do serviço de domínio quando a soma simples não serve (R$/ha, unidade);
+  // recebe a coluna e as linhas de 1º nível visíveis (com os filtros); undefined = soma padrão. agg 'fn' = só o serviço, nunca a soma.
+  if(total){ const topo=flat.filter(x=>x.lvl===0).map(x=>x.r); v[id+'_tot']=sp.cols.map((c,ci)=>{ const h=(ci&&c.agg&&typeof sp.totf==='function')?sp.totf(c,topo):undefined;
+      const s=(h===undefined&&c.agg&&c.agg!=='fn')?g2sum(sp,flat,c):null; return {t:(ci===0?'Total':(h!==undefined?h:(s===null?'':g2fmt(s,c)))), cls:(ci===0?'g2c0':''), st:'padding:8px 10px;font-weight:800;'+(ci===0?'position:sticky;left:0;z-index:1;background:#F4F6F3;':'')+(c.a==='r'?'text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;':'')}; });
     v[id+'_totopen']=()=>g2set(self,id,{fm:{tot:true,ro:true,mode:'total',draft:{},orig:{},errs:{}},fmc:null}); }
   // formulário lateral
   const fm=st.fm; const F={open:!!fm};

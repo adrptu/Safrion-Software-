@@ -1055,7 +1055,7 @@ function etapa3(self,v,saf,ro){ const st=self.state; const S=safList(self); cons
   else { v.v3_filn=''; v.v3_filt=''; }
   e3Op(self,saf,oc,G,capF);
 }
-// g_op: operação › atividade › talhão (› configuração, quando a atividade divide a área); 8 colunas, uma variável por coluna (§3.4)
+// g_op: operação › atividade › talhão (› configuração, quando a atividade divide a área); 9 colunas, uma variável por coluna (§3.4)
 function e3Op(self,saf,oc,G,capF){ const kF=capF?capF.rec:null; const pools=self.__e3.pools; const map={}; self.__opmap=map;
   const naConta=(i)=>i.mi>=0&&(!i.cls||i.cls==='cal');   // a mesma regra do capSaf: com etiqueta do calendário, fora da capacidade
   const base=capF?oc.filter(i=>i.mi===capF.mi&&naConta(i)&&cargaRec(i,kF)>1e-9):oc;
@@ -1071,6 +1071,7 @@ function e3Op(self,saf,oc,G,capF){ const kF=capF?capF.rec:null; const pools=self
   const H=(i)=>kF?cargaRec(i,kF):(i.pend?null:(Number(i.horas)||0));
   const somaH=(its)=>{ if(kF) return its.reduce((a,i)=>a+cargaRec(i,kF),0); return its.every(i=>i.pend)?'':its.reduce((a,i)=>a+(Number(i.horas)||0),0); };
   const rha=(its)=>{ const at=its.reduce((a,i)=>a+(Number(i.rp.alocado)||0),0), c=its.reduce((a,i)=>a+(Number(i.cop)||0),0); return at>1e-9?c/at:null; };
+  const custo=(its)=>its.every(i=>i.pend)?null:its.reduce((a,i)=>a+(Number(i.cop)||0),0);   // pendente sem custo: vazio, não R$ 0 (ausente ≠ zero)
   const rend=(x)=>{ const n=rpNum(x); return (n===null||isNaN(n)||!(n>0))?null:n; };
   // Situação (§3.4): chips de problema onde ocorrem; "Janela não informada" e "Cabe na janela" só quando diferem do pai; etiqueta do calendário
   const avisos=(its)=>{ const o=[]; const pc={}; its.forEach(i=>{ if(i.pend){ const c=i.rp.causa||'pendente'; (pc[c]||(pc[c]=[])).push(i); } });
@@ -1094,9 +1095,11 @@ function e3Op(self,saf,oc,G,capF){ const kF=capF?capF.rec:null; const pools=self
     const A=its.reduce((a,i)=>a+(Number(i.area)||0),0); r.v.area=A; r.s.area=nfa(A)+' '+un; r.p.area=[{k:'txt',t:r.s.area}];
     const h=somaH(its); r.v.horas=h; if(h===''){ r.p.horas=[{k:'mut',t:''}]; }
     const c=rha(its); r.v.rha=c===null?'':c; r.s.rha=c===null?'':rs(c)+'/'+un; r.p.rha=c===null?[{k:'mut',t:''}]:[{k:'txt',t:r.s.rha}];
+    const cu=custo(its); r.v.custo=cu===null?'':cu; r.s.custo=cu===null?'':rs(cu); r.p.custo=cu===null?[{k:'mut',t:''}]:[{k:'txt',t:r.s.custo}];
     return r; };
+  const itsDe={};   // operação → ocorrências na tela (Total da grade)
   const x0={};
-  const rows=grupo(base).map(o=>{ const cm=comum[o.op]||{}; const id='op:'+o.op; const r=linha(id,o.op,o.its,'','op','ha-op');
+  const rows=grupo(base).map(o=>{ const cm=comum[o.op]||{}; const id='op:'+o.op; const r=linha(id,o.op,o.its,'','op','ha-op'); itsDe[id]=o.its;
     r.p.nome=[{k:'b',t:o.op},{k:'mut',t:cm.nAtv+(cm.nAtv>1?' atividades':' atividade')}];
     const opConj=!!cm.conj&&!cm.divSo, opRend=opConj&&cm.rend!==null;
     r.v.conj=cm.divSo?cm.n+' conjuntos':(cm.conj||'varia'); r.s.conj=r.v.conj; r.p.conj=[{k:opConj?'txt':'mut',t:r.v.conj}];
@@ -1129,11 +1132,21 @@ function e3Op(self,saf,oc,G,capF){ const kF=capF?capF.rec:null; const pools=self
             if(kF){ const u=Number(rc[kF])||0; if(u>0){ rx.v.horas=(Number(x.nh)||0)*u; } else { rx.v.horas=''; rx.p.horas=[{k:'mut',t:'não usa'}]; rx.s.horas='não usa'; } }
             else { rx.v.horas=sem?'':x.h; if(sem) rx.p.horas=[{k:'mut',t:''}]; }
             const cq=(x.q>0&&x.custo!==null)?x.custo/x.q:null; rx.v.rha=cq===null?'':cq; rx.s.rha=cq===null?'':rs(cq)+'/ha'; rx.p.rha=cq===null?[{k:'mut',t:''}]:[{k:'txt',t:rx.s.rha}];
+            const cx=x.custo===null||x.custo===undefined?null:Number(x.custo); rx.v.custo=cx===null?'':cx; rx.s.custo=cx===null?'':rs(cx); rx.p.custo=cx===null?[{k:'mut',t:''}]:[{k:'txt',t:rx.s.custo}];
             map[cid]={t:'cf',op:o.op,atv:a.nome,i,j,leaf:i.cfs[j]?i.cfs[j].id:null}; return rx; }); }
         return ro; });
       return ra; });
     return r; });
   const sp=GR('g_op'); sp.rows=rows; sp.x0=x0;
+  // Total (proprietário, 13/10/2026), sobre as operações visíveis: ha-op e custo somados; R$/ha = custo ÷ hectares físicos (areaFisica, a mesma
+  // conta do Resumo da safra), "parcial" com ocorrência pendente ou tarifa desconhecida, como lá. Horas: soma padrão da grade (segue o filtro de recurso).
+  sp.totf=(c,topo)=>{ const its=[].concat(...topo.map(r=>itsDe[r.id]||[])); if(!its.length) return '';
+    const cop=its.reduce((a,i)=>a+(Number(i.cop)||0),0);
+    if(c.k==='area') return nfa(its.reduce((a,i)=>a+(Number(i.area)||0),0))+' ha-op';
+    if(c.k==='custo') return rs(cop);
+    if(c.k==='rha'){ if(its.some(i=>i.pend||!i.rp.custoOk)) return 'parcial'; const af=areaFisica(its); return af>1e-9?rs(cop/af)+'/ha':''; }
+    return undefined; };
+  self.__opTot=sp.totf;   // testes (saf_totais_test T7), como o __opmap
   const c6=sp.cols.find(c=>c.k==='horas'); if(c6){ if(c6._l0===undefined) c6._l0=c6.l; c6.l=kF?('Horas de '+G[kF].nome):c6._l0; } }
 // toque na célula ou no atalho: grava state.cap (recurso × mês desta safra) e filtra a g_op; tocar de novo limpa
 function capSel(self,rid,mi){ const cur=self.state.cap; const saf=self.state.saf; const igual=!rid||(!!cur&&cur.rec===rid&&cur.mi===mi&&cur.saf===saf);
@@ -1200,11 +1213,13 @@ function recAfter(self,gid,rows,r){ const antes=self._antes; self._antes=null; s
   const um=Number(r.v.un)===1; const base=r.v.nome+': '+nfa(r.v.un)+(gid==='g_recp_pes'?(um?' pessoa':' pessoas'):(um?' unidade':' unidades'))+', jornada de '+nfa(r.v.jornada)+' h.';
   self.setState({g2toast:base}); setTimeout(()=>{ self.setState({g2toast:base+e3Diff(self,antes,null)}); e3Foco(self,'g_cap_'+sk(saf),rid); },0); }
 // painel "Resumo da safra" (§4.3): custo por cultura (operação + insumos do plano ÷ ha físico com plano), trabalho da safra e a conta
-function resumoCultura(oc,ini){ const by={}, ord=[], vistos={};
-  oc.forEach(i=>{ const cu=i.c.v.cult; let b=by[cu]; if(!b){ b=by[cu]={cult:cu,area:0,cop:0,cins:0,npend:0,ntar:0,copAntes:0,cinsAntes:0}; ord.push(b); }
-    if(!vistos[i.c.id]){ vistos[i.c.id]=1; b.area+=Number(i.area)||0; } b.cop+=Number(i.cop)||0; b.cins+=Number(i.cins)||0;
+// hectares físicos: cada cultivo (talhão) conta uma vez, com qualquer número de passadas; fonte única do denominador do R$/ha (Resumo e Total da etapa 3)
+function areaFisica(its){ const v={}; return its.reduce((a,i)=>{ if(v[i.c.id]) return a; v[i.c.id]=1; return a+(Number(i.area)||0); },0); }
+function resumoCultura(oc,ini){ const by={}, ord=[];
+  oc.forEach(i=>{ const cu=i.c.v.cult; let b=by[cu]; if(!b){ b=by[cu]={cult:cu,area:0,cop:0,cins:0,npend:0,ntar:0,copAntes:0,cinsAntes:0,its:[]}; ord.push(b); }
+    b.its.push(i); b.cop+=Number(i.cop)||0; b.cins+=Number(i.cins)||0;
     if(i.pend) b.npend++; else if(!i.rp.custoOk) b.ntar++; if(ini&&i.dt<ini){ b.copAntes+=Number(i.cop)||0; b.cinsAntes+=Number(i.cins)||0; } });
-  ord.forEach(b=>{ b.tot=b.cop+b.cins; b.rha=(b.npend||b.ntar)?null:(b.area?b.tot/b.area:null); }); return ord; }
+  ord.forEach(b=>{ b.area=areaFisica(b.its); b.tot=b.cop+b.cins; b.rha=(b.npend||b.ntar)?null:(b.area?b.tot/b.area:null); }); return ord; }
 function resumoVals(self,v){ const st=self.state; const saf=st.saf; const e=self.__e3;
   v.rs_abrir=()=>{ self.setState({rsOpen:true}); setTimeout(()=>{ try{ const a=document.querySelector('aside[aria-label="Resumo da safra"]'); const b=a&&a.querySelector('button[aria-label=Fechar]'); if(b) b.focus(); }catch(x){} },80); };
   v.rs_open=!!st.rsOpen&&!!e&&e.saf===saf&&(st.step||1)===3;

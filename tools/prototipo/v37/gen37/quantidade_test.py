@@ -64,7 +64,9 @@ function fluxo(c,id,res){ const o=c.ordens[id]; res.area=o.area; res.tot=o.ins[0
   try{ passo('liberar',()=>osc_liberar(c,id,false,'','Ana'));   /* CTL-3: quem aprova e libera */
     const rq=c.reqs[o.req]; for(const it of rq.itens){ const q=cenSaldoEntregar(it); if(q>1e-9) passo('entregar',()=>cenEntregar(c,o.req,it.prod,q,'X','Rui')); }
     passo('confirmar',()=>cenConfirmarRecebimento(c,o.req)); passo('iniciar',()=>osc_iniciar(c,id));
-    passo('apontar o saldo',()=>osc_apontar(c,id,'20/10',o.saldo)); passo('conferência',()=>osc_conferencia(c,id)); }catch(e){}
+    passo('apontar o saldo',()=>osc_apontar(c,id,'20/10',o.saldo)); passo('conferência',()=>osc_conferencia(c,id));
+    /* desde a v56 (CONTROLE-02 fatia 1) encerrar exige a conferência diária de cada dia apontado: o teste confere como Paula (conferente) */
+    if(typeof cdConferir==='function') (o.ap||[]).forEach(a=>passo('conferir o dia '+a.dia,()=>cdConferir(c,id,a.dia,'conferir','apontamento conferido no teste',cdReferencia(c,id,a.dia),G2_PERFIS.find(p=>p.k==='Paula')))); }catch(e){}
   const it=o.req&&c.reqs[o.req]&&c.reqs[o.req].itens[0]; res.custodia=it?it.custodia:null; res.etapa=o.etapa; return res; }
 const R={mip:[],fert:[],area:[]};
 const s0=mipGet(); const maior=a=>a.tr.filter(x=>/Área maior/.test(x));

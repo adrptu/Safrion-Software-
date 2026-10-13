@@ -236,7 +236,8 @@ def ctx02_menu(tam, tec):
     # ---- CD-03: Trator (Potência cv), Irrigação (Vazão m³/h), Armazenagem (Capacidade sc de 60 kg) ----
     abre('CD-03.dc.html'); g = Grade(J, 0)
     sel_classe('Trator'); cada('CD-03 Classe = Trator', 'Potência', {'78 cv': 'Trator 04', '110 cv': 'Trator 03', '155 cv': 'Trator T1', '190 cv': 'Trator 02'})
-    sel_classe('Irrigação'); cada('CD-03 Classe = Irrigação', 'Vazão', {'45 m³/h': 'Gotejo T7', '300 m³/h': 'Bomba do Pivô 1', '340 m³/h': 'Bomba do Pivô 2'})
+    # vazões da fonte única da Irrigação desde a v56 (dados_cad.py: Pivô 1 = 540, Pivô 2 = a da ficha do pivô, Gotejo T7 = 838,8 m³/h)
+    sel_classe('Irrigação'); cada('CD-03 Classe = Irrigação', 'Vazão', {'540 m³/h': 'Bomba do Pivô 1', '597,6 m³/h': 'Bomba do Pivô 2', '838,8 m³/h': 'Gotejo T7'})
     sel_classe('Armazenagem'); cada('CD-03 Classe = Armazenagem', 'Capacidade', {'60.000 sc de 60 kg': 'Silo 01'})
     shot(f'ctx02-cd03-{tam.split()[0]}-{"teclado" if tec else "clique"}')
     # ---- CD-06 Locais: Tanque (Capacidade L), Silo (Capacidade sc de 60 kg) ----
@@ -411,9 +412,12 @@ try:
     chk('CD-04 (A3): Carlos com "Disponível até" 01/09/2026 → "Não alocável em O.S." com o motivo (contrato encerrado) e "Renovar contrato ›"; a data em vermelho',
         ca.get('Situação') == 'Não alocável em O.S. : Contrato encerrado em 01/09/2026 Renovar contrato ›' and ca.get('Disponível até') == '01/09/2026' and cor == 'rgb(180, 35, 24)', (ca.get('Situação'), ca.get('Disponível até'), cor))
     J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(x=>x.innerText.indexOf('Carlos')===0); r&&r.querySelector('[role=cell] span').click();})()"); time.sleep(.5)
-    cal = [J(f"(document.querySelector('#fx_g_pes_{k}')||{{}}).value") for k in ('cal', 'acesso')]
+    cal = [J("(document.querySelector('#fx_g_pes_cal')||{}).value"), J("!!document.querySelector('#fx_g_pes_acesso')"),
+           J("(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or '']
     J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); b&&b.click();})()"); time.sleep(.3)
-    chk('CD-04 (A1): calendário e acesso ao app no painel da pessoa (saíram da grade)', cal[0] == 'Da equipe' and cal[1] in ('Com login', 'Sem login', 'Acesso solicitado'), cal)
+    # acesso ao app: só leitura no painel, gerido em Configurações (CONF-D05, v57); antes da CONF era um campo do formulário
+    chk('CD-04 (A1): calendário e acesso ao app no painel da pessoa (saíram da grade); o acesso só se lê aqui e se gerencia em Configurações',
+        cal[0] == 'Da equipe' and cal[1] is False and 'Acesso ao app: ' in cal[2] and 'gerenciar em Configurações › Usuários e alçadas' in cal[2], [cal[0], cal[1], cal[2][-300:]])
     rr = g.rotulos('Habilidades')
     chk('CD-04: o filtro de Habilidades oferece cada habilidade (não a lista inteira da célula)', rr and 'Operar trator' in rr and not any(',' in x for x in rr), rr)
     g.filtra('Habilidades', ['Operar trator']); fl = sorted(r.get('Pessoa') for r in g.dicts())

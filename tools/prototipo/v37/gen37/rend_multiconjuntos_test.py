@@ -40,7 +40,7 @@ ROWS = r"""(()=>{ const n=s=>(s||'').replace(/\s+/g,' ').trim(); const hn=h=>n(h
   const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent&&/^OPERA/.test(hn(t.querySelector('[role=columnheader]')))); if(!t) return [];
   const hs=[...t.querySelectorAll('[role=columnheader]')].map(hn);
   return [...t.querySelectorAll('[role=row]')].slice(1).map(r=>{ const cs=[...r.querySelectorAll('[role=cell]')]; const o={_id:r.getAttribute('data-rid'),_tot:r.classList.contains('g2tot')};
-    cs.forEach((c,i)=>{ o[(hs[i]||'C'+i).split(' ')[0]]=n(c.innerText).replace(/^[▾▸] ?/,''); }); return o; }); })()"""
+    cs.forEach((c,i)=>{ const h=hs[i]||'C'+i; o[/^CUSTO TOTAL/.test(h)?'CUSTO TOTAL':h.split(' ')[0]]=n(c.innerText).replace(/^[▾▸] ?/,''); }); return o; }); })()"""
 def rows(): return c.js(ROWS) or []
 def linha(rid): return next((r for r in rows() if r['_id'] == rid), None)
 def total(): t = next((r for r in rows() if r['_tot']), None); return t and (t.get('HORAS-CONJUNTO') or t.get('HORAS'))   # com o filtro recurso × mês: "Horas de <recurso>"

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Teste real (Chrome) — TABELAS-FOCO-20261004 v2 (5983172395) no Planejar safra, agora com a etapa 3 única "Dimensione operações e
-recursos" (05/10/2026; ESPECIFICACAO etapa-unica-3-4-5 §3.4 e §9.3): a g_op tem 8 colunas, uma variável por coluna e a unidade na célula
+recursos" (05/10/2026; ESPECIFICACAO etapa-unica-3-4-5 §3.4 e §9.3): a g_op tem 9 colunas (Custo total: proprietário, 13/10/2026), uma variável por coluna e a unidade na célula
 (ha-op na operação, ha nos demais níveis); Situação só com os valores de s.sit e chips; filtros de Situação e Conjunto (os de Modo,
 Largura e Planos saíram com as colunas, que foram para o formulário); ordem numérica do Custo R$/ha; editar a largura da Adubação de
 cobertura (só esta atividade) recalcula rendimento e R$/ha na mesma linha; a busca acha o talhão. Etapas 2 e 4 (demanda) como antes; 390 px
@@ -16,8 +16,8 @@ def chk(n, cond, info=''):
 
 p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js
 URL = f'http://127.0.0.1:{p}/SAF.dc.html#saf=S2627&passo=operacoes'
-# etapa única (§3.4): 8 colunas; a unidade fixa vai na célula ("21,60 ha/h", "2.520 ha-op", "116,7 h", "R$ 14,49/ha-op")
-COLS = ['Operação › atividade › talhão', 'Situação', 'Data', 'Conjunto', 'Rendimento', 'Área trabalhada', 'Horas-conjunto', 'Custo R$/ha']
+# etapa única (§3.4): 9 colunas (Custo total desde 13/10/2026); a unidade fixa vai na célula ("21,60 ha/h", "2.520 ha-op", "116,7 h", "R$ 14,49/ha-op")
+COLS = ['Operação › atividade › talhão', 'Situação', 'Data', 'Conjunto', 'Rendimento', 'Área trabalhada', 'Horas-conjunto', 'Custo R$/ha', 'Custo total']
 TB = "[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent&&[...t.querySelectorAll('[role=columnheader]')].some(h=>/^OPERAÇÃO/i.test(h.innerText.trim())))"
 def heads(): return J(f"[...({TB}).querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\\s+/g,' ').trim().replace(/ · \\d+$/,''))") or []   # filtro ativo acrescenta ' · n'
 def linhas(): return J(f"[...({TB}).querySelectorAll('[role=row]')].filter(r=>r.offsetParent&&r.querySelector('[role=cell]')).map(r=>[...r.querySelectorAll('[role=cell]')].map((x,i)=>{{const t=x.innerText.replace(/\\s+/g,' ').trim(); return i===0?t.replace(/^[▸▾]\\s*/,''):t;}}))") or []
@@ -41,23 +41,23 @@ try:
     c.goto(URL.split('#')[0].replace('SAF.dc.html', 'Main.dc.html'), .3); J("localStorage.clear(); sessionStorage.clear()")
     c.goto(URL, 1.6); J("window.__e=[];addEventListener('error',e=>window.__e.push(String(e.message)))")
     h = heads(); rs = linhas(); shot('saf3-1440')
-    chk('§3.4 cabeçalhos: 8 colunas, uma variável por coluna, sem unidade entre parênteses (a unidade vai na célula)', [x.upper() for x in h] == [x.upper() for x in COLS], h)
+    chk('§3.4 cabeçalhos: 9 colunas, uma variável por coluna, sem unidade entre parênteses (a unidade vai na célula)', [x.upper() for x in h] == [x.upper() for x in COLS], h)
     chk('nenhuma célula junta duas medidas ("12 m × 7 km/h", "R$/kg", "Parte: …")', not any(' m × ' in x or 'R$/kg' in x or x.startswith('Parte:') for r in rs for x in r), [r for r in rs if any(' m × ' in x or 'R$/kg' in x for x in r)][:2])
-    n0 = [r for r in rs if len(r) == 8 and r[0] != 'Total']
+    n0 = [r for r in rs if len(r) == 9 and r[0] != 'Total']
     chk('Situação só com os valores de s.sit (S2627: "Janela não informada" nas 8 operações, sem números)', len(n0) == 8 and all(r[1] == 'Janela não informada' for r in n0), [r[1] for r in n0])
-    chk('unidade por nível: operação em ha-op (área e custo); horas com "h"; rendimento "ha/h" ou "varia"',
-        all(r[5].endswith(' ha-op') and (r[7] == '' or r[7].endswith('/ha-op')) and r[6].endswith(' h') and (r[4] in ('', 'varia') or r[4].endswith(' ha/h')) for r in n0), [(r[0], r[4], r[5], r[6], r[7]) for r in n0])
+    chk('unidade por nível: operação em ha-op (área e custo); horas com "h"; rendimento "ha/h" ou "varia"; custo total em R$',
+        all(r[5].endswith(' ha-op') and (r[7] == '' or r[7].endswith('/ha-op')) and r[6].endswith(' h') and (r[4] in ('', 'varia') or r[4].endswith(' ha/h')) and (r[8] == '' or r[8].startswith('R$ ')) for r in n0), [(r[0], r[4], r[5], r[6], r[7], r[8]) for r in n0])
     for _ in range(4):
         if not J(f"(()=>{{const b=[...({TB}).querySelectorAll('button[aria-label^=\"Expandir\"]')].filter(b=>b.offsetParent); b.forEach(x=>x.click()); return b.length;}})()"): break
         time.sleep(.35)
-    rs = linhas(); fi = [r for r in rs if len(r) == 8 and r[0] != 'Total' and r not in n0 and ' · ' not in r[0] and r[5]]
+    rs = linhas(); fi = [r for r in rs if len(r) == 9 and r[0] != 'Total' and r not in n0 and ' · ' not in r[0] and r[5]]
     chk('atividades em "ha" (uma passada por cultivo) e talhões em "ha"', fi and all(r[5].endswith(' ha') or r[5].endswith(' ha-op') for r in fi) and any(r[5].endswith(' ha') for r in fi), [(r[0], r[5]) for r in fi][:4])
     c.goto(URL.replace('#', '?r=2#'), 1.6)
-    ordena('Custo R$/ha'); cu = [r[7] for r in linhas() if len(r) == 8 and r[0] != 'Total']
+    ordena('Custo R$/ha'); cu = [r[7] for r in linhas() if len(r) == 9 and r[0] != 'Total']
     chk('ordenar Custo R$/ha crescente (número, não texto): R$ 3,40/ha-op primeiro, R$ 662,86/ha-op por último', cu[:1] == ['R$ 3,40/ha-op'] and cu[-1:] == ['R$ 662,86/ha-op'], cu)
-    filtra('Conjunto', ['Trator 02 MF 7719 + Pulverizador PJ-3030 36 m']); r1 = [r for r in linhas() if len(r) == 8 and r[0] != 'Total']
+    filtra('Conjunto', ['Trator 02 MF 7719 + Pulverizador PJ-3030 36 m']); r1 = [r for r in linhas() if len(r) == 9 and r[0] != 'Total']
     chk('filtro Conjunto (valor exato da célula): só a Pulverização', r1 and all(r[0].startswith('Pulverização') for r in r1), [r[0] for r in r1])
-    limpa(); filtra('Situação', ['Janela não informada']); r2 = [r for r in linhas() if len(r) == 8 and r[0] != 'Total']
+    limpa(); filtra('Situação', ['Janela não informada']); r2 = [r for r in linhas() if len(r) == 9 and r[0] != 'Total']
     chk('filtro Situação = "Janela não informada": as 8 operações', len(r2) == 8, len(r2))
     limpa()
     # busca: o talhão pelo nome (era o filtro da coluna Talhão da antiga etapa 4)
