@@ -1,0 +1,109 @@
+[
+  {
+    "nome": "Contexto, comparação honesta e foco inicial",
+    "ok": true,
+    "valor": null
+  },
+  {
+    "nome": "Teclado alcança motivo após resultado",
+    "ok": true,
+    "valor": null
+  },
+  {
+    "nome": "Motivo obrigatório, foco no erro, sem efeitos",
+    "ok": true,
+    "valor": null
+  },
+  {
+    "nome": "Fechar e reabrir preserva motivo e ordem",
+    "ok": true,
+    "valor": null
+  },
+  {
+    "nome": "Divergência grava Não conforme sem repetir efeitos",
+    "ok": true,
+    "valor": null
+  },
+  {
+    "nome": "Caso identificado, resolução explícita e foco no motivo",
+    "ok": true,
+    "valor": null
+  },
+  {
+    "nome": "Resolução exige evidência sem fechar caso",
+    "ok": true,
+    "valor": null
+  },
+  {
+    "nome": "390px: resolver caso cabe e ação primária fica alcançável",
+    "ok": true,
+    "valor": {
+      "left": 37,
+      "right": 353,
+      "scroll": 316,
+      "client": 316,
+      "primary": [
+        {
+          "h": 44,
+          "top": 429.875,
+          "bottom": 473.875
+        }
+      ]
+    }
+  },
+  {
+    "nome": "Resolução preserva histórico e devolve foco",
+    "ok": true,
+    "valor": null
+  },
+  {
+    "nome": "Versão concorrente recusa e conserva rascunho",
+    "ok": true,
+    "valor": null
+  },
+  {
+    "nome": "Rever dados permite decisão atual com recibo",
+    "ok": true,
+    "valor": null
+  },
+  {
+    "nome": "Trocar perfil fecha decisão, preserva dados",
+    "ok": true,
+    "valor": null
+  },
+  {
+    "nome": "Sem papel a tela informa quem decide e não oferece gravação",
+    "ok": true,
+    "valor": null
+  },
+  {
+    "nome": "390px: formulário e ações cabem, alvos de 44px",
+    "ok": true,
+    "valor": {
+      "left": 37,
+      "right": 353,
+      "scroll": 316,
+      "client": 316,
+      "buttons": [
+        {
+          "text": "Registrar conferência",
+          "h": 44
+        },
+        {
+          "text": "Voltar aos apontamentos",
+          "h": 44
+        }
+      ]
+    }
+  },
+  {
+    "nome": "Apontamento descartado mantém recibo visível e não oferece reconferência",
+    "ok": true,
+    "valor": null
+  },
+  {
+    "nome": "Sem erro JavaScript",
+    "ok": true,
+    "valor": []
+  }
+]

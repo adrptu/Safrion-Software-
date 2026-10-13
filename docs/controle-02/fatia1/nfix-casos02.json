@@ -1,0 +1,133 @@
+[
+  {
+    "nome": "Caso aberto fica visível na listagem em execução",
+    "ok": true,
+    "info": null
+  },
+  {
+    "nome": "Duas abas: prévia antiga não resolve caso novo",
+    "ok": true,
+    "info": "Pessoa · Paula · caldeiro 22/09 06:00–11:00 · 23/09 06:00–11:00 · 24/09 06:00–11:00 · 25/09 06:00–11:00 · 26/09 06:00–12:00 Conflito com OS-0424 em 24/09 06:00–11:00 ATIVIDADE OPERAÇÃO Pulverização ATIVIDADE Fungicida 1ª aplicação GATILHO DAP +45 LOCAL · ÁREA T1+T2 · 350 ha JANELA 20–26/09 RESPONSÁVEL Marcos CONJUNTO Trator 03 + Pulverizador PJ-3030 36 m · 21,6 ha/h HORAS PREVISTAS 16,2 h (7,4 h no saldo) PADRÃO · VERSÃO Soja alta tecnologia v6 · v2 SITUAÇÃO ATUAL Turno do dia 4 aguardando conferência · Paula. ORIGEM Safra 2026/27 · plano de safra, janela 20–26/09 Recomendação: fungicida 1ª aplicação · protocolo do plano técnico · v2 aprovada"
+  },
+  {
+    "nome": "Duas abas: recusa preserva motivo da primeira aba",
+    "ok": true,
+    "info": null
+  },
+  {
+    "nome": "Duas abas: revisão explícita da referência atual resolve uma vez",
+    "ok": true,
+    "info": null
+  },
+  {
+    "nome": "Substituição preserva caso aberto e identifica dia vencedor",
+    "ok": true,
+    "info": {
+      "d": "26/09",
+      "dia": 5,
+      "ha": 50,
+      "h": null,
+      "parc": null,
+      "st": "Duplicidade · não somado",
+      "cons": {
+        "Fungicida A": 25
+      },
+      "inf": {
+        "Adjuvante espalhante": true
+      },
+      "obs": "",
+      "origem": "web",
+      "quem": "Marcos",
+      "chave": "W-OS-0421-dia5",
+      "imp": "[\"26/09\",50,null,null,\"web\",\"\",[],[]]",
+      "at": "01:33",
+      "sinc": true,
+      "ant": 190,
+      "div": [
+        {
+          "p": "Adjuvante espalhante",
+          "un": "L",
+          "plan": 12.5,
+          "inf": 0
+        }
+      ],
+      "mov": "MV-1001",
+      "conferenciaDia": {
+        "estado": "Não conforme",
+        "versao": "v2",
+        "motivo": "Relato a conferir antes da substituição",
+        "por": "Paula (conferência)",
+        "at": "2026-10-13T04:33:17.325Z",
+        "referencia": "{\"fato\":\"{\\\"versao\\\":\\\"v2\\\",\\\"fato\\\":\\\"{\\\\\\\"fato\\\\\\\":{\\\\\\\"d\\\\\\\":\\\\\\\"26/09\\\\\\\",\\\\\\\"dia\\\\\\\":5,\\\\\\\"ha\\\\\\\":50,\\\\\\\"h\\\\\\\":null,\\\\\\\"parc\\\\\\\":null,\\\\\\\"st\\\\\\\":\\\\\\\"Provisório\\\\\\\",\\\\\\\"cons\\\\\\\":{\\\\\\\"Fungicida A\\\\\\\":25},\\\\\\\"inf\\\\\\\":{\\\\\\\"Adjuvante espalhante\\\\\\\":true},\\\\\\\"obs\\\\\\\":\\\\\\\"\\\\\\\",\\\\\\\"origem\\\\\\\":\\\\\\\"web\\\\\\\",\\\\\\\"quem\\\\\\\":\\\\\\\"Marcos\\\\\\\",\\\\\\\"chave\\\\\\\":\\\\\\\"W-OS-0421-dia5\\\\\\\",\\\\\\\"imp\\\\\\\":\\\\\\\"[\\\\\\\\\\\\\\\"26/09\\\\\\\\\\\\\\\",50,null,null,\\\\\\\\\\\\\\\"web\\\\\\\\\\\\\\\",\\\\\\\\\\\\\\\"\\\\\\\\\\\\\\\",[],[]]\\\\\\\",\\\\\\\"at\\\\\\\":\\\\\\\"01:33\\\\\\\",\\\\\\\"sinc\\\\\\\":true,\\\\\\\"ant\\\\\\\":190,\\\\\\\"div\\\\\\\":[{\\\\\\\"p\\\\\\\":\\\\\\\"Adjuvante espalhante\\\\\\\",\\\\\\\"un\\\\\\\":\\\\\\\"L\\\\\\\",\\\\\\\"plan\\\\\\\":12.5,\\\\\\\"inf\\\\\\\":0}],\\\\\\\"mov\\\\\\\":\\\\\\\"MV-1001\\\\\\\"},\\\\\\\"consumos\\\\\\\":[]}\\\"}\",\"recibos\":0}",
+        "fato": "{\"fato\":{\"d\":\"26/09\",\"dia\":5,\"ha\":50,\"h\":null,\"parc\":null,\"st\":\"Provisório\",\"cons\":{\"Fungicida A\":25},\"inf\":{\"Adjuvante espalhante\":true},\"obs\":\"\",\"origem\":\"web\",\"quem\":\"Marcos\",\"chave\":\"W-OS-0421-dia5\",\"imp\":\"[\\\"26/09\\\",50,null,null,\\\"web\\\",\\\"\\\",[],[]]\",\"at\":\"01:33\",\"sinc\":true,\"ant\":190,\"div\":[{\"p\":\"Adjuvante espalhante\",\"un\":\"L\",\"plan\":12.5,\"inf\":0}],\"mov\":\"MV-1001\"},\"consumos\":[]}",
+        "revisaoPosterior": "",
+        "caso": {
+          "id": "CD-OS-0421-5-1",
+          "comando": "CMD-50",
+          "estado": "Em conferência",
+          "versao": 1,
+          "origem": {
+            "os": "OS-0421",
+            "dia": 5,
+            "chave": "W-OS-0421-dia5"
+          },
+          "conteudo": "[5,\"26/09\",50,null,null,{\"Fungicida A\":25},{\"Adjuvante espalhante\":true},\"web\",\"W-OS-0421-dia5\",\"Marcos\",\"\"]",
+          "motivo": "Relato a conferir antes da substituição",
+          "abertoPor": "Paula (conferência)",
+          "at": "2026-10-13T04:33:17.325Z"
+        }
+      },
+      "dec": {
+        "modo": "estornado",
+        "quem": "Paula (conferência)",
+        "at": "01:33",
+        "vale": 6
+      }
+    }
+  },
+  {
+    "nome": "Descartado oferece arquivar caso, sem conferir execução",
+    "ok": true,
+    "info": null
+  },
+  {
+    "nome": "Arquivamento nomeia o motivo correto",
+    "ok": true,
+    "info": null
+  },
+  {
+    "nome": "Arquivamento exige motivo e preserva efeitos",
+    "ok": true,
+    "info": null
+  },
+  {
+    "nome": "Arquivamento fecha caso com trilha sem novo estorno",
+    "ok": true,
+    "info": null
+  },
+  {
+    "nome": "Caso arquivado não oferece nova gravação",
+    "ok": true,
+    "info": null
+  },
+  {
+    "nome": "Duplo clique não deixa rascunho de erro nem duplica recibo",
+    "ok": true,
+    "info": null
+  },
+  {
+    "nome": "Mesmo autor recebe aviso antes de gravar",
+    "ok": true,
+    "info": null
+  },
+  {
+    "nome": "Ordem encerrada oferece somente consulta da conferência",
+    "ok": true,
+    "info": null
+  },
+  {
+    "nome": "Sem erro JavaScript",
+    "ok": true,
+    "info": []
+  }
+]

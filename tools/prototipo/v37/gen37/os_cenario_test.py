@@ -9,6 +9,7 @@ Uso: python3 os_cenario_test.py   (compile antes: areas.processo_os.build())"""
 import sys, os, time, json, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from os_lib import Os
+from conferencia_diaria_nav_helpers import conferir_dias
 
 T = Os(); OS = 'OS-0430'
 def setin(lab, val):  # campo do painel pelo rótulo acessível (input + change, como a digitação)
@@ -71,6 +72,8 @@ try:
       Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set.call(i,'Bordadura sem aplicação por vento; vistoria sem rebrote');
       i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"""); time.sleep(.3)
     T.btn('Aceitar com motivo'); p = T.pan()
+    T.ok('Conferência diária pendente' in p and not T.temb('Conferir e encerrar'), 'Após revisão técnica, Paula ainda precisa conferir os dias', p[:500])
+    conferir_dias(T.J,OS,[1,2]); p=T.pan()
     T.ok('Encerrar bloqueado' not in p and T.temb('Conferir e encerrar') and 'nada em custódia' in p and 'Revisão técnica: aceita por Ana (agrônoma)' in p,
          'revisão técnica aceita por Ana (agrônoma) com motivo: bloqueio some e surge Conferir e encerrar', p[:500])
     # 9 · conferir e encerrar grava no cenário (regra atual: Em conferência → Encerradas)

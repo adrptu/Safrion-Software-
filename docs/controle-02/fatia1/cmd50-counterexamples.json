@@ -1,0 +1,335 @@
+{
+  "before": {
+    "results": [
+      {
+        "nome": "Conferir dia preserva fase, área, saldo, consumo e custódia",
+        "ok": true
+      },
+      {
+        "nome": "Reenvio devolve recibo sem histórico ou efeitos repetidos",
+        "ok": true
+      },
+      {
+        "nome": "Papel sem alçada recusa sem alteração",
+        "ok": true
+      },
+      {
+        "nome": "Versão alterada recusa prévia antiga",
+        "ok": true
+      },
+      {
+        "nome": "Fato alterado recusa prévia antiga",
+        "ok": true
+      },
+      {
+        "nome": "Sem sinal não recebe conferência",
+        "ok": true
+      },
+      {
+        "nome": "Duplicidade não recebe conferência",
+        "ok": true
+      },
+      {
+        "nome": "Divergência exige motivo e preserva fatos",
+        "ok": true
+      },
+      {
+        "nome": "CMD-09 não resolve caso aberto por texto livre",
+        "ok": false,
+        "erro": "AssertionError [ERR_ASSERTION]: Missing expected exception.\n    at recusa (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2186:69)\n    at /private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2196:121\n    at teste (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2182:34)\n    at Object.<anonymous> (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2196:1)\n    at Module._compile (node:internal/modules/cjs/loader:1872:14)\n    at Object..js (node:internal/modules/cjs/loader:2003:10)\n    at Module.load (node:internal/modules/cjs/loader:1594:32)\n    at Module._load (node:internal/modules/cjs/loader:1396:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)"
+      },
+      {
+        "nome": "CMD-50 vincula caso ao fato existente sem repetir efeitos e conserva histórico",
+        "ok": false,
+        "erro": "TypeError: Cannot read properties of undefined (reading 'estado')\n    at /private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2197:230\n    at teste (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2182:34)\n    at Object.<anonymous> (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2197:1)\n    at Module._compile (node:internal/modules/cjs/loader:1872:14)\n    at Object..js (node:internal/modules/cjs/loader:2003:10)\n    at Module.load (node:internal/modules/cjs/loader:1594:32)\n    at Module._load (node:internal/modules/cjs/loader:1396:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47"
+      },
+      {
+        "nome": "CMD-50 repete recibo da mesma referência e recusa outra decisão",
+        "ok": false,
+        "erro": "ReferenceError: cdResolverRelato is not defined\n    at vincular (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2195:100)\n    at /private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2198:161\n    at teste (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2182:34)\n    at Object.<anonymous> (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2198:1)\n    at Module._compile (node:internal/modules/cjs/loader:1872:14)\n    at Object..js (node:internal/modules/cjs/loader:2003:10)\n    at Module.load (node:internal/modules/cjs/loader:1594:32)\n    at Module._load (node:internal/modules/cjs/loader:1396:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)"
+      },
+      {
+        "nome": "CMD-50 revalida papel e versão antes de vincular",
+        "ok": false,
+        "erro": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /decisão/. Input:\n\n'ReferenceError: cdResolverRelato is not defined'\n\n    at recusa (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2186:69)\n    at /private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2199:113\n    at teste (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2182:34)\n    at Object.<anonymous> (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2199:1)\n    at Module._compile (node:internal/modules/cjs/loader:1872:14)\n    at Object..js (node:internal/modules/cjs/loader:2003:10)\n    at Module.load (node:internal/modules/cjs/loader:1594:32)\n    at Module._load (node:internal/modules/cjs/loader:1396:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)"
+      },
+      {
+        "nome": "CMD-50 não transforma vínculo documental em alteração do fato",
+        "ok": false,
+        "erro": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /fato/. Input:\n\n'ReferenceError: cdResolverRelato is not defined'\n\n    at recusa (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2186:69)\n    at /private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2200:145\n    at teste (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2182:34)\n    at Object.<anonymous> (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2200:1)\n    at Module._compile (node:internal/modules/cjs/loader:1872:14)\n    at Object..js (node:internal/modules/cjs/loader:2003:10)\n    at Module.load (node:internal/modules/cjs/loader:1594:32)\n    at Module._load (node:internal/modules/cjs/loader:1396:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)"
+      },
+      {
+        "nome": "CMD-50 não dispensa pendência técnica ou de estoque e preserva caso",
+        "ok": false,
+        "erro": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /agrônomo/. Input:\n\n'ReferenceError: cdResolverRelato is not defined'\n\n    at recusa (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2186:69)\n    at /private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2201:177\n    at teste (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2182:34)\n    at Object.<anonymous> (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-h9w3bp4i/unit.js:2201:1)\n    at Module._compile (node:internal/modules/cjs/loader:1872:14)\n    at Object..js (node:internal/modules/cjs/loader:2003:10)\n    at Module.load (node:internal/modules/cjs/loader:1594:32)\n    at Module._load (node:internal/modules/cjs/loader:1396:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)"
+      },
+      {
+        "nome": "Conferente não substitui revisão agronômica",
+        "ok": true
+      },
+      {
+        "nome": "Conferente não substitui decisão de estoque",
+        "ok": true
+      },
+      {
+        "nome": "Mesmo autor fica com revisão posterior explícita",
+        "ok": true
+      },
+      {
+        "nome": "Mudança após conferência reabre pendência sem apagar recibo",
+        "ok": true
+      },
+      {
+        "nome": "Fase encerrada não aceita decisão nova",
+        "ok": true
+      },
+      {
+        "nome": "Divergência posterior retira confirmação diária anterior",
+        "ok": true
+      },
+      {
+        "nome": "Revisão futura da ordem preserva a conferência do fato anterior",
+        "ok": true
+      },
+      {
+        "nome": "Encerramento real recusa a divergência diária",
+        "ok": true
+      },
+      {
+        "nome": "Bloqueio diário aponta conferente, não almoxarife",
+        "ok": true
+      },
+      {
+        "nome": "Apontamento provisório sem recibo impede encerramento",
+        "ok": true
+      },
+      {
+        "nome": "Substituir duplicidade preserva recibo antigo sem bloquear ordem para sempre",
+        "ok": true
+      }
+    ],
+    "exit": 1,
+    "stderr": ""
+  },
+  "fixture_failure": {
+    "results": [
+      {
+        "nome": "Conferir dia preserva fase, área, saldo, consumo e custódia",
+        "ok": true
+      },
+      {
+        "nome": "Reenvio devolve recibo sem histórico ou efeitos repetidos",
+        "ok": true
+      },
+      {
+        "nome": "Papel sem alçada recusa sem alteração",
+        "ok": true
+      },
+      {
+        "nome": "Versão alterada recusa prévia antiga",
+        "ok": true
+      },
+      {
+        "nome": "Fato alterado recusa prévia antiga",
+        "ok": true
+      },
+      {
+        "nome": "Sem sinal não recebe conferência",
+        "ok": true
+      },
+      {
+        "nome": "Duplicidade não recebe conferência",
+        "ok": true
+      },
+      {
+        "nome": "Divergência exige motivo e preserva fatos",
+        "ok": true
+      },
+      {
+        "nome": "CMD-09 não resolve caso aberto por texto livre",
+        "ok": true
+      },
+      {
+        "nome": "CMD-50 vincula caso ao fato existente sem repetir efeitos e conserva histórico",
+        "ok": true
+      },
+      {
+        "nome": "CMD-50 repete recibo da mesma referência e recusa outra decisão",
+        "ok": true
+      },
+      {
+        "nome": "CMD-50 revalida papel e versão antes de vincular",
+        "ok": true
+      },
+      {
+        "nome": "CMD-50 não transforma vínculo documental em alteração do fato",
+        "ok": false,
+        "erro": "AssertionError [ERR_ASSERTION]: Missing expected exception.\n    at recusa (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-b_1fahg2/unit.js:2222:69)\n    at /private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-b_1fahg2/unit.js:2236:145\n    at teste (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-b_1fahg2/unit.js:2218:34)\n    at Object.<anonymous> (/private/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/safrion-cd-unit-b_1fahg2/unit.js:2236:1)\n    at Module._compile (node:internal/modules/cjs/loader:1872:14)\n    at Object..js (node:internal/modules/cjs/loader:2003:10)\n    at Module.load (node:internal/modules/cjs/loader:1594:32)\n    at Module._load (node:internal/modules/cjs/loader:1396:12)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)"
+      },
+      {
+        "nome": "CMD-50 não dispensa pendência técnica ou de estoque e preserva caso",
+        "ok": true
+      },
+      {
+        "nome": "Conferente não substitui revisão agronômica",
+        "ok": true
+      },
+      {
+        "nome": "Conferente não substitui decisão de estoque",
+        "ok": true
+      },
+      {
+        "nome": "Mesmo autor fica com revisão posterior explícita",
+        "ok": true
+      },
+      {
+        "nome": "Mudança após conferência reabre pendência sem apagar recibo",
+        "ok": true
+      },
+      {
+        "nome": "Fase encerrada não aceita decisão nova",
+        "ok": true
+      },
+      {
+        "nome": "Divergência posterior retira confirmação diária anterior",
+        "ok": true
+      },
+      {
+        "nome": "Revisão futura da ordem preserva a conferência do fato anterior",
+        "ok": true
+      },
+      {
+        "nome": "Encerramento real recusa a divergência diária",
+        "ok": true
+      },
+      {
+        "nome": "Bloqueio diário aponta conferente, não almoxarife",
+        "ok": true
+      },
+      {
+        "nome": "Apontamento provisório sem recibo impede encerramento",
+        "ok": true
+      },
+      {
+        "nome": "Substituir duplicidade preserva recibo antigo sem bloquear ordem para sempre",
+        "ok": true
+      }
+    ],
+    "exit": 1,
+    "stderr": ""
+  },
+  "after": {
+    "results": [
+      {
+        "nome": "Conferir dia preserva fase, área, saldo, consumo e custódia",
+        "ok": true
+      },
+      {
+        "nome": "Reenvio devolve recibo sem histórico ou efeitos repetidos",
+        "ok": true
+      },
+      {
+        "nome": "Papel sem alçada recusa sem alteração",
+        "ok": true
+      },
+      {
+        "nome": "Versão alterada recusa prévia antiga",
+        "ok": true
+      },
+      {
+        "nome": "Fato alterado recusa prévia antiga",
+        "ok": true
+      },
+      {
+        "nome": "Sem sinal não recebe conferência",
+        "ok": true
+      },
+      {
+        "nome": "Duplicidade não recebe conferência",
+        "ok": true
+      },
+      {
+        "nome": "Divergência exige motivo e preserva fatos",
+        "ok": true
+      },
+      {
+        "nome": "CMD-09 não resolve caso aberto por texto livre",
+        "ok": true
+      },
+      {
+        "nome": "CMD-50 vincula caso ao fato existente sem repetir efeitos e conserva histórico",
+        "ok": true
+      },
+      {
+        "nome": "CMD-50 repete recibo da mesma referência e recusa outra decisão",
+        "ok": true
+      },
+      {
+        "nome": "CMD-50 revalida papel e versão antes de vincular",
+        "ok": true
+      },
+      {
+        "nome": "CMD-50 não transforma vínculo documental em alteração do fato",
+        "ok": true
+      },
+      {
+        "nome": "CMD-50 não dispensa pendência técnica ou de estoque e preserva caso",
+        "ok": true
+      },
+      {
+        "nome": "Conferente não substitui revisão agronômica",
+        "ok": true
+      },
+      {
+        "nome": "Conferente não substitui decisão de estoque",
+        "ok": true
+      },
+      {
+        "nome": "Mesmo autor fica com revisão posterior explícita",
+        "ok": true
+      },
+      {
+        "nome": "Mudança após conferência reabre pendência sem apagar recibo",
+        "ok": true
+      },
+      {
+        "nome": "Fase encerrada não aceita decisão nova",
+        "ok": true
+      },
+      {
+        "nome": "Divergência posterior retira confirmação diária anterior",
+        "ok": true
+      },
+      {
+        "nome": "Revisão futura da ordem preserva a conferência do fato anterior",
+        "ok": true
+      },
+      {
+        "nome": "Encerramento real recusa a divergência diária",
+        "ok": true
+      },
+      {
+        "nome": "Bloqueio diário aponta conferente, não almoxarife",
+        "ok": true
+      },
+      {
+        "nome": "Apontamento provisório sem recibo impede encerramento",
+        "ok": true
+      },
+      {
+        "nome": "Substituir duplicidade preserva recibo antigo sem bloquear ordem para sempre",
+        "ok": true
+      },
+      {
+        "nome": "CMD-50 referência de caso anterior não resolve caso reaberto",
+        "ok": true
+      },
+      {
+        "nome": "CMD-50 registra revisão posterior quando o autor também decide",
+        "ok": true
+      }
+    ],
+    "exit": 0,
+    "stderr": ""
+  }
+}
