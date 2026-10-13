@@ -18,7 +18,7 @@ caso('perfil', () => {
   __ls['safrion.perfilDemo'] = 'Xyz'; ok('perfil desconhecido volta a Ana', g2perfil().k === 'Ana');
   delete __ls['safrion.perfilDemo'];
   ok('quem aprova ajuste, quarentena e excedente: Ana (gestora)', g2quem('gestor') === 'Ana (gestora)', g2quem('gestor'));
-  ok('agrônomo: Ana (agrônoma), o mesmo rótulo das telas da O.S. (OS_AGRO)', g2quem('agronomo') === 'Ana (agrônoma)' && g2quem('agronomo') === OS_AGRO, g2quem('agronomo'));
+  ok('agrônomo: Ana (agrônoma), o mesmo rótulo das telas da O.S. (OS_AGRO)', g2quem('agronomo') === 'Ana (agrônoma)' && g2quem('agronomo') === OS_AGRO(), g2quem('agronomo'));
   ok('dispensa: os dois papéis (só Ana)', g2quem(['gestor', 'agronomo']) === 'Ana (gestora e agrônoma)' && !g2papel(CAIO, ['gestor', 'agronomo']) && g2papel(ANA, ['gestor', 'agronomo']), g2quem(['gestor', 'agronomo']));
   ok('almoxarifes: Rui ou Paula', g2quem('almoxarife') === 'Rui (almoxarife) ou Paula (almoxarife)', g2quem('almoxarife'));
   ok('mesma pessoa pelo nome (Ana × "Ana (gestora)")', g2mesma('Ana', 'Ana (gestora)') && !g2mesma('Ana', 'Paula (almoxarife)') && !g2mesma('', ''));
@@ -75,7 +75,8 @@ caso('INV-2609', () => {
   cenMudar(null, c => estAprovar(c, 'INV-2609', ANA)); const aj = G().ajustes[0];
   ok('INV-2609: Ana aprova −600 kg, MAP 90.000 → 89.400 kg; contador Rui; sem revisão', G().lotes[K].fisico === 89400 && aj.contador === 'Rui (almoxarife)' && aj.rev === '', [G().lotes[K].fisico, aj.contador, aj.rev]);
 });
-ok('contadores sem mudança (est_fix1_test.py:56)', JSON.stringify(E2.contadores) === JSON.stringify(['Paula (almoxarife)', 'Rui (almoxarife)']), E2.contadores);
+/* revisão CONF F6: a lista fixa E2.contadores saiu; o contador vem das pessoas ativas com o papel almoxarife (mesmo resultado no seed) */
+ok('contadores do seed: Paula e Rui (almoxarife), lidos de Configurações (est_fix1_test.py:56)', JSON.stringify(estContadores()) === JSON.stringify(['Paula (almoxarife)', 'Rui (almoxarife)']), estContadores());
 
 console.log('\n— R-D2 · quarentena (KCl 60% K26-11: 10.000 kg em quarentena, disponível 50.000 kg)');
 const KK = 'KCl 60%|K26-11';

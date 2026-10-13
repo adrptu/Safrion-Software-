@@ -345,7 +345,7 @@ try:
         from ben_unit_test import motor, node
         fx = node(motor() + """ const c = cenClone(CEN0); c.ordens['OS-0932'] = { id: 'OS-0932', tipo: 'Colheita · semana 39', talhao: 'T7', area: 0, etapa: 'Em execução', versao: 'v1', realizado: 6, saldo: 0, resp: 'Sérgio', ins: [], req: null, selos: [],
           ap: [{ d: '25/09', dia: 1, ha: 6, st: 'Conferido', sinc: true, origem: 'web' }], reservado: false, osc: {} };
-          prReceber(c, { os: 'OS-0932', ticket: 'TK-T7A', bruto: 9400, tara: 3200, cond: 'Com avaria', dcol: '2026-09-25' }); c.rev = (c.rev || 0) + 1; print(JSON.stringify(c));""", 'ben_rev_b3.js')
+          prReceber(c, { quem: 'Rui', os: 'OS-0932', ticket: 'TK-T7A', bruto: 9400, tara: 3200, cond: 'Com avaria', dcol: '2026-09-25' }); c.rev = (c.rev || 0) + 1; print(JSON.stringify(c));""", 'ben_rev_b3.js')
         ir('PROD.dc.html', limpa=True); J(f"localStorage.setItem('talhao-os-cenario-v1', {json.dumps(fx.stdout.strip().splitlines()[-1])})")
         perfil('Marta'); ir('PROD.dc.html#L39-133'); p = pan(); pp = J("PPRIM()") or []
         t.chk('B3 · BEN-REV-03: L39-133 (avaria, Packing) em processo com "Liberar lote · Marta (qualidade)" e a primária "Liberar L39-133"', 'Liberar lote · Marta (qualidade)' in p and 'Liberar L39-133' in pp, [pp, p[:300]])

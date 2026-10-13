@@ -233,8 +233,11 @@ function assinCarteira(A, cad0, salvo) { const med0 = assinMedir(cad0, salvo); c
 // dia do trial pela data simulada da cobrança (PLAT-D19): ON-01 e BO-02 leem daqui
 function assinTrial(org, hoje) { const t = (org && org.trial) || {}; const dia = assinDias(t.inicio, hoje) + 1;
   return { dia, dias: t.dias, fim: t.fim, acabou: dia > t.dias, t: dia > t.dias ? 'avaliação terminou em ' + assinBr(t.fim) : 'dia ' + dia + ' de ' + t.dias }; }
+// célula de CSV sem fórmula (revisão CONF F5, OWASP CSV injection): texto que começa com = + - @, tab ou CR vira texto com ' na frente
+// (Excel e LibreOffice avaliariam =HYPERLINK(...) digitado num motivo); número puro (−5, +3,2) fica como está. Usada também pela trilha (confCsv).
+function assinCelCsv(s) { const t = String(s == null ? '' : s); return (/^[=+\-@\t\r]/.test(t) && !/^[+-]?\d[\d.,]*$/.test(t)) ? "'" + t : t; }
 // fatura em CSV (gerada no navegador a partir da cópia da fatura; Baixar dados do PRD CF-05)
-function assinCsv(org, f) { const C = f.copia || {}; const P = assinPlano(C.plano) || {}; const q = s => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
+function assinCsv(org, f) { const C = f.copia || {}; const P = assinPlano(C.plano) || {}; const q = s => '"' + assinCelCsv(s).replace(/"/g, '""') + '"';
   const L = [['Organização', org.nome], ['Competência', assinComp(f.comp)], ['Estado', f.previa ? 'Em medição (prévia)' : assinFatEstado(f, (assinLer() || {}).hoje || f.venc)],
     ['Plano', P.nome + ' · contrato ' + C.versao + (C.aceite_por ? ' · aceite por ' + C.aceite_por : '')], ['Área medida (ha)', assinNf(C.medida, 2, 2)], ['Talhões medidos', C.ntal == null ? 'informada' : C.ntal]]
     .concat(C.abertura == null ? [] : [['Medida na abertura (ha)', assinNf(C.abertura, 2, 2)], [f.previa ? 'Medida hoje (ha)' : 'Medida no fechamento (ha)', assinNf(C.fech, 2, 2)]]).concat([

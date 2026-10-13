@@ -50,7 +50,7 @@ function cdPendente(c, id) {
   return pendentes.length ? 'Conferência diária pendente: dia ' + pendentes.map(a => a.dia).join(', ') + '.' : '';
 }
 function cdConferir(c, id, dia, decisao, motivo, referencia, ator) {
-  const quem = cenExige(ator, 'conferente', 'Conferir o dia ' + dia + ' da ' + id);
+  const quem = cenExigeAlc(ator, 'AL-12', 'Conferir o dia ' + dia + ' da ' + id);
   const { o, ap } = cdAp(c, id, dia);
   if (!['conferir', 'divergencia'].includes(decisao)) throw new Error('Escolha conferir ou registrar divergência.');
   const texto = String(motivo || '').trim();
@@ -81,7 +81,7 @@ function cdConferir(c, id, dia, decisao, motivo, referencia, ator) {
 // o fato existente; não aceita outro turno, não recusa/estorna nem converte quantidades.
 // As demais decisões exigem seus comandos físicos vinculados, fora desta fatia.
 function cdResolverRelato(c,id,dia,decisao,motivo,referencia,ator) {
-  const quem=cenExige(ator,'conferente','Resolver o relato do dia '+dia+' da '+id);
+  const quem=cenExigeAlc(ator,'AL-12','Resolver o relato do dia '+dia+' da '+id);
   const {ap}=cdAp(c,id,dia), anterior=ap.conferenciaDia, caso=anterior&&anterior.caso;
   const texto=String(motivo||'').trim();
   if(!['vincular','arquivar'].includes(decisao)) throw new Error('Este recorte permite vincular evidência ao fato existente. A correção vinculada ainda não existe no protótipo: o caso fica aberto e a O.S. não encerra.');

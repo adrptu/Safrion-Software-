@@ -116,7 +116,7 @@ def parte3(E):
     t = E.rowtxt('INV-2611'); print('a contar:', t); E.ok('oculto até contar' in t and '1.200' not in t, 'A contar: saldo do sistema oculto')
     print('primário:', E.clk('Contar INV-2611'))
     E.ok('1.200' not in E.aside(), 'formulário da contagem não mostra o saldo')
-    E.setv('fx_g_cnt_cont', '1180'); E.salvar(); print('toast:', E.toast())
+    E.setv('fx_g_cnt_contador', 'Paula (almoxarife)'); E.setv('fx_g_cnt_cont', '1180'); E.salvar(); print('toast:', E.toast())  # revisão CONF F6: o contador não tem mais valor padrão (era o 1º da lista fixa); a pessoa escolhe quem contou
     E.ok(not E.aberto(), 'salvar sempre grava (sem exigir causa ao contar)')
     t = E.rowtxt('INV-2611'); print('linha:', t); E.ok('aguardando aprovação' in t and 'informe a causa' in t and '1.200 L' in t, 'diferença vira ajuste aguardando aprovação; pede causa')
     E.ok('Recontar' in t and 'Aprovar ajuste' in t, 'linha oferece Recontar e Aprovar ajuste')
