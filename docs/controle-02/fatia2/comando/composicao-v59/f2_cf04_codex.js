@@ -1,0 +1,10 @@
+const s={state:{g2:{},saf:'S2627'},setState(x){Object.assign(this.state,x);}};
+cenReset();const antes=confTrilha(cenGet(),null);const p={chave:'cf04-real',esperada:null,safra:'S2627',ator:'Ana',previa:PlanoReferencia.projetar(s,'S2627')};
+const r=PlanoReferenciaComando.publicar(s,p,safImpedimentosRef);assert.ok(!r.erro,r.erro);
+const c=cenGet(),versoes=c.planoReferencias[0].versoes,esperada=PlanoReferencia.trilha(versoes)[0],depois=confTrilha(c,null);
+assert.equal(versoes.length,1);assert.equal(esperada.sq,r.versao.sq);assert.equal(esperada.quem,r.versao.por);assert.equal(esperada.src,versoes[0].retrato.contexto.fazenda+' · S2627 · referência R1');
+console.log('PUBLICADO '+JSON.stringify({id:r.versao.id,por:r.versao.por,em:r.versao.em,sq:r.versao.sq}));
+console.log('ADAPTADOR '+JSON.stringify(esperada));console.log('CF04 '+JSON.stringify({antes:antes.length,depois:depois.length,linhas:depois.filter(x=>x.id===esperada.id)}));
+const replay=PlanoReferenciaComando.publicar(s,p,safImpedimentosRef);assert.ok(replay.repetido);assert.equal(cenGet().planoReferencias[0].versoes.length,1);console.log('OK publicação/recibo/adaptador/replay');
+assert.equal(depois.filter(x=>x.id===esperada.id).length,1,'CF04 deve conter exatamente a linha publicada com identidade do adaptador');
+console.log('OK integração CF04');

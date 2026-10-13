@@ -12,3 +12,8 @@ Executor unitário controlado19/19+1 usa AL18real se presente; stub de domínio 
 ## Reteste da correção devolvida
 
 Claude corrigiu AL18 em 5ec321ddad3019fbd66090fe8b0543b8066a8ff9, filho de 54086e8. Codex conferiu os 3 blobs do commit por SHA Git. `al18-fixa.txt`: 5/5, incluindo os quatro comportamentos reais anteriores e contraprova corrigida: tentativa de editar para agrônomo rejeita sem mudar memória/storage; Ana apenas agrônoma recusa; Caio gestor publica R1. `config-al18-fixa.txt`: 221/221. F2-AL18-01 resolvido nesse delta. Os brutos anteriores preservam a reprodução do defeito na base anterior; não representam defeito ainda aberto no commit corrigido. Os 24 casos de UI e 5 casos do adaptador da base anterior seguem evidência válida para esses trechos, não foram reexecutados após a mudança exclusiva da editabilidade da AL18 e expectativa OC-06. OC-06 foi lido, não executado neste reteste. CF04 e integração/publicação continuam pendentes do responsável.
+
+
+## Pendência CF04 reproduzida (13/10 18:54 UTC)
+
+Em5ec321d+26feeb8, `f2_cf04_codex.py` termina exit1: publicaçãoR1, recibo, adaptador e replay válidos, mas `confTrilha(c,null)` fica14→14 e não contém a linha PLANO deR1. Copiar os dois arquivos f2_cf04_codex para gen37 e executar com Node noPATH. Bruto em cf04-pendente.txt. É prova da integração ainda ausente, atribuída aClaude, não teste verde nem nova fila. Após o gancho, o mesmo teste deve passar sem alterar a asserção; conferir tambémR2 e navegadorCF04.
