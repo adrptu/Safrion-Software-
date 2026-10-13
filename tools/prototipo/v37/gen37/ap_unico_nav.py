@@ -94,10 +94,19 @@ def rodar():
         a.ok(f == [240, 122, 38] and m5[0] == 'Duplicidade · não somado' and m5[1] == '' and m5[2].startswith('Estornado: mesmo turno do dia 6'),
              f'AP-07 "vale este" (DEMO-11): 240 ha, 122 L / 38 L; dia 5 estornado, movimento sem item: {f} · {m5}')
         mid = a.cen(f"c.ordens['{OS}'].ap.find(x=>x.dia===5).mov")
-        a.c.size(1440, 1100); a.abrir('EST'); J("document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[5].click()"); time.sleep(.5)
-        row = J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.indexOf({json.dumps(mid)})>=0); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
-        a.ok(bool(mid) and 'Consumo apontado na web' in row and ' Web ' in row + ' ' and P not in row and '25 L' not in row,
-             f'EST · movimentos: o consumo estornado do dia 5 ({mid}) é "Consumo apontado na web", origem Web, sem item nem quantidade: {row}')
+        # SUP (docs/suprimentos-simplificado §3, g_mov): Movimentos deixou de ser a 6ª seção e virou modo de Confira saldos; o registro e a
+        # origem (app ou web) foram para o painel do movimento. Mesmo propósito: o consumo estornado aparece como web, sem item nem quantidade.
+        a.c.size(1440, 1100); a.abrir('EST')
+        J("(()=>{const b=[...document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')].find(b=>b.innerText.trim().startsWith('Confira saldos')); b&&b.click();})()"); time.sleep(.5)
+        a.clk('Movimentos'); time.sleep(.4)
+        row, pm = J(f"""(async()=>{{ const espera=ms=>new Promise(z=>setTimeout(z,ms)); const n=s=>(s||'').replace(/\\s+/g,' ');
+          for(const r of [...document.querySelectorAll('[role=row].g2ed')].filter(r=>r.innerText.indexOf('Consumo apontado na web')>=0)){{
+            r.click(); await espera(350); const a=document.querySelector('aside[role=dialog]'); const t=a?n(a.innerText):'';
+            if(t.indexOf('Registro '+{json.dumps(mid)}+' ')>=0) return [n(r.innerText),t];
+            const x=a&&a.querySelector('button[aria-label=Fechar]'); if(x){{ x.click(); await espera(250); }} }}
+          return ['',''];}})()""") or ['', '']
+        a.ok(bool(mid) and 'Consumo apontado na web' in row and ('Registro ' + str(mid) + ' · web') in pm and P not in row and '25 L' not in row,
+             f'EST · movimentos: o consumo estornado do dia 5 ({mid}) é "Consumo apontado na web", origem web no painel, sem item nem quantidade: {row} · {pm[:160]}')
         guard()
         # 7 · "Outro turno: somar": web 40 ha + app 50 ha → 280 ha, 140 L
         restaurar(); web_apontar('40'); app_turno('50'); web(); ordem(OS); pan(); btn('Outro turno: somar'); f = a.cen(FATO)

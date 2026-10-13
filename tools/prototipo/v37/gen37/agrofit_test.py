@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Teste CDP (18 verificações) da AG-07 · Consulta Agrofit sobre a BASE REAL (dados abertos AGROFIT/MAPA, 02/10/2026).
+"""Teste CDP (17 verificações) da AG-07 · Consulta Agrofit sobre a BASE REAL (dados abertos AGROFIT/MAPA, 02/10/2026).
 Os esperados saem dos próprios arquivos servidos (agrofit_meta.json, agrofit_indice.json, agrofit_usos_cultura_*.json,
 agrofit_lmr.json), da base da fazenda embutida na página (AGF) e do cenário compartilhado (window.__cen na O.S.), recalculados
 aqui em Python com a mesma regra da página — nenhum número escrito à mão. Capturas em _probe/agrofit_real_*.png (1440×900).
-CTL-5 (06/10/2026, RL-E3): a AG-07 só consulta; os itens 9, 12, 14 e 15 trocaram o receituário paralelo pelo "Usar na O.S."
-(o registro nasce na O.S.; o fluxo inteiro está em ctl5_test.py). Praga-alvo (09/10/2026): com a cultura escolhida a lista é por uso
-(produto × praga-alvo), e os itens 6 e 7 contam usos (o fluxo está em praga_alvo_test.py). Uso: python3 agrofit_test.py (≈ 40 s)."""
+Uso: python3 agrofit_test.py (≈ 40 s)."""
 import sys, os, time, subprocess, json, unicodedata
 HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
 from cdp import Chrome
@@ -93,13 +91,10 @@ try:
     U_=lambda f: f'http://127.0.0.1:{p}/{f}'
     J0="window.__setv=(sel,val)=>{const el=document.querySelector(sel); if(!el) return 'SEM '+sel; const pr=el.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(pr,'value').set.call(el,val); el.dispatchEvent(new Event(el.tagName==='SELECT'?'change':'input',{bubbles:true})); return 'ok';}; 1"
     setv=lambda sel,val: (J(f"__setv({json.dumps(sel)},{json.dumps(val)})"),time.sleep(.35))[0]
-    cnt=lambda: J("(()=>{const s=[...document.querySelectorAll('main span')].find(x=>/ de [\\d.]+ (produtos|usos em .+)$/.test(x.innerText.trim())); return s?s.innerText.trim():'';})()") or ''
+    cnt=lambda: J("(()=>{const s=[...document.querySelectorAll('main span')].find(x=>/ de [\\d.]+ produtos$/.test(x.innerText.trim())); return s?s.innerText.trim():'';})()") or ''
     rows=lambda: J("[...document.querySelectorAll('main [role=table] [role=row].g2ed')].map(r=>[...r.querySelectorAll('[role=cell]')].map(x=>x.innerText.trim()))") or []
     status=lambda: J("[...document.querySelectorAll('main [role=status]')].map(x=>x.innerText.replace(/\\s+/g,' ').trim())") or []
-    FX='aside[aria-label^="Ficha"]'; RX='aside[aria-label="Preparar receituário agronômico"]'   # RX: a gaveta que saiu (CTL-5); só para conferir que não existe
-    PASSO=lambda: J(f"(document.querySelector('{FX} [role=region][aria-label=\"Próximo passo\"]')||{{innerText:''}}).innerText.replace(/\\s+/g,' ')") or ''
-    USAR=lambda: J(f"(()=>{{const b=[...document.querySelectorAll('{FX} button')].find(x=>x.innerText.trim()==='Usar na O.S.'); return b?b.disabled:null;}})()")
-    ORDS=lambda: [o for o in (J(f"[...document.querySelectorAll('{FX} select[aria-label=\"Ordem A liberar\"] option')].map(o=>o.value)") or []) if o]
+    FX='aside[aria-label^="Ficha"]'; RX='aside[aria-label="Preparar receituário agronômico"]'
     ficha=lambda: J(f"(document.querySelector('{FX}')||{{}}).innerText||''") or ''
     clica=lambda raiz,txt: J(f"(()=>{{const b=[...document.querySelectorAll({json.dumps(raiz+' button')})].find(x=>x.innerText.replace(/\\s+/g,' ').trim().startsWith({json.dumps(txt)})); if(!b) return 'NÃO ACHEI'; b.click(); return 'ok';}})()")
     def pronto(t=25):
@@ -161,19 +156,17 @@ try:
         len(E5)>0 and a1==a2==f'{nf(len(E5),0)} de {nf(NP,0)} produtos' and not (nomes & {P[i]['nome'] for i in sem} - {P[i]['nome'] for i in E5}), [a1,a2,len(E5)])
     setv('main input[type=search]','')
     # ---------- 6 · Cultura = Soja (combobox) e "só os de Soja" ----------
-    # Praga-alvo (09/10/2026): com a cultura escolhida a lista tem uma linha por USO na cultura (produto × praga-alvo); a contagem passou de
-    # produtos a usos ("N de M usos em Soja") e "Ver só os de Soja" bate com nUsos da cultura no índice (antes: produtos, nProdutos)
-    SJ=cid('Soja'); uS=sum(len(ps) for c_ in (SJ,TD) for a_,ps in U[str(c_)]); uSo=sum(len(ps) for a_,ps in U[str(SJ)])
+    SJ=cid('Soja'); eS=[x for x in P if SJ in x['cul'] or TD in x['cul']]; eSo=[x for x in P if SJ in x['cul']]
     combo('Cultura','soja'); b1=cnt(); st=status(); clica('main','Ver só os de Soja'); b2=cnt()
-    chk(f'6 Cultura Soja: {uS} usos (com "Todas as culturas") e "Ver só os de Soja" → {uSo} usos (= nUsos da cultura no índice)',
-        b1==f'{nf(uS,0)} de {nf(uS,0)} usos em Soja' and b2==f'{nf(uSo,0)} de {nf(uSo,0)} usos em Soja' and uSo==CU[SJ][4]
+    chk(f'6 Cultura Soja: {len(eS)} (com "Todas as culturas") e "Ver só os de Soja" → {len(eSo)} (= contagem da cultura no índice)',
+        b1==f'{nf(len(eS),0)} de {nf(NP,0)} produtos' and b2==f'{nf(len(eSo),0)} de {nf(NP,0)} produtos' and len(eSo)==CU[SJ][3]
         and any('Todas as culturas' in s for s in st), [b1,b2,st])
     clica('main','Incluir "Todas as culturas"')
     # ---------- 7 · Praga ou alvo (aparece com a cultura) ----------
     PH=aid('Phakopsora pachyrhizi'); eA=usos(SJ,PH)|usos(TD,PH)
-    combo('Praga-alvo','phakopsora'); c7=cnt(); L7=rows(); vis7=set(r[0].split('\n')[0] for r in L7)
-    chk(f'7 Praga ou alvo = Phakopsora pachyrhizi em Soja: {len(eA)} usos (Soja + "Todas as culturas"), linhas só deles, com o nome científico na coluna própria',
-        c7==f'{nf(len(eA),0)} de {nf(uS,0)} usos em Soja' and vis7 and vis7<= {P[i]['nome'] for i in eA} and all(r[2]=='Phakopsora pachyrhizi' for r in L7), [c7,len(eA),L7[:2]])
+    combo('Praga ou alvo','phakopsora'); c7=cnt(); vis7=set(r[0].split('\n')[0] for r in rows())
+    chk(f'7 Praga ou alvo = Phakopsora pachyrhizi em Soja: {len(eA)} registros (Soja + "Todas as culturas"), linhas só deles',
+        c7==f'{nf(len(eA),0)} de {nf(NP,0)} produtos' and vis7 and vis7<= {P[i]['nome'] for i in eA}, [c7,len(eA)])
     shot('soja_ferrugem')
     # ---------- 8 · Classe + agrupar por grupo químico ----------
     J("[...document.querySelectorAll('main button')].find(b=>/^Limpar filtros/.test(b.innerText.trim())).click()"); time.sleep(.4)
@@ -192,13 +185,13 @@ try:
     setv('main select[aria-label="Agrupar por"]',''); J("[...document.querySelectorAll('main button')].find(b=>/^Limpar filtros/.test(b.innerText.trim())).click()"); time.sleep(.3)
     junta('AG-07')
 
-    # ---------- 9 · link novo #reg-<n>: ficha do registro, "Usar na O.S." desligado até cultura e alvo (CTL-5: antes "Preparar receituário") ----------
+    # ---------- 9 · link novo #reg-<n>: ficha do registro, sem receituário até cultura e alvo ----------
     S9=usos(SJ,PH); cand=[x for x in P if x['i'] in S9 and len(x['cul'])>=2 and len(x['ids'])>=2]
     X=cand[0]
     J(f"location.hash='#reg-{X['reg']}'"); time.sleep(.8); f=ficha()
-    dis=USAR()
+    dis=J(f"(()=>{{const b=[...document.querySelectorAll('{FX} button')].find(x=>x.innerText.trim()==='Preparar receituário'); return b?b.disabled:null;}})()")
     lkf=J(f"[...document.querySelectorAll('{FX} a')].map(a=>[a.getAttribute('href'),a.target])") or []
-    chk(f'9 #reg-{X["reg"]} abre a ficha de {X["nome"]}: registro, titular, 7 seções, link oficial, nota da bula e "Usar na O.S." desligado sem cultura/alvo',
+    chk(f'9 #reg-{X["reg"]} abre a ficha de {X["nome"]}: registro, titular, 7 seções, link oficial, nota da bula e receituário bloqueado sem cultura/alvo',
         f.startswith(X['nome']) and f'Registro MAPA nº {X["reg"]} · {X["tit"]}' in f and dis is True and J("location.hash")=='#reg-'+X['reg']
         and all(s in nz(f) for s in ('usos registrados','rotacao','lmr anvisa','na fazenda','registro e composicao','dose, carencia'))
         and [OFICIAL,'_blank'] in lkf, [f[:300],dis,lkf])
@@ -222,11 +215,15 @@ try:
         exp.append((IG[k][0], ('Valor 999' if e[0]>=999 else nf(e[0],4)+' mg/kg') if e and e[0] is not None else None))
     chk('11 LMR ANVISA para Soja: um valor por ingrediente, igual ao agrofit_lmr.json',
         len(lm)==len(exp) and all(l.startswith(n) and (v is None or v in l) for l,(n,v) in zip(lm,exp)), [lm,exp])
-    # ---------- 12 · só consulta (CTL-5, RL-E3): sem gaveta de receituário; com cultura e alvo, o próximo passo é "Usar na O.S." ----------
-    temF=bool(J(f"(()=>{{try{{const A=window.__agx.AGX; return !!A.FK[A.P[A.reg['{X['reg']}']].key];}}catch(e){{return null;}}}})()")); pa=PASSO(); fx=ficha()
-    chk('12 só consulta: sem "Preparar receituário" nem "Receituário emitido"; Soja × alvo → "Usar na O.S." com as ordens A liberar de soja, ou desligado dizendo o motivo',
-        not J(f"!!document.querySelector('{RX}')") and 'Preparar receituário' not in fx and 'Receituário emitido' not in fx
-        and ((ORDS()==['OS-0430'] and ('Esta consulta não emite receituário' in pa or 'não está na referência conferida' in pa)) if temF else (USAR() is True and 'Sem produto da fazenda com este ingrediente ativo' in pa)), [temF,ORDS(),pa])   # revisão do CTL-5: só a ordem de pulverização (S3-1); alvo da referência (S3-3)
+    # ---------- 12 · receituário: produto + cultura + alvo; dose obrigatória com unidade ----------
+    clica(FX,'Preparar receituário'); time.sleep(.4); clica(RX,'Emitir receituário'); e1=J(f"[...document.querySelectorAll('{RX} [role=alert]')].map(x=>x.innerText)") or []
+    setv('#rx_dose','1,5'); clica(RX,'Emitir receituário'); e2=J(f"[...document.querySelectorAll('{RX} [role=alert]')].map(x=>x.innerText)") or []
+    setv('#rx_dose','3 litros'); clica(RX,'Emitir receituário'); e3=J(f"[...document.querySelectorAll('{RX} [role=alert]')].map(x=>x.innerText)") or []
+    setv('#rx_dose','0,6 L/ha'); shot('receituario'); clica(RX,'Emitir receituário'); time.sleep(.4)
+    feito=J(f"(document.querySelector('{FX} [role=region]')||{{}}).innerText||''") or ''
+    chk('12 receituário: sem dose → "Informe a dose…"; "1,5" → "Informe a unidade…"; "3 litros" → "Informe a base…"; "0,6 L/ha" emite com cultura e alvo',
+        any('Informe a dose' in x for x in e1) and any('Informe a unidade' in x for x in e2) and any('Informe a base' in x for x in e3) and not J(f"!!document.querySelector('{RX}')")
+        and 'Receituário emitido · Soja · ' in feito and '0,6 L/ha' in feito, [e1,e2,e3,feito])
     junta('AG-07 ficha')
 
     # ---------- 13 · links antigos: filtro pelo ingrediente, registro único abre a ficha, proibido explica ----------
@@ -249,31 +246,29 @@ try:
     disp=lambda l: max(0,(l['fisico'] or 0)-(l['quarentena'] or 0)-(l['reservado'] or 0))
     lin=[f"{l['prod']} {l['lote']} {l['local']} {nf(l['fisico'])} {l['un']} {nf(l['reservado'])} {l['un']} {nf(disp(l))} {l['un']}" for l in LA]
     MA=cid('Mamão'); alm=sorted(a for c_,a in ((c_,a) for c_,L in U.items() if int(c_)==MA for a,ps in L if XA['i'] in ps))
-    setv(f'{FX} select[aria-label="Cultura do uso"]',str(MA)); setv(f'{FX} select[aria-label="Alvo do uso"]',str(alm[0]))
-    pfs=J(f"!!document.querySelector('{FX} select[aria-label=\"Produto da fazenda\"]')"); d14=USAR()
-    # dos 3 nomes da fazenda com abamectina, só a Abamectina 18 EC está no catálogo da O.S. (lote ou plano): é ela que vai, sem perguntar
-    # revisão do CTL-5 (S3-1): só a ordem de pulverização do mamão (OS-0501) é candidata, e vem escolhida (lista de um item: um toque a menos)
-    chk(f'14 Na fazenda ({XA["nome"]}): lotes de {", ".join(nfz)} iguais ao cenário; referência "Abamectina 18 EC"; Mamão: só a ordem de pulverização A liberar de mamão (OS-0501, já escolhida; o produto é o do catálogo da O.S.)',
+    setv(f'{FX} select[aria-label="Cultura do uso"]',str(MA)); setv(f'{FX} select[aria-label="Alvo do uso"]',str(alm[0])); clica(FX,'Preparar receituário'); time.sleep(.3)
+    setv('#rx_dose','5 L/ha'); wr=J(f"[...document.querySelectorAll('{RX} [role=alert]')].map(x=>x.innerText)") or []; J(f"[...document.querySelectorAll('{RX} button')].find(b=>b.innerText.trim()==='Cancelar').click()"); time.sleep(.3)
+    chk(f'14 Na fazenda ({XA["nome"]}): lotes de {", ".join(nfz)} iguais ao cenário; referência "Abamectina 18 EC"; dose fora da referência só avisa',
         lot==lin and len(lin)>0 and 'REFERÊNCIA CONFERIDA EM BULA' in f.upper() and 'Abamectina 18 EC' in f
-        and pfs is False and ORDS()==['OS-0501'], [lin,lot,pfs,d14,ORDS()])
-    chk('14b com a ordem já escolhida, "Usar na O.S." liga e diz o próximo passo na OS-0501 com a Abamectina 18 EC para o ácaro da referência', d14 is False and USAR() is False
-        and _re.search(r'Abre a OS-0501 em Ajustar antes de liberar com Abamectina 18 EC incluído para ácaro-(branco|rajado)\.', PASSO()), [d14,USAR(),PASSO()])
+        and any('Fora da referência conferida em bula' in x for x in wr), [lin,lot,wr])
     J(f"(()=>{{const s=document.querySelector('{FX} section[aria-label=\"Na fazenda\"]'); if(s) s.scrollIntoView({{block:'start'}});}})()"); time.sleep(.3)
     shot('ficha_na_fazenda'); junta('AG-07 abamectina')
 
-    # ---------- 15 · registro só em "Todas as culturas": a ficha oferece a cultura do talhão; "Usar na O.S." pede a cultura real (CTL-5) ----------
+    # ---------- 15 · registro só em "Todas as culturas": a ficha oferece a cultura do talhão e o receituário a nomeia ----------
     XT=next(x for x in P if x['cul']=={TD} and 'Inseticida' in x['comp'])
     alT=sorted(a_ for a_,ps in U[str(TD)] if XT['i'] in ps)
     J(f"location.hash='#reg-{XT['reg']}'"); time.sleep(.8)
     op=J(f"[...document.querySelectorAll('{FX} select[aria-label=\"Cultura do uso\"] option')].map(o=>o.innerText)") or []
     setv(f'{FX} select[aria-label="Cultura do uso"]',str(TD))
-    disTD=USAR(); dica=PASSO(); ordTD=ORDS()
-    setv(f'{FX} select[aria-label="Cultura do uso"]',str(SJ)); setv(f'{FX} select[aria-label="Alvo do uso"]',str(alT[0])); time.sleep(.3)
-    temT=bool(J(f"(()=>{{try{{const A=window.__agx.AGX; return !!A.FK[A.P[A.reg['{XT['reg']}']].key];}}catch(e){{return null;}}}})()")); pS=PASSO()
-    chk(f'15 {XT["nome"]} (só "Todas as culturas"): Cultura oferece Soja; com "Todas as culturas" "Usar na O.S." fica desligado com orientação e sem ordens; com Soja vale a cultura real',
-        'Soja · pelo uso em “Todas as culturas”' in op and disTD is True and 'escolha no campo Cultura a cultura do talhão' in dica and not ordTD
-        and 'escolha no campo Cultura' not in pS and 'Receituário emitido' not in pS
-        and ((ORDS()==['OS-0430']) if temT else ('Sem produto da fazenda com este ingrediente ativo' in pS)), [op[:4],disTD,dica[-160:],temT,ORDS(),pS[-160:]])   # revisão do CTL-5 (S3-1): só a ordem de pulverização
+    disTD=J(f"(()=>{{const b=[...document.querySelectorAll('{FX} button')].find(x=>x.innerText.trim()==='Preparar receituário'); return b?b.disabled:null;}})()")
+    dica=J(f"(document.querySelector('{FX} [role=region]')||{{}}).innerText||''") or ''
+    setv(f'{FX} select[aria-label="Cultura do uso"]',str(SJ)); setv(f'{FX} select[aria-label="Alvo do uso"]',str(alT[0])); clica(FX,'Preparar receituário'); time.sleep(.4)
+    rxc=J("(document.getElementById('rx_cul')||{}).value") or ''
+    setv('#rx_dose','1 kg/ha'); clica(RX,'Emitir receituário'); time.sleep(.4)
+    feitoT=J(f"(document.querySelector('{FX} [role=region]')||{{}}).innerText||''") or ''
+    chk(f'15 {XT["nome"]} (só "Todas as culturas"): Cultura oferece Soja; com "Todas as culturas" o receituário fica bloqueado com orientação; com Soja emite "Soja"',
+        'Soja · pelo uso em “Todas as culturas”' in op and disTD is True and 'escolha no campo Cultura a cultura do talhão' in dica
+        and rxc.startswith('Soja') and 'Receituário emitido · Soja · ' in feitoT, [op[:4],disTD,dica[-160:],rxc,feitoT[-120:]])
     # ---------- 16 · 1280×800: a grade inteira cabe (sem rolagem lateral) · LMR ausente é texto neutro, não vermelho ----------
     c.size(1280,800); c.goto(U_('AG-07.dc.html'),wait=.8); pronto()
     lay=J("(()=>{const r=document.querySelector('.g2rola'); const h=[...document.querySelectorAll('main [role=columnheader]')].pop().getBoundingClientRect(); return [r.scrollWidth,r.clientWidth,Math.round(h.right),innerWidth];})()") or [1,0,1,0]

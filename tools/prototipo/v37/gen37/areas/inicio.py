@@ -38,7 +38,7 @@ observacoes (dados locais coerentes com dados.py / dados2.py / telas vizinhas):
   (Liberar para execução), com "Ajustar antes de liberar" opcional na O.S.; a REQ-038 reserva a Ureia ao liberar. Mapa e O.S. leem a
   fase no cenário compartilhado: liberada, a ordem sai da contagem "A liberar (agrônomo)".
   Custo dos 30 ha preservados da OS-0420: semente 1.560 kg × R$ 9,50 + KCl 3.600 kg × R$ 2,40 = R$ 23.460.
-- Sobras: "Receber sobras"/"Receber devolução" levam ao Estoque do menu (EST.dc.html · etapa Receba devoluções), que grava no cenário.
+- Sobras: "Receber sobras"/"Receber devolução" levam ao registro no Estoque (EST.dc.html#req=REQ-…, seção Atenda requisições), que grava no cenário.
 """
 import json
 from engine import (grid,esc,icon,chip,btn,Pt,INK,MUTED,LINE,BG,SURF,YEL,YELS,RED,REDS,GRAYS,DISP,
@@ -119,12 +119,12 @@ FILT['Carência e destino']=[('qd','Consultar em',['Hoje','Em 7 dias','Em 14 dia
 # condição: 'ag' = só enquanto a ordem está a liberar pelo agrônomo no cenário, 'cust' = só com custódia).
 _ORD_MAPA=[  # id, talhões da geometria, complemento do realizado, prazo, ação
  ('OS-0421',['T1','T2'],'','no prazo',None),
- ('OS-0420',['T4'],'','atrasada',('Acompanhar OM-0233','MA.dc.html#om=OM-0233','op',None)),   # PL-05 é oculta e fixa (Frente F): a OM-0233 viva
+ ('OS-0420',['T4'],'','atrasada',('Acompanhar OM-0233','MA-04.dc.html#OM-0233','op',None)),   # PL-05 é oculta e fixa (Frente F): a OM-0233 viva
  ('OS-0419',['P2'],'lâmina 10,81 mm','irrigando hoje',None),
  ('OS-0424',['T1'],'T1-B','até 3 dias',None),
  ('OS-0422',['P2'],'2 passadas de 6,75 mm','até 3 dias',('Definir janela','IR-03det.dc.html#OS-0422:janela','op',None)),
  ('OS-0418',['P1'],'Ureia 12 kg/ha','vence hoje',('Ajustar antes de liberar','OS.dc.html#OS-0418','lib','ag')),
- ('OS-0417',['P1'],'','até 3 dias',('Receber sobras','EST.dc.html','op','cust')),
+ ('OS-0417',['P1'],'','até 3 dias',('Receber sobras','EST.dc.html#req=REQ-031','op','cust')),
  ('OS-0415',['T3'],'','encerrada',None),
  ('OS-0423',['T7'],'estimativa por ET','vence hoje',('Resolver conflito','IR-03det.dc.html#OS-0423:conflito','op',None)),
  ('OS-0425',['C1'],'','no prazo',None),
@@ -332,6 +332,45 @@ def _fechar(P):
     P['tot']=round(P['ins']+P['op'],2); P['ins']=round(P['ins'],2); P['op']=round(P['op'],2); P['pend']=list(dict.fromkeys(P['pend'])); return P
 PREV=_prev()
 
+# ---- insumos: necessidade do talhão (plano da safra; sem plano, O.S. abertas) × situação da fazenda (estoque compartilhado + pedidos) ----
+def _nec():
+    nec={t:[] for t in TIDS}
+    for c in D2.CULTIVOS['S2627']:
+        t=c['local'].split('-')[0]
+        if not c['plano']: continue
+        nec[t].extend(_nec_cult(c))
+    for oid,tal,*_ in _ORD_MAPA:
+        if oid not in ORD_REG or len(tal)!=1 or tal[0] not in nec or any(c['plano'] and c['local'].split('-')[0]==tal[0] for c in D2.CULTIVOS['S2627']): continue   # Lagoa Grande: pelo plano
+        o=ORD_REG[oid]
+        if o['etapa'] in ('Encerradas','Em conferência'): continue
+        f=((o.get('saldo') or 0)/(o.get('area') or 1)) if o['etapa']=='Em execução' else 1
+        for x in o['ins']: nec[tal[0]].append(dict(p=x['p'],q=round(x['tot']*f,2),un=x['un'],dt=HOJE.isoformat(),orig=oid+' · '+o['atv']['nome']))
+    return nec
+def _nec_cult(c):   # insumos das atividades do plano ainda por vir (atividade já passada não gera necessidade nova)
+    out=[]; pl=next(p for p in D2.PLANOS if p['id']==c['plano'])
+    for a in pl['atividades']:
+        d=_data_atv(c,a)
+        if d is None or d<HOJE: continue
+        for x in a['prods']: out.append(dict(p=_nome(x['prod'],c),q=round(x['dose']*c['area'],2),un=x['un'],dt=d.isoformat(),orig=c['local']+' · '+a['nome']))
+    return out
+NEC=_nec()
+def _fazst():
+    lim=(HOJE+_dt.timedelta(days=30)).isoformat(); out={}
+    for per in ('Próximos 30 dias','Safra toda'):
+        tot={}
+        for t,its in NEC.items():
+            for x in its:
+                if per=='Safra toda' or x['dt']<=lim: tot[x['p']]=tot.get(x['p'],0)+x['q']
+        st={}
+        for p,q in tot.items():
+            est=D2.ESTOQUE.get(p,0); rec=D2.RECEB.get(p,0); un=next(x['un'] for its in NEC.values() for x in its if x['p']==p)
+            ped=next((pc for pc in D2.PEDIDOS if pc['item']==p and pc.get('a_entregar',0)>0),None)
+            if est>=q-1e-9: st[p]=['Estoque cobre','ok',f'fazenda precisa de {nfb(q)} {un} no período · estoque {nfb(est)} {un}']
+            elif est+rec>=q-1e-9: st[p]=['Pedido a receber'+(f" · {ped['id']} · {ped['previsao'][:5]}" if ped else ''),'yellow',f'fazenda precisa de {nfb(q)} {un} · estoque {nfb(est)} · a receber {nfb(rec)} {un}']
+            else: st[p]=['Falta '+nfb(q-est-rec)+' '+un,'red',f'fazenda precisa de {nfb(q)} {un} · estoque {nfb(est)} · a receber {nfb(rec)} {un}']
+        out[per]=st
+    return out
+FAZST=_fazst()
 
 # ---- satélite: cinco índices (Sentinel-2 L2A, 10 m) e grade de pixels dentro de cada polígono com cultura ----
 IDXN=['NDVI','NDRE','EVI','SAVI','NDMI']
@@ -423,6 +462,8 @@ for _p in LG['pivos']:
     _c=_LGC.get(_p['id'])
     LAV[_p['id']]=_lav_lg(_p,_c)
     PREV[_p['id']]=_fechar(dict(fonte='',tot=0,ins=0,op=0,base=0,orig='',pend=[],lin=[])) if not _c else _fechar(_somar_plano(dict(fonte='',tot=0,ins=0,op=0,base=0,orig='',pend=[],lin=[]),[_c],'área do pivô (KML) · Safra Mamão 2026/27'))
+    NEC[_p['id']]=_nec_cult(_c) if _c else []
+FAZST=_fazst()   # situação da fazenda com as necessidades da Lagoa Grande
 _RGB=json.load(open(_os.path.join(_LGD,'lagoa_rgb.json'),encoding='utf-8'))
 _RGBK={'25/09':'lagoa_rgb_20260925.png','10/09':'lagoa_rgb_20260910.png'}
 LG_DADOS=dict(rot=_LGROT,ids=LG_IDS,rgb=dict(cantos=_RGB['lagoa_rgb_20260925.png']['cantos'],png=_RGBK),pivos=LG['pivos'],cantos=LG['cantos'],geo=LG_GEO,H=LG['H'],W=LG['W'],
@@ -437,20 +478,6 @@ _SEMPLANO={t:(not any(c['plano'] for c in D2.CULTIVOS['S2627'] if c['local'].spl
 _PLANT=sum(x for x in (95,80,42,38,30)); _PRE=312+298+174
 _LG_ROT={p['rot'].replace('P','Pivô ',1):p['id'] for p in LG['pivos']}   # 'Pivô 1' (local do cultivo) → PV01
 _SEMPLANO.update({t:(not any(c['plano'] for c in D2.CULTIVOS[DLS.SAFRA['id']] if _LG_ROT.get(c['local'])==t)) for t in LG_IDS})
-# ---- insumos (CTL-4 · DEM-05): o Mapa calcula com a mesma conta do Planejar safra e da Compra (demFazenda, cal01.js) com ordens, físico apto,
-# reservas e recebimentos do MESMO cenário vivo (cenDemEntradas); aqui só vão as partes fixas por fazenda: ocorrências do plano das safras abertas
-# e a área dos cultivos por talhão (rateio da O.S. de vários talhões). Antes havia uma conta própria (estoque das duas fazendas, reserva contada
-# duas vezes) e, depois, estoque fixo da semente ao lado das ordens vivas (revisão do CTL-4, achado 1).
-def _dem_mapa():
-    tid={**{t:t for t in TIDS},**_LG_ROT}; faz={}
-    for f,saf in (('Santa Rita','S2627'),('Lagoa Grande',DLS.SAFRA['id'])):
-        x=D2.dem_fixas(saf); aT={}; vistos=set()
-        for o in x['occ']:
-            cid=o['k'].split('|')[0]
-            if o['saf']!=saf or cid in vistos: continue
-            vistos.add(cid); k=tid.get(o['local'],o['local'].split('-')[0]); aT[k]=aT.get(k,0)+o['area']
-        x['areaT']=aT; faz[f]=x
-    return dict(faz=faz,b=dict(osb=D2.os_base(),est=D2.est_base()),tid=tid)
 SEMCULT.update({t:'preparo de área · sem lavoura' for t in LG_IDS if LAV[t]['c']=='gray'})
 _GEO_TXT=_geo(); _GEO_TXT.update({p['id']:f"círculo pelo centro do KML e pela área declarada · raio {nfb(p['r_m'])} m" for p in LG['pivos']})
 import dados_cad as DC
@@ -460,7 +487,7 @@ def _cad0():
     return dict(faz=[pk(r) for r in CF._faz_rows()],tal=[pk(r) for r in CF._tal_rows()])
 MDATA=dict(cad0=_cad0(),hoje_iso=HOJE.isoformat(),motivos=DC.MOTIVOS_DIF,tal={t:dict(ha=TAL[t]['ha'],cult=TAL[t]['cult'],per=PERIM[t]) for t in TIDS+LG_IDS},lg=LG_DADOS,tids=TIDS,lays=LAYS,
            filt={k:[dict(k=a,l=b,o=c) for a,b,c in v] for k,v in FILT.items()},ord=ORD,integ=INTEG,sat=SAT,semcult=SEMCULT,
-           idxn=IDXN,idx=IDX,satpal=SATPAL,clsn=CLSN,px=PX,cs=CS,lav=LAV,prev=PREV,preco=PRECO,gen=_GEN,cop=COP,dem=_dem_mapa(),
+           idxn=IDXN,idx=IDX,satpal=SATPAL,clsn=CLSN,px=PX,cs=CS,lav=LAV,prev=PREV,preco=PRECO,gen=_GEN,cop=COP,nec=NEC,fazst=FAZST,
            lim30=(HOJE+_dt.timedelta(days=30)).isoformat(),hoje=_br(HOJE),semplano=_SEMPLANO,
            lavstrip=[['Área com lavoura',f'{_PLANT} ha'],['Pré-plantio',f'{nfb(_PRE)} ha'],['Colhido','96 ha'],['Cultivos na safra 2026/27',str(len(D2.CULTIVOS["S2627"]))]],
            geo=_GEO_TXT,lcop=LCOR_OP,nome=NOME_LAY)
@@ -612,12 +639,12 @@ function mapOrdsCen(){ let c=null; try{ c=cenGet(); }catch(e){ c=null; } MAPC=c;
     if(co&&co.etapa==='Em conferência'){ try{ bq=cenPodeEncerrar(c,o.id)||''; }catch(e){ bq=''; } x.selos=x.selos.filter(s=>!/^Aguardando sinal do app/.test(s[0]));
       if(/^Carga a pesar/.test(bq)){ if(!x.selos.some(s=>s[0]==='Carga a pesar')) x.selos=x.selos.concat([['Carga a pesar','yellow']]); }   /* colheita (R-18): não é sobra em custódia */
       else if(/sinal/.test(bq)) x.selos=x.selos.filter(s=>!/^Sobras a receber/i.test(s[0])).concat([['Aguardando sinal do app','yellow']]);
-      else if(bq){ const t=/^Sobra em custódia/.test(bq)?'Sobras a receber':(/^Consumo em conferência/.test(bq)?'Consumo em conferência':(/duplicidade/.test(bq)?'Apontamento em conferência':''));   /* o selo do bloqueio que existe; a divergência de dose já vem do cenário (revisão DOM achado 3) */
-        if(t&&!x.selos.some(s=>s[0]===t)) x.selos=x.selos.concat([[t,'yellow']]); } }
+      else if(/^Consumo em conferência/.test(bq)) x.selos=x.selos.filter(s=>!/^Sobras a receber/i.test(s[0]));
+      else if(bq&&!x.selos.some(s=>/^Sobras a receber/i.test(s[0]))) x.selos=x.selos.concat([['Sobras a receber','yellow']]); }
     if(x.fase!=='A liberar') x.selos=x.selos.filter(s=>!/^Aguardando(?! sinal do app)/.test(s[0]));
     if(x.fase==='Encerradas'||x.fase==='Canceladas') x.pz='encerrada';
     const a=o.act; x.act=(!a||(a.c==='ag'&&!inPendLib(c,o.id))||(a.c==='cust'&&co&&!cust.length))?null:a;
-    if(bq&&!/sinal/.test(bq)&&cust.length&&!x.act) x.act={t:'Receber sobras',h:'EST.dc.html',k:'op',c:'cust'};
+    if(bq&&!/sinal/.test(bq)&&cust.length&&!x.act) x.act={t:'Receber sobras',h:'EST.dc.html#'+(co&&co.req?'req='+co.req:'os='+o.id),k:'op',c:'cust'};
     return x; }); }
 function realCurto(id){ const o=M.ord.find(x=>x.id===id); return o?o.real.split(' · ')[0]:''; }
 // irrigação no Integrado: conflito (vermelho) e pendência de água (amarelo) vêm do estado da irrigação, não de texto fixo
@@ -666,13 +693,7 @@ function satEstado(t,f){ const v=satVal(f.dt,t,f.idx); const nt=(M.sat[f.dt].nt|
   if(ms.length||(dv!==null&&dv<-10)) return ['Atenção','yellow'];
   return ['Normal','green']; }
 // ---- insumos: necessidade do talhão × situação da fazenda (estoque compartilhado não é dividido por talhão) ----
-// CTL-4 (DEM-05): a mesma conta do Planejar safra e da Compra (demFazenda, cal01.js) com ordens e estoque do cenário vivo (cenDemEntradas):
-// liberar, apontar, cancelar ou emitir uma O.S. muda a necessidade e a situação; entregar, devolver e receber não mudam a compra (revisão, achado 1)
-function insFaz(){ const D=M.dem; const F=D.faz[FAZ]; if(!F) return {nec:{},st:{}}; const X=cenDemEntradas(cenGet(),F,D.b);
-  const k=FAZ+'|'+JSON.stringify([X.osd,X.fisico,X.reservas,X.recebDt,X.sobra,X.quar,X.quarRep]); if(insFaz._k===k) return insFaz._v;   /* custódia sem uso e quarentena (revisão do 853a6a8) também mudam a conta */ const m=demFazenda(X); const tid=(t)=>D.tid[t]||demTal(t);
-  const v={nec:demPorLocal(m,tid,F.areaT,F.hoje),st:{'Safra toda':demSituacao(m,null,F.hoje,F.viavel),'Próximos 30 dias':demSituacao(m,M.lim30,F.hoje,F.viavel)}};
-  insFaz._k=k; insFaz._v=v; return v; }
-function necAgg(t,per){ const m={}; (insFaz().nec[t]||[]).filter(x=>per==='Safra toda'||x.dt<=M.lim30).forEach(x=>{ const a=m[x.p]||(m[x.p]={p:x.p,q:0,un:x.un,dt:x.dt,orig:[]}); a.q+=x.q; if(x.dt<a.dt) a.dt=x.dt; a.orig.push(x.orig); });
+function necAgg(t,per){ const m={}; (M.nec[t]||[]).filter(x=>per==='Safra toda'||x.dt<=M.lim30).forEach(x=>{ const a=m[x.p]||(m[x.p]={p:x.p,q:0,un:x.un,dt:x.dt,orig:[]}); a.q+=x.q; if(x.dt<a.dt) a.dt=x.dt; a.orig.push(x.orig); });
   return Object.values(m).sort((a,b)=>a.dt<b.dt?-1:(a.dt>b.dt?1:0)); }
 function brIso(s){ if(!s) return ''; const a=s.split('-'); return a[2]+'/'+a[1]; }
 // ---- custos: previsto (plano ou O.S.) × realizado provisório (apontamentos aceitos) × conferido; preço ausente não vira zero ----
@@ -712,7 +733,7 @@ function cls(l,f,t){
     if(f.ver==='Balanço hídrico'){ if(x.d===null) return {c:'gray',l:x.l}; if(x.est) return {c:'cloud',l:'≈'+nfx(x.d,1)+' mm · estimado'};
       return {c:x.d<5?'ok':(x.d<10?'yellow':(x.d<15?'orange':'red')),l:'déficit '+nfx(x.d,1)+' mm'}; }
     return {c:x.c,l:x.l}; }
-  if(l==='Insumos'){ const its=necAgg(t,f.per); const st=insFaz().st[f.per]||{};
+  if(l==='Insumos'){ const its=necAgg(t,f.per); const st=M.fazst[f.per]||{};
     if(!its.length) return M.semplano[t]?{c:'gray',l:'sem plano na safra'}:{c:'none',l:'sem necessidade'};
     const c=worstC(its.map(x=>(st[x.p]||['','none'])[1])); const fal=its.filter(x=>(st[x.p]||[])[1]==='red');
     return {c,l:fal.length?('falta '+fal[0].p+(fal.length>1?' +'+(fal.length-1):'')):(c==='yellow'?'aguardando pedido':'estoque cobre')}; }
@@ -746,7 +767,7 @@ function fonte(l,f){
   if(l==='O.S./prazos') return 'O.S. do PCP · prazo pela janela de cada ordem · fase do cenário de execução';
   if(l==='MIP/MID') return 'vistorias de Pragas e doenças · NC por alvo e fase · '+(FAZ==='Lagoa Grande'?'pivôs reais, vistorias demonstrativas':'talhões desenhados')+' · hoje '+M.hoje;
   if(l==='Irrigação') return FAZ==='Lagoa Grande'?('balanço hídrico demonstrativo sobre os pivôs reais · ETo 5,5 mm/dia × Kc do mamão por fase · tarefas do dia geradas pelo balanço · hoje '+M.hoje):'balanço hídrico 23/09 06:00 · Estação Santa Rita e sondas P1, P2 e T7 · ≈ = estimativa por ET · ordens do módulo Irrigação';
-  if(l==='Insumos'){ const F=M.dem.faz[FAZ]; return 'necessidade líquida da '+(F?F.nomes[F.saf]:'safra')+' (plano sem O.S. + O.S. abertas pelo que falta tirar do almoxarifado): a mesma do Planejar safra e da Compra · estoque apto e pedidos da fazenda, não divididos por talhão'; }
+  if(l==='Insumos') return 'necessidade pelos planos da safra 2026/27 (sem plano: O.S. abertas) × estoque e pedidos da fazenda · estoque compartilhado, não dividido por talhão';
   if(l==='Custos') return 'previsto = dose × preço + operação (rendimento da safra) · realizado provisório dos apontamentos aceitos · conferido à parte';
   return ''; }
 function strip(self,l,f){ const N=(k,val)=>({k,val}); const tids=TIDS(); const ordF=M.ord.filter(o=>!irrAgua(o)&&o.tal.some(t=>tids.indexOf(t)>=0)); const area=(ts)=>ts.reduce((a,t)=>a+M.tal[t].ha,0);
@@ -762,7 +783,7 @@ function strip(self,l,f){ const N=(k,val)=>({k,val}); const tids=TIDS(); const o
     if(f.ver==='Balanço hídrico'){ const a=area(xs); const dm=a?xs.reduce((q,t)=>q+M.irr[t].d*M.tal[t].ha,0)/a:0; const mx=xs.slice().sort((p,q)=>M.irr[q].d-M.irr[p].d)[0];
       return [N('Área com balanço',nfx(a)+' ha'),N('Déficit médio',nfx(dm,1)+' mm'),N('Maior déficit',mx?(rotT(mx)+' · '+nfx(M.irr[mx].d,1)+' mm'):'—'),N('Estimados (sem sonda)',nest)]; }
     return [N('Irrigando ou programadas',n('blue')+n('lime')),N('Pendentes',n('yellow')),N('Impedidas',n('red')),N('Estimados (≈)',nest)]; }
-  if(l==='Insumos'){ const st=insFaz().st[f.per]||{}; const vs=Object.values(st); return [N('Produtos no período',vs.length),N('Faltam',vs.filter(x=>x[1]==='red').length),N('Aguardando pedido',vs.filter(x=>x[1]==='yellow').length),N('Estoque cobre',vs.filter(x=>x[1]==='ok').length)]; }
+  if(l==='Insumos'){ const st=M.fazst[f.per]||{}; const vs=Object.values(st); return [N('Produtos no período',vs.length),N('Faltam',vs.filter(x=>x[1]==='red').length),N('Aguardando pedido',vs.filter(x=>x[1]==='yellow').length),N('Estoque cobre',vs.filter(x=>x[1]==='ok').length)]; }
   if(l==='Custos'){ let p=0,r=0,c=0,sh={}; tids.forEach(t=>{ p+=M.prev[t].tot; const R=cusReal(t); r+=R.rs; c+=R.rsConf; R.shared.forEach(s=>{ sh[s.o.id]=s.c; }); });
     Object.values(sh).forEach(x=>{ r+=x.rs; c+=x.rsConf; });
     return [N('Previsto',mil(p)),N('Realizado provisório',mil(r)),N('Conferido',mil(c)),N('Execução',p?nfx(r/p*100,1)+' %':'—')]; }
@@ -795,8 +816,7 @@ function criarVis(self,ts,extra,pt){ const sat=lay(self)==='Satélite'; const ms
 function osMapa(t){ const mo=M.ord.filter(o=>o.tal.indexOf(t)>=0); const sv=(id)=>{ const x=mo.find(o=>o.id===id); return SEV.indexOf(PZC[x?x.pz:'no prazo']); };
   return OSN.filter(o=>mo.some(m=>m.id===o.id)&&o.etapa!=='Canceladas').sort((a,b)=>{ const fa=a.etapa==='Encerradas'?1:0, fb=b.etapa==='Encerradas'?1:0; const al=x=>x.etapa==='A liberar'?0:1; return (fa-fb)||(sv(a.id)-sv(b.id))||(al(a)-al(b)); }); }   /* empate de prazo: a decisão do agrônomo (A liberar) vem antes, como no rótulo do talhão (G1 do CTL-1: OS-0424 no T1-B) */
 function mapCt(o,fn){ const insTxt=(o.ins||[]).map(x=>x.p+' '+nd(x.tot)+' '+x.un).join(', '); const vn=osVn(o.versao);  // versão: só "vN" (núcleo da O.S.)
-  return {aprovar:'Aprovar '+o.id+' (versão '+vn+'): ao confirmar, '+g2ator(g2perfil(),g2alc('AL-02').papeis)+' aprova '+osEsc(o)+' (CMD-42). A ordem fica em A liberar; '+g2alcQuem('AL-01')+' libera.',
-    liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+vn+'): ao confirmar, '+osLibTxt(g2perfil(),o)+'; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar.')+osUsoAtencao(cenGet(),o.id)),
+  return {liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+vn+'): ao confirmar, '+osLibTxt(g2perfil())+'; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar.')+osUsoAtencao(cenGet(),o.id)),
     iniciar:'Iniciar '+o.id+' agora, na janela '+o.janela+'.',conferencia:'Enviar '+o.id+' para conferência: execução física concluída ('+nf(o.realizado)+' ha).',
     encerrar:'Encerrar '+o.id+': apontamentos enviados, consumo baixado e nada em custódia.'}[fn]||''; }
 function nxOf(self,o,mo){ const PF=g2perfil(); const pb=osProx(o,PF); const P=pb.P, b=pb.b;   /* CTL-3: quem age (perfil) */ const pa=(self.state.mpa&&self.state.mpa.id===o.id)?self.state.mpa:null;
@@ -805,13 +825,12 @@ function nxOf(self,o,mo){ const PF=g2perfil(); const pb=osProx(o,PF); const P=pb
     open:'OS.dc.html#'+o.id,hasLib:false,libt:'',libh:'#',
     ins:(o.etapa==='A liberar'&&(o.ins||[]).length)?('Produtos: '+o.ins.map(x=>x.p+' '+nd(x.dose)+' '+x.un+'/ha').join(' · ')):'',hasIns:o.etapa==='A liberar'&&(o.ins||[]).length>0};
   // ação da ordem no passo: 'lib' = Ajustar antes de liberar (o primário é o Liberar do núcleo) · 'op' só com o passo impedido, quando leva a outro destino que o do impedimento
-  const a=mo&&mo.act; if(a&&((a.k==='lib'&&g2papel(PF,g2alc('AL-02').papeis))||(a.k==='op'&&b&&b.h&&a.h!==b.h))){   /* ajustar antes de liberar: só o agrônomo */ N.hasLib=true; N.libt=a.t; N.libh=a.h==='OS.dc.html'?'OS.dc.html#'+o.id:a.h; if(a.k==='lib') N.libh='OS.dc.html#'+o.id+':ajustar'; }
-  if(P.fn==='ajustar'){ N.hasLib=true; N.libt=P.btn; N.libh='OS.dc.html#'+o.id+':ajustar'; }   /* SOLO-01 · revisão A6: plano mudado pela análise, o ajuste abre na O.S. (o Mapa não tem o formulário) */
-  else if(!b&&P.btn){ N.isBtn=true; N.btn=P.btn; N.go=()=>{ if(P.fn==='apontar'){ const prox=(o.ap||[]).find(x=>x.st==='Previsto'); const mx=Math.max(0,(o.saldo||0)-osApPend(o));
+  const a=mo&&mo.act; if(a&&((a.k==='lib'&&g2papel(PF,'agronomo'))||(a.k==='op'&&b&&b.h&&a.h!==b.h))){   /* ajustar antes de liberar: só o agrônomo */ N.hasLib=true; N.libt=a.t; N.libh=a.h==='OS.dc.html'?'OS.dc.html#'+o.id:a.h; if(a.k==='lib') N.libh='OS.dc.html#'+o.id+':ajustar'; }
+  if(!b&&P.btn){ N.isBtn=true; N.btn=P.btn; N.go=()=>{ if(P.fn==='apontar'){ const prox=(o.ap||[]).find(x=>x.st==='Previsto'); const mx=Math.max(0,(o.saldo||0)-osApPend(o));
       self.setState({mpa:{id:o.id,fn:'apontar',d:CEN_DIA_OP,ha:String(Math.min(mx,prox?prox.ha:mx)).replace('.',','),chave:'W-'+o.id+'-'+Date.now(),err:''}}); } else self.setState({mpa:{id:o.id,fn:P.fn,err:''}}); }; }
   if(!b&&o.dono){ N.dono='Pendência com '+o.dono+(o.prazo?' · '+o.prazo:''); N.hasDono=true; }
-  if(pa&&['liberar','aprovar','iniciar','conferencia','encerrar'].indexOf(pa.fn)>=0&&!(pa.fn==='liberar'&&b&&b.papel)&&!(pa.fn==='aprovar'&&P.fn!=='aprovar')){ N.conf=true;   /* aberta por outro perfil: não aparece (revisão do CTL-3, achado 1) */ N.ct=mapCt(o,pa.fn); N.cbtn={aprovar:'Confirmar aprovação',liberar:'Confirmar liberação',iniciar:'Confirmar início',conferencia:'Confirmar envio',encerrar:'Confirmar encerramento'}[pa.fn];
-    N.yes=()=>{ const F={aprovar:c=>osc_aprovar(c,o.id,g2perfil()),liberar:c=>osc_liberar(c,o.id,o.agua,o.janela,g2perfil()),iniciar:c=>osc_iniciar(c,o.id),conferencia:c=>osc_conferencia(c,o.id,g2perfil()),encerrar:c=>osc_encerrar(c,o.id,g2perfil())}[pa.fn];
+  if(pa&&['liberar','iniciar','conferencia','encerrar'].indexOf(pa.fn)>=0&&!(pa.fn==='liberar'&&b&&b.papel)){ N.conf=true;   /* aberta por outro perfil: não aparece (revisão do CTL-3, achado 1) */ N.ct=mapCt(o,pa.fn); N.cbtn={liberar:'Confirmar liberação',iniciar:'Confirmar início',conferencia:'Confirmar envio',encerrar:'Confirmar encerramento'}[pa.fn];
+    N.yes=()=>{ const F={liberar:c=>osc_liberar(c,o.id,o.agua,o.janela,g2perfil()),iniciar:c=>osc_iniciar(c,o.id),conferencia:c=>osc_conferencia(c,o.id),encerrar:c=>osc_encerrar(c,o.id)}[pa.fn];
       osRun(self,F,{mpa:null},(e)=>self.setState({mpa:Object.assign({},pa,{err:e})})); }; }
   if(pa&&pa.fn==='apontar'){ N.ap=true; const apP=osApPend(o), apMax=Math.max(0,(o.saldo||0)-apP); N.ad=pa.d||''; N.aha=pa.ha||'';
     N.asub='Saldo da ordem: '+nf(o.saldo)+' ha'+(apP>0?' · '+nf(apP)+' ha no aparelho aguardando sinal':'')+'. Os insumos usados saem pela dose.';
@@ -875,15 +894,15 @@ function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=M.
       note=nt>0?'':''; }
     P.secs.push(SEC(self,l,'sat','Satélite',sum,{kv,items,note,lk:'AG-06.dc.html',lkt:'Ver histórico do talhão'})); }
   // insumos
-  { const fi=flt(self,'Insumos'); const its=necAgg(t,fi.per); const st=insFaz().st[fi.per]||{};
-    const items=its.map(x=>{ const s=st[x.p]||['—','gray','']; return {t:x.p+' · '+nfx(x.q,x.q%1?1:0)+' '+x.un,sub:'a partir de '+brIso(x.dt)+' · '+x.orig[0]+(x.orig.length>1?' +'+(x.orig.length-1):'')+' · '+s[2],ch:[CH(s[0],s[1]==='ok'?'green':s[1])].concat(s[3]?[CH(s[3],'yellow')]:[]),   /* falta firme + qualidade pendente: os dois à vista, uma ação (revisão do 16fb55e, ajuste 1) */
-      acts:s[1]==='red'?[A('Comprar',{h:'CMP.dc.html',ic:'cart',tt:'Abrir Compra de insumos'})]:[]}; });
+  { const fi=flt(self,'Insumos'); const its=necAgg(t,fi.per); const st=M.fazst[fi.per]||{};
+    const items=its.map(x=>{ const s=st[x.p]||['—','gray','']; return {t:x.p+' · '+nfx(x.q,x.q%1?1:0)+' '+x.un,sub:'a partir de '+brIso(x.dt)+' · '+x.orig[0]+(x.orig.length>1?' +'+(x.orig.length-1):'')+' · '+s[2],ch:[CH(s[0],s[1]==='ok'?'green':s[1])],
+      acts:s[1]==='red'?[A('Comprar',{h:'CMP.dc.html#saf=S2627',ic:'cart',tt:'Abrir a solicitação da safra em Compras'})]:[]}; });
     const reqs=[]; osMapa(t).forEach(o=>{ if(!o.r||!o.r.itens||!o.r.itens.length||['Encerradas','Canceladas'].indexOf(o.etapa)>=0) return;
       o.r.itens.forEach(i=>reqs.push({t:o.r.id+' · '+o.id+' · '+i.prod,sub:'reservado '+nd(i.solicitado)+' '+i.un+' · lote '+i.lote+' · entregue '+nd(i.entregue)+' · em custódia '+nd(i.custodia)+' · consumido '+nd(i.consumido),ch:[CH(i.custodia>0.001?'em custódia':(i.entregue>0?'entregue':'reservado'),i.custodia>0.001?'yellow':'gray')],acts:[]})); });
     const fal=items.filter(x=>x.ch[0].t.indexOf('Falta')===0).length;
     const sum=its.length?(its.length+(its.length>1?' insumos':' insumo')+' · '+(fal?fal+(fal>1?' faltas':' falta'):'sem falta')+' · '+fi.per.toLowerCase()):(M.semplano[t]?'Sem plano na safra 2026/27':'Sem necessidade no período');
     P.secs.push(SEC(self,l,'ins','Insumos',sum,{items:items.concat(reqs),kv:[{l:'Período',t:fi.per+' (filtro da camada Insumos)'},{l:'Estoque',t:'compartilhado da fazenda · não é dividido por talhão'}],
-      note:M.semplano[t]?'Cultivo da safra 2026/27 sem plano: a necessidade vem só das O.S. abertas.':'',lk:'CMP.dc.html',lkt:'Abrir Compra de insumos'})); }
+      note:M.semplano[t]?'Cultivo da safra 2026/27 sem plano: a necessidade vem só das O.S. abertas.':'',lk:'CMP.dc.html#saf=S2627',lkt:'Abrir em Compras'})); }
   // custos
   { const Pv=M.prev[t]; const R=cusReal(t); const kv=[];
     if(Pv.fonte){ kv.push({l:'Previsto',t:money(Pv.tot)+' · '+money(Pv.tot/Pv.base)+'/ha'}); kv.push({l:'Área-base',t:nfx(Pv.base)+' ha · '+Pv.orig}); kv.push({l:'Composição',t:'insumos '+money(Pv.ins)+' · operação '+money(Pv.op)}); }
@@ -1286,7 +1305,7 @@ def build_in04(HCARD=742):
     HEIGHTS37[fname]=900
     osd=dict(ords=_ordens_os())   # as mesmas ordens da tela O.S. (o Mapa usa o núcleo dela: próximo passo, impedimentos e comandos)
     import dados_mip
-    EXTRAJS[0]=(pref+DI.js_prefixo()+dados_mip.js_prefixo()+JS_COMUM+open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','cal01.js'),encoding='utf-8').read()+'\n'+'const OSD = '+json.dumps(osd,ensure_ascii=False).replace('</','<\\/')+';\n'+JS_NUCLEO
+    EXTRAJS[0]=(pref+DI.js_prefixo()+dados_mip.js_prefixo()+JS_COMUM+'const OSD = '+json.dumps(osd,ensure_ascii=False).replace('</','<\\/')+';\n'+JS_NUCLEO
                 +'const M = '+json.dumps(MDATA,ensure_ascii=False).replace('</','<\\/')+';\n'+MAP_JS
                 +open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','talgeo.js'),encoding='utf-8').read()+'\n'
                 +open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','talmapa.js'),encoding='utf-8').read()+r'''
@@ -1350,11 +1369,11 @@ def build_in01():
      ('f1','OS-0420 · plantio','Santa Rita · T4',f'Substituir {t1} bloqueado','vence hoje','Carlos',(f'Ativo bloqueado · {OM["id"]}','red'),('Reprogramar saldo','PL-05.dc.html')),
      ('f2','OS-0418 · fertirrigação','Santa Rita · P1','Liberar a fertirrigação (pode ajustar)','vence hoje','Ana',('Falta insumo · Ureia 45%','red'),('Liberar','OS.dc.html#OS-0418')),
      ('f3','OS-0430 · dessecação','Santa Rita · T1-A','Liberar a dessecação (pode ajustar)','até 3 dias','Ana',None,('Liberar','OS.dc.html#OS-0430')),
-     ('f4','OS-0417 · cobertura','Santa Rita · P1',f'Receber devolução de sobras ({D.REQ["custodia"]} sc)','vence hoje','Rui',None,('Receber devolução','EST.dc.html')),
+     ('f4','OS-0417 · cobertura','Santa Rita · P1',f'Receber devolução de sobras ({D.REQ["custodia"]} sc)','vence hoje','Rui',None,('Receber devolução',f'EST.dc.html#req={D.REQ["id"]}')),
      ('f5','Fila de expedição','Sede · doca 1','Chamar o próximo apto da fila (T2)','vence hoje','Equipe expedição',('T1 atrasado · prev. 09:10','red'),('Abrir fila','LO-02.dc.html')),
      ('f6','OS-0421 · fungicida','Santa Rita · T1+T2',f'Conferir o apontamento do dia 4 ({D.OS[0]["dias"][3]} ha)','até 3 dias','Paula',None,('Conferir apontamentos','CA-02.dc.html')),
      ('f7','INSP-88 · qualidade','Armazém Sede',f'Decidir o lote {D.LOTE_BLOQ["id"]}','até 3 dias','Equipe qualidade',('Lote bloqueado','red'),('Abrir inspeção','CO-06det.dc.html')),
-     # f8 (amostragem de solo do T2) saiu (SOLO-01, R01/A16): o T2 já tem o LAU-2063; a coleta é operação do plano
+     ('f8','Amostragem de solo','Santa Rita · T2','Coletar 0–20 cm para a recomendação de plantio','no prazo','Sem responsável',None,('Abrir análises','AG-02.dc.html')),
     ]
     PZ={'vence hoje':'red','até 3 dias':'yellow','no prazo':'green'}
     rows=[R(i,ob=[Pt.b(o),Pt.br(),Pt.mut(l)],tar=t,pz=(p,[Pt.chip(p,PZ[p])]),resp=r,imp=([Pt.chip(*im)] if im else [Pt.mut('—')]),acao=[Pt.cta(a[0],a[1])]) for i,o,l,t,p,r,im,a in FILA]
@@ -1371,7 +1390,7 @@ function EXTRAVALS(self,v){ const rs=g2rows(self,GRx('g_dia')); const h=rs.filte
                f'Sincronização pendente do celular de João · <b style="color:{INK};">×2</b> → registros guardados no aparelho, sem conflito'))
     corpo=(bloco('Fila do dia','Resolva primeiro o que vence hoje; clique na linha para atribuir o responsável ou ajustar o prazo.',g)
            + bloco('Alertas agrupados','Trate cada caso uma vez; alertas repetidos ficam agrupados com a contagem.',alert,
-                   ilink('Abrir OM-0233','MA.dc.html#om=OM-0233','wrench','Abrir a ordem de manutenção do Trator T1')+ilink('Ver app de João','MB-01.dc.html','users','Abrir o app móvel'),tone='yellow'))
+                   ilink('Abrir OM-0233','MA-04det.dc.html','wrench','Abrir a ordem de manutenção do Trator T1')+ilink('Ver app de João','MB-01.dc.html','users','Abrir o app móvel'),tone='yellow'))
     HEIGHTS37[fname]=900
     shell37('IN-01','Meu dia',corpo,primary_html=f'<span style="{H("hs_st")}">{H("hs_t")}</span>'+btn('Registrar ocorrência',True,href='CA-03.dc.html'),search=False)
 
@@ -1385,10 +1404,10 @@ def build_in03():
     AG=[ # id, data, objeto, resp, prioridade, compromisso, bloqueio(t,c)|None, prazo limite, (ação,h)
      ('g1','2026-09-23',f'Conferir apontamento dia 4 · {D.OS[0]["id"]}','Paula','Alta','conferência diária',None,'23/09 18:00',('Abrir origem','CA-02.dc.html')),
      ('g6','2026-09-23','Resolver conflito da OS-0423 com a parada da B3','Caio','Alta','irrigação do T7 hoje 14:00–16:00',('Conflito · parada da B3','red'),'23/09 14:00',('Resolver conflito','IR-03det.dc.html#OS-0423:conflito')),
-     ('g2','2026-09-23',f'Receber devolução {D.REQ["id"]} ({D.REQ["custodia"]} sc)','Rui','Alta','custódia zerada para encerrar',None,'24/09',('Receber devolução','EST.dc.html')),
+     ('g2','2026-09-23',f'Receber devolução {D.REQ["id"]} ({D.REQ["custodia"]} sc)','Rui','Alta','custódia zerada para encerrar',None,'24/09',('Receber devolução',f'EST.dc.html#req={D.REQ["id"]}')),
      ('g3','2026-09-24',f'Substituir {OM["ativo"].split(" · ")[0]} na {OM["os_afetada"]} (T4)','Carlos','Alta','início programado',(f'{OM["id"]} em execução','red'),'24/09 06:00',('Reprogramar','PL-05.dc.html')),
      ('g4','2026-09-25',f'Decidir INSP-88 · lote {D.LOTE_BLOQ["id"]}','Equipe qualidade','Normal','liberação comercial',('Lote bloqueado','red'),'25/09',('Abrir origem','CO-06det.dc.html')),
-     # g5 (amostragem de solo do T2) saiu (SOLO-01, R01/A16): o T2 já tem o LAU-2063
+     ('g5','2026-09-26','Amostragem de solo · T2 (0–20 cm)','Sem responsável','Normal','recomendação de plantio',None,'28/09',('Abrir origem','AG-02.dc.html')),
      ('g7','2026-09-24','Definir janela da OS-0422 · Pivô 2 (2 passadas de 6,75 mm)','João','Normal','próximo ciclo de irrigação',('Janela a definir','yellow'),'25/09',('Definir janela','IR-03det.dc.html#OS-0422:janela')),
     ]
     PR={'Alta':'red','Normal':'gray','Baixa':'gray'}

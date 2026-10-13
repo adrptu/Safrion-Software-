@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Teste real (Chrome) — TABELAS-FOCO-20261004 v2 (5983172395), incremento 2c: Estoque (EST.dc.html), uma variável por coluna nas 6 seções.
-TF03: item, lote, requisição, O.S., nota, data, pedido, fornecedor, situação e detalhe em colunas próprias; a quantidade leva a unidade junto
-("60.000 kg", decisão do proprietário de 05/10/2026: mais intuitivo, filtrar unidade não gera valor) e ordena pelo número; filtro por valor
-exato; árvore item › lote preservada; página sem rolagem horizontal.
-Uso: python3 tabelas_est_test.py [pasta de capturas]   (< 90 s)"""
-import sys, os, time, json
+"""Teste real (Chrome) — TABELAS-FOCO (5983172395) no Estoque na forma do SUP (docs/suprimentos-simplificado §3 e §9.3): 4 seções e os modos
+Movimentos e Produção de Confira saldos. Fica a regra: uma variável por coluna (até 7 de dado), a quantidade leva a unidade junto ("60.000 kg",
+decisão do proprietário de 05/10/2026) e ordena pelo número; filtro por valor exato; página sem rolagem horizontal; identificação à vista a 390 px.
+Mudou o mapa de colunas (eram 6 seções com até 12 colunas) e a navegação (seção pelo nome).
+Só as colunas essenciais (pedido do proprietário de 10/10/2026): identificação, situação, quem retira ou devolve e os números que decidem; o que saiu
+(lote da requisição, fornecedor, contado, reservado, bloqueado, lote do movimento) aparece no painel do registro e o que servia para achar segue na busca.
+Uso: python3 tabelas_est_test.py [pasta de capturas]"""
+import sys, os, time, json, re
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from comp_lib import Chrome, servir
 OUT = sys.argv[1] if len(sys.argv) > 1 else None
@@ -18,7 +20,8 @@ TB = "[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent)"
 def heads(): return [x.upper() for x in (J(f"[...({TB}).querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\\s+/g,' ').trim().replace(/ · \\d+$/,''))") or [])]
 def linhas(): return J(f"[...({TB}).querySelectorAll('[role=row]')].filter(r=>r.offsetParent&&r.querySelector('[role=cell]')).map(r=>[...r.querySelectorAll('[role=cell]')].map(x=>x.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim()))") or []
 def dicts(): hs = heads(); return [dict(zip(hs, r)) for r in linhas()]
-def secao(i): J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i - 1}].click()"); time.sleep(.5)
+def secao(nome): J(f"[...document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')].find(b=>(b.querySelector('span')||b).innerText.trim()==={json.dumps(nome)}).click()"); time.sleep(.5)
+def modo(nome): J(f"[...document.querySelectorAll('main button')].find(b=>b.offsetParent&&b.innerText.trim()==={json.dumps(nome)}).click()"); time.sleep(.5)
 def filtra(col, vals):
     J(f"({TB}).querySelector('button[aria-label=\"Filtrar {col}\"]').click()"); time.sleep(.4)
     J("[...document.querySelectorAll('[role=dialog] button')].find(b=>b.innerText.trim()==='Limpar').click()"); time.sleep(.2)
@@ -28,99 +31,95 @@ def limpa(): J("(()=>{const b=[...document.querySelectorAll('main button')].find
 def ordena(col, desc=False):
     J(f"({TB}).querySelector('button[aria-label=\"Filtrar {col}\"]').click()"); time.sleep(.4)
     J(f"[...document.querySelectorAll('[role=dialog] button.g2fi')][{1 if desc else 0}].click()"); time.sleep(.5)
-def num(t): return float(t.replace('.', '').replace(',', '.').replace('−', '-'))
+def num(t): return float(t.replace('.', '').replace(',', '.').replace('−', '-').replace('+', ''))
 NUMRE = r'^[+−-]?[\d.]+(,\d+)?$'
-import re
+QRE = r'^[+−-]?[\d.]+(,\d+)? (kg|L|un|sc|t|g|mL)$'   # quantidade com a unidade junto
 def shot(n):
     if OUT: c.shot(os.path.join(OUT, n + '.png'))
+def cab_visiveis():
+    return J(f"(()=>{{const t={TB}; const sc=t.parentElement; sc.scrollLeft=0; const R=sc.getBoundingClientRect(); return [...t.querySelectorAll('[role=columnheader]')].filter(h=>h.getBoundingClientRect().right<=R.right+0.5).map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\\s+/g,' ').trim().replace(/ · \\d+$/,'').toUpperCase());}})()") or []
+
+VISOES = [('Atenda requisições', None, ('REQUISIÇÃO › ITEM', 'SITUAÇÃO', 'A ENTREGAR', 'EM CUSTÓDIA', 'COM QUEM', 'O.S.'), 'REQUISIÇÃO › ITEM'),
+          ('Receba e inspecione', None, ('DOCUMENTO › ITEM', 'SITUAÇÃO', 'NA NOTA', 'EM QUARENTENA', 'PREVISÃO'), 'DOCUMENTO › ITEM'),
+          ('Faça contagens', None, ('CONTAGEM', 'SITUAÇÃO', 'ITEM', 'LOTE', 'LOCAL', 'DIFERENÇA'), 'CONTAGEM'),
+          ('Confira saldos', 'Lotes', ('ITEM', 'LOTE', 'FÍSICO', 'DISPONÍVEL', 'VALIDADE'), 'ITEM'),
+          ('Confira saldos', 'Movimentos', ('DATA E HORA', 'MOVIMENTO', 'DOCUMENTO', 'ITEM', 'QUANTIDADE', 'QUEM'), 'DATA E HORA')]
+PAINEL = "(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); return a?a.innerText.replace(/\\s+/g,' '):'';})()"
+def painel(txt):
+    J(f"(()=>{{const r=[...({TB}).querySelectorAll('[role=row]')].find(x=>x.offsetParent&&x.innerText.indexOf({json.dumps(txt)})>=0); r&&(r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.6)
+    t = J(PAINEL) or ''; J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.offsetParent&&/^(Fechar|Cancelar)$/.test(b.innerText.trim())); b&&b.click(); document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));})()"); time.sleep(.4); return t
+def busca(q):
+    J(f"(()=>{{const i=[...document.querySelectorAll('input[aria-label=\"Buscar nesta tabela\"]')].find(x=>x.offsetParent); if(!i) return; Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,{json.dumps(q)}); i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"); time.sleep(.5)
+    return [r[0] for r in linhas()]
+QTD = {'A ENTREGAR', 'EM CUSTÓDIA', 'NA NOTA', 'EM QUARENTENA', 'DIFERENÇA', 'FÍSICO', 'DISPONÍVEL', 'QUANTIDADE'}
 
 try:
     c.aparelho(1440, 900, 1, False)
     c.goto(f'http://127.0.0.1:{p}/Main.dc.html', .3); J("localStorage.clear(); sessionStorage.clear()")
     c.goto(f'http://127.0.0.1:{p}/EST.dc.html', 1.6); J("window.__e=[];addEventListener('error',e=>window.__e.push(String(e.message)))")
-    QTD = {'NA NOTA', 'CONFERIDA', 'APTA', 'QUARENTENA', 'SOLICITADO', 'ENTREGUE', 'A ENTREGAR', 'CONSUMIDO', 'DEVOLVIDO', 'EM CUSTÓDIA', 'FÍSICO', 'RESERVADO', 'BLOQUEADO',
-           'DISPONÍVEL', 'EM CONFERÊNCIA', 'EM CUSTÓDIA (FORA DO DEPÓSITO)', 'SISTEMA NA DATA DE CORTE', 'CONTADO', 'DIFERENÇA', 'QUANTIDADE'}
-    esperado = {1: ('NOTA FISCAL', 'DATA DA NOTA', 'CONFERIDA EM', 'PEDIDO', 'FORNECEDOR', 'ITEM', 'LOTE', 'SITUAÇÃO', 'DIVERGÊNCIA', 'VALIDADE'),
-                2: ('REQUISIÇÃO', 'O.S.', 'ITEM', 'LOTE', 'EMBALAGEM', 'A ENTREGAR EM EMBALAGENS', 'SITUAÇÃO', 'DETALHE'),
-                3: ('REQUISIÇÃO', 'O.S.', 'ITEM', 'LOTE', 'COM QUEM', 'ENCERRAMENTO DA O.S.', 'DETALHE'),
-                4: ('ITEM › LOTE', 'ITEM', 'EM CONFERÊNCIA', 'O.S. COM CUSTÓDIA', 'SITUAÇÃO DO LOTE', 'VALIDADE'),
-                5: ('CONTAGEM', 'AJUSTE', 'ITEM', 'LOTE'),
-                6: ('REGISTRO', 'MOVIMENTO', 'CONDIÇÃO', 'DOCUMENTO', 'O.S.', 'ITEM', 'LOTE', 'QUANTIDADE', 'SINAL DO APP')}
-    IDENT = {1: 'NOTA FISCAL', 2: 'REQUISIÇÃO', 3: 'REQUISIÇÃO', 4: 'ITEM › LOTE', 5: 'CONTAGEM', 6: 'HORA'}
-    QRE = r'^[+−-]?[\d.]+(,\d+)? (kg|L|un|sc|t|g|mL)$'   # quantidade com a unidade junto
-    def cab_visiveis():   # cabeçalhos à vista com a grade no início (sem rolar a tabela)
-        return J(f"(()=>{{const t={TB}; const sc=t.parentElement; sc.scrollLeft=0; const R=sc.getBoundingClientRect(); return [...t.querySelectorAll('[role=columnheader]')].filter(h=>h.getBoundingClientRect().right<=R.right+0.5).map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\\s+/g,' ').trim().toUpperCase());}})()") or []
-    def rotulos(col):   # valores oferecidos pelo menu de filtro da coluna (sem a contagem)
-        J(f"({TB}).querySelector('button[aria-label=\"Filtrar {col}\"]').click()"); time.sleep(.4)
-        r = J("[...document.querySelectorAll('[role=dialog] label')].map(l=>l.innerText.replace(/\\s+\\d+$/,'').trim())") or []
-        J("(()=>{const b=[...document.querySelectorAll('[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); b&&b.click();})()"); time.sleep(.3); return r
-    # seção 1 antes de conferir: a NF 4533 ainda não chegou ("Prevista", data prevista 24/09/2026)
-    secao(1); d = dicts(); n33 = next((r for r in d if r.get('NOTA FISCAL') == 'NF 4533'), {})
-    chk('seção 1: NF 4533 ainda não chegou: Situação "Prevista", Data da nota 24/09/2026 (prevista), Conferida em —', [n33.get(k) for k in ('SITUAÇÃO', 'DATA DA NOTA', 'CONFERIDA EM')] == ['Prevista', '24/09/2026', '—'], n33)
-    # confere a NF 4533 com validade 12/2026 (ano diferente do lote S58-0801, 06/2027): a ordem por data difere da ordem do texto
-    J(f"(()=>{{const r=[...({TB}).querySelectorAll('[role=row].g2ed')].find(x=>x.innerText.indexOf('NF 4533')>=0); r.querySelector('[role=cell] span').click();}})()"); time.sleep(.5)
-    for k, val in (('conf', '20000'), ('apto', '18000'), ('quar', '2000'), ('obs', '40 sacos com embalagem avariada · aguarda laudo'), ('val', '12/2026')):
-        J(f"""(()=>{{const i=document.querySelector('#fx_g_rec_{k}'); const P=i.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,{json.dumps(val)}); i.dispatchEvent(new Event('input',{{bubbles:true}}));}})()"""); time.sleep(.15)
-    J("[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Salvar').click()"); time.sleep(.6)
-    # trilha com movimentos de vários itens: OS-0430 liberada, 3 itens entregues e confirmados no app, turno de 5 ha fechado (consumo de 3 itens em L)
+    # trilha com movimentos de vários itens: OS-0430 liberada, 3 itens entregues e confirmados no app, turno de 5 ha fechado
     J("""(()=>{const X=window.__cen; with(X){ cenMudar(null,c=>cenLiberar(c,'OS-0430')); const c0=cenGet(); const rq=Object.keys(c0.reqs).find(k=>c0.reqs[k].os==='OS-0430');
       cenMudar(null,c=>cenEntregar(c,rq,'Glifosato 480',320,'Marcos','Rui')); cenMudar(null,c=>cenEntregar(c,rq,'2,4-D 806',160,'Marcos','Rui')); cenMudar(null,c=>cenEntregar(c,rq,'Óleo mineral',80,'Marcos','Rui'));
       cenMudar(null,c=>cenConfirmarRecebimento(c,rq)); cenMudar(null,c=>cenIniciarTurno(c,'OS-0430')); return cenMudar(null,c=>cenFecharTurno(c,5,1)).erro||''; } })()""")
     c.goto(f'http://127.0.0.1:{p}/EST.dc.html', 1.4); J("window.__e=[];addEventListener('error',e=>window.__e.push(String(e.message)))")
-    for i in range(1, 7):
-        secao(i)
+    J("[...document.querySelectorAll('select[aria-label=\"Filtrar por fazenda\"]')].forEach(i=>{Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(i,'Todas'); i.dispatchEvent(new Event('change',{bubbles:true}));})"); time.sleep(.5)
+    for i, (sec, md, esperado, ident) in enumerate(VISOES, 1):
+        secao(sec)
+        if md: modo(md)
         for _ in range(2): J(f"[...({TB}).querySelectorAll('button[aria-label^=\"Expandir\"]')].filter(b=>b.offsetParent).forEach(b=>b.click())"); time.sleep(.3)
-        hs = heads(); d = dicts(); shot(f'est{i}-1440')
-        chk(f'seção {i}: colunas próprias {", ".join(esperado[i][:4])}…; sem coluna Unidade', all(k in hs for k in esperado[i]) and 'UNIDADE' not in hs and not any(' · ' in h for h in hs), hs)
-        # cada quantidade mostrada leva a unidade junto (1ª parte da célula; chips e ações podem vir depois); diferença zero é "0"
+        hs = heads(); d = dicts(); nome = sec + (' › ' + md if md else ''); shot(f'est{i}-1440')
+        chk(f'{nome}: só as colunas essenciais ({", ".join(esperado)}); sem coluna Unidade', tuple(hs) == esperado and 'UNIDADE' not in hs and len(hs) <= 7, hs)
         semun = [(h, v) for r in d for h, v in r.items() if h in QTD and v not in ('', '—', '0') and re.match(NUMRE, v.split(' ')[0]) and not re.match(QRE, ' '.join(v.split(' ')[:2]))]
-        chk(f'seção {i}: cada quantidade com a unidade junto ("60.000 kg")', not semun, semun[:3])
-        chk(f'seção {i}: página sem rolagem horizontal; identificação ({IDENT[i]}) à vista sem rolar a grade', J("document.documentElement.scrollWidth<=innerWidth+1") and IDENT[i] in cab_visiveis(), cab_visiveis()[:4])
-        if i == 1:
-            nf = next((r for r in d if r.get('NOTA FISCAL') == 'NF 4501'), {}); n33 = next((r for r in d if r.get('NOTA FISCAL') == 'NF 4533'), {})
-            chk('seção 1: NF 4501 = 19/09/2026 | PC-088 | Fertisul | KCl 60% | K26-11 | 60.000 kg', [nf.get(k) for k in ('DATA DA NOTA', 'FORNECEDOR', 'ITEM', 'LOTE', 'NA NOTA')] == ['19/09/2026', 'Fertisul', 'KCl 60%', 'K26-11', '60.000 kg'] and nf.get('PEDIDO', '').startswith('PC-088'), nf)
-            chk('seção 1: NF 4533 conferida hoje: Conferida em 23/09/2026 (data, não "hoje"), validade 12/2026, quarentena 2.000 kg', [n33.get(k) for k in ('CONFERIDA EM', 'VALIDADE', 'QUARENTENA')] == ['23/09/2026', '12/2026', '2.000 kg'], n33)
-            filtra('Na nota', ['60.000 kg']); r1 = [r.get('NOTA FISCAL') for r in dicts()]
-            chk('seção 1: filtro Na nota = "60.000 kg" (o menu oferece o texto da célula, com a unidade): só a NF 4501', r1 == ['NF 4501'], r1)
-            limpa(); ordena('Data da nota'); o1 = [r.get('NOTA FISCAL') for r in dicts()]
-            # integração BEN, rodada 1 (BEN-D23): a NF 7731 das caixas do packing (25/09, a conferir) entra na lista do Estoque
-            chk('seção 1: ordenar Data da nota (data): NF 4501 (19/09) antes da NF 4533 (24/09) e da NF 7731 das caixas (25/09)', o1 == ['NF 4501', 'NF 4533', 'NF 7731'], o1)
-        if i == 2:
-            its = sorted({r.get('ITEM') for r in d if r.get('ITEM')}); it0 = its[0] if its else ''
-            filtra('Item', [it0]); r2 = [r for r in dicts() if r.get('ITEM')]
-            chk(f'seção 2: filtro Item = {it0} corta as outras ({len(its)} itens antes)', len(its) > 1 and r2 and all(r.get('ITEM') == it0 for r in r2), [(r.get('ITEM'), r.get('LOTE')) for r in r2][:4])
-            limpa(); ordena('Solicitado', desc=True); v2 = [num(r['SOLICITADO'].split(' ')[0]) for r in dicts() if re.match(NUMRE, r.get('SOLICITADO', '').split(' ')[0])]
-            chk('seção 2: ordenar Solicitado decrescente pelo número (a unidade junto não atrapalha)', len(v2) > 1 and v2 == sorted(v2, reverse=True), v2)
-            os_ = [r.get('O.S.') for r in dicts()]; chk('seção 2: O.S. em coluna própria (OS-… ou a ordem de beneficiamento OB-…, BEN-D05), separada da requisição (REQ-…)', all(re.match(r'^(OS|OB)-', o or '') for o in os_) and all((r.get('REQUISIÇÃO') or '').startswith('REQ-') for r in dicts()), os_[:3])
-        if i == 4:
-            kcl = next((r for r in d if r.get('ITEM › LOTE', '').startswith('KCl 60%')), {}); lote = next((r for r in d if r.get('ITEM › LOTE') == 'K26-11'), {})
-            chk('seção 4: árvore item › lote; KCl 60% físico 60.000 kg, disponível 50.000 kg; lote K26-11 com Item = KCl 60% e situação "Em quarentena"',
-                kcl.get('FÍSICO') == '60.000 kg' and kcl.get('DISPONÍVEL') == '50.000 kg' and lote.get('ITEM') == 'KCl 60%' and lote.get('SITUAÇÃO DO LOTE') == 'Em quarentena', (kcl, lote))
-            rr = rotulos('Reservado'); cel = {r.get('RESERVADO') for r in d if r.get('RESERVADO') not in (None, '', '—')}
-            chk('seção 4: o menu de filtro de Reservado oferece só valores que aparecem nas células (com unidade) e "(vazio)" para "—"', rr and set(rr) - {'(vazio)'} <= cel and not any(re.match(NUMRE, x) for x in rr), (rr, sorted(cel)))
-            ordena('Validade'); sem = [r.get('ITEM › LOTE') for r in dicts() if r.get('ITEM') == 'Semente de soja 58 W' and not r.get('ITEM › LOTE', '').startswith('Semente')]
-            chk('seção 4: ordenar Validade (data): S58-0926 (12/2026) antes de S58-0801 (06/2027); pelo texto sairia o contrário', sem == ['S58-0926', 'S58-0801'], sem)
-        if i == 6:
+        chk(f'{nome}: cada quantidade com a unidade junto ("60.000 kg")', not semun, semun[:3])
+        chk(f'{nome}: página sem rolagem horizontal; identificação ({ident}) à vista sem rolar a grade', J("document.documentElement.scrollWidth<=innerWidth+1") and ident in cab_visiveis(), cab_visiveis()[:4])
+        if sec == 'Atenda requisições':
+            sits = sorted({r.get('SITUAÇÃO') for r in d if r.get('SITUAÇÃO')}); filtra('Situação', [sits[0]] if sits else []); r1 = dicts()
+            chk('requisições: filtro Situação por valor exato', len(sits) > 1 and r1 and len({r.get('SITUAÇÃO') for r in r1}) == 1, (sits, len(r1)))
+            limpa(); os_ = [r.get('O.S.') for r in dicts() if r.get('O.S.')]
+            chk('requisições: O.S. em coluna própria (OS-… ou a ordem de beneficiamento OB-…, BEN-D05), separada da requisição', os_ and all(re.match(r'^(OS|OB)-', o) for o in os_), os_[:3])
+            pn = painel('REQ-039'); bq = busca('F26-02'); busca('')
+            chk('requisições: o lote saiu da grade e está no painel (REQ-039 › Fungicida A, lote F26-02) e na busca ("F26-02" acha a REQ-039)',
+                'Fungicida A (lote F26-02)' in pn and any(x.startswith('REQ-039') for x in bq), [pn[:160], bq[:4]])
+        if sec == 'Receba e inspecione':
+            # integração BEN, rodada 1 (BEN-D23): a NF 7731 das caixas do packing (PC-096, a conferir) entra na lista com a unidade do pedido (un, não kg)
+            n77 = next((r for r in d if (r.get('DOCUMENTO › ITEM') or '').startswith('NF 7731')), {})
+            chk('notas: NF 7731 (caixas, PC-096) a conferir, 1.200 un na nota (unidade do pedido)', n77.get('SITUAÇÃO') == 'A conferir' and n77.get('NA NOTA') == '1.200 un', n77)
+            n33 = next((r for r in d if (r.get('DOCUMENTO › ITEM') or '').startswith('NF 4533')), {}).get('DOCUMENTO › ITEM', '')
+            k11 = next((r for r in d if 'K26-11' in (r.get('DOCUMENTO › ITEM') or '')), {}).get('DOCUMENTO › ITEM', '')
+            chk('notas: a célula do documento diz o item (sem coluna Item repetida): "NF 4533 › Semente de soja…" e a parcela "NF 4501 › KCl 60% · K26-11"',
+                n33.startswith('NF 4533 › Semente de soja') and k11.startswith('NF 4501 › KCl 60% · K26-11'), [n33, k11])
+            pn = painel('NF 4533'); bq = busca('Coop'); busca('')
+            chk('notas: o fornecedor saiu da grade e está no painel da nota (PC-090 · Coop. …) e na busca', 'PC-090 · Coop' in pn and any(x.startswith('NF 4533') for x in bq), [pn[:160], bq[:4]])
+        if sec == 'Confira saldos' and md == 'Lotes':
+            kcl = next((r for r in d if r.get('LOTE') == 'K26-11'), {}); pn = painel('K26-11')
+            chk('lotes: K26-11 (KCl 60%, selo "Em quarentena" na linha: o estado não sai da vista) físico 60.000 kg, disponível 50.000 kg; uma linha por lote (sem árvore); o bloqueado (10.000 kg) e a conta no painel',
+                [kcl.get(k) for k in ('ITEM', 'FÍSICO', 'DISPONÍVEL')] == ['KCl 60% Em quarentena', '60.000 kg', '50.000 kg'] and 'Disponível = físico − reservado − bloqueado = 60.000 kg − 0 kg − 10.000 kg = 50.000 kg' in pn, [kcl, pn[:200]])
+            sem = [r.get('LOTE') for r in d if 'Em quarentena' in (r.get('ITEM') or '')]
+            chk('lotes: o selo "Em quarentena" só nos lotes com parcela bloqueada (K26-11 na semente)', sem == ['K26-11'], sem)
+            ordena('Disponível', desc=True); v4 = [num(r['DISPONÍVEL'].split(' ')[0]) for r in dicts() if re.match(NUMRE, r.get('DISPONÍVEL', '').split(' ')[0])]
+            chk('lotes: ordenar Disponível decrescente pelo número (a unidade junto não atrapalha)', len(v4) > 1 and v4 == sorted(v4, reverse=True), v4[:6])
+            limpa(); ordena('Validade'); vs = [r.get('VALIDADE') for r in dicts() if re.match(r'^\d{2}/\d{4}$', r.get('VALIDADE', ''))]
+            ym = [int(v[3:]) * 100 + int(v[:2]) for v in vs]
+            chk('lotes: ordenar Validade pela data (mês/ano), não pelo texto', len(ym) > 1 and ym == sorted(ym), vs[:6])
+            limpa()
+        if md == 'Movimentos':
             movs6 = sorted({r.get('MOVIMENTO') for r in d}); filtra('Movimento', [movs6[0]] if movs6 else []); r6 = dicts()
-            chk('seção 6: filtro Movimento por valor exato', len(movs6) > 1 and r6 and len({r.get('MOVIMENTO') for r in r6}) == 1, (movs6, len(r6)))
+            chk('movimentos: filtro Movimento por valor exato', len(movs6) > 1 and r6 and len({r.get('MOVIMENTO') for r in r6}) == 1, (movs6, len(r6)))
             limpa(); res6 = [r for r in dicts() if r.get('MOVIMENTO') == 'Reserva']
-            chk('seção 6: reserva com quantidade "320 L" e a condição "reservados" em coluna própria (sem estado colado na quantidade)',
-                res6 and all(re.match(QRE, r.get('QUANTIDADE', '')) and r.get('CONDIÇÃO') == 'reservados' for r in res6), [(r.get('QUANTIDADE'), r.get('CONDIÇÃO')) for r in res6][:3])
-            ordena('Quantidade', desc=True)
-            linhas6 = J(f"[...({TB}).querySelectorAll('[role=row]')].filter(r=>r.offsetParent&&r.querySelector('[role=cell]')).map(r=>{{const hs=[...r.closest('[role=table]').querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\\s+/g,' ').trim().toUpperCase()); const i=hs.indexOf('QUANTIDADE'); return r.querySelectorAll('[role=cell]')[i].innerText.split('\\n').map(x=>x.trim()).filter(Boolean);}})") or []
-            def chave(ls):   # soma quando todas as linhas têm a mesma unidade; senão sem chave (vai para o fim)
-                ps = [re.match(QRE, x) and (num(x.split(' ')[0]), x.split(' ')[1]) for x in ls]
-                return None if not ps or not all(ps) or len({u for _, u in ps}) > 1 else sum(v for v, _ in ps)
-            ks = [chave(ls) for ls in linhas6]; multi = [ls for ls in linhas6 if len(ls) > 1]
-            vals = [k for k in ks if k is not None]; fim = ks[len(vals):]
-            chk('seção 6: ordenar Quantidade (decrescente) com movimentos de vários itens: pela soma em L, sem misturar dígitos dos itens; sem chave no fim',
-                multi and vals == sorted(vals, reverse=True) and all(k is None for k in fim) and ks[:len(vals)] == vals, (multi[:2], ks))
+            chk('movimentos: reserva com quantidade "320 L" (unidade junto)', res6 and all(re.match(QRE, r.get('QUANTIDADE', '')) for r in res6), [r.get('QUANTIDADE') for r in res6][:3])
+    # Produção (Colheita integrada, c.producao): resumo do físico na unidade da cultura e atalho à página da Colheita; não é grade copiada
+    secao('Confira saldos'); modo('Produção'); tp = J("document.querySelector('main').innerText")
+    chk('Produção: Santa Rita com "Soja em grão 38.420 sc" lido da Colheita e atalho "Abrir Estoque de produto ›" (PROD.dc.html)',
+        'Soja em grão' in tp and '38.420 sc' in tp and J("[...document.querySelectorAll('main a')].some(a=>a.getAttribute('href')==='PROD.dc.html'&&/Abrir Estoque de produto/.test(a.innerText))"), tp[-400:])
+    modo('Lotes')
     # 390 px: em cada seção a página não rola e a identificação fica à vista
     c.aparelho(390, 844, 2, True); c.goto(f'http://127.0.0.1:{p}/EST.dc.html', 1.4); r390 = []
-    for i in range(1, 7):
-        secao(i); r390.append((i, bool(J("document.documentElement.scrollWidth<=innerWidth+1")), IDENT[i] in cab_visiveis()))
+    for sec, md, esperado, ident in VISOES:
+        secao(sec)
+        if md: modo(md)
+        r390.append((sec + (md or ''), bool(J("document.documentElement.scrollWidth<=innerWidth+1")), ident in cab_visiveis()))
     shot('est4-390')
-    chk('390 px: as 6 seções sem rolagem da página e com a identificação à vista', all(a and b for _, a, b in r390), r390)
+    chk('390 px: as 4 seções e Movimentos sem rolagem da página e com a identificação à vista', all(a and b for _, a, b in r390), r390)
     chk('sem erro de script', not J("window.__e"), J("window.__e"))
 finally:
     c.close(); srv.terminate()

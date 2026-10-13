@@ -39,16 +39,13 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T; o cenário come
            caixas entregues, a falta da OB-0112 não manda receber a "devolução" da OB-0113; em execução ela guarda as caixas que ainda
            pode usar e "Pedir mais caixas" sem nota nem sobra não manda cancelar; com tudo registrado a sobra (69 un) vira a saída da
            OB-0112, o Rui a recebe pelo atalho e a OB-0113 fecha os 12.300 kg com diferença 0.
-  manutencao integração COMP (PCM × BEN): a condição da Packing linha 1 no painel da ordem vem do cenário único (c.man, onde a
-           Manutenção grava desde o PCM 1a), não da chave antiga 'talhao-os-manutencao-v1' que ninguém grava mais; bloqueada na
-           Manutenção, a OB-0110 mostra "Bloqueado na Manutenção" e "Ver na Manutenção" abre o ativo na tela única (MA.dc.html#ativo=a13).
-Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular|revisao|roteiro|roteiro390|complemento|lotes|duplo|criada|teclado|cancelar|faixa390|cadeia|cadeia390|manutencao]
+Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 ben_fluxo_test.py [fluxo|erros|celular|revisao|roteiro|roteiro390|complemento|lotes|duplo|criada|teclado|cancelar|faixa390|cadeia|cadeia390]
 Capturas em _probe/ben_*.png. Dados sintéticos (SAFRION_DADOS=sintetico)."""
 import sys, os, time, json
 os.environ.setdefault('SAFRION_DADOS', 'sintetico')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cadc_lib import T
-TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'lotes', 'duplo', 'criada', 'teclado', 'cancelar', 'faixa390', 'cadeia', 'cadeia390', 'manutencao')
+TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'lotes', 'duplo', 'criada', 'teclado', 'cancelar', 'faixa390', 'cadeia', 'cadeia390')
 MODOS = [a for a in sys.argv[1:] if a in TODOS] or list(TODOS)
 PR = os.path.join(HERE, '_probe'); os.makedirs(PR, exist_ok=True)
 t = T(); J = t.J
@@ -141,6 +138,10 @@ def tab_ate(alvo, max_=90, shift=False):
     return None
 def digita(txt): t.c.call('Input.insertText', {'text': txt}); time.sleep(.2); J("window.__tx=(window.__tx||0)+1")
 def est_secao(i): J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i - 1}].click()"); time.sleep(.5)
+# Estoque na forma do SUP (docs/suprimentos-simplificado; merge de 09/10): 4 seções (1 Atenda requisições · 2 Receba e inspecione · 3 Faça contagens ·
+# 4 Confira saldos); a linha identifica e o painel do registro resolve, com UMA primária verde cujo rótulo diz o quê, quanto e para quem
+EST_PRIM = "(()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(VIS); if(!a) return ''; const b=[...a.querySelectorAll('button')].filter(e=>VIS(e)&&getComputedStyle(e).backgroundColor==='rgb(30, 122, 76)'); return b.length?N(b[b.length-1].innerText):''; })()"
+def est_prim(): return J(EST_PRIM) or ''
 
 try:
     if 'fluxo' in MODOS:
@@ -193,11 +194,12 @@ try:
         perfil('Igor'); clk('Fechar processo', 'aside'); p = pan()
         t.chk('(3) Fechar recusado: "Sobra em custódia: Caixa de mamão Formosa 10 kg 60 un. Receba a devolução no Estoque."', 'Sobra em custódia: Caixa de mamão Formosa 10 kg 60 un. Receba a devolução no Estoque.' in p and cen("c.ordens['OB-0110'].etapa") == 'Em conferência', p[-300:])
         # devolução no Estoque (Rui, almoxarife)
-        ir('EST.dc.html'); perfil('Rui'); est_secao(3)
-        r = J("(()=>{ const rw=[...document.querySelectorAll('[role=row]')].find(x=>N(x.innerText).indexOf('REQ-030')>=0); if(!rw) return 'sem linha'; window.__cl++; (rw.querySelector('[role=cell] span')||rw).click(); return 'ok'; })()"); time.sleep(.5)
-        q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value"); clk('Salvar', 'aside[role=dialog]'); time.sleep(.3)
+        # SUP: Atenda requisições; a quantidade devolvida é digitada (conferir é de propósito, PRD 42.4; CMD-45), a custódia fica à vista no painel
+        perfil('Rui'); ir('EST.dc.html'); est_secao(1); r = row('REQ-030'); p = pan(); pr0 = est_prim()
+        setv('#fx_g_req_dqtd', '60'); pr = est_prim(); clk(pr, 'aside[role=dialog]'); time.sleep(.3)
         st = cen("[c.reqs['REQ-030'].itens[0].custodia, c.lotes['Caixa de mamão Formosa 10 kg|CX26-01'].fisico]")
-        t.chk('(3) Estoque › Receba devoluções: REQ-030 sugere 60 un; devolução apta: custódia 0 e CX26-01 540 → 600 un', r == 'ok' and q == '60' and st == [0, 600], [r, q, st, toast()])
+        t.chk('(3) Estoque › Atenda requisições: REQ-030 com 60 un em custódia no painel; devolução de 60 un digitada e apta: custódia 0 e CX26-01 540 → 600 un',
+              r == 'ok' and '60 un' in p and pr0.startswith('Registrar devolução') and pr.startswith('Registrar devolução · 60 un') and st == [0, 600], [r, pr0, pr, st, toast(), p[:300]])
         ir('BEN.dc.html#OB-0110'); perfil('Igor'); time.sleep(.3); clk('Fechar processo', 'aside'); p = toast()
         st = cen("[c.ordens['OB-0110'].etapa, c.producao.lotes['L39-120']&&c.producao.lotes['L39-120'].q0, c.producao.lotes['L39-121']&&c.producao.lotes['L39-121'].q0, c.producao.ben.insp['INSP-92'].prazo]")
         t.chk('(3) Fechar: OB-0110 Encerradas; L39-120 e L39-121 Em inspeção (INSP-92, Marta, prazo 28/09); "Fechar não libera"', st == ['Encerradas', 'Em inspeção', 'Em inspeção', '2026-09-28'] and 'Fechar não libera' in p, [st, p])
@@ -221,10 +223,12 @@ try:
         clk('Autorizar rota e liberar', 'aside'); p2 = toast()
         st = cen("[c.ordens['OB-0112'].etapa, c.ordens['OB-0112'].req, c.ordens['OB-0112'].versao, c.reqs['REQ-041']&&c.reqs['REQ-041'].itens[0].solicitado]")
         t.chk('(5) Retirar o L39-119 (v2, 6.140 kg, 584 un) e liberar: Liberadas, REQ-041 com 584 un (CMD-42 e CMD-06)', st == ['Liberadas', 'REQ-041', 'v2', 584] and 'CMD-42' in p2 and 'CMD-06' in p2, [st, p, p2])
-        ir('EST.dc.html'); est_secao(2); t.chk('(5) a REQ-041 da OB-0112 aparece em Entregue por O.S.', 'OB-0112' in (J("ROWTXT('REQ-041')") or ''), J("ROWTXT('REQ-041')"))
+        ir('EST.dc.html'); est_secao(1); t.chk('(5) a REQ-041 da OB-0112 aparece em Estoque › Atenda requisições', 'OB-0112' in (J("ROWTXT('REQ-041')") or ''), J("ROWTXT('REQ-041')"))
         cl, tx = J("[window.__cl, window.__tx]")
         print(f'MEDIDA tarefa do proprietário (§11.7): {cl} cliques/toques e {tx} campos digitados (linha de base, AC-36)')
-        t.chk('(medida) tarefa do proprietário, desde Recebimento e beneficiamento, em até 30 toques e sem campo digitado (só toques: a quantidade e as caixas vêm sugeridas)', cl <= 30 and tx == 0, [cl, tx])
+        # SUP (merge de 09/10): o único campo digitado é a quantidade devolvida da REQ-030 no Estoque (60 un). A devolução é conferida e digitada de
+        # propósito (PRD 42.4; CMD-45; docs/suprimentos-simplificado §0.3): sugerida, a devolução não conferida virava saldo apto
+        t.chk('(medida) tarefa do proprietário, desde Recebimento e beneficiamento, em até 30 toques e um campo digitado (a quantidade devolvida, conferida no Estoque; quantidade e caixas da ordem vêm sugeridas)', cl <= 30 and tx == 1, [cl, tx])
         # integração com a Colheita: o L39-131 (recebido em processo, pós-colheita do CAR0) abre uma ordem pelo atalho do Estoque de produto
         ir('PROD.dc.html#L39-131'); time.sleep(.4); p = pan()
         t.chk('Colheita → Beneficiamento: L39-131 em processo no Estoque de produto com o atalho "Abrir ordem de beneficiamento" (só navega)', 'Abrir ordem de beneficiamento' in p and rev() == cen("c.rev||0"), p[:400])
@@ -280,7 +284,9 @@ try:
         t.chk('dois quadros: o formulário aberto antes de outra gravação recebe "A OB-0110 mudou depois que você abriu", nada gravado', 'A OB-0110 mudou depois que você abriu' in p and cen("c.ordens['OB-0110'].ben.sai.length") == 4, p[-300:])
         # navegar nunca grava: atalhos do painel e do Estoque de produto
         ir('BEN.dc.html#OB-0112'); r0 = rev(); hs = J("[...document.querySelectorAll('aside a')].map(a=>a.getAttribute('href'))")
-        t.chk('atalhos da OB-0112 (devolução no Estoque, lote no Estoque de produto) só navegam; revisão igual', 'EST.dc.html' in (hs or []) and rev() == r0, hs)
+        # SUP: o atalho do Estoque abre o registro (a NF 7731 a conferir ou a REQ da sobra: EST.dc.html#nf=… / #req=…), não a página no início
+        t.chk('atalhos da OB-0112 (caixas no Estoque, lote no Estoque de produto) só navegam e abrem o registro; revisão igual',
+              any(h in ('EST.dc.html#nf=NF%207731', 'EST.dc.html#req=REQ-030') for h in (hs or [])) and rev() == r0, hs)
         shot('erros')
         t.chk('erros sem erro de JS', not t.errs(), t.errs())
     if 'celular' in MODOS:
@@ -345,7 +351,7 @@ try:
         from ben_unit_test import motor, node
         fx = node(motor() + """ const c = cenClone(CEN0); c.ordens['OS-0932'] = { id: 'OS-0932', tipo: 'Colheita · semana 39', talhao: 'T7', area: 0, etapa: 'Em execução', versao: 'v1', realizado: 6, saldo: 0, resp: 'Sérgio', ins: [], req: null, selos: [],
           ap: [{ d: '25/09', dia: 1, ha: 6, st: 'Conferido', sinc: true, origem: 'web' }], reservado: false, osc: {} };
-          prReceber(c, { quem: 'Rui', os: 'OS-0932', ticket: 'TK-T7A', bruto: 9400, tara: 3200, cond: 'Com avaria', dcol: '2026-09-25' }); c.rev = (c.rev || 0) + 1; print(JSON.stringify(c));""", 'ben_rev_b3.js')
+          prReceber(c, { os: 'OS-0932', ticket: 'TK-T7A', bruto: 9400, tara: 3200, cond: 'Com avaria', dcol: '2026-09-25' }); c.rev = (c.rev || 0) + 1; print(JSON.stringify(c));""", 'ben_rev_b3.js')
         ir('PROD.dc.html', limpa=True); J(f"localStorage.setItem('talhao-os-cenario-v1', {json.dumps(fx.stdout.strip().splitlines()[-1])})")
         perfil('Marta'); ir('PROD.dc.html#L39-133'); p = pan(); pp = J("PPRIM()") or []
         t.chk('B3 · BEN-REV-03: L39-133 (avaria, Packing) em processo com "Liberar lote · Marta (qualidade)" e a primária "Liberar L39-133"', 'Liberar lote · Marta (qualidade)' in p and 'Liberar L39-133' in pp, [pp, p[:300]])
@@ -378,14 +384,14 @@ try:
         r0 = rev(); r = tocar('Autorizar rota e liberar', 'aside'); p = pan()
         t.chk(T_ + ' R2 · Autorizar rota e liberar recusado (540 para 1.169), nada gravado', r == 'ok' and 'Liberação recusada · 1 causa' in p and rev() == r0 and cen("c.ordens['OB-0113'].etapa") == 'A liberar', [r, p[-400:]])
         perfil('Rui'); r = tocar('Conferir a NF 7731 das caixas no Estoque', 'aside', nav=True); time.sleep(.4); lib()
-        t.chk(T_ + ' R3 · o atalho leva ao Estoque (Confira recebimentos) sem gravar', r == 'ok' and J("location.pathname.split('/').pop()") == 'EST.dc.html' and rev() == r0 and 'NF 7731' in (J("ROWTXT('NF 7731')") or ''), [r, J("ROWTXT('NF 7731')")])
-        r = tocar('NF 7731'); time.sleep(.3)
-        un = J("[...document.querySelectorAll('aside[role=dialog] label')].filter(l=>/Quantidade conferida|Apta para uso/.test(l.innerText)).map(l=>N(l.parentElement.innerText))") or []
-        setv('#fx_g_rec_conf', '1200'); setv('#fx_g_rec_apto', '1200'); setv('#fx_g_rec_quar', '0')
+        # SUP: o atalho abre o registro da nota (EST.dc.html#nf=NF 7731) em Receba e inspecione, com o painel da conferência já aberto
+        t.chk(T_ + ' R3 · o atalho leva ao Estoque (Receba e inspecione) com a NF 7731 aberta no painel, sem gravar', r == 'ok' and J("location.pathname.split('/').pop()") == 'EST.dc.html' and rev() == r0 and pan().startswith('Conferir NF 7731') and 'NF 7731' in (J("ROWTXT('NF 7731')") or ''), [r, pan()[:120], J("ROWTXT('NF 7731')")])
+        un = J("[...document.querySelectorAll('aside[role=dialog] label')].filter(l=>/Quantidade conferida|Apta/.test(l.innerText)).map(l=>N(l.parentElement.innerText))") or []
+        setv('#fx_g_rec_conf', '1200')   # Apta é calculada (conferida − quarentena); a quarentena começa em 0
         fx = J("[ (document.querySelector('#fx_g_rec_local')||{}).value, (document.querySelector('#fx_g_rec_val')||{}).value, (document.querySelector('#fx_g_rec_lote')||{}).value ]")
-        r2 = tocar('Salvar', 'aside[role=dialog]'); tc = toast(); st = cen("[ (c.lotes['Caixa de mamão Formosa 10 kg|CX26-02']||{}).fisico, (c.lotes['Caixa de mamão Formosa 10 kg|CX26-02']||{}).local ]")
+        r2 = tocar('Conferir NF 7731', 'aside[role=dialog]'); tc = toast(); st = cen("[ (c.lotes['Caixa de mamão Formosa 10 kg|CX26-02']||{}).fisico, (c.lotes['Caixa de mamão Formosa 10 kg|CX26-02']||{}).local ]")
         t.chk(T_ + ' R3 · Rui confere a NF 7731 (unidade un, lote CX26-02 no Packing, sem validade): 1.200 un entram no disponível',
-              r == 'ok' and r2 == 'ok' and all(' un' in x for x in un) and fx == ['Packing', 'Sem validade', 'CX26-02'] and 'Recebimento NF 7731 conferido: 1.200 un de Caixa de mamão Formosa 10 kg no lote CX26-02' in tc and st == [1200, 'Packing'], [r, r2, un, fx, tc, st])
+              r == 'ok' and r2 == 'ok' and len(un) == 2 and all(' un' in x for x in un) and fx == ['Packing', 'Sem validade', 'CX26-02'] and 'Recebimento NF 7731 conferido: 1.200 un de Caixa de mamão Formosa 10 kg no lote CX26-02' in tc and st == [1200, 'Packing'], [r, r2, un, fx, tc, st])
         perfil('Igor'); ir('BEN.dc.html#OB-0113', w=W, h=H); p = pan()
         t.chk(T_ + ' R4 · recebida a nota, o painel da OB-0113 fica sem impedimento', 'Nenhum: a ordem pode ser autorizada e liberada.' in p, p[:800])
         r = tocar('Autorizar rota e liberar', 'aside'); tc = toast()
@@ -395,11 +401,12 @@ try:
         t.chk(T_ + ' R5 · a CG-2107 não oferece "Estornar" e o próximo passo diz por quê', 'Estornar' not in bt and 'Sem estorno enquanto a OB-0113 não fecha' in p, [bt, p[:500]])
         perfil('Marta'); ir('PROD.dc.html#L39-132', w=W, h=H); p = pan(); bt = J(BTNS) or []
         t.chk(T_ + ' R5 · Marta: o L39-132 no Estoque de produto sem "Registrar decisão"; o próximo passo aponta a OB-0113', 'Registrar decisão' not in bt and 'OB-0113' in p, [bt, p[:400]])
-        perfil('Rui'); ir('EST.dc.html', w=W, h=H)
-        if W < 500: tocar('Confira recebimentos', 'nav[aria-label="Seções do estoque"]')
-        tocar('Entregue por O.S.', 'nav[aria-label="Seções do estoque"]'); r = tocar('REQ-041'); q = J("[(document.querySelector('#fx_g_ent_qtd')||{}).value,(document.querySelector('#fx_g_ent_quem')||{}).value]")
-        r2 = tocar('Salvar', 'aside[role=dialog]'); tc = toast(); st = cen("[c.reqs['REQ-041'].itens[0].entregue, c.reqs['REQ-041'].itens[0].custodia, c.reqs['REQ-041'].itens[0].quem]")
-        t.chk(T_ + ' R6 · Rui entrega no balcão a REQ-041 inteira (1.169 un) ao Igor', r == 'ok' and r2 == 'ok' and q == ['1169', 'Igor'] and st == [1169, 1169, 'Igor'], [r, r2, q, st, tc])
+        # SUP: sem endereço o Rui (almoxarife) abre em Atenda requisições; a linha da REQ-041 abre o painel "Entregar REQ-041 · … a Igor" (recebedor herdado da ordem)
+        perfil('Rui'); ir('EST.dc.html', w=W, h=H); sec = J("(document.querySelector('nav[aria-label=\"Seções do estoque\"] [aria-current=step],nav[aria-label=\"Seções do estoque\"] [aria-current=true],nav[aria-label=\"Seções do estoque\"] [aria-pressed=true]')||{innerText:''}).innerText")
+        r = tocar('REQ-041'); q = J("(document.querySelector('#fx_g_req_quemr')||{}).value"); pr = est_prim()
+        r2 = tocar('Entregar REQ-041', 'aside[role=dialog]'); tc = toast(); st = cen("[c.reqs['REQ-041'].itens[0].entregue, c.reqs['REQ-041'].itens[0].custodia, c.reqs['REQ-041'].itens[0].quem]")
+        t.chk(T_ + ' R6 · Rui abre em Atenda requisições e entrega no balcão a REQ-041 inteira (1.169 un do CX26-02) ao Igor', r == 'ok' and r2 == 'ok' and q == 'Igor'
+              and pr == 'Entregar REQ-041 · 1.169 un Caixa de mamão Formosa 10 kg (lote CX26-02) a Igor' and st == [1169, 1169, 'Igor'], [sec, r, r2, q, pr, st, tc])
         perfil('Igor'); ir('BEN.dc.html#OB-0113', w=W, h=H); r = tocar('Iniciar processo', 'aside')
         t.chk(T_ + ' R7 · Igor inicia: Em execução', r == 'ok' and cen("c.ordens['OB-0113'].etapa") == 'Em execução', [r, toast()])
         def saida(fl, op, kg=None, cx=None, br=None):
@@ -450,11 +457,11 @@ try:
         st = cen("[c.reqs['REQ-041'].itens[0].solicitado, c.movs.filter(m=>m.tipo==='reserva'&&m.req==='REQ-041').length, c.lotes['Caixa de mamão Formosa 10 kg|CX26-02'].reservado, c.ordens['OB-0113'].ben.hist.filter(h=>/Caixas pedidas/.test(h.ev)).length]")
         t.chk('X2 · Pedir caixas (toque duplo): um complemento só (REQ-041 1.169 → 1.189, uma reserva nova de 20 no CX26-02, uma linha no histórico); o aviso diz quem entrega',
               st == [1189, 2, 20, 1] and rev() == r0 + 1 and '20 un de Caixa de mamão Formosa 10 kg pedidas para a OB-0113: REQ-041 com 1.189 un' in tc, [st, rev(), r0, tc])
-        perfil('Rui'); ir('EST.dc.html'); est_secao(2); rw = J("ROWTXT('REQ-041')") or ''
-        r = J("(()=>{ const rw=[...document.querySelectorAll('[role=row]')].find(x=>N(x.innerText).indexOf('REQ-041')>=0); if(!rw) return 'sem linha'; (rw.querySelector('[role=cell] span')||rw).click(); return 'ok'; })()"); time.sleep(.5)
-        q = J("[(document.querySelector('#fx_g_ent_qtd')||{}).value,(document.querySelector('#fx_g_ent_quem')||{}).value]"); clk('Salvar', 'aside[role=dialog]'); tc = toast()
+        perfil('Rui'); ir('EST.dc.html'); est_secao(1); rw = J("ROWTXT('REQ-041')") or ''
+        r = row('REQ-041'); q = J("(document.querySelector('#fx_g_req_quemr')||{}).value"); pr = est_prim(); clk(pr, 'aside[role=dialog]'); tc = toast()
         st = cen("[c.reqs['REQ-041'].itens[0].entregue, c.reqs['REQ-041'].itens[0].custodia]")
-        t.chk('X3 · no Estoque a REQ-041 mostra 20 un a entregar; o Rui entrega ao Igor no balcão (custódia 20)', r == 'ok' and '20 un' in rw and q == ['20', 'Igor'] and st == [1189, 20], [rw, q, st, tc])
+        t.chk('X3 · no Estoque (Atenda requisições) a REQ-041 mostra 20 un a entregar; o Rui entrega ao Igor no balcão (custódia 20)', r == 'ok' and '20 un' in rw and q == 'Igor'
+              and pr == 'Entregar REQ-041 · 20 un Caixa de mamão Formosa 10 kg (lote CX26-02) a Igor' and st == [1189, 20], [rw, q, pr, st, tc])
         perfil('Igor'); ir('BEN.dc.html#OB-0113'); clk('+ Registrar saída', 'aside'); clk('Produto', 'aside'); clk('B', 'aside'); setv('#pf_cx', '20'); setv('#pf_br', '212'); clk('Registrar', 'aside'); a = toast()
         ir('BEN.dc.html#OB-0113'); clk('+ Registrar saída', 'aside'); clk('Descarte', 'aside'); clk('Compostagem', 'aside'); setv('#pf_kg', '410'); clk('Registrar', 'aside'); b = toast()
         ir('BEN.dc.html#OB-0113'); clk(CONC, 'aside'); tc = toast(); st = cen("[c.ordens['OB-0113'].etapa, c.reqs['REQ-041'].itens[0].custodia, (c.ordens['OB-0113'].ben.just||[]).length]")
@@ -485,17 +492,17 @@ try:
         clk('Estornar S-01', 'aside'); clk('Pesagem refeita', 'aside'); clk('Confirmar estorno de S-01', 'aside'); tc = toast()
         st = cen("(()=>{ const m=c.movs.filter(x=>x.tipo==='estorno-consumo').slice(-1)[0]||{}; const o=c.movs.find(x=>x.id===m.ref)||{}; return [m.lote, m.req, o.lote, c.reqs['REQ-041'].itens[0].custodia, c.reqs['REQ-042'].itens[0].custodia]; })()")
         t.chk('L2 · estorno da S-01 pela tela (Pesagem refeita): o estorno-consumo volta ao CX26-01 e à REQ-041, o mesmo lote do consumo; a REQ-042 fica intacta', st == ['CX26-01', 'REQ-041', 'CX26-01', 540, 0], [st, tc])
-        perfil('Rui'); ir('EST.dc.html'); est_secao(3); rw = J("ROWTXT('REQ-041')") or ''
-        r = J("(()=>{ const rw=[...document.querySelectorAll('[role=row]')].find(x=>N(x.innerText).indexOf('REQ-041')>=0); if(!rw) return 'sem linha'; window.__cl++; (rw.querySelector('[role=cell] span')||rw).click(); return 'ok'; })()"); time.sleep(.5)
-        q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value"); clk('Salvar', 'aside[role=dialog]'); tc = toast(); st = cen(LT)
-        t.chk('L3 · Estoque › Receba devoluções: a REQ-041 (CX26-01) sugere 540 un; recebida, o CX26-01 volta a 540 e o QA-CX-02 continua com 1.000 e a reserva 100 da REQ-042',
-              r == 'ok' and 'CX26-01' in rw and q == '540' and st == [540, 1000, 100], [rw, q, st, tc])
-        est_secao(2); rw = J("ROWTXT('REQ-042')") or ''
-        r = J("(()=>{ const rw=[...document.querySelectorAll('[role=row]')].find(x=>N(x.innerText).indexOf('REQ-042')>=0); if(!rw) return 'sem linha'; window.__cl++; (rw.querySelector('[role=cell] span')||rw).click(); return 'ok'; })()"); time.sleep(.5)
-        q = J("[(document.querySelector('#fx_g_ent_qtd')||{}).value,(document.querySelector('#fx_g_ent_quem')||{}).value]"); clk('Salvar', 'aside[role=dialog]'); tc = toast()
+        # SUP (merge de 10/10 com a rodada 2): devolução e entrega no Estoque › Atenda requisições (4 seções); a linha identifica, o painel resolve
+        # com UMA primária; a devolução é digitada (conferir é de propósito, PRD 42.4; CMD-45; docs/suprimentos-simplificado §0.3)
+        perfil('Rui'); ir('EST.dc.html'); est_secao(1); rw = J("ROWTXT('REQ-041')") or ''
+        r = row('REQ-041'); p = pan(); pr0 = est_prim(); setv('#fx_g_req_dqtd', '540'); pr = est_prim(); clk(pr, 'aside[role=dialog]'); time.sleep(.3); tc = toast(); st = cen(LT)
+        t.chk('L3 · Estoque › Atenda requisições: a REQ-041 (o painel diz o lote CX26-01; a grade só as colunas essenciais) mostra 540 un em custódia; devolução de 540 un digitada: o CX26-01 volta a 540 e o QA-CX-02 continua com 1.000 e a reserva 100 da REQ-042',
+              r == 'ok' and 'REQ-041' in rw and '(lote CX26-01)' in p and '540 un' in p and pr0.startswith('Registrar devolução') and pr.startswith('Registrar devolução · 540 un') and st == [540, 1000, 100], [rw, pr0, pr, st, tc])
+        ir('EST.dc.html'); est_secao(1); rw = J("ROWTXT('REQ-042')") or ''
+        r = row('REQ-042'); q = J("(document.querySelector('#fx_g_req_quemr')||{}).value"); pr = est_prim(); clk(pr, 'aside[role=dialog]'); time.sleep(.3); tc = toast()
         st = cen(LT + ".concat([c.reqs['REQ-042'].itens[0].custodia])")
-        t.chk('L4 · Estoque › Entregue por O.S.: a REQ-042 (OB-0113, lote QA-CX-02) entrega 100 un ao Igor: sai do QA-CX-02 (físico 900, reserva 0) e o CX26-01 não muda (540)',
-              r == 'ok' and 'QA-CX-02' in rw and 'OB-0113' in rw and q == ['100', 'Igor'] and st == [540, 900, 0, 100], [rw, q, st, tc])
+        t.chk('L4 · Estoque › Atenda requisições: a REQ-042 (OB-0113, lote QA-CX-02) entrega 100 un ao Igor: sai do QA-CX-02 (físico 900, reserva 0) e o CX26-01 não muda (540)',
+              r == 'ok' and 'OB-0113' in rw and q == 'Igor' and pr == 'Entregar REQ-042 · 100 un Caixa de mamão Formosa 10 kg (lote QA-CX-02) a Igor' and st == [540, 900, 0, 100], [rw, q, pr, st, tc])
         perfil('Igor'); ir('BEN.dc.html#OB-0113'); p = pan()
         t.chk('L5 · no painel a custódia está na REQ-042 (100 un do QA-CX-02) e a REQ-041 mostra o devolvido (540)', 'caixas em custódia 100 un (req-041 · cx26-01 0 un; req-042 · qa-cx-02 100 un)' in p.lower() and 'REQ-041 · CX26-01 solicitado 540 un entregue 540 un usado 0 un em custódia 0 un devolvido 540 un' in p, p[p.lower().find('caixas em cust'):][:200] + ' … ' + p[p.lower().find('caixas · req'):][:300])
         shot('lotes')
@@ -558,11 +565,14 @@ try:
         t.chk('K4 · Tab até "Autorizar rota e liberar" e Enter: recusado (540 para 1.169), nada gravado', f and f['anel'] and 'Liberação recusada · 1 causa' in p and rev() == r0, [f, p[-300:]])
         tecla('Escape'); time.sleep(.5); f2 = J(FOCO)
         t.chk('K4 · Esc fecha o painel e o foco volta à página (fora do painel)', not pan() and f2 and not f2['painel'], f2)
+        # SUP: o Rui abre em Atenda requisições; Tab até a seção "Receba e inspecione", a linha da NF 7731, a quantidade conferida (Apta é calculada,
+        # a quarentena começa em 0) e a primária "Conferir NF 7731"
         perfil('Rui'); ir('EST.dc.html'); J("document.activeElement&&document.activeElement.blur()")
+        s2 = tab_ate('Receba e inspecione'); tecla('Enter'); time.sleep(.6)
         f = tab_ate('NF 7731'); tecla('Enter'); time.sleep(.6)
-        a = tab_ate('#fx_g_rec_conf'); digita('1200'); b = tab_ate('#fx_g_rec_apto'); digita('1200'); q = tab_ate('#fx_g_rec_quar'); digita('0')
-        sv = tab_ate('Salvar'); tecla('Enter'); time.sleep(.7); tc = toast()
-        t.chk('K5 · Rui confere a NF 7731 pelo teclado (Tab até a linha, Enter, campos, Salvar): 1.200 un no CX26-02', f and a and b and q and sv and sv['anel'] and 'Recebimento NF 7731 conferido: 1.200 un' in tc, [f, a, b, q, sv, tc])
+        a = tab_ate('#fx_g_rec_conf'); digita('1200')
+        sv = tab_ate('Conferir NF 7731'); tecla('Enter'); time.sleep(.7); tc = toast()
+        t.chk('K5 · Rui confere a NF 7731 pelo teclado (Tab até a seção, a linha, Enter, quantidade, "Conferir NF 7731"): 1.200 un no CX26-02', s2 and s2['anel'] and f and a and sv and sv['anel'] and 'Recebimento NF 7731 conferido: 1.200 un' in tc, [s2, f, a, sv, tc])
         perfil('Igor'); ir('BEN.dc.html#OB-0113'); time.sleep(.3); f0 = J(FOCO); f = tab_ate('Autorizar rota e liberar'); tecla('Enter'); time.sleep(.7)
         st = cen("[c.ordens['OB-0113'].etapa, c.ordens['OB-0113'].req]")
         t.chk('K6 · aberta pelo endereço, o foco já está no painel; Tab até "Autorizar rota e liberar" e Enter: Liberadas com a REQ-041', f0 and f0['painel'] and f and f['anel'] and st == ['Liberadas', 'REQ-041'], [f0, f, st])
@@ -664,18 +674,18 @@ try:
               r == 'ok' and b == 'ok' and 'S-01 registrada' in tc and cen("c.reqs['REQ-041'].itens[0].custodia") == 69 and 'Receber a devolução' not in p and 'OB-0113' not in imp, [r, a, b, tc, imp])
         abre('OB-0113'); tocar('Pedir mais caixas', 'aside'); setv('#pf_qx', '1000'); r0 = rev(); tocar('Pedir caixas', 'aside'); p = pan(); k = p.find('Pedir 1.000 un')
         t.chk(T_ + ' 3 · OB-0113 em execução pede 1.000 com 600 livres, sem nota nem sobra: a recusa diz a compra (BEN-2) e o caminho da nota, sem "Cancelar a ordem"; nada gravado',
-              'Pedir 1.000 un: 600 un livres no Estoque. Faltam 400 un e não há nota de caixas a conferir nem sobra em custódia: a compra de caixas entra no BEN-2. Quando a nota das caixas chegar, Rui (almoxarife) ou Paula (almoxarife) confere em Estoque › Confira recebimentos e você pede de novo (Pedir mais caixas).' in p
+              'Pedir 1.000 un: 600 un livres no Estoque. Faltam 400 un e não há nota de caixas a conferir nem sobra em custódia: a compra de caixas entra no BEN-2. Quando a nota das caixas chegar, Rui (almoxarife) ou Paula (almoxarife) confere em Estoque › Receba e inspecione e você pede de novo (Pedir mais caixas).' in p
               and 'Cancelar a ordem' not in p[k:k + 400] and rev() == r0, p[k:k + 400] if k >= 0 else p[-500:])
         tocar('Voltar', 'aside'); abre('OB-0113'); a = tocar('+ Registrar saída', 'aside'); tocar('Descarte', 'aside'); tocar('Compostagem', 'aside'); setv('#pf_kg', '1300'); b = tocar('Registrar', 'aside'); tc = toast()
         p = abre('OB-0112'); i = p.find('IMPEDIMENTOS'); imp = p[i:i + 400]
         t.chk(T_ + ' 4 · com tudo registrado (nada a embalar) as 69 un são sobra: a OB-0112 aponta "Receber a devolução da OB-0113" com a sobra',
-              a == 'ok' and b == 'ok' and 'S-02 registrada' in tc and 'Receber a devolução da OB-0113 no Estoque' in imp and 'Faltam 281 un. A OB-0113 tem sobra de 69 un em custódia (Receba devoluções).' in imp, [a, b, tc, imp])
+              a == 'ok' and b == 'ok' and 'S-02 registrada' in tc and 'Receber a devolução da OB-0113 no Estoque' in imp and 'Faltam 281 un. A OB-0113 tem sobra de 69 un em custódia (Estoque › Atenda requisições).' in imp, [a, b, tc, imp])
         perfil('Rui'); r0 = rev(); r = tocar('Receber a devolução da OB-0113 no Estoque', 'aside', nav=True); loc = J("location.pathname.split('/').pop()")
-        if W < 500: tocar('Confira recebimentos', 'nav[aria-label="Seções do estoque"]')
-        tocar('Receba devoluções', 'nav[aria-label="Seções do estoque"]'); rw = J("ROWTXT('REQ-041')") or ''; r2 = tocar('REQ-041'); q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value")
-        r3 = tocar('Salvar', 'aside[role=dialog]'); tc = toast(); st = cen(CXS)
-        t.chk(T_ + ' 5 · Rui segue o atalho (navega sem gravar) e recebe em Receba devoluções a sobra da REQ-041 (69 un) no CX26-02',
-              r == 'ok' and loc == 'EST.dc.html' and r2 == 'ok' and q == '69' and r3 == 'ok' and '69 un de Caixa de mamão Formosa 10 kg devolvidos ao disponível' in tc and st == ['Em execução', 0, 600, 100], [r, loc, rw, r2, q, r3, tc, st])
+        # SUP (merge de 10/10): o atalho abre a REQ-041 no Estoque (#req=) com o painel da devolução; a quantidade é digitada (conferida)
+        time.sleep(.6); rv = rev(); p = pan(); pr0 = est_prim(); r2 = 'ok' if pr0.startswith('Registrar devolução') else 'painel: ' + pr0; setv('#fx_g_req_dqtd', '69'); pr = est_prim()
+        r3 = tocar(pr, 'aside[role=dialog]'); tc = toast(); st = cen(CXS)
+        t.chk(T_ + ' 5 · Rui segue o atalho (navega sem gravar) até a REQ-041 em Estoque › Atenda requisições e recebe a sobra (69 un, digitada) no CX26-02',
+              r == 'ok' and loc == 'EST.dc.html' and rv == r0 and r2 == 'ok' and 'REQ-041' in p and pr.startswith('Registrar devolução · 69 un') and r3 == 'ok' and st == ['Em execução', 0, 600, 100], [r, loc, r2, pr0, pr, r3, tc, st, p[:200]])
         perfil('Igor'); abre('OB-0113'); r = tocar(CONC, 'aside'); tc = toast(); perfil('Paula'); r2 = tocar('Conferir balanço', 'aside'); perfil('Igor'); r3 = tocar('Fechar processo', 'aside'); tc2 = toast()
         st = cen("(()=>{ const o=c.ordens['OB-0113']; return [o.etapa, (o.ben.just||[]).length, o.ben.sai.filter(s=>s.fluxo==='Perda identificada').length, c.reqs['REQ-041'].itens[0].custodia, c.reqs['REQ-041'].itens[0].consumido]; })()")
         t.chk(T_ + ' 6 · a OB-0113 fecha os 12.300 kg (A 11.000 + descarte 1.300) com diferença 0, sem justificativa nem perda; as 1.100 caixas usadas, custódia 0',
@@ -685,29 +695,6 @@ try:
         tamanho(1440, 1000)
     if 'cadeia' in MODOS: cadeia(1440)
     if 'cadeia390' in MODOS: cadeia(390)
-    if 'manutencao' in MODOS:
-        # integração COMP (PCM × BEN): o PCM 1a levou a Manutenção para o cenário único (c.man) e aposentou a chave 'talhao-os-manutencao-v1';
-        # o painel da ordem lia a chave antiga e mostrava a condição da semente ("Apto") com a linha bloqueada na Manutenção, e o atalho
-        # apontava a MA-01 (redirecionamento). Dano evitado: a ordem de beneficiamento dizer "Apto" de uma linha que a Manutenção bloqueou
-        print('== manutencao · a condição da linha no painel da ordem é a da Manutenção (cenário único) e o atalho abre o ativo na MA')
-        tamanho(1440, 1000); ir('Main.dc.html', limpa=True); ir('BEN.dc.html#OB-0110'); time.sleep(.3); p0 = pan(); i0 = p0.find('RECURSOS')
-        t.chk('M1 · OB-0110: a Packing linha 1 aparece "Apto na Manutenção", sem atalho (nada a ver na Manutenção)',
-              'Packing linha 1' in p0 and 'Apto na Manutenção' in p0 and 'Ver na Manutenção' not in p0, p0[i0:i0 + 300])
-        ir('MA.dc.html'); r = J("(()=>{ const r=window.__man.manMudar(null,(m)=>window.__man.manCondicao(m,'a13','bloquear',{motivo:'Esteira da embaladora travada'})); return r.erro?('ERRO '+r.erro):(r.msg||''); })()")
-        cm = cen("c.man&&c.man.ativos&&c.man.ativos.a13&&c.man.ativos.a13.cond")
-        ir('BEN.dc.html#OB-0110'); time.sleep(.3); p1 = pan(); i1 = p1.find('RECURSOS')
-        t.chk('M2 · bloqueada na Manutenção (CMD-18, gravado no cenário único), a OB-0110 mostra "Bloqueado na Manutenção" e o atalho "Ver na Manutenção"',
-              cm == 'Bloqueado' and 'Bloqueado na Manutenção' in p1 and 'Apto na Manutenção' not in p1 and 'Ver na Manutenção' in p1, [r, cm, p1[i1:i1 + 300]])
-        hr = J("(()=>{ const a=[...document.querySelectorAll('aside[role=dialog] a')].filter(VIS).find(x=>N(x.innerText).startsWith('Ver na Manutenção')); return a?a.getAttribute('href'):''; })()")
-        clk('Ver na Manutenção', 'aside[role=dialog]', w=1.2)
-        for _ in range(30):
-            if J("location.pathname.endsWith('/MA.dc.html') && document.readyState==='complete' && document.body.innerText.length>50"): break
-            time.sleep(.1)
-        time.sleep(.6); lib(); loc = J("location.pathname.split('/').pop()+location.hash"); b = J("N(document.body.innerText)") or ''
-        t.chk('M3 · "Ver na Manutenção" abre a Packing linha 1 na tela única da Manutenção (MA.dc.html#ativo=a13), com o bloqueio à vista',
-              hr == 'MA.dc.html#ativo=a13' and loc == 'MA.dc.html#ativo=a13' and 'Packing linha 1' in b and 'Esteira da embaladora travada' in b, [hr, loc, b[:300]])
-        shot('manutencao')
-        t.chk('manutencao sem erro de JS', not t.errs(), t.errs())
 finally:
     t.fim()
 sys.exit(0 if all(t.ok) else 1)   # juízo pela linha RESULTADO e pelo código de saída

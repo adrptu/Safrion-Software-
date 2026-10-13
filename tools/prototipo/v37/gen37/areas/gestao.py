@@ -148,7 +148,7 @@ def _ge01():
            o=[(f'{OS_ORC} · 120 ha·op × 2,2 L/ha × R$ 22/L = R$ 5.808 contra R$ 4.000 da base V1','GE-02det.dc.html'),('Apontamentos da O.S.','CA-02.dc.html')]),
          R('d2',p=dict(desvio=[b('Plantio parado por ativo bloqueado')],onde=[t_('Soja · T4'),br(),mut('OS-0420 · 30 de 100 ha')],
              efeito=[ch('70 ha de saldo com janela em risco','yellow')],orig=[Pt.tag('OM-0233 · Trator T1')],prox=[cta('Criar ação','GE-07.dc.html')]),
-           o=[('OM-0233 · Trator T1 bloqueado · substituto a partir de 24/09','MA.dc.html#om=OM-0233'),('OS-0420 · saldo de 70 ha pausado','CA-01.dc.html')]),
+           o=[('OM-0233 · Trator T1 bloqueado · substituto a partir de 24/09','MA-04det.dc.html'),('OS-0420 · saldo de 70 ha pausado','CA-01.dc.html')]),
          R('d3',p=dict(desvio=[b('Lote de café bloqueado para venda')],onde=[t_('Armazém Sede'),br(),mut(D.LOTE_BLOQ['id'])],
              efeito=[ch(f'{nf(D.LOTE_BLOQ["sc"])} sc retidas até a inspeção','red')],orig=[Pt.tag('INSP-88')],prox=[cta('Abrir lote','CO-06det.dc.html')]),
            o=[(f'{D.LOTE_BLOQ["id"]} · {D.LOTE_BLOQ["inspecao"]}','CO-06det.dc.html'),('CT-198 e PV-028 dependem do lote','VE-05.dc.html')])],
@@ -275,8 +275,8 @@ def _ge03():
      ('req36','REQ-036 · OS-0420','SU-07.dc.html','Semente · soja 58 W','Soja · T4 · OS-0420 (30 ha)',f'{nf(r36["consumido"])} kg × R$ 9,50',r36['consumido']*9.5,'direto','Definitivo','green',True),
      ('req37','REQ-037 · OS-0420','SU-07.dc.html','Fertilizante · KCl 60%','Soja · T4 · OS-0420 (30 ha)','3.600 kg × R$ 2,40',3600*2.4,'direto','Definitivo','green',True),
      ('ap20','Apontamento · OS-0420','CA-02.dc.html','Máquina e equipe · plantio','Soja · T4 · OS-0420 (30 ha)','6,0 h × R$ 396,00',round(6*396),'por horímetro','Provisório · 12 ha a conferir','yellow',False),
-     ('die20','Abastecimento · Trator T1','MA.dc.html#vis=ativos&modo=abastecimentos','Diesel S10','Soja · T4 · OS-0420','84 L × R$ 5,92',round(84*5.92,2),'direto','Provisório · conciliar tanque','yellow',False),
-     ('om233','OM-0233','MA.dc.html#om=OM-0233','Manutenção corretiva','Máquinas · Trator T1','peças + 6,5 h',18400,'por ativo','Provisório · aguarda NF','yellow',False),
+     ('die20','Abastecimento · Trator T1','MA-05.dc.html','Diesel S10','Soja · T4 · OS-0420','84 L × R$ 5,92',round(84*5.92,2),'direto','Provisório · conciliar tanque','yellow',False),
+     ('om233','OM-0233','MA-04det.dc.html','Manutenção corretiva','Máquinas · Trator T1','peças + 6,5 h',18400,'por ativo','Provisório · aguarda NF','yellow',False),
      ('frete','Romaneio de frete','LO-04.dc.html','Frete de insumos','comum · 3 entregas','12,4 t × R$ 118,00',round(12.4*118),'Sem versão de rateio','Bloqueia fechamento','red',False),
      ('folha','Folha 09/26',None,'Mão de obra operacional','rateio por apontamento','—',None,'por h apontada','Definitivo','green',True),
     ]
@@ -345,7 +345,7 @@ def _ge04():
         [cta('Abrir pedido','SU-05.dc.html')],o=[(f'Pedido {PC88["id"]} · {forn88} · {nf(PC88["qtd"]/1000)} t × R$ 2,33/kg = {rs(PC88_VAL)}','SU-05.dc.html'),
           (f'Título único de {rs(PC88_VAL)} · sem barter · 28 dias após a NF 4501 (19/09)',None)],prog='2026-10-17'),
       T('hid','Oficina HidroMec','NF 1203','OM-0233 · corretiva do Trator T1','2026-10-05','no prazo','05/10',18400,'0 / R$ 18.400','A propor|NF conferida','gray',
-        [jact('Propor pagamento','propor:hid')],o=[('OM-0233 · manutenção corretiva','MA.dc.html#om=OM-0233')]),
+        [jact('Propor pagamento','propor:hid')],o=[('OM-0233 · manutenção corretiva','MA-04det.dc.html')]),
       T('sem',forn90,f'{PC90["id"]} · NF 4533 a conferir',f'{PC90["item"]} · {nf(PC90["qtd"]/1000)} t × R$ 9,30/kg','2027-04-30','no prazo','safra · 30/04/27',PC90_VAL,f'previsão · {rs(PC90_VAL)}','Previsão|título nasce na conferência','gray',
         [cta('Abrir pedido','SU-05.dc.html')],ro=True,o=[(f'Pedido {PC90["id"]} · entrega prevista {PC90["previsao"]}','SU-05.dc.html')]),
       T('coo','Cooperativa Central','CT-77 · antecipação','venda VD-2101 · milho 111 t · abate nas retiradas','2026-10-30','no prazo','30/10',101800,'R$ 100.000 recebidos','Crédito vinculado|abate nas retiradas','green',
@@ -465,7 +465,7 @@ def _ge06():
     kr=[K('k1','Agronômico','Custo de pulverização','R$ ÷ ha tratado (apontado)','set/26','R$ 40,00/ha','R$ 48,40/ha ↑','red','apontamentos · 100%','consumo +10% · preço +10%','yellow',
           [cta('Detalhar','GE-06det.dc.html',True)],[(f'R$ 5.808 ÷ 120 ha·op ({OS_ORC})','GE-06det.dc.html'),('Responsável: Ana (gestora) · meta da base V1',None)]),
         K('k2','Programação','Ritmo de plantio','ha plantados ÷ dia útil','janela out/26','35 ha/dia','em risco ↓','yellow','programação · 100%','OS-0420 impedida · OM-0233','red',
-          [cta('Ver ações','GE-07.dc.html')],[('OS-0420 · 30 de 100 ha · saldo pausado','CA-01.dc.html'),('OM-0233 · Trator T1','MA.dc.html#om=OM-0233')]),
+          [cta('Ver ações','GE-07.dc.html')],[('OS-0420 · 30 de 100 ha · saldo pausado','CA-01.dc.html'),('OM-0233 · Trator T1','MA-04det.dc.html')]),
         K('k3','Campo','Aderência ao programado','O.S. no dia previsto ÷ total','últimos 30 d','≥ 90%','86% ↓','yellow','ordens de campo · 100%','reprogramações por chuva',None,
           [cta('Ver ordens','CA-01.dc.html')],[('Ordens de campo dos últimos 30 dias','CA-01.dc.html')]),
         K('k4','Beneficiamento','Perda no beneficiamento','descarte ÷ entrada (t)','set/26','≤ 4%',f'{nf(perda,0)}% ↑','yellow','packing · 100%','classificação classe B alta',None,
@@ -478,16 +478,16 @@ def _ge06():
     def A(rid,at,disp,dc,ut,mtbf,mttr,cus,href,o):
         return R(rid,v=dict(at=at,ut=ut,mtbf=mtbf,mttr=mttr,cus=cus),p=dict(at=[link(at,href)],disp=[ch(disp,dc)]),o=o)
     g_atv=grid([C('at','Ativo · classe',w=210),C('disp','Disponibilidade'),C('ut','Utilização',a='r'),C('mtbf','MTBF',a='r'),C('mttr','MTTR',a='r'),C('cus','Custo/h realizado',a='r')],
-        [A('t1','Trator T1 · JD 6M 155','62% · bloqueado','red','—','184 h','9,5 h','R$ 158/h','MA.dc.html#ativo=a01',[('OM-0233 · pressão hidráulica baixa · bloqueio CMD-18','MA.dc.html#om=OM-0233')]),
-         A('t2','Trator 02 · MF 7719','97%','green','81%','412 h','2,1 h','R$ 141/h','MA.dc.html#ativo=a02',[('Horímetro e paradas do mês','MA.dc.html#ativo=a02')]),
-         A('pv','Pulverizador PJ-3030','94%','green','76%','367 h','3,4 h','R$ 96/h','MA.dc.html#ativo=a05',[('Horímetro e paradas do mês','MA.dc.html#ativo=a05')]),
+        [A('t1','Trator T1 · JD 6M 155','62% · bloqueado','red','—','184 h','9,5 h','R$ 158/h','MA-01.dc.html',[('OM-0233 · pressão hidráulica baixa · bloqueio CMD-18','MA-04det.dc.html')]),
+         A('t2','Trator 02 · MF 7719','97%','green','81%','412 h','2,1 h','R$ 141/h','MA-01.dc.html',[('Horímetro e paradas do mês','MA-01.dc.html')]),
+         A('pv','Pulverizador PJ-3030','94%','green','76%','367 h','3,4 h','R$ 96/h','MA-01.dc.html',[('Horímetro e paradas do mês','MA-01.dc.html')]),
          A('p2','Pivô 2','99%','green',f'{D.PIVO["percent"]}% da volta','—','—','R$ 38/h','IR-01.dc.html',[('Telemetria do pivô','IR-01.dc.html')])],
         edit=dict(m='origin',title='Ativo',fields=[F('ut','Utilização',ro=True),F('mtbf','MTBF',ro=True),F('mttr','MTTR',ro=True),F('cus','Custo/h realizado',ro=True)]),search=False,gid='g_atv',total=False)
     corpo=(bloco('Painéis por processo','Confira meta, realizado e causa de cada indicador; clique num indicador para ver fórmula e origem.',g_ind)
         + bloco('Desempenho dos ativos','Compare disponibilidade, utilização e confiabilidade; clique num ativo para ver a origem dos números.',g_atv,tone='yellow')
         + bloco('Parâmetros','Proponha nova versão de parâmetro a partir do aprendizado, nunca edite o cadastro em silêncio.',
                 '<div style="display: flex; gap: 10px; flex-wrap: wrap;">'+ilink('Propor parâmetro agronômico','AG-05.dc.html','leaf','Abrir a biblioteca agronômica para propor nova versão')
-                +ilink('Propor regra ou alçada','CF-01.dc.html#alc=AL-01','users','Abrir as alçadas em Configurações › Usuários e alçadas')+'</div>',tone='gray'))
+                +ilink('Propor regra ou alçada','CF-02.dc.html','users','Abrir alçadas e regras para propor mudança')+'</div>',tone='gray'))
     shell37('GE-06','Indicadores operacionais',corpo,
       subtitle='Meta, tendência, composição e diferenças entre previsto e realizado — cada número com fórmula, fonte e denominador.',
       status=('4 indicadores fora da meta','yellow'),
@@ -542,7 +542,7 @@ def _ge07():
       A('AC-102','leitura suspeita sonda P1',ORIGENS[1],'sensores · salto de 18 p.p.','sensor descalibrado','inspecionar e recalibrar; excluir do balanço até lá','Equipe irrigação','2026-09-26','Em curso',
         [Pt.act('Verificar resultado','Ainda sem resultado: a recalibração da sonda P1 está prevista para 26/09 · o caso segue em curso e a sonda fora do balanço.')],o=[('Balanço hídrico · sonda P1','IR-01.dc.html')]),
       A('AC-103','recorrência hidráulica T1',ORIGENS[2],'OM-0233','mangueira fora de especificação','trocar especificação da peça e revisar preventiva','PCP','2026-10-10','Aguardando peça',
-        [cta('Ver OM-0233','MA.dc.html#om=OM-0233')],o=[('OM-0233 · pressão hidráulica baixa','MA.dc.html#om=OM-0233')]),
+        [cta('Ver OM-0233','MA-04det.dc.html')],o=[('OM-0233 · pressão hidráulica baixa','MA-04det.dc.html')]),
       A('AC-097','perda no beneficiamento',ORIGENS[3],'descarte 5%','regulagem da classificadora','regulagem feita · medir por 2 semanas','Rui','2026-10-04','Em verificação',
         [Pt.act('Verificar resultado','Verificado · descarte caiu de 5% para 3,8% em 2 semanas — caso elegível a encerramento com evidência anexada.'),br(),jact('Encerrar com evidência','encerrar:AC-097')],o=[('Perda no beneficiamento · packing','CO-05.dc.html')]),
       A('AC-090','atraso de liberação de O.S.',ORIGENS[4],'aderência 86%','prontidão conferida tarde','checagem de prontidão na véspera','Marcos','2026-09-15','Encerrado',

@@ -50,3 +50,4 @@ try:
     a.abrir('MB-01'); a.clk('Restaurar demonstração')
 finally:
     a.fim()
+import sys; sys.exit(1 if a.FAIL else 0)   # SUP: falha sai com código ≠ 0

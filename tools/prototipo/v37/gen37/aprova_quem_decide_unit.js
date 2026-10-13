@@ -1,7 +1,7 @@
 // CTL-3 · Frente D (aprova quem decide, R-D0..R-D5; desenho CONTROLE-01-D corrigido) · node, sem navegador. Executor: aprova_quem_decide_test.py.
 // Cada caso parte do cenário inicial e grava pelo cenMudar (atômico: erro não grava nada), como a tela faz. NEGATIVO = a decisão é recusada.
 // Padrão (2) adotado em 05/10/2026 (o proprietário pode mudar): o gestor aprova ajuste e consumo acima da custódia; se quem decide registrou a
-// contagem, a decisão vale e fica "revisão posterior pendente" (PRD 2.1). Nenhum registro grava o nome de quem não agiu.
+// contagem, a decisão vale e fica "Decisão do gestor registrada · revisão independente pendente" (PRD 2.1; PEND-CTL-02). Nenhum registro grava o nome de quem não agiu.
 let nfail = 0;
 function ok(t, c, got) { if (c) console.log('OK    ' + t); else { nfail++; console.log('FALHA ' + t + (got === undefined ? '' : ' · ' + JSON.stringify(got).slice(0, 400))); } }
 const caso = (t, f) => { try { f(); } catch (e) { ok('ERRO no caso "' + t + '": ' + String(e.message || e), false); } };
@@ -18,13 +18,13 @@ caso('perfil', () => {
   __ls['safrion.perfilDemo'] = 'Xyz'; ok('perfil desconhecido volta a Ana', g2perfil().k === 'Ana');
   delete __ls['safrion.perfilDemo'];
   ok('quem aprova ajuste, quarentena e excedente: Ana (gestora)', g2quem('gestor') === 'Ana (gestora)', g2quem('gestor'));
-  ok('agrônomo: Ana (agrônoma), o mesmo rótulo das telas da O.S. (OS_AGRO)', g2quem('agronomo') === 'Ana (agrônoma)' && g2quem('agronomo') === OS_AGRO(), g2quem('agronomo'));
+  ok('agrônomo: Ana (agrônoma), o mesmo rótulo das telas da O.S. (OS_AGRO)', g2quem('agronomo') === 'Ana (agrônoma)' && g2quem('agronomo') === OS_AGRO, g2quem('agronomo'));
   ok('dispensa: os dois papéis (só Ana)', g2quem(['gestor', 'agronomo']) === 'Ana (gestora e agrônoma)' && !g2papel(CAIO, ['gestor', 'agronomo']) && g2papel(ANA, ['gestor', 'agronomo']), g2quem(['gestor', 'agronomo']));
   ok('almoxarifes: Rui ou Paula', g2quem('almoxarife') === 'Rui (almoxarife) ou Paula (almoxarife)', g2quem('almoxarife'));
   ok('mesma pessoa pelo nome (Ana × "Ana (gestora)")', g2mesma('Ana', 'Ana (gestora)') && !g2mesma('Ana', 'Paula (almoxarife)') && !g2mesma('', ''));
   ok('papel vem do cadastro: objeto forjado {k:"Caio", papeis:{gestor}} não vira gestor; chave "Ana" vale', !g2papel({ k: 'Caio', papeis: { gestor: 'gestora' } }, 'gestor') && g2papel('Ana', 'gestor') && !g2papel({ k: 'Xyz', papeis: { gestor: 'g' } }, 'gestor'));
   const self = { state: {}, setState(o) { Object.assign(this.state, o); } }; const v = {}; g2navvals(self, v, []);
-  ok('menu lateral: seletor com todos os perfis do cadastro (Otávio e João da manutenção; Igor e Marta do beneficiamento; Dora do Comercial), Ana marcada', v.perfil_k === 'Ana' && (v.perfil_opts || []).length === G2_PERFIS.length && ['Otávio', 'João', 'Igor', 'Marta', 'Dora'].every(k => (v.perfil_opts || []).some(o => o.v === k)), [v.perfil_k, (v.perfil_opts || []).map(o => o.v)]);
+  ok('menu lateral: seletor com todos os perfis do cadastro (Igor e Marta do beneficiamento entre eles), Ana marcada', v.perfil_k === 'Ana' && (v.perfil_opts || []).length === G2_PERFIS.length && ['Igor', 'Marta'].every(k => (v.perfil_opts || []).some(o => o.v === k)), [v.perfil_k, (v.perfil_opts || []).map(o => o.v)]);
   self.g2perfilFecha = { pa: null }; self.state.pa = { id: 'OS-0430', fn: 'liberar' };   // confirmação aberta pela Ana
   v.perfil_set({ target: { value: 'Caio' } });
   ok('trocar para Caio grava e avisa que não é segurança', __ls['safrion.perfilDemo'] === 'Caio' && g2perfil().k === 'Caio' && /Caio · PCP \(não é segurança de acesso\)/.test(self.state.g2toast || ''), self.state.g2toast);
@@ -55,8 +55,8 @@ caso('acúmulo', () => {
   ini(); contar(1185, 'Paula (almoxarife)', ANA);
   const r = cenMudar(null, c => estAprovar(c, 'INV-2611', ANA)); const c = G(); const aj = c.ajustes[0]; const m = c.movs.find(x => x.tipo === 'ajuste');
   ok('acúmulo: Ana registra 1.185 L (declarando Paula) e aprova: a decisão vale (físico 1.185 L)', c.lotes[KG].fisico === 1185 && aj.estado === 'Aprovado' && aj.reg === 'Ana (gestora)', [c.lotes[KG].fisico, aj.reg]);
-  ok('acúmulo grava a revisão posterior no ajuste e no movimento (declarar outro contador não esconde o acúmulo)', aj.rev === 'revisão posterior pendente (Ana registrou a contagem e decidiu)' && m && m.rev === aj.rev, aj.rev);
-  ok('acúmulo aparece na mensagem e na trilha', /Fica revisão posterior pendente \(Ana registrou a contagem e decidiu\)\.$/.test(r.msg || '') && m && / · revisão posterior pendente/.test(emovTxt(m)), r.msg || r.erro);
+  ok('acúmulo grava a revisão posterior no ajuste e no movimento (declarar outro contador não esconde o acúmulo)', aj.rev === 'Decisão do gestor registrada · revisão independente pendente (Ana registrou a contagem e decidiu)' && m && m.rev === aj.rev, aj.rev);
+  ok('acúmulo aparece na mensagem e na trilha', / Decisão do gestor registrada · revisão independente pendente \(Ana registrou a contagem e decidiu\)\.$/.test(r.msg || '') && m && / · Decisão do gestor registrada · revisão independente pendente/.test(emovTxt(m)), r.msg || r.erro);
 });
 caso('Rui registra, Ana aprova', () => {
   ini(); contar(1180, 'Paula (almoxarife)', RUI); cenMudar(null, c => estAprovar(c, 'INV-2611', ANA)); const aj = G().ajustes[0];
@@ -75,34 +75,35 @@ caso('INV-2609', () => {
   cenMudar(null, c => estAprovar(c, 'INV-2609', ANA)); const aj = G().ajustes[0];
   ok('INV-2609: Ana aprova −600 kg, MAP 90.000 → 89.400 kg; contador Rui; sem revisão', G().lotes[K].fisico === 89400 && aj.contador === 'Rui (almoxarife)' && aj.rev === '', [G().lotes[K].fisico, aj.contador, aj.rev]);
 });
-/* revisão CONF F6: a lista fixa E2.contadores saiu; o contador vem das pessoas ativas com o papel almoxarife (mesmo resultado no seed) */
-ok('contadores do seed: Paula e Rui (almoxarife), lidos de Configurações (est_fix1_test.py:56)', JSON.stringify(estContadores()) === JSON.stringify(['Paula (almoxarife)', 'Rui (almoxarife)']), estContadores());
+ok('contadores sem mudança (est_fix1_test.py:56)', JSON.stringify(E2.contadores) === JSON.stringify(['Paula (almoxarife)', 'Rui (almoxarife)']), E2.contadores);
 
-console.log('\n— R-D2 · quarentena (KCl 60% K26-11: 10.000 kg em quarentena, disponível 50.000 kg)');
+console.log('\n— R-D2 · quarentena (KCl 60% K26-11: parcela NF 4501 com 10.000 kg aguardando laudo, disponível 50.000 kg)');
+// Etapa SUP-2b (06/10): cenLiberarQuarentena (lote inteiro, sem resultado) saiu; entra cenLaudo por parcela, com nº e resultado. A regra fica: só a gestora decide e sem laudo nada sai.
 const KK = 'KCl 60%|K26-11';
 for (const [ator, nome] of [[RUI, 'Rui (almoxarife)'], [PAULA, 'Paula (almoxarife)'], [CAIO, 'Caio (PCP)'], [undefined, 'sem ator']]) caso('quarentena ' + nome, () => {
-  ini(); const r = cenMudar(null, c => cenLiberarQuarentena(c, KK, 'LAB-0917', ator));
-  ok('NEGATIVO ' + nome + ' não libera, mesmo com laudo; disponível segue 50.000 kg', r.erro === 'Liberar a quarentena do lote K26-11: decisão de Ana (gestora). Nada foi alterado.' && G().lotes[KK].quarentena === 10000 && disp(KK) === 50000, r.erro || r.msg);
+  ini(); const r = cenMudar(null, c => cenLaudo(c, KK, 'NF 4501', 'LAB-0917', 'Aprovado', ator));
+  ok('NEGATIVO ' + nome + ' não registra o laudo, mesmo com nº; disponível segue 50.000 kg', r.erro === 'Registrar o laudo da parcela NF 4501 do lote K26-11: decisão de Ana (gestora). Nada foi alterado.' && G().lotes[KK].quarentena === 10000 && disp(KK) === 50000, r.erro || r.msg);
 });
 for (const laudo of ['', '   ', undefined]) caso('laudo ' + JSON.stringify(laudo), () => {
-  ini(); const r = cenMudar(null, c => cenLiberarQuarentena(c, KK, laudo, ANA));
-  ok('NEGATIVO Ana sem laudo (' + JSON.stringify(laudo) + '): continua bloqueado', r.erro === 'Informe o nº do laudo ou relatório de inspeção do lote K26-11. Sem laudo o lote continua bloqueado.' && G().lotes[KK].quarentena === 10000, r.erro || r.msg);
+  ini(); const r = cenMudar(null, c => cenLaudo(c, KK, 'NF 4501', laudo, 'Aprovado', ANA));
+  ok('NEGATIVO Ana sem laudo (' + JSON.stringify(laudo) + '): continua bloqueado', r.erro === 'Informe o nº do laudo da parcela NF 4501 (lote K26-11). Sem laudo a parcela continua bloqueada.' && G().lotes[KK].quarentena === 10000, r.erro || r.msg);
 });
 caso('quarentena Ana', () => {
-  ini(); const r = cenMudar(null, c => cenLiberarQuarentena(c, KK, ' LAB-0917 ', ANA)); const m = G().movs[G().movs.length - 1];
-  ok('Ana com o laudo LAB-0917: quarentena 10.000 → 0; disponível 50.000 → 60.000 kg', G().lotes[KK].quarentena === 0 && disp(KK) === 60000, disp(KK));
-  ok('movimento grava laudo, quem e quantidade', m.tipo === 'inspecao' && m.doc === 'LAB-0917' && m.quem === 'Ana (gestora)' && !('rev' in m) && m.qtd === 10000, m);
-  ok('trilha com laudo e quem', emovTxt(m) === 'quarentena liberada com o laudo LAB-0917 por Ana (gestora): 10.000 kg passam a disponível', emovTxt(m));
-  ok('mensagem', r.msg === '10.000 kg do lote K26-11 liberados com o laudo LAB-0917 por Ana (gestora).', r.msg || r.erro);
-  const r2 = cenMudar(null, c => cenLiberarQuarentena(c, KK, 'LAB-0917', ANA));
-  ok('NEGATIVO repetir não soma de novo (60.000 kg)', r2.erro === 'Nada bloqueado neste lote.' && disp(KK) === 60000, r2.erro);
+  ini(); const r = cenMudar(null, c => cenLaudo(c, KK, 'NF 4501', ' LAB-0917 ', 'Aprovado', ANA)); const m = G().movs[G().movs.length - 1];
+  ok('Ana com o laudo LAB-0917 aprovado: quarentena 10.000 → 0; disponível 50.000 → 60.000 kg', G().lotes[KK].quarentena === 0 && disp(KK) === 60000, disp(KK));
+  ok('movimento grava laudo, parcela, quem e quantidade', m.tipo === 'inspecao' && m.doc === 'LAB-0917' && m.parcela === 'NF 4501' && m.quem === 'Ana (gestora)' && !('rev' in m) && m.qtd === 10000, m);
+  ok('trilha com laudo, parcela e quem', emovTxt(m) === 'quarentena liberada com o laudo LAB-0917 por Ana (gestora) (parcela NF 4501): 10.000 kg passam a disponível', emovTxt(m));
+  ok('mensagem', r.msg === '10.000 kg da parcela NF 4501 (lote K26-11) liberados com o laudo LAB-0917 por Ana (gestora).', r.msg || r.erro);
+  const r2 = cenMudar(null, c => cenLaudo(c, KK, 'NF 4501', 'LAB-0917', 'Aprovado', ANA));
+  ok('NEGATIVO repetir não soma de novo (60.000 kg)', r2.erro === 'Nenhuma parcela de NF 4501 aguardando laudo no lote K26-11.' && disp(KK) === 60000, r2.erro);
 });
 caso('devolução bloqueada', () => {
+  // Etapa SUP-2a (06/10): a semente reserva 15 L da REQ-035 no F26-02 (res0, 72.3 item 2): reservado 65 → 80 L, disponível 480 → 465 L
   ini(); const KF = 'Fungicida A|F26-02'; cenMudar(null, c => cenDevolver(c, 'REQ-035', 'Fungicida A', 10, false, RUI)); const l = G().lotes[KF];
-  ok('devolução bloqueada de 10 L (REQ-035): F26-02 físico 555, quarentena 10, disponível 480 L', l.fisico === 555 && l.quarentena === 10 && disp(KF) === 480, [l.fisico, l.quarentena, disp(KF)]);
-  const rn = cenMudar(null, c => cenLiberarQuarentena(c, KF, 'INSP-0042', RUI)); ok('NEGATIVO Rui, que recebeu a devolução, não libera (480 L)', !!rn.erro && disp(KF) === 480, rn.erro || rn.msg);
-  cenMudar(null, c => cenLiberarQuarentena(c, KF, 'INSP-0042', ANA)); const m = G().movs[G().movs.length - 1];
-  ok('Ana libera com INSP-0042: disponível 480 → 490 L', disp(KF) === 490 && !('rev' in m), [disp(KF), m.rev]);
+  ok('devolução bloqueada de 10 L (REQ-035): F26-02 físico 555, quarentena 10 (parcela REQ-035), disponível 465 L', l.fisico === 555 && l.quarentena === 10 && disp(KF) === 465 && cenQuar(l).some(p => p.doc === 'REQ-035' && p.qtd === 10), [l.fisico, l.quarentena, disp(KF)]);
+  const rn = cenMudar(null, c => cenLaudo(c, KF, 'REQ-035', 'INSP-0042', 'Aprovado', RUI)); ok('NEGATIVO Rui, que recebeu a devolução, não libera (465 L)', !!rn.erro && disp(KF) === 465, rn.erro || rn.msg);
+  cenMudar(null, c => cenLaudo(c, KF, 'REQ-035', 'INSP-0042', 'Aprovado', ANA)); const m = G().movs[G().movs.length - 1];
+  ok('Ana libera com INSP-0042: disponível 465 → 475 L', disp(KF) === 475 && !('rev' in m), [disp(KF), m.rev]);
 });
 
 console.log('\n— R-D3 · dispensa de saldo (OS-0421: 350 ha, realizado 190, saldo 160; limite 20 % = 70 ha)');
@@ -137,7 +138,8 @@ for (const [ator, nome] of [[RUI, 'Rui (almoxarife)'], [CAIO, 'Caio (PCP)'], [un
 });
 caso('excedente Ana', () => {
   const k = relato(85); const r = cenMudar(null, c => cenConciliar(c, k.id, true, undefined, ANA)); const c = G(); const ms = c.movs.slice(-2);
-  ok('Ana (gestora) aceita: F26-02 545 → 525 L; caso Aceito por Ana (gestora)', r.msg === 'CC-301 aceito: Fungicida A 85 L baixados na OS-0421 · 20 L regularizados do lote F26-02.' && c.lotes[KF].fisico === 525 && c.confs[0].por === 'Ana (gestora)', [r.msg || r.erro, c.lotes[KF].fisico, c.confs[0].por]);
+  // Etapa SUP-2a (06/10): a mensagem diz de onde saiu o excedente (a REQ-035 agora tem reserva própria no F26-02)
+  ok('Ana (gestora) aceita: F26-02 545 → 525 L; caso Aceito por Ana (gestora)', r.msg === 'CC-301 aceito: Fungicida A 85 L baixados na OS-0421 · 20 L regularizados do lote F26-02 (reserva da REQ-035).' && c.lotes[KF].fisico === 525 && c.confs[0].por === 'Ana (gestora)', [r.msg || r.erro, c.lotes[KF].fisico, c.confs[0].por]);
   ok('movimentos com quem decidiu', ms[0].quem === 'Ana (gestora) → Marcos · regularização CC-301' && ms[1].quem === 'Ana (gestora) · aceite CC-301', ms.map(m => m.quem));
 });
 caso('recusa e coberto', () => {
@@ -150,21 +152,18 @@ caso('recusa e coberto', () => {
 });
 
 console.log('\n— R-D4 · checklist da manutenção (OM-0234 Revisão 250 h, 5 tarefas)');
-ok('Manutenção (MA) sem a ação "Marcar pendentes como feitas" (pan_todas removido)', MA04_SRC_TODAS === '', MA04_SRC_TODAS.slice(0, 60));
-caso('checklist', () => {   // PCM simplificado (05/10, D-33/D-18): só o executante responde; horas de oficina obrigatórias; "Falta: …" com a tarefa
+ok('MA-04 sem a ação "Marcar pendentes como feitas" (pan_todas removido)', MA04_SRC_TODAS === '', MA04_SRC_TODAS.slice(0, 60));
+caso('checklist', () => {
   let c = manClone(MAN0); const id = 'OM-0234'; manLiberar(c, id, true); manIniciar(c, id); const o = c.oms[id];
-  manResp(c, id, 0, 'Feito', undefined, ZE); manResp(c, id, 1, 'Feito', undefined, ZE); manResp(c, id, 3, 'Feito', undefined, ZE);
-  let ea = ''; try { manResp(c, id, 2, 'Feito', undefined, ANA); } catch (x) { ea = x.message; }
-  ok('NEGATIVO Ana (gestora) não responde a tarefa do Zé (executante): recusado e nada gravado', /^Ação de Zé, executante/.test(ea) && !o.chk[2].r, ea);
-  manResp(c, id, 2, 'Feito', undefined, ZE);
-  ok('cada resposta grava quem (Zé (mecânico)) e a hora', o.chk[0].por === 'Zé (mecânico)' && /^\d\d:\d\d$/.test(o.chk[0].em || '') && o.chk[2].por === 'Zé (mecânico)', o.chk.map(t => t.por));
-  let e = ''; try { manConcluir(c, id, String(c.ativos[o.aid].leit.val + 8), '5', false, {}); } catch (x) { e = x.message; }
-  ok('NEGATIVO 4 de 5 respondidas: não conclui', e === 'Falta: responder “Lubrificar pontos de graxa”.' && o.etapa === 'Em execução', e);
-  manResp(c, id, 4, 'Não feito', undefined, ZE); e = ''; try { manConcluir(c, id, String(c.ativos[o.aid].leit.val + 8), '5', false, {}); } catch (x) { e = x.message; }
-  ok('NEGATIVO "Não feito" sem motivo: não conclui', e === 'Falta: motivo de “Lubrificar pontos de graxa”.', e);
+  manResp(c, id, 0, 'Feito', undefined, ZE); manResp(c, id, 1, 'Feito', undefined, ZE); manResp(c, id, 2, 'Feito', undefined, ANA); manResp(c, id, 3, 'Feito', undefined, ZE);
+  ok('cada resposta grava quem (Zé (mecânico); Ana (gestora)) e a hora', o.chk[0].por === 'Zé (mecânico)' && /^\d\d:\d\d$/.test(o.chk[0].em || '') && o.chk[2].por === 'Ana (gestora)', o.chk.map(t => t.por));
+  let e = ''; try { manConcluir(c, id, String(c.ativos[o.aid].leit.val + 8), '', false, {}); } catch (x) { e = x.message; }
+  ok('NEGATIVO 4 de 5 respondidas: não conclui', e === 'Responda o checklist: 1 tarefa sem resposta.' && o.etapa === 'Em execução', e);
+  manResp(c, id, 4, 'Não feito', undefined, ZE); e = ''; try { manConcluir(c, id, String(c.ativos[o.aid].leit.val + 8), '', false, {}); } catch (x) { e = x.message; }
+  ok('NEGATIVO "Não feito" sem motivo: não conclui', e === 'Informe o motivo de “Lubrificar pontos de graxa”.', e);
   manResp(c, id, 1, '', undefined, ZE); ok('desmarcar apaga quem e hora (resposta volta a pendente)', o.chk[1].r === '' && o.chk[1].por === '' && o.chk[1].em === '', o.chk[1]);
   manResp(c, id, 1, 'Feito', undefined, ZE); manResp(c, id, 4, 'Feito', undefined, ZE);
-  const r = manConcluir(c, id, String(c.ativos[o.aid].leit.val + 8), '5', false, {}); ok('respondidas as 5, uma a uma: conclui e vai Em conferência', o.etapa === 'Em conferência' && /^OM-0234 em conferência/.test(r.msg), r.msg);
+  const r = manConcluir(c, id, String(c.ativos[o.aid].leit.val + 8), '', false, {}); ok('respondidas as 5, uma a uma: conclui e vai Em conferência', o.etapa === 'Em conferência' && /^OM-0234 em conferência/.test(r.msg), r.msg);
 });
 
 console.log('\n— Revisão do CTL-3 (achados 2, 3, 4, 6 e 7)');
@@ -202,11 +201,11 @@ caso('entrega e devolução', () => {
 });
 caso('quarentena com acúmulo', () => {
   const KU = 'Ureia 45%|U26-09'; const rec = (ator, doc) => cenMudar(null, c => cenReceber(c, 'Ureia 45%', 'U26-09', 500, 'kg', 'Galpão 1', '12/2027', doc, false, ator));
-  ini(); rec(ANA, 'NF-7001'); const r = cenMudar(null, c => cenLiberarQuarentena(c, KU, 'LAB-1', ANA)); const m = G().movs[G().movs.length - 1];
+  ini(); rec(ANA, 'NF-7001'); const r = cenMudar(null, c => cenLaudo(c, KU, 'NF-7001', 'LAB-1', 'Aprovado', ANA)); const m = G().movs[G().movs.length - 1];
   ok('Ana registra o recebimento bloqueado e libera a quarentena: a decisão vale e fica revisão posterior (padrão 2; antes a entrada gravava "Rui (almoxarife)" e o acúmulo não aparecia)',
-    !r.erro && G().lotes[KU].quarentena === 0 && m.rev === 'revisão posterior pendente (Ana registrou a entrada bloqueada e decidiu)' && / Fica revisão posterior pendente \(Ana registrou a entrada bloqueada e decidiu\)\.$/.test(r.msg)
-    && / · revisão posterior pendente/.test(emovTxt(m)), [r.erro || r.msg, m.rev]);
-  ini(); rec(RUI, 'NF-7002'); const r2 = cenMudar(null, c => cenLiberarQuarentena(c, KU, 'LAB-2', ANA)); const m2 = G().movs[G().movs.length - 1];
+    !r.erro && G().lotes[KU].quarentena === 0 && m.rev === 'Decisão do gestor registrada · revisão independente pendente (Ana registrou a entrada bloqueada e decidiu)' && / Decisão do gestor registrada · revisão independente pendente \(Ana registrou a entrada bloqueada e decidiu\)\.$/.test(r.msg)
+    && / · Decisão do gestor registrada · revisão independente pendente/.test(emovTxt(m)), [r.erro || r.msg, m.rev]);
+  ini(); rec(RUI, 'NF-7002'); const r2 = cenMudar(null, c => cenLaudo(c, KU, 'NF-7002', 'LAB-2', 'Aprovado', ANA)); const m2 = G().movs[G().movs.length - 1];
   ok('Rui recebe bloqueado e Ana libera: sem revisão posterior', !r2.erro && !('rev' in m2) && !/revisão/.test(r2.msg), [r2.erro || r2.msg, m2.rev]);
 });
 for (const [ator, nome] of [[CAIO, 'Caio (PCP)'], [RUI, 'Rui (almoxarife)'], [undefined, 'sem ator']]) caso('cancelar ' + nome, () => {
@@ -222,21 +221,21 @@ caso('cancelar Ana', () => {
 });
 // achado 6 · papéis em pessoas diferentes (cadastro injetado e retirado): a dispensa exige os DOIS papéis (g2papel com lista = todos)
 caso('dispensa com papéis separados', () => {
-  const n0 = G2_PERFIS.length; G2_PERFIS.push({ k: 'Beto', t: 'Beto · Agrônomo', papeis: { agronomo: 'agrônomo' } }, { k: 'Gil', t: 'Gil · Gestor', papeis: { gestor: 'gestor' } });
-  try { for (const k of ['Beto', 'Gil']) { ini(); const r = cenMudar(null, c => osc_dispensar(c, 'OS-0421', 40, 'x', k)); const o = G().ordens['OS-0421'];
+  const n0 = G2_PERFIS.length; G2_PERFIS.push({ k: 'Beto', t: 'Beto · Agrônomo', papeis: { agronomo: 'agrônomo' } }, { k: 'Otávio', t: 'Otávio · Gestor', papeis: { gestor: 'gestor' } });
+  try { for (const k of ['Beto', 'Otávio']) { ini(); const r = cenMudar(null, c => osc_dispensar(c, 'OS-0421', 40, 'x', k)); const o = G().ordens['OS-0421'];
       ok('NEGATIVO ' + k + ' (só ' + (k === 'Beto' ? 'agrônomo' : 'gestor') + ') não dispensa: exige os dois papéis; saldo segue 160 ha', r.erro === 'Dispensar saldo da OS-0421: decisão de Ana (gestora e agrônoma). Nada foi alterado.' && o.saldo === 160 && !(o.osc && o.osc.disp), r.erro || r.msg); } }
   finally { G2_PERFIS.splice(n0); }
-  ok('cadastro restaurado: ' + n0 + ' perfis', G2_PERFIS.length === n0 && !G2_PERFIS.some(p => p.k === 'Beto' || p.k === 'Gil'));   /* sem número fixo: outra frente pode acrescentar perfil (revisão BEN, S4) */
+  ok('cadastro restaurado: ' + n0 + ' perfis', G2_PERFIS.length === n0 && !G2_PERFIS.some(p => p.k === 'Beto' || p.k === 'Otávio'));   /* sem número fixo: outra frente pode acrescentar perfil (revisão BEN, S4) */
 });
 // achado 2 · checklist: editar o motivo não troca o autor da resposta
-caso('motivo editado', () => {   // PCM simplificado (05/10, D-33): só o executante edita; o autor da resposta segue de quem respondeu
+caso('motivo editado', () => {
   let c = manClone(MAN0); const id = 'OM-0234'; manLiberar(c, id, true); manIniciar(c, id); const t = c.oms[id].chk[4];
   manResp(c, id, 4, 'Não feito', 'sem graxa', ZE); const em = t.em;
-  let ea = ''; try { manResp(c, id, 4, 'Não feito', 'sem graxa no almoxarifado', ANA); } catch (x) { ea = x.message; }
-  ok('Ana (gestora) não edita o motivo da resposta do Zé (não é a executante): recusado; resposta e motivo seguem de Zé (antes: o autor virava Ana)',
-    /^Ação de Zé, executante/.test(ea) && t.r === 'Não feito' && t.por === 'Zé (mecânico)' && t.em === em && t.mot === 'sem graxa', [ea, t]);
-  manResp(c, id, 4, 'Não feito', 'sem graxa no almoxarifado', ZE);
-  ok('editar só o motivo não troca o autor da resposta; a edição fica à parte, com quem e hora', t.r === 'Não feito' && t.por === 'Zé (mecânico)' && t.em === em && t.mot === 'sem graxa no almoxarifado' && t.motPor === 'Zé (mecânico)' && /^\d\d:\d\d$/.test(t.motEm || ''), t);
+  manResp(c, id, 4, 'Não feito', 'sem graxa no almoxarifado', ANA);
+  ok('Zé responde "Não feito"; Ana edita o motivo: a resposta segue de Zé (mecânico), a edição fica à parte com Ana (gestora) (antes: o autor virava Ana)',
+    t.r === 'Não feito' && t.por === 'Zé (mecânico)' && t.em === em && t.mot === 'sem graxa no almoxarifado' && t.motPor === 'Ana (gestora)' && /^\d\d:\d\d$/.test(t.motEm || ''), t);
+  manResp(c, id, 4, 'Não se aplica', undefined, ANA);
+  ok('trocar a resposta grava o novo autor (Ana (gestora)); o motivo segue com quem o escreveu', t.r === 'Não se aplica' && t.por === 'Ana (gestora)' && t.motPor === 'Ana (gestora)', t);
   manResp(c, id, 3, 'Não feito', undefined, ZE); manResp(c, id, 3, 'Não feito', 'peça em falta', ZE); const t3 = c.oms[id].chk[3];
   ok('o próprio Zé escreve o motivo: autor e editor iguais', t3.por === 'Zé (mecânico)' && t3.motPor === 'Zé (mecânico)', t3);
 });

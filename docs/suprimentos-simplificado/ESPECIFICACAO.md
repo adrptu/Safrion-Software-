@@ -40,39 +40,75 @@
 
 | Peça | Onde | Decisão | PR |
 |---|---|---|---|
-| `cenMudar` atômico | `cenario.js:15-19` | **muda**: ganha `cmd = {chave, nome, obj, ver, payload}` (PCMS-G04, PCMS:358-366): repetição com a mesma chave devolve o recibo sem efeito; `ver` diferente é conflito. Sem `cmd`, igual a hoje. Toda função que muda um item de REQ sobe `it.ver` (entregar, devolver, conciliar, confirmar no app, fechar turno, sinal) | SUP-2a |
+| `cenMudar` atômico | `cenario.js:15-19` | **muda**: ganha `cmd = {chave, nome, obj, ver, payload}` (PCMS-G04, PCMS:358-366): repetição com a mesma chave devolve o recibo sem efeito; `ver` diferente é conflito. Sem `cmd`, igual a hoje. Toda função que muda um item de REQ sobe `it.ver` (entregar, devolver, conciliar, confirmar no app, fechar turno, sinal) | Etapa SUP-2a |
 | `cenDisp`, `cenLiberar`, `cenSaldoEntregar`, soma do recebimento no lote, `cenPodeEncerrar`, `cenConcPrevia` | `cenario.js:43, 48-64, 67, 95-97, 243-247, 195-209` | **fica** a regra (`cenConfAbertas` passa a contar também "Aguardando gestora") | — |
-| `cenEntregar`: confere só fase e físico − quarentena; baixa a reserva de qualquer O.S.; grava "Rui" fixo | `cenario.js:68-79` (:70, :75, :76, :77) | **muda**: recusa selo "Impedida"; limita à **reserva própria** (72.3 item 2, PRD:12234); baixa só a reserva própria; grava `por` (Ver como) | SUP-2a |
-| `cenDevolver`, `cenReceber`, `cenContar`, `cenConciliar` com quem fixo | `cenario.js:87, 98, 108, 142, 212, 225` | **muda**: recebem `por`; sem `por`, "Rui (almoxarife)" | SUP-2a/2b |
-| `cenConciliar` grava recusa sem motivo | `cenario.js:212` | **muda**: recusa exige `motivo.trim()`; aceite com falta > 0 (baixa do lote além da custódia, :217) passa por "Aguardando gestora" e é decidido por outra pessoa | SUP-2a |
-| `cenAprovarAjuste(c,id,aprovar)` grava "Ana" fixo; o ajuste não guarda o contador | `cenario.js:110, 112-113` | **muda**: `cenContar(c,key,contado,contador)` grava `aj.contador`; `cenAprovarAjuste(c,id,aprovar,por)` recusa `aprovar && por===aj.contador`; recusar (recontagem) continua livre | SUP-2b |
-| `cenContar` recusa abaixo de reservado + bloqueado e mostra o número | `cenario.js:109` | **muda**: grava sempre a contagem; o ajuste leva `afeta` (reserva ou quarentena atingida); mensagem sem quantidade do sistema | SUP-2b |
-| `cenLiberarQuarentena` zera a quarentena do lote inteiro, sem laudo | `cenario.js:101-103` | **sai**; entra `cenLaudo(c,key,doc,num,resultado,por)` sobre **parcelas** `l.quar=[{doc,qtd,motivo}]` (§6) | SUP-2b |
-| Semente: REQ-035 sem reserva própria | `cenario.py:57-64` | **muda**: cada item de O.S. liberada guarda `res0` (o que a liberação reservou) e o lote reserva `res0 − entregue`; `cenResTot` (`cenario.js:153-155`) soma `res0` + movimentos `reserva`. F26-02 passa a 80 L reservados (65 da REQ-039 + 15 da REQ-035). `CEN0.v` sobe para o próximo livre e ganha `recibos:{}` | SUP-2a |
-| Funções `est*` e validações `ESTV`/`ESAVE` no texto JS da página | `processo_estoque.py:263-346` | **mudam de lugar** para `gen37/est.js` (tela, app futuro e node). `E2` (contagens, contadores, hoje, imped) é parâmetro; o teste em node lê um JSON gerado de `_dados_js()` (`processo_estoque.py:52-63`) | SUP-2a |
-| 6 seções `NOMES` (já sem número, `secoes_state`, `ui37.py:480-482`) | `processo_estoque.py:16, 146` | **muda** para 4 seções (§2) | SUP-2a/2b |
-| A página abre sempre na seção 1 | `processo_estoque.py:534` | **muda**: lê `#sec/#req/#os/#nf/#lote`; sem endereço, abre pelo papel do Ver como (§2.2) | SUP-1 |
-| Pendência da seção em vermelho (`whys`) | `processo_estoque.py:539`; `ui37.py:486` (cor RED) | **muda**: contador neutro num slot novo de `secoes_state` em `ui37.py`, preenchido no `PREVALS`; **sem tocar `g2lib.js`** (reservado pela SAF-única) | SUP-1 |
-| Filtro Fazenda: só "Boa Vista" muda algo | `processo_estoque.py:376`; `engine.py:1431` | **muda**: filtra linhas e contadores pela fazenda do local (`dados_cad.LOCAIS`, `dados_cad.py:135-138`) e da O.S. (`o.faz`, como `processo_os.py:435-437`); "Todas" soma | SUP-1 |
-| `LOCAIS` fixos (4) | `processo_estoque.py:19, 84, 553` | **muda**: fonte única `dados_cad.LOCAIS` estocáveis da fazenda do filtro (com Packing, BEN:74; `l11` Almox. oficina, PCMS:516); o cenário só informa o saldo | SUP-2b |
-| `g_ent` (12 col.) e `g_dev` (11 col.): o mesmo item em duas grades | `processo_estoque.py:89-102, 397-445` | **funde** em `g_req`, sem coluna de ação (§3) | SUP-2a |
-| Linhas "fora da requisição"/"sem requisição" | `processo_estoque.py:442-444` | **fica** a cobertura, dentro de `g_req` (§3) | SUP-2a |
-| `g_rec` com Apta digitada e unidade "kg" fixa; pedidos como linhas | `processo_estoque.py:72-87, 307-309` | **muda**: Apta calculada, quarentena começa em 0, unidade do item; só trabalho do almoxarife (§3) | SUP-2b |
-| "Liberar após inspeção" em Saldos; "Aprovar ajuste" na linha de quem contou | `processo_estoque.py:366, 482, 554-559` | **saem**; viram "Registrar laudo" e decisão da gestora | SUP-2b |
-| Árvore item › lote (54 linhas para 27 lotes); `g_mov` como seção; resumos k1-k6 | `processo_estoque.py:104-124, 446-465, 522-531` | **mudam**: uma linha por lote; Movimentos vira modo de Confira saldos; resumos saem | SUP-2a/2b |
-| `PESSOAS` fixas em "Entregar a" | `processo_estoque.py:21` | **muda**: recebedor = `o.resp`, corrigível no painel | SUP-2a |
-| `epk` só converte embalagem em kg ou L | `processo_estoque.py:170-172` | **muda**: aceita "<nome> <n> <unidade do item>" ("bandeja 50 mudas" → "1.850 bandejas") | SUP-2a |
-| Rótulo fixo "Salvar" do painel | `engine.py:1286` | **muda**: rótulo por registro (`F("savel")`); mudança pequena em `engine.py`, depois do merge da SAF-única | SUP-2a |
-| Links do EST para a O.S. sem `#OS-` | `processo_estoque.py:404, 429, 444, 499` | **muda**: `OS.dc.html#OS-…` (`processo_os.py:658-665`) | SUP-1 |
-| Bloqueio de encerramento na O.S.: `osEncBloq` e selo/prazo da lista e do Kanban tratam conferência como sobra | `processo_os.py:242-244, 287-291` | **muda**: três casos (sinal, conferência, custódia); conferência → "Rui concilia o consumo no Estoque", prazo "conciliar o consumo", sem selo "Sobras a receber", link `EST#req=` (ou `#os=` sem REQ) | SUP-1 |
-| Links da O.S. ao Estoque sem destino; comparação exata | `processo_os.py:291, 347, 416, 979`; `:542, :557` | **muda**: endereço com destino; comparação por prefixo `EST.dc.html` | SUP-1 |
-| Mapa "Receber sobras/devolução"; "Falta insumo · Suprimentos" | `inicio.py:41, 127, 645, 1370`; `irrigacao_estado.js:156` | **muda**: `EST#req=`, `#lote=`; pedido e solicitação no SUP-3 | SUP-1/SUP-3 |
-| CMP: etapas, `g_dem`, `g_apr`, trilha, k2-k6, "Registrar aprovação da Direção" pelo comprador, trava `whys` 4-6 | `processo_compras.py:16, 75-80, 99-122, 239-241, 312-323, 446, 494-497, 503-591` | **saem** (§5) | SUP-3 |
-| Reprogramar sobrescreve a previsão | `processo_compras.py:468-474` | **muda**: versões `prevs[]` (RF-SUP-012, PRD:2594) | SUP-3 sobre o PCM 1c |
+| `cenEntregar`: confere só fase e físico − quarentena; baixa a reserva de qualquer O.S.; grava "Rui" fixo | `cenario.js:68-79` (:70, :75, :76, :77) | **muda**: recusa selo "Impedida"; limita à **reserva própria** (72.3 item 2, PRD:12234); baixa só a reserva própria; grava `por` (Ver como) | Etapa SUP-2a |
+| `cenDevolver`, `cenReceber`, `cenContar`, `cenConciliar` com quem fixo | `cenario.js:87, 98, 108, 142, 212, 225` | **muda**: recebem `por`; sem `por`, "Rui (almoxarife)" | Etapas SUP-2a/2b |
+| `cenConciliar` grava recusa sem motivo | `cenario.js:212` | **muda**: recusa exige `motivo.trim()`; aceite com falta > 0 (baixa do lote além da custódia, :217) passa por "Aguardando gestora" e é decidido por outra pessoa | Etapa SUP-2a |
+| `cenAprovarAjuste(c,id,aprovar)` grava "Ana" fixo; o ajuste não guarda o contador | `cenario.js:110, 112-113` | **muda**: `cenContar(c,key,contado,contador)` grava `aj.contador`; `cenAprovarAjuste(c,id,aprovar,por)` só aprova com o papel gestor (`cenExige`); se o gestor também contou, a decisão vale com "Decisão do gestor registrada · revisão independente pendente" (§0.3, PEND-CTL-02); recusar (recontagem) continua livre | Etapa SUP-2b |
+| `cenContar` recusa abaixo de reservado + bloqueado e mostra o número | `cenario.js:109` | **muda**: grava sempre a contagem; o ajuste leva `afeta` (reserva ou quarentena atingida); mensagem sem quantidade do sistema | Etapa SUP-2b |
+| `cenLiberarQuarentena` zera a quarentena do lote inteiro, sem laudo | `cenario.js:101-103` | **sai**; entra `cenLaudo(c,key,doc,num,resultado,por)` sobre **parcelas** `l.quar=[{doc,qtd,motivo}]` (§6) | Etapa SUP-2b |
+| Semente: REQ-035 sem reserva própria | `cenario.py:57-64` | **muda**: cada item de O.S. liberada guarda `res0` (o que a liberação reservou) e o lote reserva `res0 − entregue`; `cenResTot` (`cenario.js:153-155`) soma `res0` + movimentos `reserva`. F26-02 passa a 80 L reservados (65 da REQ-039 + 15 da REQ-035). `CEN0.v` sobe para o próximo livre e ganha `recibos:{}` | Etapa SUP-2a |
+| Funções `est*` e validações `ESTV`/`ESAVE` no texto JS da página | `processo_estoque.py:263-346` | **mudam de lugar** para `gen37/est.js` (tela, app futuro e node). `E2` (contagens, contadores, hoje, imped) é parâmetro; o teste em node lê um JSON gerado de `_dados_js()` (`processo_estoque.py:52-63`) | Etapa SUP-2a |
+| 6 seções `NOMES` (já sem número, `secoes_state`, `ui37.py:480-482`) | `processo_estoque.py:16, 146` | **muda** para 4 seções (§2) | Etapas SUP-2a/2b |
+| A página abre sempre na seção 1 | `processo_estoque.py:534` | **muda**: lê `#sec/#req/#os/#nf/#lote`; sem endereço, abre pelo papel do Ver como (§2.2) | Etapa SUP-1 |
+| Pendência da seção em vermelho (`whys`) | `processo_estoque.py:539`; `ui37.py:486` (cor RED) | **muda**: contador neutro num slot novo de `secoes_state` em `ui37.py`, preenchido no `PREVALS`; **sem tocar `g2lib.js`** (reservado pela SAF-única) | Etapa SUP-1 |
+| Filtro Fazenda: só "Boa Vista" muda algo | `processo_estoque.py:376`; `engine.py:1431` | **muda**: filtra linhas e contadores pela fazenda do local (`dados_cad.LOCAIS`, `dados_cad.py:135-138`) e da O.S. (`o.faz`, como `processo_os.py:435-437`); "Todas" soma | Etapa SUP-1 |
+| `LOCAIS` fixos (4) | `processo_estoque.py:19, 84, 553` | **muda**: fonte única `dados_cad.LOCAIS` estocáveis da fazenda do filtro (com Packing, BEN:74; `l11` Almox. oficina, PCMS:516); o cenário só informa o saldo | Etapa SUP-2b |
+| `g_ent` (12 col.) e `g_dev` (11 col.): o mesmo item em duas grades | `processo_estoque.py:89-102, 397-445` | **funde** em `g_req`, sem coluna de ação (§3) | Etapa SUP-2a |
+| Linhas "fora da requisição"/"sem requisição" | `processo_estoque.py:442-444` | **fica** a cobertura, dentro de `g_req` (§3) | Etapa SUP-2a |
+| `g_rec` com Apta digitada e unidade "kg" fixa; pedidos como linhas | `processo_estoque.py:72-87, 307-309` | **muda**: Apta calculada, quarentena começa em 0, unidade do item; só trabalho do almoxarife (§3) | Etapa SUP-2b |
+| "Liberar após inspeção" em Saldos; "Aprovar ajuste" na linha de quem contou | `processo_estoque.py:366, 482, 554-559` | **saem**; viram "Registrar laudo" e decisão da gestora | Etapa SUP-2b |
+| Árvore item › lote (54 linhas para 27 lotes); `g_mov` como seção; resumos k1-k6 | `processo_estoque.py:104-124, 446-465, 522-531` | **mudam**: uma linha por lote; Movimentos vira modo de Confira saldos; resumos saem | Etapas SUP-2a/2b |
+| `PESSOAS` fixas em "Entregar a" | `processo_estoque.py:21` | **muda**: recebedor = `o.resp`, corrigível no painel | Etapa SUP-2a |
+| `epk` só converte embalagem em kg ou L | `processo_estoque.py:170-172` | **muda**: aceita "<nome> <n> <unidade do item>" ("bandeja 50 mudas" → "1.850 bandejas") | Etapa SUP-2a |
+| Rótulo fixo "Salvar" do painel | `engine.py:1286` | **muda**: rótulo por registro (`F("savel")`); mudança pequena em `engine.py`, depois do merge da SAF-única | Etapa SUP-2a |
+| Links do EST para a O.S. sem `#OS-` | `processo_estoque.py:404, 429, 444, 499` | **muda**: `OS.dc.html#OS-…` (`processo_os.py:658-665`) | Etapa SUP-1 |
+| Bloqueio de encerramento na O.S.: `osEncBloq` e selo/prazo da lista e do Kanban tratam conferência como sobra | `processo_os.py:242-244, 287-291` | **muda**: três casos (sinal, conferência, custódia); conferência → "Rui concilia o consumo no Estoque", prazo "conciliar o consumo", sem selo "Sobras a receber", link `EST#req=` (ou `#os=` sem REQ) | Etapa SUP-1 |
+| Links da O.S. ao Estoque sem destino; comparação exata | `processo_os.py:291, 347, 416, 979`; `:542, :557` | **muda**: endereço com destino; comparação por prefixo `EST.dc.html` | Etapa SUP-1 |
+| Mapa "Receber sobras/devolução"; "Falta insumo · Suprimentos" | `inicio.py:41, 127, 645, 1370`; `irrigacao_estado.js:156` | **muda**: `EST#req=`, `#lote=`; pedido e solicitação na Etapa SUP-3 | Etapa SUP-1/SUP-3 |
+| CMP: etapas, `g_dem`, `g_apr`, trilha, k2-k6, "Registrar aprovação da Direção" pelo comprador, trava `whys` 4-6 | `processo_compras.py:16, 75-80, 99-122, 239-241, 312-323, 446, 494-497, 503-591` | **saem** (§5) | Etapa SUP-3 |
+| Reprogramar sobrescreve a previsão | `processo_compras.py:468-474` | **muda**: versões `prevs[]` (RF-SUP-012, PRD:2594) | Etapa SUP-3 sobre o PCM 1c |
 | Modelo da compra: convite só a homologado, escolha padrão, `sig`, `enviar`, `emitir`, `decidir` | `processo_compras.py:222-226, 235-237, 244, 255, 436-458` | **fica** | — |
-| Aba Almoxarife do MB-05, MB-05det, link SU-03det | `mobile.py:655-720, 669` | **sai** do caminho visível (§0.1) | SUP-2b |
+| Aba Almoxarife do MB-05, MB-05det, link SU-03det | `mobile.py:655-720, 669` | **sai** do caminho visível (§0.1) | Etapa SUP-2b |
 | MB-05 "Minhas retiradas" | `mobile.py:634-654` | **fica** | — |
 | Componentes de seção, grade, painel (`aside role=dialog`, 460 px) e busca | `ui37.py:480`; `engine.py:1169-1188, 1266` | **fica** | — |
+
+### 0.3 Implementação (06-09/10): o que valeu na prática
+Rótulo: **executado** onde há comando e resultado no commit; o resto segue **especificado**.
+- **Nomes das etapas.** "Etapa SUP-1", "Etapa SUP-2a" etc., para não confundir com severidade (S1–S4, PRD 22.1) nem com as etapas PCM-S1..S4 do PCM simplificado.
+- **Ordem (Codex, 08/10):** Etapa SUP-1 → SUP-2a → SUP-2b antes do PCM-1a/1b; a **Etapa SUP-3 (tela de Compras) fica para depois da SAF-única e do PCM-1c-dados**. O rascunho da SUP-3 escrito em 06/10 está guardado, sem integrar, na branch local `claude/v44-sup-rascunho-0610`. Nesta entrega, Compras só ganha o nome "Compras" no menu e no título; o botão "Abrir Compra de insumos ›" do Planejar safra muda com a SUP-3.
+- **"Ver como" = perfil de quem age no menu lateral** (G2_PERFIS/g2perfil, frente D do CONTROLE-01). Não existe seletor próprio no cabeçalho. Onde este documento diz "Ver como", leia "perfil do menu lateral": ele define a abertura, habilita as decisões do papel e é o `por` gravado (CTL-3).
+- **Autoaprovação × PEND-CTL-02 (regra conciliada).** Quem decide ajuste de estoque, laudo de quarentena e consumo acima da custódia é o papel gestor (`cenExige`). Quem não tem o papel (o almoxarife que contou, recebeu ou entregou) não aprova: esta é a proibição geral de autoaprovação deste documento. **Exceção explícita:** quando a mesma pessoa tem o papel de gestor e também fez o fato (contou, registrou a contagem ou a entrada bloqueada, entregou o material), a decisão vale e fica gravada no registro, no movimento e na mensagem como **"Decisão do gestor registrada · revisão independente pendente (Ana contou e decidiu)"** (`cenRevisao`). Não se finge que outra pessoa revisou, não se apaga o fato e não se bloqueia a fazenda de uma pessoa só. Quem faz a revisão independente e como ela fecha o registro fica para o software real (CF-01). Esta regra substitui "recusa `por===aj.contador`" do §0.2, §4.1, §6, N6, AC-SUP-07 e DEC §1.10. Dano evitado: perda aprovada por quem a causou **sem rastro**.
+- **Produto acabado da Colheita.** A Colheita já integrada guarda o produto em `c.producao` (D-05 da Colheita) e tem a página Produção › Estoque de produto (`PROD.dc.html`). O Estoque não copia essa grade: Confira saldos › Produção mostra o resumo lido de `c.producao` (por cultura, na unidade de estoque da cultura, `prEstTxt`) e o atalho "Abrir Estoque de produto ›". Assinatura para outras frentes: `estProducao(c, faz)` em `est.js` (só leitura).
+- **Manutenção.** Ponto de entrada no Estoque: a REQ de OM entra em Atenda requisições pelo mesmo `estFila`/`estEntregarReq` e pelo `cenMudar(self, fn, cmd)`; o PCM-1b os estende para OM (§7). As SC da manutenção entram em Compras na Etapa SUP-3.
+- **Semente:** `CEN0.v = 6` (a 4 é da Colheita e a 5 do BEN-1 na branch do protótipo; no merge de 09/10 as duas mudanças ficam na 6).
+- **Painel aberto sozinho a ≥1024 px (§2.3, DEC 1.4): não implementado.** O painel comum do engine (`engine.py`, `_g2form`) é uma gaveta com fundo que cobre a página; abrir sozinho esconderia a fila e os contadores, que respondem "o que faço agora". Painel ao lado da grade é mudança do componente comum (frente DS/engine). Custo: Entregar REQ-039 fica em 2 toques, não 1.
+- **Consumo acima da custódia sem "Enviar à gestora".** O relato que passa da custódia já nasce "Aguardando gestora" (`estSitCf`, `est.js`) e entra no contador dela; o almoxarife só recusa, com motivo. A decisão continua do papel gestor (`cenExige`).
+- **Atrito medido (executado, `python3 sup_atrito_test.py --base <cópia do 99537ca>`, 09/10, 61/61).** Mesma semente e mesma régua nos dois: clique = botão, linha, chip, link ou escolha numa lista; campo = valor digitado; não contam abrir pelo menu, a preparação do cenário nem o perfil (no software real é o login). Cada tarefa confere o efeito gravado.
+
+  | Tarefa | Antes (99537ca) | Depois |
+  |---|---|---|
+  | Entregar REQ-039 (1 item) · Rui | 3 | 2 |
+  | Entregar REQ-021 (2 itens) a Renato · Rui | 5 (sem Renato no seletor) | 3 (com a troca de fazenda) |
+  | Receber a sobra da REQ-031 · Rui | 3 | 2 + 1 campo (quantidade conferida) |
+  | Aceitar consumo coberto pela custódia · Rui | 3 | 2 |
+  | Recusar relato · Rui | 2 | 3 + 1 campo (motivo) |
+  | Consumo acima da custódia | 3, só a gestora | 0 do almoxarife + 3 da gestora |
+  | Receber a NF 4533 prevista · Rui | 2 + 4 campos | 3 + 2 campos |
+  | Liberar a quarentena do K26-11 · Ana | 3 + 1 campo | 3 + 1 campo (com o resultado do laudo) |
+  | Contar INV-2611 sem diferença · Paula | 3 + 1 campo | 2 + 1 campo |
+  | Contar INV-2611 com diferença e causa · Paula | 5 + 2 campos | 3 + 2 campos |
+  | Aprovar o ajuste do INV-2609 · Ana | 2 | 3 |
+  | Da O.S. (OS-0417) à sobra no Estoque | 3 (link + seção + linha) | 1 (o link abre o registro) |
+  | **Total (cliques + campos)** | **45** | **38** |
+
+  Pioras, com o dano que evitam: a quantidade da devolução é digitada (devolução não conferida virava saldo apto); a recusa pede o motivo e é secundária do painel do aceite (o porquê do relato sumia; uma primária por painel); o ajuste é aprovado no painel, não na linha (o toque duplo na linha caía no registro seguinte; a conta e as O.S. atingidas ficam à vista antes do toque). Compras é medida na Etapa SUP-3.
+- **Pontos de entrada para outras frentes (só o lugar e a assinatura).** Produção: `estProducao(c, faz)` (acima). Manutenção no Estoque: a REQ de OM entra pelo `estFila`/`estEntregarReq` e pelo `cenMudar(self, fn, cmd)`. SC da manutenção em Compras: contrato `c.scs` da PCMS:198, lido por `solDe('SC-…')` no PCM-1c (PCMS:536) e mostrado em Atenda solicitações na Etapa SUP-3; nada de SC é implementado aqui.
+- **Verificador de duplicata (§9.1 item 4) não estendido.** `ferramentas/acoes_duplicadas.py` é ferramenta comum e não olha `[role=row]` nem o painel; a regra desta frente ("nenhum comando dentro de linha") é provada pelo caso 4 do `est_fila_test.py`.
+- **Colunas essenciais (pedido do proprietário de 10/10; executado no Estoque, §3).** As grades do Estoque mostram só identificação, situação, quem retira ou devolve e os números que decidem; o resto vai para o painel do registro, sem perder dado, e o que servia para achar continua na busca da tabela. Saíram: Lote de Atenda requisições (fica em "Separe:" e na conta do item, e a busca acha a REQ pelo lote); Fornecedor e Item de Receba e inspecione (o item passa à célula do documento; pedido e fornecedor no painel da nota e da parcela e na busca); Contado de Faça contagens (painel; a Diferença é o número que a gestora decide); Reservado e Bloqueado de Confira saldos › Lotes (a conta "Disponível = físico − reservado − bloqueado" abre o painel, com a O.S. de cada reserva e a parcela com "Registrar laudo ›"; o estado de quarentena fica na linha como selo "Em quarentena", AGENTS §4); Lote de Movimentos (painel do movimento; a trilha de um lote é o extrato do painel do lote). Compras não foi tocada nesta entrega: a regra entra nas grades da Etapa SUP-3. DEC §1.29.
+- **Testes do módulo saem com código ≠ 0 quando falham:** `cmptest.py`, `consumo_divergente_test.py` e `app_saldo_zero_test.py` saíam 0 mesmo falhando (retorno Codex de 08/10: "19/20 com saída 0 é falha").
+- **Bateria das Etapas SUP-1, SUP-2a e SUP-2b (executado, 09/10, sobre o merge do `cdc185f`).** Build 0 FALHA (140 telas) e `montar_render`; varredura 140/140; `acoes_duplicadas` 0 de 140. Do módulo: `sup_unit` 64/64, `est_fila` 52/52, `esttest` OK, `est_cenario` 16/16, `est_fix1` 10/10, `est_fix2` 11/11, `tabelas_est` 25/25, `consumo_divergente` 23/23, `app_saldo_zero` 12/12, `cmptest` sem falhas, `sup_atrito` 61/61. Que tocam os arquivos mexidos: `ap_unico` 80/80 + 23/23, `aprova_quem_decide` 102/102, `sup_os` 5/5, `assinatura` 45/45, `acao_unica` saf/familias/v3, `etapas_celular`, `map_aprov`, `map_decisoes`, `mbtest`, `app_cenario`, `app_entrega_parcial`, `os_ator`, `saf_cmp_continuidade`, `irr_fluxo`, `sutest`, `componentes` sem falha. Vermelhos iguais no `cdc185f` (não são desta frente): `os_cenario` 19/20 (PEND-OS-01), `cal01` 43/45 (CTL-4), `acao_unica responsivo` 17 e 18 (SAF/CMP), `testes_pedido` T01, T02 e T05 (SAF, sai 0 mesmo falhando).
 
 ---
 
@@ -122,7 +158,7 @@
   - Compras: Atenda solicitações; Direção com o filtro "Aguardando você".
 - **Ver como (simulação):** no cabeçalho, rotulado "simulação". Estoque: Rui (almoxarife), Paula (almoxarife), Ana (gestora). Compras: Ana (até R$ 300.000) ou Direção. Define a abertura, habilita só as decisões do papel (as outras ficam desabilitadas com o motivo, por exemplo "Ação do almoxarife") e é o `por` gravado em **todo** movimento. Não filtra a fila. Fica em `localStorage` dentro de try/catch e nunca muda `c.rev`. No software real, o papel vem do login e o servidor valida (CF-02).
 - **Fazenda:** filtro real no Estoque (DEC-2609-11, AC-72-10). Santa Rita é o padrão (`engine.py:1431`). Boa Vista continua vazia com "Ver Santa Rita".
-- **Natureza (SUPv2 65.7):** filtro rápido sobre os mesmos IDs (Insumos agrícolas primeiro; Peças e materiais; Serviços; Imobilizado), derivado do grupo do item numa tabela única em `dados_cad.py`. Só aparece quando as linhas têm mais de uma natureza; padrão "Todas" nas filas de trabalho, para não esconder pendência. Entra quando a 2ª natureza chega: EST no PCM 1b (peças), CMP no SUP-3.
+- **Natureza (SUPv2 65.7):** filtro rápido sobre os mesmos IDs (Insumos agrícolas primeiro; Peças e materiais; Serviços; Imobilizado), derivado do grupo do item numa tabela única em `dados_cad.py`. Só aparece quando as linhas têm mais de uma natureza; padrão "Todas" nas filas de trabalho, para não esconder pendência. Entra quando a 2ª natureza chega: EST no PCM 1b (peças), CMP na Etapa SUP-3.
 - **Faixa no detalhe da compra:** Veio de → Está aqui → Falta → Próxima ação (PRD:280), com **um** link de origem (hoje 4: `processo_compras.py:278, 322, 398, 505`).
 
 ### 2.3 Padrão de comando: a linha identifica, o painel resolve
@@ -165,7 +201,7 @@ toque em REQ-035 → painel em tela cheia:
 │  lote F26-02 a Marcos]              │
 └────────────────────────────────────┘
 ```
-- Promessa a 390 e 360: a página não rola de lado; Requisição e Situação ficam à vista sem rolar a grade; o painel mostra "Separe:" e a primária sem rolar. **Quantas linhas cabem acima da dobra é medido no SUP-0** (a captura atual mostra 2), não prometido.
+- Promessa a 390 e 360: a página não rola de lado; Requisição e Situação ficam à vista sem rolar a grade; o painel mostra "Separe:" e a primária sem rolar. **Quantas linhas cabem acima da dobra é medido na Etapa SUP-0** (a captura atual mostra 2), não prometido.
 - Mudar a casca (menu ☰ a ≤640 px) fica fora (FORA-DE-ESCOPO).
 
 **Estoque, 1440 × 900:** cabeçalho com Fazenda e Ver como; abas "Atenda requisições · 3 a entregar · 1 sobra", "Receba e inspecione · 1 nota · 1 laudo", "Faça contagens · 1 a contar · 1 ajuste", "Confira saldos"; grade à esquerda e painel de 460 px à direita, já aberto na REQ-035.
@@ -178,12 +214,12 @@ toque em REQ-035 → painel em tela cheia:
 
 **Regras:** uma variável por coluna; unidade na célula ("65 L", "R$ 3,90/kg"); até 7 colunas de dado (PRD:287); ordem **Identificação | Situação | dados**; 1ª coluna presa; filtro rápido pela Situação (`qf`, `engine.py:1182`); quem sai da grade vai para o painel, nunca some.
 
-**g_req · Atenda requisições** (funde `g_ent` e `g_dev`)
+**g_req · Atenda requisições** (funde `g_ent` e `g_dev`; colunas essenciais desde 10/10: o Lote saiu para "Separe:" e a conta do item no painel, e segue na busca)
 
-| Requisição › item | Situação | A entregar | Em custódia | Com quem | O.S. | Lote |
-|---|---|---|---|---|---|---|
-| REQ-039 | A entregar | 65 L | 0 L | Marcos (`o.resp`) | OS-0424 (`#OS-0424`) | F26-02 |
-| ▾ REQ-021 › Muda de mamão Formosa | A entregar | 92.500 un | 0 un | Renato | OS-0503 | LG26-05 |
+| Requisição › item | Situação | A entregar | Em custódia | Com quem | O.S. |
+|---|---|---|---|---|---|
+| REQ-039 | A entregar | 65 L | 0 L | Marcos (`o.resp`) | OS-0424 (`#OS-0424`) |
+| ▾ REQ-021 › Muda de mamão Formosa | A entregar | 92.500 un | 0 un | Renato | OS-0503 |
 
 - **Linhas além dos itens da REQ** (cobertura de `processo_estoque.py:442-444`): filha "<produto> · fora da requisição" sob a REQ, e mãe "<O.S.> · sem requisição" quando `k.req` é vazio (`cenario.js:183`); Situação "Consumo em conferência".
 - **Situação** (uma por linha, nesta prioridade): O.S. impedida · Aguarda liberação · Lote insuficiente · Reserva parcial · faltam X · A entregar · Aguarda confirmação no app · Consumo em conferência · Aguardando gestora · Sobra a receber · Em uso · Concluída.
@@ -195,11 +231,13 @@ toque em REQ-035 → painel em tela cheia:
 
 **g_rec · Receba e inspecione** (só trabalho do almoxarife; o estado do pedido fica em Acompanhe pedidos)
 
-| Documento › item | Situação | Item | Na nota | Em quarentena | Previsão | Fornecedor |
-|---|---|---|---|---|---|---|
-| NF 4533 (PC-090) | Nota prevista | Semente de soja 58 W | 20.000 kg | 0 kg | 24/09 | Coop. Vale |
-| NF 4501 (PC-088) › K26-11 | Aguarda laudo | KCl 60% | 60.000 kg | 10.000 kg | — | Fertisul |
-| REQ-xxx › lote (devolução bloqueada) | Aguarda laudo | … | — | … | — | — |
+| Documento › item | Situação | Na nota | Em quarentena | Previsão |
+|---|---|---|---|---|
+| NF 4533 › Semente de soja 58 W | Nota prevista | 20.000 kg | 0 kg | 24/09 |
+| NF 4501 › KCl 60% · K26-11 | Aguarda laudo | 60.000 kg | 10.000 kg | — |
+| REQ-xxx › item · lote · devolução (bloqueada) | Aguarda laudo | — | … | — |
+
+- Desde 10/10: a coluna Item saiu (repetia a identificação) e a célula do documento diz o item; pedido e fornecedor no painel da nota ("PC-090 · Coop. Vale · …") e da parcela ("Origem: …"), e na busca.
 
 - Uma linha por **parcela** em quarentena (documento de origem), nunca por lote inteiro.
 - **Situação:** Aguarda laudo · Nota prevista · Conferida · Sem pedido · regularizar (PCMS-M25, depois do 1c) · Conferir serviço (quando houver serviço, SUPv2 65.7).
@@ -209,8 +247,10 @@ toque em REQ-035 → painel em tela cheia:
 
 **g_cnt · Faça contagens**
 
-| Contagem | Situação | Item | Lote | Local | Contado | Diferença |
-|---|---|---|---|---|---|---|
+| Contagem | Situação | Item | Lote | Local | Diferença |
+|---|---|---|---|---|---|
+
+- Contado (desde 10/10): no painel da contagem; a Diferença é o número que decide.
 
 - **Situação:** A contar · Informar causa · Aguardando gestora · Ajustada · Recontar · Conferida.
 - Sistema e diferença só aparecem **depois** de salvar; nenhuma mensagem de erro mostra quantidade do sistema.
@@ -218,13 +258,15 @@ toque em REQ-035 → painel em tela cheia:
 
 **g_lot · Confira saldos › Lotes** (uma linha por lote; hoje cada item tem 1 lote, executado)
 
-| Item | Lote | Físico | Reservado | Bloqueado | Disponível | Validade |
-|---|---|---|---|---|---|---|
+| Item | Lote | Físico | Disponível | Validade |
+|---|---|---|---|---|
+
+- Reservado e Bloqueado (desde 10/10): na conta do painel ("Disponível = físico − reservado − bloqueado = …"), com a O.S. de cada reserva e cada parcela em quarentena. O estado fica na linha: o Item leva o selo "Vencido" ou "Em quarentena" (sem número, por causa da contagem cega).
 
 - Chips de local da fonte única, filtrados pela fazenda. Painel: a conta do disponível, local, reservas e custódias por O.S., parcelas em quarentena com "Registrar laudo ›" (`#nf=`/`#lote=`) e o extrato (`processo_estoque.py:363`).
 - **Contagem cega na consulta:** para quem tem contagem aberta atribuída do lote, Físico e Disponível mostram "— (contagem aberta)".
 
-**g_mov · Confira saldos › Movimentos:** Data e hora | Movimento | Documento | Item | Lote | Quantidade | Quem. Registro, condição, O.S., origem e sinal do app vão para o painel; fica o filtro "Aguardando sinal".
+**g_mov · Confira saldos › Movimentos:** Data e hora | Movimento | Documento | Item | Quantidade | Quem (o Lote saiu em 10/10: painel do movimento e extrato do lote). Registro, condição, O.S., origem e sinal do app vão para o painel; fica o filtro "Aguardando sinal".
 
 **g_sol · Atenda solicitações** (substitui a `g_saf`, `processo_compras.py:73`)
 
@@ -260,11 +302,11 @@ toque em REQ-035 → painel em tela cheia:
 | Painel do item com saldo | **Entregar parte** (quantidade em branco, até a reserva própria) | Trocar recebedor |
 | Painel do item com sobra | **Registrar devolução** · quantidade conferida **em branco**, dica "esperado: 500 kg com Paula"; Condição (Apta é o padrão); observação obrigatória se bloqueada | — |
 | Painel do consumo em conferência, coberto pela custódia | **Aceitar consumo**, com a prévia de `cenConcPrevia` | **Recusar relato** (motivo digitado obrigatório) |
-| Idem, com falta > 0 (baixa do lote além da custódia) | almoxarife: **Enviar à gestora**; gestora (outra pessoa): **Aprovar consumo** | Recusar relato |
+| Idem, com falta > 0 (baixa do lote além da custódia) | almoxarife: **Enviar à gestora**; gestora: **Aprovar consumo** (se foi ela quem entregou o material, fica revisão independente pendente, §0.3) | Recusar relato |
 | Painel da nota prevista | **Conferir NF 4533** | — |
 | Painel da parcela em quarentena | **Liberar parcela** (laudo aprovado) | Manter bloqueada (reprovado, com destino) |
 | Painel da contagem (contador) | **Salvar contagem** → com diferença, o mesmo painel pede a causa → **Enviar ajuste à gestora** | Salvar e contar o próximo (Contar local) |
-| Painel do ajuste (gestora) | **Aprovar ajuste · −600 kg**, com o efeito na reserva quando houver ("afeta a REQ-040: faltarão X kg") | Pedir recontagem. Para quem contou (Rui no INV-2609, `processo_estoque.py:28`), "Aprovar" fica desabilitado: "quem contou não aprova" |
+| Painel do ajuste (gestora) | **Aprovar ajuste · −600 kg**, com o efeito na reserva quando houver ("afeta a REQ-040: faltarão X kg") | Pedir recontagem. Quem contou sem o papel de gestor (Rui no INV-2609, `processo_estoque.py:28`) não vê "Aprovar"; se a gestora contou, a decisão dela vale e o painel diz "a decisão fica registrada como sua, com revisão independente pendente" (§0.3) |
 | Confira saldos | nenhuma (consulta) | Registrar laudo › |
 
 ### 4.2 Compras
@@ -293,7 +335,7 @@ toque em REQ-035 → painel em tela cheia:
 - **Repetição:** mesma chave → recibo, sem movimento; o botão some depois do efeito (§2.3).
 - **Comprovante:** "REQ-039: 65 L de Fungicida A (13 galões de 5 L, lote F26-02) entregues a Marcos · aguarda confirmação no app".
 - **Entrega parcial:** pelo painel do item. A O.S. continua sem iniciar até a mistura completa (ESTOS-03, PRD:7103).
-- É a PCMS-M14 (PCMS:310). Implementa-se no SUP-2a, com o `cenMudar` com `cmd` (G04); o PCM 1b reaproveita e estende para OM (§10).
+- É a PCMS-M14 (PCMS:310). Implementa-se na Etapa SUP-2a, com o `cenMudar` com `cmd` (G04); o PCM 1b reaproveita e estende para OM (§10).
 
 ---
 
@@ -312,7 +354,7 @@ toque em REQ-035 → painel em tela cheia:
 | EST 6 | modo | repetia o extrato do lote (`processo_estoque.py:363`) | Confira saldos › Movimentos |
 | Pedido como linha em Receba e inspecione | **sai** | o mesmo PC em duas grades com 5 colunas iguais | Acompanhe pedidos; o formulário de NF lista os PCs abertos |
 | "Liberar após inspeção" em Saldos | "Registrar laudo" por parcela | ação longe do fato; liberava sem laudo e liberava o lote inteiro | Receba e inspecione; painel do lote |
-| "Aprovar ajuste" na linha de quem contou | decisão da gestora | quem conta não aprova a própria diferença (DEC-2609-13) | Faça contagens |
+| "Aprovar ajuste" na linha de quem contou | decisão da gestora | o almoxarife que conta não aprova a própria diferença (DEC-2609-13); a gestora que contou decide com revisão independente pendente (§0.3) | Faça contagens |
 | Coluna de ação nas linhas e primária "da 1ª linha" | **saem** | o mesmo comando duas vezes para o mesmo alvo (PADRÃO:69-71); toque duplo na linha caía na REQ seguinte | painel do registro |
 | Campo Apta digitado | calculado | Apta + quarentena = conferida (`:307`) | formulário, só leitura |
 | "A entregar em embalagens", Detalhe | painel e rótulo | a mesma quantidade em duas unidades; o porquê vira Situação | "Separe:", painel |
@@ -333,9 +375,10 @@ toque em REQ-035 → painel em tela cheia:
 | Encerrar só com custódia zero e sem conferência aberta (inclui "Aguardando gestora") | igual; os links levam à linha certa | `cenPodeEncerrar`, `cenConfAbertas` | custo e saldo errados |
 | Conciliação | prévia antes de aceitar; recusa com motivo não vazio; baixa além da custódia decidida por outra pessoa | `cenConciliar` | consumo fictício; perda aprovada por quem entregou |
 | NF duplicada não entra | igual | `processo_estoque.py:311` | entrada em dobro |
+| Um código de lote, uma validade | nota no lote existente com outra validade é recusada no campo Validade e no cenário; sem validade ("—") dos dois lados não conflita (DEC §1.31, executado) | `cenValidadeConflito` (`cenario.js`), lida por `cenReceber` e pela validação de Receba e inspecione | produto vencido sem o selo "Vencido" indo ao campo |
 | Quarentena só sai por laudo, **parcela por parcela** | `l.quar=[{doc,qtd,motivo}]`, `l.quarentena` = soma; `cenLaudo` libera só a parcela do documento; reprovado mantém; lote vencido não libera. Lote salvo antes da mudança: a quarentena existente vira uma parcela "anterior" (K26-11: NF 4501/PC-088, "Laudo de umidade pendente", `processo_estoque.py:59`) | `cenReceber`, `cenDevolver`, `cenLaudo` | lote impróprio no disponível (RF-SUP-007) |
 | Contagem cega; recontagem por outra pessoa | saldo oculto no formulário, na linha, no filtro, nas mensagens e em Saldos para o contador; a contagem é sempre gravada | `estContar`/`estRecontar` (`processo_estoque.py:277-292`), `cenContar` | perda escondida |
-| Ajuste aprovado por outra pessoa, nunca por quem contou | `aj.contador` gravado; `cenAprovarAjuste(c,id,true,por)` recusa `por===aj.contador`; a trilha grava `por`; recusar continua livre | `cenario.js:110-113` | perda aprovada por quem a causou |
+| Ajuste decidido pelo papel gestor; quem contou sem esse papel não aprova; o gestor que contou decide com revisão independente pendente | `aj.contador` gravado; `cenAprovarAjuste(c,id,true,por)` exige o papel gestor (`cenExige`) e grava `aj.rev` = "Decisão do gestor registrada · revisão independente pendente (… contou e decidiu)" quando `por` é quem contou; a trilha grava `por`; recusar continua livre | `cenario.js` (`cenAprovarAjuste`, `cenRevisao`) | perda aprovada por quem a causou sem rastro (§0.3) |
 | Ajuste que atinge reserva | a gestora vê as O.S. atingidas antes de aprovar; depois, a REQ mostra "Lote insuficiente" e só "Entregar parte" | `cenContar` (`afeta`) | entrega prometida sem material |
 | Quem fez fica gravado | `por` (Ver como) em entrega, devolução, recebimento, contagem, conciliação, laudo e ajuste | funções `cen*` | trilha que não diz quem fez |
 | Convite só a homologado e canal autorizado; justificativa fora do menor custo a tempo; `sig` invalida aprovação | igual | `processo_compras.py:222-226, 235-237, 244, 255` | contratar sem cadastro; pagar mais sem motivo; aprovar compra diferente |
@@ -349,35 +392,35 @@ toque em REQ-035 → painel em tela cheia:
 
 ## 7. Integrações
 
-**Planejar safra (fonte única da demanda).** A demanda e a memória do CAL-01 ficam só no SAF, na etapa 4 da SAF-única ("Confira a demanda de insumos"), endereço `SAF.dc.html#saf=<id>&passo=demanda` (o `etapa=6` antigo é lido como 4, SAF-única:432-447). A SAF-única já troca os textos e o `safHref` em `processo_compras.py`; o SUP-3 parte disso. "Abrir Compra de insumos ›" (`safra.js:840`) vira "Abrir SOL-2026-07 ›" → `CMP.dc.html#sol=…&saf=…` (`solHref`, `safra.js:646`). Uma função de situação lida pelo SAF (`safra.js:798`) e pela Compra (`sitDem`); Recusada aparece no SAF como "Não contratado · necessidade aberta".
+**Planejar safra (fonte única da demanda).** A demanda e a memória do CAL-01 ficam só no SAF, na etapa 4 da SAF-única ("Confira a demanda de insumos"), endereço `SAF.dc.html#saf=<id>&passo=demanda` (o `etapa=6` antigo é lido como 4, SAF-única:432-447). A SAF-única já troca os textos e o `safHref` em `processo_compras.py`; a Etapa SUP-3 parte disso. "Abrir Compra de insumos ›" (`safra.js:840`) vira "Abrir SOL-2026-07 ›" → `CMP.dc.html#sol=…&saf=…` (`solHref`, `safra.js:646`). Uma função de situação lida pelo SAF (`safra.js:798`) e pela Compra (`sitDem`); Recusada aparece no SAF como "Não contratado · necessidade aberta".
 
-**O.S. (SUP-1)**
+**O.S. (Etapa SUP-1)**
 
 | Link | Destino |
 |---|---|
 | "Entregar no Estoque" (`processo_os.py:347`), "Retirar no almoxarifado ›" (`:979`), "Receber devolução no Estoque" (`:291`) | `EST.dc.html#req=REQ-…` |
 | Bloqueio por consumo em conferência (`:242-244`, `:287-291`) | "Rui concilia o consumo no Estoque" → `#req=` (ou `#os=` sem REQ) |
-| "Ver saldos no Estoque" (`:416`) | `#lote=`; depois do SUP-3, `CMP#pc=` se houver pedido, senão `CMP#sol=` |
+| "Ver saldos no Estoque" (`:416`) | `#lote=`; depois da Etapa SUP-3, `CMP#pc=` se houver pedido, senão `CMP#sol=` |
 
 Liberar continua na O.S. `processo_os.py:542, 557` passam a comparar o prefixo `EST.dc.html`.
 
 **App:** "Minhas retiradas" (`mobile.py:634-654`) fica. A aba Almoxarife e o MB-05det saem até virarem a mesma fila em cartões (FORA-DE-ESCOPO). O passo "Retirar no almoxarifado" na entrega parcial (`mobile.py:200`; AUD:191) fica com o CONTROLE-01.
 
-**Mapa:** "Receber sobras" e "Receber devolução" (`inicio.py:127, 645, 1370`) → `EST#req=`; o docstring de `inicio.py:41` passa a ser verdade. "Comprar" (`:897, 903`) → `CMP#sol=` no SUP-3.
+**Mapa:** "Receber sobras" e "Receber devolução" (`inicio.py:127, 645, 1370`) → `EST#req=`; o docstring de `inicio.py:41` passa a ser verdade. "Comprar" (`:897, 903`) → `CMP#sol=` na Etapa SUP-3.
 
 **PCM × suprimentos (PR #45).**
 - Equivalência para os aceites do PCM: EST etapa 1 → Receba e inspecione; EST 2 e 3 → Atenda requisições; EST 4 → Confira saldos; CMP 1 → Atenda solicitações; CMP 3 e 4 → detalhe Cote/Decida; CMP 6 → Acompanhe pedidos.
-- **Mudanças a registrar na PCMS** (autor da PCMS escreve, o Codex revisa): M14 e o `cenMudar` com `cmd` (G04) nascem no SUP-2a e o 1b os estende para OM; M06 deixa de dizer "a contagem abaixo do reservado continua recusada" (PCMS:270): a contagem é gravada e o ajuste com `afeta` vai à gestora, sem desviar reserva; `CEN0.v` passa a "próximo livre" em cada PR (o SUP-2a usa um número antes do 1a).
+- **Mudanças a registrar na PCMS** (autor da PCMS escreve, o Codex revisa): M14 e o `cenMudar` com `cmd` (G04) nascem na Etapa SUP-2a e o 1b os estende para OM; M06 deixa de dizer "a contagem abaixo do reservado continua recusada" (PCMS:270): a contagem é gravada e o ajuste com `afeta` vai à gestora, sem desviar reserva; `CEN0.v` passa a "próximo livre" em cada PR (a Etapa SUP-2a usa um número antes do 1a).
 - A SC-041 vira linha de Atenda solicitações (Origem "Manutenção · OM-0235", "Falta em" = data da peça, sem CAL-01). O PC-2xx vai para `c.pedidos` (1c) e aparece em Acompanhe pedidos e no formulário "Registrar NF recebida". A REQ de OM entra na fila com entrega no balcão (`confirmado:'balcao'`, M14). O teto de 6 cliques para comprar 1 item (PCMS:465) fica com folga (§8).
 
 **Beneficiamento:** as caixas da OB entram em Atenda requisições (recebedor `o.resp`, balcão). LOCAIS da fonte única, com Packing (BEN:74). `#sec` com os apelidos do §2.2. O E11 (BEN:856) passa a esperar `aria-current` em "Atenda requisições" e o filtro "Sobra a receber": combinar com a frente BEN.
 
-**CONTROLE-01 (AUD §4-5):** itens 1 (ajuste por outra pessoa) e 2 (laudo) entram no SUP-2b; o padrão de "quem aceita consumo acima da custódia" segue o da AUD:235 (a gestora) e entra no SUP-2a; o item 5 (compra) fica coberto no protótipo pelo Ver como. O item 10 (`cal01.js:14`, a demanda não lê o realizado) **continua errado** e é pré-condição para levar a Compra ao proprietário: a Compra segue pedindo 145,2 L de Fungicida A que a OS-0421 já executa.
+**CONTROLE-01 (AUD §4-5):** itens 1 (ajuste por outra pessoa) e 2 (laudo) entram na Etapa SUP-2b; o padrão de "quem aceita consumo acima da custódia" segue o da AUD:235 (a gestora) e entra na Etapa SUP-2a; o item 5 (compra) fica coberto no protótipo pelo Ver como. O item 10 (`cal01.js:14`, a demanda não lê o realizado) **continua errado** e é pré-condição para levar a Compra ao proprietário: a Compra segue pedindo 145,2 L de Fungicida A que a OS-0421 já executa.
 
 ---
 
 ## 8. Atrito, antes × depois
-Clique = botão, linha ou chip; campo = valor digitado; partida pelo menu. "Antes" da v1 (código do `884620c`); "depois" especificado. Medir os dois no `sup_atrito_test.py`.
+Clique = botão, linha ou chip; campo = valor digitado; partida pelo menu. "Antes" da v1 (código do `884620c`); "depois" especificado. Medir os dois no `sup_atrito_test.py`. **Estoque medido em 09/10 (executado): §0.3.**
 
 | Tarefa | Antes | Depois | Nota |
 |---|---|---|---|
@@ -407,7 +450,7 @@ Pioras permitidas, com dano nomeado: laudo, devolução digitada, aprovação po
 
 ## 9. Testes
 
-### 9.1 SUP-0: antes de mudar a tela
+### 9.1 Etapa SUP-0: antes de mudar a tela
 1. **Linha de base completa** (executado: leitura de `docs/parceria/evidencias/v44-tabelas-05/un-20261005/bateria`, base `0cf6f90`; refazer no `884620c` com `docs/parceria/evidencias/v44-tabelas-05/un-20261005/00-bateria.sh` e guardar o hash). Por log: nome, contagem, código de saída e IDs.
    - Saem com código ≠ 0: componentes ajustes (#26), componentes interação (#10 PA, #14 famílias), etapas complemento (1), etapas desktop (1), cal01 (2), os_cenario (14/15).
    - **Saem com 0 mesmo falhando** (julgar pela linha RESULTADO/FALHAS): partest (T1-C), consumo_divergente (18/19), cadp_fix (11/15), cotest (CO-01 a CO-04 e CO-02det, "faixa com 7 etapas"), getest (GE-04 `pc088_unico`), vetest (OF-103), testes_pedido (T05).
@@ -425,13 +468,14 @@ Pioras permitidas, com dano nomeado: laudo, devolução digitada, aprovação po
 - N3: `estEntregarReq` com um item inválido não grava nada (`c.rev`, lotes e `c.movs.length` iguais).
 - N4: a mesma chave duas vezes → recibo, sem movimento; `ver` diferente → conflito, sem movimento.
 - N5: liberar parcela sem laudo é recusado; reprovado mantém; lote vencido não aprova. **N5b:** devolução bloqueada de 100 kg (REQ-031) + NF com 2.000 kg em quarentena no M26-07: o laudo da NF libera 2.000 kg e mantém os 100 kg (hoje libera 2.100, executado).
-- N6: sobre `estAprovar(c,'INV-2609',por)`: `por='Rui (almoxarife)'` (contou) é recusado e `c.movs` não muda; `por='Ana (gestora)'` aplica −600 kg e grava "Ana". **N6b:** o contador ainda consegue "Recontar".
+- N6: sobre `estAprovar(c,'INV-2609',por)`: `por='Rui (almoxarife)'` (contou, sem papel de gestor) é recusado e `c.movs` não muda; `por='Ana (gestora)'` aplica −600 kg e grava "Ana", sem revisão pendente; Ana contou e aprova → vale com "Decisão do gestor registrada · revisão independente pendente (Ana contou e decidiu)" (§0.3). **N6b:** o contador ainda consegue "Recontar".
 - N7: recusar relato sem motivo, ou com motivo só de espaços, é recusado.
 - N8: devolução acima da custódia é recusada.
 - N9: aceite com falta > 0 (80 L na REQ-035, custódia 65) pelo próprio almoxarife que enviou é recusado; pela gestora, baixa 15 L e grava "Ana".
 - N10: contagem de 7.900 kg no N26-03 grava o ajuste com `afeta`, e nenhuma mensagem contém "8.000".
 - N11: toda função grava o `por` recebido; sem `por`, "Rui (almoxarife)".
 - N12: rótulo da REQ-021 traz "1.850 bandejas" e "400 sacos".
+- F5 (CTL-2, executado 09/10): turno do app retido por duplicidade (mesma data de um dia já somado pela web) não vira linha, contador nem item no Estoque; "mesmo turno" o mantém fora; "outro turno" o traz uma vez só, "Aguardando gestora".
 
 **`est_fila_test.py`** (navegador):
 - 4 seções (eram 6); contadores da Santa Rita "3 a entregar · 1 sobra", "1 nota · 1 laudo", "1 a contar · 1 ajuste"; Lagoa Grande "1 a entregar"; Todas "4 a entregar · 1 sobra". Trocar a fazenda muda linhas e contadores; Boa Vista mostra "Ver Santa Rita".
@@ -464,7 +508,7 @@ Pioras permitidas, com dano nomeado: laudo, devolução digitada, aprovação po
 | `acao_unica_test.py` (`:147`, `:165`, casos 27 e 31), `componentes_test.py:91`, `etapas_celular_test.py:104` | listas de seções e rótulos; **depois do merge da SAF-única**, que reescreve os mesmos arquivos | uma primária, navegar não executa, sem duplicata, 360 px |
 | `os_cenario_test.py:54, 74`, `map_aprov_test.py:38`, `map_decisoes_test.py:67, 80`, `testes_pedido.py`, `irr_fluxo_test.py` | href exato → prefixo `EST.dc.html#req=`/`#lote=` | devolução libera o encerramento; o Mapa reflete; continua proibido o link SU-07 |
 | `mbtest.py:92` | sai o MB-05det | — |
-| `verif_ce_est.py`, `verif_ce_cmpA.py`, `verif_ce_cmpB.py` | migrar para a bateria: lote existente com outra validade (`verif_ce_est.py:35`), filtro que não revela o saldo (`:69`), recontagem com outro contador (`:75`), PC no dia exato da falta, motivo só com espaços | FEFO continua lacuna (`cenario.js:42`) |
+| `verif_ce_est.py`, `verif_ce_cmpA.py`, `verif_ce_cmpB.py` | migrar para a bateria: lote existente com outra validade (`verif_ce_est.py:35`; **migrado em 10/10**: `sup_unit` N13 e `esttest` parte 1, DEC §1.31), filtro que não revela o saldo (`:69`), recontagem com outro contador (`:75`), PC no dia exato da falta, motivo só com espaços | FEFO continua lacuna (`cenario.js:42`) |
 | `sutest.py`, `app_*` | não mudam (telas SU ocultas; assinaturas `cen*` compatíveis, `por` opcional) | estorno, concorrência, app |
 
 ---
@@ -473,19 +517,19 @@ Pioras permitidas, com dano nomeado: laudo, devolução digitada, aprovação po
 
 | PR | Branch | Conteúdo | Arquivos | Entra depois de |
 |---|---|---|---|---|
-| **SUP-0** | `claude/v44-sup-00` | §9.1 inteiro | testes novos, `est_lib.py` (`ir_secao`), `ferramentas/acoes_duplicadas.py` | pode correr já, em paralelo |
-| **SUP-1** | `claude/v44-sup-01` | endereços e apelidos; contadores neutros (só `ui37.py` + `PREVALS`); Ver como (abertura e rótulo, sem decisões); filtro de fazenda real; links da O.S., do Mapa e da irrigação; EST → `#OS-`; bloqueio da conferência na O.S. (`:242-244, 287-291`); comparação por prefixo | `processo_estoque.py`, `ui37.py`, `processo_os.py`, `inicio.py`, `irrigacao_estado.js`, testes de href | #43 e #44; **SAF-única** (por `acao_unica_test.py` e `etapas_celular_test.py`). O BEN-1c reaproveita o `#sec` |
-| **SUP-2a** | `claude/v44-sup-02` | Atenda requisições (`g_req`, painel, "Separe:"); `cenMudar` com `cmd` (G04) para entregar, devolver e conciliar; travas no `cenEntregar`; semente `res0` + `CEN0.v`; `est.js`; `estEntregarReq` (M14); `por` em todas as funções; devolução em branco; recusa com motivo; consumo acima da custódia pela gestora; linhas fora/sem requisição; `epk` com unidade do item; rótulo do painel | `cenario.js`, `cenario.py`, `processo_estoque.py`, `est.js` (novo), `engine.py` (só `:1286`), testes | SUP-1 |
-| **SUP-2b** | `claude/v44-sup-03` | Receba e inspecione (parcelas, laudo, Apta calculada, NF contra pedido); Faça contagens (contador no ajuste, `afeta`, causa no painel, Contar local); Confira saldos (lote sem árvore, locais da fonte única, Movimentos, contagem cega na consulta); saída da aba Almoxarife e do MB-05det. CONTROLE-01 itens 1 e 2 | `cenario.js`, `processo_estoque.py`, `est.js`, `mobile.py`, testes | SUP-2a |
-| **PCM 1a → 1b** | PR #45 | sobre a forma nova do EST; o 1b estende `cenMudar` com `cmd`, M06 e M14 para OM, e acrescenta o filtro Natureza no EST | conforme PCMS §11, com as mudanças do §7 | SUP-2b |
+| **Etapa SUP-0** | `claude/v44-sup-00` | §9.1 inteiro | testes novos, `est_lib.py` (`ir_secao`), `ferramentas/acoes_duplicadas.py` | pode correr já, em paralelo |
+| **Etapa SUP-1** | `claude/v44-sup-01` | endereços e apelidos; contadores neutros (só `ui37.py` + `PREVALS`); Ver como (abertura e rótulo, sem decisões); filtro de fazenda real; links da O.S., do Mapa e da irrigação; EST → `#OS-`; bloqueio da conferência na O.S. (`:242-244, 287-291`); comparação por prefixo | `processo_estoque.py`, `ui37.py`, `processo_os.py`, `inicio.py`, `irrigacao_estado.js`, testes de href | #43 e #44; **SAF-única** (por `acao_unica_test.py` e `etapas_celular_test.py`). O BEN-1c reaproveita o `#sec` |
+| **Etapa SUP-2a** | `claude/v44-sup-02` | Atenda requisições (`g_req`, painel, "Separe:"); `cenMudar` com `cmd` (G04) para entregar, devolver e conciliar; travas no `cenEntregar`; semente `res0` + `CEN0.v`; `est.js`; `estEntregarReq` (M14); `por` em todas as funções; devolução em branco; recusa com motivo; consumo acima da custódia pela gestora; linhas fora/sem requisição; `epk` com unidade do item; rótulo do painel | `cenario.js`, `cenario.py`, `processo_estoque.py`, `est.js` (novo), `engine.py` (só `:1286`), testes | Etapa SUP-1 |
+| **Etapa SUP-2b** | `claude/v44-sup-03` | Receba e inspecione (parcelas, laudo, Apta calculada, NF contra pedido); Faça contagens (contador no ajuste, `afeta`, causa no painel, Contar local); Confira saldos (lote sem árvore, locais da fonte única, Movimentos, contagem cega na consulta); saída da aba Almoxarife e do MB-05det. CONTROLE-01 itens 1 e 2 | `cenario.js`, `processo_estoque.py`, `est.js`, `mobile.py`, testes | Etapa SUP-2a |
+| **PCM 1a → 1b** | PR #45 | sobre a forma nova do EST; o 1b estende `cenMudar` com `cmd`, M06 e M14 para OM, e acrescenta o filtro Natureza no EST | conforme PCMS §11, com as mudanças do §7 | Etapa SUP-2b |
 | **PCM 1c-dados** | — | `c.pedidos`, emitir grava no cenário, `cenReprogramarPC` com versões, NF contra pedido | conforme PCMS | 1b |
-| **SUP-3** (= 1c-tela) | `claude/v44-sup-04` | Compras: lista, detalhe Cote/Decida, Acompanhe pedidos, Ver como Direção, SC como linha, nome "Compras", vocabulário único com o SAF, filtro Natureza; saem `g_dem`/`g_apr`/`g2steps` | `processo_compras.py`, `safra.js` (situação), `ui37.py:41` e nomes (PCMS:54), `comp_lib.py` se preciso, testes | SAF-única e PCM 1c-dados |
+| **Etapa SUP-3** (= 1c-tela) | `claude/v44-sup-04` | Compras: lista, detalhe Cote/Decida, Acompanhe pedidos, Ver como Direção, SC como linha, nome "Compras", vocabulário único com o SAF, filtro Natureza; saem `g_dem`/`g_apr`/`g2steps` | `processo_compras.py`, `safra.js` (situação), `ui37.py:41` e nomes (PCMS:54), `comp_lib.py` se preciso, testes | SAF-única e PCM 1c-dados |
 
 **Sobreposições declaradas na reserva:** `engine.py` e `g2lib.js` (SAF-única; esta frente só toca `engine.py:1286` e não toca `g2lib.js`); `acao_unica_test.py`, `etapas_celular_test.py`, `comp_lib.py`, `cmptest.py`, `saf_cmp_continuidade_test.py` (SAF-única: depois do merge dela); `cenario.js`, `cenario.py`, `processo_estoque.py`, `processo_os.py` (PCM: SUP antes do 1a, ou reordenar pelo Codex); `acoes_duplicadas.py` (V44-ACAO).
 
 **Validação do proprietário:**
-- Estoque depois do SUP-2b. Tarefa curta: "entregue a REQ-039, receba a sobra da OS-0417 e aprove o ajuste do INV-2609 como Ana".
-- Compras depois do SUP-3 e do CONTROLE-01 item 10. Tarefa curta: "cote e mande à Direção a SOL-2026-07; aprove como Direção".
+- Estoque depois da Etapa SUP-2b. Tarefa curta: "entregue a REQ-039, receba a sobra da OS-0417 e aprove o ajuste do INV-2609 como Ana".
+- Compras depois da Etapa SUP-3 e do CONTROLE-01 item 10. Tarefa curta: "cote e mande à Direção a SOL-2026-07; aprove como Direção".
 - Cada uma exige a bateria sem falha nova contra a linha de base e o parecer do Codex (AGENTS §3.1-3.2).
 
 ---
@@ -500,7 +544,7 @@ Pioras permitidas, com dano nomeado: laudo, devolução digitada, aprovação po
 | AC-SUP-04 | Entregar inteira: tudo ou nada; mesma chave não repete; toque duplo entrega uma REQ; O.S. impedida e entrega acima da reserva própria recusadas pela função; reserva de outra O.S. intacta | `node sup_unit.js` (N1-N4, N2b) + `est_fila_test.py` |
 | AC-SUP-05 | Devolução digitada; recusa com motivo não vazio; consumo acima da custódia decidido por outra pessoa; CC-301 e CC-302 com linha e ação | `sup_unit.js` (N7-N9) + `consumo_divergente_test.py` |
 | AC-SUP-06 | Quarentena só sai por laudo, parcela por parcela; reprovado e vencido continuam bloqueados | `sup_unit.js` (N5, N5b) |
-| AC-SUP-07 | Quem contou não aprova; recontar continua livre; a trilha grava quem aprovou | `sup_unit.js` (N6, N6b) |
+| AC-SUP-07 | Quem contou sem o papel de gestor não aprova; o gestor que contou decide com revisão independente pendente gravada; recontar continua livre; a trilha grava quem aprovou | `sup_unit.js` (N6, N6b, N6t) |
 | AC-SUP-08 | Contagem cega em formulário, linha, filtro, mensagens e Saldos; contagem abaixo do reservado é gravada | `sup_unit.js` (N10) + `est_fila_test.py` |
 | AC-SUP-09 | Comprador não registra a decisão da Direção; Ver como rotulado "simulação" e gravado em todo movimento | `cmp_fila_test.py`, `sup_unit.js` (N11) |
 | AC-SUP-10 | Reprogramar acrescenta versão; pedido emitido aparece para receber | `cmp_fila_test.py` |

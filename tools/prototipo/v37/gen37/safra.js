@@ -301,25 +301,17 @@ function classeOc(dt,mi,ini,fim){ if(ini&&dt<ini) return 'antes'; if(fim&&dt>fim
 function fmtOcup(o){ if(o===null||o===undefined) return 'não calculável'; if(o<=0) return '—'; if(o<1) return '<1 %'; return Math.round(o).toLocaleString('pt-BR')+' %'; }
 // atividades em uso de uma operação nesta safra (fonte única do "N atividades" da g_op e do alcance do "Todas")
 function atvEmUso(oc,op){ const s=new Set(); oc.forEach(i=>{ if(i.a&&i.a.op===op) s.add(i.a.nome); }); return s; }
-// capSaf(oc, outras, recursos, meses, dias): oc = ocorrências desta safra, com i.cls (classeOc pelo período dela); outras = [{id, nome,
-// ini, fim, oc}] das safras abertas da mesma fazenda. Ocorrência com etiqueta do calendário (antes do início, depois do fim, fora) conta
-// no custo e não na capacidade (§3.4, FORA-DE-ESCOPO "Regra A"; revisão SAF, S3.1). SAF-C02: a etiqueta de cada ocorrência sai do
-// período da safra de ORIGEM, a desta e a de cada outra, qualquer que seja a safra aberta: a demanda do mês não depende da navegação.
-// g.fora = carga que ficou fora da conta num mês do calendário ({sid: null = desta safra, cls, mi, h, n = ocorrência}), para o veredito.
-// Contrato (verificação SAF-C02): cada ocorrência desta safra traz cls e cada outra safra traz ini e fim (null = sem período); sem eles a
-// conta voltaria a depender da safra aberta, então o erro é explícito. A célula soma as parcelas de cada safra em ordem fixa (crescente):
-// com 3 ou mais safras, a ordem da soma em ponto flutuante não muda o texto exibido conforme a safra aberta.
-function capContrato(oc,outras){ (oc||[]).forEach(i=>{ if(!('cls' in i)) throw new Error('capSaf: ocorrência desta safra sem a etiqueta cls do período dela'); });
-  (outras||[]).forEach(s=>{ if(!('ini' in s)||!('fim' in s)) throw new Error('capSaf: a safra '+s.id+' chegou sem o período (ini e fim)'); }); }
-function capSaf(oc,outras,recursos,meses,dias){ capContrato(oc,outras); const M=meses.length; const Z=()=>new Array(M).fill(0); const G={}; let n=0;
-  recursos.forEach(r=>{ G[r.id]=Object.assign(capRec(r,meses,dias),{dThis:Z(),dThisAt:Z(),dOth:Z(),oth:{},sim:Z(),semH:Z(),pendSR:Z(),fora:[]}); });
-  const add=(i,own,s)=>{ const sid=own?null:s.id, ix=n++; if(!(i.mi>=0)) return; const cl=own?i.cls:classeOc(i.dt,i.mi,s.ini,s.fim);
-    if(cl&&cl!=='cal'){ cargaItens(i).forEach(c=>{ const g=G[c.k]; if(g&&c.h>0) g.fora.push({sid,cls:cl,mi:i.mi,h:c.h,n:ix}); }); return; } const cs=cargaItens(i);
+// capSaf(oc, outras, recursos, meses, dias): oc = ocorrências desta safra; outras = [{id, nome, oc}] das safras abertas da mesma fazenda.
+// Ocorrência desta safra com etiqueta do calendário (i.cls de classeOc: antes do início, depois do fim, fora) conta no custo e não na
+// capacidade (§3.4, FORA-DE-ESCOPO "Regra A"; revisão SAF, S3.1). As das outras safras entram como estão: são a carga real do mês.
+function capSaf(oc,outras,recursos,meses,dias){ const M=meses.length; const Z=()=>new Array(M).fill(0); const G={};
+  recursos.forEach(r=>{ G[r.id]=Object.assign(capRec(r,meses,dias),{dThis:Z(),dThisAt:Z(),dOth:Z(),oth:{},sim:Z(),semH:Z(),pendSR:Z()}); });
+  const add=(i,own,sid)=>{ if(!(i.mi>=0)||(own&&i.cls&&i.cls!=='cal')) return; const cs=cargaItens(i);
     cs.forEach(c=>{ const g=G[c.k]; if(!g) return; if(own){ g.dThis[i.mi]+=c.h; g.dThisAt[i.mi]+=c.ha; if(c.semRec) g.pendSR[i.mi]++; } else { g.dOth[i.mi]+=c.h; (g.oth[sid]||(g.oth[sid]=Z()))[i.mi]+=c.h; }
       g.sim[i.mi]=Math.max(g.sim[i.mi],c.sim); });
-    if(i.rp&&i.rp.falta&&i.rp.falta.semHoras>1e-9){ /* "≥" com a área sem horas de qualquer safra elegível: a mesma marca nas duas vistas */ const ks={}; cs.forEach(c=>{ ks[c.k]=1; }); Object.keys(ks).forEach(k=>{ if(G[k]) G[k].semH[i.mi]+=i.rp.falta.semHoras; }); } };
-  (oc||[]).forEach(i=>add(i,true,null)); (outras||[]).forEach(s=>(s.oc||[]).forEach(i=>add(i,false,s)));
-  Object.values(G).forEach(g=>{ g.cells=meses.map((m,mi)=>{ const d=[g.dThis[mi]].concat(Object.keys(g.oth).map(o=>g.oth[o][mi])).sort((a,b)=>a-b).reduce((a,b)=>a+b,0), cap=g.cap[mi], pu=g.porUn[mi];
+    if(own&&i.rp&&i.rp.falta&&i.rp.falta.semHoras>1e-9){ const ks={}; cs.forEach(c=>{ ks[c.k]=1; }); Object.keys(ks).forEach(k=>{ if(G[k]) G[k].semH[i.mi]+=i.rp.falta.semHoras; }); } };
+  (oc||[]).forEach(i=>add(i,true,null)); (outras||[]).forEach(s=>(s.oc||[]).forEach(i=>add(i,false,s.id)));
+  Object.values(G).forEach(g=>{ g.cells=meses.map((m,mi)=>{ const d=g.dThis[mi]+g.dOth[mi], cap=g.cap[mi], pu=g.porUn[mi];
       const nc=(h)=>h>1e-4?(pu>0?Math.max(Math.ceil(h/pu-1e-9),g.sim[mi]):-1):0;   // −1: sem horas de uma unidade no mês (guarda)
       const nec=nc(d), necThis=nc(g.dThis[mi]); const falta=(n)=>n<0||n>g.un; const red=d>1e-4&&falta(nec);
       return {mi,mes:m[1],d,dThis:g.dThis[mi],dOth:g.dOth[mi],cap,porUn:pu,ocup:d>1e-4?(cap>0?100*d/cap:null):0,nec,red,soma:red&&!falta(necThis),own:g.dThis[mi]>1e-4,ge:g.semH[mi]>1e-9,pendSR:g.pendSR[mi]}; });
@@ -334,25 +326,17 @@ function capJanelas(oc){ const A={}; oc.forEach(i=>{ if(!(i.mi>=0)) return; cons
   const ks=Object.keys(A); return {M:ks.length,J:ks.filter(k=>A[k].sem).length}; }
 function capNomes(l){ return l.length>1?l.slice(0,-1).join(', ')+' e '+l[l.length-1]:l.join(''); }
 function capH(n){ return Number(n).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}); }
-// carga de outras safras fora da conta (SAF-C02) nas células com demanda desta safra: por safra e motivo, ocorrências e horas por recurso
-function capForaOutras(G){ const by={}, ord=[]; Object.values(G).forEach(g=>(g.fora||[]).forEach(f=>{ if(f.sid===null||!g.cells[f.mi].own) return;
-    const k=f.sid+'|'+f.cls; let x=by[k]; if(!x){ x=by[k]={sid:f.sid,cls:f.cls,oc:{},h:{},rec:[]}; ord.push(x); } x.oc[f.n]=1;
-    if(!(g.nome in x.h)){ x.h[g.nome]=0; x.rec.push(g.nome); } x.h[g.nome]+=f.h; }));
-  return ord.map(x=>({sid:x.sid,cls:x.cls,n:Object.keys(x.oc).length,h:x.rec.map(r=>[r,x.h[r]])})); }
 // veredito (§3.1): o único lugar de "cabe", do que falta e do que ficou fora da conta. x = {semPlano:[{local,area}], aPlano, cls (contagens antes/
-// fora/depois/cal), ini e fim (dd/mm/aaaa), outras {id: nome}, pend (ocorrências sem alocação), semHoras (ha), incompleto (texto do R3)}
+// fora/depois/cal), ini (dd/mm/aaaa), outras {id: nome}, pend (ocorrências sem alocação), semHoras (ha), incompleto (texto do R3)}
 function capVeredito(G,oc,x){ const nfa0=(n)=>Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2});
   const fora=[]; if(x.semPlano.length) fora.push(capNomes(x.semPlano.map(c=>c.local))+' ('+nfa0(x.semPlano.reduce((a,c)=>a+(Number(c.area)||0),0))+' ha), sem plano');
   if(x.cls.antes) fora.push(x.cls.antes+(x.cls.antes>1?' ocorrências':' ocorrência')+' antes do início da safra ('+x.ini+')');
   if(x.cls.fora) fora.push(x.cls.fora+(x.cls.fora>1?' ocorrências':' ocorrência')+' fora do calendário');
   if(x.cls.depois) fora.push(x.cls.depois+(x.cls.depois>1?' ocorrências':' ocorrência')+' depois do fim da safra');
-  capForaOutras(G).forEach(f=>fora.push(f.n+(f.n>1?' ocorrências da ':' ocorrência da ')+(x.outras[f.sid]||f.sid)+(f.cls==='antes'?' antes do início':' depois do fim')+' dela ('+capNomes(f.h.map(r=>r[0]+' '+capH(r[1])+' h'))+')'));
   const foraTxt=fora.length?' Fora da conta: '+fora.join('; ')+'.':'';
   const jn=capJanelas(oc); const prazo=jn.J?' Prazo por talhão não verificado: '+jn.J+' de '+jn.M+(jn.M>1?' atividades':' atividade')+' sem janela.':'';
   if(!x.aPlano) return {R:'R0',cor:'',txt:''};
-  // R1: o motivo sai das etiquetas (verificação SAF-C02): todas fora do calendário, ou nenhuma no período da safra (antes, depois e fora contadas)
-  if(!x.cls.cal) return {R:'R1',cor:'gray',txt:(oc.length&&x.cls.fora===oc.length)?'Capacidade não calculada: '+(oc.length>1?'as '+oc.length+' ocorrências desta safra ficam':'a ocorrência desta safra fica')+' fora do calendário do protótipo ('+x.periodoCal+').'
-    :'Capacidade não calculada: nenhuma ocorrência desta safra cai no período dela'+(x.fim?' ('+x.ini+' a '+x.fim+')':'')+(x.cls.fora?' dentro do calendário do protótipo ('+x.periodoCal+')':'')+'.'+foraTxt};
+  if(!x.cls.cal) return {R:'R1',cor:'gray',txt:'Capacidade não calculada: '+(oc.length>1?'as '+oc.length+' ocorrências desta safra ficam':'a ocorrência desta safra fica')+' fora do calendário do protótipo ('+x.periodoCal+').'};
   const aperto=(g)=>{ const c=g.necMax; return c.nec<0?Infinity:c.nec/Math.max(g.un,1e-9); };
   const reds=Object.values(G).filter(g=>g.reds.length).sort((a,b)=>aperto(b)-aperto(a));
   if(reds.length){ const tr=reds.map((g,ix)=>{ const c=g.necMax; const n=c.nec<0?'horas':c.nec;
@@ -475,21 +459,16 @@ function talhaoArea(t){ return Number((D2.talhoes||{})[t])||0; }
 // ---- painel "Planejar T1" e "Vincular ciclo C1" (§2, R-17, R-19, R-24) ----
 function ocLinha(self,t){ const info=self.__oc; return info&&info.linhas?info.linhas.find(x=>x.t===t)||null:null; }
 function maisUsado(cs,f){ const n={}; cs.forEach(c=>{ const x=c.v[f]; if(x) n[x]=(n[x]||0)+1; }); return Object.keys(n).sort((a,b)=>n[b]-n[a])[0]||''; }
-// nomes que uma parcela nova não pode repetir (R-19): os desta safra e as faixas do talhão ainda ocupadas no início dela, inclusive as de
-// ocupações futuras (SAF-C01: o café plantado numa safra de 2020 não recebe a parcela da soja de 2027, que a T-faixa recusaria)
-function faixasEmUso(self,saf,t,rid){ const S=safList(self); const so=S[saf]; const usados=cultsDe(self,saf).filter(c=>c.id!==rid).map(c=>c.v.local); if(!so) return usados;
-  const ctx=ocCtxSaf(); const a=ocDia(so.ini);
-  return usados.concat(ocOcupacoes(ctx,S,ocTodos(self).filter(c=>c.faz===so.faz&&c.talhao===t&&c.saf!==saf)).filter(o=>ocLib(ctx,o,'pior')>a).map(o=>o.faixa)); }
-// parcela sugerida (R-19): a faixa de fora que libera exatamente a Área livre no dia de "Livre a partir de"; senão a próxima letra livre
+// parcela sugerida (R-19): a faixa de fora que libera exatamente a Área livre no dia de "Livre a partir de"; senão a próxima letra
 function sugerirParcela(self,saf,L,area,rid){ const t=L.t, T=talhaoArea(t); if(area>=T-0.005) return t; const ctx=ocCtxSaf();
   const usados=cultsDe(self,saf).filter(c=>c.id!==rid).map(c=>c.v.local);
   const f=L.fora.find(o=>o.faixa!==t&&usados.indexOf(o.faixa)<0&&Math.abs(o.area-area)<=0.005&&(ocLib(ctx,o,'pior')===L.desde||ocLib(ctx,o,'est')===L.desde));
-  return f?f.faixa:nextNome(t,faixasEmUso(self,saf,t,rid)); }
+  return f?f.faixa:nextNome(t,usados.concat(L.fora.map(o=>o.faixa))); }
 // nome final da parcela (R-19): o MESMO na trava, no plantio mínimo, na prévia e no que se grava (revisão SAF, S2.2). Área cheia = talhão
 // inteiro; nome digitado vale (repetido nesta safra o cultCheck recusa); vazio ou o nome do talhão = a parcela sugerida
 function parcelaFinal(self,saf,t,area,local,rid){ const T=talhaoArea(t); if(!(area<T-0.005)) return t; const nm=String(local||'').trim();
   if(nm&&nm!==t) return nm; const L=ocLinha(self,t); if(L) return sugerirParcela(self,saf,L,area,rid);
-  return nextNome(t,faixasEmUso(self,saf,t,rid)); }
+  return nextNome(t,cultsDe(self,saf).filter(c=>c.id!==rid).map(c=>c.v.local)); }
 function ocNovoRec(self,saf,d,id){ const t=d.talhao; const T=talhaoArea(t); const a=g2num(d.area); const area=isNaN(a)?0:a; const inteiro=area>=T-0.005;
   return {id:id||'__novo',saf,faz:safFaz(self,saf),faixa:parcelaFinal(self,saf,t,area,d.local,id||'__novo'),tipo:inteiro?'Talhão inteiro':'Parcela',talhao:t,area,cult:d.cult,var:d.var||'',
     plantio:d.plantio||'',plano:d.plano||null,colheita:(!d.plano&&d.colheita)?d.colheita:null,colheita_real:d.colheita_real||null,ciclo:d.ciclo||null,origem:''}; }
@@ -498,12 +477,6 @@ function pminDraft(self,saf,d,desde){ const rec=ocNovoRec(self,saf,d,d._rid||'__
   const key=JSON.stringify([rec.cult,rec.var,rec.plano,rec.area,rec.faixa,rec.tipo,desde,self.state.g2&&self.state.g2['g_cult_'+sk(saf)]?Object.keys(self.state.g2).length:0,todos.length]);
   self._pm=self._pm||{}; if(key in self._pm) return self._pm[key];
   const S=safList(self); const r=ocPlantioMin(ocCtxSaf(),S,todos,saf,rec,desde,T,null); self._pm[key]=r; return r; }
-// sem janela: se a trava no plantio digitado (ou no primeiro possível) é de área, o "Máximo" da M1 (S4 da verificação SAF-C01; cache como o pminDraft)
-function pmArea(self,saf,d,desde){ const rec=ocNovoRec(self,saf,d,d._rid||'__novo'); const T=talhaoArea(d.talhao); const ctx=ocCtxSaf();
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(String(rec.plantio||''))) rec.plantio=ocIso(desde+(rec.plano?ocAntecedencia(ctx,rec.plano):0));
-  const todos=ocTodos(self); const key=JSON.stringify([rec.cult,rec.var,rec.plano,rec.area,rec.faixa,rec.tipo,rec.plantio,desde,todos]);
-  self._pa=self._pa||{}; if(key in self._pa) return self._pa[key];
-  const chk=ocChecar(ctx,safList(self),todos,ocTroca(todos,rec),saf,rec.id,T); const M=chk.o?ocMaximo(ctx,chk,T):null; const r=M?r2(M.max):null; self._pa[key]=r; return r; }
 function abrirPlanejar(self,t){ const saf=self.state.saf; const L=ocLinha(self,t); if(!saf||!L||!L.planejar) return;
   const sp=GR('g_cult_'+sk(saf)); const cs=cultsDe(self,saf);
   // contexto herdado da safra (cultura, variedade e plano mais usados); quantidade e meta nunca vêm do último valor (AGENTS §3.3)
@@ -530,7 +503,7 @@ function cultLive(self,gid,k,d){ const saf=self.state.saf; if(!saf) return null;
   if(k==='colh_txt'){ const pl=planById(d.plano); if(!pl||!/^\d{4}-\d{2}-\d{2}$/.test(String(d.plantio||''))) return '—'; const rec=ocNovoRec(self,saf,d,d._rid); const so=safList(self)[saf];
     const o=ocMk(ctx,Object.assign({},rec,{colheita:null}),so); return ocBr(o.fim)+' · do plano'; }
   if(k==='pmin_txt'){ if(!d.talhao) return '—'; const L=ocLinha(self,d.talhao); const desde=(self._plan&&self._plan.desde!==undefined&&self._plan.t===d.talhao)?self._plan.desde:(L?L.desde:null);
-    if(desde===null||desde===undefined) return '—'; const pm=pminDraft(self,saf,d,desde); if(pm===null){ const mx=pmArea(self,saf,d,desde); return mx!==null?'reduza a área: máximo '+ocHa(mx)+' ha':'sem janela antes do fim da safra'; }
+    if(desde===null||desde===undefined) return '—'; const pm=pminDraft(self,saf,d,desde); if(pm===null) return 'sem janela antes do fim da safra';
     const dig=ocDia(d.plantio); return ocBr(pm)+(planById(d.plano)?' com este plano':'')+((dig!==null&&dig<pm)?' · a data digitada é anterior: confira a trava ou a pendência ao salvar':''); }
   if(k==='ocup_txt'){ if(!d.cult||!/^\d{4}-\d{2}-\d{2}$/.test(String(d.plantio||''))) return '—'; const rec=ocNovoRec(self,saf,d,d._rid); const o=ocMk(ctx,rec,safList(self)[saf]); return ocBr(o.ini)+' a '+(o.classe==='semdata'?'sem data':ocBr(o.fim))+(o.classe==='estimado'?' (estimado)':''); }
   return null; }
@@ -553,46 +526,40 @@ function letra(i){ let s=''; i++; while(i>0){ const m=(i-1)%26; s=String.fromCha
 function nextNome(t,usados){ for(let i=0;;i++){ const n=t+'-'+letra(i); if(usados.indexOf(n)<0) return n; } }
 function copyAdj(self,id){ const a=adjOf(self)[id]; return a?JSON.parse(JSON.stringify(a)):null; }
 function adjOf(self){ return self.state.adj||D2.ajustes; }
-/* ---- análise de solo (SOLO-01): aceites do cenário compartilhado, uma leitura por cenrev; a dose efetiva de cada chave (ajuste manual da
-   sessão, senão aceite, senão padrão), as atividades incluídas e as retiradas pela análise vêm de soloAtividades (solo.js, R14/R16) ---- */
-function soloSaf(self){ const k=self.state.cenrev||0; if(!self.__sac||self.__sac.k!==k){ const c=cenGet(); self.__sac={k,c,ac:((c.solo||{}).aceites)||{},ls:soloLaudos(c,SOLO0)}; } return self.__sac; }
-function soloCu(self,saf,c){ const pl=planById(c.v.plano); if(!pl||pl.cultura!==c.v.cult) return null; const S=safList(self)[saf]||{};
-  return {id:c.id,saf,faz:S.faz||'Santa Rita',local:c.v.local,tal:c.v.talhao||c.v.local,cultura:c.v.cult,area:Number(c.v.area)||0,meta:c.v.meta,plano:pl,plantio:c.v.plantio,dt:(a)=>dataAtv(c,a,pl)}; }
-function soloAlvoSaf(self){ const S=safList(self); const cs=[]; const sn={};
-  Object.keys(S).forEach(id=>{ sn[id]={nome:S[id].nome,ro:S[id].ro}; if(S[id].ro) return; cultsDe(self,id).forEach(c=>cs.push({faz:S[id].faz,tal:c.v.talhao||c.v.local,saf:id,plantio:c.v.plantio})); });
-  return soloAlvo(cs,sn); }
-/* limpo: sem aceites e sem sessão (a sugestão crua de cada chave, para o painel de insumos comparar com o rascunho); senão, contra a dose efetiva */
-function soloSugsSaf(self,saf,c,limpo){ const cu=soloCu(self,saf,c); if(!cu) return {sug:[],info:[],cu:null}; const x=soloSaf(self);
-  const ac=limpo?Object.fromEntries(Object.entries(x.ac).filter(e=>e[1].tipo==='incluir')):x.ac;   /* limpo (painel): doses comparadas com o rascunho; as inclusões gravadas entram (R22, revisão A3) */
-  const R=soloSugestoes({S0:SOLO0,ls:x.ls,aceites:ac,c:x.c,adj:limpo?{}:(adjOf(self)[c.id]||{}),alvo:soloAlvoSaf(self),todas:!!limpo},cu); R.cu=cu; return R; }
-function soloNacSaf(self,c){ return soloAcAtivos(soloSaf(self).ac,c.id,c.v.plano).length; }
-function ocorr(self,saf,poolsX){ const out=[]; const adj=adjOf(self); const pools=poolsX||poolsOf(self); const AC=soloSaf(self).ac;
+function ocorr(self,saf,poolsX){ const out=[]; const adj=adjOf(self); const pools=poolsX||poolsOf(self);
   cultRows(self,saf).forEach(c=>{ const pl=planById(c.v.plano); if(!pl||pl.cultura!==c.v.cult) return; const area=Number(c.v.area)||0;
-    soloAtividades({id:c.id,plano:pl},adj[c.id]||{},AC).atvs.forEach(x=>{ const a=x.a; const dt=dataAtv(c,a,pl); const cfs=cfgsOf(self,saf,a.op,a.nome);
+    pl.atividades.forEach(a=>{ const dt=dataAtv(c,a,pl); const cfs=cfgsOf(self,saf,a.op,a.nome);
       // a área da ocorrência se divide entre as configurações do formulário Rendimento; os insumos seguem dose × área e não mudam com a divisão
-      const rp=repartir(area,cfs.map(cfgIn),pools); const horas=rp.hconj||0;
+      const rp=repartir(area,cfs.map(cfgIn),pools); const horas=rp.hconj||0; const aj=adj[c.id]||{}; const A=String(a.id);
       // recursos (capacidade da etapa 3): horas × multiplicador = Σ horas de cada configuração × unidades dela (máquinas por grupo e pessoas)
-      const rec={}; if(horas>0) rp.itens.forEach((x2,i)=>{ const rc=(cfs[i]&&cfs[i].rec)||{}; Object.keys(rc).forEach(k=>{ rec[k]=(rec[k]||0)+x2.h*rc[k]/horas; }); });
-      // dose efetiva por chave (R14): sessão > aceite da análise > padrão; a origem segue para a memória da demanda (R21)
-      const prods=x.prods.filter(q=>q.dose!=='-').map(q=>{ const p=q.p; const dose=Number(q.dose); return {nome:prodNome(p.prod,c),grupo:p.grupo,un:p.un,preco:p.preco,dose,q:dose*area,orig:q.orig,laudo:q.ac?q.ac.laudo:''}; });
-      out.push({c,a,pl,dt,mi:mesIdx(dt),area,horas,dec:rp.decorrido,cop:rp.custo,cins:prods.reduce((s2,p)=>s2+p.q*p.preco,0),prods,rec,rp,cfs,
-        saldo:rp.saldo,diesel:rp.diesel,hh:rp.hh,pend:rp.pendente,incl:!!x.incl}); }); });
+      const rec={}; if(horas>0) rp.itens.forEach((x,i)=>{ const rc=(cfs[i]&&cfs[i].rec)||{}; Object.keys(rc).forEach(k=>{ rec[k]=(rec[k]||0)+x.h*rc[k]/horas; }); });
+      const prods=a.prods.map((p,i)=>{ const key=A+'|'+i; if(aj[key]==='-') return null; const dose=(aj[key]!==undefined)?Number(aj[key]):p.dose;
+        return {nome:prodNome(p.prod,c),grupo:p.grupo,un:p.un,preco:p.preco,dose,q:dose*area}; }).filter(Boolean)
+        .concat(Object.keys(aj).filter(k=>k.indexOf(A+'|+')===0).map(k=>{ const x=aj[k]; return {nome:prodNome(x.prod,c),grupo:x.grupo,un:x.un,preco:x.preco,dose:Number(x.dose),q:Number(x.dose)*area}; }));
+      out.push({c,a,pl,dt,mi:mesIdx(dt),area,horas,dec:rp.decorrido,cop:rp.custo,cins:prods.reduce((s,p)=>s+p.q*p.preco,0),prods,rec,rp,cfs,
+        saldo:rp.saldo,diesel:rp.diesel,hh:rp.hh,pend:rp.pendente}); }); });
   return out; }
-// demanda por produto (CTL-4): a conta única demFazenda (cal01.js) com as ocorrências do plano desta safra e das outras safras abertas da mesma
-// fazenda (ocorr, com os ajustes da tela) e, do MESMO cenário compartilhado (cenDemEntradas), as O.S. (cenOsDem: o que cada ordem ainda tira do
-// almoxarifado; a parte do plano que ela cobre sai do plano), o físico apto da própria fazenda, as reservas e os recebimentos (cenEstDem).
-// A Compra e o Mapa › Insumos leem a mesma conta.
-function demanda(self,saf){ const safRows=g2rows(self,GR('g_saf')); const me=safRows.find(r=>r.id===saf); const faz=(me&&me.v.faz)||'Santa Rita';
-  const ordem={}, nomes={}; safRows.forEach((r,i)=>{ ordem[r.id]=i; nomes[r.id]=r.v.nome; });
-  const occ=[]; const vistos={}; vistos[sk(saf)]=1;
-  const add=(s)=>ocorr(self,s).forEach(o=>occ.push({saf:s,k:o.c.id+'|'+o.a.id,a:String(o.a.id),local:o.c.v.local,tal:o.c.v.talhao||ocTalhaoDe(o.c.v.local,o.c.v.tipo),
-    area:o.area,dt:o.dt||'',nome:o.a.nome,prods:o.prods}));   // área com até 2 casas na conta escrita (PRE-REV R5)
-  add(saf); safRows.forEach(r=>{ if(r.id===saf||r.ro||(r.v.faz||'Santa Rita')!==faz||vistos[sk(r.id)]) return; vistos[sk(r.id)]=1; add(r.id); });
-  const X=cenDemEntradas(cenGet(),{saf,faz,hoje:D2.hoje,viavel:D2.viavel,ordem,nomes,occ},{osb:D2.osb,est:D2.estb}); const m=demFazenda(X);   // ordens e estoque do mesmo cenário (revisão, achado 1)
-  Object.values(m).forEach(d=>{ d.quar=(X.quar||{})[d.nome]||0; d.memo=cal01Memo(d.cal,{un:d.un,res:d.res,quar:d.quar,cust:d.cust,custT:d.custT,quarC:d.quarC,quarRef:d.quarRef,cond:d.cond,condFalta:d.condFalta}); });
-  // partes fixas desta conta (plano da tela, sem ordens e estoque): a versão da SOL as guarda e a Compra refaz a conta com o cenário de agora
-  const ent={saf,faz,hoje:D2.hoje,viavel:D2.viavel,ordem,nomes,occ:occ.map(o=>Object.assign({},o,{prods:(o.prods||[]).map(p=>({nome:p.nome,grupo:p.grupo,un:p.un,preco:p.preco,dose:p.dose,q:p.q,orig:p.orig||'',laudo:p.laudo||''}))}))};   // origem da dose (R21 da análise de solo) vai junto: a Compra refaz a memória igual
-  Object.defineProperty(m,'_ent',{value:ent,enumerable:false}); return m; }
+// demanda por produto (CAL-01, cal01.js): uso = 1º uso de hoje em diante; a necessidade sai da projeção datada do insumo com as outras
+// origens do mesmo estoque — safras abertas da mesma fazenda (agregadas por data), reservas para outros destinos e recebimentos com data.
+// Uso planejado antes de hoje já foi realizado (sai da demanda residual: bruta = residual, real = realizado); compra nova só chega na data viável.
+function demanda(self,saf){ const m={}; const safRows=g2rows(self,GR('g_saf')); const me=safRows.find(r=>r.id===saf); const faz=(me&&me.v.faz)||'Santa Rita';
+  const ordem=(id)=>{ const i=safRows.findIndex(r=>r.id===id); return i<0?99:i; };
+  ocorr(self,saf).forEach(o=>o.prods.forEach(p=>{ const d=m[p.nome]||(m[p.nome]={nome:p.nome,grupo:p.grupo,un:p.un,preco:p.preco,bruta:0,uso:'',evs:[]});
+   d.bruta+=p.q; if(o.dt&&o.dt>=(D2.hoje||'')&&(!d.uso||o.dt<d.uso)) d.uso=o.dt;
+   d.evs.push({dt:o.dt||'',q:p.q,tipo:'dem',own:true,ord:ordem(saf),chave:o.c.id+'|'+o.a.id,t:o.c.v.local+' · '+o.a.nome,calc:nf(p.dose,2)+' '+p.un+'/ha × '+nfa(o.area)+' ha'}); }));   // área com até 2 casas (PRE-REV R5)
+  const vistos={}; vistos[sk(saf)]=1;
+  safRows.forEach(r=>{ if(r.id===saf||r.ro||(r.v.faz||'Santa Rita')!==faz||vistos[sk(r.id)]) return; vistos[sk(r.id)]=1; const ag={}, ks=[];
+    ocorr(self,r.id).forEach(o=>o.prods.forEach(p=>{ if(!m[p.nome]) return; const k=p.nome+'|'+o.dt; if(!ag[k]){ ag[k]={nome:p.nome,dt:o.dt||'',q:0,n:0,chaves:[]}; ks.push(k); }
+      ag[k].q+=p.q; ag[k].n++; ag[k].chaves.push(o.c.id+'|'+o.a.id); }));
+    ks.forEach(k=>{ const x=ag[k]; m[x.nome].evs.push({dt:x.dt,q:x.q,tipo:'dem',own:false,ord:ordem(r.id),chaves:x.chaves,t:r.v.nome+' · '+x.n+(x.n>1?' usos':' uso')}); }); });
+  Object.values(m).forEach(d=>{
+    (D2.reservas||[]).forEach(x=>{ if(x.item===d.nome&&x.faz===faz) d.evs.push({dt:x.dt,q:x.q,tipo:'res',own:false,ord:0,chave:x.chave,t:x.t}); });
+    (D2.recebDt||[]).forEach(x=>{ if(x.item===d.nome) d.evs.push({dt:x.dt,q:x.q,tipo:'rec',own:false,ord:0,ref:x.ref,t:x.t}); });
+    d.res=(D2.reservas||[]).filter(x=>x.item===d.nome&&x.faz===faz).reduce((a,x)=>a+x.q,0);
+    d.est=(D2.fisico||{})[d.nome]!==undefined?D2.fisico[d.nome]:(D2.estoque[d.nome]||0); d.rec=D2.receb[d.nome]||0;
+    const c=cal01(d.est,d.evs,0,{hoje:D2.hoje,viavel:D2.viavel}); d.liq=c.liq; d.falta=c.falta; d.antes=c.antes; d.tarde=c.tarde; d.valor=d.liq*d.preco;
+    d.plano=d.bruta; d.bruta=c.bruta; d.real=c.real; d.rup=c.rupRec; d.cob=c.cob;
+    d.quar=(D2.quar||{})[d.nome]||0; d.memo=cal01Memo(c,{un:d.un,res:d.res,quar:d.quar}); }); return m; }
 // produtividade da colheita (kg/ha) por cultura, a partir dos cultivos da safra aberta cujo plano (compatível) usa a operação; média ponderada pela área
 const KG_UN={'sc/ha':60,'t/ha/ano':1000,'kg/ha':1};
 function prodColheita(self,saf,op){ const by={};
@@ -789,7 +756,7 @@ function ocAvaliaCultivo(self,saf,rec){ const S=safList(self); const ctx=ocCtxSa
   if(chk.trav.some(x=>x[0]==='observado')||Object.keys(chk.pend).length){ pmin=ocPlantioMin(ctx,S,todos,saf,rec,base,T,null); }
   if(chk.trav.length){ const tp=chk.trav[0][0]; const msg=ocMsgTrava(ctx,chk,saf,T,pmin);
     const seg=chk.trav.find(x=>x[0]==='faixa')&&chk.mesmo.find(y=>y!==chk.o&&y.plantio>chk.o.plantio&&ocMesmaArea(y,chk.o)&&chk.trav.some(x=>x[1]===y.id||x[2]===y.id));
-    const p3=(seg&&ocPlantioMin(ctx,S,todos,saf,rec,base,T,null)===null)?' '+ocMsgSemJanela(ctx,chk.o,seg,base,saf,nextNome(chk.o.t,faixasEmUso(self,saf,chk.o.t,rec.id).concat([chk.o.faixa]))):'';
+    const p3=(seg&&ocPlantioMin(ctx,S,todos,saf,rec,base,T,null)===null)?' '+ocMsgSemJanela(ctx,chk.o,seg,base,saf):'';
     return {erro:msg+p3,campo:(tp==='safra'||tp==='soma')?'area':'plantio',pend:'',aviso:''}; }
   return {erro:'',pend:ocMsgPend(ctx,chk,saf,pmin),aviso:ocMsgAviso(ctx,chk)}; }
 // começo da busca do plantio mínimo de um cultivo: a liberação da ocupação anterior na mesma faixa (ou o início da safra)
@@ -827,7 +794,7 @@ function cultAfter(self,gid,rows,r,isNew){ let all=g2clone(soDaSafra(rows)); let
     // o mesmo nome que a trava conferiu (parcelaFinal, S2.2)
     if(a>=T-0.005){ x.v.local=t; x.v.tipo='Talhão inteiro'; x.decl=false; } else { x.v.local=parcelaFinal(self,saf,t,a,x.v.local,r.id); x.v.tipo='Parcela'; x.decl=true; }
     x.s.local=x.v.local; all.push(x); const fim=planById(x.v.plano)?(' · plano '+planById(x.v.plano).nome+'.'):(pl.vinc?'. Escolha o plano agronômico na linha (Aplicar plano).':'. Escolha o plano agronômico na linha.');
-    const livre=livreDepois(self,saf,t,leaves(all).filter(c=>c.v.talhao===t&&daSaf(c)));
+    const livre=T-leaves(all).filter(c=>c.v.talhao===t&&daSaf(c)).reduce((q,c)=>q+(Number(c.v.area)||0),0);
     msg=pl.vinc?('Ciclo vinculado: '+x.v.local+' · '+x.v.cult+' '+x.v.var+' desde '+br(x.v.plantio)+fim)
       :((x.v.tipo==='Parcela')?('Cultivo incluído como parcela '+x.v.local+' · '+nfa(Math.max(0,livre))+' ha livres em '+t+fim):('Cultivo incluído: '+t+' inteiro'+fim)); }
   else if(r){ const x=g2find(all,r.id); if(x){ x.v.unm=unMetaDe(x.v.cult,x.v.unm); if(x.v.plano) x.v.colheita=''; } }
@@ -841,19 +808,6 @@ function cultAfter(self,gid,rows,r,isNew){ let all=g2clone(soDaSafra(rows)); let
   const norm=normCult(all); const st=g2st(self,gid); const x0=Object.assign({},GR(gid).x0||{},st.x||{}); norm.forEach(y=>{ if(!y.grp) return; [y.id,'grp_'+y.v.talhao].forEach(k=>{ if(x0[k]!==false) x0[k]=true; }); });
   if(tNovo&&x0['grp_'+tNovo]!==false) x0['grp_'+tNovo]=true;
   g2set(self,gid,{rows:norm,x:x0}); if(msg) self.setState({g2toast:msg}); }
-// área livre do talhão depois de gravar (SAF-C01): a mesma conta da coluna Área livre e do painel (ocTabela, R-09), com as folhas novas desta
-// safra no lugar das gravadas e as ocupações de fora (perene sem fim e outras safras)
-function livreDepois(self,saf,t,folhas){ const S=safList(self); const so=S[saf]; if(!so) return 0; const ctx=ocCtxSaf();
-  const todos=ocTodos(self).filter(c=>c.saf!==saf).concat(folhas.map(c=>ocCult(c,saf,so.faz)));
-  const L=ocTabela(ctx,so,ocOcupacoes(ctx,S,todos),[[t,talhaoArea(t)]],S)[0]; return L.length?L[0].area_livre:0; }
-// capacidade do Dividir (SAF-C01): área do talhão − maior área física das ocupações de fora (outras safras) em núcleo nos dias de núcleo das
-// parcelas (ocPior, a conta da T-soma): parcelas que somam até ela não travam pela área. Sem parcela com plantio, o período desta safra
-function dvCap(self,t,rows){ const saf=self.state.saf; const T=talhaoArea(t); const S=safList(self); const so=S[saf]; if(!so) return {cap:T,pior:0,p:null};
-  const ctx=ocCtxSaf(); const fora=ocOcupacoes(ctx,S,ocTodos(self).filter(c=>c.faz===so.faz&&c.talhao===t&&c.saf!==saf));
-  let g=(rows||[]).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(String(x.plantio||''))).map((x,i)=>ocMk(ctx,{id:'__dv'+i,saf,faz:so.faz,talhao:t,faixa:String(x.local||'').trim()||t+'-?'+i,tipo:'Parcela',
-    area:g2num(x.area)||0,cult:x.cult,var:x.var||'',plantio:x.plantio,plano:x.plano||null,colheita:x.colheita||null},so));
-  if(!g.length){ const a=ocDia(so.ini), b=ocDia(so.fim); g=[{plantio:a,ini:a,nuc:b,fim:b,folga:1}]; }
-  const p=ocPior(ctx,g,fora); const pior=p?p.pior:0; return {cap:Math.max(0,Math.floor((T-pior)*100+1e-6)/100),pior:r2(pior),p,g}; }   // para baixo, como o "Máximo" da M1
 // ---- painel: dividir o talhão em quantas parcelas precisar ----
 // unidade da meta = unidade de mercado da cultura (DEC-0510-03), nunca escolhida na linha (revisão SAF, S3.7)
 function unMetaDe(cult,un0){ return (D2.unMeta||{})[cult]||un0||'sc/ha'; }
@@ -867,10 +821,9 @@ function openDiv(self,t,extra){ const saf=self.state.saf; if(!saf){ self.setStat
   if(!ro&&cur.some(c=>c.v.ciclo)){ self.setState({g2toast:'Ciclo perene vinculado: área, plantio e cultura vêm do ciclo; não se divide aqui.'}); return; }
   let lst=cur.map(dvRow); let base;
   const inteiro=(cur.length===1&&cur[0].v.tipo!=='Parcela');
-  if(!ro&&inteiro&&!extra){ const em=faixasEmUso(self,saf,t,cur[0].id); const n1=nextNome(t,em), n2=nextNome(t,em.concat([n1]));
-    lst[0].local=n1; lst.push(Object.assign({},lst[0],{id:null,local:n2,from:n1,decl:true,adj:copyAdj(self,cur[0].id)})); lst=dvDist(lst,dvCap(self,t,lst).cap); base=JSON.stringify(lst); }
+  if(!ro&&inteiro&&!extra){ lst[0].local=t+'-A'; lst.push(Object.assign({},lst[0],{id:null,local:t+'-B',from:t+'-A',decl:true,adj:copyAdj(self,cur[0].id)})); lst=dvDist(lst,talhaoArea(t)); base=JSON.stringify(lst); }
   else { base=JSON.stringify(lst); if(extra){ if(inteiro) lst[0].local=t+'-A'; const e=dvRow(extra); e.id=null; e.decl=true;
-      const usados=lst.map(x=>x.local).concat(faixasEmUso(self,saf,t,null)); if(!e.local||e.local===t||usados.indexOf(e.local)>=0) e.local=nextNome(t,usados); lst.push(e); } }
+      const usados=lst.map(x=>x.local).concat(minhas.filter(c=>c.v.talhao!==t).map(c=>c.v.local)); if(!e.local||e.local===t||usados.indexOf(e.local)>=0) e.local=nextNome(t,usados); lst.push(e); } }
   self.setState({dv:{t,rows:lst,base,ro,err:{},gerr:'',warn:false}}); }
 function dvSave(self){ const dv=self.state.dv; if(!dv||dv.ro) return; const t=dv.t, T=talhaoArea(t); const saf=self.state.saf; const gid='g_cult_'+sk(saf); const rows=g2rows(self,GR(gid));
   const daSaf=(c)=>sk(saf)!=='NOVA'||c.v.saf===saf;   // R-22: a g_cult_NOVA guarda as safras novas; só as linhas desta safra mudam (revisão SAF, S1)
@@ -893,46 +846,31 @@ function dvSave(self){ const dv=self.state.dv; if(!dv||dv.ro) return; const t=dv
     Object.assign(c.v,{talhao:t,faz:(b?b.v.faz:(old[0]?old[0].v.faz:safFaz(self,saf))),local:String(x.local).trim(),cult:x.cult,var:String(x.var).trim(),area:r2(g2num(x.area)),plantio:x.plantio,meta:g2num(x.meta),unm:unMetaDe(x.cult,x.unm),plano:x.plano||'',colheita:x.colheita||''});
     if(b&&b.v.tipo!=='Parcela') c.decl=true; if(sk(saf)==='NOVA') c.v.saf=saf; c.v.tipo='Parcela';
     c.s={}; c.p={}; if(!b&&x.adj&&Object.keys(x.adj).length) adj[c.id]=JSON.parse(JSON.stringify(x.adj)); return c; });
-  let livreD=0;
   { const S=safList(self), ctx=ocCtxSaf(), todos=ocTodos(self); const faz=safFaz(self,saf); const ids=old.map(c=>c.id);
     const recs=kids.map(c=>{ const rr=ocCult(c,saf,faz); rr.tipo=(kids.length===1&&Math.abs(rr.area-T)<=0.005)?'Talhão inteiro':'Parcela'; if(rr.tipo==='Talhão inteiro') rr.faixa=t; return rr; });
-    const depois=todos.filter(c=>ids.indexOf(c.id)<0).concat(recs); const er2={}; const area=[], pl=[];
-    // a trava de área de cada parcela conta as irmãs como ocupação; a mensagem sai agregada, com a capacidade do painel (SAF-C01)
-    recs.forEach((rr,i)=>{ const chk=ocChecar(ctx,S,todos,depois,saf,rr.id,T); if(!chk.o||!chk.trav.length) return; const ar=chk.trav.filter(x=>x[0]==='safra'||x[0]==='soma'), ou=chk.trav.filter(x=>ar.indexOf(x)<0);
-      if(ar.length) area.push(i); if(ou.length){ pl.push(i); er2[i]={plantio:ocMsgTrava(ctx,Object.assign({},chk,{trav:ou}),saf,T,null)}; } });
-    if(area.length||pl.length){ const D=dvCap(self,t,dv.rows);
-      const ta=area.length?((D.p?ocPeriodoTxt(D.g,D.p)+', '+nfa(D.pior)+' ha de '+t+' estão com '+ocQuemTxt(D.p)+'. ':'')+'As parcelas somam '+nfa(A)+' ha; o máximo é '+nfa(D.cap)+' ha nesse período. '):'';
-      area.forEach(i=>{ er2[i]=Object.assign({},er2[i]||{},{area:'Reduza a área: as parcelas somam '+nfa(A)+' ha e o máximo é '+nfa(D.cap)+' ha.'}); });
-      const tp=pl.length?(pl.length+(pl.length>1?' parcelas':' parcela')+' com ocupação certa no período. '):'';
-      self.setState({dv:Object.assign({},dv,{err:er2,gerr:'A divisão travaria a área: '+ta+tp+'Nada foi gravado.',warn:false})}); return; }
-    livreD=ocTabela(ctx,S[saf],ocOcupacoes(ctx,S,depois),[[t,T]],S)[0][0].area_livre; }
+    const depois=todos.filter(c=>ids.indexOf(c.id)<0).concat(recs); const er2={};
+    recs.forEach((rr,i)=>{ const chk=ocChecar(ctx,S,todos,depois,saf,rr.id,T); if(chk.o&&chk.trav.length){ const m=ocMsgTrava(ctx,chk,saf,T,null); er2[i]=(chk.trav[0][0]==='safra'||chk.trav[0][0]==='soma')?{area:m}:{plantio:m}; } });
+    if(Object.keys(er2).length){ self.setState({dv:Object.assign({},dv,{err:er2,gerr:'A divisão travaria a área: '+Object.keys(er2).length+(Object.keys(er2).length>1?' parcelas':' parcela')+' com ocupação certa no período. Nada foi gravado.',warn:false})}); return; } }
   const keep=kids.map(c=>c.id); old.forEach(c=>{ if(keep.indexOf(c.id)<0) delete adj[c.id]; });
   const isT=(r)=>r.v.talhao===t&&(r.grp?(r.kids||[]).some(daSaf):daSaf(r)); let pos=all.findIndex(isT); const rest=all.filter(r=>!isT(r)); if(pos<0) pos=rest.length;
   const gi=grpId(t,sk(saf)==='NOVA'?saf:''); rest.splice(pos,0,{id:gi,grp:true,dr:'div_'+t,ro:false,v:{talhao:t,faz:kids[0].v.faz,local:t},s:{},p:{},kids});
   const norm=normCult(rest); const st=g2st(self,gid); const x0=Object.assign({},GR(gid).x0||{},st.x||{}); x0[gi]=true; x0['grp_'+t]=true;
   g2set(self,gid,{rows:norm,x:x0,sel:{},fl:null});
   const inteiro=norm.some(r=>!r.grp&&r.v.talhao===t&&daSaf(r));
-  self.setState({adj,dv:null,g2toast:(inteiro?(t+' volta a talhão inteiro.'):(t+' dividido em '+kids.length+(kids.length>1?' parcelas':' parcela')+(livreD>0.005?(' · '+nfa(livreD)+' ha livres'):'')+'.'))+' Plano operacional, recursos e demanda recalculados.'}); }
+  self.setState({adj,dv:null,g2toast:(inteiro?(t+' volta a talhão inteiro.'):(t+' dividido em '+kids.length+(kids.length>1?' parcelas':' parcela')+(A<T-0.005?(' · '+nfa(T-A)+' ha livres'):'')+'.'))+' Plano operacional, recursos e demanda recalculados.'}); }
 function divVals(self,v){ const dv=self.state.dv; v.dv_open=!!dv; if(!dv){ v.dv_rows=[]; return; } const t=dv.t, T=talhaoArea(t); const saf=self.state.saf; const gid='g_cult_'+sk(saf);
-  // capacidade pelo serviço (SAF-C01): com ocupação de fora no período das parcelas (perene, outra safra), o livre e o selo saem dela, não de T
-  const lst=dv.rows; const A=lst.reduce((a,x)=>{ const n=g2num(x.area); return a+(isNaN(n)?0:n); },0); const D=dv.ro?{cap:T,pior:0}:dvCap(self,t,lst); const L=D.cap-A; const exc=L< -0.005, ok=Math.abs(L)<=0.005;
+  const lst=dv.rows; const A=lst.reduce((a,x)=>{ const n=g2num(x.area); return a+(isNaN(n)?0:n); },0); const L=T-A; const exc=L< -0.005, ok=Math.abs(L)<=0.005;
   v.dv_titulo=dv.ro?('Parcelas de '+t):('Dividir '+t+' em parcelas'); v.dv_n=lst.length+(lst.length>1?' parcelas':' parcela');
-  v.dv_resumo='Talhão '+nfa(T)+' ha'+(D.pior>0.005?' · outras safras '+nfa(D.pior)+' ha':'')+' · alocado '+nfa(A)+' ha · livre '+nfa(Math.max(0,L))+' ha';
-  // o verde só sem recusa à vista: com erro pendente no painel, a área que fecha aparece como "0 ha livres" (amarelo), não como conferida
-  const pend=!!dv.gerr||Object.keys(dv.err||{}).length>0, conf=ok&&!pend;
-  v.dv_selo=exc?('Excede em '+nfa(-L)+' ha'):(conf?'Área conferida':(nfa(Math.max(0,L))+' ha livres'));
-  const cc=exc?['#B42318','#FDE8E6']:(conf?['#1E7A4C','#E4F3E9']:['#8A5A00','#FFF4D6']);
+  v.dv_resumo='Talhão '+nfa(T)+' ha · alocado '+nfa(A)+' ha · livre '+nfa(Math.max(0,L))+' ha';
+  v.dv_selo=exc?('Excede em '+nfa(-L)+' ha'):(ok?'Área conferida':(nfa(L)+' ha livres'));
+  const cc=exc?['#B42318','#FDE8E6']:(ok?['#1E7A4C','#E4F3E9']:['#8A5A00','#FFF4D6']);
   v.dv_selost='display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';';
   v.dv_ro=!!dv.ro; v.dv_edit=!dv.ro; const adj=adjOf(self);
   const CULT=Object.keys(D2.culturas||{}).length?Object.keys(D2.culturas):['Soja','Milho','Feijão','Café','Mamão Formosa'];
   const upd=(i,patch)=>{ const cur=self.state.dv; const rs=cur.rows.slice(); rs[i]=Object.assign({},rs[i],patch); return Object.assign({},cur,{rows:rs}); };
   v.dv_rows=lst.map((x,i)=>{ const pl=planById(x.plano); const na=x.id?Object.keys(adj[x.id]||{}).length:Object.keys(x.adj||{}).length; const e=(dv.err||{})[i]||{};
-    // mudar uma área muda a soma: a recusa agregada (em todas as parcelas e no aviso do painel) fica vencida e sai; o Salvar recalcula (revisão do lote SAF, S3)
-    const AGR=/^(Reduza a área: as parcelas somam|A divisão travaria a área|As parcelas somam)/;
-    const set=(f)=>(ev)=>{ const cur=self.state.dv; const rs=cur.rows.slice(); rs[i]=Object.assign({},rs[i],{[f]:ev.target.value}); const er={};
-      Object.keys(cur.err||{}).forEach(k=>{ const o=Object.assign({},cur.err[k]); if(Number(k)===i) delete o[f]; if(f==='area'&&AGR.test(o.area||'')) delete o.area; if(Object.keys(o).length) er[k]=o; });
-      const venc=f==='area'&&AGR.test(cur.gerr||'');
-      self.setState({dv:Object.assign({},cur,{rows:rs,err:er,warn:false,gerr:(!Object.keys(er).length?'':(venc?'Corrija os campos destacados; o que você digitou foi mantido.':cur.gerr))})}); };
+    const set=(f)=>(ev)=>{ const cur=self.state.dv; const rs=cur.rows.slice(); rs[i]=Object.assign({},rs[i],{[f]:ev.target.value}); const er=Object.assign({},cur.err||{}); if(er[i]){ er[i]=Object.assign({},er[i]); delete er[i][f]; if(!Object.keys(er[i]).length) delete er[i]; }
+      self.setState({dv:Object.assign({},cur,{rows:rs,err:er,warn:false,gerr:(Object.keys(er).length?cur.gerr:'')})}); };
     const ist=(f,x2)=>'font-family:inherit;font-size:13px;padding:6px 8px;border-radius:8px;box-sizing:border-box;width:100%;min-width:0;color:#15201A;border:1px solid '+(e[f]?'#B42318':'#E4E9E5')+';background:'+(dv.ro?'#F4F6F3':'#FFFFFF')+';'+(x2||'');
     let pt; if(!pl) pt=''; else if(pl.cultura!==x.cult) pt='Plano de '+pl.cultura+': escolha um plano de '+x.cult; else pt=(na?na+(na>1?' ajustes deste talhão':' ajuste deste talhão'):'')+(x.from?((na?' · ':'')+'copiado de '+x.from):'');
     const lab=x.local||('parcela '+(i+1)); const errs=Object.keys(e).map(k=>e[k]);
@@ -947,14 +885,14 @@ function divVals(self,v){ const dv=self.state.dv; v.dv_open=!!dv; if(!dv){ v.dv_
         if(tem&&!y.ask){ self.setState({dv:upd(i,{ask:true})}); return; } self.setState({dv:Object.assign({},cur,{rows:cur.rows.filter((_,j)=>j!==i),err:{},gerr:'',warn:false})}); },
       rmNo:()=>self.setState({dv:upd(i,{ask:false})}) }; });
   v.dv_add=()=>{ const cur=self.state.dv; const rs=cur.rows.slice(); const last=rs[rs.length-1];
-    const usados=rs.map(x=>x.local).concat(faixasEmUso(self,saf,t,null));   // nem o nome de uma ocupação de fora que ainda ocupa o talhão
-    const A2=rs.reduce((a,x)=>{ const n=g2num(x.area); return a+(isNaN(n)?0:n); },0); const livre=r2(dvCap(self,t,rs).cap-A2); const area=livre>0.005?String(livre).replace('.',','):'';
+    const usados=rs.map(x=>x.local).concat(cultsDe(self,saf).filter(c=>c.v.talhao!==t).map(c=>c.v.local));
+    const A2=rs.reduce((a,x)=>{ const n=g2num(x.area); return a+(isNaN(n)?0:n); },0); const livre=r2(T-A2); const area=livre>0.005?String(livre).replace('.',','):'';
     const nw=last?Object.assign({},last,{id:null,local:nextNome(t,usados),area,from:last.local,decl:true,ask:false,adj:(last.id?copyAdj(self,last.id):(last.adj?JSON.parse(JSON.stringify(last.adj)):null))})
                  :{id:null,local:nextNome(t,usados),area,cult:'Soja',var:'',plantio:'',meta:'',unm:unMetaDe('Soja'),plano:'',colheita:'',adj:null,from:'',decl:true,ask:false};
     rs.push(nw); self.setState({dv:Object.assign({},cur,{rows:rs,warn:false,gerr:''})});
     // inserção repetitiva (UX-ACAO-UNICA-20261003 · DS-33): o foco vai ao nome da parcela nova, à vista e fora do rodapé do painel
     setTimeout(()=>{ try{ const ins=[...document.querySelectorAll('aside[role=dialog] input[aria-label^="Nome da parcela"]')]; const el=ins[ins.length-1]; if(el){ el.focus({preventScroll:true}); el.scrollIntoView({block:'nearest',inline:'nearest'}); } }catch(e){} },60); };
-  v.dv_dist=()=>{ const cur=self.state.dv; self.setState({dv:Object.assign({},cur,{rows:dvDist(cur.rows,dvCap(self,t,cur.rows).cap),err:{},gerr:'',warn:false})}); };
+  v.dv_dist=()=>{ const cur=self.state.dv; self.setState({dv:Object.assign({},cur,{rows:dvDist(cur.rows,T),err:{},gerr:'',warn:false})}); };
   v.dv_gerr=dv.gerr||''; v.dv_hasg=!!dv.gerr; v.dv_warn=!!dv.warn;
   const clean=(l)=>JSON.stringify(l.map(x=>Object.assign({},x,{ask:false})));
   const dirty=()=>clean(self.state.dv.rows)!==clean(JSON.parse(self.state.dv.base));
@@ -975,7 +913,7 @@ function recursosDe(self,rid,dv){ const o=[]; ['g_recp_maq','g_recp_pes'].forEac
 function poolsDe(recs){ const o={}; recs.forEach(r=>{ o[r.id]={un:Number(r.un)||0,nome:r.nome}; }); return o; }
 // outras safras que dividem os recursos: abertas (não encerradas) e da mesma fazenda; a própria encerrada não soma nada (o predicado do estoque)
 function outrasSafras(self,saf,pools){ const S=safList(self); const me=S[saf]; if(!me||me.ro) return [];
-  return Object.keys(S).filter(id=>id!==saf&&!S[id].ro&&S[id].faz===me.faz).map(id=>({id,nome:S[id].nome,ini:S[id].ini,fim:S[id].fim,oc:ocorr(self,id,pools)})); }   // período: a etiqueta de cada uma sai dela (SAF-C02)
+  return Object.keys(S).filter(id=>id!==saf&&!S[id].ro&&S[id].faz===me.faz).map(id=>({id,nome:S[id].nome,oc:ocorr(self,id,pools)})); }
 function capCalc(self,saf,rid,dv){ const recs=recursosDe(self,rid,dv); const pools=poolsDe(recs); const oc=ocorr(self,saf,pools); const outras=outrasSafras(self,saf,pools);
   const me=safList(self)[saf]||{}; oc.forEach(i=>{ i.cls=classeOc(i.dt,i.mi,me.ini,me.fim); });   // etiqueta antes da conta: a mesma na tela, no veredito e na capacidade
   return {oc,outras,recs,pools,G:capSaf(oc,outras,recs,D2.meses,D2.dias)}; }
@@ -1004,19 +942,15 @@ function e3Incompleto(oc){ const by={}, ord=[]; oc.forEach(i=>{ const rp=i.rp; c
     return op+' com '+t.join(', '); }).join('; '); }
 // texto, aria-label e estado de uma célula recurso × mês (o mesmo fmtOcup da célula, do filtro, dos atalhos e do espelho)
 function e3CelTxt(g,c){ return (c.ge?'≥ ':'')+(c.red?('precisa '+(c.nec<0?'horas':c.nec)):fmtOcup(c.ocup)); }
-// carga fora da conta numa célula (SAF-C02), desta safra e de cada outra, com o motivo: a mesma etiqueta do capSaf
-function e3Fora(g,c,outN){ const by={}, ord=[]; (g.fora||[]).forEach(f=>{ if(f.mi!==c.mi) return; const k=(f.sid||'')+'|'+f.cls; if(!by[k]){ by[k]={sid:f.sid,cls:f.cls,h:0}; ord.push(by[k]); } by[k].h+=f.h; });
-  return ord.map(x=>(x.sid?(outN[x.sid]||x.sid):'desta safra')+' '+capH(x.h)+' h '+(x.cls==='antes'?'antes do início':'depois do fim')+(x.sid?' dela':'')).join('; '); }
 function e3CelAria(g,c,outN){ let t=g.nome+', '+c.mes+': '+fmtOcup(c.ocup)+', '+capH(c.d)+' h de '+capH(c.cap)+' h';
   if(c.dOth>1e-4) t+=' (desta safra '+capH(c.dThis)+' h; '+Object.keys(g.oth).filter(o=>g.oth[o][c.mi]>1e-4).map(o=>(outN[o]||o)+' '+capH(g.oth[o][c.mi])+' h').join('; ')+')';
-  const fo=e3Fora(g,c,outN); if(fo) t+=', fora da conta: '+fo;
   t+=', precisa de '+(c.nec<0?'horas':c.nec)+', tem '+nfa(g.un); if(c.ge) t+=', mais '+nfa(g.semH[c.mi])+' ha sem horas calculáveis'; return t; }
 function e3Aperto(g){ const c=g.necMax; return c.nec<0?Infinity:c.nec/Math.max(g.un,1e-9); }
 function etapa3(self,v,saf,ro){ const st=self.state; const S=safList(self); const me=S[saf]||{}; const E=capCalc(self,saf); const oc=E.oc, G=E.G;
   const outN={}; E.outras.forEach(o=>{ outN[o.id]=o.nome; });
   const cs=cultRows(self,saf), sp=semPlano(cs); const aPlano=cs.filter(c=>sp.indexOf(c)<0).reduce((a,c)=>a+(Number(c.v.area)||0),0);
   const cls={antes:0,fora:0,depois:0,cal:0}; oc.forEach(i=>{ cls[i.cls]++; });
-  const ver=capVeredito(G,oc,{semPlano:sp.map(c=>({local:c.v.local,area:c.v.area})),aPlano,cls,ini:br(me.ini),fim:me.fim?br(me.fim):'',outras:outN,pend:oc.filter(i=>i.pend).length,
+  const ver=capVeredito(G,oc,{semPlano:sp.map(c=>({local:c.v.local,area:c.v.area})),aPlano,cls,ini:br(me.ini),outras:outN,pend:oc.filter(i=>i.pend).length,
     semHoras:oc.reduce((a,i)=>a+(i.rp.falta.semHoras||0),0),incompleto:e3Incompleto(oc),periodoCal:D2.meses[0][1]+' – '+D2.meses[D2.meses.length-1][1]});
   self.__e3={saf,oc,G,outras:E.outras,outN,pools:E.pools,recs:E.recs,ver};
   const COR={red:'#B42318',yellow:'#8A5A00',green:'#1E7A4C',gray:'#5B6660'};
@@ -1050,7 +984,7 @@ function etapa3(self,v,saf,ro){ const st=self.state; const S=safList(self); cons
   // linha de filtro (recurso × mês escolhido): números da célula, com o que vem de cada outra safra
   v.v3_fil=!!capF; v.v3_filx=()=>capSel(self,null,null);
   if(capF){ const g=G[capF.rec], c=g.cells[capF.mi]; const oth=Object.keys(g.oth).filter(o=>g.oth[o][c.mi]>1e-4);
-    const fo=e3Fora(g,c,outN); v.v3_filn=g.nome+' · '+c.mes; v.v3_filt=capH(c.d)+' h de '+capH(c.cap)+' h ('+fmtOcup(c.ocup)+')'+(oth.length?' · desta safra '+capH(c.dThis)+' h · '+oth.map(o=>(outN[o]||o)+' '+capH(g.oth[o][c.mi])+' h').join(' · '):'')+(fo?' · fora da conta: '+fo:'')
+    v.v3_filn=g.nome+' · '+c.mes; v.v3_filt=capH(c.d)+' h de '+capH(c.cap)+' h ('+fmtOcup(c.ocup)+')'+(oth.length?' · desta safra '+capH(c.dThis)+' h · '+oth.map(o=>(outN[o]||o)+' '+capH(g.oth[o][c.mi])+' h').join(' · '):'')
       +' · precisa de '+(c.nec<0?'horas':c.nec)+', tem '+nfa(g.un)+(c.ge?' · mais '+nfa(g.semH[c.mi])+' ha sem horas calculáveis':''); }
   else { v.v3_filn=''; v.v3_filt=''; }
   e3Op(self,saf,oc,G,capF);
@@ -1197,7 +1131,7 @@ function recLive(self,gid,k,d){ const P=recPrev(self,gid,d); if(!P) return null;
     return t; }
   return null; }
 function recAfter(self,gid,rows,r){ const antes=self._antes; self._antes=null; self._recPrev=null; const rid=r.id; const saf=self.state.saf;
-  const um=Number(r.v.un)===1; const base=r.v.nome+': '+nfa(r.v.un)+(gid==='g_recp_pes'?(um?' pessoa':' pessoas'):(um?' unidade':' unidades'))+', jornada de '+nfa(r.v.jornada)+' h.';
+  const base=r.v.nome+': '+nfa(r.v.un)+(gid==='g_recp_pes'?' pessoas':' unidades')+', jornada de '+nfa(r.v.jornada)+' h.';
   self.setState({g2toast:base}); setTimeout(()=>{ self.setState({g2toast:base+e3Diff(self,antes,null)}); e3Foco(self,'g_cap_'+sk(saf),rid); },0); }
 // painel "Resumo da safra" (§4.3): custo por cultura (operação + insumos do plano ÷ ha físico com plano), trabalho da safra e a conta
 function resumoCultura(oc,ini){ const by={}, ord=[], vistos={};
@@ -1216,10 +1150,9 @@ function resumoVals(self,v){ const st=self.state; const saf=st.saf; const e=self
       if(b.copAntes>0.005||b.cinsAntes>0.005) nota.push('inclui '+rs(b.copAntes)+' de operação e '+rs(b.cinsAntes)+' de insumos antes de '+br(me.ini));
       return {cult:b.cult,area:nfa(b.area)+' ha',cop:rs(b.cop),cins:rs(b.cins),rha:b.rha===null?'parcial':rs(b.rha)+'/ha',temNota:nota.length>0,nota:nota.join(' · ')}; });
   const T=(f)=>L.reduce((a,b)=>a+b[f],0); lin.push({cult:'Total',area:nfa(T('area'))+' ha',cop:rs(T('cop')),cins:rs(T('cins')),rha:'—',temNota:false,nota:''}); v.rs_lin=lin;
-  // CTL-4 (DEM-06): data antes de hoje não é "realizado" (RN-003); a etapa 4 troca a parte do plano já emitida em O.S. pelo que elas ainda tiram do estoque
-  const Z=oc.filter(i=>i.dt&&i.dt>=D2.hoje).reduce((a,i)=>a+(Number(i.cins)||0),0); const Y=T('cins')-Z;
-  v.rs_nota='Insumos do plano: dose × área × preço de todas as datas, antes do estoque. '+(Y>0.005?'Deles, '+rs(Y)+' têm data antes de hoje ('+br(D2.hoje)+') e '+rs(Z)+' de hoje em diante.'
-    :'Todos de hoje em diante ('+br(D2.hoje)+').')+' A etapa 4 troca a parte já emitida em O.S. pelo que elas ainda vão tirar do estoque e calcula a necessidade líquida.';
+  const dm=demanda(self,saf); const Z=Object.values(dm).reduce((a,d)=>a+(Number(d.bruta)||0)*(Number(d.preco)||0),0); const Y=T('cins')-Z;
+  v.rs_nota='Insumos do plano: dose × área × preço de todas as datas, antes do estoque. '+(Y>0.005?'Deles, '+rs(Y)+' são de antes de hoje ('+br(D2.hoje)+', já realizados) e '+rs(Z)+' de hoje em diante (a "Demanda bruta" da etapa 4).'
+    :'Todos de hoje em diante ('+br(D2.hoje)+'): são a "Demanda bruta" da etapa 4.')+' A necessidade líquida está na etapa 4.';
   const S=(lst,f)=>lst.reduce((a,i)=>a+(Number(f(i))||0),0); const tr=(lst)=>nfa(S(lst,i=>i.area))+' ha-op · '+nf(S(lst,i=>i.horas),2)+' horas-conjunto · '+nf(S(lst,i=>i.hh),2)+' horas-homem · '+nf(S(lst,i=>i.diesel),2)+' L';
   const semL=oc.filter(i=>!e3Dinf(i)).length; const an=oc.filter(i=>i.cls==='antes');
   v.rs_trab=nfa(S(oc,i=>i.area))+' ha-op (hectares-operação) · '+nf(S(oc,i=>i.horas),2)+' horas-conjunto · '+nf(S(oc,i=>i.hh),2)+' horas-homem · '+nf(S(oc,i=>i.diesel),2)+' L de diesel estimado'+(semL?' ('+semL+(semL>1?' ocorrências sem L/h)':' ocorrência sem L/h)'):'')
@@ -1240,24 +1173,17 @@ function notaEst(d,dec){ return (d.liq>0.001&&d.antes>0.001)?[{k:'br'},{k:'mut',
 const SOL_KEY='talhao-os-compras-v1';
 function solLer(){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); return (o&&o.sols)||{}; }catch(e){ return {}; } }
 function solGravar(rec){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null')||{v:1,sols:{}}; o.sols=o.sols||{}; o.sols[rec.safra]=rec; localStorage.setItem(SOL_KEY,JSON.stringify(o)); return true; }catch(e){ return false; } }
-// a versão nova da SOL que só baixou itens (DEM-09) não muda o número de complementos: o andamento gravado era da versão anterior e sai
-function solProcLimpar(saf){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); if(o&&o.proc&&o.proc[saf]){ delete o.proc[saf]; localStorage.setItem(SOL_KEY,JSON.stringify(o)); } }catch(e){} }
 function solMap(self){ if(self.state.sol) return self.state.sol; if(!self._sol0) self._sol0=Object.assign({},D2.sol,solLer()); return self._sol0; }
 // andamento gravado pela Compra de insumos (talhao-os-compras-v1 · proc): o planejamento vê em que pé está a compra da mesma solicitação
 function solEstado(saf,sol){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); const p=o&&o.proc&&o.proc[saf];
   return (p&&sol&&p.sol===sol.id&&(p.comp||0)===(sol.comp||0)&&p.estado&&p.estado!=='A cotar')?p.estado:''; }catch(e){ return ''; } }
 function solHref(saf,sol){ return 'CMP.dc.html#sol='+encodeURIComponent(sol.id)+'&saf='+encodeURIComponent(saf); }
-// DEM-09 · pedido já emitido para esta solicitação: nada baixa. Vale o andamento da versão de agora ou o de uma anterior, guardado na versão nova
-// (pedEmit): o complemento muda a versão e a Compra recomeça o andamento, mas o pedido emitido antes continua valendo (revisão do CTL-4, risco 1:
-// sem isto, depois de um complemento a redução tirava da solicitação um insumo já comprado)
-function solPedEmit(saf,sol){ return !!(sol&&(sol.pedEmit||/^Pedidos emitidos/.test(solEstado(saf,sol)))); }
 function proxSaf(self,r){ if(r.ro) return ['Consultar safra',2];
   const cs=cultsDe(self,r.id); if(!cs.length) return ['Continuar: planejar talhões',2];
   const sp=semPlano(cs).length; if(sp) return ['Continuar: aplicar plano em '+sp+(sp>1?' cultivos':' cultivo'),2];
   if(!solMap(self)[r.id]) return ['Continuar: enviar demanda para cotação',4];
   return ['Continuar: dimensionar operações e recursos',3]; }
-function PREVALS(self,v){ cenOuvir(self); compRend(self,self.state.saf||null);
-  { const gs=GR('g_sug'); if(gs) gs.rows=sgRows(self); }   /* Sugestões pelas análises (SOLO-01 §3.4) */
+function PREVALS(self,v){ compRend(self,self.state.saf||null);
   const st=self.state; const saf=st.saf||null; const safObj=saf?(g2rows(self,GR('g_saf')).find(r=>r.id===saf)):null; const ro=!!(safObj&&safObj.ro);
   // ---- etapa 1: contagens por safra ----
   g2rows(self,GR('g_saf')).forEach(r=>{ const cs=cultsDe(self,r.id); r.v.n=cs.length; r.v.area=cs.reduce((s,c)=>s+(Number(c.v.area)||0),0);
@@ -1279,46 +1205,36 @@ function PREVALS(self,v){ cenOuvir(self); compRend(self,self.state.saf||null);
   ['g_recp_maq','g_recp_pes'].forEach(g=>{ const sp=GR(g); if(sp) g2rows(self,sp).forEach(r=>{ r.ro=ro; }); });
   if((st.step||1)===3) etapa3(self,v,saf,ro);
   // ---- etapa 4: demanda de insumos ----
-  const dm=demanda(self,saf); const sol=solMap(self)[saf]; const grupos={}; const est=sol?solEstado(saf,sol):''; const pedEmit=solPedEmit(saf,sol);
-  const dmx=Object.assign({},dm); if(sol&&sol.itens) Object.keys(sol.itens).forEach(n=>{ if(!dmx[n]&&(Number(sol.itens[n])||0)>0.01) dmx[n]=demFora(self,saf,n,sol); });
-  Object.values(dmx).forEach(d=>{ (grupos[d.grupo]||(grupos[d.grupo]=[])).push(d); });
-  let tot=0, nliq=0, npend=0, nexc=0, ncomp=0, nqual=0, vqual=0;
+  const dm=demanda(self,saf); const sol=solMap(self)[saf]; const grupos={};
+  Object.values(dm).forEach(d=>{ (grupos[d.grupo]||(grupos[d.grupo]=[])).push(d); });
+  let tot=0, nliq=0, npend=0;
   GR('g_dem').rows=Object.keys(grupos).sort((a,b)=>a.localeCompare(b,'pt-BR')).map((g,gi)=>{ const its=grupos[g].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
     const val=its.reduce((a,d)=>a+d.valor,0); tot+=val; const uso=its.map(d=>d.uso).filter(Boolean).sort()[0]||'';
     // TABELAS-FOCO (5983172395): uma variável por coluna — grupo, insumo, quantidades (com a unidade junto), datas, situação, solicitação e complemento próprios
     const gr={id:'G'+gi,v:{grp:g,ins:'',valor:val},s:{grp:g,ins:''},p:{grp:[{k:'b',t:g}],ins:[{k:'mut',t:its.length+(its.length>1?' insumos':' insumo')}]},
       kids:its.map((d,ix)=>{ const dec=(d.un==='L')?1:0; const sent=sol&&sol.itens?(sol.itens[d.nome]||0):0; if(d.liq>0) nliq++;
+        let sit, sid=''; if(d.liq<=0.001&&d.rup>0.001) sit={k:'chip',t:'Coberto pelo recebimento',c:'yellow'}; else if(d.liq<=0.001) sit={k:'chip',t:'Coberto pelo estoque',c:'green'}; else if(sol && sent>=d.liq-0.01){ sit={k:'chip',t:'Em cotação',c:'blue'}; sid=sol.id; } else if(sol){ sit={k:'chip',t:'Complemento',c:'yellow'}; sid=sol.id; npend++; } else { sit={k:'chip',t:'A enviar',c:'gray'}; npend++; }
         // decisão do proprietário (05/10/2026): a unidade fica junto do valor ("62.500 kg"); o valor tipado (v) continua número para ordenar e filtrar
         const qt=(x)=>nf(x,dec)+' '+d.un, q=(x)=>[{k:'txt',t:qt(x)}], z=(x)=>x>0.001?[{k:'txt',t:qt(x)}]:[{k:'mut',t:'—'}];
-        // situação pela regra única (DEM-09, cal01.js): a SOL que pede mais do que a demanda de agora fica "Acima da demanda · <diferença>"
-        const ss=demSolSit(d,sent,!!sol,pedEmit); const exc=ss.t==='Acima da demanda'; const qual=ss.t==='Qualidade pendente'; const sid=ss.sol?sol.id:'';
-        const sit={k:'chip',t:exc?ss.t+' · '+qt(ss.dif):(qual?ss.t+' · '+qt(d.cond):ss.t),c:ss.c};
-        // falta condicionada à qualidade (revisão do 853a6a8, achado 2; PRD 65.4): visível com a decisão, fora do total e da primária
-        const condCh=(!qual&&(d.cond||0)>0.001)?[{k:'chip',t:'Qualidade pendente · '+qt(d.cond),c:'yellow'}]:[]; if((d.cond||0)>0.001){ nqual++; vqual+=d.cond*d.preco; }
-        if(ss.pend) npend++; if(exc) nexc++; else if(ss.pend) ncomp++;
-        const memoSol=exc?[sol.id+' pede '+qt(sent)+'; a necessidade líquida agora é '+qt(d.liq)+': '+qt(ss.dif)+' acima da demanda.',
-          pedEmit?'Pedido já emitido: a solicitação não muda e o excedente entra no estoque (cancelar o pedido é decisão da Compra).':'Atualize a solicitação para não comprar a mais.']:[];
         const kr={id:'G'+gi+'_'+ix,ro:true,v:{grp:d.grupo,ins:d.nome,bruta:d.bruta,real:(d.real>0.001?d.real:''),est:d.est,antes:(d.liq>0.001&&d.antes>0.001?d.antes:''),res:(!(d.liq>0.001&&d.antes>0.001)&&d.res>0.001?d.res:''),
                rec:d.rec,tarde:((d.liq>0.001||d.rup>0.001)&&d.tarde>0.001?d.tarde:''),liq:d.liq,un:d.un,preco:d.preco,valor:d.valor,sol:sid,comp:(sit.t==='Complemento'?d.liq-sent:'')},s:{sit:sit.t,sol:sid},
           p:{grp:[{k:'mut',t:d.grupo}],bruta:q(d.bruta),real:z(d.real),est:q(d.est),antes:z(d.liq>0.001?d.antes:0),res:z((d.liq>0.001&&d.antes>0.001)?0:d.res),rec:q(d.rec),
              tarde:z(((d.liq>0.001||d.rup>0.001)&&d.tarde>0.001)?d.tarde:0),liq:[{k:'b',t:qt(d.liq)}],sit:[sit],sol:sid?[{k:'txt',t:sid}]:[{k:'mut',t:'—'}],
              comp:sit.t==='Complemento'?q(d.liq-sent):[{k:'mut',t:'—'}],preco:[{k:'txt',t:rs(d.preco)+'/'+d.un}]},
-          o:memoSol.concat(d.memo).map(t=>({t})).concat((d.cond||0)>0.001?[{t:'Decidir a qualidade no Estoque (o gestor libera ou reprova com o laudo)',h:'EST.dc.html'}]:[]).concat(sol?[{t:'Ver '+sol.id+' na Compra de insumos',h:solHref(saf,sol)}]:[]) }; dcol(kr,'uso',d.uso);
-        if(condCh.length) kr.p.sit=kr.p.sit.concat(condCh);
+          o:d.memo.map(t=>({t})).concat(sol?[{t:'Ver '+sol.id+' na Compra de insumos',h:solHref(saf,sol)}]:[]) }; dcol(kr,'uso',d.uso);
         // filtro e busca leem o mesmo texto da célula (com a unidade)
         ['bruta','real','est','antes','res','rec','tarde','liq','comp','preco'].forEach(f=>{ const c=kr.p[f]&&kr.p[f][0]; kr.s[f]=(c&&c.t!=='—')?c.t:''; });
         // falta: quando o estoque acaba (com necessidade líquida ou só ruptura coberta por recebimento); coberta em: o recebimento que cobre a ruptura
         dcol(kr,'falta',(d.liq>0.001||d.rup>0.001)?d.falta:''); if(kr.s.falta) kr.p.falta=[{k:'cn',t:kr.s.falta,c:'red'}]; dcol(kr,'cob',(d.liq<=0.001&&d.rup>0.001)?d.cob:''); return kr; })};
     // situação do grupo: contagem por situação dos insumos (o que falta enviar primeiro)
     const cnt={}; gr.kids.forEach(k=>{ const t=String(k.s.sit||'').replace(/ · .*/,'').replace(/^Complemento.*/,'Complemento'); cnt[t]=(cnt[t]||0)+1; });
-    const ord=['Acima da demanda','A enviar','Complemento','Em cotação','Qualidade pendente','Coberto pelo recebimento','Coberto pelo estoque']; const cor={'Acima da demanda':'red','A enviar':'gray','Complemento':'yellow','Em cotação':'blue','Qualidade pendente':'yellow','Coberto pelo recebimento':'yellow','Coberto pelo estoque':'green'};
+    const ord=['A enviar','Complemento','Em cotação','Coberto pelo recebimento','Coberto pelo estoque']; const cor={'A enviar':'gray','Complemento':'yellow','Em cotação':'blue','Coberto pelo recebimento':'yellow','Coberto pelo estoque':'green'};
     gr.p.sit=ord.filter(t=>cnt[t]).map(t=>({k:'chip',t:cnt[t]+' '+(t==='Coberto pelo estoque'?'coberto'+(cnt[t]>1?'s':''):(t==='Coberto pelo recebimento'?'coberto'+(cnt[t]>1?'s':'')+' pelo recebimento':t.toLowerCase())),c:cor[t]})); gr.s.sit='';
     ['bruta','real','est','antes','res','rec','tarde','liq','falta','cob','preco','sol','comp'].forEach(f=>{ gr.p[f]=[{k:'mut',t:''}]; gr.s[f]=''; });
     dcol(gr,'uso',uso); return gr; });
-  v.k6='Valor da necessidade líquida '+rs(tot)+' · '+nliq+' insumos a comprar'+(sol?(' · solicitação '+sol.id+(est?' · '+est:' em cotação')+(sol.comp?' (+'+sol.comp+' complemento'+(sol.comp>1?'s':'')+')':'')):' · ainda não enviada')
-    +(nexc?' · '+nexc+(nexc>1?' insumos':' insumo')+' acima da demanda':'')
-    +(nqual?' · '+nqual+(nqual>1?' insumos':' insumo')+' com qualidade pendente ('+rs(vqual)+' condicionados ao laudo, fora da compra)':'');
-  v.k6pend=npend; v.k6exc=nexc&&!pedEmit; v.k6comp=ncomp; v.sol_link=!!sol; v.sol_id=sol?sol.id:''; v.sol_href=sol?solHref(saf,sol):'CMP.dc.html';
+  const est=sol?solEstado(saf,sol):'';
+  v.k6='Valor da necessidade líquida '+rs(tot)+' · '+nliq+' insumos a comprar'+(sol?(' · solicitação '+sol.id+(est?' · '+est:' em cotação')+(sol.comp?' (+'+sol.comp+' complemento'+(sol.comp>1?'s':'')+')':'')):' · ainda não enviada');
+  v.k6pend=npend; v.sol_link=!!sol; v.sol_id=sol?sol.id:''; v.sol_href=sol?solHref(saf,sol):'CMP.dc.html';
 }
 function EXTRAVALS(self,v){ try{ window.__safSelf=self; }catch(e){}   // testes leem o estado (OC-13)
   const st=self.state; const step=st.step||1; const saf=st.saf||null;
@@ -1341,8 +1257,7 @@ function EXTRAVALS(self,v){ try{ window.__safSelf=self; }catch(e){}   // testes 
   const cultSp={}; sp.forEach(c=>{ (cultSp[c.v.cult]||(cultSp[c.v.cult]=[])).push(c.id); }); const cuK=Object.keys(cultSp).sort((a,b)=>cultSp[b].length-cultSp[a].length)[0];
   const apIds=cuK?cultSp[cuK]:[]; const apT='Aplicar plano em '+apIds.length+(apIds.length>1?' cultivos':' cultivo')+(Object.keys(cultSp).length>1?' de '+cuK.toLowerCase():'');
   const solA=saf?solMap(self)[saf]:null; const enviado=!!solA;
-  // com SOL enviada e insumo acima da demanda, a primária diz "Atualizar" também quando há complemento junto (ela baixa e sobe na mesma versão)
-  const p6=(enviado&&!v.k6pend)?{t:'Abrir Compra de insumos ›',h:solHref(saf,solA),a:'abrir'}:((enviado&&v.k6exc)?{t:'Atualizar '+solA.id,fn:()=>enviar(self),a:'comando'}:{t:'Enviar para cotação',fn:()=>enviar(self),a:'comando'});
+  const p6=(enviado&&!v.k6pend)?{t:'Abrir Compra de insumos ›',h:solHref(saf,solA),a:'abrir'}:{t:'Enviar para cotação',fn:()=>enviar(self),a:'comando'};
   v.sol_link=v.sol_link&&!p6.h;   // "Abrir em Compra de insumos ›" do bloco só quando a primária é enviar (complemento pendente): sem cópia do mesmo link
   safAcoes(self,v,{step,saf,ro,cs,sp,apIds,apT,cultSp,temPlano,p6});
   // escolher safra (botão da linha)
@@ -1355,19 +1270,13 @@ function EXTRAVALS(self,v){ try{ window.__safSelf=self; }catch(e){}   // testes 
   v.planejar=(t)=>abrirPlanejar(self,t); v.vincular=(arg)=>{ const a=String(arg).split('|'); abrirVincular(self,a[0],a[1]); };
   v.abrirsaf=(arg)=>{ const a=String(arg).split('|'); abrirCultivo(self,a[0],a[1]||''); };
   // painéis
-  apVals(self,v); lpVals(self,v); divVals(self,v); sgVals(self,v); pqSafVals(self,v);
-  try{ window.__solo={cen:()=>cenGet(),aceitarLote:(itens,ch,a)=>cenMudar(self,c=>soloAceitarLote(c,itens,ch,a||'Ana')),desfazer:(k,ch,a)=>cenMudar(self,c=>soloDesfazer(c,k,'desfeito',ch,a||'Ana')),
-    registrar:(d,ch,a)=>cenMudar(self,c=>soloRegistrar(c,d,ch,a||'Ana')),validar:(id,ch,a)=>cenMudar(self,c=>soloValidar(c,id,ch,a||'Ana')),   /* teste: o que outra aba (AG-02) grava */
-    sugs:(saf)=>sgSugs(self,saf||self.state.saf).map(x=>x.s),
-    ocorr:(saf)=>ocorr(self,saf||self.state.saf).map(o=>({cid:o.c.id,local:o.c.v.local,atv:String(o.a.id),nome:o.a.nome,op:o.a.op,dt:o.dt,incl:o.incl,horas:o.horas,prods:o.prods.map(p=>({nome:p.nome,dose:p.dose,q:p.q,orig:p.orig,laudo:p.laudo}))})),
-    dem:(saf)=>{ const m=demanda(self,saf||self.state.saf); const o={}; Object.keys(m).forEach(k=>{ o[k]={bruta:m[k].plano,un:m[k].un,preco:m[k].preco,memo:m[k].memo}; }); return o; },salvar:(c)=>{ cenSave(c); self.setState({cenrev:Date.now()}); }}; }catch(e){}
+  apVals(self,v); lpVals(self,v); divVals(self,v);
   // SAF.dc.html#saf=S27SF&passo=demanda (vindo da Compra de insumos): abre a safra na etapa pedida, uma vez e a cada troca de endereço
   // endereço por nome (#saf=<id>&passo=safra|cultivos|operacoes|demanda[&cult=<id>]); o antigo etapa=N continua lido (SAF_PASSO)
   const abrirHash=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||''); }catch(e){ h=''; } const ms=/[#&]saf=([^&]+)/.exec(h); if(!ms) return;
     const me=/[#&]etapa=(\d+)/.exec(h), mp=/[#&]passo=([a-z]+)/.exec(h), mc=/[#&]cult=([^&]+)/.exec(h);
     const r=g2rows(self,GR('g_saf')).find(x=>x.id===ms[1]); if(!r) return; const e=safPasso(mp?mp[1]:'',me?Number(me[1]):null);
-    const msg=/[#&]sug=1/.test(h);   /* vindo do AG-02 (Ver no plano): abre as Sugestões pelas análises */
-    setTimeout(()=>{ self.setState({saf:r.id,step:e,atv:null,rec:null,corr:null,cap:null,rsOpen:false,g2toast:'Safra aberta: '+r.v.nome+' · '+SAF_CURTO[e-1]}); if(mc&&e===2) setTimeout(()=>abrirCultivo(self,r.id,mc[1]),90); if(msg&&e===2) setTimeout(()=>{ if(sgN(self,r.id)) sgAbrir(self); },120); },0); };
+    setTimeout(()=>{ self.setState({saf:r.id,step:e,atv:null,rec:null,corr:null,cap:null,rsOpen:false,g2toast:'Safra aberta: '+r.v.nome+' · '+SAF_CURTO[e-1]}); if(mc&&e===2) setTimeout(()=>abrirCultivo(self,r.id,mc[1]),90); },0); };
   if(!self.__hashIni){ self.__hashIni=1; abrirHash(); try{ window.addEventListener('hashchange',abrirHash); }catch(e){} }
 }
 // ---- UX-ACAO-UNICA-20261003 · área de ações do Planejar safra (DS-02, DS-33 §74.5.7.1, DS-61) ----
@@ -1482,9 +1391,8 @@ function apVals(self,v){ const ap=self.state.ap; v.ap_open=!!ap; if(!ap) return;
   v.ap_opts=[{v:'',t:'Escolha o plano'}].concat(opts.map(p=>({v:p.id,t:p.nome+' v'+p.versao+' · '+p.atividades.length+' atividades'}))); v.ap_plan=ap.plan; v.ap_has_opts=opts.length>0; v.ap_no_opts=(culturas.length===1&&!opts.length);
   v.ap_setplan=(e)=>self.setState({ap:Object.assign({},self.state.ap,{plan:e.target.value,confirm:false,err:''})});
   const adj=adjOf(self); const subst=rows.filter(r=>r.v.plano); const najs=rows.reduce((a,r)=>a+Object.keys(adj[r.id]||{}).length,0);
-  const nac=rows.reduce((a,r)=>a+soloNacSaf(self,r),0);   /* R16 (A13): o aceite guarda o plano; trocar o plano faz o uso da análise deixar de valer, sem apagá-lo */
   v.ap_confirm=!!ap.confirm; v.ap_normal=!ap.confirm; v.ap_err=ap.err||''; v.ap_haserr=!!ap.err;
-  v.ap_cmsg='Isto substitui o plano de '+subst.length+(subst.length===1?' cultivo':' cultivos')+(najs?' e descarta '+najs+(najs===1?' ajuste local':' ajustes locais'):'')+(nac?'; '+nac+(nac===1?' uso da análise deixa':' usos da análise deixam')+' de valer (ficam gravados no laudo)':'')+'. O plano padrão e os demais cultivos não mudam.';
+  v.ap_cmsg='Isto substitui o plano de '+subst.length+(subst.length===1?' cultivo':' cultivos')+(najs?' e descarta '+najs+(najs===1?' ajuste local':' ajustes locais'):'')+'. O plano padrão e os demais cultivos não mudam.';
   v.ap_cancel=()=>self.setState({ap:null});
   v.ap_apply=()=>{ const a=self.state.ap; if(culturas.length>1) return; if(!a.plan){ self.setState({ap:Object.assign({},a,{err:'Escolha o plano a aplicar.'})}); return; }
     if(!nOk){ self.setState({ap:Object.assign({},a,{err:'Nenhum cultivo pode receber este plano: todos travam pela ocupação do talhão.'})}); return; }
@@ -1507,69 +1415,43 @@ function lpAc(self,A,cat,pk,upd,ERR,c,o){ const itens=cat.map(p=>({v:p.prod, t:p
     {ph:'Buscar insumo no cadastro', err:!!ERR('pick'+A), enter:()=>o.pkOk(), esc:()=>o.pkNo()}); }
 function catalogo(){ if(catalogo._c) return catalogo._c; const m={}; D2.planos.forEach(pl=>pl.atividades.forEach(a=>a.prods.forEach(p=>{ if(!m[p.prod]) m[p.prod]={prod:p.prod,grupo:p.grupo,un:p.un,preco:p.preco}; })));
   catalogo._c=Object.values(m).sort((a,b)=>(a.grupo+' '+a.prod).localeCompare(b.grupo+' '+b.prod,'pt-BR')); return catalogo._c; }
-function cultActs(self,gid,r){ if(!r||r.grp) return []; const pl=planById(r.v.plano); const na=Object.keys(adjOf(self)[r.id]||{}).length+soloNacSaf(self,r); const ro=!!r.ro;
+function cultActs(self,gid,r){ if(!r||r.grp) return []; const pl=planById(r.v.plano); const na=Object.keys(adjOf(self)[r.id]||{}).length; const ro=!!r.ro;
   const t=(ro?'Ver insumos e doses de ':'Ajustar insumos e doses de ')+r.v.local;
   if(!pl||pl.cultura!==r.v.cult) return [{t, h:'Escolha um plano agronômico de '+r.v.cult+' e salve; depois ajuste os insumos só deste talhão.',
     go:()=>self.setState({g2toast:'Escolha e salve um plano agronômico de '+r.v.cult+' antes de ajustar os insumos.'})}];
   return [{t, h:(na?(na+(na>1?' ajustes deste talhão':' ajuste deste talhão')+' · '):'')+'Mude dose, retire ou inclua insumos só neste talhão; o plano padrão não muda.',
     go:()=>{ const cur=g2st(self,gid).fm; if(cur&&!cur.ro&&g2dirty(cur)){ self.setState({g2toast:'Salve ou descarte as alterações do cultivo antes de ajustar os insumos.'}); return; } g2set(self,gid,{fm:null}); openLP(self,r.id); }}]; }
-/* painel de insumos (PRD 40): o rascunho marca a origem de cada dose (src: pela análise). Os aceites gravados entram no rascunho com a origem
-   e nunca viram ajuste da sessão (R14); "Usar", "Retirar pela análise" e "Incluir calagem" só preenchem o rascunho; o Salvar grava (D-25) */
-function openLP(self,cid){ const saf=self.state.saf; const c=cultRows(self,saf).find(r=>r.id===cid); if(!c) return; const a=adjOf(self)[cid]||{}; const d={}, rm={}, add={}, src={};
+function openLP(self,cid){ const saf=self.state.saf; const c=cultRows(self,saf).find(r=>r.id===cid); if(!c) return; const a=adjOf(self)[cid]||{}; const d={}, rm={}, add={};
   Object.keys(a).forEach(k=>{ const val=a[k]; const parts=k.split('|'); const A=parts[0], pi=parts[1]||'';
     if(pi.charAt(0)==='+'){ (add[A]||(add[A]=[])).push({prod:val.prod,grupo:val.grupo,un:val.un,preco:val.preco,dose:String(val.dose).replace('.',',')}); }
     else if(val==='-') rm[k]=true; else d[k]=String(val).replace('.',','); });
-  const pl=planById(c.v.plano);
-  if(pl) soloAcAtivos(soloSaf(self).ac,cid,pl.id).forEach(x=>{ if(x.tipo==='incluir') return; const at=pl.atividades.find(q=>String(q.id)===String(x.atv.id)); const i=at?at.prods.findIndex(q=>q.prod===x.prod):-1; if(i<0) return;
-    const key=String(at.id)+'|'+i; if(a[key]!==undefined) return; if(x.dose==='-') rm[key]=true; else d[key]=String(x.dose).replace('.',','); src[key]={laudo:x.laudo,dose:x.dose,ac:x.k}; });
-  self.setState({lp:{cid,draft:d,rm,add,src,incl:{},inclRm:{},chave:'LP-'+cid+'-'+Date.now(),pick:{},orig:JSON.stringify({d,rm,add,incl:{},inclRm:{}}),warn:false,err:{},cmdErr:''},lpx:{},pq:null}); }
+  self.setState({lp:{cid,draft:d,rm,add,pick:{},orig:JSON.stringify({d,rm,add}),warn:false,err:{}},lpx:{}}); }
 function lpVals(self,v){ const lp=self.state.lp; v.lp_open=!!lp; if(!lp) return; const saf=self.state.saf; const c=cultRows(self,saf).find(r=>r.id===lp.cid); if(!c){ v.lp_open=false; return; }
   const pl=planById(c.v.plano); const safObj=g2rows(self,GR('g_saf')).find(r=>r.id===saf); const ro=!!(c.ro||(safObj&&safObj.ro));
-  const SG=soloSugsSaf(self,saf,c,true); const area=Number(c.v.area)||0; const sugBy={}; SG.sug.forEach(s=>{ if(s.tipo!=='incluir'&&!s.nega) sugBy[s.atv.id+'|'+s.prod]=s; });
-  const acSt=soloAcAtivos(soloSaf(self).ac,c.id,c.v.plano); const acDe=(A,prod)=>acSt.find(x=>x.tipo!=='incluir'&&String(x.atv.id)===A&&x.prod===prod)||null;
-  /* dose da análise mudada à mão (R15): o aceite ativo sobrescrito no rascunho ou o já substituído por ajuste manual → "ajustado pelo usuário" */
-  const acMan=(A,prod)=>{ const x=soloSaf(self).ac[c.id+'|'+A+'|'+prod]; return !!(x&&(x.st==='ativo'||x.st==='substituído por ajuste manual')); };
-  /* R11 no desfazer (revisão A5): uso da análise com O.S. fora de A liberar ou data passada fica travado no painel, com o motivo; o comando recusa igual */
-  const cenC=soloSaf(self).c; const ngAc=(a0)=>a0?soloNega(cenC,a0):'';
   v.lp_titulo='Insumos e doses de '+c.v.local+' · '+c.v.cult+' '+c.v.var+', '+nf(c.v.area)+' ha';
   v.lp_sub='Plano padrão: '+pl.nome+' v'+pl.versao+' · plantio '+br(c.v.plantio)+'. '+(ro?'Safra encerrada: somente consulta.':'Mude a dose, retire ou inclua insumos só neste talhão. O plano padrão e os outros talhões não mudam.');
-  /* laudo validado sem regra ou correção em outra safra (R17): uma frase só aqui, com o caminho para o laudo */
-  v.lp_info=SG.info.map(t=>{ const m=/LAU-\d+/.exec(t); return {t, h:m?'AG-02.dc.html#'+m[0]:'AG-02.dc.html'}; }); v.lp_hasInfo=v.lp_info.length>0;
   v.lp_ro=ro; v.lp_edit=!ro; const ex=self.state.lpx||{};
-  const upd=(patch)=>{ const cur=self.state.lp; self.setState({lp:Object.assign({},cur,patch,{warn:false,cmdErr:''})}); };
+  const upd=(patch)=>{ const cur=self.state.lp; self.setState({lp:Object.assign({},cur,patch,{warn:false})}); };
   const ERR=(k)=>(lp.err||{})[k]||'';
-  const doseSt=(k,aj,dis,an)=>'width:84px;font-family:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px solid '+(ERR(k)?'#B42318':(an?'#1E5F8F':(aj?'#8A5A00':'#E4E9E5')))+';background:'+(dis?'#F4F6F3':(an?'#E3F0FB':(aj?'#FFF8E6':'#fff')))+';text-align:right;';
-  const chipSt=(c0)=>'display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:700;color:'+(G2C[c0]||G2C.gray)[0]+';background:'+(G2C[c0]||G2C.gray)[1]+';';
-  const pqAbre=(s,fid)=>{ self.__pqFoco=fid; self.setState({pq:{k:s.k,from:'lp'}}); };
-  const usar=(s,key)=>{ const cur=self.state.lp; const d=Object.assign({},cur.draft), rr=Object.assign({},cur.rm||{}), sr=Object.assign({},cur.src||{}), er=Object.assign({},cur.err||{}); delete er[key];
-    if(s.tipo==='retirar'){ rr[key]=true; delete d[key]; } else { d[key]=String(s.sug).replace('.',','); delete rr[key]; } sr[key]={laudo:s.laudo.id,dose:s.tipo==='retirar'?'-':s.sug,s}; upd({draft:d,rm:rr,src:sr,err:er}); };
+  const doseSt=(k,aj,dis)=>'width:84px;font-family:inherit;font-size:13px;padding:5px 7px;border-radius:8px;border:1px solid '+(ERR(k)?'#B42318':(aj?'#8A5A00':'#E4E9E5'))+';background:'+(dis?'#F4F6F3':(aj?'#FFF8E6':'#fff'))+';text-align:right;';
   const grupos={}; pl.atividades.forEach(a=>{ const g=grupoGat(a.g.tipo); ((grupos[g]||(grupos[g]={}))[gatLabel(a.g)+'||'+gatOrder(a.g)]||(grupos[g][gatLabel(a.g)+'||'+gatOrder(a.g)]=[])).push(a); });
   const order=['DAP','DAC','DATA'].filter(g=>grupos[g]);
   v.lp_grupos=order.map(g=>({t:GLABEL[g],gats:Object.keys(grupos[g]).sort((x,y)=>{ const a=x.split('||')[1], b=y.split('||')[1]; return g==='DATA'? (a<b?-1:1) : (Number(a)-Number(b)); }).map(key=>{
       const atvs=grupos[g][key]; const gid=g+key; const open=ex[gid]!==false;
       return {t:key.split('||')[0], dt:br(dataAtv(c,atvs[0],pl)), sym:open?'▾':'▸', open, lab:(open?'Recolher ':'Expandir ')+key.split('||')[0], tog:()=>{ const x=Object.assign({},self.state.lpx||{}); x[gid]=!open; self.setState({lpx:x}); },
-        atvs:atvs.map(a=>{ const aid='a'+a.id; const ao=ex[aid]!==false; const A=String(a.id); const rmMap=lp.rm||{}; const adds=((lp.add||{})[A])||[]; const SRC=lp.src||{};
+        atvs:atvs.map(a=>{ const aid='a'+a.id; const ao=ex[aid]!==false; const A=String(a.id); const rmMap=lp.rm||{}; const adds=((lp.add||{})[A])||[];
           const prods=a.prods.map((p,i)=>{ const key=A+'|'+i; const removed=!!rmMap[key]; const dv=lp.draft[key]; const local=removed?0:((dv!==undefined&&dv!=='')?g2num(dv):p.dose);
-              const an=!!SRC[key]; const a0=acDe(A,p.prod); const aj=!removed&&dv!==undefined&&dv!==''&&Math.abs(local-p.dose)>1e-9; const ng=ngAc(a0);
-              const ajT=an?('pela análise · '+SRC[key].laudo+(ng?' · '+ng+': vale a dose da O.S.':'')):((a0||acMan(A,p.prod))?'ajustado pelo usuário':'dose deste talhão');
-              /* linha "Análise sugere" (§3.2): só quando a sugestão difere do rascunho; ações secundárias que preenchem o rascunho */
-              const s=sugBy[A+'|'+p.prod]; let sg=null;
-              if(s&&!ro){ const curD=removed?0:(isNaN(local)?null:local);
-                if(s.tipo==='retirar'&&!removed) sg={d:'retirar ('+(s.motivo||'pela análise')+')',q:soloQtdTxt(-cenQtd(curD||0,area),p.un,true)+(s.unico?' · a '+a.nome+' sai do '+c.v.local+' (único insumo)':''),u:'Retirar pela análise'};
-                else if(s.tipo==='dose'&&(removed||curD===null||prCmp(curD,s.sug)!==0)) sg={d:soloDoseTxt(s.sug,s.un),q:soloQtdTxt(prSub(cenQtd(s.sug,area),cenQtd(curD||0,area)),p.un,true)+' no talhão',u:'Usar '+soloDoseTxt(s.sug,s.un)}; }
-              const fid='lp_'+key.replace('|','_');
+              const aj=!removed&&dv!==undefined&&dv!==''&&Math.abs(local-p.dose)>1e-9;
               return {grupo:p.grupo, nome:prodNome(p.prod,c), padrao:nf(p.dose,2)+' '+p.un+'/ha', v:removed?'':(dv!==undefined?dv:String(p.dose).replace('.',',')), un:p.un+'/ha', preco:rs(p.preco)+'/'+p.un,
-                custo:removed?'—':(rs((isNaN(local)?0:local)*p.preco)+'/ha'), aj:aj||(an&&!removed), ajT, ajSt:chipSt(an?'blue':'yellow'), rmv:removed, rmT:an?('retirado pela análise · '+SRC[key].laudo+(ng?' · '+ng:'')):'retirado deste talhão', novo:false,
-                err:ERR(key), hasErr:!!ERR(key), dis:ro||removed||!!ng, fid, ist:doseSt(key,aj,ro||removed||!!ng,an&&!removed),
-                podeRet:!ro&&!removed&&!ng, podeDesf:!ro&&removed&&!ng, podeRest:!ro&&aj&&!ng,
-                hasSug:!!sg, sugD:sg?sg.d:'', sugQ:sg?sg.q:'', sugU:sg?sg.u:'', sugPq:()=>{ if(s) pqAbre(s,'pq_'+fid); }, pqId:'pq_'+fid, sugGo:()=>{ if(s) usar(s,key); },
-                set:(e)=>{ const cur=self.state.lp; const d=Object.assign({},cur.draft,{[key]:e.target.value}); const er=Object.assign({},cur.err||{}); delete er[key]; const sr=Object.assign({},cur.src||{}); delete sr[key]; upd({draft:d,err:er,src:sr}); },
-                reset:()=>{ const cur=self.state.lp; const d=Object.assign({},cur.draft); delete d[key]; const sr=Object.assign({},cur.src||{}); delete sr[key]; upd({draft:d,src:sr}); },
-                ret:()=>{ const cur=self.state.lp; const rr=Object.assign({},cur.rm||{},{[key]:true}); const d=Object.assign({},cur.draft); delete d[key]; const er=Object.assign({},cur.err||{}); delete er[key]; const sr=Object.assign({},cur.src||{}); delete sr[key]; upd({rm:rr,draft:d,err:er,src:sr}); },
-                desf:()=>{ const cur=self.state.lp; const rr=Object.assign({},cur.rm||{}); delete rr[key]; const sr=Object.assign({},cur.src||{}); delete sr[key]; const d=Object.assign({},cur.draft); delete d[key]; upd({rm:rr,src:sr,draft:d}); } }; })
+                custo:removed?'—':(rs((isNaN(local)?0:local)*p.preco)+'/ha'), aj, rmv:removed, novo:false, err:ERR(key), hasErr:!!ERR(key), dis:ro||removed, fid:'lp_'+key.replace('|','_'), ist:doseSt(key,aj,ro||removed),
+                podeRet:!ro&&!removed, podeDesf:!ro&&removed, podeRest:!ro&&aj,
+                set:(e)=>{ const cur=self.state.lp; const d=Object.assign({},cur.draft,{[key]:e.target.value}); const er=Object.assign({},cur.err||{}); delete er[key]; upd({draft:d,err:er}); },
+                reset:()=>{ const cur=self.state.lp; const d=Object.assign({},cur.draft); delete d[key]; upd({draft:d}); },
+                ret:()=>{ const cur=self.state.lp; const rr=Object.assign({},cur.rm||{},{[key]:true}); const d=Object.assign({},cur.draft); delete d[key]; const er=Object.assign({},cur.err||{}); delete er[key]; upd({rm:rr,draft:d,err:er}); },
+                desf:()=>{ const cur=self.state.lp; const rr=Object.assign({},cur.rm||{}); delete rr[key]; upd({rm:rr}); } }; })
             .concat(adds.map((x,j)=>{ const key=A+'|+'+j; const n=g2num(x.dose);
-              return {grupo:x.grupo, nome:prodNome(x.prod,c), padrao:'—', v:x.dose, un:x.un+'/ha', preco:rs(x.preco)+'/'+x.un, custo:(x.dose===''||isNaN(n))?'—':(rs(n*x.preco)+'/ha'), aj:false, ajT:'', ajSt:'', rmv:false, rmT:'', novo:true,
-                err:ERR(key), hasErr:!!ERR(key), dis:ro, fid:'lp_'+A+'_n'+j, ist:doseSt(key,true,ro,false), podeRet:!ro, podeDesf:false, podeRest:false, hasSug:false, sugD:'', sugQ:'', sugU:'', sugPq:()=>{}, pqId:'', sugGo:()=>{},
+              return {grupo:x.grupo, nome:prodNome(x.prod,c), padrao:'—', v:x.dose, un:x.un+'/ha', preco:rs(x.preco)+'/'+x.un, custo:(x.dose===''||isNaN(n))?'—':(rs(n*x.preco)+'/ha'), aj:false, rmv:false, novo:true,
+                err:ERR(key), hasErr:!!ERR(key), dis:ro, fid:'lp_'+A+'_n'+j, ist:doseSt(key,true,ro), podeRet:!ro, podeDesf:false, podeRest:false,
                 set:(e)=>{ const cur=self.state.lp; const ad=Object.assign({},cur.add||{}); ad[A]=(ad[A]||[]).slice(); ad[A][j]=Object.assign({},ad[A][j],{dose:e.target.value}); const er=Object.assign({},cur.err||{}); delete er[key]; upd({add:ad,err:er}); },
                 reset:()=>{}, desf:()=>{},
                 ret:()=>{ const cur=self.state.lp; const ad=Object.assign({},cur.add||{}); ad[A]=(ad[A]||[]).filter((_,q)=>q!==j); if(!ad[A].length) delete ad[A]; upd({add:ad,err:{}}); } }; }));
@@ -1584,148 +1466,42 @@ function lpVals(self,v){ const lp=self.state.lp; v.lp_open=!!lp; if(!lp) return;
               if(!p){ upd({err:Object.assign({},cur.err||{},{['pick'+A]:'Escolha o insumo a incluir.'})}); return; }
               const ad=Object.assign({},cur.add||{}); ad[A]=(ad[A]||[]).concat([{prod:p.prod,grupo:p.grupo,un:p.un,preco:p.preco,dose:''}]); const pkm=Object.assign({},cur.pick||{}); delete pkm[A]; upd({add:ad,pick:pkm}); },
             pkNo:()=>{ const cur=self.state.lp; const pkm=Object.assign({},cur.pick||{}); delete pkm[A]; const er=Object.assign({},cur.err||{}); delete er['pick'+A]; upd({pick:pkm,err:er}); } }); }) }; }) }));
-  /* operação incluída pela análise (R18): gravada (aceite) ou a salvar (rascunho), no topo do painel; e a sugestão de incluir */
-  const tipoInc=(s)=>/:ges$/.test(s.atv.id)?'gessagem':'calagem';
-  const incG=acSt.filter(x=>x.tipo==='incluir'&&!(lp.inclRm||{})[x.k]); const incP=Object.values(lp.incl||{});
-  v.lp_incl=incG.map(x=>{ const ng=ngAc(x); return {t:x.atv.nome+' · '+x.prod, d:soloDoseTxt(x.dose,x.un)+' · '+soloBr(x.dt)+' · '+soloQtdTxt(cenQtd(x.dose,area),x.un,false)+(ng?' · '+ng+': não se desfaz':''), chip:'incluída pela análise · '+x.laudo,
-      podeDesf:!ro&&!ng, desf:()=>upd({inclRm:Object.assign({},self.state.lp.inclRm||{},{[x.k]:true})}), desfT:'Desfazer inclusão'}; })
-    .concat(incP.map(s=>({t:s.atv.nome+' · '+s.prod, d:soloDoseTxt(s.sug,s.un)+' · '+soloBr(s.dt)+' · '+soloQtdTxt(cenQtd(s.sug,area),s.un,false), chip:'incluída pela análise · '+s.laudo.id+' (a salvar)',
-      podeDesf:!ro, desf:()=>{ const x=Object.assign({},self.state.lp.incl||{}); delete x[s.k]; upd({incl:x}); }, desfT:'Desfazer'})));
-  v.lp_hasIncl=v.lp_incl.length>0;
-  v.lp_incSug=ro?[]:SG.sug.filter(s=>s.tipo==='incluir'&&!s.nega&&!(lp.incl||{})[s.k]).filter(s=>{ const g0=incG.find(x=>soloTipoAtv(x.incl)===soloTipoAtv(s.incl)); return !g0||prCmp(g0.dose,s.sug)!==0; })
-    .map(s=>{ const g0=incG.find(x=>soloTipoAtv(x.incl)===soloTipoAtv(s.incl)); const fid='lp_inc_'+tipoInc(s);
-      return {d:(g0?s.atv.nome+' '+soloDoseTxt(s.sug,s.un)+' (incluída '+soloDoseTxt(g0.dose,g0.un)+')':'incluir '+s.atv.nome+' · '+s.prod+' '+soloDoseTxt(s.sug,s.un)+' em '+soloBr(s.dt)),
-        q:soloQtdTxt(g0?prSub(cenQtd(s.sug,area),cenQtd(g0.dose,area)):cenQtd(s.sug,area),s.un,true), u:g0?'Usar '+soloDoseTxt(s.sug,s.un):'Incluir '+tipoInc(s), pqId:'pq_'+fid,
-        pq:()=>pqAbre(s,'pq_'+fid), go:()=>{ const x=Object.assign({},self.state.lp.incl||{},{[s.k]:s}); const r0=Object.assign({},self.state.lp.inclRm||{}); if(g0) r0[g0.k]=true; upd({incl:x,inclRm:r0}); }}; })
-    /* R22 (revisão A3): o laudo vigente dispensa a correção incluída → "retirar"; preenche o rascunho (inclRm guarda a sugestão) e o Salvar grava */
-    .concat(SG.sug.filter(s=>s.incl0&&!s.nega&&incG.some(x=>x.k===s.k)).map(s=>{ const fid='lp_ret_'+tipoInc(s);
-      return {d:'retirar a '+s.atv.nome+' incluída ('+(s.motivo||'pela análise')+')', q:soloQtdTxt(s.dif,s.un,true), u:'Retirar pela análise', pqId:'pq_'+fid,
-        pq:()=>pqAbre(s,'pq_'+fid), go:()=>upd({inclRm:Object.assign({},self.state.lp.inclRm||{},{[s.k]:s})})}; }));
-  v.lp_hasIncSug=v.lp_incSug.length>0;
-  const dirty=()=>{ const cur=self.state.lp; return JSON.stringify({d:cur.draft,rm:cur.rm||{},add:cur.add||{},incl:Object.keys(cur.incl||{}),inclRm:cur.inclRm||{}})!==JSON.stringify(Object.assign(JSON.parse(cur.orig),{incl:[]})); };
-  v.lp_warn=!!lp.warn; v.lp_nerr=Object.keys(lp.err||{}).length>0; v.lp_cmdErr=lp.cmdErr||''; v.lp_hasCmdErr=!!lp.cmdErr;
-  v.lp_close=()=>{ if(!ro && dirty()){ self.setState({lp:Object.assign({},self.state.lp,{warn:true})}); return; } self.setState({lp:null,pq:null}); };
-  v.lp_discard=()=>self.setState({lp:null,pq:null}); v.lp_keep=()=>self.setState({lp:Object.assign({},self.state.lp,{warn:false})});
-  v.lp_save=()=>lpSalvar(self,c,pl); }
-/* Salvar do painel: sessão (ajuste manual) e cenário (aceites) com uma dose por chave (R14). Nada se copia do aceite para a sessão; mudar à mão a
-   dose da análise desfaz o aceite ("substituído por ajuste manual", R15); Restaurar dose volta ao padrão e desfaz o aceite */
-function lpSalvar(self,c,pl){ const cur=self.state.lp; const er={}; const out={}; const aceitar=[], desfazer=[]; const SRC=cur.src||{};
-  const acSt=soloAcAtivos(soloSaf(self).ac,c.id,c.v.plano); 
-  pl.atividades.forEach(a=>{ const A=String(a.id);
-    a.prods.forEach((p,i)=>{ const key=A+'|'+i; const a0=acSt.find(x=>x.tipo!=='incluir'&&String(x.atv.id)===A&&x.prod===p.prod)||null; const sr=SRC[key];
-      const rmv=!!(cur.rm||{})[key]; const dv=cur.draft[key]; const n=(dv===undefined||dv==='')?p.dose:g2num(dv);
-      if(!rmv&&(isNaN(n)||n<0)){ er[key]='Use um número ≥ 0'; return; }
-      const val=rmv?'-':n;
-      if(sr){ const igual=(sr.dose==='-'&&val==='-')||(sr.dose!=='-'&&val!=='-'&&Math.abs(Number(sr.dose)-val)<1e-9);
-        if(igual){ if(sr.s&&!(a0&&String(a0.dose)===String(sr.dose))) aceitar.push(Object.assign({},sr.s,{local:c.v.local})); return; } }   /* pela análise: fica no cenário, nunca na sessão */
-      /* revisão A7: digitar de novo a dose do uso gravado (ou retirar o que a análise já retirou) não o desfaz nem vira ajuste da sessão */
-      if(a0&&((a0.dose==='-'&&val==='-')||(a0.dose!=='-'&&val!=='-'&&Math.abs(Number(a0.dose)-val)<1e-9))) return;
-      if(rmv){ out[key]='-'; if(a0) desfazer.push({k:a0.k,motivo:'substituído por ajuste manual'}); return; }
-      if(Math.abs(n-p.dose)>1e-9){ out[key]=n; if(a0) desfazer.push({k:a0.k,motivo:'substituído por ajuste manual'}); return; }
-      if(a0) desfazer.push({k:a0.k,motivo:'desfeito: dose do plano restaurada'}); });
-    (((cur.add||{})[A])||[]).forEach((x,j)=>{ const key=A+'|+'+j; const n=g2num(x.dose); if(String(x.dose).trim()===''||isNaN(n)||n<=0){ er[key]='Informe a dose por hectare (maior que zero)'; return; }
-      out[key]={prod:x.prod,grupo:x.grupo,un:x.un,preco:x.preco,dose:n}; }); });
-  if(Object.keys(er).length){ self.setState({lp:Object.assign({},cur,{err:er})}); return; }
-  Object.values(cur.incl||{}).forEach(s=>aceitar.push(Object.assign({},s,{local:c.v.local})));
-  const tk=(k)=>(/\|solo:[^|]+:(cal|ges)\|/.exec(k)||[])[1]||'';
-  Object.keys(cur.inclRm||{}).forEach(k=>{ const x=cur.inclRm[k]; if(x&&x.incl0){ aceitar.push(Object.assign({},x,{local:c.v.local})); return; }   /* retirar pela análise (R22) */
-    if(!aceitar.some(s=>s.tipo==='incluir'&&tipoInc0(s)===tk(k))) desfazer.push({k,motivo:'desfeito'}); });   /* a nova inclusão do mesmo tipo já substitui a antiga no comando */
-  let msgSolo='';
-  if(aceitar.length||desfazer.length){ const r=cenMudar(null,cc=>soloAceitar(cc,{cid:c.id,aceitar,desfazer},cur.chave,g2perfil().k));
-    if(r.erro){ self.setState({lp:Object.assign({},cur,{cmdErr:r.erro})}); return; } msgSolo=r.msg; }
-  const adj=JSON.parse(JSON.stringify(adjOf(self))); if(Object.keys(out).length) adj[cur.cid]=out; else delete adj[cur.cid];
-  const vals=Object.values(out); const nr=vals.filter(x=>x==='-').length, ni=vals.filter(x=>x&&typeof x==='object').length, nd=vals.length-nr-ni;
-  const partes=[nd?nd+(nd>1?' doses alteradas':' dose alterada'):'', nr?nr+(nr>1?' insumos retirados':' insumo retirado'):'', ni?ni+(ni>1?' insumos incluídos':' insumo incluído'):''].filter(Boolean);
-  const nac=soloAcAtivos(soloSaf(self).ac,c.id,c.v.plano).length;   /* revisão A7 (S4): sem mudança, diz o que vale de fato */
-  const semMud=!partes.length&&!msgSolo?(nac?'Sem mudanças em '+c.v.local+': valem o plano padrão e '+nac+(nac>1?' usos':' uso')+' da análise. ':'Sem ajustes em '+c.v.local+': vale o plano padrão. '):'';
-  self.setState({adj,lp:null,pq:null,cenrev:Date.now(),g2toast:(partes.length?partes.join(' · ')+' em '+c.v.local+'. ':'')+(msgSolo?msgSolo.replace(/\.$/,'')+' em '+c.v.local+'. ':'')+semMud+'Plano operacional, recursos e demanda recalculados; o plano padrão e os outros talhões não mudaram.'}); }
-function tipoInc0(s){ return /:ges$/.test(String((s.atv||{}).id))?'ges':'cal'; }
-/* ---- Sugestões pelas análises (safra, §3.4): lista lado a lado padrão × sugestão; nada vem marcado (D-16); usa só as escolhidas, uma chave por envio ---- */
-function sgSugs(self,saf,manter){ const out=[]; cultRows(self,saf).forEach(c=>{ const R=soloSugsSaf(self,saf,c,false); R.sug.forEach(s=>{ if(!s.nega||(manter&&manter[s.k])) out.push({s,c,cu:R.cu}); }); }); return out; }   /* manter: linha negada no último envio continua com o motivo */
-function sgN(self,saf){ if(!saf) return 0; const k=(self.state.cenrev||0)+'|'+saf+'|'+JSON.stringify(adjOf(self))+'|'+cultRows(self,saf).map(c=>c.id+c.v.meta+c.v.plano+c.v.area).join(',');
-  if(self.__sgn&&self.__sgn.k===k) return self.__sgn.n; const n=sgSugs(self,saf).length; self.__sgn={k,n}; return n; }
-function sgAbrir(self){ const saf=self.state.saf; if(!saf) return; g2set(self,'g_sug',{sel:{},rows:null,q:'',f:{},qv:''}); self.setState({sg:{saf,chave:'LOTE-'+saf+'-'+Date.now(),neg:{}},pq:null}); }
-function sgRows(self){ const sg=self.state.sg; if(!sg) return []; const L=sgSugs(self,sg.saf,sg.neg); self.__sgL=L;
-  return L.map(x=>{ const s=x.s, c=x.c; const r={id:s.k,v:{},s:{},p:{}}; const tp={dose:'Outra dose',retirar:'Retirar',incluir:'Incluir'}[s.tipo];
-    r.p.tal=[{k:'b',t:c.v.local},{k:'mut',t:nf(c.v.area)+' ha'}]; r.s.tal=c.v.local; r.p.item=[{k:'txt',t:s.atv.nome},{k:'br'},{k:'mut',t:s.prod}]; r.s.item=s.atv.nome+' · '+s.prod;
-    const efV=s.ef!==null&&s.ef!=='-'&&s.efOrig!=='padrão';   /* a dose que vale hoje: a do uso (inclusão de outro laudo, revisão A1/A3) ou a do padrão */
-    r.p.pad=[{k:'txt',t:efV?soloDoseTxt(s.ef,s.un):(s.padrao===null?'—':soloDoseTxt(s.padrao,s.un))}].concat(s.efOrig&&s.efOrig!=='padrão'?[{k:'br'},{k:'mut',t:s.efOrig==='análise'?'pela análise':'ajustado pelo usuário'}]:[]); r.s.pad=r.p.pad[0].t;
-    r.p.sug=[{k:'b',t:s.tipo==='retirar'?(s.incl0?'retirar a inclusão':'retirar'):(s.tipo==='incluir'?'incluir '+soloDoseTxt(s.sug,s.un):soloDoseTxt(s.sug,s.un)+(s.desf?' (padrão)':''))}]; r.s.sug=r.p.sug[0].t;
-    r.v.dif=s.dif; r.p.dif=[{k:'txt',t:soloQtdTxt(s.dif,s.un,true)}]; r.s.dif=r.p.dif[0].t; r.p.tipo=[{k:'txt',t:tp}]; r.s.tipo=tp;
-    r.p.lau=[{k:'act',t:s.laudo.id+' · Por quê',fn:'sgpq:'+s.k,lk:true,al:'Por quê: '+s.atv.nome+' · '+s.prod+' no '+c.v.local}]; r.s.lau=s.laudo.id;
-    const ng=(sg.neg||{})[s.k]; r.p.res=ng?[{k:'chip',t:'não gravada: '+ng,c:'red'}]:[{k:'mut',t:'—'}]; r.s.res=ng?'não gravada':''; return r; }); }
-function sgVals(self,v){ const sg=self.state.sg; v.sg_open=!!sg; const saf=self.state.saf; const n=(saf&&(self.state.step||1)===2)?sgN(self,saf):0; v.sg_has=n>0; v.sg_lnk='Sugestões pelas análises · '+n; v.sg_abrir=()=>sgAbrir(self);
-  v.sgpq=(k)=>{ self.__pqFoco='sg_x'; self.setState({pq:{k,from:'sg'}}); };
-  if(!sg) return; const S=safList(self)[sg.saf]||{}; const sel=(g2st(self,'g_sug').sel)||{}; const L=self.__sgL||[]; const ks=L.filter(x=>sel[x.s.k]&&!(sg.neg||{})[x.s.k]&&!x.s.nega).map(x=>x.s.k);
-  v.sg_titulo='Sugestões pelas análises · '+(S.nome||sg.saf); v.sg_sub='Padrão ao lado da sugestão, por talhão. Marque as que quer usar; as outras seguem como estão.';
-  v.sg_pe='Os demais talhões seguem a dose do plano.'; v.sg_closeT='Fechar'; v.sg_sec=[]; v.sg_hasPA=false; v.sg_ph='#';
-  v.sg_hasPB=true; v.sg_pt='Usar '+ks.length+(ks.length===1?' sugestão':' sugestões'); v.sg_pdis=!ks.length; v.sg_pst=ks.length?'':'opacity:.5;cursor:not-allowed;';
-  v.sg_err=sg.err||''; v.sg_hasErr=!!sg.err;
-  v.sg_close=()=>self.setState({sg:null,pq:null}); v.sg_key=(e)=>{ if(e&&e.key==='Escape'&&!self.state.pq){ e.preventDefault(); v.sg_close(); } };
-  v.sg_pgo=()=>{ if(!ks.length){ self.setState({sg:Object.assign({},self.state.sg,{err:'Marque ao menos uma sugestão.'})}); return; }
-    const itens=L.filter(x=>ks.indexOf(x.s.k)>=0).map(x=>Object.assign({},x.s,{local:x.c.v.local}));
-    const r=cenMudar(null,cc=>soloAceitarLote(cc,itens,self.state.sg.chave,g2perfil().k));
-    if(r.erro){ self.setState({sg:Object.assign({},self.state.sg,{err:r.erro})}); return; }
-    /* R14: gravar o aceite apaga o ajuste manual da sessão naquela chave */
-    const neg={}; (r.neg||[]).forEach(x=>{ neg[x.k]=x.motivo; }); const adj=JSON.parse(JSON.stringify(adjOf(self)));
-    itens.filter(it=>!neg[it.k]&&it.i>=0&&it.tipo!=='incluir'&&!it.incl0&&!it.desf).forEach(it=>{ const k0=it.atv.id+'|'+it.i; if(adj[it.cid]&&adj[it.cid][k0]!==undefined){ delete adj[it.cid][k0]; if(!Object.keys(adj[it.cid]).length) delete adj[it.cid]; } });
-    g2set(self,'g_sug',{sel:{},rows:null});
-    if(Object.keys(neg).length) self.setState({adj,cenrev:Date.now(),g2toast:r.msg,sg:Object.assign({},self.state.sg,{neg,err:'',chave:'LOTE-'+sg.saf+'-'+Date.now()})});
-    else self.setState({adj,cenrev:Date.now(),g2toast:r.msg,sg:null}); }; }
-/* Por quê (no painel de insumos ou no lote): a primária pelo contexto; negada pela R11, sem primária */
-function pqSafVals(self,v){ const pq=self.state.pq; let s=null, cu=null, prim=null;
-  if(pq&&pq.from==='lp'&&self.state.lp){ const c=cultRows(self,self.state.saf).find(r=>r.id===self.state.lp.cid); if(c){ const R=soloSugsSaf(self,self.state.saf,c,true); s=R.sug.find(x=>x.k===pq.k)||null; cu=R.cu; }
-    if(s&&!s.nega) prim={t:s.tipo==='retirar'?'Retirar pela análise':(s.tipo==='incluir'?'Incluir '+(/:ges$/.test(s.atv.id)?'gessagem':'calagem'):'Usar '+soloDoseTxt(s.sug,s.un)),go:()=>{ lpUsarPq(self,s); }}; }
-  if(pq&&pq.from==='sg'){ const x=(self.__sgL||[]).find(q=>q.s.k===pq.k); if(x){ s=x.s; cu=x.cu; prim={t:'Marcar esta sugestão',go:()=>{ const sel=Object.assign({},(g2st(self,'g_sug').sel)||{}); sel[s.k]=true; g2set(self,'g_sug',{sel}); self.setState({pq:null}); }}; } }
-  soloPqVals(self,v,s,{cu,prim,ver:s?'AG-02.dc.html#'+s.laudo.id:'',fechar:()=>self.setState({pq:null})}); }
-function lpUsarPq(self,s){ const lp=self.state.lp; if(!lp) return; if(s.tipo==='incluir'){ const x=Object.assign({},lp.incl||{},{[s.k]:s}); self.setState({lp:Object.assign({},lp,{incl:x,warn:false}),pq:null}); return; }
-  if(s.incl0){ self.setState({lp:Object.assign({},lp,{inclRm:Object.assign({},lp.inclRm||{},{[s.k]:s}),warn:false}),pq:null}); return; }   /* R22: retirar a inclusão */
-  const c=cultRows(self,self.state.saf).find(r=>r.id===lp.cid); const pl=c&&planById(c.v.plano); const a=pl&&pl.atividades.find(q=>String(q.id)===String(s.atv.id)); const i=a?a.prods.findIndex(q=>q.prod===s.prod):-1; if(i<0){ self.setState({pq:null}); return; }
-  const key=String(a.id)+'|'+i; const d=Object.assign({},lp.draft), rr=Object.assign({},lp.rm||{}), sr=Object.assign({},lp.src||{});
-  if(s.tipo==='retirar'){ rr[key]=true; delete d[key]; } else { d[key]=String(s.sug).replace('.',','); delete rr[key]; } sr[key]={laudo:s.laudo.id,dose:s.tipo==='retirar'?'-':s.sug,s};
-  self.setState({lp:Object.assign({},lp,{draft:d,rm:rr,src:sr,warn:false}),pq:null}); }
+  const dirty=()=>{ const cur=self.state.lp; return JSON.stringify({d:cur.draft,rm:cur.rm||{},add:cur.add||{}})!==cur.orig; };
+  v.lp_warn=!!lp.warn; v.lp_nerr=Object.keys(lp.err||{}).length>0;
+  v.lp_close=()=>{ if(!ro && dirty()){ self.setState({lp:Object.assign({},self.state.lp,{warn:true})}); return; } self.setState({lp:null}); };
+  v.lp_discard=()=>self.setState({lp:null}); v.lp_keep=()=>self.setState({lp:Object.assign({},self.state.lp,{warn:false})});
+  v.lp_save=()=>{ const cur=self.state.lp; const er={}; const out={};
+    pl.atividades.forEach(a=>{ const A=String(a.id);
+      a.prods.forEach((p,i)=>{ const key=A+'|'+i; if((cur.rm||{})[key]){ out[key]='-'; return; } const dv=cur.draft[key]; if(dv===undefined||dv==='') return; const n=g2num(dv);
+        if(isNaN(n)||n<0){ er[key]='Use um número ≥ 0'; return; } if(Math.abs(n-p.dose)>1e-9) out[key]=n; });
+      (((cur.add||{})[A])||[]).forEach((x,j)=>{ const key=A+'|+'+j; const n=g2num(x.dose); if(String(x.dose).trim()===''||isNaN(n)||n<=0){ er[key]='Informe a dose por hectare (maior que zero)'; return; }
+        out[key]={prod:x.prod,grupo:x.grupo,un:x.un,preco:x.preco,dose:n}; }); });
+    if(Object.keys(er).length){ self.setState({lp:Object.assign({},cur,{err:er})}); return; }
+    const adj=JSON.parse(JSON.stringify(adjOf(self))); if(Object.keys(out).length) adj[cur.cid]=out; else delete adj[cur.cid];
+    const vals=Object.values(out); const nr=vals.filter(x=>x==='-').length, ni=vals.filter(x=>x&&typeof x==='object').length, nd=vals.length-nr-ni;
+    const partes=[nd?nd+(nd>1?' doses alteradas':' dose alterada'):'', nr?nr+(nr>1?' insumos retirados':' insumo retirado'):'', ni?ni+(ni>1?' insumos incluídos':' insumo incluído'):''].filter(Boolean);
+    self.setState({adj,lp:null,g2toast:(partes.length?partes.join(' · ')+' em '+c.v.local:'Sem ajustes em '+c.v.local+': vale o plano padrão')+'. Plano operacional, recursos e demanda recalculados; o plano padrão e os outros talhões não mudaram.'}); };
+}
 function enviar(self){ const saf=self.state.saf; const safObj=g2rows(self,GR('g_saf')).find(r=>r.id===saf); if(safObj&&safObj.ro){ self.setState({g2toast:'Safra encerrada: não gera solicitações.'}); return; }
   const dm=demanda(self,saf); const sols=Object.assign({},solMap(self)); const sol=sols[saf];
   const itens=Object.values(dm).filter(d=>d.liq>0.001);
-  if(!itens.length&&!sol){ self.setState({g2toast:'Nada a cotar: o estoque e os recebimentos cobrem a demanda.'}); return; }   // com SOL enviada, a demanda que zerou ainda baixa a SOL (DEM-09)
-  // revisão do CTL-4, achado 3: enviar, complementar ou baixar a solicitação é decisão de quem planeja (gestor ou agrônomo; padrão do CTL-3, cenExigeUm):
-  // grava quem agiu (perfil de demonstração) e quando; sem o papel, recusa e nada muda (dano: compra reduzida ou aumentada em nome de quem não decidiu)
-  const quem=(acao)=>{ try{ return cenExigeUm(g2perfil(),['gestor','agronomo'],acao); }catch(e){ self.setState({g2toast:String(e.message||e)}); return ''; } };
+  if(!itens.length){ self.setState({g2toast:'Nada a cotar: o estoque e os recebimentos cobrem a demanda.'}); return; }
   // registro único da solicitação: o que a Compra de insumos mostra (mesmos itens, quantidades, valores e memória CAL-01)
-  const det=Object.values(dm).map(d=>({nome:d.nome,grupo:d.grupo,un:d.un,preco:d.preco,bruta:d.bruta,est:d.est,cust:d.cust||0,custT:d.custT||[],quarC:d.quarC||0,quarRef:d.quarRef||[],cond:d.cond||0,condFalta:d.condFalta||'',res:d.res,rec:d.rec,liq:d.liq,valor:d.valor,falta:d.falta,uso:d.uso,quar:d.quar,evs:d.evs}));
+  const det=Object.values(dm).map(d=>({nome:d.nome,grupo:d.grupo,un:d.un,preco:d.preco,bruta:d.bruta,est:d.est,res:d.res,rec:d.rec,liq:d.liq,valor:d.valor,falta:d.falta,uso:d.uso,quar:d.quar,evs:d.evs}));
   const EM='23/09/2026 11:05';   // horário do cenário de demonstração (a SOL-2026-07 inicial é de 10:40)
-  const base={safra:saf,nome:safObj.v.nome,faz:safObj.v.faz||'Santa Rita',estado:'Enviada · a cotar',
-    origem:{t:'Planejar safra · '+safObj.v.nome+' · demanda de insumos',h:'SAF.dc.html#saf='+encodeURIComponent(saf)+'&passo=demanda'},det,ent:dm._ent};
+  const base={safra:saf,nome:safObj.v.nome,faz:safObj.v.faz||'Santa Rita',estado:'Enviada · a cotar',por:'Ana (gestora)',
+    origem:{t:'Planejar safra · '+safObj.v.nome+' · demanda de insumos',h:'SAF.dc.html#saf='+encodeURIComponent(saf)+'&passo=demanda'},det};
   const grava=(rec)=>{ const ok=solGravar(rec); return ok?'':' Atenção: este navegador não guarda dados; a Compra de insumos não verá a solicitação.'; };
   if(!sol){ const ids={S27SF:'SOL-2027-02',S2627:'SOL-2026-07',LG2627:'SOL-2026-09'}; const usados=Object.values(sols).map(x=>x.id); let id=ids[saf];
     for(let k=10;!id||usados.indexOf(id)>=0;k++) id='SOL-2026-'+k;
-    const por=quem('Enviar a solicitação '+id); if(!por) return;
     const it={}; itens.forEach(d=>{ it[d.nome]=d.liq; }); const tot=itens.reduce((a,d)=>a+d.valor,0);
-    sols[saf]=Object.assign({},base,{id,at:'23/09/2026',em:EM,por,itens:it,comp:0,total:tot});
+    sols[saf]=Object.assign({},base,{id,at:'23/09/2026',em:EM,itens:it,comp:0,total:tot});
     const av=grava(sols[saf]);
     self.setState({sol:sols,g2toast:'Solicitação '+id+' enviada a Compras: '+itens.length+' insumos, '+rs(tot)+'. Origem: '+safObj.v.nome+' · Planejar safra, demanda de insumos.'+av}); return; }
-  // DEM-09 (cal01.js): sobe o que a demanda pede a mais (complemento) e baixa o que ela pede a menos; com pedido emitido nada baixa
-  const pe=solPedEmit(saf,sol); const R=demSolRevisar(sol.itens,dm,pe);
-  if(!R.novos.length&&!R.menos.length){ self.setState({g2toast:'Nada novo para cotar: tudo já está na '+sol.id+'. Nenhuma solicitação duplicada foi criada.'}); return; }
-  const por=quem('Atualizar a '+sol.id); if(!por) return; const est0=solEstado(saf,sol); const agora='23/09/2026 '+cenAgora();
-  const it=R.it; const comp=(sol.comp||0)+(R.novos.length?1:0);
-  const pr=(n)=>{ const x=dm[n]||demFora(self,saf,n,sol); return {un:x.un,preco:Number(x.preco)||0,dec:x.un==='L'?1:0}; };
-  const val=R.novos.reduce((a,n)=>a+(it[n]-(sol.itens[n]||0))*pr(n).preco,0);
-  const dif=R.menos.map(n=>{ const x=pr(n), q=(sol.itens[n]||0)-(it[n]||0); return {n,q,v:q*x.preco,t:nf(q,x.dec)+' '+x.un,sai:!(it[n]>0)}; }); const valM=dif.reduce((a,x)=>a+x.v,0);
-  // insumo que fica na solicitação sem estar na demanda (pedido emitido): a Compra lê grupo, unidade e preço do registro
-  const detX=det.concat(Object.keys(it).filter(n=>!dm[n]).map(n=>{ const x=demFora(self,saf,n,sol); return {nome:n,grupo:x.grupo,un:x.un,preco:x.preco,bruta:0,est:x.est,res:0,rec:0,liq:0,valor:0,falta:'',uso:'',quar:0,evs:[]}; }));
-  // versão nova: o envio original (por, em) fica; a atualização grava quem, quando e o que subiu ou baixou (a Compra mostra "atualizada em … por …")
-  const txt=R.novos.map(n=>n+' +'+nf((it[n]||0)-(sol.itens[n]||0),pr(n).dec)+' '+pr(n).un).concat(dif.map(x=>x.n+' −'+x.t)).join('; ');
-  const atu={por,em:agora,txt}; const hist=(sol.hist||[]).concat([Object.assign({v:(sol.hist||[]).length+2},atu)]);
-  sols[saf]=Object.assign({},base,sol,{estado:'Enviada · a cotar',itens:it,comp,det:detX,total:Object.keys(it).reduce((a,n)=>a+it[n]*pr(n).preco,0),em:sol.em||(saf==='S2627'?'23/09/2026 10:40':EM),atu,hist,pedEmit:pe,ent:dm._ent});
-  const av=grava(sols[saf]); if(R.menos.length&&!R.novos.length) solProcLimpar(saf);
-  const tC=R.novos.length?'Complemento '+sol.id+'-C'+comp+' enviado com só a diferença: '+R.novos.length+' insumos, '+rs(val)+'. A solicitação original não foi duplicada.':'';
-  const tM=dif.length?(sol.id+' atualizada: '+(dif.length===1?(dif[0].n+(dif[0].sai?' sai (':' baixa ')+dif[0].t+(dif[0].sai?' · ':' · −')+rs(dif[0].v)+(dif[0].sai?')':'')):
-    (dif.length+' insumos a menos ('+dif.map(x=>x.n+' −'+x.t).join('; ')+') · −'+rs(valM)))+', porque a demanda de agora pede menos. A Compra de insumos cota a versão nova.'
-    +((est0&&!R.novos.length)?' O andamento da compra da versão anterior ('+est0+') recomeça nesta versão.':'')):'';
-  self.setState({sol:sols,g2toast:[tC,tM].filter(Boolean).join(' ')+' Atualizada por '+por+'.'+av}); }
-// insumo que a solicitação pede e a demanda de agora não pede mais (DEM-09): linha própria, para a diferença não sumir da tela
-function demFora(self,saf,n,sol){ const me=g2rows(self,GR('g_saf')).find(r=>r.id===saf); const faz=(me&&me.v.faz)||'Santa Rita';
-  const k=((D2.osb||{}).cat||{})[n]||{}; const dt=((sol&&sol.det)||[]).find(x=>x.nome===n)||{};
-  return {nome:n,grupo:dt.grupo||k.g||'—',un:dt.un||k.un||'',preco:Number(dt.preco||k.preco)||0,bruta:0,real:0,est:Number(cenEstDem(cenGet(),faz,D2.estb,[]).fisico[n])||0,antes:0,res:0,rec:0,tarde:0,
-    liq:0,valor:0,rup:0,falta:'',cob:'',uso:'',quar:0,memo:['Nenhum uso do plano desta safra nem O.S. aberta pede '+n+' agora (a O.S. que pedia foi cancelada ou o plano mudou).']}; }
+  const novos=itens.filter(d=>d.liq>(sol.itens[d.nome]||0)+0.01);
+  if(!novos.length){ self.setState({g2toast:'Nada novo para cotar: tudo já está na '+sol.id+'. Nenhuma solicitação duplicada foi criada.'}); return; }
+  const it=Object.assign({},sol.itens); novos.forEach(d=>{ it[d.nome]=d.liq; }); const comp=(sol.comp||0)+1;
+  const val=novos.reduce((a,d)=>a+(d.liq-(sol.itens[d.nome]||0))*d.preco,0);
+  sols[saf]=Object.assign({},base,sol,{estado:'Enviada · a cotar',itens:it,comp,det,total:Object.keys(it).reduce((a,n)=>a+it[n]*((dm[n]||{}).preco||0),0),em:sol.em||(saf==='S2627'?'23/09/2026 10:40':EM)});
+  const av=grava(sols[saf]);
+  self.setState({sol:sols,g2toast:'Complemento '+sol.id+'-C'+comp+' enviado com só a diferença: '+novos.length+' insumos, '+rs(val)+'. A solicitação original não foi duplicada.'+av}); }

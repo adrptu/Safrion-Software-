@@ -9,17 +9,17 @@ try:
     t.goto('CD-06.dc.html')
     # a semente criada pelo CD-02 chega pelo armazenamento do navegador
     J("localStorage.setItem('talhao-os-cadastros-v1',JSON.stringify({sementes:['Semente de soja 64 Z']}))"); t.goto('CD-06.dc.html')
-    # SOLO-01 (D-10): o Calcário dolomítico ganhou preço de referência e data; o item sem preço e o "Cadastro completo" usam só a semente do CD-02
-    t.chk('abre com pendências no selo amarelo', '1 item sem preço · 1 item sem embalagem' in t.header() and t.chipcor()=='yellow', [t.header(),t.chipcor()])
+    t.chk('abre com pendências no selo amarelo', '2 itens sem preço · 1 item sem embalagem' in t.header() and t.chipcor()=='yellow', [t.header(),t.chipcor()])
     # defeito 1 · item sem preço
+    t.openrow(0,'Calcário dolomítico'); pv=t.fv('preco'); t.fset('local','Galpão 2'); t.btn('Salvar'); time.sleep(.2)
+    t.chk('Calcário: campo de preço abre vazio e o item salva sem preço, com Galpão 2',
+          pv=='' and not t.isopen() and 'sem preço de referência' in t.toast() and 'Sem preço' in (t.rowtxt(0,'Calcário') or ''), [pv,t.alerts(),t.toast(),t.rowtxt(0,'Calcário')])
     t.openrow(0,'Semente de soja 64 Z'); pv=t.fv('preco'); t.btn('Salvar'); a=t.alerts()
     t.chk('semente do CD-02: preço abre vazio; só a embalagem é pedida', pv=='' and 'Informe quanto cabe' in a and 'número' not in a and 'data do preço' not in a, [pv,a])
-    t.fset('cont','40'); t.btn('Salvar'); time.sleep(.2)
-    t.chk('o item salva sem preço (campo vazio) e a linha diz "Sem preço"',
-          not t.isopen() and 'sem preço de referência' in t.toast() and 'Sem preço' in (t.rowtxt(0,'Semente de soja 64 Z') or ''), [t.alerts(),t.toast(),t.rowtxt(0,'Semente de soja 64 Z')])
-    t.openrow(0,'Semente de soja 64 Z'); t.fset('preco','12,5'); t.fset('pdata','2026-09-20'); t.btn('Salvar'); time.sleep(.2)
+    t.fset('cont','40'); t.fset('preco','12,5'); t.fset('pdata','2026-09-20'); t.btn('Salvar'); time.sleep(.2)
     t.chk('semente salva com embalagem e preço', not t.isopen() and 'R$ 12,50/kg' in (t.rowtxt(0,'Semente de soja 64 Z') or ''), [t.alerts(),t.rowtxt(0,'Semente de soja 64 Z')])
     # defeito 6 · selo resolvido
+    t.openrow(0,'Calcário dolomítico'); t.fset('preco','480'); t.fset('pdata','2026-09-20'); t.btn('Salvar'); time.sleep(.2)
     t.chk('Cadastro completo no selo verde', 'Cadastro completo' in t.header() and t.chipcor()=='green', [t.header(),t.chipcor()])
     # defeito 2 · grupo padrão renomeado
     t.openrow(0,'Fertilizantes 11 itens'); t.fset('nome','Fertilizantes minerais'); t.btn('Salvar'); time.sleep(.2)
@@ -34,9 +34,8 @@ try:
     t.aba('Locais'); n0=t.rowtxt(0,'Galpão 1') or ''
     t.openrow(0,'Galpão 1'); t.fset('nome','Galpão Norte'); t.btn('Salvar'); time.sleep(.2); n1=t.rowtxt(0,'Galpão Norte') or ''
     t.openrow(0,'Galpão Norte'); dn=t.dlg(); t.cancel()
-    # só o nome do local muda (1ª ocorrência): sem a coluna Capacidade (revisão TABR A4) o fim da linha "Galpão | 1" (tipo e itens) também lê "Galpão 1"
     t.chk('renomear o local leva os itens junto e o local segue protegido contra exclusão (causa no painel)',
-          n0.replace('Galpão 1','Galpão Norte',1)==n1 and 'tem itens com este local padrão' in dn, [n0,n1,dn[-160:]])
+          n0.replace('Galpão 1','Galpão Norte')==n1 and 'tem itens com este local padrão' in dn, [n0,n1,dn[-160:]])
     t.aba('Itens'); t.openrow(0,'NPK 20-05-20'); lv=t.fv('local'); ops=t.fopts('local') or []; t.cancel()
     t.chk('NPK 20-05-20 (em Galpão 1) passa a Galpão Norte e a lista não oferece mais Galpão 1', lv=='Galpão Norte' and 'Galpão 1' not in ops and 'Galpão Norte' in ops, [lv,ops])
     t.clk('Cadastrar item'); lv=t.fv('local'); t.cancel()

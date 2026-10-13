@@ -12,7 +12,7 @@ FALHAS = 0
 def unit():
     import cenario
     import areas.processo_os as P
-    est = open(os.path.join(HERE, 'areas', 'processo_estoque.py'), encoding='utf-8').read()
+    est = open(os.path.join(HERE, 'est.js'), encoding='utf-8').read()   # SUP §0.2 (06/10): as regras do Estoque saíram do texto da página para est.js
     econs = re.search(r'function econsDet\(c,m\)\{.*?\.filter\(Boolean\); \}', est, re.S).group(0)
     g2 = [l for l in open(os.path.join(HERE, 'g2lib.js'), encoding='utf-8') if l.startswith('function g2num')][0]
     ini = open(os.path.join(HERE, 'areas', 'inicio.py'), encoding='utf-8').read()   # custo do Mapa (ordCusto) com preços sintéticos isolados em M

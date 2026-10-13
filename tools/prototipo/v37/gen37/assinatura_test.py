@@ -171,7 +171,7 @@ try:
     npg = J("JSON.parse(localStorage.getItem('talhao-os-cenario-v1')).assin.orgs.sr.faturas.find(f=>f.comp==='2026-09').eventos.filter(e=>/^Paga/.test(e.t)).length")
     chk('A6/A7f pagar sem forma é recusado; com Pix (clique duplo) paga uma vez: o 2º clique devolve o mesmo recibo PAG-0001; o evento diz quem pagou; volta a Ativa',
         'Escolha a forma de pagamento' in a and ('Pagamento simulado confirmado' in t or 'Pagamento já registrado · recibo PAG-0001' in t) and 'PAG-0001' in t and npg == 1 and 'Paga' in d
-        and 'recibo PAG-0001 · por Ana (gestora)' in d and selo() == 'Ativa', [a, t, npg, selo(), d[-500:]])   # CONF-01 P7: quem age é o perfil (AL-15), no formato dos outros comandos
+        and 'recibo PAG-0001 · por Ana · Gestora' in d and selo() == 'Ativa', [a, t, npg, selo(), d[-500:]])
     clk('Baixar fatura (CSV)', 'aside[role=dialog]'); csv = J("window.__assinCsv||''") or ''
     chk('A18c Baixar fatura (CSV): números da cópia (2.570,23 ha · R$ 5.140,46; fechamento 2.450,23 ha; mesmo depois de editar o T4) e cobrança simulada',
         '"Área medida (ha)";"2.570,23"' in csv and '"Medida no fechamento (ha)";"2.450,23"' in csv and '5.140,46' in csv and 'simulada' in csv, csv[:500])
@@ -189,14 +189,14 @@ try:
         'Contestação de Grupo Santa Rita resolvida' in t and 'A vencer' in linha(1, 'set/2026') and '21/10/2026' in linha(1, 'set/2026') and 'R$ 5.140,46' in linha(1, 'set/2026') and 'crédito de R$ 100,00' in b, [t, linha(1, 'set/2026'), b[:400]])
     abre_linha(1, 'set/2026'); d = dlg(); bts = J("[...document.querySelectorAll('aside[role=dialog] button')].map(x=>x.innerText.trim())") or []
     chk('A17c (revisão PLAT, achado 1) fatura já contestada e resolvida: sem "Contestar fatura" no painel; eventos dizem quem contestou e quem resolveu',
-        'Contestar fatura' not in bts and 'Confirmar pagamento (simulado)' in bts and 'por Ana (gestora): Área da Lagoa Grande' in d and 'Contestação resolvida (RES-0001) · por Admin plataforma' in d, [bts, d[-700:]])
+        'Contestar fatura' not in bts and 'Confirmar pagamento (simulado)' in bts and 'por Ana · Gestora: Área da Lagoa Grande' in d and 'Contestação resolvida (RES-0001) · por Admin plataforma' in d, [bts, d[-700:]])
     clk('Fechar', 'aside[role=dialog]')
     # ============ cenário E · medida acima de 5.000 ha (revisão PLAT, achado 10): primária Pedir proposta empresarial, uma vez ============
     # estado injetado no cadastro salvo: o CD-01 recusa talhão acima da área da fazenda; o caso real é uma fazenda grande importada
     go('CF-05.dc.html', limpa=True)
     J('localStorage.setItem("talhao-os-cd01-v1", ' + json.dumps(json.dumps(cad_mais({'id':'TNX','v':{'t':'Grande','faz':'Santa Rita','decl':2600,'sit':'Ativo'}}))) + '); 1')
     go('CF-05.dc.html'); p0 = J(PRIMS)
-    clk('Pedir proposta empresarial', vez=2); t = toast(); p1 = J(PRIMS); dis = J("(()=>{const b=[...document.querySelectorAll('header button')].find(x=>/Proposta empresarial pedida/.test(x.innerText)); return b?b.getAttribute('aria-disabled')==='true':null;})()")   # DS-DICA-20261009: indisponível com motivo fica focável (aria-disabled)
+    clk('Pedir proposta empresarial', vez=2); t = toast(); p1 = J(PRIMS); dis = J("(()=>{const b=[...document.querySelectorAll('header button')].find(x=>/Proposta empresarial pedida/.test(x.innerText)); return b?b.disabled:null;})()")
     npro = J("Object.values(JSON.parse(localStorage.getItem('talhao-os-cenario-v1')).assin.recibos).filter(r=>/^PRO-/.test(r.id)).length")
     go('BO-02.dc.html'); lsr = linha(0, 'Grupo Santa Rita')
     chk('A20 medida 5.170,23 ha: primária Pedir proposta empresarial (não Ampliar, que seria sempre recusado); clique duplo registra um pedido (PRO-0001); a primária fica desabilitada e o BO-02 mostra o pedido',

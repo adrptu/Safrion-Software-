@@ -64,12 +64,12 @@ try:
     J("[...document.querySelectorAll('aside[aria-label^=\"P1\"] [role=radio]')].find(b=>b.innerText.indexOf('OS-0417')>=0).click()"); time.sleep(.35)
     lk2=links('P1'); pr2=prim('P1')
     chk('5 P1: OS-0418 com Liberar bloqueado pelo Estoque · primário "Ajustar antes de liberar" → O.S. da OS-0418 · OS-0417: "Receber devolução no Estoque" (EST) · sem IN-02det · nenhum destino repetido',
-        'Liberar bloqueado' in p1 and pr==['Ajustar antes de liberar','OS.dc.html#OS-0418:ajustar'] and pr2==['Receber devolução no Estoque','EST.dc.html'] and unico(lk) and unico(lk2)
+        'Liberar bloqueado' in p1 and pr==['Ajustar antes de liberar','OS.dc.html#OS-0418:ajustar'] and pr2==['Receber devolução no Estoque','EST.dc.html#req=REQ-031'] and unico(lk) and unico(lk2)
         and not any(h in ('SU-07.dc.html','IN-02det.dc.html') for _,h in lk+lk2), [pr,lk,pr2,lk2])
     tap('P1'); tap('T4'); lk=links('T4'); pr=prim('T4')
-    # CTL-1 (Frente F): PL-05 é oculta e fixa; o passo vai para a OM-0233 viva (PCM simplificado: tela única MA, âncora #om= abre o painel)
-    chk('6 T4: OS-0420 parada só pela máquina · primário "Acompanhar OM-0233" → MA#om=OM-0233 · ordem completa → CA-01x-os0420 · sem IN-02x-os0420 · sem PL-05 · nenhum destino repetido',
-        pr==['Acompanhar OM-0233','MA.dc.html#om=OM-0233'] and not any((h or '').startswith('PL-05') for _,h in lk) and any(h=='CA-01x-os0420.dc.html' for _,h in lk) and not any('IN-02x' in (h or '') for _,h in lk) and unico(lk), [pr,lk])
+    # CTL-1 (Frente F): PL-05 é oculta e fixa; o passo vai para a OM-0233 viva no MA-04 (âncora abre o painel)
+    chk('6 T4: OS-0420 parada só pela máquina · primário "Acompanhar OM-0233" → MA-04#OM-0233 · ordem completa → CA-01x-os0420 · sem IN-02x-os0420 · sem PL-05 · nenhum destino repetido',
+        pr==['Acompanhar OM-0233','MA-04.dc.html#OM-0233'] and not any((h or '').startswith('PL-05') for _,h in lk) and any(h=='CA-01x-os0420.dc.html' for _,h in lk) and not any('IN-02x' in (h or '') for _,h in lk) and unico(lk), [pr,lk])
     tap('T4')
     # 7 · o conflito de água do T7 (OS-0423) não é O.S. (01/10): em Ordens de serviço o T7 fica sem ordem; na camada Irrigação, um só botão que abre a ação no registro
     l7,_=lab('T7'); tap('T7'); t7=pan('T7'); tap('T7')
@@ -78,7 +78,10 @@ try:
         l7=='T7: sem ordem' and 'OS-0423' not in t7 and r=='ok' and pr==['Resolver conflito',H7] and [h for _,h in lk].count(H7)==1, [l7,t7[:160],r,pr,lk])
     tap('T7')
     # 8-9 · a devolução recebida pela tela Estoque tira custódia, selo e atalho da OS-0417 no mapa
-    c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/EST.dc.html',wait=1.2); clk('Receba devoluções'); clk('Receber devolução da REQ-031'); clk('Salvar','aside[role=dialog]'); t=T()
+    # SUP §3 (06/10): o endereço abre o painel da sobra; a quantidade é digitada (o que voltou de fato), sem padrão
+    c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/EST.dc.html#req=REQ-031',wait=1.4)
+    J("(()=>{const i=document.querySelector('#fx_g_req_dqtd'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'500'); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.3)
+    clk('Registrar devolução · 500 kg','aside[role=dialog]'); t=T()
     chk('8 Estoque: devolução da REQ-031 recebida (500 kg → 0 kg)', '500 kg → 0 kg' in t, t)
     mapa('O.S./prazos'); tap('P1'); t1=pan('P1'); i=t1.find('OS-0417'); o17=t1[i:i+260]
     chk('9 mapa (Ordens de serviço) após a devolução: OS-0417 sem "Sobras a receber", sem custódia e sem "Receber sobras"',
@@ -97,8 +100,8 @@ try:
     tap('T1')
     sh=J("document.documentElement.scrollHeight"); chk('13 sem rolagem (≤ 900)', sh<=900, sh)
     # 14-15 · CTL-1 (Frente F): "Acompanhar OM-0233" abre a OM viva no MA-04; liberar pelo Mapa grava CMD-42 e CMD-06 como a tela O.S.
-    c.goto(f'http://127.0.0.1:{p}/MA.dc.html#om=OM-0233',wait=1.2); am=J("(document.querySelector('#ma-painel')||{}).innerText||''") or ''
-    chk('14 "Acompanhar OM-0233" (MA#om=OM-0233): o painel da OM-0233 viva abre pela âncora', am.startswith('OM-0233'), am[:200])
+    c.goto(f'http://127.0.0.1:{p}/MA-04.dc.html#OM-0233',wait=1.2); am=J("(document.querySelector('aside[role=dialog]')||{}).innerText||''") or ''
+    chk('14 "Acompanhar OM-0233" (MA-04#OM-0233): o painel da OM-0233 viva abre pela âncora', 'OM-0233' in am, am[:200])
     J("localStorage.removeItem('talhao-os-cenario-v1')"); mapa(); tap('T1'); ver('T1','Ver ordens')
     r1=clk('Liberar para execução','aside[aria-label^="T1"]'); ct=pan('T1'); r2=clk('Confirmar liberação','aside[aria-label^="T1"]'); t=T()
     ev=J("(((JSON.parse(localStorage.getItem('talhao-os-cenario-v1')||'{}').ordens||{})['OS-0430']||{}).osc||{}).ev||[]") or []

@@ -1,76 +1,57 @@
 # -*- coding: utf-8 -*-
-"""Correções do verificador · Estoque, parte 1 (EST.dc.html no Chrome headless, 1440×1000, cenário limpo, ≤ 15 verificações, < 40 s):
-lote vencido não volta ao disponível, grades sem rolagem horizontal (etapas 1, 4 e 5), faixa da etapa 2 com O.S. impedida,
-contador com o mesmo papel da trilha e Restaurar demonstração limpando o filtro de local."""
+"""Correções do verificador · Estoque, parte 1 (EST.dc.html no Chrome headless, 1440×1000, cenário limpo), na forma do SUP:
+lote vencido não volta ao disponível (nem por laudo aprovado), página sem rolagem horizontal nas 4 seções, contador com o mesmo papel da
+trilha, a fila separa O.S. impedida de O.S. fora de fase igual às linhas, e Restaurar demonstração limpa o filtro de local.
+Fica o propósito da versão anterior (docs/suprimentos-simplificado §9.3); textos da faixa viraram contadores e situações."""
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from est_lib import Est
 
-# grade visível: [scrollWidth, clientWidth] da área que rola
-OVF = "[...document.querySelectorAll('[role=table]')].filter(x=>x.offsetParent).map(x=>[x.parentElement.scrollWidth,x.parentElement.clientWidth])"
-# botão/chip inteiro dentro da caixa da grade (linha que contém ts, elemento com texto t): true = à vista sem rolar; 'teclado' = ação
-# alcançável pelo foco; 'rolando' = selo inteiro ao rolar a grade (TABELAS-FOCO item 6: a grade rola dentro da caixa, a página não)
-INTEIRO = """((ts,t)=>{const r=[...document.querySelectorAll('[role=row]')].find(r=>ts.every(x=>r.innerText.indexOf(x)>=0)); if(!r) return 'sem linha';
-  const e=[...r.querySelectorAll('button,span')].find(x=>x.innerText.trim()===t); if(!e) return 'sem '+t; const sc=r.closest('[role=table]').parentElement;
-  const den=()=>{ const box=sc.getBoundingClientRect(), b=e.getBoundingClientRect(); return b.width>0&&b.left>=box.left-0.5&&b.right<=box.right+0.5; };
-  sc.scrollLeft=0; if(den()) return true;   // à vista sem rolar a grade
-  const f=e.closest('button'); if(f){ f.focus(); f.dispatchEvent(new FocusEvent('focusin',{bubbles:true})); return den()?'teclado':false; }   // ação: o foco do teclado traz inteira para a caixa (focusin despachado: sem janela ativa o Chrome não o dispara)
-  e.scrollIntoView({block:'nearest',inline:'nearest'}); return den()?'rolando':false; })"""
 
-
-# TABELAS-FOCO (5983172395) item 6: com uma variável por coluna a grade pode rolar dentro da própria caixa; a página não rola
 def cabe(E): return bool(E.J("document.documentElement.scrollWidth<=innerWidth+1"))
 
 
 E = Est()
 try:
-    E.abrir()
-    # 1 · recebimento de lote vencido: tudo em quarentena, situação "Vencido" e a grade continua cabendo
-    E.clk('Conferir NF 4533')
-    E.setv('fx_g_rec_conf', '20000'); E.setv('fx_g_rec_apto', '0'); E.setv('fx_g_rec_quar', '20000'); E.setv('fx_g_rec_val', '08/2026'); E.setv('fx_g_rec_obs', 'Lote vencido'); E.salvar()
-    t = E.rowtxt('NF 4533'); print('NF 4533:', t, E.J(OVF))
-    E.ok('Vencido' in t and 'Aguarda laudo' not in t and cabe(E), 'NF 4533 vencida: situação "Vencido" (não "Aguarda laudo") e grade sem rolagem', t)
-    # 2 · etapa 4: lote vencido sem "Liberar após inspeção"; faixa separa vencido de inspeção
-    E.etapa(4); t = E.rowtxt('S58-0926'); k = E.k(); print('S58-0926:', t, '| k4:', k)
-    sl, vl = E.cel('S58-0926', 'Situação do lote'), E.cel('S58-0926', 'Validade')   # TABELAS-FOCO: situação e validade em colunas próprias
-    E.ok('Liberar após inspeção' not in t and sl == 'Vencido não volta ao disponível' and vl == '08/2026', 'lote vencido S58-0926: sem "Liberar após inspeção"; Situação do lote "Vencido · não volta ao disponível", Validade 08/2026', (t, sl, vl))
-    E.ok('Bloqueado para inspeção: KCl 60% 10.000 kg' in k and 'vencido, fora do disponível: Semente de soja 58 W 20.000 kg' in k, 'faixa da etapa 4 separa inspeção de vencido', k)
-    E.ok(cabe(E) and E.J(f"({INTEIRO})(['K26-11'],'Liberar após inspeção')") in (True, 'teclado'), 'etapa 4: página sem rolagem; "Liberar após inspeção" do KCl inteiro (à vista ou pelo teclado)', E.J(OVF))
+    E.abrir(); E.perfil('Rui')
+    # 1 · recebimento de lote vencido: tudo em quarentena; a parcela fica "Vencida · aguarda laudo" e a página não rola de lado
+    E.ir('#sec=recebimentos'); E.row('NF 4533')
+    for k, v in (('conf', '20000'), ('quar', '20000'), ('val', '08/2026'), ('obs', 'Lote vencido')): E.setv('fx_g_rec_' + k, v)
+    E.clk_prim(); t = E.rowtxt('NF 4533', 'S58-0926')
+    E.ok('Vencida · aguarda laudo' in t and cabe(E), 'NF 4533 vencida: parcela "Vencida · aguarda laudo" e página sem rolagem', t)
+    # 2 · lote vencido: "Vencido" no saldo; o laudo só aceita Reprovado e a função recusa liberar
+    E.ir('#sec=saldos'); E.ok('Vencido' in E.cel('S58-0926', 'Item') and E.cel('S58-0926', 'Validade') == '08/2026' and E.cel('S58-0926', 'Disponível') == '0 kg', 'saldo: S58-0926 "Vencido", validade 08/2026, disponível 0 kg', [E.cel('S58-0926', k) for k in ('Item', 'Validade', 'Disponível')])
+    E.perfil('Ana'); E.ir('#nf=NF 4533'); ops = E.J("[...document.querySelectorAll('#fx_g_rec_res option')].map(o=>o.value)")
+    r = E.mudar("return cenLaudo(c,'Semente de soja 58 W|S58-0926','NF 4533','LAB-1','Aprovado','Ana');")
     st = E.cen("[c.lotes['Semente de soja 58 W|S58-0926'].quarentena, c.movs.filter(m=>m.tipo==='inspecao').length]")
-    E.ok(st == [20000, 0], 'cenário: 20.000 kg do lote vencido seguem bloqueados, nenhuma liberação', st)
-    # 3 · lote vencido que entra por outra tela (cenReceber, Óleo mineral 07/2026) também fica sem liberação
+    E.ok(ops == ['Reprovado'] and 'vencido' in r and st == [20000, 0], 'lote vencido: o laudo só oferece Reprovado; aprovar pela função é recusado; 20.000 kg seguem bloqueados', [ops, r, st])
+    # 3 · lote vencido que entra por outra tela (cenReceber, Óleo mineral 07/2026) também não volta ao disponível
     print('cenReceber:', E.mudar("return cenReceber(c,'Óleo mineral','O26-07V',40,'L','Almox. defensivos','07/2026','NF 9001',false,'Rui');"))
-    E.abrir(); E.etapa(4); t = E.rowtxt('O26-07V'); print('O26-07V:', t)
-    sl, vl = E.cel('O26-07V', 'Situação do lote'), E.cel('O26-07V', 'Validade')
-    E.ok('Liberar após inspeção' not in t and sl.startswith('Vencido') and vl == '07/2026', 'lote vencido recebido por cenReceber: sem "Liberar após inspeção", Situação do lote "Vencido", Validade 07/2026', (t, sl, vl))
-    # 4 · etapa 5: grade cabe e "Aprovar ajuste" inteiro, antes e depois de uma nova contagem com diferença
-    E.etapa(5)
-    E.ok(cabe(E) and E.J(f"({INTEIRO})(['INV-2609'],'Aprovar ajuste')") in (True, 'teclado'), 'etapa 5: página sem rolagem; "Aprovar ajuste" da INV-2609 inteiro (à vista ou pelo teclado)', E.J(OVF))
-    ops = E.J("[...document.querySelectorAll('#fx_g_cnt_contador option')].map(o=>o.value)") if E.clk('+ Nova contagem') == 'ok' else []
-    print('contadores:', ops)
-    E.setv('fx_g_cnt_lote', E.J("[...document.querySelector('#fx_g_cnt_lote').options].map(o=>o.value).find(v=>v.startsWith('D26-01'))")); E.setv('fx_g_cnt_contador', 'Paula (almoxarife)'); E.setv('fx_g_cnt_cont', '290'); E.salvar()
-    E.ok(cabe(E) and E.J(f"({INTEIRO})(['INV-2612'],'Aprovar ajuste')") in (True, 'teclado') and E.J(f"({INTEIRO})(['INV-2612'],'Recontar')") in (True, 'teclado'),
-         'nova contagem INV-2612 com diferença: grade sem rolagem, Recontar e Aprovar ajuste inteiros', E.J(OVF))
+    E.ir('#sec=saldos'); E.ok('Vencido' in E.cel('O26-07V', 'Item') and E.cel('O26-07V', 'Validade') == '07/2026', 'lote vencido recebido por cenReceber: "Vencido", validade 07/2026', [E.cel('O26-07V', 'Item'), E.cel('O26-07V', 'Validade')])
+    # 4 · as 4 seções e os 3 modos de Confira saldos cabem na página (a grade rola dentro da própria caixa)
+    res = []
+    for s in ('Atenda requisições', 'Receba e inspecione', 'Faça contagens', 'Confira saldos'):
+        E.ir_secao(s); res.append((s, cabe(E)))
+    for m in ('Movimentos', 'Produção', 'Lotes'):
+        E.clk(m); res.append((m, cabe(E)))
+    E.ok(all(x for _, x in res), '4 seções e 3 modos sem rolagem horizontal da página', res)
     # 5 · mesma palavra para Rui em toda a tela (contador = almoxarife, como na trilha)
-    E.row('INV-2609'); a = E.val('fx_g_cnt_contador'); b = E.J("document.body.innerText"); E.fechar()
-    # revisão CONF F6: as opções vêm das pessoas ativas com o papel almoxarife, com a 1ª vazia ("Escolha quem contou"): sem valor padrão
-    E.ok(ops == ['', 'Paula (almoxarife)', 'Rui (almoxarife)'] and a == 'Rui (almoxarife)' and 'conferente' not in b,
-         'contador "Rui (almoxarife)" (mesmo papel da trilha), sem "conferente" na tela', [ops, a])
-    # 6 · faixa da etapa 2 separa consulta por fase de bloqueio por O.S. impedida
-    E.etapa(2); k = E.k(); print('k2:', k)
-    # contagens da faixa = linhas da grade (a Lagoa Grande sintética trouxe OS-0507 impedida e OS-0508 em conferência)
+    E.perfil('Rui'); E.ir('#sec=contagens'); E.row('INV-2609'); a = E.aside(); b = E.J("document.body.innerText")
+    E.ok('Contado 89.400 kg por Rui (almoxarife)' in a and 'conferente' not in b, 'contador "Rui (almoxarife)" (mesmo papel da trilha), sem "conferente" na tela', a[:200])
+    # 6 · a fila separa O.S. impedida (bloqueio) de O.S. fora de fase (consulta), igual às linhas
+    E.ir_secao('Atenda requisições')
     sits = E.J("""(()=>{const t=[...document.querySelectorAll('[role=table]')].find(x=>x.offsetParent); const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\\s+/g,' ').trim().toUpperCase());
-      const io=hs.indexOf('O.S.'), is=hs.indexOf('SITUAÇÃO'); return [...t.querySelectorAll('[role=row].g2ed')].filter(r=>r.offsetParent).map(r=>{const c=r.querySelectorAll('[role=cell]'); return [c[io].innerText.trim(), c[is].innerText.replace(/\\s+/g,' ').trim()];});})()""") or []
-    bl = [o for o, s_ in sits if s_.startswith('Bloqueada')]; co = [o for o, s_ in sits if 'sem nova entrega' in s_]
-    E.ok(f'{len(co)} só consulta (O.S. fora de Liberadas e Em execução) · {len(bl)} bloqueado{"s" if len(bl) != 1 else ""} por O.S. impedida' in k and 'OS-0420' in bl and 'OS-0418' in co and 'OS-0417' in co,
-         f'faixa da etapa 2: {len(co)} só consulta por fase e {len(bl)} bloqueados por O.S. impedida, iguais às linhas da grade (OS-0420 bloqueada; OS-0417 e OS-0418 só consulta)', (k, bl, co))
-    d31 = E.cel('REQ-031', 'Detalhe')
-    E.ok(d31 == '5.000 kg solicitado − 3.500 kg consumido − 500 kg em custódia', 'REQ-031 (em conferência): Detalhe mostra a conta do saldo (Entregue 5.000 kg inclui o que voltou; A entregar 1.000 kg)', d31)
+      const io=hs.indexOf('O.S.'), is=hs.indexOf('SITUAÇÃO'); return [...t.querySelectorAll('[role=row]')].filter(r=>r.offsetParent&&r.querySelector('[role=cell]')&&!r.classList.contains('g2kid')).map(r=>{const c=r.querySelectorAll('[role=cell]'); return [c[io].innerText.trim(), c[is].innerText.replace(/\\s+/g,' ').trim()];}); })()""")
+    imp = [o for o, s_ in sits if s_.startswith('O.S. impedida')]; lib = [o for o, s_ in sits if s_.startswith('Aguarda liberação')]
+    E.ok(imp == ['OS-0420'] and len(lib) >= 1, 'OS-0420 "O.S. impedida"; O.S. a liberar "Aguarda liberação" (consulta)', sits)
+    E.row('REQ-031'); a = E.aside()
+    E.ok('solicitado 5.000 kg' in a and 'consumido 3.500 kg' in a and 'em custódia 500 kg' in a, 'REQ-031 (em conferência): o painel mostra a conta (solicitado, consumido, custódia)', a[:300])
     # 7 · Restaurar demonstração limpa o filtro de local
-    E.etapa(4); E.clk('Câmara fria'); f0 = E.J("[...document.querySelectorAll('[role=row].g2kid')].length")
-    E.clk('Restaurar demonstração'); E.clk('Restaurar')
-    on = E.J("[...document.querySelectorAll('button[aria-pressed=true]')].map(b=>b.innerText)"); n = E.J("[...document.querySelectorAll('[role=row].g2kid')].length"); print('filtro:', f0, on, n)
-    E.ok(f0 == 2 and on == ['Todos os locais'] and n > f0,'Restaurar demonstração volta o filtro para "Todos os locais"', [f0, on, n])
+    E.ir('#sec=saldos'); E.clk('Câmara fria'); f0 = E.J("[...document.querySelectorAll('main [role=row]')].filter(r=>r.offsetParent&&r.querySelector('[role=cell]')).length")
+    E.clk('Restaurar demonstração'); E.clk('Restaurar'); E.ir_secao('Confira saldos')
+    n = E.J("[...document.querySelectorAll('main [role=row]')].filter(r=>r.offsetParent&&r.querySelector('[role=cell]')).length")
+    on = E.J("[...document.querySelectorAll('[role=group][aria-label=\"Filtrar por local\"] button')].filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>b.innerText.trim())")
+    E.ok(f0 == 2 and n > f0 and on in ([], ['Todos os locais']), 'Restaurar demonstração volta o filtro para "Todos os locais" (Câmara fria tinha S58-0801 e o S58-0926 recebido no passo 1)', [f0, n, on])
     er = E.erros(); E.ok(not er, 'sem erro de script', er)
 finally:
     ok = E.fim()

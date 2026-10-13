@@ -56,7 +56,7 @@ QUEM={'OS-0421':'Turno do dia 4 aguardando conferência · Paula',
       'OS-0417':'Paula (equipe de campo) devolve 10 sc até 24/09 · Rui recebe no almoxarifado',
       'OS-0422':'João (irrigante) define a janela das 2 passadas',
       'OS-0423':'Caio (PCP) resolve a parada da B3 (14:00–15:00) · estimativa por ET · sonda sem dado'}
-PROX={'OS-0421':('Conferir dia 4','CA-02.dc.html'),'OS-0420':('Ver OM-0233','MA.dc.html#om=OM-0233'),
+PROX={'OS-0421':('Conferir dia 4','CA-02.dc.html'),'OS-0420':('Ver OM-0233','MA-04det.dc.html'),
       'OS-0419':('Abrir em Irrigação','IR-03det.dc.html'),'OS-0418':('Liberar','OS.dc.html#OS-0418'),
       'OS-0417':('Ver custódia','CA-04.dc.html'),'OS-0422':('Definir janela','IR-02.dc.html'),'OS-0423':('Resolver conflito','IR-02.dc.html')}
 DETALHE={'OS-0421':'CA-01det.dc.html','OS-0420':DET0420}
@@ -359,7 +359,7 @@ def _ca01x_0420():
       + bloco('Materiais e custo','Confira a requisição da ordem e o custo dos hectares realizados; clique na linha para ver a origem.',g_req))
     HEIGHTS37[fname]=1900; PARENT37[fname]='OS.dc.html'  # "Voltar" leva à tela de O.S. do menu, não ao CA-01 oculto
     shell37('CA-01','OS-0420 · Plantio Soja 58 W',corpo,fname=fname,crumbs_extra=['OS-0420'],
-      primary='Acompanhar OM-0233',primary_href='MA.dc.html#om=OM-0233',
+      primary='Acompanhar OM-0233',primary_href='MA-04det.dc.html',
       status=('Em execução · Impedida','red'),
       subtitle=f'{area} ha no T4 · {real} ha realizados · saldo de {saldo} ha parado até o ativo ser liberado ou substituído.',
       footer='Instrução, versão e realizado vêm da mesma recomendação; o ajuste alcança só o saldo e nunca reescreve o realizado.')
@@ -488,8 +488,8 @@ def _ca03():
 def _ca03det():
     fname='CA-03det.dc.html'; E._reset_screen(fname)
     vinc=[('OS-0420',DET0420,'Plantio Soja 58 W','Ordem de campo',[Pt.chip('Em execução','green'),Pt.chip('Impedida','red')],'30/100 ha · saldo de 70 ha preservado e parado'),
-          ('Trator T1','MA.dc.html#ativo=a01','JD 6M 155','Ativo',[Pt.chip('Bloqueado','red')],'não pode ser alocado até a OM-0233 liberar'),
-          ('OM-0233','MA.dc.html#om=OM-0233','corretiva hidráulica','Manutenção',[Pt.chip('Em execução','green')],'caso único · 2 registros somados'),
+          ('Trator T1','MA-01.dc.html','JD 6M 155','Ativo',[Pt.chip('Bloqueado','red')],'não pode ser alocado até a OM-0233 liberar'),
+          ('OM-0233','MA-04det.dc.html','corretiva hidráulica','Manutenção',[Pt.chip('Em execução','green')],'caso único · 2 registros somados'),
           (D.OM['substituto'],'PL-05.dc.html','substituto proposto','Ativo substituto',[Pt.chip('Apto','green'),Pt.chip('Livre a partir de 24/09 06:00','yellow')],'elegível para a OS-0420 só após confirmação do PCP')]
     g_v=grid([dict(k='reg',l='Registro',w=220),dict(k='tipo',l='Tipo'),dict(k='est',l='Estado',w=240),dict(k='ef',l='Efeito',w=340)],
         [dict(id=f'v{i}',v=dict(reg=f'{r} · {d}',tipo=t,est=' '.join(p['t'] for p in e),ef=ef),s={},p=dict(reg=[Pt.link(r,h),Pt.br(),Pt.mut(d)],est=e))
@@ -518,7 +518,7 @@ def _ca03det():
       + bloco('Trilha','Confira quem fez cada passo e o efeito; nada é apagado.',g_t))
     HEIGHTS37[fname]=1260; PARENT37[fname]='CA-03.dc.html'
     shell37('CA-03','OC-114 · Quebra do Trator T1',corpo,fname=fname,crumbs_extra=['OC-114'],
-      primary='Acompanhar OM-0233',primary_href='MA.dc.html#om=OM-0233',
+      primary='Acompanhar OM-0233',primary_href='MA-04det.dc.html',
       status=('Em tratamento · Grave','red'),
       subtitle='Ocorrência do plantio no T4 · a ordem OS-0420 segue impedida até o ativo ser liberado ou substituído.',
       footer='Encerrar a ocorrência ou a ordem não libera o Trator T1: o desbloqueio vem só da OM-0233 concluída e liberada.')

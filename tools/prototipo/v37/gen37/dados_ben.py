@@ -49,7 +49,7 @@ ROTAS = {
 
 
 # caixas para a ordem nova (integração BEN, rodada 1, BEN-D23): o pedido de compra PC-096 e a NF 7731 que chegou ao packing e espera a
-# conferência no Estoque (Confira recebimentos, o fluxo existente). Com a necessidade da rota inteira na ordem (1.169 un do L39-132 contra
+# conferência no Estoque (Receba e inspecione, o fluxo existente). Com a necessidade da rota inteira na ordem (1.169 un do L39-132 contra
 # 540 livres), a falta de caixa é impedimento da liberação e se resolve conferindo esta nota (ou recebendo a sobra em custódia). Planejar e
 # emitir compra de caixa é do BEN-2: até lá o pedido é dado da semente, lido pelo Estoque (recebimento) e pelo BEN (impedimento); Compras e
 # Suprimentos não o listam (lista de insumos da safra). Dados sintéticos (ENG-017)
@@ -64,7 +64,7 @@ def catalogo():
     import dados_manutencao as DM
     at = {a['id']: dict(nome=a['nome'], kgh=a.get('kgh'), custo_h=a.get('custo_h')) for a in DC.ATIVOS if a['id'] in ('a13',)}
     return dict(rotas=ROTAS, cx=dict(item=CX, massa=CXD['massa'], tara=CXD['tara'], un=CXD['un'], emb=EMB_CX, fonte=CXD['fonte'], preco=DC.PRECO_EXTRA.get(CX)),
-                ativos=at, cond0={k: v['cond'] for k, v in DM.ATIVOS.items() if k in at},   # condição ao vivo: c.man do cenário único (PCM 1a)
+                ativos=at, cond0={k: v['cond'] for k, v in DM.ATIVOS.items() if k in at}, manKey='talhao-os-manutencao-v1',
                 quem=dict(prod=QUEM_PROD, qual=QUEM_QUAL), local=LOCAL, emb=EMBAL,
                 # onde cada linha roda (BEN-D18): a ordem fica no local da linha; a Packing linha 1 é a do Packing da Santa Rita (l8). O CD-03
                 # guarda o local da máquina em texto livre ("Armazém Sede", também Santa Rita); linha nova por fazenda entra pelo CD-03

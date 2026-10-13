@@ -20,7 +20,11 @@ def seed():
     lotes = {}
     for l in D2.LOTES:
         lotes[l['item'] + '|' + l['lote']] = dict(prod=l['item'], lote=l['lote'], local=l['local'], un=l['un'], fisico=l['fisico'],
-                                                   quarentena=l['quarentena'], reservado=0, validade=l['validade'])
+                                                   quarentena=l['quarentena'], reservado=0, validade=l['validade'], quar=[])
+    for r in D2.RECEBIMENTOS:
+        k = r['item'] + '|' + r['lote']
+        if r.get('quarentena') and k in lotes:
+            lotes[k]['quar'].append(dict(doc=r['id'], ped=r['pedido'], qtd=r['quarentena'], motivo='Laudo de umidade pendente', por='', at=''))
     lote_de = {}
     for k, l in lotes.items(): lote_de.setdefault(l['prod'], l['lote'])
     # saldos do estoque sem lote registrado ganham um lote com o mesmo total (entrega e devolução são por lote)
@@ -32,12 +36,12 @@ def seed():
         un = UN.get(item, 'L' if any(w in item for w in ('Fungicida', 'Inseticida', 'Acaricida', 'Adjuvante', 'Óleo', '2,4-D', 'Cletodim', 'Inoculante', 'Atrazina', 'Diquat')) else 'kg')
         cod = (''.join(w[0] for w in item.replace(',', ' ').split() if w[0].isalpha()) or ''.join(ch for ch in item if ch.isalpha()))[:2].upper() + f'26-{i + 1:02d}'
         local = 'Almox. defensivos' if un == 'L' else 'Galpão 1'
-        lotes[item + '|' + cod] = dict(prod=item, lote=cod, local=local, un=un, fisico=q, quarentena=0, reservado=0, validade='12/2027')
+        lotes[item + '|' + cod] = dict(prod=item, lote=cod, local=local, un=un, fisico=q, quarentena=0, reservado=0, validade='12/2027', quar=[])
         lote_de[item] = cod
     for i, (item, q) in enumerate(sorted(DL.ESTOQUE.items())):
         if q <= 0 or item in lote_de: continue
         un = UN.get(item, 'kg'); cod = f'LG26-{i + 1:02d}'
-        lotes[item + '|' + cod] = dict(prod=item, lote=cod, local='Almox. Lagoa Grande', un=un, fisico=q, quarentena=0, reservado=0, validade='12/2027')
+        lotes[item + '|' + cod] = dict(prod=item, lote=cod, local='Almox. Lagoa Grande', un=un, fisico=q, quarentena=0, reservado=0, validade='12/2027', quar=[])
         lote_de[item] = cod
     reqs = {}
     for r in D2.REQUISICOES:
@@ -49,11 +53,20 @@ def seed():
     for o in ords:
         v = str(o.get('versao', ''))
         ins = [dict(p=x['p'], dose=x['dose'], un=x['un'], tot=x['tot'], emb=EMB.get(x['p'], '')) for x in o.get('ins', [])]
-        ordens[o['id']] = dict(id=o['id'], tipo=o['tipo'], talhao=o['talhao'], area=o.get('area') or 0, etapa=o['etapa'], versao=v,
+        ordens[o['id']] = dict(id=o['id'], tipo=o['tipo'], talhao=o['talhao'], faz=o.get('faz', ''), area=o.get('area') or 0, etapa=o['etapa'], versao=v,
                                realizado=o.get('realizado') or 0, saldo=o.get('saldo') if o.get('saldo') is not None else (o.get('area') or 0),
                                resp=o['resp'], ins=ins, req=REQ_DA_OS.get(o['id']), selos=o.get('selos', []),
                                ap=[dict(d=a['d'], dia=a['dia'], ha=a['ha'], st=a['st'], sinc=True, origem='web') for a in o.get('ap', [])],
                                reservado=o['id'] in REQ_DA_OS and o['etapa'] != 'A liberar')
+    # reserva da liberação (SUP §0.2, 72.3 item 2): cada item de requisição de O.S. que ainda retira (Liberadas, Em execução) guarda res0 = o que a
+    # liberação reservou (o solicitado) e o lote reserva res0 − entregue + devolvido; antes a REQ-035 e a REQ-036 não tinham reserva própria e a
+    # entrega tirava a reserva de outra O.S. (F26-02 passa a 80 L reservados: 65 da REQ-039 + 15 da REQ-035)
+    for rid, r in reqs.items():
+        o = ordens.get(r['os'])
+        if not o or o['etapa'] not in ('Liberadas', 'Em execução'): continue
+        for it in r['itens']:
+            it['res0'] = it['solicitado']; key = it['prod'] + '|' + it['lote']
+            if key in lotes: lotes[key]['reservado'] += max(0, it['solicitado'] - it['entregue'] + it['devolvido'])
     # reservas vigentes (liberadas e ainda não entregues): REQ-039 da OS-0424 e REQ-040 da OS-0425
     for oid, rid in (('OS-0424', 'REQ-039'), ('OS-0425', 'REQ-040')):
         o = ordens.get(oid)
@@ -63,7 +76,7 @@ def seed():
             lt = lote_de.get(x['p'], '—'); key = x['p'] + '|' + lt
             res = 65 if rid == 'REQ-039' else min(x['tot'], lotes[key]['fisico'] - lotes[key]['quarentena'] if key in lotes else 0)
             if key in lotes: lotes[key]['reservado'] += res
-            itens.append(dict(prod=x['p'], lote=lt, un=x['un'], emb=x.get('emb', ''), solicitado=res, entregue=0, consumido=0, devolvido=0, custodia=0, confirmado=False))
+            itens.append(dict(prod=x['p'], lote=lt, un=x['un'], emb=x.get('emb', ''), solicitado=res, entregue=0, consumido=0, devolvido=0, custodia=0, confirmado=False, res0=res))
         reqs[rid] = dict(id=rid, os=oid, estado='Reservada', itens=itens)
     # Lagoa Grande: entregue e consumido pela fração de cada requisição; o que não foi entregue fica reservado no lote
     for oid, (rid, fe, fc) in DL.REQS.items():
@@ -73,40 +86,29 @@ def seed():
         for x in o['ins']:
             lt = lote_de.get(x['p'], '—'); key = x['p'] + '|' + lt; sol = x['tot']; ent = round(sol * fe, 3); con = _QTD.qtd(x['dose'], o['realizado']) if fc == 1.0 or abs(fc * o['area'] - o['realizado']) < 1e-6 else round(sol * fc, 3)
             if key in lotes and sol - ent > 0: lotes[key]['reservado'] += sol - ent
-            itens.append(dict(prod=x['p'], lote=lt, un=x['un'], emb=x.get('emb', ''), solicitado=sol, entregue=ent, consumido=con, devolvido=0, custodia=round(ent - con, 3), confirmado=ent > 0))
+            itens.append(dict(prod=x['p'], lote=lt, un=x['un'], emb=x.get('emb', ''), solicitado=sol, entregue=ent, consumido=con, devolvido=0, custodia=round(ent - con, 3), confirmado=ent > 0,
+                              **({'res0': sol} if o['etapa'] in ('Liberadas', 'Em execução') else {})))
         reqs[rid] = dict(id=rid, os=oid, estado=('Reservada' if fe == 0 else 'Entregue'), itens=itens)
     # v=2 (01/10, O.S. sem revisão): descarta o cenário salvo no navegador que ainda tinha aprov, selos de aprovação e recibo APV-
     # v=3 (04/10, SINT-C03 + PRE-REV-20261004): quantidades da semente pela regra única; o salvo com a regra antiga travaria o apontamento
-    # v=4 (1a · PCMS-M01, PCM simplificado §7.2): a manutenção entra no cenário único (c.man, com achados, leituras e recibos); a
-    # chave própria da manutenção sai. O.S., Estoque, App, CD-03 e a tela MA leem e gravam o mesmo estado.
     # v=4 (06/10, colheita de ponta a ponta · docs/colheita): o estado ganha c.producao (contagens, previsões, cargas, lotes de produto,
     # pedidos, reservas e movimentos MP-); o salvo sem ele é descartado (D-18)
     # v=5 (06/10, beneficiamento BEN-1 · docs/beneficiamento): ordens de processo OB-0110 e OB-0112 (fam BEN) em c.ordens, REQ-030 e o lote
     # de caixas CX26-01; no estado da Produção, os lotes do packing, o PV-031 e as inspeções (c.producao.ben); o salvo sem eles é descartado
-    # v=5 (09/10, junção PCM × Colheita na frente PCM, D-53): c.man e c.producao juntos
-    # v=5 (06/10, comercial e logística · docs/comercial): c.producao ganha vendas com preço e condição, CT-203/CRE-0095/BT-090 no estado,
-    # cargas de saída (RM-) e sequências rm/pv/ct; o salvo da v=4 é descartado
-    # v=6 (10/10, junção PCM × BEN-1 na branch única): as duas frentes subiram para v=5 com conteúdos diferentes (BEN-1: ordens OB-,
-    # REQ-030, CX26-01 e c.producao.ben; PCM: c.man, app.usuario e app.manFila); o salvo v=5 de qualquer uma volta ao seed (cenGet)
-    # v=7 (10/10, integração V56: Comercial × v=6 da branch única): o salvo v=5 do Comercial (sem c.man e sem o BEN) e o v=6 da branch (sem
-    # as vendas do Comercial) voltam ao seed
-    import dados_manutencao as DM
-    import dados_producao, dados_ben, dados_comercial
-    est = dict(v=7, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
-               # S4 (PCM §3.7): usuario = Ver como do app (Marcos · Zé, simulação); manFila = comandos da manutenção feitos sem sinal
-               app=dict(online=True, fila=[], turno=None, operador='Marcos', usuario='Marcos', manFila=[]),
-               man=DM.seed(), producao=dados_producao.seed())
-    est = dados_ben.semear(est)   # integração V56: o BEN semeia o packing (lotes, PV-031) e o Comercial completa as vendas depois, inclusive o PV-031
-    est['producao'] = dados_comercial.completar(est['producao'])
-    return est
+    # v=6 (09/10, SUP · Suprimentos simplificado, no merge com o BEN, que também tomou a v=5): reserva da liberação (res0), quarentena por
+    # parcela (quar), fazenda da ordem e recibos dos comandos com chave; o salvo antes entregaria acima do reservado e liberaria quarentena de
+    # outra origem
+    import dados_producao, dados_ben
+    est = dict(v=6, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[], recibos={},
+               app=dict(online=True, fila=[], turno=None, operador='Marcos'), producao=dados_producao.seed())
+    return dados_ben.semear(est)
 
 
 def js_prefixo():
     import dados_producao   # regras da produção (producao.js) em toda página do estado (D-22): O.S., Mapa, Estoque e app têm prPodeEncerrar
     import dados_ben        # regras do beneficiamento (ben.js) depois: a qualidade do lote de produção e as decisões valem em toda página do estado
-    # análise de solo (SOLO-01): só as funções de solo.js (regras e comandos sobre c.solo); os dados (SOLO0) entram só no AG-02 e no Planejar safra
     return ('const CEN0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read() + '\n'
-            + dados_producao.js_regras() + dados_ben.js_regras() + open(os.path.join(HERE, 'solo.js'), encoding='utf-8').read() + '\n')
+            + dados_producao.js_regras() + dados_ben.js_regras())
 
 
 def perfis_js():

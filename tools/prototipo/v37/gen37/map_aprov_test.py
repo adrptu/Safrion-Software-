@@ -35,9 +35,10 @@ try:
     chk('3 Mapa: sem "Decisões pendentes", "A liberar (agrônomo) 2", cabeçalho sem "decis" e T4 "OS-0420 impedida"', 'Decisões pendentes' not in nm and 'A liberar (agrônomo) 2' in nm and 'decis' not in head() and lb=='T4: OS-0420 impedida', [nm,head(),lb])
     # 4-5 · devolução de sobras vai ao Estoque do menu (nunca ao módulo oculto SU-07)
     ir('IN-01.dc.html'); a1=J("[...document.querySelectorAll('a')].filter(a=>a.innerText.trim()==='Receber devolução').map(a=>a.getAttribute('href'))")
-    chk('4 Meu dia: "Receber devolução" → EST.dc.html', a1==['EST.dc.html'] and J("document.querySelectorAll('a[href=\"SU-07.dc.html\"]').length")==0, a1)
+    # SUP §7 (06/10): o atalho abre a requisição no Estoque (#req=REQ-031), não a seção; comparação pelo prefixo
+    chk('4 Meu dia: "Receber devolução" → EST.dc.html#req=REQ-031', a1==['EST.dc.html#req=REQ-031'] and J("document.querySelectorAll('a[href=\"SU-07.dc.html\"]').length")==0, a1)
     ir('IN-03.dc.html'); a3=J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/REQ-031/.test(r.innerText)); const a=r&&r.querySelector('a'); return a?[a.innerText.trim(),a.getAttribute('href')]:null;})()")
-    chk('5 Agenda: REQ-031 "Receber devolução" → EST.dc.html', a3==['Receber devolução','EST.dc.html'] and J("document.querySelectorAll('a[href=\"SU-07.dc.html\"]').length")==0, a3)
+    chk('5 Agenda: REQ-031 "Receber devolução" → EST.dc.html#req=REQ-031', a3==['Receber devolução','EST.dc.html#req=REQ-031'] and J("document.querySelectorAll('a[href=\"SU-07.dc.html\"]').length")==0, a3)
 finally:
     try:
         if c: c.close()

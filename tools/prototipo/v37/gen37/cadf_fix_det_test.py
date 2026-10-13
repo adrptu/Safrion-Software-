@@ -40,9 +40,8 @@ try:
     openrow(0,'Santa Rita'); fset('decl','100'); fset('motivo','Documento desatualizado'); save()
     J(f"({CLK})('Expandir tudo')"); time.sleep(.3)
     a=rowtxt(1,'Safra 2026/27'); e=rowtxt(1,'Safra 2025/26')
-    # TABELAS-FOCO (06/10/2026): Área (alocada) e Livre em colunas próprias: aberta "96 ha | 4 ha"; encerrada "96 ha | 0 ha" (o resumo da época)
-    chk('2 safra aberta recalcula (96 de 100 ha · 4 ha livres); encerrada fica 96 de 96 ha · Área conferida', '96 ha 4 ha' in (a or '') and 'Em planejamento' in (a or '')
-        and '96 ha 0 ha' in (e or '') and 'Encerrada' in (e or ''), [a,e])
+    chk('2 safra aberta recalcula (96 de 100 ha · 4 ha livres); encerrada fica 96 de 96 ha · Área conferida', '96 de 100 ha' in (a or '') and '4 ha livres' in (a or '')
+        and '96 de 96 ha' in (e or '') and 'Área conferida' in (e or '') and 'livres' not in (e or ''), [a,e])
     # ---------- T3 não muda de fazenda com parcelas em safra aberta ----------
     openrow(0,'Santa Rita'); fset('faz','Boa Vista'); save(); al=alerts()
     chk('3 no detalhe o T3 também não muda de fazenda', aberto() and 'T3 tem parcelas na Safra 2026/27 da Santa Rita. Tire-as no Planejar safra antes de mudar de fazenda.' in al, al)

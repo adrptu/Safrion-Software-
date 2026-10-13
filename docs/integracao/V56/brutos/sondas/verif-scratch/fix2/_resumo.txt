@@ -1,2 +1,0 @@
-ficha_pivo_test rc=0 :: RESULTADO: OK 21/21
-FIM

@@ -20,11 +20,11 @@ def seltxt(k): return J(f"(()=>{{const i=document.querySelector('aside[role=dial
 def abre(nome): r=J(f"(()=>{{const r={LIN}({json.dumps(nome)}); if(!r) return false; (r.querySelector('.g2pw')||r).click(); return true;}})()"); time.sleep(.35); return r
 try:
     t.goto('CD-03.dc.html')
-    # PCM simplificado S3 (AC-PCM-15): a leitura do horímetro deixou de ser editável no CD-03; vem da Manutenção (uma função de leitura, com histórico)
-    abre('Trator 02'); hv=t.fv('cont_tr'); hd=t.fdis('cont_tr')
-    t.chk('horímetro: só leitura no CD-03, com a leitura da Manutenção (2.988 h); não há como gravar leitura menor por aqui', hd and hv in ('2988','2.988'), [hv,hd])
-    t.fset('custo_h','185'); t.btn('Salvar'); time.sleep(.2)
-    t.chk('outros campos seguem editáveis: salvar o custo grava', not t.isopen() and 'Salvo: Trator 02' in t.toast(), [t.alerts(),t.toast()])
+    abre('Trator 02'); t.fset('cont_tr','3100'); t.btn('Salvar'); time.sleep(.2); o1=t.isopen()
+    abre('Trator 02'); t.fset('cont_tr','3000'); t.btn('Salvar'); time.sleep(.2); a2=t.alerts()
+    t.chk('horímetro: 3.100 h grava; depois 3.000 h é barrado com "A última leitura foi 3.100 h"', not o1 and 'A última leitura foi 3.100 h' in a2, a2)
+    t.fset('cont_tr','3150'); t.btn('Salvar'); time.sleep(.2); r=t.rowtxt(0,'Trator 02') or ''
+    t.chk('horímetro maior que a última leitura grava', not t.isopen() and 'Salvo: Trator 02' in t.toast(), [t.alerts(),t.toast()])
     abre('Trator T1'); d=t.dlg()
     t.chk('edição: subtítulo pede capacidade/custo/calibração e não pede a classe (fixa)', 'Altere capacidade, custo por hora e calibração' in d and 'Escolha a classe' not in d and t.fdis('classe'), d[:160])
     t.cancel(); t.clk('Cadastrar máquina ou instalação'); d=t.dlg()

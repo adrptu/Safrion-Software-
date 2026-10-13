@@ -3,7 +3,7 @@
 
 catalogo(): o que as regras de producao.js leem e não mudam (PRDC): unidade de mercado por cultura (dados_cad.CULTURA_UN, fonte
 única), cultivos das safras abertas (área, meta, cultura, fazenda), O.S. de colheita da semente → cultivo, locais com tipo (R-10),
-local de recebimento por fazenda e cultura e quem age (D-14). As obrigações físicas da soja 26/27 estão no estado (Comercial D-C04).
+local de recebimento por fazenda e cultura, obrigações físicas da soja 26/27 do VE-05 (areas/comercial.py, D-19) e quem age (D-14).
 seed(): c.producao da demonstração (§6): contagem, versões publicadas, cargas, lotes, pedidos, reserva, movimentos e sequências.
 Os números valem na camada sintética (dados_lagoa_fonte.REAL = False); os testes rodam com SAFRION_DADOS=sintetico.
 Dados sintéticos: nenhuma pessoa, cliente ou número real (a Lagoa Grande é sintética fora do Mac)."""
@@ -53,9 +53,11 @@ def catalogo():
     locais = {i: dict(id=i, nome=n, faz=f, tipo=t) for i, n, f, t, *_ in DC.LOCAIS}
     # atividade de colheita de cada plano (a primeira, só como modelo de operação da O.S. nova · spec §3.5)
     colh = {pl['id']: next((a['id'] for a in pl['atividades'] if str(a.get('op', '')).startswith('Colheita')), None) for pl in D2.PLANOS}
-    # obrigações físicas da soja 26/27 (CT-203, CRE-0095, BT-090): estão no estado como vendas futuras (Comercial D-C04: dados_comercial.completar)
+    from areas import comercial as CM   # obrigações físicas da soja 26/27 (VE-05; D-19: sc de 60 kg)
+    obrig = [dict(id='CT-203', tipo='Contrato', sc=CM.CT203, cont='Coop Grão Sul'), dict(id=CM.CPR['id'], tipo='CPR', sc=CM.CPR['sc'], cont=CM.CPR['contraparte']),
+             dict(id=CM.BT['id'], tipo='Barter', sc=CM.BT['sc'], cont='Fornecedor de insumos')]
     return dict(un=DC.CULTURA_UN, safras=safras, cult=cult, cultDe=de, osCult=oscult, locais=locais, recLocal=REC_LOCAL, proc=list(PROC),
-                fruta=FRUTA, quem=QUEM, colhAtv={k: v for k, v in colh.items() if v},
+                fruta=FRUTA, quem=QUEM, colhAtv={k: v for k, v in colh.items() if v}, obrig=[dict(x, prod='Soja em grão', cultura='Soja', saf='2026/27') for x in obrig],
                 dest={'MI-BR': 'Mercado interno · Brasil'})
 
 
@@ -125,4 +127,4 @@ def js_regras():
 
 if __name__ == '__main__':
     s = seed(); print(len(s['cargas']), 'cargas ·', len(s['lotes']), 'lotes ·', len(s['movs']), 'movimentos · seq', s['seq'])
-    k = catalogo(); print(len(k['cult']), 'cultivos ·', k['osCult'])
+    k = catalogo(); print(len(k['cult']), 'cultivos ·', k['osCult'], '· obrigações', [(o['id'], o['sc']) for o in k['obrig']])

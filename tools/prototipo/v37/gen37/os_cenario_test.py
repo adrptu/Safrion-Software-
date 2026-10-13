@@ -9,7 +9,6 @@ Uso: python3 os_cenario_test.py   (compile antes: areas.processo_os.build())"""
 import sys, os, time, json, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from os_lib import Os
-from conferencia_diaria_nav_helpers import conferir_dias
 
 T = Os(); OS = 'OS-0430'
 def setin(lab, val):  # campo do painel pelo rótulo acessível (input + change, como a digitação)
@@ -58,24 +57,12 @@ try:
     # 7 · em conferência, encerrar fica bloqueado pela sobra, com o atalho para receber a devolução no Estoque
     T.btn('Enviar para conferência'); T.btn('Confirmar envio'); p = T.pan(); print('  ', p[p.find('PRÓXIMO'):][:300])
     T.ok('Em conferência' in T.linha(OS) and 'Encerrar bloqueado: sobra em custódia · Glifosato 480 20 L (1 × galão 20 L) com Marcos.' in p
-         and T.link('Receber devolução no Estoque') == 'EST.dc.html' and not T.temb('Conferir e encerrar'),
-         'Em conferência: encerrar bloqueado pela sobra de 20 L com Marcos e link "Receber devolução no Estoque" → EST.dc.html', p[:500])
-    # 8 · Estoque recebe a devolução (apta): o bloqueio da sobra sai sem recarregar
-    # B-R8 (09/10): o turno 2 informou 180 L de Glifosato onde o planejado do trecho era 200 L (2 L/ha × 100 ha); a divergência de dose
-    # passa a ser o bloqueio do encerramento até a revisão técnica de Ana (agrônoma) — regra nova, expectativa mudada com motivo
+         and (T.link('Receber devolução no Estoque') or '').startswith('EST.dc.html#req=') and not T.temb('Conferir e encerrar'),
+         'Em conferência: encerrar bloqueado pela sobra de 20 L com Marcos e link "Receber devolução no Estoque" → EST.dc.html#req= (SUP §7: abre a requisição)', p[:500])
+    # 8 · Estoque recebe a devolução (apta): o bloqueio sai sem recarregar e o botão de encerrar aparece
     T.mudar(f"return cenDevolver(c,'{RQ}','Glifosato 480',20,true,'Rui');"); p = T.pan(); i = T.ins()
-    T.ok('sobra em custódia' not in p and 'Encerrar bloqueado: divergência de consumo/dose em revisão técnica · dia 2 · Glifosato 480 planejado 200 L × informado 180 L.' in p
-         and not T.temb('Conferir e encerrar') and 'Devolvido 20 L' in i and 'Consumido · sobra devolvida' in i,
-         'devolução recebida no Estoque: o bloqueio da sobra some e fica o da divergência de dose (Glifosato 200 L planejado × 180 L informado), trilha com Devolvido 20 L', p[:500])
-    # 8b · Ana (agrônoma) aceita a divergência com motivo na linha do apontamento: o bloqueio some e surge Conferir e encerrar
-    T.J("""(()=>{const i=[...document.querySelectorAll('aside[role=dialog] textarea')].find(x=>x.getAttribute('aria-label')==='Motivo ou correção decidida · dia 2');
-      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set.call(i,'Bordadura sem aplicação por vento; vistoria sem rebrote');
-      i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"""); time.sleep(.3)
-    T.btn('Aceitar com motivo'); p = T.pan()
-    T.ok('Conferência diária pendente' in p and not T.temb('Conferir e encerrar'), 'Após revisão técnica, Paula ainda precisa conferir os dias', p[:500])
-    conferir_dias(T.J,OS,[1,2]); p=T.pan()
-    T.ok('Encerrar bloqueado' not in p and T.temb('Conferir e encerrar') and 'nada em custódia' in p and 'Revisão técnica: aceita por Ana (agrônoma)' in p,
-         'revisão técnica aceita por Ana (agrônoma) com motivo: bloqueio some e surge Conferir e encerrar', p[:500])
+    T.ok('Encerrar bloqueado' not in p and T.temb('Conferir e encerrar') and 'Devolvido 20 L' in i and 'Consumido · sobra devolvida' in i and 'nada em custódia' in p,
+         'devolução recebida no Estoque: bloqueio some, trilha mostra Devolvido 20 L e surge Conferir e encerrar', p[:500])
     # 9 · conferir e encerrar grava no cenário (regra atual: Em conferência → Encerradas)
     T.btn('Conferir e encerrar'); T.btn('Confirmar encerramento'); st = T.cen(f"[c.ordens['{OS}'].etapa, c.ordens['{OS}'].ap.map(a=>a.st).join(',')]"); print('  ', st, T.toast())
     T.ok(st == ['Encerradas', 'Conferido,Conferido'] and 'Encerradas' in T.linha(OS) and 'somente consulta' in T.pan() and f'{OS} encerrada' in T.toast(),
@@ -90,7 +77,7 @@ try:
     # 11 · liberar bloqueado pelo Estoque: OS-0418 A liberar, sem lote de Ureia 45% → motivo no próximo passo desde a abertura, sem botão de liberar
     T.ordem('OS-0418'); p = T.pan()
     # 01/10: bloqueada pelo Estoque, a ordem segue sem "Liberar", mas o agrônomo pode ajustar (trocar o produto ou a dose) e liberar no mesmo passo
-    T.ok('Liberar bloqueado: sem lote de Ureia 45% no Estoque.' in p and T.link('Ver saldos no Estoque') == 'EST.dc.html' and not T.temb('Liberar para execução')
+    T.ok('Liberar bloqueado: sem lote de Ureia 45% no Estoque.' in p and (T.link('Ver saldos no Estoque') or '').startswith('EST.dc.html') and not T.temb('Liberar para execução')
          and T.temb('Ajustar antes de liberar') and T.cen("c.ordens['OS-0418'].etapa") == 'A liberar',
          'OS-0418 A liberar: liberar bloqueado com o motivo do Estoque (sem lote de Ureia 45%) e atalho aos saldos', p[p.find('PRÓXIMO'):][:300])
     T.fechar()
