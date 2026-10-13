@@ -33,7 +33,8 @@ def tem(k, *xs): return all(x.upper() in T[k].upper() for x in xs)   # rótulos 
 def nao(k, *xs): return not any(x.upper() in T[k].upper() for x in xs)
 def emsrc(*xs, f='MA.dc.html'): return all(x in SRC[f] for x in xs)
 try:
-    cap('so', 'vis=semordem', limpa=True); cap('or', 'vis=ordens'); cap('at', 'vis=ativos'); cap('ab', 'vis=ativos&modo=abastecimentos'); cap('pl', 'vis=planos')
+    HD = "[...document.querySelectorAll('main [role=columnheader]')].filter(e=>e.getClientRects().length).map(e=>e.innerText.replace(/[⇅▾▴▸▼▲]/g,'').replace(/\\s+/g,' ').trim().toUpperCase())"
+    cap('so', 'vis=semordem', limpa=True); cap('or', 'vis=ordens'); cap('at', 'vis=ativos'); hd_at = J(HD) or []; cap('ab', 'vis=ativos&modo=abastecimentos'); cap('pl', 'vis=planos')
     cap('a01', 'ativo=a01'); cap('a02', 'ativo=a02'); cap('a11', 'ativo=a11'); cap('pm01', 'plano=PM-01'); cap('pm02', 'plano=PM-02')
     cap('om34', 'om=OM-0234'); cap('om33', 'om=OM-0233'); cap('om33ze', 'om=OM-0233', perfil='Zé'); cap('om28', 'om=OM-0228'); cap('om30', 'om=OM-0230')
     cap('ach', 'achado=INSP-104'); cap('venc', 'venc=PM-02|a03|s1')
@@ -48,13 +49,13 @@ try:
     for a in ('vis=semordem', 'vis=ordens', 'vis=ativos', 'vis=planos', 'plano=PM-01'):
         m.ir(a); etp += J("document.querySelectorAll('.etp-ind,nav[aria-label=\"Telas da manutenção\"]').length") or 0
     m.ir('vis=ordens'); m.clk('Kanban'); kan = J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"]>*')].filter(e=>e.getClientRects().length).length")
-    m.ir('vis=semordem'); m.clk('Gerar 3 ordens preventivas'); m.ir('vis=semordem'); so2 = m.body(); m.ir('ativo=a03'); a03 = m.body() + m.pan()
+    m.ir('vis=semordem'); so1r = m.linhas(0); m.clk('Gerar 3 ordens preventivas'); m.ir('vis=semordem'); so2r = m.linhas(0); m.ir('ativo=a03'); a03 = m.body() + m.pan()
     exe = J("(()=>{ try{ const M=window.__man; const c=M.manClone(M.manGet()); c.oms['OM-0237'].executante=''; M.manLiberar(c,'OM-0237',false,'Otávio',{executante:'',tempo:'4'}); return 'liberou'; }catch(e){ return e.message; } })()")
     cap('om35', 'om=OM-0235')
     gerar_rows = [r for r in (m.linhas(0) or [])]
     # ---------- F01–F111 ----------
     g = [x for x in MENU2 if x[0] == 'Manutenção'][0]
-    F('F01', 'menu com 4 subitens da mesma tela (13/10, pedido do proprietário); Índice sem MA-01..05 nem PM', g[2] == [('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')] and not re.search(r'(MA-0[1-5]|PM)\.dc\.html', SRC['Main.dc.html']))
+    F('F01', 'menu com 1 item; Índice com 1 link', g[2] == [('Manutenção', 'MA.dc.html')] and not re.search(r'(MA-0[1-5]|PM)\.dc\.html', SRC['Main.dc.html']))
     F('F02, F03', 'Sai: faixa e "3 etapas" do PM', etp == 0 and 'Telas da manutenção' not in MAS and nao('pm01', 'Etapa 1', 'Biblioteca de planos'), etp)
     F('F04', 'detalhe do plano: "‹ Planos" e "Publicar vN"', tem('pm01', '‹ Planos') and "'Publicar v'+" in MAS)
     F('F05', 'menu ⋯ do cabeçalho com Restaurar', tem('mais', 'Restaurar demonstração'))
@@ -67,12 +68,13 @@ try:
     F('F22', 'painel Vínculo com marco pré-preenchido (D-41)', 'o marco é a última execução do serviço' in MAS and 'manMarcoSug' in MAS)
     F('F25, F26', 'cartões de Sem ordem; selo de impedimentos; filtro "Com conflito" em Ordens', tem('so', 'VENCIDAS SEM ORDEM', '1 ativo bloqueado') and tem('or', 'Com conflito'))
     F('F27, F28, F29', 'Sem ordem (até 30 d) e bloco "O que vence" do ativo', tem('so', 'Até 30 d', 'Vencida') and tem('a02', 'O que vence'))
-    F('F30', 'item com OM sai de Sem ordem; o ativo mostra a OM', 'PM-02 v2' not in so2 and 'OM-0235' in a03 and tem('at', 'OM-0234 · A liberar'))
+    F('F30', 'item com OM sai de Sem ordem; o ativo mostra a OM', 'v:PM-02|a03|s1' in so1r and 'v:PM-02|a03|s1' not in so2r and 'OM-0235' in a03 and tem('at', 'OM-0234 · A liberar'), [so1r, so2r])
     F('F31, F32', 'painel do vencimento; primária de Sem ordem; sem "Ver ordens"', tem('venc', 'Gerar ordem preventiva') and 'Gerar 3 ordens preventivas' in T['so'] and nao('so', 'Ver ordens ›'))
     F('F33, F55, F83', 'OM › Janela e equipe › Impacto na produção (AL)', tem('om34', 'Impacto na produção', 'lido da alocação do PCP'))
     F('F34', '"Mover janela" para toda OM a liberar/liberada', tem('om34', 'Mover janela') and tem('om28', 'Mover janela'))
     F('F35', '1b: "Pedir decisão da gerência" (fica para o 1b; hoje a ponte "Liberar mesmo assim")', tem('om34', 'Liberar mesmo assim'))
-    F('F36, F37, F38', 'cartão "Aptos agora"; colunas Leitura e Condição; filtro de condição', tem('at', 'APTOS AGORA', 'LEITURA', 'CONDIÇÃO', 'Bloqueado 1'))
+    F('F36, F37, F38', 'cartão "Aptos agora"; coluna Condição e filtro de condição; a leitura na página do ativo (fora da linha, COLUNAS-1)',
+      tem('at', 'APTOS AGORA', 'CONDIÇÃO', 'Bloqueado 1') and 'CONDIÇÃO' in hd_at and 'LEITURA' not in hd_at and tem('a01', 'Leitura 4.312 h · 23/09'), hd_at)
     F('F39, F40', 'agenda lida de AL no detalhe; "Elegíveis" sai', tem('a01', 'AGENDA DA SEMANA (O.S. › RECURSOS)') and 'Elegíve' not in MAS)
     F('F41', 'colunas Próxima manutenção e Em aberto', tem('at', 'PRÓXIMA MANUTENÇÃO', 'EM ABERTO'))
     F('F42, F44', 'Sai: uso 30 d fixo', 'Uso 30 d' not in MAS and 'Horas trabalhadas 30 d' not in MAS)
@@ -107,7 +109,8 @@ try:
     # revisão 09/10 (A10): a coluna passou de "Consumo L/h" a "Consumo" e a unidade (L/h ou km/L, pelo contador) vai na célula
     F('F95, F96', 'modo Abastecimentos; painel da leitura; app MB-09', tem('ab', 'AB-1042', 'CONSUMO', '16,4 L/h') and emsrc('Registrar abastecimento', 'Salvar e registrar outro', f='MB-09.dc.html'))
     F('F98, F99', 'Sai: conferir/desvio fixos (desvio é filtro e achado)', 'Investigar desvio' not in MAS and tem('at', 'Desvio de consumo'))
-    F('F100, F101', '"Corrigir com estorno"; coluna Consumo', 'Corrigir com estorno' in MAS and tem('at', 'CONSUMO'))
+    F('F100, F101', '"Corrigir com estorno"; coluna Consumo nos Abastecimentos e o consumo do ativo em "Custo e desempenho" (fora da linha de Ativos, COLUNAS-1)',
+      'Corrigir com estorno' in MAS and tem('ab', 'CONSUMO') and 'CONSUMO' not in hd_at and tem('a01', 'CUSTO E DESEMPENHO', 'Consumo'), hd_at)
     F('F103, F104', 'MB-01, MB-09 "Máquina", MB-09det = painel da OM, MB-04 → achado; sem sinal',
       emsrc('mbOmsDe', f='MB-01.dc.html') and emsrc('Não opere', 'manAppCmd', f='MB-09.dc.html') and emsrc('Anexar foto e registrar', 'manAppSinal', f='MB-09det.dc.html') and emsrc("'achado'", f='MB-04.dc.html'))
     lk = [f for f, s in SRC.items() if 'MA.dc.html#om=OM-0233' in s and f != 'MA.dc.html']; lk2 = [f for f, s in SRC.items() if 'MA.dc.html#ativo=' in s and f != 'MA.dc.html']

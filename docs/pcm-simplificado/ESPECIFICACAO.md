@@ -233,13 +233,14 @@ python3 cada_cd03_test.py && python3 cada_fix03_test.py && python3 os_v39_bloq_t
 
 | Coluna | Exemplo |
 |---|---|
-| Item | "PM-01 v3 · vencimento" / "SM-0150 · relato" / "INSP-104 · inspeção" |
-| Ativo · leitura | "Trator 02 · 2.988 h · 23/09", com os selos Ativo bloqueado · Leitura de dd/mm · Leitura a confirmar · Marco estimado |
-| O que | "Revisão 250 h · a cada 250 h ou 180 dias" / "Hidráulico · Vazamento leve em mangueira" |
+| Item | "PM-01 · vencimento" / "SM-0150 · relato" / "INSP-104 · inspeção" |
+| Ativo | "Trator 02", com os selos Ativo bloqueado · Leitura de dd/mm · Leitura a confirmar · Marco estimado |
+| O que | "Revisão 250 h" / "Hidráulico · Vazamento leve em mangueira" |
 | Prazo | "Vencida · 30 h além" / "Em breve · janela abre em 5 d" / "Alta · desde 21/09" / "Voltou da OM-0230" |
 | Peças | "Com saldo" / "Falta 1 un · Filtro de óleo MF 4292" / "—" |
 | Próximo passo (texto) | "Vincular à OM-0234" / "Gerar com a PM-05" / "Criar ordem corretiva" |
 
+- **Colunas essenciais (proprietário, 10/10; COLUNAS-1):** a versão do plano ("v3"), a periodicidade ("a cada 250 h ou 180 dias") e a leitura do ativo ("2.988 h · 23/09") saíram das células e ficam no painel do vencimento (Versão, Periodicidade, cálculo com a leitura, Leitura atual do ativo) e no painel do achado (Leitura atual do ativo). A busca continua achando a linha por elas. Os selos do ativo ficam na célula (R-13).
 - **Filtros:**
   - busca; Tipo (Vencimentos · Achados); Criticidade; Grupo; Plano;
   - Prazo: Vencidas · Até 10 d (padrão) · Até 30 d. É cumulativo pelo início da janela e sempre inclui as vencidas. Os achados não passam por esse filtro.
@@ -297,17 +298,18 @@ python3 cada_cd03_test.py && python3 cada_fix03_test.py && python3 os_v39_bloq_t
 - **Rotina:**
   - "Aguardam você · N": OMs Liberadas ou Em execução em que você é o executante, ou com selo principal em seu nome;
   - "Esta semana": OMs com janela até domingo e as vencidas. Agrupa por dia, com HH por especialidade e "capacidade da oficina não calculável" sem P10.
-- **Colunas:**
-  - Ordem · ativo;
-  - Serviço · tipo ("Revisão 250 h · Preventiva · PM-01 v3" / "Corretiva · Alta" / "Pendência");
+- **Colunas** (colunas essenciais, proprietário, 10/10; COLUNAS-1: 8 → 7):
+  - Ordem (o ID, link `#om=`);
+  - Ativo (coluna própria: "Ordem · ativo" se dividiu, R-01);
+  - Serviço ("Revisão 250 h"; o tipo, a criticidade e o plano vão ao painel da OM e ao bloco Ordens do ativo);
   - Janela; Fase;
   - Pendência (selo principal · dono · prazo, "+n");
-  - Executante;
-  - Tempo ("6,5 h prev. · 4,0 h real");
-  - Custo ("R$ 1.776,00 est." / "R$ 3.800,00").
-- **Filtros:** busca, Tipo, Especialidade, Executante, Pendência, Ativo e Data (janela ou encerramento; Mês atual · 30 d · 12 m).
+  - Executante.
+  - Saíram para o painel da OM ("Custo e tempos") e para o bloco Ordens do ativo: Tempo ("6,5 h prev. · 4,0 h real") e Custo ("R$ 1.776,00 est." / "R$ 3.800,00"). A busca acha a OM pelo ativo, pelo tipo e pelo plano.
+- **Filtros:** busca; **Tipo** (Todos os tipos · Preventiva · Corretiva · Pendência), em chips fora da grade, criado antes de o tipo sair da célula e lido também pelo Kanban; Executante, Pendência e Ativo pelas colunas; Especialidade e Data (janela ou encerramento; Mês atual · 30 d · 12 m).
 - **Ordenação:** todas as colunas. Padrão: abertas pela janela e depois pela criticidade; Encerradas no fim, da mais recente.
 - **Primária da lista:** nenhuma. A ≥1024 px abre, sem modal, o painel da 1ª OM que espera o papel (abrir não executa).
+- **Teclado (COLUNAS-1, 10/10):** Enter na linha abre o painel da OM (cabeçalho com tipo, plano e, fora da preventiva, a criticidade); Esc fecha e devolve o foco à linha, também quando o painel da 1ª OM já estava aberto ao lado.
 
 **Painel da OM** (`#om=`; o único detalhe de OM, na web e no app). Só o bloco da fase atual vem aberto; os outros mostram uma linha de resumo.
 1. **Cabeçalho:**
@@ -407,22 +409,22 @@ python3 cada_cd03_test.py && python3 cada_fix03_test.py && python3 os_v39_bloq_t
   - **Custo de manutenção · set/2026** (KPI-PCM-10; "das OMs encerradas no sistema"; o que está "em andamento R$ x est." aparece separado);
   - MTBF · MTTR (KPI-PCM-02; "não estimável").
 - **Modos:** Ativos | Abastecimentos (D-15).
-- **Colunas (Ativos):**
-  - Ativo · local ("Trator T1 · JD 6M 155 · Oficina Sede");
+- **Colunas (Ativos)** (colunas essenciais, 10/10; COLUNAS-1: 7 → 5):
+  - Ativo ("Trator T1 · JD 6M 155"; o local fica no cabeçalho da página do ativo);
   - Condição ("Bloqueado · desde 21/09"; "Restrito · até 30/09");
-  - Leitura ("4.312 h · 23/09", com selo "a confirmar" ou "de 12/09");
   - Próxima manutenção (a mais urgente, "+n");
-  - Em aberto ("OM-0233 · Em execução" / "NC-0912 sem ordem", links);
-  - Custo no período (total no rodapé);
-  - Consumo ("11,8 L/h · tanque cheio" / "— sem método"; PRD CAL-07).
+  - Em aberto: primeiro o que pede ação ("Leitura a confirmar", "Leitura de 12/09", "Desvio de consumo +18 %"), depois as ordens e achados ("OM-0233 · Em execução" / "NC-0912 sem ordem", links);
+  - Custo no período (total no rodapé).
+  - Saíram para a página do ativo: Leitura ("4.312 h · 23/09": cabeçalho, Situação e "Leituras e abastecimentos") e Consumo ("11,8 L/h · tanque cheio", com o desvio: "Custo e desempenho"; PRD CAL-07). A busca acha o ativo pelo local, pela leitura e pelo consumo.
 - **Filtros:**
   - busca; Grupo (classes do PRD 47.6);
   - Condição (Apto · Restrito · Bloqueado, com contagem);
   - Pendência (Leitura a confirmar · Sem plano · Achado sem ordem · Desvio de consumo · Vence em 30 d · Restrição vencida).
 - **Ordenação:** todas as colunas; padrão Bloqueado primeiro, depois a próxima manutenção. **Primária:** nenhuma.
 - **Modo Abastecimentos:**
-  - colunas: Lançamento · operador · evidência · Ativo · Tanque/lote · Volume ("320 L") · Data · leitura · Método · L/h · Qualidade (Confirmada · A confirmar · Troca de contador · Descartada · Estornado);
-  - filtros: data, ativo, tanque, qualidade;
+  - colunas (10/10; COLUNAS-1: 8 → 6): Lançamento · Ativo · Volume ("320 L") · Data · Consumo (L/h ou km/L) · Qualidade (Confirmada · A confirmar · Troca de contador · Descartada · Estornado);
+  - operador, evidência, tanque/lote, método e a leitura do abastecimento ficam no painel do lançamento e na busca;
+  - filtros: data, ativo, **Tanque/lote** (seletor fora da grade, criado antes de a coluna sair), qualidade;
   - primária **"Registrar abastecimento"** (ativo por busca), com "Salvar e registrar outro" (§3.6).
 - **Detalhe do ativo** (`#ativo=a01`): cabeçalho com nome do CD-03, modelo, local, grupo, condição, leitura e selo. Abre aberto o bloco que tem pendência.
   1. **Situação:**
@@ -434,7 +436,7 @@ python3 cada_cd03_test.py && python3 cada_fix03_test.py && python3 os_v39_bloq_t
      - retorno previsto condicional.
   2. **O que vence:** todos os serviços, inclusive em dia e com ordem. A linha abre o painel do vencimento. "Sem vínculo · Vincular ›" e "Sem plano · Criar plano ›" levam ao plano.
   3. **Achados:** todos, com estado (Sem ordem · Na OM-0234 · Resolvido · Fechado sem serviço). A linha abre o painel do achado.
-  4. **Ordens:** todas, com fase e custo.
+  4. **Ordens:** todas, com fase e custo (colunas Ordem, Serviço · tipo, Janela, Fase, Custo; o ativo não se repete na célula, é o título da página).
   5. **Leituras e abastecimentos:** de `c.leituras` e `c.abast`. A linha abre o painel da leitura.
   6. **Custo e desempenho:**
      - custo no período por natureza (3.1.05 peças, 3.1.04 lubrificantes, oficina, terceiros);
@@ -453,7 +455,8 @@ python3 cada_cd03_test.py && python3 cada_fix03_test.py && python3 os_v39_bloq_t
 
 ### 3.5 Planos e o detalhe do plano
 - **Lista:**
-  - colunas: Plano · PM-xx · Estado ("Publicado v3 · Rascunho v4 em edição" / "Inativo") · Aplica-se a · Serviços · Ativos ("2 vinculados de 3") · Situação ("2 vencidas · 1 sem ordem", link para Sem ordem filtrada pelo plano);
+  - colunas (10/10; COLUNAS-1: 6 → 3): Plano · PM-xx · Estado ("Publicado v3 · Rascunho v4 em edição" / "Inativo") · Situação ("2 vencidas · 1 sem ordem", link para Sem ordem filtrada pelo plano; "1 ativo do modelo sem vínculo" quando o plano alcança um ativo que não está vinculado);
+  - Aplica-se a, Serviços e o contador de Ativos ficam na página do plano (cabeçalho, Serviços, Ativos vinculados) e na busca;
   - filtros: Grupo, Estado, busca;
   - acima da grade: "4 ativos sem plano · Distribuidor 3 t, Máquina TSI, Esqueletadeira, Gotejo T7 · Criar plano" (calculado por `pmSemPlano`; Aplica-se a herdado);
   - **primária:** **Novo plano**.
@@ -461,7 +464,7 @@ python3 cada_cd03_test.py && python3 cada_fix03_test.py && python3 os_v39_bloq_t
   - selo, versão, Aplica-se a;
   - faixa de estado de uma linha: "Rascunho v4 em edição · vencimentos seguem a v3 · Descartar rascunho" / "Rascunho v1 · publique" / "Inativo · Reativar";
   - **Serviços:** a linha expande; o nome abre o painel do serviço;
-  - **Ativos vinculados**, só leitura (ativo · marco · próximo vencimento · situação · ordem), sem "Gerar";
+  - **Ativos vinculados**, só leitura (ativo · marco · próximo vencimento · situação · ordem), sem "Gerar"; a 390 px o conjunto à vista é Ativo, Situação e Próximo vencimento (quando o contrato G2-COL entrar);
   - **Versões**, recolhido.
 - **Primária:** **Publicar vN** (desabilitada com o motivo enquanto faltar serviço, gatilho ou tarefa) · **Reativar** (inativo) · nenhuma (publicado sem rascunho).
 - **Secundárias:** Incluir serviço · Vincular ativo · Editar plano; ⋯ Inativar.
@@ -550,12 +553,12 @@ python3 cada_cd03_test.py && python3 cada_fix03_test.py && python3 os_v39_bloq_t
 | F22 | Painel Vínculo | Fica; marco pré-preenchido da última OM encerrada do mesmo serviço, corrigível (D-41) | S2 |
 | F25, F26 | Cartões de Sem ordem; selo de impedimentos; filtro "Conflito" em Ordens | Funde | S1 |
 | F27, F28, F29 | Sem ordem (até 30 d) e bloco O que vence do ativo (todos) | Fica, mesmos selos e situações | S1 |
-| F30 | Item com OM sai de Sem ordem; o ativo mostra "OM-0234 · A liberar" | Fica | S1 |
+| F30 | Item com OM sai de Sem ordem (a linha some); o ativo mostra "OM-0234 · A liberar" | Fica | S1 |
 | F31, F32 | Painel do vencimento; primária de Sem ordem | Fica, uma instância por tela; sai o link "Ver ordens" | S1 |
 | F33, F55, F83 | Painel da OM › Janela e equipe › Impacto na produção, pela função de conflito sobre AL | Funde 5 → 1; Grava (calculado, D-38) | S1 |
 | F34 | Painel da OM: "Mover janela" para toda OM, com tolerância e conflito | Fica, generalizado | S1 |
 | F35 | Painel da OM: "Pedir decisão da gerência"; Ana "Registrar decisão" | Fica com a alçada certa (PCMS-M09b) | 1b |
-| F36, F37, F38 | Cartão "Aptos agora"; colunas Leitura e Condição; filtro Condição | Fica; "Elegíveis" sai com a F40 | S1 |
+| F36, F37, F38 | Cartão "Aptos agora"; coluna Condição; filtro Condição; a Leitura na página do ativo e "Leitura a confirmar" em Em aberto (COLUNAS-1, 10/10) | Fica; "Elegíveis" sai com a F40 | S1 |
 | F39, F40 | Agenda lida de AL no detalhe do ativo | Sai o dado fixo; elegibilidade é da O.S. | S1 |
 | F41 | Colunas Próxima manutenção e Em aberto | Fica | S1 |
 | F42, F44 | Uso 30 d derivado dos apontamentos (FORA-DE-ESCOPO) | Sai o dado fixo | S1 |
@@ -589,7 +592,7 @@ python3 cada_cd03_test.py && python3 cada_fix03_test.py && python3 os_v39_bloq_t
 | F94 | — (dia no modo Abastecimentos; tanque no Estoque, Bloco 6; consumo em Ativos) | Sai o dado fixo | S2 |
 | F95, F96 | Modo Abastecimentos; painel da leitura; app MB-09 | Fica, com herança | S2; S4 |
 | F98, F99 | — | Sai: conferir é a F97; desvio é filtro e achado de origem Alerta | S2 |
-| F100, F101 | "Corrigir com estorno"; coluna Consumo e detalhe, de `c.abast` | Grava | S2 |
+| F100, F101 | "Corrigir com estorno"; coluna Consumo nos Abastecimentos e o consumo do ativo em "Custo e desempenho" (fora da linha de Ativos, COLUNAS-1), de `c.abast` | Grava | S2 |
 | F103, F104 | MB-01, MB-09 "Máquina", MB-09det = painel da OM, MB-04 → achado; sem sinal | Grava | S4 |
 | F105, F106, F109, F111 | Links → `MA#om=OM-0233` e `MA#…` | Fica, direto | S1 |
 | F107, F108 | CD-03 e O.S. leem a condição única; calibração fica no CD-03 | Fonte única | S3 |

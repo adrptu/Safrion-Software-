@@ -1,6 +1,0 @@
-tabelas_irr_test rc=0 :: RESULTADO: 106/106 ok
-ficha_pivo_test rc=0 :: RESULTADO: FALHOU 20/21
-ctl5_test rc=0 :: RESULTADO 30/30 []
-tabelas_cad_test rc=0 :: RESULTADO: 178/178 ok
-cadc_cd02_test rc=0 :: RESULTADO: OK 15/15
-FIM

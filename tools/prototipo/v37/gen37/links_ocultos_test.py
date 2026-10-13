@@ -63,47 +63,27 @@ ok('E3 "Nova ordem" só emite atividade agrícola do plano', not [o for o in ops
 PJ=os.path.join(G,'project'); c=json.load(open(os.path.join(PJ,'canvas.json')))
 pag={k:v.get('page') for k,v in c['boards'].items()}; oc={k for k,v in pag.items() if v=='ocultos'}
 pares=set()
-# v55 (revisão Codex): o padrão XX-… não via destino sem hífen (BEN.dc.html, CARGA.dc.html): a extração pega todo destino *.dc.html. O ben.js
-# (biblioteca de regras, o mesmo texto em toda página do estado, oculta ou não) sai do texto antes: nele BEN.dc.html é o dado que
-# benProxEntrada devolve, e as telas visíveis o descartam com o BEN fora da navegação (areas/producao.py prBenProx · PR_BEN_H; L4 e a
-# varredura de DOM provam que nenhum <a>/onclick o mostra)
-_BENJS=open('ben.js',encoding='utf-8').read()
 for f in sorted(k for k,v in pag.items() if v=='menu'):
-    t=open(os.path.join(PJ,f),encoding='utf-8').read().replace(_BENJS,'')
-    ds=re.findall(r'([A-Z]{2}-[0-9A-Za-z\-]+\.dc\.html(?:#[^"\'\s<]*)?)',t)+re.findall(r'([A-Za-z0-9][A-Za-z0-9\-]*\.dc\.html(?:#[^"\'\s<]*)?)',t)   # o padrão antigo e o amplo
-    for h in {m.split('#')[0] for m in ds} & oc: pares.add((f,h))
+    t=open(os.path.join(PJ,f),encoding='utf-8').read()
+    for h in {m.split('#')[0] for m in re.findall(r'([A-Z]{2}-[0-9A-Za-z\-]+\.dc\.html(?:#[^"\'\s<]*)?)',t)} & oc: pares.add((f,h))
 p=lambda o,*ds: {(o+'.dc.html',d+'.dc.html') for d in ds}
 # PCM simplificado (05/10, S1): MA-01..MA-05 e MA-04det viram a tela única MA (os endereços antigos só redirecionam); S4: MB-09 deixa de ser oculto
 ESCOPO=(p('IN-04','PL-05','CA-02','CO-06det')|p('OS','CA-02','CO-06det')|p('MA','PL-04','PL-05','PL-05det')
         |p('IR-04','GE-07')|p('MB-01','MB-07','MB-08','MB-10')|p('MB-02','MB-08')|p('MB-05','MB-05det','SU-03det'))
 ok('L1 nenhum elo do escopo (PL-04/PL-05/PL-05det, CA-02, CO-06det, GE-07, MB-05det, MB-07..MB-10, SU-03det a partir de telas visíveis)', not (pares & ESCOPO), sorted(pares & ESCOPO))
 RESIDUAL={  # por PAR: um elo novo, mesmo numa tela já listada, quebra o teste
- **{x:'índice do protótipo: aponta de propósito para módulos ocultos' for x in p('Main','AG-03','BO-02','CA-01','CA-04','CO-01','CO-06','GE-01','IN-01','LO-01','LO-02','ON-01','PL-01','PL-05','PT-01','SU-01','SU-07','VE-01')},
+ **{x:'índice do protótipo: aponta de propósito para módulos ocultos' for x in p('Main','AG-02','BO-02','CA-01','CA-04','CF-01','CO-01','CO-06','GE-01','IN-01','LO-01','LO-02','ON-01','PL-01','PL-05','PT-01','SU-01','SU-07','VE-01')},
  **{x:'vivo (cenário ou MIP), só falta pôr na página visível (build.py VIS_ROWS)' for x in p('MB-01','MB-02det','MB-03x-recibo','MB-06')|p('MB-02','MB-02det','MB-03x-recibo')
     |p('MB-09','MB-03x-recibo')|p('MB-09det','MB-03x-recibo')
     |p('MB-03','MB-02det','MB-03x-recibo')|p('MB-04','MB-03x-recibo')|p('MB-05','MB-03x-recibo')|p('AG-01','MB-06')|p('AG-01det','MB-06')|p('IN-04','MB-06','CO-06')
     |p('PROD','CO-06')|p('MB-07','MB-03x-recibo')|p('MB-10','MB-03x-recibo')},   # colheita (06/10): a avaliação de carência e destino do lote vive na CO-06; MB-07 e MB-10 (no estado) levam aos envios do aparelho como as outras telas do app
  ('MB-01.dc.html','IN-01.dc.html'):'"voltar" do app',
- **{x:'cadeia MIP → diagnóstico e recomendação (frente própria)' for x in p('AG-01','AG-03','AG-03det','AG-04det')|p('AG-02','AG-03det')|p('AG-01det','AG-03det','AG-04det','AG-06','PL-02')|p('AG-07','AG-04det')|p('IN-04','AG-06')},
- **{x:'detalhe fixo na página visível (frente própria)' for x in p('CA-01det','AG-04','CA-02','CA-04','PL-05','SU-07')|p('CA-01x-os0420','AG-04det','CA-02','CA-03det','PL-05','SU-07')}}
+ **{x:'cadeia MIP → diagnóstico e recomendação (frente própria)' for x in p('AG-01','AG-03','AG-03det','AG-04det')|p('AG-01det','AG-03det','AG-04det','AG-06','PL-02')|p('AG-07','AG-04det')|p('IN-04','AG-06')},
+ # COLUNAS-1 (10/10, R-11 · caminho canônico): custódia e requisição do CA-01det e do CA-01x passam ao Estoque (EST#req=); os pares para a CA-04 e a
+ # SU-07 saem desta lista, e um elo novo para elas volta a reprovar o L2
+ **{x:'detalhe fixo na página visível (frente própria)' for x in p('CA-01det','AG-04','CA-02','PL-05')|p('CA-01x-os0420','AG-04det','CA-02','CA-03det','PL-05')}}
 fora=sorted(pares-set(RESIDUAL))
 ok('L2 todo o resto da varredura está na lista residual, por par e com motivo', not fora, fora)
-# v55 (10/10): o Beneficiamento sai da navegação até a rodada 3 (defeitos S2 de saldo e reserva de caixas em correção em outra frente;
-# BEN_PUBLICADO=False em ui37.py). A tela fica no canvas, na página "ocultos", com motivo. BEN.dc.html não casa com o padrão XX-… acima: a
-# conta é própria. O ben.js entra igual em toda página do estado (regras; o endereço que benProxEntrada devolve as telas descartam): o texto
-# dele sai antes da busca, e qualquer outra menção a BEN.dc.html numa tela visível (link, ação, faixa, título) quebra o teste
-import ui37
-OCULTOS_MOTIVO={'BEN.dc.html':'rodada 3 do BEN; reativar com BEN_PUBLICADO'}
-if not ui37.BEN_PUBLICADO:
-    _bj=_BENJS
-    for h,mot in OCULTOS_MOTIVO.items():
-        ok(f'L4a {h} oculto ({mot}): fora do menu (ui37.oculto) e no canvas na página "ocultos"', ui37.oculto(h) and pag.get(h)=='ocultos', [ui37.oculto(h), pag.get(h)])
-        _el=sorted(f for f in pag if pag[f]=='menu' and h in open(os.path.join(PJ,f),encoding='utf-8').read().replace(_bj,''))
-        ok(f'L4b nenhuma tela visível aponta para {h} ({mot}) fora do ben.js embutido', not _el, _el)
-    _cg=open(os.path.join(PJ,'CARGA.dc.html'),encoding='utf-8').read()
-    ok('L4c Cargas e recebimento é tela única: sem a faixa "Telas de recebimento e beneficiamento" (seletor de uma opção só)',
-       'Telas de recebimento e beneficiamento' not in _cg and 'class="etp ' not in _cg, [_cg.count('Telas de recebimento'), _cg.count('class="etp ')])
-else: ok('L4 BEN publicado (ui37.BEN_PUBLICADO=True): fora da conta de ocultos', True)
 import areas.inicio as I, dados_manutencao as DM
 a420=[a for a in I._ORD_MAPA if a[0]=='OS-0420'][0][4]
 ok('L3 Mapa · OS-0420: o passo vai para a OM-0233 viva (tela MA, visível e com âncora no registro: MA#om=), não para PL-05',

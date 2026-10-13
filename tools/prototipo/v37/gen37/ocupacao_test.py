@@ -28,14 +28,21 @@ try:
              ('P1', 'A conferir', '—', '—'), ('P2', 'A conferir', '80 ha', '24/03/2027 est.'), ('T7', 'Perene', '—', '—'), ('C1', 'Perene', '—', '—')],
             [(r['TALHÃO OU PARCELA'], r['SITUAÇÃO'], r['ÁREA LIVRE'], r['LIVRE A PARTIR DE']) for r in L0])
         t3 = linha('T3', L0)
-        chk('OC-02 T3 é folha com a ocupação de fora esmaecida (Soja 62 X, 17/02/2027, Estimado, Safra 2026/27 ›)',
-            (t3['CULTURA'], t3['OCUPA ATÉ'], t3['FIM POR'], t3['SAFRA']) == ('Soja', '17/02/2027', 'Estimado (ciclo)', 'Safra 2026/27 ›'), t3)
+        # colunas essenciais (COLUNAS-1, 10/10): a Safra de fora vira link na identificação; Ocupa até e Fim por ficam no formulário do cultivo
+        # da outra safra, aberto pelo link (o T3 de fora é o c5 da Safra 2026/27)
+        chk('OC-02 T3 é folha com a ocupação de fora esmaecida (Soja, link "Safra 2026/27 ›" na identificação; sem colunas Ocupa até, Fim por e Safra)',
+            t3['CULTURA'] == 'Soja' and t3['TALHÃO OU PARCELA'].endswith('Safra 2026/27 ›') and not any(k in t3 for k in ('OCUPA ATÉ', 'FIM POR', 'SAFRA')), t3)
         chk('OC-18 Situação com texto e motivo do A conferir na dica', t3['SITUAÇÃO'] == 'A conferir' and 'saída da soja' in (t3['_dica'] or ''), t3.get('_dica'))
         chk('OC-18 motivo também no texto para leitor de tela', bool(c.js("!!document.querySelector('[role=row] .g2sr')")))
-        T7 = linha('T7', L0); chk('OC-05 negativo: T7 e C1 Perene sem Planejar nem Vincular (a S2627 cruza)', 'Planejar' not in T7['TALHÃO OU PARCELA'] and 'Vincular' not in T7['TALHÃO OU PARCELA'] and T7['OCUPA ATÉ'] == 'sem fim', T7)
-        todas = rows(); t1k = [r for r in todas if r['_kid'] and r['TALHÃO OU PARCELA'] in ('T1-A', 'T1-B')]
-        chk('OC-02 grupo T1: c1 e c2 (Safra 2026/27) e d1 desta safra, por data de início', [(r['TALHÃO OU PARCELA'], r['CULTURA'], r['SAFRA']) for r in t1k] ==
-            [('T1-A', 'Soja', 'Safra 2026/27 ›'), ('T1-B', 'Soja', 'Safra 2026/27 ›'), ('T1-A', 'Milho', '—')], t1k)
+        T7 = linha('T7', L0); chk('OC-05 negativo: T7 e C1 Perene sem Planejar nem Vincular (a S2627 cruza); a perene de fora com o link da safra', 'Planejar' not in T7['TALHÃO OU PARCELA'] and 'Vincular' not in T7['TALHÃO OU PARCELA'] and T7['SITUAÇÃO'] == 'Perene' and T7['TALHÃO OU PARCELA'].endswith('Safra 2026/27 ›'), T7)
+        botao('Safra 2026/27 ›', "[...document.querySelectorAll('[role=row]')].find(r=>r.offsetParent&&/^T3\\b/.test(r.innerText.trim()))"); time.sleep(1.4)
+        f5 = c.js("Object.fromEntries([...document.querySelectorAll('aside[role=dialog] input,aside[role=dialog] select')].filter(x=>x.offsetParent&&/^fx_g_cult_/.test(x.id)).map(x=>[x.id.replace(/^fx_g_cult_[A-Za-z0-9]+_/,''),x.value]))") or {}
+        chk('OC-02 o link "Safra 2026/27 ›" do T3 abre o cultivo de fora: Ocupação prevista até 17/02/2027 (estimado) e Fim por "Estimado (ciclo)" no formulário',
+            f5.get('ocup_txt', '').endswith('a 17/02/2027 (estimado)') and f5.get('fimpor_txt') == 'Estimado (ciclo)', f5)
+        abre('#saf=S27SF&passo=cultivos')
+        todas = rows(); t1k = [r for r in todas if r['_kid'] and r['TALHÃO OU PARCELA'].split(' ')[0] in ('T1-A', 'T1-B')]
+        chk('OC-02 grupo T1: c1 e c2 (Safra 2026/27, link na identificação) e d1 desta safra, por data de início', [(r['TALHÃO OU PARCELA'], r['CULTURA']) for r in t1k] ==
+            [('T1-A Safra 2026/27 ›', 'Soja'), ('T1-B Safra 2026/27 ›', 'Soja'), ('T1-A', 'Milho')], t1k)
         chk('R-13 total da Área só desta safra (553 ha)', c.js("(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const r=t.querySelector('.g2tot'); return r?r.innerText.replace(/\\s+/g,' '):'';})()").find('553 ha') >= 0)
         chk('R-23 seleção só nas linhas desta safra', c.js("(()=>{const rs=[...document.querySelectorAll('[role=row]')].filter(r=>r.offsetParent); return rs.filter(r=>r.querySelector('input[type=checkbox]')).map(r=>r.getAttribute('data-rid'));})()") == ['d1', 'd2', 'd3'])
         botao('Livre 1'); L = nivel0()
@@ -48,7 +55,10 @@ try:
         n2627 = nota(); chk('§5.1 nota da S2627 cita a sucessão do P1 com a saída', 'P1: o Feijão da Safrinha 2027 começa em 15/04/2027; a saída da soja é estimada em 08/03/2027 (sem plano, CD-02).' in n2627 and 'Informar colheita de P1 ›' in n2627, n2627)
         abre('#saf=S2526&passo=cultivos'); L = rows()
         chk('OC-16 S2526 encerrada: 5 cultivos, sem Planejar nem Dividir, Situação "—"', len(L) == 5 and all(r['SITUAÇÃO'] == '—' for r in L) and not any('Planejar' in r['TALHÃO OU PARCELA'] or 'Dividir' in r['TALHÃO OU PARCELA'] for r in L), L[:2])
-        chk('OC-20 lavouras em campo e4/e5 na S2526 com colheita informada', [(r['TALHÃO OU PARCELA'], r['OCUPA ATÉ'], r['FIM POR']) for r in L[3:]] == [('P1 lavoura em campo', '10/10/2026', 'Colheita informada'), ('P2 lavoura em campo', '15/11/2026', 'Colheita informada')], L[3:])
+        # COLUNAS-1: Ocupa até e Fim por no formulário (consulta, safra encerrada)
+        fp1, fp2 = detalhe('P1'), detalhe('P2')
+        chk('OC-20 lavouras em campo e4/e5 na S2526 com colheita informada (formulário do cultivo)', [r['TALHÃO OU PARCELA'] for r in L[3:]] == ['P1 lavoura em campo', 'P2 lavoura em campo']
+            and fp1.get('ocup_txt', '').endswith('a 10/10/2026') and fp2.get('ocup_txt', '').endswith('a 15/11/2026') and fp1.get('fimpor_txt') == fp2.get('fimpor_txt') == 'Colheita informada', [L[3:], fp1, fp2])
         abre('#saf=LG2627&passo=cultivos'); L = nivel0()
         chk('OC-01 LG2627: 23 pivôs, nunca o T1', len(L) == 23 and all(r['TALHÃO OU PARCELA'].startswith('Pivô') for r in L), len(L))
         # ---------- OC-06 normal: Planejar T1 com os padrões ----------
@@ -96,7 +106,7 @@ try:
         chk('OC-09 R-16 o painel mostra antes quem recebe com pendência e o botão conta 4', 'P2 · Soja 62 X · 80 ha · recebe com pendência' in pn and 'Aplicar plano em 4 cultivos' in pn, pn[:700])
         botao('Aplicar plano em 4 cultivos'); t = toast()
         chk('OC-09 aplica nos 4, P2 com pendência', 'aplicado a 4 cultivos' in t and 'sobreposição prevista de 11 dias' in t, t)
-        p2 = linha('P2'); chk('OC-09 P2 A conferir com o ocupante (e5) visível na linha', p2['SITUAÇÃO'] == 'A conferir' and any(r['TALHÃO OU PARCELA'] == 'P2' and r['SAFRA'] == 'Safra 2025/26 ›' for r in rows()), p2)
+        p2 = linha('P2'); chk('OC-09 P2 A conferir com o ocupante (e5) visível na linha (link da safra na identificação)', p2['SITUAÇÃO'] == 'A conferir' and any(r['TALHÃO OU PARCELA'].split(' ')[0] == 'P2' and r['TALHÃO OU PARCELA'].endswith('Safra 2025/26 ›') for r in rows()), p2)
         n = nota(); chk('OC-09 nota sem "sem plano" e com a pendência e as saídas', 'sem plano agronômico' not in n and 'P2: sobreposição prevista de 11 dias com o Milho da Safra 2025/26 (até 15/11/2026).' in n and 'Mudar plantio de P2 ›' in n and 'Ver P2 na Safra 2025/26 ›' in n, n)
         chk('OC-12 com plano no c6, P1 sai de A conferir na S2627', sit('P1') == 'Planejado', linha('P1'))
         # Mudar plantio › abre o cultivo com o plantio mínimo (06/12/2026)

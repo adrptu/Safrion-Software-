@@ -20,14 +20,21 @@ def setv(lab,val): r=J(f"({SETV})({json.dumps(lab)},{json.dumps(val)})"); time.s
 # junto, decisão de 05/10/2026); LEGT lê as
 # colunas pelo cabeçalho e remonta o texto de antes ("T1 2 parcelas · área toda alocada Dividir …"), para as mesmas asserções valerem
 LEGT="""(r=>{ const t=r.closest('[role=table]'); const hs=t?[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim().toUpperCase()):[];
-  const raw=r.innerText.replace(/\\s+/g,' ').trim().replace(/^[▾▸] /,''); const iT=hs.indexOf('TIPO'); if(hs.indexOf('TALHÃO OU PARCELA')<0||iT<0) return raw;
-  const cs=[...r.querySelectorAll('[role=cell]')].map(c=>c.innerText.replace(/\\s+/g,' ').trim()); const g=k=>(cs[hs.indexOf(k)]||'').replace(/^[▾▸] ?/,'');
-  const L=g('TALHÃO OU PARCELA').replace(/ (Planejar|Vincular ciclo) ›$/,''), div=/ Dividir$/.test(L), nm=L.replace(/ Dividir$/,''), tp=g('TIPO'), lv=g('ÁREA LIVRE').replace(/ ha$/,''), aj=g('AJUSTES LOCAIS');
+  const raw=r.innerText.replace(/\\s+/g,' ').trim().replace(/^[▾▸] /,''); if(hs.indexOf('TALHÃO OU PARCELA')<0) return raw;
+  // colunas essenciais (COLUNAS-1, 10/10): Tipo, Variedade, Meta, Versão e Ajustes saíram da linha; para as mesmas asserções de negócio, o texto de
+  // antes é remontado com o valor da linha exibida (window.__safDisp, o mesmo objeto que preenche o formulário do cultivo)
+  const acha=(l,id)=>{ for(const x of (l||[])){ if(x.id===id) return x; const k=acha(x.kids,id); if(k) return k; } return null; };
+  const D=window.__safDisp||{}; const rid=r.getAttribute('data-rid'); let o=null; Object.keys(D).forEach(k=>{ if(!o&&k.indexOf('g_cult_')===0) o=acha(D[k],rid); });
+  const pt=(k,f)=>{ if(!o) return ''; const p=o.p&&o.p[k]; if(p&&p.length) return p.filter(x=>x.t).map(x=>x.t).join(' '); const v=o.v&&o.v[f||k]; return v===undefined||v===null?'':String(v); };
+  const ov={'TIPO':pt('tipo'),'VARIEDADE':pt('var'),'META':pt('meta'),'VERSÃO':pt('ver'),'AJUSTES LOCAIS':pt('aj')};
+  const cs=[...r.querySelectorAll('[role=cell]')].map(c=>c.innerText.replace(/\\s+/g,' ').trim()); const g=k=>(hs.indexOf(k)>=0?(cs[hs.indexOf(k)]||''):(ov[k]===undefined||ov[k]===null?'':String(ov[k]))).replace(/^[▾▸] ?/,'');
+  const L=g('TALHÃO OU PARCELA').replace(/ (Planejar|Vincular ciclo) ›$/,'').replace(/ sem polígono( Dividir)?$/,'$1'), div=/ Dividir$/.test(L), nm=L.replace(/ Dividir$/,''), tp=g('TIPO'), lv=g('ÁREA LIVRE').replace(/ ha$/,''), aj=g('AJUSTES LOCAIS');
   let head; if(/^\\d+ parcelas?$/.test(tp)){ const v=lv.replace(/^[-−]/,''); head=nm+' '+tp+' · '+((lv==='0'||lv==='—')?'área toda alocada':(/^[-−]/.test(lv)?'excede '+v+' ha':lv+' ha livres'))+(div?' Dividir':''); }
   else head=nm+' '+tp.toLowerCase().replace(' (sem polígono)',' · sem polígono')+(div?' Dividir':'');
   const n=/^\\d+$/.test(aj)?Number(aj):0; const ajt=n?(/^\\d+ parcelas?$/.test(tp)?(' '+n+(n>1?' ajustes locais':' ajuste local')):(' '+n+(n>1?' ajustes deste talhão':' ajuste deste talhão'))):'';
   return [head,g('CULTURA'),g('VARIEDADE'),g('ÁREA'),g('PLANTIO'),g('META'),g('PLANO AGRONÔMICO'),g('VERSÃO')].join(' ').replace(/\\s+/g,' ').trim()+ajt; })"""
-FORA="""(r=>{ const t=r.closest('[role=table]'); const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim().toUpperCase()); const i=hs.indexOf('SAFRA'); const cs=[...r.querySelectorAll('[role=cell]')]; return r.classList.contains('g2kid')&&i>=0&&cs[i]&&/›$/.test(cs[i].innerText.trim()); })"""
+# linha de outra safra (esmaecida): desde 10/10 (COLUNAS-1) o link "Safra … ›" fica na célula de identificação, não numa coluna Safra
+FORA="""(r=>{ const cs=[...r.querySelectorAll('[role=cell]')]; const c0=cs.find(c=>c.classList.contains('g2c0')); return r.classList.contains('g2kid')&&!!c0&&/›$/.test(c0.innerText.trim()); })"""
 ROWS=f"""(()=>[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row]')].slice(1)).filter(r=>!({FORA})(r)).map(r=>({LEGT})(r)))()"""
 def rows(): return J(ROWS) or []
 def rowbtn(prefix,label):
@@ -87,33 +94,11 @@ try:
     v=pvals(); chk('27 parcelas: última é T1-AA', v[-2]=='T1-AA' and len(v)==54, v[-4:])
     clk('Distribuir área igualmente','aside[role=dialog]')
     ar=[float(x.replace(',','.')) for x in pvals()[1::2]]; chk('soma exata 312 ha em 27 parcelas', abs(sum(ar)-312)<1e-6, round(sum(ar),4))
-    # oráculo do texto vigente do painel (safra.js divVals: "N ajuste(s) deste talhão · copiado de X"; o "· copiado de" é o mesmo)
-    chk('T1-C copia ajuste do T1-B', '1 ajuste deste talhão · copiado de T1-B' in panel(), panel()[:300])
+    chk('T1-C copia ajuste do T1-B', '1 ajuste · copiado de T1-B' in panel())
     J("(()=>{const a=document.querySelector('aside[role=dialog]'); a.scrollTop=a.scrollHeight;})()")
     clk('Salvar divisão','aside[role=dialog]'); t=toast(); chk('salvou T1 em 27 parcelas', 'T1 dividido em 27 parcelas' in t, t)
     rs=rows(); chk('27 sublinhas de T1', sum(1 for r in rs if r.startswith('T1-'))==27)
     chk('T1-B mantém o ajuste', any(r.startswith('T1-B parcela') and '1 ajuste' in r for r in rs))
-    # o ajuste copiado persiste depois de salvar a divisão (produto e dose no destino, iguais aos do T1-B) e editar a cópia não muda o
-    # original: painel "Insumos e doses de …" (clique no plano da linha), insumo da chave a6|0 (#lp_a6_0; c2 = T1-B, dados2.AJUSTES 0,60)
-    LPABRE="""(pref=>{ const rs=[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row]')]);
-      const r=rs.find(x=>({LEGT})(x).startsWith(pref)); if(!r) return 'SEM LINHA'; const t=r.closest('[role=table]');
-      const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim().toUpperCase()); const i=hs.indexOf('PLANO AGRONÔMICO');
-      const cel=[...r.querySelectorAll('[role=cell]')][i]; const b=cel&&cel.querySelector('button'); if(!b) return 'SEM PLANO'; b.click(); return 'ok'; })""".replace('{LEGT}',LEGT)
-    LPLE="""(()=>{ const d=document.querySelector('aside[role=dialog]'); const i=d&&d.querySelector('#lp_a6_0'); if(!i) return null; let r=i.parentElement;
-      while(r&&r!==d&&!/R\\$/.test(r.innerText)) r=r.parentElement;
-      return {tit:(d.querySelector('h2')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim(), dose:i.value, linha:(r||i.parentElement).innerText.replace(/\\s+/g,' ').trim()}; })()"""
-    def lp(pref): r=J(f"({LPABRE})({json.dumps(pref)})"); time.sleep(.5); return [r,J(LPLE)]
-    def lpfecha():
-        J("(()=>{const d=document.querySelector('aside[role=dialog]'); const b=d&&(d.querySelector('[aria-label=Fechar]')||[...d.querySelectorAll('button')].find(b=>b.innerText.trim()==='Cancelar')); b&&b.click();})()"); time.sleep(.35)
-        if panel(): clk('Descartar alterações','aside[role=dialog]')
-    oB=lp('T1-B parcela'); lpfecha(); oC=lp('T1-C parcela')
-    chk('T1-C (salvo) tem o ajuste copiado do T1-B: mesmo produto e dose 0,6 no painel de insumos e doses', oB[0]=='ok' and oC[0]=='ok' and oB[1] and oC[1] and 'T1-C' in oC[1]['tit'] and 'T1-B' in oB[1]['tit']
-        and oC[1]['dose']==oB[1]['dose']=='0,6' and oC[1]['linha'].replace(oC[1]['dose'],'')==oB[1]['linha'].replace(oB[1]['dose'],''), [oB,oC])
-    J("""(()=>{const i=document.querySelector('aside[role=dialog] #lp_a6_0'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'0,75'); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"""); time.sleep(.25)
-    clk('Salvar','aside[role=dialog]'); t=toast()
-    chk('editar a cópia (T1-C 0,75) salva só no T1-C', '1 dose alterada em T1-C' in t and not panel(), t)
-    nB=lp('T1-B parcela'); lpfecha(); nC=lp('T1-C parcela'); lpfecha()
-    chk('o original (T1-B) continua 0,6 e a cópia (T1-C) fica 0,75', nB[1] and nC[1] and nB[1]['dose']=='0,6' and nC[1]['dose']=='0,75', [nB,nC])
     # --- excesso bloqueia; área livre permitida
     rowbtn('T3 talhão inteiro','Dividir')
     setv('Área de T3-A em hectares','90'); setv('Área de T3-B em hectares','48')

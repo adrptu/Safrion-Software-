@@ -1,0 +1,1556 @@
+{
+ "MA-semordem": {
+  "1440": {
+   "pagina": [
+    1440,
+    1440
+   ],
+   "grades": [
+    {
+     "cols": [
+      "ITEM",
+      "ATIVO · LEITURA",
+      "O QUE",
+      "PRAZO",
+      "PEÇAS",
+      "PRÓXIMO PASSO"
+     ],
+     "linhas": 6,
+     "sw": 1142,
+     "cw": 1142,
+     "rola": 0,
+     "c0preso": true
+    }
+   ]
+  },
+  "390": {
+   "pagina": [
+    390,
+    390
+   ],
+   "grades": [
+    {
+     "cols": [
+      "ITEM",
+      "ATIVO · LEITURA",
+      "O QUE",
+      "PRAZO",
+      "PEÇAS",
+      "PRÓXIMO PASSO"
+     ],
+     "linhas": 6,
+     "sw": 883,
+     "cw": 292,
+     "rola": 591,
+     "c0preso": true
+    }
+   ]
+  },
+  "comportamento": {
+   "ordenacao_botoes": 6,
+   "ordenar": {
+    "coluna": "Ordenar por Ativo · leitura",
+    "mudou_ordem": true,
+    "mesmas_linhas": true
+   },
+   "filtrar": {
+    "coluna": "Prazo",
+    "valor": "Baixa · desde 21/09 1",
+    "linhas_antes": 6,
+    "linhas_depois": 1,
+    "corta": true
+   },
+   "detalhe": {
+    "linha": "a:SM-0150",
+    "abriu": false,
+    "trecho": "",
+    "fechou": true,
+    "filtro_e_ordem_preservados": true,
+    "rolagem_antes": [
+     0,
+     0,
+     0
+    ],
+    "rolagem_depois": [
+     0,
+     0,
+     0
+    ]
+   },
+   "teclado": {
+    "tabs_ate_linha": 15,
+    "linha_focada": "row:a:SM-0150",
+    "seta_baixo": {
+     "antes": "row:a:SM-0150",
+     "depois": "row:a:SM-0150"
+    },
+    "enter_abre": false,
+    "esc_fecha": true,
+    "foco_depois_esc": "row:a:SM-0150",
+    "foco_volta_linha": true
+   }
+  }
+ },
+ "MA-ordens": {
+  "1440": {
+   "pagina": [
+    1440,
+    1440
+   ],
+   "grades": [
+    {
+     "cols": [
+      "ORDEM · ATIVO",
+      "SERVIÇO · TIPO",
+      "JANELA",
+      "FASE",
+      "PENDÊNCIA",
+      "EXECUTANTE",
+      "TEMPO",
+      "CUSTO"
+     ],
+     "linhas": 16,
+     "sw": 1142,
+     "cw": 1142,
+     "rola": 0,
+     "c0preso": true
+    }
+   ]
+  },
+  "390": {
+   "pagina": [
+    390,
+    390
+   ],
+   "grades": [
+    {
+     "cols": [
+      "ORDEM · ATIVO",
+      "SERVIÇO · TIPO",
+      "JANELA",
+      "FASE",
+      "PENDÊNCIA",
+      "EXECUTANTE",
+      "TEMPO",
+      "CUSTO"
+     ],
+     "linhas": 16,
+     "sw": 965,
+     "cw": 292,
+     "rola": 673,
+     "c0preso": true
+    }
+   ]
+  },
+  "comportamento": {
+   "ordenacao_botoes": 8,
+   "ordenar": {
+    "coluna": "Ordenar por Serviço · tipo",
+    "mudou_ordem": true,
+    "mesmas_linhas": true
+   },
+   "filtrar": {
+    "coluna": "Fase",
+    "valor": "A liberar 1",
+    "linhas_antes": 16,
+    "linhas_depois": 1,
+    "corta": true
+   },
+   "detalhe": {
+    "linha": "OM-0234",
+    "abriu": false,
+    "trecho": "",
+    "fechou": true,
+    "filtro_e_ordem_preservados": true,
+    "rolagem_antes": [
+     0,
+     0,
+     0
+    ],
+    "rolagem_depois": [
+     0,
+     0,
+     0
+    ]
+   },
+   "teclado": {
+    "tabs_ate_linha": 19,
+    "linha_focada": "row:OM-0234",
+    "seta_baixo": {
+     "antes": "row:OM-0234",
+     "depois": "row:OM-0234"
+    },
+    "enter_abre": false,
+    "esc_fecha": true,
+    "foco_depois_esc": "row:OM-0234",
+    "foco_volta_linha": true
+   }
+  }
+ },
+ "MA-ativos": {
+  "1440": {
+   "pagina": [
+    1440,
+    1440
+   ],
+   "grades": [
+    {
+     "cols": [
+      "ATIVO · LOCAL",
+      "CONDIÇÃO",
+      "LEITURA",
+      "PRÓXIMA MANUTENÇÃO",
+      "EM ABERTO",
+      "CUSTO NO PERÍODO",
+      "CONSUMO"
+     ],
+     "linhas": 16,
+     "sw": 1142,
+     "cw": 1142,
+     "rola": 0,
+     "c0preso": true
+    }
+   ]
+  },
+  "390": {
+   "pagina": [
+    390,
+    390
+   ],
+   "grades": [
+    {
+     "cols": [
+      "ATIVO · LOCAL",
+      "CONDIÇÃO",
+      "LEITURA",
+      "PRÓXIMA MANUTENÇÃO",
+      "EM ABERTO",
+      "CUSTO NO PERÍODO",
+      "CONSUMO"
+     ],
+     "linhas": 16,
+     "sw": 891,
+     "cw": 292,
+     "rola": 599,
+     "c0preso": true
+    }
+   ]
+  },
+  "comportamento": {
+   "ordenacao_botoes": 7,
+   "ordenar": {
+    "coluna": "Ordenar por Condição",
+    "mudou_ordem": true,
+    "mesmas_linhas": true
+   },
+   "filtrar": {
+    "coluna": "Condição",
+    "valor": "Apto 14",
+    "linhas_antes": 16,
+    "linhas_depois": 14,
+    "corta": true
+   },
+   "detalhe": {
+    "linha": "a03",
+    "abriu": false,
+    "trecho": "",
+    "fechou": true,
+    "filtro_e_ordem_preservados": false,
+    "rolagem_antes": [
+     0,
+     0,
+     0
+    ],
+    "rolagem_depois": [
+     0,
+     0,
+     0
+    ]
+   },
+   "teclado": {
+    "tabs_ate_linha": 8,
+    "linha_focada": "row:PM-02|a03|s1",
+    "seta_baixo": {
+     "antes": "row:PM-02|a03|s1",
+     "depois": "row:PM-02|a03|s1"
+    },
+    "enter_abre": false,
+    "esc_fecha": true,
+    "foco_depois_esc": "row:PM-02|a03|s1",
+    "foco_volta_linha": true
+   }
+  }
+ },
+ "MA-abastecimentos": {
+  "1440": {
+   "pagina": [
+    1440,
+    1440
+   ],
+   "grades": [
+    {
+     "cols": [
+      "LANÇAMENTO · OPERADOR",
+      "ATIVO",
+      "TANQUE/LOTE",
+      "VOLUME",
+      "DATA · LEITURA",
+      "MÉTODO",
+      "CONSUMO",
+      "QUALIDADE"
+     ],
+     "linhas": 8,
+     "sw": 1142,
+     "cw": 1142,
+     "rola": 0,
+     "c0preso": true
+    }
+   ]
+  },
+  "390": {
+   "pagina": [
+    390,
+    390
+   ],
+   "grades": [
+    {
+     "cols": [
+      "LANÇAMENTO · OPERADOR",
+      "ATIVO",
+      "TANQUE/LOTE",
+      "VOLUME",
+      "DATA · LEITURA",
+      "MÉTODO",
+      "CONSUMO",
+      "QUALIDADE"
+     ],
+     "linhas": 8,
+     "sw": 934,
+     "cw": 292,
+     "rola": 642,
+     "c0preso": true
+    }
+   ]
+  },
+  "comportamento": {
+   "ordenacao_botoes": 8,
+   "ordenar": {
+    "coluna": "Ordenar por Ativo",
+    "mudou_ordem": true,
+    "mesmas_linhas": true
+   },
+   "filtrar": {
+    "coluna": "Qualidade",
+    "valor": "Confirmada 6",
+    "linhas_antes": 8,
+    "linhas_depois": 6,
+    "corta": true
+   },
+   "detalhe": {
+    "linha": "AB-1039",
+    "abriu": false,
+    "trecho": "",
+    "fechou": true,
+    "filtro_e_ordem_preservados": true,
+    "rolagem_antes": [
+     0,
+     0,
+     0
+    ],
+    "rolagem_depois": [
+     0,
+     0,
+     0
+    ]
+   },
+   "teclado": {
+    "tabs_ate_linha": 23,
+    "linha_focada": "row:AB-1039",
+    "seta_baixo": {
+     "antes": "row:AB-1039",
+     "depois": "row:AB-1039"
+    },
+    "enter_abre": false,
+    "esc_fecha": true,
+    "foco_depois_esc": "row:AB-1039",
+    "foco_volta_linha": true
+   }
+  }
+ },
+ "MA-planos": {
+  "1440": {
+   "pagina": [
+    1440,
+    1440
+   ],
+   "grades": [
+    {
+     "cols": [
+      "PLANO",
+      "ESTADO",
+      "APLICA-SE A",
+      "SERVIÇOS",
+      "ATIVOS",
+      "SITUAÇÃO"
+     ],
+     "linhas": 10,
+     "sw": 1142,
+     "cw": 1142,
+     "rola": 0,
+     "c0preso": true
+    }
+   ]
+  },
+  "390": {
+   "pagina": [
+    390,
+    390
+   ],
+   "grades": [
+    {
+     "cols": [
+      "PLANO",
+      "ESTADO",
+      "APLICA-SE A",
+      "SERVIÇOS",
+      "ATIVOS",
+      "SITUAÇÃO"
+     ],
+     "linhas": 10,
+     "sw": 871,
+     "cw": 292,
+     "rola": 579,
+     "c0preso": true
+    }
+   ]
+  },
+  "comportamento": {
+   "ordenacao_botoes": 6,
+   "ordenar": {
+    "coluna": "Ordenar por Estado",
+    "mudou_ordem": true,
+    "mesmas_linhas": true
+   },
+   "filtrar": {
+    "coluna": "Estado",
+    "valor": "Publicado v1 4",
+    "linhas_antes": 10,
+    "linhas_depois": 4,
+    "corta": true
+   },
+   "detalhe": {
+    "linha": "PM-05",
+    "abriu": false,
+    "trecho": "",
+    "fechou": true,
+    "filtro_e_ordem_preservados": false,
+    "rolagem_antes": [
+     0,
+     0,
+     0
+    ],
+    "rolagem_depois": [
+     0,
+     0,
+     0
+    ]
+   },
+   "teclado": {
+    "tabs_ate_linha": 10,
+    "linha_focada": "row:PM-05|a06",
+    "seta_baixo": {
+     "antes": "row:PM-05|a06",
+     "depois": "row:PM-05|a06"
+    },
+    "enter_abre": false,
+    "esc_fecha": true,
+    "foco_depois_esc": "BODY",
+    "foco_volta_linha": false
+   }
+  }
+ },
+ "MA-ativo-d_om": {
+  "1440": {
+   "pagina": [
+    1440,
+    1440
+   ],
+   "grades": [
+    {
+     "cols": [
+      "ORDEM · ATIVO",
+      "SERVIÇO · TIPO",
+      "JANELA",
+      "FASE",
+      "CUSTO"
+     ],
+     "linhas": 2,
+     "sw": 1116,
+     "cw": 1116,
+     "rola": 0,
+     "c0preso": true
+    }
+   ]
+  },
+  "390": {
+   "pagina": [
+    390,
+    390
+   ],
+   "grades": [
+    {
+     "cols": [
+      "ORDEM · ATIVO",
+      "SERVIÇO · TIPO",
+      "JANELA",
+      "FASE",
+      "CUSTO"
+     ],
+     "linhas": 2,
+     "sw": 573,
+     "cw": 266,
+     "rola": 307,
+     "c0preso": true
+    }
+   ]
+  },
+  "comportamento": {
+   "ordenacao_botoes": 5,
+   "ordenar": {
+    "coluna": "Ordenar por Serviço · tipo",
+    "mudou_ordem": false,
+    "mesmas_linhas": true
+   },
+   "detalhe": {
+    "linha": "OM-0233",
+    "abriu": false,
+    "trecho": "",
+    "fechou": true,
+    "filtro_e_ordem_preservados": true,
+    "rolagem_antes": [
+     0,
+     0,
+     0
+    ],
+    "rolagem_depois": [
+     0,
+     0,
+     0
+    ]
+   },
+   "teclado": {
+    "tabs_ate_linha": 11,
+    "linha_focada": "row:OM-0233",
+    "seta_baixo": {
+     "antes": "row:OM-0233",
+     "depois": "row:OM-0233"
+    },
+    "enter_abre": false,
+    "esc_fecha": true,
+    "foco_depois_esc": "row:OM-0233",
+    "foco_volta_linha": true
+   }
+  }
+ },
+ "CA-01det": {
+  "1440": {
+   "pagina": [
+    1440,
+    1440
+   ],
+   "grades": [
+    {
+     "cols": [
+      "DATA",
+      "TURNO",
+      "ÁREA DO DIA",
+      "ACUMULADO",
+      "CONFERÊNCIA",
+      "ORIGEM · SINCRONIZAÇÃO"
+     ],
+     "linhas": 7,
+     "sw": 1116,
+     "cw": 1116,
+     "rola": 0,
+     "c0preso": true
+    },
+    {
+     "cols": [
+      "ITEM · LOTE",
+      "SOLICITADO",
+      "ENTREGUE",
+      "CONSUMIDO",
+      "EM CUSTÓDIA",
+      "A ENTREGAR",
+      "CUSTÓDIA DE"
+     ],
+     "linhas": 1,
+     "sw": 1116,
+     "cw": 1116,
+     "rola": 0,
+     "c0preso": true
+    }
+   ]
+  },
+  "390": {
+   "pagina": [
+    390,
+    390
+   ],
+   "grades": [
+    {
+     "cols": [
+      "DATA",
+      "TURNO",
+      "ÁREA DO DIA",
+      "ACUMULADO",
+      "CONFERÊNCIA",
+      "ORIGEM · SINCRONIZAÇÃO"
+     ],
+     "linhas": 7,
+     "sw": 911,
+     "cw": 266,
+     "rola": 645,
+     "c0preso": true
+    },
+    {
+     "cols": [
+      "ITEM · LOTE",
+      "SOLICITADO",
+      "ENTREGUE",
+      "CONSUMIDO",
+      "EM CUSTÓDIA",
+      "A ENTREGAR",
+      "CUSTÓDIA DE"
+     ],
+     "linhas": 1,
+     "sw": 787,
+     "cw": 266,
+     "rola": 521,
+     "c0preso": true
+    }
+   ]
+  },
+  "comportamento": {
+   "ordenacao_botoes": 6,
+   "ordenar": {
+    "coluna": "Ordenar por Turno",
+    "mudou_ordem": false,
+    "mesmas_linhas": true
+   },
+   "filtrar": {
+    "coluna": "Conferência",
+    "valor": "Conferido 3",
+    "linhas_antes": 7,
+    "linhas_depois": 3,
+    "corta": true
+   },
+   "detalhe": {
+    "linha": "t1",
+    "abriu": true,
+    "trecho": "Turno · 20/09 × Corrija o apontamento com motivo (o original fica na trilha) ou redistribua os turnos previstos dentro do saldo. Turno Tipo de registro Conferência Área do dia ha Só área real; nunca arredonde nem complete por inferência. Mo",
+    "fechou": true,
+    "filtro_e_ordem_preservados": true,
+    "rolagem_antes": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "rolagem_depois": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "teclado": {
+    "tabs_ate_linha": 12,
+    "linha_focada": "row:t1",
+    "seta_baixo": {
+     "antes": "row:t1",
+     "depois": "row:t1"
+    },
+    "enter_abre": true,
+    "esc_fecha": false,
+    "foco_depois_esc": "row:t1",
+    "foco_volta_linha": true
+   }
+  }
+ },
+ "CA-01x": {
+  "1440": {
+   "pagina": [
+    1440,
+    1440
+   ],
+   "grades": [
+    {
+     "cols": [
+      "PRODUTO",
+      "DOSE DA V2",
+      "QUANTIDADE PARA 100 HA",
+      "SALDO DE 70 HA NA V3",
+      "FONTE"
+     ],
+     "linhas": 3,
+     "sw": 1116,
+     "cw": 1116,
+     "rola": 0,
+     "c0preso": true
+    },
+    {
+     "cols": [
+      "DATA",
+      "TURNO",
+      "ÁREA DO DIA",
+      "ACUMULADO",
+      "CONFERÊNCIA",
+      "ORIGEM · SINCRONIZAÇÃO"
+     ],
+     "linhas": 2,
+     "sw": 1116,
+     "cw": 1116,
+     "rola": 0,
+     "c0preso": true
+    },
+    {
+     "cols": [
+      "REQUISIÇÃO",
+      "ITEM",
+      "SOLICITADO",
+      "ENTREGUE",
+      "CONSUMIDO",
+      "EM CUSTÓDIA",
+      "CUSTO APONTADO"
+     ],
+     "linhas": 1,
+     "sw": 1116,
+     "cw": 1116,
+     "rola": 0,
+     "c0preso": true
+    }
+   ]
+  },
+  "390": {
+   "pagina": [
+    390,
+    390
+   ],
+   "grades": [
+    {
+     "cols": [
+      "PRODUTO",
+      "DOSE DA V2",
+      "QUANTIDADE PARA 100 HA",
+      "SALDO DE 70 HA NA V3",
+      "FONTE"
+     ],
+     "linhas": 3,
+     "sw": 675,
+     "cw": 266,
+     "rola": 409,
+     "c0preso": true
+    },
+    {
+     "cols": [
+      "DATA",
+      "TURNO",
+      "ÁREA DO DIA",
+      "ACUMULADO",
+      "CONFERÊNCIA",
+      "ORIGEM · SINCRONIZAÇÃO"
+     ],
+     "linhas": 2,
+     "sw": 870,
+     "cw": 266,
+     "rola": 604,
+     "c0preso": true
+    },
+    {
+     "cols": [
+      "REQUISIÇÃO",
+      "ITEM",
+      "SOLICITADO",
+      "ENTREGUE",
+      "CONSUMIDO",
+      "EM CUSTÓDIA",
+      "CUSTO APONTADO"
+     ],
+     "linhas": 1,
+     "sw": 873,
+     "cw": 266,
+     "rola": 607,
+     "c0preso": true
+    }
+   ]
+  },
+  "comportamento": {
+   "ordenacao_botoes": 5,
+   "ordenar": {
+    "coluna": "Ordenar por Dose da v2",
+    "mudou_ordem": true,
+    "mesmas_linhas": true
+   },
+   "detalhe": {
+    "linha": "i0",
+    "abriu": true,
+    "trecho": "Instrução · Semente de soja 58 W (resistente) × Valor calculado — consulte a origem abaixo. Para mudar, altere o registro de origem. Produto Dose da v2 Saldo na v3 ORIGEM Recomendação REC-014 v2 · 52 kg/ha › 100 ha da 1ª onda da necessidade",
+    "fechou": true,
+    "filtro_e_ordem_preservados": true,
+    "rolagem_antes": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "rolagem_depois": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "teclado": {
+    "tabs_ate_linha": 10,
+    "linha_focada": "row:i0",
+    "seta_baixo": {
+     "antes": "row:i0",
+     "depois": "row:i0"
+    },
+    "enter_abre": true,
+    "esc_fecha": false,
+    "foco_depois_esc": "row:i0",
+    "foco_volta_linha": true
+   }
+  }
+ },
+ "CA-02": {
+  "1440": {
+   "pagina": [
+    1440,
+    1440
+   ],
+   "grades": [
+    {
+     "cols": [
+      "APONTAMENTO",
+      "EQUIPE · CONJUNTO",
+      "REALIZADO · ACUMULADO",
+      "HORAS",
+      "CONSUMOS E SOBRAS",
+      "ORIGEM · SINCRONIZAÇÃO",
+      "CONFERÊNCIA · AÇÃO"
+     ],
+     "linhas": 4,
+     "sw": 1116,
+     "cw": 1116,
+     "rola": 0,
+     "c0preso": true
+    },
+    {
+     "cols": [
+      "QUANDO",
+      "EVENTO",
+      "EFEITO",
+      "QUEM"
+     ],
+     "linhas": 8,
+     "sw": 1116,
+     "cw": 1116,
+     "rola": 0,
+     "c0preso": true
+    }
+   ]
+  },
+  "390": {
+   "pagina": [
+    390,
+    390
+   ],
+   "grades": [
+    {
+     "cols": [
+      "APONTAMENTO",
+      "EQUIPE · CONJUNTO",
+      "REALIZADO · ACUMULADO",
+      "HORAS",
+      "CONSUMOS E SOBRAS",
+      "ORIGEM · SINCRONIZAÇÃO",
+      "CONFERÊNCIA · AÇÃO"
+     ],
+     "linhas": 4,
+     "sw": 924,
+     "cw": 266,
+     "rola": 658,
+     "c0preso": true
+    },
+    {
+     "cols": [
+      "QUANDO",
+      "EVENTO",
+      "EFEITO",
+      "QUEM"
+     ],
+     "linhas": 8,
+     "sw": 1020,
+     "cw": 266,
+     "rola": 754,
+     "c0preso": true
+    }
+   ]
+  },
+  "comportamento": {
+   "ordenacao_botoes": 7,
+   "ordenar": {
+    "coluna": "Ordenar por Equipe · conjunto",
+    "mudou_ordem": true,
+    "mesmas_linhas": true
+   },
+   "filtrar": {
+    "coluna": "Conferência",
+    "valor": "",
+    "linhas_antes": 4,
+    "linhas_depois": 4,
+    "corta": true
+   },
+   "detalhe": {
+    "linha": "f2",
+    "abriu": true,
+    "trecho": "Corrigir apontamento · OS-0420 · v2 Dia 2 · 22/09 · T4 × Corrija realizado e horas informando o motivo. A correção gera nova versão; o valor original permanece na trilha e a etapa da ordem não muda. Apontamento Conferência Realizado do dia ",
+    "fechou": true,
+    "filtro_e_ordem_preservados": true,
+    "rolagem_antes": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "rolagem_depois": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "teclado": {
+    "tabs_ate_linha": 15,
+    "linha_focada": "row:f2",
+    "seta_baixo": {
+     "antes": "row:f2",
+     "depois": "row:f2"
+    },
+    "enter_abre": true,
+    "esc_fecha": false,
+    "foco_depois_esc": "row:f2",
+    "foco_volta_linha": true
+   }
+  }
+ },
+ "CA-03": {
+  "1440": {
+   "pagina": [
+    1440,
+    1440
+   ],
+   "grades": [
+    {
+     "cols": [
+      "OCORRÊNCIA",
+      "LOCAL · INSTANTE",
+      "RELATO",
+      "GRAVIDADE",
+      "EVIDÊNCIA",
+      "DESTINO · RESPONSÁVEL",
+      "PRÓXIMA AÇÃO"
+     ],
+     "linhas": 4,
+     "sw": 1116,
+     "cw": 1116,
+     "rola": 0,
+     "c0preso": true
+    }
+   ]
+  },
+  "390": {
+   "pagina": [
+    390,
+    390
+   ],
+   "grades": [
+    {
+     "cols": [
+      "OCORRÊNCIA",
+      "LOCAL · INSTANTE",
+      "RELATO",
+      "GRAVIDADE",
+      "EVIDÊNCIA",
+      "DESTINO · RESPONSÁVEL",
+      "PRÓXIMA AÇÃO"
+     ],
+     "linhas": 4,
+     "sw": 937,
+     "cw": 266,
+     "rola": 671,
+     "c0preso": true
+    }
+   ]
+  },
+  "comportamento": {
+   "ordenacao_botoes": 7,
+   "ordenar": {
+    "coluna": "Ordenar por Local · instante",
+    "mudou_ordem": true,
+    "mesmas_linhas": true
+   },
+   "filtrar": {
+    "coluna": "Gravidade",
+    "valor": "Atenção 1",
+    "linhas_antes": 4,
+    "linhas_depois": 1,
+    "corta": true
+   },
+   "detalhe": {
+    "linha": "OC-115",
+    "abriu": true,
+    "trecho": "Ocorrência · OC-115 Praga acima do NC × Registre ou ajuste o relato, a gravidade e o destino. O tratamento acontece no módulo de destino, nunca em cópia paralela. Tipo Quebra de máquina Praga acima do NC Clima interrompeu Vazamento no pivô ",
+    "fechou": true,
+    "filtro_e_ordem_preservados": true,
+    "rolagem_antes": [
+     0,
+     0,
+     0
+    ],
+    "rolagem_depois": [
+     0,
+     0,
+     0
+    ]
+   },
+   "teclado": {
+    "tabs_ate_linha": 18,
+    "linha_focada": "row:OC-115",
+    "seta_baixo": {
+     "antes": "row:OC-115",
+     "depois": "row:OC-115"
+    },
+    "enter_abre": true,
+    "esc_fecha": false,
+    "foco_depois_esc": "row:OC-115",
+    "foco_volta_linha": true
+   }
+  }
+ },
+ "ON-01": {
+  "1440": {
+   "pagina": [
+    1440,
+    1440
+   ],
+   "grades": [
+    {
+     "cols": [
+      "PASSO",
+      "ESTADO",
+      "DADO PEDIDO NO MOMENTO DO USO",
+      "PRÓXIMA AÇÃO"
+     ],
+     "linhas": 6,
+     "sw": 1104,
+     "cw": 1104,
+     "rola": 0,
+     "c0preso": true
+    },
+    {
+     "cols": [
+      "RECURSO",
+      "HABILITAÇÃO",
+      "FRANQUIA",
+      "UNIDADE",
+      "AO ESGOTAR OU EXPIRAR"
+     ],
+     "linhas": 6,
+     "sw": 1104,
+     "cw": 1104,
+     "rola": 0,
+     "c0preso": true
+    }
+   ]
+  },
+  "390": {
+   "pagina": [
+    390,
+    390
+   ],
+   "grades": [
+    {
+     "cols": [
+      "PASSO",
+      "ESTADO",
+      "DADO PEDIDO NO MOMENTO DO USO",
+      "PRÓXIMA AÇÃO"
+     ],
+     "linhas": 6,
+     "sw": 522,
+     "cw": 254,
+     "rola": 268,
+     "c0preso": true
+    },
+    {
+     "cols": [
+      "RECURSO",
+      "HABILITAÇÃO",
+      "FRANQUIA",
+      "UNIDADE",
+      "AO ESGOTAR OU EXPIRAR"
+     ],
+     "linhas": 6,
+     "sw": 613,
+     "cw": 254,
+     "rola": 359,
+     "c0preso": true
+    }
+   ]
+  },
+  "comportamento": {
+   "ordenacao_botoes": 4,
+   "ordenar": {
+    "coluna": "Ordenar por Estado",
+    "mudou_ordem": true,
+    "mesmas_linhas": true
+   },
+   "filtrar": {
+    "coluna": "Estado",
+    "valor": "3 objetos com erro 1",
+    "linhas_antes": 6,
+    "linhas_depois": 1,
+    "corta": true
+   },
+   "detalhe": {
+    "linha": "p5",
+    "abriu": true,
+    "trecho": "Passo · 5 · Importação × Consulta Passo Estado Dado pedido Fechar",
+    "fechou": true,
+    "filtro_e_ordem_preservados": true,
+    "rolagem_antes": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "rolagem_depois": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "teclado": {
+    "tabs_ate_linha": 8,
+    "linha_focada": "row:p5",
+    "seta_baixo": {
+     "antes": "row:p5",
+     "depois": "row:p5"
+    },
+    "enter_abre": true,
+    "esc_fecha": false,
+    "foco_depois_esc": "row:p5",
+    "foco_volta_linha": true
+   }
+  }
+ },
+ "ON-01det": {
+  "1440": {
+   "pagina": [
+    1440,
+    1440
+   ],
+   "grades": [
+    {
+     "cols": [
+      "OBJETO",
+      "LINHAS",
+      "MAPEAMENTO",
+      "SISTEMA DE COORDENADAS",
+      "ERRO",
+      "ESTADO"
+     ],
+     "linhas": 4,
+     "sw": 1104,
+     "cw": 1104,
+     "rola": 0,
+     "c0preso": true
+    }
+   ]
+  },
+  "390": {
+   "pagina": [
+    390,
+    390
+   ],
+   "grades": [
+    {
+     "cols": [
+      "OBJETO",
+      "LINHAS",
+      "MAPEAMENTO",
+      "SISTEMA DE COORDENADAS",
+      "ERRO",
+      "ESTADO"
+     ],
+     "linhas": 4,
+     "sw": 747,
+     "cw": 254,
+     "rola": 493,
+     "c0preso": true
+    }
+   ]
+  },
+  "comportamento": {
+   "ordenacao_botoes": 6,
+   "ordenar": {
+    "coluna": "Ordenar por Linhas",
+    "mudou_ordem": true,
+    "mesmas_linhas": true
+   },
+   "filtrar": {
+    "coluna": "Estado",
+    "valor": "Prévia 2",
+    "linhas_antes": 4,
+    "linhas_depois": 2,
+    "corta": true
+   },
+   "detalhe": {
+    "linha": "dup",
+    "abriu": true,
+    "trecho": "Objeto da importação · Duplicidades × Corrija o erro deste objeto; a prévia é recalculada e nada é gravado até você validar. Objeto Mapeamento de colunas A IA pode sugerir; nunca completa dados. Decisão sobre T1 e T2 A decidir Mesclar com o",
+    "fechou": true,
+    "filtro_e_ordem_preservados": true,
+    "rolagem_antes": [
+     0,
+     0,
+     0
+    ],
+    "rolagem_depois": [
+     0,
+     0,
+     0
+    ]
+   },
+   "teclado": {
+    "tabs_ate_linha": 12,
+    "linha_focada": "row:dup",
+    "seta_baixo": {
+     "antes": "row:dup",
+     "depois": "row:dup"
+    },
+    "enter_abre": true,
+    "esc_fecha": false,
+    "foco_depois_esc": "row:dup",
+    "foco_volta_linha": true
+   }
+  }
+ },
+ "SAF-1": {
+  "1440": {
+   "pagina": [
+    1440,
+    1440
+   ],
+   "grades": [
+    {
+     "cols": [
+      "SAFRA",
+      "FAZENDA",
+      "CULTIVOS",
+      "ÁREA",
+      "ESTADO",
+      "PRÓXIMO PASSO"
+     ],
+     "linhas": 4,
+     "sw": 1118,
+     "cw": 1116,
+     "rola": 2,
+     "c0preso": true
+    }
+   ]
+  },
+  "390": {
+   "pagina": [
+    390,
+    390
+   ],
+   "grades": [
+    {
+     "cols": [
+      "SAFRA",
+      "FAZENDA",
+      "CULTIVOS",
+      "ÁREA",
+      "ESTADO",
+      "PRÓXIMO PASSO"
+     ],
+     "linhas": 4,
+     "sw": 664,
+     "cw": 266,
+     "rola": 398,
+     "c0preso": true
+    }
+   ]
+  },
+  "comportamento": {
+   "ordenacao_botoes": 6,
+   "ordenar": {
+    "coluna": "Ordenar por Fazenda",
+    "mudou_ordem": true,
+    "mesmas_linhas": true
+   },
+   "filtrar": {
+    "coluna": "Estado",
+    "valor": "Em planejamento 2",
+    "linhas_antes": 4,
+    "linhas_depois": 2,
+    "corta": true
+   },
+   "detalhe": {
+    "linha": "LG2627",
+    "abriu": false,
+    "trecho": "",
+    "fechou": true,
+    "filtro_e_ordem_preservados": false,
+    "rolagem_antes": [
+     0,
+     0,
+     0
+    ],
+    "rolagem_depois": [
+     0,
+     0,
+     0
+    ]
+   },
+   "teclado": {
+    "tabs_ate_linha": 42,
+    "linha_focada": "row:G0",
+    "seta_baixo": {
+     "antes": "row:G0",
+     "depois": "row:G0"
+    },
+    "enter_abre": false,
+    "esc_fecha": true,
+    "foco_depois_esc": "row:G0",
+    "foco_volta_linha": true
+   }
+  }
+ },
+ "SAF-2": {
+  "1440": {
+   "pagina": [
+    1440,
+    1440
+   ],
+   "grades": [
+    {
+     "cols": [
+      "TALHÃO OU PARCELA",
+      "SITUAÇÃO",
+      "ÁREA LIVRE",
+      "LIVRE A PARTIR DE",
+      "ÁREA",
+      "CULTURA",
+      "OCUPA ATÉ",
+      "FIM POR",
+      "SAFRA",
+      "VARIEDADE",
+      "PLANO AGRONÔMICO",
+      "VERSÃO",
+      "PLANTIO",
+      "META",
+      "AJUSTES LOCAIS",
+      "TIPO"
+     ],
+     "linhas": 18,
+     "sw": 1900,
+     "cw": 1116,
+     "rola": 784,
+     "c0preso": true
+    }
+   ]
+  },
+  "390": {
+   "pagina": [
+    390,
+    390
+   ],
+   "grades": [
+    {
+     "cols": [
+      "TALHÃO OU PARCELA",
+      "SITUAÇÃO",
+      "ÁREA LIVRE",
+      "LIVRE A PARTIR DE",
+      "ÁREA",
+      "CULTURA",
+      "OCUPA ATÉ",
+      "FIM POR",
+      "SAFRA",
+      "VARIEDADE",
+      "PLANO AGRONÔMICO",
+      "VERSÃO",
+      "PLANTIO",
+      "META",
+      "AJUSTES LOCAIS",
+      "TIPO"
+     ],
+     "linhas": 8,
+     "sw": 1761,
+     "cw": 266,
+     "rola": 1495,
+     "c0preso": true
+    }
+   ]
+  },
+  "comportamento": {
+   "ordenacao_botoes": 16,
+   "ordenar": {
+    "coluna": "Ordenar por Situação",
+    "mudou_ordem": true,
+    "mesmas_linhas": true
+   },
+   "filtrar": {
+    "coluna": "Cultura",
+    "valor": "Café 1",
+    "linhas_antes": 18,
+    "linhas_depois": 1,
+    "corta": true
+   },
+   "detalhe": {
+    "linha": "c9",
+    "abriu": true,
+    "trecho": "Cultivo · C1 × Santa Rita · Safra 2026/27 · C1 38 ha. Altere o cultivo e o plano agronômico e salve. Cultura Soja Milho Feijão Café Mamão Formosa Variedade Plano agronômico Sem plano Café arábica produção v2 · 6 atividades Planos publicados",
+    "fechou": true,
+    "filtro_e_ordem_preservados": true,
+    "rolagem_antes": [
+     0,
+     0,
+     0
+    ],
+    "rolagem_depois": [
+     0,
+     0,
+     0
+    ]
+   },
+   "teclado": {
+    "tabs_ate_linha": 40,
+    "linha_focada": "row:c9",
+    "seta_baixo": {
+     "antes": "row:c9",
+     "depois": "row:c9"
+    },
+    "enter_abre": true,
+    "esc_fecha": false,
+    "foco_depois_esc": "row:c9",
+    "foco_volta_linha": true
+   }
+  }
+ },
+ "SAF-3-g_op": {
+  "1440": {
+   "pagina": [
+    1440,
+    1440
+   ],
+   "grades": [
+    {
+     "cols": [
+      "OPERAÇÃO › ATIVIDADE › TALHÃO",
+      "SITUAÇÃO",
+      "DATA",
+      "CONJUNTO",
+      "RENDIMENTO",
+      "ÁREA TRABALHADA",
+      "HORAS-CONJUNTO",
+      "CUSTO R$/HA"
+     ],
+     "linhas": 8,
+     "sw": 1116,
+     "cw": 1116,
+     "rola": 0,
+     "c0preso": true
+    }
+   ]
+  },
+  "390": {
+   "pagina": [
+    390,
+    390
+   ],
+   "grades": [
+    {
+     "cols": [
+      "OPERAÇÃO › ATIVIDADE › TALHÃO",
+      "SITUAÇÃO",
+      "DATA",
+      "CONJUNTO",
+      "RENDIMENTO",
+      "ÁREA TRABALHADA",
+      "HORAS-CONJUNTO",
+      "CUSTO R$/HA"
+     ],
+     "linhas": 8,
+     "sw": 993,
+     "cw": 266,
+     "rola": 727,
+     "c0preso": true
+    }
+   ]
+  },
+  "comportamento": {
+   "ordenacao_botoes": 8,
+   "ordenar": {
+    "coluna": "Ordenar por Situação",
+    "mudou_ordem": false,
+    "mesmas_linhas": true
+   },
+   "filtrar": {
+    "coluna": "Situação",
+    "valor": "(vazio) 6",
+    "linhas_antes": 8,
+    "linhas_depois": 11,
+    "corta": false
+   },
+   "detalhe": {
+    "linha": "op:Plantio",
+    "abriu": false,
+    "trecho": "",
+    "fechou": true,
+    "filtro_e_ordem_preservados": true,
+    "rolagem_antes": [
+     0,
+     0,
+     0
+    ],
+    "rolagem_depois": [
+     0,
+     0,
+     0
+    ]
+   },
+   "teclado": {
+    "tabs_ate_linha": 20,
+    "linha_focada": "row:op:Plantio",
+    "seta_baixo": {
+     "antes": "row:op:Plantio",
+     "depois": "row:op:Plantio"
+    },
+    "enter_abre": false,
+    "esc_fecha": true,
+    "foco_depois_esc": "row:op:Plantio",
+    "foco_volta_linha": true
+   }
+  }
+ }
+}

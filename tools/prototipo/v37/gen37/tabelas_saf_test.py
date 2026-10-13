@@ -16,8 +16,15 @@ def chk(n, cond, info=''):
 
 p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js
 URL = f'http://127.0.0.1:{p}/SAF.dc.html#saf=S2627&passo=operacoes'
-# etapa única (§3.4): 8 colunas; a unidade fixa vai na célula ("21,60 ha/h", "2.520 ha-op", "116,7 h", "R$ 14,49/ha-op")
-COLS = ['Operação › atividade › talhão', 'Situação', 'Data', 'Conjunto', 'Rendimento', 'Área trabalhada', 'Horas-conjunto', 'Custo R$/ha']
+# etapa única (§3.4), com as colunas essenciais (COLUNAS-1, 10/10): 6 colunas; Rendimento e Área trabalhada (base das horas) foram ao formulário
+# Rendimento; a unidade fixa vai na célula ("116,7 h", "R$ 14,49/ha-op") e no formulário ("21,60" ha/h, "2.520 ha-op")
+COLS = ['Operação › atividade › talhão', 'Situação', 'Data', 'Conjunto', 'Horas-conjunto', 'Custo R$/ha']
+NCOL = len(COLS)
+def form():   # campos do formulário aberto (id fx_<grade>_<campo> → valor)
+    return J("Object.fromEntries([...document.querySelectorAll('aside[role=dialog] input,aside[role=dialog] select')].filter(x=>x.offsetParent&&/^fx_/.test(x.id)).map(x=>[x.id.replace(/^fx_g_[a-z]+_[A-Za-z0-9]+_/,''),x.value]))") or {}
+def fecha(): J("(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); if(!a) return; const b=[...a.querySelectorAll('button')].find(b=>b.getAttribute('aria-label')==='Fechar'||b.innerText.trim()==='Cancelar'); b&&b.click();})()"); time.sleep(.35)
+def abre_rid(rid):
+    J(f"(()=>{{const r=[...document.querySelectorAll('[role=row][data-rid]')].find(r=>r.getAttribute('data-rid')==={json.dumps(rid)}&&r.offsetParent); if(!r) return; const z=[...r.querySelectorAll('[role=cell]')].find(z=>z.innerText.trim()&&!z.querySelector('button,input,a')); (z||r).click();}})()"); time.sleep(.5)
 TB = "[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent&&[...t.querySelectorAll('[role=columnheader]')].some(h=>/^OPERAÇÃO/i.test(h.innerText.trim())))"
 def heads(): return J(f"[...({TB}).querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\\s+/g,' ').trim().replace(/ · \\d+$/,''))") or []   # filtro ativo acrescenta ' · n'
 def linhas(): return J(f"[...({TB}).querySelectorAll('[role=row]')].filter(r=>r.offsetParent&&r.querySelector('[role=cell]')).map(r=>[...r.querySelectorAll('[role=cell]')].map((x,i)=>{{const t=x.innerText.replace(/\\s+/g,' ').trim(); return i===0?t.replace(/^[▸▾]\\s*/,''):t;}}))") or []
@@ -41,29 +48,37 @@ try:
     c.goto(URL.split('#')[0].replace('SAF.dc.html', 'Main.dc.html'), .3); J("localStorage.clear(); sessionStorage.clear()")
     c.goto(URL, 1.6); J("window.__e=[];addEventListener('error',e=>window.__e.push(String(e.message)))")
     h = heads(); rs = linhas(); shot('saf3-1440')
-    chk('§3.4 cabeçalhos: 8 colunas, uma variável por coluna, sem unidade entre parênteses (a unidade vai na célula)', [x.upper() for x in h] == [x.upper() for x in COLS], h)
+    chk('§3.4 cabeçalhos: 6 colunas, uma variável por coluna, sem unidade entre parênteses (a unidade vai na célula); sem Rendimento nem Área trabalhada (COLUNAS-1)',
+        [x.upper() for x in h] == [x.upper() for x in COLS] and not any(x.upper() in ('RENDIMENTO', 'ÁREA TRABALHADA') for x in h), h)
     chk('nenhuma célula junta duas medidas ("12 m × 7 km/h", "R$/kg", "Parte: …")', not any(' m × ' in x or 'R$/kg' in x or x.startswith('Parte:') for r in rs for x in r), [r for r in rs if any(' m × ' in x or 'R$/kg' in x for x in r)][:2])
-    n0 = [r for r in rs if len(r) == 8 and r[0] != 'Total']
+    n0 = [r for r in rs if len(r) == NCOL and r[0] != 'Total']
     chk('Situação só com os valores de s.sit (S2627: "Janela não informada" nas 8 operações, sem números)', len(n0) == 8 and all(r[1] == 'Janela não informada' for r in n0), [r[1] for r in n0])
-    chk('unidade por nível: operação em ha-op (área e custo); horas com "h"; rendimento "ha/h" ou "varia"',
-        all(r[5].endswith(' ha-op') and (r[7] == '' or r[7].endswith('/ha-op')) and r[6].endswith(' h') and (r[4] in ('', 'varia') or r[4].endswith(' ha/h')) for r in n0), [(r[0], r[4], r[5], r[6], r[7]) for r in n0])
+    chk('unidade por nível: operação em ha-op (custo); horas com "h"', all((r[5] == '' or r[5].endswith('/ha-op')) and r[4].endswith(' h') for r in n0), [(r[0], r[4], r[5]) for r in n0])
+    # o que saiu da linha está no formulário Rendimento: rendimento efetivo (ha/h) e área trabalhada em ha-op na operação, com as horas
+    abre_rid('op:Pulverização'); fp = form(); fecha()
+    chk('COLUNAS-1 · Pulverização: o formulário Rendimento mostra 21,60 ha/h e a área trabalhada em ha-op com as horas-conjunto (saíram da linha)',
+        fp.get('rend_c') == '21,60' and re.match(r'^[\d.]+ ha-op · [\d.]+,\d horas-conjunto$', fp.get('area_c', '')), fp)
     for _ in range(4):
         if not J(f"(()=>{{const b=[...({TB}).querySelectorAll('button[aria-label^=\"Expandir\"]')].filter(b=>b.offsetParent); b.forEach(x=>x.click()); return b.length;}})()"): break
         time.sleep(.35)
-    rs = linhas(); fi = [r for r in rs if len(r) == 8 and r[0] != 'Total' and r not in n0 and ' · ' not in r[0] and r[5]]
-    chk('atividades em "ha" (uma passada por cultivo) e talhões em "ha"', fi and all(r[5].endswith(' ha') or r[5].endswith(' ha-op') for r in fi) and any(r[5].endswith(' ha') for r in fi), [(r[0], r[5]) for r in fi][:4])
+    abre_rid('at:Adubação a lanço|Adubação de cobertura'); fa = form(); fecha()
+    chk('atividade em "ha" (uma passada por cultivo) no formulário Rendimento', re.match(r'^[\d.]+(,\d+)? ha · ', fa.get('area_c', '')), fa.get('area_c'))
     c.goto(URL.replace('#', '?r=2#'), 1.6)
-    ordena('Custo R$/ha'); cu = [r[7] for r in linhas() if len(r) == 8 and r[0] != 'Total']
+    ordena('Custo R$/ha'); cu = [r[5] for r in linhas() if len(r) == NCOL and r[0] != 'Total']
     chk('ordenar Custo R$/ha crescente (número, não texto): R$ 3,40/ha-op primeiro, R$ 662,86/ha-op por último', cu[:1] == ['R$ 3,40/ha-op'] and cu[-1:] == ['R$ 662,86/ha-op'], cu)
-    filtra('Conjunto', ['Trator 02 MF 7719 + Pulverizador PJ-3030 36 m']); r1 = [r for r in linhas() if len(r) == 8 and r[0] != 'Total']
+    filtra('Conjunto', ['Trator 02 MF 7719 + Pulverizador PJ-3030 36 m']); r1 = [r for r in linhas() if len(r) == NCOL and r[0] != 'Total']
     chk('filtro Conjunto (valor exato da célula): só a Pulverização', r1 and all(r[0].startswith('Pulverização') for r in r1), [r[0] for r in r1])
-    limpa(); filtra('Situação', ['Janela não informada']); r2 = [r for r in linhas() if len(r) == 8 and r[0] != 'Total']
+    limpa(); filtra('Situação', ['Janela não informada']); r2 = [r for r in linhas() if len(r) == NCOL and r[0] != 'Total']
     chk('filtro Situação = "Janela não informada": as 8 operações', len(r2) == 8, len(r2))
     limpa()
     # busca: o talhão pelo nome (era o filtro da coluna Talhão da antiga etapa 4)
     J(f"""(()=>{{const t={TB}; const box=t.closest('.g2caixa')||t.parentElement.parentElement; const i=(box.querySelector('input[type=search]')||document.querySelector('input[type=search][aria-label="Buscar nesta tabela"]')); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'T2'); i.dispatchEvent(new Event('input',{{bubbles:true}}));}})()"""); time.sleep(.6)
     fs = [r for r in linhas() if ' · ' in r[0] and r[0][:2] in ('T1', 'T2', 'T3', 'T4', 'T7', 'C1', 'P1', 'P2')]
     chk('busca "T2": só ocorrências do T2 (com operação e atividade que as agrupam)', fs and all(r[0].startswith('T2 ') for r in fs), [r[0] for r in fs][:5])
+    # busca pelo dado que saiu da linha (COLUNAS-1): o rendimento "21,60 ha/h" acha a Pulverização
+    J(f"""(()=>{{const i=document.querySelector('input[type=search][aria-label="Buscar nesta tabela"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'21,60 ha/h'); i.dispatchEvent(new Event('input',{{bubbles:true}}));}})()"""); time.sleep(.6)
+    br = [r[0] for r in linhas() if len(r) == NCOL and r[0] != 'Total']
+    chk('COLUNAS-1 · busca "21,60 ha/h" (rendimento fora da linha) ainda acha a Pulverização', br and br[0].startswith('Pulverização'), br[:4])
     J(f"""(()=>{{const i=document.querySelector('input[type=search][aria-label="Buscar nesta tabela"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,''); i.dispatchEvent(new Event('input',{{bubbles:true}}));}})()"""); time.sleep(.4)
     # Data real: operação com a faixa de meses; ocorrência com a data (dd/mm/aaaa)
     pu = next((r for r in linhas() if r[0].startswith('Pulverização')), None)
@@ -73,8 +88,13 @@ try:
     J(f"(()=>{{const r=({TB}).querySelector('[role=row][data-rid=\"at:Adubação a lanço|Adubação de cobertura\"]'); [...r.querySelectorAll('[role=cell]')].find(z=>z.innerText.trim()&&!z.querySelector('button')).click();}})()"); time.sleep(.5)
     J("""(()=>{const l=document.querySelector('aside [id$="_larg"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(l,'12'); l.dispatchEvent(new Event('input',{bubbles:true}));})()"""); time.sleep(.3)
     J("[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Salvar').click()"); time.sleep(.8)
-    ca = next((r for r in linhas() if r[0] == 'Adubação de cobertura'), None); ad = next((r for r in linhas() if r[0].startswith('Adubação a lanço')), None)
-    chk('TF03 Adubação de cobertura 24 → 12 m (só esta): 9,00 ha/h e R$ 25,89/ha na mesma linha; a operação "varia" no rendimento', ca and ca[4] == '9,00 ha/h' and ca[7] == 'R$ 25,89/ha' and ad and ad[4] == 'varia', (ca, ad))
+    ca = next((r for r in linhas() if r[0] == 'Adubação de cobertura'), None)
+    abre_rid('at:Adubação a lanço|Adubação de cobertura'); fc = form(); fecha()
+    abre_rid('op:Adubação a lanço'); op_form = J("!![...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent)"); fecha()
+    # COLUNAS-1: o rendimento saiu da linha; a atividade mostra 9,00 ha/h no formulário e o R$/ha na linha; a operação, com rendimento que varia
+    # entre as atividades, não abre um formulário único (o toque só expande, como antes o "varia" na célula)
+    chk('TF03 Adubação de cobertura 24 → 12 m (só esta): 9,00 ha/h no formulário e R$ 25,89/ha na linha; a operação com rendimento que varia só expande',
+        ca and ca[5] == 'R$ 25,89/ha' and fc.get('rend_c') == '9,00' and not op_form, (ca, fc.get('rend_c'), op_form))
     chk('sem erro de script (1440)', not J("window.__e"), J("window.__e"))
     # ---------------- incremento 2b: etapas 2 e 4 (demanda de insumos) ----------------
     def TBF(h): return "[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent&&[...t.querySelectorAll('[role=columnheader]')].some(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\\s+/g,' ').trim().replace(/ · \\d+$/,'').toUpperCase()===%s))" % json.dumps(h)
@@ -85,51 +105,51 @@ try:
             if not J(f"(()=>{{const b=[...({TB}).querySelectorAll('button[aria-label^=\"Expandir\"]')].filter(b=>b.offsetParent); b.forEach(x=>x.click()); return b.length;}})()"): break
             time.sleep(.35)
     # etapa 2: cultivos
-    c.goto(URL.replace('passo=operacoes', 'passo=cultivos'), 1.6); TB = TBF('TIPO'); h2 = [x.upper() for x in heads()]; d2 = dicts(); shot('saf2-1440')
-    # decisão do proprietário (05/10/2026): a unidade fica junto do valor ("45 t/ha/ano", "62.500 kg"); filtrar unidade não gera valor
-    chk('2b etapa 2: Tipo, Área livre, Plano, Versão e Ajustes em colunas próprias; Meta com a unidade junto (sem coluna de unidade)',
-        all(k in h2 for k in ('TALHÃO OU PARCELA', 'TIPO', 'ÁREA', 'ÁREA LIVRE', 'META', 'PLANO AGRONÔMICO', 'VERSÃO', 'AJUSTES LOCAIS', 'SITUAÇÃO', 'LIVRE A PARTIR DE', 'OCUPA ATÉ', 'FIM POR', 'SAFRA')) and 'UNIDADE DA META' not in h2 and not any('PLANO E AJUSTES' == x for x in h2), h2)
+    c.goto(URL.replace('passo=operacoes', 'passo=cultivos'), 1.6); TB = TBF('TALHÃO OU PARCELA'); h2 = [x.upper() for x in heads()]; d2 = dicts(); shot('saf2-1440')
+    # colunas essenciais (proprietário, 10/10; COLUNAS-1): 16 → 8; Meta, Versão, Variedade, Ajustes, Ocupa até e Fim por no formulário do cultivo,
+    # Tipo sai (a árvore diz), a Safra de outra ocupação vira link na célula de identificação. A unidade continua junto do valor (05/10)
+    C2 = ['TALHÃO OU PARCELA', 'SITUAÇÃO', 'ÁREA LIVRE', 'LIVRE A PARTIR DE', 'ÁREA', 'CULTURA', 'PLANO AGRONÔMICO', 'PLANTIO']
+    FORA2 = ('TIPO', 'META', 'VERSÃO', 'AJUSTES LOCAIS', 'OCUPA ATÉ', 'FIM POR', 'SAFRA', 'VARIEDADE', 'UNIDADE DA META', 'PLANO E AJUSTES')
+    chk('2b etapa 2: as 8 colunas essenciais, nesta ordem; nenhuma das que saíram (negativa)', h2 == C2 and not any(k in h2 for k in FORA2), h2)
     t7 = next((r for r in d2 if r.get('TALHÃO OU PARCELA', '').startswith('T7')), {})
-    chk('2b T7: meta "45 t/ha/ano" (valor com a unidade); plano sem a versão colada (v3 na coluna Versão)', t7.get('META') == '45 t/ha/ano' and t7.get('VERSÃO') == 'v3' and 'v3' not in t7.get('PLANO AGRONÔMICO', ''), t7)
-    filtra('Meta', ['45 t/ha/ano']); d = [r for r in dicts() if r.get('CULTURA')]
-    chk('2b filtro Meta = "45 t/ha/ano" (o filtro mostra o valor com a unidade, como a célula): só o T7', d and all(r.get('META', '') == '45 t/ha/ano' for r in d) and d[0].get('TALHÃO OU PARCELA', '').startswith('T7'), [(r.get('TALHÃO OU PARCELA', ''), r.get('META', '')) for r in d])
-    # etapa 2 nova (todos os talhões): as filhas de outra safra também têm Cultura e Tipo; as desta safra têm Safra "—" (§7.2)
-    limpa(); filtra('Tipo', ['Parcela']); d = [r for r in dicts() if r.get('CULTURA') and not r.get('SAFRA', '').endswith('›')]
-    # o filtro tem de cortar: só parcelas e o talhão que as agrupa ("2 parcelas"), nenhum "Talhão inteiro", menos linhas que sem filtro
-    chk('2b filtro Tipo = Parcela: as parcelas T1-A e T1-B (com o talhão T1 que as agrupa), sem talhão inteiro',
-        sorted(r.get('TALHÃO OU PARCELA', '').split(' ')[0] for r in d if r.get('TIPO', '') == 'Parcela') == ['T1-A', 'T1-B']
-        and all(r.get('TIPO', '') == 'Parcela' or re.match(r'^\d+ parcelas?$', r.get('TIPO', '')) for r in d)
-        and len(d) < len([r for r in d2 if r.get('CULTURA') and not r.get('SAFRA', '').endswith('›')]), [(r.get('TALHÃO OU PARCELA', ''), r.get('TIPO', '')) for r in d])
+    abre_rid(J(f"(()=>{{const r=[...({TB}).querySelectorAll('[role=row].g2ed')].filter(x=>x.offsetParent).find(x=>/^T7\\b/.test(x.innerText.trim())); return r?r.getAttribute('data-rid'):'';}})()") or ''); f7 = form(); fecha()
+    chk('2b T7 no formulário do cultivo: meta 45 em t/ha/ano e versão aplicada v3; o plano na linha sem a versão colada',
+        f7.get('meta') == '45' and f7.get('unm_txt') == 't/ha/ano' and f7.get('ver_txt', '').startswith('v3 ') and 'v3' not in t7.get('PLANO AGRONÔMICO', 'v3'), (f7, t7))
+    # filtros das colunas que saíram não existem mais (nem chip órfão); o filtro de Cultura corta as linhas
+    sem = J(f"['Meta','Tipo','Versão','Safra','Variedade'].filter(k=>({TB}).querySelector('button[aria-label=\"Filtrar '+k+'\"]'))") or []
+    chk('2b sem filtro de coluna para Meta, Tipo, Versão, Safra e Variedade (saíram com a coluna)', sem == [], sem)
+    filtra('Cultura', ['Café']); d = [r for r in dicts() if r.get('CULTURA')]
+    chk('2b filtro Cultura = Café: só o C1, menos linhas que sem filtro', [(r.get('TALHÃO OU PARCELA', '').split(' ')[0], r.get('CULTURA', '')) for r in d] == [('C1', 'Café')] and len(d) < len([r for r in d2 if r.get('CULTURA')]), [(r.get('TALHÃO OU PARCELA', ''), r.get('CULTURA', '')) for r in d])
     limpa()
-    # meta decimal: a célula e o filtro mostram o valor exato com a unidade ("62,5 sc/ha"), sem arredondar
+    # meta decimal: o formulário guarda e mostra o valor exato ("62,5" em sc/ha), sem arredondar; a busca acha o T2 pela meta (saiu da linha)
     J(f"(()=>{{const r=[...({TB}).querySelectorAll('[role=row].g2ed')].filter(x=>x.offsetParent).find(x=>/^T2\\b/.test(x.innerText.trim())); r.querySelector('[role=cell]:nth-child(2)').click();}})()"); time.sleep(.5)
     J("""(()=>{const i=document.querySelector('aside [id$="_meta"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'62,5'); i.dispatchEvent(new Event('input',{bubbles:true}));})()"""); time.sleep(.2)
     J("[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Salvar').click()"); time.sleep(.6)
-    t2 = next((r for r in dicts() if r.get('TALHÃO OU PARCELA', '').startswith('T2')), {})
-    J(f"({TB}).querySelector('button[aria-label=\"Filtrar Meta\"]').click()"); time.sleep(.4)
-    rot = J("[...document.querySelectorAll('[role=dialog] label')].map(l=>l.innerText.replace(/\\s+\\d+$/,'').trim())") or []
-    J("(()=>{const b=[...document.querySelectorAll('[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); b&&b.click();})()"); time.sleep(.3)
-    chk('2b meta 62,5 salva no T2: célula e filtro mostram "62,5 sc/ha" (sem arredondar para 63)', t2.get('META') == '62,5 sc/ha' and '62,5 sc/ha' in rot and '63 sc/ha' not in rot, (t2.get('META'), rot))
+    rid2 = J(f"(()=>{{const r=[...({TB}).querySelectorAll('[role=row].g2ed')].filter(x=>x.offsetParent).find(x=>/^T2\\b/.test(x.innerText.trim())); return r?r.getAttribute('data-rid'):'';}})()") or ''
+    abre_rid(rid2); f2 = form(); fecha()
+    J(f"""(()=>{{const i=({TB}).closest('.g2caixa').querySelector('input[type=search]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'62,5 sc/ha'); i.dispatchEvent(new Event('input',{{bubbles:true}}));}})()"""); time.sleep(.6)
+    bm = [r.get('TALHÃO OU PARCELA', '').split(' ')[0] for r in dicts() if r.get('CULTURA')]
+    J(f"""(()=>{{const i=({TB}).closest('.g2caixa').querySelector('input[type=search]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,''); i.dispatchEvent(new Event('input',{{bubbles:true}}));}})()"""); time.sleep(.4)
+    chk('2b meta 62,5 salva no T2: o formulário mostra "62,5" em sc/ha (sem arredondar para 63) e a busca "62,5 sc/ha" acha só o T2', f2.get('meta') == '62,5' and f2.get('unm_txt') == 'sc/ha' and bm == ['T2'], (f2.get('meta'), f2.get('unm_txt'), bm))
     # etapa 4: demanda de insumos
     c.goto(URL.replace('passo=operacoes', 'passo=demanda'), 1.6); TB = TBF('FALTA EM'); expande(); d6 = dicts(); h6 = [x.upper() for x in heads()]; shot('saf6-1440')
     mp = next((r for r in d6 if r.get('INSUMO') == 'MAP 11-52'), {})
-    # CTL-4 (demanda única): MAP 79.500 kg (antes 62.500; 80.000 até a revisão do 853a6a8, que conta os 500 kg em custódia da OS-0417) — a OS-0420 (T4) conta pelo pendente; a coluna "Já realizado" vira "Antes de hoje sem O.S." (DEM-06)
-    chk('2b etapa 4 (demanda): MAP 11-52 com necessidade "79.500 kg" | falta 18/10/2026 | Em cotação | SOL-2026-07 em colunas próprias',
-        [mp.get(k) for k in ('NECESSIDADE LÍQUIDA', 'FALTA EM', 'SITUAÇÃO', 'SOLICITAÇÃO')] == ['79.500 kg', '18/10/2026', 'Em cotação', 'SOL-2026-07'], mp)
-    QT6 = ('NECESSIDADE LÍQUIDA', 'DEMANDA BRUTA', 'ESTOQUE APTO', 'RECEBIMENTOS PREVISTOS', 'ANTES DE HOJE SEM O.S.', 'USADO ANTES DA COMPRA', 'RESERVADO', 'RECEBIDO APÓS A FALTA', 'A COMPLEMENTAR')
+    chk('2b etapa 4 (demanda): MAP 11-52 com necessidade "62.500 kg" | falta 18/10/2026 | Em cotação | SOL-2026-07 em colunas próprias',
+        [mp.get(k) for k in ('NECESSIDADE LÍQUIDA', 'FALTA EM', 'SITUAÇÃO', 'SOLICITAÇÃO')] == ['62.500 kg', '18/10/2026', 'Em cotação', 'SOL-2026-07'], mp)
+    QT6 = ('NECESSIDADE LÍQUIDA', 'DEMANDA BRUTA', 'ESTOQUE APTO', 'RECEBIMENTOS PREVISTOS', 'JÁ REALIZADO', 'USADO ANTES DA COMPRA', 'RESERVADO', 'RECEBIDO APÓS A FALTA', 'A COMPLEMENTAR')
     folhas6 = [r for r in d6 if r.get('FALTA EM') is not None and r.get('SITUAÇÃO') and r.get('INSUMO') and not r.get('INSUMO', '').endswith(('insumos', 'insumo'))]
     # cada quantidade mostrada leva a unidade; '—' só onde não há valor; o preço leva a unidade do insumo ("R$ 3,90/kg")
     sem_un = [(r.get('INSUMO'), k, r.get(k)) for r in folhas6 for k in QT6 if r.get(k, '—') != '—' and not re.match(r'^[\d.]+(,\d+)? (kg|L|un|t|sc)$', r.get(k, ''))]
     sem_un += [(r.get('INSUMO'), 'PREÇO', r.get('PREÇO')) for r in folhas6 if not re.match(r'^R\$ [\d.]+,\d{2}/(kg|L|un|t|sc)$', r.get('PREÇO', ''))]
     chk('2b etapa 4 (demanda): cada quantidade com a unidade junto ("152.500 kg", "610,0 L"), sem coluna Unidade e sem "falta em" no texto',
         folhas6 and not sem_un and 'UNIDADE' not in h6 and not any('falta em' in v for r in d6 for v in r.values()), sem_un[:3])
-    filtra('Necessidade líquida', ['79.500 kg']); d = [r for r in dicts() if r.get('INSUMO') and not r.get('INSUMO', '').endswith(('insumos', 'insumo'))]
-    chk('2b filtro Necessidade líquida = "79.500 kg" (o filtro usa o texto da célula, com a unidade): só o MAP 11-52', [r.get('INSUMO') for r in d] == ['MAP 11-52'], [r.get('INSUMO') for r in d])
+    filtra('Necessidade líquida', ['62.500 kg']); d = [r for r in dicts() if r.get('INSUMO') and not r.get('INSUMO', '').endswith(('insumos', 'insumo'))]
+    chk('2b filtro Necessidade líquida = "62.500 kg" (o filtro usa o texto da célula, com a unidade): só o MAP 11-52', [r.get('INSUMO') for r in d] == ['MAP 11-52'], [r.get('INSUMO') for r in d])
     limpa(); expande(); filtra('Grupo', ['Herbicidas']); d = [r for r in dicts() if r.get('INSUMO') and not r.get('INSUMO', '').endswith(('insumos', 'insumo'))]
     chk('2b filtro Grupo = Herbicidas: só os herbicidas', d and all(r.get('GRUPO', '') == 'Herbicidas' for r in d), sorted({r.get('INSUMO', '') for r in d}))
     limpa(); expande(); ordena('Necessidade líquida', desc=True); fe = [r.get('NECESSIDADE LÍQUIDA', '') for r in dicts() if r.get('GRUPO') == 'Fertilizantes' and r.get('NECESSIDADE LÍQUIDA')]
-    chk('2b ordenar Necessidade líquida decrescente nos fertilizantes: "79.500 kg" primeiro, "0 kg" por último (ordem pelo número)',
-        fe and fe[0] == '79.500 kg' and fe[-1] == '0 kg' and [num(x.split(' ')[0]) for x in fe] == sorted([num(x.split(' ')[0]) for x in fe], reverse=True), fe)
+    chk('2b ordenar Necessidade líquida decrescente nos fertilizantes: "62.500 kg" primeiro, "0 kg" por último (ordem pelo número)',
+        fe and fe[0] == '62.500 kg' and fe[-1] == '0 kg' and [num(x.split(' ')[0]) for x in fe] == sorted([num(x.split(' ')[0]) for x in fe], reverse=True), fe)
     chk('sem erro de script (etapas 2 e 4)', not J("window.__e"), J("window.__e"))
     TB = TBF('OPERAÇÃO › ATIVIDADE › TALHÃO')
     # 390 px

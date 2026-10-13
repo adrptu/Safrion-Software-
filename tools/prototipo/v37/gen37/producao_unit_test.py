@@ -17,8 +17,7 @@ def fonte():
     pre = cenario.perfis_js() + cenario.js_prefixo()   # CTL-3: comandos com papel (cenExige) precisam dos perfis
     if 'function prUn(' not in pre: pre += dados_producao.js_regras()   # antes do P2 as regras não estão no prefixo
     from areas import producao as AP   # funções de leitura das telas (prLoteProx etc.): só definições, sem DOM (revisão A-13)
-    import dados_comercial   # Comercial A-17: a massa da saca dos contratos legados é registrada pelo comando do Comercial (comConverterSaca), não por atalho no teste
-    return PRELUDIO + pre + JS_NUCLEO + AP.PR_UI_JS + AP.PR_PED_JS + dados_comercial.js_regras() + open(os.path.join(HERE, 'producao_unit.js'), encoding='utf-8').read() + '\nprint(JSON.stringify(R));\n'
+    return PRELUDIO + pre + JS_NUCLEO + AP.PR_UI_JS + AP.PR_PED_JS + open(os.path.join(HERE, 'producao_unit.js'), encoding='utf-8').read() + '\nprint(JSON.stringify(R));\n'
 
 
 def main():

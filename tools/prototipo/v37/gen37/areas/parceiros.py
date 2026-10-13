@@ -142,7 +142,7 @@ def pt01():
           o=[('Motivo agregado: condição comercial — não revela proposta concorrente',None)]),
       ],edit=dict(m='ro',title='Oportunidade'),search=False,total=False,gid='g_op')
     av=grid([C('aviso','Aviso',w=460),C('reg','Registro'),C('abrir','Abrir')],[
-        R('a1',aviso=f'Comprador pergunta: “o frete CIF até o Galpão 2 vale para os {len(SOL_IT)} itens?”',reg=COT['sol'],abrir=[Pt.cta('Responder esclarecimento','PT-02det.dc.html',True)]),
+        R('a1',aviso='Comprador pergunta: “o frete CIF até o Galpão 2 vale para os 4 itens?”',reg=COT['sol'],abrir=[Pt.cta('Responder esclarecimento','PT-02det.dc.html',True)]),
         R('a2',aviso='Comprador pede a placa do caminhão da carga 3',reg='PC-088',abrir=[Pt.cta('Abrir negócio','PT-05det.dc.html')]),
         R('a3',aviso=f"Laudo das {CT['quar']} t em quarentena (lote K26-11) vence em {CT['laudo']}",reg='NF 4501',abrir=[Pt.cta('Abrir negócio','PT-05det.dc.html')]),
         R('a4',aviso='Renovação do plano Parceiro Profissional pede seu aceite do novo preço até 30/09',reg='Assinatura',abrir=[Pt.link('Ver assinatura','PT-07.dc.html')]),
@@ -203,7 +203,7 @@ def pt02det():
                           F('prazo','Prazo de entrega','num',req=True,min=1,max=60,u='dias',help='Contado do pedido; a entrega precisa chegar até 10/10.'),
                           F('val','Validade da proposta','date',req=True),F('obs','Observações','area')]),search=False,total=False,gid='g_cd')
     esc_=grid([C('perg','Pergunta',w=360),C('de','De · quando'),C('resp','Resposta',w=300),C('sit','Situação')],[
-        R('e1',v=dict(perg=f'O frete CIF até o Galpão 2 vale para os {len(SOL_IT)} itens?',resp=''),de=two('Comprador','23/09 14:10'),sit=ch('Aguardando sua resposta','yellow')),
+        R('e1',v=dict(perg='O frete CIF até o Galpão 2 vale para os 4 itens?',resp=''),de=two('Comprador','23/09 14:10'),sit=ch('Aguardando sua resposta','yellow')),
         R('e2',ro=True,v=dict(perg='Qual a data necessária do MAP 11-52?',resp='Até 10/10 no Galpão 2, junto com o NPK.'),de=two('Fertisul','23/09 11:05'),sit=ch('Respondida','green')),
       ],edit=dict(m='form',title='Esclarecimento',sub='Responda ao comprador; a resposta fica vinculada à cotação e visível a ele.',
                   fields=[F('perg','Pergunta','area',ro=True),F('resp','Sua resposta','area',req=True)]),search=False,total=False,gid='g_esc')

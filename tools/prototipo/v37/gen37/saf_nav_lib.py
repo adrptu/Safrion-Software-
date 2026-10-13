@@ -50,6 +50,15 @@ def linha(t, rs=None):
     rs = rs if rs is not None else nivel0()
     return next((r for r in rs if r.get('TALHÃO OU PARCELA', '').split(' ')[0] == t), None)
 def sit(t): r = linha(t); return r and r.get('SITUAÇÃO')
+# colunas essenciais (COLUNAS-1, 10/10): meta, versão, variedade, ocupa até e fim por saíram da linha e ficam no formulário do cultivo.
+# detalhe(t): abre o formulário pela linha cujo 1º texto começa com t (kid=True: só sublinha) e devolve os campos; fecha sem gravar
+def detalhe(t, kid=False):
+    r = c.js(f"""(()=>{{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const rs=[...document.querySelectorAll('[role=table]')].filter(x=>x.offsetParent).flatMap(x=>[...x.querySelectorAll('[role=row].g2ed')]);
+      const r=rs.find(x=>{{const z=x.querySelector('.g2c0'); return z&&n(z.innerText).replace(/^[▾▸] ?/,'').split(' ')[0]==={json.dumps(t)}&&(!{json.dumps(kid)}||x.classList.contains('g2kid'));}}); if(!r) return 'sem linha';
+      const z=[...r.querySelectorAll('[role=cell]')].find(z=>z.innerText.trim()&&!z.querySelector('button,input,a')&&!z.classList.contains('g2c0')); (z||r).click(); return 'ok';}})()"""); time.sleep(.5)
+    f = c.js("Object.fromEntries([...document.querySelectorAll('aside[role=dialog] input,aside[role=dialog] select')].filter(x=>x.offsetParent&&/^fx_g_cult_/.test(x.id)).map(x=>[x.id.replace(/^fx_g_cult_[A-Za-z0-9]+_/,''),x.value]))") or {}
+    c.js("(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); const b=a&&[...a.querySelectorAll('button')].find(b=>b.getAttribute('aria-label')==='Fechar'); b&&b.click();})()"); time.sleep(.3)
+    f['_r'] = r; return f
 FX27SF = 'Nesta safra 553 · Livre 152 · A conferir 380 · Perene 80 · de 1.165 ha · 1 sucessão a conferir'
 FX2627 = 'Nesta safra 1.165 · de 1.165 ha · 1 sucessão a conferir'
 def nova_safra(nome, ini, fim, faz='Santa Rita'):

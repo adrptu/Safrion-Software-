@@ -68,6 +68,14 @@ def cel_cap(rid, mes):
 def expande(rid):
     r = c.js(f"""(()=>{{const r=document.querySelector('[role=row][data-rid={json.dumps(rid)}]'); const b=r&&r.querySelector('.g2car'); if(!b) return 'sem seta'; if(b.getAttribute('aria-expanded')!=='true') b.click(); return 'ok';}})()"""); time.sleep(.5); return r
 def total_h(): t = next((r for r in gop()['rows'] if r['_tot']), None); return t and next((v for k, v in t.items() if k.startswith('HORAS')), None)
+# colunas essenciais (COLUNAS-1, 10/10): Rendimento e Área trabalhada saíram da g_op e ficam no formulário Rendimento (rend_c ou rend, area_c)
+def aberto(): return bool(c.js("!![...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent)"))
+def form_de(rid):
+    """toca a linha; devolve os campos do formulário Rendimento (ou None se o toque só expandiu, como na operação com rendimento que varia)"""
+    clica_rid(rid)
+    if not aberto(): clica_rid(rid); return None   # recolhe de novo
+    f = campos('g_rend_S2627'); fechar(); return f
+def rend_de(f): return (f or {}).get('rend_c') or (f or {}).get('rend')
 NAV = [0]
 def abre(h, w=1440, hh=900, toque=False):
     NAV[0] += 1; c.aparelho(w, hh, 1, toque); c.goto(f'http://127.0.0.1:{p}/SAF.dc.html?r={NAV[0]}{h}'); time.sleep(1.2)
@@ -114,13 +122,15 @@ try:
         chk('V1 atalho "Maior uso: Colhedoras 81 % · fev/27"', atalhos() == ['Maior uso: Colhedoras 81 % · fev/27'], atalhos())
         pc = D2.plano_op('S2627'); chk('V1 custo de operação = espelho, "máquinas e pessoas, sem insumos"', custo().startswith('Custo de operação ' + rs(pc['cop']) + ' · máquinas e pessoas, sem insumos'), custo())
         G = gop()
-        chk('O1 g_op: 8 colunas na ordem do §3.4', G['hs'] == ['OPERAÇÃO › ATIVIDADE › TALHÃO', 'SITUAÇÃO', 'DATA', 'CONJUNTO', 'RENDIMENTO', 'ÁREA TRABALHADA', 'HORAS-CONJUNTO', 'CUSTO R$/HA'], G['hs'])
+        chk('O1 g_op: 6 colunas na ordem do §3.4 (COLUNAS-1: Rendimento e Área trabalhada no formulário Rendimento)', G['hs'] == ['OPERAÇÃO › ATIVIDADE › TALHÃO', 'SITUAÇÃO', 'DATA', 'CONJUNTO', 'HORAS-CONJUNTO', 'CUSTO R$/HA'], G['hs'])
         n0 = [r for r in G['rows'] if not r['_kid'] and not r['_tot']]
         OPS = ['Pulverização', 'Fertirrigação', 'Tratamento de sementes', 'Plantio', 'Adubação a lanço', 'Colheita de grãos', 'Colheita de café', 'Poda']
         chk('O1 operações na ordem da 1ª data (§2.1)', [r['OPERAÇÃO › ATIVIDADE › TALHÃO'].split(' ')[0] for r in n0] == [o.split(' ')[0] for o in OPS] and len(n0) == 8, [r['OPERAÇÃO › ATIVIDADE › TALHÃO'] for r in n0])
         pu = op_linha('Pulverização', n0); e = esp_op('S2627', 'Pulverização')
-        chk('O2 Pulverização = espelho (data, conjunto, 21,60 ha/h, ha-op, horas, R$/ha-op)', pu and pu['DATA'] == e['data'] and pu['CONJUNTO'].startswith('Trator 02') and pu['RENDIMENTO'] == '21,60 ha/h' and pu['ÁREA TRABALHADA'] == e['area'] and pu['HORAS-CONJUNTO'] == e['horas'] and pu['CUSTO R$/HA'] == e['rha'], (pu, e))
-        chk('O2 negativo: nenhuma operação com "ha" puro na área', all(r['ÁREA TRABALHADA'].endswith(' ha-op') for r in n0), [r['ÁREA TRABALHADA'] for r in n0])
+        fpu = form_de('op:Pulverização')
+        chk('O2 Pulverização = espelho (data, conjunto, horas, R$/ha-op na linha; 21,60 ha/h e a área em ha-op no formulário)', pu and pu['DATA'] == e['data'] and pu['CONJUNTO'].startswith('Trator 02') and rend_de(fpu) == '21,60' and (fpu or {}).get('area_c', '').startswith(e['area'] + ' · ') and pu['HORAS-CONJUNTO'] == e['horas'] and pu['CUSTO R$/HA'] == e['rha'], (pu, e, fpu))
+        areas = {r['_id']: (form_de(r['_id']) or {}).get('area_c') for r in n0}; ab = {k: v for k, v in areas.items() if v}
+        chk('O2 negativo: nenhuma operação com "ha" puro na área (formulário das operações que abrem)', len(ab) >= 4 and all(re.match(r'^[\d.]+(,\d+)? ha-op · ', v) for v in ab.values()), areas)
         chk('O2 "6 atividades" na Pulverização', '6 atividades' in pu['OPERAÇÃO › ATIVIDADE › TALHÃO'], pu)
         chk('O4 S2627: 8 operações "Janela não informada", nenhum "Cabe na janela"; sem chips do filtro rápido', all(r['SITUAÇÃO'] == 'Janela não informada' for r in n0) and 'Cabe na janela' not in c.js("document.body.innerText") and not c.js("[...document.querySelectorAll('[role=group][aria-label^=\"Filtro rápido\"]')].some(g=>g.offsetParent)"), [r['SITUAÇÃO'] for r in n0])
         chk('Total da g_op só em horas-conjunto = espelho (561,8 h)', total_h() == fmt(pc['hconj'], 1) + ' h', total_h())
@@ -136,7 +146,8 @@ try:
         if t2: expande(t2['_id']); G = gop()
         cfgs = [r for r in G['rows'] if r['_id'] and r['_id'].startswith(t2['_id'] + '|c')] if t2 else []
         o2 = next(o for o in D2.ocorr_op('S2627') if o['a']['op'] == 'Plantio' and o['c']['local'] == 'T2')
-        chk('O3 Plantio T2: 2 configurações com a área atendida e o R$/ha de cada (espelho)', len(cfgs) == 2 and [x['ÁREA TRABALHADA'] for x in cfgs] == [nfa(x['q']) + ' ha' for x in o2['rp']['itens']] and [x['CUSTO R$/HA'] for x in cfgs] == [rs(x['custo'] / x['q']) + '/ha' for x in o2['rp']['itens']], ([(x['ÁREA TRABALHADA'], x['CUSTO R$/HA']) for x in cfgs], [(x['q'], x['custo']) for x in o2['rp']['itens']]))
+        acf = [(form_de(x['_id']) or {}).get('area_c', '') for x in cfgs]
+        chk('O3 Plantio T2: 2 configurações com a área atendida (formulário) e o R$/ha de cada (linha), iguais ao espelho', len(cfgs) == 2 and [a.split(' · ')[0] for a in acf] == [nfa(x['q']) + ' ha' for x in o2['rp']['itens']] and [x['CUSTO R$/HA'] for x in cfgs] == [rs(x['custo'] / x['q']) + '/ha' for x in o2['rp']['itens']], (acf, [x['CUSTO R$/HA'] for x in cfgs], [(x['q'], x['custo']) for x in o2['rp']['itens']]))
         chk('O3 T2 horas = espelho (61,3 h) e Situação sem número', t2 and t2['HORAS-CONJUNTO'] == fmt(o2['horas'], 1) + ' h' and not re.search(r'\d', t2['SITUAÇÃO']), t2)
         clica_rid(t2['_id']); f = campos('g_rend_S2627')
         chk('O3 toque no talhão abre a configuração com "Neste talhão" (trio e decorrido)', 'Necessário: ' in f.get('neste_c', '') and 'Atendido: ' in f.get('neste_c', '') and 'h decorridas' in f.get('neste_c', ''), f.get('neste_c'))
@@ -167,9 +178,12 @@ try:
         cf = {('Adubação a lanço', 'Adubação de cobertura', 'r3'): {'larg': 12}}; e0 = esp_op('S2627', 'Adubação a lanço'); e1 = esp_op('S2627', 'Adubação a lanço', cf)
         chk('P7 aviso antes → depois (§4.4): Adubação a lanço 40,2 → 74,1 h · Distribuidores nov/26: 16 % → 31 %', ('Adubação a lanço: ' + e0['horas'].replace(' h', '') + ' → ' + e1['horas']) in t and 'Distribuidores nov/26: 16 % → 31 %' in t, (t, e0['horas'], e1['horas']))
         G = gop(); ad = op_linha('Adubação a lanço', G['rows']); cob = next((r for r in G['rows'] if r['OPERAÇÃO › ATIVIDADE › TALHÃO'] == 'Adubação de cobertura'), None)
-        chk('O12 a atividade mostra 9,00 ha/h e R$ 25,89/ha; a operação "varia" no rendimento (o conjunto continua o mesmo, §3.4 coluna a coluna)', cob and cob['RENDIMENTO'] == '9,00 ha/h' and cob['CUSTO R$/HA'] == 'R$ 25,89/ha' and ad['CONJUNTO'] == 'Trator 03 + Distribuidor 3 t' and ad['RENDIMENTO'] == 'varia', (cob, ad))
+        fcob = form_de('at:Adubação a lanço|Adubação de cobertura'); fad = form_de('op:Adubação a lanço')
+        chk('O12 a atividade mostra 9,00 ha/h (formulário) e R$ 25,89/ha (linha); a operação com rendimento que varia não abre formulário único (o conjunto continua o mesmo)', cob and rend_de(fcob) == '9,00' and cob['CUSTO R$/HA'] == 'R$ 25,89/ha' and ad['CONJUNTO'] == 'Trator 03 + Distribuidor 3 t' and fad is None, (cob, rend_de(fcob), ad, fad))
+        expande('op:Adubação a lanço'); G = gop()
         outras = [r for r in G['rows'] if r['_id'] and r['_id'].startswith('at:Adubação a lanço|') and r['_id'] != 'at:Adubação a lanço|Adubação de cobertura']
-        chk('O12 as demais atividades da operação ficam com 18,00 ha/h', outras and all(r['RENDIMENTO'] == '18,00 ha/h' for r in outras), [(r['_id'], r['RENDIMENTO']) for r in outras])
+        ro_ = {r['_id']: rend_de(form_de(r['_id'])) for r in outras}
+        chk('O12 as demais atividades da operação ficam com 18,00 ha/h (formulário)', outras and all(v == '18,00' for v in ro_.values()), ro_)
         # ---------- O11: janela digitada em "Todas" é recusada; O5: janela 60 h na Colheita, só esta ----------
         clica_rid('op:Colheita de grãos'); f = campos('g_rend_S2627')
         chk('O11 Colheita de grãos (1 atividade): "Todas" sem campo de janela', f.get('esc') == 'Todas as atividades da operação' and 'jan' not in f, f)

@@ -45,7 +45,8 @@ try:
     chk('S2.1 N2: Planejar T1 com os padrões grava (nunca "Já existe T1 nesta safra", que vinha do T1 da N1)', 'Cultivo incluído: T1 inteiro' in t and 'Já existe' not in al, (al, t))
     nv = folhas(g); por = sorted((x['v'].get('saf'), x['v'].get('local'), x['v'].get('area')) for x in nv)
     chk('S2.1/R-22 g_cult_NOVA com um T1 de 312 ha em cada safra nova', por == sorted([(n1, 'T1', 312), (n2, 'T1', 312)]), por)
-    chk('E5 meta gravada na unidade de mercado do Milho: "170 sc/ha"', (linha('T1') or {}).get('META') == '170 sc/ha', linha('T1'))
+    f1 = detalhe('T1')   # COLUNAS-1 (10/10): a Meta saiu da linha e fica no formulário do cultivo, com a unidade de mercado
+    chk('E5 meta gravada na unidade de mercado do Milho: "170 sc/ha"', (f1.get('meta'), f1.get('unm_txt')) == ('170', 'sc/ha'), f1)
     # ================= S1: Dividir numa safra nova não puxa nem move o cultivo da outra (cenário do rev_probe2) =================
     abre('#saf=S2627&passo=safra')
     n1 = cria_safra('N1 2027/28', '2027-09-01', '2028-08-31'); na_linha('T1', 'Planejar ›')
@@ -109,8 +110,9 @@ try:
     fset(g, 'var', 'Formosa'); fset(g, 'meta', '45'); salvar(); al = alerta()
     chk('S3.6 Salvar sem cultura pede a cultura, e o que se vê bate com o motivo', 'Informe cultura' in al, al)
     fset(g, 'cult', 'Mamão Formosa'); fset(g, 'plano', ''); fset(g, 'var', 'Formosa'); fset(g, 'area', '100'); fset(g, 'meta', '45'); salvar(); t = toast()
-    m = [r.get('META') for r in rows() if (r.get('TALHÃO OU PARCELA') or '').startswith('T1-')]
-    chk('E5 meta do Mamão gravada na unidade de mercado: "45 t/ha/ano"', 'Cultivo incluído como parcela' in t and m == ['45 t/ha/ano'], (t, m))
+    ks = [r['TALHÃO OU PARCELA'].split(' ')[0] for r in rows() if (r.get('TALHÃO OU PARCELA') or '').startswith('T1-')]
+    fm_ = detalhe(ks[0], kid=True) if len(ks) == 1 else {}   # COLUNAS-1: a meta no formulário do cultivo
+    chk('E5 meta do Mamão gravada na unidade de mercado: "45 t/ha/ano"', 'Cultivo incluído como parcela' in t and (fm_.get('meta'), fm_.get('unm_txt')) == ('45', 't/ha/ano'), (t, ks, fm_))
     na_linha('C1', 'Vincular ciclo ›'); fset(g, 'meta', '38'); salvar(); t = toast()
     cid = next((x['id'] for x in folhas(g) if x['v'].get('ciclo') == 'c9'), None)
     chk('S3.2 C1 vinculado sem "Dividir" na linha', 'Ciclo vinculado' in t and cid and 'Dividir' not in (linha('C1') or {}).get('TALHÃO OU PARCELA', 'Dividir'), (t, linha('C1')))

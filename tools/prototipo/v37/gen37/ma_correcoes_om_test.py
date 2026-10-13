@@ -41,12 +41,13 @@ try:
     m.abre('AB-1043'); m.clk('Descartar', '#ma-painel'); d1 = m.toast(); t2 = m.man("m.ativos.a02.leit.val")
     m.ok('acima da última' in a1 and 'A confirmar' in r1 and 'descartada' in d1 and t2 == 2988, 'leitura alta: a confirmar, descartada; Trator 02 segue em 2.988 h', [a1[:100], r1[:120], d1[:100]])
     a2 = abast('cb01', '48100', 'Beto'); m.ir('vis=ativos&modo=abastecimentos'); m.abre('AB-1044'); m.clk('Confirmar troca de contador', '#ma-painel'); c2 = m.toast()
-    m.ir('vis=ativos'); lc = m.linha('cb01')
-    m.ok('troca de contador' in a2 and 'Troca de contador confirmada' in c2 and '48.100 km' in lc and '49.900 km' in lc and 'Leitura a confirmar' not in lc,
-         'troca de contador confirmada: 48.100 km, vencimento ajustado para 49.900 km', [c2[:100], lc[:160]])
+    # COLUNAS-1 (10/10): a leitura saiu da linha de Ativos (página do ativo); o vencimento ajustado e a ausência de "Leitura a confirmar" seguem na linha
+    m.ir('vis=ativos'); lc = m.linha('cb01'); m.ir('ativo=cb01'); hc = J("(()=>{const h=document.querySelector('main h2'); return h?h.parentElement.innerText.replace(/\\s+/g,' '):'';})()") or ''
+    m.ok('troca de contador' in a2 and 'Troca de contador confirmada' in c2 and 'Leitura 48.100 km' in hc and '49.900 km' in lc and 'Leitura a confirmar' not in lc and 'a confirmar' not in hc,
+         'troca de contador confirmada: 48.100 km, vencimento ajustado para 49.900 km', [c2[:100], lc[:160], hc[:160]])
     # 3 · Ativos: a leitura da linha = última leitura (abastecimento)
-    abast('a04', '3530', 'Beto'); m.ir('vis=ativos'); l4 = m.linha('a04')
-    m.ok('3.530 h' in l4 and '3.410 h' not in l4, 'Ativos: leitura do Trator 04 atualizada pelo abastecimento', l4[:120])
+    abast('a04', '3530', 'Beto'); m.ir('ativo=a04'); l4 = J("(()=>{const h=document.querySelector('main h2'); return h?h.parentElement.innerText.replace(/\\s+/g,' '):'';})()") or ''
+    m.ok('Leitura 3.530 h' in l4 and '3.410 h' not in l4, 'Ativos: leitura do Trator 04 atualizada pelo abastecimento (cabeçalho da página do ativo)', l4[:160])
     # 4 · achado vinculado à preventiva persiste e aparece na OM
     m.ir('vis=semordem', perfil='Otávio', limpa=True); m.clk('Gerar 3 ordens preventivas'); m.ir('achado=NC-0912'); m.clk('Vincular à OM-0236', '#ma-painel'); v = m.toast()
     m.ir('vis=semordem'); ids = m.linhas(0); m.ir('om=OM-0236'); m.bloco('Origem'); p = m.pan()

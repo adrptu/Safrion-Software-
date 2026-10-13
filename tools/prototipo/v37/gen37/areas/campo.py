@@ -58,7 +58,7 @@ QUEM={'OS-0421':'Turno do dia 4 aguardando conferência · Paula',
       'OS-0423':'Caio (PCP) resolve a parada da B3 (14:00–15:00) · estimativa por ET · sonda sem dado'}
 PROX={'OS-0421':('Conferir dia 4','CA-02.dc.html'),'OS-0420':('Ver OM-0233','MA.dc.html#om=OM-0233'),
       'OS-0419':('Abrir em Irrigação','IR-03det.dc.html'),'OS-0418':('Liberar','OS.dc.html#OS-0418'),
-      'OS-0417':('Ver custódia','CA-04.dc.html'),'OS-0422':('Definir janela','IR-02.dc.html'),'OS-0423':('Resolver conflito','IR-02.dc.html')}
+      'OS-0417':('Ver custódia','EST.dc.html#req=REQ-031'),'OS-0422':('Definir janela','IR-02.dc.html'),'OS-0423':('Resolver conflito','IR-02.dc.html')}
 DETALHE={'OS-0421':'CA-01det.dc.html','OS-0420':DET0420}
 REALIZ={'OS-0421':'150 conf. + 40 prov. · saldo 160 ha','OS-0420':'18 conf. + 12 prov. · saldo 70 ha parado'}
 _RED=('impedid','bloquead','atrasad','conflito','vencid')
@@ -248,24 +248,28 @@ def _ca01det():
             p=dict(ac=[Pt.mut(f'prev. {nf(ac)} / {area} ha') if pv else Pt.b(f'{nf(ac)} / {area} ha')],
                    cf=[Pt.chip('Provisório · aguardando conferência','yellow')] if cf=='Provisório' else [Pt.chip(cf,{'Conferido':'green','Previsto':'gray'}[cf])],
                    orig=[Pt.mut(orig or '—')])))
-    g_ap=grid([dict(k='dt',l='Data'),dict(k='turno',l='Turno'),dict(k='ha',l='Área do dia',t='num',a='r',u='ha'),dict(k='ac',l='Acumulado',t='num',a='r'),
-               dict(k='cf',l='Conferência'),dict(k='orig',l='Origem · sincronização',w=280)],
+    # colunas essenciais (proprietário, 10/10; AUDITORIA COLUNAS §2.1, R-08: a mesma forma dos apontamentos na O.S., no CA-01x e no CA-02):
+    # data, área do dia e conferência; turno ("Dia N de 7" repete a data), acumulado (derivável; KPI e detalhe) e origem vão ao detalhe do turno
+    g_ap=grid([dict(k='dt',l='Data'),dict(k='ha',l='Área do dia',t='num',a='r',u='ha'),dict(k='cf',l='Conferência')],
         rows,edit=dict(m='form',title='Turno',sub='Corrija o apontamento com motivo (o original fica na trilha) ou redistribua os turnos previstos dentro do saldo.',
             fields=[dict(k='turno',l='Turno',ro=True),dict(k='kind',l='Tipo de registro',ro=True),dict(k='cf',l='Conferência',ro=True),
+                    dict(k='ac',l='Acumulado até este turno',ro=True,u='ha'),dict(k='orig',l='Origem · sincronização',ro=True),
                     dict(k='ha',l='Área do dia',t='num',req=True,min=0,max=200,u='ha',help='Só área real; nunca arredonde nem complete por inferência.'),
                     dict(k='dt',l='Data prevista',t='txt',req=True,cond=dict(k='kind',eq='Previsto')),
                     dict(k='motivo',l='Motivo da correção',t='area',req=True,cond=dict(k='kind',eq='Apontado'),help='A correção gera nova versão do apontamento; o valor original permanece na trilha.')]),
         search=False,gid='g_ap',total=False)
     r=REQ['REQ-035']; pend=r['solicitado']-r['entregue']
-    g_mat=grid([dict(k='item',l='Item · lote',w=220),dict(k='sol',l='Solicitado',t='num',a='r',u='L'),dict(k='ent',l='Entregue',t='num',a='r',u='L'),
-                dict(k='cons',l='Consumido',t='num',a='r',u='L'),dict(k='cust',l='Em custódia',t='num',a='r',u='L'),dict(k='pend',l='A entregar',t='num',a='r',u='L'),dict(k='resp',l='Custódia de')],
+    # colunas essenciais (10/10): o que está com a equipe (em custódia), o que falta entregar e com quem; solicitado, entregue e consumido são
+    # componentes da conta e ficam no detalhe com a fórmula (R-10; a mesma lista no Estoque não mostra o consumido, R-08). O lote fica: rastreabilidade
+    g_mat=grid([dict(k='item',l='Item · lote',w=220),dict(k='cust',l='Em custódia',t='num',a='r',u='L'),dict(k='pend',l='A entregar',t='num',a='r',u='L'),dict(k='resp',l='Custódia de')],
         [dict(id='m1',v=dict(item='Fungicida A · lote F26-02',sol=r['solicitado'],ent=r['entregue'],cons=r['consumido'],cust=r['custodia'],pend=pend,resp='Marcos (equipe de campo)'),
               s={},p=dict(item=[Pt.txt('Fungicida A · lote F26-02'),Pt.br(),Pt.mut('REQ-035 · 0,50 L/ha da v2')],cust=[Pt.b(f'{r["custodia"]} L')]),
-              o=[dict(t=f'Requisição REQ-035 · {r["solicitado"]} L para 350 ha (0,50 L/ha da v2)',h='SU-07.dc.html'),
+              o=[dict(t=f'Requisição REQ-035 · {r["solicitado"]} L para 350 ha (0,50 L/ha da v2)',h='EST.dc.html#req=REQ-035'),
                  dict(t=f'Entregue {r["entregue"]} L pelo almoxarifado à custódia de Marcos · faltam {pend} L'),
                  dict(t=f'Consumo apontado {r["consumido"]} L = 190 ha × 0,50 L/ha (dias 1 a 4: 25, 25, 25 e 20 L)',h='CA-02.dc.html'),
                  dict(t=f'Em custódia = {r["entregue"]} − {r["consumido"]} = {r["custodia"]} L · volta ao estoque só por devolução recebida')])],
-        edit=dict(m='origin',title='Custódia',fields=[dict(k='item',l='Item · lote',ro=True),dict(k='ent',l='Entregue',ro=True,u='L'),dict(k='cons',l='Consumido',ro=True,u='L'),dict(k='cust',l='Em custódia',ro=True,u='L')]),
+        edit=dict(m='origin',title='Custódia',fields=[dict(k='item',l='Item · lote',ro=True),dict(k='sol',l='Solicitado',ro=True,u='L'),dict(k='ent',l='Entregue',ro=True,u='L'),
+                                                     dict(k='cons',l='Consumido',ro=True,u='L'),dict(k='cust',l='Em custódia',ro=True,u='L')]),
         search=False,gid='g_mat',total=False)
     ajuste=idrawer('Ajustar produtos e doses do saldo',dict(title='Ajustar produtos e doses do saldo',
              sub='Gera a v3 só para o saldo de 160 ha; os 190 ha realizados ficam preservados na v2. Ao liberar, as fichas do saldo passam à v3.',
@@ -290,7 +294,7 @@ def _ca01det():
           + imsg('Finalizar apontamento do turno','Turno do dia 4 finalizado · 40 ha provisórios seguem para conferência. A ordem permanece Em execução — finalizar o turno nunca conclui a ordem.','check','Finalizar o turno de hoje (não conclui a ordem)')
           + imsg('Concluir execução','Indisponível: faltam 160 ha sem término físico nem dispensa autorizada do saldo. Execute o saldo ou peça a dispensa ao PCP; com o término físico a ordem entra sozinha em Em conferência.','alert','Concluir a execução (exige término físico)'))
       + bloco('Materiais em custódia da equipe','Confira o que foi entregue, consumido e está com a equipe; clique na linha para ver a origem do saldo.',g_mat,
-          ilink('Requisitar material','SU-07.dc.html','box','Abrir requisições e entregas em Suprimentos') + ilink('Ver consumo e devoluções','CA-04.dc.html','layers','Abrir as requisições da equipe'))
+          ilink('Ver REQ-035 no Estoque','EST.dc.html#req=REQ-035','box','Abrir a requisição da ordem no Estoque: entregas, consumo, devoluções e custódia (um caminho só)'))
       + bloco('Plano, versão e fichas','Ajuste produtos e doses só no saldo; as fichas do caldeiro, do operador e do almoxarife derivam da versão vigente.',
           nota(f'Recomendação de origem: <b style="color:{INK};">fungicida 1ª aplicação · protocolo do plano técnico · v2 aprovada</b>. '
                f'O agrônomo ajusta e libera a v3 só para o saldo; as fichas do saldo passam à v3.'),
@@ -310,12 +314,14 @@ def _ca01x_0420():
     ins=[('Semente de soja 58 W (resistente)','52 kg/ha',area*52,'kg','plano Soja alta tecnologia · decisão do DIA-007'),
          ('KCl 60 %','120 kg/ha · zonas 140 / 120 / 95',area*120,'kg','REC-014 v2 · IAC Boletim 100 · prescrição por zona'),
          ('TS nematicida (abamectina)','100 mL/100 kg de semente',round(area*52/100*0.1,1),'L','REC-014 v2 · bula AGROFIT')]
-    g_ins=grid([dict(k='prod',l='Produto',w=230),dict(k='dose',l='Dose da v2',w=200),dict(k='qtd',l='Quantidade para 100 ha',t='num',a='r'),dict(k='v3',l='Saldo de 70 ha na v3',w=220),dict(k='fonte',l='Fonte',w=260)],
-        [dict(id=f'i{i}',v=dict(prod=p,dose=d,qtd=q,fonte=f,v3=('KCl −12 % → 105,6 kg/ha · em vigor no saldo' if 'KCl' in p else 'sem mudança')),s={},
+    # colunas essenciais (10/10): produto, dose da v2 e o saldo na v3; a quantidade (dose × área) e a fonte ficam no detalhe do produto (origem)
+    g_ins=grid([dict(k='prod',l='Produto',w=230),dict(k='dose',l='Dose da v2',w=200),dict(k='v3',l='Saldo de 70 ha na v3',w=220)],
+        [dict(id=f'i{i}',v=dict(prod=p,dose=d,qtd=q,qtd_t=f'{nf(q,1 if u=="L" else 0)} {u}',fonte=f,v3=('KCl −12 % → 105,6 kg/ha · em vigor no saldo' if 'KCl' in p else 'sem mudança')),s={},
               p=dict(qtd=[Pt.txt(f'{nf(q,1 if u=="L" else 0)} {u}')],v3=([Pt.chip('−12 % · 105,6 kg/ha','green'),Pt.br(),Pt.mut('ajustada por Ana (agrônoma) em 23/09')] if 'KCl' in p else [Pt.mut('sem mudança')])),
               o=[dict(t=f'Recomendação REC-014 v2 · {d}',h='AG-04det.dc.html'),dict(t=f'{nf(area)} ha da 1ª onda da necessidade NEC-028 × dose = {nf(q,1 if u=="L" else 0)} {u}'),dict(t=f'Fonte: {f}')])
          for i,(p,d,q,u,f) in enumerate(ins)],
-        edit=dict(m='origin',title='Instrução',fields=[dict(k='prod',l='Produto',ro=True),dict(k='dose',l='Dose da v2',ro=True),dict(k='v3',l='Saldo na v3',ro=True)]),
+        edit=dict(m='origin',title='Instrução',fields=[dict(k='prod',l='Produto',ro=True),dict(k='dose',l='Dose da v2',ro=True),dict(k='qtd_t',l='Quantidade para 100 ha',ro=True),
+                                                       dict(k='v3',l='Saldo na v3',ro=True),dict(k='fonte',l='Fonte',ro=True)]),
         search=False,gid='g_ins',total=False)
     aps=[('21/09',1,18,'Conferido','app · sincronizado'),('22/09',2,12,'Provisório','offline · sincronizado 12:10 · turno interrompido 06:40 pela quebra do Trator T1')]
     ac=0; arows=[]
@@ -323,19 +329,21 @@ def _ca01x_0420():
         ac+=ha
         arows.append(dict(id=f'a{d}',v=dict(dt=dt,turno=f'Dia {d}',ha=ha,ac=ac,cf=cf,orig=orig),s={},
             p=dict(ac=[Pt.b(f'{ac} / {area} ha')],cf=[Pt.chip(cf,'green' if cf=='Conferido' else 'yellow')],orig=[Pt.mut(orig)])))
-    g_ap=grid([dict(k='dt',l='Data'),dict(k='turno',l='Turno'),dict(k='ha',l='Área do dia',t='num',a='r',u='ha'),dict(k='ac',l='Acumulado',t='num',a='r'),
-               dict(k='cf',l='Conferência'),dict(k='orig',l='Origem · sincronização',w=380)],arows,
-        edit=dict(m='ro',title='Turno',fields=[dict(k='turno',l='Turno',ro=True),dict(k='ha',l='Área do dia',ro=True,u='ha'),dict(k='cf',l='Conferência',ro=True),dict(k='orig',l='Origem',ro=True)]),
+    # a mesma forma dos apontamentos do CA-01det e da O.S. (R-08): data, área do dia e conferência; turno, acumulado e origem no detalhe do turno
+    g_ap=grid([dict(k='dt',l='Data'),dict(k='ha',l='Área do dia',t='num',a='r',u='ha'),dict(k='cf',l='Conferência')],arows,
+        edit=dict(m='ro',title='Turno',fields=[dict(k='turno',l='Turno',ro=True),dict(k='ha',l='Área do dia',ro=True,u='ha'),dict(k='ac',l='Acumulado até este turno',ro=True,u='ha'),
+                                               dict(k='cf',l='Conferência',ro=True),dict(k='orig',l='Origem',ro=True)]),
         search=False,gid='g_ap0420',total=False)
     rq=REQ['REQ-036']; custo=rq['consumido']*9.50
-    g_req=grid([dict(k='req',l='Requisição'),dict(k='item',l='Item',w=200),dict(k='sol',l='Solicitado',t='num',a='r',u='kg'),dict(k='ent',l='Entregue',t='num',a='r',u='kg'),
-                dict(k='cons',l='Consumido',t='num',a='r',u='kg'),dict(k='cust',l='Em custódia',t='num',a='r',u='kg'),dict(k='custo',l='Custo apontado',t='num',a='r',pre='R$ ')],
+    # colunas essenciais (10/10): item, consumido, em custódia e custo apontado; a requisição (ID técnico), o solicitado e o entregue ficam no detalhe
+    g_req=grid([dict(k='item',l='Item',w=200),dict(k='cons',l='Consumido',t='num',a='r',u='kg'),dict(k='cust',l='Em custódia',t='num',a='r',u='kg'),dict(k='custo',l='Custo apontado',t='num',a='r',pre='R$ ')],
         [dict(id='q1',v=dict(req=rq['id'],item=rq['item'],sol=rq['solicitado'],ent=rq['entregue'],cons=rq['consumido'],cust=rq['custodia'],custo=custo),s={},
               p=dict(custo=[Pt.txt('R$ '+nf(custo)),Pt.br(),Pt.mut(f'R$ {nf(custo/real)}/ha realizado')]),
-              o=[dict(t=f'{rq["id"]} · {nf(rq["solicitado"])} kg para 100 ha (52 kg/ha)',h='SU-07.dc.html'),
+              o=[dict(t=f'{rq["id"]} · {nf(rq["solicitado"])} kg para 100 ha (52 kg/ha)',h='EST.dc.html#req=REQ-036'),
                  dict(t=f'Entregue {nf(rq["entregue"])} kg = {real} ha × 52 kg/ha · o restante só sai com o impedimento resolvido'),
                  dict(t=f'Consumo apontado {nf(rq["consumido"])} kg (18 ha + 12 ha) × R$ 9,50/kg = R$ {nf(custo)}',h='CA-02.dc.html')])],
-        edit=dict(m='origin',title='Requisição',fields=[dict(k='req',l='Requisição',ro=True),dict(k='item',l='Item',ro=True),dict(k='cons',l='Consumido',ro=True,u='kg')]),
+        edit=dict(m='origin',title='Requisição',fields=[dict(k='req',l='Requisição',ro=True),dict(k='item',l='Item',ro=True),dict(k='sol',l='Solicitado',ro=True,u='kg'),
+                                                       dict(k='ent',l='Entregue',ro=True,u='kg'),dict(k='cons',l='Consumido',ro=True,u='kg')]),
         search=False,gid='g_req0420',total=False)
     corpo=(
       continuity('REC-014 v2 · necessidade NEC-028','Em execução · Impedida · 30/100 ha','reparo da OM-0233 ou substituto (Trator 02 a partir de 24/09)','Acompanhar OM-0233')
@@ -375,11 +383,15 @@ function EXTRAVALS(self,v){
 '''
 def _ca02():
     fname='CA-02.dc.html'; E._reset_screen(fname)
+    # colunas essenciais (proprietário, 10/10; AUDITORIA COLUNAS §2.1): apontamento, realizado do dia, consumos e sobras, conferência e ação
+    # (R-01: "Conferência · ação" vira duas colunas, as duas decidem). Equipe · conjunto, horas (a divergência já aparece em Consumos), origem e o
+    # acumulado vão ao detalhe do apontamento e continuam na busca da grade
     def row(i,ap,det,sub,eq,real,acum,horas,cons,orig,cf,cfc,acao):
-        return dict(id=f'f{i}',v=dict(ap=ap,eq=eq,real=real,horas=horas,cons=' '.join(p['t'] for p in cons),orig=' '.join(p['t'] for p in orig),cf=cf,motivo=''),
-            s=dict(ap=f'{ap} {sub}'),
-            p=dict(ap=[Pt.link(ap,det) if det else Pt.b(ap),Pt.br(),Pt.mut(sub)],real=[Pt.txt(f'{nf(real)} ha'),Pt.br(),Pt.mut(acum)],horas=[Pt.txt(f'{nf(horas,1)} h')] if horas is not None else [Pt.mut('—')],
-                   eq=_eqp(eq),cons=cons,orig=orig,cf=[Pt.chip(cf,cfc),Pt.br()]+acao))
+        ot=' '.join(p['t'] for p in orig if p.get('t'))
+        return dict(id=f'f{i}',v=dict(ap=ap,eq=eq,real=real,horas=horas,acum=acum,cons=' '.join(p['t'] for p in cons),orig=ot,cf=cf,motivo=''),
+            s=dict(ap=f'{ap} {sub} {eq} {ot}'+(f' {nf(horas,1)} h' if horas is not None else ''),acao=' '.join(p.get('t','') for p in acao)),
+            p=dict(ap=[Pt.link(ap,det) if det else Pt.b(ap),Pt.br(),Pt.mut(sub)],real=[Pt.txt(f'{nf(real)} ha')],
+                   cons=cons,cf=[Pt.chip(cf,cfc)],acao=acao))
     rows=[
      row(1,'OS-0421 · v2','CA-01det.dc.html','Dia 4 · 23/09 · T1','Marcos · PJ-3030 + Trator 03',40,'150 conf. + 40 prov. · saldo 160 ha',7.2,
          [Pt.txt('Fungicida A 20 L'),Pt.br(),Pt.mut('sem sobras')],[Pt.mut('app · sincronizado 17:40')],'A conferir','yellow',
@@ -391,28 +403,16 @@ def _ca02():
          [Pt.txt('Fungicida A 25 L')],[Pt.mut('app · sincronizado')],'Conferido','green',[Pt.link('Ver histórico ›','CA-01det.dc.html')]),
      row(4,'OS-0417 · v1',None,'Final · 21/09 · P1','Paula · Distribuidor DA-08',95,'95 conf. · saldo 0 ha',None,
          [Pt.txt('MAP 100 sc entregues · 70 consumidos'),Pt.br(),Pt.chip('10 sc com Paula a devolver','yellow')],[Pt.mut('almoxarifado · confirmado')],'Divergência de sobras','yellow',
-         [Pt.link('Ver custódia ›','CA-04.dc.html')]),
+         [Pt.link('Ver custódia ›','EST.dc.html#req=REQ-031')]),
     ]
-    g_fila=grid([dict(k='ap',l='Apontamento',w=130),dict(k='eq',l='Equipe · conjunto',w=130),dict(k='real',l='Realizado · acumulado',t='num',w=150),dict(k='horas',l='Horas',t='num',a='r',d=1,u='h'),
-                 dict(k='cons',l='Consumos e sobras',w=190),dict(k='orig',l='Origem · sincronização',w=165),dict(k='cf',l='Conferência · ação',w=170)],
+    g_fila=grid([dict(k='ap',l='Apontamento',w=150),dict(k='real',l='Realizado do dia',t='num',a='r',u='ha'),dict(k='cons',l='Consumos e sobras',w=220),
+                 dict(k='cf',l='Conferência',w=150),dict(k='acao',l='Ação',w=150)],
         rows,edit=dict(m='form',title='Corrigir apontamento',sub='Corrija realizado e horas informando o motivo. A correção gera nova versão; o valor original permanece na trilha e a etapa da ordem não muda.',
-            fields=[dict(k='ap',l='Apontamento',ro=True),dict(k='cf',l='Conferência',ro=True),
+            fields=[dict(k='ap',l='Apontamento',ro=True),dict(k='cf',l='Conferência',ro=True),dict(k='eq',l='Equipe · conjunto',ro=True),
+                    dict(k='acum',l='Acumulado da ordem',ro=True),dict(k='orig',l='Origem · sincronização',ro=True),
                     dict(k='real',l='Realizado do dia',t='num',req=True,min=0,max=200,u='ha'),dict(k='horas',l='Horas de máquina',t='num',min=0,max=24,u='h'),
                     dict(k='motivo',l='Motivo da correção',t='area',req=True,help='Ex.: horímetro lido no fim do turno.')]),
         gid='g_fila',total=False)
-    proj=[('23/09 06:00','Água aplicada antes da reclassificação · 6,7 mm no Pivô 1','fica no balanço hídrico; não é reapontada na fertirrigação','João (irrigante) · balanço hídrico'),
-          ('liberação','Ana (agrônoma) libera a OS-0418 (v2, com ajuste opcional)','passa a Liberadas; a REQ-038 fica disponível para entrega','Ana (agrônoma)'),
-          ('entrega','REQ-038 · Ureia 45 % 1.140 kg com conferência de carga','sai do físico do depósito e passa à custódia de João','Rui (almoxarife) → João'),
-          ('início','Início da fertirrigação no Pivô 1','Em execução: a lâmina já aplicada é descontada, sem duplicar apontamentos','João'),
-          ('turnos','Consumo apontado 1.100 kg em 95 ha','uma única baixa no apontamento; a conferência não repete a baixa','João · conferência de Paula'),
-          ('devolução','40 kg declarados · 40 kg medidos e recebidos','custódia zero','João → Rui (almoxarife)'),
-          ('conciliação','1.140 entregues = 1.100 consumidos + 40 devolvidos','Em conferência · pode encerrar','Paula'),
-          ('encerramento','Encerrar OS-0418','manual, após a conciliação · sem encerramento automático pela água','PCP')]
-    g_proj=grid([dict(k='q',l='Quando',w=130),dict(k='ev',l='Evento',w=320),dict(k='ef',l='Efeito',w=360),dict(k='quem',l='Quem',w=200)],
-        [dict(id=f'p{i}',v=dict(q=q,ev=ev,ef=ef,quem=qm),s={},p=dict(ef=[Pt.chip('sem encerramento automático','gray'),Pt.br(),Pt.mut(ef)] if i==len(proj)-1 else [Pt.txt(ef)]))
-         for i,(q,ev,ef,qm) in enumerate(proj)],
-        edit=dict(m='ro',title='Passo do roteiro',fields=[dict(k='q',l='Quando',ro=True),dict(k='ev',l='Evento',ro=True),dict(k='ef',l='Efeito',ro=True),dict(k='quem',l='Quem',ro=True)]),
-        search=False,gid='g_proj',total=False,headtools=False)
     reabrir=idrawer('Reabrir saldo da OS-0417',dict(title='Reabrir saldo para execução',sub='Volta a Em execução preservando o término anterior e a trilha; a instrução do saldo é revalidada pelo responsável competente.',
              fields=[('Ordem','OS-0417 · Adubação de cobertura'),('Motivo','Falha de aplicação em 5 ha detectada na conferência'),('Saldo a reabrir','5 ha'),('Programação','24/09 · turno da manhã'),('Responsável','PCP · Ana')],
              confirm='Reabrir saldo',done='Reaberta · Em execução'),'calendar','Reabrir saldo de ordem em conferência (conferente ou PCP)')
@@ -426,7 +426,13 @@ def _ca02():
       + bloco('Encerramento','Encerre a ordem só com término físico e todas as condições satisfeitas.',
           nota('Concluir execução não encerra a ordem com custódia, divergência ou conferência pendente.'),
           imsg('Encerrar OS-0417','Indisponível: 10 sc de MAP 11-52 sob custódia de Paula (equipe de campo) · prazo 24/09. Rui recebe a devolução no almoxarifado; ou documente a destinação competente para encerrar.','check','Encerrar a ordem (exige custódia zero e conferência concluída)'))
-      + bloco('Roteiro da OS-0418 após a liberação','Confira como a fertirrigação será liberada, entregue, apontada e conciliada; cenário projetado, a ordem atual segue A liberar.',g_proj,
+      # colunas essenciais (proprietário, 10/10; AUDITORIA COLUNAS §2.1): o roteiro projetado da OS-0418 (tabela Quando, Evento, Efeito, Quem; 4 → 0)
+      # sai da fila: explica, não decide a conferência. O andamento real fica na trilha do detalhe da ordem (O.S. › OS-0418: aprovação e liberação
+      # em registros separados e a trilha do insumo reservado › entregue › consumido › em custódia › devolvido); aqui fica a regra em uma frase
+      + bloco('OS-0418 depois da liberação','A fertirrigação entra nesta fila só depois de liberada; o andamento fica na trilha do detalhe da ordem.',
+          nota('Ana (agrônoma) aprova e libera em registros separados; a REQ-038 (Ureia 45 %, 1.140 kg) passa à custódia de João; o consumo é apontado '
+               'uma vez e a conferência não repete a baixa; a conciliação (entregue = consumido + devolvido) leva a ordem a Em conferência; o PCP encerra '
+               'à mão, nunca pela água. Os 6,7 mm aplicados antes da reclassificação ficam no balanço hídrico.'),
           ilink('Liberar OS-0418','OS.dc.html#OS-0418','check','Abrir a OS-0418 para o agrônomo liberar (pode ajustar)'),tone='yellow'))
     EXTRAJS[0]=FILAJS
     prim=imsg('Conferir 2 apontamentos','Conferidos 2 de 2 · OS-0421 dia 4: 40 ha confirmados (190/350) · OS-0420 dia 2: 12 ha confirmados (30/100), horas acima do previsto registradas. Nenhuma ordem muda de etapa; o selo Impedida da OS-0420 permanece.',
@@ -442,8 +448,9 @@ OCJS=r'''
 function EXTRAVALS(self,v){
   self.g2after=(gid,rows,r)=>{ if(gid!=='g_oc'||!r) return; let novo=false;
     if(!r.v.oc){ const n=116+rows.filter(x=>String(x.id).indexOf('n')===0).length; r.v.oc='OC-'+n; novo=true; }
-    r.p.oc=[{k:'b',t:r.v.oc},{k:'br'},{k:'mut',t:r.v.tipo||''}]; r.s.oc=r.v.oc+' '+(r.v.tipo||'');
-    r.p.local=[{k:'txt',t:r.v.local||''},{k:'br'},{k:'mut',t:r.v.inst||''}]; r.s.local=(r.v.local||'')+' '+(r.v.inst||'');
+    r.p.oc=[{k:'b',t:r.v.oc},{k:'br'},{k:'mut',t:r.v.tipo||''}]; r.s.oc=[r.v.oc,r.v.tipo,r.v.inst,r.v.relato,r.v.evid,r.v.dest].filter(Boolean).join(' ');   /* instante, relato, evidência e destino saíram da grade (10/10) e seguem na busca */
+    r.p.local=[{k:'txt',t:r.v.local||''}]; r.s.local=r.v.local||'';
+    r.v.resp=String(r.v.dest||'').split(' · ').pop(); r.p.resp=[{k:'txt',t:r.v.resp}]; r.s.resp=r.v.resp;   /* quem resolve (R-06); a área de destino fica no detalhe */
     if(novo){ r.p.prox=[{k:'mut',t:'Encaminhada · '+r.v.dest}]; r.s.prox='Encaminhada'; }
     g2set(self,'g_oc',{rows});
     self.setState({g2toast:novo?(r.v.oc+' registrada · encaminhada a '+r.v.dest+' com responsável.'):('Salvo · '+r.v.oc+' atualizada; o tratamento continua no destino.')}); };
@@ -462,10 +469,13 @@ def _ca03():
           [Pt.link('Reprogramar saldo ›','PL-05.dc.html')],False),
          ('OC-111','Vazamento no pivô','P2 · Pivô 2','21/09 05:10','Vazamento na torre 3; reparo executado e documentado','Moderada','Foto do reparo','Irrigação · João',
           [Pt.link('Ver tratamento ›','IR-03.dc.html'),Pt.br(),Pt.mut('encerrada')],True)]
-    rows=[dict(id=oc,ro=ro,v=dict(oc=oc,tipo=tp,local=lc,inst=it,relato=rl,grav=gv,evid=ev,dest=ds),s=dict(oc=f'{oc} {tp}',local=f'{lc} {it}',prox=' '.join(p['t'] for p in px)),
-               p=dict(oc=[Pt.b(oc),Pt.br(),Pt.mut(tp)],local=[Pt.txt(lc),Pt.br(),Pt.mut(it)],grav=[Pt.chip(gv,GRAV[gv])],prox=px)) for oc,tp,lc,it,rl,gv,ev,ds,px,ro in occ]
-    g_oc=grid([dict(k='oc',l='Ocorrência',w=130),dict(k='local',l='Local · instante',w=130),dict(k='relato',l='Relato',w=210),
-               dict(k='grav',l='Gravidade',chips=GRAV),dict(k='evid',l='Evidência',w=110),dict(k='dest',l='Destino · responsável',w=120),dict(k='prox',l='Próxima ação',w=160)],
+    # colunas essenciais (proprietário, 10/10; AUDITORIA COLUNAS §2.1): ocorrência, local, gravidade, quem resolve (R-06) e a próxima ação.
+    # Instante, relato (texto longo), evidência e a área de destino ficam no detalhe da ocorrência (o formulário) e continuam na busca da grade
+    rows=[dict(id=oc,ro=ro,v=dict(oc=oc,tipo=tp,local=lc,inst=it,relato=rl,grav=gv,evid=ev,dest=ds,resp=ds.split(' · ')[-1]),
+               s=dict(oc=f'{oc} {tp} {it} {rl} {ev} {ds}',local=lc,prox=' '.join(p['t'] for p in px)),
+               p=dict(oc=[Pt.b(oc),Pt.br(),Pt.mut(tp)],local=[Pt.txt(lc)],grav=[Pt.chip(gv,GRAV[gv])],prox=px)) for oc,tp,lc,it,rl,gv,ev,ds,px,ro in occ]
+    g_oc=grid([dict(k='oc',l='Ocorrência',w=150),dict(k='local',l='Local',w=150),dict(k='grav',l='Gravidade',chips=GRAV),dict(k='resp',l='Responsável',w=110),
+               dict(k='prox',l='Próxima ação',w=190)],
         rows,edit=dict(m='form',title='Ocorrência',newTitle='Registrar ocorrência',sub='Registre ou ajuste o relato, a gravidade e o destino. O tratamento acontece no módulo de destino, nunca em cópia paralela.',
             fields=[dict(k='tipo',l='Tipo',t='sel',opts=TIPOS,req=True,**{'def':'Quebra de máquina'}),dict(k='local',l='Local',t='txt',req=True,help='Talhão, ordem, lote ou ativo. Ex.: T1 · OS-0421'),
                     dict(k='inst',l='Instante',t='txt',req=True,**{'def':'23/09 15:05'}),dict(k='relato',l='Relato',t='area',req=True),

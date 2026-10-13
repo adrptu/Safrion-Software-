@@ -20,7 +20,6 @@ import json, os
 from engine import (grid,esc,icon,BTN_ST,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,GRAYS,DISP,EXTRA,EXTRAJS,_MINI,_MINIP)
 import engine as E
 from ui37 import shell37, HEIGHTS37
-import ui37
 import dados_manutencao as DM
 
 H=lambda s: '{{'+s+'}}'
@@ -71,7 +70,6 @@ const MA_CH={green:['#1E7A4C','#E4F3E9'],yellow:['#8A5A00','#FFF3D6'],red:['#B42
 const MA_PRIM=__PRIM__, MA_SEC=__SEC__;
 const MA_ETC={'A liberar':'gray','Liberadas':'green','Em execução':'green','Em conferência':'yellow','Encerradas':'gray'};
 const MA_VIS=[{k:'semordem',t:'Sem ordem'},{k:'ordens',t:'Ordens'},{k:'ativos',t:'Ativos'},{k:'planos',t:'Planos'}];
-const MA_NAVST=__NAVST__;   /* menu Manutenção (13/10): estilo do subitem [inativo, ativo]; o destaque segue a visão aberta */
 function ma_G(id){ return GRIDS.find(g=>g.id===id); }
 function ma_chipSt(c){ const k=MA_CH[c]||MA_CH.gray; return 'display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+k[0]+';background:'+k[1]+';'; }
 function ma_dotSt(c){ const k=MA_CH[c]||MA_CH.gray; return 'width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+k[0]+';'; }
@@ -109,8 +107,10 @@ function ma_espera(c,o,pf){ const k=manPf(pf).k, pa=manPapelDe(pf); if(!manAbert
 function ma_ordFila(c){ return Object.values(c.oms).filter(o=>manAberta(o)).sort((a,b)=>(a.janIso||'9').localeCompare(b.janIso||'9')||({'Alta':0,'Média':1,'Baixa':2}[a.crit]-{'Alta':0,'Média':1,'Baixa':2}[b.crit])||a.id.localeCompare(b.id)); }
 function ma_autoAbre(self){ try{ if(!window.matchMedia('(min-width: 1024px)').matches) return; }catch(e){ return; } const st=self.state; if(st.pan||st.pg||st.vis!=='ordens') return;
   const c=manGet(); const o=ma_ordFila(c).find(x=>ma_espera(c,x,g2perfil())); if(o) self.setState({pan:{k:'om',id:o.id,modal:false},rec:null,anun:'Painel da '+o.id+' aberto ao lado.'}); }
-function ma_vis(self,k){ self.setState({vis:k,pg:null,pan:null,rec:null,card:'',fase:'',rot:'',anun:''}); if(k==='ordens') setTimeout(()=>ma_autoAbre(self),0); }
-function ma_abrir(self,k,id,extra){ const r=document.activeElement; if(!self.state.pan) self.__panRet=(r&&r!==document.body&&!(r.closest&&r.closest('#ma-painel')))?r:null;
+function ma_vis(self,k){ self.setState({vis:k,pg:null,pan:null,rec:null,card:'',fase:'',rot:'',otipo:'',anun:''}); if(k==='ordens') setTimeout(()=>ma_autoAbre(self),0); }
+/* foco de volta (COLUNAS-1, 10/10): a ≥1024 px o painel da 1ª OM já vem aberto ao lado (ma_autoAbre); abrir outra linha pelo teclado ou pelo toque
+   também guarda a linha, para o Esc devolver o foco a ela (antes só se guardava com o painel fechado e o foco caía no body) */
+function ma_abrir(self,k,id,extra){ const r=document.activeElement; const fora=!!(r&&r!==document.body&&!(r.closest&&r.closest('#ma-painel'))); if(fora) self.__panRet=r; else if(!self.state.pan) self.__panRet=null;
   self.setState(Object.assign({pan:{k,id,modal:true},rec:null,pf:{},pchave:manChave(),paviso:null},extra||{})); setTimeout(()=>{ const e=document.getElementById('ma-painel'); if(e) e.focus(); },0); }
 function ma_fechar(self){ self.setState({pan:null,rec:null,paviso:null,pf:{},anun:''}); setTimeout(()=>{ const r=self.__panRet; self.__panRet=null; if(r&&document.contains(r)) r.focus(); },0); }
 function ma_pg(self,k,id){ self.setState({pg:{k,id},pan:null,rec:null,blk:{},anun:''}); try{ const m=document.querySelector('main[data-scroll]'); if(m) m.scrollTop=0; }catch(e){} }
@@ -139,29 +139,36 @@ function ma_linhasSemOrdem(self,c,st){ const rows=[]; const hz=st.prazo==='venc'
     if(st.fgrupo&&l.a.grupo!==st.fgrupo) return; if(st.fplano&&l.pid!==st.fplano) return; if(st.fcrit) return;
     const pc=ma_pecasTxt(c,l.s); const prz=venc?manSitTxt(c,l.x):(l.x.sit==='Vence em breve'?'Em breve · janela abre '+(ini<=0?'hoje':'em '+Math.ceil(ini)+' d'):'Em dia · janela abre em '+Math.ceil(ini)+' d');
     const a=l.a; const k=l.vk+'#'+l.sid; const vid=l.pid+'|'+l.aid+'|'+l.sid;
-    rows.push({id:'v:'+vid,k:'venc',key:k,venc:venc,devida:manDevida(l),v:{prazo:(venc?1000:2000)+ini,item:l.pid},s:{item:l.pid+' v'+l.p.versao+' vencimento',ativo:a.nome,oque:l.s.nome,prazo:prz,pecas:pc.t,prox:manDevida(l)?'Gerar ordem preventiva':'Aguardar a janela'},
-      p:{item:[{k:'link',t:l.pid+' v'+l.p.versao,h:'#venc='+vid},{k:'mut',t:'· vencimento'}],ativo:[{k:'b',t:a.nome},{k:'mut',t:'· '+manLeitTxt(a)}].concat(ma_selosAtv(c,a)).concat(l.est?[ma_ch('Marco estimado','yellow')]:[]),
-         oque:[{k:'txt',t:l.s.nome},{k:'br',t:''},{k:'mut',t:manGatTxt(l.s)}],prazo:[ma_ch(prz,venc?'red':(l.x.sit==='Vence em breve'?'yellow':'gray'))],pecas:pc.c?[ma_ch(pc.t,'red')]:[{k:'mut',t:pc.t}],
+    /* colunas essenciais (proprietário, 10/10; AUDITORIA COLUNAS §2.2 e §1.6): a versão do plano, a periodicidade e a leitura do ativo vão ao painel
+       do vencimento (Versão, Periodicidade, cálculo com a leitura) e seguem na busca; os selos do ativo (bloqueado, leitura a confirmar) ficam (R-13) */
+    rows.push({id:'v:'+vid,k:'venc',key:k,venc:venc,devida:manDevida(l),v:{prazo:(venc?1000:2000)+ini,item:l.pid},s:{item:l.pid+' v'+l.p.versao+' vencimento',ativo:a.nome+' '+manLeitTxt(a),oque:l.s.nome+' '+manGatTxt(l.s),prazo:prz,pecas:pc.t,prox:manDevida(l)?'Gerar ordem preventiva':'Aguardar a janela'},
+      p:{item:[{k:'link',t:l.pid,h:'#venc='+vid},{k:'mut',t:'· vencimento'}],ativo:[{k:'b',t:a.nome}].concat(ma_selosAtv(c,a)).concat(l.est?[ma_ch('Marco estimado','yellow')]:[]),
+         oque:[{k:'txt',t:l.s.nome}],prazo:[ma_ch(prz,venc?'red':(l.x.sit==='Vence em breve'?'yellow':'gray'))],pecas:pc.c?[ma_ch(pc.t,'red')]:[{k:'mut',t:pc.t}],
          prox:[{k:'txt',t:manDevida(l)?'Gerar ordem preventiva':'Aguardar a janela'}]}}); });
   if(st.tipo!=='venc') Object.values(c.achados).filter(q=>q.estado==='Sem ordem').forEach(q=>{ const a=c.ativos[q.aid]; if(!a) return;
     if(st.fgrupo&&a.grupo!==st.fgrupo) return; if(st.fplano) return; if(st.fcrit&&q.crit!==st.fcrit) return;
     const op=manAchOpcoes(c,q.id); const grave=q.crit==='Alta'||q.sug==='Bloqueado'; const prz=q.voltou?('Voltou da '+q.voltou):(q.crit+' · desde '+manBr(q.oc[0]||q.em));
-    rows.push({id:'a:'+q.id,k:'achado',crit:grave,v:{prazo:(grave?0:3000)+manDias(q.em,c.hoje)*-1,item:q.id},s:{item:q.id+' '+q.origem,ativo:a.nome,oque:q.comp+' '+q.sint,prazo:prz,pecas:'—',prox:op.prim?op.prim.t:''},
-      p:{item:[{k:'link',t:q.id,h:'#achado='+q.id},{k:'mut',t:'· '+q.origem.toLowerCase()}].concat(q.nova?[ma_ch('Nova','yellow')]:[]),ativo:[{k:'b',t:a.nome},{k:'mut',t:'· '+manLeitTxt(a)}].concat(ma_selosAtv(c,a)),
+    rows.push({id:'a:'+q.id,k:'achado',crit:grave,v:{prazo:(grave?0:3000)+manDias(q.em,c.hoje)*-1,item:q.id},s:{item:q.id+' '+q.origem,ativo:a.nome+' '+manLeitTxt(a),oque:q.comp+' '+q.sint,prazo:prz,pecas:'—',prox:op.prim?op.prim.t:''},
+      p:{item:[{k:'link',t:q.id,h:'#achado='+q.id},{k:'mut',t:'· '+q.origem.toLowerCase()}].concat(q.nova?[ma_ch('Nova','yellow')]:[]),ativo:[{k:'b',t:a.nome}].concat(ma_selosAtv(c,a)),
          oque:[{k:'txt',t:q.comp+' · '+q.sint}].concat(q.oc.length>1?[{k:'mut',t:'· '+q.oc.length+' ocorrências'}]:[]),prazo:[ma_ch(prz,q.voltou?'yellow':(grave?'red':(q.crit==='Média'?'yellow':'gray')))],pecas:[{k:'mut',t:'—'}],
          prox:[{k:'txt',t:op.prim?op.prim.t:'—'}].concat(q.sug!=='Apto'?[{k:'br',t:''},ma_ch('Sugere '+q.sug,q.sug==='Bloqueado'?'red':'yellow')]:[])}}); });
   rows.sort((x,y)=>x.v.prazo-y.v.prazo); return rows; }
 function ma_pendTxt(c,o){ const s=manSelos(c,o); if(!s.length) return null; const p=s[0]; return {t:p.t+(p.dono?' · '+p.dono:'')+(p.prazo?' · '+p.prazo:''),c:p.c,n:s.length-1}; }
 /* filtro "Com conflito" em Ordens (F25/F26): conflito com a produção calculado sobre AL e registro do app a resolver */
 function ma_temConf(c,o){ return !!(((o.etapa==='A liberar'||o.etapa==='Liberadas')&&manConflito(c,o)&&!o.conflitoAceito)||o.conflitoApp); }
+/* tipo da OM para o filtro Tipo fora da grade (a coluna "Serviço · tipo" virou "Serviço"; AUDITORIA COLUNAS §1.5: o filtro sai da grade antes do tipo) */
+const MA_TIPOS=['Preventiva','Corretiva','Pendência'];
+function ma_tipoOm(o){ return o.tipo==='Preventiva'||o.tipo==='Corretiva'?o.tipo:'Pendência'; }
+function ma_tipoTxt(o){ return o.tipo==='Preventiva'?('Preventiva · '+o.pid+' v'+o.ver):(o.tipo==='Corretiva'?('Corretiva · '+o.crit):'Pendência'); }
+/* colunas essenciais (proprietário, 10/10; AUDITORIA COLUNAS §2.2): Ordem, Ativo, Serviço, Janela, Fase, Pendência e Executante; tipo, criticidade,
+   plano, tempo e custo ficam no painel da OM (cabeçalho, "Custo e tempos") e no bloco Ordens do ativo (d_om: Serviço · tipo e Custo) e seguem na busca */
 function ma_linhaOm(c,o){ const a=c.ativos[o.aid]; const p=ma_pendTxt(c,o); const fin=o.etapa==='Encerradas'; const custo=fin?manCustoFinal(c,o):manCusto(c,o,'est');
-  const tt=o.tipo==='Preventiva'?(o.serv+' · Preventiva · '+o.pid+' v'+o.ver):(o.tipo==='Corretiva'?((o.comp?o.comp:'Corretiva')+' · '+o.crit):'Pendência · '+o.serv);
-  const ex=manExecSug(o); const real=o.exec&&o.exec.horas!==undefined?(' · '+manN(o.exec.horas,1)+' h real'):'';
-  return {id:o.id,v:{jan:o.janIso||'',custo,tempo:Number(o.tempo)||0,ord:(fin?'z'+String(9e13-manT(o.exec&&o.exec.data||o.janIso||'2000-01-01')).padStart(16,'0'):'a'+(o.janIso||'9')+({'Alta':0,'Média':1,'Baixa':2}[o.crit]||1))},
-    s:{om:o.id+' '+(a?a.nome:''),serv:tt,fase:o.etapa,pend:p?p.t:'',exe:o.executante||(ex?ex+' (sugerido)':'—'),tempo:(Number(o.tempo)>0?manN(o.tempo,1)+' h prev.':'sem tempo')+real,custo:manRS(custo)+(fin?'':' est.'),jan:o.jan||''},
-    p:{om:[{k:'link',t:o.id,h:'#om='+o.id},{k:'br',t:''},{k:'mut',t:a?a.nome:''}],serv:[{k:'txt',t:o.serv},{k:'br',t:''},{k:'mut',t:o.tipo==='Preventiva'?('Preventiva · '+o.pid+' v'+o.ver):(o.tipo+' · '+o.crit)}],
+  const tt=ma_tipoTxt(o); const ex=manExecSug(o);
+  return {id:o.id,v:{jan:o.janIso||'',custo,ord:(fin?'z'+String(9e13-manT(o.exec&&o.exec.data||o.janIso||'2000-01-01')).padStart(16,'0'):'a'+(o.janIso||'9')+({'Alta':0,'Média':1,'Baixa':2}[o.crit]||1))},
+    s:{om:o.id+' '+(a?a.nome:'')+' '+tt+(o.comp?' '+o.comp:''),ativo:a?a.nome:'',serv:o.serv,servt:o.serv+' '+tt,fase:o.etapa,pend:p?p.t:'',exe:o.executante||(ex?ex+' (sugerido)':'—'),custo:manRS(custo)+(fin?'':' est.'),jan:o.jan||''},
+    p:{om:[{k:'link',t:o.id,h:'#om='+o.id}],ativo:[{k:'txt',t:a?a.nome:''}],serv:[{k:'txt',t:o.serv}],servt:[{k:'txt',t:o.serv},{k:'br',t:''},{k:'mut',t:tt}],
        jan:[{k:'txt',t:o.jan||'—'}],fase:[ma_ch(o.etapa,MA_ETC[o.etapa]||'gray')],pend:p?[ma_ch(p.t,p.c)].concat(p.n?[{k:'mut',t:'+'+p.n}]:[]):[{k:'mut',t:'—'}],
-       exe:o.executante?[{k:'txt',t:o.executante}]:(ex?[{k:'mut',t:ex+' (sugerido)'}]:[ma_ch('Falta: executante','red')]),tempo:[{k:'txt',t:Number(o.tempo)>0?manN(o.tempo,1)+' h prev.':'sem tempo'}].concat(real?[{k:'br',t:''},{k:'mut',t:real.slice(3)}]:[]),
+       exe:o.executante?[{k:'txt',t:o.executante}]:(ex?[{k:'mut',t:ex+' (sugerido)'}]:[ma_ch('Falta: executante','red')]),
        custo:[{k:'txt',t:manRS(custo)+(fin?'':' est.')}]}}; }
 function ma_prox(c,a){ const ls=manLinhas(c).filter(l=>l.aid===a.id&&l.s&&l.x.gats.length); const ord={'Vencida':0,'Vence em breve':1,'Em dia':2};
   ls.sort((x,y)=>(ord[x.x.sit]-ord[y.x.sit])||(manIniJanela(x.x)-manIniJanela(y.x))); if(!ls.length) return null; return {l:ls[0],n:ls.length-1}; }
@@ -171,24 +178,36 @@ function ma_linhaAtv(c,a,per){ const px=ma_prox(c,a); const abertas=Object.value
   const abp=[]; ab.forEach((x,j)=>{ if(j) abp.push({k:'br',t:''}); abp.push(x); });
   const pend=[]; if(a.suspeita) pend.push('Leitura a confirmar'); if(!manLinhas(c).some(l=>l.aid===a.id)) pend.push('Sem plano'); if(achs.length) pend.push('Achado sem ordem');
   if(cons&&cons.desvio!==null&&Math.abs(cons.desvio)>=15) pend.push('Desvio de consumo'); if(px&&px.l.x.prev&&manDias(c.hoje,px.l.x.prev)<=30) pend.push('Vence em 30 d'); if(manRestricaoVencida(c,a)) pend.push('Restrição vencida');
-  return {id:a.id,pend,v:{custo:cp.enc,cond:{'Bloqueado':0,'Restrito':1,'Apto':2}[a.cond],prox:px?(px.l.x.prev?manT(px.l.x.prev)/864e5:9e9):9e9,leit:a.leit?a.leit.val:null},
-    s:{ativo:a.nome+' '+a.modelo+' '+a.local+' '+a.grupo,cond:a.cond,leit:a.leit?manLeitTxt(a):'sem contador',prox:px?(px.l.s.nome+' '+px.l.x.sit):'Sem plano',ab:abertas.map(o=>o.id).join(' ')+' '+achs.map(q=>q.id).join(' '),cons:cons?cons.t:'— sem método',grupo:a.grupo},
-    p:{ativo:[{k:'link',t:a.nome,h:'#ativo='+a.id},{k:'mut',t:'· '+a.modelo+' · '+a.local}],cond:[ma_ch(a.cond+(a.cond==='Bloqueado'&&i.desde?' · desde '+manBr(i.desde):'')+(a.cond==='Restrito'&&i.ate?' · até '+manBr(i.ate):''),ma_cond(a))].concat(manRestricaoVencida(c,a)?[ma_ch('Restrição vencida','yellow')]:[]),
-       leit:a.leit?[{k:'txt',t:manLeitTxt(a)}].concat(a.suspeita?[ma_ch('a confirmar','yellow')]:(manAntiga(c,a)?[ma_ch('de '+manBr(a.leit.data),'yellow')]:[])):[{k:'mut',t:'sem contador'}],
+  /* colunas essenciais (10/10): a leitura e o consumo vão à página do ativo (cabeçalho, "Leituras e abastecimentos", "Custo e desempenho") e o local ao
+     cabeçalho dela; o que pede ação sobe para Em aberto, antes das ordens (à vista também a 390 px): leitura a confirmar, leitura antiga e desvio de consumo */
+  const avisos=[]; if(a.suspeita) avisos.push(ma_ch('Leitura a confirmar','yellow')); else if(a.leit&&manAntiga(c,a)) avisos.push(ma_ch('Leitura de '+manBr(a.leit.data),'yellow'));
+  if(cons&&cons.desvio!==null&&Math.abs(cons.desvio)>=15) avisos.push(ma_ch('Desvio de consumo '+(cons.desvio>0?'+':'')+manN(cons.desvio)+' %','yellow'));
+  const abx=avisos.concat(avisos.length&&abp.length?[{k:'br',t:''}]:[]).concat(abp);
+  return {id:a.id,pend,v:{custo:cp.enc,cond:{'Bloqueado':0,'Restrito':1,'Apto':2}[a.cond],prox:px?(px.l.x.prev?manT(px.l.x.prev)/864e5:9e9):9e9},
+    s:{ativo:a.nome+' '+a.modelo+' '+a.local+' '+a.grupo+' '+(a.leit?manLeitTxt(a):'sem contador')+' '+(cons?cons.t:''),cond:a.cond,prox:px?(px.l.s.nome+' '+px.l.x.sit):'Sem plano',
+       ab:avisos.map(x=>x.t).concat(abertas.map(o=>o.id),achs.map(q=>q.id)).join(' ')||'—',grupo:a.grupo},
+    p:{ativo:[{k:'link',t:a.nome,h:'#ativo='+a.id},{k:'mut',t:'· '+a.modelo}],cond:[ma_ch(a.cond+(a.cond==='Bloqueado'&&i.desde?' · desde '+manBr(i.desde):'')+(a.cond==='Restrito'&&i.ate?' · até '+manBr(i.ate):''),ma_cond(a))].concat(manRestricaoVencida(c,a)?[ma_ch('Restrição vencida','yellow')]:[]),
        prox:px?[ma_ch(px.l.x.sit,MAN_SITC[px.l.x.sit]||'gray'),{k:'txt',t:px.l.s.nome+' · '+manProxTxt(c,px.l.x)}].concat(px.n?[{k:'mut',t:'+'+px.n}]:[]):[{k:'mut',t:'Sem plano'}],
-       ab:abp.length?abp:[{k:'mut',t:'—'}],cons:cons?[{k:'txt',t:cons.t}].concat(cons.desvio!==null&&Math.abs(cons.desvio)>=15?[ma_ch((cons.desvio>0?'+':'')+manN(cons.desvio)+' %','yellow')]:[]):[{k:'mut',t:'— sem método'}]}}; }
+       ab:abx.length?abx:[{k:'mut',t:'—'}]}}; }
 /* consumo pelo último lançamento com método (tanque cheio a tanque cheio; PRD CAL-07); sem método, "—" */
 function ma_consumo(c,a){ const bs=(c.abast||[]).filter(b=>b.aid===a.id&&!b.tipo&&b.qual!=='Estornado').sort((x,y)=>(y.data+(y.hora||'')).localeCompare(x.data+(x.hora||'')));
   for(const b of bs){ const lh=manLh(c,b); if(lh&&lh.lh!==null){ const dv=(a.lh&&lh.un==='L/h')?Math.round((lh.lh/a.lh-1)*100):null; return {t:manConsTxt(lh)+' · tanque cheio',lh:lh.lh,un:lh.un,desvio:dv,b:b.id}; } } return null; }
 function ma_linhaAb(c,b){ const a=c.ativos[b.aid]||{nome:b.aid}; const lh=manLh(c,b); const qc={'Confirmada':'green','A confirmar':'yellow','Troca de contador':'green','Descartada':'gray','Estornado':'gray','Estorno':'gray','Substituída':'gray'}[b.qual]||'gray';
-  return {id:b.id,v:{vol:b.vol,data:b.data+' '+(b.hora||''),lh:lh?Math.round(lh.lh*10)/10:null},s:{id:b.id+' '+b.op+' '+(b.evid||''),ativo:a.nome,tq:b.tq,data:manBr(b.data)+' '+(b.hora||''),met:b.tipo?'Estorno':(lh?'Tanque cheio':(b.cheio?'Tanque cheio (sem anterior)':'Estimada')),qual:b.qual},
-    p:{id:[{k:'link',t:b.id,h:'#leitura='+b.id},{k:'br',t:''},{k:'mut',t:b.op+(b.evid?' · '+b.evid:' · sem evidência')}],ativo:[{k:'txt',t:a.nome}],tq:[{k:'txt',t:b.tq}],
-       data:[{k:'txt',t:manBr(b.data)+' '+(b.hora||'')}].concat(b.leit!==null&&b.leit!==undefined?[{k:'br',t:''},{k:'mut',t:manQ(b.leit,b.un)}]:[]),met:[{k:'txt',t:b.tipo?('Estorno de '+b.ref):(lh?'Tanque cheio':(b.cheio?'Tanque cheio · sem anterior':'Estimada'))}],
+  /* colunas essenciais (10/10): operador, evidência, tanque/lote, método e a leitura vão ao painel do lançamento (e seguem na busca); o tanque se filtra
+     pelo seletor "Tanque/lote" fora da grade (AUDITORIA COLUNAS §1.5: o filtro sai da grade antes da coluna) */
+  const met=b.tipo?('Estorno de '+b.ref):(lh?'Tanque cheio':(b.cheio?'Tanque cheio · sem anterior':'Estimada'));
+  return {id:b.id,v:{vol:b.vol,data:b.data+' '+(b.hora||''),lh:lh?Math.round(lh.lh*10)/10:null},s:{id:b.id+' '+b.op+' '+(b.evid||'sem evidência')+' '+b.tq+' '+met+(b.leit!==null&&b.leit!==undefined?' '+manQ(b.leit,b.un):''),ativo:a.nome,data:manBr(b.data)+' '+(b.hora||''),qual:b.qual},
+    p:{id:[{k:'link',t:b.id,h:'#leitura='+b.id}],ativo:[{k:'txt',t:a.nome}],
+       data:[{k:'txt',t:manBr(b.data)+' '+(b.hora||'')}],
        lh:lh?[{k:'txt',t:manConsTxt(lh)}]:[{k:'mut',t:'—'}],qual:[ma_ch(b.qual,qc)].concat(b.estorno?[{k:'mut',t:'· '+b.estorno}]:[])}}; }
 function ma_linhaPl(c,p){ const e=pmEst(p); const nv=pmVincs(c,p.id).length; const cand=pmCands(c,p).length; const si=pmSit(c,p); const sem=manLinhas(c,p.id).filter(l=>l.s&&manDevida(l)&&!l.om&&!l.dup).length;
-  return {id:p.id,v:{},s:{nome:p.id+' '+p.nome,est:e[0],apl:manAplTxt(c,p),svs:manWork(p).map(s=>s.nome).join(', '),atv:nv+' vinculados de '+(nv+cand),sit:si.t+(sem?' · '+sem+' sem ordem':''),grupo:p.grupo},
-    p:{nome:[{k:'link',t:p.id,h:'#plano='+p.id},{k:'mut',t:'· '+p.nome}],est:[ma_ch(e[0],e[1])],apl:[{k:'txt',t:manAplTxt(c,p)}],svs:[{k:'txt',t:manWork(p).map(s=>s.nome).join(' · ')||'—'}],
-       atv:[{k:'txt',t:nv+(nv===1?' vinculado de ':' vinculados de ')+(nv+cand)}],sit:[ma_ch(si.t,si.c)].concat(sem?[{k:'link',t:sem+' sem ordem',h:'#vis=semordem&plano='+p.id}]:[])}}; }
+  /* colunas essenciais (10/10; AUDITORIA COLUNAS §1.6, item 4): Aplica-se a, Serviços e o contador de Ativos vão à página do plano (cabeçalho, Serviços,
+     Ativos vinculados) e seguem na busca; a falta parcial de vínculo (ativo que o plano alcança e não está vinculado) vira pendência na Situação (R-16) */
+  const pv=nv>0&&cand>0?ma_semVincTxt(p,cand):'';
+  return {id:p.id,v:{},s:{nome:p.id+' '+p.nome+' '+manAplTxt(c,p)+' '+manWork(p).map(s=>s.nome).join(' '),est:e[0],sit:si.t+(sem?' · '+sem+' sem ordem':'')+(pv?' · '+pv:''),grupo:p.grupo},
+    p:{nome:[{k:'link',t:p.id,h:'#plano='+p.id},{k:'mut',t:'· '+p.nome}],est:[ma_ch(e[0],e[1])],
+       sit:[ma_ch(si.t,si.c)].concat(sem?[{k:'link',t:sem+' sem ordem',h:'#vis=semordem&plano='+p.id}]:[]).concat(pv?[ma_ch(pv,'yellow')]:[])}}; }
+function ma_semVincTxt(p,n){ return n+(n>1?' ativos ':' ativo ')+(p.aplica.t==='modelo'?'do modelo':'indicado')+' sem vínculo'; }
 /* ---------- Ver como (simulação) e menu ⋯ ---------- */
 function ma_verComo(self,v){ const pf=g2perfil();
   v.vc=MA_PERFIS.map(k=>{ const q=g2pf(k)||{k,t:k}; const on=pf.k===k; return {t:k,on:String(on),tit:'Ver como '+q.t+' (simulação; não é segurança de acesso)',st:ma_pill(on),
@@ -215,13 +234,14 @@ function PREVALS(self,v){ manOuvir(self); const c=manGet(); const st=self.state;
   const fim=(o)=>o.etapa==='Encerradas'; const dom=manAdd(c.hoje,7-new Date(manT(c.hoje)).getUTCDay());
   let oF=os; if(st.fase) oF=oF.filter(o=>o.etapa===st.fase);
   if(st.rot==='voce') oF=oF.filter(o=>ma_espera(c,o,pf)); else if(st.rot==='semana') oF=oF.filter(o=>!fim(o)&&o.janIso&&o.janIso<=dom); else if(st.rot==='conf') oF=oF.filter(o=>ma_temConf(c,o));
+  if(st.otipo) oF=oF.filter(o=>ma_tipoOm(o)===st.otipo);
   if(st.card==='criticas') oF=oF.filter(o=>!fim(o)&&o.crit==='Alta'); else if(st.card==='sobras') oF=oF.filter(o=>(o.pecas||[]).some(p=>p.sob>0)); else if(st.card==='peca') oF=oF.filter(o=>manFalta(c,o).length);
   const oR=oF.map(o=>ma_linhaOm(c,o)).sort((a,b)=>String(a.v.ord).localeCompare(String(b.v.ord)));
   ma_G('g_om').rows=oR; self.__om=oR;
   /* Ativos e abastecimentos */
   const at=c.ordem.map(id=>c.ativos[id]).filter(Boolean).map(a=>ma_linhaAtv(c,a,per)).filter(r=>(!st.fpend||r.pend.indexOf(st.fpend)>=0)&&(st.card!=='naoaptos'||r.s.cond!=='Apto'))
     .sort((a,b)=>(a.v.cond-b.v.cond)||(a.v.prox-b.v.prox));
-  ma_G('g_at').rows=at; ma_G('g_ab').rows=(c.abast||[]).slice().sort((x,y)=>(y.data+(y.hora||'')).localeCompare(x.data+(x.hora||''))).map(b=>ma_linhaAb(c,b));
+  ma_G('g_at').rows=at; ma_G('g_ab').rows=(c.abast||[]).filter(b=>!st.ftq||b.tq===st.ftq).sort((x,y)=>(y.data+(y.hora||'')).localeCompare(x.data+(x.hora||''))).map(b=>ma_linhaAb(c,b));
   /* Planos */
   ma_G('g_pl').rows=pmPlans(c).map(p=>ma_linhaPl(c,p));
   /* detalhe do ativo */
@@ -251,7 +271,6 @@ function PREVALS(self,v){ manOuvir(self); const c=manGet(); const st=self.state;
 MA_JS+=r'''
 function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2perfil(); const vis=st.vis||'semordem';
   ma_verComo(self,v); ma_hashSync(st);
-  MA_VIS.forEach(x=>{ const on=!st.pg&&x.k===vis; v['navvis_'+x.k]=MA_NAVST[on?1:0]; v['navvis_'+x.k+'_cur']=on?'page':'false'; });   /* subitem do menu = visão aberta (no detalhe, nenhum) */
   const lista=!st.pg; v.lista=lista; v.pg_ativo=!!(st.pg&&st.pg.k==='ativo'&&c.ativos[st.pg.id]); v.pg_plano=!!(st.pg&&st.pg.k==='plano'&&c.planos[st.pg.id]);
   ['semordem','ordens','ativos','planos'].forEach(k=>{ v['v_'+k]=lista&&vis===k; });
   self.g2pick=(gid,rid)=>{ self.__lastRow=rid; const cc=manGet();
@@ -296,6 +315,7 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2pe
   const nVoce=os.filter(o=>ma_espera(c,o,pf)).length; const dom=manAdd(c.hoje,7-new Date(manT(c.hoje)).getUTCDay());
   v.rotinas=[{t:'Aguardam você · '+nVoce,on:String(st.rot==='voce'),st:ma_pill(st.rot==='voce'),go:()=>self.setState({rot:st.rot==='voce'?'':'voce'})},{t:'Esta semana',on:String(st.rot==='semana'),st:ma_pill(st.rot==='semana'),go:()=>self.setState({rot:st.rot==='semana'?'':'semana'})},
     {t:'Com conflito · '+os.filter(o=>ma_temConf(c,o)).length,on:String(st.rot==='conf'),st:ma_pill(st.rot==='conf'),go:()=>self.setState({rot:st.rot==='conf'?'':'conf'})}];
+  v.om_tipos=chs([['','Todos os tipos']].concat(MA_TIPOS.map(t=>[t,t])),st.otipo||'',k=>self.setState({otipo:k}));
   v.om_lista=(st.omodo||'lista')==='lista'; v.om_kanban=st.omodo==='kanban';
   v.om_modos=[['lista','Lista'],['kanban','Kanban']].map(([k,t])=>({t,on:String((st.omodo||'lista')===k),st:ma_pill((st.omodo||'lista')===k),go:()=>self.setState({omodo:k})}));
   v.semana=st.rot==='semana'; const dias={}; os.filter(o=>manAberta(o)&&o.janIso&&o.janIso<=dom).forEach(o=>{ const d=o.janIso<c.hoje?'vencidas':o.janIso; (dias[d]=dias[d]||[]).push(o); });
@@ -315,6 +335,8 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2pe
     card('','Custo de manutenção · '+P.t,manRS(cp.enc),'das OMs encerradas no sistema · em andamento '+manRS(cp.and)+' est.'),card('','MTBF · MTTR','não estimável','sem histórico de falhas (KPI-PCM-02)')];
   v.at_ativos=(st.amodo||'ativos')==='ativos'; v.at_abast=st.amodo==='abast';
   v.at_modos=[['ativos','Ativos'],['abast','Abastecimentos']].map(([k,t])=>({t,on:String((st.amodo||'ativos')===k),st:ma_pill((st.amodo||'ativos')===k),go:()=>self.setState({amodo:k})}));
+  const tqs=[]; (c.abast||[]).forEach(b=>{ if(b.tq&&tqs.indexOf(b.tq)<0) tqs.push(b.tq); });
+  v.f_tqs=[{v:'',t:'Todos os tanques e lotes'}].concat(tqs.map(t=>({v:t,t}))); v.f_tq=st.ftq||''; v.f_settq=(e)=>self.setState({ftq:e.target.value});
   v.f_pends=[{v:'',t:'Toda pendência'}].concat(['Leitura a confirmar','Sem plano','Achado sem ordem','Desvio de consumo','Vence em 30 d','Restrição vencida'].map(x=>({v:x,t:x}))); v.f_pend=st.fpend||''; v.f_setpend=(e)=>self.setState({fpend:e.target.value});
   /* Planos: linha calculada dos ativos sem plano */
   const sp=pmSemPlano(c); v.tem_sem=sp.length>0; v.sem_n=sp.length+(sp.length>1?' ativos sem plano':' ativo sem plano'); v.sem=sp.map(a=>({t:a.nome,lab:'Criar plano para '+a.nome,go:()=>pmNovo(self,manGet(),a.id)}));
@@ -452,7 +474,7 @@ function ma_cas(self,c,lst,pf){ const pd=manPode(c,pf,'decidir');
 function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const a=c.ativos[o.aid]; const cur=MAN_FASES.indexOf(o.etapa);
   if(!self.__rv||self.__rv.id!==o.id) self.__rv={id:o.id,rv:o.rv||0};   /* A11: versão lida ao abrir o painel */
   v.om_cas=ma_cas(self,c,manAppConfAbertos(c,o.id),pf); v.om_hasCa=v.om_cas.length>0;
-  v.pan_t=o.id+' · '+(a?a.nome:''); v.pan_sub=(String(o.serv||'').indexOf(o.tipo)===0?o.serv:o.tipo+(o.pid?' · '+o.pid+' v'+o.ver:'')+' · '+o.serv); v.om_ah='#ativo='+o.aid; v.om_at='Abrir '+(a?a.nome:'ativo')+' ›'; v.om_goAt=()=>ma_pg(self,'ativo',o.aid);
+  v.pan_t=o.id+' · '+(a?a.nome:''); v.pan_sub=(String(o.serv||'').indexOf(o.tipo)===0?o.serv:o.tipo+(o.pid?' · '+o.pid+' v'+o.ver:'')+' · '+o.serv)+(o.tipo!=='Preventiva'&&o.crit?' · criticidade '+o.crit:'');   /* tipo, plano e criticidade saíram da linha das Ordens (COLUNAS-1, 10/10): o cabeçalho do painel os mostra */ v.om_ah='#ativo='+o.aid; v.om_at='Abrir '+(a?a.nome:'ativo')+' ›'; v.om_goAt=()=>ma_pg(self,'ativo',o.aid);
   v.om_fases=MAN_FASES.map((x,i)=>({t:x,cur:i===cur?'step':'false',st:'display:flex;flex-direction:column;gap:5px;font-size:11.5px;font-weight:'+(i===cur?'800':'600')+';color:'+(i<=cur?'#15201A':'#8A968E')+';',
     bst:'height:5px;border-radius:999px;background:'+(i<cur?'#9CCBB0':(i===cur?'#1E7A4C':'#E4E9E5'))+';'}));
   const pr=ma_omPrim(self,c,o,pf,f); const sl=manSelos(c,o); const p0=sl[0];
@@ -548,7 +570,7 @@ MA_JS+=r'''
 function ma_panAch(self,v,c,q,pf){ const st=self.state; const f=st.pf||{}; const a=c.ativos[q.aid];
   v.pan_t=q.id+' · '+(a?a.nome:''); v.pan_sub=q.origem+' · '+q.comp+' · '+(q.estado==='Na OM'?'na '+q.om:q.estado);
   v.ac_kv=[{l:'Sintoma',v:q.sint},{l:'Componente',v:q.comp},{l:'Origem',v:q.origem+(q.os?' · '+q.os:'')},{l:'Ocorrências',v:q.oc.length+' · '+q.oc.map(manBr).join(', ')},
-    {l:'Evidência',v:q.evid||'Sem evidência'},{l:'Leitura',v:(q.leit!==''&&q.leit!==undefined&&a&&a.un)?manQ(q.leit,a.un):'—'},{l:'Condição sugerida',v:q.sug},{l:'Registrado por',v:(q.por||'—')+' · '+manBr(q.em)},
+    {l:'Evidência',v:q.evid||'Sem evidência'},{l:'Leitura',v:(q.leit!==''&&q.leit!==undefined&&a&&a.un)?manQ(q.leit,a.un):'—'},{l:'Leitura atual do ativo',v:manLeitTxt(a)},{l:'Condição sugerida',v:q.sug},{l:'Registrado por',v:(q.por||'—')+' · '+manBr(q.em)},
     {l:'Responsável técnico',v:manRtTxt(a)},{l:'Estado',v:(q.estado==='Na OM'?'Na '+q.om:q.estado)+(q.voltou&&q.estado==='Sem ordem'?' · voltou da '+q.voltou:'')+(q.mot?' · '+q.mot:'')}];
   v.ac_semEvid=!q.evid; v.ac_nova=!!q.nova;
   const pd=manPode(c,pf,'decidir'); const ed=q.estado==='Sem ordem'&&!pd;
@@ -568,7 +590,8 @@ function ma_panVenc(self,v,c,id,pf){ const q=String(id).split('|'); const l=manL
   const ref=l.ref; const parts=x.gats.map(gg=>gg.u==='d'?('ou '+manBr(gg.due)+' ('+manN(s.gat.d)+' dias após '+manBr(ref.data)+')'):(manQ(gg.due,gg.u)+' = '+manQ(ref.leit,gg.u)+' + '+manQ(s.gat[gg.u],gg.u)+(a.leit?' · leitura '+manQ(a.leit.val,a.un)+' em '+manBr(a.leit.data):'')));
   v.vc_calc=parts.join(' · ')+(manPrimTxt(x)?' · '+manPrimTxt(x):'');
   v.vc_kv=[{l:'Tolerância',v:manTolTxt(s)||'sem tolerância'},{l:'Início da janela',v:isFinite(manIniJanela(x))?(manIniJanela(x)<=0?'aberta':'em '+Math.ceil(manIniJanela(x))+' d'):'—'},
-    {l:'Cumpre também',v:(s.cumpre||[]).map(id2=>(manPub(l.p).find(y=>y.id===id2)||{}).nome).filter(Boolean).join(', ')||'—'},{l:'Versão',v:l.pid+' v'+l.p.versao},{l:'Última execução',v:manBr(ref.data)+(ref.leit!==null&&ref.leit!==undefined&&a.un?' · '+manQ(ref.leit,a.un):'')+(ref.om?' · '+ref.om:'')},
+    {l:'Cumpre também',v:(s.cumpre||[]).map(id2=>(manPub(l.p).find(y=>y.id===id2)||{}).nome).filter(Boolean).join(', ')||'—'},{l:'Versão',v:l.pid+' v'+l.p.versao},{l:'Periodicidade',v:manGatTxt(s)},
+    {l:'Leitura atual do ativo',v:manLeitTxt(a)},{l:'Última execução',v:manBr(ref.data)+(ref.leit!==null&&ref.leit!==undefined&&a.un?' · '+manQ(ref.leit,a.un):'')+(ref.om?' · '+ref.om:'')},
     {l:'Tempo · especialidade',v:manN(s.tempo,1)+' h · '+s.esp}];
   v.vc_pecas=(s.pecas||[]).map(y=>{ const it=c.itens[y.item]||{nome:y.item,un:'',saldo:0,reservado:0}; const d=it.saldo-it.reservado; return {t:it.nome+' · '+manN(y.qtd,1)+' '+it.un,s:(d>=y.qtd?'livre ':'falta · livre ')+manN(d,1)+' '+it.un,st:ma_chipSt(d>=y.qtd?'gray':'red'),dot:ma_dotSt(d>=y.qtd?'gray':'red')}; });
   v.vc_temPc=v.vc_pecas.length>0; v.vc_plt='Abrir '+l.pid+' ›'; v.vc_goPl=()=>ma_pg(self,'plano',l.pid);
@@ -938,16 +961,19 @@ def _prim_cab():
 
 def _visoes():
     G=lambda cols,gid,**k: grid(cols,[],edit=dict(m='pick'),gid=gid,total=k.pop('total',False),**k)
-    g_so=G([dict(k='item',l='Item',w=120),dict(k='ativo',l='Ativo · leitura',w=160),dict(k='oque',l='O que',w=170),dict(k='prazo',l='Prazo',t='num',w=130),
+    # colunas essenciais (proprietário, 10/10; docs AUDITORIA COLUNAS §2.2, R-01 a R-16): o que sai da linha está no painel ou na página do registro e
+    # continua na busca; Tipo (Ordens) e Tanque/lote (Abastecimentos) viraram filtros fora da grade antes de a coluna sair
+    # larguras máximas de célula iguais ou menores que as de antes (a 1.280 px com o painel ao lado nenhuma grade pode rolar escondida)
+    g_so=G([dict(k='item',l='Item',w=120),dict(k='ativo',l='Ativo',w=160),dict(k='oque',l='O que',w=170),dict(k='prazo',l='Prazo',t='num',w=130),
             dict(k='pecas',l='Peças',w=120),dict(k='prox',l='Próximo passo',w=140)],'g_so')
-    g_om=G([dict(k='om',l='Ordem · ativo',w=120),dict(k='serv',l='Serviço · tipo',w=140),dict(k='jan',l='Janela',t='date',w=75),dict(k='fase',l='Fase',w=100),
-            dict(k='pend',l='Pendência',w=145),dict(k='exe',l='Executante',w=90),dict(k='tempo',l='Tempo',t='num',w=80),dict(k='custo',l='Custo',t='num',w=100)],'g_om')
-    g_at=G([dict(k='ativo',l='Ativo · local',w=150),dict(k='cond',l='Condição',w=120),dict(k='leit',l='Leitura',t='num',w=95),dict(k='prox',l='Próxima manutenção',t='num',w=145),
-            dict(k='ab',l='Em aberto',w=120),dict(k='custo',l='Custo no período',t='num',a='r',d=2,pre='R$ ',agg='sum',w=110),dict(k='cons',l='Consumo',w=95)],'g_at',total=True,
+    g_om=G([dict(k='om',l='Ordem',w=80),dict(k='ativo',l='Ativo',w=100),dict(k='serv',l='Serviço',w=130),dict(k='jan',l='Janela',t='date',w=75),dict(k='fase',l='Fase',w=100),
+            dict(k='pend',l='Pendência',w=145),dict(k='exe',l='Executante',w=130)],'g_om')   # 130: o selo "Falta: executante" cabe na célula (com 90 ele vazava 22 px da última coluna e a grade rolava a 1440)
+    g_at=G([dict(k='ativo',l='Ativo',w=160),dict(k='cond',l='Condição',w=130),dict(k='prox',l='Próxima manutenção',t='num',w=170),
+            dict(k='ab',l='Em aberto',w=160),dict(k='custo',l='Custo no período',t='num',a='r',d=2,pre='R$ ',agg='sum',w=110)],'g_at',total=True,
            qf=dict(k='cond',l='condição'))
-    g_ab=G([dict(k='id',l='Lançamento · operador',w=130),dict(k='ativo',l='Ativo',w=120),dict(k='tq',l='Tanque/lote',w=105),dict(k='vol',l='Volume (L)',t='num',a='r',w=75),
-            dict(k='data',l='Data · leitura',w=100),dict(k='met',l='Método',w=110),dict(k='lh',l='Consumo',t='num',a='r',w=80),dict(k='qual',l='Qualidade',w=105)],'g_ab',qf=dict(k='qual',l='qualidade'))
-    g_pl=G([dict(k='nome',l='Plano',w=150),dict(k='est',l='Estado',w=140),dict(k='apl',l='Aplica-se a',w=140),dict(k='svs',l='Serviços',w=140),dict(k='atv',l='Ativos',w=110),dict(k='sit',l='Situação',w=165)],'g_pl')
+    g_ab=G([dict(k='id',l='Lançamento',w=110),dict(k='ativo',l='Ativo',w=150),dict(k='vol',l='Volume (L)',t='num',a='r',w=90),
+            dict(k='data',l='Data',w=120),dict(k='lh',l='Consumo',t='num',a='r',w=100),dict(k='qual',l='Qualidade',w=150)],'g_ab',qf=dict(k='qual',l='qualidade'))
+    g_pl=G([dict(k='nome',l='Plano',w=220),dict(k='est',l='Estado',w=220),dict(k='sit',l='Situação',w=280)],'g_pl')
     flt=lambda *xs: '<div class="ma-flt" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">'+''.join(xs)+'</div>'
     semordem=(_card_html('c_so') + flt(_chips('so_tipo','Tipo'),_chips('so_prazo','Prazo pelo início da janela'),_sel('f_crit','f_setcrit','f_crits','Criticidade'),_sel('f_grupo','f_setgrupo','f_grupos','Grupo'),_sel('f_plano','f_setplano','f_planos','Plano'))
               + g_so)
@@ -958,13 +984,14 @@ def _visoes():
     ordens=(_card_html('c_om')
             + flt(f'<div role="group" aria-label="Filtrar por fase" style="display: flex; flex-wrap: wrap; gap: 6px;">'
                   + FOR('fchips','fc',f'<button type="button" aria-pressed="{H("fc.on")}" onClick="{H("fc.go")}" style="{H("fc.st")}">{H("fc.t")} <span style="opacity: .75;">{H("fc.n")}</span></button>',6) + '</div>',
-                  _chips('rotinas','Rotina'),'<span style="flex-grow: 1;"></span>',_chips('om_modos','Visão das ordens'))
+                  _chips('om_tipos','Tipo'),_chips('rotinas','Rotina'),'<span style="flex-grow: 1;"></span>',_chips('om_modos','Visão das ordens'))
             + semana + IF('om_lista',g_om,True) + IF('om_kanban',_kanban()))
     ativos=(f'<div class="ma-top" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;"><label class="ma-lbl" style="display: inline-flex; align-items: center; gap: 6px; {LBL}">Período'
             f'<select aria-label="Período" value="{H("per_v")}" onChange="{H("per_set")}" style="{INP}"><option value="mes">Mês atual</option><option value="30d">30 d</option><option value="12m">12 m</option></select></label>'
             f'<span style="flex-grow: 1;"></span>{_chips("at_modos","Modo")}</div>'
             + _card_html('c_at')
-            + IF('at_ativos',flt(_sel('f_grupo','f_setgrupo','f_grupos','Grupo'),_sel('f_pend','f_setpend','f_pends','Pendência'))+f'<div class="ma-gat">{g_at}</div>',True) + IF('at_abast',g_ab))
+            + IF('at_ativos',flt(_sel('f_grupo','f_setgrupo','f_grupos','Grupo'),_sel('f_pend','f_setpend','f_pends','Pendência'))+f'<div class="ma-gat">{g_at}</div>',True)
+            + IF('at_abast',flt(_sel('f_tq','f_settq','f_tqs','Tanque/lote'))+g_ab))
     planos=(IF('tem_sem',f'<div class="ma-sem" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; border: 1px dashed {LINE}; border-radius: 12px;">'
                f'<span style="font-size: 12.5px; font-weight: 800;">{H("sem_n")}</span>'
                + FOR('sem','a',f'<button type="button" onClick="{H("a.go")}" aria-label="{H("a.lab")}" title="{H("a.lab")}" style="{_MINI}">{H("a.t")} · Criar plano</button>',4) + '</div>')
@@ -988,7 +1015,8 @@ def _pag_ativo():
     G=lambda cols,gid,search=False: grid(cols,[],edit=dict(m='pick'),gid=gid,total=False,search=search)
     d_venc=G([dict(k='serv',l='Serviço · plano',w=230),dict(k='sit',l='Situação',w=170),dict(k='prox',l='Próximo',t='num',w=170),dict(k='om',l='Ordem',w=170)],'d_venc')
     d_ach=G([dict(k='id',l='Achado',t='date',w=150),dict(k='comp',l='Componente · sintoma',w=280),dict(k='crit',l='Criticidade',w=110),dict(k='est',l='Estado',w=190)],'d_ach')
-    d_om=G([dict(k='om',l='Ordem · ativo',w=140),dict(k='serv',l='Serviço · tipo',w=220),dict(k='jan',l='Janela',t='date',w=90),dict(k='fase',l='Fase',w=120),dict(k='custo',l='Custo',t='num',w=130)],'d_om',True)
+    # o ativo é o título da página: sai da célula da ordem (AUDITORIA COLUNAS §2.2); tipo e custo ficam aqui (as Ordens da lista não os mostram)
+    d_om=G([dict(k='om',l='Ordem',w=110),dict(k='servt',l='Serviço · tipo',w=220),dict(k='jan',l='Janela',t='date',w=90),dict(k='fase',l='Fase',w=120),dict(k='custo',l='Custo',t='num',w=130)],'d_om',True)
     d_lei=G([dict(k='data',l='Data',t='date',w=100),dict(k='val',l='Leitura · volume',t='num',w=130),dict(k='orig',l='Origem',w=280),dict(k='qual',l='Qualidade',w=150)],'d_lei',True)
     cab=(f'<div style="display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap;"><div style="display: flex; flex-direction: column; gap: 6px; flex: 1 1 320px; min-width: 0;">'
          f'<button type="button" onClick="{H("voltar")}" style="{LNK} align-self: flex-start;">‹ Ativos</button>'
@@ -1297,7 +1325,7 @@ def ma():
     EXTRA.append('<style>'+CSS+PM_CSS+'</style>')
     corpo=_visoes()+_pag_ativo()+_pag_plano()
     EXTRA.append(_painel()); EXTRA.append(_paineis_plano())
-    EXTRAJS[0]=(DM.js_prefixo()+MA_JS.replace('__NAVST__',json.dumps([ui37.subnav_st(False),ui37.subnav_st(True)],ensure_ascii=False)).replace('__PRIM__',json.dumps(PRIM)).replace('__SEC__',json.dumps(SEC))+PM_JS)
+    EXTRAJS[0]=(DM.js_prefixo()+MA_JS.replace('__PRIM__',json.dumps(PRIM)).replace('__SEC__',json.dumps(SEC))+PM_JS)
     HEIGHTS37[FNAME]=1000
     shell37('MA','Manutenção',corpo,fname=FNAME,status=(H('st_ma'),'red'),primary_html=_prim_cab(),chipsrow=_cabecalho(),search=False)
     _status_dyn(FNAME,'st_ma')

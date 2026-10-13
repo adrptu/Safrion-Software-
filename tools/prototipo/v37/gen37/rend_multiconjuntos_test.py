@@ -117,8 +117,12 @@ try:
         c.shot(os.path.join(PROBE, 'rend_depois_form_nova.png')); print('salvar:', salvar())
         at = linha('at:Adubação a lanço|Adubação de cobertura'); rid4 = abre_oc('Adubação a lanço', 'Adubação de cobertura', 'T2')
         ks = [linha(rid4 + f'|c{j}') for j in range(2)] if rid4 else []
-        chk('4b a atividade passa a 2 conjuntos; a anterior (Trator 03 + Distribuidor 3 t, 18 ha/h) continua; a nova com 6,72 ha/h',
-            bool(at) and at['CONJUNTO'] == '2 conjuntos' and len(ks) == 2 and all(ks) and ks[0]['OPERAÇÃO'].startswith('Trator 03 + Distribuidor 3 t') and ks[0]['RENDIMENTO'] == '18,00 ha/h' and ks[1]['RENDIMENTO'] == '6,72 ha/h', [at, ks])
+        # COLUNAS-1 (10/10): o rendimento saiu da g_op e fica no formulário Rendimento de cada configuração
+        rk = []
+        for j in range(2):
+            clica(rid4 + f'|c{j}') if rid4 else None; rk.append(valor('rend_c') or valor('rend')); esc()
+        chk('4b a atividade passa a 2 conjuntos; a anterior (Trator 03 + Distribuidor 3 t, 18 ha/h) continua; a nova com 6,72 ha/h (formulário)',
+            bool(at) and at['CONJUNTO'] == '2 conjuntos' and len(ks) == 2 and all(ks) and ks[0]['OPERAÇÃO'].startswith('Trator 03 + Distribuidor 3 t') and rk == ['18,00', '6,72'], [at, ks, rk])
         c.shot(os.path.join(PROBE, 'rend_depois_rendimentos.png'))
         t1 = (total(), custo()); chk('4c horas e custo recalculados no lugar (mudam)', t1 != t0, [t0, t1])
         # ---------- 5 · mudar a repartição do prestador para 30 % ----------

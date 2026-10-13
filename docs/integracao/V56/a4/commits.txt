@@ -1,3 +1,0 @@
-c62f9a7 docs(integracao): V56 · A4 — contrato 6147474674, aceites e números (A4)
-859fee3 Estoque: contagem desatualizada na tela, com o motivo e só Recontar (A4)
-b1782f9 Estoque: aprovar ajuste revalida a contagem no instante da aprovação (A4)

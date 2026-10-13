@@ -39,7 +39,7 @@ try:
     E.ok(cabe(E) and sorted(l4['kids']) == ['S58-0801', 'S58-0926'] and 'ITEM › LOTE' in l4['vis'] and 'DISPONÍVEL' in l4['vis'],
          'etapa 4 com Semente de soja 58 W em 2 lotes (S58-0801 e S58-0926 sob o item); Item › lote e Disponível à vista sem rolar a grade', l4)
     # 2 · contagem sem diferença: documento e contador na trilha
-    E.etapa(5); E.clk('Contar INV-2611'); E.setv('fx_g_cnt_contador', 'Paula (almoxarife)'); E.setv('fx_g_cnt_cont', '1200'); E.salvar(); print('toast:', E.toast())  # revisão CONF F6: o contador não tem mais valor padrão (era o 1º da lista fixa); a pessoa escolhe quem contou
+    E.etapa(5); E.clk('Contar INV-2611'); E.setv('fx_g_cnt_cont', '1200'); E.salvar(); print('toast:', E.toast())
     E.rowbtn('INV-2609', 'Aprovar ajuste'); print('toast:', E.toast())
     E.etapa(6); c0, a0 = movs(E, 'Contagem sem diferença'), movs(E, 'Ajuste de inventário'); print(' ', c0, a0)
     E.ok(len(c0) == 1 and 'INV-2611' in c0[0] and 'Paula (almoxarife)' in c0[0], 'contagem sem diferença na trilha com INV-2611 e o contador', c0)

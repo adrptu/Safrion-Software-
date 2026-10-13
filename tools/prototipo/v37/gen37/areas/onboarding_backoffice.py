@@ -80,19 +80,22 @@ def on01():
        ('p4','4 · Recursos','A fazer','gray','máquinas e equipe são pedidas quando a primeira O.S. precisar delas',[dpart('Convidar equipe',d_eq)]),
        ('p5','5 · Importação','3 objetos com erro','yellow','prévia, mapeamento e erros por objeto antes de gravar',[Pt.cta('Corrigir prévia','ON-01det.dc.html')]),
        ('p6','6 · Primeiro trabalho','A fazer','gray','rascunho de planejamento da safra com próximos passos',[{'k':'mut','t':'pelo botão principal'}])]
-    g_p=grid([dict(k='passo',l='Passo',w=170),dict(k='estado',l='Estado'),dict(k='dado',l='Dado pedido no momento do uso',w=380),dict(k='acao',l='Próxima ação',w=280)],
+    # colunas essenciais (proprietário, 10/10; AUDITORIA COLUNAS §2.1): passo, estado e próxima ação; o dado pedido no momento do uso fica no
+    # detalhe do passo (a linha abre a consulta com o campo "Dado pedido")
+    g_p=grid([dict(k='passo',l='Passo',w=170),dict(k='estado',l='Estado'),dict(k='acao',l='Próxima ação',w=280)],
        [dict(id=i,v=dict(passo=p,estado=e,dado=dd_,acao=' '.join(x['t'] for x in a)),s={},p=dict(passo=[Pt.b(p)],estado=[Pt.chip(e,c)],acao=a)) for i,p,e,c,dd_,a in P],
        edit=dict(m='ro',title='Passo',fields=[dict(k='passo',l='Passo',ro=True),dict(k='estado',l='Estado',ro=True),dict(k='dado',l='Dado pedido',t='area',ro=True)]),
        search=False,gid='g_passos',total=False)
-    T=[('t1','Cadastro, planejamento, execução e consultas','Incluído no trial','green','30 dias','período',f'termina {TRIAL["fim"]} · aviso desde a entrada'),
-       ('t2','Área gerida','Incluído no trial','green',f'{TRIAL["area_ha"]} ha','área declarada','importação maior abre revisão transparente do limite, sem cobrar'),
-       ('t3','Cenas de satélite','Franquia finita','yellow','12','cenas / 30 dias','serviço pausa; demonstração identificada continua'),
-       ('t4','Assistente de IA','Franquia finita','yellow','200','interações / 30 dias','pausa ao esgotar; o resto do trial continua'),
-       ('t5','Exportação dos próprios dados','Sempre disponível','green','ilimitada','—','mantida por 90 dias após expirar (janela informada)'),
-       ('t6','Comando remoto de equipamento','Fora do trial','gray','—','—','não é benefício implícito; contratação empresarial')]
-    g_t=grid([dict(k='rec',l='Recurso',w=260),dict(k='hab',l='Habilitação'),dict(k='fr',l='Franquia'),dict(k='un',l='Unidade'),dict(k='fim',l='Ao esgotar ou expirar',w=380)],
-       [dict(id=i,v=dict(rec=r,hab=h,fr=f,un=u,fim=x),s={},p=dict(hab=[Pt.chip(h,c)])) for i,r,h,c,f,u,x in T],
-       edit=dict(m='ro',title='Direito do trial',fields=[dict(k='rec',l='Recurso',ro=True),dict(k='fr',l='Franquia',ro=True),dict(k='un',l='Unidade',ro=True),dict(k='fim',l='Ao esgotar ou expirar',t='area',ro=True)]),
+    # a unidade vai junto do número, nunca em coluna própria (R-07, decisão de 05/10): "12 cenas / 30 dias", "480 ha declarados"
+    T=[('t1','Cadastro, planejamento, execução e consultas','Incluído no trial','green','30 dias',f'termina {TRIAL["fim"]} · aviso desde a entrada'),
+       ('t2','Área gerida','Incluído no trial','green',f'{TRIAL["area_ha"]} ha declarados','importação maior abre revisão transparente do limite, sem cobrar'),
+       ('t3','Cenas de satélite','Franquia finita','yellow','12 cenas / 30 dias','serviço pausa; demonstração identificada continua'),
+       ('t4','Assistente de IA','Franquia finita','yellow','200 interações / 30 dias','pausa ao esgotar; o resto do trial continua'),
+       ('t5','Exportação dos próprios dados','Sempre disponível','green','ilimitada','mantida por 90 dias após expirar (janela informada)'),
+       ('t6','Comando remoto de equipamento','Fora do trial','gray','—','não é benefício implícito; contratação empresarial')]
+    g_t=grid([dict(k='rec',l='Recurso',w=260),dict(k='hab',l='Habilitação'),dict(k='fr',l='Franquia'),dict(k='fim',l='Ao esgotar ou expirar',w=380)],
+       [dict(id=i,v=dict(rec=r,hab=h,fr=f,fim=x),s={},p=dict(hab=[Pt.chip(h,c)])) for i,r,h,c,f,x in T],
+       edit=dict(m='ro',title='Direito do trial',fields=[dict(k='rec',l='Recurso',ro=True),dict(k='fr',l='Franquia',ro=True),dict(k='fim',l='Ao esgotar ou expirar',t='area',ro=True)]),
        search=False,gid='g_trial',total=False)
     # ações de linha: quando o painel é confirmado, a linha mostra o resultado e o estado do passo avança
     acts={i:a for i,_,_,_,_,a in P}
@@ -131,9 +134,8 @@ function imp_ok(r){ const x=r.v; if(r.id==='tal') return !!String(x.just||'').tr
 function PREVALS(self,v){ const gv=self.state.grav||{}; let nerr=0;
   imp_R(self).forEach(r=>{ const x=r.v; const ok=imp_ok(r); let err=null;
     if(r.id==='tal' && !ok) err='1 sobreposição a justificar';
-    if(r.id==='est'){ if(!ok) err='coluna “qtde” sem unidade'; r.p.map=[{k:'txt',t:x.map+(ok?' · qtde em '+x.un:'')}]; r.s.map=r.p.map[0].t; }
+    if(r.id==='est' && !ok) err='coluna “qtde” sem unidade';   /* mapeamento e unidade da “qtde” ficam no detalhe do objeto (colunas essenciais, 10/10) */
     if(r.id==='dup' && !ok) err='mesclar ou ignorar — decisão sua';
-    r.p.crs=[{k:(r.id==='tal'?'txt':'mut'),t:(r.id==='tal'?(x.crs||'—'):'—')}];
     r.p.erros=err?[{k:'chip',t:err,c:'yellow'}]:[{k:'mut',t:'—'}]; r.s.erros=err||'—';
     let e,c;
     if(r.id==='tal'){ if(gv.tal1){ e='Gravado · 10 talhões'; c='green'; } else if(gv.tal9){ e='9 gravados · 1 na prévia'; c='yellow'; } else if(ok){ e='Pronto para validar'; c='green'; } else { e='Prévia · 9 prontos'; c='gray'; } }
@@ -165,8 +167,9 @@ def on01det():
           dict(id='maq',v=dict(obj='Máquinas (planilha)',linhas=6,map='automático'),s={},p={}),
           dict(id='dup',v=dict(obj='Duplicidades',linhas=2,map='T1 e T2 já desenhados no mapa',dec='A decidir'),s={},p={})]
     for r in rows: r['p']['obj']=[Pt.b(r['v']['obj'])]
-    g=grid([dict(k='obj',l='Objeto',w=200),dict(k='linhas',l='Linhas',t='num',a='r'),dict(k='map',l='Mapeamento',w=240),dict(k='crs',l='Sistema de coordenadas',w=200),
-            dict(k='erros',l='Erro'),dict(k='estado',l='Estado')],rows,
+    # colunas essenciais (10/10): objeto, linhas, erro e estado; mapeamento e sistema de coordenadas são técnicos e ficam no detalhe do objeto
+    # (a linha abre o formulário com "Mapeamento de colunas" e, nos talhões, "Sistema de coordenadas")
+    g=grid([dict(k='obj',l='Objeto',w=200),dict(k='linhas',l='Linhas',t='num',a='r'),dict(k='erros',l='Erro'),dict(k='estado',l='Estado')],rows,
        edit=dict(m='form',title='Objeto da importação',sub='Corrija o erro deste objeto; a prévia é recalculada e nada é gravado até você validar.',
             fields=[dict(k='obj',l='Objeto',ro=True),dict(k='map',l='Mapeamento de colunas',t='txt',req=True,help='A IA pode sugerir; nunca completa dados.'),
                     dict(k='crs',l='Sistema de coordenadas',t='sel',opts=CRS,req=True,cond=dict(k='obj',eq='Talhões (shapefile)')),

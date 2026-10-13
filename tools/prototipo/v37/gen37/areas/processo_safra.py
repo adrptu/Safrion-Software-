@@ -24,7 +24,8 @@ def build():
     fname='SAF.dc.html'; E._reset_screen(fname)
     meses=D2.MESES
     # ---------- etapa 1 · safras ----------
-    g_saf=grid([dict(k='nome',l='Safra'),dict(k='faz',l='Fazenda'),dict(k='n',l='Cultivos',t='num',a='r'),dict(k='area',l='Área',t='num',a='r',u='ha'),dict(k='estado',l='Estado'),dict(k='acao',l='Próximo passo',w=290)],
+    # colunas essenciais (proprietário, 10/10; AUDITORIA COLUNAS §2.2): o contador de Cultivos vai ao detalhe (a etapa 2 lista os cultivos, R-16)
+    g_saf=grid([dict(k='nome',l='Safra'),dict(k='faz',l='Fazenda'),dict(k='area',l='Área',t='num',a='r',u='ha'),dict(k='estado',l='Estado'),dict(k='acao',l='Próximo passo',w=290)],
        [dict(id=s['id'],ro=s['ro'],v=dict(nome=s['nome'],ini=s['ini'],fim=s['fim'],periodo=s['periodo'],faz=s['fazenda'],estado=s['estado']),s={},p={}) for s in D2.SAFRAS],
        edit=dict(m='form',title='Safra',newTitle='Nova safra',sub='Altere nome, início, fim e fazenda. Cultivos e planos ficam nas etapas seguintes.',
                  fields=[dict(k='nome',l='Nome da safra',t='txt',req=True,def_='' ),dict(k='ini',l='Início',t='date',req=True),dict(k='fim',l='Fim',t='date',req=True,help='O fim precisa ser depois do início.'),
@@ -39,11 +40,13 @@ def build():
     TALFAZ={t:f for f,lst in TAL_FAZ.items() for t,_ in lst}
     # TABELAS-FOCO (5983172395): uma variável por coluna; as cinco primeiras respondem onde, quanto e quando; Cultura, Ocupa até, Fim por e
     # Safra logo depois respondem o que ocupa e até quando (§3.1)
+    # colunas essenciais (proprietário, 10/10; AUDITORIA COLUNAS §2.2 e §1.6, item 3): onde, situação, quanto está livre e desde quando, área,
+    # cultura, plano e plantio (16 → 8). Ocupa até e Fim por, Variedade, Versão, Meta e Ajustes locais vão ao formulário do cultivo (Ocupação
+    # prevista, Fim por, Versão aplicada, Ajustes locais); o Tipo sai (a árvore talhão → parcela já diz); a Safra de outra ocupação vira o link
+    # "Safrinha 2027 ›" na célula de identificação da linha esmaecida. Tudo o que saiu continua na busca da grade (texto da 1ª coluna)
     CULT_COLS=[dict(k='local',l='Talhão ou parcela',w=130),dict(k='sit',l='Situação',w=150,niv0=True),dict(k='livre',l='Área livre (ha)',t='num',a='r',d=2,dmin=0,niv0=True),
                dict(k='desde',l='Livre a partir de',t='num',w=130,niv0=True),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum',d=2,dmin=0),dict(k='cult',l='Cultura'),
-               dict(k='ate',l='Ocupa até',t='num'),dict(k='fimpor',l='Fim por',w=150,ajuda='Pelo plano e Colheita informada são previsões. Estimado: ciclo da cultivar ou plano mais longo da cultura (CD-02), sem plano no cultivo. Observado: colheita registrada.'),
-               dict(k='saf',l='Safra',w=150),dict(k='var',l='Variedade'),dict(k='plano',l='Plano agronômico',w=190),dict(k='ver',l='Versão'),dict(k='dt_plantio',l='Plantio',t='num'),
-               dict(k='meta',l='Meta',t='num',a='r'),dict(k='aj',l='Ajustes locais',t='num',a='r'),dict(k='tipo',l='Tipo',w=120)]
+               dict(k='plano',l='Plano agronômico',w=170),dict(k='dt_plantio',l='Plantio',t='num')]   # larguras da AUDITORIA §2.2 (130 e 170): com seleção e excluir, a grade cabe na caixa de 1.116 px
     NUNCA_C=dict(k='modo',eq='__nunca'); PLAN=dict(k='modo',ne='vinc'); VINC=dict(k='modo',eq='vinc')
     # painel "Planejar T1" (§2): contexto herdado no subtítulo; Plano antes do Plantio; Plantio = PlantioMin; Colheita prevista editável só sem
     # plano; meta na unidade de mercado da cultura (DEC-0510-03). "Vincular ciclo C1" (R-24) mostra o ciclo travado e pede plano e meta.
@@ -52,6 +55,7 @@ def build():
                  dict(k='var',l='Variedade',t='txt',req=True,cond=PLAN),dict(k='var',l='Variedade',ro=True,cond=VINC),
                  dict(k='plano',l='Plano agronômico',t='sel',dyn=True,opts=[],
                       help='Planos publicados da cultura escolhida. Trocar o plano descarta os ajustes de insumos deste cultivo.'),
+                 dict(k='ver_txt',l='Versão aplicada',ro=True,live=True,help='Versão publicada do plano agronômico que vale para este cultivo (saiu da linha em 10/10; o nome do plano fica na linha).'),
                  dict(k='plantio',l='Plantio',t='date',req=True,cond=PLAN),dict(k='pmin_txt',l='Plantio a partir de',ro=True,live=True,cond=PLAN),
                  dict(k='plantio',l='Plantio real do ciclo',t='date',ro=True,cond=VINC),
                  dict(k='local',l='Parcela',t='txt',cond=PLAN,help='Sugerida pela faixa que libera nesse dia. Área igual à do talhão vira talhão inteiro.'),
@@ -59,7 +63,9 @@ def build():
                  dict(k='colheita',l='Colheita prevista',t='date',cond=[dict(k='plano',eq=''),PLAN],help='Sem plano: a data que a fazenda prevê. Vazia, o sistema estima pelo ciclo da cultivar (CD-02).'),
                  dict(k='colh_txt',l='Colheita prevista',ro=True,live=True,cond=dict(k='plano',ne='')),
                  dict(k='meta',l='Meta de produtividade',t='num',req=True,min=0),dict(k='unm_txt',l='Unidade da meta',ro=True,live=True,help='Unidade de mercado da cultura (CD-02, DEC-0510-03).'),
-                 dict(k='ocup_txt',l='Ocupação prevista',ro=True,live=True,cond=PLAN)]
+                 dict(k='ocup_txt',l='Ocupação prevista',ro=True,live=True,cond=PLAN),
+                 dict(k='fimpor_txt',l='Fim por',ro=True,live=True,help='Pelo plano e Colheita informada são previsões. Estimado: ciclo da cultivar ou plano mais longo da cultura (CD-02), sem plano no cultivo. Observado: colheita registrada.'),
+                 dict(k='aj_txt',l='Ajustes locais de insumos',ro=True,live=True,help='Mudanças de produto ou dose só neste cultivo; veja e altere em "Ajustar insumos", na linha.')]
     def talhao_de(c):
         return c['local'] if c['tipo']!='Parcela' else c['local'].rsplit('-',1)[0]
     def cult_rows(k):
@@ -143,6 +149,7 @@ def build():
     REND_EDIT=dict(m='form',title='Rendimento',newTitle='Nova configuração',leafOnly=True,sub='Informe como o conjunto trabalha e quanto custa por hora; rendimento e custo por hectare são recalculados (na colheita, também por quilo). Vale só para esta safra.',
             fields=[dict(k='multi',l='',t='txt',cond=NUNCA),dict(k='base',l='',t='txt',cond=NUNCA),dict(k='colh',l='',t='txt',cond=NUNCA),dict(k='ctx',l='',t='txt',cond=NUNCA),
                     dict(k='opatv',l='Operação · atividade',t='txt',ro=True),
+                    dict(k='area_c',l='Área trabalhada',ro=True,live=True,help='Base das horas: horas-conjunto = área ÷ rendimento. ha-op = hectares-operação: cada passada conta; 3 passadas em 10 ha = 30 ha-op (PRD 44.1).'),
                     dict(k='esc',l='Aplicar em',t='sel',opts=['Todas as atividades da operação','Só esta atividade'],cond=UMA,help='Todas: conjunto, rendimento, custos e diesel vão para as outras atividades desta operação em uso nesta safra. As divididas entre conjuntos e as de planos ainda não aplicados ficam como estão. A janela é de cada atividade.'),
                     dict(k='conj_id',l='Conjunto',t='sel',dyn=True,opts=[],help='Do cadastro, só tratores com a potência que o implemento exige (trocar usa os custos por hora do cadastro). Por classe ou prestador: planeja sem escolher patrimônio; o prestador traz máquina, operador e diesel.'),
                     dict(k='nome',l='Descrição do conjunto',t='txt',req=True,cond=dict(k='conj_id',eq='classe'),help='Ex.: Trator 100–140 cv + plantadeira 12 linhas. A O.S. escolhe a máquina depois.'),
@@ -177,8 +184,9 @@ def build():
     # ---------- etapa 3 · Dimensione operações e recursos (ESPECIFICACAO etapa-unica-3-4-5 §2-§3) ----------
     # g_op: 8 colunas, uma variável por coluna e a unidade na célula (ha-op na operação, ha nos demais níveis); a árvore é a lista e o
     # formulário Rendimento é o sub-detalhe. Situação: Com pendência · Janela não informada · Cabe na janela (só chips, sem números).
-    g_op=grid([dict(k='nome',l='Operação › atividade › talhão',w=172),dict(k='sit',l='Situação',w=164),dict(k='data',l='Data',t='num',w=104),dict(k='conj',l='Conjunto',w=150),
-               dict(k='rend',l='Rendimento',t='num',a='r'),dict(k='area',l='Área trabalhada',t='num',a='r',ajuda='ha-op = hectares-operação: cada passada conta; 3 passadas em 10 ha = 30 ha-op (PRD 44.1)'),
+    # colunas essenciais (10/10; AUDITORIA COLUNAS §2.2): Rendimento e Área trabalhada são a base do cálculo das horas e vão ao formulário
+    # Rendimento (Rendimento efetivo e Área trabalhada); a linha fica com o que decide: situação, data, conjunto, horas-conjunto e custo
+    g_op=grid([dict(k='nome',l='Operação › atividade › talhão',w=200),dict(k='sit',l='Situação',w=180),dict(k='data',l='Data',t='num',w=110),dict(k='conj',l='Conjunto',w=200),
                dict(k='horas',l='Horas-conjunto (h)',t='num',a='r',d=1,agg='sum'),dict(k='rha',l='Custo R$/ha',t='num',a='r')],
        [],edit=dict(m='pick',leafOnly=False),tree=True,gid='g_op',total=True,qf=dict(k='sit',l='situação',nivel0=True))
     # g_cap: capacidade por mês (recurso × mês, ocupação), uma por safra; recolhida por padrão.
@@ -219,19 +227,14 @@ def build():
     # (decisão do proprietário, 05/10/2026: mais intuitivo e filtrar unidade não gera valor). "1º uso" logo depois do insumo (v3.8)
     g_dem=grid([dict(k='grp',l='Grupo',w=130),dict(k='ins',l='Insumo',w=200),dict(k='uso',l='1º uso',t='num'),dict(k='liq',l='Necessidade líquida',t='num',a='r',w=128),dict(k='falta',l='Falta em',t='num',w=110),
                 dict(k='valor',l='Valor (R$)',t='num',a='r',d=2,agg='sum'),dict(k='sit',l='Situação'),dict(k='sol',l='Solicitação',w=120),dict(k='comp',l='A complementar',t='num',a='r',w=120),
-                dict(k='bruta',l='Demanda bruta',t='num',a='r'),dict(k='real',l='Antes de hoje sem O.S.',t='num',a='r',w=130,ajuda='Uso do plano com data antes de hoje que nenhuma O.S. cobre: fica fora da demanda (histórico do plano). Se ainda vai acontecer, emita a O.S.'),dict(k='est',l='Estoque apto',t='num',a='r',w=118),dict(k='antes',l='Usado antes da compra',t='num',a='r',w=130),
+                dict(k='bruta',l='Demanda bruta',t='num',a='r'),dict(k='real',l='Já realizado',t='num',a='r'),dict(k='est',l='Estoque apto',t='num',a='r',w=118),dict(k='antes',l='Usado antes da compra',t='num',a='r',w=130),
                 dict(k='res',l='Reservado',t='num',a='r'),dict(k='rec',l='Recebimentos previstos',t='num',a='r',w=112),dict(k='tarde',l='Recebido após a falta',t='num',a='r',w=130),
                 dict(k='cob',l='Coberta em',t='num',w=110),dict(k='preco',l='Preço',t='num',a='r',w=120)],   # preço com a unidade do insumo junto: "R$ 3,90/kg"
        [],edit=dict(m='origin',leafOnly=True,title='Insumo',fields=[dict(k='ins',l='Insumo',t='txt',ro=True),dict(k='un',l='Unidade',t='txt',ro=True)]),tree=True,gid='g_dem',total=True,qf=dict(k='sit',cut=' · ',l='situação'))
     # ---------- JS do processo ----------
-    sol0={'S2627':dict(id='SOL-2026-07',at='23/09/2026',em=D2.SOL_INICIAL['enviada'],por=D2.SOL_INICIAL['por'],   # envio original (a atualização grava atu e hist, revisão do CTL-4)
-                       itens={n:round(o['liq'],3) for n,o in D2.demanda('S2627').items() if o['liq']>0.001},comp=0)}
+    sol0={'S2627':dict(id='SOL-2026-07',at='23/09/2026',itens={n:round(o['liq'],3) for n,o in D2.demanda('S2627').items() if o['liq']>0.001},comp=0)}
     d2=dict(D2.js_data()); d2['sol']=sol0; d2['talhoes']=TALH; d2['talfaz']=TALFAZ; d2['talOrd']=TAL_FAZ; d2['culturas']=OCEN.CULTURAS; d2['unMeta']=OCEN.UN_META; d2['cultivares']=OCEN.cultivares(); d2['folga']=OCEN.FOLGA; d2['conj_opts']=conj_opts; d2['hoje']=D2.HOJE_ISO; d2['viavel']=D2.VIAVEL
-    import cenario, dados_solo as DSO
-    from areas.analise_solo import SOLO_UI_JS, porque_html
-    # análise de solo (SOLO-01): o estado compartilhado (cenario.js + solo.js) e os laudos (SOLO0) entram no Planejar safra; 0 colisões de nome (solo_unit_test)
-    # CTL-4: o mesmo cenário compartilhado (O.S., requisições, lotes) entra na demanda (cenDemEntradas/cenOsDem): emitir, liberar, apontar, cancelar ou devolver muda a conta
-    EXTRAJS[0]=cenario.js_prefixo()+DSO.js_prefixo()+SOLO_UI_JS+'\nconst D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
+    EXTRAJS[0]='const D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
 function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' && r && String(r.id).indexOf('n')===0 && !self.state.saf){ if(!r.v.estado) r.v.estado='Rascunho'; self.setState({saf:r.id,step:2,g2toast:'Safra criada: '+r.v.nome+'. Planeje os talhões livres na tabela.'}); }
     if(String(gid).indexOf('g_cult_')===0) cultAfter(self,gid,rows,r,isNew);
     if(String(gid).indexOf('g_rend_')===0&&r) rendAfter(self,gid,rows,r,isNew);
@@ -243,7 +246,7 @@ function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' &&
   self.g2formActs=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultActs(self,gid,r):(String(gid).indexOf('g_rend_')===0?rendActs(self,gid,r):null));
   self.g2check=(gid,rows,r,d,isNew)=>(String(gid).indexOf('g_cult_')===0?cultCheck(self,gid,rows,r,d,isNew):(String(gid).indexOf('g_rend_')===0?(self._conjAntes=(r?String(r.v.conj_id||''):null),opAntes(self,r),rendCheck(self,rows,r,d,isNew)):(String(gid).indexOf('g_recp_')===0?(opAntes(self,r),null):(gid==='g_saf'?safCheck(d):null))));
   self.g2pick=(gid,rid,r)=>{ if(gid==='g_op') abrirRend(self,rid); if(String(gid).indexOf('g_cap_')===0) abrirRec(self,rid); }; }
-const _EV=EXTRAVALS; EXTRAVALS=function(self,v){ _safhooks(self); cenOuvir(self); _EV(self,v); v.ap_bulk=()=>openApply(self,null); };
+const _EV=EXTRAVALS; EXTRAVALS=function(self,v){ _safhooks(self); _EV(self,v); v.ap_bulk=()=>openApply(self,null); };
 const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)=>rendNova(self,rid); resumoVals(self,v); };   // + Outra configuração e Resumo da safra (etapa 3)'''
     # ---------- corpo ----------
     # UX-ACAO-UNICA-20261003: o cabeçalho do bloco só tem comandos do próprio conteúdo (criar, adicionar, modo de visão); avanço,
@@ -251,9 +254,7 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
     acoes=lambda extra='': f'<span style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">{extra}</span>'
     nova_safra=f'<button type="button" onClick="{H("g_saf_new")}" style="{E.BTN_ST(False,True)}">Nova safra</button>'   # criar é secundário: a tarefa da etapa é escolher
     s1=bloco('Escolha a safra','Clique na safra para continuar de onde parou.',g_saf,acao=nova_safra)
-    # SOLO-01 §3.4: "Sugestões pelas análises · N" só com 1 sugestão ou mais (R01, D-29): quem não usa análise não vê nada
-    sg_lnk=f'<sc-if value="{H("sg_has")}" hint-placeholder-val="{F()}"><button type="button" id="sg_lnk" class="acoes-lnk" onClick="{H("sg_abrir")}" style="min-height: 28px; white-space: nowrap;">{H("sg_lnk")}</button></sc-if>'
-    s2=bloco('Talhões e cultivos',H('k2'),cult_html,desc_hole=True,acao=sg_lnk)   # sem botão: planeja-se pela linha do talhão (Planejar ›, Dividir, Vincular ciclo ›)
+    s2=bloco('Talhões e cultivos',H('k2'),cult_html,desc_hole=True)   # sem botão: planeja-se pela linha do talhão (Planejar ›, Dividir, Vincular ciclo ›)
     # etapa 3: título com o custo de operação e o link "Resumo da safra"; veredito (role=status) e, fora dele, a linha de capacidade;
     # g_cap recolhida; linha de filtro (só com recurso × mês escolhido); g_op por último (estica e só a área de dados rola)
     custo=(f'<span style="display: inline-flex; align-items: baseline; gap: 6px; flex-wrap: wrap; justify-content: flex-end; font-size: 12.8px; color: {MUTED};">'
@@ -310,8 +311,8 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
       f'</aside></div></sc-if>')
     # ---------- painel: atividades locais do cultivo (Gatilho → Atividades → Produtos e doses) ----------
     prod_row=(f'<div style="display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.6fr) 88px 122px 82px 94px 150px; gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid {LINE}; font-size: 12.5px;">'
-              f'<span style="color: {MUTED};">{H("p.grupo")}</span><span style="font-weight: 600;">{H("p.nome")}<sc-if value="{H("p.aj")}" hint-placeholder-val="{F()}"> <span style="{H("p.ajSt")}">{H("p.ajT")}</span></sc-if>'
-              f'<sc-if value="{H("p.rmv")}" hint-placeholder-val="{F()}"> <span style="display: inline-block; padding: 1px 7px; border-radius: 999px; background: {REDS}; color: {RED}; font-size: 11px; font-weight: 700;">{H("p.rmT")}</span></sc-if>'
+              f'<span style="color: {MUTED};">{H("p.grupo")}</span><span style="font-weight: 600;">{H("p.nome")}<sc-if value="{H("p.aj")}" hint-placeholder-val="{F()}"> <span style="display: inline-block; padding: 1px 7px; border-radius: 999px; background: {YELS}; color: {YEL}; font-size: 11px; font-weight: 700;">dose deste talhão</span></sc-if>'
+              f'<sc-if value="{H("p.rmv")}" hint-placeholder-val="{F()}"> <span style="display: inline-block; padding: 1px 7px; border-radius: 999px; background: {REDS}; color: {RED}; font-size: 11px; font-weight: 700;">retirado deste talhão</span></sc-if>'
               f'<sc-if value="{H("p.novo")}" hint-placeholder-val="{F()}"> <span style="display: inline-block; padding: 1px 7px; border-radius: 999px; background: {ACCS}; color: {ACC}; font-size: 11px; font-weight: 700;">incluído neste talhão</span></sc-if></span>'
               f'<span style="color: {MUTED}; white-space: nowrap; text-align: right;">{H("p.padrao")}</span>'
               f'<span style="display: flex; align-items: center; gap: 4px; white-space: nowrap;"><input id="{H("p.fid")}" aria-label="Dose local de {H("p.nome")}" value="{H("p.v")}" onChange="{H("p.set")}" readOnly="{H("p.dis")}" style="{H("p.ist")}"><span style="color: {MUTED}; font-size: 11.5px;">{H("p.un")}</span></span>'
@@ -319,27 +320,13 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
               f'<span style="display: flex; gap: 4px; justify-content: flex-end; flex-wrap: wrap;"><sc-if value="{H("p.podeRest")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("p.reset")}" title="Voltar à dose do plano padrão" style="{_MINI} font-size: 11px; padding: 3px 7px;">Restaurar dose</button></sc-if>'
               f'<sc-if value="{H("p.podeRet")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("p.ret")}" aria-label="Retirar {H("p.nome")} deste talhão" style="{_MINI} font-size: 11px; padding: 3px 7px; color: {RED};">Retirar</button></sc-if>'
               f'<sc-if value="{H("p.podeDesf")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("p.desf")}" aria-label="Desfazer a retirada de {H("p.nome")}" style="{_MINI} font-size: 11px; padding: 3px 7px;">Desfazer</button></sc-if></span></div>'
-              f'<sc-if value="{H("p.hasErr")}" hint-placeholder-val="{F()}"><div role="alert" style="font-size: 11.5px; color: {RED}; font-weight: 700;">{H("p.err")}</div></sc-if>'
-              # SOLO-01 §3.2: sugestão da análise sob a linha do produto, em texto cinza, sem cor de alerta; ações secundárias que preenchem o rascunho
-              f'<sc-if value="{H("p.hasSug")}" hint-placeholder-val="{F()}"><div class="so-sug" role="note" style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; padding: 2px 0 6px; font-size: 12.5px; color: {MUTED}; line-height: 1.5;">'
-              f'<span>Análise sugere <b style="color: {INK};">{H("p.sugD")}</b> · {H("p.sugQ")} ·</span>'
-              f'<button type="button" id="{H("p.pqId")}" onClick="{H("p.sugPq")}" style="border: 0; background: transparent; padding: 0 2px; color: {ACC}; font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; min-height: 28px;">Por quê</button><span aria-hidden="true">·</span>'
-              f'<button type="button" onClick="{H("p.sugGo")}" style="border: 0; background: transparent; padding: 0 2px; color: {ACC}; font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; min-height: 28px;">{H("p.sugU")}</button></div></sc-if>')
+              f'<sc-if value="{H("p.hasErr")}" hint-placeholder-val="{F()}"><div role="alert" style="font-size: 11.5px; color: {RED}; font-weight: 700;">{H("p.err")}</div></sc-if>')
     EXTRA.append(
       f'<sc-if value="{H("lp_open")}" hint-placeholder-val="{F()}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
       f'<button type="button" aria-label="Fechar" onClick="{H("lp_close")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button>'
       f'<aside role="dialog" aria-label="{H("lp_titulo")}" style="position: relative; width: 920px; max-width: 100%; height: 100vh; overflow-y: auto; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;">'
       f'<div style="display: flex; gap: 10px; align-items: flex-start;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px; flex-grow: 1;">{H("lp_titulo")}</h2><button type="button" aria-label="Fechar" onClick="{H("lp_close")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED};">×</button></div>'
       f'<div style="font-size: 13px; color: {MUTED};">{H("lp_sub")}</div>'
-      f'<sc-if value="{H("lp_hasInfo")}" hint-placeholder-val="{F()}"><sc-for list="{H("lp_info")}" as="q" hint-placeholder-count="1"><div style="font-size: 12.5px; color: {MUTED};">{H("q.t")} <a href="{H("q.h")}" style="color: {ACC}; font-weight: 700; text-decoration: none;">Ver laudo ›</a></div></sc-for></sc-if>'
-      f'<sc-if value="{H("lp_hasIncSug")}" hint-placeholder-val="{F()}"><sc-for list="{H("lp_incSug")}" as="q" hint-placeholder-count="1"><div class="so-sug" role="note" style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; padding: 8px 10px; border: 1px dashed {LINE}; border-radius: 10px; font-size: 12.5px; color: {MUTED}; line-height: 1.5;">'
-      f'<span>Análise sugere <b style="color: {INK};">{H("q.d")}</b> · {H("q.q")} ·</span><button type="button" id="{H("q.pqId")}" onClick="{H("q.pq")}" style="border: 0; background: transparent; padding: 0 2px; color: {ACC}; font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; min-height: 28px;">Por quê</button><span aria-hidden="true">·</span>'
-      f'<button type="button" onClick="{H("q.go")}" style="border: 0; background: transparent; padding: 0 2px; color: {ACC}; font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; min-height: 28px;">{H("q.u")}</button></div></sc-for></sc-if>'
-      f'<sc-if value="{H("lp_hasIncl")}" hint-placeholder-val="{F()}"><div style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase;">Incluída pela análise</div><sc-for list="{H("lp_incl")}" as="q" hint-placeholder-count="1">'
-      f'<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 8px 10px; border: 1px solid {LINE}; border-radius: 10px; font-size: 12.8px;"><b>{H("q.t")}</b><span style="color: {MUTED};">{H("q.d")}</span>'
-      f'<span style="display: inline-block; padding: 1px 7px; border-radius: 999px; background: #E3F0FB; color: #1E5F8F; font-size: 11px; font-weight: 700;">{H("q.chip")}</span><span style="flex-grow: 1;"></span>'
-      f'<sc-if value="{H("q.podeDesf")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("q.desf")}" style="{_MINI} font-size: 11px; padding: 3px 7px;">{H("q.desfT")}</button></sc-if></div></sc-for></sc-if>'
-      f'<sc-if value="{H("lp_hasCmdErr")}" hint-placeholder-val="{F()}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">{H("lp_cmdErr")}</div></sc-if>'
       f'<sc-if value="{H("lp_nerr")}" hint-placeholder-val="{F()}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">Corrija os campos destacados; o que você digitou foi mantido.</div></sc-if>'
       f'<sc-for list="{H("lp_grupos")}" as="g" hint-placeholder-count="1"><div style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase; padding-top: 4px;">{H("g.t")}</div>'
       f'<sc-for list="{H("g.gats")}" as="t" hint-placeholder-count="2"><div style="border: 1px solid {LINE}; border-radius: 12px; overflow: hidden;">'
@@ -392,20 +379,6 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
       f'<sc-if value="{H("dv_warn")}" hint-placeholder-val="{F()}"><div role="alert" class="saida" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{H("dv_discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{H("dv_keep")}" style="{_MINIP}">Continuar editando</button></div></div></sc-if>'
       f'<div class="pe-form" style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};"><sc-if value="{H("dv_edit")}" hint-placeholder-val="{H("true")}"><button type="button" onClick="{H("dv_close")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{H("dv_save")}" style="{BTN_ST(True,True)}">Salvar divisão</button></sc-if>'
       f'<sc-if value="{H("dv_ro")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("dv_discard")}" style="{BTN_ST(False,True)}">Fechar</button></sc-if></div></aside></div></sc-if>')
-    # ---------- painéis da análise de solo (SOLO-01): Sugestões pelas análises (lote) e Por quê ----------
-    from areas.analise_solo import _overlay, _cabeca
-    g_sug=grid([dict(k='tal',l='Talhão',w=110),dict(k='item',l='Atividade · produto',w=190),dict(k='pad',l='Padrão',w=130),dict(k='sug',l='Sugestão',w=140),
-                dict(k='dif',l='Diferença no talhão',t='num',a='r',w=150),dict(k='lau',l='Laudo',w=170),dict(k='tipo',l='Tipo',w=100),dict(k='res',l='Resultado',w=170)],[],
-               edit=dict(m='none'),sel=True,gid='g_sug',total=False,qf=dict(k='tipo',l='tipo',todas='Todas'))
-    pe_sg=(f'<div class="so-pe" style="position: sticky; bottom: -20px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 -22px -20px; padding: 12px 22px; background: {SURF}; border-top: 1px solid {LINE};">'
-           f'<span style="font-size: 12.5px; color: {MUTED};">{H("sg_pe")}</span><span style="flex-grow: 1;"></span><button type="button" onClick="{H("sg_close")}" style="{BTN_ST(False,True)}">{H("sg_closeT")}</button>'
-           f'<button type="button" aria-disabled="{H("sg_pdis")}" onClick="{H("sg_pgo")}" style="{BTN_ST(True,True)} {H("sg_pst")}">{H("sg_pt")}</button></div>')
-    corpo_sg=(_cabeca('sg_',chip=False)
-              + f'<sc-if value="{H("sg_hasErr")}" hint-placeholder-val="{F()}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">{H("sg_err")}</div></sc-if>'
-              + g_sug + f'<div style="flex-grow: 1;"></div>' + pe_sg)
-    EXTRA.append(_overlay('sg_',1080,corpo_sg))
-    EXTRA.append(porque_html())
-    EXTRA.append('<style>@media (max-width:640px){.so-sug button{min-height:44px!important}.so-pan{padding:16px 14px!important}.so-pe{margin:0 -14px -16px!important;padding:12px 14px!important}.so-pe button{min-height:44px}}</style>')
     HEIGHTS37[fname]=1500
     shell37('SAF','Planejar safra',corpo,fname=fname,subtitle='',
             steps=steps_state(NOMES),primary_html=None,  # faixa só informa; avanço/retorno/primária na área de ações (UX-ACAO-UNICA-20261003)

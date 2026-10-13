@@ -35,7 +35,10 @@ try:
     m.ok('Declarar apto' in p and 'OM-0233' in p and 'Apto' not in [x.strip() for x in p.split('\n')[:12] if x.strip() in ('Apto',)], 'Trator T1: só a OM-0233 devolve o ativo (Bloqueado → Apto por "Declarar apto" na ordem)', p[:200])
     # ---------- Sem ordem (antes MA-02 e MA-03) ----------
     m.ir('vis=semordem'); b = m.body(); n0 = len(m.linhas(0))
-    m.ok(all(x in b for x in ('INSP-104', 'SM-0150', 'NC-0912', 'PM-02 v2', 'PM-05 v1', 'PM-07 v3')) and n0 == 6, f'Sem ordem: achados do estado e vencimentos sem ordem ({n0} linhas)')
+    # COLUNAS-1 (10/10): a versão do plano saiu da célula Item e fica no painel do vencimento (Versão)
+    m.ir('venc=PM-02|a03|s1'); pv = m.pan(); m.ir('vis=semordem')
+    m.ok(all(x in b for x in ('INSP-104', 'SM-0150', 'NC-0912', 'PM-02', 'PM-05', 'PM-07')) and not any(x in b for x in ('PM-02 v2', 'PM-05 v1', 'PM-07 v3')) and n0 == 6 and 'PM-02 v2' in pv,
+         f'Sem ordem: achados do estado e vencimentos sem ordem ({n0} linhas); a versão do plano no painel do vencimento', pv[:200])
     m.clk('Registrar achado'); m.clk('Registrar achado', '#ma-painel'); t3 = m.toast()
     m.ok('ativo' in t3 and m.pan().startswith('Registrar achado'), 'Registrar achado exige escolher o ativo', t3)
     m.setv('#na-aid', 'a08'); m.clk('Relato', '#ma-painel'); m.clk('Rodado e freios', '#ma-painel'); m.clk('Média', '#ma-painel'); m.clk('Apto', '#ma-painel')

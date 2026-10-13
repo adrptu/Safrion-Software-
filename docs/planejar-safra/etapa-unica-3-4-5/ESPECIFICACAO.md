@@ -382,9 +382,8 @@ São 8 colunas: o identificador e 7 úteis (PRD 4.3). Uma variável por coluna e
   - Agrupa a saída de `ocorr` por `c.v.cult` e herda dela a regra de cultura (safra.js:323) e dos ajustes '-' e '+' (safra.js:327-329). A área de cada cultivo com plano válido entra uma vez.
   - R$/ha só quando não há pendente nem tarifa desconhecida. Senão "parcial · N ocorrências pendentes". LG2627, Mamão Formosa: "parcial · 56 ocorrências pendentes".
   - Com ocorrências antes do início, a linha da cultura diz quanto: LG2627 "inclui R$ 919.906,51 de operação e R$ 1.789.941,59 de insumos antes de 01/09/2026".
-- **Nota do quadro:** "Insumos do plano: dose × área × preço de todas as datas, antes do estoque. Deles, R$ Y têm data antes de hoje (23/09/2026) e R$ Z de hoje em diante. A etapa 4 troca a parte já emitida em O.S. pelo que elas ainda vão tirar do estoque e calcula a necessidade líquida."
-  - CTL-4 (06/10/2026, DEM-06): data antes de hoje não é "realizado" (RN-003), e a demanda bruta da etapa 4 passou a incluir as O.S. pelo pendente; por isso Z deixou de ser a "Demanda bruta".
-  - Z = Σ `cins` das ocorrências do plano com data de hoje em diante; Y = total − Z, para a soma exibida fechar (mesma regra do `nm`).
+- **Nota do quadro:** "Insumos do plano: dose × área × preço de todas as datas, antes do estoque. Deles, R$ Y são de antes de hoje (23/09/2026, já realizados) e R$ Z de hoje em diante (a 'Demanda bruta' da etapa 4). A necessidade líquida está na etapa 4."
+  - Z = Σ `bruta × preço` de `demanda`; Y = total − Z, para a soma exibida fechar (mesma regra do `nm`).
   - Executado: LG2627 Y = R$ 1.853.460,49 e Z = R$ 1.846.704,17. Na S2627, Y = 0 e o texto diz "Todos de hoje em diante".
 - **Trabalho da safra:** "5.234 ha-op (hectares-operação) · 561,84 horas-conjunto · 1.241,95 horas-homem · 6.876,08 L de diesel estimado (9 ocorrências sem L/h)".
   - LG2627, mais: "das quais antes do início: 4.061,60 ha-op · 2.654,23 horas-conjunto · 18.758,32 horas-homem · 17.097,99 L"; "horas-homem no calendário: 15.351,14".

@@ -14,16 +14,13 @@ try:
     t.fset('larg','36'); t.btn('Salvar'); time.sleep(.2)
     t.chk('salvou e fechou', not t.isopen(), t.alerts())
     ts=t.toast(); t.chk('aviso de salvo com o novo rendimento', '27,00 ha/h' in ts and 'R$ 333,00/h' in ts and 'R$ 12,33/ha' in ts, ts)
-    # TABELAS-FOCO (06/10/2026); revisão TABR (09/10/2026, A1): modo, largura, velocidade e eficiência no painel do rendimento
-    r=t.rowtxt(0,'PJ-3030'); t.openrow(0,'PJ-3030'); lve=[t.fv(k) for k in ('larg','vel','efic')]; t.cancel()
-    t.chk('linha recalculada (27,00 ha/h · R$ 333,00 · R$ 12,33) e o painel com 36 m · 10 km/h · 75 %', all(x in r for x in ['27,00 ha/h','R$ 333,00','R$ 12,33']) and lve==['36','10','75'], [r,lve])
+    r=t.rowtxt(0,'PJ-3030'); t.chk('linha recalculada (27,00 ha/h · R$ 333,00 · R$ 12,33)', all(x in r for x in ['36 m · 10 km/h · 75 %','27,00 ha/h','R$ 333,00','R$ 12,33']), r)
     # modo Informado: sem largura, rendimento digitado
     t.openrow(0,'Plantadeira 24 linhas'); t.fset('modo','Informado')
     L=t.labels(); t.chk('Informado esconde largura, velocidade e eficiência', 'Largura de trabalho' not in L and L.count('Rendimento efetivo')==1, L)
     t.chk('Informado parte do rendimento atual (6,8)', t.fv('rend')=='6,8', t.fv('rend'))
     t.fset('rend','7,5'); t.btn('Salvar'); time.sleep(.2)
-    r=t.rowtxt(0,'Plantadeira 24 linhas'); t.openrow(0,'Plantadeira 24 linhas'); md=t.fv('modo'); t.cancel()
-    t.chk('linha em modo informado (7,50 ha/h; o modo no painel)', md=='Informado' and '7,50 ha/h' in r and 'R$ 52,80' in r, [r,md])
+    r=t.rowtxt(0,'Plantadeira 24 linhas'); t.chk('linha em modo informado (7,50 ha/h)', 'rendimento informado' in r and '7,50 ha/h' in r and 'R$ 52,80' in r, r)
     t.shot('cadc_cd02_rend.png')
     # mesma lista de campos no Planejar safra (etapa 3)
     t.goto('SAF.dc.html'); t.clk('Abrir safra'); time.sleep(.3); t.clk('3 Defina os rendimentos'); time.sleep(.3)

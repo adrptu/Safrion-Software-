@@ -14,8 +14,6 @@ BTN="""((t)=>{const b=[...document.querySelectorAll('aside[role=dialog] button')
 CLK="""((t,sc)=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...document.querySelectorAll(sc||'button,a')]; const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
 def ROW(ti,txt): return f"[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(txt)})>=0)"
 def openrow(ti,txt): J(f"(()=>{{const r={ROW(ti,txt)}; (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.35)
-# revisão TABR (09/10/2026, A1): a Situação vem logo depois do talhão ("T1 Em dia Sequeiro …"); a linha é achada pelo código na 1ª célula
-def openrow1(ti,cod): J(f"""(()=>{{const r=[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>{{const c=r.querySelector('[role=cell]'); return c&&c.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim()==={json.dumps(cod)};}}); (r.querySelector('[role=cell] span')||r).click();}})()"""); time.sleep(.35)
 def rowtxt(ti,txt): return J(f"(()=>{{const r={ROW(ti,txt)}; return r?r.innerText.replace(/\\s+/g,' '):null;}})()")
 def fv(k): return J(f"(()=>{{const i=document.querySelector('aside[role=dialog] [id$=\"_{k}\"]'); return i?i.value:null;}})()")
 def fset(k,val): J(f"({SETV})('aside[role=dialog] [id$=\"_{k}\"]',{json.dumps(val)})"); time.sleep(.2)
@@ -63,17 +61,17 @@ try:
     chk('9 volta ao talhão com a fazenda nova escolhida e o preenchido mantido', 'Ao salvar, você volta ao talhão X9' in sub and fv('t')=='X9' and fv('decl')=='50' and fv('faz')=='Serra Azul', [fv('t'),fv('decl'),fv('faz')])
     save(); chk('10 talhão X9 salvo na Serra Azul', '50,0 ha' in (rowtxt(0,'Serra Azul 1 talhão') or ''), rowtxt(0,'Serra Azul'))
     # ---------- inativar sem excluir ----------
-    openrow1(0,'T1'); fset('sit','Inativo'); save(); al=alerts()
+    openrow(0,'T1 Sequeiro'); fset('sit','Inativo'); save(); al=alerts()
     chk('11 T1 com parcelas na safra não inativa', 'T1 tem parcelas na Safra 2026/27 e na Safrinha 2027' in al, al)
     J(f"({BTN})('Cancelar')"); time.sleep(.2); J(f"({BTN})('Descartar alterações')"); time.sleep(.2)
-    openrow1(0,'B1'); fset('sit','Inativo'); save()
+    openrow(0,'B1 Sequeiro'); fset('sit','Inativo'); save()
     b1=rowtxt(0,'B1'); bv=rowtxt(0,'Boa Vista')
     chk('12 B1 inativo: continua na lista com chip e sai do subtotal', not aberto() and 'Inativo' in (b1 or '') and '0,0 ha' in (bv or '') and 'sem talhão ativo' in (bv or ''), [b1,bv])
     aba('Fazendas'); opencard('Boa Vista'); fset('sit','Inativa'); save()
     chk('13 fazenda sem talhão ativo inativa sem excluir', not aberto() and 'Inativa' in (cardtxt('Boa Vista') or ''), cardtxt('Boa Vista'))
     aba('Talhões')
     # ---------- abrir o detalhe de outro talhão ----------
-    openrow1(0,'T2'); J(f"({BTN})('Abrir talhão ›')"); time.sleep(2.2)
+    openrow(0,'T2 Sequeiro'); J(f"({BTN})('Abrir talhão ›')"); time.sleep(2.2)
     for _ in range(8):
         if J("document.readyState")=='complete' and J("!!document.querySelector('header select')"): break
         time.sleep(.4)
@@ -82,9 +80,7 @@ try:
     chk('14 "Abrir talhão ›" do painel do T2 abre o detalhe do T2 (seletor, crumb e primária do T2 na aba Parcelas)', href=='CD-01det.dc.html#talhao=T2' and J("document.querySelector('header select').value")=='T2'
         and 'T2 · 298 ha' in hd and 'Planejar T2 na safra' in mn and erro_js()=='', [href,hd])
     J(f"({SETV})('header select','B1')"); time.sleep(.4); hd=J("document.querySelector('header').innerText.replace(/\\s+/g,' ')")
-    # TABELAS-FOCO (06/10/2026): a data da inativação fica só no estado do cabeçalho; a Situação da ficha é o chip "Inativo" com "Reativar B1"
-    mn=J("document.querySelector('main').innerText.replace(/\\s+/g,' ')") or ''
-    chk('15 detalhe lê o cadastro salvo na lista: B1 inativo', 'Inativo desde 23/09/2026' in hd and 'Inativo Reativar B1' in mn, [hd[-120:],mn[:200]])
+    chk('15 detalhe lê o cadastro salvo na lista: B1 inativo', 'Inativo desde 23/09/2026' in hd and 'Inativo desde' in (J("document.querySelector('main').innerText") or ''), hd)
     c.shot(os.path.join(os.path.dirname(os.path.abspath(__file__)),'_probe','cadf_det_b1.png'))
 finally:
     c.close(); srv.terminate()

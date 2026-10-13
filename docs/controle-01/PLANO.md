@@ -201,18 +201,6 @@ python3 quantidade_test.py && python3 carencia_test.py unit && python3 mip_unit_
 - tudo vencido trava com o gestor;
 - volume do dia ≤ 13.120.
 
-**Executado em 06/10 (CTL-5 da tabela nova, branch `claude/v44-controle-05`):**
-- fonte: `dados_lagoa_fonte.captacao()` sobre `LG_AGUA`; a irrigação não guarda outorga (`irrGet` repõe a captação da semente a cada leitura; `seed` v=3);
-- uma conta e um texto para IR-02, IR-04 e a trava: `irrCapDia`, `irrOutC`, `irrOutVenc` (`irrigacao_estado.js`); outorga vencida sem janela trava com o gestor;
-- o CD-01 nomeia o ponto como a IR-04 ("Outorga SINT-002/0000"; antes "Certidão");
-- testes: `outorga_unit_test.py` (base 2/18 → 18/18) e `ctl5_test.py` E3.1–E3.7 (1440 e 390 px).
-
-**Correções da revisão (09/10, executado):**
-- vigência na data de cada dia da janela, não só hoje (S3-2): `captacao()` leva `outs` (número, L/s, h/dia, vencimento, renovação); `irrOutDia` dá a vazão e o volume do dia; sem outorga vigente no dia → "Outorga vencida em dd/mm/aaaa · captação" com o gestor; o aviso só aparece se a janela passa do vencimento ("Outorga SINT-002/0000 vence em 20/11/2026 · depois, 144 L/s");
-- cadastro sem outorga de irrigação: "Sem outorga de irrigação no cadastro" (antes "Outorga vencida · sem captação no cadastro");
-- IR-02 e IR-04 usam a mesma conta do uso do dia (`irrUsoDia`, 0 % sem outorga); a IR-04 diz qual outorga vence e quanto sai ("SINT-002/0000 vence em 20/11/2026 (42 de 186 L/s)") e leva a "Renovar no cadastro ›" (CD-01 › Água);
-- testes: `outorga_unit_test.py` P5–P7 e J15–J20 (na a396c51: 16/27 → 27/27, executado em 09/10; P5 já passava: cobre os mutantes vivos E3-o/p/q/r); `ctl5_test.py` E3.2b e E3.8; `irtest.py` IR-02 (a janela de hoje não tem mais aviso de outorga).
-
 ### CTL-4 · B (início com entrega parcial)
 
 **Arquivos:**
@@ -373,40 +361,6 @@ python3 quantidade_test.py && python3 carencia_test.py unit && python3 mip_unit_
 
 **Aceite:** nenhuma tela diz "Receituário emitido" sem registro do AG-01.
 
-**Executado em 06/10 (CTL-5 da tabela nova):**
-- no lugar do link "Preparar receituário em Pragas e doenças", o AG-07 oferece "Usar na O.S." (pedido do integrador): produto da fazenda, cultura e alvo vão ao "Ajustar antes de liberar" da ordem A liberar escolhida, só as da cultura (`carCult`, a mesma regra da trava legal; `dados_carencia.JS_LOCAL`);
-- dose em branco; a trava legal do CTL-1 decide; a aprovação (CMD-42) grava produto, dose e alvo; a gaveta de receituário saiu;
-- fica: `catalogo.json` (AG-07, do PRD) ainda diz "Preparar receituário → FO-04" (mudança de contrato: Codex e proprietário);
-- testes: `usar_os_unit_test.py` (base 6/17 → 17/17), `agrofit_test.py` 9, 12, 14, 14b e 15, `ctl5_test.py` E2.1–E2.13.
-
-**Correções da revisão (09/10, executado):**
-- só ordem de operação que aplica defensivo (pulverização ou tratamento de sementes; `carOpDef`, `dados_carencia.JS_LOCAL`) é candidata no AG-07, e o link da O.S. confere a operação antes de incluir (S3-1; dano evitado: reserva e consumo de agrotóxico em calagem, sexagem, fertirrigação ou colheita);
-- alvo × referência conferida da fazenda (S3-3): `carAlvoRef` é a regra única do AG-07 e da trava da O.S. (`osUsoItem`); o AG-07 marca "na referência da fazenda" e só liga "Usar na O.S." para alvo coberto; a O.S. grava o alvo como a referência o escreve ("antracnose") e recusa alvo fora dela;
-- perfil sem o papel de agrônomo: o AG-07 desliga o botão e diz quem decide (S4-1); chegada à O.S. com mensagem "Vindo da Consulta Agrofit: …" e a linha incluída destacada por 1,5 s (`.g2flash` existente; S4-2);
-- testes: `usar_os_unit_test.py` U4, U5, U14–U18, F5 e F6 (na a396c51: 15/24 → 24/24, executado em 09/10); `ctl5_test.py` E2.2, E2.3b, E2.4b, E2.9, E2.10b, E2.11c, E2.11d e E2.13 (OS-0501); `agrofit_test.py` 12, 14, 14b e 15 (só a ordem de pulverização).
-
-**Decisão pendente (Codex e proprietário, não é defeito do CTL-5):** pelo "Usar na O.S." e pelo "Incluir produto" da O.S., a ordem é liberada com agrotóxico e com a CMD-42, mas sem receituário gravado (REC/RA; quem grava é o AG-01). PRD 41.2: "o clique interno não substitui documento legal". A liberação de agrotóxico na O.S. passa a exigir receituário gravado? O `catalogo.json` ainda diz "Preparar receituário → FO-04". O "Incluir produto" da O.S. também aceita agrotóxico em ordem que não pulveriza (anterior ao CTL-5).
-
-**Pedidos do proprietário de 09/10 (executado na mesma branch):**
-- **Praga-alvo no AG-07** (`689c138`, `1440664`). Com a cultura escolhida, a lista tem uma linha por uso na cultura (produto × praga-alvo), lida dos `agrofit_usos_cultura_*.json` e do `agrofit_indice.json`. As colunas novas são Praga-alvo (nome comum), Nome científico e Cultura do uso, com filtro e ordenação; a busca acha a praga-alvo. Sem cultura, a lista continua com uma linha por produto. Na lista por uso, os chips de classe contam usos. A ficha › Usos registrados virou tabela. Testes: `praga_alvo_unit_test.py` (1/19 na 9d4ff31 → 20/20) e `praga_alvo_test.py` (1440 e 390 px).
-- **Ficha do pivô** (`20a868e`). É a capacidade do equipamento, registrada como está na ficha (dados sintéticos), num componente único `ficha_pivo.py`. Abre em CD-03 › Bomba do Pivô 2 › "Ficha do pivô ›" e em IR-01 › setor P2 › "Ficha do pivô" (`IR-01#P2:ficha`).
-  - Fonte: `dados.FICHA_PIVO`, com a chave do equipamento do cadastro. Volta e lâmina a 100 % vêm de `dados.PIVO`. A vazão do setor P2 e da bomba no CD-03 é a da ficha: 166 L/s. O cadastro dizia 340 m³/h e divergia.
-  - A conta lâmina = lâmina100 × 100 ÷ percentímetro só confere a tabela e mostra a divergência (60 %: 11,0 × 11,17 mm).
-  - "21 h" é o regime de operação (h/dia, fora do horário de ponta) e não entra em conta.
-  - A ficha não prescreve lâmina; quem a define são a PA-07 e o responsável técnico.
-  - Ponto de leitura da CAD do talhão: `fpvCad`. Ele lê `irrCadTxt` (frente SOLO, `claude/v44-solo`) quando a função existe.
-  - Testes: `ficha_pivo_unit_test.py` (0/13 na 1440664 → 13/13) e `ficha_pivo_test.py` (0/4 na base → 14/14, 1440 e 390 px).
-- ~~Fica: a Bomba do Pivô 1 diverge da mesma forma.~~ Resolvido na revisão adicional de 10/10 (abaixo).
-
-**Correções da revisão adicional (10/10, executado; achados A1–A8 sobre 689c138..2f8a6e6):**
-- A1 (S3) conferência da ficha: tolerância = 0,05 mm + 0,05 mm × 100 ÷ percentímetro (meia casa da linha mais a da lâmina a 100 %, que a conta multiplica), em centésimos inteiros (`fpvConf`, `ficha_pivo.py`, uma conta). A ficha coerente da revisão (6,723 → 6,7) não acusa mais divergência; o 60 % sintético continua divergindo.
-- A2 (S3) vazão em um lugar: o setor da Irrigação guarda o equipamento do cadastro (`eq`) e lê a vazão dele; com ficha, vale a da ficha gravada (`irrGet` → `irrEqVaz`), que a duração e a trava de outorga usam. No CD-03 a vazão do pivô fica só leitura e a capacidade segue a ficha; renomear a bomba aparece na ficha. Bomba do Pivô 1 = 540 m³/h (150 L/s) e Gotejo T7 = 838,8 m³/h (233 L/s), os valores da Irrigação.
-- A3 (S3) a nota da ficha aponta para o limite por passada do setor (na Irrigação, o valor atual, ex.: "até 10,0 mm"); a política de água tem uma fonte (`dados.POLITICA_AGUA`: PA-07 v3, Ana agrônoma, até 30/11/2026), lida por Configurações.
-- A4 (S3) registro: "Registrar ficha do pivô ›" no equipamento do pivô (CD-03) e no setor (IR-01); "Editar ficha" na ficha aberta. Campos da ficha + tabela percentímetro × tempo × lâmina (a linha de 100 % vem dos campos; vazão e área já vêm do setor), gravado em `talhao-os-ficha-pivo-v1` (volta à semente com "Restaurar demonstração").
-- A5 (S3) AG-07: os chips de classe e de orgânicos contam as linhas que passam nos filtros das colunas (cada chip sem o próprio filtro), na lista por uso e por produto (`agChipsCol`).
-- A6 (S4) o filtro de cima passa a se chamar "Praga-alvo", o mesmo rótulo da coluna. A7 (S4) o setor mostra o nome do cadastro (Bomba do Pivô 2, não "Bomba B2"); o modelo do cadastro descreve o conjunto da ficha; a fazenda vem do setor. A8 (S4) o `cd03` de reserva lê a vazão do cadastro.
-- Testes: `ficha_pivo_unit_test.py` (3/23 na 2f8a6e6 → 23/23), `ficha_pivo_test.py` (0/4 na base, depois aborta → 21/21, 1440 e 390 px), `praga_alvo_unit_test.py` U20 (20/21 na base → 21/21), `praga_alvo_test.py` 3b (14/14).
-
 ---
 
 ## 3. Conflitos entre frentes e como resolver
@@ -526,40 +480,3 @@ Decisões pedidas ao Codex, que não são do proprietário:
 - **(e)** conferir com o proprietário o possível dado real em `dados_irrigacao.py:43` antes de qualquer publicação (G2).
 
 **Pergunta ao proprietário (realidade da fazenda):** os pivôs da Lagoa Grande captam numa rede comum às outorgas do Rio A? (E, risco 6.)
-## 7. CTL-4 (demanda única) · revisão do `853a6a8`: correções
-
-Revisão adversarial "lente estado" do `853a6a8` (ACHADOS-v1): 2 S2 e 5 S3, todos corrigidos, um commit por achado, cada um com regressão que falha no `853a6a8` e passa na candidata. Detalhe, regras e evidência em `desenho/FRENTE-C.md` §10.
-
-- `7ffe412` · S2 · custódia sem uso nas O.S. (cancelada, em conferência, encerrada ou excedente) é suprimento: cancelar ou devolver não muda a compra (I1–I4, nav K1, K2). Semente: MAP 79.500 kg, R$ 428.305,00.
-- `b64d556` · S3 (base) · cancelar com material entregue mostra a custódia e o próximo passo "Receber devolução" (I5, nav K3).
-- `e907539` · S2 · quarentena com laudo pendente é falta condicionada à qualidade, fora da compra e da primária; laudo reprovado vira falta firme com o motivo (I6, I7, nav Q1–Q3).
-- `6fce782` · S3 · turno do app sem sinal não muda a compra até o envio (I8, nav A7).
-- `1fe0902` · S3 · reserva que a O.S. já não usa deixa de ser demanda (I9, nav R1).
-- `84494d7` · S3 · reserva entre fazendas conta uma vez em cada (I10, nav F1).
-- `4130972` · S3 · SU-03det e MB-05 leem a mesma demanda viva (nav D3).
-- `6202376`, `78711bb` · vermelhos novos da bateria (cache do Mapa; saf_cmp_continuidade e esttest).
-
-Bateria 853a6a8 × candidata (executado; logs em `scratchpad/ctl4fix/logs/{base,cand}/`): nenhum vermelho novo; os quatro vermelhos que já estavam no `853a6a8` (consumo_divergente 1, os_cenario 1, ostest 1, testes_pedido T01/T02/T05) continuam iguais; build 0 FALHA, varredura 140/140, ações duplicadas 0.
-
-**Revisão do `16fb55e` (Codex, PR #47, comentário 6136083713; tarefa CTL4-FIX-REV-20261013-01).** São 4 S3 e os quatro procedem por execução. Cada um tem um commit e uma regressão que falha no `16fb55e` e passa depois. Detalhe e evidência em `desenho/FRENTE-C.md` §10.1.
-- `81aef42` · ajuste 1 · o Mapa perdia a qualidade pendente quando havia falta firme ao mesmo tempo.
-  - Contraexemplo: demanda 100 kg, estoque 0 e quarentena 40 davam só "Falta 60 kg".
-  - Correção: o Mapa, o SU-03det e o MB-05 mostram também "Qualidade pendente · 40 kg", com quem decide. A compra continua em 60 kg e não há segunda ação.
-  - Testes: J1 e J1b; nav M1 (no `est_laudo_lote_nav_test` desde o `718a914`).
-- `7551f1a` · ajuste 2 · a memória atribuía todo o reprovado ao último laudo.
-  - Contraexemplo: devolver 10 L, reprovar LAB-A, devolver mais 10 L e reprovar LAB-B dava "20 L · laudo LAB-B".
-  - Correção: os laudos vêm do histórico do lote ("= 10 L no laudo LAB-A: motivo A + 10 L no laudo LAB-B: motivo B"). O selo do lote no Estoque segue a mesma regra.
-  - Testes: J2 e nav L2.
-- `0ee25bd` · ajuste 4 · reprovar com a mesma autora da entrada bloqueada não marcava revisão posterior.
-  - Correção: vale a mesma regra de acúmulo da liberação (`cenRevEntrada`), sem veto nem segundo aprovador.
-  - Testes: J4 (positivo e negativo), nav L2b e L3.
-- `6236d70` · ajuste 3 · o motivo migrava entre lotes.
-  - Contraexemplo: o motivo digitado no K26-11 aparecia ao abrir o F26-02.
-  - Correção: abrir, manter, decidir, trocar o perfil ou restaurar limpam o laudo e o motivo. O foco, o Tab e a tela de 390×844 continuam iguais.
-  - Testes: nav L1 e L1b.
-- Bateria da candidata, uma execução por teste (logs em `scratchpad/ctl4rev01/logs/{cand,base}/`):
-  - build 0 FALHA; varredura 140/140.
-  - Motor: demanda_unica 70/0, cal01 45/0, aprova_quem_decide 102/102.
-  - Telas: est_laudo_lote_nav 7/0, demanda_estado_nav 11/0, demanda_unica_nav 29/0, saf_cmp_continuidade 31/0, esttest, est_fix1/2, est_cenario, talmapa, sutest, mbtest e cmptest verdes.
-  - No `16fb55e` falham só os casos novos: J1, J1b, J2 e J4; L1, L2, L2b e M1.
-  - Vermelho novo: nenhum. O `demanda_estado_nav_test` com o M1 passou de 900 s sob carga (rc=124), por isso o M1 mudou de arquivo.

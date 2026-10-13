@@ -79,24 +79,8 @@ const PR_FEZ = ['Liberadas', 'Em execução', 'Em conferência', 'Encerradas']; 
 /* leitura não cria nada no estado; comando (w) cria a parte da produção num estado antigo que não a tinha */
 function prP(c, w) { if (c.producao) return c.producao; const e = { contagens: [], previsoes: {}, cargas: {}, lotes: {}, pedidos: {}, reservas: {}, movs: [], seq: { cg: 2100, lote: {}, rs: 0, mp: 1000, cnt: 0 } }; if (w) c.producao = e; return e; }
 function prHoje() { return typeof CEN_DIA_OP !== 'undefined' ? CEN_DIA_OP : '2026-09-26'; }
-/* quem age (integração CONF × COLH): o que tem papel no catálogo de Configurações vem do papel vigente, nunca de nome fixo (CONF R2, R7):
-   publicar previsão = AL-17 (texto pelo g2alcQuem); receber na fazenda onde recebe o almoxarife = o almoxarife ativo (cenAlmox). Qualidade, Comercial
-   e Lúcia ainda não estão no CD-04 nem no catálogo de papéis: seguem o registro da colheita (PRDC.quem) até entrarem (CONF-D41). */
-function prQuem(k) { if (k === 'ag' && typeof g2alcQuem === 'function') { const q = g2alcQuem('AL-17'); if (q) return q; } return (PRDC.quem || {})[k] || ''; }
-function prRec(faz) { const r = ((PRDC.quem || {}).rec || {})[faz] || 'Recebimento'; return (/\(almoxarife\)$/.test(r) && typeof cenAlmox === 'function') ? cenAlmox() : r; }
-/* quem pesa, estorna e descarta (revisão CONF 10/10, R14): onde quem recebe é um papel (almoxarife: Santa Rita e Boa Vista), grava o perfil de quem age
-   (Ver como; omitido, o da sessão; "Rui (almoxarife)" vale pelo 1º nome) e recusa sem gravar se ele não tem o papel. Nunca o almoxarife deduzido:
-   o texto "quem recebe" (prRec) diz quem deve agir, não quem agiu. Lúcia (Lagoa Grande) segue o registro da colheita até entrar no CD-04 (CONF-D41).
-   Sem o bloco de perfis (página sem g2lib), o nome recebido. Dano evitado: carga pesada, estornada ou descartada em nome de quem não agiu. */
-function prAtorRec(faz, quem, acao) { const r = ((PRDC.quem || {}).rec || {})[faz] || 'Recebimento';
-  if (!/\(almoxarife\)$/.test(r) || typeof cenExige !== 'function' || typeof g2perfil !== 'function') return (typeof quem === 'string' && quem) || prRec(faz);
-  const P = (quem && typeof quem === 'object') ? quem : (quem ? String(quem).split(/[\s(]/)[0] : g2perfil()); return cenExige(P, 'almoxarife', acao); }
-/* ator de comando com alçada (publicar previsão, AL-17): o perfil de quem age (Ver como; "Ana (agrônoma)" ou {k:'Ana'} pelo 1º nome); sem papel, recusa sem gravar.
-   Sem o bloco de alçadas (página sem g2lib), o nome recebido. */
-function prAtorAlc(quem, al, acao) { if (typeof cenExigeAlc !== 'function' || typeof g2alc !== 'function' || !g2alc(al)) return (typeof quem === 'string' && quem) || prQuem('ag');
-  const P = (quem && typeof quem === 'object') ? quem : (quem ? String(quem).split(/[\s(]/)[0] : g2perfil()); return cenExigeAlc(P, al, acao); }
-/* app de campo respeita o acesso (CONF R2): operador desativado não grava contagem nem carga; o que já está na fila do aparelho envia */
-function prAppAtivo(c, via) { if (via === 'app' && typeof cenAppAtivo === 'function') cenAppAtivo(c); }
+function prQuem(k) { return (PRDC.quem || {})[k] || ''; }
+function prRec(faz) { return ((PRDC.quem || {}).rec || {})[faz] || 'Recebimento'; }
 function prEhColheita(o) { return /^Colheita/.test(String((o && o.tipo) || '')); }
 /* cultivo da O.S.: a ordem nova guarda o cultivo (#nova:); a semente vem do registro; senão o 1º cultivo aberto do talhão */
 function prCultDaOS(c, o) { if (!o) return ''; const nv = o.osc && o.osc.novo; if (nv && nv.cult) return nv.cult;
@@ -243,26 +227,9 @@ function prSaldos(c, L) { const Q = prQualidade(c, L); const fis = prFis(c, L.id
   z.esgotado = prCmp(fis, 0) <= 0; z.vencido = !!(L.validade && L.validade < prHoje()); z.ordem = Q.ordem || ''; return z; }
 
 /* ---------- pedidos, reservas e oferta (R-15, R-16) ---------- */
-/* expedido da venda, líquido de devolução (Comercial R-C10): a devolução entra como lote novo com +kg e o mesmo pedido */
-function prExpedido(c, pid) { return prSoma(prP(c).movs.filter(m => (m.tipo === 'expedição' || m.tipo === 'devolução') && m.pedido === pid).map(m => -m.kg)); }
-/* fator do compromisso (Comercial A-17; DEC-0510-03 dimensional): a venda guarda a quantidade na unidade do contrato (qc), a massa dessa
-   unidade (fat, kg) e a origem; legado com a massa ambígua (sc 50 × 60 kg, fatAmb) fica sem kg (qtd null) até a conversão registrada
-   (fatConf): falta, saldo, oferta e saída que dependem dela ficam suspensos; nada é convertido em silêncio pela unidade atual da cultura */
-function prAmb(p) { return !!(p && p.fatAmb && !p.fatConf && !p.enc); }   /* encerrada: a quantidade vigente é o expedido em kg, nada a conferir */
-/* texto na unidade do compromisso (fonte única; o Comercial usa as mesmas): massa gravada na venda, nunca a do cadastro atual; com a massa
-   igual à da cultura, o rótulo é o de sempre ("616 sc"); diferente, vai junto ("12.000 sc 50 kg"); sem massa conhecida, só kg */
-function prFatV(p) { return p.fatConf ? p.fatConf.fat : (p.fat || null); }
-function prUnV(p) { const u = prUn(p.cultura); const un = p.un || prEstUn(p.cultura); const f = prFatV(p);
-  return (u.est || !f || prCmp(f, u.massa) === 0) ? un : un + ' ' + prFmtT(f, 3) + ' kg'; }
-function prTxtV(p, kg, d) { const f = prFatV(p); if (!f) return prFmtT(kg, 3) + ' kg'; return prFmtT(prDiv(kg, f), d === undefined ? 2 : d) + ' ' + prUnV(p); }
-/* pedido sem massa gravada (pedido de teste da Colheita): a unidade de estoque da cultura; com massa: a do compromisso (Comercial A7 da revisão) */
-function prTxtP(p, kg) { return prFatV(p) ? prTxtV(p, kg) : prEstTxt(p.cultura, kg); }
-function prUnP(p) { return prFatV(p) ? prUnV(p) : prEstUn(p.cultura); }
-function prQP(p, kg) { const f = prFatV(p); return f ? prDiv(kg, f) : prEstQ(p.cultura, kg); }
-function prBaseP(p, q) { const f = prFatV(p); return f ? prMul(q, f) : prEstBase(p.cultura, q); }
-function prQtdTxt(p) { return prAmb(p) ? prFmtT(p.qc, 3) + ' ' + (p.un || '') + ' (saca de ' + p.fatAmb.join(' ou ') + ' kg a conferir)' : ((prFatV(p) || p.fatAmb) ? prTxtV(p, p.qtd || 0) : prEstTxt(p.cultura, p.qtd)); }
+function prExpedido(c, pid) { return prSoma(prP(c).movs.filter(m => m.tipo === 'expedição' && m.pedido === pid).map(m => -m.kg)); }
 function prResPed(c, pid) { return Object.values(prP(c).reservas).filter(r => r.pedido === pid && r.st === 'Ativa'); }
-function prFalta(c, ped) { if (prAmb(ped)) return 0; const f = prSub(prSub(ped.qtd, prExpedido(c, ped.id)), prSoma(prResPed(c, ped.id).map(r => r.kg))); return prCmp(f, 0) > 0 ? f : 0; }
+function prFalta(c, ped) { const f = prSub(prSub(ped.qtd, prExpedido(c, ped.id)), prSoma(prResPed(c, ped.id).map(r => r.kg))); return prCmp(f, 0) > 0 ? f : 0; }
 /* produto classificado (BEN-1, R-E05): a classe é obrigatória nos dois e igual; vazio igual a vazio nunca passa. Os demais seguem a regra da colheita */
 function prClassificado(prod) { return typeof BENC !== 'undefined' && Object.values(BENC.rotas).some(r => (r.saidas || []).some(s => s.fluxo === 'Produto' && s.prod === prod && (s.classes || []).length)); }
 function prCompatErro(ped, L) { if (!ped || !L) return 'Pedido ou lote não encontrado.';
@@ -273,33 +240,27 @@ function prCompatErro(ped, L) { if (!ped || !L) return 'Pedido ou lote não enco
   if (ped.saf && L.saf && ped.saf !== L.saf) return L.id + ' (' + L.prod + ' ' + L.saf + ') não atende o ' + ped.id + ' (' + ped.prod + ' ' + ped.saf + ').';
   return ''; }
 function prCompat(ped, L) { return !prCompatErro(ped, L); }
-/* situação do pedido: Encerrada · Entregue · Coberto · Parcial · Sem reserva · Em risco (reserva com expedição impedida) · Futura: compromete a previsão */
+/* situação do pedido: Entregue · Coberto · Parcial · Sem reserva · Em risco (reserva com expedição impedida) · Futura: compromete a previsão */
 function prSitPed(c, ped) { const rs = prResPed(c, ped.id); const exp = prExpedido(c, ped.id); const falta = prFalta(c, ped);
   const imp = rs.filter(r => { const L = prP(c).lotes[r.lote]; return !L || prSaldos(c, L).q !== 'Liberado' || !prCompat(ped, L); });   /* bloqueado ou reclassificado depois da reserva (R-E06) */
-  if (ped.enc) return { t: 'Encerrada', c: 'gray', imp };   /* saldo encerrado com motivo (Comercial R-C11) */
-  if (prAmb(ped)) return { t: 'Saca a conferir', c: 'red', imp };   /* Comercial A-17: sem a massa do contrato, nada se compara */
   if (prCmp(exp, ped.qtd) >= 0) return { t: 'Entregue', c: 'gray', imp };
   if (imp.length) return { t: 'Em risco', c: 'red', imp };
   if (prCmp(falta, 0) <= 0) return { t: 'Coberto', c: 'green', imp };
   if (ped.tipo === 'futura') return { t: rs.length ? 'Futura: parcial' : 'Futura: compromete a previsão', c: 'yellow', imp };
   return { t: rs.length ? 'Parcial' : 'Sem reserva', c: rs.length ? 'yellow' : 'yellow', imp }; }
 /* oferta publicada × vendas futuras (R-16): por semana (fruta) ou por safra (grão); o físico nunca entra aqui */
-/* saldo da venda futura = máx(0, quantidade − expedido): excesso pesado na saída não vira oferta (Comercial CE-03, D-C23) */
-function prSaldoFut(c, p) { if (prAmb(p)) return 0; const s = prSub(p.qtd, prExpedido(c, p.id)); return prCmp(s, 0) > 0 ? s : 0; }
 function prOfertaSem(c, prod, sem) { let pub = 0, tem = false; Object.keys(PRDC.cult).forEach(cid => { const k = PRDC.cult[cid]; if (prUn(k.cultura).prod !== prod) return;
     const v = prVersaoSem(c, cid, sem); if (v) { pub = prSoma([pub, v.sem[sem]]); tem = true; } });
   const fut = Object.values(prP(c).pedidos).filter(p => p.tipo === 'futura' && p.prod === prod && p.sem === sem);
-  const futKg = prSoma(fut.map(p => prSaldoFut(c, p))); const resKg = prSoma([].concat(...fut.map(p => prResPed(c, p.id))).map(r => r.kg));
-  const amb = fut.filter(prAmb).map(p => p.id);   /* Comercial A-17: oferta suspensa (livre null) enquanto um compromisso não tem a massa */
-  return { pub, tem, fut, futKg, resKg, amb, livre: amb.length ? null : prSub(pub, prSub(futKg, resKg)) }; }
+  const futKg = prSoma(fut.map(p => prSub(p.qtd, prExpedido(c, p.id)))); const resKg = prSoma([].concat(...fut.map(p => prResPed(c, p.id))).map(r => r.kg));
+  return { pub, tem, fut, futKg, resKg, livre: prSub(pub, prSub(futKg, resKg)) }; }
 function prOfertaSafra(c, prod, saf) { let pub = 0, tem = false; Object.keys(PRDC.cult).forEach(cid => { const k = PRDC.cult[cid]; if (prUn(k.cultura).prod !== prod || (PRDC.safras[k.saf] || {}).mf !== saf) return;
     const vs = (prP(c).previsoes[cid] || []).filter(v => v.safra !== undefined); const v = vs[vs.length - 1]; if (v) { pub = prSoma([pub, v.safra]); tem = true; } });
   const cultura = (Object.values(PRDC.cult).find(k => prUn(k.cultura).prod === prod) || {}).cultura || 'Soja';
-  /* CT-203, CRE-0095 e BT-090 são vendas futuras do estado (Comercial D-C04): o catálogo não tem mais obrigações (P7) */
+  const ob = (PRDC.obrig || []).filter(x => x.prod === prod && x.saf === saf).map(x => ({ id: x.id, tipo: x.tipo, kg: prMul(x.sc, prUn(cultura).massa), cont: x.cont }));
   const fut = Object.values(prP(c).pedidos).filter(p => p.tipo === 'futura' && p.prod === prod && p.saf === saf);
-  const futKg = prSoma(fut.map(p => prSaldoFut(c, p))); const resKg = prSoma([].concat(...fut.map(p => prResPed(c, p.id))).map(r => r.kg));
-  const amb = fut.filter(prAmb).map(p => p.id);   /* Comercial A-17 */
-  return { pub, tem, fut, futKg, resKg, amb, livre: amb.length ? null : prSub(pub, prSub(futKg, resKg)), cultura }; }
+  const futKg = prSoma(ob.map(x => x.kg).concat(fut.map(p => prSub(p.qtd, prExpedido(c, p.id))))); const resKg = prSoma([].concat(...fut.map(p => prResPed(c, p.id))).map(r => r.kg));
+  return { pub, tem, ob, fut, futKg, resKg, livre: prSub(pub, prSub(futKg, resKg)), cultura }; }
 
 /* ---------- encerrar a O.S. de colheita (R-18): presente em toda página do estado (cenPodeEncerrar chama) ---------- */
 function prPodeEncerrar(c, id) { const o = (c.ordens || {})[id]; if (!o || !prEhColheita(o)) return '';
@@ -329,7 +290,7 @@ function prProxLote(c, iso) { const P = prP(c, 1); const w = String(prSemN(prSem
 function prPiso(x, d) { const k = 10n ** BigInt(6 - d); const m = prM(x); const q = m >= 0n ? m / k : -((-m + k - 1n) / k); return prN(q * k); }
 
 /* contagem de frutos (MB-07): grava a amostra; não publica (R-17) */
-function prContar(c, k) { prAppAtivo(c, k.via); const P = prP(c, 1); const kk = PRDC.cult[k.cult];
+function prContar(c, k) { const P = prP(c, 1); const kk = PRDC.cult[k.cult];
   if (!kk || !kk.semanal) throw new Error('Escolha um talhão de fruta em produção.');
   const n = Number(k.plantas); const e = ['pintado', 'devez', 'verde'].map(x => Number(k[x] || 0)); const peso = prNumOk(k.peso) ? String(prNum(k.peso)) : String(k.peso === undefined ? '' : k.peso);
   const imp = JSON.stringify([k.cult, n, e, peso, k.d || prHoje()]);
@@ -345,12 +306,12 @@ function prContar(c, k) { prAppAtivo(c, k.via); const P = prP(c, 1); const kk = 
     + '. A previsão só muda quando ' + prQuem('ag') + ' publicar.' + (on ? '' : ' Salvo no aparelho; envia quando houver sinal.'), cnt: x }; }
 
 /* publicar previsão (Ana): congela a versão nova só das semanas que ainda não começaram (R-17) */
-function prPublicar(c, cid, quem, par) { const kk = PRDC.cult[cid]; if (!kk) throw new Error('Cultivo não encontrado.'); const por = prAtorAlc(quem, 'AL-17', 'Publicar a previsão do ' + kk.local); const P = prP(c, 1);
+function prPublicar(c, cid, quem, par) { const kk = PRDC.cult[cid]; if (!kk) throw new Error('Cultivo não encontrado.'); const P = prP(c, 1);
   if (par) { const ph = prNum(par.plantas_ha), pe = prNumOk(par.perda) ? String(prNum(par.perda)) : String(par.perda === undefined ? '' : par.perda);
     if (!(ph > 0 && ph < 10000) || Math.floor(ph) !== ph) throw new Error('Plantas vivas por hectare: número inteiro maior que zero.');
     if (!prNumOk(pe) || prNum(pe) < 0 || prNum(pe) >= 1) throw new Error('Perda entre 0 e 100 %.'); par = { plantas_ha: ph, perda: pe }; }
   const pb = prPublicavel(c, cid, par); if (!pb) throw new Error('Nada novo a publicar no ' + kk.local + ': a versão vigente já tem as semanas que ainda não começaram.');
-  const vs = P.previsoes[cid] = P.previsoes[cid] || []; const v = { v: vs.length + 1, d: prHoje(), at: cenAgora(), por, base: pb.base, cnt: pb.cnt || '' };
+  const vs = P.previsoes[cid] = P.previsoes[cid] || []; const v = { v: vs.length + 1, d: prHoje(), at: cenAgora(), por: quem || prQuem('ag'), base: pb.base, cnt: pb.cnt || '' };
   if (pb.safra !== undefined) v.safra = pb.safra; else { v.sem = pb.sem; v.plantas_ha = pb.par.plantas_ha; v.perda = pb.par.perda; }
   vs.push(v);
   const txt = v.safra !== undefined ? 'safra ' + prUnTxt(kk.cultura, v.safra, 0) : Object.keys(v.sem).map(s => prSemTxt(s) + ' ' + prUnTxt(kk.cultura, v.sem[s])).join(' · ');
@@ -358,7 +319,7 @@ function prPublicar(c, cid, quem, par) { const kk = PRDC.cult[cid]; if (!kk) thr
   return { msg: kk.local + ' · previsão v' + v.v + ' publicada por ' + v.por + ': ' + txt + '.' + (cur && cur.sem && cur.sem[s0] !== undefined ? ' A semana em curso (' + prSemTxt(s0) + ') não muda' + (os0 ? ': orienta a ' + os0.id + '.' : '.') : ''), v }; }
 
 /* carga do campo (MB-10 · aba Colheita): a pesar na balança; caixas ou kg estimados nunca somam (R-03) */
-function prCarga(c, k) { prAppAtivo(c, k.via || 'app'); const P = prP(c, 1); const mix = (k.mix && k.mix.length) ? k.mix : [{ os: k.os, pct: 100, modo: 'medida' }];
+function prCarga(c, k) { const P = prP(c, 1); const mix = (k.mix && k.mix.length) ? k.mix : [{ os: k.os, pct: 100, modo: 'medida' }];
   const imp = JSON.stringify([k.os, k.dcol || prHoje(), Number(k.cx) || 0, Number(k.kg) || 0, k.veic || '', mix.map(x => [x.os, Number(x.pct), x.modo || 'medida'])]);
   if (k.chave) { const ja = Object.values(P.cargas).find(g => g.chave === k.chave); if (ja) { if (ja.imp !== imp) throw prConflito(k.chave, ja.id); return { msg: 'Carga ' + ja.id + ' já registrada: nada foi gravado de novo.', g: ja, repetido: true }; } }
   const o = (c.ordens || {})[k.os]; if (!o || !prEhColheita(o)) throw new Error('Escolha a O.S. de colheita da carga.');
@@ -383,8 +344,6 @@ function prMixOrig(c, mix) { const tot = prSoma(mix.map(x => x.pct || 0)); if (p
 function prMixCompat(c, os1) { const o1 = (c.ordens || {})[os1]; if (!o1) return []; const cu = (PRDC.cult[prCultDaOS(c, o1)] || {}).cultura, fz = prFazDaOS(c, o1);
   return Object.values(c.ordens || {}).filter(o => o.id !== os1 && prEhColheita(o) && PR_FASES_COLH.indexOf(o.etapa) >= 0 && (PRDC.cult[prCultDaOS(c, o)] || {}).cultura === cu && prFazDaOS(c, o) === fz).sort((a, b) => a.id.localeCompare(b.id)); }
 
-/* id do lote novo: L<semana do dia>-<seq da semana> (o mesmo gerador do recebimento e da devolução do Comercial, R-C10) */
-function prNovoLote(c, dia) { return prProxLote(c, dia); }   /* integração V56: um gerador só (prProxLote do BEN, que também olha os lotes e as saídas do beneficiamento já gravados) */
 /* pesar e receber (CARGA): ticket, bruto e tara; descontos de grão; lote por produto + local + dia + origem (R-07, R-08, R-10, R-11) */
 const PR_CONDS = ['Íntegra', 'Com avaria', 'Fora do padrão'];
 function prReceber(c, k) { const P = prP(c, 1); const g0 = k.carga ? P.cargas[k.carga] : null;
@@ -395,8 +354,7 @@ function prReceber(c, k) { const P = prP(c, 1); const g0 = k.carga ? P.cargas[k.
   const imp = JSON.stringify([mix.map(x => [x.os, Number(x.pct)]), tkn, prNum(k.bruto), prNum(k.tara), k.u === undefined ? null : String(k.u), k.imp === undefined ? null : String(k.imp), prNum(k.litros) || 0, prNum(k.frutos) || 0, k.cond || '', k.local || '', dcol]);
   if (k.chave) { const ja = Object.values(P.cargas).find(g => g.chaveRec === k.chave); if (ja) { if (ja.impRec !== imp) throw prConflito(k.chave, ja.id); return { msg: 'Pesagem já registrada (' + ja.id + ' · ticket ' + ja.ticket + '): nada foi somado de novo.', g: ja, repetido: true }; } }
   if (g0 && g0.st !== 'A pesar') throw new Error(g0.id + ' já está ' + g0.st.toLowerCase() + '.');
-  const faz = prFazDaOS(c, o); const quemRec = prAtorRec(faz, k.quem, 'Pesar e receber ' + (g0 ? 'a ' + g0.id : 'a carga da ' + osId));
-  const kk = PRDC.cult[prCultDaOS(c, o)] || {}; const cultura = kk.cultura || (g0 && g0.cultura); const u = prUn(cultura);
+  const faz = prFazDaOS(c, o); const kk = PRDC.cult[prCultDaOS(c, o)] || {}; const cultura = kk.cultura || (g0 && g0.cultura); const u = prUn(cultura);
   if (!tkn) throw new Error('Informe o ticket da balança.');
   const dupT = Object.values(P.cargas).find(g => g.st === 'Recebida' && g.faz === faz && prTk(g.ticket) === tkn);
   if (dupT) { if (dupT.impRec === imp) return { msg: 'Ticket ' + tk + ' já recebido na ' + dupT.id + ' com o mesmo conteúdo: é a mesma carga, nada foi somado de novo.', g: dupT, repetido: true };
@@ -430,7 +388,7 @@ function prReceber(c, k) { const P = prP(c, 1); const g0 = k.carga ? P.cargas[k.
   const g = g0 || (P.seq.cg = (P.seq.cg || 2100) + 1, P.cargas['CG-' + P.seq.cg] = { id: 'CG-' + P.seq.cg, os: osId, dcol, via: 'web', sinc: true, chave: k.chave || ('W-CG-' + P.seq.cg), hora: cenAgora() });
   Object.assign(g, { ticket: tk, faz, cultura, os: osId, dcol, drec, bruto: prNum(k.bruto), tara: prNum(k.tara), liq, com, u: u.grao ? String(prNum(k.u)) : null, imp: g.imp,
     impG: u.grao ? String(prNum(k.imp)) : null, desc, litros: u.campo ? prNum(k.litros) : null, frutos: u.base === 'frutos' ? prNum(k.frutos) : null, cond: k.cond, local, st: 'Recebida', lote: L.id,
-    origem: orig.map((x, i) => Object.assign({}, x, { kg: pLiq[i], com: pCom[i], base: pBase[i], litros: u.campo ? pBase[i] : 0 })), quemRec, chaveRec: k.chave || ('W-' + g.id), impRec: imp, horaRec: cenAgora() });
+    origem: orig.map((x, i) => Object.assign({}, x, { kg: pLiq[i], com: pCom[i], base: pBase[i], litros: u.campo ? pBase[i] : 0 })), quemRec: k.quem || prRec(faz), chaveRec: k.chave || ('W-' + g.id), impRec: imp, horaRec: cenAgora() });
   orig.forEach((x, i) => L.origem.push({ carga: g.id, os: x.os, cult: x.cult, tal: x.tal, dcol, kg: pBase[i], modo: x.modo }));
   L.cargas.push(g.id); if (L.validade && u.vida) L.validade = [L.validade, prDiaMais(dcol, u.vida)].sort()[0];
   prMov(c, { tipo: 'recebimento', lote: L.id, kg: base, carga: g.id, quem: g.quemRec });
@@ -444,28 +402,24 @@ function prEstornoImpede(c, g) { const L = g && prP(c).lotes[g.lote]; const ob =
   return g.id + ' alimenta o ' + L.id + ', em processo na ' + ob.id + ' (' + ob.etapa + '): estorno recusado. Erro de pesagem aparece no balanço da ordem: justifique a diferença na conferência (alçada).'; }
 /* estornar carga recebida (R-19): motivo; devolve o efeito; recusa se o lote ficar abaixo do reservado; o ticket fica livre */
 function prEstornar(c, id, motivo, quem) { const P = prP(c, 1); const g = P.cargas[id]; if (!g || g.st !== 'Recebida') throw new Error('Só carga recebida é estornada.');
-  const por = prAtorRec(g.faz, quem, 'Estornar a ' + id);
   const mot = String(motivo || '').trim(); if (!mot) throw new Error('Informe o motivo do estorno.');
   const imp = prEstornoImpede(c, g); if (imp) throw new Error(imp);
   const L = P.lotes[g.lote]; const mv = P.movs.find(m => m.tipo === 'recebimento' && m.carga === id); const kg = mv ? mv.kg : 0;
   const fis = prFis(c, L.id), res = prResLote(c, L.id); const fica = prSub(fis, kg);
   if (prCmp(fica, res) < 0) throw new Error('Estorno recusado: o ' + L.id + ' ficaria com ' + prLoteTxt(L, fica) + ', abaixo do reservado (' + prLoteTxt(L, res) + '). Cancele ou reduza a reserva antes.');
-  prMov(c, { tipo: 'estorno', lote: L.id, kg: -kg, carga: id, quem: por, obs: mot });
-  (L.origem || []).forEach(x => { if (x.carga === id) x.est = true; }); g.st = 'Estornada'; g.estorno = { motivo: mot, quem: por, d: prHoje(), at: cenAgora() }; g.ticketLivre = g.ticket;
+  prMov(c, { tipo: 'estorno', lote: L.id, kg: -kg, carga: id, quem: quem || prRec(g.faz), obs: mot });
+  (L.origem || []).forEach(x => { if (x.carga === id) x.est = true; }); g.st = 'Estornada'; g.estorno = { motivo: mot, quem: quem || prRec(g.faz), d: prHoje(), at: cenAgora() }; g.ticketLivre = g.ticket;
   return { msg: id + ' estornada (' + mot + '): ' + prLoteTxt(L, kg) + ' saem do ' + L.id + '. O ticket ' + g.ticket + ' fica livre para novo registro; o histórico continua.' }; }
 
 /* descartar carga A pesar (revisão A-06): registro do app em dobro ou carga que não saiu; nada pesado, nada a estornar; motivo e trilha ficam */
-function prDescartarCarga(c, id, motivo, quem, via) { prAppAtivo(c, via); const P = prP(c, 1); const g = P.cargas[id]; if (!g) throw new Error('Carga ' + id + ' não encontrada.');
+function prDescartarCarga(c, id, motivo, quem) { const P = prP(c, 1); const g = P.cargas[id]; if (!g) throw new Error('Carga ' + id + ' não encontrada.');
   if (g.st !== 'A pesar') throw new Error(id + ' está ' + String(g.st).toLowerCase() + ': só carga a pesar é descartada' + (g.st === 'Recebida' ? ' (carga recebida: estorne com motivo).' : '.'));
   const mot = String(motivo || '').trim(); if (!mot) throw new Error('Informe o motivo do descarte.');
-  const por = via === 'app' ? (quem || (c.app && c.app.operador) || '') : prAtorRec(g.faz, quem, 'Descartar a ' + id);   /* app: o operador do aparelho (cenAppAtivo acima) */
-  g.st = 'Descartada'; g.descarte = { motivo: mot, quem: por, d: prHoje(), at: cenAgora(), via: via || 'web' };
+  g.st = 'Descartada'; g.descarte = { motivo: mot, quem: quem || prRec(g.faz), d: prHoje(), at: cenAgora() };
   if (c.app && Array.isArray(c.app.fila)) c.app.fila = c.app.fila.filter(x => x !== id);
   return { msg: id + ' descartada (' + mot + '): a carga sai da fila de pesagem; nada entra na produção. O registro e o motivo ficam no histórico.' }; }
 
-/* liberar lote (Qualidade, R-13): reavalia carência e ordem; recusa com a pendência e o dono. Quem age (Comercial A3 da revisão, R-C10):
-   o perfil com o papel qualidade ou agrônomo (a mesma regra do BEN-1 (d) na branch única); grava g2ator, nunca um nome fixo
-   (lote devolvido não volta à venda sem conferência) */
+/* liberar lote (Qualidade, R-13): reavalia carência e ordem; recusa com a pendência e o dono */
 /* ator = perfil de quem age (CTL-3): só a Qualidade ou a agrônoma libera lote (BEN-1 (d)); dano evitado: liberação gravada em nome de quem não decidiu */
 /* recebido fora do íntegro num local de processo ou com pós-colheita (BEN-REV-03): o lote está "em processo" pelo local, mas a qualidade do
    recebimento (a que vale para entrar numa ordem, R-A03) ainda espera a Qualidade. Sem ordem que o prenda, a Qualidade confere e libera essa
@@ -482,13 +436,10 @@ function prLiberarLote(c, lid, ator) { const quem = cenExigeUm(ator, ['qualidade
   L.q0 = 'Liberado'; L.lib = { quem, d: prHoje(), at: cenAgora() }; prMov(c, { tipo: 'liberação', lote: lid, kg: 0, fis: false, quem: L.lib.quem, obs: proc ? 'qualidade do recebimento; segue em processo (' + S.mot + ')' : '' });
   return { msg: lid + ' liberado por ' + L.lib.quem + ': ' + prLoteTxt(L, S.fis) + (proc ? ' seguem para o beneficiamento; ' + ((typeof BENC !== 'undefined' && BENC.quem.prod) || 'o beneficiamento') + ' abre a ordem.' : ' aptos para reserva e venda.') }; }
 
-/* reservar lote apto para pedido (R-15): mesma classe, avaliação do destino, ≤ disponível e ≤ falta; dedução única.
-   Quem age (Comercial R-C05, R-C14, CE-10): ator obrigatório com papel comercial ou gestor; a reserva grava g2ator, nunca um nome fixo */
+/* reservar lote apto para pedido (R-15): mesma classe, avaliação do destino, ≤ disponível e ≤ falta; dedução única */
 function prReservar(c, k) { const P = prP(c, 1); const kg = prNumOk(k.kg) ? prNum(k.kg) : NaN; const imp = JSON.stringify([k.pedido, k.lote, kg]);
   if (k.chave) { const ja = Object.values(P.reservas).find(r => r.chave === k.chave); if (ja) { if (ja.imp && ja.imp !== imp) throw prConflito(k.chave, ja.id); return { msg: 'Reserva ' + ja.id + ' já registrada: nada foi deduzido de novo.', rs: ja, repetido: true }; } }
-  const quem = cenExigeUm(k.ator, ['comercial', 'gestor'], 'Reservar lote' + (k.pedido ? ' para o ' + k.pedido : ''));
   const ped = P.pedidos[k.pedido]; if (!ped) throw new Error('Escolha o pedido.'); const L = P.lotes[k.lote]; if (!L) throw new Error('Escolha o lote.');
-  if (prAmb(ped)) throw new Error(ped.id + ': saca do contrato a conferir (' + ped.fatAmb.join(' ou ') + ' kg). A reserva fica suspensa até registrar a massa da saca em Comercial › Contratos e pedidos. Nada foi alterado.');
   const ce = prCompatErro(ped, L); if (ce) throw new Error(ce);
   const S = prSaldos(c, L); if (S.q !== 'Liberado') throw new Error(L.id + ' não está apto (' + S.q + ': ' + S.mot + '). Quem resolve: ' + (S.dono || prQuem('qual')) + '.');
   const dest = ped.dest || 'MI-BR'; let pend = [];
@@ -497,24 +448,17 @@ function prReservar(c, k) { const P = prP(c, 1); const kg = prNumOk(k.kg) ? prNu
     if (a.st === 'pendente') pend = pend.concat(a.faltas.map(f => f.t + ' (' + f.q + ')')); }
   if (!(kg > 0)) throw new Error('Informe a quantidade a reservar.');
   if (prCmp(kg, S.disp) > 0) throw new Error('Acima do disponível do ' + L.id + ': ' + prLoteTxt(L, S.disp) + '.');
-  const falta = prFalta(c, ped); if (prCmp(kg, falta) > 0) throw new Error('Acima da falta do ' + ped.id + ': ' + prTxtP(ped, falta) + '.');
-  const ini = ped.ini || (ped.sem ? prSemIni(ped.sem) : ''); const venceAntes = !!(L.validade && ini && L.validade < ini);   /* aviso, não trava (D-21 da Colheita; Comercial R-C05) */
+  const falta = prFalta(c, ped); if (prCmp(kg, falta) > 0) throw new Error('Acima da falta do ' + ped.id + ': ' + prEstTxt(L.cultura, falta) + '.');
   P.seq.rs = (P.seq.rs || 0) + 1; const id = 'RS-' + String(P.seq.rs).padStart(4, '0');
-  const rs = P.reservas[id] = { id, pedido: ped.id, lote: L.id, kg, kg0: kg, exp: 0, st: 'Ativa', d: prHoje(), at: cenAgora(), quem, chave: k.chave || id, imp };
+  const rs = P.reservas[id] = { id, pedido: ped.id, lote: L.id, kg, st: 'Ativa', d: prHoje(), at: cenAgora(), quem: k.quem || prQuem('com'), chave: k.chave || id, imp };
   prMov(c, { tipo: 'reserva', lote: L.id, kg, fis: false, reserva: id, pedido: ped.id, quem: rs.quem });
   const S2 = prSaldos(c, L); const sit = prSitPed(c, ped);
-  return { msg: id + ': ' + prTxtP(ped, kg) + ' do ' + L.id + ' reservados para o ' + ped.id + ' (' + ped.cliente + '). ' + L.id + ' disponível ' + prLoteTxt(L, S2.disp) + ' · ' + ped.id + ' ' + sit.t.toLowerCase() + '.'
-    + (pend.length ? ' Destino ' + (PRDC.dest[dest] || dest) + ' pendente: ' + pend[0] + '; a saída só passa com o destino conforme.' : '')
-    + (venceAntes ? ' Aviso: o ' + L.id + ' vence ' + prBr(L.validade) + ', antes do início da janela do ' + ped.id + ' (' + prBr(ini) + ').' : ''), rs }; }
-function prCancelarReserva(c, id, motivo, ator) { const P = prP(c, 1); const r = P.reservas[id]; if (!r || r.st !== 'Ativa') throw new Error('Reserva não está ativa.');
-  const quem = cenExigeUm(ator, ['comercial', 'gestor'], 'Cancelar a ' + id);   /* ator obrigatório (Comercial CE-10) */
-  /* Comercial A5 da revisão: a reserva de lote que está numa carga programada da mesma venda não se cancela sozinha (a carga ficaria
-     sem reserva e o caminhão sairia do disponível ou da reserva de outro): cancele a carga antes, como no encerrar saldo (R-C11) */
-  const pg = Object.values(P.expedicoes || {}).filter(x => x.st === 'Programada' && x.pedido === r.pedido && (x.lotes || []).some(l => l.lote === r.lote)).map(x => x.id);
-  if (pg.length) throw new Error('Cancelar a ' + id + ' recusado: ' + pg.join(', ') + ' programada com o ' + r.lote + ' para o ' + r.pedido + '. Cancele a carga antes (Expedição e entregas). Nada foi alterado.');
+  return { msg: id + ': ' + prLoteTxt(L, kg) + ' do ' + L.id + ' reservados para o ' + ped.id + ' (' + ped.cliente + '). ' + L.id + ' disponível ' + prLoteTxt(L, S2.disp) + ' · ' + ped.id + ' ' + sit.t.toLowerCase() + '.'
+    + (pend.length ? ' Destino ' + (PRDC.dest[dest] || dest) + ' pendente: ' + pend[0] + '; a expedição exige a liberação comercial.' : ''), rs }; }
+function prCancelarReserva(c, id, motivo, quem) { const P = prP(c, 1); const r = P.reservas[id]; if (!r || r.st !== 'Ativa') throw new Error('Reserva não está ativa.');
   const mot = String(motivo || '').trim(); if (!mot) throw new Error('Informe o motivo do cancelamento da reserva.');
-  r.st = 'Cancelada'; r.canc = { motivo: mot, quem, d: prHoje(), at: cenAgora() };
+  r.st = 'Cancelada'; r.canc = { motivo: mot, quem: quem || prQuem('com'), d: prHoje(), at: cenAgora() };
   prMov(c, { tipo: 'cancelamento de reserva', lote: r.lote, kg: -r.kg, fis: false, reserva: id, pedido: r.pedido, quem: r.canc.quem, obs: mot });
   const L = P.lotes[r.lote]; return { msg: id + ' cancelada (' + mot + '): ' + prLoteTxt(L, r.kg) + ' voltam ao disponível do ' + r.lote + '.' }; }
 /* gancho de teste/inspeção (o script da tela roda isolado) */
-try { window.__pr = { prResultado, prSaldos, prQualidade, prOfertaSem, prOfertaSafra, prReceber, prReservar, prCancelarReserva, prEstornar, prLiberarLote, prPublicar, prContar, prCarga, prPodeEncerrar, prDescartarCarga }; } catch (e) {}
+try { window.__pr = { prResultado, prSaldos, prQualidade, prOfertaSem, prOfertaSafra, prReceber, prReservar, prEstornar, prLiberarLote, prPublicar, prContar, prCarga, prPodeEncerrar, prDescartarCarga }; } catch (e) {}

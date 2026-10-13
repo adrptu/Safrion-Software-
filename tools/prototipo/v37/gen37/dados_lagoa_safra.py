@@ -154,7 +154,7 @@ COND = {'OS-0501': 'Liberação · Ana (agrônoma), que pode ajustar antes. Dess
         'OS-0510': 'Nenhuma · ordem encerrada, somente consulta.',
         'OS-0511': 'Operação manual sem insumos. Próximo passo: Ana (agrônoma) libera para execução.'}
 ORIG = {'OS-0501': ['Safra Mamão 2026/27 · Pivô 13 · plano MAMAO-IMP', f'Dessecação pré-plantio · {_br(_A[13])} ha'],
-        'OS-0502': ['Safra Mamão 2026/27 · Pivô 12 (renovação) · plano MAMAO-IMP', 'Calagem · dose do plano 2 t/ha'],
+        'OS-0502': ['Safra Mamão 2026/27 · Pivô 12 (renovação) · plano MAMAO-IMP', 'Calagem pela análise de solo · 2 t/ha'],
         'OS-0503': ['Safra Mamão 2026/27 · Pivô 11 · plano MAMAO-IMP', 'Requisição REQ-021 · mudas e superfosfato simples'],
         'OS-0504': ['Safra Mamão 2026/27 · Pivô 6 · plano MAMAO-PROD', f'Requisição REQ-022 · Abamectina 18 EC, {_br(_ABA)} L'],
         'OS-0505': ['Safra Mamão 2026/27 · Pivô 19 · colheita semanal'], 'OS-0506': ['Safra Mamão 2026/27 · Pivô 4 · plano MAMAO-PROD', 'Requisição REQ-023'],

@@ -12,11 +12,10 @@ from ui37 import MENU2
 m = MA(1440, 1100); J = m.J
 try:
     m.ir('vis=planos', perfil='Otávio', limpa=True); m.sem_erro('MA · Planos')
-    # 1 · menu (13/10/2026, pedido do proprietário): Manutenção com 4 subitens enxutos, um por visão da mesma tela MA; Planos é o último
+    # 1 · menu: um item "Manutenção" → MA (planos são uma visão da tela)
     g = [x for x in MENU2 if x[0] == 'Manutenção'][0]
-    mn = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>a.innerText.trim()+'|'+a.getAttribute('href')).filter(x=>/MA\\.dc\\.html/.test(x))")
-    m.ok(g[2] == [('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')] and mn == ['Pendências sem ordem|MA.dc.html#vis=semordem','Ordens de manutenção|MA.dc.html#vis=ordens','Ativos e disponibilidade|MA.dc.html#vis=ativos','Planos preventivos|MA.dc.html#vis=planos'],
-         'menu: Manutenção com 4 subitens (uma visão cada) → MA.dc.html; "Planos preventivos" abre a visão Planos', mn)
+    mn = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>a.innerText.trim()+'|'+a.getAttribute('href')).filter(x=>/^Manutenção\\|/.test(x))")
+    m.ok(g[2] == [('Manutenção', 'MA.dc.html')] and mn == ['Manutenção|MA.dc.html'], 'menu: Manutenção com 1 item → MA.dc.html (planos são a visão Planos)', mn)
     # 2 · visão Planos: 10 planos, 4 ativos sem plano, PM-02 com 1 vencida
     sem = J("[...document.querySelectorAll('main button[aria-label^=\"Criar plano para\"]')].map(b=>b.innerText)") or []
     pl = m.linhas(0)
@@ -61,8 +60,11 @@ try:
         m.setv('#ab-vol', '150'); m.setv('#ab-leit', cont); m.clk('Beto', '#ma-painel'); m.clk('Registrar abastecimento', '#ma-painel'); return m.toast()
     a1 = abast('a04', '3530'); a2 = abast('cb01', '48100')
     m.ok('AB-1043' in a1 and 'Revisão 250 h: vence em breve' in a1 and 'troca de contador' in a2, 'abastecimento: 3.530 h deixa o Trator 04 vencendo em breve; 48.100 km < 48.200 km pede confirmação', [a1[:120], a2[:120]])
+    # COLUNAS-1 (10/10): a Leitura saiu da linha de Ativos e fica no cabeçalho da página do ativo; "Leitura a confirmar" sobe para Em aberto
     m.ir('vis=ativos'); l4 = m.linha('a04'); lc = m.linha('cb01')
-    m.ok('Vence em breve' in l4 and '3.530 h' in l4 and 'a confirmar' in lc and '48.200 km' in lc, 'Ativos: Trator 04 recalculado; comboio mantém 48.200 km com leitura a confirmar', [l4[:120], lc[:120]])
+    m.ir('ativo=a04'); h4 = J("(()=>{const h=document.querySelector('main h2'); return h?h.parentElement.innerText.replace(/\\s+/g,' '):'';})()") or ''; m.ir('ativo=cb01'); hc = J("(()=>{const h=document.querySelector('main h2'); return h?h.parentElement.innerText.replace(/\\s+/g,' '):'';})()") or ''
+    m.ok('Vence em breve' in l4 and 'Leitura a confirmar' in lc and '3.530 h' in h4 and '48.200 km' in hc and '48.100 km a confirmar' in hc,
+         'Ativos: Trator 04 recalculado (3.530 h na página do ativo); comboio mantém 48.200 km com leitura a confirmar (Em aberto e página do ativo)', [l4[:120], lc[:120], h4[:160], hc[:160]])
     m.c.shot(os.path.join(os.path.dirname(os.path.abspath(__file__)), '_probe', 'manut', 'ma_planos_test_fim.png'))
 finally:
     rc = m.fim()
