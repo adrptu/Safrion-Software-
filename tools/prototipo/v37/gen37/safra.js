@@ -963,6 +963,20 @@ function divVals(self,v){ const dv=self.state.dv; v.dv_open=!!dv; if(!dv){ v.dv_
   v.dv_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); v.dv_close(); } };
   v.dv_save=()=>dvSave(self); }
 // próximo passo de uma safra (etapa 1): o que falta primeiro, com o verbo; encerrada só consulta
+/* CONTROLE-02 F2 · impedimentos da publicação da referência técnica (mapa no PR #58, 6152055144). Só recusa o que já trava no Planejar
+   safra: sobreposição de ocupação (R-14, ocupacao.js) e plano de outra cultura no cultivo. O resto vai à prévia como aviso: sem plano
+   (fica fora da referência), "A conferir" (R-15, pendência que salva) e sugestões das análises (opcionais). Falta de recurso também não
+   trava (AGENTS §4) e fica fora desta conta. Puro: lê o estado da tela e as mesmas funções da etapa 2, sem escrever cache nem grade. */
+function safImpedimentosRef(self,saf,c){ const imp=[], av=[]; const S=safList(self); const safra=S[saf];
+  if(!safra) return {impedimentos:['Safra '+saf+' não encontrada no planejamento.'],avisos:av};
+  const cs=cultRows(self,saf);
+  cs.forEach(r=>{ const pl=planById(r.v.plano); if(pl&&pl.cultura!==r.v.cult) imp.push(r.v.local+': plano de '+pl.cultura+' num cultivo de '+r.v.cult+'. Reaplique o plano na linha.'); });
+  const ctx=ocCtxSaf(); const occ=ocOcupacoes(ctx,S,ocTodos(self)); const ls=ocTabela(ctx,safra,occ,talOrd(safra.faz),S)[0]||[];
+  ls.filter(l=>l.sit==='Sobreposição').forEach(l=>imp.push('Sobreposição em '+l.t+': corrija em Talhões e cultivos antes de publicar.'));
+  const sp=cs.filter(r=>!planById(r.v.plano)); if(sp.length) av.push(sp.length+(sp.length>1?' cultivos sem plano ficam':' cultivo sem plano fica')+' fora da referência ('+safLocs(sp)+').');
+  const nc=ls.filter(l=>l.sit==='A conferir').length; if(nc) av.push(nc+(nc>1?' talhões a conferir':' talhão a conferir')+' (sucessão estimada): pendência, não impede.');
+  const ns=sgN(self,saf); if(ns) av.push(ns+(ns>1?' sugestões das análises de solo não aplicadas':' sugestão da análise de solo não aplicada')+': opcional.');
+  return {impedimentos:imp,avisos:av}; }
 function semPlano(cs){ return cs.filter(c=>{ const pl=planById(c.v.plano); return !(pl&&pl.cultura===c.v.cult); }); }
 // ---- SAF etapa 3 "Dimensione operações e recursos" (ESPECIFICACAO etapa-unica-3-4-5 §2–§4) ----
 // Uma tela responde se a safra cabe no que a fazenda tem (veredito, atalhos e g_cap), de onde vem a carga de um mês (filtro recurso ×
@@ -1356,6 +1370,7 @@ function EXTRAVALS(self,v){ try{ window.__safSelf=self; }catch(e){}   // testes 
   v.abrirsaf=(arg)=>{ const a=String(arg).split('|'); abrirCultivo(self,a[0],a[1]||''); };
   // painéis
   apVals(self,v); lpVals(self,v); divVals(self,v); sgVals(self,v); pqSafVals(self,v);
+  try{ window.__safRef={impedimentos:(saf)=>safImpedimentosRef(self,saf||self.state.saf,cenGet())}; }catch(e){}   /* adaptador do comando da F2 (PR #58) e teste */
   try{ window.__solo={cen:()=>cenGet(),aceitarLote:(itens,ch,a)=>cenMudar(self,c=>soloAceitarLote(c,itens,ch,a||'Ana')),desfazer:(k,ch,a)=>cenMudar(self,c=>soloDesfazer(c,k,'desfeito',ch,a||'Ana')),
     registrar:(d,ch,a)=>cenMudar(self,c=>soloRegistrar(c,d,ch,a||'Ana')),validar:(id,ch,a)=>cenMudar(self,c=>soloValidar(c,id,ch,a||'Ana')),   /* teste: o que outra aba (AG-02) grava */
     sugs:(saf)=>sgSugs(self,saf||self.state.saf).map(x=>x.s),

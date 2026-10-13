@@ -319,7 +319,8 @@ const G2_ALCADAS=[
   {id:'AL-13',t:'Conceder e retirar papel, convidar e desativar acesso',cmd:'Configurações',papeis:['gestor'],modo:'todos',edita:'',fixa:'protege o próprio controle (R3, R4, R5)'},
   {id:'AL-14',t:'Alterar alçada',cmd:'Configurações',papeis:['gestor'],modo:'todos',conf:{papeis:['gestor','direcao'],modo:'um'},edita:'',fixa:'protege o próprio controle; ampliar o próprio poder pede 2º aprovador (R10)'},
   {id:'AL-15',t:'Pagar fatura, mudar plano, desfazer, pedir proposta e contestar',cmd:'Assinatura e cobrança',papeis:['gestor'],modo:'todos',edita:'',fixa:'contrato e pagamento da organização; o backoffice (conciliar, resolver) é da plataforma (Admin plataforma)'},
-  {id:'AL-17',t:'Publicar previsão de colheita',cmd:'Colheita (R-17)',papeis:['agronomo'],modo:'todos',edita:'papel',opc:['agronomo','gestor','pcp'],obs:'a contagem do campo não muda a previsão: só quem publica (a oferta do Comercial lê a publicada)'}];
+  {id:'AL-17',t:'Publicar previsão de colheita',cmd:'Colheita (R-17)',papeis:['agronomo'],modo:'todos',edita:'papel',opc:['agronomo','gestor','pcp'],obs:'a contagem do campo não muda a previsão: só quem publica (a oferta do Comercial lê a publicada)'},
+  {id:'AL-18',t:'Publicar referência técnica do plano operacional',cmd:'CONTROLE-02 F2 (comando do PR #58)',papeis:['gestor'],modo:'todos',edita:'papel',opc:['gestor','agronomo'],obs:'publicar registra a versão de referência: não aprova orçamento nem libera O.S. (alçada própria, sem reaproveitar a de orçamento ou de O.S.)'}];
 const G2_PERFIL_KEY='safrion.perfilDemo'; let G2_PERFIL_MEM='';
 // estado de Configurações: c.conf do cenário salvo (talhao-os-cenario-v1), válido só com a versão deste build (CONF0.v); ausente → padrão.
 // Cache pelo texto salvo e pelo tamanho de G2_PERFIS (os testes injetam perfis): g2pf roda muitas vezes por desenho. Nunca chamado no carregamento.
