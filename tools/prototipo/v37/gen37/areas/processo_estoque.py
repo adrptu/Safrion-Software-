@@ -254,6 +254,7 @@ function emovTxt(m){ const u=m.un||'';
 function emovTipo(m){ if(m.tipo==='consumo'&&m.origem!=='app') return typeof m.conf==='string'?'Consumo aceito na conferência':'Consumo apontado na web'; return MTIPO[m.tipo]||m.tipo; }
 // lote vencido: validade (mês/ano) anterior ao mês de hoje; entra todo em quarentena e não volta ao disponível
 function evenc(l){ return !!l&&!!l.validade&&l.validade!=='—'&&eval_(l.validade)<ehojeYM(); }
+function estValidadeEntradaErro(l){ return evenc(l)?'Lote '+l.lote+' vencido em '+l.validade+': receba em quarentena, sem quantidade apta para uso.':''; }
 function estValidadeErro(l){ return evenc(l)?'Lote '+l.lote+' vencido em '+l.validade+': não pode ser entregue. Revise a reserva com o responsável pela O.S.; o físico permanece no estoque.':''; }
 // consumo apontado no app: "Glifosato 480 10, 2,4-D 806 5" (cenFecharTurno) → itens com a unidade da requisição ou da O.S.
 function econsDet(c,m){ const r=m.req&&c.reqs[m.req]; const o=c.ordens[m.os]||{};
@@ -291,6 +292,8 @@ function estReceber(c,d,ator,chave){
   if(d.div==='Item diferente do pedido') throw new Error(EST_ITEM_DIFERENTE);
   return cenIdem(c,chave,JSON.stringify(['estReceber',d,(g2pf(ator)||{}).k||'']),'Recebimento '+(d.nf||''),()=>estReceber0(c,d,ator)); }
 function estReceber0(c,d,ator){   /* ator: quem confere (perfil); o movimento grava quem agiu (revisão do CTL-3, achado 4) */ const n0=c.movs.length; const antes=eitemDisp(c,d.item);
+  const validadeErro=estValidadeEntradaErro({lote:d.lote,validade:d.val})||estValidadeEntradaErro(c.lotes[d.item+'|'+d.lote]);
+  if(d.apto>0&&validadeErro) throw new Error(validadeErro);
   if(d.apto>0) cenReceber(c,d.item,d.lote,d.apto,d.un,d.local,d.val,d.nf,true,ator);
   if(d.quar>0) cenReceber(c,d.item,d.lote,d.quar,d.un,d.local,d.val,d.nf,false,ator);
   if(c.movs.length===n0) throw new Error('Nada conferido para entrar no estoque.');
@@ -303,7 +306,11 @@ function estEntregar0(c,rid,prod,qtd,quem,ator){ const r0=c.reqs[rid]; const it0
   const res0=l?l.reservado:0; const own=it0&&l?Math.max(0,Math.min(res0,eresTot(c,rid,prod)-it0.entregue)):0;
   const r=cenEntregar(c,rid,prod,qtd,quem,ator);
   if(l) l.reservado=Math.max(0,res0-Math.min(qtd,own)); it0.confirmado=false; return r; }
-function estDevolver(c,rid,prod,qtd,apto,obs,ator){ const r=cenDevolver(c,rid,prod,qtd,apto,ator); if(obs) c.movs[c.movs.length-1].obs=obs;
+function estDevolver(c,rid,prod,qtd,apto,obs,ator){
+  const req0=c.reqs[rid],it0=req0&&req0.itens.find(i=>i.prod===prod);
+  const validadeErro=estValidadeEntradaErro(it0&&c.lotes[prod+'|'+it0.lote]);
+  if(apto&&validadeErro) throw new Error(validadeErro);
+  const r=cenDevolver(c,rid,prod,qtd,apto,ator); if(obs) c.movs[c.movs.length-1].obs=obs;
   const req=c.reqs[rid]; const o=c.ordens[req.os]||{}; const it=req.itens.find(i=>i.prod===prod); const pe=cenPodeEncerrar(c,req.os);
   return {msg:r.msg+' Custódia de '+prod+' na '+req.os+': '+eq(it.custodia+qtd,it.un)+' → '+eq(it.custodia,it.un)+(o.etapa==='Em conferência'&&!pe?' · encerramento liberado.':'.')}; }
 // contador do inventário (revisão CONF F6): pessoas com acesso Ativo e o papel almoxarife em Configurações, em ordem alfabética; nunca uma lista
@@ -356,7 +363,7 @@ ESTV.g_rec=(self,fm)=>{ const C=cenGet(); const e={}, d=fm.draft; const n=(k)=>g
   if(!efert(d.ped)){ const vv=String(d.val||'').trim();
     if(!vv) e.val='Informe a validade do lote (mês/ano, ex.: 06/2027).';
     else if(!/^(0[1-9]|1[0-2])\/\d{4}$/.test(vv)) e.val='Use mês/ano com 4 dígitos no ano (ex.: 06/2027).';
-    else if(eval_(vv)<ehojeYM()){ if(!isNaN(apto)&&apto>1e-9) e.apto='Lote vencido em '+vv+': registre toda a quantidade em quarentena (Apta para uso = 0).';
+    else if(eval_(vv)<ehojeYM()){ if(!isNaN(apto)&&apto>1e-9) e.apto=estValidadeEntradaErro({lote:lt,validade:vv});
       if(!String(d.obs||'').trim()) e.obs='Informe o motivo (lote vencido em '+vv+').'; } }
   return e; };
 ESTV.g_ent=(self,fm)=>{ const e={}; const x=eitens(cenGet()).find(y=>y.id===fm.rid); if(!x) return e; const n=g2num(fm.draft.qtd); if(isNaN(n)) return e;
@@ -367,6 +374,7 @@ ESTV.g_dev=(self,fm)=>{ const e={}; const x=eitens(cenGet()).find(y=>y.id===fm.r
   if(x.sinal){ e.qtd='Apontamento de '+x.os+' no aparelho, aguardando sinal: receba a sobra depois do envio.'; return e; }
   if(x.cf){ e.qtd='Consumo em conferência ('+x.cf.id+'): aceite ou recuse o relato antes de receber devolução.'; return e; }
   if(!isNaN(n)&&n>x.it.custodia+1e-9) e.qtd='Acima da custódia: só '+eq(x.it.custodia,x.un)+' estão com '+x.quem+'.';
+  if(fm.draft.cond===E2.conds[0]&&evenc(x.l)) e.cond=estValidadeEntradaErro(x.l);
   if(fm.draft.cond!==E2.conds[0]&&!String(fm.draft.obs||'').trim()) e.obs='Descreva a condição (ex.: embalagem aberta).';
   return e; };
 ESTV.g_cnt=(self,fm)=>{ const e={}; const C=cenGet(); if(!elotKey(C,fm.draft.lote)){ e.lote='Escolha o lote contado.'; return e; }

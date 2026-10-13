@@ -1,0 +1,13 @@
+  OK  1440: erro mostra validade e recuperação
+  OK  1440: rascunho preservado
+  OK  1440: recusa sem alterar estado
+  OK  1440: correção em quarentena conclui devolução
+  OK  1440: custódia baixada uma vez
+  OK  1440: sem overflow/erro JS
+  OK  390: erro mostra validade e recuperação
+  OK  390: rascunho preservado
+  OK  390: recusa sem alterar estado
+  OK  390: correção em quarentena conclui devolução
+  OK  390: custódia baixada uma vez
+  OK  390: sem overflow/erro JS
+RESULTADO: 12/12 ok
