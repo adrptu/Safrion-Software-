@@ -8,6 +8,9 @@ Cada caso repete o contraexemplo do Codex com os comandos das próprias telas e 
        (motivo B): cada reprovação fica "revisão posterior pendente" como a liberação do mesmo acúmulo; a memória do Planejar safra diz 10 L/LAB-A e
        10 L/LAB-B, total 20, e o lote no Estoque mostra os dois laudos (no 16fb55e: "20 L · laudo LAB-B: motivo B" e reprovação sem marca)
   L3 · ajuste 4 (negativo) · Paula devolve bloqueado e Ana reprova: sem marca de revisão
+  M1 · ajuste 1 · 30 L de Fungicida A devolvidos bloqueados e reprovados (LAB-9), e mais 10 L devolvidos bloqueados: 5,5 L de compra firme e 10 L
+       aguardando laudo aparecem juntos no Planejar safra, na Compra, no Mapa, no SU-03det e no MB-05, sem somar à compra nem trocar a primária
+       (no 16fb55e: Mapa, SU-03det e MB-05 só a falta). Estava no demanda_estado_nav_test, que com ele passou de 900 s sob carga (rc=124).
 Uso: python3 est_laudo_lote_nav_test.py   (depois do build e do montar_render; capturas q_ctl4l_*.png em _probe/)"""
 import sys, os, time, subprocess, json
 HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
@@ -51,6 +54,28 @@ try:
         ir('SAF.dc.html#saf=S2627&passo=demanda',w=1.7); clk('Expandir tudo',w=.6)
         J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(nome)})>=0); if(!r) return; r.scrollIntoView({{block:'center'}}); (r.querySelector('[role=cell] b')||r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.6)
         t=(J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText") or '').split('\n'); return [x.strip() for x in t if x.strip()]
+    def cel(nome,coluna):   # valor de uma coluna (cabeçalho) na linha cujo Insumo é nome
+        return J(f"""(()=>{{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); if(!t) return ''; const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim().toUpperCase());
+          const iI=hs.indexOf('INSUMO'), i=hs.indexOf({json.dumps(coluna.upper())}); const r=[...t.querySelectorAll('[role=row]')].find(x=>{{const cs=x.querySelectorAll('[role=cell]'); return cs[iI]&&cs[iI].innerText.replace(/\\s+/g,' ').trim()==={json.dumps(nome)};}});
+          return r?[...r.querySelectorAll('[role=cell]')][i].innerText.replace(/\\s+/g,' ').trim():'(sem linha)';}})()""") or ''
+    k6=lambda: J("(document.body.innerText.match(/Valor da necessidade[^\\n]+/)||[''])[0]") or ''
+    prim=lambda: (J("(()=>{const b=[...document.querySelectorAll('.acoes-prim')].find(x=>x.offsetParent); return b?b.innerText.replace(/\\s+/g,' ').trim():'';})()") or '')
+    def safler(nomes,s='S2627'):
+        ir(f'SAF.dc.html#saf={s}&passo=demanda',w=1.7); clk('Expandir tudo',w=.6)
+        return dict(total=k6(),prim=prim(),**{n:[cel(n,k) for k in ('Necessidade líquida','Estoque apto','Situação')] for n in nomes})
+    def cmp_ler(nome):
+        ir('CMP.dc.html#sol=SOL-2026-07&saf=S2627',w=1.7); clk('Expandir tudo',w=.6)
+        r=J(f"(()=>{{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf({json.dumps(nome)})>=0); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
+        k2=J("(document.body.innerText.match(/SOL-2026-07 · [^\\n]*enviada em[^\\n]*/)||[''])[0]") or ''
+        return dict(row=r,k2=k2)
+    SV="[...document.querySelectorAll('svg [role=button]')]"
+    def tap(t): J(f"(()=>{{const e={SV}.find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); e&&e.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}})()"); time.sleep(.5)
+    pan=lambda t: (J(f"(document.querySelector('aside[aria-label^=\"{t}\"]')||{{}}).innerText||''") or '').replace('\n',' · ')
+    def mapa(tal,faz='Santa Rita'):
+        J(f"sessionStorage.setItem('mapa-ctx',{json.dumps(json.dumps({'mf_faz':faz,'lay':'Insumos','tsel':[],'flt':{'Insumos':{'per':'Safra toda'}}}))})"); ir('IN-04.dc.html',w=2.0)
+        tap(tal); x=pan(tal); tap(tal); return x
+    def su03det(): ir('SU-03det.dc.html',w=1.6); return (J("document.body.innerText") or '').replace('\n',' · ')
+    def mb05(): ir('MB-05.dc.html',w=1.6); clk('Almoxarife',w=.6); return (J("document.body.innerText") or '').replace('\n',' · ')
     def tab(): c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Tab','code':'Tab','windowsVirtualKeyCode':9}); c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':'Tab','code':'Tab','windowsVirtualKeyCode':9}); time.sleep(.15)
     CABE="""(()=>{const g=document.querySelector('%s'); if(!g) return {sem:true}; const W=window.innerWidth; const els=[g].concat([...g.querySelectorAll('input,button')]).filter(e=>e.offsetParent!==null);
       const fora=els.filter(e=>{const b=e.getBoundingClientRect(); return b.left<-0.5||b.right>W+0.5;}).map(e=>(e.id||e.innerText||e.tagName).slice(0,30));
@@ -91,7 +116,20 @@ try:
     rc,rm2,rr3,td=reprovar('F26-02','LAB-N','motivo N')
     chk('L3 pessoas distintas (ajuste 4, negativo): Paula devolve bloqueado e Ana reprova com o laudo — a reprovação vale e não fica marca de revisão posterior',
         'devolvidos e bloqueados' in tc and rc=='ok' and rr3=='ok' and 'reprovados com o laudo LAB-N' in td and 'revisão posterior' not in td,dict(tc=tc[-120:],td=td[-220:],rc=rc))
-    col(); chk('E1 sem erro JS nas telas abertas (Estoque, Planejar safra)',ERR==[],ERR[:5])
+    # ================= M1 · ajuste 1: falta firme + qualidade pendente juntas, nas cinco telas =================
+    ir('EST.dc.html'); J("localStorage.clear(); sessionStorage.clear()"); perfil('Ana')
+    e4,t4=devolver(30,'Galão sem lacre (teste ajuste 1)'); r9=reprovar('F26-02','LAB-9','lacre violado'); s2=safler(['Fungicida A'])
+    e5,tm=devolver(10,'Galão amassado (teste ajuste 1)')
+    s3=safler(['Fungicida A']); foto('m1_saf_falta_e_qualidade'); cm1=cmp_ler('Fungicida A'); mp=mapa('T2'); foto('m1_mapa_falta_e_qualidade'); su3=su03det(); foto('m1_su03det_falta_e_qualidade'); mb3=mb05(); foto('m1_mb05_falta_e_qualidade')
+    chk('M1 falta firme + qualidade pendente (ajuste 1, S3): 30 L reprovados e mais 10 L devolvidos bloqueados — 5,5 L de compra firme e 10 L aguardando laudo nas cinco telas: Planejar safra "5,5 L" Complemento + "Qualidade pendente · 10,0 L" (primária e total iguais); Compra "Qualidade pendente · 10"; Mapa T2 "Falta 5 L" + "Qualidade pendente · 10 L" com "o gestor libera ou reprova no Estoque"; SU-03det "Pendência de compra · 5,5 L" + "Qualidade pendente · 10,0 L"; MB-05 "Conflito de reserva" + "Qualidade pendente · 10,0 L" (no 16fb55e: Mapa, SU-03det e MB-05 só a falta)',
+        'devolvidos e bloqueados' in t4 and r9[2]=='ok' and 'reprovados com o laudo LAB-9' in r9[3] and 'Complemento' in s2['Fungicida A'][2] and 'devolvidos e bloqueados' in tm
+        and s3['Fungicida A'][0]=='5,5 L' and 'Complemento' in s3['Fungicida A'][2] and 'Qualidade pendente · 10,0 L' in s3['Fungicida A'][2] and s3['prim']==s2['prim'] and s3['total'].startswith(s2['total'])
+        and 'Qualidade pendente · 10' in cm1['row'] and 'Fungicida A' in mp and 'Falta 5 L' in mp and 'Qualidade pendente · 10 L' in mp and '10 L em quarentena aguardam laudo (o gestor libera ou reprova no Estoque)' in mp
+        and 'Pendência de compra · 5,5 L' in su3 and 'Qualidade pendente · 10,0 L' in su3 and 'Enviar o complemento no Planejar safra' in su3
+        and 'Conflito de reserva' in mb3 and 'Qualidade pendente · 10,0 L' in mb3 and 'dependem do laudo da quarentena' in mb3 and 'Registrar divergência' in mb3,
+        dict(t4=t4[-60:],r9=r9[3][-80:],s2=s2,s3=s3,cmp='Qualidade pendente · 10' in cm1['row'],mapa=[x for x in mp.split(' · ') if 'Fungicida' in x or 'Falta' in x or 'Qualidade' in x or 'quarentena' in x][:6],
+             su=['Pendência de compra · 5,5 L' in su3,'Qualidade pendente · 10,0 L' in su3,'Enviar o complemento no Planejar safra' in su3],mb=['Conflito de reserva' in mb3,'Qualidade pendente · 10,0 L' in mb3,'dependem do laudo da quarentena' in mb3]))
+    col(); chk('E1 sem erro JS nas telas abertas (Estoque, Planejar safra, Compra, Mapa, SU-03det, MB-05)',ERR==[],ERR[:5])
 finally:
     c.close(); srv.terminate()
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas'); [print('  -',f) for f in FAIL]

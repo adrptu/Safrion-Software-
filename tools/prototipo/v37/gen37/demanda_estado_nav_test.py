@@ -15,8 +15,6 @@ Cada caso repete pela tela a reprodução da revisão (ACHADOS-v1) e falha no 85
   F1 · liberar a OS-0501 (Lagoa Grande) com lotes da Santa Rita conta a reserva uma vez em cada fazenda e a entrega não muda nenhuma das duas
   D3 · SU-03det e MB-05 leem a mesma demanda viva do Planejar safra: devolução bloqueada (qualidade pendente) e laudo reprovado (pendência de compra,
        conflito e "Registrar divergência") aparecem nas três telas com o mesmo número; nunca "sem pendência de compra" com a demanda pedindo complemento
-  M1 · (revisão do 16fb55e, ajuste 1) mais 10 L devolvidos bloqueados depois da reprovação: falta firme (5,5 L) e qualidade pendente (10 L) juntas no
-       Planejar safra, na Compra, no Mapa, no SU-03det e no MB-05, sem somar à compra nem trocar a primária
 Uso: python3 demanda_estado_nav_test.py   (depois do build e do montar_render; capturas q_ctl4e_*.png em _probe/)"""
 import sys, os, time, subprocess, json
 HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
@@ -175,17 +173,6 @@ try:
         dict(ok=['Qualidade pendente · '+cq in su1,'Qualidade pendente · '+cq in mb1,'Sem pendência de compra' not in su1,'Pendência de compra · '+lq in su2,'Sem pendência de compra' not in su2,'Conflito de reserva' in mb2,'Registrar divergência' in mb2,'pendência de compra de '+lq in mb2,rr3],
              su0='Sem pendência de compra' in su0,mb0='Sem pendência de compra' in mb0,tdv=tdv,s1=s1,su1=[x for x in su1.split(' · ') if 'pend' in x.lower()][:4],mb1=[x for x in mb1.split(' · ') if 'pend' in x.lower()][:4],
              trp=trp,s2=s2,su2=[x for x in su2.split(' · ') if 'pend' in x.lower()][:4],mb2=[x for x in mb2.split(' · ') if 'onflito' in x or 'pend' in x.lower()][:5]))
-    # ================= M1 · revisão do 16fb55e (ajuste 1): falta firme + qualidade pendente juntas, nas cinco telas =================
-    # continua o D3 (30 L devolvidos bloqueados e reprovados): mais 10 L devolvidos bloqueados → 5,48 L de compra firme e 10 L aguardando laudo
-    est_secao(3); em=est_row('REQ-035','Fungicida A'); setv('#fx_g_dev_qtd','10'); setv('#fx_g_dev_cond','Bloqueada para inspeção · vai para quarentena'); setv('#fx_g_dev_obs','Galão amassado (teste ajuste 1)'); clk('Salvar','aside[role=dialog]',w=.8); tm=T()
-    s3=safler(['Fungicida A']); foto('m1_saf_falta_e_qualidade'); cm1=cmp_ler('Fungicida A'); mp=mapa('T2'); foto('m1_mapa_falta_e_qualidade'); su3=su03det(); foto('m1_su03det_falta_e_qualidade'); mb3=mb05(); foto('m1_mb05_falta_e_qualidade')
-    chk('M1 falta firme + qualidade pendente (ajuste 1, S3): com 5,5 L de compra firme e 10 L aguardando laudo, as cinco telas dizem as duas coisas — Planejar safra "5,5 L" Complemento + "Qualidade pendente · 10,0 L" (primária e total iguais); Compra "Qualidade pendente · 10"; Mapa T2 "Falta 5 L" + "Qualidade pendente · 10 L" com "o gestor libera ou reprova no Estoque"; SU-03det "Pendência de compra · 5,5 L" + "Qualidade pendente · 10,0 L"; MB-05 "Conflito de reserva" + "Qualidade pendente · 10,0 L" (no 16fb55e: Mapa, SU-03det e MB-05 só a falta)',
-        'devolvidos e bloqueados' in tm and s3['Fungicida A'][0]=='5,5 L' and 'Complemento' in s3['Fungicida A'][2] and 'Qualidade pendente · 10,0 L' in s3['Fungicida A'][2] and s3['prim']==s2['prim'] and s3['total'].startswith(s2['total'])
-        and 'Qualidade pendente · 10' in cm1['row'] and 'Fungicida A' in mp and 'Falta 5 L' in mp and 'Qualidade pendente · 10 L' in mp and '10 L em quarentena aguardam laudo (o gestor libera ou reprova no Estoque)' in mp
-        and 'Pendência de compra · 5,5 L' in su3 and 'Qualidade pendente · 10,0 L' in su3 and 'Enviar o complemento no Planejar safra' in su3
-        and 'Conflito de reserva' in mb3 and 'Qualidade pendente · 10,0 L' in mb3 and 'dependem do laudo da quarentena' in mb3 and 'Registrar divergência' in mb3,
-        dict(tm=tm,s2=s2,s3=s3,cmp='Qualidade pendente · 10' in cm1['row'],mapa=[x for x in mp.split(' · ') if 'Fungicida' in x or 'Falta' in x or 'Qualidade' in x or 'quarentena' in x][:6],
-             su=['Pendência de compra · 5,5 L' in su3,'Qualidade pendente · 10,0 L' in su3,'Enviar o complemento no Planejar safra' in su3],mb=['Conflito de reserva' in mb3,'Qualidade pendente · 10,0 L' in mb3,'dependem do laudo da quarentena' in mb3]))
     col(); chk('E1 sem erro JS nas telas abertas (Planejar safra, Estoque, O.S., Compra, Mapa)',ERR==[],ERR[:5])
 finally:
     c.close(); srv.terminate()
