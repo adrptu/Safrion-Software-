@@ -165,6 +165,7 @@ _ESTICA=(f'{_S1}:has(.g2caixa,.rola)',f'{_S1}:has(.g2caixa,.rola)>div:last-child
 _CSS_RESP=('[data-root]{height:100vh;height:100dvh;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}'
     '.ml-fundo{display:none}'
     'main[data-scroll]{scroll-padding-block:8px}'   # o foco levado à vista pela rolagem fica com o contorno inteiro (não rente à borda)
+    'main[data-scroll]>*{flex-shrink:0!important}'   # cortes visuais (13/10): na coluna flex que rola, o bloco não encolhe para a janela; senão o conteúdo transborda da caixa e a barra de ações (logo depois dela) fica no meio da tela com a lista correndo por baixo
     '@media (max-width: 1023px){'
     '.menu-lat:not(.rec){position:absolute;top:env(safe-area-inset-top,0px);bottom:env(safe-area-inset-bottom,0px);left:env(safe-area-inset-left,0px);z-index:35;box-shadow:12px 0 32px -12px rgba(21,32,26,.45)}'
     '.menu-lat:not(.rec)+.ml-tog+div{margin-left:68px}'

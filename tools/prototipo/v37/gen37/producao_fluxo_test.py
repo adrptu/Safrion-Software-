@@ -426,8 +426,10 @@ window.CARDS=()=>[...document.querySelectorAll('.pr-card, .pr-grp')].filter(VIS)
         ir('CARGA.dc.html')
         J("window.__car.cenMudar(null,c=>{ c.ordens['OS-0930']={id:'OS-0930',tipo:'Colheita de café',talhao:'C1',area:0,etapa:'Em execução',versao:'v1',realizado:5,saldo:0,resp:'Sérgio',ins:[],req:null,selos:[],"
           "ap:[{d:'25/09',dia:1,ha:5,st:'Conferido',sinc:true,origem:'web'}],reservado:false,osc:{}}; return {msg:''}; })")
+        J("localStorage.setItem('safrion.perfilDemo','Rui')")   # desde a CONF (v57) pesar e receber é do almoxarife: a pesagem age como Rui
         ir('CARGA.dc.html'); J("SETV('select[aria-label=\"Filtrar por fazenda\"]','Santa Rita')"); time.sleep(.4)
         clk('Registrar pesagem'); clk('OS-0930 · C1', 'aside'); setv('#pf_dcol', '25/09'); setv('#pf_tk', 'TK-CF1'); setv('#pf_bruto', '9200'); setv('#pf_tara', '3200'); setv('#pf_lit', '12000'); clk('Íntegra', 'aside'); clk('Registrar pesagem', 'aside')
+        J("localStorage.removeItem('safrion.perfilDemo')")
         ir('COLH.dc.html'); ul(); row('C1 Catuaí'); uf = ui(); usel('kg'); cf = cel('C1 Catuaí'); uf2 = ui()
         J("window.__car.cenMudar(null,c=>{ Object.values(c.producao.cargas).filter(g=>g.cultura==='Café').forEach(g=>(g.origem||[]).forEach(x=>{ x.kg=0; })); return {msg:''}; })")
         ir('COLH.dc.html'); ul(); row('C1 Catuaí'); cs0 = cel('C1 Catuaí'); us0 = ui()
