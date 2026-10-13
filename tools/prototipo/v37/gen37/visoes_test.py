@@ -584,6 +584,18 @@ def modo_e2e():
             len(g1) == 1 and g1[0][0] == 'Santa Rita|T2' and a1 is not None and abs((num_br(g1[0][1]) or -1) - a1) < .01 and abs(a1 - 102) < .01
             and a2 is not None and abs(s2 - a2) < .01 and abs(a2 - 490.95) < .01, [g1, t1, g2, s2, t2])
     passo('E1b', _e1b)
+    def _e1c():
+        # E1c (revisão, achado C1, S2, a parte da busca): sem fase, a busca "0431" deixa só a OS-0431 no recorte; o grupo T2 soma só ela (= Total,
+        # 102 ha), e não as 452 ha de todas as O.S. do talhão; a soma dos grupos = Total
+        abre('OS.dc.html')
+        J("""(()=>{const i=[...document.querySelectorAll('main input[aria-label="Buscar nesta tabela"]')].find(x=>x.getClientRects().length);
+          Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'0431'); i.dispatchEvent(new Event('input',{bubbles:true})); return 1;})()"""); time.sleep(.6)
+        troca_visao(J, 'agrupada'); time.sleep(.5)
+        g = J(GRUPOS_AREA) or []; t = total_nota(); a = num_br((t.split('·') + ['', ''])[1]); s = round(sum(num_br(x) or 0 for _, x in g), 2)
+        lin = sorted(set(x.split('@')[0] for x in ids() if not x.startswith('grp@')))
+        chk('E1c busca "0431" (sem fase) → Agrupada: só o grupo T2, com a OS-0431, e o subtotal = Total (102 ha); a soma dos grupos = Total',
+            lin == ['OS-0431'] and [k for k, _ in g] == ['Santa Rita|T2'] and a is not None and abs(a - 102) < .01 and abs(s - a) < .01, [lin, g, s, t])
+    passo('E1c', _e1c)
     def _e3b2():
         # E3b2 (revisão, achado A2): recorte só com ordens canceladas (Santa Rita · Safrinha 2027 depois de emitir e cancelar a OS nova):
         # toda visão diz o motivo e oferece "Ver canceladas" (antes: Lista em branco e Kanban com 5 colunas vazias, sem motivo)
@@ -634,6 +646,17 @@ def modo_e2e():
             and bl2 == ['OS-0418', 'OS-0430', 'OS-0431'] and es2 is None and sa == 'Sem alocação (3) OS-0501 OS-0502 OS-0511' and pa.startswith('OS-0502'), [bl, es, nota[:160], bl2, sa, es2, pa])
         guarda_erros('E8')
     passo('E8', _e8)
+    def _e8b():
+        # E8b (revisão, achado A5, a parte da Safra): a Carga segue a Safra do topo. A safra 2025/26 só tem ordens encerradas, sem bloco na
+        # semana: nenhum bloco (nem os da irrigação só com água, que são da 2026/27) e o estado diz o recorte. Controle: a 2026/27 mostra blocos
+        abre('OS.dc.html'); setsel('Filtrar por safra', '2026/27'); troca_visao(J, 'carga'); time.sleep(.4); bl0 = blocos()
+        setsel('Filtrar por safra', '2025/26'); time.sleep(.4); es = estado(); bl = blocos()
+        nota = J("[...document.querySelectorAll('main [role=note]')].filter(n=>n.getClientRects().length).map(n=>n.innerText).find(t=>/carga por recurso mostra/.test(t))||''") or ''
+        chk('E8b Carga com Safra 2025/26: nenhum bloco (as ordens dela não têm alocação) e o estado "Nenhuma ordem de … safra 2025/26 tem alocação…"; com a 2026/27 os blocos aparecem (OS-0419 e OS-0421)',
+            {'OS-0419', 'OS-0421'} <= set(bl0) and bl == [] and bool(es) and es['tipo'] == 'regra' and es['t'].startswith('Nenhuma ordem de') and 'safra 2025/26' in es['t']
+            and 'safra 2025/26' in nota, [bl0, bl, es, nota[:160]])
+        guarda_erros('E8b')
+    passo('E8b', _e8b)
 
 def modo_e7():
     """Cliques da persona até o mesmo resultado (window.__cl conta cada clique no documento), na tela que existir."""
