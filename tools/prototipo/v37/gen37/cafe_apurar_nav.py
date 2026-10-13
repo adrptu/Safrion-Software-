@@ -43,7 +43,8 @@ def rodar():
         ir('CARGA.dc.html')
         J("window.__car.cenMudar(null,c=>{ c.ordens['OS-0930']={id:'OS-0930',tipo:'Colheita de café',talhao:'C1',area:0,etapa:'Em execução',versao:'v1',realizado:5,saldo:0,resp:'Sérgio',ins:[],req:null,selos:[],"
           "ap:[{d:'25/09',dia:1,ha:5,st:'Conferido',sinc:true,origem:'web'}],reservado:false,osc:{}}; return {msg:''}; })")
-        ir('CARGA.dc.html'); faz('Santa Rita')
+        # desde a CONF (v57) pesar e receber é decisão do almoxarife: a pesagem age como Rui (Ver como); a colheita volta ao perfil padrão
+        J("localStorage.setItem('safrion.perfilDemo','Rui')"); ir('CARGA.dc.html'); faz('Santa Rita')
         # erro: café sem litros é recusado junto ao campo, nada gravado
         n0 = cen("Object.keys(c.producao.cargas).length")
         clk('Registrar pesagem'); clk('OS-0930 · C1', 'aside'); setv('#pf_dcol', '25/09'); setv('#pf_tk', 'TK-CF1'); setv('#pf_bruto', '9200'); setv('#pf_tara', '3200'); clk('Íntegra', 'aside')
@@ -56,7 +57,7 @@ def rodar():
         # repetição: o mesmo ticket com o mesmo conteúdo não soma de novo (comando direto, como um reenvio)
         rp = J("(()=>{ const r=window.__car.cenMudar(null,c=>window.__pr.prReceber(c,{os:'OS-0930',ticket:'TK-CF1',bruto:9200,tara:3200,litros:12000,cond:'Íntegra',dcol:'2026-09-25',local:c.producao.cargas[Object.keys(c.producao.cargas).find(k=>c.producao.cargas[k].ticket==='TK-CF1')].local})); return r.erro||r.msg; })()") or ''
         t.chk('repetição: o mesmo ticket com o mesmo conteúdo é a mesma carga, nada somado', 'nada foi somado de novo' in rp and cen("Object.values(c.producao.cargas).filter(g=>g.st==='Recebida'&&g.cultura==='Café').length") == 1, rp[:200])
-        shot('1_carga')
+        shot('1_carga'); J("localStorage.removeItem('safrion.perfilDemo')")
         # Previsão e colheita (1440 px): linha, total da cultura e painel
         ir('COLH.dc.html'); faz('Santa Rita'); lc = J("ROWTXT('C1')") or ''; gr = J("ROWTXT('Café 1 talhão')") or J("ROWTXT('Café')") or ''
         t.chk('COLH: linha do C1 "12.000 L · sc a apurar", "sc/ha a apurar", meta a apurar; nenhum 0 sc, 0,00 sc/ha ou −100,0 %',

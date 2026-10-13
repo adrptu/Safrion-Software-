@@ -63,6 +63,7 @@ try:
     m.ok('AB-1043' in a1 and 'Revisão 250 h: vence em breve' in a1 and 'troca de contador' in a2, 'abastecimento: 3.530 h deixa o Trator 04 vencendo em breve; 48.100 km < 48.200 km pede confirmação', [a1[:120], a2[:120]])
     m.ir('vis=ativos'); l4 = m.linha('a04'); lc = m.linha('cb01')
     m.ok('Vence em breve' in l4 and '3.530 h' in l4 and 'a confirmar' in lc and '48.200 km' in lc, 'Ativos: Trator 04 recalculado; comboio mantém 48.200 km com leitura a confirmar', [l4[:120], lc[:120]])
+    os.makedirs(os.path.join(os.path.dirname(os.path.abspath(__file__)), '_probe', 'manut'), exist_ok=True)   # a pasta da captura pode não existir (falha da ferramenta, não do teste)
     m.c.shot(os.path.join(os.path.dirname(os.path.abspath(__file__)), '_probe', 'manut', 'ma_planos_test_fim.png'))
 finally:
     rc = m.fim()

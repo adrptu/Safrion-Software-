@@ -95,7 +95,7 @@ def rodar():
         # 7 · conferência: o resto da área (150 ha) com Óleo abaixo do planejado; sobras devolvidas; enviada para conferência
         f = cmd(f"(W.cenIniciarTurno(c,'{OS}'), W.cenFecharTurno(c,150,8,{{'Glifosato 480':300,'2,4-D 806':150,'Óleo mineral':50}},'',[]))")
         dv = cmd(f"(c.reqs[c.ordens['{OS}'].req].itens.filter(i=>i.custodia>0).forEach(i=>W.cenDevolver(c,c.ordens['{OS}'].req,i.prod,i.custodia,true,'Rui')), W.osc_conferencia(c,'{OS}'))")
-        a.ok('Óleo mineral planejado 75 L × informado 50 L' in f and dv == 'OS-0430 enviada para conferência.', f'turno de 150 ha com Óleo 50 L (75 L planejado) e envio para conferência: {f[-120:]} · {dv}')
+        a.ok('Óleo mineral planejado 75 L × informado 50 L' in f and dv == 'OS-0430 enviada para conferência por Ana (gestora).', f'turno de 150 ha com Óleo 50 L (75 L planejado) e envio para conferência: {f[-120:]} · {dv}')
         web(); ordem(OS); p = pan(); i = p.find('PRÓXIMO PASSO'); pp = p[i:i + 420]
         a.ok(f'{SELO} · Óleo mineral' in p and 'Encerrar bloqueado: divergência de consumo/dose em revisão técnica · dia 2 · Óleo mineral planejado 75 L × informado 50 L.' in pp
              and 'Quem resolve: Ana (agrônoma), na linha do apontamento' in pp and not temb('Conferir e encerrar'),
