@@ -72,7 +72,7 @@ SOLO_UI_JS=r'''
 /* ===== Análise de solo · peças de tela comuns (AG-02 e Planejar safra); regras em solo.js ===== */
 function soChs(c){ const k=G2C[c]||G2C.gray; return 'display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+k[0]+';background:'+k[1]+';'; }
 function soDot(c){ const k=G2C[c]||G2C.gray; return 'width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+k[0]+';'; }
-const SOLO_SITC={'Validado':'green','Aguardando validação':'yellow','Inconsistente':'red','Vencido':'gray','Substituído':'gray'};
+/* SOLO_SITC (cor da situação do laudo) está em solo.js: o Mapa usa a mesma */
 function soDiaCol(r,k,iso){ const ok=/^\d{4}-\d{2}-\d{2}/.test(String(iso||'')); r.v[k]=ok?Number(String(iso).slice(0,10).replace(/-/g,'')):''; const t=ok?soloBr(iso):'—'; r.p[k]=[{k:'txt',t}]; r.s[k]=ok?t:''; }
 function soSugTxt(s){ return s.tipo==='retirar'?(s.incl0?'retirar a inclusão ('+(s.motivo||'pela análise')+')':'retirar ('+(s.motivo||'pela análise')+')'):(s.tipo==='incluir'?'incluir '+soloDoseTxt(s.sug,s.un):soloDoseTxt(s.sug,s.un)+(s.desf?' (padrão do plano)':'')); }
 function soEfeito(s,cu){ const out=[]; const area=Number((cu&&cu.area)||0);
@@ -102,16 +102,14 @@ const SO_AN=['Ca','Mg','K','H+Al','Al','Argila'];
 function soFazOk(self,f){ const x=self.state.mf_faz||'Todas'; return x==='Todas'||f===x; }
 function soFz(self){ const x=self.state.mf_faz||'Todas'; return x==='Todas'?'Santa Rita':x; }
 function soAtor(){ return g2perfil().k; }
-function soUsoCont(u){ const n=u.filter(x=>x.s&&!/^não aplicável/.test(x.st)).length, e=u.filter(x=>x.ac).length; return {n,e}; }
-function soNoPlano(l,u){ if(l.tipo!=='solo'||l.sit!=='Validado') return {t:'—',c:''}; const k=soUsoCont(u);
-  if(!k.n&&!k.e) return {t:'sem sugestão',c:''}; return {t:k.n+(k.n>1?' sugestões':' sugestão')+(k.e?' · '+k.e+' em uso':''),c:k.e?'green':'blue'}; }
+/* soloUsoCont e soloNoPlano ("No plano" do laudo) estão em solo.js: o Mapa (camada Análises de solo) usa os mesmos */
 function soTalTxt(l){ return l.tal+(l.area?' · '+cenNum(Number(l.area))+' ha':'')+(l.zona?' · '+l.zona:''); }
 function soSafraDe(u){ const x=(u||[]).find(z=>z.s&&!/^não aplicável/.test(z.st)); return x?x.cu.saf:''; }
 function soPlanoHref(saf){ return 'SAF.dc.html#saf='+encodeURIComponent(saf)+'&passo=cultivos&sug=1'; }
 function PREVALS(self,v){ cenOuvir(self); if(self.state.mf_faz===undefined) self.state.mf_faz='Todas';
   const c=cenGet(); const ls=soloLaudos(c,SOLO0); self.__ls=ls; self.__uso={};
   /* ---- laudos ---- */
-  GR('g_lau').rows=ls.filter(l=>soFazOk(self,l.faz)).map(l=>{ const u=soloUsoNoPlano(c,SOLO0,l); self.__uso[l.id]=u; const np=soNoPlano(l,u); const ix=l.idx; const K=soloAn(l,'K');
+  GR('g_lau').rows=ls.filter(l=>soFazOk(self,l.faz)).map(l=>{ const u=soloUsoNoPlano(c,SOLO0,l); self.__uso[l.id]=u; const np=soloNoPlano(l,u); const ix=l.idx; const K=soloAn(l,'K');
     const r={id:l.id,ro:true,v:{},s:{},p:{}};
     r.p.lau=[{k:'b',t:l.id},{k:'mut',t:l.tipo}]; r.s.lau=l.id+' '+l.tipo;
     r.p.tal=[{k:'txt',t:l.tal+(l.area?' · '+cenNum(Number(l.area))+' ha':'')}].concat(l.zona?[{k:'br'},{k:'mut',t:l.zona}]:[]); r.s.tal=soTalTxt(l);
@@ -160,7 +158,7 @@ function soLdVals(self,v){ const l=self.__l; v.ld_open=!!l; if(!l) return; const
   v.ld_sub=l.lab+' · coleta '+soloBr(l.coleta)+(l.zona?' · '+l.zona:'');
   v.ld_kv=[{l:'Fazenda · talhão',v:l.faz+' · '+soTalTxt(l)},{l:'Profundidade',v:l.prof?l.prof+' cm':'— (folha)'},{l:'Extrator',v:l.ext},{l:'Coleta',v:soloBr(l.coleta)},
     {l:'Validação',v:l.por?(l.por+' em '+soloBr(l.em)):'—'},{l:'Validade para sugerir',v:l.tipo==='solo'?'até '+soloBr(l.val):'—'}];
-  v.ld_arq=l.arq||'laudo.pdf'; const nu=soUsoCont(u); const saf=soSafraDe(u);
+  v.ld_arq=l.arq||'laudo.pdf'; const nu=soloUsoCont(u); const saf=soSafraDe(u);
   let next='', pa=null, pb=null;
   if(l.sit==='Aguardando validação'){ const ag=g2papel(g2perfil(),'agronomo');   /* revisão A8: sem o papel, nada de primário; a tela diz quem decide (o comando recusa igual) */
     next=(ag?'':'Decisão de '+g2quem('agronomo')+': só o agrônomo valida. ')+'Confira o extraído com o original e valide. O OCR nunca valida.'; if(ag) pb={t:'Validar laudo',go:()=>soValidar(self,l.id)}; }
@@ -177,11 +175,12 @@ function soLdVals(self,v){ const l=self.__l; v.ld_open=!!l; if(!l) return; const
   v.ld_close=()=>{ self.setState({lau:null,ld_err:'',pqi:null}); }; v.ld_key=(e)=>{ if(e&&e.key==='Escape'&&!self.state.pqi&&self.state.pqi!==0){ e.preventDefault(); v.ld_close(); } }; }
 function soValidar(self,id){ const ch='VAL-'+id+'-'+Date.now(); const r=cenMudar(null,c=>soloValidar(c,id,ch,soAtor()));
   if(r.erro){ self.setState({ld_err:r.erro,g2toast:r.erro}); return; }
-  const c=cenGet(); const l=soloLaudos(c,SOLO0).find(x=>x.id===id); const u=l?soloUsoNoPlano(c,SOLO0,l):[]; const n=soUsoCont(u).n;
+  const c=cenGet(); const l=soloLaudos(c,SOLO0).find(x=>x.id===id); const u=l?soloUsoNoPlano(c,SOLO0,l):[]; const n=soloUsoCont(u).n;
   self.setState({cenrev:Date.now(),ld_err:'',g2toast:r.msg+(n?' '+n+(n>1?' sugestões aparecem':' sugestão aparece')+' no Planejar safra.':' Sem sugestão de dose para este talhão.')}); }
 /* ---- registrar laudo ---- */
-function soRlNovo(self){ const f=soFz(self); const tal=((SOLO_TAL[f]||[])[0]||[''])[0];
-  self.setState({rl:{chave:'REG-'+Date.now()+'-'+Math.floor(Math.random()*1e4),faz:f,tal:'',prof:'0–20',coleta:'',lab:'',ext:'Mehlich-1',arq:'',an:SO_AN.map(a=>({a,v:'',un:SO_UN[a][0]})),err:'',warn:false,orig:''}}); }
+/* faz/tal: contexto herdado (Mapa › Análises de solo, talhão sem análise: AG-02.dc.html#registrar=<fazenda>/<talhão>); visível e corrigível no formulário */
+function soRlNovo(self,faz,tal){ const f=(faz&&SOLO_TAL[faz])?faz:soFz(self); const t=(tal&&(SOLO_TAL[f]||[]).some(x=>x[0]===tal))?tal:'';
+  self.setState({rl:{chave:'REG-'+Date.now()+'-'+Math.floor(Math.random()*1e4),faz:f,tal:t,tal0:t,prof:'0–20',coleta:'',lab:'',ext:'Mehlich-1',arq:'',an:SO_AN.map(a=>({a,v:'',un:SO_UN[a][0]})),err:'',warn:false,orig:''}}); }
 function soRlVals(self,v){ const rl=self.state.rl; v.rl_open=!!rl; if(!rl) return;
   const upd=(p)=>self.setState({rl:Object.assign({},self.state.rl,p,{err:'',warn:false})});
   v.rl_titulo='Registrar laudo de solo'; v.rl_sub='O laudo nasce aguardando validação do agrônomo; o OCR nunca valida.';
@@ -200,7 +199,7 @@ function soRlVals(self,v){ const rl=self.state.rl; v.rl_open=!!rl; if(!rl) retur
     setu:(e)=>{ const an=self.state.rl.an.slice(); an[i]=Object.assign({},an[i],{un:e.target.value}); upd({an}); }}));
   v.rl_ex=()=>{ const x=SOLO0.exemplo; upd({faz:x.faz,tal:x.tal,prof:x.prof,coleta:x.coleta,lab:x.lab,ext:x.ext,arq:x.arq,an:SO_AN.map(a=>{ const q=x.an.find(z=>z.a===a); return {a,v:q?String(q.v).replace('.',','):'',un:q?q.un:SO_UN[a][0]}; })}); };
   v.rl_err=rl.err||''; v.rl_hasErr=!!rl.err; v.rl_warn=!!rl.warn;
-  const sujo=()=>{ const r=self.state.rl; return !!(r.tal||r.coleta||r.lab||r.arq||r.an.some(x=>x.v)); };
+  const sujo=()=>{ const r=self.state.rl; return !!((r.tal&&r.tal!==r.tal0)||r.coleta||r.lab||r.arq||r.an.some(x=>x.v)); };   /* o talhão herdado do Mapa não conta como alteração */
   v.rl_close=()=>{ if(sujo()&&!self.state.rl.warn){ self.setState({rl:Object.assign({},self.state.rl,{warn:true})}); return; } self.setState({rl:null}); };
   v.rl_discard=()=>self.setState({rl:null}); v.rl_keep=()=>self.setState({rl:Object.assign({},self.state.rl,{warn:false})});
   v.rl_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); v.rl_close(); } };
@@ -313,8 +312,9 @@ function EXTRAVALS(self,v){ try{ window.__soloSelf=self; window.__solo={get:()=>
     catch(e){ const m=String(e.message||e); const f=/capacidade de campo/.test(m)?'ccv':(/ponto de murcha|Ponto de murcha/.test(m)?'pmpv':(/profundidade efetiva/.test(m)?'z':(/data|depois de hoje/i.test(m)?'datav':(/já está registrada/.test(m)?'datav':'talv')))); const o={}; o[f]=m.replace(' Nada foi gravado.',''); return o; } };
   self.g2opts=(gid,k,d)=>{ if(gid==='g_agua'&&k==='talv') return [{v:'',t:'Escolha o talhão'}].concat((SOLO_TAL[d.faz||'Santa Rita']||[]).map(x=>({v:x[0],t:x[0]+' · '+cenNum(x[1])+' ha'}))); return null; };
   self.g2live=(gid,k,d)=>{ if(gid==='g_agua'&&k==='cadT'){ const cad=soloCAD({cc:d.ccv,pmp:d.pmpv,z:d.z,un:d.un}); return cad.v===null?'não calculável: '+cad.nc:cad.e; } return null; };
-  /* abrir pelo endereço: AG-02.dc.html#LAU-2061 */
-  if(!self.__hashIni){ self.__hashIni=1; const ab=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||'').replace('#',''); }catch(e){} if(/^LAU-\d+$/.test(h)) setTimeout(()=>self.setState({lau:h,mf_faz:'Todas'}),0); }; ab(); try{ window.addEventListener('hashchange',ab); }catch(e){} } }
+  /* abrir pelo endereço: AG-02.dc.html#LAU-2061 (laudo) · AG-02.dc.html#registrar=Santa Rita/T3 (Registrar laudo com fazenda e talhão, vindo do Mapa) */
+  if(!self.__hashIni){ self.__hashIni=1; const ab=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||'').replace('#',''); }catch(e){} if(/^LAU-\d+$/.test(h)) setTimeout(()=>self.setState({lau:h,mf_faz:'Todas'}),0);
+      const m=/^registrar=([^/]+)\/(.+)$/.exec(h); if(m) setTimeout(()=>{ self.setState({lau:null,mf_faz:'Todas'}); soRlNovo(self,m[1],m[2]); },0); }; ab(); try{ window.addEventListener('hashchange',ab); }catch(e){} } }
 function soAgDados(x){ return {faz:x.faz,tal:x.talv,zona:x.zona||'',data:x.datav,prof:x.profv,z:x.z,met:x.metv,un:x.un,cc:x.ccv,pmp:x.pmpv,fonte:x.fontev,resp:x.resp}; }
 ''')
     EXTRA.append('<style>'+CSS+'</style>')
