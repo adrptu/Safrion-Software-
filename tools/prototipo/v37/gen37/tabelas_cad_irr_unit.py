@@ -13,6 +13,7 @@
     TABR-CTX-01 (revisão do Codex, 10/10): C15–C18 filtro, ordem e menu da coluna de capacidade que muda de grandeza (CD-03, CD-06); C17b
     (TABR-CTX-02) o mesmo rótulo com outra unidade (Capacidade sc de 60 kg → kg/h) também muda de grandeza.
     Revisão do TABR-CTX-01 (10/10): C19 (TABR-CTX-02) a coluna Fazenda do IR-01 sai com a fazenda do topo e leva filtro, ordem e menu dela;
+    C19b (TABR-CTX-02) toda grade da Irrigação com coluna Fazenda passa por essa reconciliação (IR-01, IR-03, IR-04 Fontes e Captações);
     C20 a 1ª coluna presa (g2lib) é refeita só quando a coluna entra ou sai (nº de colunas muda), não a cada desenho nem na troca de grandeza.
 Uso: python3 tabelas_cad_irr_unit.py   (sai com 1 se alguma regra falhar)"""
 import os, re, sys, json, subprocess
@@ -284,6 +285,16 @@ chk('C19 (TABR-CTX-02) IR-01: Todas + Fazenda = Santa Rita (↓) → Lagoa Grand
     and lg.get('fmc') is None and lg.get('q') == 'Pivô' and lg.get('vis') == ['Pivô 2 Lagoa Grande', 'Pivô 5 Lagoa Grande']
     and td.get('ncol') == 3 and td.get('chips') == ['Situação: Impedida, Programada'] and sorted(td.get('vis', [])) == ['Pivô 1 Santa Rita', 'Pivô 2 Lagoa Grande', 'Pivô 5 Lagoa Grande']
     and rs.get('f') == ['sit'] and rs.get('vis') == ['Pivô 5 Lagoa Grande'] and kk.get('chips') == ['Fazenda: Lagoa Grande'], uf)
+# C19b (TABR-CTX-02, conferido na tela em 13/10/2026 no IR-01, IR-03 e IR-04): toda grade da Irrigação com coluna Fazenda passa pelo irrColsFaz
+# (que leva filtro, ordem e menu dela quando a coluna sai); uma grade nova com Fazenda sem essa chamada voltaria a deixar o filtro órfão
+semfaz = []; comfaz = []
+for pg in ('IR-01', 'IR-02', 'IR-03', 'IR-04'):
+    hp = page(pg)
+    for gx in grids(hp):
+        if any(c.get('k') == 'faz' for c in gx.get('cols', [])):
+            (comfaz if re.search(r"irrColsFaz\(self,'%s'," % re.escape(gx['id']), hp) else semfaz).append(pg + ' ' + gx['id'])
+chk('C19b (TABR-CTX-02) Irrigação: toda grade com coluna Fazenda (IR-01 g_set, IR-03 g_os, IR-04 g_src e g_cap) passa pelo irrColsFaz, sem filtro de Fazenda órfão',
+    not semfaz and sorted(comfaz) == ['IR-01 g_set', 'IR-03 g_os', 'IR-04 g_cap', 'IR-04 g_src'], {'sem': semfaz, 'com': comfaz})
 # C20 (revisão do TABR-CTX-01, 10/10/2026): a 390 px a 1ª coluna presa do g2lib (data-c0, --g2cols) guardava o nº de colunas da abertura e só era
 # refeita quando a largura mudava: com a capacidade (ou a Fazenda) entrando, a última coluna caía para a linha de baixo. capColDeps desfaz a coluna
 # presa quando a coluna entra ou sai, antes do novo desenho, e o motor a refaz com o nº novo. Só nesses passos: não a cada desenho nem quando só a
