@@ -1,0 +1,9 @@
+{"disponivel":0,"suprimento":{"fisico":{},"quar":{},"quarRep":{},"quarRef":[],"reservas":[],"recebDt":[],"sobra":[]}}
+OK vencido fora do suprimento
+OK projeção preserva físico apto, quarentena e dados do lote
+RESERVA_OUTRA_FAZENDA {"vencido":false,"demanda":0}
+OK reserva em outra fazenda apta cobre a demanda
+RESERVA_OUTRA_FAZENDA {"vencido":true,"demanda":0}
+FALHA reserva em outra fazenda vencida não cobre a demanda: invariante não atendida
+RESULTADO controles 2/3
+RESULTADO 3/4

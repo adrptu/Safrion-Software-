@@ -105,7 +105,7 @@ function cenOsSup(c, co, r, fz, fo) { const out = {}; if (!co) return out; r = r
   ((r && r.itens) || []).forEach(it => { const pd = Math.min(dev[it.prod] || 0, it.consumido || 0); dev[it.prod] = (dev[it.prod] || 0) - pd; P(it.prod).cust += (it.custodia || 0) + pd; });
   Object.values(out).forEach(x => { x.need = Math.max(0, cenQtd(x.bruto - x.cust, 1)); x.sobra = Math.max(0, cenQtd(x.cust - x.bruto, 1)); });
   if (r && r.estado !== 'Cancelada' && CEN_FASES_PEND.indexOf(co.etapa) >= 0) { const lotes = (c && c.lotes) || {}; const rs = [];
-    (r.itens || []).forEach(it => { const l = lotes[it.prod + '|' + it.lote]; if (!l) return; const q = cenResPropria(c, r.id, it, l); if (q > 1e-9) rs.push({ it, l, q, ef: 0 }); });
+    (r.itens || []).forEach(it => { const l = lotes[it.prod + '|' + it.lote]; if (!l || cenLoteVencido(l)) return; const q = cenResPropria(c, r.id, it, l); if (q > 1e-9) rs.push({ it, l, q, ef: 0 }); });
     const rem = {}; Object.keys(out).forEach(p => { rem[p] = out[p].need; });
     (fz ? rs.filter(y => fz(y.l) === fo).concat(rs.filter(y => fz(y.l) !== fo)) : rs).forEach(y => { const p = y.it.prod; y.ef = Math.min(y.q, Math.max(0, rem[p] || 0)); rem[p] = (rem[p] || 0) - y.ef; });
     rs.forEach(y => { P(y.it.prod).res.push(y); }); }
@@ -169,7 +169,7 @@ function cenRepsLote(c, l, qr) { let pend = []; const reps = [];
   return Math.abs(sh - qr) < 1e-6 ? reps : [Object.assign({ q: qr, doc: '' }, l.rep || {}, { q: qr })]; }
 function cenEstDem(c, faz, b, osd) { b = b || {}; const lf = b.locFaz || {}; const fz = (l) => lf[l.local] || b.faz0 || 'Santa Rita';
   const fisico = {}, quar = {}, quarRep = {}, quarRef = [], reservas = [], recebDt = [], sobra = []; const lotes = (c && c.lotes) || {};
-  Object.values(lotes).forEach(l => { if (fz(l) !== faz) return; fisico[l.prod] = (fisico[l.prod] || 0) + (l.fisico || 0) - (l.quarentena || 0);
+  Object.values(lotes).forEach(l => { if (fz(l) !== faz) return; if (!cenLoteVencido(l)) fisico[l.prod] = (fisico[l.prod] || 0) + (l.fisico || 0) - (l.quarentena || 0);
     const qr = Math.min(l.quarentena || 0, l.quarRep || 0), qp = (l.quarentena || 0) - qr;
     const doc = (((c && c.movs) || []).filter(m => m.prod === l.prod && m.lote === l.lote && !m.apto && (m.tipo === 'recebimento-nf' || m.tipo === 'devolucao'))
       .map(m => m.tipo === 'devolucao' ? 'devolução da ' + m.req : m.doc).filter(Boolean).pop()) || '';
@@ -673,7 +673,8 @@ function cenConcPrevia(c, id) {
   const cust = it ? it.custodia : 0; const falta = Math.max(0, k.relatado - cust);
   const own = falta > 1e-9 ? cenResPropria(c, k.req, it, l) : 0; const res = Math.min(falta, own); const livre = falta - res;
   let erro = '';
-  if (falta > 1e-9 && (!l || cenDisp(l) + 1e-9 < livre)) erro = 'Sem origem física para ' + cenNum(falta) + ' ' + un + ' de ' + k.prod
+  if (falta > 1e-9 && cenLoteVencido(l)) erro = 'Lote ' + l.lote + ' vencido em ' + l.validade + ': não pode fornecer a retirada complementar. Revise a origem física ou recuse o relato; a custódia já entregue permanece preservada.';
+  else if (falta > 1e-9 && (!l || cenDisp(l) + 1e-9 < livre)) erro = 'Sem origem física para ' + cenNum(falta) + ' ' + un + ' de ' + k.prod
     + (l ? ': o lote ' + l.lote + ' tem ' + cenNum(cenDisp(l) + own) + ' ' + un + ' para esta O.S.' : ': sem lote no Estoque') + '. Conte o lote ou recuse o relato.';
   const ori = (!(falta > 1e-9) || !l) ? '' : cenNum(falta) + ' ' + un + cenPl(falta, ' sai', ' saem') + ' do lote ' + l.lote
     + ' (' + (res > 1e-9 ? (livre > 1e-9 ? cenNum(res) + ' ' + un + ' da reserva da ' + k.req + ' e ' + cenNum(livre) + ' ' + un + ' do livre' : 'reserva da ' + k.req) : 'livre') + ')';
