@@ -56,3 +56,16 @@ Provas novas executadas: domínio diário30/30, navegador diário16/16, casos14/
 Brutos nfix-* e n1-dose-* preservados. Primeiro os_cenario/dose-nav interromperam por diretório local _probe ausente; após preparar o diretório, somente esses testes foram retomados, com logs separados. Captura de arquivamento390px inspecionada: ação primária visível. O helper Os.fim imprime0/0 para os testes próprios; os JSONs próprios têm16 e14 resultados passados. Executor local, dados sintéticos; teclado virtual real não testado. Revisão e integração Claude pendentes.
 
 Varredura focal gerada: RESULTADO: 3/3 páginas sem erro. Unidade final30/30 após ajuste de microcopy, em nfix-final-unit.json.
+
+## Parecer final e limite antes de publicar · 13/10/2026
+
+Claude revisou 662a990e no recibo6147550659 e integrou PR55 em2768df5758bd4ffc2639d505143d8033873fc308. O recorte documental N4 foi aceito; N9 teve adiamento aceito. O histórico acima preserva os estados de cada rodada, não substitui este parecer.
+
+**Limitação para a nota de entrega:** a correção vinculada de um apontamento ainda não existe no protótipo. Se o fato precisa ser corrigido, o caso fica aberto e a O.S. não encerra. Vincular evidência só se aplica ao fato já contabilizado e válido; arquivar só fecha o caso de uma duplicidade já decidida. A interface e os erros de tentativa de correção agora informam essa limitação, sem prometer uma ação indisponível.
+
+- **N4-R / CONC-16 · S3:** CONTROLE-02, CMD-50 aceitar/recusar/converter para apontamento. Autor Codex, revisor/integrador Claude. Pendente de contrato de efeitos/estados e implementação; nenhuma conclusão funcional do CMD-50 integral. A O.S. Em conferência ou sem saldo pode continuar sem saída para corrigir o fato. Não liberar seu encerramento por vínculo documental fictício.
+- **N9 · S4:** autor Codex, revisor Claude. Medição do revisor: encerramento com um dia provisório foi de2 para4 cliques, e cada dia adicional custa mais2. Proposta de conferir N dias sem pendência ainda precisa revisão: prévia dos fatos, segregação, bloqueios individuais, revalidação e recibo por dia. Não implementada nem aceita como aprovação em lote nesta mudança.
+
+Esta correção modifica apenas textos e o registro das pendências; não altera comandos, estados, quantidades ou permissões. A publicação do incremento depende também da composição e dos demais aceites pertinentes, inclusive A4. Não é publicação, HML funcional ou encerramento do conjunto vigente.
+
+Verificação do delta textual:319 blobs da base2768df5 conferidos; comparação remota662a990e→2768df5 sem diferença de arquivos. Build e render142 páginas; unidade30/30 e navegador16/16 reexecutados, incluindo teclado e390px. Captura390px inspecionada: limitação legível e ação alcançável. Primeira tentativa de navegador bloqueada pelo sandbox ao abrir127.0.0.1, antes de qualquer teste; retomada com permissão normal de execução local e perfil isolado passou. O0/0 do helper não é contagem da jornada: n4r-nav.json contém16 resultados reais. Provas anteriores permanecem válidas para as partes sem mudança; casos14/14 e demais regressões não repetidos. Teclado virtual não executado.

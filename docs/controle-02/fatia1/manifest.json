@@ -3,8 +3,8 @@
   "autor": "Codex",
   "revisor": "Claude real",
   "arquivos": {
-    "conferencia_diaria.js": "d728702e31839cad626e83341afd698e1614b86c6af57cfe9975ad9afabbbdee",
-    "conferencia_diaria.py": "c8a33d5c4980f9861a20d5dce40d4b338084271e124a1b8edebf0d86648d51cd",
+    "conferencia_diaria.js": "7ff101ee22c4c6227807e71fe84a0080d25238f3ab0fb8176e22be474399de42",
+    "conferencia_diaria.py": "85a0787c370ee5802a754be9fad1649e46cdbb902c5cbbf2d7daf5a8816b38da",
     "conferencia_diaria_ui.js": "e5567376fb1fb8cce68f915d412fbc8f5176fd41dab1546a4b4512bb3c836a94",
     "conferencia_diaria_unit.js": "58745bd49b62abc0f9a2b81216997bceaa0e9111d533f80b2b3de21fc85a2f50",
     "conferencia_diaria_test.py": "aa5ee810c3c66111306c7c4c3755b47ef0a5baed44a0290223700aaf208229ec",
@@ -24,7 +24,7 @@
   "limites": [
     "Teclado virtual real não executado",
     "Não é HML com banco/login real",
-    "Revisão Claude pendente; não publicado",
+    "Fatia1 revisada/integrada por Claude; delta textual N4-R aguarda revisão; não publicado",
     "CMD-50 apenas vínculo documental; demais decisões/correção física pendentes"
   ],
   "critica_claude": "6137033305",
@@ -42,5 +42,13 @@
     }
   },
   "revisao_claude": "6138112576",
-  "bot": "4254646830"
+  "bot": "4254646830",
+  "revisao_claude_final_fatia1": "6147550659 / 662a990e; integrado pelo revisor em2768df5",
+  "delta_n4r": {
+    "base": "2768df5758bd4ffc2639d505143d8033873fc308",
+    "escopo": "Textos de limite e registro de pendências; sem alteração de comportamento",
+    "unit_reexecutado": 30,
+    "browser_reexecutado": 16,
+    "revisao": "Claude pendente para este delta; sem publicação"
+  }
 }
