@@ -1,0 +1,46 @@
+== dem_unit (01:59:03)
+RESULTADO: 70 ok · 0 falhas
+rc=0
+== cal01 (01:59:20)
+RESULTADO: 45 ok · 0 falhas
+rc=0
+== aqd (01:59:21)
+RESULTADO 102/102
+rc=0
+== varredura (01:59:22)
+RESULTADO: 140/140 páginas sem erro
+rc=0
+== dem_estado (02:05:35)
+OK    · E1 sem erro JS nas telas abertas (Planejar safra, Estoque, O.S., Compra, Mapa)
+rc=124
+== esttest (02:20:35)
+RESULTADO: OK
+rc=0
+== est_fix1 (02:21:45)
+RESULTADO: 13/13 ok
+rc=0
+== est_fix2 (02:22:00)
+RESULTADO: 11/11 ok
+rc=0
+== est_cen (02:22:22)
+RESULTADO: 15/15 ok
+rc=0
+== talmapa (02:22:47)
+RESULTADO: 8/8
+rc=0
+== safcmp (02:23:08)
+RESULTADO: 31 ok · 0 falhas
+rc=0
+== dem_nav (02:27:00)
+RESULTADO: 29 ok · 0 falhas
+rc=0
+== su (02:36:56)
+RESULTADO: OK
+rc=0
+== mb (02:37:39)
+FALHAS: 0
+rc=0
+== cmp (02:37:55)
+FALHAS: nenhuma
+rc=0
+FIM
