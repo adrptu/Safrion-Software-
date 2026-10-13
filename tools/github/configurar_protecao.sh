@@ -4,8 +4,9 @@
 #   Sem --aplicar (padrão): lê o ruleset atual, valida o arquivo contra ele e contra os jobs reais dos workflows
 #   e mostra a diferença. Não altera nada.
 #   --aplicar: depois da mesma validação, grava por PUT e confere a leitura de volta; qualquer diferença sai com erro.
-# O arquivo só acrescenta os checks obrigatórios (app GitHub Actions, strict); nome, alvo, bypass e as demais
-# regras precisam ser iguais aos do ruleset atual. Renomear um job exige mudar o arquivo na mesma mudança:
+# O arquivo só acrescenta os checks obrigatórios (app GitHub Actions, strict) e liga a resolução obrigatória das
+# conversas da revisão (EXIGIDOS_PR em protecao.py); nome, alvo, bypass e as demais regras precisam ser iguais aos
+# do ruleset atual. Renomear um job exige mudar o arquivo na mesma mudança:
 # tools/ci/test_protecao_main.py falha na CI enquanto nomes e jobs divergirem.
 # Requer gh autenticado com permissão de administração. O GitHub pode pedir Confirm access ao dono; não contornar.
 # Não imprime credenciais.

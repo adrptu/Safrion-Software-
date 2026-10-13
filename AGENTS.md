@@ -39,6 +39,11 @@ Sistema **"Do Talhão à O.S."**: plataforma de gestão agrícola integrada. Vai
   - Codex lidera produto, organização do projeto, backlog, critérios de aceite, QA e revisão.
   - Cada artefato tem **um autor e um revisor**; os dois não são autores do mesmo artefato. No protótipo, a revisão não bloqueia (3.5).
 - **Ciclo:** tarefa com critérios → branch própria → pull request pequeno → revisão do outro agente → correção → nova verificação → merge pelo revisor (2, DEC-0910-02). Ninguém aprova nem integra o próprio pull request. PR que a `main` já absorveu é fechado com a prova (arquivo a arquivo), pelo autor ou, com aviso, pelo outro agente.
+- **Merge automático do revisor** (proprietário, 09/10/2026: "Automatize PR e Merge entre claude e Codex. quero menos trabalho pra mim"; complementa DEC-0910-02):
+  - o revisor avalia o HEAD, inclusive os achados do app do Codex, e só então publica no PR um comentário dedicado, só com o texto `Parecer favorável do revisor: <SHA completo do HEAD>`, e liga o auto-merge. Para retirar, publica `Parecer retirado: <SHA completo do HEAD>`; vale o último ato. O autor nunca publica esses comentários, nem como exemplo. O GitHub integra quando os checks obrigatórios passam, inclusive "Revisão do Codex no commit atual" (revisão do app concluída e esse parecer, ambos no HEAD), e todas as conversas da revisão estão resolvidas;
+  - depois de cada push no PR pronto, o autor pede nova revisão ao app com o comentário `@codex review`, porque ele não revisa push sozinho; o parecer do commit anterior não vale para o novo HEAD;
+  - o autor resolve a conversa de um achado só quando o corrigiu ou o recusou com fundamento técnico e o revisor reavaliou. Achado que depende do proprietário fica aberto, e o merge espera por ele;
+  - sem auto-merge, com integração manual pelo revisor: mudança nos próprios portões (`.github/workflows/`, `tools/github/`) e o PR do protótipo (3.5).
 - **Canal entre agentes:** `docs/parceria/rodadas/`, um arquivo por rodada, e os comentários do pull request. Revisão só conta quando existe registro escrito do outro agente (autor, versão, data, parecer).
 - **Evidência** é commit, comando executado, saída e captura. Rotule sempre "especificado" ou "executado".
 - **Severidade e prioridade são coisas diferentes:**
@@ -141,7 +146,7 @@ O protótipo (`tools/prototipo/`) valida telas e regras; não é produto. O rigo
   - Versões fixadas em [`docs/architecture/versions.md`](docs/architecture/versions.md) no primeiro commit executável.
 - **Estrutura** (23.3): `apps/web`, `apps/worker`, `packages/domain`, `packages/application`, `packages/db`, `packages/contracts`, `packages/ui`, `packages/integrations`, `packages/observability`, `tests`, `infra/terraform` e `docs`. Crie um pacote só quando ele tiver responsabilidade real.
 - **Comandos contratados** (23.4): `pnpm setup | dev | check | test:integration | test:e2e | test:load | demo:reset | doctor`. Existem hoje, com `pnpm run`: `check`, `test:integration`, `test:e2e`, `demo:reset` e `doctor`. **Ainda não existem** `setup`, `dev` na raiz e `test:load`: não diga que existem até o PR que os cria passar na CI.
-- **Checks que existem hoje:** os 10 jobs da CI (documentação, segredos, vulnerabilidades, código, navegador, imagens, Semgrep, travas do Cloud SQL e Terraform dos dois módulos), os mesmos nomes de `tools/github/protecao-main.json`. Os comandos locais equivalentes estão no `README.md`.
+- **Checks que existem hoje:** os 11 jobs da CI (documentação, segredos, vulnerabilidades, código, navegador, imagens, Semgrep, travas do Cloud SQL, Terraform dos dois módulos e revisão do Codex no commit atual), os mesmos nomes de `tools/github/protecao-main.json`. Os comandos locais equivalentes estão no `README.md`.
 
 ## 6. Ao terminar cada incremento
 Atualize `docs/STATUS.md` e explique ao proprietário, em português simples:
