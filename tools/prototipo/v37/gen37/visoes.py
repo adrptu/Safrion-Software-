@@ -10,7 +10,7 @@ ORDEM = ['lista', 'agrupada', 'kanban', 'calendario', 'timeline', 'mapa', 'carga
 NOME = {'lista': 'lista', 'agrupada': 'tabela agrupada', 'kanban': 'kanban', 'calendario': 'calendário', 'timeline': 'linha do tempo',
         'mapa': 'mapa', 'carga': 'carga por recurso', 'matriz': 'matriz', 'arvore': 'árvore', 'galeria': 'galeria'}
 # ícones Lucide 1.45.0 (ISC; LICENSES/lucide-ISC.txt) convertidos para o icon() do engine; só entram os que alguma tela usa
-ICONE = {'lista': 'v_lista', 'agrupada': 'v_agrupada', 'kanban': 'v_kanban', 'carga': 'v_carga'}
+ICONE = {'lista': 'v_lista', 'agrupada': 'v_agrupada', 'kanban': 'v_kanban', 'calendario': 'v_calendario', 'carga': 'v_carga'}
 # o atributo dominante que cada visão exige (regra do pedido: sem o dado, sem a visão)
 EXIGE = {
     'lista': [],
@@ -41,13 +41,14 @@ REGISTRO = {
             'agrupada': {'categoria': 'Talhão multivalorado (areas/processo_os.py, coluna tal multi=True; agrupamento TF06 em PREVALS)',
                          'somavel': 'Área em ha somada como ha-operação; o grupo conta O.S. distintas (PRD 297 e 7292)'},
             'kanban': {'fluxo': 'FASES com 5 etapas fixas (areas/processo_os.py FASES; _kanban; PRD 2972-2988)'},
+            # VISOES-2 (F2a): a janela da ordem (início e fim ISO) decide quando ela acontece; só leitura, programar continua no detalhe
+            'calendario': {'data': 'Janela da O.S.: início e fim ISO (o.ini e o.fim, colunas Início e Fim da grade g_os em areas/processo_os.py)'},
             'carga': {'recurso': 'alocacao.py RECURSOS (máquina, implemento, pessoa)',
                       'tempo': 'alocacao.py DIAS e ALOC (dia e hora; DEC-2609-09)'},
         },
         'cortes': {
             'timeline': 'Repete o Calendário e a Carga (uma solução por problema, AGENTS §3.4; DESENHO 1.4).',
             'mapa': 'DEC-2609-09 mantida: o mapa das ordens fica no IN-04; reabrir só por pedido do proprietário (DESENHO 1.4).',
-            'calendario': 'Fatia 2 (VISOES-2): o dado sustenta (início e fim ISO), mas não entra na F1.',
             'matriz': 'Nenhuma matriz decide algo na O.S. (DESENHO 1.1).',
             'arvore': 'A Lista já é a forma da O.S.; o talhão é vínculo multivalorado, não pai (DESENHO 1.1).',
             'galeria': 'Sem imagem como informação principal (DESENHO 1.4).',

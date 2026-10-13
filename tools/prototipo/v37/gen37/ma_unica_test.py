@@ -5,7 +5,7 @@ repetição (duplo toque = um efeito). O app (AC-PCM-27) está em ma_app_fluxo_t
 Uso (de gen37/, depois de build.py e montar_render.py): python3 ma_unica_test.py"""
 import sys, os, re, json, time, glob
 from ma_lib import MA
-from ui37 import MENU2
+from ui37 import MENU2, INICIO37
 from areas.maquinas import REDIRECIONA
 
 HERE = os.path.dirname(os.path.abspath(__file__)); PJ = os.path.join(HERE, 'project')
@@ -14,17 +14,21 @@ PRIMS_FORA = "[...document.querySelectorAll('header button,header a,main button,
 PRIMS_PAN = "[...document.querySelectorAll('#ma-painel button,#ma-painel a')].filter(e=>e.getClientRects().length&&getComputedStyle(e).backgroundColor==='rgb(30, 122, 76)').map(e=>e.innerText.replace(/\\s+/g,' ').trim())"
 CEN = "localStorage.getItem('talhao-os-cenario-v1')"
 try:
-    # ---------- AC-PCM-01 · menu com 1 item, link direto; Índice com 1 link ----------
+    # ---------- AC-PCM-01 · menu com 1 item (ícone), link direto para a tela única; o início leva à MA num toque ----------
     m.ir('vis=semordem', perfil='Otávio', limpa=True); m.sem_erro('MA')
     g = [x for x in MENU2 if x[0] == 'Manutenção'][0]
-    mn = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].filter(a=>/^Manutenção/.test(a.innerText.trim())).map(a=>a.innerText.trim()+'|'+a.getAttribute('href'))")
-    tog = J("[...document.querySelectorAll('nav[aria-label=Menu] button')].filter(b=>/^Manutenção/.test(b.innerText.trim())).length")
-    idx = open(os.path.join(PJ, 'Main.dc.html'), encoding='utf-8').read()
-    # v57 (pedido do proprietário, 13/10): o grupo Manutenção tem 4 subitens enxutos, um por visão da mesma tela MA (antes: 1 link direto)
-    VIS4 = [('Pendências sem ordem', 'MA.dc.html#vis=semordem'), ('Ordens de manutenção', 'MA.dc.html#vis=ordens'), ('Ativos e disponibilidade', 'MA.dc.html#vis=ativos'), ('Planos preventivos', 'MA.dc.html#vis=planos')]
+    mn = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].filter(a=>a.getAttribute('aria-label')==='Manutenção').map(a=>[a.getAttribute('href'),a.getAttribute('title'),a.getAttribute('aria-current'),a.innerText.trim()])")
+    tog = J("[...document.querySelectorAll('nav[aria-label=Menu] button,nav[aria-label=Menu] .ml-tog')].filter(e=>e.getClientRects().length).length")
+    idx = open(os.path.join(PJ, 'Main.dc.html'), encoding='utf-8').read(); ini = open(os.path.join(PJ, INICIO37), encoding='utf-8').read()
+    # 13/10 (proprietário): barra lateral só com ícones, sem submenus nem expandir; as 4 visões ficam no seletor da própria MA (v57: 4 subitens no menu).
+    # O índice central saiu (Main.dc.html é página técnica sem menu): o caminho de entrada é o ícone Manutenção na página inicial (Mapa).
+    VIS_OK = {'', 'vis=semordem', 'vis=ordens', 'vis=ativos', 'vis=planos'}
     lk = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>a.getAttribute('href')).filter(h=>/^MA/.test(h||''))")
-    m.ok(g[2] == VIS4 and sorted(set(lk)) == sorted(h for _, h in VIS4) and not re.search(r'(MA-0[1-5]|PM|MA-04det)\.dc\.html', idx) and 'MA.dc.html' in idx,
-         'AC-PCM-01 · menu: grupo Manutenção com os 4 subitens, todos para a tela única MA (#vis=…); nenhuma rota antiga; o Índice leva só à MA', [lk, mn, tog])
+    vs = J("[...document.querySelectorAll('main .ma-vis button')].map(b=>b.innerText.replace(/\\s*\\d+\\s*$/,'').trim())")
+    li = re.findall(r'<a [^>]*href="(MA[^"]*)"', ini)
+    m.ok(all(h.split('#')[0] == 'MA.dc.html' and (h.split('#', 1) + [''])[1] in VIS_OK for _, h in g[2]) and lk == ['MA.dc.html'] and mn == [['MA.dc.html', 'Manutenção', 'page', '']]
+         and tog == 0 and vs == ['Sem ordem', 'Ordens', 'Ativos', 'Planos'] and li == ['MA.dc.html'] and not re.search(r'(MA-0[1-5]|PM|MA-04det)\.dc\.html', idx + ini),
+         'AC-PCM-01 · menu: um só ícone Manutenção, link direto para a tela única MA (destacado, sem subitens nem expandir), as 4 visões no seletor da tela; nenhuma rota antiga; o início (Mapa) leva à MA num toque', [lk, mn, tog, vs, li])
     # ---------- AC-PCM-02 · rotas antigas (com e sem âncora) e fora do canvas ----------
     rotas = [('PM.dc.html', 'vis=planos'), ('MA-01.dc.html', 'vis=ativos'), ('MA-02.dc.html', 'vis=semordem&tipo=achados'), ('MA-03.dc.html', 'vis=semordem'),
              ('MA-04.dc.html', 'vis=ordens'), ('MA-05.dc.html', 'vis=ativos&modo=abastecimentos'), ('MA-04det.dc.html', 'om=OM-0233'),

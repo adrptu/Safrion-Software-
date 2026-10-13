@@ -6,6 +6,7 @@ Capturas em _probe/dose_div_*.png. Uso: python3 dose_divergente_test.py nav   (c
 import json, os, re, time
 from app_lib import App
 from conferencia_diaria_nav_helpers import conferir_dias
+from comp_lib import troca_visao   # VISOES-1: o seletor de visões da O.S. é por ícone (data-visao), sem texto
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OS = 'OS-0430'
@@ -31,7 +32,7 @@ def rodar():
     def alerta(): return J("[...document.querySelectorAll('aside[role=dialog] [role=alert]')].map(x=>x.innerText).join(' | ')") or ''
     def toast(): return J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
     def linha(id_): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
-    def aba(n): J(f"(()=>{{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==={json.dumps(n)}); b&&b.click();}})()"); time.sleep(.4)
+    def aba(n): troca_visao(J, {'Lista': 'lista', 'Kanban': 'kanban'}[n])   # antes: botão de texto "Kanban", que saiu com a VISOES-1 (o Kanban nunca abria)
     def cartao(id_): return J(f"(()=>{{const k=[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].find(x=>x.innerText.indexOf({json.dumps(id_)})===0); return k?k.innerText.replace(/\\s+/g,' '):'';}})()") or ''
     def perfil(k):
         J(f"(()=>{{const i=document.querySelector('[aria-label=\"Trocar perfil de demonstração\"]'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(i,{json.dumps(k)}); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"); time.sleep(.4)

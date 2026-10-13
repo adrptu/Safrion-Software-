@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Teste CDP dos Planos de manutenção girando as preventivas (pedido de 02/10/2026), na tela única MA (PCM simplificado S1–S2):
-menu (1 item) · visão Planos (10 planos, 4 ativos sem plano) · vencimentos calculados (paridade JS × Python) · gerar sem duplicar ·
+navegação (ícone Manutenção → MA; visões no seletor da tela) · visão Planos (10 planos, 4 ativos sem plano) · vencimentos calculados (paridade JS × Python) · gerar sem duplicar ·
 falta de peça trava a liberação · jornada da OM-0234 (conflito → Liberar mesmo assim → iniciar → tarefas + leitura → concluir fecha o ciclo) ·
 publicar v+1 sem mudar a ordem aberta · leitura do abastecimento muda a situação · leitura menor vira troca de contador a confirmar.
 Uso: python3 ma_planos_test.py   (lê _render; o cenário é zerado no início)"""
@@ -12,11 +12,14 @@ from ui37 import MENU2
 m = MA(1440, 1100); J = m.J
 try:
     m.ir('vis=planos', perfil='Otávio', limpa=True); m.sem_erro('MA · Planos')
-    # 1 · menu (13/10/2026, pedido do proprietário): Manutenção com 4 subitens enxutos, um por visão da mesma tela MA; Planos é o último
+    # 1 · navegação (13/10/2026, proprietário: barra lateral só com ícones, sem submenus): um ícone Manutenção → tela única MA, destacado e sem
+    #     subitens; as 4 visões ficam no seletor da própria tela, Planos por último; #vis=planos abre a visão Planos (antes, v57: 4 subitens no menu)
     g = [x for x in MENU2 if x[0] == 'Manutenção'][0]
-    mn = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>a.innerText.trim()+'|'+a.getAttribute('href')).filter(x=>/MA\\.dc\\.html/.test(x))")
-    m.ok(g[2] == [('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')] and mn == ['Pendências sem ordem|MA.dc.html#vis=semordem','Ordens de manutenção|MA.dc.html#vis=ordens','Ativos e disponibilidade|MA.dc.html#vis=ativos','Planos preventivos|MA.dc.html#vis=planos'],
-         'menu: Manutenção com 4 subitens (uma visão cada) → MA.dc.html; "Planos preventivos" abre a visão Planos', mn)
+    mn = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].filter(a=>/^MA/.test(a.getAttribute('href')||'')).map(a=>[a.getAttribute('aria-label'),a.getAttribute('href'),a.getAttribute('aria-current'),a.innerText.trim()])")
+    vs = J("[...document.querySelectorAll('main .ma-vis button')].map(b=>[b.innerText.replace(/\\s*\\d+\\s*$/,'').trim(),b.getAttribute('aria-pressed')])")
+    m.ok(all(h.split('#')[0] == 'MA.dc.html' for _, h in g[2]) and mn == [['Manutenção', 'MA.dc.html', 'page', '']]
+         and vs == [['Sem ordem', 'false'], ['Ordens', 'false'], ['Ativos', 'false'], ['Planos', 'true']] and m.hash() == '#vis=planos',
+         'navegação: um ícone Manutenção → MA.dc.html (destacado, sem subitens); o seletor da tela traz Sem ordem · Ordens · Ativos · Planos e #vis=planos abre a visão Planos', [mn, vs, m.hash()])
     # 2 · visão Planos: 10 planos, 4 ativos sem plano, PM-02 com 1 vencida
     sem = J("[...document.querySelectorAll('main button[aria-label^=\"Criar plano para\"]')].map(b=>b.innerText)") or []
     pl = m.linhas(0)

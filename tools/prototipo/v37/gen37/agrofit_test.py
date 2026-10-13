@@ -111,21 +111,33 @@ try:
         J(f"document.querySelector('input[aria-label={json.dumps(rot)}]').focus()"); time.sleep(.2); setv(f'input[aria-label={json.dumps(rot)}]',txt)
         J(f"document.querySelector('input[aria-label={json.dumps(rot)}]').dispatchEvent(new KeyboardEvent('keydown',{{key:'Enter',bubbles:true}}))"); time.sleep(.4)
     shot=lambda n: c.shot(os.path.join(PROBE,f'agrofit_real_{n}.png'))
-    menu=lambda: J("[...document.querySelectorAll('.ml-sub a')].filter(a=>a.offsetParent).map(a=>[a.innerText.trim(),a.getAttribute('href'),a.style.backgroundColor])") or []
-    agri=lambda m: [x[:2] for x in m if x[1] in ('AG-07.dc.html','PA.dc.html','SAF.dc.html','OS.dc.html','AG-01.dc.html','IR-01.dc.html')]
+    # navegação sem submenus (13/10/2026, ui37.MENU2/HUB37/CURTO37/VOLTA37): módulo marcado, "‹ Módulo" e os cartões da tela de entrada
+    NAV="JSON.stringify((()=>{const n=document.querySelector('nav[aria-label=Menu]'); const v=document.querySelector('a.volta37'); return {cur:n?[...n.querySelectorAll('a[aria-current=page]')].map(a=>a.getAttribute('aria-label')):[], volta:v?[v.getAttribute('href'),v.innerText.replace(/\\s+/g,' ').trim()]:null};})())"
+    CARDS="JSON.stringify([...document.querySelectorAll('a.mod-cartao')].filter(a=>a.getClientRects().length).map(a=>[a.getAttribute('href'),a.innerText.replace(/\\s+/g,' ').trim()]))"
+    def espera(js,ate=20.0):   # condição observável (página nova pronta), não tempo fixo; no limite devolve False e a verificação falha
+        t1=time.time()
+        while time.time()-t1<ate:
+            try:
+                if J(js): return True
+            except Exception: pass
+            time.sleep(.1)
+        return False
 
     # ---------- 1 · O.S.: menu e atalho "Agrofit ›" (links antigos #<id da ficha da fazenda>) ----------
     c.goto(U_('Main.dc.html'),wait=.8); J("localStorage.removeItem('talhao-os-cenario-v1')")
     c.goto(U_('OS.dc.html#OS-0430'),wait=1.5)
     cen=J("(()=>{const c=window.__cen.cenGet(); return {lotes:Object.values(c.lotes), ins430:c.ordens['OS-0430'].ins.map(x=>x.p)};})()")
-    m=agri(menu())
+    nv=json.loads(J(NAV) or '{}')
     J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(x=>x.innerText.trim()==='Ajustar antes de liberar'); if(b) b.click();})()"); time.sleep(.5)
     lk=J("(()=>{const g=document.querySelector('[role=group][aria-label=\"Ajustar antes de liberar\"]'); return g?[...g.querySelectorAll('a')].filter(a=>a.innerText.trim()==='Agrofit ›').map(a=>[a.getAttribute('href'),a.target,a.rel]):[];})()") or []
     esp=sorted('AG-07.dc.html#'+r['id'] for n in cen['ins430'] for r in AGF['ref'] if n in r['nomes_fazenda'])
-    chk('1 O.S.: Agrícola começa por Consulta Agrofit (antes de Planos agronômicos); OS-0430 › Ajustar: "Agrofit ›" → AG-07.dc.html#<ficha>, nova aba',
-        m[:2]==[['Consulta Agrofit','AG-07.dc.html'],['Planos agronômicos','PA.dc.html']] and esp and sorted(h for h,_,_ in lk)==esp
-        and all(t=='_blank' and 'noopener' in (r or '') for _,t,r in lk), [m[:2],esp,lk])
     J("window.__cen.cenMudar(null,c=>({msg:''}))"); junta('OS')
+    # Agrícola começa pela Consulta Agrofit: "‹ Agrícola" da O.S. → tela de entrada, cujos cartões seguem a ordem do menu (antes: subitens do menu lateral)
+    J("(document.querySelector('a.volta37')||{click:()=>0}).click()"); hub=espera("location.pathname.endsWith('/MOD-AGR.dc.html') && document.readyState==='complete' && document.querySelectorAll('a.mod-cartao').length>0")
+    m=json.loads(J(CARDS) or '[]'); junta('MOD-AGR')
+    chk('1 O.S.: Agrícola começa por Agrofit (cartão antes de Planos agronômicos na tela de entrada, aberta por "‹ Agrícola"); OS-0430 › Ajustar: "Agrofit ›" → AG-07.dc.html#<ficha>, nova aba',
+        hub and nv.get('cur')==['Agrícola'] and nv.get('volta')==['MOD-AGR.dc.html','‹ Agrícola'] and m[:2]==[['AG-07.dc.html','Agrofit'],['PA.dc.html','Planos agronômicos']]
+        and esp and sorted(h for h,_,_ in lk)==esp and all(t=='_blank' and 'noopener' in (r or '') for _,t,r in lk), [nv,hub,m[:2],esp,lk])
 
     # ---------- 2 · o link antigo da O.S. abre a lista filtrada pelo mesmo ingrediente ----------
     alvo=esp[0]; r0=REF[alvo.split('#')[1]]; k0=gk(r0); L0=[x for x in P if x['key']==k0]; n0=len(L0)

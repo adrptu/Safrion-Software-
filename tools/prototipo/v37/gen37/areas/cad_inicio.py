@@ -62,13 +62,15 @@ CSS = ('<style>'
 
 JS = r'''
 const CDI_CARTOES = __CARTOES__;
+const CDI_Q = 'safrion.cdi_q';   // termo da busca na sessão da aba: "‹ Cadastros" volta com o recorte (revisão Codex CAD-INICIO-RETORNO-01)
 function cdiNorm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
-function EXTRAVALS(self, v) { const q = cdiNorm(self.state.cdi_q || '').trim(); const ws = q ? q.split(/\s+/) : []; let n = 0; const gs = {};
+function EXTRAVALS(self, v) { modVolta(self); if (self.state.cdi_q === undefined) self.state.cdi_q = modLe(CDI_Q);
+  const q = cdiNorm(self.state.cdi_q || '').trim(); const ws = q ? q.split(/\s+/) : []; let n = 0; const gs = {};
   CDI_CARTOES.forEach(c => { const ok = ws.every(w => cdiNorm(c.k).indexOf(w) >= 0); v['cdi_h_' + c.id] = !ok; if (ok) { n++; gs[c.gi] = 1; } });
   CDI_CARTOES.forEach(c => { v['cdi_hg_' + c.gi] = !gs[c.gi]; });
   v.cdi_vazio = n === 0; v.cdi_q = self.state.cdi_q || ''; v.cdi_n = q ? n + ' de ' + CDI_CARTOES.length : '';
-  v.cdi_set = e => self.setState({ cdi_q: e && e.target ? e.target.value : '' });
-  v.cdi_key = e => { if (e && e.key === 'Escape') { e.preventDefault(); self.setState({ cdi_q: '' }); } }; }
+  v.cdi_set = e => { const t = e && e.target ? e.target.value : ''; modGrava(CDI_Q, t); self.setState({ cdi_q: t }); };
+  v.cdi_key = e => { if (e && e.key === 'Escape') { e.preventDefault(); modGrava(CDI_Q, ''); self.setState({ cdi_q: '' }); } }; }
 '''
 
 
@@ -89,6 +91,7 @@ def build():
                f'<span role="status" style="font-size: 13px; color: {MUTED}; font-weight: 600;">{H("cdi_n")}</span></div>'
              + f'<sc-if value="{H("cdi_vazio")}" hint-placeholder-val="{H("false")}"><p role="status" style="margin: 0; font-size: 14px; color: {INK};">Nenhum cadastro encontrado.</p></sc-if>'
              + grupos + '</div>')
-    EXTRAJS[0] = JS.replace('__CARTOES__', json.dumps([dict(id=c['id'].replace('-', ''), gi=[g for g, _ in GRUPOS].index(c['g']), k=c['k']) for c in CARTOES], ensure_ascii=False))
+    from areas.modulos import JS_VOLTA
+    EXTRAJS[0] = JS_VOLTA + JS.replace('__CARTOES__', json.dumps([dict(id=c['id'].replace('-', ''), gi=[g for g, _ in GRUPOS].index(c['g']), k=c['k']) for c in CARTOES], ensure_ascii=False))
     HEIGHTS37[fname] = 900
     shell37('CD', 'Cadastros', corpo, fname=fname, status=None, primary_html=None, search=False)

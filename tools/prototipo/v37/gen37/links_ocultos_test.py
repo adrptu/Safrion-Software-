@@ -61,14 +61,35 @@ ops={a['op'] for p in P._nova_ordem_dados()['planos'].values() for a in p['atv']
 ok('E3 "Nova ordem" só emite atividade agrícola do plano', not [o for o in ops if re.search('Benef|Manut|Oficina',o)], sorted(ops))
 # (b) elos
 PJ=os.path.join(G,'project'); c=json.load(open(os.path.join(PJ,'canvas.json')))
-pag={k:v.get('page') for k,v in c['boards'].items()}; oc={k for k,v in pag.items() if v=='ocultos'}
+pag={k:v.get('page') for k,v in c['boards'].items()}
+# navegação sem submenus (13/10/2026, proprietário): cada módulo com mais de uma tela abre a sua tela de entrada (ui37.HUB37 e a tela
+# Cadastros), que leva às telas do módulo (ui37.VOLTA37: cada uma volta por "‹ Módulo"); "Outros acessos" (ui37.OUTROS37, MOD-OUT) leva ao
+# app de campo, portal, onboarding e backoffice. Essas telas são alcançáveis, ainda que o canvas deixe CD-01..CD-08, PT-01, ON-01 e BO-02
+# na página "ocultos" e o MOD-OUT fora dele; o Main (página técnica mínima, que ui37.oculto exclui) também é origem. Só o resto da página
+# "ocultos" segue oculto. O L0 confere no HTML que cada caminho declarado existe (entrada na barra lateral, cartão na entrada, "‹ Módulo"
+# de volta): a noção de visível não cresce sem caminho real, e as telas que essas pontas abrem por dentro continuam ocultas (lista residual)
+import ui37
+ENTRADAS=set(ui37.HUB37.values())|{h for _,h in ui37.VOLTA37.values()}|{ui37.OUTROS37[2]}
+ABERTAS=set(ui37.VOLTA37)|{h for _,h,_ in ui37.OUTROS37[3]}
+VISIVEIS={k for k,v in pag.items() if v=='menu'}|ENTRADAS|ABERTAS|{'Main.dc.html'}
+oc={k for k,v in pag.items() if v=='ocultos'}-VISIVEIS
+_rd=lambda f: open(os.path.join(PJ,f),encoding='utf-8').read()
+_l0=[('arquivo ausente',f) for f in sorted(VISIVEIS) if not os.path.exists(os.path.join(PJ,f))]
+if not _l0:
+    _ini=_rd(ui37.INICIO37)
+    _l0+=[('sem a entrada na barra lateral',h) for h in sorted(ENTRADAS) if not re.search(r'<a href="'+re.escape(h)+r'" title=',_ini)]
+    _l0+=[('sem cartão em '+hub,f) for f,(_,hub) in sorted(ui37.VOLTA37.items()) if not re.search(r'class="mod-cartao" role="listitem" href="'+re.escape(f)+r'(#[^"]*)?"',_rd(hub))]
+    _l0+=[('sem "‹ '+rot+'" de volta',f) for f,(rot,hub) in sorted(ui37.VOLTA37.items()) if f'<a href="{hub}" class="volta37" aria-label="Voltar para {rot}"' not in _rd(f)]
+    _l0+=[('sem cartão em '+ui37.OUTROS37[2],h) for _,h,_ in ui37.OUTROS37[3] if not re.search(r'class="mod-cartao" role="listitem" href="'+re.escape(h)+r'"',_rd(ui37.OUTROS37[2]))]
+ok(f'L0 navegação nova: {len(ENTRADAS)} telas de entrada na barra lateral, {len(ui37.VOLTA37)} telas com cartão na entrada e "‹ Módulo" de volta, '
+   f'{len(ui37.OUTROS37[3])} em Outros acessos; {len(oc)} telas seguem ocultas', not _l0 and len(oc)>0, _l0)
 pares=set()
 # v55 (revisão Codex): o padrão XX-… não via destino sem hífen (BEN.dc.html, CARGA.dc.html): a extração pega todo destino *.dc.html. O ben.js
 # (biblioteca de regras, o mesmo texto em toda página do estado, oculta ou não) sai do texto antes: nele BEN.dc.html é o dado que
 # benProxEntrada devolve, e as telas visíveis o descartam com o BEN fora da navegação (areas/producao.py prBenProx · PR_BEN_H; L4 e a
 # varredura de DOM provam que nenhum <a>/onclick o mostra)
 _BENJS=open('ben.js',encoding='utf-8').read()
-for f in sorted(k for k,v in pag.items() if v=='menu'):
+for f in sorted(VISIVEIS):
     t=open(os.path.join(PJ,f),encoding='utf-8').read().replace(_BENJS,'')
     ds=re.findall(r'([A-Z]{2}-[0-9A-Za-z\-]+\.dc\.html(?:#[^"\'\s<]*)?)',t)+re.findall(r'([A-Za-z0-9][A-Za-z0-9\-]*\.dc\.html(?:#[^"\'\s<]*)?)',t)   # o padrão antigo e o amplo
     for h in {m.split('#')[0] for m in ds} & oc: pares.add((f,h))
@@ -77,8 +98,10 @@ p=lambda o,*ds: {(o+'.dc.html',d+'.dc.html') for d in ds}
 ESCOPO=(p('IN-04','PL-05','CA-02','CO-06det')|p('OS','CA-02','CO-06det')|p('MA','PL-04','PL-05','PL-05det')
         |p('IR-04','GE-07')|p('MB-01','MB-07','MB-08','MB-10')|p('MB-02','MB-08')|p('MB-05','MB-05det','SU-03det'))
 ok('L1 nenhum elo do escopo (PL-04/PL-05/PL-05det, CA-02, CO-06det, GE-07, MB-05det, MB-07..MB-10, SU-03det a partir de telas visíveis)', not (pares & ESCOPO), sorted(pares & ESCOPO))
-RESIDUAL={  # por PAR: um elo novo, mesmo numa tela já listada, quebra o teste
- **{x:'índice do protótipo: aponta de propósito para módulos ocultos' for x in p('Main','AG-03','BO-02','CA-01','CA-04','CO-01','CO-06','GE-01','IN-01','LO-01','LO-02','ON-01','PL-01','PL-05','PT-01','SU-01','SU-07','VE-01')},
+# 13/10: o índice saiu do Main (só leva ao Mapa), e os pares dele saíram da lista; as pontas de "Outros acessos" levam às próprias telas internas
+RESIDUAL={  # por PAR: um elo novo, mesmo numa tela já listada, quebra o teste; um par que não existe mais também (L2b)
+ **{x:'navegação interna da ponta aberta por Outros acessos (portal do parceiro, onboarding, backoffice): telas dela, fora do menu da organização'
+    for x in p('PT-01','PT-02det','PT-03','PT-04','PT-05','PT-05det','PT-07')|p('ON-01','ON-01det')|p('BO-02','BO-01')},
  **{x:'vivo (cenário ou MIP), só falta pôr na página visível (build.py VIS_ROWS)' for x in p('MB-01','MB-02det','MB-03x-recibo','MB-06')|p('MB-02','MB-02det','MB-03x-recibo')
     |p('MB-09','MB-03x-recibo')|p('MB-09det','MB-03x-recibo')
     |p('MB-03','MB-02det','MB-03x-recibo')|p('MB-04','MB-03x-recibo')|p('MB-05','MB-03x-recibo')|p('AG-01','MB-06')|p('AG-01det','MB-06')|p('IN-04','MB-06','CO-06')
@@ -88,17 +111,18 @@ RESIDUAL={  # por PAR: um elo novo, mesmo numa tela já listada, quebra o teste
  **{x:'detalhe fixo na página visível (frente própria)' for x in p('CA-01det','AG-04','CA-02','CA-04','PL-05','SU-07')|p('CA-01x-os0420','AG-04det','CA-02','CA-03det','PL-05','SU-07')}}
 fora=sorted(pares-set(RESIDUAL))
 ok('L2 todo o resto da varredura está na lista residual, por par e com motivo', not fora, fora)
+velhos=sorted(set(RESIDUAL)-pares)
+ok('L2b a lista residual só tem pares que a varredura ainda acha (par que sumiu sai da lista, para não liberar de antemão um elo futuro)', not velhos, velhos)
 # v55 (10/10): o Beneficiamento sai da navegação até a rodada 3 (defeitos S2 de saldo e reserva de caixas em correção em outra frente;
 # BEN_PUBLICADO=False em ui37.py). A tela fica no canvas, na página "ocultos", com motivo. BEN.dc.html não casa com o padrão XX-… acima: a
 # conta é própria. O ben.js entra igual em toda página do estado (regras; o endereço que benProxEntrada devolve as telas descartam): o texto
 # dele sai antes da busca, e qualquer outra menção a BEN.dc.html numa tela visível (link, ação, faixa, título) quebra o teste
-import ui37
 OCULTOS_MOTIVO={'BEN.dc.html':'rodada 3 do BEN; reativar com BEN_PUBLICADO'}
 if not ui37.BEN_PUBLICADO:
     _bj=_BENJS
     for h,mot in OCULTOS_MOTIVO.items():
-        ok(f'L4a {h} oculto ({mot}): fora do menu (ui37.oculto) e no canvas na página "ocultos"', ui37.oculto(h) and pag.get(h)=='ocultos', [ui37.oculto(h), pag.get(h)])
-        _el=sorted(f for f in pag if pag[f]=='menu' and h in open(os.path.join(PJ,f),encoding='utf-8').read().replace(_bj,''))
+        ok(f'L4a {h} oculto ({mot}): fora do menu (ui37.oculto), fora das telas de entrada e no canvas na página "ocultos"', ui37.oculto(h) and pag.get(h)=='ocultos' and h in oc, [ui37.oculto(h), pag.get(h), h in oc])
+        _el=sorted(f for f in VISIVEIS if h in open(os.path.join(PJ,f),encoding='utf-8').read().replace(_bj,''))
         ok(f'L4b nenhuma tela visível aponta para {h} ({mot}) fora do ben.js embutido', not _el, _el)
     _cg=open(os.path.join(PJ,'CARGA.dc.html'),encoding='utf-8').read()
     ok('L4c Cargas e recebimento é tela única: sem a faixa "Telas de recebimento e beneficiamento" (seletor de uma opção só)',

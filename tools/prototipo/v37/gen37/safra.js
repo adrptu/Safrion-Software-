@@ -1197,13 +1197,14 @@ function e3Op(self,saf,oc,G,capF){ const kF=capF?capF.rec:null; const pools=self
       return ra; });
     return r; });
   const sp=GR('g_op'); sp.rows=rows; sp.x0=x0;
-  // Total (proprietário, 13/10/2026), sobre as operações visíveis: ha-op e custo somados; R$/ha = custo ÷ hectares físicos (areaFisica, a mesma
+  // Total (proprietário, 13/10/2026), sobre o recorte visível: ha-op e custo somados; R$/ha = custo ÷ hectares físicos (cada cultivo uma vez, a
   // conta do Resumo da safra), "parcial" com ocorrência pendente ou tarifa desconhecida, como lá. Horas: soma padrão da grade (segue o filtro de recurso).
-  sp.totf=(c,topo)=>{ const its=[].concat(...topo.map(r=>itsDe[r.id]||[])); if(!its.length) return '';
-    const cop=its.reduce((a,i)=>a+(Number(i.cop)||0),0);
-    if(c.k==='area') return nfa(its.reduce((a,i)=>a+(Number(i.area)||0),0))+' ha-op';
+  // Revisão Codex V58-TOTAL-FILTRO-01 (S2): com busca ou filtro, soma só o que passou no filtro (e3Partes), não a operação inteira.
+  sp.totf=(c,topo,F)=>{ const ps=e3Partes(map,topo,F,itsDe); if(!ps.length) return '';
+    const cop=ps.reduce((a,p)=>a+(Number(p.cop)||0),0);
+    if(c.k==='area') return nfa(ps.reduce((a,p)=>a+(Number(p.area)||0),0))+' ha-op';
     if(c.k==='custo') return rs(cop);
-    if(c.k==='rha'){ if(its.some(i=>i.pend||!i.rp.custoOk)) return 'parcial'; const af=areaFisica(its); return af>1e-9?rs(cop/af)+'/ha':''; }
+    if(c.k==='rha'){ if(ps.some(p=>p.pend||!p.ok)) return 'parcial'; const v={}; const af=ps.reduce((a,p)=>{ if(v[p.c]) return a; v[p.c]=1; return a+(Number(p.area)||0); },0); return af>1e-9?rs(cop/af)+'/ha':''; }
     return undefined; };
   self.__opTot=sp.totf;   // testes (saf_totais_test T7), como o __opmap
   const c6=sp.cols.find(c=>c.k==='horas'); if(c6){ if(c6._l0===undefined) c6._l0=c6.l; c6.l=kF?('Horas de '+G[kF].nome):c6._l0; } }
@@ -1273,6 +1274,20 @@ function recAfter(self,gid,rows,r){ const antes=self._antes; self._antes=null; s
   self.setState({g2toast:base}); setTimeout(()=>{ self.setState({g2toast:base+e3Diff(self,antes,null)}); e3Foco(self,'g_cap_'+sk(saf),rid); },0); }
 // painel "Resumo da safra" (§4.3): custo por cultura (operação + insumos do plano ÷ ha físico com plano), trabalho da safra e a conta
 // hectares físicos: cada cultivo (talhão) conta uma vez, com qualquer número de passadas; fonte única do denominador do R$/ha (Resumo e Total da etapa 3)
+// partes do Total da etapa 3 no recorte filtrado (revisão Codex V58-TOTAL-FILTRO-01): a ocorrência que casa com o filtro entra inteira; numa
+// ocorrência repartida em conjuntos, só a parte do conjunto que casa; a operação ou a atividade que casa por si (ex.: busca "Colheita") entra
+// inteira quando nada abaixo dela casa. Cada ocorrência e cada parte uma vez só (expandir/recolher não muda nada). Sem filtro: tudo.
+function e3Partes(map,topo,F,itsDe){ const filt=!!(F&&F.filt), m=(r)=>!F||!F.match||F.match(r); const out=[], vistos=new Set();
+  const inteira=(i)=>{ const k='oc:'+i.c.id+'|'+i.a.id+'|'+i.dt; if(vistos.has(k)) return; vistos.add(k); out.push({c:i.c.id,area:Number(i.area)||0,cop:Number(i.cop)||0,pend:!!i.pend,ok:!!i.rp.custoOk}); };
+  const desce=(r)=>(r.kids||[]).some(k=>m(k)||desce(k));
+  const walk=(r,todo)=>{ const M=map[r.id]||{};
+    if(M.t==='oc'){ if(!filt||todo||m(r)) { inteira(M.i); return; }
+      (r.kids||[]).filter(k=>m(k)).forEach(k=>{ const C=map[k.id]; if(!C) return; const x=(C.i.rp.itens||[])[C.j]; const kk='cf:'+k.id; if(!x||vistos.has(kk)) return; vistos.add(kk);
+        out.push({c:C.i.c.id,area:Number(x.q)||0,cop:x.custo===null||x.custo===undefined?0:Number(x.custo),pend:!!C.i.pend,ok:x.custo!==null&&x.custo!==undefined}); }); return; }
+    const so=filt&&!todo&&m(r)&&!desce(r);
+    (r.kids||[]).forEach(k=>walk(k,todo||so)); };
+  topo.forEach(r=>{ if(!r.kids) { (itsDe[r.id]||[]).forEach(inteira); return; } walk(r,!filt); });
+  return out; }
 function areaFisica(its){ const v={}; return its.reduce((a,i)=>{ if(v[i.c.id]) return a; v[i.c.id]=1; return a+(Number(i.area)||0); },0); }
 function resumoCultura(oc,ini){ const by={}, ord=[];
   oc.forEach(i=>{ const cu=i.c.v.cult; let b=by[cu]; if(!b){ b=by[cu]={cult:cu,area:0,cop:0,cins:0,npend:0,ntar:0,copAntes:0,cinsAntes:0,its:[]}; ord.push(b); }

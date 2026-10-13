@@ -291,8 +291,10 @@ function g2vals(self,sp,v,mask){
   v[id+'_xlab']=xtodos?'Recolher tudo':'Expandir tudo'; v[id+'_xtog']=xtodos?v[id+'_colall']:v[id+'_expall']; v[id+'_xup']=xtodos; v[id+'_xdown']=!xtodos;
   v[id+'_xhas']=rows.some(r=>(r.kids||[]).length>0);   // sem grupo na tela, sem botão de expandir
   // sp.totf (opcional, posto pela tela em tempo de execução): total vindo do serviço de domínio quando a soma simples não serve (R$/ha, unidade);
-  // recebe a coluna e as linhas de 1º nível visíveis (com os filtros); undefined = soma padrão. agg 'fn' = só o serviço, nunca a soma.
-  if(total){ const topo=flat.filter(x=>x.lvl===0).map(x=>x.r); v[id+'_tot']=sp.cols.map((c,ci)=>{ const h=(ci&&c.agg&&typeof sp.totf==='function')?sp.totf(c,topo):undefined;
+  // recebe a coluna, as linhas de 1º nível visíveis e o critério do filtro da grade (F.filt, F.match: a mesma regra da lista, para o serviço
+  // totalizar o recorte filtrado e não a linha-pai inteira — revisão Codex V58-TOTAL-FILTRO-01); undefined = soma padrão. agg 'fn' = só o serviço.
+  if(total){ const topo=flat.filter(x=>x.lvl===0).map(x=>x.r); const F={filt:g2filtering(st),match:(r)=>g2match(r,sp,st,mask,added)};
+    v[id+'_tot']=sp.cols.map((c,ci)=>{ const h=(ci&&c.agg&&typeof sp.totf==='function')?sp.totf(c,topo,F):undefined;
       const s=(h===undefined&&c.agg&&c.agg!=='fn')?g2sum(sp,flat,c):null; return {t:(ci===0?'Total':(h!==undefined?h:(s===null?'':g2fmt(s,c)))), cls:(ci===0?'g2c0':''), st:'padding:8px 10px;font-weight:800;'+(ci===0?'position:sticky;left:0;z-index:1;background:#F4F6F3;':'')+(c.a==='r'?'text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;':'')}; });
     v[id+'_totopen']=()=>g2set(self,id,{fm:{tot:true,ro:true,mode:'total',draft:{},orig:{},errs:{}},fmc:null}); }
   // formulário lateral
@@ -525,6 +527,7 @@ function g2etapa(self,patch,pos){ self.setState(patch); setTimeout(()=>{ try{ co
   const col=document.querySelector('.ml-tog+div'); const rola=(col&&col.scrollHeight>col.clientHeight+1&&getComputedStyle(col).overflowY==='auto')?col:m;
   if(pos&&pos.top!==undefined){ rola.scrollTop=pos.top; [...m.querySelectorAll('.g2rola,.rola')].forEach((r,i)=>{ if(pos.rolas&&pos.rolas[i]!==undefined) r.scrollTop=pos.rolas[i]; }); }
   else { rola.scrollTop=0; if(rola!==m) m.scrollTop=0; }
+  { const ae0=document.activeElement; if(ae0&&ae0.closest&&ae0.closest('[role=dialog]')) return; }   // painel aberto antes deste passo atrasado: o foco fica nele (sem isto o Esc do painel não chegava; diagnóstico 13/10)
   const alvo=(pos&&pos.foco)?document.querySelector(pos.foco):null; const h=alvo||[...m.querySelectorAll('h2,h3')].find(e=>e.getClientRects().length);
   if(h){ if(!h.matches('a,button,input,select,textarea,[tabindex]')) h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); } }catch(e){} },30); }
 // Área de ações única do processo guiado (engine.area_acoes): nota com a causa da pendência e um atalho contextual, retorno secundário
@@ -748,6 +751,13 @@ function g2ttTira(n){ if(G2D.tt&&n&&G2D.tt.contains(n)) return; g2ttVolta();
 // (safrion.pref.visao:<perfil>:<entidade>, prefixo que o TF02 ignora); precedência URL › preferência › Lista. Trocar de visão nunca é ação
 // de negócio (não grava no cenário). Trocar o perfil não muda a visão aberta; a preferência do novo perfil vale na próxima entrada sem ?view.
 const G2_VISAO_PREF='safrion.pref.visao:'; const G2_VISAO_MEM={};
+/* VISOES-2 · semana do Calendário (segunda a domingo) em ISO e sem fuso: a janela da O.S. é de dias, não de instantes */
+function g2isoDia(iso){ const a=String(iso||'').split('-').map(Number); return (a.length===3&&a.every(n=>n>0))?new Date(Date.UTC(a[0],a[1]-1,a[2])):null; }
+function g2somaDias(iso,n){ const d=g2isoDia(iso); if(!d) return ''; d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
+function g2segunda(iso){ const d=g2isoDia(iso); return d?g2somaDias(iso,-((d.getUTCDay()+6)%7)):''; }
+function g2semana(seg){ return g2isoDia(seg)?Array.from({length:7},(_,i)=>g2somaDias(seg,i)):[]; }
+/* a ordem está no dia se o dia cai na janela (início a fim; sem fim ou fim antes do início, só o dia do início); sem início, não está em dia nenhum */
+function g2noDia(ini,fim,dia){ if(!ini) return false; const f=(fim&&fim>=ini)?fim:ini; return ini<=dia&&dia<=f; }
 function g2visaoValida(k,validas){ return typeof k==='string'&&/^[a-z]+$/.test(k)&&(validas||[]).indexOf(k)>=0; }
 // precedência (pura): ?view válida › preferência válida › a primeira das válidas (Lista); valor fora das válidas ou fora de ^[a-z]+$: aviso
 function g2visaoInicial(search,pref,validas){ let q=null; try{ q=new URLSearchParams(String(search||'')).get('view'); }catch(e){ q=null; }

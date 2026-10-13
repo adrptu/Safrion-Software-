@@ -43,6 +43,16 @@ def reset(perfil=''):
 
 
 def perfil(k): J(f"localStorage.setItem('safrion.perfilDemo',{json.dumps(k)})")
+def espera(js, ate=20.0):
+    """espera a condição observável (página nova pronta), não um tempo fixo; no limite devolve False e a verificação falha"""
+    t0 = time.time()
+    while time.time() - t0 < ate:
+        try:
+            if J(js): return True
+        except Exception: pass
+        time.sleep(.1)
+    return False
+def pronta(pg, extra='true'): return f"location.pathname.endsWith('/{pg}') && document.readyState==='complete' && !!document.body && ({extra})"
 def errs(): return J("(window.__errs||[]).filter(e=>e.indexOf(\"reading 'g2toast'\")<0).join(' | ')") or ''
 def hdr(): return J("document.querySelector('header').innerText.replace(/\\s+/g,' ')")
 def dlg(): return J("(()=>{const d=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); return d?d.innerText.replace(/\\s+/g,' '):'';})()") or ''
@@ -127,11 +137,16 @@ try:
     if 'cf01' in PARTES:
         # ---------- seed ----------
         go('CF-01.dc.html'); reset(); go('CF-01.dc.html')
-        menu = J("[...document.querySelectorAll('.menu-lat .ml-sub a')].map(a=>a.innerText.trim()).join('|')")
-        grupos = J("[...document.querySelectorAll('.menu-lat button .ml-txt:first-of-type')].map(x=>x.innerText.trim()).filter(Boolean).join('|')")
-        ORD = ['Usuários e alçadas', 'Auditoria', 'Integrações', 'Assinatura e cobrança']; its = menu.split('|')
-        chk('A15 menu: Configurações é o último grupo, no máximo 4 itens na ordem Usuários e alçadas · Auditoria · Integrações · Assinatura e cobrança',
-            grupos.split('|')[-1] == 'Configurações' and len(its) <= 4 and its[0] == ORD[0] and its[-1] == ORD[-1] and its == [x for x in ORD if x in its], [grupos, menu])
+        # navegação sem submenus (13/10/2026, ui37.MENU2/HUB37/CURTO37/VOLTA37): barra só com ícones (aria-label) e, por último, "Outros acessos";
+        # os itens do módulo são os cartões da tela de entrada. Como o usuário: "‹ Configurações" → tela de entrada → cartão "Usuários e alçadas"
+        nv = J("(()=>{const n=document.querySelector('nav[aria-label=Menu]'); const v=document.querySelector('a.volta37'); return {mods:[...n.querySelectorAll('a[aria-label]')].filter(a=>!a.closest('.ml-topo')).map(a=>a.getAttribute('aria-label')), cur:[...n.querySelectorAll('a[aria-current=page]')].map(a=>a.getAttribute('aria-label')), volta:v?[v.getAttribute('href'),v.innerText.replace(/\\s+/g,' ').trim()]:null};})()") or {}
+        J("document.querySelector('a.volta37').click()"); h0 = espera(pronta('MOD-CFG.dc.html', "document.querySelectorAll('a.mod-cartao').length>0"))
+        cs = J("[...document.querySelectorAll('a.mod-cartao')].filter(a=>a.getClientRects().length).map(a=>[a.getAttribute('href'),a.innerText.replace(/\\s+/g,' ').trim()])") or []; e0 = errs()
+        r1 = clk('Usuários e alçadas', '.mod-grade'); h1 = espera(pronta('CF-01.dc.html', "document.querySelectorAll('[role=table] [role=row]').length>2")); time.sleep(.5)
+        ORD = [['CF-01.dc.html', 'Usuários e alçadas'], ['CF-04.dc.html', 'Auditoria'], ['CF-03.dc.html', 'Integrações'], ['CF-05.dc.html', 'Assinatura']]
+        chk('A15 navegação: Configurações é o último módulo da barra (antes de Outros acessos), marcado no CF-01; a tela de entrada ("‹ Configurações") tem no máximo 4 cartões na ordem Usuários e alçadas · Auditoria · Integrações · Assinatura, e o cartão abre o CF-01',
+            nv.get('mods', [])[-2:] == ['Configurações', 'Outros acessos'] and nv.get('cur') == ['Configurações'] and nv.get('volta') == ['MOD-CFG.dc.html', '‹ Configurações']
+            and h0 and len(cs) <= 4 and cs[:1] == ORD[:1] and cs[-1:] == ORD[-1:] and cs == [x for x in ORD if x in cs] and not e0 and r1 == 'ok' and h1, [nv, h0, cs, e0, r1, h1])
         chk('CF-01 seed: "14 com acesso · 1 sem acesso" (Igor e Marta do BEN-1; Otávio e Dora da v56 entram) e a primária "Convidar pessoa"; sem erro de JS', '14 com acesso · 1 sem acesso' in hdr() and prims()['prims'] == ['Convidar pessoa'] and not errs(), [hdr(), prims(), errs()])
         tbl = J("[...document.querySelectorAll('[role=table]')].map(t=>t.querySelectorAll('[role=columnheader] button').length)")
         chk('A14 as duas grades têm busca, filtro rápido e ordenação/filtro por coluna; "%" na célula da AL-05', len(tbl) == 2 and all(x >= 8 for x in tbl) and J("document.querySelectorAll('main input[type=search]').length") == 2

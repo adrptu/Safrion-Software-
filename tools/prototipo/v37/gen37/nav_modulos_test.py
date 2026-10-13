@@ -73,7 +73,10 @@ try:
     chk('N3 cada tela dos módulos tem "‹ Módulo" (≥ 36 px) para a tela de entrada', not voltas, voltas[:4])
     c.goto(U('MOD-AGR.dc.html'), 1.0); J("[...document.querySelectorAll('a.mod-cartao')].find(a=>a.innerText.trim()==='Ordens de serviço').click()"); time.sleep(1.2)
     p1 = J("location.pathname"); J("document.querySelector('a.volta37').click()"); time.sleep(1.0); p2 = J("location.pathname")
-    chk('N3 um toque no cartão abre a tela e "‹ Agrícola" volta', (p1 or '').endswith('/OS.dc.html') and (p2 or '').endswith('/MOD-AGR.dc.html'), [p1, p2])
+    fo = J("(document.activeElement&&document.activeElement.getAttribute('href'))||''")
+    chk('N3 um toque no cartão abre a tela e "‹ Agrícola" volta, com o foco no cartão aberto (ponto útil da volta)', (p1 or '').endswith('/OS.dc.html') and (p2 or '').endswith('/MOD-AGR.dc.html') and fo == 'OS.dc.html', [p1, p2, fo])
+    ax = json.loads(J("JSON.stringify([...document.querySelectorAll('a.mod-cartao')].map(a=>[a.getAttribute('role'), a.parentElement.getAttribute('role'), !!a.parentElement.closest('[role=list]')]))") or '[]')
+    chk('N3 cartões das telas de entrada: link nativo dentro de item de lista', ax and all(x == [None, 'listitem', True] for x in ax), ax)
     dir_ = {}
     for nome, ic, items in ui37.MENU2:
         if nome in ('Mapa', 'Manutenção'):

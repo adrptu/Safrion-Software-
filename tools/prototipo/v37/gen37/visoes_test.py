@@ -162,9 +162,10 @@ def modo_comp():
         ks = [x['k'] for x in (b or {}).get('bs', []) if x['k'] != 'mais']
         labs = [x['lab'] for x in (b or {}).get('bs', []) if x['k'] != 'mais']
         chips = J("(()=>{const g=document.querySelector('[aria-label=\"Filtrar por fase\"]'); return g?Math.round(g.getBoundingClientRect().right):0;})()")
-        chk('C1 barra role=toolbar "Visão das ordens" à direita dos filtros: 4 botões data-visao (lista, agrupada, kanban, carga), aria-label "Ver em …", sem texto visível nem title, svg aria-hidden',
-            bool(b) and b['role'] == 'toolbar' and b['lab'] == 'Visão das ordens' and b['vs'] == 'lista agrupada kanban carga' and ks == ['lista', 'agrupada', 'kanban', 'carga']
-            and labs == ['Ver em lista', 'Ver em tabela agrupada', 'Ver em kanban', 'Ver em carga por recurso'] and all(x['txt'] == '' and not x['tit'] and x['svg'] for x in b['bs'])
+        # VISOES-2 F2a (13/10): o Calendário entra entre o Kanban e a Carga (ordem do registro, visoes.ORDEM)
+        chk('C1 barra role=toolbar "Visão das ordens" à direita dos filtros: 5 botões data-visao (lista, agrupada, kanban, calendario, carga), aria-label "Ver em …", sem texto visível nem title, svg aria-hidden',
+            bool(b) and b['role'] == 'toolbar' and b['lab'] == 'Visão das ordens' and b['vs'] == 'lista agrupada kanban calendario carga' and ks == ['lista', 'agrupada', 'kanban', 'calendario', 'carga']
+            and labs == ['Ver em lista', 'Ver em tabela agrupada', 'Ver em kanban', 'Ver em calendário', 'Ver em carga por recurso'] and all(x['txt'] == '' and not x['tit'] and x['svg'] for x in b['bs'])
             and b['esq'] >= chips - 1, b)
         # C2
         f = J(CHK_C); at = [x for x in b['bs'] if x['p'] == 'true'] if b else []
@@ -185,8 +186,8 @@ def modo_comp():
         tecla('ArrowRight'); tecla(' '); time.sleep(.4); e2 = (ativa(), foco(), busca())
         tecla('Tab'); fora_ = foco(); c.tab(1, True); time.sleep(.25); volta = foco()
         chk('C3 Tab para uma vez na barra (entra na ativa e sai com o próximo Tab); ← → com volta, Home/End, ↑ ↓ não movem; seta não ativa (Lista segue ativa, sem ?view); Enter e Espaço ativam e o foco fica no botão; Shift+Tab volta à mesma parada',
-            f1 == 'lista' and f2 not in ('lista', 'agrupada', 'kanban', 'carga', 'mais') and f3 == 'lista'
-            and seq == ['agrupada', 'kanban', 'carga', 'lista', 'carga', 'lista', 'carga', 'carga', 'carga'] and sem_ativar
+            f1 == 'lista' and f2 not in ('lista', 'agrupada', 'kanban', 'calendario', 'carga', 'mais') and f3 == 'lista'
+            and seq == ['agrupada', 'kanban', 'calendario', 'carga', 'calendario', 'lista', 'carga', 'carga', 'carga'] and sem_ativar
             and e1[0] == 'agrupada' and e1[1] == 'agrupada' and 'view=agrupada' in e1[2] and e2[0] == 'kanban' and e2[1] == 'kanban' and 'view=kanban' in e2[2]
             and fora_ not in ('lista', 'agrupada', 'kanban', 'carga') and volta == 'kanban', [f1, f2, f3, seq, sem_ativar, e1, e2, fora_, volta])
     passo('C3', _c3)

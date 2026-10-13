@@ -7,6 +7,9 @@ cadastros"). Confere, no navegador, em 1440 × 900 e 390 × 844:
      minimalistas e essencialistas"), sem subtítulo nem contador fora da busca, e o link certo; T2 um toque abre o cadastro;
   B1 a busca filtra pelos termos ("trator" → só Máquinas; "embalagem" → só Produtos); sem resultado, diz o que buscar; Esc limpa;
   V1 os 8 cadastros têm "‹ Cadastros" (link para CD.dc.html, alvo ≥ 36 px) e o caminho diz qual é o cadastro; V2 o botão volta;
+  R1 (revisão Codex CAD-INICIO-RETORNO-01) buscar "trator", abrir Máquinas e voltar por "‹ Cadastros": volta com o termo, o recorte e o foco no
+     cartão aberto; Esc limpa e a próxima volta já vem sem busca;
+  A1 (revisão Codex CAD-INICIO-AX-01) cada cartão é link (papel nativo do <a href>) dentro de um item de lista, numa lista;
   C1 sem rolagem lateral no celular e sem erro de JS. Uso: python3 cad_inicio_test.py (lê _render ou RENDER_DIR)."""
 import os, sys, json, time
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -56,6 +59,18 @@ try:
         if not (v.get('tem') and v.get('href') == 'CD.dc.html' and v.get('txt') == '‹ Cadastros' and v.get('alt', 0) >= 36 and v.get('h1') and ('Cadastros › ' + v['h1']) in v.get('cr', '') and v.get('navAtivo')):
             falhas.append([pg, v])
     chk('V1 os 8 cadastros têm "‹ Cadastros" (link para a tela inicial, alvo ≥ 36 px), o caminho "Cadastros › <cadastro>" e o menu marcando Cadastros', not falhas, falhas)
+    # R1 · volta com a busca e o foco no cartão aberto
+    c.goto(U('Main.dc.html'), .3); J("sessionStorage.clear()"); c.goto(U('CD.dc.html'), 1.2); busca('trator')
+    J("document.querySelector('a.mod-cartao[href=\"CD-03.dc.html\"]').click()"); time.sleep(1.2); J("document.querySelector('a.volta37').click()"); time.sleep(1.4)
+    r1 = json.loads(J("JSON.stringify([document.querySelector('input[aria-label=\"Buscar cadastro\"]').value, (document.activeElement&&document.activeElement.getAttribute('href'))||'', location.pathname])") or '[]')
+    cs = json.loads(J(CARDS) or '[]')
+    chk('R1 "‹ Cadastros" volta com a busca "trator", só Máquinas e o foco no cartão aberto', r1 and r1[0] == 'trator' and [h for h, _ in cs] == ['CD-03.dc.html'] and r1[1] == 'CD-03.dc.html' and r1[2].endswith('/CD.dc.html'), [r1, cs])
+    J("(()=>{const i=document.querySelector('input[aria-label=\"Buscar cadastro\"]'); i.focus(); i.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));})()"); time.sleep(.4)
+    c.goto(U('CD-04.dc.html'), 1.0); J("document.querySelector('a.volta37').click()"); time.sleep(1.2)
+    chk('R1 Esc limpa a busca e a volta seguinte já vem com os 8 cadastros', len(json.loads(J(CARDS) or '[]')) == 8 and J("document.querySelector('input[aria-label=\"Buscar cadastro\"]').value") == '', J(CARDS))
+    # A1 · semântica: link dentro de item de lista
+    ax = json.loads(J("JSON.stringify([...document.querySelectorAll('a.mod-cartao')].map(a=>[a.getAttribute('role'), a.parentElement.getAttribute('role'), !!a.parentElement.closest('[role=list]'), !!a.getAttribute('href')]))") or '[]')
+    chk('A1 os 8 cartões são links (sem papel sobrescrito), cada um num item de lista dentro de uma lista', len(ax) == 8 and all(x == [None, 'listitem', True, True] for x in ax), ax)
     c.goto(U('CD-06.dc.html'), 1.0); J("document.querySelector('a.volta37').click()"); time.sleep(1.0)
     chk('V2 "‹ Cadastros" volta para a tela inicial', (J("location.pathname") or '').endswith('/CD.dc.html'), J("location.pathname"))
     c.aparelho(390, 844, 1, True); c.goto(U('CD.dc.html'), 1.2)

@@ -13,6 +13,7 @@ from ui37 import shell37, HEIGHTS37, MENU2, HUB37, CURTO37, OUTROS37
 
 CSS=('<style>.mod-grade{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;align-content:start}'   # !important: a coluna do main põe display:flex nos filhos diretos
      '.mod-grade [hidden]{display:none!important}'   # o display:flex do cartão venceria o [hidden] padrão (busca da tela Cadastros)
+     '.mod-item{display:flex;min-width:0}.mod-item>.mod-cartao{flex:1 1 auto;min-width:0}'   # item da lista no contêiner; o <a> segue link (revisão Codex CAD-INICIO-AX-01)
      '.mod-cartao{display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:64px;box-sizing:border-box;border:1px solid #E4E9E5;border-radius:14px;'
      'background:#FFFFFF;text-decoration:none;color:#15201A;font-size:15px;font-weight:700;line-height:1.25}'
      '.mod-cartao:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}'
@@ -22,8 +23,22 @@ CSS=('<style>.mod-grade{display:grid!important;grid-template-columns:repeat(auto
 
 
 def cartao(h, nome, ic, extra=''):
-    return (f'<a class="mod-cartao" role="listitem" href="{h}"{extra}><span class="mod-ic" aria-hidden="true">{icon(ic, 22, "#1E7A4C")}</span>'
-            f'<span>{E.esc(nome)}</span></a>')
+    # o papel de item de lista fica no contêiner: o <a href> mantém o papel nativo de link (revisão Codex CAD-INICIO-AX-01: com role="listitem"
+    # no <a>, a navegação assistiva por links perdia o destino); extra (ex.: hidden da busca) vai no contêiner
+    return (f'<div class="mod-item" role="listitem"{extra}><a class="mod-cartao" href="{h}"><span class="mod-ic" aria-hidden="true">{icon(ic, 22, "#1E7A4C")}</span>'
+            f'<span>{E.esc(nome)}</span></a></div>')
+
+# volta ao ponto útil (revisão Codex CAD-INICIO-RETORNO-01): o cartão aberto fica guardado na sessão da aba; na volta por "‹ Módulo" (ou pelo
+# Voltar do navegador) a tela de entrada devolve o foco a ele. A tela Cadastros também guarda o termo da busca (areas/cad_inicio.py).
+JS_VOLTA = r'''
+function modLe(k) { try { return sessionStorage.getItem(k) || ''; } catch (e) { return ''; } }
+function modGrava(k, v) { try { if (v) sessionStorage.setItem(k, v); else sessionStorage.removeItem(k); } catch (e) {} }
+function modVolta(self) { if (self.__modVolta) return; self.__modVolta = 1; const pg = String(location.pathname).split('/').pop(), k = 'safrion.mod_ult:' + pg;
+  document.addEventListener('click', e => { const a = e.target && e.target.closest && e.target.closest('a.mod-cartao'); if (a) modGrava(k, a.getAttribute('href')); }, true);
+  const u = modLe(k); if (!u) return; let n = 0;   // espera o cartão existir (condição, até 2 s), em vez de um tempo fixo
+  const foca = () => { const a = [...document.querySelectorAll('a.mod-cartao')].find(x => x.getAttribute('href') === u && x.getClientRects().length);
+    if (a) { a.focus(); return; } if (++n < 40) setTimeout(foca, 50); }; setTimeout(foca, 0); }
+'''
 
 
 def grade(itens, rotulo):
@@ -32,6 +47,7 @@ def grade(itens, rotulo):
 
 def _hub(fname, titulo, itens):
     E._reset_screen(fname); HEIGHTS37[fname] = 760
+    E.EXTRAJS[0] = JS_VOLTA + 'function EXTRAVALS(self, v) { modVolta(self); }\n'
     shell37(fname.replace('.dc.html', ''), titulo, CSS + grade(itens, titulo), fname=fname, status=None, primary_html=None, search=False)
 
 

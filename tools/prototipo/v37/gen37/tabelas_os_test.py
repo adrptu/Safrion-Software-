@@ -3,7 +3,11 @@
 TF01 vínculo por ID (P1, T1 ≠ T1-A/Trator T1, T1 ou T2 sem duplicar, Sem talhão, vazio continua vazio, troca de fazenda, mesmo nome em
 fazendas distintas); TF02 recorte combinado conservado em Lista/Kanban/Recursos, detalhe→voltar e recarga, sem ação de negócio;
 TF03 colunas tipadas (número, data com anos distintos, vazio); TF04 teclado e toque em 1440 e 390 px com capturas; TF06 agrupar por
-talhão com contagem distinta e total sem somar grupos sobrepostos.
+talhão com contagem distinta e total sem somar grupos sobrepostos; TF07 Cultura na faixa.
+13/10/2026 (proprietário): o botão "Talhão: Todos ▾" da barra da tabela (ost_btn, diálogo com busca e caixas) saiu. O Talhão é a lista
+"Filtrar por talhão" da faixa "Filtros desta tela" (Todos, os talhões do recorte e, com mais de um marcado na coluna, "N talhões"), ligada ao
+MESMO filtro da coluna Talhão da grade (f.tal), que segue no cabeçalho para escolher vários. Entrou "Filtrar por cultura" (a do cultivo de
+cada talhão da ordem na safra dela). As verificações de talhão andam pela faixa e pelo filtro da coluna, e conferem um contra o outro.
 Uso: python3 tabelas_os_test.py [pasta de capturas]   (< 90 s)"""
 import sys, os, re, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -17,14 +21,36 @@ def chk(n, cond, info=''):
 p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js
 URL = f'http://127.0.0.1:{p}/OS.dc.html'
 def ids(): return J("[...document.querySelectorAll('[role=row].g2ed')].filter(r=>r.offsetParent).map(r=>r.querySelector('[role=cell]').innerText.trim())") or []
-def btn_tal(): return J("document.getElementById('ost_btn').innerText.replace(/\\s+/g,' ').trim()") or ''
-def abre_tal():
-    if not J("!!document.querySelector('[aria-label=\"Filtrar por talhão\"]')"): J("document.getElementById('ost_btn').click()"); time.sleep(.35)
-def opcoes(): abre_tal(); return J("[...document.querySelectorAll('[aria-label=\"Filtrar por talhão\"] label')].map(l=>l.innerText.replace(/\\s+/g,' ').trim())") or []
-def marca(nome):   # marca/desmarca uma opção pelo nome exato (o número ao lado é a contagem)
-    abre_tal(); r = J(f"(()=>{{const l=[...document.querySelectorAll('[aria-label=\"Filtrar por talhão\"] label')].find(l=>l.innerText.replace(/\\s+\\d+$/,'').trim()==={json.dumps(nome)}); if(!l) return false; l.querySelector('input').click(); return true;}})()"); time.sleep(.4); return r
-def fecha_tal(): J("(()=>{const d=document.querySelector('[aria-label=\"Filtrar por talhão\"]'); if(d) [...d.querySelectorAll('button')].find(b=>b.innerText.trim()==='Fechar').click();})()"); time.sleep(.3)
-def todos(): J("[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Todos os talhões').click()"); time.sleep(.4)
+TAL, CUL = 'Filtrar por talhão', 'Filtrar por cultura'
+def _s(lab): return f"document.querySelector('select[aria-label={json.dumps(lab)}]')"
+def esc_txt(lab=TAL):   # texto da opção escolhida na faixa (Todos, T1, "2 talhões"…); None sem a lista
+    return J(f"(()=>{{const s={_s(lab)}; return s&&s.selectedIndex>=0?s.options[s.selectedIndex].text.trim():null;}})()")
+def tal(): return esc_txt(TAL)
+def opcoes(lab=TAL): return J(f"(()=>{{const s={_s(lab)}; return s?[...s.options].map(o=>o.text.trim()):[];}})()") or []
+def escolhe(nome, lab=TAL):   # escolhe na faixa pelo texto da opção (o que a pessoa lê); False se a opção não existe
+    r = J(f"""(()=>{{const s={_s(lab)}; const o=s&&[...s.options].find(o=>o.text.trim()==={json.dumps(nome)}); if(!o) return false;
+      Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(s,o.value);
+      s.dispatchEvent(new Event('input',{{bubbles:true}})); s.dispatchEvent(new Event('change',{{bubbles:true}})); return true;}})()"""); time.sleep(.6); return r
+def todos(): escolhe('Todos')
+# filtro da coluna Talhão no cabeçalho da grade (menu de valores com contagem: Limpar, marcar, OK/Cancelar); o "Sem talhão" da faixa é "(vazio)" aqui
+DLG = '[role=dialog][aria-label="Filtrar Talhão"]'
+def _dlg_bt(t): J(f"(()=>{{const b=[...document.querySelectorAll({json.dumps(DLG + ' button')})].find(b=>b.innerText.trim()==={json.dumps(t)}); b&&b.click();}})()"); time.sleep(.3)
+def col_abre():
+    J("(()=>{const b=[...document.querySelectorAll('button[aria-label=\"Filtrar Talhão\"]')].find(b=>b.offsetParent); b&&b.click();})()"); time.sleep(.4)
+    return bool(J(f"!!document.querySelector({json.dumps(DLG)})"))
+def col_valores():   # valores do filtro da coluna com a contagem ("T1 1"); fecha com Cancelar
+    if not col_abre(): return []
+    r = J(f"[...document.querySelectorAll({json.dumps(DLG + ' label')})].map(l=>l.innerText.replace(/\\s+/g,' ').trim())") or []; _dlg_bt('Cancelar'); return r
+def col_marcados():   # valores marcados no filtro da coluna Talhão; None = todos marcados (sem filtro); fecha com Cancelar
+    if not col_abre(): return 'sem o filtro da coluna'
+    m = J(f"[...document.querySelectorAll({json.dumps(DLG + ' label')})].map(l=>[l.innerText.replace(/\\s+\\d+$/,'').trim(),l.querySelector('input').checked])") or []
+    _dlg_bt('Cancelar'); v = [n for n, on in m if on]; return None if m and len(v) == len(m) else v
+def col_tal(nomes):   # filtra pela coluna: Limpar, marca cada nome exato (o número ao lado é a contagem), OK
+    if not col_abre(): return False
+    _dlg_bt('Limpar'); achou = True
+    for n in nomes:
+        achou = J(f"(()=>{{const l=[...document.querySelectorAll({json.dumps(DLG + ' label')})].find(l=>l.innerText.replace(/\\s+\\d+$/,'').trim()==={json.dumps(n)}); if(!l) return false; l.querySelector('input').click(); return true;}})()") and achou; time.sleep(.15)
+    _dlg_bt('OK'); time.sleep(.3); return achou
 def aba(t): troca_visao(J, {'Lista': 'lista', 'Kanban': 'kanban', 'Recursos': 'carga', 'Agrupada': 'agrupada'}[t])   # VISOES-1: pelo seletor (data-visao)
 def fase(t): J(f"(()=>{{const b=[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] button')].find(b=>b.innerText.trim().startsWith({json.dumps(t)})); b&&b.click();}})()"); time.sleep(.4)
 def busca(q):
@@ -52,21 +78,33 @@ try:
     todas = ids(); neg0 = negocio(); shot('tf04-1440-antes')
     print('linhas', todas)
     # ---------------- TF01 ----------------
-    op = opcoes(); print('opções', op)
-    chk('TF01 seletor Talhão visível com Todos, contagem por opção e Sem talhão', btn_tal().startswith('Talhão: Todos') and any(o.startswith('Sem talhão') for o in op) and all(o.split()[-1].isdigit() for o in op), (btn_tal(), op))
-    marca('P1'); chk('TF01 P1 devolve os vínculos P1 (OS-0417, OS-0418)', sorted(ids()) == ['OS-0417', 'OS-0418'], ids()); marca('P1')
-    marca('T1'); r = ids()
-    chk('TF01 T1 não seleciona T1-A (OS-0430) nem "Trator T1" (OS-0431): só OS-0421', r == ['OS-0421'] and btn_tal() == 'Talhão: T1 ▾', (r, btn_tal()))
-    marca('T2'); r = ids()
-    chk('TF01 T1 ou T2: OS-0421 (T1+T2) aparece uma vez, com OS-0431', sorted(r) == ['OS-0421', 'OS-0431'] and r.count('OS-0421') == 1, r)
-    todos(); marca('Sem talhão')
-    chk('TF01 Sem talhão: OB-0104 com Local Armazém Sede', ids() == ['OB-0104'] and cel_col('Local') == ['Armazém Sede'], (ids(), cel_col('Local')))
-    todos(); fecha_tal()
-    chk('TF01 Todos os talhões volta às linhas do contexto', ids() == todas, len(ids()))
+    op = opcoes(); cv = col_valores(); print('opções', op, cv)
+    vis_t = J(f"(()=>{{const s={_s(TAL)}; return !!s&&!!s.offsetParent&&!!s.closest('[aria-label=\"Filtros desta tela\"]');}})()")
+    chk('TF01 faixa "Filtros desta tela": Talhão visível em Todos, com Sem talhão e os mesmos talhões do filtro da coluna (que mostra a contagem por valor)',
+        vis_t and tal() == 'Todos' and op[:1] == ['Todos'] and 'Sem talhão' in op and bool(cv) and all(x.split()[-1].isdigit() for x in cv)
+        and sorted('(vazio)' if o == 'Sem talhão' else o for o in op[1:]) == sorted(x.rsplit(' ', 1)[0] for x in cv), (vis_t, tal(), op, cv))
+    escolhe('P1'); chk('TF01 P1 devolve os vínculos P1 (OS-0417, OS-0418)', sorted(ids()) == ['OS-0417', 'OS-0418'], ids()); todos()
+    escolhe('T1'); r = ids(); cm = col_marcados()
+    chk('TF01 T1 na faixa filtra na hora e não seleciona T1-A (OS-0430) nem "Trator T1" (OS-0431): só OS-0421; o filtro da coluna Talhão fica com T1',
+        r == ['OS-0421'] and tal() == 'T1' and cm == ['T1'], (r, tal(), cm))
+    col_tal(['T1', 'T2']); r = ids()
+    chk('TF01 T1 ou T2 pelo filtro da coluna: OS-0421 (T1+T2) aparece uma vez, com OS-0431; a faixa mostra "2 talhões"',
+        sorted(r) == ['OS-0421', 'OS-0431'] and r.count('OS-0421') == 1 and tal() == '2 talhões', (r, tal()))
+    escolhe('Sem talhão'); cm = col_marcados()
+    chk('TF01 Sem talhão: OB-0104 com Local Armazém Sede; na coluna, "(vazio)"', ids() == ['OB-0104'] and cel_col('Local') == ['Armazém Sede'] and cm == ['(vazio)'], (ids(), cel_col('Local'), cm))
+    todos(); cm = col_marcados()
+    chk('TF01 Todos volta às linhas do contexto e limpa o filtro da coluna Talhão', ids() == todas and tal() == 'Todos' and cm is None, (len(ids()), tal(), cm))
     # vazio continua vazio (T1 + fase em que a OS-0421 não está)
-    marca('T1'); fecha_tal(); fase('Encerradas'); r = ids()
+    escolhe('T1'); fase('Encerradas'); r = ids()
     chk('TF01 T1 + Encerradas: vazio continua vazio (sem cair para todas as linhas)', r == [], r)
     fase('Todas'); todos()
+    # ---------------- TF07 Cultura (13/10): a do cultivo de cada talhão da ordem na safra dela ----------------
+    rec = (esc_txt('Filtrar por fazenda'), esc_txt('Filtrar por safra')); co = opcoes(CUL)
+    escolhe('Café', CUL); r = ids(); ot = opcoes(); lt = cel_col('Talhão')
+    chk('TF07 Cultura "Café" no recorte padrão (Santa Rita, Todas as safras): só OS-0425, na hora; o Talhão oferece só os talhões do recorte',
+        rec == ('Santa Rita', 'Todas') and co[:1] == ['Todas'] and 'Café' in co and esc_txt(CUL) == 'Café' and r == ['OS-0425'] and ot == ['Todos'] + lt, (rec, co, r, ot, lt))
+    escolhe('Todas', CUL)
+    chk('TF07 Cultura "Todas" volta às linhas do contexto', ids() == todas and esc_txt(CUL) == 'Todas', len(ids()))
     # mesmo nome de talhão em fazendas diferentes: o vínculo é por ID com a fazenda (componente G2, linhas sintéticas)
     import subprocess
     u = json.loads(subprocess.run(['node', '-e', """const vm=require('vm'),fs=require('fs'); const ctx={}; vm.createContext(ctx);
@@ -78,14 +116,14 @@ try:
     # troca de contexto: Fazenda = Todas mostra a fazenda no rótulo; escolher um pivô e voltar a Santa Rita remove o valor e avisa
     fz = J("[...document.querySelector('select[aria-label=\"Filtrar por fazenda\"]').options].map(o=>o.value)") or []
     sel('Filtrar por fazenda', 'Todas'); op = opcoes()
-    pv = next((o.rsplit(' ', 1)[0] for o in op if o.startswith('Pivô')), '')
-    chk('TF01 Fazenda = Todas: rótulos com a fazenda', bool(pv) and ' · ' in pv and any(o.startswith('T1 · Santa Rita') for o in op), op[:6])
-    marca(pv); fecha_tal(); n_pv = ids()
-    sel('Filtrar por fazenda', 'Santa Rita'); m = notas()
+    pv = next((o for o in op if o.startswith('Pivô')), '')
+    chk('TF01 Fazenda = Todas: rótulos com a fazenda', bool(pv) and ' · ' in pv and 'T1 · Santa Rita' in op, op[:6])
+    escolhe(pv); n_pv = ids()
+    sel('Filtrar por fazenda', 'Santa Rita'); m = notas(); cm = col_marcados()
     chk('TF01 troca para Santa Rita: talhão fora do escopo sai do filtro e a tela avisa (sem trocar a fazenda sozinha)',
-        btn_tal() == 'Talhão: Todos ▾' and any('saiu do filtro' in x for x in m) and J("document.querySelector('select[aria-label=\"Filtrar por fazenda\"]').value") == 'Santa Rita' and ids() == todas, (fz, pv, n_pv, btn_tal(), m))
+        bool(n_pv) and tal() == 'Todos' and cm is None and any('saiu do filtro' in x for x in m) and J("document.querySelector('select[aria-label=\"Filtrar por fazenda\"]').value") == 'Santa Rita' and ids() == todas, (fz, pv, n_pv, tal(), cm, m))
     # ---------------- TF02 ----------------
-    marca('T1'); marca('T2'); fecha_tal(); busca('Plantio'); r = ids()
+    col_tal(['T1', 'T2']); busca('Plantio'); r = ids()
     chk('TF02 Talhão (T1 ou T2) E busca "Plantio": só OS-0431', r == ['OS-0431'], r)
     busca(''); fase('Em execução'); r1 = ids()
     aba('Kanban'); k = kanban(); kn = notas()
@@ -96,9 +134,10 @@ try:
     J("[...document.querySelectorAll('[role=row].g2ed')].filter(r=>r.offsetParent)[0].click()"); time.sleep(.5)
     det = J("!!document.querySelector('aside[role=dialog]')")
     J("(()=>{const b=document.querySelector('aside[role=dialog] button[aria-label=Fechar]'); b&&b.click();})()"); time.sleep(.4)
-    chk('TF02 abrir e fechar o detalhe conserva o recorte', det and ids() == r1 and btn_tal() == 'Talhão: T1, T2 ▾', (det, ids(), btn_tal()))
-    c.goto(URL, 1.2)
-    chk('TF02 recarregar a página (volta do detalhe completo) conserva talhão e fase', ids() == r1 and btn_tal() == 'Talhão: T1, T2 ▾', (ids(), btn_tal()))
+    cm = col_marcados()
+    chk('TF02 abrir e fechar o detalhe conserva o recorte', det and ids() == r1 and tal() == '2 talhões' and cm == ['T1', 'T2'], (det, ids(), tal(), cm))
+    c.goto(URL, 1.2); cm = col_marcados()
+    chk('TF02 recarregar a página (volta do detalhe completo) conserva talhão e fase', ids() == r1 and tal() == '2 talhões' and cm == ['T1', 'T2'], (ids(), tal(), cm))
     todos(); r2 = ids()
     chk('TF02 limpar Talhão mantém o filtro de fase', len(r2) > len(r1) and set(r1) <= set(r2) and J("[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] button')].some(b=>b.getAttribute('aria-pressed')==='true'&&b.innerText.startsWith('Em execução'))"), (r1, r2))
     fase('Todas')
@@ -127,7 +166,7 @@ try:
     cont = J("(()=>{const s=[...document.querySelectorAll('span')].find(s=>s.offsetParent&&/^\\d+ de \\d+$/.test(s.innerText.trim())); return s?s.innerText.trim():'';})()")
     chk('TF06 contador da grade no agrupado conta O.S. distintas (10 de 10), não grupos (9)', cont == f'{dist} de {len(todas)}', cont)
     shot('tf06-1440-agrupado')
-    marca('T1'); marca('T2'); fecha_tal(); g2 = J("[...document.querySelectorAll('[role=row].g2r')].filter(r=>r.offsetParent).map(r=>r.querySelector('[role=cell]').innerText.replace('▾','').trim())"); tot = next((x for x in notas() if x.startswith('Total')), '')
+    col_tal(['T1', 'T2']); g2 = J("[...document.querySelectorAll('[role=row].g2r')].filter(r=>r.offsetParent).map(r=>r.querySelector('[role=cell]').innerText.replace('▾','').trim())"); tot = next((x for x in notas() if x.startswith('Total')), '')
     chk('TF06 com T1 ou T2: só grupos T1 e T2; total 2 O.S. · 452 ha (350 + 102, cada O.S. uma vez)', [x for x in g2 if not x.startswith('O')] == ['T1', 'T2'] and tot.startswith('Total: 2 O.S. distintas · 452 ha'), (g2, tot))
     J("[...document.querySelectorAll('[role=row].g2r')].filter(r=>r.offsetParent).find(r=>/^OS-0421/.test(r.innerText.trim())).querySelector('[role=cell]').click()"); time.sleep(.5)
     chk('TF06 clicar na O.S. dentro do grupo abre o detalhe da própria O.S.', (J("(document.querySelector('aside[role=dialog]')||{}).innerText||''") or '').startswith('OS-0421'))
@@ -136,32 +175,32 @@ try:
     chk('TF06 desagrupar volta às linhas canônicas', sorted(ids()) == sorted(todas), len(ids()))
     chk('sem botão Expandir/Recolher na lista sem grupos', not J("[...document.querySelectorAll('.g2xtog')].some(b=>b.offsetParent)"))
     chk('sem erro de script (1440)', not J("window.__e"), J("window.__e"))
-    # ---------------- TF04: 390 px, toque e teclado ----------------
+    # ---------------- TF04: 390 px, toque e teclado na lista "Filtrar por talhão" da faixa ----------------
     c.aparelho(390, 844, 2, True); c.goto(URL, 1.2); J("window.__e=[];addEventListener('error',e=>window.__e.push(String(e.message)))")
     shot('tf04-390-antes')
-    b = J("(()=>{const r=document.getElementById('ost_btn').getBoundingClientRect(); return [r.left,r.right,r.top,r.height,innerWidth,document.documentElement.scrollWidth];})()")
-    chk('TF04 390 px: Talhão visível sem rolar a tabela, alvo ≥ 28 px e página sem rolagem horizontal', b[0] >= 0 and b[1] <= b[4] and b[3] >= 28 and b[5] <= b[4] + 1, b)
-    c.toque(b[0] + 20, b[2] + b[3] / 2); time.sleep(.3)
-    lab = J("(()=>{const l=[...document.querySelectorAll('[aria-label=\"Filtrar por talhão\"] label')].find(l=>/^T1\\s/.test(l.innerText.trim())); const r=l.getBoundingClientRect(); return [r.left+20,r.top+r.height/2,r.height];})()")
-    pop = J("(()=>{const r=document.querySelector('[aria-label=\"Filtrar por talhão\"]').getBoundingClientRect(); const m=document.querySelector('main'); return [r.left,r.right,innerWidth,document.documentElement.scrollWidth,document.activeElement&&document.activeElement.id,m?m.getBoundingClientRect().left:0];})()")
-    chk('TF04 390 px: seletor aberto cabe entre o menu e a borda, sem deslocar a página, foco na pesquisa', pop[0] >= pop[5] and pop[1] <= pop[2] and pop[3] <= pop[2] + 1 and pop[4] == 'ost_q', pop)
-    c.toque(lab[0], lab[1]); time.sleep(.3)
-    chk('TF04 toque: abre o seletor e marca T1 (alvo ≥ 32 px); a lista filtra na hora', lab[2] >= 32 and ids() == ['OS-0421'] and btn_tal() == 'Talhão: T1 ▾', (lab, ids()))
+    foco = lambda: J("document.activeElement&&document.activeElement.getAttribute('aria-label')")
+    b = J(f"(()=>{{const r={_s(TAL)}.getBoundingClientRect(); const m=document.querySelector('main'); return [r.left,r.right,r.top,r.height,innerWidth,innerHeight,document.documentElement.scrollWidth,m?m.getBoundingClientRect().left:0];}})()")
+    chk('TF04 390 px: Talhão da faixa à vista sem rolar, entre o menu e a borda, alvo ≥ 32 px de altura e página sem rolagem horizontal',
+        b[0] >= b[7] and b[1] <= b[4] and b[2] >= 0 and b[2] + b[3] <= b[5] and b[3] >= 32 and b[6] <= b[4] + 1, b)
+    # toque abre a lista nativa com o foco nela; digitar "T1" e Enter escolhe (o teclado do celular faz o mesmo); a lista filtra na hora
+    c.toque(b[0] + 20, b[2] + b[3] / 2); time.sleep(.3); f0 = foco()
+    for ch in 'T1': c.tecla(ch, 'Key' + ch if ch.isalpha() else 'Digit' + ch, ord(ch), text=ch)
+    c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.6); r = ids(); f1 = foco()
+    chk('TF04 toque: a lista do Talhão recebe o foco; escolher T1 filtra na hora (só OS-0421) e o foco fica na lista', f0 == TAL and r == ['OS-0421'] and tal() == 'T1' and f1 == TAL, (f0, r, tal(), f1))
     shot('tf04-390-depois')
-    c.tecla('Escape', 'Escape', 27); time.sleep(.3)
-    chk('TF04 Esc fecha o seletor e o foco volta ao botão Talhão', not J("!!document.querySelector('[aria-label=\"Filtrar por talhão\"]')") and J("document.activeElement&&document.activeElement.id") == 'ost_btn')
-    c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.4)
-    foco_q = J("document.activeElement&&document.activeElement.id")
-    for ch in 'T2': c.tecla(ch, 'Key' + ch if ch.isalpha() else 'Digit' + ch, ord(ch), text=ch)
-    time.sleep(.4); filtradas = J("[...document.querySelectorAll('[aria-label=\"Filtrar por talhão\"] label')].map(l=>l.innerText.replace(/\\s+\\d+$/,'').trim())") or []
-    chk('TF04 teclado: Enter abre com o foco na pesquisa; digitar "T2" deixa só T2', foco_q == 'ost_q' and filtradas == ['T2'], (foco_q, filtradas))
-    c.tab(2); c.tecla(' ', 'Space', 32, text=' '); time.sleep(.4)
-    chk('TF04 teclado: Tab até T2 e Espaço marca (T1 ou T2)', sorted(ids()) == ['OS-0421', 'OS-0431'], (ids(), J("document.activeElement&&document.activeElement.outerHTML.slice(0,80)")))
-    c.tecla('Escape', 'Escape', 27); time.sleep(.3)
+    c.tecla('ArrowDown', 'ArrowDown', 40); time.sleep(.6); r1, t1 = ids(), tal()
+    c.tecla('ArrowUp', 'ArrowUp', 38); time.sleep(.6); r2, t2 = ids(), tal()
+    chk('TF04 teclado: com o foco na lista, ↓ escolhe T1-A (só OS-0430) e ↑ volta a T1 (só OS-0421), filtrando na hora', (t1, r1, t2, r2) == ('T1-A', ['OS-0430'], 'T1', ['OS-0421']) and foco() == TAL, (t1, r1, t2, r2, foco()))
+    cm = col_marcados()
+    chk('TF04 390 px: o filtro da coluna Talhão fica com o T1 escolhido na faixa', cm == ['T1'], cm)
+    col_tal(['T1', 'T2']); r = ids()
+    chk('TF04 390 px: dois talhões pelo filtro da coluna (T1 ou T2) mostram "2 talhões" na faixa', sorted(r) == ['OS-0421', 'OS-0431'] and tal() == '2 talhões', (r, tal()))
     J("[...document.querySelectorAll('[role=row].g2ed')].filter(r=>r.offsetParent)[0].focus()"); c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.5)
     det = J("!!document.querySelector('aside[role=dialog]')"); shot('tf04-390-detalhe')
     J("(()=>{const b=document.querySelector('aside[role=dialog] button[aria-label=Fechar]'); b&&b.click();})()"); time.sleep(.4)
-    chk('TF04 Enter na linha abre o detalhe; fechar volta com o recorte', det and sorted(ids()) == ['OS-0421', 'OS-0431'] and btn_tal() == 'Talhão: T1, T2 ▾', (det, ids()))
+    chk('TF04 Enter na linha abre o detalhe; fechar volta com o recorte', det and sorted(ids()) == ['OS-0421', 'OS-0431'] and tal() == '2 talhões', (det, ids(), tal()))
+    todos(); cm = col_marcados()
+    chk('TF04 390 px: "Todos" na faixa limpa o Talhão (linhas do contexto, na ordem gravada no TF03, e filtro da coluna sem marca)', sorted(ids()) == sorted(todas) and tal() == 'Todos' and cm is None, (len(ids()), tal(), cm))
     chk('sem erro de script (390)', not J("window.__e"), J("window.__e"))
 finally:
     c.close(); srv.terminate()

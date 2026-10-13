@@ -129,6 +129,9 @@ try:
     # ======================= A · separador =======================
     if 'A' in PARTES:
         pags = sorted(os.path.basename(p) for p in glob.glob(os.path.join(R, '*.dc.html')))
+        # Main.dc.html é página técnica mínima desde 13/10/2026 (o índice saiu e o protótipo abre no Mapa: areas/indice.py), sem cabeçalho de
+        # tela; sai da varredura só enquanto não tiver cabeçalho (se voltar a ser tela, volta a ser medida)
+        pags = [p for p in pags if not (p == 'Main.dc.html' and '<header' not in open(os.path.join(R, p), encoding='utf-8').read())]
         janela(1440, 900); media()
         semcab, semlin, nblocos, duplas = [], [], 0, []
         for p in pags:
@@ -160,9 +163,13 @@ try:
         row = "document.querySelector('[role=table] [role=row].g2ed')"
         hover(row); bg = J(f"getComputedStyle({row}).backgroundColor")
         chk('B1 linha da grade da O.S.: hover verde #F2F8F4', bg == 'rgb(242, 248, 244)', bg)
-        sec = "document.getElementById('ost_btn')"   # VISOES-1: o secundário claro da barra é o seletor Talhão ("Agrupar por talhão" virou a visão Tabela agrupada)
+        # 13/10/2026 (filtros da O.S. na faixa "Filtros desta tela"): o seletor Talhão da barra da O.S. (ost_btn), secundário claro de referência
+        # desde a VISOES-1, saiu; a barra da O.S. não tem outro botão secundário, e a referência passa a ser "Nova safra" do Planejar safra
+        fora(); abre('SAF.dc.html')
+        sec = "[...document.querySelectorAll('main button')].find(b=>b.getClientRects().length&&b.innerText.trim()==='Nova safra')"
         hover(sec); st = J(f"(()=>{{const s=getComputedStyle({sec}); return [s.backgroundImage,s.borderTopColor,s.boxShadow,s.filter];}})()") or ['', '', '', '']
-        chk('B2 botão secundário: camada verde (rgba(30,122,76,.07)) e borda #9DBFAA; sem a camada cinza nem escurecer', '30, 122, 76, 0.07' in st[0] and st[1] == 'rgb(157, 191, 170)' and '21, 32, 26, 0.05' not in st[2] and st[3] == 'none', st)
+        chk('B2 botão secundário (Nova safra): camada verde (rgba(30,122,76,.07)) e borda #9DBFAA; sem a camada cinza nem escurecer', '30, 122, 76, 0.07' in st[0] and st[1] == 'rgb(157, 191, 170)' and '21, 32, 26, 0.05' not in st[2] and st[3] == 'none', st)
+        fora(); abre('OS.dc.html')
         seg = "document.querySelector('[role=toolbar] [data-visao=kanban]')"   # VISOES-1: opção de visão só com ícone
         hover(seg); st = J(f"(()=>{{const s=getComputedStyle({seg}); return [s.backgroundImage,s.boxShadow,s.filter];}})()") or ['', '', '']
         chk('B3 opção de visão (Kanban): camada verde, sem cinza', '30, 122, 76' in st[0] and '21, 32, 26, 0.05' not in st[1] and st[2] == 'none', st)
@@ -190,17 +197,18 @@ try:
         chk('C1 tela nova: o título da tela é realçado e o novo contexto é anunciado (aria-live polite)', any(x['tag'] == 'H1' and 'Ordem de Serviço' in x['txt'] for x in rs) and v.startswith('Tela: Ordem de Serviço')
             and J("document.getElementById('g2-vivo').getAttribute('aria-live')") == 'polite', [rs, v])
         J("window.__pp=null; window.addEventListener('pageshow',e=>{window.__pp=e.persisted;}); 1")   # o C2c lê se a O.S. voltou da memória
-        cl = J("(()=>{const a=document.querySelector('.menu-lat a[href=\"SAF.dc.html\"]'); if(!a) return 'sem link'; a.click(); const g=document.getElementById('g2-carga'); return g?g.className:'sem barra';})()")
+        # barra lateral sempre recolhida (13/10/2026): o Planejar safra saiu da barra; o link é o ícone "Agrícola", que abre a tela de entrada do módulo
+        cl = J("(()=>{const a=document.querySelector('.menu-lat a[href=\"MOD-AGR.dc.html\"]'); if(!a) return 'sem link'; a.click(); const g=document.getElementById('g2-carga'); return g?g.className:'sem barra';})()")
         chk('C2 clicar num link de outra tela liga a barra fina de carga no topo já no clique', cl == 'ini', cl)
         for _ in range(40):
             time.sleep(.2)
-            if (J("location.pathname") or '').endswith('SAF.dc.html') and J("document.readyState") == 'complete': break
+            if (J("location.pathname") or '').endswith('MOD-AGR.dc.html') and J("document.readyState") == 'complete': break
         time.sleep(.8)
         fo = J("(()=>{const a=document.activeElement; return a?[a.tagName,(a.innerText||'').trim()]:null;})()"); v = vivo(); rs = realces(0)
         stT = J("(()=>{const h=document.querySelector('header h1'); return h&&h.nextElementSibling?h.nextElementSibling.textContent.replace(/\\s+/g,' ').trim():'';})()") or ''
-        # revisão DS (achado 10): com o foco no título o leitor de tela já lê "Planejar safra"; o anúncio leva só o estado (antes: "Tela: Planejar safra · …", o título duas vezes)
-        chk('C3 tela aberta pelo link: foco no título da tela nova, título realçado e anúncio só do estado (sem repetir o título que o foco já lê)', fo and fo[0] == 'H1' and fo[1] == 'Planejar safra'
-            and any(x['tag'] == 'H1' for x in rs) and v == stT and 'Planejar safra' not in v and not v.startswith('Tela:'), [fo, v, stT, rs])
+        # revisão DS (achado 10): com o foco no título o leitor de tela já lê "Agrícola"; o anúncio leva só o estado (antes: "Tela: … · …", o título duas vezes)
+        chk('C3 tela aberta pelo link (ícone Agrícola da barra): foco no título da tela nova, título realçado e anúncio só do estado (sem repetir o título que o foco já lê)', fo and fo[0] == 'H1' and fo[1] == 'Agrícola'
+            and any(x['tag'] == 'H1' for x in rs) and v == stT and 'Agrícola' not in v and not v.startswith('Tela:'), [fo, v, stT, rs])
         # revisão DS (achado 4, mutante M2): a barra termina depois da carga (o C2 só via o começo)
         time.sleep(.4); bar = J("(()=>{const b=document.getElementById('g2-carga'); return b?[b.className,getComputedStyle(b).opacity]:null;})()")
         chk('C2b a barra de carga termina depois que a tela nova monta (sem ini/chega, opacidade 0)', bool(bar) and bar[0] not in ('ini', 'chega') and bar[1] == '0', bar)
@@ -287,15 +295,23 @@ try:
         ncon = J("Object.values(JSON.parse(localStorage.getItem('talhao-os-cenario-v1')).assin.recibos).filter(r=>/^CON-/.test(r.id)).length")
         chk('D6 Enter no botão indisponível: o comando não roda (1 recibo), a dica mostra o porquê e a recusa é anunciada', ncon == 1 and d['vis'] and v.startswith('Indisponível: Nenhum evento'), [ncon, d, v])
         fora()
-        # ícone sem texto: o nome do comando, sem repetir para o leitor de tela
-        abre('OS.dc.html'); hover("document.querySelector('.ml-tog')", .7); d = J(DICA); db = J("document.querySelector('.ml-tog').getAttribute('aria-describedby')||''")
-        chk('D7 ícone sem texto (botão do menu): a dica mostra o nome do comando e não vira descrição repetida', d['vis'] and d['t'] in ('Recolher menu', 'Expandir menu') and 'g2-dica' not in db, [d, db])
-        fora(); MAPA = "document.querySelector('.menu-lat a[href=\"IN-04.dc.html\"]')"; t0 = J(f"({MAPA}).getAttribute('title')")
-        hover(MAPA, .7); d = J(DICA); t1 = J(f"({MAPA}).getAttribute('title')")
-        chk('D8 título igual ao rótulo visível (Mapa no menu aberto): sem dica', not d['vis'], d)
+        # ícone sem texto (barra lateral sempre recolhida, 13/10/2026; antes: o botão de expandir/recolher o menu): a dica mostra o nome do
+        # módulo, sem repetir para o leitor de tela; a dica nativa (title) sai enquanto a do sistema está aberta e volta quando o ponteiro sai
+        abre('OS.dc.html'); ICO = "document.querySelector('.menu-lat a[aria-label=\"Mapa\"]')"; t0 = J(f"({ICO}).getAttribute('title')")   # aria-label: o logotipo (Início (Mapa)) também leva ao IN-04
+        hover(ICO, .7); d = J(DICA); db = J(f"({ICO}).getAttribute('aria-describedby')||''"); t1 = J(f"({ICO}).getAttribute('title')")
+        fora(); t2 = J(f"({ICO}).getAttribute('title')"); d2 = J(DICA)
+        chk('D7 ícone sem texto (ícone "Mapa" da barra recolhida): a dica mostra o nome do módulo e não vira descrição repetida; a dica nativa sai enquanto ela está aberta e volta quando o ponteiro sai',
+            d['vis'] and d['t'] == 'Mapa' and 'g2-dica' not in db and t0 == 'Mapa' and t1 is None and t2 == 'Mapa' and not d2['vis'], [d, db, t0, t1, t2, d2])
+        # título igual ao rótulo visível: a barra recolhida não tem mais rótulo visível (antes: item "Mapa" do menu aberto); o caso da tela é a
+        # fonte do mapa (IN-04: texto cortado com reticências e o mesmo texto no title, areas/inicio.py)
+        abre('IN-04.dc.html'); FON = "window.__d8"
+        t0 = J("(()=>{const e=[...document.querySelectorAll('main div[title]')].find(e=>e.getClientRects().length&&e.getAttribute('title').trim()&&e.getAttribute('title').trim()===e.innerText.trim()); window.__d8=e||null; return e?e.getAttribute('title'):null;})()")
+        hover(FON, .7); d = J(DICA); t1 = J(f"(({FON})||{{getAttribute:()=>'sem fonte'}}).getAttribute('title')")
+        chk('D8 título igual ao rótulo visível (fonte do mapa no IN-04): sem dica', bool(t0) and not d['vis'], [t0, d])
         # revisão DS (achado 9): o title igual ao rótulo faria o navegador mostrar a dica nativa repetida: ele sai enquanto o ponteiro está em cima
-        fora(); t2 = J(f"({MAPA}).getAttribute('title')")
-        chk('D8b ponteiro no item "Mapa" do menu aberto: o title igual ao rótulo sai (sem a dica nativa repetida) e volta quando o ponteiro sai', t0 == 'Mapa' and t1 is None and t2 == 'Mapa', [t0, t1, t2])
+        fora(); t2 = J(f"(({FON})||{{getAttribute:()=>'sem fonte'}}).getAttribute('title')")
+        chk('D8b ponteiro na fonte do mapa (title igual ao texto): o title sai (sem a dica nativa repetida) e volta quando o ponteiro sai', bool(t0) and t1 is None and t2 == t0, [t0, t1, t2])
+        abre('OS.dc.html')
         fora(); troca_visao(J, 'kanban')
         COLT = "[...document.querySelectorAll('[role=list] [data-dica-de]')].find(s=>s.textContent.trim()==='A liberar')"   # textContent: o título da coluna é maiúsculo só no CSS
         hover(COLT, .7); d = J(DICA)

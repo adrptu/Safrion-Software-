@@ -107,7 +107,7 @@ MEDE=r"""(()=>{
  const nav=document.querySelector('.etp'); if(nav&&vis(nav)){ const at=nav.querySelector('.etp-atual'); const comp=!!(at&&vis(at)); const cur=nav.querySelector('.etp-itens [aria-current=step],.etp-itens [aria-current=page],.etp-itens [aria-current=true]');
    out.etapa=comp?n(at.innerText):(cur?n(cur.innerText):''); out.etapaOk=comp?topo(at):(!!cur&&topo(cur)); out.etapaCompacta=comp;
    const its=[...nav.querySelectorAll('.etp-itens>*')].filter(vis); let sob=0; for(let i=0;i<its.length;i++) for(let j=i+1;j<its.length;j++){ const a=its[i].getBoundingClientRect(), b=its[j].getBoundingClientRect(); if(Math.min(a.right,b.right)-Math.max(a.left,b.left)>1&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>1) sob++; } out.etapaSob=sob; }
- const tog=document.querySelector('.ml-tog'); if(tog) out.menuBtnOk=topo(tog);
+ const tog=document.querySelector('.ml-tog'); if(tog&&vis(tog)) out.menuBtnOk=topo(tog);   // 13/10: a barra é sempre recolhida e a .ml-tog fica oculta (marcador)
  const menu=document.querySelector('.menu-lat'); const m=document.querySelector('main');
  if(menu&&m){ const a=menu.getBoundingClientRect(), b=m.getBoundingClientRect(); out.menu=[Math.round(a.width),getComputedStyle(menu).position]; out.menuCobre=a.right>b.left+1; }
  if(m){ const r=m.getBoundingClientRect(); out.mainW=Math.round(Math.min(r.right,vw)-Math.max(r.left,0)); out.util=Math.round(Math.min(r.bottom,vh)-Math.max(r.top,0));

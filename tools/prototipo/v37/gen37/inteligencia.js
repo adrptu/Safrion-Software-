@@ -91,11 +91,15 @@ function intLinhaPreco(s) { if (!s || !s.length) return null; const z = intSazon
   return { s, z, atual: ult.p, mesAtual: intMes(ult.m), ref: ult.m, v1: intVarK(s, 1), v12: intVarK(s, 12), tend: t.est, tv: t.v, norma: z ? intNorma(s, z) : null }; }
 /* venda: melhor mês dos próximos 12; esperar só compensa se o ganho histórico menos o custo do dinheiro (1,2% a.m.) passar de 3%.
    Perecível não espera: a época boa orienta o plantio e a colheita, e a venda acompanha a colheita */
-function intMomentoVenda(s, perecivel) { const L = intLinhaPreco(s); if (!L || !L.z) return L; const z = L.z, m0 = L.mesAtual; let bd = 0;
-  for (let d = 1; d < 12; d++) if (prCmp(z.idx[(m0 + d) % 12], z.idx[(m0 + bd) % 12]) > 0) bd = d;
-  const ganho = intRel(z.idx[(m0 + bd) % 12], z.idx[m0]); const liq = prSub(ganho, prMul(INT_TAXA_MES, bd));
-  const rec = perecivel ? 'Vender na colheita' : (bd === 0 || prCmp(L.norma.vs, INT_NORMA) >= 0) ? 'Vender agora' : prCmp(liq, INT_SAZ) >= 0 ? 'Esperar' : 'Sem ganho em esperar';
-  return Object.assign(L, { melhor: intExtremo(z, true), bd, mesAlvo: (m0 + bd) % 12, ganho, liq, rec, perecivel: !!perecivel }); }
+function intMomentoVenda(s, perecivel) { const L = intLinhaPreco(s); if (!L || !L.z) return L; const z = L.z, m0 = L.mesAtual; let bdB = 0;
+  for (let d = 1; d < 12; d++) if (prCmp(z.idx[(m0 + d) % 12], z.idx[(m0 + bdB) % 12]) > 0) bdB = d;   // melhor mês bruto à frente (0 = agora)
+  /* revisão Codex INTEL-02-LIQUIDO-01 (S2): o mês-alvo é o de maior ganho LÍQUIDO nos próximos 11 meses (índice do mês ÷ agora − 1 − custo do
+     dinheiro × meses de espera); empate: o mais cedo (não esperar sem benefício). Antes o alvo era o maior índice bruto, e um mês próximo que
+     pagava a espera ficava de fora ("Sem ganho em esperar" falso). */
+  let bd = 0, liq = 0, ganho = 0;
+  if (bdB > 0) { liq = null; for (let d = 1; d < 12; d++) { const g = intRel(z.idx[(m0 + d) % 12], z.idx[m0]), l = prSub(g, prMul(INT_TAXA_MES, d)); if (liq === null || prCmp(l, liq) > 0) { liq = l; bd = d; ganho = g; } } }
+  const rec = perecivel ? 'Vender na colheita' : (bdB === 0 || prCmp(L.norma.vs, INT_NORMA) >= 0) ? 'Vender agora' : prCmp(liq, INT_SAZ) >= 0 ? 'Esperar' : 'Sem ganho em esperar';
+  return Object.assign(L, { melhor: intExtremo(z, true), bdBruto: bdB, bd, mesAlvo: (m0 + bd) % 12, ganho, liq, rec, perecivel: !!perecivel }); }
 /* compra: melhor mês entre agora e o último dia para pedir e receber antes da necessidade (Planejar safra − prazo de entrega) */
 function intMesesAte(de, ate) { return (Number(ate.slice(0, 4)) - Number(de.slice(0, 4))) * 12 + Number(ate.slice(5, 7)) - Number(de.slice(5, 7)); }
 function intMomentoCompra(s, lim) { const L = intLinhaPreco(s); if (!L || !L.z) return L; const z = L.z, m0 = L.mesAtual;

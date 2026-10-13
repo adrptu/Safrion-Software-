@@ -32,6 +32,16 @@ def go(pg, hash='', limpa=False):
     if limpa: J("localStorage.clear(); sessionStorage.clear(); 1"); c.goto(f'http://127.0.0.1:{p}/{pg}{hash}')
     time.sleep(.4)
 def body(): return J("document.body.innerText") or ''
+def espera(js, ate=20.0):
+    """espera a condição observável (página nova pronta), não um tempo fixo; no limite devolve False e a verificação falha"""
+    t0 = time.time()
+    while time.time() - t0 < ate:
+        try:
+            if J(js): return True
+        except Exception: pass
+        time.sleep(.1)
+    return False
+def pronta(pg, extra='true'): return f"location.pathname.endsWith('/{pg}') && document.readyState==='complete' && !!document.body && ({extra})"
 def toast(): return J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
 def dlg(): return J(f"(()=>{{const d=[...document.querySelectorAll('aside[role=dialog]')].find({VIS}); return d?d.innerText.replace(/\\s+/g,' '):'';}})()") or ''
 def clk(t, root='', vez=1):
@@ -56,9 +66,21 @@ try:
     c = Chrome(); c.aparelho(1440, 900)
     # ============ cenário A · 23/09: menu, estado, uma primária, grades, prévia, aceite, desfazer, talhão de 50 ha ============
     go('CF-05.dc.html', limpa=True)
-    m = J("""(()=>{const n=document.querySelector('nav.menu-lat'); const it=[...n.querySelectorAll(':scope>a,:scope>button')].map(e=>e.textContent.replace(/\\s+/g,' ').replace(/[▾▸]/g,'').trim());
-      return {it, cf:[...n.querySelectorAll('a[href="CF-05.dc.html"]')].map(a=>a.textContent.trim()), mapa:[...n.querySelectorAll(':scope>a[href="IN-04.dc.html"]')].map(a=>a.textContent.trim()), atual:[...n.querySelectorAll('a[href="CF-05.dc.html"]')].map(a=>getComputedStyle(a).backgroundColor)};})()""")
-    chk('A16 menu: Configurações é o último grupo e abre "Assinatura e cobrança"; Mapa segue link único', m['it'][-1] == 'Configurações' and m['cf'] == ['Assinatura e cobrança'] and m['mapa'] == ['Mapa'], m)
+    # navegação sem submenus (13/10/2026, ui37.MENU2/HUB37/CURTO37): barra só com ícones (aria-label = módulo) e, por último, "Outros acessos";
+    # o ícone Configurações abre a tela de entrada e o cartão "Assinatura" abre esta tela (antes: o subitem "Assinatura e cobrança")
+    m = J("""(()=>{const n=document.querySelector('nav[aria-label=Menu]'); const as=[...n.querySelectorAll('a[aria-label]')].filter(a=>a.closest('.ml-topo')===null);
+      return {it:as.map(a=>a.getAttribute('aria-label')), cfg:as.filter(a=>a.getAttribute('aria-label')==='Configurações').map(a=>a.getAttribute('href')),
+        mapa:as.filter(a=>a.getAttribute('aria-label')==='Mapa').map(a=>a.getAttribute('href')), atual:as.filter(a=>a.getAttribute('aria-current')==='page').map(a=>a.getAttribute('aria-label'))};})()""")
+    ERRL.extend(errs()); J("document.querySelector('nav[aria-label=Menu] a[aria-label=\"Configurações\"]').click()")
+    m['hub'] = espera(pronta('MOD-CFG.dc.html', "document.querySelectorAll('a.mod-cartao').length>0"))
+    m['cartoes'] = J("[...document.querySelectorAll('a.mod-cartao')].filter(a=>a.getClientRects().length).map(a=>[a.getAttribute('href'),a.innerText.replace(/\\s+/g,' ').trim()])") or []
+    ERRL.extend(errs()); m['clk'] = clk('Assinatura', '.mod-grade')
+    m['volta'] = espera(pronta('CF-05.dc.html', "!!document.querySelector('header h1') && document.querySelectorAll('main [role=table]').length>0")); time.sleep(.4)
+    m['h1'] = J("(document.querySelector('header h1')||{innerText:''}).innerText.trim()")
+    chk('A16 navegação: Configurações é o último módulo da barra (antes de Outros acessos), marcado nesta tela; o ícone abre a tela de entrada e o cartão "Assinatura" abre "Assinatura e cobrança"; Mapa segue link único',
+        m['it'][-2:] == ['Configurações', 'Outros acessos'] and m['cfg'] == ['MOD-CFG.dc.html'] and m['atual'] == ['Configurações'] and m['hub']
+        and [x for x in m['cartoes'] if x[0] == 'CF-05.dc.html'] == [['CF-05.dc.html', 'Assinatura']] and m['clk'] == 'ok' and m['volta'] and m['h1'] == 'Assinatura e cobrança'
+        and m['mapa'] == ['IN-04.dc.html'], m)
     b = body()
     chk('A7a 23/09: selo Ativa; resumo Completo · 2.570,23 ha de 2.600 ha · R$ 5.140,46 (set/2026 fecha em 30/09) · próxima 01/10/2026',
         selo() == 'Ativa' and all(x in b for x in ('Completo', '2.570,23 ha', 'de 2.600 ha contratados', 'R$ 5.140,46', 'set/2026 fecha em 30/09', '01/10/2026')), [selo(), b[:600]])

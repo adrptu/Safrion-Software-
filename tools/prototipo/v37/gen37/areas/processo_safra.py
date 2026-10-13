@@ -283,7 +283,7 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
     s3=bloco('Operações e recursos','',corpo3,acao=custo)
     s4=bloco('Demanda de insumos por grupo',H('k6'),g_dem,desc_hole=True,
                 acao=f'<span style="display: inline-flex; align-items: center; gap: 8px;"><sc-if value="{H("sol_link")}" hint-placeholder-val="{F()}"><a href="{H("sol_href")}" style="{_MINI} text-decoration: none;">Abrir em Compra de insumos ›</a></sc-if></span>')
-    corpo=PR.entrada()+''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{H("true") if i==1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}</div></sc-if>'
+    corpo=''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{H("true") if i==1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}</div></sc-if>'
                   for i,s in enumerate([s1,s2,s3,s4],1)) + E.area_acoes('aa','Ações da etapa')
     # ---------- painel: Resumo da safra (§4.3) ----------
     rs_lin=(f'<div style="display: grid; grid-template-columns: minmax(0,1.2fr) 90px minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr); gap: 8px; padding: 7px 0; border-top: 1px solid {LINE}; font-size: 12.8px; align-items: baseline;">'
@@ -423,4 +423,5 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
     HEIGHTS37[fname]=1500
     shell37('SAF','Planejar safra',corpo,fname=fname,subtitle='',
             steps=steps_state(NOMES),primary_html=None,  # faixa só informa; avanço/retorno/primária na área de ações (UX-ACAO-UNICA-20261003)
-            ctx=(H('ctx_faz'),H('ctx_saf'),None),search=False)
+            ctx=(H('ctx_faz'),H('ctx_saf'),None),search=False,
+            mf_fim=PR.entrada())   # na faixa "Trabalhando em": devolve ao Total a altura que a faixa nova tomou (L1 a 1440 × 1040; diagnóstico 13/10)

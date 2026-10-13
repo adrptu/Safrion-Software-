@@ -22,12 +22,13 @@ Fonte única: `inteligencia.js`, em decimal, com 6 casas nas razões.
 | Tendência | Média dos 3 últimos meses contra os 3 anteriores, **sem o efeito da época** (preço ÷ índice do mês). Acima de +3% é Alta; abaixo de −3%, Queda; entre os dois, Estável |
 | Normal do mês | Média dos últimos 12 meses × índice do mês |
 | Agora vs normal | Preço ÷ normal do mês − 1 |
-| Melhor mês | Venda: o de maior índice; compra: o de menor. Empate: o mês mais cedo |
+| Melhor mês (histórico) | Venda: o de maior índice; compra: o de menor. Empate: o mês mais cedo. É informação: o mês-alvo da venda é o de maior ganho líquido (abaixo) |
 
 ## O que fazer
 **Venda:**
 - **"Vender agora":** o mês atual é o melhor dos próximos 12, ou o preço está 5% ou mais acima do normal.
-- **"Esperar":** o ganho até o melhor mês, menos o custo do dinheiro (1,2% a.m. × meses), passa de 3%. A tela lembra de somar a armazenagem.
+- **"Esperar":** o maior ganho líquido nos próximos 11 meses passa de 3%. Ganho líquido de cada mês: índice do mês ÷ índice de agora − 1 − custo do dinheiro (1,2% a.m. × meses de espera). O alvo é esse mês; no empate, o mais cedo. A tela lembra de somar a armazenagem.
+  - Revisão Codex INTEL-02-LIQUIDO-01 (13/10): antes o alvo era o mês de maior preço bruto, e um mês próximo que pagava a espera ficava de fora ("Sem ganho em esperar" falso; o Milho em grão da demonstração era um caso).
 - **"Sem ganho em esperar":** nenhuma das condições acima.
 - **Perecível (mamão):** "Vender na colheita". Não dá para estocar e esperar; a época boa orienta o plantio e a colheita.
 
@@ -49,11 +50,12 @@ Fonte única: `inteligencia.js`, em decimal, com 6 casas nas razões.
   Condição de retorno: fonte real de preço contratada, ou pedido do proprietário.
 
 ## Testes executados
-- `inteligencia_unit_test.py`: **32/32**.
+- `inteligencia_unit_test.py`: **35/35** (32 antes da revisão INTEL-02-LIQUIDO-01; P11 a P13 entraram com ela; com a regra antiga, P5, P11 e P13 falham).
   - Casos P1 a P10, contra um oráculo em Decimal que refaz índice, tendência, normal, melhor mês, recomendação e economia a partir dos mesmos dados, sem o JS.
   - P7, contraprova da tendência: uma série só com a época sai Estável, onde a conta crua diria Alta (+10,5%).
   - P8, contraprova do prazo: necessidade neste mês → Comprar agora; necessidade em janeiro → Esperar até janeiro (9,5% mais barato).
   - P9: o perecível não espera.
+  - P11, caso do revisor: outubro paga +8,8% líquido e agosto −1,2%; o certo é Esperar até outubro. P12: sem ganho líquido continua "Sem ganho em esperar". P13: empate fica com o mês mais cedo.
 - `inteligencia_nav_test.py`: **27/27**, em 1440 e 390 px.
   - Indicadores de preço no topo.
   - Linhas: soja, milho, mamão, feijão, semente 58 W (pedir até 05/10) e glifosato.

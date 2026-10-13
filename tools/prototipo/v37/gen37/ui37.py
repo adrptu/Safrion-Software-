@@ -81,7 +81,7 @@ def menu_item(fname):
             if h==f or (f.startswith(h.replace('.dc.html','')) and f!=h and h not in ('IN-04.dc.html',) and f[:len(h)-8]==h[:-8]): return i,h
     return None,None
 def oculto(fname):
-    return menu_item(fname)[0] is None and fname not in ('Main.dc.html',OUTROS37[2])
+    return menu_item(fname)[0] is None and fname not in ('Main.dc.html',OUTROS37[2]) and fname not in {h for _,h,_ in OUTROS37[3]}   # pontas de Outros acessos não são ocultas
 def subnav_st(cur):
     """estilo do subitem do menu (ativo ou não); a Manutenção usa os dois no navegador para destacar a visão aberta."""
     return ('display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; '
@@ -263,15 +263,15 @@ MACRO = {
     'SAF.dc.html': dict(faz='contexto', saf='contexto'),
     'CMP.dc.html': dict(faz='contexto', saf='contexto'),
     'EST.dc.html': dict(faz='filtro'),
-    'COLH.dc.html': dict(faz='filtro', saf='filtro'),
-    'CARGA.dc.html': dict(faz='filtro', saf='filtro'),
-    'PROD.dc.html': dict(faz='filtro', saf='filtro'),
+    'COLH.dc.html': dict(faz='filtro', saf='filtro', cult='filtro', tal='filtro'),   # 13/10: Cultura e Talhão onde ajudam (colheita é por cultura e talhão)
+    'CARGA.dc.html': dict(faz='filtro', saf='filtro', cult='filtro'),
+    'PROD.dc.html': dict(faz='filtro', saf='filtro', cult='filtro'),
 }
 FAZENDAS = ['Lagoa Grande', 'Santa Rita', 'Boa Vista']
 SAFRAS_MF = ['2026/27', 'Safrinha 2027', '2025/26']
 def _macro_html(fname, ctx, sep=True):
     cfg = MACRO.get(fname)
-    sel = ('font-family: inherit; font-size: 12px; font-weight: 700; padding: 4px 26px 4px 10px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer;')
+    sel = ('font-family: inherit; font-size: 12px; font-weight: 700; padding: 4px 26px 4px 10px; min-height: 32px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer;')   # alvo de toque ≥ 32 px
     lab = f'display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: {GRAYS}; font-weight: 700; font-size: 11.5px;'
     if cfg is None:
         return ''
@@ -309,7 +309,7 @@ def faixa_cobranca(fid,fname):
             f'<span class="assin-fx-w">{{{{assin_fx_t}}}}</span><span class="assin-fx-m">{{{{assin_fx_m}}}}</span><a href="CF-05.dc.html#pagar" style="color: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: 3px;">Pagar fatura ›</a></div></sc-if>')
 def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=None,crumbs_extra=None,
             ctx=('Fazenda Santa Rita','Safra 2026/27',None),cont=None,chipsrow='',footer=None,
-            fname=None,W=1440,H=880,perfil='Ana · Gestora',search=True,steps=None,primary_html=None):
+            fname=None,W=1440,H=880,perfil='Ana · Gestora',search=True,steps=None,primary_html=None,mf_fim=''):
     fname=fname or ffile(fid)
     H=_h(fname,H)
     if steps: H=max(900,min(H,1000))  # processos: tela de trabalho com rolagem interna; faixa de etapas sempre visível
@@ -341,8 +341,8 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
             _filtra='filtro' in (MACRO.get(fname) or {}).values()   # só contexto (Planejar safra, Compra): a faixa diz onde se trabalha, não "filtros"
             _rot='Filtros desta tela' if _filtra else 'Trabalhando em'
             body=(f'<div class="mf-tela" role="group" aria-label="{_rot}" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex-shrink: 0; '
-                  f'padding: 8px 14px; border: 1px solid {LINE}; border-radius: 12px; background: {SURF};">'
-                  f'<span style="font-size: 11.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: {MUTED};">{_rot}</span>{mf}</div>') + body
+                  f'padding: {"0 14px" if mf_fim else "8px 14px"}; border: 1px solid {LINE}; border-radius: 12px; background: {SURF};">'
+                  f'<span style="font-size: 11.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: {MUTED};">{_rot}</span>{mf}' + (f'<span style="margin-left: auto;">{mf_fim}</span>' if mf_fim else '') + '</div>') + body   # mf_fim: ação da tela que cabe na faixa (Planejar safra: Comparar versões do plano), sem uma linha a mais
         search=False
     st=chip(status[0],status[1]) if status else ''
     srch=(f'<span style="flex-grow: 1;"></span><span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid {LINE}; border-radius: 999px; background: {SURF}; color: {MUTED}; font-size: 12.5px; min-width: 220px;">'

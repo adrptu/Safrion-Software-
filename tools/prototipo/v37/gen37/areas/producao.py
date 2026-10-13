@@ -146,7 +146,19 @@ function prPill(on){ return 'font-family:inherit;font-size:13px;font-weight:700;
 function prInSt(err){ return 'font-family:inherit;font-size:15px;padding:9px 11px;border-radius:10px;box-sizing:border-box;width:100%;max-width:240px;background:#FFFFFF;color:#15201A;border:1px solid '+(err?'#B42318':'#E4E9E5')+';'; }
 function prCel(t,k){ return {t:String(t==null?'':t), st:k==='b'?'font-weight:800;color:#15201A;':(k==='mut'?'color:#65736A;':(k==='red'?'color:#B42318;font-weight:700;':(k==='ok'?'color:#1E7A4C;font-weight:700;':'color:#15201A;')))}; }
 /* filtros do topo (DEC-2609-11): nestas telas a fazenda começa em Todas (a colheita em curso é da Lagoa Grande e o estoque de grão da Santa Rita) */
-function prTopo(self,v){ if(self.state.mf_faz===undefined){ self.state.mf_faz='Todas'; } v.mf_faz=self.state.mf_faz; v.mf_saf=self.state.mf_saf||'Todas'; }
+function prTopo(self,v){ if(self.state.mf_faz===undefined){ self.state.mf_faz='Todas'; } v.mf_faz=self.state.mf_faz; v.mf_saf=self.state.mf_saf||'Todas';
+  /* Cultura e Talhão (proprietário, 13/10/2026: "nas demais telas que isso for bastante essencial e ajudar o usuário"): as opções são as dos cultivos
+     com produção no recorte de Fazenda e Safra; o Talhão segue a Cultura escolhida. Colheita usa os dois; Cargas e Estoque de produto, a Cultura. */
+  const cu=self.state.mf_cult||'Todas', cs=[], ts=[];
+  Object.values(PRDC.cult).forEach(k=>{ if(!k.prod||!prFazOk(self,k.faz)||!prSafOk(self,(PRDC.safras[k.saf]||{}).mf)) return; if(cs.indexOf(k.cultura)<0) cs.push(k.cultura);
+    if((cu==='Todas'||k.cultura===cu)&&ts.indexOf(k.local)<0) ts.push(k.local); });
+  cs.sort((a,b)=>a.localeCompare(b,'pt-BR')); ts.sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true})); if(cu!=='Todas'&&cs.indexOf(cu)<0) cs.push(cu);
+  v.mf_cult=cu; v.mf_cult_opts=[{v:'Todas',t:'Todas'}].concat(cs.map(c=>({v:c,t:c})));
+  v.mf_setcult=(e)=>self.setState({mf_cult:e.target.value,mf_tal:'',g2toast:'Cultura: '+e.target.value});
+  const tl=self.state.mf_tal||''; if(tl&&ts.indexOf(tl)<0) ts.push(tl); v.mf_tal=tl; v.mf_tal_opts=[{v:'',t:'Todos'}].concat(ts.map(t=>({v:t,t})));
+  v.mf_settal=(e)=>self.setState({mf_tal:e.target.value,g2toast:'Talhão: '+(e.target.value||'Todos')}); }
+function prCultOk(self,cu){ const f=self.state.mf_cult||'Todas'; return f==='Todas'||!cu||cu===f; }
+function prTalOk(self,t){ const f=self.state.mf_tal||''; return !f||!t||t===f; }
 function prFazOk(self,faz){ const f=self.state.mf_faz||'Todas'; return f==='Todas'||!faz||faz===f; }
 function prSafOk(self,saf){ const s=self.state.mf_saf||'Todas'; return s==='Todas'||!saf||saf===s; }
 /* formulário do painel: valores em self.state.pr_form; o padrão (o.v) só para o que é herdado ou calculado, nunca último valor */
@@ -287,7 +299,7 @@ const _g2rows0=g2rows; g2rows=function(self,sp){ return PR_GRIDS[sp.id]?sp.rows:
 function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c; const P=prP(c);
   self.g2pick=(gid,rid)=>{ if(String(rid).indexOf('grp:')===0) return; self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null,pr_cx:null,pr_ch:prChave('W-RS')}); };
   const so=self.state.pr_saldo!==false; v.sl_on=String(so); v.sl_st=prPill(so); v.sl_tog=()=>self.setState({pr_saldo:!so});
-  const lots=Object.values(P.lotes).filter(L=>prFazOk(self,L.faz)&&prSafOk(self,L.saf)); const prods={};
+  const lots=Object.values(P.lotes).filter(L=>prFazOk(self,L.faz)&&prSafOk(self,L.saf)&&prCultOk(self,L.cultura)); const prods={};
   lots.forEach(L=>{ const S=prSaldos(c,L); if(so&&S.esgotado) return; (prods[L.prod]=prods[L.prod]||[]).push({L,S}); });
   const rows=Object.keys(prods).sort().map(pr=>{ const ls=prods[pr]; const U=x=>prLoteTxt(ls[0].L,x); const sm=k=>prSoma(ls.map(x=>x.S[k]));
     return {id:'grp:'+pr,ro:true,v:{nome:pr,prod:pr,fis:sm('fis'),blq:sm('blq'),proc:sm('proc'),apto:sm('apto'),res:sm('res'),disp:sm('disp')},
@@ -417,10 +429,10 @@ function prCgRow(c,g){ const P=prP(c); const s=prCgSit(c,g); const L=P.lotes[g.l
        sit:[{k:'chip',t:s.t,c:s.c},{k:'br'},s.h?{k:'link',t:s.nx,h:s.h}:{k:'mut',t:s.nx}]}}; }
 function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c; const P=prP(c);
   self.g2pick=(gid,rid)=>self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null,pr_ch:null});
-  const gs=prCargas(c,g=>g.sinc!==false&&prFazOk(self,g.faz)&&prSafOk(self,((PRDC.safras[(PRDC.cult[(g.origem[0]||{}).cult]||{}).saf]||{}).mf)||''));
+  const gs=prCargas(c,g=>g.sinc!==false&&prFazOk(self,g.faz)&&prSafOk(self,((PRDC.safras[(PRDC.cult[(g.origem[0]||{}).cult]||{}).saf]||{}).mf)||'')&&prCultOk(self,(PRDC.cult[(g.origem[0]||{}).cult]||{}).cultura||''));
   GR('g_cg').rows=gs.map(g=>prCgRow(c,g)); self._gs=gs; }
 /* origens possíveis da carga (R-06): O.S. de colheita Liberadas, Em execução ou Em conferência, nas fazendas do filtro */
-function prOrigens(self,c){ return Object.values(c.ordens||{}).filter(o=>prEhColheita(o)&&PR_FASES_COLH.indexOf(o.etapa)>=0&&prFazOk(self,prFazDaOS(c,o))).sort((a,b)=>a.id.localeCompare(b.id)); }
+function prOrigens(self,c){ return Object.values(c.ordens||{}).filter(o=>prEhColheita(o)&&PR_FASES_COLH.indexOf(o.etapa)>=0&&prFazOk(self,prFazDaOS(c,o))&&prCultOk(self,(PRDC.cult[prCultDaOS(c,o)]||{}).cultura||'')).sort((a,b)=>a.id.localeCompare(b.id)); }
 function prFormPesar(self,c,g){ const P=prP(c); const nova=!g; const ords=prOrigens(self,c);
   const os1=g?g.os:prFval(self,'os',ords.length===1?ords[0].id:''); const o=c.ordens[os1]; const cu=g?g.cultura:(o?(PRDC.cult[prCultDaOS(c,o)]||{}).cultura:''); const u=cu?prUn(cu):{};
   const mix=!g&&prFval(self,'mix','')==='sim'; const os2=prFval(self,'os2','');
@@ -581,7 +593,7 @@ function prGrpNum(cu,rs){ const pd=prPonderada(rs); const nap=rs.filter(r=>r&&r.
   return nap?prPrtvResTxt(cu,{apurar:true},op)+' · '+n:n; }
 function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c;
   self.g2pick=(gid,rid)=>{ if(String(rid).indexOf('grp:')===0) return; self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null}); };
-  const cids=Object.keys(PRDC.cult).filter(id=>{ const k=PRDC.cult[id]; return k.prod&&prFazOk(self,k.faz)&&prSafOk(self,(PRDC.safras[k.saf]||{}).mf); });
+  const cids=Object.keys(PRDC.cult).filter(id=>{ const k=PRDC.cult[id]; return k.prod&&prFazOk(self,k.faz)&&prSafOk(self,(PRDC.safras[k.saf]||{}).mf)&&prCultOk(self,k.cultura)&&prTalOk(self,k.local); });
   const X=cids.map(id=>prTal(c,id)); self._X=X; const por={};
   X.forEach(x=>{ (por[x.k.cultura]=por[x.k.cultura]||[]).push(x); });
   const grupos=Object.keys(por).map(cu=>{ const xs=por[cu].sort((a,b)=>(PR_SITORD[a.sit]-PR_SITORD[b.sit])||String(a.k.local).localeCompare(String(b.k.local),'pt-BR',{numeric:true}));

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """Teste CDP · celular operável sem redesenho do desktop (revisão QUALIDADE-ARTEFATO-20261003-FLUXO, item 3).
 Faixa de etapas em tela estreita: etapa atual em texto ("Etapa 2 de 6 · Confira a demanda"), ‹ › e lista completa sob demanda
-(toque e teclado); título e comando principal na tela; tabela em região rolável; menu aberto passa por cima do conteúdo;
-contexto e rascunho preservados ao trocar de etapa e de zoom; painel lateral cobre a faixa.
+(toque e teclado); título e comando principal na tela; tabela em região rolável; barra lateral sempre recolhida (68 px, só ícones
+com dica, sem expandir: proprietário, 13/10/2026) e o conteúdo com a largura restante; contexto e rascunho preservados ao trocar de
+etapa e de zoom; painel lateral cobre a faixa.
 Larguras: 390 px (quadro de 390), 325 px (quadro do site com a janela de 390) e zoom de 200 % (1440 px → 720 px CSS, escala 2).
 Uso: python3 etapas_celular_test.py              celular (≈ 50 s, capturas em _probe/q_celular_<TAG>_*.png, TAG=depois)
      python3 etapas_celular_test.py complemento  listas alcançáveis, títulos de bloco, CD-07, tela baixa, folha de etapas (≈ 60 s)
@@ -51,7 +52,10 @@ MEDIR = r"""(()=>{
   const tabs=[...m.querySelectorAll('[role=table]')].filter(vis); out.tabelas=tabs.length;
   const fol=[...m.querySelectorAll('*')].filter(e=>e.getClientRects().length&&[...e.childNodes].some(x=>x.nodeType===3&&x.textContent.trim())&&!e.closest('[role=table]'));
   const RR=fol.map(e=>{const rg=document.createRange(); rg.selectNodeContents(e); return [...rg.getClientRects()].filter(r=>r.width>1);}); const sm=[];
-  for(let i=0;i<fol.length;i++) for(let j=i+1;j<fol.length;j++){ if(fol[i].contains(fol[j])||fol[j].contains(fol[i])) continue; for(const a of RR[i]) for(const b of RR[j]){ const w=Math.min(a.right,b.right)-Math.max(a.left,b.left), h=Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top); if(w>2&&h>2) sm.push(n(fol[i].innerText).slice(0,25)+' × '+n(fol[j].innerText).slice(0,25)); } }
+  // conteúdo que rola por baixo da área de ações presa (sticky, fundo opaco, por cima no ponto) fica escondido: não é texto sobre texto
+  const ac=document.querySelector('[data-acoes]'), acCs=ac&&getComputedStyle(ac), acOpaca=!!acCs&&acCs.position==='sticky'&&/^rgb\(/.test(acCs.backgroundColor);
+  const escondido=(p,q,x,y)=>{ if(!acOpaca||ac.contains(p)===ac.contains(q)) return false; const t=document.elementFromPoint(x,y); return !!t&&ac.contains(t); };
+  for(let i=0;i<fol.length;i++) for(let j=i+1;j<fol.length;j++){ if(fol[i].contains(fol[j])||fol[j].contains(fol[i])) continue; for(const a of RR[i]) for(const b of RR[j]){ const w=Math.min(a.right,b.right)-Math.max(a.left,b.left), h=Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top); if(w>2&&h>2&&!escondido(fol[i],fol[j],(Math.max(a.left,b.left)+Math.min(a.right,b.right))/2,(Math.max(a.top,b.top)+Math.min(a.bottom,b.bottom))/2)) sm.push(n(fol[i].innerText).slice(0,25)+' × '+n(fol[j].innerText).slice(0,25)); } }
   out.textoSobreTexto=[...new Set(sm)].slice(0,4);
   out.tabelasRolam=tabs.map(t=>{ for(let p=t;p&&p!==m;p=p.parentElement){ const ox=getComputedStyle(p).overflowX; if(ox==='auto'||ox==='scroll') return true; } return false; });
  }
@@ -63,6 +67,24 @@ COBRE = r"""(()=>{ const d=[...document.querySelectorAll('aside[role=dialog]')].
  const r=alvo.getBoundingClientRect(); const pts=[[r.left+8,r.top+r.height/2],[r.left+r.width/2,r.top+r.height/2],[r.right-8,r.top+r.height/2]];
  const fora=pts.filter(([x,y])=>{ const e=document.elementFromPoint(x,y); return e&&alvo.contains(e); });
  const ar=d.getBoundingClientRect(); return {painelW:Math.round(ar.width),painelX:Math.round(ar.left),faixaVisivelSobre:fora.length,vw:innerWidth}; })()"""
+# barra lateral sempre recolhida (proprietário, 13/10/2026: "somente recolhido com os ícones e tooltip sem opção de expandir"): largura e
+# posição da barra, coluna do conteúdo, um ícone com nome por módulo (aria-label = title da dica, sem texto visível, sem submenu), cada ícone
+# e o avatar do perfil de demonstração tocáveis (nada por cima), nenhum controle de expandir/recolher o menu e nenhum fundo de menu sobreposto
+BARRA = r"""(()=>{ const m=document.querySelector('nav[aria-label=Menu]'); if(!m) return {semBarra:true};
+ const vis=e=>!!e&&e.getClientRects().length>0&&getComputedStyle(e).visibility!=='hidden'; const n=s=>(s||'').replace(/\s+/g,' ').trim();
+ const r=m.getBoundingClientRect(), col=document.querySelector('main[data-scroll]').getBoundingClientRect(), st0=m.scrollTop;
+ const toca=e=>{ e.scrollIntoView({block:'nearest',inline:'nearest'}); const q=e.getBoundingClientRect(); const h=document.elementFromPoint(q.left+q.width/2,q.top+q.height/2); return !!h&&(e===h||e.contains(h)||h.contains(e)); };
+ const its=[...m.querySelectorAll('a[href]')].filter(vis).filter(a=>!a.closest('.ml-topo'));
+ const ruins=its.filter(a=>{ const al=n(a.getAttribute('aria-label')), t=n(a.getAttribute('title')); return !al||al!==t||!!n(a.innerText)||!a.querySelector('svg')||!toca(a); }).map(a=>n(a.getAttribute('aria-label'))||a.getAttribute('href'));
+ const pf=m.querySelector('select[aria-label="Trocar perfil de demonstração"]'); const pfOk=!!pf&&vis(pf)&&toca(pf); m.scrollTop=st0;
+ const exp=[...document.querySelectorAll('button,[role=button],a,label,input')].filter(vis).filter(e=>/\b(expandir|recolher|abrir|fechar|mostrar|ocultar)\b.{0,12}\bmenu\b/i.test(n(e.getAttribute('aria-label'))+' '+n(e.getAttribute('title'))+' '+n(e.innerText))).length+[...m.querySelectorAll('button')].filter(vis).length;
+ const tg=document.querySelector('.ml-tog'), fu=document.querySelector('.ml-fundo');
+ return {w:Math.round(r.width), pos:getComputedStyle(m).position, colL:Math.round(col.left), colW:Math.round(col.width), itens:its.length, ruins, pfOk, exp,
+   togVis:!!tg&&vis(tg), togBotao:!!tg&&tg.matches('button,[role=button],[tabindex]'), fundo:!!fu&&vis(fu)}; })()"""
+def barra_ok(b,colW):
+    """barra de 68 px ao lado (não sobrepõe), conteúdo a partir de 68 px com a largura restante, ícones com nome e tocáveis, sem expandir"""
+    return (isinstance(b,dict) and b.get('w')==68 and b.get('pos') not in ('absolute','fixed') and b.get('colL')==68 and b.get('colW')==colW and b.get('itens',0)>=5
+            and not b.get('ruins') and b.get('pfOk') and b.get('exp')==0 and not b.get('togVis') and not b.get('togBotao') and not b.get('fundo'))
 # ---- Chrome: anexa a um já aberto (CDP_PORT) ou abre um novo com espera longa (máquina carregada) ----
 class ChromeAnexo(Chrome):
     def __init__(self,port=None,w=1440,h=900,espera=90):
@@ -130,22 +152,22 @@ try:
         # 5 · quadro do site (325 px), o caso da revisão
         m=abre('CMP',325,700); shot('CMP_325')
         chk('5 325 px (quadro do site) · Compras sem sobreposição, "Etapa 1 de 6 · Escolha a safra", título inteiro', m['sobrepoe']==0 and not m['vazam'] and m['progresso'].startswith(exp['CMP']) and not m['h1Cortado'] and not m['headerFora'], m)
-        # 6 · menu aberto em 390: passa por cima, não espreme; recolher devolve. Desde 03/10 (verificação de componentes, item
-        #     "menu aberto guardado") a tela estreita sempre começa com o menu recolhido, mesmo com "aberto" guardado: abre pelo botão
-        abre('CMP',rec='0'); ini=J("Math.round(document.querySelector('.menu-lat').getBoundingClientRect().width)")
-        J("document.querySelector('.menu-lat.rec')&&document.querySelector('.ml-tog').click()"); time.sleep(.4); shot('CMP_390_menu_aberto')
-        g=lambda: J("(()=>{const m=document.querySelector('.menu-lat').getBoundingClientRect(); const col=document.querySelector('main[data-scroll]').getBoundingClientRect(); const t=document.querySelector('.ml-tog'); const r=t.getBoundingClientRect(); const e=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2); return [Math.round(m.width),Math.round(col.left),Math.round(col.width),t.contains(e)];})()")
-        a=g(); J("document.querySelector('.ml-tog').click()"); time.sleep(.4); b=g()
-        chk('6 390 px · com "aberto" guardado começa recolhido (68 px); aberto pelo botão passa por cima (conteúdo continua com 322 px) e o botão de recolher fica alcançável', ini==68 and a==[232,68,322,True] and b[:3]==[68,68,322], [ini,a,b])
-        # 7-8 · zoom de 200 % (1440 px a 2×): menu recolhido nas telas com etapas e aberto em CMP e SAF
+        # 6 · barra lateral sempre recolhida (proprietário, 13/10/2026; substitui o menu que abria pelo botão e passava por cima): com o
+        #     "aberto" guardado da versão anterior (sem efeito), 68 px ao lado, um ícone com nome por módulo, sem texto, sem submenu e sem botão
+        #     de expandir; o conteúdo fica com os 322 px restantes; os ícones e o avatar (troca do perfil de demonstração) tocáveis
+        abre('CMP',rec='0'); b6=J(BARRA); shot('CMP_390_barra')
+        chk('6 390 px · barra lateral sempre recolhida (68 px, ao lado, mesmo com "aberto" guardado): um ícone com nome por módulo, sem texto nem submenu, sem botão de expandir nem fundo; conteúdo com os 322 px restantes; ícones e avatar do perfil tocáveis',
+            barra_ok(b6,322), b6)
+        # 7-8 · zoom de 200 % (1440 px a 2×): faixa das telas com etapas; barra sempre recolhida em CMP e SAF (antes: menu aberto pelo botão)
         # NAV-1 (integração V56, Codex NAV1-REV-20261010-01): a PA deixou de ter faixa de etapas (lista → detalhe) e sai SÓ desta asserção da
         # faixa; título, comando e rolagem da PA seguem nos itens 3 e 4 (P8) e o contexto, as ações e o teclado dela no pa_lista_test/patest
         z={}
         for pg in ['CMP','SAF','EST','IR-02']: z[pg]=abre(pg,720,450,2); shot(f'{pg}_zoom200')
         chk('7 zoom 200 % · sem sobreposição, etapa atual legível e comando principal na tela (4 telas com etapas)', all(z[g]['sobrepoe']==0 and not z[g]['vazam'] and not z[g]['headerFora'] and not z[g]['h1Cortado'] for g in z), {g:(z[g]['sobrepoe'],z[g]['vazam'],z[g]['progresso'],z[g]['headerFora']) for g in z})
-        def abre_menu(pg): abre(pg,720,450,2,rec='0'); J("document.querySelector('.menu-lat.rec')&&document.querySelector('.ml-tog').click()"); time.sleep(.4); return J(MEDIR)
-        za={pg:abre_menu(pg) for pg in ['CMP','SAF']}; zw=J("Math.round(document.querySelector('.menu-lat').getBoundingClientRect().width)"); shot('SAF_zoom200_menu_aberto')
-        chk('8 zoom 200 % com menu aberto (pelo botão) · CMP e SAF sem sobreposição', zw==232 and all(za[g]['sobrepoe']==0 and not za[g]['vazam'] and za[g]['progresso'] for g in za), [zw,{g:(za[g]['sobrepoe'],za[g]['vazam'],za[g]['progresso']) for g in za}])
+        zb={}
+        for pg in ['CMP','SAF']: zm=abre(pg,720,450,2,rec='0'); zb[pg]=(zm,J(BARRA)); shot(f'{pg}_zoom200_barra')
+        chk('8 zoom 200 % · CMP e SAF com a barra recolhida (68 px, ao lado, sem botão de expandir) e o conteúdo com os 652 px restantes: etapa atual legível, sem sobreposição nem rolagem lateral',
+            all(barra_ok(b,652) and m['sobrepoe']==0 and not m['vazam'] and m['progresso'] and not m['hscroll'] for m,b in zb.values()), {g:(m['sobrepoe'],m['vazam'],m['progresso'],m['hscroll'],b) for g,(m,b) in zb.items()})
         # 9 · teclado: Tab chega à etapa atual, Espaço abre a lista com as 6 etapas; o próximo Tab entra na lista
         abre('CMP'); J("document.activeElement&&document.activeElement.blur()")
         def tab(): c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Tab','code':'Tab','windowsVirtualKeyCode':9}); c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':'Tab','code':'Tab','windowsVirtualKeyCode':9}); time.sleep(.05)
@@ -158,13 +180,13 @@ try:
         abre('CMP'); clk('Abrir compra'); m1=J(MEDIR)
         clk('Etapa 2 de 6'); aberta=J(MEDIR)['etapasVis']; r=clk('3 Solicite cotações','.etp-itens'); m15=J(MEDIR)
         r2=J("(()=>{const b=document.querySelector('[data-acoes] [data-acao=avancar]'); if(!b) return 'sem avanço'; b.scrollIntoView({block:'center'}); b.click(); return b.innerText.trim();})()"); time.sleep(.5)
-        m2=J(MEDIR); hd=J("document.querySelector('header').innerText.replace(/\\s+/g,' ')"); shot('CMP_390_etapa3')
+        m2=J(MEDIR); hd=J("[...document.querySelectorAll('header,.mf-tela')].map(e=>e.innerText).join(' ').replace(/\\s+/g,' ')"); shot('CMP_390_etapa3')
         chk('10 toque · Abrir compra → "Etapa 2 de 6 · Confira a demanda"; a lista aberta só informa (a etapa 3 não é alvo de toque e a etapa não muda); o avanço "Solicitar cotações ›" da área de ações leva à etapa 3, sem texto sobre texto; Safra 2026/27 no contexto (UX-ACAO-UNICA)',
             m1['progresso'].startswith('Etapa 2 de 6 · Confira a demanda') and aberta==6 and r!='ok' and m15['progresso'].startswith('Etapa 2 de 6') and r2.startswith('Solicitar cotações') and m2['progresso'].startswith('Etapa 3 de 6 · Solicite cotações') and m2['etapasVis']==0 and not m2['textoSobreTexto'] and 'Safra 2026/27' in hd, [m1['progresso'],aberta,r,m15['progresso'],r2,m2['progresso'],m2['etapasVis'],m2['textoSobreTexto'],hd[:120]])
         # 11 · ‹ volta uma etapa; mudar de 390 para 1440 e voltar mantém etapa e safra (troca de zoom não perde contexto)
         J("document.querySelector('[data-acoes] [data-acao=voltar]').click()"); time.sleep(.4); m3=J(MEDIR)
         vp(1440,900); m4=J(MEDIR); cur=J("(document.querySelector('[aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ')"); shot('CMP_1440_mesma_sessao')
-        vp(390,844); m5=J(MEDIR); hd=J("document.querySelector('header').innerText.replace(/\\s+/g,' ')")
+        vp(390,844); m5=J(MEDIR); hd=J("[...document.querySelectorAll('header,.mf-tela')].map(e=>e.innerText).join(' ').replace(/\\s+/g,' ')")
         chk('11 "‹ Demanda" (área de ações) volta à etapa 2; em 1440 a faixa completa mostra a etapa 2 e em 390 volta "Etapa 2 de 6", com a Safra 2026/27', m3['progresso'].startswith('Etapa 2 de 6') and m4['etapasVis']==6 and not m4['progresso'] and cur.startswith('2 Confira a demanda') and m5['progresso'].startswith('Etapa 2 de 6') and 'Safra 2026/27' in hd, [m3['progresso'],m4['etapasVis'],cur,m5['progresso']])
         # 12 · rascunho no painel lateral (IR-02 · Programar irrigação): cobre a faixa no celular e o texto digitado sobrevive à troca de zoom
         abre('IR-02'); r=clk('Programar irrigação'); cob=J(COBRE); shot('IR-02_390_painel')

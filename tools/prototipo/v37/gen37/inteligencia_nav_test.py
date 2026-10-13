@@ -1,23 +1,46 @@
 # -*- coding: utf-8 -*-
 """INTEL-01 e INTEL-02 · navegador: Inteligência de vendas (IV) e de compras (IC), pedidos do proprietário de 13/10/2026 (INTEL-02: "mais
 relativo aos preços, tendências, melhor mês para compra e venda": a seção de preço e melhor mês fica no topo de cada tela).
-Confere, em 1440 × 900 e 390 × 844: menu (Comercial › Inteligência de vendas; Suprimentos › Inteligência de compras) com o destaque
-na tela aberta; indicadores; estados honestos (soja "Suspenso" pela saca a conferir, mamão "Sem previsão"; nada vira 0%); o painel
-de cada linha diz a conta e o próximo passo; sem erro de JS e sem rolagem lateral no celular. Dados sintéticos. Uso: python3 inteligencia_nav_test.py"""
-import sys, json
+Confere, em 1440 × 900 e 390 × 844: navegação sem submenus (13/10/2026): o cartão "Inteligência" na tela de entrada do Comercial (logo
+depois do Painel) e do Suprimentos, com o ícone do módulo marcado na tela aberta e "‹ Módulo" de volta; indicadores; estados honestos
+(soja "Suspenso" pela saca a conferir, mamão "Sem previsão"; nada vira 0%); o painel de cada linha diz a conta e o próximo passo; sem erro
+de JS e sem rolagem lateral no celular. Dados sintéticos. Uso: python3 inteligencia_nav_test.py"""
+import sys, json, time
 from ma_lib import MA
 
 PAN = "(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); return a?a.innerText.replace(/\\s+/g,' '):'';})()"
-MENU = "JSON.stringify([...document.querySelectorAll('nav a')].map(a=>[a.innerText.trim(),a.getAttribute('href')]).filter(x=>/^(IV|IC|PCOM|VEN|CMP)\\.dc\\.html/.test(x[1]||'')))"
+# navegação sem submenus (13/10/2026, ui37.MENU2/HUB37/CURTO37/VOLTA37): o ícone do módulo marcado (aria-current) e "‹ Módulo" na tela;
+# os cartões da tela de entrada (href, nome curto) na ordem do menu
+NAV = "JSON.stringify((()=>{const n=document.querySelector('nav[aria-label=Menu]'); const v=document.querySelector('a.volta37'); return {cur:n?[...n.querySelectorAll('a[aria-current=page]')].map(a=>a.getAttribute('aria-label')):null, volta:v?[v.getAttribute('href'),v.innerText.replace(/\\s+/g,' ').trim()]:null};})())"
+CARDS = "JSON.stringify([...document.querySelectorAll('a.mod-cartao')].filter(a=>a.getClientRects().length).map(a=>[a.getAttribute('href'),a.innerText.replace(/\\s+/g,' ').trim()]))"
 KPI = "[...document.querySelectorAll('[aria-label=Indicadores]')].map(x=>x.innerText).join(' ').replace(/\\s+/g,' ').toLowerCase()"
 KPI1 = "(document.querySelector('[aria-label=Indicadores]')||{innerText:''}).innerText.replace(/\\s+/g,' ').toLowerCase()"
 SAZ = "(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); if(!a) return 0; const t=a.innerText; return (t.match(/▮/g)||[]).length>0 ? (t.split('\\n').filter(l=>/▮/.test(l)).length) : 0;})()"
 m = MA(1440, 900); J = m.J
+def espera(js, ate=20.0):
+    """espera a condição observável (a página nova pronta), não um tempo fixo; falha no limite fica explícita no ok seguinte"""
+    t0 = time.time()
+    while time.time() - t0 < ate:
+        try:
+            if J(js): return True
+        except Exception: pass
+        time.sleep(.1)
+    return False
+def pronta(pg, extra='true'): return f"location.pathname.endsWith('/{pg}') && document.readyState==='complete' && !!document.body && ({extra})"
+TELA = "!!document.querySelector('[aria-label=Indicadores]') && [...document.querySelectorAll('[role=row][data-rid]')].some(r=>r.getClientRects().length)"
+def pelo_modulo(volta, hub, cartao, pg):
+    """como o usuário: "‹ Módulo" → tela de entrada → cartão; devolve (nav da tela, cartões, erros da tela de entrada, chegou, erros da tela)"""
+    nv = json.loads(J(NAV) or '{}'); m.clk(volta)
+    espera(pronta(hub, "document.querySelectorAll('a.mod-cartao').length>0")); cs = json.loads(J(CARDS) or '[]'); e_hub = m.errs()
+    m.clk(cartao, '.mod-grade'); ok = espera(pronta(pg, TELA)); time.sleep(.3)
+    return nv, cs, e_hub, ok, m.errs()
 try:
     # ---------------- Vendas ----------------
     m.ir('', pagina='IV.dc.html', limpa=True); m.sem_erro('IV 1440')
-    mn = json.loads(J(MENU) or '[]')
-    m.ok(['Inteligência de vendas', 'IV.dc.html'] in mn and ['Painel comercial', 'PCOM.dc.html'] in mn, 'IV no menu Comercial, ao lado do Painel comercial', mn)
+    nv, cs, e_hub, chegou, e_iv = pelo_modulo('Voltar para Comercial', 'MOD-COM.dc.html', 'Inteligência', 'IV.dc.html')
+    par = [['PCOM.dc.html', 'Painel'], ['IV.dc.html', 'Inteligência']]
+    m.ok(nv.get('cur') == ['Comercial'] and nv.get('volta') == ['MOD-COM.dc.html', '‹ Comercial'] and any(cs[i:i + 2] == par for i in range(len(cs))) and chegou and not e_hub and not e_iv,
+         'IV na tela de entrada do Comercial, logo depois do Painel (ícone Comercial marcado; "‹ Comercial" → cartão "Inteligência" abre a IV sem erro de JS)', [nv, cs, chegou, e_hub, e_iv])
     k1 = J(KPI1) or ''
     m.ok('produtos em alta 1' in k1 and 'vender agora 1' in k1 and 'soja set · milho fev · mamão jul' in k1, 'INTEL-02 IV: indicadores de preço no topo (1 em alta, 1 vender agora, melhor mês de cada produto)', k1)
     sj = m.linha('m:Soja em grão'); mi = m.linha('m:Milho em grão'); ma = m.linha('m:Mamão Formosa · fruta de campo'); fj = m.linha('m:Feijão em grão')
@@ -45,8 +68,9 @@ try:
     m.ok(bool(cl) and 'Líquido = preço' in p and 'custo do prazo' in p, 'IV recebimento líquido: o painel mostra a conta (preço − frete − custo do prazo)', p[:400])
     # ---------------- Compras ----------------
     m.ir('', pagina='IC.dc.html'); m.sem_erro('IC 1440')
-    mn = json.loads(J(MENU) or '[]')
-    m.ok(['Inteligência de compras', 'IC.dc.html'] in mn, 'IC no menu Suprimentos', mn)
+    nv, cs, e_hub, chegou, e_ic = pelo_modulo('Voltar para Suprimentos', 'MOD-SUP.dc.html', 'Inteligência', 'IC.dc.html')
+    m.ok(nv.get('cur') == ['Suprimentos'] and nv.get('volta') == ['MOD-SUP.dc.html', '‹ Suprimentos'] and ['IC.dc.html', 'Inteligência'] in cs and chegou and not e_hub and not e_ic,
+         'IC na tela de entrada do Suprimentos (ícone Suprimentos marcado; "‹ Suprimentos" → cartão "Inteligência" abre a IC sem erro de JS)', [nv, cs, chegou, e_hub, e_ic])
     b1 = J(KPI1) or ''
     m.ok('insumos em alta 6' in b1 and 'comprar agora 4' in b1 and 'r$ 23.103,6' in b1, 'INTEL-02 IC: indicadores (6 em alta, 4 comprar agora, economia esperando o mês certo)', b1)
     se = m.linha('m:Semente de soja 58 W'); gl = m.linha('m:Glifosato 480')

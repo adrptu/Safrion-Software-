@@ -41,8 +41,9 @@ from areas.maquinas import REDIRECIONA
 files=sorted(f for f in os.listdir(E.P) if f.endswith('.dc.html') and f not in REDIRECIONA and f!='Main.dc.html')   # Main: página técnica mínima desde 13/10 (o protótipo abre no Mapa)
 boards={}; order=[]; notes={}
 # ---- página 1 · menu vigente ----
-from ui37 import HUB37, OUTROS37
-VIS_ROWS=[('Mapa',['IN-04.dc.html'])]+[(nome,([HUB37[nome]] if nome in HUB37 else [])+list(dict.fromkeys(h.split('#')[0] for _,h in items))) for nome,ic,items in MENU2 if nome!='Mapa']   # tela de entrada do módulo à frente (13/10)   # visões da mesma tela (Manutenção) = um quadro
+from ui37 import HUB37, OUTROS37, VOLTA37
+VIS_ROWS=[('Mapa',['IN-04.dc.html'])]+[(nome,([HUB37[nome]] if nome in HUB37 else [])+list(dict.fromkeys(h.split('#')[0] for _,h in items))+(sorted(k for k in VOLTA37 if k.startswith('CD-')) if nome=='Cadastros' else [])) for nome,ic,items in MENU2 if nome!='Mapa']   # tela de entrada do módulo à frente; os cadastros que a tela Cadastros abre (13/10)
+VIS_ROWS.append((OUTROS37[0],[OUTROS37[2]]+[h for _,h,_ in OUTROS37[3] if not h.startswith('MB-')]))   # Outros acessos (o app de campo tem linha própria abaixo)   # visões da mesma tela (Manutenção) = um quadro
 # App de campo (prioridade de teste com os primeiros clientes, DEC-2609-13): mesmo cenário da O.S. e do Estoque
 # PCM S4 (§1, §3.7): MB-09 "Máquina" e MB-09det "Ordem de manutenção" deixam de ser ocultos: ligados ao MB-01, gravam no cenário e funcionam sem sinal
 VIS_ROWS.append(('App de campo',['MB-01.dc.html','MB-02.dc.html','MB-03.dc.html','MB-04.dc.html','MB-05.dc.html','MB-07.dc.html','MB-10.dc.html',

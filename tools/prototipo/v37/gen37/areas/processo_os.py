@@ -682,7 +682,7 @@ function PREVALS(self,v){
     if(ft.length){ const ok=new Set(); os.forEach(o=>tals(o).forEach(t=>ok.add(t.id))); const fica=ft.filter(k=>k==='(vazio)'||ok.has(k)), sai=ft.filter(k=>fica.indexOf(k)<0);
       if(sai.length){ const f=Object.assign({},st0.f||{}); if(fica.length) f.tal=fica; else delete f.tal; const all=Object.assign({},self.state.g2||{}); all.g_os=Object.assign({},st0,{f}); self.state.g2=all;
         g2keepGrava(self,'g_os');
-        self.__osMsg='Talhão fora de '+(mfFaz(self)==='Todas'?'todas as fazendas':mfFaz(self))+(mfSaf(self)==='Todas'?'':' · '+mfSaf(self))+(mfCult(self)==='Todas'?'':' · '+mfCult(self))+': '+sai.map(k=>k.split('|')[1]).join(', ')+' saiu do filtro.'; } } }
+        self.__osMsg='Talhão fora de '+(mfFaz(self)==='Todas'?'todas as fazendas':mfFaz(self))+(mfSaf(self)==='Todas'?'':' · '+mfSaf(self))+(mfCult(self)==='Todas'?'':' · '+mfCult(self))+': '+sai.map(k=>{ const id=k.split('|')[1]; const t=ords(self).map(o=>(o.talhoes||[]).find(x=>x.id===id)).find(Boolean); return t&&t.nome?t.nome:id; }).join(', ')+' saiu do filtro.'; } } }   /* o nome que a pessoa escolheu ("Pivô 4"), não o ID */
   self.__osCtx=ctx;
   const nfx=(x)=>x===null||x===undefined||x===''?null:x;
   // o texto de pendência mistura próxima ação e prazo ("entrega até 15/10"); na tabela vira duas colunas (uma variável por coluna)
@@ -1008,6 +1008,10 @@ function EXTRAVALS(self,v){
       /* revisão VISOES-1, achado A2: recorte só com canceladas (fora da lista e do quadro por regra) diz o motivo em toda visão */
       if(!filtrando&&nDist===0&&nCanc>0) return {tipo:'regra',texto:'Só há ordens canceladas neste recorte ('+escD+'): '+ord(nCanc)+'.',acao:'Ver canceladas',fn:setF('Canceladas')};
       if(k==='kanban'&&nDist>0&&nKb===0) return {tipo:'regra',texto:'Canceladas ficam fora do quadro: '+ord(nDist)+' no filtro.',acao:'Ver em lista',fn:lista};
+      if(k==='calendario'&&nDist>0&&nKb===0) return {tipo:'regra',texto:'Canceladas ficam fora do calendário: '+ord(nDist)+' no filtro.',acao:'Ver em lista',fn:lista};
+      /* VISOES-2: semana sem ordem do recorte (há ordem em outra semana): diz e leva à próxima (ou à anterior) */
+      if(k==='calendario'&&self.__cal&&nKb>0&&self.__cal.n===0&&self.__cal.sem===0){ const C=self.__cal, d=C.prox||C.ant;
+        return {tipo:'regra',texto:'Nenhuma ordem do recorte nesta semana.',acao:d?(C.prox?'Ir para a semana de ':'Voltar para a semana de ')+brd(d).slice(0,5):'Ver em lista',fn:d?()=>C.ir(d):lista}; }
       if(k==='carga'&&nDist>0&&nAl===0) return {tipo:'regra',texto:'Nenhuma ordem de '+rDesc+' tem alocação na semana do PCP: '+ord(nDist)+'.',acao:'Ver em lista',fn:lista};
       return null; }; }
   // ---- Talhão (TABELAS-FOCO): seletor na barra da coleção, fora das abas; o mesmo estado do filtro da coluna Talhão (f.tal) ----
@@ -1046,6 +1050,23 @@ function EXTRAVALS(self,v){
           selos:o.selos.map(s=>({t:s.t,dica:osSeloDica(o,s.t)||g2dicaDe(s.t),st:chipSt(s.c).replace('white-space:nowrap;','white-space:normal;line-height:1.3;align-items:baseline;').replace('border-radius:999px;','border-radius:8px;'),dot:dotSt(s.c)+'transform:translateY(-1px);'})),meta:o.resp+' · '+o.janela,dp:(o.dono?o.dono+' · '+o.prazo:''),hasDp:!!o.dono,lab:'Abrir '+o.id+' · '+o.tipo,
           st:'display:flex;flex-direction:column;gap:6px;text-align:left;width:100%;box-sizing:border-box;background:#FFFFFF;border-radius:10px;padding:9px 10px;cursor:pointer;font-family:inherit;color:#15201A;'+(st.pan===o.id?'border:2px solid #1E7A4C;':'border:1px solid #E4E9E5;box-shadow:0 1px 2px rgba(21,32,26,.05);'),
           open:()=>openPan(o.id), key:(e)=>{ if(e&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); openPan(o.id); } }}; })}; }); });
+  /* VISOES-2 (F2a) · Calendário, só leitura: a semana de segunda a domingo com o mesmo recorte do Kanban (filtros, busca, Talhão; Canceladas
+     fora); a ordem aparece em cada dia da sua janela; sem início, na faixa "Sem data"; o clique abre o mesmo painel. Programar fica no detalhe. */
+  v.cal=[]; v.cal_sem=[]; self.__cal=null; g2visaoTenta(self,'g_os','calendario',()=>{ const hoje=(typeof CEN_DIA_OP!=='undefined'?CEN_DIA_OP:'2026-09-26'); const seg0=g2segunda(hoje);
+    const seg=self.state.cal_seg||seg0; const dias=g2semana(seg); const cs=osK.filter(o=>FASES.indexOf(o.etapa)>=0); const DS=['seg','ter','qua','qui','sex','sáb','dom'];
+    const card=o=>({id:o.id,tipo:o.tipo,local:localTxt(o),fase:o.etapa,fst:chipSt(FCOR[o.etapa]),fdot:dotSt(FCOR[o.etapa]),open:()=>openPan(o.id),
+      lab:'Abrir '+o.id+' · '+o.tipo+' · '+o.etapa+(o.ini?' · janela '+brd(o.ini)+(o.fim&&o.fim!==o.ini?' a '+brd(o.fim):''):' · sem data')});
+    const naSem=new Set();
+    v.cal=dias.map((d,i)=>{ const ds=cs.filter(o=>g2noDia(o.ini,o.fim,d)); ds.forEach(o=>naSem.add(o.id)); const ehHoje=d===hoje;
+      return {d,t:DS[i]+' '+d.slice(8,10)+'/'+d.slice(5,7)+(ehHoje?' · hoje':''),hoje:ehHoje?'true':'false',vazio:ds.length===0,vz:ds.length===0?'true':'false',nt:ds.length?String(ds.length):'',ords:ds.map(card)}; });
+    v.cal_sem=cs.filter(o=>!o.ini).map(card); v.cal_temsem=v.cal_sem.length>0;
+    v.cal_tit=brd(dias[0]).slice(0,5)+' a '+brd(dias[6]); v.cal_n=naSem.size+(naSem.size===1?' ordem':' ordens')+' nesta semana'+(v.cal_sem.length?' · '+v.cal_sem.length+' sem data':'');
+    v.cal_naoHoje=seg!==seg0;
+    v.cal_prev=()=>self.setState({cal_seg:g2somaDias(seg,-7)}); v.cal_next=()=>self.setState({cal_seg:g2somaDias(seg,7)}); v.cal_hoje=()=>self.setState({cal_seg:null});
+    /* semana vazia: a próxima com ordem do recorte (a janela que começa ou ainda corre depois do domingo) */
+    const prox=cs.filter(o=>o.ini&&((o.fim&&o.fim>=o.ini?o.fim:o.ini)>dias[6])).map(o=>o.ini>dias[6]?o.ini:g2somaDias(dias[6],1)).sort()[0]||'';
+    const ant=cs.filter(o=>o.ini&&o.ini<dias[0]).map(o=>o.ini).sort().reverse()[0]||'';
+    self.__cal={n:naSem.size,sem:v.cal_sem.length,prox,ant,ir:(d)=>self.setState({cal_seg:g2segunda(d)})}; });
   // ---- painel lateral de consulta ----
   const o=st.pan?all.find(x=>x.id===st.pan):null; v.pan_open=!!o;
   const close=()=>self.setState({pan:null});
@@ -1206,23 +1227,12 @@ def _culturas_da(o):
             if (l in alvo or any(l.startswith(a+'-') or a.startswith(l+'-') for a in alvo)) and c['cultura'] not in out: out.append(c['cultura'])
     return out
 
-def _talsel():
-    """Talhão (TABELAS-FOCO, 5983172395): à vista na barra da coleção, fora das visões (vale para todas), Todos e
-    escolha pesquisável por ID do cadastro; o mesmo estado do filtro da coluna Talhão. Aplica ao marcar; Esc fecha e devolve o foco."""
-    lk=f'border: 0; background: transparent; padding: 0; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;'
-    return (f'<div style="position: relative; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">'
-            f'<button type="button" id="ost_btn" aria-haspopup="dialog" aria-expanded="{H("ost_open")}" aria-pressed="{H("ost_on")}" onClick="{H("ost_toggle")}" style="{H("ost_btnst")}">{H("ost_btn")} ▾</button>'
-            f'<sc-if value="{H("ost_limpa")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("ost_todos")}" style="{lk}">Todos os talhões</button><span style="font-size: 12px; color: {MUTED};">{H("ost_conta")}</span></sc-if>'
-            f'<sc-if value="{H("os_agr")}" hint-placeholder-val="{F()}"><span role="note" style="font-size: 12px; color: {MUTED};">{H("os_gtot")}</span></sc-if>'
-            f'<sc-if value="{H("os_temmsg")}" hint-placeholder-val="{F()}"><span role="status" style="font-size: 12px; font-weight: 700; color: #8A5A00;">{H("os_tmsg")}</span></sc-if>'
-            f'<sc-if value="{H("ost_open")}" hint-placeholder-val="{F()}"><div role="dialog" aria-label="Filtrar por talhão" onKeyDown="{H("ost_key")}" style="position: absolute; top: calc(100% + 6px); z-index: 60; box-sizing: border-box; {H("ost_popst")} background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 8px; display: flex; flex-direction: column; gap: 6px;">'
-            f'<input id="ost_q" type="search" aria-label="Pesquisar talhão" placeholder="Pesquisar talhão" value="{H("ost_q")}" onChange="{H("ost_setq")}" style="font-family: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid {LINE}; border-radius: 9px;">'
-            f'<button type="button" onClick="{H("ost_todos")}" style="{lk} text-align: left; padding: 4px 6px;">Todos os talhões</button>'
-            f'<div style="max-height: 260px; overflow-y: auto; border: 1px solid {LINE}; border-radius: 9px; padding: 4px;">'
-            f'<sc-for list="{H("ost_vals")}" as="tv" hint-placeholder-count="0"><label style="display: flex; align-items: center; gap: 10px; padding: 8px 6px; border-radius: 7px; font-size: 14px; cursor: pointer; min-height: 32px;">'
-            f'<input type="checkbox" checked="{H("tv.on")}" onChange="{H("tv.tog")}" style="width: 18px; height: 18px; accent-color: {ACC}; margin: 0;"><span style="flex-grow: 1; min-width: 0; overflow-wrap: anywhere;">{H("tv.t")}</span><span style="font-size: 12px; color: {MUTED};">{H("tv.n")}</span></label></sc-for>'
-            f'<sc-if value="{H("ost_semres")}" hint-placeholder-val="{F()}"><div style="padding: 8px; font-size: 12.5px; color: {MUTED};">Nenhum talhão com “{H("ost_q")}”.</div></sc-if></div>'
-            f'<div style="display: flex; justify-content: flex-end;"><button type="button" onClick="{H("ost_fecha")}" style="{_MINI}">Fechar</button></div></div></sc-if></div>')
+def _notas_tal():
+    """avisos que eram do seletor de Talhão da barra (subiu para a faixa "Filtros desta tela" em 13/10): o total de O.S. distintas na Tabela
+    agrupada (os grupos se sobrepõem) e o aviso de talhão que saiu do filtro ao trocar Fazenda, Safra ou Cultura."""
+    return (f'<sc-if value="{H("os_agr")}" hint-placeholder-val="{F()}"><span role="note" style="font-size: 12px; color: {MUTED};">{H("os_gtot")}</span></sc-if>'
+            f'<sc-if value="{H("os_temmsg")}" hint-placeholder-val="{F()}"><span role="status" style="font-size: 12px; font-weight: 700; color: #8A5A00;">{H("os_tmsg")}</span></sc-if>')
+
 def _chips():
     return (f'<div role="group" aria-label="Filtrar por fase" style="display: flex; flex-wrap: wrap; gap: 6px;">'
             f'<sc-for list="{H("fchips")}" as="fc" hint-placeholder-count="7"><button type="button" aria-pressed="{H("fc.on")}" onClick="{H("fc.fn")}" style="{H("fc.st")}">{H("fc.t")}<span style="{H("fc.nst")}">{H("fc.n")}</span></button></sc-for></div>')
@@ -1494,8 +1504,8 @@ def build():
               f'<sc-for list="{H("rc_sem")}" as="s" hint-placeholder-count="2"><button type="button" onClick="{H("s.go")}" style="{_MINI}">{H("s.id")}</button></sc-for></div></sc-if>')
     # VISOES-1 (proprietário, 10/10/2026): seletor por ícone; Lista e Tabela agrupada na mesma grade (o agrupamento é estado da grade),
     # Kanban e Carga por recurso migram sem mudança de regra. Visões válidas: visoes.py (fonte única; O.S. sem Mapa: DEC-2609-09)
-    bar,panes=visoes('g_os','os',{'lista':g_os,'agrupada':'lista','kanban':kb_nota+_kanban(celular_rola=True),'carga':rc_nota+_recursos_tab()},rotulo='Visão das ordens')
-    colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_chips()}</div>'   # o Talhão subiu para a faixa "Filtros desta tela" (13/10)
+    bar,panes=visoes('g_os','os',{'lista':g_os,'agrupada':'lista','kanban':kb_nota+_kanban(celular_rola=True),'calendario':kb_nota+_calendario(),'carga':rc_nota+_recursos_tab()},rotulo='Visão das ordens')
+    colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_chips()}{_notas_tal()}</div>'   # o Talhão subiu para a faixa "Filtros desta tela" (13/10); os avisos dele ficam aqui
             f'<div style="flex: 0 0 auto; margin-left: auto;">{bar}</div></div>')
     # recorte vazio (Fazenda/Safra do topo): uma frase e uma ação no lugar das visões
     vazio=(f'<sc-if value="{H("os_vazio")}" hint-placeholder-val="{F()}"><div aria-label="Sem ordens no filtro" style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 36px 16px; border: 1px dashed {LINE}; border-radius: 12px;">'
@@ -1520,6 +1530,34 @@ def build():
             footer='A fase só muda por evento: liberação, início, término físico e encerramento. Finalizar apontamento do turno não encerra a O.S.')
     _status_dinamico(fname)
     return fname
+
+def _calendario():
+    """VISOES-2 (F2a) · Calendário das ordens, só leitura: semana de segunda a domingo com ‹ › e Hoje; cada dia lista as ordens da janela;
+    faixa "Sem data"; abaixo de 900 px vira agenda por dia (só os dias com ordem). Sem arrastar: programar fica no detalhe (DESENHO §2.9)."""
+    css = ('<style>.oscal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}'
+           '.oscal-dia{display:flex;flex-direction:column;gap:6px;min-width:0;padding:8px;border:1px solid #E4E9E5;border-radius:12px;background:#FBFCFA;min-height:140px}'
+           '.oscal-dia[data-hoje=true]{border-color:#1E7A4C;background:#F2F8F4}'
+           '.oscal-dt{display:flex;justify-content:space-between;gap:6px;font-size:12px;font-weight:800;color:#4B5A51;text-transform:capitalize}'
+           '.oscal-o{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;width:100%;box-sizing:border-box;padding:7px 8px;border:1px solid #E4E9E5;'
+           'border-radius:10px;background:#FFFFFF;cursor:pointer;font-family:inherit;color:#15201A;min-height:44px;min-width:0;overflow-wrap:anywhere}'
+           '@media (hover:hover){.oscal-o:hover{border-color:#1E7A4C;background:#F2F8F4}}.oscal-o:focus-visible{outline:2px solid #1E7A4C;outline-offset:1px}'
+           '@media (max-width:900px){.oscal{grid-template-columns:1fr}.oscal-dia{min-height:0}.oscal-dia[data-vazio=true]{display:none}}</style>')
+    cab = (f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">'
+           f'<button type="button" aria-label="Semana anterior" onClick="{H("cal_prev")}" style="{_MINI}">‹</button>'
+           f'<b style="font-size: 14px;" aria-live="polite">{H("cal_tit")}</b>'
+           f'<button type="button" aria-label="Próxima semana" onClick="{H("cal_next")}" style="{_MINI}">›</button>'
+           f'<sc-if value="{H("cal_naoHoje")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("cal_hoje")}" style="{_MINI}">Hoje</button></sc-if>'
+           f'<span style="font-size: 12.5px; color: {MUTED};">{H("cal_n")}</span></div>')
+    sem = (f'<sc-if value="{H("cal_temsem")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Sem data" style="display: flex; align-items: center; gap: 6px 8px; flex-wrap: wrap; '
+           f'padding: 8px 10px; margin-bottom: 8px; border: 1px dashed {LINE}; border-radius: 10px; font-size: 12.5px;"><b>Sem data</b>'
+           f'<sc-for list="{H("cal_sem")}" as="o" hint-placeholder-count="1"><button type="button" aria-label="{H("o.lab")}" onClick="{H("o.open")}" style="{_MINI}">{H("o.id")} · {H("o.tipo")}</button></sc-for></div></sc-if>')
+    dias = (f'<div class="oscal" role="list" aria-label="Semana das ordens"><sc-for list="{H("cal")}" as="d" hint-placeholder-count="7">'
+            f'<div class="oscal-dia" role="listitem" data-hoje="{H("d.hoje")}" data-vazio="{H("d.vz")}" aria-label="{H("d.t")}"><div class="oscal-dt"><span>{H("d.t")}</span><span>{H("d.nt")}</span></div>'
+            f'<sc-for list="{H("d.ords")}" as="o" hint-placeholder-count="1"><button type="button" class="oscal-o" aria-label="{H("o.lab")}" onClick="{H("o.open")}">'
+            f'<b style="font-size: 12.5px;">{H("o.id")}</b><span style="font-size: 12px; line-height: 1.3;">{H("o.tipo")}</span>'
+            f'<span style="font-size: 11.5px; color: {MUTED};">{H("o.local")}</span><span style="{H("o.fst")}"><span style="{H("o.fdot")}"></span>{H("o.fase")}</span></button></sc-for>'
+            f'<sc-if value="{H("d.vazio")}" hint-placeholder-val="{F()}"><span style="font-size: 12px; color: {MUTED};">sem ordem</span></sc-if></div></sc-for></div>')
+    return css + cab + sem + dias
 
 def _agf_fichas():
     """Nome usado na fazenda → ficha do Consulta Agrofit (AG-07): id, classe e grupo de ação. Fertilizante, semente e muda ficam fora."""

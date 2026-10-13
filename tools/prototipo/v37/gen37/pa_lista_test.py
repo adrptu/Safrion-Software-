@@ -25,7 +25,8 @@ Aceite do docs/navegacao/CONSOLIDADO.md §3.1 e do design system de 09/10 (BOT-0
       sem Enter não publica e o erro continua no campo
   L15 R3: rascunho que volta a ficar igual à v6 desabilita "Publicar" com o motivo
   L16 R4: trocar o endereço com o painel da atividade aberto não troca de plano (endereço volta) nem grava em outro plano
-  L17 R6: Esc com o filtro de coluna aberto fecha só o filtro; a 390 px, Esc com o menu sobreposto fecha só o menu
+  L17 R6: Esc com o filtro de coluna aberto fecha só o filtro, a 1440 e a 390 px (toque); a 390 px a barra lateral fica recolhida
+      (68 px, sem expandir: proprietário, 13/10/2026; antes: Esc com o menu sobreposto fechava só o menu)
   L18 R7: plano novo e F5: o aviso não mostra o id interno
   L19 R8: voltar ou trocar de plano com a inclusão de insumo digitada avisa ("Descartar e …" ou "Continuar editando")
   L13 sem erro de JavaScript
@@ -295,16 +296,24 @@ try:
             p0 == 'Atividade · Dessecação pré-plantio' and p1 == p0 and h16 == '#plano=SOJA-AT' and 'Feche o painel antes de trocar de plano.' in t16 and rod == ['Cancelar', 'Salvar']
             and e16['h2'] == 'Soja alta tecnologia' and 'Publicado · v4' in mi and 'Rascunho v5' not in mi and 'Dessecação pré-plantio' not in mi, [p0, p1, h16, t16, rod, e16['h2'], mi[:300]])
     # ---------------- L17 · R6: Esc fecha só a camada de cima ----------------
+    # 13/10/2026 (proprietário: "deixe a barra lateral dos menus somente recolhido com os ícones e tooltip sem opção de expandir"): a 390 px
+    # não há mais menu sobreposto para o Esc fechar. A parte de 390 px passa a ser a do filtro de coluna (por toque) e a barra recolhida
+    FILTRO = "[...document.querySelectorAll('main button')].find(b=>b.getClientRects().length&&/^Filtrar /.test(b.getAttribute('aria-label')||''))"
+    FOCA = "(()=>{const d=[...document.querySelectorAll('div[role=dialog]')].find(x=>x.getClientRects().length); if(!d) return false; const b=[...d.querySelectorAll('button')].find(x=>x.getClientRects().length); b&&b.focus(); return document.activeElement===b;})()"
+    ABERTO = "!![...document.querySelectorAll('div[role=dialog]')].find(x=>x.getClientRects().length)"
+    BARRA = r"""(()=>{const m=document.querySelector('nav[aria-label=Menu]'); const vis=e=>!!e&&e.getClientRects().length>0;
+      const exp=[...document.querySelectorAll('button,[role=button],a,label')].filter(vis).filter(e=>/\b(expandir|recolher|abrir|fechar)\b.{0,12}\bmenu\b/i.test((e.getAttribute('aria-label')||'')+' '+(e.getAttribute('title')||'')+' '+e.innerText)).length;
+      return [Math.round(m.getBoundingClientRect().width), exp, getComputedStyle(m).position==='absolute'||vis(document.querySelector('.ml-fundo'))];})()"""
     with secao('L17'):
         abre('PA.dc.html#plano=SOJA-AT')
-        clique("[...document.querySelectorAll('main button')].find(b=>b.getClientRects().length&&/^Filtrar /.test(b.getAttribute('aria-label')||''))", w=.5)
-        f0 = J("(()=>{const d=[...document.querySelectorAll('div[role=dialog]')].find(x=>x.getClientRects().length); if(!d) return false; const b=[...d.querySelectorAll('button')].find(x=>x.getClientRects().length); b&&b.focus(); return document.activeElement===b;})()")
-        c.tecla('Escape', 'Escape', 27); time.sleep(.5); f1 = est(); fa = J("!![...document.querySelectorAll('div[role=dialog]')].find(x=>x.getClientRects().length)")
-        abre('PA.dc.html#plano=SOJA-AT', 390, 844, 3, True); clique("document.querySelector('.ml-tog')", True, .5)
-        m0 = J("!!document.querySelector('.menu-lat:not(.rec)')"); J("(()=>{const a=[...document.querySelectorAll('.menu-lat a,.menu-lat button')].find(x=>x.getClientRects().length); a&&a.focus();})()")
-        c.tecla('Escape', 'Escape', 27); time.sleep(.5); m1 = J("!!document.querySelector('.menu-lat:not(.rec)')"); g1 = est()
-        chk('L17 R6: Esc com o filtro de coluna dos cultivos aberto fecha só o filtro (o plano continua aberto); a 390 px, Esc com o menu sobreposto aberto fecha só o menu',
-            f0 and not fa and f1['h2'] == 'Soja alta tecnologia' and f1['hash'] == '#plano=SOJA-AT' and m0 and not m1 and g1['h2'] == 'Soja alta tecnologia' and g1['hash'] == '#plano=SOJA-AT', [f0, fa, f1['h2'], f1['hash'], m0, m1, g1['h2']])
+        clique(FILTRO, w=.5); f0 = J(FOCA)
+        c.tecla('Escape', 'Escape', 27); time.sleep(.5); f1 = est(); fa = J(ABERTO)
+        abre('PA.dc.html#plano=SOJA-AT', 390, 844, 3, True); b0 = J(BARRA)
+        clique(FILTRO, True, .5); g0 = J(FOCA); shot('L17_390_filtro')
+        c.tecla('Escape', 'Escape', 27); time.sleep(.5); g1 = est(); ga = J(ABERTO); b1 = J(BARRA)
+        chk('L17 R6: Esc com o filtro de coluna dos cultivos aberto fecha só o filtro (o plano continua aberto), a 1440 px e a 390 px (toque); a 390 px a barra lateral fica recolhida (68 px), sem botão de expandir nem menu sobreposto',
+            f0 and not fa and f1['h2'] == 'Soja alta tecnologia' and f1['hash'] == '#plano=SOJA-AT' and b0 == [68, 0, False]
+            and g0 and not ga and g1['h2'] == 'Soja alta tecnologia' and g1['hash'] == '#plano=SOJA-AT' and b1 == [68, 0, False], [f0, fa, f1['h2'], f1['hash'], b0, g0, ga, g1['h2'], g1['hash'], b1])
     # ---------------- L18 · R7: aviso sem o id interno ----------------
     with secao('L18'):
         abre('PA.dc.html'); clique(btn('Criar plano'), w=.5)

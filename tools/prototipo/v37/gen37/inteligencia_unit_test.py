@@ -51,11 +51,15 @@ def oraculo_precos():
     vendas, compras = {}, {}
     for v in P['vendas']:
         if not v['serie']: vendas[v['prod']] = None; continue
-        o, idx, m0, vs = comum(v['serie']); bd = 0
+        o, idx, m0, vs = comum(v['serie']); bdB = 0
         for d in range(1, 12):
-            if idx[(m0 + d) % 12] > idx[(m0 + bd) % 12]: bd = d
-        ganho = idx[(m0 + bd) % 12] / idx[m0] - 1; liq = ganho - D('0.012') * bd
-        rec = 'Vender na colheita' if v.get('perecivel') else 'Vender agora' if (bd == 0 or vs >= D('0.05')) else 'Esperar' if liq >= D('0.03') else 'Sem ganho em esperar'
+            if idx[(m0 + d) % 12] > idx[(m0 + bdB) % 12]: bdB = d
+        # revisão Codex INTEL-02-LIQUIDO-01: o alvo é o maior ganho LÍQUIDO (empate: o mais cedo); o oráculo antigo repetia a seleção bruta
+        bd, liq, ganho = 0, D(0), D(0)
+        if bdB > 0:
+            cand = [(idx[(m0 + d) % 12] / idx[m0] - 1 - D('0.012') * d, -d) for d in range(1, 12)]
+            l, nd = max(cand); bd = -nd; liq = l; ganho = idx[(m0 + bd) % 12] / idx[m0] - 1
+        rec = 'Vender na colheita' if v.get('perecivel') else 'Vender agora' if (bdB == 0 or vs >= D('0.05')) else 'Esperar' if liq >= D('0.03') else 'Sem ganho em esperar'
         o.update(melhor=max(range(12), key=lambda k: (idx[k], -k)), bd=bd, ganho=str(ganho), liq=str(liq), rec=rec); vendas[v['prod']] = o
     eco_t = D(0)
     for c in P['compras']:
