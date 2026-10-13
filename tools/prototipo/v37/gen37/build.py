@@ -22,8 +22,7 @@ if FALHAS: print('MÓDULOS COM FALHA:',FALHAS)
 # telas que deixaram de ser geradas (01/10: O.S. sem revisão; o agrônomo libera na tela O.S.): o arquivo de um build anterior sai do project/ e do canvas
 # 06/10 (colheita, D-16): MB-10det sai; pesar e receber ficam em Produção › Cargas e recebimento (CARGA)
 # 06/10 (PLAT-01, PLAT-D02): CF-05det, BO-01det, BO-02det, BO-03 e BO-03det viram o detalhe da linha; BO-04 sai. A tela antiga sai também do _render/ (o montar_render só copia)
-# 06/10 (CONF-01, CONF-D01, CONF-D20): CF-02 e CF-02det saem (o bloco Alçadas fica no CF-01); CF-03det sai (o conflito é o CMD-09 da O.S.)
-for _f in ('IN-02det.dc.html','IN-02x-os0420.dc.html','CF-05det.dc.html','CF-02.dc.html','CF-02det.dc.html','CF-03det.dc.html','BO-01det.dc.html','BO-02det.dc.html','BO-03.dc.html','BO-03det.dc.html','BO-04.dc.html','MB-10det.dc.html'):
+for _f in ('IN-02det.dc.html','IN-02x-os0420.dc.html','CF-05det.dc.html','BO-01det.dc.html','BO-02det.dc.html','BO-03.dc.html','BO-03det.dc.html','BO-04.dc.html','MB-10det.dc.html'):
     for _d in (E.P,os.path.join(os.path.dirname(E.P),'_render')):
         if os.path.exists(os.path.join(_d,_f)): os.remove(os.path.join(_d,_f))
 # tudo que foi escrito no project/ com meta conhecida entra no canvas
@@ -41,7 +40,7 @@ from areas.maquinas import REDIRECIONA
 files=sorted(f for f in os.listdir(E.P) if f.endswith('.dc.html') and f not in REDIRECIONA)
 boards={}; order=[]; notes={}
 # ---- página 1 · menu vigente ----
-VIS_ROWS=[('Índice',['Main.dc.html']),('Mapa',['IN-04.dc.html'])]+[(nome,list(dict.fromkeys(h.split('#')[0] for _,h in items))) for nome,ic,items in MENU2 if nome!='Mapa']   # visões da mesma tela (Manutenção) = um quadro
+VIS_ROWS=[('Índice',['Main.dc.html']),('Mapa',['IN-04.dc.html'])]+[(nome,[h for _,h in items]) for nome,ic,items in MENU2 if nome!='Mapa']
 # App de campo (prioridade de teste com os primeiros clientes, DEC-2609-13): mesmo cenário da O.S. e do Estoque
 # PCM S4 (§1, §3.7): MB-09 "Máquina" e MB-09det "Ordem de manutenção" deixam de ser ocultos: ligados ao MB-01, gravam no cenário e funcionam sem sinal
 VIS_ROWS.append(('App de campo',['MB-01.dc.html','MB-02.dc.html','MB-03.dc.html','MB-04.dc.html','MB-05.dc.html','MB-07.dc.html','MB-10.dc.html',

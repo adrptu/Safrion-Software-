@@ -1,0 +1,24 @@
+MORTO X01 alocação parcial grava (tudo ou nada quebrado) → U46e, U50c, U52a
+MORTO X02 falta sem o teto do kg aberto → U48c
+MORTO X03 falta sem o planejado (só o teto) → U52a, U52b, U54
+MORTO X04 falta sem o a entregar → U52a
+MORTO X05 linhas da sobra sem ordenar → U48e
+MORTO X06 linhas da sobra: empate pela mais antiga → U48e
+MORTO X07 alocação sem preferir os lotes das linhas da ordem → U41c, U41d, U45f, U45g, U51
+MORTO X08 livre conta a quarentena → U49a, U49f
+MORTO X09 recomendação sem preferir a fonte que cobre sozinha → U39c, U50b
+VIVO  X10 cenResTot sem descontar a reserva-baixa → SOBREVIVEU
+VIVO  X11 cenResTot: base da semente não Reservada = 0 → SOBREVIVEU
+VIVO  X12 avaria não sai do a entregar → SOBREVIVEU
+MORTO X13 complemento não soma às caixas da ordem (Σsol ≠ ins.tot) → U41c, U41e, U45a, U49e
+MORTO X14 sem o aviso Reserva sem físico → U55
+VIVO  X15 recomendação em conferência sem Reabrir → SOBREVIVEU
+VIVO  X16 selo Sobra em custódia pela custódia inteira → SOBREVIVEU
+MORTO X17 sem o selo Faltam N caixas → U52a
+MORTO X18 recusa da saída em conferência sem Reabrir → U52b
+MORTO X19 próximo passo da falta em conferência sem Reabrir → U52b
+VIVO  X20 liberação marca reservado mesmo sem caixas → SOBREVIVEU
+MORTO X21 sobra apta não sai do a entregar (dispensado só da avaria) → U48a, U48c, U52a, U52b
+MORTO X22 Fechar baixa a reserva mas não grava o movimento → U51
+VIVO  X23 kg aberto zera em conferência conferida → SOBREVIVEU
+VIVO  X24 a nota cobre só a 1ª (ignora outras notas) → SOBREVIVEU

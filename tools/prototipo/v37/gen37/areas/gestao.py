@@ -487,7 +487,7 @@ def _ge06():
         + bloco('Desempenho dos ativos','Compare disponibilidade, utilização e confiabilidade; clique num ativo para ver a origem dos números.',g_atv,tone='yellow')
         + bloco('Parâmetros','Proponha nova versão de parâmetro a partir do aprendizado, nunca edite o cadastro em silêncio.',
                 '<div style="display: flex; gap: 10px; flex-wrap: wrap;">'+ilink('Propor parâmetro agronômico','AG-05.dc.html','leaf','Abrir a biblioteca agronômica para propor nova versão')
-                +ilink('Propor regra ou alçada','CF-01.dc.html#alc=AL-01','users','Abrir as alçadas em Configurações › Usuários e alçadas')+'</div>',tone='gray'))
+                +ilink('Propor regra ou alçada','CF-02.dc.html','users','Abrir alçadas e regras para propor mudança')+'</div>',tone='gray'))
     shell37('GE-06','Indicadores operacionais',corpo,
       subtitle='Meta, tendência, composição e diferenças entre previsto e realizado — cada número com fórmula, fonte e denominador.',
       status=('4 indicadores fora da meta','yellow'),

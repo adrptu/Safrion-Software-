@@ -1,0 +1,25 @@
+== roteiro 1440 · tarefa do proprietário com as caixas da necessidade, recebimento no Estoque e balanço fechado
+FALHOU 1440 R1 · Cargas › faixa › Beneficiamento pelo toque · ['NÃO ACHEI: Beneficiamento', '/CARGA.dc.html']
+FALHOU 1440 R1 · Nova ordem com o L39-132: Caixas vem com a necessidade da rota (1169) e o campo avisa a falta no Estoque e como se resolve (NF 7731 a conferir, quem confere) · [None, '']
+FALHOU 1440 R1 · Criar ordem: OB-0113 em A liberar com 1.169 un (sugestão confirmada) e o aviso de que a liberação fica impedida até o Estoque receber as caixas · ['NÃO ACHEI: Criar ordem', '']
+FALHOU 1440 R2 · impedimento das caixas à vista antes do toque, com quem resolve e a recuperação (conferir a NF 7731 no Estoque)
+FALHOU 1440 R2 · Autorizar rota e liberar recusado (540 para 1.169), nada gravado · ['NÃO ACHEI: Autorizar rota e liberar', '']
+FALHOU 1440 R3 · o atalho leva ao Estoque (Confira recebimentos) sem gravar · ['NÃO ACHEI: Conferir a NF 7731 das caixas no Estoque', '']
+FALHOU 1440 R3 · Rui confere a NF 7731 (unidade un, lote CX26-02 no Packing, sem validade): 1.200 un entram no disponível · ['NÃO ACHEI: NF 7731', 'NÃO ACHEI: Salvar', [], [None, None, None], '', [None, None]]
+FALHOU 1440 R4 · recebida a nota, o painel da OB-0113 fica sem impedimento
+RESULTADO: FALHOU 0/8
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ben3/base/tools/prototipo/v37/gen37/ben_fluxo_test.py", line 426, in <module>
+    if 'roteiro' in MODOS: roteiro(1440)
+                           ^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ben3/base/tools/prototipo/v37/gen37/ben_fluxo_test.py", line 392, in roteiro
+    st = cen("[c.ordens['OB-0113'].etapa, c.ordens['OB-0113'].req, c.producao.lotes['L39-132'].ordem, c.reqs['REQ-041']&&c.reqs['REQ-041'].itens[0].solicitado, c.reqs['REQ-041']&&c.reqs['REQ-041'].itens[0].lote]")
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ben3/base/tools/prototipo/v37/gen37/ben_fluxo_test.py", line 90, in cen
+    def cen(expr): return J(f"(()=>{{ const c=CEN()||(window.__cen?window.__cen.cenGet():{{}}); return ({expr}); }})()")   # nada gravado ainda: lê o cenário inicial pelo cenGet
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ben3/base/tools/prototipo/v37/gen37/cdp.py", line 95, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught
+rc=1

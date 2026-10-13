@@ -1,0 +1,8 @@
+OK    U53a I-d2 · devolução guiada da sobra sem "a entregar" fantasma
+OK    U53b I-a3 · a devolução guiada não tira caixa em uso
+OK    U53c I-b1 · livre total de dois lotes
+OK    U53d I-a4 · Encerradas sem custódia, a entregar nem reserva
+OK    U53e I-e4 · reserva do lote = reserva própria das linhas abertas (Fechar baixa)
+OK    U53f I-b3 · Pedir mais caixas aceito com o livre total
+OK    U53g I-a1 · sobra em conferência pelo kg aberto
+RESULTADO: OK 360 sequências × 35 passos; 7 casos fixos · invariantes violados: nenhum

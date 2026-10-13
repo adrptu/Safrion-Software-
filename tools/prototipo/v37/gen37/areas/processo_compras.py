@@ -187,7 +187,7 @@ function vivaDe(saf){ if(!SX||SX.safra!==saf) return null; const X=SX.ent||((CD.
   const E=cenDemEntradas(cenGet(),X,CD.viva.b); const m=demFazenda(E); const qual={};
   // falta condicionada à qualidade (revisão do 853a6a8, achado 2; PRD 65.4; CAL-01 "Qualidade pendente"; DEMO-02): a mesma conta do Planejar safra;
   // a Compra mostra a decisão (laudo no Estoque) e não compra a parcela — nenhuma trava, nenhuma proposta automática
-  Object.values(m).forEach(d=>{ if((d.cond||0)>0.001) qual[d.nome]={q:d.cond,un:d.un,falta:d.condFalta||'',txt:demCondTxt(d)}; });   /* motivo, responsável, prazo e decisão (cal01.js) */
+  Object.values(m).forEach(d=>{ if((d.cond||0)>0.001) qual[d.nome]={q:d.cond,un:d.un,falta:d.condFalta||'',txt:demCondTxt(d)}; });   // motivo, responsável, prazo e decisão (cal01.js)
   // Integração V56 × CTL-4 (aceite CTL-4-FIX itens 2 e 5): as linhas da etapa 2 (estoque apto, a receber, necessidade, falta e memória) são as
   // da mesma conta viva, não a foto da versão: devolução, custódia e NF em quarentena aparecem na Compra como no Planejar safra (antes a Compra
   // mostrava "A receber 20.000" e "Estoque apto 90.000" da foto ao lado do aviso de qualidade pendente). Os insumos são os da versão; o que saiu
@@ -242,7 +242,7 @@ function aprOf(st){ return (st.aprov&&st.aprov.estado==='aprovada')?st.aprov:nul
 function dm(iso){ return iso?iso.slice(8,10)+'/'+iso.slice(5,7):'—'; }
 // falta a partir de (CAL-01): 1ª data em que a projeção do insumo falta para esta solicitação — estoque apto com reservas, outras origens
 // e pedidos em aberto na data prevista (a previsão reprogramada na etapa 6 vale; excl = pedido a desconsiderar; pedidos novos desta solicitação nunca entram)
-function faltaDe(st,nome,excl,src){ const d=(src||(SX?SX.dem:[])).find(x=>x.nome===nome);   /* src: a demanda de agora (etapa 2, demAgora); sem src, a da versão da SOL (cotação, aprovação e entrega comparam com a falta que a SOL pediu: DEM-08) */ if(!d||!d.evs) return null; const px=st.pcx||{};
+function faltaDe(st,nome,excl){ const d=demAgora().find(x=>x.nome===nome); if(!d||!d.evs) return null; const px=st.pcx||{};
   const evs=d.evs.filter(e=>!(e.tipo==='rec'&&e.ref&&e.ref===excl)).map(e=>(e.tipo==='rec'&&e.ref&&px[e.ref]&&px[e.ref].prev)?Object.assign({},e,{dt:px[e.ref].prev}):e);
   return cal01(d.est+(Number(d.cust)||0)+(Number(d.quarC)||0),evs,0,OPT).falta; }
 // respostas simuladas chegando uma a uma (um único relógio por tela)
@@ -254,11 +254,6 @@ function tickResp(self){ if(self._tk) return; self._tk=true;
 function keep(self,gid,rid,patch){ const all=Object.assign({},self.state.g2||{}); all[gid]=Object.assign({},all[gid]||{},{rows:undefined,fm:null,fl:rid}); patch.g2=all; self.setState(patch); }
 function tog(self,gid,rid){ const sp=GR(gid); const x=Object.assign({},g2st(self,gid).x||sp.x0||{}); x[rid]=!x[rid]; g2set(self,gid,{x}); }
 // ---------- modelo do processo (SOL-2026-07) ----------
-/* quem aprova a compra (revisão CONF 13/10, achado de base): o perfil de quem age (Ver como, o mesmo do CF-01), lido na hora; nunca "Ana" fixa.
-   Nível pela alçada da Compra (dados2.ALCADA, só leitura no CF-01, CONF-D23): direção → Direção; gestor → Gerente da fazenda; sem um desses papéis,
-   nenhum nível (envia à alçada). "Gestor de suprimentos" ainda não é papel do catálogo. Dano evitado: compra aprovada em nome de quem não agiu. */
-function cmpPerfil(){ const P=(typeof g2perfil==='function')?g2perfil():null; if(!P) return Object.assign({},CD.perfil);
-  const idx=g2papel(P,'direcao')?2:(g2papel(P,'gestor')?1:-1); return {nome:P.k,nivel:idx>=0?CD.alcada[idx].quem:'sem alçada de compra',idx}; }
 function M(self){ sx(self);
   const st=self.state; const G=grupos(); const conv={}; const env=st.env||null; const nresp=st.nresp||0; const apr0=aprOf(st);
   G.forEach((g,gi)=>{ CD.forn.filter(f=>f.grupos.indexOf(g)>=0).forEach(f=>{ const rid='C_'+gi+'_'+f.id; const s=(st.conv||{})[rid]||{};
@@ -287,7 +282,7 @@ function M(self){ sx(self);
   const invited=Object.values(conv).filter(c=>c.conv==='Convidar');
   const nadic=(env&&!apr0)?Object.values(conv).filter(c=>c.homol&&!c.enviado&&c.conv==='Convidar').length:0;
   const semForn=G.filter(g=>!Object.values(conv).some(c=>c.g===g&&c.homol));
-  return {G,conv,env,nresp,got,items,pcs,total,ni,quem:CD.alcada[ni].quem,podeAna:ni<=cmpPerfil().idx,sig,nconv:invited.length,nadic,semForn,
+  return {G,conv,env,nresp,got,items,pcs,total,ni,quem:CD.alcada[ni].quem,podeAna:ni<=CD.perfil.idx,sig,nconv:invited.length,nadic,semForn,
     njust:items.filter(x=>x.justPend).length,semProp:items.filter(x=>!x.ch).length,excl:items.filter(x=>x.ch&&!(x.ped>0)).length,
     nlate:items.filter(x=>x.ch&&x.ch.late&&x.ped>0).length,esperadas:env?env.ordem.length:0,ref:SX?SX.ref:0};
 }
@@ -300,8 +295,7 @@ function estadoCompra(self,m,id){ const st=self.state; const b=(id&&id!==st.saf)
   if(m.env) return CH('Em cotação · '+m.nresp+' de '+m.env.n+' respostas','blue');
   return CH('A cotar','gray'); }
 function sitDem(self,m,d,fa){ const apr=aprOf(self.state);
-  if(d.liq<=0.001&&(Number(d.cond)||0)>0.001) return [];
-  if(d.liq<=0.001&&ACIMA[d.nome]) return [];   /* a SOL pede o que a demanda de agora já não pede: o aviso "Acima da demanda" (acimaCh) é a situação, não "Coberto" */   /* cobertura só se o laudo liberar: o aviso "Qualidade pendente" (qualCh) é a situação, nunca "Coberto" */
+  if(d.liq<=0.001&&(Number(d.cond)||0)>0.001) return [];   // cobertura só se o laudo liberar: o aviso "Qualidade pendente" (qualCh) é a situação, nunca "Coberto"
   if(d.liq<=0.001) return [CH('Coberto','green')].concat(d.quar?[MU(nf(d.quar)+' '+d.un+' em quarentena não contam')]:[]).concat(fa?[MU('pedido em aberto chega depois da falta')]:[]);
   const it=m.items.find(x=>x.nome===d.nome); if(!it) return [MU('—')];
   if(apr){ let pc=null, pi=null; apr.pcs.forEach(p=>p.itens.forEach(x=>{ if(x.nome===d.nome){ pc=p; pi=x; } }));
@@ -356,7 +350,7 @@ function PREVALS(self,v){
   // ---- etapa 2 · demanda (mesmas linhas e números do Planejar safra) ----
   const byG={}; demAgora().forEach(d=>{ (byG[d.grupo]||(byG[d.grupo]=[])).push(d); });
   GR('g_dem').rows=Object.keys(byG).sort(pt).map((g,gi)=>{ const its=byG[g].slice().sort((a,b)=>pt(a.nome,b.nome)); const val=its.reduce((a,d)=>a+d.valor,0);
-    const fas=its.map(d=>faltaDe(st,d.nome,null,its)); const fg=fas.filter(Boolean).sort()[0]||'';
+    const fas=its.map(d=>faltaDe(st,d.nome,null)); const fg=fas.filter(Boolean).sort()[0]||'';
     return {id:'DG'+gi,v:{ins:g,valor:val,falta:fg},s:{ins:g},p:{ins:[B(g),MU(its.length+(its.length>1?' insumos':' insumo'))],falta:fg?[MU(brd(fg))]:[MU('')]},
       kids:its.map((d,ix)=>{ const dc=d.un==='L'?1:0; const fa=fas[ix]; const sit=acimaCh(d.nome,d.un).concat(compCh(d)).concat(qualCh(d.nome)).concat(sitDem(self,m,d,fa)); const c=calDe(d);
         return {id:'DG'+gi+'_'+ix,ro:true,v:{ins:d.nome,bruta:d.bruta,est:d.est,rec:d.rec,liq:d.liq,un:d.un,falta:fa||'',preco:d.preco,valor:d.valor},s:{sit:sit.map(x=>x.t).join(' ')},
@@ -572,25 +566,24 @@ function EXTRAVALS(self,v){ hooks(self);
   v.dec4=devA?('Devolvida pela '+a.quem+' (simulado): '+a.motivo+'. '+(mud?'Compra ajustada: reenvie na etapa 5.':'Ajuste escolhas ou quantidades abaixo e reenvie na etapa 5.'))
     :(recA?('Recusada pela '+a.quem+' (simulado): '+a.motivo+'. Nada foi contratado; para uma nova proposta de compra, altere escolhas ou quantidades e envie de novo na etapa 5.'):'');
   const tot5=apr?apr.total:m.total; const pcs5=apr?apr.pcs:m.pcs;
-  const PF5=cmpPerfil();   /* quem age agora (Ver como) */
   let ni5=CD.alcada.findIndex(x=>x.ate===null||tot5<=x.ate+1e-9); if(ni5<0) ni5=CD.alcada.length-1;
   const limTxt=(ix)=>CD.alcada[ix].ate===null?('acima de '+rs(CD.alcada[ix-1].ate)):('até '+rs(CD.alcada[ix].ate));
   v.k5='Valor da compra '+rs(tot5)+' · '+pcs5.length+(pcs5.length===1?' pedido':' pedidos')+' · aprova: '+CD.alcada[ni5].quem+' ('+limTxt(ni5)+')'; v.k5st=MUT;
   v.apr_tit=apr?'Pedidos emitidos':'Pedidos a gerar';
-  v.alc=CD.alcada.map((x,ix)=>{ const req=(ix===ni5); const me=(ix===PF5.idx); const tags=[]; if(me) tags.push('Seu perfil · '+PF5.nome); if(req) tags.push('Exigida para '+rs(tot5));
+  v.alc=CD.alcada.map((x,ix)=>{ const req=(ix===ni5); const me=(ix===CD.perfil.idx); const tags=[]; if(me) tags.push('Seu perfil · '+CD.perfil.nome); if(req) tags.push('Exigida para '+rs(tot5));
     return {lim:(x.ate===null?'Acima de '+rs(CD.alcada[ix-1].ate):'Até '+rs(x.ate)),quem:x.quem,tag:tags.join(' · '),hasTag:tags.length>0,
       tagst:'padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;'+(req?'background:#1E7A4C;color:#fff;':'background:#EEF1EE;color:#15201A;'),
       st:'display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;font-size:13px;border:1px solid '+(req?'#1E7A4C':'#E4E9E5')+';background:'+(req?'#E4F3E9':'#FFFFFF')+';'}; });
   let a5, a5st='padding:8px 12px;border-radius:10px;font-size:13px;font-weight:700;';
   if(apr){ a5='Aprovada por '+apr.por+' em '+apr.em+' · pedidos '+pcIds(apr.pcs)+' emitidos e vinculados à '+(SX?SX.sol.id:'')+'.'; a5st+='background:#E4F3E9;color:#1E7A4C;'; }
   else if(m.njust){ a5='Justifique '+m.njust+(m.njust>1?' escolhas que não são':' escolha que não é')+' a de menor custo que chega a tempo na etapa 4 antes de aprovar.'; a5st+='background:#FDE8E6;color:#B42318;'; }
-  else if(m.podeAna){ a5='Valor dentro da sua alçada ('+PF5.nome+' · '+PF5.nivel+', '+limTxt(PF5.idx)+'). Aprovar emite '+m.pcs.length+' pedidos vinculados à '+(SX?SX.nome+' e à '+SX.sol.id:'safra')+'.'+(stale?' O envio anterior à Direção perdeu a validade.':''); a5st+='background:#E3F0FB;color:#1E5F8F;'; }
+  else if(m.podeAna){ a5='Valor dentro da sua alçada ('+CD.perfil.nivel+', '+limTxt(CD.perfil.idx)+'). Aprovar emite '+m.pcs.length+' pedidos vinculados à '+(SX?SX.nome+' e à '+SX.sol.id:'safra')+'.'+(stale?' O envio anterior à Direção perdeu a validade.':''); a5st+='background:#E3F0FB;color:#1E5F8F;'; }
   else if(pendOk){ a5='Aguardando '+a.quem+' desde '+a.em+' (simulado · nenhuma mensagem real enviada). Registre a decisão quando ela chegar: aprovação, devolução ou recusa.'; a5st+='background:#FFF3D6;color:#8A5A00;'; }
   else if(stale){ a5='A compra mudou depois do envio (etapa 4): a aprovação pendente perdeu a validade. Reenvie à '+m.quem+'.'; a5st+='background:#FDE8E6;color:#B42318;'; }
   else if(devA&&!mud){ a5='Devolvida pela '+a.quem+' em '+a.dec+' (simulado): '+a.motivo+'. Ajuste escolhas ou quantidades na etapa 4; depois de qualquer mudança, reenvie.'; a5st+='background:#FDE8E6;color:#B42318;'; }
   else if(devA){ a5='Compra ajustada depois da devolução ('+a.motivo+'). Reenvie à '+m.quem+'.'; a5st+='background:#FFF3D6;color:#8A5A00;'; }
   else if(recA&&!mud){ a5='Recusada pela '+a.quem+' em '+a.dec+' (simulado): '+a.motivo+'. Nada foi contratado; a necessidade da '+(SX?SX.sol.id:'solicitação')+' continua aberta (etapa 2).'; a5st+='background:#FDE8E6;color:#B42318;'; }
-  else { a5=(PF5.idx<0?'Sem alçada de compra no perfil de '+PF5.nome:'Acima da sua alçada ('+PF5.nome+' · '+PF5.nivel+', '+limTxt(PF5.idx)+')')+': só a '+m.quem+' aprova '+rs(m.total)+'. Envie para aprovação.'+(recA?' A proposta anterior foi recusada: '+a.motivo+'.':''); a5st+='background:#FFF3D6;color:#8A5A00;'; }
+  else { a5='Acima da sua alçada ('+CD.perfil.nivel+', '+limTxt(CD.perfil.idx)+'): só a '+m.quem+' aprova '+rs(m.total)+'. Envie para aprovação.'+(recA?' A proposta anterior foi recusada: '+a.motivo+'.':''); a5st+='background:#FFF3D6;color:#8A5A00;'; }
   v.a5=a5; v.a5st=a5st;
   // devolução ou recusa (ações secundárias enquanto a aprovação está pendente)
   const d5=st.dec5||null; v.d5_on=pendOk&&!m.podeAna&&!d5; v.d5_open=pendOk&&!m.podeAna&&!!d5;
@@ -599,10 +592,8 @@ function EXTRAVALS(self,v){ hooks(self);
   v.d5_set=(e)=>self.setState({dec5:Object.assign({},self.state.dec5,{motivo:e.target.value,err:''})});
   v.d5_dev=()=>self.setState({dec5:{tipo:'dev',motivo:'',err:''},conf5:false}); v.d5_rec=()=>self.setState({dec5:{tipo:'rec',motivo:'',err:''},conf5:false});
   v.d5_no=()=>self.setState({dec5:null}); v.d5_yes=()=>decidir(self);
-  v.conf5=!!st.conf5&&!apr&&m.podeAna; v.c5_msg='Aprovar '+rs(m.total)+' e emitir '+m.pcs.length+(m.pcs.length===1?' pedido':' pedidos')+' ('+pcIds(m.pcs)+') como '+PF5.nome+' · '+PF5.nivel+'?';
-  v.c5_no=()=>self.setState({conf5:false}); v.c5_yes=()=>{ const mm=M(self); if(aprOf(self.state)){ aprovar(self); return; } if(!podeAprovar(self,mm)) return;
-    const pf=cmpPerfil(); if(!(mm.ni<=pf.idx)){ self.setState({conf5:false,g2toast:'Aprovar '+rs(mm.total)+': decisão de '+mm.quem+' (o perfil de '+pf.nome+' é '+pf.nivel+'). Nada foi aprovado.'}); return; }   /* confere quem age na hora de gravar */
-    emitir(self,mm,pf.nome+' ('+pf.nivel+')'); };
+  v.conf5=!!st.conf5&&!apr&&m.podeAna; v.c5_msg='Aprovar '+rs(m.total)+' e emitir '+m.pcs.length+(m.pcs.length===1?' pedido':' pedidos')+' ('+pcIds(m.pcs)+') como '+CD.perfil.nome+' · '+CD.perfil.nivel+'?';
+  v.c5_no=()=>self.setState({conf5:false}); v.c5_yes=()=>{ const mm=M(self); if(aprOf(self.state)){ aprovar(self); return; } if(!podeAprovar(self,mm)||!mm.podeAna) return; emitir(self,mm,CD.perfil.nome+' ('+CD.perfil.nivel+')'); };
   // etapa 6
   if(saf==='S2526'){ v.k6='Safra encerrada · '+CD.ped2526.length+' pedidos entregues e conciliados · somente consulta'; v.k6st=MUT; }
   else if(SX){ const novos=apr?apr.pcs.length:0; const ant=CD.pedidos.filter(p=>SX.safra==='S2627'||SX.dem.some(d=>d.nome===p.item)).length;

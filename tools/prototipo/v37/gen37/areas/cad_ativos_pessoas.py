@@ -6,8 +6,7 @@ CD-03 · a classe vem primeiro e abre só a capacidade dela (potência; barra + 
   herdada, condição derivada, substituto sugerido, operadores alocáveis (habilidades do CD-04) e rendimento do CD-02.
 CD-04 · habilidades em múltipla escolha (a habilitação exigida aparece conforme a habilidade), várias habilitações com validade, vínculo
   e vigência, calendário herdado da equipe, custo-hora com encargos. Habilitação vencida ou pendente grava e marca 'Não alocável em O.S.'.
-  Filtro do bloco: Todas · A resolver (estado) e Função (lista: operadores, caldeiros, irrigantes…). Acesso ao app: só leitura do estado de
-  Configurações (CONF-01, CONF-D05), com o link para gerenciar em Configurações › Usuários e alçadas.
+  Filtro do bloco: Todas · A resolver (estado) e Função (lista: operadores, caldeiros, irrigantes…); 'Solicitar acesso ao app' é simulado.
   Layout de 01/10/2026: abas Pessoas | Equipes (cartões) e Máquinas e instalações | Conjuntos (cartões), cada uma com a sua ação.
   Líder inativo continua visível no formulário da equipe, com aviso, e salvar pede um líder ativo; renomear a pessoa atualiza o líder.
 Dados: dados_cad (lido e copiado; Paula passa a caldeira da OS-0424, como em alocacao.py) e dados2.CONJ (rendimentos)."""
@@ -39,7 +38,7 @@ _REN={'Preparar calda':CALDA}
 _OVR={'p6':dict(funcao='Caldeiro',equipe='Campo 1',hab=[CALDA,'Conferir'],v31='2027-04-30'),
       'p7':dict(funcao='Almoxarife',hab=['Almoxarifado','Conferir']),
       'p10':dict(equipe='Campo 2')}
-_ORDEM=['p1','p11','p2','p3','p6','p10','p4','p5','p7','p8','p14','p9','p12','p13','p15']   # p11 Caio (PCP, Agronomia): CONF-D04 · p14 Otávio (PCM; p11 na v56, renumerado na v57 porque a CONF já usava p11) · p12 Igor e p13 Marta: equipe e8 Beneficiamento e qualidade (BEN-1)
+_ORDEM=['p1','p2','p3','p6','p10','p4','p5','p7','p8','p11','p9','p12','p13']   # p11 Otávio (PCM); p12 Igor e p13 Marta: equipe e8 Beneficiamento e qualidade (BEN-1)
 def pessoas():
     by={p['id']:dict(p,**_OVR.get(p['id'],{})) for p in DC.PESSOAS}
     out=[]
@@ -370,6 +369,7 @@ def cd04():
                dat('ate','Disponível até',req=False,help='Fim do contrato de safrista ou diarista.'),
                sel('cal','Calendário de trabalho',['Da equipe']+CALS,**{'def':'Da equipe'},help='Mude só se a pessoa foge do calendário da equipe.'),
                num('custo','Custo-hora com encargos','R$/h',min=0,help='Salário e encargos por hora trabalhada; visível só para quem tem permissão de custos.'),
+               sel('acesso','Acesso ao app',['Com login','Sem login','Acesso solicitado','Solicitar acesso ao app'],**{'def':'Sem login'}),
                sel('sit','Situação',['Ativa','Inativa'],**{'def':'Ativa'})])
     # pessoa numa linha, uma variável por coluna (TABELAS-FOCO, 04/10/2026): equipe, habilidades (filtro por habilidade), vínculo, disponível até,
     # "Custo R$/h", habilitação exigida e a validade que vence primeiro, calendário (o da equipe ou o próprio) e acesso ao app (a ficha de campo
@@ -413,15 +413,10 @@ function c4sit(V){ const A=alocavel(V);
   return {t:'Alocável',p:sitOk('Alocável')}; }
 // validade que vale para alocar: a mais próxima entre as habilitações exigidas (pendente fica sem data)
 function c4val(A){ const ds=A.t.filter(y=>y.d).map(y=>y.d).sort(); return ds.length?ds[0]:''; }
-// acesso: só leitura do estado de Configurações (c.conf; CONF-D05): concede, convida e desativa em Configurações › Usuários e alçadas
-function c4ac(V){ return (typeof confAcessoDe==='function'&&confAcessoDe(V.nome))||{a:'sem'}; }
-function c4acesso(V){ const e=c4ac(V); return e.a==='ativo'?'':(e.a==='desativado'?'Acesso desativado em '+br(e.ate):'Sem acesso ao app'); }
-function c4acOrig(V){ const e=c4ac(V); const t=e.a==='ativo'?'Ativo desde '+br(e.desde):(e.a==='desativado'?'Desativado em '+br(e.ate):'Sem acesso');
-  return [{t:'Acesso ao app: '+t+' · gerenciar em Configurações › Usuários e alçadas',h:'CF-01.dc.html#pessoa='+encodeURIComponent(V.nome||'')}]; }
 CAD_ACTS.g_eq=(self,r)=>[cadExcluir(self,'g_eq',r,'equipe',r.nd?'tem pessoas ativas; mude-as de equipe antes':'')];
 function PREVALS(self,v){ cadActsIni(self); const ps=RW(self,'g_pes'); const eqc=c4eqcal(self); self._c4eq=self._c4eq||{}; self._c4pes=self._c4pes||{};
   ps.forEach(r=>{ const V=r.v; self._c4pes[r.id]=V.nome;
-    r.p.nome=[{k:'b',t:V.nome||''}]; r.s.nome=V.nome||''; r.o=c4acOrig(V); r.p.equipe=[{k:'txt',t:V.equipe||'—'}]; r.s.equipe=V.equipe||'';
+    r.p.nome=[{k:'b',t:V.nome||''}]; r.s.nome=V.nome||''; r.p.equipe=[{k:'txt',t:V.equipe||'—'}]; r.s.equipe=V.equipe||'';
     const hs=ml(V.hab); r.m=Object.assign({},r.m||{},{habs:hs.map(h=>({id:h,l:h}))}); r.p.habs=[hs.length?{k:'txt',t:hs.join(', ')}:{k:'mut',t:'—'}]; r.s.habs=hs.join(', ');
     r.p.vinc=[{k:'txt',t:V.vinc||'—'}]; r.s.vinc=V.vinc||'';
     // disponível até: contrato encerrado em vermelho (o chip da Situação diz o motivo)
@@ -467,7 +462,10 @@ function EXTRAVALS(self,v){ const ps=RW(self,'g_pes'); const eqc=c4eqcal(self);
       if(!dv||dv<HOJE){ f.help=(dv?'Vencida':'Pendente')+': grava, mas a pessoa fica não alocável em O.S.'; f.hasHelp=true; } else { f.help=''; f.hasHelp=false; } });
     const fh=F.fields.find(f=>f.fid==='fx_g_pes_hab'); if(fh){ fh.help=ex.length?'Exige '+lista(ex)+' com validade.':'Nenhuma habilitação exigida.'; fh.hasHelp=true; }
     const fq=F.fields.find(f=>f.fid==='fx_g_pes_equipe'); if(fq){ const c=eqc[d.equipe]; fq.help=c?'Calendário da equipe: '+c+' · '+c4hdia(c):''; fq.hasHelp=!!c; }
-  }
+    const fa=F.fields.find(f=>f.fid==='fx_g_pes_acesso'); if(fa){ const cur=(fm.orig||{}).acesso||'Sem login';
+      if(cur==='Com login'||cur==='Acesso solicitado'){ fa.opts=[{v:cur,t:cur}]; fa.dis=true; fa.ist=fa.ist.replace('background:#FFFFFF','background:#F4F6F3'); fa.help=cur==='Com login'?'A ficha de execução no app usa este login.':'Pedido enviado ao administrador (simulado).'; }
+      else { fa.opts=['Sem login','Solicitar acesso ao app'].map(o=>({v:o,t:o})); fa.help='Solicitar envia o pedido ao administrador ao salvar (simulado).'; }
+      fa.hasHelp=true; } }
   // formulário da equipe: o líder gravado continua visível mesmo inativo, com aviso para escolher outro
   const FE=v.g_eq_F; const lidInat=(n)=>{ const P=ps.find(p=>p.v.nome===n); return !!n&&(!P||P.v.sit==='Inativa'); };
   if(FE&&FE.open&&FE.fields){ const d=(g2st(self,'g_eq').fm||{}).draft||{}; const fl=FE.fields.find(f=>f.fid==='fx_g_eq_lider');
@@ -480,12 +478,13 @@ function EXTRAVALS(self,v){ const ps=RW(self,'g_pes'); const eqc=c4eqcal(self);
   valida(self,v,'g_eq',(d,fm)=>{ const e={}; const dup=unico(self,'g_eq',fm,r=>String(r.v.nome).toLowerCase(),d.nome); if(dup) e.nome='Já existe a equipe '+d.nome+'.';
     if(lidInat(d.lider)) e.lider=d.lider+' está inativa; escolha um líder ativo.'; return e; });
   self.g2after=(gid,rows,r,isNew)=>{ if(!r) return;
-    if(gid==='g_pes'){
+    if(gid==='g_pes'){ let ped=false; if(r.v.acesso==='Solicitar acesso ao app'){ r.v.acesso='Acesso solicitado'; ped=true; g2set(self,'g_pes',{rows:g2clone(rows)}); }
       // renomear a pessoa atualiza o líder das equipes (como equipe → pessoas)
       const old=(self._c4pes||{})[r.id]; const es=g2clone(RW(self,'g_eq')); const ren=[];
       if(old&&old!==r.v.nome){ es.forEach(e=>{ if(e.v.lider===old){ e.v.lider=r.v.nome; ren.push(e.v.nome); } }); if(ren.length) g2set(self,'g_eq',{rows:es}); }
       const A=alocavel(r.v); const lid=es.filter(e=>e.v.lider===r.v.nome).map(e=>e.v.nome);
       self.setState({g2toast:ponto((isNew?'Cadastrado: ':'Salvo: ')+r.v.nome+' · '+(A.inat?'inativa':(A.ok?'alocável em O.S.':'não alocável em O.S. até resolver '+A.m))
+        +(ped?' · pedido de acesso ao app enviado ao administrador (simulado)':'')
         +(A.inat&&lid.length?' · escolha outro líder para '+lista(lid):(ren.length?' · líder de '+lista(ren)+' atualizado':'')))}); }
     if(gid==='g_eq'){ const old=(self._c4eq||{})[r.id]; let n=0;
       if(old&&old!==r.v.nome){ const ps=g2clone(RW(self,'g_pes')); ps.forEach(p=>{ if(p.v.equipe===old){ p.v.equipe=r.v.nome; n++; } }); g2set(self,'g_pes',{rows:ps}); }

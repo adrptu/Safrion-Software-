@@ -392,7 +392,7 @@ def _osc_js():
                 dd-=1
                 if dd==0: return src[i:k+1]
             k+=1
-    for n in ('osc_o','osc_txt','osCargasVivas','osc_cancCust','osc_cancTxt','osc_cancelar','osc_fim','osc_conferencia','osc_encerrar','osApPend','cortaPrev','nd','nf','osc_dispensar'):
+    for n in ('osc_o','osc_txt','osCargasVivas','osc_cancCust','osc_cancTxt','osc_cancelar','osc_conferencia','osc_encerrar','osApPend','cortaPrev','nd','nf','osc_dispensar'):
         out.append(fn(n))
     return '\n'.join(out)+"\nconst LIM_DISP=0.20;\n"
 def motor(corpo):
@@ -501,7 +501,7 @@ def i9():
     r=motor("""OUT.d0=D(c); const o=c.ordens['OS-0430']; const r0=o.req&&c.reqs[o.req]; if(r0&&!o.reservado){ r0.itens=r0.itens.filter(i=>i.entregue>0); r0.estado='Reservada'; }
 cenLiberar(c,'OS-0430'); OUT.d1=D(c); const rid=c.ordens['OS-0430'].req; ['Glifosato 480','2,4-D 806'].forEach(p=>cenEntregar(c,rid,p,160,'Marcos',PAULA)); cenEntregar(c,rid,'Óleo mineral',80,'Marcos',PAULA); OUT.d2=D(c);
 c.ordens['OS-0430'].etapa='Em execução'; cenApontar(c,{os:'OS-0430',d:'26/09',ha:160,cons:{'Glifosato 480':160,'2,4-D 806':160,'Óleo mineral':80},est:[],origem:'web',chave:'W-I9'}); OUT.d3=D(c); OUT.c3=CL(c);
-OUT.res=c.lotes[Object.keys(c.lotes).find(k=>k.indexOf('Glifosato 480|')===0)].reservado; osc_conferencia(c,'OS-0430',PAULA); OUT.d4=D(c);   /* v57 (CONF R14): enviar para conferência grava quem agiu */
+OUT.res=c.lotes[Object.keys(c.lotes).find(k=>k.indexOf('Glifosato 480|')===0)].reservado; osc_conferencia(c,'OS-0430'); OUT.d4=D(c);
 const e=CL(CEN0); OUT.e0=D(e); cenEntregar(e,'REQ-039','Fungicida A',64,'Marcos',PAULA); OUT.e1=D(e);""")
     g=lambda k: r[k]['S2627']['liq'].get('Glifosato 480',0); py=D2.demanda('S2627',cen=r['c3'])
     return (g('d0')==20 and g('d1')==20 and g('d2')==20 and g('d3')==0 and r['d4']==r['d3'] and r['res']>=160-1e-6 and r['e1']==r['e0'] and L(py,'Glifosato 480') in (0,None),
@@ -519,75 +519,5 @@ cenEntregar(c,rid,'Glifosato 480',147.93,'João',PAULA); cenEntregar(c,rid,'Óle
     return (ok,dict(lot=r['lot'],sr=(g('d0','S2627','Glifosato 480'),g('d1','S2627','Glifosato 480'),g('d2','S2627','Glifosato 480')),lg=(g('d0','LG2627','Glifosato 480'),g('d1','LG2627','Glifosato 480'),g('d2','LG2627','Glifosato 480')),
                     soma=(sm('d0','Glifosato 480'),sm('d1','Glifosato 480')),py=(L(py,'Glifosato 480'),L(pys,'Glifosato 480'))))
 caso('I10 reserva entre fazendas (achado 3, S3): liberar a OS-0501 (Lagoa Grande) com lotes da Santa Rita move a compra de uma fazenda para a outra sem contar duas vezes (Glifosato SR 20 → 167,93 L, LG 293,34 → 145,41 L; a soma não muda) e a entrega não muda nenhuma das duas; a conta da OS-0501 diz "− 147,93 L reservados em Almox. defensivos (Santa Rita)"; Python = JS (no 853a6a8: os 147,93 L contavam nas duas e a entrega baixava a LG)',i10)
-# ---------------- J · revisão do 16fb55e (PR #47, comentário 6136083713 do Codex): 4 S3 ----------------
-print('== J · revisão do 16fb55e: qualidade pendente com falta firme, memória por laudo e revisão posterior na reprovação')
-def j1():
-    # ajuste 1 · contraexemplo do Codex: demanda 100 kg, estoque 0, quarentena 40 → o Mapa dizia só "Falta 60 kg" e a compra; os 40 kg sumiam.
-    # Aceite: 60 kg continuam compra firme; os 40 kg aparecem aguardando laudo, com quem decide no detalhe; nada soma à compra, nenhuma segunda ação
-    r=runjs(PRE+'\n'+CAL+"""
-const X={saf:'S',faz:'F',hoje:'2026-09-23',viavel:'2026-09-23',ordem:{S:0},nomes:{S:'Safra'},osd:[],reservas:[],recebDt:[],sobra:[],fisico:{'Insumo X':0},quar:{'Insumo X':40},quarRep:{},
-  quarRef:[{item:'Insumo X',q:40,lote:'X-01',doc:'NF 1',rep:null}],
-  occ:[{saf:'S',k:'c1|a1',a:'a1',local:'T1',tal:'T1',area:1,dt:'2026-10-01',nome:'Uso',prods:[{nome:'Insumo X',grupo:'',un:'kg',preco:2,dose:100,q:100}]}]};
-const m=demFazenda(X); const d=m['Insumo X'];
-console.log(JSON.stringify({st:demSituacao(m,null,X.hoje,X.viavel)['Insumo X'],liq:d.liq,cond:d.cond,valor:d.valor,sol:demSolSit(d,0,false,false),
-  memo:cal01Memo(d.cal,{un:d.un,quarC:d.quarC,quarRef:d.quarRef,cond:d.cond,condFalta:d.condFalta})}));""")
-    st=r['st']; det=st[2] if len(st)>2 else ''
-    ok=(st[0]=='Falta 60 kg' and st[1]=='red' and len(st)>3 and st[3]=='Qualidade pendente · 40 kg'
-        and 'se o laudo reprovar, faltam mais 40 kg · motivo: 40 kg em quarentena aguardam laudo (lote X-01 · NF 1)' in det   # texto único da falta condicionada (demCondTxt, integração V56)
-        and 'responsável: o gestor libera ou reprova com o laudo no Estoque' in det and 'prazo: decidir antes de 01/10/2026' in det and 'fora da compra' in det
-        and 'Falta 100' not in json.dumps(st,ensure_ascii=False) and r['liq']==60 and r['cond']==40 and r['valor']==120
-        and r['sol']['t']=='A enviar' and r['sol']['dif']==60 and any(l.startswith('Falta condicionada à qualidade: 40 kg') for l in r['memo']))
-    return (ok,r)
-caso('J1 falta firme com quarentena (ajuste 1, contraexemplo do Codex): demanda 100 kg, estoque 0, quarentena 40 — o Mapa diz "Falta 60 kg" (compra firme, R$ 120 a 2,00/kg) e, à parte, "Qualidade pendente · 40 kg" com motivo, responsável ("o gestor libera ou reprova com o laudo no Estoque") e prazo no detalhe; a compra não soma os 40 kg e a situação segue "A enviar 60 kg" (no 16fb55e: só "Falta 60 kg" e a compra)',j1)
-def j1b():
-    # o mesmo pelo cenário real (comandos do Estoque): 30 L de Fungicida A devolvidos bloqueados, reprovados (LAB-9) e mais 10 L devolvidos bloqueados
-    r=motor("""cenDevolver(c,'REQ-035','Fungicida A',30,false,PAULA); cenReprovarQuarentena(c,'Fungicida A|F26-02','LAB-9','lacre violado',ANA); cenDevolver(c,'REQ-035','Fungicida A',10,false,PAULA);
-const X=ENT(c,XS.S2627); const m=demFazenda(X); OUT.st=demSituacao(m,null,X.hoje,X.viavel)['Fungicida A']; OUT.liq=m['Fungicida A'].liq; OUT.cond=m['Fungicida A'].cond; OUT.d=D(c);""")
-    st=r['st']
-    return (r['liq']==5.48 and r['cond']==10 and st[0]=='Falta 5 L' and st[1]=='red' and len(st)>3 and st[3]=='Qualidade pendente · 10 L'
-            and 'se o laudo reprovar, faltam mais 10 L · motivo: 10 L em quarentena aguardam laudo (lote F26-02 · devolução da REQ-035)' in st[2]
-            and 'responsável: o gestor libera ou reprova com o laudo no Estoque' in st[2] and r['d']['S2627']['liq'].get('Fungicida A')==5.48,(st,r['liq'],r['cond']))
-caso('J1b o mesmo pelo cenário: devolver 30 L de Fungicida A bloqueados, reprovar (LAB-9) e devolver mais 10 L bloqueados — Safra 2026/27 com 5,48 L de compra firme e 10 L aguardando laudo; o Mapa diz "Falta 5 L" e "Qualidade pendente · 10 L" (no 16fb55e: só "Falta 5 L")',j1b)
-REV2="""cenDevolver(c,'REQ-035','Fungicida A',10,false,ANA); OUT.r1=cenReprovarQuarentena(c,'Fungicida A|F26-02','LAB-A','motivo A',ANA).msg;
-cenDevolver(c,'REQ-035','Fungicida A',10,false,ANA); OUT.r2=cenReprovarQuarentena(c,'Fungicida A|F26-02','LAB-B','motivo B',ANA).msg;"""   # comandos do contraexemplo (itens 2 e 4)
-def j2():
-    # ajuste 2 · contraexemplo do Codex por comandos reais: devolver 10 L bloqueados (REQ-035/F26-02), reprovar LAB-A/motivo A, devolver mais 10 L,
-    # reprovar LAB-B/motivo B → a memória dizia "Reprovado: 20 L … laudo LAB-B: motivo B". Aceite: 10 L/LAB-A e 10 L/LAB-B, total 20, do histórico
-    r=motor(REV2+"""OUT.c=CL(c); const X=ENT(c,XS.S2627); OUT.ref=X.quarRef.filter(x=>x.item==='Fungicida A'&&x.rep); const d=demFazenda(X)['Fungicida A'];
-OUT.memo=cal01Memo(d.cal,{un:d.un,quarC:d.quarC,quarRef:d.quarRef,cond:d.cond,condFalta:d.condFalta}).filter(l=>/^Reprovado/.test(l));""")
-    rp=[(x.get('q'),x.get('laudo'),x.get('motivo')) for x in ((r['ref'] or [{}])[0].get('reps') or [])]
-    py=[q for q in D2.est_dem(r['c'],'Santa Rita')['quarRef'] if q['item']=='Fungicida A' and q['rep']]
-    pyr=[(x.get('q'),x.get('laudo'),x.get('motivo')) for x in ((py or [{}])[0].get('reps') or [])]
-    m=r['memo']
-    ok=(len(m)==1 and m[0].startswith('Reprovado: 20 L do lote F26-02 (devolução da REQ-035) = 10 L no laudo LAB-A: motivo A + 10 L no laudo LAB-B: motivo B')
-        and 'segregado para devolução ao fornecedor' in m[0] and len(r['ref'])==1 and r['ref'][0]['q']==20 and rp==[(10,'LAB-A','motivo A'),(10,'LAB-B','motivo B')] and pyr==rp)
-    return (ok,dict(memo=m,reps=rp,py=pyr))
-caso('J2 memória por laudo (ajuste 2, contraexemplo do Codex): devolver 10 L de Fungicida A bloqueados, reprovar LAB-A (motivo A), devolver mais 10 L e reprovar LAB-B (motivo B) — "Reprovado: 20 L do lote F26-02 (devolução da REQ-035) = 10 L no laudo LAB-A: motivo A + 10 L no laudo LAB-B: motivo B", do histórico do lote; Python = JS (no 16fb55e: "20 L · laudo LAB-B: motivo B")',j2)
-def j4():
-    # ajuste 4 · nos comandos do item 2 Ana devolve bloqueado e reprova: a reprovação não tinha revisão posterior, enquanto liberar o mesmo acúmulo tem.
-    # Aceite: a mesma regra de acúmulo (cenRevisao) na reprovação, sem veto nem segundo aprovador. Positivo (mesma pessoa) e negativo (pessoas distintas)
-    r=motor(REV2+"""OUT.mv=c.movs.filter(m=>m.tipo==='inspecao-reprovada').map(m=>({laudo:m.doc,rev:m.rev||''})); OUT.rep=c.lotes['Fungicida A|F26-02'].rep;
-const a=CL(CEN0); cenDevolver(a,'REQ-035','Fungicida A',10,false,ANA); OUT.lib=cenLiberarQuarentena(a,'Fungicida A|F26-02','LAB-L',ANA).msg; OUT.libRev=a.movs[a.movs.length-1].rev||'';
-const b=CL(CEN0); cenDevolver(b,'REQ-035','Fungicida A',10,false,PAULA); OUT.neg=cenReprovarQuarentena(b,'Fungicida A|F26-02','LAB-N','motivo N',ANA).msg; OUT.negMv=b.movs[b.movs.length-1];""")
-    rv='revisão posterior pendente (Ana registrou a entrada bloqueada e decidiu)'
-    ok=(all(m['rev']==rv for m in r['mv']) and len(r['mv'])==2 and r['libRev']==rv and ('Fica '+rv+'.') in r['r1'] and ('Fica '+rv+'.') in r['r2'] and r['rep'].get('rev')==rv
-        and 'revisão posterior' not in r['neg'] and not r['negMv'].get('rev') and r['negMv']['tipo']=='inspecao-reprovada' and 'reprovados com o laudo LAB-N' in r['neg'])
-    return (ok,dict(mv=r['mv'],lib=r['libRev'],r1=r['r1'][-140:],neg=r['neg'][-120:],negRev=r['negMv'].get('rev')))
-caso('J4 revisão posterior na reprovação (ajuste 4): Ana devolve bloqueado e reprova (LAB-A e LAB-B) — as duas reprovações ficam "revisão posterior pendente (Ana registrou a entrada bloqueada e decidiu)", como a liberação do mesmo acúmulo; Paula devolve e Ana reprova → sem marca; a decisão vale nos dois (no 16fb55e: reprovação sem marca)',j4)
-# ---------------- J5 · junção na v56 (int/v56 × 74063d1): motivo da entrada (integração V56) e laudos por quantidade (ajuste 2) juntos ----------------
-def j5():
-    # a junção juntou mot (cenEstDem/est_dem, integração V56) e reps (cenRepsLote/_reps_lote, ajuste 2) no mesmo quarRef; o Mapa usa o texto
-    # único da falta condicionada (demCondTxt) também quando há falta firme (ajuste 1). Dano evitado: perder o motivo ou o laudo de um dos lados.
-    r=motor("""cenDevolver(c,'REQ-035','Fungicida A',30,false,PAULA); c.movs[c.movs.length-1].obs='Galão sem lacre'; cenReprovarQuarentena(c,'Fungicida A|F26-02','LAB-9','lacre violado',ANA);
-cenDevolver(c,'REQ-035','Fungicida A',10,false,PAULA); c.movs[c.movs.length-1].obs='Galão amassado'; OUT.c=CL(c);
-const X=ENT(c,XS.S2627); OUT.ref=X.quarRef.filter(x=>x.item==='Fungicida A'); OUT.st=demSituacao(demFazenda(X),null,X.hoje,X.viavel)['Fungicida A'];""")
-    k=lambda q:(q.get('q'),q.get('lote'),q.get('doc'),q.get('mot'),bool(q.get('rep')),[(x.get('q'),x.get('laudo'),x.get('motivo'),x.get('doc')) for x in (q.get('reps') or [])])
-    js=[k(q) for q in r['ref']]; py=[k(q) for q in D2.est_dem(r['c'],'Santa Rita')['quarRef'] if q['item']=='Fungicida A']
-    st=r['st']; det=st[2] if len(st)>2 else ''
-    ok=(js==py and (10,'F26-02','devolução da REQ-035','Galão amassado',False,[]) in js and (30,'F26-02','devolução da REQ-035','Galão amassado',True,[(30,'LAB-9','lacre violado','devolução da REQ-035')]) in js
-        and st[0]=='Falta 5 L' and len(st)>3 and st[3]=='Qualidade pendente · 10 L'
-        and 'se o laudo reprovar, faltam mais 10 L · motivo: 10 L em quarentena aguardam laudo (lote F26-02 · devolução da REQ-035: Galão amassado)' in det)
-    return (ok,dict(js=js,py=py,st=st[:2]+[det[-260:]]+st[3:]))
-caso('J5 junção v56 × ajustes da CTL-4: 30 L de Fungicida A devolvidos bloqueados ("Galão sem lacre") e reprovados (LAB-9), mais 10 L bloqueados ("Galão amassado") — o quarRef leva o motivo da entrada e o laudo com a sua quantidade ao mesmo tempo, Python = JS; o Mapa diz "Falta 5 L", "Qualidade pendente · 10 L" e "se o laudo reprovar, faltam mais 10 L · motivo: … Galão amassado"',j5)
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas'); [print('  -',f) for f in FAIL]
 sys.exit(1 if FAIL else 0)

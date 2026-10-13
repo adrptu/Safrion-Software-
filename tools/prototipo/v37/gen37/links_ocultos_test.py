@@ -15,13 +15,14 @@ src={f:open(f,encoding='utf-8').read() for f in fontes}
 cham=sorted(f for f,s in src.items() if re.search(r'\bosc_liberar\(',s))
 ok('E1 em todo o código de produto, só a O.S. e o Mapa chamam osc_liberar', cham==['areas/inicio.py','areas/processo_os.py'], cham)
 cl=sorted(f for f,s in src.items() if re.search(r'\bcenLiberar\(c',s) and not f.endswith('cenario.js'))
-ok('E1b só osc_liberar (processo_os) e a liberação da ordem de beneficiamento (ben.js, BEN-D05) chamam cenLiberar: nenhum atalho libera sem gravar CMD-42/CMD-06', cl==['areas/processo_os.py','ben.js'], cl)
-# BEN-D05 (integração BEN, 09/10): a OB (fam 'BEN', responsável próprio: Igor) reaproveita cenLiberar. Em ben.js a única função que chama
-# cenLiberar é benAutorizarLiberar, que exige o perfil de produção, recusa ordem que não é de beneficiamento (benO) e grava CMD-42 e CMD-06.
-# rodada 1 da integração (S4): o E1d antigo dividia o arquivo em "\nfunction " e procurava "cenLiberar(c": um atalho logo depois de
-# benAutorizarLiberar (const x = (c, id) => cenLiberar(c, id)) ficava no mesmo pedaço, e uma chamada com outra variável escapava. Agora,
-# sem comentários, o nome cenLiberar aparece exatamente uma vez em ben.js, como cenLiberar(c, id), dentro do corpo (chaves casadas) de
-# benAutorizarLiberar; e nenhuma outra fonte do Beneficiamento o cita
+ok('E1b só osc_liberar (processo_os) chama cenLiberar: nenhum atalho libera sem gravar CMD-42/CMD-06 (o Beneficiamento libera pelo benAutorizarLiberar, E1d)', cl==['areas/processo_os.py'], cl)
+# BEN-D05 (integração BEN, 09/10): a OB (fam 'BEN', responsável próprio: Igor) reaproveitava cenLiberar, chamado só por benAutorizarLiberar.
+# BEN-D34 (rodada 3, 10/10): a liberação da OB deixa de chamar cenLiberar (que reserva de um lote só): benAutorizarLiberar aloca no livre total
+# dos lotes (benAlocarCx, tudo ou nada) e grava com benReservaCx. A trava continua a mesma: em ben.js, sem comentários, o nome cenLiberar não
+# aparece (nem chamada, nem apelido), e a única passagem para Liberadas (etapa = 'Liberadas' ou etapa: 'Liberadas') fica dentro do corpo
+# (chaves casadas) de benAutorizarLiberar, que exige o perfil de produção, recusa ordem que não é de beneficiamento (benO) e grava CMD-42 e
+# CMD-06; nenhuma outra fonte do Beneficiamento cita cenLiberar. Rodada 1 (S4): o E1d antigo dividia o arquivo em "\nfunction " e um atalho
+# colado a benAutorizarLiberar ficava no mesmo pedaço; as chaves casadas seguem valendo
 def _sem_coment(t): return re.sub(r'^[ \t]*//[^\n]*', '', re.sub(r'/\*.*?\*/', '', t, flags=re.S), flags=re.M)
 def _corpo(t, nome):
     i = t.find('function ' + nome + '('); j = t.find('{', i) if i >= 0 else -1
@@ -33,18 +34,21 @@ def _corpo(t, nome):
     return (-1, -1)
 def e1d(texto):
     t = _sem_coment(texto); usos = [m.start() for m in re.finditer(r'\bcenLiberar\b', t)]; a, b = _corpo(t, 'benAutorizarLiberar'); f = t[a:b + 1] if a >= 0 else ''
-    return (len(usos) == 1 and a < usos[0] < b and t[usos[0]:usos[0] + len('cenLiberar(c, id)')] == 'cenLiberar(c, id)'
-            and all(x in f for x in ("cenExige(ator, 'producao'", 'benO(c, id)', "benHist(o, quem, 'Versão ' + o.versao + ' da ordem autorizada (CMD-42)'", "benHist(o, quem, 'Liberada (CMD-06)'")), usos)
+    lib = [m.start() for m in re.finditer(r"\betapa\s*(?:=(?!=)|:)\s*['\"]Liberadas['\"]", t)]
+    return (not usos and len(lib) == 1 and a < lib[0] < b
+            and all(x in f for x in ("cenExige(ator, 'producao'", 'benO(c, id)', "benHist(o, quem, 'Versão ' + o.versao + ' da ordem autorizada (CMD-42)'", "benHist(o, quem, 'Liberada (CMD-06)'")), [usos, lib])
 _ok, _usos = e1d(src.get('ben.js', ''))
 def _sem_coment_py(t): return _sem_coment(re.sub(r'^[ \t]*#[^\n]*', '', re.sub(r'\"\"\".*?\"\"\"', '', t, flags=re.S), flags=re.M))   # docstrings e # fora; o JS da tela (r''') fica
 _outros = [f for f in ('areas/processo_beneficiamento.py', 'dados_ben.py') if re.search(r'\bcenLiberar\b', _sem_coment_py(src.get(f, '')))]
-ok('E1d em ben.js o nome cenLiberar aparece uma vez só, como cenLiberar(c, id) dentro de benAutorizarLiberar (perfil de produção, benO, CMD-42 e CMD-06); a tela e a semente do BEN não o citam',
+ok('E1d em ben.js o nome cenLiberar não aparece e a única passagem para Liberadas fica dentro de benAutorizarLiberar (perfil de produção, benO, CMD-42 e CMD-06); a tela e a semente do BEN não citam cenLiberar',
    _ok and not _outros, [_usos, _outros])
 _b = src.get('ben.js', ''); _m = _b.find('\nfunction benIniciar(')
 _mut = [('atalho logo depois de benAutorizarLiberar', _b[:_m] + '\nconst benLibDireto = (c, id) => cenLiberar(c, id);' + _b[_m:]),
         ('chamada com outra variável', _b.replace("o.etapa = 'Em execução'; const T = benCxTot(c, o);", "o.etapa = 'Em execução'; cenLiberar(x, id); const T = benCxTot(c, o);", 1)),
-        ('apelido do nome', _b[:_m] + '\nconst benL = cenLiberar;' + _b[_m:])]
-ok('E1e o E1d derruba os atalhos de cenLiberar entre funções do ben.js (3 mutantes: atalho colado, outra variável, apelido)',
+        ('apelido do nome', _b[:_m] + '\nconst benL = cenLiberar;' + _b[_m:]),
+        ('atalho que põe Liberadas fora de benAutorizarLiberar', _b[:_m] + "\nfunction benLibDireto(c, id) { c.ordens[id].etapa = 'Liberadas'; }" + _b[_m:]),
+        ('objeto com etapa Liberadas fora de benAutorizarLiberar', _b[:_m] + "\nconst benLibObj = (o) => Object.assign(o, { etapa: 'Liberadas' });" + _b[_m:])]
+ok('E1e o E1d derruba os atalhos de liberação no ben.js (5 mutantes: cenLiberar colado, com outra variável e por apelido; Liberadas por atribuição e por objeto)',
    _m > 0 and all(not e1d(t)[0] for _, t in _mut) and all(t != _b for _, t in _mut), [(n, e1d(t)[1]) for n, t in _mut])
 ef=[(f,len(re.findall(r'\bosc_libEfeito\(',s))) for f,s in src.items() if re.search(r'\bosc_libEfeito\(',s)]   # CTL-3: definição + 2 chamadas
 ok('E1c o efeito sem o registro de quem decide (osc_libEfeito) só é chamado por osc_liberar e pela prévia osLibErro (cópia)', ef==[('areas/processo_os.py',3)], ef)
@@ -78,7 +82,7 @@ ESCOPO=(p('IN-04','PL-05','CA-02','CO-06det')|p('OS','CA-02','CO-06det')|p('MA',
         |p('IR-04','GE-07')|p('MB-01','MB-07','MB-08','MB-10')|p('MB-02','MB-08')|p('MB-05','MB-05det','SU-03det'))
 ok('L1 nenhum elo do escopo (PL-04/PL-05/PL-05det, CA-02, CO-06det, GE-07, MB-05det, MB-07..MB-10, SU-03det a partir de telas visíveis)', not (pares & ESCOPO), sorted(pares & ESCOPO))
 RESIDUAL={  # por PAR: um elo novo, mesmo numa tela já listada, quebra o teste
- **{x:'índice do protótipo: aponta de propósito para módulos ocultos' for x in p('Main','AG-03','BO-02','CA-01','CA-04','CO-01','CO-06','GE-01','IN-01','LO-01','LO-02','ON-01','PL-01','PL-05','PT-01','SU-01','SU-07','VE-01')},
+ **{x:'índice do protótipo: aponta de propósito para módulos ocultos' for x in p('Main','AG-03','BO-02','CA-01','CA-04','CF-01','CO-01','CO-06','GE-01','IN-01','LO-01','LO-02','ON-01','PL-01','PL-05','PT-01','SU-01','SU-07','VE-01')},
  **{x:'vivo (cenário ou MIP), só falta pôr na página visível (build.py VIS_ROWS)' for x in p('MB-01','MB-02det','MB-03x-recibo','MB-06')|p('MB-02','MB-02det','MB-03x-recibo')
     |p('MB-09','MB-03x-recibo')|p('MB-09det','MB-03x-recibo')
     |p('MB-03','MB-02det','MB-03x-recibo')|p('MB-04','MB-03x-recibo')|p('MB-05','MB-03x-recibo')|p('AG-01','MB-06')|p('AG-01det','MB-06')|p('IN-04','MB-06','CO-06')

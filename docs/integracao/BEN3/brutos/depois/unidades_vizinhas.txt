@@ -1,0 +1,30 @@
+# unidades sem navegador no estado fundido (88728cf; o motor não mudou depois), SAFRION_DADOS=sintetico, em tools/prototipo/v37/gen37
+aprova_quem_decide_test.py :: 103 linhas OK · 0 linhas de falha :: RESULTADO 103/103
+assinatura_unit_test.py :: 77 linhas OK · 0 linhas de falha :: RESULTADO passou · 76 verificações JS · falhas 0
+ben_prop_test.py :: 7 linhas OK · 0 linhas de falha :: RESULTADO: OK 360 sequências × 35 passos; 7 casos fixos · invariantes violados: nenhum
+ben_unit_test.py :: 193 linhas OK · 0 linhas de falha :: RESULTADO: OK 193/193
+cafe_apurar_test.py :: 16 linhas OK · 1 linhas de falha :: RuntimeError: Chrome não encontrado: defina CHROME_BIN
+capacidade_unit.py :: 101 linhas OK · 0 linhas de falha :: RESULTADO: 101 OK · 0 FALHA
+comercial_unit_test.py :: 114 linhas OK · 0 linhas de falha :: RESULTADO: OK 114/114
+demanda_unica_test.py :: 67 linhas OK · 0 linhas de falha :: RESULTADO: 66 ok · 0 falhas
+dose_divergente_test.py :: 37 linhas OK · 1 linhas de falha :: RuntimeError: Chrome não encontrado: defina CHROME_BIN
+ds_unit_test.py :: 29 linhas OK · 0 linhas de falha :: RESULTADO: OK 29/29
+ficha_pivo_unit_test.py :: 23 linhas OK · 0 linhas de falha :: RESULTADO 23/23
+inicio_entrega_test.py :: 26 linhas OK · 0 linhas de falha :: 26/26
+legal_unit_test.py :: 35 linhas OK · 0 linhas de falha :: RESULTADO 35/35
+ma_regras_test.py :: 150 linhas OK · 0 linhas de falha :: RESULTADO: 150/150 ok
+mip_unit_test.py :: 36 linhas OK · 0 linhas de falha :: RESULTADO 34/34
+ocupacao_unit.py :: 130 linhas OK · 0 linhas de falha :: RESULTADO: 130 OK · 0 FALHA
+os_aprov_lib_test.py :: 45 linhas OK · 0 linhas de falha :: RESULTADO passou · TOTAL 45 · falhas 0
+outorga_unit_test.py :: 27 linhas OK · 0 linhas de falha :: RESULTADO 27/27
+pa_regras_test.py :: 18 linhas OK · 0 linhas de falha :: RESULTADO 18/18
+praga_alvo_unit_test.py :: 21 linhas OK · 0 linhas de falha :: RESULTADO 21/21
+producao_unit_test.py :: 123 linhas OK · 0 linhas de falha :: RESULTADO: OK 123/123
+quantidade_test.py :: 14 linhas OK · 0 linhas de falha :: RESULTADO: 14/14
+rend_multiconjuntos_unit.py :: 106 linhas OK · 0 linhas de falha :: RESULTADO: 106/106 OK · JS = bloco REPARTIR de safra.js no jsc · Python = dados2.repartir com Fraction
+solo_unit_test.py :: 128 linhas OK · 0 linhas de falha :: RESULTADO: OK 128/128
+tabelas_cad_irr_unit.py :: 49 linhas OK · 0 linhas de falha :: RESULTADO: 49/49 ok
+usar_os_unit_test.py :: 24 linhas OK · 0 linhas de falha :: RESULTADO 24/24
+# notas: ben_unit_test (193/193) e ben_prop_test aqui são do merge 88728cf, antes dos U57 e do I-d4; os finais estão em ben_unit_test.log (200/200) e ben_prop_test.log.
+# cafe_apurar_test e dose_divergente_test pedem o Chrome: sem CHROME_BIN param no começo; foram rodados no lote de navegador (navegador/).
+# HEAD final (1bbf442 + docs): ben_unit 200/200, ben_prop OK, producao_unit 123/123, comercial_unit 116/116 (C06j e C06k novos), demanda_unica 66 ok · 0 falhas

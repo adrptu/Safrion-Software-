@@ -85,7 +85,7 @@ def painel():
           f'<sc-if value="{H("pp_hasErr")}" hint-placeholder-val="{F()}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700; line-height: 1.4;">{H("pp_err")}</div></sc-if></div></sc-if>')
     pe=(f'<div style="position: sticky; bottom: -20px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 -22px -20px; padding: 12px 22px; background: {SURF}; border-top: 1px solid {LINE};">'
         f'<sc-for list="{H("pp_sec")}" as="b" hint-placeholder-count="0"><button type="button" onClick="{H("b.go")}" style="{BTN_ST(False,True)}">{H("b.t")}</button></sc-for>'
-        f'<span style="flex-grow: 1;"></span><button type="button" onClick="{H("pp_close")}" style="{BTN_ST(False,True)}">{H("pp_closeT")}</button>'
+        f'<span style="flex-grow: 1;"></span><sc-if value="{H("pp_closeOn")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("pp_close")}" style="{BTN_ST(False,True)}">{H("pp_closeT")}</button></sc-if>'
         f'<sc-if value="{H("pp_hasPB")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("pp_pgo")}" style="{BTN_ST(True,True)}">{H("pp_pt")}</button></sc-if>'
         f'<sc-if value="{H("pp_hasPA")}" hint-placeholder-val="{F()}"><a href="{H("pp_ph")}" style="{BTN_ST(True,True)} text-decoration: none;">{H("pp_pt")}</a></sc-if></div>')
     return (f'<sc-if value="{H("pp_open")}" hint-placeholder-val="{F()}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
@@ -167,6 +167,7 @@ function prPainel(self,v,P){ v.pp_open=!!P; P=P||{chip:['','gray']};
   v.pp_hasErr=!!P.err; v.pp_err=P.err||''; v.pp_sec=(P.sec||[]).map(b=>Object.assign({},b,{go:prGuarda(self,b.go)}));
   v.pp_hasPB=!!(P.prim&&P.prim.go); v.pp_hasPA=!!(P.prim&&P.prim.h&&!P.prim.go); v.pp_pt=P.prim?P.prim.t:''; v.pp_ph=(P.prim&&P.prim.h)||'#'; v.pp_pgo=prGuarda(self,(P.prim&&P.prim.go)||(()=>{}));
   v.pp_close=()=>self.setState({pr_pan:null,pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null}); v.pp_closeT=P.form&&!P.form.aviso?'Cancelar':'Fechar';   /* form.aviso: recusa mostrada no lugar do formulário (nada a cancelar) */
+  v.pp_closeOn=!P.closeHide;   /* closeHide (opcional, só o BEN usa): o formulário já tem "Voltar"; o fechar do rodapé repetiria a saída (rodada 3, S4) */
   v.pp_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); v.pp_close(); } }; }
 /* executa um comando no estado (atômico) e mostra o resultado; erro fica no painel, junto da ação */
 function prRun(self,fn,ok){ const r=cenMudar(null,fn); if(r.erro){ self.setState({pr_err:r.erro,g2toast:''}); return r; }
@@ -445,7 +446,7 @@ function prFormPesar(self,c,g){ const P=prP(c); const nova=!g; const ords=prOrig
   const locs=Object.values(PRDC.locais).filter(l=>l.faz===faz&&['Galpão','Armazém','Silo','Câmara fria','Packing','Terreiro','Secador'].indexOf(l.tipo)>=0);
   if(locs.length>1) fs.push(prFld(self,'loc','Local de recebimento',{t:'sel',v:loc0,opts:locs.map(l=>({v:l.id,t:l.nome+' · '+l.tipo})),h:'Herdado da fazenda e da cultura. Packing, terreiro e secador: o lote nasce em processo.'}));
   const go=()=>{ const F=self.state.pr_form||{}; const val=k=>prFval(self,k,'');
-    const k={ticket:val('tk'),bruto:val('bruto'),tara:val('tara'),cond:val('cond'),local:prFval(self,'loc',loc0),quem:g2perfil()};   /* quem age (Ver como), não quem deveria receber (revisão CONF 10/10, R14) */
+    const k={ticket:val('tk'),bruto:val('bruto'),tara:val('tara'),cond:val('cond'),local:prFval(self,'loc',loc0),quem:prRec(faz)};
     if(u.grao){ k.u=val('u'); k.imp=val('imp'); } if(u.campo) k.litros=val('lit'); if(u.base==='frutos') k.frutos=val('fr');
     if(g){ k.carga=g.id; k.chave='W-REC-'+g.id; }
     else { if(!os1){ self.setState({pr_err:'Escolha a O.S. de colheita de origem.'}); return; }
@@ -465,7 +466,7 @@ function prPanCarga(self,c,g){ const P=prP(c); const s=prCgSit(c,g); const cu=g.
   if(g.st==='A pesar'){
     if(self.state.pr_modo==='descarte') return {title:g.id+' · descartar',chip:['A pesar','yellow'],sub,next:'Descarte só a carga registrada por engano (em dobro no app ou que não saiu do campo). Nada foi pesado; o registro e o motivo ficam.',
       form:{t:'Descartar '+g.id+' · '+prRec(g.faz),h:'A carga sai da fila de pesagem e deixa de impedir o encerramento da O.S.',fields:[prFld(self,'mot','Motivo do descarte',{t:'txt',im:'text',ph:'ex.: registrada duas vezes no app'})]},err:self.state.pr_err,
-      prim:{t:'Confirmar descarte',go:()=>prRun(self,x=>prDescartarCarga(x,g.id,prFval(self,'mot',''),g2perfil()),{pr_modo:null,pr_form:null})},sec:[{t:'Manter carga',go:()=>self.setState({pr_modo:null,pr_err:''})}]};
+      prim:{t:'Confirmar descarte',go:()=>prRun(self,x=>prDescartarCarga(x,g.id,prFval(self,'mot',''),prRec(g.faz)),{pr_modo:null,pr_form:null})},sec:[{t:'Manter carga',go:()=>self.setState({pr_modo:null,pr_err:''})}]};
     const f=prFormPesar(self,c,g);
     return {title:g.id+' · a pesar',chip:['A pesar','yellow'],sub:sub+(g.est_cx?' · estimativa ~'+g.est_cx+' caixas (não soma)':''),next:'Pesar na balança e receber: '+prRec(g.faz)+'. A O.S. de colheita só encerra depois desta pesagem.',
       form:{t:'Pesar e receber · '+prRec(g.faz),h:'Bruto e tara em kg, sem valor anterior. O líquido, os descontos e o lote são calculados.',fields:f.fields},err:self.state.pr_err,prim:{t:'Pesar a '+g.id,go:f.go},
@@ -480,7 +481,7 @@ function prPanCarga(self,c,g){ const P=prP(c); const s=prCgSit(c,g); const cu=g.
     secs:[{t:'Participação por talhão',rows:part},{t:'Lote',rows:L?[{c:[[L.id,'b'],L.prod,S.q,S.mot],l:{t:'Abrir no estoque',h:'PROD.dc.html#'+L.id}}]:[]},{t:'Trilha de movimentos',rows:mv},
           {t:'Chave e recibo',rows:[{c:['chave do campo: '+(g.chave||'—')]},{c:['chave da pesagem: '+(g.chaveRec||'—')]}]}],err:self.state.pr_err};
   if(g.st==='Recebida'){ if(self.state.pr_modo==='estorno'){ PPx.form={t:'Estornar '+g.id,h:'Devolve o efeito: sai do '+g.lote+' e da produção do talhão. Recusado se o lote ficar abaixo do reservado.',fields:[prFld(self,'mot','Motivo do estorno',{t:'txt',im:'text',ph:'ex.: ticket trocado na balança'})]};
-      PPx.prim={t:'Confirmar estorno',go:()=>prRun(self,x=>prEstornar(x,g.id,prFval(self,'mot',''),g2perfil()),{pr_modo:null,pr_form:null})}; PPx.sec=[{t:'Manter carga',go:()=>self.setState({pr_modo:null,pr_err:''})}]; }
+      PPx.prim={t:'Confirmar estorno',go:()=>prRun(self,x=>prEstornar(x,g.id,prFval(self,'mot',''),prRec(g.faz)),{pr_modo:null,pr_form:null})}; PPx.sec=[{t:'Manter carga',go:()=>self.setState({pr_modo:null,pr_err:''})}]; }
     else { const ob=L&&typeof benPrende==='function'?benPrende(c,L):null;   /* lote em processo numa ordem liberada: sem estorno (BEN-REV-02, mesma regra do prEstornoImpede); o porquê fica no próximo passo, sem repetir o lote */
       if(ob) PPx.next=s.nx+'. Sem estorno enquanto a '+ob.id+' não fecha: erro de pesagem entra no balanço da ordem e se justifica na conferência (alçada).';
       else PPx.sec=[{t:'Estornar',go:()=>self.setState({pr_modo:'estorno',pr_form:null,pr_err:''})}]; } }
@@ -542,17 +543,17 @@ function prJanAnual(k){ return k.colheita||(k.plantio?prDiaMais(k.plantio,120):'
 function prTal(c,cid){ const k=PRDC.cult[cid]; const R=prResultado(c,cid); const oss=prOsCult(c,cid); const vs=prP(c).previsoes[cid]||[]; const ult=vs[vs.length-1]||null;
   const abertas=oss.filter(o=>o.etapa!=='Encerradas'); const exec=abertas.find(o=>o.etapa==='Em execução'||o.etapa==='Em conferência'); const prog=abertas.find(o=>o.etapa==='A liberar'||o.etapa==='Liberadas');
   let sit; if(exec) sit='Em colheita'; else if(prog) sit='Programada'; else if(R.passes.some(p=>p.final)&&!(ult&&Object.keys(ult.sem||{}).some(w=>!prSemComecou(w)))) sit='Colhida'; else if(ult) sit='Prevista'; else sit='Sem previsão';
-  const cnt=k.semanal?prContagem(c,cid):null; const pub=prPublicavel(c,cid); const ag=prQuem('ag'); const agO=g2alcQuem('AL-02')||ag; let ac=null;   /* publicar: AL-17; emitir a O.S. e acompanhar: o agrônomo da O.S. (AL-02) */
+  const cnt=k.semanal?prContagem(c,cid):null; const pub=prPublicavel(c,cid); const ag=prQuem('ag'); let ac=null;
   if(k.semanal){ let w=prSemMais(prSem(prHoje()),1); while(oss.some(o=>prSemDaOS(o)===w)) w=prSemMais(w,1);
     const atv=(PRDC.colhAtv||{})[k.plano];
     if(!cnt) ac={k:'contar',t:'Coletar contagem',h:'MB-07.dc.html#'+cid,q:'equipe de colheita (app)',x:'contar os frutos de 20 plantas'};
     else if(pub) ac={k:'publicar',t:'Publicar previsão',q:ag,x:'publicar '+Object.keys(pub.sem).map(prSemTxt).join(' e ')};
-    else if(atv&&prVersaoSem(c,cid,w)) ac={k:'programar',t:'Programar colheita '+prSemTxt(w),h:'OS.dc.html#nova:'+cid+':'+atv+':'+prSemIni(w),q:agO,x:'emitir a O.S. da '+prSemTxt(w)};
-    else if(exec||prog) ac={k:'abrir',t:'Abrir '+(exec||prog).id,h:'OS.dc.html#'+(exec||prog).id,q:(exec||prog).resp||agO,x:(exec?'acompanhar a '+exec.id:'liberar a '+prog.id)}; }
+    else if(atv&&prVersaoSem(c,cid,w)) ac={k:'programar',t:'Programar colheita '+prSemTxt(w),h:'OS.dc.html#nova:'+cid+':'+atv+':'+prSemIni(w),q:ag,x:'emitir a O.S. da '+prSemTxt(w)};
+    else if(exec||prog) ac={k:'abrir',t:'Abrir '+(exec||prog).id,h:'OS.dc.html#'+(exec||prog).id,q:(exec||prog).resp||ag,x:(exec?'acompanhar a '+exec.id:'liberar a '+prog.id)}; }
   else { const jan=prJanAnual(k); const perto=jan&&jan<=prDiaMais(prHoje(),30); const atv=(PRDC.colhAtv||{})[k.plano];
     if(pub&&!(R.comecou)) ac={k:'publicar',t:'Publicar previsão',q:ag,x:'publicar a previsão da safra pela meta'};
-    else if(exec||prog) ac={k:'abrir',t:'Abrir '+(exec||prog).id,h:'OS.dc.html#'+(exec||prog).id,q:(exec||prog).resp||agO,x:'acompanhar a '+(exec||prog).id};
-    else if(perto&&atv) ac={k:'programar',t:'Programar colheita',h:'OS.dc.html#nova:'+cid+':'+atv+':'+jan,q:agO,x:'emitir a O.S. de colheita'}; }
+    else if(exec||prog) ac={k:'abrir',t:'Abrir '+(exec||prog).id,h:'OS.dc.html#'+(exec||prog).id,q:(exec||prog).resp||ag,x:'acompanhar a '+(exec||prog).id};
+    else if(perto&&atv) ac={k:'programar',t:'Programar colheita',h:'OS.dc.html#nova:'+cid+':'+atv+':'+jan,q:ag,x:'emitir a O.S. de colheita'}; }
   const nx=ac?(ac.x.charAt(0).toUpperCase()+ac.x.slice(1)+' · '+ac.q):(k.semanal?'acompanhar':(prJanAnual(k)?'colheita a partir de '+prBr(prJanAnual(k))+'/'+prJanAnual(k).slice(2,4)+' · nada a fazer agora':'sem janela de colheita'));
   return {k,R,sit,ac,nx,ult,cnt,pub,exec,prog,oss}; }
 /* previsão vigente na linha: semana em curso ou a próxima publicada; anual, a safra */
@@ -643,7 +644,7 @@ function prPanTal(self,c,X){ const k=X.k, R=X.R; const P=prP(c); const U=x=>prUn
           if(!prNumOk(pe)||prNum(pe)<0||prNum(pe)>=100) fe.pe='Número de 0 a 99 (ex.: 5).';
           if(Object.keys(fe).length){ self.setState({pr_ferr:fe,pr_err:'Corrija o campo marcado: nada foi publicado.'}); return; }
           par={plantas_ha:prNum(ph),perda:prDiv(prNum(pe),100)}; }
-        prRun(self,x=>prPublicar(x,k.id,g2perfil(),par),{pr_form:null}); }}; } }
+        prRun(self,x=>prPublicar(x,k.id,prQuem('ag'),par),{pr_form:null}); }}; } }
   return PPx; }
 function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=self.state; const vis=st.pr_vis||'t';
   v.vt=vis==='t'; v.vs=vis==='s'; v.vt_on=String(vis==='t'); v.vs_on=String(vis==='s'); v.vt_go=()=>self.setState({pr_vis:'t'}); v.vs_go=()=>self.setState({pr_vis:'s'});

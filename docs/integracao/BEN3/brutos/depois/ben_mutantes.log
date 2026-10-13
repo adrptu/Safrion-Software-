@@ -1,0 +1,100 @@
+OK    M01 elegibilidade da entrada desligada (R-A03) → U25a, U25b, U25d, U32a, U32b, U32c
+OK    M02 R-A07 sem a tolerância → U08b, U08c, U14a, U14b, U14c, U36f
+OK    M03 Fechar sem cenPodeEncerrar (custódia) → U19a, U19c, U19d, U45f, U45g
+OK    M04 Fechar sem as etapas exigidas → U19g
+OK    M05 R-C02 caixas acima da custódia desligada → U23a, U23c, U41a, U52b
+OK    M07 R-E05 sem comparar classe → U15d, U16c
+OK    M08 R-E02 Liberar com Não conforme → U17e
+OK    M08b R-E02 recusa do Liberar não conforme desligada → U17c
+OK    M09 R-F02 sem o valor absoluto → U08d
+OK    M10 R-G06 sem o teto → U09d, U26c2, U26d
+OK    M11 R-G06 desligada → erro de execução
+OK    M12 R-F07 sem a alçada de dif0 → erro de execução
+OK    M13 perda identificada sem exigir evidência → U10a, U10b
+OK    M14 estorno que não devolve caixas → U08b, U08c, U09a, U09b, U09c, U10b
+OK    M15 estorno que não derruba a conferência → U11d, U11e, U28
+OK    M16 balanço somando o registro estornado → U08b, U08c, U09a, U09b, U09c, U10b
+OK    M17 ID de lote olhando só os lotes → U13e
+OK    M18 chave (recibo) desligada → U14a, U14b, U40b, U41c, U42a, U45h
+OK    M19 versão esperada desligada → U14c, U36c, U36f, U40a, U40b, U41b
+OK    M20 liberar sem o evento CMD-42 → U25e
+OK    M21 número da REQ pela contagem (liberação e complemento: benReservaCx; o M21b da rodada 2 fundiu-se a este) → erro de execução
+OK    M23 R-E05 sem o limite do disponível → U15b, U15c, U16b, U16d
+OK    M24 fechar libera o lote (R-E01) → U15a, U15b, U15c, U17b, U17e, U19c
+OK    M25 carência não herdada pela genealogia → U26d, U26f
+OK    M26 liberar lote sem perfil (prLiberarLote) → U17f, U32a, U32b, U32c
+OK    M27 em processo antes do Iniciar (BEN-D15) → U29
+OK    M28 REV-01 decisões no lote preso numa ordem liberada → U30a
+OK    M29 REV-01 benDecidir sem a trava da ordem liberada → U30a
+OK    M30 REV-01/02 Fechar sem reconferir o físico das entradas → U30b
+OK    M31 REV-02 estorno de carga com o lote em processo → U31b
+OK    M32 REV-03 avaria no local de processo sem liberação → U32a, U32b, U32c
+OK    M33 REV-04 Reabrir zera a diferença declarada → U33a, U33b, U33c
+OK    M34 REV-04 Concluir depois de reabrir sem a gestão → U33a, U33b
+OK    M35 REV-04 correção na conferência só com o dif0 vigente → U33c
+OK    M36 REV-05 ordem com 0 caixa → U21c, U21d
+OK    M37 REV-08 ordem no local do lote, não no da linha → U26d2, U34
+OK    M38 REV-09 entrada parcial aceita → U35a, U35b
+OK    M39 REV-09 carga nova soma no lote da ordem → U31a, U31b
+OK    M40 REV-07 decisão do lote sem perfil → U36a
+OK    M41 REV-07 Fechar sem perfil → U36b
+OK    M42 REV-07 lote em duas ordens → U36c
+OK    M43 REV-07 fazendas misturadas → U36c
+OK    M44 REV-07 lote reservado entra na ordem → U37
+OK    M45 REV-07 entrada acima do físico → U35a, U35b, U40f
+OK    M46 REV-07 Retirar sem versão esperada → U36c
+OK    M47 REV-07 Não conforme sem observação → U36e
+OK    M48 REV-07 correção na conferência sem motivo → U36e
+OK    M49 REV-07 Concluir sem Produto → U36d, U43a
+OK    M50 REV-07 justificar dentro da faixa → U36b
+OK    M51 REV-07 Iniciar em A liberar → U36c
+OK    M52 REV-07 reclassificar sem motivo → U36a
+OK    M53 REV-07 bruto menor ou igual à tara → U36d
+OK    M54 REV-07 Produto sem classe → U36d
+OK    M55 S4 Conferir sem versão esperada → U36f
+OK    M56 S4 versão antes do "já feito" (toque repetido vira conflito) → U36f
+OK    M57 S4 recusa do Liberar lote chama fruta de campo de lote do beneficiamento → U38
+OK    M58 caixas da ordem nova reduzidas ao livre (a falta some do planejamento; rodada 1, BEN-D23) → U39a, U39b, U39c, U39d, U39e, U39f
+OK    M59 cancelar fora de A liberar (reserva e entrega soltas) → U40e
+OK    M60 cancelar sem motivo → U40a, U40b, U40c
+OK    M61 ordem cancelada continua prendendo o lote → U40c, U40d, U40e, U40g
+OK    M63 falta de caixa sem a nota a conferir como saída (BEN-D23) → U25d, U39c, U50b, U57g
+OK    M64 nota de caixa já conferida continua oferecida como saída → U39f, U46a, U46b, U46c, U46e
+OK    M65 complemento (e liberação) sem reserva no Estoque (rodada 1, S3) → U21a, U41c, U41e, U45a, U45c, U48b
+OK    M66 complemento em outro lote troca o lote do item (BEN-REV-20261009-03) → U41e, U41g, U45a, U45b, U45c, U45d
+OK    M67 recusa por custódia sem a saída (complemento da ordem) → U23a, U41a
+OK    M68 comando sobre ordem Cancelada vira "Já feito" (rodada 1, S4) → U44a
+OK    M69 consumo sem as partes por lote (tudo na linha mais antiga) → U45d, U45e, U45f, U45g
+OK    M70 estorno no lote da REQ da liberação, sem as partes do consumo → U45e
+OK    M71 Fechar olha só a REQ da liberação (custódia do complemento esquecida) → U45f, U45g
+OK    M72 complemento ignora o lote das linhas da ordem (abre REQ nova no maior lote) → U41c, U41d, U45f, U45g, U51
+OK    M62 cancelar sem perfil → U40a, U40b, U40e
+OK    M73 recuperação conta a custódia inteira de qualquer ordem como sobra (rodada 2, S2) → erro de execução
+OK    M74 sobra de ordem em execução ignora o que falta registrar → U46b, U47a, U47b, U47c, U48a, U48b
+OK    M75 sobra com a fração vendável (subestima as caixas que a ordem usa) → U46d, U47a, U47b, U47c, U48a, U48b
+OK    M76 falta de caixa em ordem liberada manda Cancelar a ordem → U46e, U57d
+OK    M77 sobra em conferência = a custódia inteira (BEN-D32 antiga) → U47a, U47b, U47c, U52b, U57e, U57f
+OK    M78 teto pelo piso (A1 da lente: ⌊kg ÷ 10⌋) → U50a
+OK    M79 a própria ordem como fonte (A6 da lente) → U50c
+OK    M80 devolução sem divisão (tudo livre) → U48a, U48b, U57b
+OK    M81 "a entregar" ignora o dispensado → U48a, U48c, U52a, U52b, U57c
+OK    M82 livre de um lote só → U39f, U46a, U46c, U46e, U48b, U49a
+OK    M83 liberação e complemento sem dividir entre lotes → U48b, U49a, U49b, U49d, U49e, U49f
+OK    M84 Fechar sem baixar a reserva não entregue → U47e, U51, U57a
+OK    M85a entrega acima da reserva própria e do livre (usa a reserva de outra requisição) → U48d
+OK    M85b entrega baixa a reserva agregada (Math.max, sem a reserva própria) → U48d
+OK    M86 pré-preenchido da devolução = a custódia → U48c, U52a, U52b
+OK    M89 falta pela necessidade da rota (reaplica a fração vendável; falso "Faltam N") → U52a, U52b, U54, U57c
+OK    M90 entrega sem a trava física (estoque negativo depois do ajuste) → U55
+OK    M91 gancho da devolução falha aberto sem o ben.js (devolve tudo ao livre em silêncio) → U56
+OK    M93 conferência dentro da faixa traz só a sobra (2ª visita do almoxarife) → U47e
+OK    M94 caixa em uso devolvida volta livre (sem a reserva da linha) → U45c, U48a, U48b, U57b
+OK    M95 Fechar não tira o não entregue do "a entregar" → U47e, U51
+OK    M96 cenResTot não desconta a reserva-baixa (a linha encerrada volta a ter reserva própria) → U57a
+OK    M97 cenResTot: base da REQ da semente não Reservada = 0 (a caixa em uso devolvida à REQ-030 fica sem reserva própria) → U57b
+OK    M98 avaria não sai do "a entregar" (entrega sem reserva no lugar do Pedir mais caixas) → U57c
+OK    M99 recuperação em conferência sem Reabrir a execução → U57d
+OK    M100 selo "Sobra em custódia" pela custódia inteira → U57e
+OK    M101 kg aberto zera com a conferência dada → U57f
+OK    M102 só a 1ª nota de caixas é fonte → U57g
+RESULTADO: OK 99/99

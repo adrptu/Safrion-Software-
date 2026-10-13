@@ -67,12 +67,8 @@ function cal01Memo(r, o){ o=o||{}; const u=' '+(o.un||'');
     else if(l.tipo==='dem') out.push(t+(l.calc?l.calc+' = ':'')+n1(l.q)+u+sx+(l.nec>1e-9?' · falta '+n(l.nec)+u:'')+(l.rup>1e-9?' · ruptura '+n(l.rup)+u:''));
     else out.push(t+'−'+n1(l.q)+u+sx); });
   if((Number(o.cond)||0)>1e-9) out.push('Falta condicionada à qualidade: '+n(o.cond)+u+(o.condFalta?' a partir de '+d(o.condFalta):'')+' se o laudo reprovar · '+demCondTxt(o));   // PRD 65.4; CAL-01 "Qualidade pendente"; DEMO-02
-  // reprovado por laudo (revisão do 16fb55e, ajuste 2): com mais de um laudo no lote, cada um com a sua quantidade e o seu motivo (x.reps, do histórico)
-  const rl=(r,dc)=>' laudo '+(r.laudo||'—')+(dc&&r.doc?' ('+r.doc+')':'')+(r.motivo?': '+r.motivo:'');
-  (o.quarRef||[]).filter(x=>x.rep).forEach(x=>{ const rs=(x.reps||[]).length>1?x.reps:null; const dc=!!rs&&rs.some(r=>r.doc!==rs[0].doc);
-    out.push('Reprovado: '+n(x.q)+u+' do lote '+x.lote+(x.doc&&!dc?' ('+x.doc+')':'')
-      +(rs?' = '+rs.map(r=>n(r.q)+u+' no'+rl(r,dc)).join(' + '):' ·'+rl(x.rep,false))
-      +' · segregado para devolução ao fornecedor, não cobre: a falta é firme'); });
+  (o.quarRef||[]).filter(x=>x.rep).forEach(x=>out.push('Reprovado: '+n(x.q)+u+' do lote '+x.lote+(x.doc?' ('+x.doc+')':'')+' · laudo '+(x.rep.laudo||'—')+(x.rep.motivo?': '+x.rep.motivo:'')
+    +' · segregado para devolução ao fornecedor, não cobre: a falta é firme'));
   out.push(r.liq>1e-9?('Necessidade líquida = soma das faltas desta safra = '+n(r.liq)+u+' · falta a partir de '+d(r.falta))
     :(r.rupRec>1e-9?('Sem compra nova · ruptura de '+n(r.rupRec)+u+' de '+d(r.falta)+' a '+d(r.cob)+', coberta pelo recebimento')
     :('Sem falta nesta safra'+((Number(o.cond)||0)>1e-9?' se o laudo liberar os '+n(qc)+u+' em quarentena (a falta condicionada está acima)':'')+' · saldo depois do último uso: '+n(r.saldoUlt==null?r.saldo:r.saldoUlt)+u)));
@@ -149,21 +145,15 @@ function demFazenda(x){ const m={}; const ord=(s)=>{ const i=(x.ordem||{})[s]; r
   return m; }
 // DEM-05 · Mapa › Insumos: situação de cada insumo da fazenda no período (eventos até lim; sem lim, a safra toda) pela mesma projeção:
 // Falta (necessidade líquida) · Pedido a receber (sem os recebimentos faltaria) · Estoque cobre. Entra o insumo com uso desta safra de hoje em
-// diante no período. Devolve {insumo: [rótulo, cor ('red'|'yellow'|'ok'), detalhe, qualidade pendente junto da falta firme ('' sem ela)]}.
-// Revisão do 16fb55e (ajuste 1, PRD 65.4): com falta firme E quarentena com laudo pendente, o rótulo segue a compra firme e a parte condicionada
-// aparece à parte (4º item e detalhe, com quem decide), fora da compra e sem segunda ação (dano evitado: o Mapa esconder 40 kg aguardando laudo
-// e o comprador decidir sem saber que eles podem virar falta).
+// diante no período. Devolve {insumo: [rótulo, cor ('red'|'yellow'|'ok'), detalhe]}.
 function demSituacao(m, lim, hoje, viavel){ const st={}; const dm=(s)=>s?s.slice(8,10)+'/'+s.slice(5,7):''; const d4=(s)=>s?dm(s)+'/'+s.slice(0,4):'';
   Object.values(m||{}).forEach(d=>{ const evs=lim?d.evs.filter(e=>e.dt<=lim):d.evs; const own=evs.filter(e=>e.tipo==='dem'&&e.own&&e.dt>=hoje); if(!own.length) return;
     const s0=d.est+(Number(d.cust)||0), qc=Number(d.quarC)||0; const r=cal01(s0+qc,evs,0,{hoje,viavel}), r0=cal01(s0+qc,evs.filter(e=>e.tipo!=='rec'),0,{hoje,viavel}); const u=' '+d.un;
     const rF=qc>1e-9?cal01(s0,evs,0,{hoje,viavel}):r;   // sem a quarentena: falta condicionada à qualidade (revisão do 853a6a8, achado 2)
-    const cq=qc>1e-9?Math.max(0,calR2(calR2(rF.liq)-calR2(r.liq))):0;   // a parte da falta que só existe se o laudo reprovar (a mesma conta de d.cond, no período)
     const rc=evs.filter(e=>e.tipo==='rec').sort((a,b)=>a.dt<b.dt?-1:(a.dt>b.dt?1:0))[0]; const ar=evs.filter(e=>e.tipo==='rec').reduce((a,e)=>a+e.q,0);
     const base='precisa de '+calNf(own.reduce((a,e)=>a+e.q,0))+u+' · estoque apto '+calNf(d.est)+u+((d.cust||0)>1e-9?' + '+calNf(d.cust)+u+' em custódia a devolver':'');
-    const ctx=qc>1e-9?demCondTxt({quarC:qc,quarRef:d.quarRef,condFalta:rF.falta,un:d.un}):'';   /* motivo, responsável, prazo e fora da compra: o texto único da falta condicionada (integração V56) */
-    if(r.liq>1e-9) st[d.nome]=['Falta '+calNf(r.liq)+u,'red',base+' · falta a partir de '+d4(r.falta)+' · Suprimentos compra na Compra de insumos'
-      +(cq>0.001?' · se o laudo reprovar, faltam mais '+calNf(cq)+u+' · '+ctx:''),cq>0.001?'Qualidade pendente · '+calNf(cq)+u:''];
-    else if(rF.liq>1e-9) st[d.nome]=['Qualidade pendente · '+calNf(rF.liq)+u,'yellow',base+' · se o laudo reprovar, falta a partir de '+d4(rF.falta)+' · '+ctx];
+    if(r.liq>1e-9) st[d.nome]=['Falta '+calNf(r.liq)+u,'red',base+' · falta a partir de '+d4(r.falta)+' · Suprimentos compra na Compra de insumos'];
+    else if(rF.liq>1e-9) st[d.nome]=['Qualidade pendente · '+calNf(rF.liq)+u,'yellow',base+' · se o laudo reprovar, falta a partir de '+d4(rF.falta)+' · '+demCondTxt({quarC:qc,quarRef:d.quarRef,condFalta:rF.falta,un:d.un})];
     else if(r0.liq>1e-9||r0.rupRec>1e-9) st[d.nome]=['Pedido a receber'+(rc?(rc.ref?' · '+rc.ref:'')+' · '+dm(rc.dt):''),'yellow',base+' · a receber '+calNf(ar)+u];
     else st[d.nome]=['Estoque cobre','ok',base]; });
   return st; }

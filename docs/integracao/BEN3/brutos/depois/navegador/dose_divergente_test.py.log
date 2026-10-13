@@ -1,0 +1,63 @@
+REPRO B-R8 {"esperado":{"Glifosato 480":20,"2,4-D 806":10,"Óleo mineral":5},"retorno":{"r":{"msg":"Turno fechado: 10 ha em 1 h. A ordem continua em execução. Divergência de consumo/dose: 2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L · revisão técnica de Ana (agrônoma)."}},"realizado":10,"saldo":150,"st":"Provisório","div":[{"p":"2,4-D 806","un":"L","plan":10,"inf":0},{"p":"Óleo mineral","un":"L","plan":5,"inf":0}],"selos":[{"t":"Divergência de consumo/dose · 2,4-D 806, Óleo mineral","c":"red"}]}
+OK    D01a planejado do trecho pela regra única: 20 / 10 / 5 L para 10 ha
+OK    D01b o fato fica como informado: 10 ha realizados, apontamento Provisório, Glifosato 20 L baixado e 2,4-D e Óleo sem baixa (nada forçado à dose)
+OK    D01c o apontamento guarda a divergência por produto, planejado × informado com unidade (2,4-D 806 10 → 0 L; Óleo mineral 5 → 0 L)
+OK    D01d a O.S. ganha o selo vermelho "Divergência de consumo/dose · 2,4-D 806, Óleo mineral"
+OK    D01e revisão técnica pendente do agrônomo (uma, do dia 1)
+OK    D01f o fecho do turno diz o que divergiu e quem revisa, sem "S2"
+OK    D02 controle 20 / 10 / 5: sem divergência, sem selo, sem revisão; mesma mensagem de fecho
+OK    D03 sugestão dose × área não editada: sem divergência nem selo
+OK    D04 20,004 L arredonda para 20,00 (igual ao planejado); 20,01 L diverge (centésimo, sem tolerância)
+OK    D04b 9,995 L = 10,00 L (cenQtd) não diverge do planejado 10 L; 10,005 L = 10,01 L diverge e o texto mostra 10,01 L; 10,0049 L não diverge
+OK    D05a Rui (almoxarife) não revisa: recusado com quem decide, nada muda
+OK    D05b aceitar sem motivo é recusado, nada muda
+OK    D05c dia sem divergência em revisão é recusado
+OK    D05d Ana (agrônoma) aceita com motivo: revisão gravada com autor, selo sai, consumo informado continua como está
+OK    D05e repetir a mesma revisão não grava de novo; outra decisão no mesmo dia é conflito, nada muda
+OK    D06 correção sem texto é recusada; com o texto, gravada como "Correção decidida" por Ana e o selo sai
+OK    D07a enviada para conferência, o selo continua e o encerramento diz a divergência e quem revisa
+OK    D07b encerrar é recusado e nada muda
+OK    D07c O.S./Kanban (osMerge): selo, dono Ana (agrônoma) e próximo passo bloqueado com quem resolve; sem "Sobras a receber"
+OK    D07d revisada, o encerramento passa e o apontamento fica Conferido com a revisão
+OK    D08 sem sinal: divergência gravada no apontamento, sem selo; ao voltar o sinal (dois envios) o selo e a revisão aparecem uma vez
+OK    D09 web: 2,4-D 12 L contra 10 L planejado abre a divergência (superdose) e a mensagem diz quem revisa
+OK    D10 duplicidade retida: sem selo; somada como outro turno por Paula, a divergência do turno abre a revisão
+OK    D11a app (OS-0421, campo do Adjuvante sem edição): selo "Divergência de consumo/dose · Adjuvante espalhante", planejado 2,5 L × informado 0 L, revisão de Ana; a sugestão do Fungicida não diverge
+OK    D11b a baixa não muda: só o Fungicida sai da custódia, sem conferência nem linha 0 do Adjuvante
+OK    D11c web (formulário sem edição): a mesma divergência do Adjuvante e a mensagem diz quem revisa
+OK    D12a recusado o relato de 15 L (CC-301): a divergência do dia 2 vira "2,4-D 806 planejado 10 L × baixado 0 L (informado 15 L, relato CC-301 recusado no Estoque)", selo e revisão seguem
+OK    D12b revisada sobre os 15 L e depois recusado o relato: a revisão anterior vai para o histórico (reaberta, com quem recusou) e a do dia volta a pendente
+OK    D12c a Origem da O.S. guarda a revisão reaberta
+OK    D12d informado igual ao planejado mas acima da custódia: sem divergência; recusado o relato, nada foi baixado e a divergência abre (planejado 10 L × baixado 0 L)
+OK    D12e aceito o relato (baixa os 15 L): a divergência continua a do informado
+OK    D13 produto fora da ordem (Adjuvante 5 L): divergência planejado 0 L × informado 5 L, com unidade
+OK    D14 sugestão retida sem divergência; somada por Paula com o usado de 2,4-D 5 L (planejado 10 L), a divergência abre
+OK    D15 dois turnos de 0,333 ha sem sinal, cada um com o trecho exato (Óleo 0,17 e 0,16 L): nenhuma divergência; base do 2º = 0,333 ha no aparelho
+OK    D16 Em execução: selo, dona Ana (agrônoma) e próxima ação "revisar a divergência de dose do dia 1"
+RESULTADO unit: 35/35
+OK    M1 Início (IN-04): em conferência, sem custódia e com a divergência aberta, o selo é o da divergência; sem "Sobras a receber" nem "Receber sobras"
+OK    M2 Início (IN-04): com sobra em custódia, "Sobras a receber" continua
+RESULTADO unit Início: 2/2
+  OK  preparo: OS-0430 liberada por Ana, insumos entregues e confirmados: Recebimento confirmado: Glifosato 480 320 L, 2,4-D 806 160 L, Óleo mineral 80 L.
+  OK  MB-03: sugestão 20/10/5; informado 20/0/0 fecha o turno e o aviso diz a divergência e quem revisa: ['20', '10', '5'] · Turno fechado: 10 ha em 1 h. A ordem continua em execução. Divergência de consumo/dose: 2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L · revisão técnica de Ana (agrônoma).
+  OK  recibo do turno no app: selo e planejado × informado com unidade, sem "S2": Turno fechado · OS-0430 · dia 1 · 10 ha em 1 h / Enviado · a ordem continua aberta / Divergência de consumo/dose / Consumo: Glifosato 480 20 L / 2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L · revisão técnica de Ana (agrônoma) / Realizado 10 de 160 ha · saldo 1
+  OK  app a 390 px sem rolagem horizontal
+  OK  lista: selo por produto, quem resolve Ana (agrônoma) e a próxima ação: OS-0430 Dessecação pré-plantio T1-A — 160,00 ha 25/09/2026 25/09/2026 Em execução Divergência de consumo/dose · 2,4-D 806, Óleo mineral — Ana (agrônoma) revisar a divergência de dose do dia 1 — 10,00 ha 150,00 ha — 6,3 % Marcos
+  OK  Kanban (5 fases, sem coluna nova): cartão com o selo e a pendência: OS-0430 Dessecação pré-plantio T1-A · 160 ha 10/160 ha · 6 % · saldo 150 ha Divergência de consumo/dose · 2,4-D 806, Óleo mineral Ana (agrônoma) · revisar a divergência de dose do dia 1 Marcos · 25/09 (DAP −20)
+  OK  painel: linha do dia 1 com planejado × informado, Aceitar com motivo e Registrar correção (perfil Ana): Dia 1 · app 10 ha · 1 h 10 / 160 ha Provisório Divergência de consumo/dose · 2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L Aceitar com motivo Registrar correção Acumulado 10 / 160 ha · saldo 150 ha RECURSOS ALOCADOS Máquina · Trator 03 25/09 13:00–20:24 condici
+  OK  perfil Rui: sem os botões, a linha diz quem decide; comando direto recusado, nada gravado: Revisar a divergência de consumo/dose do dia 1 da OS-0430: decisão de Ana (agrônoma). Nada foi alterado.
+  OK  aceitar sem motivo: erro junto ao campo, revisão continua pendente: Informe o motivo para aceitar a divergência do dia 1 da OS-0430. Nada foi alterado.
+  OK  Ana aceita com motivo: selo sai da lista, a linha mostra quem e quando; consumo informado preservado (Glifosato 480 20, 2,4-D 806 0, Óleo mineral 0): Divergência de consumo/dose do dia 1 da OS-0430 aceita por Ana (agrônoma): Calda sem 2,4-D por deriva no vizinho; controle conferido em campo. O consumo informa
+  OK  repetição sem efeito; outra decisão é conflito: Divergência do dia 1 da OS-0430 já revisada (aceita por Ana (agrônoma) às 05:16): nada foi · A divergência do dia 1 da OS-0430 já foi revisada (aceita por Ana (agrônoma) às 05:16): ou
+  OK  turno de 150 ha com Óleo 50 L (75 L planejado) e envio para conferência: execução. Divergência de consumo/dose: Óleo mineral planejado 75 L × informado 50 L · revisão técnica de Ana (agrônoma). · OS-0430 enviada para conferência.
+  OK  Em conferência: selo e encerramento bloqueado com quem resolve; sem "Conferir e encerrar": PRÓXIMO PASSO Confira apontamentos, consumo e sobras e encerre a ordem. Encerrar bloqueado: divergência de consumo/dose em revisão técnica · dia 2 · Óleo mineral planejado 75 L × informado 50 L. Quem resolve: Ana (agrônoma), na linha do apontamento: aceita com motivo ou registra a correção ou reapli
+  OK  Kanban em conferência: selo e pendência com Ana, sem "Sobras a receber": OS-0430 Dessecação pré-plantio T1-A · 160 ha 160/160 ha · 100 % · saldo 0 ha Divergência de consumo/dose · Óleo mineral Ana (agrônoma) · revisar a divergência de dose Marcos · 25/09 (DAP −20)
+  OK  390 px: Registrar correção grava a decisão, sem rolagem horizontal: Correção registrada por Ana (agrônoma) para o dia 2 da OS-0430: Reaplicar Óleo mineral 0,5 L/ha nos 50 ha do fim do talhão em nova O.S. O consumo informado fica
+  OK  revisões feitas: Conferir e encerrar → Encerradas (Encerradas)
+  OK  sem erros JS (O.S., app) e Kanban com as 5 fases, sem coluna nova: [] · a liberar|liberadas|em execução|em conferência|encerradas
+  OK  recibo do turno retido como duplicidade: a divergência fica registrada e a revisão só abre se Paula somar: Turno fechado · OS-0430 · dia 2 · 10 ha em 1 h / Em conferência · duplicidade / Divergência de consumo/dose / Consumo: nada baixado: Paula (conferência) decide se é outro turno / 2,4-D 806 planejado 10 L × informado 0 L · a revisão técnica abre se Paula (conferência) somar o turno / Realizado 10 de 160 ha · saldo 150 h
+  OK  guardado como duplicidade (Dia 2 guardado como duplicidade do dia 1: nada foi somado ne): a linha do dia 2 sem divergência nem promessa de revisão; lista sem selo: Dia 2 · app 10 ha · 1 h não somado Duplicidade · não somado 
+  OK  dois dias divergentes: Enter em "Aceitar com motivo" do dia 1 grava só o dia 1; o texto do dia 2 fica ('Reaplicar Óleo mineral 0,5 L/ha nos 10 ha do dia 2 em nova O.S.') e o foco vai para ele (Aceitar com motivo → dv_2): Apontamento do dia 2: 10 ha (provisório) · Divergência de consumo/dose do dia 1 da OS-0430 aceita por Ana (agrônoma): Calda sem 2,4-D no dia 1: deriva no vizinho, 
+  OK  dia 2 pelo teclado (Tab até "Registrar correção" e Enter) grava o rascunho preservado, só a decisão confirmada: Registrar correção · Correção registrada por Ana (agrônoma) para o dia 2 da OS-0430: Reaplicar Óleo mineral 0,5 L/ha nos 10 ha do dia 2 em nova O.S. O consumo informado fica como es
+21/21 ok · FALHAS: 0
+rc=0

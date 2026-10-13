@@ -1,0 +1,33 @@
+# navegador, carga de 1 min <= 8, env CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdpI.lock (demanda_estado: /tmp/cdp9333.lock) env CDP_GL=1 SAFRION_DADOS=sintetico timeout 900
+## depois · worktree (BEN_PUBLICADO=False)
+ben_fluxo_test.py_cadeia_cadeia390.log :: RESULTADO: OK 16/16 :: rc=0
+ben_fluxo_test.py_complemento_lotes_duplo_criada.log :: RESULTADO: OK 26/26 :: rc=0
+ben_fluxo_test.py_conferencia_conferencia390_sobra_sobra390.log :: RESULTADO: OK 26/26 :: rc=0
+ben_fluxo_test.py_fluxo_erros_celular_revisao.log :: RESULTADO: OK 62/62 :: rc=0
+ben_fluxo_test.py_multilote_multilote390_rodape_manutencao.log :: RESULTADO: OK 18/18 :: rc=0
+ben_fluxo_test.py_roteiro_roteiro390.log :: RESULTADO: OK 34/34 :: rc=0
+ben_fluxo_test.py_teclado_cancelar_faixa390.log :: RESULTADO: OK 29/29 :: rc=0
+cafe_apurar_test.py.log :: RESULTADO: OK 10/10 :: rc=0
+comercial_fluxo_test.py.log :: RESULTADO: OK 72/72 :: rc=0
+comercial_revisao_test.py.log :: RESULTADO: OK 33/33 :: rc=0
+demanda_estado_nav_test.py.log :: RESULTADO: 14 ok · 0 falhas :: rc=0
+dose_divergente_test.py.log :: 21/21 ok · FALHAS: 0 :: rc=0
+links_ocultos_test.py.log :: TOTAL 14 · falhas 0 :: rc=0
+producao_fluxo_test.py.log :: RESULTADO: OK 67/67 :: rc=0
+tabelas_ben_test.py.log :: RESULTADO: OK 12/12 :: rc=0
+tabelas_est_test.py.log :: RESULTADO: 34/34 ok :: rc=0
+## depois · cópia de rascunho com BEN_PUBLICADO=True (sem commit)
+ben_fluxo_test.py_cadeia_cadeia390.log :: RESULTADO: OK 16/16 :: rc=0
+ben_fluxo_test.py_complemento_lotes_duplo_criada.log :: RESULTADO: OK 26/26 :: rc=0
+ben_fluxo_test.py_conferencia_conferencia390_sobra_sobra390.log :: RESULTADO: OK 26/26 :: rc=0
+ben_fluxo_test.py_fluxo_erros_celular_revisao.log :: RESULTADO: OK 64/64 :: rc=0
+ben_fluxo_test.py_multilote_multilote390_rodape_manutencao.log :: RESULTADO: OK 18/18 :: rc=0
+ben_fluxo_test.py_roteiro_roteiro390.log :: RESULTADO: OK 34/34 :: rc=0
+ben_fluxo_test.py_teclado_cancelar_faixa390.log :: RESULTADO: OK 33/33 :: rc=0
+producao_fluxo_test.py.log :: RESULTADO: OK 67/67 :: rc=0
+tabelas_ben_test.py.log :: RESULTADO: OK 12/12 :: rc=0
+## antes · base 3f9e4f6 com os próprios testes (oculto = como está; publicado = cópia com BEN_PUBLICADO=True)
+oculto_ben_fluxo_test.py_fluxo_erros_celular_revisao.log :: RESULTADO: FALHOU 2/13 :: rc=1
+oculto_ben_fluxo_test.py_roteiro_roteiro390.log :: RESULTADO: FALHOU 0/8 :: rc=1
+oculto_ben_fluxo_test.py_teclado_cancelar_faixa390.log :: RESULTADO: FALHOU 24/28 :: rc=1
+publicado_ben_fluxo_test.py_fluxo_erros_celular_revisao.log :: RESULTADO: FALHOU 60/64 :: rc=1

@@ -1,0 +1,10 @@
+M96 VIVO []
+M97 MORTO ['I-a4', 'I-e4']
+M98 MORTO ['I-a3', 'I-d2', 'I-e4']
+M99 MORTO ['I-f2']
+M100 VIVO []
+M101 MORTO ['I-a1', 'I-a2', 'I-a3', 'I-f4']
+M102 VIVO []
+rc=0
+M96 MORTO ['I-d4']
+M100 MORTO ['I-a1']

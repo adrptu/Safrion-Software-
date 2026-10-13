@@ -24,7 +24,9 @@ def build():
     nova = f'<button type="button" onClick="{H("nova_go")}" style="{_MINI}">+ Nova ordem</button>'
     kb = (f'<style>@media (max-width:479px){{.bn-kb>div{{flex-direction:column!important}}.bn-kb>div>div{{width:100%!important}}}}</style>'
           f'<div class="bn-kb" style="overflow-x: auto;">{_kanban()}</div>')
-    corpo = (bloco('Ordens de beneficiamento', 'Da fruta recebida ao lote embalado: entradas, saídas pesadas, caixas e balanço na mesma ordem. Clique numa ordem para o próximo passo.',
+    # aviso (role=status) acima do conteúdo e sem receber toque com o painel aberto (rodada 3, I-g4: cobria a primária do rodapé 2 a 4 s a 390 px)
+    aviso = '<style>body:has(aside[role=dialog]) div[role=status]{top:calc(12px + env(safe-area-inset-top, 0px))!important;bottom:auto!important;pointer-events:none;}</style>'
+    corpo = aviso + (bloco('Ordens de beneficiamento', 'Da fruta recebida ao lote embalado: entradas, saídas pesadas, caixas e balanço na mesma ordem. Clique numa ordem para o próximo passo.',
                    IF('vl', g_ob + cartoes('cards_ob'), d=True) + IF('vk', kb), acao=f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">{vis}{nova}</div>'))
     _shell('BEN', 'Beneficiamento', 'Processe as ordens: autorize a rota, registre as saídas pesadas, confira o balanço e feche. Fechar não libera o lote: a Qualidade libera.',
            corpo, fname, 1100,
@@ -49,7 +51,24 @@ function bnRun(self,fn,ok){ const r=benMudar(fn); self._bnUlt={t:bnAgora(),msg:r
   /* toque repetido (duplo toque, outra aba): o efeito já existe; o retorno é aviso, não erro, e não apaga o aviso do primeiro toque */
   if(r.erro&&/^Já feito/.test(r.erro)){ self.setState({g2toast:r.erro,pr_err:''}); return r; }
   if(r.erro){ self.setState({pr_err:r.erro,g2toast:''}); return r; }
-  self.setState(Object.assign({cenrev:Date.now(),g2toast:r.msg||'Registrado.',pr_err:'',pr_ferr:null},ok||{})); return r; }
+  self.setState(Object.assign({cenrev:Date.now(),g2toast:r.msg||'Registrado.',pr_err:'',pr_ferr:null,bn_rasc:null},ok||{})); bnFocoTitulo(); return r; }
+/* depois de um comando que muda a fase ou fecha um formulário, o foco vai ao título do painel (tabindex −1, não acionável): o Enter seguinte
+   não aciona a primária nova (rodada 3, I-g2: "Autorizar" virava "Iniciar processo" no mesmo botão, a um Enter) */
+function bnFocoTitulo(){ setTimeout(()=>{ try{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); const h=a&&a.querySelector('h2');
+  if(h){ h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); } }catch(e){} },0); }
+/* tecla segurada (auto-repetição, e.repeat) não aciona botão no BEN: o clique do Enter sai a cada keydown repetido (rodada 3, I-g1). Só em botão:
+   num campo de texto, segurar o Espaço é digitação */
+function bnRepete(){ if(window.__bnRep) return; window.__bnRep=1; try{ window.addEventListener('keydown',(e)=>{ if(!e.repeat||(e.key!=='Enter'&&e.key!==' ')) return;
+  const t=e.target; if(t&&t.closest&&t.closest('button,[role=button]')){ e.preventDefault(); e.stopPropagation(); } },true); }catch(e){} }
+/* rascunho (rodada 3, I-h1): Esc, o X, o fundo e o Voltar com campo digitado não descartam; o aviso "Rascunho não salvo" oferece Continuar
+   editando ou Descartar, e um 2º Esc com o aviso à vista descarta. Só campo digitado conta (número ou texto): escolher por toque não pede
+   confirmação. Reabrir o rascunho preenchido é vetado (seria "último valor" de quantidade e bruto, AGENTS §3.3) */
+const BN_DIG=/^(cx|br|kg|tk|mo|tj|mc|qx|mr|mt|cx_\d+)$/;
+function bnSujo(self){ const F=self.state.pr_form||{}; return Object.keys(F).some(k=>BN_DIG.test(k)&&String(F[k]==null?'':F[k]).trim()!==''); }
+/* o aviso vale para o rascunho de quando apareceu: digitar de novo o tira (a pessoa voltou a editar) */
+function bnRascOn(self){ const r=self.state.bn_rasc; return !!r&&r.f===JSON.stringify(self.state.pr_form||{})&&bnSujo(self); }
+function bnRasc(self,m){ self.setState({bn_rasc:{m,f:JSON.stringify(self.state.pr_form||{})}}); }
+function bnVolta(self,fn){ return ()=>{ if(bnSujo(self)&&!bnRascOn(self)){ bnRasc(self,'voltar'); return; } self.setState({bn_rasc:null}); fn(); }; }
 /* condição dos ativos: a da Manutenção, que vive no cenário único (c.man, PCM 1a); a chave antiga 'talhao-os-manutencao-v1' não é mais gravada.
    Integração COMP (PCM × BEN): lida da chave antiga, a ordem mostrava a condição da semente ("Apto") com a linha bloqueada na Manutenção */
 function bnMan(){ try{ const c=cenGet(); return c&&c.man||null; }catch(e){ return null; } }
@@ -71,7 +90,7 @@ function bnKanban(self,c,ords){ return BEN_FASES.map(f=>{ const os=ords.filter(o
         hasReal:true,real:bnQtdTxt(o).replace(/^./,x=>x.toUpperCase()),selos:benSelos(c,o).map(s=>({t:s.t,st:prChs(s.c),dot:prDot(s.c)})),
         hasObs:false,obs:'',hasDp:true,dp:nx.t,meta:nx.quem||''}; })}; }); }
 function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c;
-  self.g2pick=(gid,rid)=>(self._bnUlt={t:bnAgora(),msg:''},self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null,pr_ch:null,bn_sub:null}));
+  self.g2pick=(gid,rid)=>(self._bnUlt={t:bnAgora(),msg:''},self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null,pr_ch:null,bn_sub:null,bn_rasc:null}));
   const ords=benOrdens(c).filter(o=>prFazOk(self,o.ben.faz)); self._ords=ords;
   const ord=o=>(BEN_FASES.indexOf(o.etapa)+1||BEN_FASES.length+1)*1000+Number(o.id.replace(/\D/g,''));   /* Canceladas (fora do quadro, BEN-D22) por último */
   GR('g_ob').rows=ords.slice().sort((a,b)=>ord(a)-ord(b)).map(o=>bnRow(c,o)); }
@@ -193,25 +212,27 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
       fields:[bnFldOpts(self,'me','Motivo',BEN_MOT_EST.map(x=>({v:x,t:x})),'')].concat(prFval(self,'me','')==='Outro'?[prFld(self,'mt','Descreva',{t:'txt',im:'text'})]:[])};
     PPx.prim={t:'Confirmar estorno de '+sid,go:()=>{ if(self.state.pr_modo!==modo) return; const r1=bnRun(self,x=>benEstornar(x,o.id,sid,prFval(self,'me',''),prFval(self,'mt',''),g2perfil(),{chave:self.state.pr_ch,ver:self.state.bn_ver}),{pr_form:null,pr_ch:null});
       if(!r1.erro&&!r1.nada) self.setState({pr_modo:'saida',bn_sub:{id:sid,fluxo:s.fluxo},pr_form:{fl:s.fluxo,cl:s.classe||'',de:s.destino||'',ca:s.causa||''},pr_ch:prChave('W-BNS'),bn_ver:(benO(cenGet(),o.id)||{}).ver}); }};
-    PPx.sec=[{t:'Manter registro',go:()=>self.setState({pr_modo:null,pr_err:''})}]; return PPx; }
+    PPx.sec=[{t:'Manter registro',go:bnVolta(self,()=>self.setState({pr_modo:null,pr_err:''}))}]; PPx.closeHide=true; return PPx; }
   if(modo==='just'){ const al=benAlcada(o,b.dif);
     PPx.form={t:'Justificar diferença',h:'Diferença '+benKg(b.dif)+' ('+benPct(b.pct)+') fora da faixa de '+benKg(b.faixa)+'. Alçada do responsável de produção: '+benKg(al.lim)+' ('+prFmtT(r.par.alcada_pct,2)+' % do processado, teto '+prFmtT(r.par.alcada_kg,0)+' kg; vale o menor)'+(al.passa?': '+al.msg+', decide '+benQuem('gestor')+'.':'.'),
       fields:[bnFldOpts(self,'mj','Motivo',BEN_MOT_JUST.map(x=>({v:x,t:x})),''),prFld(self,'tj','Justificativa',{t:'txt',im:'text',ph:'ex.: fruta mole retirada sem pesar'})]};
     PPx.prim={t:'Justificar diferença',go:()=>self.state.pr_modo==='just'&&bnRun(self,x=>benJustificar(x,o.id,prFval(self,'mj',''),prFval(self,'tj',''),g2perfil(),{chave:self.state.pr_ch,ver:self.state.bn_ver}),{pr_form:null,pr_ch:null,pr_modo:null})};
-    PPx.sec=[{t:'Voltar',go:()=>self.setState({pr_modo:null,pr_err:''})}]; return PPx; }
+    PPx.sec=[{t:'Voltar',go:bnVolta(self,()=>self.setState({pr_modo:null,pr_err:''}))}]; PPx.closeHide=true; return PPx; }
   if(modo==='cancelar'){ const ls=o.ben.ent.map(e=>e.lote).join(', ');
     PPx.form={t:'Cancelar a '+o.id+' · '+benProdQ(),h:'A ordem ainda não foi liberada: nada foi reservado. Ela sai do quadro para Canceladas, com o motivo no histórico, e '+ls+(o.ben.ent.length>1?' voltam':' volta')+' a abrir ordem.',
       fields:[prFld(self,'mc','Motivo',{t:'txt',im:'text',ph:'ex.: caixas insuficientes no Estoque'})]};
     PPx.prim={t:'Confirmar cancelamento da '+o.id,go:()=>self.state.pr_modo==='cancelar'&&bnRun(self,x=>benCancelar(x,o.id,prFval(self,'mc',''),g2perfil(),{chave:self.state.pr_ch,ver:self.state.bn_ver}),{pr_form:null,pr_ch:null,pr_modo:null})};
-    PPx.sec=[{t:'Voltar',go:()=>self.setState({pr_modo:null,pr_err:''})}]; return PPx; }
-  /* pedir mais caixas (rodada 1, S3): complemento da mesma REQ; sugestão pelo que falta processar menos o que já está em custódia ou a entregar */
-  if(modo==='caixas'){ const TC=benCxTot(c,o); const cu=TC.cust, pe=TC.pend; const ne=benCaixas(ep,r); const sx=Math.max(1,ne-Math.ceil(cu+pe-1e-9));
-    PPx.form={t:'Pedir mais caixas · '+benProdQ(),h:'Complemento da '+o.req+': o Estoque reserva'+(it?' no '+it.lote:'')+' e entrega no balcão; as caixas viram custódia da ordem. Sem caixa livre nesse lote, o pedido abre uma requisição própria no lote que tem (a devolução volta a cada lote). Em custódia '+benUn(cu)+' · a entregar '+benUn(pe)+' · em processo '+benKg(ep)+' (⌈'+benKg(ep)+' × '+prFmtT(prMul(r.par.frac_vend,100),2)+' % ÷ '+prFmtT(BENC.cx.massa,3)+' kg⌉ = '+ne+' un). Confirme ou ajuste.',
-      fields:[prFld(self,'qx','Caixas',{t:'txt',im:'numeric',v:String(sx),u:'un'})]};
-    PPx.prim={t:'Pedir caixas',go:()=>self.state.pr_modo==='caixas'&&bnRun(self,x=>benComplementar(x,o.id,prNum(prFval(self,'qx',String(sx))),g2perfil(),{chave:self.state.pr_ch,ver:self.state.bn_ver}),{pr_form:null,pr_ch:null,pr_modo:null})};
-    PPx.sec=[{t:'Voltar',go:()=>self.setState({pr_modo:null,pr_err:''})}]; return PPx; }
+    PPx.sec=[{t:'Voltar',go:bnVolta(self,()=>self.setState({pr_modo:null,pr_err:''}))}]; PPx.closeHide=true; return PPx; }
+  /* pedir mais caixas (rodada 1, S3): complemento da ordem. A sugestão é a falta pelo planejado (benFaltaCx: caixas da rota ainda não usadas,
+     até o teto do kg aberto, menos custódia e a entregar; rodada 3, C-1); sem falta o campo vem vazio e a estimativa pelo kg é só texto */
+  if(modo==='caixas'){ const TC=benCxTot(c,o); const cu=TC.cust, pe=TC.pend; const ne=benCaixas(ep,r); const fx=benFaltaCx(c,o); const sx=fx>0?String(fx):'';
+    PPx.form={t:'Pedir mais caixas · '+benProdQ(),h:'Complemento da '+o.req+': o Estoque reserva'+(it?' no '+it.lote:'')+' e entrega no balcão; as caixas viram custódia da ordem. Sem caixa livre bastante nesse lote, o pedido usa os outros lotes, uma requisição por lote (a devolução volta a cada lote). Em custódia '+benUn(cu)+' · a entregar '+benUn(pe)+'. '
+      +(fx>0?'Faltam '+benUn(fx)+' pelo planejado (caixas da rota ainda não usadas, até o teto de '+benKg(benKgAberto(o))+' a registrar).':'Sugestão: nada falta pelo planejado. Estimativa pelo kg em processo, só como referência: ⌈'+benKg(ep)+' × '+prFmtT(prMul(r.par.frac_vend,100),2)+' % ÷ '+prFmtT(BENC.cx.massa,3)+' kg⌉ = '+ne+' un.')+' Confirme ou ajuste.',
+      fields:[prFld(self,'qx','Caixas',{t:'txt',im:'numeric',v:sx,u:'un'})]};
+    PPx.prim={t:'Pedir caixas',go:()=>self.state.pr_modo==='caixas'&&bnRun(self,x=>benComplementar(x,o.id,prNum(prFval(self,'qx',sx)),g2perfil(),{chave:self.state.pr_ch,ver:self.state.bn_ver}),{pr_form:null,pr_ch:null,pr_modo:null})};
+    PPx.sec=[{t:'Voltar',go:bnVolta(self,()=>self.setState({pr_modo:null,pr_err:''}))}]; PPx.closeHide=true; return PPx; }
   if(modo==='reabrir'){ PPx.form={t:'Reabrir execução · '+benProdQ(),h:'Volta a Em execução: a declaração do envio para conferência, a conferência e a justificativa caem. Para corrigir um registro, estorne na conferência.',fields:[prFld(self,'mr','Motivo',{t:'txt',im:'text',ph:'ex.: faltou registrar a classe B do turno da tarde'})]};
-    PPx.prim={t:'Reabrir execução',go:()=>self.state.pr_modo==='reabrir'&&bnRun(self,x=>benReabrir(x,o.id,prFval(self,'mr',''),g2perfil()),{pr_form:null,pr_modo:null})}; PPx.sec=[{t:'Voltar',go:()=>self.setState({pr_modo:null,pr_err:''})}]; return PPx; }
+    PPx.prim={t:'Reabrir execução',go:()=>self.state.pr_modo==='reabrir'&&bnRun(self,x=>benReabrir(x,o.id,prFval(self,'mr',''),g2perfil()),{pr_form:null,pr_modo:null})}; PPx.sec=[{t:'Voltar',go:bnVolta(self,()=>self.setState({pr_modo:null,pr_err:''}))}]; PPx.closeHide=true; return PPx; }
   /* recusa de um comando sem formulário aberto (autorizar, concluir, conferir, fechar): a causa fica no painel, junto da ação */
   if(self.state.pr_err&&!modo) PPx.form={t:'Não gravado',h:'Nada foi alterado. Resolva a causa e toque de novo.',fields:[],aviso:true};   /* aviso, não formulário: o rodapé fecha com "Fechar" */
   /* uma ação primária por estado (§5.3); secundárias à esquerda */
@@ -227,13 +248,13 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
   else if(nx.acao==='fechar') PPx.prim={t:'Fechar processo',go:()=>bnRun(self,x=>benFechar(x,o.id,g2perfil(),k),{})};
   /* A liberar é rascunho (nada reservado): quem cria pode cancelar, com motivo (BEN-D22) */
   if(at==='A liberar') sec.push({t:'Cancelar a ordem',go:()=>self.setState({pr_modo:'cancelar',pr_form:null,pr_err:'',pr_ch:prChave('W-BNC'),bn_ver:o.ver})});
-  if(at==='Em execução'&&o.req) sec.push({t:'Pedir mais caixas',go:()=>self.setState({pr_modo:'caixas',pr_form:null,pr_err:'',pr_ch:prChave('W-BNX'),bn_ver:o.ver})});
+  if((at==='Em execução'||(at==='Liberadas'&&benFaltaCx(c,o)>0))&&o.req) sec.push({t:'Pedir mais caixas',go:()=>self.setState({pr_modo:'caixas',pr_form:null,pr_err:'',pr_ch:prChave('W-BNX'),bn_ver:o.ver})});
   if(at==='Em conferência'){ sec.push({t:'Reabrir execução',go:()=>self.setState({pr_modo:'reabrir',pr_form:null,pr_err:''})}); if(!o.ben.conf) sec.push({t:'+ Registrar perda',go:abreSaida}); }
   return PPx; }
 function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=self.state; const ords=self._ords||[]; prFaixaRec(self,v,c);
   const vis=st.bn_vis||'l'; v.vl=vis==='l'; v.vk=vis==='k'; v.vl_on=String(vis==='l'); v.vk_on=String(vis==='k'); v.vl_go=()=>self.setState({bn_vis:'l'}); v.vk_go=()=>self.setState({bn_vis:'k'});
   v.kb=bnKanban(self,c,ords);
-  v.nova_go=()=>self.setState({pr_pan:{g:'nova'},pr_sel:null,pr_form:null,pr_err:'',pr_modo:null,pr_ch:prChave('W-BNN')});
+  v.nova_go=()=>self.setState({pr_pan:{g:'nova'},pr_sel:null,pr_form:null,pr_err:'',pr_modo:null,pr_ch:prChave('W-BNN'),bn_rasc:null});
   v.cards_ob=prCards(self,v,'g_ob',id=>{ const o=c.ordens[id]; if(!benEh(o)) return null; const nx=benProx(c,o);
     return prCard({t1:o.id+' · '+bnProdTxt(o),num:benKg(benEntrada(o)),t2:benRotaTxt(benRota(o.ben.rota))+' · '+o.talhao+' · '+bnQtdTxt(o),chip:[o.etapa,BN_FCOR[o.etapa]||'gray'],nx:nx.t+(nx.quem?' · '+nx.quem:''),go:()=>self.g2pick('g_ob',id)}); });
   /* sem primária no cabeçalho (rodada 1, S4; BOT-01 e BOT-08): ela só abria o painel da ordem (navegação) e repetia o verde do painel com
@@ -245,11 +266,20 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=s
   if(pan&&pan.g==='nova') PP=bnNovaForm(self,c,pan.lote||'');
   else if(pan&&c.ordens[pan.id]&&benEh(c.ordens[pan.id])) PP=bnPainel(self,c,c.ordens[pan.id]);
   /* toda ação do painel (primária, secundárias, ações das linhas e o fechar) passa pela guarda da repetição */
+  /* rascunho à vista (I-h1): o aviso no lugar do erro e as duas saídas no rodapé (o fechar genérico some: Descartar já é a saída) */
+  if(PP&&bnRascOn(self)){ const voltar=st.bn_rasc.m==='voltar';
+    PP.err='Rascunho não salvo: os valores digitados se perdem. Continuar editando ou Descartar?'; PP.closeHide=true;
+    PP.sec=[{t:'Continuar editando',go:()=>{ self.setState({bn_rasc:null}); setTimeout(()=>{ try{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); const f=a&&a.querySelector('input,select,textarea'); if(f) f.focus(); }catch(e){} },0); }},
+      {t:'Descartar',go:()=>voltar?self.setState({bn_rasc:null,pr_modo:null,pr_form:null,pr_err:''}):self.setState({bn_rasc:null,pr_pan:null,pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null})}]; }
   if(PP){ if(PP.prim&&PP.prim.go) PP.prim.go=bnGuarda(self,PP.prim.go); (PP.sec||[]).forEach(b=>{ b.go=bnGuarda(self,b.go); });
     (PP.secs||[]).forEach(s=>(s.rows||[]).forEach(r=>{ if(r.a&&r.a.go) r.a.go=bnGuarda(self,r.a.go); })); }
   prPainel(self,v,PP);
   /* fechar: o toque logo depois de uma ação é absorvido calado (toque duplo na linha cai no fundo do painel); o Esc (sem evento) fecha sempre */
-  if(PP){ const fc=v.pp_close, fg=bnGuarda(self,fc,true); v.pp_close=(e)=>e?fg(e):fc(); }
+  if(PP){ const fc=v.pp_close, fg=bnGuarda(self,fc,true); const fz=(e)=>e?fg(e):fc();
+    v.pp_close=(e)=>{ if(bnSujo(self)&&!bnRascOn(self)){ bnRasc(self,'fechar'); return; } if(self.state.bn_rasc) self.setState({bn_rasc:null}); fz(e); };
+    /* sem formulário (ou depois de uma recusa) o fechar do rodapé volta à lista: "Fechar" ao lado de "Fechar processo" repetia o verbo (S4) */
+    if(!(PP.form&&!PP.form.aviso)) v.pp_closeT='Voltar à lista'; }
+  self._bnFecha=v.pp_close;
   /* foco do painel (teclado, rodada 1): ao abrir uma ordem (ou a ordem nova), o foco entra no painel pelo "Fechar" do topo, para a leitura
      começar do título; ao fechar, volta para quem abriu. Sem isso o foco ficava fora do painel (Tab percorria a página) ou, depois do
      "Criar ordem", parava em "Autorizar rota e liberar" (o mesmo botão, reaproveitado), a um Enter de liberar */
@@ -258,7 +288,7 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=s
   if(PP) setTimeout(()=>{ try{ const ae=document.activeElement; if(ae&&ae!==document.body) return; const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length);
     const b=a&&a.querySelector('button[aria-label="Fechar"]'); if(b) b.focus({preventScroll:true}); }catch(e){} },0);
   if(!self.__bnEsc){ self.__bnEsc=1; try{ window.addEventListener('keydown',(e)=>{ if(e.key!=='Escape'||e.defaultPrevented||!self.state.pr_pan) return; const ae=document.activeElement;
-    if(ae&&ae.closest&&ae.closest('aside[role=dialog],[role=dialog]')) return; e.preventDefault(); self.setState({pr_pan:null,pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null}); }); }catch(e){} }
+    if(ae&&ae.closest&&ae.closest('aside[role=dialog],[role=dialog]')) return; e.preventDefault(); if(self._bnFecha) self._bnFecha(); else self.setState({pr_pan:null,pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null}); }); }catch(e){} }
   const pn=st.pr_pan, pk=PP&&pn?(pn.g+'|'+(pn.id||'')):'';
   if(pk!==(self._bnPk||'')){ const ant=self._bnPk||''; self._bnPk=pk;
     if(pk){ self._bnVoltaId=pn.id||''; if(!ant){ try{ const ae=document.activeElement; self._bnVolta=ae&&ae!==document.body&&!(ae.closest&&ae.closest('aside[role=dialog]'))?ae:null; }catch(e){ self._bnVolta=null; } }
@@ -274,7 +304,7 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=s
 function bnHash(self){ if(self.__bnh) return; self.__bnh=1; const ab=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||'').slice(1); }catch(e){} const c=cenGet();
   if(/^nova=/.test(h)){ const id=h.slice(5); setTimeout(()=>self.setState({pr_pan:{g:'nova',lote:id},pr_sel:null,pr_form:{lt:id},pr_err:'',pr_modo:null,pr_ch:prChave('W-BNN')}),0); }
   else if(benEh((c.ordens||{})[h])) setTimeout(()=>self.g2pick('g_ob',h),0); }; ab(); try{ window.addEventListener('hashchange',ab); }catch(e){} }
-const _EXV=EXTRAVALS; EXTRAVALS=function(self,v){ bnHash(self); _EXV(self,v); };
+const _EXV=EXTRAVALS; EXTRAVALS=function(self,v){ bnHash(self); bnRepete(); _EXV(self,v); };
 /* gancho de teste, como na O.S. e no Estoque: o teste lê o cenário pelo cenGet quando nada foi gravado ainda */
 try { window.__cen = { cenGet, cenMudar, cenReset }; } catch (e) {}
 '''

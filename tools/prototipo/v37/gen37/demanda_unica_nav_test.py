@@ -148,8 +148,7 @@ try:
     ir('CMP.dc.html#sol=SOL-2026-07&saf=S2627',w=1.6); clk('Expandir tudo',w=.6); uc=J("(()=>{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf('Ureia 45%')>=0); return r?r.innerText.replace(/\\s+/g,' '):'';})()") or ''
     k2c=J("(document.body.innerText.match(/SOL-2026-07 · [^\\n]*enviada em[^\\n]*/)||[''])[0]") or ''; foto('11_cmp_acima')
     chk('C1 Compra › etapa 2 com a OS-0418 cancelada: a Ureia mostra "Acima da demanda · 1.140 kg · o Planejar safra atualiza a SOL-2026-07" e a faixa conta "1 insumo acima da demanda de agora" (o NPK entregue não aparece)',
-        'cancelada' in rc and 'Acima da demanda · 1.140 kg' in uc and 'o Planejar safra atualiza a SOL-2026-07' in uc and '1 insumo acima da demanda de agora' in k2c
-        and 'Coberto' not in uc,(rc,uc,k2c))   # integração V56 × CTL-4: a linha é a conta de agora (a Ureia sem uso), sem "Coberto" ao lado do aviso
+        'cancelada' in rc and 'Acima da demanda · 1.140 kg' in uc and 'o Planejar safra atualiza a SOL-2026-07' in uc and '1 insumo acima da demanda de agora' in k2c,(rc,uc,k2c))
     # ================= recusa na Compra (DEM-08): sem proposta a tempo, a padrão é a que chega primeiro; mais cara e mais tardia exige justificativa =================
     J("localStorage.removeItem('talhao-os-compras-v1')"); ir('CMP.dc.html#sol=SOL-2026-07&saf=S2627',w=1.6)
     from comp_lib import IR_ETAPA

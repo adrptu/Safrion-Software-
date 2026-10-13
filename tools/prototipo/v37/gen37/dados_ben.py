@@ -6,8 +6,8 @@ catalogo(): BENC, o que as regras de ben.js leem e não mudam: versões de rota 
 com massa declarada e tara (fonte única: dados_cad.EMB_PACK, DEC-0510-03), ativo do packing (CD-03) e condição da Manutenção na
 semente (dados_manutencao; a tela lê o estado da Manutenção quando existe). A rota é por cultura, produto e estágio: grão (SEC-GRA) e
 café (CAF-BEN) já são dados com o bloco em que entram, mas só a PACK-FRU v3 está aprovada no BEN-1.
-semear(est): grava no estado do cenário (cenario.seed) as ordens OB-0110 e OB-0112 (c.ordens, fam 'BEN': reaproveitam cenLiberar,
-cenEntregar, cenDevolver e cenPodeEncerrar), a REQ-030 das caixas, o lote de caixas CX26-01 (c.lotes) e, no estado da Produção
+semear(est): grava no estado do cenário (cenario.seed) as ordens OB-0110 e OB-0112 (c.ordens, fam 'BEN': reaproveitam cenEntregar,
+cenDevolver e cenPodeEncerrar; a liberação reserva pelo benReservaCx do ben.js, BEN-D34), a REQ-030 das caixas, o lote de caixas CX26-01 (c.lotes) e, no estado da Produção
 (c.producao, o mesmo modelo de lote, movimento MP-, pedido e reserva da Colheita), os lotes do packing, o PV-031 e as inspeções.
 Dados sintéticos (ENG-017): pessoas, clientes e números fictícios."""
 import json, os

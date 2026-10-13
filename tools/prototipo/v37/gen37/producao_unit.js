@@ -187,16 +187,16 @@ function SACA60(c, ids) { (ids || ['PV-030', 'CT-203', 'CRE-0095', 'BT-090']).fo
 
 // ---- U12 · café: L, Em processo, sc a apurar (AC-13, R-09) ----
 { const c = NOVO(); OSX(c, 'OS-0930', 'C1', 'Em execução', [['25/09', 5]], 'Colheita de café');
-  const r = MUD(c, x => prReceber(x, { quem: 'Rui', os: 'OS-0930', ticket: 'TK-CF1', bruto: 9200, tara: 3200, litros: 12000, cond: 'Íntegra', dcol: '2026-09-25' }));
+  const r = MUD(c, x => prReceber(x, { os: 'OS-0930', ticket: 'TK-CF1', bruto: 9200, tara: 3200, litros: 12000, cond: 'Íntegra', dcol: '2026-09-25' }));
   const S = r.L && prSaldos(c, r.L); const R = prResultado(c, 'c9');
   ok('U12 café: lote "Café da roça" em L, Em processo; produção em sc a apurar (0 sc, 12.000 L)', !r.erro && r.L.prod === 'Café da roça' && S.q === 'Em processo' && S.fis === 12000 && R.kg === 0 && R.cafe === 12000, [r.erro, S, R && R.kg, R && R.cafe]);
-  const e = MUD(c, x => prReceber(x, { quem: 'Rui', os: 'OS-0930', ticket: 'TK-CF2', bruto: 9200, tara: 3200, cond: 'Íntegra', dcol: '2026-09-25' }));
+  const e = MUD(c, x => prReceber(x, { os: 'OS-0930', ticket: 'TK-CF2', bruto: 9200, tara: 3200, cond: 'Íntegra', dcol: '2026-09-25' }));
   ok('U12b café sem litros é recusado', /litros/.test(e.erro || ''), e); }
 
 // ---- U02e · grão: descontos na pesagem; umidade e impureza obrigatórias ----
 { const c = NOVO(); OSX(c, 'OS-0931', 'T1-A', 'Em execução', [['25/09', 20]], 'Colheita de grãos');
-  const e = MUD(c, x => prReceber(x, { quem: 'Rui', os: 'OS-0931', ticket: 'TK-S0', bruto: 45000, tara: 15000, cond: 'Íntegra', dcol: '2026-09-25' }));
-  const r = MUD(c, x => prReceber(x, { quem: 'Rui', os: 'OS-0931', ticket: 'TK-S1', bruto: 45000, tara: 15000, u: '16,5', imp: '2,0', cond: 'Íntegra', dcol: '2026-09-25' }));
+  const e = MUD(c, x => prReceber(x, { os: 'OS-0931', ticket: 'TK-S0', bruto: 45000, tara: 15000, cond: 'Íntegra', dcol: '2026-09-25' }));
+  const r = MUD(c, x => prReceber(x, { os: 'OS-0931', ticket: 'TK-S1', bruto: 45000, tara: 15000, u: '16,5', imp: '2,0', cond: 'Íntegra', dcol: '2026-09-25' }));
   ok('U02e grão sem umidade é recusado; com 16,5 % e 2 %: comercial 28.836,627907 kg = 480,61 sc no lote do Silo 01 (bruto, descontos e comercial separados)', /umidade/.test(e.erro || '') && !r.erro && r.g.com === 28836.627907 && r.g.desc.dImp === 300 && r.L.local === 'l6' && prUnTxt('Soja', prFis(c, r.L.id)) === '480,61 sc', [e.erro, r.erro, r.g && r.g.desc]); }
 
 // ---- U13 · estorno (AC-14, R-19) ----
@@ -211,13 +211,10 @@ function SACA60(c, ids) { (ids || ['PV-030', 'CT-203', 'CRE-0095', 'BT-090']).fo
   ok('U13d o ticket estornado fica livre para novo registro', !nv.erro, nv); }
 
 // ---- U14 · encerrar O.S. de colheita com carga a pesar (AC-15, R-18), pelo comando da O.S. ----
-// v57: a conferência diária (CONTROLE-02, PR #55) vale para toda O.S. agrícola; o dia 2 da OS-0505 é conferido antes de encerrar
-const CONF_DIA = (x, id, dia) => cdConferir(x, id, dia, 'conferir', 'apontamento conferido com o ticket', cdReferencia(x, id, dia), G2_PERFIS.find(p => p.k === 'Paula'));
 { const c = NOVO(); c.ordens['OS-0505'].etapa = 'Em conferência'; c.ordens['OS-0505'].saldo = 0;
   const e = MUD(c, x => osc_encerrar(x, 'OS-0505'));
   ok('U14a Encerrar a OS-0505 com a CG-2108 a pesar é recusado com dono (Lúcia)', /Encerrar bloqueado/.test(e.erro || '') && /CG-2108/.test(e.erro) && /Lúcia/.test(e.erro), e);
   MUD(c, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4520', bruto: 19250, tara: 7200, cond: 'Íntegra' }));
-  MUD(c, x => CONF_DIA(x, 'OS-0505', 2));
   const ok2 = MUD(c, x => osc_encerrar(x, 'OS-0505')); ok('U14b pesada a carga, encerrar passa; o passe S39 fica final', !ok2.erro && prResultado(c, 'lg19').passes[0].final, ok2); }
 
 // ---- U15 · carga sem sinal: fora da web até o sinal; entra uma vez (AC-16) ----
@@ -235,7 +232,7 @@ const CONF_DIA = (x, id, dia) => cdConferir(x, id, dia, 'conferir', 'apontamento
   const procPk = prSoma(Object.values(L).filter(x => x.prod === MAM && x.abertura).map(x => q(x.id).proc));
   ok('U16b apto de mamão na semente = 0; 66.250 kg da colheita fora do acabado (+ 21.270 kg do packing do BEN-1, saldo de abertura); L38-131 expedido ao PV-037 (físico 0, 30.490 kg)', aptoM === 0 && proc === 66250 && procPk === 21270 && q('L38-131').fis === 0 && prExpedido(c, 'PV-037') === 30490, [aptoM, proc, procPk]);
   OSX(c, 'OS-0932', 'T7', 'Em execução', [['25/09', 6]], 'Colheita · semana 39');
-  const r = MUD(c, x => prReceber(x, { quem: 'Rui', os: 'OS-0932', ticket: 'TK-T7', bruto: 9400, tara: 3200, cond: 'Íntegra', dcol: '2026-09-25' }));
+  const r = MUD(c, x => prReceber(x, { os: 'OS-0932', ticket: 'TK-T7', bruto: 9400, tara: 3200, cond: 'Íntegra', dcol: '2026-09-25' }));
   ok('U16c carga do T7 vai ao l8 Packing (tipo Packing, D-24) e nasce Em processo', !r.erro && r.L.local === 'l8' && prSaldos(c, r.L).q === 'Em processo' && PRDC.locais.l8.tipo === 'Packing', [r.erro, r.L && r.L.local]);
   ok('U16d seq da semente: próxima carga CG-2109, próximo lote da S39 L39-133, próxima reserva RS-0002, próximo MP-1019 (MP-1011..1018: saldos de abertura do packing, BEN-1)', CEN0.producao.seq.cg === 2108 && CEN0.producao.seq.lote['39'] === 132 && CEN0.producao.seq.rs === 1 && CEN0.producao.seq.mp === 1018); }
 
@@ -306,7 +303,6 @@ ok('R02a prNum: "19.250" = 19.250; "1.234.567,8"; "1,20" = 1,2; "1.20" = 1,2; "1
   const e0 = MUD(c, x => prDescartarCarga(x, g.g.id, '')); const e1 = MUD(c, x => prDescartarCarga(x, 'CG-2108', 'teste'));
   ok('R06a descartar exige motivo e só vale para carga a pesar (recebida: estorne)', /motivo/.test(e0.erro || '') && /só carga a pesar/.test(e1.erro || '') && /estorne/.test(e1.erro), [e0.erro, e1.erro]);
   const enc0 = MUD(c, x => osc_encerrar(x, 'OS-0505')); const ds = MUD(c, x => prDescartarCarga(x, g.g.id, 'registrada duas vezes no app', 'Lúcia'));
-  MUD(c, x => CONF_DIA(x, 'OS-0505', 2));
   const enc = MUD(c, x => osc_encerrar(x, 'OS-0505'));
   ok('R06b a carga fantasma impede encerrar; descartada (motivo e trilha), a O.S. encerra e a produção não muda', /Encerrar bloqueado/.test(enc0.erro || '') && !ds.erro && c.producao.cargas[g.g.id].st === 'Descartada' && c.producao.cargas[g.g.id].descarte.motivo === 'registrada duas vezes no app' && !enc.erro && prResultado(c, 'lg19').kg === 48470,
      [enc0.erro, ds.erro, enc.erro]); }
@@ -358,7 +354,7 @@ ok('R19 "semana 2" lida em 26/09/2026 = 2027-W02; "semana 39" = 2026-W39; janela
   const m39 = MUD(c, x => prReceber(x, { carga: 'CG-2108', ticket: 'TK-4521', bruto: 19250, tara: 7200, cond: 'Íntegra', chave: 'W-M39b' }));
   ok('M39 pesar de novo uma carga já recebida é recusado', /já está recebida/.test(m39.erro || ''), m39);
   OSX(c, 'OS-0931', 'T1-A', 'Em execução', [['25/09', 20]], 'Colheita de grãos');
-  const m40 = MUD(c, x => prReceber(x, { quem: 'Rui', os: 'OS-0931', ticket: 'TK-M40', bruto: 45000, tara: 15000, u: '41', imp: '1', cond: 'Íntegra', dcol: '2026-09-25' }));
+  const m40 = MUD(c, x => prReceber(x, { os: 'OS-0931', ticket: 'TK-M40', bruto: 45000, tara: 15000, u: '41', imp: '1', cond: 'Íntegra', dcol: '2026-09-25' }));
   ok('M40 umidade acima de 40 % é recusada', /umidade/.test(m40.erro || ''), m40);
   const m36a = MUD(c, x => prPublicar(x, 'lg19', 'Ana (agrônoma)', { plantas_ha: 1700, perda: 1.5 })); const m36b = MUD(c, x => prPublicar(x, 'lg19', 'Ana (agrônoma)', { plantas_ha: 1700, perda: -0.1 }));
   ok('M36 perda fora de 0 a 100 % é recusada ao publicar', /Perda entre/.test(m36a.erro || '') && /Perda entre/.test(m36b.erro || ''), [m36a.erro, m36b.erro]);
