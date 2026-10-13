@@ -254,8 +254,9 @@ function osMerge(b,co,c){ if(!co) return b;
     const dpx=(co.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dpx.length){ o.dono=CEN_CONF_AP; o.prazo='decidir se o dia '+dpx.map(a=>a.dia).join(', ')+' é outro turno'; esp=true; }   // duplicidade retida: decide a conferência (CMD-09)
     else if(!o.esg&&cenDivAbertas(co).length){ o.dono=OS_AGRO; o.prazo='revisar a divergência de dose do dia '+cenDivAbertas(co).map(a=>a.dia).join(', '); esp=true; } }   // B-R8: revisão técnica pendente
   // conferência: o encerramento depende do cenário (apontamento aguardando sinal ou sobra em custódia)
-  if(co.etapa==='Em conferência'){ o.encM=cenPodeEncerrar(c,co.id); esp=!!o.encM;   /* bloqueio do encerramento: carga, divergência, sinal, duplicidade ou sobra */
-    if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
+  if(co.etapa==='Em conferência'){ o.encM=cdPendente(c,co.id)||cenPodeEncerrar(c,co.id); esp=!!o.encM;   /* bloqueio do encerramento: carga, divergência, sinal, duplicidade ou sobra */
+    if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal|Conferência diária pendente/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
+    else if(/^Reveja a conferência diária/.test(o.encM)){ o.dono=CEN_CONF_AP; o.prazo='rever a conferência diária'; o.selos=o.selos.filter(s=>s.t!=='Conferência diária pendente').concat([{t:'Conferência diária pendente',c:'yellow'}]); }
     else if(/^Carga a pesar/.test(o.encM)){ const t='Carga a pesar';   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Produção › Recebimento e beneficiamento (Cargas) */
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]); o.dono=(typeof prRec==='function'?prRec(prFazDaOS(c,co)):'Recebimento'); o.prazo='pesar e receber a carga'; }
     else if(o.encM.indexOf(CEN_DIV)===0){ o.dono=OS_AGRO; o.prazo='revisar a divergência de dose'; }   /* B-R8: o selo vem do cenário (cenSeloDiv) */
@@ -329,6 +330,7 @@ function osTrilha(o,it){ if(!it||o.etapa==='Canceladas'||(!o.reservado&&!(it.ent
 function osLibErro(o,c0){ const c=c0||cenGet(); if(!c.ordens[o.id]) return ''; const k=cenClone(c);
   try { osc_libEfeito(k,o.id,false,o.janela); return ''; } catch (e) { return String(e.message||e); } }   /* o motivo do Estoque, da lei ou da carência; não o perfil */
 function osEncBloq(o){ const m=o.encM;
+  if(/^Reveja a conferência diária/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m,q:CEN_CONF_AP+' resolve na conferência do dia, abaixo em Apontamentos.'};
   if(String(m).indexOf(CEN_DIV)===0) return {acao:'encerrar',t:'Encerrar bloqueado: divergência de consumo/dose em revisão técnica · '+cenDivAbertas(o).map(a=>'dia '+a.dia+' · '+a.div.map(cenDivTxt).join('; ')).join(' | ')+'.',
     q:OS_AGRO+', na linha do apontamento: aceita com motivo ou registra a correção ou reaplicação.'};   /* B-R8 */
   if(/^Carga a pesar/.test(m)){ const g=(/CG-\d+/.exec(m)||[''])[0]; return {acao:'encerrar',t:'Encerrar bloqueado: '+m.replace(/\.$/,'')+'.',q:(o.dono||'Recebimento')+' pesa e recebe a carga (registrada por engano: descarta com motivo na mesma tela); a produção do talhão só fecha com ela.',h:'CARGA.dc.html'+(g?'#'+g:''),hl:'Pesar a carga'}; }   /* colheita (R-18) */
@@ -472,7 +474,7 @@ function osc_conferencia(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em execução
   return {msg:id+' enviada para conferência.'}; }
 // encerrar: só com apontamentos enviados e nada em custódia (cenPodeEncerrar); os apontamentos passam a conferidos
 function osc_encerrar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em conferência') throw new Error(id+' não está em conferência.');
-  const m=cenPodeEncerrar(c,id); if(m) throw new Error('Encerrar bloqueado: '+m);
+  const m=cdPendente(c,id)||cenPodeEncerrar(c,id); if(m) throw new Error('Encerrar bloqueado: '+m);
   o.etapa='Encerradas'; o.selos=[]; (o.ap||[]).forEach(a=>{ if(a.st==='Provisório') a.st='Conferido'; });
   return {msg:id+' encerrada.'}; }
 // cancelar sem execução: a reserva ainda não entregue volta ao disponível do lote e a requisição fica cancelada
@@ -773,7 +775,7 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
     osRun(self,c=>osc_dispensar(c,o.id,n,mot,g2perfil()),{pa:null}); };
 }
 function EXTRAVALS(self,v){
-  self.g2perfilFecha={pa:null,dvr:null};   /* trocar o perfil fecha a confirmação e os formulários de decisão (liberar, ajustar, dispensar, cancelar, revisão de dose) */
+  self.g2perfilFecha={pa:null,dvr:null,cdAtivo:null};   /* trocar o perfil fecha a confirmação e os formulários de decisão (liberar, ajustar, dispensar, cancelar, revisão de dose) */
   const st=self.state, all=ords(self), os=vis(self);
   // OS.dc.html#OS-0420 (vindo do Mapa ou de outra tela): abre a ordem na tela de trabalho, uma vez
   // #OS-0430:ajustar (vindo do Mapa) abre o formulário de ajuste; ordem de outra fazenda troca o filtro Fazenda para a dela
@@ -906,6 +908,7 @@ function EXTRAVALS(self,v){
           +(uso?' "Vale este" indisponível: '+uso+'.':''),
         vant:'Mesmo turno: vale o dia '+de,hasAnt:viv.length>0,hasEste:!!K&&!uso,usx,hasUs:CONF&&usx.length>0,pode:CONF,
         ant:()=>apDec(x.dia,'anterior'),este:()=>apDec(x.dia,'este'),somar:()=>apDec(x.dia,'somar')}; });
+    v.pan_ap.forEach((linha,i)=>Object.assign(linha,cdLinha(self,o,(o.ap||[])[i])));
     v.pan_hasAp=v.pan_ap.length>0; v.pan_noAp=!v.pan_hasAp;
     v.pan_noApT=o.area?(o.etapa==='A liberar'||o.etapa==='Liberadas'?'Sem apontamentos: a ordem ainda não foi iniciada.':'Sem apontamentos registrados.'):'Ordem de processo: entradas e saídas são registradas por etapa do beneficiamento, não por área.';
     v.pan_acum=!o.area?'':(o.disp?('Realizado '+nf(o.realizado)+' ha · Dispensado '+nf(o.disp)+' ha · Saldo '+nf(o.saldo)+' ha (de '+nf(o.area)+' ha)')
@@ -914,6 +917,7 @@ function EXTRAVALS(self,v){
     v.pan_cond=o.cond; v.pan_orig=o.orig.map(t=>({t}));
     v.pan_link=o.link||'#'; v.pan_hasLink=!!o.link;
     osWork(self,v,o); panSecs(self,v,o);
+    if(v.pan_ap.some(a=>a.cdAberto)){v.pan_hasBtn=false;v.pan_hasAj=false;v.pan_hasAjc=false;}
   }
   // ---- nova ordem (nasce A liberar; nunca liberada automaticamente) ----
   const nv=st.nv; v.nv_show=!!nv;
@@ -1058,6 +1062,7 @@ def _painel():
            f'<sc-if value="{H("a.hasDverr")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H("a.dverr")}</span></sc-if>'
            f'<div style="display: flex; gap: 6px; flex-wrap: wrap;"><button type="button" onClick="{H("a.dvAc")}" style="{_MINI}">Aceitar com motivo</button>'
            f'<button type="button" onClick="{H("a.dvCo")}" style="{_MINI}">Registrar correção</button></div></div></sc-if></div></sc-if>')
+    aprow += _CD.linha_html()
     aphead=(f'<div style="display: grid; grid-template-columns: 64px 84px 1fr 1.3fr auto; gap: 8px; padding: 4px 0; font-size: 10.5px; font-weight: 700; letter-spacing: .04em; color: {MUTED}; text-transform: uppercase;">'
             f'<span>Data</span><span>Turno</span><span style="text-align: right;">Realizado</span><span style="text-align: right;">Acumulado</span><span>Situação</span></div>')
     IC='minmax(0,1.6fr) 96px 110px 110px minmax(0,1.5fr)'
@@ -1323,6 +1328,10 @@ for _k,_v in _DL.AP.items(): AP[_k]=_v
 # Motor puro e regras em dados_carencia.py (CARD + JS), anexado ao núcleo: a tela O.S. e o Mapa usam os mesmos cálculos.
 # Colheita: liberar/iniciar impedidos no comando enquanto a carência corre (motivo e dono); registrar colheita feita nunca é impedido.
 # Aplicação: aviso preventivo (não bloqueia) quando a carência cai na janela de colheita do talhão ou no mamão em produção.
+import conferencia_diaria as _CD
+JS_NUCLEO += _CD.js_nucleo()
+JS += _CD.js_ui()
+
 import dados_carencia as _DCAR
 JS_NUCLEO += _DCAR.js_nucleo()
 JS += r"""
