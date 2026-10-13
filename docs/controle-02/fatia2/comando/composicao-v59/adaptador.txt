@@ -1,0 +1,6 @@
+OK    · I1 semente S2627: nenhum impedimento; avisos dizem os 4 sem plano (fora da referência), 1 a conferir e 4 sugestões opcionais
+OK    · I2 o adaptador é puro: a grade e a revisão do cenário não mudam ao calcular
+OK    · I3 contraprova: sem a sobreposição não recusa; com ela, recusa "Sobreposição em T1" (a mesma trava da etapa 2)
+OK    · I4 contraprova: cultivo de Milho com o plano da Soja recusa ("plano de Soja num cultivo de Milho")
+OK    · I5 contrato do comando (PR #58): impedimentos é lista de textos não vazios
+RESULTADO: 5 ok · 0 falhas
