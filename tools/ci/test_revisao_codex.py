@@ -24,8 +24,12 @@ def resumo(head=HEAD, status='completed', code='✅ **Completed** <relative-time
             f'| 🔒 **Security Review** | ✅ **Completed** | `{curto}` | Draft marked ready |\n')
 
 
-def comentario(corpo, login='chatgpt-codex-connector[bot]', atualizado='2026-10-09T13:09:18Z'):
-    return {'user': {'login': login}, 'body': corpo, 'updated_at': atualizado}
+def comentario(corpo, login='chatgpt-codex-connector[bot]', atualizado='2026-10-09T13:09:18Z', acesso='NONE'):
+    return {'user': {'login': login}, 'body': corpo, 'updated_at': atualizado, 'author_association': acesso}
+
+
+def parecer(head=HEAD, acesso='OWNER', login='adrptu'):
+    return comentario(f'Revisão focal.\nParecer favorável do revisor: {head}\n', login=login, acesso=acesso)
 
 
 class Portao(unittest.TestCase):
@@ -33,11 +37,31 @@ class Portao(unittest.TestCase):
         return revisao_codex.motivo_de_bloqueio(comentarios, head)
 
     def test_revisao_concluida_no_head_libera(self):
-        self.assertIsNone(self.motivo([comentario('outro texto', login='adrptu'), comentario(resumo())]))
+        self.assertIsNone(self.motivo([comentario('outro texto', login='adrptu'), comentario(resumo()), parecer()]))
+
+    def test_revisao_concluida_sem_parecer_nao_libera(self):
+        # Contraprova do achado 4253439328 e de PR49-REV-20261013-01: concluir com achados não é parecer favorável.
+        com_achados = resumo() + '\n### Security findings\n\n#### Advisory findings (1)\n'
+        self.assertIn('parecer favorável', self.motivo([comentario(com_achados)]))
+        self.assertIn('parecer favorável', self.motivo([comentario(resumo())]))
+
+    def test_parecer_invalido_nao_libera(self):
+        casos = {
+            'de outro commit': parecer(head=OUTRO),
+            'sem acesso ao repositório': parecer(acesso='NONE'),
+            'escrito por bot': parecer(login='chatgpt-codex-connector[bot]'),
+            'sha curto': comentario(f'Parecer favorável do revisor: {HEAD[:7]}', login='adrptu', acesso='OWNER'),
+            'citado no meio da linha': comentario(f'> Parecer favorável do revisor: {HEAD}', login='adrptu',
+                                                  acesso='OWNER'),
+        }
+        for nome, c in casos.items():
+            with self.subTest(nome):
+                self.assertIsNotNone(self.motivo([comentario(resumo()), c]), nome)
 
     def test_bloqueios(self):
         casos = {
             'sem resumo': [],
+            'só o parecer, sem revisão do app': [parecer()],
             'resumo de outro commit': [comentario(resumo(head=OUTRO))],
             'segurança em andamento': [comentario(resumo(status='in_progress'))],
             'código em andamento': [comentario(resumo(code='⏳ **In progress**'))],
@@ -56,8 +80,8 @@ class Portao(unittest.TestCase):
     def test_vale_o_resumo_mais_recente(self):
         antigo = comentario(resumo(), atualizado='2026-10-09T13:00:00Z')
         novo = comentario(resumo(head=OUTRO), atualizado='2026-10-09T14:00:00Z')
-        self.assertIsNotNone(self.motivo([antigo, novo]))
-        self.assertIsNone(self.motivo([novo, antigo], head=OUTRO))
+        self.assertIsNotNone(self.motivo([antigo, novo, parecer()]))
+        self.assertIsNone(self.motivo([novo, antigo, parecer(head=OUTRO)], head=OUTRO))
 
     def test_head_invalido(self):
         for head in ('', 'abc', 'A' * 40, None):
@@ -78,7 +102,7 @@ class Linha(unittest.TestCase):
                                   capture_output=True, text=True)
 
     def test_pull_request(self):
-        ok = self.rodar('--evento', 'pull_request', '--head', HEAD, comentarios=[comentario(resumo())])
+        ok = self.rodar('--evento', 'pull_request', '--head', HEAD, comentarios=[comentario(resumo()), parecer()])
         self.assertEqual(ok.returncode, 0, ok.stderr)
         espera = self.rodar('--evento', 'pull_request', '--head', HEAD, comentarios=[])
         self.assertEqual(espera.returncode, 1)

@@ -1,10 +1,11 @@
 name: Revisão do Codex
 
-# Portão do merge automático: o check só fica verde quando o Codex concluiu a revisão do commit atual do PR.
+# Portão do merge automático: o check só fica verde quando o app do Codex revisou o commit atual do PR e o revisor
+# escreveu o parecer favorável para esse commit (tools/github/revisao_codex.py).
 # Limite: o PR ainda pode alterar este workflow (todo check de pull_request tem esse limite). Por isso mudança em
 # .github/workflows/ ou tools/github/ não usa auto-merge (AGENTS.md 3).
-# Enquanto o Codex não termina, o check falha com o motivo; revisao-codex-reacionar.yml roda de novo quando o
-# resumo do Codex muda. Na main (push), passa direto: a revisão já foi exigida no PR (cloudshell.sh conferir lê os
+# Enquanto falta algo, o check falha com o motivo; revisao-codex-reacionar.yml roda de novo quando o resumo do
+# Codex muda ou chega o parecer. Na main (push), passa direto: a revisão já foi exigida no PR (cloudshell.sh conferir lê os
 # checks obrigatórios no commit da main).
 on:
   pull_request:
