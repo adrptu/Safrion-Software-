@@ -10,7 +10,8 @@
     (A11, A6, A2); C10–C11 motivo e verbo da pessoa não alocável e a validade que vence primeiro (A3, M-i); C12–C13 calibração a vencer
     no chip e capacidade só com uma grandeza (A10, A4); B6 versão do estado salvo da irrigação (A9); B7 parcelas da lista = do detalhe
     (PV01 da Lagoa Grande, pré-existente); C14 duração da passada = fim − início da mesma linha (IR-03det, pré-existente).
-    TABR-CTX-01 (revisão do Codex, 10/10): C15–C18 filtro, ordem e menu da coluna de capacidade que muda de grandeza (CD-03, CD-06).
+    TABR-CTX-01 (revisão do Codex, 10/10): C15–C18 filtro, ordem e menu da coluna de capacidade que muda de grandeza (CD-03, CD-06); C17b
+    (TABR-CTX-02) o mesmo rótulo com outra unidade (Capacidade sc de 60 kg → kg/h) também muda de grandeza.
     Revisão do TABR-CTX-01 (10/10): C19 (TABR-CTX-02) a coluna Fazenda do IR-01 sai com a fazenda do topo e leva filtro, ordem e menu dela;
     C20 a 1ª coluna presa (g2lib) é refeita só quando a coluna entra ou sai (nº de colunas muda), não a cada desenho nem na troca de grandeza.
 Uso: python3 tabelas_cad_irr_unit.py   (sai com 1 se alguma regra falhar)"""
@@ -215,6 +216,11 @@ const V3=(s)=>VER(s,sp3,c3capCol,ROWS3), V6=(s)=>VER(s,sp6,c6capCol,ROWS6), out=
 // C17: mesma grandeza e unidade (Capacidade kg/h): Tratamento de sementes ↔ Beneficiamento mantém filtro, ordem e menu
 { const k=MK({g_atv:{f:{classe:['Tratamento de sementes']}}}); V3(k); F(k,'g_atv',{capn:['2.400 kg/h']}); g2set(k,'g_atv',{so:{k:'capn',d:true},fmc:'est',fmd:['Apta'],fmq:'Ap'});
   out.k0=V3(k); F(k,'g_atv',{classe:['Beneficiamento']}); out.k1=V3(k); F(k,'g_atv',{classe:['Tratamento de sementes','Beneficiamento']}); out.k2=V3(k); }
+// C17b (TABR-CTX-02, lacuna S4 da reverificação): mesmo rótulo com unidade diferente (Armazenagem "Capacidade" em sc de 60 kg → Tratamento de
+// sementes "Capacidade" em kg/h) tira o filtro, a ordem e o menu aberto; a comparação é rótulo + unidade, não só o rótulo
+{ const V3s=(s)=>VER(s,sp3,c3capCol,ROWS3.concat([R3('Silo 01','Armazenagem',60000)]));
+  const u=MK({g_atv:{f:{classe:['Armazenagem']},q:'i'}}); V3s(u); F(u,'g_atv',{capn:['60.000 sc de 60 kg']}); g2set(u,'g_atv',{so:{k:'capn',d:false}});
+  out.u0=V3s(u); g2set(u,'g_atv',{fmc:'capn',fmd:['60.000 sc de 60 kg'],fmq:'60',fpos:{x:0,xr:0,y:0}}); F(u,'g_atv',{classe:['Tratamento de sementes']}); out.u1=V3s(u); }
 // C18: CD-06 Tanque (L) ↔ Silo (sc de 60 kg) pelo filtro rápido de Tipo, e Todos (a coluna sai)
 { const e=MK({g_loc:{qv:'Tanque',f:{faz:['Santa Rita']},q:'Santa',fm:{draft:{nome:'Rascunho sintético'},orig:{}}}}); V6(e);
   F(e,'g_loc',{capn:['15.000 L']}); g2set(e,'g_loc',{so:{k:'capn',d:true}}); out.e0=V6(e); g2set(e,'g_loc',{qv:'Silo'}); out.e1=V6(e);
@@ -235,6 +241,12 @@ k0, k1, k2 = (ux.get(k) or {} for k in ('k0', 'k1', 'k2'))
 chk('C17 (TABR-CTX-01) CD-03, mesma grandeza (Capacidade kg/h): Tratamento de sementes → Beneficiamento → os dois mantêm o filtro 2.400 kg/h, a ordem e o menu aberto',
     k0.get('vis') == ['Máquina TSI'] and k1.get('col') == 'Capacidade kg/h' and 'Capacidade: 2.400 kg/h' in k1.get('chips', []) and k1.get('so') == 'capn' and k1.get('vis') == ['Packing linha 1']
     and (k1.get('fmc'), k1.get('fmd'), k1.get('fmq')) == ('est', ['Apta'], 'Ap') and sorted(k2.get('vis', [])) == ['Máquina TSI', 'Packing linha 1'] and k2.get('so') == 'capn', {k: ux.get(k) for k in ('k0', 'k1', 'k2')})
+u0, u1 = (ux.get(k) or {} for k in ('u0', 'u1'))
+chk('C17b (TABR-CTX-02) CD-03, mesmo rótulo com unidade diferente: Armazenagem · Capacidade 60.000 sc de 60 kg (↑, menu aberto) → Tratamento de sementes '
+    'tira o filtro, a ordem e o menu em sc (a Capacidade passa a kg/h e a Máquina TSI aparece); a busca fica',
+    u0.get('col') == 'Capacidade sc de 60 kg' and u0.get('vis') == ['Silo 01'] and 'Capacidade: 60.000 sc de 60 kg' in u0.get('chips', [])
+    and u1.get('col') == 'Capacidade kg/h' and u1.get('chips') == ['Classe: Tratamento de sementes'] and u1.get('f') == ['classe'] and u1.get('so') is None
+    and (u1.get('fmc'), u1.get('fmd'), u1.get('fmq')) == (None, None, '') and u1.get('vis') == ['Máquina TSI'] and u1.get('q') == 'i', {'u0': u0, 'u1': u1})
 e0, e1, e2, e3 = (ux.get(k) or {} for k in ('e0', 'e1', 'e2', 'e3'))
 chk('C18 (TABR-CTX-01) CD-06 Locais: Tanque · 15.000 L → Silo tira filtro e ordem em L (o Silo 01 aparece em sc de 60 kg); Silo · 60.000 sc → Todos tira a coluna sem chip órfão; '
     'busca, filtro de Fazenda e rascunho ficam',
