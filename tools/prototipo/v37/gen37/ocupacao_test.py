@@ -57,7 +57,7 @@ try:
         chk('OC-06 painel "Planejar T1" com contexto herdado', r == 'ok' and painel().startswith('Planejar T1') and 'Santa Rita · Safrinha 2027 · T1 312 ha. Livre: 152 ha a partir de 21/02/2027 (folga 1 dia).' in painel(), painel()[:300])
         chk('OC-06 padrões: 152 ha, 21/02/2027 (PlantioMin), T1-B; prévia 21/02/2027 a 11/07/2027', (f.get('area'), f.get('plantio'), f.get('local'), f.get('ocup_txt'), f.get('plano')) == ('152', '2027-02-21', 'T1-B', '21/02/2027 a 11/07/2027', 'MILHO-SF'), f)
         chk('OC-06 Plano antes de Plantio; Colheita prevista do plano só leitura; unidade da meta da cultura (DEC-0510-03)',
-            list(f).index('plano') < list(f).index('plantio') and f.get('colh_txt') == '11/07/2027 · do plano' and f.get('unm_txt') == 'sc/ha', list(f))
+            list(f).index('plano') < list(f).index('plantio') and f.get('colh_txt') == '11/07/2027 · do plano' and f.get('unm_txt') == 'sc/ha · Padrão da cultura', list(f))
         chk('§0 campo numérico com teclado decimal', c.js("document.getElementById('fx_g_cult_S27SF_area').getAttribute('inputmode')") == 'decimal')
         fset('g_cult_S27SF', 'meta', '170'); cliques += 1; salvar(); cliques += 1; t = toast()
         chk('OC-06 salva: "Cultivo incluído como parcela T1-B"', 'Cultivo incluído como parcela T1-B' in t and not painel(), t)
