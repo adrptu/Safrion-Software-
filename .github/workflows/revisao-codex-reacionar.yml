@@ -1,11 +1,11 @@
 name: Revisão do Codex (reacionar)
 
-# Quando o app do Codex cria ou atualiza o resumo da revisão num PR, ou quando o revisor publica ou retira o parecer,
+# Quando o app do Codex cria, atualiza ou apaga o resumo da revisão num PR, ou quando o revisor publica, retira ou apaga o parecer,
 # roda de novo o check "Revisão do Codex no commit atual" do head desse PR. Comentário não dispara workflow no commit do PR, por isso o re-run.
 # O texto do comentário só é lido pelo if do job; ele nunca entra no shell.
 on:
   issue_comment:
-    types: [created, edited]
+    types: [created, edited, deleted]  # apagar evidência também reavalia (4253587317)
 
 permissions: {}
 
