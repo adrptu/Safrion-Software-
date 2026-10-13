@@ -7,20 +7,34 @@ const CEN_KEY = 'talhao-os-cenario-v1';
 let CEN_MEM = null;
 function cenClone(o) { return JSON.parse(JSON.stringify(o)); }
 function cenLoad() { try { const t = localStorage.getItem(CEN_KEY); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
-function cenSave(c) { CEN_MEM = c; try { localStorage.setItem(CEN_KEY, JSON.stringify(c)); } catch (e) {} }
+// Gravação (Codex 6150155986): devolve true se o navegador gravou. Sem gravar (cota cheia, armazenamento bloqueado):
+// - modo estrito (comando que precisa ser durável): a memória volta ao estado anterior e o comando recebe o erro, sem efeito;
+// - modo padrão (prévias e demonstração só em memória): a cópia antiga gravada sai, para não esconder a mudança desta aba, e o
+//   comando avisa que ela vale só nesta aba. Sem armazenamento algum (sandbox), segue só em memória, como antes.
+const CEN_GRAVA_ERRO = 'Não foi possível gravar no navegador (armazenamento cheio ou bloqueado). Nada foi alterado: libere espaço e repita.';
+const CEN_GRAVA_AVISO = ' · Atenção: o navegador não gravou; a mudança vale só nesta aba até liberar espaço.';
+function cenSave(c, estrito) { const ant = CEN_MEM; CEN_MEM = c;
+  try { localStorage.setItem(CEN_KEY, JSON.stringify(c)); return true; }
+  catch (e) { if (estrito) { CEN_MEM = ant; throw new Error(CEN_GRAVA_ERRO); }
+    try { localStorage.removeItem(CEN_KEY); } catch (e2) {} return false; } }
 function cenGet() { const c = cenLoad() || CEN_MEM; if (c && c.v === CEN0.v) return c; CEN_MEM = cenClone(CEN0); return CEN_MEM; }
 function cenReset() { CEN_MEM = cenClone(CEN0); try { localStorage.removeItem(CEN_KEY); } catch (e) {} }
 function cenAgora() { const d = new Date(); return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2); }
 // Mudança atômica: aplica fn numa cópia, grava e devolve a mensagem (ou o erro, sem gravar nada).
 // Ordem de gravação (CONF-01 R14, revisão F1): o que já existia antes do comando fica com sq 0 (seed) e o que o comando gravou ganha sq = c.rev,
 // para a trilha ordenar atos do mesmo minuto pela ordem em que foram gravados (confCarimbar, configuracoes.js).
-function cenMudar(self, fn) {
-  const c = cenClone(cenGet()); let r; const carimba = (typeof confCarimbar === 'function') ? confCarimbar : null;
+// opt.estrito: só confirma depois de gravar; se a gravação falhar, nada muda (memória, recibo e armazenamento) e volta o erro.
+function cenMudar(self, fn, opt) {
+  const c = cenClone(cenGet()); let r; const carimba = (typeof confCarimbar === 'function') ? confCarimbar : null; const estrito = !!(opt && opt.estrito);
   if (carimba) carimba(c, 0);
   try { r = fn(c) || {}; } catch (e) { r = { erro: String(e.message || e) }; }
   if (r.erro) { if (self) self.setState({ g2toast: r.erro }); return r; }
-  c.rev = (c.rev || 0) + 1; if (carimba) carimba(c, c.rev); cenSave(c); if (self) self.setState({ cenrev: c.rev, g2toast: r.msg || '' }); return r;
+  c.rev = (c.rev || 0) + 1; if (carimba) carimba(c, c.rev);
+  let gravou; try { gravou = cenSave(c, estrito); } catch (e) { const er = { erro: String(e.message || e) }; if (self) self.setState({ g2toast: er.erro }); return er; }
+  if (!gravou && cenHasLS()) r = Object.assign({}, r, { msg: String(r.msg || '') + CEN_GRAVA_AVISO, naoGravado: true });
+  if (self) self.setState({ cenrev: c.rev, g2toast: r.msg || '' }); return r;
 }
+function cenHasLS() { try { return typeof localStorage !== 'undefined' && !!localStorage; } catch (e) { return false; } }   // há armazenamento (a falha foi de gravação, não sandbox)
 // Outras telas (outros quadros do Canvas) atualizam quando o cenário muda.
 function cenOuvir(self) {
   if (self.__cenOuvindo) return; self.__cenOuvindo = true;
