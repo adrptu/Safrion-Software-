@@ -27,7 +27,7 @@ jobs:
           PR: ${{ github.event.issue.number }}
         run: |
           head="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq .head.sha)"
-          # Espera a execução do push aparecer e terminar (normalmente segundos); depois, re-run só se não passou.
+          # Espera a execução do push aparecer e terminar (normalmente segundos); depois, re-run completo.
           id='' estado='' conclusao=''
           for _ in $(seq 1 20); do
             read -r id estado conclusao < <(gh api \
@@ -39,6 +39,6 @@ jobs:
           done
           [ -n "$id" ] || { echo "Nenhuma execução do portão em $head depois da espera." >&2; exit 1; }
           [ "$estado" = completed ] || { echo "Portão ainda rodando em $head; nada a fazer."; exit 0; }
-          [ "$conclusao" = success ] && { echo "Portão já verde em $head."; exit 0; }
-          gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/$id/rerun-failed-jobs"
-          echo "Portão do Codex reexecutado em $head (run $id)."
+          # Reexecuta mesmo verde: resumo novo pode trazer achado que invalida o parecer (achado do Codex 4253491149).
+          gh api --method POST "repos/$GITHUB_REPOSITORY/actions/runs/$id/rerun"
+          echo "Portão do Codex reexecutado em $head (run $id, antes: $conclusao)."

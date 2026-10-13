@@ -28,8 +28,9 @@ def comentario(corpo, login='chatgpt-codex-connector[bot]', atualizado='2026-10-
     return {'user': {'login': login}, 'body': corpo, 'updated_at': atualizado, 'author_association': acesso}
 
 
-def parecer(head=HEAD, acesso='OWNER', login='adrptu'):
-    return comentario(f'Revisão focal.\nParecer favorável do revisor: {head}\n', login=login, acesso=acesso)
+def parecer(head=HEAD, acesso='OWNER', login='adrptu', atualizado='2026-10-09T15:00:00Z'):
+    return comentario(f'Revisão focal.\nParecer favorável do revisor: {head}\n', login=login, acesso=acesso,
+                      atualizado=atualizado)
 
 
 class Portao(unittest.TestCase):
@@ -49,10 +50,12 @@ class Portao(unittest.TestCase):
         casos = {
             'de outro commit': parecer(head=OUTRO),
             'sem acesso ao repositório': parecer(acesso='NONE'),
+            'anterior ao último resumo (4253491148)': parecer(atualizado='2026-10-09T13:00:00Z'),
             'escrito por bot': parecer(login='chatgpt-codex-connector[bot]'),
-            'sha curto': comentario(f'Parecer favorável do revisor: {HEAD[:7]}', login='adrptu', acesso='OWNER'),
+            'sha curto': comentario(f'Parecer favorável do revisor: {HEAD[:7]}', login='adrptu', acesso='OWNER',
+                                    atualizado='2026-10-09T15:00:00Z'),
             'citado no meio da linha': comentario(f'> Parecer favorável do revisor: {HEAD}', login='adrptu',
-                                                  acesso='OWNER'),
+                                                  acesso='OWNER', atualizado='2026-10-09T15:00:00Z'),
         }
         for nome, c in casos.items():
             with self.subTest(nome):
@@ -79,7 +82,7 @@ class Portao(unittest.TestCase):
 
     def test_vale_o_resumo_mais_recente(self):
         antigo = comentario(resumo(), atualizado='2026-10-09T13:00:00Z')
-        novo = comentario(resumo(head=OUTRO), atualizado='2026-10-09T14:00:00Z')
+        novo = comentario(resumo(head=OUTRO), atualizado='2026-10-09T14:00:00Z')  # parecer() é das 15:00
         self.assertIsNotNone(self.motivo([antigo, novo, parecer()]))
         self.assertIsNone(self.motivo([novo, antigo, parecer(head=OUTRO)], head=OUTRO))
 

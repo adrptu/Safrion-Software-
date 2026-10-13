@@ -6,7 +6,8 @@ Sem rede: lê os comentários do PR (um JSON por linha, como gh api --paginate -
 Passa quando, para o commit atual (head do PR):
 - o comentário-resumo do app do Codex tem a marca codex-security-review:v1 com headSha igual ao head completo e status
   completed, e a linha Code Review com Completed e o head abreviado (7 caracteres);
-- um comentário de quem tem acesso ao repositório tem a linha "Parecer favorável do revisor: <head completo>".
+- um comentário de quem tem acesso ao repositório, atualizado depois do resumo, tem a linha
+  "Parecer favorável do revisor: <head completo>".
 Concluir a revisão não é parecer favorável: achados do app, contestados ou não, ficam para o revisor avaliar antes de
 escrever a linha (achado do Codex 4253439328). O autor nunca escreve essa linha (AGENTS.md 3).
 Formato desconhecido, resumo ausente ou de outro commit: falha fechado, com o motivo. Fora de pull_request (push na
@@ -62,12 +63,14 @@ def motivo_de_bloqueio(comentarios, head):
         return f'revisão de código do Codex em {head[:7]} ainda não concluída'
     if f'`{head[:7]}`' not in linha.group(1):
         return f'a revisão de código do Codex não é do commit {head[:7]}. {ORIENTACAO}'
+    # O parecer precisa ser posterior à última atualização do resumo: achado novo exige nova avaliação (4253491148).
     pareceres = [c for c in comentarios if c.get('author_association') in ACESSO
                  and not (c.get('user') or {}).get('login', '').endswith('[bot]')
-                 and head in PARECER.findall(c.get('body') or '')]
+                 and head in PARECER.findall(c.get('body') or '')
+                 and (c.get('updated_at') or '') > (resumo.get('updated_at') or '')]
     if not pareceres:
-        return (f'falta o parecer favorável do revisor para {head[:7]}: comentário com a linha '
-                f'"Parecer favorável do revisor: {head}"')
+        return (f'falta o parecer favorável do revisor para {head[:7]}, posterior ao último resumo do Codex: '
+                f'comentário com a linha "Parecer favorável do revisor: {head}"')
     return None
 
 
