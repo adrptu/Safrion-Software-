@@ -141,5 +141,22 @@ const PlanoReferencia = (() => {
     if(bytes(previa)!==bytes(atual)) throw new Error('O plano mudou depois da prévia. Confira as diferenças e tente novamente; seu rascunho foi preservado.');
     return fixa({responsavel,atual});
   }
-  return Object.freeze({retrato, comparar, bytes, projetar, validarContexto});
+  // Prepara uma versão sem gravar. O comando compartilhado revalida contexto/domínio,
+  // executa cenIdem e só então acrescenta esta versão na mesma gravação durável.
+  function prepararVersao(publicadas, atual, esperada, por, em) {
+    if (!Array.isArray(publicadas)) throw new Error('Histórico de versões inválido.');
+    const r=normaliza(atual), ids=new Set();
+    const anteriores=publicadas.map((p,i)=>{
+      if (!p || p.id!=='R'+(i+1) || ids.has(p.id) || !p.por || !p.em) throw new Error('Histórico de versões inválido.');
+      ids.add(p.id); comparar(p.retrato,r);
+      return copia(p);
+    });
+    const ultima=anteriores.length?anteriores[anteriores.length-1]:null;
+    if (esperada!==(ultima?ultima.id:null)) throw new Error('A referência mudou em outra aba. Confira a versão mais recente; seu rascunho foi preservado.');
+    if (ultima && bytes(ultima.retrato)===bytes(r)) return fixa({nova:false,versao:ultima});
+    texto(por,'Responsável'); texto(em,'Data da publicação');
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(em) || !Number.isFinite(Date.parse(em)) || new Date(em).toISOString()!==em) throw new Error('Data da publicação inválida.');
+    return fixa({nova:true,versao:{id:'R'+(anteriores.length+1),por,em,retrato:r}});
+  }
+  return Object.freeze({retrato, comparar, bytes, projetar, validarContexto, prepararVersao});
 })();

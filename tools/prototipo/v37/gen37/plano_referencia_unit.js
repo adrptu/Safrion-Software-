@@ -201,5 +201,38 @@ teste('contexto: área, data e dose alteradas exigem nova prévia sem perder ras
     PR.validarContexto(s,'S2627','Ana',PR.projetar(s,'S2627'));
   });
 });
-console.log(`RESULTADO ${n-falhas}/${n} · núcleo/projeção/contexto; publicação e UI não executadas`);
+const preparar=(h,r,esp=null,por='Ana (gestora)',em='2026-10-13T16:30:00.000Z')=>PR.prepararVersao(h,r,esp,por,em);
+teste('versão: primeira referência independente e metadados explícitos, sem gravar',()=>{
+  const atual=snap([e('C1',{area:{valor:10,unidade:'ha'}})]), h=[], antes=JSON.stringify(__ls);
+  const p=preparar(h,atual);assert.equal(p.nova,true);assert.equal(p.versao.id,'R1');
+  assert.equal(h.length,0);assert.ok(Object.isFrozen(p.versao.retrato));assert.notEqual(p.versao.retrato,atual);
+  assert.equal(JSON.stringify(__ls),antes);
+});
+teste('versão: R2 conserva R1 após recarga e alteração do plano',()=>{
+  const a=snap([e('C1',{area:{valor:10,unidade:'ha'}})]), h=[preparar([],a).versao];
+  const original=JSON.stringify(h);const recarga=clone(h);
+  const p=preparar(recarga,snap([e('C1',{area:{valor:11,unidade:'ha'}})]),'R1');
+  assert.equal(p.versao.id,'R2');assert.equal(p.nova,true);assert.equal(JSON.stringify(h),original);assert.equal(JSON.stringify(recarga),original);
+});
+teste('versão: conteúdo sem mudança não gera versão redundante',()=>{
+  const a=snap([e('C1',{area:10}),e('C2',{area:20})]), h=[preparar([],a).versao];
+  const p=preparar(h,snap([e('C2',{area:20}),e('C1',{area:10})]),'R1');
+  assert.equal(p.nova,false);assert.deepEqual(p.versao,h[0]);assert.notEqual(p.versao,h[0]);
+});
+teste('versão: referência concorrente recusa mesmo conteúdo, sem mudar histórico',()=>{
+  const a=snap([e('C1',{area:10})]), h=[preparar([],a).versao], antes=JSON.stringify(h);
+  for(const esperada of [null,'R0','R2',undefined]) assert.throws(()=>preparar(h,a,esperada),/outra aba/);
+  assert.equal(JSON.stringify(h),antes);
+});
+teste('versão: histórico de outra safra/fazenda, incompleto ou fora de ordem é recusado',()=>{
+  const a=snap([e('C1',{area:10})]), r=preparar([],a).versao;
+  for(const campo of ['fazenda','safra']){const x=clone(r);x.retrato.contexto[campo]='Outra';assert.throws(()=>preparar([x],a,'R1'),/fazendas ou safras/);}
+  for(const h of [[{...r,id:'R2'}],[r,r],[{...r,por:''}],[{...r,em:''}]]) assert.throws(()=>preparar(h,a,'R1'),/Histórico/);
+});
+teste('versão: publicação nova exige autor e instante válido sem inventá-los',()=>{
+  const a=snap([e('C1',{area:10})]);
+  assert.throws(()=>preparar([],a,null,''),/Responsável/);
+  for(const em of ['', 'ontem', '2026-02-30T16:30:00.000Z']) assert.throws(()=>preparar([],a,null,'Ana',em),/Data/);
+});
+console.log(`RESULTADO ${n-falhas}/${n} · núcleo/projeção/contexto/preparação; publicação e UI não executadas`);
 if (falhas) process.exitCode=1;
