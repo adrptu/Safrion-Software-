@@ -1,460 +1,405 @@
 # -*- coding: utf-8 -*-
-"""Área Configurações (módulo OCULTO do menu, preservado; não sequencial → sem faixa de etapas).
-CF-01 Usuários e permissões · CF-02 Alçadas e regras (+ CF-02det AL-05) · CF-03 Integrações e sincronização
-(+ CF-03det reconciliação do ERP e conflito offline) · CF-04 Auditoria e parâmetros. CF-05 Assinatura e cobrança está em areas/assinatura.py (PLAT-01).
-Padrão v3.7-processos: descrição imperativa sob cada bloco, edição pela linha (G2), ícone + rótulo + title nas ações secundárias.
-
-observacoes (dados locais coerentes com dados.py / dados2.py / telas vizinhas):
-- Pessoas: Ana = gestora e agrônoma RT; Caio = PCP; Marcos = operador da OS-0421; João = irrigação; Paula = conferência;
-  Rui = estoque (autor da contagem INV-2609 em EST); Beto = convite pendente (IN-02); Davi = acesso revogado.
-- DEMO-11 unificado em 40 ha = dia 4 da OS-0421 (dados.OS[0]['dias'][3]); APT-1187, identidade local c9e2-…-4f1a e recibo
-  REC-7741 = os mesmos de MB-03 (areas/mobile.py). Relato sobreposto do tablet de Paula: identidade 7b31-…-09d2 (local).
-- Divergência de MAP 11-52 no Galpão 2 = dados2.CONTAGENS INV-2609 (90.000 kg → 89.400 kg = −600 kg = −12 sc 50 kg).
-- Devolução REQ-031 = dados2.REQUISICOES (20 sc recebidas). NF 4412 (título rejeitado por unidade) é dado local do conector.
-"""
-import json
-from engine import (grid,section,kpis,chip,btn,tag,icon,esc,msgbtn,drawer_button,toolrow,Pt,
-                    INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,GRAY,GRAYS,SH,DISP,BTN_ST,EXTRAJS)
+"""Área Configurações (menu, último grupo; CONF-01, docs/configuracoes/ESPECIFICACAO.md e DECISOES.md).
+CF-01 Usuários e alçadas (pessoas do CD-04 com acesso e papéis; alçadas lidas pelos comandos) · CF-04 Auditoria (trilha lida dos registros)
+· CF-03 Integrações (demonstração, fila do ERP do cenário). CF-05 Assinatura e cobrança está em areas/assinatura.py (PLAT-01).
+CF-02, CF-02det e CF-03det saíram (CONF-D01, CONF-D20). Estado: c.conf do cenário salvo (configuracoes.js, prefixo de toda tela);
+nada aqui é digitado à mão nem guarda credencial (ENG-017). Cada tela: uma primária; detalhe = painel modal da linha."""
+from engine import grid, section, esc, BTN_ST, INK, MUTED, LINE, BG, SURF, ACC, ACCS, YEL, YELS, RED, REDS, EXTRAJS
 import engine as E
-from ui37 import shell37, continuity, HEIGHTS37, PARENT37
-import dados as D
-import dados2 as D2
+import ui37
+from ui37 import shell37, HEIGHTS37
 
 H=lambda s: '{{'+s+'}}'
-def n0(v): return f'{v:,.0f}'.replace(',','.')
-OS0,OS1,OS2,OS3=D.OS[0],D.OS[1],D.OS[2],D.OS[3]
-# DEMO-11 · mesmo fato do app (MB-03): dia 4 da OS-0421
-APT=dict(id='APT-1187',os=OS0['id'],dia=4,ha=OS0['dias'][3],uuid='c9e2-…-4f1a',recibo='REC-7741')
-APT_B=dict(uuid='7b31-…-09d2',disp='Tablet de Paula · conferência')
-INV=next(c for c in D2.CONTAGENS if c['id']=='INV-2609')
-INV_DIF_KG=INV['contado']-INV['sistema']                       # −600 kg
-INV_DIF_SC=INV_DIF_KG//50                                      # −12 sc 50 kg
-REQ=next(r for r in D2.REQUISICOES if r['id']=='REQ-031')
 
-# ---------------- helpers ----------------
-REV_OK='Vigente · aceita proposta de revisão'
-T_UN='Unidade não mapeada · corrija e reprocesse'
-T_SB='Sobreposto · decida o conflito'
-def C(k,l,**kw): return dict(k=k,l=l,**kw)
-def plain(parts): return ' '.join(p['t'] for p in parts if p.get('k')!='br').strip()
-def R(id,ro=False,o=None,v=None,extra=None,**cells):
-    """linha G2: str/número → v (editável); lista de partes → p (exibição rica, busca por texto)."""
-    r=dict(id=id,v=dict(v or {}),s={},p={})
-    for k,x in cells.items():
-        if isinstance(x,list): r['p'][k]=x; r['s'][k]=plain(x)
-        else: r['v'][k]=x
-    if ro: r['ro']=True
-    if o: r['o']=[dict(t=t,h=h) if h else dict(t=t) for t,h in o]
-    if extra: r.update(extra)
-    return r
-def two(a,b): return [Pt.b(a),Pt.br(),Pt.mut(b)]
-def ch(t,c): return [Pt.chip(t,c)]
-def fn(t,f,u=False): return {'k':'act','t':t,'fn':f,'u':u}
-def ic(html,name,title=None):
-    """Ação secundária com ícone + rótulo + title (acessível)."""
-    t=f' title="{esc(title)}"' if title else ''
-    svg=icon(name,14)
-    html=html.replace('display: inline-block;','display: inline-flex; align-items: center; gap: 6px;',1)
-    if html.startswith('<a '): return html.replace('<a ',f'<a{t} ',1).replace('">',f'">{svg}',1)
-    return html.replace('<button ',f'<button{t} ',1).replace('style="',f'style="display: inline-flex; align-items: center; gap: 6px; ',1).replace('">',f'">{svg}',1)
-def nota(txt,state='gray'):
-    cor={'gray':MUTED,'yellow':'#8A5A00','red':'#9E0A1F'}[state]
-    return f'<div style="font-size: 13px; color: {cor}; line-height: 1.55; padding-top: 10px;">{txt}</div>'
-def B(t): return f'<b style="color:{INK};">{t}</b>'
-PRIM_A=f'text-decoration: none; display: inline-block; {BTN_ST(True)}'
-def prim_dyn():
-    """botão primário dinâmico: executa (prim_btn) ou navega (prim_lnk) conforme o estado."""
-    return (f'<sc-if value="{H("prim_btn")}" hint-placeholder-val="{H("true")}"><button type="button" onClick="{H("prim_fn")}" style="{BTN_ST(True)}">{H("prim_t")}</button></sc-if>'
-            f'<sc-if value="{H("prim_lnk")}" hint-placeholder-val="{H("false")}"><a href="{H("prim_h")}" style="{PRIM_A}">{H("prim_t")}</a></sc-if>')
-JS_BASE='''
-function GR(id){ return GRIDS.find(g=>g.id===id); }
-function setRow(self,gid,rid,fn){ const sp=GR(gid); const rows=g2clone(g2rows(self,sp)); const r=g2find(rows,rid); if(r) fn(r); g2set(self,gid,{rows}); return r; }
-function getRow(self,gid,rid){ return g2find(g2rows(self,GR(gid)),rid); }
-function isNew(r){ return r && String(r.id).indexOf('n')===0 && !r.v.__ok; }
-function CH(t,c){ return {k:'chip',t:t,c:c}; }
-function MU(t){ return {k:'mut',t:t}; }
-const BR={k:'br',t:''};
-function PROP(r,keys){ const ch=[]; keys.forEach(k=>{ const o=r.v['o_'+k]; if(o===undefined) return; const n=r.v[k];
-  if(String(o)!==String(n)){ r.p[k]=[{k:'txt',t:String(o)},BR,CH('proposto: '+(String(n)===''?'—':n),'yellow')]; r.s[k]=String(o); ch.push(k); }
-  else { delete r.p[k]; r.s[k]=String(o); } }); return ch; }
-function pl(n,s,p){ return n+' '+(n===1?s:p); }
+# ===================================== CF-01 · Usuários e alçadas (CONF-01 §3.1) =====================================
+# Quem entra e quem decide cada comando, numa tela: pessoas = CD-04 (CONF0), papéis e acesso = c.conf, alçadas = G2_ALCADAS + c.conf (as mesmas
+# que os comandos leem). Detalhe = painel da linha (modal; com ele aberto, conta só a primária do painel). Uma primária no cabeçalho, pela ordem:
+# Confirmar AL-xx (mudança pendente que o perfil confirma) › Resolver AL-xx (sem titular) › Convidar pessoa.
+from areas.assinatura import painel, titulo, injeta, chip_dyn, JS_COMUM as A_JS
+import cenario
+SEC = BTN_ST(False, True)
+PRI = BTN_ST(True, True)
+F_ = H('false'); T_ = H('true')
+CF1_CSS = ('<style>'
+           '.conf-sw{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;font-family:inherit;padding:8px 12px;border-radius:12px;border:1px solid #E4E9E5;background:#FFFFFF;color:#15201A;cursor:pointer;min-width:0}'
+           '.conf-sw[aria-checked=true]{border-color:#1E7A4C;background:#E4F3E9}.conf-sw:disabled{opacity:.5;cursor:not-allowed}'
+           '.conf-swt{font-size:13px;font-weight:800}.conf-sws{font-size:11.5px;color:#65736A;line-height:1.3}'
+           '.conf-paps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}'
+           '.conf-lin{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #E4E9E5;font-size:13px;line-height:1.4}'
+           '.conf-lin>span:first-child{color:#65736A;flex-shrink:0;max-width:42%}.conf-lin>span:last-child{text-align:right;min-width:0;overflow-wrap:anywhere}'
+           '.conf-esc{font-family:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;border:1px solid #E4E9E5;background:#FFFFFF;color:#15201A;cursor:pointer;text-align:left}'
+           '.conf-esc[aria-checked=true]{border-color:#1E7A4C;background:#E4F3E9;color:#1E7A4C}'
+           '.conf-prim:disabled{opacity:.5;cursor:not-allowed}'
+           '.conf-nota{font-size:12.5px;color:#65736A;line-height:1.45}'
+           '@media (max-width:640px){.conf-paps{grid-template-columns:1fr}}'
+           '</style>')
+CF1_JS = r'''
+// ---- CF-01 · Usuários e alçadas: linhas, primária e painéis (estado: c.conf por confLer; gravação: comandos conf* dentro de cenMudar) ----
+/* radiogroup pelo teclado (revisão CONF 13/10): setas movem e escolhem; Tab entra só na opção marcada (um ponto de Tab por grupo) */
+function cf1Setas(e){ const k=e.key; const d=(k==='ArrowDown'||k==='ArrowRight')?1:((k==='ArrowUp'||k==='ArrowLeft')?-1:0); if(!d) return;
+  const g=e.currentTarget; const bs=[...g.querySelectorAll('[role=radio]')]; const i=bs.indexOf(document.activeElement); if(i<0) return;
+  e.preventDefault(); const j=(i+d+bs.length)%bs.length; bs[j].click(); bs[j].focus(); setTimeout(()=>{ const n=[...g.querySelectorAll('[role=radio]')][j]; if(n&&document.activeElement!==n) n.focus(); },0); }
+function cf1Safe(id){ return String(id).replace(/[^A-Za-z0-9]/g,'_'); }
+function cf1Rot(x){ const P=G2_PAPEIS.find(y=>y.k===x); return P?P.t:x; }
+function cf1PapT(a){ return a.papeis.map(x=>((G2_PAPEIS.find(y=>y.k===x)||{}).m||x)).join(a.modo==='um'?' ou ':' e '); }
+function cf1Nomes(K,a){ return g2perfisDe(K).filter(P=>confPodeA(P,a)).map(P=>P.k); }
+function cf1QuemT(K,a){ const L=cf1Nomes(K,a); return cf1PapT(a)+' · '+(L.length?L.join(', '):'sem titular'); }
+function cf1Ev(K,id){ return (K.ev||[]).filter(e=>e.alvo===id&&/^alc/.test(e.tipo)); }
+function cf1Desde(K,id){ const L=cf1Ev(K,id).filter(e=>e.tipo==='alc'||e.tipo==='alc-conf'); return L.length?L[L.length-1].d:CONF0.alc_desde; }
+function cf1PodeConf(K,PF,id){ const pd=K.pend[id]; if(!pd||!PF||PF.k===pd.k) return false; return confPodeA(confAtor(K,PF),g2alcDe(K,'AL-14').conf); }
+function cf1Gestor(K,PF){ return confPodeA(confAtor(K,PF),g2alcDe(K,'AL-13')); }
+function cf1Lim(a){ if(a.id==='AL-05') return 'até '+a.lim+' % da área da ordem · acima: '+cf1PapT(a.acima);
+  if(a.id==='AL-10') return 'até '+a.lim+' · acima: '+cf1PapT(a.acima); return a.lim?String(a.lim):(a.obs&&a.id==='AL-01'?'fora: irrigação só com água (DEC-2609-10)':'—'); }
+function cf1Mud(b){ return b.edita==='papel'?'Editável: papel':(b.edita==='lim'?'Editável: limite em %':(b.edita==='acima'?'Editável: excedente':'Fixa: '+b.fixa)); }
+// quem pode receber o papel que falta (sem titular): ativos, habilidade do CD-04 primeiro, agrônomo só com CREA válido, nunca o próprio perfil (R3)
+const CF1_HAB={conferente:'Conferir',almoxarife:'Almoxarifado',mecanico:'Manutenção de máquinas',agronomo:'Liberar O.S. (agrônomo)'};
+function cf1Falta(K,id){ const a=g2alcDe(K,id); const P=g2perfisDe(K); if(!P.some(x=>confPodeA(x,a))) return {nivel:'base',a,papeis:a.modo==='um'?[a.papeis[0]]:a.papeis};
+  if(a.acima&&id!=='AL-05'&&!P.some(x=>confPodeA(x,a.acima))) return {nivel:'acima',a:a.acima,papeis:a.acima.modo==='um'?[a.acima.papeis[0]]:a.acima.papeis}; return null; }
+// sem candidato (revisão F9): por que ninguém pode receber agora e o caminho (R3: outra pessoa com gestor concede; R4: CREA no CD-04)
+function cf1SemCand(K,papeis,PF){ const ag=papeis.indexOf('agronomo')>=0; const at=CONF0.pessoas.filter(p=>(K.pessoas[p.id]||{}).a==='ativo');
+  const eu=PF&&at.find(p=>p.k===PF.k&&(!ag||confCrea(p))); const L=[];
+  if(eu) L.push('Você ('+eu.k+') pode receber, mas ninguém concede papel a si mesmo (R3): outra pessoa com o papel de gestor concede'+(g2perfisDe(K).some(P=>P.papeis.gestor&&P.k!==eu.k)?'.':'; conceda gestor a outra pessoa antes, no painel dela.'));
+  if(ag) L.push('Agrônomo só com CREA válido: cadastre a habilitação em Cadastros › Pessoas e equipes (CD-04) e volte aqui.');
+  return L.join(' ')||'Ninguém ativo pode receber: convide ou reative uma pessoa antes.'; }
+function cf1Cand(K,papeis,PF){ return CONF0.pessoas.filter(p=>{ const e=K.pessoas[p.id]; return e&&e.a==='ativo'&&(!PF||p.k!==PF.k)&&(papeis.indexOf('agronomo')<0||confCrea(p)); })
+  .map(p=>({p,hab:papeis.some(x=>CF1_HAB[x]&&p.hab.indexOf(CF1_HAB[x])>=0)})).sort((x,y)=>(y.hab-x.hab)||x.p.k.localeCompare(y.p.k,'pt-BR')); }
+function cf1Abre(self,o){ self.setState(Object.assign({cf1_p:null,cf1_a:null,cf1_cv:false,cf1_err:'',cf1_pp:null,cf1_mud:null,cf1_mot:'',cf1_tit:''},o)); self.__cf1k=confChave('cf1'); }
+function cf1Run(self,fn,fecha,fl){ const r=cenMudar(null,fn); if(r.erro){ self.setState({cf1_err:r.erro}); return r; }
+  self.__cf1k=confChave('cf1'); self.setState(Object.assign({cenrev:Date.now(),g2toast:r.msg||'',cf1_err:''},fl?confFl(self,fl):{},fecha||{})); return r; }   /* depois de gravar, chave nova (R12) */
+function PREVALS(self,v){ cenOuvir(self); const K=confLer(cenGet()); self._cf1={K};
+  aGrid('g_pes').rows=CONF0.pessoas.slice().sort((x,y)=>x.k.localeCompare(y.k,'pt-BR')).map(p=>{ const e=K.pessoas[p.id]||{a:'sem',papeis:[]}; const at=e.a==='ativo';
+    const dec=at?confDecide(K,p.k):[]; const grp=at?'Com acesso':(e.a==='desativado'?'Desativadas':'Sem acesso'); const pap=e.papeis.map(x=>confRot(x,p));
+    return {id:'pe_'+p.id,dr:'cf1_pe_'+cf1Safe(p.id),v:{nome:p.k,pap:pap.join(', '),dec:dec.length,acs:grp},
+      s:{nome:p.k+' · '+p.equipe,pap:pap.length?pap.join(', '):(at?'só app de campo':'—'),dec:dec.length?dec.length+' · '+dec.join(', '):'—',acs:grp+' · '+p.k+' · '+confAcessoT(e)},   /* ordena por acesso e depois nome */
+      p:{nome:[{k:'b',t:p.k},{k:'mut',t:p.equipe+' · '+p.funcao}],pap:pap.length?pap.map(t=>aCh(t,at?'green':'gray')):[{k:'mut',t:at?'só app de campo':'—'}],
+        dec:dec.length?[{k:'b',t:String(dec.length)},{k:'mut',t:dec.join(', ')}]:[{k:'mut',t:'—'}],acs:[aCh(confAcessoT(e),at?'green':(e.a==='desativado'?'gray':'yellow'))]},
+      m:{pap:e.papeis.map(x=>({id:x,l:cf1Rot(x)})),acs:[{id:grp,l:grp}]}}; });
+  const sem=confSemTitular(K);
+  aGrid('g_alc').rows=G2_ALCADAS.map(b=>{ const a=g2alcDe(K,b.id); const pd=K.pend[b.id]; const st=sem.indexOf(b.id)>=0;
+    const sit=pd?'Aguarda 2º aprovador':(st?'Sem titular':'Vigente v'+a.v+' desde '+confBr(cf1Desde(K,b.id)));
+    const quem=cf1QuemT(K,a)+(a.acima&&b.id!=='AL-05'?' · excedente: '+cf1QuemT(K,a.acima):'');
+    const tags=[b.edita?'Editáveis':'Fixas'].concat(pd||st?['Pendências']:[]);
+    return {id:'al_'+b.id,dr:'cf1_al_'+cf1Safe(b.id),v:{alc:b.id,quem,lim:cf1Lim(a),sit,mud:cf1Mud(b)},
+      s:{alc:b.id+' · '+b.t+' · '+b.cmd,quem,lim:cf1Lim(a),sit,mud:tags.join(', ')},
+      p:{alc:[{k:'b',t:b.id+' · '+b.t},{k:'mut',t:b.cmd}],quem:[{k:'txt',t:quem}],lim:[{k:'txt',t:cf1Lim(a)}],sit:[aCh(sit,pd?'yellow':(st?'red':'green'))],mud:[{k:b.edita?'txt':'mut',t:cf1Mud(b)}]},
+      m:{mud:tags.map(t=>({id:t,l:t}))}}; }).concat([{id:'al_AL-16',dr:'cf1_al_AL_16',v:{alc:'AL-16'},
+      s:{alc:'AL-16 · Aprovar compra de insumos · Compra de insumos',quem:CONF0.compras.map(x=>x.quem).join(' · '),lim:'R$ por compra',sit:'Vigente (lida da Compra de insumos)',mud:'Só leitura'},
+      p:{alc:[{k:'b',t:'AL-16 · Aprovar compra de insumos'},{k:'mut',t:'Compra de insumos'}],quem:[{k:'txt',t:CONF0.compras.map(x=>x.quem+(x.ate?' até '+assinR(x.ate):' acima')).join(' · ')}],
+        lim:[{k:'txt',t:'R$ por compra'}],sit:[aCh('Vigente · lida da Compra de insumos','green')],mud:[{k:'mut',t:'Só leitura: a Compra de insumos aplica'}]},m:{mud:[{id:'Só leitura',l:'Só leitura'}]}}]); }
+function EXTRAVALS(self,v){ const K=self._cf1.K; const st=self.state; const PF=g2perfil(); const c=cenGet(); const sem=confSemTitular(K); const gest=cf1Gestor(K,PF);
+  const K1=self.__cf1k||(self.__cf1k=confChave('cf1'));   /* chave e rascunho capturados no desenho: o 2º clique do mesmo desenho repete o mesmo comando (mesmo recibo, R12), nunca outro */
+  const npes=confComAcesso(K), nsem=CONF0.pessoas.filter(p=>(K.pessoas[p.id]||{}).a==='sem');
+  const pend=Object.keys(K.pend); const pc=pend.find(id=>cf1PodeConf(K,PF,id));
+  aSelo(self,v,'cf1_st',sem.length?sem[0]+' sem titular':(pend.length?pend[0]+' aguarda confirmação':npes+' com acesso · '+nsem.length+' sem acesso'),sem.length?'red':(pend.length?'yellow':'gray'));
+  // primária única, pela ordem do §3.1
+  v.cf1_prim_dis=false; v.cf1_prim_tit='';
+  if(pc){ v.cf1_prim_t='Confirmar '+pc; v.cf1_prim_fn=()=>cf1Abre(self,{cf1_a:pc}); }
+  else if(sem.length){ v.cf1_prim_t='Resolver '+sem[0]; v.cf1_prim_fn=()=>cf1Abre(self,{cf1_a:sem[0]}); }
+  else { v.cf1_prim_t='Convidar pessoa'; v.cf1_prim_fn=()=>cf1Abre(self,{cf1_cv:true});
+    if(!gest){ v.cf1_prim_dis=true; v.cf1_prim_tit='Convidar: decisão de '+confQuemA(K,g2alcDe(K,'AL-13')); }
+    else if(!nsem.length){ v.cf1_prim_dis=true; v.cf1_prim_tit='Todas as pessoas do cadastro têm acesso'; } }
+  if(v.cf1_prim_dis) v.cf1_prim_t=v.cf1_prim_tit;   /* o motivo no próprio rótulo, visível no toque e no leitor de tela (revisão CONF 13/10; convenção do engine) */
+  v.cf1_prim_lab=v.cf1_prim_tit||v.cf1_prim_t; v.cf1_setas=cf1Setas;
+  CONF0.pessoas.forEach(p=>{ v['cf1_pe_'+cf1Safe(p.id)]=()=>cf1Abre(self,{cf1_p:p.id}); });
+  G2_ALCADAS.forEach(b=>{ v['cf1_al_'+cf1Safe(b.id)]=()=>cf1Abre(self,{cf1_a:b.id}); }); v.cf1_al_AL_16=()=>cf1Abre(self,{cf1_a:'AL-16'});
+  // atalhos: CF-01.dc.html#pessoa=Caio · #alc=AL-05
+  if(!self.__cf1h){ self.__cf1h=1; let h=''; try{ h=decodeURIComponent(location.hash||''); }catch(e){} const m1=/pessoa=([^&]+)/.exec(h), m2=/alc=(AL-\d+)/.exec(h);
+    const pp=m1&&confP(m1[1]); if(pp) setTimeout(()=>cf1Abre(self,{cf1_p:pp.id}),0); else if(m2) setTimeout(()=>cf1Abre(self,{cf1_a:m2[1]}),0); }
+  v.cf1_err=st.cf1_err||''; v.cf1_terr=!!st.cf1_err;
+  // ---- painel Convidar: lista curta de quem está sem acesso (um toque abre a pessoa; o comando fica no painel dela) ----
+  aPainel(self,v,'cf1_cvp',!!st.cf1_cv,'Convidar pessoa',()=>self.setState({cf1_cv:false}));
+  v.cf1_cvl=nsem.map(p=>({t:p.k+' · '+p.equipe+' · '+p.funcao,go:()=>cf1Abre(self,{cf1_p:p.id})})); v.cf1_cvnada=!nsem.length;
+  // ---- painel Pessoa ----
+  const p=st.cf1_p?confP(st.cf1_p):null; const e=p?(K.pessoas[p.id]||{a:'sem',papeis:[]}):null;
+  aPainel(self,v,'cf1_pp',!!p,p?p.k+' · '+p.equipe:'',()=>self.setState({cf1_p:null,cf1_err:''}));
+  if(p){ const at=e.a==='ativo'; const dr=st.cf1_pp||e.papeis; const eu=!!PF&&PF.k===p.k;
+    aSelo(self,v,'cf1_pac',confAcessoT(e),at?'green':(e.a==='desativado'?'gray':'yellow'));
+    v.cf1_pcad=[{t:'Função (CD-04)',v:p.funcao||'—'},{t:'Habilidades',v:p.hab.join(' · ')||'—'}].concat(p.crea?[{t:'CREA',v:'válido até '+confBr(p.crea)+(confCrea(p)?'':' · vencido')}]:[]).map(x=>Object.assign({st:''},x));
+    v.cf1_pcadh='CD-04.dc.html';
+    v.cf1_paps=G2_PAPEIS.map(P=>{ const on=dr.indexOf(P.k)>=0; const dc=G2_ALCADAS.filter(b=>{ const a=g2alcDe(K,b.id); return a.papeis.indexOf(P.k)>=0||(a.acima&&a.acima.papeis.indexOf(P.k)>=0); }).map(b=>b.id);
+      const semCrea=P.k==='agronomo'&&!confCrea(p)&&!on; const dis=!at||!gest||semCrea;
+      return {t:confRot(P.k,p),s:semCrea?'exige CREA válido no CD-04 (lei)':(dc.length?'decide: '+dc.join(', '):'nenhuma alçada'),on:String(on),dis,tit:semCrea?'Agrônomo só com CREA válido no cadastro (lei: receituário e aprovação agronômica)':'',
+        go:()=>{ if(dis) return; const cur=(self.state.cf1_pp||e.papeis).slice(); const i=cur.indexOf(P.k); if(i>=0) cur.splice(i,1); else cur.push(P.k); self.setState({cf1_pp:cur,cf1_err:''}); }}; });
+    const ganha=dr.filter(x=>e.papeis.indexOf(x)<0), perde=e.papeis.filter(x=>dr.indexOf(x)<0); const mudou=!!(ganha.length||perde.length);
+    let semN=[]; if(mudou){ const Kx=confClone(K); Kx.pessoas[p.id]=Object.assign({},e,{papeis:dr}); const s0=confSemTitular(K); semN=confSemTitular(Kx).filter(x=>s0.indexOf(x)<0); }
+    v.cf1_ppv=[{t:'Ganha',v:ganha.length?ganha.map(x=>confRot(x,p)).join(', '):'—'},{t:'Perde',v:perde.length?perde.map(x=>confRot(x,p)).join(', '):'—'},
+      {t:'Alçadas que ficam sem titular',v:semN.length?semN.join(', ')+' (aviso: resolva em seguida)':'nenhuma',st:semN.length?'color:#B42318;font-weight:700;':''}].map(x=>Object.assign({st:''},x));
+    if(eu&&mudou&&!dr.length) v.cf1_ppv.push({t:'Você sem nenhum papel',v:'Ninguém retira todos os próprios papéis: o Ver como passaria a outra pessoa e o próximo ato sairia em nome dela. Peça a outra pessoa com o papel de gestor.',st:'color:#B42318;font-weight:700;'});   /* revisão CONF 10/10 (CONF-D34) */
+    v.cf1_ptpv=mudou; v.cf1_pnota=!gest?'Conceder e retirar papel, convidar e desativar: decisão de '+confQuemA(K,g2alcDe(K,'AL-13'))+'.':(at?(e.papeis.length||dr.length?'':'Sem papel: '+p.k+' só usa o app de campo.'):(e.a==='desativado'?'Acesso desativado: '+p.k+' não aparece no Ver como e não decide. Os registros antigos guardam o nome.':'Sem acesso: o convite é simulado e aceito na hora; nenhuma mensagem real é enviada.'));
+    v.cf1_temnota=!!v.cf1_pnota;
+    // primária do painel: Salvar papéis (ativo) · Convidar (sem acesso) · Reativar acesso (desativado)
+    const dr0=dr.slice();
+    const FLP=[['g_pes','pe_'+p.id]];
+    if(at){ v.cf1_ppt='Salvar papéis'; v.cf1_ppdis=!gest||!mudou; v.cf1_ppfn=()=>cf1Run(self,c=>confPapeis(c,p.id,dr0,K1,g2perfil()),{cf1_pp:null,cf1_p:null},FLP); }
+    else if(e.a==='sem'){ v.cf1_ppt='Convidar (simulado)'; v.cf1_ppdis=!gest; v.cf1_ppfn=()=>cf1Run(self,c=>confConvidar(c,p.id,K1,g2perfil()),{cf1_pp:null,cf1_p:null},FLP); }
+    else { v.cf1_ppt='Reativar acesso'; v.cf1_ppdis=!gest; v.cf1_ppfn=()=>cf1Run(self,c=>confAcesso(c,p.id,true,K1,g2perfil()),{cf1_pp:null,cf1_p:null},FLP); }
+    v.cf1_pdes=at&&gest&&!eu; v.cf1_pdesfn=()=>cf1Run(self,c=>confAcesso(c,p.id,false,K1,g2perfil()),{cf1_pp:null,cf1_p:null},FLP);   /* revisão F11: ninguém desativa o próprio acesso */
+    /* revisão F3: conferência para quem também aponta no app: decidir a duplicidade do próprio apontamento fica com revisão posterior (AL-12) */
+    const aponta=Object.values(c.ordens||{}).some(o=>(o.ap||[]).some(a=>g2mesma(a.quem,p.k)))||(!!c.app&&c.app.operador===p.k);
+    if(aponta&&dr.indexOf('conferente')>=0) v.cf1_ppv.push({t:'Conferência de quem aponta',v:p.k+' aponta no app: decidir a duplicidade do próprio apontamento fica com revisão posterior (AL-12).',st:'color:#8A5A00;font-weight:700;'});
+    const vc=at&&e.papeis.length>0&&!eu; v.cf1_pvc=vc; v.cf1_pvct='Ver como '+p.k;
+    v.cf1_pvcfn=()=>{ G2_PERFIL_MEM=p.k; try{ localStorage.setItem(G2_PERFIL_KEY,p.k); }catch(er){} self.setState({perfil:p.k,g2toast:'Perfil de demonstração: '+((g2pf(p.k)||{}).t||p.k)+' (não é segurança de acesso).'}); };
+  } else { v.cf1_paps=[]; v.cf1_ppv=[]; v.cf1_pcad=[]; }
+  // ---- painel Alçada ----
+  const id=st.cf1_a; const b=id?G2_ALCADAS.find(x=>x.id===id):null; const e16=id==='AL-16';
+  aPainel(self,v,'cf1_ap',!!(b||e16),b?b.id+' · '+b.t:(e16?'AL-16 · Aprovar compra de insumos':''),()=>self.setState({cf1_a:null,cf1_err:''}));
+  v.cf1_a16=e16; v.cf1_anao16=!!b; v.cf1_a16l=CONF0.compras.map(x=>({t:x.ate?'até '+assinR(x.ate):'acima de '+assinR(CONF0.compras[CONF0.compras.length-2].ate),v:x.quem,st:''}));
+  v.cf1_aedit=false; v.cf1_apend=false; v.cf1_asem=false; v.cf1_aprim=false; v.cf1_ades=false; v.cf1_arec=false; v.cf1_aprimtit='';
+  if(b){ const a=g2alcDe(K,b.id); const pd=K.pend[b.id]; const falta=cf1Falta(K,b.id);
+    v.cf1_adef=[{t:'Comando',v:b.cmd},{t:'Quem decide',v:cf1QuemT(K,a)+(a.acima?' · acima: '+cf1QuemT(K,a.acima):'')},{t:'Valor / limite',v:cf1Lim(a)},
+      {t:'Situação',v:pd?'v'+pd.v+' aguarda 2º aprovador':(falta?'Sem titular':'Vigente v'+a.v+' desde '+confBr(cf1Desde(K,b.id))),st:pd?'color:#8A5A00;font-weight:700;':(falta?'color:#B42318;font-weight:700;':'')},
+      {t:'Mudança',v:cf1Mud(b)}].concat(b.pend?[{t:'Pendência do proprietário',v:b.pend+' (padrão dos agentes; o proprietário decide)'}]:[]).map(x=>Object.assign({st:''},x));
+    v.cf1_aver=[{t:'v1 · '+confBr(CONF0.alc_desde),v:'implantação · '+cf1PapT(G2_ALCADAS.find(x=>x.id===b.id))+(b.lim&&b.id==='AL-05'?' · '+b.lim+' %':'')}].concat(cf1Ev(K,b.id).map(x=>({t:confBr(x.d)+' '+x.at,v:x.t+' · '+x.quem}))).map(x=>Object.assign({st:''},x));
+    // ordens afetadas agora, pela mesma função do comando; a ordem de beneficiamento (fam BEN) libera pelo papel de produção, fora da AL-01 (merge CONF × BEN)
+    let af=[]; if(b.id==='AL-01') af=Object.values(c.ordens).filter(o=>o.etapa==='A liberar'&&o.fam!=='BEN').map(o=>({t:o.id+' · '+o.talhao,v:o.tipo,h:'OS.dc.html#'+o.id}));
+    if(b.id==='AL-05') af=Object.values(c.ordens).filter(o=>o.etapa==='Em execução'&&o.area>0).map(o=>{ const L=cenLimDisp(o.area); return {t:o.id+' · '+cenNum(o.area)+' ha',v:'limite '+L.pct+' % = '+cenNum(L.ha,2)+' ha · saldo '+cenNum(o.saldo)+' ha',h:'OS.dc.html#'+o.id}; });
+    if(b.id==='AL-09') af=(c.ajustes||[]).filter(x=>x.estado==='Aguardando gestor').map(x=>({t:(x.inv||x.id)+' · lote '+x.lote,v:cenNum(x.dif)+' '+x.un+' aguardando aprovação',h:'EST.dc.html'}));
+    if(b.id==='AL-10') af=(c.confs||[]).filter(x=>x.estado==='Em conferência').map(x=>({t:x.id+' · '+x.os,v:cenConfTxt(x,c),h:'EST.dc.html'}));
+    v.cf1_aaf=af; v.cf1_taf=['AL-01','AL-05','AL-09','AL-10'].indexOf(b.id)>=0; v.cf1_aafnada=!af.length; v.cf1_aaft='Ordens e registros afetados agora ('+af.length+')';
+    const PFk=confAtor(K,PF); const podeAlt=confPodeA(PFk,g2alcDe(K,'AL-14'));
+    if(pd){ v.cf1_apend=true; v.cf1_apendt='v'+pd.v+' proposta por '+pd.por+' em '+confBr(pd.d)+' '+pd.at+': '+confAlcMudT(b,a,pd.mud)+' · motivo: '+pd.motivo+'. Até a confirmação vale a v'+a.v+'.';
+      const pode=cf1PodeConf(K,PF,b.id); const pv=pd.v; const FLA=[['g_alc','al_'+b.id]]; v.cf1_aprim=pode; v.cf1_aprimt='Confirmar mudança'; v.cf1_aprimdis=false;
+      v.cf1_aprimfn=()=>cf1Run(self,c=>confAlcConfirmar(c,b.id,K1,g2perfil(),pv),{cf1_a:null},FLA);
+      v.cf1_apendq=pode?'':(PF&&PF.k===pd.k?'Você propôs: confirma '+confQuemConf(K,pd)+'.':'Confirma ou recusa: '+confQuemConf(K,pd)+'.');
+      v.cf1_ades=!!PF&&PF.k===pd.k; v.cf1_adesfn=()=>cf1Run(self,c=>confAlcDesistir(c,b.id,K1,g2perfil(),pv),{cf1_a:null},FLA);
+      v.cf1_arec=pode; v.cf1_arecfn=()=>cf1Run(self,c=>confAlcRecusar(c,b.id,K1,g2perfil(),pv),{cf1_a:null},FLA); }
+    else if(falta){ v.cf1_asem=true; const cand=cf1Cand(K,falta.papeis,PF); const ptx=falta.papeis.map(x=>(G2_PAPEIS.find(y=>y.k===x)||{}).m||x).join(' e ');
+      v.cf1_asemt=b.id+' sem titular: ninguém ativo tem '+ptx+(falta.nivel==='acima'?' (nível acima do limite)':'')+'. '+(cand.length?'Escolha quem recebe o papel.':'Ninguém pode receber agora. '+cf1SemCand(K,falta.papeis,PF));
+      const esc=st.cf1_tit&&cand.find(x=>x.p.id===st.cf1_tit)?st.cf1_tit:'';
+      v.cf1_acand=cand.map(x=>({t:x.p.k+' · '+x.p.equipe+(x.hab?' · habilidade no CD-04':''),on:String(esc===x.p.id),ti:(esc?esc===x.p.id:x===cand[0])?'0':'-1',go:()=>self.setState({cf1_tit:x.p.id,cf1_err:''})}));
+      const pe=esc?confP(esc):null; v.cf1_aprim=gest; v.cf1_aprimt=pe?'Conceder '+ptx+' a '+pe.k:'Conceder '+ptx; v.cf1_aprimdis=!pe;
+      v.cf1_aprimtit=pe?'':(cand.length?'Escolha acima quem recebe o papel':'Ninguém pode receber agora: veja o caminho acima');
+      v.cf1_aprimfn=()=>{ if(!pe) return; const e2=K.pessoas[pe.id]; cf1Run(self,c=>confPapeis(c,pe.id,e2.papeis.concat(falta.papeis.filter(x=>e2.papeis.indexOf(x)<0)),K1,g2perfil()),{cf1_a:null,cf1_tit:''},[['g_alc','al_'+b.id],['g_pes','pe_'+pe.id]]); };
+      v.cf1_asemq=gest?'':'Conceder: decisão de '+confQuemA(K,g2alcDe(K,'AL-13'))+'.'; }
+    else if(b.edita){ v.cf1_aedit=true; const cur=a; const mud=st.cf1_mud||{}; let nv=null, erro='';
+      try{ nv=Object.keys(mud).length?confAlcNova(b,cur,mud):null; }catch(x){ erro=String(x.message||x); }
+      v.cf1_alim=b.edita==='lim'; v.cf1_apap=b.edita!=='lim';
+      v.cf1_aopc=(b.opc||[]).map(x=>{ const atual=b.edita==='acima'?cur.acima.papeis.join():cur.papeis.join(); const sel=mud.papel!==undefined?mud.papel:atual;
+        return {t:(G2_PAPEIS.find(y=>y.k===x)||{}).t+(x===atual?' (vigente)':''),on:String(sel===x),go:()=>self.setState({cf1_mud:{papel:x},cf1_err:''})}; });
+      v.cf1_aoptit=b.edita==='acima'?'Quem aceita o excedente da custódia':'Papel que decide';
+      v.cf1_alimv=mud.lim!==undefined?String(mud.lim):String(cur.lim); v.cf1_aset=(ev)=>self.setState({cf1_mud:{lim:ev.target.value},cf1_err:''});
+      v.cf1_amot=st.cf1_mot||''; v.cf1_asetm=(ev)=>self.setState({cf1_mot:ev.target.value,cf1_err:''});
+      let amplia=false, pv=[]; if(nv){ const n2=Object.assign({},cur,nv); const lv=b.edita==='acima'?'acima':'base';
+        const an=cf1Nomes(K,g2alcN(cur,lv)), dp=cf1Nomes(K,g2alcN(n2,lv)); amplia=confAmplia(b,PFk,cur,n2);
+        pv=[{t:'Muda',v:confAlcMudT(b,cur,nv)},{t:'Quem ganha',v:dp.filter(x=>an.indexOf(x)<0).join(', ')||'—'},{t:'Quem perde',v:an.filter(x=>dp.indexOf(x)<0).join(', ')||'—'},
+          {t:'Quando vale',v:amplia?'aguarda 2º aprovador: amplia o seu poder (outra pessoa com gestor ou direção confirma)':'vale na hora, para os comandos novos',st:amplia?'color:#8A5A00;font-weight:700;':''}];
+        if(b.edita==='lim'){ const o=Object.values(c.ordens).filter(x=>x.etapa==='Em execução'&&x.area>0).sort((x,y)=>y.area-x.area)[0];   /* exemplo: a maior ordem em execução */ if(o) pv.push({t:'Exemplo: '+o.id+' ('+cenNum(o.area)+' ha)',v:cenNum(cenQtd(cur.lim/100,o.area),2)+' ha → '+cenNum(cenQtd(n2.lim/100,o.area),2)+' ha'}); } }
+      v.cf1_apv=pv.map(x=>Object.assign({st:''},x)); v.cf1_tapv=pv.length>0; v.cf1_aerrm=erro; v.cf1_taerrm=!!erro;
+      v.cf1_aprim=podeAlt; v.cf1_aprimt=amplia?'Enviar para confirmação':'Salvar alçada'; v.cf1_aprimdis=!nv||String(st.cf1_mot||'').trim().length<3;
+      const mud0=Object.assign({},mud), mot0=st.cf1_mot||'', v0=cur.v; v.cf1_aprimfn=()=>cf1Run(self,c=>confAlcMudar(c,b.id,mud0,mot0,K1,g2perfil(),v0),{cf1_a:null,cf1_mud:null,cf1_mot:''},[['g_alc','al_'+b.id]]);
+      v.cf1_aeditq=podeAlt?'':'Alterar alçada: decisão de '+confQuemA(K,g2alcDe(K,'AL-14'))+'.'; }
+    v.cf1_temq=!!(v.cf1_apendq||v.cf1_asemq||v.cf1_aeditq); v.cf1_aq=v.cf1_apendq||v.cf1_asemq||v.cf1_aeditq||'';
+  } else { v.cf1_adef=[]; v.cf1_aver=[]; v.cf1_aaf=[]; v.cf1_acand=[]; v.cf1_aopc=[]; v.cf1_apv=[]; v.cf1_temq=false; }
+}
 '''
 
+
+def _lin(lista):
+    return (f'<div><sc-for list="{H(lista)}" as="ln" hint-placeholder-count="3"><div class="conf-lin"><span>{H("ln.t")}</span><span style="{H("ln.st")}">{H("ln.v")}</span></div></sc-for></div>')
+
+
+def _sc(var, html, ph='false'):
+    return f'<sc-if value="{H(var)}" hint-placeholder-val="{H(ph)}">{html}</sc-if>'
+
+
+def _alerta():
+    return _sc('cf1_terr', f'<div role="alert" style="padding: 9px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 13px; font-weight: 700; line-height: 1.4;">{H("cf1_err")}</div>')
+
+
+def cf01():
+    fname = 'CF-01.dc.html'; E._reset_screen(fname)
+    ui37.CAT['CF-01'] = dict(ui37.CAT.get('CF-01', {}), titulo='Usuários e alçadas')
+    g_pes = grid([dict(k='nome', l='Pessoa', w=220), dict(k='pap', l='Papéis', w=220, multi=True), dict(k='dec', l='Decide (alçadas)', w=230),
+                  dict(k='acs', l='Acesso', w=220, multi=True)], [], gid='g_pes', search=True, total=False, so={'k': 'acs'},
+                 qf=dict(k='acs', cut=' · ', todas='Todas as pessoas'), edit=dict(m='ro', title='Pessoa', fields=[]))
+    g_alc = grid([dict(k='alc', l='Alçada', w=280), dict(k='quem', l='Quem decide', w=260), dict(k='lim', l='Valor / limite', w=230),
+                  dict(k='sit', l='Situação', w=200), dict(k='mud', l='Mudança', w=220, multi=True)], [], gid='g_alc', search=True, total=False,
+                 so={'k': 'alc'}, qf=dict(k='mud', sep=', ', todas='Todas as alçadas'), edit=dict(m='ro', title='Alçada', fields=[]))
+    nota = lambda t: f'<div class="conf-nota" style="padding: 0 0 10px;">{t}</div>'
+    corpo = ('<div style="display: flex; flex-direction: column; gap: 18px;">' + CF1_CSS
+             + section('Pessoas', 'Conceda e retire papéis, convide e desative acesso; clique na pessoa para abrir.', '',
+                       nota(f'Origem: Cadastros › Pessoas e equipes (nome, função, habilidade e CREA). Aqui não se cadastra pessoa. '
+                            f'Papel é permissão de decidir; quem tem acesso sem papel só usa o app de campo.') + g_pes)
+             + section('Alçadas', 'Confira quem decide cada comando; clique na alçada para ver as versões, as ordens afetadas e mudar o que é editável.', '',
+                       nota('Os comandos da O.S., do Estoque e do app leem esta tabela. Mudança vale para o próximo comando e nunca reescreve registro antigo.') + g_alc)
+             + '</div>')
+    # painel Convidar (lista curta)
+    cvl = (f'<div style="display: flex; flex-direction: column; gap: 8px;"><sc-for list="{H("cf1_cvl")}" as="cv" hint-placeholder-count="1">'
+           f'<button type="button" class="conf-esc" onClick="{H("cv.go")}">{H("cv.t")}</button></sc-for></div>'
+           + _sc('cf1_cvnada', f'<div class="conf-nota">Todas as pessoas do cadastro têm acesso.</div>')
+           + f'<div class="conf-nota">Escolha a pessoa: o painel dela tem o convite (simulado, aceito na hora; nenhuma mensagem real é enviada). Pessoa nova se cadastra no CD-04.</div>')
+    E.EXTRA.append(painel('cf1_cvp', cvl, '', 460, foco=True))
+    # painel Pessoa
+    corpo_p = (f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">{chip_dyn("cf1_pac")}<a href="{H("cf1_pcadh")}" style="font-size: 12.5px; font-weight: 700; color: {ACC};">Abrir no cadastro</a></div>'
+               + _lin('cf1_pcad') + titulo('Papéis (permissão de decidir)')
+               + f'<div role="group" aria-label="Papéis" class="conf-paps"><sc-for list="{H("cf1_paps")}" as="pp" hint-placeholder-count="7">'
+               f'<button type="button" role="switch" class="conf-sw" aria-checked="{H("pp.on")}" disabled="{H("pp.dis")}" title="{H("pp.tit")}" onClick="{H("pp.go")}">'
+               f'<span class="conf-swt">{H("pp.t")}</span><span class="conf-sws">{H("pp.s")}</span></button></sc-for></div>'
+               + _sc('cf1_ptpv', titulo('Prévia') + _lin('cf1_ppv'))
+               + _sc('cf1_temnota', f'<div class="conf-nota">{H("cf1_pnota")}</div>') + _alerta())
+    rod_p = (f'<div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">'
+             + _sc('cf1_pvc', f'<button type="button" onClick="{H("cf1_pvcfn")}" style="{SEC}">{H("cf1_pvct")}</button>')
+             + _sc('cf1_pdes', f'<button type="button" onClick="{H("cf1_pdesfn")}" style="{SEC}">Desativar acesso</button>')
+             + f'<button type="button" class="conf-prim" disabled="{H("cf1_ppdis")}" onClick="{H("cf1_ppfn")}" style="{PRI}">{H("cf1_ppt")}</button></div>')
+    E.EXTRA.append(painel('cf1_pp', corpo_p, rod_p, 520, foco=True))
+    # painel Alçada
+    corpo_a = (_sc('cf1_a16', titulo('Níveis da Compra de insumos (dados2.ALCADA)') + _lin('cf1_a16l')
+                   + '<div class="conf-nota">Só leitura: a Compra de insumos aplica estes níveis. Editar ou ligar a papéis é da frente Suprimentos (CONF-D23).</div>'
+                   + f'<div><a href="CMP.dc.html" style="font-size: 13px; font-weight: 700; color: {ACC};">Abrir Compra de insumos</a></div>')
+               + _sc('cf1_anao16', titulo('Definição') + _lin('cf1_adef')
+                     + _sc('cf1_apend', f'<div role="note" style="padding: 10px 12px; border-radius: 12px; background: {YELS}; color: {YEL}; font-size: 13px; font-weight: 700; line-height: 1.4;">{H("cf1_apendt")}</div>')
+                     + _sc('cf1_asem', f'<div role="note" style="padding: 10px 12px; border-radius: 12px; background: {REDS}; color: {RED}; font-size: 13px; font-weight: 700; line-height: 1.4;">{H("cf1_asemt")}</div>'
+                           + f'<div role="radiogroup" aria-label="Quem recebe o papel" onKeyDown="{H("cf1_setas")}" style="display: flex; flex-direction: column; gap: 8px;"><sc-for list="{H("cf1_acand")}" as="cd" hint-placeholder-count="3">'
+                           f'<button type="button" role="radio" class="conf-esc" aria-checked="{H("cd.on")}" tabIndex="{H("cd.ti")}" onClick="{H("cd.go")}">{H("cd.t")}</button></sc-for></div>')
+                     + _sc('cf1_aedit', titulo('Mudar') + _sc('cf1_apap', f'<div style="font-size: 12px; font-weight: 700; color: {MUTED};">{H("cf1_aoptit")}</div>'
+                           + f'<div role="radiogroup" aria-label="{H("cf1_aoptit")}" onKeyDown="{H("cf1_setas")}" style="display: flex; flex-wrap: wrap; gap: 8px;"><sc-for list="{H("cf1_aopc")}" as="op" hint-placeholder-count="3">'
+                           f'<button type="button" role="radio" class="conf-esc" aria-checked="{H("op.on")}" tabIndex="{H("op.ti")}" onClick="{H("op.go")}">{H("op.t")}</button></sc-for></div>')
+                           + _sc('cf1_alim', f'<label for="cf1_lim" style="font-size: 12px; font-weight: 700; color: {MUTED};">Limite (% da área da ordem)</label>'
+                                 f'<div style="display: flex; align-items: center; gap: 8px;"><input id="cf1_lim" type="text" inputMode="numeric" value="{H("cf1_alimv")}" onChange="{H("cf1_aset")}" '
+                                 f'style="width: 110px; font-family: inherit; font-size: 14px; padding: 9px 11px; border-radius: 10px; border: 1px solid {LINE}; box-sizing: border-box;"><span style="font-size: 13px; color: {MUTED};">%</span></div>')
+                           + f'<label for="cf1_mot" style="font-size: 12px; font-weight: 700; color: {MUTED};">Motivo (obrigatório)</label>'
+                           f'<textarea id="cf1_mot" value="{H("cf1_amot")}" onChange="{H("cf1_asetm")}" style="font-family: inherit; font-size: 13.5px; padding: 9px 11px; border-radius: 10px; border: 1px solid {LINE}; min-height: 56px; resize: vertical;"></textarea>'
+                           + _sc('cf1_taerrm', f'<span role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">{H("cf1_aerrm")}</span>')
+                           + _sc('cf1_tapv', titulo('Prévia') + _lin('cf1_apv')))
+                     + _sc('cf1_taf', titulo(H('cf1_aaft')) + f'<div><sc-for list="{H("cf1_aaf")}" as="af" hint-placeholder-count="3"><div class="conf-lin"><span><a href="{H("af.h")}" style="color: {ACC}; font-weight: 700;">{H("af.t")}</a></span><span>{H("af.v")}</span></div></sc-for></div>'
+                           + _sc('cf1_aafnada', '<div class="conf-nota">Nada afetado agora.</div>'))
+                     + titulo('Versões') + _lin('cf1_aver')
+                     + _sc('cf1_temq', f'<div class="conf-nota" style="font-weight: 700;">{H("cf1_aq")}</div>') + _alerta()))
+    rod_a = (f'<div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">'
+             + _sc('cf1_ades', f'<button type="button" onClick="{H("cf1_adesfn")}" style="{SEC}">Desistir da mudança</button>')
+             + _sc('cf1_arec', f'<button type="button" onClick="{H("cf1_arecfn")}" style="{SEC}">Recusar mudança</button>')
+             + _sc('cf1_aprim', f'<button type="button" class="conf-prim" disabled="{H("cf1_aprimdis")}" title="{H("cf1_aprimtit")}" onClick="{H("cf1_aprimfn")}" style="{PRI}">{H("cf1_aprimt")}</button>') + '</div>')
+    E.EXTRA.append(painel('cf1_ap', corpo_a, rod_a, 540, foco=True))
+    EXTRAJS[0] = cenario.js_prefixo() + A_JS + CF1_JS
+    HEIGHTS37[fname] = 1500
+    shell37('CF-01', 'Usuários e alçadas', corpo, fname=fname, search=False,
+            subtitle='Quem entra e quem decide cada comando. Pessoas vêm do cadastro; papéis e alçadas valem para o próximo comando, na hora.',
+            primary_html=f'<button type="button" class="conf-prim" disabled="{H("cf1_prim_dis")}" title="{H("cf1_prim_lab")}" onClick="{H("cf1_prim_fn")}" style="{BTN_ST(True)}">{H("cf1_prim_t")}</button>',
+            footer='O perfil de demonstração (Ver como) mostra a experiência e não é segurança: no software o servidor tira o ator da sessão.')
+    injeta(fname, 'Usuários e alçadas', chip_dyn('cf1_st'))
+
+# ===================================== CF-03 · Integrações (CONF-01 §3.3) =====================================
+# O que entra e sai, de onde, e se está em dia. Só demonstração: nenhuma conexão real e nenhuma credencial (ENG-017); o selo nunca some.
+# A fila do ERP são os movimentos do cenário que mudam o físico, enviados uma vez por conteúdo; o estornado depois de enviado volta uma vez (R17).
+CF3_JS = r'''
+// ---- CF-03 · Integrações (simuladas): conexões, fila do ERP lida de c.movs, sincronização idempotente (confSincronizar) ----
+function cf3Ult(x){ return x.ult?confBr(x.ult.slice(0,10))+' '+x.ult.slice(11):'—'; }
+function PREVALS(self,v){ cenOuvir(self); const c=cenGet(); const X=confConexoes(c); self._cf3={c,X};
+  aGrid('g_con').rows=X.map(x=>({id:'cx_'+x.id,dr:'cf3_cx_'+x.id,v:{con:x.t,tl:x.traz,est:x.estado,ult:x.ult?x.ult.slice(0,10):'',pend:x.pend,cred:'Não configurada'},
+    s:{con:x.t,tl:'traz: '+x.traz+' · leva: '+x.leva,est:x.estado,pend:(x.pend?'Com pendência':'Sem pendência')+' · '+x.pend,cred:'Não configurada · cofre do ambiente'},
+    p:{con:[{k:'b',t:x.t},{k:'mut',t:'Demonstração'}],tl:[{k:'txt',t:'traz: '+x.traz},{k:'mut',t:'leva: '+x.leva}],est:[aCh(x.estado,x.cor)],ult:[{k:x.ult?'txt':'mut',t:x.id==='app'?'pelo sinal do aparelho (simulado)':cf3Ult(x)}],
+      pend:x.pend?[{k:'b',t:String(x.pend)},{k:'mut',t:'abra a linha'}]:[{k:'mut',t:'0'}],cred:[{k:'mut',t:'Não configurada · em produção, no cofre do ambiente'}]}})); }
+function EXTRAVALS(self,v){ const {c,X}=self._cf3; const st=self.state; const PF=g2perfil(); const erp=X.find(x=>x.id==='erp');
+  aSelo(self,v,'cf3_st','Demonstração · nenhuma conexão real','yellow');
+  v.cf3_res='Fila do ERP: '+erp.pend+(erp.pend===1?' movimento':' movimentos')+' · app de campo: '+X.find(x=>x.id==='app').estado+' · nenhuma credencial existe nesta demonstração';
+  const ch=self.__cf3k||(self.__cf3k=confChave('sinc')); const rid=(self.__cf3n=(self.__cf3n||0)+1);   /* nº deste desenho (CONF-D51) */
+  v.cf3_prim_fn=(e)=>{ const u=self.__cf3u; const k1=confRepJanela(u,e,rid)?u.k:ch;   /* duplo clique: o 2º clique repete o mesmo pedido (revisão CONF 13/10) */
+    const r=cenMudar(null,k=>confSincronizar(k,k1,g2perfil()));   /* chave do desenho: clique repetido = mesma sincronização (R12) */ if(r.erro){ self.setState({g2toast:r.erro}); return; } if(r.repetido) return;
+    self.__cf3u={k:k1,r:rid}; self.__cf3k=confChave('sinc'); self.setState(Object.assign({cenrev:Date.now(),g2toast:r.msg},confFl(self,[['g_con','cx_erp']]))); };
+  X.forEach(x=>{ v['cf3_cx_'+x.id]=()=>self.setState({cf3_c:x.id}); });
+  const x=st.cf3_c?X.find(y=>y.id===st.cf3_c):null; const K=confLer(c);
+  aPainel(self,v,'cf3_cp',!!x,x?x.t:'',()=>self.setState({cf3_c:null}));
+  if(x){ aSelo(self,v,'cf3_cest',x.estado,x.cor);
+    v.cf3_cl=[{t:'Traz',v:x.traz},{t:'Leva',v:x.leva},{t:'Quem escreve cada objeto',v:x.escritor},{t:'Onde se usa',v:x.onde},
+      {t:'Ambiente',v:'Demonstração (dados sintéticos) · homologação e produção só com autorização do proprietário'},
+      {t:'Credencial',v:'Não configurada · em produção fica no cofre do ambiente e só aparece mascarada (••••••••)'},
+      {t:'Última sincronização',v:x.id==='app'?x.estado:cf3Ult(x)}].map(y=>Object.assign({st:''},y));
+    const fila=x.id==='erp'?confErpFila(c):[];
+    v.cf3_cpend=x.id==='erp'?fila.map(y=>({t:y.m.id,v:confErpT(y).replace(y.m.id+' · ',''),h:y.m.os?'OS.dc.html#'+y.m.os:'EST.dc.html'}))
+      :(x.id==='app'&&x.pend?[{t:x.pend+(x.pend>1?' duplicidades':' duplicidade'),v:'decide a conferência na O.S. (CMD-09)',h:'OS.dc.html'}]:[]);
+    v.cf3_tpend=v.cf3_cpend.length>0; v.cf3_npend=!v.cf3_cpend.length;
+    v.cf3_csin=(K.ev||[]).filter(e=>e.tipo==='sinc').slice(-5).reverse().map(e=>({t:confBr(e.d)+' '+e.at,v:e.t+' · '+e.quem,st:''}));
+    v.cf3_tsin=v.cf3_csin.length>0; v.cf3_nsin=!v.cf3_csin.length; }
+  else { v.cf3_cl=[]; v.cf3_cpend=[]; v.cf3_csin=[]; } }
+'''
+
+
+def cf03():
+    fname = 'CF-03.dc.html'; E._reset_screen(fname)
+    ui37.CAT['CF-03'] = dict(ui37.CAT.get('CF-03', {}), titulo='Integrações')
+    g_con = grid([dict(k='con', l='Conexão', w=200), dict(k='tl', l='Traz / leva', w=320), dict(k='est', l='Estado', w=190), dict(k='ult', l='Última sincronização', t='date', w=170),
+                  dict(k='pend', l='Pendências', t='num', a='r', w=120), dict(k='cred', l='Credencial', w=200)], [], gid='g_con', search=True, total=False, so={'k': 'con'},
+                 qf=dict(k='pend', cut=' · ', todas='Todas'), edit=dict(m='ro', title='Conexão', fields=[]))
+    corpo = ('<div style="display: flex; flex-direction: column; gap: 18px;">' + CF1_CSS
+             + section('Conexões', 'Confira o que entra e sai e se está em dia; clique na conexão para ver quem escreve cada objeto e as pendências.', '',
+                       f'<div class="conf-nota" style="padding: 0 0 10px; font-weight: 700; color: {INK};">{H("cf3_res")}</div>' + g_con
+                       + '<div class="conf-nota" style="padding-top: 10px;">Sincronizar envia ao ERP cada movimento uma vez por conteúdo: repetir não reenvia; um consumo estornado depois de enviado volta uma vez, como estorno. '
+                       'O app de campo envia pelo próprio aparelho quando há sinal.</div>')
+             + '</div>')
+    corpo_c = (f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">{chip_dyn("cf3_cest")}<span class="conf-nota">Demonstração · nenhuma conexão real</span></div>'
+               + _lin('cf3_cl') + titulo('Pendências')
+               + _sc('cf3_tpend', f'<div><sc-for list="{H("cf3_cpend")}" as="pd" hint-placeholder-count="2"><div class="conf-lin"><span><a href="{H("pd.h")}" style="color: {ACC}; font-weight: 700;">{H("pd.t")}</a></span><span>{H("pd.v")}</span></div></sc-for></div>')
+               + _sc('cf3_npend', '<div class="conf-nota">Nada pendente.</div>')
+               + titulo('Sincronizações recentes') + _sc('cf3_tsin', _lin('cf3_csin')) + _sc('cf3_nsin', '<div class="conf-nota">Nenhuma sincronização nesta demonstração ainda.</div>'))
+    E.EXTRA.append(painel('cf3_cp', corpo_c, '', 520, foco=True))
+    EXTRAJS[0] = cenario.js_prefixo() + A_JS + CF3_JS
+    HEIGHTS37[fname] = 900
+    shell37('CF-03', 'Integrações', corpo, fname=fname, search=False,
+            subtitle='O que entra e sai, de onde e se está em dia. Só demonstração: nenhuma conexão real e nenhuma credencial.',
+            primary_html=f'<button type="button" class="conf-prim" onClick="{H("cf3_prim_fn")}" style="{BTN_ST(True)}">Sincronizar agora (simulado)</button>',
+            footer='Homologação, produção e credenciais reais só com autorização e custo aprovados pelo proprietário (AGENTS §2; ENG-017).')
+    injeta(fname, 'Integrações', chip_dyn('cf3_st'))
+
+# ===================================== CF-04 · Auditoria (CONF-01 §3.2) =====================================
+# Quem fez o quê, quando e com que efeito: confTrilha lê os registros que os comandos já gravam (nada é digitado; nenhum autor é inferido).
+# Uma ação: Baixar trilha (CSV) com as linhas filtradas; a exportação vira registro (R15). Detalhe = painel só leitura da linha.
+CF4_JS = r'''
+// ---- CF-04 · Auditoria: trilha única (confTrilha) com filtros de pessoa, comando e mês; CSV das linhas filtradas ----
+const CF4_MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+function cf4Mes(d){ const a=String(d).split('-'); return CF4_MES[Number(a[1])-1]+'/'+a[0]; }
+function PREVALS(self,v){ cenOuvir(self); assinOuvir(self); const L=confTrilha(cenGet(),assinLer()); self._cf4={L};
+  const EST4=g2estreito();   /* estreito (390 px): só a 1ª coluna fica presa; Quem vai junto de Quando (revisão CONF 13/10, §3.2) */
+  const pos={}; L.forEach((r,i)=>{ pos[r.seq]=i; });   /* revisão F1: a coluna Quando ordena pela ordem da trilha (data, gravação, hora), não só pela data */
+  aGrid('g_tr').rows=L.slice().reverse().map(r=>{ const q=r.quem||'autor não registrado'; const k=r.quem?r.k:'autor não registrado'; const qd=confBr(r.d)+(r.at?' '+r.at:'');
+    return {id:'tr_'+r.uid,dr:'cf4_tr_'+r.seq,v:{qd:r.d+'#'+String(pos[r.seq]).padStart(6,'0'),quem:q,oq:r.oq,obj:r.obj,ef:r.ef,ori:r.origem},s:{qd:cf4Mes(r.d)+' · '+qd,quem:q,oq:r.oq,obj:r.obj,ef:r.ef,ori:r.origem},
+      p:{qd:EST4?[{k:'txt',t:qd},{k:'br'},{k:'mut',t:q}]:[{k:'txt',t:qd}],quem:r.quem?[{k:'b',t:q}]:[aCh('autor não registrado','gray')],oq:[{k:'txt',t:r.oq}],obj:r.h?[{k:'link',t:r.obj,h:r.h}]:[{k:'txt',t:r.obj}],ef:[{k:'txt',t:r.ef}],ori:[{k:'mut',t:r.origem}]},
+      m:{quem:[{id:k,l:k}],qd:[{id:cf4Mes(r.d),l:cf4Mes(r.d)}]},seq:r.seq}; }); }   /* id da linha = uid (estável); seq só nomeia o gatilho desta pintura */
+function EXTRAVALS(self,v){ const L=self._cf4.L; const st=self.state; const PF=g2perfil();
+  const vis=new Set((v.g_tr_rows||[]).map(x=>x.id)); const F=L.filter(r=>vis.has('tr_'+r.uid)).reverse();   /* as linhas que a grade mostra, mais recente primeiro */
+  const aut=new Set(F.map(r=>r.quem?r.k:'—')); const autAll=new Set(L.map(r=>r.quem?r.k:'—'));
+  v.cf4_res=F.length+(F.length===1?' registro':' registros')+(F.length<L.length?' de '+L.length:'')+' · '+aut.size+(aut.size===1?' autor':' autores')+' · lidos dos comandos gravados; nada é digitado aqui';
+  L.forEach(r=>{ v['cf4_tr_'+r.seq]=()=>self.setState({cf4_d:r.uid}); });   /* detalhe só leitura da linha, pelo uid: outra aba que grave não troca o registro aberto (revisão CONF 10/10) */
+  const g=st.g2&&st.g2.g_tr||{}; const fil=[(g.q||'').trim()?'texto "'+g.q.trim()+'"':'',g.qv?'mês '+g.qv:''].concat(Object.keys(g.f||{}).filter(k=>(g.f[k]||[]).length).map(k=>({quem:'pessoa',oq:'comando',qd:'mês',ori:'origem',obj:'objeto',ef:'efeito'}[k]||k)+': '+g.f[k].join(', '))).filter(Boolean).join(' · ');
+  v.cf4_prim_dis=!F.length; v.cf4_prim_tit=F.length?'Baixa as '+F.length+' linhas filtradas em CSV; a exportação fica na trilha':'Nenhum registro para baixar';
+  const ch=self.__cf4k||(self.__cf4k=confChave('exp')); const rid=(self.__cf4n=(self.__cf4n||0)+1);   /* nº deste desenho (CONF-D51) */   /* chave do desenho: clique repetido = mesma exportação (R12) */
+  v.cf4_prim_fn=(e)=>{ if(!F.length) return; const csv=confCsv(F); const u=self.__cf4u; const rep=confRepJanela(u,e,rid); const n=rep?u.n:F.length; const fx=rep?u.fil:(fil||'sem filtros'); const k1=rep?u.k:ch;
+    /* duplo clique: o 2º clique repete o mesmo pedido (mesma chave, mesmo n e filtros) e recebe o mesmo recibo, sem 2º arquivo (revisão CONF 13/10) */
+    const r=cenMudar(null,c=>confExportar(c,n,fx,k1,g2perfil())); if(r.erro){ self.setState({g2toast:r.erro}); return; }
+    if(r.repetido) return;   /* revisão F16: o 2º clique do mesmo desenho devolve o mesmo recibo e não baixa outro arquivo */
+    self.__cf4u={k:k1,n,fil:fx,r:rid}; self.__cf4k=confChave('exp'); try{ window.__confCsv=csv; window.__confCsvN=(window.__confCsvN||0)+1; }catch(e){}
+    try{ const b=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='trilha-auditoria-'+CONF0.hoje+'.csv';
+      document.body.appendChild(a); a.click(); setTimeout(()=>{ try{ URL.revokeObjectURL(a.href); a.remove(); }catch(e){} },500); }catch(e){}
+    const nr=confTrilha(cenGet(),assinLer()).find(x=>x.src===(r.recibo||{}).id); self.setState(Object.assign({cenrev:Date.now(),g2toast:r.msg},nr?confFl(self,[['g_tr','tr_'+nr.uid]]):{})); };
+  const d=st.cf4_d?L.find(r=>r.uid===st.cf4_d):null;
+  aPainel(self,v,'cf4_dp',!!d,d?d.oq:'',()=>self.setState({cf4_d:null}));
+  v.cf4_dl=d?[{t:'Quando',v:confBr(d.d)+(d.at?' '+d.at:'')},{t:'De onde vem a data',v:d.ds},{t:'Quem',v:d.quem||'autor não registrado'},{t:'O quê',v:d.oq},{t:'Objeto',v:d.obj},
+    {t:'Antes → depois / efeito',v:d.ef},{t:'Origem',v:d.origem},{t:'Registro de origem',v:d.src||'—'}].map(x=>Object.assign({st:''},x)):[];
+  v.cf4_dh=d&&d.h?d.h:'#'; v.cf4_temh=!!(d&&d.h); }
+'''
+
+
+def cf04():
+    fname = 'CF-04.dc.html'; E._reset_screen(fname)
+    ui37.CAT['CF-04'] = dict(ui37.CAT.get('CF-04', {}), titulo='Auditoria')
+    g_tr = grid([dict(k='qd', l='Quando', t='date', w=150, multi=True), dict(k='quem', l='Quem', w=170, multi=True), dict(k='oq', l='O quê', w=230),
+                 dict(k='obj', l='Objeto', w=170), dict(k='ef', l='Antes → depois / efeito', w=360), dict(k='ori', l='Origem', w=120)], [], gid='g_tr', search=True,
+                total=False, so={'k': 'qd', 'd': True}, qf=dict(k='qd', cut=' · ', todas='Todos', l='mês'), edit=dict(m='ro', title='Registro', fields=[]))
+    corpo = ('<div style="display: flex; flex-direction: column; gap: 18px;">' + CF1_CSS
+             + section('Trilha de auditoria', 'Filtre por pessoa, comando ou mês; clique no registro para ver a origem. A trilha não se edita.', '',
+                       f'<div class="conf-nota" role="status" style="padding: 0 0 10px; font-weight: 700; color: {INK};">{H("cf4_res")}</div>' + g_tr)
+             + '</div>')
+    corpo_d = (_lin('cf4_dl') + f'<div class="conf-nota">A trilha não se edita: corrija no domínio, por ajuste ou estorno vinculado.</div>')
+    rod_d = (f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">'
+             + _sc('cf4_temh', f'<a href="{H("cf4_dh")}" style="text-decoration: none; {SEC}">Abrir no domínio</a>') + '</div>')
+    E.EXTRA.append(painel('cf4_dp', corpo_d, rod_d, 500, foco=True))
+    EXTRAJS[0] = cenario.js_prefixo() + A_JS + CF4_JS
+    HEIGHTS37[fname] = 1100
+    shell37('CF-04', 'Auditoria', corpo, fname=fname, search=False,
+            subtitle='Quem fez o quê, quando e com que efeito: a trilha lê os registros que os comandos gravam. Nada é digitado aqui.',
+            primary_html=f'<button type="button" class="conf-prim" disabled="{H("cf4_prim_dis")}" title="{H("cf4_prim_tit")}" onClick="{H("cf4_prim_fn")}" style="{BTN_ST(True)}">Baixar trilha (CSV)</button>',
+            footer='Datas: a do registro; registro do cenário só com hora usa a data operacional da demonstração (26/09/2026); a assinatura usa a data simulada da cobrança.')
+
 def build():
-    # ================= CF-01 · Usuários e permissões =================
-    fname='CF-01.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1400
-    PAPEIS=['Gestora · agrônoma RT','PCP','Operador · pulverização','Operador · irrigação','Operador','Conferente (delegação de Ana)','Estoque']
-    ESCOPOS=['Santa Rita + Boa Vista','Santa Rita','Santa Rita · T1+T2','Santa Rita · pivôs','Boa Vista']
-    AUTH=['senha + 2º fator','PIN no dispositivo']
-    def usr(rid,nome,email,papel,escopo,vig,auth,sess,sit,acao,ro=False):
-        sitp=sit+[Pt.br()]+acao
-        return R(rid,ro=ro,v=dict(nome=nome,email=email,o_papel=papel,o_escopo=escopo,o_vig=vig,o_auth=auth,sess=sess),extra=dict(sit0=sitp,acao0=acao),
-                 ident=two(nome,email),papel=papel,escopo=escopo,vig=vig,auth=auth,sit=sitp)
-    visao=lambda p: Pt.act('Simular visão',f'Visão de {p} aplicada em demonstração — não representa segurança real; o servidor continua a autoridade das permissões.')
-    usrs=[
-      usr('u_ana','Ana Souza','ana@fazsantarita.com.br','Gestora · agrônoma RT','Santa Rita + Boa Vista','sem prazo','senha + 2º fator','2 ativas',ch('Ativo','green'),[visao('Ana (gestora)')]),
-      usr('u_caio','Caio Martins','caio@fazsantarita.com.br','PCP','Santa Rita','sem prazo','senha + 2º fator','1 ativa',ch('Ativo','green'),[visao('Caio (PCP)')]),
-      usr('u_marcos','Marcos Lima','marcos@fazsantarita.com.br','Operador · pulverização','Santa Rita · T1+T2','até 30/06/2027','PIN no dispositivo','1 offline',ch('Offline · pacote válido','yellow'),[visao('Marcos (operador): só ordens liberadas do seu escopo')]),
-      usr('u_joao','João Prado','joao@fazsantarita.com.br','Operador · irrigação','Santa Rita · pivôs','até 30/06/2027','PIN no dispositivo','1 ativa',ch('Ativo','green'),[visao('João (irrigação)')]),
-      usr('u_paula','Paula Neri','paula@fazsantarita.com.br','Conferente (delegação de Ana)','Santa Rita','delegação até 30/09','senha + 2º fator','1 ativa',ch('Delegação vence em 5 dias','yellow'),[fn('Revogar delegação','revoga:u_paula',True)]),
-      usr('u_beto','Beto Ramos','beto@fazsantarita.com.br','Operador','Santa Rita','—','PIN no dispositivo','—',ch('Convite pendente · aprovação','yellow'),[Pt.cta('Acompanhar aprovação','IN-02.dc.html')]),
-      usr('u_davi','Davi Melo','davi@fazsantarita.com.br','Operador','Santa Rita','encerrada 15/09','—','0',ch('Revogado','gray'),[Pt.cta('Ver trilha','CF-04.dc.html')],ro=True),
-    ]
-    g_usr=grid([C('ident','Identidade',w=200),C('papel','Papel',w=170),C('escopo','Escopo',w=150),C('vig','Vigência',w=130),C('auth','Autenticação',w=130),
-                C('sit','Situação · ação',w=240)],usrs,
-       edit=dict(m='form',title='Usuário',newTitle='Convidar usuário',
-         sub='Mudança de papel, escopo, vigência ou autenticação fica pendente: vale depois da aprovação do gestor e entra na trilha com o aprovador.',
-         fields=[dict(k='nome',l='Nome',t='txt',req=True),dict(k='email',l='E-mail',t='email',req=True),
-                 dict(k='papel',l='Papel',t='sel',req=True,opts=PAPEIS,**{'def':'Operador'}),
-                 dict(k='escopo',l='Escopo',t='sel',req=True,opts=ESCOPOS,**{'def':'Santa Rita'}),
-                 dict(k='vig',l='Vigência',t='txt',req=True,help='Ex.: até 30/06/2027 ou sem prazo',**{'def':'até 30/06/2027'}),
-                 dict(k='auth',l='Autenticação',t='sel',req=True,opts=AUTH,**{'def':'PIN no dispositivo'})]),
-       add='Convidar usuário',gid='g_usr',total=False)
-    devs=[
-      R('d_marcos',ro=True,v=dict(pac='Válido até 25/09'),disp=two('Celular · MB-03','Marcos Lima'),ult='hoje 06:10',
-        pacote=[Pt.chip(f'Sincronizado · {APT["id"]} recibo {APT["recibo"]}','green'),Pt.br(),Pt.mut('pacote válido até 25/09 · agora offline')],
-        acao=[fn('Encerrar sessão','encerra:d_marcos')]),
-      R('d_paula',ro=True,disp=two('Tablet · conferência','Paula Neri'),ult='hoje 07:30',
-        pacote=[Pt.chip('Sincronizado · 1 conflito em reconciliação','red')],acao=[Pt.cta('Ver conflito','CF-03det.dc.html',True)]),
-      R('d_rui',ro=True,disp=two('Tablet · balança','Rui'),ult='hoje 07:05',pacote=ch('Sincronizado','green'),acao=[fn('Encerrar sessão','encerra:d_rui')]),
-      R('d_ana',ro=True,disp=two('Notebook · escritório','Ana Souza'),ult='agora',pacote=ch('Sincronizado','green'),acao=[Pt.mut('sessão atual')]),
-    ]
-    g_dev=grid([C('disp','Dispositivo · usuário',w=200),C('ult','Último sincronismo'),C('pacote','Pacote offline',w=300),C('acao','Ação')],devs,
-       edit=dict(m='ro',title='Dispositivo',fields=[dict(k='disp',l='Dispositivo · usuário',ro=True),dict(k='ult',l='Último sincronismo',ro=True),dict(k='pacote',l='Pacote offline',ro=True)]),
-       search=False,gid='g_dev',total=False)
-    EXTRAJS[0]=JS_BASE+'''
-function EXTRAVALS(self,v){
-  const U=g2rows(self,GR('g_usr'));
-  const conv=U.filter(r=>String(r.s.sit||'').indexOf('Convite pendente')===0).length;
-  const alt=U.filter(r=>String(r.s.sit||'').indexOf('Alteração pendente')===0).length;
-  v.k_conv=String(conv); v.k_conv_u=alt?pl(alt,'alteração pendente','alterações pendentes'):'aguardando aprovação do gestor';
-  v.st_t=pl(conv,'convite pendente','convites pendentes')+(alt?' · '+pl(alt,'alteração','alterações'):'');
-  v.revoga=(rid)=>{ const r0=getRow(self,'g_usr',rid); if(!r0||String(r0.s.sit).indexOf('revogada')>=0) return;
-    setRow(self,'g_usr',rid,r=>{ r.acao0=[{k:'cta',t:'Ver trilha',h:'CF-04.dc.html'}]; r.p.sit=[CH('Delegação revogada','gray'),BR].concat(r.acao0); r.s.sit='Delegação revogada'; r.sit0=r.p.sit; r.ro=true; });
-    self.setState({g2toast:'Delegação de Ana para Paula revogada no servidor · sessões com a delegação encerradas · conferências já feitas são preservadas.'}); };
-  v.encerra=(rid)=>{ setRow(self,'g_dev',rid,r=>{ r.p.pacote=[CH('Sessão encerrada','gray'),BR,MU('novo login exige credencial e 2º fator')]; r.s.pacote='Sessão encerrada'; r.p.acao=[MU('encerrada agora')]; });
-    self.setState({g2toast:'Sessão encerrada no servidor · dispositivo offline é suspenso ao expirar o pacote — fatos capturados são preservados.'}); };
-  self.g2after=(gid,rows,r)=>{ if(gid!=='g_usr'||!r) return;
-    r.p.ident=[{k:'b',t:r.v.nome},BR,MU(r.v.email)]; r.s.ident=r.v.nome+' '+r.v.email;
-    if(isNew(r)){ r.v.__ok=1; ['papel','escopo','vig','auth'].forEach(k=>{ r.v['o_'+k]=r.v[k]; }); r.v.sess='—';
-      r.acao0=[{k:'cta',t:'Acompanhar aprovação',h:'IN-02.dc.html'}]; r.p.sit=[CH('Convite pendente · aprovação','yellow'),BR].concat(r.acao0); r.s.sit='Convite pendente · aprovação'; r.sit0=r.p.sit;
-      self.setState({g2toast:'Convite enviado a '+r.v.email+' · acesso pendente de aprovação do gestor (aparece em Aprovações).'}); return; }
-    const chg=PROP(r,['papel','escopo','vig','auth']);
-    if(chg.length){ r.p.sit=[CH('Alteração pendente · aprovação do gestor','yellow'),BR].concat(r.acao0||[]); r.s.sit='Alteração pendente · aprovação do gestor';
-      self.setState({g2toast:'Alteração proposta para '+r.v.nome+' · vale depois da aprovação do gestor · aprovador registrado na trilha.'}); }
-    else { r.p.sit=r.sit0; r.s.sit=(r.sit0&&r.sit0[0])?r.sit0[0].t:''; self.setState({g2toast:'Nada mudou no acesso de '+r.v.nome+'.'}); } };
-}'''
-    corpo=(
-      kpis([('USUÁRIOS ATIVOS','18','em 2 fazendas'),('CONVITES PENDENTES',H('k_conv'),H('k_conv_u')),
-            ('SESSÕES E DISPOSITIVOS','23','1 offline com pacote válido'),('DELEGAÇÕES VIGENTES','2','com prazo e escopo')])
-      + section('Usuários','Convide pessoas e ajuste papel, escopo e vigência; clique na linha para editar.','',g_usr)
-      + section('Sessões e dispositivos','Encerre sessões no servidor e confira pacotes offline e conflitos de sincronização.',
-        [ic(msgbtn('Revisar acessos','Campanha de revisão aberta · 12 acessos para reconfirmar até 30/09 · donos notificados (simulado · nenhuma mensagem real enviada) — não reconfirmado é suspenso, não apagado.'),'users','Abrir campanha de revisão de acessos')],
-        g_dev))
-    shell37('CF-01','Usuários e permissões',corpo,fname=fname,
-      subtitle='Usuários, papéis, escopos, credenciais e sessões — visão de demonstração por persona não representa segurança real.',
-      status=(H('st_t'),'yellow'),
-      footer='Servidor é autoridade das permissões; alteração de perfil registra aprovador (FO-39) e entra na trilha CF-04.')
-
-    # ================= CF-02 · Alçadas e regras (fecha A-01) =================
-    fname='CF-02.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1240
-    DONOS=['Liberador do domínio · Caio (PCP)','Responsável do domínio · Ana (Gestora)','Gerencial · Ana + validação agronômica do RT',
-           'Conferente ou PCP com permissão específica · Paula/Caio','Supervisor de expedição · Rui','Aprovador competente por objeto · Ana (agrônoma RT)','Direção']
-    def alc(rid,cmd,idl,nv,dono,lim,nota_,fonte,vig,acao):
-        return R(rid,v=dict(idl=idl,fonte=fonte,o_dono=dono,o_lim=lim,o_vig=vig,classe='Obrigatória',motivo='',rv=REV_OK),extra=dict(nv=nv,cmd0=cmd),
-                 cmd=[Pt.b(cmd),Pt.br(),Pt.mut(f'{idl} · {fonte}')],dono=dono,lim=lim,classe=[Pt.tag('Obrigatória'),Pt.br(),Pt.mut(nota_)],vig=vig,acao=acao)
-    alcs=[
-      alc('al01','Liberar ordem','AL-01 v4','v5','Liberador do domínio · Caio (PCP)','até R$ 80 mil por ordem; acima, Direção','exige versão aprovada vigente e evento de liberação','cap. 8.2 · 41.3','até 31/07/2027',[]),
-      alc('al04','Cancelar sem execução','AL-04 v2','v3','Responsável do domínio · Ana (Gestora)','qualquer valor · conclusão só com custódia zero','materiais pendentes não são apagados','cap. 8.2.1','até 31/07/2027',[]),
-      alc('al05','Dispensar saldo','AL-05 v2','v3','Gerencial · Ana + validação agronômica do RT','saldo até 20% da área da ordem; acima, Direção','decisão técnica aplicável','cap. 8.2.1 · 42.3','até 31/07/2027',[Pt.cta('Ver alçada','CF-02det.dc.html')]),
-      alc('al06','Reabrir saldo','AL-06 v1','v2','Conferente ou PCP com permissão específica · Paula/Caio','só ordens Em conferência · histórico preservado','não reabre período contábil','cap. 8.2.1','até 31/07/2027',[]),
-      alc('al08','Reordenar fila logística','AL-08 v1','v2','Supervisor de expedição · Rui','caminhão presente e apto + motivo registrado','promessa original preservada','cap. 50','até 31/07/2027',[Pt.cta('Ver fila','LO-02.dc.html')]),
-      alc('al02','Decidir revisão','AL-02 v3','v4','Aprovador competente por objeto · Ana (agrônoma RT)','sem teto financeiro · competência por domínio','rejeitar não cancela a ordem','cap. 8.2.1 · 41','até 31/07/2027',[Pt.cta('Ver caixa','IN-02.dc.html')]),
-    ]
-    # AL-05 já tem v3 em revisão: abre em consulta (a decisão fica no detalhe)
-    alcs[2]['ro']=True; alcs[2]['v']['rv']='v3 já em revisão · decida no detalhe da alçada'; alcs[2]['p']['cmd']+= [Pt.br(),Pt.chip('v3 em revisão','yellow')]; alcs[2]['s']['cmd']+=' v3 em revisão'
-    PROP_FIELDS=lambda lim_l: [dict(k='rv',l='Revisão',t='txt',ro=True),dict(k='dono',l='Dono (quem decide)',t='sel',req=True,opts=DONOS),dict(k='lim',l=lim_l,t='area',req=True),
-                               dict(k='classe',l='Classe de bloqueio',t='txt',ro=True,help='Classe obrigatória não pode virar exceção livre.'),
-                               dict(k='vig',l='Vigência',t='txt',req=True,help='Ex.: até 31/07/2027'),
-                               dict(k='motivo',l='Motivo da revisão',t='area',req=True,cond=dict(k='rv',eq=REV_OK))]
-    g_alc=grid([C('cmd','Comando · alçada · fonte',w=200),C('dono','Dono (quem decide)',w=200),C('lim','Valor / limite',w=210),C('classe','Classe de bloqueio',w=210),
-                C('vig','Vigência',w=110),C('acao','Abrir')],alcs,
-       edit=dict(m='form',title='Propor revisão',sub='Salvar cria uma nova versão em revisão: a versão vigente continua valendo até a aprovação registrada do aprovador competente.',
-                 fields=PROP_FIELDS('Valor / limite')),
-       gid='g_alc',total=False)
-    def pol(rid,idl,nome,nv,escopo,lim,aprov,dono,vig,sit,acao,ro=False,rv=None):
-        return R(rid,ro=ro,v=dict(idl=idl,o_lim=lim,o_aprov=aprov,o_vig=vig,motivo='',rv=(rv or REV_OK)),extra=dict(nv=nv,sit0=sit,acao0=acao),
-                 regra=two(idl,f'{nome} · dono: {dono}'),escopo=escopo,lim=lim,aprov=aprov,vig=vig,sit=sit+([Pt.br()]+acao if acao else []))
-    PA=D.POLITICA_AGUA; lam=str(PA['lamina_max']).replace('.',',')
-    pols=[
-      # política de água: identificador, versão, dono e validade de dados.POLITICA_AGUA (a mesma da ficha do pivô e do app; revisão de 10/10, A3)
-      pol('pa07',f'{PA["id"]} {PA["versao"]}','limites de irrigação (só água)','v'+str(int(PA['versao'].lstrip('v'))+1),f'{D.PIVO["id"]} + pivô 1 + gotejo T7',f'lâmina ≤ {lam} mm por passada · intervalo ≥ {PA["intervalo_min"]}','Gestor · sem aprovação por evento',PA['autor'],f'até {PA["validade"]}',ch('Vigente','green'),[]),
-      pol('pe04','PE-04','estoque Diesel S10','v1','tanque Sede','mínimo do tanque 40%','Gestor','Rui','—',ch('Aguardando aprovação','yellow'),
-          [Pt.act('Publicar','Publicação bloqueada · PE-04 é classe Obrigatória e ainda não tem aprovação do gestor nem teste de exemplo. Como resolver: simule os casos e aprove em Aprovações; depois publique.')],ro=True,rv='Aguardando aprovação do gestor'),
-      pol('al05p','AL-05 v2','dispensar saldo','v3','ordens agrícolas','saldo até 20% da área','Gerencial + agronômica','Ana','até 31/07/2027',ch('Vigente · v3 proposta','yellow'),[Pt.cta('Ver alçada','CF-02det.dc.html')],ro=True,rv='v3 já em revisão · decida no detalhe da alçada'),
-      pol('tl01','TL-01','tolerância de compras','v1','contratos de insumos','por contrato/item · ±10% é só HIPÓTESE, sem padrão','Compras + contraparte','—','—',ch('Sem padrão autorizado','gray'),[]),
-    ]
-    g_pol=grid([C('regra','Regra/ID · proprietário',w=220),C('escopo','Escopo',w=150),C('lim','Limites',w=210),C('aprov','Aprovadores',w=150),C('vig','Vigência',w=100),C('sit','Situação · ação',w=220)],pols,
-       edit=dict(m='form',title='Propor revisão',sub='Salvar cria uma nova versão em revisão; publicar exige aprovação registrada e ao menos um teste de exemplo.',
-                 fields=[dict(k='rv',l='Revisão',t='txt',ro=True),dict(k='lim',l='Limites',t='area',req=True),dict(k='aprov',l='Aprovadores',t='sel',req=True,opts=['Agrônomo RT','Gestor','Gerencial + agronômica','Compras + contraparte','Direção']),
-                         dict(k='vig',l='Vigência',t='txt',req=True,help='Ex.: até 30/11'),dict(k='motivo',l='Motivo da revisão',t='area',req=True,cond=dict(k='rv',eq=REV_OK))]),
-       gid='g_pol',total=False)
-    EXTRAJS[0]=JS_BASE+'''
-function EXTRAVALS(self,v){
-  const A=g2rows(self,GR('g_alc')), P=g2rows(self,GR('g_pol'));
-  const rev=1+A.filter(r=>r.v.__rev).length+P.filter(r=>r.v.__rev).length;
-  v.k_rev=String(rev); v.st_t=pl(rev,'em revisão','em revisão');
-  v.k_rev_u=(A.concat(P).filter(r=>r.v.__rev).map(r=>String(r.v.idl).split(' ')[0]+' '+r.nv).concat(['AL-05 v3'])).join(' · ');
-  self.g2after=(gid,rows,r)=>{ if(!r||(gid!=='g_alc'&&gid!=='g_pol')) return;
-    const chg=PROP(r,gid==='g_alc'?['dono','lim','vig']:['lim','aprov','vig']);
-    const nome=r.v.idl;
-    if(!chg.length){ self.setState({g2toast:'Nada mudou em '+nome+' · nenhuma revisão criada.'}); return; }
-    r.v.__rev=1;
-    if(gid==='g_alc'){ r.p.cmd=[{k:'b',t:r.cmd0},BR,MU(r.v.idl+' · '+r.v.fonte),BR,CH(r.nv+' em revisão','yellow')]; r.s.cmd=r.cmd0+' '+r.v.idl+' '+r.nv+' em revisão'; }
-    else { r.p.sit=[CH(r.nv+' em revisão · Aprovações','yellow'),BR,MU('vigente continua valendo')].concat(r.acao0&&r.acao0.length?[BR].concat(r.acao0):[]); r.s.sit=r.nv+' em revisão'; }
-    self.setState({g2toast:'Revisão '+nome.split(' ')[0]+' '+r.nv+' criada em revisão · aguardando aprovação em Aprovações — a versão vigente continua valendo.'}); };
-}
-function plain2(ps){ return (ps||[]).filter(p=>p.k!=='br').map(p=>p.t).join(' '); }'''
-    corpo=(
-      kpis([('POLÍTICAS VIGENTES','14','com dono e vigência'),('EM REVISÃO',H('k_rev'),H('k_rev_u')),
-            ('VENCEM EM 60 DIAS','0','nenhuma no período'),('BLOQUEIOS OBRIGATÓRIOS','6','não viram exceção livre')])
-      + section('Alçadas dos comandos da ordem','Confira quem decide cada comando e até que limite; clique na linha para propor revisão.',
-        [ic(btn('Ver objetos afetados',small=True,href='OS.dc.html'),'lista','Abrir as ordens de serviço que dependem destas alçadas')],g_alc)
-      + section('Registro central de políticas','Revise versão, limites e vigência de cada política; clique na linha para propor revisão.',
-        [ic(msgbtn('Simular casos','Simulados 6 casos de exemplo · 5 conforme · 1 bloqueado: dispensa de 30% do saldo excede o limite de 20% e exigiria Direção — resultado por caso.'),'calc','Rodar os testes de exemplo das políticas'),
-         ic(btn('Aprovar pendentes',small=True,href='IN-02.dc.html'),'check','Abrir a caixa de Aprovações')],
-        g_pol + nota(f'Publique só política com dono, aprovador, fonte e teste de exemplo: restrição {B("Obrigatória")} não vira exceção livre. '
-                     f'PE-04 está bloqueada para publicação até a aprovação do gestor.','yellow'),state='yellow'))
-    shell37('CF-02','Alçadas e regras',corpo,fname=fname,
-      subtitle='Registro central de políticas com testes de exemplo, versão, proprietário e vigência — é a fonte que os comandos citam ao bloquear ou exigir alçada.',
-      status=(H('st_t'),'yellow'),
-      footer='Liberar (CMD-06), cancelar (CMD-46), dispensar saldo (CMD-47), reabrir (CMD-48) e reordenar fila (CMD-37) só executam dentro da alçada vigente registrada aqui.')
-
-    # ---- CF-02det · detalhe da alçada AL-05 (dispensar saldo) ----
-    fname='CF-02det.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1180; PARENT37[fname]='CF-02.dc.html'
-    g_def=grid([C('campo','Campo',w=170),C('vig','Valor vigente (v2)',w=330),C('prop','Proposta (v3 · em revisão)',w=300)],[
-        R('f1',campo='Dono da decisão',vig='Gerencial · Ana (Gestora)',prop='sem mudança'),
-        R('f2',campo='Validação técnica',vig='Agronômica · agrônomo RT, registrada à parte (obrigatória em atividade agrícola)',prop='sem mudança'),
-        R('f3',campo='Valor / limite',vig=[Pt.txt('saldo até '),Pt.b('20%'),Pt.txt(' da área da ordem; acima, Direção')],prop=[Pt.txt('saldo até '),Pt.b('25%'),Pt.txt(' da área da ordem')]),
-        R('f4',campo='Classe de bloqueio',vig=[Pt.tag('Obrigatória')],prop=[Pt.tag('Obrigatória')]),
-        R('f5',campo='Fonte',vig='cap. 8.2.1 · 42.3',prop='idem + motivo de revisão'),
-        R('f6',campo='Vigência',vig='até 31/07/2027',prop='a partir de 01/11/2026, se aprovada')],
-       edit=dict(m='none'),search=False,gid='g_def',total=False)
-    pct1=round(100*OS1['saldo']/OS1['area'])
-    g_tst=grid([C('caso','Caso',w=180),C('ent','Entrada',w=280),C('esp','Resultado esperado',w=280),C('sit','Situação')],[
-        R('t1',caso='Dispensa pequena',ent=[Pt.link(OS0['id'],'OS.dc.html'),Pt.txt(f' · dispensar 10 ha de {OS0["area"]} ha (3%)')],esp='permitida na alçada gerencial + validação técnica',sit=ch('Conforme','green'),
-          o=[(f'10 ÷ {OS0["area"]} ha = 3% ≤ 20% → alçada gerencial',None),(f'{OS0["id"]} · {OS0["realizado"]} ha realizados preservados','OS.dc.html')]),
-        R('t2',caso='Dispensa acima do limite',ent=[Pt.link(OS1['id'],'OS.dc.html'),Pt.txt(f' · dispensar {OS1["saldo"]} ha de {OS1["area"]} ha ({pct1}%)')],esp='bloqueada · excede 20% — exige Direção',sit=ch('Bloqueio correto','green'),
-          o=[(f'{OS1["saldo"]} ÷ {OS1["area"]} ha = {pct1}% > 20% → Direção',None),(f'{OS1["id"]} · {OS1["realizado"]} ha realizados preservados','OS.dc.html')]),
-        R('t3',caso='Sem trabalho iniciado',ent='ordem sem nenhum apontamento',esp='recusada · usar Cancelar sem execução',sit=ch('Bloqueio correto','green'),o=[('Nenhum apontamento → CMD-46, não CMD-47',None)]),
-        R('t4',caso='Sem validação técnica',ent='dispensa agrícola sem decisão agronômica',esp='recusada · decisão técnica aplicável ausente',sit=ch('Bloqueio correto','green'),o=[('Atividade agrícola exige validação do agrônomo RT',None)])],
-       edit=dict(m='origin',title='Teste',fields=[dict(k='caso',l='Caso',ro=True),dict(k='esp',l='Resultado esperado',ro=True)]),search=False,gid='g_tst',total=False)
-    g_obj=grid([C('obj','Objeto',w=300),C('cond','Condição',w=420),C('abrir','Abrir')],[
-        R('o1',obj=[Pt.b(OS1['id']),Pt.txt(' · plantio · selo Impedida ('+D.OM['id']+')')],cond=f'eventual dispensa do saldo de {OS1["saldo"]} ha passaria por AL-05 · {OS1["realizado"]} ha realizados preservados',abrir=[Pt.cta('Abrir ordem','OS.dc.html')]),
-        R('o2',obj=[Pt.b('Reprogramações')],cond='dispensa registrada aparece com realizado, dispensado e motivo',abrir=[Pt.cta('Abrir painel','PL-05.dc.html')])],
-       edit=dict(m='ro',title='Objeto afetado',fields=[dict(k='obj',l='Objeto',ro=True),dict(k='cond',l='Condição',ro=True)]),search=False,gid='g_obj',total=False)
-    g_v3=grid([C('ver','Versão'),C('mud','Mudança proposta',w=300),C('por','Proposta por'),C('sit','Situação',w=240)],[
-        R('v3',v=dict(dec='Aprovar e publicar (vigência 01/11/2026)',motivo='',ori=''),ver=[Pt.b('AL-05 v3')],mud='limite gerencial de 20% para 25% do saldo · replantios frequentes',por='Ana · 18/09',
-          sit=ch('Em revisão · aguardando decisão','yellow'))],
-       edit=dict(m='form',title='Decidir',sub='Aprovar aqui tem o mesmo efeito e recibo de aprovar em Aprovações. Relógio e caminho não mudam a regra: a v2 vale até a vigência da v3.',
-         fields=[dict(k='dec',l='Decisão',t='sel',req=True,opts=['Aprovar e publicar (vigência 01/11/2026)','Devolver para ajuste']),
-                 dict(k='motivo',l='Motivo da devolução',t='area',req=True,cond=dict(k='dec',eq='Devolver para ajuste')),
-                 dict(k='ori',l='Orientação ao proprietário',t='area',cond=dict(k='dec',eq='Devolver para ajuste'),help='Ex.: manter 20% e tratar replantio caso a caso pela Direção')]),
-       search=False,gid='g_v3',total=False)
-    EXTRAJS[0]=JS_BASE+'''
-function EXTRAVALS(self,v){
-  const r3=getRow(self,'g_v3','v3'); const d=r3&&r3.v.__ok?r3.v.__ok:0;
-  v.st_t=d===1?'v3 aprovada · vigência 01/11':(d===2?'v3 devolvida · v2 vigente':'v3 em revisão');
-  v.c_aqui=d===1?'AL-05 v2 vigente · v3 aprovada':(d===2?'AL-05 v2 vigente · v3 devolvida':'AL-05 v2 · vigente');
-  v.c_falta=d===1?'nada · v2 vale até 31/10':(d===2?'ajuste da proposta pelo proprietário':'decisão sobre a revisão v3 proposta');
-  v.c_prox=d?'Voltar ao registro de políticas':'Aprovar ou devolver a v3';
-  v.prim_t=d?'Voltar ao registro de políticas':'Decidir a v3'; v.prim_btn=!d; v.prim_lnk=!!d; v.prim_h='CF-02.dc.html';
-  v.prim_fn=()=>g2open(self,GR('g_v3'),'v3',null);
-  self.g2after=(gid,rows,r)=>{ if(gid!=='g_v3'||!r) return; r.ro=true;
-    if(String(r.v.dec).indexOf('Aprovar')===0){ r.v.__ok=1; r.p.sit=[CH('Aprovada · vigente a partir de 01/11/2026','green'),BR,MU('aprovador registrado na trilha')]; r.s.sit='Aprovada';
-      self.setState({g2toast:'AL-05 v3 aprovada e publicada · vigência 01/11/2026 · aprovador registrado na trilha — v2 segue valendo até lá.'}); }
-    else { r.v.__ok=2; r.p.sit=[CH('Devolvida ao proprietário','gray'),BR,MU(r.v.motivo)]; r.s.sit='Devolvida';
-      self.setState({g2toast:'Proposta v3 devolvida ao proprietário da política · v2 permanece vigente.'}); } };
-}'''
-    corpo=(
-      continuity('Alçadas e regras · registro de políticas',H('c_aqui'),H('c_falta'),H('c_prox'))
-      + section('Definição da alçada','Compare a versão vigente com a proposta antes de decidir.','',g_def)
-      + section('Testes de exemplo','Confira os casos que a publicação exige; clique no caso para ver o cálculo.','',g_tst)
-      + section('Objetos afetados hoje','Abra as ordens em que esta alçada é condição de comando.','',g_obj)
-      + section('Decisão sobre a v3','Aprove ou devolva a proposta; clique na linha para decidir.','',g_v3,state='yellow'))
-    shell37('CF-02','Alçada AL-05 · Dispensar saldo',corpo,fname=fname,crumbs_extra=['AL-05'],
-      subtitle='Detalhe da alçada com testes de exemplo, objetos afetados e revisão versionada.',
-      status=(H('st_t'),'yellow'),primary_html=prim_dyn(),
-      footer='Dispensar saldo (CMD-47) preserva realizado e histórico; se nenhum trabalho iniciou, o caminho é CMD-46 — a alçada não converte um comando no outro.')
-
-    # ================= CF-03 · Integrações e sincronização =================
-    fname='CF-03.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1240
-    RESPS=['TI · Décio','Agronomia · Ana','Estoque · Rui','Gestor · Ana']
-    g_con=grid([C('con','Conector / escopo',w=180),C('fonte','Fonte oficial (escritor)',w=280),C('est','Estado · erros',w=200),C('ult','Atualização · evento',w=140),
-                C('resp','Responsável',w=130),C('acao','Ação')],[
-        R('c_sk',v=dict(),con=two('Sankhya','financeiro + estoque'),fonte='ERP escreve títulos e posição fiscal; plataforma escreve ordens e fatos de campo',
-          est=[Pt.chip('Simulado · demonstração','yellow'),Pt.br(),Pt.mut('2 erros na fila')],ult=[Pt.txt('23/09 06:40'),Pt.br(),Pt.mut('EVT-99182')],resp='TI · Décio',acao=[Pt.cta('Conciliar','CF-03det.dc.html',True)]),
-        R('c_tt',con=two('TOTVS Protheus','fiscal'),fonte='ERP/base fiscal é autoridade; agrícola recebe estados oficiais',est=[Pt.chip('Homologação pendente','gray'),Pt.br(),Pt.mut('sem escrita até homologar')],ult='—',resp='TI · Décio',
-          acao=[Pt.act('Ver escritores','Escritor oficial: ERP grava fiscal e títulos; plataforma grava ordens e fatos de campo — conector em homologação não recebe escrita até ser homologado.')]),
-        R('c_em',con=two('Estação meteorológica','clima'),fonte='estação é fonte; plataforma só lê',est=[Pt.chip('Simulado · demonstração','yellow'),Pt.br(),Pt.mut('0 erros')],ult=[Pt.txt('23/09 06:00'),Pt.br(),Pt.mut('EVT-99170')],resp='Agronomia · Ana',
-          acao=[Pt.cta('Ver leituras','IR-04.dc.html')])],
-       edit=dict(m='form',title='Conector',sub='Troque o responsável pelos erros deste conector. Credenciais e destinos só mudam no ambiente autorizado e nunca aparecem aqui.',
-         fields=[dict(k='resp',l='Responsável',t='sel',req=True,opts=RESPS),dict(k='fonte',l='Fonte oficial (escritor)',t='area',ro=True),dict(k='est',l='Estado',ro=True)]),
-       search=False,gid='g_con',total=False)
-    g_err=grid([C('item','Item · direção',w=220),C('erro','Erro / estado',w=250),C('ct','Correlação · tentativas',w=180),C('resp','Responsável',w=130),C('acao','Ação')],[
-        R('e_nf',v=dict(tipo=T_UN,unid_pl='sc 50 kg',unid_erp='',motivo='De-para ausente na carga inicial'),item=two('Título NF 4412','R$ 18.400 · linha 1 · plataforma → ERP'),erro=ch('Rejeitado · unidade não mapeada','red'),corr='EVT-99182',
-          ct=[Pt.txt('EVT-99182'),Pt.br(),Pt.mut('3 tentativas · espera progressiva')],resp='TI · Décio',acao=[Pt.mut('clique para corrigir')]),
-        R('e_dev',ro=True,v=dict(tipo='Aguardando aceite · consulte por chave'),item=two(f'Devolução {REQ["id"]}',f'{REQ["dev_recebida"]} sc · {REQ["item"]} · plataforma → ERP'),erro=ch('Enviado · aguardando aceite','yellow'),corr='EVT-99188',ct=[Pt.txt('EVT-99188'),Pt.br(),Pt.mut('1 tentativa')],resp='Estoque · Rui',
-          acao=[fn('Consultar por chave','consulta:e_dev')]),
-        R('e_map',ro=True,v=dict(tipo='Divergência de saldo · decida na contagem'),item=two(f'Saldo {INV["item"]}',f'{INV["local"]} · {INV["id"]} · reconciliação'),erro=ch(f'Divergência · {INV_DIF_SC} sc ({n0(INV_DIF_KG)} kg)','red'),corr='REC-0142',ct=[Pt.txt('REC-0142')],resp='Gestor · Ana',
-          acao=[Pt.cta('Abrir contagem','EST.dc.html')])],
-       edit=dict(m='form',title='Item',sub='Corrija a unidade e salve para reprocessar: a mesma correlação é reutilizada — nada duplica.',
-         fields=[dict(k='tipo',l='Pendência',t='txt',ro=True),dict(k='corr',l='Correlação',t='txt',ro=True),
-                 dict(k='unid_pl',l='Unidade na plataforma',t='txt',ro=True,cond=dict(k='tipo',eq=T_UN)),dict(k='unid_erp',l='Unidade no ERP',t='sel',req=True,opts=['SC50','SC','KG'],help='De-para ausente na carga inicial.',cond=dict(k='tipo',eq=T_UN)),
-                 dict(k='motivo',l='Motivo',t='txt',req=True,cond=dict(k='tipo',eq=T_UN))]),
-       gid='g_err',total=False)
-    g_off=grid([C('disp','Dispositivo',w=170),C('pend','Registro',w=210),C('idr','Identidade · recibo',w=150),C('comp','Comportamento verificado',w=270),C('sit','Situação · ação',w=210)],[
-        R('o_m',ro=True,disp=two('Celular de Marcos','MB-03'),pend=[Pt.b(APT['id']),Pt.txt(f' · {APT["os"]} dia {APT["dia"]} · {APT["ha"]} ha')],idr=[Pt.txt(APT['uuid']),Pt.br(),Pt.mut(APT['recibo'])],
-          comp=f'reenvio duplo devolveu o MESMO recibo {APT["recibo"]} · efeito único',sit=ch('Deduplicado','green')),
-        R('o_p',ro=True,disp=two('Tablet de Paula','conferência'),pend=[Pt.txt(f'fato sobreposto · mesmos {APT["ha"]} ha de {APT["os"]}')],idr=[Pt.txt(APT_B['uuid']),Pt.br(),Pt.mut('sem recibo · retido')],
-          comp=f'ambos os relatos preservados · nada somado como 2 execuções',sit=[Pt.chip('Reconciliação pendente','red'),Pt.br(),Pt.cta('Ver conflito','CF-03det.dc.html',True)])],
-       edit=dict(m='ro',title='Registro offline',fields=[dict(k='disp',l='Dispositivo',ro=True),dict(k='pend',l='Registro',ro=True),dict(k='idr',l='Identidade · recibo',ro=True),dict(k='comp',l='Comportamento',ro=True)]),
-       search=False,gid='g_off',total=False)
-    EXTRAJS[0]=JS_BASE+'''
-function EXTRAVALS(self,v){
-  const E=g2rows(self,GR('g_err')); const nerr=E.filter(r=>(r.p.erro||[]).some(p=>p.c==='red')).length;
-  v.k_err=String(nerr); v.st_t=pl(nerr,'erro','erros')+' · 1 conflito';
-  v.consulta=(rid)=>{ const r0=getRow(self,'g_err',rid); if(r0&&r0.v.__ok){ self.setState({g2toast:'Já consultado · ERP registrou o movimento; nada reenviado.'}); return; }
-    setRow(self,'g_err',rid,r=>{ r.v.__ok=1; r.p.erro=[CH('Aceito pelo ERP','green'),BR,MU('confirmado por consulta de chave')]; r.s.erro='Aceito pelo ERP'; r.p.acao=[MU('sem reenvio')]; r.s.acao='sem reenvio'; });
-    self.setState({g2toast:'Consulta por chave: o ERP registrou o movimento · estado Aceito — sem reenvio (timeout não presume falha).'}); };
-  self.g2after=(gid,rows,r)=>{ if(!r) return;
-    if(gid==='g_con'){ self.setState({g2toast:'Responsável do conector atualizado · mudança registrada na trilha.'}); return; }
-    if(gid!=='g_err') return;
-    if(r.v.unid_erp==='SC50'){ r.v.__ok=1; r.ro=true; r.p.erro=[CH('Aceito · reprocessado','green'),BR,MU('de-para sc 50 kg → SC50')]; r.s.erro='Aceito · reprocessado'; r.p.ct=[{k:'txt',t:'EVT-99182'},BR,MU('4 tentativas · mesma correlação')]; r.p.acao=[MU('efeito único')]; r.s.acao='efeito único';
-      self.setState({g2toast:'Item reprocessado · aceito pelo ERP · recibo EVT-99182 reutilizado — efeito único, sem duplicar título.'}); }
-    else { r.p.erro=[CH('Rejeitado · '+r.v.unid_erp+' não é sc 50 kg no ERP','red')]; r.s.erro='Rejeitado'; r.p.ct=[{k:'txt',t:'EVT-99182'},BR,MU('4 tentativas · espera progressiva')];
-      self.setState({g2toast:'ERP rejeitou de novo: '+r.v.unid_erp+' não corresponde a sc 50 kg · nada duplicado — use SC50.'}); } };
-}'''
-    corpo=(
-      kpis([('CONECTORES','3','1 em homologação'),('FILA DE SAÍDA','12','eventos · 0 perdidos'),
-            ('ERROS A TRATAR',H('k_err'),'com dono'),('DISPOSITIVOS OFFLINE','1',f'{APT["id"]} com recibo')])
-      + section('Conectores','Confira quem escreve cada objeto e o estado de cada conector; clique na linha para trocar o responsável.',
-        [ic(msgbtn('Configurar em ambiente autorizado','Configuração aberta somente no ambiente de homologação autorizado · credenciais de menor privilégio ficam no cofre e nunca aparecem em registros.'),'wrench','Abrir a configuração no ambiente autorizado'),
-         ic(msgbtn('Testar conexão','Teste executado no simulador · resposta em 340 ms · selo Simulado mantido — teste não homologa integração.'),'check','Testar a conexão no simulador')],g_con)
-      + section('Fila de erros e reconciliação','Corrija e reprocesse os itens rejeitados; reprocessar não duplica efeito.',
-        [ic(msgbtn('Exportar diagnóstico sem segredo','Diagnóstico exportado · 128 eventos · credenciais, tokens e endereços internos omitidos — a exportação entrou na trilha de auditoria.'),'doc','Exportar diagnóstico sem credenciais')],g_err,state='red')
-      + section('Dispositivos offline','Confira reenvios e fatos sobrepostos; o mesmo fato aplica uma vez.','',g_off,state='red'))
-    shell37('CF-03','Integrações e sincronização',corpo,fname=fname,
-      subtitle='Conectores, fonte oficial por objeto, filas, falhas e reconciliação — resposta de transporte não comprova efetivação do documento.',
-      status=(H('st_t'),'red'),
-      primary='Conciliar pendências',primary_href='CF-03det.dc.html',
-      footer='Conector conectado não é sinônimo de entidades sincronizadas (ERP-01); DEV/HML/PROD têm destinos e chaves isolados (cap. 66).')
-
-    # ---- CF-03det · reconciliação do ERP (simulado) + conflito de sincronização offline ----
-    fname='CF-03det.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1040; PARENT37[fname]='CF-03.dc.html'
-    g_rec=grid([C('doc','Documento / linha',w=200),C('corr','Correlação'),C('plat','Plataforma',w=180),C('erp','ERP (Sankhya)',w=160),C('dif','Diferença',w=180),C('est','Estado',w=220)],[
-        R('nf',v=dict(tipo=T_UN,unid_pl='sc 50 kg',unid_erp='',motivo='De-para ausente na carga inicial'),doc=two('Título NF 4412','linha 1'),corr='EVT-99182',plat='R$ 18.400 · sc 50 kg',erp='—',dif=ch('Unidade não mapeada','red'),
-          est=[Pt.chip('Rejeitado','red'),Pt.br(),Pt.mut('clique para corrigir e reprocessar')]),
-        R('dev',ro=True,v=dict(tipo='Aguardando aceite · consulte por chave'),doc=two(f'Devolução {REQ["id"]}',REQ['item']),corr='EVT-99188',plat=f'{REQ["dev_recebida"]} sc recebidas',erp='sem confirmação',dif=ch('A confirmar','yellow'),
-          est=[Pt.chip('Enviado · aguardando aceite','yellow'),Pt.br(),fn('Consultar por chave','consulta:dev')])],
-       edit=dict(m='form',title='Item',sub='Corrija a unidade e salve para reprocessar: a correlação EVT-99182 é reutilizada — nada duplica.',
-         fields=[dict(k='tipo',l='Pendência',t='txt',ro=True),dict(k='corr',l='Correlação',t='txt',ro=True),
-                 dict(k='unid_pl',l='Unidade na plataforma',t='txt',ro=True,cond=dict(k='tipo',eq=T_UN)),dict(k='unid_erp',l='Unidade no ERP',t='sel',req=True,opts=['SC50','SC','KG'],cond=dict(k='tipo',eq=T_UN)),
-                 dict(k='motivo',l='Motivo',t='txt',req=True,cond=dict(k='tipo',eq=T_UN))]),
-       search=False,gid='g_rec',total=False)
-    g_syn=grid([C('rel','Relato · dispositivo',w=200),C('idl','Identidade local',w=120),C('rec','Recibo',w=160),C('area','Área',t='num',a='r',u='ha'),C('srv','Servidor',w=220),C('est','Estado',w=220)],[
-        R('a',ro=True,v=dict(tipo='Aceito com recibo · efeito único'),rel=two(f'Relato A · {APT["id"]}','Celular de Marcos · MB-03'),idl=APT['uuid'],rec=[Pt.b(APT['recibo']),Pt.br(),Pt.mut('2 reenvios · mesmo recibo')],area=APT['ha'],
-          srv=f'aceito uma vez · conta {APT["ha"]} ha no dia {APT["dia"]}',est=ch('Confirmado','green')),
-        R('b',v=dict(tipo=T_SB,dec='Duplicidade de captura · contar uma vez',motivo=''),rel=two('Relato B · captura do tablet','Tablet de Paula · conferência'),idl=APT_B['uuid'],rec=[Pt.mut('sem recibo · retido')],area=APT['ha'],
-          srv=f'sobrepõe os {APT["ha"]} ha já aceitos · não somar',est=[Pt.chip('Em reconciliação','red'),Pt.br(),Pt.mut('clique para decidir')])],
-       edit=dict(m='form',title='Relato',sub='Relógio do aparelho não define vencedor e fases confirmadas não regridem. Os dois relatos ficam preservados; a decisão entra na trilha.',
-         fields=[dict(k='tipo',l='Situação do relato',t='txt',ro=True),dict(k='rel',l='Relato · dispositivo',ro=True),dict(k='idl',l='Identidade local',ro=True),dict(k='srv',l='Servidor',ro=True),
-                 dict(k='dec',l='Decisão',t='sel',req=True,opts=['Duplicidade de captura · contar uma vez','Fato distinto · enviar à conferência da O.S.'],cond=dict(k='tipo',eq=T_SB)),
-                 dict(k='motivo',l='Motivo',t='area',req=True,help='Ex.: mesma passada registrada por dois dispositivos',cond=dict(k='tipo',eq=T_SB))]),
-       search=False,gid='g_syn',total=False)
-    EXTRAJS[0]=JS_BASE+f'''
-const APTID='{APT["id"]}', HA={APT["ha"]}, OSID='{APT["os"]}';
-''' + '''
-function EXTRAVALS(self,v){
-  const nf=getRow(self,'g_rec','nf'), dv=getRow(self,'g_rec','dev'), b=getRow(self,'g_syn','b');
-  const pend=[]; if(!(nf&&nf.v.__ok)) pend.push(['NF 4412','Corrigir e reprocessar a NF 4412',()=>g2open(self,GR('g_rec'),'nf',null)]);
-  if(!(dv&&dv.v.__ok)) pend.push(['aceite REQ-031','Consultar a devolução por chave',()=>v.consulta('dev')]);
-  if(!(b&&b.v.__ok)) pend.push(['conflito offline','Decidir o conflito offline',()=>g2open(self,GR('g_syn'),'b',null)]);
-  const nerp=(!(nf&&nf.v.__ok)?1:0)+(!(dv&&dv.v.__ok)?1:0);
-  v.st_t=pend.length?('Simulado · '+pl(pend.length,'pendência','pendências')):'Simulado · conciliado';
-  v.c_aqui=pend.length?(pl(nerp,'item','itens')+' no ERP · '+(b&&b.v.__ok?'conflito decidido':'1 conflito')):'tudo conciliado';
-  v.c_falta=pend.length?pend.map(p=>p[0]).join(' · '):'nada pendente';
-  v.c_prox=pend.length?pend[0][1]:'Conferir a trilha de auditoria';
-  v.prim_t=v.c_prox; v.prim_btn=pend.length>0; v.prim_lnk=!pend.length; v.prim_h='CF-04.dc.html'; v.prim_fn=pend.length?pend[0][2]:(()=>{});
-  v.consulta=(rid)=>{ const r0=getRow(self,'g_rec',rid); if(r0&&r0.v.__ok) return;
-    setRow(self,'g_rec',rid,r=>{ r.v.__ok=1; r.v.erp=r.v.plat; r.p.erp=[{k:'txt',t:String(r.v.plat||'20 sc')}]; r.s.erp='20 sc'; r.p.dif=[CH('Sem diferença','green')]; r.s.dif='Sem diferença';
-      r.p.est=[CH('Aceito','green'),BR,MU('confirmado por consulta de chave')]; r.s.est='Aceito'; });
-    self.setState({g2toast:'Consulta por chave: o ERP registrou a devolução · estado Aceito — sem reenvio (timeout não presume falha).'}); };
-  self.g2after=(gid,rows,r)=>{ if(!r) return;
-    if(gid==='g_rec'){ if(r.v.unid_erp==='SC50'){ r.v.__ok=1; r.ro=true; r.p.erp=[{k:'txt',t:'R$ 18.400 · SC50'}]; r.s.erp='R$ 18.400 SC50'; r.p.dif=[CH('Sem diferença','green')]; r.s.dif='Sem diferença';
-        r.p.est=[CH('Aceito · reprocessado','green'),BR,MU('EVT-99182 reutilizado · efeito único')]; r.s.est='Aceito';
-        self.setState({g2toast:'Reprocessado com de-para sc 50 kg → SC50 · aceito pelo ERP · correlação EVT-99182 preservada — sem duplicar título.'}); }
-      else { r.p.est=[CH('Rejeitado de novo','red'),BR,MU(r.v.unid_erp+' não é sc 50 kg no ERP')]; r.s.est='Rejeitado';
-        self.setState({g2toast:'ERP rejeitou de novo: '+r.v.unid_erp+' não corresponde a sc 50 kg · nada duplicado — use SC50.'}); } return; }
-    if(gid==='g_syn'){ r.v.__ok=1; r.ro=true; const dup=String(r.v.dec).indexOf('Duplicidade')===0;
-      r.p.est=[CH(dup?'Decidido · relatos preservados':'Decidido · enviado à conferência','green'),BR,MU(dup?'relato B guardado como duplicidade':'conferência da '+OSID+' decide a área')]; r.s.est='Decidido';
-      r.p.srv=dup?[{k:'txt',t:'conta '+HA+' ha uma vez · '+APTID+' mantém o recibo'}]:[{k:'txt',t:'não somado até a conferência · '+APTID+' mantém o recibo'}]; r.s.srv='decidido';
-      r.p.rec=[MU('sem recibo · preservado como relato')];
-      self.setState({g2toast:dup?('Conflito decidido · '+HA+' ha permanecem contados uma vez · relato do tablet preservado como duplicidade — decisão na trilha de auditoria.')
-                                :('Conflito decidido · relato do tablet enviado à conferência da '+OSID+' sem somar área — os dois relatos ficam preservados.')}); } };
-}'''
-    corpo=(
-      continuity('Integrações',H('c_aqui'),H('c_falta'),H('c_prox'))
-      + section('Reconciliação · Sankhya (ERP simulado)','Compare plataforma e ERP por documento e linha; clique no item rejeitado para corrigir e reprocessar.','',
-        g_rec + nota(f'Em timeout após possível gravação externa, o conector {B("consulta por chave antes de reenviar")}. '
-                     'Eventos duplicados ou fora de ordem não duplicam pedido, movimento ou liquidação; queda do ERP não apaga apontamento agrícola aceito.'),state='yellow')
-      + section(f'Sincronização offline · {APT["os"]} dia {APT["dia"]}',f'Decida o fato sobreposto; os dois relatos ficam preservados e os {APT["ha"]} ha contam uma vez.','',g_syn,state='red'))
-    shell37('CF-03','Reconciliação e sincronização',corpo,fname=fname,crumbs_extra=['Pendências'],
-      subtitle='Itens do conector ERP e conflitos entre dispositivos offline, em blocos separados — reprocessar não duplica efeito; fato sobreposto exige decisão humana.',
-      status=(H('st_t'),'yellow'),primary_html=prim_dyn(),
-      footer='Selo Simulado permanece em toda a tela: demonstração não recebe selo de integração homologada (ERP-01, ERP-03).')
-
-    # ================= CF-04 · Auditoria e parâmetros =================
-    fname='CF-04.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1380
-    trail=[
-      ('23/09 06:40',[Pt.link(OS2['id'],'IR-03det.dc.html'),Pt.txt(' · irrigação')],'Serviço · balanço hídrico','A liberar → Liberadas','água sem produto pela necessidade da cultura','liberação automática pela prontidão, sem aprovação'),
-      ('22/09 17:12',[Pt.link(OS3['id'],'OS.dc.html'),Pt.txt(' · v1 → v2')],'João · app','só água → fertirrigação (+ Ureia 12 kg/ha)','produto adicionado na mesma tarefa','liberação da água não vale para o saldo com produto · revisão individual do agrônomo'),
-      ('22/09 16:05',[Pt.link(f'Contagem {INV["id"]}','EST.dc.html'),Pt.txt(f' · {INV["local"]}')],'Rui · contagem cega',f'{n0(INV["sistema"])} kg → {n0(INV["contado"])} kg {INV["item"]} ({n0(INV_DIF_KG)} kg · {INV_DIF_SC} sc)','divergência de contagem','ajuste aguardando aprovação do gestor · saldo não alterado'),
-      ('22/09 09:20',[Pt.b('Fila de expedição · 23/09')],'Rui · alçada AL-08','T2 2º → 1º da fila','T1 atrasado · T2 presente e apto','promessa original de T1 preservada · T4 antecipado mantém a vez'),
-      ('20/09 11:02',[Pt.b('Limites de irrigação'),Pt.txt(' · Pivô 2')],'Ana · gestora','lâmina máx. por passada 11 → 12 mm','ajuste do percentímetro','vale para a próxima programação'),
-      ('15/09 15:44',[Pt.b('Acesso · Davi Melo')],'Ana · gestora','Ativo → Revogado','desligamento','sessões encerradas · histórico preservado'),
-    ]
-    g_tr=grid([C('inst','Instante (BRT)',w=100),C('obj','Objeto / versão',w=190),C('aut','Autor / origem',w=150),C('ad','Antes → depois · motivo',w=290),C('efe','Efeito',w=260)],
-       [R(f't{i}',ro=True,inst=a,obj=b,aut=c,ad=[Pt.txt(d),Pt.br(),Pt.mut('motivo: '+e)],mot=e,efe=f) for i,(a,b,c,d,e,f) in enumerate(trail)],
-       edit=dict(m='ro',title='Evento da trilha',fields=[dict(k='inst',l='Instante (BRT)',ro=True),dict(k='obj',l='Objeto / versão',ro=True),dict(k='aut',l='Autor / origem',ro=True),
-                 dict(k='ad',l='Antes → depois · motivo',ro=True),dict(k='mot',l='Motivo',ro=True),dict(k='efe',l='Efeito',ro=True)]),
-       so={'k':'inst','d':True},gid='g_tr',total=False)
-    g_par=grid([C('par','Parâmetro',w=200),C('val','Valor',w=300),C('fonte','Fonte'),C('sit','Situação')],[
-        R('p1',ro=True,par='Fuso horário do registro',val='America/Sao_Paulo (BRT)',fonte='cap. 12',sit=ch('Vigente','green')),
-        R('p2',ro=True,par='Retenção da trilha',val='permanente · exportação autorizada por papel',fonte='cap. 30',sit=ch('Vigente','green')),
-        R('p3',ro=True,par='Unidades de exibição',val='pt-BR · ha, sc 50 kg, mm, R$ mil, t',fonte='cap. 6',sit=ch('Vigente','green'))],
-       edit=dict(m='ro',title='Parâmetro',fields=[dict(k='par',l='Parâmetro',ro=True),dict(k='val',l='Valor',ro=True),dict(k='fonte',l='Fonte',ro=True)]),
-       search=False,gid='g_par',total=False)
-    lam_ap=str(D.PIVO['lamina_aplicada']).replace('.',','); exh=str(round(D.PIVO['volta_62_h'],1)).replace('.',',')
-    g_doc=grid([C('tipo','Tipo'),C('proc','Processo',w=180),C('gar','O que garante',w=320),C('ex','Exemplo',w=220),C('abrir','Abrir')],[
-        R('d1',ro=True,tipo=[Pt.tag('FL')],proc='Uma ordem, vários dias',gar='apontamentos diários acumulam na mesma ordem; fechar o turno não conclui',
-          ex=f'{OS0["id"]} · {OS0["realizado"]} de {OS0["area"]} ha · dia 4 ({APT["ha"]} ha)',abrir=[Pt.cta('Ver exemplo','OS.dc.html')]),
-        R('d2',ro=True,tipo=[Pt.tag('RN')],proc='Água sem produto',gar='libera pela prontidão, sem agrônomo, requisição ou custódia; adicionar produto reclassifica a mesma ordem para o agrônomo',ex=f'{OS2["id"]} · {OS3["id"]}',abrir=[Pt.cta('Ver exemplo','IR-03.dc.html')]),
-        R('d3',ro=True,tipo=[Pt.tag('CAL')],proc='Lâmina aplicada no pivô',gar='percentímetro e tempo definem a lâmina, sem duplicar água aplicada',
-          ex=f'{D.PIVO["id"]} · {D.PIVO["percent"]}% → {lam_ap} mm em {exh} h/volta',abrir=[Pt.cta('Ver exemplo','IR-01.dc.html')])],
-       edit=dict(m='ro',title='Documentação',fields=[dict(k='proc',l='Processo',ro=True),dict(k='gar',l='O que garante',ro=True),dict(k='ex',l='Exemplo',ro=True)]),
-       search=False,gid='g_doc',total=False)
-    corpo=(
-      section('Trilha de decisões','Filtre por objeto, autor ou período no cabeçalho; clique no evento para ver o registro completo.',
-        [ic(msgbtn('Exportar autorizado','Exportação registrada · 1.240 eventos no escopo do seu papel · a própria exportação entrou na trilha.'),'doc','Exportar a trilha no escopo do seu papel'),
-         drawer_button('Solicitar correção pelo domínio',dict(title='Solicitar correção de um fato',sub='A trilha não se edita: a correção nasce no domínio do objeto, como ajuste/estorno vinculado ao documento de origem.',
-           fields=[('Objeto',f'Contagem {INV["id"]} · {INV["local"]}'),('Motivo','Contagem lançada no depósito errado'),('Encaminhar para','Rui (estoque)')],
-           confirm='Enviar solicitação',done='Solicitação enviada ao dono do domínio · fato original preservado · correção sairá como ajuste vinculado'),primary=True)],g_tr)
-      + section('Parâmetros globais','Consulte fonte e vigência; mudar parâmetro não reescreve fatos passados.','',g_par)
-      + section('Documentação de processos','Abra o exemplo navegável de cada fluxo, regra e cálculo.',
-        [ic(btn('Consultar política',small=True,href='CF-02.dc.html'),'doc','Abrir o registro central de políticas')],g_doc))
-    shell37('CF-04','Auditoria e parâmetros',corpo,fname=fname,
-      subtitle='Histórico de decisões, parâmetros globais, retenção e documentação — quem fez o quê, quando, por quê e com que efeito.',
-      status=('Trilha íntegra','green'),
-      footer='Consulta não edita fato: correção acontece no domínio, por ajuste/estorno vinculado ao documento de origem.')
-    # CF-05 (Assinatura e cobrança) saiu daqui em 06/10/2026: areas/assinatura.py, no menu Configurações (PLAT-01). CF-05det virou o detalhe da fatura.
+    cf01()
+    cf03()
+    cf04()

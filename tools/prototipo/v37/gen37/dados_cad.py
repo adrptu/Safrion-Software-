@@ -97,7 +97,7 @@ HAB_EXIGE={'Operar trator':'NR-31','Operar pulverizador':'NR-31','Operar plantad
 HAB_CAMPO={'NR-31':'v31','NR-10':'v10','NR-11':'v11','NR-12':'v12','CREA':'vcrea'}
 EQUIPES=[('e1','Agronomia','Ana','seg–sex · 07–17h'),('e2','Campo 1','Marcos','seg–sáb · 06–15h'),('e3','Campo 2','Lucas','seg–sáb · 06–15h'),
          ('e4','Irrigação','João','escala 6×2 · 8h'),('e6','Suprimentos','Rui','seg–sex · 07–17h'),('e7','Oficina','Zé','seg–sex · 07–17h'),
-         ('e8','Beneficiamento e qualidade','Igor','seg–sáb · 06–15h')]
+         ('e8','Beneficiamento e qualidade','Igor','seg–sáb · 06–15h'),('e9','Comercial','Dora','seg–sex · 07–17h')]
 CALS=['seg–sex · 07–17h','seg–sex · 08–18h','seg–sáb · 06–15h','escala 6×2 · 8h']
 # custo-hora com encargos alinhado ao rendimento (D2.CONJ: operador R$ 38/h; irrigante e equipe de café R$ 32/h)
 PESSOAS=[
@@ -111,12 +111,15 @@ PESSOAS=[
  dict(id='p7',nome='Rui',funcao='Conferente',equipe='Suprimentos',vinc='CLT',hab=['Conferir','Almoxarifado','Operar empilhadeira'],v11='2027-02-28',adm='2017-09-11',custo=30,login=True),
  dict(id='p8',nome='Zé',funcao='Mecânico',equipe='Oficina',vinc='CLT',hab=['Manutenção de máquinas','Testar reparo'],v12='2027-05-31',adm='2016-04-04',custo=34,login=True),
  # PCM simplificado (05/10, D-20/D-37): Otávio, responsável de manutenção (sintético), aprova a OM e decide a aptidão do ativo (CMD-19)
- dict(id='p11',nome='Otávio',funcao='Responsável de manutenção',equipe='Oficina',vinc='CLT',hab=['Aprovar O.S. de manutenção','Liberar ativo'],adm='2015-03-02',custo=58,login=True),
+ dict(id='p14',nome='Otávio',funcao='Responsável de manutenção',equipe='Oficina',vinc='CLT',hab=['Aprovar O.S. de manutenção','Liberar ativo'],adm='2015-03-02',custo=58,login=True),
  dict(id='p9',nome='Beto',funcao='Operador',equipe='Campo 1',vinc='CLT',hab=['Operar trator'],v31='',adm='2026-09-22',custo=38,login=False),
+ # CONF-D04: Caio (PCP) decide pelo perfil de demonstração desde o CTL-3 e não estava no cadastro (segundo cadastro de pessoas); entra aqui (sintético)
+ dict(id='p11',nome='Caio',funcao='PCP',equipe='Agronomia',vinc='CLT',hab=['Conferir'],adm='2024-03-04',custo=52,login=True),
  # BEN-1 (docs/beneficiamento §2.3, §10.2; sintéticos): responsável de produção do packing e a Qualidade que libera lote (a Marta que a
  # carência e a Produção já citam como "Qualidade (Marta)"); perfis de quem age em g2lib.js (G2_PERFIS)
  dict(id='p12',nome='Igor',funcao='Responsável de produção',equipe='Beneficiamento e qualidade',vinc='CLT',hab=['Autorizar rota e liberar ordem de processo'],adm='2024-03-04',custo=38,login=True),
  dict(id='p13',nome='Marta',funcao='Qualidade',equipe='Beneficiamento e qualidade',vinc='CLT',hab=['Liberar lote (qualidade)'],adm='2023-08-14',custo=34,login=True),
+ dict(id='p15',nome='Dora',funcao='Comercial',equipe='Comercial',vinc='CLT',hab=[],adm='2024-03-04',custo=40,login=True),   # v57: quem decide no Comercial é pessoa do CD-04 (CONF R5)
 ]
 
 # ============ CD-05 · parceiros com papéis ============

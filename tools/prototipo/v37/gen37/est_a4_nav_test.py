@@ -31,7 +31,8 @@ try:
         E.c.size(W, H); E.abrir(); E.J("localStorage.clear(); sessionStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana')"); E.abrir()
 
     def contar(q, causa):
-        E.etapa(5); a = E.clk('Contar INV-2611'); asd = E.aside(); E.setv('fx_g_cnt_cont', str(q)); E.setv('fx_g_cnt_causa', causa); E.salvar(); return a, asd, E.toast()
+        E.etapa(5); a = E.clk('Contar INV-2611'); asd = E.aside(); E.setv('fx_g_cnt_contador', 'Paula (almoxarife)'); E.setv('fx_g_cnt_cont', str(q));   # v57 (CONF F6): o contador não tem valor padrão
+        E.setv('fx_g_cnt_causa', causa); E.salvar(); return a, asd, E.toast()
 
     def fora():   # página sem rolagem horizontal
         w = E.J(OVF); return w[0] <= w[1] + 1, w
@@ -52,7 +53,7 @@ try:
              and 'contagem desatualizada a recontar' in E.k() and ok2,
              f'T2 {tag}: entrega de 320 L depois da contagem → linha "Desatualizada", motivo e só "Recontar"; faixa conta 1 a recontar; sem rolagem horizontal', [te[-90:], r2, E.k(), w2])
         # T3 · recusa com motivo: a contagem atual vira desatualizada por outra tela (devolução), sem redesenhar esta
-        E.rowbtn('INV-2611', 'Recontar'); asd3 = E.aside(); E.setv('fx_g_cnt_cont', '870'); E.setv('fx_g_cnt_causa', 'Bombona com vazamento'); E.salvar()
+        E.rowbtn('INV-2611', 'Recontar'); asd3 = E.aside(); E.setv('fx_g_cnt_contador', 'Rui (almoxarife)'); E.setv('fx_g_cnt_cont', '870'); E.setv('fx_g_cnt_causa', 'Bombona com vazamento'); E.salvar()
         r3a = E.rowtxt('INV-2611'); s3a = E.cen(ST)
         dv = E.mudar(f"return cenDevolver(c,'{RQ}','Glifosato 480',20,true,'Rui');")
         b3 = E.rowbtn('INV-2611', 'Aprovar ajuste'); t3 = E.toast(); s3 = E.cen(ST); r3 = E.rowtxt('INV-2611'); ok3, w3 = fora()
@@ -71,7 +72,7 @@ try:
              f'T3b {tag}: recusa atômica (físico 900 L, ajuste pendente, sem movimento de ajuste) e a linha passa a "Desatualizada" com "Recontar"; sem rolagem horizontal', [s3a, s3, r3, w3])
         # T4 · caminho de recontagem até a aprovação
         E.rowbtn('INV-2611', 'Recontar'); asd4 = E.aside(); cont4 = E.val('fx_g_cnt_contador') if E.J("!!document.querySelector('#fx_g_cnt_contador')") else ''
-        E.setv('fx_g_cnt_cont', '895'); E.setv('fx_g_cnt_causa', 'Bombona com vazamento'); E.salvar(); r4a = E.rowtxt('INV-2611')
+        E.setv('fx_g_cnt_contador', 'Paula (almoxarife)'); E.setv('fx_g_cnt_cont', '895'); E.setv('fx_g_cnt_causa', 'Bombona com vazamento'); E.salvar(); r4a = E.rowtxt('INV-2611')
         E.rowbtn('INV-2611', 'Aprovar ajuste'); t4 = E.toast(); s4 = E.cen(ST); r4 = E.rowtxt('INV-2611')
         E.shot(f'a4_{tag}_t4_recontada.png')
         E.ok('900 L' not in asd4 and 'Ajuste aguardando aprovação' in r4a and 'Ajuste INV-2611' in t4 and 'aprovado por Ana (gestora): −5 L no lote G26-14. Físico 900 L → 895 L.' in t4

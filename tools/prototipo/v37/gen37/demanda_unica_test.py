@@ -392,7 +392,7 @@ def _osc_js():
                 dd-=1
                 if dd==0: return src[i:k+1]
             k+=1
-    for n in ('osc_o','osc_txt','osCargasVivas','osc_cancCust','osc_cancTxt','osc_cancelar','osc_conferencia','osc_encerrar','osApPend','cortaPrev','nd','nf','osc_dispensar'):
+    for n in ('osc_o','osc_txt','osCargasVivas','osc_cancCust','osc_cancTxt','osc_cancelar','osc_fim','osc_conferencia','osc_encerrar','osApPend','cortaPrev','nd','nf','osc_dispensar'):
         out.append(fn(n))
     return '\n'.join(out)+"\nconst LIM_DISP=0.20;\n"
 def motor(corpo):
@@ -501,7 +501,7 @@ def i9():
     r=motor("""OUT.d0=D(c); const o=c.ordens['OS-0430']; const r0=o.req&&c.reqs[o.req]; if(r0&&!o.reservado){ r0.itens=r0.itens.filter(i=>i.entregue>0); r0.estado='Reservada'; }
 cenLiberar(c,'OS-0430'); OUT.d1=D(c); const rid=c.ordens['OS-0430'].req; ['Glifosato 480','2,4-D 806'].forEach(p=>cenEntregar(c,rid,p,160,'Marcos',PAULA)); cenEntregar(c,rid,'Óleo mineral',80,'Marcos',PAULA); OUT.d2=D(c);
 c.ordens['OS-0430'].etapa='Em execução'; cenApontar(c,{os:'OS-0430',d:'26/09',ha:160,cons:{'Glifosato 480':160,'2,4-D 806':160,'Óleo mineral':80},est:[],origem:'web',chave:'W-I9'}); OUT.d3=D(c); OUT.c3=CL(c);
-OUT.res=c.lotes[Object.keys(c.lotes).find(k=>k.indexOf('Glifosato 480|')===0)].reservado; osc_conferencia(c,'OS-0430'); OUT.d4=D(c);
+OUT.res=c.lotes[Object.keys(c.lotes).find(k=>k.indexOf('Glifosato 480|')===0)].reservado; osc_conferencia(c,'OS-0430',PAULA); OUT.d4=D(c);   /* v57 (CONF R14): enviar para conferência grava quem agiu */
 const e=CL(CEN0); OUT.e0=D(e); cenEntregar(e,'REQ-039','Fungicida A',64,'Marcos',PAULA); OUT.e1=D(e);""")
     g=lambda k: r[k]['S2627']['liq'].get('Glifosato 480',0); py=D2.demanda('S2627',cen=r['c3'])
     return (g('d0')==20 and g('d1')==20 and g('d2')==20 and g('d3')==0 and r['d4']==r['d3'] and r['res']>=160-1e-6 and r['e1']==r['e0'] and L(py,'Glifosato 480') in (0,None),

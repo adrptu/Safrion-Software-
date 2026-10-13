@@ -20,6 +20,7 @@ import json, os
 from engine import (grid,esc,icon,BTN_ST,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,GRAYS,DISP,EXTRA,EXTRAJS,_MINI,_MINIP)
 import engine as E
 from ui37 import shell37, HEIGHTS37
+import ui37
 import dados_manutencao as DM
 
 H=lambda s: '{{'+s+'}}'
@@ -70,6 +71,7 @@ const MA_CH={green:['#1E7A4C','#E4F3E9'],yellow:['#8A5A00','#FFF3D6'],red:['#B42
 const MA_PRIM=__PRIM__, MA_SEC=__SEC__;
 const MA_ETC={'A liberar':'gray','Liberadas':'green','Em execução':'green','Em conferência':'yellow','Encerradas':'gray'};
 const MA_VIS=[{k:'semordem',t:'Sem ordem'},{k:'ordens',t:'Ordens'},{k:'ativos',t:'Ativos'},{k:'planos',t:'Planos'}];
+const MA_NAVST=__NAVST__;   /* menu Manutenção (13/10): estilo do subitem [inativo, ativo]; o destaque segue a visão aberta */
 function ma_G(id){ return GRIDS.find(g=>g.id===id); }
 function ma_chipSt(c){ const k=MA_CH[c]||MA_CH.gray; return 'display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+k[0]+';background:'+k[1]+';'; }
 function ma_dotSt(c){ const k=MA_CH[c]||MA_CH.gray; return 'width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+k[0]+';'; }
@@ -249,6 +251,7 @@ function PREVALS(self,v){ manOuvir(self); const c=manGet(); const st=self.state;
 MA_JS+=r'''
 function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2perfil(); const vis=st.vis||'semordem';
   ma_verComo(self,v); ma_hashSync(st);
+  MA_VIS.forEach(x=>{ const on=!st.pg&&x.k===vis; v['navvis_'+x.k]=MA_NAVST[on?1:0]; v['navvis_'+x.k+'_cur']=on?'page':'false'; });   /* subitem do menu = visão aberta (no detalhe, nenhum) */
   const lista=!st.pg; v.lista=lista; v.pg_ativo=!!(st.pg&&st.pg.k==='ativo'&&c.ativos[st.pg.id]); v.pg_plano=!!(st.pg&&st.pg.k==='plano'&&c.planos[st.pg.id]);
   ['semordem','ordens','ativos','planos'].forEach(k=>{ v['v_'+k]=lista&&vis===k; });
   self.g2pick=(gid,rid)=>{ self.__lastRow=rid; const cc=manGet();
@@ -1294,7 +1297,7 @@ def ma():
     EXTRA.append('<style>'+CSS+PM_CSS+'</style>')
     corpo=_visoes()+_pag_ativo()+_pag_plano()
     EXTRA.append(_painel()); EXTRA.append(_paineis_plano())
-    EXTRAJS[0]=(DM.js_prefixo()+MA_JS.replace('__PRIM__',json.dumps(PRIM)).replace('__SEC__',json.dumps(SEC))+PM_JS)
+    EXTRAJS[0]=(DM.js_prefixo()+MA_JS.replace('__NAVST__',json.dumps([ui37.subnav_st(False),ui37.subnav_st(True)],ensure_ascii=False)).replace('__PRIM__',json.dumps(PRIM)).replace('__SEC__',json.dumps(SEC))+PM_JS)
     HEIGHTS37[FNAME]=1000
     shell37('MA','Manutenção',corpo,fname=FNAME,status=(H('st_ma'),'red'),primary_html=_prim_cab(),chipsrow=_cabecalho(),search=False)
     _status_dyn(FNAME,'st_ma')

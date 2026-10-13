@@ -20,7 +20,7 @@ LOCAIS=['Galpão 1','Galpão 2','Câmara fria','Almox. defensivos','Packing']   
 LOCAL_REC={'KCl 60%':'Galpão 2','Semente de soja 58 W':'Câmara fria','Semente de soja 62 X':'Câmara fria'}
 PESSOAS=['Paula','Marcos','Carlos','João','Igor']   # Igor: quem executa a ordem de beneficiamento recebe as caixas no balcão (BEN-D13 → BEN-D23)
 # mesma palavra para a mesma pessoa em toda a tela: Rui é o almoxarife que entrega e recebe (cenario.js) e também conta
-CONTADORES=['Paula (almoxarife)','Rui (almoxarife)']
+# contador do inventário (revisão CONF F6): sem lista fixa; quem conta vem das pessoas ativas com o papel almoxarife (estContadores, JS)
 CONDS=['Apta · volta ao disponível','Bloqueada para inspeção · vai para quarentena']
 DIVS=['Sem divergência','Falta','Sobra','Avaria','Item diferente do pedido']
 CAUSA_BASE={'INV-2609':'Sacaria rasgada na pilha 3'}
@@ -68,8 +68,8 @@ def _dados_js():
                          div='Sem divergência',obs=('Laudo de umidade pendente' if r['quarentena'] else ''),ok=r['qtd_conf'] is not None))
     chave={l['lote']:l['item']+'|'+l['lote'] for l in D2.LOTES}
     conts=[dict(id=c['id'],key=chave[c['lote']],sis=(c['sistema'] if c['contado'] is not None else None),cont=c['contado'],
-                contador=CONTADOR_BASE.get(c['id'],CONTADORES[0]),causa=CAUSA_BASE.get(c['id'],''),aj=None,hist=[]) for c in D2.CONTAGENS]
-    return dict(hoje=D2.HOJE,pedidos=peds,recs=recs,contagens=conts,conds=CONDS,contadores=CONTADORES,sem_validade=SEM_VALIDADE,imped=IMPED,locais=LOCAIS)
+                contador=CONTADOR_BASE.get(c['id'],''),causa=CAUSA_BASE.get(c['id'],''),aj=None,hist=[]) for c in D2.CONTAGENS]
+    return dict(hoje=D2.HOJE,pedidos=peds,recs=recs,contagens=conts,conds=CONDS,sem_validade=SEM_VALIDADE,imped=IMPED,locais=LOCAIS)
 
 def build():
     fname='EST.dc.html'; E._reset_screen(fname)
@@ -123,7 +123,7 @@ def build():
                 dict(k='cont',l='Contado',t='num',a='r'),dict(k='dif',l='Diferença',t='num',a='r'),dict(k='sit',l='Situação',w=230),dict(k='acao',l='Ação',w=120)],
         [],edit=dict(m='form',title='Contagem',newTitle='Nova contagem',sub='',
             fields=[dict(k='lote',l='Item · lote',t='sel',opts=[],req=True),dict(k='cont',l='Quantidade contada',t='num',req=True,min=0),
-                    dict(k='contador',l='Contador',t='sel',opts=CONTADORES,req=True,**{'def':CONTADORES[0]}),
+                    dict(k='contador',l='Contador',t='sel',dyn=True,opts=[],req=True),
                     dict(k='causa',l='Causa da diferença',t='area',help='Obrigatória para aprovar o ajuste quando houver diferença.')]),
         gid='g_cnt',total=False,qf=dict(k='sit',cut=' · '),tools=f'<sc-if value="{H("cnt_add")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("g_cnt_new")}" style="{_MINI}">+ Nova contagem</button></sc-if>')
     # ---------- etapa 6 · movimentos (trilha do cenário) ----------
@@ -211,8 +211,8 @@ function eitem(c,r,it0){ const o=c.ordens[r.os]||{}; const sq=Math.min(epCons(o,
 // consumo em conferência (CONC-07): relatado × custódia, quem concilia e as duas decisões do almoxarife (CMD-50)
 function ecfCel(k,c,ask,PF){ const h=[{k:'chip',t:'Consumo em conferência',c:'yellow'},{k:'mut',t:k.id+' · '+cenConfTxt(k,c)+' · '+k.resp}];
   const exc=k.relatado-cenConfCust(c,k)>1e-9;   /* o excedente da custódia sai do lote: aceite do gestor (padrão 2) */
-  const AC=['almoxarife','gestor'], pode=exc?g2papel(PF,'gestor'):!!g2umPapel(PF,AC);   /* coberto pela custódia: almoxarife ou gestor (revisão do CTL-3, achado 3) */
-  if(ask!==k.id||!pode) return h.concat(pode?[{k:'act',t:'Aceitar consumo',fn:'cfa:'+k.id}]:[{k:'mut',t:'aceite: '+(exc?g2quem('gestor'):g2quemUm(AC))}]).concat([{k:'act',t:'Recusar relato',fn:'cfr:'+k.id}]);
+  const AL=g2alc('AL-10'), AX=g2alcN(AL,'acima'), pode=exc?g2papel(PF,AX.papeis):!!g2umPapel(PF,AL.papeis);   /* coberto pela custódia: almoxarife ou gestor; acima: nível acima da AL-10 (CONF-01 R7) */
+  if(ask!==k.id||!pode) return h.concat(pode?[{k:'act',t:'Aceitar consumo',fn:'cfa:'+k.id}]:[{k:'mut',t:'aceite: '+g2alcQuem('AL-10',exc?'acima':'base')}]).concat([{k:'act',t:'Recusar relato',fn:'cfr:'+k.id}]);
   let p; try{ p=cenConcPrevia(c,k.id); }catch(e){ p={erro:String(e.message||e)}; }
   if(p.erro) return h.concat([{k:'mut',t:p.erro},{k:'act',t:'Recusar relato',fn:'cfr:'+k.id},{k:'act',t:'Voltar',fn:'cfno:x'}]);
   return h.concat([{k:'txt',t:p.txt},{k:'act',t:'Confirmar aceite',fn:'cfok:'+k.id},{k:'act',t:'Voltar',fn:'cfno:x'}]); }
@@ -283,21 +283,30 @@ function emovDoc(c,m,usados){ if(m.doc||m.tipo!=='ajuste') return m.doc?{doc:m.d
 
 // ---------- mudanças no cenário (sempre dentro de cenMudar) ----------
 // Recebimento: a parte apta e a parte em quarentena entram no mesmo lote (cenReceber); os dados da conferência ficam no movimento.
-function estReceber(c,d,ator){   /* ator: quem confere (perfil); o movimento grava quem agiu (revisão do CTL-3, achado 4) */ const n0=c.movs.length; const antes=eitemDisp(c,d.item);
+// chave: do formulário de quem confere (ENG-021); o mesmo formulário enviado 2× não recebe de novo (cenIdem; revisão CONF 13/10)
+function estReceber(c,d,ator,chave){ return cenIdem(c,chave,JSON.stringify(['estReceber',d,(g2pf(ator)||{}).k||'']),'Recebimento '+(d.nf||''),()=>estReceber0(c,d,ator)); }
+function estReceber0(c,d,ator){   /* ator: quem confere (perfil); o movimento grava quem agiu (revisão do CTL-3, achado 4) */ const n0=c.movs.length; const antes=eitemDisp(c,d.item);
   if(d.apto>0) cenReceber(c,d.item,d.lote,d.apto,d.un,d.local,d.val,d.nf,true,ator);
   if(d.quar>0) cenReceber(c,d.item,d.lote,d.quar,d.un,d.local,d.val,d.nf,false,ator);
   if(c.movs.length===n0) throw new Error('Nada conferido para entrar no estoque.');
   c.movs.slice(n0).forEach(m=>{ m.val=d.val; }); c.movs[n0].estRec=d;
   return {msg:'Recebimento '+d.nf+' conferido: '+eq(d.conf,d.un)+' de '+d.item+' no lote '+d.lote+(d.val&&d.val!=='—'?' (validade '+d.val+')':'')+'. Disponível '+eq(antes,d.un)+' → '+eq(eitemDisp(c,d.item),d.un)+(d.quar?'; '+eq(d.quar,d.un)+' em quarentena ficam fora do disponível.':'.')}; }
 // Entrega: só a reserva desta requisição é baixada (a de outras O.S. fica); a nova entrega aguarda a confirmação no app.
-function estEntregar(c,rid,prod,qtd,quem,ator){ const r0=c.reqs[rid]; const it0=r0&&r0.itens.find(i=>i.prod===prod); const l=it0&&c.lotes[prod+'|'+it0.lote];
+function estEntregar(c,rid,prod,qtd,quem,ator,chave){ return cenIdem(c,chave,JSON.stringify(['estEntregar',rid,prod,Number(qtd),quem||'',(g2pf(ator)||{}).k||'']),'Entrega',()=>estEntregar0(c,rid,prod,qtd,quem,ator)); }
+function estEntregar0(c,rid,prod,qtd,quem,ator){ const r0=c.reqs[rid]; const it0=r0&&r0.itens.find(i=>i.prod===prod); const l=it0&&c.lotes[prod+'|'+it0.lote];
   const res0=l?l.reservado:0; const own=it0&&l?Math.max(0,Math.min(res0,eresTot(c,rid,prod)-it0.entregue)):0;
   const r=cenEntregar(c,rid,prod,qtd,quem,ator);
   if(l) l.reservado=Math.max(0,res0-Math.min(qtd,own)); it0.confirmado=false; return r; }
 function estDevolver(c,rid,prod,qtd,apto,obs,ator){ const r=cenDevolver(c,rid,prod,qtd,apto,ator); if(obs) c.movs[c.movs.length-1].obs=obs;
   const req=c.reqs[rid]; const o=c.ordens[req.os]||{}; const it=req.itens.find(i=>i.prod===prod); const pe=cenPodeEncerrar(c,req.os);
   return {msg:r.msg+' Custódia de '+prod+' na '+req.os+': '+eq(it.custodia+qtd,it.un)+' → '+eq(it.custodia,it.un)+(o.etapa==='Em conferência'&&!pe?' · encerramento liberado.':'.')}; }
+// contador do inventário (revisão CONF F6): pessoas com acesso Ativo e o papel almoxarife em Configurações, em ordem alfabética; nunca uma lista
+// fixa (pessoa desativada não conta) nem valor padrão (o fato sairia em nome de quem não contou)
+function estContadores(){ return g2perfis().filter(p=>g2papel(p,'almoxarife')).map(p=>g2ator(p,'almoxarife')).sort((a,b)=>a.localeCompare(b,'pt-BR')); }
+function estContOpts(d){ const L=estContadores(); const cur=String((d||{}).contador||'');
+  return [{v:'',t:L.length?'Escolha quem contou':'Almoxarife sem titular: conceda em Configurações'}].concat(L.map(x=>({v:x,t:x}))).concat(cur&&L.indexOf(cur)<0?[{v:cur,t:cur+' (registro)'}]:[]); }
 function estContar(c,inv,key,contado,contador,causa,ator){ const l=c.lotes[key]; if(!l) throw new Error('Escolha o lote contado.');
+  { const L=estContadores(); if(L.indexOf(contador)<0) throw new Error('Contador: escolha quem contou entre as pessoas com acesso e o papel de almoxarife ('+(L.join(', ')||'almoxarife sem titular: conceda em Configurações › Usuários e alçadas')+'). Nada foi gravado.'); }
   const rec=einvRec(c,inv)||{id:inv,key,hist:[]}; const sis=l.fisico; const n0=(c.ajustes||[]).length;
   const m0=c.movs.length; const rc=cenContar(c,key,contado); const aj=(c.ajustes||[]).length>n0?c.ajustes[c.ajustes.length-1]:null; const reg=ator?g2ator(ator,'almoxarife'):''; if(aj){ aj.inv=inv; aj.causa=causa; aj.contador=contador; aj.reg=reg; }   /* reg: quem registrou (perfil) */
   c.movs.slice(m0).forEach(m=>{ if(m.tipo==='contagem'){ m.doc=inv; m.quem=contador; } });   // contagem sem diferença: documento e contador na trilha
@@ -305,11 +314,11 @@ function estContar(c,inv,key,contado,contador,causa,ator){ const l=c.lotes[key];
   return {msg:Math.abs(d)<1e-9?('Contagem '+inv+' conferida: sem diferença.'):('Contagem '+inv+' registrada: diferença '+esig(d,l.un)+' · '+aj.id+' aguarda o gestor. O saldo não muda até aprovar'+(causa?'.':' · informe a causa antes da aprovação.')+(rc.alerta?' Se aprovado: '+rc.alerta:''))}; }
 function estCausa(c,inv,causa){ const rec=einvRec(c,inv); rec.causa=causa; const aj=eajuste(c,rec); if(aj) aj.causa=causa; eput(c,rec);
   return {msg:'Causa da diferença de '+inv+' registrada'+(causa?': '+causa:'')+'. Quantidade e contador seguem travados; o ajuste aguarda aprovação.'}; }
-function estRecontar(c,inv){ const rec=einvRec(c,inv); if(!econtou(rec)) throw new Error(inv+' ainda não foi contada.');
+function estRecontar(c,inv,ator){ const rec=einvRec(c,inv); if(!econtou(rec)) throw new Error(inv+' ainda não foi contada.');   /* ator: quem pede a recontagem (gravado no ajuste recusado, trilha CF-04) */
   const aj=eajuste(c,rec); if(aj&&aj.estado==='Aprovado') throw new Error('Ajuste '+inv+' já aprovado: não há recontagem.');
-  if(aj&&aj.estado==='Aguardando gestor') cenAprovarAjuste(c,aj.id,false);
+  if(aj&&aj.estado==='Aguardando gestor') cenAprovarAjuste(c,aj.id,false,ator);
   rec.hist=(rec.hist||[]).concat([{cont:rec.cont,contador:rec.contador,causa:rec.causa||'',dif:rec.cont-rec.sis}]);
-  const outro=E2.contadores.find(x=>x!==rec.contador)||rec.contador;
+  const outro=estContadores().find(x=>x!==rec.contador)||'';   /* sem outro almoxarife ativo: o formulário pede quem conta (a regra do outro contador segue) */
   Object.assign(rec,{cont:null,sis:null,causa:'',contador:outro,reg:'',aj:null}); eput(c,rec);
   return {msg:'Recontagem de '+inv+' aberta: outro contador conta sem ver o saldo; a contagem anterior fica registrada na origem da linha.'}; }
 // Aprovar (A4; contrato do PR #47, comentário 6147474674): quem decide é o motor (cenAprovarAjuste: papel do gestor, contagem atual e valor contado).
@@ -359,13 +368,15 @@ ESTV.g_cnt=(self,fm)=>{ const e={}; const C=cenGet(); if(!elotKey(C,fm.draft.lot
   return e; };
 // ---------- gravação: cada formulário vira uma mudança no cenário ----------
 const ESAVE={}, ECAMPO={g_rec:'lote',g_ent:'qtd',g_dev:'qtd',g_cnt:'cont'};
+// chave do formulário aberto (ENG-021): nasce no 1º envio e fica no próprio formulário; reenvio e duplo clique do mesmo formulário usam a mesma chave
+function eChave(fm,p){ if(!fm.chave) fm.chave='W-'+p+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); return fm.chave; }
 ESAVE.g_rec=(self,fm)=>{ const d=fm.draft; const p=epedBase(d.ped); const n=k=>eblank(d[k])?0:g2num(d[k]); const nfv=String(d.nf||'').trim();
   const id=fm.rid||('r'+(nfv.replace(/\D/g,'')||String(Date.now()).slice(-6))); const base=E2.recs.find(b=>b.id===id)||{};
   const rec={id,nf:nfv,data:base.data||'',ped:d.ped,item:p.item,un:p.un,qtd_nf:n('qtd_nf'),conf:n('conf'),apto:n('apto'),quar:n('quar'),lote:String(d.lote||'').trim(),
     val:efert(d.ped)?'—':String(d.val||'').trim(),local:d.local,div:d.div||'Sem divergência',obs:String(d.obs||'').trim()};
-  const r=cenMudar(null,c=>estReceber(c,rec,g2perfil())); r.fl=id; return r; };
+  const r=cenMudar(null,c=>estReceber(c,rec,g2perfil(),eChave(fm,'REC'))); r.fl=id; return r; };
 ESAVE.g_ent=(self,fm)=>{ const x=eitens(cenGet()).find(y=>y.id===fm.rid); if(!x) return {erro:'Requisição não encontrada.'};
-  return cenMudar(null,c=>estEntregar(c,x.rid,x.it.prod,g2num(fm.draft.qtd),fm.draft.quem,g2perfil())); };
+  return cenMudar(null,c=>estEntregar(c,x.rid,x.it.prod,g2num(fm.draft.qtd),fm.draft.quem,g2perfil(),eChave(fm,'ENT'))); };
 ESAVE.g_dev=(self,fm)=>{ const x=eitens(cenGet()).find(y=>y.id===fm.rid); if(!x) return {erro:'Requisição não encontrada.'};
   return cenMudar(null,c=>estDevolver(c,x.rid,x.it.prod,g2num(fm.draft.qtd),fm.draft.cond===E2.conds[0],String(fm.draft.obs||'').trim(),g2perfil())); };
 ESAVE.g_cnt=(self,fm)=>{ const d=fm.draft; const C=cenGet(); const rec=fm.rid?einvRec(C,fm.rid):null; const causa=String(d.causa||'').trim();
@@ -393,7 +404,7 @@ function elotRow(c,l,ask,INV,GEST){ const un=l.un; const venc=evenc(l);
   const qrep=Math.min(l.quarentena||0,l.quarRep||0), qpen=(l.quarentena||0)-qrep;   // reprovado: segregado para devolução ao fornecedor (revisão do 853a6a8, achado 2)
   const rps=qrep>1e-9?cenRepsLote(c,l,qrep):[];   /* cada laudo com a sua quantidade, do histórico do lote (revisão do 16fb55e, ajuste 2) */
   const blq=l.quarentena>1e-9?[{k:'chip',t:eq(l.quarentena,un),c:'yellow'}].concat(qrep>1e-9?[{k:'chip',t:'Reprovado · '+eq(qrep,un)+' · '+(rps.length>1?'laudos '+rps.map(r=>(r.laudo||'—')+' '+eq(r.q,un)).join(' + '):'laudo '+((rps[0]||l.rep||{}).laudo||'—')),c:'red'}]:[])
-    .concat((venc||!(qpen>1e-9))?[]:(!GEST?[{k:'mut',t:'aguarda laudo · '+g2quem('gestor')+' libera ou reprova'}]:(ask===l.key?[{k:'mut',t:'informe o laudo acima'},{k:'act',t:'Manter',fn:'libno:x'}]:[{k:'act',t:'Liberar após inspeção',fn:'libq:'+l.key}]))):[{k:'mut',t:'—'}];
+    .concat((venc||!(qpen>1e-9))?[]:(!GEST?[{k:'mut',t:'aguarda laudo · '+g2alcQuem('AL-11')+' libera ou reprova'}]:(ask===l.key?[{k:'mut',t:'informe o laudo acima'},{k:'act',t:'Manter',fn:'libno:x'}]:[{k:'act',t:'Liberar após inspeção',fn:'libq:'+l.key}]))):[{k:'mut',t:'—'}];
   return {id:'L|'+l.key,ro:true,v:{nome:l.lote,prod:l.prod,un,local:l.local,fis:l.fisico,res:l.reservado,blq:l.quarentena,disp:cenDisp(l),expo:'',cust:'',cos:'',val:l.validade,vali:eym(l.validade),sitl:(venc?'Vencido':(l.quarentena>1e-9?'Em quarentena':'Disponível'))},
     s:{nome:l.lote,prod:l.prod,un,vali:(l.validade&&l.validade!=='—'?l.validade:''),sitl:(venc?'Vencido':(l.quarentena>1e-9?'Em quarentena':'Disponível'))},
     p:{prod:[{k:'mut',t:l.prod}],fis:[{k:'txt',t:eq(l.fisico,un)}],res:l.reservado>1e-9?[{k:'txt',t:eq(l.reservado,un)}]:[{k:'mut',t:'—'}],blq,disp:[{k:'b',t:eq(cenDisp(l),un)}],expo:[{k:'mut',t:''}],cust:[{k:'mut',t:''}],cos:[{k:'mut',t:''}],
@@ -403,7 +414,8 @@ function elotRow(c,l,ask,INV,GEST){ const un=l.un; const venc=evenc(l);
     o:(mv.length?mv:[{t:'Sem movimentos desde o início da demonstração.'}]).concat(pend).concat(cenSemFisico(l)>1e-9?[{t:cenSemFisicoTxt(c,l,cenSemFisico(l))}]:[])}; }
 
 function PREVALS(self,v){
-  cenOuvir(self); const C=cenGet(); self._cen=C; const PF=g2perfil(), GEST=g2papel(PF,'gestor');   /* quem age; decisões do gestor (DEC-2609-13) */
+  self.g2opts=(gid,k,d)=>(gid==='g_cnt'&&k==='contador')?estContOpts(d):null;   /* contador: pessoas ativas com o papel almoxarife (revisão CONF F6) */
+  cenOuvir(self); const C=cenGet(); self._cen=C; const PF=g2perfil(), GEST=g2papel(PF,g2alc('AL-11').papeis), GAJ=g2papel(PF,g2alc('AL-09').papeis);   /* quem age; quarentena (AL-11) e ajuste (AL-09) pela alçada vigente */
   const vazio=(v.mf_faz==='Boa Vista'); v.est_vazio=vazio; v.est_tem=!vazio; v.est_versr=()=>self.setState({mf_faz:'Santa Rita',g2toast:'Fazenda: Santa Rita'});
   const IT=eitens(C); const INV=einvs(C);
   // ---- etapa 1: recebimentos ----
@@ -499,7 +511,7 @@ function PREVALS(self,v){
   let nacontar=0,naprov=0,nvelha=0;
   const cntOpts=elotes(C).map(elotLbl);
   GR('g_cnt').rows=INV.map(rec=>{ const l=C.lotes[rec.key]; const un=l?l.un:''; const has=econtou(rec); const d=has?rec.cont-rec.sis:null; const aj=eajuste(C,rec); const apr=!!(aj&&aj.estado==='Aprovado'); const vel=apr?null:evelha(C,rec);
-    const r={id:rec.id,ro:apr||(d!==null&&Math.abs(d)<1e-9),v:{inv:rec.id,aj:aj?aj.id:'',prod:l?l.prod:'',un,lote:l?elotLbl(l):rec.key,local:l?l.local:'',sis:has?rec.sis:'',cont:has?rec.cont:'',dif:d===null?'':d,contador:rec.contador||E2.contadores[0],causa:rec.causa||''},s:{},p:{}};
+    const r={id:rec.id,ro:apr||(d!==null&&Math.abs(d)<1e-9),v:{inv:rec.id,aj:aj?aj.id:'',prod:l?l.prod:'',un,lote:l?elotLbl(l):rec.key,local:l?l.local:'',sis:has?rec.sis:'',cont:has?rec.cont:'',dif:d===null?'':d,contador:rec.contador||'',causa:rec.causa||''},s:{},p:{}};
     // contagens anteriores ficam na origem da linha, visíveis só depois da nova contagem (a recontagem também é cega)
     r.o=has?(rec.hist||[]).map(h=>({t:'Contagem anterior: '+eq(h.cont,un)+' por '+h.contador+' · diferença '+esig(h.dif,un)+(h.causa?' · causa: '+h.causa:'')})):[];
     r.p.inv=[{k:'b',t:rec.id}]; r.s.inv=rec.id; r.s.aj=aj?aj.id:''; r.p.aj=aj?[{k:'txt',t:aj.id}]:[{k:'mut',t:'—'}];
@@ -511,7 +523,7 @@ function PREVALS(self,v){
     else if(apr) sit={k:'chip',t:'Ajuste aprovado',c:'green'}; else if(vel) { sit={k:'chip',t:'Desatualizada',c:'red'}; nvelha++; } else { sit={k:'chip',t:'Ajuste aguardando aprovação',c:'yellow'}; naprov++; }
     const semCausa=(d!==null&&Math.abs(d)>1e-9&&!apr&&!String(rec.causa||'').trim());
     r.p.sit=[sit].concat(vel?[{k:'mut',t:'contagem anterior a '+(vel.length?vel.length+(vel.length===1?' movimento':' movimentos')+' do lote':'mudança do físico')+' · reconte'}]:[]).concat(semCausa&&!vel?[{k:'mut',t:'informe a causa'}]:[]).concat(apr?[{k:'mut',t:'aplicado ao saldo'}]:[]).concat(apr&&aj.rev?[{k:'mut',t:aj.rev}]:[]); r.s.sit=sit.t;
-    r.p.acao=(d!==null&&Math.abs(d)>1e-9&&!apr)?[{k:'act',t:'Recontar',fn:'recont:'+rec.id}].concat(vel?[]:GEST?[{k:'act',t:'Aprovar ajuste',fn:'aprova:'+rec.id}]:[{k:'mut',t:'aprova: '+g2quem('gestor')}]):[]; r.s.acao=''; return r; });
+    r.p.acao=(d!==null&&Math.abs(d)>1e-9&&!apr)?[{k:'act',t:'Recontar',fn:'recont:'+rec.id}].concat(vel?[]:GAJ?[{k:'act',t:'Aprovar ajuste',fn:'aprova:'+rec.id}]:[{k:'mut',t:'aprova: '+g2alcQuem('AL-09')}]):[]; r.s.acao=''; return r; });
   const fmC=g2st(self,'g_cnt').fm; const fsC=GR('g_cnt').edit.fields; fsC[0].opts=cntOpts; fsC[0].def=cntOpts[0]||''; fsC[0].ro=!!(fmC&&!fmC.isNew);
   // contagem salva fica travada (quantidade e contador); só a causa continua editável
   const rC=fmC&&fmC.rid?GR('g_cnt').rows.find(x=>x.id===fmC.rid):null; const trav=!!(rC&&!eblank(rC.v.cont));
@@ -556,7 +568,7 @@ function PREVALS(self,v){
   v.k1=(npend?npend+(npend>1?' notas a conferir':' nota a conferir'):'Nenhuma nota a conferir')+' · '+(quarTxt.length?'em quarentena: '+quarTxt.join(', '):'nenhum lote em quarentena')+' · pedidos com saldo a entregar: '+(pdTxt.join(', ')||'nenhum');
   v.k2=nent+(nent===1?' item a entregar':' itens a entregar')+' · '+nag+' aguardando confirmação no app · '+ncons+' só consulta (O.S. fora de Liberadas e Em execução)'
     +(nimp?' · '+nimp+(nimp===1?' bloqueado por O.S. impedida':' bloqueados por O.S. impedida'):'');
-  v.k3=(CFS.length?'Consumo em conferência: '+CFS.map(k=>k.os+' · '+cenConfTxt(k,C)).join(' · ')+' · '+CFS[0].resp+' confere ou recusa o relato; '+g2quem('gestor')+' aceita o excedente · ':'')+(custs.length?('Em custódia: '+custs.map(x=>x.rid+' '+eq(x.it.custodia,x.un)+' de '+x.it.prod+' com '+x.quem+' ('+x.os+')').join(' · ')):'Nenhum material em custódia. Todas as O.S. podem conciliar materiais.');
+  v.k3=(CFS.length?'Consumo em conferência: '+CFS.map(k=>k.os+' · '+cenConfTxt(k,C)).join(' · ')+' · '+CFS[0].resp+' confere ou recusa o relato; '+g2alcQuem('AL-10','acima')+' aceita o excedente · ':'')+(custs.length?('Em custódia: '+custs.map(x=>x.rid+' '+eq(x.it.custodia,x.un)+' de '+x.it.prod+' com '+x.quem+' ('+x.os+')').join(' · ')):'Nenhum material em custódia. Todas as O.S. podem conciliar materiais.');
   v.k4=(inspTxt.length?'Bloqueado para inspeção: '+inspTxt.join(', '):(vencTxt.length?'Nenhum lote aguardando inspeção':'Nenhum lote bloqueado'))
     +(vencTxt.length?' · vencido, fora do disponível: '+vencTxt.join(', '):'')+' · custódia fica fora do depósito e não soma no físico';
   v.k5=nacontar+(nacontar===1?' contagem a fazer':' contagens a fazer')+' · '+naprov+(naprov===1?' ajuste aguardando aprovação':' ajustes aguardando aprovação')+(nvelha?' · '+nvelha+(nvelha===1?' contagem desatualizada a recontar':' contagens desatualizadas a recontar'):'');
@@ -586,7 +598,7 @@ function EXTRAVALS(self,v){
   v.est_locs=[''].concat(E2.locais).map(lc=>({t:lc||'Todos os locais',on:String(loc===lc),st:CH+(loc===lc?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;'),go:()=>self.setState({est_loc:lc})}));
   // liberar quarentena do lote após inspeção (confirmação na linha; repetir não soma de novo)
   // (gestor, com o nº do laudo; sem laudo ou sem papel nada muda e o erro fica no painel, com o laudo digitado preservado)
-  const lk=st.libask; const lq=lk&&C.lotes[lk]; v.lib_on=!!(lq&&lq.quarentena>1e-9)&&g2papel(g2perfil(),'gestor');   /* aberto por outro perfil: não aparece (achado 1) */
+  const lk=st.libask; const lq=lk&&C.lotes[lk]; v.lib_on=!!(lq&&lq.quarentena>1e-9)&&g2papel(g2perfil(),g2alc('AL-11').papeis);   /* aberto por outro perfil: não aparece (achado 1) */
   const lqp=lq?(lq.quarentena||0)-Math.min(lq.quarentena||0,lq.quarRep||0):0;
   v.lib_t=v.lib_on?('Liberar '+eq(lqp,lq.un)+' do lote '+lq.lote+' ('+lq.prod+'): informe o laudo que aprova o material. Se o laudo reprovar, use "Reprovar com o laudo": o material fica segregado para devolução ao fornecedor e a falta deixa de ser condicionada.'):'';
   v.lib_mot=st.lib_mot||''; v.lib_setmot=(e)=>self.setState({lib_mot:e.target.value,lib_err:''});
@@ -606,7 +618,7 @@ function EXTRAVALS(self,v){
   v.aprova=(id)=>{ const rec=einvRec(cenGet(),id);
     if(rec&&econtou(rec)&&!String(rec.causa||'').trim()){ g2open(self,GR('g_cnt'),id,null); self.setState({g2toast:'Informe a causa da diferença de '+id+' na contagem antes de aprovar o ajuste.'}); return; }
     cenMudar(self,c=>estAprovar(c,id,g2perfil())); };
-  v.recont=(id)=>{ const r=cenMudar(self,c=>estRecontar(c,id)); if(r.erro) return; const c1=cenGet(); const rec=einvRec(c1,id); const l=c1.lotes[rec.key];
+  v.recont=(id)=>{ const r=cenMudar(self,c=>estRecontar(c,id,g2perfil())); if(r.erro) return; const c1=cenGet(); const rec=einvRec(c1,id); const l=c1.lotes[rec.key];
     const draft={lote:l?elotLbl(l):'',cont:'',contador:rec.contador,causa:''};
     g2set(self,'g_cnt',{fm:{rid:id,draft,orig:Object.assign({},draft),errs:{},warn:false,ro:false,isNew:false,mode:'form'},fl:null,fmc:null}); };
   v.cfa=(id)=>self.setState({est_cfask:id}); v.cfno=()=>self.setState({est_cfask:null});
