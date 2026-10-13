@@ -84,7 +84,7 @@ function cdResolverRelato(c,id,dia,decisao,motivo,referencia,ator) {
   const quem=cenExige(ator,'conferente','Resolver o relato do dia '+dia+' da '+id);
   const {ap}=cdAp(c,id,dia), anterior=ap.conferenciaDia, caso=anterior&&anterior.caso;
   const texto=String(motivo||'').trim();
-  if(!['vincular','arquivar'].includes(decisao)) throw new Error('Este recorte permite vincular evidência ao fato existente. Alterar o fato exige correção vinculada própria.');
+  if(!['vincular','arquivar'].includes(decisao)) throw new Error('Este recorte permite vincular evidência ao fato existente. A correção vinculada ainda não existe no protótipo: o caso fica aberto e a O.S. não encerra.');
   if(!caso) throw new Error('Sem caso identificado: reavalie o relato antes de decidir.');
   const atual=cdBaseReferencia(c,id,dia);
   if(caso.estado!=='Em conferência') {
@@ -102,7 +102,7 @@ function cdResolverRelato(c,id,dia,decisao,motivo,referencia,ator) {
     if(ap.st===CEN_AP_DESC)throw new Error('Relato descartado: arquive o caso com a decisão de duplicidade, sem conferir como execução válida.');
     cdValidarEvidencias(c,id,dia,ap);
   }
-  if(!arquivar && caso.conteudo!==cdConteudo(ap))throw new Error('O conteúdo do fato mudou: o vínculo documental não corrige quantidades. Trate a correção vinculada antes de fechar o caso.');
+  if(!arquivar && caso.conteudo!==cdConteudo(ap))throw new Error('O conteúdo do fato mudou: o vínculo documental não corrige quantidades. A correção vinculada ainda não existe no protótipo: o caso fica aberto e a O.S. não encerra.');
   const rp=cenRevisao(ator,ap.quem,'apontou'), at=new Date().toISOString();
   const resolvido=Object.assign({},caso,{estado:arquivar?'Arquivado':'Vinculado',descarte:arquivar?Object.assign({},ap.dec):null,versao:caso.versao+1,decisao,motivoDecisao:texto,por:quem,atDecisao:at,referencia,apontamento:atual,revisaoPosterior:rp||''});
   const recibo={estado:arquivar?'Arquivado':'Conferido',versao:c.ordens[id].versao,motivo:texto,por:quem,at,referencia:atual,fato:cdFato(c,id,dia),revisaoPosterior:rp||'',caso:resolvido};
