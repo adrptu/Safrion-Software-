@@ -1,0 +1,56 @@
+varredura rc=0 t=371.780098868s :: RESULTADO: 145/145 páginas sem erro 
+acoes_duplicadas rc=0 t=240.240919005s :: RESULTADO: 145 páginas · 0 com ação repetida · erros 0 
+ds_test rc=0 t=290.737415323s :: RESULTADO: OK 68/68 
+componentes_matriz rc=0 t=86.402816949s :: RESULTADO: 3 ok · 0 falhas (matriz) 
+componentes_rotacao rc=0 t=48.271757653s :: RESULTADO: 6 ok · 0 falhas (rotacao) 
+componentes_interacao rc=0 t=46.320780221s :: RESULTADO: 10 ok · 0 falhas (interacao) 
+componentes_ajustes rc=0 t=68.073039020s :: RESULTADO: 4 ok · 0 falhas (ajustes) 
+componentes_ajustes2 rc=0 t=68.415484357s :: RESULTADO: 2 ok · 0 falhas (ajustes2) 
+tabelas_cad_test rc=0 t=327.187321344s :: RESULTADO: 178/178 ok 
+tabelas_irr_test rc=0 t=208.736189319s :: RESULTADO: 106/106 ok 
+irtest rc=0 t=51.156782301s :: 
+irr_fluxo_test rc=0 t=145.630428119s :: 33 ok · 0 falhas [] 
+irr_estado_test rc=0 t=13.895955173s :: 38 ok · 0 falhas [] 
+map_irrig_filtro_test rc=0 t=26.411707795s :: 15 ok · 0 falhas [] 
+cada_cd03_test rc=0 t=17.124469082s :: RESULTADO: OK 14/14 
+cada_fix03_test rc=0 t=19.330676928s :: RESULTADO: OK 11/11 
+cadc_cd06_test rc=0 t=26.155794075s :: RESULTADO: OK 14/14 
+cadc_fix_cd06 rc=0 t=35.972896817s :: RESULTADO: OK 13/13 
+ctl5_test rc=0 t=80.612013103s :: RESULTADO 30/30 [] 
+agrofit_test rc=0 t=41.342430773s :: RESULTADO: 18/18 ok · 40 s [] 
+carencia_test rc=0 t=81.632812123s :: RESULTADO: 91/91 verificações 
+ficha_pivo_test rc=0 t=76.262073237s :: RESULTADO: OK 21/21 
+praga_alvo_test rc=0 t=50.307655136s :: RESULTADO: 14/14 ok · 49 s [] 
+solo_saf_test rc=0 t=118.506883256s :: RESULTADO: OK 36/36 
+solo_os_test rc=0 t=74.505757841s :: RESULTADO: OK 18/18 
+solo_ag02_test rc=0 t=57.925835567s :: RESULTADO: OK 32/32 
+solo_rev_test rc=0 t=174.143277353s :: RESULTADO: OK 22/22 
+tabelas_os_test rc=0 t=35.797963388s :: RESULTADO: 38/38 ok 
+tabelas_saf_test rc=0 t=44.289009354s :: RESULTADO: 24/24 ok 
+tabelas_est_test rc=0 t=33.123461578s :: RESULTADO: 34/34 ok 
+map_aprov_test rc=0 t=14.819036885s :: 5 ok · 0 falhas [] 
+map_decisoes_test rc=0 t=52.145237686s :: 18 ok · 0 falhas [] 
+pa_lista_test rc=0 t=127.009350702s :: RESULTADO: 24 ok · 0 falhas 
+patest rc=0 t=31.556920874s :: RESULTADO: 46 ok · OK 
+acao_familias rc=0 t=63.750928487s :: RESULTADO: 8 ok · 0 falhas (familias) 
+acao_v3 rc=0 t=121.471316237s :: RESULTADO: 10 ok · 0 falhas (v3) 
+acao_responsivo rc=0 t=87.643782524s :: RESULTADO: 5 ok · 0 falhas (responsivo) 
+acao_saf rc=0 t=70.155871212s :: RESULTADO: 10 ok · 0 falhas (saf) 
+etapas_celular rc=0 t=44.463993848s :: RESULTADO: 14 ok · 0 falhas (celular) 
+etapas_complemento rc=0 t=50.455121525s :: RESULTADO: 9 ok · 0 falhas (complemento) 
+etapas_desktop_a rc=0 t=365.380249497s :: RESULTADO: 1 ok · 0 falhas (desktop) 
+etapas_desktop_b rc=0 t=363.976840350s :: RESULTADO: 1 ok · 0 falhas (desktop) 
+etapas_faixa rc=0 t=45.052364362s :: RESULTADO: 1 ok · 0 falhas (faixa) 
+comercial_revisao_test rc=0 t=117.060792234s :: RESULTADO: OK 33/33 
+comercial_fluxo_test rc=0 t=138.792696549s :: RESULTADO: OK 72/72 
+producao_fluxo_test rc=0 t=269.713274026s :: RESULTADO: OK 67/67 
+reserva_duplo_clique_test rc=0 t=10.815959999s :: RESULTADO: OK 2/2 
+partest rc=0 t=99.733459261s :: RESULTADO: 50 ok · 0 falhas 
+ma_unica_test rc=0 t=190.878463120s :: RESULTADO: 23/23 ok 
+dose_divergente_nav rc=0 t=74.060506951s :: 21/21 ok · FALHAS: 0 
+cafe_apurar_nav rc=0 t=30.727442730s :: RESULTADO: OK 10/10 
+ostest rc=0 t=25.675586533s :: 33 ok · 0 falhas [] 
+os_cenario_test rc=0 t=40.862594934s :: RESULTADO: 21/21 ok 
+osacoes rc=0 t=28.938164956s :: RESULTADO: 45 ok · 0 falhas 
+cadc_cd02_test rc=0 t=26.844901001s :: RESULTADO: OK 15/15 
+FIM 12:54:59

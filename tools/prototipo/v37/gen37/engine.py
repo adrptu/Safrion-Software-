@@ -1617,20 +1617,12 @@ def _assin_prefixo():
         import dados_assinatura as _DA
         _ASSIN[0]=_DA.js_prefixo()
     return _ASSIN[0]
-# CONF-01 (RV-13): Configurações (CONF0 + configuracoes.js) entra UMA vez em toda tela, depois da assinatura; só nomes conf*/CONF*.
-# Sem ele o efetivo é o padrão (G2_PERFIS e G2_ALCADAS); com ele, papéis, acessos e alçadas do CF-01 valem em toda tela (g2perfis, g2alc).
-_CONF=[None]
-def _conf_prefixo():
-    if _CONF[0] is None:
-        import dados_config as _DC
-        _CONF[0]=_DC.js_prefixo()
-    return _CONF[0]
 def engine():
     spec=json.dumps(WIDGETS,ensure_ascii=False).replace('</','<\\/')
     grids=json.dumps(GRIDS,ensure_ascii=False).replace('</','<\\/')
     nav=json.dumps(NAVSPEC,ensure_ascii=False)
     gloss=json.dumps(_GLOSS_CEL,ensure_ascii=False)   # glossário da célula (revisão DS, achado 8): g2glossCol no g2lib
-    return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\nconst G2_GLOSS = '+gloss+';\n'+G2LIB+'\n'+_assin_prefixo()+_conf_prefixo()+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
+    return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\nconst G2_GLOSS = '+gloss+';\n'+G2LIB+'\n'+_assin_prefixo()+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
 # o aviso é visto aqui e anunciado uma vez pela região viva do g2lib (g2vivo, DS-RETORNO-20261009): aria-live=off evita a leitura em dobro
 # aviso temporário: largura do texto até min(560 px, janela − 32); sem o width, o left:50% limitava a caixa a meia janela (180 px a 360 px)
 # e o aviso quebrava em 3 a 17 linhas (medido: 47 e 345 caracteres), cobrindo o pé da tela (V55-RESP-01)

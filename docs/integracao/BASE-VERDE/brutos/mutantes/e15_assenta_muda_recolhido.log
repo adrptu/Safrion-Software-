@@ -1,0 +1,5 @@
+     referência do desktop: /root/.cache/safrion-gen37-ref/302b26f8e04f-sintetico/tools/prototipo/v37/gen37/_render
+FALHA 15 1440 px igual à referência (menu aberto e recolhido) em 15 telas (95:110 de 145) {'OS/1': ['NAV|A|0|0|68|900', 'A||12|18|40|28', 'path||31|26|13|12', '→', 'NAV|A|0|0|80|900', 'A||18|18|40|28', 'path||37|26|13|12']}
+
+RESULTADO: 0 ok · 1 falhas (desktop)
+  - 15 1440 px igual à referência (menu aberto e recolhido) em 15 telas (95:110 de 145)

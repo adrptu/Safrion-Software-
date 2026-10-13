@@ -79,6 +79,15 @@ def usos(c,a): return set(dict(U.get(str(c),[])).get(a,[]))
 NOMEID={nz(g[0]).strip():i for i,g in enumerate(IG)}
 def gk(r): return ','.join(map(str,sorted(NOMEID[nz(n).strip()] for n in r['agrofit']))) if r['agrofit'] else None   # chave da ficha da fazenda
 DT='02/10/2026' if META['fontes']['formulados']['last_modified'].startswith('Fri, 02 Oct 2026') else None
+# Relógio sintético (BASE-VERDE): o selo do cabeçalho compara o arquivo do AGROFIT (02/10/2026) com o relógio do navegador e marca a base
+# como desatualizada depois de 7 dias (agDiasArq() > 7; validade por fonte, DEC-0910-13 b). Com o relógio real o item 3 dependia do dia em
+# que o teste rodava; aqui o navegador anda num relógio fixo de 05/10/2026 12:00 (BRT) e, com ?relogio=AAAA-MM-DD, noutro dia.
+RELOGIO='2026-10-05'
+REL_JS=("(function(){var m=/[?&]relogio=(\\d{4}-\\d{2}-\\d{2})/.exec(location.search); var alvo=Date.parse((m?m[1]:'"+RELOGIO+"')+'T12:00:00-03:00');"
+        "var D0=Date, off=alvo-D0.now();"
+        "function FD(){ if(!(this instanceof FD)) return new D0(D0.now()+off).toString(); if(!arguments.length) return new D0(D0.now()+off);"
+        " return new (Function.prototype.bind.apply(D0,[null].concat([].slice.call(arguments))))(); }"
+        "FD.prototype=D0.prototype; FD.now=function(){return D0.now()+off;}; FD.parse=D0.parse; FD.UTC=D0.UTC; window.Date=FD; })();")
 srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(0.8)
 c=None; OK=[]; FAIL=[]; ERRS=[]
 def chk(nome,cond,info=''):
@@ -86,7 +95,7 @@ def chk(nome,cond,info=''):
 t0=time.time()
 try:
     c=Chrome(port=free()); J=c.js; c.size(1440,900)
-    c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__errs=[];window.addEventListener('error',e=>window.__errs.push(String(e.message)));const __ce=console.error;console.error=function(){window.__errs.push([...arguments].map(String).join(' ').slice(0,300));__ce.apply(console,arguments);};"
+    c.call('Page.addScriptToEvaluateOnNewDocument',{'source':REL_JS+"window.__errs=[];window.addEventListener('error',e=>window.__errs.push(String(e.message)));const __ce=console.error;console.error=function(){window.__errs.push([...arguments].map(String).join(' ').slice(0,300));__ce.apply(console,arguments);};"
         # falha simulada do índice (só quando a página pede: ?falha=1) para conferir o estado de erro e o "Tentar de novo"
         "if(location.search.indexOf('falha=1')>=0){ window.__agFail=true; const f0=window.fetch; window.fetch=function(u,o){ if(window.__agFail&&String(u).indexOf('agrofit_indice')>=0) return Promise.reject(new Error('rede indisponível (simulada)')); return f0.apply(this,arguments); }; }"})
     def junta(pag): ERRS.extend(f'{pag}: {e}' for e in (J("(window.__errs||[]).filter(e=>e.indexOf(\"reading 'g2toast'\")<0)") or []))
@@ -142,10 +151,24 @@ try:
     c.goto(U_('AG-07.dc.html'),wait=.8); carregou=pronto()
     head=J("document.querySelector('header').innerText.replace(/\\n/g,' | ')") or ''
     ln=J("[...document.querySelectorAll('header a')].map(a=>[a.innerText.trim(),a.getAttribute('href'),a.target,a.rel])") or []
-    NP=META['contagens']['registros']
-    chk(f'3 cabeçalho: "Base atualizada · {DT}" e "Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de {DT} · {nf(NP,0)} produtos com registro" + AGROFIT oficial (nova aba)',
-        carregou and NP==len(P) and f'Base atualizada · {DT}' in head and f'Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de {DT} · {nf(NP,0)} produtos com registro' in head
-        and any(t.startswith('Abrir no AGROFIT oficial') and h==OFICIAL and tg=='_blank' and 'noopener' in (rl or '') for t,h,tg,rl in ln), [head,ln])
+    NP=META['contagens']['registros']; hoje=J("new Date().toISOString().slice(0,10)")
+    # o mesmo arquivo com o relógio em 10/10 (8 dias depois do arquivo: 1 dia além do limite de 7) e em 09/10 (7 dias: ainda em dia)
+    def abre_ag(q):   # mesmo caminho com outra consulta: espera o documento novo (o antigo fica na tela até a troca) antes de ler
+        c.goto(U_('AG-07.dc.html'+q),wait=.8)
+        for _ in range(80):
+            try:
+                if J(f"location.search==={json.dumps(q)}&&document.readyState==='complete'&&!!document.querySelector('header')"): break
+            except Exception: pass
+            time.sleep(.25)
+        return pronto()
+    cab=lambda: J("(document.querySelector('header')||{innerText:''}).innerText.replace(/\\n/g,' | ')") or ''
+    abre_ag('?relogio=2026-10-10'); head8=cab()
+    abre_ag('?relogio=2026-10-09'); head7=cab()
+    abre_ag('')
+    chk(f'3 cabeçalho (relógio sintético {RELOGIO}): "Base atualizada · {DT}" e "Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de {DT} · {nf(NP,0)} produtos com registro" + AGROFIT oficial (nova aba); com 7 dias ainda em dia e com 8 dias "Base de {DT} · desatualizada"',
+        carregou and hoje==RELOGIO and NP==len(P) and f'Base atualizada · {DT}' in head and f'Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de {DT} · {nf(NP,0)} produtos com registro' in head
+        and any(t.startswith('Abrir no AGROFIT oficial') and h==OFICIAL and tg=='_blank' and 'noopener' in (rl or '') for t,h,tg,rl in ln)
+        and f'Base atualizada · {DT}' in head7 and 'desatualizada' not in head7 and f'Base de {DT} · desatualizada' in head8 and 'Base atualizada' not in head8, [hoje,head,ln,head7,head8])
     # ---------- 4 · listagem: todos os registros, 6 colunas, render incremental ----------
     cols=[nz(x).replace('⇅','').replace('▾','').strip() for x in (J("[...document.querySelectorAll('main [role=columnheader]')].map(h=>h.innerText.replace(/\\s+/g,' '))") or [])]
     n50=len(rows()); clica('main','Mostrar mais'); time.sleep(.4); n150=len(rows())

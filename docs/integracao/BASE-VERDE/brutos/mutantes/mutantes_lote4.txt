@@ -1,0 +1,13 @@
+e17_sem_respiro: 1 troca(s) em _render/OS.dc.html
+e17_sem_respiro rc=1 662s :: FALHA 17 lista da tela alcançável (O.S. e AG-07 em 390 px e zoom de 200 %, EST em 320 px): caixa não espremida e última linha tocável rolando a tela {'OS 390x844@1': {'alt': 409, 'cont': 409, 'linhas': 11, 'rolaTela': True, 'ultNa || RESULTADO: 8 ok · 1 falhas (complemento)
+e20_folha_nao_fixa: 1 troca(s) em _render/CMP.dc.html
+e20_folha_nao_fixa rc=1 104s :: FALHA 20 tela baixa (800×360 e 568×320) · folha com a última etapa à vista (CMP, SAF: só informa) ou tocável (EST: seções); IR-02 com ≥ 280 px úteis (cabeçalho rola, faixa fica) e "Programar irrigação" alcançável [{'CMP 800x360':  || FALHA 22 toque · folha abre; tocar fora fecha; tocar na etapa atual fecha sem mudar; tocar na etapa 3 fecha sem navegar (a lista só informa · UX-ACAO-UNICA) [False, True, True, 'Etapa 2 de 6 · Confira a demanda ▾', True, 'Etapa 2  || RESULTADO: 7 ok · 2 falhas (complemento)
+e20_saf_sobrepoe: 1 troca(s) em _render/SAF.dc.html
+e20_saf_sobrepoe rc=1 53s :: FALHA 20 tela baixa (800×360 e 568×320) · folha com a última etapa à vista (CMP, SAF: só informa) ou tocável (EST: seções); IR-02 com ≥ 280 px úteis (cabeçalho rola, faixa fica) e "Programar irrigação" alcançável [{'CMP 800x360':  || RESULTADO: 8 ok · 1 falhas (complemento)
+e16_rotulo_vaza: 1 troca(s) em _render/CMP.dc.html
+e16_rotulo_vaza rc=0 45s :: RESULTADO: 1 ok · 0 falhas (faixa)
+e15_desktop_muda: 1 troca(s) em _render/CMP.dc.html
+e15_desktop_muda rc=1 12s :: FALHA 15 1440 px igual à referência (menu aberto e recolhido) em 1 telas (36:37 de 145) {'CMP/0': ['SECTION|Safras e solicitações Ab|264|183|1144|695', 'H3|Safras e solicitações|281|196|1110|21', 'DIV|Abra a compra da safra: |281| || RESULTADO: 0 ok · 1 falhas (desktop)
+e15_controle_sem_mutacao: 1 troca(s) em _render/CMP.dc.html
+e15_controle_sem_mutacao rc=1 12s :: FALHA 15 1440 px igual à referência (menu aberto e recolhido) em 1 telas (36:37 de 145) {'CMP/1': ['→', 'DIV||0|0|1440|3']} || RESULTADO: 0 ok · 1 falhas (desktop)
+FIM

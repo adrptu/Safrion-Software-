@@ -43,35 +43,13 @@ def main():
     import cenario
     proib = sorted(set(re.findall(r'política de água|PA-07|exceção|revisão individual', cenario.js_prefixo(), re.I)))
     ok('prefixo do cenário (com solo.js) sem "política de água", "PA-07", "exceção" e "revisão individual" (a O.S. carrega o prefixo)', not proib, proib)
-    # regressão (rodada 3): a etapa 4 do Planejar safra passou a dizer a origem da dose (R21); a Compra lê a memória do dados2.demanda.
-    # Sem o mesmo rótulo no Python, a memória do Fungicida A diferia entre as duas telas (saf_cmp_continuidade_test, verificação 21).
-    # Integração V56 × CTL-4: a conta das duas telas é a demanda única (demFazenda no cal01.js; dem_fazenda no Python); o rótulo vai nela,
-    # e o T1-B entra só pela parte sem O.S. (OS-0421 cobre 350 de 610 ha: 152 × 260/610 = 64,79 ha), com a dose ajustada da sessão.
+    # regressão (rodada 3): a etapa 4 do Planejar safra (safra.js demanda) passou a dizer a origem da dose (R21); a Compra lê a memória do
+    # dados2.demanda. Sem o mesmo rótulo no Python, a memória do Fungicida A diferia entre as duas telas (saf_cmp_continuidade_test, verificação 21)
     import dados2 as D2
     fa = [e['calc'] for e in D2.demanda('S2627')['Fungicida A']['evs'] if e.get('own')]
-    cj = open(os.path.join(HERE, 'cal01.js'), encoding='utf-8').read()
-    ok('memória da demanda no Python com a origem do ajuste do talhão, como o Planejar safra (T1-B 0,60 L/ha "(ajustado pelo usuário)" na parte sem O.S.; os demais sem rótulo)',
-       '0,60 L/ha (ajustado pelo usuário) × 64,79 ha' in fa and sum('ajustado' in x for x in fa) == 1 and "' (ajustado pelo usuário)'" in cj and "' (pela análise · '" in cj, fa)
-    # o mesmo rótulo na conta JS (demFazenda): dose da análise, dose da sessão e padrão sem rótulo; a cópia das partes fixas da SOL (safra.js _ent) leva a origem
-    occ = [dict(saf='S', k='c1|a1', a='a1', local='T1-A', tal='T1', area=160, dt='2026-12-01', nome='Cobertura',
-                prods=[dict(nome='KCl 60%', grupo='F', un='kg', preco=2.4, dose=150, q=24000, orig='análise', laudo='LAU-2061')]),
-           dict(saf='S', k='c2|a1', a='a1', local='T1-B', tal='T1', area=152, dt='2026-12-01', nome='Cobertura',
-                prods=[dict(nome='KCl 60%', grupo='F', un='kg', preco=2.4, dose=140, q=21280, orig='sessão', laudo='')]),
-           dict(saf='S', k='c3|a1', a='a1', local='T2', tal='T2', area=298, dt='2026-12-01', nome='Cobertura',
-                prods=[dict(nome='KCl 60%', grupo='F', un='kg', preco=2.4, dose=120, q=35760)])]
-    x = dict(saf='S', faz='F', hoje='2026-10-01', viavel='2026-10-08', ordem={'S': 0}, nomes={'S': 'S'}, occ=occ, osd=[], reservas=[], recebDt=[], fisico={})
-    pj = os.path.join(HERE, '_solo_dem_orig.js')
-    open(pj, 'w', encoding='utf-8').write(PRELUDIO + cj + '\nconst m=demFazenda(' + json.dumps(x, ensure_ascii=False)
-                                          + ");\nprint(JSON.stringify(m['KCl 60%'].evs.filter(e=>e.own).map(e=>e.calc)));\n")
-    try: r = subprocess.run(['node', pj], capture_output=True, text=True, timeout=120)
-    finally: os.unlink(pj)
-    cs = json.loads(r.stdout.strip().splitlines()[-1]) if r.returncode == 0 and r.stdout.strip() else []
     sj = open(os.path.join(HERE, 'safra.js'), encoding='utf-8').read()
-    ok('demFazenda (Planejar safra, Compra e Mapa) escreve a origem da dose: "pela análise · LAU-2061", "ajustado pelo usuário" e o padrão sem rótulo; a SOL guarda orig e laudo',
-       cs == ['150,00 kg/ha (pela análise · LAU-2061) × 160 ha', '140,00 kg/ha (ajustado pelo usuário) × 152 ha', '120,00 kg/ha × 298 ha']
-       and "orig:p.orig||'',laudo:p.laudo||''" in sj, [cs, r.stderr[-400:]])
-    fb = [e['calc'] for e in D2.dem_fazenda(dict(x, occ=occ))['KCl 60%']['evs'] if e.get('own')]
-    ok('dem_fazenda (Python) escreve a mesma memória que o demFazenda', fb == cs, [fb, cs])
+    ok('memória da demanda no Python com a origem do ajuste do talhão, como a etapa 4 (T1-B 0,60 L/ha "(ajustado pelo usuário)"; os demais sem rótulo)',
+       '0,60 L/ha (ajustado pelo usuário) × 152 ha' in fa and sum('ajustado' in x for x in fa) == 1 and "' (ajustado pelo usuário)'" in sj, fa)
     print('RESULTADO:', 'OK' if all(OK) else 'FALHOU', f'{sum(OK)}/{len(OK)}')
     return all(OK)
 

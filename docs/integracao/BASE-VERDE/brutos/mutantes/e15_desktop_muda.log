@@ -1,0 +1,5 @@
+     referência do desktop: /root/.cache/safrion-gen37-ref/302b26f8e04f-sintetico/tools/prototipo/v37/gen37/_render
+FALHA 15 1440 px igual à referência (menu aberto e recolhido) em 1 telas (36:37 de 145) {'CMP/0': ['SECTION|Safras e solicitações Ab|264|183|1144|695', 'H3|Safras e solicitações|281|196|1110|21', 'DIV|Abra a compra da safra: |281|219|1110|18', '→', 'SECTION|Safras e solicitações Ab|264|195|1144|683', 'H3|Safras e solicitações|281|208|1110|21', 'DIV|Abra a compra da safra: |281|231|1110|18'], 'CMP/1': ['SECTION|Safras e solicitações Ab|100|183|1308|695', 'H3|Safras e solicitações|117|196|1274|21', 'DIV|Abra a compra da safra: |117|219|1274|18', '→', 'SECTION|Safras e solicitações Ab|100|195|1308|683', 'H3|Safras e solicitações|117|208|1274|21', 'DIV|Abra a compra da safra: |117|231|1274|18']}
+
+RESULTADO: 0 ok · 1 falhas (desktop)
+  - 15 1440 px igual à referência (menu aberto e recolhido) em 1 telas (36:37 de 145)

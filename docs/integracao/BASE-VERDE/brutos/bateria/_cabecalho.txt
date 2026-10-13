@@ -1,0 +1,1 @@
+inicio 02:45:30 HEAD 53e7444 + etapas_celular_test.py (desktop) no working tree

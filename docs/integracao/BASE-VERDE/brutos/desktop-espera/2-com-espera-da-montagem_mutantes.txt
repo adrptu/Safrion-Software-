@@ -1,0 +1,10 @@
+etapas_desktop rc=0 t=769s :: RESULTADO: 1 ok · 0 falhas (desktop) 
+e15_assenta_controle_1: 1 troca(s) em _render/OS.dc.html
+e15_assenta_controle_1 rc=0 113s :: RESULTADO: 1 ok · 0 falhas (desktop)
+e15_assenta_controle_2: 1 troca(s) em _render/OS.dc.html
+e15_assenta_controle_2 rc=0 111s :: RESULTADO: 1 ok · 0 falhas (desktop)
+e15_assenta_muda: 1 troca(s) em _render/CMP.dc.html
+e15_assenta_muda rc=1 74s :: FALHA 15 1440 px igual à referência (menu aberto e recolhido) em 15 telas (30:45 de 145) {'CMP/0': ['SECTION|Safras e solicitações Ab|264|183|1144|695', 'H3|Safras e solicitações|281|196|1110|21', 'DIV|Abra a compra da safra: |281 || RESULTADO: 0 ok · 1 falhas (desktop)
+e15_assenta_muda_recolhido: 1 troca(s) em _render/OS.dc.html
+e15_assenta_muda_recolhido rc=1 74s :: FALHA 15 1440 px igual à referência (menu aberto e recolhido) em 15 telas (95:110 de 145) {'OS/1': ['NAV|A|0|0|68|900', 'A||12|18|40|28', 'path||31|26|13|12', '→', 'NAV|A|0|0|80|900', 'A||18|18|40|28', 'path||37|26|13|12']} || RESULTADO: 0 ok · 1 falhas (desktop)
+FIM

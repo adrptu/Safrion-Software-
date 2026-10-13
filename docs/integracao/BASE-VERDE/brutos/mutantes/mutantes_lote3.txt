@@ -1,0 +1,4 @@
+componentes_interacao rc=0 t=44s :: RESULTADO: 10 ok · 0 falhas (interacao) 
+c10_sem_hover_cartao rc=1 57s :: FALHA 10 PA · repouso branco com "Abrir plano →" visível; hover muda fundo e borda; ao sair volta; nada selecionado; mesmo tamanho e posição [['Abrir plano →', True], ['rgb(255, 255, 255)', 'rgb(228, 233, 229)', 'pointer'], ['rgb( || FALHA 18 menu sobreposto · Esc fecha (232 → 68 px) e o foco volta ao botão do menu [232, [232, True]] || RESULTADO: 8 ok · 2 falhas (interacao)
+c14_sem_hover_menu rc=1 57s :: FALHA 14 famílias · botão, menu, chip, busca (hover e foco), talhão do mapa (foco tracejado) e trilha do mapa respondem; título de seção e etapa da faixa (inertes) sem cursor de ação nem hover {'botão primário hover': 'brightness( || RESULTADO: 9 ok · 1 falhas (interacao)
+FIM

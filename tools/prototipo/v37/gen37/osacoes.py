@@ -20,6 +20,11 @@ def btn(t,root='aside[role=dialog]'):
     r=J(f"(()=>{{const b=[...document.querySelectorAll({json.dumps(root+' button')})].find(b=>b.innerText.trim()==={json.dumps(t)}); if(!b) return false; b.click(); return true;}})()"); time.sleep(.35); return r
 def toast(): return J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
 def linha(id_): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
+def cel(id_,col):   # TABELAS-FOCO (5983172395, 5ad4cad): uma variável por coluna; valor da coluna na linha da O.S. (mesmo de os_lib.Os.cel)
+    return J(f"""(()=>{{const hs=[...document.querySelectorAll('[role=columnheader]')].filter(h=>h.offsetParent).map(h=>h.innerText.replace(/[⇅▾▴▲▼]/g,'').replace(/\\s+/g,' ').trim().toUpperCase());
+      const i=hs.indexOf({json.dumps(col)}.toUpperCase()); const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)}));
+      const c=r&&i>=0&&[...r.querySelectorAll('[role=cell]')][i]; return c?c.innerText.replace(/\\s+/g,' ').trim():'';}})()""") or ''
+def cels(id_,*cols): return [cel(id_,k) for k in cols]
 def ids(): return J("[...document.querySelectorAll('[role=row].g2ed')].map(r=>r.innerText.split('\\n')[0].trim())") or []
 def abrir(id_): J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); r.click();}})()"); time.sleep(.4)
 def fechar(): J("(()=>{const b=document.querySelector('aside[role=dialog] button[aria-label=Fechar]'); b&&b.click();})()"); time.sleep(.3)
@@ -38,8 +43,10 @@ try:
     N0=len(ids())   # 01/10: só ordens agrícolas; as de água vivem na Irrigação
     chk('lista inicial: 10 ordens agrícolas = chip Todas, sem OS-0419/OS-0422/OS-0423', N0==10 and chips()[:1]==[f'Todas {N0}'] and not any(x in ids() for x in ('OS-0419','OS-0422','OS-0423')), (ids(), chips()[:1]))
     # ---------- os-07: selos e percentual ----------
-    l=linha('OS-0421'); chk('lista mostra percentual: 190 / 350 ha · 54 % · saldo 160 ha', '190 / 350 ha · 54 %' in l and 'saldo 160 ha' in l, l)
-    l=linha('OS-0430'); chk('OS-0430 A liberar com dono Ana (agrônoma), sem selo de agrônomo', 'A liberar' in l and 'Ana (agrônoma) · ' in l and 'Aguardando agrônomo' not in l, l)
+    # TABELAS-FOCO incremento 1 (5983172395, 5ad4cad): Realizado | Saldo | Progresso e Quem resolve | Próxima ação | Prazo em colunas próprias
+    v=cels('OS-0421','Área','Realizado','Progresso','Saldo'); chk('lista mostra percentual: Área 350 ha · Realizado 190 ha · Progresso 54,3 % · Saldo 160 ha', v==['350,00 ha','190,00 ha','54,3 %','160,00 ha'], (v,linha('OS-0421')))
+    l=linha('OS-0430'); v=cels('OS-0430','Quem resolve','Prazo')
+    chk('OS-0430 A liberar com dono Ana (agrônoma) e prazo antes de 25/09, sem selo de agrônomo', 'A liberar' in l and v==['Ana (agrônoma)','antes de 25/09'] and 'Aguardando agrônomo' not in l, (v,l))
     l=linha('OS-0420'); chk('OS-0420 impedida, sem selo de revisão', 'Impedida · ativo bloqueado' in l and 'Revisão de saldo' not in l, l)
     kanban(); k=cartao('OS-0421'); chk('cartão do Kanban: 190/350 ha · 54 % · saldo 160 ha', '190/350 ha · 54 % · saldo 160 ha' in k, k)
     k=cartao('OS-0420'); chk('cartão da OS-0420 sem selo de revisão', 'Impedida · ativo bloqueado' in k and 'Revisão de saldo' not in k, k)
@@ -49,7 +56,12 @@ try:
     cor=J("""(()=>{const c=(id,t)=>{ const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith(id)); const s=[...r.querySelectorAll('span')].filter(x=>x.innerText.trim().startsWith(t)).pop(); return getComputedStyle(s).color; };
       return [c('OS-0431','Falta máquina'), c('OS-0420','Impedida'), c('OS-0421','Parcial')];})()""")
     chk('falta de máquina da OS-0431 continua vermelha (mesma cor de Impedida)', cor and cor[0]==cor[1] and cor[0]!=cor[2], cor)
-    ov=J("(()=>{const t=document.querySelector('[role=table]').parentElement; return [t.scrollWidth,t.clientWidth];})()"); chk('lista cabe sem rolagem horizontal', ov[0]<=ov[1]+1, ov)
+    # TABELAS-FOCO (5983172395 item 6; mesma regra de ostest.py desde 5ad4cad): uma variável por coluna; a página não rola de lado, a tabela
+    # cabe na caixa ou rola dentro dela (overflow-x auto/scroll), a 1ª coluna (O.S.) fica à vista e o filtro Talhão não some
+    ov=J("""(()=>{const t=document.querySelector('[role=table]'); const sc=t.closest('.g2rola')||t.parentElement; const R=sc.getBoundingClientRect(); const h=t.querySelector('[role=columnheader]').getBoundingClientRect();
+      const ox=getComputedStyle(sc).overflowX; const cabe=sc.scrollWidth<=sc.clientWidth+1; const b=document.getElementById('ost_btn').getBoundingClientRect();
+      return {pagina:document.documentElement.scrollWidth<=innerWidth+1, caixa:cabe||ox==='auto'||ox==='scroll', c0:h.left>=R.left-1&&h.right<=R.right+1&&h.width>0, talhao:b.left>=0&&b.right<=innerWidth&&b.width>0, larg:[sc.scrollWidth,sc.clientWidth]};})()""") or {}
+    chk('lista sem rolagem horizontal da página: a tabela cabe ou rola dentro da caixa, 1ª coluna e filtro Talhão à vista', ov.get('pagina') and ov.get('caixa') and ov.get('c0') and ov.get('talhao'), ov)
     chk('cabeçalho conta 3 impedidas (OS-0418, OS-0420 e OS-0431)', '2 em execução · 3 impedidas' in J("document.body.innerText"))
     abrir('OS-0431'); t=pan()
     chk('OS-0431: versão v1 da REC-014 v2, sem revisão', 'REC-014 v2 · v1' in t and 'v1 aprovada' not in t and not temb('Revisar versão'), t[:300])
@@ -80,7 +92,7 @@ try:
     setv('aside[role=dialog] textarea[aria-label="Motivo da dispensa"]','Área alagada na baixada')   # CTL-3 (R-D3): sem caixa; quem decide é o perfil
     btn('Confirmar dispensa'); t=pan()
     chk('OS-0420: 70 ha recusados (70 % acima de 20 % · exige Direção)', '70 ha = 70 % acima de 20 % · exige Direção.' in t, t[:600])
-    btn('Voltar'); chk('recusa não muda o saldo (70 ha)', 'saldo 70 ha' in linha('OS-0420') and 'dispensado' not in linha('OS-0420'), linha('OS-0420'))
+    btn('Voltar'); v=cels('OS-0420','Saldo','Dispensado'); chk('recusa não muda o saldo (70 ha) nem registra dispensado', v==['70,00 ha','—'], (v,linha('OS-0420')))
     fechar(); abrir('OS-0421'); chk('OS-0421 em execução: Dispensar saldo, sem Cancelar', temb('Dispensar saldo') and not temb('Cancelar sem execução'))
     btn('Dispensar saldo'); setv('aside[role=dialog] input[aria-label="Área a dispensar em hectares"]','40')
     btn('Confirmar dispensa'); chk('motivo obrigatório', 'Informe o motivo da dispensa.' in pan())
@@ -92,7 +104,7 @@ try:
     ap=J("[...document.querySelectorAll('aside[role=dialog] [style*=\"grid-template-columns: 64px\"]')].slice(1).map(r=>r.innerText.replace(/\\s+/g,' '))") or []
     pv=[x for x in ap if 'Previsto' in x]
     chk('turnos previstos acompanham o saldo (50 + 50 + 20)', len(pv)==3 and 'prev. 50 ha' in pv[0] and 'prev. 50 ha' in pv[1] and 'prev. 20 ha' in pv[2], ap)
-    chk('lista: saldo 120 ha e dispensado 40 ha', '190 / 350 ha · 54 % saldo 120 ha dispensado 40 ha' in linha('OS-0421'), linha('OS-0421'))
+    v=cels('OS-0421','Área','Realizado','Progresso','Saldo','Dispensado'); chk('lista: Realizado 190 ha · Progresso 54,3 % · Saldo 120 ha · Dispensado 40 ha', v==['350,00 ha','190,00 ha','54,3 %','120,00 ha','40,00 ha'], (v,linha('OS-0421')))
     btn('Dispensar saldo'); setv('aside[role=dialog] input[aria-label="Área a dispensar em hectares"]','31'); setv('aside[role=dialog] textarea[aria-label="Motivo da dispensa"]','x'); btn('Confirmar dispensa')
     chk('limite é acumulado (40 + 31 = 71 ha > 70 ha)', '71 ha = 20,3 % acima de 20 % · exige Direção.' in pan(), pan()[:500])
     btn('Voltar'); fechar()

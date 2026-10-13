@@ -68,7 +68,6 @@ Baseline executado: `python3 cal01_test.py` dá **43 ok · 2 falhas já no HEAD*
 | **DEM-06** | O uso do plano com data passada e sem O.S. continua fora da demanda, mas deixa de se chamar "realizado". | Afirmar execução sem registro. | RN-003 |
 | **DEM-07** | O físico apto e os recebimentos são os da fazenda da safra. Estoque de outra fazenda não cobre a demanda. | Compra a menos na Lagoa Grande (Glifosato 293 L a partir de 30/09). | RN-011, l.5127, l.9184 |
 | **DEM-08** | Na Compra (etapa 4), quando nenhuma proposta chega antes da falta, a escolha padrão é a que chega primeiro (empate: menor custo), **sem justificativa obrigatória**. O aviso "chega depois da falta" continua. Quando existe proposta a tempo, a trava atual fica. | A trava sem dano que a Ureia passaria a disparar: "Enviar à Direção" e "Aprovar compra" ficariam bloqueados sem alternativa possível. | AGENTS §4, CAL-01 (l.9182: pedir antecipação ou alternativa) |
-| **DEM-09** (acrescentada na implementação, 09/10) | Com a demanda viva (SAF e Mapa leem as O.S. do cenário), ela pode baixar depois do envio da solicitação (O.S. cancelada, plano mudado). No Planejar safra (etapa 4), o insumo que a SOL pede acima da líquida de agora fica "Acima da demanda · <diferença>", inclusive o que saiu da demanda; a primária vira "Atualizar <SOL>" e a versão nova tira só a diferença (o complemento continua subindo o que falta). Com pedido já emitido a SOL não muda: a linha só avisa e o excedente entra no estoque. Regra em `cal01.js` (`demSolSit`, `demSolRevisar`); a Compra lê o registro da versão inteiro. | Compra a mais em silêncio: OS-0418 cancelada depois do envio e a SOL-2026-07 seguia cotando 1.140 kg de Ureia (R$ 3.534,00), sem sinal no Planejar safra e com R$ 430.255,00 na Compra. | RN-006, AC-08, CAL-01, AGENTS §4 |
 
 A OS-0420 recebe a chave da própria origem, `c4|a3`. As fontes:
 - `processo_os.py:120`: "Soja alta tecnologia v6 · REC-014 v2 · Plantio e adubação de base";
@@ -81,7 +80,6 @@ Sem plano no T4, a ordem conta inteira (N7). Com o plano aplicado, ela cobre 100
 - **PA-C2:** a O.S. de várias chaves sem área por chave usa rateio pela área. No software real, a O.S. traz a área de cada chave.
 - **PA-C3:** a O.S. sem vínculo conta a mais, com aviso, em vez de sumir.
 - **PA-C4 (DEM-08):** sem proposta a tempo, o padrão é a que chega primeiro, sem justificativa.
-- **PA-C5 (DEM-09):** a redução da SOL não pede confirmação extra: é a primária da etapa 4 e nomeia o insumo e a diferença. A Compra recomeça a cotação na versão nova, como já faz no complemento.
 
 A entrada de Controle transversal fica para depois (padrão 3 do pedido).
 
@@ -327,79 +325,3 @@ Contraprovas:
 4. **Espelho JS/Python (ENG-011).** É o padrão do protótipo, com teste de paridade. O pendente só existe no Python (`os_dem`).
 5. **Leitura estática da semente.** Não regride em relação ao HEAD; fica como fatia seguinte.
 6. **NEC-028, bloqueio da Nova ordem e `cenLote` entre fazendas.** São problemas reais, mas de outra origem. Vão para tarefas próprias e não entram nesta frente.
----
-
-## 9. Revisão adversarial do `c5d337a` (09/10): correções
-
-A recusa 5 acima ("leitura estática da semente") caiu: com as O.S. vivas e o estoque fixo, a demanda misturava dois estados. Agora tudo vem do mesmo cenário.
-
-| Achado | Correção | Regressão |
-|---|---|---|
-| **1 · S2** Entregar 8.000 kg de NPK cortava 8.000 kg da compra (R$ 27.200); devolver 30 L de Fungicida A comprava 24,5 L a mais; cancelar a OS-0424 deixava 24 L na Safrinha. | **DEM-07 ampliada.** `cenEstDem` (cenario.js) lê do mesmo cenário das O.S.: físico apto da fazenda (lote − quarentena), reservas ativas (`cenResPropria`, só de O.S. em A liberar, Liberadas ou Em execução; chave = ID da O.S.) e recebimentos previstos menos o que o Estoque já conferiu da nota do pedido. `cenDemEntradas` junta ordens e estoque para Planejar safra, Mapa › Insumos e Compra. Espelho Python: `dados2.est_dem`, paridade testada. | `demanda_unica_test` G0–G7 (G1–G5 vermelhos no `c5d337a` com os números da revisão); nav V1, V2 |
-| **2 · S3** A Compra seguia cotando a Ureia da OS-0418 cancelada, sem aviso. | DEM-09 na Compra: `demSolAcima` (cal01.js). A conta é a da versão da SOL: o plano que o Planejar safra usou fica gravado na versão (`ent`, com os ajustes da tela), e as ordens e o estoque vêm do cenário de agora. Aviso sem trava nas etapas 2, 4 e 5: "Acima da demanda · 1.140 kg · o Planejar safra atualiza a SOL-2026-07". Com pedido emitido: "pedido já emitido: o excedente entra no estoque". | F4, F5; nav C1, C2, A1 |
-| **3 · S3** "Atualizar SOL" gravava em nome de Ana e qualquer perfil reduzia a compra. | Enviar, complementar ou baixar a solicitação exige gestor ou agrônomo (`cenExigeUm`, padrão do CTL-3); sem o papel, recusa e nada muda. A versão nova guarda quem, quando e o que mudou (`atu`, `hist`); o envio original fica. A Compra mostra "atualizada em … por …". | nav Q1, Q2 |
-| **4 · S4** SU-03 e SU-03det com "pendência 0 L"; MB-05 verde oferecendo "Registrar divergência". | SU-03 e SU-03det sem conflito quando a SOL não tem pendência (reserva da OS-0424 e uso da safra que o lote cobre); MB-05 só oferece a divergência quando há conflito. | `sutest` (SU-03det) |
-| **5 · S4** Mutantes sobreviventes. | Asserções novas: rateio pela área (H1), limite de 30 dias (H2), desempate pelo custo (H3), outra fazenda não cobre (H4), reserva só de requisição ativa (H5), 1º uso no C2 (C2b). J2, J9 e J16 são equivalentes (revisão). | H1–H5, C2b |
-| Risco lido 1 | Pedido emitido antes de um complemento deixa de ser esquecido: a versão nova guarda `pedEmit`, e nada baixa. | nav P1 |
-| Risco lido 2 | Reduzir com a compra em andamento avisa: "O andamento da compra da versão anterior (…) recomeça nesta versão." | nav Q2 |
-| Risco lido 3 | Com complemento e redução juntos, a primária diz "Atualizar <SOL>". | lido no código |
-
-**Limite que fica:** os ajustes de plano feitos na tela do Planejar safra só ficam na tela. A Compra os lê da versão da SOL, mas o Mapa › Insumos continua com o plano da semente. Ao recarregar, o Planejar safra também volta ao plano da semente.
-
----
-
-## 10. Revisão do `853a6a8` (09/10, lente estado): correções
-
-Reproduções da revisão em `ACHADOS-v1` (motor e tela). Cada linha tem um commit próprio e regressão que falha no `853a6a8` e passa depois: `demanda_unica_test.py` (seção I, motor real) e `demanda_estado_nav_test.py` (navegador, comandos das próprias telas).
-
-| Achado | Correção (commit) | Regressão |
-|---|---|---|
-| **1 · S2** Custódia fora do pendente da O.S. ativa não era suprimento: cancelar a OS-0425 com 8.000 kg entregues comprava 8.000 kg de NPK de novo (+R$ 27.200); devolver a sobra mudava a compra (MAP −500 kg da OS-0417); a OS-0421 com sobra antecipada deixava 7,98 L na Safrinha. | `cenOsSup`/`_os_sup`: bruto, custódia, need e sobra por insumo. A sobra (O.S. cancelada, em conferência, encerrada ou o que passa do pendente) entra no saldo inicial da fazenda da O.S. (`sobra`, `d.cust`), com a memória "+ X em custódia sem uso nas O.S., a devolver ao Estoque". Semente: MAP 80.000 → 79.500 kg, Safra 2026/27 R$ 430.255,00 → R$ 428.305,00 (`7ffe412`). | I1, I2, I3 e I4 (propriedade, 44 casos: entregar e cancelar = cancelar; devolver qualquer custódia não muda; apontar na dose não muda; B20 continua); nav K1, K2 |
-| **7 · S3 (base)** Cancelar com material entregue gravava "nada tinha sido entregue" e a custódia ficava sem destino. | `osc_cancTxt`: o texto sai da requisição ("8.000 kg de NPK 20-05-20 entregue segue em custódia com Paula: receba a devolução no Estoque"), dono Rui (almoxarife), prazo "receber a devolução"; a O.S. cancelada mostra selo, situação do insumo e o próximo passo com o link "Receber devolução" (`b64d556`). | I5; nav K3 |
-| **2 · S2** NF 4533 em quarentena virava falta firme: Semente de soja 58 W 15.456 kg, +R$ 146.832, primária "Enviar para cotação" (contra PRD 65.4, CAL-01 "Qualidade pendente", DEMO-02). Devolução bloqueada idem. | Quarentena com laudo pendente = cobertura condicionada: `liq` é a falta mesmo com ela liberada; `cond` é a falta condicionada à qualidade, visível ("Qualidade pendente · 15.456 kg") no Planejar safra, na Compra, no Mapa e na memória, fora do total e da primária, com a decisão ("o gestor libera ou reprova no Estoque; sem nova compra automática"). Laudo liberado → coberto; "Reprovar com o laudo" (`cenReprovarQuarentena`, com motivo) → falta firme com o motivo (`e907539`). | I6, I7; nav Q1, Q2, Q3 |
-| **4 · S3** Turno fechado no app sem sinal mudava a compra até o envio e discordava da custódia da O.S. | A custódia da demanda é a da tela O.S. (`osReqVis`): o consumo ainda no aparelho volta até o envio; com o sinal, o resultado é o de um apontamento direto (`6fce782`). | I8; nav A7 |
-| **5 · S3** Reserva de O.S. que não precisa de mais nada contava como demanda até a conferência (OS-0430 20 L; OS-0424 +1 L). | A reserva entra pela parte útil (`ef` até o need); acima disso não é demanda de ninguém (`1fe0902`). | I9; nav R1 |
-| **3 · S3** Reserva entre fazendas contava duas vezes (OS-0501 da Lagoa Grande com lotes da Santa Rita) e a entrega mudava a compra da Lagoa Grande. | `os_base` leva o local de cada fazenda; a reserva em lote de outra fazenda cobre a ordem na fazenda dela ("− 147,93 L reservados em Almox. defensivos (Santa Rita)") e é demanda só na fazenda do lote; a soma não muda na liberação e a entrega não muda nada (`84494d7`). `cenLote` continua sem olhar a fazenda (transferir é decisão de quem libera). | I10; nav F1 |
-| **6 · S3** SU-03det e MB-05 diziam "sem pendência de compra" com a demanda pedindo complemento (números da semente no build). | `dados2.js_dem_viva`: as duas telas leem a mesma demanda viva do Planejar safra e da Compra; lote, reserva, uso da safra, qualidade pendente e pendência de compra acompanham o Estoque; o MB-05 só oferece "Registrar divergência" com pendência de verdade. O KPI do SU-03 deixa de afirmar cobertura (`4130972`). | nav D3; `sutest` (SU-03det) |
-| Bateria (vermelhos novos) | O Mapa › Insumos refaz a conta quando custódia ou quarentena mudam (`6202376`). `saf_cmp_continuidade_test` passa a esperar os 500 kg da OS-0417 no "usado antes" (90.500 kg); o painel do laudo volta a dizer "informe o laudo que aprova o material" (`esttest`) (`78711bb`). | `saf_cmp_continuidade_test`, `esttest` |
-
-**Evidência (executado, 12–13/10/2026).** Logs em `scratchpad/ctl4fix/logs/{base,cand}/` com `_resumo.txt` e `_comparacao.txt`:
-- `demanda_unica_test`: 66 ok · 0 falhas na candidata; o mesmo arquivo contra o código do `853a6a8`: 43 ok · 23 falhas — I1 a I10 (regressões) e A3, A7, A8, B4, B5, B12, B18, B20, E2, E3, G0, G1, G5 (expectativas novas da semente: custódia da OS-0417 e quarentena condicionada).
-- `demanda_estado_nav_test` (novo): 11 ok · 0 falhas na candidata; contra o `_render` do `853a6a8`: 2 ok · 9 falhas (K1, K2, K3, Q1, Q2, A7, R1, F1 e D3; Q3 é controle e passa nos dois).
-- Mesmo resultado na base e na candidata (32 testes): cal01, quantidade, ap_unico unit e nav, demanda_unica_nav (29), est_cenario, app_cenario, cmptest, pttest, sutest, saftest (sem erro), mbtest a, talmapa, map_aprov, tabelas_saf/est/os, saf_operacoes (87), acao_unica saf, links_ocultos, est_fix1/2, app_entrega_parcial, app_os0424, app_saldo_zero, app_mb03_turno, inicio_entrega, os_ator, aprova_quem_decide (102), varredura (140/140), acoes_duplicadas (0); `saf_cmp_continuidade` 31 ok e `esttest` OK depois do `78711bb`.
-- Vermelhos que já estavam no `853a6a8`, iguais nos dois: `consumo_divergente_test` 20/21, `os_cenario_test` 19/20, `ostest` 32 ok · 1, `testes_pedido` T01, T02 e T05.
-- build 0 FALHA; montar_render 140 páginas.
-
-**Recusado:** nada. **Limite que fica:** a sobra de custódia de uma O.S. com duas requisições do mesmo insumo é calculada por requisição (não há caso na semente); o SU-03det continua sendo o lote F26-02 do DEMO-18.
-
-### 10.1 Revisão do `16fb55e` (PR #47, comentário 6136083713 do Codex): 4 S3
-
-Tarefa `CTL4-FIX-REV-20261013-01`. Os quatro procedem por execução: o contraexemplo de cada um foi repetido por comandos reais e falha no `16fb55e` (motor: `demanda_unica_test` seção J; tela: `demanda_estado_nav_test` M1 e `est_laudo_lote_nav_test`, novo). Sem redesenho: um commit por ajuste.
-
-| Ajuste | Contraexemplo do Codex | Correção (commit) | Regressão |
-|---|---|---|---|
-| **1 · S3** Mapa perde a qualidade pendente com falta firme | Demanda 100 kg, estoque 0, quarentena 40: o Mapa dizia só "Falta 60 kg" e a compra. No cenário: 30 L de Fungicida A reprovados e mais 10 L devolvidos bloqueados davam só "Falta 5 L" no Mapa, no SU-03det e no MB-05. | `demSituacao` devolve a parte condicionada como 4º item ("Qualidade pendente · 40 kg"). O detalhe diz "40 kg em quarentena aguardam laudo (o gestor libera ou reprova no Estoque); se reprovar, faltam mais 40 kg · fora da compra". Rótulo, cor e ação seguem a compra firme de 60 kg. Mapa, SU-03det e MB-05 mostram as duas coisas; Planejar safra e Compra já mostravam (`81aef42`). | J1 (100/0/40), J1b (cenário); nav M1 nas cinco telas (no `est_laudo_lote_nav_test` desde o `718a914`) |
-| **2 · S3** Memória atribui todo o reprovado ao último laudo | Devolver 10 L (REQ-035/F26-02) bloqueados, reprovar LAB-A (motivo A), devolver mais 10 L, reprovar LAB-B (motivo B): "Reprovado: 20 L … laudo LAB-B: motivo B". | `cenRepsLote` (espelho `dados2._reps_lote`) lê o histórico do lote: cada reprovação com quantidade, laudo, motivo e as entradas bloqueadas que decidiu. A memória diz "Reprovado: 20 L do lote F26-02 (devolução da REQ-035) = 10 L no laudo LAB-A: motivo A + 10 L no laudo LAB-B: motivo B"; um só laudo segue o formato de antes. O selo do lote no Estoque e o aviso "só tem material reprovado" usam a mesma lista. Sem histórico que feche com o reprovado (semente sem movimentos), vale o registro do lote, sem inventar proveniência (`7551f1a`). | J2 (Python = JS); nav L2 |
-| **4 · S3** Reprovação pela mesma autora da entrada sem revisão posterior | Nos comandos do ajuste 2, Ana devolve bloqueado e reprova: a reprovação não tinha `rev`; liberar o mesmo acúmulo tinha. | `cenRevEntrada`: a regra que a liberação já usava, numa função só, chamada pelas duas decisões. A reprovação grava `rev` no movimento e no lote, e o aviso diz "Fica revisão posterior pendente (Ana registrou a entrada bloqueada e decidiu)". A decisão vale; não há veto nem segundo aprovador (`0ee25bd`). | J4 (positivo: Ana e Ana; negativo: Paula e Ana); nav L2b, L3 |
-| **3 · S3** Motivo migra entre lotes | Laudo do K26-11, digitar "Motivo exclusivo K26-11", Manter bloqueado, abrir o F26-02: o campo já trazia o motivo do KCl. | Abrir um lote, manter bloqueado, liberar, reprovar, trocar o perfil ou restaurar limpam o laudo e o motivo juntos. Foi escolhido limpar, não guardar rascunho por lote. Continua igual: a abertura foca `est-laudo`, o Tab chega a `est-laudo-mot` e a 390×844 nada transborda (`6236d70`). | nav L1 (com troca direta pela linha), L1b |
-
-**Limites.**
-- O ajuste 4 aplica a política vigente da liberação sem mudá-la: marca quem registrou qualquer entrada bloqueada do lote, inclusive uma já decidida antes. A marca é conservadora e não trava nada.
-- O ajuste 2 não reparte o reprovado quando o histórico não fecha; isso não acontece com os comandos atuais.
-
-**Evidência (executado, 13/10/2026).** Logs em `scratchpad/ctl4rev01/logs/{cand,base}/`. A base é o `16fb55e` extraído com `git archive`, com build e render próprios.
-- Candidata: build 0 FALHA; montar_render 140 páginas; varredura 140/140.
-- Candidata, testes de motor: `demanda_unica_test` 70 ok · 0; `cal01_test` 45 ok · 0; `aprova_quem_decide_test` 102/102.
-- Candidata, telas: `est_laudo_lote_nav_test` 7 ok · 0; `demanda_estado_nav_test` 11 ok · 0 (o mesmo arquivo do `16fb55e`); `demanda_unica_nav_test` 29 ok · 0; `saf_cmp_continuidade_test` 31 ok · 0; `esttest` OK; `est_fix1` 13/13; `est_fix2` 11/11; `est_cenario_test` 15/15; `talmapa_test` 8/8; `sutest` OK; `mbtest a` 0 falhas; `cmptest` 0 falhas.
-- `16fb55e` com os testes novos: `demanda_unica_test` 66 ok · 4 falhas, exatamente J1, J1b, J2 e J4.
-  - J2 dá "Reprovado: 20 L … · laudo LAB-B: motivo B".
-  - J4 dá `rev` vazio nas duas reprovações e preenchido na liberação.
-- `16fb55e`, `est_laudo_lote_nav_test`: 3 ok · 4 falhas, exatamente L1, L2, L2b e M1.
-  - L1: o F26-02 abre com "Motivo exclusivo K26-11".
-  - M1: Planejar safra e Compra já mostravam "Qualidade pendente · 10,0 L"; Mapa ("Falta 5 L"), SU-03det e MB-05 não.
-  - L1b e L3 (controles) passam nos dois.
-- Vermelho novo: nenhum.
-  - A primeira execução do `demanda_estado_nav_test`, ainda com o M1, foi interrompida pelo limite de 900 s (rc=124, carga da máquina ≈ 9–10), com os dez casos anteriores OK.
-  - O M1 passou para o teste do laudo (`718a914`); antes disso, o mesmo arquivo com o M1 deu 12 ok · 0 no render do ajuste 1.
-
-**Recusado:** nada; os quatro procedem por execução.

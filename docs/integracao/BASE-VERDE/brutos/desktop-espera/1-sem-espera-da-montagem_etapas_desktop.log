@@ -1,0 +1,6 @@
+     referência do desktop: /root/.cache/safrion-gen37-ref/302b26f8e04f-sintetico/tools/prototipo/v37/gen37/_render
+     (informativo) mesmo conjunto de elementos, contagem do mapa varia: ['IN-04/0', 'IN-04/1']
+FALHA 15 1440 px igual à referência (menu aberto e recolhido) em 145 telas (0:145 de 145) {'COLH/0': ['DIV|Tela: Previsão e colheit|-1|899|1|1', '→'], 'AG-07/1': ['LABEL||126|292|402|31', 'circle||139|303|7|7', 'path||145|310|2|2', '→', 'DIV|Carregando culturas e al|113|283|1282|17', 'LABEL||126|319|402|31', 'circle||139|330|7|7'], 'IN-03/1': ['DIV|Tela: Agenda e pendência|-1|899|1|1', '→'], 'MB-07/1': ['DIV|Tela: Contagem de frutos|-1|899|1|1', '→', 'DIV||0|0|1181|3', 'DIV||-1|899|1|1'], 'OS/1': ['DIV|Tela: Ordem de Serviço ·|-1|899|1|1', '→']}
+
+RESULTADO: 0 ok · 1 falhas (desktop)
+  - 15 1440 px igual à referência (menu aberto e recolhido) em 145 telas (0:145 de 145)

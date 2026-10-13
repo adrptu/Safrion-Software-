@@ -6,8 +6,10 @@ contexto e rascunho preservados ao trocar de etapa e de zoom; painel lateral cob
 Larguras: 390 px (quadro de 390), 325 px (quadro do site com a janela de 390) e zoom de 200 % (1440 px → 720 px CSS, escala 2).
 Uso: python3 etapas_celular_test.py              celular (≈ 50 s, capturas em _probe/q_celular_<TAG>_*.png, TAG=depois)
      python3 etapas_celular_test.py complemento  listas alcançáveis, títulos de bloco, CD-07, tela baixa, folha de etapas (≈ 60 s)
-     python3 etapas_celular_test.py desktop A B  1440 px igual à base (ANTES_DIR, padrão ../gen37_antes/_render), menu aberto e
-                                                 recolhido, nas telas A:B da lista ordenada de todas as telas (sem A B: todas)
+     python3 etapas_celular_test.py desktop A B  1440 px igual à referência, menu aberto e recolhido, nas telas A:B da lista ordenada
+                                                 de todas as telas (sem A B: todas). Referência: ANTES_DIR (um _render pronto) ou, sem
+                                                 ele, o _render montado pelo próprio teste a partir do commit ANTES_REF (padrão
+                                                 REF_DESKTOP), em cache por commit (ANTES_CACHE, padrão ~/.cache/safrion-gen37-ref)
      python3 etapas_celular_test.py faixa        varredura de largura (1400 → 300 px) em todas as telas com etapas
 CDP_PORT=<porta> anexa a um Chrome já aberto (máquina carregada)."""
 import sys, os, time, subprocess, json, glob
@@ -92,6 +94,29 @@ class ChromeAnexo(Chrome):
             except Exception: pass
         if self.dir: shutil.rmtree(self.dir,ignore_errors=True)
 TAG=os.environ.get('TAG','depois'); MODO=sys.argv[1] if len(sys.argv)>1 else 'celular'
+# ---- referência do modo desktop (BASE-VERDE) ----
+# Antes: ../gen37_antes/_render, uma cópia feita à mão na máquina de quem escreveu o teste; fora dela o item 15 falhava sempre ("base
+# ausente") e toda bateria precisava rodar a versão anterior para separar esse vermelho. Agora o teste monta a referência sozinho:
+# git archive do commit fixo → build.py → montar_render.py, em cache por commit e modo de dados. REF_DESKTOP é o último desktop de 1440 px
+# aceito (V56, candidata composta); muda só quando uma mudança do desktop for decidida, com o motivo no commit.
+REF_DESKTOP='302b26f'
+def ref_desktop(ref):
+    raiz=subprocess.run(['git','-C',HERE,'rev-parse','--show-toplevel'],capture_output=True,text=True).stdout.strip()
+    sha=subprocess.run(['git','-C',raiz or HERE,'rev-parse','--verify','--quiet',ref+'^{commit}'],capture_output=True,text=True).stdout.strip()
+    if not sha: return f'(commit {ref} não encontrado neste repositório)'
+    modo='sintetico' if os.environ.get('SAFRION_DADOS')=='sintetico' else 'padrao'
+    dest=os.path.join(os.environ.get('ANTES_CACHE') or os.path.join(os.path.expanduser('~'),'.cache','safrion-gen37-ref'),f'{sha[:12]}-{modo}')
+    R2=os.path.join(dest,'tools','prototipo','v37','gen37','_render')
+    if os.path.exists(os.path.join(R2,'.pronto')): return R2
+    tmp=dest+f'.tmp{os.getpid()}'; shutil.rmtree(tmp,ignore_errors=True); os.makedirs(tmp)
+    arq=subprocess.Popen(['git','-C',raiz,'archive',sha,'tools/prototipo/v37'],stdout=subprocess.PIPE)
+    subprocess.run(['tar','-x','-C',tmp],stdin=arq.stdout,check=True); arq.stdout.close(); arq.wait()
+    g=os.path.join(tmp,'tools','prototipo','v37','gen37')
+    for cmd in (['python3','build.py'],['python3','montar_render.py']):
+        r=subprocess.run(cmd,cwd=g,capture_output=True,text=True)
+        if r.returncode!=0 or 'FALHA' in r.stdout: return f'(montagem de {ref} falhou em {cmd[1]}: {(r.stdout+r.stderr)[-300:]})'
+    open(os.path.join(g,'_render','.pronto'),'w').write(sha+'\n')
+    shutil.rmtree(dest,ignore_errors=True); os.rename(tmp,dest); return R2
 PROBE=os.environ.get('PROBE_DIR') or os.path.join(HERE,'_probe'); os.makedirs(PROBE,exist_ok=True)
 def serve(d):
     p=free(); s=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',d],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); return p,s
@@ -233,12 +258,18 @@ try:
         res={}
         for w,h in ((800,360),(568,320)):
             for pg in ('CMP','SAF','EST'):
-                abre(pg,w,h); J("(()=>{const a=document.querySelector('.etp-atual'); a&&a.getClientRects().length&&a.click();})()"); time.sleep(.25); res[f'{pg} {w}x{h}']=J(FOLHA)
+                # BASE-VERDE: a faixa só fica compacta (rótulo + folha) quando a completa não cabe (regra do item 16: "faixa completa sem
+                # sobreposição ou compacta"). Com 4 etapas desde 8a08de9 (SAF etapa única), a faixa do SAF cabe inteira a 800 px e não tem
+                # folha: aí as etapas ficam todas na faixa, sem vazar nem sobrepor, e a última à vista (MEDIR antes do toque)
+                md=abre(pg,w,h); comp=J("(()=>{const a=document.querySelector('.etp-atual'); const v=!!(a&&a.getClientRects().length); if(v) a.click(); return v;})()"); time.sleep(.25)
+                res[f'{pg} {w}x{h}']=dict(J(FOLHA),compacta=comp,etapasVis=md.get('etapasVis'),vazam=md.get('vazam'),sobrepoe=md.get('sobrepoe'),faixaFolha=md.get('folha'))
         shot('EST_568x320_folha')
         abre('IR-02',800,360); u=J(UTIL); pr=J("(()=>{const e=[...document.querySelectorAll('header a,header button')].find(x=>x.innerText.trim()==='Programar irrigação'); e.scrollIntoView({block:'center'}); const r=e.getBoundingClientRect(); const h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2); return r.bottom<=innerHeight&&!!h&&e.contains(h);})()")
         shot('IR-02_800x360')
         chk('20 tela baixa (800×360 e 568×320) · folha com a última etapa à vista (CMP, SAF: só informa) ou tocável (EST: seções); IR-02 com ≥ 280 px úteis (cabeçalho rola, faixa fica) e "Programar irrigação" alcançável',
-            all(r['aberta'] and r['folha'] and (r['ultTocavel'] or (k.split()[0] in GUIADO and r['ultVisivel'])) for k,r in res.items()) and u['rolaColuna'] and u['util']>=280 and pr, [res,u,pr])
+            all(r['aberta'] and (r['ultTocavel'] or (k.split()[0] in GUIADO and r['ultVisivel'])) and
+                (r['folha'] if r['compacta'] else (not r['faixaFolha'] and r['ultVisivel'] and r['etapasVis']==r['n']>=2 and not r['vazam'] and r['sobrepoe']==0))
+                for k,r in res.items()) and u['rolaColuna'] and u['util']>=280 and pr, [res,u,pr])
         # 21 · zoom de 200 % nas telas de cabeçalho alto (antes 95–111 px de conteúdo)
         res={}
         for pg in ('CO-02','CO-02det','CO-06','CO-06det','LO-02det'): abre(pg,720,450,2); res[pg]=J(UTIL)
@@ -262,7 +293,7 @@ try:
         ERRL.extend(errs()); chk('25 sem erro de JS nas telas visitadas', not ERRL, ERRL[:5])
     elif MODO=='desktop':
         # 1440 px igual à base, menu aberto e recolhido, em todas as telas (fatias A:B para caber no tempo de um comando)
-        AD=os.environ.get('ANTES_DIR',os.path.join(HERE,'..','gen37_antes','_render'))
+        AD=os.environ.get('ANTES_DIR') or ref_desktop(os.environ.get('ANTES_REF',REF_DESKTOP)); print('     referência do desktop:',AD,flush=True)
         todas=sorted(os.path.basename(f)[:-8] for f in glob.glob(os.path.join(HERE,'_render','*.dc.html')))
         A,B=(int(sys.argv[2]),int(sys.argv[3])) if len(sys.argv)>3 else (0,len(todas))
         pags=todas[A:B]
@@ -275,24 +306,37 @@ try:
             for rec in ('0','1'):
                 for porta in (p2,p):   # a escolha do menu fica no navegador por origem: gravar nas duas (base e atual)
                     c.goto(f'http://127.0.0.1:{porta}/Main.dc.html',wait=.4); J(f"localStorage.setItem('safrion.menuRecolhido','{rec}')")
+                # BASE-VERDE: a barra de carga entre telas (DS-RETORNO, g2carga: #g2-carga com classe até 0,7 s depois da montagem) é retorno
+                # passageiro, não desenho: mede depois que ela termina (até 3 s), nos dois lados; se ela não terminar, entra na comparação.
+                # Tela com g2montou: espera também a barra existir (a montagem já rodou, com o anúncio da tela nova, o 1×1 do g2-vivo) e o
+                # "Carregando…" dos dados que chegam depois (AG-07: culturas e alvos do AGROFIT) sair da tela
+                ASSENTOU="(()=>{const b=document.getElementById('g2-carga'); if(!b&&typeof g2montou==='function') return false; if(/Carregando/.test(document.body.innerText)) return false; return !b||!b.className;})()"
+                def geo():
+                    for _ in range(30):
+                        if J(ASSENTOU): break
+                        time.sleep(.1)
+                    return J(GEO)
                 for pg in pags:
-                    c.goto(f'http://127.0.0.1:{p2}/{pg}.dc.html',wait=.4); a=J(GEO)
-                    c.goto(f'http://127.0.0.1:{p}/{pg}.dc.html',wait=.4); b=J(GEO)
+                    c.goto(f'http://127.0.0.1:{p2}/{pg}.dc.html',wait=.4); a=geo()
+                    c.goto(f'http://127.0.0.1:{p}/{pg}.dc.html',wait=.4); b=geo()
                     if a!=b:
                         if set(a)==set(b): mapa.append(f'{pg}/{rec}'); continue   # mesmo conjunto de elementos (mapa repete peças): igual
                         dif[f'{pg}/{rec}']=[x for x in a if x not in b][:3]+['→']+[x for x in b if x not in a][:3]
             if mapa: print('     (informativo) mesmo conjunto de elementos, contagem do mapa varia:',mapa)
-            chk(f'15 1440 px igual à base (menu aberto e recolhido) em {len(pags)} telas ({A}:{B} de {len(todas)})', not dif, dif)
-        else: chk('15 1440 px igual à base', False, 'base ausente: '+AD)
+            chk(f'15 1440 px igual à referência (menu aberto e recolhido) em {len(pags)} telas ({A}:{B} de {len(todas)})', not dif, dif)
+        else: chk('15 1440 px igual à referência', False, 'referência ausente: '+AD)
     else:   # faixa: varredura de largura da faixa em todas as telas com etapas
         pags=sorted(os.path.basename(f)[:-8] for f in glob.glob(os.path.join(HERE,'_render','*.dc.html')) if 'class="etp etp-' in open(f).read())
-        VAR=r"""(()=>{const nav=document.querySelector('.etp'); const out=[];
+        # BASE-VERDE: o texto só para leitor de tela (.etp-sr, " · etapa atual" / " · impedida", recorte de 1 px) não conta como texto
+        # na tela, a mesma regra do MEDIR; antes o item 16 apontava esse texto como vazamento em CMP e SAF (sondado: todos os retângulos
+        # "fora" eram o .etp-sr)
+        VAR=r"""(()=>{const sr=document.createElement('style'); sr.textContent='.etp-sr{display:none!important}'; document.head.appendChild(sr); try{ const nav=document.querySelector('.etp'); const out=[];
           for(let W=1400;W>=300;W-=20){ nav.style.width=W+'px'; const at=nav.querySelector('.etp-atual'); const comp=!!(at&&at.getClientRects().length);
             const its=[...nav.querySelectorAll('.etp-itens>*')].filter(e=>e.getClientRects().length); const nr=nav.getBoundingClientRect(); const lr=nav.querySelector('.etp-itens').getBoundingClientRect();
             let ruim=''; if(!comp){ for(const e of its){ const b=e.getBoundingClientRect(); const rg=document.createRange(); rg.selectNodeContents(e); if([...rg.getClientRects()].some(r=>r.width>.5&&(r.right>b.right+1.5||r.left<b.left-1.5))||b.right>lr.right+1.5) { ruim=e.innerText.replace(/\s+/g,' ').slice(0,30); break; } } }
             else if(its.length||at.getBoundingClientRect().right>nr.right) ruim='lista visível ou rótulo fora';
             if(ruim) out.push(W+':'+ruim); }
-          nav.style.width=''; return out; })()"""
+          nav.style.width=''; return out; } finally { sr.remove(); } })()"""
         ruins={}
         vp(1440,900)
         for pg in pags:

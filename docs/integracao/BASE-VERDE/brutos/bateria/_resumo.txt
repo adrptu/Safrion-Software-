@@ -1,0 +1,55 @@
+varredura rc=0 t=373s :: RESULTADO: 145/145 páginas sem erro 
+acoes_duplicadas rc=0 t=248s :: RESULTADO: 145 páginas · 0 com ação repetida · erros 0 
+ds_test rc=0 t=347s :: RESULTADO: OK 68/68 
+componentes_matriz rc=0 t=93s :: RESULTADO: 3 ok · 0 falhas (matriz) 
+componentes_rotacao rc=0 t=56s :: RESULTADO: 6 ok · 0 falhas (rotacao) 
+componentes_interacao rc=0 t=53s :: RESULTADO: 10 ok · 0 falhas (interacao) 
+componentes_ajustes rc=0 t=75s :: RESULTADO: 4 ok · 0 falhas (ajustes) 
+componentes_ajustes2 rc=0 t=70s :: RESULTADO: 2 ok · 0 falhas (ajustes2) 
+tabelas_cad_test rc=0 t=338s :: RESULTADO: 178/178 ok 
+tabelas_irr_test rc=0 t=217s :: RESULTADO: 106/106 ok 
+irtest rc=0 t=52s :: 
+irr_fluxo_test rc=0 t=163s :: 33 ok · 0 falhas [] 
+irr_estado_test rc=0 t=15s :: 38 ok · 0 falhas [] 
+map_irrig_filtro_test rc=0 t=40s :: 15 ok · 0 falhas [] 
+cada_cd03_test rc=0 t=20s :: RESULTADO: OK 14/14 
+cada_fix03_test rc=0 t=22s :: RESULTADO: OK 11/11 
+cadc_cd06_test rc=0 t=31s :: RESULTADO: OK 14/14 
+cadc_fix_cd06 rc=0 t=44s :: RESULTADO: OK 13/13 
+ctl5_test rc=0 t=92s :: RESULTADO 30/30 [] 
+agrofit_test rc=0 t=62s :: RESULTADO: 18/18 ok · 59 s [] 
+carencia_test rc=0 t=102s :: RESULTADO: 91/91 verificações 
+ficha_pivo_test rc=0 t=79s :: RESULTADO: OK 21/21 
+praga_alvo_test rc=0 t=59s :: RESULTADO: 14/14 ok · 58 s [] 
+solo_saf_test rc=0 t=126s :: RESULTADO: OK 36/36 
+solo_os_test rc=0 t=80s :: RESULTADO: OK 18/18 
+solo_ag02_test rc=0 t=59s :: RESULTADO: OK 32/32 
+solo_rev_test rc=0 t=205s :: RESULTADO: OK 22/22 
+tabelas_os_test rc=0 t=41s :: RESULTADO: 38/38 ok 
+tabelas_saf_test rc=0 t=67s :: RESULTADO: 24/24 ok 
+tabelas_est_test rc=0 t=39s :: RESULTADO: 34/34 ok 
+map_aprov_test rc=0 t=19s :: 5 ok · 0 falhas [] 
+map_decisoes_test rc=0 t=62s :: 18 ok · 0 falhas [] 
+pa_lista_test rc=0 t=161s :: RESULTADO: 24 ok · 0 falhas 
+patest rc=0 t=37s :: RESULTADO: 46 ok · OK 
+acao_familias rc=0 t=89s :: RESULTADO: 8 ok · 0 falhas (familias) 
+acao_v3 rc=0 t=162s :: RESULTADO: 10 ok · 0 falhas (v3) 
+acao_responsivo rc=0 t=115s :: RESULTADO: 5 ok · 0 falhas (responsivo) 
+acao_saf rc=0 t=101s :: RESULTADO: 10 ok · 0 falhas (saf) 
+etapas_celular rc=0 t=52s :: RESULTADO: 14 ok · 0 falhas (celular) 
+etapas_complemento rc=0 t=57s :: RESULTADO: 9 ok · 0 falhas (complemento) 
+etapas_desktop rc=0 t=814s :: RESULTADO: 1 ok · 0 falhas (desktop) 
+etapas_faixa rc=0 t=48s :: RESULTADO: 1 ok · 0 falhas (faixa) 
+comercial_revisao_test rc=0 t=131s :: RESULTADO: OK 33/33 
+comercial_fluxo_test rc=0 t=145s :: RESULTADO: OK 72/72 
+producao_fluxo_test rc=0 t=266s :: RESULTADO: OK 67/67 
+reserva_duplo_clique_test rc=0 t=10s :: RESULTADO: OK 2/2 
+partest rc=0 t=104s :: RESULTADO: 50 ok · 0 falhas 
+ma_unica_test rc=0 t=211s :: RESULTADO: 23/23 ok 
+dose_divergente_nav rc=0 t=61s :: 21/21 ok · FALHAS: 0 
+cafe_apurar_nav rc=0 t=29s :: RESULTADO: OK 10/10 
+ostest rc=0 t=27s :: 33 ok · 0 falhas [] 
+os_cenario_test rc=0 t=41s :: RESULTADO: 21/21 ok 
+osacoes rc=0 t=31s :: RESULTADO: 45 ok · 0 falhas 
+cadc_cd02_test rc=0 t=27s :: RESULTADO: OK 15/15 
+FIM 04:26:40

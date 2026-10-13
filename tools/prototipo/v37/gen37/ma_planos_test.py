@@ -12,11 +12,10 @@ from ui37 import MENU2
 m = MA(1440, 1100); J = m.J
 try:
     m.ir('vis=planos', perfil='Otávio', limpa=True); m.sem_erro('MA · Planos')
-    # 1 · menu (13/10/2026, pedido do proprietário): Manutenção com 4 subitens enxutos, um por visão da mesma tela MA; Planos é o último
+    # 1 · menu: um item "Manutenção" → MA (planos são uma visão da tela)
     g = [x for x in MENU2 if x[0] == 'Manutenção'][0]
-    mn = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>a.innerText.trim()+'|'+a.getAttribute('href')).filter(x=>/MA\\.dc\\.html/.test(x))")
-    m.ok(g[2] == [('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')] and mn == ['Pendências sem ordem|MA.dc.html#vis=semordem','Ordens de manutenção|MA.dc.html#vis=ordens','Ativos e disponibilidade|MA.dc.html#vis=ativos','Planos preventivos|MA.dc.html#vis=planos'],
-         'menu: Manutenção com 4 subitens (uma visão cada) → MA.dc.html; "Planos preventivos" abre a visão Planos', mn)
+    mn = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>a.innerText.trim()+'|'+a.getAttribute('href')).filter(x=>/^Manutenção\\|/.test(x))")
+    m.ok(g[2] == [('Manutenção', 'MA.dc.html')] and mn == ['Manutenção|MA.dc.html'], 'menu: Manutenção com 1 item → MA.dc.html (planos são a visão Planos)', mn)
     # 2 · visão Planos: 10 planos, 4 ativos sem plano, PM-02 com 1 vencida
     sem = J("[...document.querySelectorAll('main button[aria-label^=\"Criar plano para\"]')].map(b=>b.innerText)") or []
     pl = m.linhas(0)

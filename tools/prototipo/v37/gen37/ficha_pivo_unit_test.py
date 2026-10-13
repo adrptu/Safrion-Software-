@@ -40,9 +40,8 @@ chk('F5 A7 · o setor mostra o nome do equipamento do cadastro (Bomba do Pivô 2
     all(S[k].get('bnome') == at[S[k]['eq']]['nome'] for k in ('P2', 'P1', 'T7') if S[k].get('eq')) and S['P2'].get('bnome') == 'Bomba do Pivô 2'
     and 'pivô central' in at['a11']['modelo'] and 'motobomba' in at['a11']['modelo'], [S['P2'].get('bnome'), at['a11']['modelo']])
 PA = D.POLITICA_AGUA; cfg = open(os.path.join(HERE, 'areas', 'configuracoes.py'), encoding='utf-8').read()
-# v57: o registro de políticas (CF-02) saiu com a CONF (CONF-D01); a política de água segue com uma fonte (dados.POLITICA_AGUA), lida pela ficha e pelo app
-chk('F6 A3 · a política de água tem uma fonte (dados.POLITICA_AGUA): Configurações não tem cópia à mão ("IR-LIM", "v4", "Ana (gestora)" nem linha pa07)',
-    PA.get('versao') == 'v3' and PA.get('id') == 'PA-07' and "'IR-LIM'" not in cfg and "'Ana (gestora)','sem validade'" not in cfg and "'pa07'" not in cfg, [PA, "'IR-LIM'" in cfg])
+chk('F6 A3 · a política de água tem uma fonte (dados.POLITICA_AGUA): Configurações não escreve à mão "IR-LIM", "v4" nem "Ana (gestora)" na linha dela',
+    PA.get('versao') == 'v3' and PA.get('id') == 'PA-07' and "'IR-LIM'" not in cfg and "'Ana (gestora)','sem validade'" not in cfg and "PA['autor']" in cfg, [PA, "'IR-LIM'" in cfg])
 import areas.cadastros as CAD
 res = {a[0]: a[4] for a in CAD.ATIVOS}
 chk('F7 A8 · o cd03 de reserva (areas/cadastros.py) lê a vazão do cadastro: Bomba do Pivô 2 = 597,6 m³/h (não 340) e Gotejo T7 = o do cadastro',

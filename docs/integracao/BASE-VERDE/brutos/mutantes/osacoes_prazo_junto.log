@@ -1,0 +1,48 @@
+  ok  sem erro JS
+  ok  lista inicial: 10 ordens agrícolas = chip Todas, sem OS-0419/OS-0422/OS-0423 · (['OS-0415', 'OS-0417', 'OS-0418', 'OS-0420', 'OS-0421', 'OS-0424', 'OS-0425', 'OS-0430', 'OS-0431', 'OB-0104'], ['Todas 10'])
+  ok  lista mostra percentual: Área 350 ha · Realizado 190 ha · Progresso 54,3 % · Saldo 160 ha · (['350,00 ha', '190,00 ha', '54,3 %', '160,00 ha'], 'OS-0421 Pulverização · Fungicida 1ª aplicação T1 T2 — 350,00 ha 20/09/2026 26/09/2026 Em execução Parcial · dia 4 de 7 — Paula conferir o dia 4 hoje — 190,00 ha 160,00 ha — 54,3 % Marcos'
+  FALHOU OS-0430 A liberar com dono Ana (agrônoma) e prazo antes de 25/09, sem selo de agrônomo · (['Ana (agrônoma)', '—'], 'OS-0430 Dessecação pré-plantio T1-A — 160,00 ha 25/09/2026 25/09/2026 A liberar — — Ana (agrônoma) antes de 25/09 — 0,00 ha 160,00 ha — 0,0 % Marcos')
+  ok  OS-0420 impedida, sem selo de revisão · OS-0420 Plantio · Soja 58 W T4 — 100,00 ha 22/09/2026 28/09/2026 Em execução Impedida · ativo bloqueado — Manutenção OM-0233 até 24/09 — 30,00 ha 70,00 ha — 30,0 % Carlos
+  ok  cartão do Kanban: 190/350 ha · 54 % · saldo 160 ha · OS-0421 Pulverização · Fungicida 1ª aplicação T1+T2 · 350 ha 190/350 ha · 54 % · saldo 160 ha Parcial · dia 4 de 7 Paula · conferir o dia 4 hoje Marcos · 20–26/09
+  ok  cartão da OS-0420 sem selo de revisão · OS-0420 Plantio · Soja 58 W T4 · 100 ha 30/100 ha · 30 % · saldo 70 ha Impedida · ativo bloqueado Manutenção · OM-0233 até 24/09 Carlos · 22–28/09
+  ok  OS-0431 com o selo Falta máquina · Trator T1 bloqueado, sem selo de aprovação · OS-0431 Plantio · Soja 58 W T2 — 102,00 ha 24/09/2026 24/09/2026 A liberar Falta máquina · Trator T1 bloqueado — PCP substituto antes de 24/09 06:00 — 0,00 ha 102,00 ha — 0,0 % Carlos
+  ok  falta de máquina da OS-0431 continua vermelha (mesma cor de Impedida) · ['rgb(180, 35, 24)', 'rgb(180, 35, 24)', 'rgb(138, 90, 0)']
+  ok  lista sem rolagem horizontal da página: a tabela cabe ou rola dentro da caixa, 1ª coluna e filtro Talhão à vista · {'pagina': True, 'caixa': True, 'c0': True, 'talhao': True, 'larg': [2081, 1116]}
+  ok  cabeçalho conta 3 impedidas (OS-0418, OS-0420 e OS-0431)
+  ok  OS-0431: versão v1 da REC-014 v2, sem revisão · OS-0431 · Plantio · Soja 58 W × A liberar Falta máquina · Trator T1 bloqueado T2 · 102 ha · janela amanhã (24/09) 06:00 · Carlos A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO O agrônomo confere atividade, área, pro
+  ok  OS-0431: liberar bloqueado por falta de máquina, dono PCP
+  ok  OS-0431: situação cita a retirada de Liberadas, sem citar o Trator 02 · ÁVEL Carlos CONJUNTO Trator T1 JD 6M 155 + Plantadeira 24 linhas · 6,8 ha/h HORAS PREVISTAS 15 h (15 h no saldo) PADRÃO · VERSÃO Soja alta tecnologia v6 · REC-014 v2 · v1 SITUAÇÃO ATUAL Retirada de Liberadas em 23/09: a INSP-105 bloqueou o 
+  ok  OS-0431: origem mostra liberada e retirada pela INSP-105
+  ok  OS-0431: pode ser cancelada (sem realizado)
+  ok  OS-0424 (Liberadas, sem realizado): Cancelar sem execução, sem Dispensar
+  ok  confirmação diz o que acontece com a reserva · OS-0424 · Pulverização · Fungicida A × Liberadas T1-B · 128 ha · janela 24/09 · Marcos A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO Confira máquina, equipe e insumos e inicie a execução na janela 24/09. Iniciar bl
+  ok  motivo é obrigatório
+  ok  toast: cancelada e reserva de 65 L do F26-02 liberada · OS-0424 cancelada sem execução. Reserva de 65 L do lote F26-02 liberada. Cancelada por Ana (gestora).
+  ok  painel: Canceladas, somente consulta, sem ações · OS-0424 · Pulverização · Fungicida A × Canceladas T1-B · 128 ha · janela 24/09 · Marcos A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO Ordem cancelada sem execução: somente consulta. INSUMOS E DOSES PRODUTO DOSE NA 
+  ok  sai da lista (Todas) · ['OS-0415', 'OS-0417', 'OS-0418', 'OS-0420', 'OS-0421', 'OS-0425', 'OS-0430', 'OS-0431', 'OB-0104']
+  ok  chip Canceladas depois de Encerradas, com 1 · ['Todas 9', 'A liberar 3', 'Liberadas 1', 'Em execução 2', 'Em conferência 1', 'Encerradas 2', 'Canceladas 1']
+  ok  chip Canceladas mostra a OS-0424 · (['OS-0424'], 'OS-0424 Pulverização · Fungicida A T1-B — 128,00 ha 24/09/2026 24/09/2026 Canceladas — — — — — 0,00 ha 128,00 ha — 0,0 % Marcos')
+  ok  sai do quadro (Kanban) · 9
+  ok  OS-0420 (com realizado): Dispensar saldo, nunca Cancelar
+  ok  formulário de dispensa com limite de 20 % · OS-0420 · Plantio · Soja 58 W Abrir ordem completa › × Em execução Impedida · ativo bloqueado T4 · 100 ha · janela 22–28/09 · Carlos 30 / 100 ha · 30 % · saldo 70 ha A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO Re
+  ok  OS-0420: 70 ha recusados (70 % acima de 20 % · exige Direção) · OS-0420 · Plantio · Soja 58 W Abrir ordem completa › × Em execução Impedida · ativo bloqueado T4 · 100 ha · janela 22–28/09 · Carlos 30 / 100 ha · 30 % · saldo 70 ha A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO Re
+  ok  recusa não muda o saldo (70 ha) nem registra dispensado · (['70,00 ha', '—'], 'OS-0420 Plantio · Soja 58 W T4 — 100,00 ha 22/09/2026 28/09/2026 Em execução Impedida · ativo bloqueado — Manutenção OM-0233 até 24/09 — 30,00 ha 70,00 ha — 30,0 % Carlos')
+  ok  OS-0421 em execução: Dispensar saldo, sem Cancelar
+  ok  motivo obrigatório
+  ok  CTL-3: sem caixa a marcar; o formulário diz quem decide e valida (perfil Ana) · OS-0421 · Pulverização · Fungicida 1ª aplicação Abrir ordem completa › × Em execução Parcial · dia 4 de 7 T1+T2 · 350 ha · janela 20–26/09 · Marcos 190 / 350 ha · 54 % · saldo 160 ha A liberar Liberadas Em execução Em conferência Encerradas
+  ok  dispensa dentro do limite registrada · Dispensados 40 ha da OS-0421 por Ana (gestora e agrônoma) · realizado 190 ha preservado · saldo 120 ha.
+  ok  painel: Realizado 190 · Dispensado 40 · Saldo 120 · APONTAMENTOS DIÁRIOS DATA TURNO REALIZADO ACUMULADO SITUAÇÃO 20/09 Dia 1 50 ha 50 / 350 ha Conferido 21/09 Dia 2 50 ha 100 / 350 ha Conferido 22/09 Dia 3 50 ha 150 / 350 ha Conferido 23/09 Dia 4 40 ha 190 / 350 ha Provisório 24/09 Dia 5 pre
+  ok  turnos previstos acompanham o saldo (50 + 50 + 20) · ['20/09 Dia 1 50 ha 50 / 350 ha Conferido', '21/09 Dia 2 50 ha 100 / 350 ha Conferido', '22/09 Dia 3 50 ha 150 / 350 ha Conferido', '23/09 Dia 4 40 ha 190 / 350 ha Provisório', '24/09 Dia 5 prev. 50 ha — Previsto', '25/09 Dia 6 prev. 50 ha 
+  ok  lista: Realizado 190 ha · Progresso 54,3 % · Saldo 120 ha · Dispensado 40 ha · (['350,00 ha', '190,00 ha', '54,3 %', '120,00 ha', '40,00 ha'], 'OS-0421 Pulverização · Fungicida 1ª aplicação T1 T2 — 350,00 ha 20/09/2026 26/09/2026 Em execução Parcial · dia 4 de 7 — — — — 190,00 ha 120,00 ha 40,00 ha 54,3 % Marcos')
+  ok  limite é acumulado (40 + 31 = 71 ha > 70 ha) · OS-0421 · Pulverização · Fungicida 1ª aplicação Abrir ordem completa › × Em execução Parcial · dia 4 de 7 T1+T2 · 350 ha · janela 20–26/09 · Marcos 190 / 350 ha · 54 % · saldo 120 ha A liberar Liberadas Em execução Em conferência Encerradas
+  ok  CTL-3: perfil Caio vê "Dispensar saldo: decisão de Ana (gestora e agrônoma)." e não tem o botão; comando direto recusado · ('OS-0421 · Pulverização · Fungicida 1ª aplicação Abrir ordem completa › × Em execução Parcial · dia 4 de 7 T1+T2 · 350 ha · janela 20–26/09 · Marcos 190 / 350 ha · 54 % · saldo 120 ha A liberar Liberadas Em execução Em conferência Encerrad
+  ok  T1-A · Dessecação pré-plantio: erro no campo aponta a OS-0430 · Corrija os campos destacados; o que você preencheu foi mantido. | Já existe OS-0430 para esta atividade neste cultivo.
+  ok  botão Abrir OS-0430 no lugar da instrução
+  ok  Abrir OS-0430 fecha o formulário e abre a ordem existente, sem emitir · ('OS-0430 · Dessecação pré-plantio × A liberar T1-A · 160 ha · janela 25/09 (DAP −', 9)
+  ok  C1 · Adubação 1ª parcela: aponta a OS-0425 · Corrija os campos destacados; o que você preencheu foi mantido. | Já existe OS-0425 para esta atividade neste cultivo.
+  ok  trocar a atividade tira o botão da duplicata
+  ok  atividade sem ordem emite normalmente (OS-0440) · OS-0440 emitida em A liberar. Não foi liberada: o agrônomo libera para execução e pode ajustar antes.
+  ok  sem erro JS no fim
+
+RESULTADO: 44 ok · 1 falhas
+  - OS-0430 A liberar com dono Ana (agrônoma) e prazo antes de 25/09, sem selo de agrônomo

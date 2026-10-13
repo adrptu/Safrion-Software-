@@ -87,7 +87,13 @@ try:
     clk('Cancelar','aside[role=dialog]'); check('aviso não salvo', 'Há alterações não salvas' in pan())
     clk('Continuar editando','aside[role=dialog]'); clk('Emitir ordem','aside[role=dialog]')
     tt=toast(); check('emite em A liberar', 'OS-0440' in tt and 'A liberar' in tt and 'Não foi liberada' in tt, tt)
-    t=pan(); check('painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo', 'OS-0440' in t and 'Liberar para execução' in t and 'Ajustar antes de liberar' in t and 'Aguardando agrônomo' not in t and 'Revisar versão' not in t, t[:120])
+    # CTL-1 (revisão, achado 1; AGR-07 em DECISOES-DELEGADAS): unidade da dose diferente da bula trava a liberação. O plano Soja alta
+    # tecnologia v6 traz o Inseticida B em L/ha e a bula é em kg/ha, então a nova ordem c1·a7 nasce A liberar com "Liberar bloqueado"
+    # (mesma regra de legal_unit.js N11 e os_cenario_test 14e): sem o botão Liberar para execução, com o ajuste e quem resolve
+    t=pan(); bts=J("[...document.querySelectorAll('aside[role=dialog] button')].map(b=>b.innerText.trim())") or []
+    check('painel da nova ordem A liberar: liberação bloqueada pela unidade da bula (Inseticida B L/ha × kg/ha), sem Liberar para execução, com Ajustar antes de liberar, sem selo de agrônomo',
+          'OS-0440' in t and 'A liberar' in t and 'Liberar bloqueado: Inseticida B 0,3 L/ha em T1 (T1-A): dose em L/ha e bula em 0,8–1 kg/ha: unidade diferente da bula' in t
+          and 'Quem resolve: Ana (agrônoma)' in t and 'Liberar para execução' not in bts and 'Ajustar antes de liberar' in bts and 'Aguardando agrônomo' not in t and 'Revisar versão' not in t, (bts, t[:700]))
     J("document.querySelector('aside[role=dialog] button[aria-label=Fechar]').click()"); time.sleep(.3); check(f'{N+1} ordens', len(rows())==N+1)
     cs=chips(); check('contador A liberar 4 e Todas sobe junto', cs[1]=='A liberar 4' and cs[0]==f'Todas {N+1}', cs)
     clk('Nova ordem'); setv('#nv_saf','S2627'); setv('#nv_cult','c1'); setv('#nv_atv','a7'); setv('#nv_jan','2026-12-02'); clk('Emitir ordem','aside[role=dialog]')

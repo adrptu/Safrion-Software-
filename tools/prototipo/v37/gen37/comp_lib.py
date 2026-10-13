@@ -17,15 +17,20 @@ IR_ETAPA=r"""(async (n)=>{ const num=()=>{ const c=document.querySelector('.etp-
     if(!b) return 'sem caminho de '+i+' para '+n; b.click(); await new Promise(r=>setTimeout(r,450)); }
   return 'não chegou: '+num(); })"""
 
+MOUSE=['--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4']   # = ds_test._chrome_com_hover
 class Chrome:
-    """Abre um Chrome próprio (CDP_GL=1: WebGL por software para o mapa real) ou anexa a um já aberto (CDP_PORT)."""
-    def __init__(self,espera=90):
+    """Abre um Chrome próprio (CDP_GL=1: WebGL por software para o mapa real) ou anexa a um já aberto (CDP_PORT).
+    mouse=True (BASE-VERDE): o Chrome se declara com mouse (hover:hover, pointer:fine), como o computador de quem usa. O headless do Linux
+    não tem dispositivo apontador e responde (hover:none) e (pointer:none); Emulation.setEmulatedMedia não cobre hover nem pointer (no
+    Chromium 141 a chamada é aceita e ignorada), então nenhuma regra @media (hover:hover) valia. Desligar a emulação de toque devolve o
+    Chrome ao "sem mouse": aparelho() só a desliga se ela foi ligada; um teste que mede hover depois de usar o toque abre outro Chrome."""
+    def __init__(self,espera=90,mouse=False):
         self.p=None; self.dir=None; self.alvo=None; porta=os.environ.get('CDP_PORT')
         if porta: self.port=int(porta)
         else:
             self.port=free(); self.dir=tempfile.mkdtemp(prefix='cdp_')
             gl=(['--use-angle=swiftshader','--enable-unsafe-swiftshader'] if os.environ.get('CDP_GL')=='1' else ['--disable-gpu'])
-            self.p=subprocess.Popen([CH,'--headless=new']+gl+['--hide-scrollbars',f'--remote-debugging-port={self.port}',f'--user-data-dir={self.dir}','--window-size=1440,900','about:blank'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+            self.p=subprocess.Popen([CH,'--headless=new']+gl+(MOUSE if mouse else [])+['--hide-scrollbars',f'--remote-debugging-port={self.port}',f'--user-data-dir={self.dir}','--window-size=1440,900','about:blank'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
         fim=time.time()+espera
         while True:
             try: urllib.request.urlopen(f'http://127.0.0.1:{self.port}/json/version',timeout=5); break
@@ -37,6 +42,12 @@ class Chrome:
         self.call('Page.enable'); self.call('Runtime.enable'); self.call('Page.addScriptToEvaluateOnNewDocument',{'source':ERRS})
         try: self.call('Emulation.setFocusEmulationEnabled',{'enabled':True})   # página com foco, como a janela ativa de quem usa
         except Exception: pass
+        # BASE-VERDE: a aba aberta por /json/new fica em segundo plano e, depois da 1ª navegação para outra página, o documento perde o
+        # foco da janela (document.hasFocus() false): focus() muda o elemento ativo sem disparar focus/focusin, e o g2lib não leva à
+        # vista o controle focado que estava só em parte visível. Na frente, a aba fica com o foco como a janela ativa de quem usa.
+        try: self.call('Page.bringToFront')
+        except Exception: pass
+        self._toque=False
     def call(self,method,params=None,timeout=60):
         self.i+=1; mid=self.i; self.ws.send(json.dumps({'id':mid,'method':method,'params':params or {}})); fim=time.monotonic()+timeout
         while True:
@@ -52,7 +63,8 @@ class Chrome:
         """Janela de w × h px CSS. toque=True: celular/tablet (meta viewport vale, toque, ponteiro grosso e sem hover)."""
         self.call('Emulation.setDeviceMetricsOverride',{'width':w,'height':h,'deviceScaleFactor':escala,'mobile':bool(toque),
                   'screenOrientation':{'type':'portraitPrimary' if h>=w else 'landscapePrimary','angle':0 if h>=w else 90}})
-        self.call('Emulation.setTouchEmulationEnabled',{'enabled':bool(toque),'maxTouchPoints':5 if toque else 1})
+        if toque or self._toque: self.call('Emulation.setTouchEmulationEnabled',{'enabled':bool(toque),'maxTouchPoints':5 if toque else 1})   # desligar sem ter ligado tiraria o mouse
+        self._toque=bool(toque)
         self.call('Emulation.setEmulatedMedia',{'features':[{'name':'hover','value':'none' if toque else 'hover'},{'name':'pointer','value':'coarse' if toque else 'fine'}]})
         time.sleep(.3)
     def goto(self,url,espera=.6):

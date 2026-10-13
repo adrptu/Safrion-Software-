@@ -36,10 +36,13 @@ def centro(sel):
     return c.js(f"(()=>{{const e={sel}; if(!e) return null; e.scrollIntoView({{block:'center',inline:'nearest'}}); const r=e.getBoundingClientRect(); return [r.left+r.width/2,r.top+r.height/2];}})()")
 def estilo(sel,props):
     return c.js(f"(()=>{{const e={sel}; if(!e) return null; const cs=getComputedStyle(e); return {json.dumps(props)}.map(k=>cs.getPropertyValue(k));}})()")
+def assenta(sel='.menu-lat',t=3):   # BASE-VERDE: espera a transição do elemento acabar (com a máquina carregada 0,18 s de CSS passam de 0,35 s): mede o estado final
+    fim=time.time()+t
+    while time.time()<fim and c.js(f"(()=>{{const e=document.querySelector({json.dumps(sel)}); return e?e.getAnimations().length:0;}})()"): time.sleep(.05)
 def rect(sel): return c.js(f"(()=>{{const e={sel}; if(!e) return null; const r=e.getBoundingClientRect(); return [Math.round(r.left),Math.round(r.top),Math.round(r.width),Math.round(r.height)];}})()")
 N="(s=>(s||'').replace(/\\s+/g,' ').trim())"
 try:
-    c=Chrome()
+    c=Chrome(mouse=(MODO=='interacao'))   # BASE-VERDE: na interação o computador tem mouse (hover:hover, pointer:fine); ver comp_lib.Chrome
     if MODO=='matriz':
         # 1 · meta viewport: no celular a página usa a largura do aparelho (antes desenhava em 980 px e encolhia tudo)
         abre('SAF',360,800,3,True,rec=''); a=c.js("document.querySelector('[data-root]').getBoundingClientRect().width")
@@ -150,6 +153,8 @@ try:
             and volta[0].startswith('Soja') and volta[1]==nome and volta[2]=='rgb(30, 122, 76)' and 'Último aberto' in volta[3] and volta[4]==2, [k,ef,ea,st2,toasts,volta])
         # 12 · toque (sem hover, 390 px): passar o "dedo" não pinta hover; rolar até o último cartão, um toque abre o plano;
         #      ‹ volta à biblioteca na mesma posição de rolagem, com o foco no cartão aberto
+        #      Num Chrome só de toque (BASE-VERDE): desligar o toque tira o mouse do Chrome do teste, e os itens 13-19 continuam com mouse
+        c_mouse=c; c=Chrome()
         abre('PA',390,844,3,True); hv=c.js("matchMedia('(hover: hover)').matches")
         ULT="[...document.querySelectorAll('main .g2card')].pop()"
         xy=centro(ULT); c.mouse(*xy); time.sleep(.15); eh=estilo(ULT,['background-color'])
@@ -160,6 +165,7 @@ try:
         depois=c.js(rol); foco=c.js("document.activeElement&&document.activeElement.getAttribute('aria-label')"); shot('PA_390_volta_posicao')
         chk('12 toque sem hover (390 px) · sem pintura de hover; um toque no último cartão abre o plano; "‹ Biblioteca de planos" volta à mesma posição de rolagem com o foco no cartão aberto',
             not hv and eh[0]=='rgb(255, 255, 255)' and st.startswith('#plano=') and max(antes)>200 and all(abs(a-b)<=2 for a,b in zip(antes,depois)) and foco==nome, [hv,eh,st,antes,depois,foco,nome])
+        ERRL.extend(errs()); c.close(); c=c_mouse
         # 13 · linha da grade com controle interno (CD-06): Enter/Espaço no expandir só expande/recolhe; Enter na linha abre o detalhe uma vez
         abre('CD-06',1440,900)
         CAR="document.querySelector('[role=row].g2ed .g2car')"
@@ -214,8 +220,8 @@ try:
         f3=c.js("(()=>{const k=[...document.querySelectorAll('.etp-chk')].find(x=>x.getClientRects().length); return [k.checked, (document.querySelector('.etp-atual:not([style*=none])')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim().slice(0,30), document.querySelectorAll('.etp-itens button,.etp-itens a,.etp-itens [tabindex]').length];})()")
         chk('17 folha de etapas pelo teclado · Enter abre, Esc fecha e o foco fica no rótulo; a lista só informa: o Tab não entra nela, nenhum item é botão/link e a etapa continua a 2 (UX-ACAO-UNICA)', f1 and f2==[False,True] and not dentro and f3[0]==False and f3[1].startswith('Etapa 2 de 6') and f3[2]==0, [f1,f2,dentro,f3])
         # 18 · menu sobreposto (390 px): Esc fecha e devolve o foco ao botão do menu
-        abre('CMP',390,844,3,False,rec=''); c.js("document.querySelector('.ml-tog').click()"); time.sleep(.3); w1=c.js("Math.round(document.querySelector('.menu-lat').getBoundingClientRect().width)")
-        c.js("document.querySelector('.menu-lat a').focus()"); c.tecla('Escape','Escape',27); time.sleep(.35)
+        abre('CMP',390,844,3,False,rec=''); c.js("document.querySelector('.ml-tog').click()"); time.sleep(.3); assenta(); w1=c.js("Math.round(document.querySelector('.menu-lat').getBoundingClientRect().width)")
+        c.js("document.querySelector('.menu-lat a').focus()"); c.tecla('Escape','Escape',27); time.sleep(.35); assenta()   # BASE-VERDE: mede depois da transição (sondado: 232 px aos 0,35 s com a máquina carregada)
         w2=c.js("[Math.round(document.querySelector('.menu-lat').getBoundingClientRect().width), document.activeElement===document.querySelector('.ml-tog')]")
         chk('18 menu sobreposto · Esc fecha (232 → 68 px) e o foco volta ao botão do menu', w1==232 and w2==[68,True], [w1,w2])
         # 19 · tabela mais larga que a tela (SAF 390 px): borda direita esmaecida enquanto há colunas à direita; some ao rolar até o fim
@@ -247,11 +253,14 @@ try:
         for tag,w,h,e,t in (MAT[0],MAT[2],MAT[6],MAT[5]):
             for pg in ('CMP','OS'):
                 abre(pg,w,h,e,t,rec='0'); g[f'{pg} {tag}']=c.js("(()=>{const m=document.querySelector('.menu-lat'); const h1=document.querySelector('h1').getBoundingClientRect(); const hit=document.elementFromPoint(h1.left+5,h1.top+h1.height/2); return [Math.round(m.getBoundingClientRect().width), getComputedStyle(m).position, getComputedStyle(document.querySelector('.ml-fundo')).display, !!hit&&document.querySelector('h1').contains(hit)];})()")
-        abre('CMP',768,1024,2,True,rec='0'); c.js("document.querySelector('.ml-tog').click()"); time.sleep(.35); ab=c.js("Math.round(document.querySelector('.menu-lat').getBoundingClientRect().width)")
-        c.js("(()=>{const its=[...document.querySelectorAll('.menu-lat a,.menu-lat button')].filter(x=>x.getClientRects().length); its[its.length-1].focus();})()"); c.tab(); c.tab(); time.sleep(.35)
+        abre('CMP',768,1024,2,True,rec='0'); c.js("document.querySelector('.ml-tog').click()"); time.sleep(.35); assenta(); ab=c.js("Math.round(document.querySelector('.menu-lat').getBoundingClientRect().width)")
+        # o último item é o último controle focável do menu, qualquer que seja a tag: desde o CTL-3 (perfil de quem age, 0b99e0e) o menu
+        # termina no seletor "Trocar perfil de demonstração" (select), depois dos links e botões; Tab dele vai ao botão do menu e o
+        # seguinte, ao conteúdo (BASE-VERDE: o teste focava o último a/button e o 2º Tab parava no botão do menu, com o menu aberto)
+        ult=c.js("(()=>{const its=[...document.querySelectorAll('.menu-lat :is(a[href],button,select,input,textarea,[tabindex])')].filter(x=>x.getClientRects().length&&!x.disabled&&x.tabIndex>=0); const u=its[its.length-1]; u.focus(); return u.tagName+':'+(u.getAttribute('aria-label')||u.innerText||'').trim().slice(0,30);})()"); c.tab(); c.tab(); time.sleep(.35); assenta()
         tb=c.js("(()=>{const e=document.activeElement; return [Math.round(document.querySelector('.menu-lat').getBoundingClientRect().width), getComputedStyle(document.querySelector('.ml-fundo')).display, !!e.closest('.menu-lat'), (e.innerText||e.getAttribute('aria-label')||'').trim().slice(0,20), localStorage.getItem('safrion.menuRecolhido')];})()"); shot('menu_tab_fecha_768')
         chk('27 menu · com "aberto" guardado, CMP e O.S. começam recolhidos (68 px, sem fundo, título livre) em 360, 768 e zoom 200 %, e abertos ao lado em 1440; no estreito, Tab depois do último item fecha o menu e o foco segue no conteúdo; a escolha guardada não muda',
-            all(v==[68,'static','none',True] for k,v in g.items() if '1440' not in k) and all(v[:2]==[232,'static'] for k,v in g.items() if '1440' in k) and ab==232 and tb[0]==68 and tb[1]=='none' and not tb[2] and tb[4]=='0', [g,ab,tb])
+            all(v==[68,'static','none',True] for k,v in g.items() if '1440' not in k) and all(v[:2]==[232,'static'] for k,v in g.items() if '1440' in k) and ab==232 and tb[0]==68 and tb[1]=='none' and not tb[2] and tb[4]=='0', [g,ab,ult,tb])
         # 28 · áreas seguras (Emulation.setSafeAreaInsetsOverride): deitado com entalhe nas laterais e em pé com entalhe no alto, o botão do
         #      menu e o menu sobreposto ficam dentro da área segura e o botão não cobre itens do menu
         SAFE="""(()=>{const R=e=>{const q=e.getBoundingClientRect(); return [Math.round(q.left),Math.round(q.top),Math.round(q.right),Math.round(q.bottom)];}; const tg=document.querySelector('.ml-tog'); const t=tg.getBoundingClientRect();
@@ -370,6 +379,7 @@ try:
         ERRL.extend(errs()); chk('25 sem erro de JS nas telas visitadas (ícones)', not ERRL, ERRL[:5])
 finally:
     if c: c.close()
+    if globals().get('c_mouse') not in (None, c): c_mouse.close()   # item 12 interrompido no meio: fecha também o Chrome com mouse
     srv.terminate()
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas ({MODO})'); [print('  -',f) for f in FAIL]
 sys.exit(1 if FAIL else 0)

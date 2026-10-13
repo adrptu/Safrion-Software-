@@ -1,0 +1,9 @@
+os_cenario_test rc=1 t=43s :: RESULTADO: 20/21 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov 
+osacoes rc=0 t=30s :: RESULTADO: 40 ok · 5 falhas 
+agrofit_test rc=0 t=40s :: RESULTADO: 17/18 ok · 38 s ['3 cabeçalho: "Base atualizada · 02/10/2026" e "Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de 02/10/2026 · 4.409 produtos com registro" + AGROFIT oficial (nova aba)'] 
+componentes_interacao rc=1 t=44s :: RESULTADO: 8 ok · 2 falhas (interacao) 
+componentes_ajustes rc=1 t=64s :: RESULTADO: 2 ok · 2 falhas (ajustes) 
+etapas_complemento rc=1 t=52s :: RESULTADO: 7 ok · 2 falhas (complemento) 
+etapas_desktop rc=1 t=9s :: RESULTADO: 0 ok · 1 falhas (desktop) 
+etapas_faixa rc=1 t=42s :: RESULTADO: 0 ok · 1 falhas (faixa) 
+FIM 01:44:02

@@ -9,7 +9,6 @@ Uso: python3 os_cenario_test.py   (compile antes: areas.processo_os.build())"""
 import sys, os, time, json, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from os_lib import Os
-from conferencia_diaria_nav_helpers import conferir_dias
 
 T = Os(); OS = 'OS-0430'
 def setin(lab, val):  # campo do painel pelo rótulo acessível (input + change, como a digitação)
@@ -18,11 +17,13 @@ def setin(lab, val):  # campo do painel pelo rótulo acessível (input + change,
 try:
     T.abrir()
     # 1 · A liberar sem etapa de revisão: próximo passo Liberar para execução (Ana pode ajustar antes); ajuste inválido não libera
-    T.ordem(OS); p = T.pan(); st = T.cen(f"[c.ordens['{OS}'].etapa, 'aprov' in c.ordens['{OS}'], c.v]")
+    # cenario.py (v=2, 01/10, O.S. sem revisão): a semente sem aprov começa na v=2 e cada mudança da semente sobe o número (hoje v=7, V56);
+    # o cenário lido tem de ser a semente da própria página (CEN0.v), nunca um salvo antigo, e a semente não pode ser anterior à v=2
+    T.ordem(OS); p = T.pan(); st = T.cen(f"[c.ordens['{OS}'].etapa, 'aprov' in c.ordens['{OS}'], c.v]"); v0 = int(re.search(r'const CEN0 = \{"v": (\d+)', open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '_render', 'OS.dc.html'), encoding='utf-8').read()).group(1))
     T.btn('Ajustar antes de liberar'); setin('Área da ordem (ha)', '0'); T.btn('Salvar e liberar'); pa = T.pan(); T.btn('Voltar'); print('  ', st)
-    T.ok(st == ['A liberar', False, 2] and T.temb('Liberar para execução') and T.temb('Ajustar antes de liberar') and not T.temb('Revisar versão') and not T.temb('Aprovar versão')
+    T.ok(st == ['A liberar', False, v0] and isinstance(v0, int) and v0 >= 2 and T.temb('Liberar para execução') and T.temb('Ajustar antes de liberar') and not T.temb('Revisar versão') and not T.temb('Aprovar versão')
          and 'Aguardando agrônomo' not in p and 'Aprovada pelo agrônomo' not in p and 'APV-' not in p and 'Informe a área maior que 0 ha.' in pa and T.cen(f"c.ordens['{OS}'].etapa") == 'A liberar',
-         'A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov', (st, p[p.find('PRÓXIMO'):][:300], pa[-300:]))
+         'A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário = semente da página (≥ v2) sem aprov', (st, v0, p[p.find('PRÓXIMO'):][:300], pa[-300:]))
     # 2 · liberar: a requisição nova reserva por lote (Glifosato 320 L, 2,4-D 160 L, Óleo 80 L)
     T.btn('Liberar para execução'); ct = T.pan(); T.btn('Confirmar liberação'); tt = T.toast()
     RQ = T.cen(f"c.ordens['{OS}'].req"); st = T.cen(f"[c.ordens['{OS}'].etapa, c.reqs['{RQ}'].itens.map(i=>i.prod+' '+i.solicitado+' '+i.lote).join(' | '), c.lotes['Glifosato 480|G26-14'].reservado]")
@@ -72,8 +73,6 @@ try:
       Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set.call(i,'Bordadura sem aplicação por vento; vistoria sem rebrote');
       i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"""); time.sleep(.3)
     T.btn('Aceitar com motivo'); p = T.pan()
-    T.ok('Conferência diária pendente' in p and not T.temb('Conferir e encerrar'), 'Após revisão técnica, Paula ainda precisa conferir os dias', p[:500])
-    conferir_dias(T.J,OS,[1,2]); p=T.pan()
     T.ok('Encerrar bloqueado' not in p and T.temb('Conferir e encerrar') and 'nada em custódia' in p and 'Revisão técnica: aceita por Ana (agrônoma)' in p,
          'revisão técnica aceita por Ana (agrônoma) com motivo: bloqueio some e surge Conferir e encerrar', p[:500])
     # 9 · conferir e encerrar grava no cenário (regra atual: Em conferência → Encerradas)

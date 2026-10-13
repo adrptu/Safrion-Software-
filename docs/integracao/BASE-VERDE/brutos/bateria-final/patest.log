@@ -1,0 +1,48 @@
+PASSOU biblioteca com um cartão por plano da fonte (8), sem faixa de etapas 
+PASSOU cartão mostra versão, estado, atividades, gatilhos, custo e cultivos 
+PASSOU cartão do café com gatilhos Data e Após a colheita 
+PASSOU abrir o cartão leva ao detalhe do plano (#plano=SOJA-AT), sem primária enquanto não há rascunho 
+PASSOU gatilhos DAP em ordem numérica com negativos 
+PASSOU o detalhe informa que editar cria o rascunho v7 
+PASSOU a seta da atividade mostra os insumos sem abrir edição 
+PASSOU o nome da atividade abre o painel com o gatilho DAP 45 e o resumo dos 2 insumos 
+PASSOU cancelar com alteração avisa antes de descartar 
+PASSOU erro junto ao campo, o resto do que foi preenchido fica 
+PASSOU descartar a edição fecha o painel sem criar rascunho 
+PASSOU mudar a dose na tabela cria o rascunho v7 sem mexer na v6 
+PASSOU faixa amarela: aplicado em cultivos, que não serão alterados 
+PASSOU a dose fica marcada como alterada, com a versão publicada na dica 
+PASSOU incluir insumo pelo cadastro (busca, escolha, dose) grava no mesmo rascunho v7 
+PASSOU a atividade fica marcada como alterada 
+PASSOU excluir pede confirmação 
+PASSOU manter não exclui 
+PASSOU excluir confirmado remove a atividade do rascunho 
+PASSOU o painel começa por Operação → Atividade, com o foco no 1º campo e o rodapé "Cancelar · Incluir atividade" 
+PASSOU atividade desabilitada antes da operação 
+PASSOU atividades filtradas pela operação (Adubação a lanço) 
+PASSOU "Outra atividade…" abre o campo do nome 
+PASSOU trocar a operação refiltra (Pulverização) 
+PASSOU a atividade nova entra no grupo "Em relação à colheita", com a inclusão de insumo pronta 
+PASSOU o insumo da atividade nova entra pela tabela (Diquat 200, 2 L/ha) 
+PASSOU tipo "Dias antes do plantio" aparece antes do DAP 
+PASSOU DAP −20 abre como "Dias antes do plantio" com 20, sem sinal 
+PASSOU ajuda sem pedir negativo: "Zero é o dia do plantio." 
+PASSOU número negativo é recusado: "Use zero ou mais: o sentido já está no tipo." 
+PASSOU DAP com −20 é recusado (não salva como DAP 20) 
+PASSOU DAP com –15 é recusado (não salva como DAP 15) 
+PASSOU antes do plantio limitado a 180 dias 
+PASSOU salvar 25 dias antes grava DAP −25 
+PASSOU o bloco de alterações v7 × v6 lista dose, inclusão, exclusão, atividade nova e gatilho 
+PASSOU cultivos continuam na v6 ao publicar (safra encerrada fica na v5) 
+PASSOU uma primária: "Publicar versão v7" 
+PASSOU publicar cria a v7 e avisa que os cultivos ficam 
+PASSOU depois de publicar: v7 em vigor, v6 substituída com 3 cultivos; cultivos "Na v6 · v7 publicada" com o link ao Planejar safra; sem primária 
+PASSOU o cartão passa à v7 publicada, com os cultivos ainda na v6 e na v5 
+PASSOU mudar a dose do milho cria o rascunho v5 
+PASSOU descartar o rascunho volta à v4 publicada, sem primária 
+PASSOU nome repetido na cultura é recusado 
+PASSOU plano novo nasce como rascunho v1 com a cópia das atividades e abre no detalhe 
+PASSOU descartar o plano novo volta à biblioteca 
+PASSOU sem erros JS 
+
+RESULTADO: 46 ok · OK

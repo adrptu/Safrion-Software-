@@ -1,1 +1,0 @@
-_render remontado no 45a68b2 = _render em que o est_laudo_lote_nav_test rodou (3353f86): 170 arquivos, sha256 idênticos

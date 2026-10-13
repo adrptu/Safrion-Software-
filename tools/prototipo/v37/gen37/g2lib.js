@@ -290,79 +290,27 @@ function g2menuRec(){ if(g2estreito()) return true; try{ return localStorage.get
 // <perfis> Perfil de demonstração (sem login; PRD 2.1): quem age nas decisões que exigem papel. Vale entre telas, no navegador de quem usa;
 // demonstra a experiência, não é segurança (no software o servidor tira o ator da sessão). Pessoas e papéis: CF-01 e telas vizinhas.
 // O papel vem sempre desta lista (g2pf), nunca do objeto que o comando recebe. Bloco único, lido também pelos testes sem navegador.
-// G2_PERFIS é o PADRÃO (sem estado de Configurações); o efetivo (g2perfis) lê c.conf do cenário salvo: o CF-01 concede e retira papel,
-// convida e desativa (CONF-01 R2). G2_ALCADAS diz quem decide cada comando e é lida pelos próprios comandos (cenExigeAlc, R7).
 const G2_PERFIS=[{k:'Ana',t:'Ana · Gestora e RT',papeis:{gestor:'gestora',agronomo:'agrônoma'}},{k:'Caio',t:'Caio · PCP',papeis:{pcp:'PCP'}},
   {k:'Rui',t:'Rui · Almoxarife e expedição',papeis:{almoxarife:'almoxarife',expedicao:'expedição'}},{k:'Paula',t:'Paula · Conferência',papeis:{almoxarife:'almoxarife',conferente:'conferência'}},{k:'Zé',t:'Zé · Mecânico',papeis:{mecanico:'mecânico'}},
   {k:'Otávio',t:'Otávio · Manutenção (PCM)',papeis:{pcm:'responsável de manutenção'}},
   {k:'João',t:'João · Irrigante (eletricista NR-10)',papeis:{eletricista:'irrigante'}},   /* PCM simplificado (05/10, D-20): Ver como da Manutenção = Otávio · Zé · João · Ana; João executa as OMs de eletricista (revisão 09/10, A8) */
   {k:'Igor',t:'Igor · Produção',papeis:{producao:'responsável de produção'}},   // BEN-1: beneficiamento
   {k:'Dora',t:'Dora · Comercial',papeis:{comercial:'comercial'}},{k:'Marta',t:'Marta · Qualidade',papeis:{qualidade:'qualidade'}}];   // Comercial (D-C13): Dora vende, reserva e programa carga; Rui confirma a saída física; Ana (gestora) pode tudo e aprova crédito. Marta (Qualidade, R-13 da Colheita e BEN-1): libera lote em inspeção, inclusive o devolvido (A3 da revisão do Comercial)
-// catálogo de papéis (CONF-D03): papel = permissão de decidir; função e habilidade ficam no CD-04. Rótulo pelo gênero da pessoa (CONF0.pessoas[].fem)
-const G2_PAPEIS=[{k:'gestor',t:'Gestor',m:'gestor',f:'gestora'},{k:'agronomo',t:'Agrônomo',m:'agrônomo',f:'agrônoma'},{k:'pcp',t:'PCP',m:'PCP',f:'PCP'},
-  {k:'almoxarife',t:'Almoxarife',m:'almoxarife',f:'almoxarife'},{k:'conferente',t:'Conferência',m:'conferência',f:'conferência'},{k:'mecanico',t:'Mecânico',m:'mecânico',f:'mecânica'},
-  {k:'producao',t:'Produção',m:'responsável de produção',f:'responsável de produção'},{k:'qualidade',t:'Qualidade',m:'qualidade',f:'qualidade'},   /* BEN-1 (merge CONF × BEN) */
-  {k:'expedicao',t:'Expedição',m:'expedição',f:'expedição'},{k:'pcm',t:'Manutenção (PCM)',m:'responsável de manutenção',f:'responsável de manutenção'},   /* v57: papéis da v56 (Comercial e PCM) no catálogo, senão o perfil efetivo os descarta */
-  {k:'eletricista',t:'Irrigante (NR-10)',m:'irrigante',f:'irrigante'},{k:'comercial',t:'Comercial',m:'comercial',f:'comercial'},
-  {k:'direcao',t:'Direção',m:'direção',f:'direção'}];
-// alçadas (CONF-01 §4, R7): papeis/modo = quem decide ('todos' os papéis ou 'um' deles); acima = nível acima do limite; edita = o que o CF-01 muda
-// ('papel', 'lim', 'acima' ou '' = fixa, com o motivo em fixa). Versão e vigência vêm dos eventos de Configurações (c.conf); a v1 vale desde a implantação.
-const G2_ALCADAS=[
-  {id:'AL-01',t:'Liberar O.S. agrícola',cmd:'CMD-06',papeis:['gestor'],modo:'todos',edita:'papel',opc:['gestor','pcp','agronomo'],obs:'fora desta alçada: irrigação só com água, que libera pela prontidão (DEC-2609-10)',pend:'PEND-OS-01'},
-  {id:'AL-02',t:'Aprovar a versão da O.S. e ajustar antes de liberar',cmd:'CMD-42',papeis:['agronomo'],modo:'todos',edita:'',fixa:'lei (receituário agronômico) e PRD 41'},
-  {id:'AL-04',t:'Cancelar O.S. sem execução',cmd:'CMD-46',papeis:['gestor'],modo:'todos',edita:'',lim:'só sem realizado',fixa:'ordem com realizado não se cancela: dispensa o saldo (AL-05)'},
-  {id:'AL-05',t:'Dispensar saldo da O.S.',cmd:'CMD-47',papeis:['gestor','agronomo'],modo:'todos',lim:20,un:'%',acima:{papeis:['direcao','agronomo'],modo:'todos'},edita:'lim',faixa:[1,100]},
-  {id:'AL-09',t:'Aprovar ajuste de inventário',cmd:'Ajuste',papeis:['gestor'],modo:'todos',edita:'papel',opc:['gestor','direcao'],obs:'quem contou e aprova fica com revisão posterior',pend:'PEND-CTL-02'},
-  {id:'AL-10',t:'Aceitar consumo informado',cmd:'CMD-50',papeis:['almoxarife','gestor'],modo:'um',lim:'a custódia',acima:{papeis:['gestor'],modo:'todos'},edita:'acima',opc:['gestor','direcao'],pend:'PEND-CTL-02'},
-  {id:'AL-11',t:'Liberar lote da quarentena com laudo',cmd:'CMD-24',papeis:['gestor'],modo:'todos',edita:'',fixa:'qualidade do insumo: quem guarda o estoque não libera o próprio bloqueio'},
-  {id:'AL-12',t:'Decidir duplicidade de apontamento',cmd:'CMD-09',papeis:['conferente'],modo:'todos',edita:'',fixa:'conferência separada de quem executa: quem apontou e decide a própria duplicidade fica com revisão posterior'},
-  {id:'AL-13',t:'Conceder e retirar papel, convidar e desativar acesso',cmd:'Configurações',papeis:['gestor'],modo:'todos',edita:'',fixa:'protege o próprio controle (R3, R4, R5)'},
-  {id:'AL-14',t:'Alterar alçada',cmd:'Configurações',papeis:['gestor'],modo:'todos',conf:{papeis:['gestor','direcao'],modo:'um'},edita:'',fixa:'protege o próprio controle; ampliar o próprio poder pede 2º aprovador (R10)'},
-  {id:'AL-15',t:'Pagar fatura, mudar plano, desfazer, pedir proposta e contestar',cmd:'Assinatura e cobrança',papeis:['gestor'],modo:'todos',edita:'',fixa:'contrato e pagamento da organização; o backoffice (conciliar, resolver) é da plataforma (Admin plataforma)'},
-  {id:'AL-17',t:'Publicar previsão de colheita',cmd:'Colheita (R-17)',papeis:['agronomo'],modo:'todos',edita:'papel',opc:['agronomo','gestor','pcp'],obs:'a contagem do campo não muda a previsão: só quem publica (a oferta do Comercial lê a publicada)'}];
 const G2_PERFIL_KEY='safrion.perfilDemo'; let G2_PERFIL_MEM='';
-// estado de Configurações: c.conf do cenário salvo (talhao-os-cenario-v1), válido só com a versão deste build (CONF0.v); ausente → padrão.
-// Cache pelo texto salvo e pelo tamanho de G2_PERFIS (os testes injetam perfis): g2pf roda muitas vezes por desenho. Nunca chamado no carregamento.
-const G2_CF={raw:null,conf:null,src:undefined,np:-1,pf:null};
-function g2confOk(c){ if(!c||!c.conf||typeof CONF0==='undefined'||c.conf.v!==CONF0.v) return false;
-  return c.v===((typeof CEN0!=='undefined')?CEN0.v:((typeof ASSIN_CENV!=='undefined')?ASSIN_CENV:null)); }
-function g2conf(){ if(typeof CONF0==='undefined') return null; let raw=null; try{ raw=localStorage.getItem('talhao-os-cenario-v1'); }catch(e){ raw=null; }
-  if(raw===null){ const m=(typeof CEN_MEM!=='undefined')?CEN_MEM:null; return (m&&g2confOk(m))?m.conf:null; }   /* sem nada salvo: o cenário da página (cenGet) */
-  if(raw!==G2_CF.raw){ G2_CF.raw=raw; let c=null; try{ c=JSON.parse(raw); }catch(e){ c=null; } G2_CF.conf=(c&&g2confOk(c))?c.conf:null; }
-  return G2_CF.conf; }
-function g2papRot(k,papel,fem){ const d=G2_PERFIS.find(p=>p.k===k); if(d&&d.papeis[papel]) return d.papeis[papel]; const P=G2_PAPEIS.find(x=>x.k===papel); return P?(fem?P.f:P.m):papel; }
-// perfis efetivos de um estado (R2): sem conf, exatamente G2_PERFIS; com conf, quem tem acesso Ativo e ao menos um papel (ordem de G2_PERFIS, depois a do CD-04)
-function g2perfisDe(conf){ if(!conf||typeof CONF0==='undefined') return G2_PERFIS; const out=[], vis={};
-  const add=(p)=>{ if(vis[p.k]) return; vis[p.k]=1; const e=(conf.pessoas||{})[p.id]; if(!e||e.a!=='ativo'||!(e.papeis||[]).length) return;
-    const papeis={}; G2_PAPEIS.forEach(x=>{ if(e.papeis.indexOf(x.k)>=0) papeis[x.k]=g2papRot(p.k,x.k,p.fem); });
-    const d=G2_PERFIS.find(q=>q.k===p.k); const igual=!!d&&Object.keys(d.papeis).sort().join()===Object.keys(papeis).sort().join();
-    out.push({k:p.k,t:igual?d.t:p.k+' · '+Object.values(papeis).map((x,i)=>i?x:x.charAt(0).toUpperCase()+x.slice(1)).join(' e '),papeis}); };
-  G2_PERFIS.forEach(d=>{ const p=CONF0.pessoas.find(x=>x.k===d.k); if(p) add(p); else if(!vis[d.k]){ vis[d.k]=1; out.push(d); } });   /* perfil fora do CD-04 (outra frente): segue o padrão */
-  CONF0.pessoas.forEach(add); return out; }
-function g2perfis(){ const conf=g2conf(); if(!conf) return G2_PERFIS;
-  if(G2_CF.src!==conf||G2_CF.np!==G2_PERFIS.length){ G2_CF.src=conf; G2_CF.np=G2_PERFIS.length; G2_CF.pf=g2perfisDe(conf); } return G2_CF.pf; }
-function g2pf(p){ const k=(typeof p==='string')?p:(p&&p.k); return g2perfis().find(x=>x.k===k)||null; }   // perfil efetivo pela chave ("Ana" ou {k:'Ana'})
-function g2perfil(){ let k=G2_PERFIL_MEM; try{ k=localStorage.getItem(G2_PERFIL_KEY)||k; }catch(e){} return g2pf(k)||g2perfis()[0]||G2_PERFIS[0]; }   // o desativado cai no 1º efetivo
+function g2pf(p){ const k=(typeof p==='string')?p:(p&&p.k); return G2_PERFIS.find(x=>x.k===k)||null; }   // perfil do cadastro pela chave ("Ana" ou {k:'Ana'})
+function g2perfil(){ let k=G2_PERFIL_MEM; try{ k=localStorage.getItem(G2_PERFIL_KEY)||k; }catch(e){} return g2pf(k)||G2_PERFIS[0]; }
 function g2papel(p,papel){ const q=g2pf(p); return !!q&&[].concat(papel).every(x=>!!q.papeis[x]); }   // papel ou lista (todos exigidos)
 function g2ator(p,papel){ const q=g2pf(p); if(!q) return ''; const n=[].concat(papel).map(x=>q.papeis[x]).filter(Boolean);
   return q.k+' ('+(n.length?n.join(' e '):Object.values(q.papeis)[0])+')'; }   // "Ana (gestora)" · "Ana (gestora e agrônoma)"; fora do cadastro: ''
-function g2quem(papel){ return g2perfis().filter(p=>g2papel(p,papel)).map(p=>g2ator(p,papel)).join(' ou '); }
+function g2quem(papel){ return G2_PERFIS.filter(p=>g2papel(p,papel)).map(p=>g2ator(p,papel)).join(' ou '); }
 function g2umPapel(p,papeis){ const q=g2pf(p); return (q&&papeis.find(x=>!!q.papeis[x]))||''; }   // o primeiro papel da lista que o perfil tem (basta um): '' se nenhum
-function g2quemUm(papeis){ return g2perfis().filter(p=>g2umPapel(p,papeis)).map(p=>g2ator(p,g2umPapel(p,papeis))).join(' ou '); }   // "Ana (gestora) ou Rui (almoxarife) ou …"
+function g2quemUm(papeis){ return G2_PERFIS.filter(p=>g2umPapel(p,papeis)).map(p=>g2ator(p,g2umPapel(p,papeis))).join(' ou '); }   // "Ana (gestora) ou Rui (almoxarife) ou …"
 function g2mesma(a,b){ const n=s=>String(s||'').split(/[\s(]/)[0]; return !!n(a)&&n(a)===n(b); }   // "Ana" × "Ana (gestora)"
-// alçada vigente: a linha de G2_ALCADAS com a mudança gravada em c.conf.alc (versão, papéis, limite ou nível acima)
-function g2alcDe(conf,id){ const b=G2_ALCADAS.find(a=>a.id===id); if(!b) return null; const o=conf&&conf.alc&&conf.alc[id]; return Object.assign({v:1},b,o||{}); }
-function g2alc(id){ return g2alcDe(g2conf(),id); }
-function g2alcN(a,nivel){ return (a&&nivel==='acima'&&a.acima)?a.acima:a; }   // nível 'base' (padrão) ou 'acima' do limite
-function g2papT(papeis){ return [].concat(papeis).map(x=>((G2_PAPEIS.find(y=>y.k===x)||{}).m||x)).join(' e '); }   // "gestor e agrônomo"
-// quem decide a alçada (texto das telas, nunca nome fixo): sem titular ativo, diz onde conceder
-function g2alcQuem(id,nivel){ const n=g2alcN(g2alc(id),nivel); if(!n) return ''; const q=n.modo==='um'?g2quemUm(n.papeis):g2quem(n.papeis);
-  return q||(g2papT(n.papeis)+' sem titular: conceda em Configurações › Usuários e alçadas'); }
 // </perfis>
 // trocar o perfil (aqui ou em outra aba) fecha a confirmação ou o formulário de decisão aberto, montado para o perfil anterior (revisão do CTL-3,
 // achado 1; dano evitado: a tela afirmar que decide quem não tem o papel). Cada tela diz o que fecha em self.g2perfilFecha (O.S., Mapa, Estoque)
 function g2navvals(self,v,nav){ const rec=(self.state.menuRec===undefined)?g2menuRec():!!self.state.menuRec;
-  const pf=g2perfil(); v.perfil_k=pf.k; v.perfil_ini=pf.k.charAt(0); v.perfil_opts=g2perfis().map(p=>({v:p.k,t:p.t}));
+  const pf=g2perfil(); v.perfil_k=pf.k; v.perfil_ini=pf.k.charAt(0); v.perfil_opts=G2_PERFIS.map(p=>({v:p.k,t:p.t}));
   v.perfil_set=(e)=>{ const k=e.target.value; G2_PERFIL_MEM=k; try{ localStorage.setItem(G2_PERFIL_KEY,k); }catch(er){} self.setState(Object.assign({perfil:k,g2toast:'Perfil de demonstração: '+((g2pf(k)||{}).t||k)+' (não é segurança de acesso).'},self.g2perfilFecha||{})); };
   if(!self.__g2pf){ self.__g2pf=1; try{ window.addEventListener('storage',(e)=>{ if(e.key===G2_PERFIL_KEY) self.setState(Object.assign({perfil:e.newValue},self.g2perfilFecha||{})); }); }catch(er){} }
   const fixa=(n)=>{ if(g2estreito()) return; try{ localStorage.setItem('safrion.menuRecolhido',n?'1':'0'); }catch(e){} };
@@ -457,8 +405,7 @@ function g2avisoH(){ try{ let h=0; document.querySelectorAll('[role=status]').fo
     return (m.a&&cs.find(e=>e.dataset.acao===m.a))||cs.find(e=>(e.innerText||'').replace(/\s+/g,' ').trim()===m.t)||null; };
   const devolve=(v,m)=>{ const ae=document.activeElement; if(ae&&ae!==document.body&&ae.isConnected) return true; const alvo=vis(v)?v:acha(m); if(!alvo) return false; try{ alvo.focus({preventScroll:true}); }catch(e){} return document.activeElement===alvo; };
   const olha=()=>{ const d=modal();
-    if(d&&d!==aberto){ aberto=d; const ae=document.activeElement, o=(ae&&ae!==document.body&&!(ae.closest&&ae.closest('aside[role=dialog]')))?ae:fora; d.__volta=o; d.__marca=marca(o); if(d.getAttribute('aria-modal')!=='true') d.setAttribute('aria-modal','true');
-      if(d.dataset&&d.dataset.foco==='1') setTimeout(()=>{ if(aberto!==d||d.contains(document.activeElement)) return; const f=foc(d)[0]; if(f) try{ f.focus({preventScroll:true}); }catch(e){} },0); }   /* opt-in (Configurações): o foco entra no painel ao abrir; Esc fecha sem um Tab antes */
+    if(d&&d!==aberto){ aberto=d; const ae=document.activeElement, o=(ae&&ae!==document.body&&!(ae.closest&&ae.closest('aside[role=dialog]')))?ae:fora; d.__volta=o; d.__marca=marca(o); if(d.getAttribute('aria-modal')!=='true') d.setAttribute('aria-modal','true'); }
     else if(!d&&aberto){ const v=aberto.__volta, m=aberto.__marca; aberto=null;
       devolve(v,m); setTimeout(()=>devolve(v,m),0); setTimeout(()=>devolve(v,m),80); } };   // de novo depois do redesenho da tela (só age se o foco caiu no BODY)
   try{ new MutationObserver(olha).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){} })();

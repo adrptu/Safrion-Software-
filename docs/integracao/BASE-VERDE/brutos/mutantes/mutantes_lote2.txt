@@ -1,0 +1,4 @@
+osacoes_prazo_junto rc=0 35s ::   FALHOU OS-0430 A liberar com dono Ana (agrônoma) e prazo antes de 25/09, sem selo de agrônomo · (['Ana (agrônoma)', '—'], 'OS-0430 Dessecação pré-plantio T1-A — 160,00 ha 25/09/2026 25/09/2026 A liberar — — Ana (agrônoma) antes  || RESULTADO: 44 ok · 1 falhas
+osacoes_rolagem_pagina rc=0 97s ::   FALHOU lista sem rolagem horizontal da página: a tabela cabe ou rola dentro da caixa, 1ª coluna e filtro Talhão à vista · {'pagina': True, 'caixa': False, 'c0': True, 'talhao': True, 'larg': [2150, 1116]} || RESULTADO: 44 ok · 1 falhas
+osacoes_dispensado_zero rc=0 43s :: RESULTADO: 45 ok · 0 falhas
+FIM

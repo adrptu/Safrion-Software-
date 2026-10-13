@@ -1,0 +1,7 @@
+OK    26 tabela no celular (SAF, CMP, CD-06, SU-01, MA#vis=ativos em 360×800) · 1ª coluna limitada, todas as colunas aparecem ao rolar, todo controle da 1ª linha e do cabeçalho fica inteiro à vista com o foco, nada vaza da coluna presa; 1440 px sem limite 
+OK    27 menu · com "aberto" guardado, CMP e O.S. começam recolhidos (68 px, sem fundo, título livre) em 360, 768 e zoom 200 %, e abertos ao lado em 1440; no estreito, Tab depois do último item fecha o menu e o foco segue no conteúdo; a escolha guardada não muda 
+OK    28 áreas seguras emuladas (800×360 com 47 px nas laterais; 360×800 com 47 px no alto) · botão do menu e menu aberto dentro da área segura; o botão não cobre itens do menu 
+OK    29 toque (360×800, sem hover) · expandir da grade e filtro de coluna sem fundo de hover depois do toque 
+     erros JS (ajustes): []
+
+RESULTADO: 4 ok · 0 falhas (ajustes)

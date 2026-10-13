@@ -1,0 +1,2 @@
+inicio 11:23:43 HEAD 0900d59 árvore v37 907ecf0 · árvore limpa: 0 arquivos alterados
+fim 12:54:59 · árvore limpa: 0 arquivos alterados

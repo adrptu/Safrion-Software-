@@ -20,10 +20,9 @@ class Conta:
         r = m.abre(rid); s.c += 1; s.troca(); return r
     def dig(s, sel, val):
         r = m.setv(sel, val); s.c += 1; s.k += len(val); return r
-    def menu(s, item):
-        """menu Manutenção com subitens (pedido do proprietário, 13/10/2026): abre o grupo e toca a visão (2 cliques; antes 1, o item
-        único "Manutenção"). A página nova não conta como troca: é o destino da tarefa. As metas abaixo sobem 1 clique só por isso."""
-        m.clk('Manutenção', 'nav[aria-label=Menu]', w=.6); m.clk(item, 'nav[aria-label=Menu]', w=1.4); s.c += 2; s.marca()
+    def menu(s):
+        """toque no item "Manutenção" do menu (1 clique; a página nova não conta como troca: é o destino da tarefa)"""
+        m.clk('Manutenção', 'nav[aria-label=Menu]', w=1.4); s.c += 1; s.marca()
 RES = []
 def tarefa(nome, c, esperado, ok_estado, info=''):
     tot = (c.c, c.k, c.t); RES.append((nome, tot, esperado))
@@ -37,42 +36,42 @@ try:
     # (a) Zé conclui a OM-0234 liberada (5 tarefas), web
     c = inicio('Otávio', prep=lambda: man("return window.__man.manLiberar(m,'OM-0234',true,'Otávio',{executante:'Zé',tempo:'5'});"))
     m.J("localStorage.setItem('safrion.perfilDemo','Zé')"); m.ir('', pagina='IN-01.dc.html'); c.marca()
-    c.menu('Ordens de manutenção'); c.abre('OM-0234'); c.clk('Iniciar serviço', '#ma-painel'); m.bloco('Tarefas')
+    c.menu(); c.abre('OM-0234'); c.clk('Iniciar serviço', '#ma-painel'); m.bloco('Tarefas')
     n = m.responder('Feito'); c.c += n
     c.dig('#om-leitura', '2995'); c.clk('Previsto (5 h)', '#ma-painel'); c.clk('Concluir serviço', '#ma-painel')
-    tarefa('(a) Zé conclui a OM-0234 (5 tarefas), web', c, (12, 4, 0), m.man("m.oms['OM-0234'].etapa") == 'Em conferência' and n == 5)
+    tarefa('(a) Zé conclui a OM-0234 (5 tarefas), web', c, (11, 4, 0), m.man("m.oms['OM-0234'].etapa") == 'Em conferência' and n == 5)
     # (a) Zé conclui a OM-0233 com teste e declara apto, web
-    c = inicio('Zé'); c.menu('Ordens de manutenção'); c.abre('OM-0233') if 'om=OM-0233' not in m.hash() else None
+    c = inicio('Zé'); c.menu(); c.abre('OM-0233') if 'om=OM-0233' not in m.hash() else None
     c.clk('Aprovado', '#ma-painel'); c.clk('Anexar foto e registrar Aprovado', '#ma-painel'); c.dig('#om-leitura', '4320'); c.clk('Previsto (6,5 h)', '#ma-painel')
     c.clk('Concluir serviço', '#ma-painel'); c.clk('Declarar Trator T1 apto', '#ma-painel')
-    tarefa('(a) Zé conclui a OM-0233 com teste e declara apto, web', c, (8, 4, 0), m.man("m.ativos.a01.cond") == 'Apto')
+    tarefa('(a) Zé conclui a OM-0233 com teste e declara apto, web', c, (7, 4, 0), m.man("m.ativos.a01.cond") == 'Apto')
     # (b) SM-0150 → corretiva liberada
-    c = inicio('Otávio'); c.menu('Pendências sem ordem'); c.abre('a:SM-0150'); c.clk('Criar ordem corretiva', '#ma-painel'); c.dig('#om-tempo', '3'); c.clk('Liberar serviço', '#ma-painel')
+    c = inicio('Otávio'); c.menu(); c.abre('a:SM-0150'); c.clk('Criar ordem corretiva', '#ma-painel'); c.dig('#om-tempo', '3'); c.clk('Liberar serviço', '#ma-painel')
     om = m.man("Object.values(m.oms).find(o=>o.origAch==='SM-0150')||{}") or {}
-    tarefa('(b) SM-0150 → corretiva liberada', c, (6, 1, 0), om.get('etapa') == 'Liberadas', om.get('etapa'))
+    tarefa('(b) SM-0150 → corretiva liberada', c, (5, 1, 0), om.get('etapa') == 'Liberadas', om.get('etapa'))
     # (b) INSP-104 → OM-0234, resolvendo o conflito
-    c = inicio('Otávio'); c.menu('Pendências sem ordem'); c.abre('a:INSP-104'); c.clk('Vincular à OM-0234', '#ma-painel'); c.clk('Mover janela para 29/09', '#ma-painel'); c.clk('Liberar serviço', '#ma-painel')
-    tarefa('(b) INSP-104 → OM-0234, resolvendo o conflito', c, (6, 0, 0), m.man("m.oms['OM-0234'].etapa") == 'Liberadas' and m.man("m.oms['OM-0234'].janIso") == '2026-09-29')
+    c = inicio('Otávio'); c.menu(); c.abre('a:INSP-104'); c.clk('Vincular à OM-0234', '#ma-painel'); c.clk('Mover janela para 29/09', '#ma-painel'); c.clk('Liberar serviço', '#ma-painel')
+    tarefa('(b) INSP-104 → OM-0234, resolvendo o conflito', c, (5, 0, 0), m.man("m.oms['OM-0234'].etapa") == 'Liberadas' and m.man("m.oms['OM-0234'].janIso") == '2026-09-29')
     # (b) NC-0912
-    c = inicio('Otávio'); c.menu('Pendências sem ordem'); c.abre('a:NC-0912'); c.clk('Gerar ordem preventiva com NC-0912', '#ma-painel'); c.clk('Liberar serviço', '#ma-painel'); c.clk('Liberar mesmo assim', '#ma-painel')
+    c = inicio('Otávio'); c.menu(); c.abre('a:NC-0912'); c.clk('Gerar ordem preventiva com NC-0912', '#ma-painel'); c.clk('Liberar serviço', '#ma-painel'); c.clk('Liberar mesmo assim', '#ma-painel')
     om = m.man("Object.values(m.oms).find(o=>(o.achados||[]).indexOf('NC-0912')>=0)||{}") or {}
-    tarefa('(b) NC-0912 → preventiva liberada', c, (6, 0, 0), om.get('etapa') == 'Liberadas', om.get('id'))
+    tarefa('(b) NC-0912 → preventiva liberada', c, (5, 0, 0), om.get('etapa') == 'Liberadas', om.get('id'))
     # (c) ver o que vence · programar · liberar as 3
-    c = inicio('Otávio'); c.menu('Pendências sem ordem'); ver = 'VENCIDAS SEM ORDEM' in m.body().upper()
-    tarefa('(c) ver o que vence', c, (2, 0, 0), ver and 'vis=semordem' in m.hash())
-    c.clk('Gerar 3 ordens preventivas'); tarefa('(c) programar', c, (3, 0, 0), m.man("['OM-0235','OM-0236','OM-0237'].every(id=>!!m.oms[id])"))
+    c = inicio('Otávio'); c.menu(); ver = 'VENCIDAS SEM ORDEM' in m.body().upper()
+    tarefa('(c) ver o que vence', c, (1, 0, 0), ver and 'vis=semordem' in m.hash())
+    c.clk('Gerar 3 ordens preventivas'); tarefa('(c) programar', c, (2, 0, 0), m.man("['OM-0235','OM-0236','OM-0237'].every(id=>!!m.oms[id])"))
     c.clk('Solicitar compra', '#ma-painel'); c.clk('Registrar recebimento', '#ma-painel'); c.clk('Liberar serviço', '#ma-painel')
     c.clk('Próxima', '#ma-painel'); c.clk('Liberar serviço', '#ma-painel'); c.clk('Liberar mesmo assim', '#ma-painel'); c.clk('Próxima', '#ma-painel'); c.clk('Liberar serviço', '#ma-painel')
-    tarefa('(c) liberar as 3 (acumulado)', c, (12, 0, 0), m.man("['OM-0235','OM-0236','OM-0237'].every(id=>m.oms[id].etapa==='Liberadas')"), [m.man("['OM-0235','OM-0236','OM-0237'].map(id=>m.oms[id].etapa)")])
+    tarefa('(c) liberar as 3 (acumulado)', c, (11, 0, 0), m.man("['OM-0235','OM-0236','OM-0237'].every(id=>m.oms[id].etapa==='Liberadas')"), [m.man("['OM-0235','OM-0236','OM-0237'].map(id=>m.oms[id].etapa)")])
     # (d) aptos agora · custo do mês · custo de uma OM · custo por ativo
-    c = inicio('Ana'); c.menu('Ativos e disponibilidade'); b = m.body().upper()
-    tarefa('(d) aptos agora', c, (2, 0, 0), 'APTOS AGORA' in b and 'vis=ativos' in m.hash())
-    tarefa('(d) custo do mês', c, (2, 0, 0), 'CUSTO DE MANUTENÇÃO · SET/2026' in b)
-    tarefa('(d) custo por ativo', c, (2, 0, 0), 'CUSTO NO PERÍODO' in b)
-    c = inicio('Ana'); c.menu('Ativos e disponibilidade'); c.abre('a02'); m.bloco('Ordens'); b = m.body()
-    tarefa('(d) custo de uma OM (Manutenção · ativo › Ordens)', c, (3, 0, 0), 'OM-0219' in b and 'R$ 4.658,00' in b)
+    c = inicio('Ana'); c.menu(); b = m.body().upper()
+    tarefa('(d) aptos agora', c, (1, 0, 0), 'APTOS AGORA' in b and 'vis=ativos' in m.hash())
+    tarefa('(d) custo do mês', c, (1, 0, 0), 'CUSTO DE MANUTENÇÃO · SET/2026' in b)
+    tarefa('(d) custo por ativo', c, (1, 0, 0), 'CUSTO NO PERÍODO' in b)
+    c = inicio('Ana'); c.menu(); c.abre('a02'); m.bloco('Ordens'); b = m.body()
+    tarefa('(d) custo de uma OM (Manutenção · ativo › Ordens)', c, (2, 0, 0), 'OM-0219' in b and 'R$ 4.658,00' in b)
     # (e) abastecimento, web (operador herdado da alocação: 8)
-    c = inicio('Otávio'); c.menu('Ativos e disponibilidade'); c.abre('a02');   # o subitem leva direto à visão Ativos (antes: menu + aba Ativos) c.clk('Registrar abastecimento')
+    c = inicio('Otávio'); c.menu(); c.clk('Ativos', 'main'); c.abre('a02'); c.clk('Registrar abastecimento')
     # revisão 09/10 (S4): o toque no tanque só conta quando há escolha; no campo o Trator 02 só tem o comboio, já escolhido (antes contava um toque em "Sede · D-118" que não existe)
     tq = J("[...document.querySelectorAll('#ma-painel [role=group] button')].filter(b=>/D-11[78]/.test(b.innerText)).map(b=>[b.innerText.trim(),b.getAttribute('aria-pressed')])") or []
     if not any(x[1] == 'true' for x in tq): c.clk('Sede · D-118', '#ma-painel')
