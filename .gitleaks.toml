@@ -82,6 +82,18 @@ regexes = [
   '''^talhao-os-manutencao-v1$''',
 ]
 
+# VEL-20261013-01: nome da chave localStorage da ficha sintética de pivô, autorizado pelo proprietário.
+# Só este literal nestes dois arquivos; outros valores e caminhos continuam sujeitos às regras padrão.
+[[rules.allowlists]]
+description = "Chave exata de localStorage da ficha de pivô; não é credencial"
+condition = "AND"
+regexTarget = "secret"
+paths = [
+  '''^tools/prototipo/v37/gen37/ficha_pivo\.py$''',
+  '''^tools/prototipo/v37/gen37/irrigacao_estado\.js$''',
+]
+regexes = ['''^talhao-os-ficha-pivo-v1$''']
+
 # HML-SECRET-02: nomes de Secret Manager usados por value_source.secret_key_ref.
 # Este identificador não é senha; outros valores/arquivos continuam sujeitos à regra.
 [[rules]]
