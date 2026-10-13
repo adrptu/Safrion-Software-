@@ -3,6 +3,7 @@ e HML-SECRET-04 (cinco nomes exatos de chave de localStorage, só no protótipo 
 O .gitleaksignore tem só o achado exato da HML-SECRET-05 (commit, arquivo, regra e linha), sem curinga."""
 from pathlib import Path
 import re
+import json
 import tomllib
 import unittest
 
@@ -94,6 +95,77 @@ class IgnoreSoComAchadoExato(unittest.TestCase):
                 # commit de 40 hex, caminho exato, regra e linha: sem curinga nem fingerprint de arquivo inteiro
                 self.assertRegex(l, r'^[0-9a-f]{40}:[A-Za-z0-9_./-]+:generic-api-key:[0-9]+$')
                 self.assertNotIn('*', l)
+
+
+class ExcecaoDaFichaDePivo(unittest.TestCase):
+    """Contrato descoberto pela CI; os scans reais estão na rodada VEL-20261013-01."""
+
+    def excecao(self):
+        cfg = tomllib.loads((RAIZ / '.gitleaks.toml').read_text(encoding='utf-8'))
+        self.assertTrue(cfg['extend']['useDefault'])
+        regra = next(r for r in cfg['rules'] if r['id'] == 'generic-api-key')
+        candidatas = [a for a in regra['allowlists'] if '^talhao-os-ficha-pivo-v1$' in a.get('regexes', [])]
+        self.assertEqual(len(candidatas), 1)
+        return candidatas[0]
+
+    def test_um_literal_dois_arquivos_e_duas_condicoes(self):
+        a = self.excecao()
+        self.assertEqual(a['condition'], 'AND')
+        self.assertEqual(a['regexTarget'], 'secret')
+        self.assertEqual(a['regexes'], ['^talhao-os-ficha-pivo-v1$'])
+        self.assertEqual(a['paths'], [r'^tools/prototipo/v37/gen37/ficha_pivo\.py$',
+                                      r'^tools/prototipo/v37/gen37/irrigacao_estado\.js$'])
+
+    def test_outras_excecoes_nao_ampliam_a_permissao_efetiva(self):
+        cfg = tomllib.loads((RAIZ / '.gitleaks.toml').read_text(encoding='utf-8'))
+        # Novas formas de exceção precisam de revisão e contraprova do detector real.
+        self.assertFalse(cfg.get('allowlist'))
+        self.assertFalse(cfg.get('allowlists'))
+        regras = [r for r in cfg['rules'] if r['id'] == 'generic-api-key']
+        self.assertEqual(len(regras), 1, 'Regra duplicada pode sobrescrever a configuração efetiva.')
+        regra = regras[0]
+        self.assertEqual(set(regra), {'id', 'allowlists'}, 'A regra padrão não pode receber sobrescritas.')
+        self.assertEqual(cfg['extend'], {'useDefault': True}, 'Manter todas as regras herdadas, sem configuração adicional.')
+        self.assertFalse(regra.get('allowlist'))
+        referencia = json.loads((RAIZ / 'tools/ci/fixtures/gitleaks_generic_allowlists.json').read_text(encoding='utf-8'))
+        self.assertEqual(regra['allowlists'], referencia,
+                         'Exceção nova ou alterada exige revisão explícita da referência autorizada.')
+        literais = ('talhao-os-ficha-pivo-v1', 'talhao-os-ficha-pivo-v2',
+                    'Q9x7-talhao-os-ficha-pivo-v1', 'talhao-os-ficha-pivo-v1-7zW2', 'ghp_' + 'A' * 36)
+        autorizados = (PREFIXO + 'ficha_pivo.py', PREFIXO + 'irrigacao_estado.js')
+        caminhos = list(autorizados) + [PREFIXO + 'outra_ficha.py']
+        for dentro in autorizados:
+            caminhos.extend((dentro + '.bak', 'backup/' + dentro,
+                             dentro.replace('gen37/', 'gen370/'), dentro.replace('.', 'X')))
+        for a in regra['allowlists']:
+            with self.subTest(excecao=a.get('description')):
+                self.assertLessEqual(set(a), {'description', 'condition', 'regexTarget', 'paths', 'regexes'})
+                self.assertEqual(a.get('regexTarget'), 'secret')
+                self.assertEqual(a.get('condition'), 'AND')
+                self.assertTrue(a.get('paths'))
+                self.assertTrue(a.get('regexes'))
+                for valor in literais:
+                    for caminho in caminhos:
+                        permitido = (valor == literais[0] and caminho in autorizados)
+                        combina = (any(re.search(r, valor) for r in a['regexes'])
+                                   and any(re.search(r, caminho) for r in a['paths']))
+                        with self.subTest(valor=valor, caminho=caminho):
+                            self.assertFalse(combina and not permitido)
+
+    def test_limites_do_valor_e_do_caminho(self):
+        a = self.excecao()
+        segredo = re.compile(a['regexes'][0])
+        caminhos = [re.compile(p) for p in a['paths']]
+        literal = 'talhao-os-ficha-pivo-v1'
+        self.assertTrue(segredo.search(literal))
+        for outro in ('talhao-os-ficha-pivo-v2', 'Q9x7-' + literal, literal + '-7zW2', 'ghp_' + 'A' * 36):
+            self.assertIsNone(segredo.search(outro), outro)
+        for arquivo in ('ficha_pivo.py', 'irrigacao_estado.js'):
+            dentro = PREFIXO + arquivo
+            self.assertTrue(any(c.search(dentro) for c in caminhos), dentro)
+            for fora in (dentro + '.bak', 'backup/' + dentro, dentro.replace('gen37/', 'gen370/'),
+                         dentro.replace('.', 'X'), PREFIXO + 'outra_ficha.py'):
+                self.assertFalse(any(c.search(fora) for c in caminhos), fora)
 
 
 if __name__ == '__main__':
