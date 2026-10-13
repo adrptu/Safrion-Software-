@@ -292,6 +292,9 @@ function confTrilha(c, A) { const L = []; let n = 0; const op = CONF0.hoje; cons
     add({ id: m.id, d: op, at: m.at, sq: m.sq, quem: qi[0], cmd: m.tipo === 'inspecao' ? 'CMD-24' : 'Estoque', oq: MV[m.tipo], obj: m.id + (m.req ? ' · ' + m.req : '') + (m.doc ? ' · ' + m.doc : ''), h: m.tipo === 'recebimento' ? 'MB-05.dc.html' : 'EST.dc.html',
       origem: m.origem || 'web', ef: itens + (qi[1] ? ' · para ' + qi[1] : '') + (m.tipo === 'devolucao' || m.tipo === 'recebimento-nf' ? (m.apto ? ' · ao disponível' : ' · bloqueado para inspeção') : ''), src: m.id }); });
   confTrilhaProd(c, add);
+  /* CONTROLE-02 F2 (CF04, contrato do PR #58): cada recibo completo da referência técnica publicada vira uma linha, pelo adaptador do Codex
+     (PlanoReferencia.trilha: id PLANO:…, sq real, autor e data do registro); recibo incompleto o adaptador recusa e não derruba as outras linhas */
+  if (typeof CONF_PLANO_REF !== 'undefined') (c.planoReferencias || []).forEach(x => { let ls = []; try { ls = CONF_PLANO_REF.trilha((x && x.versoes) || []); } catch (e) { ls = []; } ls.forEach(r => add(r)); });
   if (A && A.orgs && A.orgs[A.demo]) { const org = A.orgs[A.demo]; const cob = (r) => add(Object.assign({ ds: CONF_DS.cob, h: 'CF-05.dc.html', cmd: 'Assinatura' }, r));
     (org.contratos || []).concat((org.desfeitos || []).map(k => Object.assign({ des: true }, k))).filter(k => k.aceite).forEach(k => {
       cob({ id: 'ACE:' + k.v + (k.des ? 'd' : ''), d: k.aceite, sq: k.sq, quem: k.por || '', oq: 'Aceitar contrato da assinatura', obj: 'Contrato v' + k.v, ef: ((assinPlano(k.plano) || {}).nome || k.plano) + ' · ' + assinHa(k.ha) + ' a partir de ' + confBr(k.desde) + (k.recibo ? ' · ' + k.recibo : ''), src: k.recibo || 'contrato v' + k.v });
