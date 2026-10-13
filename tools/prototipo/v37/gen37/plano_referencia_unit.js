@@ -234,5 +234,34 @@ teste('versão: publicação nova exige autor e instante válido sem inventá-lo
   assert.throws(()=>preparar([],a,null,''),/Responsável/);
   for(const em of ['', 'ontem', '2026-02-30T16:30:00.000Z']) assert.throws(()=>preparar([],a,null,'Ana',em),/Data/);
 });
-console.log(`RESULTADO ${n-falhas}/${n} · núcleo/projeção/contexto/preparação; publicação e UI não executadas`);
+const reciboTrilha=(r,sq=1)=>({...preparar([],r).versao,sq});
+teste('trilha: legado vazio não recebe data, ator ou publicação fictícia',()=>assert.deepEqual(PR.trilha([]),[]));
+teste('trilha: recibo completo usa a identidade, autor, instante e ordem registrados',()=>{
+  const p=reciboTrilha(snap([e('C1',{area:10})]),7), antes=JSON.stringify(p), estado=JSON.stringify(__ls);
+  const [linha]=PR.trilha([p]);
+  assert.equal(linha.quem,p.por);assert.equal(linha.d,'2026-10-13');assert.equal(linha.at,'16:30:00');assert.equal(linha.sq,7);
+  assert.equal(linha.cmd,'CMD-02');assert.equal(linha.h,'SAF.dc.html#saf=S2627');assert.match(linha.ef,/Não autoriza/);
+  assert.equal(JSON.stringify(p),antes);assert.equal(JSON.stringify(__ls),estado);assert.ok(Object.isFrozen(linha));
+});
+teste('trilha: mesmo R1 em contextos diferentes tem identidade distinta e estável',()=>{
+  const a=reciboTrilha(snap([e('C1',{area:10})]));
+  const b=reciboTrilha(PR.retrato({fazenda:'Outra',safra:'S2627'},[e('C1',{area:10})]),2);
+  const c=reciboTrilha(PR.retrato({fazenda:'Santa Rita',safra:'S2526'},[e('C1',{area:10})]),3);
+  const linhas=PR.trilha([a,b,c]);assert.equal(new Set(linhas.map(l=>l.id)).size,3);
+  assert.deepEqual(PR.trilha([c,a,b]).map(l=>l.id).sort(),linhas.map(l=>l.id).sort());
+  assert.deepEqual(PR.trilha(clone([a,b,c])),linhas);
+});
+teste('trilha: revisão indica orçamento a revisar sem dar aprovação ou alterar R1',()=>{
+  const a=snap([e('C1',{area:10})]), r1=reciboTrilha(a), antes=JSON.stringify(r1);
+  const r2={...preparar([r1],snap([e('C1',{area:11})]),'R1').versao,sq:2};
+  const ls=PR.trilha([r1,r2]);assert.match(ls[0].oq,/referência/);assert.match(ls[1].oq,/revisão/);assert.match(ls[1].ef,/Orçamento a revisar/);
+  assert.equal(JSON.stringify(r1),antes);
+});
+teste('trilha: recibo duplicado ou sem autor/data/ordem não vira evento',()=>{
+  const p=reciboTrilha(snap([e('C1',{area:10})]));
+  assert.throws(()=>PR.trilha([p,p]),/repetido/);
+  for(const mudanca of [{por:''},{em:''},{em:'2026-02-30T00:00:00.000Z'},{sq:0},{sq:undefined},{sq:1.5},{id:'R0'}])
+    assert.throws(()=>PR.trilha([{...p,...mudanca}]),/incompleto/);
+});
+console.log(`RESULTADO ${n-falhas}/${n} · núcleo/projeção/contexto/preparação/trilha; publicação e UI não executadas`);
 if (falhas) process.exitCode=1;

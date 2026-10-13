@@ -158,5 +158,27 @@ const PlanoReferencia = (() => {
     if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(em) || !Number.isFinite(Date.parse(em)) || new Date(em).toISOString()!==em) throw new Error('Data da publicação inválida.');
     return fixa({nova:true,versao:{id:'R'+(anteriores.length+1),por,em,retrato:r}});
   }
-  return Object.freeze({retrato, comparar, bytes, projetar, validarContexto, prepararVersao});
+  // Adaptação para CF-04: apenas recibos completos já gravados pelo comando.
+  // sq é a ordem real da gravação compartilhada; não fabrica data, autor ou evento de semente.
+  function trilha(publicadas) {
+    if (!Array.isArray(publicadas)) throw new Error('Histórico de versões inválido.');
+    const ids=new Set();
+    return fixa(publicadas.map(p=>{
+      if (!p || !/^R[1-9]\d*$/.test(p.id) || typeof p.por!=='string' || !p.por.trim()
+        || typeof p.em!=='string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(p.em)
+        || !Number.isFinite(Date.parse(p.em)) || new Date(p.em).toISOString()!==p.em
+        || !Number.isSafeInteger(p.sq) || p.sq<1) throw new Error('Recibo técnico incompleto: não pode entrar na trilha.');
+      const r=normaliza(p.retrato), c=r.contexto;
+      const id='PLANO:'+chave(c.fazenda,c.safra,p.id);
+      if (ids.has(id)) throw new Error('Recibo técnico repetido na trilha.');
+      ids.add(id);
+      return {id,sq:p.sq,d:p.em.slice(0,10),at:p.em.slice(11,19),quem:p.por,cmd:'CMD-02',
+        oq:p.id==='R1'?'Publicar referência técnica do plano':'Publicar revisão técnica do plano',
+        obj:c.fazenda+' · '+c.safra+' · '+p.id,
+        ef:(p.id==='R1'?'Referência original preservada.':'Nova revisão; referência original preservada. Orçamento a revisar.')+' Não autoriza orçamento nem execução de O.S.',
+        src:c.fazenda+' · '+c.safra+' · referência '+p.id,
+        h:'SAF.dc.html#saf='+encodeURIComponent(c.safra),origem:'web'};
+    }));
+  }
+  return Object.freeze({retrato, comparar, bytes, projetar, validarContexto, prepararVersao, trilha});
 })();
