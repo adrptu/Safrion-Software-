@@ -1,0 +1,96 @@
+[
+ {
+  "cw": 1142,
+  "sw": 1179,
+  "cols": "80.7031px 201px 136px 176px 82px 121.25px 104.297px 104.891px 172.594px",
+  "heads": [
+   [
+    "Pessoa",
+    81,
+    [
+     "Marcos",
+     48
+    ]
+   ],
+   [
+    "Situação",
+    201,
+    [
+     "Não alocável em O.S. : NR-31 pendente Registrar NR-31 ›",
+     268
+    ]
+   ],
+   [
+    "Equipe",
+    136,
+    [
+     "Beneficiamento e qualidade",
+     173
+    ]
+   ],
+   [
+    "Habilidades",
+    176,
+    [
+     "Autorizar rota e liberar ordem de processo",
+     259
+    ]
+   ],
+   [
+    "Vínculo",
+    82,
+    [
+     "Safrista",
+     49
+    ]
+   ],
+   [
+    "Disponível até",
+    121,
+    [
+     "31/07/2027",
+     69
+    ]
+   ],
+   [
+    "Custo R$/h",
+    104,
+    [
+     "R$ 84,00/h",
+     69
+    ]
+   ],
+   [
+    "Habilitação",
+    105,
+    [
+     "NR-10",
+     37
+    ]
+   ],
+   [
+    "Validade da habilitação",
+    173,
+    [
+     "30/09/2026",
+     80
+    ]
+   ]
+  ],
+  "nomes": [
+   "Ana",
+   "Marcos",
+   "Carlos",
+   "Paula",
+   "Nilton",
+   "Lucas",
+   "João",
+   "Rui",
+   "Zé",
+   "Otávio",
+   "Beto",
+   "Igor",
+   "Marta"
+  ]
+ }
+]

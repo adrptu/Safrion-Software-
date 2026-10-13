@@ -37,7 +37,8 @@ observacoes (dados locais coerentes com dados.py / dados2.py / telas vizinhas):
   Próximo ciclo = OS-0422 (13,5 mm em 2 passadas de 6,75 mm · janela a definir), sem aprovação do agrônomo.
 - Almoxarife (aba de MB-05) = dados2: REQ-031 (MAP 100/70/20/10 sc, custódia de Paula; sobras vão ao lote M26-05 de suprimentos.py),
   REQ-038 (OS-0418, Ureia 45 % 1.140 kg, aguardando liberação; estoque apto 0 kg), conflito F26-02 rebaseado como em suprimentos.py
-  (545 L físicos, 65 L reservados à OS-0424, 480 L livres; reserva planejada da safra 625,2 L em conflito, pendência 145,2 L).
+  (545 L físicos, 65 L reservados à OS-0424, 480 L livres); o uso da safra e a pendência na SOL-2026-07 vêm de dados2.demanda (CTL-4: com as
+  O.S. na demanda, o Fungicida A não tem pendência e o cartão sai do vermelho).
 - DEMO-20: Balança/Recebedor usam a carga CG-1207 da colheita.py (OC-0510 · talhão T7 · Carreta 03 · 4.310 − 1.180 = 3.130 kg ·
   ROM-0791 · Packing Sede · chegada a confirmar). Motorista = caminhão T1 da logistica.py (VD-2101 1ª de 3, janela 08:00,
   previsão 09:10 informada às 07:40, posição 4 ao chegar). Carga 07 = PV-034 · CD Horti · 9,6 t · dono Sandra (fiscal) · prazo 10:00.
@@ -50,6 +51,7 @@ import engine as E
 from ui37 import mobile37, HEIGHTS37, selo, etapa, ETAPA_COR
 import dados as D
 import dados2 as D2
+import dados_irrigacao as _DI   # equipamento do setor (nome e vazão do cadastro e da ficha do pivô)
 import cenario
 import dados_manutencao as DM   # regras da manutenção sobre o cenário único (PCM S4: MB-01, MB-04, MB-09, MB-09det)
 
@@ -66,7 +68,7 @@ REQ=next(r for r in D2.REQUISICOES if r['id']=='REQ-031')
 R38=next(r for r in D2.REQUISICOES if r['id']=='REQ-038')
 F02=next(l for l in D2.LOTES if l['lote']=='F26-02')
 F02_LIVRE=F02['fisico']-F02['quarentena']-F02['reservado']                            # 480 L
-PLAN_FA=625.2; PEND_FA=round(PLAN_FA-F02_LIVRE,1)                                    # reserva planejada da safra · pendência 145,2 L
+
 EQ421='Marcos · Pulverizador PJ-3030 + Trator 03'
 CALDA=dict(litros='2.000', vazao='120 L/ha', dose='0,5 L/ha de Fungicida A', cobre='16,7 ha', por_tanque='8,3 L')
 P,POL=D.PIVO,D.POLITICA_AGUA
@@ -319,12 +321,12 @@ def ffield(label,fid,val,setfn,err,hint='',big=False,area=False,ph=''):
             + (IF(err+'_has',f'<span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H(err)}</span>') if err else '') + '</div>')
 
 _PRIM_RE=re.compile(r'(<div style="padding: 12px 20px 28px;[^"]*">)<a href="[^"]*" style="([^"]*)">.*?</a>(</div>)',re.S)
-def emit(fid,title,sub,status,primary,body,H_=900,fname=None,back='MB-01.dc.html',primary_href=None,js='',dyn_status=False,prim=None,cen=False,dyn_head=None,sem_prim=False):
+def emit(fid,title,sub,status,primary,body,H_=900,fname=None,back='MB-01.dc.html',primary_href=None,js='',dyn_status=False,prim=None,cen=False,dyn_head=None,sem_prim=False,pre_extra=''):
     """Gera a tela. dyn_status: selo do cabeçalho vem de v.hdr_* (JS). prim: variantes do botão primário
     [(condição|None,'a'|'b'|'ac',rótulo,href|função|(href,função))] — link navega, botão executa na própria tela, 'ac' = link que também
     executa (ex.: escolher a ordem antes de abrir o detalhe). cen: tela ligada ao cenário compartilhado (cenario.js_prefixo() + JS do app).
     dyn_head: título do <title> quando título e subtítulo do cabeçalho vêm de v.hdr_ttl / v.hdr_sub."""
-    pre=(cenario.js_prefixo()+DM.js_regras()+JS_BASE+MBAPP_JS) if cen else JS_BASE
+    pre=((cenario.js_prefixo()+DM.js_regras()+JS_BASE+MBAPP_JS) if cen else JS_BASE)+pre_extra   # pre_extra: ex. a demanda viva (dados2.js_dem_viva) no MB-05
     head=' cenOuvir(self); const c=cenGet(); mbSig(self,v,c);' if cen else ''
     EXTRAJS[0]=pre+'const M='+json.dumps(MS,ensure_ascii=False)+';\nfunction EXTRAVALS(self,v){ const s=self.state; SAY(self,v,M);'+head+'\n'+js+'\n}'
     MS.clear()
@@ -745,14 +747,27 @@ DCH(v,'hdr',done?(naf?'no aparelho':(achDone?'enviada à Manutenção':'registra
           kv('Produto',f'{R38["item"]} · {nf(R38["solicitado"])} kg (12 kg/ha × 95 ha)'),
           chips(chip('Aguardando liberação da O.S.','yellow'),chip('Saldo apto 0 kg','red')),
           btns(say('Conferir e entregar · bloqueado',f'Bloqueado: a {R38["os"]} aguarda a liberação por Ana (agrônoma) e a {R38["item"]} não tem saldo apto (0 kg) — nada foi separado.','alert','Ver por que não pode entregar'))],state='yellow')
-      + card(f'Conflito de reserva · lote {F02["lote"]} · {F02["item"]}',[
-          kv('Saldo',f'{nf(F02["fisico"])} L físicos · {F02["reservado"]} L reservados (OS-0424) · <b>{nf(F02_LIVRE)} L livres</b>'),
-          kv('Conflito',f'reserva planejada da safra pediu {nf(PLAN_FA,1)} L → nada reservado · pendência de {nf(PEND_FA,1)} L na SOL-2026-07'),
-          chips(chip('Conflito · decide o planejamento','red')),
-          btns(say('Registrar divergência','Divergência registrada com dono (planejamento) e prazo · reservas congeladas até a decisão — nada foi entregue.','alert','Registrar a divergência física do lote'))],state='red')
+      # revisão do 853a6a8 (achado 6, S3): lote, uso da safra e pendência de compra AO VIVO, da mesma demanda do Planejar safra e da Compra
+      # (dados2.js_dem_viva) — nunca "sem pendência" da semente com a demanda pedindo complemento. Sem pendência não há conflito a registrar
+      # (revisão do CTL-4, S4: congelar reservas sem conflito travaria a entrega da OS-0424 à toa).
+      + IF('mbfa_conf',card(f'Conflito de reserva · lote {F02["lote"]} · {F02["item"]}',[
+          kv('Saldo',H('mbfa_saldo')),
+          kv('Conflito','a demanda da safra pede '+H('mbfa_plan')+' de hoje em diante · pendência de compra de '+H('mbfa_pend')+' (complemento no Planejar safra)'+H('mbfa_condc')),
+          chips(chip('Conflito · decide o planejamento','red')+IF('mbfa_cond',chip(H('mbfa_condt'),'yellow'))),   # falta firme + qualidade pendente (revisão do 16fb55e, ajuste 1)
+          btns(say('Registrar divergência','Divergência registrada com dono (planejamento) e prazo · reservas congeladas até a decisão — nada foi entregue.','alert','Registrar a divergência física do lote'))],state='red'))
+      + IF('mbfa_ok',card(f'Reserva da safra · lote {F02["lote"]} · {F02["item"]}',[
+          kv('Saldo',H('mbfa_saldo')),
+          kv('Safra','uso de hoje em diante '+H('mbfa_plan')+' (O.S. abertas pelo pendente + plano sem O.S.) · '+H('mbfa_okt')),
+          chips(IF('mbfa_cond',chip(H('mbfa_condt'),'yellow'))+IF('mbfa_semp',chip('Sem pendência de compra','green')))],state='green'))
       + note(f'<b style="color:{INK};">{O419["id"]} · água</b> não aparece aqui: água só-água não cria fila nem documento de movimentação de produtos.'))
     corpo=tabs+IF('r0',operador)+IF('r1',almox)
     js=f'''const r0=(s.role||0)===0; v.r0=r0; v.r1=!r0;
+{{ const fa=demViva('Fungicida A')||{{liq:0,cond:0,bruta:0}}; const lf=c.lotes['Fungicida A|F26-02']||{{fisico:0,reservado:0,quarentena:0}};   /* a mesma demanda do Planejar safra e da Compra, viva */
+  const n1=(x)=>Number(x||0).toLocaleString('pt-BR',{{minimumFractionDigits:1,maximumFractionDigits:1}})+' L';   /* o mesmo formato do Planejar safra e do SU-03det */
+  v.mbfa_conf=fa.liq>0.05; v.mbfa_ok=!v.mbfa_conf; v.mbfa_cond=fa.cond>0.05; v.mbfa_semp=!v.mbfa_cond; v.mbfa_plan=n1(fa.bruta); v.mbfa_pend=n1(fa.liq); v.mbfa_condq=n1(fa.cond); v.mbfa_condt='Qualidade pendente · '+n1(fa.cond);
+  v.mbfa_condc=v.mbfa_cond?(' · mais '+n1(fa.cond)+' dependem do laudo da quarentena (fora da compra; o gestor libera ou reprova no Estoque)'):'';
+  v.mbfa_okt=v.mbfa_cond?(n1(fa.cond)+' dependem do laudo da quarentena; sem nova compra automática'):'sem pendência de compra: o estoque apto cobre';
+  v.mbfa_saldo=cenNum(lf.fisico)+' L físicos · '+cenNum(lf.reservado)+' L reservados'+(lf.quarentena>1e-9?' · '+cenNum(lf.quarentena)+' L em quarentena':'')+' · '+cenNum(cenDisp(lf))+' L livres'; }}
 [0,1].forEach(i=>{{ v['role'+i]=()=>self.setState({{role:i}}); v['rs'+i]='font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 0; cursor: pointer; white-space: nowrap; '+(((s.role||0)===i)?'background: {SURF}; color: {INK}; box-shadow: 0 1px 2px rgba(21,32,26,.12);':'background: transparent; color: {MUTED};'); }});
 // vindo do passo de uma ordem (MB-01 · MB-05.dc.html#OS-…): essa ordem vem primeiro e o selo a nomeia; sem âncora, a fila de sempre (AÇÃO v3.1)
 const foco=(typeof location!=='undefined'&&/^#OS-[0-9]+$/.test(location.hash||''))?location.hash.slice(1):''; const fila0=mbFila(c);
@@ -773,7 +788,7 @@ v.pc_go=()=>{{ if(pend[0]) cenMudar(self,c=>cenConfirmarRecebimento(c,pend[0].id
 if(r0) DCH(v,'hdr',(foco&&c.ordens[foco]?foco+' · ':'')+(pend.length?pend.length+(pend.length>1?' entregas a confirmar':' entrega a confirmar'):(cust.length?'insumos com você':'nada a confirmar')),pend.length?'yellow':'green');
 else DCH(v,'hdr','1 devolução hoje','yellow');'''
     emit('MB-05','Almoxarifado móvel','retiradas do operador e tarefas do almoxarife · por lote e embalagem',None,
-         'Confirmar recebimento',corpo,H_=1220,back='MB-01.dc.html',js=js,dyn_status=True,cen=True,
+         'Confirmar recebimento',corpo,H_=1220,back='MB-01.dc.html',js=js,dyn_status=True,cen=True,pre_extra=D2.js_dem_viva('S2627'),
          prim=[('p_conf','b',H('pc_lab'),'pc_go'),('p_back','a','Voltar à fila','MB-01.dc.html')])
 
     # ---- MB-05det · tarefa-âncora: receber devolução REQ-031 ----
@@ -938,10 +953,10 @@ DCH(v,'hdr',k?(k.local+' · planta '+(n+1)):(s.m7ok?'contagem gravada':'escolha 
           kv('Janela',f'hoje {IRR["janela"]} · 1 volta de {IRR["dur"]} · iniciada {IRR["ini"]} ({IRR["ex"]}) · término previsto {IRR["fim"]}'),
           kv('Percentímetro',f'<b>{P["percent"]}%</b> → lâmina {br(P["lamina_aplicada"])} mm (100% = {br(P["lamina_100"])} mm)'),
           kv('Andamento',f'≈{br(AREA_COB)} de {AREA_PIVO} ha ({br(P["cobertura_pct"])}% da volta) · {br(P["exec_h"])} de {IRR["dur"]} executadas'),
-          kv('Medidores','bomba B2 · 166 L/s · pressão 2,8 bar · ponta parcial 20–21 h'),
+          kv('Medidores',f"{_DI.eq_nome('a11')} · {_DI.eq_vazao_ls('a11')} L/s · pressão 2,8 bar · ponta parcial 20–21 h"),   # nome e vazão do cadastro e da ficha do pivô (A7)
           chips(prazo('irrigando','volta em curso'))],state='green',desc='Acompanhe a volta e confirme o término no fim.')
       + h2('Ações da volta','Registre pausas e avanço sem encerrar a ordem.')
-      + btns(say('Pausar','Pausada · queda de pressão na bomba B2 · o tempo parado não conta como lâmina e empurra o término previsto.','clock','Pausar a volta com motivo'),
+      + btns(say('Pausar','Pausada · queda de pressão na '+_DI.eq_nome('a11')+' · o tempo parado não conta como lâmina e empurra o término previsto.','clock','Pausar a volta com motivo'),
              say('Retomar','Retomada · pressão normalizada · término previsto recalculado pelo tempo parado.','check','Retomar a volta'),
              say('Registrar avanço',f'Avanço registrado: {br(P["exec_h"])} h · {exec_txt} · balanço hídrico atualizado 1× por aplicação.','drop','Registrar o avanço da volta'))
       + btns(say('Finalizar apontamento do turno','Turno do irrigante finalizado · a ordem segue Em execução — finalizar o turno nunca conclui.','doc','Guardar o turno sem concluir'),

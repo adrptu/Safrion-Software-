@@ -34,6 +34,8 @@ PARENT37={}   # fname -> fname de volta
 # 05/10/2026 (pedido "PCM /manutenção também tem telas e menus demais... faça o melhor num só"; PCM simplificado v2, D-01/D-02): o grupo Manutenção
 #   passa a 1 item, "Manutenção" → MA.dc.html (link direto), com as visões Sem ordem · Ordens · Ativos · Planos; a posição de 01/10 fica.
 # 06/10/2026: grupo Produção logo depois de Agrícola (colheita de ponta a ponta, docs/colheita · D-01): no máximo 3 itens.
+# 09/10/2026 (SOLO-01, D-01): Análises de solo (AG-02) em Agrícola, entre Planos agronômicos e Planejar safra (o laudo vira sugestão nas doses do plano).
+# 06/10/2026: grupo Comercial logo depois de Produção (comercial e logística, docs/comercial · D-C01): planejamento, execução e controle, no máximo 3 itens.
 # Os demais módulos ficam ocultos do menu, preservados no canvas (página "Módulos ocultos").
 # v55 (10/10/2026): o Beneficiamento (BEN.dc.html) sai da navegação até a rodada 3 do BEN: os defeitos S2 de saldo e reserva de caixas
 #   estão em correção em outra frente e a tela não estreia no artefato. O código fica na branch, sem perda; só deixa de ser alcançável:
@@ -43,8 +45,9 @@ BEN_PUBLICADO=False
 MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
  ('Cadastros','layers',[('Fazendas, áreas e talhões','CD-01.dc.html'),('Culturas, cultivares e operações','CD-02.dc.html'),('Máquinas, instalações e setores','CD-03.dc.html'),
    ('Pessoas e equipes','CD-04.dc.html'),('Parceiros e fornecedores','CD-05.dc.html'),('Produtos, unidades e locais','CD-06.dc.html'),('Estrutura gerencial','CD-07.dc.html')]),
- ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html')]),
+ ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html')]),
  ('Produção','Colheita',[('Previsão e colheita','COLH.dc.html'),('Recebimento e beneficiamento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html')]),   # 3 itens (colheita D-01); Beneficiamento é tela irmã de Cargas (BEN-D14)
+ ('Comercial','Vendas',[('Contratos e pedidos','VEN.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Painel comercial','PCOM.dc.html')]),
  ('Manutenção','wrench',[('Manutenção','MA.dc.html')]),
  ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html')]),
  ('Configurações','grid',[('Assinatura e cobrança','CF-05.dc.html')])]   # 06/10/2026 (PLAT-01): grupo por último; o módulo Configurações usará o mesmo grupo

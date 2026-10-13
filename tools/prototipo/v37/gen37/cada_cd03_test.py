@@ -41,9 +41,11 @@ try:
     for k,v in [('nome','Pulverizador PJ-2500'),('barra_pv','30'),('tanque_pv','2500'),('preq_pv','90'),('cont_pv','0'),('interv','90')]: t.fset(k,v)
     t.btn('Salvar'); a=t.alerts()
     t.fset('custo_h','90'); t.fset('custo_f','Tabela de referência'); t.btn('Salvar'); time.sleep(.2)
-    r=t.rowtxt(0,'Pulverizador PJ-2500') or ''; op=t.isopen(); t.openrow(0,'Pulverizador PJ-2500'); cf=t.fv('custo_f'); t.cancel()
-    t.chk('sem custo por hora o cadastro é barrado no campo; com custo e fonte grava, a linha mostra barra, tanque e R$/h e o painel a fonte',
-          'Informe o custo por hora' in a and not op and 'barra 30 m · tanque 2.500 L' in r and 'R$ 90,00/h' in r and cf=='Tabela de referência', [a,r,cf,t.alerts()])
+    r=t.rowtxt(0,'Pulverizador PJ-2500') or ''; op=t.isopen(); t.openrow(0,'Pulverizador PJ-2500'); cf=t.fv('custo_f'); tq=t.fv('tanque_pv'); br=t.fv('barra_pv'); t.cancel()
+    # TABELAS-FOCO (06/10/2026): uma variável por coluna. Revisão TABR (09/10/2026, A1/A4): tanque e barra no painel da máquina (a capacidade
+    # muda de grandeza com a classe e só tem coluna com o filtro de Classe)
+    t.chk('sem custo por hora o cadastro é barrado no campo; com custo e fonte grava, a linha mostra R$/h e o painel barra, tanque e a fonte',
+          'Informe o custo por hora' in a and not op and tq in ('2500','2.500') and br=='30' and 'R$ 90,00/h' in r and cf=='Tabela de referência', [a,r,tq,br,cf,t.alerts()])
     t.chk('estado do cabeçalho é recalculado (nova máquina sem calibração: 3 a resolver)', '1 máquina bloqueada · 3 calibrações a resolver' in t.header(), t.header())
     # conjuntos
     t.aba('Conjuntos'); k2=t.card('Trator T1 + Plantadeira 24 linhas') or ''

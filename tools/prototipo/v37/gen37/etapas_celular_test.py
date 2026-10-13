@@ -137,10 +137,12 @@ try:
         g=lambda: J("(()=>{const m=document.querySelector('.menu-lat').getBoundingClientRect(); const col=document.querySelector('main[data-scroll]').getBoundingClientRect(); const t=document.querySelector('.ml-tog'); const r=t.getBoundingClientRect(); const e=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2); return [Math.round(m.width),Math.round(col.left),Math.round(col.width),t.contains(e)];})()")
         a=g(); J("document.querySelector('.ml-tog').click()"); time.sleep(.4); b=g()
         chk('6 390 px · com "aberto" guardado começa recolhido (68 px); aberto pelo botão passa por cima (conteúdo continua com 322 px) e o botão de recolher fica alcançável', ini==68 and a==[232,68,322,True] and b[:3]==[68,68,322], [ini,a,b])
-        # 7-8 · zoom de 200 % (1440 px a 2×): menu recolhido nas seis telas com etapas e aberto em CMP e SAF
+        # 7-8 · zoom de 200 % (1440 px a 2×): menu recolhido nas telas com etapas e aberto em CMP e SAF
+        # NAV-1 (integração V56, Codex NAV1-REV-20261010-01): a PA deixou de ter faixa de etapas (lista → detalhe) e sai SÓ desta asserção da
+        # faixa; título, comando e rolagem da PA seguem nos itens 3 e 4 (P8) e o contexto, as ações e o teclado dela no pa_lista_test/patest
         z={}
-        for pg in ['CMP','SAF','PA','EST','IR-02']: z[pg]=abre(pg,720,450,2); shot(f'{pg}_zoom200')
-        chk('7 zoom 200 % · sem sobreposição, etapa atual legível e comando principal na tela (5 telas)', all(z[g]['sobrepoe']==0 and not z[g]['vazam'] and not z[g]['headerFora'] and not z[g]['h1Cortado'] for g in z), {g:(z[g]['sobrepoe'],z[g]['vazam'],z[g]['progresso'],z[g]['headerFora']) for g in z})
+        for pg in ['CMP','SAF','EST','IR-02']: z[pg]=abre(pg,720,450,2); shot(f'{pg}_zoom200')
+        chk('7 zoom 200 % · sem sobreposição, etapa atual legível e comando principal na tela (4 telas com etapas)', all(z[g]['sobrepoe']==0 and not z[g]['vazam'] and not z[g]['headerFora'] and not z[g]['h1Cortado'] for g in z), {g:(z[g]['sobrepoe'],z[g]['vazam'],z[g]['progresso'],z[g]['headerFora']) for g in z})
         def abre_menu(pg): abre(pg,720,450,2,rec='0'); J("document.querySelector('.menu-lat.rec')&&document.querySelector('.ml-tog').click()"); time.sleep(.4); return J(MEDIR)
         za={pg:abre_menu(pg) for pg in ['CMP','SAF']}; zw=J("Math.round(document.querySelector('.menu-lat').getBoundingClientRect().width)"); shot('SAF_zoom200_menu_aberto')
         chk('8 zoom 200 % com menu aberto (pelo botão) · CMP e SAF sem sobreposição', zw==232 and all(za[g]['sobrepoe']==0 and not za[g]['vazam'] and za[g]['progresso'] for g in za), [zw,{g:(za[g]['sobrepoe'],za[g]['vazam'],za[g]['progresso']) for g in za}])

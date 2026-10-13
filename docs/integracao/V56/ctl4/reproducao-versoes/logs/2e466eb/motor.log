@@ -1,0 +1,5 @@
+versão: 2e466eb GEN= /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/ctl4-recorte/wt-2e466eb/tools/prototipo/v37/gen37
+funções presentes (cenario.js + cal01.js): {"cenOsDem": false, "cenEstDem": false, "cenDemEntradas": false, "demFazenda": false, "demSolSit": false, "demSolRevisar": false, "cenEntregar": true, "cenDevolver": true, "cenReceber": true, "cenLiberarQuarentena": true}
+assinatura dados2.demanda: (safra, ajustes=None, planos_extra=None)
+dados2.demanda("S2627") (build, sem cenário): {"Semente de soja 58 W": {"liq": 0.0, "bruta": 23816.0, "plano": 23816.0, "valor": 0.0}, "MAP 11-52": {"liq": 62500.0, "bruta": 152500.0, "plano": 152500.0, "valor": 243750.0}, "Fungicida A": {"liq": 145.2, "bruta": 625.2, "plano": 625.2, "valor": 21054.0}, "NPK 20-05-20": {"liq": 14800.0, "bruta": 22800.0, "plano": 22800.0, "valor": 50320.0}}
+MOTOR DA DEMANDA VIVA AUSENTE nesta versão: Planejar safra/Compra não recebem o cenário (cenGet) como entrada da demanda; a reprodução é só pela tela.

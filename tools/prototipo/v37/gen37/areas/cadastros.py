@@ -103,14 +103,14 @@ CADX_CSS=(
     # o motor envolve cada texto num span.sc-interp, por isso o chip é o span com outro span dentro)
     ".cadx .g2pw span{min-width:0;overflow:hidden;text-overflow:ellipsis}.cadx .g2pw b,.cadx .g2pw span:has(>span:not(.sc-interp)),.cadx .g2pw a,.cadx .g2pw button{flex-shrink:0}"
     ".cadx .g2pw a,.cadx .g2pw button{color:#15201A!important;font-weight:700}@media (hover:hover){.cadx .g2pw a:hover,.cadx .g2pw button:hover{text-decoration:underline!important}}"
-    ".cadx .g2kid{background:#FFFFFF}@media (hover:hover){.cadx .g2ed:hover{background:#F4F6F3}}"
+    ".cadx .g2kid{background:#FFFFFF}@media (hover:hover){.cadx .g2ed:hover{background:#F2F8F4}}"   # DS-HOVER-20261009: verde do sistema, não cinza
     # árvore: a linha do grupo ganha faixa clara (hierarquia sem precisar de caixa)
-    ".cadx-arv .g2r:not(.g2kid) [role=cell]{background:#F7F9F6!important}@media (hover:hover){.cadx-arv .g2r.g2ed:not(.g2kid):hover [role=cell]{background:#EEF3EE!important}}"
+    ".cadx-arv .g2r:not(.g2kid) [role=cell]{background:#F7F9F6!important}@media (hover:hover){.cadx-arv .g2r.g2ed:not(.g2kid):hover [role=cell]{background:#E8F3EC!important}}"
     # faixa "precisa de atenção": cartões brancos com borda esquerda na cor do estado
     ".cadx-faixa{display:flex;gap:12px;flex-wrap:wrap;padding:12px 16px 2px}"
     ".cadx-aviso{flex:0 1 330px;min-width:240px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:#FFFFFF;"
     "border:1px solid #E4E9E5;border-radius:12px;padding:10px 14px;cursor:pointer;font-family:inherit;color:#15201A}"
-    "@media (hover:hover){.cadx-aviso:hover{background:#F9FBF8}.cadx-aviso:hover .cadx-verbo{text-decoration:underline}}.cadx-aviso:focus-visible,.cadx-cartao:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}"
+    "@media (hover:hover){.cadx-aviso:hover{background:#F2F8F4;border-color:#9DBFAA}.cadx-aviso:hover .cadx-verbo{text-decoration:underline}}.cadx-aviso:focus-visible,.cadx-cartao:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}"
     ".cadx-verbo{font-weight:700;color:#15201A;white-space:nowrap}"
     # cartões de entidade contêiner (fazendas, equipes, conjuntos)
     ".cadx-cartoes{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;padding:16px;align-content:start}"
@@ -200,6 +200,16 @@ def estado_cab(fname,titulo,key):
     p=os.path.join(E.P,fname); s=open(p).read(); alvo=f'>{esc(titulo)}</h1>'
     assert s.count(alvo)==1, (fname,alvo)
     open(p,'w').write(s.replace(alvo,alvo+estado_html(key),1))
+def ncol_dinamico(fname,holes):
+    """grade cujas colunas mudam no navegador (ex.: colunas do papel no CD-05; Fazenda só em "Todas" na Irrigação): troca o nº fixo de
+    colunas da i-ésima grade da página (ordem do HTML) pelo buraco holes[i] (None mantém), para a trilha do grid acompanhar as colunas."""
+    import os
+    p=os.path.join(E.P,fname); s=open(p,encoding='utf-8').read(); alvo='grid-template-columns: var(--g2cols, repeat('
+    partes=s.split(alvo); assert len(partes)-1>=len(holes), (fname,len(partes)-1,holes)
+    for i,h in enumerate(holes):
+        if h is None: continue
+        q=partes[i+1]; j=q.index(','); assert q[:j].isdigit(), (fname,q[:20]); partes[i+1]='{{'+h+'}}'+q[j:]
+    open(p,'w',encoding='utf-8').write(alvo.join(partes))
 def estado_html(key):
     return f'<span class="cadx-estado" style="{H(key+"_stst")}"><span style="{H(key+"_stdot")}"></span>{H(key)}</span>'
 def acoes_form(gid):
@@ -214,9 +224,9 @@ CADXJS=r'''
 // ===== padrão visual dos cadastros =====
 const CADT={yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],green:['#1E7A4C','#E4F3E9']};
 const CAD_TAB=[__TABOFF__,__TABON__];
-// situação da linha: estado OK sem pílula (ponto verde + texto apagado); exceção em chip com o próximo passo
-function sitOk(t){ return [{k:'cn',t:'●',c:'green'},{k:'mut',t:t}]; }
-function sitInfo(t){ return [{k:'cn',t:'●',c:'gray'},{k:'mut',t:t}]; }   // estado neutro (nem ok nem pendência): ponto cinza
+// situação da linha como chip (TABELAS-FOCO, proprietário 04/10/2026): verde quando ok, cinza quando neutro; exceção em chip com o próximo passo
+function sitOk(t){ return [chipc(t,'green')]; }
+function sitInfo(t){ return [chipc(t,'gray')]; }   // estado neutro (nem ok nem pendência)
 function sitX(t,c,verbo,h){ return [chipc(t,c)].concat(verbo?[h?{k:'link',t:verbo+' ›',h:h}:{k:'b',t:verbo+' ›'}]:[]); }
 // estado da tela ao lado do título
 function cadEstado(v,key,t,cor){ const c=(CADT[cor]||CADT.gray)[0]; v[key]=t;
@@ -492,6 +502,9 @@ CLASSES=['Trator','Pulverizador','Plantadeira','Distribuidor','Colhedora','Imple
 CAPU=['cv','m de barra','linhas','t','m de plataforma','kg/h','m³/h','sc 60 kg']
 LOC_ATV=['Oficina Sede','Galpão 1','Santa Rita · T1','Santa Rita · T4','Pivô 2','Talhão T7','Armazém Sede']
 # (id, nome, modelo, classe, cap, capu, contador h, exige calibração, última, intervalo dias, local, fonte, valor R$, usado em)
+# cd03() de reserva (vale só sem areas/cad_ativos_pessoas.py): capacidade dos equipamentos de irrigação lida do cadastro (dados_cad), sem valor antigo (revisão de 10/10, A8)
+import dados_cad as _DC
+_VZ={a['id']:a.get('vazao') for a in _DC.ATIVOS}
 ATIVOS=[('a01','Trator T1','JD 6M 155','Trator',155,'cv',4312,'Não','',None,'Oficina Sede','Fabricante',412000,'r2'),
         ('a02','Trator 02','MF 7719','Trator',190,'cv',2988,'Não','',None,'Santa Rita · T4','Fabricante',486000,'r1'),
         ('a03','Trator 03','MF 4292','Trator',110,'cv',5120,'Não','',None,'Galpão 1','Fabricante',268000,'r3'),
@@ -502,8 +515,8 @@ ATIVOS=[('a01','Trator T1','JD 6M 155','Trator',155,'cv',4312,'Não','',None,'Of
         ('a08','Colhedora Axial-Flow 7250','plataforma 10 m','Colhedora',10,'m de plataforma',2150,'Não','',None,'Galpão 1','Fabricante',2450000,'r5'),
         ('a09','Máquina TSI','tratamento de sementes na sede','Tratamento de sementes',2400,'kg/h',720,'Sim','2026-07-20',60,'Oficina Sede','Ensaio da fazenda',180000,'r4'),
         ('a10','Esqueletadeira','café · 1 linha','Implemento',1,'linhas',310,'Não','',None,'Galpão 1','Fabricante',58000,'r7'),
-        ('a11','Bomba do Pivô 2','motobomba + hidrômetro novo','Irrigação',340,'m³/h',8914,'Sim','',30,'Pivô 2','Ensaio da fazenda',96000,''),
-        ('a12','Gotejo T7','cabeçal + injetora de fertilizante','Irrigação',45,'m³/h',5210,'Sim','2026-09-05',60,'Talhão T7','Ensaio da fazenda',210000,'r8'),
+        ('a11','Bomba do Pivô 2',next(a['modelo'] for a in _DC.ATIVOS if a['id']=='a11'),'Irrigação',_VZ['a11'],'m³/h',8914,'Sim','',30,'Pivô 2','Ensaio da fazenda',96000,''),
+        ('a12','Gotejo T7','cabeçal + injetora de fertilizante','Irrigação',_VZ['a12'],'m³/h',5210,'Sim','2026-09-05',60,'Talhão T7','Ensaio da fazenda',210000,'r8'),
         ('a13','Packing linha 1','esteira + balança','Beneficiamento',2400,'kg/h',12301,'Sim','2026-09-01',30,'Armazém Sede','Ensaio da fazenda',310000,''),
         ('a14','Silo 01','aeração + termometria','Armazenagem',60000,'sc 60 kg',0,'Sim','2026-09-18',90,'Armazém Sede','Fabricante',890000,'')]
 def cd03():

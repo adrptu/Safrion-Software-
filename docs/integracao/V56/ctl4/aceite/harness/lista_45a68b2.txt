@@ -1,0 +1,10 @@
+demanda_estado_nav_test||demanda_estado_nav_test.py
+demanda_unica_nav_test||demanda_unica_nav_test.py
+esttest||esttest.py
+est_fix1_test||est_fix1_test.py
+est_fix2_test||est_fix2_test.py
+est_cenario_test||est_cenario_test.py
+talmapa_test||talmapa_test.py
+sutest||sutest.py
+mbtest_a||mbtest.py a
+cmptest||cmptest.py

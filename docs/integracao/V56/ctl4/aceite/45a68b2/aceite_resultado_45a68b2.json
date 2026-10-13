@@ -1,0 +1,654 @@
+{
+ "item1": {
+  "saf_liq": [
+   "79.500 kg",
+   "79.500 kg"
+  ],
+  "saf_apto": [
+   "90.000 kg",
+   "90.500 kg"
+  ],
+  "cmp_apto": [
+   "90.000",
+   "90.500"
+  ],
+  "cmp_nec": [
+   "79.500",
+   "79.500"
+  ],
+  "total": [
+   "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação",
+   "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação"
+  ],
+  "prim": [
+   "Abrir Compra de insumos ›",
+   "Abrir Compra de insumos ›"
+  ],
+  "memo": [
+   "Estoque apto hoje: 90.000 kg + 500 kg em custódia sem uso nas O.S., a devolver ao Estoque (500 kg · REQ-031 · OS-0417 (em conferência)) = 90.500 kg",
+   "Estoque apto hoje: 90.500 kg"
+  ],
+  "lote": [
+   90000,
+   90500
+  ],
+  "custodia": [
+   500,
+   0
+  ],
+  "est_disp": [
+   [
+    "90.000 kg",
+    "90.000 kg"
+   ],
+   [
+    "90.500 kg",
+    "90.500 kg"
+   ]
+  ],
+  "est_cust": [
+   "500 kg",
+   "—"
+  ],
+  "mapa": [
+   "Falta 79.500 kg",
+   "Falta 79.500 kg"
+  ],
+  "pt": [
+   "79.500 kg",
+   "79.500 kg"
+  ],
+  "recibo": "500 kg de MAP 11-52 devolvidos ao disponível. Custódia de MAP 11-52 na OS-0417: 500 kg → 0 kg · encerramento liberado.",
+  "memo_parcelas": [
+   "Estoque apto hoje: 90.500 kg",
+   "23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 250,00 kg/ha × 70 ha = 17.500,0 kg → saldo 73.000 kg",
+   "24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 250,00 kg/ha × 102 ha = 25.500,0 kg → saldo 47.500 kg",
+   "15/10/2026 · T1-A · Plantio e adubação de base · 250,00 kg/ha × 160 ha = 40.000,0 kg → saldo 7.500 kg",
+   "18/10/2026 · T2 · Plantio e adubação de base · parte sem O.S. (OS-0431 cobre 102 de 298 ha) · 250,00 kg/ha × 196 ha = 49.000,0 kg → saldo 0 kg · falta 41.500 kg",
+   "25/10/2026 · T1-B · Plantio e adubação de base · 250,00 kg/ha × 152 ha = 38.000,0 kg → saldo 0 kg · falta 38.000 kg",
+   "Necessidade líquida = soma das faltas desta safra = 79.500 kg · falta a partir de 18/10/2026",
+   "Ver SOL-2026-07 na Compra de insumos ›"
+  ]
+ },
+ "item2": {
+  "saf_antes": [
+   "0 kg",
+   "12.000 kg",
+   "20.000 kg",
+   "Coberto pelo estoque"
+  ],
+  "saf_quar": [
+   "0 kg",
+   "12.000 kg",
+   "0 kg",
+   "Qualidade pendente · 15.456 kg"
+  ],
+  "cmp_antes": [
+   "12.000",
+   "20.000",
+   "0",
+   "Coberto"
+  ],
+  "cmp_quar": [
+   "12.000",
+   "0",
+   "0",
+   "Qualidade pendente · 15.456 kg condicionada ao laudo · motivo: 20.000 kg em quarentena aguardam laudo (lote S58-0926 · NF 4533: Aguarda laudo de germinação (aceite CTL-4-FIX)) · responsável: o gestor libera ou reprova com o laudo no Estoque (reprovado, vira falta firme) · prazo: decidir antes de 15/10/2026, quando a falta começa se reprovar · fora da compra: sem nova compra automática"
+  ],
+  "total": [
+   "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação",
+   "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação · 1 insumo com qualidade pendente (R$ 146.832,00 condicionados ao laudo, fora da compra)"
+  ],
+  "prim": [
+   "Abrir Compra de insumos ›",
+   "Abrir Compra de insumos ›"
+  ],
+  "cmp_tot": [
+   [
+    "Total R$ 428.305,00"
+   ],
+   [
+    "Total R$ 428.305,00"
+   ]
+  ],
+  "cmp_prim": [
+   "Solicitar cotações ›",
+   "Solicitar cotações ›"
+  ],
+  "memo_cond": "Falta condicionada à qualidade: 15.456 kg a partir de 15/10/2026 se o laudo reprovar · motivo: 20.000 kg em quarentena aguardam laudo (lote S58-0926 · NF 4533: Aguarda laudo de germinação (aceite CTL-4-FIX)) · responsável: o gestor libera ou reprova com o laudo no Estoque (reprovado, vira falta firme) · prazo: decidir antes de 15/10/2026, quando a falta começa se reprovar · fora da compra: sem nova compra automática",
+  "memo_ini": "Estoque apto hoje: 12.000 kg + 20.000 kg em quarentena, cobertura condicionada à qualidade (lote S58-0926 · NF 4533: laudo pendente) = 32.000 kg",
+  "mapa": [
+   "Semente de soja 58 W · 3.640 kg · Pedido a receber · PC-090 · 05/10 · a partir de 23/09 · T4 · OS-0420 · Plantio e aduba",
+   "Semente de soja 58 W · 3.640 kg · Qualidade pendente · 15.456 kg · a partir de 23/09 · T4 · OS-0420 · Plantio e adubação de base · precisa de 27.456 kg · estoque apto 12.000 kg · se o laudo reprovar, falta a partir de 15/10/2026 · motivo: 20.000 kg em quarentena aguardam laudo (lote S58-0926 · NF 4533: Aguarda laudo de germinação (aceite CTL-4-FIX)) · responsável: o gestor libera ou reprova com o laudo no Estoque (re"
+  ],
+  "liberado": [
+   "0 kg",
+   "32.000 kg",
+   "Coberto pelo estoque"
+  ],
+  "liberado_cmp": [
+   "32.000",
+   "0",
+   "Coberto"
+  ],
+  "liberado_mapa": "Semente de soja 58 W · 3.640 kg · Estoque cobre · a partir de 23/09 · T4 · OS-0420 · Plantio e adubação de base · precis",
+  "reprovado": [
+   "15.456 kg",
+   "12.000 kg",
+   "Complemento"
+  ],
+  "reprovado_prim": "Enviar para cotação",
+  "reprovado_memo": [
+   "Reprovado: 20.000 kg do lote S58-0926 (NF 4533) · laudo LAB-2: germinação 71% · segregado para devolução ao fornecedor, não cobre: a falta é firme"
+  ],
+  "reprovado_cmp": [
+   "15.456",
+   "Complemento · 15.456 kg o Planejar safra envia o complemento da SOL-2026-07 —"
+  ],
+  "reprovado_mapa": "Semente de soja 58 W · 3.640 kg · Falta 15.456 kg · a partir de 23/09 · T4 · OS-0420 · Plantio e adubação de base · prec",
+  "recibos": [
+   "Recebimento NF 4533 conferido: 20.000 kg de Semente de soja 58 W no lote S58-0926 (validade 06/2027). Disponível 12.000 kg → 12.000 kg; 20.000 kg em quarentena ficam fora do disponível.",
+   "20.000 kg do lote S58-0926 liberados com o laudo LAB-1 por Ana (gestora). Fica revisão posterior pendente (Ana registrou a entrada bloqueada e decidiu). Disponível de Semente de soja 58 W: 12.000 kg → 32.000 kg.",
+   "20.000 kg do lote S58-0926 reprovados com o laudo LAB-2 por Ana (gestora) (germinação 71%): ficam segregados para a devolução ao fornecedor e a falta deixa de ser condicionada. Fica revisão posterior pendente (Ana registrou a entrada bloqueada e decidiu)."
+  ]
+ },
+ "item3": {
+  "saf": {
+   "antes": "14.800 kg",
+   "entregue": "14.800 kg",
+   "cancelada": "14.800 kg",
+   "devolvida": "14.800 kg"
+  },
+  "total": {
+   "antes": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a co",
+   "entregue": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a co",
+   "cancelada": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a co",
+   "devolvida": "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a co"
+  },
+  "prim": {
+   "antes": "Abrir Compra de insumos ›",
+   "entregue": "Abrir Compra de insumos ›",
+   "cancelada": "Abrir Compra de insumos ›",
+   "devolvida": "Abrir Compra de insumos ›"
+  },
+  "cmp": {
+   "antes": [
+    "14.800",
+    "A cotar"
+   ],
+   "entregue": [
+    "14.800",
+    "A cotar"
+   ],
+   "cancelada": [
+    "14.800",
+    "A cotar"
+   ],
+   "devolvida": [
+    "14.800",
+    "A cotar"
+   ]
+  },
+  "cmp_tot": {
+   "antes": [
+    "Total R$ 428.305,00"
+   ],
+   "entregue": [
+    "Total R$ 428.305,00"
+   ],
+   "cancelada": [
+    "Total R$ 428.305,00"
+   ],
+   "devolvida": [
+    "Total R$ 428.305,00"
+   ]
+  },
+  "mapa": {
+   "antes": "Falta 14.800 kg",
+   "entregue": "Falta 14.800 kg",
+   "cancelada": "Falta 14.800 kg",
+   "devolvida": "Falta 14.800 kg"
+  },
+  "recibos": [
+   "8.000 kg de NPK 20-05-20 entregues a Paula (OS-0425). Aguarda confirmação no app.",
+   "Custódia a devolver: 8.000 kg de NPK 20-05-20 com Paula.\nQuem resolve: Rui (almoxarife) recebe a devolução no Estoque; até lá o material conta como suprimento na demanda de insumos. | OS-0425 cancelada sem execução. Requisição REQ-040 cancelada. 8.000 kg de NPK 20-05-20 entregue segue em custódia com Paula: receba a devolução no Estoque. Cancelada por Ana (gestora).",
+   "8.000 kg de NPK 20-05-20 devolvidos ao disponível. Custódia de NPK 20-05-20 na OS-0425: 8.000 kg → 0 kg."
+  ],
+  "os_osc": {
+   "canPor": "Ana (gestora)",
+   "canEm": "12:08",
+   "cond": "Cancelada sem execução por Ana (gestora) às 12:08: Talhão replanejado (aceite CTL-4-FIX). Requisição REQ-040 cancelada. 8.000 kg de NPK 20-05-20 entregue segue em custódia com Paula: receba a devolução no Estoque.",
+   "dono": "Rui (almoxarife)",
+   "prazo": "receber a devolução",
+   "insx": "REQ-040 cancelada · 8.000 kg de NPK 20-05-20 em custódia · receber devolução",
+   "fase": "Canceladas"
+  },
+  "painel": "OS-0425 · Adubação 1ª parcela · café · × · Canceladas · Custódia a devolver · C1 · 38 ha · janela 15/10 · Paula · A liberar · Liberadas · Em execução · Em conferência · Encerradas · PRÓXIMO PASSO · Ordem cancelada sem execução: somente consulta. · Custódia a devolver: 8.000 kg de NPK 20-05-20 com Paula. · Quem resolve: Rui (almoxarife) recebe a devolução no Estoque; até lá o material conta como suprimento na demanda de insumos. · Receber devolução · › · INSUMOS E DOSES · PRODUTO · DOSE · NA ORDEM · USADO · SITUAÇÃO · NPK 20-05-20 · Fertilizantes · padrão do plano v2 · 300 kg/ha · 11.400 kg · — · Ordem cancelada · 8.000 kg em custódia com Paula · receber devolução no Estoque · ATIVIDADE · Adu",
+  "links": [
+   "Receber devolução\n›>EST.dc.html"
+  ],
+  "req040": [
+   {
+    "estado": "Cancelada",
+    "itens": [
+     {
+      "prod": "NPK 20-05-20",
+      "entregue": 8000,
+      "custodia": 8000,
+      "devolvido": 0
+     }
+    ]
+   },
+   {
+    "estado": "Cancelada",
+    "itens": [
+     {
+      "prod": "NPK 20-05-20",
+      "entregue": 8000,
+      "custodia": 0,
+      "devolvido": 8000
+     }
+    ]
+   }
+  ],
+  "A11": {
+   "apontar": "Apontamento do dia 5: 150 ha (provisório) · usado: Fungicida A 20 L. Saldo 10 ha; a ordem continua em execução. Divergência de consumo/dose: Fungicida A planejado 75 L × informado 20 L; Adjuvante espalhante planejado 37,5 L × informado 0 L · revisão técnica de Ana (agrônoma).",
+   "cen_apontado": {
+    "req035": [
+     {
+      "prod": "Fungicida A",
+      "entregue": 160,
+      "consumido": 115,
+      "custodia": 45,
+      "devolvido": 0
+     }
+    ],
+    "os": "Em execução"
+   },
+   "dev": "40 L de Fungicida A devolvidos ao disponível. Custódia de Fungicida A na OS-0421: 45 L → 5 L.",
+   "cen_devolvido": {
+    "req035": [
+     {
+      "prod": "Fungicida A",
+      "entregue": 160,
+      "consumido": 115,
+      "custodia": 5,
+      "devolvido": 40
+     }
+    ],
+    "lotes": [
+     {
+      "lote": "F26-02",
+      "fisico": 585
+     }
+    ]
+   },
+   "s2627": {
+    "antes": [
+     "0,0 L",
+     "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a co"
+    ],
+    "apontado": [
+     "0,0 L",
+     "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a co"
+    ],
+    "devolvido": [
+     "0,0 L",
+     "Valor da necessidade líquida R$ 428.305,00 · 14 insumos a co"
+    ]
+   },
+   "s27sf": {
+    "antes": [
+     "23,0 L",
+     "545,0 L",
+     "Valor da necessidade líquida R$ 1.094.947,10 · 8 insumos a comprar · a",
+     "Enviar para cotação"
+    ],
+    "apontado": [
+     "0,0 L",
+     "545,0 L",
+     "Valor da necessidade líquida R$ 1.091.615,00 · 7 insumos a comprar · a",
+     "Enviar para cotação"
+    ],
+    "devolvido": [
+     "0,0 L",
+     "585,0 L",
+     "Valor da necessidade líquida R$ 1.091.615,00 · 7 insumos a comprar · a",
+     "Enviar para cotação"
+    ]
+   }
+  }
+ },
+ "item4": {
+  "semente": {
+   "KCl 60%": [
+    "02/10/2026 · Recebimento PC-088 (Fertisul) · +40.000,0 kg → saldo 100.000 kg"
+   ],
+   "Semente de soja 62 X": [
+    "08/10/2026 · Recebimento PC-091 (Sementes Vale) · +8.000,0 kg → saldo 8.000 kg"
+   ],
+   "Semente de soja 58 W": [
+    "05/10/2026 · Recebimento PC-090 (Coop. Vale) · +20.000,0 kg → saldo 23.056 kg"
+   ]
+  },
+  "parcial": {
+   "KCl 60%": [
+    "02/10/2026 · Recebimento PC-088 (Fertisul) · +40.000,0 kg → saldo 100.000 kg"
+   ],
+   "Semente de soja 62 X": [
+    "08/10/2026 · Recebimento PC-091 (Sementes Vale) · +8.000,0 kg → saldo 8.000 kg"
+   ],
+   "Semente de soja 58 W": [
+    "05/10/2026 · Recebimento PC-090 (Coop. Vale) · +8.000,0 kg → saldo 23.056 kg"
+   ]
+  },
+  "rec_cols": {
+   "semente": [
+    "20.000 kg",
+    "20.000",
+    "12.000 kg"
+   ],
+   "parcial": [
+    "8.000 kg",
+    "8.000",
+    "24.000 kg"
+   ]
+  },
+  "cmp_igual_saf": {
+   "semente": true,
+   "parcial": true
+  },
+  "nf": "Recebimento NF 4533 conferido: 12.000 kg de Semente de soja 58 W no lote S58-0926 (validade 06/2027). Disponível 12.000 kg → 24.000 kg."
+ },
+ "item5": {
+  "MAP": {
+   "saf": "79.500 kg",
+   "cmp": "79.500",
+   "mapa": "Falta 79.500 kg",
+   "portal": "79.500 kg"
+  },
+  "NPK": {
+   "saf": "14.800 kg",
+   "cmp": "14.800",
+   "mapa": "Falta 14.800 kg"
+  },
+  "SEM_quar": {
+   "saf": "Qualidade pendente · 15.456 kg",
+   "cmp": "Qualidade pendente · 15.456 kg",
+   "mapa": "Qualidade pendente · 15.456 kg"
+  },
+  "SEM_rep": {
+   "saf": "15.456 kg",
+   "cmp": "15.456",
+   "mapa": "Falta 15.456 kg"
+  }
+ },
+ "roteiro": {
+  "0_antes": {
+   "SAF_MAP": [
+    "170.000 kg",
+    "90.000 kg",
+    "0 kg",
+    "79.500 kg",
+    "18/10/2026",
+    "R$ 310.050,00",
+    "Em cotação"
+   ],
+   "SAF_SEM": [
+    "27.456 kg",
+    "12.000 kg",
+    "20.000 kg",
+    "0 kg",
+    "Coberto pelo estoque"
+   ],
+   "CMP_MAP": [
+    "170.000",
+    "90.000",
+    "0",
+    "79.500",
+    "R$ 310.050,00",
+    "A cotar"
+   ],
+   "CMP_SEM": [
+    "27.456",
+    "12.000",
+    "20.000",
+    "0",
+    "Coberto"
+   ],
+   "total": [
+    "Total R$ 428.305,00"
+   ],
+   "prim": [
+    [
+     "Abrir Compra de insumos ›"
+    ],
+    [
+     "Solicitar cotações ›"
+    ]
+   ]
+  },
+  "1_apos_devolucao": {
+   "SAF_MAP": [
+    "170.000 kg",
+    "90.500 kg",
+    "0 kg",
+    "79.500 kg",
+    "18/10/2026",
+    "R$ 310.050,00",
+    "Em cotação"
+   ],
+   "SAF_SEM": [
+    "27.456 kg",
+    "12.000 kg",
+    "20.000 kg",
+    "0 kg",
+    "Coberto pelo estoque"
+   ],
+   "CMP_MAP": [
+    "170.000",
+    "90.500",
+    "0",
+    "79.500",
+    "R$ 310.050,00",
+    "A cotar"
+   ],
+   "CMP_SEM": [
+    "27.456",
+    "12.000",
+    "20.000",
+    "0",
+    "Coberto"
+   ],
+   "total": [
+    "Total R$ 428.305,00"
+   ],
+   "prim": [
+    [
+     "Abrir Compra de insumos ›"
+    ],
+    [
+     "Solicitar cotações ›"
+    ]
+   ]
+  },
+  "3_final": {
+   "SAF_MAP": [
+    "170.000 kg",
+    "90.500 kg",
+    "0 kg",
+    "79.500 kg",
+    "18/10/2026",
+    "R$ 310.050,00",
+    "Em cotação"
+   ],
+   "SAF_SEM": [
+    "27.456 kg",
+    "12.000 kg",
+    "0 kg",
+    "0 kg",
+    "Qualidade pendente · 15.456 kg"
+   ],
+   "CMP_MAP": [
+    "170.000",
+    "90.500",
+    "0",
+    "79.500",
+    "R$ 310.050,00",
+    "A cotar"
+   ],
+   "CMP_SEM": [
+    "27.456",
+    "12.000",
+    "0",
+    "0",
+    "Qualidade pendente · 15.456 kg condicionada ao laudo · motivo: 20.000 kg em quarentena aguardam laudo (lote S58-0926 · NF 4533: Aguarda laudo de germinação (contraprova sintética)) · responsável: o gestor libera ou reprova com o laudo no Estoque (reprovado, vira falta firme) · prazo: decidir antes de 15/10/2026, quando a falta começa se reprovar · fora da compra: sem nova compra automática"
+   ],
+   "total": [
+    "Total R$ 428.305,00"
+   ],
+   "prim": [
+    [
+     "Abrir Compra de insumos ›"
+    ],
+    [
+     "Solicitar cotações ›"
+    ]
+   ]
+  }
+ },
+ "verificacoes": [
+  {
+   "item": 1,
+   "nome": "necessidade do MAP igual antes e depois da devolução (Planejar safra e Compra), total e primária iguais",
+   "passou": true,
+   "evidencia": "(('79.500 kg', '79.500 kg'), ('79.500', '79.500'), 'Valor da necessidade líquida R$ 428.305,00 · 14 insumos a co')"
+  },
+  {
+   "item": 1,
+   "nome": "depósito 90.000 → 90.500 (lote M26-07, Estoque apto no Planejar safra e na Compra) e custódia da REQ-031 500 → 0",
+   "passou": true,
+   "evidencia": "((90000, 90500), ('90.000 kg', '90.500 kg'), ('90.000', '90.500'), (500, 0))"
+  },
+  {
+   "item": 1,
+   "nome": "os 500 kg contam uma vez (antes: 90.000 + 500 em custódia = 90.500; depois: 90.500 aptos, sem custódia) e não ficam livres no Estoque enquanto estão com a OS-0417 (disponível 90.000, custódia 500)",
+   "passou": true,
+   "evidencia": "(('Estoque apto hoje: 90.000 kg + 500 kg em custódia sem uso nas O.S., a devolver ao Estoque (500 kg · REQ-031 · OS-0417 (em conferência)) = 90.500 kg', 'Estoque apto hoje: 90.500 kg'), (['90.000 kg', '90.000 kg'], ['90.500 kg', '90.500 kg']), ('500 kg', '—'))"
+  },
+  {
+   "item": 1,
+   "nome": "Mapa e Portal com o mesmo número (Falta 79.500 kg; SOL 79.500 kg), antes e depois",
+   "passou": true,
+   "evidencia": "(('Falta 79.500 kg', 'Falta 79.500 kg'), ('79.500 kg', '79.500 kg'))"
+  },
+  {
+   "item": 1,
+   "nome": "motor: devolver os 500 kg não muda a demanda",
+   "passou": true,
+   "evidencia": "motor_3f9e4f6.log"
+  },
+  {
+   "item": 2,
+   "nome": "a NF em quarentena sai de \"Recebimentos previstos\" (20.000 → 0) e de \"A receber\" (20.000 → 0); quarentena não é apto (12.000)",
+   "passou": true,
+   "evidencia": "(['12.000 kg', '20.000 kg'], ['12.000 kg', '0 kg'], ['12.000', '20.000'], ['12.000', '0'])"
+  },
+  {
+   "item": 2,
+   "nome": "não é cobertura confirmada: \"Qualidade pendente · 15.456 kg\" no lugar de \"Coberto\" (Planejar safra, Compra e Mapa)",
+   "passou": true,
+   "evidencia": "('Qualidade pendente · 15.456 kg', 'Qualidade pendente · 15.456 kg condicion', 'Semente de soja 58 W · 3.640 kg · Qualidade pendente · 15.456 kg · a partir de 2')"
+  },
+  {
+   "item": 2,
+   "nome": "falta condicionada com motivo (o da conferência), responsável, prazo e decisão à vista na memória do Planejar safra, na Compra e no Mapa",
+   "passou": true,
+   "evidencia": "('Falta condicionada à qualidade: 15.456 kg a partir de 15/10/2026 se o laudo reprovar · motivo: 20.000 kg em quarentena aguardam laudo (lote S58-0926 · NF 4533: Aguarda laudo de germinação (aceite CTL-4-FIX)) · responsável: o gestor libera ou reprova com o laudo no Estoque (reprovado, vira falta firme) · prazo: decidir antes de 15/10/2026, quando a falta começa se reprovar · fora da compra: sem nova compra automática', 'Mapa (420 car.): /10/2026 · motivo: 20.000 kg em quarentena aguardam laudo (lote S58-0926 · NF 4533: Aguarda laudo de germinação (aceite CTL-4-FIX)) · responsável: o gestor li"
+  },
+  {
+   "item": 2,
+   "nome": "fora da compra firme e sem trocar a primária: necessidade 0, total e primária iguais (Planejar safra e Compra); o total diz \"R$ 146.832,00 condicionados ao laudo, fora da compra\"",
+   "passou": true,
+   "evidencia": "('OL-2026-07 em cotação · 1 insumo com qualidade pendente (R$ 146.832,00 condicionados ao laudo, fora da compra)', ('Abrir Compra de insumos ›', 'Abrir Compra de insumos ›'), (['Total R$ 428.305,00'], ['Total R$ 428.305,00']))"
+  },
+  {
+   "item": 2,
+   "nome": "laudo liberado → coberto (32.000 kg aptos; Planejar safra, Compra e Mapa)",
+   "passou": true,
+   "evidencia": "(['0 kg', '32.000 kg', 'Coberto pelo estoque'], ['32.000', '0', 'Coberto'], 'Semente de soja 58 W · 3.640 kg · Estoque cobre · a partir d')"
+  },
+  {
+   "item": 2,
+   "nome": "laudo reprovado → falta firme de 15.456 kg com o motivo (\"Reprovado: … laudo LAB-2: germinação 71%\"), \"Complemento\" e a primária pede o envio; Compra e Mapa com o mesmo número",
+   "passou": true,
+   "evidencia": "(['15.456 kg', '12.000 kg', 'Complemento'], ['Reprovado: 20.000 kg do lote S58-0926 (NF 4533) · laudo LAB-2: germinação 71% · segregado para devolução ao fornecedor, não cobre: a falta é firme'], ['15.456', 'Complemento · 15.456 kg o Planejar safra envia o complemento da SOL-2026-07 —'])"
+  },
+  {
+   "item": 2,
+   "nome": "motor: NF em quarentena e laudo não mudam a compra (liq 0; total 428.305); situação \"Qualidade pendente\" com cond 15.456 e a SOL não ganha a semente",
+   "passou": true,
+   "evidencia": "motor_3f9e4f6.log"
+  },
+  {
+   "item": 3,
+   "nome": "NPK: entregar 8.000 kg, cancelar a OS-0425 e devolver não mudam a compra (14.800 kg; total, primária, Compra e Mapa iguais em todos os passos)",
+   "passou": true,
+   "evidencia": "({'antes': '14.800 kg', 'entregue': '14.800 kg', 'cancelada': '14.800 kg', 'devolvida': '14.800 kg'}, {'antes': 'Falta 14.800 kg', 'entregue': 'Falta 14.800 kg', 'cancelada': 'Falta 14.800 kg', 'devolvida': 'Falta 14.800 kg'})"
+  },
+  {
+   "item": 3,
+   "nome": "cancelar (Ana, com motivo) não grava \"nada tinha sido entregue\"; a custódia fica com destino: dono Rui (almoxarife), prazo \"receber a devolução\", link \"Receber devolução\" ao Estoque",
+   "passou": true,
+   "evidencia": "('lhão replanejado (aceite CTL-4-FIX). Requisição REQ-040 cancelada. 8.000 kg de NPK 20-05-20 entregue segue em custódia com Paula: receba a devolução no Estoque.', 'Rui (almoxarife)', 'receber a devolução')"
+  },
+  {
+   "item": 3,
+   "nome": "A11: a OS-0421 aponta 150 ha com 20 L e devolve 40 L — a compra não muda com a devolução (Safra 2026/27 e Safrinha 2027: necessidade, total e primária iguais; o depósito sobe 40 L)",
+   "passou": true,
+   "evidencia": "Apontamento do dia 5: 150 ha (provisório) · usado: Fungicida A 20 L. Saldo 10 ha; a ordem continua em execução. Divergência de consumo/dose: Fungicida A planejado 75 L × informado 20 L; Adjuvante espalhante planejado 37,5 L × informado 0 L · revisão técnica de Ana (agrônoma)."
+  },
+  {
+   "item": 3,
+   "nome": "A11 (números): devolução sem mudança de compra",
+   "passou": true,
+   "evidencia": "({'antes': ('0,0 L', 'Valor da necessidade líquida R$ 428.305,00 · 14 insumos a co'), 'apontado': ('0,0 L', 'Valor da necessidade líquida R$ 428.305,00 · 14 insumos a co'), 'devolvido': ('0,0 L', 'Valor da necessidade líquida R$ 428.305,00 · 14 insumos a co')}, {'antes': ('23,0 L', '545,0 L', 'Valor da necessidade líquida R$ 1.094.947,10 · 8 insumos a comprar · a', 'Enviar para cotação'), 'apontado': ('0,0 L', '545,0 L', 'Valor da necessidade líquida R$ 1.091.615,00 · 7 insumos a comprar · a', 'Enviar para cotação'), 'devolvido': ('0,0 L', '585,0 L', 'Valor da necessidade líquida R$ 1.091.615,"
+  },
+  {
+   "item": 3,
+   "nome": "motor: C4 (entrega, cancelamento, devolução) e A11 (devolução) sem mudança na demanda; T10: SOL e pedido não mudam",
+   "passou": true,
+   "evidencia": "motor_3f9e4f6.log"
+  },
+  {
+   "item": 4,
+   "nome": "recebimentos com data na projeção: PC-088 em 02/10, PC-091 em 08/10 e PC-090 em 05/10, na ordem das datas de uso; Compra com a mesma memória",
+   "passou": true,
+   "evidencia": "{'KCl 60%': ['02/10/2026 · Recebimento PC-088 (Fertisul) · +40.000,0 kg → saldo 100.000 kg'], 'Semente de soja 62 X': ['08/10/2026 · Recebimento PC-091 (Sementes Vale) · +8.000,0 kg → saldo 8.000 kg'], 'Semente de soja 58 W': ['05/10/2026 · Recebimento PC-090 (Coop. Vale) · +20.000,0 kg → saldo 23.056 kg']}"
+  },
+  {
+   "item": 4,
+   "nome": "entrega parcial (NF 4533 com 12.000 aptos): o saldo aberto do PC-090 (8.000 kg) continua com a data 05/10; os outros pedidos não mudam",
+   "passou": true,
+   "evidencia": "({'semente': ['20.000 kg', '20.000', '12.000 kg'], 'parcial': ['8.000 kg', '8.000', '24.000 kg']}, ['05/10/2026 · Recebimento PC-090 (Coop. Vale) · +8.000,0 kg → saldo 23.056 kg'])"
+  },
+  {
+   "item": 5,
+   "nome": "mesmos números em Planejar safra, Compra/SOL-2026-07, Mapa › Insumos e Portal do parceiro (MAP 79.500; NPK 14.800; Semente 15.456 condicionada e, reprovada, 15.456 firme)",
+   "passou": true,
+   "evidencia": "{'MAP': {'saf': '79.500 kg', 'cmp': '79.500', 'mapa': 'Falta 79.500 kg', 'portal': '79.500 kg'}, 'NPK': {'saf': '14.800 kg', 'cmp': '14.800', 'mapa': 'Falta 14.800 kg'}, 'SEM_quar': {'saf': 'Qualidade pendente · 15.456 kg', 'cmp': 'Qualidade pendente · 15.456 kg', 'mapa': 'Qualidade pendente · 15.456 kg'}, 'SEM_rep': {'saf': '15.456 kg', 'cmp': '15.456', 'mapa': 'Falta 15.456 kg'}}"
+  },
+  {
+   "item": "roteiro",
+   "nome": "contraprova (mesmas entradas da base): MAP 79.500 nos três momentos, apto 90.000 → 90.500 no Planejar safra e na Compra; Semente sem \"a receber\" e em \"Qualidade pendente · 15.456 kg\" no final; total e primárias iguais",
+   "passou": true,
+   "evidencia": "{'0_antes': ('90.000 kg', '79.500 kg', ['20.000 kg', '0 kg', 'Coberto pelo estoque']), '1_apos_devolucao': ('90.500 kg', '79.500 kg', ['20.000 kg', '0 kg', 'Coberto pelo estoque']), '3_final': ('90.500 kg', '79.500 kg', ['0 kg', '0 kg', 'Qualidade pendente · 15.456 kg'])}"
+  },
+  {
+   "item": "js",
+   "nome": "sem erro de JavaScript nas telas abertas (aceite e roteiro)",
+   "passou": true,
+   "evidencia": "([], [])"
+  }
+ ]
+}

@@ -1,0 +1,28 @@
+OK    N1 web: entrega parcial bloqueia o início com dono e atalho Entregar no Estoque
+OK    N1 web: osc_iniciar recusa com o mesmo texto
+OK    N1 app: mbIniciar recusa com o texto da web + dono (uma regra, dois canais)
+OK    N1 app: cartão pede retirada ("Entrega parcial · REQ-041"), não "Iniciar turno"
+OK    N1 atômico: recusado não grava (rev, movimentos, fase e turno iguais)
+OK    N1 app sem sinal: a mesma recusa (regra avaliada no aparelho)
+OK    N2 app: OS-0424 sem entrega recusa e o cartão segue "Reservado · REQ-039"
+OK    N3 web: entregue sem confirmação bloqueia com atalho Ver no app
+OK    N3 app: mesma recusa; o cartão pede Confirmar recebimento
+OK    P1 web sem bloqueio e app oferece Iniciar turno
+OK    P1 app: inicia e a ordem vai a Em execução
+OK    P2 web: entrega fracionada com todos os componentes inicia (osc_iniciar)
+OK    P2 app: turno abre e fecha 20 ha (40/20/10 L baixados, custódia 0/0/0)
+OK    N4 app: próximo turno recusado: 280 + 140 + 70 L a entregar; cartão "Entrega parcial"
+OK    R7 residual documentado: a 2ª entrega herda a confirmação da 1ª (cenEntregar não zera confirmado)
+OK    N4b app: inicia com os três; fecha 20 ha e o Óleo zera
+OK    N4b app: só o Óleo falta: "Óleo mineral 60 L a entregar"
+OK    N5 estado: 175 solicitados, 175 consumidos, custódia 0, nada a entregar, 60 ha de saldo
+OK    N5 app: recusa com dono Ana (agrônoma); cartão "Insumo esgotado", não "Retirar"
+OK    N5 web: a dona vê a pendência na lista/Kanban/Mapa (selo vermelho "Insumo esgotado · Fungicida A", Ana, decidir a área restante; painel com o impedimento no lugar do primário)
+OK    N5 Rui não resolve: entregar mais é recusado (saldo a entregar 0 L)
+OK    P5 web: ordem concluída com consumo exato fica sem "Insumo esgotado", sem dona Ana, primário Enviar para conferência
+OK    P6 web: turno no aparelho consumiu tudo; a web segue "Aguardando sinal do app", sem "Insumo esgotado" nem dona Ana
+OK    P6b web sem sinal: o consumo no aparelho não vira "Insumo esgotado" antes do envio; com o sinal vira, com Ana (60 ha a fazer)
+OK    P3 sem insumo: OS-0505 (Em execução) e OS-0511 (liberada sem requisição) iniciam
+OK    P4 residual: OS-0421 (Adjuvante fora da REQ-035) inicia como hoje
+26/26
+rc=0

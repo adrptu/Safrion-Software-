@@ -1,0 +1,7 @@
+tabelas_cad_test||tabelas_cad_test.py
+tabelas_irr_test||tabelas_irr_test.py
+ctl5_test||ctl5_test.py
+ficha_pivo_test||ficha_pivo_test.py
+comercial_fluxo_test||comercial_fluxo_test.py
+cadc_cd02_test||cadc_cd02_test.py
+varredura||varredura.py

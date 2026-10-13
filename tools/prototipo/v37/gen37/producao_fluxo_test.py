@@ -151,7 +151,7 @@ try:
         setv('#pf_bruto', '19250'); clk('Com avaria', 'aside'); clk('Registrar pesagem', 'aside'); p = toast()
         t.chk('a mesma pesagem por outro formulário (mesmo ticket e conteúdo) = a mesma carga, nada somado', 'mesma carga' in p and cen("c.producao.movs.length") == n, [p, cen("c.producao.movs.length"), n])
         ir('PROD.dc.html'); row('L39-133'); clk('Liberar L39-133', 'aside'); p = toast()
-        t.chk('Liberar lote (Qualidade ou agrônoma, pelo perfil de quem age: a Ana do perfil padrão) passa a Liberado', 'liberado por Ana (agrônoma)' in p, p)   # BEN-1 (d): perfil, não nome fixo
+        t.chk('Liberar lote passa a Liberado e grava quem agiu (perfil Ana, agrônoma; Comercial A3 da revisão e BEN-1 (d): nunca o nome fixo da Qualidade)', 'liberado por Ana (agrônoma)' in p, p)
         row('L39-133'); setv('[id^=pf_q_L39-133_PV-036]', '10001'); clk('Reservar', 'aside'); p = pan()
         t.chk('reserva acima da falta do pedido é recusada junto ao formulário', 'Acima da falta' in p, p[-300:])
         ir('MB-10.dc.html'); lib(); clk('Sem sinal'); clk('Registrar carga · OS-0505'); setv('#mb_cx', '300'); clk('Carreta 02'); clk('Gravar carga'); p = toast()
@@ -179,6 +179,13 @@ try:
         print('== celular · AC-19 em 390 × 844')
         for pg in ('COLH', 'CARGA', 'PROD'):
             ir(pg + '.dc.html', limpa=True, w=390, h=844)
+            if pg == 'PROD':   # Comercial A-17 (expectativa nova): na semente o PV-030 tem a saca a conferir, nenhum lote tem reserva a fazer e o cartão diz o próximo passo
+                cd = J("(()=>{ const e=[...document.querySelectorAll('.pr-card')].filter(VIS).find(x=>N(x.innerText).indexOf('L10-031')>=0); return e?N(e.innerText):''; })()") or ''
+                t.chk('AC-19 PROD na semente (Comercial A-17): sem reserva a fazer, sem primária; o cartão do L10-031 diz "Registrar a saca do PV-030 em Contratos e pedidos"',
+                      not J("[...document.querySelectorAll('.pr-prim')].some(VIS)") and 'Registrar a saca do PV-030 em Contratos e pedidos' in cd, cd)
+                ir('VEN.dc.html', w=390, h=844)   # registrada a saca de 60 kg pelo comando da tela (comercial.js só carrega no grupo Comercial), a reserva volta a ser a primária
+                J("(()=>{ const {comConverterSaca}=window.__com; const r=window.__car.cenMudar(null,c=>comConverterSaca(c,{venda:'PV-030',fat:'60',fonte:'Contrato CT-201 (teste)',ator:'Ana',chave:'T-SACA-PV-030'})); return r.erro||'ok'; })()")
+                ir('PROD.dc.html', w=390, h=844)
             m = J("(()=>{ const m=document.querySelector('main'); return [document.documentElement.scrollWidth, m.scrollWidth-m.clientWidth, [...document.querySelectorAll('.pr-card')].filter(VIS).length, [...document.querySelectorAll('.g2rola')].filter(VIS).length]; })()")
             b = J("(()=>{ const b=[...document.querySelectorAll('.pr-prim')].find(VIS); if(!b) return null; const r=b.getBoundingClientRect(); return [N(b.innerText), Math.round(r.top), Math.round(r.bottom), innerHeight, getComputedStyle(b).position]; })()")
             t.chk(f'AC-19 {pg}: cartões no lugar da tabela, sem rolagem horizontal', m and m[0] <= 390 and m[1] <= 0 and m[2] > 0 and m[3] == 0, m)
@@ -195,13 +202,17 @@ try:
         t.chk('A-02 bruto "19.250" e tara "7.200": 12.050 kg líquidos (não 12,05)', g == ['Recebida', 12050, 'L39-133'] and '12.050 kg líquidos' in p, [g, p])
         # A-03 · reservar, cancelar e reservar de novo
         ir('PROD.dc.html'); row('L39-133'); clk('Reservar', 'aside'); p1 = toast()
-        ir('PROD.dc.html'); row('PV-036'); clk('Cancelar reserva', 'aside'); setv('#pf_mot', 'cliente adiou'); clk('Cancelar RS-0002', 'aside'); p2 = toast()
+        # Comercial P6 (D-C14): a venda e o "Cancelar reserva" estão em Comercial › Contratos e pedidos; a situação do PV-036 coberto pela reserva é
+        # "Aguardando crédito" (R-C08, KC09: a receber da Frutas Real + esta reserva passa o limite), não "Coberto": a falta é o que prova a cobertura
+        ir('VEN.dc.html'); row('PV-036'); clk('Cancelar reserva', 'aside'); setv('#pf_mot', 'cliente adiou'); clk('Cancelar RS-0002', 'aside'); p2 = toast()
         ir('PROD.dc.html'); row('L39-133'); clk('Reservar', 'aside'); p3 = toast() + ' ' + pan()[-200:]
         a = cen("Object.values(c.producao.reservas).filter(r=>r.pedido==='PV-036'&&r.st==='Ativa').map(r=>r.id)")
-        t.chk('A-03 reservar → cancelar → reservar de novo: uma reserva ativa nova (RS-0003) e PV-036 coberto', a == ['RS-0003'] and 'RS-0002' in p1 and 'cancelada' in p2 and 'RS-0003' in p3 and 'Coberto' in (J("ROWTXT('PV-036')") or ''), [a, p1, p2, p3])
+        ir('VEN.dc.html'); pv = J("ROWTXT('PV-036')") or ''
+        t.chk('A-03 reservar → cancelar → reservar de novo: uma reserva ativa nova (RS-0003) e PV-036 sem falta (Aguardando crédito)', a == ['RS-0003'] and 'RS-0002' in p1 and 'cancelada' in p2 and 'RS-0003' in p3 and 'Aguardando crédito' in pv and '10.000 kg 0 kg' in pv, [a, p1, p2, p3, pv])
         # A-17 · PV-030 diz que é o saldo do CT-201; A-18 · coluna Em processo
-        ir('PROD.dc.html', limpa=True)
+        ir('VEN.dc.html', limpa=True)   # Comercial P6: a linha da venda está em Contratos e pedidos
         t.chk('A-17 a linha do PV-030 diz que a quantidade é o saldo do CT-201', 'saldo 4.000 sc do CT-201' in (J("ROWTXT('PV-030')") or ''), J("ROWTXT('PV-030')"))
+        ir('PROD.dc.html')
         hd = J("[...document.querySelectorAll('[role=columnheader]')].map(x=>N(x.innerText))") or []
         mam = J("ROWTXT('Mamão Formosa · fruta de campo')") or ''
         # BEN-1: a semente ganha 21.270 kg de fruta de campo no packing (saldo de abertura): 66.250 da colheita + 21.270 = 87.520 kg em processo

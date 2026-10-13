@@ -185,9 +185,10 @@ function EXTRAVALS(self,v){
     def pol(rid,idl,nome,nv,escopo,lim,aprov,dono,vig,sit,acao,ro=False,rv=None):
         return R(rid,ro=ro,v=dict(idl=idl,o_lim=lim,o_aprov=aprov,o_vig=vig,motivo='',rv=(rv or REV_OK)),extra=dict(nv=nv,sit0=sit,acao0=acao),
                  regra=two(idl,f'{nome} · dono: {dono}'),escopo=escopo,lim=lim,aprov=aprov,vig=vig,sit=sit+([Pt.br()]+acao if acao else []))
-    lam=str(D.POLITICA_AGUA['lamina_max']).replace('.',',')
+    PA=D.POLITICA_AGUA; lam=str(PA['lamina_max']).replace('.',',')
     pols=[
-      pol('pa07','IR-LIM','limites de irrigação (só água)','v4',f'{D.PIVO["id"]} + pivô 1 + gotejo T7',f'lâmina ≤ {lam} mm por passada · intervalo ≥ {D.POLITICA_AGUA["intervalo_min"]}','Gestor · sem aprovação por evento','Ana (gestora)','sem validade',ch('Vigente','green'),[]),
+      # política de água: identificador, versão, dono e validade de dados.POLITICA_AGUA (a mesma da ficha do pivô e do app; revisão de 10/10, A3)
+      pol('pa07',f'{PA["id"]} {PA["versao"]}','limites de irrigação (só água)','v'+str(int(PA['versao'].lstrip('v'))+1),f'{D.PIVO["id"]} + pivô 1 + gotejo T7',f'lâmina ≤ {lam} mm por passada · intervalo ≥ {PA["intervalo_min"]}','Gestor · sem aprovação por evento',PA['autor'],f'até {PA["validade"]}',ch('Vigente','green'),[]),
       pol('pe04','PE-04','estoque Diesel S10','v1','tanque Sede','mínimo do tanque 40%','Gestor','Rui','—',ch('Aguardando aprovação','yellow'),
           [Pt.act('Publicar','Publicação bloqueada · PE-04 é classe Obrigatória e ainda não tem aprovação do gestor nem teste de exemplo. Como resolver: simule os casos e aprove em Aprovações; depois publique.')],ro=True,rv='Aguardando aprovação do gestor'),
       pol('al05p','AL-05 v2','dispensar saldo','v3','ordens agrícolas','saldo até 20% da área','Gerencial + agronômica','Ana','até 31/07/2027',ch('Vigente · v3 proposta','yellow'),[Pt.cta('Ver alçada','CF-02det.dc.html')],ro=True,rv='v3 já em revisão · decida no detalhe da alçada'),

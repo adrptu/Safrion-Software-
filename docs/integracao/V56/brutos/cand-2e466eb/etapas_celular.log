@@ -1,0 +1,17 @@
+OK    1 390 px · nenhuma etapa sobrepõe ou vaza (CMP, SAF, PA, EST, IR-02) 
+OK    2 390 px · processo guiado com "Etapa i de n · Nome" e telas/seções com o nome da atual; lista recolhida; nenhuma seta ‹ › (UX-ACAO-UNICA) 
+OK    3 390 px · título inteiro, situação e comando principal na tela, sem rolagem horizontal da página (8 telas) 
+OK    4 390 px · tabelas em região rolável na horizontal; o conteúdo não rola de lado; nenhum texto ou comando cortado fora de região rolável nem texto sobre texto 
+     (informativo) campos cortados pela própria caixa da área: {}
+OK    5 325 px (quadro do site) · Compras sem sobreposição, "Etapa 1 de 6 · Escolha a safra", título inteiro 
+OK    6 390 px · com "aberto" guardado começa recolhido (68 px); aberto pelo botão passa por cima (conteúdo continua com 322 px) e o botão de recolher fica alcançável 
+OK    7 zoom 200 % · sem sobreposição, etapa atual legível e comando principal na tela (4 telas com etapas) 
+OK    8 zoom 200 % com menu aberto (pelo botão) · CMP e SAF sem sobreposição 
+OK    9 teclado · Tab chega ao rótulo da etapa atual, Espaço abre a lista em folha (6 etapas, sem sobreposição) e o Tab seguinte não entra nela: a lista só informa (UX-ACAO-UNICA) 
+OK    10 toque · Abrir compra → "Etapa 2 de 6 · Confira a demanda"; a lista aberta só informa (a etapa 3 não é alvo de toque e a etapa não muda); o avanço "Solicitar cotações ›" da área de ações leva à etapa 3, sem texto sobre texto; Safra 2026/27 no contexto (UX-ACAO-UNICA) 
+OK    11 "‹ Demanda" (área de ações) volta à etapa 2; em 1440 a faixa completa mostra a etapa 2 e em 390 volta "Etapa 2 de 6", com a Safra 2026/27 
+OK    12 painel lateral em 390 px · cobre a faixa e o cabeçalho (largura da tela) e o rascunho digitado sobrevive à troca de zoom 
+OK    13 O.S. em 390 px · painel da ordem ocupa a largura e nada do cabeçalho fica por cima 
+OK    14 sem erro de JS nas telas visitadas 
+
+RESULTADO: 14 ok · 0 falhas (celular)

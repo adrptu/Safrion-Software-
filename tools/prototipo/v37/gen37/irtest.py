@@ -27,6 +27,9 @@ def clk(t, root=None): r = J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); ti
 def sv(sel, val): J(f"({SETV})({json.dumps(sel)},{json.dumps(val)})"); time.sleep(.3)
 def rowopen(txt):
     J(f"""(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(txt)})>=0); (r.querySelector('[role=cell] span')||r).click();}})()"""); time.sleep(.45)
+def painel(txt, ks):
+    """valores dos campos do painel do setor (IR-01): o que saiu da grade na revisão TABR (fonte do déficit, passadas, cobertura e resta)"""
+    rowopen(txt); out = [J(f"(document.querySelector('#fx_g_set_{k}')||{{}}).value") or '' for k in ks]; clk('Cancelar', 'aside[role=dialog]'); return out
 def goto(pg, w=1.4): c.goto(f'http://127.0.0.1:{p}/{pg}', wait=w); time.sleep(.3)
 ok = []
 def chk(nome, cond, info=''): ok.append((nome, bool(cond))); print(('✓ ' if cond else '✗ ') + nome + ('' if cond else '  ' + str(info)[:400]), flush=True)
@@ -42,21 +45,26 @@ try:
     # ---------- IR-01 ----------
     goto('IR-01.dc.html'); b = J("document.body.innerText")
     chk('IR-01: título igual ao menu, sem seções explicativas nem rodapé de regra', J("document.querySelector('h1').innerText.trim()") == 'Irrigação' and 'Passagem parcial do pivô' not in b and 'Água sem produto não passa' not in b)
-    chk('IR-01: P2 11,2 mm medido · P1 ≈8,4 mm e T7 ≈10,0 mm por estimativa de ET', '11,2 mm' in ROW('Pivô 2') and 'medido' in ROW('Pivô 2') and '≈8,4 mm' in ROW('Pivô 1') and 'Estimativa por ET' in ROW('Pivô 1') and '≈10,0 mm' in ROW('Gotejo T7'))
-    chk('IR-01: T7 cobre 38 % e resta 6,2 mm; primeiro da lista é o impedido (Resolver conflito)', 'cobre 38 % · resta 6,2 mm' in ROW('Gotejo T7') and J("[...document.querySelectorAll('[role=row].g2ed')][0].innerText").startswith('Gotejo T7') and 'Resolver conflito' in ROW('Gotejo T7'))
+    # TABELAS-FOCO (06/10/2026): uma variável por coluna; cobertura é coluna numérica ("38 %"). Revisão TABR (09/10/2026, A1): a fonte do
+    # déficit, o que resta e as passadas necessárias ficam no painel do setor (antes "12,44 mm brutos em 3 passadas" numa célula)
+    f1, f2 = painel('Pivô 1', ['defT'])[0], painel('Pivô 2', ['defT'])[0]
+    chk('IR-01: P2 11,2 mm medido · P1 ≈8,4 mm e T7 ≈10,0 mm por estimativa de ET', '11,2 mm' in ROW('Pivô 2') and 'sonda' in f2 and 'estimativa' not in f2 and '≈8,4 mm' in ROW('Pivô 1') and 'estimativa por ET' in f1 and '≈10,0 mm' in ROW('Gotejo T7'), [f1, f2])
+    o7 = painel('Gotejo T7', ['ordT'])[0]
+    chk('IR-01: T7 cobre 38 % e resta 6,2 mm; primeiro da lista é o impedido (Resolver conflito)', '38 %' in ROW('Gotejo T7') and o7 == 'OS-0423 · cobre 38 % · resta 6,2 mm' and J("[...document.querySelectorAll('[role=row].g2ed')][0].innerText").startswith('Gotejo T7') and 'Resolver conflito' in ROW('Gotejo T7'))
     rowopen('Pivô 2'); d = DLG()
     chk('IR-01: painel do setor com a memória (irrigação líquida) e a passagem parcial só na área coberta',
         '5,0 + ETc 7 dias 35,1 − chuva efetiva 12,0 − irrigação líquida 16,9 = 11,2 mm' in d and 'faixa de 11,6 ha (OS-0394): 1,8 mm · resto do pivô: 11,2 mm' in d
         and '1.206 m³ em 11,6 ha = 10,4 mm brutos na faixa × 90 % = 9,36 mm líquidos · fora do déficit do pivô · provisório' in d, d[d.find('Passagem parcial'):][:700])
     sv('#fx_g_set_lmax', '4,5'); clk('Salvar', 'aside[role=dialog]'); t = T()
-    chk('IR-01: limite de 4,5 mm vale para a próxima programação; OS-0419 liberada não muda', 'até 4,5 mm por passada' in t and 'OS-0419 não muda' in t and '3 passadas' in ROW('Pivô 2'), [t, ROW('Pivô 2')])
+    n2 = painel('Pivô 2', ['necT'])[0]
+    chk('IR-01: limite de 4,5 mm vale para a próxima programação; OS-0419 liberada não muda', 'até 4,5 mm por passada' in t and 'OS-0419 não muda' in t and '12,44 mm OS-0419' in ROW('Pivô 2') and '3 passadas necessárias' in n2, [t, ROW('Pivô 2'), n2])
     # ---------- IR-02 ----------
     goto('IR-02.dc.html'); hd = J("[...document.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/\\s+/g,' ').trim())")
     chk('IR-02: cabeçalho "1 conflito · 1 janela a definir"; agenda por captação, sem coluna Ação', '1 conflito · 1 janela a definir' in HDR() and not any(h.startswith('AÇÃO') or h.startswith('Ação') for h in hd) and 'Rio · captação da sede' in J("document.body.innerText"), [HDR(), hd])
     J(f"({SETV})('select[aria-label=\"Filtrar por fazenda\"]','Lagoa Grande')"); time.sleep(.5)
     clk('Programar irrigação'); sv('#pg_sel', 'PV01'); d = J("[...document.querySelectorAll('aside[role=dialog] > div, aside[role=dialog] [role=list]')].map(e=>e.innerText).join(' ')").replace('\n', ' ')
     dl = d.lower()   # innerText traz o text-transform dos rótulos: comparar sem caixa
-    chk('IR-02: painel Programar irrigação com necessidade, passadas e janela sugerida (PV01, Lagoa Grande)', 'pivô 1' in dl and 'janela sugerida' in dl and 'pronta' in dl and 'outorga em renovação' in dl, d[-500:])
+    chk('IR-02: painel Programar irrigação com necessidade, passadas e janela sugerida (PV01, Lagoa Grande)', 'pivô 1' in dl and 'janela sugerida' in dl and 'pronta' in dl and 'vence em 20/11/2026' not in dl and 'em renovação' not in dl, d[-500:])   # CTL-5 (revisão S3-2): a janela de hoje não passa do vencimento da SINT-002/0000 (20/11/2026): sem aviso de outorga
     clk('Programar', 'aside[role=dialog]'); t = T()
     chk('IR-02: nova tarefa OS-0607 liberada automaticamente (água sem produto)', 'OS-0607' in t and 'Liberadas' in t and 'Liberadas' in ROW('OS-0607'), t)
     clk('Programar irrigação'); sv('#pg_sel', 'PV01'); d = J("[...document.querySelectorAll('aside[role=dialog] [role=status]')].map(e=>e.innerText).join(' ')") or ''
@@ -96,7 +104,8 @@ try:
     clk('+ Cadastrar sensor'); sv('#fx_g_src_nome', 'Sonda de umidade · P2 (40 cm)'); sv('#fx_g_src_cal', '2027-03-31'); clk('Salvar', 'aside[role=dialog]'); time.sleep(.3)
     chk('IR-04: sensor novo aguarda a 1ª leitura e nada entra no balanço sem origem', 'Aguardando 1ª leitura' in ROW('P2 (40 cm)') and 'primeira leitura' in T(), ROW('P2 (40 cm)'))
     goto('IR-01.dc.html')
-    chk('IR-01: o mesmo estado — P2 agora com ≈ e Estimativa por ET', '≈' in ROW('Pivô 2') and 'Estimativa por ET' in ROW('Pivô 2'), ROW('Pivô 2'))
+    f2 = painel('Pivô 2', ['defT'])[0]
+    chk('IR-01: o mesmo estado — P2 agora com ≈ e estimativa por ET (no painel do setor)', '≈' in ROW('Pivô 2') and 'estimativa por ET' in f2, [ROW('Pivô 2'), f2])
     goto('IR-01.dc.html#PV02', 1.8); time.sleep(.6); d = DLG()
     chk('IR-01#PV02 (link do Mapa): troca para a Lagoa Grande e abre o setor com a memória demonstrativa', J("document.querySelector('select[aria-label=\"Filtrar por fazenda\"]').value") == 'Lagoa Grande'
         and 'Setor · Pivô 2' in d and 'Memória (demonstrativa)' in d, d[:300])

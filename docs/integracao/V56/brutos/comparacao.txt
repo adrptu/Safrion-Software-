@@ -1,0 +1,432 @@
+acao_familias
+  base: RESULTADO: 8 ok · 0 falhas (familias)
+  cand: RESULTADO: 8 ok · 0 falhas (familias)
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+acao_responsivo
+  base: RESULTADO: 5 ok · 0 falhas (responsivo)
+  cand: RESULTADO: 5 ok · 0 falhas (responsivo)
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+acao_saf
+  base: RESULTADO: 10 ok · 0 falhas (saf)
+  cand: RESULTADO: 10 ok · 0 falhas (saf)
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+acao_v3
+  base: RESULTADO: 10 ok · 0 falhas (v3)
+  cand: RESULTADO: 10 ok · 0 falhas (v3)
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+acoes_duplicadas
+  base: RESULTADO: 142 páginas · 0 com ação repetida · erros 0
+  cand: RESULTADO: 145 páginas · 0 com ação repetida · erros 0
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+agrofit_test
+  base: RESULTADO: 16/17 ok · 41 s ['3 cabeçalho: "Base atualizada · 02/10/2026" e "Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de 02/10/2026 · 4.409 produtos com registro" + AGROFIT oficial (nova aba)']
+  cand: RESULTADO: 17/18 ok · 33 s ['3 cabeçalho: "Base atualizada · 02/10/2026" e "Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de 02/10/2026 · 4.409 produtos com registro" + AGROFIT oficial (nova aba)']
+  falhas cand: ['3 cabeçalho: "Base atualizada · 02/10/2026" e "Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de 02/10/2026 · 4.409 produtos com registro" + AGROFIT oficial (nova aba) [\'Agrícola › Consulta Agr']
+  falhas base: ['3 cabeçalho: "Base atualizada · 02/10/2026" e "Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de 02/10/2026 · 4.409 produtos com registro" + AGROFIT oficial (nova aba) [\'Agrícola › Consulta Agr']
+  novas: [] [IGUAL]
+ben_unit_test
+  base: RESULTADO: OK 168/168
+  cand: RESULTADO: OK 168/168
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+cada_cd03_test
+  base: RESULTADO: OK 14/14
+  cand: RESULTADO: OK 14/14
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+cada_fix03_test
+  base: RESULTADO: OK 11/11
+  cand: RESULTADO: OK 11/11
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+cadc_cd02_test
+  base: RESULTADO: OK 15/15
+  cand(pós-correção): RESULTADO: OK 15/15
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+cadc_cd06_test
+  base: RESULTADO: OK 14/14
+  cand: RESULTADO: OK 14/14
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+cadc_fix_cd06
+  base: RESULTADO: OK 13/13
+  cand: RESULTADO: OK 13/13
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+cafe_apurar_nav
+  base: RESULTADO: OK 10/10
+  cand: RESULTADO: OK 10/10
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+cafe_apurar_unit
+  base: RESULTADO unit: 16/16
+  cand: RESULTADO unit: 16/16
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+carencia_test
+  base: RESULTADO: 91/91 verificações
+  cand: RESULTADO: 91/91 verificações
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+comercial_fluxo_test
+  base: comercial_fluxo_test AUSENTE_NESTE_LADO
+  cand(pós-correção): RESULTADO: OK 72/72
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+comercial_revisao_test
+  base: comercial_revisao_test AUSENTE_NESTE_LADO
+  cand: RESULTADO: OK 33/33
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+comercial_unit_test
+  base: comercial_unit_test AUSENTE_NESTE_LADO
+  cand: RESULTADO: OK 114/114
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+componentes_ajustes
+  base: RESULTADO: 2 ok · 2 falhas (ajustes)
+  cand: RESULTADO: 2 ok · 2 falhas (ajustes)
+  falhas cand: ['26 tabela no celular (SAF, CMP, CD-06, SU-01, MA#vis=ativos em 360×800) · 1ª coluna limitada, todas as colunas aparecem ao rolar, todo controle da 1ª linha e do cabeçalho fica inteiro à vista com o fo', '27 menu · com "aberto" guardado, CMP e O.S. começam recolhidos (68 px, sem fundo, título livre) em 360, 768 e zoom 200 %, e abertos ao lado em 1440; no estreito, Tab depois do último item fecha o menu']
+  falhas base: ['26 tabela no celular (SAF, CMP, CD-06, SU-01, MA#vis=ativos em 360×800) · 1ª coluna limitada, todas as colunas aparecem ao rolar, todo controle da 1ª linha e do cabeçalho fica inteiro à vista com o fo', '27 menu · com "aberto" guardado, CMP e O.S. começam recolhidos (68 px, sem fundo, título livre) em 360, 768 e zoom 200 %, e abertos ao lado em 1440; no estreito, Tab depois do último item fecha o menu']
+  novas: [] [IGUAL]
+componentes_ajustes2
+  base: RESULTADO: 2 ok · 0 falhas (ajustes2)
+  cand: RESULTADO: 2 ok · 0 falhas (ajustes2)
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+componentes_interacao
+  base: RESULTADO: 8 ok · 2 falhas (interacao)
+  cand: RESULTADO: 8 ok · 2 falhas (interacao)
+  falhas cand: ['10 PA · repouso branco com "Abrir plano →" visível; hover muda fundo e borda; ao sair volta; nada selecionado; mesmo tamanho e posição [[\'Abrir plano →\', True], [\'rgb(255, 255, 255)\', \'rgb(228, 233, 2', "14 famílias · botão, menu, chip, busca (hover e foco), talhão do mapa (foco tracejado) e trilha do mapa respondem; título de seção e etapa da faixa (inertes) sem cursor de ação nem hover {'botão primá"]
+  falhas base: ['10 PA · repouso branco com "Abrir plano →" visível; hover muda fundo e borda; ao sair volta; nada selecionado; mesmo tamanho e posição [[\'Abrir plano →\', True], [\'rgb(255, 255, 255)\', \'rgb(228, 233, 2', "14 famílias · botão, menu, chip, busca (hover e foco), talhão do mapa (foco tracejado) e trilha do mapa respondem; título de seção e etapa da faixa (inertes) sem cursor de ação nem hover {'botão primá"]
+  novas: [] [IGUAL]
+componentes_matriz
+  base: RESULTADO: 3 ok · 0 falhas (matriz)
+  cand: RESULTADO: 3 ok · 0 falhas (matriz)
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+componentes_rotacao
+  base: RESULTADO: 6 ok · 0 falhas (rotacao)
+  cand: RESULTADO: 6 ok · 0 falhas (rotacao)
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+ctl5_test
+  base: ctl5_test AUSENTE_NESTE_LADO
+  cand(pós-correção): RESULTADO 30/30 []
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+dose_divergente_nav
+  base: 21/21 ok · FALHAS: 0
+  cand: 21/21 ok · FALHAS: 0
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+dose_divergente_unit
+  base: RESULTADO unit: 35/35 RESULTADO unit Início: 2/2
+  cand: RESULTADO unit: 35/35 RESULTADO unit Início: 2/2
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+ds_test
+  base: ds_test AUSENTE_NESTE_LADO
+  cand: RESULTADO: OK 68/68
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+ds_unit_test
+  base: ds_unit_test AUSENTE_NESTE_LADO
+  cand: RESULTADO: OK 44/44 RESULTADO: OK 29/29
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+etapas_celular
+  base: RESULTADO: 14 ok · 0 falhas (celular)
+  cand: RESULTADO: 14 ok · 0 falhas (celular)
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+etapas_complemento
+  base: RESULTADO: 7 ok · 2 falhas (complemento)
+  cand: RESULTADO: 7 ok · 2 falhas (complemento)
+  falhas cand: ["17 lista da tela alcançável (O.S. e AG-07 em 390 px e zoom de 200 %, EST em 320 px): caixa não espremida e última linha tocável rolando a tela {'OS 390x844@1': {'alt': 409, 'cont': 409, 'linhas': 11, ", '20 tela baixa (800×360 e 568×320) · folha com a última etapa à vista (CMP, SAF: só informa) ou tocável (EST: seções); IR-02 com ≥ 280 px úteis (cabeçalho rola, faixa fica) e "Programar irrigação" alca']
+  falhas base: ["17 lista da tela alcançável (O.S. e AG-07 em 390 px e zoom de 200 %, EST em 320 px): caixa não espremida e última linha tocável rolando a tela {'OS 390x844@1': {'alt': 409, 'cont': 409, 'linhas': 11, ", '20 tela baixa (800×360 e 568×320) · folha com a última etapa à vista (CMP, SAF: só informa) ou tocável (EST: seções); IR-02 com ≥ 280 px úteis (cabeçalho rola, faixa fica) e "Programar irrigação" alca']
+  novas: [] [IGUAL]
+etapas_desktop
+  base: RESULTADO: 0 ok · 1 falhas (desktop)
+  cand: RESULTADO: 0 ok · 1 falhas (desktop)
+  falhas cand: ['15 1440 px igual à base base ausente: /home/user/sp-v56/tools/prototipo/v37/gen37/../gen37_antes/_render']
+  falhas base: ['15 1440 px igual à base base ausente: /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/integ/V56/base055/tools/prototipo/v37/gen37/../gen37_antes/_render']
+  novas: ['15 1440 px igual à base base ausente: /home/user/sp-v56/tools/prototipo/v37/gen37/../gen37_antes/_render'] [DIFERE]
+etapas_faixa
+  base: RESULTADO: 0 ok · 1 falhas (faixa)
+  cand: RESULTADO: 0 ok · 1 falhas (faixa)
+  falhas cand: ["16 varredura de largura (1400 → 300 px) em 33 telas com etapas: faixa completa sem sobreposição ou compacta {'CMP': ['1400:1 Escolha a safra · etapa atua', '1380:1 Escolha a safra · etapa atua', '1360"]
+  falhas base: ["16 varredura de largura (1400 → 300 px) em 34 telas com etapas: faixa completa sem sobreposição ou compacta {'CMP': ['1400:1 Escolha a safra · etapa atua', '1380:1 Escolha a safra · etapa atua', '1360"]
+  novas: ["16 varredura de largura (1400 → 300 px) em 33 telas com etapas: faixa completa sem sobreposição ou compacta {'CMP': ['1400:1 Escolha a safra · etapa atua', '1380:1 Escolha a safra · etapa atua', '1360"] [DIFERE]
+ficha_pivo_test
+  base: ficha_pivo_test AUSENTE_NESTE_LADO
+  cand(pós-correção): RESULTADO: OK 21/21
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+ficha_pivo_unit_test
+  base: ficha_pivo_unit_test AUSENTE_NESTE_LADO
+  cand: RESULTADO 23/23
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+irr_estado_test
+  base: 38 ok · 0 falhas []
+  cand: 38 ok · 0 falhas []
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+irr_fluxo_test
+  base: 33 ok · 0 falhas []
+  cand: 33 ok · 0 falhas []
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+irtest
+  base: 
+  cand: 
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+jscheck
+  base: None
+  cand: None
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+links_ocultos_test
+  base: TOTAL 14 · falhas 0
+  cand: TOTAL 14 · falhas 0
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+ma_app_test
+  base: RESULTADO: 36/36 ok
+  cand: RESULTADO: 36/36 ok
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+ma_regras_test
+  base: RESULTADO: 150/150 ok
+  cand: RESULTADO: 150/150 ok
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+ma_unica_test
+  base: RESULTADO: 23/23 ok
+  cand: RESULTADO: 23/23 ok
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+map_aprov_test
+  base: 5 ok · 0 falhas []
+  cand: 5 ok · 0 falhas []
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+map_decisoes_test
+  base: 18 ok · 0 falhas []
+  cand: 18 ok · 0 falhas []
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+map_irrig_filtro_test
+  base: 15 ok · 0 falhas []
+  cand: 15 ok · 0 falhas []
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+os_aprov_lib_test
+  base: TOTAL 45 · falhas 0 RESULTADO passou · TOTAL 45 · falhas 0
+  cand: TOTAL 45 · falhas 0 RESULTADO passou · TOTAL 45 · falhas 0
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+os_cenario_test
+  base: RESULTADO: 20/21 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov
+  cand: RESULTADO: 20/21 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov
+  falhas cand: ['A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov']
+  falhas base: ['A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov']
+  novas: [] [IGUAL]
+osacoes
+  base: RESULTADO: 40 ok · 5 falhas
+  cand: RESULTADO: 40 ok · 5 falhas
+  falhas cand: ['lista mostra percentual: 190 / 350 ha · 54 % · saldo 160 ha · OS-0421 Pulverização · Fungicida 1ª aplicação T1 T2 — 350,00 ha 20/09/2026 26/09/2026 Em execução Parcial · dia 4 de 7 — Paula conferir o ', 'OS-0430 A liberar com dono Ana (agrônoma), sem selo de agrônomo · OS-0430 Dessecação pré-plantio T1-A — 160,00 ha 25/09/2026 25/09/2026 A liberar — — Ana (agrônoma) — antes de 25/09 0,00 ha 160,00 ha ', 'lista cabe sem rolagem horizontal', 'recusa não muda o saldo (70 ha) · OS-0420 Plantio · Soja 58 W T4 — 100,00 ha 22/09/2026 28/09/2026 Em execução Impedida · ativo bloqueado — Manutenção OM-0233 até 24/09 30,00 ha 70,00 ha — 30,0 % Carl', 'lista: saldo 120 ha e dispensado 40 ha · OS-0421 Pulverização · Fungicida 1ª aplicação T1 T2 — 350,00 ha 20/09/2026 26/09/2026 Em execução Parcial · dia 4 de 7 — — — — 190,00 ha 120,00 ha 40,00 ha 54,']
+  falhas base: ['lista mostra percentual: 190 / 350 ha · 54 % · saldo 160 ha · OS-0421 Pulverização · Fungicida 1ª aplicação T1 T2 — 350,00 ha 20/09/2026 26/09/2026 Em execução Parcial · dia 4 de 7 — Paula conferir o ', 'OS-0430 A liberar com dono Ana (agrônoma), sem selo de agrônomo · OS-0430 Dessecação pré-plantio T1-A — 160,00 ha 25/09/2026 25/09/2026 A liberar — — Ana (agrônoma) — antes de 25/09 0,00 ha 160,00 ha ', 'lista cabe sem rolagem horizontal', 'recusa não muda o saldo (70 ha) · OS-0420 Plantio · Soja 58 W T4 — 100,00 ha 22/09/2026 28/09/2026 Em execução Impedida · ativo bloqueado — Manutenção OM-0233 até 24/09 30,00 ha 70,00 ha — 30,0 % Carl', 'lista: saldo 120 ha e dispensado 40 ha · OS-0421 Pulverização · Fungicida 1ª aplicação T1 T2 — 350,00 ha 20/09/2026 26/09/2026 Em execução Parcial · dia 4 de 7 — — — — 190,00 ha 120,00 ha 40,00 ha 54,']
+  novas: [] [IGUAL]
+ostest
+  base: 32 ok · 1 falhas ['painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo']
+  cand: 32 ok · 1 falhas ['painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo']
+  falhas cand: ['painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo OS-0440 · Pulverização · Fungicida 2ª aplicação + inseticida']
+  falhas base: ['painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo OS-0440 · Pulverização · Fungicida 2ª aplicação + inseticida']
+  novas: [] [IGUAL]
+outorga_unit_test
+  base: outorga_unit_test AUSENTE_NESTE_LADO
+  cand: RESULTADO 27/27
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+pa_lista_test
+  base: pa_lista_test AUSENTE_NESTE_LADO
+  cand: RESULTADO: 24 ok · 0 falhas
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+pa_regras_test
+  base: pa_regras_test AUSENTE_NESTE_LADO
+  cand: RESULTADO 18/18
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+partest
+  base: RESULTADO: 50 ok · 0 falhas
+  cand: RESULTADO: 50 ok · 0 falhas
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+patest
+  base: 
+  cand: RESULTADO: 46 ok · OK
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+praga_alvo_test
+  base: praga_alvo_test AUSENTE_NESTE_LADO
+  cand: RESULTADO: 14/14 ok · 49 s []
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+praga_alvo_unit_test
+  base: praga_alvo_unit_test AUSENTE_NESTE_LADO
+  cand: RESULTADO 21/21
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+producao_fluxo_test
+  base: RESULTADO: OK 66/66
+  cand: RESULTADO: OK 67/67
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+producao_unit_test
+  base: RESULTADO: OK 121/121
+  cand: RESULTADO: OK 123/123
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+reserva_duplo_clique_test
+  base: reserva_duplo_clique_test AUSENTE_NESTE_LADO
+  cand: RESULTADO: OK 2/2
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+solo_ag02_test
+  base: solo_ag02_test AUSENTE_NESTE_LADO
+  cand: RESULTADO: OK 32/32
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+solo_os_test
+  base: solo_os_test AUSENTE_NESTE_LADO
+  cand: RESULTADO: OK 18/18
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+solo_rev_test
+  base: solo_rev_test AUSENTE_NESTE_LADO
+  cand: RESULTADO: OK 22/22
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+solo_saf_test
+  base: solo_saf_test AUSENTE_NESTE_LADO
+  cand: RESULTADO: OK 36/36
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+solo_unit_test
+  base: solo_unit_test AUSENTE_NESTE_LADO
+  cand: RESULTADO: OK 126/126
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+tabelas_cad_irr_unit
+  base: tabelas_cad_irr_unit AUSENTE_NESTE_LADO
+  cand: RESULTADO: 49/49 ok
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+tabelas_cad_test
+  base: tabelas_cad_test AUSENTE_NESTE_LADO
+  cand(pós-correção): RESULTADO: 178/178 ok
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+tabelas_est_test
+  base: RESULTADO: 34/34 ok
+  cand: RESULTADO: 34/34 ok
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+tabelas_irr_test
+  base: tabelas_irr_test AUSENTE_NESTE_LADO
+  cand(pós-correção): RESULTADO: 106/106 ok
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+tabelas_os_test
+  base: RESULTADO: 38/38 ok
+  cand: RESULTADO: 38/38 ok
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+tabelas_saf_test
+  base: RESULTADO: 24/24 ok
+  cand: RESULTADO: 24/24 ok
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]
+usar_os_unit_test
+  base: usar_os_unit_test AUSENTE_NESTE_LADO
+  cand: RESULTADO 24/24
+  falhas cand: []
+  falhas base: None
+  novas: [] [SÓ CAND]
+varredura
+  base: RESULTADO: 142/142 páginas sem erro
+  cand(pós-correção): RESULTADO: 145/145 páginas sem erro
+  falhas cand: []
+  falhas base: []
+  novas: [] [IGUAL]

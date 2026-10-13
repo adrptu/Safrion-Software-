@@ -21,7 +21,7 @@ try:
     for k,val in [('conj','Trator 05 + Pulverizador 2'),('modo','Informado'),('rend','10'),('maq','100'),('pess','1'),('fonte','Medição local'),('vig','2027-06-30')]: t.fset(k,val)
     t.btn('Salvar'); time.sleep(.2)
     t.chk('Cadastrar rendimento sem mexer em Operação salva em Pulverização',
-          op=='Pulverização' and not t.isopen() and 'Pulverização rende 10,00 ha/h' in t.toast() and 'Pulverização Tratos culturais · 2 conjuntos' in (t.rowtxt(0,'Pulverização') or ''),
+          op=='Pulverização' and not t.isopen() and 'Pulverização rende 10,00 ha/h' in t.toast() and 'Pulverização 2 conjuntos Tratos culturais' in (t.rowtxt(0,'Pulverização') or ''),   # TABELAS-FOCO (06/10/2026): Processo em coluna própria
           [op,t.alerts(),t.toast(),t.rowtxt(0,'Pulverização')])
     # defeito 6 · selo resolvido em verde
     t.openrow(0,'Derriçadeiras'); t.fset('fonte','Medição local'); t.btn('Salvar'); time.sleep(.2)

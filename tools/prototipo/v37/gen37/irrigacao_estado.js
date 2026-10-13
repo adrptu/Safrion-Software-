@@ -11,12 +11,16 @@ function irrInicial() { const s = irrClone(IRR0); irrGerar(s); return s; }
 function irrGet() {
   let t = null; try { t = localStorage.getItem(IRR_KEY); } catch (e) { t = null; }
   if (t) { let o = (t === IRR_RAW && IRR_OBJ) ? IRR_OBJ : null;
-    if (!o) { try { const p = JSON.parse(t); if (p && p.v === IRR0.v) o = p; } catch (e) {} }
+    if (!o) { try { const p = JSON.parse(t); if (p && p.v === IRR0.v) { o = p; o.capt = irrClone(IRR0.capt); } } catch (e) {} }   // outorga: vale sempre a do cadastro (CTL-5)
     if (o && irrOrfa(o)) { irrReset(); o = null; }
-    if (o) { IRR_RAW = t; IRR_OBJ = o; return o; } }
+    if (o) { IRR_RAW = t; IRR_OBJ = o; return irrEqVaz(o); } }
   if (IRR_MEM && irrOrfa(IRR_MEM)) IRR_MEM = null;
-  if (!IRR_MEM) IRR_MEM = irrInicial(); return IRR_MEM;
+  if (!IRR_MEM) IRR_MEM = irrInicial(); return irrEqVaz(IRR_MEM);
 }
+// vazão do setor = a do equipamento (x.eq, cadastro CD-03): com ficha do pivô registrada, vale a vazão da ficha (fpvFicha, ficha_pivo.py),
+// a mesma do cadastro; a duração e a trava de outorga usam este valor (revisão de 10/10, A2: uma fonte também durante o uso)
+function irrEqVaz(o) { if (typeof fpvFicha !== 'function' || !o || !o.setores) return o;
+  Object.keys(o.setores).forEach(k => { const x = o.setores[k]; const f = x.eq ? fpvFicha(x.eq) : null; if (f && f.vazao_ls > 0) x.vazao = f.vazao_ls; }); return o; }
 function irrSave(s) { s.cenVisto = Math.max(s.cenVisto || 0, irrCenRev()); IRR_MEM = s; try { const t = JSON.stringify(s); localStorage.setItem(IRR_KEY, t); IRR_RAW = t; IRR_OBJ = s; } catch (e) {} }
 function irrReset() { IRR_MEM = null; IRR_RAW = null; IRR_OBJ = null; try { localStorage.removeItem(IRR_KEY); } catch (e) {} }
 // mudança atômica: aplica fn numa cópia, grava e devolve a mensagem; com erro nada é gravado
@@ -28,7 +32,7 @@ function irrMudar(self, fn) {
 }
 function irrOuvir(self) {
   if (self.__irrOuvindo) return; self.__irrOuvindo = true;
-  try { window.addEventListener('storage', (e) => { if (e.key === IRR_KEY || e.key === 'talhao-os-cenario-v1') self.setState({ irrrev: Date.now() }); }); } catch (e) {}
+  try { window.addEventListener('storage', (e) => { if (e.key === IRR_KEY || e.key === 'talhao-os-cenario-v1' || e.key === 'talhao-os-ficha-pivo-v1') self.setState({ irrrev: Date.now() }); }); } catch (e) {}
 }
 // cenário da O.S. (cenario.js): lido uma vez por versão gravada (o texto do localStorage serve de chave do cache)
 let IRR_CRAW = null, IRR_COBJ = null;
@@ -173,29 +177,66 @@ function irrOv(a1, b1, a2, b2) { return a1 < b2 && a2 < b1; }
 function irrPonta(s, a, b) { const P = s.ponta; let ini = null, fim = null;
   for (let k = irrDiaN(a); k <= irrDiaN(b); k++) { const pa = k * 1440 + P[0], pb = k * 1440 + P[1]; if (irrOv(a, b, pa, pb)) { const x = Math.max(a, pa), y = Math.min(b, pb); if (ini === null) { ini = x; fim = y; } } }
   if (ini === null) return ''; const tot = (fim - ini) >= (P[1] - P[0]); return (tot ? 'Ponta' : 'Ponta parcial') + ' (' + irrN(ini % 1440 / 60, 0) + '–' + irrN((fim % 1440 || 1440) / 60, 0) + ' h)'; }
-// bloqueios de uma janela: bomba ocupada, parada do PCM, outorga vencida, vazão outorgada (instantânea e do dia)
+// ---------- outorga da captação (fonte única: o cadastro, via dados_lagoa_fonte.captacao; CTL-5 · RL-E4) ----------
+// volume do dia autorizado (m³) = vazão (L/s) × horas por dia × 3,6: uma conta só para a trava e para as telas
+function irrVolOut(o) { return o ? o.ls * o.h * 3.6 : 0; }
+function irrCapDia(cp) { return irrVolOut(cp); }
+function irrOutC(st) { return { 'Vigente': 'green', 'Vence em 90 dias': 'yellow', 'Em renovação': 'yellow', 'Vencida': 'red', 'Sem outorga': 'red' }[st] || 'gray'; }
+function irrBrIso(iso) { const a = String(iso || '').split('-'); return a.length === 3 ? a[2] + '/' + a[1] + '/' + a[0] : ''; }
+// outorgas da captação (cadastro); captação sem a lista (Santa Rita, demonstrativa) vale como uma outorga só
+function irrOuts(cp) { return !cp ? [] : (cp.outs || [{ num: cp.outorga, ls: cp.ls, h: cp.h, venc: cp.venc || '', renov: cp.st === 'Em renovação' }]); }
+// vigência na DATA DO DIA k (revisão do CTL-5, S3-2): vale a outorga com vencimento ≥ o dia, ou em renovação; dela saem a vazão e o volume do dia
+function irrOutDia(cp, k) { const d = irrIso(k); const vig = irrOuts(cp).filter(o => o.ls > 0 && o.h > 0 && (o.renov || !o.venc || o.venc >= d));
+  return { ls: vig.reduce((q, o) => q + o.ls, 0), vol: vig.reduce((q, o) => q + irrVolOut(o), 0), vig }; }
+// sem outorga vigente no dia k: o texto do bloqueio (com o gestor)
+function irrOutSemT(cp, k) { const os = irrOuts(cp).filter(o => o.ls > 0 && o.h > 0); if (!os.length || !cp.outorga || cp.outorga === '—') return 'Sem outorga de irrigação no cadastro';
+  const d = irrIso(k); const vs = os.map(o => o.venc).filter(v => v && v < d).sort(); return 'Outorga vencida' + (vs.length ? ' em ' + irrBrIso(vs[vs.length - 1]) : '') + ' · ' + cp.nome; }
+// vencimento na tela (IR-02, IR-04): com várias outorgas na soma, diz qual vence e quanto sai (não sugere que a captação inteira acaba)
+function irrOutVenc(s, cp) { if (!cp || !String(cp.venc || '').split('-')[2]) return 'sem vencimento no cadastro';
+  if (cp.venc < s.hoje) return 'venceu em ' + irrBrIso(cp.venc);
+  const vig = irrOuts(cp).filter(o => o.ls > 0 && o.h > 0 && (o.renov || !o.venc || o.venc >= s.hoje));
+  if (vig.length < 2) return 'até ' + irrBrIso(cp.venc);
+  const pri = vig.filter(o => o.venc === cp.venc); return pri.map(o => o.num).join(' + ') + ' vence em ' + irrBrIso(cp.venc) + ' (' + irrN(pri.reduce((q, o) => q + o.ls, 0)) + ' de ' + irrN(cp.ls) + ' L/s)'; }
+// dias com sobreposição positiva com a janela [a, b) (a que termina à meia-noite não entra no dia seguinte)
+function irrDiasJan(a, b) { const out = []; for (let k = irrDiaN(a); k <= irrDiaN(b); k++) if (Math.min(b, k * 1440 + 1440) > Math.max(a, k * 1440)) out.push(k); return out; }
+// uso da captação no dia k (IR-02 e IR-04): volume comprometido, pico de vazão e % do volume outorgado do dia (0 % sem outorga, nunca ÷ 0)
+function irrUsoDia(s, cid, k) { const cp = s.capt[cid]; const ws = irrComprometidas(s, null).filter(w => w.capt === cid); const d0 = k * 1440, d1 = d0 + 1440; let vol = 0, pico = 0;
+  ws.forEach(w => { const a = Math.max(d0, w.ini), b = Math.min(d1, w.fim); if (b > a) vol += w.ls * (b - a) * 0.06; });
+  ws.filter(w => w.fim > d0 && w.ini < d1).forEach(w => { const t = Math.max(w.ini, d0); const q = ws.filter(z => z.ini <= t && z.fim > t).reduce((a, z) => a + z.ls, 0); if (q > pico) pico = q; });
+  const cap = irrOutDia(cp, k).vol; return { vol, pico, cap, pct: cap > 0 ? vol / cap * 100 : 0 }; }
+// bloqueios de uma janela: bomba ocupada, parada do PCM, outorga vencida, vazão outorgada (instantânea e do dia), na data de cada dia da janela
 function irrBloqJanela(s, x, a, b, excl, proprias) {
   const F = s.faz[x.faz]; const out = []; const occ = irrComprometidas(s, excl).concat(proprias || []);
   occ.filter(w => w.bomba === x.bomba && irrOv(a, b, w.ini, w.fim)).forEach(w => out.push({ k: 'bomba', c: 'red', t: 'Conflito · ' + (w.os === excl ? 'passadas sobrepostas' : w.os + ' na ' + x.bnome), h: irrJan(w.ini, w.fim), dono: F.pcp, os: w.os }));
   s.paradas.filter(z => z.bomba === x.bomba && irrOv(a, b, z.ini, z.fim)).forEach(z => out.push({ k: 'parada', c: 'red', t: 'Conflito · ' + z.txt, h: irrHm(z.ini) + '–' + irrHm(z.fim) + (irrDiaN(z.ini) !== irrDiaN(z.fim) ? ' (' + irrDdmm(irrDiaN(z.fim)) + ')' : ''), dono: z.dono || F.pcm, ref: z.ref }));
   const cp = s.capt[x.capt];
-  if (cp) {
-    if (cp.st === 'Vencida') out.push({ k: 'outorga', c: 'red', t: 'Outorga vencida · ' + cp.nome, dono: F.gestor });
+  if (cp) { const dias = irrDiasJan(a, b);
+    const sem = dias.find(k => !(irrOutDia(cp, k).ls > 0));
+    if (sem !== undefined) { out.push({ k: 'outorga', c: 'red', t: irrOutSemT(cp, sem), dono: F.gestor }); return out; }   // sem outorga vigente no dia nada se capta: a vazão não entra
     const ws = occ.filter(w => w.capt === x.capt && w.bomba !== x.bomba);
-    const pts = [a].concat(ws.filter(w => w.ini > a && w.ini < b).map(w => w.ini)); let mx = 0;
-    pts.forEach(t => { const q = x.vazao + ws.filter(w => w.ini <= t && w.fim > t).reduce((q2, w) => q2 + w.ls, 0); if (q > mx) mx = q; });
-    if (mx > cp.ls + 1e-9) out.push({ k: 'vazao', c: 'red', t: 'Sem vazão outorgada · ' + irrN(mx) + ' de ' + irrN(cp.ls) + ' L/s', dono: F.gestor });
-    else { const lim = cp.ls * cp.h * 3.6; for (let k = irrDiaN(a); k <= irrDiaN(b); k++) { const d0 = k * 1440, d1 = d0 + 1440; let v = 0;
+    const pts = [a].concat(ws.filter(w => w.ini > a && w.ini < b).map(w => w.ini)).concat(dias.slice(1).map(k => k * 1440)); let ex = null;   // a vazão do dia muda à meia-noite
+    pts.forEach(t => { const q = x.vazao + ws.filter(w => w.ini <= t && w.fim > t).reduce((q2, w) => q2 + w.ls, 0); const L = irrOutDia(cp, irrDiaN(t)).ls; if (q > L + 1e-9 && (!ex || q > ex.q)) ex = { q, L }; });
+    if (ex) out.push({ k: 'vazao', c: 'red', t: 'Sem vazão outorgada · ' + irrN(ex.q) + ' de ' + irrN(ex.L) + ' L/s', dono: F.gestor });
+    else { for (const k of dias) { const d0 = k * 1440, d1 = d0 + 1440; let v = 0; const lim = irrOutDia(cp, k).vol;
         ws.concat([{ ini: a, fim: b, ls: x.vazao }]).forEach(w => { const o0 = Math.max(d0, w.ini), o1 = Math.min(d1, w.fim); if (o1 > o0) v += w.ls * (o1 - o0) * 0.06; });
         if (v > lim + 1e-6) { out.push({ k: 'vazao', c: 'red', t: 'Sem vazão outorgada · ' + irrN(v) + ' de ' + irrN(lim) + ' m³ em ' + irrDdmm(k), dono: F.gestor }); break; } } }
   }
   return out;
 }
+// aviso da outorga: só quando a janela passa do vencimento de uma outorga da soma de hoje (sai da soma) ou usa outorga em renovação
+function irrOutAviso(s, cp, wins) { if (!cp || !wins.length) return [];
+  const kf = Math.max.apply(null, wins.map(w => { const d = irrDiasJan(w[0], w[1]); return d.length ? d[d.length - 1] : irrDiaN(w[0]); })); const df = irrIso(kf); const out = [];
+  irrOuts(cp).filter(o => o.ls > 0 && o.h > 0 && o.venc && o.venc < df && (o.renov || o.venc >= s.hoje)).forEach(o => {
+    if (o.renov) out.push('Outorga ' + o.num + ' em renovação (venceu em ' + irrBrIso(o.venc) + ')');
+    else { const L = irrOutDia(cp, kf).ls; if (L > 0) out.push('Outorga ' + o.num + ' vence em ' + irrBrIso(o.venc) + ' · depois, ' + irrN(L) + ' L/s'); } });
+  return out; }
 // prontidão da ordem: bloqueios (impedem a liberação) e avisos (não impedem)
 function irrChecar(s, o, ps) {
   ps = ps || o.passadas; const x = s.setores[o.setor]; const F = s.faz[x.faz]; const bloq = [], av = [];
   const pend = ps.filter(p => p.st === 'Programada' || p.st === 'Em execução');
   if (pend.some(p => p.ini === null || p.ini === undefined)) bloq.push({ k: 'jan', c: 'yellow', t: 'Janela a definir', dono: F.irrig });
+  // sem outorga vigente hoje e sem janela: quem resolve é o gestor (com janela, irrBloqJanela já trava por passada, na data de cada dia)
+  { const cp0 = s.capt[x.capt]; if (cp0 && !(irrOutDia(cp0, 0).ls > 0) && pend.some(p => p.ini === null || p.ini === undefined)) bloq.unshift({ k: 'outorga', c: 'red', t: irrOutSemT(cp0, 0), dono: F.gestor }); }
   const prop = [];
   pend.forEach(p => { if (p.ini === null || p.ini === undefined) return; const a = p.ini, b = irrFimP(o, p);
     irrBloqJanela(s, x, a, b, o.id, prop).forEach(z => bloq.push(z)); prop.push({ os: o.id, n: p.n, bomba: x.bomba, capt: x.capt, ls: x.vazao, ini: a, fim: b });
@@ -206,7 +247,7 @@ function irrChecar(s, o, ps) {
   const todos = ant.slice(-1).concat(ini).sort((p, q) => p - q);
   for (let i = 1; i < todos.length; i++) { const dh = (todos[i] - todos[i - 1]) / 60; if (dh < x.imin - 1e-9) { av.push({ k: 'int', t: 'Intervalo curto · ' + irrN(dh, 1) + ' h (mín. ' + irrN(x.imin) + ' h)' }); break; } }
   if (irrEst(s, x)) av.push({ k: 'est', t: 'Estimativa por ET' });
-  const cp = s.capt[x.capt]; if (cp && cp.st === 'Em renovação') av.push({ k: 'renov', t: 'Outorga em renovação' });
+  irrOutAviso(s, s.capt[x.capt], pend.filter(p => p.ini !== null && p.ini !== undefined).map(p => [p.ini, irrFimP(o, p)])).forEach(t => av.push({ k: 'renov', t }));   // aviso da outorga: só se a janela passa do vencimento
   // lâmina × necessidade (só aviso): acima do que o setor vai precisar até a última passada, ou setor abaixo do limiar de irrigação
   if (x.bal && !ps.some(p => p.st === 'Feita' || p.st === 'Parcial' || p.st === 'Em execução')) {
     const liq = ps.filter(p => p.st === 'Programada').reduce((q, p) => q + p.lam, 0) * (o.ef || x.efic) / 100; const d = irrDef(s, o.setor);

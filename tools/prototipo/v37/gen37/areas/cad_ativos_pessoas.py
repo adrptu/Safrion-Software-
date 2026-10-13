@@ -13,6 +13,7 @@ Dados: dados_cad (lido e copiado; Paula passa a caldeira da OS-0424, como em alo
 import json
 from engine import grid, MUTED
 import engine as E
+import ficha_pivo as FP   # ficha do pivô no detalhe do equipamento de irrigação (09/10/2026)
 import ui37
 from ui37 import shell37, HEIGHTS37
 import dados2 as D2
@@ -95,6 +96,32 @@ OPS=list(dict.fromkeys(c['op'] for c in D2.CONJ))
 OPHAB={'Pulverização':['Operar trator','Operar pulverizador'],'Plantio':['Operar trator','Operar plantadeira'],'Adubação a lanço':['Operar trator'],
        'Tratamento de sementes':[],'Colheita de grãos':['Operar colhedora'],'Colheita de café':[],'Poda':['Operar trator'],'Fertirrigação':['Irrigar']}
 SEM_IMPL='Sem implemento'
+# capacidade principal por classe (rótulo, unidade), a mesma de c3capn(): a coluna só aparece quando o filtro de Classe deixa uma grandeza
+CAPCOL={'Trator':('Potência','cv'),'Pulverizador':('Tanque útil','L'),'Plantadeira':('Linhas','linhas'),'Distribuidor':('Carga','kg'),
+        'Irrigação':('Vazão','m³/h'),'Armazenagem':('Capacidade','sc de 60 kg'),'Tratamento de sementes':('Capacidade','kg/h'),'Beneficiamento':('Capacidade','kg/h')}
+# TABR-CTX-01 (revisão do Codex, 10/10/2026): a coluna de capacidade muda de grandeza com o filtro (Classe no CD-03, Tanque/Silo no CD-06);
+# o filtro, a ordenação e o menu de filtro dela não podem sobrar de outra grandeza. Uma função para as duas telas (o CD-06 importa daqui).
+# Revisão do TABR-CTX-01 (10/10/2026): a coluna Fazenda da Irrigação (só com "Todas" no topo) usa a mesma função (TABR-CTX-02); e a coluna
+# presa do g2lib é refeita quando a coluna entra ou sai (a 390 px a última coluna caía para a linha de baixo).
+CAPCOL_JS=r'''
+// coluna que muda de grandeza com o filtro (tup = rótulo|unidade; '' sem coluna): filtro, ordenação e menu de filtro dela valem para uma tupla.
+// Mudou a tupla ou a coluna saiu: só eles saem (busca, outros filtros, menu de outra coluna e rascunho do cadastro ficam); mesma tupla, ficam.
+// Roda no PREVALS, antes de g2vals ler o estado (o mesmo desenho do talhão fora do recorte na O.S.). Serve também à coluna que só entra e sai
+// (Fazenda da Irrigação: tup = 'Fazenda' ou '').
+function capColDeps(self,gid,k,tup){ const m=self.__capTup=self.__capTup||{}; const ant=m[gid]; m[gid]=tup;
+  // a coluna entrou ou saiu: a 1ª coluna presa do g2lib (data-c0, --g2cols) foi feita com o nº anterior de colunas e o motor só a refaz quando a
+  // largura muda (a 390 px a última coluna caía para a linha de baixo). Desfeita aqui, antes do novo desenho, o motor a refaz com o nº novo de
+  // cabeçalhos (o desenho muda a lista de cabeçalhos e o observador do g2lib roda). Só quando o nº de colunas muda: a troca de grandeza não refaz.
+  if(ant!==undefined&&!ant!==!tup&&typeof document!=='undefined') document.querySelectorAll('.g2rola[data-c0]').forEach(r=>{ r.removeAttribute('data-c0'); r.style.removeProperty('--g2cols'); });
+  if(tup&&(ant===undefined||ant===tup)) return;
+  const st=g2st(self,gid), f=st.f||{}, p={}; if(k in f){ p.f=Object.assign({},f); delete p.f[k]; } if(st.so&&st.so.k===k) p.so=null; if(st.fmc===k) Object.assign(p,{fmc:null,fmd:null,fmq:''});
+  if(!Object.keys(p).length) return; const all=Object.assign({},self.state.g2||{}); all[gid]=Object.assign({},st,p); self.state.g2=all;
+  // foco: o × que a pessoa usou (ex.: Classe) pode sumir junto com o chip da capacidade; sem foco, ele vai ao chip vizinho ou à busca da grade
+  if(!p.f||typeof document==='undefined') return; const a=document.activeElement, cx=a&&a.closest?a.closest('.g2caixa'):null;
+  if(!cx||a.getAttribute('aria-label')!=='Remover filtro') return; const RF='button[aria-label="Remover filtro"]', i=[...cx.querySelectorAll(RF)].indexOf(a);
+  setTimeout(()=>{ const ae=document.activeElement; if(ae&&ae!==document.body) return; const xs=[...cx.querySelectorAll(RF)];
+    const b=xs[Math.min(i,xs.length-1)]||cx.querySelector('input[aria-label="Buscar nesta tabela"]'); if(b) b.focus(); },0); }
+'''
 # subtítulo do formulário: no cadastro a classe vem primeiro; na edição ela fica fixa
 SUB_NEW='Escolha a classe para abrir a capacidade dela.'
 SUB_EDIT='Altere capacidade, custo por hora e calibração; inative em vez de excluir, o histórico continua.'
@@ -135,8 +162,12 @@ def _linhas_ativo():
 
 def cd03():
     fname='CD-03.dc.html'; E._reset_screen(fname)
-    g=grid([dict(k='nome',l='Máquina ou instalação',w=236),dict(k='classe',l='Classe',w=150),dict(k='cap',l='Capacidade',w=190),
-            dict(k='custo_h',l='Custo R$/h da máquina',t='num',a='r'),dict(k='ncj',l='Conjuntos',t='num',a='r'),dict(k='est',l='Situação',w=290)],
+    # uma variável por coluna (TABELAS-FOCO, 04/10/2026): classe, "Custo R$/h" (05/10/2026), conjuntos e próxima calibração em colunas próprias.
+    # Revisão TABR (09/10): a Situação logo depois da máquina (A1); modelo, largura de trabalho, espaçamento e plataforma no painel. A capacidade
+    # principal muda de grandeza com a classe (potência em cv, tanque em L, vazão em m³/h…), então não fica numa coluna só (A4: ordenava cv
+    # com L): a coluna entra quando o filtro de Classe deixa uma só grandeza, com o rótulo e a unidade dela, e ordena pelo número
+    g=grid([dict(k='nome',l='Máquina ou instalação',w=190),dict(k='est',l='Situação',w=230),dict(k='classe',l='Classe',w=150),
+            dict(k='custo_h',l='R$/h',t='num',a='r',d=2),dict(k='ncj',l='Conjuntos',t='num',a='r'),dict(k='calv',l='Próxima calibração',t='date')],
         _linhas_ativo(),gid='g_atv',total=False,frame=False,
         tools=qf_chips('g_atv')+prim('g_atv_new','Cadastrar máquina ou instalação'),
         edit=dict(m='form',title='Máquina',newTitle='Cadastrar máquina ou instalação',
@@ -156,11 +187,12 @@ def cd03():
     acoes_form('g_atv'); acoes_form('g_cj'); cadx_css()
     p1=(barra(f'<span style="font-size: 12px; font-weight: 600; color: {MUTED};">{H("c3_ncj")}</span>',prim('g_cj_new','Montar conjunto'))+cartoes('c3_cjs','Conjuntos'))
     corpo=bloco_cad(abas('c3t',['Máquinas e instalações','Conjuntos'],'Cadastros de máquinas'),pane('c3t',0,faixa('c3_fx0')+g)+pane('c3t',1,p1),'Máquinas, instalações e setores')
-    dados=dict(cod=COD,impl=IMPL,calib=CALIB_CLS,sem=SEM_IMPL,ophab=OPHAB,subnew=SUB_NEW,
+    dados=dict(cod=COD,impl=IMPL,calib=CALIB_CLS,sem=SEM_IMPL,ophab=OPHAB,subnew=SUB_NEW,capcol=CAPCOL,
                cond={k:dict(t=c['t'],m=c['om']+' · '+c['det'],ordens=c['ordens'],om=c['om']) for k,c in DC.CONDICAO.items()},
                pes=[dict(v,id=pid) for pid,v in pessoas()])
+    EXTRA_FP=FP.painel()   # gaveta "Ficha do pivô" (o mesmo componente do IR-01)
     import cenario   # PCM simplificado S3: condição, responsável técnico e leitura do cenário único (c.man)
-    js({},cenario.js_prefixo()+ALOC_JS+'const C3='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
+    js({},cenario.js_prefixo()+ALOC_JS+CAPCOL_JS+FP.store_js()+FP.js('CD')+'const C3='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
 function c3v(V,k){ return V[k+'_'+(C3.cod[V.classe]||'')]; }
 function c3n(V,k){ const x=c3v(V,k); return isnum(x)?Number(x):null; }
 function c3larg(V){ const c=V.classe; if(c==='Plantadeira'){ const a=c3n(V,'linhas'), b=c3n(V,'esp'); return (a!==null&&b!==null)?Math.round(a*b*100)/100:null; }
@@ -173,6 +205,11 @@ function c3cap(V){ const n=k=>c3n(V,k), f=(x,u)=>x===null?'—':nfa(x)+' '+u;
     case 'Colhedora': return 'plataforma '+f(n('plat'),'m'); case 'Implemento': return f(n('larg'),'m');
     case 'Irrigação': return f(n('vazao'),'m³/h'); case 'Armazenagem': return f(n('capsc'),'sc de 60 kg');
     default: return f(n('kgh'),'kg/h'); } }
+// capacidade principal da classe (a largura de trabalho tem coluna própria): número para ordenar e texto com a unidade
+function c3capn(V){ const n=k=>c3n(V,k), f=(x,u)=>x===null?null:{n:x,t:nfa(x)+' '+u};
+  switch(V.classe){ case 'Trator': return f(n('pot'),'cv'); case 'Pulverizador': return f(n('tanque'),'L'); case 'Plantadeira': return f(n('linhas'),'linhas');
+    case 'Distribuidor': return f(n('carga'),'kg'); case 'Irrigação': return f(n('vazao'),'m³/h'); case 'Armazenagem': return f(n('capsc'),'sc de 60 kg');
+    case 'Tratamento de sementes': case 'Beneficiamento': return f(n('kgh'),'kg/h'); default: return null; } }
 /* condição única (PCM simplificado S3, F107): lida de c.man do cenário, a mesma da Manutenção e da O.S.; o cadastro não a altera */
 function c3man(id){ try{ return ((cenGet().man||{}).ativos||{})[id]||null; }catch(e){ return null; } }
 function c3cond(r){ const V=r.v; if(V.sit==='Inativo') return {t:'Inativo',c:'gray',ok:false,curto:'inativo'}; const a=c3man(r.id); const x=C3.cond[r.id];
@@ -185,9 +222,9 @@ function c3cond(r){ const V=r.v; if(V.sit==='Inativo') return {t:'Inativo',c:'gr
 function c3calib(V){ if(V.exige!=='Sim') return {p:[{k:'mut',t:'não exige'}],s:'não exige',bad:false};
   if(!V.calib) return {p:[chipc('Aferir','yellow'),{k:'mut',t:'sem registro'}],s:'Aferir',bad:true};
   const venc=addd(V.calib,V.interv||0); const d=ddiff(HOJE,venc);
-  if(d<0) return {p:[chipc('Vencida em '+br(venc),'red')],s:'Vencida',bad:true};
-  if(d<=15) return {p:[chipc('Vence '+br(venc),'yellow')],s:'Vence',bad:false};
-  return {p:[chipc('Em dia até '+br(venc),'green')],s:'Em dia',bad:false}; }
+  if(d<0) return {p:[chipc('Vencida em '+br(venc),'red')],s:'Vencida',bad:true,venc:venc};
+  if(d<=15) return {p:[chipc('Vence '+br(venc),'yellow')],s:'Vence',bad:false,venc:venc};
+  return {p:[chipc('Em dia até '+br(venc),'green')],s:'Em dia',bad:false,venc:venc}; }
 // última leitura gravada do horímetro por máquina (atualizada a cada salvar; a trava compara com ela)
 const CONT0={}; function c3lei(r){ const c=c3v(r.v,'cont'); if(isnum(c)&&String(c)!=='') CONT0[r.id]=Number(c); }
 GR('g_atv').rows.forEach(c3lei);
@@ -210,24 +247,42 @@ function c3sit(r){ const V=r.v; const C=c3cond(r), K=c3calib(V);
   if(C.t==='Bloqueado') return {t:'Bloqueado',p:sitX('Bloqueado','red','Ver ordens afetadas','OS.dc.html'),res:'man'};
   if(K.s==='Vencida') return {t:'Calibração vencida',p:sitX('Calibração vencida','red','Registrar calibração'),res:'cal'};
   if(K.s==='Aferir') return {t:'Sem aferição',p:sitX('Sem aferição','yellow','Registrar aferição'),res:'cal'};
-  if(K.s==='Vence') return {t:'Apta',p:sitOk('Apta · calibrar até '+br(addd(V.calib,V.interv||0)))};
+  // calibração que vence em 15 dias: o chip diz isso (a cor da data não é o único sinal, revisão TABR A10); continua apta, fora do "A resolver"
+  if(K.s==='Vence') return {t:'Calibração a vencer',p:sitX('Calibração a vencer','yellow','Registrar calibração')};
   return {t:'Apta',p:sitOk('Apta')}; }
+// coluna da capacidade: só com o filtro de Classe numa grandeza (rótulo e unidade da classe); sem isso a grade não mistura grandezas
+function c3capCol(self){ const sp=GR('g_atv'); if(!sp.colsAll) sp.colsAll=sp.cols.slice(); const fc=((g2st(self,'g_atv').f||{}).classe)||[];
+  const ks=[...new Set(fc.map(c=>C3.capcol[c]?C3.capcol[c].join('|'):'').filter(Boolean))];
+  const ok=fc.length&&fc.every(c=>C3.capcol[c])&&ks.length===1; const cc=ok?{k:'capn',l:C3.capcol[fc[0]][0],t:'num',a:'r',un:C3.capcol[fc[0]][1],w:140}:null;
+  capColDeps(self,'g_atv','capn',cc?cc.l+'|'+cc.un:'');   // TABR-CTX-01: Potência cv → Vazão m³/h (ou sem coluna) tira o filtro e a ordem; kg/h ↔ kg/h fica
+  sp.cols=cc?sp.colsAll.slice(0,3).concat([cc],sp.colsAll.slice(3)):sp.colsAll; return sp.cols.length; }
 function c3usos(self){ const u={}; RW(self,'g_cj').forEach(r=>{ [r.v.maq,r.v.impl].forEach(n=>{ if(n&&n!==C3.sem) (u[n]=u[n]||[]).push(r); }); }); return u; }
 function c3temR(V){ return isnum(V.rend)&&String(V.rend)!==''; }
 // painel da máquina: os conjuntos que a usam (cada um abre o conjunto); painel do conjunto: rendimento e exclusão
 CAD_ACTS.g_atv=(self,r,fm)=>{ if(g2dirty(fm)) return []; const us=(c3usos(self)[r.v.nome]||[]);
-  return us.map((c,i)=>{ const o=c.v.maq===r.v.nome?(c.v.impl&&c.v.impl!==C3.sem?c.v.impl:''):c.v.maq;
-    return {t:(o?o+' · ':'')+(ml(c.v.ops).join(', ')||'conjunto')+' ›',h:i===us.length-1?(us.length>1?'Conjuntos que usam esta máquina.':'Conjunto que usa esta máquina.'):'',go:()=>{ g2set(self,'g_atv',{fm:null}); g2open(self,GR('g_cj'),c.id,null); }}; }); };
+  // equipamento do pivô de um setor da Irrigação: a ficha do pivô (capacidade) como sub-detalhe; sem ficha, registrá-la (revisão de 10/10, A4);
+  // fechar volta a este painel
+  const tf=FPV_EQ[r.id]?!!fpvFicha(r.id):null;
+  const fp=tf===null?[]:[{t:tf?'Ficha do pivô ›':'Registrar ficha do pivô ›',h:tf?'Capacidade do equipamento: vazão, pressão, tempo de volta e lâmina pelo percentímetro.':'Digite a capacidade como está na ficha do fabricante: vazão, pressão, tempo de volta e lâmina pelo percentímetro.',
+    go:()=>{ g2set(self,'g_atv',{fm:null}); fpvAbrir(self,r.id,{gid:'g_atv',rid:r.id},!tf); }}];
+  return fp.concat(us.map((c,i)=>{ const o=c.v.maq===r.v.nome?(c.v.impl&&c.v.impl!==C3.sem?c.v.impl:''):c.v.maq;
+    return {t:(o?o+' · ':'')+(ml(c.v.ops).join(', ')||'conjunto')+' ›',h:i===us.length-1?(us.length>1?'Conjuntos que usam esta máquina.':'Conjunto que usa esta máquina.'):'',go:()=>{ g2set(self,'g_atv',{fm:null}); g2open(self,GR('g_cj'),c.id,null); }}; })); };
 CAD_ACTS.g_cj=(self,r)=>[c3temR(r.v)?null:{t:'Cadastrar rendimento ›',h:'Sem rendimento o planejamento não calcula horas nem custo deste conjunto.',go:()=>{ location.href='CD-02.dc.html#aba=operacoes'; }},
   cadExcluir(self,'g_cj',r,'conjunto',r.nd?'tem rendimento em Culturas e operações; troque o conjunto lá antes':'')];
-function PREVALS(self,v){ cadActsIni(self); const atv=RW(self,'g_atv'); self._c3nomes=self._c3nomes||{}; const usos=c3usos(self);
+function PREVALS(self,v){ cadActsIni(self); fpvVals(self,v);
+  // CD-03.dc.html#ficha=<equipamento> (vindo da Irrigação) abre a ficha do pivô; fechar volta ao detalhe do equipamento
+  if(!self.__fpvHash){ self.__fpvHash=1; try{ const m=/[#&]ficha=([^&]+)/.exec(location.hash||''); const id=m?decodeURIComponent(m[1]):''; if(FPV_EQ[id]&&fpvFicha(id)) setTimeout(()=>fpvAbrir(self,id,{gid:'g_atv',rid:id}),0); }catch(e){} }
+  const atv=RW(self,'g_atv'); self._c3nomes=self._c3nomes||{}; const usos=c3usos(self); v.c3_ncol=c3capCol(self);
   atv.forEach(r=>{ const V=r.v; self._c3nomes[r.id]=V.nome; const C=c3cond(r);
-    r.p.nome=[{k:'b',t:V.nome||''}].concat(V.modelo?[{k:'mut',t:V.modelo}]:[]); r.s.nome=(V.nome||'')+' '+(V.modelo||'');
+    // com ficha do pivô, a vazão do equipamento é a da ficha (uma fonte com a Irrigação; revisão de 10/10, A2)
+    const fv=FPV_EQ[r.id]?fpvFicha(r.id):null; if(fv) V.vazao_ir=fpvM3(fv.vazao_ls);
+    r.p.nome=[{k:'b',t:V.nome||''}]; r.s.nome=V.nome||''; r.p.modelo=[V.modelo?{k:'txt',t:V.modelo}:{k:'mut',t:'—'}]; r.s.modelo=V.modelo||'';
     r.p.classe=[{k:'txt',t:V.classe||'—'}]; r.s.classe=V.classe||'';
-    r.p.cap=[{k:'txt',t:c3cap(V)}]; r.s.cap=c3cap(V);
+    const CP=c3capn(V); V.capn=CP?CP.n:''; r.p.capn=[CP?{k:'txt',t:nfa(CP.n)}:{k:'mut',t:'—'}]; r.s.capn=CP?nfa(CP.n):'';   /* a coluna põe a unidade da classe */
+    const K=c3calib(V); V.calv=K.venc||''; r.p.calv=[K.venc?(K.s==='Em dia'?{k:'txt',t:br(K.venc)}:{k:'cn',t:br(K.venc),c:K.s==='Vencida'?'red':'yellow'}):{k:'mut',t:'—'}]; r.s.calv=K.venc?br(K.venc):'';
     V.cond_t=C.m?C.t+' · '+C.m:C.t; const am=c3man(r.id); if(am){ V.rt=am.rt||'Otávio'; const cd=C3.cod[V.classe]; if(cd&&am.leit) V['cont_'+cd]=am.leit.val; }
     r.o=(C.x?[{t:'Ver ordens afetadas · '+C.x.ordens.join(' e '),h:'OS.dc.html'}].concat(C.x.om?[{t:'Abrir '+C.x.om+' na Manutenção',h:'MA.dc.html#om='+C.x.om}]:[]):[]).concat(am?[{t:'Abrir '+V.nome+' na Manutenção',h:'MA.dc.html#ativo='+r.id}]:[]);
-    r.p.custo_h=isnum(V.custo_h)&&String(V.custo_h)!==''?[{k:'txt',t:'R$ '+nf(V.custo_h,2)+'/h'}]:[{k:'mut',t:'—'}];
+    const ch=isnum(V.custo_h)&&String(V.custo_h)!==''; r.p.custo_h=ch?[{k:'txt',t:nf(V.custo_h,2)}]:[{k:'mut',t:'—'}]; r.s.custo_h=ch?nf(V.custo_h,2):'';   // a coluna põe "R$ …/h"
     const n=(usos[V.nome]||[]).length; V.ncj=n; r.p.ncj=[{k:(n?'txt':'mut'),t:n?String(n):'—'}]; r.s.ncj=n?String(n):'';
     const S=c3sit(r); r.p.est=S.p; r.s.est=S.t; });
   cadQf(self,v,'g_atv','c3qf',[{k:'res',t:'A resolver',f:r=>!!c3sit(r).res},{k:'inat',t:'Inativas',f:r=>r.v.sit==='Inativo',oz:true}]);
@@ -264,6 +319,12 @@ function EXTRAVALS(self,v){
       g2set(self,'g_atv',{fm:Object.assign({},cur,{draft:d,errs:er,warn:false})}); }; }
   if(F&&F.open&&F.edit&&(g2st(self,'g_atv').fm||{}).isNew) F.sub=C3.subnew;
   selFiel(v.g_atv_F); selFiel(v.g_cj_F);
+  // vazão do pivô (equipamento de um setor da Irrigação): só leitura aqui; muda-se na ficha do pivô, que o cadastro e a Irrigação leem
+  // (revisão de 10/10, A2: uma fonte também durante o uso; sem ficha, vale a do setor até registrar a ficha)
+  if(F&&F.open&&F.fields){ const fm=g2st(self,'g_atv').fm; const pv=fm&&fm.rid&&FPV_EQ[fm.rid]; const fv=pv?fpvFicha(fm.rid):null; const f=F.fields.find(x=>x.fid==='fx_g_atv_vazao_ir');
+    if(f&&pv){ f.dis=true; if(fv) f.v=String(fpvM3(fv.vazao_ls)); f.ist=f.ist.replace('background:#FFFFFF','background:#F4F6F3'); f.set=()=>{}; f.hasHelp=true;
+      f.help=fv?('Vem da ficha do pivô ('+fpvNat(fv.vazao_ls)+' L/s): corrija na Ficha do pivô; o cadastro e a Irrigação usam a mesma vazão.')
+        :('Vazão do setor '+pv.setor+' na Irrigação ('+fpvNat(pv.vaz)+' L/s). Para mudar, registre a ficha do pivô: o cadastro e a Irrigação passam a usá-la.'); } }
   self.g2live=(gid,k,d)=>{ const n=x=>{ const y=g2num(d[x]); return isNaN(y)?null:y; };
     if(gid==='g_atv'&&k==='larg_pl'){ const a=n('linhas_pl'), b=n('esp_pl'); return (a!==null&&b!==null)?nfa(Math.round(a*b*100)/100):'—'; }
     if(gid==='g_cj'){ const atv=RW(self,'g_atv'); const M=atv.find(r=>r.v.nome===d.maq); const I=(d.impl&&d.impl!==C3.sem)?atv.find(r=>r.v.nome===d.impl):null;
@@ -290,8 +351,11 @@ function EXTRAVALS(self,v){
         +(X.bad.length?' · indisponível: '+X.bad.map(y=>y.x.v.nome+' '+y.c.curto).join(', '):' · disponível')+(isNew?'. Cadastre o rendimento em Culturas e operações.':'.')}); } }; }
 ''')
     HEIGHTS37[fname]=1000   # sem rolagem de página: só a tabela ou os cartões da aba rolam
+    E.EXTRA.append(EXTRA_FP)
     shell37('CD-03','Máquinas, instalações e setores',corpo,fname=fname,status=None,primary_html=None,search=False)
     estado_cab(fname,'Máquinas, instalações e setores','c3e')
+    from areas.cadastros import ncol_dinamico
+    ncol_dinamico(fname,['c3_ncol'])   # a coluna da capacidade entra e sai com o filtro de Classe
 
 # ================= CD-04 · Pessoas e equipes =================
 QF=[('ope','Operadores'),('cal','Caldeiros'),('irr','Irrigantes'),('alm','Almoxarifes'),('agr','Agrônomos'),('nao','Não alocáveis')]
@@ -307,9 +371,16 @@ def cd04():
                num('custo','Custo-hora com encargos','R$/h',min=0,help='Salário e encargos por hora trabalhada; visível só para quem tem permissão de custos.'),
                sel('acesso','Acesso ao app',['Com login','Sem login','Acesso solicitado','Solicitar acesso ao app'],**{'def':'Sem login'}),
                sel('sit','Situação',['Ativa','Inativa'],**{'def':'Ativa'})])
-    # pessoa numa linha: nome e equipe · habilidades · vínculo · custo-hora · situação (alocável em O.S. ou o que falta)
-    gp=grid([dict(k='nome',l='Pessoa · equipe',w=300),dict(k='habs',l='Habilidades',w=210),dict(k='vig',l='Vínculo',w=170),
-             dict(k='custo',l='Custo-hora',t='num',a='r'),dict(k='est',l='Situação',w=300)],
+    # pessoa numa linha, uma variável por coluna (TABELAS-FOCO, 04/10/2026): equipe, habilidades (filtro por habilidade), vínculo, disponível até,
+    # "Custo R$/h", habilitação exigida e a validade que vence primeiro, calendário (o da equipe ou o próprio) e acesso ao app (a ficha de campo
+    # depende dele); situação (alocável em O.S. ou não)
+    # revisão TABR (09/10): a Situação logo depois da pessoa (A1), com o motivo e o próximo passo quando não alocável (A3); calendário e acesso
+    # ao app no painel da pessoa (campos do formulário)
+    # integração V56: com as equipes e pessoas do Beneficiamento e da Manutenção (Igor, Marta: "Beneficiamento e qualidade", "Autorizar rota e
+    # liberar ordem de processo") a grade passava 37 px da caixa a 1440 px; Equipe e Habilidades quebram linha um pouco antes e a grade cabe (A1)
+    gp=grid([dict(k='nome',l='Pessoa',w=140),dict(k='est',l='Situação',w=185),dict(k='equipe',l='Equipe',w=104),dict(k='habs',l='Habilidades',multi=True,w=136),
+             dict(k='vinc',l='Vínculo',w=100),dict(k='ate',l='Disponível até',t='date'),dict(k='custo',l='R$/h',t='num',a='r',d=2),dict(k='habx',l='Habilitação',multi=True),
+             dict(k='habv',l='Validade da habilitação',t='date')],
         [R(pid,v) for pid,v in pes],gid='g_pes',total=False,frame=False,
         tools=qf_chips('g_pes')+filtro_sel('c4fun','Função')+prim('g_pes_new','Cadastrar pessoa'),
         edit=dict(m='form',title='Pessoa',newTitle='Cadastrar pessoa',
@@ -331,19 +402,29 @@ function c4qf(k,V,A){ const h=ml(V.hab);
   if(k==='res') return (!A.ok&&!A.inat)||A.vence; return true; }
 function c4eqcal(self){ const o={}; RW(self,'g_eq').forEach(e=>{ o[e.v.nome]=e.v.cal; }); return o; }
 // situação da pessoa: um só cálculo para a linha, o filtro "A resolver", a faixa, o ponto da aba e o estado do cabeçalho
+// a habilitação e a validade têm colunas próprias; a Situação é só o estado (chip) e o próximo passo
+// não alocável: o chip diz a consequência e a dica diz o motivo; o verbo nomeia o que resolver (revisão TABR A3: o motivo tinha saído da linha)
+function c4passo(V,A){ const h=A.t.find(y=>y.s==='venc'||y.s==='pend'); if(h) return (h.s==='pend'?'Registrar ':'Renovar ')+h.x;
+  if(V.ate&&V.ate<HOJE) return 'Renovar contrato'; if(V.adm&&V.adm>HOJE) return 'Aguardar admissão em '+br(V.adm); return 'Regularizar'; }
 function c4sit(V){ const A=alocavel(V);
   if(A.inat) return {t:'Inativa',p:[chipc('Inativa','gray')]};
-  if(!A.ok) return {t:'Não alocável',p:[chipc('Não alocável em O.S.','red'),{k:'mut',t:A.m}],res:'nao'};
-  if(A.vence){ const y=A.t.find(x=>x.s==='vence'); return {t:'Vence em 30 dias',p:sitX(y.x+' vence '+br(y.d),'yellow','Renovar'),res:'ven'}; }
-  const ok=A.t.map(y=>y.x+' até '+br(y.d)); return {t:'Alocável',p:sitOk('Alocável'+(ok.length?' · '+ok.join(' · '):''))}; }
-function c4acesso(V){ const ac=V.acesso||'Sem login'; return ac==='Com login'?'':(ac==='Acesso solicitado'?'Acesso solicitado · simulado':'Sem acesso ao app'); }
+  if(!A.ok){ const m=A.m.charAt(0).toUpperCase()+A.m.slice(1); return {t:'Não alocável',p:[Object.assign(chipc('Não alocável em O.S.','red'),{dica:m}),{k:'b',t:c4passo(V,A)+' ›'}],res:'nao'}; }
+  if(A.vence) return {t:'Vence em 30 dias',p:sitX('Vence em 30 dias','yellow','Renovar'),res:'ven'};
+  return {t:'Alocável',p:sitOk('Alocável')}; }
+// validade que vale para alocar: a mais próxima entre as habilitações exigidas (pendente fica sem data)
+function c4val(A){ const ds=A.t.filter(y=>y.d).map(y=>y.d).sort(); return ds.length?ds[0]:''; }
 CAD_ACTS.g_eq=(self,r)=>[cadExcluir(self,'g_eq',r,'equipe',r.nd?'tem pessoas ativas; mude-as de equipe antes':'')];
 function PREVALS(self,v){ cadActsIni(self); const ps=RW(self,'g_pes'); const eqc=c4eqcal(self); self._c4eq=self._c4eq||{}; self._c4pes=self._c4pes||{};
-  ps.forEach(r=>{ const V=r.v; self._c4pes[r.id]=V.nome; const herd=!V.cal||V.cal==='Da equipe'; const ac=c4acesso(V);
-    r.p.nome=[{k:'b',t:V.nome||''},{k:'mut',t:(V.equipe||'—')+(herd?'':' · calendário próprio: '+V.cal)}].concat(ac?[{k:'mut',t:ac}]:[]); r.s.nome=V.nome||'';
-    r.p.habs=[{k:'txt',t:ml(V.hab).join(' · ')||'—'}]; r.s.habs=ml(V.hab).join(' · ');
-    r.p.vig=[{k:'txt',t:V.vinc||'—'}].concat(V.ate?[{k:'mut',t:'até '+br(V.ate)}]:[]); r.s.vig=V.vinc||'';
-    r.p.custo=[{k:'txt',t:isnum(V.custo)?'R$ '+nf(V.custo,2)+'/h':'—'}];
+  ps.forEach(r=>{ const V=r.v; self._c4pes[r.id]=V.nome;
+    r.p.nome=[{k:'b',t:V.nome||''}]; r.s.nome=V.nome||''; r.p.equipe=[{k:'txt',t:V.equipe||'—'}]; r.s.equipe=V.equipe||'';
+    const hs=ml(V.hab); r.m=Object.assign({},r.m||{},{habs:hs.map(h=>({id:h,l:h}))}); r.p.habs=[hs.length?{k:'txt',t:hs.join(', ')}:{k:'mut',t:'—'}]; r.s.habs=hs.join(', ');
+    r.p.vinc=[{k:'txt',t:V.vinc||'—'}]; r.s.vinc=V.vinc||'';
+    // disponível até: contrato encerrado em vermelho (o chip da Situação diz o motivo)
+    r.p.ate=[V.ate?(V.ate<HOJE?{k:'cn',t:br(V.ate),c:'red'}:{k:'txt',t:br(V.ate)}):{k:'mut',t:'—'}]; r.s.ate=V.ate?br(V.ate):'';
+    const cu=isnum(V.custo)&&String(V.custo)!==''; r.p.custo=[cu?{k:'txt',t:nf(V.custo,2)}:{k:'mut',t:'—'}]; r.s.custo=cu?nf(V.custo,2):'';   // a coluna põe "R$ …/h"
+    const A=alocavel(V); const ex=habExig(V.hab); r.m.habx=ex.map(x=>({id:x,l:x})); r.p.habx=[ex.length?{k:'txt',t:ex.join(', ')}:{k:'mut',t:'—'}]; r.s.habx=ex.join(', ');
+    const hv=c4val(A); V.habv=hv; const pend=A.t.some(y=>y.s==='pend'); const hvc=A.t.some(y=>y.s==='venc')?'red':(A.vence?'yellow':'');
+    r.p.habv=[hv?(hvc?{k:'cn',t:br(hv),c:hvc}:{k:'txt',t:br(hv)}):(pend?{k:'cn',t:'pendente',c:'red'}:{k:'mut',t:'—'})]; r.s.habv=hv?br(hv):(pend?'pendente':'');
     const S=c4sit(V); r.p.est=S.p; r.s.est=S.t; });
   // filtro do bloco: estado (Todas · A resolver) e função (lista), que valem juntos
   const fun=cadSel(self,v,'c4fun',[{v:'',t:'Todas'}].concat(C4.qf.filter(([k])=>k!=='nao').map(([k,t])=>({v:k,t:t+' ('+ps.filter(r=>c4qf(k,r.v,alocavel(r.v))).length+')'}))));

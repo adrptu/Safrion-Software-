@@ -1,0 +1,31 @@
+RESULTADO: OK 44/44
+OK  1 node ds_unit.js (dica, dicionário de estados, contraste AA)
+OK  2.1 hover: sem a camada cinza (rgba(21,32,26,.05)) nem escurecer controle claro (brightness .95)
+OK  2.2 hover: camada verde (#F2F8F4 sobre o branco) e borda #9DBFAA nos controles claros; primária só escurece
+OK  2.3 nenhuma regra de hover com fundo cinza no gerador (engine, ui37, areas)
+OK  2.4 separador: linha abaixo do título do bloco (sem linha dupla sobre conteúdo que começa com borda no topo), do painel lateral e .g2-cab
+OK  2.5 realce: animação de 0,52 s e, com menos movimento, realce estático sem animação
+OK  2.6 barra de carga no topo e dica (role=tooltip criada pelo g2lib) com estilo comum
+OK  2.7 indisponível com motivo (aria-disabled) com a aparência do desabilitado
+OK  2.8 motivo visível do indisponível: estilo comum .g2motivo (texto secundário #65736A, sem depender de ponteiro)
+OK  2.9 componente comum acao_motivo: o botão e, só quando indisponível, o motivo em texto ao lado (sc-if no mesmo estado)
+OK  3.1 montagem chama g2montou e cada desenho chama g2mudou (pontos centrais)
+OK  3.2 nenhuma tela chama g2flash direto (a função é chamada só pelo motor)
+OK  3.3 aviso visível com aria-live=off; o anúncio sai uma vez pela região viva (aria-live polite)
+OK  3.4 clique em aria-disabled="true" é recusado no g2lib (o comando não roda) e a recusa é anunciada
+OK  3.5 a recusa realça o motivo visível junto do controle (g2flash no .g2motivo do mesmo .g2ind)
+OK  3.6 selo do bloqueio do encerramento: nome por osEncSelo (osMerge) e dica por osSeloDica ← osEncBloq na lista, no Kanban e no painel
+OK  3.7 voltar pelo navegador (bfcache) termina a barra de carga; troca de etapa com o foco perdido foca o título do novo contexto
+OK  3.8 title igual ao rótulo visível sai enquanto o ponteiro está em cima (g2ttTira/g2ttVolta); o foco no título anuncia só o estado
+OK  4.1 fórmula da coluna calculada com os rótulos
+OK  4.2 termo sem rótulo não vira fórmula (não mostra chave interna)
+OK  4.3 rótulo do campo do formulário completa a fórmula
+OK  4.4 glossário: R$/ha, lâmina e NC ganham dica; ajuda própria fica; coluna comum fica sem dica
+OK  4.5 sc/ha diz a saca da cultura (DEC-0510-03)
+OK  4.6 R$/ha·mês e R$/ha·ano: dica com o período (a de R$/ha fica para R$/ha sem período); R$/mês sem dica
+OK  4.7 glossário da célula = GLOSSARIO sem as entradas só de rótulo ("^"), e o motor entrega G2_GLOSS ao g2lib
+OK  5.1 o teste de contraste mede os tokens do engine (realce, linha, camada do hover)
+OK  6 as 138 páginas do project/ carregam o CSS comum (realce, separador, dica)
+OK  6r as 7 páginas fora da conta são só redirecionamento para a tela MA (sem tela própria)
+OK  6.1 BO-02 (Conciliar pagamentos) e CF-05 (Pedir proposta empresarial): primária indisponível com o motivo visível (acao_motivo)
+RESULTADO: OK 29/29

@@ -1,0 +1,8 @@
+tabelas_cad_test rc=0 t=510s :: RESULTADO: 178/178 ok 
+tabelas_irr_test rc=0 t=278s :: RESULTADO: 106/106 ok 
+ctl5_test rc=0 t=136s :: RESULTADO 30/30 [] 
+ficha_pivo_test rc=0 t=120s :: RESULTADO: OK 21/21 
+comercial_fluxo_test rc=0 t=192s :: RESULTADO: OK 72/72 
+cadc_cd02_test rc=0 t=86s :: RESULTADO: OK 15/15 
+varredura rc=0 t=415s :: RESULTADO: 145/145 páginas sem erro 
+FIM 23:54:57

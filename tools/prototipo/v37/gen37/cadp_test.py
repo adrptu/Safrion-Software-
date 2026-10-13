@@ -49,7 +49,9 @@ try:
     al=AL(); chk('5 cliente: produtos e validade do limite obrigatórios', ABERTO() and 'Escolha ao menos uma opção.' in al and 'Informe a validade da análise de crédito.' in al, al)
     CAN('Mamão Formosa classe A'); SETK('limv','2027-03-31'); SETK('entrega','CD Salvador/BA · seg–sex 05–10h'); time.sleep(.2); BTN('Salvar'); time.sleep(.2)
     t=LIN('Hortifruti Serra Azul')
-    chk('6 cliente salvo com limite e contagem', not ABERTO() and 'Limite R$ 50.000 até 31/03/2027' in t and 'Clientes 8' in FILS(), f'{t} · {ST()}')
+    # TABELAS-FOCO (06/10/2026): limite, validade e situação do papel em colunas próprias (antes "Limite R$ 50.000 até 31/03/2027" numa célula só);
+    # revisão TABR (09/10/2026, A1): a situação do papel vem logo depois do parceiro
+    chk('6 cliente salvo com limite e contagem', not ABERTO() and t.startswith('Hortifruti Serra Azul Limite vigente') and 'R$ 50.000 31/03/2027' in t and 'Clientes 8' in FILS(), f'{t} · {ST()}')
     # ---- cadastrar parceiro de crédito ----
     FIL('Parceiros de crédito'); NOVO(); SETK('cnpj','52.119.804/0001-08'); SETK('nome','Cooperativa Cerrado Crédito'); CAN('Parceiro de crédito')
     lb=LABS()
@@ -80,7 +82,8 @@ try:
     chk('14 suspenso com motivo: aviso e situação na linha', not ABERTO() and 'Suspenso: Sementes Vale sai de cotação' in st and 'Suspenso' in t and 'Documentação fiscal vencida' in t, f'{st} · {t}')
     FIL('Fornecedores'); cs=cob('Sementes'); ABRE('Sementes Vale')
     sub=J("document.querySelector('aside[role=dialog]').innerText"); re_=J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Reativar parceiro')")
-    chk('15 suspenso sai da cobertura (Sementes: só 1) e abre com Reativar parceiro', cs and 'Só 1' in cs and 'Suspenso: fora de cotação' in sub and re_, f'{cs} · reativar={re_}')
+    # TABELAS-FOCO (06/10/2026): a cobertura mostra o número na coluna Fornecedores e o estado em chip ("Sem concorrência" no lugar de "Só 1")
+    chk('15 suspenso sai da cobertura (Sementes: só 1) e abre com Reativar parceiro', cs and cs.startswith('Sementes 1 ') and 'Sem concorrência' in cs and 'Suspenso: fora de cotação' in sub and re_, f'{cs} · reativar={re_}')
 finally:
     c.close(); srv.terminate()
 print('RESULTADO:', 'OK' if all(ok) else 'FALHOU', f'{sum(ok)}/{len(ok)}')

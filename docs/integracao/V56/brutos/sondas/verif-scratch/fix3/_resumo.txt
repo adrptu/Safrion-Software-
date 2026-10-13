@@ -1,0 +1,2 @@
+comercial_fluxo_test rc=0 :: RESULTADO: OK 72/72
+FIM

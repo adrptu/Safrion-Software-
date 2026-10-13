@@ -142,11 +142,11 @@ try:
         c.js("window.__toasts=[]; new MutationObserver(()=>{const t=document.querySelector('[role=status]'); if(t&&t.innerText.trim()) window.__toasts.push(t.innerText.trim());}).observe(document.body,{subtree:true,childList:true,characterData:true})")
         c.js(f"[...document.querySelectorAll('main .g2card')].find(b=>b.getAttribute('aria-label')==={json.dumps(nome)}).focus()")
         c.tecla('Enter','Enter',13,text='\r'); time.sleep(.5)
-        st2=c.js("(document.querySelector('.etp-itens [aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()"); toasts=c.js("[...new Set(window.__toasts)]")
+        st2=c.js("location.hash"); toasts=c.js("[...new Set(window.__toasts)]")   # NAV-1: o plano abre no detalhe (#plano=), sem etapas
         c.js("document.querySelector('[data-acoes] [data-acao=voltar]').click()"); time.sleep(.5)
         volta=c.js(f"(()=>{{const f=document.querySelector('[aria-label=\"Filtrar planos por cultura\"] button[aria-pressed=true]'); const cs=[...document.querySelectorAll('main .g2card')]; const a=cs.find(b=>b.getAttribute('aria-current')==='true'); return [f?{N}(f.innerText):'', a?a.getAttribute('aria-label'):'', a?getComputedStyle(a).borderTopColor:'', a?getComputedStyle(a,'::after').content:'', cs.length];}})()"); shot('PA_1440_volta_selecionado')
-        chk('11 PA teclado · Tab chega ao cartão com contorno de 2 px não cortado; pressionado escurece; Enter abre o plano uma vez (etapa 2); "‹ Biblioteca de planos" (área de ações) volta com filtro Soja, cartão aberto marcado (borda verde + "Último aberto")',
-            k<30 and ef[0] and ef[1]=='solid' and ef[2]=='2px' and ef[4] and ea[0]=='rgb(228, 243, 233)' and st2.startswith('2 ') and len([t for t in toasts if t.startswith('Plano aberto')])==1
+        chk('11 PA teclado · Tab chega ao cartão com contorno de 2 px não cortado; pressionado escurece; Enter abre o plano uma vez (detalhe #plano=); "‹ Biblioteca de planos" (área de ações) volta com filtro Soja, cartão aberto marcado (borda verde + "Último aberto")',
+            k<30 and ef[0] and ef[1]=='solid' and ef[2]=='2px' and ef[4] and ea[0]=='rgb(228, 243, 233)' and st2.startswith('#plano=') and len([t for t in toasts if t.startswith('Plano aberto')])==1
             and volta[0].startswith('Soja') and volta[1]==nome and volta[2]=='rgb(30, 122, 76)' and 'Último aberto' in volta[3] and volta[4]==2, [k,ef,ea,st2,toasts,volta])
         # 12 · toque (sem hover, 390 px): passar o "dedo" não pinta hover; rolar até o último cartão, um toque abre o plano;
         #      ‹ volta à biblioteca na mesma posição de rolagem, com o foco no cartão aberto
@@ -155,11 +155,11 @@ try:
         xy=centro(ULT); c.mouse(*xy); time.sleep(.15); eh=estilo(ULT,['background-color'])
         rol="[...document.querySelectorAll('main[data-scroll],.ml-tog+div')].map(e=>Math.round(e.scrollTop))"
         antes=c.js(rol); nome=c.js(f"{ULT}.getAttribute('aria-label')")
-        c.toque(*xy); st=c.js("(document.querySelector('.etp-atual')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()"); shot('PA_390_toque_aberto')
+        c.toque(*xy); st=c.js("location.hash"); shot('PA_390_toque_aberto')   # NAV-1: detalhe #plano=, sem etapas
         c.js("document.querySelector('[data-acoes] [data-acao=voltar]').click()"); time.sleep(.5)
         depois=c.js(rol); foco=c.js("document.activeElement&&document.activeElement.getAttribute('aria-label')"); shot('PA_390_volta_posicao')
         chk('12 toque sem hover (390 px) · sem pintura de hover; um toque no último cartão abre o plano; "‹ Biblioteca de planos" volta à mesma posição de rolagem com o foco no cartão aberto',
-            not hv and eh[0]=='rgb(255, 255, 255)' and st.startswith('Etapa 2 de 3') and max(antes)>200 and all(abs(a-b)<=2 for a,b in zip(antes,depois)) and foco==nome, [hv,eh,st,antes,depois,foco,nome])
+            not hv and eh[0]=='rgb(255, 255, 255)' and st.startswith('#plano=') and max(antes)>200 and all(abs(a-b)<=2 for a,b in zip(antes,depois)) and foco==nome, [hv,eh,st,antes,depois,foco,nome])
         # 13 · linha da grade com controle interno (CD-06): Enter/Espaço no expandir só expande/recolhe; Enter na linha abre o detalhe uma vez
         abre('CD-06',1440,900)
         CAR="document.querySelector('[role=row].g2ed .g2car')"
@@ -171,16 +171,16 @@ try:
         # 14 · uma ocorrência por família (hover/foco/pressionado) e conteúdo inerte sem cara de ação
         fam={}
         abre('PA',1440,900)
-        NOVO=f"[...document.querySelectorAll('main button')].find(b=>{N}(b.innerText)==='Novo plano')"
+        NOVO=f"[...document.querySelectorAll('header button')].find(b=>{N}(b.innerText)==='Criar plano')"   # NAV-1/BOT-03: "Criar plano" no cabeçalho
         mouse_em(NOVO); fam['botão primário hover']=estilo(NOVO,['filter'])[0]
         MEN="[...document.querySelectorAll('.menu-lat a')].find(a=>a.innerText.trim()==='Planejar safra')"
         mouse_em(MEN); fam['menu hover']=estilo(MEN,['box-shadow'])[0]
         CHP=f"[...document.querySelectorAll('[aria-label=\"Filtrar planos por cultura\"] button')].find(b=>{N}(b.innerText).startsWith('Milho'))"
-        mouse_em(CHP); fam['chip hover']=estilo(CHP,['box-shadow','filter'])
-        STP="document.querySelectorAll('.etp-itens>*')[1]"
-        mouse_em(STP); fam['etapa inerte']=estilo(STP,['filter','cursor','box-shadow'])   # UX-ACAO-UNICA: a faixa só informa
+        mouse_em(CHP); fam['chip hover']=estilo(CHP,['background-image','filter'])   # DS-HOVER-20261009: camada verde por background-image (antes: camada cinza por box-shadow)
         INE="[...document.querySelectorAll('main div')].find(d=>/^soja\s*·/i.test(d.textContent.trim()))"; mouse_em(INE); fam['texto inerte']=estilo(INE,['cursor','filter','box-shadow'])
         abre('SAF',1440,900); BUS="document.querySelector('main input[type=search]')"
+        STP="document.querySelectorAll('.etp-itens>*')[1]"   # NAV-1: a PA não tem mais faixa; a etapa inerte é medida no Planejar safra
+        mouse_em(STP); fam['etapa inerte']=estilo(STP,['filter','cursor','box-shadow'])   # UX-ACAO-UNICA: a faixa só informa
         mouse_em(BUS); fam['busca hover']=estilo(f"{BUS}.closest('label')",['box-shadow'])[0]
         c.js(f"{BUS}.focus()"); fam['busca foco']=estilo(f"{BUS}.closest('label')",['outline-style','outline-color'])
         abre('IN-04',1440,900); c.js("(()=>{const s=document.querySelector('select[aria-label=\"Filtrar por fazenda\"]'); s.value='Santa Rita'; s.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.5)
@@ -188,11 +188,11 @@ try:
         while k<60 and not c.js("document.activeElement&&document.activeElement.matches('polygon[role=button]')"): c.tab(); k+=1
         fam['talhão foco']=estilo("document.activeElement",['stroke-dasharray','stroke']); shot('IN-04_1440_talhao_foco')
         TB="document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')[1]"
-        mouse_em(TB); fam['trilha hover']=estilo(TB,['box-shadow'])[0]
+        mouse_em(TB); fam['trilha hover']=estilo(TB,['background-image'])[0]   # DS-HOVER-20261009
         print('     (informativo) famílias:',fam)
         fam_ok=(fam['texto inerte'][0]!='pointer' and fam['texto inerte'][1]=='none' and fam['texto inerte'][2]=='none'
-                and 'brightness(0.95)' in fam['botão primário hover'] and '255, 255, 255' in fam['menu hover'] and 'inset' in fam['chip hover'][0] and fam['etapa inerte'][0]=='none' and fam['etapa inerte'][1]!='pointer' and fam['etapa inerte'][2]=='none'
-                and 'rgb(157, 191, 170)' in fam['busca hover'] and fam['busca foco'][0]=='solid' and fam['talhão foco'][0].replace(' ','').replace('px','').startswith('7,4') and 'inset' in fam['trilha hover'])
+                and 'brightness(0.92)' in fam['botão primário hover'] and '255, 255, 255' in fam['menu hover'] and '30, 122, 76' in fam['chip hover'][0] and fam['chip hover'][1]=='none' and fam['etapa inerte'][0]=='none' and fam['etapa inerte'][1]!='pointer' and fam['etapa inerte'][2]=='none'
+                and 'rgb(157, 191, 170)' in fam['busca hover'] and fam['busca foco'][0]=='solid' and fam['talhão foco'][0].replace(' ','').replace('px','').startswith('7,4') and '30, 122, 76' in fam['trilha hover'])
         chk('14 famílias · botão, menu, chip, busca (hover e foco), talhão do mapa (foco tracejado) e trilha do mapa respondem; título de seção e etapa da faixa (inertes) sem cursor de ação nem hover', fam_ok, fam)
         # 15 · indisponível: OK do filtro sem valor marcado fica diferente, cursor de proibido e motivo em texto (role=alert)
         abre('OS',1440,900); c.js("document.querySelector('.g2fb').click()"); time.sleep(.3)
@@ -349,10 +349,10 @@ try:
             s1[0]=='true' and s1[1].startswith('T1') and s1[2]=='Santa Rita' and s1[3] and s1[4]=='solid' and s2[0]=='true' and s2[1].startswith('T1') and s2[2] and s2[3]=='rgb(30, 107, 71)' and s2[4]=='rgb(255, 255, 255)', [s1,s2])
         # 23 · estados da trilha: hover (camada interna) ≠ selecionado (fundo verde) ≠ foco (contorno); celular: rótulos visíveis e nome acessível
         TB=f"{TRI}.find(b=>b.innerText.trim()==='Satélite')"
-        xy=centro(TB); c.mouse(*xy); time.sleep(.15); hv=estilo(TB,['box-shadow','background-color','outline-style']); c.mouse(5,890); time.sleep(.1)
+        xy=centro(TB); c.mouse(*xy); time.sleep(.15); hv=estilo(TB,['background-image','background-color','outline-style']); c.mouse(5,890); time.sleep(.1)   # DS-HOVER-20261009: camada verde
         abre('IN-04',360,800,3,True); tc=trilha(); shot('IN-04_360x800_trilha')
         chk('23 trilha · hover = camada interna sem trocar o fundo; no celular (360 px) Satélite e Pragas e doenças com rótulo visível, título e os novos desenhos',
-            'inset' in hv[0] and hv[1] in ('rgba(0, 0, 0, 0)','transparent') and any(x[0]=='Satélite' and x[2]==SAT and x[1] for x in tc) and any(x[0]=='Pragas e doenças' and x[2]==MON and x[1] for x in tc), [hv,[(x[0],x[1]) for x in tc][:4]])
+            '30, 122, 76' in hv[0] and hv[1] in ('rgba(0, 0, 0, 0)','transparent') and any(x[0]=='Satélite' and x[2]==SAT and x[1] for x in tc) and any(x[0]=='Pragas e doenças' and x[2]==MON and x[1] for x in tc), [hv,[(x[0],x[1]) for x in tc][:4]])
         # 24 · capturas antes/depois da trilha (desktop e celular) e menu recolhido com nome acessível
         AD=os.environ.get('ANTES_DIR') or next((d for d in (os.path.join(HERE,'..','..','base_v42','gen37','_render'),os.path.join(HERE,'..','gen37_antes','_render')) if os.path.isdir(d)),None)
         def recorte(nome):

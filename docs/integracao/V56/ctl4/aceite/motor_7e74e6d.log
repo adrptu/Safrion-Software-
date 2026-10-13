@@ -1,0 +1,29 @@
+versão: 7e74e6d GEN= /home/user/sp-v56/tools/prototipo/v37/gen37
+funções presentes (cenario.js + cal01.js): {"cenOsDem": true, "cenEstDem": true, "cenDemEntradas": true, "demFazenda": true, "demSolSit": true, "demSolRevisar": true, "cenEntregar": true, "cenDevolver": true, "cenReceber": true, "cenLiberarQuarentena": true}
+assinatura dados2.demanda: (safra, ajustes=None, planos_extra=None, osd=None, cen=None)
+dados2.demanda("S2627") (build, sem cenário): {"Semente de soja 58 W": {"liq": 0.0, "est": 12000, "res": 0, "rec": 20000, "bruta": 27456.0, "plano": 18512.0, "valor": 0.0}, "MAP 11-52": {"liq": 79500.0, "est": 90000, "res": 0, "rec": 0, "bruta": 170000.0, "plano": 127000.0, "valor": 310050.0}, "Fungicida A": {"liq": 0.0, "est": 545, "res": 65, "rec": 0, "bruta": 520.4786885245901, "plano": 441.47868852459015, "valor": 0.0}, "NPK 20-05-20": {"liq": 14800.0, "est": 8000, "res": 8000, "rec": 0, "bruta": 22800.0, "plano": 11400.0, "valor": 50320.0}}
+######## S2-1 custódia fora do pendente
+== D1 devolver 500 kg MAP 11-52 da REQ-031 (OS-0417 em conferência)
+  passo dev500 → sem mudança na demanda
+== C4 entregar 8.000 kg NPK (REQ-040/OS-0425), cancelar a OS-0425, devolver 8.000
+  passo ent8000 → sem mudança na demanda
+  passo cancel → sem mudança na demanda
+  passo dev8000 → sem mudança na demanda
+== A11 OS-0421 aponta 150 ha usando 20 L, devolve 40 L
+  passo ap → {"S27SF": {"d": {"Fungicida A": [22.98, 0]}, "tot": [1094947.1, 1091615]}}
+  passo dev40 → sem mudança na demanda
+== T10 SOL com complemento e pedido emitido antes da devolução
+  ["SOL-2026-07 enviada (semente) NPK", 14800]
+  ["entrega 8.000 kg: novos/menos", [], []]
+  ["OS-0425 cancelada → Atualizar SOL: novos/menos/SOL NPK", [], [], 14800]
+  ["devolução 8.000 kg com pedido emitido: novos/menos/SOL NPK/liq/situação", [], [], 14800, 14800, {"t": "Em cotação", "c": "blue", "dif": 0, "pend": false, "sol": true}]
+######## S2-2 quarentena virando falta firme
+== G5 NF 4533 20.000 kg em quarentena, depois laudo (S2627 Semente: liq, total)
+   seed (0, 428305)
+   nfq (0, 428305)
+   laudo (0, 428305)
+== G5b situação e revisão da SOL com a quarentena
+  ["após NF em quarentena: liq, situação (SOL enviada sem a semente)", 0, {"t": "Qualidade pendente", "c": "yellow", "dif": 0, "pend": false, "sol": false, "cond": 15456}]
+  ["Atualizar SOL: novos", [], null]
+== D3 devolver 30 L Fungicida A da REQ-035 bloqueado
+  passo dev30q → sem mudança na demanda
