@@ -55,4 +55,11 @@ teste('adaptador reexecutado dentro de cada intenção; erro não deixa efeito p
 teste('sem chave ou referência esperada não aceita publicação',()=>{
  const s=self();for(const muda of [{chave:''},{esperada:undefined}])assert.ok(pub(s,{...pedido(s),...muda}).erro);assert.equal(cenGet().planoReferencias,undefined);
 });
+teste('consulta lê versão gravada pelo comando no contexto selecionado, por cópia',()=>{
+ global.document={getElementById:()=>null};global.requestAnimationFrame=()=>{};
+ const s=self(),r=pub(s,pedido(s));assert.ok(!r.erro,r.erro);
+ const antes=estado();planoRefAbrir(s,null);assert.equal(s.state.prPainel.publicadas[0].id,'R1');
+ s.state.prPainel.publicadas[0].por='Outro';assert.equal(estado(),antes);
+ const outro=self();outro.state.saf='S27SF';planoRefAbrir(outro,null);assert.deepEqual(outro.state.prPainel.publicadas,[]);
+});
 console.log(`RESULTADO ${n-fail}/${n} · transação real com adaptador de domínio de teste; UI/agronomia não executadas`);if(fail)process.exitCode=1;

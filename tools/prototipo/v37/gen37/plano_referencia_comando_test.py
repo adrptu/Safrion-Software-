@@ -15,7 +15,7 @@ shim="""const assert=require('node:assert/strict');const __ls={};let __cota=fals
 const localStorage={getItem:k=>__ls[k]||null,setItem:(k,v)=>{if(__cota)throw new Error('QuotaExceededError');__ls[k]=String(v);},removeItem:k=>{delete __ls[k];}};
 const window={addEventListener(){}};const location={hash:'',pathname:'',search:''};const history={replaceState(){}};
 """
-source=shim+'\nconst GRIDS='+json.dumps(E.GRIDS,ensure_ascii=False)+';\n'+(HERE/'g2lib.js').read_text()+'\n'+dados_assinatura.js_prefixo()+dados_config.js_prefixo()+'\n'+E.EXTRAJS[0]+'\n'+(HERE/'plano_referencia_comando.js').read_text()+'\n'+(HERE/'plano_referencia_comando_unit.js').read_text()
+source=shim+'\nconst GRIDS='+json.dumps(E.GRIDS,ensure_ascii=False)+';\n'+(HERE/'g2lib.js').read_text()+'\n'+dados_assinatura.js_prefixo()+dados_config.js_prefixo()+'\n'+E.EXTRAJS[0]+'\n'+(HERE/'plano_referencia_comando_unit.js').read_text()
 with tempfile.TemporaryDirectory(prefix='safrion-f2-cmd-') as td:
  p=Path(td)/'test.js';p.write_text(source);r=subprocess.run(['node',str(p)],capture_output=True,text=True,timeout=90)
 print(r.stdout,end='');print(r.stderr,end='')

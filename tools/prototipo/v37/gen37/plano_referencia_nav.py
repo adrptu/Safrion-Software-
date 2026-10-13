@@ -4,6 +4,7 @@ Depois de gerar SAF.dc.html e montar_render.py: python3 plano_referencia_nav.py.
 """
 import json
 import time
+import cenario
 from pathlib import Path
 from est_lib import Est, CLK, SETV
 
@@ -55,6 +56,21 @@ try:
         E.J(f"({CLK})('Voltar ao plano','[role=dialog]')")
         time.sleep(.25)
         E.ok(E.J("document.activeElement.id")=='pr_abrir',f'{w}: primária volta ao contexto')
+        # Fixture persistida separada da publicação: prova leitura/isolamento após reload.
+        seed=json.dumps(cenario.seed(),ensure_ascii=False)
+        E.J("""(()=>{const c="""+seed+""";const r=window.__planoRef.projetar();
+          c.planoReferencias=[{contexto:r.contexto,versoes:[{id:'R1',por:'Perfil sintético',em:'2026-10-13T17:00:00.000Z',sq:1,retrato:r}],orcamentoRevisar:false}];
+          localStorage.setItem('talhao-os-cenario-v1',JSON.stringify(c));})()""")
+        E.c.goto(f'http://127.0.0.1:{E.p}/SAF.dc.html')
+        E.J("window.__safSelf.__v.pick('S2627')");time.sleep(.25)
+        armazenado=E.J("JSON.stringify({...localStorage})")
+        E.J("document.querySelector('#pr_abrir').click()");time.sleep(.25)
+        E.ok('Comparando R1' in E.J("document.querySelector('[role=dialog]').innerText"),f'{w}: botão lê histórico persistido após reload (fixture)')
+        E.J(f"({CLK})('Voltar ao plano','[role=dialog]')");time.sleep(.2)
+        E.ok(armazenado==E.J("JSON.stringify({...localStorage})"),f'{w}: leitura persistida não escreve armazenamento')
+        E.J("window.__safSelf.__v.pick('S27SF')");time.sleep(.25)
+        E.J("document.querySelector('#pr_abrir').click()");time.sleep(.25)
+        E.ok('Sem referência registrada' in E.J("document.querySelector('[role=dialog]').innerText"),f'{w}: outra safra não herda R1')
     E.ok(not E.erros(),'sem erro de script na tela',E.erros())
 finally:
     ok=E.fim()

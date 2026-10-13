@@ -55,10 +55,14 @@ function planoRefLinhas(atual, anterior, busca, completo) {
   const q=String(busca||'').toLocaleLowerCase('pt-BR').trim();
   return q ? rows.filter(r=>[r.entidade,r.campo,r.estado,r.antes,r.depois].join(' ').toLocaleLowerCase('pt-BR').includes(q)) : rows;
 }
-function planoRefAbrir(self, evento, publicadas=[]) {
+function planoRefAbrir(self, evento, publicadas=null) {
   const safra=self.state.saf;
   try {
     const atual=PlanoReferencia.projetar(self,safra);
+    if (publicadas === null) {
+      const h=PlanoReferenciaComando.historico(cenGet(),atual.contexto);
+      publicadas=h?h.versoes:[];
+    }
     // Recusa histórico de outra safra, versão sem identificação ou mesmo ID repetido.
     const ids=new Set();
     const historico=publicadas.map(p=>{

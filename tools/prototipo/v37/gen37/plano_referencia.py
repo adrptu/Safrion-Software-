@@ -7,7 +7,7 @@ H=lambda s:'{{'+s+'}}'
 
 def js():
     root=Path(__file__).resolve().parent
-    return '\n'+(root/'plano_referencia.js').read_text()+'\n'+(root/'plano_referencia_ui.js').read_text()+'''
+    return '\n'+(root/'plano_referencia.js').read_text()+'\n'+(root/'plano_referencia_comando.js').read_text()+'\n'+(root/'plano_referencia_ui.js').read_text()+'''
 const _PR_EV=EXTRAVALS; EXTRAVALS=function(self,v){_PR_EV(self,v);planoRefVals(self,v);};
 '''
 
