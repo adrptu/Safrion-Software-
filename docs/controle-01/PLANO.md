@@ -477,3 +477,17 @@ Decisões pedidas ao Codex, que não são do proprietário:
 - **(e)** conferir com o proprietário o possível dado real em `dados_irrigacao.py:43` antes de qualquer publicação (G2).
 
 **Pergunta ao proprietário (realidade da fazenda):** os pivôs da Lagoa Grande captam numa rede comum às outorgas do Rio A? (E, risco 6.)
+## 7. CTL-4 (demanda única) · revisão do `853a6a8`: correções
+
+Revisão adversarial "lente estado" do `853a6a8` (ACHADOS-v1): 2 S2 e 5 S3, todos corrigidos, um commit por achado, cada um com regressão que falha no `853a6a8` e passa na candidata. Detalhe, regras e evidência em `desenho/FRENTE-C.md` §10.
+
+- `7ffe412` · S2 · custódia sem uso nas O.S. (cancelada, em conferência, encerrada ou excedente) é suprimento: cancelar ou devolver não muda a compra (I1–I4, nav K1, K2). Semente: MAP 79.500 kg, R$ 428.305,00.
+- `b64d556` · S3 (base) · cancelar com material entregue mostra a custódia e o próximo passo "Receber devolução" (I5, nav K3).
+- `e907539` · S2 · quarentena com laudo pendente é falta condicionada à qualidade, fora da compra e da primária; laudo reprovado vira falta firme com o motivo (I6, I7, nav Q1–Q3).
+- `6fce782` · S3 · turno do app sem sinal não muda a compra até o envio (I8, nav A7).
+- `1fe0902` · S3 · reserva que a O.S. já não usa deixa de ser demanda (I9, nav R1).
+- `84494d7` · S3 · reserva entre fazendas conta uma vez em cada (I10, nav F1).
+- `4130972` · S3 · SU-03det e MB-05 leem a mesma demanda viva (nav D3).
+- `6202376`, `78711bb` · vermelhos novos da bateria (cache do Mapa; saf_cmp_continuidade e esttest).
+
+Bateria 853a6a8 × candidata (executado; logs em `scratchpad/ctl4fix/logs/{base,cand}/`): nenhum vermelho novo; os quatro vermelhos que já estavam no `853a6a8` (consumo_divergente 1, os_cenario 1, ostest 1, testes_pedido T01/T02/T05) continuam iguais; build 0 FALHA, varredura 140/140, ações duplicadas 0.
