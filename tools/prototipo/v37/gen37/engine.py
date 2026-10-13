@@ -52,10 +52,25 @@ ICONS.update({'Indicadores':ICONS['Controle'],'PCE':ICONS['PCP'],'Estoque':ICONS
  'leaf':'M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 20 3c1 2 2 4.5 2 8.5S16.8 21 12.5 21zM2 21c0-3 1.85-5.36 5.08-6',
  'calendar':'M3 5h18v16H3zM16 3v4M8 3v4M3 10h18',
  'layers':'M12 2l9 5-9 5-9-5 9-5zM3 12l9 5 9-5M3 17l9 5 9-5',
- # MAPA-ICONES-20261003: satélite com corpo, dois painéis solares lisos (sem divisões: legível em 20 px, escala 1) e antena (camada Satélite); lupa sobre folha = vistoria/monitoramento
- # (camada Pragas e doenças), distinto da folha da Lavoura. O triângulo 'alert' continua só para alerta/impedimento real.
+ # MAPA-ICONES-20261003: satélite com corpo, dois painéis solares lisos (sem divisões: legível em 20 px, escala 1) e antena (camada Satélite).
+ # Pragas e doenças: inseto (Lucide bug, ISC; aviso em LICENSES/lucide-ISC.txt), pedido do proprietário de 13/10/2026 ("mude ícone para um inseto
+ # intuitivo"); substitui a lupa sobre folha. Distinto da folha da Lavoura; o triângulo 'alert' continua só para alerta/impedimento real.
  'satelite':'M7.69 11.51L11.51 7.69L15.61 11.79L11.79 15.61zM1.89 17.44L5.92 13.41L10.59 18.08L6.56 22.11zM13.41 5.92L17.44 1.89L22.11 6.56L18.08 10.59zM8.25 15.75L10.09 13.91M13.91 10.09L15.75 8.25M13.7 13.7L14.97 14.97M13.98 17.66A3.4 3.4 0 0 0 17.66 13.98',
- 'monitoramento':'M3.5 20.5C3.5 14.2 6.8 10.8 12.6 10.6C12.6 16.6 9.4 20.5 3.5 20.5zM3.5 20.5L9.2 14.8M20.2 9.2a5.2 5.2 0 1 1-10.4 0a5.2 5.2 0 0 1 10.4 0zM18.8 12.9L22 16.1',
+ 'busca':'M21 21L16.66 16.66M3 11a8 8 0 1 0 16 0a8 8 0 1 0 -16 0',   # lupa (Lucide search, ISC): campo de busca da tela Cadastros
+ # navegação sem submenus (13/10/2026): ícones Lucide (ISC; aviso em LICENSES/lucide-ISC.txt) das telas de entrada e da barra lateral
+ 'engrenagem':'M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2zM9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0',
+ 'pasta':'M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z',
+ 'livro':'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z',
+ 'prancheta':'M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1zM16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M12 11h4M12 16h4M8 11h.01M8 16h.01',
+ 'prancheta_ok':'M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1zM16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M9 14l2 2 4-4',
+ 'frasco':'M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2M8.5 2h7M7 16h10',
+ 'tomada':'M12 22v-5M9 8V2M15 8V2M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z',
+ 'armazem':'M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35ZM6 18h12M6 14h12M6 10h12v12h-12z',
+ 'historico':'M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5M12 7v5l4 2',
+ 'escudo':'M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1zM9 12l2 2 4-4',
+ 'grafico':'M3 3v18h18M18 17V9M13 17V5M8 17v-3',
+ 'celular':'M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2v-16a2 2 0 0 1 2-2zM12 18h.01',
+ 'inseto':'M8 2L9.88 3.88M14.12 3.88L16 2M9 7.13v-1a3.003 3.003 0 1 1 6 0v1M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6M12 20v-9M6.53 9C4.6 8.8 3 7.1 3 5M6 13H2M3 21c0-2.1 1.7-3.9 3.8-4M20.97 5c0 2.1-1.6 3.8-3.5 4M22 13h-4M17.2 17c2.1.1 3.8 1.9 3.8 4',
 })
 # VISOES-1 (10/10/2026): ícones do seletor de visões, Lucide 1.45.0 (ISC; aviso em LICENSES/lucide-ISC.txt, que também traz o MIT do Feather,
 # origem dos ícones acima). rect/circle convertidos para o caminho único de icon(); só entram os que alguma tela usa.
@@ -1044,6 +1059,9 @@ INTERACAO_CSS=(
     ".menu-lat :focus-visible{outline-color:#8FD6AE}"
     "[role=row]:focus-visible{outline-offset:-2px}"
     "label:has(>input[type=search]):focus-within{outline:2px solid #1E7A4C;outline-offset:1px}"
+    # campo de busca em pílula (13/10, proprietário: "tire esse retângulo estranho de todos campos de busca ao passar o mouse"): o input de
+    # dentro não desenha caixa no hover nem no foco; o retorno fica só no contorno arredondado da pílula (hover acima e focus-within)
+    "label:has(>input[type=search])>input{outline:none!important;box-shadow:none!important}"
     "aside[role=dialog]>div[style*=\"justify-content: flex-end; gap: 8px; padding-top: 6px; border-top\"]{position:sticky;bottom:0;z-index:2;background:#FFFFFF;padding-bottom:2px}"
     "svg [role=button]:focus-visible{outline:none;stroke:#15201A;stroke-width:4px;stroke-dasharray:7 4}"
     # indisponível: aparência diferente e cursor de proibido; o motivo fica no texto/rótulo do próprio componente
@@ -1324,7 +1342,9 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         # da largura); no celular segue a rolagem com a 1ª coluna presa (proprietário, 13/10/2026: "rolagem desnecessária")
         # a célula nunca fica mais estreita que o seu menor conteúdo (a linha da célula traz min-width:0): o que não quebra (nome no CADX,
         # número) segura a coluna e, se preciso, a tabela rola de lado em vez de um texto invadir a coluna vizinha
-        "@media (min-width:700px){.g2rola [role=table]{width:100%!important}.g2rola [role=table] [role=cell]{min-width:min-content!important}}"
+        # 13/10 (correção da v59): ocupar ao menos a largura útil (tabela estreita estica), sem obrigar a caber; com width:100% a tabela larga
+        # da O.S. espremia as colunas e os selos quebravam letra a letra ("En cer rad as"). A larga volta à largura natural e rola de lado.
+        "@media (min-width:700px){.g2rola [role=table]{min-width:100%!important}.g2rola [role=table] [role=cell]{min-width:min-content!important}}"
         # separador "·" no começo de uma parte da célula: fica num elemento próprio e some (opacidade, sem mudar a largura) quando a parte
         # começa a linha; o texto lido (innerText, leitor de tela sem o ponto) não muda (g2sepIni em g2lib.js)
         ".g2sepd[data-ini]{opacity:0}"

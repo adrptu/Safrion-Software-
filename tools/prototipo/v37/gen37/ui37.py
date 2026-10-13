@@ -28,7 +28,7 @@ def _h(fname,H): return H_OVR.get(fname) or HEIGHTS37.get(fname,H)
 PRIMHREF={}   # fid -> destino do botão primário
 PARENT37={}   # fname -> fname de volta
 # botão de voltar com rótulo, ao lado do título (13/10/2026, proprietário: "botão de voltar fácil para todos cadastros"): fname -> (rótulo, destino)
-VOLTA37={f'CD-0{i}.dc.html':('Cadastros','CD.dc.html') for i in range(1,8)}
+VOLTA37={f'CD-0{i}.dc.html':('Cadastros','CD.dc.html') for i in range(1,9)}   # CD-08 Operações e rendimentos (13/10)
 
 # Menu vigente por decisão do proprietário (25/09/2026): Mapa · Cadastros · Agrícola · Suprimentos.
 # 01/10/2026: Consulta Agrofit (antes de Planos), Pragas e doenças (MIP/MID) e Irrigação voltam dentro de Agrícola; Manutenção volta logo abaixo de Agrícola (pedidos do proprietário).
@@ -45,55 +45,60 @@ VOLTA37={f'CD-0{i}.dc.html':('Cadastros','CD.dc.html') for i in range(1,8)}
 #   no canvas, na página "Módulos ocultos". Chave única, lida por ui37, areas/producao.py e build.py: reativar é BEN_PUBLICADO=True.
 BEN_PUBLICADO=False
 MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
- ('Cadastros','layers',[('Cadastros','CD.dc.html')]),   # 13/10/2026 (proprietário): sem submenus; a tela CD mostra os 7 cadastros em cartões e cada um volta por "‹ Cadastros"
+ ('Cadastros','pasta',[('Cadastros','CD.dc.html')]),   # 13/10/2026 (proprietário): sem submenus; a tela CD mostra os 7 cadastros em cartões e cada um volta por "‹ Cadastros"
  ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html')]),
  ('Produção','Colheita',[('Previsão e colheita','COLH.dc.html'),('Recebimento e beneficiamento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html')]),   # 3 itens (colheita D-01); Beneficiamento é tela irmã de Cargas (BEN-D14)
  ('Comercial','Vendas',[('Contratos e pedidos','VEN.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Painel comercial','PCOM.dc.html'),('Inteligência de vendas','IV.dc.html')]),   # INTEL-01 (13/10): inteligência comercial de vendas
  ('Manutenção','wrench',[('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')]),   # 13/10/2026 (pedido do proprietário: subitens de novo, enxutos): um subitem por visão da tela única, sem tela nova
  ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html'),('Inteligência de compras','IC.dc.html')]),   # INTEL-01 (13/10)
- ('Configurações','grid',[('Usuários e alçadas','CF-01.dc.html'),('Auditoria','CF-04.dc.html'),('Integrações','CF-03.dc.html'),('Assinatura e cobrança','CF-05.dc.html')])]   # 06/10/2026 (PLAT-01): grupo por último; CONF-01 (CONF-D01/D02): Usuários e alçadas · Auditoria · Integrações · Assinatura e cobrança, cada item entra no passo que entrega a tela
+ ('Configurações','engrenagem',[('Usuários e alçadas','CF-01.dc.html'),('Auditoria','CF-04.dc.html'),('Integrações','CF-03.dc.html'),('Assinatura e cobrança','CF-05.dc.html')])]   # 06/10/2026 (PLAT-01): grupo por último; CONF-01 (CONF-D01/D02): Usuários e alçadas · Auditoria · Integrações · Assinatura e cobrança, cada item entra no passo que entrega a tela
+# 13/10/2026 (proprietário: "tire todos submenus de todos os módulos e coloque na tela como fizemos com cadastros e deixe a barra lateral dos
+# menus somente recolhido com os ícones e tooltip sem opção de expandir. Mas reduza texto ao mínimo essencial de cada submenu ... sempre com
+# opção de voltar rápido e fácil. use sempre ícones mais intuitivos"): cada módulo com mais de uma tela abre a sua tela de entrada (cartões
+# com ícone e nome curto, areas/modulos.py); Mapa e Manutenção (uma tela com visões) abrem direto. Cada tela do módulo volta por "‹ Módulo".
+HUB37={'Agrícola':'MOD-AGR.dc.html','Produção':'MOD-PRO.dc.html','Comercial':'MOD-COM.dc.html','Suprimentos':'MOD-SUP.dc.html','Configurações':'MOD-CFG.dc.html'}
+CURTO37={'AG-07.dc.html':('Agrofit','livro'),'PA.dc.html':('Planos agronômicos','prancheta'),'AG-02.dc.html':('Análises de solo','frasco'),
+ 'SAF.dc.html':('Planejar safra','calendar'),'OS.dc.html':('Ordens de serviço','prancheta_ok'),'AG-01.dc.html':('Pragas e doenças','inseto'),'IR-01.dc.html':('Irrigação','drop'),
+ 'COLH.dc.html':('Colheita','Colheita'),'CARGA.dc.html':('Recebimento','scale'),'PROD.dc.html':('Estoque de produto','armazem'),
+ 'VEN.dc.html':('Contratos e pedidos','doc'),'EXPED.dc.html':('Expedição','truck'),'PCOM.dc.html':('Painel','grafico'),'IV.dc.html':('Inteligência','trend'),
+ 'CMP.dc.html':('Compras','cart'),'EST.dc.html':('Estoque','box'),'IC.dc.html':('Inteligência','trend'),
+ 'CF-01.dc.html':('Usuários e alçadas','users'),'CF-04.dc.html':('Auditoria','historico'),'CF-03.dc.html':('Integrações','tomada'),'CF-05.dc.html':('Assinatura','card')}
+# outras pontas do protótipo (antes só no índice, que saiu em 13/10: o artefato abre direto no Mapa)
+OUTROS37=('Outros acessos','grid','MOD-OUT.dc.html',[('App de campo','MB-01.dc.html','celular'),('Portal do parceiro','PT-01.dc.html','users'),
+                                                    ('Onboarding','ON-01.dc.html','check'),('Backoffice','BO-02.dc.html','escudo')])
+VOLTA37.update({_hv.split('#')[0]:(_nv,HUB37[_nv]) for _nv,_iv,_itv in MENU2 if _nv in HUB37 for _lv,_hv in _itv})
+INICIO37='IN-04.dc.html'   # o protótipo começa no Mapa (1º item do menu)
 MENU_OF={'CA-01det.dc.html':'OS.dc.html','CA-02.dc.html':'OS.dc.html','CA-01x-os0420.dc.html':'OS.dc.html',
  'IR-02.dc.html':'IR-01.dc.html','IR-03.dc.html':'IR-01.dc.html','IR-03det.dc.html':'IR-01.dc.html','IR-04.dc.html':'IR-01.dc.html',
  **({'BEN.dc.html':'CARGA.dc.html'} if BEN_PUBLICADO else {})}  # detalhes e telas irmãs que pertencem a um item do menu (BEN: só publicado)
 def menu_item(fname):
     f=MENU_OF.get(fname,fname)
     for i,(nome,ic,items) in enumerate(MENU2):
+        if HUB37.get(nome)==f: return i,f   # tela de entrada do módulo
+    for i,(nome,ic,items) in enumerate(MENU2):
         for lab,h in items:
             h=h.split('#')[0]   # subitem que abre uma visão da mesma tela (Manutenção: MA.dc.html#vis=…) pertence à tela
             if h==f or (f.startswith(h.replace('.dc.html','')) and f!=h and h not in ('IN-04.dc.html',) and f[:len(h)-8]==h[:-8]): return i,h
     return None,None
 def oculto(fname):
-    return menu_item(fname)[0] is None and fname!='Main.dc.html'
+    return menu_item(fname)[0] is None and fname not in ('Main.dc.html',OUTROS37[2])
 def subnav_st(cur):
     """estilo do subitem do menu (ativo ou não); a Manutenção usa os dois no navegador para destacar a visão aberta."""
     return ('display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; '
             + (f'background: {ACC}; color: #fff; font-weight: 700;' if cur else f'color: {SIDE_MUTED}; font-weight: 500;'))
 def navbar(fid,fname=None):
-    """Barra lateral: macro menus expansíveis (estado real na tela); item ativo destacado."""
-    import engine as _E
+    """Barra lateral sempre recolhida (13/10/2026): um ícone por módulo, com o nome na dica (title → g2dica) e no nome acessível; o módulo
+    com mais de uma tela abre a tela de entrada (HUB37). Sem submenus e sem expandir. Por último, "Outros acessos" (app, portal, backoffice)."""
     fname=fname or ffile(fid)
-    act_i,act_h=menu_item(fname)
-    out=[]
-    for i,(nome,ic,items) in enumerate(MENU2):
-        on=(i==act_i)
-        if len(items)==1 and items[0][0]==nome:   # grupo de 1 item vira link só quando o item tem o nome do grupo (Mapa); Configurações abre e mostra o item
-            h=items[0][1]
-            st=(f'display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; font-size: 13.5px; font-weight: 700; text-decoration: none; '
-                + (f'background: {ACC}; color: #fff;' if on else f'color: {SIDE_TX};'))
-            out.append(f'<a href="{h}" title="{esc(nome)}" style="{st}">{icon(ic,16,"#fff" if on else SIDE_TX)}<span class="ml-txt">{esc(nome)}</span></a>')
-            continue
-        _E.NAVSPEC.append({'open':on})
-        k=len(_E.NAVSPEC)-1
-        out.append(f'<button type="button" aria-expanded="{{{{nav{k}_open}}}}" onClick="{{{{nav{k}_tog}}}}" title="{esc(nome)}" style="display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 12px; border: 0; border-radius: 10px; font-family: inherit; font-size: 13.5px; font-weight: 700; text-align: left; cursor: pointer; background: {"rgba(255,255,255,.10)" if on else "transparent"}; color: {"#fff" if on else SIDE_TX};">'
-                   f'{icon(ic,16,"#fff" if on else SIDE_TX)}<span class="ml-txt" style="flex-grow: 1;">{esc(nome)}</span><span class="ml-txt" aria-hidden="true" style="font-size: 11px; color: {SIDE_MUTED};">{{{{nav{k}_sym}}}}</span></button>')
-        subs=''
-        for lab,h in items:
-            cur=(h==act_h)
-            s2=subnav_st(cur)
-            if on and '#vis=' in h and h.split('#')[0]==act_h:   # visão da tela aberta: o destaque segue a visão escolhida (a tela preenche navvis_*)
-                vk=h.split('#vis=')[1]; subs+=f'<a href="{h}" aria-current="{{{{navvis_{vk}_cur}}}}" style="{{{{navvis_{vk}}}}}">{esc(lab)}</a>'; continue
-            subs+=f'<a href="{h}" style="{s2}">{esc(lab)}</a>'
-        out.append(f'<sc-if value="{{{{nav{k}_open}}}}" hint-placeholder-val="{{{{{"true" if on else "false"}}}}}"><div class="ml-sub" style="display: flex; flex-direction: column; gap: 1px; margin-bottom: 4px;">{subs}</div></sc-if>')
+    act_i,_=menu_item(fname)
+    def item(nome,ic,h,on):
+        st=('display: flex; align-items: center; justify-content: center; gap: 10px; padding: 8px 12px; border-radius: 10px; min-height: 40px; text-decoration: none; '
+            + (f'background: {ACC}; color: #fff;' if on else f'color: {SIDE_TX};'))
+        return (f'<a href="{h}" title="{esc(nome)}" aria-label="{esc(nome)}"' + (' aria-current="page"' if on else '') + f' style="{st}">'
+                f'{icon(ic,20,"#fff" if on else SIDE_TX)}<span class="ml-txt">{esc(nome)}</span></a>')
+    out=[item(nome,ic,HUB37.get(nome) or items[0][1].split('#')[0],i==act_i) for i,(nome,ic,items) in enumerate(MENU2)]
+    out.append(f'<span aria-hidden="true" style="height: 1px; margin: 6px 8px; background: rgba(255,255,255,.12);"></span>')
+    out.append(item(OUTROS37[0],OUTROS37[1],OUTROS37[2],fname==OUTROS37[2]))
     return ''.join(out)
 
 # ---------------- progresso do processo e telas do módulo (UX-ACAO-UNICA-20261003 · DS-31 v2 · DS-33 §74.5.7.1) ----------------
@@ -237,23 +242,24 @@ def demo_badge():
             f'<span style="width: 7px; height: 7px; border-radius: 999px; background: {YEL}; flex-shrink: 0;"></span><span class="ml-txt">DEMONSTRAÇÃO · dados fictícios</span></div>')
 
 def perfil_pill(perfil):
+    """avatar do perfil no pé da barra recolhida (13/10/2026): a dica diz o perfil; na equipe da fazenda o toque no avatar abre a lista de
+    perfis de demonstração (o seletor fica por cima do avatar, transparente; g2lib.js G2_PERFIS é a fonte única). Portal e backoffice: fixos."""
     ini=perfil[0].upper()
-    if perfil=='Ana · Gestora':   # equipe da fazenda: perfil trocável (g2lib.js G2_PERFIS, fonte única); portal e backoffice seguem fixos
-        return (f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 12.5px; color: {SIDE_TX}; border-top: 1px solid rgba(255,255,255,.08);">'
-            f'<span style="width: 26px; height: 26px; border-radius: 999px; background: {ACC}; color: #fff; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">{{{{perfil_ini}}}}</span>'
-            f'<label class="ml-txt" style="display: flex; flex-direction: column; line-height: 1.2; min-width: 0;"><select aria-label="Trocar perfil de demonstração" value="{{{{perfil_k}}}}" onChange="{{{{perfil_set}}}}" style="font-family: inherit; font-size: 12.5px; font-weight: 700; color: #fff; background: transparent; border: 0; padding: 0; cursor: pointer; max-width: 170px;">'
-            f'<sc-for list="{{{{perfil_opts}}}}" as="o" hint-placeholder-count="5"><option value="{{{{o.v}}}}" style="color: {INK};">{{{{o.t}}}}</option></sc-for></select>'
-            f'<span style="color: {SIDE_MUTED}; font-size: 11.5px;">Perfil de demonstração</span></label></div>')
-    return (f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 12.5px; color: {SIDE_TX}; border-top: 1px solid rgba(255,255,255,.08);">'
-            f'<span style="width: 26px; height: 26px; border-radius: 999px; background: {ACC}; color: #fff; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: center;">{ini}</span>'
-            f'<span class="ml-txt" style="display: flex; flex-direction: column; line-height: 1.2;"><span style="font-weight: 700; color: #fff;">{esc(perfil)}</span><span style="color: {SIDE_MUTED}; font-size: 11.5px;">Trocar perfil de demonstração ▾</span></span></div>')
+    av=('position: relative; width: 32px; height: 32px; border-radius: 999px; background: {ACC}; color: #fff; font-weight: 700; font-size: 13px; '
+        'display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;').replace('{ACC}',ACC)
+    pe='display: flex; align-items: center; justify-content: center; padding: 10px 0; border-top: 1px solid rgba(255,255,255,.08);'
+    if perfil=='Ana · Gestora':
+        return (f'<div style="{pe}"><label title="Perfil de demonstração: {{{{perfil_k}}}} · tocar para trocar" style="{av} cursor: pointer;">{{{{perfil_ini}}}}'
+            f'<select aria-label="Trocar perfil de demonstração" value="{{{{perfil_k}}}}" onChange="{{{{perfil_set}}}}" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 16px; border: 0;">'
+            f'<sc-for list="{{{{perfil_opts}}}}" as="o" hint-placeholder-count="5"><option value="{{{{o.v}}}}" style="color: {INK};">{{{{o.t}}}}</option></sc-for></select></label></div>')
+    return f'<div style="{pe}"><span title="{esc(perfil)}" style="{av}">{ini}</span></div>'
 
 # Filtros de fazenda e safra por tela: 'filtro' = seletor que muda os dados da tela; 'contexto' = só leitura (escolhido no próprio processo).
 # 13/10/2026 (proprietário: "tire o macro filtro fazenda e safra do topo e coloque nas telas para evitar confusão"): saem da barra do topo e
 # ficam na própria tela, numa faixa "Filtros desta tela" acima dos dados que filtram (shell37); as ligações (mf_*) não mudam.
 MACRO = {
     'IN-04.dc.html': dict(faz='filtro'),
-    'OS.dc.html': dict(faz='filtro', saf='filtro'),
+    'OS.dc.html': dict(faz='filtro', saf='filtro', cult='filtro', tal='filtro'),   # 13/10 (proprietário): Cultura e Talhão no filtro principal da O.S.
     'SAF.dc.html': dict(faz='contexto', saf='contexto'),
     'CMP.dc.html': dict(faz='contexto', saf='contexto'),
     'EST.dc.html': dict(faz='filtro'),
@@ -283,6 +289,13 @@ def _macro_html(fname, ctx, sep=True):
     elif cfg.get('saf') == 'contexto':
         out += (f'<span style="{lab}">{ctx[1] if ctx and len(ctx) > 1 and ctx[1] else ""}</span>'
                 f'<button type="button" onClick="{{{{mf_trocar}}}}" title="Voltar à etapa 1 para escolher outra safra" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">Trocar safra</button>')
+    # Cultura e Talhão (13/10/2026, proprietário: "em ordem de serviço coloque no filtro principal da tela... também cultura e talhão"): as opções
+    # vêm da tela (mf_cult_opts, mf_tal_opts: só o que existe no recorte de Fazenda e Safra); o Talhão é o mesmo filtro da coluna Talhão
+    for k, rot, al in (('cult', 'Cultura', 'Filtrar por cultura'), ('tal', 'Talhão', 'Filtrar por talhão')):
+        if cfg.get(k) == 'filtro':
+            out += (f'<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: {MUTED}; font-weight: 700;">{rot}'
+                    f'<select aria-label="{al}" value="{{{{mf_{k}}}}}" onChange="{{{{mf_set{k}}}}}" style="' + sel.format(LINE=LINE, SURF=SURF, INK=INK) + '">'
+                    f'<sc-for list="{{{{mf_{k}_opts}}}}" as="o" hint-placeholder-count="3"><option value="{{{{o.v}}}}">{{{{o.t}}}}</option></sc-for></select></label>')
     return out + (f'<span style="width: 1px; height: 18px; background: {LINE};"></span>' if sep else '')
 
 # Faixa de cobrança (PLAT-01, R11): só nas telas web da organização (fora de BO, ON e PT; não no próprio CF-05, que já mostra o estado e a
@@ -306,6 +319,7 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
         m={'area':MENU2[mi][0],'submenu':vs[0] if len(vs)==1 else MENU2[mi][0]}
     else:
         m=MAPA.get(fid) or {'area':area_of(fid) or 'Módulo oculto','submenu':CAT.get(fid,{}).get('titulo',fid)}
+    if fname==OUTROS37[2]: m={'area':OUTROS37[0],'submenu':OUTROS37[0]}
     if fname in VOLTA37 and not crumbs_extra: m={'area':m['area'],'submenu':title}   # cadastro aberto pela tela inicial: o caminho diz qual
     crumbs=([m['area']] if m['area']==m['submenu'] and not crumbs_extra else [m['area'],m['submenu']])+(crumbs_extra or [])   # "Cadastros", não "Cadastros › Cadastros"
     back=PARENT37.get(fname) or ffile(fid) if crumbs_extra else (PARENT37.get(fname) or fname)
@@ -316,6 +330,7 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
         elif i<len(crumbs)-1: parts.append(f'<span style="color: {MUTED};">{esc(c)}</span>')
         else: parts.append(f'<span>{esc(c)}</span>')
     crumb=_sep.join(parts)
+    if crumbs==[title]: crumb=''   # tela de entrada do módulo: o caminho repetiria o título (13/10, mais essencial)
     if oculto(fname):
         ctxp=''.join(f'<span style="font-size: 11.5px; color: {MUTED}; font-weight: 600;">{esc(c)}</span>' for c in (tuple(ctx)+('Módulo oculto no menu · preservado',)) if c)
         ctxp+=f'<span style="width: 1px; height: 18px; background: {LINE};"></span>'
@@ -366,14 +381,14 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 </helmet>
 <div data-root="1" style="position: relative; width: 100%; box-sizing: border-box; display: flex; background: {BG}; font-family: {FONT}; color: {INK}; overflow: clip;">
 <nav aria-label="Menu" class="menu-lat {{{{menu_cls}}}}" style="flex-shrink: 0; background: {SIDE}; display: flex; flex-direction: column; padding: 16px 12px 12px; gap: 2px; box-sizing: border-box; overflow-x: clip; overflow-y: auto;">
-<div class="ml-topo" style="display: flex; align-items: center; gap: 6px; padding: 2px 4px 8px 0;"><a href="Main.dc.html" aria-label="Índice do protótipo" style="display: flex; align-items: center; gap: 10px; padding: 0 0 0 12px; font-family: {DISP}; font-weight: 700; font-size: 15px; letter-spacing: -.01em; color: #fff; text-decoration: none; flex-grow: 1; min-width: 0;"><span style="width: 28px; height: 28px; border-radius: 9px; background: {ACC}; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">{icon("Agronomia",16,"#fff")}</span><span class="ml-txt" style="white-space: nowrap;">Talhão à O.S.</span></a>
+<div class="ml-topo" style="display: flex; align-items: center; gap: 6px; padding: 2px 4px 8px 0;"><a href="{INICIO37}" aria-label="Início (Mapa)" title="Início (Mapa)" style="display: flex; align-items: center; gap: 10px; padding: 0 0 0 12px; font-family: {DISP}; font-weight: 700; font-size: 15px; letter-spacing: -.01em; color: #fff; text-decoration: none; flex-grow: 1; min-width: 0;"><span style="width: 28px; height: 28px; border-radius: 9px; background: {ACC}; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">{icon("Agronomia",16,"#fff")}</span><span class="ml-txt" style="white-space: nowrap;">Talhão à O.S.</span></a>
 </div>
 {navbar(fid,fname)}
 <div style="flex-grow: 1;"></div>
 {demo_badge()}
 {perfil_pill(perfil)}
 </nav>
-<button type="button" class="ml-tog" onClick="{{{{menu_tog}}}}" aria-label="{{{{menu_tog_lab}}}}" title="{{{{menu_tog_lab}}}}" aria-expanded="{{{{menu_aberto}}}}"><sc-if value="{{{{menu_aberto}}}}" hint-placeholder-val="{{{{true}}}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></sc-if><sc-if value="{{{{menu_rec}}}}" hint-placeholder-val="{{{{false}}}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></sc-if></button>
+<span class="ml-tog" aria-hidden="true" style="display: none;"></span>
 <div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0;">
 <header style="padding: 14px 32px 14px; background: {SURF}; border-bottom: 1px solid {LINE}; display: flex; flex-direction: column; gap: 10px;">
 <div style="display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 500;">{ctxp}<span>{crumb}</span>{srch}</div>
@@ -394,7 +409,6 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 </main>
 {foot}
 </div>
-<div class="ml-fundo" aria-hidden="true" onClick="{{{{menu_tog}}}}"></div>
 {extra_html()}
 {E.G2_TOAST}
 </div>

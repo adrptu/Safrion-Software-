@@ -278,7 +278,7 @@ def cd07():
                     txt('sup','Código superior',req=False,help='Soma no total do superior (ex.: 3.1.01 em 3.1).'),
                     sel('rat','Direcionador de rateio',DC.RATEIO,cond=cond('dim','Centro de responsabilidade'),**{'def':DC.RATEIO[0]},help='Como o custo deste centro chega às culturas, em vez de ratear tudo por hectare.'),
                     dict(k='grp',l='Grupos de insumo',ro=True,cond=cond('dim','Natureza'),help='Vêm de Produtos, unidades e locais; troque a natureza no grupo.'),
-                    dict(k='ops',l='Operações',ro=True,cond=cond('dim','Processo'),help='Vêm de Culturas, cultivares e operações; troque o processo na operação.'),
+                    dict(k='ops',l='Operações',ro=True,cond=cond('dim','Processo'),help='Vêm de Operações e rendimentos; troque o processo na operação.'),
                     dat('ini','Início da vigência'),dat('fim','Fim da vigência',req=False,help='Deixe em branco se não houver fim previsto.'),
                     sel('trad','Tradução no ERP',TRAD,**{'def':'Conta do ERP'},help='Dimensão própria segue no lançamento e é traduzida pela integração, sem conta fixa.'),
                     txt('conta','Conta ou centro no ERP',req=False,cond=cond('trad','Conta do ERP'),help='Em branco, o código fica fora da publicação até ser mapeado. Exemplo: pulverização na soja do T1 = empresa 01 + natureza 3.1.02 + CR-SR + cultura SOJA + processo TRAT + talhão T1 → conta 4.1.1.02 · TOP 1201.'),
@@ -318,7 +318,7 @@ function c7sit(self,r){ const V=r.v; const m=c7mud(self)[r.id]; const prop=V.tra
   if(!prop&&!V.conta) return {t:'Tradução pendente',p:sitX('Tradução pendente','yellow','Traduzir'),res:true};
   return {t:prop?'Dimensão própria':'Mapeado',p:(prop?sitInfo('Dimensão própria'):sitOk('Mapeado'))}; }
 const C7_ND={'com lançamentos':'tem lançamentos; encerre a vigência em vez de excluir','usada em grupos':'é a natureza de grupos de insumo em Produtos; troque lá antes',
-  'vem de Culturas':'vem de Culturas, cultivares e operações; exclua lá','vem de Operações':'vem de Culturas, cultivares e operações; exclua lá'};
+  'vem de Culturas':'vem de Culturas e cultivares; exclua lá','vem de Operações':'vem de Operações e rendimentos; exclua lá'};
 CAD_ACTS.g_dim=(self,r,fm)=>{ if(!r.v.dim||r.ro||fm.ro) return []; return [cadExcluir(self,'g_dim',r,'código',C7_ND[r.nd]||r.nd||'',()=>c7excluir(self,r.id))]; };
 function PREVALS(self,v){ cadActsIni(self); const mud=c7mud(self); const cods=c7vivos(self);
   c7cods(self).forEach(r=>{ if(mud[r.id]==='excluído') r.ro=true; });
@@ -356,7 +356,7 @@ function EXTRAVALS(self,v){ const ver=c7ver(self), mud=c7mud(self), n=Object.key
   const F=v.g_dim_F; const fm=g2st(self,'g_dim').fm;
   if(F&&F.open&&fm&&fm.rid&&mud[fm.rid]==='excluído') F.sub='Excluído no rascunho v'+(ver+1)+': o código sai da estrutura quando a versão for publicada; até lá, só consulta.';
   if(F&&F.open&&F.fields&&fm&&fm.rid&&!fm.ro){ const r=g2find(RW(self,'g_dim'),fm.rid);
-    if(r&&r.v.orig){ F.sub=r.v.dim+' vem de Culturas, cultivares e operações: aqui você altera só a tradução para o ERP.';
+    if(r&&r.v.orig){ F.sub=r.v.dim+' vem de '+(r.v.dim==='Cultura'?'Culturas e cultivares':'Operações e rendimentos')+': aqui você altera só a tradução para o ERP.';
       F.fields=F.fields.filter(f=>['fx_g_dim_sup'].indexOf(f.fid)<0);
       F.fields.forEach(f=>{ const k=f.fid.replace('fx_g_dim_',''); if(['cod','nome','dim','ini','fim'].indexOf(k)>=0){ f.dis=true; f.ist=f.ist.replace('background:#FFFFFF','background:#F4F6F3'); if(k==='dim') f.opts=[{v:r.v.dim,t:r.v.dim}]; } }); } }
   valida(self,v,'g_dim',(d,fm)=>{ const e={}; const r=fm.rid?g2find(RW(self,'g_dim'),fm.rid):null; if(r&&r.v.orig) return e;

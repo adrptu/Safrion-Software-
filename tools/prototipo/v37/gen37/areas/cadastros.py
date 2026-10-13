@@ -296,7 +296,7 @@ function cadExcluir(self,gid,r,ent,motivo,fazer){
 
 # =====================================================================================
 # Cada tela pode ser reescrita num módulo próprio (areas/cad_*.py, que importa os auxiliares daqui); se ele existir, é o que vale.
-CAD_MODS=(('areas.cad_fazendas',('cd01','cd01det')),('areas.cad_culturas',('cd02',)),('areas.cad_ativos_pessoas',('cd03','cd04')),
+CAD_MODS=(('areas.cad_fazendas',('cd01','cd01det')),('areas.cad_culturas',('cd02','cd08')),('areas.cad_ativos_pessoas',('cd03','cd04')),
           ('areas.cad_parceiros',('cd05',)),('areas.cad_produtos_estrutura',('cd06','cd07')))
 def build():
     import importlib, importlib.util

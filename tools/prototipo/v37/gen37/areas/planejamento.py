@@ -332,8 +332,8 @@ function EXTRAVALS(self,v){
          ('equi','Equipes de campo','Todas',280,300,240,40,20,'—',0),
          ('colh','Colhedoras','Milho P2 (nov)',0,360,0,180,180,'—',None)]
     ORIGC={'trat':[dict(t='Plano operacional: plantio T1-A, T1-B, T2, T4 (1ª onda) e T3 · 910 ha',h='PL-02.dc.html'),dict(t='Capacidade: 4 tratores × 22 dias úteis × 10 h, menos manutenção'),dict(t='Indisponível: Trator T1 parado pela OM-0233',h='MA.dc.html#om=OM-0233')],
-           'pulv':[dict(t='Plano operacional: dessecações e fungicidas de outubro',h='PL-02.dc.html'),dict(t='Rendimento 21,6 ha/h · Trator 02 + Pulverizador PJ-3030',h='CD-02.dc.html')],
-           'plan':[dict(t='Plano operacional: plantio escalonado T1-A/T1-B e T2',h='PL-02.dc.html'),dict(t='Rendimento 6,8 ha/h · Plantadeira 24 linhas',h='CD-02.dc.html')],
+           'pulv':[dict(t='Plano operacional: dessecações e fungicidas de outubro',h='PL-02.dc.html'),dict(t='Rendimento 21,6 ha/h · Trator 02 + Pulverizador PJ-3030',h='CD-08.dc.html')],
+           'plan':[dict(t='Plano operacional: plantio escalonado T1-A/T1-B e T2',h='PL-02.dc.html'),dict(t='Rendimento 6,8 ha/h · Plantadeira 24 linhas',h='CD-08.dc.html')],
            'equi':[dict(t='Soma das horas de pessoas de todas as operações do mês')],
            'colh':[dict(t='Colheita do milho P2 só em novembro · capacidade ociosa em outubro')]}
     g_cap=grid([dict(k='cls',l='Recurso/classe',w=170),dict(k='op',l='Operação dominante',w=190),dict(k='carga',l='Carga out/26',t='num',a='r',u='h'),dict(k='cap',l='Capacidade líquida',t='num',a='r',u='h'),
@@ -360,7 +360,7 @@ function EXTRAVALS(self,v){
       kpis([('CARGA OUT/26','2.410 h','demanda do plano'),('CAPACIDADE LÍQUIDA','2.640 h','após manutenção'),
             ('DÉFICIT','270 h','tratores 150+ cv'),('OCIOSIDADE OUT/26','180 h','colhedoras')])
       + section('Carga × capacidade por recurso/classe','Compare a carga herdada do plano com a capacidade líquida; clique na classe para ver a origem dos números.',
-        [ilnk('Ver rendimentos','CD-02.dc.html','calc','Abrir a tabela de rendimentos das operações')],g_cap,state='red')
+        [ilnk('Ver rendimentos','CD-08.dc.html','calc','Abrir a tabela de rendimentos das operações')],g_cap,state='red')
       + section('Cenários para o déficit de 270 h','Compare custo e restrição de cada cenário; publicar não contrata nem compra automaticamente.',
         [imsg('Simular turnos e conjuntos','Simulação: 2º turno nos tratores (out) cobre 190 h · custo estimado +R$ 26 mil · restrição: contratar 1 operador habilitado. Nada é alterado.','calc','Simular turnos, equipes e conjuntos'),
          ilnk('Propor cotação','SU-04.dc.html','cart','Abrir a cotação de aluguel ou prestador'),

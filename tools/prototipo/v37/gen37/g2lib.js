@@ -14,7 +14,7 @@ function g2set(self,id,patch){ const all=Object.assign({},self.state.g2||{}); al
   if(G2KEEP[id]) g2keepGrava(self,id,all[id]); }
 // grava o recorte guardado (g2keep): filtros, busca, ordenação, filtro rápido e, quando a tela pede (VISOES-1), Fazenda e Safra do topo
 function g2keepGrava(self,id,x){ if(!G2KEEP[id]) return; x=x||g2st(self,id); const o={f:x.f||{},q:x.q||'',so:x.so||null,qv:x.qv||''};
-  if(G2KEEP_TOPO[id]){ const s=self.state||{}; if(s.mf_faz) o.mf_faz=s.mf_faz; if(s.mf_saf) o.mf_saf=s.mf_saf; }
+  if(G2KEEP_TOPO[id]){ const s=self.state||{}; if(s.mf_faz) o.mf_faz=s.mf_faz; if(s.mf_saf) o.mf_saf=s.mf_saf; if(s.mf_cult) o.mf_cult=s.mf_cult; }
   try{ sessionStorage.setItem(G2KEEP[id],JSON.stringify(o)); }catch(e){} }
 // recorte guardado na sessão (TABELAS-FOCO): filtros, busca e ordenação sobrevivem a abrir o detalhe e voltar; só a tabela que pede (g2keep)
 const G2KEEP={}, G2KEEP_TOPO={};
@@ -22,11 +22,11 @@ const G2KEEP={}, G2KEEP_TOPO={};
 // mostra o valor restaurado no mesmo desenho). Na volta do detalhe, um talhão de outra fazenda não esvazia a lista com "filtro ativo".
 function g2keep(self,id,opt){ let key='g2:'+id; try{ key='g2:'+String(location.pathname).split('/').pop()+':'+id; }catch(e){} G2KEEP[id]=key;
   if(opt&&opt.topo) G2KEEP_TOPO[id]=1;
-  if(self.__g2kept&&self.__g2kept[id]){ if(G2KEEP_TOPO[id]){ const s=self.state||{}, k=(s.mf_faz||'')+'|'+(s.mf_saf||''); if(self.__g2keptTopo!==k){ self.__g2keptTopo=k; g2keepGrava(self,id); } } return; }
+  if(self.__g2kept&&self.__g2kept[id]){ if(G2KEEP_TOPO[id]){ const s=self.state||{}, k=(s.mf_faz||'')+'|'+(s.mf_saf||'')+'|'+(s.mf_cult||''); if(self.__g2keptTopo!==k){ self.__g2keptTopo=k; g2keepGrava(self,id); } } return; }
   (self.__g2kept=self.__g2kept||{})[id]=1;
   try{ const o=JSON.parse(sessionStorage.getItem(key)||'null'); if(o&&typeof o==='object'){ const all=Object.assign({},self.state.g2||{}); all[id]=Object.assign({},all[id]||{},{f:o.f||{},q:o.q||'',so:o.so||null,qv:o.qv||''}); self.state.g2=all;
-    if(G2KEEP_TOPO[id]){ ['mf_faz','mf_saf'].forEach(c=>{ if(typeof o[c]==='string'&&o[c]&&self.state[c]===undefined){ self.state[c]=o[c]; if(opt&&opt.v) opt.v[c]=o[c]; } }); } } }catch(e){}
-  if(G2KEEP_TOPO[id]){ const s=self.state||{}; self.__g2keptTopo=(s.mf_faz||'')+'|'+(s.mf_saf||''); } }
+    if(G2KEEP_TOPO[id]){ ['mf_faz','mf_saf','mf_cult'].forEach(c=>{ if(typeof o[c]==='string'&&o[c]&&self.state[c]===undefined){ self.state[c]=o[c]; if(opt&&opt.v) opt.v[c]=o[c]; } }); } } }catch(e){}
+  if(G2KEEP_TOPO[id]){ const s=self.state||{}; self.__g2keptTopo=(s.mf_faz||'')+'|'+(s.mf_saf||'')+'|'+(s.mf_cult||''); } }
 function g2rows(self,sp){ const st=g2st(self,sp.id); return st.rows||sp.rows; }
 function g2find(list,id){ for(const r of list){ if(r.id===id) return r; if(r.kids){ const k=g2find(r.kids,id); if(k) return k; } } return null; }
 function g2text(r,c){ if(r.s&&r.s[c.k]!==undefined&&r.s[c.k]!==null) return (c&&c.un)?g2unf(r.s[c.k],c):String(r.s[c.k]); if(r.v&&r.v[c.k]!==undefined&&r.v[c.k]!==null) return g2fmt(r.v[c.k],c); return ''; }
@@ -324,7 +324,7 @@ function g2vals(self,sp,v,mask){
 // e ao estreitar a janela (girar o aparelho) ele recolhe sem recarregar.
 const G2_ESTREITO='(max-width: 1023px)';
 function g2estreito(){ try{ return window.matchMedia(G2_ESTREITO).matches; }catch(e){ return false; } }
-function g2menuRec(){ if(g2estreito()) return true; try{ return localStorage.getItem('safrion.menuRecolhido')==='1'; }catch(e){ return false; } }
+function g2menuRec(){ return true; }   // 13/10/2026 (proprietário): a barra lateral fica sempre recolhida, só com ícones e dica, sem expandir
 // <perfis> Perfil de demonstração (sem login; PRD 2.1): quem age nas decisões que exigem papel. Vale entre telas, no navegador de quem usa;
 // demonstra a experiência, não é segurança (no software o servidor tira o ator da sessão). Pessoas e papéis: CF-01 e telas vizinhas.
 // O papel vem sempre desta lista (g2pf), nunca do objeto que o comando recebe. Bloco único, lido também pelos testes sem navegador.
@@ -406,7 +406,7 @@ function g2unidSet(cultura,op){ const k=g2unidChave(cultura); G2_UNID_MEM[k]=Str
 // </perfis>
 // trocar o perfil (aqui ou em outra aba) fecha a confirmação ou o formulário de decisão aberto, montado para o perfil anterior (revisão do CTL-3,
 // achado 1; dano evitado: a tela afirmar que decide quem não tem o papel). Cada tela diz o que fecha em self.g2perfilFecha (O.S., Mapa, Estoque)
-function g2navvals(self,v,nav){ const rec=(self.state.menuRec===undefined)?g2menuRec():!!self.state.menuRec;
+function g2navvals(self,v,nav){ const rec=g2menuRec();
   const pf=g2perfil(); v.perfil_k=pf.k; v.perfil_ini=pf.k.charAt(0); v.perfil_opts=g2perfis().map(p=>({v:p.k,t:p.t}));
   v.perfil_set=(e)=>{ const k=e.target.value; G2_PERFIL_MEM=k; try{ localStorage.setItem(G2_PERFIL_KEY,k); }catch(er){} self.setState(Object.assign({perfil:k,g2toast:'Perfil de demonstração: '+((g2pf(k)||{}).t||k)+' (não é segurança de acesso).'},self.g2perfilFecha||{})); };
   if(!self.__g2pf){ self.__g2pf=1; try{ window.addEventListener('storage',(e)=>{ if(e.key===G2_PERFIL_KEY) self.setState(Object.assign({perfil:e.newValue},self.g2perfilFecha||{})); }); }catch(er){} }

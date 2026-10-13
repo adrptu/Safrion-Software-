@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""CD-02 · culturas e operações cadastráveis (15 verificações no Chrome): abas com uma primária cada, árvore Cultura → cultivar,
+"""CD-02 Culturas e cultivares e CD-08 Operações e rendimentos (16 verificações no Chrome). Desde 13/10/2026 (proprietário: "tire cadastro
+de operações de culturas e cultivares, e coloque no lugar mais correto") são dois cadastros, cada um com a sua primária: árvore Cultura → cultivar,
 formulário da cultura pela linha, 'Outra cultura…', item de semente vinculado, árvore Operação → conjunto, formulário da operação
 (processo e atividades), 'Outra operação…' e rendimento por cultura."""
 # TABELAS-FOCO (06/10/2026): processo, tipo de ciclo e unidade em colunas próprias; no CD-06, Unidade kg e Embalagem "—" em colunas próprias ('sem embalagem' segue no cabeçalho)
@@ -8,8 +9,9 @@ import time
 t=T(); J=t.J
 try:
     t.goto('CD-02.dc.html')
-    t.chk('abre na aba Culturas com a primária "Cadastrar cultivar" (no bloco) e o estado das pendências',
-          'Cadastrar cultivar' in t.bloco() and '1 cultivar sem semente · 1 premissa a validar' in t.header() and not t.errs(), t.header()+' '+t.errs())
+    t.chk('CD-02 Culturas e cultivares: primária "Cadastrar cultivar" (no bloco), estado só das cultivares e nenhuma aba ou linha de operação',
+          'Cadastrar cultivar' in t.bloco() and '1 cultivar sem semente' in t.header() and 'premissa' not in t.header() and J("document.querySelector('h1').innerText")=='Culturas e cultivares'
+          and J("!document.querySelector('[role=tablist][aria-label^=\"Cadastros de\"]') && document.body.innerText.indexOf('Operações e rendimentos')<0 && document.body.innerText.indexOf('Cadastrar rendimento')<0") and not t.errs(), t.header()+' '+t.errs())
     soja=t.rowtxt(0,'Soja 3 cultivares')
     t.chk('árvore Cultura → cultivar: Soja com unidade de produtividade e ciclo anual; coluna Registro saiu da tabela',
           soja and 'sc de 60 kg/ha' in soja and 'Anual' in soja and J("document.querySelector('[role=table]').innerText.indexOf('REGISTRO')<0"), soja)
@@ -40,10 +42,11 @@ try:
     t.fset('cult','Soja'); t.fset('nome','58 W'); t.fset('dias','118'); t.btn('Salvar')
     t.chk('cultivar repetida na mesma cultura é barrada', '58 W já está cadastrada em Soja' in t.alerts(), t.alerts())
     t.cancel()
-    # ---- aba Operações e rendimentos ----
-    t.clk('Operações e rendimentos'); time.sleep(.2)
-    t.chk('aba Operações: primária "Cadastrar rendimento" e secundária "Comparar com o realizado"',
-          'Cadastrar rendimento' in t.bloco() and J("document.body.innerText.indexOf('Comparar com o realizado')>=0 && document.body.innerText.indexOf('apontado')<0"), t.header())
+    # ---- CD-08 Operações e rendimentos (cadastro próprio desde 13/10) ----
+    t.goto('CD-08.dc.html')
+    t.chk('CD-08: título, "‹ Cadastros", estado "1 premissa a validar", primária "Cadastrar rendimento" e secundária "Comparar com o realizado"',
+          J("document.querySelector('h1').innerText")=='Operações e rendimentos' and J("!!document.querySelector('a.volta37[href=\"CD.dc.html\"]')") and '1 premissa a validar' in t.header()
+          and 'Cadastrar rendimento' in t.bloco() and J("document.body.innerText.indexOf('Comparar com o realizado')>=0 && document.body.innerText.indexOf('apontado')<0"), t.header())
     t.openrow(0,'Pulverização 1 conjunto Tratos culturais')   # processo em coluna própria (TABELAS-FOCO)
     t.chk('linha da operação abre processo (etapa de custo) e atividades usuais',
           t.title()=='Operação · Pulverização' and t.fv('proc')=='Tratos culturais' and 'Dessecação pré-plantio' in (t.fv('atvs') or ''), [t.title(),t.fv('proc'),t.fv('atvs')])
