@@ -19,7 +19,11 @@ Todos) e ficam com a mesma grandeza (Tratamento de sementes → Beneficiamento, 
 por clique e só pelo teclado (Tab, Enter e Espaço no menu de filtro e nos chips). Revisão do TABR-CTX-01 (10/10/2026): a cada vez que a
 coluna de capacidade entra, muda ou sai, a grade tem uma trilha por cabeçalho e nenhuma linha fora dela (a 390 px a 1ª coluna presa do
 g2lib guardava o nº de colunas da abertura e a última coluna caía para a linha de baixo; a 1440 px não há coluna presa).
-Uso: python3 tabelas_cad_test.py [pasta de capturas]   (~5 min) · python3 tabelas_cad_test.py --ctx [pasta]: só o TABR-CTX-01"""
+TABR-CTX-02 (reverificação do TABR-CTX-01, 10/10/2026): o menu de filtro da coluna de capacidade só oferece números da grandeza dela (CD-03
+Trator, Irrigação e Armazenagem; CD-06 Tanque e Silo) e escolher cada um mostra a linha dele (antes "300 cv", a vazão da bomba, e a lista vazia);
+mesmo rótulo com outra unidade (Armazenagem, Capacidade em sc de 60 kg → Tratamento de sementes, em kg/h) tira o filtro e a ordem; o × da
+Classe leva o foco à busca só pelo teclado (no toque e no mouse, não: no celular abriria o teclado).
+Uso: python3 tabelas_cad_test.py [pasta de capturas]   (~6 min) · python3 tabelas_cad_test.py --ctx [pasta]: só o TABR-CTX-01 e o TABR-CTX-02"""
 import sys, os, re, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from comp_lib import Chrome, servir
@@ -176,6 +180,13 @@ def ctx01(tam, tec):
     chk(f'{m} CD-03: mesma grandeza e unidade (kg/h): Tratamento de sementes · 2.400 kg/h → Beneficiamento mantém o filtro e a ordem (Packing linha 1)',
         all(prep) and r3 == ['Máquina TSI'] and sorted(c4) == ['Capacidade: 2.400 kg/h', 'Classe: Beneficiamento'] and dict(h4).get('Capacidade') == 'kg/h' and r4 == ['Packing linha 1'] and seta('Capacidade') == '▼',
         (prep, r3, c4, h4, r4, seta('Capacidade')))
+    # ---- CD-03: mesmo rótulo, outra unidade (TABR-CTX-02): Armazenagem · 60.000 sc de 60 kg (↓) → Tratamento de sementes (Capacidade kg/h) ----
+    prep = [filtra('Classe', 'Armaze', 'Armazenagem'), filtra('Capacidade', '60.000', '60.000 sc de 60 kg'), ordena('Capacidade')]; r5, c5 = nomes(), fchips(); al3.append(trilha(g, 'Armazenagem'))
+    filtra('Classe', 'Tratamento', 'Tratamento de sementes'); c6, h6, r6 = fchips(), g.heads(), nomes(); al3.append(trilha(g, 'Tratamento de sementes (de sc)'))
+    chk(f'{m} CD-03: mesmo rótulo com outra unidade: Armazenagem · Capacidade 60.000 sc de 60 kg (↓) → Tratamento de sementes tira o filtro e a ordem em sc '
+        '(Capacidade em kg/h e a Máquina TSI à vista; sem "Capacidade: 60.000 sc de 60 kg" e lista vazia)',
+        all(prep) and r5 == ['Silo 01'] and sorted(c5) == ['Capacidade: 60.000 sc de 60 kg', 'Classe: Armazenagem'] and c6 == ['Classe: Tratamento de sementes']
+        and dict(h6).get('Capacidade') == 'kg/h' and r6 == ['Máquina TSI'] and seta('Capacidade') == '⇅', (prep, r5, c5, c6, h6, r6, seta('Capacidade')))
     chk(f'{m} CD-03: a coluna de capacidade entra (Trator), sai (sem Classe), muda (Irrigação) e volta (kg/h) com uma trilha por cabeçalho e cada célula sob o seu cabeçalho'
         + (' (antes, a 390 px, 6 trilhas para 7 cabeçalhos e a Próxima calibração na linha de baixo)' if tam != '1440' else ''),
         all(x[1] == x[2] and x[3] == 0 for x in al3), al3)
@@ -201,13 +212,71 @@ def ctx01(tam, tec):
         all(x[1] == x[2] and x[3] == 0 for x in al6), al6)
     shot(f'ctx01-cd06-{tam.split()[0]}-{"teclado" if tec else "clique"}')
 
-class _SoCtx(Exception): pass   # --ctx: só o TABR-CTX-01 (os dois tamanhos, clique e teclado)
+# ---------- TABR-CTX-02: o menu de filtro da coluna de capacidade só oferece valores da grandeza dela; cada um mostra a sua linha ----------
+def ctx02_menu(tam, tec):
+    """Antes (a2e9a9b): com Classe = Trator o menu da Potência oferecia 11 números ("300 cv" é a vazão da bomba, "60.000 cv" as sacas do silo),
+    e no CD-06 Tanque o da Capacidade oferecia "60.000 L" (o silo); escolher um deles dava "0 de 15" e a lista vazia. Agora o menu só tem os
+    números das linhas da classe (ou do tipo) da coluna; nas outras linhas a célula é vazia ("(vazio)", como em qualquer coluna sem valor).
+    Escolher cada número, pelo clique ou só pelo teclado, mostra a linha dele."""
+    m = f'TABR-CTX-02 {tam} ' + ('teclado' if tec else 'clique')
+    def vals(col):
+        if not tec: return g.rotulos(col)
+        foca(f'button[aria-label="Filtrar {col}"]'); ENTER(); time.sleep(.45); r = menu_aberto(); c.tecla('Escape', 'Escape', 27); time.sleep(.35)
+        return [x for x, _ in (r[1] if r else [])]
+    def filtra(col, val):
+        return menu_tecla(col, 'vazio' if val == '(vazio)' else val.split(' ')[0], val) if tec else g.filtra(col, [val])
+    nomes = lambda: [r.get(g.labels()[0]) for r in g.dicts()]
+    def cada(onde, col, esperado):
+        """os números do menu da coluna são exatamente os esperados; escolher cada número oferecido mostra só a linha dele, nunca a lista vazia."""
+        vs = [x for x in vals(col) if x != '(vazio)']; res = []
+        for x in vs: ok = filtra(col, x); res.append((x, ok, nomes()))
+        chk(f'{m} {onde}: o menu {col} oferece só {", ".join(esperado)} (sem número de outra grandeza com a unidade da coluna) e cada um mostra a sua linha',
+            vs == list(esperado) and all(ok and r == [esperado.get(x)] for x, ok, r in res), (vs, [r for r in res if not (r[1] and r[2] == [esperado.get(r[0])])][:4]))
+    sel_classe = lambda cl: menu_tecla('Classe', cl[:6], cl) if tec else g.filtra('Classe', [cl])
+    # ---- CD-03: Trator (Potência cv), Irrigação (Vazão m³/h), Armazenagem (Capacidade sc de 60 kg) ----
+    abre('CD-03.dc.html'); g = Grade(J, 0)
+    sel_classe('Trator'); cada('CD-03 Classe = Trator', 'Potência', {'78 cv': 'Trator 04', '110 cv': 'Trator 03', '155 cv': 'Trator T1', '190 cv': 'Trator 02'})
+    sel_classe('Irrigação'); cada('CD-03 Classe = Irrigação', 'Vazão', {'45 m³/h': 'Gotejo T7', '300 m³/h': 'Bomba do Pivô 1', '340 m³/h': 'Bomba do Pivô 2'})
+    sel_classe('Armazenagem'); cada('CD-03 Classe = Armazenagem', 'Capacidade', {'60.000 sc de 60 kg': 'Silo 01'})
+    shot(f'ctx02-cd03-{tam.split()[0]}-{"teclado" if tec else "clique"}')
+    # ---- CD-06 Locais: Tanque (Capacidade L), Silo (Capacidade sc de 60 kg) ----
+    abre('CD-06.dc.html'); aba('Locais'); g = Grade(J, 0)
+    qf('Tanque', tec); cada('CD-06 Locais · Tanque', 'Capacidade', {'15.000 L': 'Tanque Sede'})
+    qf('Silo', tec); cada('CD-06 Locais · Silo', 'Capacidade', {'60.000 sc de 60 kg': 'Silo 01'})
+    shot(f'ctx02-cd06-{tam.split()[0]}-{"teclado" if tec else "clique"}')
+
+def toca(expr, toque):
+    """toque real (CDP touch) ou clique real do mouse no centro do elemento: o botão recebe o foco como no aparelho (o .click() do JS não foca)."""
+    r = J(f"(()=>{{const e=({expr}); if(!e) return null; e.scrollIntoView({{block:'center',inline:'nearest'}}); const r=e.getBoundingClientRect(); return [r.left+r.width/2,r.top+r.height/2];}})()")
+    if not r: return False
+    time.sleep(.15); x, y = r
+    if toque: c.toque(x, y)
+    else: c.mouse(x, y); c.mouse(x, y, 'mousePressed', 'left'); c.mouse(x, y, 'mouseReleased', 'left')
+    time.sleep(.5); return True
+def ctx02_foco(tam):
+    """TABR-CTX-02 (S4 da reverificação): tirar a Classe pelo × quando só havia ela e o filtro de capacidade (os dois chips somem). Pelo teclado o
+    foco vai à busca da grade (não se perde no corpo da página); pelo toque ou pelo mouse ele não vai ao campo de texto (no celular, o foco
+    programático num campo de texto abre o teclado sem a pessoa pedir). Antes (a2e9a9b) ia à busca também no toque e no clique."""
+    toque = tam != '1440'; m = f'TABR-CTX-02 {tam}'
+    def prep():
+        abre('CD-03.dc.html'); g = Grade(J, 0); ok = g.filtra('Classe', ['Trator']) and g.filtra('Potência', ['78 cv'])
+        J("document.activeElement&&document.activeElement.blur()"); time.sleep(.1); return bool(ok) and fchips() == ['Classe: Trator', 'Potência: 78 cv']
+    tag = lambda: J("(document.activeElement||document.body).tagName")
+    X = f"[...document.querySelectorAll('{RF}')].find(b=>b.offsetParent&&b.parentElement.innerText.trim().startsWith('Classe:'))"
+    p1 = prep(); t = toca(X, toque); time.sleep(.3); c1, f1, t1 = fchips(), foco(), tag()
+    chk(f'{m} CD-03: Classe = Trator + Potência 78 cv; o × da Classe pelo {"toque" if toque else "mouse"} tira os dois chips e não leva o foco ao campo "Buscar nesta tabela"',
+        p1 and t and c1 == [] and f1[0] != 'Buscar nesta tabela' and t1 not in ('INPUT', 'TEXTAREA'), (p1, t, c1, f1, t1))
+    p2 = prep(); ok = tira_chip('Classe:', True); time.sleep(.3); c2, f2 = fchips(), foco()
+    chk(f'{m} CD-03: o mesmo × pelo teclado (Tab e Enter) leva o foco à busca da grade, sem se perder no corpo da página',
+        p2 and ok and c2 == [] and f2[0] == 'Buscar nesta tabela', (p2, ok, c2, f2))
+
+class _SoCtx(Exception): pass   # --ctx: só o TABR-CTX-01 e o TABR-CTX-02 (os dois tamanhos, clique e teclado)
 try:
     if CTX:
         for w, h, e, t, tam in ((1440, 900, 1, False, '1440'), (390, 844, 2, True, '390 px')):
             c.aparelho(w, h, e, t); abre('Main.dc.html', .3); J("localStorage.clear(); sessionStorage.clear()")
-            ctx01(tam, False); ctx01(tam, True)
-        ERRS.extend(J("window.__errs") or []); chk('sem erro de script (TABR-CTX-01)', not ERRS, ERRS[:3]); raise _SoCtx
+            ctx01(tam, False); ctx01(tam, True); ctx02_menu(tam, False); ctx02_menu(tam, True); ctx02_foco(tam)
+        ERRS.extend(J("window.__errs") or []); chk('sem erro de script (TABR-CTX-01 e TABR-CTX-02)', not ERRS, ERRS[:3]); raise _SoCtx
     c.aparelho(1440, 900, 1, False)
     abre('Main.dc.html', .3); J("localStorage.clear(); sessionStorage.clear()")
     # ================= CD-01 Talhões =================
@@ -437,7 +506,7 @@ try:
                     ruim = sorted({'Situação', 'Situação do papel', 'Fonte'} & set(m['fora'])) + (['rola %d px' % m['sobra']] if (w == 1440 and m['sobra'] > 1 and not pg.startswith('CD-05')) else [])
                     if ruim: larg.append((w, pg.split('.')[0], tb, i, ruim))
     chk('CD (A1): Situação à vista sem rolar a 1440 e 1280 px; a 1440 px as grades cabem na caixa (o CD-05 rola só os contatos)', not larg, larg)
-    c.aparelho(1440, 900, 1, False); ctx01('1440', False); ctx01('1440', True)
+    c.aparelho(1440, 900, 1, False); ctx01('1440', False); ctx01('1440', True); ctx02_menu('1440', False); ctx02_menu('1440', True); ctx02_foco('1440')
     ERRS.extend(J("window.__errs") or []); chk('sem erro de script (1440)', not ERRS, ERRS[:3])
     # ================= 390 px =================
     c.aparelho(390, 844, 2, True); r390 = []
@@ -461,7 +530,7 @@ try:
     vaz = J("[...document.querySelectorAll('main div')].some(x=>x.offsetParent&&/^Nenhuma linha corresponde aos filtros/.test(x.innerText.trim()))")
     chk('CD-03 390 px (filtro): Classe = Irrigação → 3 linhas; + busca "Silo" → nenhuma linha e o aviso; Limpar filtros volta a todas',
         len(a1) == 3 and g.dicts() == [] and vaz and (limpa(J) or True) and len(g.dicts()) == n0, (a1, n0))
-    ctx01('390 px', False); ctx01('390 px', True)
+    ctx01('390 px', False); ctx01('390 px', True); ctx02_menu('390 px', False); ctx02_menu('390 px', True); ctx02_foco('390 px')
     ERRS.extend(J("window.__errs") or []); chk('sem erro de script (390)', not ERRS, ERRS[:3])
 except _SoCtx: pass
 finally:
