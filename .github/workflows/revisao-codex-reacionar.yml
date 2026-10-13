@@ -2,7 +2,7 @@ name: Revisão do Codex (reacionar)
 
 # Quando o app do Codex cria, atualiza ou apaga o resumo da revisão num PR, ou quando o revisor publica, retira ou apaga o parecer,
 # roda de novo o check "Revisão do Codex no commit atual" do head desse PR. Comentário não dispara workflow no commit do PR, por isso o re-run.
-# O texto do comentário só é lido pelo if do job; ele nunca entra no shell.
+# O texto do comentário (e o anterior, na edição: 4253612391) só é lido pelo if do job; ele nunca entra no shell.
 on:
   issue_comment:
     types: [created, edited, deleted]  # apagar evidência também reavalia (4253587317)
@@ -15,7 +15,9 @@ jobs:
     if: >-
       github.event.issue.pull_request && (github.event.comment.user.login == 'chatgpt-codex-connector[bot]'
       || contains(github.event.comment.body, 'Parecer favorável do revisor:')
-      || contains(github.event.comment.body, 'Parecer retirado:'))
+      || contains(github.event.comment.body, 'Parecer retirado:')
+      || contains(github.event.changes.body.from, 'Parecer favorável do revisor:')
+      || contains(github.event.changes.body.from, 'Parecer retirado:'))
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
