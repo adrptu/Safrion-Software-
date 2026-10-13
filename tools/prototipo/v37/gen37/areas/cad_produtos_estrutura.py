@@ -157,11 +157,13 @@ function PREVALS(self,v){ cadActsIni(self); const grps=RW(self,'g_grp'); const i
   // Local padrão do item = locais cadastrados (novo, renomeado ou excluído acompanha); padrão pelo id do Galpão 2
   const lf=(GR('g_itm').edit.fields||[]).find(x=>x.k==='local'); if(lf) lf.opts=locs.map(l=>l.v.nome);
   const dl=locs.find(l=>l.id===C6.defl); cadcPadrao('g_itm','local',dl?dl.v.nome:'');
+  /* TABR-CTX-02: a capacidade só nas linhas do tipo que a coluna representa (Tanque em L, Silo em sc de 60 kg); nas outras a célula fica vazia
+     (o menu de filtro conta todas as linhas: no Tanque oferecia "60.000 L", que eram as sacas do silo, e escolher esvaziava a lista) */
+  v.c6l_ncol=c6capCol(self); const qc=GR('g_loc').cols.some(c=>c.k==='capn')?g2st(self,'g_loc').qv:'';
   locs.forEach(r=>{ const V=r.v; const n=its.filter(i=>i.v.local===V.nome).length; V.itens=n; r.nd=n?'com itens':''; r.p.nome=[{k:'b',t:V.nome||''}]; r.s.nome=V.nome||'';
-    const tq=V.tipo==='Tanque'&&isnum(V.cap)&&String(V.cap)!==''; const si=V.tipo==='Silo'&&isnum(V.capsc)&&String(V.capsc)!=='';
+    const tq=qc==='Tanque'&&V.tipo==='Tanque'&&isnum(V.cap)&&String(V.cap)!==''; const si=qc==='Silo'&&V.tipo==='Silo'&&isnum(V.capsc)&&String(V.capsc)!=='';
     V.capn=tq?Number(V.cap):(si?Number(V.capsc):''); const cap=tq?nf(V.cap):(si?nf(V.capsc):'');
-    r.p.capn=cap?[{k:'txt',t:cap}]:[{k:'mut',t:'—'}]; r.s.capn=cap; });   /* a coluna põe a unidade do tipo */
-  v.c6l_ncol=c6capCol(self); }
+    r.p.capn=cap?[{k:'txt',t:cap}]:[{k:'mut',t:'—'}]; r.s.capn=cap; }); }   /* a coluna põe a unidade do tipo */
 // capacidade dos locais com o filtro rápido Tanque (L) ou Silo (sc de 60 kg); L ↔ sc ou Todos tira o filtro e a ordem dela (TABR-CTX-01)
 function c6capCol(self){ const sl=GR('g_loc'); if(!sl.colsAll) sl.colsAll=sl.cols.slice(); const qv=g2st(self,'g_loc').qv||''; const un={'Tanque':'L','Silo':'sc de 60 kg'}[qv];
   capColDeps(self,'g_loc','capn',un?'Capacidade|'+un:'');
