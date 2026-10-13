@@ -281,8 +281,10 @@ function cenReqsDoLote(c, l) { return Object.values(c.reqs || {}).filter(r => ['
 function cenSemFisicoTxt(c, l, q) { const rs = cenReqsDoLote(c, l); const quem = typeof g2quem === 'function' ? g2quem('almoxarife') : 'o almoxarife';
   return 'Reserva sem físico: ' + cenNum(q) + ' ' + l.un + ' no lote ' + l.lote + (rs.length ? ' (' + rs.join(', ') + ')' : '') + ' · ' + quem + ' confere o lote e recebe a reposição, ou a ordem revê a quantidade; a reserva continua e a entrega acima do físico é recusada.'; }
 // Decisão única do valor contado contra o bloqueado e o reservado do lote (na contagem e na aprovação): {erro} ou {alerta}.
+// Quantidade contada: número finito, 0 ou mais (recusa vazio, NaN, Infinity e o null que o Infinity vira depois de salvo). Vale na contagem e na aprovação.
+function cenQtdContada(x) { return typeof x === 'number' && Number.isFinite(x) && x >= 0; }
 function cenAjusteDecisao(c, l, contado) {
-  if (!(contado >= 0)) return { erro: 'Contagem inválida: informe a quantidade contada (0 ou mais).' };
+  if (!cenQtdContada(contado)) return { erro: 'Contagem inválida: informe a quantidade contada (número de 0 em diante). Nada foi alterado.' };
   if (contado + 1e-9 < (l.quarentena || 0)) { const qa = typeof g2quem === 'function' ? g2quem('almoxarife') : 'o almoxarife', qg = typeof g2quem === 'function' ? g2quem('gestor') : 'o gestor';
     return { erro: 'Contagem de ' + cenNum(contado) + ' ' + l.un + ' abaixo do bloqueado em quarentena (' + cenNum(l.quarentena) + ' ' + l.un + ') no lote ' + l.lote + ': nada foi alterado e o bloqueado não é liberado. ' + qa + ' confere a parcela bloqueada ou a perda e reconta; laudo ou perda do bloqueado: ' + qg + '.' }; }
   const q = cenSemFisico(Object.assign({}, l, { fisico: contado })); if (!(q > 1e-9)) return { alerta: '' };
@@ -303,7 +305,7 @@ function cenVelhaTxt(c, aj, ms) { const l = c.lotes[aj.key] || {}; const un = aj
   return 'A contagem ' + (aj.inv || aj.id) + (aj.em0 ? ' de ' + aj.em0 : '') + ' está desatualizada: depois dela o lote ' + aj.lote + ' teve '
     + (ms.length ? ms.length + cenPl(ms.length, ' movimento', ' movimentos') + ' (' + lst + ')' : 'o físico mudado') + '; o físico era ' + cenNum(aj.sistema) + ' ' + un + ' e agora é ' + cenNum(l.fisico) + ' ' + un + fim; }
 function cenContar(c, key, contado) { const l = c.lotes[key]; if (!l) throw new Error('Lote não encontrado.');
-  if (!(contado >= 0) || contado === '' || contado === null) throw new Error('Informe a quantidade contada.');
+  if (!cenQtdContada(contado)) throw new Error('Informe a quantidade contada (número de 0 em diante).');
   const dif = contado - l.fisico; c.ajustes = c.ajustes || [];
   if (Math.abs(dif) < 1e-9) { cenMov(c, { tipo: 'contagem', prod: l.prod, lote: l.lote, qtd: 0, un: l.un, quem: 'Rui (almoxarife)', origem: 'web' }); return { msg: 'Contagem confere: ' + cenNum(contado) + ' ' + l.un + ' no lote ' + l.lote + '.' }; }
   const dc = cenAjusteDecisao(c, l, contado); if (dc.erro) throw new Error(dc.erro);

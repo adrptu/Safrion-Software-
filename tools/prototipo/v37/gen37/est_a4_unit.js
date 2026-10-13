@@ -145,5 +145,23 @@ caso('contagem de base (INV-2609, anterior à demonstração): marcador no iníc
   ok('com entrada depois do início: recusado, sem criar ajuste nem mudar o físico (91.000)', DES.test(r2.erro || '') && snap() === s0 && G().lotes[K].fisico === 91000 && !(G().ajustes || []).length, r2.erro || r2.msg);
 });
 
+caso('A4 · quantidade contada finita (Codex 6148863313): Infinity, NaN e null recusados na contagem e na aprovação; 0 vale', () => {
+  cenReset(); nf(1200, 'NF 7731');
+  for (const [nome, v] of [['9…9 (309 dígitos) → Infinity', g2num('9'.repeat(309))], ['NaN', NaN], ['vazio', g2num('')], ['negativo', -1]]) {
+    const s0 = snap(); const r = contar(v);
+    ok('contagem ' + nome + ': recusada sem efeito (nenhum ajuste, físico 1.200)', !!r.erro && snap() === s0 && lot()[0] === 1200 && !(G().ajustes || []).length, r.erro || r.msg);
+  }
+  const inv = invDe(contar(1100)); ok('contagem 1.100 registrada (pendente)', (ajDe(inv) || {}).estado === 'Aguardando gestor', ajDe(inv));
+  // contado corrompido depois de salvo (o Infinity vira null no JSON): a aprovação confere de novo, antes de qualquer mutação
+  for (const [nome, v] of [['null', null], ['Infinity', Infinity], ['NaN', NaN], ['texto', '1100']]) {
+    M(c => { c.ajustes.find(x => x.inv === inv).contado = v; return { msg: 'ok' }; });
+    const s1 = snap(); const rt = aprovar(inv); const rd = M(c => cenAprovarAjuste(c, ajDe(inv).id, true, ANA));
+    ok('aprovar com contado ' + nome + ': recusado pela tela e pelo motor, físico 1.200, ajuste pendente, sem movimento', /Contagem inválida/.test(rt.erro || '') && /Contagem inválida/.test(rd.erro || '') && snap() === s1 && lot()[0] === 1200 && ajDe(inv).estado === 'Aguardando gestor' && nAjMov() === 0, [rt.erro || rt.msg, rd.erro || rd.msg]);
+  }
+  M(c => { const a = c.ajustes.find(x => x.inv === inv); a.contado = 1100; a.dif = -100; return { msg: 'ok' }; });
+  const ra = aprovar(inv); ok('contado 1.100 restaurado: aprova (físico 1.100)', !ra.erro && lot()[0] === 1100, ra.erro || lot());
+  const i0 = invDe(contar(0)); const r0 = aprovar(i0); ok('contagem 0 continua válida: registrada e aprovada (físico 0)', !!i0 && !r0.erro && lot()[0] === 0, [i0, r0.erro || r0.msg, lot()]);
+});
+
 console.log('\nRESULTADO_JS ' + (nfail ? 'FALHA ' + nfail : 'OK'));
 })();
