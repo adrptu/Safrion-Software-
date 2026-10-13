@@ -64,3 +64,48 @@ function intCompras(D, hoje) { hoje = hoje || prHoje(); const hist = D.hist || [
            economia: prSoma(itens.filter(i => i.economia !== null && prCmp(i.economia, 0) > 0).map(i => i.economia)), acima: itens.filter(i => i.acima).length,
            vencidas: itens.filter(i => !i.melhor && i.nVenc).length }; }
 try { window.__int = { intSpread, intVariacao, intPosicao, intLiquido, intPontualidade, intRsHa, intVendas, intCompras }; } catch (e) {}
+
+/* ---------- INTEL-02 · preço, tendência e melhor mês (pedido do proprietário, 13/10/2026) ----------
+   Série mensal (INTP, sintética e rotulada). Índice sazonal do mês = média, nas janelas de 12 meses que terminam no mês mais
+   recente, de (preço do mês ÷ média da janela); só janelas completas. Tendência = média dos 3 últimos meses contra os 3
+   anteriores, sem o efeito da época (preço ÷ índice do mês; ±3% muda o sinal). Normal do mês = média dos últimos 12 meses ×
+   índice do mês. Histórico não é previsão. */
+const INT_MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const INT_TEND = '0.03';   // tendência: ±3%
+const INT_SAZ = '0.03';    // vantagem sazonal mínima para recomendar esperar (venda: já descontado o custo do dinheiro)
+const INT_NORMA = '0.05';  // preço fora do normal do mês: ±5%
+function intMes(m) { return Number(String(m).slice(5, 7)) - 1; }
+function intMesTxt(i) { return INT_MESES[((i % 12) + 12) % 12]; }
+function intMedia(xs) { return xs && xs.length ? prDiv(prSoma(xs), xs.length) : null; }
+function intSazonal(s) { const n = Math.floor((s || []).length / 12); if (n < 2) return null; const acc = Array.from({ length: 12 }, () => []);
+  for (let w = 0; w < n; w++) { const jan = s.slice(s.length - 12 * (w + 1), s.length - 12 * w); const med = intMedia(jan.map(x => x.p)); jan.forEach(x => acc[intMes(x.m)].push(prDiv(x.p, med))); }
+  return { idx: acc.map(intMedia), anos: n }; }
+function intTendencia(s, z) { if (!s || s.length < 6 || !z) return { v: null, est: 'Sem série' }; const ds = x => prDiv(x.p, z.idx[intMes(x.m)]);   // sem o efeito da época
+  const v = intRel(intMedia(s.slice(-3).map(ds)), intMedia(s.slice(-6, -3).map(ds)));
+  return { v, est: prCmp(v, INT_TEND) > 0 ? 'Alta' : prCmp(v, prSub(0, INT_TEND)) < 0 ? 'Queda' : 'Estável' }; }
+function intVarK(s, k) { return s && s.length > k ? intRel(s[s.length - 1].p, s[s.length - 1 - k].p) : null; }
+function intNorma(s, z) { const m = intMes(s[s.length - 1].m); const esp = prMul(intMedia(s.slice(-12).map(x => x.p)), z.idx[m]); return { esp, vs: intRel(s[s.length - 1].p, esp) }; }
+function intExtremo(z, maior) { let b = 0; for (let k = 1; k < 12; k++) { const c = prCmp(z.idx[k], z.idx[b]); if (maior ? c > 0 : c < 0) b = k; } return b; }   // empate: o mês mais cedo
+/* comum aos dois lados: preço de agora, variações, tendência, sazonalidade e normal do mês */
+function intLinhaPreco(s) { if (!s || !s.length) return null; const z = intSazonal(s); const ult = s[s.length - 1]; const t = intTendencia(s, z);
+  return { s, z, atual: ult.p, mesAtual: intMes(ult.m), ref: ult.m, v1: intVarK(s, 1), v12: intVarK(s, 12), tend: t.est, tv: t.v, norma: z ? intNorma(s, z) : null }; }
+/* venda: melhor mês dos próximos 12; esperar só compensa se o ganho histórico menos o custo do dinheiro (1,2% a.m.) passar de 3%.
+   Perecível não espera: a época boa orienta o plantio e a colheita, e a venda acompanha a colheita */
+function intMomentoVenda(s, perecivel) { const L = intLinhaPreco(s); if (!L || !L.z) return L; const z = L.z, m0 = L.mesAtual; let bd = 0;
+  for (let d = 1; d < 12; d++) if (prCmp(z.idx[(m0 + d) % 12], z.idx[(m0 + bd) % 12]) > 0) bd = d;
+  const ganho = intRel(z.idx[(m0 + bd) % 12], z.idx[m0]); const liq = prSub(ganho, prMul(INT_TAXA_MES, bd));
+  const rec = perecivel ? 'Vender na colheita' : (bd === 0 || prCmp(L.norma.vs, INT_NORMA) >= 0) ? 'Vender agora' : prCmp(liq, INT_SAZ) >= 0 ? 'Esperar' : 'Sem ganho em esperar';
+  return Object.assign(L, { melhor: intExtremo(z, true), bd, mesAlvo: (m0 + bd) % 12, ganho, liq, rec, perecivel: !!perecivel }); }
+/* compra: melhor mês entre agora e o último dia para pedir e receber antes da necessidade (Planejar safra − prazo de entrega) */
+function intMesesAte(de, ate) { return (Number(ate.slice(0, 4)) - Number(de.slice(0, 4))) * 12 + Number(ate.slice(5, 7)) - Number(de.slice(5, 7)); }
+function intMomentoCompra(s, lim) { const L = intLinhaPreco(s); if (!L || !L.z) return L; const z = L.z, m0 = L.mesAtual;
+  const D = lim ? Math.max(0, Math.min(11, intMesesAte(L.ref, lim))) : 11; let bd = 0;
+  for (let d = 1; d <= D; d++) if (prCmp(z.idx[(m0 + d) % 12], z.idx[(m0 + bd) % 12]) < 0) bd = d;
+  const econ = prSub(1, prDiv(z.idx[(m0 + bd) % 12], z.idx[m0]));
+  const rec = (D === 0 || bd === 0 || prCmp(L.norma.vs, prSub(0, INT_NORMA)) <= 0) ? 'Comprar agora' : prCmp(econ, INT_SAZ) >= 0 ? 'Esperar' : 'Comprar até a necessidade';
+  return Object.assign(L, { melhor: intExtremo(z, false), D, bd, mesAlvo: (m0 + bd) % 12, econ, rec, lim }); }
+function intPrecos(P) { P = P || {};
+  const vendas = (P.vendas || []).map(v => Object.assign({ prod: v.prod, un: v.un, fonte: v.fonte }, v.serie && v.serie.length ? intMomentoVenda(v.serie, v.perecivel) : { semSerie: true }));
+  const compras = (P.compras || []).map(c => { const M = intMomentoCompra(c.serie, c.lim); const eco = M && M.rec === 'Esperar' ? prMul(prMul(c.qtd, M.atual), M.econ) : null;
+    return Object.assign({ nome: c.nome, grupo: c.grupo, un: c.un, qtd: c.qtd, nec: c.nec, prazo: c.prazo }, M, { eco }); });
+  return { vendas, compras, economia: prSoma(compras.map(c => c.eco || 0)) }; }

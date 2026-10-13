@@ -27,6 +27,8 @@ H_OVR=json.load(open(_OVR_P)) if os.path.exists(_OVR_P) else {}  # alturas medid
 def _h(fname,H): return H_OVR.get(fname) or HEIGHTS37.get(fname,H)
 PRIMHREF={}   # fid -> destino do botão primário
 PARENT37={}   # fname -> fname de volta
+# botão de voltar com rótulo, ao lado do título (13/10/2026, proprietário: "botão de voltar fácil para todos cadastros"): fname -> (rótulo, destino)
+VOLTA37={f'CD-0{i}.dc.html':('Cadastros','CD.dc.html') for i in range(1,8)}
 
 # Menu vigente por decisão do proprietário (25/09/2026): Mapa · Cadastros · Agrícola · Suprimentos.
 # 01/10/2026: Consulta Agrofit (antes de Planos), Pragas e doenças (MIP/MID) e Irrigação voltam dentro de Agrícola; Manutenção volta logo abaixo de Agrícola (pedidos do proprietário).
@@ -43,8 +45,7 @@ PARENT37={}   # fname -> fname de volta
 #   no canvas, na página "Módulos ocultos". Chave única, lida por ui37, areas/producao.py e build.py: reativar é BEN_PUBLICADO=True.
 BEN_PUBLICADO=False
 MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
- ('Cadastros','layers',[('Fazendas, áreas e talhões','CD-01.dc.html'),('Culturas, cultivares e operações','CD-02.dc.html'),('Máquinas, instalações e setores','CD-03.dc.html'),
-   ('Pessoas e equipes','CD-04.dc.html'),('Parceiros e fornecedores','CD-05.dc.html'),('Produtos, unidades e locais','CD-06.dc.html'),('Estrutura gerencial','CD-07.dc.html')]),
+ ('Cadastros','layers',[('Cadastros','CD.dc.html')]),   # 13/10/2026 (proprietário): sem submenus; a tela CD mostra os 7 cadastros em cartões e cada um volta por "‹ Cadastros"
  ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html')]),
  ('Produção','Colheita',[('Previsão e colheita','COLH.dc.html'),('Recebimento e beneficiamento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html')]),   # 3 itens (colheita D-01); Beneficiamento é tela irmã de Cargas (BEN-D14)
  ('Comercial','Vendas',[('Contratos e pedidos','VEN.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Painel comercial','PCOM.dc.html'),('Inteligência de vendas','IV.dc.html')]),   # INTEL-01 (13/10): inteligência comercial de vendas
@@ -303,7 +304,8 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
         m={'area':MENU2[mi][0],'submenu':vs[0] if len(vs)==1 else MENU2[mi][0]}
     else:
         m=MAPA.get(fid) or {'area':area_of(fid) or 'Módulo oculto','submenu':CAT.get(fid,{}).get('titulo',fid)}
-    crumbs=[m['area'],m['submenu']]+(crumbs_extra or [])
+    if fname in VOLTA37 and not crumbs_extra: m={'area':m['area'],'submenu':title}   # cadastro aberto pela tela inicial: o caminho diz qual
+    crumbs=([m['area']] if m['area']==m['submenu'] and not crumbs_extra else [m['area'],m['submenu']])+(crumbs_extra or [])   # "Cadastros", não "Cadastros › Cadastros"
     back=PARENT37.get(fname) or ffile(fid) if crumbs_extra else (PARENT37.get(fname) or fname)
     _sep=f' <span style="color: {MUTED};">›</span> '
     parts=[]
@@ -325,6 +327,11 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
     controw=cont if cont else ''
     foot=f'<div style="display: flex; align-items: center; gap: 10px; padding: 12px 32px; border-top: 1px solid {LINE}; background: {SURF};"><span style="width: 8px; height: 8px; border-radius: 999px; background: {ACC};"></span><div style="font-size: 13px; color: {MUTED};">{esc(footer)}</div></div>' if footer else ''
     voltar=f'<a href="{back}" aria-label="Voltar" style="text-decoration: none; display: inline-flex; align-items: center;">{chev()}</a>' if crumbs_extra else ''
+    if not crumbs_extra and fname in VOLTA37:
+        _vr,_vh=VOLTA37[fname]
+        voltar=(f'<a href="{_vh}" class="volta37" aria-label="Voltar para {esc(_vr)}" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 14px 0 10px; '
+                f'border: 1px solid {LINE}; border-radius: 999px; background: {SURF}; color: {INK}; font-size: 13px; font-weight: 700; flex-shrink: 0;">'
+                f'<span aria-hidden="true" style="font-size: 16px; line-height: 1;">‹</span>{esc(_vr)}</a>')
     html=f'''<!doctype html>
 <html lang="pt-BR">
 <head>

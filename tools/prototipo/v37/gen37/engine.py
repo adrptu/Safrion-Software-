@@ -1322,7 +1322,9 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         ".g2rola [role=table]>[role=row]:first-child{position:sticky;top:0;z-index:3}"
         # a tabela cabe na largura visível quebrando o texto das colunas e só rola de lado quando nem assim cabe (o menor conteúdo passa
         # da largura); no celular segue a rolagem com a 1ª coluna presa (proprietário, 13/10/2026: "rolagem desnecessária")
-        "@media (min-width:700px){.g2rola [role=table]{width:100%!important}}"
+        # a célula nunca fica mais estreita que o seu menor conteúdo (a linha da célula traz min-width:0): o que não quebra (nome no CADX,
+        # número) segura a coluna e, se preciso, a tabela rola de lado em vez de um texto invadir a coluna vizinha
+        "@media (min-width:700px){.g2rola [role=table]{width:100%!important}.g2rola [role=table] [role=cell]{min-width:min-content!important}}"
         # separador "·" no começo de uma parte da célula: fica num elemento próprio e some (opacidade, sem mudar a largura) quando a parte
         # começa a linha; o texto lido (innerText, leitor de tela sem o ponto) não muda (g2sepIni em g2lib.js)
         ".g2sepd[data-ini]{opacity:0}"
