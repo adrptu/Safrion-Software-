@@ -9,7 +9,9 @@ const PlanoReferencia = (() => {
   const chave = (...partes) => JSON.stringify(partes); // separadores em nomes não colidem
   function copia(v) {
     if (v === null || typeof v === 'string' || typeof v === 'boolean') return v;
-    if (typeof v === 'number' && Number.isFinite(v)) return v;
+    // Canoniza apenas o ruído do Number do protótipo, sem arredondar dose/área a centésimos.
+    // Inteiros (incluindo identidades) ficam intactos; não é o decimal do software real.
+    if (typeof v === 'number' && Number.isFinite(v)) return Number.isInteger(v) ? v : Number(v.toPrecision(15));
     if (Array.isArray(v)) return v.map(copia); // listas ordenadas permanecem ordenadas
     if (v && Object.getPrototypeOf(v) === Object.prototype) {
       const out = {};

@@ -27,6 +27,15 @@ teste('ordem visual de entidades e chaves não produz revisão', () => {
   const b=snap([e('1',{area:2}),e('2',{area:1,data:'2026-10-01'})]);
   assert.equal(PR.bytes(a),PR.bytes(b)); assert.deepEqual(PR.comparar(a,b),[]);
 });
+teste('ruído binário não cria revisão; dose pequena e diferença real permanecem', () => {
+  const a=snap([e('1',{dose:{valor:0.1+0.2,unidade:'L/ha'},area:0.1+0.2})]);
+  const b=snap([e('1',{dose:{valor:0.3,unidade:'L/ha'},area:0.3})]);
+  assert.equal(PR.bytes(a),PR.bytes(b)); assert.deepEqual(PR.comparar(a,b),[]);
+  assert.equal(PR.comparar(b,snap([e('1',{dose:{valor:0.300001,unidade:'L/ha'},area:0.3})])).length,1);
+  assert.equal(PR.comparar(snap([e('1',{dose:1e-7})]),snap([e('1',{dose:2e-7})])).length,1);
+  assert.equal(snap([e('1',{dose:1e-20})]).entidades[0].campos.dose,1e-20);
+  assert.equal(snap([e('1',{codigo:Number.MAX_SAFE_INTEGER})]).entidades[0].campos.codigo,Number.MAX_SAFE_INTEGER);
+});
 teste('incluído, removido e alterado por identidade, sem depender da posição', () => {
   const d=PR.comparar(snap([e('1',{area:10}),e('2',{area:20})]),snap([e('1',{area:11}),e('3',{area:30})]));
   assert.deepEqual(d.map(x=>[x.id,x.estado]),[['1','alterado'],['2','removido'],['3','incluído']]);
