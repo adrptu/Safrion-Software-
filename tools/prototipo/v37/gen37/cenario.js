@@ -237,15 +237,17 @@ function cenReceber(c, prod, lote, qtd, un, local, validade, doc, apto, ator) { 
   cenMov(c, { tipo: 'recebimento-nf', prod, lote, qtd, un: l.un, quem: qa, origem: 'web', doc, apto: !!apto });
   return { msg: cenNum(qtd) + ' ' + l.un + ' de ' + prod + ' recebidos no lote ' + lote + ' (' + l.local + ')' + (apto ? '.' : ' e bloqueados até a inspeção.') };
 }
+// acúmulo (padrão 2) na decisão de qualidade do lote: quem registrou a entrada bloqueada (recebimento ou devolução) e decide (libera ou reprova)
+// fica com revisão posterior — a decisão vale, sem veto nem segundo aprovador. Com a entrada gravando quem agiu (revisão do CTL-3, achado 4), a
+// gestora que recebe e libera deixou de ser invisível; a mesma regra vale para reprovar (revisão do 16fb55e, ajuste 4).
+function cenRevEntrada(c, l, ator) { return (c.movs || []).filter(m => m.prod === l.prod && m.lote === l.lote && (m.tipo === 'recebimento-nf' || m.tipo === 'devolucao') && !m.apto)
+    .map(m => cenRevisao(ator, m.quem, 'registrou a entrada bloqueada')).find(Boolean) || ''; }
 // Liberar quarentena (RN-015; SU-06 "Liberar qualidade"): só com o nº do laudo ou relatório de inspeção, pelo gestor (padrão adotado, igual ao ajuste)
 function cenLiberarQuarentena(c, key, laudo, ator) { const l = c.lotes[key]; if (!l || !(l.quarentena > 0)) throw new Error('Nada bloqueado neste lote.');
   if (!((l.quarentena || 0) - (l.quarRep || 0) > 1e-9)) throw new Error('O lote ' + l.lote + ' só tem material reprovado (' + (cenRepsLote(c, l, l.quarRep || 0).map(r => 'laudo ' + (r.laudo || '—') + ' ' + cenNum(r.q) + ' ' + l.un).join(' + ') || 'laudo —') + '): ele fica segregado para a devolução ao fornecedor, não volta ao disponível.');
   const quem = cenExige(ator, 'gestor', 'Liberar a quarentena do lote ' + l.lote); const doc = String(laudo || '').trim();
   if (!doc) throw new Error('Informe o nº do laudo ou relatório de inspeção do lote ' + l.lote + '. Sem laudo o lote continua bloqueado.');
-  // acúmulo (padrão 2): quem registrou a entrada bloqueada (recebimento ou devolução) e libera fica com revisão posterior. Com a entrada gravando
-  // quem agiu (revisão do CTL-3, achado 4), a gestora que recebe e libera deixou de ser invisível
-  const rev = (c.movs || []).filter(m => m.prod === l.prod && m.lote === l.lote && (m.tipo === 'recebimento-nf' || m.tipo === 'devolucao') && !m.apto)
-    .map(m => cenRevisao(ator, m.quem, 'registrou a entrada bloqueada')).find(Boolean) || '';
+  const rev = cenRevEntrada(c, l, ator);
   const q = l.quarentena - (l.quarRep || 0); l.quarentena = l.quarRep || 0; cenMov(c, Object.assign({ tipo: 'inspecao', prod: l.prod, lote: l.lote, qtd: q, un: l.un, quem, origem: 'web', doc }, rev ? { rev } : {}));
   return { msg: cenNum(q) + ' ' + l.un + ' do lote ' + l.lote + ' liberados com o laudo ' + doc + ' por ' + quem + '.' + (rev ? ' Fica ' + rev + '.' : '') }; }
 // Reprovar a qualidade (RN-015; PRD 65.4: "reprovação reconcilia obrigação de reposição/devolução e falta antes de gerar nova proposta"): o gestor
@@ -255,10 +257,10 @@ function cenReprovarQuarentena(c, key, laudo, motivo, ator) { const l = c.lotes[
   if (!l || !(pend > 1e-9)) throw new Error('Nada aguardando laudo neste lote.');
   const quem = cenExige(ator, 'gestor', 'Reprovar a qualidade do lote ' + l.lote); const doc = String(laudo || '').trim();
   if (!doc) throw new Error('Informe o nº do laudo que reprova o lote ' + l.lote + '. Sem laudo o lote continua aguardando a decisão.');
-  const mot = String(motivo || '').trim() || 'reprovado no laudo';
-  l.quarRep = (l.quarRep || 0) + pend; l.rep = { laudo: doc, motivo: mot, quem, em: cenAgora() };
-  cenMov(c, { tipo: 'inspecao-reprovada', prod: l.prod, lote: l.lote, qtd: pend, un: l.un, quem, origem: 'web', doc, motivo: mot });
-  return { msg: cenNum(pend) + ' ' + l.un + ' do lote ' + l.lote + ' reprovados com o laudo ' + doc + ' por ' + quem + ' (' + mot + '): ficam segregados para a devolução ao fornecedor e a falta deixa de ser condicionada.' }; }
+  const mot = String(motivo || '').trim() || 'reprovado no laudo'; const rev = cenRevEntrada(c, l, ator);   // acúmulo: a mesma regra de liberar (ajuste 4)
+  l.quarRep = (l.quarRep || 0) + pend; l.rep = Object.assign({ laudo: doc, motivo: mot, quem, em: cenAgora() }, rev ? { rev } : {});
+  cenMov(c, Object.assign({ tipo: 'inspecao-reprovada', prod: l.prod, lote: l.lote, qtd: pend, un: l.un, quem, origem: 'web', doc, motivo: mot }, rev ? { rev } : {}));
+  return { msg: cenNum(pend) + ' ' + l.un + ' do lote ' + l.lote + ' reprovados com o laudo ' + doc + ' por ' + quem + ' (' + mot + '): ficam segregados para a devolução ao fornecedor e a falta deixa de ser condicionada.' + (rev ? ' Fica ' + rev + '.' : '') }; }
 // Inventário: contagem cega por lote; diferença vira ajuste pendente (o saldo só muda com a aprovação do gestor).
 function cenContar(c, key, contado) { const l = c.lotes[key]; if (!l) throw new Error('Lote não encontrado.');
   if (!(contado >= 0) || contado === '' || contado === null) throw new Error('Informe a quantidade contada.');

@@ -561,5 +561,16 @@ OUT.memo=cal01Memo(d.cal,{un:d.un,quarC:d.quarC,quarRef:d.quarRef,cond:d.cond,co
         and 'segregado para devolução ao fornecedor' in m[0] and len(r['ref'])==1 and r['ref'][0]['q']==20 and rp==[(10,'LAB-A','motivo A'),(10,'LAB-B','motivo B')] and pyr==rp)
     return (ok,dict(memo=m,reps=rp,py=pyr))
 caso('J2 memória por laudo (ajuste 2, contraexemplo do Codex): devolver 10 L de Fungicida A bloqueados, reprovar LAB-A (motivo A), devolver mais 10 L e reprovar LAB-B (motivo B) — "Reprovado: 20 L do lote F26-02 (devolução da REQ-035) = 10 L no laudo LAB-A: motivo A + 10 L no laudo LAB-B: motivo B", do histórico do lote; Python = JS (no 16fb55e: "20 L · laudo LAB-B: motivo B")',j2)
+def j4():
+    # ajuste 4 · nos comandos do item 2 Ana devolve bloqueado e reprova: a reprovação não tinha revisão posterior, enquanto liberar o mesmo acúmulo tem.
+    # Aceite: a mesma regra de acúmulo (cenRevisao) na reprovação, sem veto nem segundo aprovador. Positivo (mesma pessoa) e negativo (pessoas distintas)
+    r=motor(REV2+"""OUT.mv=c.movs.filter(m=>m.tipo==='inspecao-reprovada').map(m=>({laudo:m.doc,rev:m.rev||''})); OUT.rep=c.lotes['Fungicida A|F26-02'].rep;
+const a=CL(CEN0); cenDevolver(a,'REQ-035','Fungicida A',10,false,ANA); OUT.lib=cenLiberarQuarentena(a,'Fungicida A|F26-02','LAB-L',ANA).msg; OUT.libRev=a.movs[a.movs.length-1].rev||'';
+const b=CL(CEN0); cenDevolver(b,'REQ-035','Fungicida A',10,false,PAULA); OUT.neg=cenReprovarQuarentena(b,'Fungicida A|F26-02','LAB-N','motivo N',ANA).msg; OUT.negMv=b.movs[b.movs.length-1];""")
+    rv='revisão posterior pendente (Ana registrou a entrada bloqueada e decidiu)'
+    ok=(all(m['rev']==rv for m in r['mv']) and len(r['mv'])==2 and r['libRev']==rv and ('Fica '+rv+'.') in r['r1'] and ('Fica '+rv+'.') in r['r2'] and r['rep'].get('rev')==rv
+        and 'revisão posterior' not in r['neg'] and not r['negMv'].get('rev') and r['negMv']['tipo']=='inspecao-reprovada' and 'reprovados com o laudo LAB-N' in r['neg'])
+    return (ok,dict(mv=r['mv'],lib=r['libRev'],r1=r['r1'][-140:],neg=r['neg'][-120:],negRev=r['negMv'].get('rev')))
+caso('J4 revisão posterior na reprovação (ajuste 4): Ana devolve bloqueado e reprova (LAB-A e LAB-B) — as duas reprovações ficam "revisão posterior pendente (Ana registrou a entrada bloqueada e decidiu)", como a liberação do mesmo acúmulo; Paula devolve e Ana reprova → sem marca; a decisão vale nos dois (no 16fb55e: reprovação sem marca)',j4)
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas'); [print('  -',f) for f in FAIL]
 sys.exit(1 if FAIL else 0)

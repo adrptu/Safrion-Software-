@@ -237,7 +237,7 @@ function emovTxt(m){ const u=m.un||'';
   if(m.tipo==='devolucao') return 'devolução '+m.req+' ('+m.os+'): +'+eq(m.qtd,u)+(m.apto?' apta':' bloqueada para inspeção');
   if(m.tipo==='recebimento-nf') return 'recebimento '+m.doc+': +'+eq(m.qtd,u)+(m.apto?' apto':' em quarentena')+(m.val&&m.val!=='—'?' · validade '+m.val:'');
   if(m.tipo==='inspecao') return 'quarentena liberada '+(m.doc?'com o laudo '+m.doc+' por '+m.quem:'após inspeção')+': '+eq(m.qtd,u)+' passam a disponível'+(m.rev?' · '+m.rev:'');
-  if(m.tipo==='inspecao-reprovada') return 'qualidade reprovada com o laudo '+(m.doc||'—')+' por '+m.quem+(m.motivo?' ('+m.motivo+')':'')+': '+eq(m.qtd,u)+' segregados para devolução ao fornecedor';
+  if(m.tipo==='inspecao-reprovada') return 'qualidade reprovada com o laudo '+(m.doc||'—')+' por '+m.quem+(m.motivo?' ('+m.motivo+')':'')+': '+eq(m.qtd,u)+' segregados para devolução ao fornecedor'+(m.rev?' · '+m.rev:'');
   if(m.tipo==='contagem') return 'contagem '+(m.doc?m.doc+' ':'')+'sem diferença';
   if(m.tipo==='ajuste') return 'ajuste de inventário '+(m.doc?m.doc+' ':'')+'aprovado por '+(m.quem||'gestor')+': '+esig(m.qtd,u)+(m.rev?' · '+m.rev:'');
   return emovTipo(m); }
