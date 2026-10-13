@@ -13,6 +13,8 @@ import argparse, glob, itertools, json, os, re, sys
 APP_GITHUB_ACTIONS = 15368
 CAMPOS = ('name', 'target', 'enforcement', 'conditions', 'bypass_actors')
 PADROES_RSC = {'do_not_enforce_on_create': False}
+# Única mudança aceita fora dos checks: conversas da revisão resolvidas antes do merge (merge automático com o Codex).
+EXIGIDOS_PR = {'required_review_thread_resolution': True}
 EXPR = re.compile(r'\$\{\{\s*(.*?)\s*\}\}')
 
 
@@ -171,15 +173,23 @@ def diferencas(atual, desejado):
 
 
 def problemas(payload, atual, contextos):
-    """O que impede aplicar: só a regra de checks pode mudar, e ela precisa bater com os jobs reais."""
+    """O que impede aplicar: só a regra de checks e EXIGIDOS_PR podem mudar; os checks batem com os jobs reais."""
     p, a, erros = normalizar(payload), normalizar(atual), []
     for c in CAMPOS:
         if p[c] != a[c]:
-            erros.append(f'{c} difere do ruleset atual; este arquivo só acrescenta checks')
+            erros.append(f'{c} difere do ruleset atual; este arquivo só acrescenta checks e EXIGIDOS_PR')
     if p['bypass_actors'] != []:
         erros.append('bypass_actors precisa ficar vazio')
+    pr = p['rules'].get('pull_request') or {}
+    for chave, valor in EXIGIDOS_PR.items():
+        if pr.get(chave) is not valor:
+            erros.append(f'pull_request.{chave} precisa ser {json.dumps(valor)}')
+    sem_exigidos = lambda r: {k: v for k, v in r.items() if k not in EXIGIDOS_PR} if r is not None else None
     for tipo in sorted((set(p['rules']) | set(a['rules'])) - {'required_status_checks'}):
-        if p['rules'].get(tipo) != a['rules'].get(tipo):
+        pa, aa = p['rules'].get(tipo), a['rules'].get(tipo)
+        if tipo == 'pull_request':
+            pa, aa = sem_exigidos(pa), sem_exigidos(aa)
+        if pa != aa:
             erros.append(f'regra {tipo} difere do ruleset atual (preservar exatamente)')
     rsc = p['rules'].get('required_status_checks')
     if rsc is None:
