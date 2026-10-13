@@ -1,6 +1,6 @@
 name: Revisão do Codex (reacionar)
 
-# Quando o app do Codex cria ou atualiza o resumo da revisão num PR, ou quando o revisor publica o parecer favorável,
+# Quando o app do Codex cria ou atualiza o resumo da revisão num PR, ou quando o revisor publica ou retira o parecer,
 # roda de novo o check "Revisão do Codex no commit atual" do head desse PR. Comentário não dispara workflow no commit do PR, por isso o re-run.
 # O texto do comentário só é lido pelo if do job; ele nunca entra no shell.
 on:
@@ -14,7 +14,8 @@ jobs:
     name: Reacionar o portão do Codex
     if: >-
       github.event.issue.pull_request && (github.event.comment.user.login == 'chatgpt-codex-connector[bot]'
-      || contains(github.event.comment.body, 'Parecer favorável do revisor:'))
+      || contains(github.event.comment.body, 'Parecer favorável do revisor:')
+      || contains(github.event.comment.body, 'Parecer retirado:'))
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -31,9 +32,10 @@ jobs:
           id='' estado='' conclusao=''
           for _ in $(seq 1 20); do
             read -r id estado conclusao < <(gh api \
-              "repos/$GITHUB_REPOSITORY/actions/workflows/revisao-codex.yml/runs?head_sha=$head&event=pull_request&per_page=1" \
-              --jq '.workflow_runs[0] // empty | "\(.id) \(.status) \(.conclusion)"') || true
-            # Execução ainda ausente na API conta como pendente (achado do Codex 4253469813).
+              "repos/$GITHUB_REPOSITORY/actions/workflows/revisao-codex.yml/runs?head_sha=$head&event=pull_request&per_page=30" \
+              --jq '[.workflow_runs[] | select(any(.pull_requests[]?; .number == (env.PR | tonumber)))][0]
+                    // empty | "\(.id) \(.status) \(.conclusion)"') || true
+            # Só execução ligada a este PR (4253549830); ausente na API conta como pendente (4253469813).
             [ -n "$id" ] && [ "$estado" = completed ] && break
             sleep 10
           done

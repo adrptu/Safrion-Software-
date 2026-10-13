@@ -28,9 +28,9 @@ def comentario(corpo, login='chatgpt-codex-connector[bot]', atualizado='2026-10-
     return {'user': {'login': login}, 'body': corpo, 'updated_at': atualizado, 'author_association': acesso}
 
 
-def parecer(head=HEAD, acesso='OWNER', login='adrptu', atualizado='2026-10-09T15:00:00Z'):
-    return comentario(f'Revisão focal.\nParecer favorável do revisor: {head}\n', login=login, acesso=acesso,
-                      atualizado=atualizado)
+def parecer(head=HEAD, acesso='OWNER', login='adrptu', atualizado='2026-10-09T15:00:00Z',
+            ato='Parecer favorável do revisor'):
+    return comentario(f'{ato}: {head}\n', login=login, acesso=acesso, atualizado=atualizado)
 
 
 class Portao(unittest.TestCase):
@@ -56,6 +56,11 @@ class Portao(unittest.TestCase):
                                     atualizado='2026-10-09T15:00:00Z'),
             'citado no meio da linha': comentario(f'> Parecer favorável do revisor: {HEAD}', login='adrptu',
                                                   acesso='OWNER', atualizado='2026-10-09T15:00:00Z'),
+            'dentro de outro texto': comentario(f'Revisão focal.\nParecer favorável do revisor: {HEAD}\n',
+                                                login='adrptu', acesso='OWNER', atualizado='2026-10-09T15:00:00Z'),
+            'exemplo em bloco de código (PR49-REV-20261013-02)': comentario(
+                f'Exemplo de formato, não é aprovação:\n```\nParecer favorável do revisor: {HEAD}\n```',
+                login='adrptu', acesso='OWNER', atualizado='2026-10-09T15:00:00Z'),
         }
         for nome, c in casos.items():
             with self.subTest(nome):
@@ -79,6 +84,15 @@ class Portao(unittest.TestCase):
         for nome, comentarios in casos.items():
             with self.subTest(nome):
                 self.assertIsNotNone(self.motivo(comentarios), nome)
+
+    def test_retirada_vale_ate_novo_parecer(self):
+        # PR49-REV-20261013-02, caso 2: vale o último ato dedicado para o head.
+        positivo = parecer(atualizado='2026-10-09T15:00:00Z')
+        retirada = parecer(atualizado='2026-10-09T16:00:00Z', ato='Parecer retirado')
+        novo = parecer(atualizado='2026-10-09T17:00:00Z')
+        self.assertIn('retirou', self.motivo([comentario(resumo()), positivo, retirada]))
+        self.assertIsNone(self.motivo([comentario(resumo()), positivo, retirada, novo]))
+        self.assertIsNone(self.motivo([comentario(resumo()), parecer(head=OUTRO, ato='Parecer retirado'), positivo]))
 
     def test_vale_o_resumo_mais_recente(self):
         antigo = comentario(resumo(), atualizado='2026-10-09T13:00:00Z')
