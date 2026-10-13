@@ -128,6 +128,20 @@ O protótipo (`tools/prototipo/`) valida telas e regras; não é produto. O rigo
 - **Entrega:** artefato atualizado a cada melhoria, com uma linha do que mudou.
 - **Continua valendo:** dados sintéticos e sem segredo (ENG-017), nunca declarar teste não executado, proteção de regressão para defeito corrigido.
 
+- **Branches das frentes** (`claude/v44-*`) também vão ao remoto para revisão dos commits e recuperação do trabalho. O Gitleaks roda antes de cada envio; branch com achado não sobe. Exceção exige escopo explícito, justificativa, autorização pertinente e teste dos limites.
+
+### 3.6 Velocidade com a mesma qualidade (VEL-20261013-01, autorizado pelo proprietário no canal Codex)
+- **No máximo três frentes abertas.** Uma nova só começa quando outra entra numa versão publicada. O teto não amplia a fatia funcional ativa nem uma tarefa de autoria por agente; preserve e consolide as frentes já abertas (§3.1).
+- Antes da revisão, a frente incorpora a ponta publicada da branch única e verifica o delta da composição.
+- **Base verde:** vermelho antigo é corrigido, distinguindo defeito do produto, teste obsoleto e falha da ferramenta. Corrigir não é afrouxar: a contraprova continua reprovando a versão com defeito. Com a base verde, a bateria roda na candidata; não se repete a base sem nova divergência.
+- Testes pelo impacto a cada correção; bateria completa uma vez por versão composta. Preserve provas equivalentes e repita o afetado após correções ou mudanças de composição.
+- **Montagem compartilhada:** uma por commit de árvore limpa, com as entradas que alteram a saída na chave do cache (dados/configuração, dependências e versão do gerador). Artefato pronto é imutável; cada execução mantém perfil e dados de teste isolados. Não reutilize saída de árvore suja como prova daquele commit.
+- Espere a condição observável, preservando os limites contratuais de carregamento e das asserções. DOM quieto é pré-condição, não prova de conclusão do domínio. Espera fixa só quando o tempo real importa (debounce, relógio); falha no limite deve ser explícita.
+- Aceite mensurável combinado com o revisor antes do código (§3.4), com unidades, estados e oráculo de cálculo pertinentes.
+- Uma revisão adversarial por versão composta, com lentes pelo risco: estoque, demanda, aprovação e dinheiro com lente própria; mudança só visual com conferência proporcional. Não substitui a auditoria integral real de Codex, Claude e Gemini na mesma candidata completa, com dados/perfis isolados, inventário comum e análise dos brutos, após todo o conjunto vigente. A revisão final do PRD só começa após todas as implantações do conjunto vigente, conforme o pedido do proprietário de 09/10/2026; publicação parcial não aciona nenhum desses gatilhos.
+- Fonte e brutos no repositório na mesma entrega; mensagens curtas no formato da §3.4.
+- Fluxo cujo agente termina com erro sem resultado não pode registrar conclusão. Ausência de ACK não comprova perda ou ociosidade; timeout de envio exige readback antes de reenvio (§3.4). Commit a cada passo verde, preservando rascunhos em falhas.
+
 ## 4. Regras de produto que o código não pode quebrar
 - **Master-detail** (Menu → Listagem → Detalhe → Sub-detalhe), uma ação primária por tela, estado sempre visível e próximo passo com verbo (PRD 4.2 e 4.3).
 - **Design system único** (PRD cap. 74 e [`docs/design-system/`](docs/design-system/), padrões do proprietário de 09/10/2026): botões BOT-01 a BOT-09 (um verde por contexto; lugar, verbo, tamanho e ícone fixos; componente comum), seleção que abre detalhe (SEL-01/02), etapa futura neutra (ETP-01), separador, hover verde, retorno visual e dica (VIS-01 a VIS-04). Vale para toda tela nova e para a correção das existentes, no protótipo e no software real.
