@@ -11,7 +11,8 @@ function OSX(c, id, tal, etapa, ap, tipo) { c.ordens[id] = { id, tipo: tipo || '
 const CID = 'c9';   // C1 · Café Catuaí 144 (38 ha, meta 38 sc/ha), Santa Rita · sintético
 // a carga da revisão Codex: 12.000 L de café da roça recebidos (bruto 9.200 − tara 3.200 = 6.000 kg), sem rendimento beneficiado medido
 function base(area) { const c = cenClone(CEN0); OSX(c, 'OS-0930', 'C1', 'Em execução', area ? [['25/09', area]] : []);
-  const r = MUD(c, x => prReceber(x, { os: 'OS-0930', ticket: 'TK-CF1', bruto: 9200, tara: 3200, litros: 12000, cond: 'Íntegra', dcol: '2026-09-25' })); return { c, r }; }
+  const r = MUD(c, x => prReceber(x, { os: 'OS-0930', ticket: 'TK-CF1', bruto: 9200, tara: 3200, litros: 12000, cond: 'Íntegra', dcol: '2026-09-25', quem: 'Rui' }));   /* desde a CONF (v57) pesar e receber exige o almoxarife: sem quem, a carga era recusada e o teste não exercia a regra do café */
+  if (r.erro) throw new Error('base: ' + r.erro); return { c, r }; }
 const linha = (c) => { const X = prTal(c, CID); return { X, row: prTalRow(c, X) }; };
 const FALSO = /(^|[^\d.,])0 sc\b|0,00 sc\/ha|−100,0 %/;
 const ORIG = (c, ben) => Object.values(c.producao.cargas).filter(g => g.st === 'Recebida' && g.cultura === 'Café').forEach(g => g.origem.forEach(x => { x.ben = ben; }));
@@ -57,7 +58,7 @@ const ORIG = (c, ben) => Object.values(c.producao.cargas).filter(g => g.st === '
 
 // ---- C01k · parte medida e parte pendente: soma só o medido e diz o que falta, sem produtividade ----
 { const A = base(5); ORIG(A.c, 3000);
-  const r2 = MUD(A.c, x => prReceber(x, { os: 'OS-0930', ticket: 'TK-CF2', bruto: 7200, tara: 3200, litros: 8000, cond: 'Íntegra', dcol: '2026-09-25' }));
+  const r2 = MUD(A.c, x => prReceber(x, { os: 'OS-0930', ticket: 'TK-CF2', bruto: 7200, tara: 3200, litros: 8000, cond: 'Íntegra', dcol: '2026-09-25', quem: 'Rui' }));
   const { X, row } = linha(A.c);
   ok('C01k 3.000 kg medidos + 8.000 L pendentes: "50 sc + 8.000 L · sc a apurar", produtividade a apurar',
      !r2.erro && X.R.apurar === true && row.s.colh === '50 sc + 8.000 L · sc a apurar' && row.s.prtv === 'sc/ha a apurar', [r2.erro, row.s]); }
@@ -69,7 +70,7 @@ const ORIG = (c, ben) => Object.values(c.producao.cargas).filter(g => g.st === '
      t0 === 'sc/ha a apurar · 1 talhão' && t1 === '10,00 sc/ha ponderada sobre 5 ha' && t2 === '10,00 sc/ha ponderada sobre 5 ha · 1 talhão a apurar fora da conta' && !FALSO.test(t0), [t0, t1, t2]); }
 
 // ---- C01p · revisão DOM achado 7: ordenação do talhão misto (50 sc medidos + 8.000 L a apurar) pelo medido, não como vazio ----
-{ const A = base(5); ORIG(A.c, 3000); MUD(A.c, x => prReceber(x, { os: 'OS-0930', ticket: 'TK-CF2', bruto: 7200, tara: 3200, litros: 8000, cond: 'Íntegra', dcol: '2026-09-25' }));
+{ const A = base(5); ORIG(A.c, 3000); MUD(A.c, x => prReceber(x, { os: 'OS-0930', ticket: 'TK-CF2', bruto: 7200, tara: 3200, litros: 8000, cond: 'Íntegra', dcol: '2026-09-25', quem: 'Rui' }));
   const { X, row } = linha(A.c);
   ok('C01p talhão misto ordena pelo medido (3.000 kg), não como vazio; só a apurar continua vazio (C01c)', X.R.apurar === true && row.v.colh === 3000, [X.R.apurar, row.v.colh]); }
 
