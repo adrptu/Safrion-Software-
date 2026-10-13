@@ -371,3 +371,35 @@ Reproduções da revisão em `ACHADOS-v1` (motor e tela). Cada linha tem um comm
 - build 0 FALHA; montar_render 140 páginas.
 
 **Recusado:** nada. **Limite que fica:** a sobra de custódia de uma O.S. com duas requisições do mesmo insumo é calculada por requisição (não há caso na semente); o SU-03det continua sendo o lote F26-02 do DEMO-18.
+
+### 10.1 Revisão do `16fb55e` (PR #47, comentário 6136083713 do Codex): 4 S3
+
+Tarefa `CTL4-FIX-REV-20261013-01`. Os quatro procedem por execução: o contraexemplo de cada um foi repetido por comandos reais e falha no `16fb55e` (motor: `demanda_unica_test` seção J; tela: `demanda_estado_nav_test` M1 e `est_laudo_lote_nav_test`, novo). Sem redesenho: um commit por ajuste.
+
+| Ajuste | Contraexemplo do Codex | Correção (commit) | Regressão |
+|---|---|---|---|
+| **1 · S3** Mapa perde a qualidade pendente com falta firme | Demanda 100 kg, estoque 0, quarentena 40: o Mapa dizia só "Falta 60 kg" e a compra. No cenário: 30 L de Fungicida A reprovados e mais 10 L devolvidos bloqueados davam só "Falta 5 L" no Mapa, no SU-03det e no MB-05. | `demSituacao` devolve a parte condicionada como 4º item ("Qualidade pendente · 40 kg"). O detalhe diz "40 kg em quarentena aguardam laudo (o gestor libera ou reprova no Estoque); se reprovar, faltam mais 40 kg · fora da compra". Rótulo, cor e ação seguem a compra firme de 60 kg. Mapa, SU-03det e MB-05 mostram as duas coisas; Planejar safra e Compra já mostravam (`81aef42`). | J1 (100/0/40), J1b (cenário); nav M1 nas cinco telas (no `est_laudo_lote_nav_test` desde o `718a914`) |
+| **2 · S3** Memória atribui todo o reprovado ao último laudo | Devolver 10 L (REQ-035/F26-02) bloqueados, reprovar LAB-A (motivo A), devolver mais 10 L, reprovar LAB-B (motivo B): "Reprovado: 20 L … laudo LAB-B: motivo B". | `cenRepsLote` (espelho `dados2._reps_lote`) lê o histórico do lote: cada reprovação com quantidade, laudo, motivo e as entradas bloqueadas que decidiu. A memória diz "Reprovado: 20 L do lote F26-02 (devolução da REQ-035) = 10 L no laudo LAB-A: motivo A + 10 L no laudo LAB-B: motivo B"; um só laudo segue o formato de antes. O selo do lote no Estoque e o aviso "só tem material reprovado" usam a mesma lista. Sem histórico que feche com o reprovado (semente sem movimentos), vale o registro do lote, sem inventar proveniência (`7551f1a`). | J2 (Python = JS); nav L2 |
+| **4 · S3** Reprovação pela mesma autora da entrada sem revisão posterior | Nos comandos do ajuste 2, Ana devolve bloqueado e reprova: a reprovação não tinha `rev`; liberar o mesmo acúmulo tinha. | `cenRevEntrada`: a regra que a liberação já usava, numa função só, chamada pelas duas decisões. A reprovação grava `rev` no movimento e no lote, e o aviso diz "Fica revisão posterior pendente (Ana registrou a entrada bloqueada e decidiu)". A decisão vale; não há veto nem segundo aprovador (`0ee25bd`). | J4 (positivo: Ana e Ana; negativo: Paula e Ana); nav L2b, L3 |
+| **3 · S3** Motivo migra entre lotes | Laudo do K26-11, digitar "Motivo exclusivo K26-11", Manter bloqueado, abrir o F26-02: o campo já trazia o motivo do KCl. | Abrir um lote, manter bloqueado, liberar, reprovar, trocar o perfil ou restaurar limpam o laudo e o motivo juntos. Foi escolhido limpar, não guardar rascunho por lote. Continua igual: a abertura foca `est-laudo`, o Tab chega a `est-laudo-mot` e a 390×844 nada transborda (`6236d70`). | nav L1 (com troca direta pela linha), L1b |
+
+**Limites.**
+- O ajuste 4 aplica a política vigente da liberação sem mudá-la: marca quem registrou qualquer entrada bloqueada do lote, inclusive uma já decidida antes. A marca é conservadora e não trava nada.
+- O ajuste 2 não reparte o reprovado quando o histórico não fecha; isso não acontece com os comandos atuais.
+
+**Evidência (executado, 13/10/2026).** Logs em `scratchpad/ctl4rev01/logs/{cand,base}/`. A base é o `16fb55e` extraído com `git archive`, com build e render próprios.
+- Candidata: build 0 FALHA; montar_render 140 páginas; varredura 140/140.
+- Candidata, testes de motor: `demanda_unica_test` 70 ok · 0; `cal01_test` 45 ok · 0; `aprova_quem_decide_test` 102/102.
+- Candidata, telas: `est_laudo_lote_nav_test` 7 ok · 0; `demanda_estado_nav_test` 11 ok · 0 (o mesmo arquivo do `16fb55e`); `demanda_unica_nav_test` 29 ok · 0; `saf_cmp_continuidade_test` 31 ok · 0; `esttest` OK; `est_fix1` 13/13; `est_fix2` 11/11; `est_cenario_test` 15/15; `talmapa_test` 8/8; `sutest` OK; `mbtest a` 0 falhas; `cmptest` 0 falhas.
+- `16fb55e` com os testes novos: `demanda_unica_test` 66 ok · 4 falhas, exatamente J1, J1b, J2 e J4.
+  - J2 dá "Reprovado: 20 L … · laudo LAB-B: motivo B".
+  - J4 dá `rev` vazio nas duas reprovações e preenchido na liberação.
+- `16fb55e`, `est_laudo_lote_nav_test`: 3 ok · 4 falhas, exatamente L1, L2, L2b e M1.
+  - L1: o F26-02 abre com "Motivo exclusivo K26-11".
+  - M1: Planejar safra e Compra já mostravam "Qualidade pendente · 10,0 L"; Mapa ("Falta 5 L"), SU-03det e MB-05 não.
+  - L1b e L3 (controles) passam nos dois.
+- Vermelho novo: nenhum.
+  - A primeira execução do `demanda_estado_nav_test`, ainda com o M1, foi interrompida pelo limite de 900 s (rc=124, carga da máquina ≈ 9–10), com os dez casos anteriores OK.
+  - O M1 passou para o teste do laudo (`718a914`); antes disso, o mesmo arquivo com o M1 deu 12 ok · 0 no render do ajuste 1.
+
+**Recusado:** nada; os quatro procedem por execução.

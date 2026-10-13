@@ -491,3 +491,26 @@ Revisão adversarial "lente estado" do `853a6a8` (ACHADOS-v1): 2 S2 e 5 S3, todo
 - `6202376`, `78711bb` · vermelhos novos da bateria (cache do Mapa; saf_cmp_continuidade e esttest).
 
 Bateria 853a6a8 × candidata (executado; logs em `scratchpad/ctl4fix/logs/{base,cand}/`): nenhum vermelho novo; os quatro vermelhos que já estavam no `853a6a8` (consumo_divergente 1, os_cenario 1, ostest 1, testes_pedido T01/T02/T05) continuam iguais; build 0 FALHA, varredura 140/140, ações duplicadas 0.
+
+**Revisão do `16fb55e` (Codex, PR #47, comentário 6136083713; tarefa CTL4-FIX-REV-20261013-01).** São 4 S3 e os quatro procedem por execução. Cada um tem um commit e uma regressão que falha no `16fb55e` e passa depois. Detalhe e evidência em `desenho/FRENTE-C.md` §10.1.
+- `81aef42` · ajuste 1 · o Mapa perdia a qualidade pendente quando havia falta firme ao mesmo tempo.
+  - Contraexemplo: demanda 100 kg, estoque 0 e quarentena 40 davam só "Falta 60 kg".
+  - Correção: o Mapa, o SU-03det e o MB-05 mostram também "Qualidade pendente · 40 kg", com quem decide. A compra continua em 60 kg e não há segunda ação.
+  - Testes: J1 e J1b; nav M1 (no `est_laudo_lote_nav_test` desde o `718a914`).
+- `7551f1a` · ajuste 2 · a memória atribuía todo o reprovado ao último laudo.
+  - Contraexemplo: devolver 10 L, reprovar LAB-A, devolver mais 10 L e reprovar LAB-B dava "20 L · laudo LAB-B".
+  - Correção: os laudos vêm do histórico do lote ("= 10 L no laudo LAB-A: motivo A + 10 L no laudo LAB-B: motivo B"). O selo do lote no Estoque segue a mesma regra.
+  - Testes: J2 e nav L2.
+- `0ee25bd` · ajuste 4 · reprovar com a mesma autora da entrada bloqueada não marcava revisão posterior.
+  - Correção: vale a mesma regra de acúmulo da liberação (`cenRevEntrada`), sem veto nem segundo aprovador.
+  - Testes: J4 (positivo e negativo), nav L2b e L3.
+- `6236d70` · ajuste 3 · o motivo migrava entre lotes.
+  - Contraexemplo: o motivo digitado no K26-11 aparecia ao abrir o F26-02.
+  - Correção: abrir, manter, decidir, trocar o perfil ou restaurar limpam o laudo e o motivo. O foco, o Tab e a tela de 390×844 continuam iguais.
+  - Testes: nav L1 e L1b.
+- Bateria da candidata, uma execução por teste (logs em `scratchpad/ctl4rev01/logs/{cand,base}/`):
+  - build 0 FALHA; varredura 140/140.
+  - Motor: demanda_unica 70/0, cal01 45/0, aprova_quem_decide 102/102.
+  - Telas: est_laudo_lote_nav 7/0, demanda_estado_nav 11/0, demanda_unica_nav 29/0, saf_cmp_continuidade 31/0, esttest, est_fix1/2, est_cenario, talmapa, sutest, mbtest e cmptest verdes.
+  - No `16fb55e` falham só os casos novos: J1, J1b, J2 e J4; L1, L2, L2b e M1.
+  - Vermelho novo: nenhum. O `demanda_estado_nav_test` com o M1 passou de 900 s sob carga (rc=124), por isso o M1 mudou de arquivo.
