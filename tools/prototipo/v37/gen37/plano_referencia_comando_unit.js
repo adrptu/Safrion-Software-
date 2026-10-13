@@ -45,6 +45,13 @@ teste('safra encerrada e contexto alheio recusam',()=>{
  const s=self(),p=pedido(s);p.previa=clone(p.previa);p.previa.contexto.fazenda='Outra';assert.match(pub(s,p).erro,/fazenda/);
  const g=GR('g_saf');s.state.g2[g.id]={rows:clone(g.rows)};safById(s,'S2627').v.estado='Encerrada';assert.match(pub(s,pedido(s)).erro,/encerrada/);assert.equal(cenGet().planoReferencias,undefined);
 });
+teste('fazenda ausente recusa publicação e replay sem assumir contexto',()=>{
+ for(const replay of [true,false]) for(const faz of [undefined,null,'','   ']) {
+  cenReset();const s=self(),p=pedido(s);if(replay)assert.ok(!pub(s,p).erro);
+  const g=GR('g_saf');s.state.g2[g.id]={rows:clone(g.rows)};safById(s,'S2627').v.faz=faz;
+  cenGet();const antes=estado(),r=pub(s,p);assert.match(r.erro,/Fazenda da safra ausente/);assert.equal(estado(),antes);
+ }
+});
 teste('sem adaptador, validação incompleta ou impedimento não escreve',()=>{
  const s=self(),p=pedido(s);cenGet();const antes=estado();
  for(const fn of [undefined,()=>true,()=>Promise.resolve({impedimentos:[]}),()=>({impedimentos:['Dose pendente.']})]){const r=PlanoReferenciaComando.publicar(s,p,fn);assert.ok(r.erro);assert.equal(estado(),antes);}
