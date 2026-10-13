@@ -1,0 +1,90 @@
+[
+  {
+    "description": "Canário exato de privacidade de preparo e vínculo; não é credencial de ambiente",
+    "condition": "AND",
+    "regexTarget": "secret",
+    "paths": [
+      "^packages/db/test/preparo\\.int\\.test\\.ts$",
+      "^packages/db/test/vinculo\\.int\\.test\\.ts$"
+    ],
+    "regexes": [
+      "^SenhaQueNaoPodeVazar123$"
+    ]
+  },
+  {
+    "description": "Nome da chave de localStorage do cenário do protótipo v3.7; não é credencial",
+    "condition": "AND",
+    "regexTarget": "secret",
+    "paths": [
+      "^tools/prototipo/v37/gen37/_probe/ver_estoque5\\.py$",
+      "^tools/prototipo/v37/gen37/_probe/ver_estoque8\\.py$",
+      "^tools/prototipo/v37/gen37/_probe/ver_estoque_r2c\\.py$",
+      "^tools/prototipo/v37/gen37/_probe/ver_mapa5\\.py$",
+      "^tools/prototipo/v37/gen37/_probe/ver_mapa_lib\\.py$",
+      "^tools/prototipo/v37/gen37/cenario\\.js$",
+      "^tools/prototipo/v37/gen37/est_cenario_test\\.py$",
+      "^tools/prototipo/v37/gen37/map_irrig_filtro_test\\.py$",
+      "^tools/prototipo/v37/gen37/os_cenario_test\\.py$",
+      "^tools/prototipo/v37/gen37/os_lib\\.py$",
+      "^tools/prototipo/v37/gen37/ostela\\.py$",
+      "^tools/prototipo/v37/gen37/project/EST\\.dc\\.html$",
+      "^tools/prototipo/v37/gen37/project/IN-02\\.dc\\.html$",
+      "^tools/prototipo/v37/gen37/project/IN-02det\\.dc\\.html$",
+      "^tools/prototipo/v37/gen37/project/IN-02x-os0420\\.dc\\.html$",
+      "^tools/prototipo/v37/gen37/project/IN-04\\.dc\\.html$",
+      "^tools/prototipo/v37/gen37/project/MB-01\\.dc\\.html$",
+      "^tools/prototipo/v37/gen37/project/MB-02\\.dc\\.html$",
+      "^tools/prototipo/v37/gen37/project/MB-02det\\.dc\\.html$",
+      "^tools/prototipo/v37/gen37/project/MB-03\\.dc\\.html$",
+      "^tools/prototipo/v37/gen37/project/MB-03x-recibo\\.dc\\.html$",
+      "^tools/prototipo/v37/gen37/project/MB-04\\.dc\\.html$",
+      "^tools/prototipo/v37/gen37/project/MB-05\\.dc\\.html$",
+      "^tools/prototipo/v37/gen37/project/OS-0424-app\\.dc\\.html$",
+      "^tools/prototipo/v37/gen37/project/OS\\.dc\\.html$"
+    ],
+    "regexes": [
+      "^talhao-os-cenario-v1$"
+    ]
+  },
+  {
+    "description": "Identificadores exatos de intenção das fixtures Grok NAV-F1-A; não são credenciais",
+    "condition": "AND",
+    "regexTarget": "secret",
+    "paths": [
+      "^evidencias/grok/nav-f1-a/nav-f1-offline-adendo-check\\.mjs$"
+    ],
+    "regexes": [
+      "^ap-OS-0420-kempty$",
+      "^ap-OS-0420-kstop1$"
+    ]
+  },
+  {
+    "description": "Nomes exatos das chaves de localStorage dos cenários do protótipo; não são credenciais",
+    "condition": "AND",
+    "regexTarget": "secret",
+    "paths": [
+      "^tools/prototipo/v37/gen37/",
+      "^docs/pcm-suprimentos/verificacao/man_prefix\\.js$",
+      "^docs/beneficiamento/verificacao/revisao\\.json$"
+    ],
+    "regexes": [
+      "^talhao-os-cenario-v1$",
+      "^talhao-os-compras-v1$",
+      "^talhao-os-irrigacao-v1$",
+      "^talhao-os-mip-v1$",
+      "^talhao-os-manutencao-v1$"
+    ]
+  },
+  {
+    "description": "Chave exata de localStorage da ficha de pivô; não é credencial",
+    "condition": "AND",
+    "regexTarget": "secret",
+    "paths": [
+      "^tools/prototipo/v37/gen37/ficha_pivo\\.py$",
+      "^tools/prototipo/v37/gen37/irrigacao_estado\\.js$"
+    ],
+    "regexes": [
+      "^talhao-os-ficha-pivo-v1$"
+    ]
+  }
+]

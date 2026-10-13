@@ -1,5 +1,6 @@
 """Discovery and controlled mutations of the focal CI contract in isolated copies."""
 import argparse
+import shutil
 import hashlib
 import tempfile
 import json
@@ -56,11 +57,16 @@ def main():
     ])
     temporary = tempfile.TemporaryDirectory(prefix='safrion-vel-contract-')
     temporary_root = Path(temporary.name)
+    cases.extend([
+        ('additional_unenumerated_literal', substitute(block + block.replace('^talhao-os-ficha-pivo-v1$', '^talhao-os-ficha-pivo-v3$')), 1),
+        ('duplicate_generic_rule', config + '\n[[rules]]\nid = "generic-api-key"\n' + broad, 1),
+    ])
     results = []
     for name, text, expected in cases:
         root = temporary_root / name
         (root / "tools/ci").mkdir(parents=True, exist_ok=False)
         (root / "tools/ci/test_gitleaks_excecoes.py").write_bytes(source)
+        shutil.copytree(args.repository / 'tools/ci/fixtures', root / 'tools/ci/fixtures')
         (root / ".gitleaks.toml").write_text(text)
         (root / ".gitleaksignore").write_text(IGNORE)
         command = [sys.executable, "-B", "-m", "unittest", "discover", "-s", "tools/ci", "-p", "test_*.py", "-v"]
@@ -84,6 +90,7 @@ def main():
                         "config_sha256": digest(root / ".gitleaks.toml")})
     evidence = {"python": sys.version, "scope": "unittest discovery in isolated copies; no Gitleaks rescans",
                 "harness_sha256": digest(Path(__file__)), "expected_tests": args.expected_tests,
+                "reference_sha256": digest(args.repository / "tools/ci/fixtures/gitleaks_generic_allowlists.json"),
                 "candidate_config_sha256": config_hash, "candidate_test_sha256": source_hash,
                 "candidate_unchanged": config_hash == digest(CONFIG) and source_hash == digest(SOURCE),
                 "tests": results, "runs": len(results), "passed_runs": sum(r["passed"] for r in results),

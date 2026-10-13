@@ -3,6 +3,7 @@ e HML-SECRET-04 (cinco nomes exatos de chave de localStorage, só no protótipo 
 O .gitleaksignore tem só o achado exato da HML-SECRET-05 (commit, arquivo, regra e linha), sem curinga."""
 from pathlib import Path
 import re
+import json
 import tomllib
 import unittest
 
@@ -120,8 +121,13 @@ class ExcecaoDaFichaDePivo(unittest.TestCase):
         # Novas formas de exceção precisam de revisão e contraprova do detector real.
         self.assertFalse(cfg.get('allowlist'))
         self.assertFalse(cfg.get('allowlists'))
-        regra = next(r for r in cfg['rules'] if r['id'] == 'generic-api-key')
+        regras = [r for r in cfg['rules'] if r['id'] == 'generic-api-key']
+        self.assertEqual(len(regras), 1, 'Regra duplicada pode sobrescrever a configuração efetiva.')
+        regra = regras[0]
         self.assertFalse(regra.get('allowlist'))
+        referencia = json.loads((RAIZ / 'tools/ci/fixtures/gitleaks_generic_allowlists.json').read_text(encoding='utf-8'))
+        self.assertEqual(regra['allowlists'], referencia,
+                         'Exceção nova ou alterada exige revisão explícita da referência autorizada.')
         literais = ('talhao-os-ficha-pivo-v1', 'talhao-os-ficha-pivo-v2',
                     'Q9x7-talhao-os-ficha-pivo-v1', 'talhao-os-ficha-pivo-v1-7zW2', 'ghp_' + 'A' * 36)
         autorizados = (PREFIXO + 'ficha_pivo.py', PREFIXO + 'irrigacao_estado.js')
