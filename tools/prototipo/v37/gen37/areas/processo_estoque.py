@@ -368,7 +368,7 @@ ESTV.g_rec=(self,fm)=>{ const C=cenGet(); const e={}, d=fm.draft; const n=(k)=>g
     else if(!/^(0[1-9]|1[0-2])\/\d{4}$/.test(vv)) e.val='Use mês/ano com 4 dígitos no ano (ex.: 06/2027).';
     else if(evenc({validade:vv})){ if(!isNaN(apto)&&apto>1e-9) e.apto=estValidadeEntradaErro({lote:lt,validade:vv});
       if(!String(d.obs||'').trim()) e.obs='Informe o motivo (lote vencido em '+vv+').'; } }
-  const conflito=p&&estValidadeConflito(C.lotes[p.item+'|'+lt],d.val); if(conflito&&!e.val) e.val=conflito;
+  const conflito=p&&estValidadeConflito(C.lotes[p.item+'|'+lt],efert(d.ped)?'—':d.val); if(conflito&&!e.val) e.val=conflito;
   return e; };
 ESTV.g_ent=(self,fm)=>{ const e={}; const x=eitens(cenGet()).find(y=>y.id===fm.rid); if(!x) return e; const n=g2num(fm.draft.qtd); if(isNaN(n)) return e;
   if(n>x.pend+1e-9) e.qtd='Acima do saldo a entregar: '+eq(x.pend,x.un)+' ('+econta(x)+').';
