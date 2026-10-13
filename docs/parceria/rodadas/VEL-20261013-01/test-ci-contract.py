@@ -61,6 +61,11 @@ def main():
         ('additional_unenumerated_literal', substitute(block + block.replace('^talhao-os-ficha-pivo-v1$', '^talhao-os-ficha-pivo-v3$')), 1),
         ('duplicate_generic_rule', config + '\n[[rules]]\nid = "generic-api-key"\n' + broad, 1),
     ])
+    cases.extend([
+        ('generic_rule_path_override', config.replace('id = "generic-api-key"', 'id = "generic-api-key"\npath = "^tools/prototipo/v37/gen37/"'), 1),
+        ('generic_rule_regex_override', config.replace('id = "generic-api-key"', 'id = "generic-api-key"\nregex = "never-match-synthetic-fixture"'), 1),
+        ('disable_inherited_generic_rule', config.replace('useDefault = true', 'useDefault = true\ndisabledRules = ["generic-api-key"]'), 1),
+    ])
     results = []
     for name, text, expected in cases:
         root = temporary_root / name

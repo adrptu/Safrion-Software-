@@ -124,6 +124,8 @@ class ExcecaoDaFichaDePivo(unittest.TestCase):
         regras = [r for r in cfg['rules'] if r['id'] == 'generic-api-key']
         self.assertEqual(len(regras), 1, 'Regra duplicada pode sobrescrever a configuração efetiva.')
         regra = regras[0]
+        self.assertEqual(set(regra), {'id', 'allowlists'}, 'A regra padrão não pode receber sobrescritas.')
+        self.assertEqual(cfg['extend'], {'useDefault': True}, 'Manter todas as regras herdadas, sem configuração adicional.')
         self.assertFalse(regra.get('allowlist'))
         referencia = json.loads((RAIZ / 'tools/ci/fixtures/gitleaks_generic_allowlists.json').read_text(encoding='utf-8'))
         self.assertEqual(regra['allowlists'], referencia,

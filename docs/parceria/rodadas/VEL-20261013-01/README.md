@@ -47,3 +47,8 @@ Para reproduzir o defeito, use este mesmo harness com `--repository` apontando p
 A amostra de pares não é suficiente: outra versão exata (v3) e uma segunda regra generic-api-key escapavam. Reproduzidos os dois casos no2c8c450:11/13 execuções esperadas. Agora há exatamente uma regra generic-api-key; todas as suas allowlists são comparadas, em igualdade integral, com a referência autorizada em tools/ci/fixtures/gitleaks_generic_allowlists.json. Uma mudança de exceção exige mudança visível dessa referência no PR e revisão. A referência contém as cinco exceções existentes (HML-SECRET-01/03/04, NAV-F1-A e VEL), sem conceder nenhuma nova. O teste por pares permanece suplementar. Configuração real e workflows intactos.
 
 O mesmo comando portátil agora executa8testes e12mutações,13/13 verificadas; harness copia também a referência fixa para as cópias isoladas. Brutos antes/depois em ci-contract-structural-evidence.json; evidências anteriores preservadas. Para a reprodução antes, usar o teste do2c8c450 com o novo harness e a referência copiada. Não é nova execução dos30scans do detector, cuja configuração não mudou.
+
+
+### Revisão de sobrescritas da regra (4254187158)
+
+Além das allowlists exatas, o contrato exige que a regra generic-api-key contenha apenas id e allowlists e que extend seja exatamente useDefault=true. Contraprovas recuperáveis: path restritivo, regex substituta e disabledRules da regra herdada. Antes, as três escapavam (13/16); depois, 8 testes passam e 15 mutações são recusadas (16/16). Brutos em ci-contract-override-evidence.json; repetir pelo mesmo test-ci-contract.py. A configuração Gitleaks permanece intacta. O JSON de referência foi formatado com Prettier 3.9.8 para corrigir a falha real da CI de Código, sem mudança semântica.
