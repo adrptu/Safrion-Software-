@@ -65,9 +65,10 @@ try:
     # TABELAS-FOCO (5983172395): necessidade, unidade, data da falta e "usado antes" em colunas próprias
     # a unidade fica junto do valor (decisão do proprietário, 05/10/2026); data da falta e "usado antes" em colunas próprias
     mpc=[cel('MAP 11-52',k) for k in ('Necessidade líquida','Falta em','Usado antes da compra')]
-    chk('3 SAF MAP 11-52: 101.440 kg com falta em 20/02/2027 · estoque apto 90.000 usado antes',mpc==['101.440 kg','20/02/2027','90.000 kg'],(mpc,mp))
+    # revisão do 853a6a8 (achado 1): os 500 kg em custódia sem uso da OS-0417 (em conferência) são suprimento da fazenda e a Safra 2026/27 os usa antes
+    chk('3 SAF MAP 11-52: 101.440 kg com falta em 20/02/2027 · estoque apto 90.000 + 500 em custódia usados antes',mpc==['101.440 kg','20/02/2027','90.500 kg'],(mpc,mp))
     rowclick('MAP 11-52'); m_saf=memo(); fechar()
-    chk('4 SAF memória MAP: estoque apto, usos da Safra 2026/27 antes, resultado com a data',m_saf[:1]==['Estoque apto hoje: 90.000 kg'] and any(l.startswith('15/10/2026 · Safra 2026/27 · 1 uso · −') for l in m_saf)
+    chk('4 SAF memória MAP: estoque apto, usos da Safra 2026/27 antes, resultado com a data',m_saf[:1]==['Estoque apto hoje: 90.000 kg + 500 kg em custódia sem uso nas O.S., a devolver ao Estoque (500 kg · REQ-031 · OS-0417 (em conferência)) = 90.500 kg'] and any(l.startswith('15/10/2026 · Safra 2026/27 · 1 uso · −') for l in m_saf)
         and m_saf[-1]=='Necessidade líquida = soma das faltas desta safra = 101.440 kg · falta a partir de 20/02/2027',m_saf)
     foto('1_saf_etapa6')
     clk('Enviar para cotação'); t=T()
@@ -85,7 +86,7 @@ try:
     k2=J("(document.body.innerText.match(/SOL-2027-02 · Safrinha 2027[^\\n]+/)||[''])[0]"); tot=J("[...document.querySelectorAll('.g2tot')].filter(x=>x.offsetParent).map(x=>x.innerText).join(' ')") or ''
     chk('9 CMP etapa 2: mesmos 8 insumos e R$ 1.094.947,10 (resumo e total da tabela)','8 insumos a comprar · R$ 1.094.947,10 a preço de referência' in k2 and '1.094.947,10' in tot,(k2,tot))
     clk('Expandir tudo'); mp2=rowtxt('MAP 11-52')
-    chk('10 CMP MAP 11-52: 101.440 · falta a partir de 20/02/2027 · estoque usado antes: 90.000',all(x in mp2 for x in ['101.440','20/02/2027','usado antes: 90.000']),mp2)
+    chk('10 CMP MAP 11-52: 101.440 · falta a partir de 20/02/2027 · estoque usado antes: 90.500 (com os 500 kg em custódia da OS-0417)',all(x in mp2 for x in ['101.440','20/02/2027','usado antes: 90.500']),mp2)
     rowclick('MAP 11-52'); m_cmp=memo(); lk=J("[...document.querySelectorAll('aside[role=dialog] a')].map(a=>[a.innerText.trim(),a.getAttribute('href')])") or []; foto('3b_cmp_memoria_cal01'); fechar()
     chk('11 mesma memória CAL-01 nas duas telas (MAP 11-52, linha a linha)',m_cmp==m_saf and len(m_saf)>=6,{'saf':m_saf,'cmp':m_cmp})
     chk('12 origem do insumo volta ao Planejar safra na demanda de insumos da Safrinha (passo=demanda)',any(t.startswith('Ver no Planejar safra · demanda de insumos') and h=='SAF.dc.html#saf=S27SF&passo=demanda' for t,h in lk),lk)

@@ -572,7 +572,7 @@ function EXTRAVALS(self,v){
   // (gestor, com o nº do laudo; sem laudo ou sem papel nada muda e o erro fica no painel, com o laudo digitado preservado)
   const lk=st.libask; const lq=lk&&C.lotes[lk]; v.lib_on=!!(lq&&lq.quarentena>1e-9)&&g2papel(g2perfil(),'gestor');   /* aberto por outro perfil: não aparece (achado 1) */
   const lqp=lq?(lq.quarentena||0)-Math.min(lq.quarentena||0,lq.quarRep||0):0;
-  v.lib_t=v.lib_on?(eq(lqp,lq.un)+' do lote '+lq.lote+' ('+lq.prod+') aguardam o laudo: informe o nº e libere, ou reprove (o material fica segregado para devolução ao fornecedor e a falta deixa de ser condicionada).'):'';
+  v.lib_t=v.lib_on?('Liberar '+eq(lqp,lq.un)+' do lote '+lq.lote+' ('+lq.prod+'): informe o laudo que aprova o material. Se o laudo reprovar, use "Reprovar com o laudo": o material fica segregado para devolução ao fornecedor e a falta deixa de ser condicionada.'):'';
   v.lib_mot=st.lib_mot||''; v.lib_setmot=(e)=>self.setState({lib_mot:e.target.value,lib_err:''});
   v.lib_rep=()=>{ const k=self.state.libask; const r=cenMudar(null,c=>cenReprovarQuarentena(c,k,self.state.lib_laudo,self.state.lib_mot,g2perfil()));
     if(r.erro){ self.setState({lib_err:r.erro}); return; } self.setState({libask:null,lib_laudo:'',lib_mot:'',lib_err:'',cenrev:Date.now(),g2toast:r.msg}); };
