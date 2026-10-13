@@ -17,6 +17,18 @@ function cdFato(c, id, dia) {
 function cdReferencia(c, id, dia) {
   return JSON.stringify({versao:c.ordens[id].versao, fato:cdFato(c,id,dia)});
 }
+function cdCasoReferencia(c,id,dia) {
+  const caso=cdAp(c,id,dia).ap.conferenciaDia?.caso;
+  return JSON.stringify({apontamento:cdReferencia(c,id,dia),caso:caso?.id,versao:caso?.versao});
+}
+function cdConteudo(ap) {
+  // Conteúdo físico do relato; revisão técnica e recibos não são uma nova execução.
+  return JSON.stringify([ap.dia,ap.d,ap.ha,ap.h,ap.parc,ap.cons,ap.inf,ap.origem,ap.chave,ap.quem,ap.obs]);
+}
+function cdValidarEvidencias(c,id,dia,ap) {
+  if ((ap.div || []).length && !ap.rev) throw new Error('A divergência de dose aguarda revisão técnica do agrônomo.');
+  if (cenConfAbertas(c, id).some(x => x.dia === dia)) throw new Error('O consumo deste dia aguarda decisão no Estoque.');
+}
 function cdImpedimento(c, id, dia) {
   const { o, ap } = cdAp(c, id, dia);
   if (!['Em execução', 'Em conferência'].includes(o.etapa)) return 'A ordem não admite conferência diária nesta fase.';
@@ -46,15 +58,43 @@ function cdConferir(c, id, dia, decisao, motivo, referencia, ator) {
   }
   const impedimento = cdImpedimento(c, id, dia);
   if (impedimento) throw new Error(impedimento);
-  if ((decisao === 'divergencia' || (anterior && anterior.estado === 'Não conforme')) && !texto) throw new Error('Informe o motivo da divergência ou como ela foi resolvida.');
+  if (anterior && anterior.estado === 'Não conforme') throw new Error('Resolva o caso do relato antes de conferir o dia. Conferência não substitui a decisão do caso.');
+  if (decisao === 'divergencia' && !texto) throw new Error('Informe o motivo da divergência.');
   if (decisao === 'conferir') {
-    if ((ap.div || []).length && !ap.rev) throw new Error('A divergência de dose aguarda revisão técnica do agrônomo.');
-    if (cenConfAbertas(c, id).some(x => x.dia === dia)) throw new Error('O consumo deste dia aguarda decisão no Estoque.');
+    cdValidarEvidencias(c,id,dia,ap);
   }
   const rp = cenRevisao(ator, ap.quem, 'apontou');
   const recibo = { estado, motivo: texto, por: quem, at: new Date().toISOString(), referencia: atual, fato: cdFato(c,id,dia), revisaoPosterior: rp || '' };
+  if (decisao === 'divergencia') recibo.caso = {id:'CD-'+id+'-'+dia+'-'+((ap.conferenciasAnteriores||[]).length+1),comando:'CMD-50',estado:'Em conferência',versao:1,
+    origem:{os:id,dia,chave:ap.chave||null},conteudo:cdConteudo(ap),motivo:texto,abertoPor:quem,at:recibo.at};
   if (anterior) ap.conferenciasAnteriores = (ap.conferenciasAnteriores || []).concat([anterior]);
   ap.conferenciaDia = recibo;
   ap.st = decisao === 'conferir' ? 'Conferido' : 'Provisório';
   return { msg: 'Dia ' + dia + ': ' + estado.toLowerCase() + ' por ' + quem + '. A fase da O.S. e os efeitos do apontamento permanecem.' + (rp ? ' ' + rp : ''), recibo };
+}
+// CMD-50, recorte documental: o relato já tem efeito. Vincular a evidência confirma
+// o fato existente; não aceita outro turno, não recusa/estorna nem converte quantidades.
+// As demais decisões exigem seus comandos físicos vinculados, fora desta fatia.
+function cdResolverRelato(c,id,dia,decisao,motivo,referencia,ator) {
+  const quem=cenExige(ator,'conferente','Resolver o relato do dia '+dia+' da '+id);
+  const {ap}=cdAp(c,id,dia), anterior=ap.conferenciaDia, caso=anterior&&anterior.caso;
+  const texto=String(motivo||'').trim();
+  if(decisao!=='vincular') throw new Error('Este recorte permite vincular evidência ao fato existente. Alterar o fato exige correção vinculada própria.');
+  if(!caso) throw new Error('Sem caso identificado: reavalie o relato antes de decidir.');
+  const atual=cdReferencia(c,id,dia);
+  if(caso.estado!=='Em conferência') {
+    if(caso.decisao===decisao&&caso.motivoDecisao===texto&&caso.por===quem&&caso.referencia===referencia&&caso.apontamento===atual)
+      return {msg:'Caso já vinculado. Mesmo recibo, sem repetir efeitos.',repetido:true,recibo:anterior};
+    throw new Error('Caso já resolvido: outra decisão é conflito, nada gravado.');
+  }
+  if(!referencia||referencia!==cdCasoReferencia(c,id,dia)) throw new Error('O apontamento, o caso ou a versão mudou. Reveja os dados atuais; o motivo foi preservado.');
+  if(!texto) throw new Error('Informe o motivo e a evidência que vinculam o relato ao fato existente.');
+  const impedimento=cdImpedimento(c,id,dia);if(impedimento)throw new Error(impedimento);
+  cdValidarEvidencias(c,id,dia,ap);
+  if(caso.conteudo!==cdConteudo(ap))throw new Error('O conteúdo do fato mudou: o vínculo documental não corrige quantidades. Trate a correção vinculada antes de fechar o caso.');
+  const rp=cenRevisao(ator,ap.quem,'apontou'), at=new Date().toISOString();
+  const resolvido=Object.assign({},caso,{estado:'Vinculado',versao:caso.versao+1,decisao,motivoDecisao:texto,por:quem,atDecisao:at,referencia,apontamento:atual,revisaoPosterior:rp||''});
+  const recibo={estado:'Conferido',motivo:texto,por:quem,at,referencia:atual,fato:cdFato(c,id,dia),revisaoPosterior:rp||'',caso:resolvido};
+  ap.conferenciasAnteriores=(ap.conferenciasAnteriores||[]).concat([anterior]);ap.conferenciaDia=recibo;ap.st='Conferido';
+  return {msg:caso.id+' vinculado ao fato do dia '+dia+' e conferido por '+quem+'. Nenhuma nova área, hora ou baixa de consumo.'+(rp?' '+rp:''),recibo};
 }

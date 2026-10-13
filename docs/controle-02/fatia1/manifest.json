@@ -3,21 +3,23 @@
   "autor": "Codex",
   "revisor": "Claude real",
   "arquivos": {
-    "conferencia_diaria.js": "174c1ea736fbf3837de85dcc50ace8012381098afe59808181231f0864441bd3",
-    "conferencia_diaria.py": "6c2e0ea1546870c625fbbe4dbc1055768f431b10ca9049a7e33ffc224d9d53d8",
-    "conferencia_diaria_ui.js": "089f2c7e760d81cfcdd0e6bb3bba0f19bf5595780f67ea4199033c89d139f1f3",
-    "conferencia_diaria_unit.js": "d936808c68d3d2af5327a20c2c1a63f69b3c1f1119a6b8fb5cfb847a66d1e19c",
+    "conferencia_diaria.js": "421f50d4300464b3c71ffadae478adb0c99af8086274f4ad4e73eb1a2ed0a9d2",
+    "conferencia_diaria.py": "358f3b97f4010703fd9f9e86450a54aac8547c606aeb3f50d1016aca8e7cc46a",
+    "conferencia_diaria_ui.js": "7d6bb921b382cb2ed3b5a6b5615edd853cd6b04d68f8cc9f888abb8978982cda",
+    "conferencia_diaria_unit.js": "71c7a75d547315a8e4b478773bc815d27912ac877125eca3ace4962defa73363",
     "conferencia_diaria_test.py": "aa5ee810c3c66111306c7c4c3755b47ef0a5baed44a0290223700aaf208229ec",
-    "conferencia_diaria_nav.py": "366a77ec886733fdad01de383052f84acc32c857f87023a133833a38980d603e",
+    "conferencia_diaria_nav.py": "e9ef32f81b6272310ec2ac7de7dcbc79691c650d0e08eed8a3d04550cc6443f2",
     "areas/processo_os.py": "04e446edea3a6ec776cfafc83b990e5391596191e864fdc286087e0d2e5ea870"
   },
-  "unit": 20,
-  "browser": 13,
+  "unit": 27,
+  "browser": 16,
   "regressao_apontamento_unico": 80,
   "ambiente": "Mac local; Chrome headless e perfil isolado; dados sintéticos",
   "limites": [
     "Teclado virtual real não executado",
     "Não é HML com banco/login real",
-    "Revisão Claude pendente; não publicado"
-  ]
+    "Revisão Claude pendente; não publicado",
+    "CMD-50 apenas vínculo documental; demais decisões/correção física pendentes"
+  ],
+  "critica_claude": "6137033305"
 }
