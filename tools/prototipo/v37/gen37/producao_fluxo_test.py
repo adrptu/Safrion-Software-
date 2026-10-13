@@ -413,6 +413,12 @@ window.CARDS=()=>[...document.querySelectorAll('.pr-card, .pr-grp')].filter(VIS)
         usel('padrao'); a4 = J("SAFR('S2627','T1-A')"); m4b = cel('T1-A', 'Meta')
         t.chk('R-U06 digitar 3,85 com t/ha grava {3,85, t/ha}; no Padrão a tabela mostra "64,17 sc/ha"; 20 trocas depois, o mesmo texto e o mesmo {3,85, t/ha} (sem deriva)',
               a3 == [3.85, 't/ha'] and m3 == '64,17 sc/ha' and a4 == [3.85, 't/ha'] and m4b == '64,17 sc/ha', [a3, m3, a4, m4b])
+        # revisão v57 (S2): com kg/ha escolhido, trocar a cultura mantém kg/ha (no mamão, kg/ha/ano); antes virava 3.720 t/ha/ano, mil vezes a meta
+        usel('kg'); rowc('T1-B'); f5 = [fv('meta'), fv('unm_txt')]; fset('cult', 'Mamão Formosa'); f6 = [fv('meta'), fv('unm_txt')]
+        clk('Salvar', 'aside[role=dialog]'); a5 = J("SAFR('S2627','T1-B')"); m5 = cel('T1-B', 'Meta')
+        t.chk('R-U06 T1-B (62 sc/ha) aberto em kg/ha mostra "3720"; trocar a cultura para Mamão mantém "3720" com "kg/ha/ano"; salvar grava {3720, kg/ha/ano} (não t/ha/ano)',
+              f5 == ['3720', 'kg/ha · Padrão da cultura: sc/ha (60 kg)'] and f6 == ['3720', 'kg/ha/ano · Padrão da cultura: t/ha/ano'] and a5 == [3720, 'kg/ha/ano'] and m5 in ('3.720 kg/ha/ano', '3,72 t/ha/ano'),
+              [f5, f6, a5, m5])
         ir('SAF.dc.html', w=390, h=844); clk('Continuar'); time.sleep(.6); ul(); u9 = ui(); sw9 = J("[document.documentElement.scrollWidth, innerWidth]")
         t.chk('AC-g SAF a 390 px: seletor com alvo ≥ 44 px e sem rolagem horizontal', u9.get('h', 0) >= 44 and sw9 and sw9[0] <= sw9[1], [u9, sw9])
         shot('unid_saf')

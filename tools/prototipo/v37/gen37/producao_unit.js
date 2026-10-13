@@ -502,4 +502,12 @@ ok('R19 "semana 2" lida em 26/09/2026 = 2027-W02; "semana 39" = 2026-W39; janela
   // a ponderada traz "apurar" como contagem dos talhões fora da conta: o indicador dela continua medido (revisão de 10/10, C01o)
   const pf = prPonderada([{ k: { cultura: 'Café' }, kg: 3000, area: 5 }, { k: { cultura: 'Café' }, kg: 0, area: 5, apurar: true }]);
   ok('U20p ponderada com 1 talhão a apurar fora da conta: indicador medido "10,00 sc/ha" (a contagem não vira estado a apurar)', pf.apurar === 1 && TX('Café', pf, 'padrao') === '10,00 sc/ha' && TX('Café', pf, 'kg') === '600,00 kg/ha', [pf, TX('Café', pf, 'padrao')]);
+  // U24 · revisão adversarial v57 (S4): o número da tela sai da produção e da área com um arredondamento só (R-U02, PRD 10.0). Antes o conversor
+  // arredondava para 6 casas e o texto de novo para 2: 8,0849995 → 8,085000 → "8,09", quando o certo é "8,08". A chave kgHa continua com 6 casas
+  const X5 = { kg: '485.09997', area: '1' }; const L5 = TX('Laranja', { kg: '8084.9995', area: '1' }, 'padrao');
+  const C5 = TX('Café', { apurar: true, litros: '16.169999', liq: 0, kgOk: false, area: '2' }, 'padrao');
+  ok('U24a R-U02 um arredondamento: 485,09997 kg em 1 ha = 8,0849995 sc/ha → "8,08 sc/ha" (não "8,09"); a meta de 485,09997 kg/ha no Padrão "8,08 sc/ha"; o lado da laranja "8,08 t/ha"; café da roça 16,169999 L em 2 ha "8,08 L/ha"; kgHa com 6 casas',
+     TX('Soja', X5, 'padrao') === '8,08 sc/ha' && M('Soja', 485.09997, 'kg/ha', 'padrao') === '8,08 sc/ha' && / · 8,08 t\/ha$/.test(L5) && C5 === 'sc/ha a apurar · 8,08 L/ha de Café da roça'
+     && prUnpInd('Soja', X5, 'padrao').kgHa === 485.09997 && prUnpMeta('Soja', 485.09997, 'kg/ha', 'padrao').kgHa === 485.09997,
+     [TX('Soja', X5, 'padrao'), M('Soja', 485.09997, 'kg/ha', 'padrao'), L5, C5]);
   ok('U20o o catálogo volta ao original depois dos casos injetados (tu1, OS-0971/0972)', !PRDC.cult.tu1 && !PRDC.osCult['OS-0971'] && !PRDC.osCult['OS-0972']); }

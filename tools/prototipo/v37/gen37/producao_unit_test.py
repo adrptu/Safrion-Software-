@@ -80,6 +80,17 @@ let m={meta:3.85,unm:'t/ha'}; const ks=['t','kg','padrao']; for(let i=0;i<20;i++
 o.deriva=m; g2unidSet('Soja','padrao'); o.tela=metaTela({v:{cult:'Soja',meta:3.85,unm:'t/ha'}});
 o.un=[metaUnTxt({cult:'Soja',_un:'kg/ha'}),metaUnTxt({cult:'Soja',_un:'sc/ha'}),metaUnTxt({cult:'Mamão Formosa',_un:'kg/ha/ano'})];
 const KG_ANTES={'sc/ha':60,'t/ha/ano':1000,'kg/ha':1}; o.custo=CULT_SEM.filter(([cu,m,u])=>prUnpKgHa(cu,m,u)!==m*KG_ANTES[u]);
+/* U23f-h · revisão adversarial v57 (S2): trocar a cultura mantém a opção escolhida (kg/ha) com o período da nova cultura; sem a opção, o Padrão.
+   Painel = cultDraft (troca); Dividir = set('cult') (só a cultura muda na linha) */
+const SS={state:{saf:'S2627'}}; const troca=(d,cu)=>{ const x=Object.assign({},d,{cult:cu}); return cultDraft(SS,'g_cult_S2627','cult',x,null)||x; };
+g2unidSet('Soja','kg'); g2unidSet('Mamão Formosa','padrao');
+const pS=Object.assign({cult:'Soja'},metaRascunho('Soja',62,'sc/ha')); const pM=troca(pS,'Mamão Formosa'); const dM=Object.assign({},pS,{cult:'Mamão Formosa'}); const gM=metaGravar(pM);
+o.f=[pS.meta,metaUnTela(pM),gM,metaUnTxt(pM),metaUnTela(dM),metaGravar(dM),prUnpKgHa('Mamão Formosa',gM.meta,gM.unm),metaGravar(troca(pM,'Soja'))];
+g2unidSet('Mamão Formosa','kg'); const mM=Object.assign({cult:'Mamão Formosa'},metaRascunho('Mamão Formosa',50,'t/ha/ano'));
+o.g=[mM.meta,mM._un,metaGravar(troca(mM,'Soja')),metaGravar(Object.assign({},mM,{cult:'Soja'}))];
+g2unidSet('Soja','padrao'); const cS=Object.assign({cult:'Soja'},metaRascunho('Soja',62,'sc/ha')); const vz=Object.assign({cult:'Soja'},metaRascunho('Soja','',''));
+o.h=[metaGravar(troca(cS,'Mamão Formosa')),metaGravar(Object.assign({},cS,{cult:'Mamão Formosa'})),vz._un,metaUnTela(troca(vz,'Mamão Formosa')),metaUnTela(Object.assign({},vz,{cult:'Mamão Formosa'})),metaUnTela(troca(vz,'Milho'))];
+g2unidSet('Mamão Formosa','padrao');
 console.log(JSON.stringify(o));''')
     p23 = os.path.join(HERE, '_probe', 'unidprod_saf_unit.js'); open(p23, 'w', encoding='utf-8').write(js23)
     r = subprocess.run(['node', p23], capture_output=True, text=True, timeout=60)
@@ -95,6 +106,13 @@ console.log(JSON.stringify(o));''')
        o.get('un') == ['kg/ha · Padrão da cultura: sc/ha (60 kg)', 'sc/ha · Padrão da cultura', 'kg/ha/ano · Padrão da cultura: t/ha/ano'], o.get('un'))
     ok('U23e Custo R$/kg do Planejar safra: a meta em kg/ha pelo conversor é igual à da tabela antiga (KG_UN) nas 40 metas da semente',
        o.get('custo') == [], o.get('custo'))
+    M = lambda m, u: {'meta': m, 'unm': u}
+    ok('U23f R-U06 (revisão v57, S2) T1-B 62 sc/ha aberto em kg/ha ("3720"): trocar a cultura para Mamão no painel e no Dividir grava {3720, kg/ha/ano} (não 3.720 t/ha/ano); o Custo R$/kg lê 3.720 kg/ha; voltar à Soja sem mexer mantém {62, sc/ha}',
+       o.get('f') == ['3720', 'kg/ha/ano', M(3720, 'kg/ha/ano'), 'kg/ha/ano · Padrão da cultura: t/ha/ano', 'kg/ha/ano', M(3720, 'kg/ha/ano'), 3720, M(62, 'sc/ha')], [o.get('f'), r.stderr[-300:]])
+    ok('U23g R-U06 sentido inverso: mamão 50 t/ha/ano aberto em kg/ha ("50000", kg/ha/ano) trocado para Soja no painel e no Dividir grava {50000, kg/ha} (não 50.000 sc/ha)',
+       o.get('g') == ['50000', 'kg/ha/ano', M(50000, 'kg/ha'), M(50000, 'kg/ha')], o.get('g'))
+    ok('U23h sem a opção na nova cultura, o Padrão dela com o número como está (Soja no Padrão 62 → {62, t/ha/ano}, como hoje); campo vazio segue a preferência da nova cultura (Mamão em kg → kg/ha/ano; Milho no Padrão → sc/ha, D-U01)',
+       o.get('h') == [M(62, 't/ha/ano'), M(62, 't/ha/ano'), 'sc/ha', 'kg/ha/ano', 'kg/ha/ano', 'sc/ha'], o.get('h'))
     # AC-j · fonte única do fator (ENG-011, R-U01): a segunda tabela (KG_UN do Planejar safra) e o × 1000 fixo do rascunho pela meta saíram
     saf = open(os.path.join(HERE, 'safra.js'), encoding='utf-8').read(); prj = open(os.path.join(HERE, 'producao.js'), encoding='utf-8').read()
     ok('AC-j fonte única: sem KG_UN no safra.js e sem o × 1000 fixo no rascunho; o Planejar safra converte pelo prUnpKgHa',

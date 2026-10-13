@@ -226,6 +226,9 @@ function prUnpQHa(cultura, valor, unTxt) { const u = prUn(cultura); const s = St
 function prUnpKgHa(cultura, valor, unTxt) { if (!prUnpPesa(prUn(cultura))) throw new Error('Unidade sem massa para ' + cultura + ': ' + unTxt + '.'); return prUnpQHa(cultura, valor, unTxt); }
 /* q ÷ (área × div), um arredondamento (prM em milionésimos: q·10^12 ÷ (área·div·10^12)) */
 function prUnpDiv(q, area, div) { return prN(prRd(prM(q) * PR_S * PR_S, prM(area) * prM(div))); }
+/* o mesmo quociente direto em d casas, para a tela: um arredondamento só (R-U02, PRD 10.0). O de 6 casas fica para kgHa e a chave r.ordk;
+   arredondar o de 6 casas de novo para 2 dava 8,0849995 → 8,085 → "8,09" (revisão v57, S4) */
+function prUnpDivD(q, area, div, d) { const e = 10n ** BigInt(d); return prN(prRd(prM(q) * PR_S * e, prM(area) * prM(div)) * (PR_S / e)); }
 /* desvio % contra a meta na base por ha: (q ÷ área − meta) ÷ meta × 100, um arredondamento; meta com a unidade gravada (R-U09) */
 function prUnpDesv(cultura, q, area, meta, unMeta) { const Q = prM(prUnpQHa(cultura, meta, unMeta)), A = prM(area); const den = Q * A; if (den === 0n) return null;
   return prN(prRd((prM(q) * PR_S - den) * 100n * PR_S, den)); }
@@ -242,13 +245,14 @@ function prUnpInd(cultura, X, k) { const u = prUn(cultura); const ops = prUnpOpc
       else { const oc = prUnpOpcoes(cultura, 'campo', X); const pc = oc.find(x => x.k === o.k); const c = (pc && pc.ok) ? pc : oc[0];
         if (pc && !pc.ok) ind.motivo = pc.rot + ' indisponível para ' + u.proc + ': ' + pc.motivo.toLowerCase();
         ind.campo = { st: 'medido', estagio: 'campo', prod: u.proc, un: c.un, L: !!c.L, kgHa: c.massa ? prUnpDiv(X.liq, X.area, 1) : null, lHa: prUnpDiv(X.litros, X.area, 1),
-                      num: prUnpDiv(c.massa ? X.liq : X.litros, X.area, c.div) }; } }
+                      num: prUnpDiv(c.massa ? X.liq : X.litros, X.area, c.div), n2: prUnpDivD(c.massa ? X.liq : X.litros, X.area, c.div, 2) }; } }
     return ind; }
   if (!temArea) { ind.st = prCmp(X.kg || 0, 0) > 0 ? 'pend' : 'vazio'; return ind; }
-  ind.st = 'medido'; ind.kgHa = prUnpDiv(X.kg, X.area, 1); ind.num = prUnpDiv(X.kg, X.area, o.div);
-  if (o.eq) ind.prod = u.prod; if (o.k === 'padrao' && u.lado) ind.lado = prFmt(prUnpDiv(X.kg, X.area, 1000), 2) + ' ' + u.lado;
+  ind.st = 'medido'; ind.kgHa = prUnpDiv(X.kg, X.area, 1); ind.num = prUnpDiv(X.kg, X.area, o.div); ind.n2 = prUnpDivD(X.kg, X.area, o.div, 2);
+  if (o.eq) ind.prod = u.prod; if (o.k === 'padrao' && u.lado) ind.lado = prFmt(prUnpDivD(X.kg, X.area, 1000, 2), 2) + ' ' + u.lado;
   return ind; }
-function prUnpNum(x) { return (x.L ? prFmtT(x.num, 2) : prFmt(x.num, 2)) + ' ' + x.un; }
+/* número da tela com 2 casas (n2: um arredondamento só, R-U02) */
+function prUnpNum(x) { const n = x.n2 !== undefined ? x.n2 : x.num; return (x.L ? prFmtT(n, 2) : prFmt(n, 2)) + ' ' + x.un; }
 /* texto da célula (R-U03): "‹número› ‹un›" [· lado] [de ‹produto› quando é equivalência ou outro estágio] [· estimativa] */
 function prUnpTxt(ind) { if (!ind || ind.st === 'vazio') return '—'; if (ind.st === 'pend') return 'sem área colhida apontada'; const est = ind.estim ? ' · estimativa' : '';
   if (ind.st === 'apurar') { const c = ind.campo; return ind.un + ' a apurar' + (c ? ' · ' + (c.st === 'pend' ? 'sem área colhida apontada' : prUnpNum(c) + ' de ' + c.prod) : '') + est; }
@@ -259,7 +263,8 @@ function prUnpMeta(cultura, valor, unTxt, k) { const ops = prUnpOpcoes(cultura, 
   const per = /\/ano$/.test(String(unTxt || '').trim()) ? '/ano' : ''; let q;
   try { q = prUnpQHa(cultura, valor, unTxt); } catch (e) { return { txt: prFmtT(valor, 2) + ' ' + (unTxt || ''), kgHa: null, ok: false, un: unTxt || '' }; }
   const m = prUnpMassa(cultura, unTxt); const mesma = m ? m.k === o.k : o.k === 'padrao';
-  const num = mesma ? prN(prM(valor)) : prUnpDiv(q, 1, o.div); return { txt: prFmtT(num, 2) + ' ' + o.un + per, num, kgHa: q, ok: true, un: o.un + per }; }
+  const num = mesma ? prN(prM(valor)) : prUnpDiv(q, 1, o.div); const n2 = mesma ? num : prUnpDivD(q, 1, o.div, 2);   /* n2: o texto com um arredondamento só (R-U02) */
+  return { txt: prFmtT(n2, 2) + ' ' + o.un + per, num, n2, kgHa: q, ok: true, un: o.un + per }; }
 
 /* ---------- previsão (R-17) ---------- */
 function prContagem(c, cid) { const l = (prP(c).contagens || []).filter(x => x.cult === cid && x.sinc !== false); return l[l.length - 1] || null; }

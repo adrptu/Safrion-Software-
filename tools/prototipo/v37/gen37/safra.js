@@ -538,7 +538,7 @@ function cultLive(self,gid,k,d){ const saf=self.state.saf; if(!saf) return null;
 // pessoa não digitou a data (R-17)
 function cultDraft(self,gid,k,d,fm){ const saf=self.state.saf; if(!saf||d.modo==='vinc') return null; const cs=cultsDe(self,saf);
   if(k==='plantio'){ d._pt='1'; return d; }
-  if(k==='cult'){ d.var=maisUsado(cs.filter(c=>c.v.cult===d.cult),'var')||''; d.plano=maisUsado(cs.filter(c=>c.v.cult===d.cult&&planById(c.v.plano)),'plano')||''; d._un=unMetaDe(d.cult,d._un); }
+  if(k==='cult'){ d.var=maisUsado(cs.filter(c=>c.v.cult===d.cult),'var')||''; d.plano=maisUsado(cs.filter(c=>c.v.cult===d.cult&&planById(c.v.plano)),'plano')||''; }   /* a unidade da meta sai de metaUnTela (R-U06): _un fica a fixada ao abrir */
   if(fm&&fm.isNew&&!d._pt&&['cult','plano','area','local'].indexOf(k)>=0&&self._plan&&self._plan.desde!==undefined){ const pm=pminDraft(self,saf,d,self._plan.desde); if(pm!==null) d.plantio=ocIso(pm); }
   return d; }
 function nfa(n){ return Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2}); }
@@ -872,14 +872,21 @@ function metaTela(r){ const m=r.v.meta; if(m===''||m===undefined||m===null) retu
 // rascunho da meta ao abrir: o número na unidade da preferência, com a unidade fixa (_un) e a origem (_m0, _u0, _c0) e o texto mostrado (_t0)
 function metaRascunho(cult,meta,unm){ const vz=(meta===''||meta===undefined||meta===null); let un=unMetaDe(cult,unm), t=vz?'':String(meta).replace('.',',');
   try{ const op=metaPref(cult); const ops=prUnpOpcoes(cult,'base'); const o=ops.find(x=>x.k===op&&x.ok)||ops[0];
-    if(vz) un=o.un+metaPer(cult); else { const m=prUnpMeta(cult,meta,unm,op); if(m.ok){ t=prFmtT(m.num,2).replace(/\./g,''); un=m.un; } } }catch(e){}
+    if(vz) un=o.un+metaPer(cult); else { const m=prUnpMeta(cult,meta,unm,op); if(m.ok){ t=prFmtT(m.n2,2).replace(/\./g,''); un=m.un; } } }catch(e){}
   return {meta:t,_t0:t,_m0:vz?'':String(meta),_u0:unm||'',_un:un,_c0:cult||''}; }
 // o que gravar: texto igual ao mostrado ao abrir (e a mesma cultura) mantém {meta, unm} gravados; senão {número digitado, unidade do rascunho}
 function metaGravar(d){ const t=String(d.meta===undefined||d.meta===null?'':d.meta).trim();
   if(d._t0!==undefined&&d._m0!==''&&t===d._t0&&String(d.cult||'')===String(d._c0||'')) return {meta:Number(d._m0),unm:unMetaDe(d.cult,d._u0)};
-  return {meta:g2num(t),unm:unMetaDe(d.cult,d._un)}; }
-// unidade mostrada ao lado do campo: a do rascunho, se vale para a cultura escolhida; senão o Padrão da nova cultura (como hoje)
-function metaUnTela(d){ return unMetaDe(d.cult,d._un||d.unm); }
+  return {meta:g2num(t),unm:metaUnTela(d)}; }
+// unidade ao lado do campo e a gravada com o número digitado. Na cultura de abertura (_c0), a fixada ao abrir (_un, D-U20). Trocada a cultura
+// (painel ou linha do Dividir), com o campo vazio vale a preferência da nova cultura (D-U01); com número, fica a mesma opção (kg/ha, t/ha,
+// sc 60, cx 10) se ela existe na nova cultura, com o período dela (kg/ha → kg/ha/ano); sem a opção, o Padrão da nova cultura com o número
+// como está (como hoje). Sem isso, 3.720 kg/ha da soja virava 3.720 t/ha/ano no mamão: mil vezes a meta (revisão v57, S2)
+function metaUnTela(d){ const cu=d.cult, un=d._un||d.unm, c0=d._c0;
+  if(c0===undefined||String(c0)===String(cu||'')) return unMetaDe(cu,un);
+  try{ const vz=String(d.meta===undefined||d.meta===null?'':d.meta).trim()===''; const m=vz?null:prUnpMassa(c0,un); const k=vz?metaPref(cu):(m?m.k:'padrao');
+    const o=prUnpOpcoes(cu,'base').find(x=>x.k===k&&x.ok); if(o) return o.un+metaPer(cu); }catch(e){}
+  return unMetaDe(cu,''); }
 // texto do campo "Unidade da meta": "kg/ha · Padrão da cultura: sc/ha (60 kg)"; no Padrão, "sc/ha · Padrão da cultura"
 function metaUnTxt(d){ const un=metaUnTela(d); const pad=(D2.unMeta||{})[d.cult]||''; let rot=pad;
   try{ rot=prUnpOpcoes(d.cult,'base')[0].rot.replace('Padrão da cultura · ','').replace(/^(\S+)/,'$1'+metaPer(d.cult)); }catch(e){}
