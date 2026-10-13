@@ -180,11 +180,14 @@ def build():
         x0={r['id']:True for r in rrows}; x0.update({a['id']:True for r in rrows for a in r['kids'] if a.get('grp')})
         grid(REND_COLS,rrows,edit=(dict(REND_EDIT,m='ro') if k=='S2526' else REND_EDIT),gid=f'g_rend_{k}',total=False,tree=True,x0=x0)
     # ---------- etapa 3 · Dimensione operações e recursos (ESPECIFICACAO etapa-unica-3-4-5 §2-§3) ----------
-    # g_op: 8 colunas, uma variável por coluna e a unidade na célula (ha-op na operação, ha nos demais níveis); a árvore é a lista e o
+    # g_op: 9 colunas, uma variável por coluna e a unidade na célula (ha-op na operação, ha nos demais níveis); a árvore é a lista e o
     # formulário Rendimento é o sub-detalhe. Situação: Com pendência · Janela não informada · Cabe na janela (só chips, sem números).
+    # Total (proprietário, 13/10/2026): ha-op, horas, R$/ha e custo; o R$/ha e as unidades vêm do e3Op (safra.js), não da soma da grade.
     g_op=grid([dict(k='nome',l='Operação › atividade › talhão',w=172),dict(k='sit',l='Situação',w=164),dict(k='data',l='Data',t='num',w=104),dict(k='conj',l='Conjunto',w=150),
-               dict(k='rend',l='Rendimento',t='num',a='r'),dict(k='area',l='Área trabalhada',t='num',a='r',ajuda='ha-op = hectares-operação: cada passada conta; 3 passadas em 10 ha = 30 ha-op (PRD 44.1)'),
-               dict(k='horas',l='Horas-conjunto (h)',t='num',a='r',d=1,agg='sum'),dict(k='rha',l='Custo R$/ha',t='num',a='r')],
+               dict(k='rend',l='Rendimento',t='num',a='r'),dict(k='area',l='Área trabalhada',t='num',a='r',agg='sum',ajuda='ha-op = hectares-operação: cada passada conta; 3 passadas em 10 ha = 30 ha-op (PRD 44.1)'),
+               dict(k='horas',l='Horas-conjunto (h)',t='num',a='r',d=1,agg='sum'),
+               dict(k='rha',l='Custo R$/ha',t='num',a='r',agg='fn',ajuda='Na linha: custo ÷ área trabalhada. No Total: custo ÷ hectares dos talhões (cada talhão conta uma vez, como no Resumo da safra)'),
+               dict(k='custo',l='Custo total',t='num',a='r',agg='sum',ajuda='Máquinas e pessoas, sem insumos. O Total é o Custo de operação do topo')],
        [],edit=dict(m='pick',leafOnly=False),tree=True,gid='g_op',total=True,qf=dict(k='sit',l='situação',nivel0=True))
     # g_cap: capacidade por mês (recurso × mês, ocupação), uma por safra; recolhida por padrão.
     # Recurso, Maior uso e Mês abrem o formulário do recurso; as células de mês (nr) só filtram (toque na célula com demanda desta safra)

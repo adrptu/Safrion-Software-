@@ -82,8 +82,8 @@ function cenUsoLegal(us, rot, dose, un, nap, refs) {   // refs (opcional): o que
   if (isFinite(mx) && nap >= mx) tr.push('Nº máximo de aplicações no ciclo atingido: ' + nap + ' de ' + mx + (refs && refs.length ? ' (' + refs.join(', ') + ')' : '') + '.');
   return { tr, al };
 }
-function cenLote(c, prod) { return Object.values(c.lotes).filter(l => l.prod === prod).sort((a, b) => (b.fisico - b.reservado - b.quarentena) - (a.fisico - a.reservado - a.quarentena))[0] || null; }
-function cenDisp(l) { return Math.max(0, (l.fisico || 0) - (l.quarentena || 0) - (l.reservado || 0)); }
+function cenLote(c, prod) { return Object.values(c.lotes).filter(l => l.prod === prod && !cenLoteVencido(l)).sort((a, b) => cenDisp(b) - cenDisp(a))[0] || null; }
+function cenDisp(l) { if (cenLoteVencido(l)) return 0; return Math.max(0, (l.fisico || 0) - (l.quarentena || 0) - (l.reservado || 0)); }
 // ---------- CTL-4 (revisão do 853a6a8, achado 1, S2) · o que cada O.S. ainda precisa e o que já tem, por insumo, numa conta só (cenOsDem e cenEstDem).
 // bruto = o que falta aplicar: A liberar, Liberadas e Em execução, quantidade(dose, saldo) (sem realizado, o total da versão); nas outras fases 0.
 // cust = custódia da requisição. need = máx(0, bruto − cust): o que a ordem ainda tira do almoxarifado. sobra = máx(0, cust − bruto): material
@@ -264,6 +264,7 @@ function cenEntregar0(c, rid, prod, qtd, quem, ator) {
   if (['Liberadas', 'Em execução'].indexOf(o.etapa) < 0) throw new Error('Entregue só para O.S. liberada ou em execução (' + r.os + ' está em ' + o.etapa + ').');
   const it = r.itens.find(i => i.prod === prod); if (!it) throw new Error(prod + ' não está na ' + rid + '.');
   const l = c.lotes[prod + '|' + it.lote]; if (!l) throw new Error('Lote ' + it.lote + ' de ' + prod + ' não encontrado no Estoque.');
+  if (cenLoteVencido(l)) throw new Error('Lote ' + l.lote + ' vencido em ' + l.validade + ': não pode ser entregue. Revise a reserva com o responsável pela O.S.; o físico permanece no estoque.');
   if (!(qtd > 0)) throw new Error('Informe a quantidade.');
   if (qtd > cenSaldoEntregar(it) + 1e-9) throw new Error('Acima do saldo a entregar: ' + cenNum(cenSaldoEntregar(it)) + ' ' + it.un + '.');
   if (qtd > l.fisico - l.quarentena + 1e-9) throw new Error('O lote ' + it.lote + ' não tem ' + cenNum(qtd) + ' ' + it.un + ' livres.');
@@ -444,7 +445,7 @@ function cenResPropria(c, rid, it, l) { return (l && it) ? Math.max(0, Math.min(
 // Consumo: informado é o fato; não informado = dose × área do trecho (SINT-C03), só estimativa (CONC-13): acima da custódia, estimativa é
 // recusada e informado vai para conferência com o almoxarife (CONC-07). Mesma chave = mesmo apontamento, nada de novo (OSDIA-03).
 // Duplicata provável (cenApDup) fica "Duplicidade a conferir": não soma área nem baixa consumo até a decisão (OSDIA-04; PRD 8.5).
-const CEN_DIA_OP = '2026-09-26';   // data padrão do apontamento na demonstração: a mesma na O.S., no Mapa e no turno do app
+const CEN_DIA_OP = CEN0.diaOperacional;   // data padrão do apontamento na demonstração: a mesma na O.S., no Mapa e no turno do app
 const CEN_AP_DUP = 'Duplicidade a conferir', CEN_AP_DESC = 'Duplicidade · não somado', CEN_CC_AGUARDA = 'Aguarda duplicidade';
 function CEN_CONF_AP() { return g2alcQuem('AL-12'); }   // quem confere os apontamentos (AL-12, CMD-09): do papel, nunca nome fixo (CONF-01 R7)
 function cenDdMm(iso) { const a = String(iso || '').split('-'); return a.length === 3 ? a[2] + '/' + a[1] : String(iso || ''); }

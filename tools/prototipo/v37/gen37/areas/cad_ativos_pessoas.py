@@ -272,8 +272,8 @@ CAD_ACTS.g_atv=(self,r,fm)=>{ if(g2dirty(fm)) return []; const us=(c3usos(self)[
     go:()=>{ g2set(self,'g_atv',{fm:null}); fpvAbrir(self,r.id,{gid:'g_atv',rid:r.id},!tf); }}];
   return fp.concat(us.map((c,i)=>{ const o=c.v.maq===r.v.nome?(c.v.impl&&c.v.impl!==C3.sem?c.v.impl:''):c.v.maq;
     return {t:(o?o+' · ':'')+(ml(c.v.ops).join(', ')||'conjunto')+' ›',h:i===us.length-1?(us.length>1?'Conjuntos que usam esta máquina.':'Conjunto que usa esta máquina.'):'',go:()=>{ g2set(self,'g_atv',{fm:null}); g2open(self,GR('g_cj'),c.id,null); }}; })); };
-CAD_ACTS.g_cj=(self,r)=>[c3temR(r.v)?null:{t:'Cadastrar rendimento ›',h:'Sem rendimento o planejamento não calcula horas nem custo deste conjunto.',go:()=>{ location.href='CD-02.dc.html#aba=operacoes'; }},
-  cadExcluir(self,'g_cj',r,'conjunto',r.nd?'tem rendimento em Culturas e operações; troque o conjunto lá antes':'')];
+CAD_ACTS.g_cj=(self,r)=>[c3temR(r.v)?null:{t:'Cadastrar rendimento ›',h:'Sem rendimento o planejamento não calcula horas nem custo deste conjunto.',go:()=>{ location.href='CD-08.dc.html'; }},
+  cadExcluir(self,'g_cj',r,'conjunto',r.nd?'tem rendimento em Operações e rendimentos; troque o conjunto lá antes':'')];
 function PREVALS(self,v){ cadActsIni(self); fpvVals(self,v);
   // CD-03.dc.html#ficha=<equipamento> (vindo da Irrigação) abre a ficha do pivô; fechar volta ao detalhe do equipamento
   if(!self.__fpvHash){ self.__fpvHash=1; try{ const m=/[#&]ficha=([^&]+)/.exec(location.hash||''); const id=m?decodeURIComponent(m[1]):''; if(FPV_EQ[id]&&fpvFicha(id)) setTimeout(()=>fpvAbrir(self,id,{gid:'g_atv',rid:id}),0); }catch(e){} }
@@ -356,7 +356,7 @@ function EXTRAVALS(self,v){
       const C=c3cond(r); self.setState({g2toast:(isNew?'Cadastrado: ':'Salvo: ')+r.v.nome+' · '+c3cap(r.v)+(isnum(r.v.custo_h)&&String(r.v.custo_h)!==''?' · R$ '+nf(r.v.custo_h,2)+'/h':'')+' · '+C.t+'.'}); }
     if(gid==='g_cj'){ const X=c3conj(self,r.v); const lg=X.I?c3larg(X.I.v):(X.M?c3larg(X.M.v):null);
       self.setState({g2toast:(isNew?'Conjunto montado: ':'Salvo: ')+r.v.maq+(X.I?' + '+r.v.impl:'')+' · '+ml(r.v.ops).join(', ')+(lg!==null?' · '+nfa(lg)+' m':'')
-        +(X.bad.length?' · indisponível: '+X.bad.map(y=>y.x.v.nome+' '+y.c.curto).join(', '):' · disponível')+(isNew?'. Cadastre o rendimento em Culturas e operações.':'.')}); } }; }
+        +(X.bad.length?' · indisponível: '+X.bad.map(y=>y.x.v.nome+' '+y.c.curto).join(', '):' · disponível')+(isNew?'. Cadastre o rendimento em Operações e rendimentos.':'.')}); } }; }
 ''')
     HEIGHTS37[fname]=1000   # sem rolagem de página: só a tabela ou os cartões da aba rolam
     E.EXTRA.append(EXTRA_FP)

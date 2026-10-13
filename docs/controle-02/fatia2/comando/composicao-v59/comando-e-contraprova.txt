@@ -1,0 +1,9 @@
+OK adaptador real permite avisos e publica R1 pela alçada real
+OK sobreposição real recusa antes de gravar recibo ou referência
+OK cultura incompatível real recusa e preserva rascunho
+OK Rui sem AL18 recusa comando real
+MUDANCA {"msg":"AL-18 v2 vigente (CFG-0017): gestor → agrônomo. Vale para o próximo comando.","recibo":{"id":"CFG-0017","imp":"[\"alc\",\"AL-18\",{\"papel\":\"agronomo\"},\"Contraprova sintética\",1]"}}
+AL18 {"v":2,"id":"AL-18","t":"Publicar referência técnica do plano operacional","cmd":"CONTROLE-02 F2 (comando do PR #58)","papeis":["agronomo"],"modo":"todos","edita":"papel","opc":["gestor","agronomo"],"obs":"publicar registra a versão de referência: não aprova orçamento nem libera O.S. (alçada própria, sem reaproveitar a de orçamento ou de O.S.)"}
+PUBLICAR {"erro":"Publicar referência do plano: decisão de Caio (gestor). Nada foi alterado."}
+OK AL18 editável para agrônomo conflita com gestor fixo no núcleo (contraprova)
+RESULTADO 5/5

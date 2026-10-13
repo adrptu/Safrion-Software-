@@ -38,10 +38,11 @@ def _interactive(fname):
     s=open(os.path.join(E.P,fname)).read(); return ('onClick=' in s) or ('href=' in s)
 # páginas de redirecionamento (PCM simplificado, D-24): PM, MA-01..05 e MA-04det levam ao endereço novo da tela MA; ficam fora do canvas e do Índice
 from areas.maquinas import REDIRECIONA
-files=sorted(f for f in os.listdir(E.P) if f.endswith('.dc.html') and f not in REDIRECIONA)
+files=sorted(f for f in os.listdir(E.P) if f.endswith('.dc.html') and f not in REDIRECIONA and f!='Main.dc.html')   # Main: página técnica mínima desde 13/10 (o protótipo abre no Mapa)
 boards={}; order=[]; notes={}
 # ---- página 1 · menu vigente ----
-VIS_ROWS=[('Índice',['Main.dc.html']),('Mapa',['IN-04.dc.html'])]+[(nome,list(dict.fromkeys(h.split('#')[0] for _,h in items))) for nome,ic,items in MENU2 if nome!='Mapa']   # visões da mesma tela (Manutenção) = um quadro
+from ui37 import HUB37, OUTROS37
+VIS_ROWS=[('Mapa',['IN-04.dc.html'])]+[(nome,([HUB37[nome]] if nome in HUB37 else [])+list(dict.fromkeys(h.split('#')[0] for _,h in items))) for nome,ic,items in MENU2 if nome!='Mapa']   # tela de entrada do módulo à frente (13/10)   # visões da mesma tela (Manutenção) = um quadro
 # App de campo (prioridade de teste com os primeiros clientes, DEC-2609-13): mesmo cenário da O.S. e do Estoque
 # PCM S4 (§1, §3.7): MB-09 "Máquina" e MB-09det "Ordem de manutenção" deixam de ser ocultos: ligados ao MB-01, gravam no cenário e funcionam sem sinal
 VIS_ROWS.append(('App de campo',['MB-01.dc.html','MB-02.dc.html','MB-03.dc.html','MB-04.dc.html','MB-05.dc.html','MB-07.dc.html','MB-10.dc.html',
@@ -56,7 +57,6 @@ for nome,fs in VIS_ROWS:
     notes['v_'+str(len(notes))]={'x':0,'y':y-240,'text':nome,'kind':'title1','maxW':1840,'page':'menu'}
     for f in fs:
         w,h=_wh(f); boards[f]={'x':x,'y':y,'w':w,'h':h,'title':CAT.get(f[:5],{}).get('titulo',f.replace('.dc.html','')) if f[:5] in CAT else f.replace('.dc.html',''),'is_interactive':_interactive(f),'page':'menu'}
-        if f=='Main.dc.html': boards[f]['title']='Índice central · comece aqui'
         if f=='OS-0424-app.dc.html': boards[f]['title']='Agrícola › Ordem de Serviço › OS-0424 · ficha no app (funciona sem internet)'
         if f=='OS-0424-ficha.dc.html': boards[f]['title']='Agrícola › Ordem de Serviço › OS-0424 · ficha impressa'
         if f=='BEN.dc.html': boards[f]['title']='Produção › Recebimento e beneficiamento › Beneficiamento'   # tela irmã de Cargas (BEN-D14)

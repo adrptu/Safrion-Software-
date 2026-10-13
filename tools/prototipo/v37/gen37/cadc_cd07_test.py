@@ -22,7 +22,7 @@ try:
           and 'rateio por horas de máquina' in pv('CC-OFI','vincT'), [pv('3.1.01','vincT'),pv('CC-OFI','vincT')])
     t.openrow(0,'SOJA'); d1=t.dlg(); t.cancel(); t.openrow(0,'3.1.05'); d2=t.dlg(); t.cancel()
     t.chk('exclusão bloqueada com motivo (no painel): cultura do CD-02 e natureza usada em grupos',
-          'vem de Culturas, cultivares e operações' in d1 and 'natureza de grupos de insumo' in d2, [d1[-160:],d2[-160:]])
+          'vem de Culturas e cultivares' in d1 and 'natureza de grupos de insumo' in d2, [d1[-160:],d2[-160:]])
     t.openrow(0,'SOJA'); d=t.dlg()
     t.chk('código do CD-02 abre só com a tradução editável', all(t.fdis(k) for k in ('cod','nome','dim','ini')) and not t.fdis('trad') and 'só a tradução' in d, d[:200])
     t.fset('trad','Conta do ERP'); t.fset('conta','cultura 01'); t.btn('Salvar'); time.sleep(.2)

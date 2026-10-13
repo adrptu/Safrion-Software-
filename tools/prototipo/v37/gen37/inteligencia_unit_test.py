@@ -29,12 +29,51 @@ def oraculo():
     for f in d['forn']:
         es = [h for h in d['hist'] if h['f'] == f['id'] and h['entregue']]
         pont[f['id']] = str(D(sum(1 for h in es if not h['atraso'] > 0)) / D(len(es))) if es else None
-    return dict(itens=it, eco=str(eco), rsha=str(tot / D(d['area'])), pont=pont, n_itens=len(d['itens']))
+    return dict(itens=it, eco=str(eco), rsha=str(tot / D(d['area'])), pont=pont, n_itens=len(d['itens']), precos=oraculo_precos())
+
+
+def oraculo_precos():
+    """INTEL-02 em Decimal, dos mesmos dados (DI.precos), sem o JS: índice sazonal, tendência sem a época, normal do mês, melhor mês,
+    recomendação e economia."""
+    P = DI.precos(); MES = lambda m: int(m[5:7]) - 1
+    media = lambda xs: sum(xs, D(0)) / len(xs)
+    def saz(s):
+        acc = [[] for _ in range(12)]
+        for w in range(len(s) // 12):
+            jan = s[len(s) - 12 * (w + 1): len(s) - 12 * w]; med = media([D(x['p']) for x in jan])
+            for x in jan: acc[MES(x['m'])].append(D(x['p']) / med)
+        return [media(a) for a in acc]
+    def comum(s):
+        idx = saz(s); m0 = MES(s[-1]['m']); ds = lambda x: D(x['p']) / idx[MES(x['m'])]
+        a, b = media([ds(x) for x in s[-3:]]), media([ds(x) for x in s[-6:-3]]); tv = (a - b) / b
+        esp = media([D(x['p']) for x in s[-12:]]) * idx[m0]; vs = (D(s[-1]['p']) - esp) / esp
+        return dict(idx=[str(x) for x in idx], m0=m0, tv=str(tv), tend='Alta' if tv > D('0.03') else 'Queda' if tv < D('-0.03') else 'Estável', esp=str(esp), vs=str(vs)), idx, m0, vs
+    vendas, compras = {}, {}
+    for v in P['vendas']:
+        if not v['serie']: vendas[v['prod']] = None; continue
+        o, idx, m0, vs = comum(v['serie']); bd = 0
+        for d in range(1, 12):
+            if idx[(m0 + d) % 12] > idx[(m0 + bd) % 12]: bd = d
+        ganho = idx[(m0 + bd) % 12] / idx[m0] - 1; liq = ganho - D('0.012') * bd
+        rec = 'Vender na colheita' if v.get('perecivel') else 'Vender agora' if (bd == 0 or vs >= D('0.05')) else 'Esperar' if liq >= D('0.03') else 'Sem ganho em esperar'
+        o.update(melhor=max(range(12), key=lambda k: (idx[k], -k)), bd=bd, ganho=str(ganho), liq=str(liq), rec=rec); vendas[v['prod']] = o
+    eco_t = D(0)
+    for c in P['compras']:
+        s = c['serie']; o, idx, m0, vs = comum(s); ref = s[-1]['m']; lim = c['lim']
+        DD = max(0, min(11, (int(lim[:4]) - int(ref[:4])) * 12 + int(lim[5:7]) - int(ref[5:7]))) if lim else 11; bd = 0
+        for d in range(1, DD + 1):
+            if idx[(m0 + d) % 12] < idx[(m0 + bd) % 12]: bd = d
+        econ = 1 - idx[(m0 + bd) % 12] / idx[m0]
+        rec = 'Comprar agora' if (DD == 0 or bd == 0 or vs <= D('-0.05')) else 'Esperar' if econ >= D('0.03') else 'Comprar até a necessidade'
+        eco = D(c['qtd']) * D(s[-1]['p']) * econ if rec == 'Esperar' else None
+        if eco is not None: eco_t += eco
+        o.update(melhor=min(range(12), key=lambda k: (idx[k], k)), D=DD, bd=bd, econ=str(econ), rec=rec, eco=None if eco is None else str(eco)); compras[c['nome']] = o
+    return dict(vendas=vendas, compras=compras, economia=str(eco_t))
 
 
 def main():
     src = CU.fonte(True).split('const NUCLEO =')[0]
-    src += DI.js() + open(os.path.join(HERE, 'inteligencia.js'), encoding='utf-8').read()
+    src += DI.js() + DI.js_precos() + open(os.path.join(HERE, 'inteligencia.js'), encoding='utf-8').read()
     src += 'const ORA = ' + json.dumps(oraculo(), ensure_ascii=False) + ';\n'
     src += open(os.path.join(HERE, 'inteligencia_unit.js'), encoding='utf-8').read() + '\nprint(JSON.stringify(R));\n'
     os.makedirs(os.path.join(HERE, '_probe'), exist_ok=True)

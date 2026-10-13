@@ -179,7 +179,6 @@ function eiso(s){ const t=String(s||'').replace(/^previsto /,'').replace(/ \(pre
 function edmy(iso){ const a=String(iso||'').split('-'); return a.length===3?a[2]+'/'+a[1]+'/'+a[0]:'—'; }
 function eym(s){ const m=/^(\d{2})\/(\d{4})$/.exec(String(s||'')); return m?m[2]+'-'+m[1]:''; }
 function eval_(s){ const m=/^(\d{2})\/(\d{4})$/.exec(String(s||'')); return m?Number(m[2])*100+Number(m[1]):999999; }
-function ehojeYM(){ const a=String(E2.hoje).split('/'); return Number(a[2])*100+Number(a[1]); }
 function ereqN(id){ return Number(String(id||'').replace(/\D/g,''))||0; }
 const EOK=['Liberadas','Em execução'];
 const FCOR={'A liberar':'gray','Liberadas':'green','Em execução':'green','Em conferência':'yellow','Encerradas':'gray'};
@@ -253,7 +252,7 @@ function emovTxt(m){ const u=m.un||'';
 // consumo: o canal do apontamento (app ou web) ou o aceite do almoxarife (conf = o caso conciliado)
 function emovTipo(m){ if(m.tipo==='consumo'&&m.origem!=='app') return typeof m.conf==='string'?'Consumo aceito na conferência':'Consumo apontado na web'; return MTIPO[m.tipo]||m.tipo; }
 // lote vencido: validade (mês/ano) anterior ao mês de hoje; entra todo em quarentena e não volta ao disponível
-function evenc(l){ return !!l&&!!l.validade&&l.validade!=='—'&&eval_(l.validade)<ehojeYM(); }
+function evenc(l){ return cenLoteVencido(l,eiso(E2.hoje)); }
 function estValidadeEntradaErro(l){ return evenc(l)?'Lote '+l.lote+' vencido em '+l.validade+': receba em quarentena, sem quantidade apta para uso.':''; }
 function estValidadeErro(l){ return evenc(l)?'Lote '+l.lote+' vencido em '+l.validade+': não pode ser entregue. Revise a reserva com o responsável pela O.S.; o físico permanece no estoque.':''; }
 // consumo apontado no app: "Glifosato 480 10, 2,4-D 806 5" (cenFecharTurno) → itens com a unidade da requisição ou da O.S.
@@ -363,7 +362,7 @@ ESTV.g_rec=(self,fm)=>{ const C=cenGet(); const e={}, d=fm.draft; const n=(k)=>g
   if(!efert(d.ped)){ const vv=String(d.val||'').trim();
     if(!vv) e.val='Informe a validade do lote (mês/ano, ex.: 06/2027).';
     else if(!/^(0[1-9]|1[0-2])\/\d{4}$/.test(vv)) e.val='Use mês/ano com 4 dígitos no ano (ex.: 06/2027).';
-    else if(eval_(vv)<ehojeYM()){ if(!isNaN(apto)&&apto>1e-9) e.apto=estValidadeEntradaErro({lote:lt,validade:vv});
+    else if(evenc({validade:vv})){ if(!isNaN(apto)&&apto>1e-9) e.apto=estValidadeEntradaErro({lote:lt,validade:vv});
       if(!String(d.obs||'').trim()) e.obs='Informe o motivo (lote vencido em '+vv+').'; } }
   return e; };
 ESTV.g_ent=(self,fm)=>{ const e={}; const x=eitens(cenGet()).find(y=>y.id===fm.rid); if(!x) return e; const n=g2num(fm.draft.qtd); if(isNaN(n)) return e;

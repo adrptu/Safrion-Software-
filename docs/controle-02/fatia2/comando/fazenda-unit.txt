@@ -1,0 +1,17 @@
+OK R1 grava snapshot e recibo juntos; não altera O.S./estoque/demanda
+OK duplo envio e recarga recuperam mesmo recibo sem incrementar rev
+OK mesma chave com outro conteúdo recusa sem modificar versão/recibo
+OK R2 preserva R1 e sinaliza orçamento a revisar após recarga
+OK nova intenção sem mudança preserva a versão e orçamento a revisar
+OK duas prévias: segunda intenção com referência antiga recusa atomicamente
+OK cota cheia não grava histórico/recibo; retry grava uma vez
+OK papel revogado antes de confirmar ou recuperar recibo recusa
+OK plano alterado após prévia recusa e preserva rascunho
+OK safra encerrada e contexto alheio recusam
+OK fazenda ausente recusa publicação e replay sem assumir contexto
+OK sem adaptador, validação incompleta ou impedimento não escreve
+OK adaptador reexecutado dentro de cada intenção; erro não deixa efeito parcial
+OK sem chave ou referência esperada não aceita publicação
+OK consulta lê versão gravada pelo comando no contexto selecionado, por cópia
+RESULTADO 15/15 · transação real com adaptador de domínio de teste; UI/agronomia não executadas
+OK guarda sem dependência estrita: 1/1

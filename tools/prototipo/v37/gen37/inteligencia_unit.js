@@ -55,3 +55,31 @@ caso('C8', () => { const it = INTC.itens[0]; const mk = f => { const D2 = JSON.p
   const a = mk(1.06), b = mk(1.05); ok('C8 cotação 6% acima da referência alerta; exatamente 5% acima não', a.acima && !b.acima, [a.vRef, b.vRef]); });
 caso('C9', () => { intCompras(INTC, '2026-10-13'); const algum = Object.values(INTC.cot).some(cs => cs.some(x => 'venc' in x));
   ok('C9 a conta não altera os dados de entrada (INTC sem campo novo depois de duas chamadas)', !algum); });
+
+/* ---------- INTEL-02 · preço, tendência e melhor mês (P) contra o oráculo Python ---------- */
+const PZ = intPrecos(INTP); const OP = ORA.precos;
+const dif4 = (a, b) => !perto(a, b, 1e-4);
+caso('P1', () => { const ruins = []; PZ.vendas.filter(v => !v.semSerie).concat(PZ.compras).forEach(x => { const o = (OP.vendas[x.prod] || OP.compras[x.nome]); x.z.idx.forEach((v, k) => { if (dif4(v, o.idx[k])) ruins.push([x.prod || x.nome, k, v, o.idx[k]]); }); });
+  ok('P1 índice sazonal de cada mês = média, nas janelas de 12 meses, de preço ÷ média da janela (oráculo, ' + (PZ.vendas.length - 1 + PZ.compras.length) + ' séries)', !ruins.length, ruins.slice(0, 3)); });
+caso('P2', () => { const ruins = PZ.vendas.filter(v => !v.semSerie && v.melhor !== OP.vendas[v.prod].melhor).map(v => v.prod).concat(PZ.compras.filter(c => c.melhor !== OP.compras[c.nome].melhor).map(c => c.nome));
+  ok('P2 melhor mês: venda = o de maior índice; compra = o de menor (empate: o mais cedo), igual ao oráculo', !ruins.length, ruins); });
+caso('P3', () => { const ruins = PZ.vendas.filter(v => !v.semSerie).concat(PZ.compras).filter(x => { const o = OP.vendas[x.prod] || OP.compras[x.nome]; return x.tend !== o.tend || dif4(x.tv, o.tv); }).map(x => [x.prod || x.nome, x.tend, x.tv]);
+  const est = new Set(PZ.vendas.filter(v => !v.semSerie).concat(PZ.compras).map(x => x.tend));
+  ok('P3 tendência sem a época (3 meses contra os 3 anteriores, preço ÷ índice) = oráculo; a semente mostra Alta, Queda e Estável', !ruins.length && est.has('Alta') && est.has('Queda') && est.has('Estável'), [ruins.slice(0, 3), [...est]]); });
+caso('P4', () => { const ruins = PZ.vendas.filter(v => !v.semSerie).concat(PZ.compras).filter(x => { const o = OP.vendas[x.prod] || OP.compras[x.nome]; return dif4(x.norma.vs, o.vs) || !perto(x.norma.esp, o.esp, 0.01); }).map(x => x.prod || x.nome);
+  ok('P4 normal do mês = média dos últimos 12 meses × índice do mês; agora vs normal = oráculo', !ruins.length, ruins); });
+caso('P5', () => { const rv = PZ.vendas.filter(v => !v.semSerie && v.rec !== OP.vendas[v.prod].rec).map(v => [v.prod, v.rec, OP.vendas[v.prod].rec]);
+  const rc = PZ.compras.filter(c => c.rec !== OP.compras[c.nome].rec || (OP.compras[c.nome].eco === null ? c.eco !== null : !perto(c.eco, OP.compras[c.nome].eco, 0.5))).map(c => [c.nome, c.rec, OP.compras[c.nome].rec, c.eco]);
+  /* tolerância: o motor guarda a razão com 6 casas; em R$ 75 mil isso dá centavos (R$ 0,50 por linha, R$ 1 no total) */
+  ok('P5 o que fazer e a economia de cada linha = oráculo; economia total R$ ' + Number(OP.economia).toFixed(2), !rv.length && !rc.length && perto(PZ.economia, OP.economia, 1), [rv, rc.slice(0, 3), PZ.economia]); });
+caso('P6', () => { const f = PZ.vendas.find(v => v.prod === 'Feijão em grão');
+  ok('P6 ausente ≠ zero: Feijão sem fonte de preço fica "sem série" (sem preço, sem melhor mês, sem recomendação inventada)', f && f.semSerie && f.atual === undefined && f.rec === undefined, f); });
+/* série construída: jan–jun 5% abaixo da média, jul–dez 5% acima, sem tendência; termina em set */
+const SZ = (() => { const s = []; for (let i = 0; i < 36; i++) { const a = 2023 + Math.floor((9 + i) / 12), m = (9 + i) % 12; s.push({ m: a + '-' + String(m + 1).padStart(2, '0'), p: m < 6 ? '95' : '105' }); } return s; })();
+caso('P7', () => { const z = intSazonal(SZ); const t = intTendencia(SZ, z); const cru = intRel(intMedia(SZ.slice(-3).map(x => x.p)), intMedia(SZ.slice(-6, -3).map(x => x.p)));
+  ok('P7 contraprova da tendência: série só com a época sai "Estável" sem a época; a conta crua (jul–set contra abr–jun) diria +10,5% (Alta)', t.est === 'Estável' && perto(t.v, 0, 1e-6) && perto(cru, 0.105263, 1e-5), [t, cru]); });
+caso('P8', () => { const a = intMomentoCompra(SZ, '2026-09-30'), b = intMomentoCompra(SZ, '2027-01-20');
+  ok('P8 contraprova do prazo: necessidade (menos a entrega) neste mês → "Comprar agora"; até jan → "Esperar" até jan, 9,5% mais barato', a.rec === 'Comprar agora' && b.rec === 'Esperar' && b.mesAlvo === 0 && perto(b.econ, 1 - 95 / 105, 1e-5), [a.rec, b.rec, b.mesAlvo, b.econ]); });
+caso('P9', () => { const sv = SZ.slice(0, 33);   /* termina em jun: jul paga 10,5% a mais */ const n = intMomentoVenda(sv, false), p = intMomentoVenda(sv, true);
+  ok('P9 perecível não espera: a mesma série que manda esperar o produto armazenável manda o perecível "Vender na colheita"', n.rec === 'Esperar' && p.rec === 'Vender na colheita', [n.rec, p.rec, n.liq]); });
+caso('P10', () => { const antes = JSON.stringify(INTP); intPrecos(INTP); intPrecos(INTP); ok('P10 a conta não altera a série de entrada (INTP igual depois de duas chamadas)', JSON.stringify(INTP) === antes); });

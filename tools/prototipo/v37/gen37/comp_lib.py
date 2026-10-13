@@ -13,7 +13,7 @@ from cadc_lib import ERRS
 IR_ETAPA=r"""(async (n)=>{ const num=()=>{ const c=document.querySelector('.etp-ind [aria-current=step]'); return c?Number((c.innerText.match(/\d+/)||[0])[0]):0; };
   for(let k=0;k<10;k++){ const i=num(); if(i===n) return i;
     let b=document.querySelector(i<n?'[data-acoes] [data-acao=avancar]':'[data-acoes] [data-acao=voltar]');
-    if(!b&&i>n&&n===1) b=[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Trocar safra');
+    if(!b&&i>n&&n===1) b=[...document.querySelectorAll('.mf-tela button, header button')].find(x=>x.innerText.trim()==='Trocar safra');
     if(!b) return 'sem caminho de '+i+' para '+n; b.click(); await new Promise(r=>setTimeout(r,450)); }
   return 'não chegou: '+num(); })"""
 

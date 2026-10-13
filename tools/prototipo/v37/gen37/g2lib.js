@@ -1,8 +1,8 @@
 // ===== G2 · grade interativa, formulário lateral e navegação (motor do protótipo v3.7) =====
 const G2C={green:['#1E7A4C','#E4F3E9'],yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],blue:['#1E5F8F','#E3F0FB'],orange:['#9A3F00','#FFE8D6']};
 // a não quebra de linha das ações da célula vem da classe g2cta (engine): numa tabela com a 1ª coluna limitada (celular) elas quebram
-const G2CTA='display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;background:#FFFFFF;color:#15201A;border:1px solid #E4E9E5;cursor:pointer;font-family:inherit;line-height:1.25;';
-const G2CTAU='display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;background:#FFFFFF;color:#B42318;border:1px solid #B42318;cursor:pointer;font-family:inherit;line-height:1.25;';
+const G2CTA='display:inline-flex;align-items:center;gap:6px;padding:5px 11px;max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:left;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;background:#FFFFFF;color:#15201A;border:1px solid #E4E9E5;cursor:pointer;font-family:inherit;line-height:1.25;';
+const G2CTAU='display:inline-flex;align-items:center;gap:6px;padding:5px 11px;max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:left;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;background:#FFFFFF;color:#B42318;border:1px solid #B42318;cursor:pointer;font-family:inherit;line-height:1.25;';
 function g2num(s){ if(typeof s==='number') return s; if(s===null||s===undefined) return NaN; let t=String(s).trim(); if(!t) return NaN; t=t.replace(/[^0-9,.\-]/g,''); if(t.indexOf(',')>=0){ t=t.replace(/\./g,'').replace(',','.'); } else if((t.match(/\./g)||[]).length>1 || /^\-?\d{1,3}(\.\d{3})+$/.test(t)){ t=t.replace(/\./g,''); } return parseFloat(t); }
 function g2fmtn(n,d,dmin){ return Number(n).toLocaleString('pt-BR',{minimumFractionDigits:(dmin!==undefined?dmin:(d||0)),maximumFractionDigits:d||0}); }
 // unidade junto do valor (c.un, decisão de 05/10/2026): "160 ha", "54 %", "R$ 14,49/ha"; só em texto que é um número puro
@@ -14,7 +14,7 @@ function g2set(self,id,patch){ const all=Object.assign({},self.state.g2||{}); al
   if(G2KEEP[id]) g2keepGrava(self,id,all[id]); }
 // grava o recorte guardado (g2keep): filtros, busca, ordenação, filtro rápido e, quando a tela pede (VISOES-1), Fazenda e Safra do topo
 function g2keepGrava(self,id,x){ if(!G2KEEP[id]) return; x=x||g2st(self,id); const o={f:x.f||{},q:x.q||'',so:x.so||null,qv:x.qv||''};
-  if(G2KEEP_TOPO[id]){ const s=self.state||{}; if(s.mf_faz) o.mf_faz=s.mf_faz; if(s.mf_saf) o.mf_saf=s.mf_saf; }
+  if(G2KEEP_TOPO[id]){ const s=self.state||{}; if(s.mf_faz) o.mf_faz=s.mf_faz; if(s.mf_saf) o.mf_saf=s.mf_saf; if(s.mf_cult) o.mf_cult=s.mf_cult; }
   try{ sessionStorage.setItem(G2KEEP[id],JSON.stringify(o)); }catch(e){} }
 // recorte guardado na sessão (TABELAS-FOCO): filtros, busca e ordenação sobrevivem a abrir o detalhe e voltar; só a tabela que pede (g2keep)
 const G2KEEP={}, G2KEEP_TOPO={};
@@ -22,11 +22,11 @@ const G2KEEP={}, G2KEEP_TOPO={};
 // mostra o valor restaurado no mesmo desenho). Na volta do detalhe, um talhão de outra fazenda não esvazia a lista com "filtro ativo".
 function g2keep(self,id,opt){ let key='g2:'+id; try{ key='g2:'+String(location.pathname).split('/').pop()+':'+id; }catch(e){} G2KEEP[id]=key;
   if(opt&&opt.topo) G2KEEP_TOPO[id]=1;
-  if(self.__g2kept&&self.__g2kept[id]){ if(G2KEEP_TOPO[id]){ const s=self.state||{}, k=(s.mf_faz||'')+'|'+(s.mf_saf||''); if(self.__g2keptTopo!==k){ self.__g2keptTopo=k; g2keepGrava(self,id); } } return; }
+  if(self.__g2kept&&self.__g2kept[id]){ if(G2KEEP_TOPO[id]){ const s=self.state||{}, k=(s.mf_faz||'')+'|'+(s.mf_saf||'')+'|'+(s.mf_cult||''); if(self.__g2keptTopo!==k){ self.__g2keptTopo=k; g2keepGrava(self,id); } } return; }
   (self.__g2kept=self.__g2kept||{})[id]=1;
   try{ const o=JSON.parse(sessionStorage.getItem(key)||'null'); if(o&&typeof o==='object'){ const all=Object.assign({},self.state.g2||{}); all[id]=Object.assign({},all[id]||{},{f:o.f||{},q:o.q||'',so:o.so||null,qv:o.qv||''}); self.state.g2=all;
-    if(G2KEEP_TOPO[id]){ ['mf_faz','mf_saf'].forEach(c=>{ if(typeof o[c]==='string'&&o[c]&&self.state[c]===undefined){ self.state[c]=o[c]; if(opt&&opt.v) opt.v[c]=o[c]; } }); } } }catch(e){}
-  if(G2KEEP_TOPO[id]){ const s=self.state||{}; self.__g2keptTopo=(s.mf_faz||'')+'|'+(s.mf_saf||''); } }
+    if(G2KEEP_TOPO[id]){ ['mf_faz','mf_saf','mf_cult'].forEach(c=>{ if(typeof o[c]==='string'&&o[c]&&self.state[c]===undefined){ self.state[c]=o[c]; if(opt&&opt.v) opt.v[c]=o[c]; } }); } } }catch(e){}
+  if(G2KEEP_TOPO[id]){ const s=self.state||{}; self.__g2keptTopo=(s.mf_faz||'')+'|'+(s.mf_saf||'')+'|'+(s.mf_cult||''); } }
 function g2rows(self,sp){ const st=g2st(self,sp.id); return st.rows||sp.rows; }
 function g2find(list,id){ for(const r of list){ if(r.id===id) return r; if(r.kids){ const k=g2find(r.kids,id); if(k) return k; } } return null; }
 function g2text(r,c){ if(r.s&&r.s[c.k]!==undefined&&r.s[c.k]!==null) return (c&&c.un)?g2unf(r.s[c.k],c):String(r.s[c.k]); if(r.v&&r.v[c.k]!==undefined&&r.v[c.k]!==null) return g2fmt(r.v[c.k],c); return ''; }
@@ -120,9 +120,11 @@ const G2_DICAS={
 // Sobras a receber, Aguardando sinal do app, Apontamento em conferência) leva a dica do próprio bloqueio (processo_os.osSeloDica ← osEncBloq,
 // o mesmo texto do painel e do comando); "Carga a pesar" só existe aí e saiu daqui. As três outras ficam para o selo antes da conferência.
 function g2dicaDe(t){ const s=String(t||'').trim(); return G2_DICAS[s]||G2_DICAS[s.split(' · ')[0].trim()]||''; }
+/* cortes visuais (13/10): parte que abre linha (1ª da célula ou depois de uma quebra) não começa com o separador "·" */
+function g2semSep(raw,i){ const p=raw[i]; if(!p||typeof p.t!=='string'||!/^\s*·\s/.test(p.t)) return p; if(i>0&&!(raw[i-1]&&raw[i-1].k==='br')) return p; return Object.assign({},p,{t:p.t.replace(/^\s*·\s*/,'')}); }
 function g2part(p,v){ const o={isCn:false,isTxt:false,isB:false,isMut:false,isChip:false,isTag:false,isLink:false,isCta:false,isAct:false,isBr:false,t:p.t||'',st:'',cls:'',dot:'',href:p.h||'#',fn:null,title:p.t||'',dica:'',hasDica:false};
   switch(p.k){ case 'b': o.isB=true; break; case 'mut': o.isMut=true; break;
-    case 'chip': { const cc=G2C[p.c]||G2C.gray; o.isChip=true; o.dica=p.dica||p.dv||(p.de?g2dicaDe(p.t):''); o.hasDica=!!p.dica;   /* p.de: dica de estado do dicionário; p.dv: texto pronto da tela (selo do bloqueio, osSeloDica); os dois só visuais (o leitor de tela lê o motivo explícito p.dica; a linha focada recebe a dica do selo, g2dicaSelo) */ o.st='display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';'; o.dot='width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'; break; }
+    case 'chip': { const cc=G2C[p.c]||G2C.gray; o.isChip=true; o.dica=p.dica||p.dv||(p.de?g2dicaDe(p.t):''); o.hasDica=!!p.dica;   /* p.de: dica de estado do dicionário; p.dv: texto pronto da tela (selo do bloqueio, osSeloDica); os dois só visuais (o leitor de tela lê o motivo explícito p.dica; a linha focada recebe a dica do selo, g2dicaSelo) */ o.st='display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:normal;max-width:100%;min-width:0;overflow-wrap:anywhere;line-height:1.3;color:'+cc[0]+';background:'+cc[1]+';';   /* cortes visuais (13/10): selo longo quebra na própria célula, nunca invade a vizinha */ o.dot='width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'; break; }
     case 'cn': { const cc=G2C[p.c]||G2C.gray; o.isCn=true; o.st='font-weight:800;white-space:nowrap;color:'+cc[0]+';'; break; }
     case 'tag': o.isTag=true; break; case 'link': o.isLink=true; break;
     case 'cta': o.isCta=true; o.cls='g2cta'; o.st=p.u?G2CTAU:G2CTA; break;
@@ -130,7 +132,21 @@ function g2part(p,v){ const o={isCn:false,isTxt:false,isB:false,isMut:false,isCh
       // célula inteira tocável (DS: alvo ≥ 44 px): texto da célula, sem negrito, na cor do estado; aria-pressed quando é o filtro ativo
       if(p.full){ o.cls='g2full'; o.st='width:100%;min-height:44px;border:0;background:'+(p.on?'#E4F3E9':'transparent')+';padding:0 6px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:'+(p.on?'700':'400')+';text-align:right;font-variant-numeric:tabular-nums;color:'+((G2C[p.c]||[])[0]||'#15201A')+';'+(p.on?'outline:2px solid #1E7A4C;outline-offset:-2px;border-radius:6px;':''); } break;
     case 'br': o.isBr=true; break; default: o.isTxt=true; }
+  // separador no começo da parte ("· TK-4502" depois de "CG-2107"): vai para um elemento próprio, que o g2sepIni esconde quando a parte
+  // começa a linha (a quebra da célula não deixa linha começando com "·"); o texto lido continua "· TK-4502"
+  if((o.isTxt||o.isMut||o.isB)&&/^\s*·\s/.test(o.t)){ o.sepL=true; o.t=o.t.replace(/^\s*·\s*/,''); }
   return o; }
+// marca (data-ini) o separador que caiu no começo de uma linha: nada visível à esquerda dele na mesma linha, dentro da mesma lista de partes.
+// Roda depois de cada desenho e ao mudar o tamanho da janela; só mexe na opacidade, então não muda a quebra (sem efeito sanfona).
+function g2sepIni(){ if(typeof document==='undefined') return; document.querySelectorAll('.g2sepd').forEach(d=>{ const r=d.getBoundingClientRect(); if(!r.width) return;
+    const pw=d.closest('.g2pw')||d.parentElement; const parte=d.parentElement&&d.parentElement.closest('span:not(.g2sepd),b'); let ini=true;
+    for(const o of pw.querySelectorAll('span,b,a,button')){ if(o===d||(parte&&(o===parte||o.contains(parte)||parte.contains(o)))) continue; const q=o.getBoundingClientRect();
+      if(q.width>0&&q.bottom>r.top+2&&q.top<r.bottom-2&&q.right<=r.left+2){ ini=false; break; } }
+    if(ini){ if(!d.hasAttribute('data-ini')) d.setAttribute('data-ini',''); } else if(d.hasAttribute('data-ini')) d.removeAttribute('data-ini'); }); }
+(function(){ if(typeof document==='undefined'||typeof MutationObserver==='undefined'||typeof requestAnimationFrame==='undefined') return; let q=0;
+  const vez=()=>{ if(q) return; q=requestAnimationFrame(()=>{ q=0; try{ g2sepIni(); }catch(e){} }); };
+  try{ new MutationObserver(vez).observe(document.documentElement,{subtree:true,childList:true,characterData:true}); addEventListener('resize',vez);
+    if(document.fonts&&document.fonts.ready) document.fonts.ready.then(vez); vez(); }catch(e){} })();
 // revisão DS (achado 8): sigla ou unidade que está na célula ("62,4 sc/ha", "35 DAP") e não no rótulo dá a dica do cabeçalho da coluna, só onde é da
 // coluna (em ao menos 30 % das células com texto; termo solto numa observação não conta); código de registro (COT-0031) não é sigla. Texto: G2_GLOSS
 // (engine._GLOSS_CEL, fonte única). Guardado por grade enquanto as linhas são as mesmas (o desenho não refaz a varredura); com linhas novas, lê até
@@ -237,7 +253,7 @@ function g2vals(self,sp,v,mask){
       const raw0=empty?[]:((r.p&&r.p[c.k]&&r.p[c.k].length)?r.p[c.k]:[{k:(ci===0&&lvl===0&&has?'b':'txt'),t:g2fmt(r.v?r.v[c.k]:'',c)}]);
       // partes próprias (p) com número puro ganham a unidade (cópia: r.p não muda)
       const raw=c.un?raw0.map(p=>(p&&typeof p.t==='string'&&['txt','b','cn','chip'].indexOf(p.k)>=0)?Object.assign({},p,{t:g2unf(p.t,c)}):p):raw0;
-      const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':'')+(c.nr?' g2nr':''),parts:raw.map(p=>g2part(p,v)),pw:'max-width:'+(c.w||340)+'px;',
+      const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':'')+(c.nr?' g2nr':'')+(c.a==='r'?' g2celn':''),parts:raw.map((p,i)=>g2part(g2semSep(raw,i),v)),pw:'max-width:'+(c.w||340)+'px;',
         st:(c.nr?'padding:0 2px;':'padding:6px 8px;')+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&sp.tree?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:inherit;box-shadow:1px 0 0 #E4E9E5;':'')};
       if(ci===0 && sp.tree){ cell.hasCaret=true; cell.caretOk=has; cell.caretNo=!has; const open=!!exp[r.id]||(g2filtering(st)&&has);
         cell.caretSym=open?'▾':'▸'; cell.caretExp=String(open); cell.caretLabel=(open?'Recolher ':'Expandir ')+g2text(r,c);
@@ -274,7 +290,10 @@ function g2vals(self,sp,v,mask){
   const xe=st.x||sp.x0||{}; const xtodos=xids.length>0&&xids.every(k=>xe[k]);
   v[id+'_xlab']=xtodos?'Recolher tudo':'Expandir tudo'; v[id+'_xtog']=xtodos?v[id+'_colall']:v[id+'_expall']; v[id+'_xup']=xtodos; v[id+'_xdown']=!xtodos;
   v[id+'_xhas']=rows.some(r=>(r.kids||[]).length>0);   // sem grupo na tela, sem botão de expandir
-  if(total){ v[id+'_tot']=sp.cols.map((c,ci)=>{ const s=c.agg?g2sum(sp,flat,c):null; return {t:(ci===0?'Total':(s===null?'':g2fmt(s,c))), cls:(ci===0?'g2c0':''), st:'padding:8px 10px;font-weight:800;'+(ci===0?'position:sticky;left:0;z-index:1;background:#F4F6F3;':'')+(c.a==='r'?'text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;':'')}; });
+  // sp.totf (opcional, posto pela tela em tempo de execução): total vindo do serviço de domínio quando a soma simples não serve (R$/ha, unidade);
+  // recebe a coluna e as linhas de 1º nível visíveis (com os filtros); undefined = soma padrão. agg 'fn' = só o serviço, nunca a soma.
+  if(total){ const topo=flat.filter(x=>x.lvl===0).map(x=>x.r); v[id+'_tot']=sp.cols.map((c,ci)=>{ const h=(ci&&c.agg&&typeof sp.totf==='function')?sp.totf(c,topo):undefined;
+      const s=(h===undefined&&c.agg&&c.agg!=='fn')?g2sum(sp,flat,c):null; return {t:(ci===0?'Total':(h!==undefined?h:(s===null?'':g2fmt(s,c)))), cls:(ci===0?'g2c0':''), st:'padding:8px 10px;font-weight:800;'+(ci===0?'position:sticky;left:0;z-index:1;background:#F4F6F3;':'')+(c.a==='r'?'text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;':'')}; });
     v[id+'_totopen']=()=>g2set(self,id,{fm:{tot:true,ro:true,mode:'total',draft:{},orig:{},errs:{}},fmc:null}); }
   // formulário lateral
   const fm=st.fm; const F={open:!!fm};
@@ -305,7 +324,7 @@ function g2vals(self,sp,v,mask){
 // e ao estreitar a janela (girar o aparelho) ele recolhe sem recarregar.
 const G2_ESTREITO='(max-width: 1023px)';
 function g2estreito(){ try{ return window.matchMedia(G2_ESTREITO).matches; }catch(e){ return false; } }
-function g2menuRec(){ if(g2estreito()) return true; try{ return localStorage.getItem('safrion.menuRecolhido')==='1'; }catch(e){ return false; } }
+function g2menuRec(){ return true; }   // 13/10/2026 (proprietário): a barra lateral fica sempre recolhida, só com ícones e dica, sem expandir
 // <perfis> Perfil de demonstração (sem login; PRD 2.1): quem age nas decisões que exigem papel. Vale entre telas, no navegador de quem usa;
 // demonstra a experiência, não é segurança (no software o servidor tira o ator da sessão). Pessoas e papéis: CF-01 e telas vizinhas.
 // O papel vem sempre desta lista (g2pf), nunca do objeto que o comando recebe. Bloco único, lido também pelos testes sem navegador.
@@ -387,7 +406,7 @@ function g2unidSet(cultura,op){ const k=g2unidChave(cultura); G2_UNID_MEM[k]=Str
 // </perfis>
 // trocar o perfil (aqui ou em outra aba) fecha a confirmação ou o formulário de decisão aberto, montado para o perfil anterior (revisão do CTL-3,
 // achado 1; dano evitado: a tela afirmar que decide quem não tem o papel). Cada tela diz o que fecha em self.g2perfilFecha (O.S., Mapa, Estoque)
-function g2navvals(self,v,nav){ const rec=(self.state.menuRec===undefined)?g2menuRec():!!self.state.menuRec;
+function g2navvals(self,v,nav){ const rec=g2menuRec();
   const pf=g2perfil(); v.perfil_k=pf.k; v.perfil_ini=pf.k.charAt(0); v.perfil_opts=g2perfis().map(p=>({v:p.k,t:p.t}));
   v.perfil_set=(e)=>{ const k=e.target.value; G2_PERFIL_MEM=k; try{ localStorage.setItem(G2_PERFIL_KEY,k); }catch(er){} self.setState(Object.assign({perfil:k,g2toast:'Perfil de demonstração: '+((g2pf(k)||{}).t||k)+' (não é segurança de acesso).'},self.g2perfilFecha||{})); };
   if(!self.__g2pf){ self.__g2pf=1; try{ window.addEventListener('storage',(e)=>{ if(e.key===G2_PERFIL_KEY) self.setState(Object.assign({perfil:e.newValue},self.g2perfilFecha||{})); }); }catch(er){} }

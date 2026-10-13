@@ -659,7 +659,9 @@ try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenD
 // filtros do topo (Fazenda e Safra): lista, Kanban, chips de fase e selo do cabeçalho mostram só as ordens do recorte
 function mfFaz(self){ return self.state.mf_faz||'Santa Rita'; }
 function mfSaf(self){ return self.state.mf_saf||'Todas'; }
-function vis(self){ const f=mfFaz(self), s=mfSaf(self); return ords(self).filter(o=>(f==='Todas'||o.faz===f)&&(s==='Todas'||o.saf===s)); }
+function mfCult(self){ return self.state.mf_cult||'Todas'; }   // 13/10: Cultura no filtro principal (cultura do cultivo de cada talhão da ordem)
+function osCults(o){ return o.culturas||(o.cultura?[o.cultura]:[]); }
+function vis(self,semCult){ const f=mfFaz(self), s=mfSaf(self), cu=semCult?'Todas':mfCult(self); return ords(self).filter(o=>(f==='Todas'||o.faz===f)&&(s==='Todas'||o.saf===s)&&(cu==='Todas'||osCults(o).indexOf(cu)>=0)); }
 function localTxt(o){ return o.talhao+(o.area?' · '+nf(o.area)+' ha':''); }
 function acum(o){ let conf=0,prov=0,sem=0; (o.ap||[]).forEach(a=>{ if(a.sinc===false) sem+=a.ha; else if(a.st==='Conferido') conf+=a.ha; else if(a.st==='Provisório') prov+=a.ha; }); return {conf,prov,sem}; }
 function realTxt(o){ return o.area? (nf(o.realizado)+' / '+nf(o.area)+' ha') : '—'; }
@@ -676,11 +678,11 @@ function PREVALS(self,v){
   const todas=mfFaz(self)==='Todas';
   const tals=(o)=>(o.talhoes||[]).map(t=>({id:o.faz+'|'+t.id,l:todas?t.nome+' · '+o.faz:t.nome}));
   // troca de fazenda/safra: o talhão escolhido fora do novo recorte sai do filtro, com aviso (nunca muda fazenda/safra para "caber")
-  const ctx=mfFaz(self)+'|'+mfSaf(self); if(self.__osCtx!==undefined&&self.__osCtx!==ctx){ const st0=g2st(self,'g_os'), ft=((st0.f||{}).tal)||[];
+  const ctx=mfFaz(self)+'|'+mfSaf(self)+'|'+mfCult(self); if(self.__osCtx!==undefined&&self.__osCtx!==ctx){ const st0=g2st(self,'g_os'), ft=((st0.f||{}).tal)||[];
     if(ft.length){ const ok=new Set(); os.forEach(o=>tals(o).forEach(t=>ok.add(t.id))); const fica=ft.filter(k=>k==='(vazio)'||ok.has(k)), sai=ft.filter(k=>fica.indexOf(k)<0);
       if(sai.length){ const f=Object.assign({},st0.f||{}); if(fica.length) f.tal=fica; else delete f.tal; const all=Object.assign({},self.state.g2||{}); all.g_os=Object.assign({},st0,{f}); self.state.g2=all;
         g2keepGrava(self,'g_os');
-        self.__osMsg='Talhão fora de '+(mfFaz(self)==='Todas'?'todas as fazendas':mfFaz(self))+(mfSaf(self)==='Todas'?'':' · '+mfSaf(self))+': '+sai.map(k=>k.split('|')[1]).join(', ')+' saiu do filtro.'; } } }
+        self.__osMsg='Talhão fora de '+(mfFaz(self)==='Todas'?'todas as fazendas':mfFaz(self))+(mfSaf(self)==='Todas'?'':' · '+mfSaf(self))+(mfCult(self)==='Todas'?'':' · '+mfCult(self))+': '+sai.map(k=>k.split('|')[1]).join(', ')+' saiu do filtro.'; } } }
   self.__osCtx=ctx;
   const nfx=(x)=>x===null||x===undefined||x===''?null:x;
   // o texto de pendência mistura próxima ação e prazo ("entrega até 15/10"); na tabela vira duas colunas (uma variável por coluna)
@@ -951,10 +953,11 @@ function EXTRAVALS(self,v){
   const openPan=(id)=>self.setState({pan:id});
   // estado vazio do recorte: uma frase e uma ação que troca o filtro que zerou a tela
   const fz=mfFaz(self), sf=mfSaf(self), semFaz=!all.some(o=>fz==='Todas'||o.faz===fz);
+  const cu=mfCult(self), soCult=cu!=='Todas'&&vis(self,true).length>0;   /* zerou só pela Cultura: a ação devolve todas as culturas */
   v.os_vazio=os.length===0; v.os_tem=!v.os_vazio;
-  v.os_vt=semFaz?('Nenhuma ordem na '+fz):('Nenhuma ordem na safra '+sf);
-  v.os_va=semFaz?'Ver Santa Rita':'Ver todas as safras';
-  v.os_vgo=()=>self.setState(semFaz?{mf_faz:'Santa Rita',g2toast:'Fazenda: Santa Rita'}:{mf_saf:'Todas',g2toast:'Safra: Todas'});
+  v.os_vt=soCult?('Nenhuma ordem de '+cu.toLowerCase()+' neste recorte'):(semFaz?('Nenhuma ordem na '+fz):('Nenhuma ordem na safra '+sf));
+  v.os_va=soCult?'Ver todas as culturas':(semFaz?'Ver Santa Rita':'Ver todas as safras');
+  v.os_vgo=()=>self.setState(soCult?{mf_cult:'Todas',g2toast:'Cultura: Todas'}:(semFaz?{mf_faz:'Santa Rita',g2toast:'Fazenda: Santa Rita'}:{mf_saf:'Todas',g2toast:'Safra: Todas'}));
   // selo do cabeçalho: recalculado do estado (cancelar, iniciar ou enviar para conferência muda as contagens)
   const nEx=os.filter(o=>o.etapa==='Em execução').length;
   const nIm=os.filter(o=>o.etapa!=='Canceladas'&&o.selos.some(s=>/impedida|falta máquina|falta insumo/i.test(s.t))).length;
@@ -1015,6 +1018,11 @@ function EXTRAVALS(self,v){
     const setT=(arr)=>{ const f=Object.assign({},g2st(self,'g_os').f||{}); if(arr.length) f.tal=arr; else delete f.tal; self.__osMsg=''; g2set(self,'g_os',{f,fmc:null}); };
     const nome=(k)=>tlab[k]||(k==='(vazio)'?'Sem talhão':k.split('|')[1]);
     v.ost_open=!!self.state.ost_open; v.ost_q=tq; v.ost_on=tsel.length?'true':'false';
+    /* faixa "Filtros desta tela" (13/10): Talhão é este mesmo filtro (f.tal), escolhido numa lista; Cultura, os cultivos do recorte de Fazenda e Safra */
+    v.mf_tal=tsel.length===1?tsel[0]:(tsel.length?'__v':''); v.mf_tal_opts=[{v:'',t:'Todos'}].concat(tsel.length>1?[{v:'__v',t:tsel.length+' talhões'}]:[]).concat(tks.map(k=>({v:k,t:nome(k)})));
+    v.mf_settal=(e)=>{ const x=e.target.value; if(x==='__v') return; setT(x?[x]:[]); self.setState({g2toast:'Talhão: '+(x?nome(x):'Todos')}); };
+    { const cs=[]; vis(self,true).forEach(o=>osCults(o).forEach(c=>{ if(cs.indexOf(c)<0) cs.push(c); })); cs.sort((a,b)=>a.localeCompare(b,'pt-BR')); const cu=mfCult(self); if(cu!=='Todas'&&cs.indexOf(cu)<0) cs.push(cu);
+      v.mf_cult=cu; v.mf_cult_opts=[{v:'Todas',t:'Todas'}].concat(cs.map(c=>({v:c,t:c}))); v.mf_setcult=(e)=>self.setState({mf_cult:e.target.value,g2toast:'Cultura: '+e.target.value}); }
     v.ost_btn='Talhão: '+(tsel.length?tsel.map(nome).join(', '):'Todos');
     v.ost_btnst='display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;'
       +(tsel.length?'border:1px solid #1E7A4C;background:#E4F3E9;color:#14532D;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;');
@@ -1187,6 +1195,16 @@ def _kanban(celular_rola=False):
     rola = ('<style>@media (max-width:640px){.os-kb{overflow-x:auto;padding-bottom:6px}.os-kb .os-kbcol{flex:0 0 148px!important;min-width:148px!important}}</style>'
             if celular_rola else '')
     return rola + f'<div role="list" aria-label="Kanban das ordens" class="{"os-kb" if celular_rola else ""}" style="display: flex; gap: 10px; align-items: flex-start;"><sc-for list="{H("kb")}" as="c" hint-placeholder-count="5">{col}</sc-for></div>'
+
+def _culturas_da(o):
+    sid=next((s['id'] for s in D2.SAFRAS if s.get('fazenda')==o.get('faz') and str(s.get('nome','')).endswith(str(o.get('saf','')))),None)
+    cs=D2.CULTIVOS.get(sid,[]) if sid else []; out=[]
+    for t in (o.get('talhoes') or []):
+        tid=str(t.get('id','')); alvo={tid}|({'Pivô '+str(int(tid[2:]))} if tid.startswith('PV') and tid[2:].isdigit() else set())
+        for c in cs:
+            l=c['local']
+            if (l in alvo or any(l.startswith(a+'-') or a.startswith(l+'-') for a in alvo)) and c['cultura'] not in out: out.append(c['cultura'])
+    return out
 
 def _talsel():
     """Talhão (TABELAS-FOCO, 5983172395): à vista na barra da coleção, fora das visões (vale para todas), Todos e
@@ -1477,7 +1495,7 @@ def build():
     # VISOES-1 (proprietário, 10/10/2026): seletor por ícone; Lista e Tabela agrupada na mesma grade (o agrupamento é estado da grade),
     # Kanban e Carga por recurso migram sem mudança de regra. Visões válidas: visoes.py (fonte única; O.S. sem Mapa: DEC-2609-09)
     bar,panes=visoes('g_os','os',{'lista':g_os,'agrupada':'lista','kanban':kb_nota+_kanban(celular_rola=True),'carga':rc_nota+_recursos_tab()},rotulo='Visão das ordens')
-    colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_talsel()}{_chips()}</div>'
+    colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_chips()}</div>'   # o Talhão subiu para a faixa "Filtros desta tela" (13/10)
             f'<div style="flex: 0 0 auto; margin-left: auto;">{bar}</div></div>')
     # recorte vazio (Fazenda/Safra do topo): uma frase e uma ação no lugar das visões
     vazio=(f'<sc-if value="{H("os_vazio")}" hint-placeholder-val="{F()}"><div aria-label="Sem ordens no filtro" style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 36px 16px; border: 1px dashed {LINE}; border-radius: 12px;">'
@@ -1487,6 +1505,8 @@ def build():
                 vazio+tem(f'<div style="display: flex; flex-direction: column; gap: 10px;">{colbar}{panes}</div>')+_restaurar(),
                 acao=f'<span style="display: inline-flex; align-items: center; gap: 10px;"><button type="button" onClick="{H("nv_open")}" style="padding: 7px 14px; border-radius: 9px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; background: {ACC}; color: #fff; border: 1px solid {ACC}; flex-shrink: 0;">Nova ordem</button></span>')
     EXTRA.append(_painel()); EXTRA.append(_form())
+    # cultura de cada ordem (13/10, filtro Cultura): a do cultivo de cada talhão da ordem na safra dela (D2.SAFRAS e D2.CULTIVOS, fonte do Planejar safra)
+    for o in ordens: o['culturas']=_culturas_da(o)
     data=dict(ords=ordens,nova=_nova_ordem_dados(),aloc={o['id']:AL.da_ordem(o['id']) for o in ordens},agf=_agf_fichas())
     # cenário compartilhado (O.S. ↔ Estoque ↔ App) antes do JS da tela
     # blocos da Carga de ordens fora da lista da O.S. (irrigação só com água, do módulo Irrigação): Fazenda e Safra delas, para seguirem o recorte do topo

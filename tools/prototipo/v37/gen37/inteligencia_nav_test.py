@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""INTEL-01 · navegador: Inteligência de vendas (IV) e de compras (IC), pedido do proprietário de 13/10/2026.
+"""INTEL-01 e INTEL-02 · navegador: Inteligência de vendas (IV) e de compras (IC), pedidos do proprietário de 13/10/2026 (INTEL-02: "mais
+relativo aos preços, tendências, melhor mês para compra e venda": a seção de preço e melhor mês fica no topo de cada tela).
 Confere, em 1440 × 900 e 390 × 844: menu (Comercial › Inteligência de vendas; Suprimentos › Inteligência de compras) com o destaque
 na tela aberta; indicadores; estados honestos (soja "Suspenso" pela saca a conferir, mamão "Sem previsão"; nada vira 0%); o painel
 de cada linha diz a conta e o próximo passo; sem erro de JS e sem rolagem lateral no celular. Dados sintéticos. Uso: python3 inteligencia_nav_test.py"""
@@ -8,13 +9,25 @@ from ma_lib import MA
 
 PAN = "(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); return a?a.innerText.replace(/\\s+/g,' '):'';})()"
 MENU = "JSON.stringify([...document.querySelectorAll('nav a')].map(a=>[a.innerText.trim(),a.getAttribute('href')]).filter(x=>/^(IV|IC|PCOM|VEN|CMP)\\.dc\\.html/.test(x[1]||'')))"
-KPI = "(document.querySelector('[aria-label=Indicadores]')||{innerText:''}).innerText.replace(/\\s+/g,' ').toLowerCase()"
+KPI = "[...document.querySelectorAll('[aria-label=Indicadores]')].map(x=>x.innerText).join(' ').replace(/\\s+/g,' ').toLowerCase()"
+KPI1 = "(document.querySelector('[aria-label=Indicadores]')||{innerText:''}).innerText.replace(/\\s+/g,' ').toLowerCase()"
+SAZ = "(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); if(!a) return 0; const t=a.innerText; return (t.match(/▮/g)||[]).length>0 ? (t.split('\\n').filter(l=>/▮/.test(l)).length) : 0;})()"
 m = MA(1440, 900); J = m.J
 try:
     # ---------------- Vendas ----------------
     m.ir('', pagina='IV.dc.html', limpa=True); m.sem_erro('IV 1440')
     mn = json.loads(J(MENU) or '[]')
     m.ok(['Inteligência de vendas', 'IV.dc.html'] in mn and ['Painel comercial', 'PCOM.dc.html'] in mn, 'IV no menu Comercial, ao lado do Painel comercial', mn)
+    k1 = J(KPI1) or ''
+    m.ok('produtos em alta 1' in k1 and 'vender agora 1' in k1 and 'soja set · milho fev · mamão jul' in k1, 'INTEL-02 IV: indicadores de preço no topo (1 em alta, 1 vender agora, melhor mês de cada produto)', k1)
+    sj = m.linha('m:Soja em grão'); mi = m.linha('m:Milho em grão'); ma = m.linha('m:Mamão Formosa · fruta de campo'); fj = m.linha('m:Feijão em grão')
+    m.ok('R$ 129,40/sc' in sj and 'Alta' in sj and 'Vender agora' in sj and 'set' in sj, 'INTEL-02 IV: soja R$ 129,40/sc em alta, melhor mês set, "Vender agora"', sj)
+    m.ok('Queda' in mi and 'Sem ganho em esperar' in mi and 'custo do dinheiro' in mi, 'INTEL-02 IV: milho em queda; esperar até fev não compensa o custo do dinheiro', mi)
+    m.ok('Vender na colheita' in ma and 'perecível' in ma, 'INTEL-02 IV: mamão perecível vende na colheita (a época orienta o plano)', ma)
+    m.ok('Sem série de preço' in fj and 'R$ 0' not in fj, 'INTEL-02 IV: feijão sem fonte de preço fica sem série (ausente ≠ zero)', fj)
+    m.abre('m:Soja em grão'); p = J(PAN) or ''
+    m.ok('preço por mês no histórico' in p.lower() and 'últimos 12 meses' in p.lower() and 'sintética' in p and (J(SAZ) or 0) == 12, 'INTEL-02 IV painel da soja: 12 meses de sazonalidade em barras, últimos 12 meses e o rótulo de série sintética', [p[:300], J(SAZ)])
+    m.clk('Fechar painel', w=.4)
     k = J(KPI) or ''
     m.ok('vendas abaixo da referência 0' in k and 'venda sem oferta que cubra 1' in k and 'mamão: vendido sem previsão' in k and 'melhor recebimento líquido r$ 2,88/kg' in k, 'IV: os 3 indicadores (0 abaixo, 1 sem oferta: mamão, melhor líquido R$ 2,88/kg)', k)
     s = m.linha('s:Soja em grão'); mm = m.linha('s:Mamão Formosa · fruta de campo')
@@ -27,16 +40,24 @@ try:
     m.clk('Fechar painel', w=.4); m.abre('s:Mamão Formosa · fruta de campo'); p = J(PAN) or ''
     m.ok('Sem oferta publicada' in p and 'Publique a previsão' in p, 'IV painel do mamão: vendido sem previsão e o próximo passo', p[:400])
     m.clk('Fechar painel', w=.4)
-    cl = m.linhas(2)
+    cl = m.linhas(3)
     if cl: m.abre(cl[0]); p = J(PAN) or ''
     m.ok(bool(cl) and 'Líquido = preço' in p and 'custo do prazo' in p, 'IV recebimento líquido: o painel mostra a conta (preço − frete − custo do prazo)', p[:400])
     # ---------------- Compras ----------------
     m.ir('', pagina='IC.dc.html'); m.sem_erro('IC 1440')
     mn = json.loads(J(MENU) or '[]')
     m.ok(['Inteligência de compras', 'IC.dc.html'] in mn, 'IC no menu Suprimentos', mn)
+    b1 = J(KPI1) or ''
+    m.ok('insumos em alta 6' in b1 and 'comprar agora 4' in b1 and 'r$ 23.103,6' in b1, 'INTEL-02 IC: indicadores (6 em alta, 4 comprar agora, economia esperando o mês certo)', b1)
+    se = m.linha('m:Semente de soja 58 W'); gl = m.linha('m:Glifosato 480')
+    m.ok('Esperar' in se and 'pedir até 05/10' in se and 'R$ 13.554' in se, 'INTEL-02 IC: semente 58 W espera out, pedindo até 05/10 (necessidade 15/10 − 10 dias de entrega)', se)
+    m.ok('Comprar agora' in gl and '28/09' in gl, 'INTEL-02 IC: glifosato com uso em 28/09 compra agora', gl)
+    m.abre('m:Semente de soja 58 W'); p = J(PAN) or ''
+    m.ok('mais barato' in p.lower() and 'planejar safra' in p.lower() and (J(SAZ) or 0) == 12, 'INTEL-02 IC painel: sazonalidade em 12 meses e a necessidade do Planejar safra', [p[:300], J(SAZ)])
+    m.clk('Fechar painel', w=.4)
     b = J(KPI) or ''
     m.ok('r$ 41.363' in b and '1.277,84' in b, 'IC: economia pela melhor cotação R$ 41.363 e R$ 1.277,84/ha (oráculo do inteligencia_unit C3/C4)', b[:500])
-    it = m.linhas(0)
+    it = m.linhas(1)
     m.abre(it[0]) if it else None; p = J(PAN) or ''
     m.ok(bool(it) and 'Melhor cotação' in p and 'válida até' in p and 'Abrir Compra de insumos' in p, 'IC painel do insumo: melhor cotação, validade de cada uma e o próximo passo', p[:500])
     m.clk('Fechar painel', w=.4)

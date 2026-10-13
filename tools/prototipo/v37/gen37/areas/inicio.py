@@ -768,7 +768,7 @@ function strip(self,l,f){ const N=(k,val)=>({k,val}); const tids=TIDS(); const o
     return [N('Previsto',mil(p)),N('Realizado provisório',mil(r)),N('Conferido',mil(c)),N('Execução',p?nfx(r/p*100,1)+' %':'—')]; }
   return []; }
 // ---- ações do painel (ícone + rótulo + title) ----
-const ICN=['doc','alert','drop','leaf','map','trend','cash','lab','check','calendar','layers','box','cart','satelite','monitoramento'];
+const ICN=['doc','alert','drop','leaf','map','trend','cash','lab','check','calendar','layers','box','cart','satelite','inseto'];
 function A(t,o){ const a={t,tt:o.tt||t,isH:!!o.h,isF:!!o.fn,h:o.h||'#',fn:o.fn||(()=>{}),
   st:(o.prim?'background:#1E7A4C;color:#fff;border:1px solid #1E7A4C;':'background:#FFFFFF;color:#15201A;border:1px solid #E4E9E5;')+'display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;white-space:nowrap;cursor:pointer;font-family:inherit;line-height:1.25;'};
   ICN.forEach(n=>{ a['i_'+n]=(o.ic===n); }); return a; }
@@ -931,7 +931,7 @@ function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=M.
       x.items.forEach(it=>{ it.acts=(it.acts||[]).filter(a=>!(a.isH&&(hs.indexOf(a.h)>=0||lh.indexOf(a.h)>=0))); }); if(x.lk&&hs.indexOf(x.lk)>=0){ x.lk=''; x.hasLk=false; } }); return P0; };
   if(l===CAR_L){ P.secs=[byK.car]; const ca=carAc(t,flt(self,CAR_L)); P.acts=ca?[A(ca[0],Object.assign({ic:'calendar',prim:true},ca[1]))]:[]; return semRep(P); }   // MAPA-CARENCIA-LMR-20261003
   if(KL[l]){ P.secs=[byK[KL[l]]]; P.acts=(l==='Irrigação'&&xi.ac)?[A(xi.ac[0],{h:xi.ac[1],ic:'drop',prim:true})]:((l==='MIP/MID'&&mipAc)?[A(mipAc[0],Object.assign({ic:'alert',prim:true},mipAc[1]))]:[]); return semRep(P); }
-  const VER={'Satélite':['Ver satélite','satelite'],'Lavoura':['Ver lavoura','leaf'],'MIP/MID':['Ver pragas e doenças','monitoramento'],'O.S./prazos':['Ver ordens','doc'],'Irrigação':['Ver irrigação','drop'],'Insumos':['Ver insumos','box'],'Custos':['Ver custos','cash']};
+  const VER={'Satélite':['Ver satélite','satelite'],'Lavoura':['Ver lavoura','leaf'],'MIP/MID':['Ver pragas e doenças','inseto'],'O.S./prazos':['Ver ordens','doc'],'Irrigação':['Ver irrigação','drop'],'Insumos':['Ver insumos','box'],'Custos':['Ver custos','cash']};
   VER[CAR_L]=['Ver carência','calendar'];   // MAPA-CARENCIA-LMR-20261003
   const ab=os.filter(o=>['Encerradas','Canceladas'].indexOf(o.etapa)<0).length;
   const osRes=os.length?(os.length+(os.length>1?' ordens':' ordem')+' · '+ab+(ab===1?' aberta':' abertas')):'nenhuma ordem neste talhão';
@@ -967,7 +967,7 @@ function MAPVALS(self,v){
   const FL={'Integrado':['Abrir ordens','OS.dc.html'],'Satélite':['Ver histórico','AG-06.dc.html'],'Lavoura':['Abrir safra','SAF.dc.html'],'O.S./prazos':['Abrir ordens','OS.dc.html'],'Irrigação':['Abrir irrigação','IR-01.dc.html#faz='+encodeURIComponent(FAZ)],'MIP/MID':['Abrir Pragas e doenças','AG-01.dc.html'],'Insumos':['Abrir compras','CMP.dc.html'],'Custos':['Abrir safra','SAF.dc.html']};
   FL[CAR_L]=['Abrir qualidade dos lotes','CO-06.dc.html'];   // MAPA-CARENCIA-LMR-20261003
   v.flink=(FL[l]||['',''])[1]; v.flinkt=(FL[l]||['',''])[0]; v.hasFlink=!!FL[l]; v.hasFvis=(l==='MIP/MID');
-  const lst=(on)=>'width:92px;box-sizing:border-box;padding:9px 4px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;font-family:inherit;border:0;'+(on?'background:#1E6B47;color:#FFFFFF;':'background:transparent;color:#4B5A51;');
+  const lst=(on)=>'width:48px;height:48px;box-sizing:border-box;padding:0;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;cursor:pointer;position:relative;flex-shrink:0;font-family:inherit;border:0;'+(on?'background:#1E6B47;color:#FFFFFF;':'background:transparent;color:#4B5A51;');
   M.lays.forEach((x,i)=>{ v['ly'+i+'_st']=lst(x===l); v['ly'+i+'_on']=(x===l)?'true':'false'; v['ly'+i+'_go']=()=>self.setState({lay:x,cvis:false,mpa:null}); });
   const ms=(l==='Satélite')?M.sat[f.dt].manchas:[];
   M.tids.forEach(t=>{ const c=cls(l,f,t); const on=sel.indexOf(t)>=0; const lc=M.lcop[c.c]||M.lcop.none;
@@ -1117,7 +1117,7 @@ def _cel(tid):
             + ''.join(f'<rect x="{c[0]}" y="{c[1]}" width="{CS}" height="{CS}" fill="{H("px_"+tid+"_"+str(i))}"/>' for i,c in enumerate(PX[tid])) + '</g>')
 
 def _panel_html():
-    ICS=['doc','alert','drop','leaf','map','trend','cash','lab','check','calendar','layers','box','cart','satelite','monitoramento']
+    ICS=['doc','alert','drop','leaf','map','trend','cash','lab','check','calendar','layers','box','cart','satelite','inseto']
     def actions(lst,a='a'):
         ic=''.join(f'<sc-if value="{H(a+".i_"+n)}" hint-placeholder-val="{F()}">{icon(n,14)}</sc-if>' for n in ICS)
         return (f'<sc-for list="{H(lst)}" as="{a}" hint-placeholder-count="2">'
@@ -1271,10 +1271,12 @@ def _defs_body():
 
 def _rail():
     ICON={'Integrado': 'layers', 'Satélite': 'satelite', 'Lavoura': 'leaf', 'O.S./prazos': 'doc', 'Insumos': 'box', 'Custos': 'cash',
-          'Solo': 'lab', 'MIP/MID': 'monitoramento', 'Irrigação': 'drop', 'Colheita/produtividade': 'Colheita'}
+          'Solo': 'lab', 'MIP/MID': 'inseto', 'Irrigação': 'drop', 'Colheita/produtividade': 'Colheita'}
     ICON['Carência e destino']='clock'   # prazo (relógio); o triângulo fica reservado a alerta real · MAPA-CARENCIA-LMR-20261003
-    items=[f'<button type="button" role="tab" aria-selected="{H("ly%d_on" % i)}" onClick="{H("ly%d_go" % i)}" title="Mostrar {esc(NOME_LAY.get(t,t))} no mapa" style="{H("ly%d_st" % i)}">'
-           f'{icon(ICON[t],20,"currentColor")}<span style="font-size: 11.5px; font-weight: 700; line-height: 1.15; text-align: center;">{esc(NOME_LAY.get(t,t))}</span></button>'
+    # pedido do proprietário (13/10/2026): "nos ícones à esquerda na barra coloque só o ícone e tooltip". O nome fica para o leitor de tela
+    # (g2sr) e aparece na dica (g2dica: hover, foco de teclado e toque longo); o título "Mostrar … no mapa" continua (a dica nativa sai no hover)
+    items=[f'<button type="button" role="tab" aria-selected="{H("ly%d_on" % i)}" onClick="{H("ly%d_go" % i)}" title="Mostrar {esc(NOME_LAY.get(t,t))} no mapa" data-dica="{esc(NOME_LAY.get(t,t))}" style="{H("ly%d_st" % i)}">'
+           f'{icon(ICON[t],22,"currentColor")}<span class="g2sr">{esc(NOME_LAY.get(t,t))}</span></button>'
            for i,t in enumerate(MDATA['lays'])]
     return (f'<nav role="tablist" aria-orientation="vertical" aria-label="Funcionalidades do mapa" class="mapa-trilha" style="display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; '
             f'background: {SURF}; border-right: 1px solid {LINE}; padding: 8px; box-sizing: border-box;">{"".join(items)}</nav>')
@@ -1295,7 +1297,7 @@ function EXTRAVALS(self,v){ self.g2perfilFecha={mpa:null}; cenOuvir(self); irrOu
     corpo=f'<div class="mapa-corpo" style="display: flex; flex-direction: row; align-items: stretch; min-width: 0; min-height: 0; background: {SURF}; border: 1px solid {LINE}; border-radius: 16px; overflow: hidden;">{_rail()}{_mapcard(None)}</div>'
     # IN-04 no celular/tablet/zoom 200 % (pendência de componentes 03/10): a proposta comp_in04_proposta.css, validada por injeção no
     # componentes_test (8 e 31), passa a valer de fato; decide pela largura do main e do próprio mapa (container queries)
-    EXTRA.append('<style>'+'main:has(>.mapa-corpo){container:in04/inline-size} .mapa-area{container:in04mapa/inline-size} @container in04 (max-width: 760px){ .mapa-corpo{flex-direction:column!important} .mapa-trilha{flex-direction:row!important;overflow-x:auto;border-right:0!important;border-bottom:1px solid #E4E9E5;flex-shrink:0} .mapa-trilha>button{flex:0 0 auto;width:84px!important;min-height:56px} .mapa-corpo [role=group]{flex-wrap:wrap} } @container in04 (max-width: 919px){ .mapa-corpo{flex:1 0 auto!important} .mapa-linha{flex-direction:column} .mapa-area{min-height:max(62vh,280px)} .mapa-linha aside[aria-label]{width:auto!important;border-left:0!important;border-top:1px solid #E4E9E5} } @container in04mapa (max-width: 700px){ [role=toolbar][aria-label="Ferramentas do mapa"]{left:12px;right:12px!important;top:52px!important;max-width:none!important;flex-wrap:nowrap!important;justify-content:flex-start!important;overflow-x:auto;padding:2px;scrollbar-width:thin} [role=toolbar][aria-label="Ferramentas do mapa"] button{flex-shrink:0;white-space:nowrap} .mapa-area span[style*="top: 10px"]{max-width:calc(100% - 24px);box-sizing:border-box} .mapa-area>div[style*="bottom: 12px"]{max-height:30%;overflow-y:auto;box-sizing:border-box} }'+'</style>')
+    EXTRA.append('<style>'+'main:has(>.mapa-corpo){container:in04/inline-size} .mapa-area{container:in04mapa/inline-size} @container in04 (max-width: 760px){ .mapa-corpo{flex-direction:column!important} .mapa-trilha{flex-direction:row!important;overflow-x:auto;border-right:0!important;border-bottom:1px solid #E4E9E5;flex-shrink:0} .mapa-trilha>button{flex:0 0 auto;width:48px!important;min-height:48px} .mapa-corpo [role=group]{flex-wrap:wrap} } @container in04 (max-width: 919px){ .mapa-corpo{flex:1 0 auto!important} .mapa-linha{flex-direction:column} .mapa-area{min-height:max(62vh,280px)} .mapa-linha aside[aria-label]{width:auto!important;border-left:0!important;border-top:1px solid #E4E9E5} } @container in04mapa (max-width: 700px){ [role=toolbar][aria-label="Ferramentas do mapa"]{left:12px;right:12px!important;top:52px!important;max-width:none!important;flex-wrap:nowrap!important;justify-content:flex-start!important;overflow-x:auto;padding:2px;scrollbar-width:thin} [role=toolbar][aria-label="Ferramentas do mapa"] button{flex-shrink:0;white-space:nowrap} .mapa-area span[style*="top: 10px"]{max-width:calc(100% - 24px);box-sizing:border-box} .mapa-area>div[style*="bottom: 12px"]{max-height:30%;overflow-y:auto;box-sizing:border-box} }'+'</style>')
     EXTRA.append(f'<sc-if value="{H("full")}" hint-placeholder-val="{F()}"><div role="dialog" aria-label="Mapa em tela cheia" style="position: fixed; inset: 0; z-index: 55; background: {BG}; padding: 14px; box-sizing: border-box; display: flex; gap: 12px;">{_rail()}{_mapcard(872,full=True)}</div></sc-if>')
     shell37('IN-04','Mapa da fazenda',corpo,primary_html=f'<span style="{H("hs_st")}">{H("hs_t")}</span>')
 
