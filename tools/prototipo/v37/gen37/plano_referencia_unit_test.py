@@ -27,7 +27,6 @@ const history = {replaceState(){}};
 """
 source = (shim + '\nconst GRIDS = ' + json.dumps(E.GRIDS, ensure_ascii=False) + ';\n'
           + (HERE / 'g2lib.js').read_text() + '\n' + E.EXTRAJS[0] + '\n'
-          + (HERE / 'plano_referencia.js').read_text() + '\n'
           + (HERE / 'plano_referencia_unit.js').read_text())
 with tempfile.TemporaryDirectory(prefix='safrion-f2-') as td:
     target = Path(td) / 'test.js'
