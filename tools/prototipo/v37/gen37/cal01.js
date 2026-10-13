@@ -59,8 +59,12 @@ function cal01Memo(r, o){ o=o||{}; const u=' '+(o.un||'');
     else out.push(t+'−'+n1(l.q)+u+sx); });
   if((Number(o.cond)||0)>1e-9) out.push('Falta condicionada à qualidade: '+n(o.cond)+u+(o.condFalta?' a partir de '+d(o.condFalta):'')+' se o laudo reprovar os '+n(qc)+u+' em quarentena · fora da compra: sem nova compra automática; '
     +'o gestor libera ou reprova a qualidade no Estoque (reprovado, vira falta firme)');   // PRD 65.4; CAL-01 "Qualidade pendente"; DEMO-02
-  (o.quarRef||[]).filter(x=>x.rep).forEach(x=>out.push('Reprovado: '+n(x.q)+u+' do lote '+x.lote+(x.doc?' ('+x.doc+')':'')+' · laudo '+(x.rep.laudo||'—')+(x.rep.motivo?': '+x.rep.motivo:'')
-    +' · segregado para devolução ao fornecedor, não cobre: a falta é firme'));
+  // reprovado por laudo (revisão do 16fb55e, ajuste 2): com mais de um laudo no lote, cada um com a sua quantidade e o seu motivo (x.reps, do histórico)
+  const rl=(r,dc)=>' laudo '+(r.laudo||'—')+(dc&&r.doc?' ('+r.doc+')':'')+(r.motivo?': '+r.motivo:'');
+  (o.quarRef||[]).filter(x=>x.rep).forEach(x=>{ const rs=(x.reps||[]).length>1?x.reps:null; const dc=!!rs&&rs.some(r=>r.doc!==rs[0].doc);
+    out.push('Reprovado: '+n(x.q)+u+' do lote '+x.lote+(x.doc&&!dc?' ('+x.doc+')':'')
+      +(rs?' = '+rs.map(r=>n(r.q)+u+' no'+rl(r,dc)).join(' + '):' ·'+rl(x.rep,false))
+      +' · segregado para devolução ao fornecedor, não cobre: a falta é firme'); });
   out.push(r.liq>1e-9?('Necessidade líquida = soma das faltas desta safra = '+n(r.liq)+u+' · falta a partir de '+d(r.falta))
     :(r.rupRec>1e-9?('Sem compra nova · ruptura de '+n(r.rupRec)+u+' de '+d(r.falta)+' a '+d(r.cob)+', coberta pelo recebimento')
     :('Sem falta nesta safra · saldo depois do último uso: '+n(r.saldoUlt==null?r.saldo:r.saldoUlt)+u)));

@@ -546,5 +546,20 @@ const X=ENT(c,XS.S2627); const m=demFazenda(X); OUT.st=demSituacao(m,null,X.hoje
     return (r['liq']==5.48 and r['cond']==10 and st[0]=='Falta 5 L' and st[1]=='red' and len(st)>3 and st[3]=='Qualidade pendente · 10 L'
             and '10 L em quarentena aguardam laudo (o gestor libera ou reprova no Estoque)' in st[2] and r['d']['S2627']['liq'].get('Fungicida A')==5.48,(st,r['liq'],r['cond']))
 caso('J1b o mesmo pelo cenário: devolver 30 L de Fungicida A bloqueados, reprovar (LAB-9) e devolver mais 10 L bloqueados — Safra 2026/27 com 5,48 L de compra firme e 10 L aguardando laudo; o Mapa diz "Falta 5 L" e "Qualidade pendente · 10 L" (no 16fb55e: só "Falta 5 L")',j1b)
+REV2="""cenDevolver(c,'REQ-035','Fungicida A',10,false,ANA); OUT.r1=cenReprovarQuarentena(c,'Fungicida A|F26-02','LAB-A','motivo A',ANA).msg;
+cenDevolver(c,'REQ-035','Fungicida A',10,false,ANA); OUT.r2=cenReprovarQuarentena(c,'Fungicida A|F26-02','LAB-B','motivo B',ANA).msg;"""   # comandos do contraexemplo (itens 2 e 4)
+def j2():
+    # ajuste 2 · contraexemplo do Codex por comandos reais: devolver 10 L bloqueados (REQ-035/F26-02), reprovar LAB-A/motivo A, devolver mais 10 L,
+    # reprovar LAB-B/motivo B → a memória dizia "Reprovado: 20 L … laudo LAB-B: motivo B". Aceite: 10 L/LAB-A e 10 L/LAB-B, total 20, do histórico
+    r=motor(REV2+"""OUT.c=CL(c); const X=ENT(c,XS.S2627); OUT.ref=X.quarRef.filter(x=>x.item==='Fungicida A'&&x.rep); const d=demFazenda(X)['Fungicida A'];
+OUT.memo=cal01Memo(d.cal,{un:d.un,quarC:d.quarC,quarRef:d.quarRef,cond:d.cond,condFalta:d.condFalta}).filter(l=>/^Reprovado/.test(l));""")
+    rp=[(x.get('q'),x.get('laudo'),x.get('motivo')) for x in ((r['ref'] or [{}])[0].get('reps') or [])]
+    py=[q for q in D2.est_dem(r['c'],'Santa Rita')['quarRef'] if q['item']=='Fungicida A' and q['rep']]
+    pyr=[(x.get('q'),x.get('laudo'),x.get('motivo')) for x in ((py or [{}])[0].get('reps') or [])]
+    m=r['memo']
+    ok=(len(m)==1 and m[0].startswith('Reprovado: 20 L do lote F26-02 (devolução da REQ-035) = 10 L no laudo LAB-A: motivo A + 10 L no laudo LAB-B: motivo B')
+        and 'segregado para devolução ao fornecedor' in m[0] and len(r['ref'])==1 and r['ref'][0]['q']==20 and rp==[(10,'LAB-A','motivo A'),(10,'LAB-B','motivo B')] and pyr==rp)
+    return (ok,dict(memo=m,reps=rp,py=pyr))
+caso('J2 memória por laudo (ajuste 2, contraexemplo do Codex): devolver 10 L de Fungicida A bloqueados, reprovar LAB-A (motivo A), devolver mais 10 L e reprovar LAB-B (motivo B) — "Reprovado: 20 L do lote F26-02 (devolução da REQ-035) = 10 L no laudo LAB-A: motivo A + 10 L no laudo LAB-B: motivo B", do histórico do lote; Python = JS (no 16fb55e: "20 L · laudo LAB-B: motivo B")',j2)
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas'); [print('  -',f) for f in FAIL]
 sys.exit(1 if FAIL else 0)

@@ -1046,6 +1046,21 @@ def os_faz(cen=None):
         no=((co or {}).get('osc') or {}).get('novo')
         if no and k not in f: f[k]=no.get('faz') or 'Santa Rita'
     return f
+def _reps_lote(c,l,qr):
+    """Espelho de cenRepsLote (revisão do 16fb55e, ajuste 2): cada reprovação do lote com quantidade, laudo, motivo e as entradas bloqueadas que
+    ela decidiu, do histórico; sem histórico que feche com o reprovado, o registro do lote (rep)."""
+    pend=[]; reps=[]
+    for m in (c.get('movs') or []):
+        if m.get('prod')!=l['prod'] or m.get('lote')!=l['lote']: continue
+        t=m.get('tipo')
+        if t in ('recebimento-nf','devolucao') and not m.get('apto'):
+            d=('devolução da '+str(m.get('req'))) if t=='devolucao' else (m.get('doc') or '')
+            if d and d not in pend: pend.append(d)
+        elif t=='inspecao': pend=[]
+        elif t=='inspecao-reprovada':
+            reps.append(dict(q=m.get('qtd') or 0,laudo=m.get('doc') or '',motivo=m.get('motivo') or '',quem=m.get('quem') or '',em=m.get('at') or '',doc=', '.join(pend))); pend=[]
+    if abs(sum(r['q'] for r in reps)-qr)<1e-6: return reps
+    x=dict(q=qr,doc=''); x.update(l.get('rep') or {}); x['q']=qr; return [x]
 def est_dem(cen=None,faz='Santa Rita',osd=None):
     """Espelho de cenEstDem: {fisico, quar, reservas, recebDt, sobra} da fazenda no cenário cen (None = semente). osd: os_dem do mesmo cenário."""
     c=_seed() if cen is None else cen; b=est_base(); osd=os_dem(cen) if osd is None else osd; hoje=b['hoje']; ofaz=os_faz(cen)
@@ -1059,7 +1074,11 @@ def est_dem(cen=None,faz='Santa Rita',osd=None):
               if m.get('prod')==l['prod'] and m.get('lote')==l['lote'] and not m.get('apto') and m.get('tipo') in ('recebimento-nf','devolucao')]
         doc=([x for x in docs if x] or [''])[-1]
         if qp>1e-9: quar[l['prod']]=quar.get(l['prod'],0)+qp; quar_ref.append(dict(item=l['prod'],q=qp,lote=l['lote'],doc=doc,rep=None))
-        if qr>1e-9: quar_rep[l['prod']]=quar_rep.get(l['prod'],0)+qr; quar_ref.append(dict(item=l['prod'],q=qr,lote=l['lote'],doc=doc,rep=l.get('rep') or {}))
+        if qr>1e-9:
+            quar_rep[l['prod']]=quar_rep.get(l['prod'],0)+qr; reps=_reps_lote(c,l,qr); dr=[]
+            for r_ in reps:
+                if r_['doc'] and r_['doc'] not in dr: dr.append(r_['doc'])
+            quar_ref.append(dict(item=l['prod'],q=qr,lote=l['lote'],doc=', '.join(dr) or doc,rep=l.get('rep') or {},reps=reps))
     for rid,r in (c.get('reqs') or {}).items():
         o=(c.get('ordens') or {}).get(r['os'])
         if not o: continue

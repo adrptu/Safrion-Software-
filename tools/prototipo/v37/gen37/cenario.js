@@ -130,7 +130,19 @@ function cenOsFaz(c, osb) { const f = {}; ((osb || {}).ords || []).forEach(x => 
 // cancelar com material entregue e devolver a sobra não mudam a compra.
 // Revisão do 853a6a8 (achado 2, S2) · quarentena (PRD 65.4; CAL-01 "Qualidade pendente"; DEMO-02): a parte com laudo pendente (quar) é
 // fornecimento condicionado à qualidade — não é apta nem saldo do pedido, e a falta que ela cobriria fica "condicionada à qualidade", fora da compra;
-// a parte com laudo reprovado (quarRep) não cobre nada e vira falta firme, com o motivo. quarRef: [{item,q,lote,doc,rep}] para a memória.
+// a parte com laudo reprovado (quarRep) não cobre nada e vira falta firme, com o motivo. quarRef: [{item,q,lote,doc,rep,reps}] para a memória
+// (reps: cada laudo reprovado do lote com a sua quantidade, cenRepsLote; revisão do 16fb55e, ajuste 2).
+// Revisão do 16fb55e (ajuste 2) · reprovado por laudo, do histórico do lote: cada "Qualidade reprovada" com a sua quantidade, laudo e motivo, e as
+// entradas bloqueadas (nota ou devolução) que ela decidiu — as registradas desde a decisão anterior do lote. Dano evitado: a memória atribuir ao
+// último laudo o que outro reprovou (10 L LAB-A + 10 L LAB-B viravam "20 L · laudo LAB-B"). Sem histórico que feche com o reprovado do lote
+// (semente sem movimentos), vale o registro do lote (l.rep), sem inventar proveniência. Espelho: dados2._reps_lote.
+function cenRepsLote(c, l, qr) { let pend = []; const reps = [];
+  (((c && c.movs) || []).filter(m => m.prod === l.prod && m.lote === l.lote)).forEach(m => {
+    if ((m.tipo === 'recebimento-nf' || m.tipo === 'devolucao') && !m.apto) { const d = m.tipo === 'devolucao' ? 'devolução da ' + m.req : (m.doc || ''); if (d && pend.indexOf(d) < 0) pend.push(d); }
+    else if (m.tipo === 'inspecao') pend = [];
+    else if (m.tipo === 'inspecao-reprovada') { reps.push({ q: Number(m.qtd) || 0, laudo: m.doc || '', motivo: m.motivo || '', quem: m.quem || '', em: m.at || '', doc: pend.join(', ') }); pend = []; } });
+  const sh = reps.reduce((a, r) => a + r.q, 0);
+  return Math.abs(sh - qr) < 1e-6 ? reps : [Object.assign({ q: qr, doc: '' }, l.rep || {}, { q: qr })]; }
 function cenEstDem(c, faz, b, osd) { b = b || {}; const lf = b.locFaz || {}; const fz = (l) => lf[l.local] || b.faz0 || 'Santa Rita';
   const fisico = {}, quar = {}, quarRep = {}, quarRef = [], reservas = [], recebDt = [], sobra = []; const lotes = (c && c.lotes) || {};
   Object.values(lotes).forEach(l => { if (fz(l) !== faz) return; fisico[l.prod] = (fisico[l.prod] || 0) + (l.fisico || 0) - (l.quarentena || 0);
@@ -138,7 +150,8 @@ function cenEstDem(c, faz, b, osd) { b = b || {}; const lf = b.locFaz || {}; con
     const doc = (((c && c.movs) || []).filter(m => m.prod === l.prod && m.lote === l.lote && !m.apto && (m.tipo === 'recebimento-nf' || m.tipo === 'devolucao'))
       .map(m => m.tipo === 'devolucao' ? 'devolução da ' + m.req : m.doc).filter(Boolean).pop()) || '';
     if (qp > 1e-9) { quar[l.prod] = (quar[l.prod] || 0) + qp; quarRef.push({ item: l.prod, q: qp, lote: l.lote, doc, rep: null }); }
-    if (qr > 1e-9) { quarRep[l.prod] = (quarRep[l.prod] || 0) + qr; quarRef.push({ item: l.prod, q: qr, lote: l.lote, doc, rep: l.rep || {} }); } });
+    if (qr > 1e-9) { quarRep[l.prod] = (quarRep[l.prod] || 0) + qr; const reps = cenRepsLote(c, l, qr);
+      quarRef.push({ item: l.prod, q: qr, lote: l.lote, doc: reps.map(r => r.doc).filter((v, i, a) => v && a.indexOf(v) === i).join(', ') || doc, rep: l.rep || {}, reps }); } });
   Object.keys((c && c.reqs) || {}).forEach(rid => { const r = c.reqs[rid]; const o = ((c && c.ordens) || {})[r.os]; if (!o) return;
     const l0 = (r.itens || []).map(it => lotes[it.prod + '|' + it.lote]).find(Boolean); const fo = (b.ofaz || {})[r.os] || (l0 ? fz(l0) : (b.faz0 || 'Santa Rita'));
     if (fo === faz) { const S = cenOsSup(c, o, r);
@@ -226,7 +239,7 @@ function cenReceber(c, prod, lote, qtd, un, local, validade, doc, apto, ator) { 
 }
 // Liberar quarentena (RN-015; SU-06 "Liberar qualidade"): só com o nº do laudo ou relatório de inspeção, pelo gestor (padrão adotado, igual ao ajuste)
 function cenLiberarQuarentena(c, key, laudo, ator) { const l = c.lotes[key]; if (!l || !(l.quarentena > 0)) throw new Error('Nada bloqueado neste lote.');
-  if (!((l.quarentena || 0) - (l.quarRep || 0) > 1e-9)) throw new Error('O lote ' + l.lote + ' só tem material reprovado (laudo ' + ((l.rep || {}).laudo || '—') + '): ele fica segregado para a devolução ao fornecedor, não volta ao disponível.');
+  if (!((l.quarentena || 0) - (l.quarRep || 0) > 1e-9)) throw new Error('O lote ' + l.lote + ' só tem material reprovado (' + (cenRepsLote(c, l, l.quarRep || 0).map(r => 'laudo ' + (r.laudo || '—') + ' ' + cenNum(r.q) + ' ' + l.un).join(' + ') || 'laudo —') + '): ele fica segregado para a devolução ao fornecedor, não volta ao disponível.');
   const quem = cenExige(ator, 'gestor', 'Liberar a quarentena do lote ' + l.lote); const doc = String(laudo || '').trim();
   if (!doc) throw new Error('Informe o nº do laudo ou relatório de inspeção do lote ' + l.lote + '. Sem laudo o lote continua bloqueado.');
   // acúmulo (padrão 2): quem registrou a entrada bloqueada (recebimento ou devolução) e libera fica com revisão posterior. Com a entrada gravando
