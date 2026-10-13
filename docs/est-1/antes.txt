@@ -1,0 +1,8 @@
+FALHA saldo vencido sai do disponível sem apagar físico: disponível=90
+FALHA lote válido menor é escolhido em vez de vencido com maior saldo: selecionou vencido
+FALHA O.S. não reserva produto com todos os lotes vencidos: O.S. liberada
+FALHA reserva antiga não permite entregar lote que venceu: entrega vencida aceita
+OK sem validade aplicável e lote futuro preservam disponível
+OK reserva e entrega válidas continuam possíveis
+RESULTADO 2/6
+RESULTADO 2/6
