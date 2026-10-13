@@ -204,7 +204,12 @@ function ma_verComo(self,v){ const pf=g2perfil();
 MA_JS+=r'''
 function PREVALS(self,v){ manOuvir(self); const c=manGet(); const st=self.state; const pf=g2perfil();
   if(!self.__hashIni){ self.__hashIni=1; const h=ma_hashLer(); setTimeout(()=>ma_aplicaHash(self,h),0);
-    try{ window.addEventListener('hashchange',()=>{ const h2=ma_hashLer(); if(ma_hashDe(self.state)!==decodeURIComponent((location.hash||'').slice(1))) ma_aplicaHash(self,h2); }); }catch(e){} }
+    try{ window.addEventListener('hashchange',()=>{ const h2=ma_hashLer(); if(ma_hashDe(self.state)!==decodeURIComponent((location.hash||'').slice(1))) ma_aplicaHash(self,h2); }); }catch(e){} 
+    /* subitem do menu na própria tela: aplica a visão no clique, sem esperar o hashchange. Antes, com o painel da OM aberto ao lado,
+       a sincronização estado → endereço podia regravar o # antigo entre o clique e o hashchange, e a troca de visão se perdia (v57) */
+    try{ document.addEventListener('click',e=>{ const a=e.target&&e.target.closest?e.target.closest('a[href^="MA.dc.html#"]'):null;
+      if(!a||e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey) return; e.preventDefault();
+      history.pushState(null,'',location.pathname+location.search+'#'+a.getAttribute('href').split('#')[1]); ma_aplicaHash(self,ma_hashLer()); }); }catch(e){} }
   const vis=st.vis||'semordem'; const per=st.per||'mes';
   /* Sem ordem */
   const so=ma_linhasSemOrdem(self,c,Object.assign({prazo:'10'},st,{tipo:st.tipo||''}));

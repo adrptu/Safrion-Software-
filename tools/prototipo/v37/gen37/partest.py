@@ -51,7 +51,7 @@ try:
     chk('T1 aparece como linha do talhão com 2 parcelas', any(r.startswith('T1 2 parcelas · área toda alocada Dividir') for r in rs), [r for r in rs if r.startswith('T1')][:3])
     chk('T1-A e T1-B são sublinhas', any(r.startswith('T1-A parcela') for r in rs) and any(r.startswith('T1-B parcela') for r in rs))
     # etapa 2 nova: a faixa diz os hectares desta safra; a contagem é das linhas desta safra (sem a linha do talhão nem as de fora)
-    NFOLHAS=f"""(()=>[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row]')]).filter(r=>r.querySelector('input[type=checkbox]')&&!({FORA})(r)).length)()"""
+    NFOLHAS=f"""(()=>[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row]')]).filter(r=>r.querySelector('button.g2del')&&!({FORA})(r)).length)()"""
     k2a=k(r"/Nesta safra [^\n]+/"); print('   faixa:',k2a)
     chk('faixa "Nesta safra 1.165" e 9 cultivos (folhas)', k2a.startswith('Nesta safra 1.165') and J(NFOLHAS)==9, (k2a,J(NFOLHAS)))
     # etapa única (05/10/2026): o k4 saiu; horas e custo de operação ficam na etapa 3 (Total da g_op e linha do título); a demanda na 4

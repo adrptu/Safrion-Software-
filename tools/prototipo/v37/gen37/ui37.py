@@ -47,9 +47,9 @@ MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
    ('Pessoas e equipes','CD-04.dc.html'),('Parceiros e fornecedores','CD-05.dc.html'),('Produtos, unidades e locais','CD-06.dc.html'),('Estrutura gerencial','CD-07.dc.html')]),
  ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html')]),
  ('Produção','Colheita',[('Previsão e colheita','COLH.dc.html'),('Recebimento e beneficiamento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html')]),   # 3 itens (colheita D-01); Beneficiamento é tela irmã de Cargas (BEN-D14)
- ('Comercial','Vendas',[('Contratos e pedidos','VEN.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Painel comercial','PCOM.dc.html')]),
+ ('Comercial','Vendas',[('Contratos e pedidos','VEN.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Painel comercial','PCOM.dc.html'),('Inteligência de vendas','IV.dc.html')]),   # INTEL-01 (13/10): inteligência comercial de vendas
  ('Manutenção','wrench',[('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')]),   # 13/10/2026 (pedido do proprietário: subitens de novo, enxutos): um subitem por visão da tela única, sem tela nova
- ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html')]),
+ ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html'),('Inteligência de compras','IC.dc.html')]),   # INTEL-01 (13/10)
  ('Configurações','grid',[('Usuários e alçadas','CF-01.dc.html'),('Auditoria','CF-04.dc.html'),('Integrações','CF-03.dc.html'),('Assinatura e cobrança','CF-05.dc.html')])]   # 06/10/2026 (PLAT-01): grupo por último; CONF-01 (CONF-D01/D02): Usuários e alçadas · Auditoria · Integrações · Assinatura e cobrança, cada item entra no passo que entrega a tela
 MENU_OF={'CA-01det.dc.html':'OS.dc.html','CA-02.dc.html':'OS.dc.html','CA-01x-os0420.dc.html':'OS.dc.html',
  'IR-02.dc.html':'IR-01.dc.html','IR-03.dc.html':'IR-01.dc.html','IR-03det.dc.html':'IR-01.dc.html','IR-04.dc.html':'IR-01.dc.html',

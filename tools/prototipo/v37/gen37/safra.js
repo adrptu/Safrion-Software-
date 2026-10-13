@@ -1426,7 +1426,6 @@ function abrirCultivo(self,saf,cid,o){ if(saf!==self.state.saf||(self.state.step
 const SAF_PASSO={safra:1,cultivos:2,operacoes:3,demanda:4};
 const SAF_ETAPA6={1:1,2:2,3:3,4:3,5:3,6:4};
 function safPasso(p,e){ if(p&&SAF_PASSO[p]) return SAF_PASSO[p]; if(e&&SAF_ETAPA6[e]) return SAF_ETAPA6[e]; return 4; }
-function nSel(self,saf){ return Object.values((g2st(self,'g_cult_'+sk(saf)).sel)||{}).filter(Boolean).length; }
 function safAcoes(self,v,x){ const st=self.state, step=x.step, ro=x.ro, corr=st.corr||null;
   const ir=(i)=>({t:'‹ '+SAF_CURTO[i-1],fn:()=>g2etapa(self,{step:i,corr:null}),to:i,a:'voltar'});
   const av=(i,t)=>({t:t+' ›',fn:()=>g2etapa(self,{step:i,corr:null}),to:i,a:'avancar'});
@@ -1453,7 +1452,6 @@ function safAcoes(self,v,x){ const st=self.state, step=x.step, ro=x.ro, corr=st.
           c={nota:'Todos os talhões estão com perenes da '+(o?o.safnome:'outra safra')+' neste período ('+ocHa(per)+' ha).',lnks:o?[{t:'Planeje por ela ›',fn:()=>abrirCultivo(self,o.saf,'')}]:[]}; }
         else { const ps=[]; if(nl.length) ps.push(nl.length+(nl.length>1?' talhões livres':' talhão livre')+' ('+ocHa(b.livre||0)+' ha)'); if(nc.length) ps.push(nc.length+' a conferir ('+ocHa(b.conf||0)+' ha)'); if(nv) ps.push(nv+(nv>1?' ciclos perenes a vincular':' ciclo perene a vincular'));
           c={nota:'Nenhum cultivo nesta safra'+(ps.length?': '+ps.join(', '):'')+'. Use Planejar ›'+(nv?' ou Vincular ciclo ›':'')+' na linha.'+(fr.t?' '+fr.t:''),lnks:fr.lnks}; } }
-      else if(nSel(self,x.saf)) c={nota:(nSp?semTxt+'. ':'')+'Seleção ativa: o plano dos selecionados é aplicado pela barra da lista.',sec:av(3,'Dimensionar operações')};   // lote = comando da tarefa ativa (DS-02/DS-40): sem 2ª primária de "aplicar"
       else if(x.apIds.length) c={nota:semTxt+': sem plano não entram operações nem insumos.'+(fr.t?' '+fr.t:''),lnks:fr.lnks,prim:aplicar,sec:av(3,'Dimensionar operações')};
       else c={nota:fr.t||'',lnks:fr.lnks,prim:av(3,'Dimensionar operações')}; } }
   else if(!ro&&step===3&&!x.temPlano) c={volta:ir(2),nota:'Nenhum cultivo tem plano agronômico: operações, recursos e demanda dependem dele.',prim:x.apIds.length?aplicar:null};
@@ -1465,9 +1463,9 @@ function safAcoes(self,v,x){ const st=self.state, step=x.step, ro=x.ro, corr=st.
   g2acoes(v,'aa',c); }
 function openApply(self,ids){ const saf=self.state.saf; if(!saf){ self.setState({g2toast:'Escolha a safra primeiro.'}); return; }
   const safObj=g2rows(self,GR('g_saf')).find(r=>r.id===saf); if(safObj&&safObj.ro){ self.setState({g2toast:'Safra encerrada: somente consulta.'}); return; }
-  const gsel=(g2st(self,'g_cult_'+sk(saf)).sel)||{}; const all=g2rows(self,GR('g_cult_'+sk(saf)));
-  const sel=[...new Set([].concat(...(ids||Object.keys(gsel).filter(k=>gsel[k]&&k.indexOf('livre_')!==0)).map(id=>{ const r=g2find(all,id); return (r&&r.grp)?(r.kids||[]).map(k=>k.id):[id]; })))];
-  if(!sel.length){ self.setState({g2toast:'Selecione cultivos na caixa à esquerda de cada linha para aplicar um plano em lote.'}); return; }
+  const all=g2rows(self,GR('g_cult_'+sk(saf)));
+  const sel=[...new Set([].concat(...(ids||[]).map(id=>{ const r=g2find(all,id); return (r&&r.grp)?(r.kids||[]).map(k=>k.id):[id]; })))];
+  if(!sel.length){ self.setState({g2toast:'Nenhum cultivo sem plano nesta safra.'}); return; }
   // sugestão: o plano mais usado pela mesma cultura nesta safra (a pessoa pode trocar)
   const cs=cultRows(self,saf); const cu=(cs.find(c=>c.id===sel[0])||{v:{}}).v.cult; const uso={};
   cs.forEach(c=>{ const pl=planById(c.v.plano); if(pl&&pl.cultura===cu&&c.v.cult===cu) uso[c.v.plano]=(uso[c.v.plano]||0)+1; });

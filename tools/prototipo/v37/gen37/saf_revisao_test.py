@@ -129,12 +129,10 @@ try:
     botao('Salvar', PAINEL); time.sleep(.4)
     t2 = [(x['v'].get('local'), x['v'].get('cult'), x['v'].get('unm')) for x in folhas('g_cult_S27SF') if x['v'].get('talhao') == 'T2']
     chk('S3.7 gravado com a unidade de mercado de cada cultura', sorted(t2) == [('T2-A', 'Milho', 'sc/ha'), ('T2-B', 'Mamão Formosa', 't/ha/ano')], t2)
-    # ================= S3.8: "Selecionar as N linhas visíveis" =================
+    # ================= S3.8 (13/10/2026): sem caixas de seleção nos cultivos, nem "Selecionar as N linhas visíveis" =================
     abre('#saf=S27SF&passo=cultivos')
-    lab = c.js("(()=>{const b=[...document.querySelectorAll('[role=columnheader] button')].find(b=>/^Selecionar as|^Desmarcar/.test(b.getAttribute('aria-label')||'')); return b?b.getAttribute('aria-label'):'';})()")
-    c.js("(()=>{const b=[...document.querySelectorAll('[role=columnheader] button')].find(b=>/^Selecionar as/.test(b.getAttribute('aria-label')||'')); if(b) b.click();})()"); time.sleep(.5)
-    sel = c.js("(()=>{const s=window.__safSelf.state.g2['g_cult_S27SF'].sel||{}; return Object.keys(s).filter(k=>s[k]).sort();})()")
-    chk('S3.8 "Selecionar as 3 linhas visíveis" marca só os cultivos desta safra (d1, d2, d3)', lab.startswith('Selecionar as 3 linhas visíveis') and sel == ['d1', 'd2', 'd3'], (lab, sel))
+    sx = c.js("(()=>({cx:document.querySelectorAll('[role=table] input[type=checkbox]').length, todas:[...document.querySelectorAll('[role=columnheader] button')].some(b=>/^Selecionar as|^Desmarcar/.test(b.getAttribute('aria-label')||''))}))()")
+    chk('S3.8 sem caixas de seleção nem "Selecionar as N linhas visíveis" na grade de cultivos (pedido do proprietário, 13/10)', sx == {'cx': 0, 'todas': False}, sx)
     # ================= S3.1 e B10: ocorrência depois do fim fora da capacidade =================
     abre('#saf=S27SF&passo=cultivos'); clica_linha('d3'); fset('g_cult_S27SF', 'plantio', '2027-05-20'); salvar(); time.sleep(.3)
     c.js("window.__safSelf.setState({step:3})"); time.sleep(1.2); v = veredito()
@@ -156,7 +154,7 @@ try:
     for k, v in (('cult', 'Milho'), ('var', 'AG 8700'), ('plano', ''), ('plantio', '2027-02-05'), ('meta', '170')): fset(g, k, v)
     salvar(); t = toast(); mid = next((x['id'] for x in folhas(g) if x['v'].get('local') == 'T3' and x['v'].get('cult') == 'Milho'), None)
     chk('E3 preparo: milho sem plano no T3 em 05/02/2027 grava (previsão não trava)', 'Cultivo incluído: T3 inteiro' in t and mid, (alerta(), t))
-    seleciona(mid); botao('Aplicar plano', "document.querySelector('[role=table]').closest('.g2caixa')"); time.sleep(.3)
+    botao('Aplicar plano', f"document.querySelector('[role=row][data-rid=\\'{mid}\\']')"); time.sleep(.3)   # sem caixas de seleção (13/10): o botão da linha
     c.js("(()=>{const e=document.getElementById('ap_sel'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(e,'MILHO-SF'); e.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.4)
     pn = painel()
     chk('E3 prévia do lote: com o plano, o T3 trava (núcleo da soja até 10/02/2027) e "não recebe"; botão conta 0', 'não recebe' in pn and 'Aplicar plano em 0 cultivos' in pn, pn[:500])

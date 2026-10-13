@@ -79,9 +79,10 @@ def build():
     for k in ['S2627','S27SF','S2526','LG2627','NOVA']:
         rows=cult_rows(k)
         ro=(k=='S2526')
-        bulk=f'<button type="button" onClick="{H("ap_bulk")}" style="{_MINIP}">Aplicar plano</button>' if not ro else ''
+        # sem caixas de seleção (proprietário, 13/10/2026): o plano entra pela primária "Aplicar plano em N cultivos" (os sem plano) ou pelo
+        # "Aplicar plano" / "Reaplicar" da linha; trocar o plano de um cultivo é pelo formulário da linha
         g=grid(CULT_COLS,rows,edit=dict(m='form',title='Cultivo',newTitle='Novo cultivo',sub='Altere o cultivo e o plano agronômico e salve.',fields=CULT_FIELDS),
-               sel=not ro,dele=not ro,add=None,bulk=bulk,gid=f'g_cult_{k}',qf=dict(k='sit',l='situação',nivel0=True),total=True,tree=True,x0={})
+               sel=False,dele=not ro,add=None,gid=f'g_cult_{k}',qf=dict(k='sit',l='situação',nivel0=True),total=True,tree=True,x0={})
         cult_html+=f'<sc-if value="{H("cult_"+k)}" hint-placeholder-val="{F()}">{g}</sc-if>'
     # ---------- etapa 3 · rendimentos (uma grade por safra: a edição vale só para a safra aberta; safra encerrada abre só em consulta) ----------
     ops={}
@@ -243,7 +244,7 @@ function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' &&
   self.g2formActs=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultActs(self,gid,r):(String(gid).indexOf('g_rend_')===0?rendActs(self,gid,r):null));
   self.g2check=(gid,rows,r,d,isNew)=>(String(gid).indexOf('g_cult_')===0?cultCheck(self,gid,rows,r,d,isNew):(String(gid).indexOf('g_rend_')===0?(self._conjAntes=(r?String(r.v.conj_id||''):null),opAntes(self,r),rendCheck(self,rows,r,d,isNew)):(String(gid).indexOf('g_recp_')===0?(opAntes(self,r),null):(gid==='g_saf'?safCheck(d):null))));
   self.g2pick=(gid,rid,r)=>{ if(gid==='g_op') abrirRend(self,rid); if(String(gid).indexOf('g_cap_')===0) abrirRec(self,rid); }; }
-const _EV=EXTRAVALS; EXTRAVALS=function(self,v){ _safhooks(self); cenOuvir(self); _EV(self,v); v.ap_bulk=()=>openApply(self,null); };
+const _EV=EXTRAVALS; EXTRAVALS=function(self,v){ _safhooks(self); cenOuvir(self); _EV(self,v); };
 const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)=>rendNova(self,rid); resumoVals(self,v); };   // + Outra configuração e Resumo da safra (etapa 3)'''
     # ---------- corpo ----------
     # UX-ACAO-UNICA-20261003: o cabeçalho do bloco só tem comandos do próprio conteúdo (criar, adicionar, modo de visão); avanço,
