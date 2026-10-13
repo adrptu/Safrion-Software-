@@ -172,7 +172,7 @@ const PlanoReferencia = (() => {
       const id='PLANO:'+chave(c.fazenda,c.safra,p.id);
       if (ids.has(id)) throw new Error('Recibo técnico repetido na trilha.');
       ids.add(id);
-      return {id,sq:p.sq,d:p.em.slice(0,10),at:p.em.slice(11,19),quem:p.por,cmd:'CMD-02',
+      return {id,sq:p.sq,d:p.em.slice(0,10),at:p.em.slice(11,19),ds:'data do registro (UTC)',quem:p.por,cmd:'CMD-02',
         oq:p.id==='R1'?'Publicar referência técnica do plano':'Publicar revisão técnica do plano',
         obj:c.fazenda+' · '+c.safra+' · '+p.id,
         ef:(p.id==='R1'?'Referência original preservada.':'Nova revisão; referência original preservada. Orçamento a revisar.')+' Não autoriza orçamento nem execução de O.S.',

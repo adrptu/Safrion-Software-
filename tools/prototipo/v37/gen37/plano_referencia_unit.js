@@ -240,7 +240,7 @@ teste('trilha: recibo completo usa a identidade, autor, instante e ordem registr
   const p=reciboTrilha(snap([e('C1',{area:10})]),7), antes=JSON.stringify(p), estado=JSON.stringify(__ls);
   const [linha]=PR.trilha([p]);
   assert.equal(linha.quem,p.por);assert.equal(linha.d,'2026-10-13');assert.equal(linha.at,'16:30:00');assert.equal(linha.sq,7);
-  assert.equal(linha.cmd,'CMD-02');assert.equal(linha.h,'SAF.dc.html#saf=S2627');assert.match(linha.ef,/Não autoriza/);
+  assert.equal(linha.ds,'data do registro (UTC)');assert.equal(linha.cmd,'CMD-02');assert.equal(linha.h,'SAF.dc.html#saf=S2627');assert.match(linha.ef,/Não autoriza/);
   assert.equal(JSON.stringify(p),antes);assert.equal(JSON.stringify(__ls),estado);assert.ok(Object.isFrozen(linha));
 });
 teste('trilha: mesmo R1 em contextos diferentes tem identidade distinta e estável',()=>{
