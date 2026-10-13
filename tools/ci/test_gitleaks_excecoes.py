@@ -96,5 +96,40 @@ class IgnoreSoComAchadoExato(unittest.TestCase):
                 self.assertNotIn('*', l)
 
 
+class ExcecaoDaFichaDePivo(unittest.TestCase):
+    """Contrato descoberto pela CI; os scans reais estão na rodada VEL-20261013-01."""
+
+    def excecao(self):
+        cfg = tomllib.loads((RAIZ / '.gitleaks.toml').read_text(encoding='utf-8'))
+        self.assertTrue(cfg['extend']['useDefault'])
+        regra = next(r for r in cfg['rules'] if r['id'] == 'generic-api-key')
+        candidatas = [a for a in regra['allowlists'] if '^talhao-os-ficha-pivo-v1$' in a.get('regexes', [])]
+        self.assertEqual(len(candidatas), 1)
+        return candidatas[0]
+
+    def test_um_literal_dois_arquivos_e_duas_condicoes(self):
+        a = self.excecao()
+        self.assertEqual(a['condition'], 'AND')
+        self.assertEqual(a['regexTarget'], 'secret')
+        self.assertEqual(a['regexes'], ['^talhao-os-ficha-pivo-v1$'])
+        self.assertEqual(a['paths'], [r'^tools/prototipo/v37/gen37/ficha_pivo\.py$',
+                                      r'^tools/prototipo/v37/gen37/irrigacao_estado\.js$'])
+
+    def test_limites_do_valor_e_do_caminho(self):
+        a = self.excecao()
+        segredo = re.compile(a['regexes'][0])
+        caminhos = [re.compile(p) for p in a['paths']]
+        literal = 'talhao-os-ficha-pivo-v1'
+        self.assertTrue(segredo.search(literal))
+        for outro in ('talhao-os-ficha-pivo-v2', 'Q9x7-' + literal, literal + '-7zW2', 'ghp_' + 'A' * 36):
+            self.assertIsNone(segredo.search(outro), outro)
+        for arquivo in ('ficha_pivo.py', 'irrigacao_estado.js'):
+            dentro = PREFIXO + arquivo
+            self.assertTrue(any(c.search(dentro) for c in caminhos), dentro)
+            for fora in (dentro + '.bak', 'backup/' + dentro, dentro.replace('gen37/', 'gen370/'),
+                         dentro.replace('.', 'X'), PREFIXO + 'outra_ficha.py'):
+                self.assertFalse(any(c.search(fora) for c in caminhos), fora)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -22,6 +22,7 @@ Base do retrato histórico abaixo: 09/10/2026, Claude, `main` `266a682`. Estados
 
 ## Verificação executada e limite
 
+- **VEL-20261013-01 (PR #53 integrado pelo Claude em `999b0d0`, autoria Codex):** autorização direta de Adrianus para a exceção da chave localStorage da ficha de pivô, limitada a um literal e dois arquivos, e para AGENTS §3.5/3.6. Gitleaks 8.30.1: 30/30 scans sintéticos executados; [fonte, brutos e reprodução](parceria/rodadas/VEL-20261013-01/README.md). Complemento em revisão: contrato dos limites na descoberta existente da CI (7/7 testes e sete contraprovas executados) e este registro. Próximo passo: Claude revisa/integra o complemento após os checks e confere a composição real antes de publicar suas branches. Sem custo novo, publicação de produto ou conclusão de CTL-4/v56 por este incremento. Estado posterior no checkpoint único.
 - PR #14, candidata `a1c880e`: 10 checks com success; 247 testes unitários; integração com PostgreSQL real, 171 testes em 16 arquivos, nenhum pulado; jornadas de navegador no desktop e no celular; imagens com SBOM; Terraform validado sem credencial.
 - PR #15, candidata `b300f6ad`: 10 checks com success, inclusive a regressão da proteção da `main` (`tools/ci/test_protecao_main.py`); simulação contra o GitHub real só com leitura.
 - CI verde não prova operação hospedada, login com provedor real na homologação nem restauração de backup.

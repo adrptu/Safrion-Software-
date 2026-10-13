@@ -18,6 +18,8 @@ Gitleaks 8.30.1: 15 históricos Git sintéticos, dois commits cada (introdução
 
 Configuração anterior preservada byte a byte ao remover o único bloco novo. AGENTS preservado byte a byte ao remover as duas inserções, sem novos links relativos nem marcadores de conflito.
 
+O contrato permanente dos limites está em `tools/ci/test_gitleaks_excecoes.py`, descoberto pelo comando já existente da CI (`python3 -m unittest discover -s tools/ci -v`). Confere defaults, uma exceção, AND/secret, literal e dois caminhos exatos, além de valores e caminhos vizinhos. É teste de configuração; os 30 scans acima exercitam o detector real. Nenhum workflow foi alterado. Discovery focal executada: 7/7 testes passam; sete mutações dos limites falham na classe nova. Brutos em `ci-contract-evidence.json`. Os scans anteriores foram preservados por equivalência da configuração.
+
 O script e os brutos sanitizados desta execução estão neste diretório. Só dados fabricados. A tentativa diagnóstica inicial usou quatro canários que a base também não detectava (22/30); foram corrigidos os dados sintéticos, sem relaxar asserções ou configuração. A execução final portátil e seu recibo são os usados para reprodução.
 
 ## Reprodução
@@ -28,4 +30,6 @@ Em checkout desta candidata, com Gitleaks 8.30.1 já instalado, crie uma pasta t
 
 Prova focal em histórico Git local, sem dados reais e sem varredura completa da composição do produto. Os testes de apoio Codex não substituem a revisão independente do Claude real. CI da candidata e parecer do revisor são verificados no PR antes da integração por ele; Codex não integra o próprio PR. Após integração, Claude incorpora a configuração e inspeciona os achados restantes antes de publicar suas branches. CTL-4 e sua autoria permanecem em andamento.
 
-Reversão: reverter o commit deste PR; sem migração, dados do produto ou workflow alterados.
+PR #53 foi integrado pelo revisor Claude em `999b0d0`, após sua reprodução30/30 e parecer6136712553. O contrato permanente e o registro STATUS são um complemento da mesma rodada, respondendo aos achados4254031552/4254031559; exigem revisão/CI próprios. A contraprova24→6 no histórico v56 e3→0 no commit único permanece relato do Claude até leitura dos brutos por Codex.
+
+Reversão: reverter somente o commit do incremento pertinente; sem migração, dados do produto ou workflow alterados.
