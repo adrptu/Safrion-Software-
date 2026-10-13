@@ -1,0 +1,22 @@
+df0f272 VISOES-1: correções da revisão · rolagem da volta reafirmada como o foco (A4)
+build · exit=0 · 3s · FALHA=0 · 135 artboards → /home/user/sp-vis/tools/prototipo/v37/gen37/project · menu vigente: 42 · ocultos: 93
+montar · exit=0 · 1s · _render montado: 142 páginas + 20 arquivos do site · dados da Lagoa Grande: sintéticos 5/5
+visoes_unit · exit=0 · 2s ·    TOTAL 30 · OK 30 · FALHAS 0 RESULTADO: OK 22/22 
+visoes_comp · exit=0 · 57s · RESULTADO: 9 ok · 0 falhas (comp) 
+visoes_celular · exit=0 · 73s · RESULTADO: 9 ok · 0 falhas (celular) 
+visoes_e2e · exit=0 · 672s · RESULTADO: 38 ok · 0 falhas (e2e) 
+visoes_e7 · exit=0 · 17s · CLIQUES · tela: seletor · A (filtrar → agrupar → abrir → voltar e estar agrupado): 5 (dos quais 0 para reagrupar) · B (outra entrada até agrupado): 1 (dos quais 1 para entrar) RESULTADO: 2 ok · 0 falhas (e7) 
+varredura · exit=0 · 445s · RESULTADO: 142/142 páginas sem erro
+ostest · exit=0 · 48s · 32 ok · 1 falhas ['painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo']
+tabelas_os · exit=0 · 54s · RESULTADO: 38/38 ok
+os_irrig_filtro · exit=0 · 60s · RESULTADO: 15 ok · 0 falhas
+os_v39_bloq · exit=0 · 21s · RESULTADO: 12/12 ok
+os_v39_selo_agua · exit=0 · 17s · RESULTADO: 12/12 ok
+os_cenario · exit=1 · 49s · RESULTADO: 20/21 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov
+t12 · exit=0 · 19s · 
+au_familias · exit=0 · 81s · RESULTADO: 8 ok · 0 falhas (familias)
+au_v3 · exit=0 · 127s · RESULTADO: 10 ok · 0 falhas (v3)
+dup · exit=0 · 7s · RESULTADO: 3 páginas · 0 com ação repetida · erros 0
+componentes_matriz · exit=0 · 98s · RESULTADO: 3 ok · 0 falhas (matriz)
+etapas_celular · exit=0 · 45s · RESULTADO: 14 ok · 0 falhas (celular)
+links_ocultos · exit=0 · 2s · TOTAL 11 · falhas 0

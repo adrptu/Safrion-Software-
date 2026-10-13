@@ -1,0 +1,4 @@
+componentes_matriz (depois, 2ª execução) · exit=1 · RESULTADO: 2 ok · 1 falhas (matriz)
+ds_test parte A (depois, 2ª execução) · exit=0 · RESULTADO: OK 7/7
+FIM
+componentes_matriz (_render ANTES, sob a mesma carga) · exit=0 · RESULTADO: 3 ok · 0 falhas (matriz)

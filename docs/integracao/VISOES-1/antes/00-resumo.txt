@@ -1,0 +1,17 @@
+varredura · exit=0 · 365s · RESULTADO: 142/142 páginas sem erro
+ostest · exit=0 · 25s · 32 ok · 1 falhas ['painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo']
+tabelas_os · exit=0 · 33s · RESULTADO: 38/38 ok
+os_irrig_filtro · exit=0 · 42s · RESULTADO: 15 ok · 0 falhas
+os_v39_bloq · exit=0 · 14s · RESULTADO: 12/12 ok
+os_v39_selo_agua · exit=0 · 12s · RESULTADO: 12/12 ok
+os_cenario · exit=1 · 39s · RESULTADO: 20/21 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov
+t12 · exit=0 · 18s · 
+au_familias · exit=0 · 60s · RESULTADO: 8 ok · 0 falhas (familias)
+au_v3 · exit=0 · 106s · RESULTADO: 10 ok · 0 falhas (v3)
+dup · exit=0 · 7s · RESULTADO: 3 páginas · 0 com ação repetida · erros 0
+componentes_matriz · exit=0 · 77s · RESULTADO: 3 ok · 0 falhas (matriz)
+etapas_celular · exit=0 · 45s · RESULTADO: 14 ok · 0 falhas (celular)
+links_ocultos · exit=0 · 1s · TOTAL 11 · falhas 0
+ds · exit=0 · 322s · RESULTADO: OK 69/69
+ds_unit · exit=1 · 0s · RESULTADO: FALHOU 27/28
+ben_fluxo · exit=0 · 602s · RESULTADO: OK 172/172

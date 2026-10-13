@@ -1,0 +1,8 @@
+FALHA C1 barra role=toolbar "Visão das ordens" à direita dos filtros: 4 botões data-visao (lista, agrupada, kanban, carga), aria-label "Ver em …", sem texto visível nem title, svg aria-hidden · None
+FALHA C2 exatamente um aria-pressed="true" (Lista ao entrar); o ativo é tonal (fundo #E4F3E9, barra interna de 2 px), nunca rgb(30, 122, 76); 32 × 32 px no computador · [['sem barra'], []]
+FALHA C3 (exceção) · RuntimeError("TypeError: Cannot read properties of null (reading 'focus')\n    at <anonymous>:1:60")
+FALHA C4 (exceção) · TypeError("'NoneType' object is not subscriptable")
+FALHA C5 em cada visão (1440): só "Nova ordem" como primária, 0 duplicata (acoes_duplicadas) e nenhum [draggable=true] · {'lista': (['Nova ordem'], 0, 0, ''), 'agrupada': (['Nova ordem'], 0, 0, ''), 'kanban': (['Nova ordem'], 0, 0, ''), 'carga': (['Nova ordem'], 0, 0, '')}
+FALHA C6 (exceção) · RuntimeError("TypeError: Cannot read properties of null (reading 'cloneNode')\n    at <anonymous>:1:86\n    at <anonymous>:1:187")
+OK   sem erro de script nas páginas
+RESULTADO: 1 ok · 6 falhas (comp) · FALHAS: C1 barra role=toolbar "Visão das ordens" à direita dos filtros: 4 botões data-visao (lista, agrupada, kanban, carga), aria-label "Ver em …", sem texto visível nem title, svg aria-hidden | C2 exatamente um aria-pressed="true" (Lista ao entrar); o ativo é tonal (fundo #E4F3E9, barra interna de 2 px), nunca rgb(30, 122, 76); 32 × 32 px no computador | C3 (exceção) | C4 (exceção) | C5 em cada visão (1440): só "Nova ordem" como primária, 0 duplicata (acoes_duplicadas) e nenhum [draggable=true] | C6 (exceção)

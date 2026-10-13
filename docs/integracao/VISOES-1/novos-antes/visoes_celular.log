@@ -1,0 +1,6 @@
+FALHA M1 alvos ≥ 44 × 44 px a 390 px com toque (pointer:coarse) e sem toque (janela de 390 px com mouse) · [[], [], []]
+FALHA M2 (exceção) · TypeError("'NoneType' object is not subscriptable")
+FALHA M3 390 px, em cada visão: nada cortado, sem rolagem lateral, título e "Nova ordem" alcançáveis (MEDE/resumo vazio), uma primária e 0 duplicata · {'lista': ([], ['Nova ordem'], 0, ''), 'agrupada': ([], ['Nova ordem'], 0, ''), 'kanban': ([], ['Nova ordem'], 0, ''), 'carga': ([], ['Nova ordem'], 0, '')}
+FALHA M4 (exceção) · TypeError("'NoneType' object is not subscriptable")
+OK   sem erro de script nas páginas
+RESULTADO: 1 ok · 4 falhas (celular) · FALHAS: M1 alvos ≥ 44 × 44 px a 390 px com toque (pointer:coarse) e sem toque (janela de 390 px com mouse) | M2 (exceção) | M3 390 px, em cada visão: nada cortado, sem rolagem lateral, título e "Nova ordem" alcançáveis (MEDE/resumo vazio), uma primária e 0 duplicata | M4 (exceção)

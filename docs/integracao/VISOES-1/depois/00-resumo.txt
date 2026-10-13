@@ -1,0 +1,19 @@
+build · exit=0 · FALHA=0 · 135 artboards → /home/user/sp-vis/tools/prototipo/v37/gen37/project · menu vigente: 42 · ocultos: 93
+montar · exit=0 · _render montado: 142 páginas + 20 arquivos do site · dados da Lagoa Grande: sintéticos 5/5
+varredura · exit=0 · 416s · RESULTADO: 142/142 páginas sem erro
+ostest · exit=0 · 39s · 32 ok · 1 falhas ['painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo']
+tabelas_os · exit=0 · 49s · RESULTADO: 38/38 ok
+os_irrig_filtro · exit=0 · 60s · RESULTADO: 15 ok · 0 falhas
+os_v39_bloq · exit=0 · 22s · RESULTADO: 12/12 ok
+os_v39_selo_agua · exit=0 · 17s · RESULTADO: 12/12 ok
+os_cenario · exit=1 · 62s · RESULTADO: 20/21 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov
+t12 · exit=0 · 34s · 
+au_familias · exit=0 · 104s · RESULTADO: 8 ok · 0 falhas (familias)
+au_v3 · exit=0 · 204s · RESULTADO: 10 ok · 0 falhas (v3)
+dup · exit=0 · 13s · RESULTADO: 3 páginas · 0 com ação repetida · erros 0
+componentes_matriz · exit=1 · 172s · RESULTADO: 2 ok · 1 falhas (matriz)
+etapas_celular · exit=0 · 50s · RESULTADO: 14 ok · 0 falhas (celular)
+links_ocultos · exit=0 · 2s · TOTAL 11 · falhas 0
+ds · exit=1 · 607s · RESULTADO: FALHOU 68/69
+ds_unit · exit=1 · 1s · RESULTADO: FALHOU 27/28
+ben_fluxo · exit=0 · 712s · RESULTADO: OK 172/172

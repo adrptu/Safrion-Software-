@@ -1,0 +1,54 @@
+   FALHOU U1 ?view=agrupada vence a preferência kanban (fonte url, sem aviso) · erro: g2visaoInicial ausente no g2lib
+   FALHOU U2 ?view=mapa (fora das válidas da O.S.) abre a preferência kanban, com aviso sem o valor cru · erro: g2visaoInicial ausente no g2lib
+   FALHOU U2b ?view=<script> sem preferência abre a Lista e o aviso não traz o valor · erro: g2visaoInicial ausente no g2lib
+   FALHOU U3 preferência antiga (calendario, não válida na O.S.) abre a Lista · erro: g2visaoInicial ausente no g2lib
+   FALHOU U3b preferência de lixo ("KANBAN") abre a Lista · erro: g2visaoInicial ausente no g2lib
+   FALHOU U4 sem URL e sem preferência: Lista, sem aviso · erro: g2visaoInicial ausente no g2lib
+   FALHOU U4b ?view= vazio: aviso e precedência (preferência kanban) · erro: g2visaoInicial ausente no g2lib
+   FALHOU U4c sem ?view a preferência vale (kanban) · erro: g2visaoInicial ausente no g2lib
+   FALHOU U5 KANBAN, kanbán, <x>, "kanban " e "kanban1" são inválidos · erro: g2visaoValida ausente no g2lib
+   FALHOU U6 #OS-0420 fica: /OS.dc.html?view=agrupada#OS-0420 · erro: g2visaoUrl ausente no g2lib
+   FALHOU U6b ?theme=dark e #tal=Santa Rita|T1 ficam · erro: g2visaoUrl ausente no g2lib
+   FALHOU U6c escolher a Lista grava ?view=lista (não tira o parâmetro) · erro: g2visaoUrl ausente no g2lib
+   FALHOU U6d sem visão (k vazio) tira só o view; os outros parâmetros ficam · erro: g2visaoUrl ausente no g2lib
+   FALHOU U6e ida e volta: o endereço gravado reabre na mesma visão e preserva theme · erro: g2visaoUrl ausente no g2lib
+   FALHOU U6f (Codex, item 1) preferência kanban → escolher Lista → F5: abre a Lista · erro: g2visaoUrl ausente no g2lib
+   FALHOU U7 → com volta (3 → 0), ← com volta (0 → 3), Home 0 e End 3 · erro: g2visaoTecla ausente no g2lib
+   FALHOU U7b ↑ e ↓ não movem na barra; no "mais", ↓ abre o menu · erro: g2visaoTecla ausente no g2lib
+   FALHOU U7c Enter, Espaço e outras teclas devolvem nulo (ativar é do botão); nenhuma seta ativa · erro: g2visaoTecla ausente no g2lib
+   FALHOU U8 chave por perfil × entidade com o prefixo safrion.pref.visao: · erro: g2visaoChave ausente no g2lib
+   FALHOU U8b armazenamento que lança: ler devolve nulo e a entrada abre a Lista, sem erro · erro: g2visaoPrefLer ausente no g2lib
+   FALHOU U8c gravar com armazenamento que lança não quebra e vale na memória da tela · erro: g2visaoPrefGrava ausente no g2lib
+   FALHOU U9 até 3 visões: todas na barra, sem "mais" · erro: g2visoesCelular ausente no g2lib
+   FALHOU U9b 4 visões: 3 na barra + "mais" com a Carga · erro: g2visoesCelular ausente no g2lib
+   FALHOU U9c ativa dentro do "mais" (carga) marca o "mais" · erro: g2visoesCelular ausente no g2lib
+   FALHOU U9d uma visão só: nada (sem barra) · erro: g2visoesCelular ausente no g2lib
+   FALHOU V1 mesma aba (marca do detalhe = contexto e história > 1): history.back() · erro: g2voltaDecide ausente no g2lib
+   FALHOU V2 nova aba (history.length = 1, sem marca): destino canônico com ?view · erro: g2voltaDecide ausente no g2lib
+   FALHOU V3 referrer sem histórico comprovado (marca de outro contexto): canônico, nunca back · erro: g2voltaDecide ausente no g2lib
+   FALHOU V4 link para outra lista ou contexto inválido (arquivo, entidade, visão): o link segue como está · erro: g2voltaDecide ausente no g2lib
+   TOTAL 29 · OK 0 · FALHAS 29
+FALHOU 1 node visoes_unit.js (U1–U9, V1–V4) · history.length = 1, sem marca): destino canônico com ?view · erro: g2voltaDecide ausente no g2lib
+FALHOU V3 referrer sem histórico comprovado (marca de outro contexto): canônico, nunca back · erro: g2voltaDecide ausente no g2lib
+FALHOU V4 link para outra lista ou contexto inválido (arquivo, entidade, visão): o link segue como está · erro: g2voltaDecide ausente no g2lib
+TOTAL 29 · OK 0 · FALHAS 29
+
+FALHOU P1 validas(os) = lista, agrupada, kanban, carga; cada visão com os atributos que EXIGE pede, com fonte; cortes com motivo (Mapa: DEC-2609-09) · ['visoes.py ausente']
+FALHOU P2 negativos: sem data sem Calendário; sem início e fim sem Timeline; sem geometria sem Mapa; sem fluxo sem Kanban; sem somável sem Agrupada; sem pai/filho sem Árvore; sem foto sem Galeria · ['visoes.py ausente']
+FALHOU P2b uma visão só: sem barra (devolve só o painel) · componente ausente
+FALHOU P3 painel para visão não sustentada, painel faltando ou apelido sem painel e visão sem fonte fazem o build falhar (ValueError) · ['componente ausente']
+FALHOU C0 componente do seletor (engine.visoes) · ausente
+FALHOU C0b componente do seletor (engine.visoes) · ausente
+FALHOU C0c componente do seletor (engine.visoes) · ausente
+FALHOU C0d componente do seletor (engine.visoes) · ausente
+FALHOU C0e componente do seletor (engine.visoes) · ausente
+FALHOU C0f componente do seletor (engine.visoes) · ausente
+FALHOU M1 mutante "precedência invertida" (preferência antes da URL) fica vermelho · sem a regra
+FALHOU M2 mutante "seta que ativa" fica vermelho · sem a regra
+FALHOU M3 mutante "aria-pressed ausente" · componente ausente
+FALHOU M4 mutante "Calendário aceito sem data" · visoes.py ausente
+FALHOU B1 só a O.S. tem o seletor nesta fatia, com as 4 visões; G2_VISOES vai na página · []
+FALHOU B2 um caminho só: o botão "Agrupar por talhão" (os_agrgo) e as abas de texto Lista | Kanban | Recursos saíram
+OK  B3 nenhum arrastar (Kanban e Carga sem draggable)
+OK  B4 telas com seletor: nenhuma escrita de URL que apague a query (?view)
+RESULTADO: FALHOU 2/19

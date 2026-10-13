@@ -1,0 +1,6 @@
+visoes_e2e · exit=0 · 223s · RESULTADO: 30 ok · 0 falhas (e2e)
+ostest · exit=0 · 30s · 32 ok · 1 falhas ['painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo']
+os_cenario · exit=1 · 43s · RESULTADO: 20/21 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov
+tabelas_os · exit=0 · 36s · RESULTADO: 38/38 ok
+t12 · exit=0 · 17s · 
+os_v39_bloq · exit=0 · 17s · RESULTADO: 12/12 ok

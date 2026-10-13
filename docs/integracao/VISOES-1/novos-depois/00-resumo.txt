@@ -1,0 +1,5 @@
+visoes_unit · exit=0 · 1s · RESULTADO: OK 19/19
+visoes_comp · exit=0 · 32s · RESULTADO: 7 ok · 0 falhas (comp) 
+visoes_celular · exit=0 · 29s · RESULTADO: 5 ok · 0 falhas (celular) 
+visoes_e2e · exit=0 · 255s · RESULTADO: 30 ok · 0 falhas (e2e) 
+visoes_e7 · exit=0 · 17s · CLIQUES · tela: seletor · A (filtrar → agrupar → abrir → voltar e estar agrupado): 5 (dos quais 0 para reagrupar) · B (outra entrada até agrupado): 1 (dos quais 1 para entrar) RESULTADO: 2 ok · 0 falhas (e7) 

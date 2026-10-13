@@ -1,0 +1,2 @@
+mutante pushState aplicado em /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/visoes/f1r/render_mut_push/OS.dc.html
+mutante push · E5 · exit=1 · 21s · RESULTADO: 2 ok · 1 falhas (e2e) · FALHAS: E5b 8 trocas de visão não mudam history.length e o Voltar do navegador sai da O.S. (para a tela anterior, Main) 
