@@ -1,6 +1,8 @@
 name: Revisão do Codex
 
 # Portão do merge automático: o check só fica verde quando o Codex concluiu a revisão do commit atual do PR.
+# Limite: o PR ainda pode alterar este workflow (todo check de pull_request tem esse limite). Por isso mudança em
+# .github/workflows/ ou tools/github/ não usa auto-merge (AGENTS.md 3).
 # Enquanto o Codex não termina, o check falha com o motivo; revisao-codex-reacionar.yml roda de novo quando o
 # resumo do Codex muda. Na main (push), passa direto: a revisão já foi exigida no PR (cloudshell.sh conferir lê os
 # checks obrigatórios no commit da main).
@@ -24,7 +26,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      # O avaliador vem da base do PR, não do PR: trocar revisao_codex.py no PR não muda o portão deste PR.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+          persist-credentials: false
       - name: Conferir o resumo do Codex
         env:
           GH_TOKEN: ${{ github.token }}
@@ -32,6 +38,7 @@ jobs:
           PR: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
+          [ -f tools/github/revisao_codex.py ] || { echo "A base do PR ainda não tem tools/github/revisao_codex.py." >&2; exit 1; }
           if [ "$EVENTO" = pull_request ]; then
             gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments?per_page=100" --jq '.[]' >"$RUNNER_TEMP/comentarios.jsonl"
             python3 tools/github/revisao_codex.py --evento "$EVENTO" --head "$HEAD_SHA" --comentarios "$RUNNER_TEMP/comentarios.jsonl"
