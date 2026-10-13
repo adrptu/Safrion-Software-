@@ -673,8 +673,8 @@ const ocd=done&&(c.ocorr||[]).find(x=>x.id===done); DCH(v,'hdr',done?(ocd&&!ocd.
       # (revisão do CTL-4, S4: congelar reservas sem conflito travaria a entrega da OS-0424 à toa).
       + IF('mbfa_conf',card(f'Conflito de reserva · lote {F02["lote"]} · {F02["item"]}',[
           kv('Saldo',H('mbfa_saldo')),
-          kv('Conflito','a demanda da safra pede '+H('mbfa_plan')+' de hoje em diante · pendência de compra de '+H('mbfa_pend')+' (complemento no Planejar safra)'),
-          chips(chip('Conflito · decide o planejamento','red')),
+          kv('Conflito','a demanda da safra pede '+H('mbfa_plan')+' de hoje em diante · pendência de compra de '+H('mbfa_pend')+' (complemento no Planejar safra)'+H('mbfa_condc')),
+          chips(chip('Conflito · decide o planejamento','red')+IF('mbfa_cond',chip(H('mbfa_condt'),'yellow'))),   # falta firme + qualidade pendente (revisão do 16fb55e, ajuste 1)
           btns(say('Registrar divergência','Divergência registrada com dono (planejamento) e prazo · reservas congeladas até a decisão — nada foi entregue.','alert','Registrar a divergência física do lote'))],state='red'))
       + IF('mbfa_ok',card(f'Reserva da safra · lote {F02["lote"]} · {F02["item"]}',[
           kv('Saldo',H('mbfa_saldo')),
@@ -686,6 +686,7 @@ const ocd=done&&(c.ocorr||[]).find(x=>x.id===done); DCH(v,'hdr',done?(ocd&&!ocd.
 {{ const fa=demViva('Fungicida A')||{{liq:0,cond:0,bruta:0}}; const lf=c.lotes['Fungicida A|F26-02']||{{fisico:0,reservado:0,quarentena:0}};   /* a mesma demanda do Planejar safra e da Compra, viva */
   const n1=(x)=>Number(x||0).toLocaleString('pt-BR',{{minimumFractionDigits:1,maximumFractionDigits:1}})+' L';   /* o mesmo formato do Planejar safra e do SU-03det */
   v.mbfa_conf=fa.liq>0.05; v.mbfa_ok=!v.mbfa_conf; v.mbfa_cond=fa.cond>0.05; v.mbfa_semp=!v.mbfa_cond; v.mbfa_plan=n1(fa.bruta); v.mbfa_pend=n1(fa.liq); v.mbfa_condq=n1(fa.cond); v.mbfa_condt='Qualidade pendente · '+n1(fa.cond);
+  v.mbfa_condc=v.mbfa_cond?(' · mais '+n1(fa.cond)+' dependem do laudo da quarentena (fora da compra; o gestor libera ou reprova no Estoque)'):'';
   v.mbfa_okt=v.mbfa_cond?(n1(fa.cond)+' dependem do laudo da quarentena; sem nova compra automática'):'sem pendência de compra: o estoque apto cobre';
   v.mbfa_saldo=cenNum(lf.fisico)+' L físicos · '+cenNum(lf.reservado)+' L reservados'+(lf.quarentena>1e-9?' · '+cenNum(lf.quarentena)+' L em quarentena':'')+' · '+cenNum(cenDisp(lf))+' L livres'; }}
 [0,1].forEach(i=>{{ v['role'+i]=()=>self.setState({{role:i}}); v['rs'+i]='font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 0; cursor: pointer; white-space: nowrap; '+(((s.role||0)===i)?'background: {SURF}; color: {INK}; box-shadow: 0 1px 2px rgba(21,32,26,.12);':'background: transparent; color: {MUTED};'); }});

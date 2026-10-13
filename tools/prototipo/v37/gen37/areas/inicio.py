@@ -873,7 +873,7 @@ function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=M.
     P.secs.push(SEC(self,l,'sat','Satélite',sum,{kv,items,note,lk:'AG-06.dc.html',lkt:'Ver histórico do talhão'})); }
   // insumos
   { const fi=flt(self,'Insumos'); const its=necAgg(t,fi.per); const st=insFaz().st[fi.per]||{};
-    const items=its.map(x=>{ const s=st[x.p]||['—','gray','']; return {t:x.p+' · '+nfx(x.q,x.q%1?1:0)+' '+x.un,sub:'a partir de '+brIso(x.dt)+' · '+x.orig[0]+(x.orig.length>1?' +'+(x.orig.length-1):'')+' · '+s[2],ch:[CH(s[0],s[1]==='ok'?'green':s[1])],
+    const items=its.map(x=>{ const s=st[x.p]||['—','gray','']; return {t:x.p+' · '+nfx(x.q,x.q%1?1:0)+' '+x.un,sub:'a partir de '+brIso(x.dt)+' · '+x.orig[0]+(x.orig.length>1?' +'+(x.orig.length-1):'')+' · '+s[2],ch:[CH(s[0],s[1]==='ok'?'green':s[1])].concat(s[3]?[CH(s[3],'yellow')]:[]),   /* falta firme + qualidade pendente: os dois à vista, uma ação (revisão do 16fb55e, ajuste 1) */
       acts:s[1]==='red'?[A('Comprar',{h:'CMP.dc.html',ic:'cart',tt:'Abrir Compra de insumos'})]:[]}; });
     const reqs=[]; osMapa(t).forEach(o=>{ if(!o.r||!o.r.itens||!o.r.itens.length||['Encerradas','Canceladas'].indexOf(o.etapa)>=0) return;
       o.r.itens.forEach(i=>reqs.push({t:o.r.id+' · '+o.id+' · '+i.prod,sub:'reservado '+nd(i.solicitado)+' '+i.un+' · lote '+i.lote+' · entregue '+nd(i.entregue)+' · em custódia '+nd(i.custodia)+' · consumido '+nd(i.consumido),ch:[CH(i.custodia>0.001?'em custódia':(i.entregue>0?'entregue':'reservado'),i.custodia>0.001?'yellow':'gray')],acts:[]})); });

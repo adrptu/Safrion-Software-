@@ -495,19 +495,21 @@ function PREVALS(self,v){ const x=faViva(); const rs=RW(self,'g_lot'); const R_=
   F.v.q=L.fisico; F.p.q=[B(nf(L.fisico)+' L')]; F.p.sit=[T('validade 03/2028 · NF 4390')].concat(L.quarentena>1e-9?[BRK,chipc(nf(L.quarentena)+' L em quarentena · aguardam laudo','yellow')]:[]);
   O.v.q=x.res; O.p.q=[T(x.res>1e-9?nf(x.res)+' L':'—')]; O.p.sit=x.res>1e-9?[chipc('Confirmada · recibo RS-7741','green')]:[M('sem reserva presa (entregue ou cancelada)')];
   U.v.q=Math.round(x.bruta*10)/10; U.p.q=[T(nf(x.bruta,1)+' L')];
-  U.p.sit=x.liq>0.05?[chipc('Falta '+nf(x.liq,1)+' L','yellow')]:(x.cond>0.05?[chipc('Qualidade pendente · '+nf(x.cond,1)+' L','yellow')]:[chipc('Coberto pelo lote','green')]);
+  /* falta firme e qualidade pendente juntas: as duas à vista, a ação segue a da compra firme (revisão do 16fb55e, ajuste 1) */
+  const QP=x.cond>0.05?[chipc('Qualidade pendente · '+nf(x.cond,1)+' L','yellow')]:[];
+  U.p.sit=x.liq>0.05?[chipc('Falta '+nf(x.liq,1)+' L','yellow')].concat(QP):(x.cond>0.05?QP:[chipc('Coberto pelo lote','green')]);
   U.o=[{t:'O.S. abertas pelo que falta tirar do almoxarifado: '+nf(x.qos,1)+' L'+(x.oss?' ('+x.oss+')':'')},{t:'Plano sem O.S. (sem a parte que as ordens já cobrem): '+nf(x.qpl,1)+' L'},{t:'Abrir a demanda no Planejar safra',h:'SAF.dc.html#saf=S2627&passo=demanda'}];
   Dp.v.q=x.disp; Dp.p.q=[B(nf(x.disp)+' L')]; Dp.o=[{t:'Físico '+nf(L.fisico)+' − bloqueado '+nf(L.quarentena)+' − reservado '+nf(L.reservado)+' = '+nf(x.disp)+' L'}];
   Pe.v.q=x.liq; Pe.p.q=[T(x.liq>0.05?nf(x.liq,1)+' L':'—')];
-  Pe.p.sit=x.liq>0.05?[chipc('Pendência de compra · '+nf(x.liq,1)+' L','yellow'),{k:'link',t:'Ver no Planejar safra',h:'SAF.dc.html#saf=S2627&passo=demanda'}]
+  Pe.p.sit=x.liq>0.05?[chipc('Pendência de compra · '+nf(x.liq,1)+' L','yellow')].concat(QP.length?QP.concat([M('fora da compra · o gestor libera ou reprova no Estoque')]):[]).concat([{k:'link',t:'Ver no Planejar safra',h:'SAF.dc.html#saf=S2627&passo=demanda'}])
     :(x.cond>0.05?[chipc('Qualidade pendente · '+nf(x.cond,1)+' L','yellow'),M('condicionada ao laudo · sem nova compra automática')]:[chipc('Sem pendência de compra','green')]);
-  Pe.o=[{t:'A Compra de insumos e o Planejar safra leem a mesma demanda: '+(x.liq>0.05?'faltam '+nf(x.liq,1)+' L de Fungicida A nesta safra':(x.cond>0.05?nf(x.cond,1)+' L dependem do laudo da quarentena':'o estoque apto cobre o Fungicida A desta safra'))},{t:'Abrir a Compra de insumos',h:'CMP.dc.html'}]; }
+  Pe.o=[{t:'A Compra de insumos e o Planejar safra leem a mesma demanda: '+(x.liq>0.05?'faltam '+nf(x.liq,1)+' L de Fungicida A nesta safra'+(x.cond>0.05?'; mais '+nf(x.cond,1)+' L dependem do laudo da quarentena (fora da compra, sem nova compra automática)':''):(x.cond>0.05?nf(x.cond,1)+' L dependem do laudo da quarentena':'o estoque apto cobre o Fungicida A desta safra'))},{t:'Abrir a Compra de insumos',h:'CMP.dc.html'}]; }
 function EXTRAVALS(self,v){ cenOuvir(self); const x=faViva();
   if(x.liq>0.05) hstatus(v,'Pendência de compra · '+nf(x.liq,1)+' L','yellow'); else if(x.cond>0.05) hstatus(v,'Qualidade pendente · '+nf(x.cond,1)+' L','yellow'); else hstatus(v,'Sem conflito · livre '+nf(x.disp)+' L','green');
-  v.ct_falta=x.liq>0.05?('Comprar '+nf(x.liq,1)+' L (complemento no Planejar safra)'):(x.cond>0.05?('Laudo da quarentena ('+nf(x.cond,1)+' L condicionados)'):'Nada a decidir');
+  v.ct_falta=x.liq>0.05?('Comprar '+nf(x.liq,1)+' L (complemento no Planejar safra)'+(x.cond>0.05?' · mais '+nf(x.cond,1)+' L aguardam o laudo da quarentena (o gestor libera ou reprova no Estoque)':'')):(x.cond>0.05?('Laudo da quarentena ('+nf(x.cond,1)+' L condicionados)'):'Nada a decidir');
   v.ct_prox=x.liq>0.05?'Enviar o complemento no Planejar safra':(x.cond>0.05?'O gestor libera ou reprova a qualidade no Estoque':'Acompanhar as O.S. da safra');
   v.tl=[{t:'23/09 10:02:01 · OS-0424 pede 65 L → confirmada (recibo RS-7741)'},{t:'23/09 10:04 · reenvio da OS-0424 devolve o mesmo recibo RS-7741, sem nova dedução'},
-        {t:'demanda única de agora: uso da safra de hoje em diante '+nf(x.bruta,1)+' L · '+(x.liq>0.05?'faltam '+nf(x.liq,1)+' L':(x.cond>0.05?nf(x.cond,1)+' L condicionados ao laudo':'o lote cobre'))}]; }""")
+        {t:'demanda única de agora: uso da safra de hoje em diante '+nf(x.bruta,1)+' L · '+(x.liq>0.05?'faltam '+nf(x.liq,1)+' L'+(x.cond>0.05?' + '+nf(x.cond,1)+' L condicionados ao laudo':''):(x.cond>0.05?nf(x.cond,1)+' L condicionados ao laudo':'o lote cobre'))}]; }""")
     tl=f'<div style="display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: {MUTED}; line-height: 1.5;"><sc-for list="{H("tl")}" as="x" hint-placeholder-count="3"><div>{H("x.t")}</div></sc-for></div>'
     corpo=(continuity('Reservas do lote','Lote F26-02 · Fungicida A',H('ct_falta'),H('ct_prox'))
            + bloco('Saldo do lote','Confira o reservado, o uso da safra e o disponível; clique na linha para ver a origem.',g)

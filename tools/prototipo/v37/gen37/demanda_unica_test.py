@@ -519,5 +519,32 @@ cenEntregar(c,rid,'Glifosato 480',147.93,'João',PAULA); cenEntregar(c,rid,'Óle
     return (ok,dict(lot=r['lot'],sr=(g('d0','S2627','Glifosato 480'),g('d1','S2627','Glifosato 480'),g('d2','S2627','Glifosato 480')),lg=(g('d0','LG2627','Glifosato 480'),g('d1','LG2627','Glifosato 480'),g('d2','LG2627','Glifosato 480')),
                     soma=(sm('d0','Glifosato 480'),sm('d1','Glifosato 480')),py=(L(py,'Glifosato 480'),L(pys,'Glifosato 480'))))
 caso('I10 reserva entre fazendas (achado 3, S3): liberar a OS-0501 (Lagoa Grande) com lotes da Santa Rita move a compra de uma fazenda para a outra sem contar duas vezes (Glifosato SR 20 → 167,93 L, LG 293,34 → 145,41 L; a soma não muda) e a entrega não muda nenhuma das duas; a conta da OS-0501 diz "− 147,93 L reservados em Almox. defensivos (Santa Rita)"; Python = JS (no 853a6a8: os 147,93 L contavam nas duas e a entrega baixava a LG)',i10)
+# ---------------- J · revisão do 16fb55e (PR #47, comentário 6136083713 do Codex): 4 S3 ----------------
+print('== J · revisão do 16fb55e: qualidade pendente com falta firme, memória por laudo e revisão posterior na reprovação')
+def j1():
+    # ajuste 1 · contraexemplo do Codex: demanda 100 kg, estoque 0, quarentena 40 → o Mapa dizia só "Falta 60 kg" e a compra; os 40 kg sumiam.
+    # Aceite: 60 kg continuam compra firme; os 40 kg aparecem aguardando laudo, com quem decide no detalhe; nada soma à compra, nenhuma segunda ação
+    r=runjs(PRE+'\n'+CAL+"""
+const X={saf:'S',faz:'F',hoje:'2026-09-23',viavel:'2026-09-23',ordem:{S:0},nomes:{S:'Safra'},osd:[],reservas:[],recebDt:[],sobra:[],fisico:{'Insumo X':0},quar:{'Insumo X':40},quarRep:{},
+  quarRef:[{item:'Insumo X',q:40,lote:'X-01',doc:'NF 1',rep:null}],
+  occ:[{saf:'S',k:'c1|a1',a:'a1',local:'T1',tal:'T1',area:1,dt:'2026-10-01',nome:'Uso',prods:[{nome:'Insumo X',grupo:'',un:'kg',preco:2,dose:100,q:100}]}]};
+const m=demFazenda(X); const d=m['Insumo X'];
+console.log(JSON.stringify({st:demSituacao(m,null,X.hoje,X.viavel)['Insumo X'],liq:d.liq,cond:d.cond,valor:d.valor,sol:demSolSit(d,0,false,false),
+  memo:cal01Memo(d.cal,{un:d.un,quarC:d.quarC,quarRef:d.quarRef,cond:d.cond,condFalta:d.condFalta})}));""")
+    st=r['st']; det=st[2] if len(st)>2 else ''
+    ok=(st[0]=='Falta 60 kg' and st[1]=='red' and len(st)>3 and st[3]=='Qualidade pendente · 40 kg'
+        and '40 kg em quarentena aguardam laudo (o gestor libera ou reprova no Estoque)' in det and 'se reprovar, faltam mais 40 kg' in det and 'fora da compra' in det
+        and 'Falta 100' not in json.dumps(st,ensure_ascii=False) and r['liq']==60 and r['cond']==40 and r['valor']==120
+        and r['sol']['t']=='A enviar' and r['sol']['dif']==60 and any(l.startswith('Falta condicionada à qualidade: 40 kg') for l in r['memo']))
+    return (ok,r)
+caso('J1 falta firme com quarentena (ajuste 1, contraexemplo do Codex): demanda 100 kg, estoque 0, quarentena 40 — o Mapa diz "Falta 60 kg" (compra firme, R$ 120 a 2,00/kg) e, à parte, "Qualidade pendente · 40 kg" com "o gestor libera ou reprova no Estoque" no detalhe; a compra não soma os 40 kg e a situação segue "A enviar 60 kg" (no 16fb55e: só "Falta 60 kg" e a compra)',j1)
+def j1b():
+    # o mesmo pelo cenário real (comandos do Estoque): 30 L de Fungicida A devolvidos bloqueados, reprovados (LAB-9) e mais 10 L devolvidos bloqueados
+    r=motor("""cenDevolver(c,'REQ-035','Fungicida A',30,false,PAULA); cenReprovarQuarentena(c,'Fungicida A|F26-02','LAB-9','lacre violado',ANA); cenDevolver(c,'REQ-035','Fungicida A',10,false,PAULA);
+const X=ENT(c,XS.S2627); const m=demFazenda(X); OUT.st=demSituacao(m,null,X.hoje,X.viavel)['Fungicida A']; OUT.liq=m['Fungicida A'].liq; OUT.cond=m['Fungicida A'].cond; OUT.d=D(c);""")
+    st=r['st']
+    return (r['liq']==5.48 and r['cond']==10 and st[0]=='Falta 5 L' and st[1]=='red' and len(st)>3 and st[3]=='Qualidade pendente · 10 L'
+            and '10 L em quarentena aguardam laudo (o gestor libera ou reprova no Estoque)' in st[2] and r['d']['S2627']['liq'].get('Fungicida A')==5.48,(st,r['liq'],r['cond']))
+caso('J1b o mesmo pelo cenário: devolver 30 L de Fungicida A bloqueados, reprovar (LAB-9) e devolver mais 10 L bloqueados — Safra 2026/27 com 5,48 L de compra firme e 10 L aguardando laudo; o Mapa diz "Falta 5 L" e "Qualidade pendente · 10 L" (no 16fb55e: só "Falta 5 L")',j1b)
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas'); [print('  -',f) for f in FAIL]
 sys.exit(1 if FAIL else 0)
