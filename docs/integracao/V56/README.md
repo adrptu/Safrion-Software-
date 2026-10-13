@@ -1,29 +1,11 @@
 # V56 · candidata composta (executado)
 
-Regime leve do protótipo (AGENTS.md 3.5), revisão por candidata composta (aceita pelo Codex em 6096838853). A seção 0 registra a composição publicada.
+Regime leve do protótipo (AGENTS.md 3.5), revisão por candidata composta (aceita pelo Codex em 6096838853). Sem push, sem PR, sem publicação.
 
 - **Base:** `0c0931f` (a v55 publicada: `claude/prototipo-v44`), numa cópia local (`git worktree add --detach … 0c0931f`). Build 135 quadros, 0 FALHA; render 142 páginas.
 - **Candidata:** branch local `int/v56`, código em `1f83eee` (o commit deste pacote só acrescenta `docs/`). Build 138 quadros, 0 FALHA; render 145 páginas; sintaxe JS das 145 páginas sem erro (`brutos/builds/`).
 - **Ambiente:** Chrome headless com emulação, dados sintéticos (`SAFRION_DADOS=sintetico`), um teste de navegador por vez na trava `/tmp/cdpN.lock` (nenhum teste da bateria usa a porta 9333: todos abrem o Chrome numa porta livre).
 - **Comando:** `env CHROME_BIN=/tmp/cloudchrome/chrome flock /tmp/cdpN.lock env CDP_GL=1 SAFRION_DADOS=sintetico timeout 900 python3 <teste>`, de `tools/prototipo/v37/gen37`. Os testes sem navegador rodaram com `env SAFRION_DADOS=sintetico python3 <teste>`.
-
-## 0. Composição publicada (13/10/2026, executado)
-
-- **Candidata final:** `int/v56c` @ código `a46bbc3` = v56 com CTL-4 e seus 4 ajustes (`90e5f67`), o **A4** do Estoque (`c62f9a7`, [`a4/`](a4/README.md)) e a ponta da branch única `021809a` (PR #55, conferência diária do Codex, e PR #56, textos do limite da correção vinculada).
-- **Conflito único:** `areas/processo_os.py`, encerramento em conferência. Ficaram a regra da conferência diária (`cdPendente`, selo e dono) e o selo do bloqueio por `osEncSelo`; `osEncSelo` passa a nomear também "Conferência diária pendente", para a dica sair do mesmo bloqueio.
-- **Commit único** na branch única, com pai `021809a`. Gitleaks no commit simulado, com a configuração da main: sem achado. O patch inteiro da CTL-4 saiu de `ctl4/` porque a fonte está na branch remota `claude/v44-controle-04`.
-- **Testes atingidos** (regime rápido; `final/_resumo.log`):
-  - build: 138 quadros; render: 145 páginas, dados sintéticos 5/5; varredura 145/145; ações repetidas 0;
-  - conferência diária: unidade 30/30, navegador 16/16;
-  - A4: 42/42 e 15/15. Estoque: esttest OK, est_fix1 13/13, est_fix2 11/11, est_cenario 15/15, tabelas_est 34/34, demanda_unica 71/0;
-  - O.S.: aprova_quem_decide 103/103, tabelas_os 38/38, os_ator 15/15. DS: ds_test 69/69; ds_unit 29/29 em 3 reexecuções.
-- **Primeira execução do ds_unit:** 28/29, com o `ds_unit.js` saindo com erro enquanto as outras raias rodavam. Rodado sozinho, deu 44/44; as 3 reexecuções deram 29/29. A causa não foi isolada; o log está em `final/ds_unit_test_1a_execucao.log`.
-- **Vermelhos antigos, iguais aos da v55 publicada** (`brutos/base-0c0931f`):
-  - ostest 32/1 ("painel da nova ordem A liberar");
-  - os_cenario 21/22 ("A liberar sem revisão");
-  - consumo_divergente 20/21 ("EST etapa 4"). A correção está na frente base-verde, na v57.
-- **Revisão de regressão** (lente V56F:v1-regressao): parada no regime rápido depois de 45 testes na candidata `90e5f67`, sem vermelho novo em relação à v55. A lente CTL-4 aprovou, com 4 S3 para a v57.
-- **Pendências registradas:** N4-R/CONC-16 (S3) e N9 (S4), com o Codex como dono (PR #56). Também ficam para depois: os 4 S3 da lente CTL-4 e a revisão do A4 pelo Codex.
 
 ## 1. O que entrou (por frente)
 
@@ -36,15 +18,12 @@ Regime leve do protótipo (AGENTS.md 3.5), revisão por candidata composta (acei
 | NAV1 (Planos agronômicos em lista → detalhe) | `a7023ca` | `a676ac0` | 8 arquivos, +1013 −250 | — |
 | COM (Comercial e logística) | `5efb2c4` | `e9670f0` | 24 arquivos, +2644 −125 | `0ad2d0d` (PV-031 do BEN no Comercial); `1f83eee` (COM × BEN) |
 | v55 publicada (RESP-01, partest T1-C, COMP-02) | `0c0931f` | `2e466eb` | 131 arquivos, +14062 −27 (6 de código: +162 −27) | — |
-| CTL-4 corrigida (demanda única lendo o estado vivo: custódia, devoluções, quarentena, realizado das O.S.) | `16fb55e` (base `cdc185f`; correção da revisão `853a6a8..16fb55e`) | `232f3d9` | 27 arquivos, +1934 −269 | `3f9e4f6` (a Compra lê a conta viva; falta condicionada com motivo, responsável e prazo); `7e74e6d` (DEM-08 com a falta da versão da SOL; sem "Coberto" ao lado de "Acima da demanda") · pacote e aceite CTL-4-FIX em [`ctl4/`](ctl4/README.md) |
 
 Conflitos da junção `2e466eb`, resolvidos com as duas intenções:
 - `engine.py`: `componentDidMount`/`g2mudou` do DS e a medida do aviso na troca (`g2avisoH`, RESP-01); o aviso com `aria-live="off"` do DS e `AVISO_PE` + `width: max-content` da RESP-01; `G2_GLOSS` do DS.
 - `areas/processo_os.py`: o passo da liberação da COMP-02 (`osManCond` com `esp`/`passo`) seguido do selo "Plano mudou pela análise" do SOLO.
 
 Recibo da publicação da v55 copiado em `docs/integracao/V55/publicacao.md` (commit `5d2119c`).
-
-**CTL-4 (junção `232f3d9`, depois deste pacote).** É ela que fecha o S2 que o Codex reproduziu na v55 (o Planejar safra e a Compra liam só o D2 da montagem: a devolução e a quarentena não mudavam nada). Conflitos, aceite CTL-4-FIX item a item (base `0c0931f` × candidata), memória das parcelas (62.500 da v55 → 79.500), testes e vermelhos em [`ctl4/README.md`](ctl4/README.md). As seções 2 e 3 abaixo são da candidata `1f83eee` (antes da CTL-4); os testes refeitos depois da CTL-4 estão no pacote dela.
 
 ## 2. Testes · base `0c0931f` × candidata (executado)
 

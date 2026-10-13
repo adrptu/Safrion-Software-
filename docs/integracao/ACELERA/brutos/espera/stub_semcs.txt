@@ -1,0 +1,6 @@
+        shutil.rmtree(self.dir,ignore_errors=True)
+
+# --- stub da prova (10-credito): crédito por navegador (self._credito); zerar = pôr _CRED[0] nele
+_CRED = [0.0]
+def _poe(self): self._credito = _CRED[0]
+Assenta._poe_credito = _poe

@@ -1,0 +1,106 @@
+../ferramentas/acoes_duplicadas.py  :: conjunto fixo · varre todas as páginas (15 mudaram)
+acao_unica_test.py  :: abre página mudada: CD-01det, CD-02, CD-06, CD-07, IN-04, IR-02
+agrofit_test.py  :: abre página mudada: IR-01
+ap_unico_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py
+app_entrega_parcial_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py
+assinatura_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · abre página mudada: CD-01, CD-01det, CD-02, CD-06, CD-07, IN-04
+ben_fluxo_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · abre página mudada: CD-02, CD-04, CD-06, CD-07
+cada_cd03_test.py  :: o teste mudou · abre página mudada: CD-03, CD-04
+cada_cd04_test.py  :: o teste mudou · abre página mudada: CD-03, CD-04
+cada_fix03_test.py  :: abre página mudada: CD-03, CD-04
+cada_fix04_test.py  :: abre página mudada: CD-03, CD-04
+cadc_cd0102_a.py  :: o teste mudou · abre página mudada: CD-02, CD-06, CD-07
+cadc_cd0102_b.py  :: o teste mudou · abre página mudada: CD-02, CD-06, CD-07
+cadc_cd02_test.py  :: o teste mudou · abre página mudada: CD-02, CD-06, CD-07
+cadc_cd06_test.py  :: o teste mudou · abre página mudada: CD-02, CD-06, CD-07
+cadc_cd07_test.py  :: o teste mudou · abre página mudada: CD-02, CD-06, CD-07
+cadc_fix_cd02.py  :: o teste mudou · abre página mudada: CD-02, CD-06, CD-07
+cadc_fix_cd06.py  :: o teste mudou · abre página mudada: CD-02, CD-06, CD-07
+cadc_fix_cd07.py  :: o teste mudou · abre página mudada: CD-02, CD-06, CD-07
+cadf_det_test.py  :: o teste mudou · abre página mudada: CD-01det
+cadf_fix_det_test.py  :: o teste mudou · abre página mudada: CD-01det
+cadf_fix_lista_test.py  :: o teste mudou · abre página mudada: CD-01
+cadf_test.py  :: o teste mudou · abre página mudada: CD-01, CD-01det
+cadp_fix_test.py  :: o teste mudou · abre página mudada: CD-05
+cadp_test.py  :: o teste mudou · abre página mudada: CD-05
+cadp_vtest.py  :: abre página mudada: CD-05
+cafe_apurar_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · abre página mudada: CD-02, CD-06, CD-07
+carencia_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · abre página mudada: CD-02, CD-06, CD-07, IN-04
+cd05test.py  :: o teste mudou · abre página mudada: CD-05
+cd05vtest.py  :: o teste mudou · abre página mudada: CD-05
+cmptest.py  :: abre página mudada: CD-02, CD-05, CD-06, CD-07
+componentes_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · abre página mudada: CD-02, CD-06, CD-07, IN-04, IR-02
+consumo_divergente_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py
+dose_divergente_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py, dados_irrigacao.py · abre página mudada: CD-01, CD-01det, IN-03, IN-04, IR-01, IR-02, IR-03, IR-03det …
+ds_test.py  :: varre todas as páginas (15 mudaram)
+etapas_celular_test.py  :: varre todas as páginas (15 mudaram)
+intest.py  :: abre página mudada: IN-04
+irr_estado_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py, dados_irrigacao.py · abre página mudada: IN-04, IR-01, IR-02, IR-03det, IR-04
+irr_fluxo_test.py  :: o teste mudou · abre página mudada: IN-03, IN-04, IR-01, IR-02, IR-03, IR-03det, IR-04
+irtest.py  :: o teste mudou · usa arquivo mudado: irr_fluxo_test.py · abre página mudada: IR-01, IR-02, IR-03, IR-03det, IR-04
+ma_app_fluxo_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py
+ma_atrito_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · abre página mudada: CD-02, CD-06, CD-07
+ma_correcoes_om_test.py  :: abre página mudada: CD-02, CD-06, CD-07
+ma_correcoes_pm_test.py  :: abre página mudada: CD-02, CD-06, CD-07
+ma_planos_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · abre página mudada: CD-02, CD-06, CD-07
+ma_rastreio_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · varre todas as páginas (15 mudaram)
+ma_revisao_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · abre página mudada: CD-02, CD-04, CD-06, CD-07
+ma_unica_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · varre todas as páginas (15 mudaram)
+map_aprov_test.py  :: abre página mudada: IN-03, IN-04
+map_decisoes_test.py  :: abre página mudada: IN-04, IR-03det
+map_irrig_filtro_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · abre página mudada: CD-01, IN-03, IN-04, IR-01, IR-02, IR-03det, IR-04
+matest.py  :: abre página mudada: CD-02, CD-03, CD-06, CD-07
+mip_correcoes_test.py  :: abre página mudada: IN-04
+mip_fluxo_test.py  :: abre página mudada: IN-04
+ocupacao_test.py  :: abre página mudada: CD-02, CD-06, CD-07
+os_ator_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py
+os_irrig_filtro_test.py  :: o teste mudou · abre página mudada: IR-02, IR-03, IR-03det
+os_v39_selo_agua_test.py  :: o teste mudou · abre página mudada: IR-03, IR-03det
+ostela.py  :: abre página mudada: IR-03, IR-03det
+ostest.py  :: abre página mudada: IN-04
+partest.py  :: abre página mudada: CD-02, CD-06, CD-07
+patest.py  :: abre página mudada: CD-02, CD-06, CD-07
+plataforma_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · abre página mudada: CD-02, CD-06, CD-07
+producao_fluxo_test.py  :: abre página mudada: CD-02, CD-06, CD-07
+psfix38test.py  :: abre página mudada: CD-02, CD-06, CD-07
+rend_multiconjuntos_test.py  :: abre página mudada: CD-02, CD-06, CD-07
+saf38test.py  :: abre página mudada: CD-02, CD-06, CD-07
+saf_c01_test.py  :: abre página mudada: CD-02, CD-06, CD-07
+saf_capacidade_simetrica_test.py  :: varre todas as páginas (15 mudaram)
+saf_cmp_continuidade_test.py  :: abre página mudada: CD-02, CD-06, CD-07
+saf_operacoes_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · abre página mudada: CD-02, CD-06, CD-07
+saf_revisao_test.py  :: abre página mudada: CD-02, CD-06, CD-07
+saftest.py  :: abre página mudada: CD-02, CD-06, CD-07
+tabelas_ben_test.py  :: abre página mudada: CD-02, CD-06, CD-07
+tabelas_cad_test.py  :: o teste mudou · usa arquivo mudado: tabelas_lib.py · abre página mudada: CD-01, CD-01det, CD-02, CD-03, CD-04, CD-05, CD-06, CD-07
+tabelas_est_test.py  :: abre página mudada: CD-02, CD-06, CD-07
+tabelas_irr_test.py  :: o teste mudou · usa arquivo mudado: tabelas_lib.py · abre página mudada: CD-02, CD-05, CD-06, CD-07, IR-01, IR-02, IR-03, IR-03det …
+tabelas_os_test.py  :: abre página mudada: CD-02, CD-06, CD-07
+tabelas_saf_test.py  :: abre página mudada: CD-02, CD-06, CD-07
+talmapa_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · abre página mudada: CD-01, CD-01det, CD-02, CD-06, CD-07, IN-04
+varredura.py  :: conjunto fixo · varre todas as páginas (15 mudaram)
+verif_barras.py  :: abre página mudada: IN-04
+verif_cad.py  :: abre página mudada: CD-01det, CD-02, CD-05
+verif_cad2.py  :: abre página mudada: CD-01det, CD-02, CD-05
+verif_dirty.py  :: abre página mudada: CD-01det, CD-02, CD-05
+verif_h.py  :: abre página mudada: CD-01, CD-01det, CD-02, CD-05
+verif_mapa.py  :: abre página mudada: IN-04
+verif_pedido.py  :: abre página mudada: CD-02, CD-05, CD-06, CD-07, IN-04
+verif_shots.py  :: abre página mudada: IN-04
+verif_t12.py  :: abre página mudada: CD-02, CD-05, CD-06, CD-07, IN-04
+aprova_quem_decide_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py
+assinatura_unit_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py, dados_irrigacao.py · abre página mudada: CD-01, CD-01det, IN-03, IN-04, IR-01, IR-02, IR-03, IR-03det …
+ben_mutantes.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · abre página mudada: CD-04
+cadc_test.py  :: abre página mudada: CD-02, CD-06, CD-07
+ds_unit_test.py  :: usa arquivo mudado: areas/cad_ativos_pessoas.py, areas/cad_culturas.py, areas/cad_fazendas.py, areas/cad_parceiros.py, areas/cad_produtos_estrutura.py, areas/cadastros.py … · varre todas as páginas (15 mudaram)
+inicio_entrega_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py
+legal_unit_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py
+links_ocultos_test.py  :: conjunto fixo · usa arquivo mudado: areas/cad_ativos_pessoas.py, areas/cad_culturas.py, areas/cad_fazendas.py, areas/cad_parceiros.py, areas/cad_produtos_estrutura.py, areas/cadastros.py … · abre página mudada: CD-01, CD-01det, CD-02, CD-04, IN-03, IN-04, IR-01, IR-02 …
+ma_app_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py
+ma_regras_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · abre página mudada: CD-04
+mip_unit_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py
+ocupacao_unit.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · abre página mudada: CD-01, CD-02
+os_aprov_lib_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py
+producao_unit_test.py  :: usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py · abre página mudada: CD-06
+quantidade_test.py  :: usa arquivo mudado: areas/cad_ativos_pessoas.py, areas/cad_culturas.py, areas/cad_fazendas.py, areas/cad_parceiros.py, areas/cad_produtos_estrutura.py, areas/cadastros.py … · abre página mudada: CD-01, CD-01det, CD-02, CD-04, IN-04, IR-01, IR-02, IR-03det …
+tabelas_cad_irr_unit.py  :: o teste mudou · usa arquivo mudado: areas/cad_fazendas.py, areas/cadastros.py, dados_irrigacao.py · varre todas as páginas (15 mudaram)

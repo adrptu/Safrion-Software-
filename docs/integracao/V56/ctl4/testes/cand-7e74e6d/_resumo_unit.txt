@@ -1,6 +1,0 @@
-demanda_unica_test rc=0 :: RESULTADO: 66 ok · 0 falhas
-cal01_test rc=0 :: RESULTADO: 45 ok · 0 falhas
-quantidade_test rc=0 :: RESULTADO: 14/14
-solo_unit_test rc=0 :: RESULTADO: OK 128/128
-ben_unit_test rc=0 :: RESULTADO: OK 168/168
-comercial_unit_test rc=0 :: RESULTADO: OK 114/114

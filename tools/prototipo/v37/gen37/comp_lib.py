@@ -5,7 +5,7 @@ widthcheck não vê: ocultação dos elementos-chave (elementFromPoint), comando
 painel lateral dentro da tela. É emulação: não substitui aparelho físico nem o Safari do iPhone."""
 import os, sys, time, json, subprocess, tempfile, shutil, urllib.request
 HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
-from cdp import WS, CH
+from cdp import WS, CH, Assenta, CONDICAO, _dormir
 from journeys import free
 from cadc_lib import ERRS
 # Caminho único entre as etapas de um processo guiado (UX-ACAO-UNICA-20261003): a faixa só informa; o teste anda pela área de ações,
@@ -17,7 +17,7 @@ IR_ETAPA=r"""(async (n)=>{ const num=()=>{ const c=document.querySelector('.etp-
     if(!b) return 'sem caminho de '+i+' para '+n; b.click(); await new Promise(r=>setTimeout(r,450)); }
   return 'não chegou: '+num(); })"""
 
-class Chrome:
+class Chrome(Assenta):
     """Abre um Chrome próprio (CDP_GL=1: WebGL por software para o mapa real) ou anexa a um já aberto (CDP_PORT)."""
     def __init__(self,espera=90):
         self.p=None; self.dir=None; self.alvo=None; porta=os.environ.get('CDP_PORT')
@@ -34,16 +34,17 @@ class Chrome:
                 time.sleep(.4)
         t=json.load(urllib.request.urlopen(urllib.request.Request(f'http://127.0.0.1:{self.port}/json/new?about:blank',method='PUT'),timeout=30)); self.alvo=t['id']
         self.ws=WS(t['webSocketDebuggerUrl']); self.i=0
-        self.call('Page.enable'); self.call('Runtime.enable'); self.call('Page.addScriptToEvaluateOnNewDocument',{'source':ERRS})
+        self.call('Page.enable'); self.call('Runtime.enable'); self.call('Page.addScriptToEvaluateOnNewDocument',{'source':ERRS}); self._garante_quieto()
         try: self.call('Emulation.setFocusEmulationEnabled',{'enabled':True})   # página com foco, como a janela ativa de quem usa
         except Exception: pass
     def call(self,method,params=None,timeout=60):
+        self._usou(); self._antes(method)
         self.i+=1; mid=self.i; self.ws.send(json.dumps({'id':mid,'method':method,'params':params or {}})); fim=time.monotonic()+timeout
         while True:
             m=json.loads(self.ws.recv(timeout=max(.1,fim-time.monotonic())))
             if m.get('id')==mid:
                 if 'error' in m: raise RuntimeError(f"{method}: {m['error']}")
-                return m.get('result',{})
+                res=m.get('result',{}); self._depois(method,res); return res
     def js(self,expr):
         r=self.call('Runtime.evaluate',{'expression':expr,'awaitPromise':True,'returnByValue':True})
         if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
@@ -56,13 +57,15 @@ class Chrome:
         self.call('Emulation.setEmulatedMedia',{'features':[{'name':'hover','value':'none' if toque else 'hover'},{'name':'pointer','value':'coarse' if toque else 'fine'}]})
         time.sleep(.3)
     def goto(self,url,espera=.6):
-        self.call('Page.navigate',{'url':url}); time.sleep(espera)
+        # ACELERA (cdp.Assenta): por condição, mesmo teto (espera + laço + 0,4 s); SAFRION_ESPERA=fixa: as esperas fixas de antes
+        if CONDICAO: return self._ir(url,espera,.4,60*.2,.2)
+        self.call('Page.navigate',{'url':url}); _dormir(espera)
         for _ in range(60):
             try:
                 if self.js("document.readyState")=='complete' and self.js("!!document.body && document.body.innerText.length>50"): break
             except Exception: pass
-            time.sleep(.2)
-        time.sleep(.4)
+            _dormir(.2)
+        _dormir(.4)
     def shot(self,path):
         import base64
         d=self.call('Page.captureScreenshot',{'format':'png','captureBeyondViewport':False}); open(path,'wb').write(base64.b64decode(d['data']))
@@ -78,6 +81,7 @@ class Chrome:
         self.call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':x,'y':y}]}); time.sleep(.05)
         self.call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]}); time.sleep(.35)
     def close(self):
+        self._fechado=True   # a espera por condição deixa de usar este navegador
         try:
             if self.alvo: urllib.request.urlopen(f'http://127.0.0.1:{self.port}/json/close/{self.alvo}',timeout=10)
         except Exception: pass

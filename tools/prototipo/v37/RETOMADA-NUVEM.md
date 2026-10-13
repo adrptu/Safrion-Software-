@@ -62,6 +62,7 @@ CHROME_BIN=$(which chromium || which google-chrome) python3 varredura.py   # bui
 python3 <teste>.py          # Chrome headless via cdp.py (CHROME_BIN)
 ```
 Sem a camada sintética (tarefa 1), o build para em `dados_lagoa_fonte`, com uma mensagem clara.
+Atalhos de velocidade (montagem em cache por commit, testes pelo impacto, esperas por condição): `gen37/README.md`.
 
 **Executor da nuvem** (contêiner Linux como root, saída pelo proxy da sessão):
 - O Chromium exige `--no-sandbox`. O `CHROME_BIN` aponta para um wrapper local, fora do repositório, que acrescenta essa opção e `--proxy-server` para o proxy oficial. O `cdp.py` não muda.

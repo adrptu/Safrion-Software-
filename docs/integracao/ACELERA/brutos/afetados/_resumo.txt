@@ -1,0 +1,18 @@
+DSxTABR_490301f rc=0 d30f30b→4afd477 (106 de 162 testes): tabelas_irr_test.py=SIM[o teste mudou · usa arquivo mudado: tabelas_lib.py · abre página mudada: CD-02, CD-05, ]
+TABRxBEN_1e847eb rc=0 d30f30b→4afd477 (106 de 162 testes): tabelas_cad_test.py=SIM[o teste mudou · usa arquivo mudado: tabelas_lib.py · abre página mudada: CD-01, CD-01de]
+TABRxSOLO_8245911 rc=0 7cd0082→afc38fa (173 de 175 testes): tabelas_cad_test.py=SIM[abre página mudada: CD-01, CD-01det, CD-02, CD-03, CD-04, CD-05, CD-06, CD-07 …] cadc_cd02_test.py=SIM[o teste mudou · abre página mudada: CD-02, CD-06, CD-07]
+CTL5xTABR_885a68c rc=0 4afd477→7cd0082 (167 de 169 testes): ctl5_test.py=SIM[o teste mudou · abre página mudada: AG-07, CD-01, IR-02, IR-03det, IR-04, MA, OS] ficha_pivo_test.py=SIM[o teste mudou · usa arquivo mudado: dados.py, dados_lagoa_fonte.py · abre página mudada]
+CTL5xSOLO_885a68c rc=0 7cd0082→afc38fa (173 de 175 testes): ficha_pivo_test.py=SIM[usa arquivo mudado: dados_lagoa_safra.py · abre página mudada: CD-03, CD-04, IR-01, PA]
+COMxBEN_1f83eee_juncao rc=0 a676ac0→e9670f0 (178 de 181 testes): comercial_fluxo_test.py=SIM[o teste mudou · abre página mudada: CD-02, CD-06, CD-07, COLH, EXPED, Main, PCOM, PROD �]
+COMxBEN_1f83eee_pv031 rc=0 ab25ec2→0ad2d0d (148 de 181 testes): comercial_fluxo_test.py=SIM[abre página mudada: COLH, EXPED, PCOM, PROD, VEN]
+CTL4_78711bb rc=0 853a6a8→4130972 (119 de 146 testes): saf_cmp_continuidade_test.py=SIM[o teste mudou · usa arquivo mudado: areas/processo_os.py, cal01.js, dados2.py, safra.js �] esttest.py=SIM[abre página mudada: EST, OS]
+fix_490301f rc=0 5d2119c→490301f (5 de 181 testes): tabelas_irr_test.py=SIM[o teste mudou]
+fix_1e847eb rc=0 490301f→1e847eb (22 de 181 testes): tabelas_cad_test.py=SIM[abre página mudada: CD-04]
+fix_8245911 rc=0 1e847eb→8245911 (5 de 181 testes): tabelas_cad_test.py=SIM[o teste mudou]
+fix_885a68c rc=0 8245911→885a68c (6 de 181 testes): ctl5_test.py=SIM[o teste mudou] ficha_pivo_test.py=SIM[o teste mudou]
+fix_1f83eee rc=0 885a68c→1f83eee (5 de 181 testes): comercial_fluxo_test.py=SIM[o teste mudou]
+fix_93ca16c rc=0 e9670f0→93ca16c (5 de 181 testes): ds_unit_test.py=SIM[o teste mudou]
+fix_ab25ec2 rc=0 93ca16c→ab25ec2 (5 de 181 testes): tabelas_cad_irr_unit.py=SIM[o teste mudou]
+fix_78711bb rc=0 6202376→78711bb (37 de 146 testes): saf_cmp_continuidade_test.py=SIM[o teste mudou] esttest.py=SIM[abre página mudada: EST]
+so_docs rc=0 1f83eee→302b26f (3 de 181 testes):
+FIM_VALIDA

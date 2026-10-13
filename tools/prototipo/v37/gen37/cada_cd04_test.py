@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """CD-04 · pessoas e equipes (15 verificações no Chrome): caldeira da OS-0424 (Paula), habilidades em múltipla escolha com a habilitação
 exigida, habilitação vencida grava e marca 'Não alocável em O.S.', filtros rápidos por habilidade e 'Não alocáveis', estado calculado e
-clicável, vigência do safrista, calendário herdado da equipe, 'Irrigante' e o acesso ao app só leitura (Configurações › Usuários e alçadas, CONF-01)."""
-# TABELAS-FOCO (06/10/2026): vínculo | disponível até | habilitação | validade (vencida em vermelho) em colunas próprias; calendário e acesso no painel
+clicável, vigência do safrista, calendário herdado da equipe, 'Irrigante' e 'Solicitar acesso ao app' simulado no formulário."""
+# TABELAS-FOCO (06/10/2026): vínculo | disponível até | habilitação | validade (vencida em vermelho) | calendário | acesso ao app em colunas próprias; "simulado" fica no aviso
 from cada_lib import T
 import time, json
 t=T(); J=t.J
@@ -24,14 +24,14 @@ try:
     t.chk('Lucas (safrista) com NR-31 vencida aparece "Não alocável em O.S." com o motivo e a vigência do contrato',
           'Não alocável em O.S.' in l and 'NR-31 15/08/2026' in l and 'Safrista 31/07/2027' in l, l)
     t.mainsel('cal'); a=nomes(); t.clk('A resolver'); b=nomes(); t.mainsel(''); b2=nomes(); t.clk('Todas'); c=conta()
-    # PCM simplificado (S1): Otávio (p14) entra no cadastro; CONF-D04: Caio (p11); BEN-1: Igor e Marta (equipe e8) · 14 pessoas na v57
-    t.chk('filtros do bloco: Função Caldeiros → Paula e Nilton; com A resolver → nenhum caldeiro; Todas → 15 (Caio da CONF-D04; Otávio da manutenção; Dora do comercial; Igor e Marta do beneficiamento)', a==['Paula','Nilton'] and b==[] and c=='15/15', [a,b,c])
+    # PCM simplificado (S1): Otávio entra no cadastro; BEN-1: Igor e Marta (equipe e8) · 10 → 13 pessoas na junção das duas frentes
+    t.chk('filtros do bloco: Função Caldeiros → Paula e Nilton; com A resolver → nenhum caldeiro; Todas → 13 (Otávio da manutenção; Igor e Marta do beneficiamento)', a==['Paula','Nilton'] and b==[] and c=='13/13', [a,b,c])
     t.clk('A resolver'); a=nomes(); ch=J("(()=>{const b=[...document.querySelectorAll('main .cadx-qf button')].find(b=>b.innerText.trim().startsWith('A resolver')); return !!b&&b.getAttribute('aria-pressed')==='true';})()"); t.clk('Limpar filtros'); c=conta()
-    t.chk('filtro rápido "A resolver" (no bloco) mostra quem precisa de ação (Marcos a renovar, Lucas, Beto) e "Limpar filtros" volta às 15',
-          a==['Marcos','Lucas','Beto'] and b2==['Marcos','Lucas','Beto'] and ch and c=='15/15', [a,b2,ch,c])
+    t.chk('filtro rápido "A resolver" (no bloco) mostra quem precisa de ação (Marcos a renovar, Lucas, Beto) e "Limpar filtros" volta às 13',
+          a==['Marcos','Lucas','Beto'] and b2==['Marcos','Lucas','Beto'] and ch and c=='13/13', [a,b2,ch,c])
     t.openrow(0,'Lucas'); L=t.labels()
     t.chk('formulário: Nome → Equipe → Habilidades → validade da habilitação exigida → vínculo e vigência → calendário → custo com encargos; sem "Função"',
-          L==['Nome','Equipe','Habilidades','Validade da NR-31','Vínculo','Admissão','Disponível até','Calendário de trabalho','Custo-hora com encargos','Situação'], L)   # acesso ao app saiu do formulário (CONF-01 P4, CONF-D05)
+          L==['Nome','Equipe','Habilidades','Validade da NR-31','Vínculo','Admissão','Disponível até','Calendário de trabalho','Custo-hora com encargos','Acesso ao app','Situação'], L)
     t.fset('custo','40'); t.btn('Salvar'); time.sleep(.2); l=t.rowtxt(0,'Lucas') or ''; ts=t.toast()
     t.chk('salvar com NR-31 vencida grava (sem bloquear) e mantém "Não alocável em O.S." com aviso do efeito',
           not t.isopen() and 'R$ 40,00/h' in l and 'Não alocável em O.S.' in l and 'não alocável em O.S. até resolver NR-31 vencida em 15/08/2026' in ts, [l,ts,t.alerts()])
@@ -42,16 +42,16 @@ try:
     t.chk('marcar "Irrigar" faz aparecer a validade da NR-10 exigida (Rui não exigia nenhuma)',
           'Nenhuma habilitação exigida' in h0 and 'Validade da NR-10' in L and 'Exige NR-10 com validade' in h1, [h0,L,h1])
     t.cancel()
-    # CONF-01 P4 (CONF-D05): o acesso ao app sai do formulário; o CD-04 só lê o estado de Configurações e leva a Usuários e alçadas para gerenciar.
-    # Revisão TABR (09/10, A1): calendário e acesso ficam no painel da pessoa (não na linha).
-    t.openrow(0,'Beto'); he=help_('Equipe'); og=t.dlg(); lk=t.J("!![...document.querySelectorAll('aside[role=dialog] a')].find(a=>a.getAttribute('href')==='CF-01.dc.html#pessoa=Beto')")
-    t.chk('calendário herdado da equipe aparece no campo Equipe; o acesso ao app é só leitura ("Sem acesso") com o link para gerenciar em Configurações',
-          'Calendário da equipe: seg–sáb · 06–15h · 9 h/dia' in he and 'Acesso ao app: Sem acesso · gerenciar em Configurações › Usuários e alçadas' in og and lk and t.fv('cal')=='Da equipe' and t.fv('acesso') is None, [he,og[-250:],lk,t.fv('cal')])
-    t.fset('cal','escala 6×2 · 8h'); t.btn('Salvar'); time.sleep(.2); ts=t.toast()
-    t.openrow(0,'Beto'); b=t.fv('cal'); t.cancel()
-    t.chk('a exceção de calendário fica na pessoa (painel) e salvar não envia pedido de acesso', b=='escala 6×2 · 8h' and 'pedido de acesso' not in ts, [b,ts])
-    t.openrow(0,'Ana'); og=t.dlg(); t.cancel()
-    t.chk('quem tem acesso vê "Acesso ao app: Ativo desde 28/06/2026" só em consulta, com o link para Configurações', 'Acesso ao app: Ativo desde 28/06/2026' in og and t.fv('acesso') is None, og[-250:])
+    t.openrow(0,'Beto'); he=help_('Equipe'); ops=t.fopts('acesso')
+    t.chk('calendário herdado da equipe aparece no campo Equipe; acesso ao app oferece "Solicitar acesso ao app"',
+          'Calendário da equipe: seg–sáb · 06–15h · 9 h/dia' in he and ops==['Sem login','Solicitar acesso ao app'] and t.fv('cal')=='Da equipe', [he,ops,t.fv('cal')])
+    t.fset('acesso','Solicitar acesso ao app'); t.fset('cal','escala 6×2 · 8h'); t.btn('Salvar'); time.sleep(.2); ts=t.toast()
+    # revisão TABR (09/10/2026, A1): calendário e acesso ao app ficam no painel da pessoa (a Situação vem logo depois do nome, à vista sem rolar)
+    t.openrow(0,'Beto'); b=[t.fv('cal'),t.fv('acesso')]; t.cancel()
+    t.chk('"Solicitar acesso ao app" (simulado) grava o pedido e a exceção de calendário fica na pessoa (painel)',
+          b==['escala 6×2 · 8h','Acesso solicitado'] and 'pedido de acesso ao app enviado ao administrador (simulado)' in ts, [b,ts])
+    t.openrow(0,'Ana'); acd=t.fdis('acesso'); t.cancel()
+    t.chk('quem já tem login vê o acesso só em consulta', acd is True, acd)
     t.clk('Cadastrar pessoa')
     for k,v in [('nome','Rita'),('vinc','Safrista'),('adm','2026-09-20'),('custo','32')]: t.fset(k,v)
     marca('Preparar calda (caldeiro)'); t.btn('Salvar'); a=t.alerts()

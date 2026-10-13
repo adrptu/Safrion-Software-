@@ -1,0 +1,30 @@
+tabelas_cad_test rc=0 t=335.790772515s :: RESULTADO: 178/178 ok 
+FIM 03:05:23
+tabelas_irr_test rc=0 t=218.198563823s :: RESULTADO: 106/106 ok 
+FIM 03:17:39
+comercial_fluxo_test rc=0 t=149.209305953s :: RESULTADO: OK 72/72 
+FIM 03:20:08
+ctl5_test rc=0 t=95.248659545s :: RESULTADO 30/30 [] 
+FIM 03:25:43
+solo_saf_test rc=0 t=130.679401561s :: RESULTADO: OK 36/36 
+FIM 03:27:54
+partest rc=0 t=111.428127865s :: RESULTADO: 50 ok · 0 falhas 
+FIM 03:33:38
+acao_responsivo rc=0 t=80.564681078s :: RESULTADO: 5 ok · 0 falhas (responsivo) 
+FIM 03:34:59
+ostest rc=0 t=34.623579103s :: 32 ok · 1 falhas ['painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo'] 
+FIM 03:37:43
+osacoes rc=0 t=35.081277264s :: RESULTADO: 40 ok · 5 falhas 
+FIM 03:38:19
+producao_fluxo_test rc=0 t=302.920452609s :: RESULTADO: OK 67/67 
+FIM 03:48:34
+ma_unica_test rc=1 t=246.327896736s :: RESULTADO: 22/23 ok · FALHAS: AC-PCM-02 · o destino abre o registro (painel da OM-0234, plano PM-01, Novo plano do Silo 01) 
+FIM 03:52:40
+irr_fluxo_test rc=0 t=167.740896728s :: 33 ok · 0 falhas [] 
+FIM 04:01:45
+cafe_apurar_nav rc=0 t=35.817137694s :: RESULTADO: OK 10/10 
+FIM 04:02:20
+dose_divergente_nav rc=0 t=75.794154647s :: 21/21 ok · FALHAS: 0 
+FIM 04:05:21
+etapas_celular rc=0 t=51.600910229s :: RESULTADO: 14 ok · 0 falhas (celular) 
+FIM 04:06:13

@@ -1,0 +1,37 @@
+../ferramentas/acoes_duplicadas.py  :: conjunto fixo · varre todas as páginas (1 mudaram)
+acao_unica_test.py  :: abre página mudada: EST
+ap_unico_test.py  :: abre página mudada: EST
+assinatura_test.py  :: abre página mudada: EST
+cmptest.py  :: abre página mudada: EST
+consumo_divergente_test.py  :: abre página mudada: EST
+demanda_estado_nav_test.py  :: abre página mudada: EST
+demanda_unica_nav_test.py  :: abre página mudada: EST
+est_cenario_test.py  :: abre página mudada: EST
+est_fix1_test.py  :: abre página mudada: EST
+est_fix2_test.py  :: abre página mudada: EST
+est_repro.py  :: abre página mudada: EST
+esttest.py  :: abre página mudada: EST
+etapas_celular_test.py  :: varre todas as páginas (1 mudaram)
+irr_estado_test.py  :: abre página mudada: EST
+irr_fluxo_test.py  :: abre página mudada: EST
+map_aprov_test.py  :: abre página mudada: EST
+map_decisoes_test.py  :: abre página mudada: EST
+os_cenario_test.py  :: abre página mudada: EST
+os_irrig_filtro_test.py  :: abre página mudada: EST
+ostela.py  :: abre página mudada: EST
+saf_cmp_continuidade_test.py  :: o teste mudou
+tabelas_est_test.py  :: abre página mudada: EST
+varredura.py  :: conjunto fixo · varre todas as páginas (1 mudaram)
+verif_ce_est.py  :: abre página mudada: EST
+verif_est1.py  :: abre página mudada: EST
+verif_est2.py  :: abre página mudada: EST
+verif_overflow.py  :: abre página mudada: EST
+verif_pedido.py  :: abre página mudada: EST
+verif_shots_cmpest.py  :: abre página mudada: EST
+verif_t12.py  :: abre página mudada: EST
+aprova_quem_decide_test.py  :: usa arquivo mudado: areas/processo_estoque.py · abre página mudada: EST
+assinatura_unit_test.py  :: abre página mudada: EST
+demanda_unica_test.py  :: abre página mudada: EST
+inicio_entrega_test.py  :: abre página mudada: EST
+links_ocultos_test.py  :: conjunto fixo · usa arquivo mudado: areas/processo_estoque.py, saf_cmp_continuidade_test.py · abre página mudada: EST
+quantidade_test.py  :: usa arquivo mudado: areas/processo_estoque.py, saf_cmp_continuidade_test.py · abre página mudada: EST

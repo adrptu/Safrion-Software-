@@ -1,0 +1,5 @@
+IGUAL  tabelas_cad_test: rc=1 RESULTADO: 176/178 ok · FALHAS: CD-06: Diesel S10 L | granel | R$ 6,19/L | 15/09/2026; Calcário dolomítico sem preço (— | Sem preço); CD (A1): Situaçã
+IGUAL  tabelas_irr_test: rc=1 
+IGUAL  ctl5_test: rc=1 RESULTADO 28/30 ['E3.1 CD-01 › Água (a fonte): 16 pontos; "Outorga SINT-002/0000" 150 m³/h, vence 20/11/2026; captação superficial vigente do Rio A so
+IGUAL  ficha_pivo_test: rc=0 RESULTADO: FALHOU 17/21
+IGUAL  comercial_fluxo_test: rc=1 RESULTADO: FALHOU 71/72

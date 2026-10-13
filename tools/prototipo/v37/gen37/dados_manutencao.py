@@ -186,7 +186,7 @@ def pessoas():
     out = []
     for p in DC.PESSOAS:
         nr = sorted({_NR_HAB[h] for h in p['hab'] if h in _NR_HAB})
-        if nr or p['id'] == 'p14':   # p14 Otávio (PCM; p11 até a v56)
+        if nr or p['id'] == 'p11':
             out.append(dict(k=p['nome'], f=p['funcao'], hab=list(p['hab']), nr=nr))
     return out
 

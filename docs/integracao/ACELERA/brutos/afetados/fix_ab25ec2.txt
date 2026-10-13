@@ -1,0 +1,5 @@
+../ferramentas/acoes_duplicadas.py  :: conjunto fixo
+varredura.py  :: conjunto fixo
+links_ocultos_test.py  :: conjunto fixo · usa arquivo mudado: tabelas_cad_irr_unit.py
+quantidade_test.py  :: usa arquivo mudado: tabelas_cad_irr_unit.py
+tabelas_cad_irr_unit.py  :: o teste mudou

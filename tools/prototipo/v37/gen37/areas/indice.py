@@ -49,8 +49,7 @@ def build():
                      + f'<span style="font-size: 15px; font-weight: 800; flex-grow: 1;">{esc(nome)}</span>' + (f'<span style="color:{MUTED};">›</span></a>' if len(items)==1 else '</div>') + f'{lis}</div>')
     ocultos=[(a['area'],[f for f,m in MAPA.items() if m['area']==a['area']]) for a in MENU]
     from ui37 import menu_item
-    SAIRAM={'CF-02'}   # telas que deixaram de existir (CONF-01, CONF-D01: o bloco Alçadas fica no CF-01): sem atalho no índice
-    ocultos=[(n,[f for f in fs if menu_item(ffile(f))[0] is None and f not in SAIRAM]) for n,fs in ocultos if n not in ('Cadastros',)]   # só as telas que continuam fora do menu (01/10)
+    ocultos=[(n,[f for f in fs if menu_item(ffile(f))[0] is None]) for n,fs in ocultos if n not in ('Cadastros',)]   # só as telas que continuam fora do menu (01/10)
     oc_html=''.join(f'<a href="{ffile(fs[0])}" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; font-size: 12.3px; color: {INK}; text-decoration: none; background: {SURF};">{esc(n)} <span style="color: {MUTED};">{len(fs)}</span></a>' for n,fs in ocultos if fs)
     EXT=[('App móvel','MB-01',10,''),('Portal do parceiro','PT-01',7,''),('Onboarding','ON-01',1,''),('Backoffice','BO-02',2,'')]
     oc_html+=''.join(f'<a href="{fid}.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; font-size: 12.3px; color: {INK}; text-decoration: none; background: {SURF};">{esc(nome)} <span style="color: {MUTED};">{n}</span></a>' for nome,fid,n,ic in EXT)

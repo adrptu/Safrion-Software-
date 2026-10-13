@@ -48,13 +48,12 @@ try:
     E.ok(cabe(E) and E.J(f"({INTEIRO})(['INV-2609'],'Aprovar ajuste')") in (True, 'teclado'), 'etapa 5: página sem rolagem; "Aprovar ajuste" da INV-2609 inteiro (à vista ou pelo teclado)', E.J(OVF))
     ops = E.J("[...document.querySelectorAll('#fx_g_cnt_contador option')].map(o=>o.value)") if E.clk('+ Nova contagem') == 'ok' else []
     print('contadores:', ops)
-    E.setv('fx_g_cnt_lote', E.J("[...document.querySelector('#fx_g_cnt_lote').options].map(o=>o.value).find(v=>v.startsWith('D26-01'))")); E.setv('fx_g_cnt_contador', 'Paula (almoxarife)'); E.setv('fx_g_cnt_cont', '290'); E.salvar()
+    E.setv('fx_g_cnt_lote', E.J("[...document.querySelector('#fx_g_cnt_lote').options].map(o=>o.value).find(v=>v.startsWith('D26-01'))")); E.setv('fx_g_cnt_cont', '290'); E.salvar()
     E.ok(cabe(E) and E.J(f"({INTEIRO})(['INV-2612'],'Aprovar ajuste')") in (True, 'teclado') and E.J(f"({INTEIRO})(['INV-2612'],'Recontar')") in (True, 'teclado'),
          'nova contagem INV-2612 com diferença: grade sem rolagem, Recontar e Aprovar ajuste inteiros', E.J(OVF))
     # 5 · mesma palavra para Rui em toda a tela (contador = almoxarife, como na trilha)
     E.row('INV-2609'); a = E.val('fx_g_cnt_contador'); b = E.J("document.body.innerText"); E.fechar()
-    # revisão CONF F6: as opções vêm das pessoas ativas com o papel almoxarife, com a 1ª vazia ("Escolha quem contou"): sem valor padrão
-    E.ok(ops == ['', 'Paula (almoxarife)', 'Rui (almoxarife)'] and a == 'Rui (almoxarife)' and 'conferente' not in b,
+    E.ok(ops == ['Paula (almoxarife)', 'Rui (almoxarife)'] and a == 'Rui (almoxarife)' and 'conferente' not in b,
          'contador "Rui (almoxarife)" (mesmo papel da trilha), sem "conferente" na tela', [ops, a])
     # 6 · faixa da etapa 2 separa consulta por fase de bloqueio por O.S. impedida
     E.etapa(2); k = E.k(); print('k2:', k)

@@ -1,0 +1,22 @@
+../ferramentas/acoes_duplicadas.py  :: conjunto fixo · varre todas as páginas (1 mudaram)
+ben_fluxo_test.py  :: abre página mudada: CD-04
+cada_cd03_test.py  :: abre página mudada: CD-04
+cada_cd04_test.py  :: abre página mudada: CD-04
+cada_fix03_test.py  :: abre página mudada: CD-04
+cada_fix04_test.py  :: abre página mudada: CD-04
+ds_test.py  :: varre todas as páginas (1 mudaram)
+etapas_celular_test.py  :: varre todas as páginas (1 mudaram)
+ficha_pivo_test.py  :: abre página mudada: CD-04
+ma_rastreio_test.py  :: varre todas as páginas (1 mudaram)
+ma_revisao_test.py  :: abre página mudada: CD-04
+ma_unica_test.py  :: varre todas as páginas (1 mudaram)
+saf_capacidade_simetrica_test.py  :: varre todas as páginas (1 mudaram)
+tabelas_cad_test.py  :: abre página mudada: CD-04
+varredura.py  :: conjunto fixo · varre todas as páginas (1 mudaram)
+ben_mutantes.py  :: abre página mudada: CD-04
+ds_unit_test.py  :: usa arquivo mudado: areas/cad_ativos_pessoas.py · varre todas as páginas (1 mudaram)
+links_ocultos_test.py  :: conjunto fixo · usa arquivo mudado: areas/cad_ativos_pessoas.py · abre página mudada: CD-04
+ma_regras_test.py  :: abre página mudada: CD-04
+quantidade_test.py  :: usa arquivo mudado: areas/cad_ativos_pessoas.py · abre página mudada: CD-04
+solo_unit_test.py  :: abre página mudada: CD-04
+tabelas_cad_irr_unit.py  :: varre todas as páginas (1 mudaram)

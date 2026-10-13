@@ -1,0 +1,6 @@
+  ok  WS semente 7: 40 mensagens picadas, fragmentadas e com ping chegam inteiras e na ordem com prazo de 10 ms (329 prazos vencidos no meio)
+  ok  WS semente 11: 40 mensagens picadas, fragmentadas e com ping chegam inteiras e na ordem com prazo de 10 ms (412 prazos vencidos no meio)
+  ok  time.sleep fora de laço (linha 2, função na linha 7) assenta; em for, while e compreensão (linhas 4, 5, 8) fica fixo
+  ok  SAFRION_ESPERA padrão é por condição e time.sleep foi trocado só nesse modo
+  ok  time.sleep(1,0) de outro fio dorme o tempo real (sem settle); o do fio principal vira settle
+RESULTADO: 5/5 ok

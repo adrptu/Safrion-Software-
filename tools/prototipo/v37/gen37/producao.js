@@ -79,24 +79,8 @@ const PR_FEZ = ['Liberadas', 'Em execução', 'Em conferência', 'Encerradas']; 
 /* leitura não cria nada no estado; comando (w) cria a parte da produção num estado antigo que não a tinha */
 function prP(c, w) { if (c.producao) return c.producao; const e = { contagens: [], previsoes: {}, cargas: {}, lotes: {}, pedidos: {}, reservas: {}, movs: [], seq: { cg: 2100, lote: {}, rs: 0, mp: 1000, cnt: 0 } }; if (w) c.producao = e; return e; }
 function prHoje() { return typeof CEN_DIA_OP !== 'undefined' ? CEN_DIA_OP : '2026-09-26'; }
-/* quem age (integração CONF × COLH): o que tem papel no catálogo de Configurações vem do papel vigente, nunca de nome fixo (CONF R2, R7):
-   publicar previsão = AL-17 (texto pelo g2alcQuem); receber na fazenda onde recebe o almoxarife = o almoxarife ativo (cenAlmox). Qualidade, Comercial
-   e Lúcia ainda não estão no CD-04 nem no catálogo de papéis: seguem o registro da colheita (PRDC.quem) até entrarem (CONF-D41). */
-function prQuem(k) { if (k === 'ag' && typeof g2alcQuem === 'function') { const q = g2alcQuem('AL-17'); if (q) return q; } return (PRDC.quem || {})[k] || ''; }
-function prRec(faz) { const r = ((PRDC.quem || {}).rec || {})[faz] || 'Recebimento'; return (/\(almoxarife\)$/.test(r) && typeof cenAlmox === 'function') ? cenAlmox() : r; }
-/* quem pesa, estorna e descarta (revisão CONF 10/10, R14): onde quem recebe é um papel (almoxarife: Santa Rita e Boa Vista), grava o perfil de quem age
-   (Ver como; omitido, o da sessão; "Rui (almoxarife)" vale pelo 1º nome) e recusa sem gravar se ele não tem o papel. Nunca o almoxarife deduzido:
-   o texto "quem recebe" (prRec) diz quem deve agir, não quem agiu. Lúcia (Lagoa Grande) segue o registro da colheita até entrar no CD-04 (CONF-D41).
-   Sem o bloco de perfis (página sem g2lib), o nome recebido. Dano evitado: carga pesada, estornada ou descartada em nome de quem não agiu. */
-function prAtorRec(faz, quem, acao) { const r = ((PRDC.quem || {}).rec || {})[faz] || 'Recebimento';
-  if (!/\(almoxarife\)$/.test(r) || typeof cenExige !== 'function' || typeof g2perfil !== 'function') return (typeof quem === 'string' && quem) || prRec(faz);
-  const P = (quem && typeof quem === 'object') ? quem : (quem ? String(quem).split(/[\s(]/)[0] : g2perfil()); return cenExige(P, 'almoxarife', acao); }
-/* ator de comando com alçada (publicar previsão, AL-17): o perfil de quem age (Ver como; "Ana (agrônoma)" ou {k:'Ana'} pelo 1º nome); sem papel, recusa sem gravar.
-   Sem o bloco de alçadas (página sem g2lib), o nome recebido. */
-function prAtorAlc(quem, al, acao) { if (typeof cenExigeAlc !== 'function' || typeof g2alc !== 'function' || !g2alc(al)) return (typeof quem === 'string' && quem) || prQuem('ag');
-  const P = (quem && typeof quem === 'object') ? quem : (quem ? String(quem).split(/[\s(]/)[0] : g2perfil()); return cenExigeAlc(P, al, acao); }
-/* app de campo respeita o acesso (CONF R2): operador desativado não grava contagem nem carga; o que já está na fila do aparelho envia */
-function prAppAtivo(c, via) { if (via === 'app' && typeof cenAppAtivo === 'function') cenAppAtivo(c); }
+function prQuem(k) { return (PRDC.quem || {})[k] || ''; }
+function prRec(faz) { return ((PRDC.quem || {}).rec || {})[faz] || 'Recebimento'; }
 function prEhColheita(o) { return /^Colheita/.test(String((o && o.tipo) || '')); }
 /* cultivo da O.S.: a ordem nova guarda o cultivo (#nova:); a semente vem do registro; senão o 1º cultivo aberto do talhão */
 function prCultDaOS(c, o) { if (!o) return ''; const nv = o.osc && o.osc.novo; if (nv && nv.cult) return nv.cult;
@@ -329,7 +313,7 @@ function prProxLote(c, iso) { const P = prP(c, 1); const w = String(prSemN(prSem
 function prPiso(x, d) { const k = 10n ** BigInt(6 - d); const m = prM(x); const q = m >= 0n ? m / k : -((-m + k - 1n) / k); return prN(q * k); }
 
 /* contagem de frutos (MB-07): grava a amostra; não publica (R-17) */
-function prContar(c, k) { prAppAtivo(c, k.via); const P = prP(c, 1); const kk = PRDC.cult[k.cult];
+function prContar(c, k) { const P = prP(c, 1); const kk = PRDC.cult[k.cult];
   if (!kk || !kk.semanal) throw new Error('Escolha um talhão de fruta em produção.');
   const n = Number(k.plantas); const e = ['pintado', 'devez', 'verde'].map(x => Number(k[x] || 0)); const peso = prNumOk(k.peso) ? String(prNum(k.peso)) : String(k.peso === undefined ? '' : k.peso);
   const imp = JSON.stringify([k.cult, n, e, peso, k.d || prHoje()]);
@@ -345,12 +329,12 @@ function prContar(c, k) { prAppAtivo(c, k.via); const P = prP(c, 1); const kk = 
     + '. A previsão só muda quando ' + prQuem('ag') + ' publicar.' + (on ? '' : ' Salvo no aparelho; envia quando houver sinal.'), cnt: x }; }
 
 /* publicar previsão (Ana): congela a versão nova só das semanas que ainda não começaram (R-17) */
-function prPublicar(c, cid, quem, par) { const kk = PRDC.cult[cid]; if (!kk) throw new Error('Cultivo não encontrado.'); const por = prAtorAlc(quem, 'AL-17', 'Publicar a previsão do ' + kk.local); const P = prP(c, 1);
+function prPublicar(c, cid, quem, par) { const kk = PRDC.cult[cid]; if (!kk) throw new Error('Cultivo não encontrado.'); const P = prP(c, 1);
   if (par) { const ph = prNum(par.plantas_ha), pe = prNumOk(par.perda) ? String(prNum(par.perda)) : String(par.perda === undefined ? '' : par.perda);
     if (!(ph > 0 && ph < 10000) || Math.floor(ph) !== ph) throw new Error('Plantas vivas por hectare: número inteiro maior que zero.');
     if (!prNumOk(pe) || prNum(pe) < 0 || prNum(pe) >= 1) throw new Error('Perda entre 0 e 100 %.'); par = { plantas_ha: ph, perda: pe }; }
   const pb = prPublicavel(c, cid, par); if (!pb) throw new Error('Nada novo a publicar no ' + kk.local + ': a versão vigente já tem as semanas que ainda não começaram.');
-  const vs = P.previsoes[cid] = P.previsoes[cid] || []; const v = { v: vs.length + 1, d: prHoje(), at: cenAgora(), por, base: pb.base, cnt: pb.cnt || '' };
+  const vs = P.previsoes[cid] = P.previsoes[cid] || []; const v = { v: vs.length + 1, d: prHoje(), at: cenAgora(), por: quem || prQuem('ag'), base: pb.base, cnt: pb.cnt || '' };
   if (pb.safra !== undefined) v.safra = pb.safra; else { v.sem = pb.sem; v.plantas_ha = pb.par.plantas_ha; v.perda = pb.par.perda; }
   vs.push(v);
   const txt = v.safra !== undefined ? 'safra ' + prUnTxt(kk.cultura, v.safra, 0) : Object.keys(v.sem).map(s => prSemTxt(s) + ' ' + prUnTxt(kk.cultura, v.sem[s])).join(' · ');
@@ -358,7 +342,7 @@ function prPublicar(c, cid, quem, par) { const kk = PRDC.cult[cid]; if (!kk) thr
   return { msg: kk.local + ' · previsão v' + v.v + ' publicada por ' + v.por + ': ' + txt + '.' + (cur && cur.sem && cur.sem[s0] !== undefined ? ' A semana em curso (' + prSemTxt(s0) + ') não muda' + (os0 ? ': orienta a ' + os0.id + '.' : '.') : ''), v }; }
 
 /* carga do campo (MB-10 · aba Colheita): a pesar na balança; caixas ou kg estimados nunca somam (R-03) */
-function prCarga(c, k) { prAppAtivo(c, k.via || 'app'); const P = prP(c, 1); const mix = (k.mix && k.mix.length) ? k.mix : [{ os: k.os, pct: 100, modo: 'medida' }];
+function prCarga(c, k) { const P = prP(c, 1); const mix = (k.mix && k.mix.length) ? k.mix : [{ os: k.os, pct: 100, modo: 'medida' }];
   const imp = JSON.stringify([k.os, k.dcol || prHoje(), Number(k.cx) || 0, Number(k.kg) || 0, k.veic || '', mix.map(x => [x.os, Number(x.pct), x.modo || 'medida'])]);
   if (k.chave) { const ja = Object.values(P.cargas).find(g => g.chave === k.chave); if (ja) { if (ja.imp !== imp) throw prConflito(k.chave, ja.id); return { msg: 'Carga ' + ja.id + ' já registrada: nada foi gravado de novo.', g: ja, repetido: true }; } }
   const o = (c.ordens || {})[k.os]; if (!o || !prEhColheita(o)) throw new Error('Escolha a O.S. de colheita da carga.');
@@ -395,8 +379,7 @@ function prReceber(c, k) { const P = prP(c, 1); const g0 = k.carga ? P.cargas[k.
   const imp = JSON.stringify([mix.map(x => [x.os, Number(x.pct)]), tkn, prNum(k.bruto), prNum(k.tara), k.u === undefined ? null : String(k.u), k.imp === undefined ? null : String(k.imp), prNum(k.litros) || 0, prNum(k.frutos) || 0, k.cond || '', k.local || '', dcol]);
   if (k.chave) { const ja = Object.values(P.cargas).find(g => g.chaveRec === k.chave); if (ja) { if (ja.impRec !== imp) throw prConflito(k.chave, ja.id); return { msg: 'Pesagem já registrada (' + ja.id + ' · ticket ' + ja.ticket + '): nada foi somado de novo.', g: ja, repetido: true }; } }
   if (g0 && g0.st !== 'A pesar') throw new Error(g0.id + ' já está ' + g0.st.toLowerCase() + '.');
-  const faz = prFazDaOS(c, o); const quemRec = prAtorRec(faz, k.quem, 'Pesar e receber ' + (g0 ? 'a ' + g0.id : 'a carga da ' + osId));
-  const kk = PRDC.cult[prCultDaOS(c, o)] || {}; const cultura = kk.cultura || (g0 && g0.cultura); const u = prUn(cultura);
+  const faz = prFazDaOS(c, o); const kk = PRDC.cult[prCultDaOS(c, o)] || {}; const cultura = kk.cultura || (g0 && g0.cultura); const u = prUn(cultura);
   if (!tkn) throw new Error('Informe o ticket da balança.');
   const dupT = Object.values(P.cargas).find(g => g.st === 'Recebida' && g.faz === faz && prTk(g.ticket) === tkn);
   if (dupT) { if (dupT.impRec === imp) return { msg: 'Ticket ' + tk + ' já recebido na ' + dupT.id + ' com o mesmo conteúdo: é a mesma carga, nada foi somado de novo.', g: dupT, repetido: true };
@@ -430,7 +413,7 @@ function prReceber(c, k) { const P = prP(c, 1); const g0 = k.carga ? P.cargas[k.
   const g = g0 || (P.seq.cg = (P.seq.cg || 2100) + 1, P.cargas['CG-' + P.seq.cg] = { id: 'CG-' + P.seq.cg, os: osId, dcol, via: 'web', sinc: true, chave: k.chave || ('W-CG-' + P.seq.cg), hora: cenAgora() });
   Object.assign(g, { ticket: tk, faz, cultura, os: osId, dcol, drec, bruto: prNum(k.bruto), tara: prNum(k.tara), liq, com, u: u.grao ? String(prNum(k.u)) : null, imp: g.imp,
     impG: u.grao ? String(prNum(k.imp)) : null, desc, litros: u.campo ? prNum(k.litros) : null, frutos: u.base === 'frutos' ? prNum(k.frutos) : null, cond: k.cond, local, st: 'Recebida', lote: L.id,
-    origem: orig.map((x, i) => Object.assign({}, x, { kg: pLiq[i], com: pCom[i], base: pBase[i], litros: u.campo ? pBase[i] : 0 })), quemRec, chaveRec: k.chave || ('W-' + g.id), impRec: imp, horaRec: cenAgora() });
+    origem: orig.map((x, i) => Object.assign({}, x, { kg: pLiq[i], com: pCom[i], base: pBase[i], litros: u.campo ? pBase[i] : 0 })), quemRec: k.quem || prRec(faz), chaveRec: k.chave || ('W-' + g.id), impRec: imp, horaRec: cenAgora() });
   orig.forEach((x, i) => L.origem.push({ carga: g.id, os: x.os, cult: x.cult, tal: x.tal, dcol, kg: pBase[i], modo: x.modo }));
   L.cargas.push(g.id); if (L.validade && u.vida) L.validade = [L.validade, prDiaMais(dcol, u.vida)].sort()[0];
   prMov(c, { tipo: 'recebimento', lote: L.id, kg: base, carga: g.id, quem: g.quemRec });
@@ -444,22 +427,20 @@ function prEstornoImpede(c, g) { const L = g && prP(c).lotes[g.lote]; const ob =
   return g.id + ' alimenta o ' + L.id + ', em processo na ' + ob.id + ' (' + ob.etapa + '): estorno recusado. Erro de pesagem aparece no balanço da ordem: justifique a diferença na conferência (alçada).'; }
 /* estornar carga recebida (R-19): motivo; devolve o efeito; recusa se o lote ficar abaixo do reservado; o ticket fica livre */
 function prEstornar(c, id, motivo, quem) { const P = prP(c, 1); const g = P.cargas[id]; if (!g || g.st !== 'Recebida') throw new Error('Só carga recebida é estornada.');
-  const por = prAtorRec(g.faz, quem, 'Estornar a ' + id);
   const mot = String(motivo || '').trim(); if (!mot) throw new Error('Informe o motivo do estorno.');
   const imp = prEstornoImpede(c, g); if (imp) throw new Error(imp);
   const L = P.lotes[g.lote]; const mv = P.movs.find(m => m.tipo === 'recebimento' && m.carga === id); const kg = mv ? mv.kg : 0;
   const fis = prFis(c, L.id), res = prResLote(c, L.id); const fica = prSub(fis, kg);
   if (prCmp(fica, res) < 0) throw new Error('Estorno recusado: o ' + L.id + ' ficaria com ' + prLoteTxt(L, fica) + ', abaixo do reservado (' + prLoteTxt(L, res) + '). Cancele ou reduza a reserva antes.');
-  prMov(c, { tipo: 'estorno', lote: L.id, kg: -kg, carga: id, quem: por, obs: mot });
-  (L.origem || []).forEach(x => { if (x.carga === id) x.est = true; }); g.st = 'Estornada'; g.estorno = { motivo: mot, quem: por, d: prHoje(), at: cenAgora() }; g.ticketLivre = g.ticket;
+  prMov(c, { tipo: 'estorno', lote: L.id, kg: -kg, carga: id, quem: quem || prRec(g.faz), obs: mot });
+  (L.origem || []).forEach(x => { if (x.carga === id) x.est = true; }); g.st = 'Estornada'; g.estorno = { motivo: mot, quem: quem || prRec(g.faz), d: prHoje(), at: cenAgora() }; g.ticketLivre = g.ticket;
   return { msg: id + ' estornada (' + mot + '): ' + prLoteTxt(L, kg) + ' saem do ' + L.id + '. O ticket ' + g.ticket + ' fica livre para novo registro; o histórico continua.' }; }
 
 /* descartar carga A pesar (revisão A-06): registro do app em dobro ou carga que não saiu; nada pesado, nada a estornar; motivo e trilha ficam */
-function prDescartarCarga(c, id, motivo, quem, via) { prAppAtivo(c, via); const P = prP(c, 1); const g = P.cargas[id]; if (!g) throw new Error('Carga ' + id + ' não encontrada.');
+function prDescartarCarga(c, id, motivo, quem) { const P = prP(c, 1); const g = P.cargas[id]; if (!g) throw new Error('Carga ' + id + ' não encontrada.');
   if (g.st !== 'A pesar') throw new Error(id + ' está ' + String(g.st).toLowerCase() + ': só carga a pesar é descartada' + (g.st === 'Recebida' ? ' (carga recebida: estorne com motivo).' : '.'));
   const mot = String(motivo || '').trim(); if (!mot) throw new Error('Informe o motivo do descarte.');
-  const por = via === 'app' ? (quem || (c.app && c.app.operador) || '') : prAtorRec(g.faz, quem, 'Descartar a ' + id);   /* app: o operador do aparelho (cenAppAtivo acima) */
-  g.st = 'Descartada'; g.descarte = { motivo: mot, quem: por, d: prHoje(), at: cenAgora(), via: via || 'web' };
+  g.st = 'Descartada'; g.descarte = { motivo: mot, quem: quem || prRec(g.faz), d: prHoje(), at: cenAgora() };
   if (c.app && Array.isArray(c.app.fila)) c.app.fila = c.app.fila.filter(x => x !== id);
   return { msg: id + ' descartada (' + mot + '): a carga sai da fila de pesagem; nada entra na produção. O registro e o motivo ficam no histórico.' }; }
 

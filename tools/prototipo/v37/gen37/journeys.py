@@ -3,9 +3,9 @@
 Uso: python3 journeys.py DEMO-13 [DEMO-15 ...]   (roteiros em ../validacao/roteiros/DEMO-xx.json)
 Passos: ["abrir","X.dc.html"] · ["clicar","rótulo"] · ["ver","texto"] · ["nao_ver","texto"] · ["resultado","trecho do aviso exibido"]
         ["tela","X.dc.html"] · ["foto","nome"] · ["movel"] (390×844) · ["desktop"] · ["nota","observação livre"]"""
-import sys, os, json, time, socket, subprocess, re
+import sys, os, json, time, socket, subprocess, re, math
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
-from cdp import Chrome
+from cdp import Chrome, CONDICAO, _dormir
 HERE=os.path.dirname(os.path.abspath(__file__)); R=os.path.join(HERE,'_render'); V=os.path.join(HERE,'..','validacao')
 def free():
     s=socket.socket(); s.bind(('127.0.0.1',0)); p=s.getsockname()[1]; s.close(); return p
@@ -33,12 +33,25 @@ def run(demo):
                 elif k=='clicar':
                     res=c.js(f"({CLICK})({json.dumps(arg)})"); r['ok']=bool(res and res.get('ok')); r['obs']=res
                     if r['ok'] and res.get('href') and res['href'].endswith('.dc.html'):
-                        time.sleep(1.2)
-                        for _ in range(40):
-                            if c.js("location.pathname").endswith(res['href']) and c.js("document.readyState")=='complete': break
-                            time.sleep(0.25)
-                        time.sleep(1.5)
-                    else: time.sleep(0.8)
+                        if CONDICAO:
+                            # ACELERA: espera o documento novo (caminho certo, completo, sem navegação pendente) e assenta, com o
+                            # mesmo teto de antes: max(clique + 1,2 s, pronto) + 1,5 s
+                            t0=time.monotonic(); pronto=None
+                            while True:
+                                try: ok=c.js(f"location.pathname.endsWith({json.dumps(res['href'])}) && document.readyState==='complete' && !!window.__sfq && !window.__sfq.nav")
+                                except Exception: ok=False
+                                if ok: pronto=time.monotonic(); break
+                                if time.monotonic()>=t0+1.2+40*0.25: break
+                                _dormir(.05)
+                            if pronto is not None and pronto>t0+1.2: pronto=t0+1.2+math.ceil((pronto-t0-1.2)/0.25-1e-9)*0.25   # o laço antigo olhava a cada 0,25 s
+                            c.settle(.3,max(t0+1.2,pronto or time.monotonic())+1.5-time.monotonic())
+                        else:
+                            _dormir(1.2)
+                            for _ in range(40):
+                                if c.js("location.pathname").endswith(res['href']) and c.js("document.readyState")=='complete': break
+                                _dormir(0.25)
+                            _dormir(1.5)
+                    else: c.espera_acao(0.8)
                 elif k=='ver':
                     body=c.js("document.body.innerText"); r['ok']=arg.lower() in body.lower(); r['obs']='encontrado' if r['ok'] else 'ausente'
                 elif k=='nao_ver':
@@ -50,7 +63,7 @@ def run(demo):
                 elif k=='foto':
                     nfoto+=1; f=f'{nfoto:02d}_{arg}.png'
                     w=c.js("Math.max(document.documentElement.scrollWidth, 390)"); h=c.js("Math.min(Math.max(document.documentElement.scrollHeight, 600), 4000)")
-                    c.size(w,h); time.sleep(0.3); c.shot(os.path.join(out,f)); c.size(390 if movel else 1440, 844 if movel else 1100)
+                    c.size(w,h); c.espera_acao(0.3); c.shot(os.path.join(out,f)); c.size(390 if movel else 1440, 844 if movel else 1100)
                     r['ok']=True; r['obs']=f
                 elif k=='movel': movel=True; c.size(390,844); r['ok']=True
                 elif k=='desktop': movel=False; c.size(1440,1100); r['ok']=True

@@ -14,7 +14,7 @@ caso('REV-A5 O.S. depois do apto', () => {
   ok('REV-A5 (S3) · com o T1 apto, a OS-0420 em execução perde o impedimento e não vai para o PCP ("reprogramar" só antes de liberar)', !r1.erro && !r2.erro && !a.bloq && a.etapa === 'Em execução' && a.dono !== 'PCP' && !/reprogram/.test(a.prazo + ' ' + a.cond) && !(a.selos || []).some(s => /bloquead|Falta máquina/i.test(s.t)), [r2, a.dono, a.prazo, a.cond]);
   ok('REV-A5 · a OS-0431 (A liberar) perde o impedimento; o PCP reprograma uma vez e o texto diz quem libera depois', !b.bloq && b.etapa === 'A liberar' && b.dono === 'PCP' && /reprogram/.test(b.prazo) && /reprograma a máquina/.test(b.cond) && /confere e libera/.test(b.cond), [b.dono, b.prazo, b.cond]);
   cenMudar(null, (c) => { c.ordens['OS-0420'].etapa = 'Em conferência'; return {}; }); const e = os('OS-0420');
-  ok('REV-A5 · em Em conferência a ordem volta ao dono da fase (quem confere), nunca "Pendência com PCP" (v57: com dia provisório, o prazo é rever a conferência diária, CONTROLE-02)', e.dono !== 'PCP' && (e.prazo === 'conferir' || e.prazo === 'rever a conferência diária') && !/reprogram/.test(e.cond), [e.dono, e.prazo, e.cond]);
+  ok('REV-A5 · em Em conferência a ordem volta ao dono da fase (quem confere), nunca "Pendência com PCP"', e.dono !== 'PCP' && e.prazo === 'conferir' && !/reprogram/.test(e.cond), [e.dono, e.prazo, e.cond]);
 });
 // V55-COMP-02 (S3): com a máquina apta, osManCond (último passo do osMerge) tira só o impedimento; a pendência específica que as regras do
 // osMerge já calcularam (divergência de dose, saldo do Estoque…) fica com o dono e o prazo dela, como numa ordem sem o vínculo da máquina
@@ -27,7 +27,7 @@ for (const et of ['Em execução', 'Em conferência']) caso('COMP-02 A ' + et, (
   const pz = et === 'Em execução' ? 'revisar a divergência de dose do dia 1' : 'revisar a divergência de dose';
   ok('COMP-02 A · OS-0420 ' + et + ' com divergência de dose aberta e o Trator T1 apto: dono e prazo iguais aos da ordem sem o vínculo da máquina ("Ana (agrônoma)" · "' + pz + '"), sem impedimento nem selo da máquina',
     !!b.bloq && r1.dono === r0.dono && r1.prazo === r0.prazo && r1.dono === 'Ana (agrônoma)' && r1.prazo === pz && !r1.bloq && !D(r1).maq.length && (r1.selos || []).some(s => /^Divergência de consumo\/dose/.test(s.t)), [D(r1), D(r0)]);
-  if (et === 'Em conferência') ok('COMP-02 A · ativo apto não encerra a revisão agronômica: o encerramento continua bloqueado pela divergência (quem resolve: ' + OS_AGRO() + ')',
+  if (et === 'Em conferência') ok('COMP-02 A · ativo apto não encerra a revisão agronômica: o encerramento continua bloqueado pela divergência (quem resolve: ' + OS_AGRO + ')',
     String(r1.encM || '').indexOf(CEN_DIV) === 0 && /^Encerrar bloqueado: divergência/.test(osEncBloq(r1).t), [r1.encM, osEncBloq(r1)]);
 });
 caso('COMP-02 B', () => {

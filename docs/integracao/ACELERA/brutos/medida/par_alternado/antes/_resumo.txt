@@ -1,0 +1,30 @@
+tabelas_cad_test rc=0 t=321.146164221s :: RESULTADO: 178/178 ok 
+FIM 13:12:36
+tabelas_irr_test rc=0 t=208.178762352s :: RESULTADO: 106/106 ok 
+FIM 13:24:13
+comercial_fluxo_test rc=0 t=137.841697101s :: RESULTADO: OK 72/72 
+FIM 13:26:31
+ctl5_test rc=0 t=81.862992043s :: RESULTADO 30/30 [] 
+FIM 13:31:14
+solo_saf_test rc=0 t=117.539548990s :: RESULTADO: OK 36/36 
+FIM 13:33:12
+partest rc=0 t=97.232925753s :: RESULTADO: 50 ok · 0 falhas 
+FIM 13:38:05
+acao_responsivo rc=0 t=68.589449149s :: RESULTADO: 5 ok · 0 falhas (responsivo) 
+FIM 13:39:14
+ostest rc=0 t=26.096101319s :: 32 ok · 1 falhas ['painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo'] 
+FIM 13:41:12
+osacoes rc=0 t=28.624175514s :: RESULTADO: 40 ok · 5 falhas 
+FIM 13:41:40
+producao_fluxo_test rc=0 t=255.071179051s :: RESULTADO: OK 67/67 
+FIM 13:50:13
+ma_unica_test rc=0 t=168.805818062s :: RESULTADO: 23/23 ok 
+FIM 13:53:02
+irr_fluxo_test rc=0 t=137.717942253s :: 33 ok · 0 falhas [] 
+FIM 13:59:47
+cafe_apurar_nav rc=0 t=27.586743754s :: RESULTADO: OK 10/10 
+FIM 14:00:14
+dose_divergente_nav rc=0 t=58.064712671s :: 21/21 ok · FALHAS: 0 
+FIM 14:02:33
+etapas_celular rc=0 t=43.854271407s :: RESULTADO: 14 ok · 0 falhas (celular) 
+FIM 14:03:17

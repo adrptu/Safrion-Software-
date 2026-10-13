@@ -1,0 +1,16 @@
+OK    1 sem cultura: 6 colunas por produto ("4.409 de 4.409 produtos"); Cultura = Soja: 8 colunas por uso, "25.092 de 25.092 usos em Soja", Praga-alvo e Nome científico preenchidos, grade em 8 trilhas 
+OK    2 ordenar por Praga-alvo (cabeçalho): as primeiras linhas em ordem alfabética 
+OK    3 filtro da coluna Praga-alvo = "Ferrugem da soja": "332 de 25.092 usos em Soja", só linhas com esse nome comum 
+OK    3b A5 · com o filtro "Ferrugem da soja", os chips contam as linhas filtradas: Todas = 332, Fungicida = a lista com o chip, orgânicos (com Fungicida) = a lista com os dois 
+OK    4 busca "ferrugem ASIATICA" em Soja: 332 usos, todos de Phakopsora pachyrhizi 
+OK    5 linha do uso (28517@223@973) abre a ficha com Cultura = Soja e Alvo = Phakopsora pachyrhizi já escolhidos (um toque a menos para "Usar na O.S.") 
+OK    5b ficha › Usos registrados: colunas Praga-alvo | Nome científico | Tipo; o cabeçalho ordena A → Z e Z → A (aria-sort) 
+OK    5c Esc fecha a ficha e o foco volta à linha do uso 
+OK    6 RECUSA busca sem resultado em Soja: "0 de 25.092 usos em Soja" + "Nenhuma linha corresponde aos filtros"; "Limpar filtros" volta a 4.409 produtos e 6 colunas 
+OK    7 REPETIÇÃO: Soja de novo e depois de recarregar = "25.092 de 25.092 usos em Soja"; Mamão = 4.886 usos 
+OK    8 RECUSA usos indisponíveis: Soja fica por produto (6 colunas, "… de 4.409 produtos") com "Os usos registrados … não carregaram" + "Tentar de novo"; depois, por uso (8 colunas) 
+OK    9 390 px · Soja: 8 colunas (Praga-alvo e Nome científico), 1ª coluna presa, rolagem lateral só dentro da tabela, linhas sem quebrar; sem cultura volta a 6 trilhas 
+OK    9b 390 px · ficha com a tabela de usos sem rolagem lateral 
+OK    10 nenhum erro de execução nas páginas 
+
+RESULTADO: 14/14 ok · 53 s []

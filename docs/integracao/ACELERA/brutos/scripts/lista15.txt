@@ -1,0 +1,15 @@
+tabelas_cad_test||tabelas_cad_test.py
+tabelas_irr_test||tabelas_irr_test.py
+comercial_fluxo_test||comercial_fluxo_test.py
+ctl5_test||ctl5_test.py
+solo_saf_test||solo_saf_test.py
+partest||partest.py
+acao_responsivo||acao_unica_test.py responsivo
+ostest||ostest.py
+osacoes||osacoes.py
+producao_fluxo_test||producao_fluxo_test.py
+ma_unica_test||ma_unica_test.py
+irr_fluxo_test||irr_fluxo_test.py
+cafe_apurar_nav||cafe_apurar_test.py nav
+dose_divergente_nav||dose_divergente_test.py nav
+etapas_celular||etapas_celular_test.py celular

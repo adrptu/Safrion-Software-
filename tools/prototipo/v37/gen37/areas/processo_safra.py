@@ -219,19 +219,17 @@ def build():
     # (decisão do proprietário, 05/10/2026: mais intuitivo e filtrar unidade não gera valor). "1º uso" logo depois do insumo (v3.8)
     g_dem=grid([dict(k='grp',l='Grupo',w=130),dict(k='ins',l='Insumo',w=200),dict(k='uso',l='1º uso',t='num'),dict(k='liq',l='Necessidade líquida',t='num',a='r',w=128),dict(k='falta',l='Falta em',t='num',w=110),
                 dict(k='valor',l='Valor (R$)',t='num',a='r',d=2,agg='sum'),dict(k='sit',l='Situação'),dict(k='sol',l='Solicitação',w=120),dict(k='comp',l='A complementar',t='num',a='r',w=120),
-                dict(k='bruta',l='Demanda bruta',t='num',a='r'),dict(k='real',l='Antes de hoje sem O.S.',t='num',a='r',w=130,ajuda='Uso do plano com data antes de hoje que nenhuma O.S. cobre: fica fora da demanda (histórico do plano). Se ainda vai acontecer, emita a O.S.'),dict(k='est',l='Estoque apto',t='num',a='r',w=118),dict(k='antes',l='Usado antes da compra',t='num',a='r',w=130),
+                dict(k='bruta',l='Demanda bruta',t='num',a='r'),dict(k='real',l='Já realizado',t='num',a='r'),dict(k='est',l='Estoque apto',t='num',a='r',w=118),dict(k='antes',l='Usado antes da compra',t='num',a='r',w=130),
                 dict(k='res',l='Reservado',t='num',a='r'),dict(k='rec',l='Recebimentos previstos',t='num',a='r',w=112),dict(k='tarde',l='Recebido após a falta',t='num',a='r',w=130),
                 dict(k='cob',l='Coberta em',t='num',w=110),dict(k='preco',l='Preço',t='num',a='r',w=120)],   # preço com a unidade do insumo junto: "R$ 3,90/kg"
        [],edit=dict(m='origin',leafOnly=True,title='Insumo',fields=[dict(k='ins',l='Insumo',t='txt',ro=True),dict(k='un',l='Unidade',t='txt',ro=True)]),tree=True,gid='g_dem',total=True,qf=dict(k='sit',cut=' · ',l='situação'))
     # ---------- JS do processo ----------
-    sol0={'S2627':dict(id='SOL-2026-07',at='23/09/2026',em=D2.SOL_INICIAL['enviada'],por=D2.SOL_INICIAL['por'],   # envio original (a atualização grava atu e hist, revisão do CTL-4)
-                       itens={n:round(o['liq'],3) for n,o in D2.demanda('S2627').items() if o['liq']>0.001},comp=0)}
+    sol0={'S2627':dict(id='SOL-2026-07',at='23/09/2026',itens={n:round(o['liq'],3) for n,o in D2.demanda('S2627').items() if o['liq']>0.001},comp=0)}
     d2=dict(D2.js_data()); d2['sol']=sol0; d2['talhoes']=TALH; d2['talfaz']=TALFAZ; d2['talOrd']=TAL_FAZ; d2['culturas']=OCEN.CULTURAS; d2['unMeta']=OCEN.UN_META; d2['cultivares']=OCEN.cultivares(); d2['folga']=OCEN.FOLGA; d2['conj_opts']=conj_opts; d2['hoje']=D2.HOJE_ISO; d2['viavel']=D2.VIAVEL
     import cenario, dados_solo as DSO
     from areas.analise_solo import SOLO_UI_JS, porque_html
     # análise de solo (SOLO-01): o estado compartilhado (cenario.js + solo.js) e os laudos (SOLO0) entram no Planejar safra; 0 colisões de nome (solo_unit_test)
-    # CTL-4: o mesmo cenário compartilhado (O.S., requisições, lotes) entra na demanda (cenDemEntradas/cenOsDem): emitir, liberar, apontar, cancelar ou devolver muda a conta
-    EXTRAJS[0]=cenario.js_prefixo()+DSO.js_prefixo()+SOLO_UI_JS+'\nconst D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
+    EXTRAJS[0]=cenario.js_prefixo()+DSO.js_prefixo()+SOLO_UI_JS+'const D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
 function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' && r && String(r.id).indexOf('n')===0 && !self.state.saf){ if(!r.v.estado) r.v.estado='Rascunho'; self.setState({saf:r.id,step:2,g2toast:'Safra criada: '+r.v.nome+'. Planeje os talhões livres na tabela.'}); }
     if(String(gid).indexOf('g_cult_')===0) cultAfter(self,gid,rows,r,isNew);
     if(String(gid).indexOf('g_rend_')===0&&r) rendAfter(self,gid,rows,r,isNew);
@@ -243,7 +241,7 @@ function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' &&
   self.g2formActs=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultActs(self,gid,r):(String(gid).indexOf('g_rend_')===0?rendActs(self,gid,r):null));
   self.g2check=(gid,rows,r,d,isNew)=>(String(gid).indexOf('g_cult_')===0?cultCheck(self,gid,rows,r,d,isNew):(String(gid).indexOf('g_rend_')===0?(self._conjAntes=(r?String(r.v.conj_id||''):null),opAntes(self,r),rendCheck(self,rows,r,d,isNew)):(String(gid).indexOf('g_recp_')===0?(opAntes(self,r),null):(gid==='g_saf'?safCheck(d):null))));
   self.g2pick=(gid,rid,r)=>{ if(gid==='g_op') abrirRend(self,rid); if(String(gid).indexOf('g_cap_')===0) abrirRec(self,rid); }; }
-const _EV=EXTRAVALS; EXTRAVALS=function(self,v){ _safhooks(self); cenOuvir(self); _EV(self,v); v.ap_bulk=()=>openApply(self,null); };
+const _EV=EXTRAVALS; EXTRAVALS=function(self,v){ _safhooks(self); _EV(self,v); v.ap_bulk=()=>openApply(self,null); };
 const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)=>rendNova(self,rid); resumoVals(self,v); };   // + Outra configuração e Resumo da safra (etapa 3)'''
     # ---------- corpo ----------
     # UX-ACAO-UNICA-20261003: o cabeçalho do bloco só tem comandos do próprio conteúdo (criar, adicionar, modo de visão); avanço,

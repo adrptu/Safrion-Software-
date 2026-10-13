@@ -1,0 +1,18 @@
+ds_unit_test||ds_unit_test.py
+tabelas_cad_irr_unit||tabelas_cad_irr_unit.py
+outorga_unit_test||outorga_unit_test.py
+usar_os_unit_test||usar_os_unit_test.py
+ficha_pivo_unit_test||ficha_pivo_unit_test.py
+praga_alvo_unit_test||praga_alvo_unit_test.py
+solo_unit_test||solo_unit_test.py
+pa_regras_test||pa_regras_test.py
+comercial_unit_test||comercial_unit_test.py
+producao_unit_test||producao_unit_test.py
+ben_unit_test||ben_unit_test.py
+ma_regras_test||ma_regras_test.py
+ma_app_test||ma_app_test.py
+os_aprov_lib_test||os_aprov_lib_test.py
+dose_divergente_unit||dose_divergente_test.py unit
+cafe_apurar_unit||cafe_apurar_test.py unit
+links_ocultos_test||links_ocultos_test.py
+cdp_unit_test||cdp_unit_test.py

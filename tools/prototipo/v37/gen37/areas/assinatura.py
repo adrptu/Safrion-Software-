@@ -6,13 +6,14 @@ Cobrança simulada: nenhum provedor, nenhuma credencial, nenhum campo de cartão
 cenário salvo (assinatura.js, prefixo de toda tela); valores por assinMensalidade (regra decimal única cenQtd).
 Uma ação primária (R14): Pagar fatura › Ampliar área contratada › Alterar plano ou área. A faixa de cobrança não aparece aqui (R11).
 Os painéis (fatura, plano) e o estilo vivem aqui e são usados também pela plataforma (areas/plataforma.py)."""
-import json   # (usado pelas telas que importam daqui)
+import json
 from engine import grid, section, esc, BTN_ST, INK, MUTED, LINE, BG, SURF, ACC, ACCS, YEL, YELS, RED, REDS, DISP, EXTRAJS
 import engine as E
 import ui37
 from ui37 import shell37, HEIGHTS37
 import cenario
 import dados_assinatura as DA
+import dados_cad as DC
 
 H = lambda s: '{{' + s + '}}'
 PERFIL_CF = DA.GESTORA   # quem age no CF-05 (perfil da casca), gravado em cada ato (revisão PLAT, achado 4)
@@ -46,12 +47,11 @@ def kpis_dyn(pre, rotulos):
         for i, r in enumerate(rotulos)) + '</div>'
 
 
-def painel(hole, corpo, rodape, largura=480, foco=False):
-    """painel lateral (aside role=dialog) do mesmo padrão dos formulários G2: fundo escuro fecha; Esc fecha; título vem do estado.
-    foco=True (Configurações, revisão CONF 13/10): ao abrir, o foco entra no painel (o g2lib move para o 1º controle), e Esc fecha sem um Tab antes."""
+def painel(hole, corpo, rodape, largura=480):
+    """painel lateral (aside role=dialog) do mesmo padrão dos formulários G2: fundo escuro fecha; Esc fecha; título vem do estado."""
     return (f'<sc-if value="{H(hole)}" hint-placeholder-val="{F_}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
             f'<button type="button" aria-label="Fechar" tabIndex="-1" onClick="{H(hole + "_fechar")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button>'
-            f'<aside role="dialog"' + (' data-foco="1"' if foco else '') + f' aria-label="{H(hole + "_tit")}" onKeyDown="{H(hole + "_tecla")}" style="position: relative; width: {largura}px; max-width: 100%; height: 100%; overflow-y: auto; background: {SURF}; '
+            f'<aside role="dialog" aria-label="{H(hole + "_tit")}" onKeyDown="{H(hole + "_tecla")}" style="position: relative; width: {largura}px; max-width: 100%; height: 100%; overflow-y: auto; background: {SURF}; '
             f'box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;">'
             f'<div style="display: flex; align-items: flex-start; gap: 10px;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">{H(hole + "_tit")}</h2>'
             f'<button type="button" aria-label="Fechar" title="Fechar" onClick="{H(hole + "_fechar")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED}; flex-shrink: 0;">×</button></div>'
@@ -115,9 +115,6 @@ function aBaixar(self,org,f){ const csv=assinCsv(org,f); try{ window.__assinCsv=
 
 CF_JS = r'''
 function cfMed(){ return assinMedir(ASSIN_CAD0, assinCadSalvo()); }
-// quem age no CF-05 (CONF-01 P7, R7 · AL-15): o perfil de demonstração (Ver como) conferido na alçada, DENTRO do cenMudar: sem o papel, recusa e
-// nada é gravado. assinIni e o backoffice não mudam (RV-01: conciliar e resolver seguem com "Admin plataforma", fora da organização)
-function cfPor(acao){ return cenExigeAlc(g2perfil(),'AL-15',acao); }
 function cfSafe(id){ return String(id).replace(/[^A-Za-z0-9]/g,'_'); }
 function cfFaturas(org,A,med){ return (org.faturas||[]).concat([assinPrevia(org,A.hoje,med.ha,med.n)]); }
 function cfAbreFat(self,id){ self.setState({cf_fat:id,cf_chave:assinChave('pag'),cf_forma:'',cf_ferr:'',cf_cts:false,cf_motivo:'',cf_cts_chave:assinChave('cts'),cf_pl:false}); }
@@ -154,14 +151,14 @@ function EXTRAVALS(self,v){ const X=self._cf; const {A,org,hoje,med,k,ag,P,pv}=X
   // acima do contratado: não entra na cobrança sem aceite (R2)
   const lim=(ag||k).ha; const exc=assinCent(med.ha)-assinCent(k.ha);
   v.cf_acima=exc>0; v.cf_acima_t=exc>0?(assinHa(exc/100)+' acima da área contratada não entram na cobrança de '+assinComp(pv.comp)+(assinCent(med.ha)>assinCent(lim)||!ag?'; com o aceite da ampliação, entram a partir de '+assinBr(assinMesSeg(hoje))+'.':'; a ampliação já está agendada para '+assinBr(ag.desde)+'.')):'';
-  v.cf_pessoas='Pessoas com acesso: '+confComAcesso()+' (Configurações › Usuários e alçadas) · usuários sem limite · não entram na cobrança';
+  v.cf_pessoas='Pessoas com acesso: '+CF_PESSOAS+' (Cadastros › Pessoas e equipes) · usuários sem limite · não entram na cobrança';
   // primária única (R14)
   v.cf_prim_dis=false; v.cf_prim_tit='';
   if(prim==='pagar'){ v.cf_prim_t='Pagar fatura'; v.cf_prim_fn=()=>cfAbreFat(self,ab.id); }
   else if(prim==='proposta'){ const pr=org.proposta; if(!self.__cfPro) self.__cfPro=assinChave('pro'); const kp=self.__cfPro;
     v.cf_prim_t=pr?'Proposta empresarial pedida em '+assinBrC(pr.d):'Pedir proposta empresarial'; v.cf_prim_dis=!!pr;
     v.cf_prim_tit=pr?'Pedido '+pr.recibo+' por '+pr.por+': a plataforma responde; a cobrança segue o contrato de hoje.':'Medida acima de '+assinNf(ASSIN_PAR.limite_ha,0,0)+' ha: os planos vão até esse limite.';
-    v.cf_prim_fn=()=>{ if(!pr) cenMudar(self,c=>assinProposta(c,cfMed().ha,kp,cfPor('Pedir proposta empresarial'))); }; }
+    v.cf_prim_fn=()=>{ if(!pr) cenMudar(self,c=>assinProposta(c,cfMed().ha,kp,CF_POR)); }; }
   else if(prim==='ampliar'){ v.cf_prim_t='Ampliar área contratada'; v.cf_prim_fn=()=>cfAbrePl(self,k.plano,assinSugere(med.ha)); }
   else { v.cf_prim_t='Alterar plano ou área'; v.cf_prim_fn=()=>cfAbrePl(self,(ag||k).plano,(ag||k).ha); }
   // linhas: abrir fatura e plano
@@ -178,10 +175,10 @@ function EXTRAVALS(self,v){ const X=self._cf; const {A,org,hoje,med,k,ag,P,pv}=X
     v.cf_fmem=aMemoria(f); v.cf_fev=aEventos(f); v.cf_temev=v.cf_fev.length>0;
     v.cf_fpag=f.st==='aberta'; v.cf_formas=ASSIN_PAR.formas.map(x=>({t:x+' · simulado',on:String(st.cf_forma===x),go:()=>self.setState({cf_forma:x,cf_ferr:''})}));
     v.cf_ferr=st.cf_ferr||''; v.cf_tferr=!!st.cf_ferr;
-    v.cf_pagar=()=>{ const r=cenMudar(self,c=>assinPagar(c,f.id,self.state.cf_forma,self.state.cf_chave,cfPor('Pagar a fatura de '+assinComp(f.comp)))); self.setState({cf_ferr:r.erro||''}); };
+    v.cf_pagar=()=>{ const r=cenMudar(self,c=>assinPagar(c,f.id,self.state.cf_forma,self.state.cf_chave,CF_POR)); self.setState({cf_ferr:r.erro||''}); };
     v.cf_podects=assinPodeContestar(f); v.cf_cts=!!st.cf_cts&&v.cf_podects; v.cf_cts_tog=()=>self.setState({cf_cts:!self.state.cf_cts});   /* uma contestação por fatura (achado 1) */
     v.cf_motivo=st.cf_motivo||''; v.cf_setmot=(e)=>self.setState({cf_motivo:e.target.value});
-    v.cf_contestar=()=>{ const r=cenMudar(self,c=>assinContestar(c,f.id,self.state.cf_motivo,self.state.cf_cts_chave,cfPor('Contestar a fatura de '+assinComp(f.comp)))); if(!r.erro) self.setState({cf_cts:false}); };
+    v.cf_contestar=()=>{ const r=cenMudar(self,c=>assinContestar(c,f.id,self.state.cf_motivo,self.state.cf_cts_chave,CF_POR)); if(!r.erro) self.setState({cf_cts:false}); };
     v.cf_csv=()=>aBaixar(self,org,f); }
   else { v.cf_fmem=[]; v.cf_fev=[]; v.cf_formas=[]; }
   // ---- painel do plano ou área (prévia hoje → depois) ----
@@ -204,9 +201,9 @@ function EXTRAVALS(self,v){ const X=self._cf; const {A,org,hoje,med,k,ag,P,pv}=X
     v.cf_pv=L.map(x=>({t:x[0],a:x[1],b:x[2],tema:!!x[1]&&x[1]!==x[2]}));   /* só o que muda mostra hoje → depois */
     const alvo=ag||k; v.cf_pl_pode=!teto&&!(alvo.plano===pl&&assinCent(alvo.ha)===assinCent(ha));
     v.cf_pl_ok='Aceitar e agendar para '+assinBr(desde);
-    v.cf_aceitar=()=>{ const r=cenMudar(self,c=>assinMudar(c,pl,self.state.cf_pl_ha,cfMed().ha,self.state.cf_pl_chave,cfPor('Aceitar a mudança de plano ou área'))); self.setState({cf_pl_err:r.erro||''}); };   /* a chave muda quando o formulário muda (ou ao desfazer): o clique repetido devolve o mesmo recibo (R8) */
+    v.cf_aceitar=()=>{ const r=cenMudar(self,c=>assinMudar(c,pl,self.state.cf_pl_ha,cfMed().ha,self.state.cf_pl_chave,CF_POR)); self.setState({cf_pl_err:r.erro||''}); };   /* a chave muda quando o formulário muda (ou ao desfazer): o clique repetido devolve o mesmo recibo (R8) */
     v.cf_tag=!!ag; v.cf_ag_t=ag?('Mudança agendada: '+assinPlano(ag.plano).nome+' · '+assinHa(ag.ha)+' a partir de '+assinBr(ag.desde)+' (aceite '+assinBrC(ag.aceite)+(ag.recibo?' · '+ag.recibo:'')+(ag.por?' · por '+ag.por:'')+').'):'';
-    v.cf_desfazer=()=>{ const r=cenMudar(self,c=>assinDesfazer(c,self.state.cf_des_chave,cfPor('Desfazer a mudança agendada'))); if(!r.erro&&!r.repetido) self.setState({cf_pl_chave:assinChave('ace'),cf_des_chave:assinChave('des')}); }; }
+    v.cf_desfazer=()=>{ const r=cenMudar(self,c=>assinDesfazer(c,self.state.cf_des_chave,CF_POR)); if(!r.erro&&!r.repetido) self.setState({cf_pl_chave:assinChave('ace'),cf_des_chave:assinChave('des')}); }; }
   else { v.cf_ppl=[]; v.cf_pv=[]; }
   // ---- demonstração: data simulada da cobrança (só avança) e restaurar ----
   v.cf_hoje=assinBr(hoje);
@@ -267,11 +264,11 @@ def build():
                + f'<textarea id="cf_motivo" value="{H("cf_motivo")}" onChange="{H("cf_setmot")}" style="font-family: inherit; font-size: 13.5px; padding: 9px 11px; border-radius: 10px; border: 1px solid {LINE}; min-height: 64px; resize: vertical;"></textarea>'
                + f'<span style="font-size: 11.5px; color: {MUTED};">Enquanto a plataforma não resolve, a fatura não conta atraso nem restringe nada. A fatura não é reescrita.</span>'
                + f'<div><button type="button" onClick="{H("cf_contestar")}" style="{SEC}">Registrar contestação</button></div></div></sc-if>')
-    rod_f = (f'<div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">'
+    rod_f = (f'<div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding-top: 10px; border-top: 1px solid {LINE};">'
              f'<button type="button" onClick="{H("cf_csv")}" style="{SEC}">Baixar fatura (CSV)</button>'
              f'<sc-if value="{H("cf_podects")}" hint-placeholder-val="{F_}"><button type="button" aria-expanded="{H("cf_cts")}" onClick="{H("cf_cts_tog")}" style="{SEC}">Contestar fatura</button></sc-if>'
              f'<sc-if value="{H("cf_fpag")}" hint-placeholder-val="{F_}"><button type="button" onClick="{H("cf_pagar")}" style="{PRI}">Confirmar pagamento (simulado)</button></sc-if></div>')
-    E.EXTRA.append(painel('cf_fp', corpo_f, rod_f, 500, foco=True))
+    E.EXTRA.append(painel('cf_fp', corpo_f, rod_f, 500))
     # painel do plano ou área
     corpo_p = (titulo('Plano') + f'<div role="radiogroup" aria-label="Plano" style="display: flex; gap: 8px;"><sc-for list="{H("cf_ppl")}" as="pp" hint-placeholder-count="2">'
                f'<button type="button" role="radio" class="assin-esc" aria-checked="{H("pp.on")}" onClick="{H("pp.go")}">{H("pp.t")}</button></sc-for></div>'
@@ -285,10 +282,12 @@ def build():
                + f'<span><sc-if value="{H("pv.tema")}" hint-placeholder-val="{T_}"><span>{H("pv.a")} → </span></sc-if><b>{H("pv.b")}</b></span></div></sc-for></div>'
                + f'<sc-if value="{H("cf_tag")}" hint-placeholder-val="{F_}"><div role="note" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 12px; background: {YELS}; color: {YEL}; font-size: 13px; font-weight: 700;">'
                + f'<span>{H("cf_ag_t")}</span><div><button type="button" onClick="{H("cf_desfazer")}" style="{SEC}">Desfazer mudança</button></div></div></sc-if>')
-    rod_p = (f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">'
+    rod_p = (f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 10px; border-top: 1px solid {LINE};">'
              f'<sc-if value="{H("cf_pl_pode")}" hint-placeholder-val="{T_}"><button type="button" onClick="{H("cf_aceitar")}" style="{PRI}">{H("cf_pl_ok")}</button></sc-if></div>')
-    E.EXTRA.append(painel('cf_pp', corpo_p, rod_p, 500, foco=True))
-    EXTRAJS[0] = cenario.js_prefixo() + DA.js_cad0() + JS_COMUM + CF_JS   # quem age: cfPor (AL-15 pelo Ver como); pessoas com acesso: confComAcesso (c.conf)
+    E.EXTRA.append(painel('cf_pp', corpo_p, rod_p, 500))
+    pessoas = sum(1 for p in DC.PESSOAS if p.get('login'))
+    EXTRAJS[0] = (cenario.js_prefixo() + DA.js_cad0() + f'const CF_PESSOAS = {pessoas};\nconst CF_POR = {json.dumps(PERFIL_CF, ensure_ascii=False)};\n'
+                  + JS_COMUM + CF_JS)
     HEIGHTS37[fname] = 1700
     shell37('CF-05', 'Assinatura e cobrança', corpo, fname=fname, search=False, perfil=PERFIL_CF,
             subtitle='Cobrança simulada · nenhum valor é cobrado. Plano, uso medido no cadastro, faturas e mudança de plano ou área com prévia.',

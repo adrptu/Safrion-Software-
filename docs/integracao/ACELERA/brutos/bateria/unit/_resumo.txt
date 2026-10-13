@@ -1,0 +1,19 @@
+ds_unit_test rc=0 t=.591805031s :: RESULTADO: OK 44/44 RESULTADO: OK 29/29 
+tabelas_cad_irr_unit rc=0 t=.842981063s :: RESULTADO: 49/49 ok 
+outorga_unit_test rc=0 t=2.637243439s :: RESULTADO 27/27 
+usar_os_unit_test rc=0 t=.764666511s :: RESULTADO 24/24 
+ficha_pivo_unit_test rc=0 t=.632558959s :: RESULTADO 23/23 
+praga_alvo_unit_test rc=0 t=10.842093910s :: RESULTADO 21/21 
+solo_unit_test rc=0 t=.598943497s :: RESULTADO: OK 126/126 
+pa_regras_test rc=0 t=.295040345s :: RESULTADO 18/18 
+comercial_unit_test rc=0 t=1.241959907s :: RESULTADO: OK 114/114 
+producao_unit_test rc=0 t=.597369015s :: RESULTADO: OK 123/123 
+ben_unit_test rc=0 t=1.977753272s :: RESULTADO: OK 168/168 
+ma_regras_test rc=0 t=.682688174s :: RESULTADO: 150/150 ok 
+ma_app_test rc=0 t=.562516774s :: RESULTADO: 36/36 ok 
+os_aprov_lib_test rc=0 t=.528547533s :: TOTAL 45 · falhas 0 RESULTADO passou · TOTAL 45 · falhas 0 
+dose_divergente_unit rc=0 t=.721940771s :: RESULTADO unit: 35/35 RESULTADO unit Início: 2/2 
+cafe_apurar_unit rc=0 t=.377626201s :: RESULTADO unit: 16/16 
+links_ocultos_test rc=0 t=2.320548817s :: TOTAL 14 · falhas 0 
+cdp_unit_test rc=0 t=9.128816421s :: RESULTADO: 5/5 ok 
+FIM 13:06:51

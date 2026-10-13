@@ -1,0 +1,148 @@
+../ferramentas/acoes_duplicadas.py  :: conjunto fixo · varre todas as páginas (42 mudaram)
+acao_unica_test.py  :: abre página mudada: AG-01det, EST, IN-04, IR-02, MA, MB-01, MB-02, MB-05 …
+agrofit_test.py  :: abre página mudada: AG-01, AG-07, IR-01, MA, OS, SAF
+agtest.py  :: abre página mudada: AG-01, AG-01det, AG-02, AG-03, AG-07, OS
+ap_unico_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: EST, MB-01, MB-03, OS
+app_cenario_test.py  :: abre página mudada: MB-01, MB-02det, MB-03, MB-04, MB-05, OS
+app_entrega_parcial_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: MB-01, MB-02det, MB-03, MB-05, OS
+app_mb02det_test.py  :: abre página mudada: MB-01, MB-02det, OS
+app_mb03_turno_test.py  :: abre página mudada: MB-01, MB-02det, MB-03, MB-03x-recibo, OS
+app_mb03x_test.py  :: abre página mudada: MB-01, MB-03x-recibo, OS
+app_mb04_test.py  :: abre página mudada: MB-01, MB-04, OS
+app_os0424_test.py  :: abre página mudada: MB-01, OS, OS-0424-app
+app_restaurar_test.py  :: abre página mudada: MB-01, MB-03, OS
+app_saldo_zero_test.py  :: abre página mudada: MB-01, MB-02det, MB-03, MB-05, OS
+assinatura_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: BO-02, CF-05, EST, IN-04, MB-01, OS
+ben_fluxo_test.py  :: usa arquivo mudado: ben_unit.js, cenario.py, dados_comercial.py · abre página mudada: BEN, CARGA, COLH, EST, MA, OS, PROD
+cada_cd03_test.py  :: abre página mudada: CD-03, OS
+cada_cd04_test.py  :: abre página mudada: BEN, CD-03, OS
+cada_fix03_test.py  :: abre página mudada: CD-03
+cada_fix04_test.py  :: abre página mudada: CD-03
+cadc_cd0102_b.py  :: abre página mudada: SAF
+cadf_det_test.py  :: abre página mudada: SAF
+cadp_fix_test.py  :: abre página mudada: VE-04
+cafe_apurar_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: BEN, CARGA, COLH, OS, PROD
+carencia_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: AG-01, CARGA, CD-03, CO-06, EST, IN-04, IR-01, IR-03det …
+cftest.py  :: abre página mudada: CF-05, OS
+cmptest.py  :: abre página mudada: EST, SAF
+comercial_fluxo_test.py  :: abre página mudada: COLH, EXPED, PCOM, PROD, VEN
+comercial_revisao_test.py  :: usa arquivo mudado: comercial_unit.js · abre página mudada: BEN, EXPED, OS, PCOM, PROD, VEN
+componentes_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: IN-04, IR-02, MA, MB-01, MB-03, OS, OS-0424-app, SAF
+consumo_divergente_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: EST, MB-01, MB-02det, MB-03, MB-05, OS
+cotest.py  :: abre página mudada: CO-06
+ctl5_test.py  :: abre página mudada: AG-07, IR-02, IR-03det, IR-04, MA, OS
+dose_divergente_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: AG-01, CD-03, CO-06, EST, IN-03, IN-04, IR-01, IR-02 …
+ds_test.py  :: varre todas as páginas (42 mudaram)
+est_cenario_test.py  :: abre página mudada: BEN, EST, OS
+est_fix1_test.py  :: abre página mudada: EST, OS
+est_fix2_test.py  :: abre página mudada: EST, OS
+est_repro.py  :: abre página mudada: EST, OS
+esttest.py  :: abre página mudada: BEN, EST, OS
+etapas_celular_test.py  :: varre todas as páginas (42 mudaram)
+ficha_pivo_test.py  :: abre página mudada: CD-03, IR-01
+getest.py  :: abre página mudada: OS
+intest.py  :: abre página mudada: AG-01, IN-04, OS
+irr_estado_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: CD-03, EST, IN-04, IR-01, IR-02, IR-03det, IR-04, OS
+irr_fluxo_test.py  :: abre página mudada: EST, IN-03, IN-04, IR-01, IR-02, IR-03, IR-03det, IR-04 …
+irtest.py  :: abre página mudada: IR-01, IR-02, IR-03, IR-03det, IR-04, OS
+ma_app_fluxo_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: MA, MB-01, MB-04, MB-09, MB-09det, OS
+ma_atrito_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: MA
+ma_correcoes_om_test.py  :: abre página mudada: MA
+ma_correcoes_pm_test.py  :: abre página mudada: MA
+ma_planos_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: MA
+ma_rastreio_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · varre todas as páginas (42 mudaram)
+ma_revisao_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: MA, OS
+ma_unica_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · varre todas as páginas (42 mudaram)
+map_aprov_test.py  :: abre página mudada: EST, IN-03, IN-04, OS
+map_decisoes_test.py  :: abre página mudada: EST, IN-04, IR-03det, MA, OS
+map_irrig_filtro_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: IN-03, IN-04, IR-01, IR-02, IR-03det, IR-04, OS
+matest.py  :: abre página mudada: CD-03, MA, OS
+mbtest.py  :: abre página mudada: CARGA, MB-01, MB-02, MB-02det, MB-03, MB-03x-recibo, MB-04, MB-05 …
+mip_correcoes_test.py  :: abre página mudada: AG-01, AG-01det, AG-03, AG-04, AG-07, IN-04, OS
+mip_fluxo_test.py  :: abre página mudada: AG-01, AG-01det, AG-03, AG-04, IN-04, OS
+obotest.py  :: abre página mudada: BO-01, BO-02
+ocupacao_test.py  :: abre página mudada: SAF
+os_ator_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: OS
+os_cenario_test.py  :: abre página mudada: AG-01, BEN, EST, OS
+os_irrig_filtro_test.py  :: abre página mudada: EST, IR-02, IR-03, IR-03det, OS, SAF
+os_v39_bloq_test.py  :: abre página mudada: OS
+os_v39_liberar_test.py  :: abre página mudada: OS
+os_v39_selo_agua_test.py  :: abre página mudada: IR-03, IR-03det, OS
+osacoes.py  :: abre página mudada: OS
+osfix.py  :: abre página mudada: OS
+ostela.py  :: abre página mudada: EST, IR-03, IR-03det, OS
+ostest.py  :: abre página mudada: IN-04, MB-02, OS
+pa_lista_test.py  :: abre página mudada: EST, SAF
+partest.py  :: abre página mudada: SAF
+plataforma_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: BO-01, BO-02, CF-05
+pltest.py  :: abre página mudada: OS
+praga_alvo_test.py  :: abre página mudada: AG-07, MA
+producao_fluxo_test.py  :: abre página mudada: BEN, CARGA, COLH, MB-07, MB-10, OS, PROD, VEN
+psfix38test.py  :: abre página mudada: SAF
+rend_multiconjuntos_test.py  :: abre página mudada: SAF
+reserva_duplo_clique_test.py  :: abre página mudada: PROD
+saf38test.py  :: abre página mudada: SAF
+saf_c01_test.py  :: abre página mudada: SAF
+saf_capacidade_simetrica_test.py  :: varre todas as páginas (42 mudaram)
+saf_cmp_continuidade_test.py  :: abre página mudada: OS, SAF
+saf_operacoes_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: SAF
+saf_revisao_test.py  :: abre página mudada: SAF
+saftest.py  :: abre página mudada: SAF
+solo_ag02_test.py  :: abre página mudada: AG-02, IR-01, OS, SAF
+solo_os_test.py  :: abre página mudada: OS, SAF
+solo_rev_test.py  :: abre página mudada: AG-02, IN-04, OS, SAF
+solo_saf_test.py  :: abre página mudada: AG-02, OS, SAF
+sutest.py  :: abre página mudada: OS
+tabelas_ben_test.py  :: abre página mudada: BEN
+tabelas_cad_test.py  :: abre página mudada: CD-03
+tabelas_est_test.py  :: abre página mudada: BEN, EST, OS
+tabelas_irr_test.py  :: abre página mudada: IR-01, IR-02, IR-03, IR-03det, IR-04, OS
+tabelas_os_test.py  :: abre página mudada: OS
+tabelas_saf_test.py  :: abre página mudada: SAF
+talmapa_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: IN-04
+varredura.py  :: conjunto fixo · varre todas as páginas (42 mudaram)
+verif_barras.py  :: abre página mudada: IN-04
+verif_ce_est.py  :: abre página mudada: EST
+verif_chips.py  :: abre página mudada: OS
+verif_dup.py  :: abre página mudada: OS
+verif_est1.py  :: abre página mudada: EST
+verif_est2.py  :: abre página mudada: EST
+verif_largura.py  :: abre página mudada: OS
+verif_mapa.py  :: abre página mudada: AG-01, IN-04, MB-02, OS
+verif_os.py  :: abre página mudada: OS
+verif_overflow.py  :: abre página mudada: EST
+verif_pedido.py  :: abre página mudada: EST, IN-04, MB-02, OS, SAF
+verif_saf.py  :: abre página mudada: SAF
+verif_saf2.py  :: abre página mudada: SAF
+verif_saf3.py  :: abre página mudada: SAF
+verif_saf4.py  :: abre página mudada: SAF
+verif_saf4_old.py  :: abre página mudada: SAF
+verif_shots.py  :: abre página mudada: IN-04, OS
+verif_shots_cmpest.py  :: abre página mudada: EST
+verif_t12.py  :: abre página mudada: EST, IN-04, MB-02, OS, SAF
+vetest.py  :: abre página mudada: VE-04
+aprova_quem_decide_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: BEN, EST, MA, OS
+assinatura_unit_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: AG-01, BO-01, BO-02, CD-03, CF-05, CO-06, EST, IN-03 …
+ben_mutantes.py  :: usa arquivo mudado: ben_unit.js, cenario.py, dados_comercial.py · abre página mudada: BEN, EST, MA, OS, PROD
+cal01_test.py  :: abre página mudada: OS
+capacidade_unit.py  :: abre página mudada: SAF
+comercial_unit_test.py  :: usa arquivo mudado: cenario.py, comercial_unit.js, dados_comercial.py · abre página mudada: BEN, OS
+ds_unit_test.py  :: usa arquivo mudado: ben_unit.js, cenario.py, comercial_unit.js, dados_comercial.py · varre todas as páginas (42 mudaram)
+ficha_pivo_unit_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: CD-03, EST, IN-04, IR-01, IR-02, IR-03det, IR-04, OS
+inicio_entrega_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: AG-01, CARGA, CD-03, EST, IN-04, IR-01, IR-03det, IR-04 …
+legal_unit_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: AG-01, OS
+links_ocultos_test.py  :: conjunto fixo · usa arquivo mudado: ben_unit.js, cenario.py, comercial_unit.js, dados_comercial.py · abre página mudada: AG-01, AG-01det, AG-02, AG-03, AG-04, AG-07, BEN, BO-01 …
+ma_app_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: AG-01, CARGA, CD-03, EST, IN-04, IR-01, IR-03det, IR-04 …
+ma_regras_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: OS
+mip_unit_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: AG-01, OS
+ocupacao_unit.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: SAF
+os_aprov_lib_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: BEN, OS
+outorga_unit_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: CD-03, EST, IN-04, IR-01, IR-02, IR-03det, IR-04, OS
+pa_regras_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: MA, SAF
+praga_alvo_unit_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: AG-01, AG-01det, AG-02, AG-03, AG-04, AG-07, EST, MA …
+producao_unit_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: BEN, OS, VE-04
+quantidade_test.py  :: usa arquivo mudado: ben_unit.js, cenario.py, comercial_unit.js, dados_comercial.py · abre página mudada: AG-01, AG-01det, AG-02, AG-03, AG-04, AG-07, BEN, BO-01 …
+solo_regressao_test.py  :: abre página mudada: OS
+solo_unit_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: AG-02, MA, OS, SAF
+tabelas_cad_irr_unit.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · varre todas as páginas (42 mudaram)
+usar_os_unit_test.py  :: usa arquivo mudado: cenario.py, dados_comercial.py · abre página mudada: AG-01, AG-01det, AG-02, AG-03, AG-04, AG-07, EST, MA …

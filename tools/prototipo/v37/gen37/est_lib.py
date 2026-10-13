@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Apoio dos testes do Estoque (esttest.py, est_*.py): servidor local de _render/, Chrome headless (cdp.py) e ações curtas na EST.dc.html.
-O cenário compartilhado vive no localStorage da origem; cada execução usa um perfil novo do Chrome (cenário limpo)."""
+O cenário compartilhado vive no localStorage da origem; cada execução usa um perfil novo do Chrome (cenário limpo).
+ACELERA (13/10/2026): depois de clicar ou mudar um campo, espera a página assentar com o mesmo teto de antes (cdp.espera_acao);
+SAFRION_ESPERA=fixa volta às esperas fixas. A espera depois de subir o servidor continua fixa (tempo real)."""
 import sys, os, time, subprocess, json
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
@@ -34,17 +36,17 @@ class Est:
 
     def etapa(self, i):
         # Estoque é trabalho paralelo: as visões ficam na navegação "Seções do estoque" (mesma ordem 1…5), não em etapas (UX-ACAO-UNICA-20261003)
-        self.J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i - 1}].click()"); time.sleep(.4)
+        self.J(f"document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[{i - 1}].click()"); self.c.espera_acao(.4)
 
     def clk(self, t, root=None):
-        r = self.J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.4); return r
+        r = self.J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); self.c.espera_acao(.4); return r
 
     def setv(self, i, val):
         sel = i if i[0] in '#[.' or ' ' in i else '#' + i
-        r = self.J(f"({SETV})({json.dumps(sel)},{json.dumps(val)})"); time.sleep(.2); return r
+        r = self.J(f"({SETV})({json.dumps(sel)},{json.dumps(val)})"); self.c.espera_acao(.2); return r
 
     def row(self, *ts):
-        r = self.J(f"(()=>{{const r=({FIND})({json.dumps(list(ts))}); if(!r) return 'sem linha'; (r.querySelector('[role=cell] span')||r).click(); return 'ok';}})()"); time.sleep(.4); return r
+        r = self.J(f"(()=>{{const r=({FIND})({json.dumps(list(ts))}); if(!r) return 'sem linha'; (r.querySelector('[role=cell] span')||r).click(); return 'ok';}})()"); self.c.espera_acao(.4); return r
 
     def rowtxt(self, *ts):
         # TABELAS-FOCO (5983172395): lote, "com quem" e validade têm colunas próprias; o texto da linha recompõe "lote X", "com X" e
@@ -59,7 +61,7 @@ class Est:
 
     def rowbtn(self, ts, b):
         ts = [ts] if isinstance(ts, str) else list(ts)
-        r = self.J(f"(()=>{{const r=({FIND})({json.dumps(ts)}); if(!r) return 'sem linha'; const x=[...r.querySelectorAll('button')].find(x=>x.innerText.trim().startsWith({json.dumps(b)})); if(!x) return 'sem botão'; x.click(); return 'ok';}})()"); time.sleep(.4); return r
+        r = self.J(f"(()=>{{const r=({FIND})({json.dumps(ts)}); if(!r) return 'sem linha'; const x=[...r.querySelectorAll('button')].find(x=>x.innerText.trim().startsWith({json.dumps(b)})); if(!x) return 'sem botão'; x.click(); return 'ok';}})()"); self.c.espera_acao(.4); return r
 
     def salvar(self): return self.clk('Salvar', 'aside[role=dialog]')
     def fechar(self): return self.clk('Fechar', 'aside[role=dialog]')

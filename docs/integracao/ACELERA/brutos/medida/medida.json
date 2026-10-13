@@ -1,0 +1,213 @@
+{
+ "tabelas_cad_test": {
+  "antes": 321.146164221,
+  "depois": 310.423462027,
+  "antes_extra": [
+   325.865713742,
+   335.790772515
+  ],
+  "depois_extra": [
+   309.440958868
+  ],
+  "resultados": [
+   "0 RESULTADO: 178/178 ok"
+  ]
+ },
+ "tabelas_irr_test": {
+  "antes": 208.178762352,
+  "depois": 177.707210317,
+  "antes_extra": [
+   203.8960438,
+   218.198563823
+  ],
+  "depois_extra": [
+   172.560147625
+  ],
+  "resultados": [
+   "0 RESULTADO: 106/106 ok"
+  ]
+ },
+ "comercial_fluxo_test": {
+  "antes": 137.841697101,
+  "depois": 126.736531313,
+  "antes_extra": [
+   130.980889568,
+   149.209305953
+  ],
+  "depois_extra": [
+   125.206832686
+  ],
+  "resultados": [
+   "0 RESULTADO: OK 72/72"
+  ]
+ },
+ "ctl5_test": {
+  "antes": 81.862992043,
+  "depois": 74.553489715,
+  "antes_extra": [
+   80.14959562,
+   95.248659545
+  ],
+  "depois_extra": [
+   70.376371045
+  ],
+  "resultados": [
+   "0 RESULTADO 30/30 []"
+  ]
+ },
+ "solo_saf_test": {
+  "antes": 117.53954899,
+  "depois": 97.481065407,
+  "antes_extra": [
+   114.850556018,
+   130.679401561
+  ],
+  "depois_extra": [
+   114.652295314
+  ],
+  "resultados": [
+   "0 RESULTADO: OK 36/36"
+  ]
+ },
+ "partest": {
+  "antes": 97.232925753,
+  "depois": 98.537377904,
+  "antes_extra": [
+   126.238414967,
+   111.428127865
+  ],
+  "depois_extra": [
+   95.487209127
+  ],
+  "resultados": [
+   "0 RESULTADO: 50 ok · 0 falhas"
+  ]
+ },
+ "acao_responsivo": {
+  "antes": 68.589449149,
+  "depois": 68.280809298,
+  "antes_extra": [
+   83.826402733,
+   80.564681078
+  ],
+  "depois_extra": [
+   74.120270573
+  ],
+  "resultados": [
+   "0 RESULTADO: 5 ok · 0 falhas (responsivo)"
+  ]
+ },
+ "ostest": {
+  "antes": 26.096101319,
+  "depois": 23.291846146,
+  "antes_extra": [
+   26.365474022,
+   34.623579103
+  ],
+  "depois_extra": [
+   25.734959905
+  ],
+  "resultados": [
+   "0 32 ok · 1 falhas ['painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo']"
+  ]
+ },
+ "osacoes": {
+  "antes": 28.624175514,
+  "depois": 29.411963006,
+  "antes_extra": [
+   29.454775277,
+   35.081277264
+  ],
+  "depois_extra": [
+   27.536684591
+  ],
+  "resultados": [
+   "0 RESULTADO: 40 ok · 5 falhas"
+  ]
+ },
+ "producao_fluxo_test": {
+  "antes": 255.071179051,
+  "depois": 227.93835121,
+  "antes_extra": [
+   268.692507278,
+   302.920452609
+  ],
+  "depois_extra": [
+   236.507023423
+  ],
+  "resultados": [
+   "0 RESULTADO: OK 67/67"
+  ]
+ },
+ "ma_unica_test": {
+  "antes": 168.805818062,
+  "depois": 162.934505829,
+  "antes_extra": [
+   183.888941026,
+   246.327896736
+  ],
+  "depois_extra": [
+   169.075284583
+  ],
+  "resultados": [
+   "0 RESULTADO: 23/23 ok",
+   "1 RESULTADO: 22/23 ok · FALHAS: AC-PCM-02 · o destino abre o registro (painel da OM-0234, plano PM-01, Novo plano do Silo 01)"
+  ]
+ },
+ "irr_fluxo_test": {
+  "antes": 137.717942253,
+  "depois": 104.497881858,
+  "antes_extra": [
+   144.372084938,
+   167.740896728
+  ],
+  "depois_extra": [
+   118.644353321
+  ],
+  "resultados": [
+   "0 33 ok · 0 falhas []"
+  ]
+ },
+ "cafe_apurar_nav": {
+  "antes": 27.586743754,
+  "depois": 25.568563846,
+  "antes_extra": [
+   28.84683941,
+   35.817137694
+  ],
+  "depois_extra": [
+   26.989472536
+  ],
+  "resultados": [
+   "0 RESULTADO: OK 10/10"
+  ]
+ },
+ "dose_divergente_nav": {
+  "antes": 58.064712671,
+  "depois": 54.819367425,
+  "antes_extra": [
+   60.820666188,
+   75.794154647
+  ],
+  "depois_extra": [
+   56.655471694
+  ],
+  "resultados": [
+   "0 21/21 ok · FALHAS: 0"
+  ]
+ },
+ "etapas_celular": {
+  "antes": 43.854271407,
+  "depois": 44.241571579,
+  "antes_extra": [
+   46.179958759,
+   51.600910229
+  ],
+  "depois_extra": [
+   43.653430391
+  ],
+  "resultados": [
+   "0 RESULTADO: 14 ok · 0 falhas (celular)"
+  ]
+ }
+}

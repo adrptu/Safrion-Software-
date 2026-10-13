@@ -1,0 +1,3 @@
+../ferramentas/acoes_duplicadas.py  :: conjunto fixo
+varredura.py  :: conjunto fixo
+links_ocultos_test.py  :: conjunto fixo

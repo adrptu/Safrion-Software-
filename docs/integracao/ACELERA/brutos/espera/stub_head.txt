@@ -1,0 +1,6 @@
+            except Exception: pass
+        shutil.rmtree(self.dir,ignore_errors=True)
+
+# --- stub da prova (10-credito): esta versão não tem crédito; zerar não faz nada
+_CRED = [0.0]
+Assenta._poe_credito = lambda self: None

@@ -1,0 +1,3 @@
+  ok  SAFRION_ESPERA padrão é por condição e time.sleep foi trocado só nesse modo
+  FALHOU time.sleep(1,0) de outro fio dorme o tempo real (sem settle); o do fio principal vira settle · ([1.0, 1.0], 0.0)
+RESULTADO: 4/5 ok · FALHAS: time.sleep(1,0) de outro fio dorme o tempo real (sem settle); o do fio principal vira settle

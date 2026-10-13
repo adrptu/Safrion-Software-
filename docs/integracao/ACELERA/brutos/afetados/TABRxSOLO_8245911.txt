@@ -1,0 +1,173 @@
+../ferramentas/acoes_duplicadas.py  :: conjunto fixo · varre todas as páginas (130 mudaram)
+acao_unica_test.py  :: abre página mudada: AG-01det, AG-03det, AG-04det, AG-06, CA-01x-os0420, CD-01det, CD-02, CD-06 …
+agrofit_test.py  :: abre página mudada: AG-01, AG-07, IR-01, MA, Main, OS, PA, SAF
+agtest.py  :: o teste mudou · abre página mudada: AG-01, AG-01det, AG-02, AG-03, AG-03det, AG-04det, AG-05, AG-07 …
+ap_unico_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: EST, MB-01, MB-03, OS
+app_cenario_test.py  :: abre página mudada: MB-01, MB-02det, MB-03, MB-04, MB-05, OS
+app_entrega_parcial_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: MB-01, MB-02det, MB-03, MB-05, OS
+app_mb02det_test.py  :: abre página mudada: MB-01, MB-02det, OS
+app_mb03_turno_test.py  :: abre página mudada: MB-01, MB-02det, MB-03, MB-03x-recibo, OS
+app_mb03x_test.py  :: abre página mudada: MB-01, MB-03x-recibo, OS
+app_mb04_test.py  :: abre página mudada: MB-01, MB-04, OS
+app_os0424_test.py  :: abre página mudada: MB-01, OS, OS-0424-app
+app_restaurar_test.py  :: abre página mudada: MB-01, MB-03, OS
+app_saldo_zero_test.py  :: abre página mudada: MB-01, MB-02det, MB-03, MB-05, OS
+assinatura_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: BO-02, CD-01, CD-01det, CD-02, CD-06, CD-07, CF-05, EST …
+ben_fluxo_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: BEN, CARGA, CD-02, CD-04, CD-06, CD-07, COLH, EST …
+cada_cd03_test.py  :: abre página mudada: CD-03, CD-04, OS
+cada_cd04_test.py  :: abre página mudada: BEN, CD-03, CD-04, OS
+cada_fix03_test.py  :: abre página mudada: CD-03, CD-04
+cada_fix04_test.py  :: abre página mudada: CD-03, CD-04
+cadc_cd0102_a.py  :: abre página mudada: CD-02, CD-06, CD-07
+cadc_cd0102_b.py  :: abre página mudada: CD-02, CD-06, CD-07, SAF
+cadc_cd02_test.py  :: o teste mudou · abre página mudada: CD-02, CD-06, CD-07
+cadc_cd06_test.py  :: o teste mudou · abre página mudada: CD-02, CD-06, CD-07
+cadc_cd07_test.py  :: abre página mudada: CD-02, CD-06, CD-07
+cadc_fix_cd02.py  :: abre página mudada: CD-02, CD-06, CD-07
+cadc_fix_cd06.py  :: o teste mudou · abre página mudada: CD-02, CD-06, CD-07
+cadc_fix_cd07.py  :: abre página mudada: CD-02, CD-06, CD-07
+cadf_det_test.py  :: abre página mudada: CD-01det, SAF
+cadf_fix_det_test.py  :: abre página mudada: CD-01det
+cadf_fix_lista_test.py  :: abre página mudada: CD-01
+cadf_test.py  :: abre página mudada: CD-01, CD-01det
+cadp_fix_test.py  :: abre página mudada: CD-05, GE-05, VE-04, VE-05
+cadp_test.py  :: abre página mudada: CD-05
+cadp_vtest.py  :: abre página mudada: CD-05, PT-07
+cafe_apurar_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: BEN, CARGA, CD-02, CD-06, CD-07, COLH, Main, OS …
+carencia_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: AG-01, CARGA, CD-01, CD-02, CD-03, CD-06, CD-07, CO-06 …
+cd05test.py  :: abre página mudada: CD-05
+cd05vtest.py  :: abre página mudada: CD-05, PT-07
+cftest.py  :: abre página mudada: CF-01, CF-02, CF-02det, CF-03, CF-03det, CF-04, CF-05, OS
+cmptest.py  :: abre página mudada: CD-02, CD-05, CD-06, CD-07, CMP, EST, SAF
+componentes_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: CD-02, CD-06, CD-07, CMP, IN-04, IR-02, MA, MB-01 …
+consumo_divergente_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: EST, MB-01, MB-02det, MB-03, MB-05, OS
+cotest.py  :: abre página mudada: CO-01, CO-02, CO-02det, CO-03, CO-04, CO-05, CO-05det, CO-06 …
+ctl5_test.py  :: abre página mudada: AG-07, CD-01, IR-02, IR-03det, IR-04, MA, OS
+dose_divergente_test.py  :: usa arquivo mudado: areas/inicio.py, areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py … · abre página mudada: AG-01, AG-06, CA-01x-os0420, CA-02, CA-03, CD-01, CD-01det, CD-03 …
+ds_test.py  :: varre todas as páginas (130 mudaram)
+est_cenario_test.py  :: abre página mudada: BEN, EST, OS
+est_fix1_test.py  :: abre página mudada: EST, OS
+est_fix2_test.py  :: abre página mudada: EST, OS
+est_repro.py  :: abre página mudada: EST, OS
+esttest.py  :: abre página mudada: BEN, EST, OS
+etapas_celular_test.py  :: varre todas as páginas (130 mudaram)
+ficha_pivo_test.py  :: usa arquivo mudado: dados_lagoa_safra.py · abre página mudada: CD-03, CD-04, IR-01, PA
+getest.py  :: abre página mudada: GE-02det, GE-03, GE-04, GE-05, GE-07, GE-08, OS
+intest.py  :: abre página mudada: AG-01, CA-01x-os0420, IN-02, IN-04, Main, OS
+irr_estado_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: CD-01, CD-03, EST, IN-04, IR-01, IR-02, IR-03det, IR-04 …
+irr_fluxo_test.py  :: abre página mudada: EST, IN-03, IN-04, IR-01, IR-02, IR-03, IR-03det, IR-04 …
+irtest.py  :: abre página mudada: GE-07, IR-01, IR-02, IR-03, IR-03det, IR-04, OS
+lotest.py  :: abre página mudada: LO-01, LO-02, LO-02det, LO-03, LO-04, VE-06
+ma_app_fluxo_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: MA, MB-01, MB-04, MB-09, MB-09det, OS
+ma_atrito_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: CD-02, CD-06, CD-07, IN-01, MA
+ma_correcoes_om_test.py  :: abre página mudada: CD-02, CD-06, CD-07, MA
+ma_correcoes_pm_test.py  :: abre página mudada: CD-02, CD-06, CD-07, MA
+ma_planos_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: CD-02, CD-06, CD-07, MA
+ma_rastreio_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · varre todas as páginas (130 mudaram)
+ma_revisao_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: CD-02, CD-04, CD-06, CD-07, MA, OS
+ma_unica_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · varre todas as páginas (130 mudaram) · lê saída do build que mudou: canvas.json
+map_aprov_test.py  :: abre página mudada: EST, IN-01, IN-02, IN-03, IN-04, OS, SU-07
+map_decisoes_test.py  :: abre página mudada: CA-01x-os0420, EST, IN-04, IR-03det, MA, Main, OS, PL-05 …
+map_irrig_filtro_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: CD-01, IN-02, IN-03, IN-04, IR-01, IR-02, IR-03det, IR-04 …
+matest.py  :: abre página mudada: CD-02, CD-03, CD-06, CD-07, MA, OS, PL-05
+mbtest.py  :: abre página mudada: CARGA, MB-01, MB-02, MB-02det, MB-03, MB-03x-recibo, MB-04, MB-05 …
+mip_correcoes_test.py  :: abre página mudada: AG-01, AG-01det, AG-03, AG-03det, AG-04, AG-04det, AG-07, IN-04 …
+mip_fluxo_test.py  :: abre página mudada: AG-01, AG-01det, AG-03, AG-04, IN-04, Main, OS
+obotest.py  :: abre página mudada: BO-01, BO-02, ON-01, ON-01det
+ocupacao_test.py  :: abre página mudada: CD-02, CD-06, CD-07, SAF
+os_ator_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: OS
+os_cenario_test.py  :: abre página mudada: AG-01, BEN, EST, OS
+os_irrig_filtro_test.py  :: abre página mudada: CA-01, EST, IR-02, IR-03, IR-03det, OS, PA, SAF
+os_v39_bloq_test.py  :: abre página mudada: OS
+os_v39_liberar_test.py  :: abre página mudada: OS
+os_v39_selo_agua_test.py  :: abre página mudada: IR-03, IR-03det, OS
+osacoes.py  :: abre página mudada: OS
+osfix.py  :: abre página mudada: OS
+ostela.py  :: abre página mudada: CA-02, EST, IR-03, IR-03det, OS
+ostest.py  :: abre página mudada: CA-01det, CA-01x-os0420, IN-04, MB-02, OS
+partest.py  :: abre página mudada: CD-02, CD-06, CD-07, SAF
+patest.py  :: usa arquivo mudado: dados2.py, dados_lagoa_safra.py · abre página mudada: CD-02, CD-06, CD-07, PA
+plataforma_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: BO-01, BO-02, CD-02, CD-06, CD-07, CF-05, ON-01
+pltest.py  :: abre página mudada: OS, PL-02, PL-02det, PL-04, PL-06
+praga_alvo_test.py  :: abre página mudada: AG-07, MA
+producao_fluxo_test.py  :: abre página mudada: BEN, CARGA, CD-02, CD-06, CD-07, COLH, MB-07, MB-10 …
+psfix38test.py  :: abre página mudada: CD-02, CD-06, CD-07, SAF
+pttest.py  :: abre página mudada: PT-01, PT-02det, PT-03, PT-04, PT-04det, PT-05det, PT-06, PT-07
+rend_multiconjuntos_test.py  :: usa arquivo mudado: dados2.py, dados_lagoa_safra.py, safra.js · abre página mudada: CD-02, CD-06, CD-07, SAF
+saf38test.py  :: abre página mudada: CD-02, CD-06, CD-07, SAF
+saf_c01_test.py  :: abre página mudada: CD-02, CD-06, CD-07, SAF
+saf_capacidade_simetrica_test.py  :: usa arquivo mudado: dados2.py, dados_lagoa_safra.py · varre todas as páginas (130 mudaram)
+saf_cmp_continuidade_test.py  :: usa arquivo mudado: dados2.py, dados_lagoa_safra.py, safra.js · abre página mudada: CD-02, CD-06, CD-07, CMP, OS, SAF
+saf_operacoes_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: CD-02, CD-06, CD-07, SAF
+saf_revisao_test.py  :: usa arquivo mudado: dados2.py, dados_lagoa_safra.py · abre página mudada: CD-02, CD-06, CD-07, SAF
+saftest.py  :: abre página mudada: CD-02, CD-06, CD-07, SAF
+solo_ag02_test.py  :: o teste mudou · abre página mudada: AG-02, CD-02, CD-06, CD-07, IR-01, Main, OS, SAF
+solo_os_test.py  :: o teste mudou · abre página mudada: CD-02, CD-06, CD-07, Main, OS, SAF
+solo_rev_test.py  :: o teste mudou · abre página mudada: AG-02, CD-02, CD-06, CD-07, IN-04, Main, OS, SAF
+solo_saf_test.py  :: o teste mudou · abre página mudada: AG-02, CD-02, CD-06, CD-07, Main, OS, SAF
+sutest.py  :: abre página mudada: OS, SU-03, SU-03det, SU-06, SU-07, SU-07det, SU-08, SU-09
+tabelas_ben_test.py  :: abre página mudada: BEN, CD-02, CD-06, CD-07, Main
+tabelas_cad_test.py  :: abre página mudada: CD-01, CD-01det, CD-02, CD-03, CD-04, CD-05, CD-06, CD-07 …
+tabelas_est_test.py  :: abre página mudada: BEN, CD-02, CD-06, CD-07, EST, Main, OS
+tabelas_irr_test.py  :: abre página mudada: CD-01, CD-02, CD-05, CD-06, CD-07, IR-01, IR-02, IR-03 …
+tabelas_os_test.py  :: abre página mudada: CD-02, CD-06, CD-07, Main, OS
+tabelas_saf_test.py  :: abre página mudada: CD-02, CD-06, CD-07, Main, SAF
+talmapa_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: CD-01, CD-01det, CD-02, CD-06, CD-07, IN-04, Main
+varredura.py  :: conjunto fixo · varre todas as páginas (130 mudaram)
+verif_barras.py  :: abre página mudada: IN-04
+verif_cad.py  :: abre página mudada: CD-01det, CD-02, CD-05, PT-07
+verif_cad2.py  :: abre página mudada: CD-01det, CD-02, CD-05
+verif_ce_cmpA.py  :: usa arquivo mudado: dados2.py, dados_lagoa_safra.py · abre página mudada: CMP
+verif_ce_cmpB.py  :: abre página mudada: CMP
+verif_ce_est.py  :: abre página mudada: EST
+verif_chips.py  :: abre página mudada: OS
+verif_cmp1.py  :: usa arquivo mudado: dados2.py, dados_lagoa_safra.py · abre página mudada: CMP
+verif_cmp2.py  :: abre página mudada: CMP
+verif_cmp3.py  :: abre página mudada: CMP
+verif_cmp4.py  :: abre página mudada: CMP
+verif_cmp_chip.py  :: abre página mudada: CMP
+verif_dirty.py  :: abre página mudada: CD-01det, CD-02, CD-05
+verif_dup.py  :: abre página mudada: OS
+verif_est1.py  :: abre página mudada: EST
+verif_est2.py  :: abre página mudada: EST
+verif_h.py  :: abre página mudada: CD-01, CD-01det, CD-02, CD-05
+verif_largura.py  :: abre página mudada: OS
+verif_mapa.py  :: abre página mudada: AG-01, CA-01, CA-01det, CA-01x-os0420, IN-04, MB-02, Main, OS
+verif_os.py  :: abre página mudada: OS
+verif_overflow.py  :: abre página mudada: CMP, EST
+verif_pa.py  :: abre página mudada: PA
+verif_pedido.py  :: usa arquivo mudado: dados_lagoa_safra.py · abre página mudada: CA-01det, CD-02, CD-05, CD-06, CD-07, CMP, EST, IN-04 …
+verif_saf.py  :: abre página mudada: SAF
+verif_saf2.py  :: abre página mudada: SAF
+verif_saf3.py  :: abre página mudada: SAF
+verif_saf4.py  :: abre página mudada: SAF
+verif_saf4_old.py  :: abre página mudada: SAF
+verif_shots.py  :: abre página mudada: IN-04, OS
+verif_shots_cmpest.py  :: abre página mudada: CMP, EST
+verif_t12.py  :: usa arquivo mudado: dados_lagoa_safra.py · abre página mudada: CA-01det, CD-02, CD-05, CD-06, CD-07, CMP, EST, IN-04 …
+vetest.py  :: abre página mudada: VE-01, VE-02, VE-03, VE-04, VE-04det, VE-05, VE-06
+aprova_quem_decide_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: BEN, CMP, EST, MA, OS
+assinatura_unit_test.py  :: usa arquivo mudado: areas/inicio.py, areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py … · abre página mudada: AG-01, AG-06, BO-01, BO-02, CA-01x-os0420, CA-02, CA-03, CD-01 …
+ben_mutantes.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: BEN, CD-04, EST, MA, OS, PA, PROD
+cadc_test.py  :: abre página mudada: CD-02, CD-06, CD-07
+cal01_test.py  :: usa arquivo mudado: dados2.py, dados_lagoa_safra.py, safra.js · abre página mudada: OS
+capacidade_unit.py  :: usa arquivo mudado: dados2.py, dados_lagoa_safra.py, safra.js · abre página mudada: SAF
+ds_unit_test.py  :: usa arquivo mudado: areas/agronomia.py, areas/analise_solo.py, areas/cad_produtos_estrutura.py, areas/inicio.py, areas/irrigacao.py, areas/processo_os.py … · varre todas as páginas (130 mudaram)
+ficha_pivo_unit_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: CD-01, CD-03, EST, IN-04, IR-01, IR-02, IR-03det, IR-04 …
+inicio_entrega_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: AG-01, CARGA, CD-01, CD-03, EST, IN-01, IN-04, IR-01 …
+legal_unit_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: AG-01, OS
+links_ocultos_test.py  :: conjunto fixo · o teste mudou · usa arquivo mudado: agtest.py, areas/agronomia.py, areas/analise_solo.py, areas/cad_produtos_estrutura.py, areas/inicio.py, areas/irrigacao.py … · abre página mudada: AG-01, AG-01det, AG-02, AG-03, AG-03det, AG-04, AG-04det, AG-06 … · lê saída do build que mudou: canvas.json
+ma_app_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: AG-01, CARGA, CD-01, CD-03, EST, IN-01, IN-04, IR-01 …
+ma_regras_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: CD-04, OS
+mip_unit_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: AG-01, OS
+ocupacao_unit.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: CD-01, CD-02, SAF
+os_aprov_lib_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: BEN, OS
+outorga_unit_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: CD-01, CD-03, EST, IN-04, IR-01, IR-02, IR-03det, IR-04 …
+praga_alvo_unit_test.py  :: usa arquivo mudado: areas/agronomia.py, areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py … · abre página mudada: AG-01, AG-01det, AG-02, AG-03, AG-03det, AG-04, AG-04det, AG-05 …
+producao_unit_test.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: BEN, CD-06, OS, VE-05
+quantidade_test.py  :: usa arquivo mudado: agtest.py, areas/agronomia.py, areas/analise_solo.py, areas/cad_produtos_estrutura.py, areas/inicio.py, areas/irrigacao.py … · abre página mudada: AG-01, AG-01det, AG-02, AG-03, AG-03det, AG-04, AG-04det, AG-05 …
+rend_multiconjuntos_unit.py  :: usa arquivo mudado: dados2.py, dados_lagoa_safra.py, safra.js
+solo_regressao_test.py  :: o teste mudou · usa arquivo mudado: dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py · abre página mudada: OS
+solo_unit_test.py  :: o teste mudou · usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · abre página mudada: AG-02, CD-01, CD-02, CD-04, CD-06, MA, OS, PA …
+tabelas_cad_irr_unit.py  :: usa arquivo mudado: areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py, dados_lagoa_safra.py … · varre todas as páginas (130 mudaram) · lê saída do build que mudou: canvas.json
+usar_os_unit_test.py  :: usa arquivo mudado: areas/agronomia.py, areas/processo_os.py, cenario.py, dados2.py, dados_cad.py, dados_carencia.py … · abre página mudada: AG-01, AG-01det, AG-02, AG-03, AG-03det, AG-04, AG-04det, AG-05 …

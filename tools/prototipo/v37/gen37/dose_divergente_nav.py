@@ -5,7 +5,6 @@ encerrar antes da revisão), repetição (mesma revisão de novo não grava) e o
 Capturas em _probe/dose_div_*.png. Uso: python3 dose_divergente_test.py nav   (compile antes: build.py && montar_render.py)"""
 import json, os, re, time
 from app_lib import App
-from conferencia_diaria_nav_helpers import conferir_dias
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OS = 'OS-0430'
@@ -109,8 +108,6 @@ def rodar():
         a.ok('Correção registrada por Ana (agrônoma) para o dia 2 da OS-0430' in t and a.cen(REV) == '1:Aceita:Ana (agrônoma),2:Correção decidida:Ana (agrônoma)' and sem_rolagem(),
              '390 px: Registrar correção grava a decisão, sem rolagem horizontal: ' + t[:160])
         shot('dose_div_6_390_correcao.png')
-        a.ok(not temb('Conferir e encerrar') and 'Conferência diária pendente' in pan(),'Revisão técnica não substitui conferência diária')
-        conferir_dias(J,OS,[1,2])
         ok_enc = btn('Conferir e encerrar') and btn('Confirmar encerramento'); et = a.cen(f"c.ordens['{OS}'].etapa")
         a.ok(ok_enc and et == 'Encerradas', f'revisões feitas: Conferir e encerrar → Encerradas ({et})')
         guard()

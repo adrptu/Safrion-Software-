@@ -344,7 +344,7 @@ ok('U18 K29 condição do a13: "Apto" da semente; "Restrito · monitorado" → a
 function OSX(c, id, tal, etapa, ap) { c.ordens[id] = { id, tipo: 'Colheita · semana 39', talhao: tal, area: 0, etapa, versao: 'v1', realizado: 0, saldo: 0, resp: 'Sérgio', ins: [], req: null, selos: [],
   ap: (ap || []).map((a, i) => ({ d: a[0], dia: i + 1, ha: a[1], st: 'Conferido', sinc: true, origem: 'web' })), reservado: false, osc: {} }; const o = c.ordens[id]; o.realizado = o.ap.reduce((s, a) => s + a.ha, 0); return o; }
 /* carga do T7 (Santa Rita) recebida no Packing (l8) por uma O.S. de colheita sintética (a semente não tem colheita do T7) */
-function T7(c, cond, tk) { if (!c.ordens['OS-0932']) OSX(c, 'OS-0932', 'T7', 'Em execução', [['25/09', 6]]); return MUD(c, x => prReceber(x, { quem: RU, os: 'OS-0932', ticket: tk || 'TK-T7A', bruto: 9400, tara: 3200, cond, dcol: '2026-09-25' })); }
+function T7(c, cond, tk) { if (!c.ordens['OS-0932']) OSX(c, 'OS-0932', 'T7', 'Em execução', [['25/09', 6]]); return MUD(c, x => prReceber(x, { os: 'OS-0932', ticket: tk || 'TK-T7A', bruto: 9400, tara: 3200, cond, dcol: '2026-09-25' })); }
 
 // ---- U30 · BEN-REV-01 · lote de entrada numa ordem liberada: sem decisão da Qualidade (a massa iria a dois destinos); defesa no Fechar ----
 { const c = NOVO(); const L = 'L39-119';

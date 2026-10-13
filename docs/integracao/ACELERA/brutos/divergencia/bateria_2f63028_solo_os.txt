@@ -1,0 +1,1 @@
+solo_os_test rc=0 t=59.466861109s :: RESULTADO: FALHOU 17/18 

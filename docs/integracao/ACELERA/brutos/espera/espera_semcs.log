@@ -1,0 +1,7 @@
+OK  oráculo: com as esperas fixas, E1/E2/E3 dão os estados do relógio fixo · [{'E1': ['AVISO', 'AVISO', 'AVISO', ''], 'E2': ['AVISO', ''], 'E3': ['', 'RESPOSTA'], 'E4': [True, 11.01, 11.0], 'E5': [3.105259570000044, '#outra']}, '']
+OK  E1 aviso de 3,5 s: visível depois de 1, 2 e 3 s e some antes da quarta ação (4 s), como com as esperas fixas · ['AVISO', 'AVISO', 'AVISO', '']
+FALHOU E2 crédito acumulado e aviso novo de 1,5 s: visível depois de 1 s (o crédito não adianta timer criado depois dele), some depois de 2 s · ['', '']
+OK  E3 resposta de rede de 1,5 s: ausente depois de 1 s, presente depois de 2 s · ['', 'RESPOSTA']
+OK  E4 a soma do tempo real das esperas não passa da soma dos tetos (folga de 0,25 s para as chamadas) · [True, 8.75, 11.0]
+OK  E5 goto que muda só a âncora volta antes do goto fixo (3,1 s), sem esperar documento novo · [0.3973714059998201, '#outra']
+RESULTADO: 5 ok · 1 falhas · FALHAS: E2 crédito acumulado e aviso novo de 1,5 s: visível depois de 1 s (o crédito não adianta timer criado depois dele), some depois de 2 s

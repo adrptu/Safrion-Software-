@@ -75,13 +75,10 @@ try:
     clk('Aprovar ajuste INV-2609'); t=T(); print('   ',t); ok('AJ-0093' in t and '90.000 → 89.400' in t,'SU-09 aprova ajuste com vínculo')
     ok('Ver efeito no extrato' in J("document.querySelector('h1').parentElement.parentElement.innerText"),'SU-09 primário troca após aprovar')
     # ---------- SU-03det · DEMO-18 ----------
-    # revisão do CTL-4 (S4): com a demanda única o Fungicida A não tem pendência na SOL-2026-07 e o DEMO-18 não tem conflito a decidir
-    # (antes: "pendência 0 L" com "Reservar 480 L com pendência"); a tela mostra a reserva da OS-0424 e o uso da safra que o lote cobre
     go('SU-03det.dc.html')
-    hdr=J("document.querySelector('h1').parentElement.innerText"); bd=J("document.body.innerText")
-    # revisão do 853a6a8 (achado 6): a pendência vem da demanda única viva (a mesma do Planejar safra e da Compra), não da semente no build
-    ok('Sem conflito' in hdr and 'Uso da safra 2026/27 de hoje em diante' in bd and 'Sem pendência de compra' in bd,'SU-03det sem conflito: selo, uso da safra e sem pendência')
-    ok('com pendência' not in bd and 'Aguardar a compra' not in bd and 'pendência 0' not in bd,'SU-03det sem decisão de conflito inexistente')
+    clk('Reservar'); t=T(); print('   ',t)
+    hdr=J("document.querySelector('h1').parentElement.innerText"); ok('Conflito tratado' in hdr,'SU-03det selo muda após reservar')
+    ok('Aguardar a compra' not in J("document.body.innerText"),'SU-03det ação alternativa some após decidir')
     # ---------- SU-03 ----------
     go('SU-03.dc.html')
     clk('Reservar para ordem'); clk('Reservar','aside[role=dialog]'); t=T(); print('   ',t); ok('Reserva confirmada para a OS-0421' in t,'SU-03 reserva nomeia a ordem')
