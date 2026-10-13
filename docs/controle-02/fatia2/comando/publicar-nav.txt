@@ -1,0 +1,25 @@
+  OK  1440: prévia mostra autor, aviso e consequência
+  OK  1440: prévia não escreve
+  OK  1440: foco vai à confirmação
+  OK  1440: foco preserva cabeçalho e contexto visíveis
+  OK  1440: ação alcançável e sem excesso horizontal
+  OK  1440: confirmação repetida grava só R1
+  OK  1440: sucesso tem sequência persistida
+  OK  1440: volta preserva rascunho e foco
+  OK  1440: recarga recupera publicação feita pela UI
+  OK  1440: impedimento visível bloqueia confirmar
+  OK  1440: Escape cancela prévia sem escrever e devolve foco
+  OK  1440: sem erro JS
+  OK  390: prévia mostra autor, aviso e consequência
+  OK  390: prévia não escreve
+  OK  390: foco vai à confirmação
+  OK  390: foco preserva cabeçalho e contexto visíveis
+  OK  390: ação alcançável e sem excesso horizontal
+  OK  390: confirmação repetida grava só R1
+  OK  390: sucesso tem sequência persistida
+  OK  390: volta preserva rascunho e foco
+  OK  390: recarga recupera publicação feita pela UI
+  OK  390: impedimento visível bloqueia confirmar
+  OK  390: Escape cancela prévia sem escrever e devolve foco
+  OK  390: sem erro JS
+RESULTADO: 24/24 ok

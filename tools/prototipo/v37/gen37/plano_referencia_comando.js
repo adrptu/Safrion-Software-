@@ -11,7 +11,8 @@ const PlanoReferenciaComando = (() => {
     if (p.esperada!==null && (typeof p.esperada!=='string' || !/^R[1-9]\d*$/.test(p.esperada))) throw new Error('Referência esperada inválida. Confira a prévia.');
     const previa=JSON.parse(PlanoReferencia.bytes(p.previa));
     const s=safById(self,p.safra);
-    if (!s || self.state.saf!==p.safra || previa.contexto.safra!==p.safra || previa.contexto.fazenda!==(s.v.faz||'Santa Rita')) throw new Error('Escolha a fazenda e a safra da prévia. Nada foi alterado.');
+    if (s && (typeof s.v.faz!=='string' || !s.v.faz.trim())) throw new Error('Fazenda da safra ausente. Confira o cadastro antes de publicar. Nada foi alterado.');
+    if (!s || self.state.saf!==p.safra || previa.contexto.safra!==p.safra || previa.contexto.fazenda!==s.v.faz) throw new Error('Escolha a fazenda e a safra da prévia. Nada foi alterado.');
     if (s.ro || s.v.estado==='Encerrada') throw new Error('Safra encerrada: versões disponíveis somente para consulta.');
     const por=cenExigeAlc(p.ator,'AL-18','Publicar referência técnica');
     const ator=g2pf(p.ator);
