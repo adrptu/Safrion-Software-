@@ -115,6 +115,35 @@ class ExcecaoDaFichaDePivo(unittest.TestCase):
         self.assertEqual(a['paths'], [r'^tools/prototipo/v37/gen37/ficha_pivo\.py$',
                                       r'^tools/prototipo/v37/gen37/irrigacao_estado\.js$'])
 
+    def test_outras_excecoes_nao_ampliam_a_permissao_efetiva(self):
+        cfg = tomllib.loads((RAIZ / '.gitleaks.toml').read_text(encoding='utf-8'))
+        # Novas formas de exceção precisam de revisão e contraprova do detector real.
+        self.assertFalse(cfg.get('allowlist'))
+        self.assertFalse(cfg.get('allowlists'))
+        regra = next(r for r in cfg['rules'] if r['id'] == 'generic-api-key')
+        self.assertFalse(regra.get('allowlist'))
+        literais = ('talhao-os-ficha-pivo-v1', 'talhao-os-ficha-pivo-v2',
+                    'Q9x7-talhao-os-ficha-pivo-v1', 'talhao-os-ficha-pivo-v1-7zW2', 'ghp_' + 'A' * 36)
+        autorizados = (PREFIXO + 'ficha_pivo.py', PREFIXO + 'irrigacao_estado.js')
+        caminhos = list(autorizados) + [PREFIXO + 'outra_ficha.py']
+        for dentro in autorizados:
+            caminhos.extend((dentro + '.bak', 'backup/' + dentro,
+                             dentro.replace('gen37/', 'gen370/'), dentro.replace('.', 'X')))
+        for a in regra['allowlists']:
+            with self.subTest(excecao=a.get('description')):
+                self.assertLessEqual(set(a), {'description', 'condition', 'regexTarget', 'paths', 'regexes'})
+                self.assertEqual(a.get('regexTarget'), 'secret')
+                self.assertEqual(a.get('condition'), 'AND')
+                self.assertTrue(a.get('paths'))
+                self.assertTrue(a.get('regexes'))
+                for valor in literais:
+                    for caminho in caminhos:
+                        permitido = (valor == literais[0] and caminho in autorizados)
+                        combina = (any(re.search(r, valor) for r in a['regexes'])
+                                   and any(re.search(r, caminho) for r in a['paths']))
+                        with self.subTest(valor=valor, caminho=caminho):
+                            self.assertFalse(combina and not permitido)
+
     def test_limites_do_valor_e_do_caminho(self):
         a = self.excecao()
         segredo = re.compile(a['regexes'][0])

@@ -33,3 +33,11 @@ Prova focal em histórico Git local, sem dados reais e sem varredura completa da
 PR #53 foi integrado pelo revisor Claude em `999b0d0`, após sua reprodução30/30 e parecer6136712553. O contrato permanente e o registro STATUS são um complemento da mesma rodada, respondendo aos achados4254031552/4254031559; exigem revisão/CI próprios. A contraprova24→6 no histórico v56 e3→0 no commit único permanece relato do Claude até leitura dos brutos por Codex.
 
 Reversão: reverter somente o commit do incremento pertinente; sem migração, dados do produto ou workflow alterados.
+
+## Correção da revisão do PR #54
+
+Os achados 4254083832/4254083841 foram reproduzidos: os sete testes anteriores aceitavam uma segunda exceção ampla antes ou depois do bloco exato, e uma exceção global. A candidata agora avalia todos os blocos de `generic-api-key` para os pares de valor/caminho proibidos; exige as formas AND/secret atualmente autorizadas e rejeita formas globais ou campos adicionais até revisão específica. Este contrato usa regexes Python compatíveis com as expressões atuais, não pretende substituir o detector Gitleaks.
+
+O harness recuperável `test-ci-contract.py` executa discovery em cópias temporárias e preserva a configuração real. Execute, da raiz: `python3 docs/parceria/rodadas/VEL-20261013-01/test-ci-contract.py --repository . --output /tmp/vel-contract-nova-execucao.json`. A saída deve ser um caminho ainda inexistente. Python 3.11+; nenhuma dependência adicional. Resultado: 8/8 testes focais e dez mutações rejeitadas, total de 11 execuções verificadas. Fonte do harness e brutos antes/depois em `ci-contract-review-evidence.json`; a prova anterior de sete mutações permanece em `ci-contract-evidence.json`.
+
+Para reproduzir o defeito, use este mesmo harness com `--repository` apontando para checkout separado de `1ef1c499be50099a65f40371a0f35e8e5a4e607c` e `--expected-tests 7`: três mutações novas escapam, portanto o harness termina com erro. A primeira tentativa local de preparar a reprodução encontrou `.gitleaksignore` ausente na cópia parcial; depois de recuperado da mesma SHA, os resultados antes/depois acima foram executados. Não foi defeito do produto.

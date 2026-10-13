@@ -4,6 +4,8 @@ Base do retrato histórico abaixo: 09/10/2026, Claude, `main` `266a682`. Estados
 
 **Prioridade de execução:** concluir e validar o conjunto vigente do protótipo, publicando incrementos operáveis conforme seus aceites. A reconciliação integral do PRD aguarda todas as implantações atuais. Após validação integral do protótipo, transferir para a aplicação existente por fatias tela → domínio → banco → HML. CMD-15, C2 e demais trabalhos reais permanecem preservados; F1 técnico de estoque não equivale à Fase 1 comercial.
 
+PR #54, complemento VEL: revisão apontou lacuna em exceções concorrentes e harness ausente. Corrigidos com contrato agregado, fonte portátil e prova antes/depois (8 testes, dez mutações); aguardam revisão do Claude e checks da nova candidata. Sem alteração funcional do protótipo.
+
 ## Onde estamos
 
 | Frente | Estado | Evidência |
