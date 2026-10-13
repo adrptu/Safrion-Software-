@@ -27,7 +27,7 @@ for (const et of ['Em execução', 'Em conferência']) caso('COMP-02 A ' + et, (
   const pz = et === 'Em execução' ? 'revisar a divergência de dose do dia 1' : 'revisar a divergência de dose';
   ok('COMP-02 A · OS-0420 ' + et + ' com divergência de dose aberta e o Trator T1 apto: dono e prazo iguais aos da ordem sem o vínculo da máquina ("Ana (agrônoma)" · "' + pz + '"), sem impedimento nem selo da máquina',
     !!b.bloq && r1.dono === r0.dono && r1.prazo === r0.prazo && r1.dono === 'Ana (agrônoma)' && r1.prazo === pz && !r1.bloq && !D(r1).maq.length && (r1.selos || []).some(s => /^Divergência de consumo\/dose/.test(s.t)), [D(r1), D(r0)]);
-  if (et === 'Em conferência') ok('COMP-02 A · ativo apto não encerra a revisão agronômica: o encerramento continua bloqueado pela divergência (quem resolve: ' + OS_AGRO + ')',
+  if (et === 'Em conferência') ok('COMP-02 A · ativo apto não encerra a revisão agronômica: o encerramento continua bloqueado pela divergência (quem resolve: ' + OS_AGRO() + ')',
     String(r1.encM || '').indexOf(CEN_DIV) === 0 && /^Encerrar bloqueado: divergência/.test(osEncBloq(r1).t), [r1.encM, osEncBloq(r1)]);
 });
 caso('COMP-02 B', () => {

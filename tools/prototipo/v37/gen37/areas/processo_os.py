@@ -239,42 +239,45 @@ function osMerge(b,co,c){ if(!co) return b;
   if(x.ev&&x.ev.length) o.orig=(o.orig||[]).concat(x.ev.map(e=>e.t));   // aprovação (CMD-42) e liberação (CMD-06) na Origem
   (co.ap||[]).forEach(a=>{ (a.revAnt||[]).forEach(r=>{ o.orig=(o.orig||[]).concat(['Dia '+a.dia+' · '+CEN_DIV+' '+r.dec.toLowerCase()+' por '+r.quem+' às '+r.at+': '+r.txt+' · reaberta: '+r.reaberta]); });
     if(a.rev) o.orig=(o.orig||[]).concat(['Dia '+a.dia+' · '+CEN_DIV+' '+a.rev.dec.toLowerCase()+' por '+a.rev.quem+' às '+a.rev.at+': '+a.rev.txt]); });   // B-R8 (revisão reaberta fica no histórico)
+  { const vn=osVn(o.versao); const ap=co.etapa==='A liberar'?osAprovada({osc:x},vn):null;   /* R13: aprovada e ainda não liberada (selo na lista, no Kanban e no painel) */
+    o.aprov=ap; if(ap){ o.selos=(o.selos||[]).filter(s=>!/^Aprovada v\d+/.test(s.t)).concat([{t:'Aprovada '+vn+' · aguarda liberação',c:'yellow'}]); o.dono=g2alcQuem('AL-01'); o.prazo='liberar a '+vn; } }
   if(b.area){ o.realizado=co.realizado||0; o.saldo=co.saldo||0; }
   let esp=false, passo='';   /* V55-COMP-02: as regras abaixo que calculam uma pendência específica (dono e prazo dela) marcam esp; o passo da liberação vai junto ao osManCond */
   if(co.etapa!==b.etapa){ o.cond=osCondGen(o); o.dono=co.etapa==='Em conferência'?o.resp:''; o.prazo=co.etapa==='Em conferência'?'conferir':''; }
   if(mine){ o.cond=x.cond; o.dono=x.dono||''; o.prazo=x.prazo||''; }
+  if(co.etapa==='A liberar'&&o.cond) o.cond=osCondLib(o.cond);   /* revisão CONF F14: quem aprova e quem libera pela alçada vigente */
   if(x.disp) o.disp=x.disp;
   if(co.etapa==='Canceladas'&&x.insx) o.insx=x.insx;
   if(co.etapa==='Canceladas'){ const cu=r?r.itens.filter(i=>(i.custodia||0)>1e-6):[];   // custódia de ordem cancelada: some só com a devolução no Estoque
-    if(cu.length){ o.dono=CEN_CONC_RESP; o.prazo='receber a devolução'; o.selos=(o.selos||[]).filter(s=>s.t!=='Custódia a devolver').concat([{t:'Custódia a devolver',c:'yellow'}]); }
-    else if(mine&&x.dono===CEN_CONC_RESP){ o.dono=''; o.prazo=''; o.selos=(o.selos||[]).filter(s=>s.t!=='Custódia a devolver'); } }
+    if(cu.length){ o.dono=CEN_CONC_RESP(); o.prazo='receber a devolução'; o.selos=(o.selos||[]).filter(s=>s.t!=='Custódia a devolver').concat([{t:'Custódia a devolver',c:'yellow'}]); }
+    else if(mine&&x.dono===CEN_CONC_RESP()){ o.dono=''; o.prazo=''; o.selos=(o.selos||[]).filter(s=>s.t!=='Custódia a devolver'); } }
   // execução com turno no aparelho: o mesmo selo da conferência na lista e no Kanban (o painel e o Mapa dizem "aguardando sinal")
   if(co.etapa==='Em execução'){ o.selos=o.selos.filter(s=>!/^Aguardando sinal/.test(s.t));
     if((co.ap||[]).some(a=>a.sinc===false)) o.selos=o.selos.concat([{t:'Aguardando sinal do app',c:'yellow'}]);
     const fz=((co.saldo||0)-osApPend(co)>0.001)&&cenIniFalta(co,r);   // componente esgotado com área a fazer (regra única de início)
-    if(fz&&fz.k==='rever'){ o.selos=o.selos.concat([{t:'Insumo esgotado · '+fz.its.map(i=>i.prod).join(', '),c:'red'}]); o.dono=OS_AGRO; o.prazo='decidir a área restante';
+    if(fz&&fz.k==='rever'){ o.selos=o.selos.concat([{t:'Insumo esgotado · '+fz.its.map(i=>i.prod).join(', '),c:'red'}]); o.dono=OS_AGRO(); o.prazo='decidir a área restante';
       o.esg={acao:'apontar',t:'Apontar bloqueado: '+fz.t,q:fz.q}; esp=true; }
-    const dpx=(co.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dpx.length){ o.dono=CEN_CONF_AP; o.prazo='decidir se o dia '+dpx.map(a=>a.dia).join(', ')+' é outro turno'; esp=true; }   // duplicidade retida: decide a conferência (CMD-09)
-    else if(!o.esg&&cenDivAbertas(co).length){ o.dono=OS_AGRO; o.prazo='revisar a divergência de dose do dia '+cenDivAbertas(co).map(a=>a.dia).join(', '); esp=true; } }   // B-R8: revisão técnica pendente
+    const dpx=(co.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dpx.length){ o.dono=CEN_CONF_AP(); o.prazo='decidir se o dia '+dpx.map(a=>a.dia).join(', ')+' é outro turno'; esp=true; }   // duplicidade retida: decide a conferência (CMD-09)
+    else if(!o.esg&&cenDivAbertas(co).length){ o.dono=OS_AGRO(); o.prazo='revisar a divergência de dose do dia '+cenDivAbertas(co).map(a=>a.dia).join(', '); esp=true; } }   // B-R8: revisão técnica pendente
   if(['Em execução','Em conferência'].includes(co.etapa)&&(co.ap||[]).some(a=>a.conferenciaDia?.caso?.estado==='Em conferência')) o.selos=o.selos.filter(s=>s.t!=='Divergência diária pendente').concat([{t:'Divergência diária pendente',c:'yellow'}]);
   // conferência: o encerramento depende do cenário (apontamento aguardando sinal ou sobra em custódia)
   if(co.etapa==='Em conferência'){ o.encM=cenPodeEncerrar(c,co.id)||cdPendente(c,co.id); esp=!!o.encM;   /* bloqueio do encerramento: carga, divergência, sinal, duplicidade ou sobra */
     if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal|Conferência diária pendente/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
-    else if(/^Conferência diária pendente/.test(o.encM)){ o.dono=CEN_CONF_AP; o.prazo='rever a conferência diária'; o.selos=o.selos.filter(s=>s.t!=='Conferência diária pendente').concat([{t:'Conferência diária pendente',c:'yellow'}]); }
+    else if(/^Conferência diária pendente/.test(o.encM)){ o.dono=CEN_CONF_AP(); o.prazo='rever a conferência diária'; o.selos=o.selos.filter(s=>s.t!=='Conferência diária pendente').concat([{t:'Conferência diária pendente',c:'yellow'}]); }
     else if(/^Carga a pesar/.test(o.encM)){ const t=osEncSelo(o.encM);   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Produção › Recebimento e beneficiamento (Cargas) */
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]); o.dono=(typeof prRec==='function'?prRec(prFazDaOS(c,co)):'Recebimento'); o.prazo='pesar e receber a carga'; }
-    else if(o.encM.indexOf(CEN_DIV)===0){ o.dono=OS_AGRO; o.prazo='revisar a divergência de dose'; }   /* B-R8: o selo vem do cenário (cenSeloDiv) */
+    else if(o.encM.indexOf(CEN_DIV)===0){ o.dono=OS_AGRO(); o.prazo='revisar a divergência de dose'; }   /* B-R8: o selo vem do cenário (cenSeloDiv) */
     else { const sin=/sinal/.test(o.encM); const t=osEncSelo(o.encM);  // o bloqueio também na lista e no Kanban
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]);
-      if(sin){ o.dono=o.resp; o.prazo='reconectar o app'; } else if(/duplicidade/.test(o.encM)){ o.dono=CEN_CONF_AP; o.prazo='decidir a duplicidade'; } else if(!/almoxarife/.test(o.dono||'')){ o.dono='Rui (almoxarife)'; o.prazo='receber a devolução'; } } }
+      if(sin){ o.dono=o.resp; o.prazo='reconectar o app'; } else if(/duplicidade/.test(o.encM)){ o.dono=CEN_CONF_AP(); o.prazo='decidir a duplicidade'; } else if(!/almoxarife/.test(o.dono||'')){ o.dono=cenAlmox(); o.prazo='receber a devolução'; } } }
   // A liberar: o Estoque (reserva por lote) pode segurar a liberação desde a abertura → selo vermelho e dono na lista, no Kanban e no painel
   if(co.etapa==='A liberar'&&!o.agua&&(co.ins||[]).length){ const e=osLibErro(o,c); esp=!!e;
     const z=e&&/Dose × área de (.+?) dá 0/.exec(e);   // total 0: quem resolve é o agrônomo, não o Estoque (PRE-REV Y3)
     const lg=!z&&!!e&&e===osUsoErro(c,co);   // regra legal (Frente E): quem resolve é o agrônomo
     if(lg){ const pr=((co.ins||[]).find(x=>osUsoItem(c,co,x))||{}).p||''; o.libErr=e; o.legal=true;
-      o.selos=o.selos.filter(s=>!/^Falta insumo|^Total 0|^Fora do registro/.test(s.t)).concat([{t:'Fora do registro · '+pr,c:'red'}]); o.dono=OS_AGRO; o.prazo='ajustar produto ou dose';
+      o.selos=o.selos.filter(s=>!/^Falta insumo|^Total 0|^Fora do registro/.test(s.t)).concat([{t:'Fora do registro · '+pr,c:'red'}]); o.dono=OS_AGRO(); o.prazo='ajustar produto ou dose';
       passo='Próximo passo: ajustar antes de liberar.'; o.cond=String(o.cond||'').replace('Próximo passo: liberar para execução.',passo); }
-    else if(z){ o.libErr=e; o.total0=true; o.selos=o.selos.filter(s=>!/^Falta insumo|^Total 0/.test(s.t)).concat([{t:'Total 0 · '+z[1],c:'red'}]); o.dono=OS_AGRO; o.prazo='ajustar dose ou área';
+    else if(z){ o.libErr=e; o.total0=true; o.selos=o.selos.filter(s=>!/^Falta insumo|^Total 0/.test(s.t)).concat([{t:'Total 0 · '+z[1],c:'red'}]); o.dono=OS_AGRO(); o.prazo='ajustar dose ou área';
       passo='Dose × área de '+z[1]+' dá 0. Próximo passo: ajustar antes de liberar.'; o.cond=String(o.cond||'').replace('Próximo passo: liberar para execução.',passo); }
     else if(e){ const pr=(/ de (.+?)(?: no Estoque|:)/.exec(e)||[])[1]||''; o.libErr=e;
       o.selos=o.selos.filter(s=>!/^Falta insumo/.test(s.t)).concat([{t:'Falta insumo'+(pr?' · '+pr:''),c:'red'}]);
@@ -303,7 +306,7 @@ function osManCond(o,b,c,esp,passo){ if(!b||!b.bloq||!b.bloq.aid) return; const 
      texto troca só a parte da máquina (reprogramar segue como atividade paralela). Ativo apto não encerra a revisão agronômica. Sem pendência
      específica, o padrão de antes: PCP antes de liberar; o dono da fase depois */
   const h=(a.condHist||[]).slice(-1)[0]||{}; const desde=a.nome+' '+a.cond.toLowerCase()+' desde '+String(h.em||'').split('-').reverse().slice(0,2).join('/')+(h.om?' ('+h.om+')':'');
-  if(o.etapa==='A liberar'){ o.cond=desde+' · o PCP reprograma a máquina da ordem (O.S. › Recursos); depois '+OS_AGRO+' confere e libera. Próximo passo: liberar para execução.';
+  if(o.etapa==='A liberar'){ o.cond=desde+' · o PCP reprograma a máquina da ordem (O.S. › Recursos); depois '+OS_AGRO()+' confere e libera. Próximo passo: liberar para execução.';
     if(esp){ if(passo) o.cond=o.cond.replace('Próximo passo: liberar para execução.',passo); return; }
     o.dono='PCP'; o.prazo='reprogramar antes de liberar'; return; }
   o.cond=osCondGen(Object.assign({},o,{cond:desde+'.'})); if(esp) return;
@@ -343,16 +346,16 @@ function osTrilha(o,it){ if(!it||o.etapa==='Canceladas'||(!o.reservado&&!(it.ent
 function osLibErro(o,c0){ const c=c0||cenGet(); if(!c.ordens[o.id]) return ''; const k=cenClone(c);
   try { osc_libEfeito(k,o.id,false,o.janela); return ''; } catch (e) { return String(e.message||e); } }   /* o motivo do Estoque, da lei ou da carência; não o perfil */
 function osEncBloq(o){ const m=o.encM;
-  if(/^Conferência diária pendente/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m,q:CEN_CONF_AP+' resolve na conferência do dia, nos Apontamentos da O.S.'};
+  if(/^Conferência diária pendente/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m,q:CEN_CONF_AP()+' resolve na conferência do dia, nos Apontamentos da O.S.'};
   if(String(m).indexOf(CEN_DIV)===0) return {acao:'encerrar',t:'Encerrar bloqueado: divergência de consumo/dose em revisão técnica · '+cenDivAbertas(o).map(a=>'dia '+a.dia+' · '+a.div.map(cenDivTxt).join('; ')).join(' | ')+'.',
-    q:OS_AGRO+', na linha do apontamento: aceita com motivo ou registra a correção ou reaplicação.'};   /* B-R8 */
+    q:OS_AGRO()+', na linha do apontamento: aceita com motivo ou registra a correção ou reaplicação.'};   /* B-R8 */
   if(/^Carga a pesar/.test(m)){ const g=(/CG-\d+/.exec(m)||[''])[0]; return {acao:'encerrar',t:'Encerrar bloqueado: '+m.replace(/\.$/,'')+'.',q:(o.dono||'Recebimento')+' pesa e recebe a carga (registrada por engano: descarta com motivo na mesma tela); a produção do talhão só fecha com ela.',h:'CARGA.dc.html'+(g?'#'+g:''),hl:'Pesar a carga'}; }   /* colheita (R-18) */
   if(/^Carga no aparelho/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m.replace(/\.$/,'')+'.',q:(typeof prResp==='function'?prResp(o):o.resp)+' reconecta o app; a carga entra uma vez e vai para a pesagem.'};   /* colheita sem sinal (revisão A-11): não é o recebimento que resolve */
   if(/sinal/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: há apontamentos no aparelho aguardando sinal.',q:o.resp+' reconecta o app; o envio é automático e não duplica.'};
-  if(/duplicidade/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m,q:CEN_CONF_AP+' decide na linha do apontamento: mesmo turno conta uma vez; outro turno soma.'};
+  if(/duplicidade/.test(m)) return {acao:'encerrar',t:'Encerrar bloqueado: '+m,q:CEN_CONF_AP()+' decide na linha do apontamento: mesmo turno conta uma vez; outro turno soma.'};
   const its=(o.r?o.r.itens:[]).filter(i=>i.custodia>0.001); const quem=its.map(i=>i.quem||o.resp).filter((v,i,a)=>a.indexOf(v)===i).join(', ')||o.resp;
   return {acao:'encerrar',t:'Encerrar bloqueado: sobra em custódia · '+its.map(i=>{ const pk=osPk(i.custodia,i.emb); return i.prod+' '+nd(i.custodia)+' '+i.un+(pk?' ('+pk+')':''); }).join(', ')+' com '+quem+'.',
-    q:'Rui (almoxarife) recebe a devolução no Estoque.',h:'EST.dc.html',hl:'Receber devolução no Estoque'}; }
+    q:cenAlmox()+' recebe a devolução no Estoque.',h:'EST.dc.html',hl:'Receber devolução no Estoque'}; }
 // selo do bloqueio do encerramento: o nome (osEncSelo, o mesmo em osMerge) e a dica com quem resolve (osSeloDica) saem do mesmo bloqueio que o
 // painel e o comando mostram (osEncBloq, fonte única; revisão DS, achado 6). Outro selo, ou o mesmo antes da conferência: '' (vale o dicionário
 // do g2lib). Como a do dicionário, é visual no selo; o teclado e o leitor de tela a recebem na linha ou no cartão focado (g2dicaSelo).
@@ -368,26 +371,58 @@ function osc_txt(o,p){ Object.assign(o.osc,p,{fase:o.etapa}); }
 // Aprovar e liberar numa só confirmação (PRD 41.3; padrão adotado em 05/10, o proprietário pode mudar): a O.S. agrícola grava dois
 // registros separados na trilha da ordem: aprovação da versão (CMD-42, agrônomo) e liberação (CMD-06). Água só com água (DEC-2609-10)
 // não grava CMD-42; manutenção (manLiberar) e beneficiamento não passam por osc_liberar.
-const OS_AGRO='Ana (agrônoma)';   // agrônoma das duas fazendas no protótipo (DONO aqui e em dados_lagoa_safra)
-const OS_LIB='gestor';   /* papel liberador do CMD-06 na demonstração (padrão dos agentes, 05/10/2026; o proprietário pode mudar). O CMD-42 é do agrônomo */
+// quem aprova (AL-02, CMD-42) e o papel liberador (AL-01, CMD-06) vêm da alçada vigente (G2_ALCADAS + c.conf; CONF-01 R7), não de nome fixo.
+// AL-01 = gestor é o padrão dos agentes (PEND-OS-01, 05/10/2026); o proprietário muda em Configurações › Usuários e alçadas (CONF-D10)
+function OS_AGRO(){ return g2alcQuem('AL-02'); }   // "Ana (agrônoma)" no seed
+function OS_LIB(){ return g2alc('AL-01').papeis; }   // ['gestor'] no seed
+// quem confere e libera, pela alçada vigente (revisão CONF F14): o texto do registro (seed e ordem nova) é trocado na tela; mesma pessoa nas duas
+// alçadas → "Ana (agrônoma) confere, ajusta se precisar e libera"; pessoas diferentes → "… e aprova; Caio (PCP) libera"
+const OS_COND_LIB=['Ana (agrônoma) confere, ajusta se precisar e libera','o agrônomo confere, ajusta se precisar e libera'];   /* seed e ordem nova; v2 da irrigação (irrReclassCen) */
+function osLibQuemT(){ const A=g2perfis().filter(P=>g2papel(P,g2alc('AL-02').papeis)), L=g2perfis().filter(P=>g2papel(P,OS_LIB()));
+  if(A.length===1&&L.length===1&&A[0].k===L[0].k) return OS_AGRO()+' confere, ajusta se precisar e libera';
+  return OS_AGRO()+' confere, ajusta se precisar e aprova; '+g2alcQuem('AL-01')+' libera'; }
+function osCondLib(t){ const q=osLibQuemT(); return OS_COND_LIB.reduce((s,x)=>s.split(x).join(q),String(t||'')); }
 function osVn(s){ return (String(s||'').match(/\bv\d+\b/g)||['v1']).pop(); }   // versão da ordem: o último vN (fonte única: tela, Mapa e registro)
-function osc_aprovLib(o,qa,ql){ const hr=cenAgora(), vn=osVn(o.versao);   /* qa/ql: quem aprovou e quem liberou (perfil conferido em osLibPor) */
-  const esc=cenNum(o.area)+' ha · '+((o.ins||[]).length?o.ins.map(x=>x.p+' '+cenNum(x.dose,4)+' '+x.un+'/ha'+(x.alvo?' para '+x.alvo:'')).join(', '):'sem insumos');
-  o.osc.ev=(o.osc.ev||[]).concat([{cmd:'CMD-42',v:vn,por:qa,at:hr,t:vn+' aprovada por '+qa+' às '+hr+' · '+esc+' (CMD-42)'},
-    {cmd:'CMD-06',v:vn,por:ql,at:hr,t:vn+' liberada por '+ql+' às '+hr+(o.reservado&&o.req?' · '+o.req+' reservada no Estoque':'')+' (CMD-06)'}]);
-  return ' '+vn+' aprovada por '+qa+' e liberada por '+ql+'.'; }   /* o próximo passo fica só no painel (osCondGen), sem segunda versão no aviso */
-// CTL-3 · ATOR: quem aprova (CMD-42, agrônomo) e quem libera (CMD-06, OS_LIB) vêm do perfil de quem age, conferido no cadastro antes de qualquer
+function osEsc(o){ return cenNum(o.area)+' ha · '+((o.ins||[]).length?o.ins.map(x=>x.p+' '+cenNum(x.dose,4)+' '+x.un+'/ha'+(x.alvo?' para '+x.alvo:'')).join(', '):'sem insumos'); }   /* escopo da versão aprovada */
+// aprovação (CMD-42) da versão vigente ainda sem liberação: a ordem segue em A liberar com o selo "Aprovada vN · aguarda liberação" (R13)
+function osAprovada(o,vn){ const ev=(o.osc||o.oscx||{}).ev||[]; return ev.find(e=>e.cmd==='CMD-42'&&e.v===vn)||null; }
+function osc_aprovLib(o,qa,ql){ const hr=cenAgora(), vn=osVn(o.versao); const ap=qa?null:osAprovada(o,vn);   /* qa/ql: quem aprovou e quem liberou (perfil conferido em osLibPor); qa nulo: a versão já tinha CMD-42 */
+  o.osc.ev=(o.osc.ev||[]).concat((qa?[{cmd:'CMD-42',v:vn,por:qa,at:hr,t:vn+' aprovada por '+qa+' às '+hr+' · '+osEsc(o)+' (CMD-42)'}]:[]).concat([
+    {cmd:'CMD-06',v:vn,por:ql,at:hr,t:vn+' liberada por '+ql+' às '+hr+(o.reservado&&o.req?' · '+o.req+' reservada no Estoque':'')+' (CMD-06)'}]));
+  return qa?' '+vn+' aprovada por '+qa+' e liberada por '+ql+'.':' '+vn+' liberada por '+ql+(ap?'; aprovada antes por '+ap.por+' às '+ap.at:'')+'.'; }   /* o próximo passo fica só no painel (osCondGen) */
+// CTL-3 · ATOR: quem aprova (CMD-42, AL-02) e quem libera (CMD-06, AL-01) vêm do perfil de quem age, conferido no cadastro antes de qualquer
 // gravação (PRD 41.3 l.6864: "o usuário possuir ambas as permissões"; CMD-06 l.2777). Dano evitado: liberação gravada em nome de quem não decidiu.
-function osLibPor(ator,id,vn){ return [cenExige(ator,'agronomo','Aprovar a '+vn+' da '+id+' (CMD-42)'),cenExige(ator,OS_LIB,'Liberar a '+id+' (CMD-06)')]; }
-function osLibTxt(PF){ const q=(p)=>g2papel(PF,p)?g2ator(PF,p):g2quem(p);   /* sem o papel, nomeia quem decide (revisão do CTL-3, achado 1) */
-  return q('agronomo')+' aprova esta versão e '+q(OS_LIB)+' libera'; }   /* confirmação (O.S. e Mapa) */
+// CONF-01 R13 (papéis em pessoas diferentes): quem tem só o AL-01 libera só versão já aprovada e grava só o CMD-06; com a versão já aprovada,
+// quem tem os dois grava só o CMD-06. A aprovação de uma versão nunca libera outra (a versão vem de osVn, a mesma do registro).
+function osLibPor(ator,id,vn,o){ const hasA=g2papel(ator,g2alc('AL-02').papeis), hasL=g2papel(ator,OS_LIB()); const ap=o?osAprovada(o,vn):null;
+  if(hasL&&!hasA){ if(!ap) throw new Error('Aprovação agronômica da '+vn+' da '+id+' pendente: decisão de '+g2alcQuem('AL-02')+'. Nada foi alterado.');
+    return [null,cenExigeAlc(ator,'AL-01','Liberar a '+id+' (CMD-06)')]; }
+  return [(ap&&hasA)?null:cenExigeAlc(ator,'AL-02','Aprovar a '+vn+' da '+id+' (CMD-42)'),cenExigeAlc(ator,'AL-01','Liberar a '+id+' (CMD-06)')]; }
+function osLibTxt(PF,o){ const q=(id)=>{ const a=g2alc(id); return g2papel(PF,a.papeis)?g2ator(PF,a.papeis):g2alcQuem(id); };   /* sem o papel, nomeia quem decide (revisão do CTL-3, achado 1) */
+  const ap=o&&o.aprov; if(ap) return q('AL-01')+' libera a '+ap.v+' aprovada por '+ap.por;   /* versão já aprovada (R13): só o CMD-06 */
+  return q('AL-02')+' aprova esta versão e '+q('AL-01')+' libera'; }   /* confirmação (O.S. e Mapa) */
+// aprovar sem liberar (R13, quem tem só o AL-02): confere a regra legal e o total > 0 antes de gravar e grava só o CMD-42; fica em A liberar
+function osc_aprovar(c,id,ator){ const o=osc_o(c,id); const vn=osVn(o.versao); const qa=cenExigeAlc(ator,'AL-02','Aprovar a '+vn+' da '+id+' (CMD-42)');
+  if(o.etapa!=='A liberar') throw new Error(id+' não está em A liberar.');
+  if(!(o.ins||[]).length&&osSoAgua(o)) throw new Error(id+' é irrigação só com água: libera pela prontidão, sem aprovação agronômica (DEC-2609-10).');
+  const ap=osAprovada(o,vn); if(ap) throw new Error('A '+vn+' da '+id+' já está aprovada por '+ap.por+' às '+ap.at+': nada foi gravado de novo.');
+  { const z0=(o.ins||[]).find(x=>x.dose>0&&!(x.tot>0)); if(z0) throw new Error('Dose × área de '+z0.p+' dá 0 '+z0.un+': aumente a dose ou a área.'); }
+  { const e=osUsoErro(c,o); if(e) throw new Error(e); }   /* regra legal (RN-016), a mesma da liberação */
+  const hr=cenAgora(); o.osc.ev=(o.osc.ev||[]).concat([{cmd:'CMD-42',v:vn,por:qa,at:hr,t:vn+' aprovada por '+qa+' às '+hr+' · '+osEsc(o)+' (CMD-42)'}]);
+  return {msg:vn+' da '+id+' aprovada por '+qa+' (CMD-42). Fica em A liberar: '+g2alcQuem('AL-01')+' libera para execução e reserva os insumos.'+osUsoAtencao(c,id)}; }
 // água só com água (DEC-2609-10) é decidida pela ordem (cadastro de irrigação), não pelo sinal da tela: sem isso o sinal liberaria sem CMD-42
 function osSoAgua(o){ return (typeof OSD!=='undefined'&&(OSD.ords||[]).some(b=>b.id===o.id&&b.agua))||/^Irrigação/i.test(String(o.tipo||'')); }
 // liberar (agrônomo aprova e liberador libera; pode ajustar antes): reserva por lote (cenLiberar); água sem produto libera pela prontidão, sem requisição
 function osc_liberar(c,id,agua,jan,ator){ const o=osc_o(c,id);
   if(agua&&!osSoAgua(o)) throw new Error(id+' não é irrigação só com água: exige aprovação agronômica.');
-  const q=agua?null:osLibPor(ator,id,osVn(o.versao));
-  const r=osc_libEfeito(c,id,agua,jan); if(q) r.msg+=osc_aprovLib(o,q[0],q[1]); return r; }
+  const q=agua?null:osLibPor(ator,id,osVn(o.versao),o);
+  /* só água (DEC-2609-10): sem aprovação agronômica, mas o CMD-06 tem autor (revisão CONF 13/10): perfil ativo de quem age, conferido antes de gravar,
+     e o registro em o.osc.ev (a trilha lê). Sem alçada própria: a AL-01 deixa a água fora (prontidão operacional). Dano evitado: ordem liberada sem autor. */
+  const qw=agua?cenQuem(ator===undefined?g2perfil():ator,[],'Liberar a '+id+' (CMD-06, irrigação só com água)'):'';
+  const r=osc_libEfeito(c,id,agua,jan); if(q) r.msg+=osc_aprovLib(o,q[0],q[1]);
+  if(qw){ const vn=osVn(o.versao), hr=cenAgora(); o.osc.ev=(o.osc.ev||[]).concat([{cmd:'CMD-06',v:vn,por:qw,at:hr,t:vn+' liberada por '+qw+' às '+hr+' · irrigação só com água, sem aprovação agronômica (DEC-2609-10) (CMD-06)'}]);
+    r.msg=r.msg.replace(/ liberada pela prontidão operacional\./,' liberada pela prontidão operacional por '+qw+'.'); }
+  return r; }
 // efeito da liberação, sem o registro de quem decide: só osc_liberar (que grava CMD-42/CMD-06) e a prévia osLibErro (na cópia) o chamam
 function osc_libEfeito(c,id,agua,jan){ const o=osc_o(c,id);
   { const cb=carBloqColheita(c,o,'liberar'); if(cb) throw new Error(cb.t); }   // carência (MAPA-CARENCIA-LMR-20261003)
@@ -414,7 +449,7 @@ function osc_ajFalta(c,p,un,d,ar){ if(!isFinite(d)||!isFinite(ar)) return 'Dose 
   const l=cenLote(c,p), dp=l?cenDisp(l):0, need=cenQtd(d,ar);
   if(!(need>0)) return 'Dose × área dá 0 '+un+': aumente a dose ou a área.';
   return need>dp+1e-9?('Estoque: '+cenNum(dp)+' '+un+' disponíveis'+(l?' no lote '+l.lote:'')+' para '+cenNum(need)+' '+un+'. Baixe a dose ou a área, ou troque o produto.'):''; }
-function osc_ajustar(c,id,area,doses,jan,rem,add,lib,ator){ const o=osc_o(c,id); const qa=cenExige(ator,'agronomo','Ajustar a '+id+' (nova versão)');   /* dose e área: decisão do agrônomo */
+function osc_ajustar(c,id,area,doses,jan,rem,add,lib,ator){ const o=osc_o(c,id); const qa=cenExigeAlc(ator,'AL-02','Ajustar a '+id+' (nova versão)');   /* dose e área: decisão do agrônomo (AL-02) */
   if(o.etapa!=='A liberar') throw new Error(id+' não está em A liberar.');
   rem=rem||[]; add=add||[]; o.ins=o.ins||[]; lib=lib!==false;   // lib=false: grava a versão sem liberar (liberação impedida por outro motivo)
   if(!(area>0)) throw new Error('Informe a área maior que 0 ha.'); if(area>o.area+1e-9) throw new Error('Máximo '+cenNum(o.area)+' ha: é a área da ordem.');
@@ -470,7 +505,7 @@ function osc_iniciar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Liberadas') throw
 // apontamento pela web (O.S. e Mapa): o mesmo comando do app (cenApontar); cons/est vêm do formulário (osApIns), chave do formulário aberto
 function osc_apontar(c,id,d,ha,cons,est,chave){ const R=cenApontar(c,{os:id,d,ha,cons,est,chave,origem:'web'}); const o=c.ordens[id]; const ap=R.ap;
   if(R.repetido) return {msg:'Apontamento do dia '+ap.dia+' já registrado ('+nd(ap.ha)+' ha): nada foi somado de novo.'};
-  if(R.dup.length) return {msg:'Apontamento do dia '+ap.dia+' ('+nd(ha)+' ha em '+d+') em conferência: já há '+cenApDupTxt(R.dup)+' nesta data. Nada foi somado nem baixado; '+CEN_CONF_AP+' decide se é outro turno.'};
+  if(R.dup.length) return {msg:'Apontamento do dia '+ap.dia+' ('+nd(ha)+' ha em '+d+') em conferência: já há '+cenApDupTxt(R.dup)+' nesta data. Nada foi somado nem baixado; '+CEN_CONF_AP()+' decide se é outro turno.'};
   const un=p=>((o.ins||[]).find(x=>x.p===p)||{}).un||''; const ins=Object.keys(ap.cons||{}).map(p=>p+' '+nd(ap.cons[p])+' '+un(p)).join(', ');
   return {msg:'Apontamento do dia '+ap.dia+': '+nd(ha)+' ha (provisório)'+(ins?' · usado: '+ins:'')+'. Saldo '+nf(o.saldo)+' ha; a ordem continua em execução.'+cenDivMsg(ap)
     +(R.ks.length?' Consumo em conferência: '+R.ks.map(k=>cenConfTxt(k,c)).join('; ')+' · '+cenConcQuem(c,R.ks)+'.':'')}; }
@@ -481,7 +516,7 @@ function osApIns(c,o,ha,ced){ const r=o.req&&c.reqs[o.req]; const pend=osApPend(
   return (o.ins||[]).map((x,i)=>{ const it=r&&r.itens.find(y=>y.prod===x.p); const ed=(ced||{})[x.p]; const vazio=ed===undefined||String(ed).trim()==='';
     const sug=(ha>0&&it&&isFinite(ha))?cenQtdTrecho(x.dose,(o.realizado||0)+pend,ha):null; const tem=it?it.custodia:0;
     const q=!vazio?g2num(ed):(it?(ed===undefined?sug:NaN):0);
-    const warn=(q>tem+1e-9)?(ed===undefined?'Sugestão acima do que está em custódia ('+nd(tem)+' '+x.un+'): informe quanto foi usado.':'Acima da custódia ('+nd(tem)+' '+x.un+'): o consumo vai para conferência com '+CEN_CONC_RESP+'.'):'';
+    const warn=(q>tem+1e-9)?(ed===undefined?'Sugestão acima do que está em custódia ('+nd(tem)+' '+x.un+'): informe quanto foi usado.':'Acima da custódia ('+nd(tem)+' '+x.un+'): o consumo vai para conferência com '+CEN_CONC_RESP()+'.'):'';
     return {p:x.p,un:x.un,fid:'ap_c'+i,lab:'Usado de '+x.p+' ('+x.un+')',v:ed!==undefined?ed:(sug!==null?String(sug).replace('.',','):''),q,est:ed===undefined,warn,hasWarn:!!warn,
       hint:it?nd(x.dose)+' '+x.un+'/ha × área · em custódia '+nd(tem)+' '+x.un:(r?'Fora da '+r.id+' · nada em custódia':'Sem requisição · nada em custódia')}; }); }
 function osApColeta(L){ const cons={},est=[]; let erro='';
@@ -489,15 +524,19 @@ function osApColeta(L){ const cons={},est=[]; let erro='';
   return {cons,est,erro}; }
 // aviso no formulário (não trava): o mesmo critério do servidor (cenApDup) para a data escolhida, antes de salvar
 function osApDupAviso(c,o,d){ const co=c.ordens[o.id]; if(!co||!/^\d\d\/\d\d$/.test(d||'')) return '';
-  const l=cenApDup(co,{d,parc:null,chave:'?',origem:'web'}); return l.length?'Já há '+cenApDupTxt(l)+' em '+d+'. Se for outro turno, salve: ele fica em conferência com '+CEN_CONF_AP+' e só soma depois da decisão.':''; }
-function osc_conferencia(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em execução') throw new Error(id+' não está em execução.');
-  if(o.area&&o.saldo>0.001) throw new Error('Ainda há '+cenNum(o.saldo)+' ha de saldo.'); o.etapa='Em conferência'; o.selos=[]; cenSeloDiv(c,id);   /* B-R8: a revisão pendente segue visível */
-  return {msg:id+' enviada para conferência.'}; }
+  const l=cenApDup(co,{d,parc:null,chave:'?',origem:'web'}); return l.length?'Já há '+cenApDupTxt(l)+' em '+d+'. Se for outro turno, salve: ele fica em conferência com '+CEN_CONF_AP()+' e só soma depois da decisão.':''; }
+// enviar para conferência (CMD-08) e encerrar (CMD-10) gravam quem agiu e a hora em o.osc.fim, uma linha por ato (revisão CONF 10/10, R14):
+// ator = perfil de quem age (Ver como; omitido, o da sessão); sem perfil ativo, recusa sem gravar. Não há alçada própria (o PRD diz "regra
+// autorizada"): o que segura o encerramento são os requisitos locais (cenPodeEncerrar). Dano evitado: ordem encerrada sem autor rastreável.
+function osc_fim(o,cmd,ator,acao){ const quem=cenQuem(ator===undefined?g2perfil():ator,[],acao); o.osc.fim=(o.osc.fim||[]).concat([{cmd,por:quem,at:cenAgora()}]); return quem; }
+function osc_conferencia(c,id,ator){ const o=osc_o(c,id); if(o.etapa!=='Em execução') throw new Error(id+' não está em execução.');
+  if(o.area&&o.saldo>0.001) throw new Error('Ainda há '+cenNum(o.saldo)+' ha de saldo.'); const quem=osc_fim(o,'CMD-08',ator,'Enviar a '+id+' para conferência (CMD-08)'); o.etapa='Em conferência'; o.selos=[]; cenSeloDiv(c,id);   /* B-R8: a revisão pendente segue visível */
+  return {msg:id+' enviada para conferência por '+quem+'.'}; }
 // encerrar: só com apontamentos enviados e nada em custódia (cenPodeEncerrar); os apontamentos passam a conferidos
-function osc_encerrar(c,id){ const o=osc_o(c,id); if(o.etapa!=='Em conferência') throw new Error(id+' não está em conferência.');
+function osc_encerrar(c,id,ator){ const o=osc_o(c,id); if(o.etapa!=='Em conferência') throw new Error(id+' não está em conferência.');
   const m=cenPodeEncerrar(c,id)||cdPendente(c,id); if(m) throw new Error('Encerrar bloqueado: '+m);
-  o.etapa='Encerradas'; o.selos=[]; (o.ap||[]).forEach(a=>{ if(a.st==='Provisório') a.st='Conferido'; });
-  return {msg:id+' encerrada.'}; }
+  const quem=osc_fim(o,'CMD-10',ator,'Encerrar a '+id+' (CMD-10)'); o.etapa='Encerradas'; o.selos=[]; (o.ap||[]).forEach(a=>{ if(a.st==='Provisório') a.st='Conferido'; });
+  return {msg:id+' encerrada por '+quem+'.'}; }
 // cancelar sem execução: a reserva ainda não entregue volta ao disponível do lote e a requisição fica cancelada
 // CMD-46 (AL-04: responsável do domínio, o gestor; revisão do CTL-3, achado 4): grava quem cancelou e a hora. Dano evitado: ordem aprovada e
 // liberada desfeita, com a reserva solta, sem decisão competente e sem autor
@@ -515,23 +554,29 @@ function osc_cancTxt(c,id,cx){ cx=cx||['','','']; const o=c.ordens[id]; const r=
   return ['Cancela a requisição '+r.id+(sl?' e libera a reserva não entregue ('+sl+')':'')+'. '+ct+(um?' já entregue fica':' já entregues ficam')+' em custódia com '+quem+' até a devolução no Estoque.',
     'Requisição '+r.id+' cancelada'+(sl?'; reserva não entregue liberada ('+sl+')':'')+'. '+ct+(um?' entregue segue':' entregues seguem')+' em custódia com '+quem+': receba a devolução no Estoque.',
     r.id+' cancelada · '+ct+' em custódia · receber devolução']; }
-function osc_cancelar(c,id,mot,cx,ator){ const o=osc_o(c,id); const quem=cenExige(ator,'gestor','Cancelar a '+id+' sem execução (CMD-46)');
+function osc_cancelar(c,id,mot,cx,ator){ const o=osc_o(c,id); const quem=cenExigeAlc(ator,'AL-04','Cancelar a '+id+' sem execução (CMD-46)');
   if((o.realizado||0)>0||['A liberar','Liberadas'].indexOf(o.etapa)<0) throw new Error('Só ordem sem realizado, em A liberar ou Liberadas, é cancelada sem execução.');
   { const cg=osCargasVivas(c,id); if(cg.length) throw new Error('Cancelar recusado: a '+id+' tem carga '+cg.map(g=>g.id+' '+String(g.st).toLowerCase()).join(', ')+'. Colheita com carga é fato executado: estorne a carga recebida ou descarte a carga a pesar (com motivo) em Produção › Recebimento e beneficiamento (Cargas) antes de cancelar.'); }
   cx=osc_cancTxt(c,id,cx); const cust=osc_cancCust(c,id).length>0; const r=o.req&&c.reqs[o.req];
   if(r){ if(o.reservado) r.itens.forEach(it=>{ const l=c.lotes[it.prod+'|'+it.lote]; const res=Math.max(0,it.solicitado-it.entregue); if(l&&res>0) l.reservado=Math.max(0,l.reservado-res); }); r.estado='Cancelada'; }
-  const hr=cenAgora(); o.etapa='Canceladas'; o.reservado=false; o.selos=[]; osc_txt(o,{canPor:quem,canEm:hr,cond:'Cancelada sem execução por '+quem+' às '+hr+': '+mot+'. '+cx[1],dono:cust?CEN_CONC_RESP:'',prazo:cust?'receber a devolução':'',insx:cx[2]});
+  const hr=cenAgora(); o.etapa='Canceladas'; o.reservado=false; o.selos=[]; osc_txt(o,{canPor:quem,canEm:hr,cond:'Cancelada sem execução por '+quem+' às '+hr+': '+mot+'. '+cx[1],dono:cust?CEN_CONC_RESP():'',prazo:cust?'receber a devolução':'',insx:cx[2]});
   return {msg:(id+' cancelada sem execução. '+cx[1]).trim()+' Cancelada por '+quem+'.'}; }
 /* cargas da O.S. de colheita que ainda contam (revisão A-04): a pesar (com ou sem sinal) ou recebidas; estornada e descartada não */
 function osCargasVivas(c,id){ return (typeof prCargasOS==='function')?prCargasOS(c,id).filter(g=>g.st==='A pesar'||g.st==='Recebida'):[]; }
-const LIM_DISP=0.20;  /* alçada AL-05: dispensa de saldo até 20 % da área sem a Direção (regra única: comando e texto da tela) */
-function osc_dispensar(c,id,n,mot,ator){ const o=osc_o(c,id); const quem=cenExige(ator,['gestor','agronomo'],'Dispensar saldo da '+id);   /* CMD-47 · AL-05: alçada gerencial e validação agronômica */
+// alçada AL-05 (regra única: comando e texto da tela, CONF-01 R11): limite em ha = cenQtd(limite/100, área da ordem), decimal; acima, o nível acima
+function osLimDisp(o){ return cenLimDisp(o&&o.area); }
+// chave de quem inicia (o painel, ao abrir; ENG-021): a mesma chave não dispensa de novo (cenIdem; revisão CONF 13/10)
+function osc_dispensar(c,id,n,mot,ator,chave){ return cenIdem(c,chave,JSON.stringify(['CMD-47',id,Number(n),String(mot||''),(g2pf(ator)||{}).k||'']),'Dispensa',()=>osc_dispensar0(c,id,n,mot,ator)); }
+function osc_dispensar0(c,id,n,mot,ator){ const o=osc_o(c,id); let quem=cenExigeAlc(ator,'AL-05','Dispensar saldo da '+id);   /* CMD-47 · AL-05: alçada gerencial e validação agronômica */
   if(o.etapa!=='Em execução') throw new Error(id+' não está em execução.');
-  { const dp=(o.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dp.length) throw new Error('Apontamento em conferência de duplicidade (dia '+dp.map(a=>a.dia).join(', ')+'): '+CEN_CONF_AP+' decide antes de dispensar o saldo.'); }
+  { const dp=(o.ap||[]).filter(a=>a.st===CEN_AP_DUP); if(dp.length) throw new Error('Apontamento em conferência de duplicidade (dia '+dp.map(a=>a.dia).join(', ')+'): '+CEN_CONF_AP()+' decide antes de dispensar o saldo.'); }
   const pap=osApPend(o); if(n>o.saldo-pap+0.001) throw new Error('Máximo '+cenNum(Math.max(0,o.saldo-pap))+' ha: é o saldo da ordem'+(pap?' descontando '+cenNum(pap)+' ha ainda no aparelho.':'.'));
-  const tot=(o.osc.disp||0)+n; if(o.area>0&&tot>o.area*LIM_DISP+0.001) throw new Error(nd(tot)+' ha = '+nd(100*tot/o.area,1)+' % acima de 20 % · exige Direção.');
+  const tot=(o.osc.disp||0)+n; const L=osLimDisp(o);
+  if(o.area>0&&tot>L.ha+1e-9){ const ac=g2alcN(g2alc('AL-05'),'acima');   /* acima do limite: só o nível acima (direção e agrônomo); sem titular, recusa como antes */
+    if(!g2papel(ator,ac.papeis)) throw new Error(nd(tot)+' ha = '+nd(100*tot/o.area,1)+' % acima de '+L.pct+' % · exige Direção.'); quem=g2ator(ator,ac.papeis); }
   o.saldo=Math.max(0,o.saldo-n); o.ap=cortaPrev(o.ap,o.saldo);
-  const hr=cenAgora(); osc_txt(o,{disp:tot,dispPor:quem,dispEm:hr,cond:'Saldo de '+nd(n)+' ha dispensado: '+mot+' · decisão gerencial e validação agronômica de '+quem+' às '+hr+'. Realizado de '+nf(o.realizado)+' ha preservado.',dono:'',prazo:''});
+  const hr=cenAgora(); o.osc.disps=(o.osc.disps||[]).concat([{ha:n,tot,por:quem,at:hr,mot}]);   /* uma linha por CMD-47 (a trilha não perde a 1ª dispensa) */
+  osc_txt(o,{disp:tot,dispPor:quem,dispEm:hr,cond:'Saldo de '+nd(n)+' ha dispensado: '+mot+' · decisão gerencial e validação agronômica de '+quem+' às '+hr+'. Realizado de '+nf(o.realizado)+' ha preservado.',dono:'',prazo:''});
   return {msg:'Dispensados '+nd(n)+' ha da '+id+' por '+quem+' · realizado '+nf(o.realizado)+' ha preservado · saldo '+nf(o.saldo)+' ha.'+(o.saldo<=0.001?' Envie a ordem para conferência.':'')}; }
 // nova ordem: entra no cenário em A liberar com os insumos da atividade do plano (dose × área) e sem requisição; os textos da tela ficam em osc.novo
 /* origem da dose (R21): ordem nova guarda a origem; ajustada pelo agrônomo (dose diferente da do registro) diz a versão; senão o padrão do plano */
@@ -541,7 +586,7 @@ function osOrigem(o,x){ if(o.ajv&&(x.d0===undefined||Math.abs(Number(x.d0)-Numbe
 function osc_nova(c,no){ if(c.ordens[no.id]) throw new Error(no.id+' já existe.');
   const ins=(no.ins||[]).map(x=>({g:x.g||'',p:x.p,dose:x.dose,un:x.un,tot:x.tot,emb:(OSD.nova.emb||{})[x.p]||'',orig:x.orig||''}));   /* g: o grupo vai junto (A4: corretivo fora da trava de agrotóxico) */
   c.ordens[no.id]={id:no.id,tipo:no.tipo,talhao:no.talhao,area:no.area,etapa:'A liberar',versao:no.versao,realizado:0,saldo:no.area,resp:no.resp,ins,req:null,selos:no.selos,ap:[],reservado:false,osc:{novo:no}};
-  return {msg:no.id+' emitida em A liberar. Não foi liberada: o agrônomo libera para execução e pode ajustar antes.'}; }
+  return {msg:no.id+' emitida em A liberar. Não foi liberada: '+osLibQuemT()+' para execução.'}; }
 function nvAtvs(c,pl){ const plO={id:c.plano,versao:pl.versao,atividades:pl.atv.map(a=>({id:a.id,nome:a.nome,op:a.op,gat:a.gat,prods:(a.ins||[]).map(x=>({grupo:x.g,prod:x.p,dose:x.dose,un:x.un}))}))};
   const SA=soloAtividades({id:c.id,plano:plO},{},((cenGet().solo)||{}).aceites||{});
   return SA.atvs.map(x=>({id:String(x.a.id),nome:x.a.nome,op:x.a.op,gat:x.incl?('data '+soloBr(x.a.g.data)):(x.a.gat||''),incl:!!x.incl,laudo:x.ac?x.ac.laudo:'',
@@ -570,22 +615,33 @@ function osProx(o,PF){
   if(pm) P=Object.assign({},P,{t:'O plano mudou pela análise ('+pm.ac.laudo+'): '+(pm.ac.dose==='-'?'retirar '+pm.p:pm.p+' '+cenNum(pm.ac.dose,4)+' '+pm.un+'/ha')+'; a O.S. tem '+cenNum(pm.os,4)+' '+pm.un+'/ha. O agrônomo ajusta antes de liberar ou libera com a dose da O.S.'});
   // impedimento do próximo passo: do registro (máquina, janela, conflito) ou do cenário (saldo no Estoque; sinal ou sobra no encerramento)
   let b=(o.bloq&&o.bloq.fase===o.etapa&&o.bloq.acao===P.fn)?o.bloq:null;
-  if(!b&&P.fn==='liberar'&&!o.agua){ const e=o.libErr||''; if(e) b=o.legal?{acao:'liberar',t:'Liberar bloqueado: '+e,q:OS_AGRO+', ajustando produto ou dose antes de liberar.',legal:true}:o.total0?{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Ana (agrônoma), ajustando a dose ou a área antes de liberar.',total0:true}
+  if(!b&&P.fn==='liberar'&&!o.agua){ const e=o.libErr||''; if(e) b=o.legal?{acao:'liberar',t:'Liberar bloqueado: '+e,q:OS_AGRO()+', ajustando produto ou dose antes de liberar.',legal:true}:o.total0?{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:OS_AGRO()+', ajustando a dose ou a área antes de liberar.',total0:true}
       :{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Suprimentos, recebendo o insumo no Estoque.',h:'EST.dc.html',hl:'Ver saldos no Estoque'}; }
   if(!b&&P.fn==='encerrar'&&o.encM) b=osEncBloq(o);
   if(!b&&o.etapa==='Canceladas'){ const cu=o.r?o.r.itens.filter(i=>(i.custodia||0)>1e-6):[];   /* revisão do 853a6a8, achado 7: a custódia não fica sem destino */
     if(cu.length) b={acao:'',tone:'yellow',h:'EST.dc.html',hl:'Receber devolução',t:'Custódia a devolver: '+cu.map(i=>nd(i.custodia)+' '+i.un+' de '+i.prod+' com '+(i.quem||o.resp)).join(', ')+'.',
-      q:CEN_CONC_RESP+' recebe a devolução no Estoque; até lá o material conta como suprimento na demanda de insumos.'}; }
+      q:CEN_CONC_RESP()+' recebe a devolução no Estoque; até lá o material conta como suprimento na demanda de insumos.'}; }
   if(!b&&P.fn==='iniciar'&&!o.agua) b=osIniErro(o,o.r);
   if(!b&&P.fn==='apontar'&&o.esg) b=o.esg;   // componente esgotado: Dispensar saldo segue no painel
   if(!b&&(P.fn==='liberar'||P.fn==='iniciar')&&o.carB) b=Object.assign({},o.carB,{acao:P.fn});   // carência (MAPA-CARENCIA-LMR-20261003)
-  const LP=['agronomo',OS_LIB];   /* CTL-3 · ATOR: sem os dois papéis, a tela diz quem decide; o comando recusa do mesmo jeito */
-  if(!b&&P.fn==='liberar'&&!o.agua&&PF&&!g2papel(PF,LP)) b={acao:'liberar',t:'Liberar para execução: decisão de '+g2quem(LP)+'.',q:g2quem('agronomo')+' aprova esta versão e '+g2quem(OS_LIB)+' libera; o perfil '+PF.t+' não tem esses papéis.',tone:'yellow',papel:true};
+  const LP=g2alc('AL-02').papeis.concat(OS_LIB().filter(x=>g2alc('AL-02').papeis.indexOf(x)<0));   /* CTL-3 · ATOR: sem os dois papéis (AL-02 e AL-01), a tela diz quem decide; o comando recusa do mesmo jeito */
+  /* revisão CONF F4: quem só aprova (AL-02, R13) aprova mesmo com a liberação impedida por estoque ou máquina (osc_aprovar não depende disso);
+     só a regra legal, o total 0 e a carência seguram a aprovação. O impedimento segue no texto, para a liberação depois. */
+  let espera=null; if(b&&P.fn==='liberar'&&!o.agua&&PF&&!b.legal&&!b.total0&&!o.carB&&!o.aprov&&g2papel(PF,g2alc('AL-02').papeis)&&!g2papel(PF,OS_LIB())){ espera=b; b=null; }
+  if(!b&&P.fn==='liberar'&&!o.agua&&PF){ const hasA=g2papel(PF,g2alc('AL-02').papeis), hasL=g2papel(PF,OS_LIB()), vn=osVn(o.versao), ap=o.aprov||null;
+    if(hasA&&hasL){ if(ap) P=Object.assign({},P,{t:'Aprovada '+vn+' por '+ap.por+'. Confira máquina, janela e insumos e libere; os insumos são reservados no Estoque.',sec:null}); }   /* versão já aprovada: só o CMD-06 */
+    else if(hasA){ /* CONF-01 R13: só o AL-02 aprova (CMD-42) e a ordem fica em A liberar; o liberador libera depois */
+      if(!ap) P=Object.assign({},P,{t:'Confira atividade, área, produtos e doses e aprove a '+vn+'; se precisar, ajuste antes. '+g2alcQuem('AL-01')+' libera depois e reserva os insumos no Estoque.'
+        +(espera?' A liberação aguarda: '+String(espera.t).replace(/^Liberar bloqueado: /,'').replace(/\.$/,'')+' ('+String(espera.q||'').replace(/\.$/,'')+').':''),btn:'Aprovar '+vn,fn:'aprovar',sec:P.sec?{btn:'Ajustar antes de aprovar',fn:'ajustar'}:null});
+      else b={acao:'liberar',t:'Aprovada '+vn+' por '+ap.por+': aguarda liberação.',q:g2alcQuem('AL-01')+' libera para execução; o perfil '+PF.t+' aprova, não libera.',tone:'yellow',papel:true}; }
+    else if(hasL){ if(!ap) b={acao:'liberar',t:'Aprovação agronômica da '+vn+' pendente: decisão de '+g2alcQuem('AL-02')+'.',q:g2alcQuem('AL-02')+' aprova esta versão; depois '+g2ator(PF,OS_LIB())+' libera.',tone:'yellow',papel:true};
+      else P=Object.assign({},P,{t:'Aprovada '+vn+' por '+ap.por+'. Confira máquina, janela e insumos e libere; os insumos são reservados no Estoque.',sec:null}); }
+    else b={acao:'liberar',t:'Liberar para execução: decisão de '+(g2quem(LP)||g2alcQuem('AL-02')+' e '+g2alcQuem('AL-01'))+'.',q:OS_AGRO()+' aprova esta versão e '+g2alcQuem('AL-01')+' libera; o perfil '+PF.t+' não tem esses papéis.',tone:'yellow',papel:true}; }
   /* SOLO-01 · revisão A6: plano mudado e quem age é agrônomo (ou sem perfil, nos testes) → primário "Ajustar antes de liberar". "Liberar com a dose
      da O.S." só fica como secundário quando nada impede liberar; o impedimento (estoque, regra legal, carência, total 0, papel) continua visível e
      não esconde o ajuste (keep). Sem o papel de agrônomo, o passo segue liberar com o impedimento de quem decide. Dano evitado: botão sem efeito e
      uma liberação oferecida que o comando recusa. */
-  if(pm&&(!PF||g2papel(PF,'agronomo'))){ P={t:P.t,btn:'Ajustar antes de liberar',fn:'ajustar',sec:b?null:{btn:'Liberar com '+cenNum(pm.os,4)+' '+pm.un+'/ha',fn:'liberar'}};
+  if(pm&&(!PF||(g2papel(PF,g2alc('AL-02').papeis)&&g2papel(PF,OS_LIB())))){   /* v57 (CONF R13): só quem aprova e libera; quem só aprova segue o "Aprovar vN" */ P={t:P.t,btn:'Ajustar antes de liberar',fn:'ajustar',sec:b?null:{btn:'Liberar com '+cenNum(pm.os,4)+' '+pm.un+'/ha',fn:'liberar'}};
     if(b) b=Object.assign({},b,{keep:true}); }
   return {P,b}; }
 '''
@@ -719,19 +775,20 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   const apP=osApPend(o), apMax=Math.max(0,(o.saldo||0)-apP);
   v.pan_go=()=>{ if(P.fn==='ajustar'){ v.pan_ajgo(); return; } if(P.fn==='apontar'){ const prox=(o.ap||[]).find(x=>x.st==='Previsto'); self.setState({pa:{id:o.id,fn:'apontar',d:CEN_DIA_OP,ha:String(Math.min(apMax,prox?prox.ha:apMax)).replace('.',','),ced:{},chave:'W-'+o.id+'-'+Date.now(),err:''}}); return; } self.setState({pa:{id:o.id,fn:P.fn}}); };
   // confirmação e formulários de decisão só com o papel: aberto por outro perfil (troca no seletor ou em outra aba), não aparece (achado 1)
-  const DSP=['gestor','agronomo'], agr=g2papel(PF,DSP), gest=g2papel(PF,'gestor');   /* dispensa: alçada gerencial e validação agronômica (CMD-47; AL-05); cancelar: gestor (CMD-46; AL-04) */
-  const paOk=!!pa&&({ajustar:g2papel(PF,'agronomo'),dispensar:agr,cancelar:gest}[pa.fn]!==false)&&!(pa.fn==='liberar'&&b&&b.papel);
-  v.pan_conf=paOk&&['liberar','iniciar','conferencia','encerrar'].indexOf(pa.fn)>=0; v.pan_apf=paOk&&pa.fn==='apontar'; v.pan_ajf=paOk&&pa.fn==='ajustar'; v.pan_idle=!paOk;
+  const DSP=g2alc('AL-05').papeis, agr=g2papel(PF,DSP), gest=g2papel(PF,g2alc('AL-04').papeis), AGR=g2papel(PF,g2alc('AL-02').papeis);   /* dispensa (CMD-47; AL-05); cancelar (CMD-46; AL-04); ajustar (AL-02): da alçada vigente */
+  const paOk=!!pa&&({ajustar:AGR,dispensar:agr,cancelar:gest,aprovar:AGR}[pa.fn]!==false)&&!(pa.fn==='liberar'&&b&&b.papel)&&!(pa.fn==='aprovar'&&P.fn!=='aprovar');
+  v.pan_conf=paOk&&['liberar','aprovar','iniciar','conferencia','encerrar'].indexOf(pa.fn)>=0; v.pan_apf=paOk&&pa.fn==='apontar'; v.pan_ajf=paOk&&pa.fn==='ajustar'; v.pan_idle=!paOk;
   v.pan_canf=paOk&&pa.fn==='cancelar'; v.pan_disf=paOk&&pa.fn==='dispensar';
   v.pan_rmot=(pa&&pa.motivo)||''; v.pan_rerr=(pa&&pa.err)||''; v.pan_hasRerr=!!(pa&&pa.err);
   v.pan_setrmot=(e)=>self.setState({pa:Object.assign({},self.state.pa,{motivo:e.target.value,err:''})});
   // ajustar antes de liberar (secundário do passo A liberar com produto, também na confirmação): dose por insumo e área → osc_ajustar
-  v.pan_hasAj=!!P.sec&&g2papel(PF,'agronomo'); v.pan_hasAjc=v.pan_hasAj&&!b&&!!pa&&pa.fn==='liberar'; v.pan_ajbtn=P.sec?P.sec.btn:'';
+  v.pan_hasAj=!!P.sec&&AGR; v.pan_hasAjc=v.pan_hasAj&&!b&&!!pa&&pa.fn==='liberar'; v.pan_ajbtn=P.sec?P.sec.btn:'';
   v.pan_secgo=()=>{ if(P.sec&&P.sec.fn==='liberar') self.setState({pa:{id:o.id,fn:'liberar'}}); else v.pan_ajgo(); };   /* SOLO-01: com o plano mudado, o secundário libera com a dose da O.S. */
   if(o.planoMudou&&pa&&pa.fn==='liberar') v.pan_hasAjc=false;
-  const ajLib=!b||b.h==='EST.dc.html'||!!b.total0||!!b.legal;   // falta no Estoque: o ajuste pode resolver e libera; máquina, janela ou conflito: só grava a versão
-  v.pan_ajsbtn=ajLib?'Salvar e liberar':'Salvar ajuste';
+  const ajAp=AGR&&!g2papel(PF,OS_LIB());   /* CONF-01 R13: quem só aprova grava a versão nova e aprova (CMD-42) no mesmo comando; não libera */
+  const ajLib=!ajAp&&(!b||b.h==='EST.dc.html'||!!b.total0||!!b.legal);   // falta no Estoque: o ajuste pode resolver e libera; máquina, janela ou conflito: só grava a versão
   const vcur=osVn(o.versao); const vnx='v'+(Number(vcur.slice(1))+1);
+  v.pan_ajsbtn=ajAp?'Salvar e aprovar '+vnx:(ajLib?'Salvar e liberar':'Salvar ajuste');
   // us = produto vindo do "Usar na O.S." do AG-07 ({p,cul,alvo}): entra como incluído, dose em branco (nunca o último valor)
   // SOLO-01: com o plano mudado pela análise, o ajuste abre com a dose do plano (ou o produto a retirar marcado), não com a da O.S.
   const pmD=(p)=>((o.planoMudou||[]).find(z=>z.p===p)||null);
@@ -750,10 +807,10 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
     if(us&&!carOpDef(a.op)) setTimeout(()=>self.setState({g2toast:o.id+' é '+o.tipo+' ('+(a.op||'operação sem defensivo')+'): produto da Consulta Agrofit só entra em ordem de pulverização ou de tratamento de sementes. Nada foi incluído.'}),0);   /* CTL-5, S3-1 */
     else if(v.pan_hasAj&&!pa) setTimeout(()=>ajAbrir(us),0);
     else if(us) setTimeout(()=>self.setState({g2toast:o.etapa!=='A liberar'?(o.id+' está em '+o.etapa+': '+us.p+' não foi incluído. Só ordem A liberar recebe produto novo.')
-      :('Incluir '+us.p+' na '+o.id+' é decisão de '+OS_AGRO+'. Nada foi incluído.')}),0); }
+      :('Incluir '+us.p+' na '+o.id+' é decisão de '+OS_AGRO()+'. Nada foi incluído.')}),0); }
   const ajE=(pa&&pa.errs)||{}; const ajA=(pa&&pa.fn==='ajustar')?g2num(pa.area):NaN;
   const ajSt=(e)=>'font-family:inherit;font-size:14px;padding:7px 9px;border-radius:8px;width:110px;box-sizing:border-box;text-align:right;background:#FFFFFF;color:#15201A;border:1px solid '+(e?'#B42318':'#E4E9E5')+';';
-  v.pan_ajt='Tire, inclua ou mude a dose dos produtos e a área da '+vcur+'. '+(ajLib?'Salvar e liberar grava a '+vnx+' e libera para execução, reservando no Estoque o total ajustado.':'Salvar ajuste grava a '+vnx+'; a liberação continua impedida: '+String(b.t).replace(/^Liberar bloqueado: /,'')+'.');
+  v.pan_ajt='Tire, inclua ou mude a dose dos produtos e a área da '+vcur+'. '+(ajAp?'Salvar e aprovar grava a '+vnx+' e a aprova (CMD-42); '+g2alcQuem('AL-01')+' libera depois.':(ajLib?'Salvar e liberar grava a '+vnx+' e libera para execução, reservando no Estoque o total ajustado.':'Salvar ajuste grava a '+vnx+'; a liberação continua impedida: '+String(b.t).replace(/^Liberar bloqueado: /,'')+'.'));
   const ajRem=(pa&&pa.rem)||{}; const ajAdd=(pa&&pa.add)||[];
   const ajPa=(p)=>Object.assign({},self.state.pa,{qerr:'',confVazio:false},p,{err:''});
   const prodN=(x)=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
@@ -803,13 +860,16 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
     if(Object.keys(errs).length){ self.setState({pa:Object.assign({},cur,{errs,err:''})}); return; }
     if((o.ins||[]).length&&rem.length===(o.ins||[]).length&&!add.length&&!cur.confVazio){
       self.setState({pa:Object.assign({},cur,{errs,confVazio:true,err:'A ordem fica sem nenhum produto. Clique em '+v.pan_ajsbtn+' de novo para confirmar, ou inclua um produto.'})}); return; }
+    if(ajAp){ osRun(self,c=>{ const r1=osc_ajustar(c,o.id,ar,ds,o.janela,rem,add,false,g2perfil()); const r2=osc_aprovar(c,o.id,g2perfil());   /* mesmo cenMudar: os dois ou nada */
+      return {msg:String(r1.msg).replace(' A liberação continua impedida.','')+' '+r2.msg}; },{pa:null}); return; }
     osRun(self,c=>osc_ajustar(c,o.id,ar,ds,o.janela,rem,add,LIB,g2perfil()),{pa:null}); };
   const insTxt=(o.ins||[]).map(x=>x.p+' '+nd(x.tot)+' '+x.un).join(', ');
-  v.pan_ct={liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+osVn(o.versao)+'): ao confirmar, '+osLibTxt(PF)+'; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar, nenhuma requisição no Estoque.')+osUsoAtencao(cenC,o.id)),iniciar:'Iniciar '+o.id+' agora, na janela '+o.janela+(o.r&&(o.ins||[]).length?': insumos com '+o.resp+', confirmados no app.':'.'),
+  v.pan_ct={aprovar:'Aprovar '+o.id+' (versão '+osVn(o.versao)+'): ao confirmar, '+g2ator(PF,g2alc('AL-02').papeis)+' aprova '+osEsc(o)+' (CMD-42). A ordem fica em A liberar; '+g2alcQuem('AL-01')+' libera e reserva os insumos.'+osUsoAtencao(cenC,o.id),
+    liberar:o.agua?('Liberar '+o.id+': janela, bomba e energia confirmadas; água sem requisição no Estoque.'):('Liberar '+o.id+' (versão '+osVn(o.versao)+'): ao confirmar, '+osLibTxt(PF,o)+'; '+(insTxt?'a requisição reserva no Estoque, por lote: '+insTxt+'.':'sem insumos a reservar, nenhuma requisição no Estoque.')+osUsoAtencao(cenC,o.id)),iniciar:'Iniciar '+o.id+' agora, na janela '+o.janela+(o.r&&(o.ins||[]).length?': insumos com '+o.resp+', confirmados no app.':'.'),
     conferencia:'Enviar '+o.id+' para conferência: execução física concluída ('+nf(o.realizado)+' ha).',encerrar:'Encerrar '+o.id+': apontamentos enviados, consumo baixado e nada em custódia.'}[pa?pa.fn:'']||'';
-  v.pan_cbtn={liberar:'Confirmar liberação',iniciar:'Confirmar início',conferencia:'Confirmar envio',encerrar:'Confirmar encerramento'}[pa?pa.fn:'']||'';
+  v.pan_cbtn={aprovar:'Confirmar aprovação',liberar:'Confirmar liberação',iniciar:'Confirmar início',conferencia:'Confirmar envio',encerrar:'Confirmar encerramento'}[pa?pa.fn:'']||'';
   v.pan_back=()=>self.setState({pa:null});
-  v.pan_yes=()=>{ const F={liberar:c=>osc_liberar(c,o.id,o.agua,o.janela,g2perfil()),iniciar:c=>osc_iniciar(c,o.id),conferencia:c=>osc_conferencia(c,o.id),encerrar:c=>osc_encerrar(c,o.id)}[pa.fn];
+  v.pan_yes=()=>{ const F={aprovar:c=>osc_aprovar(c,o.id,g2perfil()),liberar:c=>osc_liberar(c,o.id,o.agua,o.janela,g2perfil()),iniciar:c=>osc_iniciar(c,o.id),conferencia:c=>osc_conferencia(c,o.id,g2perfil()),encerrar:c=>osc_encerrar(c,o.id,g2perfil())}[pa.fn];
     if(F) osRun(self,F,{pa:null}); };
   v.pan_ad=pa&&pa.d||''; v.pan_aha=pa&&pa.ha||''; v.pan_aerr=pa&&pa.err||''; v.pan_hasAerr=!!(pa&&pa.err);
   v.pan_asub='Saldo da ordem: '+nf(o.saldo)+' ha'+(apP>0?' · '+nf(apP)+' ha no aparelho aguardando sinal':'');
@@ -832,9 +892,9 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   const canCanc=!((o.realizado||0)>0)&&(o.etapa==='A liberar'||o.etapa==='Liberadas')&&!osCargasVivas(cenGet(),o.id).length;   // carga de colheita é execução (revisão A-04)
   const canDisp=o.etapa==='Em execução'&&!!o.area&&(o.saldo||0)>0.001;
   v.pan_hasCanc=canCanc&&gest; v.pan_hasDisp=canDisp&&agr;   /* sem o papel: a ação secundária vira o texto de quem decide (uma das duas, nunca juntas) */
-  v.pan_dispQ=(canDisp&&!agr)?('Dispensar saldo: decisão de '+g2quem(DSP)+'.'):((canCanc&&!gest)?('Cancelar sem execução: decisão de '+g2quem('gestor')+'.'):''); v.pan_hasDispQ=!!v.pan_dispQ;
+  v.pan_dispQ=(canDisp&&!agr)?('Dispensar saldo: decisão de '+g2alcQuem('AL-05')+'.'):((canCanc&&!gest)?('Cancelar sem execução: decisão de '+g2alcQuem('AL-04')+'.'):''); v.pan_hasDispQ=!!v.pan_dispQ;
   v.pan_cango=()=>self.setState({pa:{id:o.id,fn:'cancelar',motivo:'',err:''}});
-  v.pan_disgo=()=>self.setState({pa:{id:o.id,fn:'dispensar',ha:String(apMax).replace('.',','),motivo:'',err:''}});
+  v.pan_disgo=()=>self.setState({pa:{id:o.id,fn:'dispensar',ha:String(apMax).replace('.',','),motivo:'',err:'',chave:'W-DSP-'+o.id+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}});   /* chave gerada ao abrir (ENG-021) */
   // (confirmação, aviso final, nova situação do insumo): a seção Insumos acompanha o que o aviso diz
   const cx=o.canc||((o.reservado&&insTxt)?['Libera a reserva no Estoque: '+insTxt+'.','Reserva liberada no Estoque: '+insTxt+'.','Reserva liberada no Estoque']:((o.ins||[]).length?['Nenhum insumo foi reservado.','Nenhum insumo estava reservado.','Nada reservado · ordem cancelada']:['','','']));
   const cxv=osc_cancTxt(cenGet(),o.id,cx);   /* com material entregue: a confirmação diz o que fica em custódia (revisão do 853a6a8, achado 7) */
@@ -842,15 +902,15 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   v.pan_cansave=()=>{ const cur=self.state.pa; const mot=String(cur.motivo||'').trim();
     if(!mot){ self.setState({pa:Object.assign({},cur,{err:'Informe o motivo do cancelamento.'})}); return; }
     osRun(self,c=>osc_cancelar(c,o.id,mot,cx,g2perfil()),{pa:null}); };
-  const lim=(o.area||0)*LIM_DISP;
-  v.pan_dsub='Até 20 % da área ('+nd(lim,1)+' ha) sem alçada; acima disso, exige Direção. O realizado de '+nf(o.realizado)+' ha fica preservado.';
+  const lim=osLimDisp(o);   /* a mesma função do comando (AL-05 vigente, decimal) */
+  v.pan_dsub='Até '+lim.pct+' % da área ('+nd(lim.ha,2)+' ha) sem alçada; acima disso, exige Direção. O realizado de '+nf(o.realizado)+' ha fica preservado.';
   v.pan_dval=agr?('Decisão gerencial e validação agronômica: '+g2ator(PF,DSP)+', registradas ao confirmar.'):'';
   v.pan_dissave=()=>{ const cur=self.state.pa; const n=g2num(cur.ha); const mot=String(cur.motivo||'').trim();
     const err=(m)=>self.setState({pa:Object.assign({},cur,{err:m})});
     if(isNaN(n)||n<=0) return err('Informe a área a dispensar (maior que 0 ha).');
     if(n>apMax+0.001) return err('Máximo '+nf(apMax)+' ha: é o saldo da ordem'+(apP>0?' descontando '+nf(apP)+' ha ainda no aparelho.':'.'));
     if(!mot) return err('Informe o motivo da dispensa.');
-    osRun(self,c=>osc_dispensar(c,o.id,n,mot,g2perfil()),{pa:null}); };
+    osRun(self,c=>osc_dispensar(c,o.id,n,mot,g2perfil(),cur.chave),{pa:null}); };
 }
 function EXTRAVALS(self,v){
   self.g2perfilFecha={pa:null,dvr:null,cdAtivo:null};   /* trocar o perfil fecha a confirmação e os formulários de decisão (liberar, ajustar, dispensar, cancelar, revisão de dose) */
@@ -963,9 +1023,9 @@ function EXTRAVALS(self,v){
     const cg=cenGet(), cgo=cg.ordens[o.id]; const apus=st.apus&&st.apus.id===o.id?st.apus:{id:o.id};
     const usOf=(dia)=>{ const u=apus[dia]||{}; const r={}; Object.keys(u).forEach(p=>{ const n=g2num(u[p]); if(String(u[p]).trim()!==''&&!isNaN(n)) r[p]=n; }); return r; };
     const apDec=(dia,modo)=>osRun(self,c=>osc_apDecidir(c,o.id,dia,modo,usOf(dia),g2perfil()),{apus:null},(e)=>self.setState({g2toast:e}));
-    const CONF=g2papel(g2perfil(),'conferente');   /* CMD-09: as três saídas só para quem confere (CTL-3 · ATOR) */
+    const CONF=g2papel(g2perfil(),g2alc('AL-12').papeis);   /* CMD-09: as três saídas só para quem confere (AL-12; CTL-3 · ATOR) */
     /* B-R8: divergência de consumo/dose na linha do apontamento; a revisão técnica (aceitar com motivo ou registrar a correção) só com o papel agronomo */
-    const AGRd=g2papel(g2perfil(),'agronomo'); const dvr=(st.dvr&&st.dvr.id===o.id)?st.dvr:{id:o.id};
+    const AGRd=g2papel(g2perfil(),g2alc('AL-02').papeis); const dvr=(st.dvr&&st.dvr.id===o.id)?st.dvr:{id:o.id};
     const dvSet=(dia,patch)=>{ const cur=(self.state.dvr&&self.state.dvr.id===o.id)?self.state.dvr:{id:o.id}; self.setState({dvr:Object.assign({},cur,{[dia]:Object.assign({},cur[dia]||{},patch)})}); };
     /* DOM-REV-20261009-01 (S3): gravar a revisão de um dia limpa só o rascunho desse dia; o dos outros dias da mesma ordem fica,
        e o foco vai para o próximo dia ainda em revisão (quem usa o teclado continua de onde estava) */
@@ -980,12 +1040,12 @@ function EXTRAVALS(self,v){
       const usx=fal.map(f=>({lab:'Usado de '+f.p+' ('+f.un+')',v:(apus[x.dia]||{})[f.p]||'',hint:'Estimativa '+nd(f.q)+' '+f.un+' passa da custódia ('+nd(f.cust)+' '+f.un+'): informe o usado'+(x.quem?' com '+x.quem:''),
         set:(e)=>{ const cur=self.state.apus&&self.state.apus.id===o.id?self.state.apus:{id:o.id}; self.setState({apus:Object.assign({},cur,{[x.dia]:Object.assign({},cur[x.dia]||{},{[f.p]:e.target.value})})}); }}));
       const dv=!prev&&x.st!==CEN_AP_DESC&&(x.div||[]).length>0, dvAb=dv&&som&&!x.rev, dvS=dvr[x.dia]||{};   /* guardado como duplicidade nunca soma: sem divergência (revisão DOM achado 6) */
-      const dvQ=(dvAb&&!AGRd)?'Revisão técnica pendente: decisão de '+g2quem('agronomo')+' (aceitar com motivo ou registrar a correção).':((dv&&!som&&!x.rev)?'A revisão técnica abre quando o apontamento somar.':'');
+      const dvQ=(dvAb&&!AGRd)?'Revisão técnica pendente: decisão de '+g2alcQuem('AL-02')+' (aceitar com motivo ou registrar a correção).':((dv&&!som&&!x.rev)?'A revisão técnica abre quando o apontamento somar.':'');
       return {div:dv,divT:dv?CEN_DIV+' · '+x.div.map(cenDivTxt).join('; '):'',hasRev:dv&&!!x.rev,revT:x.rev?'Revisão técnica: '+x.rev.dec.toLowerCase()+' por '+x.rev.quem+' às '+x.rev.at+' · '+x.rev.txt+(x.rev.rp?' · '+x.rev.rp:''):'',
         divQ:dvQ,hasDivQ:!!dvQ,dvPode:dvAb&&AGRd,dvfid:'dv_'+x.dia,dvlab:'Motivo ou correção decidida · dia '+x.dia,dvv:dvS.t||'',dverr:dvS.err||'',hasDverr:!!dvS.err,
         dvset:(e)=>dvSet(x.dia,{t:e.target.value,err:''}),dvAc:()=>dvGo(x.dia,'aceitar'),dvCo:()=>dvGo(x.dia,'corrigir'),
         d:x.d,dia:'Dia '+x.dia+(x.origem==='app'?' · app':''),ha:(prev?'prev. ':'')+nf(x.ha)+' ha'+(x.h?' · '+nd(x.h,1)+' h':''),ac:(prev?'—':(!som?'não somado':nf(ac)+' / '+nf(o.area)+' ha')),t:s,st:chipSt(STCOR[s]),dot:dotSt(STCOR[s]),rst:prev?'color:#8A968E;':'',
-        dup,dupT:!dup?'':(viv.length?'Mesma data e talhão do dia '+de+'. É outro turno? Quem decide: '+CEN_CONF_AP+'.':'O dia '+(x.dupDe||[]).join(', ')+' já não vale: este só pode ser somado como outro turno. Quem decide: '+CEN_CONF_AP+'.')
+        dup,dupT:!dup?'':(viv.length?'Mesma data e talhão do dia '+de+'. É outro turno? Quem decide: '+CEN_CONF_AP()+'.':'O dia '+(x.dupDe||[]).join(', ')+' já não vale: este só pode ser somado como outro turno. Quem decide: '+CEN_CONF_AP()+'.')
           +(uso?' "Vale este" indisponível: '+uso+'.':''),
         vant:'Mesmo turno: vale o dia '+de,hasAnt:viv.length>0,hasEste:!!K&&!uso,usx,hasUs:CONF&&usx.length>0,pode:CONF,
         ant:()=>apDec(x.dia,'anterior'),este:()=>apDec(x.dia,'este'),somar:()=>apDec(x.dia,'somar')}; });
@@ -1048,7 +1108,7 @@ function EXTRAVALS(self,v){
       const ins=(a.ins||[]).map(x=>({g:x.g,p:x.p.replace(/ · (variedade|híbrido) do cultivo$/,' '+c.var),dose:x.dose,un:x.un,tot:cenQtd(x.dose,c.area),sit:'Reserva ao liberar',orig:x.orig}));
       const cj=(OSD.nova.conj||{})[a.op]||null;
       const no={id,novo:true,jan:cur.jan,keys:[semana?cur.cult+'|'+sw:cur.cult+'|'+cur.atv],tipo:semana?'Colheita · semana '+sn:(a.op===a.nome?a.nome:a.op+' · '+a.nome),talhao:c.local,area:c.area,etapa:'A liberar',selos:[],
-        faz:s.faz||'Santa Rita',saf:s.mf,cult:c.id,cultura:c.cultura||'',obs:'',agua:false,ins,semins:'',bloq:null,aviso:'',dono:OS_AGRO,prazo:'liberar',
+        faz:s.faz||'Santa Rita',saf:s.mf,cult:c.id,cultura:c.cultura||'',obs:'',agua:false,ins,semins:'',bloq:null,aviso:'',dono:OS_AGRO(),prazo:'liberar',
         atv:{op:a.op,nome:a.nome,gat:a.gat||'',orig:a.incl?('Análise de solo · '+a.laudo):(pl.nome+' v'+pl.versao),conj:cj?cj.conj:'',rend:cj?cj.rend:0},
         realizado:0,saldo:c.area,resp:'—',versao:'v1',janela:'a partir de '+brd(cur.jan),ap:[],nota:'',
         cond:'Ana (agrônoma) confere, ajusta se precisar e libera; liberar exige a prontidão de máquina, equipe e insumos. Próximo passo: liberar para execução.',

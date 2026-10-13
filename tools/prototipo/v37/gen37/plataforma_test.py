@@ -80,7 +80,7 @@ try:
     go('CF-05.dc.html'); clk('01/10/2026'); clk('Pagar fatura'); clk('Boleto · simulado', 'aside[role=dialog]'); clk('Confirmar pagamento (simulado)', 'aside[role=dialog]')
     go('BO-02.dc.html'); abre_linha(0, 'Grupo Santa Rita'); d = dlg()
     chk('A12f pagamento feito no CF-05 aparece Paga no BO-02 (set/2026, R$ 5.140,46), com quem pagou e quem aceitou o contrato', 'set/2026 · R$ 5.140,46' in d and 'Paga · evt_sim_0001 · Boleto' in d
-        and 'recibo PAG-0001 · por Ana · Gestora' in d and 'aceite 28/08 por Ana · Gestora' in d, d[:900])
+        and 'recibo PAG-0001 · por Ana (gestora)' in d and 'aceite 28/08 por Ana · Gestora' in d, d[:900])   # CONF-01 P7: o ato novo grava o perfil (AL-15); o contrato do seed segue 'Ana · Gestora'
     clk('Fechar', 'aside[role=dialog]')
     # contestação pendente sem evento a conciliar: a primária leva à contestação; resolver volta a primária desabilitada (achado 9)
     go('BO-02.dc.html', limpa=True); clk('Conciliar pagamentos'); go('CF-05.dc.html'); clk('01/10/2026'); abre_linha(1, 'set/2026'); clk('Contestar fatura', 'aside[role=dialog]')

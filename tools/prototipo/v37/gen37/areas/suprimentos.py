@@ -1166,5 +1166,5 @@ function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_inv');
     shell37('SU-09','Inventários e ajustes',corpo,fname=fname,
       subtitle='Contagens cegas com corte de movimentos, recontagem, causa e alçada; ajuste aprovado vira movimento no extrato.',
       status=(MARK,'gray'),primary_html=prim,
-      footer='Diferença vira ajuste com causa, evidência e alçada, nunca correção silenciosa; limite e segregação seguem CF-02 (SU-09 · FO-32).')
+      footer='Diferença vira ajuste com causa, evidência e alçada, nunca correção silenciosa; limite e segregação seguem Configurações › Usuários e alçadas (SU-09 · FO-32).')
     dyn_status(fname)
