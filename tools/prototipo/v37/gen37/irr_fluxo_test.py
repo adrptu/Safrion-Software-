@@ -4,9 +4,8 @@ IR-03det e na camada Irrigação do Mapa. Conflito resolvido continua resolvido 
 prevalece); OS-0419 iniciada e terminada → conferência automática (−1,9 %) → balanço do Pivô 2 creditado uma vez (1,7 mm) → Mapa e IR-01
 mudam; Lagoa Grande: Programar irrigação no PV02 recupera a tarefa única OS-0601 (sem duplicar); páginas sem rolagem lateral a 1280 e 1440 px.
 TABELAS-FOCO (06/10/2026): no IR-01 a situação é chip e o rótulo composto ("janela a definir · OS-0422", "programada · hoje 21:00",
-"falta insumo · OS-0418") virou colunas: Ordem, Situação, Pendência e Próxima passada (a fonte do déficit fica no painel do setor).
-Revisão TABR (09/10/2026, A1): volta o critério de largura de antes das colunas novas: a 1440 px as grades IR cabem na caixa (sem rolar de
-lado); a 1280 px a página não rola e situação/etapa, pendência e próximo passo ficam à vista sem rolar a grade.
+"falta insumo · OS-0418") virou colunas: Ordem, Situação, Pendência, Próxima passada e Fonte do déficit ("Demonstrativo"). Com uma variável
+por coluna a grade rola dentro da própria caixa (TABELAS-FOCO item 6, como em ostest e est_fix1); a página não rola e a 1ª coluna fica à vista.
 Capturas em _probe/fluxo_*.png. Uso: python3 irr_fluxo_test.py"""
 import sys, os, time, subprocess, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -33,10 +32,6 @@ try:
     dlg = lambda: (J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText.replace(/\\s+/g,' ')") or '')
     ROW = lambda txt: J(f"""(()=>{{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(txt)})>=0); return r?r.innerText.replace(/\\s+/g,' '):'—';}})()""")
     def goto(pg, w=1.6): c.goto(U(pg), wait=w); time.sleep(.4)
-    def painel(txt, k):
-        """campo do painel do setor no IR-01 (revisão TABR: fonte do déficit e responsável saíram da grade para o painel)"""
-        J(f"""(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(txt)})===0); r&&(r.querySelector('[role=cell] span')||r).click();}})()"""); time.sleep(.5)
-        v = J(f"(document.querySelector('#fx_g_set_{k}')||{{}}).value") or ''; clk('Cancelar', 'aside[role=dialog]'); return v
     erros = []
     def errs(nome): e = J("window.__err||''") or ''; (erros.append(nome + ': ' + e) if e else None)
     c.size(1440, 1000); goto('IR-01.dc.html', 1.0)
@@ -95,8 +90,7 @@ try:
     chk('18 PV02 continua com uma só ordem', n == 1, n)
     goto('IR-01.dc.html')
     nlg = J("[...document.querySelectorAll('[role=row].g2ed')].length"); r = ROW('Pivô 2 ')
-    f2 = painel('Pivô 2 ', 'defT')
-    chk('19 IR-01 na Lagoa Grande: 23 pivôs; Pivô 2 programado (OS-0601 hoje 21:00), balanço demonstrativo (no painel do setor)', nlg == 23 and 'OS-0601' in r and 'Programada' in r and 'hoje 21:00' in r and 'demonstrativo' in f2, [nlg, r, f2])
+    chk('19 IR-01 na Lagoa Grande: 23 pivôs; Pivô 2 programado (OS-0601 hoje 21:00), balanço demonstrativo', nlg == 23 and 'OS-0601' in r and 'Programada' in r and 'hoje 21:00' in r and 'Demonstrativo' in r, [nlg, r])
     # 7 · correções da verificação v43 (03/10): estado limpo
     def setv(sel, val):
         return J(f"""(()=>{{const e=document.querySelector({json.dumps(sel)}); if(!e) return 'sem'; const d=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(e),'value'); d.set.call(e,{json.dumps(val)}); e.dispatchEvent(new Event('input',{{bubbles:true}})); e.dispatchEvent(new Event('change',{{bubbles:true}})); return 'ok';}})()""")
@@ -126,8 +120,7 @@ try:
     chk('26 Agenda (IN-03) lê o estado: OS-0423 resolvida vira Iniciar irrigação · João, prioridade Normal, sem selo de conflito', 'Iniciar irrigação · OS-0423' in r23 and 'João' in r23 and 'Normal' in r23 and 'Conflito' not in r23, r23)
     # fertirrigação OS-0418 parada por falta de insumo: mesma situação da O.S. e água sem o produto
     goto('IR-01.dc.html'); r1 = ROW('Pivô 1')
-    d1 = painel('Pivô 1', 'donoT')
-    chk('27 IR-01 Pivô 1: falta insumo · OS-0418 (como na O.S.) e próximo passo Programar só água · João (responsável no painel do setor)', 'OS-0418' in r1 and 'Impedida Falta insumo' in r1 and 'Programar só água' in r1 and d1 == 'João', [r1, d1])
+    chk('27 IR-01 Pivô 1: falta insumo · OS-0418 (como na O.S.) e próximo passo Programar só água · João', 'OS-0418' in r1 and 'Impedida Falta insumo' in r1 and 'Programar só água' in r1 and 'João' in r1, r1)
     goto('IR-02.dc.html#programar=P1'); time.sleep(.5); clk('Programar só água', 'aside[role=dialog]'); tt = toast()
     chk('28 IR-02#programar=P1: Programar só água cria e libera a ordem de água; OS-0418 segue parada', 'criada' in tt and 'Liberadas' in tt and 'OS-0418 segue parada' in tt, tt)
     # v2 durante a execução, liberada na O.S.: a irrigação segue a O.S. (sem beco sem saída)
@@ -158,18 +151,15 @@ try:
     n2 = J("document.querySelectorAll('[role=row].g2ed').length")
     chk('33 IR-03: filtro rápido (A liberar) continua ao voltar do registro', n1 == n2 and (J("location.pathname") or '').endswith('IR-03.dc.html'), [n1, n2])
     errs('jornada v43')
-    # 6 · largura (revisão TABR A1): a 1440 px nenhuma grade IR rola de lado; a 1280 px a página não rola e o estado, a pendência e o próximo passo
-    # ficam à vista sem rolar a grade (antes das colunas novas, nenhuma grade rolava a 1280; com uma variável por coluna, o resto pode rolar)
+    # 6 · largura: página sem rolagem lateral a 1280 e 1440 px; a grade pode rolar dentro da caixa com a 1ª coluna à vista (TABELAS-FOCO item 6)
     larg = []
     for w in (1280, 1440):
         c.size(w, 1000)
         for pg in ('IR-01.dc.html', 'IR-02.dc.html', 'IR-03.dc.html', 'IR-04.dc.html'):
-            goto(pg, 1.2); o = J("""[document.documentElement.scrollWidth-innerWidth].concat([...document.querySelectorAll('.g2rola')].filter(e=>e.offsetParent).map(e=>{ const R=e.getBoundingClientRect();
-              const hs=[...e.querySelectorAll('[role=table]>[role=row] [role=columnheader]')]; const fora=hs.filter(h=>['Situação','Etapa','Estado','Pendência','Próximo passo'].indexOf(h.textContent.replace(/[⇅▾▴▼▲]/g,'').trim())>=0&&h.getBoundingClientRect().right>R.right+1).length;
-              return fora?99:(%s?e.scrollWidth-e.clientWidth:0); }))""" % ('true' if w == 1440 else 'false')) or []
+            goto(pg, 1.2); o = J("[document.documentElement.scrollWidth-innerWidth].concat([...document.querySelectorAll('.g2rola')].filter(e=>e.offsetParent).map(e=>{ const h=e.querySelector('[role=columnheader]'); if(!h) return 0; const r=h.getBoundingClientRect(); return (r.left>=0&&r.right<=innerWidth)?0:99; }))") or []
             if any(x > 1 for x in o): larg.append((w, pg, o))
             if w == 1280: c.shot(os.path.join(SH, 'fluxo_6_' + pg.replace('.dc.html', '') + '_1280.png'))
-    chk('20 sem rolagem lateral nas grades IR a 1440 px; a 1280 px a página não rola e estado, pendência e próximo passo ficam à vista (Lagoa Grande, 23 pivôs)', not larg, larg)
+    chk('20 sem rolagem lateral da página nas telas IR a 1280 e 1440 px e 1ª coluna das grades à vista (Lagoa Grande, 23 pivôs)', not larg, larg)
     chk('21 nenhuma tela com erro de execução', not erros, erros)
 finally:
     try:

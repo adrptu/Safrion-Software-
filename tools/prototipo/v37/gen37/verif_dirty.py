@@ -1,25 +1,24 @@
-import sys, os, time, subprocess, json
-sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
-from cdp import Chrome
-from journeys import free
-R=os.path.join(os.path.dirname(os.path.abspath(__file__)),'_render'); p=free()
-srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(0.8)
-c=Chrome(port=free()); J=c.js
-SETV="""((sel,val)=>{const i=document.querySelector(sel); const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,val); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})"""
-BTN="""((t)=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()===t); if(b){b.click(); return true;} return false;})"""
-def ROW(ti,txt): return f"[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(txt)})>=0)"
-def openrow(ti,txt): J(f"(()=>{{const r={ROW(ti,txt)}; (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.5)
-def kb(ti,txt): J(f"(()=>{{const r={ROW(ti,txt)}; r.focus(); r.dispatchEvent(new KeyboardEvent('keydown',{{key:'Enter',bubbles:true}}));}})()"); time.sleep(.4)
+# -*- coding: utf-8 -*-
+"""Verificação independente: abrir e sair sem mudar não pede confirmação; o teclado abre; salvar sem mudar não dá erro. Só imprime.
+CADUX (09/10/2026): reescrito sobre a seleção que abre detalhe (verif_cad_lib.py): o alvo da linha abre a consulta e "Editar …" o
+formulário; Cancelar volta à consulta. A parcela do CD-01det é só consulta (muda no Planejar safra)."""
+import os, sys, time
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from verif_cad_lib import V, out
+v = V(); J = v.J
 try:
-    c.size(1440,1100)
-    for f,ti,row in [('CD-02.dc.html',1,'Pulverização'),('CD-02.dc.html',1,'Tratamento de sementes'),('CD-05.dc.html',0,'Sementes Vale'),('CD-01det.dc.html',0,'T1-B')]:
-        c.goto(f'http://127.0.0.1:{p}/{f}',wait=1.2)
-        openrow(ti,row); J(f"({BTN})('Cancelar')"); time.sleep(.3)
-        print(f,row,'cancelar sem mudar → pede confirmação?', J("document.body.innerText.indexOf('Há alterações não salvas')>=0"), 'fechou?', J("!document.querySelector('aside[role=dialog]')"))
-        J(f"({BTN})('Descartar alterações')"); time.sleep(.2)
-        kb(ti,row); print('  teclado abre?', J("!!document.querySelector('aside[role=dialog]')")); J(f"({BTN})('Cancelar')"); time.sleep(.2); J(f"({BTN})('Descartar alterações')"); time.sleep(.2)
-        # salvar sem mudar
-        openrow(ti,row); J(f"({BTN})('Salvar')"); time.sleep(.5); print('  salvar sem mudar fecha?', J("!document.querySelector('aside[role=dialog]')"), J("[...document.querySelectorAll('aside [role=alert]')].map(x=>x.innerText).join(' | ')"))
-        print('  linha', J(f"(()=>{{const r={ROW(ti,row)}; return r?r.innerText.replace(/\\s+/g,' '):null;}})()"))
+    v.c.size(1440, 1100)
+    for f, row in [('CD-02.dc.html#aba=operacoes', 'Trator 02'), ('CD-02.dc.html#aba=operacoes', 'TSI'), ('CD-05.dc.html', 'Sementes Vale'), ('CD-01det.dc.html', 'T1-B')]:
+        v.ir(f, 1.2)
+        v.edita(row); ed = v.editando(); v.btn('Cancelar')
+        print(f, row, '· editável:', ed, '· cancelar sem mudar pede confirmação?', J("document.body.innerText.indexOf('Há alterações não salvas')>=0"), '· painel depois:', v.painel())
+        v.fecha()
+        J(f"(()=>{{const r={v.ROW(row)}; const a=r&&r.querySelector('.g2alvo'); a&&a.focus();}})()")
+        print('  alvo da linha recebe o foco do teclado?', J(f"(()=>{{const r={v.ROW(row)}; const a=r&&r.querySelector('.g2alvo'); return !!a&&document.activeElement===a;}})()"),
+              '· a linha fora do Tab?', J(f"(()=>{{const r={v.ROW(row)}; return !!r&&r.tabIndex<0;}})()"))
+        if ed:
+            v.edita(row); v.btn('Salvar'); print('  salvar sem mudar → painel:', v.painel(), '· alertas:', v.alerts() or '—'); v.fecha()
+        print('  linha', v.rowtxt(row))
+    print('erro JS', J("(window.__errs||[]).join(' | ')"))
 finally:
-    c.close(); srv.terminate()
+    v.fim()

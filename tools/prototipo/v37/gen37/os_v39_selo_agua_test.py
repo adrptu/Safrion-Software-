@@ -56,17 +56,14 @@ try:
     T.fechar(); ERR += T.erros()
     # ---- ordens de água na IR-03: cada fato uma vez por linha ----
     T.c.goto(f'http://127.0.0.1:{T.p}/IR-03.dc.html', wait=1.0)
-    # revisão TABR (09/10/2026): na Pendência o chip diz o tipo ("Conflito") e o detalhe ("parada da B3 · 14:00–15:00") vai na dica e no texto do
-    # leitor de tela (A11); avisos (a nota de ET) e passadas saíram da grade da IR-03 para o detalhe da ordem (A1): cada fato continua uma vez só
     l3 = T.linha('OS-0423')
+    T.ok(l3.count('Conflito · parada da B3') == 1 and cor('OS-0423', 'Conflito') == VERM and l3.lower().count('estimativa por et') == 1 and l3.count('4,0 mm') == 1,
+         'IR-03 · OS-0423: selo vermelho Conflito · parada da B3, nota de ET e lâmina 4,0 mm uma vez cada (formato irrMm: 2 casas, mínimo 1)', (l3, cor('OS-0423', 'Conflito')))
     l2 = T.linha('OS-0422')
-    l9 = T.linha('OS-0419'); c23 = cor('OS-0423', 'Conflito'); c22 = cor('OS-0422', 'Janela a definir'); ERR += T.erros()
-    def det(oid): T.c.goto(f'http://127.0.0.1:{T.p}/IR-03det.dc.html#{oid}', wait=1.0); return J("document.body.innerText") or ''
-    d23 = det('OS-0423'); d22 = det('OS-0422')
-    T.ok(l3.count('Conflito') == 1 and l3.count('parada da B3') == 1 and c23 == VERM and l3.count('4,0 mm') == 1 and 'estimativa por et' not in l3.lower() and 'estimativa por et' in d23.lower(),
-         'IR-03 · OS-0423: selo vermelho Conflito (parada da B3 na dica) e lâmina 4,0 mm uma vez na linha; a nota de ET no detalhe (formato irrMm: 2 casas, mínimo 1)', (l3, c23, d23[:300]))
-    T.ok(l2.count('Janela a definir') == 1 and c22 == AMAR and l2.count('13,5 mm') == 1 and '13,5 mm brutos em 2 passadas' in d22,
-         'IR-03 · OS-0422: selo amarelo Janela a definir e 13,5 mm uma vez na linha; as 2 passadas no detalhe da ordem', (l2, c22, d22[:300]))
+    # TABELAS-FOCO (06/10/2026): Lâmina e Passadas em colunas próprias ("13,5 mm | 2"); a lâmina de cada passada (6,75 mm) fica no detalhe da ordem
+    T.ok(l2.count('Janela a definir') == 1 and cor('OS-0422', 'Janela a definir') == AMAR and l2.count('13,5 mm') == 1 and '13,5 mm 2 ' in l2,
+         'IR-03 · OS-0422: selo amarelo Janela a definir; 13,5 mm em 2 passadas, uma vez cada', (l2, cor('OS-0422', 'Janela a definir')))
+    l9 = T.linha('OS-0419'); ERR += T.erros()
     T.c.goto(f'http://127.0.0.1:{T.p}/IR-03det.dc.html', wait=1.0); b = J("document.body.innerText") or ''
     T.ok('Liberadas' in l9 and l9.count('10,81 mm') == 1 and J("document.querySelector('h1').innerText.trim()") == 'OS-0419 · Irrigação · Pivô 2' and '10,81 mm' in b
          and 'olítica' not in b and 'agrônom' not in b, 'IR-03 · OS-0419 liberada com 10,81 mm uma vez na linha; IR-03det abre a OS-0419 sem citar política nem agrônomo', (l9, b[:160]))

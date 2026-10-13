@@ -1,0 +1,2077 @@
+{
+ "CD-01_1440_aba0": {
+  "h1": "Fazendas, áreas e talhões",
+  "header": "Cadastros › Fazendas, áreas e talhões Fazendas, áreas e talhões B1 sem polígono · 2 fazendas com cadastro pendente · 6 outorgas a renovar",
+  "tabs": [
+   "Talhões 32 [ativa]",
+   "Fazendas 3",
+   "Ambiental 18",
+   "Água 16"
+  ],
+  "faixa": [
+   "1 talhão sem polígono B1 · Boa Vista Definir polígono ›"
+  ],
+  "botoes": [
+   "1 talhão sem polígono B1 · Boa Vista Definir polígono ›",
+   "Todos 32",
+   "A resolver 1",
+   "Lista",
+   "Mapa",
+   "Cadastrar talhão [PRIM]",
+   "Recolher tudo"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Fazenda › talhão ⇅ ▾",
+     "Sistema ⇅ ▾",
+     "Área cultivável ⇅ ▾",
+     "Polígono ⇅ ▾",
+     "Diferença ⇅ ▾",
+     "Parcelas na safra 2026/27 ⇅ ▾",
+     "Situação ⇅ ▾"
+    ],
+    "linhas": 35,
+    "editaveis": 32,
+    "filhos": 32,
+    "primeiras": [
+     "▾ Santa Rita 8 talhões ativos 1.165,0 ha",
+     "T1 Sequeiro 312,0 ha 312,4 ha +0,1 % 2 Em dia",
+     "T2 Sequeiro 298,0 ha 298,1 ha 0,0 % 1 Em dia",
+     "T3 Sequeiro 96,0 ha 96,0 ha 0,0 % 1 Em dia"
+    ],
+    "rolaV": [
+     1609,
+     696
+    ],
+    "rolaH": [
+     1142,
+     1142
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 1916,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-01_1440_aba1": {
+  "h1": "Fazendas, áreas e talhões",
+  "header": "Cadastros › Fazendas, áreas e talhões Fazendas, áreas e talhões B1 sem polígono · 2 fazendas com cadastro pendente · 6 outorgas a renovar",
+  "tabs": [
+   "Talhões 32",
+   "Fazendas 3 [ativa]",
+   "Ambiental 18",
+   "Água 16"
+  ],
+  "faixa": [],
+  "botoes": [
+   "Cadastrar fazenda [PRIM]",
+   "Santa Rita Santa Rita Agro · Rio Verde/GO 1.480 ha Área total 1.165,0 ha Cultivável 8 Talhões ativos Própria Em dia",
+   "Boa Vista CAR pendente Boa Vista Ltda · Sorriso/MT 420 ha Área total 120,0 ha Cultivável 1 Talhão ativo Arrendada até 31/08/2029 Informar CAR ›",
+   "Lagoa Grande Cadastro incompleto Empresa a informar · Lagoa Grande/MG 2.378 ha Área total 1.285,2 ha Cultivável 23 Talhões ativos Posse a informar Completar cadastro ›"
+  ],
+  "busca": [],
+  "selects": [],
+  "tabelas": [],
+  "cartoes": [
+   "Santa Rita Santa Rita Agro · Rio Verde/GO 1.480 ha Área total 1.165,0 ha Cultivável 8 Talhões ativos Própria Em dia",
+   "Boa Vista CAR pendente Boa Vista Ltda · Sorriso/MT 420 ha Área total 120,0 ha Cultivável 1 Talhão ativo Arrendada até 31/08/2029 Informar CAR ›",
+   "Lagoa Grande Cadastro incompleto Empresa a informar · Lagoa Grande/MG 2.378 ha Área total 1.285,2 ha Cultivável 23 Talhões ativos Posse a informar Completar cad"
+  ],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 499,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-01_1440_aba2": {
+  "h1": "Fazendas, áreas e talhões",
+  "header": "Cadastros › Fazendas, áreas e talhões Fazendas, áreas e talhões B1 sem polígono · 2 fazendas com cadastro pendente · 6 outorgas a renovar",
+  "tabs": [
+   "Talhões 32",
+   "Fazendas 3",
+   "Ambiental 18 [ativa]",
+   "Água 16"
+  ],
+  "faixa": [],
+  "botoes": [
+   "Todos 18",
+   "APP 9",
+   "Reserva legal 4",
+   "Área consolidada 1",
+   "Pousio 1",
+   "Servidão administrativa 1",
+   "Uso restrito 1",
+   "Vegetação nativa 1"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Área ambiental ⇅ ▾",
+     "Fazenda ⇅ ▾",
+     "Tipo ⇅ ▾",
+     "Área ⇅ ▾"
+    ],
+    "linhas": 18,
+    "editaveis": 18,
+    "filhos": 0,
+    "primeiras": [
+     "Reserva legal total (demonstração) Lagoa Grande Reserva legal 285,77 ha",
+     "Reserva legal averbada · gleba B (demonstração) Lagoa Grande Reserva legal 120,37 ha",
+     "Reserva legal averbada · gleba C (demonstração) Lagoa Grande Reserva legal 91,43 ha",
+     "Reserva legal averbada · gleba A (demonstração) Lagoa Grande Reserva legal 73,97 ha"
+    ],
+    "rolaV": [
+     844,
+     717
+    ],
+    "rolaH": [
+     1142,
+     1142
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 1499,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-01_1440_aba3": {
+  "h1": "Fazendas, áreas e talhões",
+  "header": "Cadastros › Fazendas, áreas e talhões Fazendas, áreas e talhões B1 sem polígono · 2 fazendas com cadastro pendente · 6 outorgas a renovar",
+  "tabs": [
+   "Talhões 32",
+   "Fazendas 3",
+   "Ambiental 18",
+   "Água 16 [ativa]"
+  ],
+  "faixa": [
+   "2 outorgas vencidas Outorga SINT-003/0000 · Ribeirão B (demonstração), Outorga SINT-012/0000 · Poço tubular Renovar outorga ›",
+   "2 outorgas em renovação Outorga SINT-004/0000 · Ribeirão B (demonstração), Outorga SINT-015/0000 · Poço tubular Acompanhar renovação ›",
+   "2 documentos vencem em 90 dias Outorga SINT-002/0000 · 20/11/2026, Certidão SINT-009/0000 · 10/12/2026 Renovar ›"
+  ],
+  "botoes": [
+   "2 outorgas vencidas Outorga SINT-003/0000 · Ribeirão B (demonstração), Outorga SINT-012/0000 · Poço tubular Renovar outorga ›",
+   "2 outorgas em renovação Outorga SINT-004/0000 · Ribeirão B (demonstração), Outorga SINT-015/0000 · Poço tubular Acompanhar renovação ›",
+   "2 documentos vencem em 90 dias Outorga SINT-002/0000 · 20/11/2026, Certidão SINT-009/0000 · 10/12/2026 Renovar ›",
+   "Todos 16",
+   "A resolver 6"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Ponto de água ⇅ ▾",
+     "Fazenda ⇅ ▾",
+     "Documento ⇅ ▾",
+     "Uso ⇅ ▾",
+     "Curso d’água ⇅ ▾",
+     "Vazão ⇅ ▾",
+     "Vencimento ⇅ ▾",
+     "Situação ⇅ ▾"
+    ],
+    "linhas": 16,
+    "editaveis": 16,
+    "filhos": 0,
+    "primeiras": [
+     "Ponto de água 1 (demonstração) Lagoa Grande Outorga Captação superficial Rio A (demonstração) 180 m³/h 30/04/2031 Vigente",
+     "Ponto de água 2 (demonstração) Lagoa Grande Outorga Captação superficial Rio A (demonstração) 150 m³/h 20/11/2026 Vence em 90 dias Renovar ›",
+     "Ponto de água 3 (demonstração) Lagoa Grande Outorga Captação superficial Ribeirão B (demonstração) 120 m³/h 10/05/2026 Vencida Renovar ›",
+     "Ponto de água 4 (demonstração) Lagoa Grande Outorga Barramento Ribeirão B (demonstração) — 01/12/2025 Em renovação"
+    ],
+    "rolaV": [
+     754,
+     679
+    ],
+    "rolaH": [
+     1170,
+     1142
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 2445,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-01det_1440_aba0": {
+  "h1": "Talhão",
+  "header": "Cadastros › Fazendas, áreas e talhões › T1 · 312 ha Talhão T1 · Santa Rita T2 · Santa Rita T3 · Santa Rita T4 · Santa Rita P1 · Santa Rita P2 · Santa Rita T7 · Santa Rita C1 · Santa Rita B1 · Boa Vista PV01 · Lagoa Grande PV02 · Lagoa Grande PV03 · Lagoa Grande PV04 · Lagoa Grande PV05 · Lagoa Grande PV06 · Lagoa Grande PV07 · Lagoa Grande PV08 · Lagoa Grande PV09 · Lagoa Grande PV10 · Lagoa Grand",
+  "tabs": [
+   "Parcelas por safra 4 [ativa]",
+   "Geometria v3"
+  ],
+  "faixa": [
+   "1 parcela sem polígono T1-B · Safra 2026/27 Definir polígono ›"
+  ],
+  "botoes": [
+   "1 parcela sem polígono T1-B · Safra 2026/27 Definir polígono ›",
+   "Planejar T1 na safra [PRIM]",
+   "Expandir tudo"
+  ],
+  "busca": [],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Fazenda",
+     "Sistema",
+     "Setor de irrigação",
+     "Área cultivável",
+     "Polígono",
+     "Versão",
+     "Diferença ha",
+     "Diferença %",
+     "Situação"
+    ],
+    "linhas": 1,
+    "editaveis": 1,
+    "filhos": 0,
+    "primeiras": [
+     "Santa Rita Sequeiro — 312,0 ha 312,4 ha v3 +0,4 ha +0,1 % Ativo"
+    ],
+    "rolaV": [
+     79,
+     79
+    ],
+    "rolaH": [
+     1142,
+     1142
+    ]
+   },
+   {
+    "cols": [
+     "Safra › parcela ⇅ ▾",
+     "Tipo ⇅ ▾",
+     "Cultura ⇅ ▾",
+     "Cultivar ⇅ ▾",
+     "Área ⇅ ▾",
+     "Livre ⇅ ▾",
+     "Plantio ⇅ ▾",
+     "Situação ⇅ ▾"
+    ],
+    "linhas": 6,
+    "editaveis": 3,
+    "filhos": 3,
+    "primeiras": [
+     "▾ Safra 2026/27 312 ha 0 ha Em planejamento",
+     "T1-A Parcela Soja 58 W 160,0 ha 15/10/2026 Polígono validado",
+     "T1-B Parcela Soja 62 X 152,0 ha 25/10/2026 Sem polígono",
+     "▾ Safrinha 2027 160 ha 152 ha Rascunho"
+    ],
+    "rolaV": [
+     608,
+     608
+    ],
+    "rolaH": [
+     1142,
+     1142
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 705,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-01det_1440_aba1": {
+  "h1": "Talhão",
+  "header": "Cadastros › Fazendas, áreas e talhões › T1 · 312 ha Talhão T1 · Santa Rita T2 · Santa Rita T3 · Santa Rita T4 · Santa Rita P1 · Santa Rita P2 · Santa Rita T7 · Santa Rita C1 · Santa Rita B1 · Boa Vista PV01 · Lagoa Grande PV02 · Lagoa Grande PV03 · Lagoa Grande PV04 · Lagoa Grande PV05 · Lagoa Grande PV06 · Lagoa Grande PV07 · Lagoa Grande PV08 · Lagoa Grande PV09 · Lagoa Grande PV10 · Lagoa Grand",
+  "tabs": [
+   "Parcelas por safra 4",
+   "Geometria v3 [ativa]"
+  ],
+  "faixa": [],
+  "botoes": [
+   "Definir polígono da T1-B [PRIM]"
+  ],
+  "busca": [],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Fazenda",
+     "Sistema",
+     "Setor de irrigação",
+     "Área cultivável",
+     "Polígono",
+     "Versão",
+     "Diferença ha",
+     "Diferença %",
+     "Situação"
+    ],
+    "linhas": 1,
+    "editaveis": 1,
+    "filhos": 0,
+    "primeiras": [
+     "Santa Rita Sequeiro — 312,0 ha 312,4 ha v3 +0,4 ha +0,1 % Ativo"
+    ],
+    "rolaV": [
+     79,
+     79
+    ],
+    "rolaH": [
+     1142,
+     1142
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 482,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-02_1440_aba0": {
+  "h1": "Culturas, cultivares e operações",
+  "header": "Cadastros › Culturas, cultivares e operações Culturas, cultivares e operações 1 cultivar sem semente · 1 premissa a validar",
+  "tabs": [
+   "Culturas e cultivares 7 [ativa]",
+   "Operações e rendimentos 11"
+  ],
+  "faixa": [
+   "1 cultivar anual sem item de semente Soja 64 Z Vincular semente ›"
+  ],
+  "botoes": [
+   "1 cultivar anual sem item de semente Soja 64 Z Vincular semente ›",
+   "Todos 7",
+   "A resolver 1",
+   "Cadastrar cultivar [PRIM]",
+   "Recolher tudo"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Cultura › cultivar ⇅ ▾",
+     "Tipo de ciclo ⇅ ▾",
+     "Unidade de produtividade ⇅ ▾",
+     "Ciclo ⇅ ▾",
+     "Item de semente ⇅ ▾",
+     "Cultivos ⇅ ▾",
+     "Situação ⇅ ▾"
+    ],
+    "linhas": 12,
+    "editaveis": 12,
+    "filhos": 7,
+    "primeiras": [
+     "▾ Soja 3 cultivares Anual sc de 60 kg/ha",
+     "58 W Anual sc de 60 kg/ha 118 dias Semente de soja 58 W › 6 Em dia",
+     "62 X Anual sc de 60 kg/ha 112 dias Semente de soja 62 X › 3 Em dia",
+     "64 Z Anual sc de 60 kg/ha 125 dias — 0 Sem semente Vincular semente ›"
+    ],
+    "rolaV": [
+     697,
+     697
+    ],
+    "rolaH": [
+     1142,
+     1142
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 949,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-02_1440_aba1": {
+  "h1": "Culturas, cultivares e operações",
+  "header": "Cadastros › Culturas, cultivares e operações Culturas, cultivares e operações 1 cultivar sem semente · 1 premissa a validar",
+  "tabs": [
+   "Culturas e cultivares 7",
+   "Operações e rendimentos 11 [ativa]"
+  ],
+  "faixa": [
+   "1 rendimento como premissa Colheita de café · Derriçadeiras portáteis · equipe de 6 Validar rendimento ›"
+  ],
+  "botoes": [
+   "1 rendimento como premissa Colheita de café · Derriçadeiras portáteis · equipe de 6 Validar rendimento ›",
+   "Todos 11",
+   "A resolver 1",
+   "Comparar com o realizado",
+   "Cadastrar rendimento [PRIM]",
+   "Recolher tudo"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Operação › conjunto ⇅ ▾",
+     "Processo ⇅ ▾",
+     "Cultura ⇅ ▾",
+     "Modo ⇅ ▾",
+     "Largura ⇅ ▾",
+     "Velocidade ⇅ ▾",
+     "Eficiência ⇅ ▾",
+     "Rendimento ⇅ ▾",
+     "Custo R$/h ⇅ ▾",
+     "Custo R$/ha ⇅ ▾",
+     "Fonte ⇅ ▾"
+    ],
+    "linhas": 22,
+    "editaveis": 22,
+    "filhos": 11,
+    "primeiras": [
+     "▾ Pulverização 1 conjunto Tratos culturais",
+     "Trator 02 MF 7719 + Pulverizador PJ-3030 36 m Tratos culturais Todas Largura × velocidade 36 m 8 km/h 75 % 21,60 ha/h R$ 313,00/h R$ 14,49/h",
+     "▾ Plantio 1 conjunto Implantação",
+     "Trator T1 JD 6M 155 + Plantadeira 24 linhas Implantação Todas Largura × velocidade 12 m 7 km/h 81 % 6,80 ha/h R$ 396,00/h R$ 58,24/ha Fabric"
+    ],
+    "rolaV": [
+     1024,
+     678
+    ],
+    "rolaH": [
+     1523,
+     1142
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 2315,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-03_1440_aba0": {
+  "h1": "Máquinas, instalações e setores",
+  "header": "Cadastros › Máquinas, instalações e setores Máquinas, instalações e setores 1 máquina em manutenção · 2 calibrações a resolver",
+  "tabs": [
+   "Máquinas e instalações 15 [ativa]",
+   "Conjuntos 7"
+  ],
+  "faixa": [
+   "1 máquina em manutenção Trator T1 · OM-0233 · retorno previsto 24/09 · aguardando teste Ver ordens afetadas ›",
+   "2 calibrações a resolver Máquina TSI, Bomba do Pivô 2 Registrar calibração ›"
+  ],
+  "botoes": [
+   "1 máquina em manutenção Trator T1 · OM-0233 · retorno previsto 24/09 · aguardando teste Ver ordens afetadas ›",
+   "2 calibrações a resolver Máquina TSI, Bomba do Pivô 2 Registrar calibração ›",
+   "Todos 15",
+   "A resolver 3",
+   "Cadastrar máquina ou instalação [PRIM]"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Máquina ou instalação ⇅ ▾",
+     "Modelo ⇅ ▾",
+     "Classe ⇅ ▾",
+     "Capacidade ⇅ ▾",
+     "Largura de trabalho ⇅ ▾",
+     "Custo R$/h ⇅ ▾",
+     "Conjuntos ⇅ ▾",
+     "Próxima calibração ⇅ ▾",
+     "Situação ⇅ ▾"
+    ],
+    "linhas": 15,
+    "editaveis": 15,
+    "filhos": 0,
+    "primeiras": [
+     "Trator T1 JD 6M 155 Trator 155 cv — R$ 180,00/h 1 — Em manutenção Ver ordens afetadas ›",
+     "Trator 02 MF 7719 Trator 190 cv — R$ 180,00/h 1 — Apta",
+     "Trator 03 MF 4292 Trator 110 cv — R$ 150,00/h 1 — Apta",
+     "Trator 04 JD 5078E Trator 78 cv — R$ 150,00/h 1 — Apta"
+    ],
+    "rolaV": [
+     709,
+     678
+    ],
+    "rolaH": [
+     1405,
+     1142
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 1706,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-03_1440_aba1": {
+  "h1": "Máquinas, instalações e setores",
+  "header": "Cadastros › Máquinas, instalações e setores Máquinas, instalações e setores 1 máquina em manutenção · 2 calibrações a resolver",
+  "tabs": [
+   "Máquinas e instalações 15",
+   "Conjuntos 7 [ativa]"
+  ],
+  "faixa": [],
+  "botoes": [
+   "Montar conjunto [PRIM]",
+   "Trator 02 + Pulverizador PJ-3030 Pulverização 36 m Largura 21,60 ha/h Rendimento 190 cv Potência Operadores: Marcos Disponível",
+   "Trator T1 + Plantadeira 24 linhas Indisponível Plantio · Trator T1 em manutenção · substituto: Trator 02 (190 cv) 12 m Largura 6,80 ha/h Rendimento 155 cv Potência Operadores: Carlos Trocar pelo Trator 02 ›",
+   "Trator 03 + Distribuidor 3 t Adubação a lanço 24 m Largura 18,00 ha/h Rendimento 110 cv Potência Operadores: Marcos, Carlos · Lucas, Beto não alocáveis Disponível",
+   "Máquina TSI Calibrar antes de usar Tratamento de sementes · Máquina TSI · vencida — Largura 40,00 ha/h Rendimento Operadores: sem habilidade exigida Registrar calibração ›",
+   "Colhedora Axial-Flow 7250 Colheita de grãos 10 m Largura 5,00 ha/h Rendimento Operadores: Nenhum operador alocável · Lucas · NR-31 vencida em 15/08/2026 Disponível",
+   "Trator 04 + Esqueletadeira Poda 3 m Largura 1,50 ha/h Rendimento 78 cv Potência Operadores: Marcos, Carlos · Lucas, Beto não alocáveis Disponível",
+   "Gotejo T7 Fertirrigação — Largura 10,00 ha/h Rendimento Operadores: João Disponível"
+  ],
+  "busca": [],
+  "selects": [],
+  "tabelas": [],
+  "cartoes": [
+   "Trator 02 + Pulverizador PJ-3030 Pulverização 36 m Largura 21,60 ha/h Rendimento 190 cv Potência Operadores: Marcos Disponível",
+   "Trator T1 + Plantadeira 24 linhas Indisponível Plantio · Trator T1 em manutenção · substituto: Trator 02 (190 cv) 12 m Largura 6,80 ha/h Rendimento 155 cv Potên",
+   "Trator 03 + Distribuidor 3 t Adubação a lanço 24 m Largura 18,00 ha/h Rendimento 110 cv Potência Operadores: Marcos, Carlos · Lucas, Beto não alocáveis Disponív",
+   "Máquina TSI Calibrar antes de usar Tratamento de sementes · Máquina TSI · vencida — Largura 40,00 ha/h Rendimento Operadores: sem habilidade exigida Registrar c",
+   "Colhedora Axial-Flow 7250 Colheita de grãos 10 m Largura 5,00 ha/h Rendimento Operadores: Nenhum operador alocável · Lucas · NR-31 vencida em 15/08/2026 Disponí",
+   "Trator 04 + Esqueletadeira Poda 3 m Largura 1,50 ha/h Rendimento 78 cv Potência Operadores: Marcos, Carlos · Lucas, Beto não alocáveis Disponível",
+   "Gotejo T7 Fertirrigação — Largura 10,00 ha/h Rendimento Operadores: João Disponível"
+  ],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 1128,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-04_1440_aba0": {
+  "h1": "Pessoas e equipes",
+  "header": "Cadastros › Pessoas e equipes Pessoas e equipes 2 não alocáveis · 1 a renovar em 30 dias",
+  "tabs": [
+   "Pessoas 10 [ativa]",
+   "Equipes 6"
+  ],
+  "faixa": [
+   "2 não alocáveis em O.S. Lucas, Beto Regularizar habilitação ›",
+   "1 habilitação vence em 30 dias Marcos Renovar ›"
+  ],
+  "botoes": [
+   "2 não alocáveis em O.S. Lucas, Beto Regularizar habilitação ›",
+   "1 habilitação vence em 30 dias Marcos Renovar ›",
+   "Todas 10",
+   "A resolver 3",
+   "Cadastrar pessoa [PRIM]"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [
+   "Função: Todas|Operadores (4)|Caldeiros (2)|Irrigantes (1)|Almoxarifes (1)|Agrônomos (1)"
+  ],
+  "tabelas": [
+   {
+    "cols": [
+     "Pessoa ⇅ ▾",
+     "Equipe ⇅ ▾",
+     "Habilidades ⇅ ▾",
+     "Vínculo ⇅ ▾",
+     "Disponível até ⇅ ▾",
+     "Custo R$/h ⇅ ▾",
+     "Habilitação ⇅ ▾",
+     "Validade da habilitação ⇅ ▾",
+     "Calendário ⇅ ▾",
+     "Acesso ao app ⇅ ▾",
+     "Situação ⇅ ▾"
+    ],
+    "linhas": 10,
+    "editaveis": 10,
+    "filhos": 0,
+    "primeiras": [
+     "Ana Agronomia Liberar O.S. (agrônomo) CLT — R$ 84,00/h CREA 31/12/2027 Da equipe Com login Alocável",
+     "Marcos Campo 1 Operar trator, Operar pulverizador CLT — R$ 38,00/h NR-31 30/09/2026 Da equipe Com login Vence em 30 dias Renovar ›",
+     "Carlos Campo 1 Operar trator, Operar plantadeira CLT — R$ 38,00/h NR-31 31/08/2027 Da equipe Com login Alocável",
+     "Paula Campo 1 Preparar calda (caldeiro), Conferir CLT — R$ 32,00/h NR-31 30/04/2027 Da equipe Com login Alocável"
+    ],
+    "rolaV": [
+     697,
+     697
+    ],
+    "rolaH": [
+     1427,
+     1142
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 1506,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-04_1440_aba1": {
+  "h1": "Pessoas e equipes",
+  "header": "Cadastros › Pessoas e equipes Pessoas e equipes 2 não alocáveis · 1 a renovar em 30 dias",
+  "tabs": [
+   "Pessoas 10",
+   "Equipes 6 [ativa]"
+  ],
+  "faixa": [],
+  "botoes": [
+   "Cadastrar equipe [PRIM]",
+   "Agronomia Líder Ana 1 Pessoa ativa 10 h/dia Jornada seg–sex · 07–17h Em dia",
+   "Campo 1 1 não alocável Líder Marcos 4 Pessoas ativas 9 h/dia Jornada seg–sáb · 06–15h Em dia",
+   "Campo 2 1 não alocável Líder Lucas 2 Pessoas ativas 9 h/dia Jornada seg–sáb · 06–15h Em dia",
+   "Irrigação Líder João 1 Pessoa ativa 8 h/dia Jornada escala 6×2 · 8h Em dia",
+   "Suprimentos Líder Rui 1 Pessoa ativa 10 h/dia Jornada seg–sex · 07–17h Em dia",
+   "Oficina Líder Zé 1 Pessoa ativa 10 h/dia Jornada seg–sex · 07–17h Em dia"
+  ],
+  "busca": [],
+  "selects": [],
+  "tabelas": [],
+  "cartoes": [
+   "Agronomia Líder Ana 1 Pessoa ativa 10 h/dia Jornada seg–sex · 07–17h Em dia",
+   "Campo 1 1 não alocável Líder Marcos 4 Pessoas ativas 9 h/dia Jornada seg–sáb · 06–15h Em dia",
+   "Campo 2 1 não alocável Líder Lucas 2 Pessoas ativas 9 h/dia Jornada seg–sáb · 06–15h Em dia",
+   "Irrigação Líder João 1 Pessoa ativa 8 h/dia Jornada escala 6×2 · 8h Em dia",
+   "Suprimentos Líder Rui 1 Pessoa ativa 10 h/dia Jornada seg–sex · 07–17h Em dia",
+   "Oficina Líder Zé 1 Pessoa ativa 10 h/dia Jornada seg–sex · 07–17h Em dia"
+  ],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 534,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-05_1440_aba0": {
+  "h1": "Parceiros e fornecedores",
+  "header": "Cadastros › Parceiros e fornecedores Parceiros e fornecedores 2 grupos sem fornecedor · 1 limite vencido",
+  "tabs": [
+   "Parceiros 20 [ativa]",
+   "Cobertura de cotação 9"
+  ],
+  "faixa": [
+   "1 limite de crédito vencido Rede Hortifrúti BA Renovar limite ›"
+  ],
+  "botoes": [
+   "1 limite de crédito vencido Rede Hortifrúti BA Renovar limite ›",
+   "Todos 20",
+   "Fornecedores 8",
+   "Clientes 7",
+   "Parceiros de crédito 3",
+   "Transportadores 2",
+   "Prestadores 1",
+   "Cadastrar parceiro [PRIM]"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Parceiro ⇅ ▾",
+     "CPF/CNPJ ⇅ ▾",
+     "Papéis ⇅ ▾",
+     "Contato ⇅ ▾",
+     "WhatsApp ⇅ ▾",
+     "E-mail ⇅ ▾",
+     "Canais autorizados ⇅ ▾",
+     "Situação do papel ⇅ ▾"
+    ],
+    "linhas": 20,
+    "editaveis": 20,
+    "filhos": 0,
+    "primeiras": [
+     "Fertisul 12.345.678/0001-95 Fornecedor Rafael Moura 65 99911-2233 cotacoes@fertisul.com.br E-mail, WhatsApp Homologado",
+     "Casa do Adubo 22.456.789/0001-22 Fornecedor Juliana Prado 65 99822-3344 não autorizado vendas@casadoadubo.com.br E-mail Homologado",
+     "Agro Norte 33.567.890/0001-77 Fornecedor Marcelo Tavares 65 99733-4455 orcamento@agronorte.com.br E-mail, WhatsApp Homologado",
+     "Santa Rita Insumos 44.678.901/0001-02 Fornecedor Denise Rocha 65 99644-5566 compras@santaritainsumos.com.br E-mail, WhatsApp Homologado"
+    ],
+    "rolaV": [
+     934,
+     658
+    ],
+    "rolaH": [
+     1327,
+     1142
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 2804,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-05_1440_aba1": {
+  "h1": "Parceiros e fornecedores",
+  "header": "Cadastros › Parceiros e fornecedores Parceiros e fornecedores 2 grupos sem fornecedor · 1 limite vencido",
+  "tabs": [
+   "Parceiros 20",
+   "Cobertura de cotação 9 [ativa]"
+  ],
+  "faixa": [
+   "2 grupos sem fornecedor que receba cotação Combustível, Peças Homologar fornecedor ›"
+  ],
+  "botoes": [
+   "2 grupos sem fornecedor que receba cotação Combustível, Peças Homologar fornecedor ›"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Grupo de insumo ⇅ ▾",
+     "Fornecedores que recebem cotação ⇅ ▾",
+     "Situação ⇅ ▾"
+    ],
+    "linhas": 9,
+    "editaveis": 9,
+    "filhos": 0,
+    "primeiras": [
+     "Sementes 2 Com concorrência",
+     "Fertilizantes 3 Com concorrência",
+     "Herbicidas 3 Com concorrência",
+     "Fungicidas 3 Com concorrência"
+    ],
+    "rolaV": [
+     698,
+     698
+    ],
+    "rolaH": [
+     1142,
+     1142
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 508,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-06_1440_aba0": {
+  "h1": "Produtos, unidades e locais",
+  "header": "Cadastros › Produtos, unidades e locais Produtos, unidades e locais 1 item sem preço",
+  "tabs": [
+   "Itens 38 [ativa]",
+   "Locais de estoque 11"
+  ],
+  "faixa": [
+   "1 item sem preço de referência Calcário dolomítico Informar preço ›"
+  ],
+  "botoes": [
+   "1 item sem preço de referência Calcário dolomítico Informar preço ›",
+   "Todos 38",
+   "A resolver 1",
+   "Cadastrar item [PRIM]",
+   "Recolher tudo"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Grupo › item ⇅ ▾",
+     "Natureza de custo ⇅ ▾",
+     "Unidade ⇅ ▾",
+     "Embalagem ⇅ ▾",
+     "Controle ⇅ ▾",
+     "Preço de referência ⇅ ▾",
+     "Data do preço ⇅ ▾",
+     "Situação ⇅ ▾"
+    ],
+    "linhas": 50,
+    "editaveis": 50,
+    "filhos": 38,
+    "primeiras": [
+     "▾ Adjuvantes 2 itens 3.1.02 · Defensivos",
+     "Adjuvante espalhante 3.1.02 · Defensivos L galão de 5 L Lote e validade R$ 22,00/L 15/09/2026 Em dia",
+     "Óleo mineral 3.1.02 · Defensivos L galão de 20 L Lote e validade R$ 18,00/L 15/09/2026 Em dia",
+     "▾ Combustível 1 item 3.1.04 · Combustíveis e lubrificantes"
+    ],
+    "rolaV": [
+     2284,
+     697
+    ],
+    "rolaH": [
+     1280,
+     1142
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 4608,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-06_1440_aba1": {
+  "h1": "Produtos, unidades e locais",
+  "header": "Cadastros › Produtos, unidades e locais Produtos, unidades e locais 1 item sem preço",
+  "tabs": [
+   "Itens 38",
+   "Locais de estoque 11 [ativa]"
+  ],
+  "faixa": [],
+  "botoes": [
+   "Todos 11",
+   "Galpão 4",
+   "Almoxarifado 2",
+   "Armazém 1",
+   "Câmara fria 1",
+   "Packing 1",
+   "Silo 1",
+   "Tanque 1",
+   "Cadastrar local [PRIM]"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Local ⇅ ▾",
+     "Fazenda ⇅ ▾",
+     "Tipo ⇅ ▾",
+     "Capacidade ⇅ ▾",
+     "Itens com este local padrão ⇅ ▾"
+    ],
+    "linhas": 11,
+    "editaveis": 11,
+    "filhos": 0,
+    "primeiras": [
+     "Galpão 1 Santa Rita Galpão — 2",
+     "Galpão 2 Santa Rita Galpão — 5",
+     "Almox. defensivos Santa Rita Almoxarifado — 12",
+     "Câmara fria Santa Rita Câmara fria — 5"
+    ],
+    "rolaV": [
+     776,
+     776
+    ],
+    "rolaH": [
+     1142,
+     1142
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 659,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-07_1440": {
+  "h1": "Estrutura gerencial",
+  "header": "Cadastros › Estrutura gerencial Estrutura gerencial v5 em vigor · rascunho v6 com 3 alterações · 1 tradução pendente",
+  "tabs": [],
+  "faixa": [
+   "3 alterações no rascunho v6 v5 segue em vigor até publicar Publicar estrutura ›",
+   "1 tradução pendente PRJ-PIVO3 · Expansão pivô 3 · investimento Traduzir no ERP ›"
+  ],
+  "botoes": [
+   "3 alterações no rascunho v6 v5 segue em vigor até publicar Publicar estrutura ›",
+   "1 tradução pendente PRJ-PIVO3 · Expansão pivô 3 · investimento Traduzir no ERP ›",
+   "Todos 23",
+   "No rascunho v6 3",
+   "A resolver 1",
+   "Importar do ERP",
+   "Cadastrar código [PRIM]",
+   "Recolher tudo"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Dimensão › código ⇅ ▾",
+     "Nome ⇅ ▾",
+     "Origem ⇅ ▾",
+     "Início da vigência ⇅ ▾",
+     "Fim da vigência ⇅ ▾",
+     "Vínculos ⇅ ▾",
+     "Conta no ERP (Sankhya) ⇅ ▾",
+     "TOP no ERP ⇅ ▾",
+     "Situação ⇅ ▾",
+     "No rascunho ⇅ ▾"
+    ],
+    "linhas": 30,
+    "editaveis": 23,
+    "filhos": 23,
+    "primeiras": [
+     "▾ Empresa 2 códigos",
+     "01 Santa Rita Agro Estrutura gerencial 01/07/2024 — — empresa 1 — Mapeado —",
+     "02 Boa Vista Ltda Estrutura gerencial 01/09/2026 — — empresa 2 — Mapeado Novo",
+     "▾ Natureza 7 códigos"
+    ],
+    "rolaV": [
+     1384,
+     726
+    ],
+    "rolaH": [
+     1679,
+     1142
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 1440,
+  "vh": 1000,
+  "mainTxt": 2965,
+  "menu": [
+   232,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-01_390_aba0": {
+  "h1": "Fazendas, áreas e talhões",
+  "header": "Cadastros › Fazendas, áreas e talhões Fazendas, áreas e talhões B1 sem polígono · 2 fazendas com cadastro pendente · 6 outorgas a renovar",
+  "tabs": [
+   "Talhões 32 [ativa]",
+   "Fazendas 3",
+   "Ambiental 18",
+   "Água 16"
+  ],
+  "faixa": [
+   "1 talhão sem polígono B1 · Boa Vista Definir polígono ›"
+  ],
+  "botoes": [
+   "1 talhão sem polígono B1 · Boa Vista Definir polígono ›",
+   "Todos 32",
+   "A resolver 1",
+   "Lista",
+   "Mapa",
+   "Cadastrar talhão [PRIM]",
+   "Recolher tudo"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Fazenda › talhão ⇅ ▾",
+     "Sistema ⇅ ▾",
+     "Área cultivável ⇅ ▾",
+     "Polígono ⇅ ▾",
+     "Diferença ⇅ ▾",
+     "Parcelas na safra 2026/27 ⇅ ▾",
+     "Situação ⇅ ▾"
+    ],
+    "linhas": 35,
+    "editaveis": 32,
+    "filhos": 32,
+    "primeiras": [
+     "▾ Santa Rita 8 talhões ativos 1.165,0 ha",
+     "T1 Sequeiro 312,0 ha 312,4 ha +0,1 % 2 Em dia",
+     "T2 Sequeiro 298,0 ha 298,1 ha 0,0 % 1 Em dia",
+     "T3 Sequeiro 96,0 ha 96,0 ha 0,0 % 1 Em dia"
+    ],
+    "rolaV": [
+     1716,
+     1716
+    ],
+    "rolaH": [
+     842,
+     292
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 1916,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-01_390_aba1": {
+  "h1": "Fazendas, áreas e talhões",
+  "header": "Cadastros › Fazendas, áreas e talhões Fazendas, áreas e talhões B1 sem polígono · 2 fazendas com cadastro pendente · 6 outorgas a renovar",
+  "tabs": [
+   "Talhões 32",
+   "Fazendas 3 [ativa]",
+   "Ambiental 18",
+   "Água 16"
+  ],
+  "faixa": [],
+  "botoes": [
+   "Cadastrar fazenda [PRIM]",
+   "Santa Rita Santa Rita Agro · Rio Verde/GO 1.480 ha Área total 1.165,0 ha Cultivável 8 Talhões ativos Própria Em dia",
+   "Boa Vista CAR pendente Boa Vista Ltda · Sorriso/MT 420 ha Área total 120,0 ha Cultivável 1 Talhão ativo Arrendada até 31/08/2029 Informar CAR ›",
+   "Lagoa Grande Cadastro incompleto Empresa a informar · Lagoa Grande/MG 2.378 ha Área total 1.285,2 ha Cultivável 23 Talhões ativos Posse a informar Completar cadastro ›"
+  ],
+  "busca": [],
+  "selects": [],
+  "tabelas": [],
+  "cartoes": [
+   "Santa Rita Santa Rita Agro · Rio Verde/GO 1.480 ha Área total 1.165,0 ha Cultivável 8 Talhões ativos Própria Em dia",
+   "Boa Vista CAR pendente Boa Vista Ltda · Sorriso/MT 420 ha Área total 120,0 ha Cultivável 1 Talhão ativo Arrendada até 31/08/2029 Informar CAR ›",
+   "Lagoa Grande Cadastro incompleto Empresa a informar · Lagoa Grande/MG 2.378 ha Área total 1.285,2 ha Cultivável 23 Talhões ativos Posse a informar Completar cad"
+  ],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 499,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-01_390_aba2": {
+  "h1": "Fazendas, áreas e talhões",
+  "header": "Cadastros › Fazendas, áreas e talhões Fazendas, áreas e talhões B1 sem polígono · 2 fazendas com cadastro pendente · 6 outorgas a renovar",
+  "tabs": [
+   "Talhões 32",
+   "Fazendas 3",
+   "Ambiental 18 [ativa]",
+   "Água 16"
+  ],
+  "faixa": [],
+  "botoes": [
+   "Todos 18",
+   "APP 9",
+   "Reserva legal 4",
+   "Área consolidada 1",
+   "Pousio 1",
+   "Servidão administrativa 1",
+   "Uso restrito 1",
+   "Vegetação nativa 1"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Área ambiental ⇅ ▾",
+     "Fazenda ⇅ ▾",
+     "Tipo ⇅ ▾",
+     "Área ⇅ ▾"
+    ],
+    "linhas": 18,
+    "editaveis": 18,
+    "filhos": 0,
+    "primeiras": [
+     "Reserva legal total (demonstração) Lagoa Grande Reserva legal 285,77 ha",
+     "Reserva legal averbada · gleba B (demonstração) Lagoa Grande Reserva legal 120,37 ha",
+     "Reserva legal averbada · gleba C (demonstração) Lagoa Grande Reserva legal 91,43 ha",
+     "Reserva legal averbada · gleba A (demonstração) Lagoa Grande Reserva legal 73,97 ha"
+    ],
+    "rolaV": [
+     1160,
+     1160
+    ],
+    "rolaH": [
+     482,
+     292
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 1499,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-01_390_aba3": {
+  "h1": "Fazendas, áreas e talhões",
+  "header": "Cadastros › Fazendas, áreas e talhões Fazendas, áreas e talhões B1 sem polígono · 2 fazendas com cadastro pendente · 6 outorgas a renovar",
+  "tabs": [
+   "Talhões 32",
+   "Fazendas 3",
+   "Ambiental 18",
+   "Água 16 [ativa]"
+  ],
+  "faixa": [
+   "2 outorgas vencidas Outorga SINT-003/0000 · Ribeirão B (demonstração), Outorga SINT-012/0000 · Poço tubular Renovar outorga ›",
+   "2 outorgas em renovação Outorga SINT-004/0000 · Ribeirão B (demonstração), Outorga SINT-015/0000 · Poço tubular Acompanhar renovação ›",
+   "2 documentos vencem em 90 dias Outorga SINT-002/0000 · 20/11/2026, Certidão SINT-009/0000 · 10/12/2026 Renovar ›"
+  ],
+  "botoes": [
+   "2 outorgas vencidas Outorga SINT-003/0000 · Ribeirão B (demonstração), Outorga SINT-012/0000 · Poço tubular Renovar outorga ›",
+   "2 outorgas em renovação Outorga SINT-004/0000 · Ribeirão B (demonstração), Outorga SINT-015/0000 · Poço tubular Acompanhar renovação ›",
+   "2 documentos vencem em 90 dias Outorga SINT-002/0000 · 20/11/2026, Certidão SINT-009/0000 · 10/12/2026 Renovar ›",
+   "Todos 16",
+   "A resolver 6"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Ponto de água ⇅ ▾",
+     "Fazenda ⇅ ▾",
+     "Documento ⇅ ▾",
+     "Uso ⇅ ▾",
+     "Curso d’água ⇅ ▾",
+     "Vazão ⇅ ▾",
+     "Vencimento ⇅ ▾",
+     "Situação ⇅ ▾"
+    ],
+    "linhas": 16,
+    "editaveis": 16,
+    "filhos": 0,
+    "primeiras": [
+     "Ponto de água 1 (demonstração) Lagoa Grande Outorga Captação superficial Rio A (demonstração) 180 m³/h 30/04/2031 Vigente",
+     "Ponto de água 2 (demonstração) Lagoa Grande Outorga Captação superficial Rio A (demonstração) 150 m³/h 20/11/2026 Vence em 90 dias Renovar ›",
+     "Ponto de água 3 (demonstração) Lagoa Grande Outorga Captação superficial Ribeirão B (demonstração) 120 m³/h 10/05/2026 Vencida Renovar ›",
+     "Ponto de água 4 (demonstração) Lagoa Grande Outorga Barramento Ribeirão B (demonstração) — 01/12/2025 Em renovação"
+    ],
+    "rolaV": [
+     854,
+     854
+    ],
+    "rolaH": [
+     980,
+     292
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 2445,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-01det_390_aba0": {
+  "h1": "Talhão",
+  "header": "Cadastros › Fazendas, áreas e talhões › T1 · 312 ha Talhão T1 · Santa Rita T2 · Santa Rita T3 · Santa Rita T4 · Santa Rita P1 · Santa Rita P2 · Santa Rita T7 · Santa Rita C1 · Santa Rita B1 · Boa Vista PV01 · Lagoa Grande PV02 · Lagoa Grande PV03 · Lagoa Grande PV04 · Lagoa Grande PV05 · Lagoa Grande PV06 · Lagoa Grande PV07 · Lagoa Grande PV08 · Lagoa Grande PV09 · Lagoa Grande PV10 · Lagoa Grand",
+  "tabs": [
+   "Parcelas por safra 4 [ativa]",
+   "Geometria v3"
+  ],
+  "faixa": [
+   "1 parcela sem polígono T1-B · Safra 2026/27 Definir polígono ›"
+  ],
+  "botoes": [
+   "1 parcela sem polígono T1-B · Safra 2026/27 Definir polígono ›",
+   "Planejar T1 na safra [PRIM]",
+   "Expandir tudo"
+  ],
+  "busca": [],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Fazenda",
+     "Sistema",
+     "Setor de irrigação",
+     "Área cultivável",
+     "Polígono",
+     "Versão",
+     "Diferença ha",
+     "Diferença %",
+     "Situação"
+    ],
+    "linhas": 1,
+    "editaveis": 1,
+    "filhos": 0,
+    "primeiras": [
+     "Santa Rita Sequeiro — 312,0 ha 312,4 ha v3 +0,4 ha +0,1 % Ativo"
+    ],
+    "rolaV": [
+     79,
+     79
+    ],
+    "rolaH": [
+     744,
+     292
+    ]
+   },
+   {
+    "cols": [
+     "Safra › parcela ⇅ ▾",
+     "Tipo ⇅ ▾",
+     "Cultura ⇅ ▾",
+     "Cultivar ⇅ ▾",
+     "Área ⇅ ▾",
+     "Livre ⇅ ▾",
+     "Plantio ⇅ ▾",
+     "Situação ⇅ ▾"
+    ],
+    "linhas": 6,
+    "editaveis": 3,
+    "filhos": 3,
+    "primeiras": [
+     "▾ Safra 2026/27 312 ha 0 ha Em planejamento",
+     "T1-A Parcela Soja 58 W 160,0 ha 15/10/2026 Polígono validado",
+     "T1-B Parcela Soja 62 X 152,0 ha 25/10/2026 Sem polígono",
+     "▾ Safrinha 2027 160 ha 152 ha Rascunho"
+    ],
+    "rolaV": [
+     325,
+     325
+    ],
+    "rolaH": [
+     768,
+     292
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 705,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-01det_390_aba1": {
+  "h1": "Talhão",
+  "header": "Cadastros › Fazendas, áreas e talhões › T1 · 312 ha Talhão T1 · Santa Rita T2 · Santa Rita T3 · Santa Rita T4 · Santa Rita P1 · Santa Rita P2 · Santa Rita T7 · Santa Rita C1 · Santa Rita B1 · Boa Vista PV01 · Lagoa Grande PV02 · Lagoa Grande PV03 · Lagoa Grande PV04 · Lagoa Grande PV05 · Lagoa Grande PV06 · Lagoa Grande PV07 · Lagoa Grande PV08 · Lagoa Grande PV09 · Lagoa Grande PV10 · Lagoa Grand",
+  "tabs": [
+   "Parcelas por safra 4",
+   "Geometria v3 [ativa]"
+  ],
+  "faixa": [],
+  "botoes": [
+   "Definir polígono da T1-B [PRIM]"
+  ],
+  "busca": [],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Fazenda",
+     "Sistema",
+     "Setor de irrigação",
+     "Área cultivável",
+     "Polígono",
+     "Versão",
+     "Diferença ha",
+     "Diferença %",
+     "Situação"
+    ],
+    "linhas": 1,
+    "editaveis": 1,
+    "filhos": 0,
+    "primeiras": [
+     "Santa Rita Sequeiro — 312,0 ha 312,4 ha v3 +0,4 ha +0,1 % Ativo"
+    ],
+    "rolaV": [
+     79,
+     79
+    ],
+    "rolaH": [
+     744,
+     292
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 482,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-02_390_aba0": {
+  "h1": "Culturas, cultivares e operações",
+  "header": "Cadastros › Culturas, cultivares e operações Culturas, cultivares e operações 1 cultivar sem semente · 1 premissa a validar",
+  "tabs": [
+   "Culturas e cultivares 7 [ativa]",
+   "Operações e rendimentos 11"
+  ],
+  "faixa": [
+   "1 cultivar anual sem item de semente Soja 64 Z Vincular semente ›"
+  ],
+  "botoes": [
+   "1 cultivar anual sem item de semente Soja 64 Z Vincular semente ›",
+   "Todos 7",
+   "A resolver 1",
+   "Cadastrar cultivar [PRIM]",
+   "Recolher tudo"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Cultura › cultivar ⇅ ▾",
+     "Tipo de ciclo ⇅ ▾",
+     "Unidade de produtividade ⇅ ▾",
+     "Ciclo ⇅ ▾",
+     "Item de semente ⇅ ▾",
+     "Cultivos ⇅ ▾",
+     "Situação ⇅ ▾"
+    ],
+    "linhas": 12,
+    "editaveis": 12,
+    "filhos": 7,
+    "primeiras": [
+     "▾ Soja 3 cultivares Anual sc de 60 kg/ha",
+     "58 W Anual sc de 60 kg/ha 118 dias Semente de soja 58 W › 6 Em dia",
+     "62 X Anual sc de 60 kg/ha 112 dias Semente de soja 62 X › 3 Em dia",
+     "64 Z Anual sc de 60 kg/ha 125 dias — 0 Sem semente Vincular semente ›"
+    ],
+    "rolaV": [
+     676,
+     676
+    ],
+    "rolaH": [
+     870,
+     292
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 949,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-02_390_aba1": {
+  "h1": "Culturas, cultivares e operações",
+  "header": "Cadastros › Culturas, cultivares e operações Culturas, cultivares e operações 1 cultivar sem semente · 1 premissa a validar",
+  "tabs": [
+   "Culturas e cultivares 7",
+   "Operações e rendimentos 11 [ativa]"
+  ],
+  "faixa": [
+   "1 rendimento como premissa Colheita de café · Derriçadeiras portáteis · equipe de 6 Validar rendimento ›"
+  ],
+  "botoes": [
+   "1 rendimento como premissa Colheita de café · Derriçadeiras portáteis · equipe de 6 Validar rendimento ›",
+   "Todos 11",
+   "A resolver 1",
+   "Comparar com o realizado",
+   "Cadastrar rendimento [PRIM]",
+   "Recolher tudo"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Operação › conjunto ⇅ ▾",
+     "Processo ⇅ ▾",
+     "Cultura ⇅ ▾",
+     "Modo ⇅ ▾",
+     "Largura ⇅ ▾",
+     "Velocidade ⇅ ▾",
+     "Eficiência ⇅ ▾",
+     "Rendimento ⇅ ▾",
+     "Custo R$/h ⇅ ▾",
+     "Custo R$/ha ⇅ ▾",
+     "Fonte ⇅ ▾"
+    ],
+    "linhas": 22,
+    "editaveis": 22,
+    "filhos": 11,
+    "primeiras": [
+     "▾ Pulverização 1 conjunto Tratos culturais",
+     "Trator 02 MF 7719 + Pulverizador PJ-3030 36 m Tratos culturais Todas Largura × velocidade 36 m 8 km/h 75 % 21,60 ha/h R$ 313,00/h R$ 14,49/h",
+     "▾ Plantio 1 conjunto Implantação",
+     "Trator T1 JD 6M 155 + Plantadeira 24 linhas Implantação Todas Largura × velocidade 12 m 7 km/h 81 % 6,80 ha/h R$ 396,00/h R$ 58,24/ha Fabric"
+    ],
+    "rolaV": [
+     1455,
+     1455
+    ],
+    "rolaH": [
+     1215,
+     292
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 2315,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-03_390_aba0": {
+  "h1": "Máquinas, instalações e setores",
+  "header": "Cadastros › Máquinas, instalações e setores Máquinas, instalações e setores 1 máquina em manutenção · 2 calibrações a resolver",
+  "tabs": [
+   "Máquinas e instalações 15 [ativa]",
+   "Conjuntos 7"
+  ],
+  "faixa": [
+   "1 máquina em manutenção Trator T1 · OM-0233 · retorno previsto 24/09 · aguardando teste Ver ordens afetadas ›",
+   "2 calibrações a resolver Máquina TSI, Bomba do Pivô 2 Registrar calibração ›"
+  ],
+  "botoes": [
+   "1 máquina em manutenção Trator T1 · OM-0233 · retorno previsto 24/09 · aguardando teste Ver ordens afetadas ›",
+   "2 calibrações a resolver Máquina TSI, Bomba do Pivô 2 Registrar calibração ›",
+   "Todos 15",
+   "A resolver 3",
+   "Cadastrar máquina ou instalação [PRIM]"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Máquina ou instalação ⇅ ▾",
+     "Modelo ⇅ ▾",
+     "Classe ⇅ ▾",
+     "Capacidade ⇅ ▾",
+     "Largura de trabalho ⇅ ▾",
+     "Custo R$/h ⇅ ▾",
+     "Conjuntos ⇅ ▾",
+     "Próxima calibração ⇅ ▾",
+     "Situação ⇅ ▾"
+    ],
+    "linhas": 15,
+    "editaveis": 15,
+    "filhos": 0,
+    "primeiras": [
+     "Trator T1 JD 6M 155 Trator 155 cv — R$ 180,00/h 1 — Em manutenção Ver ordens afetadas ›",
+     "Trator 02 MF 7719 Trator 190 cv — R$ 180,00/h 1 — Apta",
+     "Trator 03 MF 4292 Trator 110 cv — R$ 150,00/h 1 — Apta",
+     "Trator 04 JD 5078E Trator 78 cv — R$ 150,00/h 1 — Apta"
+    ],
+    "rolaV": [
+     819,
+     819
+    ],
+    "rolaH": [
+     1240,
+     292
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 1706,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-03_390_aba1": {
+  "h1": "Máquinas, instalações e setores",
+  "header": "Cadastros › Máquinas, instalações e setores Máquinas, instalações e setores 1 máquina em manutenção · 2 calibrações a resolver",
+  "tabs": [
+   "Máquinas e instalações 15",
+   "Conjuntos 7 [ativa]"
+  ],
+  "faixa": [],
+  "botoes": [
+   "Montar conjunto [PRIM]",
+   "Trator 02 + Pulverizador PJ-3030 Pulverização 36 m Largura 21,60 ha/h Rendimento 190 cv Potência Operadores: Marcos Disponível",
+   "Trator T1 + Plantadeira 24 linhas Indisponível Plantio · Trator T1 em manutenção · substituto: Trator 02 (190 cv) 12 m Largura 6,80 ha/h Rendimento 155 cv Potência Operadores: Carlos Trocar pelo Trator 02 ›",
+   "Trator 03 + Distribuidor 3 t Adubação a lanço 24 m Largura 18,00 ha/h Rendimento 110 cv Potência Operadores: Marcos, Carlos · Lucas, Beto não alocáveis Disponível",
+   "Máquina TSI Calibrar antes de usar Tratamento de sementes · Máquina TSI · vencida — Largura 40,00 ha/h Rendimento Operadores: sem habilidade exigida Registrar calibração ›",
+   "Colhedora Axial-Flow 7250 Colheita de grãos 10 m Largura 5,00 ha/h Rendimento Operadores: Nenhum operador alocável · Lucas · NR-31 vencida em 15/08/2026 Disponível",
+   "Trator 04 + Esqueletadeira Poda 3 m Largura 1,50 ha/h Rendimento 78 cv Potência Operadores: Marcos, Carlos · Lucas, Beto não alocáveis Disponível",
+   "Gotejo T7 Fertirrigação — Largura 10,00 ha/h Rendimento Operadores: João Disponível"
+  ],
+  "busca": [],
+  "selects": [],
+  "tabelas": [],
+  "cartoes": [
+   "Trator 02 + Pulverizador PJ-3030 Pulverização 36 m Largura 21,60 ha/h Rendimento 190 cv Potência Operadores: Marcos Disponível",
+   "Trator T1 + Plantadeira 24 linhas Indisponível Plantio · Trator T1 em manutenção · substituto: Trator 02 (190 cv) 12 m Largura 6,80 ha/h Rendimento 155 cv Potên",
+   "Trator 03 + Distribuidor 3 t Adubação a lanço 24 m Largura 18,00 ha/h Rendimento 110 cv Potência Operadores: Marcos, Carlos · Lucas, Beto não alocáveis Disponív",
+   "Máquina TSI Calibrar antes de usar Tratamento de sementes · Máquina TSI · vencida — Largura 40,00 ha/h Rendimento Operadores: sem habilidade exigida Registrar c",
+   "Colhedora Axial-Flow 7250 Colheita de grãos 10 m Largura 5,00 ha/h Rendimento Operadores: Nenhum operador alocável · Lucas · NR-31 vencida em 15/08/2026 Disponí",
+   "Trator 04 + Esqueletadeira Poda 3 m Largura 1,50 ha/h Rendimento 78 cv Potência Operadores: Marcos, Carlos · Lucas, Beto não alocáveis Disponível",
+   "Gotejo T7 Fertirrigação — Largura 10,00 ha/h Rendimento Operadores: João Disponível"
+  ],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 1128,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-04_390_aba0": {
+  "h1": "Pessoas e equipes",
+  "header": "Cadastros › Pessoas e equipes Pessoas e equipes 2 não alocáveis · 1 a renovar em 30 dias",
+  "tabs": [
+   "Pessoas 10 [ativa]",
+   "Equipes 6"
+  ],
+  "faixa": [
+   "2 não alocáveis em O.S. Lucas, Beto Regularizar habilitação ›",
+   "1 habilitação vence em 30 dias Marcos Renovar ›"
+  ],
+  "botoes": [
+   "2 não alocáveis em O.S. Lucas, Beto Regularizar habilitação ›",
+   "1 habilitação vence em 30 dias Marcos Renovar ›",
+   "Todas 10",
+   "A resolver 3",
+   "Cadastrar pessoa [PRIM]"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [
+   "Função: Todas|Operadores (4)|Caldeiros (2)|Irrigantes (1)|Almoxarifes (1)|Agrônomos (1)"
+  ],
+  "tabelas": [
+   {
+    "cols": [
+     "Pessoa ⇅ ▾",
+     "Equipe ⇅ ▾",
+     "Habilidades ⇅ ▾",
+     "Vínculo ⇅ ▾",
+     "Disponível até ⇅ ▾",
+     "Custo R$/h ⇅ ▾",
+     "Habilitação ⇅ ▾",
+     "Validade da habilitação ⇅ ▾",
+     "Calendário ⇅ ▾",
+     "Acesso ao app ⇅ ▾",
+     "Situação ⇅ ▾"
+    ],
+    "linhas": 10,
+    "editaveis": 10,
+    "filhos": 0,
+    "primeiras": [
+     "Ana Agronomia Liberar O.S. (agrônomo) CLT — R$ 84,00/h CREA 31/12/2027 Da equipe Com login Alocável",
+     "Marcos Campo 1 Operar trator, Operar pulverizador CLT — R$ 38,00/h NR-31 30/09/2026 Da equipe Com login Vence em 30 dias Renovar ›",
+     "Carlos Campo 1 Operar trator, Operar plantadeira CLT — R$ 38,00/h NR-31 31/08/2027 Da equipe Com login Alocável",
+     "Paula Campo 1 Preparar calda (caldeiro), Conferir CLT — R$ 32,00/h NR-31 30/04/2027 Da equipe Com login Alocável"
+    ],
+    "rolaV": [
+     484,
+     484
+    ],
+    "rolaH": [
+     1427,
+     292
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 1506,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-04_390_aba1": {
+  "h1": "Pessoas e equipes",
+  "header": "Cadastros › Pessoas e equipes Pessoas e equipes 2 não alocáveis · 1 a renovar em 30 dias",
+  "tabs": [
+   "Pessoas 10",
+   "Equipes 6 [ativa]"
+  ],
+  "faixa": [],
+  "botoes": [
+   "Cadastrar equipe [PRIM]",
+   "Agronomia Líder Ana 1 Pessoa ativa 10 h/dia Jornada seg–sex · 07–17h Em dia",
+   "Campo 1 1 não alocável Líder Marcos 4 Pessoas ativas 9 h/dia Jornada seg–sáb · 06–15h Em dia",
+   "Campo 2 1 não alocável Líder Lucas 2 Pessoas ativas 9 h/dia Jornada seg–sáb · 06–15h Em dia",
+   "Irrigação Líder João 1 Pessoa ativa 8 h/dia Jornada escala 6×2 · 8h Em dia",
+   "Suprimentos Líder Rui 1 Pessoa ativa 10 h/dia Jornada seg–sex · 07–17h Em dia",
+   "Oficina Líder Zé 1 Pessoa ativa 10 h/dia Jornada seg–sex · 07–17h Em dia"
+  ],
+  "busca": [],
+  "selects": [],
+  "tabelas": [],
+  "cartoes": [
+   "Agronomia Líder Ana 1 Pessoa ativa 10 h/dia Jornada seg–sex · 07–17h Em dia",
+   "Campo 1 1 não alocável Líder Marcos 4 Pessoas ativas 9 h/dia Jornada seg–sáb · 06–15h Em dia",
+   "Campo 2 1 não alocável Líder Lucas 2 Pessoas ativas 9 h/dia Jornada seg–sáb · 06–15h Em dia",
+   "Irrigação Líder João 1 Pessoa ativa 8 h/dia Jornada escala 6×2 · 8h Em dia",
+   "Suprimentos Líder Rui 1 Pessoa ativa 10 h/dia Jornada seg–sex · 07–17h Em dia",
+   "Oficina Líder Zé 1 Pessoa ativa 10 h/dia Jornada seg–sex · 07–17h Em dia"
+  ],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 534,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-05_390_aba0": {
+  "h1": "Parceiros e fornecedores",
+  "header": "Cadastros › Parceiros e fornecedores Parceiros e fornecedores 2 grupos sem fornecedor · 1 limite vencido",
+  "tabs": [
+   "Parceiros 20 [ativa]",
+   "Cobertura de cotação 9"
+  ],
+  "faixa": [
+   "1 limite de crédito vencido Rede Hortifrúti BA Renovar limite ›"
+  ],
+  "botoes": [
+   "1 limite de crédito vencido Rede Hortifrúti BA Renovar limite ›",
+   "Todos 20",
+   "Fornecedores 8",
+   "Clientes 7",
+   "Parceiros de crédito 3",
+   "Transportadores 2",
+   "Prestadores 1",
+   "Cadastrar parceiro [PRIM]"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Parceiro ⇅ ▾",
+     "CPF/CNPJ ⇅ ▾",
+     "Papéis ⇅ ▾",
+     "Contato ⇅ ▾",
+     "WhatsApp ⇅ ▾",
+     "E-mail ⇅ ▾",
+     "Canais autorizados ⇅ ▾",
+     "Situação do papel ⇅ ▾"
+    ],
+    "linhas": 20,
+    "editaveis": 20,
+    "filhos": 0,
+    "primeiras": [
+     "Fertisul 12.345.678/0001-95 Fornecedor Rafael Moura 65 99911-2233 cotacoes@fertisul.com.br E-mail, WhatsApp Homologado",
+     "Casa do Adubo 22.456.789/0001-22 Fornecedor Juliana Prado 65 99822-3344 não autorizado vendas@casadoadubo.com.br E-mail Homologado",
+     "Agro Norte 33.567.890/0001-77 Fornecedor Marcelo Tavares 65 99733-4455 orcamento@agronorte.com.br E-mail, WhatsApp Homologado",
+     "Santa Rita Insumos 44.678.901/0001-02 Fornecedor Denise Rocha 65 99644-5566 compras@santaritainsumos.com.br E-mail, WhatsApp Homologado"
+    ],
+    "rolaV": [
+     1014,
+     1014
+    ],
+    "rolaH": [
+     1137,
+     292
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 2804,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-05_390_aba1": {
+  "h1": "Parceiros e fornecedores",
+  "header": "Cadastros › Parceiros e fornecedores Parceiros e fornecedores 2 grupos sem fornecedor · 1 limite vencido",
+  "tabs": [
+   "Parceiros 20",
+   "Cobertura de cotação 9 [ativa]"
+  ],
+  "faixa": [
+   "2 grupos sem fornecedor que receba cotação Combustível, Peças Homologar fornecedor ›"
+  ],
+  "botoes": [
+   "2 grupos sem fornecedor que receba cotação Combustível, Peças Homologar fornecedor ›"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Grupo de insumo ⇅ ▾",
+     "Fornecedores que recebem cotação ⇅ ▾",
+     "Situação ⇅ ▾"
+    ],
+    "linhas": 9,
+    "editaveis": 9,
+    "filhos": 0,
+    "primeiras": [
+     "Sementes 2 Com concorrência",
+     "Fertilizantes 3 Com concorrência",
+     "Herbicidas 3 Com concorrência",
+     "Fungicidas 3 Com concorrência"
+    ],
+    "rolaV": [
+     516,
+     516
+    ],
+    "rolaH": [
+     445,
+     292
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 508,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-06_390_aba0": {
+  "h1": "Produtos, unidades e locais",
+  "header": "Cadastros › Produtos, unidades e locais Produtos, unidades e locais 1 item sem preço",
+  "tabs": [
+   "Itens 38 [ativa]",
+   "Locais de estoque 11"
+  ],
+  "faixa": [
+   "1 item sem preço de referência Calcário dolomítico Informar preço ›"
+  ],
+  "botoes": [
+   "1 item sem preço de referência Calcário dolomítico Informar preço ›",
+   "Todos 38",
+   "A resolver 1",
+   "Cadastrar item [PRIM]",
+   "Recolher tudo"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Grupo › item ⇅ ▾",
+     "Natureza de custo ⇅ ▾",
+     "Unidade ⇅ ▾",
+     "Embalagem ⇅ ▾",
+     "Controle ⇅ ▾",
+     "Preço de referência ⇅ ▾",
+     "Data do preço ⇅ ▾",
+     "Situação ⇅ ▾"
+    ],
+    "linhas": 50,
+    "editaveis": 50,
+    "filhos": 38,
+    "primeiras": [
+     "▾ Adjuvantes 2 itens 3.1.02 · Defensivos",
+     "Adjuvante espalhante 3.1.02 · Defensivos L galão de 5 L Lote e validade R$ 22,00/L 15/09/2026 Em dia",
+     "Óleo mineral 3.1.02 · Defensivos L galão de 20 L Lote e validade R$ 18,00/L 15/09/2026 Em dia",
+     "▾ Combustível 1 item 3.1.04 · Combustíveis e lubrificantes"
+    ],
+    "rolaV": [
+     2617,
+     2617
+    ],
+    "rolaH": [
+     955,
+     292
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 4608,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-06_390_aba1": {
+  "h1": "Produtos, unidades e locais",
+  "header": "Cadastros › Produtos, unidades e locais Produtos, unidades e locais 1 item sem preço",
+  "tabs": [
+   "Itens 38",
+   "Locais de estoque 11 [ativa]"
+  ],
+  "faixa": [],
+  "botoes": [
+   "Todos 11",
+   "Galpão 4",
+   "Almoxarifado 2",
+   "Armazém 1",
+   "Câmara fria 1",
+   "Packing 1",
+   "Silo 1",
+   "Tanque 1",
+   "Cadastrar local [PRIM]"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Local ⇅ ▾",
+     "Fazenda ⇅ ▾",
+     "Tipo ⇅ ▾",
+     "Capacidade ⇅ ▾",
+     "Itens com este local padrão ⇅ ▾"
+    ],
+    "linhas": 11,
+    "editaveis": 11,
+    "filhos": 0,
+    "primeiras": [
+     "Galpão 1 Santa Rita Galpão — 2",
+     "Galpão 2 Santa Rita Galpão — 5",
+     "Almox. defensivos Santa Rita Almoxarifado — 12",
+     "Câmara fria Santa Rita Câmara fria — 5"
+    ],
+    "rolaV": [
+     556,
+     556
+    ],
+    "rolaH": [
+     621,
+     292
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 659,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "CD-07_390": {
+  "h1": "Estrutura gerencial",
+  "header": "Cadastros › Estrutura gerencial Estrutura gerencial v5 em vigor · rascunho v6 com 3 alterações · 1 tradução pendente",
+  "tabs": [],
+  "faixa": [
+   "3 alterações no rascunho v6 v5 segue em vigor até publicar Publicar estrutura ›",
+   "1 tradução pendente PRJ-PIVO3 · Expansão pivô 3 · investimento Traduzir no ERP ›"
+  ],
+  "botoes": [
+   "3 alterações no rascunho v6 v5 segue em vigor até publicar Publicar estrutura ›",
+   "1 tradução pendente PRJ-PIVO3 · Expansão pivô 3 · investimento Traduzir no ERP ›",
+   "Todos 23",
+   "No rascunho v6 3",
+   "A resolver 1",
+   "Importar do ERP",
+   "Cadastrar código [PRIM]",
+   "Recolher tudo"
+  ],
+  "busca": [
+   "Buscar…"
+  ],
+  "selects": [],
+  "tabelas": [
+   {
+    "cols": [
+     "Dimensão › código ⇅ ▾",
+     "Nome ⇅ ▾",
+     "Origem ⇅ ▾",
+     "Início da vigência ⇅ ▾",
+     "Fim da vigência ⇅ ▾",
+     "Vínculos ⇅ ▾",
+     "Conta no ERP (Sankhya) ⇅ ▾",
+     "TOP no ERP ⇅ ▾",
+     "Situação ⇅ ▾",
+     "No rascunho ⇅ ▾"
+    ],
+    "linhas": 30,
+    "editaveis": 23,
+    "filhos": 23,
+    "primeiras": [
+     "▾ Empresa 2 códigos",
+     "01 Santa Rita Agro Estrutura gerencial 01/07/2024 — — empresa 1 — Mapeado —",
+     "02 Boa Vista Ltda Estrutura gerencial 01/09/2026 — — empresa 2 — Mapeado Novo",
+     "▾ Natureza 7 códigos"
+    ],
+    "rolaV": [
+     1834,
+     1834
+    ],
+    "rolaH": [
+     1165,
+     292
+    ]
+   }
+  ],
+  "cartoes": [],
+  "pagLado": false,
+  "vw": 390,
+  "vh": 844,
+  "mainTxt": 2965,
+  "menu": [
+   68,
+   "static",
+   true
+  ],
+  "dialog": ""
+ },
+ "_errs": []
+}

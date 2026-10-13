@@ -21,7 +21,7 @@ from ui37 import shell37, HEIGHTS37
 import dados2 as D2
 import dados_cad as DC
 from areas.cadastros import H, sel, num, txt, dat, cond, R, js
-from areas.cadastros import (cadx_css, abas, pane, faixa, prim, bloco_cad, estado_cab)
+from areas.cadastros import (cadx_css, abas, pane, se, faixa, prim, bloco_cad, estado_cab, md, mestre, det_cab, vazio, md_css, criar_cab)
 
 F_=H('false')
 # ================= CD-05 · Parceiros e fornecedores =================
@@ -144,15 +144,12 @@ _ID=[dict(k='nome',l='Parceiro',w=180),dict(k='cnpj',l='CPF/CNPJ',w=150)]
 _CT=[dict(k='cont',l='Contato',w=140),dict(k='whats',l='WhatsApp',w=130),dict(k='email',l='E-mail',w=220),dict(k='canais',l='Canais autorizados',multi=True,w=150)]
 _SIT=dict(k='papel',l='Situação do papel',multi=True,w=220)
 _PAP=dict(k='papeis',l='Papéis',multi=True,w=170)
-# revisão TABR (A1, 09/10): a situação do papel (em Fornecedores, a homologação) logo depois do parceiro, à vista sem rolar; depois CPF/CNPJ,
-# papéis, as colunas do papel filtrado e os contatos
-_P,_C=_ID[0],_ID[1]
-COLS_T=[_P,_SIT,_C,_PAP]+_CT
-COLS_P={'Fornecedor':[_P,dict(k='homol',l='Homologado',w=130),_C,dict(k='grupos',l='Grupos homologados',multi=True,w=260)]+_CT,
-        'Cliente':[_P,_SIT,_C,_PAP,dict(k='lim',l='Limite de crédito',t='num',a='r',un='R$',d=0),dict(k='limv',l='Validade da análise de crédito',t='date')]+_CT,
-        'Parceiro de crédito':[_P,_SIT,_C,_PAP,dict(k='linhas',l='Linhas de crédito',multi=True,w=220),dict(k='gar',l='Garantias aceitas',multi=True,w=240)]+_CT,
-        'Transportador':[_P,_SIT,_C,_PAP,dict(k='rntrc',l='RNTRC'),dict(k='veic',l='Veículos',multi=True,w=260)]+_CT,
-        'Prestador':[_P,_SIT,_C,_PAP,dict(k='ops',l='Operações que presta',multi=True,w=220)]+_CT}
+COLS_T=_ID+[_PAP]+_CT+[_SIT]
+COLS_P={'Fornecedor':_ID+[dict(k='grupos',l='Grupos homologados',multi=True,w=260)]+_CT+[dict(k='homol',l='Homologado',w=130)],
+        'Cliente':_ID+[_PAP]+_CT+[dict(k='lim',l='Limite de crédito',t='num',a='r',un='R$',d=0),dict(k='limv',l='Validade da análise de crédito',t='date'),_SIT],
+        'Parceiro de crédito':_ID+[_PAP]+_CT+[dict(k='linhas',l='Linhas de crédito',multi=True,w=220),dict(k='gar',l='Garantias aceitas',multi=True,w=240),_SIT],
+        'Transportador':_ID+[_PAP]+_CT+[dict(k='rntrc',l='RNTRC'),dict(k='veic',l='Veículos',multi=True,w=260),_SIT],
+        'Prestador':_ID+[_PAP]+_CT+[dict(k='ops',l='Operações que presta',multi=True,w=220),_SIT]}
 COL_MOT=dict(k='motivo',l='Motivo da suspensão',w=220)
 FILTROS=[('','Todos'),('Fornecedor','Fornecedores'),('Cliente','Clientes'),('Parceiro de crédito','Parceiros de crédito'),('Transportador','Transportadores'),('Prestador','Prestadores')]
 
@@ -176,23 +173,41 @@ def _filtros():
     return (f'<div role="group" aria-label="Filtrar por papel" class="cadx-qf">'
             f'<sc-for list="{H("cd5_fil")}" as="x" hint-placeholder-count="{len(FILTROS)}"><button type="button" aria-pressed="{H("x.cur")}" onClick="{H("x.go")}" style="{H("x.st")}">'
             f'{H("x.t")}<span style="{H("x.nst")}">{H("x.n")}</span></button></sc-for></div>')
+# CADUX (09/10/2026): mestre Todos · Fornecedores · Clientes · Crédito · Transportadores · Prestadores · Grupos de insumo → parceiros do papel
+# (as colunas do papel) → painel do parceiro em consulta (identidade e um bloco por papel; no Fornecedor, os grupos homologados no topo).
+# Grupos de insumo só em consulta (a fonte é o CD-06): fornecedores que recebem cotação e itens do grupo. A busca acha o fornecedor pelo insumo.
+PAPEL_SLUG=[('fornecedor','Fornecedor','Fornecedores'),('cliente','Cliente','Clientes'),('credito','Parceiro de crédito','Crédito'),
+            ('transportador','Transportador','Transportadores'),('prestador','Prestador','Prestadores')]
 def cd05():
     fname='CD-05.dc.html'; E._reset_screen(fname)
     rows=[R(f['id'],_v(f)) for f in _parceiros()]
-    g=grid(COLS_T,rows,gid='g_forn',total=False,frame=False,tools=_filtros()+prim('g_forn_new','Cadastrar parceiro'),
-        edit=dict(m='form',title='Parceiro',newTitle='Cadastrar parceiro',
-                  sub='Um cadastro por CPF ou CNPJ: marque os papéis e preencha só as seções deles.',fields=CAMPOS))
+    g=grid(COLS_T,rows,gid='g_forn',total=False,frame=False,search=False,tools=f'<span class="cmd-conta">{H("cd5_conta")}</span>',
+        edit=dict(m='form',title='Parceiro',newTitle='Criar parceiro',alvo='parceiro',
+                  sub='Um cadastro por CPF ou CNPJ: comece pelo documento (conferimos se já existe) e marque os papéis; preencha só as seções deles.',fields=CAMPOS))
     assert 'g_forn_F.open' in E.EXTRA[-1]; E.EXTRA[-1]=_form_extra(E.EXTRA[-1])
-    cob=grid([dict(k='g',l='Grupo de insumo',w=260),dict(k='n',l='Fornecedores que recebem cotação',t='num',a='r'),dict(k='sit',l='Situação',w=430)],[],gid='g_cob',total=False,search=True,frame=False,
-        edit=dict(m='origin',title='Grupo',fields=[dict(k='g',l='Grupo',t='txt',ro=True),dict(k='n',l='Fornecedores que recebem cotação',t='num',ro=True)]))
-    # um bloco com abas: Parceiros (filtro por papel e a primária) | Cobertura de cotação (grupos de insumo); cada aba com a sua faixa de atenção
-    cadx_css()
-    corpo=bloco_cad(abas('c5t',['Parceiros','Cobertura de cotação'],'Cadastros de parceiros'),pane('c5t',0,faixa('cd5_fx0')+g)+pane('c5t',1,faixa('cd5_fx1')+cob),
-                    'Parceiros e fornecedores')
+    # Grupo | Situação | Fornecedores que recebem cotação | Itens no CD-06 (consulta; a fonte do grupo é o CD-06)
+    cob=grid([dict(k='g',l='Grupo',w=220),dict(k='sit',l='Situação',w=200),dict(k='n',l='Fornecedores que recebem cotação',t='num',a='r'),dict(k='ni',l='Itens no CD-06',t='num',a='r')],[],
+        gid='g_cob',total=False,search=False,frame=False,tools=f'<span class="cmd-conta">{H("cd5_contaG")}</span>',
+        edit=dict(m='origin',title='Grupo',alvo='grupo',fields=[dict(k='g',l='Grupo',t='txt',ro=True),dict(k='n',l='Fornecedores que recebem cotação',t='num',ro=True)]))
+    cadx_css(); md_css()
+    det=det_cab()+f'<div class="cadx-dados">'+vazio('cd5_v')+se('cd5_forn_on',g,True)+se('cd5_cob_on',cob)+'</div>'
+    corpo=md(mestre('Papéis','Buscar parceiro, CNPJ, grupo ou insumo'),det,'Parceiros e fornecedores')
+    from areas.cadastros import _itens
+    itg={}
+    for n,d in _itens().items(): itg.setdefault(d['grupo'],[]).append(n)
+    import dados_cad as _DC
+    for n,d in getattr(_DC,'ITENS_NOVOS',{}).items(): itg.setdefault(d['grupo'],[]).append(n)
     js({},'const GRUPOS_='+json.dumps(D2.GRUPOS,ensure_ascii=False)+', COLS_T='+json.dumps(COLS_T,ensure_ascii=False)+', COLS_P='+json.dumps(COLS_P,ensure_ascii=False)+', COL_MOT='+json.dumps(COL_MOT,ensure_ascii=False)
        +', FILTROS='+json.dumps(FILTROS,ensure_ascii=False)+', RP='+json.dumps(RP,ensure_ascii=False)+', SECOES='+json.dumps(SECOES,ensure_ascii=False)
-       +', PAPEIS_='+json.dumps(PAPEIS,ensure_ascii=False)+', ACC_='+json.dumps(E.ACC)+', ACCS_='+json.dumps(E.ACCS)+', LINE_='+json.dumps(LINE)+', INK_='+json.dumps(INK)+', MUTED_='+json.dumps(MUTED)+';\n'+r'''
-const OCULTO='cd5_fora_do_filtro';   // linha fora do filtro de papel: r.sh sem entrada em state.added some da grade
+       +', PAPEIS_='+json.dumps(PAPEIS,ensure_ascii=False)+', PSLUG='+json.dumps(PAPEL_SLUG,ensure_ascii=False)+', ITG='+json.dumps(itg,ensure_ascii=False)+';\n'+CD05JS)
+    HEIGHTS37[fname]=1000   # sem rolagem de página: só a lista rola
+    shell37('CD-05','Parceiros e fornecedores',corpo,fname=fname,status=None,primary_html=criar_cab('cd5_criar','+ Criar parceiro'),search=False)
+    estado_cab(fname,'Parceiros e fornecedores','cd5e')
+    from areas.cadastros import ncol_dinamico
+    ncol_dinamico(fname,['cd5_ncol',None])   # as colunas do papel mudam a quantidade de colunas
+CD05JS=r'''
+const OCULTO='cadm_g_forn';   // linha fora do papel escolhido no mestre (marca do mestre: a contagem "N de M" é do papel)
+const C5G='grupos';
 function dig(s){ return String(s||'').replace(/\D/g,''); }
 // dígitos verificadores (módulo 11): CPF ou CNPJ com dígito errado não é aceito
 function docOk(dg){ if(/^(\d)\1+$/.test(dg)) return false; const N=k=>Number(dg[k]);
@@ -213,65 +228,92 @@ function sitPapeis(V,pp,so){ if(V.sit==='Suspenso') return [{t:'Suspenso',c:'gra
     if(p==='Transportador') out.push(V.rntrc?{t:'Ativo',c:'green'}:{t:'Sem RNTRC',c:'yellow'});
     if(p==='Prestador') out.push(ml(V.ops).length?{t:'Ativo',c:'green'}:{t:'Sem operação',c:'yellow'}); });
   return out; }
-// troca o filtro de papel: limpa o filtro de coluna que sai da grade e o de "Situação do papel" (o texto dela muda com o papel),
-// para não sobrar chip de filtro que não vale; os demais filtros de coluna e a busca continuam
-function trocaPapel(self,k,st){ if(k===(self.state.cd5_p||'')){ if(st) self.setState(st); return; }
-  const g=g2st(self,'g_forn'), ks=((k&&COLS_P[k])||COLS_T).map(c=>c.k), f={};
-  Object.keys(g.f||{}).forEach(x=>{ if(ks.indexOf(x)>=0&&x!=='papel'&&(g.f[x]||[]).length) f[x]=g.f[x]; });
-  g2set(self,'g_forn',{f:f,fmc:null}); self.setState(Object.assign({cd5_p:k},st||{})); }
+function c5papel(sel){ const x=PSLUG.find(p=>p[0]===sel); return x?x[1]:''; }
+function c5slug(papel){ const x=PSLUG.find(p=>p[1]===papel); return x?x[0]:''; }
 function cotaveis(rows){ return rows.filter(r=>ml(r.v.papeis).indexOf('Fornecedor')>=0&&r.v.sit!=='Suspenso'&&r.v.homol==='Sim'&&r.v.email&&ml(r.v.canais).indexOf('E-mail')>=0); }
-function PREVALS(self,v){ const rows=RW(self,'g_forn'); const fp=self.state.cd5_p||''; const cb=(fp&&COLS_P[fp])||COLS_T; const susp=rows.some(r=>r.v.sit==='Suspenso'&&(!fp||ml(r.v.papeis).indexOf(fp)>=0));
-  GR('g_forn').cols=susp?cb.slice(0,2).concat([COL_MOT],cb.slice(2)):cb; v.cd5_ncol=GR('g_forn').cols.length;   /* o motivo logo depois da situação */
+// a busca casa nome, CPF/CNPJ, contato, papéis, grupos homologados e os itens desses grupos ("Tebuconazol" → fornecedores de Fungicidas)
+function c5hay(V){ const gg=ml(V.grupos); return [V.nome,V.cnpj,V.contato,V.papeis,V.grupos,V.email].concat(V.homol==='Sim'?gg.reduce((a,g)=>a.concat(ITG[g]||[]),[]):[]).join(' '); }
+// troca o papel: limpa o filtro de coluna que sai da grade e o de "Situação do papel" (o texto dela muda com o papel)
+function c5limpa(self,fp){ if(self.__c5p===fp) return; self.__c5p=fp; const g=g2st(self,'g_forn'), ks=((fp&&COLS_P[fp])||COLS_T).map(c=>c.k), f={};
+  Object.keys(g.f||{}).forEach(x=>{ if(ks.indexOf(x)>=0&&x!=='papel'&&(g.f[x]||[]).length) f[x]=g.f[x]; }); if(Object.keys(g.f||{}).length) g2set(self,'g_forn',{f:f,fmc:null}); }
+// o que fazer com o parceiro: limite vencido (Cliente) → fornecedor com grupo marcado e não homologado; o verbo abre o formulário no campo
+function c5pend(r,fp){ const V=r.v; const pp=ml(V.papeis); if(V.sit==='Suspenso') return null;
+  if((!fp||fp==='Cliente')&&pp.indexOf('Cliente')>=0&&Number(V.lim)&&V.limv&&V.limv<HOJE) return {cor:'yellow',t:'Limite de crédito de '+V.nome+' vencido em '+br(V.limv)+': novos pedidos ficam retidos até nova análise.',prim:{t:'Renovar limite de '+V.nome,campo:'limv'},s:'limite de '+V.nome+' vencido'};
+  if((!fp||fp==='Fornecedor')&&pp.indexOf('Fornecedor')>=0&&V.homol!=='Sim'&&ml(V.grupos).length) return {cor:'yellow',t:V.nome+' tem grupo marcado e não é homologado: não recebe cotação.',prim:{t:'Homologar fornecedor',campo:'homol'},s:V.nome+' não homologado'};
+  return null; }
+function c5pends(self,fp){ return RW(self,'g_forn').filter(r=>!fp||ml(r.v.papeis).indexOf(fp)>=0).map(r=>{ const p=c5pend(r,fp); return p?Object.assign(p,{rid:r.id}):null; }).filter(Boolean); }
+function c5prox(self,ps,ok){ if(!ps.length) return {cor:'green',t:ok||'Em dia.'}; const p=ps[0], r=ps.slice(1);
+  return {cor:p.cor,t:p.t,prim:{t:p.prim.t,go:()=>{ g2open(self,GR('g_forn'),p.rid,null); setTimeout(()=>g2editar(self,GR('g_forn'),p.rid,p.prim.campo),0); }},mais:r.length?('e mais '+r.length+': '+r.map(x=>x.s).join('; ')+'.'):''}; }
+function c5consPar(self,r){ const V=r.v; const pp=ml(V.papeis); const S=sitPapeis(V,pp,''); const p=c5pend(r,'');
+  const bl=[{t:'Identidade',lin:[{l:'CPF ou CNPJ',v:V.cnpj||'—'},{l:'Contato',v:V.contato||'—'},{l:'E-mail',v:V.email||'—'},{l:'WhatsApp',v:V.whats||'—'},{l:'Canais autorizados',v:ml(V.canais).join(', ')||'nenhum'},{l:'Papéis',v:pp.join(', ')}]}];
+  if(pp.indexOf('Fornecedor')>=0){ const gg=ml(V.grupos); bl.unshift({t:'Fornecedor · grupos homologados',fil:gg.map(gn=>({t:gn,sub:(ITG[gn]||[]).length+' itens no CD-06',chip:V.homol==='Sim'?{t:'Recebe cotação',c:'green'}:{t:'Não homologado',c:'gray'},
+      go:()=>{ g2set(self,'g_forn',{fm:null}); g2open(self,GR('g_cob'),'c_'+gn,null,{pai:{gid:'g_forn',rid:r.id,t:V.nome}}); }})),nota:gg.length?(V.homol==='Sim'?'':'Não homologado: não recebe cotação, mesmo com grupo marcado.'):'Nenhum grupo marcado.'}); }
+  if(pp.indexOf('Cliente')>=0) bl.push({t:'Cliente',lin:[{l:'Produtos de interesse',v:ml(V.prod).join(', ')||'—'},{l:'Local e horário de entrega',v:V.entrega||'—'},{l:'Condição de pagamento',v:V.pag||'—'},
+      {l:'Limite de crédito comercial',v:Number(V.lim)?'R$ '+nf(V.lim,0):'—'},{l:'Validade da análise',v:V.limv?br(V.limv):'—',cor:(V.limv&&V.limv<HOJE)?'red':''}]});
+  if(pp.indexOf('Parceiro de crédito')>=0) bl.push({t:'Parceiro de crédito',lin:[{l:'Linhas',v:ml(V.linhas).join(', ')||'—'},{l:'Garantias aceitas',v:ml(V.gar).join(', ')||'—'},{l:'Gerente',v:V.ger||'—'}]});
+  if(pp.indexOf('Transportador')>=0) bl.push({t:'Transportador',lin:[{l:'RNTRC',v:V.rntrc||'a informar',cor:V.rntrc?'':'yellow'},{l:'Veículos',v:ml(V.veic).join(', ')||'—'}]});
+  if(pp.indexOf('Prestador')>=0) bl.push({t:'Prestador',lin:[{l:'Operações que presta',v:ml(V.ops).join(', ')||'—'}]});
+  if(V.sit==='Suspenso') bl.push({t:'Suspensão',lin:[{l:'Motivo',v:V.motivo||'—',cor:'red'}]});
+  return {titulo:'Parceiro · '+V.nome,sub:(V.cnpj||'')+' · '+S.map(x=>x.t).join(', '),
+    prox:V.sit==='Suspenso'?{cor:'gray',t:'Suspenso: fora de cotação, oferta e crédito; o histórico continua.'}:(p?{cor:p.cor,t:p.t,prim:{t:p.prim.t,go:()=>g2editar(self,GR('g_forn'),r.id,p.prim.campo)}}:{cor:'green',t:'Em dia nos papéis: '+S.map(x=>x.t).join(', ')+'.'}),
+    sec:[{t:'Editar parceiro',go:()=>g2editar(self,GR('g_forn'),r.id)}],blocos:bl}; }
+function c5consGrp(self,r){ const gn=r.v.g; const ok=cotaveis(RW(self,'g_forn')).filter(x=>ml(x.v.grupos).indexOf(gn)>=0); const outros=RW(self,'g_forn').filter(x=>ml(x.v.grupos).indexOf(gn)>=0&&ok.indexOf(x)<0);
+  const it=ITG[gn]||[];
+  return {titulo:'Grupo · '+gn,sub:'Grupo de insumo do CD-06 · '+ok.length+(ok.length===1?' fornecedor recebe':' fornecedores recebem')+' cotação',
+    prox:ok.length?(ok.length===1?{cor:'yellow',t:'Sem concorrência: só '+ok[0].v.nome+' recebe a cotação de '+gn+'.'}:{cor:'green',t:'Com concorrência: '+ok.length+' fornecedores recebem a cotação.'})
+      :{cor:'yellow',t:'Nenhum fornecedor homologado com e-mail autorizado recebe a cotação de '+gn+'.',quem:'Homologue um fornecedor no painel dele (Editar parceiro).'},
+    sec:[],blocos:[{t:'Fornecedores que recebem cotação',fil:ok.map(x=>({t:x.v.nome,sub:(x.v.contato?x.v.contato+' · ':'')+(x.v.email||''),go:()=>{ g2set(self,'g_cob',{fm:null}); g2open(self,GR('g_forn'),x.id,null,{pai:{gid:'g_cob',rid:r.id,t:gn}}); }})),nota:ok.length?'':'Nenhum.'},
+      outros.length?{t:'Com o grupo marcado, sem receber cotação',fil:outros.map(x=>({t:x.v.nome,sub:x.v.sit==='Suspenso'?'suspenso':(x.v.homol!=='Sim'?'não homologado':'sem e-mail autorizado'),go:()=>{ g2set(self,'g_cob',{fm:null}); g2open(self,GR('g_forn'),x.id,null,{pai:{gid:'g_cob',rid:r.id,t:gn}}); }}))}:null,
+      {t:'Itens do grupo no CD-06',lin:[{l:'Itens',v:it.length?it.join(', '):'nenhum'}],lks:[{t:'Abrir grupo nos Produtos',h:'CD-06.dc.html#grp='+encodeURIComponent(gn)}],nota:'A fonte do grupo é o CD-06: aqui não se cria nem renomeia grupo.'}]}; }
+function c5cfg(self){ cmdIni(self,{gp:'papel',ip:{g_forn:'par',g_cob:'grp'},
+  grupoDe:(s,gid,r,pedido)=>{ if(gid==='g_cob') return C5G; if(pedido){ const fq=c5papel(pedido); if(fq&&ml(r.v.papeis).indexOf(fq)>=0) return pedido; } const sel=cmdSel(s); if(sel===''&&s.state.mx_sel!==undefined) return ''; const pp=ml(r.v.papeis); const fp=c5papel(sel); return (fp&&pp.indexOf(fp)>=0)?sel:(sel===C5G?'':(sel||'')); },
+  existeGrupo:(s,id)=>id===C5G||!!c5papel(id),
+  normItem:(gid,rid)=>(gid==='g_cob'&&String(rid).indexOf('c_')!==0)?'c_'+rid:rid,
+  reg:(s,id)=>RW(s,'g_forn').some(r=>r.id===id)?{gid:'g_forn',rid:id}:null,
+  indisp:(id,gid)=>cmdIndisp(gid==='g_cob'?'Grupo de insumo':'Parceiro',id),
+  indispGrupo:(id)=>'Papel “'+id+'” não existe nos Cadastros.',
+  inativo:()=>null,
+  novo:(s)=>{ if(s.__v&&s.__v.cd5_criar) s.__v.cd5_criar(); },
+  anuncio:(s,id)=>{ if(id===C5G) return 'Grupos de insumo: '+GRUPOS_.length+' grupos'; const fp=c5papel(id); const n=RW(s,'g_forn').filter(r=>!fp||ml(r.v.papeis).indexOf(fp)>=0).length; const p=c5pends(s,fp).length;
+    return (fp?(PSLUG.find(x=>x[0]===id)||[])[2]:'Todos os parceiros')+': '+n+(n===1?' parceiro':' parceiros')+' · '+(p?p+' a resolver':'Em dia'); },
+  cons:{g_forn:c5consPar,g_cob:c5consGrp}}); }
+function PREVALS(self,v){ if(self.state.mx_q===undefined){ const k=cadKeepLe('q'); if(k) self.state.mx_q=k; }
+  const rows=RW(self,'g_forn'); const sel=cmdSel(self); const fp=c5papel(sel); const q=self.state.mx_q||''; c5limpa(self,fp);
+  const cb=(fp&&COLS_P[fp])||COLS_T; const susp=rows.some(r=>r.v.sit==='Suspenso'&&(!fp||ml(r.v.papeis).indexOf(fp)>=0));
+  // ≤ 7 colunas (AC-09): Parceiro | Situação do papel | as colunas próprias do papel | contato e canais até completar; CPF/CNPJ vai para o painel
+  const base=[cb[0],cb.find(c=>c.k==='papel')||cb.find(c=>c.k==='homol')].filter(Boolean); const ct=['cont','email','whats','canais'];
+  const prop=cb.filter(c=>base.indexOf(c)<0&&c.k!=='cnpj'&&ct.indexOf(c.k)<0); const cts=ct.map(k=>cb.find(c=>c.k===k)).filter(Boolean);
+  const mot=susp?[COL_MOT]:[]; GR('g_forn').cols=base.concat(prop).concat(cts.slice(0,Math.max(0,7-base.length-prop.length-mot.length))).concat(mot); v.cd5_ncol=GR('g_forn').cols.length;
   rows.forEach(r=>{ const V=r.v; const pp=ml(V.papeis); Object.assign(V,rpFlags(pp)); if(!V.sit) V.sit='Ativo';
     const forn=pp.indexOf('Fornecedor')>=0, hom=V.homol==='Sim', gg=ml(V.grupos), susp=V.sit==='Suspenso';
     r.p.nome=[{k:'b',t:V.nome||''}]; r.s.nome=V.nome||''; r.p.cnpj=[V.cnpj?{k:'txt',t:V.cnpj}:{k:'mut',t:'—'}]; r.s.cnpj=V.cnpj||'';
     const M=r.m=Object.assign({},r.m||{}); const lst=(k,a)=>{ M[k]=a.map(x=>({id:x,l:x})); r.p[k]=[a.length?{k:'txt',t:a.join(', ')}:{k:'mut',t:'—'}]; r.s[k]=a.join(', '); };
     lst('papeis',pp); lst('canais',ml(V.canais)); lst('grupos',gg); lst('linhas',ml(V.linhas)); lst('gar',ml(V.gar)); lst('veic',ml(V.veic)); lst('ops',ml(V.ops));
-    // canal preenchido sem autorização leva o aviso discreto "não autorizado" ao lado do número ou do e-mail (o filtro usa só o valor)
     const cc=ml(V.canais), na=(c)=>cc.indexOf(c)<0?[{k:'mut',t:'não autorizado'}]:[];
     r.p.cont=[V.contato?{k:'txt',t:V.contato}:{k:'mut',t:'—'}]; r.s.cont=V.contato||''; r.p.whats=V.whats?[{k:'txt',t:V.whats}].concat(na('WhatsApp')):[{k:'mut',t:'—'}]; r.s.whats=V.whats||'';
-    // fornecedor homologado sem e-mail não recebe a cotação (vai por e-mail): o vazio vira aviso
     r.p.email=V.email?[{k:'txt',t:V.email}].concat(na('E-mail')):(forn&&hom&&!susp?[chipc('Sem e-mail','red')]:[{k:'mut',t:'—'}]); r.s.email=V.email||(forn&&hom&&!susp?'Sem e-mail':'');
     const S=sitPapeis(V,pp,fp); M.papel=S.map(x=>({id:x.t,l:x.t})); r.p.papel=S.length?S.map(x=>chipc(x.t,x.c)):[{k:'mut',t:'—'}]; r.s.papel=S.map(x=>x.t).join(', ');
     r.p.homol=[chipc(susp?'Suspenso':(hom?'Sim':'Não'),hom&&!susp?'green':'gray')].concat(!susp&&!hom?[{k:'mut',t:'não recebe cotação'}]:[]); r.s.homol=susp?'Suspenso':(hom?'Sim':'Não');
     const lim=Number(V.lim)||0; r.p.lim=[lim?{k:'txt',t:nf(lim,0)}:{k:'mut',t:'—'}]; r.s.lim=lim?nf(lim,0):'';
     r.p.limv=[V.limv?(V.limv<HOJE?{k:'cn',t:br(V.limv),c:'red'}:{k:'txt',t:br(V.limv)}):{k:'mut',t:'—'}]; r.s.limv=V.limv?br(V.limv):'';
     r.p.rntrc=[V.rntrc?{k:'txt',t:V.rntrc}:{k:'mut',t:'—'}]; r.s.rntrc=V.rntrc||'';
-    const mt=V.sit==='Suspenso'?(V.motivo||''):''; r.p.motivo=[mt?{k:'txt',t:mt}:{k:'mut',t:'—'}]; r.s.motivo=mt;
-    if(fp&&pp.indexOf(fp)<0) r.sh=OCULTO; else delete r.sh; });
+    const mt=V.sit==='Suspenso'?(V.motivo||''):''; r.p.motivo=[mt?{k:'txt',t:mt}:{k:'mut',t:'—'}]; r.s.motivo=mt; });
+  // mestre (papel) → busca da tela; os grupos de insumo são outra lista
+  cmdPasse(rows,OCULTO,r=>!fp||ml(r.v.papeis).indexOf(fp)>=0);
+  cmdPasse(rows,'cadb_g_forn',r=>cmdCasa(c5hay(r.v),q));
   const ok=cotaveis(rows);
-  GR('g_cob').rows=GRUPOS_.map(g=>{ const fs=ok.filter(r=>ml(r.v.grupos).indexOf(g)>=0); const n=fs.length;
-    // situação da cobertura só com o estado (o número está na coluna ao lado)
-    const st=n===0?['Sem fornecedor',sitX('Sem fornecedor','yellow','Homologar fornecedor')]:(n===1?['Sem concorrência',[chipc('Sem concorrência','yellow')]]:['Com concorrência',sitOk('Com concorrência')]);
-    return {id:'c_'+g,v:{g:g,n:n},s:{sit:st[0]},
-      p:{g:[{k:'b',t:g}],sit:st[1]},
-      o:n?fs.map(r=>({t:r.v.nome+' · '+(r.v.contato?r.v.contato+' · ':'')+r.v.email})):[{t:'Nenhum fornecedor homologado com e-mail autorizado neste grupo. Marque o grupo num fornecedor e homologue.'}]}; });
-  // filtros rápidos por papel, com contagem
-  v.cd5_fil=FILTROS.map(([k,t])=>{ const n=k?rows.filter(r=>ml(r.v.papeis).indexOf(k)>=0).length:rows.length; const on=(k===fp);
-    return {t:t,n:n,cur:on?'true':'false',go:()=>trocaPapel(self,k),
-      st:'display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:999px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;'+(on?'background:'+ACC_+';color:#fff;border:1px solid '+ACC_+';':'background:#FFFFFF;color:'+INK_+';border:1px solid '+LINE_+';'),
-      nst:'font-weight:600;'+(on?'color:#fff;opacity:.8;':'color:'+MUTED_+';')}; });
-  // estado do cabeçalho calculado: grupos sem fornecedor que receba cotação e limites de cliente vencidos
-  const semG=GR('g_cob').rows.filter(x=>x.v.n===0).length;
-  const venc=rows.filter(r=>r.v.sit!=='Suspenso'&&ml(r.v.papeis).indexOf('Cliente')>=0&&Number(r.v.lim)&&r.v.limv&&r.v.limv<HOJE).length;
-  const pend=[semG?semG+(semG>1?' grupos':' grupo')+' sem fornecedor':'',venc?venc+(venc>1?' limites vencidos':' limite vencido'):''].filter(Boolean);
-  cadEstado(v,'cd5e',pend.join(' · ')||'Cadastro em dia',pend.length?'yellow':'green');
-  // abas e faixa "precisa de atenção": limite de cliente vencido (aba Parceiros) e grupo sem fornecedor que receba cotação (aba Cobertura)
-  cadAbas(self,v,'c5t','c5aba',[{slug:'parceiros',n:rows.length,cor:venc?'yellow':''},{slug:'cobertura',n:GR('g_cob').rows.length,cor:semG?'yellow':''}]);
-  const vencL=rows.filter(r=>r.v.sit!=='Suspenso'&&ml(r.v.papeis).indexOf('Cliente')>=0&&Number(r.v.lim)&&r.v.limv&&r.v.limv<HOJE);
-  cadFaixa(v,'cd5_fx0',[venc?{n:venc,rot:venc>1?'limites de crédito vencidos':'limite de crédito vencido',reg:vencL.map(r=>r.v.nome).join(', '),verbo:'Renovar limite',cor:'yellow',
-    go:venc===1?()=>g2open(self,GR('g_forn'),vencL[0].id,null):()=>trocaPapel(self,'Cliente')}:null]);
-  const semL=GR('g_cob').rows.filter(x=>x.v.n===0);
-  cadFaixa(v,'cd5_fx1',[semG?{n:semG,rot:semG>1?'grupos sem fornecedor que receba cotação':'grupo sem fornecedor que receba cotação',reg:semL.map(x=>x.v.g).join(', '),verbo:'Homologar fornecedor',cor:'yellow',
-    go:()=>{ cadHash('parceiros'); trocaPapel(self,'Fornecedor',{c5aba:0}); }}:null]); }
+  GR('g_cob').rows=GRUPOS_.map(g=>{ const fs=ok.filter(r=>ml(r.v.grupos).indexOf(g)>=0); const n=fs.length; const ni=(ITG[g]||[]).length;
+    const st=n===0?['Sem fornecedor',sitX('Sem fornecedor','yellow')]:(n===1?['Sem concorrência',[chipc('Sem concorrência','yellow')]]:['Com concorrência',sitOk('Com concorrência')]);
+    return {id:'c_'+g,v:{g:g,n:n,ni:ni},s:{sit:st[0]},p:{g:[{k:'b',t:g}],sit:st[1]},o:null}; });
+  cmdPasse(GR('g_cob').rows,'cadb_g_cob',r=>cmdCasa([r.v.g].concat(ITG[r.v.g]||[]).join(' '),q));
+  c5cfg(self); }   // o endereço é lido depois que os grupos de insumo existem (#grp=Fungicidas abre o painel do grupo)
 // "Abrir e ativar papel": abre o parceiro já cadastrado com os papéis marcados no cadastro novo (nada é duplicado)
 function abrirAtivar(self,id){ const sp=GR('g_forn'); const cur=g2st(self,'g_forn').fm; const r=g2find(RW(self,'g_forn'),id); if(!r) return;
   const draft={}; sp.edit.fields.forEach(f=>{ const x=r.v[f.k]; draft[f.k]=(x!==undefined&&x!==null&&x!=='')?(f.t==='num'?String(x).replace('.',','):String(x)):''; });
   const orig=Object.assign({},draft); const tem=ml(draft.papeis); const novos=(cur?ml(cur.draft.papeis):[]).filter(p=>tem.indexOf(p)<0);
   const pp=ordena(tem.concat(novos)); Object.assign(draft,{papeis:pp.join('; ')},rpFlags(pp));
-  g2set(self,'g_forn',{fm:{rid:id,draft:draft,orig:orig,errs:{},warn:false,ro:false,isNew:false,mode:'form'},fl:null,fmc:null});
-  const st={g2toast:novos.length?(r.v.nome+': papel '+novos.join(', ')+' marcado. Confira a seção e salve.'):(r.v.nome+' aberto: marque o novo papel e salve.')};
-  if(self.state.cd5_p&&pp.indexOf(self.state.cd5_p)<0) trocaPapel(self,'',st); else self.setState(st); }
+  g2set(self,'g_forn',{fm:{rid:id,draft:draft,orig:orig,errs:{},warn:false,ro:false,isNew:false,mode:'form',vc:true},fl:null,fmc:null});
+  self.setState({g2toast:novos.length?(r.v.nome+': papel '+novos.join(', ')+' marcado. Confira a seção e salve.'):(r.v.nome+' aberto: marque o novo papel e salve.')}); }
 // regras do cadastro (além das do motor): documento único, canais, homologação, limite, RNTRC
 function regras(self,d,fm){ const e={}; const dg=dig(d.cnpj); const cc=ml(d.canais); const pp=ml(d.papeis); const tem=p=>pp.indexOf(p)>=0;
   if(d.cnpj&&dg.length!==11&&dg.length!==14) e.cnpj='Informe CPF (11 dígitos) ou CNPJ (14 dígitos).';
@@ -287,45 +329,64 @@ function regras(self,d,fm){ const e={}; const dg=dig(d.cnpj); const cc=ml(d.cana
   if(tem('Cliente')&&g2num(d.lim)>0&&!d.limv) e.limv='Informe a validade da análise de crédito.';
   if(tem('Transportador')&&String(d.rntrc||'').trim()&&dig(d.rntrc).length!==8) e.rntrc='O RNTRC tem 8 dígitos.';
   return e; }
-function EXTRAVALS(self,v){ const sp=GR('g_forn'); const F=v.g_forn_F; v.cd5_susp=false; v.cd5_reat=false;
-  // menu do filtro de coluna: o g2lib conta todas as linhas; aqui ficam só os valores e as contagens das linhas do filtro de papel
+function EXTRAVALS(self,v){ const sp=GR('g_forn'); const F=v.g_forn_F; v.cd5_susp=false; v.cd5_reat=false; const rows=RW(self,'g_forn'); const sel=cmdSel(self); const fp=c5papel(sel); const q=self.state.mx_q||''; const larga=cadLarga();
+  // ---- mestre: Todos · os papéis · Grupos de insumo ----
+  const its=PSLUG.map(([sl,pap,rot])=>{ const n=rows.filter(r=>ml(r.v.papeis).indexOf(pap)>=0).length; const p=c5pends(self,pap).length; return {id:sl,t:rot,n:String(n),sub:'',res:p?p+' a resolver':'Em dia',cor:p?'yellow':'green'}; })
+    .filter(x=>!q||x.id===sel||rows.some(r=>ml(r.v.papeis).indexOf(c5papel(x.id))>=0&&cmdCasa(c5hay(r.v),q)));
+  const semG=GR('g_cob').rows.filter(x=>x.v.n===0).length; its.push({tit:true,t:'Cotação'}); its.push({id:C5G,t:'Grupos de insumo',n:String(GRUPOS_.length),sub:'quem recebe a cotação de cada grupo',res:semG?semG+' sem fornecedor':'Em dia',cor:semG?'yellow':'green'});
+  cadMestreVals(self,v,{todos:{t:'Todos os parceiros',sub:rows.length+' parceiros'},itens:its,sel:sel,inatN:0,escolhe:id=>cmdEscolhe(self,id)});
+  const rs=[]; if(q&&!larga){ rows.filter(r=>cmdCasa(c5hay(r.v),q)).forEach(r=>rs.push({t:r.v.nome,sub:'Parceiro · '+ml(r.v.papeis).join(', '),go:()=>cmdAbre(self,'g_forn',r.id,'')}));
+    GR('g_cob').rows.filter(r=>cmdCasa([r.v.g].concat(ITG[r.v.g]||[]).join(' '),q)).forEach(r=>rs.push({t:r.v.g,sub:'Grupo de insumo · '+r.v.n+' fornecedores',go:()=>cmdAbre(self,'g_cob',r.id,C5G)})); }
+  cadResVals(v,rs);
+  // ---- detalhe ----
+  const av=cmdAviso(self,'Ver todos os parceiros'); v.cd5_forn_on=sel!==C5G; v.cd5_cob_on=sel===C5G;
+  if(sel===C5G){ const sg=GR('g_cob').rows.filter(x=>x.v.n===0).map(x=>x.v.g);
+    cadDetVals(self,v,Object.assign({t:'Grupos de insumo',sub:'Consulta: a fonte do grupo é o CD-06 (Produtos, unidades e locais); a cotação vai por e-mail a fornecedores homologados',
+      chip:sg.length?{t:sg.length+' sem fornecedor',c:'yellow'}:{t:'Em dia',c:'green'},prox:sg.length?{cor:'yellow',t:lista(sg)+(sg.length>1?' não têm':' não tem')+' fornecedor que receba a cotação.',quem:'Homologue um fornecedor no painel dele (Editar parceiro).',
+        lks:[{t:'Abrir fornecedores',go:()=>cmdEscolhe(self,'fornecedor')}]}:{cor:'green',t:'Em dia: todo grupo tem fornecedor que recebe a cotação.'},lks:[{t:'Abrir grupos nos Produtos',h:'CD-06.dc.html'}],volta:'Papéis',voltar:()=>cmdVolta(self)},av)); }
+  else { const ps=c5pends(self,fp); const n=rows.filter(r=>!fp||ml(r.v.papeis).indexOf(fp)>=0).length; const rot=fp?(PSLUG.find(x=>x[1]===fp)||[])[2]:'Todos os parceiros';
+    const sub={'Fornecedor':'recebem cotação só se homologados, com e-mail autorizado','Cliente':'limite e validade da análise de crédito por cliente','Parceiro de crédito':'linhas e garantias aceitas',
+      'Transportador':'RNTRC e veículos','Prestador':'operações que presta'}[fp]||'um cadastro por CPF ou CNPJ, com os papéis marcados';
+    cadDetVals(self,v,Object.assign({t:rot,sub:n+(n===1?' parceiro':' parceiros')+' · '+sub,chip:ps.length?{t:ps.length+' a resolver',c:'yellow'}:{t:'Em dia',c:'green'},prox:c5prox(self,ps,'Em dia: papéis sem pendência.'),volta:'Papéis',voltar:()=>cmdVolta(self)},av)); }
+  // "+ Criar parceiro": CPF/CNPJ primeiro, papel herdado; com Grupos de insumo o cabeçalho fica sem verde (a fonte do grupo é o CD-06, R15)
+  v.cab_criar_on=sel!==C5G; v.cab_criarT='+ Criar parceiro';
+  v.cd5_criar=()=>{ if(sel===C5G) return; g2set(self,'g_forn',{fm:null}); const pp=fp?[fp]:[]; g2new(self,sp,{draft:Object.assign({papeis:pp.join('; ')},rpFlags(pp))});
+    setTimeout(()=>{ try{ const x=document.getElementById('fx_g_forn_cnpj'); if(x) x.focus(); }catch(z){} },90); };
+  const semGL=GR('g_cob').rows.filter(x=>x.v.n===0).length; const venc=rows.filter(r=>r.v.sit!=='Suspenso'&&ml(r.v.papeis).indexOf('Cliente')>=0&&Number(r.v.lim)&&r.v.limv&&r.v.limv<HOJE).length;
+  const pend=[semGL?semGL+(semGL>1?' grupos':' grupo')+' sem fornecedor':'',venc?venc+(venc>1?' limites vencidos':' limite vencido'):''].filter(Boolean);
+  cadEstado(v,'cd5e',pend.join(' · ')||'Cadastro em dia',pend.length?'yellow':'green');
+  const ct=cmdConta(self,'g_forn',rows); v.cd5_conta=ct.n+' de '+ct.tot; const cg=cmdConta(self,'g_cob',GR('g_cob').rows); v.cd5_contaG=cg.n+' de '+cg.tot;
+  const vz=sel===C5G?(!cg.n?{t:'Nenhum grupo de insumo encontrado para “'+q+'”.'}:null):(!ct.n?(q?{t:'Nenhum parceiro encontrado para “'+q+'”. Para cadastrar, use + Criar parceiro, no topo.'}:{t:'Nenhum parceiro com este papel. Crie em + Criar parceiro, no topo.'}):null);
+  cadVazioSe(self,v,'cd5_v',vz,['g_forn','g_cob']);
+  // menu do filtro de coluna: só os valores e as contagens das linhas do papel escolhido
   const fc=sp.cols.find(c=>c.k===g2st(self,'g_forn').fmc), FM=v.g_forn_fm;
-  // (colunas multivaloradas contam cada item da lista, como o g2lib; valor sem linha no filtro de papel não aparece, mesmo marcado por padrão)
-  if(fc&&FM&&FM.open){ const cnt={}; RW(self,'g_forn').forEach(r=>{ if(r.sh===OCULTO) return; g2fkeys(r,fc).forEach(t=>{ cnt[t]=(cnt[t]||0)+1; }); });
-    /* valor do filtro APLICADO na coluna fica no menu mesmo sem linha no papel, com 0 (revisão TABR A5); sem filtro aplicado tudo vem marcado
-       por padrão e o valor sem linha no papel continua fora (cadp_fix_test 9) */
-    const apl=((g2st(self,'g_forn').f||{})[fc.k])||[]; FM.vals=FM.vals.filter(x=>cnt[x.t]||apl.indexOf(x.t)>=0).map(x=>Object.assign(x,{n:cnt[x.t]||0})); }
-  if(F&&F.open&&F.isRec){ const fm=g2st(self,'g_forn').fm; const d=fm.draft;
-    if(fm.rid){ const r=g2find(RW(self,'g_forn'),fm.rid); if(r) F.title='Parceiro · '+r.v.nome; }
+  if(fc&&FM&&FM.open){ const cnt={}; rows.forEach(r=>{ if(r.sh===OCULTO) return; g2fkeys(r,fc).forEach(t=>{ cnt[t]=(cnt[t]||0)+1; }); });
+    FM.vals=FM.vals.filter(x=>cnt[x.t]).map(x=>Object.assign(x,{n:cnt[x.t]})); }
+  if(F&&F.open&&F.isRec&&F.edit){ const fm=g2st(self,'g_forn').fm; const d=fm.draft;
+    if(fm.rid){ const r=g2find(rows,fm.rid); if(r) F.title='Parceiro · '+r.v.nome; }
     if(fm.orig.sit==='Suspenso') F.sub='Suspenso: fora de cotação, oferta e crédito; o histórico continua.';
     (F.fields||[]).forEach(f=>{ const k=f.fid.slice('fx_g_forn_'.length);
       if(SECOES[k]){ f.hasSec=true; f.sec=SECOES[k]; }
-      if((k==='contato'||k==='email')&&d.rp_forn!=='Sim') f.hasHelp=false;   // a ajuda fala de homologação: só para fornecedor
-      if(k==='papeis'&&F.edit) f.mopts.forEach(mo=>{ mo.tog=()=>{ const cur=g2st(self,'g_forn').fm; if(!cur) return; const a=ml(cur.draft.papeis); const i=a.indexOf(mo.t);
+      if((k==='contato'||k==='email')&&d.rp_forn!=='Sim') f.hasHelp=false;
+      if(k==='papeis') f.mopts.forEach(mo=>{ mo.tog=()=>{ const cur=g2st(self,'g_forn').fm; if(!cur) return; const a=ml(cur.draft.papeis); const i=a.indexOf(mo.t);
           if(i>=0) a.splice(i,1); else a.push(mo.t); const pp=ordena(a); draftSet(self,'g_forn',Object.assign({papeis:pp.join('; ')},rpFlags(pp))); }; });
-      if(k==='cnpj'&&F.edit&&!fm.isNew){ f.help='Identifica o parceiro; não muda depois do cadastro.'; f.hasHelp=true; }
-      if(k==='cnpj'&&F.edit&&fm.isNew){ const dup=dupDoc(self,d.cnpj,null);
+      if(k==='cnpj'&&!fm.isNew){ f.help='Identifica o parceiro; não muda depois do cadastro.'; f.hasHelp=true; }
+      if(k==='cnpj'&&fm.isNew){ const dup=dupDoc(self,d.cnpj,null);
         if(dup){ f.hasDup=true; f.dupT='Já cadastrado: '+dup.v.nome+' ('+ml(dup.v.papeis).join(', ')+')'; f.dupGo=()=>abrirAtivar(self,dup.id); } } });
-    if(F.edit&&!fm.isNew){ v.cd5_susp=d.sit!=='Suspenso'; v.cd5_reat=d.sit==='Suspenso'; v.cd5_reatT=fm.orig.sit==='Suspenso'?'Reativar parceiro':'Manter ativo'; }
-    if(F.edit) F.save=()=>{ const cur=g2st(self,'g_forn').fm; if(!cur) return; const e=Object.assign(basic(sp,cur),regras(self,cur.draft,cur));
+    if(!fm.isNew){ v.cd5_susp=d.sit!=='Suspenso'; v.cd5_reat=d.sit==='Suspenso'; v.cd5_reatT=fm.orig.sit==='Suspenso'?'Reativar parceiro':'Manter ativo'; }
+    F.save=()=>{ const cur=g2st(self,'g_forn').fm; if(!cur) return; const e=Object.assign(basic(sp,cur),regras(self,cur.draft,cur));
       if(Object.keys(e).length){ g2set(self,'g_forn',{fm:Object.assign({},cur,{errs:e,warn:false})}); return; }
       self._cd5d=Object.assign({},cur.draft); g2save(self,sp); }; }
   v.cd5_suspender=()=>draftSet(self,'g_forn',{sit:'Suspenso'});
   v.cd5_reativar=()=>draftSet(self,'g_forn',{sit:'Ativo'});
-  self.g2after=(gid,rows,r,isNew)=>{ if(gid!=='g_forn'||!r) return; const d=self._cd5d||{}; self._cd5d=null;
-    // a situação é campo escondido (o motor não grava): aplica na linha já salva, que é a mesma referência do estado
-    // fora da suspensão o motivo some da linha inteira: o g2save grava o texto também em r.s, e o g2open recorre a r.s quando r.v está vazio
+  self.g2after=(gid,rows2,r,isNew)=>{ if(gid!=='g_forn'||!r) return; const d=self._cd5d||{}; self._cd5d=null;
     const antes=r.v.sit||'Ativo'; r.v.sit=d.sit||'Ativo'; if(r.v.sit!=='Suspenso'){ r.v.motivo=''; if(r.s) delete r.s.motivo; }
     const pp=ml(r.v.papeis), forn=pp.indexOf('Fornecedor')>=0, hom=r.v.homol==='Sim'; let msg;
     if(r.v.sit==='Suspenso'&&antes!=='Suspenso') msg='Suspenso: '+r.v.nome+' sai de cotação, oferta e crédito; o histórico continua.';
     else if(r.v.sit!=='Suspenso'&&antes==='Suspenso') msg='Reativado: '+r.v.nome+' volta a cotação, oferta e crédito conforme os papéis.';
-    else if(isNew) msg='Cadastrado: '+r.v.nome+' · '+pp.join(', ')+'.'+(forn&&!hom?' Homologue por grupo para receber cotação.':'');
+    else if(isNew) msg='Criado: '+r.v.nome+' · '+pp.join(', ')+'.'+(forn&&!hom?' Homologue por grupo para receber cotação.':'');
     else if(forn) msg=hom?('Salvo: '+r.v.nome+' recebe cotação de '+ml(r.v.grupos).join(', ')+'.'):('Salvo: '+r.v.nome+' não recebe cotação enquanto não for homologado.');
     else msg='Salvo: '+r.v.nome+'.';
-    const st={g2toast:msg}; if(self.state.cd5_p&&pp.indexOf(self.state.cd5_p)<0) trocaPapel(self,'',st); else self.setState(st); }; }
-''')
-    HEIGHTS37[fname]=1000   # sem rolagem de página: só a tabela da aba rola
-    shell37('CD-05','Parceiros e fornecedores',corpo,fname=fname,status=None,primary_html=None,search=False)
-    estado_cab(fname,'Parceiros e fornecedores','cd5e')
-    from areas.cadastros import ncol_dinamico
-    ncol_dinamico(fname,['cd5_ncol'])   # as colunas do papel e o motivo da suspensão mudam a quantidade de colunas
+    self.setState({g2toast:msg}); }; }
+function lista(a){ return a.length<2?(a[0]||''):a.slice(0,-1).join(', ')+' e '+a[a.length-1]; }
+'''

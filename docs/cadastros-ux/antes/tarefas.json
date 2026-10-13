@@ -1,0 +1,511 @@
+{
+ "1440": [
+  {
+   "tarefa": "1a talhões da Santa Rita pelo cartão da fazenda",
+   "largura": 1440,
+   "cliques": 7,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu Cadastros › Fazendas, áreas e talhões (abre na aba Talhões)",
+    "clique 2: aba Fazendas [ok]",
+    "clique 3: cartão Santa Rita [ok]",
+    "captura t1a_cartao_fazenda_1440.png",
+    "o cartão abriu: {\"titulo\": \"Fazenda · Santa Rita\", \"sub\": \"Altere a fazenda. Para tirar de uso, marque Inativa: nada é excluído.\", \"campos\": [\"Nome da fazenda\", \"Empresa\", \"Município\", \"UF\", \"Fuso horário\", \"Área total do imóvel\", \"Posse\", \"Módulos fiscais\", \"CAR\", \"Matrícula e cartório\", \"Pendência nos documentos\", \"Situação\"], \"botoes\": [\"×\", \"Cadastrar talhão nesta fazenda\", \"Cancelar\", \"Salvar\"], \"editaveis\": 12, \"alturaConteudo\": 1240, \"alturaVisivel\": 1000, \"largura\": 460}",
+    "clique 4: fechar o painel da fazenda",
+    "clique 5: aba Talhões [ok]",
+    "clique 6: linha T2 [ok]",
+    "captura t1a_painel_talhao_1440.png",
+    "painel do talhão: {\"titulo\": \"Talhão · T2\", \"sub\": \"Altere o talhão. A área do polígono só muda com nova versão, no detalhe do talhão; para tirar de uso, marque Inativo (nada é excluído).\", \"campos\": [\"Identificação do talhão\", \"Fazenda\", \"Sistema\", \"Área cultivável\", \"Área do polígono\", \"Situação\"], \"botoes\": [\"×\", \"Abrir talhão ›\", \"Cancelar\", \"Salvar\"], \"editaveis\": 5, \"alturaConteudo\": 1000, \"alturaVisivel\": 1000, \"largura\": 460}",
+    "clique 7: Abrir talhão [ok]",
+    "chegou em: /CD-01det.dc.html#talhao=T2",
+    "captura t1a_detalhe_1440.png"
+   ],
+   "painel_talhao": {
+    "titulo": "Talhão · T2",
+    "sub": "Altere o talhão. A área do polígono só muda com nova versão, no detalhe do talhão; para tirar de uso, marque Inativo (nada é excluído).",
+    "campos": [
+     "Identificação do talhão",
+     "Fazenda",
+     "Sistema",
+     "Área cultivável",
+     "Área do polígono",
+     "Situação"
+    ],
+    "botoes": [
+     "×",
+     "Abrir talhão ›",
+     "Cancelar",
+     "Salvar"
+    ],
+    "editaveis": 5,
+    "alturaConteudo": 1000,
+    "alturaVisivel": 1000,
+    "largura": 460
+   }
+  },
+  {
+   "tarefa": "1b talhões da Santa Rita pela aba Talhões (caminho mais curto)",
+   "largura": 1440,
+   "cliques": 3,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu",
+    "último talhão da Santa Rita (C1) na janela sem rolar: {\"y\": 689, \"dentro\": true}",
+    "clique 2: linha T2 [ok]",
+    "clique 3: Abrir talhão [ok]",
+    "chegou em: /CD-01det.dc.html#talhao=T2"
+   ]
+  },
+  {
+   "tarefa": "2a cadastrar talhão na Boa Vista pelo botão da aba",
+   "largura": 1440,
+   "cliques": 4,
+   "campos_digitados": 2,
+   "caracteres": 4,
+   "passos": [
+    "clique 1: menu",
+    "clique 2: Cadastrar talhão [ok]",
+    "captura t2_form_novo_1440.png",
+    "formulário: {\"titulo\": \"Cadastrar talhão\", \"sub\": \"Cadastre o talhão com fazenda, sistema e área cultivável; o polígono é definido depois, no detalhe do talhão.\", \"campos\": [\"Identificação do talhão\", \"Fazenda\", \"Sistema\", \"Área cultivável\"], \"botoes\": [\"×\", \"Cancelar\", \"Salvar\"], \"editaveis\": 4, \"alturaConteudo\": 1000, \"alturaVisivel\": 1000, \"largura\": 460}",
+    "fazenda pré-escolhida: Santa Rita",
+    "digita \"B2\" em Identificação [ok]",
+    "clique 3: escolhe Boa Vista em Fazenda [ok]",
+    "digita \"80\" em Área cultivável [ok]",
+    "clique 4: Salvar [ok]",
+    "aviso: B2 cadastrado na Boa Vista. Próximo passo: definir o polígono no detalhe do talhão.",
+    "painel ainda aberto? False · erros: ",
+    "captura t2_salvo_1440.png"
+   ]
+  },
+  {
+   "tarefa": "2b cadastrar talhão a partir do cartão da fazenda Boa Vista",
+   "largura": 1440,
+   "cliques": 5,
+   "campos_digitados": 2,
+   "caracteres": 4,
+   "passos": [
+    "clique 1: menu",
+    "clique 2: aba Fazendas [ok]",
+    "clique 3: cartão Boa Vista [ok]",
+    "clique 4: Cadastrar talhão nesta fazenda [ok]",
+    "fazenda pré-escolhida: Boa Vista · painel: Cadastrar talhão",
+    "digita \"B2\" em Identificação [ok]",
+    "digita \"80\" em Área cultivável [ok]",
+    "clique 5: Salvar [ok]",
+    "aviso: "
+   ]
+  },
+  {
+   "tarefa": "3 achar Trator 02 e ver implementos e horímetro",
+   "largura": 1440,
+   "cliques": 3,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu",
+    "Trator 02 na janela sem rolar: {\"y\": 393, \"dentro\": true}",
+    "clique 2: linha Trator 02 [ok]",
+    "captura t3_painel_maquina_1440.png",
+    "painel: {\"titulo\": \"Máquina · Trator 02\", \"sub\": \"Altere capacidade, custo por hora e calibração; inative em vez de excluir, o histórico continua.\", \"campos\": [\"Classe\", \"Nome\", \"Modelo\", \"Condição técnica\", \"Potência\", \"Custo por hora\", \"Fonte do custo\", \"Horímetro atual\", \"Exige calibração ou aferição?\", \"Local\", \"Situação\"], \"botoes\": [\"×\", \"Pulverizador PJ-3030 · Pulverização ›\", \"Cancelar\", \"Salvar\"], \"editaveis\": 9, \"alturaConteudo\": 1219, \"alturaVisivel\": 1000, \"largura\": 460}",
+    "Horímetro na janela do painel sem rolar: {\"y\": 740, \"dentro\": true} · conjunto (implemento) visível: {\"y\": 1086, \"dentro\": false}",
+    "clique 3: Pulverizador PJ-3030 [ok]",
+    "captura t3_painel_conjunto_1440.png",
+    "painel do conjunto: {\"titulo\": \"Conjunto · Trator 02 + Pulverizador PJ-3030\", \"sub\": \"Escolha a máquina, o implemento e as operações; a largura vem do implemento.\", \"campos\": [\"Máquina\", \"Implemento\", \"Operações\", \"Largura de trabalho\", \"Potência\"], \"botoes\": [\"×\", \"Excluir conjunto\", \"Cancelar\", \"Salvar\"], \"editaveis\": 2, \"alturaConteudo\": 1000, \"alturaVisivel\": 1000, \"largura\": 460}"
+   ],
+   "painel": {
+    "titulo": "Máquina · Trator 02",
+    "sub": "Altere capacidade, custo por hora e calibração; inative em vez de excluir, o histórico continua.",
+    "campos": [
+     "Classe",
+     "Nome",
+     "Modelo",
+     "Condição técnica",
+     "Potência",
+     "Custo por hora",
+     "Fonte do custo",
+     "Horímetro atual",
+     "Exige calibração ou aferição?",
+     "Local",
+     "Situação"
+    ],
+    "botoes": [
+     "×",
+     "Pulverizador PJ-3030 · Pulverização ›",
+     "Cancelar",
+     "Salvar"
+    ],
+    "editaveis": 9,
+    "alturaConteudo": 1219,
+    "alturaVisivel": 1000,
+    "largura": 460
+   }
+  },
+  {
+   "tarefa": "4 ver a equipe de Marcos e o papel dele",
+   "largura": 1440,
+   "cliques": 10,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu",
+    "linha Marcos: Marcos Campo 1 Operar trator, Operar pulverizador CLT — R$ 38,00/h NR-31 30/09/2026 Da equipe Com login Vence em 30 dias Renovar ›",
+    "clique 2: linha Marcos [ok]",
+    "captura t4_painel_pessoa_1440.png",
+    "painel: {\"titulo\": \"Pessoa · Marcos\", \"sub\": \"Marque o que a pessoa faz; a habilitação exigida aparece abaixo. Cadastrar não cria login. Inative em vez de excluir.\", \"campos\": [\"Nome\", \"Equipe\", \"Habilidades\", \"Validade da NR-31\", \"Vínculo\", \"Admissão\", \"Disponível até\", \"Calendário de trabalho\", \"Custo-hora com encargos\", \"Acesso ao app\", \"Situação\"], \"botoes\": [\"×\", \"Cancelar\", \"Salvar\"], \"editaveis\": 9, \"alturaConteudo\": 1258, \"alturaVisivel\": 1000, \"largura\": 460}",
+    "clique 3: fechar painel",
+    "clique 4: aba Equipes [ok]",
+    "clique 5: cartão Campo 1 [ok]",
+    "captura t4_painel_equipe_1440.png",
+    "cartão Campo 1 abriu: {\"titulo\": \"Equipe · Campo 1\", \"sub\": \"Altere nome, líder e calendário; quem segue a equipe herda o calendário.\", \"campos\": [\"Nome da equipe\", \"Líder\", \"Calendário\"], \"botoes\": [\"×\", \"Excluir equipe\", \"Cancelar\", \"Salvar\"], \"editaveis\": 3, \"alturaConteudo\": 1000, \"alturaVisivel\": 1000, \"largura\": 460}",
+    "clique 6: fechar",
+    "clique 7: aba Pessoas [ok]",
+    "clique 8: menu ▾ da coluna Equipe [ok]",
+    "clique 9: marca Campo 1 [ok]",
+    "clique 10: OK [ok]",
+    "linhas: ['Ana', 'Nilton', 'Lucas', 'João', 'Rui', 'Zé']",
+    "captura t4_membros_filtro_1440.png"
+   ]
+  },
+  {
+   "tarefa": "5 achar um fungicida e ver registro, unidade, embalagem e locais",
+   "largura": 1440,
+   "cliques": 2,
+   "campos_digitados": 1,
+   "caracteres": 9,
+   "passos": [
+    "clique 1: menu",
+    "digita \"fungicida\" em Buscar [ok]",
+    "linhas após busca: ['▾ Fungicidas 4 itens 3.1.02 · Defensivos', 'Fungicida A 3.1.02 · Defensivos L galão de 5 L Lote e validade R$ 145,00/L 15/09', 'Fungicida C 3.1.02 · Defensivos L galão de 5 L Lote e validade R$ 120,00/L 15/09', 'Fungicida TS 3.1.02 · Defensivos L galão de 5 L Lote e validade R$ 210,00/L 15/0']",
+    "clique 2: linha Fungicida A [ok]",
+    "captura t5_painel_item_1440.png",
+    "painel: {\"titulo\": \"Item · Fungicida A\", \"sub\": \"Altere o item. O saldo não se edita aqui: nasce de recebimentos e movimentos no Estoque.\", \"campos\": [\"Nome do item\", \"Grupo\", \"Unidade-base\", \"Embalagem de entrega\", \"Conteúdo da embalagem\", \"Controle\", \"Preço de referência\", \"Data do preço\", \"Garantia ou densidade\", \"Local padrão\", \"Situação\"], \"botoes\": [\"×\", \"Ver saldo no Estoque ›\", \"Excluir item\", \"Cancelar\", \"Salvar\"], \"editaveis\": 10, \"alturaConteudo\": 1276, \"alturaVisivel\": 1000, \"largura\": 460}",
+    "tem \"registro\" no painel? False"
+   ],
+   "item": "Fungicida A",
+   "painel": {
+    "titulo": "Item · Fungicida A",
+    "sub": "Altere o item. O saldo não se edita aqui: nasce de recebimentos e movimentos no Estoque.",
+    "campos": [
+     "Nome do item",
+     "Grupo",
+     "Unidade-base",
+     "Embalagem de entrega",
+     "Conteúdo da embalagem",
+     "Controle",
+     "Preço de referência",
+     "Data do preço",
+     "Garantia ou densidade",
+     "Local padrão",
+     "Situação"
+    ],
+    "botoes": [
+     "×",
+     "Ver saldo no Estoque ›",
+     "Excluir item",
+     "Cancelar",
+     "Salvar"
+    ],
+    "editaveis": 10,
+    "alturaConteudo": 1276,
+    "alturaVisivel": 1000,
+    "largura": 460
+   }
+  },
+  {
+   "tarefa": "6 achar Agro Norte e ver o que ele fornece",
+   "largura": 1440,
+   "cliques": 4,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu",
+    "colunas: ['Parceiro', 'CPF/CNPJ', 'Papéis', 'Contato', 'WhatsApp', 'E-mail', 'Canais autorizados', 'Situação do papel']",
+    "clique 2: linha Agro Norte [ok]",
+    "captura t6_painel_parceiro_1440.png",
+    "painel: {\"titulo\": \"Parceiro · Agro Norte\", \"sub\": \"Um cadastro por CPF ou CNPJ: marque os papéis e preencha só as seções deles.\", \"campos\": [\"CPF ou CNPJ\", \"Nome ou razão social\", \"Papéis\", \"Nome do contato\", \"E-mail\", \"WhatsApp\", \"Canais autorizados\", \"Grupos homologados\", \"Homologado\"], \"botoes\": [\"×\", \"Suspender parceiro\", \"Cancelar\", \"Salvar\"], \"editaveis\": 5, \"alturaConteudo\": 1102, \"alturaVisivel\": 1000, \"largura\": 460}",
+    "grupos visíveis sem rolar o painel: {\"y\": 768, \"dentro\": true}",
+    "clique 3: fechar",
+    "clique 4: Fornecedores [ok]",
+    "colunas no filtro Fornecedores: ['Parceiro', 'CPF/CNPJ', 'Grupos homologados', 'Contato', 'WhatsApp', 'E-mail', 'Canais autorizados', 'Homologado']",
+    "linha Agro Norte: Agro Norte 33.567.890/0001-77 Herbicidas, Fungicidas, Inseticidas, Adjuvantes Marcelo Tavares 65 99733-4455 orcamento@agronorte.com.br E-mail, WhatsApp Sim",
+    "captura t6_filtro_fornecedores_1440.png"
+   ]
+  },
+  {
+   "tarefa": "7 ver a cultivar 58 W e o rendimento da pulverização",
+   "largura": 1440,
+   "cliques": 5,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu",
+    "clique 2: linha 58 W [ok]",
+    "captura t7_painel_cultivar_1440.png",
+    "painel: {\"titulo\": \"Cultivar · 58 W\", \"sub\": \"Registro no RNC é referência, não prova de adaptação local; cultivar em uso não se exclui, inative.\", \"campos\": [\"Cultivar ou híbrido\", \"Cultura\", \"Ciclo até a colheita\", \"Item de semente\", \"Registro\", \"Situação\"], \"botoes\": [\"×\", \"Excluir cultivar\", \"Cancelar\", \"Salvar\"], \"editaveis\": 6, \"alturaConteudo\": 1000, \"alturaVisivel\": 1000, \"largura\": 460}",
+    "clique 3: fechar",
+    "clique 4: aba Operações [ok]",
+    "rendimento na linha visível: {\"y\": 393, \"dentro\": true}",
+    "clique 5: linha Trator 02 MF 7719 [ok]",
+    "captura t7_painel_rendimento_1440.png",
+    "painel: {\"titulo\": \"Rendimento · Trator 02 MF 7719 + Pulverizador PJ-3030 36 m\", \"sub\": \"Informe como o conjunto trabalha e quanto custa por hora; rendimento e custo por hectare são recalculados. Planejar safra parte deste padrão.\", \"campos\": [\"Operação\", \"Conjunto ou equipe\", \"Cultura\", \"Como obter o rendimento\", \"Largura de trabalho\", \"Velocidade de trabalho\", \"Eficiência de campo\", \"Rendimento efetivo\", \"Máquina\", \"Implemento\", \"Pessoas na equipe\", \"Custo por pessoa\", \"Custo por hora\", \"Fonte do dado\", \"Vigente até\"], \"botoes\": [\"×\", \"Cancelar\", \"Salvar\"], \"editaveis\": 13, \"alturaConteudo\": 1460, \"alturaVisivel\": 1000, \"largura\": 460}"
+   ]
+  }
+ ],
+ "390": [
+  {
+   "tarefa": "1a talhões da Santa Rita pelo cartão da fazenda",
+   "largura": 390,
+   "cliques": 7,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu Cadastros › Fazendas, áreas e talhões (abre na aba Talhões)",
+    "clique 2: aba Fazendas [ok]",
+    "clique 3: cartão Santa Rita [ok]",
+    "captura t1a_cartao_fazenda_390.png",
+    "o cartão abriu: {\"titulo\": \"Fazenda · Santa Rita\", \"sub\": \"Altere a fazenda. Para tirar de uso, marque Inativa: nada é excluído.\", \"campos\": [\"Nome da fazenda\", \"Empresa\", \"Município\", \"UF\", \"Fuso horário\", \"Área total do imóvel\", \"Posse\", \"Módulos fiscais\", \"CAR\", \"Matrícula e cartório\", \"Pendência nos documentos\", \"Situação\"], \"botoes\": [\"×\", \"Cadastrar talhão nesta fazenda\", \"Cancelar\", \"Salvar\"], \"editaveis\": 12, \"alturaConteudo\": 1304, \"alturaVisivel\": 844, \"largura\": 390}",
+    "clique 4: fechar o painel da fazenda",
+    "clique 5: aba Talhões [ok]",
+    "clique 6: linha T2 [ok]",
+    "captura t1a_painel_talhao_390.png",
+    "painel do talhão: {\"titulo\": \"Talhão · T2\", \"sub\": \"Altere o talhão. A área do polígono só muda com nova versão, no detalhe do talhão; para tirar de uso, marque Inativo (nada é excluído).\", \"campos\": [\"Identificação do talhão\", \"Fazenda\", \"Sistema\", \"Área cultivável\", \"Área do polígono\", \"Situação\"], \"botoes\": [\"×\", \"Abrir talhão ›\", \"Cancelar\", \"Salvar\"], \"editaveis\": 5, \"alturaConteudo\": 845, \"alturaVisivel\": 844, \"largura\": 390}",
+    "clique 7: Abrir talhão [ok]",
+    "chegou em: /CD-01det.dc.html#talhao=T2",
+    "captura t1a_detalhe_390.png"
+   ],
+   "painel_talhao": {
+    "titulo": "Talhão · T2",
+    "sub": "Altere o talhão. A área do polígono só muda com nova versão, no detalhe do talhão; para tirar de uso, marque Inativo (nada é excluído).",
+    "campos": [
+     "Identificação do talhão",
+     "Fazenda",
+     "Sistema",
+     "Área cultivável",
+     "Área do polígono",
+     "Situação"
+    ],
+    "botoes": [
+     "×",
+     "Abrir talhão ›",
+     "Cancelar",
+     "Salvar"
+    ],
+    "editaveis": 5,
+    "alturaConteudo": 845,
+    "alturaVisivel": 844,
+    "largura": 390
+   }
+  },
+  {
+   "tarefa": "1b talhões da Santa Rita pela aba Talhões (caminho mais curto)",
+   "largura": 390,
+   "cliques": 3,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu",
+    "último talhão da Santa Rita (C1) na janela sem rolar: {\"y\": 893, \"dentro\": false}",
+    "clique 2: linha T2 [ok]",
+    "clique 3: Abrir talhão [ok]",
+    "chegou em: /CD-01det.dc.html#talhao=T2"
+   ]
+  },
+  {
+   "tarefa": "2a cadastrar talhão na Boa Vista pelo botão da aba",
+   "largura": 390,
+   "cliques": 4,
+   "campos_digitados": 2,
+   "caracteres": 4,
+   "passos": [
+    "clique 1: menu",
+    "clique 2: Cadastrar talhão [ok]",
+    "captura t2_form_novo_390.png",
+    "formulário: {\"titulo\": \"Cadastrar talhão\", \"sub\": \"Cadastre o talhão com fazenda, sistema e área cultivável; o polígono é definido depois, no detalhe do talhão.\", \"campos\": [\"Identificação do talhão\", \"Fazenda\", \"Sistema\", \"Área cultivável\"], \"botoes\": [\"×\", \"Cancelar\", \"Salvar\"], \"editaveis\": 4, \"alturaConteudo\": 844, \"alturaVisivel\": 844, \"largura\": 390}",
+    "fazenda pré-escolhida: Santa Rita",
+    "digita \"B2\" em Identificação [ok]",
+    "clique 3: escolhe Boa Vista em Fazenda [ok]",
+    "digita \"80\" em Área cultivável [ok]",
+    "clique 4: Salvar [ok]",
+    "aviso: B2 cadastrado na Boa Vista. Próximo passo: definir o polígono no detalhe do talhão.",
+    "painel ainda aberto? False · erros: ",
+    "captura t2_salvo_390.png"
+   ]
+  },
+  {
+   "tarefa": "2b cadastrar talhão a partir do cartão da fazenda Boa Vista",
+   "largura": 390,
+   "cliques": 5,
+   "campos_digitados": 2,
+   "caracteres": 4,
+   "passos": [
+    "clique 1: menu",
+    "clique 2: aba Fazendas [ok]",
+    "clique 3: cartão Boa Vista [ok]",
+    "clique 4: Cadastrar talhão nesta fazenda [ok]",
+    "fazenda pré-escolhida: Boa Vista · painel: Cadastrar talhão",
+    "digita \"B2\" em Identificação [ok]",
+    "digita \"80\" em Área cultivável [ok]",
+    "clique 5: Salvar [ok]",
+    "aviso: "
+   ]
+  },
+  {
+   "tarefa": "3 achar Trator 02 e ver implementos e horímetro",
+   "largura": 390,
+   "cliques": 3,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu",
+    "Trator 02 na janela sem rolar: {\"y\": 671, \"dentro\": true}",
+    "clique 2: linha Trator 02 [ok]",
+    "captura t3_painel_maquina_390.png",
+    "painel: {\"titulo\": \"Máquina · Trator 02\", \"sub\": \"Altere capacidade, custo por hora e calibração; inative em vez de excluir, o histórico continua.\", \"campos\": [\"Classe\", \"Nome\", \"Modelo\", \"Condição técnica\", \"Potência\", \"Custo por hora\", \"Fonte do custo\", \"Horímetro atual\", \"Exige calibração ou aferição?\", \"Local\", \"Situação\"], \"botoes\": [\"×\", \"Pulverizador PJ-3030 · Pulverização ›\", \"Cancelar\", \"Salvar\"], \"editaveis\": 9, \"alturaConteudo\": 1219, \"alturaVisivel\": 844, \"largura\": 390}",
+    "Horímetro na janela do painel sem rolar: {\"y\": 740, \"dentro\": true} · conjunto (implemento) visível: {\"y\": 1086, \"dentro\": false}",
+    "clique 3: Pulverizador PJ-3030 [ok]",
+    "captura t3_painel_conjunto_390.png",
+    "painel do conjunto: {\"titulo\": \"Conjunto · Trator 02 + Pulverizador PJ-3030\", \"sub\": \"Escolha a máquina, o implemento e as operações; a largura vem do implemento.\", \"campos\": [\"Máquina\", \"Implemento\", \"Operações\", \"Largura de trabalho\", \"Potência\"], \"botoes\": [\"×\", \"Excluir conjunto\", \"Cancelar\", \"Salvar\"], \"editaveis\": 2, \"alturaConteudo\": 865, \"alturaVisivel\": 844, \"largura\": 390}"
+   ],
+   "painel": {
+    "titulo": "Máquina · Trator 02",
+    "sub": "Altere capacidade, custo por hora e calibração; inative em vez de excluir, o histórico continua.",
+    "campos": [
+     "Classe",
+     "Nome",
+     "Modelo",
+     "Condição técnica",
+     "Potência",
+     "Custo por hora",
+     "Fonte do custo",
+     "Horímetro atual",
+     "Exige calibração ou aferição?",
+     "Local",
+     "Situação"
+    ],
+    "botoes": [
+     "×",
+     "Pulverizador PJ-3030 · Pulverização ›",
+     "Cancelar",
+     "Salvar"
+    ],
+    "editaveis": 9,
+    "alturaConteudo": 1219,
+    "alturaVisivel": 844,
+    "largura": 390
+   }
+  },
+  {
+   "tarefa": "4 ver a equipe de Marcos e o papel dele",
+   "largura": 390,
+   "cliques": 10,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu",
+    "linha Marcos: Marcos Campo 1 Operar trator, Operar pulverizador CLT — R$ 38,00/h NR-31 30/09/2026 Da equipe Com login Vence em 30 dias Renovar ›",
+    "clique 2: linha Marcos [ok]",
+    "captura t4_painel_pessoa_390.png",
+    "painel: {\"titulo\": \"Pessoa · Marcos\", \"sub\": \"Marque o que a pessoa faz; a habilitação exigida aparece abaixo. Cadastrar não cria login. Inative em vez de excluir.\", \"campos\": [\"Nome\", \"Equipe\", \"Habilidades\", \"Validade da NR-31\", \"Vínculo\", \"Admissão\", \"Disponível até\", \"Calendário de trabalho\", \"Custo-hora com encargos\", \"Acesso ao app\", \"Situação\"], \"botoes\": [\"×\", \"Cancelar\", \"Salvar\"], \"editaveis\": 9, \"alturaConteudo\": 1258, \"alturaVisivel\": 844, \"largura\": 390}",
+    "clique 3: fechar painel",
+    "clique 4: aba Equipes [ok]",
+    "clique 5: cartão Campo 1 [ok]",
+    "captura t4_painel_equipe_390.png",
+    "cartão Campo 1 abriu: {\"titulo\": \"Equipe · Campo 1\", \"sub\": \"Altere nome, líder e calendário; quem segue a equipe herda o calendário.\", \"campos\": [\"Nome da equipe\", \"Líder\", \"Calendário\"], \"botoes\": [\"×\", \"Excluir equipe\", \"Cancelar\", \"Salvar\"], \"editaveis\": 3, \"alturaConteudo\": 844, \"alturaVisivel\": 844, \"largura\": 390}",
+    "clique 6: fechar",
+    "clique 7: aba Pessoas [ok]",
+    "clique 8: menu ▾ da coluna Equipe [ok]",
+    "clique 9: marca Campo 1 [ok]",
+    "clique 10: OK [ok]",
+    "linhas: ['Ana', 'Nilton', 'Lucas', 'João', 'Rui', 'Zé']",
+    "captura t4_membros_filtro_390.png"
+   ]
+  },
+  {
+   "tarefa": "5 achar um fungicida e ver registro, unidade, embalagem e locais",
+   "largura": 390,
+   "cliques": 2,
+   "campos_digitados": 1,
+   "caracteres": 9,
+   "passos": [
+    "clique 1: menu",
+    "digita \"fungicida\" em Buscar [ok]",
+    "linhas após busca: ['▾ Fungicidas 4 itens 3.1.02 · Defensivos', 'Fungicida A 3.1.02 · Defensivos L galão de 5 L Lote e validade R$ 145,00/L 15/09', 'Fungicida C 3.1.02 · Defensivos L galão de 5 L Lote e validade R$ 120,00/L 15/09', 'Fungicida TS 3.1.02 · Defensivos L galão de 5 L Lote e validade R$ 210,00/L 15/0']",
+    "clique 2: linha Fungicida A [ok]",
+    "captura t5_painel_item_390.png",
+    "painel: {\"titulo\": \"Item · Fungicida A\", \"sub\": \"Altere o item. O saldo não se edita aqui: nasce de recebimentos e movimentos no Estoque.\", \"campos\": [\"Nome do item\", \"Grupo\", \"Unidade-base\", \"Embalagem de entrega\", \"Conteúdo da embalagem\", \"Controle\", \"Preço de referência\", \"Data do preço\", \"Garantia ou densidade\", \"Local padrão\", \"Situação\"], \"botoes\": [\"×\", \"Ver saldo no Estoque ›\", \"Excluir item\", \"Cancelar\", \"Salvar\"], \"editaveis\": 10, \"alturaConteudo\": 1306, \"alturaVisivel\": 844, \"largura\": 390}",
+    "tem \"registro\" no painel? False"
+   ],
+   "item": "Fungicida A",
+   "painel": {
+    "titulo": "Item · Fungicida A",
+    "sub": "Altere o item. O saldo não se edita aqui: nasce de recebimentos e movimentos no Estoque.",
+    "campos": [
+     "Nome do item",
+     "Grupo",
+     "Unidade-base",
+     "Embalagem de entrega",
+     "Conteúdo da embalagem",
+     "Controle",
+     "Preço de referência",
+     "Data do preço",
+     "Garantia ou densidade",
+     "Local padrão",
+     "Situação"
+    ],
+    "botoes": [
+     "×",
+     "Ver saldo no Estoque ›",
+     "Excluir item",
+     "Cancelar",
+     "Salvar"
+    ],
+    "editaveis": 10,
+    "alturaConteudo": 1306,
+    "alturaVisivel": 844,
+    "largura": 390
+   }
+  },
+  {
+   "tarefa": "6 achar Agro Norte e ver o que ele fornece",
+   "largura": 390,
+   "cliques": 4,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu",
+    "colunas: ['Parceiro', 'CPF/CNPJ', 'Papéis', 'Contato', 'WhatsApp', 'E-mail', 'Canais autorizados', 'Situação do papel']",
+    "clique 2: linha Agro Norte [ok]",
+    "captura t6_painel_parceiro_390.png",
+    "painel: {\"titulo\": \"Parceiro · Agro Norte\", \"sub\": \"Um cadastro por CPF ou CNPJ: marque os papéis e preencha só as seções deles.\", \"campos\": [\"CPF ou CNPJ\", \"Nome ou razão social\", \"Papéis\", \"Nome do contato\", \"E-mail\", \"WhatsApp\", \"Canais autorizados\", \"Grupos homologados\", \"Homologado\"], \"botoes\": [\"×\", \"Suspender parceiro\", \"Cancelar\", \"Salvar\"], \"editaveis\": 5, \"alturaConteudo\": 1167, \"alturaVisivel\": 844, \"largura\": 390}",
+    "grupos visíveis sem rolar o painel: {\"y\": 833, \"dentro\": false}",
+    "clique 3: fechar",
+    "clique 4: Fornecedores [ok]",
+    "colunas no filtro Fornecedores: ['Parceiro', 'CPF/CNPJ', 'Grupos homologados', 'Contato', 'WhatsApp', 'E-mail', 'Canais autorizados', 'Homologado']",
+    "linha Agro Norte: Agro Norte 33.567.890/0001-77 Herbicidas, Fungicidas, Inseticidas, Adjuvantes Marcelo Tavares 65 99733-4455 orcamento@agronorte.com.br E-mail, WhatsApp Sim",
+    "captura t6_filtro_fornecedores_390.png"
+   ]
+  },
+  {
+   "tarefa": "7 ver a cultivar 58 W e o rendimento da pulverização",
+   "largura": 390,
+   "cliques": 5,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu",
+    "clique 2: linha 58 W [ok]",
+    "captura t7_painel_cultivar_390.png",
+    "painel: {\"titulo\": \"Cultivar · 58 W\", \"sub\": \"Registro no RNC é referência, não prova de adaptação local; cultivar em uso não se exclui, inative.\", \"campos\": [\"Cultivar ou híbrido\", \"Cultura\", \"Ciclo até a colheita\", \"Item de semente\", \"Registro\", \"Situação\"], \"botoes\": [\"×\", \"Excluir cultivar\", \"Cancelar\", \"Salvar\"], \"editaveis\": 6, \"alturaConteudo\": 844, \"alturaVisivel\": 844, \"largura\": 390}",
+    "clique 3: fechar",
+    "clique 4: aba Operações [ok]",
+    "rendimento na linha visível: {\"y\": 634, \"dentro\": true}",
+    "clique 5: linha Trator 02 MF 7719 [ok]",
+    "captura t7_painel_rendimento_390.png",
+    "painel: {\"titulo\": \"Rendimento · Trator 02 MF 7719 + Pulverizador PJ-3030 36 m\", \"sub\": \"Informe como o conjunto trabalha e quanto custa por hora; rendimento e custo por hectare são recalculados. Planejar safra parte deste padrão.\", \"campos\": [\"Operação\", \"Conjunto ou equipe\", \"Cultura\", \"Como obter o rendimento\", \"Largura de trabalho\", \"Velocidade de trabalho\", \"Eficiência de campo\", \"Rendimento efetivo\", \"Máquina\", \"Implemento\", \"Pessoas na equipe\", \"Custo por pessoa\", \"Custo por hora\", \"Fonte do dado\", \"Vigente até\"], \"botoes\": [\"×\", \"Cancelar\", \"Salvar\"], \"editaveis\": 13, \"alturaConteudo\": 1475, \"alturaVisivel\": 844, \"largura\": 390}"
+   ]
+  }
+ ],
+ "_errs": []
+}

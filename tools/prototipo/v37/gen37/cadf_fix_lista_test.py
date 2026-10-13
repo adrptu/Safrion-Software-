@@ -1,93 +1,53 @@
 # -*- coding: utf-8 -*-
-"""Teste CDP do CD-01 · correções da verificação independente (frente cad-fazendas):
-sem rolagem de página (só a tabela ou o mapa rolam dentro do bloco; a legenda do mapa nunca fica cortada), talhão com parcelas em safra aberta não muda de
+"""Teste do CD-01 · correções da verificação independente (frente cad-fazendas): talhão com parcelas em safra aberta não muda de
 fazenda, mapa só mostra talhão da fazenda do mapa, "Importar geometrias" retirado, formulários de cadastro novo com texto de cadastro.
-Uso: python3 cadf_fix_lista_test.py  (serve _render/; ≤ 15 verificações; cada passo espera ≤ 0,5 s)."""
-import sys, os, time, subprocess, json
-sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
-from cdp import Chrome
-from journeys import free
-HERE=os.path.dirname(os.path.abspath(__file__))
-R=sys.argv[1] if len(sys.argv)>1 else os.path.join(HERE,'_render'); p=free()
-srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(0.6)
-c=Chrome(port=free()); J=c.js
-SETV="""((sel,val)=>{const i=document.querySelector(sel); const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,val); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})"""
-BTN="""((t)=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()===t); if(b){b.click(); return true;} return false;})"""
-CLK="""((t,sc)=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...document.querySelectorAll(sc||'button,a')]; const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
-def ROW(ti,txt): return f"[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(txt)})>=0)"
-def openrow(ti,txt): J(f"(()=>{{const r={ROW(ti,txt)}; (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.35)
-# revisão TABR (09/10/2026, A1): a Situação vem logo depois do talhão ("T3 Em dia Sequeiro …"); a linha é achada pelo código na 1ª célula
-def openrow1(ti,cod): J(f"""(()=>{{const r=[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>{{const c=r.querySelector('[role=cell]'); return c&&c.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim()==={json.dumps(cod)};}}); (r.querySelector('[role=cell] span')||r).click();}})()"""); time.sleep(.35)
-def rowtxt(ti,txt): return J(f"(()=>{{const r={ROW(ti,txt)}; return r?r.innerText.replace(/\\s+/g,' '):null;}})()")
-def fset(k,val): J(f"({SETV})('aside[role=dialog] [id$=\"_{k}\"]',{json.dumps(val)})"); time.sleep(.2)
-def dlg(): return J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
-def labels(): return J("[...document.querySelectorAll('aside[role=dialog] label[for]')].map(l=>l.innerText.trim())")
-def alerts(): return J("[...document.querySelectorAll('aside [role=alert]')].map(x=>x.innerText).join(' | ')")
-def toast(): return J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')")
-def aberto(): return J("!!document.querySelector('aside[role=dialog]')")
-def erro_js(): return J("[...document.querySelectorAll('.sc-logic-error')].map(e=>e.innerText).join(' | ')")
-def save(): J(f"({BTN})('Salvar')"); time.sleep(.4)
-def fechar(): J(f"({BTN})('Cancelar')"); time.sleep(.2); J(f"({BTN})('Descartar alterações')"); time.sleep(.2)
-def fill(i): return J(f"(()=>{{const e=document.querySelectorAll('main svg polygon, main svg circle')[{i}]; return e?e.getAttribute('fill'):null;}})()")
-def aba(t): J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab]')].find(b=>b.innerText.replace(/\\s+/g,' ').trim().startsWith({json.dumps(t)})); if(b) b.click();}})()"); time.sleep(.35)
-def vis(t): J(f"({CLK})({json.dumps(t)},'main [role=group] button')"); time.sleep(.35)
-def novafaz(): aba('Fazendas'); J(f"({CLK})('Cadastrar fazenda','main button')"); time.sleep(.35)
-# sem rolagem de página: documento e <main> cabem na janela; a área de dados (ou o mapa) rola por dentro do bloco
-PAG="""(()=>{const se=document.scrollingElement; const m=document.querySelector('main'); return {doc:se.scrollHeight<=innerHeight, main:m.scrollHeight<=m.clientHeight+1};})()"""
-# posição da legenda do mapa em relação ao artboard e ao corpo que rola
-LEG="""(()=>{const root=document.querySelector('[data-root]').getBoundingClientRect(); const m=document.querySelector('main'); const mb=m.getBoundingClientRect();
-  const l=[...document.querySelectorAll('main div')].find(d=>d.children.length>=3&&d.innerText.indexOf('polígono validado')>=0&&d.innerText.indexOf('inativo')>=0);
-  const b=l.getBoundingClientRect(); return {leg:Math.round(b.bottom), root:Math.round(root.bottom), mainBottom:Math.round(mb.bottom), rola:m.scrollHeight>m.clientHeight+1, ov:getComputedStyle(m).overflowY};})()"""
-ok=[]
-def chk(nome,cond,extra=''):
-    ok.append(bool(cond)); print(('OK  ' if cond else 'FALHOU ')+nome+(' · '+str(extra)[:300] if extra else ''), flush=True)
-try:
-    c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/CD-01.dc.html',wait=1.2)
-    bts=J("[...document.querySelectorAll('button,a')].map(b=>b.innerText.trim())")
-    chk('1 sem erro JS e "Importar geometrias" retirado da tela', erro_js()=='' and 'Importar geometrias' not in bts, [erro_js()])
-    # ---------- formulários de cadastro novo ----------
-    novafaz(); d=dlg(); L=labels()
-    chk('2 fazenda nova: texto de cadastro, sem instrução de inativar e sem campo Situação', 'Cadastre a fazenda' in d and 'Inativa' not in d and 'Altere' not in d and 'Situação' not in L, [d[:160],L])
-    J(f"({BTN})('Cancelar')"); time.sleep(.25); aba('Talhões')
-    J(f"({CLK})('Cadastrar talhão','main button')"); time.sleep(.35); d=dlg(); L=labels()
-    chk('3 talhão novo: texto de cadastro, sem "Área do polígono" vazio e sem Situação', 'Cadastre o talhão' in d and 'Inativo' not in d and 'Altere' not in d
-        and 'Área do polígono' not in L and 'Situação' not in L and 'Área cultivável' in L, [d[:200],L])
-    J(f"({BTN})('Cancelar')"); time.sleep(.25)
-    # ---------- talhão com parcelas em safra aberta não muda de fazenda ----------
-    openrow1(0,'T3'); d=dlg(); L=labels()
-    chk('4 edição do T3 mantém texto de edição, polígono e Situação', 'Altere o talhão' in d and 'Área do polígono' in L and 'Situação' in L, [d[:120],L])
-    fset('faz','Boa Vista'); save(); al=alerts()
-    chk('5 T3 com parcelas na safra aberta não muda de fazenda (erro no campo Fazenda)', aberto() and 'T3 tem parcelas na Safra 2026/27 da Santa Rita. Tire-as no Planejar safra antes de mudar de fazenda.' in al
-        and 'Salvo' not in toast(), [al,toast()])
-    fechar(); sr=rowtxt(0,'Santa Rita 8 talhões'); bv=rowtxt(0,'Boa Vista 1 talhão'); vis('Mapa')
-    chk('6 depois de cancelar: T3 segue na Santa Rita (1.165,0 ha) e verde no mapa', '1.165,0 ha' in (sr or '') and '120,0 ha' in (bv or '') and fill(3)=='#8FD67F', [sr,bv,fill(3)])
-    vis('Lista')
-    # ---------- talhão sem parcelas muda de fazenda ----------
-    openrow1(0,'B1'); fset('faz','Santa Rita'); save()
-    chk('7 B1 sem parcelas muda para a Santa Rita', not aberto() and 'Salvo: B1 · Santa Rita.' in toast() and '1.285,0 ha' in (rowtxt(0,'Santa Rita 9 talhões') or ''), [toast(),rowtxt(0,'Santa Rita')])
-    # ---------- reativar com toast próprio ----------
-    openrow1(0,'B1'); fset('sit','Inativo'); save(); openrow1(0,'B1'); fset('sit','Ativo'); save()
-    chk('8 reativar o B1 avisa que volta ao Planejar safra e ao Mapa', 'B1 reativado: volta ao Planejar safra e ao Mapa.' in toast(), toast())
-    # ---------- sem rolagem de página: cadastrar fazendas e talhões não faz a página rolar; lista e mapa rolam no bloco ----------
-    novafaz(); fset('nome','Nova Esperança'); fset('mun','Jataí'); fset('area','600'); save(); aba('Talhões')
-    J(f"(()=>{{const r={ROW(0,'Nova Esperança')}; [...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Cadastrar talhão').click();}})()"); time.sleep(.35)
-    fset('t','N1'); fset('decl','250'); save()
-    pg=J(PAG); rola=J("(()=>{const r=document.querySelector('main .g2rola'); return r?[r.scrollHeight,r.clientHeight,getComputedStyle(r).overflowY]:null;})()")
-    print('   ', toast(), rowtxt(0,'Nova Esperança'))
-    chk('9 com uma fazenda e um talhão novos a página não rola; a tabela rola dentro do bloco', pg['doc'] and pg['main'] and rola and rola[2]=='auto', [pg,rola])
-    for nm in ('Serra Azul','Alvorada'):
-        novafaz(); fset('nome',nm); fset('mun','Jataí'); fset('area','300'); save()
-    aba('Talhões'); vis('Mapa'); time.sleep(.2)
-    J("(()=>{const r=[...document.querySelectorAll('main .cadx-rola')].pop(); if(r) r.scrollTop=r.scrollHeight;})()"); time.sleep(.3)
-    lg2=J("""(()=>{const l=[...document.querySelectorAll('main div')].filter(d=>d.children.length>=3&&d.innerText.indexOf('polígono validado')>=0&&d.innerText.indexOf('inativo')>=0).pop();
-      const r=l&&l.closest('.cadx-rola'); if(!l||!r) return null; const b=l.getBoundingClientRect(), rb=r.getBoundingClientRect(); return {leg:Math.round(b.bottom), rola:Math.round(rb.bottom)};})()""")
-    pg=J(PAG); c.shot(os.path.join(HERE,'_probe','cadf_fix_lista_rolagem.png')); vis('Lista')
-    chk('10 com mais fazendas a página continua sem rolar e a legenda do mapa fica inteira dentro do bloco', pg['doc'] and pg['main'] and lg2 and lg2['leg']<=lg2['rola'], [pg,lg2])
-    # ---------- mapa só mostra talhão da fazenda do mapa (cadastro salvo por versão anterior) ----------
-    J("""(()=>{const k='talhao-os-cd01-v1'; const s=JSON.parse(localStorage.getItem(k)); s.tal.forEach(t=>{ if(t.id==='T3') t.v.faz='Boa Vista'; }); localStorage.setItem(k,JSON.stringify(s));})()""")
-    c.goto(f'http://127.0.0.1:{p}/CD-01.dc.html',wait=1.2); vis('Mapa')
-    J("document.querySelectorAll('main svg polygon')[3].dispatchEvent(new MouseEvent('click',{bubbles:true}))"); time.sleep(.3)
-    chk('11 T3 de outra fazenda não aparece no Mapa · Santa Rita nem abre por ele', fill(3)=='#E9EEE6' and fill(2)=='#8FD67F' and not aberto() and erro_js()=='', [fill(3),fill(2),aberto()])
-finally:
-    c.close(); srv.terminate()
+CADUX P9 (09/10/2026): reescrito com as mesmas regras (REQUISITOS §4: B1, E2) sobre a seleção que abre detalhe (DEC-0910-01); roda a
+lógica da página no node (cadux_node.py). Expectativas que mudaram, com o motivo:
+  2, 3  o texto de criação começa por "Crie" (BOT-03: o verbo é "Criar"), não "Cadastre";
+  9, 10 (página sem rolagem; legenda do mapa inteira) dependem de layout: passaram para o teste de navegador cadux_cd01_test.py
+        ("a página não rola; a grade e o mapa rolam dentro do bloco"), com a mesma regra.
+Uso: python3 cadf_fix_lista_test.py  (lê project/; sai com 1 se alguma regra falhar)."""
+import os, sys, json
+HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); os.chdir(HERE)
+from cadux_node import roda, AUX
+ok = []
+def chk(nome, cond, extra=''):
+    ok.append(bool(cond)); print(('OK  ' if cond else 'FALHOU ') + nome + (' · ' + str(extra)[:300] if extra and not cond else ''), flush=True)
+html = open(os.path.join(HERE, 'project', 'CD-01.dc.html'), encoding='utf-8').read()
+o = roda('CD-01', AUX + r'''
+let x=v(); x.cd_nfaz(); v(); const F2=painel('g_faz'); OUT.d2=F2.sub; OUT.l2=rotulos('g_faz'); fecha('g_faz');
+x=v(); x.cd_criar(); v(); const F3=painel('g_tal'); OUT.d3=F3.sub; OUT.l3=rotulos('g_tal'); fecha('g_tal');
+x=mestre('SR'); edita('g_tal','T3'); OUT.d4=painel('g_tal').sub; OUT.l4=rotulos('g_tal');
+fset('g_tal','faz','Boa Vista'); OUT.t5=salva('g_tal'); OUT.e5=errosT('g_tal'); OUT.ab5=!!painel('g_tal');
+cancela('g_tal'); fecha('g_tal'); x=mestre(''); OUT.sr6=linhaTxt('g_tal','F_SR'); OUT.bv6=linhaTxt('g_tal','F_BV'); x=mestre('SR'); OUT.f6=x.mf_T3;
+// ---------- talhão sem parcelas muda de fazenda ----------
+x=mestre('BV'); edita('g_tal','B1'); fset('g_tal','faz','Santa Rita'); OUT.t7=salva('g_tal'); OUT.ab7=!!(painel('g_tal')&&!painel('g_tal').cons); fecha('g_tal');
+x=mestre(''); OUT.sr7=linhaTxt('g_tal','F_SR');
+// ---------- reativar com aviso próprio ----------
+edita('g_tal','B1'); fset('g_tal','sit','Inativo'); salva('g_tal'); fecha('g_tal');
+edita('g_tal','B1'); fset('g_tal','sit','Ativo'); OUT.t8=salva('g_tal'); fecha('g_tal');
+OUT.ls=ls();
+''')
+if o.get('__errs'): print('erros de script:', o['__errs'])
+chk('1 sem erro JS e "Importar geometrias" retirado da tela', not o.get('__errs') and 'Importar geometrias' not in html, o.get('__errs'))
+chk('2 fazenda nova: texto de criação, sem instrução de inativar e sem campo Situação', (o.get('d2') or '').startswith('Crie a fazenda') and 'Inativa' not in (o.get('d2') or '')
+    and 'Altere' not in (o.get('d2') or '') and 'Situação' not in (o.get('l2') or []), [o.get('d2'), o.get('l2')])
+chk('3 talhão novo: texto de criação, sem "Área do polígono" vazio e sem Situação', (o.get('d3') or '').startswith('Crie o talhão') and 'Inativo' not in (o.get('d3') or '')
+    and 'Área do polígono' not in (o.get('l3') or []) and 'Situação' not in (o.get('l3') or []) and 'Área cultivável' in (o.get('l3') or []), [o.get('d3'), o.get('l3')])
+chk('4 edição do T3 mantém texto de edição, polígono e Situação', 'Altere o talhão' in (o.get('d4') or '') and 'Área do polígono' in (o.get('l4') or []) and 'Situação' in (o.get('l4') or []), [o.get('d4'), o.get('l4')])
+chk('5 T3 com parcelas na safra aberta não muda de fazenda (erro no campo Fazenda)', o.get('ab5') and 'T3 tem parcelas na Safra 2026/27 da Santa Rita. Tire-as no Planejar safra antes de mudar de fazenda.' in (o.get('e5') or '')
+    and 'Salvo' not in (o.get('t5') or ''), [o.get('e5'), o.get('t5')])
+chk('6 depois de cancelar: T3 segue na Santa Rita (1.165,0 ha) e verde no mapa', '1.165,0 ha' in (o.get('sr6') or '') and '120,0 ha' in (o.get('bv6') or '') and o.get('f6') == '#8FD67F', [o.get('sr6'), o.get('bv6'), o.get('f6')])
+chk('7 B1 sem parcelas muda para a Santa Rita', not o.get('ab7') and 'Salvo: B1 · Santa Rita.' in (o.get('t7') or '') and '1.285,0 ha' in (o.get('sr7') or '') and '9 talhões' in (o.get('sr7') or ''), [o.get('t7'), o.get('sr7')])
+chk('8 reativar o B1 avisa que volta ao Planejar safra e ao Mapa', 'B1 reativado: volta ao Planejar safra e ao Mapa.' in (o.get('t8') or ''), o.get('t8'))
+# 11: mapa só mostra talhão da fazenda do mapa (cadastro salvo por versão anterior com o T3 na Boa Vista)
+ls = json.loads(o.get('ls') or '{}'); k = 'talhao-os-cd01-v1'
+cad = json.loads(ls.get(k) or 'null') or {}
+for t in cad.get('tal', []):
+    if t.get('id') == 'T3': t['v']['faz'] = 'Boa Vista'
+ls[k] = json.dumps(cad, ensure_ascii=False)
+m = roda('CD-01', AUX + r'''let x=v(); OUT.f3=x.mf_T3; OUT.f2=x.mf_T2; OUT.tu=typeof x.mt_T3; try{ x.cd_mtu; }catch(e){} OUT.p=!!painel('g_tal');''', hash='#faz=SR',
+         antes='(function(){ const o=' + json.dumps(ls, ensure_ascii=False) + '; for(const k in o) localStorage.setItem(k,o[k]); })();')
+chk('11 T3 de outra fazenda não aparece no mapa da Santa Rita nem abre por ele', m.get('f3') == '#E9EEE6' and m.get('f2') == '#8FD67F' and not m.get('p') and not m.get('__errs'), m)
 print('RESULTADO:', 'OK' if all(ok) else 'FALHOU', f'{sum(ok)}/{len(ok)}')
+sys.exit(0 if all(ok) else 1)

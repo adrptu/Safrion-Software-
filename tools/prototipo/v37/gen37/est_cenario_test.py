@@ -62,7 +62,7 @@ try:
     E.shot('est_cen_saldos.png')
     # 9 · contagem cega com divergência vira ajuste pendente; o saldo não muda
     E.etapa(5); print('primário:', E.prim()); E.clk('Contar INV-2611'); a = E.aside()
-    E.setv('fx_g_cnt_contador', 'Paula (almoxarife)'); E.setv('fx_g_cnt_cont', '870'); E.salvar(); print('toast:', E.toast())  # revisão CONF F6: o contador não tem mais valor padrão (era o 1º da lista fixa); a pessoa escolhe quem contou
+    E.setv('fx_g_cnt_cont', '870'); E.salvar(); print('toast:', E.toast())
     st = E.cen("(()=>{const a=(c.ajustes||[]).slice(-1)[0]||{}; return [a.estado,a.dif,a.inv,c.lotes['Glifosato 480|G26-14'].fisico];})()"); print(' ', st, E.rowtxt('INV-2611'))
     E.ok('900' not in a and st == ['Aguardando gestor', -30, 'INV-2611', 900] and 'Ajuste aguardando aprovação' in E.rowtxt('INV-2611'),
          'contagem cega (saldo oculto) de 870 L no G26-14: ajuste −30 L aguardando o gestor; físico continua 900 L')

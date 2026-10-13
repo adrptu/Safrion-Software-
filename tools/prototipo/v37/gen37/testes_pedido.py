@@ -99,11 +99,18 @@ def t06(t):
     """Clicar na linha para editar pelo formulário lateral."""
     for f,txt in [('SAF.dc.html',None),('CD-05.dc.html','Fertisul'),('EST.dc.html',None)]:
         if f=='SAF.dc.html': abrir_safra(t); r=row_click(t,'T1-A')
+        elif f=='CD-05.dc.html':
+            # CADUX (09/10/2026, SEL-01 da DEC-0910-01 e R12): nos Cadastros o alvo da linha abre o parceiro em consulta e "Editar parceiro"
+            # abre o formulário lateral preenchido (antes a linha abria o formulário direto)
+            t.abrir(f); r=t.js(f"(()=>{{const r=[...document.querySelectorAll('[role=row][data-rid]')].find(r=>r.innerText.indexOf({json.dumps(txt)})>=0); const a=r&&r.querySelector('.g2alvo'); if(!a) return 'sem linha'; a.click(); return 'ok';}})()"); time.sleep(.4)
+            t.check(f'{f}: o alvo da linha abre o parceiro em consulta (sem campo editável)',t.form() and not t.js("[...document.querySelectorAll('aside[role=dialog] input:not([readonly]),aside[role=dialog] select:not([disabled])')].length"),r)
+            t.clk('Editar parceiro','aside[role=dialog]')
         else:
             t.abrir(f); r=row_click(t,txt) if txt else t.js("(()=>{const r=document.querySelector('[role=row].g2ed'); if(!r) return 'sem linha'; (r.querySelector('[role=cell] span')||r).click(); return 'ok';})()")
-        time.sleep(.4); t.check(f'{f}: clique na linha abre formulário preenchido',t.form() and t.js("[...document.querySelectorAll('aside[role=dialog] input,aside[role=dialog] select')].some(i=>i.value)"),r)
+        time.sleep(.4); t.check(f'{f}: '+('"Editar parceiro" abre o formulário preenchido' if f=='CD-05.dc.html' else 'clique na linha abre formulário preenchido'),t.form() and t.js("[...document.querySelectorAll('aside[role=dialog] input,aside[role=dialog] select')].some(i=>i.value)"),r)
         if f=='CD-05.dc.html': t.foto('fornecedor-form')
         t.clk('Cancelar','aside[role=dialog]',esperado=False); t.clk('Fechar','aside[role=dialog]',esperado=False)
+        if f=='CD-05.dc.html': t.js("(()=>{const b=document.querySelector('aside[role=dialog] button[aria-label=Fechar]'); b&&b.click();})()"); time.sleep(.3)
 def t07(t):
     """Expandir, selecionar ou excluir sem abrir acidentalmente a edição."""
     abrir_safra(t)

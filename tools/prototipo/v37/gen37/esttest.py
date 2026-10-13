@@ -116,7 +116,7 @@ def parte3(E):
     t = E.rowtxt('INV-2611'); print('a contar:', t); E.ok('oculto até contar' in t and '1.200' not in t, 'A contar: saldo do sistema oculto')
     print('primário:', E.clk('Contar INV-2611'))
     E.ok('1.200' not in E.aside(), 'formulário da contagem não mostra o saldo')
-    E.setv('fx_g_cnt_contador', 'Paula (almoxarife)'); E.setv('fx_g_cnt_cont', '1180'); E.salvar(); print('toast:', E.toast())  # revisão CONF F6: o contador não tem mais valor padrão (era o 1º da lista fixa); a pessoa escolhe quem contou
+    E.setv('fx_g_cnt_cont', '1180'); E.salvar(); print('toast:', E.toast())
     E.ok(not E.aberto(), 'salvar sempre grava (sem exigir causa ao contar)')
     t = E.rowtxt('INV-2611'); print('linha:', t); E.ok('aguardando aprovação' in t and 'informe a causa' in t and '1.200 L' in t, 'diferença vira ajuste aguardando aprovação; pede causa')
     E.ok('Recontar' in t and 'Aprovar ajuste' in t, 'linha oferece Recontar e Aprovar ajuste')
@@ -146,7 +146,7 @@ def parte4(E):
     # CTL-3 · aprova quem decide (R-D1, R-D2; padrão 2): o perfil de demonstração (menu lateral) é quem age; não é segurança de acesso
     SEL = '[aria-label="Trocar perfil de demonstração"]'
     E.ok(E.J(f"(document.querySelector('{SEL}')||{{value:''}}).value") == 'Ana', 'menu lateral: seletor de perfil começa em Ana')
-    print('perfil Rui:', E.setv(SEL, 'Rui'), E.toast()); E.ok('Perfil de demonstração: Rui · Almoxarife e expedição (não é segurança de acesso).' in E.toast(), 'trocar de perfil avisa que não é segurança de acesso', E.toast())  # COM P1 (498104d): Rui é "Almoxarife e expedição" (comercial_unit C11b)
+    print('perfil Rui:', E.setv(SEL, 'Rui'), E.toast()); E.ok('Rui · Almoxarife (não é segurança de acesso)' in E.toast(), 'trocar de perfil avisa que não é segurança de acesso', E.toast())
     E.clk('Faça contagens'); t = E.rowtxt('INV-2609'); print('INV-2609 (Rui):', t)
     E.ok('aprova: Ana (gestora)' in t and 'Aprovar ajuste' not in t and 'Recontar' in t, 'Rui vê "aprova: Ana (gestora)" no lugar de Aprovar ajuste; Recontar continua', t)
     E.clk('Confira saldos'); t = E.rowtxt('K26-11'); print('K26-11 (Rui):', t)

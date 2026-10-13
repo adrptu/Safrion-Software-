@@ -979,7 +979,7 @@ def add(f,t,W,H,r):
 # =====================================================================================
 from html.parser import HTMLParser as _HP
 GRIDS=[]; NAVSPEC=[]
-G2LIB=open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'g2lib.js')).read()
+G2LIB=open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'g2lib.js')).read()+'\n'+open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'g2end.js')).read()   # CADUX: endereço e mestre (SEL-02)
 _old_reset=_reset_screen
 def _reset_screen(f):
     _old_reset(f); GRIDS.clear(); NAVSPEC.clear()
@@ -994,41 +994,19 @@ def _reset_screen(f):
 # selos, valores, cartões informativos) não recebe nada: só button, link, aba, opção, linha que abre detalhe e talhão.
 # =====================================================================================
 _ACAO=':is(button,a[href],summary,[role=tab],[role=option]):not(:disabled):not([aria-disabled=true]):not(.g2card)'
-# DS-HOVER-20261009 (proprietário, 05/10: "Padronize o hover verdinho em vez do cinza"): o realce passageiro do hover é o verde-claro do
-# sistema, o mesmo do .g2card (fundo #F2F8F4, borda #9DBFAA), nunca cinza. Três famílias, pela aparência que o próprio controle já tem:
-# - claro (secundário, opção, aba, item de lista, cartão clicável, link com cara de botão): camada verde translúcida por background-image
-#   (o estilo inline não define a imagem de fundo, então o matiz do estado continua: tonal, amarelo, vermelho) e a borda neutra #E4E9E5
-#   vira #9DBFAA; sobre o branco a camada dá #EFF6F2;
-# - cheio (primária verde, escuro, destrutivo cheio): só escurece (filter), sem camada clara por cima do texto branco;
-# - destrutivo claro (texto vermelho): camada vermelha translúcida, para o hover não dizer "seguro" num comando que apaga.
-# O menu lateral escuro mantém a regra própria. Contraste AA do texto sobre o hover medido em ds_unit.js (DS_HOVER).
-DS_HOVER=dict(fundo='#F2F8F4',borda='#9DBFAA',camada='rgba(30,122,76,.07)',camada_ativa='rgba(30,122,76,.14)',camada_destr='rgba(180,35,24,.06)')
-_CLARO=':is(button,a[href][style*="padding"],a.g2cta,summary,[role=tab],[role=option],div[role=button])'
-_CHEIO=(':is(.acoes-prim,[style*="background: rgb(30, 122, 76)"],[style*="background-color: rgb(30, 122, 76)"],[style*="background: rgb(21, 32, 26)"],'
-        '[style*="background-color: rgb(21, 32, 26)"],[style*="background: rgb(180, 35, 24)"],[style*="background-color: rgb(180, 35, 24)"])')
-_DESTR='[style*="color: rgb(180, 35, 24)"]'
-_LIVRE=':not(:disabled):not([aria-disabled=true]):not(.g2card):not(.menu-lat *)'
-_TONAL='main [aria-pressed=true]'   # escolha tonal (ACOES_CSS repinta o desenho cheio antigo): é clara, não cheia
-_NEUTRA=':is([style*="border: 1px solid rgb(228, 233, 229)"],[style*="border-color: rgb(228, 233, 229)"],.acoes-sec)'
-_CLARO_OK=f'{_CLARO}{_LIVRE}:is(:not({_CHEIO}),{_TONAL}):not({_DESTR})'
-_CHEIO_OK=f'{_CHEIO}{_LIVRE}:not({_TONAL})'
-def _camada(c): return f'background-image:linear-gradient({c},{c})!important'
 INTERACAO_CSS=(
-    # hover (DS-HOVER-20261009): claro ganha a camada e a borda verdes; cheio escurece; destrutivo claro ganha camada vermelha; menu escuro clareia
+    # hover: escurece de leve e acende uma camada interna (botões e links com cara de botão); menu escuro clareia
     "@media (hover:hover){"
-    f"{_CLARO_OK}:hover{{{_camada(DS_HOVER['camada'])}}}"
-    f"{_CLARO_OK}{_NEUTRA}:hover{{border-color:{DS_HOVER['borda']}!important}}"
-    f"{_CHEIO_OK}:hover{{filter:brightness(.92)}}"
-    f"{_DESTR}{_LIVRE}:not({_CHEIO}):hover{{{_camada(DS_HOVER['camada_destr'])}}}"
+    f"{_ACAO}:not(.menu-lat *):hover{{filter:brightness(.95)}}"
+    ":is(button,a[href][style*=\"padding\"],[role=tab],[role=option]):not(:disabled):not([aria-disabled=true]):not(.g2card):not(.menu-lat *):hover{box-shadow:inset 0 0 0 999px rgba(21,32,26,.05)}"
     ".menu-lat :is(a,button):hover{box-shadow:inset 0 0 0 999px rgba(255,255,255,.09)}"
-    f".g2ed:hover,.g2tot:hover{{background:{DS_HOVER['fundo']}}}"
-    f":is(input:not([type=checkbox]):not([type=radio]),select,textarea):not(:disabled):not([readonly]):hover{{box-shadow:0 0 0 1px {DS_HOVER['borda']}}}"
-    f"label:has(>input[type=search]):hover{{box-shadow:0 0 0 1px {DS_HOVER['borda']}}}"
+    ".g2ed:hover,.g2tot:hover{background:#F2F8F4}"
+    ":is(input:not([type=checkbox]):not([type=radio]),select,textarea):not(:disabled):not([readonly]):hover{box-shadow:0 0 0 1px #9DBFAA}"
+    "label:has(>input[type=search]):hover{box-shadow:0 0 0 1px #9DBFAA}"
     "svg [role=button]:hover{filter:brightness(.92)}"
     "}"
-    # pressionado: retorno imediato no toque e no clique (o iOS só aplica :active com um ouvinte de toque: g2lib); claro fica mais verde, cheio escurece
-    f"{_CLARO_OK}:active{{{_camada(DS_HOVER['camada_ativa'])}}}"
-    f"{_CHEIO_OK}:active{{filter:brightness(.86)}}"
+    # pressionado: retorno imediato no toque e no clique (o iOS só aplica :active com um ouvinte de toque: g2lib)
+    f"{_ACAO}:active{{filter:brightness(.88)}}"
     ".g2ed:active{background:#E4F3E9}"
     # foco de teclado: contorno nítido de 2 px fora do controle (dentro na linha da grade e no menu escuro em verde-claro)
     ":is(button,a[href],summary,input,select,textarea,[role=tab],[role=option],[tabindex]:not([tabindex=\"-1\"])):focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}"
@@ -1068,7 +1046,6 @@ MOBILE_CSS=("[data-mroot]{max-width:var(--mw);max-height:100vh;max-height:100dvh
 # do conteúdo, alcançável por rolagem. O foco levado à vista desconta a altura dela (scroll-padding, medido pelo g2lib) e o
 # aviso temporário sobe acima dela. No estreito, empilha mantendo a ordem: nota, retorno, avanço/primária.
 # =====================================================================================
-AVISO_PE='22px'   # distância do aviso temporário (G2_TOAST) ao pé da janela, sem a área de ações presa; a reserva da área em fluxo usa a mesma
 ACOES_CSS=(".acoes{position:sticky;bottom:0;z-index:6;display:flex;flex-direction:column;gap:6px;margin-top:2px;padding:10px 0 2px;"
     "background:#F4F6F3;border-top:1px solid #E4E9E5;box-shadow:0 -8px 12px -12px rgba(21,32,26,.35)}"
     ".acoes-nota{margin:0;font-size:12.8px;line-height:1.4;color:#5B4300;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}"
@@ -1085,14 +1062,8 @@ ACOES_CSS=(".acoes{position:sticky;bottom:0;z-index:6;display:flex;flex-directio
     "@media (pointer:coarse){.acoes :is(.acoes-sec,.acoes-prim){min-height:44px}}"
     # estreito: botões na largura disponível, sem comprimir a barra; ordem visual = ordem de leitura/Tab (retorno, avanço, primária)
     "@media (max-width:640px){.acoes-linha{flex-wrap:wrap}.acoes-esp{display:none}.acoes :is(.acoes-sec,.acoes-prim){flex:1 1 140px;white-space:normal;text-align:center}}"
-    # altura curta: a casca rola inteira (ui37) e a área volta ao fluxo, no fim do conteúdo. V55-RESP-01: em fluxo, o aviso temporário
-    # (role=status, fixo a AVISO_PE do pé) ficava sobre os botões da área no fim da rolagem e o toque caía no aviso. A área reserva a faixa
-    # do aviso real: AVISO_PE + safe-area + altura medida do aviso (--aviso-h, g2lib: a do aviso na tela, com a quebra do texto; 0 sem
-    # aviso) + 8 px, no fim da rolagem (margem) e nos controles (margem de rolagem): rolar até o fim, centralizar ou levar o foco por Tab
-    # deixa o comando acima do aviso, qualquer que seja o tamanho dele. Em fluxo a área não sobe o aviso: --acoes-h = 0 já no CSS, sem
-    # esperar o quadro do g2lib (ao abrir o teclado o aviso vai logo para o pé, onde a reserva conta com ele)
-    "@media (max-height:560px){:root{--acoes-h:0px!important}.acoes{position:static;box-shadow:none;margin-bottom:calc("+AVISO_PE+" + env(safe-area-inset-bottom,0px) + var(--aviso-h,0px) + 8px)}"
-    ".acoes :is(button,a){scroll-margin-bottom:calc("+AVISO_PE+" + env(safe-area-inset-bottom,0px) + var(--aviso-h,0px) + 8px)}}"
+    # altura curta: a casca rola inteira (ui37) e a área volta ao fluxo, no fim do conteúdo
+    "@media (max-height:560px){.acoes{position:static;box-shadow:none}}"
     # painel lateral com rodapé preso: o campo focado (teclado aberto) não fica sob o rodapé
     "aside[role=dialog]{scroll-padding-bottom:84px}"
     # leitor de tela: palavra do estado da etapa sem depender da cor
@@ -1128,83 +1099,36 @@ def area_acoes(pre='aa',rotulo='Ações da etapa'):
             f'<sc-if value="{h("_hasPrim")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-prim" data-acao="{h("_primA")}" aria-describedby="{h("_desc")}" onClick="{h("_primFn")}">{h("_primT")}</button></sc-if>'
             f'<sc-if value="{h("_hasLink")}" hint-placeholder-val="{F_}"><a class="acoes-prim" data-acao="abrir" href="{h("_href")}">{h("_primT")}</a></sc-if>'
             f'</div></div></sc-if>')
-# =====================================================================================
-# DS-SEPARADOR-20261009 (proprietário: "tem telas sem essas linhas separadoras visuais que ficam abaixo do título e do botão no topo à direita
-# como no caso nova safra ... acho melhor ter para organizar a visão e a mente em blocos. Faça em todas telas e padronize no design system"):
-# uma linha de 1 px (#E4E9E5) separa o cabeçalho do resto, em três lugares, sempre pela classe/estrutura comum (nenhum divisor por tela):
-# 1. cabeçalho da página (título + ação do topo à direita): a borda inferior do header da casca (ui37.shell37, engine.mobile); telas fora da
-#    casca (índice, ficha impressa) usam .g2-cab;
-# 2. linha de título do bloco (section: título + descrição + ação à direita): linha recuada 12 px dos lados, como a moldura da tabela da
-#    tela Planejar safra; quando o conteúdo já começa por uma tabela emoldurada (.g2caixa com borda), a borda dela é a linha (sem linha dupla);
-# 3. painel lateral (aside[role=dialog]): abaixo do título e do × do topo à direita.
-DS_SEP=dict(cor='#E4E9E5',recuo='12px',espaco='10px')
-_CAB_BLOCO='main section>div:first-child:not(:last-child):has(>h2,>h3,>div>h2,>div>h3)'
-# o conteúdo que já começa por uma borda no topo faz o papel da linha (sem linha dupla): tabela emoldurada (.g2caixa), caixa com borda (aviso,
-# memória de cálculo) e ficha de pares rótulo × valor cuja 1ª célula traz border-top (revisão DS, achado 5: AG-04det, GE-05, GE-06det)
-_BORDA_TOPO=':is([style*="border: 1px"],[style*="border-top: 1px"])'
-_SEM_MOLDURA=(f':not(:has(+*>{_BORDA_TOPO}:first-child))'
-              f':not(:has(+*>sc-if:first-child>{_BORDA_TOPO}:first-child))'
-              f':not(:has(+*>:first-child>[style*="border-top: 1px"]:first-child))'
-              f':not(:has(+*>sc-if:first-child>:first-child>[style*="border-top: 1px"]:first-child))')
-SEP_CSS=(
-    f"{_CAB_BLOCO}{_SEM_MOLDURA}{{background-image:linear-gradient({DS_SEP['cor']},{DS_SEP['cor']})!important;background-size:calc(100% - 2 * {DS_SEP['recuo']}) 1px!important;"
-    "background-position:50% 100%!important;background-repeat:no-repeat!important}"
-    f"{_CAB_BLOCO}{_SEM_MOLDURA}+*{{margin-top:{DS_SEP['espaco']}}}"
-    f"aside[role=dialog]>div:first-child:has(>h2),aside[role=dialog]>h2:first-child{{border-bottom:1px solid {DS_SEP['cor']};padding-bottom:12px}}"
-    f".g2-cab{{border-bottom:1px solid {DS_SEP['cor']};padding-bottom:14px}}"
-)
-# =====================================================================================
-# DS-RETORNO-20261009 (g2lib: g2flash, g2vivo, g2carga; chamados só pelo motor, ENGINE_JS2: montagem e cada desenho): realce passageiro do
-# que mudou, barra de carga entre telas e título focado por código. docs/design-system/separador-hover-retorno-dica.md (padrões e amostras).
-# =====================================================================================
-DS_RETORNO=dict(realce='#EDF7F0',realce_meio='#F2F8F4',anel='rgba(30,122,76,.38)',realce_ms=520,estatico='#EDF7F0',carga='#1E7A4C',carga_h='3px')   # realce claro o bastante para o texto apagado (#65736A) ficar em 4,55:1; o anel verde é o que chama o olho
-RETORNO_CSS=(
-    # realce passageiro do que mudou: verde suave que esmaece em 520 ms; com "menos movimento", realce estático curto (o g2lib tira em 600 ms)
-    f"@keyframes g2realce{{0%{{background-color:{DS_RETORNO['realce']};box-shadow:0 0 0 3px {DS_RETORNO['anel']}}}55%{{background-color:{DS_RETORNO['realce_meio']};box-shadow:0 0 0 2px rgba(30,122,76,.14)}}100%{{}}}}"
-    f".g2-realce{{animation:g2realce {DS_RETORNO['realce_ms']/1000:.2f}s ease-out}}"
-    f"@media (prefers-reduced-motion:reduce){{.g2-realce{{animation:none!important;background-color:{DS_RETORNO['estatico']}!important;box-shadow:0 0 0 2px #1E7A4C!important}}}}"
-    # título que recebe o foco por código (tela nova, etapa nova): sem anel de foco; o realce mostra o novo contexto
-    ":is(h1,h2,h3)[tabindex=\"-1\"]:focus{outline:none}"
-    # barra fina de carga entre telas (do clique no link até a tela nova montar)
-    f"#g2-carga{{position:fixed;top:0;left:0;height:{DS_RETORNO['carga_h']};width:0;background:{DS_RETORNO['carga']};box-shadow:0 0 8px rgba(30,122,76,.5);z-index:2147483000;pointer-events:none;opacity:0}}"
-    "#g2-carga.ini{opacity:1;width:82%;transition:width 1.4s cubic-bezier(.08,.6,.2,1)}#g2-carga.chega{opacity:1;width:82%}"
-    "#g2-carga.fim{opacity:0;width:100%;transition:width .22s ease-out,opacity .28s ease .22s}"
-    "@media (prefers-reduced-motion:reduce){#g2-carga.ini,#g2-carga.chega{width:100%;transition:none}#g2-carga.fim{transition:none}}"
-)
-# =====================================================================================
-# DS-DICA-20261009 (g2lib: g2dica, G2_DICAS): dica acessível (role=tooltip), ícone ⓘ, termo com dica e indisponível com motivo.
-# =====================================================================================
-DS_DICA=dict(fundo='#15201A',texto='#FFFFFF',raio='9px',largura='320px',atraso_ms=300,toque_ms=500,borda_i='#9DBFAA')
-DICA_CSS=(
-    # dica (role=tooltip): fundo escuro, texto branco (contraste 16,7:1), até 320 px, fora do fluxo (não empurra nada)
-    f".g2dica{{position:fixed;z-index:2147483001;max-width:{DS_DICA['largura']};box-sizing:border-box;padding:8px 11px;border-radius:{DS_DICA['raio']};background:{DS_DICA['fundo']};color:{DS_DICA['texto']};"
-    "font-family:'Manrope',system-ui,sans-serif;font-size:12.5px;font-weight:600;line-height:1.4;letter-spacing:0;text-transform:none;text-align:left;white-space:normal;overflow-wrap:anywhere;"
-    "box-shadow:0 10px 26px -10px rgba(21,32,26,.55);pointer-events:auto}.g2dica[hidden]{display:none}"
-    "@media (prefers-reduced-motion:no-preference){.g2dica:not([hidden]){animation:g2dicaEntra .12s ease-out}}@keyframes g2dicaEntra{from{opacity:0;transform:translateY(2px)}to{opacity:1;transform:none}}"
-    # ícone ⓘ (caminho da dica no toque): 18 px no desenho, 44 px de alvo com ponteiro grosso
-    f".g2dica-i{{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;padding:0;margin:0 0 0 4px;border:1px solid {DS_DICA['borda_i']};border-radius:999px;"
-    "background:#FFFFFF;color:#1E7A4C;font-family:inherit;font-size:11px;font-weight:800;font-style:normal;line-height:1;cursor:help;vertical-align:middle;position:relative;flex-shrink:0}"
-    "@media (pointer:coarse){.g2dica-i::after{content:'';position:absolute;inset:-13px}}"
-    # termo com dica (sigla, unidade, valor calculado): sublinhado pontilhado, como abbr; selo com dica: cursor de ajuda
-    "span[data-dica]:not([data-dica=\"\"]):not(.g2dica-i):not([style*=\"border-radius: 999px\"]){text-decoration:underline dotted #8A968E;text-decoration-thickness:1px;text-underline-offset:3px;cursor:help}"
-    "[data-dica]:not([data-dica=\"\"])[style*=\"border-radius: 999px\"]{cursor:help}"
-    # indisponível com motivo: continua focável (aria-disabled), com a mesma aparência do desabilitado; o g2lib recusa o clique e mostra o porquê
-    ":is(button,a)[aria-disabled=true]{opacity:.55;cursor:not-allowed;filter:none;box-shadow:none}"
-    # motivo do indisponível em texto junto do controle (PRD DS-06 e 74.5.0, VIS-04): visível sem ponteiro nem foco, texto secundário (4,97:1
-    # no branco); acao_motivo monta o par botão + motivo; no estreito o par ocupa a linha e o motivo alinha à esquerda, sob o botão
-    ".g2ind{display:inline-flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:0;max-width:360px}"
-    ".g2motivo{display:block;font-size:12.5px;font-weight:600;line-height:1.35;color:#65736A;text-align:right;white-space:normal;overflow-wrap:anywhere;border-radius:6px}"
-    "@media (max-width:640px){.g2ind{align-items:flex-start;max-width:100%}.g2motivo{text-align:left}}"
-)
-def acao_motivo(botao, dis, motivo):
-    """Botão que pode ficar indisponível com motivo (PRD DS-06 e 74.5.0, VIS-04): o botão (com aria-disabled="{dis}" e data-dica="{motivo}") e,
-    só enquanto indisponível, o motivo em texto visível logo abaixo, na cor do texto secundário. A dica no ponteiro, no foco e no toque longo
-    complementa; não substitui o texto. Ativar o botão indisponível realça este motivo e anuncia a recusa (g2lib)."""
-    return f'<span class="g2ind">{botao}<sc-if value="{dis}" hint-placeholder-val="{{{{false}}}}"><span class="g2motivo">{motivo}</span></sc-if></span>'
 G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
         # hover dos controles pequenos da grade só onde existe ponteiro com hover (no toque o fundo não fica "grudado")
-        "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover,.g2car:hover{background:#E4F3E9}.g2del:hover{background:#FDE8E6;color:#B42318}}"   # DS-HOVER: verde, não cinza
+        "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover,.g2car:hover{background:#E4E9E5}.g2del:hover{background:#FDE8E6;color:#B42318}}"
         ".g2kid{background:#FBFCFA}.g2flash{background:#E4F3E9}.g2tot{cursor:pointer}"
+        # CADUX: alvo único da linha (BOT-07) com cara de nome, não de botão; linha do registro aberto marcada (o painel cobre a grade)
+        ".g2alvo{border:0;background:transparent;padding:0;margin:0;font:inherit;font-weight:800;color:#15201A;cursor:pointer;text-align:left;white-space:nowrap}.g2rola[data-c0] .g2alvo{white-space:normal;overflow-wrap:anywhere}"
+        "@media (hover:hover){.g2alvo:hover{text-decoration:underline;text-underline-offset:3px;color:#1E7A4C}}.g2alvo:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:4px}"
+        ".g2aberto [role=cell]{box-shadow:inset 0 -2px 0 #1E7A4C}"
+        ".g2pai{border:0;background:transparent;padding:4px 0;font-family:inherit;font-size:13px;font-weight:700;color:#1E7A4C;cursor:pointer}"
+        ".g2nav{display:inline-flex;align-items:center;gap:4px;flex-shrink:0;font-size:12px;color:#65736A;font-weight:600}"
+        ".g2nav button{width:32px;height:32px;border-radius:999px;border:1px solid #E4E9E5;background:#FFFFFF;font-size:17px;font-weight:700;color:#15201A;cursor:pointer;font-family:inherit}"
+        ".g2nav button:disabled{opacity:.4;cursor:not-allowed}"
+        ".g2cons{display:flex;flex-direction:column;gap:14px}"
+        ".g2prox{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:12px}.g2prox p{margin:0;font-size:13.5px;font-weight:700;line-height:1.4}"
+        ".g2prox-k{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#65736A}.g2prox .g2prox-q,.g2prox .g2prox-m{font-weight:600;font-size:12.5px;color:#4B5A51}"
+        ".g2prox-a{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}.g2prox-a:empty{display:none}"
+        ".g2lk{border:0;background:transparent;padding:0;font-family:inherit;font-size:13px;font-weight:700;color:#1E7A4C;cursor:pointer;text-align:left}"
+        "@media (hover:hover){.g2lk:hover,.g2cons a:hover{text-decoration:underline;text-underline-offset:3px}}"
+        ".g2sec{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.g2mais{position:relative}.g2mais>summary{list-style:none;display:inline-block}.g2mais>summary::-webkit-details-marker{display:none}"
+        ".g2mais>div{position:absolute;z-index:5;top:calc(100% + 4px);left:0;min-width:220px;background:#FFFFFF;border:1px solid #E4E9E5;border-radius:10px;box-shadow:0 12px 30px -14px rgba(21,32,26,.4);padding:4px;display:flex;flex-direction:column}"
+        ".g2mais>div>button{border:0;background:transparent;text-align:left;padding:8px 10px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;color:#15201A;cursor:pointer}"
+        "@media (hover:hover){.g2mais>div>button:hover{background:#E4F3E9}}"
+        ".g2bloco{display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px solid #E4E9E5}.g2bloco>h3{margin:0;font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#4B5A51}"
+        ".g2bloco dl{margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px 18px}.g2bloco dl>div{display:flex;flex-direction:column;gap:1px;min-width:0}"
+        ".g2bloco dt{font-size:11.5px;font-weight:600;color:#65736A}.g2bloco dd{margin:0;font-size:13.5px;font-weight:600;color:#15201A;overflow-wrap:anywhere}"
+        ".g2fil{display:flex;flex-direction:column;gap:6px}.g2fil button{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:8px 12px;border:1px solid #E4E9E5;border-radius:10px;background:#FFFFFF;font-family:inherit;font-size:13px;color:#15201A;cursor:pointer;text-align:left;box-sizing:border-box}"
+        "@media (hover:hover){.g2fil button:hover{border-color:#1E7A4C;background:#F2F8F4}}.g2fil-t{font-weight:800;white-space:nowrap}.g2fil-s{flex-grow:1;min-width:0;color:#65736A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}"
+        ".g2ctab{overflow-x:auto;border:1px solid #E4E9E5;border-radius:10px}.g2ctab [role=table]{min-width:100%;width:max-content;font-size:12.8px}"
+        ".g2ctab [role=columnheader]{padding:7px 10px;background:#F4F6F3;font-weight:700;color:#4B5A51;white-space:nowrap}.g2ctab [role=cell]{padding:7px 10px;border-top:1px solid #E4E9E5;white-space:nowrap}"
+        ".g2nota{margin:0;font-size:12.8px;color:#4B5A51;line-height:1.45}.g2lks{display:flex;flex-wrap:wrap;gap:6px 16px}"
         ".g2sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}"   # texto só para leitor de tela (motivo do chip)
         ".g2hb{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;padding:7px 2px 7px 0;text-align:left;white-space:normal;max-width:104px;line-height:1.2}"
         ".g2fb{border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;padding:4px 3px;border-radius:6px}"
@@ -1236,7 +1160,7 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         "main section:only-of-type>div:last-child>div>.g2caixa:last-of-type{flex:1 1 0}main section:only-of-type>div:last-child>div>.g2caixa:last-of-type>.g2rola{flex:1 1 0}"
         "main section:only-of-type>div:last-child>div>.rola{flex:1 1 0;min-height:0;overflow:auto}"
         ".g2rola [role=table]>[role=row]:first-child{position:sticky;top:0;z-index:3}"
-        + INTERACAO_CSS + ACOES_CSS + SEP_CSS + RETORNO_CSS + DICA_CSS)
+        + INTERACAO_CSS + ACOES_CSS)
 _TRASH='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>'
 _MINI=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap;'
 _MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {ACC}; background: {ACC}; color: #fff; cursor: pointer; white-space: nowrap;'
@@ -1244,7 +1168,7 @@ _PARTS=(f'<sc-if value="{{{{p.isTxt}}}}" hint-placeholder-val="{{{{false}}}}"><s
         f'<sc-if value="{{{{p.isCn}}}}" hint-placeholder-val="{{{{false}}}}"><span style="{{{{p.st}}}}">{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isB}}}}" hint-placeholder-val="{{{{false}}}}"><b>{{{{p.t}}}}</b></sc-if>'
         f'<sc-if value="{{{{p.isMut}}}}" hint-placeholder-val="{{{{false}}}}"><span style="color: {MUTED}; font-size: 12px;">{{{{p.t}}}}</span></sc-if>'
-        f'<sc-if value="{{{{p.isChip}}}}" hint-placeholder-val="{{{{false}}}}"><span data-dica="{{{{p.dica}}}}" style="{{{{p.st}}}}"><span style="{{{{p.dot}}}}"></span>{{{{p.t}}}}<sc-if value="{{{{p.hasDica}}}}" hint-placeholder-val="{{{{false}}}}"><span class="g2sr">: {{{{p.dica}}}}</span></sc-if></span></sc-if>'
+        f'<sc-if value="{{{{p.isChip}}}}" hint-placeholder-val="{{{{false}}}}"><span title="{{{{p.dica}}}}" style="{{{{p.st}}}}"><span style="{{{{p.dot}}}}"></span>{{{{p.t}}}}<sc-if value="{{{{p.hasDica}}}}" hint-placeholder-val="{{{{false}}}}"><span class="g2sr">: {{{{p.dica}}}}</span></sc-if></span></sc-if>'
         f'<sc-if value="{{{{p.isTag}}}}" hint-placeholder-val="{{{{false}}}}"><span style="display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; color: {MUTED}; border: 1px solid {LINE}; white-space: nowrap;">{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isLink}}}}" hint-placeholder-val="{{{{false}}}}"><a href="{{{{p.href}}}}" style="color: {ACC}; font-weight: 700; text-decoration: none;">{{{{p.t}}}}</a></sc-if>'
         f'<sc-if value="{{{{p.isCta}}}}" hint-placeholder-val="{{{{false}}}}"><a class="{{{{p.cls}}}}" href="{{{{p.href}}}}" style="{{{{p.st}}}}">{{{{p.t}}}}</a></sc-if>'
@@ -1270,71 +1194,12 @@ def _col_un(c):
 import re as _re_mod
 _re_un=_re_mod.compile(r'^(.*?)\s*\(([^()]+)\)\s*$'); _re_un2=_re_mod.compile(r'^(\S+) por (.+)$')
 
-# DS-DICA-20261009 · siglas, unidades e valores calculados no cabeçalho da coluna: a dica nasce aqui (fonte única) quando a coluna não traz
-# ajuda própria. Só o que o rótulo não diz: o significado da sigla ou da unidade e a fórmula curta da coluna calculada (edit.calc).
-GLOSSARIO=[
-    (r'\bDAP\b','DAP: dias após o plantio, contados da data de plantio do talhão.'),
-    (r'\bDAE\b','DAE: dias após a emergência.'),
-    (r'\bCAD\b','CAD: capacidade de água disponível do solo (mm) na zona das raízes.'),
-    (r'\bNC\b','NC: nível de controle; acima dele o controle compensa o dano.'),
-    (r'\bETc\b','ETc: evapotranspiração da cultura (mm/dia) = ETo × Kc.'),
-    (r'\bETo\b','ETo: evapotranspiração de referência (mm/dia), da estação meteorológica.'),
-    (r'\bKc\b','Kc: coeficiente da cultura no estádio atual.'),
-    (r'\bha-op\b','ha-op: hectares-operação; cada passada conta (3 passadas em 10 ha = 30 ha-op).'),
-    (r'sc/ha','sc/ha: sacas por hectare; saca de 60 kg (soja, milho, feijão, trigo, café beneficiado); arroz em casca no RS e em SC, 50 kg (DEC-0510-03).'),
-    (r'\bt/ha\b','t/ha: toneladas por hectare (frutas e cana; cana em t de colmos por corte).'),
-    (r'ha/h','ha/h: rendimento, hectares trabalhados por hora de máquina.'),
-    (r'R\$/ha·mês','R$/ha·mês: reais por hectare por mês (valor mensal ÷ área em ha).'),
-    (r'R\$/ha·ano','R$/ha·ano: reais por hectare por ano (preço por ha·mês × 12).'),
-    (r'R\$/ha(?![·/])','R$/ha: reais por hectare (valor ÷ área em ha).'),   # revisão DS (achado 7): R$/ha·mês e R$/ha·ano têm entrada própria
-    (r'R\$/h\b','R$/h: reais por hora (valor ÷ horas).'),
-    (r'^Lâmina','Lâmina de água em mm: 1 mm = 10 m³ por hectare.'),
-    (r'\bATR\b','ATR: açúcar total recuperável, kg por tonelada de cana.'),
-    (r'\bTCH\b','TCH: toneladas de colmos por hectare.'),
-    (r'\bCOE\b','COE: custo operacional efetivo (desembolso da safra).'),
-    (r'\bCOT\b','COT: custo operacional total (COE + depreciação e pró-labore).'),
-    (r'^Carência','Carência: dias mínimos entre a última aplicação e a colheita (bula e AGROFIT).'),
-    (r'^Reentrada','Reentrada: tempo mínimo para entrar na área depois da aplicação (bula).'),
-]
-_OPS={'mul':' × ','sum':' + ','sub':' − '}
-def _formula(k,calc,cols,campos=()):
-    """Fórmula curta da coluna calculada: "Calculado: Quantidade × Preço" (g2calc no g2lib faz a conta; aqui só o texto). Termo sem rótulo
-    (nem coluna nem campo do formulário) não vira dica: a fórmula diria a chave interna."""
-    cx=next((x for x in (calc or []) if x.get('k')==k),None)
-    if not cx: return ''
-    L={f['k']:f.get('l') for f in campos if f.get('k') and f.get('l')}; L.update({c['k']:c.get('l') for c in cols if c.get('l')})
-    if any(x not in L for x in cx.get('a',[])): return ''
-    a=[L[x] for x in cx.get('a',[])]
-    op=cx.get('op')
-    if op in _OPS: f=_OPS[op].join(a)
-    elif op=='div' and len(a)>=2: f=a[0]+' ÷ '+a[1]
-    elif op=='max0sub': f='o maior entre 0 e '+' − '.join(a)
-    else: return ''
-    return 'Calculado: '+f+'.'
-def _ajuda_auto(cols,calc,campos=()):
-    """Ajuda da coluna (dica do cabeçalho) quando a tela não deu uma: sigla/unidade do GLOSSARIO e fórmula da coluna calculada."""
-    import re as _r
-    out=[]
-    for c in cols:
-        if c.get('ajuda'): out.append(c); continue
-        rot=(c.get('l') or '')+' '+(c.get('un') or c.get('u') or '')
-        partes=[t for rx,t in GLOSSARIO if _r.search(rx,rot)][:2]
-        f=_formula(c['k'],calc,cols,campos)
-        if f: partes.append(f)
-        out.append(dict(c,ajuda=' '.join(partes)) if partes else c)
-    return out
-# revisão DS (achado 8): a sigla ou a unidade que está na célula (unidade junto do valor: "62,4 sc/ha", "35 DAP") e não no rótulo também dá a dica
-# do cabeçalho da coluna. A regra roda no navegador (g2lib.g2glossCol), sobre as linhas que a grade mostra (as do build e as montadas na tela), com
-# estas entradas do GLOSSARIO (as de "^" valem só para o rótulo): fonte única do texto, aqui.
-_GLOSS_CEL=[(rx,t) for rx,t in GLOSSARIO if not rx.startswith('^')]
 def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None):
     cols=[_col_un(c) for c in cols]
     # rótulos que ficariam iguais sem a unidade ("Custo (R$/h)" e "Custo (R$/ha)") mantêm a unidade, sem parênteses: "Custo R$/h", "Custo R$/ha"
     # (proprietário, 05/10/2026: "Custo R$/h e R$/ha é melhor e mais intuitivo")
     _ls=[c.get('l') for c in cols]
     cols=[(dict(c,l=c['l']+' '+c['un']) if (c.get('un') and _ls.count(c.get('l'))>1) else c) for c in cols]
-    _ed=edit if isinstance(edit,dict) else {}
-    cols=_ajuda_auto(cols,_ed.get('calc'),_ed.get('fields') or ())   # DS-DICA: sigla, unidade e fórmula no cabeçalho
     """Grade interativa. cols: [dict(k,l,t='txt'|'num',a='r',u,d,agg='sum'|'avg',chips={valor:cor},w,pre)];
     rows: [dict(id,v={},s={},p={k:[partes]},ro=False,kids=[...],o=[dict(t,h)],dr='d3_open',sh='d2')];
     edit: dict(m='form'|'ro'|'origin'|'none', title, sub, fields=[dict(k,l,t='txt'|'num'|'sel'|'date'|'area',opts,req,min,max,u,cond=dict(k,eq),help,def,ro)], calc, newTitle, leafOnly)."""
@@ -1384,7 +1249,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     hsel=f'<div role="columnheader" style="padding: 6px 4px 6px 12px; display: flex; align-items: center;"><button type="button" aria-label="{H("_selallLab")}" title="{H("_selallLab")}" onClick="{H("_selall")}" style="border: 1px solid {LINE}; background: {SURF}; width: 16px; height: 16px; border-radius: 4px; cursor: pointer; padding: 0;"></button></div>' if sel else ''
     hdel=f'<div role="columnheader"></div>' if dele else ''
     head=(f'<div role="row" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; background: {BG}; border-radius: 0;">{hsel}'
-          f'<sc-for list="{H("_head")}" as="h" hint-placeholder-count="{len(cols)}"><div role="columnheader" class="{_h("h.cls")}" data-un="{_h("h.un")}" data-dica="{_h("h.tt")}" style="{_h("h.st")} padding: 0 4px 0 8px;">'
+          f'<sc-for list="{H("_head")}" as="h" hint-placeholder-count="{len(cols)}"><div role="columnheader" class="{_h("h.cls")}" data-un="{_h("h.un")}" title="{_h("h.tt")}" style="{_h("h.st")} padding: 0 4px 0 8px;">'
           + (f'<button type="button" class="g2hb" onClick="{_h("h.sort")}" aria-label="{_h("h.sortLabel")}">{_h("h.l")} <span aria-hidden="true" style="{_h("h.astyle")} font-size: 9px;">{_h("h.arrow")}</span></button>'
              f'<button type="button" class="g2fb" onClick="{_h("h.fmenu")}" aria-label="{_h("h.flabel")}" title="{_h("h.flabel")}" style="color: {_h("h.fcolor")};">▾{_h("h.fil")}</button>' if headtools else
              f'<span class="g2hb" style="cursor: default;">{_h("h.l")}</span>')
@@ -1402,7 +1267,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
         tot=(f'<div role="row" class="g2tot" tabIndex="0" onClick="{H("_totopen")}" title="Ver a composição do total" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 2px solid {INK}; background: {BG}; font-size: 13px;">'
              + ('<div role="cell"></div>' if sel else '') + f'<sc-for list="{H("_tot")}" as="t" hint-placeholder-count="{len(cols)}"><div role="cell" class="{_h("t.cls")}" style="{_h("t.st")}">{_h("t.t")}</div></sc-for>' + ('<div role="cell"></div>' if dele else '') + '</div>')
     empty=f'<sc-if value="{H("_empty")}" hint-placeholder-val="{{{{false}}}}"><div style="padding: 16px; font-size: 13px; color: {MUTED};">Nenhuma linha corresponde aos filtros · <button type="button" onClick="{H("_clear")}" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-weight: 700; cursor: pointer;">Limpar filtros</button></div></sc-if>'
-    tbl=(f'<div class="g2rola"><div role="table" data-g2g="{gid}" style="display: grid; grid-template-columns: var(--g2cols, repeat({n}, auto)); min-width: 100%; width: max-content;">{head}{body}{tot}</div></div>{empty}')
+    tbl=(f'<div class="g2rola"><div role="table" style="display: grid; grid-template-columns: var(--g2cols, repeat({n}, auto)); min-width: 100%; width: max-content;">{head}{body}{tot}</div></div>{empty}')
     EXTRA.append(_g2form(gid))
     box=f'background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; min-width: 0; overflow: hidden;' if frame else 'min-width: 0;'
     return f'<div class="g2caixa" style="{box}">{tb}{fpanel}{tbl}</div>'
@@ -1426,10 +1291,14 @@ def _g2form(gid):
     F=lambda s: _h(gid+'_F.'+s)
     return (f'<sc-if value="{F("open")}" hint-placeholder-val="{{{{false}}}}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
             f'<button type="button" aria-label="Fechar formulário" onClick="{F("close")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button>'
-            f'<aside role="dialog" aria-label="{F("title")}" onKeyDown="{F("key")}" style="position: relative; width: 460px; max-width: 100%; height: 100%; overflow-y: auto; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;">'
-            f'<div style="display: flex; align-items: flex-start; gap: 10px;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">{F("title")}</h2>'
+            f'<aside role="dialog" aria-label="{F("title")}" onKeyDown="{F("key")}" style="position: relative; width: {F("w")}; max-width: 100%; height: 100%; overflow-y: auto; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;">'
+            f'<sc-if value="{F("temPai")}" hint-placeholder-val="{{{{false}}}}"><div><button type="button" class="g2pai" onClick="{F("paiGo")}">{F("paiT")}</button></div></sc-if>'
+            f'<div style="display: flex; align-items: flex-start; gap: 10px;"><h2 tabIndex="-1" style="margin: 0; font-family: {DISP}; font-size: 19px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1; min-width: 0;">{F("title")}</h2>'
+            f'<sc-if value="{F("temNav")}" hint-placeholder-val="{{{{false}}}}"><div class="g2nav" role="group" aria-label="Percorrer a lista"><button type="button" aria-label="{F("antL")}" title="{F("antL")}" disabled="{F("antOff")}" onClick="{F("ant")}">‹</button>'
+            f'<span>{F("pos")}</span><button type="button" aria-label="{F("proxL")}" title="{F("proxL")}" disabled="{F("proxOff")}" onClick="{F("prox")}">›</button></div></sc-if>'
             f'<button type="button" aria-label="Fechar" title="Fechar" onClick="{F("close")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED}; flex-shrink: 0;">×</button></div>'
             f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{F("sub")}</div>'
+            + _g2cons(F) +
             f'<sc-if value="{F("hasErr")}" hint-placeholder-val="{{{{false}}}}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">Corrija os campos destacados; o que você preencheu foi mantido.</div></sc-if>'
             f'<sc-for list="{F("fields")}" as="f" hint-placeholder-count="3"><div style="display: flex; flex-direction: column; gap: 4px;">'
             f'<label for="{_h("f.fid")}" style="font-size: 12px; font-weight: 600; color: {MUTED};">{_h("f.l")}</label><div style="display: flex; align-items: center; gap: 8px;">'
@@ -1445,10 +1314,44 @@ def _g2form(gid):
             f'<sc-if value="{F("hasOrigins")}" hint-placeholder-val="{{{{false}}}}"><div style="font-size: 12px; font-weight: 700; color: {MUTED}; letter-spacing: .04em;">ORIGEM</div><sc-for list="{F("origins")}" as="og" hint-placeholder-count="1"><sc-if value="{_h("og.isLink")}" hint-placeholder-val="{{{{false}}}}"><a href="{_h("og.h")}" style="color: {ACC}; font-weight: 700; text-decoration: none; font-size: 13px;">{_h("og.t")} ›</a></sc-if><sc-if value="{_h("og.isTxt")}" hint-placeholder-val="{{{{true}}}}"><div style="font-size: 12.8px; padding: 5px 0; border-bottom: 1px solid {LINE};">{_h("og.t")}</div></sc-if></sc-for></sc-if>'
             f'<div style="flex-grow: 1;"></div>'
             f'<sc-if value="{F("warn")}" hint-placeholder-val="{{{{false}}}}"><div role="alert" class="saida" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{F("discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{F("keep")}" style="{_MINIP}">Continuar editando</button></div></div></sc-if>'
-            f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">'
-            f'<sc-if value="{F("edit")}" hint-placeholder-val="{{{{true}}}}"><button type="button" onClick="{F("cancel")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{F("save")}" style="{BTN_ST(True,True)}">Salvar</button></sc-if>'
-            f'<sc-if value="{F("ro")}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{F("discard")}" style="{BTN_ST(False,True)}">Fechar</button></sc-if></div>'
+            f'<sc-if value="{F("rod")}" hint-placeholder-val="{{{{true}}}}"><div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">'
+            f'<sc-if value="{F("edit")}" hint-placeholder-val="{{{{true}}}}"><button type="button" onClick="{F("cancel")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{F("save")}" style="{BTN_ST(True,True)}">{F("saveT")}</button></sc-if>'
+            f'<sc-if value="{F("ro")}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{F("discard")}" style="{BTN_ST(False,True)}">Fechar</button></sc-if></div></sc-if>'
             f'</aside></div></sc-if>')
+# CADUX · painel em consulta (DS-41, DS-58): Próximo passo logo abaixo do título com no máximo uma primária; até duas secundárias à vista,
+# o resto em "Mais"; blocos com ficha (rótulo · valor), filhos selecionáveis (troca o conteúdo do mesmo painel), tabela, nota e links
+def g2prox_tpl(X):
+    """bloco Próximo passo (DS-58; BOT-01/02): texto com a causa, quem resolve, no máximo uma primária, links de saída (BOT-08) e "e mais n".
+    X(chave) devolve o buraco: o painel usa F.c.*, o detalhe do grupo dos Cadastros usa dx_p.*; os valores vêm de g2consVals (g2lib)."""
+    h=_h; lk=f'color: {ACC}; font-weight: 700; font-size: 13px; text-decoration: none;'
+    return (f'<sc-if value="{X("temProx")}" hint-placeholder-val="{{{{false}}}}"><section class="g2prox" aria-label="Próximo passo" style="{X("proxSt")}">'
+        f'<span class="g2prox-k">Próximo passo</span><p style="{X("proxCor")}">{X("proxT")}</p>'
+        f'<sc-if value="{X("temQuem")}" hint-placeholder-val="{{{{false}}}}"><p class="g2prox-q">{X("proxQuem")}</p></sc-if>'
+        f'<div class="g2prox-a"><sc-if value="{X("temPrim")}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="g2prox-prim" disabled="{X("primDis")}" onClick="{X("prim")}" style="{BTN_ST(True,True)}">{X("primT")}</button></sc-if>'
+        f'<sc-for list="{X("lks")}" as="k" hint-placeholder-count="0"><sc-if value="{h("k.isA")}" hint-placeholder-val="{{{{false}}}}"><a href="{h("k.h")}" style="{lk}">{h("k.t")} ›</a></sc-if>'
+        f'<sc-if value="{h("k.isB")}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="g2lk" onClick="{h("k.go")}">{h("k.t")} ›</button></sc-if></sc-for></div>'
+        f'<sc-if value="{X("temMais")}" hint-placeholder-val="{{{{false}}}}"><p class="g2prox-m">{X("mais")}</p></sc-if></section></sc-if>')
+def g2sec_tpl(X):
+    """até duas secundárias à vista e o resto em "Mais ▾" (BOT-06)."""
+    h=_h; sec=BTN_ST(False,True)
+    return (f'<sc-if value="{X("temSec")}" hint-placeholder-val="{{{{false}}}}"><div class="g2sec"><sc-for list="{X("sec")}" as="x" hint-placeholder-count="2"><button type="button" aria-label="{h("x.al")}" disabled="{h("x.dis")}" onClick="{h("x.go")}" style="{sec}">{h("x.t")}</button></sc-for>'
+        f'<sc-if value="{X("temMenu")}" hint-placeholder-val="{{{{false}}}}"><details class="g2mais"><summary style="{sec}">Mais ▾</summary><div><sc-for list="{X("menu")}" as="x" hint-placeholder-count="1"><button type="button" onClick="{h("x.go")}">{h("x.t")}</button></sc-for></div></details></sc-if></div></sc-if>')
+def _g2cons(F):
+    h=_h; lk=f'color: {ACC}; font-weight: 700; font-size: 13px; text-decoration: none;'
+    X=lambda k: F('c.'+k)
+    return (f'<sc-if value="{F("cons")}" hint-placeholder-val="{{{{false}}}}"><div class="g2cons">'
+        + g2prox_tpl(X) + g2sec_tpl(X) +
+        f'<sc-for list="{F("c.blocos")}" as="b" hint-placeholder-count="2"><section class="g2bloco" data-bloco="{h("b.id")}"><h3>{h("b.t")}</h3>'
+        f'<sc-if value="{h("b.temLin")}" hint-placeholder-val="{{{{false}}}}"><dl><sc-for list="{h("b.lin")}" as="l" hint-placeholder-count="3"><div><dt>{h("l.l")}</dt><dd><span style="{h("l.st")}">{h("l.v")}</span>'
+        f'<sc-if value="{h("l.temH")}" hint-placeholder-val="{{{{false}}}}"> <a href="{h("l.h")}" style="{lk}">{h("l.ht")} ›</a></sc-if></dd></div></sc-for></dl></sc-if>'
+        f'<sc-if value="{h("b.temFil")}" hint-placeholder-val="{{{{false}}}}"><div class="g2fil" role="list"><sc-for list="{h("b.fil")}" as="f" hint-placeholder-count="2"><div role="listitem"><button type="button" aria-label="{h("f.al")}" onClick="{h("f.go")}">'
+        f'<span class="g2fil-t">{h("f.t")}</span><span class="g2fil-s">{h("f.sub")}</span><sc-if value="{h("f.temChip")}" hint-placeholder-val="{{{{false}}}}"><span style="{h("f.chSt")}">{h("f.chT")}</span></sc-if><span aria-hidden="true">›</span></button></div></sc-for></div></sc-if>'
+        f'<sc-if value="{h("b.temTab")}" hint-placeholder-val="{{{{false}}}}"><div class="g2ctab"><div role="table" style="{h("b.tabSt")}"><div role="row" style="display: contents;"><sc-for list="{h("b.cols")}" as="hc" hint-placeholder-count="3"><div role="columnheader">{h("hc")}</div></sc-for></div>'
+        f'<sc-for list="{h("b.rows")}" as="rw" hint-placeholder-count="2"><div role="row" style="display: contents;"><sc-for list="{h("rw.c")}" as="cc" hint-placeholder-count="3"><div role="cell">{h("cc.t")}</div></sc-for></div></sc-for></div></div></sc-if>'
+        f'<sc-if value="{h("b.temNota")}" hint-placeholder-val="{{{{false}}}}"><p class="g2nota">{h("b.nota")}</p></sc-if>'
+        f'<sc-if value="{h("b.temLks")}" hint-placeholder-val="{{{{false}}}}"><div class="g2lks"><sc-for list="{h("b.lks")}" as="k" hint-placeholder-count="1"><sc-if value="{h("k.isA")}" hint-placeholder-val="{{{{false}}}}"><a href="{h("k.h")}" style="{lk}">{h("k.t")} ›</a></sc-if>'
+        f'<sc-if value="{h("k.isB")}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="g2lk" onClick="{h("k.go")}">{h("k.t")} ›</button></sc-if></sc-for></div></sc-if>'
+        f'</section></sc-for></div></sc-if>')
 # ---------- partes de célula (API para telas novas) ----------
 class Pt:
     txt=staticmethod(lambda t: {'k':'txt','t':t}); b=staticmethod(lambda t: {'k':'b','t':t}); mut=staticmethod(lambda t: {'k':'mut','t':t})
@@ -1602,10 +1505,7 @@ ENGINE_JS2=ENGINE_JS2.replace("    return v;\n  }\n}","""    v.g2toast = this.st
     if (typeof assinAvisoVals === 'function') assinAvisoVals(this, v);   // faixa de cobrança (PLAT-01, R11): só as telas da organização têm o buraco
     return v;
   }
-  componentDidMount() { g2montou(this); }   /* DS-RETORNO-20261009: tela nova (realce do título, fim da barra de carga, anúncio) */
-  componentDidUpdate(pp, ps) { if (this.state.g2toast !== (ps || {}).g2toast && typeof g2avisoH === 'function') g2avisoH();   /* V55-RESP-01: altura do aviso medida na troca */
-    if (this.state.g2toast && this.state.g2toast !== (ps || {}).g2toast) { clearTimeout(this._g2t); this._g2t = setTimeout(() => this.setState({ g2toast: '' }), 4500); }
-    g2mudou(this); }   /* DS-RETORNO-20261009: etapa/seção nova ou aviso novo realça o que mudou e anuncia (ponto central, não por tela) */
+  componentDidUpdate(pp, ps) { if (this.state.g2toast && this.state.g2toast !== (ps || {}).g2toast) { clearTimeout(this._g2t); this._g2t = setTimeout(() => this.setState({ g2toast: '' }), 4500); } }
 }""")
 assert 'g2vals' in ENGINE_JS2, 'patch do motor falhou'
 EXTRAJS=['']  # JS específico da tela (function EXTRAVALS(self,v){...}) — processos usam
@@ -1617,21 +1517,9 @@ def _assin_prefixo():
         import dados_assinatura as _DA
         _ASSIN[0]=_DA.js_prefixo()
     return _ASSIN[0]
-# CONF-01 (RV-13): Configurações (CONF0 + configuracoes.js) entra UMA vez em toda tela, depois da assinatura; só nomes conf*/CONF*.
-# Sem ele o efetivo é o padrão (G2_PERFIS e G2_ALCADAS); com ele, papéis, acessos e alçadas do CF-01 valem em toda tela (g2perfis, g2alc).
-_CONF=[None]
-def _conf_prefixo():
-    if _CONF[0] is None:
-        import dados_config as _DC
-        _CONF[0]=_DC.js_prefixo()
-    return _CONF[0]
 def engine():
     spec=json.dumps(WIDGETS,ensure_ascii=False).replace('</','<\\/')
     grids=json.dumps(GRIDS,ensure_ascii=False).replace('</','<\\/')
     nav=json.dumps(NAVSPEC,ensure_ascii=False)
-    gloss=json.dumps(_GLOSS_CEL,ensure_ascii=False)   # glossário da célula (revisão DS, achado 8): g2glossCol no g2lib
-    return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\nconst G2_GLOSS = '+gloss+';\n'+G2LIB+'\n'+_assin_prefixo()+_conf_prefixo()+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
-# o aviso é visto aqui e anunciado uma vez pela região viva do g2lib (g2vivo, DS-RETORNO-20261009): aria-live=off evita a leitura em dobro
-# aviso temporário: largura do texto até min(560 px, janela − 32); sem o width, o left:50% limitava a caixa a meia janela (180 px a 360 px)
-# e o aviso quebrava em 3 a 17 linhas (medido: 47 e 345 caracteres), cobrindo o pé da tela (V55-RESP-01)
-G2_TOAST=f'<div role="status" aria-live="off" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: calc({AVISO_PE} + var(--acoes-h, 0px) + env(safe-area-inset-bottom, 0px)); z-index: 70; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); width: max-content; max-width: min(560px, calc(100vw - 32px)); box-sizing: border-box; {{{{g2toastst}}}}">{{{{g2toast}}}}</div>'
+    return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\n'+G2LIB+'\n'+_assin_prefixo()+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
+G2_TOAST=f'<div role="status" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(22px + var(--acoes-h, 0px) + env(safe-area-inset-bottom, 0px)); z-index: 70; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: min(560px, calc(100vw - 32px)); box-sizing: border-box; {{{{g2toastst}}}}">{{{{g2toast}}}}</div>'

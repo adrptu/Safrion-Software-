@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Testes da frente Cadastros · CD-02, CD-06 e CD-07 — uma tela por execução (≤ 15 verificações cada, < 30 s no Chrome headless).
+"""Testes da frente Cadastros · CD-02, CD-06 e CD-07 — uma tela por execução (≤ 15 verificações cada). CADUX P9 (09/10/2026): todos rodam a
+lógica da página no node (cadux_node.py), sem navegador; o caminho na tela fica em cadux_cd01_test.py e cadux_tarefas_test.py.
 Uso: python3 cadc_test.py cd02 | cd06 | cd07 | cd0102a | cd0102b | fix02 | fix06 | fix07
   cd02     cadc_cd02_test.py    culturas e operações cadastráveis, semente vinculada (e o item chegando ao CD-06), rendimento por cultura
   cd06     cadc_cd06_test.py    grupo com natureza, preço com data, embalagem, controle, situação, unidade travada, locais com fazenda

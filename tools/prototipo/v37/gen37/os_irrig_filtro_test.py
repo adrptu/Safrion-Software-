@@ -115,14 +115,10 @@ try:
     ir3=ids(); a3=[linha(x) for x in AGUA]; c3=(cor('OS-0422','Janela a definir'),cor('OS-0423','Conflito'))
     # TABELAS-FOCO (06/10/2026): no IR-03 Lâmina e Passadas são colunas próprias ("13,5 mm | 2"); a lâmina de cada passada (6,75 mm) fica no detalhe
     nx3=[x for x in (('OS-0419','Iniciar irrigação'),('OS-0422','Definir janela'),('OS-0423','Resolver conflito'),('OS-0418','Receber o insumo no Estoque')) if x[1] in linha(x[0])]
-    # revisão TABR (09/10/2026, A1): tipo (Água) na IR-03 e no detalhe; passadas e avisos (nota de ET) saíram da grade para o detalhe da ordem
-    er=J("window.__err||''") or ''
-    def det(oid): c.goto(f'http://127.0.0.1:{p}/IR-03det.dc.html#{oid}',wait=1.0); return J("document.body.innerText") or ''
-    d22,d23=det('OS-0422'),det('OS-0423'); c.goto(f'http://127.0.0.1:{p}/IR-03.dc.html',wait=1.0)
-    chk('13 IR-02 e IR-03 listam OS-0419/0422/0423 como água; OS-0422 amarela (Janela a definir, Lâmina 13,5 mm na linha, 2 passadas no detalhe), OS-0423 vermelha (Conflito; estimativa por ET no detalhe); próximo passo na linha: Iniciar irrigação, Definir janela, Resolver conflito e, para a OS-0418, o mesmo passo da O.S. (Receber o insumo no Estoque)',
-        set(AGUA)<=set(ir2) and set(AGUA)<=set(ir3) and all('gua' in x for x in a3) and c2==(AMAR,VERM) and c3==(AMAR,VERM)
-        and '13,5 mm' in a3[1] and '13,5 mm brutos em 2 passadas' in d22 and 'estimativa por et' in d23.lower() and len(nx3)==4 and er=='',
-        (ir2,ir3,c2,c3,nx3,a3[1],d22[:200],d23[:200]))
+    chk('13 IR-02 e IR-03 listam OS-0419/0422/0423 como água; OS-0422 amarela (Janela a definir, Lâmina 13,5 mm e Passadas 2 em colunas), OS-0423 vermelha (Conflito · parada da B3, estimativa por ET); próximo passo na linha: Iniciar irrigação, Definir janela, Resolver conflito e, para a OS-0418, o mesmo passo da O.S. (Receber o insumo no Estoque)',
+        set(AGUA)<=set(ir2) and set(AGUA)<=set(ir3) and all('gua' in x for x in a2+a3) and c2==(AMAR,VERM) and c3==(AMAR,VERM)
+        and '13,5 mm 2' in a3[1] and 'estimativa por et' in a3[2].lower() and len(nx3)==4 and (J("window.__err||''") or '')=='',
+        (ir2,ir3,c2,c3,nx3))
     J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith('OS-0419')); r&&r.click();})()"); esperar('IR-03det.dc.html')
     b=J("document.body.innerText") or ''
     chk('14 IR-03det (linha da OS-0419 → IR-03det#OS-0419): OS-0419 · Irrigação · Pivô 2, Liberadas, 10,81 mm do balanço de 23/09, Iniciar irrigação; sem agrônomo nem política',

@@ -50,18 +50,7 @@ PC=dict(id='PC-088', item='KCl 60 %', pedido=100, recebido=60, apto=50, quarente
 # ---- Irrigação (DEMO-05/15) ----
 # volta_62_h: uma volta a 62 % = 9,0 h ÷ 0,62 ≈ 14,52 h (= 10,81 mm × 80 ha ÷ 166 L/s); exec_h = andamento de 2,1 h (≈14,47 % da volta)
 PIVO=dict(id='Pivô 2', volta_h=9.0, lamina_100=6.7, percent=62, exec_h=2.1, lamina_aplicada=10.81, cobertura_pct=14.47, volta_62_h=14.52)
-# Ficha do pivô (pedido de 09/10/2026): capacidade do equipamento como está na ficha técnica do fabricante · DADOS SINTÉTICOS (semente).
-# Chave = o equipamento de irrigação do cadastro (dados_cad.ATIVOS a11, Bomba do Pivô 2); nome e modelo ficam no cadastro (não se repetem aqui).
-# Tempo de volta e lâmina a 100 % são os de PIVO (fonte atual, sem cópia) e são a linha de 100 % da tabela (a tabela guarda só as outras linhas:
-# o mesmo dado não se digita duas vezes). A vazão daqui é a da Irrigação (setor P2) e a do cadastro da bomba. Tabela percentímetro (%) ×
-# tempo de volta (h) × lâmina (mm) registrada como está; a conferência (uma conta) fica em ficha_pivo.py (fpvConf). O registro feito na tela
-# grava no navegador ('talhao-os-ficha-pivo-v1') e vale para o cadastro e a Irrigação (revisão de 10/10, A2/A4).
-# regime_h: "21 h" é o regime de operação (h/dia, fora do horário de ponta), guardado como referência, sem outro uso.
-FICHA_PIVO={'a11':dict(fabricante='Fabricante demonstrativo (sintético)', raio_m=505, area_ha=80,
-                       vazao_ls=166, pressao_mca=32, volta_100_h=PIVO['volta_h'], lamina_100_mm=PIVO['lamina_100'], regime_h=21, regime_obs='fora do horário de ponta',
-                       tabela=[[90,10.0,7.4],[80,11.3,8.4],[70,12.9,9.6],[60,15.0,11.0],[50,18.0,13.4],[40,22.5,16.8],[30,30.0,22.3],[20,45.0,33.5],[10,90.0,67.0]])}
-# política de água (limites de irrigação só com água): identificador, versão, dono e validade numa fonte só (Configurações e app leem daqui; revisão de 10/10, A3)
-POLITICA_AGUA=dict(id='PA-07', versao='v3', lamina_max=12.0, intervalo_min='18 h', validade='30/11/2026', autor='Ana (agrônoma)')
+POLITICA_AGUA=dict(id='PA-07 v3', lamina_max=12.0, intervalo_min='18 h', validade='30/11/2026', autor='Ana (agrônoma)')
 
 # ---- Máquinas (DEMO-04/17) ----
 OM=dict(id='OM-0233', ativo='Trator T1 · JD 6M 155', causa='Pressão hidráulica baixa', etapa='Em execução',
@@ -94,17 +83,14 @@ APROV=[
 # Histórico (encerradas antigas) usa a faixa OS-0380..OS-0399; novas ordens criadas no protótipo: OS-0440 em diante.
 # Campos opcionais: selos_extra = condições além do selo principal (mesma lista na O.S., no Mapa e no detalhe);
 # chave = cultivo|atividade do plano que gerou a ordem, ou lista delas quando a ordem cobre vários cultivos
-# (a "Nova ordem" não emite outra para a mesma chave): OS-0421 = T1-A, T1-B e T2 · a6; OS-0425 = c9|k1; OS-0430 = c1|a1; OS-0431 = c3|a3;
-# OS-0420 = c4|a3 (origem declarada: Soja alta tecnologia v6 · REC-014 v2 · Plantio e adubação de base, 1ª onda de 100 ha da NEC-028 no T4;
-# CTL-4: com o plano aplicado no T4 a ordem cobre a parte dela, sem somar plano e O.S. do mesmo consumo).
+# (a "Nova ordem" não emite outra para a mesma chave): OS-0421 = T1-A, T1-B e T2 · a6; OS-0425 = c9|k1; OS-0430 = c1|a1; OS-0431 = c3|a3.
 # Selo com "Impedida" ou "Falta máquina" conta como ordem impedida em todas as telas.
 ORDENS=[
  dict(id='OS-0415',tipo='Dessecação pós-colheita',talhao='T3',area=96,etapa='Encerradas',selo=None,realizado=96,saldo=0,janela='10–12/09',resp='Marcos',detalhe=None),
  dict(id='OS-0417',tipo='Adubação de cobertura',talhao='P1',area=95,etapa='Em conferência',selo='Sobras a receber',realizado=95,saldo=0,janela='19–21/09',resp='Paula',detalhe=None),
  dict(id='OS-0418',tipo='Fertirrigação · reclassificada',talhao='P1',area=95,etapa='A liberar',selo=None,realizado=0,saldo=95,janela='24/09 21:00–25/09 11:15',resp='João',detalhe=None),
  dict(id='OS-0419',tipo='Irrigação · água por política',talhao='P2',area=80,etapa='Liberadas',selo=None,realizado=0,saldo=80,janela='hoje 20:00–amanhã 10:31',resp='João',detalhe='IR-03det.dc.html'),
- dict(id='OS-0420',tipo='Plantio · Soja 58 W',talhao='T4',area=100,etapa='Em execução',selo='Impedida · ativo bloqueado',realizado=30,saldo=70,janela='22–28/09',resp='Carlos',detalhe='CA-01x-os0420.dc.html',
-      chave='c4|a3'),
+ dict(id='OS-0420',tipo='Plantio · Soja 58 W',talhao='T4',area=100,etapa='Em execução',selo='Impedida · ativo bloqueado',realizado=30,saldo=70,janela='22–28/09',resp='Carlos',detalhe='CA-01x-os0420.dc.html'),
  dict(id='OS-0421',tipo='Pulverização · Fungicida 1ª aplicação',talhao='T1+T2',area=350,etapa='Em execução',selo='Parcial · dia 4 de 7',realizado=190,saldo=160,janela='20–26/09',resp='Marcos',detalhe='CA-01det.dc.html',
       chave=['c1|a6','c2|a6','c3|a6']),
  dict(id='OS-0422',tipo='Irrigação · água',talhao='P2',area=80,etapa='A liberar',selo='Janela a definir',realizado=0,saldo=80,janela='a definir',resp='João',detalhe='IR-02.dc.html'),

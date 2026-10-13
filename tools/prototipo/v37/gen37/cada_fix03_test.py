@@ -1,49 +1,51 @@
 # -*- coding: utf-8 -*-
-"""CD-03 · regressão dos defeitos do verificador (11 verificações no Chrome): horímetro compara com a última leitura gravada,
-subtítulo da edição sem 'escolha a classe', links da coluna Conjuntos identificam o conjunto e abrem o certo, plural em
-'não alocáveis' e select do formulário sempre mostra o valor gravado ('Escolha…' quando vazio)."""
-from cada_lib import T
-import time, json
-t=T(); J=t.J
-MULTI="""((t)=>{const l=[...document.querySelectorAll('aside[role=dialog] label')].find(x=>x.innerText.trim()===t); if(!l) return false; l.querySelector('input').click(); return true;})"""
-def marca(txt): r=J(f"({MULTI})({json.dumps(txt)})"); time.sleep(.2); return r
-# linha da 1ª grade pelo nome em negrito (o texto da linha também traz nomes de outras máquinas na coluna Conjuntos)
-LIN="(n=>[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row].g2ed')].find(r=>(r.querySelector('b')||{}).innerText===n))"
-def cjlinks(nome):
-    """conjuntos da máquina listados no painel dela (antes eram links na coluna Conjuntos)."""
-    if not abre(nome): return None
-    r=J("[...document.querySelectorAll('aside[role=dialog] button')].map(b=>b.innerText.trim()).filter(t=>t.endsWith('›')).map(t=>t.replace(/\\s*›$/,''))"); t.cancel(); return r
-def cjclick(nome,txt):
-    if not abre(nome): return False
-    r=J(f"(()=>{{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==={json.dumps(txt+' ›')}); if(!b) return false; b.click(); return true;}})()"); time.sleep(.35); return r
-def seltxt(k): return J(f"(()=>{{const i=document.querySelector('aside[role=dialog] select[id$=\"_{k}\"]'); return i?i.options[i.selectedIndex].text:null;}})()")
-def abre(nome): r=J(f"(()=>{{const r={LIN}({json.dumps(nome)}); if(!r) return false; (r.querySelector('.g2pw')||r).click(); return true;}})()"); time.sleep(.35); return r
-try:
-    t.goto('CD-03.dc.html')
-    # PCM simplificado S3 (AC-PCM-15): a leitura do horímetro deixou de ser editável no CD-03; vem da Manutenção (uma função de leitura, com histórico)
-    abre('Trator 02'); hv=t.fv('cont_tr'); hd=t.fdis('cont_tr')
-    t.chk('horímetro: só leitura no CD-03, com a leitura da Manutenção (2.988 h); não há como gravar leitura menor por aqui', hd and hv in ('2988','2.988'), [hv,hd])
-    t.fset('custo_h','185'); t.btn('Salvar'); time.sleep(.2)
-    t.chk('outros campos seguem editáveis: salvar o custo grava', not t.isopen() and 'Salvo: Trator 02' in t.toast(), [t.alerts(),t.toast()])
-    abre('Trator T1'); d=t.dlg()
-    t.chk('edição: subtítulo pede capacidade/custo/calibração e não pede a classe (fixa)', 'Altere capacidade, custo por hora e calibração' in d and 'Escolha a classe' not in d and t.fdis('classe'), d[:160])
-    t.cancel(); t.clk('Cadastrar máquina ou instalação'); d=t.dlg()
-    t.chk('cadastro novo: subtítulo "Escolha a classe para abrir a capacidade dela."', 'Escolha a classe para abrir a capacidade dela.' in d and 'Altere capacidade' not in d, d[:160]); t.cancel()
-    abre('Silo 01'); sv=[t.fv('custo_f'),seltxt('custo_f')]; t.cancel()
-    t.chk('Silo 01 sem custo: "Fonte do custo" mostra "Escolha…" (valor vazio), não uma fonte que não foi gravada', sv==['','Escolha…'], sv)
-    di=cjlinks('Distribuidor 3 t')
-    t.chk('Distribuidor 3 t: o link identifica o conjunto pelo trator', di==['Trator 03 · Adubação a lanço'], di)
-    t.aba('Conjuntos'); t.clk('Montar conjunto'); mt=seltxt('maq'); t.fset('impl','Plantadeira 24 linhas'); marca('Plantio'); t.btn('Salvar'); a=t.alerts()
-    t.chk('Montar conjunto: Máquina começa em "Escolha…" e salvar sem ela pede a máquina no campo', mt=='Escolha…' and 'Informe máquina' in a, [mt,a])
-    t.fset('maq','Trator 02'); t.btn('Salvar'); time.sleep(.2); t.aba('Máquinas')
-    pl=cjlinks('Plantadeira 24 linhas'); t1=cjlinks('Trator T1')
-    t.chk('Plantadeira 24 linhas: links "Trator T1 · Plantio" e "Trator 02 · Plantio"; Trator T1 mostra "Plantadeira 24 linhas · Plantio"',
-          pl==['Trator T1 · Plantio','Trator 02 · Plantio'] and t1==['Plantadeira 24 linhas · Plantio'], [pl,t1])
-    cjclick('Plantadeira 24 linhas','Trator 02 · Plantio'); ti=t.title(); t.cancel()
-    t.chk('o link "Trator 02 · Plantio" abre o conjunto Trator 02 + Plantadeira 24 linhas', 'Trator 02 + Plantadeira 24 linhas' in ti, ti)
-    t.aba('Conjuntos'); k1=t.card('Trator 03 + Distribuidor 3 t') or ''; k2=t.card('Trator 04 + Esqueletadeira') or ''
-    t.chk('operadores: "Lucas, Beto não alocáveis" no plural', 'Lucas, Beto não alocáveis' in k1 and 'Lucas, Beto não alocáveis' in k2, [k1,k2])
-    t.shot('cada_fix03.png')
-    t.chk('nenhum erro de JS', not t.errs(), t.errs())
-finally:
-    t.fim()
+"""CD-03 · regressão dos defeitos do verificador (11 verificações): horímetro compara com a última leitura gravada, subtítulo da edição
+sem 'escolha a classe', conjuntos da máquina identificam o conjunto e abrem o certo, plural em 'não alocáveis' e select do formulário
+sempre mostra o valor gravado ('Escolha…' quando vazio).
+CADUX P9 (09/10/2026): reescrito com as mesmas regras sobre a seleção que abre detalhe (DEC-0910-01); roda a lógica da página no node
+(cadux_node.py). Expectativas que mudaram, com o motivo:
+  4  "+ Criar ativo" no cabeçalho (BOT-03), não "Cadastrar máquina ou instalação";
+  6, 8, 9 os conjuntos da máquina são filhos selecionáveis no painel dela (SEL-01: produto → filhos), com o nome do conjunto e a operação
+     ("Trator 03 + Distribuidor 3 t · Adubação a lanço"), e abrem no mesmo painel com "‹ {máquina}" (C07);
+  7  "+ Criar conjunto" no cabeçalho com "Conjuntos" escolhido no mestre, não "Montar conjunto" na aba.
+Uso: python3 cada_fix03_test.py  (lê project/; sai com 1 se alguma regra falhar)."""
+import os, sys, json
+HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); os.chdir(HERE)
+from cadux_node import roda, AUX
+OK = []
+def chk(nome, cond, extra=''):
+    OK.append(bool(cond)); print(('OK  ' if cond else 'FALHOU ') + nome + (' · ' + str(extra)[:400] if extra and not cond else ''), flush=True)
+FIL = r"""function filhos(gid,titulo){ const F=painel(gid); const b=F&&F.c.blocos.find(b=>b.t===titulo); return b?(b.fil||[]).map(f=>f.t+' · '+f.sub):null; }
+function abreFilho(gid,titulo,t){ const F=painel(gid); const b=F.c.blocos.find(b=>b.t===titulo); const f=b.fil.find(f=>f.t===t); f.go(); v(); }
+function abreNome(nome){ const r=RW(C,'g_atv').find(r=>r.v.nome===nome); abre('g_atv',r.id); }
+"""
+o = roda('CD-03', AUX + FIL + r'''
+edita('g_atv','a02'); fset('g_atv','cont_tr','3100'); OUT.t1=salva('g_atv'); OUT.o1=!!(painel('g_atv')&&!painel('g_atv').cons); fecha('g_atv');
+edita('g_atv','a02'); fset('g_atv','cont_tr','3000'); salva('g_atv'); OUT.a2=errosT('g_atv');
+fset('g_atv','cont_tr','3150'); OUT.t3=salva('g_atv'); OUT.o3=!!(painel('g_atv')&&!painel('g_atv').cons); fecha('g_atv');
+edita('g_atv','a01'); OUT.d4=painel('g_atv').sub; OUT.cl4=fdis('g_atv','classe'); cancela('g_atv'); fecha('g_atv');
+let x=v(); x.c3_criar(); v(); OUT.d5=painel('g_atv').sub; fecha('g_atv');
+const silo=RW(C,'g_atv').find(r=>r.v.nome==='Silo 01'); edita('g_atv',silo.id); OUT.sv=[fval('g_atv','custo_f'),(fopts('g_atv','custo_f')||[])[0]]; cancela('g_atv'); fecha('g_atv');
+abreNome('Distribuidor 3 t'); OUT.di=filhos('g_atv','Conjuntos'); fecha('g_atv');
+x=mestre('conjuntos'); x.c3_criar(); v(); OUT.mt=[fval('g_cj','maq'),(fopts('g_cj','maq')||[])[0]]; fset('g_cj','impl','Plantadeira 24 linhas'); fmulti('g_cj','ops',['Plantio']); salva('g_cj'); OUT.a7=errosT('g_cj');
+fset('g_cj','maq','Trator 02'); salva('g_cj'); fecha('g_cj'); x=mestre('');
+abreNome('Plantadeira 24 linhas'); OUT.pl=filhos('g_atv','Conjuntos'); fecha('g_atv'); abreNome('Trator T1'); OUT.t1f=filhos('g_atv','Conjuntos'); fecha('g_atv');
+abreNome('Plantadeira 24 linhas'); abreFilho('g_atv','Conjuntos','Trator 02 + Plantadeira 24 linhas'); const P=painel('g_cj'); OUT.ti=P&&[P.title,P.temPai,P.paiT]; fecha('g_cj');
+x=mestre('conjuntos'); OUT.k1=linhaTxt('g_cj','k3'); const k4=RW(C,'g_cj').find(r=>r.v.maq==='Trator 04'); OUT.k2=k4&&linhaTxt('g_cj',k4.id);
+''')
+if o.get('__errs'): print('erros de script:', o['__errs'])
+chk('1 horímetro: 3.100 h grava; depois 3.000 h é barrado com "A última leitura foi 3.100 h"', not o.get('o1') and 'A última leitura foi 3.100 h' in (o.get('a2') or ''), [o.get('t1'), o.get('a2')])
+chk('2 horímetro maior que a última leitura grava', not o.get('o3') and 'Salvo: Trator 02' in (o.get('t3') or ''), o.get('t3'))
+chk('3 edição: subtítulo pede capacidade/custo/calibração e não pede a classe (fixa)', 'Altere capacidade, custo por hora e calibração' in (o.get('d4') or '') and 'Escolha a classe' not in (o.get('d4') or '') and o.get('cl4') is True, o.get('d4'))
+chk('4 criação: subtítulo "Escolha a classe para abrir a capacidade dela."', 'Escolha a classe para abrir a capacidade dela.' in (o.get('d5') or '') and 'Altere capacidade' not in (o.get('d5') or ''), o.get('d5'))
+chk('5 Silo 01 sem custo: "Fonte do custo" mostra "Escolha…" (valor vazio), não uma fonte que não foi gravada', o.get('sv') == ['', 'Escolha…'], o.get('sv'))
+chk('6 Distribuidor 3 t: o conjunto aparece pelo trator e pela operação', o.get('di') == ['Trator 03 + Distribuidor 3 t · Adubação a lanço'], o.get('di'))
+chk('7 criar conjunto: Máquina começa em "Escolha…" e salvar sem ela pede a máquina no campo', o.get('mt') == ['', 'Escolha…'] and 'Informe máquina' in (o.get('a7') or ''), [o.get('mt'), o.get('a7')])
+chk('8 Plantadeira 24 linhas: conjuntos "Trator T1 + …" e "Trator 02 + …" (Plantio); Trator T1 mostra o dele',
+    o.get('pl') == ['Trator T1 + Plantadeira 24 linhas · Plantio', 'Trator 02 + Plantadeira 24 linhas · Plantio'] and o.get('t1f') == ['Trator T1 + Plantadeira 24 linhas · Plantio'], [o.get('pl'), o.get('t1f')])
+ti = o.get('ti') or ['', False, '']
+chk('9 o conjunto "Trator 02 + Plantadeira 24 linhas" abre no mesmo painel, com "‹ Plantadeira 24 linhas"', 'Trator 02 + Plantadeira 24 linhas' in ti[0] and ti[1] and 'Plantadeira 24 linhas' in (ti[2] or ''), ti)
+chk('10 operadores: "Lucas, Beto não alocáveis" no plural', 'Lucas, Beto não alocáveis' in (o.get('k1') or '') and 'Lucas, Beto não alocáveis' in (o.get('k2') or ''), [o.get('k1'), o.get('k2')])
+chk('11 nenhum erro de JS', not o.get('__errs'), o.get('__errs'))
+print('RESULTADO:', 'OK' if all(OK) else 'FALHOU', f'{sum(OK)}/{len(OK)}')
+sys.exit(0 if all(OK) else 1)

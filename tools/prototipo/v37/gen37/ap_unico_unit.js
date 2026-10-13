@@ -71,7 +71,7 @@ const view=(c,id)=>{ const b=OSD.ords.find(x=>x.id===id); const o=osMerge(b,c.or
 const f=c=>{ const it=c.reqs['REQ-035'].itens[0]; return [c.ordens['OS-0421'].realizado,it.consumido,it.custodia]; };
 // 1 · Em execução com retido: dono/prazo
 caso(()=>{ const c=C(); osc_apontar(c,'OS-0421','26/09',50,undefined,undefined,'W-1'); cenIniciarTurno(c,'OS-0421'); cenFecharTurno(c,50,8,undefined,'',[]);
-  const v=view(c,'OS-0421'); ok('C0 retido em Em execução: selo "Apontamento em conferência", dono Paula (conferência), prazo com o dia', v.selos.indexOf('Apontamento em conferência')>=0&&v.dono===CEN_CONF_AP()&&v.prazo==='decidir se o dia 6 é outro turno', v); });
+  const v=view(c,'OS-0421'); ok('C0 retido em Em execução: selo "Apontamento em conferência", dono Paula (conferência), prazo com o dia', v.selos.indexOf('Apontamento em conferência')>=0&&v.dono===CEN_CONF_AP&&v.prazo==='decidir se o dia 6 é outro turno', v); });
 // 2 · retido chega a Em conferência: dono deveria ser a conferência, não o almoxarife
 caso(()=>{ const c=C(); cenEntregar(c,'REQ-035','Fungicida A',15,'Marcos','Rui');
   console.log('2a', TRYM(()=>osc_apontar(c,'OS-0421','26/09',50,undefined,undefined,'W-1')));
@@ -79,7 +79,7 @@ caso(()=>{ const c=C(); cenEntregar(c,'REQ-035','Fungicida A',15,'Marcos','Rui')
   console.log('2c', TRYM(()=>osc_apontar(c,'OS-0421','27/09',110,undefined,undefined,'W-2')), JSON.stringify(f(c)));
   console.log('2d', TRYM(()=>osc_conferencia(c,'OS-0421')));
   const v=view(c,'OS-0421'); console.log('2 em conferência', JSON.stringify(v));
-  ok('C1 retido em Em conferência: dono = conferência (Paula), não Rui', v.dono===CEN_CONF_AP(), v); });
+  ok('C1 retido em Em conferência: dono = conferência (Paula), não Rui', v.dono===CEN_CONF_AP, v); });
 // 3 · web informado acima da custódia: CC.quem e texto da prévia do Rui
 caso(()=>{ const c=C(); const m=osc_apontar(c,'OS-0421','26/09',50,{'Fungicida A':80},[],'W-1'); const k=c.confs[0]; const p=cenConcPrevia(c,k.id);
   console.log('3', m.msg, '|', k.quem, '|', p.txt, '|', JSON.stringify(c.movs.slice(-1)[0]));
@@ -147,7 +147,7 @@ caso(()=>{ const c=C(); osc_apontar(c,'OS-0421','26/09',50,undefined,undefined,'
 caso(()=>{ const c=C(); const it=FA(c); it.consumido=it.solicitado; it.custodia=0;
   osc_apontar(c,'OS-0421','26/09',10,{'Fungicida A':0,'Adjuvante espalhante':0},[],'W-1'); osc_apontar(c,'OS-0421','26/09',10,{'Fungicida A':0,'Adjuvante espalhante':0},[],'W-2');
   const v=view(c,'OS-0421'); ok('BA retido + insumo esgotado: selos "Insumo esgotado · Fungicida A" e "Apontamento em conferência", dono Paula (conferência)',
-    v.selos.some(s=>/^Insumo esgotado · Fungicida A/.test(s))&&v.selos.indexOf('Apontamento em conferência')>=0&&v.dono===CEN_CONF_AP()&&/decidir se o dia 6 é outro turno/.test(v.prazo), v); });
+    v.selos.some(s=>/^Insumo esgotado · Fungicida A/.test(s))&&v.selos.indexOf('Apontamento em conferência')>=0&&v.dono===CEN_CONF_AP&&/decidir se o dia 6 é outro turno/.test(v.prazo), v); });
 // ---- reprodução da auditoria (falha da base): web 50 ha + app 50 ha no mesmo turno → 240 ha · 120 L (base: 290 ha · 145 L) ----
 caso(()=>{ const c=C(); osc_apontar(c,'OS-0421','26/09',50); cenIniciarTurno(c,'OS-0421'); cenFecharTurno(c,50,8,undefined,'',[]);
   console.log('REPRO OS-0421 realizado '+O(c).realizado+' ha · Fungicida A consumido '+FA(c).consumido+' L · custódia '+FA(c).custodia+' L');
@@ -182,7 +182,7 @@ caso(()=>{ const c=C(); osc_apontar(c,'OS-0421','26/09',50,undefined,undefined,'
   const s=TRY(()=>cenApDecidir(c,'OS-0421',6,'somar','Paula'));
   ok('V4 dispensar saldo com retido é recusado (Paula decide antes); "Outro turno: somar" continua possível: 290 ha', /^Apontamento em conferência de duplicidade \(dia 6\): Paula \(conferência\) decide antes de dispensar o saldo\.$/.test(x.e)&&!s.e&&O(c).realizado===290&&!(O(c).osc||{}).disp, [x.e,s.e,fato(c)]); });
 caso(()=>{ const c=C(); osc_dispensar(c,'OS-0421',10,'borda','Ana'); osc_apontar(c,'OS-0421','26/09',50,undefined,undefined,'W-1'); turno(c,50); const v=view(c,'OS-0421');
-  ok('V4b dispensa parcial na mesma fase e depois retido: dono Paula (conferência), não vazio', v.dono===CEN_CONF_AP()&&v.prazo==='decidir se o dia 6 é outro turno', v); });
+  ok('V4b dispensa parcial na mesma fase e depois retido: dono Paula (conferência), não vazio', v.dono===CEN_CONF_AP&&v.prazo==='decidir se o dia 6 é outro turno', v); });
 // CTL-3 (R-D3): a alçada de 20 % (70 ha) passou para o comando; o turno no aparelho vira 100 ha para o máximo (60 ha) ficar dentro da alçada
 caso(()=>{ const c=C(); cenSinal(c,false); turno(c,100,8,{'Fungicida A':50}); const x=TRY(()=>osc_dispensar(c,'OS-0421',61,'chuva','Ana')); const y=TRY(()=>osc_dispensar(c,'OS-0421',60,'chuva','Ana')); cenSinal(c,true);
   ok('V4c S2 pré-existente: dispensar desconta a área no aparelho; 61 recusado (máximo 60 ha), 60 aceito; com o sinal, 290 + 60 dispensados = 350 ha', /^Máximo 60 ha: é o saldo da ordem descontando 100 ha ainda no aparelho\.$/.test(x.e)&&!y.e&&O(c).realizado===290&&O(c).osc.disp===60&&inv(c), [x.e,y.e,fato(c)]); });
@@ -235,5 +235,5 @@ for(const [ator,nome] of [[PF_('Rui'),'Rui (almoxarife)'],[PF_('Ana'),'Ana (gest
      x.e==='Decidir a duplicidade do dia 6 da OS-0421: decisão de Paula (conferência). Nada foi alterado.'&&JSON.stringify(fato(c))===f0&&a6.st===CEN_AP_DUP&&!a6.dec, [x.e,fato(c),a6.dec]); });
 caso(()=>{ const c=C(); osc_apontar(c,'OS-0421','26/09',50); turno(c,50); const x=TRY(()=>osc_apDecidir(c,'OS-0421',6,'anterior',undefined,PF_('Paula'))); const a6=O(c).ap.find(a=>a.dia===6);
   ok('AT2 Paula (conferência) decide pela tela (osc_apDecidir com o perfil): vale o dia 5, a decisão grava Paula (conferência)', !x.e&&a6.st===CEN_AP_DESC&&a6.dec&&a6.dec.quem==='Paula (conferência)'&&fato(c).real===240, [x.e,a6.dec]); });
-caso(()=>{ ok('AT3 o papel de conferência é da Paula: g2quem("conferente") = CEN_CONF_AP (o texto "Quem decide" das telas e do app)', typeof g2quem==='function'&&g2quem('conferente')===CEN_CONF_AP()&&g2quem('almoxarife')==='Rui (almoxarife) ou Paula (almoxarife)', typeof g2quem==='function'?[g2quem('conferente'),g2quem('almoxarife')]:'sem g2quem'); });
+caso(()=>{ ok('AT3 o papel de conferência é da Paula: g2quem("conferente") = CEN_CONF_AP (o texto "Quem decide" das telas e do app)', typeof g2quem==='function'&&g2quem('conferente')===CEN_CONF_AP&&g2quem('almoxarife')==='Rui (almoxarife) ou Paula (almoxarife)', typeof g2quem==='function'?[g2quem('conferente'),g2quem('almoxarife')]:'sem g2quem'); });
 console.log(JSON.stringify(R));

@@ -4,7 +4,7 @@
 const R = []; function ok(n, c, info) { R.push({ n, ok: !!c, info: c ? '' : JSON.stringify(info === undefined ? '' : info).slice(0, 700) }); }
 function MUD(c, fn) { const x = cenClone(c); try { const r = fn(x) || {}; if (!r.nada) { Object.keys(c).forEach(k => delete c[k]); Object.assign(c, x); } return r; } catch (e) { return { erro: String(e.message || e) }; } }
 const NOVO = () => cenClone(CEN0);
-const IG = 'Igor', PA = 'Paula', AN = 'Ana', MA = 'Marta', RU = 'Rui', CX = BENC.cx.item;   // integração V56: reservas com ator (Comercial CE-10: comercial ou gestor), aqui a Ana
+const IG = 'Igor', PA = 'Paula', AN = 'Ana', MA = 'Marta', RU = 'Rui', CX = BENC.cx.item;
 const O = (c, id) => c.ordens[id]; const LT = (c, id) => c.producao.lotes[id]; const REQ = (c, rid) => c.reqs[rid].itens.find(i => i.prod === CX);
 const K = (x) => prFmtT(x, 3);
 /* OB-0110 da semente até Encerradas: concluir (Igor), conferir (Paula), devolver a sobra (Rui) e fechar (Igor) */
@@ -156,36 +156,36 @@ function fechar110(c) { const a = MUD(c, x => benConcluir(x, 'OB-0110', IG)); co
   /* fixture: lote liberado de 2.000 kg classe A e pedido de 1.000 kg A: 1.000 e depois 500 → falta 0, disponível 1.000 */
   const c3 = NOVO(); fechar110(c3); MUD(c3, x => benResultado(x, 'L39-120', 'Conforme', '', MA)); MUD(c3, x => benDecidir(x, 'L39-120', 'Liberar', {}, MA));
   c3.producao.pedidos['PV-T9'] = { id: 'PV-T9', cliente: 'Teste', prod: 'Mamão Formosa · fruta embalada', cultura: 'Mamão Formosa', classe: 'A', saf: '', tipo: 'pronta', janela: '—', qtd: 1000, dest: 'MI-BR' };
-  const r1 = MUD(c3, x => prReservar(x, { ator: AN, pedido: 'PV-T9', lote: 'L39-120', kg: 1000, chave: 'W-RS-T9a' })); const r2 = MUD(c3, x => prReservar(x, { ator: AN, pedido: 'PV-T9', lote: 'L39-120', kg: 500, chave: 'W-RS-T9b' }));
+  const r1 = MUD(c3, x => prReservar(x, { pedido: 'PV-T9', lote: 'L39-120', kg: 1000, chave: 'W-RS-T9a' })); const r2 = MUD(c3, x => prReservar(x, { pedido: 'PV-T9', lote: 'L39-120', kg: 500, chave: 'W-RS-T9b' }));
   ok('U14e reservar 1.000 e depois 500 para um pedido de 1.000 kg: a segunda é recusada pela falta (0 kg); disponível 8.600', !r1.erro && /Acima da falta do PV-T9: 0 kg/.test(r2.erro || '') && prSaldos(c3, LT(c3, 'L39-120')).disp === 8600, [r1.erro, r2.erro]); }
 
 // ---- U15 · R-E04, R-E05 · K21 reserva do PV-031 (prReservar, a mesma da Colheita) ----
 { const c = NOVO(); fechar110(c);
-  const ei = MUD(c, x => prReservar(x, { ator: AN, pedido: 'PV-031', lote: 'L39-120', kg: 9600 }));
+  const ei = MUD(c, x => prReservar(x, { pedido: 'PV-031', lote: 'L39-120', kg: 9600 }));
   ok('U15a K21 L39-120 Em inspeção: reserva recusada', /L39-120 não está apto \(Em inspeção/.test(ei.erro || ''), ei);
   MUD(c, x => benResultado(x, 'L39-120', 'Conforme', '', MA)); MUD(c, x => benDecidir(x, 'L39-120', 'Liberar', {}, MA));
   const S = prSaldos(c, LT(c, 'L39-120')); const f0 = prFalta(c, c.producao.pedidos['PV-031']);
-  const ac = MUD(c, x => prReservar(x, { ator: AN, pedido: 'PV-031', lote: 'L39-120', kg: 10000 }));
+  const ac = MUD(c, x => prReservar(x, { pedido: 'PV-031', lote: 'L39-120', kg: 10000 }));
   ok('U15b K21 liberado: disponível 9.600, falta 10.000 → sugestão mín = 9.600; 10.000 recusado ("Acima do disponível do L39-120: 9.600 kg.")', S.disp === 9600 && f0 === 10000 && ac.erro === 'Acima do disponível do L39-120: 9.600 kg.', [S.disp, f0, ac]);
-  const rs = MUD(c, x => prReservar(x, { ator: AN, pedido: 'PV-031', lote: 'L39-120', kg: 9600 }));
+  const rs = MUD(c, x => prReservar(x, { pedido: 'PV-031', lote: 'L39-120', kg: 9600 }));
   ok('U15c K21 reservado 9.600; falta 400 kg; disponível 0; RS-0002 (a RS-0001 é da soja)', !rs.erro && rs.rs.id === 'RS-0002' && prFalta(c, c.producao.pedidos['PV-031']) === 400 && prSaldos(c, LT(c, 'L39-120')).disp === 0, rs);
   MUD(c, x => benResultado(x, 'L39-121', 'Conforme', '', MA)); MUD(c, x => benDecidir(x, 'L39-121', 'Liberar', {}, MA));
-  const cb = MUD(c, x => prReservar(x, { ator: AN, pedido: 'PV-031', lote: 'L39-121', kg: 100 }));
-  c.producao.pedidos['PV-T0'] = Object.assign({}, c.producao.pedidos['PV-031'], { id: 'PV-T0', classe: '' }); const cv = MUD(c, x => prReservar(x, { ator: AN, pedido: 'PV-T0', lote: 'L39-121', kg: 100 }));
+  const cb = MUD(c, x => prReservar(x, { pedido: 'PV-031', lote: 'L39-121', kg: 100 }));
+  c.producao.pedidos['PV-T0'] = Object.assign({}, c.producao.pedidos['PV-031'], { id: 'PV-T0', classe: '' }); const cv = MUD(c, x => prReservar(x, { pedido: 'PV-T0', lote: 'L39-121', kg: 100 }));
   ok('U15d classe diferente recusada ("Classe B ≠ A do PV-031"); classe vazia no pedido recusada ("Classe não informada")', cb.erro === 'Classe B ≠ A do PV-031.' && /^Classe não informada \(PV-T0\)/.test(cv.erro || ''), [cb, cv]); }
 
 // ---- U16 · R-E03, R-E06 · K22, K23, K24 bloqueio, reclassificação e cancelamento com reserva ----
 { const c = NOVO(); fechar110(c); MUD(c, x => benResultado(x, 'L39-120', 'Conforme', '', MA)); MUD(c, x => benDecidir(x, 'L39-120', 'Liberar', {}, MA));
-  MUD(c, x => prReservar(x, { ator: AN, pedido: 'PV-031', lote: 'L39-120', kg: 9600 })); const ped = () => prSitPed(c, c.producao.pedidos['PV-031']);
+  MUD(c, x => prReservar(x, { pedido: 'PV-031', lote: 'L39-120', kg: 9600 })); const ped = () => prSitPed(c, c.producao.pedidos['PV-031']);
   const bs = MUD(c, x => benDecidir(x, 'L39-120', 'Bloquear', {}, MA)); const bl = MUD(c, x => benDecidir(x, 'L39-120', 'Bloquear', { motivo: 'reclamação de transporte' }, MA));
   ok('U16a K22 bloquear exige motivo; bloqueado: RS-0002 continua Ativa com expedição impedida; PV-031 Em risco; falta 400; disponível 0', /motivo do bloqueio/.test(bs.erro || '') && !bl.erro && c.producao.reservas['RS-0002'].st === 'Ativa' && ped().t === 'Em risco' && prFalta(c, c.producao.pedidos['PV-031']) === 400 && prSaldos(c, LT(c, 'L39-120')).disp === 0, [bs, bl.erro, ped().t]);
   MUD(c, x => benDecidir(x, 'L39-120', 'Liberar', {}, MA));
-  ok('U16b K22 liberar de novo: o impedimento some sem reativar nada; nova reserva recusada (disponível 0)', ped().t === 'Parcial' && /Acima do disponível do L39-120: 0 kg/.test(MUD(c, x => prReservar(x, { ator: AN, pedido: 'PV-031', lote: 'L39-120', kg: 1 })).erro || ''), ped().t);
+  ok('U16b K22 liberar de novo: o impedimento some sem reativar nada; nova reserva recusada (disponível 0)', ped().t === 'Parcial' && /Acima do disponível do L39-120: 0 kg/.test(MUD(c, x => prReservar(x, { pedido: 'PV-031', lote: 'L39-120', kg: 1 })).erro || ''), ped().t);
   const f0 = prFis(c, 'L39-120'); const tot0 = prSoma(Object.values(c.producao.lotes).filter(L => L.cultura === 'Mamão Formosa').map(L => prFis(c, L.id)));
   const rc = MUD(c, x => benDecidir(x, 'L39-120', 'Reclassificar', { classe: 'B', motivo: 'calibre menor na reinspeção' }, MA));
   const tot1 = prSoma(Object.values(c.producao.lotes).filter(L => L.cultura === 'Mamão Formosa').map(L => prFis(c, L.id)));
   ok('U16c K23 reclassificar A → B: físico 9.600 antes e depois; Σ do mamão igual; RS-0002 Ativa com expedição impedida (classe B ≠ A); PV-031 Em risco', !rc.erro && f0 === 9600 && prFis(c, 'L39-120') === 9600 && tot0 === tot1 && LT(c, 'L39-120').classe === 'B' && ped().t === 'Em risco' && /expedição impedida/.test(rc.msg), [rc, ped().t]);
-  const cs = MUD(c, x => prCancelarReserva(x, 'RS-0002', '', AN)); const cc = MUD(c, x => prCancelarReserva(x, 'RS-0002', 'cliente quer só classe A', AN));   /* integração V56: o Comercial exige quem age na reserva e no cancelamento (CE-10); Ana é gestora */
+  const cs = MUD(c, x => prCancelarReserva(x, 'RS-0002', '')); const cc = MUD(c, x => prCancelarReserva(x, 'RS-0002', 'cliente quer só classe A'));
   ok('U16d K24 cancelar sem motivo recusado; com motivo: Cancelada, L39-120 disponível 9.600 (classe B), PV-031 falta 10.000, MP de cancelamento', /motivo/.test(cs.erro || '') && !cc.erro && c.producao.reservas['RS-0002'].st === 'Cancelada' && prSaldos(c, LT(c, 'L39-120')).disp === 9600 && prFalta(c, c.producao.pedidos['PV-031']) === 10000 && c.producao.movs.some(m => m.tipo === 'cancelamento de reserva' && m.reserva === 'RS-0002'), [cs, cc]); }
 
 // ---- U17 · R-E02, R-E03 · K20 e K25 resultado e decisão ----
@@ -344,7 +344,7 @@ ok('U18 K29 condição do a13: "Apto" da semente; "Restrito · monitorado" → a
 function OSX(c, id, tal, etapa, ap) { c.ordens[id] = { id, tipo: 'Colheita · semana 39', talhao: tal, area: 0, etapa, versao: 'v1', realizado: 0, saldo: 0, resp: 'Sérgio', ins: [], req: null, selos: [],
   ap: (ap || []).map((a, i) => ({ d: a[0], dia: i + 1, ha: a[1], st: 'Conferido', sinc: true, origem: 'web' })), reservado: false, osc: {} }; const o = c.ordens[id]; o.realizado = o.ap.reduce((s, a) => s + a.ha, 0); return o; }
 /* carga do T7 (Santa Rita) recebida no Packing (l8) por uma O.S. de colheita sintética (a semente não tem colheita do T7) */
-function T7(c, cond, tk) { if (!c.ordens['OS-0932']) OSX(c, 'OS-0932', 'T7', 'Em execução', [['25/09', 6]]); return MUD(c, x => prReceber(x, { quem: RU, os: 'OS-0932', ticket: tk || 'TK-T7A', bruto: 9400, tara: 3200, cond, dcol: '2026-09-25' })); }
+function T7(c, cond, tk) { if (!c.ordens['OS-0932']) OSX(c, 'OS-0932', 'T7', 'Em execução', [['25/09', 6]]); return MUD(c, x => prReceber(x, { os: 'OS-0932', ticket: tk || 'TK-T7A', bruto: 9400, tara: 3200, cond, dcol: '2026-09-25' })); }
 
 // ---- U30 · BEN-REV-01 · lote de entrada numa ordem liberada: sem decisão da Qualidade (a massa iria a dois destinos); defesa no Fechar ----
 { const c = NOVO(); const L = 'L39-119';
@@ -438,7 +438,7 @@ function T7(c, cond, tk) { if (!c.ordens['OS-0932']) OSX(c, 'OS-0932', 'T7', 'Em
 // ---- U37 · BEN-REV-07 · lote reservado para pedido não entra na ordem (cancelar a reserva antes) ----
 { const c = NOVO(); c.producao.lotes['LX-3'] = Object.assign({}, LT(c, 'L38-131'), { id: 'LX-3', origem: [], abertura: true }); c.producao.movs.push({ id: 'MP-T3', tipo: 'abertura', lote: 'LX-3', kg: 1000, d: '2026-09-25' });
   c.producao.pedidos['PV-T3'] = { id: 'PV-T3', cliente: 'Teste', prod: LT(c, 'LX-3').prod, cultura: 'Mamão Formosa', classe: '', saf: '', tipo: 'pronta', janela: '—', qtd: 500, dest: 'MI-BR' };
-  const S = prSaldos(c, LT(c, 'LX-3')); const rs = MUD(c, x => prReservar(x, { ator: AN, pedido: 'PV-T3', lote: 'LX-3', kg: 500 })); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'LX-3', kg: 1000 }] }, IG));
+  const S = prSaldos(c, LT(c, 'LX-3')); const rs = MUD(c, x => prReservar(x, { pedido: 'PV-T3', lote: 'LX-3', kg: 500 })); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'LX-3', kg: 1000 }] }, IG));
   ok('U37 lote reservado para pedido não entra na ordem ("LX-3 reservado para pedido: cancele a reserva antes de beneficiar")', S.q === 'Liberado' && !rs.erro && n.erro === 'LX-3 reservado para pedido: cancele a reserva antes de beneficiar.', [S.q, rs, n]); }
 
 // ---- U38 · S4 da revisão · a recusa do Liberar lote diz de onde vem a inspeção (fruta de campo não é "lote do beneficiamento") ----

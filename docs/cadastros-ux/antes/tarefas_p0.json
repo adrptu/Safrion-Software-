@@ -1,0 +1,167 @@
+{
+ "1440": [
+  {
+   "tarefa": "8 talhão seguido na mesma fazenda (do 2º em diante)",
+   "largura": 1440,
+   "cliques": 3,
+   "campos_digitados": 2,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: Cadastrar talhão [ok]",
+    "fazenda pré-escolhida: Santa Rita",
+    "digita \"B3\" em Identificação [ok]",
+    "clique 2: escolhe Boa Vista em Fazenda [ok]",
+    "digita \"40\" em Área cultivável [ok]",
+    "clique 3: Salvar [ok]",
+    "linha B3: B3 Sequeiro 40,0 ha — — 0 Sem polígono Definir polígono ›"
+   ],
+   "chegou": true
+  },
+  {
+   "tarefa": "9 PV07 pela busca",
+   "largura": 1440,
+   "cliques": 2,
+   "campos_digitados": 1,
+   "caracteres": 4,
+   "passos": [
+    "clique 1: menu",
+    "digita \"PV07\" em Buscar [ok]",
+    "linhas após busca: ['Fazenda › talhão ⇅ ▾ Sistema ⇅ ▾ Área cultivável ⇅ ▾ Polígono ⇅ ▾ Diferença ⇅ ▾ Parcelas n', '▾ Lagoa Grande 23 talhões ativos 1.285,2 ha', 'PV07 Pivô central 61,4 ha — — 1 Círculo do KML']",
+    "clique 2: linha PV07 [ok]",
+    "painel: {\"titulo\": \"Talhão · PV07\", \"sub\": \"Altere o talhão. A área do polígono só muda com nova versão, no detalhe do talhão; para tirar de uso, marque Inativo (nada é excluído).\", \"campos\": [\"Identificação do talhão\", \"Fazenda\", \"Sistema\", \"Área cultivável\", \"Área do polígono\", \"Geometria\", \"Situação\"], \""
+   ],
+   "chegou": true
+  },
+  {
+   "tarefa": "9m PV07 pelo mapa",
+   "largura": 1440,
+   "cliques": 2,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu",
+    "abas: ['Talhões\\n32', 'Fazendas\\n3', 'Ambiental\\n18', 'Água\\n16']",
+    "clique 2: aba Mapa [NÃO ACHEI]",
+    "PV07 no mapa? False"
+   ],
+   "chegou": false
+  },
+  {
+   "tarefa": "10 fungicida novo com unidade, embalagem e local",
+   "largura": 1440,
+   "cliques": 6,
+   "campos_digitados": 2,
+   "caracteres": 23,
+   "passos": [
+    "clique 1: menu",
+    "clique 2: Cadastrar item [ok]",
+    "campos e valores iniciais: [[\"fx_g_itm_item\", \"INPUT\", \"\"], [\"fx_g_itm_grupo\", \"SELECT\", \"Fertilizantes\"], [\"fx_g_itm_un\", \"SELECT\", \"kg\"], [\"fx_g_itm_emb\", \"SELECT\", \"Saco\"], [\"fx_g_itm_cont\", \"INPUT\", \"\"], [\"fx_g_itm_ctrl\", \"SELECT\", \"Lote e validade\"], [\"fx_g_itm_preco\", \"INPUT\", \"\"], [\"fx_g_itm_pdata\", \"INPUT\", \"\"], [\"fx_g_itm_gar\", \"INPUT\", \"\"], [\"fx_g_itm_local\", \"SELECT\", \"Galpão 2\"], [\"fx_g_itm_sit\", \"SELECT\", \"Ativo\"]]",
+    "digita \"Fungicida Teste 250 SC\" em nome [ok]",
+    "clique 3: escolhe L em Unidade-base [ok]",
+    "clique 4: escolhe Galão em Embalagem [ok]",
+    "digita \"5\" em Conteúdo [ok]",
+    "clique 5: escolhe Almox. defensivos em Local padrão [ok]",
+    "clique 6: Salvar [ok]",
+    "erros: ",
+    "linha: Fungicida Teste 250 SC 3.1.01 · Fertilizantes e corretivos L galão de 5 L Lote e validade — — Sem preço Informar preço ›"
+   ],
+   "chegou": true
+  },
+  {
+   "tarefa": "11 quem fornece Tebuconazol 200 EC",
+   "largura": 1440,
+   "cliques": 1,
+   "campos_digitados": 1,
+   "caracteres": 11,
+   "passos": [
+    "clique 1: menu",
+    "digita \"Tebuconazol\" em Buscar [ok]",
+    "linhas após busca: []"
+   ],
+   "chegou": false
+  }
+ ],
+ "390": [
+  {
+   "tarefa": "8 talhão seguido na mesma fazenda (do 2º em diante)",
+   "largura": 390,
+   "cliques": 3,
+   "campos_digitados": 2,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: Cadastrar talhão [ok]",
+    "fazenda pré-escolhida: Santa Rita",
+    "digita \"B3\" em Identificação [ok]",
+    "clique 2: escolhe Boa Vista em Fazenda [ok]",
+    "digita \"40\" em Área cultivável [ok]",
+    "clique 3: Salvar [ok]",
+    "linha B3: B3 Sequeiro 40,0 ha — — 0 Sem polígono Definir polígono ›"
+   ],
+   "chegou": true
+  },
+  {
+   "tarefa": "9 PV07 pela busca",
+   "largura": 390,
+   "cliques": 2,
+   "campos_digitados": 1,
+   "caracteres": 4,
+   "passos": [
+    "clique 1: menu",
+    "digita \"PV07\" em Buscar [ok]",
+    "linhas após busca: ['Fazenda › talhão ⇅ ▾ Sistema ⇅ ▾ Área cultivável ⇅ ▾ Polígono ⇅ ▾ Diferença ⇅ ▾ Parcelas n', '▾ Lagoa Grande 23 talhões ativos 1.285,2 ha', 'PV07 Pivô central 61,4 ha — — 1 Círculo do KML']",
+    "clique 2: linha PV07 [ok]",
+    "painel: {\"titulo\": \"Talhão · PV07\", \"sub\": \"Altere o talhão. A área do polígono só muda com nova versão, no detalhe do talhão; para tirar de uso, marque Inativo (nada é excluído).\", \"campos\": [\"Identificação do talhão\", \"Fazenda\", \"Sistema\", \"Área cultivável\", \"Área do polígono\", \"Geometria\", \"Situação\"], \""
+   ],
+   "chegou": true
+  },
+  {
+   "tarefa": "9m PV07 pelo mapa",
+   "largura": 390,
+   "cliques": 2,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu",
+    "abas: ['Talhões\\n32', 'Fazendas\\n3', 'Ambiental\\n18', 'Água\\n16']",
+    "clique 2: aba Mapa [NÃO ACHEI]",
+    "PV07 no mapa? False"
+   ],
+   "chegou": false
+  },
+  {
+   "tarefa": "10 fungicida novo com unidade, embalagem e local",
+   "largura": 390,
+   "cliques": 6,
+   "campos_digitados": 2,
+   "caracteres": 23,
+   "passos": [
+    "clique 1: menu",
+    "clique 2: Cadastrar item [ok]",
+    "campos e valores iniciais: [[\"fx_g_itm_item\", \"INPUT\", \"\"], [\"fx_g_itm_grupo\", \"SELECT\", \"Fertilizantes\"], [\"fx_g_itm_un\", \"SELECT\", \"kg\"], [\"fx_g_itm_emb\", \"SELECT\", \"Saco\"], [\"fx_g_itm_cont\", \"INPUT\", \"\"], [\"fx_g_itm_ctrl\", \"SELECT\", \"Lote e validade\"], [\"fx_g_itm_preco\", \"INPUT\", \"\"], [\"fx_g_itm_pdata\", \"INPUT\", \"\"], [\"fx_g_itm_gar\", \"INPUT\", \"\"], [\"fx_g_itm_local\", \"SELECT\", \"Galpão 2\"], [\"fx_g_itm_sit\", \"SELECT\", \"Ativo\"]]",
+    "digita \"Fungicida Teste 250 SC\" em nome [ok]",
+    "clique 3: escolhe L em Unidade-base [ok]",
+    "clique 4: escolhe Galão em Embalagem [ok]",
+    "digita \"5\" em Conteúdo [ok]",
+    "clique 5: escolhe Almox. defensivos em Local padrão [ok]",
+    "clique 6: Salvar [ok]",
+    "erros: ",
+    "linha: Fungicida Teste 250 SC 3.1.01 · Fertilizantes e corretivos L galão de 5 L Lote e validade — — Sem preço Informar preço ›"
+   ],
+   "chegou": true
+  },
+  {
+   "tarefa": "11 quem fornece Tebuconazol 200 EC",
+   "largura": 390,
+   "cliques": 1,
+   "campos_digitados": 1,
+   "caracteres": 11,
+   "passos": [
+    "clique 1: menu",
+    "digita \"Tebuconazol\" em Buscar [ok]",
+    "linhas após busca: []"
+   ],
+   "chegou": false
+  }
+ ],
+ "_errs": []
+}

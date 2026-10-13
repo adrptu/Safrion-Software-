@@ -1,8 +1,0 @@
-OK    1 viewport do aparelho · casca e App de campo com a largura do celular (360 px), sem desenho em 980 px reduzido 
-     (informativo, pendência os_campo.py) OS-0424-app ainda desenha em 360 px no celular
-OK    2 matriz 7 dimensões × SAF, CMP, O.S., PA · título, comando principal e etapa atual visíveis/alcançáveis, nada cortado fora de região rolável, sem rolagem lateral da página, fonte ≥ 10 px, sem escala global 
-     (informativo) área útil, menu e etapa: {'SAF 360x800': (606, [68, 'static'], 'Etapa 1 de 4 · Escolha a'), 'OS 360x800': (424, [68, 'static'], ''), 'SAF 800x360': (204, [68, 'static'], '1 Escolha a safra · etap'), 'OS 800x360': (222, [68, 'static'], ''), 'SAF 768x1024': (868, [68, 'static'], '1 Escolha a safra · etap'), 'OS 768x1024': (825, [68, 'static'], ''), 'SAF 1024x768': (612, [232, 'static'], '1 Escolha a safra · etap'), 'OS 1024x768': (569, [232, 'static'], ''), 'SAF 1280x720': (578, [232, 'static'], '1 Escolha a safra · etap'), 'OS 1280x720': (556, [232, 'static'], ''), 'SAF 1440x900': (758, [232, 'static'], '1 Escolha a safra · etap'), 'OS 1440x900': (736, [232, 'static'], ''), 'SAF zoom200': (302, [68, 'static'], 'Etapa 1 de 4 · Escolha a'), 'OS zoom200': (312, [68, 'static'], '')}
-OK    3 menu · 1ª visita: recolhido (68 px) em 360, 768 e zoom 200 %, ao lado (232 px) em 1024 e 1440; no estreito abre por cima com fundo, o toque no fundo fecha e a escolha guardada não muda 
-     erros JS (matriz): []
-
-RESULTADO: 3 ok · 0 falhas (matriz)

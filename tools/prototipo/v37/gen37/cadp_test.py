@@ -1,89 +1,68 @@
 # -*- coding: utf-8 -*-
-"""Teste CDP de CD-05 com papéis (v3.9): filtros por papel com contagem; cadastrar cliente; cadastrar parceiro de crédito;
-CNPJ já cadastrado → aviso ao digitar e "Abrir e ativar papel" sem duplicar; suspender com motivo obrigatório (sai da cotação).
-15 verificações. Uso: python3 cadp_test.py (serve _render/ e abre o Chrome headless)."""
-import sys, os, time, subprocess, json
-sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
-from cdp import Chrome
-from journeys import free
-R=os.path.join(os.path.dirname(os.path.abspath(__file__)),'_render'); p=free()
-srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(0.8)
-c=Chrome(port=free()); J=c.js
-SETV="""((sel,val)=>{const i=document.querySelector(sel); const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,val); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})"""
-SETK=lambda k,val: J(f"({SETV})('#fx_g_forn_{k}',{json.dumps(val)})")
-BTN=lambda t: J(f"(()=>{{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==={json.dumps(t)}); if(b){{b.click(); return true;}} return false;}})()") or time.sleep(.4)
-CAN=lambda t: J(f"[...document.querySelectorAll('aside[role=dialog] label')].find(l=>l.innerText.trim()==={json.dumps(t)} && l.querySelector('input[type=checkbox]')).querySelector('input').click()") or time.sleep(.2)
-ON=lambda t: J(f"[...document.querySelectorAll('aside[role=dialog] label')].find(l=>l.innerText.trim()==={json.dumps(t)} && l.querySelector('input[type=checkbox]')).querySelector('input').checked")
-AL=lambda: J("[...document.querySelectorAll('aside [role=alert]')].map(x=>x.innerText).join(' | ')")
-LABS=lambda: J("[...document.querySelectorAll('aside[role=dialog] label[for]')].map(l=>l.innerText.trim())")
-ST=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).join(' | ')")
-ABERTO=lambda: J("!!document.querySelector('aside[role=dialog]')")
-ROWS="[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row].g2ed')]"
-LIN=lambda n: J(f"(()=>{{const r={ROWS}.find(r=>r.innerText.indexOf({json.dumps(n)})>=0); return r?r.innerText.replace(/\\s+/g,' '):'';}})()")
-ABRE=lambda n: J(f"(()=>{{const r={ROWS}.find(r=>r.innerText.indexOf({json.dumps(n)})>=0); (r.querySelector('[role=cell] span')||r).click();}})()") or time.sleep(.4)
-FILS=lambda: J("[...document.querySelectorAll('[role=group][aria-label=\"Filtrar por papel\"] button')].map(b=>b.innerText.replace(/\\s+/g,' ').trim()).join(' | ')")
-FIL=lambda t: J(f"[...document.querySelectorAll('[role=group][aria-label=\"Filtrar por papel\"] button')].find(b=>b.innerText.trim().startsWith({json.dumps(t)})).click()") or time.sleep(.3)
-NOVO=lambda: J("[...document.querySelectorAll('main button')].find(b=>b.innerText.trim()==='Cadastrar parceiro').click()") or time.sleep(.4)   # a ação fica no bloco (01/10)
-def _aba(t): J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab]')].find(b=>b.innerText.replace(/\\s+/g,' ').trim().startsWith({json.dumps(t)})); if(b) b.click();}})()"); time.sleep(.35)
-def cob(g):
-    """cobertura por grupo (layout de 01/10: aba "Cobertura de cotação" no mesmo bloco); lê e volta à aba Parceiros."""
-    _aba('Cobertura'); r=J(f"(()=>{{const t=document.querySelectorAll('[role=table]')[0]; if(!t) return null; const r=[...t.querySelectorAll('[role=row]')].find(r=>r.innerText.split('\\n')[0].trim()==={json.dumps(g)}); return r?r.innerText.replace(/\\s+/g,' '):null;}})()"); _aba('Parceiros'); return r
-ok=[]
-def chk(nome,cond,extra=''):
-    ok.append(bool(cond)); print(('OK  ' if cond else 'FALHOU ')+nome+(' · '+str(extra) if extra else ''))
-try:
-    c.size(1440,1100); c.goto(f'http://127.0.0.1:{p}/CD-05.dc.html'); time.sleep(.5)
-    hd=J("document.querySelector('h1').parentElement.innerText.replace(/\\s+/g,' ')")
-    chk('1 sem erro JS e estado do cabeçalho calculado', J("window.__err||''")=='' and '2 grupos sem fornecedor · 1 limite vencido' in hd, hd)
-    f0=FILS(); chk('2 filtros por papel com contagem', f0=='Todos 20 | Fornecedores 8 | Clientes 7 | Parceiros de crédito 3 | Transportadores 2 | Prestadores 1', f0)
-    FIL('Clientes')
-    ls=J(f"{ROWS}.map(r=>r.innerText.replace(/\\s+/g,' '))")
-    chk('3 filtro Clientes: só clientes, com limite, sem cobertura de cotação', len(ls)==7 and all('Cliente' in x for x in ls) and all('Limite' in x for x in ls)
-        and J("document.querySelectorAll('[role=table]').length")==1, ls)
-    # ---- cadastrar cliente ----
-    NOVO(); SETK('cnpj','41.552.310/0001-04'); SETK('nome','Hortifruti Serra Azul'); CAN('Cliente')
-    lb=LABS()
-    chk('4 cliente: começa pelo CPF/CNPJ e mostra só a seção Cliente', lb[0]=='CPF ou CNPJ' and all(x in lb for x in ['Produtos de interesse','Local e horário de entrega','Condição de pagamento','Limite de crédito comercial','Validade da análise de crédito'])
-        and 'Grupos homologados' not in lb and 'Linhas de crédito' not in lb, lb)
-    SETK('lim','50.000'); time.sleep(.2); BTN('Salvar')
-    al=AL(); chk('5 cliente: produtos e validade do limite obrigatórios', ABERTO() and 'Escolha ao menos uma opção.' in al and 'Informe a validade da análise de crédito.' in al, al)
-    CAN('Mamão Formosa classe A'); SETK('limv','2027-03-31'); SETK('entrega','CD Salvador/BA · seg–sex 05–10h'); time.sleep(.2); BTN('Salvar'); time.sleep(.2)
-    t=LIN('Hortifruti Serra Azul')
-    # TABELAS-FOCO (06/10/2026): limite, validade e situação do papel em colunas próprias (antes "Limite R$ 50.000 até 31/03/2027" numa célula só);
-    # revisão TABR (09/10/2026, A1): a situação do papel vem logo depois do parceiro
-    chk('6 cliente salvo com limite e contagem', not ABERTO() and t.startswith('Hortifruti Serra Azul Limite vigente') and 'R$ 50.000 31/03/2027' in t and 'Clientes 8' in FILS(), f'{t} · {ST()}')
-    # ---- cadastrar parceiro de crédito ----
-    FIL('Parceiros de crédito'); NOVO(); SETK('cnpj','52.119.804/0001-08'); SETK('nome','Cooperativa Cerrado Crédito'); CAN('Parceiro de crédito')
-    lb=LABS()
-    chk('7 crédito: seção com linhas, garantias e gerente com e-mail e telefone', all(x in lb for x in ['Linhas de crédito','Garantias aceitas','Gerente do crédito','E-mail do gerente','Telefone do gerente'])
-        and 'Produtos de interesse' not in lb and 'Homologado' not in lb, lb)
-    BTN('Salvar'); al=AL()
-    chk('8 crédito: linhas e gerente obrigatórios', ABERTO() and 'Escolha ao menos uma opção.' in al and 'Informe gerente do crédito.' in al, al)
-    CAN('Custeio'); CAN('Penhor de safra'); SETK('ger','Luís Prado'); SETK('ger_email','luis.prado@cerradocredito.coop.br'); SETK('ger_tel','64 99111-2233'); time.sleep(.2); BTN('Salvar'); time.sleep(.2)
-    t=LIN('Cooperativa Cerrado Crédito')
-    chk('9 crédito salvo: linhas e garantias na linha; filtro conta 4', not ABERTO() and 'Custeio' in t and 'Penhor de safra' in t and 'Parceiros de crédito 4' in FILS(), f'{t} · {AL()}')
-    # ---- CNPJ já cadastrado: aviso ao digitar e abrir o existente ativando o papel ----
-    FIL('Todos'); NOVO(); CAN('Fornecedor'); SETK('cnpj','98.765.432/0001-98'); time.sleep(.2)
-    av=J("[...document.querySelectorAll('aside [role=status]')].map(x=>x.innerText.replace(/\\s+/g,' ')).join(' | ')")
-    BTN('Salvar'); al=AL()
-    chk('10 CNPJ duplicado: aviso ao digitar e salvar barrado', 'Já cadastrado: Coop Grão Sul (Cliente)' in av and 'Abrir e ativar papel' in av and 'CNPJ já cadastrado em Coop Grão Sul' in al, f'{av} · {al}')
-    BTN('Abrir e ativar papel')
-    tit=J("(document.querySelector('aside[role=dialog] h2')||{}).innerText"); lb=LABS()
-    chk('11 abre Coop Grão Sul com Fornecedor marcado e a seção Fornecedor', tit=='Parceiro · Coop Grão Sul' and ON('Fornecedor') and ON('Cliente') and 'Grupos homologados' in lb and 'Produtos de interesse' in lb, f'{tit} · {lb}')
-    BTN('Salvar'); time.sleep(.2)
-    t=LIN('Coop Grão Sul'); n=J(f"{ROWS}.filter(r=>r.innerText.indexOf('Coop Grão Sul')>=0).length"); f1=FILS()
-    chk('12 salvo sem duplicar: Coop Grão Sul com 2 papéis, total 22, Fornecedores 9', not ABERTO() and 'Fornecedor' in t and 'Cliente' in t and n==1 and 'Todos 22' in f1 and 'Fornecedores 9' in f1, f'{t} · {f1}')
-    # ---- suspender com motivo ----
-    ABRE('Sementes Vale'); BTN('Suspender parceiro'); BTN('Salvar')
-    al=J("(()=>{const i=document.getElementById('fx_g_forn_motivo'); let n=i; for(let k=0;k<4&&n;k++){ n=n.parentElement; const a=n&&n.querySelector('[role=alert]'); if(a) return a.innerText; } return ''; })()")
-    chk('13 suspender sem motivo é barrado junto ao campo', ABERTO() and 'Motivo da suspensão' in LABS() and al=='Informe motivo da suspensão.', al)
-    SETK('motivo','Documentação fiscal vencida'); time.sleep(.2); BTN('Salvar'); time.sleep(.2)
-    st=ST(); t=LIN('Sementes Vale')
-    chk('14 suspenso com motivo: aviso e situação na linha', not ABERTO() and 'Suspenso: Sementes Vale sai de cotação' in st and 'Suspenso' in t and 'Documentação fiscal vencida' in t, f'{st} · {t}')
-    FIL('Fornecedores'); cs=cob('Sementes'); ABRE('Sementes Vale')
-    sub=J("document.querySelector('aside[role=dialog]').innerText"); re_=J("[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==='Reativar parceiro')")
-    # TABELAS-FOCO (06/10/2026): a cobertura mostra o número na coluna Fornecedores e o estado em chip ("Sem concorrência" no lugar de "Só 1")
-    chk('15 suspenso sai da cobertura (Sementes: só 1) e abre com Reativar parceiro', cs and cs.startswith('Sementes 1 ') and 'Sem concorrência' in cs and 'Suspenso: fora de cotação' in sub and re_, f'{cs} · reativar={re_}')
-finally:
-    c.close(); srv.terminate()
+"""CD-05 com papéis (v3.9): papéis com contagem; cadastrar cliente; cadastrar parceiro de crédito; CNPJ já cadastrado → aviso ao digitar
+e "Abrir e ativar papel" sem duplicar; suspender com motivo obrigatório (sai da cotação). 15 verificações.
+CADUX P9 (09/10/2026): reescrito com as mesmas regras (REQUISITOS §4: D1, D3, E2) sobre a seleção que abre detalhe (DEC-0910-01); roda a
+lógica da página no node (cadux_node.py). Expectativas que mudaram, com o motivo:
+  2, 3 os papéis são o mestre (Fornecedores, Clientes, Crédito, Transportadores, Prestadores e Grupos de insumo), com a contagem, em vez de
+     chips de filtro e de uma aba "Cobertura" (C17); escolher o papel mostra as colunas dele;
+  4, 7 "+ Criar parceiro" no cabeçalho com o papel do mestre já marcado (R03, BOT-03), em vez de "Cadastrar parceiro" no bloco;
+  15 a cobertura de cotação é o grupo "Grupos de insumo" do mestre; o parceiro abre em consulta (SEL-01) e "Reativar parceiro" fica
+     no formulário de edição.
+Uso: python3 cadp_test.py  (lê project/; sai com 1 se alguma regra falhar)."""
+import os, sys, json
+HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE); os.chdir(HERE)
+from cadux_node import roda, AUX
+ok = []
+def chk(nome, cond, extra=''):
+    ok.append(bool(cond)); print(('OK  ' if cond else 'FALHOU ') + nome + (' · ' + str(extra)[:400] if extra and not cond else ''), flush=True)
+AUX5 = r"""function mlab(){ return v().mx_itens.filter(i=>i.item).map(i=>i.t+' '+i.n); }
+function linN(n){ const r=(v().g_forn_rows||[]).find(r=>r.cells.find(c=>c.isData).parts.map(p=>p.t).join(' ').indexOf(n)>=0); return r?r.cells.filter(c=>c.isData).map(c=>c.parts.map(p=>p.t).join(' ')).join(' | '):''; }
+function idN(n){ const r=RW(C,'g_forn').find(r=>r.v.nome===n); return r&&r.id; }
+function campo(k){ const F=painel('g_forn'); return F&&F.fields.find(f=>f.fid==='fx_g_forn_'+k); }
+function marcado(k,t){ const f=campo(k); const o=f&&(f.mopts||[]).find(o=>o.t===t); return !!(o&&o.on); }
+"""
+o = roda('CD-05', AUX + AUX5 + r'''
+let x=v(); OUT.e1=x.cd5e; OUT.m2=mlab();
+x=mestre('cliente'); OUT.c3=x.cd5_conta; OUT.cols3=GR('g_forn').cols.map(c=>c.l); OUT.r3=(x.g_forn_rows||[]).map(r=>r.cells.filter(c=>c.isData).map(c=>c.parts.map(p=>p.t).join(' ')).join(' | '));
+x.cd5_criar(); v(); fset('g_forn','cnpj','41.552.310/0001-04'); fset('g_forn','nome','Hortifruti Serra Azul'); OUT.l4=rotulos('g_forn');
+fset('g_forn','lim','50.000'); salva('g_forn'); OUT.a5=errosT('g_forn'); OUT.o5=!!painel('g_forn');
+fmulti('g_forn','prod',['Mamão Formosa classe A']); fset('g_forn','limv','2027-03-31'); fset('g_forn','entrega','CD Salvador/BA · seg–sex 05–10h'); OUT.t6=salva('g_forn'); OUT.o6=!!(painel('g_forn')&&!painel('g_forn').cons); fecha('g_forn');
+x=v(); OUT.r6=linN('Hortifruti Serra Azul'); OUT.m6=mlab();
+x=mestre('credito'); x.cd5_criar(); v(); fset('g_forn','cnpj','52.119.804/0001-08'); fset('g_forn','nome','Cooperativa Cerrado Crédito'); OUT.l7=rotulos('g_forn');
+salva('g_forn'); OUT.a8=errosT('g_forn'); OUT.o8=!!painel('g_forn');
+fmulti('g_forn','linhas',['Custeio']); fmulti('g_forn','gar',['Penhor de safra']); fset('g_forn','ger','Luís Prado'); fset('g_forn','ger_email','luis.prado@cerradocredito.coop.br'); fset('g_forn','ger_tel','64 99111-2233');
+OUT.t9=salva('g_forn'); OUT.a9=errosT('g_forn'); OUT.o9=!!(painel('g_forn')&&!painel('g_forn').cons); fecha('g_forn'); x=v(); OUT.r9=linN('Cooperativa Cerrado Crédito'); OUT.m9=mlab();
+x=mestre(''); x.cd5_criar(); v(); fmulti('g_forn','papeis',['Fornecedor']); fset('g_forn','cnpj','98.765.432/0001-98'); const fc=campo('cnpj'); OUT.d10=[fc.hasDup,fc.dupT]; salva('g_forn'); OUT.a10=errosT('g_forn');
+campo('cnpj').dupGo(); v(); const P=painel('g_forn'); OUT.t11=P&&P.title; OUT.on11=[marcado('papeis','Fornecedor'),marcado('papeis','Cliente')]; OUT.l11=rotulos('g_forn');
+OUT.t12=salva('g_forn'); fecha('g_forn'); x=v(); OUT.n12=RW(C,'g_forn').filter(r=>r.v.nome==='Coop Grão Sul').length; OUT.r12=linN('Coop Grão Sul'); OUT.m12=mlab(); OUT.c12=x.cd5_conta;
+edita('g_forn','F05'); x=v(); x.cd5_suspender(); v(); OUT.l13=rotulos('g_forn'); salva('g_forn'); OUT.a13=errosT('g_forn'); OUT.o13=!!painel('g_forn');
+fset('g_forn','motivo','Documentação fiscal vencida'); OUT.t14=salva('g_forn'); fecha('g_forn'); x=v(); OUT.r14=linhaTxt('g_forn','F05');
+x=mestre('grupos'); OUT.cob=linhaTxt('g_cob','c_Sementes')||((x.g_cob_rows||[]).map(r=>r.cells.filter(c=>c.isData).map(c=>c.parts.map(p=>p.t).join(' ')).join(' | ')).find(t=>t.indexOf('Sementes')===0));
+x=mestre(''); abre('g_forn','F05'); OUT.p15=cons('g_forn'); consGo('g_forn','Editar parceiro'); x=v(); OUT.re15=[x.cd5_reat,x.cd5_reatT];
+''')
+if o.get('__errs'): print('erros de script:', o['__errs'])
+chk('1 sem erro JS e estado do cabeçalho calculado', not o.get('__errs') and o.get('e1') == '2 grupos sem fornecedor · 1 limite vencido', o.get('e1'))
+chk('2 papéis no mestre com contagem', o.get('m2') == ['Todos os parceiros ', 'Fornecedores 8', 'Clientes 7', 'Crédito 3', 'Transportadores 2', 'Prestadores 1', 'Grupos de insumo 9'], o.get('m2'))
+r3 = o.get('r3') or []
+chk('3 Clientes: só clientes, com limite e validade em colunas próprias', len(r3) == 7 and all('Cliente' in x for x in r3) and 'Limite de crédito' in (o.get('cols3') or []) and (o.get('c3') or '').startswith('7 de 7'), [o.get('cols3'), r3[:2]])
+L4 = o.get('l4') or []
+chk('4 cliente: começa pelo CPF/CNPJ (papel Cliente herdado do mestre) e mostra só a seção Cliente', L4[:1] == ['CPF ou CNPJ'] and all(x in L4 for x in ['Produtos de interesse', 'Local e horário de entrega', 'Condição de pagamento', 'Limite de crédito comercial', 'Validade da análise de crédito'])
+    and 'Grupos homologados' not in L4 and 'Linhas de crédito' not in L4, L4)
+chk('5 cliente: produtos e validade do limite obrigatórios', o.get('o5') and 'Escolha ao menos uma opção.' in (o.get('a5') or '') and 'Informe a validade da análise de crédito.' in (o.get('a5') or ''), o.get('a5'))
+chk('6 cliente salvo com limite e contagem', not o.get('o6') and 'R$ 50.000' in (o.get('r6') or '') and '31/03/2027' in (o.get('r6') or '') and 'Limite vigente' in (o.get('r6') or '') and 'Clientes 8' in (o.get('m6') or []), [o.get('r6'), o.get('m6'), o.get('t6')])
+L7 = o.get('l7') or []
+chk('7 crédito: seção com linhas, garantias e gerente com e-mail e telefone', all(x in L7 for x in ['Linhas de crédito', 'Garantias aceitas', 'Gerente do crédito', 'E-mail do gerente', 'Telefone do gerente']) and 'Produtos de interesse' not in L7 and 'Homologado' not in L7, L7)
+chk('8 crédito: linhas e gerente obrigatórios', o.get('o8') and 'Escolha ao menos uma opção.' in (o.get('a8') or '') and 'Informe gerente do crédito.' in (o.get('a8') or ''), o.get('a8'))
+chk('9 crédito salvo: linhas e garantias na linha; Crédito conta 4', not o.get('o9') and 'Custeio' in (o.get('r9') or '') and 'Penhor de safra' in (o.get('r9') or '') and 'Crédito 4' in (o.get('m9') or []), [o.get('r9'), o.get('m9'), o.get('a9')])
+d10 = o.get('d10') or [False, '']
+chk('10 CNPJ duplicado: aviso ao digitar com "Abrir e ativar papel" e salvar barrado', d10[0] and 'Já cadastrado: Coop Grão Sul (Cliente)' in (d10[1] or '') and 'CNPJ já cadastrado em Coop Grão Sul' in (o.get('a10') or ''), [d10, o.get('a10')])
+chk('11 abre Coop Grão Sul com Fornecedor marcado e a seção Fornecedor', o.get('t11') == 'Parceiro · Coop Grão Sul' and o.get('on11') == [True, True] and 'Grupos homologados' in (o.get('l11') or []) and 'Produtos de interesse' in (o.get('l11') or []), [o.get('t11'), o.get('on11'), o.get('l11')])
+m12 = o.get('m12') or []
+chk('12 salvo sem duplicar: Coop Grão Sul com 2 papéis, total 22, Fornecedores 9', o.get('n12') == 1 and 'Fornecedor' in (o.get('r12') or '') and 'Cliente' in (o.get('r12') or '') and (o.get('c12') or '').startswith('22 de 22') and 'Fornecedores 9' in m12, [o.get('r12'), o.get('c12'), m12])
+chk('13 suspender sem motivo é barrado junto ao campo', o.get('o13') and 'Motivo da suspensão' in (o.get('l13') or []) and 'motivo: Informe motivo da suspensão.' in (o.get('a13') or ''), [o.get('l13'), o.get('a13')])
+chk('14 suspenso com motivo: aviso e situação na linha', 'Suspenso: Sementes Vale sai de cotação' in (o.get('t14') or '') and 'Suspenso' in (o.get('r14') or '') and 'Documentação fiscal vencida' in (o.get('r14') or ''), [o.get('t14'), o.get('r14')])
+p15 = json.dumps(o.get('p15') or {}, ensure_ascii=False); cob = o.get('cob') or ''
+chk('15 suspenso sai da cobertura (Sementes: 1 fornecedor, sem concorrência) e o parceiro abre com "Reativar parceiro"',
+    cob.startswith('Sementes') and '1' in cob and 'Sem concorrência' in cob and 'Suspenso' in p15 and 'fora de cotação' in p15.lower() and (o.get('re15') or [False, ''])[1] == 'Reativar parceiro', [cob, p15[:300], o.get('re15')])
 print('RESULTADO:', 'OK' if all(ok) else 'FALHOU', f'{sum(ok)}/{len(ok)}')
+sys.exit(0 if all(ok) else 1)

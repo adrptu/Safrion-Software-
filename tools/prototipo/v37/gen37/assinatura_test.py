@@ -7,7 +7,10 @@ Revisão PLAT (06/10): medida do período = maior entre abertura e fechamento (A
 eventos (A17c, A6), proposta empresarial acima de 5.000 ha (A20), faixa curta no celular (A15e), nenhuma faixa no PT (A8c).
 Trava (R12): Cadastrar talhão e Desenhar recusam antes de abrir; Reativar recusa ao salvar; importação recusa a linha "Talhão novo" e importa o
 contorno novo de talhão existente; editar a área de talhão existente salva; liberar O.S. segue. Contestação congela a régua; crédito vai para o
-período seguinte. Uso (de gen37/, depois de build.py e montar_render.py): python3 assinatura_test.py   (CDP_GL=1 para o mapa real)"""
+período seguinte. Uso (de gen37/, depois de build.py e montar_render.py): python3 assinatura_test.py   (CDP_GL=1 para o mapa real)
+CADUX (09/10/2026, seleção que abre detalhe): no CD-01 o talhão abre em consulta pelo endereço (#reg=) e se altera por "Editar talhão";
+"Cadastrar talhão" virou "+ Criar talhão" no cabeçalho (BOT-03) e o aviso de criação diz "T9 criado na Santa Rita"; salvar volta à consulta
+do talhão (o painel fica aberto, sem campo editável). A trava e os números esperados são os mesmos."""
 import sys, os, time, json, tempfile
 os.environ.setdefault('CDP_GL', '1')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -84,11 +87,11 @@ try:
     chk('A4c desfazer antes de 01/10 volta ao contrato v2 (com recibo DES-0001: desfazer também registra quem agiu, revisão PLAT achado 4)', 'Mudança desfeita (DES-0001): segue Completo' in t and 'Seu plano' in linha(2, 'Completo'), t)
     clk('Fechar', 'aside[role=dialog]')
     # talhão novo de 50 ha pelo formulário do CD-01 (A10)
-    go('CD-01.dc.html'); clk('Cadastrar talhão')
+    go('CD-01.dc.html'); clk('+ Criar talhão', 'header')
     setv('#fx_g_tal_t', 'T9'); setv('#fx_g_tal_faz', 'Santa Rita'); setv('#fx_g_tal_sis', 'Sequeiro'); setv('#fx_g_tal_decl', '50'); clk('Salvar', 'aside[role=dialog]'); t = toast()
     go('CF-05.dc.html'); b = body()
     chk('A10a talhão de 50 ha no CD-01: CF-05 mede 2.620,23 ha, avisa 20,23 ha acima do contratado (sem cobrança-surpresa: prévia R$ 5.200,00) e a primária vira Ampliar área contratada',
-        'T9 cadastrado' in t and '2.620,23 ha' in b and '20,23 ha acima da área contratada' in b and 'R$ 5.200,00' in b and J(PRIMS) == ['Ampliar área contratada'], [t, J(PRIMS), b[:500]])
+        'T9 criado na Santa Rita' in t and '2.620,23 ha' in b and '20,23 ha acima da área contratada' in b and 'R$ 5.200,00' in b and J(PRIMS) == ['Ampliar área contratada'], [t, J(PRIMS), b[:500]])
     clk('Ampliar área contratada'); d = dlg()
     chk('A10b Ampliar abre a prévia com 2.700 ha: R$ 5.200,00 → R$ 5.240,46', J("document.querySelector('#cf_pha').value") == '2.700' and 'R$ 5.200,00 → R$ 5.240,46' in d, [J("document.querySelector('#cf_pha').value"), d[:600]])
     clk('Fechar', 'aside[role=dialog]')
@@ -96,7 +99,9 @@ try:
     chk('A10c BO-02 mede ao vivo: Grupo Santa Rita 2.620,23 ha e mensalidades vigentes R$ 6.338,00', '2.620,23 ha' in linha(0, 'Grupo Santa Rita') and 'R$ 6.338,00' in b, [linha(0, 'Grupo Santa Rita'), b[:300]])
     # ============ cenário B · datas, faixa, trava, pagamento ============
     # B1 (Boa Vista, sem parcela em safra aberta) é o talhão que dá para inativar; os da Santa Rita têm parcelas (o CD-01 recusa inativar)
-    go('CD-01.dc.html', limpa=True); abre_linha(0, 'B1'); setv('#fx_g_tal_sit', 'Inativo'); clk('Salvar', 'aside[role=dialog]'); t0 = toast()
+    # limpar com o endereço igual não recarrega a página: limpa sem o endereço e depois abre o B1 pelo endereço
+    go('CD-01.dc.html', limpa=True); go('CD-01.dc.html', '#reg=B1'); clk('Editar talhão', 'aside[role=dialog]')
+    setv('#fx_g_tal_sit', 'Inativo'); clk('Salvar', 'aside[role=dialog]'); t0 = toast()
     go('CF-05.dc.html'); clk('Alterar plano ou área'); clk('Essencial', 'aside[role=dialog]'); clk('Aceitar e agendar para 01/10/2026', 'aside[role=dialog]'); clk('Fechar', 'aside[role=dialog]')
     data('01/10/2026'); t = toast(); b = body()
     # revisão PLAT, achado 3: a medida do período é a maior entre a abertura (01/09: 2.570,23 ha) e o fechamento (2.450,23 ha com B1 inativo);
@@ -126,11 +131,11 @@ try:
     chk('A8d faixa vermelha na O.S.: suspenso ampliar a área, nada apagado, trabalho de campo segue', f and f['bg'] == 'rgb(253, 232, 230)' and 'suspenso' in f['t'] and 'nada foi apagado' in f['t'], f)
     lib = J("(()=>{ const C=window.__cen; if(!C) return 'sem window.__cen'; const r=C.cenMudar(null,k=>C.osc_liberar(k,'OS-0430',false,'',{k:'Ana'})); return r.erro||r.msg||''; })()")
     chk('A9a inadimplente: liberar a OS-0430 (mesmo comando da tela, osc_liberar) segue', 'liberada' in (lib or ''), lib)
-    go('CD-01.dc.html'); clk('Cadastrar talhão'); t = toast()
-    chk('A9b Cadastrar talhão recusa antes de abrir, com motivo e caminho', 'suspenso até o pagamento' in t and 'Configurações › Assinatura e cobrança' in t and dlg() == '', [t, dlg()[:200]])
-    abre_linha(0, 'T4'); setv('#fx_g_tal_decl', '205'); clk('Salvar', 'aside[role=dialog]'); t = toast()
-    chk('A9c editar a área cultivável de um talhão existente salva (corrigir o fato não é ampliar o contrato)', 'Salvo: T4' in t and dlg() == '', [t, dlg()[:300]])
-    abre_linha(0, 'B1'); setv('#fx_g_tal_sit', 'Ativo'); clk('Salvar', 'aside[role=dialog]'); a = J(ALERTA) or dlg()
+    go('CD-01.dc.html'); clk('+ Criar talhão', 'header'); t = toast()
+    chk('A9b + Criar talhão recusa antes de abrir, com motivo e caminho', 'suspenso até o pagamento' in t and 'Configurações › Assinatura e cobrança' in t and dlg() == '', [t, dlg()[:200]])
+    go('CD-01.dc.html', '#reg=T4'); clk('Editar talhão', 'aside[role=dialog]'); setv('#fx_g_tal_decl', '205'); clk('Salvar', 'aside[role=dialog]'); t = toast()
+    chk('A9c editar a área cultivável de um talhão existente salva (corrigir o fato não é ampliar o contrato) e volta à consulta do T4', 'Salvo: T4' in t and dlg().startswith('Talhão · T4') and J(ALERTA) == '', [t, dlg()[:300]])
+    go('CD-01.dc.html', '#reg=B1'); clk('Editar talhão', 'aside[role=dialog]'); setv('#fx_g_tal_sit', 'Ativo'); clk('Salvar', 'aside[role=dialog]'); a = J(ALERTA) or dlg()
     chk('A9d Reativar B1 recusado ao salvar (CD-01)', 'suspenso' in a and 'B1' in J("JSON.stringify(JSON.parse(localStorage.getItem('talhao-os-cd01-v1')).tal.filter(t=>t.id==='B1'&&t.v.sit==='Inativo'))"), a[:300])
     clk('Cancelar', 'aside[role=dialog]'); clk('Descartar alterações', 'aside[role=dialog]')
     go('CD-01det.dc.html', '#talhao=B1'); clk('Reativar B1'); clk('Salvar', 'aside[role=dialog]'); a = dlg()
@@ -171,13 +176,13 @@ try:
     npg = J("JSON.parse(localStorage.getItem('talhao-os-cenario-v1')).assin.orgs.sr.faturas.find(f=>f.comp==='2026-09').eventos.filter(e=>/^Paga/.test(e.t)).length")
     chk('A6/A7f pagar sem forma é recusado; com Pix (clique duplo) paga uma vez: o 2º clique devolve o mesmo recibo PAG-0001; o evento diz quem pagou; volta a Ativa',
         'Escolha a forma de pagamento' in a and ('Pagamento simulado confirmado' in t or 'Pagamento já registrado · recibo PAG-0001' in t) and 'PAG-0001' in t and npg == 1 and 'Paga' in d
-        and 'recibo PAG-0001 · por Ana (gestora)' in d and selo() == 'Ativa', [a, t, npg, selo(), d[-500:]])   # CONF-01 P7: quem age é o perfil (AL-15), no formato dos outros comandos
+        and 'recibo PAG-0001 · por Ana · Gestora' in d and selo() == 'Ativa', [a, t, npg, selo(), d[-500:]])
     clk('Baixar fatura (CSV)', 'aside[role=dialog]'); csv = J("window.__assinCsv||''") or ''
     chk('A18c Baixar fatura (CSV): números da cópia (2.570,23 ha · R$ 5.140,46; fechamento 2.450,23 ha; mesmo depois de editar o T4) e cobrança simulada',
         '"Área medida (ha)";"2.570,23"' in csv and '"Medida no fechamento (ha)";"2.450,23"' in csv and '5.140,46' in csv and 'simulada' in csv, csv[:500])
     clk('Fechar', 'aside[role=dialog]')
-    go('CD-01.dc.html'); clk('Cadastrar talhão')
-    chk('A9h depois de pagar, Cadastrar talhão volta a abrir o formulário; faixa some', 'Cadastrar talhão' in dlg() and faixa() is None, dlg()[:120])
+    go('CD-01.dc.html'); clk('+ Criar talhão', 'header')
+    chk('A9h depois de pagar, + Criar talhão volta a abrir o formulário; faixa some', 'Criar talhão' in dlg() and faixa() is None, dlg()[:120])
     # ============ cenário C · contestação congela a régua e resolver com crédito vai para o período seguinte (A17) ============
     go('CF-05.dc.html', limpa=True); data('01/10/2026'); abre_linha(1, 'set/2026'); clk('Contestar fatura', 'aside[role=dialog]')
     setv('#cf_motivo', 'Área da Lagoa Grande contada antes do aceite'); clk('Registrar contestação', 'aside[role=dialog]'); t = toast(); clk('Fechar', 'aside[role=dialog]')
@@ -189,14 +194,14 @@ try:
         'Contestação de Grupo Santa Rita resolvida' in t and 'A vencer' in linha(1, 'set/2026') and '21/10/2026' in linha(1, 'set/2026') and 'R$ 5.140,46' in linha(1, 'set/2026') and 'crédito de R$ 100,00' in b, [t, linha(1, 'set/2026'), b[:400]])
     abre_linha(1, 'set/2026'); d = dlg(); bts = J("[...document.querySelectorAll('aside[role=dialog] button')].map(x=>x.innerText.trim())") or []
     chk('A17c (revisão PLAT, achado 1) fatura já contestada e resolvida: sem "Contestar fatura" no painel; eventos dizem quem contestou e quem resolveu',
-        'Contestar fatura' not in bts and 'Confirmar pagamento (simulado)' in bts and 'por Ana (gestora): Área da Lagoa Grande' in d and 'Contestação resolvida (RES-0001) · por Admin plataforma' in d, [bts, d[-700:]])
+        'Contestar fatura' not in bts and 'Confirmar pagamento (simulado)' in bts and 'por Ana · Gestora: Área da Lagoa Grande' in d and 'Contestação resolvida (RES-0001) · por Admin plataforma' in d, [bts, d[-700:]])
     clk('Fechar', 'aside[role=dialog]')
     # ============ cenário E · medida acima de 5.000 ha (revisão PLAT, achado 10): primária Pedir proposta empresarial, uma vez ============
     # estado injetado no cadastro salvo: o CD-01 recusa talhão acima da área da fazenda; o caso real é uma fazenda grande importada
     go('CF-05.dc.html', limpa=True)
     J('localStorage.setItem("talhao-os-cd01-v1", ' + json.dumps(json.dumps(cad_mais({'id':'TNX','v':{'t':'Grande','faz':'Santa Rita','decl':2600,'sit':'Ativo'}}))) + '); 1')
     go('CF-05.dc.html'); p0 = J(PRIMS)
-    clk('Pedir proposta empresarial', vez=2); t = toast(); p1 = J(PRIMS); dis = J("(()=>{const b=[...document.querySelectorAll('header button')].find(x=>/Proposta empresarial pedida/.test(x.innerText)); return b?b.getAttribute('aria-disabled')==='true':null;})()")   # DS-DICA-20261009: indisponível com motivo fica focável (aria-disabled)
+    clk('Pedir proposta empresarial', vez=2); t = toast(); p1 = J(PRIMS); dis = J("(()=>{const b=[...document.querySelectorAll('header button')].find(x=>/Proposta empresarial pedida/.test(x.innerText)); return b?b.disabled:null;})()")
     npro = J("Object.values(JSON.parse(localStorage.getItem('talhao-os-cenario-v1')).assin.recibos).filter(r=>/^PRO-/.test(r.id)).length")
     go('BO-02.dc.html'); lsr = linha(0, 'Grupo Santa Rita')
     chk('A20 medida 5.170,23 ha: primária Pedir proposta empresarial (não Ampliar, que seria sempre recusado); clique duplo registra um pedido (PRO-0001); a primária fica desabilitada e o BO-02 mostra o pedido',

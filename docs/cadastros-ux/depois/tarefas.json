@@ -1,0 +1,418 @@
+{
+ "1440": [
+  {
+   "tarefa": "1 talhões da Santa Rita e o T2",
+   "largura": 1440,
+   "cliques": 3,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu CD-01",
+    "clique 2: Santa Rita",
+    "clique 3: T2"
+   ],
+   "chegou": true,
+   "info": [
+    "T1 Em dia Sequeiro 312,0 ha 312,4 ha +0,1 % 3",
+    "T2 Em dia Sequeiro 298,0 ha 298,1 ha 0,0 % 2"
+   ]
+  },
+  {
+   "tarefa": "2 cadastrar B2 com 80 ha na Boa Vista",
+   "largura": 1440,
+   "cliques": 4,
+   "campos_digitados": 2,
+   "caracteres": 4,
+   "passos": [
+    "clique 1: menu CD-01",
+    "clique 2: Boa Vista",
+    "clique 3: + Criar talhão",
+    "digita Identificação: \"B2\"",
+    "digita Área cultivável: \"80\"",
+    "clique 4: Salvar"
+   ],
+   "chegou": true,
+   "info": [
+    "Boa Vista",
+    "#faz=BV&talhao=n4_06054"
+   ]
+  },
+  {
+   "tarefa": "3 Trator 02: contador e conjuntos sem rolar",
+   "largura": 1440,
+   "cliques": 2,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu CD-03",
+    "clique 2: Trator 02"
+   ],
+   "chegou": true,
+   "info": [
+    "Ativo · Trator 02",
+    true,
+    true
+   ]
+  },
+  {
+   "tarefa": "4a equipe e papel do Marcos",
+   "largura": 1440,
+   "cliques": 1,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu CD-04"
+   ],
+   "chegou": true,
+   "info": [
+    "Marcos Vence em 30 dias Operar trator, Operar pulverizador CLT NR-31 30/09/2026 Campo 1"
+   ]
+  },
+  {
+   "tarefa": "4b membros da equipe Campo 1",
+   "largura": 1440,
+   "cliques": 2,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu CD-04",
+    "clique 2: Campo 1"
+   ],
+   "chegou": true,
+   "info": [
+    "Marcos",
+    "Carlos",
+    "Paula",
+    "Beto"
+   ]
+  },
+  {
+   "tarefa": "5 Fungicida A: registro, unidade, embalagem e locais",
+   "largura": 1440,
+   "cliques": 3,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu CD-06",
+    "clique 2: Fungicidas",
+    "clique 3: Fungicida A"
+   ],
+   "chegou": true,
+   "info": "Item · Fungicida A\n‹\n1 de 4\n›\n×\nFungicidas · L · Ativo\nPRÓXIMO PASSO\n\nEm dia: unidade, embalagem, controle e preço informados.\n\nEditar item\nUNIDADE E EMBALAGEM\nUnidade-base\nL · travada: item com 545 L"
+  },
+  {
+   "tarefa": "6 grupos que a Agro Norte fornece",
+   "largura": 1440,
+   "cliques": 2,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu CD-05",
+    "clique 2: Fornecedores"
+   ],
+   "chegou": true,
+   "info": [
+    "Agro Norte Sim Herbicidas, Fungicidas, Inseticidas, Adjuvantes Marcelo Tavares orcamento@agronorte.com.br 65 99733-4455 E-mail, WhatsApp"
+   ]
+  },
+  {
+   "tarefa": "7 cultivar 58 W e o rendimento da pulverização",
+   "largura": 1440,
+   "cliques": 3,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu CD-02",
+    "clique 2: Soja",
+    "clique 3: 58 W"
+   ],
+   "chegou": true,
+   "info": "Cultivar · 58 W\n‹\n1 de 3\n›\n×\nSoja · Anual · Em dia\nPRÓXIMO PASSO\n\nEm dia: semente vinculada.\n\nEditar cultivar\nFICHA\nCultura\nSoja\nTipo de ciclo\nAnual\nUnidade de produtividade\nsc de 60 kg/ha\nCiclo até a"
+  },
+  {
+   "tarefa": "8 talhão seguido na mesma fazenda",
+   "largura": 1440,
+   "cliques": 2,
+   "campos_digitados": 2,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: + Criar outro talhão na Boa Vista",
+    "digita Identificação: \"B3\"",
+    "digita Área: \"40\"",
+    "clique 2: Salvar"
+   ],
+   "chegou": true,
+   "info": [
+    "",
+    ""
+   ]
+  },
+  {
+   "tarefa": "10 fungicida novo com unidade, embalagem e local",
+   "largura": 1440,
+   "cliques": 7,
+   "campos_digitados": 2,
+   "caracteres": 23,
+   "passos": [
+    "clique 1: menu CD-06",
+    "clique 2: Fungicidas",
+    "clique 3: + Criar item",
+    "digita nome: \"Fungicida Teste 250 SC\"",
+    "clique 4: escolhe L",
+    "clique 5: escolhe Galão",
+    "digita Conteúdo: \"5\"",
+    "clique 6: escolhe Almox. defensivos",
+    "clique 7: Salvar"
+   ],
+   "chegou": true,
+   "info": [
+    {
+     "un": "",
+     "emb": "",
+     "local": ""
+    },
+    "Almox. defensivos",
+    "Item · Fungicida Teste 250 SC"
+   ]
+  },
+  {
+   "tarefa": "11 quem fornece Tebuconazol 200 EC",
+   "largura": 1440,
+   "cliques": 1,
+   "campos_digitados": 1,
+   "caracteres": 11,
+   "passos": [
+    "clique 1: menu CD-05",
+    "digita busca: \"Tebuconazol\""
+   ],
+   "chegou": true,
+   "info": [
+    "Agro Norte Homologado Fornecedor Marcelo Tavares orcamento@agronorte.com.br 65 99733-4455 E-mail, WhatsApp",
+    "Santa Rita Insumos Homologado Fornecedor Denise Rocha compras@santaritainsumos.com.br 65 99644-5566 E-mail, WhatsApp",
+    "Coop. Vale Homologado Limite vigente Fornecedor, Cliente Sandra Kuhn insumos@coopvale.coop.br 65 99466-7788 E-mail, WhatsApp"
+   ]
+  }
+ ],
+ "390": [
+  {
+   "tarefa": "1 talhões da Santa Rita e o T2",
+   "largura": 390,
+   "cliques": 3,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu CD-01",
+    "clique 2: Santa Rita",
+    "clique 3: T2"
+   ],
+   "chegou": true,
+   "info": [
+    "T1 Em dia Sequeiro 312,0 ha 312,4 ha +0,1 % 3",
+    "T2 Em dia Sequeiro 298,0 ha 298,1 ha 0,0 % 2"
+   ]
+  },
+  {
+   "tarefa": "2 cadastrar B2 com 80 ha na Boa Vista",
+   "largura": 390,
+   "cliques": 4,
+   "campos_digitados": 2,
+   "caracteres": 4,
+   "passos": [
+    "clique 1: menu CD-01",
+    "clique 2: Boa Vista",
+    "clique 3: + Criar talhão",
+    "digita Identificação: \"B2\"",
+    "digita Área cultivável: \"80\"",
+    "clique 4: Salvar"
+   ],
+   "chegou": true,
+   "info": [
+    "Boa Vista",
+    "#faz=BV&talhao=n4_52958"
+   ]
+  },
+  {
+   "tarefa": "3 Trator 02: contador e conjuntos sem rolar",
+   "largura": 390,
+   "cliques": 3,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu CD-03",
+    "clique 2: Todos os ativos",
+    "clique 3: Trator 02"
+   ],
+   "chegou": true,
+   "info": [
+    "Ativo · Trator 02",
+    true,
+    true
+   ]
+  },
+  {
+   "tarefa": "4a equipe e papel do Marcos",
+   "largura": 390,
+   "cliques": 3,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu CD-04",
+    "clique 2: Todas as pessoas",
+    "clique 3: Marcos"
+   ],
+   "chegou": true,
+   "info": "Pessoa · Marcos"
+  },
+  {
+   "tarefa": "4b membros da equipe Campo 1",
+   "largura": 390,
+   "cliques": 2,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu CD-04",
+    "clique 2: Campo 1"
+   ],
+   "chegou": true,
+   "info": [
+    "Marcos",
+    "Carlos",
+    "Paula",
+    "Beto"
+   ]
+  },
+  {
+   "tarefa": "5 Fungicida A: registro, unidade, embalagem e locais",
+   "largura": 390,
+   "cliques": 3,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu CD-06",
+    "clique 2: Fungicidas",
+    "clique 3: Fungicida A"
+   ],
+   "chegou": true,
+   "info": "‹ Fungicidas\nItem · Fungicida A\n‹\n1 de 4\n›\n×\nFungicidas · L · Ativo\nPRÓXIMO PASSO\n\nEm dia: unidade, embalagem, controle e preço informados.\n\nEditar item\nUNIDADE E EMBALAGEM\nUnidade-base\nL · travada: i"
+  },
+  {
+   "tarefa": "6 grupos que a Agro Norte fornece",
+   "largura": 390,
+   "cliques": 3,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu CD-05",
+    "clique 2: Fornecedores",
+    "clique 3: Agro Norte"
+   ],
+   "chegou": true,
+   "info": "Parceiro · Agro Norte"
+  },
+  {
+   "tarefa": "7 cultivar 58 W e o rendimento da pulverização",
+   "largura": 390,
+   "cliques": 3,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu CD-02",
+    "clique 2: Soja",
+    "clique 3: 58 W"
+   ],
+   "chegou": true,
+   "info": "‹ Soja\nCultivar · 58 W\n‹\n1 de 3\n›\n×\nSoja · Anual · Em dia\nPRÓXIMO PASSO\n\nEm dia: semente vinculada.\n\nEditar cultivar\nFICHA\nCultura\nSoja\nTipo de ciclo\nAnual\nUnidade de produtividade\nsc de 60 kg/ha\nCicl"
+  },
+  {
+   "tarefa": "8 talhão seguido na mesma fazenda",
+   "largura": 390,
+   "cliques": 2,
+   "campos_digitados": 2,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: + Criar outro talhão na Boa Vista",
+    "digita Identificação: \"B3\"",
+    "digita Área: \"40\"",
+    "clique 2: Salvar"
+   ],
+   "chegou": true,
+   "info": [
+    "",
+    ""
+   ]
+  },
+  {
+   "tarefa": "9 PV07 pela busca do mestre",
+   "largura": 390,
+   "cliques": 2,
+   "campos_digitados": 1,
+   "caracteres": 4,
+   "passos": [
+    "clique 1: menu CD-01",
+    "digita busca: \"PV07\"",
+    "clique 2: PV07 · Lagoa Grande"
+   ],
+   "chegou": true,
+   "info": "Talhão · PV07"
+  },
+  {
+   "tarefa": "9m PV07 pelo mapa",
+   "largura": 390,
+   "cliques": 4,
+   "campos_digitados": 0,
+   "caracteres": 0,
+   "passos": [
+    "clique 1: menu CD-01",
+    "clique 2: Lagoa Grande",
+    "clique 3: Mapa",
+    "clique 4: PV07 no mapa"
+   ],
+   "chegou": true,
+   "info": "Talhão · PV07"
+  },
+  {
+   "tarefa": "10 fungicida novo com unidade, embalagem e local",
+   "largura": 390,
+   "cliques": 7,
+   "campos_digitados": 2,
+   "caracteres": 23,
+   "passos": [
+    "clique 1: menu CD-06",
+    "clique 2: Fungicidas",
+    "clique 3: + Criar item",
+    "digita nome: \"Fungicida Teste 250 SC\"",
+    "clique 4: escolhe L",
+    "clique 5: escolhe Galão",
+    "digita Conteúdo: \"5\"",
+    "clique 6: escolhe Almox. defensivos",
+    "clique 7: Salvar"
+   ],
+   "chegou": true,
+   "info": [
+    {
+     "un": "",
+     "emb": "",
+     "local": ""
+    },
+    "Almox. defensivos",
+    "Item · Fungicida Teste 250 SC"
+   ]
+  },
+  {
+   "tarefa": "11 quem fornece Tebuconazol 200 EC",
+   "largura": 390,
+   "cliques": 2,
+   "campos_digitados": 1,
+   "caracteres": 11,
+   "passos": [
+    "clique 1: menu CD-05",
+    "digita busca: \"Tebuconazol\"",
+    "clique 2: Fungicidas · fornecedores"
+   ],
+   "chegou": true,
+   "info": [
+    "‹ Grupos de insumo\nGrupo · Fungicidas\n‹\n4 de 9\n›\n×\nGrupo de insumo do CD-06 · 3 fornecedores recebem cotação\nPRÓXIMO PASSO\n\nCom concorrência: 3 fornecedores recebem a cotação.\n\nFORNECEDORES QUE RECEBEM COTAÇÃO\nAgro Norte\nMarcelo Tavares · orcamento@agronorte.com.br\n›\nSanta Rita Insumos\nDenise Rocha "
+   ]
+  }
+ ]
+}

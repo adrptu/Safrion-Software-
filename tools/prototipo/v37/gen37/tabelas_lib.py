@@ -75,15 +75,6 @@ class Grade:
         """colunas com botão de filtro (menu ▾) e com botão de ordenar no título."""
         return self.J(f"[...{T(self.i)}.querySelectorAll('[role=columnheader]')].map(h=>!!h.querySelector('button.g2fb')&&!!h.querySelector('button.g2hb'))") or []
 
-    def desalinhadas(self):
-        """linhas (o cabeçalho conta como uma) fora da trilha do grid: cabeçalhos que quebram para outra linha ou se empilham (a borda esquerda
-        não cresce da esquerda para a direita) e linhas cujas células não ficam sob os cabeçalhos. Com a trilha menor que as colunas (colunas que
-        entram e saem sem o nº de colunas acompanhar), cabeçalho e células quebram juntos e ficam "alinhados" pela borda esquerda: só a ordem
-        das bordas mostra o defeito (sonda da revisão TABR, 10/10/2026: CD-05 Clientes com repeat(8) para 10 colunas)."""
-        return self.J(f"""(()=>{{const t={T(self.i)}; const hs=[...t.querySelectorAll('[role=columnheader]')]; const hl=hs.map(h=>Math.round(h.getBoundingClientRect().left));
-          const cab=hl.some((x,i)=>i>0&&x<=hl[i-1])?1:0;
-          return cab+[...t.querySelectorAll('[role=row]')].filter(r=>r.querySelector('[role=cell]')).filter(r=>{{const cs=[...r.querySelectorAll('[role=cell]')]; return cs.length!==hs.length||cs.some((c,i)=>Math.abs(Math.round(c.getBoundingClientRect().left)-hl[i])>1);}}).length;}})()""")
-
     def rola_dentro(self):
         """390 px: a página não rola de lado; a grade cabe na caixa ou rola dentro dela; a 1ª coluna fica à vista."""
         return self.J(f"""(()=>{{const t={T(self.i)}; const sc=t.closest('.g2rola'); const R=sc.getBoundingClientRect(); const h=t.querySelector('[role=columnheader]').getBoundingClientRect();

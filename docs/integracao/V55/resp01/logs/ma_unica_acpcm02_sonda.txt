@@ -1,7 +1,0 @@
-Sonda AC-PCM-02 (executado, 10/10/2026): MA.dc.html#vis=planos&novo=plano:a14 aberto 2 vezes em documento novo (ma_lib.MA.ir),
-texto de #np-painel lido em 0 s, 1 s e 3 s depois do carregamento.
-a3b4dab:   carga 1 → 0 s "Novo plano de manutenção…" · 1 s idem · 3 s idem | carga 2 → idem nas três leituras
-esta branch: carga 1 → 0 s "" (painel ainda vazio) · 1 s "Novo plano de manutenção…" · 3 s idem | carga 2 → idem nas três leituras
-Leitura: o painel abre nas duas versões; a asserção do ma_unica_test.py lê o painel logo depois de abrir (sem espera) e falha
-quando a leitura vem antes da pintura. Dependência de tempo do teste, não destas mudanças: a3b4dab deu 22/23 duas vezes, esta
-branch 23/23 uma vez, e a sonda viu o painel vazio na 1ª leitura justamente nesta branch.

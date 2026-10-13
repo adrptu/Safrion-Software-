@@ -77,36 +77,21 @@ def seed():
         reqs[rid] = dict(id=rid, os=oid, estado=('Reservada' if fe == 0 else 'Entregue'), itens=itens)
     # v=2 (01/10, O.S. sem revisão): descarta o cenário salvo no navegador que ainda tinha aprov, selos de aprovação e recibo APV-
     # v=3 (04/10, SINT-C03 + PRE-REV-20261004): quantidades da semente pela regra única; o salvo com a regra antiga travaria o apontamento
-    # v=4 (1a · PCMS-M01, PCM simplificado §7.2): a manutenção entra no cenário único (c.man, com achados, leituras e recibos); a
-    # chave própria da manutenção sai. O.S., Estoque, App, CD-03 e a tela MA leem e gravam o mesmo estado.
     # v=4 (06/10, colheita de ponta a ponta · docs/colheita): o estado ganha c.producao (contagens, previsões, cargas, lotes de produto,
     # pedidos, reservas e movimentos MP-); o salvo sem ele é descartado (D-18)
     # v=5 (06/10, beneficiamento BEN-1 · docs/beneficiamento): ordens de processo OB-0110 e OB-0112 (fam BEN) em c.ordens, REQ-030 e o lote
     # de caixas CX26-01; no estado da Produção, os lotes do packing, o PV-031 e as inspeções (c.producao.ben); o salvo sem eles é descartado
-    # v=5 (09/10, junção PCM × Colheita na frente PCM, D-53): c.man e c.producao juntos
-    # v=5 (06/10, comercial e logística · docs/comercial): c.producao ganha vendas com preço e condição, CT-203/CRE-0095/BT-090 no estado,
-    # cargas de saída (RM-) e sequências rm/pv/ct; o salvo da v=4 é descartado
-    # v=6 (10/10, junção PCM × BEN-1 na branch única): as duas frentes subiram para v=5 com conteúdos diferentes (BEN-1: ordens OB-,
-    # REQ-030, CX26-01 e c.producao.ben; PCM: c.man, app.usuario e app.manFila); o salvo v=5 de qualquer uma volta ao seed (cenGet)
-    # v=7 (10/10, integração V56: Comercial × v=6 da branch única): o salvo v=5 do Comercial (sem c.man e sem o BEN) e o v=6 da branch (sem
-    # as vendas do Comercial) voltam ao seed
-    import dados_manutencao as DM
-    import dados_producao, dados_ben, dados_comercial
-    est = dict(v=7, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
-               # S4 (PCM §3.7): usuario = Ver como do app (Marcos · Zé, simulação); manFila = comandos da manutenção feitos sem sinal
-               app=dict(online=True, fila=[], turno=None, operador='Marcos', usuario='Marcos', manFila=[]),
-               man=DM.seed(), producao=dados_producao.seed())
-    est = dados_ben.semear(est)   # integração V56: o BEN semeia o packing (lotes, PV-031) e o Comercial completa as vendas depois, inclusive o PV-031
-    est['producao'] = dados_comercial.completar(est['producao'])
-    return est
+    import dados_producao, dados_ben
+    est = dict(v=5, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
+               app=dict(online=True, fila=[], turno=None, operador='Marcos'), producao=dados_producao.seed())
+    return dados_ben.semear(est)
 
 
 def js_prefixo():
     import dados_producao   # regras da produção (producao.js) em toda página do estado (D-22): O.S., Mapa, Estoque e app têm prPodeEncerrar
     import dados_ben        # regras do beneficiamento (ben.js) depois: a qualidade do lote de produção e as decisões valem em toda página do estado
-    # análise de solo (SOLO-01): só as funções de solo.js (regras e comandos sobre c.solo); os dados (SOLO0) entram só no AG-02 e no Planejar safra
     return ('const CEN0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read() + '\n'
-            + dados_producao.js_regras() + dados_ben.js_regras() + open(os.path.join(HERE, 'solo.js'), encoding='utf-8').read() + '\n')
+            + dados_producao.js_regras() + dados_ben.js_regras())
 
 
 def perfis_js():

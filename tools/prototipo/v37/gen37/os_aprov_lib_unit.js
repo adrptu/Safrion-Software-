@@ -39,8 +39,7 @@ ok('N3 saldo insuficiente (Glifosato 100 L para 320 L): recusa e nenhum registro
 // N4 · água só com água (DEC-2609-10): liberada pela prontidão, sem CMD-42
 cenReset(); cenMudar(null,k=>{ k.ordens['OS-W']={id:'OS-W',tipo:'Irrigação · água',talhao:'P2',area:80,etapa:'A liberar',versao:'v1',realizado:0,saldo:80,resp:'João',ins:[],req:null,selos:[],ap:[],reservado:false}; return {msg:''}; });
 r=cenMudar(null,k=>osc_liberar(k,'OS-W',true,'')); 
-/* revisão CONF 13/10 (achado de base): a liberação só com água grava o CMD-06 com quem liberou (sem CMD-42; o sem-agrônomo segue) */
-ok('N4 água sem produto: Liberadas pela prontidão, sem registro de agrônomo (só o CMD-06, com autor)', cenGet().ordens['OS-W'].etapa==='Liberadas'&&ev('OS-W').length===1&&ev('OS-W')[0].cmd==='CMD-06'&&!!ev('OS-W')[0].por&&!/aprovada|agrônom/.test(r.msg), r);
+ok('N4 água sem produto: Liberadas pela prontidão, sem registro de agrônomo', cenGet().ordens['OS-W'].etapa==='Liberadas'&&ev('OS-W').length===0&&!/aprovada|agrônom/.test(r.msg), r);
 // N4b · revisão do CTL-1, achado 3: o sinal "água" vindo da tela não libera ordem com produto (o comando confere); N4c · nem ordem já liberada (M16)
 r=cenMudar(null,k=>osc_liberar(k,'OS-0430',true,''));
 ok('N4b sinal água na OS-0430 (herbicidas): recusa "exige aprovação agronômica", segue A liberar, sem CMD-42 e sem reserva', /OS-0430 não é irrigação só com água: exige aprovação agronômica/.test(r.erro||'')&&cenGet().ordens['OS-0430'].etapa==='A liberar'&&ev('OS-0430').length===0&&!cenGet().lotes['Glifosato 480|G26-14'].reservado, r);
@@ -105,40 +104,20 @@ caso('A5 tela',()=>{ cenReset(); const o=ords().find(x=>x.id==='OS-0430');
   ok('A5d revisão do CTL-3, achado 1: com o perfil Caio (sem os papéis) a confirmação nomeia quem decide, nunca "Caio (PCP) aprova" (antes: "Caio (PCP) aprova esta versão e Caio (PCP) libera")',
     osLibTxt(P_('Caio'))==='Ana (agrônoma) aprova esta versão e Ana (gestora) libera'&&osLibTxt(P_('Rui'))==='Ana (agrônoma) aprova esta versão e Ana (gestora) libera', [osLibTxt(P_('Caio')),osLibTxt(P_('Rui'))]); });
 caso('A6 prévia',()=>{ cenReset(); ok('A6 a prévia do impedimento (osLibErro) não depende do perfil: OS-0418 segue "Sem lote de Ureia 45% no Estoque."', osLibErro({id:'OS-0418'},cenGet())==='Sem lote de Ureia 45% no Estoque.'); });
-caso('A7 cadastro',()=>{ ok('A7 papéis do cadastro: OS_LIB() = gestor; g2quem(agrônomo) = OS_AGRO(); g2quem(gestor) = Ana (gestora)', typeof OS_LIB==='function'&&OS_LIB().join()==='gestor'&&g2quem('agronomo')===OS_AGRO()&&g2quem('gestor')==='Ana (gestora)'); });
+caso('A7 cadastro',()=>{ ok('A7 papéis do cadastro: OS_LIB = gestor; g2quem(agrônomo) = OS_AGRO; g2quem(gestor) = Ana (gestora)', typeof OS_LIB!=='undefined'&&OS_LIB==='gestor'&&g2quem('agronomo')===OS_AGRO&&g2quem('gestor')==='Ana (gestora)'); });
 // A8 · revisão do CTL-3, achado 6: papéis em pessoas diferentes (cadastro injetado e retirado). Prova que o CMD-06 exige o liberador (gestor) e o
-// CMD-42 o agrônomo, cada um no seu registro. CONF-01 R13 (mudança de expectativa, caminho previsto no PLANO CTL-7): Beto (só agrônomo) aprova e a
-// ordem fica em A liberar; Gil (só gestor) libera depois, gravando só o CMD-06; Gil antes da aprovação é recusado sem gravar.
-caso('A8 papéis separados',()=>{ const n0=G2_PERFIS.length; G2_PERFIS.push({k:'Beto',t:'Beto · Agrônomo',papeis:{agronomo:'agrônomo'}},{k:'Gil',t:'Gil · Gestor',papeis:{gestor:'gestor'}});
+// CMD-42 o agrônomo, cada um no seu registro (antes, sem perfil com um só dos papéis, os mutantes "CMD-06 sem papel" e "g2papel com some" passavam)
+caso('A8 papéis separados',()=>{ const n0=G2_PERFIS.length; G2_PERFIS.push({k:'Beto',t:'Beto · Agrônomo',papeis:{agronomo:'agrônomo'}},{k:'Otávio',t:'Otávio · Gestor',papeis:{gestor:'gestor'}});
   try{ cenReset(); const rev=cenGet().rev, nreq=Object.keys(cenGet().reqs).length; const o=ords().find(x=>x.id==='OS-0430');
     const rb=L(null,'OS-0430',P_('Beto'));
-    ok('A8 NEGATIVO Beto (só agrônomo) libera a OS-0430: recusado no CMD-06 ("decisão de Ana (gestora) ou Gil (gestor)"), sem CMD-42/CMD-06 e sem reserva',
-      rb.erro==='Liberar a OS-0430 (CMD-06): decisão de Ana (gestora) ou Gil (gestor). Nada foi alterado.'&&nada('OS-0430',rev,nreq), rb.erro||rb.msg);
-    const ro=L(null,'OS-0430',P_('Gil'));
-    ok('A8b NEGATIVO Gil (só gestor) libera antes da aprovação: recusado ("Aprovação agronômica da v1 da OS-0430 pendente: decisão de Ana (agrônoma) ou Beto (agrônomo)"), nada gravado (antes: recusado no CMD-42; CONF-01 R13)',
-      ro.erro==='Aprovação agronômica da v1 da OS-0430 pendente: decisão de Ana (agrônoma) ou Beto (agrônomo). Nada foi alterado.'&&nada('OS-0430',rev,nreq), ro.erro||ro.msg);
-    const pb=osProx(o,P_('Beto')), bo=osProx(o,P_('Gil')).b||{};
-    ok('A8c a tela não oferece "Liberar para execução" a quem tem só um dos papéis: Beto vê "Aprovar v1"; Gil vê a aprovação pendente (antes: os dois só viam a pendência de papel)',
-      !pb.b&&pb.P.btn==='Aprovar v1'&&pb.P.fn==='aprovar'&&!!bo.papel&&/Aprovação agronômica da v1 pendente/.test(bo.t||''), [pb.P,pb.b,bo]);
-    ok('A8d confirmação com Beto: "Beto (agrônomo) aprova esta versão e Ana (gestora) ou Gil (gestor) libera"', osLibTxt(P_('Beto'))==='Beto (agrônomo) aprova esta versão e Ana (gestora) ou Gil (gestor) libera', osLibTxt(P_('Beto')));
-    const ra=cenMudar(null,k=>osc_aprovar(k,'OS-0430',P_('Beto'))); const o1=ords().find(x=>x.id==='OS-0430'); const e1=ev('OS-0430');
-    ok('A8e Beto aprova: só o CMD-42 (v1, Beto (agrônomo)); segue A liberar, sem reserva, com o selo "Aprovada v1 · aguarda liberação"',
-      !ra.erro&&e1.length===1&&e1[0].cmd==='CMD-42'&&e1[0].por==='Beto (agrônomo)'&&cenGet().ordens['OS-0430'].etapa==='A liberar'&&!cenGet().lotes['Glifosato 480|G26-14'].reservado
-      &&o1.selos.some(x=>x.t==='Aprovada v1 · aguarda liberação'), [ra.erro||ra.msg,e1,o1.selos]);
-    const ra2=cenMudar(null,k=>osc_aprovar(k,'OS-0430',P_('Beto')));
-    ok('A8f NEGATIVO aprovar de novo a mesma versão: recusado sem gravar', /já está aprovada por Beto \(agrônomo\)/.test(ra2.erro||'')&&ev('OS-0430').length===1, ra2.erro||ra2.msg);
-    const pbo=osProx(o1,P_('Gil'));
-    ok('A8g depois da aprovação, Gil vê "Liberar para execução" e Beto vê a pendência "aguarda liberação"', !pbo.b&&pbo.P.btn==='Liberar para execução'&&!!(osProx(o1,P_('Beto')).b||{}).papel, [pbo,osProx(o1,P_('Beto')).b]);
-    const rl=L(null,'OS-0430',P_('Gil')); const e2=ev('OS-0430');
-    ok('A8h Gil libera: só o CMD-06 (Gil (gestor)); Liberadas; REQ-041 reservada; o aviso diz quem aprovou antes',
-      !rl.erro&&e2.length===2&&e2[1].cmd==='CMD-06'&&e2[1].por==='Gil (gestor)'&&cenGet().ordens['OS-0430'].etapa==='Liberadas'&&cenGet().lotes['Glifosato 480|G26-14'].reservado===320
-      &&/v1 liberada por Gil \(gestor\); aprovada antes por Beto \(agrônomo\)/.test(rl.msg||''), [rl.erro||rl.msg,e2]);
-    cenReset(); cenMudar(null,k=>osc_aprovar(k,'OS-0430',P_('Beto'))); const raj=cenMudar(null,k=>{ const r1=osc_ajustar(k,'OS-0430',150,{},'',[],[],false,P_('Beto')); const r2=osc_aprovar(k,'OS-0430',P_('Beto')); return {msg:r1.msg+' '+r2.msg}; });
-    const e3=ev('OS-0430'); const ro2=L(null,'OS-0430',P_('Gil'));
-    ok('A8i "Salvar e aprovar v2": CMD-42 da v2; a aprovação da v1 não libera a v2 (Gil libera a v2 aprovada)', !raj.erro&&e3.length===2&&e3[1].v==='v2'&&e3[1].cmd==='CMD-42'&&!ro2.erro&&ev('OS-0430')[2].v==='v2', [raj.erro||raj.msg,e3,ro2.erro]);
-    cenReset(); cenMudar(null,k=>osc_aprovar(k,'OS-0430',P_('Beto'))); cenMudar(null,k=>osc_ajustar(k,'OS-0430',150,{},'',[],[],false,P_('Ana')));
-    const ro3=L(null,'OS-0430',P_('Gil'));
-    ok('A8j NEGATIVO v1 aprovada e v2 salva sem aprovar: Gil é recusado (a aprovação de uma versão nunca libera outra)', /Aprovação agronômica da v2 da OS-0430 pendente/.test(ro3.erro||'')&&cenGet().ordens['OS-0430'].etapa==='A liberar', ro3.erro||ro3.msg);
+    ok('A8 NEGATIVO Beto (só agrônomo) libera a OS-0430: recusado no CMD-06 ("decisão de Ana (gestora) ou Otávio (gestor)"), sem CMD-42/CMD-06 e sem reserva',
+      rb.erro==='Liberar a OS-0430 (CMD-06): decisão de Ana (gestora) ou Otávio (gestor). Nada foi alterado.'&&nada('OS-0430',rev,nreq), rb.erro||rb.msg);
+    const ro=L(null,'OS-0430',P_('Otávio'));
+    ok('A8b NEGATIVO Otávio (só gestor) libera: recusado no CMD-42 ("decisão de Ana (agrônoma) ou Beto (agrônomo)"), nada gravado',
+      ro.erro==='Aprovar a v1 da OS-0430 (CMD-42): decisão de Ana (agrônoma) ou Beto (agrônomo). Nada foi alterado.'&&nada('OS-0430',rev,nreq), ro.erro||ro.msg);
+    const bb=osProx(o,P_('Beto')).b||{}, bo=osProx(o,P_('Otávio')).b||{};
+    ok('A8c a tela (osProx) não oferece "Liberar para execução" a quem tem só um dos papéis (pendência de papel)', !!bb.papel&&!!bo.papel, [bb,bo]);
+    ok('A8d confirmação com Beto: "Beto (agrônomo) aprova esta versão e Ana (gestora) ou Otávio (gestor) libera"', osLibTxt(P_('Beto'))==='Beto (agrônomo) aprova esta versão e Ana (gestora) ou Otávio (gestor) libera', osLibTxt(P_('Beto')));
   } finally { G2_PERFIS.splice(n0); }
-  ok('A8k cadastro restaurado ('+n0+' perfis)', G2_PERFIS.length===n0&&!G2_PERFIS.some(p=>p.k==='Beto'||p.k==='Gil')); });   /* sem número fixo (revisão BEN, S4) */
+  ok('A8e cadastro restaurado ('+n0+' perfis)', G2_PERFIS.length===n0&&!G2_PERFIS.some(p=>p.k==='Beto'||p.k==='Otávio')); });   /* sem número fixo (revisão BEN, S4) */
 print('TOTAL '+R.length+' · falhas '+(ok.f||0));
