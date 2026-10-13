@@ -6,6 +6,7 @@ listadas em EXTRA) e mede, no navegador:
   C2 texto cortado sem aviso (elemento com overflow escondido, conteúdo maior que a caixa e sem reticências);
   C3 barra de ações presa embaixo (.acoes / .acoes-form) flutuando no meio da tela, com conteúdo da mesma rolagem visível abaixo;
   C4 linha que começa com o separador "·" (resto de uma quebra de linha: "· Trator MF 7719").
+  R (informativo, não conta) texto longo cortado de propósito com reticências dentro da célula (CADX, linha de uma altura).
 Saída: uma linha por achado e o total por regra; sai 1 se houver achado. Uso: python3 visual_corte_test.py [prefixo das páginas]."""
 import sys, os, json, time
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -21,7 +22,10 @@ MEDE = r"""(()=>{ const out=[]; const vis=e=>{ const r=e.getBoundingClientRect()
   // C1 · conteúdo além da célula (só os filhos diretos visíveis e os selos)
   document.querySelectorAll('[role=cell]').forEach(c=>{ if(!vis(c)) return; const cr=c.getBoundingClientRect(); if(cr.width<8) return;
     const es=[...c.querySelectorAll('span,a,button,b,strong,em,div')].filter(vis);
-    for(const e of es){ const r=e.getBoundingClientRect(); if(r.right>cr.right+2||r.left<cr.left-2){ out.push(['C1',nome(e)||nome(c),Math.round(r.right-cr.right)]); break; } } });
+    for(const e of es){ const r=e.getBoundingClientRect(); if(r.right>cr.right+2||r.left<cr.left-2){
+      // R (informativo): texto longo cortado de propósito com reticências por um bloco dentro da célula (CADX: linha de uma altura)
+      let a=e.parentElement, ret=false; while(a&&a!==c){ const s=getComputedStyle(a); if(s.textOverflow==='ellipsis'&&s.overflowX!=='visible'){ ret=true; break; } a=a.parentElement; }
+      out.push([ret?'R':'C1',nome(e)||nome(c),Math.round(r.right-cr.right)]); break; } } });
   // C2 · texto cortado sem reticências
   document.querySelectorAll('body *').forEach(e=>{ if(!vis(e)||!e.children) return; const s=getComputedStyle(e); const rr=e.getBoundingClientRect();
     if(rr.width<=2||rr.height<=2||s.clip!=='auto'&&s.clip!==''||s.clipPath!=='none'||e.closest('.g2sr,.sr-only,.ma-sr,[class*=sr]')) return;   /* texto só para leitor de tela (invisível de propósito) */
@@ -32,9 +36,15 @@ MEDE = r"""(()=>{ const out=[]; const vis=e=>{ const r=e.getBoundingClientRect()
     const debaixo=xs.map(x=>document.elementFromPoint(x,y)).filter(el=>el&&!b.contains(el)&&el!==document.body&&el!==document.documentElement&&(el.innerText||'').trim()&&getComputedStyle(b).position==='sticky');
     if(debaixo.length&&r.bottom<innerHeight-30) out.push(['C3',nome(b).slice(0,40),Math.round(innerHeight-r.bottom)]); });
   // C4 · linha que começa com "·"
+  // começa a linha = nada visível à esquerda na mesma linha, subindo pelos irmãos até o bloco que contém (item flexível ao lado do título não conta;
+  // texto só para leitor de tela também não)
+  const naLinha=(x,rr)=>{ while(x&&x!==document.body){ for(let s=x.previousSibling;s;s=s.previousSibling){ const g=document.createRange(); g.selectNodeContents(s);
+        if([...g.getClientRects()].some(q=>q.width>0&&q.height>0&&q.bottom>rr.top+2&&q.top<rr.bottom-2&&q.right<=rr.left+2)) return false; }
+      const pe=x.parentElement; if(!pe) break; if(['block','list-item','table-cell','grid','flow-root','flex','inline-flex'].includes(getComputedStyle(pe).display)) return true; x=pe; } return true; };
   const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT); let n; while((n=w.nextNode())){ const t=n.textContent; if(!/^\s*·\s/.test(t)) continue; const p=n.parentElement; if(!p||!vis(p)) continue;
-    const prev=n.previousSibling; const br=prev&&prev.nodeName==='BR'; const ini=br||(p.previousElementSibling&&p.previousElementSibling.nodeName==='BR')||(p.firstChild===n&&getComputedStyle(p).display==='block');
-    if(ini) out.push(['C4',t.trim().slice(0,50),0]); }
+    if(p.closest('.etp-sr,.g2sr,.sr-only,.ma-sr')||getComputedStyle(p).opacity==='0') continue;   // escondido no começo da linha (g2sepIni)
+    const i0=t.indexOf('·'); const g=document.createRange(); g.setStart(n,i0); g.setEnd(n,i0+1); const rr=g.getBoundingClientRect(); if(!(rr.width>1&&rr.height>1)) continue;
+    if(naLinha(n,rr)) out.push(['C4',t.trim().slice(0,50),0]); }
   return out; })()"""
 ROLA = "(()=>{ const m=document.querySelector('main[data-scroll]')||document.scrollingElement; const H=m.scrollHeight; return H; })()"
 def rola_para(c, f):
@@ -51,10 +61,10 @@ try:
                 for regra, txt, d in (c.js(MEDE) or []):
                     k = (regra, txt)
                     if k in vistos: continue
-                    vistos.add(k); achados.setdefault(regra, []).append((pg, w, txt, d)); total += 1
+                    vistos.add(k); achados.setdefault(regra, []).append((pg, w, txt, d)); total += regra != 'R'
                     print(f'{regra} | {pg} | {w}px | {txt} | {d}', flush=True)
 finally:
     c.close(); srv.terminate()
-for k in sorted(achados): print(f'TOTAL {k}: {len(achados[k])}')
+for k in sorted(achados): print(f'TOTAL {k}: {len(achados[k])}' + (' (informativo: reticências de propósito, não conta)' if k == 'R' else ''))
 print(f'RESULTADO: {total} achado(s) em {len(PAGS)} páginas + {len(EXTRA)} visões × {len(TAMS)} tamanhos')
 sys.exit(1 if total else 0)

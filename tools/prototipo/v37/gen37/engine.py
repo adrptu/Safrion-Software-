@@ -1294,6 +1294,8 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         # tela sem rolagem de página (pedido do Adrianus, 01/10/2026): título, filtros rápidos e expandir/recolher ficam parados;
         # o último bloco com dados estica até o fim da janela e só a área de dados rola, com o cabeçalho da tabela fixo
         "main>div:last-child{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}"
+        # rodapé sem dados depois do bloco com a tabela ("Restaurar demonstração" na Carga) não estica: o espaço é da tabela (proprietário, 13/10/2026)
+        "main>section:has(.g2caixa,.rola)~div:last-child:not(:has(.g2caixa,.rola)){flex:0 0 auto}"
         # só estica quando é o único bloco da tela (vários blocos empilhados: a área rola, sem rolagem dupla)
         # e só a tabela/lista que está direto no corpo do bloco (aninhada mais fundo fica na altura natural)
         "main section:only-of-type:has(.g2caixa,.rola){flex:1 1 0;min-height:240px;display:flex;flex-direction:column}"
@@ -1304,24 +1306,35 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         ".g2rola{--g2cols:initial;scroll-padding:calc(var(--g2hh,0px) + 6px) 6px 6px calc(var(--g2c0w,0px) + 6px)}"
         ".g2rola [role=columnheader] button:focus-visible{outline-offset:-2px}"   # cabeçalho rente à borda da caixa: o anel fica por dentro, inteiro
         ".g2cta{white-space:nowrap}"
+        # coluna de número (a='r', célula sem quebra): o número curto fica numa linha; o texto que passa da largura da coluna (linha de apoio
+        # "01/09 · Sementes Vale", "R$ 131,00/sc (saca a conferir)") quebra dentro dela em vez de invadir a vizinha (proprietário, 13/10/2026).
+        # Os cadastros (CADX) mantêm uma linha com reticências, de propósito.
+        ".g2celn .g2pw{white-space:normal}.cadx .g2celn .g2pw{white-space:nowrap}"
         # tabela com a 1ª coluna limitada (g2lib, data-c0): textos, cabeçalhos e ações quebram linha dentro da largura visível
         # (vale também onde a área trunca com reticências), para cada célula caber inteira ao rolar
         ".g2rola[data-c0] :is(.g2pw,.g2hb,.g2cta){white-space:normal}.g2rola[data-c0] .g2pw{flex-wrap:wrap}.g2rola[data-c0] .g2pw :is(b,a,button,span){flex-shrink:1}.g2rola[data-c0] [role=cell]{align-self:stretch}"   # linha mais alta: a célula acompanha (fundo inteiro)
-        "main section:only-of-type>div:last-child>.g2caixa:last-of-type{flex:1 1 0}main section:only-of-type>div:last-child>.g2caixa:last-of-type>.g2rola{flex:1 1 0}"
+        "main section:only-of-type>div:last-child>.g2caixa:not(:has(~ .g2caixa)){flex:1 1 0}main section:only-of-type>div:last-child>.g2caixa:not(:has(~ .g2caixa))>.g2rola{flex:1 1 0}"
         "main section:only-of-type>div:last-child>.rola{flex:1 1 0;min-height:0;overflow:auto}"
         # tabela um nível abaixo, junto com chips ou legenda (ex.: Ordem de Serviço): o contêiner direto também estica
         "main section:only-of-type>div:last-child>div:has(>.g2caixa,>.rola){flex:1 1 0;min-height:0;display:flex;flex-direction:column}"
-        "main section:only-of-type>div:last-child>div>.g2caixa:last-of-type{flex:1 1 0}main section:only-of-type>div:last-child>div>.g2caixa:last-of-type>.g2rola{flex:1 1 0}"
+        "main section:only-of-type>div:last-child>div>.g2caixa:not(:has(~ .g2caixa)){flex:1 1 0}main section:only-of-type>div:last-child>div>.g2caixa:not(:has(~ .g2caixa))>.g2rola{flex:1 1 0}"
         "main section:only-of-type>div:last-child>div>.rola{flex:1 1 0;min-height:0;overflow:auto}"
         ".g2rola [role=table]>[role=row]:first-child{position:sticky;top:0;z-index:3}"
+        # a tabela cabe na largura visível quebrando o texto das colunas e só rola de lado quando nem assim cabe (o menor conteúdo passa
+        # da largura); no celular segue a rolagem com a 1ª coluna presa (proprietário, 13/10/2026: "rolagem desnecessária")
+        "@media (min-width:700px){.g2rola [role=table]{width:100%!important}}"
+        # separador "·" no começo de uma parte da célula: fica num elemento próprio e some (opacidade, sem mudar a largura) quando a parte
+        # começa a linha; o texto lido (innerText, leitor de tela sem o ponto) não muda (g2sepIni em g2lib.js)
+        ".g2sepd[data-ini]{opacity:0}"
         + INTERACAO_CSS + ACOES_CSS + SEP_CSS + RETORNO_CSS + DICA_CSS + VISOES_CSS)
 _TRASH='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>'
 _MINI=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap;'
 _MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {ACC}; background: {ACC}; color: #fff; cursor: pointer; white-space: nowrap;'
-_PARTS=(f'<sc-if value="{{{{p.isTxt}}}}" hint-placeholder-val="{{{{false}}}}"><span>{{{{p.t}}}}</span></sc-if>'
+_SEPD=f'<sc-if value="{{{{p.sepL}}}}" hint-placeholder-val="{{{{false}}}}"><span class="g2sepd" aria-hidden="true">· </span></sc-if>'
+_PARTS=(f'<sc-if value="{{{{p.isTxt}}}}" hint-placeholder-val="{{{{false}}}}"><span>{_SEPD}{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isCn}}}}" hint-placeholder-val="{{{{false}}}}"><span style="{{{{p.st}}}}">{{{{p.t}}}}</span></sc-if>'
-        f'<sc-if value="{{{{p.isB}}}}" hint-placeholder-val="{{{{false}}}}"><b>{{{{p.t}}}}</b></sc-if>'
-        f'<sc-if value="{{{{p.isMut}}}}" hint-placeholder-val="{{{{false}}}}"><span style="color: {MUTED}; font-size: 12px;">{{{{p.t}}}}</span></sc-if>'
+        f'<sc-if value="{{{{p.isB}}}}" hint-placeholder-val="{{{{false}}}}"><b>{_SEPD}{{{{p.t}}}}</b></sc-if>'
+        f'<sc-if value="{{{{p.isMut}}}}" hint-placeholder-val="{{{{false}}}}"><span style="color: {MUTED}; font-size: 12px;">{_SEPD}{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isChip}}}}" hint-placeholder-val="{{{{false}}}}"><span data-dica="{{{{p.dica}}}}" style="{{{{p.st}}}}"><span style="{{{{p.dot}}}}"></span>{{{{p.t}}}}<sc-if value="{{{{p.hasDica}}}}" hint-placeholder-val="{{{{false}}}}"><span class="g2sr">: {{{{p.dica}}}}</span></sc-if></span></sc-if>'
         f'<sc-if value="{{{{p.isTag}}}}" hint-placeholder-val="{{{{false}}}}"><span style="display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; color: {MUTED}; border: 1px solid {LINE}; white-space: nowrap;">{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isLink}}}}" hint-placeholder-val="{{{{false}}}}"><a href="{{{{p.href}}}}" style="color: {ACC}; font-weight: 700; text-decoration: none;">{{{{p.t}}}}</a></sc-if>'

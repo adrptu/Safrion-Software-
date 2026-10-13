@@ -132,7 +132,21 @@ function g2part(p,v){ const o={isCn:false,isTxt:false,isB:false,isMut:false,isCh
       // célula inteira tocável (DS: alvo ≥ 44 px): texto da célula, sem negrito, na cor do estado; aria-pressed quando é o filtro ativo
       if(p.full){ o.cls='g2full'; o.st='width:100%;min-height:44px;border:0;background:'+(p.on?'#E4F3E9':'transparent')+';padding:0 6px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:'+(p.on?'700':'400')+';text-align:right;font-variant-numeric:tabular-nums;color:'+((G2C[p.c]||[])[0]||'#15201A')+';'+(p.on?'outline:2px solid #1E7A4C;outline-offset:-2px;border-radius:6px;':''); } break;
     case 'br': o.isBr=true; break; default: o.isTxt=true; }
+  // separador no começo da parte ("· TK-4502" depois de "CG-2107"): vai para um elemento próprio, que o g2sepIni esconde quando a parte
+  // começa a linha (a quebra da célula não deixa linha começando com "·"); o texto lido continua "· TK-4502"
+  if((o.isTxt||o.isMut||o.isB)&&/^\s*·\s/.test(o.t)){ o.sepL=true; o.t=o.t.replace(/^\s*·\s*/,''); }
   return o; }
+// marca (data-ini) o separador que caiu no começo de uma linha: nada visível à esquerda dele na mesma linha, dentro da mesma lista de partes.
+// Roda depois de cada desenho e ao mudar o tamanho da janela; só mexe na opacidade, então não muda a quebra (sem efeito sanfona).
+function g2sepIni(){ if(typeof document==='undefined') return; document.querySelectorAll('.g2sepd').forEach(d=>{ const r=d.getBoundingClientRect(); if(!r.width) return;
+    const pw=d.closest('.g2pw')||d.parentElement; const parte=d.parentElement&&d.parentElement.closest('span:not(.g2sepd),b'); let ini=true;
+    for(const o of pw.querySelectorAll('span,b,a,button')){ if(o===d||(parte&&(o===parte||o.contains(parte)||parte.contains(o)))) continue; const q=o.getBoundingClientRect();
+      if(q.width>0&&q.bottom>r.top+2&&q.top<r.bottom-2&&q.right<=r.left+2){ ini=false; break; } }
+    if(ini){ if(!d.hasAttribute('data-ini')) d.setAttribute('data-ini',''); } else if(d.hasAttribute('data-ini')) d.removeAttribute('data-ini'); }); }
+(function(){ if(typeof document==='undefined'||typeof MutationObserver==='undefined'||typeof requestAnimationFrame==='undefined') return; let q=0;
+  const vez=()=>{ if(q) return; q=requestAnimationFrame(()=>{ q=0; try{ g2sepIni(); }catch(e){} }); };
+  try{ new MutationObserver(vez).observe(document.documentElement,{subtree:true,childList:true,characterData:true}); addEventListener('resize',vez);
+    if(document.fonts&&document.fonts.ready) document.fonts.ready.then(vez); vez(); }catch(e){} })();
 // revisão DS (achado 8): sigla ou unidade que está na célula ("62,4 sc/ha", "35 DAP") e não no rótulo dá a dica do cabeçalho da coluna, só onde é da
 // coluna (em ao menos 30 % das células com texto; termo solto numa observação não conta); código de registro (COT-0031) não é sigla. Texto: G2_GLOSS
 // (engine._GLOSS_CEL, fonte única). Guardado por grade enquanto as linhas são as mesmas (o desenho não refaz a varredura); com linhas novas, lê até
@@ -239,7 +253,7 @@ function g2vals(self,sp,v,mask){
       const raw0=empty?[]:((r.p&&r.p[c.k]&&r.p[c.k].length)?r.p[c.k]:[{k:(ci===0&&lvl===0&&has?'b':'txt'),t:g2fmt(r.v?r.v[c.k]:'',c)}]);
       // partes próprias (p) com número puro ganham a unidade (cópia: r.p não muda)
       const raw=c.un?raw0.map(p=>(p&&typeof p.t==='string'&&['txt','b','cn','chip'].indexOf(p.k)>=0)?Object.assign({},p,{t:g2unf(p.t,c)}):p):raw0;
-      const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':'')+(c.nr?' g2nr':''),parts:raw.map((p,i)=>g2part(g2semSep(raw,i),v)),pw:'max-width:'+(c.w||340)+'px;',
+      const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':'')+(c.nr?' g2nr':'')+(c.a==='r'?' g2celn':''),parts:raw.map((p,i)=>g2part(g2semSep(raw,i),v)),pw:'max-width:'+(c.w||340)+'px;',
         st:(c.nr?'padding:0 2px;':'padding:6px 8px;')+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&sp.tree?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:inherit;box-shadow:1px 0 0 #E4E9E5;':'')};
       if(ci===0 && sp.tree){ cell.hasCaret=true; cell.caretOk=has; cell.caretNo=!has; const open=!!exp[r.id]||(g2filtering(st)&&has);
         cell.caretSym=open?'▾':'▸'; cell.caretExp=String(open); cell.caretLabel=(open?'Recolher ':'Expandir ')+g2text(r,c);
