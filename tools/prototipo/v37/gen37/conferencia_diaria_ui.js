@@ -8,7 +8,7 @@ function cdLinha(self, o, ap) {
   const foco = suffix => setTimeout(() => {const el=document.getElementById(fid+suffix);if(el)el.focus();}, 0);
   const rec = ap.conferenciaDia, mudou = !!rec && rec.fato !== cdFato(c,o.id,ap.dia);
   const impedimento = cdImpedimento(c,o.id,ap.dia);
-  const estado = mudou ? 'Reabrir conferência: dados alterados' : rec ? rec.estado : ap.st==='Conferido' ? 'Conferido · registro anterior sem recibo detalhado' : 'Conferência pendente';
+  const estado = ap.st===CEN_AP_DESC ? 'Fora do acumulado · histórico preservado' : mudou ? 'Reabrir conferência: dados alterados' : rec ? rec.estado : ap.st==='Conferido' ? 'Conferido · registro anterior sem recibo detalhado' : 'Conferência pendente';
   const recibo = rec ? rec.estado+' por '+rec.por+' · '+rec.at+(rec.motivo?' · '+rec.motivo:'')+(rec.revisaoPosterior?' · '+rec.revisaoPosterior:'') : '';
   const abrir = () => {
     const anterior=(self.state.cdRascunhos||{})[k];
@@ -23,7 +23,7 @@ function cdLinha(self, o, ap) {
   };
   return {cdVisivel:ap.st!=='Previsto',cdAberto:aberto,cdFechado:!aberto,cdId:fid,cdDecId:fid+'_dec',cdMotId:fid+'_mot',cdErrId:fid+'_erro',cdOpenId:fid+'_open',
     cdTitulo:o.id+' · '+o.talhao+' · dia '+ap.dia+' · '+ap.d,
-    cdEstado:estado,cdRecibo:recibo,cdTemRecibo:!!rec,cdQuem:g2quem('conferente'),cdPode:g2papel(g2perfil(),'conferente'),
+    cdEstado:estado,cdRecibo:recibo,cdTemRecibo:!!rec,cdQuem:g2quem('conferente'),cdPode:g2papel(g2perfil(),'conferente')&&!impedimento,
     cdContexto:'Apontado por '+(ap.quem||'responsável não informado')+' · '+(ap.origem||'web')+' · '+(ap.sinc===false?'aguarda envio':'sincronizado'),
     cdComparacao:'Realizado neste dia: '+nf(ap.ha)+' ha'+(ap.h?' · '+nd(ap.h,1)+' h':'')+'. Área autorizada da O.S. inteira: '+nf(o.area)+' ha. Não há meta diária registrada.',
     cdImpedimento:impedimento,cdTemImpedimento:!!impedimento,cdDec:draft.decisao||'conferir',cdMot:draft.motivo||'',cdErro:draft.erro||'',cdTemErro:!!draft.erro,

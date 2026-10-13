@@ -46,6 +46,8 @@ try:
  bounds=j("(()=>{const s=document.querySelector('section[aria-label=\"Conferência diária\"]'),r=s.getBoundingClientRect();return {left:r.left,right:r.right,scroll:s.scrollWidth,client:s.clientWidth,buttons:[...s.querySelectorAll('button')].map(b=>({text:b.innerText,h:b.getBoundingClientRect().height}))}})()")
  check('390px: formulário e ações cabem, alvos de 44px',bounds['left']>=0 and bounds['right']<=390 and bounds['scroll']<=bounds['client'] and all(b['h']>=44 for b in bounds['buttons']),bounds)
  t.c.shot(str(args.output.with_suffix('.png')))
+ t.mudar("c.ordens['OS-0421'].ap.find(a=>a.dia===4).st='Duplicidade · não somado';return {msg:'Projeção sintética do resultado de descarte'}")
+ check('Apontamento descartado mantém recibo visível e não oferece reconferência', 'Fora do acumulado · histórico preservado' in t.pan() and not t.temb('Registrar conferência') and bool(t.cen("c.ordens['OS-0421'].ap.find(a=>a.dia===4).conferenciaDia")))
  check('Sem erro JavaScript',not t.erros(),t.erros())
 except Exception as e:
  check('Jornada executada sem interrupção',False,repr(e));raise

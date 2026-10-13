@@ -70,6 +70,11 @@
     }
   },
   {
+    "nome": "Apontamento descartado mantém recibo visível e não oferece reconferência",
+    "ok": true,
+    "valor": null
+  },
+  {
     "nome": "Sem erro JavaScript",
     "ok": true,
     "valor": []

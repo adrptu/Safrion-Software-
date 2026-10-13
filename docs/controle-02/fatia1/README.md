@@ -10,9 +10,9 @@ Aplicado: subdetalhe dentro da O.S.; uma ação primária no contexto ativo; rec
 
 ## Provas executadas
 
--18/18 unidade sobre cenario.js, perfis e JS_NUCLEO reais, incluindo os comandos de encerramento e seu responsável.
--12/12 navegador: motivo obrigatório/foco, contexto, rascunho ao reabrir O.S., resolução/histórico, versão concorrente, recuperação, perfil, teclado e390px; sem erros JS. Captura inspecionada localmente. Teclado virtual não executado.
--80/80 regressão existente ap_unico_test.py unit.
+- 20/20 unidade sobre cenario.js, perfis e JS_NUCLEO reais, incluindo os comandos de encerramento e seu responsável.
+- 13/13 navegador: motivo obrigatório/foco, contexto, rascunho ao reabrir O.S., resolução/histórico, versão concorrente, recuperação, perfil, teclado e390px; sem erros JS. Captura inspecionada localmente. Teclado virtual não executado.
+- 80/80 regressão existente ap_unico_test.py unit.
 
 Brutos: unit.json, nav.json e ap-unico-regression.txt. Hashes em manifest.json. Testes novos não mockam permissão ou comando. O navegador usa os_lib/App existentes, perfil Chrome isolado e servidor127.0.0.1, sem dados reais.
 
@@ -27,3 +27,6 @@ python3 ap_unico_test.py unit
 ```
 
 Escolher outputs novos; scripts recusam sobrescrever brutos. Nav também salva captura PNG. Scripts fontes e provas pertencem à mesma candidata; publicação depende da revisão pertinente e integração pelo revisor. Não encerra CONTROLE-02 inteiro, conjunto do protótipo ou gatilho PRD.
+
+
+Revisão4254267592/4254267597: provisório somado sem recibo agora exige conferência; descartado não bloqueia encerramento, conserva recibo e aparece como Fora do acumulado. Contraprova com comandos reais de apontar/app/substituir/agrônomo antes18/20→depois20/20; nav13/13 e regressão80/80. Brutos adicionais em close-counterexamples.json.

@@ -3,16 +3,16 @@
   "autor": "Codex",
   "revisor": "Claude real",
   "arquivos": {
-    "conferencia_diaria.js": "c502989c2c2d066a48a8d79f2711beca3864856910ad0bf1df29025d7a4af9d5",
+    "conferencia_diaria.js": "174c1ea736fbf3837de85dcc50ace8012381098afe59808181231f0864441bd3",
     "conferencia_diaria.py": "6c2e0ea1546870c625fbbe4dbc1055768f431b10ca9049a7e33ffc224d9d53d8",
-    "conferencia_diaria_ui.js": "ffd9a487169cad91408f4eb56e94c9fb7e6a2b4584a05e78cb7a45232b726b73",
-    "conferencia_diaria_unit.js": "377188853d8f2a2a068a3c2d26b79131be8ec99a2f18ed03c46bc4dd631f0f53",
+    "conferencia_diaria_ui.js": "089f2c7e760d81cfcdd0e6bb3bba0f19bf5595780f67ea4199033c89d139f1f3",
+    "conferencia_diaria_unit.js": "d936808c68d3d2af5327a20c2c1a63f69b3c1f1119a6b8fb5cfb847a66d1e19c",
     "conferencia_diaria_test.py": "aa5ee810c3c66111306c7c4c3755b47ef0a5baed44a0290223700aaf208229ec",
-    "conferencia_diaria_nav.py": "b30172cad5bf25d9f95771af20b5a52aafc519c1dbc8d74cae5955bc30d0a689",
+    "conferencia_diaria_nav.py": "366a77ec886733fdad01de383052f84acc32c857f87023a133833a38980d603e",
     "areas/processo_os.py": "04e446edea3a6ec776cfafc83b990e5391596191e864fdc286087e0d2e5ea870"
   },
-  "unit": 18,
-  "browser": 12,
+  "unit": 20,
+  "browser": 13,
   "regressao_apontamento_unico": 80,
   "ambiente": "Mac local; Chrome headless e perfil isolado; dados sintéticos",
   "limites": [

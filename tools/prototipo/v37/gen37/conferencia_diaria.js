@@ -27,8 +27,9 @@ function cdImpedimento(c, id, dia) {
 function cdPendente(c, id) {
   const o = c.ordens[id];
   if (!o) return '';
-  const pendentes = (o.ap || []).filter(a => a.conferenciaDia &&
-    (a.conferenciaDia.estado === 'Não conforme' || a.conferenciaDia.fato !== cdFato(c, id, a.dia)));
+  const pendentes = (o.ap || []).filter(a => cenApSomado(a) &&
+    (!a.conferenciaDia ? a.st === 'Provisório' :
+      (a.conferenciaDia.estado === 'Não conforme' || a.conferenciaDia.fato !== cdFato(c, id, a.dia))));
   return pendentes.length ? 'Reveja a conferência diária: dia ' + pendentes.map(a => a.dia).join(', ') + '.' : '';
 }
 function cdConferir(c, id, dia, decisao, motivo, referencia, ator) {

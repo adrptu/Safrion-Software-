@@ -71,6 +71,14 @@
     {
       "nome": "Bloqueio diário aponta conferente, não almoxarife",
       "ok": true
+    },
+    {
+      "nome": "Apontamento provisório sem recibo impede encerramento",
+      "ok": true
+    },
+    {
+      "nome": "Substituir duplicidade preserva recibo antigo sem bloquear ordem para sempre",
+      "ok": true
     }
   ],
   "exit": 0,
