@@ -20,8 +20,11 @@ try:
     mn = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].filter(a=>/^Manutenção/.test(a.innerText.trim())).map(a=>a.innerText.trim()+'|'+a.getAttribute('href'))")
     tog = J("[...document.querySelectorAll('nav[aria-label=Menu] button')].filter(b=>/^Manutenção/.test(b.innerText.trim())).length")
     idx = open(os.path.join(PJ, 'Main.dc.html'), encoding='utf-8').read()
-    m.ok(g[2] == [('Manutenção', 'MA.dc.html')] and mn == ['Manutenção|MA.dc.html'] and tog == 0 and not re.search(r'(MA-0[1-5]|PM|MA-04det)\.dc\.html', idx) and 'MA.dc.html' in idx,
-         'AC-PCM-01 · menu: grupo Manutenção = 1 item "Manutenção" → MA.dc.html, link direto (sem submenu); o Índice leva só à MA', [mn, tog])
+    # v57 (pedido do proprietário, 13/10): o grupo Manutenção tem 4 subitens enxutos, um por visão da mesma tela MA (antes: 1 link direto)
+    VIS4 = [('Pendências sem ordem', 'MA.dc.html#vis=semordem'), ('Ordens de manutenção', 'MA.dc.html#vis=ordens'), ('Ativos e disponibilidade', 'MA.dc.html#vis=ativos'), ('Planos preventivos', 'MA.dc.html#vis=planos')]
+    lk = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>a.getAttribute('href')).filter(h=>/^MA/.test(h||''))")
+    m.ok(g[2] == VIS4 and sorted(set(lk)) == sorted(h for _, h in VIS4) and not re.search(r'(MA-0[1-5]|PM|MA-04det)\.dc\.html', idx) and 'MA.dc.html' in idx,
+         'AC-PCM-01 · menu: grupo Manutenção com os 4 subitens, todos para a tela única MA (#vis=…); nenhuma rota antiga; o Índice leva só à MA', [lk, mn, tog])
     # ---------- AC-PCM-02 · rotas antigas (com e sem âncora) e fora do canvas ----------
     rotas = [('PM.dc.html', 'vis=planos'), ('MA-01.dc.html', 'vis=ativos'), ('MA-02.dc.html', 'vis=semordem&tipo=achados'), ('MA-03.dc.html', 'vis=semordem'),
              ('MA-04.dc.html', 'vis=ordens'), ('MA-05.dc.html', 'vis=ativos&modo=abastecimentos'), ('MA-04det.dc.html', 'om=OM-0233'),

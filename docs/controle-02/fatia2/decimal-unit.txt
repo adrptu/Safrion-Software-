@@ -1,0 +1,42 @@
+OK retrato independente e congelado em todos os níveis
+OK ordem visual de entidades e chaves não produz revisão
+OK ruído binário não cria revisão; dose pequena e diferença real permanecem
+OK incluído, removido e alterado por identidade, sem depender da posição
+OK ausente, null e zero são três estados distintos
+OK unidades incompatíveis explicitadas, sem subtrair kg de L
+OK isolamento fazenda/safra mesmo com ID de cultivo igual
+OK recusa identidades repetidas, sem sobrescrever silenciosamente
+OK número não finito não vira null na serialização
+OK versão de esquema desconhecida e identidade vazia recusadas
+OK serializar e recuperar conserva a referência sem recalcular
+OK SAF real: projeção copia todos os cultivos e ocorrências
+OK SAF real: dose, quantidade e preço vêm da ocorrência existente
+OK SAF real: editar área/data/meta não altera o retrato anterior
+OK SAF real: mudança de preço/versão de catálogo não reescreve passado
+OK SAF real: estoque/reserva/realizado não entram no retrato
+OK SAF real: ordem de linhas não gera diferenças
+OK SAF real: safra inexistente recusa, encerrada permite somente leitura do retrato
+OK SAF real: retrato não grava cenário ou recibo
+OK SAF real: ajuste de dose, retirada e inclusão entram pela conta existente
+OK SAF real: parâmetros de recursos e calendário ficam congelados
+OK SAF real: quantidade infinita recusa projeção sem gravar
+OK SAF real: projetar não modifica a demanda calculada
+OK contexto: gestora recebe retrato atual congelado sem gravar
+OK contexto: papel vem do cadastro, não do objeto informado
+OK contexto: nova chamada revalida papel após prévia válida
+OK contexto: ambos os marcadores de encerramento impedem publicação
+OK contexto: seleção diferente e ausência de prévia preservam rascunho
+OK contexto: outra fazenda ou safra não reutiliza prévia
+OK contexto: área, data e dose alteradas exigem nova prévia sem perder rascunho
+OK versão: primeira referência independente e metadados explícitos, sem gravar
+OK versão: R2 conserva R1 após recarga e alteração do plano
+OK versão: conteúdo sem mudança não gera versão redundante
+OK versão: referência concorrente recusa mesmo conteúdo, sem mudar histórico
+OK versão: histórico de outra safra/fazenda, incompleto ou fora de ordem é recusado
+OK versão: publicação nova exige autor e instante válido sem inventá-los
+OK trilha: legado vazio não recebe data, ator ou publicação fictícia
+OK trilha: recibo completo usa a identidade, autor, instante e ordem registrados
+OK trilha: mesmo R1 em contextos diferentes tem identidade distinta e estável
+OK trilha: revisão indica orçamento a revisar sem dar aprovação ou alterar R1
+OK trilha: recibo duplicado ou sem autor/data/ordem não vira evento
+RESULTADO 41/41 · núcleo/projeção/contexto/preparação/trilha; publicação e UI não executadas

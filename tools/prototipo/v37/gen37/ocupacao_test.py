@@ -37,7 +37,7 @@ try:
         chk('OC-02 grupo T1: c1 e c2 (Safra 2026/27) e d1 desta safra, por data de início', [(r['TALHÃO OU PARCELA'], r['CULTURA'], r['SAFRA']) for r in t1k] ==
             [('T1-A', 'Soja', 'Safra 2026/27 ›'), ('T1-B', 'Soja', 'Safra 2026/27 ›'), ('T1-A', 'Milho', '—')], t1k)
         chk('R-13 total da Área só desta safra (553 ha)', c.js("(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const r=t.querySelector('.g2tot'); return r?r.innerText.replace(/\\s+/g,' '):'';})()").find('553 ha') >= 0)
-        chk('R-23 seleção só nas linhas desta safra', c.js("(()=>{const rs=[...document.querySelectorAll('[role=row]')].filter(r=>r.offsetParent); return rs.filter(r=>r.querySelector('input[type=checkbox]')).map(r=>r.getAttribute('data-rid'));})()") == ['d1', 'd2', 'd3'])
+        chk('R-23 sem caixas de seleção nos cultivos (proprietário, 13/10/2026): o plano entra pela primária ou pela linha', c.js("document.querySelectorAll('[role=table] input[type=checkbox]').length") == 0)
         botao('Livre 1'); L = nivel0()
         chk('OC-04 chip Livre mostra só o T1 (com as filhas ao abrir)', [r['TALHÃO OU PARCELA'].split(' ')[0] for r in L] == ['T1'] and len(rows()) == 4, [r['TALHÃO OU PARCELA'] for r in rows()])
         botao('Todas 8')
@@ -89,12 +89,11 @@ try:
         chk('OC-11 em 11/02/2027 salva com o aviso "provável sobreposição (7 dias)"', 'Cultivo incluído: T3 inteiro' in t and 'provável sobreposição (7 dias)' in t, t)
         # ---------- OC-09 lote com pendência; OC-12 ----------
         abre('#saf=S2627&passo=cultivos')
-        for rid in ('c4', 'c5', 'c6', 'c7'): seleciona(rid)
-        botao('Aplicar plano', "document.querySelector('[role=table]').closest('.g2caixa')"); time.sleep(.3)
+        botao('Aplicar plano em 4 cultivos', "document.querySelector('[data-acoes]')"); time.sleep(.3)   # sem caixas de seleção (13/10): a primária leva os 4 sem plano (c4..c7)
         c.js("(()=>{const e=document.getElementById('ap_sel'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(e,'SOJA-AT'); e.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.4)
         pn = painel()
         chk('OC-09 R-16 o painel mostra antes quem recebe com pendência e o botão conta 4', 'P2 · Soja 62 X · 80 ha · recebe com pendência' in pn and 'Aplicar plano em 4 cultivos' in pn, pn[:700])
-        botao('Aplicar plano em 4 cultivos'); t = toast()
+        botao('Aplicar plano em 4 cultivos', "[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent)"); t = toast()
         chk('OC-09 aplica nos 4, P2 com pendência', 'aplicado a 4 cultivos' in t and 'sobreposição prevista de 11 dias' in t, t)
         p2 = linha('P2'); chk('OC-09 P2 A conferir com o ocupante (e5) visível na linha', p2['SITUAÇÃO'] == 'A conferir' and any(r['TALHÃO OU PARCELA'] == 'P2' and r['SAFRA'] == 'Safra 2025/26 ›' for r in rows()), p2)
         n = nota(); chk('OC-09 nota sem "sem plano" e com a pendência e as saídas', 'sem plano agronômico' not in n and 'P2: sobreposição prevista de 11 dias com o Milho da Safra 2025/26 (até 15/11/2026).' in n and 'Mudar plantio de P2 ›' in n and 'Ver P2 na Safra 2025/26 ›' in n, n)
@@ -139,12 +138,12 @@ try:
         for w, h in ((390, 844), (360, 800)):
             abre('#saf=S27SF&passo=cultivos', w, h, True); time.sleep(.4)
             m = c.js(r"""(()=>{ const vw=innerWidth; const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const caixa=t.closest('.g2rola'); const q=caixa.getBoundingClientRect();
-              const hs=[...t.querySelectorAll('[role=columnheader]')]; const sel=hs[0].getBoundingClientRect(); const si=hs.find(h=>/SITUAÇÃO/i.test(h.innerText)).getBoundingClientRect();
-              const chs=[...t.querySelectorAll('[role=row]')].slice(1).map(r=>r.querySelectorAll('[role=cell]')[2]).filter(Boolean).map(c=>c.getBoundingClientRect());
+              const hs=[...t.querySelectorAll('[role=columnheader]')]; const iS=hs.findIndex(h=>/SITUAÇÃO/i.test(h.innerText)); const si=hs[iS].getBoundingClientRect();
+              const chs=[...t.querySelectorAll('[role=row]')].slice(1).map(r=>r.querySelectorAll('[role=cell]')[iS]).filter(Boolean).map(c=>c.getBoundingClientRect());
               const pl=[...t.querySelectorAll('button')].find(b=>b.innerText.trim()==='Planejar ›'); const pr=pl?pl.getBoundingClientRect():null;
-              return {pag:document.documentElement.scrollWidth>vw+1, sel:Math.round(sel.width), sitIn:si.right<=q.left+caixa.clientWidth+1, chipsIn:chs.every(r=>r.right<=q.left+caixa.clientWidth+1),
+              return {pag:document.documentElement.scrollWidth>vw+1, caixas:t.querySelectorAll('input[type=checkbox]').length, sitIn:si.right<=q.left+caixa.clientWidth+1, chipsIn:chs.every(r=>r.right<=q.left+caixa.clientWidth+1),
                       planejar:!!pr&&pr.right<=q.left+caixa.clientWidth+1&&!!pl.closest('.g2c0'), grupos:[...t.querySelectorAll('[aria-expanded]')].filter(b=>b.offsetParent).every(b=>b.getAttribute('aria-expanded')==='false')}; })()""")
-            chk(f'OC-17 {w}×{h}: sem rolagem lateral da página; seleção ≤ 40 px; Situação inteira sem rolar a caixa; Planejar › na coluna presa; grupos recolhidos', not m['pag'] and m['sel'] <= 40 and m['sitIn'] and m['chipsIn'] and m['planejar'] and m['grupos'], m)
+            chk(f'OC-17 {w}×{h}: sem rolagem lateral da página; sem caixas de seleção; Situação inteira sem rolar a caixa; Planejar › na coluna presa; grupos recolhidos', not m['pag'] and m['caixas'] == 0 and m['sitIn'] and m['chipsIn'] and m['planejar'] and m['grupos'], m)
             c.shot(os.path.join(PROBE, f'oc_etapa2_{w}.png'))
         abre('#saf=S27SF&passo=cultivos', 390, 844, True); cliques = 0
         na_linha('T1', 'Planejar ›'); cliques += 1

@@ -21,5 +21,11 @@ try:
     cur = J("([...document.querySelectorAll('nav[aria-label=Menu] a[aria-current=page]')].map(a=>a.innerText.trim()))")
     m.ok(m.hash() == '#vis=planos' and cur == ['Planos preventivos'] and 'PLANOS' in (m.body() or '').upper(),
          'tocar "Planos preventivos" estando em Ordens troca a visão na mesma tela e move o destaque', [m.hash(), cur])
+    falhou = []
+    for i in range(8):   # corrida da v57: com o painel da OM aberto ao lado, o clique no menu às vezes não trocava a visão
+        m.ir('vis=ordens', perfil='Otávio'); m.clk('Ativos e disponibilidade' if i % 2 else 'Planos preventivos', 'nav[aria-label=Menu]', w=.05)
+        alvo = '#vis=ativos' if i % 2 else '#vis=planos'
+        if m.hash() != alvo: falhou.append((i, m.hash()))
+    m.ok(not falhou, 'com o painel da OM aberto ao lado, 8 trocas de visão pelo menu, logo após abrir, valem todas (sem voltar ao # antigo)', falhou)
 finally:
-    m.fim() if hasattr(m, 'fim') else None
+    sys.exit(m.fim())   # o código de saída segue o resultado (na v57 saía 0 mesmo com falha)

@@ -51,9 +51,8 @@ def t01(t):
 def t02(t):
     """Aplicar um plano a vários cultivos e ajustar somente um."""
     abrir_safra(t)
-    n=t.js("""(()=>{let n=0; [...document.querySelectorAll('[role=row].g2ed')].filter(r=>r.querySelector('input[type=checkbox]')).forEach(r=>{ if(/\\b(T4|T3|P1|P2)\\b/.test(r.innerText)){ r.querySelector('input[type=checkbox]').click(); n++; } }); return n;})()"""); time.sleep(.4)
-    t.check('4 cultivos selecionados (seleção não abre edição)',n==4 and not t.form(),n)
-    t.clk('Aplicar plano'); t.setv('#ap_sel','SOJA-AT'); t.clk('Aplicar plano','aside[role=dialog]')
+    t.check('Sem caixas de seleção nos cultivos (13/10)',t.js("document.querySelectorAll('[role=row].g2ed input[type=checkbox]').length")==0)
+    t.clk('Aplicar plano em 4 cultivos'); t.setv('#ap_sel','SOJA-AT'); t.clk('Aplicar plano','aside[role=dialog]')
     t.check('Plano aplicado aos 4',('aplicado a 4 cultivos' in t.aviso()),t.aviso())
     r=t.js("""(()=>{const row=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/\\bT4\\b/.test(r.innerText)); const b=[...row.querySelectorAll('button')].find(b=>/Soja alta tecnologia/.test(b.innerText)); b.click(); return 'ok';})()"""); time.sleep(.5)
     t.check('Clique no nome do plano abre atividades locais do T4',t.js("(document.querySelector('aside[role=dialog] h2')||{}).innerText||''").find('T4')>=0)
@@ -105,11 +104,9 @@ def t06(t):
         if f=='CD-05.dc.html': t.foto('fornecedor-form')
         t.clk('Cancelar','aside[role=dialog]',esperado=False); t.clk('Fechar','aside[role=dialog]',esperado=False)
 def t07(t):
-    """Expandir, selecionar ou excluir sem abrir acidentalmente a edição."""
+    """Expandir ou excluir sem abrir acidentalmente a edição."""
     abrir_safra(t)
-    t.js("[...document.querySelectorAll('[role=row].g2ed')].find(r=>/\\bP2\\b/.test(r.innerText)&&r.querySelector('input[type=checkbox]')).querySelector('input[type=checkbox]').click()"); time.sleep(.3)
-    t.check('Selecionar não abre edição',not t.form())
-    t.js("[...document.querySelectorAll('[role=row].g2ed')].find(r=>/\\bP2\\b/.test(r.innerText)&&r.querySelector('input[type=checkbox]')).querySelector('button.g2del').click()"); time.sleep(.3)
+    t.js("[...document.querySelectorAll('[role=row].g2ed')].find(r=>/\\bP2\\b/.test(r.innerText)&&r.querySelector('button.g2del')).querySelector('button.g2del').click()"); time.sleep(.3)
     t.check('Excluir pede confirmação e não abre edição',not t.form() and t.js("document.body.innerText.indexOf('Excluir?')>=0"))
     t.clk('Manter'); t.check('Manter preserva o registro',t.js("[...document.querySelectorAll('[role=row].g2ed')].some(r=>/\\bP2\\b/.test(r.innerText))"))
     etapa(t,3); t.js("document.querySelector('button.g2car').click()"); time.sleep(.3)
@@ -189,7 +186,7 @@ def t12(t):
     t.check(f'Mesma fase em todas as visualizações ({total} leituras de fase comparadas)',not difs and total>=20,'; '.join(difs)[:600] if difs else f'{total} leituras, 0 divergências')
 TESTES=[('T01','Escolher/criar safra e percorrer as seis etapas',t01),('T02','Aplicar um plano a vários cultivos e ajustar somente um',t02),
  ('T03','Expandir gatilhos, atividades e insumos',t03),('T04','Encaminhar demanda para compras mantendo a origem',t04),('T05','Navegar entre etapas sem perder dados',t05),
- ('T06','Clicar na linha para editar pelo formulário lateral',t06),('T07','Expandir, selecionar ou excluir sem abrir acidentalmente a edição',t07),
+ ('T06','Clicar na linha para editar pelo formulário lateral',t06),('T07','Expandir ou excluir sem abrir acidentalmente a edição',t07),
  ('T08','Salvar, cancelar e tratar alterações não salvas',t08),('T09','Consultar registros sem permissão de edição',t09),('T10','Abrir a origem de indicadores calculados',t10),
  ('T12','Conferir a consistência das fases das O.S. entre as visualizações',t12)]
 if __name__=='__main__':

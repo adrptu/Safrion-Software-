@@ -199,7 +199,7 @@ try:
         chk('Resolver AL-12: lista curta com quem tem a habilidade "Conferir" primeiro (Caio, Rui)', 'AL-12 sem titular' in d and d.index('Caio · Agronomia · habilidade no CD-04') < d.index('Carlos') and 'Rui · Suprimentos · habilidade no CD-04' in d, d[:600])
         clk('Rui · Suprimentos', 'aside[role=dialog]'); chk('um toque escolhe: primária "Conceder conferência a Rui"', prims()['prims'] == ['Conceder conferência a Rui'], prims())
         clk('Conceder conferência a Rui', 'aside[role=dialog]')
-        chk('AL-12 volta a ter titular (Rui); cabeçalho sem pendência', 'conferência · Rui' in (linha(1, 'AL-12 · Decidir') or '') and 'sem titular' not in hdr(), [linha(1, 'AL-12 · Decidir'), hdr()])
+        chk('AL-12 volta a ter titular (Rui); cabeçalho sem pendência', 'conferência · Rui' in (linha(1, 'AL-12 · ') or '') and 'sem titular' not in hdr(), [linha(1, 'AL-12 · '), hdr()])
         # ---------- revisão F9: Ana retira o próprio agrônomo → Resolver AL-02 explica o caminho ----------
         go('CF-01.dc.html'); reset(); go('CF-01.dc.html'); abre(0, 'Ana'); papel('agrônoma'); d = dlg(); clk('Salvar papéis')
         chk('F9 Ana retira o próprio agrônomo: a prévia avisa AL-02 sem titular e a primária vira "Resolver AL-02"', 'AL-02' in d and prims()['prims'] == ['Resolver AL-02'], [d[-300:], prims()])

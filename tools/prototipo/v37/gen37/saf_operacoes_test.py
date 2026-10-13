@@ -114,7 +114,7 @@ try:
         chk('V1 atalho "Maior uso: Colhedoras 81 % · fev/27"', atalhos() == ['Maior uso: Colhedoras 81 % · fev/27'], atalhos())
         pc = D2.plano_op('S2627'); chk('V1 custo de operação = espelho, "máquinas e pessoas, sem insumos"', custo().startswith('Custo de operação ' + rs(pc['cop']) + ' · máquinas e pessoas, sem insumos'), custo())
         G = gop()
-        chk('O1 g_op: 8 colunas na ordem do §3.4', G['hs'] == ['OPERAÇÃO › ATIVIDADE › TALHÃO', 'SITUAÇÃO', 'DATA', 'CONJUNTO', 'RENDIMENTO', 'ÁREA TRABALHADA', 'HORAS-CONJUNTO', 'CUSTO R$/HA'], G['hs'])
+        chk('O1 g_op: 9 colunas na ordem do §3.4 (Custo total no fim: proprietário, 13/10/2026)', G['hs'] == ['OPERAÇÃO › ATIVIDADE › TALHÃO', 'SITUAÇÃO', 'DATA', 'CONJUNTO', 'RENDIMENTO', 'ÁREA TRABALHADA', 'HORAS-CONJUNTO', 'CUSTO R$/HA', 'CUSTO TOTAL'], G['hs'])
         n0 = [r for r in G['rows'] if not r['_kid'] and not r['_tot']]
         OPS = ['Pulverização', 'Fertirrigação', 'Tratamento de sementes', 'Plantio', 'Adubação a lanço', 'Colheita de grãos', 'Colheita de café', 'Poda']
         chk('O1 operações na ordem da 1ª data (§2.1)', [r['OPERAÇÃO › ATIVIDADE › TALHÃO'].split(' ')[0] for r in n0] == [o.split(' ')[0] for o in OPS] and len(n0) == 8, [r['OPERAÇÃO › ATIVIDADE › TALHÃO'] for r in n0])

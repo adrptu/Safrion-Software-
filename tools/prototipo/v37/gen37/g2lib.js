@@ -255,7 +255,10 @@ function g2vals(self,sp,v,mask){
   const xe=st.x||sp.x0||{}; const xtodos=xids.length>0&&xids.every(k=>xe[k]);
   v[id+'_xlab']=xtodos?'Recolher tudo':'Expandir tudo'; v[id+'_xtog']=xtodos?v[id+'_colall']:v[id+'_expall']; v[id+'_xup']=xtodos; v[id+'_xdown']=!xtodos;
   v[id+'_xhas']=rows.some(r=>(r.kids||[]).length>0);   // sem grupo na tela, sem botão de expandir
-  if(total){ v[id+'_tot']=sp.cols.map((c,ci)=>{ const s=c.agg?g2sum(sp,flat,c):null; return {t:(ci===0?'Total':(s===null?'':g2fmt(s,c))), cls:(ci===0?'g2c0':''), st:'padding:8px 10px;font-weight:800;'+(ci===0?'position:sticky;left:0;z-index:1;background:#F4F6F3;':'')+(c.a==='r'?'text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;':'')}; });
+  // sp.totf (opcional, posto pela tela em tempo de execução): total vindo do serviço de domínio quando a soma simples não serve (R$/ha, unidade);
+  // recebe a coluna e as linhas de 1º nível visíveis (com os filtros); undefined = soma padrão. agg 'fn' = só o serviço, nunca a soma.
+  if(total){ const topo=flat.filter(x=>x.lvl===0).map(x=>x.r); v[id+'_tot']=sp.cols.map((c,ci)=>{ const h=(ci&&c.agg&&typeof sp.totf==='function')?sp.totf(c,topo):undefined;
+      const s=(h===undefined&&c.agg&&c.agg!=='fn')?g2sum(sp,flat,c):null; return {t:(ci===0?'Total':(h!==undefined?h:(s===null?'':g2fmt(s,c)))), cls:(ci===0?'g2c0':''), st:'padding:8px 10px;font-weight:800;'+(ci===0?'position:sticky;left:0;z-index:1;background:#F4F6F3;':'')+(c.a==='r'?'text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;':'')}; });
     v[id+'_totopen']=()=>g2set(self,id,{fm:{tot:true,ro:true,mode:'total',draft:{},orig:{},errs:{}},fmc:null}); }
   // formulário lateral
   const fm=st.fm; const F={open:!!fm};
@@ -315,7 +318,7 @@ const G2_ALCADAS=[
   {id:'AL-09',t:'Aprovar ajuste de inventário',cmd:'Ajuste',papeis:['gestor'],modo:'todos',edita:'papel',opc:['gestor','direcao'],obs:'quem contou e aprova fica com revisão posterior',pend:'PEND-CTL-02'},
   {id:'AL-10',t:'Aceitar consumo informado',cmd:'CMD-50',papeis:['almoxarife','gestor'],modo:'um',lim:'a custódia',acima:{papeis:['gestor'],modo:'todos'},edita:'acima',opc:['gestor','direcao'],pend:'PEND-CTL-02'},
   {id:'AL-11',t:'Liberar lote da quarentena com laudo',cmd:'CMD-24',papeis:['gestor'],modo:'todos',edita:'',fixa:'qualidade do insumo: quem guarda o estoque não libera o próprio bloqueio'},
-  {id:'AL-12',t:'Decidir duplicidade de apontamento',cmd:'CMD-09',papeis:['conferente'],modo:'todos',edita:'',fixa:'conferência separada de quem executa: quem apontou e decide a própria duplicidade fica com revisão posterior'},
+  {id:'AL-12',t:'Conferir o dia e decidir duplicidade de apontamento',cmd:'CMD-09 · conferência diária',papeis:['conferente'],modo:'todos',edita:'',fixa:'conferência separada de quem executa: quem apontou e decide a própria duplicidade fica com revisão posterior'},
   {id:'AL-13',t:'Conceder e retirar papel, convidar e desativar acesso',cmd:'Configurações',papeis:['gestor'],modo:'todos',edita:'',fixa:'protege o próprio controle (R3, R4, R5)'},
   {id:'AL-14',t:'Alterar alçada',cmd:'Configurações',papeis:['gestor'],modo:'todos',conf:{papeis:['gestor','direcao'],modo:'um'},edita:'',fixa:'protege o próprio controle; ampliar o próprio poder pede 2º aprovador (R10)'},
   {id:'AL-15',t:'Pagar fatura, mudar plano, desfazer, pedir proposta e contestar',cmd:'Assinatura e cobrança',papeis:['gestor'],modo:'todos',edita:'',fixa:'contrato e pagamento da organização; o backoffice (conciliar, resolver) é da plataforma (Admin plataforma)'},

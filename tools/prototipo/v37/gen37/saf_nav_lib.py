@@ -16,7 +16,7 @@ N = "(s=>(s||'').replace(/\\s+/g,' ').trim())"
 ROWS = r"""(()=>{ const n=s=>(s||'').replace(/\s+/g,' ').trim(); const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); if(!t) return [];
   const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>n(h.innerText).replace(/[⇅▾▴▲▼]/g,'').replace(/\s*·\s*\d+$/,'').trim().toUpperCase());
   return [...t.querySelectorAll('[role=row]')].slice(1).filter(r=>!r.classList.contains('g2tot')).map(r=>{ const cs=[...r.querySelectorAll('[role=cell]')]; const o={_id:r.getAttribute('data-rid'),_kid:r.classList.contains('g2kid')};
-    cs.forEach((c,i)=>{ const h=hs[i]||('C'+i); let x=c.innerText; c.querySelectorAll('.g2sr').forEach(e=>{ x=x.replace(e.innerText,''); }); o[h]=n(x).replace(/^[▾▸] ?/,''); const ch=c.querySelector('[title]'); if(h==='SITUAÇÃO') o._dica=ch?ch.getAttribute('title'):''; });
+    cs.forEach((c,i)=>{ const h=hs[i]||('C'+i); let x=c.innerText; c.querySelectorAll('.g2sr').forEach(e=>{ x=x.replace(e.innerText,''); }); o[h]=n(x).replace(/^[▾▸] ?/,''); const ch=c.querySelector('[data-dica]:not([data-dica=""]),[title]'); if(h==='SITUAÇÃO') o._dica=ch?(ch.getAttribute('data-dica')||ch.getAttribute('title')||''):'';   /* DS-DICA (v56): a dica fica em data-dica, não em title */ });
     return o; }); })()"""
 def rows(): return c.js(ROWS) or []
 def nivel0(): return [r for r in rows() if not r['_kid']]

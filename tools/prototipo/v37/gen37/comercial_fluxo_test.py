@@ -111,7 +111,11 @@ try:
               r2 == 'ok' and n == 1 and liq == 36960 and S and S[2] == 2065200 and ('616 sc' in p or 'já confirmada' in p), [r2, n, liq, S, p])
         rw = J("ROWTXT('RM-0002')") or ''
         t.chk('(3) cliente retira: a RM-0002 fica Entregue, R$ 78.848,00 a receber até 26/09', 'Entregue' in rw and 'R$ 78.848,00 a receber até 26/09' in rw, [rw, p])
-        clk('Painel comercial'); time.sleep(.9); lib()
+        clk('Painel comercial')
+        for _ in range(150):   # espera a condição (Painel comercial com os indicadores), não um tempo fixo: sob carga 0,9 s não bastava (§3.6)
+            if J("/PCOM\\.dc\\.html/.test(location.pathname) && !!document.querySelector('[aria-label=Indicadores]')"): break
+            time.sleep(.1)
+        lib()
         pz = J("ROWTXT('Soja em grão R$')") or J("ROWTXT('Soja em grão')") or ''; kp = J("N(document.querySelector('[aria-label=Indicadores]').innerText)") or ''
         t.chk('(4) Painel comercial: soja realizado R$ 128,00/sc e a receber R$ 170.318,00', 'R$ 128,00/sc' in (J("N(document.querySelector('main').innerText)") or '') and 'R$ 170.318,00' in kp, [pz, kp])
         cl, tx = J("[+sessionStorage.getItem('__cl')||0, +sessionStorage.getItem('__tx')||0]")

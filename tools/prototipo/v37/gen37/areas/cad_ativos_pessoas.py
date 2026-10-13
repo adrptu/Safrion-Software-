@@ -119,7 +119,11 @@ function capColDeps(self,gid,k,tup){ const m=self.__capTup=self.__capTup||{}; co
   if(!Object.keys(p).length) return; const all=Object.assign({},self.state.g2||{}); all[gid]=Object.assign({},st,p); self.state.g2=all;
   // foco: o × que a pessoa usou (ex.: Classe) pode sumir junto com o chip da capacidade; sem foco, ele vai ao chip vizinho ou à busca da grade
   if(!p.f||typeof document==='undefined') return; const a=document.activeElement, cx=a&&a.closest?a.closest('.g2caixa'):null;
-  if(!cx||a.getAttribute('aria-label')!=='Remover filtro') return; const RF='button[aria-label="Remover filtro"]', i=[...cx.querySelectorAll(RF)].indexOf(a);
+  if(!cx||a.getAttribute('aria-label')!=='Remover filtro') return;
+  /* TABR-CTX-02: só quando o × veio do teclado (:focus-visible). No toque e no mouse o foco não é conduzido, como nos outros chips do g2lib:
+     levá-lo ao campo de busca abriria o teclado do celular sem a pessoa pedir */
+  let kb=false; try{ kb=a.matches(':focus-visible'); }catch(e){} if(!kb) return;
+  const RF='button[aria-label="Remover filtro"]', i=[...cx.querySelectorAll(RF)].indexOf(a);
   setTimeout(()=>{ const ae=document.activeElement; if(ae&&ae!==document.body) return; const xs=[...cx.querySelectorAll(RF)];
     const b=xs[Math.min(i,xs.length-1)]||cx.querySelector('input[aria-label="Buscar nesta tabela"]'); if(b) b.focus(); },0); }
 '''
@@ -274,12 +278,15 @@ function PREVALS(self,v){ cadActsIni(self); fpvVals(self,v);
   // CD-03.dc.html#ficha=<equipamento> (vindo da Irrigação) abre a ficha do pivô; fechar volta ao detalhe do equipamento
   if(!self.__fpvHash){ self.__fpvHash=1; try{ const m=/[#&]ficha=([^&]+)/.exec(location.hash||''); const id=m?decodeURIComponent(m[1]):''; if(FPV_EQ[id]&&fpvFicha(id)) setTimeout(()=>fpvAbrir(self,id,{gid:'g_atv',rid:id}),0); }catch(e){} }
   const atv=RW(self,'g_atv'); self._c3nomes=self._c3nomes||{}; const usos=c3usos(self); v.c3_ncol=c3capCol(self);
+  /* TABR-CTX-02: a capacidade só nas linhas das classes do filtro que a coluna representa; nas outras a célula fica vazia. O menu de filtro (g2vals)
+     conta todas as linhas da grade e punha a unidade da coluna no número de outra classe ("300 cv" era a vazão da bomba; escolher esvaziava a lista) */
+  const emCap=GR('g_atv').cols.some(c=>c.k==='capn')?(V)=>(((g2st(self,'g_atv').f||{}).classe)||[]).indexOf(V.classe)>=0:()=>false;
   atv.forEach(r=>{ const V=r.v; self._c3nomes[r.id]=V.nome; const C=c3cond(r);
     // com ficha do pivô, a vazão do equipamento é a da ficha (uma fonte com a Irrigação; revisão de 10/10, A2)
     const fv=FPV_EQ[r.id]?fpvFicha(r.id):null; if(fv) V.vazao_ir=fpvM3(fv.vazao_ls);
     r.p.nome=[{k:'b',t:V.nome||''}]; r.s.nome=V.nome||''; r.p.modelo=[V.modelo?{k:'txt',t:V.modelo}:{k:'mut',t:'—'}]; r.s.modelo=V.modelo||'';
     r.p.classe=[{k:'txt',t:V.classe||'—'}]; r.s.classe=V.classe||'';
-    const CP=c3capn(V); V.capn=CP?CP.n:''; r.p.capn=[CP?{k:'txt',t:nfa(CP.n)}:{k:'mut',t:'—'}]; r.s.capn=CP?nfa(CP.n):'';   /* a coluna põe a unidade da classe */
+    const CP=emCap(V)?c3capn(V):null; V.capn=CP?CP.n:''; r.p.capn=[CP?{k:'txt',t:nfa(CP.n)}:{k:'mut',t:'—'}]; r.s.capn=CP?nfa(CP.n):'';   /* a coluna põe a unidade da classe */
     const K=c3calib(V); V.calv=K.venc||''; r.p.calv=[K.venc?(K.s==='Em dia'?{k:'txt',t:br(K.venc)}:{k:'cn',t:br(K.venc),c:K.s==='Vencida'?'red':'yellow'}):{k:'mut',t:'—'}]; r.s.calv=K.venc?br(K.venc):'';
     V.cond_t=C.m?C.t+' · '+C.m:C.t; const am=c3man(r.id); if(am){ V.rt=am.rt||'Otávio'; const cd=C3.cod[V.classe]; if(cd&&am.leit) V['cont_'+cd]=am.leit.val; }
     r.o=(C.x?[{t:'Ver ordens afetadas · '+C.x.ordens.join(' e '),h:'OS.dc.html'}].concat(C.x.om?[{t:'Abrir '+C.x.om+' na Manutenção',h:'MA.dc.html#om='+C.x.om}]:[]):[]).concat(am?[{t:'Abrir '+V.nome+' na Manutenção',h:'MA.dc.html#ativo='+r.id}]:[]);
