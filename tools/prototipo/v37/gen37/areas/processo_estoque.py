@@ -548,7 +548,7 @@ function PREVALS(self,v){
   v.k6=(C.movs||[]).length+((C.movs||[]).length===1?' movimento':' movimentos')+' desde o início da demonstração · '+nsin+' aguardando sinal do app';
 }
 function EXTRAVALS(self,v){
-  self.g2perfilFecha={est_cfask:null,libask:null,lib_laudo:'',lib_err:''};   /* trocar o perfil fecha o aceite do consumo e o laudo da quarentena */
+  self.g2perfilFecha={est_cfask:null,libask:null,lib_laudo:'',lib_mot:'',lib_err:''};   /* trocar o perfil fecha o aceite do consumo e o laudo da quarentena (com o motivo) */
   const st=self.state; const step=st.step||1; const N=6; const C=self._cen||cenGet();
   self.g2live=(gid,k,d)=>{ if(gid==='g_rec'&&k==='val'&&efert(d.ped)) return 'Sem validade'; return undefined; };
   for(let i=1;i<=N;i++) v['s'+i]=(step===i);
@@ -578,13 +578,15 @@ function EXTRAVALS(self,v){
   v.lib_rep=()=>{ const k=self.state.libask; const r=cenMudar(null,c=>cenReprovarQuarentena(c,k,self.state.lib_laudo,self.state.lib_mot,g2perfil()));
     if(r.erro){ self.setState({lib_err:r.erro}); return; } self.setState({libask:null,lib_laudo:'',lib_mot:'',lib_err:'',cenrev:Date.now(),g2toast:r.msg}); };
   v.lib_laudo=st.lib_laudo||''; v.lib_setlaudo=(e)=>self.setState({lib_laudo:e.target.value,lib_err:''}); v.lib_err=st.lib_err||''; v.lib_hasErr=!!st.lib_err;
-  v.libq=(k)=>{ self.setState({libask:k,lib_laudo:'',lib_err:''}); setTimeout(()=>{ const e=document.getElementById('est-laudo'); if(e) e.focus(); },0); };
-  v.libno=()=>self.setState({libask:null,lib_laudo:'',lib_err:''});
+  /* laudo e motivo são do lote aberto: abrir outro lote, manter bloqueado ou decidir limpam os dois (revisão do 16fb55e, ajuste 3; dano evitado:
+     gravar em um lote o motivo digitado para outro) */
+  v.libq=(k)=>{ self.setState({libask:k,lib_laudo:'',lib_mot:'',lib_err:''}); setTimeout(()=>{ const e=document.getElementById('est-laudo'); if(e) e.focus(); },0); };
+  v.libno=()=>self.setState({libask:null,lib_laudo:'',lib_mot:'',lib_err:''});
   v.lib_ok=()=>{ const k=self.state.libask; const c0=cenGet(); const l0=c0.lotes[k]; const antes=l0?eitemDisp(c0,l0.prod):0;
     const r=cenMudar(null,c=>{ const lv=c.lotes[k]; if(evenc(lv)) throw new Error('Lote '+lv.lote+' vencido em '+lv.validade+': fica bloqueado e não volta ao disponível.');
       const r=cenLiberarQuarentena(c,k,self.state.lib_laudo,g2perfil()); const L=c.lotes[k]; return {msg:r.msg+' Disponível de '+L.prod+': '+eq(antes,L.un)+' → '+eq(eitemDisp(c,L.prod),L.un)+'.'}; });
     if(r.erro){ self.setState({lib_err:r.erro}); return; }
-    self.setState({libask:null,lib_laudo:'',lib_err:'',cenrev:Date.now(),g2toast:r.msg}); };
+    self.setState({libask:null,lib_laudo:'',lib_mot:'',lib_err:'',cenrev:Date.now(),g2toast:r.msg}); };
   // aprovar ajuste (causa obrigatória; aplica uma vez) e recontar (outro contador, contagem cega)
   v.aprova=(id)=>{ const rec=einvRec(cenGet(),id);
     if(rec&&econtou(rec)&&!String(rec.causa||'').trim()){ g2open(self,GR('g_cnt'),id,null); self.setState({g2toast:'Informe a causa da diferença de '+id+' na contagem antes de aprovar o ajuste.'}); return; }
@@ -598,7 +600,7 @@ function EXTRAVALS(self,v){
   // restaurar a demonstração (cenário compartilhado volta ao início)
   v.est_rst_ask=!!st.est_rst; v.est_rst_no=!st.est_rst;
   v.est_rst=()=>self.setState({est_rst:true}); v.est_rst_cancel=()=>self.setState({est_rst:false});
-  v.est_rst_ok=()=>{ cenReset(); self.setState({est_rst:false,g2:{},libask:null,est_loc:'',cenrev:Date.now(),g2toast:'Demonstração restaurada: O.S., estoque e app voltaram ao início.'}); };
+  v.est_rst_ok=()=>{ cenReset(); self.setState({est_rst:false,g2:{},libask:null,lib_laudo:'',lib_mot:'',est_loc:'',cenrev:Date.now(),g2toast:'Demonstração restaurada: O.S., estoque e app voltaram ao início.'}); };
   // textos do formulário conforme o registro aberto
   const Fr=v.g_rec_F; if(Fr&&Fr.open&&Fr.ro) Fr.sub='Recebimento conferido: consulta. Documento já lançado não cria segunda entrada; a quarentena é liberada no lote, em Confira saldos.';
   const Fe=v.g_ent_F; const fmE=g2st(self,'g_ent').fm; if(Fe&&Fe.open&&fmE){ const x=IT.find(y=>y.id===fmE.rid); if(x){
