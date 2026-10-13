@@ -48,7 +48,7 @@ MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
  ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html')]),
  ('Produção','Colheita',[('Previsão e colheita','COLH.dc.html'),('Recebimento e beneficiamento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html')]),   # 3 itens (colheita D-01); Beneficiamento é tela irmã de Cargas (BEN-D14)
  ('Comercial','Vendas',[('Contratos e pedidos','VEN.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Painel comercial','PCOM.dc.html')]),
- ('Manutenção','wrench',[('Manutenção','MA.dc.html')]),
+ ('Manutenção','wrench',[('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')]),   # 13/10/2026 (pedido do proprietário: subitens de novo, enxutos): um subitem por visão da tela única, sem tela nova
  ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html')]),
  ('Configurações','grid',[('Usuários e alçadas','CF-01.dc.html'),('Auditoria','CF-04.dc.html'),('Integrações','CF-03.dc.html'),('Assinatura e cobrança','CF-05.dc.html')])]   # 06/10/2026 (PLAT-01): grupo por último; CONF-01 (CONF-D01/D02): Usuários e alçadas · Auditoria · Integrações · Assinatura e cobrança, cada item entra no passo que entrega a tela
 MENU_OF={'CA-01det.dc.html':'OS.dc.html','CA-02.dc.html':'OS.dc.html','CA-01x-os0420.dc.html':'OS.dc.html',
@@ -58,10 +58,15 @@ def menu_item(fname):
     f=MENU_OF.get(fname,fname)
     for i,(nome,ic,items) in enumerate(MENU2):
         for lab,h in items:
+            h=h.split('#')[0]   # subitem que abre uma visão da mesma tela (Manutenção: MA.dc.html#vis=…) pertence à tela
             if h==f or (f.startswith(h.replace('.dc.html','')) and f!=h and h not in ('IN-04.dc.html',) and f[:len(h)-8]==h[:-8]): return i,h
     return None,None
 def oculto(fname):
     return menu_item(fname)[0] is None and fname!='Main.dc.html'
+def subnav_st(cur):
+    """estilo do subitem do menu (ativo ou não); a Manutenção usa os dois no navegador para destacar a visão aberta."""
+    return ('display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; '
+            + (f'background: {ACC}; color: #fff; font-weight: 700;' if cur else f'color: {SIDE_MUTED}; font-weight: 500;'))
 def navbar(fid,fname=None):
     """Barra lateral: macro menus expansíveis (estado real na tela); item ativo destacado."""
     import engine as _E
@@ -83,8 +88,9 @@ def navbar(fid,fname=None):
         subs=''
         for lab,h in items:
             cur=(h==act_h)
-            s2=('display: block; margin-left: 30px; padding: 5px 10px; border-radius: 8px; font-size: 12.8px; text-decoration: none; '
-                + (f'background: {ACC}; color: #fff; font-weight: 700;' if cur else f'color: {SIDE_MUTED}; font-weight: 500;'))
+            s2=subnav_st(cur)
+            if on and '#vis=' in h and h.split('#')[0]==act_h:   # visão da tela aberta: o destaque segue a visão escolhida (a tela preenche navvis_*)
+                vk=h.split('#vis=')[1]; subs+=f'<a href="{h}" aria-current="{{{{navvis_{vk}_cur}}}}" style="{{{{navvis_{vk}}}}}">{esc(lab)}</a>'; continue
             subs+=f'<a href="{h}" style="{s2}">{esc(lab)}</a>'
         out.append(f'<sc-if value="{{{{nav{k}_open}}}}" hint-placeholder-val="{{{{{"true" if on else "false"}}}}}"><div class="ml-sub" style="display: flex; flex-direction: column; gap: 1px; margin-bottom: 4px;">{subs}</div></sc-if>')
     return ''.join(out)
@@ -292,7 +298,8 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
     if steps: H=max(900,min(H,1000))  # processos: tela de trabalho com rolagem interna; faixa de etapas sempre visível
     mi,mh=menu_item(fname)
     if mi is not None:
-        m={'area':MENU2[mi][0],'submenu':next(l for l,h in MENU2[mi][2] if h==mh)}
+        vs=[l for l,h in MENU2[mi][2] if h.split('#')[0]==mh]   # vários subitens da mesma tela (visões da Manutenção): o caminho diz o grupo, como antes
+        m={'area':MENU2[mi][0],'submenu':vs[0] if len(vs)==1 else MENU2[mi][0]}
     else:
         m=MAPA.get(fid) or {'area':area_of(fid) or 'Módulo oculto','submenu':CAT.get(fid,{}).get('titulo',fid)}
     crumbs=[m['area'],m['submenu']]+(crumbs_extra or [])

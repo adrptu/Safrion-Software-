@@ -54,7 +54,7 @@ try:
     gerar_rows = [r for r in (m.linhas(0) or [])]
     # ---------- F01–F111 ----------
     g = [x for x in MENU2 if x[0] == 'Manutenção'][0]
-    F('F01', 'menu com 1 item; Índice com 1 link', g[2] == [('Manutenção', 'MA.dc.html')] and not re.search(r'(MA-0[1-5]|PM)\.dc\.html', SRC['Main.dc.html']))
+    F('F01', 'menu com 4 subitens da mesma tela (13/10, pedido do proprietário); Índice sem MA-01..05 nem PM', g[2] == [('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')] and not re.search(r'(MA-0[1-5]|PM)\.dc\.html', SRC['Main.dc.html']))
     F('F02, F03', 'Sai: faixa e "3 etapas" do PM', etp == 0 and 'Telas da manutenção' not in MAS and nao('pm01', 'Etapa 1', 'Biblioteca de planos'), etp)
     F('F04', 'detalhe do plano: "‹ Planos" e "Publicar vN"', tem('pm01', '‹ Planos') and "'Publicar v'+" in MAS)
     F('F05', 'menu ⋯ do cabeçalho com Restaurar', tem('mais', 'Restaurar demonstração'))
