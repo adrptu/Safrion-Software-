@@ -82,30 +82,9 @@ function g2flat(sp,st,rows,mask,added){
       out.push({r,lvl,has:kids.length>0});
       if(kids.length && (exp[r.id] || (filt && anyKid && !selfOk))) walk(kids,lvl+1,selfOk&&!filt); }); };
   walk(rows,0,false); return out; }
-// Selos e chips de estado com significado e próximo passo (DS-DICA-20261009): fonte única das dicas de estado; o texto segue as regras do
-// motor (fases da O.S. do AGENTS §4, PEND-OS-01 e as exceções da aprovação; bloqueios nas mensagens de osEncBloq/osLibErro). Chave = texto
-// do selo antes de " · ". Só vale onde a tela pede (data-dica-de ou parte {de:1}): o mesmo texto noutro contexto pode significar outra coisa.
-const G2_DICAS={
-  'A liberar':'Criada e ainda fora do campo. Próximo passo: liberar. O.S. agrícola: Aprovar e liberar (o agrônomo aprova a versão e o gestor libera, em dois registros); irrigação só com água, manutenção e beneficiamento: libera o responsável próprio.',
-  'Liberadas':'Liberada para o campo; os insumos da ordem ficam reservados no Estoque. Próximo passo: entregar os insumos a quem executa e iniciar.',
-  'Em execução':'Em execução: cada turno aponta o que foi feito (área ou quantidade, horas e consumo). Próximo passo: terminar e levar à conferência.',
-  'Em conferência':'Execução terminada: apontamentos, consumo e sobras em conferência. Próximo passo: conferir (sobra em custódia volta ao Estoque) e encerrar.',
-  'Encerradas':'Fechada: realizado, consumo e custo gravados. Sem próximo passo.',
-  'Canceladas':'Cancelada sem execução, com o motivo registrado. Sem próximo passo.',
-  'Aguardando sinal do app':'Turno apontado no aparelho que ainda não chegou. Próximo passo: quem executou reconecta o app; o envio é automático e não duplica.',
-  'Sobras a receber':'Sobra de insumo em custódia com quem executou. Próximo passo: o almoxarife recebe a devolução no Estoque; só então a ordem encerra.',
-  'Apontamento em conferência':'Apontamento em possível duplicidade. Próximo passo: a conferência decide na linha do apontamento (mesmo turno conta uma vez; outro turno soma).',
-  'Falta insumo':'O saldo do lote no Estoque não cobre dose × área. Próximo passo: o Estoque recebe o insumo ou o agrônomo ajusta dose, área ou produto antes de liberar.',
-  'Fora do registro':'Produto, dose ou cultura fora do registro (bula e AGROFIT). Próximo passo: o agrônomo ajusta produto ou dose antes de liberar.',
-  'Total 0':'Dose × área dá 0 na precisão do Estoque. Próximo passo: o agrônomo ajusta a dose ou a área.',
-  'Insumo esgotado':'Um insumo acabou com área ainda a fazer. Próximo passo: o agrônomo decide a área restante.'};
-// revisão DS (achado 6): sem caminho de menu no texto (o nome do item muda). O selo do bloqueio do encerramento em conferência (Carga a pesar,
-// Sobras a receber, Aguardando sinal do app, Apontamento em conferência) leva a dica do próprio bloqueio (processo_os.osSeloDica ← osEncBloq,
-// o mesmo texto do painel e do comando); "Carga a pesar" só existe aí e saiu daqui. As três outras ficam para o selo antes da conferência.
-function g2dicaDe(t){ const s=String(t||'').trim(); return G2_DICAS[s]||G2_DICAS[s.split(' · ')[0].trim()]||''; }
 function g2part(p,v){ const o={isCn:false,isTxt:false,isB:false,isMut:false,isChip:false,isTag:false,isLink:false,isCta:false,isAct:false,isBr:false,t:p.t||'',st:'',cls:'',dot:'',href:p.h||'#',fn:null,title:p.t||'',dica:'',hasDica:false};
   switch(p.k){ case 'b': o.isB=true; break; case 'mut': o.isMut=true; break;
-    case 'chip': { const cc=G2C[p.c]||G2C.gray; o.isChip=true; o.dica=p.dica||p.dv||(p.de?g2dicaDe(p.t):''); o.hasDica=!!p.dica;   /* p.de: dica de estado do dicionário; p.dv: texto pronto da tela (selo do bloqueio, osSeloDica); os dois só visuais (o leitor de tela lê o motivo explícito p.dica; a linha focada recebe a dica do selo, g2dicaSelo) */ o.st='display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';'; o.dot='width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'; break; }
+    case 'chip': { const cc=G2C[p.c]||G2C.gray; o.isChip=true; o.dica=p.dica||''; o.hasDica=!!p.dica; o.st='display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+cc[0]+';background:'+cc[1]+';'; o.dot='width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'; break; }
     case 'cn': { const cc=G2C[p.c]||G2C.gray; o.isCn=true; o.st='font-weight:800;white-space:nowrap;color:'+cc[0]+';'; break; }
     case 'tag': o.isTag=true; break; case 'link': o.isLink=true; break;
     case 'cta': o.isCta=true; o.cls='g2cta'; o.st=p.u?G2CTAU:G2CTA; break;
@@ -114,18 +93,6 @@ function g2part(p,v){ const o={isCn:false,isTxt:false,isB:false,isMut:false,isCh
       if(p.full){ o.cls='g2full'; o.st='width:100%;min-height:44px;border:0;background:'+(p.on?'#E4F3E9':'transparent')+';padding:0 6px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:'+(p.on?'700':'400')+';text-align:right;font-variant-numeric:tabular-nums;color:'+((G2C[p.c]||[])[0]||'#15201A')+';'+(p.on?'outline:2px solid #1E7A4C;outline-offset:-2px;border-radius:6px;':''); } break;
     case 'br': o.isBr=true; break; default: o.isTxt=true; }
   return o; }
-// revisão DS (achado 8): sigla ou unidade que está na célula ("62,4 sc/ha", "35 DAP") e não no rótulo dá a dica do cabeçalho da coluna, só onde é da
-// coluna (em ao menos 30 % das células com texto; termo solto numa observação não conta); código de registro (COT-0031) não é sigla. Texto: G2_GLOSS
-// (engine._GLOSS_CEL, fonte única). Guardado por grade enquanto as linhas são as mesmas (o desenho não refaz a varredura); com linhas novas, lê até
-// 200 linhas e só conta célula a célula o termo que aparece no texto junto (pior caso medido em node: ds_unit.js 2b.8).
-const G2GC={};
-function g2glossCol(sp,c,rows){ if(typeof G2_GLOSS==='undefined'||!rows||!rows.length) return '';
-  let m=G2GC[sp.id]; if(!m||m.rows!==rows){ m=G2GC[sp.id]={rows,k:{}}; } if(m.k[c.k]!==undefined) return m.k[c.k];
-  if(!G2GC.__re) G2GC.__re=G2_GLOSS.map(x=>[new RegExp(x[0]),x[1]]);
-  const cel=[]; let n=0; const walk=(l)=>{ for(const r of l){ if(++n>200) return; const t=(g2text(r,c)+' '+(((r.p&&r.p[c.k])||[]).map(p=>(p&&p.t)||'').join(' '))).replace(/\b[A-Z]{2,5}-\d[\w-]*/g,'').trim();
-      if(t&&t!=='—') cel.push(t); if(r.kids) walk(r.kids); } }; walk(rows);
-  const all=cel.join('\n'); const out=cel.length?G2GC.__re.filter(([re])=>re.test(all)&&cel.filter(x=>re.test(x)).length>=Math.max(1,0.3*cel.length)).slice(0,2).map(x=>x[1]).join(' '):'';
-  return (m.k[c.k]=out); }
 function g2sum(sp,flat,c){ let s=0,n=0; flat.forEach(x=>{ if(x.lvl!==0) return; const k=g2key(x.r,c); if(typeof k==='number'){ s+=k; n++; } }); return n? (c.agg==='avg'? s/n : s) : null; }
 // condição de campo do formulário: {k, eq} (igual) ou {k, ne} (diferente)
 function g2cond(f,d){ if(!f.cond) return true; const um=(c)=>{ const v=String((d||{})[c.k]===undefined?'':d[c.k]); return (c.ne!==undefined)?v!==String(c.ne):v===String(c.eq); };
@@ -175,7 +142,7 @@ function g2vals(self,sp,v,mask){
   const flat=g2flat(sp,st,g2qrows(sp,st,rows),mask,added); const ed=sp.edit||{m:'none'}; const editable=ed.m&&ed.m!=='none';
   g2qvals(self,sp,v,st,rows,added);
   const so=st.so||sp.so||{};
-  v[id+'_head']=sp.cols.map((c,ci)=>({l:c.l, tt:c.ajuda||g2glossCol(sp,c,rows), un:c.un||'', cls:(ci===0?'g2c0':''), st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;box-shadow:1px 0 0 #E4E9E5;':''),
+  v[id+'_head']=sp.cols.map((c,ci)=>({l:c.l, tt:c.ajuda||'', un:c.un||'', cls:(ci===0?'g2c0':''), st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;box-shadow:1px 0 0 #E4E9E5;':''),
      arrow:(so.k===c.k?(so.d?'▼':'▲'):'⇅'), astyle:(so.k===c.k?'color:#1E7A4C;':'color:#B7C1BA;'), sortLabel:'Ordenar por '+c.l,
      sort:()=>{ const cur=g2st(self,id).so||sp.so||{}; let nx; if(cur.k!==c.k) nx={k:c.k,d:false}; else if(!cur.d) nx={k:c.k,d:true}; else nx={}; g2set(self,id,{so:nx}); },
      fil:(((st.f||{})[c.k]||[]).length?' · '+((st.f||{})[c.k]||[]).length:''), fcolor:(((st.f||{})[c.k]||[]).length?'#1E7A4C':'#8A968E'),
@@ -293,17 +260,12 @@ function g2menuRec(){ if(g2estreito()) return true; try{ return localStorage.get
 // G2_PERFIS é o PADRÃO (sem estado de Configurações); o efetivo (g2perfis) lê c.conf do cenário salvo: o CF-01 concede e retira papel,
 // convida e desativa (CONF-01 R2). G2_ALCADAS diz quem decide cada comando e é lida pelos próprios comandos (cenExigeAlc, R7).
 const G2_PERFIS=[{k:'Ana',t:'Ana · Gestora e RT',papeis:{gestor:'gestora',agronomo:'agrônoma'}},{k:'Caio',t:'Caio · PCP',papeis:{pcp:'PCP'}},
-  {k:'Rui',t:'Rui · Almoxarife e expedição',papeis:{almoxarife:'almoxarife',expedicao:'expedição'}},{k:'Paula',t:'Paula · Conferência',papeis:{almoxarife:'almoxarife',conferente:'conferência'}},{k:'Zé',t:'Zé · Mecânico',papeis:{mecanico:'mecânico'}},
-  {k:'Otávio',t:'Otávio · Manutenção (PCM)',papeis:{pcm:'responsável de manutenção'}},
-  {k:'João',t:'João · Irrigante (eletricista NR-10)',papeis:{eletricista:'irrigante'}},   /* PCM simplificado (05/10, D-20): Ver como da Manutenção = Otávio · Zé · João · Ana; João executa as OMs de eletricista (revisão 09/10, A8) */
-  {k:'Igor',t:'Igor · Produção',papeis:{producao:'responsável de produção'}},   // BEN-1: beneficiamento
-  {k:'Dora',t:'Dora · Comercial',papeis:{comercial:'comercial'}},{k:'Marta',t:'Marta · Qualidade',papeis:{qualidade:'qualidade'}}];   // Comercial (D-C13): Dora vende, reserva e programa carga; Rui confirma a saída física; Ana (gestora) pode tudo e aprova crédito. Marta (Qualidade, R-13 da Colheita e BEN-1): libera lote em inspeção, inclusive o devolvido (A3 da revisão do Comercial)
+  {k:'Rui',t:'Rui · Almoxarife',papeis:{almoxarife:'almoxarife'}},{k:'Paula',t:'Paula · Conferência',papeis:{almoxarife:'almoxarife',conferente:'conferência'}},{k:'Zé',t:'Zé · Mecânico',papeis:{mecanico:'mecânico'}},
+  {k:'Igor',t:'Igor · Produção',papeis:{producao:'responsável de produção'}},{k:'Marta',t:'Marta · Qualidade',papeis:{qualidade:'qualidade'}}];   // BEN-1: beneficiamento e liberação de lote
 // catálogo de papéis (CONF-D03): papel = permissão de decidir; função e habilidade ficam no CD-04. Rótulo pelo gênero da pessoa (CONF0.pessoas[].fem)
 const G2_PAPEIS=[{k:'gestor',t:'Gestor',m:'gestor',f:'gestora'},{k:'agronomo',t:'Agrônomo',m:'agrônomo',f:'agrônoma'},{k:'pcp',t:'PCP',m:'PCP',f:'PCP'},
   {k:'almoxarife',t:'Almoxarife',m:'almoxarife',f:'almoxarife'},{k:'conferente',t:'Conferência',m:'conferência',f:'conferência'},{k:'mecanico',t:'Mecânico',m:'mecânico',f:'mecânica'},
   {k:'producao',t:'Produção',m:'responsável de produção',f:'responsável de produção'},{k:'qualidade',t:'Qualidade',m:'qualidade',f:'qualidade'},   /* BEN-1 (merge CONF × BEN) */
-  {k:'expedicao',t:'Expedição',m:'expedição',f:'expedição'},{k:'pcm',t:'Manutenção (PCM)',m:'responsável de manutenção',f:'responsável de manutenção'},   /* v57: papéis da v56 (Comercial e PCM) no catálogo, senão o perfil efetivo os descarta */
-  {k:'eletricista',t:'Irrigante (NR-10)',m:'irrigante',f:'irrigante'},{k:'comercial',t:'Comercial',m:'comercial',f:'comercial'},
   {k:'direcao',t:'Direção',m:'direção',f:'direção'}];
 // alçadas (CONF-01 §4, R7): papeis/modo = quem decide ('todos' os papéis ou 'um' deles); acima = nível acima do limite; edita = o que o CF-01 muda
 // ('papel', 'lim', 'acima' ou '' = fixa, com o motivo em fixa). Versão e vigência vêm dos eventos de Configurações (c.conf); a v1 vale desde a implantação.
@@ -374,13 +336,6 @@ function g2navvals(self,v,nav){ const rec=(self.state.menuRec===undefined)?g2men
   // com a barra recolhida, clicar no grupo abre a barra com esse grupo aberto
   v['nav'+i+'_tog']=()=>{ const n=Object.assign({},self.state.nav||{}); if(rec){ n[i]=true; fixa(false); self.setState({nav:n,menuRec:false}); return; } n[i]=!open; self.setState({nav:n}); }; }); }
 
-// V55-RESP-01: altura do aviso temporário (role=status fixo no pé) medida no aviso real, com a quebra do texto na largura atual; 0 sem
-// aviso. Com a área de ações em fluxo (altura curta) a área reserva a faixa dele no fim da rolagem e nos controles (ACOES_CSS: distância
-// do pé + safe-area + esta altura), em vez de uma altura estimada. Não depende da altura da janela (abrir o teclado não a muda). Medida a
-// cada troca do aviso (componentDidUpdate, no mesmo quadro) e no quadro do g2glob (redimensionar, rolar, mudar a página)
-function g2avisoH(){ try{ let h=0; document.querySelectorAll('[role=status]').forEach(t=>{ const cs=getComputedStyle(t); if(cs.position!=='fixed'||cs.bottom==='auto') return;
-    const r=t.getBoundingClientRect(); if(r.height>2&&r.width>2) h=Math.max(h,Math.ceil(r.height)); });
-  const v=h+'px', de=document.documentElement; if(de.style.getPropertyValue('--aviso-h')!==v) de.style.setProperty('--aviso-h',v); }catch(e){} }
 (function g2glob(){ if(typeof document==='undefined'||window.__g2glob) return; window.__g2glob=1;
   const vis=(e)=>!!e&&e.getClientRects().length>0;
   const rotulo=()=>[...document.querySelectorAll('.etp-chk')].find(vis);
@@ -407,15 +362,14 @@ function g2avisoH(){ try{ let h=0; document.querySelectorAll('[role=status]').fo
   // coluna presa e o cabeçalho preso (--g2c0w, --g2hh): nada focado fica por baixo deles.
   const presa=(r)=>{ const cw=r.clientWidth; if(!cw) return; const hr=r.querySelector('[role=table]>[role=row]'); if(!hr) return;
     const hs=[...hr.querySelectorAll('[role=columnheader]')]; const h=hs.find(x=>x.classList.contains('g2c0')); if(!h) return;
-    // refaz também quando o número de colunas muda (AG-07: 6 por produto, 8 por uso na cultura): --g2cols tem uma trilha por coluna
-    if(r.hasAttribute('data-c0')&&(r.__c0w!==cw||r.__c0n!==hs.length)){ r.removeAttribute('data-c0'); r.style.removeProperty('--g2cols'); }
+    if(r.hasAttribute('data-c0')&&r.__c0w!==cw){ r.removeAttribute('data-c0'); r.style.removeProperty('--g2cols'); }
     const cap=Math.max(96,Math.round(cw*.45));
     if(!r.hasAttribute('data-c0')&&r.scrollWidth-cw>2&&h.getBoundingClientRect().width>cap+1){
       const c0='minmax(min-content, '+cap+'px)'; r.setAttribute('data-c0',''); r.style.setProperty('--g2cols',hs.map(x=>x===h?c0:'auto').join(' '));
       const vis=Math.max(96,Math.floor(cw-h.getBoundingClientRect().width-4)); r.style.setProperty('--g2cols',hs.map(x=>x===h?c0:'fit-content('+vis+'px)').join(' ')); }
-    r.__c0w=cw; r.__c0n=hs.length; r.style.setProperty('--g2c0w',Math.round(h.getBoundingClientRect().width)+'px'); r.style.setProperty('--g2hh',Math.round(hr.getBoundingClientRect().height)+'px'); };
+    r.__c0w=cw; r.style.setProperty('--g2c0w',Math.round(h.getBoundingClientRect().width)+'px'); r.style.setProperty('--g2hh',Math.round(hr.getBoundingClientRect().height)+'px'); };
   const faixa=()=>{ const col=document.querySelector('.ml-tog+div'); if(!col) return; const nv=col.querySelector(':scope>.etp'); col.style.setProperty('--etp-h',(nv&&nv.getClientRects().length?nv.offsetHeight:0)+'px'); };
-  const acoes=()=>{ const a=[...document.querySelectorAll('main .acoes')].find(vis); const h=(a&&getComputedStyle(a).position==='sticky')?Math.round(a.getBoundingClientRect().height):0; document.documentElement.style.setProperty('--acoes-h',h+'px'); g2avisoH(); };
+  const acoes=()=>{ const a=[...document.querySelectorAll('main .acoes')].find(vis); const h=(a&&getComputedStyle(a).position==='sticky')?Math.round(a.getBoundingClientRect().height):0; document.documentElement.style.setProperty('--acoes-h',h+'px'); };
   const mais=()=>{ faixa(); acoes(); document.querySelectorAll('.g2rola,.rola').forEach(r=>{ if(r.classList.contains('g2rola')) presa(r); if(r.scrollWidth-r.clientWidth-r.scrollLeft>2) r.setAttribute('data-mais',''); else r.removeAttribute('data-mais'); }); };
   // o navegador não rola até um controle só em parte visível na caixa da tabela (ex.: botão do cabeçalho rente à borda, ou por
   // trás da coluna presa): ao receber o foco ele vem inteiro para a vista (a linha inteira e a coluna presa não precisam)
@@ -497,199 +451,3 @@ function g2acoes(v,pre,c){ c=c||{}; const nada=()=>{};
   const lk=!!(prim&&prim.h); v[pre+'_hasPrim']=!!prim&&!lk; v[pre+'_hasLink']=lk; v[pre+'_primT']=prim?prim.t:''; v[pre+'_primFn']=(prim&&prim.fn)||nada; v[pre+'_href']=lk?prim.h:'#';
   v[pre+'_primA']=(prim&&prim.a)||'avancar'; v[pre+'_desc']=c.nota?(pre+'-nota'):'';
   v[pre+'_has']=!!(c.nota||lnks.length||volta||sec||prim); }
-// ===== DS-RETORNO-20261009 · retorno visual de mudança (g2flash) =====
-// Proprietário (09/10/2026): "quando muda de tela e avança no processo não está dando aquele feedback ao usuário em tempo real como se fosse um
-// flash de atualização e mudança de contexto". Uma só função de realce (g2flash), chamada só pelos pontos centrais do motor (engine.ENGINE_JS2):
-// carga da tela (componentDidMount → g2montou), troca de etapa ou seção (faixa de progresso lida depois de cada desenho → g2mudou) e mudança de
-// estado com aviso (g2toast novo: gravar, aprovar, liberar, mover cartão → g2mudou). Realce = camada verde que esmaece em 520 ms no bloco que
-// mudou; com "menos movimento" fica um realce estático curto (CSS). Não atrasa a ação nem esconde o resultado: o desenho novo já está na tela.
-// Anúncio: região viva única (aria-live polite) com o novo estado. Navegação entre telas: barra fina no topo (g2carga) do clique até a tela nova.
-const G2_REALCE_MS=520;
-function g2menos(){ try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; } }
-function g2txt(el){ return String((el&&el.textContent)||'').replace(/\s+/g,' ').trim(); }
-function g2vis(el){ return !!el&&el.isConnected&&el.getClientRects().length>0; }
-// região viva única: repetir a mesma frase anuncia de novo (esvazia e preenche)
-function g2vivo(msg){ if(typeof document==='undefined'||!document.body) return null; let r=document.getElementById('g2-vivo');
-  if(!r){ r=document.createElement('div'); r.id='g2-vivo'; r.setAttribute('aria-live','polite'); r.setAttribute('aria-atomic','true'); r.className='g2sr';
-    r.style.cssText='position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap'; document.body.appendChild(r); }
-  // duas frases no mesmo instante (ex.: o resultado e a recusa do 2º clique) saem juntas, sem uma apagar a outra
-  const t=(r.__pend?r.__pend+' ':'')+String(msg||''); clearTimeout(r.__t); r.textContent=''; r.__pend=t;
-  r.__t=setTimeout(()=>{ r.textContent=t; r.__pend=''; },60); r.dataset.ultimo=t; return r; }
-// realce passageiro de um elemento (ou seletor) + anúncio opcional; window.__g2realces guarda os últimos 20 (o teste de navegador lê)
-function g2flash(alvo,msg){ let el=null; try{ if(typeof document==='undefined') return null;
-    el=(typeof alvo==='string')?document.querySelector(alvo):alvo; if(!g2vis(el)) el=null;
-    if(el){ el.classList.remove('g2-realce'); void el.offsetWidth; el.classList.add('g2-realce'); clearTimeout(el.__g2r);
-      el.__g2r=setTimeout(()=>el.classList.remove('g2-realce'),G2_REALCE_MS+80);
-      const L=(window.__g2realces=window.__g2realces||[]); L.push({t:Date.now(),tag:el.tagName,txt:g2txt(el).slice(0,80),msg:String(msg||'')}); if(L.length>20) L.shift(); }
-    if(msg) g2vivo(msg); }catch(e){} return el; }
-// barra fina de carga no topo: 'ini' (clique num link de outra tela), 'chega' + 'fim' (tela nova montada)
-function g2carga(fase){ if(typeof document==='undefined'||!document.body) return; let b=document.getElementById('g2-carga');
-  if(!b){ b=document.createElement('div'); b.id='g2-carga'; b.setAttribute('aria-hidden','true'); document.body.appendChild(b); }
-  clearTimeout(b.__t); b.className=''; void b.offsetWidth; b.className=fase||''; if(fase==='fim') b.__t=setTimeout(()=>{ b.className=''; },700); }
-// etapa ou seção atual (faixa de progresso SAF/CMP/PA/PM ou seções do Estoque): '' se a tela não tem faixa
-function g2passo(){ if(typeof document==='undefined') return '';
-  const e=document.querySelector('.etp-ind li[aria-current="step"],.etp-sec .etp-itens>[aria-current="true"]'); if(!e) return '';
-  const nm=e.querySelector(':scope>span:not([aria-hidden="true"])>span')||e.querySelector('span'); const c=nm?nm.cloneNode(true):null;
-  if(c) c.querySelectorAll('.etp-sr').forEach(x=>x.remove()); const nome=c?g2txt(c):g2txt(e);
-  if(e.tagName==='LI'){ const ls=[...e.parentElement.children].filter(x=>x.tagName==='LI'); return 'Etapa '+(ls.indexOf(e)+1)+' de '+ls.length+': '+nome; }
-  return 'Seção: '+nome; }
-// bloco do contexto atual: o cartão do 1º título visível do conteúdo (o mesmo que g2etapa foca)
-function g2blocoAtual(){ const m=document.querySelector('main'); if(!m) return null; const h=[...m.querySelectorAll('h2,h3')].find(g2vis);
-  if(h) return h.closest('section')||h.parentElement; return [...m.children].find(g2vis)||m; }
-// filhos com caixa (sc-if e sc-for são display:contents)
-function g2blocos(p){ const out=[]; for(const c of p.children){ if(/^SC-/.test(c.tagName)) out.push(...g2blocos(c)); else out.push(c); } return out; }
-// foto do que está na tela, por chave estável e nível (1 = linha/cartão, 2 = região rotulada/estado do cabeçalho, 3 = bloco do conteúdo)
-function g2foto(){ const f={}; if(typeof document==='undefined') return f;
-  const add=(k,el,nv,s)=>{ if(el&&!f[k]) f[k]={el,nv,s:(s===undefined?g2txt(el):s)}; };
-  document.querySelectorAll('[role=table][data-g2g] [role=row][data-rid]').forEach(r=>add('r:'+r.closest('[role=table]').getAttribute('data-g2g')+':'+r.getAttribute('data-rid'),r,1));
-  document.querySelectorAll('[role=list]').forEach(l=>g2blocos(l).forEach((col,ci)=>col.querySelectorAll('[role=button],[role=listitem]').forEach(k=>{
-    const b=k.querySelector('b'); add('k:'+(b?g2txt(b):(k.getAttribute('aria-label')||g2txt(k).slice(0,40))),k,1,ci+'|'+g2txt(k)); })));
-  document.querySelectorAll('[data-g2k]').forEach(e=>add('x:'+e.getAttribute('data-g2k'),e,1));
-  const h=document.querySelector('header h1'); if(h&&h.nextElementSibling) add('h:estado',h.nextElementSibling,2);
-  document.querySelectorAll('[role=region][aria-label],section[aria-label]').forEach(e=>add('g:'+e.getAttribute('aria-label'),e,2));
-  document.querySelectorAll('aside[role=dialog] h2').forEach(t=>add('d:'+g2txt(t).slice(0,60),t.parentElement,2));
-  document.querySelectorAll('main section').forEach((s,i)=>{ const t=s.querySelector('h2,h3'); add('s:'+(t?g2txt(t).slice(0,60):i),s,3); });
-  return f; }
-// tela montada: barra de carga termina, título realçado e anunciado; vindo de um link do protótipo, o foco vai ao título da tela nova
-function g2montou(self){ if(typeof document==='undefined') return; setTimeout(()=>{ try{
-    const h=document.querySelector('header h1')||document.querySelector('h1');
-    let veio=false; try{ const t=Number(sessionStorage.getItem('g2nav')||0); sessionStorage.removeItem('g2nav'); veio=t>0&&Date.now()-t<15000; }catch(e){}
-    g2carga('chega'); setTimeout(()=>g2carga('fim'),g2menos()?300:40);
-    const st=h&&h.nextElementSibling; const stT=st?g2txt(st):''; const tit=h?g2txt(h):document.title;
-    const ae=document.activeElement; const foca=veio&&h&&!location.hash&&(!ae||ae===document.body);
-    /* revisão DS (achado 10): com o foco no título o leitor de tela já lê o título; o anúncio leva só o estado (sem ler o título duas vezes) */
-    g2flash(h,foca?stT:('Tela: '+tit+(stT?' · '+stT:'')));
-    if(foca){ if(!h.hasAttribute('tabindex')) h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); }
-    self.__g2foto=g2foto(); self.__g2passo=g2passo(); self.__g2toastVisto=(self.state&&self.state.g2toast)||''; }catch(e){} },60); }
-// depois de cada desenho: troca de etapa/seção realça o bloco do novo contexto; aviso novo (g2toast) realça o que mudou e anuncia
-function g2mudou(self){ if(typeof document==='undefined'||!self.__g2foto) return;   // antes da 1ª foto (montagem) não compara
-  const f=g2foto(), ant=self.__g2foto, agora=Date.now(); self.__g2foto=f;
-  const mud=self.__g2mud=(self.__g2mud||[]).filter(x=>agora-x.t<1200);   // mudanças recentes (o aviso pode vir num desenho seguinte ao do dado)
-  for(const k in f){ if(ant[k]&&ant[k].s!==f[k].s) mud.push({k,t:agora}); }
-  const t=(self.state&&self.state.g2toast)||''; const tNovo=!!t&&t!==self.__g2toastVisto; if(!t) self.__g2toastVisto='';
-  const p=g2passo();
-  if(p&&self.__g2passo&&p!==self.__g2passo){ self.__g2passo=p; if(tNovo) self.__g2toastVisto=t; self.__g2mud=[]; const b=g2blocoAtual(); g2flash(b,p+(tNovo?'. '+t:''));
-    /* revisão DS (achado 3): o botão que trocou a etapa sumiu (foco no BODY ou fora da página): o foco vai ao título do novo contexto (rola só se ele estiver fora da vista) */
-    const ae=document.activeElement; if(!ae||ae===document.body||!ae.isConnected){ const hh=b&&b.querySelector('h2,h3'); if(hh){ if(!hh.hasAttribute('tabindex')) hh.setAttribute('tabindex','-1'); hh.focus({preventScroll:false}); } }
-    return; }
-  if(p) self.__g2passo=p;
-  if(!tNovo) return; self.__g2toastVisto=t;
-  const ks=[...new Set(mud.map(x=>x.k).concat(Object.keys(f).filter(k=>!ant[k]&&f[k].nv===1&&f[k].el.classList.contains('g2flash'))))]; self.__g2mud=[];
-  const nivel=(n)=>ks.filter(k=>f[k]&&f[k].nv===n).map(k=>f[k].el).filter(g2vis);
-  let alvos=nivel(1).slice(0,3).concat(nivel(2).slice(0,2)); if(!alvos.length) alvos=nivel(3).slice(0,1);
-  alvos.forEach(e=>g2flash(e)); g2vivo(t); }
-(function g2retGlob(){ if(typeof document==='undefined'||window.__g2ret) return; window.__g2ret=1;
-  // revisão DS (achado 1): a tela que volta da memória do navegador (voltar/avançar, bfcache) não monta de novo: a barra ligada no clique termina aqui
-  window.addEventListener('pageshow',(e)=>{ if(!e.persisted) return; g2carga('fim'); try{ sessionStorage.removeItem('g2nav'); }catch(er){} });
-  // clique num link para outra tela do protótipo: a barra começa já (a navegação segue sem espera); a tela nova termina a barra e foca o título
-  document.addEventListener('click',(e)=>{ if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey) return;
-    const a=e.target&&e.target.closest&&e.target.closest('a[href]'); if(!a||(a.target&&a.target!=='_self')||a.hasAttribute('download')) return;
-    let u=null; try{ u=new URL(a.getAttribute('href'),location.href); }catch(er){ return; }
-    if(u.origin!==location.origin||u.pathname===location.pathname) return;   // âncora na mesma tela não carrega outra
-    g2carga('ini'); try{ sessionStorage.setItem('g2nav',String(Date.now())); }catch(er){} });
-})();
-// ===== DS-DICA-20261009 · dica acessível (g2dica) =====
-// Proprietário (09/10/2026): "coloque tooltip onde for necessária para melhorar feedback ao usuário". Componente único: abre no hover (ponteiro
-// fino, 300 ms) e no foco de teclado; no toque, com toque longo (500 ms) ou no ícone ⓘ (.g2dica-i); fecha com Esc, ao sair e ao perder o foco.
-// role=tooltip e o gatilho passa a ser descrito por ela (aria-describedby) enquanto aberta. Texto: data-dica (explícito; vazio = sem dica),
-// data-dica-de (selo: o texto do selo busca o significado e o próximo passo em G2_DICAS) ou
-// o title que acrescenta algo ao rótulo visível; ícone sem texto mostra o nome do comando. Nunca repete o rótulo visível. Botão indisponível
-// com motivo usa aria-disabled="true" (continua focável): o clique é recusado aqui e a dica diz o porquê; o motivo também fica em texto junto do
-// botão (engine.acao_motivo, PRD DS-06 e 74.5.0, VIS-04), realçado na recusa: a dica complementa, não substitui.
-const G2_DICA_ID='g2-dica';
-const G2D={el:null,desc:null,modo:'',sai:0,entra:0,lp:0,lpXY:null,toque:0,tt:null};
-function g2visTxt(el){ return String((el&&el.innerText)||'').replace(/\s+/g,' ').trim(); }
-function g2contem(vis,t){ const n=(s)=>g2norm(s).replace(/[^a-z0-9]+/g,' ').trim(); const b=n(t); return !!b&&n(vis).indexOf(b)>=0; }
-// regra do texto (pura, testada em ds_unit.js): explícito > title que acrescenta > nome do ícone sem texto > nada
-function g2dicaRegra(o){ if(o.dica!==null&&o.dica!==undefined) return String(o.dica).trim();
-  if(o.de!==null&&o.de!==undefined) return g2dicaDe(o.de);   // data-dica-de="texto do selo": dica de estado do dicionário (G2_DICAS)
-  const t=String(o.title||'').trim(), vis=String(o.vis||'').trim(), al=String(o.aria||'').trim();
-  if(t&&!g2contem(vis,t)) return t;
-  if(al&&o.comando&&!/[\p{L}\p{N}]/u.test(vis)) return al;   // sem letra nem número visível (×, ‹, ▾, só ícone)
-  return ''; }
-function g2dicaTexto(el){ if(!el||el.nodeType!==1||!el.getAttribute) return '';
-  const d=el.getAttribute('data-dica'), de=el.getAttribute('data-dica-de'), t=el.getAttribute('title')||el.__g2tt||'', al=el.getAttribute('aria-label')||'';
-  if(d===null&&de===null&&!t&&!al) return '';   // sem fonte de dica: nem mede o texto visível (innerText custa layout)
-  return g2dicaRegra({dica:d,de,title:t,vis:(d===null&&de===null)?g2visTxt(el):'',aria:al,
-    comando:el.matches('button,a[href],[role=button]')&&!(typeof SVGElement!=='undefined'&&el instanceof SVGElement)}); }   // polígono do mapa não vira dica
-function g2dicaAlvo(n){ for(let e=n,i=0;e&&e.nodeType===1&&i<6;e=e.parentElement,i++){
-    if(e.id===G2_DICA_ID) return null; if(e.closest&&e.closest('svg')&&e.tagName!=='svg'&&!(e.matches&&e.matches('svg [role=button]'))) continue;
-    const t=g2dicaTexto(e); if(t) return {el:e,t};
-    if(e.matches&&e.matches('main,header,nav,aside,section,[role=table],[role=row],[role=list],body')) break; }
-  return null; }
-// revisão DS (achado 2): o selo de estado não recebe foco; a linha da grade e o cartão do Kanban, sim. Com foco de teclado (:focus-visible) numa
-// linha ou cartão sem dica própria, a dica é a do selo mais grave de dentro dele (vermelho > amarelo/laranja > os demais; empate: o primeiro),
-// com o nome do selo à frente; ela descreve a linha ou o cartão (aria-describedby). O clique do ponteiro na linha não abre dica.
-function g2dicaSelo(n){ if(!n||n.nodeType!==1||!n.matches('[role=row],[role=list] [role=button],[role=list] [role=listitem]')) return null;
-  try{ if(!n.matches(':focus-visible')) return null; }catch(e){}
-  const ss=[...n.querySelectorAll('[data-dica-de],span[data-dica][style*="border-radius"]')].filter(s=>g2vis(s)&&!s.closest('[role=columnheader]')).map(s=>({s,t:g2dicaTexto(s)})).filter(x=>x.t);
-  if(!ss.length) return null;
-  const grav=(s)=>{ const c=getComputedStyle(s).color; return c==='rgb(180, 35, 24)'?3:((c==='rgb(138, 90, 0)'||c==='rgb(154, 63, 0)')?2:1); };
-  let m=ss[0], g=grav(m.s); ss.slice(1).forEach(x=>{ const k=grav(x.s); if(k>g){ m=x; g=k; } });
-  const nome=g2txt(m.s).split(' · ')[0].trim();
-  return {el:m.s,t:(nome&&!g2contem(m.t,nome)?nome+': ':'')+m.t}; }
-function g2dicaEl(){ let d=document.getElementById(G2_DICA_ID);
-  if(!d){ d=document.createElement('div'); d.id=G2_DICA_ID; d.setAttribute('role','tooltip'); d.className='g2dica'; d.hidden=true; document.body.appendChild(d);
-    d.addEventListener('pointerenter',()=>clearTimeout(G2D.sai)); d.addEventListener('pointerleave',()=>g2dicaSai(120)); }
-  return d; }
-function g2dicaPos(){ const d=document.getElementById(G2_DICA_ID), el=G2D.el; if(!d||d.hidden||!el) return;
-  if(!g2vis(el)){ g2dicaFecha(); return; }
-  const r=(el.closest('.g2ind')||el).getBoundingClientRect(), W=window.innerWidth, H=window.innerHeight;   /* botão com motivo visível (acao_motivo): a dica fica fora do par e não cobre o motivo */ d.style.maxWidth=Math.min(320,W-16)+'px'; d.style.left='0px'; d.style.top='0px';
-  const w=d.offsetWidth, h=d.offsetHeight; let x=Math.round(r.left+r.width/2-w/2); x=Math.max(8,Math.min(x,W-w-8));
-  let y=Math.round(r.top-h-8), lado='cima'; if(y<8){ y=Math.round(r.bottom+8); lado='baixo'; } if(y+h>H-8) y=Math.max(8,H-h-8);
-  d.style.left=x+'px'; d.style.top=y+'px'; d.dataset.lado=lado; }
-// desc: quem o leitor de tela descreve (o elemento focado; no hover, o próprio gatilho)
-function g2dicaMostra(el,t,modo,desc){ if(typeof document==='undefined') return; const d=g2dicaEl(); clearTimeout(G2D.sai); clearTimeout(G2D.entra);
-  if(G2D.el&&(G2D.el!==el||G2D.desc!==(desc||el))) g2dicaLimpa();
-  d.textContent=t; d.hidden=false; d.dataset.modo=modo; G2D.el=el; G2D.desc=desc||el; G2D.modo=modo;
-  const ds=G2D.desc, nome=String(ds.getAttribute('aria-label')||g2visTxt(ds)).trim();
-  if(g2norm(nome)!==g2norm(t)){ const db=String(ds.getAttribute('aria-describedby')||'').split(/\s+/).filter(Boolean); if(db.indexOf(G2_DICA_ID)<0){ db.push(G2_DICA_ID); ds.setAttribute('aria-describedby',db.join(' ')); } }
-  if(modo==='ponteiro'&&el.hasAttribute('title')){ el.__g2tt=el.getAttribute('title'); el.removeAttribute('title'); }   // sem a dica nativa por cima; volta ao fechar
-  g2dicaPos(); }
-function g2dicaLimpa(){ const el=G2D.el, ds=G2D.desc; if(ds){ const db=String(ds.getAttribute('aria-describedby')||'').split(/\s+/).filter(x=>x&&x!==G2_DICA_ID);
-    if(db.length) ds.setAttribute('aria-describedby',db.join(' ')); else ds.removeAttribute('aria-describedby'); }
-  if(el&&el.__g2tt!==undefined){ if(!el.hasAttribute('title')) el.setAttribute('title',el.__g2tt); delete el.__g2tt; }
-  G2D.el=null; G2D.desc=null; G2D.modo=''; }
-function g2dicaFecha(){ clearTimeout(G2D.sai); clearTimeout(G2D.entra); const d=document.getElementById(G2_DICA_ID); if(d) d.hidden=true; g2dicaLimpa(); }
-function g2dicaSai(ms){ clearTimeout(G2D.sai); G2D.sai=setTimeout(g2dicaFecha,ms); }
-// revisão DS (achado 9): title igual ao rótulo visível (ex.: item do menu aberto) faria o navegador mostrar a dica nativa repetida: ele sai enquanto
-// o ponteiro está em cima e volta ao sair (com o menu recolhido o texto fica oculto e o title vira a dica do sistema, como antes)
-function g2ttVolta(){ const el=G2D.tt; G2D.tt=null; if(el&&el.__g2ttR!==undefined){ if(!el.hasAttribute('title')) el.setAttribute('title',el.__g2ttR); delete el.__g2ttR; } }
-function g2ttTira(n){ if(G2D.tt&&n&&G2D.tt.contains(n)) return; g2ttVolta();
-  let el=null; for(let e=n,i=0;e&&e.nodeType===1&&i<6;e=e.parentElement,i++){ if(e.hasAttribute('title')){ el=e; break; } } if(!el) return;
-  const t=String(el.getAttribute('title')||'').trim(); if(!t||!g2contem(g2visTxt(el),t)) return;
-  el.__g2ttR=el.getAttribute('title'); el.removeAttribute('title'); G2D.tt=el; }
-(function g2dicaGlob(){ if(typeof document==='undefined'||window.__g2dica) return; window.__g2dica=1;
-  const dentro=(n)=>!!(n&&n.closest&&n.closest('#'+G2_DICA_ID));
-  // hover: abre depois de 300 ms parado no gatilho (sem espera se outra dica já está aberta); sair do gatilho e da dica fecha em 120 ms
-  document.addEventListener('pointerover',(e)=>{ if(e.pointerType==='touch'||dentro(e.target)) return; g2ttTira(e.target); const a=g2dicaAlvo(e.target);
-    if(!a){ clearTimeout(G2D.entra); if(G2D.el&&G2D.modo==='ponteiro') g2dicaSai(120); return; }
-    if(a.el===G2D.el){ clearTimeout(G2D.sai); return; }
-    clearTimeout(G2D.entra); G2D.entra=setTimeout(()=>g2dicaMostra(a.el,a.t,'ponteiro'),(G2D.el&&G2D.modo==='ponteiro')?0:300); },true);
-  document.addEventListener('pointerout',(e)=>{ if(e.pointerType==='touch'||e.relatedTarget) return; g2ttVolta(); clearTimeout(G2D.entra); if(G2D.el&&G2D.modo==='ponteiro') g2dicaSai(120); },true);
-  // foco de teclado: abre já; descreve o elemento focado (a dica pode vir do cabeçalho da coluna do botão de ordenar). Linha de grade ou cartão
-  // (Kanban) sem dica própria, com foco de teclado: a dica do selo de estado de dentro dela (revisão DS, achado 2: o selo não é focável)
-  document.addEventListener('focusin',(e)=>{ const a=g2dicaAlvo(e.target)||g2dicaSelo(e.target); if(a) g2dicaMostra(a.el,a.t,'foco',e.target); else if(G2D.el&&G2D.modo!=='ponteiro') g2dicaFecha(); },true);
-  document.addEventListener('focusout',(e)=>{ if(G2D.el&&G2D.modo!=='ponteiro'&&G2D.modo!=='recusa'&&(!e.relatedTarget||!G2D.el.contains(e.relatedTarget))) g2dicaFecha(); },true);
-  // Esc fecha a dica; a dica explícita (data-dica) consome a tecla, para não fechar também o painel em que o foco está (WCAG 1.4.13)
-  document.addEventListener('keydown',(e)=>{ if(e.key!=='Escape') return; const d=document.getElementById(G2_DICA_ID); if(!d||d.hidden||!G2D.el) return;
-    const exp=G2D.el.hasAttribute('data-dica'); g2dicaFecha(); if(exp){ e.preventDefault(); e.stopPropagation(); } },true);
-  // toque longo (500 ms parado) mostra a dica e não aciona o comando; tocar fora fecha
-  document.addEventListener('pointerdown',(e)=>{ if(e.pointerType!=='touch') return; const a=g2dicaAlvo(e.target);
-    if(!a){ if(G2D.el&&!dentro(e.target)) g2dicaFecha(); return; }
-    clearTimeout(G2D.lp); G2D.lpXY=[e.clientX,e.clientY]; G2D.lp=setTimeout(()=>{ G2D.lp=0; G2D.toque=Date.now(); g2dicaMostra(a.el,a.t,'toque'); g2dicaSai(4000); },500); },true);
-  document.addEventListener('pointermove',(e)=>{ if(e.pointerType==='touch'&&G2D.lp&&G2D.lpXY&&Math.hypot(e.clientX-G2D.lpXY[0],e.clientY-G2D.lpXY[1])>10){ clearTimeout(G2D.lp); G2D.lp=0; } },true);
-  const solta=()=>{ clearTimeout(G2D.lp); G2D.lp=0; }; document.addEventListener('pointerup',solta,true); document.addEventListener('pointercancel',solta,true);
-  document.addEventListener('contextmenu',(e)=>{ if(G2D.toque&&Date.now()-G2D.toque<900) e.preventDefault(); },true);
-  document.addEventListener('click',(e)=>{
-    if(G2D.toque&&Date.now()-G2D.toque<900){ G2D.toque=0; e.preventDefault(); e.stopPropagation(); return; }   // o toque longo foi para ler a dica
-    const t=e.target;
-    // ícone ⓘ: tocar (ou Enter) abre e fecha a dica; não é comando
-    const i=t&&t.closest&&t.closest('.g2dica-i'); if(i){ e.preventDefault(); e.stopPropagation(); if(G2D.el===i) g2dicaFecha(); else { g2dicaMostra(i,g2dicaTexto(i),'toque'); g2dicaSai(6000); } return; }
-    // indisponível com motivo (aria-disabled="true"): o comando não roda; a dica diz o porquê e o leitor de tela ouve a recusa
-    const b=t&&t.closest&&t.closest('[aria-disabled="true"]'); if(b&&b.matches('button,a,[role=button]')){ e.preventDefault(); e.stopPropagation();
-      const m=g2dicaTexto(b)||'Indisponível agora.'; g2dicaMostra(b,m,'recusa'); g2dicaSai(4000);
-      const mv=b.closest('.g2ind'); g2flash(mv&&mv.querySelector('.g2motivo'),'Indisponível: '+m); } },true);   /* o motivo visível junto do botão (acao_motivo) é realçado */
-  const repos=()=>{ if(G2D.el) g2dicaPos(); }; window.addEventListener('resize',()=>{ if(G2D.el) g2dicaFecha(); }); document.addEventListener('scroll',repos,true);
-  try{ new MutationObserver(()=>{ if(G2D.el&&!g2vis(G2D.el)) g2dicaFecha(); }).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){}
-})();

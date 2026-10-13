@@ -71,7 +71,7 @@ try:
         ('Conciliado (CON-0001): 1 pagamento aprovado · 1 recusa registrada' in t1 or 'Conciliação já registrada (CON-0001)' in t1) and ncon == 1
         and '1 · R$ 299,00' in b and 'Conciliado' in linha(1, 'evt_1JKT5') and selo() == 'Pagamentos conciliados', [t1, ncon, b[:400]])
     # revisão PLAT, achado 9: sem evento a conciliar nem contestação, a primária fica desabilitada com o motivo (antes respondia "nada mudou")
-    pb = J("(()=>{const b=[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Conciliar pagamentos'); return b?{dis:b.getAttribute('aria-disabled')==='true',tit:b.title}:null;})()")   # DS-DICA-20261009: aria-disabled (focável, com dica)
+    pb = J("(()=>{const b=[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Conciliar pagamentos'); return b?{dis:b.disabled,tit:b.title}:null;})()")
     abre_linha(0, 'Fazenda Aurora'); d = dlg()
     chk('A12e tudo conciliado: primária Conciliar pagamentos desabilitada com o motivo; a recusa aparece uma vez na Aurora, com quem conciliou',
         pb and pb['dis'] is True and 'Nenhum evento do provedor a conciliar' in pb['tit'] and d.count('evt_1JKR9') == 1 and 'Vencida' in d and 'por Admin plataforma' in d, [pb, d[:600]])
@@ -88,7 +88,7 @@ try:
     time.sleep(.3); clk('Registrar contestação', 'aside[role=dialog]'); clk('Fechar', 'aside[role=dialog]')
     go('BO-02.dc.html'); p0 = J(PRIMS); clk('Resolver contestação'); d = dlg()
     clk('Manter o valor', 'aside[role=dialog]'); clk('Registrar resolução', 'aside[role=dialog]'); t = toast(); clk('Fechar', 'aside[role=dialog]')
-    pb = J("(()=>{const b=[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Conciliar pagamentos'); return b?b.getAttribute('aria-disabled')==='true':null;})()")   # DS-DICA-20261009
+    pb = J("(()=>{const b=[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Conciliar pagamentos'); return b?b.disabled:null;})()")
     chk('A12i contestação aberta e nada a conciliar: primária Resolver contestação abre a Santa Rita; Registrar resolução (manter) volta a primária desabilitada',
         p0 == ['Resolver contestação'] and 'Grupo Santa Rita' in d and 'Contestação de set/2026' in d and 'resolvida (RES-0001): valor mantido' in t and pb is True, [p0, d[:300], t, pb])
     # dia do trial pela mesma data simulada no ON-01 e no BO-02 (achado 8)

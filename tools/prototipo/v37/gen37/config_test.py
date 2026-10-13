@@ -132,7 +132,7 @@ try:
         ORD = ['Usuários e alçadas', 'Auditoria', 'Integrações', 'Assinatura e cobrança']; its = menu.split('|')
         chk('A15 menu: Configurações é o último grupo, no máximo 4 itens na ordem Usuários e alçadas · Auditoria · Integrações · Assinatura e cobrança',
             grupos.split('|')[-1] == 'Configurações' and len(its) <= 4 and its[0] == ORD[0] and its[-1] == ORD[-1] and its == [x for x in ORD if x in its], [grupos, menu])
-        chk('CF-01 seed: "14 com acesso · 1 sem acesso" (Igor e Marta do BEN-1; Otávio e Dora da v56 entram) e a primária "Convidar pessoa"; sem erro de JS', '14 com acesso · 1 sem acesso' in hdr() and prims()['prims'] == ['Convidar pessoa'] and not errs(), [hdr(), prims(), errs()])
+        chk('CF-01 seed: "12 com acesso · 1 sem acesso" (Igor e Marta do BEN-1 entram) e a primária "Convidar pessoa"; sem erro de JS', '12 com acesso · 1 sem acesso' in hdr() and prims()['prims'] == ['Convidar pessoa'] and not errs(), [hdr(), prims(), errs()])
         tbl = J("[...document.querySelectorAll('[role=table]')].map(t=>t.querySelectorAll('[role=columnheader] button').length)")
         chk('A14 as duas grades têm busca, filtro rápido e ordenação/filtro por coluna; "%" na célula da AL-05', len(tbl) == 2 and all(x >= 8 for x in tbl) and J("document.querySelectorAll('main input[type=search]').length") == 2
             and 'até 20 % da área da ordem' in (linha(1, 'AL-05 · Dispensar') or ''), [tbl, linha(1, 'AL-05 · Dispensar')])
@@ -210,8 +210,8 @@ try:
         go('CF-01.dc.html'); reset(); go('CF-01.dc.html'); clk('Convidar pessoa'); clk('Beto', 'aside[role=dialog]'); d = dlg()
         chk('Convidar pessoa → Beto (lista curta) → painel com "Convidar (simulado)" como única primária', 'Sem acesso' in d and prims()['prims'] == ['Convidar (simulado)'], [d[:300], prims()])
         clk('Convidar (simulado)', 'aside[role=dialog]')
-        chk('A9 Beto com acesso Ativo, só app de campo; cabeçalho "15 com acesso · 0 sem acesso"; primária desabilitada "Todas as pessoas do cadastro têm acesso"',
-            'Ativo desde 26/09/2026' in (linha(0, 'Beto') or '') and '15 com acesso · 0 sem acesso' in hdr()
+        chk('A9 Beto com acesso Ativo, só app de campo; cabeçalho "13 com acesso · 0 sem acesso"; primária desabilitada "Todas as pessoas do cadastro têm acesso"',
+            'Ativo desde 26/09/2026' in (linha(0, 'Beto') or '') and '13 com acesso · 0 sem acesso' in hdr()
             and J("(()=>{const b=document.querySelector('header .conf-prim'); return !!b&&b.disabled&&b.title;})()") == 'Todas as pessoas do cadastro têm acesso', [linha(0, 'Beto'), hdr()])
         go('CD-04.dc.html'); b = J("(()=>{const r=[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf('Beto')>=0); return r?r.innerText.replace(/\\s+/g,' '):'';})()")
         J("(()=>{const r=[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.indexOf('Beto')>=0); (r.querySelector('.g2pw')||r).click();})()"); time.sleep(.4)
@@ -230,22 +230,22 @@ try:
     SEGREDO = re.compile(r'(senha|token|secret|apikey)\s*[:=]|[A-Za-z0-9_-]{24,}', re.I)
     if 'cf04' in PARTES:
         go('CF-04.dc.html'); reset(); go('CF-04.dc.html'); res = J("(document.querySelector('main [role=status]')||{}).innerText||''")
-        chk('CF-04 seed: "18 registros · 3 autores · lidos dos comandos gravados; nada é digitado aqui"; uma primária "Baixar trilha (CSV)"',
-            res.startswith('18 registros · 3 autores') and 'nada é digitado aqui' in res and prims()['prims'] == ['Baixar trilha (CSV)'] and not errs(), [res, prims(), errs()])
+        chk('CF-04 seed: "16 registros · 3 autores · lidos dos comandos gravados; nada é digitado aqui"; uma primária "Baixar trilha (CSV)"',
+            res.startswith('16 registros · 3 autores') and 'nada é digitado aqui' in res and prims()['prims'] == ['Baixar trilha (CSV)'] and not errs(), [res, prims(), errs()])
         qf = J("[...document.querySelectorAll('main [role=group] button')].map(b=>b.innerText.replace(/\\s+/g,' ').trim()).join('|')")
-        chk('filtro rápido por mês: Todos 18 · jul/2026 12 · ago/2026 3 · jun/2026 2 · set/2026 1', all(x in qf for x in ['Todos 18', 'jul/2026 12', 'ago/2026 3', 'jun/2026 2', 'set/2026 1']), qf)
+        chk('filtro rápido por mês: Todos 16 · jul/2026 10 · ago/2026 3 · jun/2026 2 · set/2026 1', all(x in qf for x in ['Todos 16', 'jul/2026 10', 'ago/2026 3', 'jun/2026 2', 'set/2026 1']), qf)
         clk('jul/2026'); n0 = nev(); clk('Baixar trilha (CSV)'); csv = J("window.__confCsv||''") or ''
-        chk('A11 CSV = as 12 linhas de jul/2026 (+ cabeçalho), sem segredo; a exportação vira registro', len([l for l in csv.split('\r\n') if l]) == 13 and nev() == n0 + 1 and not SEGREDO.search(csv)
-            and 'Exportação · 12 registros · mês jul/2026' in J("JSON.stringify(JSON.parse(localStorage.getItem('talhao-os-cenario-v1')).conf.ev)"), [csv[:300], nev() - n0])
+        chk('A11 CSV = as 10 linhas de jul/2026 (+ cabeçalho), sem segredo; a exportação vira registro', len([l for l in csv.split('\r\n') if l]) == 11 and nev() == n0 + 1 and not SEGREDO.search(csv)
+            and 'Exportação · 10 registros · mês jul/2026' in J("JSON.stringify(JSON.parse(localStorage.getItem('talhao-os-cenario-v1')).conf.ev)"), [csv[:300], nev() - n0])
         clk('Todos'); res = J("(document.querySelector('main [role=status]')||{}).innerText||''")
-        chk('a própria exportação aparece na trilha: 19 registros', res.startswith('19 registros'), res)
+        chk('a própria exportação aparece na trilha: 17 registros', res.startswith('17 registros'), res)
         chk('F13 a linha da exportação fica realçada (g2flash)', fl(0, 'Baixar trilha (CSV)'), linha(0, 'Baixar trilha (CSV)'))
         n1 = nev(); k1 = J("window.__confCsvN||0"); J("(()=>{const b=document.querySelector('header .conf-prim'); b.click(); b.click();})()"); time.sleep(.6)
         chk('F16 duplo clique em "Baixar trilha": 1 registro e 1 arquivo', nev() == n1 + 1 and J("window.__confCsvN||0") == k1 + 1, [nev() - n1, J("window.__confCsvN||0") - k1])
         J("document.querySelector('[aria-label=\"Filtrar Quem\"]').click()"); time.sleep(.3); clk('Limpar', '[role=dialog]')
         J("(()=>{const l=[...document.querySelectorAll('[role=dialog] label')].find(x=>x.innerText.indexOf('Provedor')>=0); l.querySelector('input').click();})()"); time.sleep(.2); clk('OK', '[role=dialog]')
         res = J("(document.querySelector('main [role=status]')||{}).innerText||''")
-        chk('filtro por pessoa (Quem): Provedor → 2 registros de 20 (faturas pagas pelo provedor simulado; a 2ª exportação, do F16, entra na conta)', res.startswith('2 registros de 20') and 'Provedor (simulado)' in (linha(0, 'jul/2026') or linha(0, 'Fatura') or ''), [res, linha(0, 'Fatura')])
+        chk('filtro por pessoa (Quem): Provedor → 2 registros de 18 (faturas pagas pelo provedor simulado; a 2ª exportação, do F16, entra na conta)', res.startswith('2 registros de 18') and 'Provedor (simulado)' in (linha(0, 'jul/2026') or linha(0, 'Fatura') or ''), [res, linha(0, 'Fatura')])
         abre(0, 'Fatura jul/2026'); d = dlg()
         chk('detalhe só leitura: de onde vem a data (simulada da cobrança), registro de origem e "A trilha não se edita"', 'data simulada da cobrança' in d and 'evt_demo_0801' in d and 'A trilha não se edita' in d and 'Abrir no domínio' in d, d[:500])
         J("document.querySelector('aside[role=dialog] button[aria-label=Fechar]').click()"); time.sleep(.3)
@@ -285,7 +285,7 @@ try:
         chk('CF-03 sem erro de JS', not errs(), errs())
     if 'cf05' in PARTES:
         go('CF-05.dc.html'); reset('Rui'); go('CF-05.dc.html')
-        chk('A9 CF-05 conta as pessoas com acesso do estado de Configurações (14 no seed, com Igor, Marta, Otávio e Dora)', 'Pessoas com acesso: 14 (Configurações › Usuários e alçadas)' in J("document.body.innerText"), J("document.body.innerText")[:200])
+        chk('A9 CF-05 conta as pessoas com acesso do estado de Configurações (12 no seed, com Igor e Marta)', 'Pessoas com acesso: 12 (Configurações › Usuários e alçadas)' in J("document.body.innerText"), J("document.body.innerText")[:200])
         clk('01/10/2026'); clk('Pagar fatura'); clk('Pix · simulado', 'aside[role=dialog]'); clk('Confirmar pagamento (simulado)', 'aside[role=dialog]'); d = dlg()
         pago = J("(()=>{ const c=JSON.parse(localStorage.getItem('talhao-os-cenario-v1')); return c.assin.orgs.sr.faturas.find(f=>f.comp==='2026-09').st; })()")
         chk('A18 Ver como Rui: pagar a fatura é recusado "decisão de Ana (gestora)" e nada é pago', 'decisão de Ana (gestora)' in d and pago == 'aberta', [d[-300:], pago])
@@ -307,7 +307,7 @@ try:
         go('CF-04.dc.html'); reset(); go('CF-04.dc.html'); abre(0, 'Lucas'); d0 = dlg()
         r = aba_js('EST.dc.html', "(()=>{ const X=window.__cen; const r=X.cenMudar(null,c=>X.cenEntregar(c,'REQ-035','Fungicida A',5,'Marcos','Rui')); return r.erro||r.msg; })()")
         time.sleep(1.0); d1 = dlg(); res = J("(document.querySelector('main [role=status]')||{}).innerText||''")
-        chk('REV5 outra aba entrega no Estoque (19 registros): o detalhe aberto segue o de Lucas (01/08/2026), o mesmo registro', 'Objeto Lucas' in d0 and res.startswith('19 registros') and 'Objeto Lucas' in d1 and '01/08/2026' in d1 and d1 == d0, [r, res, d0[:160], d1[:160]])
+        chk('REV5 outra aba entrega no Estoque (17 registros): o detalhe aberto segue o de Lucas (01/08/2026), o mesmo registro', 'Objeto Lucas' in d0 and res.startswith('17 registros') and 'Objeto Lucas' in d1 and '01/08/2026' in d1 and d1 == d0, [r, res, d0[:160], d1[:160]])
         J("document.querySelector('aside[role=dialog] button[aria-label=Fechar]').click()"); time.sleep(.3)
         # ---------- REV1 · colheita pela web: pesar, estornar e descartar conferem quem age (Santa Rita: o almoxarife) ----------
         from ben_unit_test import motor, node
@@ -326,8 +326,8 @@ try:
         # ---------- REV4 · encerrar a O.S. grava quem agiu e entra na trilha ----------
         go('OS.dc.html#OS-0508'); reset('Zé'); go('OS.dc.html#OS-0508'); clk('Conferir e encerrar'); clk('Confirmar encerramento'); t = toast()
         go('CF-04.dc.html'); res = J("(document.querySelector('main [role=status]')||{}).innerText||''"); l = linha(0, 'OS-0508') or ''
-        chk('REV4 Ver como Zé encerra a OS-0508: o aviso diz por quem; o CF-04 passa a 19 registros · 4 autores com "Encerrar O.S. · CMD-10" por Zé (mecânico)',
-            'encerrada por Zé (mecânico)' in t and res.startswith('19 registros · 4 autores') and 'Encerrar O.S. · CMD-10' in l and 'Zé (mecânico)' in l, [t, res, l])
+        chk('REV4 Ver como Zé encerra a OS-0508: o aviso diz por quem; o CF-04 passa a 17 registros · 4 autores com "Encerrar O.S. · CMD-10" por Zé (mecânico)',
+            'encerrada por Zé (mecânico)' in t and res.startswith('17 registros · 4 autores') and 'Encerrar O.S. · CMD-10' in l and 'Zé (mecânico)' in l, [t, res, l])
         chk('REV sem erro de JS', not errs(), errs())
     if 'rev2' in PARTES:
         # ---------- duplo clique da mão em "Baixar trilha" e em "Sincronizar" (S4 de correção do F16) ----------

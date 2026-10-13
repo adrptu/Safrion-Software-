@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Área Agronomia — no menu: AG-01 Pragas e doenças (MIP/MID) e AG-07 Consulta Agrofit (Agrícola). Ligados ao item Pragas e doenças:
 AG-01det Rota e evidências (#VIS-xxx) · AG-03 Diagnósticos (+ AG-03det DIA-007) · AG-04 Recomendações (+ AG-04det REC-014).
-AG-02 Análises de solo (menu Agrícola) em areas/analise_solo.py. Módulos ocultos, preservados: AG-05 Biblioteca e planos técnicos · AG-06 Eficácia e histórico.
+Módulos ocultos, preservados: AG-02 Análises e amostras · AG-05 Biblioteca e planos técnicos · AG-06 Eficácia e histórico.
 
 Pragas e doenças (02/10/2026, pedido do proprietário: autoanálise do MIP/MID): UMA base para o Mapa, o AG-01, o AG-01det, o AG-03/AG-04
 e o app (MB-06) — dados_mip.py (protocolos, talhões das duas fazendas, vistorias VIS-006…017 e VIS-051…060, DIA/REC, aplicações) +
@@ -142,7 +142,58 @@ function agNovo(self,rows,r,idk,pref,base,parts,msg){
 def build():
     ag01(); ag01det()   # Pragas e doenças (MIP/MID): funções próprias, abaixo
 
-    # AG-02 · Análises de solo: areas/analise_solo.py (SOLO-01; menu Agrícola). Os planos de amostragem saíram (D-13): a coleta é operação do plano.
+    # ================= AG-02 · Análises e amostras =================
+    fname='AG-02.dc.html'; E._reset_screen(fname)
+    c2=[dict(k='id',l='Laudo · amostra'),dict(k='local',l='Local · área representada',w=170),dict(k='prof',l='Profund.'),dict(k='data',l='Data',t='date'),
+        dict(k='lab',l='Laboratório',w=120),dict(k='met',l='Método · extrator',w=120),dict(k='val',l='Validação',w=150),dict(k='acao',l='Próxima ação',w=150)]
+    rows2=[
+      R('LAU-2043',ro=True,id=[Pt.b('LAU-2043'),Pt.mut('solo')],local='T4 · 204 ha · composta por zona (3 zonas)',prof='0–20 cm',data='2026-09-12',lab='Lab Solo Vale',met='Mehlich-1',
+        val=[Pt.chip('Validado','green')],acao=[Pt.cta('Abrir diagnóstico','AG-03det.dc.html')]),
+      R('LAU-2044',ro=True,id=[Pt.b('LAU-2044'),Pt.mut('solo')],local='T4 · 204 ha · composta por zona (3 zonas)',prof='20–40 cm',data='2026-09-12',lab='Lab Solo Vale',met='Mehlich-1',
+        val=[Pt.chip('Validado','green')],acao=[Pt.cta('Abrir diagnóstico','AG-03det.dc.html')]),
+      R('LAU-2048',ro=True,id=[Pt.b('LAU-2048'),Pt.mut('folha')],local='P1 · 95 ha · terço médio R5',prof='—',data='2026-09-18',lab='Agrolab',met='digestão nítrico-perclórica',
+        val=[Pt.chip('Inconsistente','red'),Pt.br(),Pt.mut('K sem unidade')],acao=[Pt.mut('corrija o K no painel abaixo')]),
+      R('LAU-2050',ro=True,id=[Pt.b('LAU-2050'),Pt.mut('solo')],local='C1 · 38 ha · composta',prof='0–20 cm',data='2026-09-19',lab='Agrolab',met='Resina',
+        val=[Pt.chip('Aguardando validação','yellow')],
+        acao=[Pt.act('Validar dados','LAU-2050 validado por Ana · original preservado ao lado dos valores extraídos · liberado para diagnóstico.')]),
+      R('PLA-104',id=[Pt.b('PLA-104'),Pt.mut('plano')],local='T2 · 298 ha · grade 16 pontos',prof='0–20 cm',data='2026-09-26',lab='Lab Solo Vale',met='Mehlich-1',
+        val=[Pt.chip('Coleta até 26/09','yellow')],acao=[Pt.cta('Coletar','MB-06.dc.html')]),
+      R('PLA-105',id=[Pt.b('PLA-105'),Pt.mut('plano')],local='C1 · 38 ha · nematoide',prof='0–20 cm',data='2026-09-30',lab='Embrapa Solos (convênio)',met='extração de cistos',
+        val=[Pt.chip('Planejada','gray')],acao=[Pt.cta('Coletar','MB-06.dc.html')]),
+    ]
+    g2=grid(c2,rows2,edit=dict(m='form',title='Amostra',newTitle='Planejar coleta',
+             sub='Planeje a coleta por grade ou zona; a amostra composta representa a área declarada, sem resolução espacial inventada. Laudo recebido fica em consulta.',
+             fields=[F('local','Local · área representada','txt',req=True,help='Ex.: T2 · 298 ha · grade 16 pontos'),F('prof','Profundidade','sel',opts=['0–20 cm','20–40 cm','0–10 cm','40–60 cm'],req=True,def_='0–20 cm'),
+                     F('data','Data','date',req=True),F('lab','Laboratório','sel',opts=['Lab Solo Vale','Agrolab','Embrapa Solos (convênio)'],req=True,def_='Lab Solo Vale'),
+                     F('met','Método · extrator','sel',opts=['Mehlich-1','Resina','DTPA','extração de cistos','digestão nítrico-perclórica'],req=True,def_='Mehlich-1')]),
+             add='Planejar coleta',gid='g_lau',so=dict(k='data',d=True),total=False)
+    c2e=[dict(k='atr',l='Atributo'),dict(k='val',l='Valor',t='num',a='r',d=1),dict(k='un',l='Unidade',chips={'sem unidade':'red'}),dict(k='ld',l='LD')]
+    ext=[R('N',atr='N',val=48.2,un='g/kg',ld='0,1'),R('P',atr='P',val=3.1,un='g/kg',ld='0,1'),
+         R('K',atr='K',val=17.4,un=('sem unidade',[Pt.chip('sem unidade','red')]),ld='—'),R('B',atr='B',val=42,un='mg/kg',ld='1')]
+    g2e=grid(c2e,ext,edit=dict(m='form',title='Valor extraído',sub='Corrija o valor ou a unidade lida pelo OCR; o PDF original não se altera e o laudo volta para validação humana.',
+             fields=[F('val','Valor','num',req=True,min=0),F('un','Unidade','sel',opts=['sem unidade','g/kg','mg/kg','dag/kg'],req=True),F('ld','Limite de detecção','txt')]),
+             search=False,gid='g_ext',total=False)
+    EXTRAJS[0]=JS_NOVO+'''
+function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{
+  if(gid==='g_lau') agNovo(self,rows,r,'id','PLA-',106,{val:[{k:'chip',t:'Planejada',c:'gray'}],acao:[{k:'cta',t:'Coletar',h:'MB-06.dc.html'}]},'{id} planejado · pontos enviados ao app do coletor.');
+  if(gid==='g_ext' && r.id==='K' && r.v.un && r.v.un!=='sem unidade'){
+    const sp=GRIDS.find(g=>g.id==='g_lau'); const x=g2find(g2rows(self,sp),'LAU-2048');
+    if(x){ x.p.val=[{k:'chip',t:'Aguardando validação',c:'yellow'}]; x.s.val='Aguardando validação'; x.p.acao=[{k:'mut',t:'mapeamento salvo · aguarda validação humana'}]; x.s.acao=''; }
+    self.setState({g2toast:'K corrigido para '+r.v.un+' · mapeamento salvo para o Agrolab · LAU-2048 volta à validação humana.'}); } }; }'''
+    orig=(f'<div style="border: 1px solid {LINE}; border-radius: 12px; padding: 12px 14px; background: {BG};"><div style="font-size: 11px; font-weight: 700; color: {MUTED}; letter-spacing: .06em;">ORIGINAL · PDF DO LABORATÓRIO</div>'
+          f'<div style="height: 150px; margin-top: 8px; border: 1px dashed {LINE}; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; color: {MUTED}; font-size: 12.5px;">{icon("doc",18,MUTED)}laudo_agrolab_P1_folha.pdf · pág. 1/2</div></div>')
+    corpo=(
+      bloco('Planos de amostragem, amostras e laudos','Planeje coletas e acompanhe a validação; clique na linha para ajustar um plano ou consultar o laudo.',g2,
+          idrawer('Importar laudo',dict(title='Importar laudo',sub='O original fica ao lado dos valores extraídos; OCR nunca aprova o laudo.',
+             fields=[('Laboratório','Lab Solo Vale'),('Arquivo do laudo (PDF)',''),('Talhão','T2 · 298 ha'),('Profundidade','0–20 cm'),('Mapeamento de colunas','Lab Solo Vale · padrão v3')],
+             confirm='Importar e abrir prévia',done='Prévia aberta · erros por linha destacados'),'doc','Importar o PDF do laboratório e abrir a prévia com erros por linha',primary=True))
+      + bloco('Original ao lado do extraído · LAU-2048','Compare o PDF com os valores extraídos e corrija a unidade do K pela linha.',
+          f'<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start;">{orig}{g2e}</div>',tone='red'))
+    HEIGHTS37[fname]=980
+    shell37('AG-02','Análises e amostras',corpo,fname=fname,
+      subtitle='Planos de amostragem, amostras e laudos com método, extrator, profundidade e limite de detecção.',
+      status=('1 laudo inconsistente','yellow'),
+      footer='OCR não aprova laudo; o original é preservado; laudo inconsistente não bloqueia o controle de pragas.')
 
     # ================= AG-03 · Diagnósticos (MIP do estado compartilhado: DIA-007…010 e os novos, DIA-011 em diante) =================
     import cenario, dados_mip as DM
@@ -153,7 +204,7 @@ def build():
         dict(k='risco',l='Risco',chips={'alto':'red','médio':'yellow','baixo':'green'}),
         dict(k='sit',l='Situação · decisão',w=150),dict(k='acao',l='Próximo passo',w=160)]
     g3=grid(c3,[],edit=dict(m='form',title='Diagnóstico',newTitle='Criar diagnóstico',
-             fields=[F('parc','Talhão · cultura','sel',opts=PARC,req=True,def_='T2 · Soja'),F('evid','Evidências (vistoria · laudo)','txt',req=True,help='Ex.: VIS-017 · LAU-2063'),
+             fields=[F('parc','Talhão · cultura','sel',opts=PARC,req=True,def_='T2 · Soja'),F('evid','Evidências (vistoria · laudo)','txt',req=True,help='Ex.: VIS-017 · PLA-104'),
                      F('hip','Hipótese · causa','area',req=True),F('meta','Meta','txt',req=True),F('risco','Risco','sel',opts=['baixo','médio','alto'],req=True,def_='médio'),
                      F('acp','Ação proposta','area',req=True),F('resp','Responsável','sel',opts=['Ana','Marcos'],req=True,def_='Ana')]),
              add='Criar diagnóstico',gid='g_dia',total=False)
@@ -229,15 +280,18 @@ function EXTRAVALS(self,v){ const s=mipGet(), c=agC(); const osDe=(d)=>{ const r
       R('REC-017',ro=True,id=[Pt.b('REC-017'),Pt.mut('v2')],parc='P1 · Feijão',orig='OS-0418 reclassificada (água → fertirrigação)',op='Fertirrigação · ureia',
         prod=('Ureia 45 % 12 kg/ha',[Pt.txt('Ureia 45 % 12 kg/ha'),Pt.br(),Pt.mut('janela: esta semana')]),jan='esta semana',fonte='protocolo do plano técnico',
         sit=[Pt.chip('Submetida','yellow'),Pt.br(),Pt.mut('liberação na OS-0418')],acao=[Pt.cta('Liberar OS-0418','OS.dc.html#OS-0418')]),
-      # REC-018 (calagem do T2 'aguarda laudo') saiu (SOLO-01, D-14): a calagem do T2 vem do LAU-2063 como sugestão na dose do plano
+      R('REC-018',id=[Pt.b('REC-018'),Pt.mut('rascunho')],parc='T2 · Soja',orig='PLA-104 · coleta do T2 em 26/09',op='Calagem · saturação por bases',
+        prod=('Calcário PRNT 80 · dose por zona',[Pt.txt('Calcário PRNT 80 · dose por zona'),Pt.br(),Pt.mut('janela: pré-plantio · até 20/10')]),dose='',jan='pré-plantio · até 20/10',fonte='CQFS-RS/SC',
+        sit=[Pt.chip('Rascunho','gray'),Pt.br(),Pt.mut('aguarda laudo do T2')],acao=[]),
     ]
     for r_ in rows4:   # operação + talhão (linha de baixo); a versão vai para baixo do número
         r_['p']['op']=[Pt.txt(r_['v']['op']),Pt.br(),Pt.mut(r_['v']['parc'])]; r_['s']['op']=r_['v']['op']+' '+r_['v']['parc']
         if len(r_['p'].get('id',[]))==2: r_['p']['id']=[r_['p']['id'][0],Pt.br(),r_['p']['id'][1]]
     rows4[0]['dr']='a4go_REC-014'
     g4=grid(c4,rows4,edit=dict(m='form',title='Recomendação',
-             fields=[F('op','Operação · alvo','sel',opts=['Plantio · nematoide + K','Pulverização · ferrugem asiática','Fertirrigação · ureia'],req=True),
+             fields=[F('op','Operação · alvo','sel',opts=['Calagem · saturação por bases','Gessagem','Plantio · nematoide + K','Pulverização · ferrugem asiática','Fertirrigação · ureia'],req=True),
                      F('parc','Talhão','sel',opts=PARC,req=True),F('prod','Produto · dose','txt',req=True),
+                     F('dose','Dose informada','num',min=0,max=10,u='t/ha',help='Sugerida 2,1 t/ha (aguarda laudo); o desvio fica registrado.'),
                      F('jan','Janela','txt',req=True),F('fonte','Fonte','sel',opts=['CQFS-RS/SC','IAC Boletim 100','Embrapa Cerrados','CFSEMG 5ª aproximação'],req=True)]),
              gid='g_rec',total=False)
     EXTRAJS[0]=cenario.js_prefixo()+DM.js_prefixo()+JS_AG01.split('function agRow(')[0]+r'''
@@ -299,7 +353,7 @@ function EXTRAVALS(self,v){ v['a4go_REC-014']=()=>{ location.href='AG-04det.dc.h
     CUSTO=[('c1','Semente de soja 58 W','REQ-036','SU-07.dc.html','1.560 kg × R$ 9,50',1560*9.5,'Definitivo','green'),
            ('c2','KCl 60 %','REQ-037','SU-07.dc.html','3.600 kg × R$ 2,40',3600*2.4,'Definitivo','green'),
            ('c3','Máquina e equipe · plantio','Apontamentos dias 1 e 2','CA-02.dc.html','6,0 h × R$ 396,00',6*396,'Provisório · 12 ha a conferir','yellow'),
-           ('c4','Diesel S10 · Trator T1','Abastecimento','MA.dc.html#vis=ativos&modo=abastecimentos','84 L × R$ 5,92',84*5.92,'Provisório · conciliar tanque','yellow')]
+           ('c4','Diesel S10 · Trator T1','Abastecimento','MA-05.dc.html','84 L × R$ 5,92',84*5.92,'Provisório · conciliar tanque','yellow')]
     ccu=[dict(k='item',l='Recurso',w=200),dict(k='orig',l='Origem'),dict(k='qtd',l='Quantidade × preço',w=170),dict(k='custo',l='Custo',t='num',a='r',d=2,pre='R$ ',agg='sum'),dict(k='sit',l='Situação',w=200)]
     gcu=grid(ccu,[R(i,item=it,orig=[Pt.link(o,h)],qtd=q,custo=round(v,2),sit=[Pt.chip(s,c)],o=[(f'{o} · {q}',h),(f'{REAL20} ha realizados na v2 · preservados na v3',None)])
                   for i,it,o,h,q,v,s,c in CUSTO],
@@ -887,9 +941,8 @@ def ag01det():
 # Listagem: grade G2 (ordenar e filtrar no cabeçalho, agrupar) com render incremental (50 linhas + "Mostrar mais"); busca sem acento
 # em produto, registro, ingrediente, grupo químico, titular, classe e modo de ação, e — palavra a palavra — num MESMO uso (cultura e
 # alvo juntos). Filtros: Cultura (combobox, culturas da fazenda primeiro; "Todas as culturas" do AGROFIT vale para qualquer cultura),
-# Praga-alvo (aparece com a cultura), Classe por componente (+ Biológico) e Orgânicos.
-# Ficha (painel lateral): uso (cultura × alvo) → "Usar na O.S." (CTL-5 · RL-E3: a consulta não emite receituário; leva produto da fazenda,
-# cultura e alvo ao "Ajustar antes de liberar" da ordem A liberar escolhida, onde a liberação confere a regra legal única e grava a aprovação);
+# Praga ou alvo (aparece com a cultura), Classe por componente (+ Biológico) e Orgânicos.
+# Ficha (painel lateral): uso (cultura × alvo) → "Preparar receituário" (registro em "Todas as culturas" pede a cultura do talhão);
 # usos registrados; rotação (mesma cultura × alvo, OUTRO MODO DE AÇÃO pelo código IRAC/FRAC/HRAC de referência de cada ingrediente,
 # agrofit_dados.GRUPO_RESIST; multissítio já presente não conta como rotação); LMR ANVISA da cultura (vermelho só se NÃO autorizado);
 # na fazenda (ao vivo, pelo cenário); referência conferida em bula (agrofit_dados, mesma combinação de ingredientes); registro; link oficial.
@@ -899,16 +952,6 @@ def ag01det():
 import os as _os, shutil as _sh
 AGF_ID='g_agf'
 AGF_CULTURAS=['Soja','Milho','Feijão','Café','Mamão']
-# Praga-alvo (pedido do proprietário, 09/10/2026: "na consulta agrofit tem que aparecer colunas das pragas alvo"): com a cultura escolhida a
-# lista tem uma linha por USO na cultura (produto × praga-alvo, como no AGROFIT), lida dos usos registrados (agrofit_usos_cultura_*.json) e dos
-# alvos do agrofit_indice.json (nada inventado): Praga-alvo (nomes comuns; coluna multivalorada, o filtro marca o nome) e Nome científico, uma
-# variável por coluna, com filtro e ordenação no cabeçalho; "Cultura do uso" separa o uso registrado na cultura do uso em "Todas as culturas".
-# Sem cultura, a lista continua com uma linha por produto (AGF_COLS_P, as 6 colunas do desenho).
-AGF_COLS_P=[dict(k='prod',l='Produto · registro',w=180),dict(k='ing',l='Ingrediente ativo · grupo químico',w=190),dict(k='cls',l='Classe · modo de ação',w=130),
-            dict(k='cult',l='Culturas',t='num',w=115),dict(k='tox',l='Tox · amb',w=120),dict(k='faz',l='Na fazenda',t='num',w=125)]
-AGF_COLS_U=[dict(k='prod',l='Produto · registro',w=170),dict(k='alvo',l='Praga-alvo',w=170,multi=True),dict(k='cien',l='Nome científico',w=160),
-            dict(k='ucul',l='Cultura do uso',w=110),dict(k='ing',l='Ingrediente ativo · grupo químico',w=180),dict(k='cls',l='Classe · modo de ação',w=130),
-            dict(k='tox',l='Tox · amb',w=120),dict(k='faz',l='Na fazenda',t='num',w=125)]
 AGF_DIR=_os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))),'dados_agrofit','site')
 # arquivos que a página busca (publicar ao lado de AG-07.dc.html); os de produto e de técnicos ficam só no servidor
 def agf_arquivos():
@@ -921,8 +964,8 @@ def _nd(x):
     return s.replace('.',',')
 
 def agf_dados():
-    """Dados embutidos: fichas da fazenda (referência conferida em bula + elo Na fazenda), grupos de resistência por ingrediente e
-    planos que usam cada ficha. A base real vem dos JSON (fetch)."""
+    """Dados embutidos: fichas da fazenda (referência conferida em bula + elo Na fazenda), grupos de resistência por ingrediente,
+    planos que usam cada ficha e talhões por cultura. A base real vem dos JSON (fetch)."""
     import agrofit_dados as A
     import dados2 as D2
     ind=json.load(open(_os.path.join(AGF_DIR,'agrofit_indice.json'),encoding='utf-8'))
@@ -935,6 +978,12 @@ def agf_dados():
             for x in a['prods']:
                 pid=nome2id.get(x['prod'])
                 if pid: planos.setdefault(pid,[]).append(dict(id=pl['id'],nome=pl['nome'],atv=a['nome'],dose=f"{_nd(x['dose'])} {x['un']}/ha"))
+    safn={s['id']:s['nome'] for s in D2.SAFRAS if not s['ro']}
+    tal={}
+    for sid,cs in D2.CULTIVOS.items():
+        if sid not in safn: continue
+        for c in cs:
+            tal.setdefault(c['cultura'].split()[0],[]).append(f"{c['local']} · {_nd(c['area'])} ha · {c['fazenda']} · {safn[sid]}")
     K=('id','nome','nomes_fazenda','ingrediente','concentracao','formulacao','classe','grupos','grupo','grupo_nome','situacao','situacao_nota',
        'avisos','alertas_fazenda','refs_fazenda')
     ref=[]
@@ -947,12 +996,8 @@ def agf_dados():
     gref=[[[_agf_norm(n) for n in ns],c] for ns,c in A.GRUPO_RESIST]
     lac=A.lacunas_resist(ind)
     if lac: print(f'AVISO AG-07: {len(lac)} ingrediente(s) químico(s) sem código IRAC/FRAC/HRAC (rotação cai no grupo químico): {lac[:12]}')
-    # produtos que a O.S. aceita no "Incluir produto" (o mesmo catálogo da tela O.S.: plano + lotes): "Usar na O.S." só oferece estes (CTL-5)
-    from areas.processo_os import _nova_ordem_dados, _ordens
-    osp=sorted({x['p'] for x in _nova_ordem_dados()['prods']})
-    osop={o['id']:o['atv']['op'] for o in _ordens()}   # operação de cada ordem do registro (ordem nova: osc.novo.atv.op): "Usar na O.S." só em pulverização (CTL-5, S3-1)
-    return dict(ref=ref,osp=osp,osop=osop,grupos={k:list(v) for k,v in A.GRUPOS_RESIST.items()},grupo_ref=gref,gq_gen=[_agf_norm(g) for g in A.GQ_GENERICOS],
-                planos=planos,culturas=AGF_CULTURAS,consulta=A.CONSULTA['data'],oficial=A.CONSULTA['link'])
+    return dict(ref=ref,grupos={k:list(v) for k,v in A.GRUPOS_RESIST.items()},grupo_ref=gref,gq_gen=[_agf_norm(g) for g in A.GQ_GENERICOS],
+                planos=planos,tal=tal,culturas=AGF_CULTURAS,consulta=A.CONSULTA['data'],oficial=A.CONSULTA['link'])
 
 def _agf_norm(s):
     import unicodedata
@@ -973,8 +1018,8 @@ def _agf_filtros():
            f'<sc-if value="{H("agf_temClsO")}" hint-placeholder-val="{T_()}"><select aria-label="Outras classes" value="{H("agf_clsO")}" onChange="{H("agf_setClsO")}" style="{H("agf_clsOSt")}">'
            f'<sc-for list="{H("agf_clsOs")}" as="o" hint-placeholder-count="4"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></sc-if></div>')
     cul=f'<div style="display: flex; flex-direction: column; gap: 4px;">{_LAB("Cultura")}{E.ac_campo("agc.","Cultura","250px")}</div>'
-    alvo=(f'<sc-if value="{H("agf_temCul")}" hint-placeholder-val="{F_()}"><div style="display: flex; flex-direction: column; gap: 4px;">{_LAB("Praga-alvo")}'
-          f'{E.ac_campo("aga.","Praga-alvo","330px")}</div></sc-if>')   # o mesmo rótulo da coluna (revisão de 10/10, A6)
+    alvo=(f'<sc-if value="{H("agf_temCul")}" hint-placeholder-val="{F_()}"><div style="display: flex; flex-direction: column; gap: 4px;">{_LAB("Praga ou alvo")}'
+          f'{E.ac_campo("aga.","Praga ou alvo","330px")}</div></sc-if>')
     org=(f'<div style="display: flex; flex-direction: column; gap: 4px;">{_LAB("Orgânicos")}<button type="button" aria-pressed="{H("agf_orgOn")}" onClick="{H("agf_orgTog")}" '
          f'title="Mostrar só produtos marcados como aprovados para agricultura orgânica no AGROFIT" style="{H("agf_orgSt")}">Aprovados para orgânicos <span style="opacity: .75;">{H("agf_orgN")}</span></button></div>')
     faixa=lambda cond,bg,t,d,bt,go: (f'<sc-if value="{H(cond)}" hint-placeholder-val="{F_()}"><div role="status" style="display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; '
@@ -1061,33 +1106,24 @@ def _agf_painel(link):
                 f'align-items: start; padding: 7px 0; border-top: 1px solid {LINE}; font-size: 12.8px; line-height: 1.4; font-variant-numeric: tabular-nums;">{celulas}</div></sc-for></div>')
     cel=lambda x,r=False,b=False: (f'<span role="cell" style="min-width: 0;{" text-align: right;" if r else ""}">' + (f'<b>{x}</b>' if b else x) + '</span>')
     se=lambda c,corpo,ph='false': f'<sc-if value="{H(c)}" hint-placeholder-val="{{{{{ph}}}}}">{corpo}</sc-if>'
-    # próximo passo: uso (cultura × alvo) → "Usar na O.S." (CTL-5 · RL-E3): a consulta não emite receituário; o produto da fazenda, a cultura e o
-    # alvo vão para o "Ajustar antes de liberar" da ordem A liberar escolhida (só as da cultura), onde a liberação confere a regra legal única
+    # próximo passo: uso (cultura × alvo) e o primário "Preparar receituário"
     passo=(f'<div role="region" aria-label="Próximo passo" style="display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; background: {BG}; border-radius: 12px;">'
            f'<div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 12px;">'
            f'<label style="display: flex; flex-direction: column; gap: 4px; flex: 1 1 200px; min-width: 0; font-size: 12px; font-weight: 600; color: {MUTED};">Cultura'
            f'<select aria-label="Cultura do uso" value="{H("af_cul")}" onChange="{H("af_setcul")}" style="{SEL}"><sc-for list="{H("af_culs")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label>'
-           f'<label style="display: flex; flex-direction: column; gap: 4px; flex: 2 1 260px; min-width: 0; font-size: 12px; font-weight: 600; color: {MUTED};">Praga-alvo'
-           f'<select aria-label="Alvo do uso" value="{H("af_alvo")}" onChange="{H("af_setalvo")}" disabled="{H("af_alvoDis")}" style="{SEL}"><sc-for list="{H("af_alvos")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label></div>'
-           f'<div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 12px;">'
-           + se('af_hasPf',f'<label style="display: flex; flex-direction: column; gap: 4px; flex: 1 1 200px; min-width: 0; font-size: 12px; font-weight: 600; color: {MUTED};">Produto da fazenda'
-                f'<select aria-label="Produto da fazenda" value="{H("af_pf")}" onChange="{H("af_setpf")}" style="{SEL}"><sc-for list="{H("af_pfs")}" as="o" hint-placeholder-count="2"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label>')
-           + f'<label style="display: flex; flex-direction: column; gap: 4px; flex: 2 1 260px; min-width: 0; font-size: 12px; font-weight: 600; color: {MUTED};">Ordem A liberar'
-           f'<select aria-label="Ordem A liberar" value="{H("af_ord")}" onChange="{H("af_setord")}" disabled="{H("af_ordDis")}" style="{SEL}"><sc-for list="{H("af_ords")}" as="o" hint-placeholder-count="2"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label>'
-           f'<button type="button" onClick="{H("af_usar")}" disabled="{H("af_usarDis")}" title="Abrir a ordem em Ajustar antes de liberar com este produto incluído" style="{BTN_ST(True,True)} {H("af_usarSt")}">Usar na O.S.</button></div>'
-           + f'<div role="status" style="{MUT}">{H("af_dica")}</div></div>')
+           f'<label style="display: flex; flex-direction: column; gap: 4px; flex: 2 1 260px; min-width: 0; font-size: 12px; font-weight: 600; color: {MUTED};">Praga ou alvo'
+           f'<select aria-label="Alvo do uso" value="{H("af_alvo")}" onChange="{H("af_setalvo")}" disabled="{H("af_alvoDis")}" style="{SEL}"><sc-for list="{H("af_alvos")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label>'
+           f'<button type="button" onClick="{H("af_rxgo")}" disabled="{H("af_rxDis")}" title="Preparar o receituário agronômico deste registro para a cultura e o alvo escolhidos" style="{BTN_ST(True,True)} {H("af_rxSt")}">Preparar receituário</button></div>'
+           + se('af_hasDica',f'<div style="{MUT}">{H("af_dica")}</div>')
+           + se('af_hasDone',f'<span role="status" style="font-size: 12.5px; font-weight: 700; color: {ACC};">{H("af_done")}</span>') + '</div>')
     # usos registrados (por cultura; com a cultura escolhida, os alvos dela)
     usos=(f'<input type="search" aria-label="Filtrar usos por cultura ou alvo" placeholder="Filtrar cultura ou alvo…" value="{H("af_q")}" onChange="{H("af_setq")}" '
           f'style="font-family: inherit; font-size: 13px; padding: 7px 10px; border: 1px solid {LINE}; border-radius: 9px; max-width: 340px;">'
           + se('af_usosLoad',f'<div role="status" style="{MUT}">Carregando os usos registrados…</div>')
-          + f'<div role="table" aria-label="{H("af_usosL")}" style="display: flex; flex-direction: column;">'
-          f'<div role="row" style="display: grid; grid-template-columns: {H("af_usosTpl")}; gap: 10px; padding: 4px 8px; {TH}">'
-          f'<sc-for list="{H("af_usosCab")}" as="h" hint-placeholder-count="3"><span role="columnheader" aria-sort="{H("h.sort")}" style="min-width: 0;">'
-          f'<button type="button" onClick="{H("h.go")}" title="{H("h.tt")}" style="border: 0; background: transparent; padding: 0; font: inherit; color: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; text-align: left;">{H("h.l")} <span aria-hidden="true" style="{H("h.ast")}">{H("h.seta")}</span></button></span></sc-for>'
-          f'<span role="columnheader" aria-label="Ação"></span></div>'
-          f'<sc-for list="{H("af_usos")}" as="u" hint-placeholder-count="3"><div role="row" style="display: grid; grid-template-columns: {H("af_usosTpl")}; gap: 10px; align-items: baseline; padding: 7px 8px; border-top: 1px solid {LINE}; font-size: 12.8px; line-height: 1.4; {H("u.st")}">'
-          f'<sc-for list="{H("u.cs")}" as="x" hint-placeholder-count="3"><span role="cell" style="min-width: 0; overflow-wrap: anywhere; {H("x.st")}">{H("x.t")}</span></sc-for>'
-          f'<span role="cell"><button type="button" onClick="{H("u.go")}" aria-label="{H("u.lab")}" style="{BL} font-size: 12.5px; white-space: nowrap;">{H("u.bt")} ›</button></span></div></sc-for></div>'
+          + f'<div role="list" aria-label="{H("af_usosL")}" style="display: flex; flex-direction: column;">'
+          f'<sc-for list="{H("af_usos")}" as="u" hint-placeholder-count="3"><div role="listitem" style="display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,2fr) auto; gap: 10px; align-items: baseline; padding: 7px 8px; border-top: 1px solid {LINE}; font-size: 12.8px; line-height: 1.4; {H("u.st")}">'
+          f'<b style="min-width: 0;">{H("u.t")}</b><span style="min-width: 0; color: {MUTED};">{H("u.sub")}</span>'
+          f'<button type="button" onClick="{H("u.go")}" aria-label="{H("u.lab")}" style="{BL} font-size: 12.5px;">{H("u.bt")} ›</button></div></sc-for></div>'
           + se('af_usosVazio',f'<div style="{MUT}">Nenhum uso com “{H("af_q")}”.</div>')
           + se('af_usosMais',f'<button type="button" onClick="{H("af_usosTodos")}" style="{BL}">Mostrar todos ({H("af_usosN")}) ›</button>'))
     # rotação: mesma cultura × alvo, outro grupo químico (e outro grupo de resistência quando conhecido)
@@ -1125,7 +1161,7 @@ def _agf_painel(link):
                 f'<a href="{H("rf.h")}" style="{LK}">{H("rf.ref")} ›</a><span>{H("rf.t")}</span></div></sc-for>')))
     # referência conferida em bula (agrofit_dados): mesma combinação de ingredientes
     refb=(f'<div style="{MUT}">Doses e carências conferidas em bula pública de produto com os mesmos ingredientes ativos: não são a bula deste registro. '
-          f'Use para comparar; a dose segue a bula do produto escolhido.</div>'+_agf_cref('af_cref'))
+          f'Use para comparar; o receituário segue a bula do produto escolhido.</div>'+_agf_cref('af_cref'))
     # registro e composição (como no AGROFIT) + link oficial e a nota da bula
     IT='minmax(0,1.3fr) minmax(0,1.1fr) minmax(0,.8fr) minmax(0,1fr)'
     reg_=(f'<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; padding: 12px 14px; background: {BG}; border-radius: 12px;">'
@@ -1154,13 +1190,42 @@ def _agf_painel(link):
       + sec('Na fazenda',faz) + se('af_hasCref',sec('Referência conferida em bula',refb)) + sec('Registro e composição',reg_)
       + '</aside></div></sc-if>')
 
+def _agf_receituario():
+    """Receituário agronômico do registro, da cultura e do alvo escolhidos na ficha (painel sobre a ficha)."""
+    lab=lambda f,t: f'<label for="{f}" style="font-size: 12px; font-weight: 600; color: {MUTED};">{t}</label>'
+    err=lambda c,t: f'<sc-if value="{H(c)}" hint-placeholder-val="{F_()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H(t)}</span></sc-if>'
+    campo=lambda f,t,ctrl,extra='': f'<div style="display: flex; flex-direction: column; gap: 4px;">{lab(f,t)}{ctrl}{extra}</div>'
+    ro=lambda i,hole: f'<input id="{i}" type="text" readOnly="{H("rx_ro")}" value="{H(hole)}" style="{H("rx_rost")}">'
+    return (f'<sc-if value="{H("rx_open")}" hint-placeholder-val="{F_()}"><div style="position: fixed; inset: 0; z-index: 66; display: flex; justify-content: flex-end;">'
+      f'<button type="button" tabIndex="-1" aria-label="Fechar receituário" onClick="{H("rx_cancel")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.35); cursor: pointer;"></button>'
+      f'<aside role="dialog" aria-modal="true" aria-label="Preparar receituário agronômico" style="position: relative; width: 460px; max-width: 100%; height: 100vh; overflow-y: auto; background: {SURF}; '
+      f'box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 24px 26px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px;">'
+      f'<div style="display: flex; align-items: center; gap: 10px;"><h2 style="margin: 0; font-family: {DISP}; font-size: 20px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">Preparar receituário agronômico</h2>'
+      f'<button type="button" aria-label="Fechar" title="Fechar" onClick="{H("rx_cancel")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED};">×</button></div>'
+      + campo('rx_prod','Produto registrado',ro('rx_prod','rx_prod'))
+      + campo('rx_cul','Cultura',ro('rx_cul','rx_cul'))
+      + campo('rx_alvo','Praga ou alvo',ro('rx_alvo','rx_alvo'))
+      + campo('rx_tal','Talhão',f'<sc-if value="{H("rx_hasTals")}" hint-placeholder-val="{T_()}"><select id="rx_tal" value="{H("rx_tal")}" onChange="{H("rx_settal")}" style="{H("rx_tst")}"><sc-for list="{H("rx_tals")}" as="o" hint-placeholder-count="2"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></sc-if>'
+              f'<sc-if value="{H("rx_semTal")}" hint-placeholder-val="{F_()}"><span id="rx_tal" style="font-size: 13px; color: {YEL}; font-weight: 700;">{H("rx_semTalT")}</span></sc-if>',err('rx_hasET','rx_eT'))
+      + campo('rx_dose','Dose (com a unidade)',f'<input id="rx_dose" type="text" placeholder="ex.: 1,5 L/ha" aria-invalid="{H("rx_dinv")}" aria-describedby="rx_dose_bula" value="{H("rx_dose")}" '
+              f'onChange="{H("rx_setdose")}" onBlur="{H("rx_doseok")}" style="{H("rx_dst")}">',
+              err('rx_hasED','rx_eD')+f'<span id="rx_dose_bula" style="font-size: 12px; line-height: 1.45; color: {MUTED};">{H("rx_bula")}</span>')
+      + campo('rx_rt','Responsável técnico',ro('rx_rt','rx_rt'))
+      + campo('rx_rec','Recomendação vinculada',f'<input id="rx_rec" type="text" placeholder="REC-… (opcional)" value="{H("rx_rec")}" onChange="{H("rx_setrec")}" style="{H("rx_ist")}">')
+      + f'<sc-for list="{H("rx_warns")}" as="w" hint-placeholder-count="0"><div role="alert" style="font-size: 12.5px; font-weight: 700; line-height: 1.45; color: {YEL}; background: {YELS}; padding: 8px 12px; border-radius: 10px;">{H("w.t")}</div></sc-for>'
+      + f'<div style="flex-grow: 1;"></div><div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">'
+      f'<button type="button" onClick="{H("rx_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'
+      f'<button type="button" onClick="{H("rx_emit")}" style="{BTN_ST(True,True)}">Emitir receituário</button></div>'
+      f'</aside></div></sc-if>')
+
 AGF_JS=r'''
 // ===== AG-07 · Consulta Agrofit: registros reais (dados abertos AGROFIT/MAPA) =====
 function GR(id){ return GRIDS.find(g=>g.id===id); }
 const AGC=new Intl.Collator('pt-BR',{numeric:true,sensitivity:'base'});
 const AGX={st:'',err:'',tries:0,meta:null,I:null,P:[],reg:{},ord:[],uSt:'',uErr:'',U:null,PU:null,pairs:null,UA:{},lSt:'',lErr:'',L:null,rev:0,
-  vk:null,vis:null,gk:null,grows:null,leaf:{},FK:{},fazCul:[],culItems:[],uleaf:{},UH:{},AT:{},uvk:null,uvis:null,retRid:''};
+  vk:null,vis:null,gk:null,grows:null,leaf:{},FK:{},fazCul:[],culItems:[]};
 const AG_REF={}; AGF.ref.forEach(r=>{ AG_REF[r.id]=r; });
+const AG_RT='Ana Souza · agrônoma RT', AG_RT_NOME='Ana Souza (RT)';   // perfil de demonstração: Ana é gestora e agrônoma RT (Configurações)
 const AG_FAZ=['Com saldo disponível','Sem saldo disponível','Fora da fazenda'];
 const AG_FASE={'A liberar':'gray','Liberadas':'green','Em execução':'green','Em conferência':'yellow'};
 const AG_QST='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;';
@@ -1237,7 +1302,7 @@ function agPrep(I){ AGX.I=I; const F={}; I.campos.forEach((c,i)=>{ F[c]=i; });
   const inm={}; IG.forEach((x,id)=>{ inm[g2norm(x[0]).trim()]=id; }); AGX.FK={};
   AGF.ref.forEach(r=>{ const ids=r.agrofit.map(n=>inm[g2norm(n).trim()]); r.ids=ids.filter(x=>x!==undefined);
     r.key=(r.ids.length&&r.ids.length===r.agrofit.length)?r.ids.slice().sort((a,b)=>a-b).join(','):''; if(r.key) (AGX.FK[r.key]=AGX.FK[r.key]||[]).push(r); });
-  AGX.leaf={}; AGX.uleaf={}; AGX.UH={}; AGX.AT={}; AGX.vk=null; AGX.uvk=null; AGX.gk=null; }
+  AGX.leaf={}; AGX.vk=null; AGX.gk=null; }
 // rotação por MODO DE AÇÃO: código IRAC/FRAC/HRAC de referência de cada ingrediente (AGF.grupo_ref cobre todos os químicos do arquivo).
 // Sem código, vale o grupo químico do AGROFIT; rótulo que não indica modo de ação (biológico, extrato, inorgânico) → o próprio ingrediente.
 // Código "UN" (modo de ação desconhecido) não une produtos. s = chaves de sítio específico; m = multissítio (FRAC M).
@@ -1254,7 +1319,7 @@ function agMesmo(p,q){ const P=p.rot, Q=q.rot; for(const k of Q.s) if(P.s.has(k)
 function agPrepUsos(arr){ const U={}; arr.forEach(s=>{ Object.keys(s.culturas).forEach(k=>{ U[k]=s.culturas[k]; }); });
   const PU=AGX.P.map(()=>[]), pairs=[];
   Object.keys(U).forEach(k=>{ const c=Number(k); U[k].forEach(x=>{ pairs.push({c:c,a:x[0],ps:x[1],h:null}); x[1].forEach(pi=>{ if(PU[pi]) PU[pi].push([c,x[0]]); }); }); });
-  AGX.U=U; AGX.PU=PU; AGX.pairs=pairs; AGX.UA={}; AGX.uleaf={}; AGX.vk=null; AGX.uvk=null; AGX.gk=null; agPrepH(pairs); }
+  AGX.U=U; AGX.PU=PU; AGX.pairs=pairs; AGX.UA={}; AGX.vk=null; AGX.gk=null; agPrepH(pairs); }
 // texto pesquisável dos ~280 mil usos montado em fatias de ~12 ms logo após a carga (a 1ª busca não paga a montagem)
 function agPrepH(pairs){ let i=0; const passo=()=>{ if(AGX.pairs!==pairs) return; const t0=Date.now();
     while(i<pairs.length){ agPairH(pairs[i++]); if((i&511)===0&&Date.now()-t0>12) break; } if(i<pairs.length) setTimeout(passo,0); };
@@ -1292,7 +1357,7 @@ function agVis(st){ const q=st.agf_q||'', cul=st.agf_cul||'', al=st.agf_alvo||''
   const orgN=pre.filter(i=>okCls(P[i])&&P[i].org==='S').length;
   const semCls=pre.filter(i=>!org||P[i].org==='S').length;
   const nTD=cul!==''?ids.filter(i=>!P[i].culSet.has(Number(cul))).length:0;
-  AGX.vis={ids:ids,pre:pre,cnt:cnt,bio:bio,orgN:orgN,semCls:semCls,nTD:nTD,semUsos:incomp&&!uOk}; AGX.vk=k; return AGX.vis; }
+  AGX.vis={ids:ids,cnt:cnt,bio:bio,orgN:orgN,semCls:semCls,nTD:nTD,semUsos:incomp&&!uOk}; AGX.vk=k; return AGX.vis; }
 // ---------- na fazenda (ao vivo): mesmo ingrediente ativo das fichas da fazenda ----------
 function agFaz(p,c){ const refs=AGX.FK[p.key]||[]; if(!refs.length) return null;
   const nf=agUni([].concat.apply([],refs.map(r=>r.nomes_fazenda)));
@@ -1316,53 +1381,6 @@ function agLeafFaz(L,F){ if(!F){ L.v.faz=null; L.s.faz=AG_FAZ[2]; L.p.faz=[{k:'m
   const com=F.por.filter(x=>x.L.length), x0=com[0]||F.por[0]; L.v.faz=F.disp; L.s.faz=F.cat;
   const fz=[{k:'txt',t:x0.n+(F.por.length>1?' +'+(F.por.length-1):'')},{k:'br'}];
   fz.push(x0.L.length?{k:'mut',t:agNf(x0.disp)+' '+x0.un+' disponíveis'}:{k:'mut',t:'sem lote'}); L.p.faz=fz; }
-// ---------- Praga-alvo (09/10): com a cultura escolhida, uma linha por USO na cultura (produto × praga-alvo), como no AGROFIT ----------
-// Praga-alvo = nomes comuns do AGROFIT (r.m.alvo: o filtro da coluna marca o nome, não um pedaço de texto); Nome científico na sua coluna;
-// Cultura do uso = a cultura escolhida ou "Todas as culturas". Sem cultura (ou com os usos ainda carregando), uma linha por produto.
-let AG_COLS_P=null;
-function agModoUso(st){ return (st.agf_cul||'')!==''&&AGX.uSt==='ok'; }
-function agUH(c,a){ const k=c+'|'+a; let h=AGX.UH[k]; if(h===undefined){ const I=AGX.I, al=I.alvos[a]||['',[]]; h=AGX.UH[k]=g2norm(I.culturas[c][0]+' '+al[0]+' '+(al[1]||[]).join(' ')); } return h; }
-function agAT(a){ let t=AGX.AT[a]; if(t===undefined) t=AGX.AT[a]=agAlvoT(a,true); return t; }
-function agUsoLeaf(p,c,a){ const k=p.i+'|'+c+'|'+a; let L=AGX.uleaf[k]; if(L) return L;
-  const I=AGX.I, P0=agLeaf(p), al=I.alvos[a]||['',[],'',0], cs=al[1]||[], com=cs.join(', '), ci=al[0]||'', cn=I.culturas[c][0], id=p.reg+'@'+c+'@'+a;
-  L={id:id, dr:'agf_op_'+id, pi:p.i, uc:c, ua:a, v:{faz:P0.v.faz}, m:{alvo:cs.map(n=>({id:n,l:n}))},
-    s:Object.assign({},P0.s,{alvo:com,cien:ci,ucul:cn}),
-    p:Object.assign({},P0.p,{alvo:[{k:com?'txt':'mut',t:com||(ci?'—':'não informado')}],cien:[{k:ci?'txt':'mut',t:ci||'—'}],ucul:[{k:'txt',t:cn}]})};
-  return (AGX.uleaf[k]=L); }
-// usos visíveis: os produtos que passam nos filtros da lista (agVis) × os alvos deles na cultura (e em "Todas as culturas", salvo "só os de");
-// a busca vale palavra a palavra no produto OU na praga-alvo do MESMO uso (cultura, nome científico e nomes comuns)
-// os chips de classe e de orgânicos contam usos (a mesma unidade da lista), com os demais filtros
-function agVisUso(st){ const V=agVis(st), k=AGX.vk; if(AGX.uvk===k&&AGX.uvis) return AGX.uvis;
-  const I=AGX.I, TD=I.todasCulturas, cul=Number(st.agf_cul), al=st.agf_alvo||'', semTD=!!st.agf_semTD, cls=st.agf_cls||'', org=!!st.agf_org;
-  const ws=g2norm(st.agf_q||'').split(/\s+/).filter(Boolean).slice(0,30), ok=new Set(V.pre), por={};
-  [cul].concat(cul!==TD&&!semTD?[TD]:[]).forEach(c=>agUA(c).forEach((ps,a)=>{ if(al!==''&&a!==Number(al)) return; ps.forEach(i=>{ if(ok.has(i)) (por[i]=por[i]||[]).push([c,a]); }); }));
-  const okCls=(p)=>!cls||(cls==='Biológico'?p.bio:p.comp.indexOf(cls)>=0);
-  const rows=[], cnt={}, pool=[]; let bio=0, orgN=0, semCls=0;
-  V.pre.forEach(i=>{ const L=por[i]; if(!L) return; const p=AGX.P[i];
-    L.sort((x,y)=>((x[0]===cul?0:1)-(y[0]===cul?0:1))||AGC.compare(agAT(x[1]),agAT(y[1])));
-    const M=ws.length?L.filter(x=>ws.every(w=>p.hay.indexOf(w)>=0||agUH(x[0],x[1]).indexOf(w)>=0)):L; if(!M.length) return; const n=M.length; pool.push([i,M]);
-    if(!org||p.org==='S'){ p.comp.forEach(c=>{ cnt[c]=(cnt[c]||0)+n; }); if(p.bio) bio+=n; semCls+=n; }
-    if(okCls(p)&&p.org==='S') orgN+=n;
-    if(okCls(p)&&(!org||p.org==='S')) M.forEach(x=>rows.push(agUsoLeaf(p,x[0],x[1]))); });
-  AGX.uvis={rows:rows,nCul:rows.filter(r=>r.uc===cul).length,cnt:cnt,bio:bio,orgN:orgN,semCls:semCls,pool:pool}; AGX.uvk=k; return AGX.uvis; }
-// chips de classe e de orgânicos com os FILTROS DAS COLUNAS (revisão de 10/10, A5): com filtro de coluna, a contagem é sobre as linhas que
-// passam nele (a mesma unidade da lista: uso ou produto), cada chip sem o próprio filtro (classe: com orgânicos; orgânicos: com a classe).
-// Sem filtro de coluna, valem as contagens de agVis/agVisUso. Em cache pela chave dos filtros.
-function agChipsCol(st,gs){ const f=(gs&&gs.f)||{}; if(!Object.keys(f).some(k=>(f[k]||[]).length)) return null;
-  const mu=agModoUso(st), V=agVis(st), U=mu?agVisUso(st):null, cls=st.agf_cls||'', org=!!st.agf_org;
-  const k=AGX.vk+'#'+(mu?'u':'p')+'#'+JSON.stringify(f); if(AGX.cck===k&&AGX.ccv) return AGX.ccv;
-  const sp=GR(AGF_G), added=st.added||{}, okCls=(p)=>!cls||(cls==='Biológico'?p.bio:p.comp.indexOf(cls)>=0), cnt={}; let bio=0, semCls=0, orgN=0;
-  const conta=(r,p)=>{ if(!g2match(r,sp,{f:f},null,added)) return; if(!org||p.org==='S'){ p.comp.forEach(c=>{ cnt[c]=(cnt[c]||0)+1; }); if(p.bio) bio++; semCls++; } if(okCls(p)&&p.org==='S') orgN++; };
-  if(mu) U.pool.forEach(([i,M])=>{ const p=AGX.P[i]; M.forEach(x=>conta(agUsoLeaf(p,x[0],x[1]),p)); });
-  else V.pre.forEach(i=>{ const p=AGX.P[i]; conta(agLeaf(p),p); });
-  AGX.ccv={cnt:cnt,bio:bio,semCls:semCls,orgN:orgN}; AGX.cck=k; return AGX.ccv; }
-// total de usos da cultura (com "Todas as culturas", salvo "só os de"): o "de N usos em <cultura>" da contagem
-function agUsoTot(st){ const TD=AGX.I.todasCulturas, cul=Number(st.agf_cul); let n=0;
-  [cul].concat(cul!==TD&&!st.agf_semTD?[TD]:[]).forEach(c=>agUA(c).forEach(ps=>{ n+=ps.length; })); return n; }
-// trocar de modo (cultura sim/não) tira filtro e ordenação das colunas que só existem no outro modo
-function agColsLimpa(self,mu){ const ks=(mu?AGF_COLS_U:(AG_COLS_P||[])).map(c=>c.k); const gs=g2st(self,AGF_G), f=Object.assign({},gs.f||{}); let mud=false;
-  Object.keys(f).forEach(k=>{ if(ks.indexOf(k)<0){ delete f[k]; mud=true; } }); const so=gs.so&&gs.so.k&&ks.indexOf(gs.so.k)<0?{}:gs.so;
-  if(mud||so!==gs.so) g2set(self,AGF_G,{f:f,so:so}); }
 function agGKeys(p,gb,F){ const I=AGX.I; switch(gb){
   case 'cls': return p.comp.length?p.comp:['(classe não informada)'];
   case 'gq': return p.gq.length?p.gq.map(g=>I.gruposQuimicos[g]):['(grupo químico não informado)'];
@@ -1402,36 +1420,56 @@ function agHash(){ try{ return decodeURIComponent((location.hash||'').slice(1));
 function agSetHash(h){ try{ if(h){ if(location.hash!=='#'+h) history.replaceState(null,'','#'+h); } else if(location.hash) history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
 function agFoc(el){ return Array.prototype.slice.call(el.querySelectorAll('a[href],button,input,select,textarea,[tabindex]'))
   .filter(x=>!x.disabled&&x.tabIndex>=0&&x.getClientRects().length>0); }
-function agOpen(self,reg,o){ const pi=AGX.reg[reg]; if(pi===undefined) return; const st=self.state, p=AGX.P[pi]; AGX.retRid=(o&&o.rid)||'';
+function agOpen(self,reg){ const pi=AGX.reg[reg]; if(pi===undefined) return; const st=self.state, p=AGX.P[pi];
   if(!st.agf){ try{ AG_RET=document.activeElement; }catch(e){ AG_RET=null; } }
   // cultura e alvo da ficha: os da lista quando o registro os tem. Uso em "Todas as culturas" vale para a cultura da lista (ex.: Mamão),
-  // que fica escolhida: a O.S. precisa da cultura real do talhão.
+  // que fica escolhida: o receituário precisa da cultura real do talhão.
   let cul='', al=''; const lc=st.agf_cul||'', TD=AGX.I.todasCulturas;
   if(lc!==''){ if(p.culSet.has(Number(lc))||p.todas) cul=lc; }
   else if(p.cul.length===1) cul=String(p.cul[0]);
-  const la=(o&&o.a!==undefined)?String(o.a):(st.agf_alvo||''); if(cul!==''&&la!==''&&AGX.PU&&AGX.PU[pi].some(x=>(String(x[0])===cul||(p.todas&&x[0]===TD))&&String(x[1])===la)) al=la;
-  self.setState({agf:reg,af_cul:cul,af_alvo:al,af_q:'',af_all:false,af_uso_so:{},af_pf:'',af_ord:'',agf_miss:''}); agSetHash('reg-'+reg);
+  const la=st.agf_alvo||''; if(cul!==''&&la!==''&&AGX.PU&&AGX.PU[pi].some(x=>(String(x[0])===cul||(p.todas&&x[0]===TD))&&String(x[1])===la)) al=la;
+  self.setState({agf:reg,af_cul:cul,af_alvo:al,af_q:'',af_all:false,rx:null,agf_miss:''}); agSetHash('reg-'+reg);
   setTimeout(()=>{ try{ const a=document.querySelector('aside[aria-label^="Ficha"]'); if(a){ a.scrollTop=0; const b=a.querySelector('button[aria-label="Fechar"]'); if(b&&!a.contains(document.activeElement)) b.focus(); } }catch(e){} },30); }
-function agClose(self){ const reg=self.state.agf; self.setState({agf:null}); agSetHash(self.state.agf_ref||'');
-  const rid=AGX.retRid; AGX.retRid='';
-  setTimeout(()=>{ try{ const p=AGX.P[AGX.reg[reg]]; const lin=(rid&&Array.prototype.slice.call(document.querySelectorAll('main [role=row].g2ed')).find(r=>r.getAttribute('data-rid')===rid))
-      ||(p&&Array.prototype.slice.call(document.querySelectorAll('main [role=row].g2ed')).find(r=>{ const c=r.querySelector('[role=cell]'); return c&&c.innerText.split('\n')[0].trim()===p.nome; }));
+function agClose(self){ const reg=self.state.agf; self.setState({agf:null,rx:null}); agSetHash(self.state.agf_ref||'');
+  setTimeout(()=>{ try{ const p=AGX.P[AGX.reg[reg]]; const lin=p&&Array.prototype.slice.call(document.querySelectorAll('main [role=row].g2ed')).find(r=>{ const c=r.querySelector('[role=cell]'); return c&&c.innerText.split('\n')[0].trim()===p.nome; });
     const alvo=lin||((AG_RET&&AG_RET.isConnected&&AG_RET!==document.body)?AG_RET:document.querySelector('main input[type=search]')); AG_RET=null; if(alvo) alvo.focus(); }catch(e){} },30); }
-function agTeclas(self,e){ const st=self.state; if(!st.agf) return;
-  if(e.key==='Escape'){ if(e.defaultPrevented) return; e.preventDefault(); agClose(self); return; }
-  if(e.key!=='Tab') return; const dlg=document.querySelector('aside[aria-label^="Ficha"]'); if(!dlg) return;
+function agRxFechar(self){ self.setState({rx:null});
+  setTimeout(()=>{ try{ const a=document.querySelector('aside[aria-label^="Ficha"]'); if(!a) return; const b=Array.prototype.slice.call(a.querySelectorAll('button')).find(x=>x.innerText.trim()==='Preparar receituário')||a.querySelector('button[aria-label="Fechar"]'); if(b) b.focus(); }catch(e){} },30); }
+function agTeclas(self,e){ const st=self.state; if(!st.agf&&!st.rx) return;
+  if(e.key==='Escape'){ if(e.defaultPrevented) return; e.preventDefault(); if(st.rx) agRxFechar(self); else agClose(self); return; }
+  if(e.key!=='Tab') return; const dlg=document.querySelector(st.rx?'aside[aria-label="Preparar receituário agronômico"]':'aside[aria-label^="Ficha"]'); if(!dlg) return;
   const f=agFoc(dlg); if(!f.length) return; const a=document.activeElement, i=f.indexOf(a);
   if(!dlg.contains(a)){ e.preventDefault(); (e.shiftKey?f[f.length-1]:f[0]).focus(); }
   else if(e.shiftKey&&i<=0){ e.preventDefault(); f[f.length-1].focus(); }
   else if(!e.shiftKey&&i===f.length-1){ e.preventDefault(); f[0].focus(); } }
 // #reg-<registro> abre a ficha; #<id da ficha da fazenda> (links antigos da O.S. e do MIP) filtra pelo mesmo ingrediente
 function agHashAplica(self){ if(AGX.st!=='ok') return; const h=agHash(), st=self.state;
-  if(!h){ if(st.agf) self.setState({agf:null}); return; }
-  if(h.indexOf('reg-')===0){ const reg=h.slice(4); if(AGX.reg[reg]!==undefined){ if(st.agf!==reg) agOpen(self,reg); } else self.setState({agf:null,agf_miss:reg}); return; }
+  if(!h){ if(st.agf) self.setState({agf:null,rx:null}); return; }
+  if(h.indexOf('reg-')===0){ const reg=h.slice(4); if(AGX.reg[reg]!==undefined){ if(st.agf!==reg) agOpen(self,reg); } else self.setState({agf:null,rx:null,agf_miss:reg}); return; }
   const r=AG_REF[h]; if(!r) return;
   g2set(self,AGF_G,{f:{},aq:'',x:null,so:null});
-  agSetF(self,{agf_ref:h,agf_cul:'',agf_alvo:'',agf_cls:'',agf_org:false,agf_q:'',agf_miss:'',agf:null});
+  agSetF(self,{agf_ref:h,agf_cul:'',agf_alvo:'',agf_cls:'',agf_org:false,agf_q:'',agf_miss:'',agf:null,rx:null});
   const ps=r.key?AGX.P.filter(p=>p.key===r.key):[]; if(ps.length===1) setTimeout(()=>agOpen(self,ps[0].reg),0); }
+// ---------- receituário ----------
+function agTal(cn){ if(cn==='Todas as culturas') return [].concat.apply([],Object.keys(AGF.tal).map(k=>AGF.tal[k])); return AGF.tal[cn]||AGF.tal[String(cn).split(' ')[0]]||[]; }
+function agUn(u){ return String(u||'').toLowerCase().replace(/\s+/g,''); }
+function agFaixa(dose){ const s=String(dose||'').replace(/\([^)]*\)/g,' ').split(' · ')[0].split(' + ')[0].replace(/\s+/g,' ').trim();
+  const m=/^([\d.,]+)\s*(?:[–-]\s*([\d.,]+)\s*)?(.*)$/.exec(s); if(!m) return null; let a=g2num(m[1]), b=m[2]?g2num(m[2]):a, un=m[3].trim();
+  const m2=/^(.+?)\s*[–-]\s*([\d.,]+)\s*(.+)$/.exec(un); if(m2&&agUn(m2[1])===agUn(m2[3])){ b=g2num(m2[2]); un=m2[1].trim(); }
+  if(isNaN(a)||isNaN(b)||!un) return null; return {a:Math.min(a,b),b:Math.max(a,b),un:un}; }
+function agConv(x,de,para){ const A=agUn(de).split('/'), B=agUn(para).split('/'); if(A.join('/')===B.join('/')) return x;
+  if(A.slice(1).join('/')!==B.slice(1).join('/')) return null; const F={l:['v',1],ml:['v',.001],kg:['m',1],g:['m',.001]}, a=F[A[0]], b=F[B[0]];
+  return (a&&b&&a[0]===b[0])?x*a[1]/b[1]:null; }
+function agFaixaT(f){ return (f.a===f.b?agNf(f.a):(agNf(f.a)+'–'+agNf(f.b)))+' '+f.un; }
+function agValDose(s){ const t=String(s||'').trim(); if(!t) return {e:'Informe a dose com a unidade (ex.: 1,5 L/ha).'};
+  if(/^[\d.,]+\s*[–-]\s*[\d.,]/.test(t)) return {e:'Informe uma dose só (ex.: 1,5 L/ha).'};
+  const m=/^([\d.,]+)\s*(.*)$/.exec(t), x=m?g2num(m[1]):NaN; if(isNaN(x)) return {e:'Dose em número com a unidade (ex.: 1,5 L/ha).'};
+  if(!(x>0)) return {e:'A dose precisa ser maior que zero.'}; const un=m[2].trim();
+  if(!/[a-zA-Zµ%]/.test(un)) return {e:'Informe a unidade da dose (ex.: L/ha, kg/ha, mL/100 kg de sementes, % v/v).'};
+  // unidade com base: por área, por volume de calda ou de semente, por planta… ("3 litros" sozinho não diz a quê); % v/v vale (óleo, adjuvante)
+  if(!/^%/.test(un)&&un.indexOf('/')<0&&!/(^|\s)por\s/i.test(un)) return {e:'Informe a base da dose (ex.: L/ha, mL/100 kg de sementes, g/100 L de água ou % v/v).'};
+  return {x:x,un:un,t:agNf(x,3)+' '+un}; }
+// referência conferida da fazenda para a cultura (mesma combinação de ingredientes): faixa na unidade da bula
 // cartão da referência conferida (ficha e faixa "Da fazenda"); p = registro aberto (marca "mesma concentração"), cn = cultura escolhida primeiro
 function agCref(r,p,cn){ const mc=!!p&&r.conc.length===r.ids.length&&r.ids.every((id,j)=>{ const x=p.ing.find(y=>y[0]===id); return x&&Math.abs(Number(x[1])-r.conc[j])<1e-6; });
   const chips=[agChip(r.situacao,r.situacao==='Vigente'?'green':(r.situacao==='Cancelado'?'red':'yellow'))].concat(mc?[agChip('mesma concentração','blue')]:[]);
@@ -1439,13 +1477,13 @@ function agCref(r,p,cn){ const mc=!!p&&r.conc.length===r.ids.length&&r.ids.every
   return {t:r.nome,sub:r.ingrediente+' · '+r.concentracao+' · '+r.formulacao,chips:chips,g:r.grupos.length?r.grupo:'Sem grupo',gn:r.grupo_nome,
     usos:us.map(u=>({c:u.cultura,a:u.alvo,nc:!u.conferido,d:u.dose,car:u.carencia,max:String(u.max_aplic),int:u.intervalo||'—'})),
     avisos:(r.avisos||[]).map(t=>({t:t})),alertas:(r.alertas_fazenda||[]).map(a=>({ref:a.ref,t:a.texto}))}; }
-// ---------- uso na O.S. (CTL-5 · RL-E3) ----------
-// ordens A liberar da cultura: a cultura de cada talhão da ordem pela mesma regra da trava legal (carCult, dados_carencia)
-try{ window.__agx={AGX,AG_REF,agAlvoT,agOsCand}; }catch(e){}   // inspeção nos testes (ctl5_test, agrofit_test), como window.__cen
-// e de operação que aplica defensivo (carOpDef, dados_carencia: pulverização ou tratamento de sementes; revisão do CTL-5, S3-1)
-function agOsOp(o){ const n=o&&o.osc&&o.osc.novo; return (n&&n.atv&&n.atv.op)||((AGF.osop||{})[o.id])||''; }
-function agOsCand(c,cn){ return Object.values((c&&c.ordens)||{}).filter(o=>o.etapa==='A liberar'&&/^OS-/.test(o.id)&&carOpDef(agOsOp(o))&&carTals(o.talhao).some(t=>carCult(o,t.tid)===cn))
-  .sort((a,b)=>AGC.compare(a.id,b.id)); }
+function agRefFaixa(p,cn){ const refs=AGX.FK[p.key]||[]; const out=[];
+  refs.forEach(r=>r.usos.forEach(u=>{ if(u.cultura!==cn) return; const f=agFaixa(u.dose); if(f) out.push({r:r,u:u,f:f}); })); return out; }
+function agRxAbrir(self,p){ const st=self.state; if(st.af_cul===''||st.af_cul===undefined||st.af_alvo===''||st.af_alvo===undefined) return;
+  if(Number(st.af_cul)===AGX.I.todasCulturas) return;   // o receituário nomeia a cultura real do talhão
+  const cn=AGX.I.culturas[Number(st.af_cul)][0], ts=agTal(cn);
+  self.setState({rx:{reg:p.reg,cul:st.af_cul,al:st.af_alvo,t:ts[0]||'',d:'',rec:'',errs:{},dv:null}});
+  setTimeout(()=>{ try{ const s=document.getElementById(ts.length?'rx_tal':'rx_dose'); if(s) s.focus(); }catch(e){} },30); }
 // ---------- render ----------
 function PREVALS(self,v){
   cenOuvir(self);
@@ -1466,19 +1504,15 @@ function PREVALS(self,v){
   v.agf_uLoad=ok&&AGX.uSt==='carregando'; v.agf_uErro=ok&&AGX.uSt==='erro'; v.agf_uErrT=AGX.uErr||''; v.agf_uRetry=()=>{ AGX.uSt=''; agUsosCarregar(self); };
   v.agf_setgb=(e)=>{ self.setState({agf_gb:e.target.value,agf_lim:AG_LIM}); g2set(self,AGF_G,{x:null}); };
   sp.lim=st.agf_lim||AG_LIM;
-  if(!AG_COLS_P) AG_COLS_P=sp.cols.slice();
-  const mu=ok&&agModoUso(st); sp.cols=mu?AGF_COLS_U:AG_COLS_P; v.agf_ncol=sp.cols.length;
   if(!ok){ sp.rows=[]; sp.tree=false; v.agc=agAc(self,'agf_cul',[],'',()=>{}); v.aga=agAc(self,'agf_alvo',[],'',()=>{}); v.agf_orgOn='false'; v.agf_orgN=''; v.agf_orgSt=''; return; }
   const I=AGX.I, TD=I.todasCulturas, cul=st.agf_cul||'', al=st.agf_alvo||'', cls=st.agf_cls||'', gb=st.agf_gb||'';
   const V=agVis(st);
   // filtros: cultura (combobox), praga ou alvo (com a cultura), classe por componente (+ Biológico), orgânicos
-  v.agc=agAc(self,'agf_cul',AGX.culItems,cul,(x)=>{ agColsLimpa(self,x!==''); agSetF(self,{agf_cul:x,agf_alvo:''}); },{ph:'Todas as culturas · digite para buscar'});
+  v.agc=agAc(self,'agf_cul',AGX.culItems,cul,(x)=>{ agSetF(self,{agf_cul:x,agf_alvo:''}); },{ph:'Todas as culturas · digite para buscar'});
   v.agf_temCul=cul!=='';
   const semTD=!!st.agf_semTD, cn0=cul!==''?I.culturas[Number(cul)][0]:''; v.agf_hasTD=cul!==''&&Number(cul)!==TD&&(V.nTD>0||semTD);
-  const VU=mu?agVisUso(st):null; if(mu&&Number(cul)!==TD) v.agf_hasTD=semTD||VU.rows.length>VU.nCul;
   v.agf_tdT=semTD?('Só registros específicos de '+cn0+'; os com uso em "Todas as culturas" (em geral biológicos, registrados por alvo) estão fora.')
-    :(mu?(agNf(VU.nCul)+(VU.nCul===1?' uso registrado em ':' usos registrados em ')+cn0+' + '+agNf(VU.rows.length-VU.nCul)+' em "Todas as culturas" (em geral biológicos, registrados por alvo; valem para qualquer cultura).')
-    :(agNf(V.ids.length-V.nTD)+' com registro em '+cn0+' + '+agNf(V.nTD)+' com uso em "Todas as culturas" (em geral biológicos, registrados por alvo; valem para qualquer cultura).'));
+    :(agNf(V.ids.length-V.nTD)+' com registro em '+cn0+' + '+agNf(V.nTD)+' com uso em "Todas as culturas" (em geral biológicos, registrados por alvo; valem para qualquer cultura).');
   v.agf_tdBt=semTD?'Incluir "Todas as culturas"':('Ver só os de '+cn0); v.agf_tdTog=()=>agSetF(self,{agf_semTD:!semTD});
   let alItems=[]; if(cul!==''&&AGX.uSt==='ok'){ const mm=new Map(); agUA(cul).forEach((ps,a)=>{ mm.set(a,{n:ps.length,todas:false}); });
       if(Number(cul)!==TD&&!st.agf_semTD) agUA(TD).forEach((ps,a)=>{ const x=mm.get(a); if(x) x.n+=ps.length; else mm.set(a,{n:ps.length,todas:true}); });
@@ -1487,15 +1521,15 @@ function PREVALS(self,v){
   v.aga=agAc(self,'agf_alvo',alItems,al,(x)=>{ agSetF(self,{agf_alvo:x}); },{ph:AGX.uSt==='ok'?('Todos os alvos de '+(cul!==''?I.culturas[Number(cul)][0]:'')+' · digite para buscar'):'Carregando alvos…'});
   const chip=(t,n,on,go,lab)=>({t:t,n:agNf(n),on:String(!!on),go:go,lab:lab,st:AG_QST+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')});
   // classes principais em chips (contagem com os demais filtros); as outras num seletor compacto
-  const CN=agChipsCol(st,g2st(self,AGF_G))||(mu?VU:V), nCls=(k)=>k==='Biológico'?CN.bio:(CN.cnt[k]||0);
-  v.agf_clsL=[chip('Todas',CN.semCls,!cls,()=>agSetF(self,{agf_cls:''}),'Mostrar todas as classes')]
+  const nCls=(k)=>k==='Biológico'?V.bio:(V.cnt[k]||0);
+  v.agf_clsL=[chip('Todas',V.semCls,!cls,()=>agSetF(self,{agf_cls:''}),'Mostrar todas as classes')]
     .concat(AG_CLS_PRI.map(k=>chip(k,nCls(k),cls===k,()=>agSetF(self,{agf_cls:cls===k?'':k}),cls===k?'Mostrar todas as classes':'Mostrar só '+k)));
-  const outras=Object.keys(CN.cnt).filter(k=>AG_CLS_PRI.indexOf(k)<0).sort((a,b)=>(CN.cnt[b]-CN.cnt[a])||AGC.compare(a,b)); if(cls&&AG_CLS_PRI.indexOf(cls)<0&&outras.indexOf(cls)<0) outras.push(cls);
+  const outras=Object.keys(V.cnt).filter(k=>AG_CLS_PRI.indexOf(k)<0).sort((a,b)=>(V.cnt[b]-V.cnt[a])||AGC.compare(a,b)); if(cls&&AG_CLS_PRI.indexOf(cls)<0&&outras.indexOf(cls)<0) outras.push(cls);
   const oOn=cls&&AG_CLS_PRI.indexOf(cls)<0; v.agf_temClsO=outras.length>0; v.agf_clsO=oOn?cls:'';
   v.agf_clsOs=[{v:'',t:'Outras classes'}].concat(outras.map(k=>({v:k,t:k+' · '+agNf(nCls(k))})));
   v.agf_setClsO=(e)=>agSetF(self,{agf_cls:e.target.value});
   v.agf_clsOSt=AG_QST+'padding:4px 8px;'+(oOn?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;');
-  const org=!!st.agf_org; v.agf_orgOn=String(org); v.agf_orgN=agNf(CN.orgN); v.agf_orgTog=()=>agSetF(self,{agf_org:!org});
+  const org=!!st.agf_org; v.agf_orgOn=String(org); v.agf_orgN=agNf(V.orgN); v.agf_orgTog=()=>agSetF(self,{agf_org:!org});
   v.agf_orgSt=AG_QST+(org?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')+'padding:6px 12px;';
   // faixa "Da fazenda" (link antigo #<id da ficha>) e aviso de registro fora do arquivo (#reg-<n>)
   const r=st.agf_ref?AG_REF[st.agf_ref]:null;
@@ -1510,15 +1544,12 @@ function PREVALS(self,v){
     v.agf_missSt='background:#FFF3D6;color:#8A5A00;'; v.agf_missX=()=>{ self.setState({agf_miss:''}); agSetHash(''); }; }
   // linhas da grade: folhas em cache; "Na fazenda" ao vivo só nos registros com ingrediente de produto da fazenda
   const P=AGX.P, Fz={}; V.ids.forEach(i=>{ const p=P[i]; if(AGX.FK[p.key]){ Fz[i]=agFaz(p,c); agLeafFaz(agLeaf(p),Fz[i]); } });
-  // por uso: a coluna "Na fazenda" da linha segue a do produto (ao vivo, pelo cenário)
-  const base=mu?VU.rows:V.ids.map(i=>agLeaf(P[i]));
-  if(mu) base.forEach(r=>{ if(Fz[r.pi]!==undefined){ const L=agLeaf(P[r.pi]); r.v.faz=L.v.faz; r.s.faz=L.s.faz; r.p.faz=L.p.faz; } });
-  if(!gb){ sp.tree=false; sp.x0={}; sp.rows=base; }
-  else { const gk=AGX.vk+'#'+gb+'#'+(mu?'u':'p')+'#'+(gb==='faz'?(c.rev||0):''); if(AGX.gk!==gk){ const G={};
-      base.forEach(r=>{ const i=mu?r.pi:AGX.reg[r.id]; agGKeys(P[i],gb,Fz[i]).forEach(k=>{ (G[k]=G[k]||[]).push(r); }); });
+  if(!gb){ sp.tree=false; sp.x0={}; sp.rows=V.ids.map(i=>agLeaf(P[i])); }
+  else { const gk=AGX.vk+'#'+gb+'#'+(gb==='faz'?(c.rev||0):''); if(AGX.gk!==gk){ const G={};
+      V.ids.forEach(i=>{ const p=P[i]; agGKeys(p,gb,Fz[i]).forEach(k=>{ (G[k]=G[k]||[]).push(i); }); });
       const ks2=Object.keys(G).sort(agGOrd(gb));
-      AGX.grows=ks2.map((k,j)=>{ const its=G[k], n=its.length; return {id:'G~'+j, dr:'agf_gx_'+j, v:{}, s:{prod:k}, p:{prod:[{k:'b',t:k},{k:'mut',t:agNf(n)+(mu?(n>1?' usos':' uso'):(n>1?' produtos':' produto'))}]},
-          kids:its.map(r=>Object.assign({},r,{id:r.id+'~'+j}))}; }); AGX.gk=gk; }
+      AGX.grows=ks2.map((k,j)=>{ const its=G[k], n=its.length; return {id:'G~'+j, dr:'agf_gx_'+j, v:{}, s:{prod:k}, p:{prod:[{k:'b',t:k},{k:'mut',t:agNf(n)+(n>1?' produtos':' produto')}]},
+          kids:its.map(i=>Object.assign({},agLeaf(P[i]),{id:P[i].reg+'~'+j}))}; }); AGX.gk=gk; }
     sp.tree=true; sp.x0={}; sp.rows=AGX.grows; }
 }
 // render incremental: a grade ordena e filtra o conjunto inteiro; só as primeiras linhas viram DOM ("Mostrar mais" amplia)
@@ -1534,26 +1565,25 @@ function EXTRAVALS(self,v){
   const st=self.state, sp=GR(AGF_G), gs=g2st(self,AGF_G), G=AGF_G, ok=AGX.st==='ok';
   // busca própria (sem acento; cultura e alvo no mesmo uso) no lugar da busca da grade
   v[G+'_q']=st.agf_q||''; v[G+'_setq']=(e)=>agSetF(self,{agf_q:e.target.value});
-  const mu=ok&&agModoUso(st);
-  v[G+'_all']=mu?(agNf(agUsoTot(st))+' usos em '+AGX.I.culturas[Number(st.agf_cul)][0]):(agNf(ok?AGX.P.length:0)+' produtos');
+  v[G+'_all']=agNf(ok?AGX.P.length:0)+' produtos';
   const fil=Object.keys(gs.f||{}).some(k=>(gs.f[k]||[]).length);
-  if(ok){ const V=agVis(st); if(!fil) v[G+'_count']=agNf(mu?agVisUso(st).rows.length:V.ids.length);
+  if(ok){ const V=agVis(st); if(!fil) v[G+'_count']=agNf(V.ids.length);
     else { const added=st.added||{}, ids=new Set(); const walk=(l)=>l.forEach(r=>{ if(r.kids) walk(r.kids); else if(g2match(r,sp,gs,null,added)) ids.add(String(r.id).split('~')[0]); }); walk(sp.rows||[]); v[G+'_count']=agNf(ids.size); } }
   else v[G+'_count']='0';
   v[G+'_filtered']=fil||!!(st.agf_q||st.agf_cul||st.agf_alvo||st.agf_cls||st.agf_org||st.agf_ref||st.agf_semTD);
   v[G+'_clear']=()=>{ g2set(self,G,{q:'',f:{},qv:'',aq:''}); agSetF(self,{agf_q:'',agf_cul:'',agf_alvo:'',agf_cls:'',agf_org:false,agf_ref:'',agf_semTD:false}); if(st.agf_ref) agSetHash(''); };
   // mais linhas
   const lim=sp.lim||AG_LIM, nf=sp.nflat||0; v.agf_temMais=ok&&nf>lim; v.agf_maisN=agNf(Math.min(AG_PASSO,nf-lim));
-  v.agf_maisT='Mostrando '+agNf(Math.min(lim,nf))+' de '+agNf(nf)+(st.agf_gb?' linhas':(mu?' usos':' produtos')); v.agf_mais=()=>self.setState({agf_lim:lim+AG_PASSO});
+  v.agf_maisT='Mostrando '+agNf(Math.min(lim,nf))+' de '+agNf(nf)+(st.agf_gb?' linhas':' produtos'); v.agf_mais=()=>self.setState({agf_lim:lim+AG_PASSO});
   // abrir ficha e abrir/fechar grupo só nas linhas desenhadas
   (v[G+'_rows']||[]).forEach(rw=>{ const s=String(rw.id); if(s.indexOf('G~')===0){ const j=s.slice(2); v['agf_gx_'+j]=()=>{ const x=Object.assign({},g2st(self,G).x||sp.x0||{}); x[s]=!x[s]; g2set(self,G,{x:x}); }; }
-    else { const id0=s.split('~')[0], q=id0.split('@'); v['agf_op_'+id0]=q.length===3?(()=>agOpen(self,q[0],{a:q[2],rid:s})):(()=>agOpen(self,q[0])); } });
+    else { const reg=s.split('~')[0]; v['agf_op_'+reg]=()=>agOpen(self,reg); } });
   // menu ▾ da coluna: no máximo 300 valores (a busca do menu acha os demais)
   const fm=v[G+'_fm']; if(fm&&fm.open&&fm.vals&&fm.vals.length>300) fm.vals=fm.vals.slice(0,300);
-  agFichaVals(self,v);
+  agFichaVals(self,v); agRxVals(self,v);
 }
 function agFichaVals(self,v){ const st=self.state; const pi=(st.agf&&AGX.st==='ok')?AGX.reg[st.agf]:undefined; const p=pi!==undefined?AGX.P[pi]:null;
-  ['af_chips','af_culs','af_alvos','af_usos','af_usosCab','af_rotG','af_lmr','af_lotes','af_planos','af_os','af_refsF','af_cref','af_kv','af_ings'].forEach(k=>{ v[k]=[]; });
+  ['af_chips','af_culs','af_alvos','af_usos','af_rotG','af_lmr','af_lotes','af_planos','af_os','af_refsF','af_cref','af_kv','af_ings'].forEach(k=>{ v[k]=[]; });
   v.af_open=!!p; v.af_close=()=>agClose(self); if(!p) return;
   if(!AGX.lSt) setTimeout(()=>agLmrCarregar(self),0);
   const I=AGX.I, TD=I.todasCulturas, c=cenGet(), uOk=AGX.uSt==='ok', cul=st.af_cul||'', al=st.af_alvo||'', dt=agDataArq();
@@ -1566,72 +1596,39 @@ function agFichaVals(self,v){ const st=self.state; const pi=(st.agf&&AGX.st==='o
   const ids=agVis(st).ids, i=ids.indexOf(pi); v.af_hasNav=i>=0&&ids.length>1; v.af_pos=agNf(i+1)+' de '+agNf(ids.length);
   v.af_prevDis=i<=0; v.af_nextDis=i<0||i>=ids.length-1; v.af_prevSt=v.af_prevDis?'opacity:.4;cursor:default;':''; v.af_nextSt=v.af_nextDis?'opacity:.4;cursor:default;':'';
   v.af_prev=()=>{ if(i>0) agOpen(self,AGX.P[ids[i-1]].reg); }; v.af_next=()=>{ if(i>=0&&i<ids.length-1) agOpen(self,AGX.P[ids[i+1]].reg); };
-  // uso: cultura × alvo → O.S. Registro em "Todas as culturas": a ficha oferece as culturas da fazenda (e a da lista), porque a
-  // ordem é de um talhão com cultura real; os alvos vêm do uso em "Todas as culturas".
+  // uso: cultura × alvo → receituário. Registro em "Todas as culturas": a ficha oferece as culturas da fazenda (e a da lista), porque o
+  // receituário nomeia a cultura real do talhão; os alvos vêm do uso em "Todas as culturas".
   const cs=p.cul.slice().sort(AGX.culCmp), isTD=cul!==''&&Number(cul)===TD, viaTD=cul!==''&&!isTD&&!p.culSet.has(Number(cul));
   const extra=p.todas?agUni(AGX.fazCul.concat(cul!==''?[Number(cul)]:[])).filter(id=>id!==TD&&!p.culSet.has(id)):[];
   const opC=[]; cs.forEach(id=>{ opC.push({v:String(id),t:I.culturas[id][0]+(id===TD?' (escolha abaixo a cultura do talhão)':'')});
     if(id===TD) extra.forEach(x=>opC.push({v:String(x),t:I.culturas[x][0]+' · pelo uso em “Todas as culturas”'})); });
   v.af_cul=cul; v.af_culs=[{v:'',t:'Escolha a cultura ('+agNf(cs.length)+')'}].concat(opC);
-  v.af_setcul=(e)=>self.setState({af_cul:e.target.value,af_alvo:'',af_all:false,af_uso_so:{}});
+  v.af_setcul=(e)=>self.setState({af_cul:e.target.value,af_alvo:'',af_all:false});
   const PU=uOk?AGX.PU[pi]:[]; const meus=cul!==''?agUni(PU.filter(x=>x[0]===Number(cul)||(p.todas&&!isTD&&x[0]===TD)).map(x=>x[1])):[];
   const alSort=(a,b)=>AGC.compare(agAlvoT(a,true),agAlvoT(b,true)); meus.sort(alSort);
   v.af_alvo=al; v.af_alvoDis=cul===''||!uOk; v.af_setalvo=(e)=>self.setState({af_alvo:e.target.value});
-  // uso na O.S. (CTL-5 · RL-E3): leva produto da fazenda, cultura e alvo ao "Ajustar antes de liberar" da ordem; a consulta não emite receituário
-  const F=agFaz(p,c), nf=F?F.nf.filter(n=>(AGF.osp||[]).indexOf(n)>=0):[], pf=nf.length===1?nf[0]:(nf.indexOf(st.af_pf)>=0?st.af_pf:'');
-  // alvo × referência conferida da fazenda (carAlvoRef, a mesma regra da trava da O.S.; revisão do CTL-5, S3-3): a O.S. grava o alvo como a
-  // referência o escreve, e só alvo coberto por ela liga "Usar na O.S." (a lista continua com todos os alvos do registro, para a consulta)
-  const refDe=(n,a)=>{ const x=I.alvos[a]||['',[]]; for(const t of (x[1]||[]).concat(x[0]?[x[0]]:[])){ const r=carAlvoRef(CARD.prod[n],cn,t); if(r) return r; } return ''; };
-  const cob=nf.length&&cul!==''&&!isTD?meus.filter(a=>nf.some(n=>!!refDe(n,a))):[], marca=cob.length>0&&cob.length<meus.length;
   v.af_alvos=[{v:'',t:!uOk?'Carregando alvos…':(cul===''?'Escolha a cultura primeiro':('Escolha o alvo ('+agNf(meus.length)+')'))}]
-    .concat(meus.map(a=>({v:String(a),t:agAlvoT(a,true)+' · '+((I.alvos[a]||[''])[0]||'—')+(marca&&cob.indexOf(a)>=0?' · na referência da fazenda':'')})));
-  const ar=(al!==''&&pf)?refDe(pf,Number(al)):'', refAl=((((CARD.prod[pf]||{}).usos||{})[cn]||{}).al)||[];
-  v.af_hasPf=nf.length>1; v.af_pf=pf; v.af_pfs=[{v:'',t:'Escolha o produto ('+agNf(nf.length)+')'}].concat(nf.map(n=>({v:n,t:n}))); v.af_setpf=(e)=>self.setState({af_pf:e.target.value});
-  const cand=(cul!==''&&!isTD)?agOsCand(c,cn):[], ord=cand.some(o=>o.id===st.af_ord)?st.af_ord:(cand.length===1?cand[0].id:'');
-  v.af_ord=ord; v.af_ordDis=!cand.length; v.af_setord=(e)=>self.setState({af_ord:e.target.value});
-  v.af_ords=[{v:'',t:cul===''||isTD?'Escolha a cultura primeiro':(cand.length?'Escolha a ordem ('+agNf(cand.length)+')':'Nenhuma ordem de pulverização A liberar em '+cn)}]
-    .concat(cand.map(o=>({v:o.id,t:o.id+' · '+o.tipo+' · '+o.talhao})));
-  // quem age (perfil de demonstração; CTL-3): incluir produto na O.S. é decisão do agrônomo; sem o papel, o botão fica desligado e diz quem decide
-  const PF=g2perfil(), agr=g2papel(PF,'agronomo');
-  const pode=cul!==''&&!isTD&&al!==''&&uOk&&!!pf&&!!ar&&!!ord&&agr; v.af_usarDis=!pode; v.af_usarSt=pode?'':'opacity:.45;cursor:not-allowed;';
-  v.af_usar=()=>{ if(!pode) return; try{ location.href='OS.dc.html#'+ord+':usar='+[pf,cn,ar].map(encodeURIComponent).join('|'); }catch(e){} };
-  v.af_dica=!uOk?'Carregando os usos registrados…':(cul===''?'Escolha a cultura e o alvo do uso registrado para usar o produto numa O.S.'
-    :(isTD?'Uso registrado em “Todas as culturas”: escolha no campo Cultura a cultura do talhão (ex.: '+(extra.slice(0,2).map(x=>I.culturas[x][0]).join(', ')||'Soja')+').'
-    :(al===''?((viaTD?'Registro sem uso específico em '+cn+': vale o uso em “Todas as culturas”. ':'')+'Escolha o alvo.'+(marca?' Os marcados “na referência da fazenda” podem ir para a O.S.':''))
-    :(!nf.length?(F?('A fazenda tem '+F.nf.join(', ')+' só como referência de bula (sem lote nem plano): cadastre o produto para usá-lo numa O.S.')
-      :'Sem produto da fazenda com este ingrediente ativo: cadastre o produto para usá-lo numa O.S.')
-    :(!pf?'Escolha o produto da fazenda.'
-    :(!ar?(an+' não está na referência conferida de '+pf+' em '+cn.toLowerCase()+(refAl.length?' ('+refAl.join('; ')+')':' (sem uso nesta cultura)')+': a O.S. só grava alvo da referência.'+(cob.length?' Escolha um alvo marcado “na referência da fazenda”.':''))
-    :(!cand.length?'Nenhuma ordem de pulverização A liberar em '+cn.toLowerCase()+'. A ordem nasce do plano (Nova ordem, na O.S.) ou da vistoria (Pragas e doenças).'
-    :(!ord?'Escolha a ordem A liberar.'
-    :(!agr?'Incluir '+pf+' na '+ord+' é decisão de '+g2quem('agronomo')+'; o perfil '+PF.t+' só consulta.'
-    :'Abre a '+ord+' em Ajustar antes de liberar com '+pf+' incluído para '+ar+'. A agrônoma informa a dose; ao liberar, a O.S. confere registro, dose e nº de aplicações e grava a aprovação. Esta consulta não emite receituário.')))))))));
+    .concat(meus.map(a=>({v:String(a),t:agAlvoT(a,true)+' · '+((I.alvos[a]||[''])[0]||'—')})));
+  const pode=cul!==''&&!isTD&&al!==''&&uOk; v.af_rxDis=!pode; v.af_rxSt=pode?'':'opacity:.45;cursor:not-allowed;'; v.af_rxgo=()=>{ if(pode) agRxAbrir(self,p); };
+  v.af_hasDica=!pode||viaTD; v.af_dica=!uOk?'Carregando os usos registrados…':(cul===''?'Escolha a cultura e o alvo do uso registrado para preparar o receituário.'
+    :(isTD?'Uso registrado em “Todas as culturas”: escolha no campo Cultura a cultura do talhão (ex.: '+(extra.slice(0,2).map(x=>I.culturas[x][0]).join(', ')||'Soja')+') para preparar o receituário.'
+    :(viaTD?('Registro sem uso específico em '+cn+': vale o uso em “Todas as culturas”.'+(al===''?' Escolha o alvo para preparar o receituário.':''))
+    :'Escolha o alvo para preparar o receituário.')));
+  const dn=(st.agf_rx||{})[p.reg]; v.af_hasDone=!!dn; v.af_done=dn?('Receituário emitido · '+dn):'';
   // usos registrados
   const fq=g2norm(st.af_q||'').split(/\s+/).filter(Boolean), casa=(t)=>fq.every(w=>t.indexOf(w)>=0);
   v.af_q=st.af_q||''; v.af_setq=(e)=>self.setState({af_q:e.target.value,af_all:false}); v.af_usosLoad=!uOk;
   v.af_usosT='Usos registrados · '+agNf(cs.length)+(cs.length===1?' cultura':' culturas')+' · '+agNf(p.nUsos)+(p.nUsos===1?' uso':' usos');
-  // tabela de usos, uma variável por coluna (09/10): com a cultura, os alvos dela (Praga-alvo = nomes comuns · Nome científico · Tipo);
-  // sem cultura, as culturas do registro (Cultura · Nº de alvos · Alvos). Ordenação no cabeçalho (af_uso_so); filtro no campo acima.
-  let rows=[]; const MU='color:#5B6660;';
-  const so=st.af_uso_so||{}, cab=(ks)=>ks.map(([k,l])=>{ const on=so.k===k; return {l:l,sort:on?(so.d?'descending':'ascending'):'none',seta:on?(so.d?'▼':'▲'):'⇅',ast:on?'color:#1E7A4C;font-size:9px;':'color:#B7C1BA;font-size:9px;',
-      tt:'Ordenar por '+l.toLowerCase(),go:()=>self.setState({af_uso_so:!on?{k:k,d:false}:(!so.d?{k:k,d:true}:{})})}; });
-  const ordena=(L,key)=>{ if(!so.k) return L; const d=so.d?-1:1; return L.slice().sort((x,y)=>{ const a=key(x,so.k), b=key(y,so.k); if(a===''&&b==='') return 0; if(a==='') return 1; if(b==='') return -1;
-      return (typeof a==='number'&&typeof b==='number'?(a-b):AGC.compare(String(a),String(b)))*d; }); };
-  if(uOk&&cul!==''){ v.af_usosL='Alvos em '+cn; v.af_usosTpl='minmax(0,1.2fr) minmax(0,1.1fr) minmax(0,.7fr) auto';
-    v.af_usosCab=cab([['com','Praga-alvo'],['ci','Nome científico'],['tipo','Tipo']]);
-    const ali=(a)=>I.alvos[a]||['',[],'',0], kA=(a,k)=>k==='com'?(ali(a)[1]||[]).join(', '):(k==='ci'?(ali(a)[0]||''):(AG_TIPO[ali(a)[2]]||''));
-    rows=ordena(meus.filter(a=>!fq.length||casa(g2norm(cn+' '+agAlvoT(a)))),kA).map(a=>{ const x=ali(a), on=String(a)===al, com=(x[1]||[]).join(', ');
-      return {cs:[{t:com||(x[0]?'—':'não informado'),st:com?'font-weight:700;':MU},{t:x[0]||'—',st:x[0]?'font-style:italic;':MU},{t:AG_TIPO[x[2]]||'—',st:MU}],
-        bt:on?'Escolhido':'Escolher',lab:'Escolher o alvo '+agAlvoT(a,true),st:on?'background:#E4F3E9;border-radius:8px;':'',go:()=>self.setState({af_alvo:String(a)})}; }); }
-  else if(uOk){ v.af_usosL='Culturas do registro'; v.af_usosTpl='minmax(0,1fr) minmax(0,.6fr) minmax(0,1.6fr) auto';
-    v.af_usosCab=cab([['cul','Cultura'],['n','Nº de alvos'],['alvos','Alvos']]); const por={}; PU.forEach(x=>{ (por[x[0]]=por[x[0]]||[]).push(x[1]); });
-    const L=cs.map(cid=>{ const as=(por[cid]||[]).slice().sort(alSort), nm=I.culturas[cid][0]; let mt=as;
+  let rows=[];
+  if(uOk&&cul!==''){ v.af_usosL='Alvos em '+cn;
+    rows=meus.filter(a=>!fq.length||casa(g2norm(cn+' '+agAlvoT(a)))).map(a=>{ const ali=I.alvos[a]||['',[],'',0], on=String(a)===al;
+      return {t:agAlvoT(a,true),sub:(ali[0]||'—')+' · '+(AG_TIPO[ali[2]]||'alvo')+((ali[1]||[]).length>1?' · também '+ali[1].slice(1,4).join(', '):''),bt:on?'Escolhido':'Escolher',lab:'Escolher o alvo '+agAlvoT(a,true),
+        st:on?'background:#E4F3E9;border-radius:8px;':'',go:()=>self.setState({af_alvo:String(a)})}; }); }
+  else if(uOk){ v.af_usosL='Culturas do registro'; const por={}; PU.forEach(x=>{ (por[x[0]]=por[x[0]]||[]).push(x[1]); });
+    rows=cs.map(cid=>{ const as=(por[cid]||[]).slice().sort(alSort), nm=I.culturas[cid][0]; let mt=as;
         if(fq.length){ if(casa(g2norm(nm))) mt=as; else { mt=as.filter(a=>casa(g2norm(nm+' '+agAlvoT(a)))); if(!mt.length) return null; } }
-        return {cid:cid,nm:nm,as:as,mt:mt}; }).filter(Boolean);
-    rows=ordena(L,(x,k)=>k==='cul'?x.nm:(k==='n'?x.as.length:x.mt.map(a=>agAlvoT(a,true)).join(', '))).map(x=>({
-        cs:[{t:x.nm,st:'font-weight:700;'},{t:agNf(x.as.length),st:'font-variant-numeric:tabular-nums;'},{t:x.mt.slice(0,4).map(a=>agAlvoT(a,true)).join(', ')+(x.mt.length>4?' +'+agNf(x.mt.length-4):''),st:MU}],
-        bt:'Escolher',lab:'Escolher a cultura '+x.nm,st:'',go:()=>self.setState({af_cul:String(x.cid),af_alvo:(fq.length&&x.mt.length===1)?String(x.mt[0]):'',af_q:'',af_all:false,af_uso_so:{}})})); }
-  else { v.af_usosL='Usos registrados'; v.af_usosTpl='minmax(0,1fr) auto'; v.af_usosCab=[]; }
+        return {t:nm,sub:agNf(as.length)+(as.length===1?' alvo: ':' alvos: ')+mt.slice(0,4).map(a=>agAlvoT(a,true)).join(', ')+(mt.length>4?' +'+(mt.length-4):''),bt:'Escolher',lab:'Escolher a cultura '+nm,st:'',
+          go:()=>self.setState({af_cul:String(cid),af_alvo:(fq.length&&mt.length===1)?String(mt[0]):'',af_q:'',af_all:false})}; }).filter(Boolean); }
   v.af_usosN=agNf(rows.length); v.af_usosMais=!st.af_all&&rows.length>40; v.af_usosTodos=()=>self.setState({af_all:true});
   v.af_usos=st.af_all?rows:rows.slice(0,40); v.af_usosVazio=uOk&&fq.length>0&&!rows.length;
   // rotação: mesma cultura × alvo, OUTRO MODO DE AÇÃO (código IRAC/FRAC/HRAC de referência por ingrediente; ver agRotKeys)
@@ -1649,7 +1646,7 @@ function agFichaVals(self,v){ const st=self.state; const pi=(st.agf&&AGX.st==='o
       ps:L.slice(0,4).map(Q=>({t:Q.nome,lab:'Abrir a ficha de '+Q.nome+' (registro '+Q.reg+')',go:()=>agOpen(self,Q.reg)})),mais:L.length>4?('+'+agNf(L.length-4)):''}; });
     if(gks.length>12) v.af_rotG.push({t:'+ '+agNf(gks.length-12)+' grupos',n:'na lista',ps:[],mais:''});
     v.af_rotNota='Modo de ação pelo código IRAC/FRAC/HRAC de referência de cada ingrediente (o AGROFIT publica só o grupo químico); sem código, vale o grupo químico. Multissítio (FRAC M) que o produto já tem não conta como rotação; multissítio novo conta.';
-    v.af_rotVer=()=>{ g2set(self,AGF_G,{f:{},x:null}); agSetF(self,{agf_cul:cul,agf_alvo:al,agf_q:'',agf_cls:'',agf_org:false,agf_ref:'',agf_gb:'moa',agf:null}); agSetHash(''); }; }
+    v.af_rotVer=()=>{ g2set(self,AGF_G,{f:{},x:null}); agSetF(self,{agf_cul:cul,agf_alvo:al,agf_q:'',agf_cls:'',agf_org:false,agf_ref:'',agf_gb:'moa',agf:null,rx:null}); agSetHash(''); }; }
   // LMR ANVISA da cultura
   v.af_lmrT=cul!==''?('LMR ANVISA · '+cn):'LMR ANVISA'; v.af_lmrHint=cul===''||AGX.lSt!=='ok'; v.af_hasLmr=false; v.af_lmrErro=AGX.lSt==='erro'&&cul!=='';
   v.af_lmrErrT='O LMR da ANVISA não carregou: '+(AGX.lErr||''); v.af_lmrRetry=()=>{ AGX.lSt=''; agLmrCarregar(self); };
@@ -1668,7 +1665,7 @@ function agFichaVals(self,v){ const st=self.state; const pi=(st.agf&&AGX.st==='o
         else { t=agLmrT(e,L)+(k!==can?(' · registrado como “'+k+'”'):''); bad=!e[2]; } }
       return {t:ig[0],v:t,st:bad?'color:#B42318;font-weight:700;':''}; }); }
   // na fazenda (ao vivo)
-  v.af_fora=!F; v.af_hasFaz=!!F;
+  const F=agFaz(p,c); v.af_fora=!F; v.af_hasFaz=!!F;
   if(F){ v.af_fazT='Mesmo ingrediente ativo de '+F.nf.join(', ')+' (a fazenda registra o produto pelo nome, sem a marca).';
     v.af_lotes=F.L.slice().sort((a,b)=>cenDisp(b)-cenDisp(a)).map(l=>({prod:l.prod,lote:l.lote,local:l.local,fis:agNf(l.fisico)+' '+l.un,res:agNf(l.reservado)+' '+l.un,disp:agNf(cenDisp(l))+' '+l.un}));
     v.af_hasLotes=F.L.length>0; v.af_semLotes=!F.L.length; v.af_lotTot='Disponível: '+F.por.filter(x=>x.L.length).map(x=>x.n+' '+agNf(x.disp)+' '+x.un).join(' · ');
@@ -1692,6 +1689,32 @@ function agFichaVals(self,v){ const st=self.state; const pi=(st.agf&&AGX.st==='o
   v.af_resNota='O AGROFIT informa o grupo químico, não o grupo de resistência; o código IRAC/FRAC/HRAC acima é referência das classificações públicas, por ingrediente ativo (sem código: biológico, extrato, óleo ou modo de ação desconhecido).';
   v.af_bula='Dose, carência, intervalo de reentrada e nº de aplicações: na bula do produto (não estão nos dados abertos). No AGROFIT oficial, consulte o registro nº '+p.reg+'.';
 }
+function agRxVals(self,v){ const st=self.state, rx=st.rx, pi=(rx&&AGX.st==='ok')?AGX.reg[rx.reg]:undefined, p=pi!==undefined?AGX.P[pi]:null;
+  v.rx_open=!!p; ['rx_tals','rx_warns'].forEach(k=>{ v[k]=[]; }); v.rx_cancel=()=>agRxFechar(self); if(!p) return;
+  const I=AGX.I, cn=I.culturas[Number(rx.cul)][0], an=agAlvoT(Number(rx.al),true), sci=(I.alvos[Number(rx.al)]||[''])[0], ts=agTal(cn), er=rx.errs||{};
+  const upd=(o)=>self.setState({rx:Object.assign({},self.state.rx,o)});
+  v.rx_prod=p.nome+' · registro '+p.reg; v.rx_cul=cn+(p.culSet.has(Number(rx.cul))?'':' (uso registrado em “Todas as culturas”)'); v.rx_alvo=an+(sci&&sci!==an?' ('+sci+')':''); v.rx_rt=AG_RT; v.rx_ro=true;
+  v.rx_tals=ts.map(t=>({v:t,t:t})); v.rx_tal=rx.t; v.rx_hasTals=ts.length>0; v.rx_semTal=!ts.length; v.rx_semTalT='Nenhum cultivo de '+cn.toLowerCase()+' nas safras abertas.';
+  v.rx_settal=(e)=>upd({t:e.target.value,errs:Object.assign({},self.state.rx.errs,{t:''})});
+  // referência conferida (mesma combinação de ingredientes, mesma cultura): só AVISA fora da faixa; a bula do registro manda
+  const RF=agRefFaixa(p,cn);
+  const fora=(vd)=>{ if(!vd||vd.e||!RF.length) return ''; const f0=RF[0].f; let a=Infinity,b=-Infinity,un=f0.un; RF.forEach(x=>{ const fa=agConv(x.f.a,x.f.un,un), fb=agConv(x.f.b,x.f.un,un); if(fa!==null){ a=Math.min(a,fa); b=Math.max(b,fb); } });
+    const x=agConv(vd.x,vd.un,un); if(x===null||a===Infinity) return ''; if(x<a-1e-9||x>b+1e-9) return 'Fora da referência conferida em bula ('+RF[0].r.nome+': '+agFaixaT({a:a,b:b,un:un})+' em '+cn+'). Confira a bula deste registro antes de emitir.'; return ''; };
+  v.rx_dose=rx.d; v.rx_setdose=(e)=>{ const d=e.target.value, cur=self.state.rx; upd({d:d,errs:Object.assign({},cur.errs,{d:(cur.errs||{}).d?(agValDose(d).e||''):''})}); };
+  v.rx_doseok=()=>{ const cur=self.state.rx; if(!cur||!String(cur.d||'').trim()) return; upd({errs:Object.assign({},cur.errs,{d:agValDose(cur.d).e||''})}); };
+  v.rx_bula='Confira dose e carência na bula (AGROFIT oficial · registro '+p.reg+').'+(RF.length?(' Referência conferida: '+agUni(RF.map(x=>x.r.nome+' '+agFaixaT(x.f)+' ('+x.u.alvo+')')).slice(0,3).join('; ')+' em '+cn+'.'):'');
+  v.rx_rec=rx.rec; v.rx_setrec=(e)=>upd({rec:e.target.value});
+  const w=[]; const vd=String(rx.d||'').trim()?agValDose(rx.d):null; const fw=fora(vd); if(fw) w.push(fw);
+  v.rx_warns=w.map(t=>({t:t}));
+  v.rx_eT=er.t||''; v.rx_hasET=!!er.t; v.rx_eD=er.d||''; v.rx_hasED=!!er.d; v.rx_dinv=String(!!er.d);
+  const IST=(bad,ro)=>'font-family:inherit;font-size:14px;padding:9px 11px;border-radius:10px;box-sizing:border-box;width:100%;color:#15201A;border:1px solid '+(bad?'#B42318':'#E4E9E5')+';background:'+(ro?'#F4F6F3':'#FFFFFF')+';';
+  v.rx_ist=IST(false,false); v.rx_rost=IST(false,true); v.rx_tst=IST(!!er.t,false); v.rx_dst=IST(!!er.d,false);
+  v.rx_emit=()=>{ const cur=self.state.rx, e2={}, vd2=agValDose(cur.d); if(!cur.t) e2.t=ts.length?'Escolha o talhão.':'Sem cultivo desta cultura nas safras abertas: escolha outra cultura na ficha.'; if(vd2.e) e2.d=vd2.e;
+    if(Object.keys(e2).length){ upd({errs:e2}); setTimeout(()=>{ try{ const el=document.getElementById(e2.t?'rx_tal':'rx_dose'); if(el&&el.focus) el.focus(); }catch(e){} },30); return; }
+    const lbl=cn+' · '+an+' · '+cur.t.split(' · ')[0]+' · '+vd2.t, rec=String(cur.rec||'').trim();
+    const okx=Object.assign({},self.state.agf_rx||{}); okx[p.reg]=lbl;
+    self.setState({agf_rx:okx,g2toast:'Receituário emitido · '+p.nome+' (reg. '+p.reg+') · '+lbl+' · assinado por '+AG_RT_NOME+(rec?' · vinculado a '+rec:'')}); agRxFechar(self); };
+}
 '''
 
 def ag07():
@@ -1700,14 +1723,12 @@ def ag07():
     fname='AG-07.dc.html'; E._reset_screen(fname)
     dados=agf_dados(); link=A.CONSULTA['link']
     # 6 colunas; larguras máximas (texto quebra) para a grade inteira caber em 1280 px com o menu aberto (contêiner de ~956 px)
-    # com a cultura escolhida, as 8 colunas por uso (AGF_COLS_U): a página troca sp.cols e o número de trilhas da grade (agf_ncol, _agf_pos)
-    cols=[dict(c) for c in AGF_COLS_P]
+    cols=[dict(k='prod',l='Produto · registro',w=180),dict(k='ing',l='Ingrediente ativo · grupo químico',w=190),dict(k='cls',l='Classe · modo de ação',w=130),
+          dict(k='cult',l='Culturas',t='num',w=115),dict(k='tox',l='Tox · amb',w=120),dict(k='faz',l='Na fazenda',t='num',w=125)]
     g=grid(cols,[],edit=dict(m='ro',title='',fields=[]),gid=AGF_ID,total=False,tools=_agf_tools())
     corpo=_agf_estados()+f'<sc-if value="{H("agf_ok")}" hint-placeholder-val="{F_()}">'+bloco('Produtos fitossanitários com registro','',_agf_filtros()+g+_agf_mais())+'</sc-if>'
-    EXTRA.append(_agf_painel(link))
-    import dados_carencia as DCAR   # local e cultura das ordens (Usar na O.S.): a mesma regra da trava legal da O.S.
-    EXTRAJS[0]=(cenario.js_prefixo()+DCAR.js_local()+'const AGF = '+json.dumps(dados,ensure_ascii=False).replace('</','<\\/')+';\nconst AGF_G = '+json.dumps(AGF_ID)+';\n'
-                +'const AGF_COLS_U = '+json.dumps([E._col_un(dict(c)) for c in AGF_COLS_U],ensure_ascii=False)+';\n'+AGF_JS)
+    EXTRA.append(_agf_painel(link)); EXTRA.append(_agf_receituario())
+    EXTRAJS[0]=(cenario.js_prefixo()+'const AGF = '+json.dumps(dados,ensure_ascii=False).replace('</','<\\/')+';\nconst AGF_G = '+json.dumps(AGF_ID)+';\n'+AGF_JS)
     HEIGHTS37[fname]=900
     shell37('AG-07','Consulta Agrofit',corpo,fname=fname,status=(H('agf_stT'),'gray'),cont=_agf_fonte(link),search=False)
     _agf_pos(fname)
@@ -1733,8 +1754,4 @@ def _agf_pos(fname):
     assert s.count('</style>')>=1; s=s.replace('</style>','.agf-busca:focus-within{outline:2px solid #1E7A4C;outline-offset:1px}</style>',1)
     old=_chip(H('agf_stT'),'gray'); assert s.count(old)==1, 'selo do cabeçalho não encontrado em '+fname
     s=s.replace(old,f'<span role="status" style="{H("agf_stSt")}"><span style="{H("agf_stDot")}"></span>{H("agf_stT")}</span>')
-    # uma linha por uso (cultura escolhida) tem 8 colunas; por produto, 6: o número de trilhas da grade vem da página (agf_ncol)
-    tpl=f'grid-template-columns: var(--g2cols, repeat({len(AGF_COLS_P)}, auto));'
-    assert s.count(tpl)==1, 'trilhas da grade não encontradas em '+fname
-    s=s.replace(tpl,'grid-template-columns: var(--g2cols, repeat('+H('agf_ncol')+', auto));')
     open(p,'w',encoding='utf-8').write(s)

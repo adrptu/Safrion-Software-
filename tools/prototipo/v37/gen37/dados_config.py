@@ -10,7 +10,7 @@ import json, os, re, hashlib
 HERE = os.path.dirname(os.path.abspath(__file__))
 VERSAO = 1
 DIA_OP = '2026-09-26'      # data operacional da demonstração (a mesma de CEN_DIA_OP)
-FEM = {'Ana', 'Paula', 'Marta', 'Dora'}     # rótulo do papel no feminino ("gestora", "agrônoma"); sintético (Marta: BEN-1)
+FEM = {'Ana', 'Paula', 'Marta'}     # rótulo do papel no feminino ("gestora", "agrônoma"); sintético (Marta: BEN-1)
 # implantação (CONF-D22): Ana recebe o acesso da plataforma no aceite do contrato v1 (28/06) e concede aos outros no início do contrato (01/07);
 # quem foi admitido depois recebe na admissão (Lucas, 01/08). Beto (admitido em 22/09) segue sem acesso.
 ACESSO_INI = {'p1': ('2026-06-28', 'Plataforma (implantação)')}
@@ -90,9 +90,7 @@ _CACHE = {}
 def js_prefixo():
     """prefixo de TODA tela (engine), uma vez, depois do da assinatura: CONF0 + configuracoes.js (só nomes conf*/CONF*, RV-13)."""
     if 'js' not in _CACHE:
-        import ui37   # v57: com o Beneficiamento fora da navegação (BEN_PUBLICADO=False), a trilha não liga para BEN.dc.html (decisão da v55)
         _CACHE['js'] = ('const CONF0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n'
-                        + 'const CONF_BEN_H = ' + json.dumps('BEN.dc.html#' if ui37.BEN_PUBLICADO else '') + ';\n'
                         + open(os.path.join(HERE, 'configuracoes.js'), encoding='utf-8').read() + '\n')
     return _CACHE['js']
 

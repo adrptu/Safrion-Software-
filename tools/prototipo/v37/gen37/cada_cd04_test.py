@@ -2,7 +2,6 @@
 """CD-04 · pessoas e equipes (15 verificações no Chrome): caldeira da OS-0424 (Paula), habilidades em múltipla escolha com a habilitação
 exigida, habilitação vencida grava e marca 'Não alocável em O.S.', filtros rápidos por habilidade e 'Não alocáveis', estado calculado e
 clicável, vigência do safrista, calendário herdado da equipe, 'Irrigante' e o acesso ao app só leitura (Configurações › Usuários e alçadas, CONF-01)."""
-# TABELAS-FOCO (06/10/2026): vínculo | disponível até | habilitação | validade (vencida em vermelho) em colunas próprias; calendário e acesso no painel
 from cada_lib import T
 import time, json
 t=T(); J=t.J
@@ -15,20 +14,18 @@ try:
     t.goto('CD-04.dc.html')
     t.chk('cabeçalho: estado calculado "2 não alocáveis · 1 a renovar em 30 dias" e primária "Cadastrar pessoa"',
           '2 não alocáveis · 1 a renovar em 30 dias' in t.header() and 'Cadastrar pessoa' in t.bloco() and not t.errs(), t.header()+' '+t.errs())
-    # TABELAS-FOCO (06/10/2026): habilitação e validade em colunas próprias ("NR-31 | 30/04/2027"), o estado no chip da Situação
     p=t.rowtxt(0,'Paula') or ''
     t.chk('Paula é caldeira da equipe Campo 1 (OS-0424) com NR-31 válida; "Irrigante" no lugar de "Irrigacionista"',
-          'Preparar calda (caldeiro)' in p and 'Campo 1' in p and 'NR-31 30/04/2027' in p and 'Alocável' in p and 'Irrigacionista' not in J("document.body.innerText")
+          'Preparar calda (caldeiro)' in p and 'Campo 1' in p and 'NR-31 até 30/04/2027' in p and 'Irrigacionista' not in J("document.body.innerText")
           and 'Irrigantes (1)' in J("[...document.querySelectorAll('main select option')].map(o=>o.text).join(' | ')"), p)
     l=t.rowtxt(0,'Lucas') or ''
     t.chk('Lucas (safrista) com NR-31 vencida aparece "Não alocável em O.S." com o motivo e a vigência do contrato',
-          'Não alocável em O.S.' in l and 'NR-31 15/08/2026' in l and 'Safrista 31/07/2027' in l, l)
+          'Não alocável em O.S.' in l and 'NR-31 vencida em 15/08/2026' in l and 'Safrista' in l and 'até 31/07/2027' in l, l)
     t.mainsel('cal'); a=nomes(); t.clk('A resolver'); b=nomes(); t.mainsel(''); b2=nomes(); t.clk('Todas'); c=conta()
-    # PCM simplificado (S1): Otávio (p14) entra no cadastro; CONF-D04: Caio (p11); BEN-1: Igor e Marta (equipe e8) · 14 pessoas na v57
-    t.chk('filtros do bloco: Função Caldeiros → Paula e Nilton; com A resolver → nenhum caldeiro; Todas → 15 (Caio da CONF-D04; Otávio da manutenção; Dora do comercial; Igor e Marta do beneficiamento)', a==['Paula','Nilton'] and b==[] and c=='15/15', [a,b,c])
+    t.chk('filtros do bloco: Função Caldeiros → Paula e Nilton; com A resolver → nenhum caldeiro; Todas → 13 (Caio entrou no CD-04, CONF-D04; Igor e Marta do beneficiamento, BEN-1)', a==['Paula','Nilton'] and b==[] and c=='13/13', [a,b,c])
     t.clk('A resolver'); a=nomes(); ch=J("(()=>{const b=[...document.querySelectorAll('main .cadx-qf button')].find(b=>b.innerText.trim().startsWith('A resolver')); return !!b&&b.getAttribute('aria-pressed')==='true';})()"); t.clk('Limpar filtros'); c=conta()
-    t.chk('filtro rápido "A resolver" (no bloco) mostra quem precisa de ação (Marcos a renovar, Lucas, Beto) e "Limpar filtros" volta às 15',
-          a==['Marcos','Lucas','Beto'] and b2==['Marcos','Lucas','Beto'] and ch and c=='15/15', [a,b2,ch,c])
+    t.chk('filtro rápido "A resolver" (no bloco) mostra quem precisa de ação (Marcos a renovar, Lucas, Beto) e "Limpar filtros" volta às 13',
+          a==['Marcos','Lucas','Beto'] and b2==['Marcos','Lucas','Beto'] and ch and c=='13/13', [a,b2,ch,c])
     t.openrow(0,'Lucas'); L=t.labels()
     t.chk('formulário: Nome → Equipe → Habilidades → validade da habilitação exigida → vínculo e vigência → calendário → custo com encargos; sem "Função"',
           L==['Nome','Equipe','Habilidades','Validade da NR-31','Vínculo','Admissão','Disponível até','Calendário de trabalho','Custo-hora com encargos','Situação'], L)   # acesso ao app saiu do formulário (CONF-01 P4, CONF-D05)
@@ -37,19 +34,18 @@ try:
           not t.isopen() and 'R$ 40,00/h' in l and 'Não alocável em O.S.' in l and 'não alocável em O.S. até resolver NR-31 vencida em 15/08/2026' in ts, [l,ts,t.alerts()])
     t.openrow(0,'Lucas'); t.fset('v31','2027-08-15'); t.btn('Salvar'); time.sleep(.2); l=t.rowtxt(0,'Lucas') or ''
     t.chk('renovar a NR-31 libera o Lucas e o estado do cabeçalho é recalculado',
-          'NR-31 15/08/2027' in l and 'Não alocável' not in l and '1 não alocável · 1 a renovar em 30 dias' in t.header(), [l,t.header()])
+          'NR-31 até 15/08/2027' in l and 'Não alocável' not in l and '1 não alocável · 1 a renovar em 30 dias' in t.header(), [l,t.header()])
     t.openrow(0,'Rui'); h0=help_('Habilidades'); marca('Irrigar'); L=t.labels(); h1=help_('Habilidades')
     t.chk('marcar "Irrigar" faz aparecer a validade da NR-10 exigida (Rui não exigia nenhuma)',
           'Nenhuma habilitação exigida' in h0 and 'Validade da NR-10' in L and 'Exige NR-10 com validade' in h1, [h0,L,h1])
     t.cancel()
-    # CONF-01 P4 (CONF-D05): o acesso ao app sai do formulário; o CD-04 só lê o estado de Configurações e leva a Usuários e alçadas para gerenciar.
-    # Revisão TABR (09/10, A1): calendário e acesso ficam no painel da pessoa (não na linha).
+    # CONF-01 P4 (CONF-D05): o acesso ao app sai do formulário; o CD-04 só lê o estado de Configurações e leva a Usuários e alçadas para gerenciar
     t.openrow(0,'Beto'); he=help_('Equipe'); og=t.dlg(); lk=t.J("!![...document.querySelectorAll('aside[role=dialog] a')].find(a=>a.getAttribute('href')==='CF-01.dc.html#pessoa=Beto')")
     t.chk('calendário herdado da equipe aparece no campo Equipe; o acesso ao app é só leitura ("Sem acesso") com o link para gerenciar em Configurações',
-          'Calendário da equipe: seg–sáb · 06–15h · 9 h/dia' in he and 'Acesso ao app: Sem acesso · gerenciar em Configurações › Usuários e alçadas' in og and lk and t.fv('cal')=='Da equipe' and t.fv('acesso') is None, [he,og[-250:],lk,t.fv('cal')])
-    t.fset('cal','escala 6×2 · 8h'); t.btn('Salvar'); time.sleep(.2); ts=t.toast()
-    t.openrow(0,'Beto'); b=t.fv('cal'); t.cancel()
-    t.chk('a exceção de calendário fica na pessoa (painel) e salvar não envia pedido de acesso', b=='escala 6×2 · 8h' and 'pedido de acesso' not in ts, [b,ts])
+          'Calendário da equipe: seg–sáb · 06–15h · 9 h/dia' in he and 'Acesso ao app: Sem acesso · gerenciar em Configurações › Usuários e alçadas' in og and lk and t.fv('cal')=='Da equipe', [he,og[-250:],lk,t.fv('cal')])
+    t.fset('cal','escala 6×2 · 8h'); t.btn('Salvar'); time.sleep(.2); b=t.rowtxt(0,'Beto') or ''; ts=t.toast()
+    t.chk('a exceção de calendário aparece na linha e a linha diz "Sem acesso ao app" (lido de Configurações)',
+          'Sem acesso ao app' in b and 'calendário próprio: escala 6×2 · 8h' in b and 'pedido de acesso' not in ts, [b,ts])
     t.openrow(0,'Ana'); og=t.dlg(); t.cancel()
     t.chk('quem tem acesso vê "Acesso ao app: Ativo desde 28/06/2026" só em consulta, com o link para Configurações', 'Acesso ao app: Ativo desde 28/06/2026' in og and t.fv('acesso') is None, og[-250:])
     t.clk('Cadastrar pessoa')

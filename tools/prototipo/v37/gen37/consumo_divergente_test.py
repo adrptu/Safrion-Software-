@@ -6,7 +6,7 @@ Aceitar mostra antes de confirmar de onde sai cada litro (custódia, reserva da 
 O.S. mostra o selo e não encerra com o caso aberto · aceitar regulariza uma vez e não deixa reserva própria acima da necessidade · recusar deixa o relato
 sem efeito · sem sinal o caso só aparece depois do envio · recibo de caso resolvido abre com o estado (Aceito/Recusado).
 Capturas em _probe/q_consumo_*.png. Uso: python3 consumo_divergente_test.py   (compile antes: build.py ou areas.mobile/processo_estoque)"""
-import os, sys, time
+import os, time
 from app_lib import App
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -158,4 +158,3 @@ try:
     a.abrir('MB-01'); a.clk('Restaurar demonstração')
 finally:
     a.fim()
-sys.exit(1 if a.FAIL else 0)   # revisão Codex 6064114787 §5: "19/20 com exit 0 é falha, não aprovação" — o resultado do harness segue as verificações

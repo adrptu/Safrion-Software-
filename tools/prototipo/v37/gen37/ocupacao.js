@@ -56,9 +56,7 @@ function ocP(ctx,o){ if(o.classe==='perene') return OC_INF; if(o.classe==='plano
 function ocOcupaAte(ctx,o,modo){ if(modo==='pior') return ocP(ctx,o); if(o.classe==='semdata') return o.plantio; return o.fim; }
 function ocLib(ctx,o,modo){ return ocMais(ocOcupaAte(ctx,o,modo),o.folga); }
 function ocNucLib(o){ return ocMais(o.nuc,o.folga); }
-// fim (exclusivo) do núcleo com pelo menos o dia do plantio: cultura sem ciclo com folga 0 ocupa o dia (SAF-C01; a T-faixa usava o intervalo vazio)
-function ocNucFim(o){ return Math.max(ocNucLib(o),o.plantio+1); }
-function ocNucAtivo(o,x){ return o.plantio<=x&&x<ocNucFim(o); }
+function ocNucAtivo(o,x){ return (o.plantio<=x&&x<ocNucLib(o))||o.plantio===x; }
 function ocMesmaArea(a,b){ return a.faixa===b.faixa||a.tipo!=='Parcela'||b.tipo!=='Parcela'; }
 function ocComPlano(o){ return !!o.plano||o.classe==='perene'; }
 function ocOcupacoes(ctx,safras,cults){ const recs=[], vistos={};
@@ -66,35 +64,29 @@ function ocOcupacoes(ctx,safras,cults){ const recs=[], vistos={};
     if(vistos[o.ciclo]){ vistos[o.ciclo].safs.push(c.saf); return; } vistos[o.ciclo]=o; recs.push(o); }); return recs; }
 function ocIntersec(a0,a1,b0,b1){ const x0=Math.max(a0,b0), x1=Math.min(a1,b1); return x0<x1?[x0,x1]:null; }
 function ocCmp(a,b){ return (a.plantio-b.plantio)||(a.id<b.id?-1:(a.id>b.id?1:0)); }
-// área física ocupada num dia (SAF-C01): na mesma faixa conta a maior área; talhão inteiro cobre o talhão (vale o maior entre ele e as parcelas).
-// Sem par na mesma área é a soma simples, na mesma ordem
-function ocFisica(l){ let ti=null; const fx=new Map(); l.forEach(o=>{ if(o.tipo!=='Parcela') ti=ti===null?o.area:Math.max(ti,o.area); else fx.set(o.faixa,fx.has(o.faixa)?Math.max(fx.get(o.faixa),o.area):o.area); });
-  let p=0; fx.forEach(a=>{ p+=a; }); return ti===null?p:(fx.size?Math.max(ti,p):ti); }
 // R-14 trava e R-15 pendência entre as ocupações de um talhão de área T. A pendência fica na de plantio mais tardio.
 // Soma no tempo por eventos (SAF-C01): os núcleos ativos só mudam em plantio, plantio + 1 e fim do núcleo (com folga), e os períodos previstos
 // em início e liberação (est). Entre dois pontos seguidos nada muda: cada trecho é avaliado uma vez, sem horizonte (o teto antigo, d0 + 900
 // dias, deixava uma perene ou ocupação antiga esconder a soma de anos depois). Depois do último ponto só ficam perenes, com núcleo igual ao
 // previsto: dá trava ou nada, nunca pendência; por isso o último trecho conta 1 dia.
-// A soma do dia é a área física (ocFisica): um par antigo na mesma faixa não tira o dia da soma. O dia só sai da soma do alvo quando o
-// próprio alvo está na mesma área de outra ocupação ativa e esse par já tem regra: a T-faixa no núcleo (com plano), a R-15 por par no previsto.
 function ocAvalia(ctx,occs,T,alvo){ const trav=[], pend={}; const oc=occs.slice().sort(ocCmp); const add=(k,x)=>{ (pend[k]||(pend[k]=[])).push(x); };
   for(let i=0;i<oc.length;i++){ const A=oc[i]; for(let j=i+1;j<oc.length;j++){ const B=oc[j];
     if(A.ciclo===B.ciclo) continue; if(alvo&&alvo!==A.id&&alvo!==B.id) continue; if(!ocMesmaArea(A,B)) continue;
     [[A,B],[B,A]].forEach(([X,Y])=>{ if(Y.classe==='observado'&&ocIntersec(X.ini,ocLib(ctx,X,'est'),Y.plantio,ocNucLib(Y))&&X.plantio>=Y.plantio) trav.push(['observado',Y.id,X.id,Math.max(X.ini,Y.plantio)]); });
-    if((ocComPlano(A)||ocComPlano(B))&&ocIntersec(A.plantio,ocNucFim(A),B.plantio,ocNucFim(B))){ trav.push(['faixa',A.id,B.id,B.plantio]); continue; }
+    if((ocComPlano(A)||ocComPlano(B))&&ocIntersec(A.plantio,ocNucLib(A),B.plantio,ocNucLib(B))){ trav.push(['faixa',A.id,B.id,B.plantio]); continue; }
     const kind={plano:'prevista',informada:'prevista',observado:'prevista',estimado:'provavel',semdata:'naoconf'}[A.classe];
     if(kind){ const fimA=ocLib(ctx,A,kind==='naoconf'?'pior':'est'); const r=ocIntersec(A.ini,fimA,B.ini,ocLib(ctx,B,'est')); if(r) add(B.id,[kind,A.id,r[0],r[1]-1,r[1]-r[0]]); } } }
-  if(occs.length){ const pts=new Set(); const NF=occs.map(ocNucFim), LE=occs.map(o=>ocLib(ctx,o,'est'));   // fim do núcleo e liberação, uma vez por ocupação
-    occs.forEach((o,k)=>{ [o.plantio,o.plantio+1,ocNucLib(o),o.ini,LE[k]].forEach(x=>{ if(x<OC_INF) pts.add(x); }); });
+  if(occs.length){ const pts=new Set();
+    occs.forEach(o=>{ [o.plantio,o.plantio+1,ocNucLib(o),o.ini,ocLib(ctx,o,'est')].forEach(x=>{ if(x<OC_INF) pts.add(x); }); });
     const xs=Array.from(pts).sort((p,q)=>p-q);
-    const visT={}, visP={}, ordP=[];
-    const crA=(l,plano)=>{ if(!alvo) return false; const a=l.find(o=>o.id===alvo); return !!a&&l.some(b=>b!==a&&b.ciclo!==a.ciclo&&ocMesmaArea(a,b)&&(!plano||ocComPlano(a)||ocComPlano(b))); };
+    const visT={}, visP={}, ordP=[]; const sum=(l)=>l.reduce((s,o)=>s+o.area,0);
+    const cruz=(l)=>l.some((a,k)=>l.slice(k+1).some(b=>ocMesmaArea(a,b)&&a.ciclo!==b.ciclo));
     const ult=(l)=>l.reduce((m,o)=>(!m||ocCmp(o,m)>0)?o:m,null);
-    for(let i=0;i<xs.length;i++){ const x=xs[i], n=(i+1<xs.length?xs[i+1]:x+1)-x; const nu=occs.filter((o,k)=>o.plantio<=x&&x<NF[k]); const sn=ocFisica(nu);
-      if(sn>T+0.005&&nu.some(ocComPlano)&&!crA(nu,true)){ const last=ult(nu);
-        if(!alvo||nu.some(o=>o.id===alvo)){ const k=nu.filter(o=>o!==last).map(o=>o.id).sort().join('+'); const kk=k+'>'+last.id; if(!visT[kk]){ visT[kk]=1; trav.push(['soma',k,last.id,x,ocR2(sn)]); } } }
-      else { const pv=occs.filter((o,k)=>o.ini<=x&&x<LE[k]);
-        if(ocFisica(pv)>T+0.005&&!crA(pv,false)){ const last=ult(pv); const key=last.id+'>'+pv.filter(o=>o!==last).map(o=>o.id).sort().join('+');
+    for(let i=0;i<xs.length;i++){ const x=xs[i], n=(i+1<xs.length?xs[i+1]:x+1)-x; const nu=occs.filter(o=>ocNucAtivo(o,x));
+      if(sum(nu)>T+0.005&&nu.some(ocComPlano)&&!cruz(nu)){ const last=ult(nu);
+        if(!alvo||nu.some(o=>o.id===alvo)){ const k=nu.filter(o=>o!==last).map(o=>o.id).sort().join('+'); const kk=k+'>'+last.id; if(!visT[kk]){ visT[kk]=1; trav.push(['soma',k,last.id,x,ocR2(sum(nu))]); } } }
+      else { const pv=occs.filter(o=>o.ini<=x&&x<ocLib(ctx,o,'est'));
+        if(sum(pv)>T+0.005&&!cruz(pv)){ const last=ult(pv); const key=last.id+'>'+pv.filter(o=>o!==last).map(o=>o.id).sort().join('+');
           if(!visP[key]){ visP[key]=[x,x,0]; ordP.push(key); } const v=visP[key]; v[1]=x+n-1; v[2]+=n; } } }
     ordP.forEach(key=>{ const i=key.indexOf('>'); const lid=key.slice(0,i), causa=key.slice(i+1); const v=visP[key];
       if(alvo&&alvo!==lid&&causa.split('+').indexOf(alvo)<0) return; add(lid,['soma',causa,v[0],v[1],v[2]]); }); }
@@ -154,14 +146,8 @@ function ocChecar(ctx,safras,antes,depois,sid,alvo,T){ const occ=ocOcupacoes(ctx
   const aviso=mesmo.filter(y=>y!==o&&ocMesmaArea(o,y)&&(y.classe==='estimado'||y.classe==='semdata')&&y.ini<o.ini&&o.ini<ocLib(ctx,y,'pior'));
   return {trav,pend:ocPendNovas(pe0,pe),aviso,o,mesmo}; }
 function ocTroca(cults,novo){ return cults.filter(c=>c.id!==novo.id).concat([novo]); }
-// SAF-C01 (desempenho): fica de fora o que libera, no pior caso, antes de todo candidato (início ≥ desde) e da versão gravada do alvo, salvo
-// esta safra (T-área) e o ciclo do alvo. Não cruza nenhum dia em que o alvo existe: a trava e as pendências do alvo saem iguais (teste de
-// equivalência em ocupacao_unit.py); com histórico longo a busca dia a dia deixa de reavaliar décadas de ocupações a cada dia.
 function ocPlantioMin(ctx,safras,cults,sid,novo,desde,T,ate){ const t=novo.talhao||ocTalhaoDe(novo.faixa,novo.tipo);
-  const old=cults.filter(c=>c.id===novo.id); let base=cults.filter(c=>c.faz===novo.faz&&(c.talhao||ocTalhaoDe(c.faixa,c.tipo))===t&&c.id!==novo.id);
-  let c0=desde; ocOcupacoes(ctx,safras,old).forEach(o=>{ if(o.ini<c0) c0=o.ini; }); const cic=novo.ciclo||novo.id; const vale={};
-  ocOcupacoes(ctx,safras,base).forEach(o=>{ if(o.safs.indexOf(sid)>=0||o.ciclo===cic||Math.max(ocLib(ctx,o,'pior'),o.plantio+1)>c0) vale[o.ciclo]=1; });
-  base=base.filter(c=>vale[c.ciclo||c.id]); const antes=base.concat(old);
+  const base=cults.filter(c=>c.faz===novo.faz&&(c.talhao||ocTalhaoDe(c.faixa,c.tipo))===t&&c.id!==novo.id); const antes=base.concat(cults.filter(c=>c.id===novo.id));
   let d=desde+(novo.plano?ocAntecedencia(ctx,novo.plano):0); const fim=(ate!==undefined&&ate!==null)?ate:ocDia(safras[sid].fim);
   for(;d<=fim;d++){ const nv=Object.assign({},novo,{plantio:ocIso(d)}); const r=ocChecar(ctx,safras,antes,base.concat([nv]),sid,novo.id,T); if(!r.trav.length&&!Object.keys(r.pend).length) return d; }
   return null; }
@@ -179,25 +165,15 @@ function ocAtvDo(ctx,o){ const a=ocAtvEm(ctx,o,o.ini); const pn=ocPlanoNome(ctx,
 function ocPomar(cult){ return {'Café':'o cafezal','Mamão Formosa':'o pomar'}[cult]||'a lavoura perene'; }
 function ocDaSafra(o,sid){ return o.safs.indexOf(sid)>=0?'desta safra':'da '+o.safnome; }
 function ocDias(n){ return n+(n===1?' dia':' dias'); }
-// M1 e Dividir (SAF-C01): maior área física dos outros em núcleo nos dias de núcleo do grupo (o alvo, ou as parcelas do Dividir), pelos pontos de
-// evento da varredura (o critério da T-soma); x = primeiro dia desse pior, quem = os outros em núcleo nele. null: nenhum outro em núcleo nesses dias
-function ocPior(ctx,grupo,outros){ const pts=new Set(); grupo.concat(outros).forEach(o=>{ [o.plantio,o.plantio+1,ocNucLib(o)].forEach(x=>{ if(x<OC_INF) pts.add(x); }); });
-  let best=null; Array.from(pts).sort((p,q)=>p-q).forEach(x=>{ if(!grupo.some(g=>ocNucAtivo(g,x))) return; const at=outros.filter(o=>ocNucAtivo(o,x)); if(!at.length) return;
-    const s=ocFisica(at); if(!best||s>best.pior) best={pior:s,x,quem:at}; }); return best; }
-// "Máximo X ha" da M1: área − pior dos outros nos dias de núcleo do alvo; com a T-área, também o que sobra desta safra. Regravar com ele não deixa
-// trava de soma nem de safra (propriedade em ocupacao_unit.py). null: sem trava de área
-function ocMaximo(ctx,chk,T){ const o=chk.o, tr=chk.trav; const sf=tr.find(x=>x[0]==='safra'); if(!sf&&!tr.some(x=>x[0]==='soma')) return null;
-  const p=ocPior(ctx,[o],chk.mesmo.filter(x=>x!==o)); let m=p?T-p.pior:T;
-  if(sf) m=Math.min(m,T-(chk.mesmo.filter(x=>x!==o&&x.safs.indexOf(sf[1])>=0).reduce((q,x)=>q+x.area,0)));   // soma sem arredondar (a da trava vem com 2 casas)
-  return {max:Math.max(0,Math.floor(m*100+1e-6)/100),p}; }   // para baixo: regravar com o número mostrado nunca passa da área
-// período citado: do maior início ao menor fim entre o grupo e quem está no pior dia (com duas ocupações, a interseção dos dois períodos)
-function ocPeriodoTxt(grupo,p){ const ini=ocMax([ocMin(grupo.map(g=>g.ini))].concat(p.quem.map(x=>x.ini)));
-  let fim=ocMin([ocMax(grupo.map(g=>g.fim!==null?g.fim:g.plantio))].concat(p.quem.filter(x=>x.fim!==null).map(x=>x.fim))); if(fim<ini) fim=ini;
-  return fim>=OC_INF?'A partir de '+ocBr(ini):'De '+ocBr(ini)+' a '+ocBr(fim); }
-function ocQuemTxt(p){ return p.quem.map(x=>x.cult+' ('+x.faixa+', '+x.safnome+')').join(' e '); }
 function ocMsgTrava(ctx,chk,sid,T,pmin){ const o=chk.o, tr=chk.trav; const by={}; chk.mesmo.forEach(x=>{ by[x.id]=x; }); const folga=ctx.folga; const tipos=tr.map(x=>x[0]);
-  if(tipos.indexOf('safra')>=0||tipos.indexOf('soma')>=0){ const M=ocMaximo(ctx,chk,T);
-    if(M.p) return ocPeriodoTxt([o],M.p)+', '+ocHa(M.p.pior)+' ha de '+o.t+' estão com '+ocQuemTxt(M.p)+'. Máximo '+ocHa(M.max)+' ha nesse período.';
+  if(tipos.indexOf('safra')>=0||tipos.indexOf('soma')>=0){
+    const outros=chk.mesmo.filter(x=>x!==o&&ocIntersec(o.ini,ocLib(ctx,o,'est'),x.ini,ocLib(ctx,x,'est')));
+    if(outros.length){ const ini=ocMax([o.ini].concat(outros.map(x=>x.ini))); const fim=ocMin([o.fim!==null?o.fim:o.plantio].concat(outros.filter(x=>x.fim!==null).map(x=>x.fim)));
+      // maior soma dos outros nos dias ini..ate: só muda no início e na liberação de cada um (SAF-C01; o laço dia a dia ia até 10^8 com perenes)
+      const ate=ini+Math.max(1,fim-ini+1)-1; const pts=[ini].concat(outros.map(x=>x.ini),outros.map(x=>ocLib(ctx,x,'est'))).filter(d=>ini<=d&&d<=ate);
+      const pior=ocMax(pts.map(d=>outros.filter(x=>x.ini<=d&&d<ocLib(ctx,x,'est')).reduce((q,x)=>q+x.area,0)));
+      const quem=outros.map(x=>x.cult+' ('+x.faixa+', '+x.safnome+')').join(' e ');
+      return (fim>=OC_INF?'A partir de '+ocBr(ini):'De '+ocBr(ini)+' a '+ocBr(fim))+', '+ocHa(pior)+' ha de '+o.t+' estão com '+quem+'. Máximo '+ocHa(Math.max(0,T-pior))+' ha nesse período.'; }
     const s=(tr.find(x=>x[0]==='safra')||[0,0,0,0,0])[4];
     return 'As áreas de '+o.t+' nesta safra somariam '+ocHa(s)+' ha; o talhão tem '+ocHa(T)+' ha (livre: '+ocHa(Math.max(0,T-(s-o.area)))+' ha).'; }
   const ob=tr.find(x=>x[0]==='observado');
@@ -212,9 +188,7 @@ function ocMsgTrava(ctx,chk,sid,T,pmin){ const o=chk.o, tr=chk.trav; const by={}
     if(pri===outro) return pri.faixa+' está com '+ocNomeCv(pri)+' '+ocDaSafra(pri,sid)+', '+ocGen(pri.cult,'plantado')+' em '+ocBr(pri.plantio)+': ocupa a área até pelo menos '+ocBr(pri.nuc)+' ('+base+'). O plano geraria insumo e O.S. sobre lavoura em campo. Informe a colheita '+ocDe(pri.cult)+' '+ocMinus(pri.cult)+' ou plante a partir de '+ocBr(ocMais(pri.nuc,folga))+'.';
     return pri.faixa+': '+ocArt(pri.cult)+' '+ocNomeCv(pri)+' '+ocDaSafra(pri,sid)+', '+ocGen(pri.cult,'plantado')+' em '+ocBr(pri.plantio)+', ocupa a área até pelo menos '+ocBr(pri.nuc)+' ('+base+'), e '+ocArt(seg.cult)+' '+seg.cult+' '+ocDaSafra(seg,sid)+' começa em '+ocBr(seg.plantio)+'. O plano geraria insumo e O.S. sobre lavoura em campo.'; }
   return 'Sobreposição com outra ocupação do talhão.'; }
-// P3. Perene nova (SAF-C01): ela não libera a parcela, então replanejar a sucessora não resolve; a saída é outra parcela (livre = nome sugerido)
-function ocMsgSemJanela(ctx,o,seg,baseLib,sid,livre){ if(o.classe==='perene') return ocArt(o.cult).toUpperCase()+' '+ocMinus(o.cult)+' é perene e não libera '+o.faixa+': use outra parcela'+(livre?' (ex.: '+livre+')':'')+'.';
-  const ant=o.plano?ocAntecedencia(ctx,o.plano):0; const pl=baseLib+ant; let fim;
+function ocMsgSemJanela(ctx,o,seg,baseLib,sid){ const ant=o.plano?ocAntecedencia(ctx,o.plano):0; const pl=baseLib+ant; let fim;
   if(o.plano){ const [ok]=ocDatasValidas(ctx,pl,o.plano,o.safini,o.safim,null); fim=ocMax([pl].concat(ok.map(x=>x[2]))); } else fim=ocFimEstimado(ctx,o.cult,o.var,pl)||pl;
   return o.faixa+' tem '+seg.cult+' '+ocDaSafra(seg,sid)+' a partir de '+ocBr(seg.plantio)+'. Para '+ocArt(o.cult)+' '+ocMinus(o.cult)+' com '+(ocPlanoNome(ctx,o)||'o plano')+' começar depois do cultivo anterior ('+ocBr(baseLib)+'), replaneje esse '+ocMinus(seg.cult)+' para '+ocBr(ocMais(fim,ctx.folga))+' ou depois.'; }
 function ocMsgPend(ctx,chk,sid,pmin){ const o=chk.o; const by={}; chk.mesmo.forEach(x=>{ by[x.id]=x; }); if(!Object.keys(chk.pend).length) return '';

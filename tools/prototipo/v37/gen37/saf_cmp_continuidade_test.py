@@ -58,24 +58,21 @@ try:
     r=J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf('Safrinha 2027')>=0); const b=r&&[...r.querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())); if(!b) return 'sem botão'; b.click(); return b.innerText.trim();})()"""); time.sleep(.6)
     chk('1 SAF: Safrinha 2027 abre direto na etapa 4, demanda de insumos ("Continuar: enviar demanda para cotação")',r=='Continuar: enviar demanda para cotação' and cur().startswith('4 '),(r,cur()))
     k6=J("(document.body.innerText.match(/Valor da necessidade[^\\n]+/)||[''])[0]")
-    # CTL-4 (demanda única): as O.S. abertas entram na demanda da fazenda e a parte do plano que elas cobrem sai (antes R$ 1.098.502,50);
-    # o valor sai da quantidade a comprar com 0,01 da unidade, a mesma da Compra (Fungicida A 22,98 L: R$ 1.094.947,10, nunca 1.094.946,91 aqui e 947,10 lá)
-    chk('2 SAF demanda de insumos (CAL-01): R$ 1.094.947,10 · 8 insumos a comprar · ainda não enviada',k6=='Valor da necessidade líquida R$ 1.094.947,10 · 8 insumos a comprar · ainda não enviada',k6)
+    chk('2 SAF demanda de insumos (CAL-01): R$ 1.098.502,50 · 8 insumos a comprar · ainda não enviada',k6=='Valor da necessidade líquida R$ 1.098.502,50 · 8 insumos a comprar · ainda não enviada',k6)
     clk('Expandir tudo'); mp=rowtxt('MAP 11-52')
     # TABELAS-FOCO (5983172395): necessidade, unidade, data da falta e "usado antes" em colunas próprias
     # a unidade fica junto do valor (decisão do proprietário, 05/10/2026); data da falta e "usado antes" em colunas próprias
     mpc=[cel('MAP 11-52',k) for k in ('Necessidade líquida','Falta em','Usado antes da compra')]
-    # revisão do 853a6a8 (achado 1): os 500 kg em custódia sem uso da OS-0417 (em conferência) são suprimento da fazenda e a Safra 2026/27 os usa antes
-    chk('3 SAF MAP 11-52: 101.440 kg com falta em 20/02/2027 · estoque apto 90.000 + 500 em custódia usados antes',mpc==['101.440 kg','20/02/2027','90.500 kg'],(mpc,mp))
+    chk('3 SAF MAP 11-52: 101.440 kg com falta em 20/02/2027 · estoque apto 90.000 usado antes',mpc==['101.440 kg','20/02/2027','90.000 kg'],(mpc,mp))
     rowclick('MAP 11-52'); m_saf=memo(); fechar()
-    chk('4 SAF memória MAP: estoque apto, usos da Safra 2026/27 antes, resultado com a data',m_saf[:1]==['Estoque apto hoje: 90.000 kg + 500 kg em custódia sem uso nas O.S., a devolver ao Estoque (500 kg · REQ-031 · OS-0417 (em conferência)) = 90.500 kg'] and any(l.startswith('15/10/2026 · Safra 2026/27 · 1 uso · −') for l in m_saf)
+    chk('4 SAF memória MAP: estoque apto, usos da Safra 2026/27 antes, resultado com a data',m_saf[:1]==['Estoque apto hoje: 90.000 kg'] and any(l.startswith('15/10/2026 · Safra 2026/27 · 1 uso · −') for l in m_saf)
         and m_saf[-1]=='Necessidade líquida = soma das faltas desta safra = 101.440 kg · falta a partir de 20/02/2027',m_saf)
     foto('1_saf_etapa6')
     clk('Enviar para cotação'); t=T()
-    chk('5 SAF envia SOL-2027-02: 8 insumos, R$ 1.094.947,10, origem Safrinha 2027 · demanda de insumos',t.startswith('Solicitação SOL-2027-02 enviada a Compras: 8 insumos, R$ 1.094.947,10. Origem: Safrinha 2027 · Planejar safra, demanda de insumos.'),t)
+    chk('5 SAF envia SOL-2027-02: 8 insumos, R$ 1.098.502,50, origem Safrinha 2027 · demanda de insumos',t.startswith('Solicitação SOL-2027-02 enviada a Compras: 8 insumos, R$ 1.098.502,50. Origem: Safrinha 2027 · Planejar safra, demanda de insumos.'),t)
     g=ls(); s=((g or {}).get('sols') or {}).get('S27SF') or {}
     chk('6 registro único talhao-os-compras-v1: ID, fazenda, safra, 8 itens, estado e origem',s.get('id')=='SOL-2027-02' and s.get('safra')=='S27SF' and s.get('nome')=='Safrinha 2027' and s.get('faz')=='Santa Rita'
-        and len(s.get('itens') or {})==8 and s.get('estado')=='Enviada · a cotar' and (s.get('origem') or {}).get('h')=='SAF.dc.html#saf=S27SF&passo=demanda' and abs((s.get('total') or 0)-1094947.10)<0.01,
+        and len(s.get('itens') or {})==8 and s.get('estado')=='Enviada · a cotar' and (s.get('origem') or {}).get('h')=='SAF.dc.html#saf=S27SF&passo=demanda' and abs((s.get('total') or 0)-1098502.5)<0.01,
         {k:s.get(k) for k in ['id','safra','nome','faz','estado','origem','total']})
     clk('Enviar para cotação') if J("[...document.querySelectorAll('button')].some(b=>b.offsetParent&&b.innerText.trim()==='Enviar para cotação')") else None
     chk('7 SAF: tudo enviado, a ação principal vira "Abrir Compra de insumos ›" (sem duplicar)',J("[...document.querySelectorAll('button,a')].filter(b=>b.offsetParent).some(b=>b.innerText.trim()==='Abrir Compra de insumos ›')") and len((ls() or {}).get('sols',{}))==1)
@@ -84,18 +81,18 @@ try:
     nav('Abrir Compra de insumos ›','CMP.dc.html')
     chk('8 CMP abre a mesma solicitação: #sol=SOL-2027-02&saf=S27SF, etapa 2, contexto "Safrinha 2027 · SOL-2027-02"',url()=='/CMP.dc.html#sol=SOL-2027-02&saf=S27SF' and cur().startswith('2 Confira a demanda') and 'Safrinha 2027 · SOL-2027-02' in body(),(url(),cur()))
     k2=J("(document.body.innerText.match(/SOL-2027-02 · Safrinha 2027[^\\n]+/)||[''])[0]"); tot=J("[...document.querySelectorAll('.g2tot')].filter(x=>x.offsetParent).map(x=>x.innerText).join(' ')") or ''
-    chk('9 CMP etapa 2: mesmos 8 insumos e R$ 1.094.947,10 (resumo e total da tabela)','8 insumos a comprar · R$ 1.094.947,10 a preço de referência' in k2 and '1.094.947,10' in tot,(k2,tot))
+    chk('9 CMP etapa 2: mesmos 8 insumos e R$ 1.098.502,50 (resumo e total da tabela)','8 insumos a comprar · R$ 1.098.502,50 a preço de referência' in k2 and '1.098.502,50' in tot,(k2,tot))
     clk('Expandir tudo'); mp2=rowtxt('MAP 11-52')
-    chk('10 CMP MAP 11-52: 101.440 · falta a partir de 20/02/2027 · estoque usado antes: 90.500 (com os 500 kg em custódia da OS-0417)',all(x in mp2 for x in ['101.440','20/02/2027','usado antes: 90.500']),mp2)
+    chk('10 CMP MAP 11-52: 101.440 · falta a partir de 20/02/2027 · estoque usado antes: 90.000',all(x in mp2 for x in ['101.440','20/02/2027','usado antes: 90.000']),mp2)
     rowclick('MAP 11-52'); m_cmp=memo(); lk=J("[...document.querySelectorAll('aside[role=dialog] a')].map(a=>[a.innerText.trim(),a.getAttribute('href')])") or []; foto('3b_cmp_memoria_cal01'); fechar()
     chk('11 mesma memória CAL-01 nas duas telas (MAP 11-52, linha a linha)',m_cmp==m_saf and len(m_saf)>=6,{'saf':m_saf,'cmp':m_cmp})
     chk('12 origem do insumo volta ao Planejar safra na demanda de insumos da Safrinha (passo=demanda)',any(t.startswith('Ver no Planejar safra · demanda de insumos') and h=='SAF.dc.html#saf=S27SF&passo=demanda' for t,h in lk),lk)
     foto('3_cmp_etapa2')
     ir('CMP.dc.html#sol=SOL-2027-02&saf=S27SF',w=1.4)
-    chk('13 recarregar a Compra mantém SOL-2027-02 na etapa 2',cur().startswith('2 Confira a demanda') and 'Safrinha 2027 · SOL-2027-02' in body() and '1.094.947,10' in body(),(cur(),url()))
+    chk('13 recarregar a Compra mantém SOL-2027-02 na etapa 2',cur().startswith('2 Confira a demanda') and 'Safrinha 2027 · SOL-2027-02' in body() and '1.098.502,50' in body(),(cur(),url()))
     etapa(1); sf=rowtxt('Safrinha 2027'); s7=rowtxt('Safra 2026/27')
-    chk('14 CMP etapa 1: Safrinha com SOL-2027-02 · 8 insumos · R$ 1.094.947,10 · A cotar; 2026/27 continua SOL-2026-07 · R$ 428.305,00',
-        all(x in sf for x in ['SOL-2027-02','8 insumos · R$ 1.094.947,10','A cotar','Abrir compra']) and 'Sem solicitação' not in sf and 'SOL-2026-07' in s7 and 'R$ 428.305,00' in s7,(sf,s7))
+    chk('14 CMP etapa 1: Safrinha com SOL-2027-02 · 8 insumos · R$ 1.098.502,50 · A cotar; 2026/27 continua SOL-2026-07 · R$ 379.580,00',
+        all(x in sf for x in ['SOL-2027-02','8 insumos · R$ 1.098.502,50','A cotar','Abrir compra']) and 'Sem solicitação' not in sf and 'SOL-2026-07' in s7 and 'R$ 379.580,00' in s7,(sf,s7))
     foto('4_cmp_etapa1')
     # cada safra guarda o próprio andamento: convites da 2026/27 não aparecem na Safrinha
     J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(x=>x.innerText.indexOf('Safra 2026/27')>=0); [...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Abrir compra').click();})()"""); time.sleep(.5)
@@ -136,20 +133,12 @@ try:
     chk('23 SAF demanda de insumos, etapa 4 (2026/27, grupos recolhidos): a página não rola; "1º uso" logo depois de Grupo | Insumo (v3.8); Necessidade líquida e Falta em à vista sem rolar a tabela',
         pg[0]<=pg[1]+1 and len(hs)>3 and [h.upper() for h in hs[:3]]==['GRUPO','INSUMO','1º USO'] and all(x in vis for x in ess),(w,pg,hs[:4],vis))
     clk('Expandir tudo'); fa=rowtxt('Fungicida A'); gl=rowtxt('Glifosato 480'); rowclick('Glifosato 480'); gm=memo(); fechar()
-    # CTL-4 (DEM-01/02): a OS-0430 (A liberar, chave c1|a1, T1-A) cobre a dessecação do T1-A: o uso entra pela ordem, com a mesma conta
-    chk('24 memória como extrato por data, com a origem: "25/09/2026 · T1-A · OS-0430 · Dessecação pré-plantio · 2,00 L/ha × 160 ha = 320,0 L"; 1º uso intacto',
-        any(l.startswith('25/09/2026 · T1-A · OS-0430 · Dessecação pré-plantio · 2,00 L/ha × 160 ha = 320,0 L → saldo') for l in gm) and cel('Glifosato 480','1º uso')=='25/09/2026',(gl,gm[:3]))
+    chk('24 memória como extrato por data, com a origem de sempre: "25/09/2026 · T1-A · Dessecação pré-plantio · 2,00 L/ha × 160 ha = 320,0 L"; 1º uso intacto',
+        any(l.startswith('25/09/2026 · T1-A · Dessecação pré-plantio · 2,00 L/ha × 160 ha = 320,0 L → saldo') for l in gm) and cel('Glifosato 480','1º uso')=='25/09/2026',(gl,gm[:3]))
     rowclick('Fungicida A'); fs=memo(); fechar(); fa=fa+' | '+' · '.join(cel('Fungicida A',k) for k in ('Estoque apto','Usado antes da compra','Necessidade líquida'))
     ir('CMP.dc.html#sol=SOL-2026-07&saf=S2627',w=1.4); clk('Expandir tudo'); fa2=rowtxt('Fungicida A'); rowclick('Fungicida A'); fc=memo(); fechar()
-    sol7=list(D2.sol_itens())
-    # CTL-4 (DEM-01/02/04): a OS-0421 cobre a 1ª aplicação (350 de 610 ha) e conta pelo pendente (15 L); a reserva da OS-0424 conta uma vez com a ordem.
-    # Antes: 145,2 L a comprar (compra em dobro do que a OS-0421 já tem). Fungicida A e Adjuvante saem da SOL-2026-07.
-    chk('21 Fungicida A (2026/27): estoque apto 545 L (65 reservados à OS-0424, a mesma demanda) · 0 L a comprar (nunca 145,2 L); memória com a OS-0421 pelo pendente e a reserva contada uma vez, igual nas duas telas; Fungicida A e Adjuvante fora da SOL-2026-07',
-        fa.endswith(' | 545,0 L · — · 0,0 L') and 'res. 65,0' in fa2 and '145,2' not in fa2 and fs==fc
-        and '23/09/2026 · T1+T2 · OS-0421 · Fungicida 1ª aplicação · 0,50 L/ha × 160 ha − 65 L em custódia = 15,0 L → saldo 530 L' in fs
-        and '24/09/2026 · Reserva REQ-039 · OS-0424 (T1-B) · 65,0 L da mesma demanda, contados uma vez' in fs
-        and any(l.startswith('29/11/2026 · T1-A · Fungicida 1ª aplicação · parte sem O.S. (OS-0421 cobre 350 de 610 ha, rateados pela área) · 0,50 L/ha × 68,2 ha = 34,1 L') for l in fs)
-        and not ({'Fungicida A','Adjuvante espalhante'} & set(sol7)),{'fa':fa,'fa2':fa2,'iguais':fs==fc,'saf':fs[:4],'cmp':fc[-2:],'sol':sol7})
+    chk('21 Fungicida A (2026/27): estoque apto 545 (65 reservados à OS-0424, usados antes); 145,2 L como antes; memória igual nas duas telas',
+        fa.endswith(' | 545,0 L · 65,0 L · 145,2 L') and 'usado antes: 65,0' in fa2 and '145,2' in fa2 and fs==fc and any(l.startswith('24/09/2026 · Reserva REQ-039 · OS-0424 (T1-B) · −65,0 L') for l in fs),{'fa':fa,'fa2':fa2,'iguais':fs==fc,'saf':fs[-2:],'cmp':fc[-2:]})
     # safra criada no Planejar safra (fora do cadastro da Compra): a solicitação gravada aparece na lista e abre com contexto próprio
     J("""(()=>{const o=JSON.parse(localStorage.getItem('talhao-os-compras-v1')); const r=JSON.parse(JSON.stringify(o.sols.S27SF)); r.safra='n9'; r.nome='Safra nova teste'; r.id='SOL-2026-10'; o.sols.n9=r; localStorage.setItem('talhao-os-compras-v1',JSON.stringify(o));})()""")
     ir('CMP.dc.html#sol=SOL-2026-10&saf=n9',w=1.4); ctxn=J("(document.body.innerText.match(/Safra nova teste · SOL-2026-10/)||[''])[0]"); cn=cur()
@@ -174,20 +163,20 @@ try:
         import re as _re, dados_lagoa_fonte as _F
         ln=next((l for l in mc if l.startswith(f"{dm_(cdm['falta'])}/{cdm['falta'][:4]} · Pivô ")),''); m=_re.search(r'Pivô (\d+)',ln)
         return bool(m) and f"× {D2._nfa(_F.PIVOS_HA[int(m.group(1))])} ha" in ln
-    chk(f"28 SAF Mamão 2026/27: Fazenda Lagoa Grande; nenhuma falta antes de hoje; calcário com {nk(cdm['real'])} kg antes de hoje sem O.S. (coluna 'Antes de hoje sem O.S.', DEM-06), {rup_} coberta pelo recebimento, 0 a comprar (= dados2.demanda)",
+    chk(f"28 SAF Mamão 2026/27: Fazenda Lagoa Grande; nenhuma falta antes de hoje; calcário com {nk(cdm['real'])} realizados, {rup_} coberta pelo recebimento, 0 a comprar (= dados2.demanda)",
         fz==['Fazenda Lagoa Grande'] and not passadas and cdm['liq']==0 and cdm['rup']>0
-        and [cel('Calcário dolomítico filler',k) for k in ('Antes de hoje sem O.S.','Falta em','Coberta em','Situação','Demanda bruta')]==[nk(cdm['real'])+' kg',dm_(cdm['falta'])+'/'+cdm['falta'][:4],dm_(cdm['cob'])+'/'+cdm['cob'][:4],'Coberto pelo recebimento',nk(cdm['bruta'])+' kg'],
-        (fz,passadas,cal,[cel('Calcário dolomítico filler',k) for k in ('Antes de hoje sem O.S.','Falta em','Coberta em','Situação','Demanda bruta')]))
+        and [cel('Calcário dolomítico filler',k) for k in ('Já realizado','Falta em','Coberta em','Situação','Demanda bruta')]==[nk(cdm['real'])+' kg',dm_(cdm['falta'])+'/'+cdm['falta'][:4],dm_(cdm['cob'])+'/'+cdm['cob'][:4],'Coberto pelo recebimento',nk(cdm['bruta'])+' kg'],
+        (fz,passadas,cal,[cel('Calcário dolomítico filler',k) for k in ('Já realizado','Falta em','Coberta em','Situação','Demanda bruta')]))
     rowclick('Calcário dolomítico filler'); mc=memo(); fechar(); foto('7_saf_lg_etapa6')
-    chk('29 memória do calcário: antes de hoje sem O.S. fora da demanda (histórico do plano, nunca "Realizado"), ruptura na calagem de 25/09, recebimento de 30/09 cobre, sem compra nova',
-        len(mc)>2 and mc[1].startswith('Antes de 23/09/2026 sem O.S. · ') and not any(l.startswith('Realizado') for l in mc) and any(l.startswith('30/09/2026 · ') and l.endswith('cobre a ruptura') for l in mc)
+    chk('29 memória do calcário: realizado antes de hoje, ruptura na calagem de 25/09, recebimento de 30/09 cobre, sem compra nova',
+        len(mc)>2 and mc[1].startswith('Realizado antes de 23/09/2026 · ') and any(l.startswith('30/09/2026 · ') and l.endswith('cobre a ruptura') for l in mc)
         and mc[-1]==f"Sem compra nova · ruptura de {nk(cdm['rup'])} kg de {dm_(cdm['falta'])}/{cdm['falta'][:4]} a {dm_(cdm['cob'])}/{cdm['cob'][:4]}, coberta pelo recebimento"
         and calagem_ok(mc),mc)
     clk('Enviar para cotação'); tl=T(); nav('Abrir Compra de insumos ›','CMP.dc.html')
     fz2=J("[...document.querySelectorAll('span')].filter(s=>s.children.length===0&&/^Fazenda /.test(s.innerText.trim())).map(s=>s.innerText.trim())")
     etapa(3); cg=[rowtxt('Corretivos'),rowtxt('Mudas')]; clk('Enviar convites (simulado)'); tc=T(); time.sleep(3.5); trl=trail(); foto('8_cmp_lg_etapa3')
     chk('30 Compra da SOL-2026-09: Fazenda Lagoa Grande; Corretivos e Mudas "Sem fornecedor homologado" com link de cadastro; convites dos outros grupos saem e as propostas chegam',
-        tl.startswith('Solicitação SOL-2026-09 enviada a Compras: 13 insumos') and fz2==['Fazenda Lagoa Grande'] and all('Sem fornecedor homologado' in x and 'Cadastrar em Parceiros e fornecedores' in x for x in cg)
+        tl.startswith('Solicitação SOL-2026-09 enviada a Compras: 12 insumos') and fz2==['Fazenda Lagoa Grande'] and all('Sem fornecedor homologado' in x and 'Cadastrar em Parceiros e fornecedores' in x for x in cg)
         and tc.startswith('Convites simulados') and tc.endswith('Sem cotação (sem fornecedor homologado): Corretivos, Mudas.') and 'convites enviados' in trl and ' 0 propostas' not in trl,(tl,fz2,cg,tc,trl))
     # ---------------- bordas de endereço ----------------
     ir('CMP.dc.html#sol=SOL-9999&saf=S27SF',w=1.4); b1=(url(),cur(),T())

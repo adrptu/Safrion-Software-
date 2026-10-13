@@ -24,7 +24,7 @@ caso('perfil', () => {
   ok('mesma pessoa pelo nome (Ana × "Ana (gestora)")', g2mesma('Ana', 'Ana (gestora)') && !g2mesma('Ana', 'Paula (almoxarife)') && !g2mesma('', ''));
   ok('papel vem do cadastro: objeto forjado {k:"Caio", papeis:{gestor}} não vira gestor; chave "Ana" vale', !g2papel({ k: 'Caio', papeis: { gestor: 'gestora' } }, 'gestor') && g2papel('Ana', 'gestor') && !g2papel({ k: 'Xyz', papeis: { gestor: 'g' } }, 'gestor'));
   const self = { state: {}, setState(o) { Object.assign(this.state, o); } }; const v = {}; g2navvals(self, v, []);
-  ok('menu lateral: seletor com todos os perfis do cadastro (Otávio e João da manutenção; Igor e Marta do beneficiamento; Dora do Comercial), Ana marcada', v.perfil_k === 'Ana' && (v.perfil_opts || []).length === G2_PERFIS.length && ['Otávio', 'João', 'Igor', 'Marta', 'Dora'].every(k => (v.perfil_opts || []).some(o => o.v === k)), [v.perfil_k, (v.perfil_opts || []).map(o => o.v)]);
+  ok('menu lateral: seletor com todos os perfis do cadastro (Igor e Marta do beneficiamento entre eles), Ana marcada', v.perfil_k === 'Ana' && (v.perfil_opts || []).length === G2_PERFIS.length && ['Igor', 'Marta'].every(k => (v.perfil_opts || []).some(o => o.v === k)), [v.perfil_k, (v.perfil_opts || []).map(o => o.v)]);
   self.g2perfilFecha = { pa: null }; self.state.pa = { id: 'OS-0430', fn: 'liberar' };   // confirmação aberta pela Ana
   v.perfil_set({ target: { value: 'Caio' } });
   ok('trocar para Caio grava e avisa que não é segurança', __ls['safrion.perfilDemo'] === 'Caio' && g2perfil().k === 'Caio' && /Caio · PCP \(não é segurança de acesso\)/.test(self.state.g2toast || ''), self.state.g2toast);
@@ -150,21 +150,18 @@ caso('recusa e coberto', () => {
 });
 
 console.log('\n— R-D4 · checklist da manutenção (OM-0234 Revisão 250 h, 5 tarefas)');
-ok('Manutenção (MA) sem a ação "Marcar pendentes como feitas" (pan_todas removido)', MA04_SRC_TODAS === '', MA04_SRC_TODAS.slice(0, 60));
-caso('checklist', () => {   // PCM simplificado (05/10, D-33/D-18): só o executante responde; horas de oficina obrigatórias; "Falta: …" com a tarefa
+ok('MA-04 sem a ação "Marcar pendentes como feitas" (pan_todas removido)', MA04_SRC_TODAS === '', MA04_SRC_TODAS.slice(0, 60));
+caso('checklist', () => {
   let c = manClone(MAN0); const id = 'OM-0234'; manLiberar(c, id, true); manIniciar(c, id); const o = c.oms[id];
-  manResp(c, id, 0, 'Feito', undefined, ZE); manResp(c, id, 1, 'Feito', undefined, ZE); manResp(c, id, 3, 'Feito', undefined, ZE);
-  let ea = ''; try { manResp(c, id, 2, 'Feito', undefined, ANA); } catch (x) { ea = x.message; }
-  ok('NEGATIVO Ana (gestora) não responde a tarefa do Zé (executante): recusado e nada gravado', /^Ação de Zé, executante/.test(ea) && !o.chk[2].r, ea);
-  manResp(c, id, 2, 'Feito', undefined, ZE);
-  ok('cada resposta grava quem (Zé (mecânico)) e a hora', o.chk[0].por === 'Zé (mecânico)' && /^\d\d:\d\d$/.test(o.chk[0].em || '') && o.chk[2].por === 'Zé (mecânico)', o.chk.map(t => t.por));
-  let e = ''; try { manConcluir(c, id, String(c.ativos[o.aid].leit.val + 8), '5', false, {}); } catch (x) { e = x.message; }
-  ok('NEGATIVO 4 de 5 respondidas: não conclui', e === 'Falta: responder “Lubrificar pontos de graxa”.' && o.etapa === 'Em execução', e);
-  manResp(c, id, 4, 'Não feito', undefined, ZE); e = ''; try { manConcluir(c, id, String(c.ativos[o.aid].leit.val + 8), '5', false, {}); } catch (x) { e = x.message; }
-  ok('NEGATIVO "Não feito" sem motivo: não conclui', e === 'Falta: motivo de “Lubrificar pontos de graxa”.', e);
+  manResp(c, id, 0, 'Feito', undefined, ZE); manResp(c, id, 1, 'Feito', undefined, ZE); manResp(c, id, 2, 'Feito', undefined, ANA); manResp(c, id, 3, 'Feito', undefined, ZE);
+  ok('cada resposta grava quem (Zé (mecânico); Ana (gestora)) e a hora', o.chk[0].por === 'Zé (mecânico)' && /^\d\d:\d\d$/.test(o.chk[0].em || '') && o.chk[2].por === 'Ana (gestora)', o.chk.map(t => t.por));
+  let e = ''; try { manConcluir(c, id, String(c.ativos[o.aid].leit.val + 8), '', false, {}); } catch (x) { e = x.message; }
+  ok('NEGATIVO 4 de 5 respondidas: não conclui', e === 'Responda o checklist: 1 tarefa sem resposta.' && o.etapa === 'Em execução', e);
+  manResp(c, id, 4, 'Não feito', undefined, ZE); e = ''; try { manConcluir(c, id, String(c.ativos[o.aid].leit.val + 8), '', false, {}); } catch (x) { e = x.message; }
+  ok('NEGATIVO "Não feito" sem motivo: não conclui', e === 'Informe o motivo de “Lubrificar pontos de graxa”.', e);
   manResp(c, id, 1, '', undefined, ZE); ok('desmarcar apaga quem e hora (resposta volta a pendente)', o.chk[1].r === '' && o.chk[1].por === '' && o.chk[1].em === '', o.chk[1]);
   manResp(c, id, 1, 'Feito', undefined, ZE); manResp(c, id, 4, 'Feito', undefined, ZE);
-  const r = manConcluir(c, id, String(c.ativos[o.aid].leit.val + 8), '5', false, {}); ok('respondidas as 5, uma a uma: conclui e vai Em conferência', o.etapa === 'Em conferência' && /^OM-0234 em conferência/.test(r.msg), r.msg);
+  const r = manConcluir(c, id, String(c.ativos[o.aid].leit.val + 8), '', false, {}); ok('respondidas as 5, uma a uma: conclui e vai Em conferência', o.etapa === 'Em conferência' && /^OM-0234 em conferência/.test(r.msg), r.msg);
 });
 
 console.log('\n— Revisão do CTL-3 (achados 2, 3, 4, 6 e 7)');
@@ -222,21 +219,21 @@ caso('cancelar Ana', () => {
 });
 // achado 6 · papéis em pessoas diferentes (cadastro injetado e retirado): a dispensa exige os DOIS papéis (g2papel com lista = todos)
 caso('dispensa com papéis separados', () => {
-  const n0 = G2_PERFIS.length; G2_PERFIS.push({ k: 'Beto', t: 'Beto · Agrônomo', papeis: { agronomo: 'agrônomo' } }, { k: 'Gil', t: 'Gil · Gestor', papeis: { gestor: 'gestor' } });
-  try { for (const k of ['Beto', 'Gil']) { ini(); const r = cenMudar(null, c => osc_dispensar(c, 'OS-0421', 40, 'x', k)); const o = G().ordens['OS-0421'];
+  const n0 = G2_PERFIS.length; G2_PERFIS.push({ k: 'Beto', t: 'Beto · Agrônomo', papeis: { agronomo: 'agrônomo' } }, { k: 'Otávio', t: 'Otávio · Gestor', papeis: { gestor: 'gestor' } });
+  try { for (const k of ['Beto', 'Otávio']) { ini(); const r = cenMudar(null, c => osc_dispensar(c, 'OS-0421', 40, 'x', k)); const o = G().ordens['OS-0421'];
       ok('NEGATIVO ' + k + ' (só ' + (k === 'Beto' ? 'agrônomo' : 'gestor') + ') não dispensa: exige os dois papéis; saldo segue 160 ha', r.erro === 'Dispensar saldo da OS-0421: decisão de Ana (gestora e agrônoma). Nada foi alterado.' && o.saldo === 160 && !(o.osc && o.osc.disp), r.erro || r.msg); } }
   finally { G2_PERFIS.splice(n0); }
-  ok('cadastro restaurado: ' + n0 + ' perfis', G2_PERFIS.length === n0 && !G2_PERFIS.some(p => p.k === 'Beto' || p.k === 'Gil'));   /* sem número fixo: outra frente pode acrescentar perfil (revisão BEN, S4) */
+  ok('cadastro restaurado: ' + n0 + ' perfis', G2_PERFIS.length === n0 && !G2_PERFIS.some(p => p.k === 'Beto' || p.k === 'Otávio'));   /* sem número fixo: outra frente pode acrescentar perfil (revisão BEN, S4) */
 });
 // achado 2 · checklist: editar o motivo não troca o autor da resposta
-caso('motivo editado', () => {   // PCM simplificado (05/10, D-33): só o executante edita; o autor da resposta segue de quem respondeu
+caso('motivo editado', () => {
   let c = manClone(MAN0); const id = 'OM-0234'; manLiberar(c, id, true); manIniciar(c, id); const t = c.oms[id].chk[4];
   manResp(c, id, 4, 'Não feito', 'sem graxa', ZE); const em = t.em;
-  let ea = ''; try { manResp(c, id, 4, 'Não feito', 'sem graxa no almoxarifado', ANA); } catch (x) { ea = x.message; }
-  ok('Ana (gestora) não edita o motivo da resposta do Zé (não é a executante): recusado; resposta e motivo seguem de Zé (antes: o autor virava Ana)',
-    /^Ação de Zé, executante/.test(ea) && t.r === 'Não feito' && t.por === 'Zé (mecânico)' && t.em === em && t.mot === 'sem graxa', [ea, t]);
-  manResp(c, id, 4, 'Não feito', 'sem graxa no almoxarifado', ZE);
-  ok('editar só o motivo não troca o autor da resposta; a edição fica à parte, com quem e hora', t.r === 'Não feito' && t.por === 'Zé (mecânico)' && t.em === em && t.mot === 'sem graxa no almoxarifado' && t.motPor === 'Zé (mecânico)' && /^\d\d:\d\d$/.test(t.motEm || ''), t);
+  manResp(c, id, 4, 'Não feito', 'sem graxa no almoxarifado', ANA);
+  ok('Zé responde "Não feito"; Ana edita o motivo: a resposta segue de Zé (mecânico), a edição fica à parte com Ana (gestora) (antes: o autor virava Ana)',
+    t.r === 'Não feito' && t.por === 'Zé (mecânico)' && t.em === em && t.mot === 'sem graxa no almoxarifado' && t.motPor === 'Ana (gestora)' && /^\d\d:\d\d$/.test(t.motEm || ''), t);
+  manResp(c, id, 4, 'Não se aplica', undefined, ANA);
+  ok('trocar a resposta grava o novo autor (Ana (gestora)); o motivo segue com quem o escreveu', t.r === 'Não se aplica' && t.por === 'Ana (gestora)' && t.motPor === 'Ana (gestora)', t);
   manResp(c, id, 3, 'Não feito', undefined, ZE); manResp(c, id, 3, 'Não feito', 'peça em falta', ZE); const t3 = c.oms[id].chk[3];
   ok('o próprio Zé escreve o motivo: autor e editor iguais', t3.por === 'Zé (mecânico)' && t3.motPor === 'Zé (mecânico)', t3);
 });

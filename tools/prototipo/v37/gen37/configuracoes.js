@@ -254,7 +254,7 @@ function confTrilhaProd(c, add) { const PP = c.producao; if (!PP) return; const 
     const n0 = (((O0[id] || {}).ben || {}).hist || []).length;
     o.ben.hist.slice(n0).forEach((e, i) => { const cm = (String(e.ev || '').match(/\((CMD-\d+)\)/) || [])[1];
       add({ id: 'BEN:' + id + ':' + (n0 + i), d: e.d, at: e.at, sq: e.sq, quem: e.quem, cmd: cm || 'Beneficiamento', oq: String(e.ev || ''), obj: id + ' · ' + String(o.tipo || '').replace(/^Beneficiamento · /, ''),
-        h: CONF_BEN_H ? CONF_BEN_H + id : 'CARGA.dc.html', ef:   /* sem o BEN publicado, a ordem aparece em texto em Cargas */ String(e.det || '') + (e.mov ? ' · ' + e.mov : ''), src: id + ' · histórico da ordem', ds: CONF_DS.reg }); }); });
+        h: 'BEN.dc.html#' + id, ef: String(e.det || '') + (e.mov ? ' · ' + e.mov : ''), src: id + ' · histórico da ordem', ds: CONF_DS.reg }); }); });
   Object.values(PP.cargas || {}).forEach(g => { if (!g.descarte) return;
     add({ id: 'DCG:' + g.id, d: g.descarte.d, at: g.descarte.at, sq: g.descarte.sq, quem: g.descarte.quem, cmd: 'Colheita', oq: 'Descartar carga a pesar', obj: g.id + (g.os ? ' · ' + g.os : ''), h: 'CARGA.dc.html',
       origem: g.descarte.via || 'web', ef: 'sai da fila de pesagem; nada entra na produção · ' + g.descarte.motivo, src: g.id, ds: CONF_DS.reg }); }); }

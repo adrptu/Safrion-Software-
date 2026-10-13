@@ -9,8 +9,8 @@ PERFIS=[('Ana','Gestora · safra, compras e aprovações','SAF.dc.html'),
  ('Beto','Agrônomo(a) · planos agronômicos','PA.dc.html'),
  ('Caio','PCP · ordens de serviço','OS.dc.html'),
  ('Marcos','Operador(a) de campo · app móvel','MB-01.dc.html'),
- ('Rui','Almoxarife · estoque, custódia e expedição','EST.dc.html'),
- ('Dora','Comercial e logística','VEN.dc.html'),   # Comercial (D-C13): Contratos e pedidos
+ ('Rui','Almoxarife · estoque e custódia','EST.dc.html'),
+ ('Dora','Comercial e logística','VE-01.dc.html'),
  ('Fertisul','Parceiro credenciado (portal)','PT-01.dc.html'),
  ('Plataforma','Backoffice (admin)','BO-02.dc.html')]
 CENARIOS=[('Safra','Planejar safra: aplicar plano em lote, ajustar um cultivo e enviar para cotação','SAF.dc.html'),
@@ -73,13 +73,13 @@ def build():
     html=f'''<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><title>Do Talhão à O.S. · protótipo v3.7</title><script src="./support.js"></script></head><body><x-dc><helmet>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Sora:wght@600;700&amp;display=swap">
-<style>body{{margin:0;font-family:{FONT};color:{INK};background:{BG}}}a{{color:{ACC}}}{E.G2_CSS}</style></helmet>
+<style>body{{margin:0;font-family:{FONT};color:{INK};background:{BG}}}a{{color:{ACC}}}</style></helmet>
 <div data-root="1" style="position: relative; width: {W}px; height: {H}px; box-sizing: border-box; background: {BG}; font-family: {FONT}; color: {INK}; overflow: hidden; padding: 34px 40px; display: flex; flex-direction: column; gap: 20px;">
-<header class="g2-cab" style="display: flex; align-items: center; gap: 14px;">
+<div style="display: flex; align-items: center; gap: 14px;">
 <span style="width: 44px; height: 44px; border-radius: 13px; background: {ACC}; display: inline-flex; align-items: center; justify-content: center;">{icon("Agronomia",24,"#fff")}</span>
 <div style="display: flex; flex-direction: column;"><h1 style="margin: 0; font-family: {DISP}; font-size: 26px; font-weight: 700; letter-spacing: -.02em;">Do Talhão à O.S. — protótipo navegável v3.7</h1>
 <span style="font-size: 13px; color: {MUTED};">Fonte oficial: PRD v3.7 · 23/09/2026 · etapa: validação do proprietário · dados fictícios (Fazenda Santa Rita, safra 2026/27, hoje = 23/09/2026)</span></div>
-<span style="flex-grow: 1;"></span>{chip('DEMONSTRAÇÃO','yellow')}{E.msgbtn('Restaurar dados iniciais','Para voltar ao cenário inicial, recarregue o Canvas: cada tela reabre com os dados de demonstração originais. Nada foi gravado fora do protótipo.')}</header>
+<span style="flex-grow: 1;"></span>{chip('DEMONSTRAÇÃO','yellow')}{E.msgbtn('Restaurar dados iniciais','Para voltar ao cenário inicial, recarregue o Canvas: cada tela reabre com os dados de demonstração originais. Nada foi gravado fora do protótipo.')}</div>
 <div style="display: grid; grid-template-columns: 1.05fr 1fr; gap: 16px;">
 <div style="background: {SURF}; border: 1px solid {LINE}; border-radius: 16px; box-shadow: {SH}; padding: 14px 16px;"><div style="font-size: 13px; font-weight: 800; letter-spacing: .04em; color: {MUTED}; margin-bottom: 8px;">ENTRAR COMO (perfil de demonstração)</div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">{perfis}</div>
 <div style="font-size: 11.5px; color: {MUTED}; margin-top: 8px;">A troca de perfil demonstra a experiência esperada; não comprova segurança real de acesso.</div>

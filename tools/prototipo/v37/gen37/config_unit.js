@@ -12,13 +12,13 @@ const pid = k => confP(k).id;
 
 console.log('— A1 · padrão: sem c.conf o efetivo é exatamente G2_PERFIS; estado de outra versão volta ao padrão');
 caso('A1', () => { ini();
-  ok('A1 sem c.conf: g2perfis() = G2_PERFIS (10 perfis: + Otávio, João e Dora da v56, PCM e Comercial; mesma ordem e mesmos papéis)', g2perfis() === G2_PERFIS && g2perfis().map(p => p.k).join() === 'Ana,Caio,Rui,Paula,Zé,Otávio,João,Igor,Dora,Marta', g2perfis().map(p => p.k));
-  ok('A1b CD-04 (R1): 15 pessoas (v57: + Otávio p14 e Dora p15), Caio (p11, PCP, Agronomia) entra, Igor e Marta (BEN-1) também; 14 com acesso, Beto sem; só Ana com CREA válido',
-    CONF0.pessoas.length === 15 && confP('Caio').id === 'p11' && confP('Caio').equipe === 'Agronomia' && confAcessoDe('Beto').a === 'sem' && confComAcesso() === 14
+  ok('A1 sem c.conf: g2perfis() = G2_PERFIS (7 perfis com Igor e Marta do BEN-1, mesma ordem e mesmos papéis)', g2perfis() === G2_PERFIS && g2perfis().map(p => p.k).join() === 'Ana,Caio,Rui,Paula,Zé,Igor,Marta', g2perfis().map(p => p.k));
+  ok('A1b CD-04 (R1): 13 pessoas, Caio (p11, PCP, Agronomia) entra, Igor e Marta (BEN-1) também; 12 com acesso, Beto sem; só Ana com CREA válido',
+    CONF0.pessoas.length === 13 && confP('Caio').id === 'p11' && confP('Caio').equipe === 'Agronomia' && confComAcesso() === 12 && confAcessoDe('Beto').a === 'sem'
     && CONF0.pessoas.filter(p => confCrea(p)).map(p => p.k).join() === 'Ana', [CONF0.pessoas.length, confComAcesso()]);
   ok('A1c perfil desativado ou desconhecido guardado no navegador cai no 1º efetivo (Ana)', (() => { __ls['safrion.perfilDemo'] = 'Xyz'; const k = g2perfil().k; delete __ls['safrion.perfilDemo']; return k === 'Ana'; })());
-  const r = M(c => confPapeis(c, 'p7', ['almoxarife', 'expedicao', 'conferente'], 'k-a1', 'Ana'));
-  ok('A1d com c.conf (Rui ganha conferência): o efetivo muda na hora, sem recarregar', !r.erro && g2papel('Rui', 'conferente') && g2papel('Rui', 'expedicao') && g2perfis().length === 10, r);
+  const r = M(c => confPapeis(c, 'p7', ['almoxarife', 'conferente'], 'k-a1', 'Ana'));
+  ok('A1d com c.conf (Rui ganha conferência): o efetivo muda na hora, sem recarregar', !r.erro && g2papel('Rui', 'conferente') && g2perfis().length === 7, r);
   const c = JSON.parse(__ls['talhao-os-cenario-v1']); c.conf.v = 'CONF-0-velho'; __ls['talhao-os-cenario-v1'] = JSON.stringify(c);
   ok('A1e c.conf de outra versão (outro build ou outro G2_PERFIS): volta ao padrão', !g2papel('Rui', 'conferente') && g2perfis() === G2_PERFIS);
   ok('A1f a versão do CONF0 inclui o resumo do bloco <perfis> (outra frente que mude G2_PERFIS invalida o salvo)', /^CONF-1-[0-9a-f]{8}$/.test(CONF0.v), CONF0.v); });
@@ -53,18 +53,18 @@ caso('A3', () => { ini(); const rv = G().rev;
   ok('A3c R5 Ana retira o próprio gestor (última gestora): recusado (organização trancada)', /última pessoa ativa com o papel de gestor/.test(d.erro || ''), d);
   ok('A3d R5 desativar a última gestora: recusado', /última pessoa ativa com o papel de gestor e não pode ser desativada/.test(e.erro || ''), e);
   ok('A3e quem não é gestor não muda papel (AL-13): Rui recusado, decisão de Ana (gestora)', /decisão de Ana \(gestora\)/.test(f.erro || ''), f);
-  ok('A3f nada gravado: c.rev igual e trilha com 18 registros (v57: + acesso de Otávio e Dora)', G().rev === rv && nT() === 18, [G().rev, rv, nT()]); });
+  ok('A3f nada gravado: c.rev igual e trilha com 16 registros', G().rev === rv && nT() === 16, [G().rev, rv, nT()]); });
 
 console.log('\n— A17 · Restaurar demonstração volta acessos, alçadas, conexões e trilha ao seed');
 caso('A17', () => { ini(); M(c => confPapeis(c, 'p7', ['almoxarife', 'conferente'], 'k1', 'Ana')); M(c => confAcesso(c, 'p6', false, 'k2', 'Ana'));
   const antes = nT(); cenReset();
-  ok('A17 cenReset: g2perfis() = G2_PERFIS, Paula volta, trilha 18 (antes ' + antes + ')', g2perfis() === G2_PERFIS && g2papel('Paula', 'conferente') && nT() === 18 && antes === 20, [antes, nT()]); });
+  ok('A17 cenReset: g2perfis() = G2_PERFIS, Paula volta, trilha 16 (antes ' + antes + ')', g2perfis() === G2_PERFIS && g2papel('Paula', 'conferente') && nT() === 16 && antes === 18, [antes, nT()]); });
 
 console.log('\n— A10 (seed) · trilha lida dos registros: 14 no início');
 caso('A10 seed', () => { ini(); const L = trilha(); const mes = {}; L.forEach(r => { const m = r.d.slice(0, 7); mes[m] = (mes[m] || 0) + 1; });
   const aut = {}; L.forEach(r => { aut[r.k] = (aut[r.k] || 0) + 1; });
-  ok('A10a 18 registros: jun 2 · jul 12 · ago 3 · set 1 (v57: Otávio e Dora recebem acesso em 01/07)', L.length === 18 && mes['2026-06'] === 2 && mes['2026-07'] === 12 && mes['2026-08'] === 3 && mes['2026-09'] === 1, mes);
-  ok('A10b autores pelo 1º nome: Ana 15, Plataforma 1, Provedor 2 (3 autores)', aut.Ana === 15 && aut.Plataforma === 1 && aut.Provedor === 2 && Object.keys(aut).length === 3, aut);
+  ok('A10a 16 registros: jun 2 · jul 10 · ago 3 · set 1', L.length === 16 && mes['2026-06'] === 2 && mes['2026-07'] === 10 && mes['2026-08'] === 3 && mes['2026-09'] === 1, mes);
+  ok('A10b autores pelo 1º nome: Ana 13, Plataforma 1, Provedor 2 (3 autores)', aut.Ana === 13 && aut.Plataforma === 1 && aut.Provedor === 2 && Object.keys(aut).length === 3, aut);
   ok('A10c nenhuma linha sem autor, data ou objeto', L.every(r => r.quem && r.d && r.obj && r.oq), L.filter(r => !(r.quem && r.d && r.obj)));
   ok('A10d fatura paga pelo provedor aparece "Provedor (simulado)"; contrato v1 por "Ana · Gestora"', L.some(r => r.quem === 'Provedor (simulado)' && /jul\/2026/.test(r.obj)) && L.some(r => r.quem === 'Ana · Gestora' && r.obj === 'Contrato v1'), L.map(r => r.quem + '|' + r.obj)); });
 
@@ -201,7 +201,7 @@ caso('A10 roteiro', () => {
     M(c => confAlcConfirmar(c, 'AL-05', 'k3', 'Ana')); M(c => confPapeis(c, 'p11', ['gestor', 'pcp'], 'k4', 'Ana')); M(c => confAlcConfirmar(c, 'AL-05', 'k5', 'Caio')); }) === 3);
   ok('A10j recusas (agrônomo sem CREA, autoconcessão, último gestor): +0', mais(() => { M(c => confPapeis(c, 'p11', ['pcp', 'agronomo'], 'k1', 'Ana')); M(c => confPapeis(c, 'p1', ['gestor', 'agronomo', 'direcao'], 'k2', 'Ana')); M(c => confPapeis(c, 'p1', ['agronomo'], 'k3', 'Ana')); }) === 0);
   ok('A10k desativar Paula e conceder conferência a Rui: +2', mais(() => { M(c => confAcesso(c, 'p6', false, 'k1', 'Ana')); M(c => confPapeis(c, 'p7', ['almoxarife', 'conferente'], 'k2', 'Ana')); }) === 2);
-  ok('A10l convidar Beto: +1 e CF-05 contaria 15 com acesso', mais(() => M(c => confConvidar(c, 'p9', 'k1', 'Ana'))) === 1 && confComAcesso() === 15);
+  ok('A10l convidar Beto: +1 e CF-05 contaria 13 com acesso', mais(() => M(c => confConvidar(c, 'p9', 'k1', 'Ana'))) === 1 && confComAcesso() === 13);
   ok('A10m desativar Marcos (só app): +1', mais(() => M(c => confAcesso(c, 'p2', false, 'k1', 'Ana'))) === 1);
   let fila = []; const n = mais(() => { M(c => osc_liberar(c, 'OS-0430', false, '', 'Ana')); M(c => cenEntregar(c, 'REQ-041', 'Glifosato 480', 20, 'Marcos', 'Rui'));
     fila.push(confErpFila(G()).length); const s1 = M(c => confSincronizar(c, 'k-s1', 'Ana')); fila.push(s1.n, confErpFila(G()).length); const s2 = M(c => confSincronizar(c, 'k-s2', 'Ana')); fila.push(s2.n); });
@@ -209,12 +209,12 @@ caso('A10 roteiro', () => {
   const L = trilha(); const e = L.find(r => r.oq === 'Entregar insumo');
   ok('A10o a entrega aparece com autor Rui (almoxarife) e o destinatário no efeito (autor = o campo até " → ")', !!e && e.quem === 'Rui (almoxarife)' && /para Marcos/.test(e.ef), e); });
 caso('A10 filtros', () => { ini(); M(c => confAlcMudar(c, 'AL-05', { lim: 15 }, 'safra curta', 'k1', 'Ana')); const L = trilha();
-  ok('A10p filtrar pela pessoa pelo 1º nome junta "Ana · Gestora" e "Ana (gestora)"; por mês, set tem 2 (fatura de ago e a mudança da AL-05)', L.filter(r => r.k === 'Ana').length === 16 && L.filter(r => r.d.slice(0, 7) === '2026-09').length === 2, [L.filter(r => r.k === 'Ana').length]); });
+  ok('A10p filtrar pela pessoa pelo 1º nome junta "Ana · Gestora" e "Ana (gestora)"; por mês, set tem 2 (fatura de ago e a mudança da AL-05)', L.filter(r => r.k === 'Ana').length === 14 && L.filter(r => r.d.slice(0, 7) === '2026-09').length === 2, [L.filter(r => r.k === 'Ana').length]); });
 
 console.log('\n— A11 · CSV = linhas filtradas, sem segredo; a exportação vira registro (R15)');
 const SEGREDO = /(senha|token|secret|apikey)\s*[:=]|[A-Za-z0-9_-]{24,}/i;
 caso('A11', () => { ini(); const L = trilha().filter(r => r.k === 'Ana'); const csv = confCsv(L);
-  ok('A11a CSV com cabeçalho e uma linha por registro filtrado (15 da Ana), separador ";", CRLF', csv.split('\r\n').filter(Boolean).length === 16 && /^"Quando";"Quem";"O quê"/.test(csv), csv.slice(0, 200));
+  ok('A11a CSV com cabeçalho e uma linha por registro filtrado (13 da Ana), separador ";", CRLF', csv.split('\r\n').filter(Boolean).length === 14 && /^"Quando";"Quem";"O quê"/.test(csv), csv.slice(0, 200));
   ok('A11b nenhum texto com cara de segredo no CSV', !SEGREDO.test(csv), (csv.match(SEGREDO) || [])[0]);
   const n0 = nT(); const r = M(c => confExportar(c, 11, 'pessoa: Ana', 'k-exp', 'Ana')); const r2 = M(c => confExportar(c, 11, 'pessoa: Ana', 'k-exp', 'Ana'));
   ok('A11c a exportação grava "Exportação · 11 registros · pessoa: Ana" (+1); a mesma chave não grava de novo', !r.erro && r2.repetido && nT() === n0 + 1 && trilha().some(x => /^Exportação · 11 registros · pessoa: Ana/.test(x.ef)), [r, r2]); });
@@ -241,7 +241,7 @@ caso('A18', () => { ini(); M(c => assinAvancar(c, '2026-10-01', { ha: 2570.23, n
   ok('A18b Ana paga: grava "Ana (gestora)" (o formato dos outros comandos)', !r2.erro && f.paga_por === 'Ana (gestora)' && trilha().some(x => x.oq === 'Pagar fatura (simulado)' && x.quem === 'Ana (gestora)'), [r2, f.paga_por]);
   __ls['safrion.perfilDemo'] = 'Rui'; const r3 = M(c => assinConciliar(c, 'k3', 'Admin plataforma'));
   ok('A18c com o Ver como em Rui, o backoffice concilia como "Admin plataforma" (assinIni não confere AL-15)', !r3.erro && /Conciliado/.test(r3.msg), r3); delete __ls['safrion.perfilDemo'];
-  ok('A18d CF-05 conta as pessoas com acesso do c.conf: 14 no seed', confComAcesso() === 14); });
+  ok('A18d CF-05 conta as pessoas com acesso do c.conf: 12 no seed', confComAcesso() === 12); });
 
 console.log('\n— REV · correções da revisão adversarial (F1..F16, 09/10): cada caso falha no HEAD 9f49bf0 e passa depois');
 const idx = (L, f) => L.findIndex(f);
@@ -350,7 +350,7 @@ caso('INT2 AL-17 publicar previsão pelo papel', () => { ini();
   ini(); const r2 = M(c => prPublicar(c, 'lg19', 'Ana (agrônoma)'));
   ok('INT2c o nome do registro ("Ana (agrônoma)") vira o perfil pelo 1º nome e passa pela alçada', !r2.erro && G().producao.previsoes.lg19.slice(-1)[0].por === 'Ana (agrônoma)', r2); });
 caso('INT3 produção na trilha', () => { ini(); const n0 = nT();
-  ok('INT3a o seed da produção (cargas, previsões, reserva) é histórico anterior: a trilha segue com 18', n0 === 18 && !trilha().some(r => r.cmd === 'Colheita'), n0);
+  ok('INT3a o seed da produção (cargas, previsões, reserva) é histórico anterior: a trilha segue com 16', n0 === 16 && !trilha().some(r => r.cmd === 'Colheita'), n0);
   M(c => prPublicar(c, 'lg19', 'Ana'));
   const rc = M(c => prReceber(c, { carga: 'CG-2108', ticket: 'TK-4600', bruto: '18000', tara: '6000', cond: 'Com avaria', quem: prRec('Lagoa Grande'), chave: 'rc1' }));
   const lid = rc.L && rc.L.id; const lb = M(c => prLiberarLote(c, lid, 'Marta'));
@@ -386,7 +386,7 @@ caso('INT5 beneficiamento na trilha', () => { ini(); const n0 = nT(); const s0 =
   const lid = (f.lotes || [])[0]; const r = B(c => benResultado(c, lid, 'Conforme', '', 'Marta')); const l = B(c => benDecidir(c, lid, 'Liberar', {}, 'Marta'));
   const T = trilha(); const H = T.filter(x => /^BEN:OB-0110:/.test(x.id)); const Q = T.filter(x => x.cmd === 'Beneficiamento' && /^MP-/.test(x.id));
   const er = [a, b, d, f, r, l].map(x => x.erro).filter(Boolean);
-  ok('INT5a o histórico das OB-0110 e OB-0112 que veio do seed não entra: a trilha do seed segue com 18', n0 === 18 && !s0, [n0, s0]);
+  ok('INT5a o histórico das OB-0110 e OB-0112 que veio do seed não entra: a trilha do seed segue com 16', n0 === 16 && !s0, [n0, s0]);
   ok('INT5b enviar para conferência (Igor; era "Execução concluída" antes do faa47c7), conferir (Paula) e fechar (Igor, CMD-23): linhas do histórico da OB-0110 com autor, lidas do registro', !er.length
     && JSON.stringify(H.map(x => [x.oq.replace(/ ·.*$/, ''), x.k, x.cmd]).filter(x => /^(Enviada para conferência|Balanço conferido|Processo fechado)/.test(x[0])))
        === JSON.stringify([['Enviada para conferência', 'Igor', 'Beneficiamento'], ['Balanço conferido', 'Paula', 'Beneficiamento'], ['Processo fechado (CMD-23)', 'Igor', 'CMD-23']]), [er, H.map(x => [x.oq, x.k, x.cmd])]);

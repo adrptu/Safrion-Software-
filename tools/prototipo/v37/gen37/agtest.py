@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Teste CDP da área Agronomia: REC-014 com a v3 (KCl) aprovada e o TS sem registro travado no saldo (AG-04det), cadeia navegável, programar vistoria e painel
-(AG-01, base do MIP), novo diagnóstico com numeração única (AG-03), correção do K no painel do laudo (AG-02 · Análises de solo), limiar (AG-05)."""
+(AG-01, base do MIP), novo diagnóstico com numeração única (AG-03), correção do K (AG-02), limiar (AG-05)."""
 import sys, os, time, subprocess, json
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
@@ -44,17 +44,14 @@ try:
     c.goto(f'http://127.0.0.1:{p}/AG-01.dc.html'); time.sleep(.6)
     J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/VIS-014/.test(r.innerText)); r.querySelector('[role=cell]').click();})()"); time.sleep(.5)
     chk('VIS-014 abre o painel (não o formulário) com "Continuar coleta" no app', J("(()=>{const a=document.querySelector('aside[role=dialog]'); return !!a && a.innerText.startsWith('VIS-014') && !!a.querySelector('a[href=\"MB-06.dc.html#VIS-014\"]');})()"))
-    # ---- AG-02 (SOLO-01: Análises de solo no menu): a correção do K passa ao painel do LAU-2048, com o mesmo resultado
+    # ---- AG-02: corrigir unidade do K
     c.goto(f'http://127.0.0.1:{p}/AG-02.dc.html'); time.sleep(.6)
-    J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/LAU-2048/.test(r.innerText)); (r.querySelector('.g2pw')||r.querySelector('[role=cell]')).click();})()"); time.sleep(.6)
-    J("(()=>{const a=document.querySelector('aside[role=dialog]'); const r=[...a.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith('K')); r.querySelector('[role=cell]').click();})()"); time.sleep(.5)
-    fill('Unidade','g/kg'); clk('Salvar','aside[role=dialog]'); time.sleep(.4)
-    b=body(); lin=J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/LAU-2048/.test(r.innerText)); return r?r.innerText.replace(/\\s+/g,' '):'';})()")
-    chk('K corrigido e LAU-2048 volta à validação', 'corrigido para 17,4 g/kg' in b and 'Aguardando validação' in lin and 'sem unidade' not in lin, [lin, J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).join('|')")])
-    J("localStorage.removeItem('talhao-os-cenario-v1')")
+    J("(()=>{const t=document.querySelectorAll('[role=table]')[1]; const r=[...t.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith('K')); r.querySelector('[role=cell]').click();})()"); time.sleep(.4)
+    fill('Unidade','g/kg'); clk('Salvar','aside[role=dialog]')
+    b=body(); chk('K corrigido e LAU-2048 volta à validação', 'mapeamento salvo · aguarda validação humana' in b and 'sem unidade' not in b.split('Original ao lado')[1])
     # ---- AG-03: criar diagnóstico
     c.goto(f'http://127.0.0.1:{p}/AG-03.dc.html'); time.sleep(.6)
-    clk('+ Criar diagnóstico'); fill('Evidências (vistoria · laudo)','VIS-017 · LAU-2063'); fill('Hipótese · causa','Daninhas resistentes na bordadura')
+    clk('+ Criar diagnóstico'); fill('Evidências (vistoria · laudo)','VIS-017 · PLA-104'); fill('Hipótese · causa','Daninhas resistentes na bordadura')
     fill('Meta','plantio limpo'); fill('Ação proposta','Dessecação sequencial'); clk('Salvar','aside[role=dialog]')
     chk('DIA-011 criado em rascunho (numeração única com o MIP)', 'DIA-011' in body() and 'Rascunho' in body())
     # ---- AG-05: anexar referência ao limiar

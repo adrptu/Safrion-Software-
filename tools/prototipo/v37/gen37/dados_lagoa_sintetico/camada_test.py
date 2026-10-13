@@ -223,13 +223,5 @@ try: _r = _json.loads(_p.stdout.strip().splitlines()[-1])
 except Exception: _r = {'erro': _p.stderr[-600:]}
 chk('16 PRE-REV P4: versões cenário 3, MIP 2, irrigação 2; o estado salvo com a versão anterior é descartado nas três bases',
     _r.get('cen') == [3, True] and _r.get('mip') == [2, True] and _r.get('irr') == [2, True], _r)
-# verificação SAF-C02: o montar_render dizia "dados reais locais: 5/5" com a camada sintética; o rótulo sai de F.REAL (ENG-017)
-import glob as _glob
-if _glob.glob(os.path.join(GEN, 'project', '*.dc.html')):
-    _m = _sp.run([sys.executable, os.path.join(GEN, 'montar_render.py')], capture_output=True, text=True, timeout=300, env=dict(os.environ, SAFRION_DADOS='sintetico'))
-    chk('17 montar_render com a camada sintética: "dados da Lagoa Grande: sintéticos", nunca "reais"',
-        _m.returncode == 0 and 'dados da Lagoa Grande: sintéticos ' in _m.stdout and 'reais' not in _m.stdout, [_m.returncode, _m.stdout[-300:], _m.stderr[-300:]])
-else:
-    print('PULADO 17 montar_render: sem project/*.dc.html (rode python3 build.py antes)', flush=True)
 print(f'RESULTADO: {sum(OK)}/{len(OK)}')
 sys.exit(0 if all(OK) else 1)

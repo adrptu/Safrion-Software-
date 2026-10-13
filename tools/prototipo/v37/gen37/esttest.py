@@ -146,7 +146,7 @@ def parte4(E):
     # CTL-3 · aprova quem decide (R-D1, R-D2; padrão 2): o perfil de demonstração (menu lateral) é quem age; não é segurança de acesso
     SEL = '[aria-label="Trocar perfil de demonstração"]'
     E.ok(E.J(f"(document.querySelector('{SEL}')||{{value:''}}).value") == 'Ana', 'menu lateral: seletor de perfil começa em Ana')
-    print('perfil Rui:', E.setv(SEL, 'Rui'), E.toast()); E.ok('Perfil de demonstração: Rui · Almoxarife e expedição (não é segurança de acesso).' in E.toast(), 'trocar de perfil avisa que não é segurança de acesso', E.toast())  # COM P1 (498104d): Rui é "Almoxarife e expedição" (comercial_unit C11b)
+    print('perfil Rui:', E.setv(SEL, 'Rui'), E.toast()); E.ok('Rui · Almoxarife (não é segurança de acesso)' in E.toast(), 'trocar de perfil avisa que não é segurança de acesso', E.toast())
     E.clk('Faça contagens'); t = E.rowtxt('INV-2609'); print('INV-2609 (Rui):', t)
     E.ok('aprova: Ana (gestora)' in t and 'Aprovar ajuste' not in t and 'Recontar' in t, 'Rui vê "aprova: Ana (gestora)" no lugar de Aprovar ajuste; Recontar continua', t)
     E.clk('Confira saldos'); t = E.rowtxt('K26-11'); print('K26-11 (Rui):', t)

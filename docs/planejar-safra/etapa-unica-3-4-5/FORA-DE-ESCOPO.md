@@ -21,7 +21,7 @@ Companheiro de [ESPECIFICACAO.md](ESPECIFICACAO.md). Cada item tem o motivo de f
 | **"Nova configuração" para atividade sem nenhuma** | O `rendAfter` exige `_novaCfg` (safra.js:440-441) | o `rendAfter` aceitar inclusão sem ele |
 | **Cartões no lugar de tabela no celular** (PRD 4.3) | Componente G2 novo | componente pronto e testado |
 | **Diesel como item de demanda** (D2) | Quem fornece o combustível não está definido | a fazenda definir quem fornece |
-| **PL-03 oculto com números fixos** que contradizem a etapa 3 (planejamento.py:314-381) | Outra tela. Sem entrada desde a verificação SAF-C02: "Ver capacidade" no PL-02, no PL-04 e no PL-05 abre a etapa 3 (`saf_capacidade_simetrica_test.py`) | tarefa própria: derivar da etapa 3 ou remover |
+| **PL-03 oculto com números fixos** que contradizem a etapa 5 (planejamento.py:312-379) | Outra tela | tarefa própria: derivar da etapa 3 ou remover |
 | **Navegação por setas na `g_cap`** (tabindex móvel) | Com a grade recolhida e "—" inerte, as paradas de Tab caem; ainda são uma por célula com demanda | o G2 ganhar navegação por setas |
 | **Espelho `_ocorr_py` sem conferir cultura nem ajustes '-' e '+'** (dados2.py:130-138) | Corrigir mexe no espelho da demanda; `resumo_cultura` usa o laço do `plano_op` | tarefa própria, com a paridade da demanda verde |
 | **`aj` sem uso** depois da Origem calculada (inclusive na atividade dividida, safra.js:465-466) | O selo sai da linha e a Origem não lê `aj` | limpeza à parte, sem mudar comportamento |

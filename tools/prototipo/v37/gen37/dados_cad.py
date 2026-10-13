@@ -60,9 +60,6 @@ SEMENTES={('Soja','58 W'):'Semente de soja 58 W',('Soja','62 X'):'Semente de soj
 # ============ CD-03 · máquinas, instalações e conjuntos ============
 # capacidade por classe: pot (cv) · barra (m) + tanque (L) · linhas × esp (m) · larg (m) [+ carga kg] · plat (m) · vazao (m³/h) · kgh (kg/h) · cap_sc (sc 60 kg)
 # custo_h: máquina/implemento R$/h que o rendimento (CD-02 e Planejar safra etapa 3) usa
-# vazão (m³/h) do equipamento de irrigação = a fonte da Irrigação (dados_irrigacao.eq_vazao_ls lê daqui): Bomba do Pivô 2 = a da ficha do pivô
-# (dados.FICHA_PIVO, 166 L/s; antes 340 m³/h); Bomba do Pivô 1 = 540 m³/h (150 L/s; antes 300); Gotejo T7 = 838,8 m³/h (233 L/s; antes 45)
-# (revisão de 10/10, A2: a mesma vazão no cadastro e na Irrigação). Modelo da a11 = o conjunto da ficha (pivô + motobomba), A7.
 ATIVOS=[
  dict(id='a01',nome='Trator T1',modelo='JD 6M 155',classe='Trator',pot=155,custo_h=180,cont=4312,exige='Não',local='Oficina Sede',fonte='Fabricante'),
  dict(id='a02',nome='Trator 02',modelo='MF 7719',classe='Trator',pot=190,custo_h=180,cont=2988,exige='Não',local='Santa Rita · T4',fonte='Fabricante'),
@@ -74,9 +71,9 @@ ATIVOS=[
  dict(id='a08',nome='Colhedora Axial-Flow 7250',modelo='Case IH 7250',classe='Colhedora',plat=10,custo_h=950,cont=2150,exige='Não',local='Galpão 1',fonte='Fabricante'),
  dict(id='a09',nome='Máquina TSI',modelo='tratamento de sementes na sede',classe='Tratamento de sementes',kgh=2400,custo_h=60,cont=720,exige='Sim',calib='2026-07-20',interv=60,local='Oficina Sede',fonte='Ensaio da fazenda'),
  dict(id='a10',nome='Esqueletadeira',modelo='café · 1 linha',classe='Implemento',larg=3,custo_h=60,cont=310,exige='Não',local='Galpão 1',fonte='Fabricante'),
- dict(id='a15',nome='Bomba do Pivô 1',modelo='motobomba 125 cv',classe='Irrigação',vazao=540,custo_h=85,cont=7650,exige='Sim',calib='2026-09-12',interv=30,local='Pivô 1',fonte='Ensaio da fazenda'),
- dict(id='a11',nome='Bomba do Pivô 2',modelo='pivô central fixo · 8 torres · motobomba + hidrômetro novo',classe='Irrigação',vazao=round(D.FICHA_PIVO['a11']['vazao_ls']*3.6,1),custo_h=85,cont=8914,exige='Sim',calib='',interv=30,local='Pivô 2',fonte='Ensaio da fazenda'),
- dict(id='a12',nome='Gotejo T7',modelo='cabeçal + injetora de fertilizante',classe='Irrigação',vazao=838.8,custo_h=25,cont=5210,exige='Sim',calib='2026-09-05',interv=60,local='Talhão T7',fonte='Ensaio da fazenda'),
+ dict(id='a15',nome='Bomba do Pivô 1',modelo='motobomba 125 cv',classe='Irrigação',vazao=300,custo_h=85,cont=7650,exige='Sim',calib='2026-09-12',interv=30,local='Pivô 1',fonte='Ensaio da fazenda'),
+ dict(id='a11',nome='Bomba do Pivô 2',modelo='motobomba + hidrômetro novo',classe='Irrigação',vazao=340,custo_h=85,cont=8914,exige='Sim',calib='',interv=30,local='Pivô 2',fonte='Ensaio da fazenda'),
+ dict(id='a12',nome='Gotejo T7',modelo='cabeçal + injetora de fertilizante',classe='Irrigação',vazao=45,custo_h=25,cont=5210,exige='Sim',calib='2026-09-05',interv=60,local='Talhão T7',fonte='Ensaio da fazenda'),
  dict(id='a13',nome='Packing linha 1',modelo='esteira + balança',classe='Beneficiamento',kgh=2400,custo_h=120,cont=12301,exige='Sim',calib='2026-09-01',interv=30,local='Armazém Sede',fonte='Ensaio da fazenda'),
  dict(id='a14',nome='Silo 01',modelo='aeração + termometria',classe='Armazenagem',cap_sc=60000,custo_h='',cont='',exige='Sim',calib='2026-09-18',interv=90,local='Armazém Sede',fonte='Fabricante'),
 ]
@@ -89,15 +86,15 @@ CONJUNTOS=[('k1','Trator 02','Pulverizador PJ-3030','Pulverização','r1'),('k2'
 
 # ============ CD-04 · pessoas, habilidades e habilitações ============
 HABILIDADES=['Operar trator','Operar pulverizador','Operar plantadeira','Operar colhedora','Preparar calda','Irrigar','Almoxarifado',
-             'Operar empilhadeira','Conferir','Manutenção de máquinas','Testar reparo','Aprovar O.S. de manutenção','Liberar ativo','Liberar O.S. (agrônomo)',
-             'Autorizar rota e liberar ordem de processo','Liberar lote (qualidade)']   # PCM (D-20/D-36): teste, aprovação e aptidão; BEN-1 (docs/beneficiamento §2.3): Igor e Marta
+             'Operar empilhadeira','Conferir','Manutenção de máquinas','Liberar O.S. (agrônomo)',
+             'Autorizar rota e liberar ordem de processo','Liberar lote (qualidade)']   # BEN-1 (docs/beneficiamento §2.3): Igor e Marta
 # habilitação exigida por habilidade (validade controlada na pessoa)
 HAB_EXIGE={'Operar trator':'NR-31','Operar pulverizador':'NR-31','Operar plantadeira':'NR-31','Operar colhedora':'NR-31','Preparar calda':'NR-31',
            'Irrigar':'NR-10','Operar empilhadeira':'NR-11','Manutenção de máquinas':'NR-12','Liberar O.S. (agrônomo)':'CREA'}
 HAB_CAMPO={'NR-31':'v31','NR-10':'v10','NR-11':'v11','NR-12':'v12','CREA':'vcrea'}
 EQUIPES=[('e1','Agronomia','Ana','seg–sex · 07–17h'),('e2','Campo 1','Marcos','seg–sáb · 06–15h'),('e3','Campo 2','Lucas','seg–sáb · 06–15h'),
          ('e4','Irrigação','João','escala 6×2 · 8h'),('e6','Suprimentos','Rui','seg–sex · 07–17h'),('e7','Oficina','Zé','seg–sex · 07–17h'),
-         ('e8','Beneficiamento e qualidade','Igor','seg–sáb · 06–15h'),('e9','Comercial','Dora','seg–sex · 07–17h')]
+         ('e8','Beneficiamento e qualidade','Igor','seg–sáb · 06–15h')]
 CALS=['seg–sex · 07–17h','seg–sex · 08–18h','seg–sáb · 06–15h','escala 6×2 · 8h']
 # custo-hora com encargos alinhado ao rendimento (D2.CONJ: operador R$ 38/h; irrigante e equipe de café R$ 32/h)
 PESSOAS=[
@@ -109,9 +106,7 @@ PESSOAS=[
  dict(id='p5',nome='João',funcao='Irrigante',equipe='Irrigação',vinc='CLT',hab=['Irrigar'],v10='2027-03-31',adm='2018-05-02',custo=32,login=True),
  dict(id='p6',nome='Paula',funcao='Almoxarife',equipe='Suprimentos',vinc='CLT',hab=['Almoxarifado','Conferir'],adm='2020-02-03',custo=32,login=True),
  dict(id='p7',nome='Rui',funcao='Conferente',equipe='Suprimentos',vinc='CLT',hab=['Conferir','Almoxarifado','Operar empilhadeira'],v11='2027-02-28',adm='2017-09-11',custo=30,login=True),
- dict(id='p8',nome='Zé',funcao='Mecânico',equipe='Oficina',vinc='CLT',hab=['Manutenção de máquinas','Testar reparo'],v12='2027-05-31',adm='2016-04-04',custo=34,login=True),
- # PCM simplificado (05/10, D-20/D-37): Otávio, responsável de manutenção (sintético), aprova a OM e decide a aptidão do ativo (CMD-19)
- dict(id='p14',nome='Otávio',funcao='Responsável de manutenção',equipe='Oficina',vinc='CLT',hab=['Aprovar O.S. de manutenção','Liberar ativo'],adm='2015-03-02',custo=58,login=True),
+ dict(id='p8',nome='Zé',funcao='Mecânico',equipe='Oficina',vinc='CLT',hab=['Manutenção de máquinas'],v12='2027-05-31',adm='2016-04-04',custo=34,login=True),
  dict(id='p9',nome='Beto',funcao='Operador',equipe='Campo 1',vinc='CLT',hab=['Operar trator'],v31='',adm='2026-09-22',custo=38,login=False),
  # CONF-D04: Caio (PCP) decide pelo perfil de demonstração desde o CTL-3 e não estava no cadastro (segundo cadastro de pessoas); entra aqui (sintético)
  dict(id='p11',nome='Caio',funcao='PCP',equipe='Agronomia',vinc='CLT',hab=['Conferir'],adm='2024-03-04',custo=52,login=True),
@@ -119,7 +114,6 @@ PESSOAS=[
  # carência e a Produção já citam como "Qualidade (Marta)"); perfis de quem age em g2lib.js (G2_PERFIS)
  dict(id='p12',nome='Igor',funcao='Responsável de produção',equipe='Beneficiamento e qualidade',vinc='CLT',hab=['Autorizar rota e liberar ordem de processo'],adm='2024-03-04',custo=38,login=True),
  dict(id='p13',nome='Marta',funcao='Qualidade',equipe='Beneficiamento e qualidade',vinc='CLT',hab=['Liberar lote (qualidade)'],adm='2023-08-14',custo=34,login=True),
- dict(id='p15',nome='Dora',funcao='Comercial',equipe='Comercial',vinc='CLT',hab=[],adm='2024-03-04',custo=40,login=True),   # v57: quem decide no Comercial é pessoa do CD-04 (CONF R5)
 ]
 
 # ============ CD-05 · parceiros com papéis ============
@@ -165,33 +159,13 @@ EMB_ITEM={'Glifosato 480':('Galão',20),'2,4-D 806':('Galão',20),'Óleo mineral
           'Semente de feijão Pérola':('Saco',40),'Diesel S10':('Granel',''),'Soja em grão':('Granel',''),'Café beneficiado':('Saco',1),'Caixa de mamão Formosa 10 kg':('Pallet',60),
           'Calcário dolomítico':('Granel','')}
 PRECO_DATA='2026-09-15'   # preço de referência dos itens de plano (última cotação homologada)
-# Calcário dolomítico: R$ 180,00/t sintético (SOLO-01, D-10): sem preço, a calagem incluída pela análise daria custo 0 na safra e proposta de R$ 0 na Compra
-PRECO_EXTRA={'Diesel S10':6.19,'Caixa de mamão Formosa 10 kg':2.90,'Calcário dolomítico':180.0}
+PRECO_EXTRA={'Diesel S10':6.19,'Caixa de mamão Formosa 10 kg':2.90}
 # Caixa do packing com massa declarada (BEN-1; DEC-0510-03 e docs/culturas/UNIDADES-DE-MERCADO.md: mamão formosa em kg ao produtor e
 # cx 10 kg no atacado, CEPEA/Ceagesp; havaí por número de frutos fica para quando houver havaí). Fonte única do conteúdo nominal e da tara
 # (sintética): o CD-06 e o beneficiamento leem daqui. Massa e tara em texto decimal (kg).
 CX_MAMAO='Caixa de mamão Formosa 10 kg'
 EMB_PACK={CX_MAMAO:dict(massa='10',tara='0.6',un='un',cultura='Mamão Formosa',fonte='cx 10 kg do formosa (CEPEA/Ceagesp); tara sintética')}
 ITENS_NOVOS={'Calcário dolomítico':dict(grupo='Corretivos',un='t')}   # corretivo: cadastrável, homologável e cotável
-def preco_ref(n):
-    """preço de referência (fonte única do CD-06 e da análise de solo): o dos planos (última cotação homologada) e os extras; a semente de
-    cultivar usa o preço da semente da cultura no plano. Sem preço: ''."""
-    if not hasattr(preco_ref,'_m'):
-        m={}
-        for p in D2.PLANOS:
-            for a in p['atividades']:
-                for x in a['prods']:
-                    if 'do cultivo' in x['prod']: m.setdefault('Semente de '+p['cultura'].lower(),x['preco'])
-                    else: m.setdefault(x['prod'],x['preco'])
-        m.update(PRECO_EXTRA); preco_ref._m=m
-    m=preco_ref._m
-    return m.get(n, next((v for k,v in m.items() if k.startswith('Semente de ') and n.startswith(k+' ')),''))
-# Garantia estruturada (SOLO-01, D-11): uma fonte para o texto do CD-06 (txt) e para a regra da análise de solo (PRNT do corretivo e
-# % de K₂O da fonte simples de potássio). Números em texto decimal (a regra usa a aritmética decimal pr*). Filler: PRNT 90 % sintético.
-GARANTIA={'MAP 11-52':dict(txt='11% N · 52% P₂O₅'),'KCl 60%':dict(txt='60% K₂O',k2o='60'),'Ureia 45%':dict(txt='45% N'),'NPK 20-05-20':dict(txt='20-05-20'),
-          'Nitrato de cálcio':dict(txt='15,5% N · 19% Ca'),'Nitrato de potássio':dict(txt='13% N · 44% K₂O'),'Diesel S10':dict(txt='densidade 0,85 kg/L a 20 °C'),
-          'Soja em grão':dict(txt='umidade-base 14%'),'Café beneficiado':dict(txt='umidade-base 12%'),CX_MAMAO:dict(txt='tara '+EMB_PACK[CX_MAMAO]['tara'].replace('.',',')+' kg'),
-          'Calcário dolomítico':dict(txt='PRNT 85%',prnt='85'),'Calcário dolomítico filler':dict(txt='PRNT 90%',prnt='90')}
 LOCAIS=[('l1','Galpão 1','Santa Rita','Galpão','',''),('l2','Galpão 2','Santa Rita','Galpão','',''),('l3','Almox. defensivos','Santa Rita','Almoxarifado','',''),
         ('l4','Câmara fria','Santa Rita','Câmara fria','',''),('l5','Tanque Sede','Santa Rita','Tanque',15000,'L'),('l6','Silo 01','Santa Rita','Silo',60000,'sc 60 kg'),
         ('l7','Armazém Sede','Santa Rita','Armazém','',''),('l8','Packing','Santa Rita','Packing','',''),('l9','Galpão Boa Vista','Boa Vista','Galpão','',''),

@@ -50,9 +50,7 @@ function bnRun(self,fn,ok){ const r=benMudar(fn); self._bnUlt={t:bnAgora(),msg:r
   if(r.erro&&/^Já feito/.test(r.erro)){ self.setState({g2toast:r.erro,pr_err:''}); return r; }
   if(r.erro){ self.setState({pr_err:r.erro,g2toast:''}); return r; }
   self.setState(Object.assign({cenrev:Date.now(),g2toast:r.msg||'Registrado.',pr_err:'',pr_ferr:null},ok||{})); return r; }
-/* condição dos ativos: a da Manutenção, que vive no cenário único (c.man, PCM 1a); a chave antiga 'talhao-os-manutencao-v1' não é mais gravada.
-   Integração COMP (PCM × BEN): lida da chave antiga, a ordem mostrava a condição da semente ("Apto") com a linha bloqueada na Manutenção */
-function bnMan(){ try{ const c=cenGet(); return c&&c.man||null; }catch(e){ return null; } }
+function bnMan(){ try{ const t=localStorage.getItem(BENC.manKey); return t?JSON.parse(t):null; }catch(e){ return null; } }
 function bnProdTxt(o){ const r=benRota(o.ben.rota); return r?r.ent.split(' · ')[0]:''; }
 function bnQtdTxt(o){ const e=benKg(benEntrada(o)); return o.etapa==='A liberar'||o.etapa==='Liberadas'||o.etapa==='Canceladas'?'entrada '+e:(o.etapa==='Em execução'?'em processo '+benKg(benEmProc(o))+' de '+e:'processado '+e); }
 function bnRow(c,o){ const r=benRota(o.ben.rota); const nx=benProx(c,o); const ss=benSelos(c,o); const ep=benEmProc(o); const pr=bnProdTxt(o);
@@ -167,7 +165,7 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
   secs.push({t:'Etapas · '+benRotaTxt(r),rows:benEtapas(c,o).map(e=>({c:[[e.nome,'b'],e.pert,[e.sit,e.sit==='Cumprida'?'ok':(e.sit==='Pendente'&&at==='Em conferência'?'red':'mut')],e.ev]}))});
   /* recursos: condição do ativo lida da Manutenção (só exibição no BEN-1) e horas pela capacidade */
   const hr=benHoras(o); const ca=benCondAtivo(bnMan(),(r.ativos||[])[0]);
-  if(hr) secs.push({t:'Recursos',rows:[{c:[[hr.ativo.nome,'b'],[ca.t+' na Manutenção',ca.k==='ok'?'ok':'red'],prFmtT(hr.ativo.kgh,0)+' kg/h',prFmt(hr.h,2)+' h de linha','equipe '+hr.equipe+' · '+prFmt(hr.hh,2)+' HH','estimado pela capacidade'].concat(ca.msg?[ca.msg]:[]),l:ca.k==='ok'?null:{t:'Ver na Manutenção',h:'MA.dc.html#ativo='+(r.ativos||[])[0]}}]});   /* tela única da Manutenção (PCM): o ativo, não a MA-01 */
+  if(hr) secs.push({t:'Recursos',rows:[{c:[[hr.ativo.nome,'b'],[ca.t+' na Manutenção',ca.k==='ok'?'ok':'red'],prFmtT(hr.ativo.kgh,0)+' kg/h',prFmt(hr.h,2)+' h de linha','equipe '+hr.equipe+' · '+prFmt(hr.hh,2)+' HH','estimado pela capacidade'].concat(ca.msg?[ca.msg]:[]),l:ca.k==='ok'?null:{t:'Ver na Manutenção',h:'MA-01.dc.html'}}]});
   /* lotes gerados (Encerradas) */
   if(at==='Encerradas'){ const I=o.ben.insp&&benB(c).insp[o.ben.insp]; const ls=Object.values(prP(c).lotes).filter(L=>L.benef===o.id);
     secs.unshift({t:'Lotes gerados',rows:ls.map(L=>{ const S=prSaldos(c,L); return {c:[[L.id,'b'],L.prod.split(' · ')[1]+' '+L.classe,benKg(S.fis)+' · '+(L.cx||0)+' cx',[S.esgotado?'esgotado':S.q,S.q==='Liberado'?'ok':''],I?I.id+' · prazo '+prBr(I.prazo)+' · '+I.resp:''],l:{t:'Abrir no Estoque de produto',h:'PROD.dc.html#'+L.id}}; })}); }

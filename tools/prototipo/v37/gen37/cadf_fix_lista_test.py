@@ -16,8 +16,6 @@ BTN="""((t)=>{const b=[...document.querySelectorAll('aside[role=dialog] button')
 CLK="""((t,sc)=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...document.querySelectorAll(sc||'button,a')]; const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
 def ROW(ti,txt): return f"[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(txt)})>=0)"
 def openrow(ti,txt): J(f"(()=>{{const r={ROW(ti,txt)}; (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.35)
-# revisão TABR (09/10/2026, A1): a Situação vem logo depois do talhão ("T3 Em dia Sequeiro …"); a linha é achada pelo código na 1ª célula
-def openrow1(ti,cod): J(f"""(()=>{{const r=[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>{{const c=r.querySelector('[role=cell]'); return c&&c.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim()==={json.dumps(cod)};}}); (r.querySelector('[role=cell] span')||r).click();}})()"""); time.sleep(.35)
 def rowtxt(ti,txt): return J(f"(()=>{{const r={ROW(ti,txt)}; return r?r.innerText.replace(/\\s+/g,' '):null;}})()")
 def fset(k,val): J(f"({SETV})('aside[role=dialog] [id$=\"_{k}\"]',{json.dumps(val)})"); time.sleep(.2)
 def dlg(): return J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
@@ -54,7 +52,7 @@ try:
         and 'Área do polígono' not in L and 'Situação' not in L and 'Área cultivável' in L, [d[:200],L])
     J(f"({BTN})('Cancelar')"); time.sleep(.25)
     # ---------- talhão com parcelas em safra aberta não muda de fazenda ----------
-    openrow1(0,'T3'); d=dlg(); L=labels()
+    openrow(0,'T3 Sequeiro'); d=dlg(); L=labels()
     chk('4 edição do T3 mantém texto de edição, polígono e Situação', 'Altere o talhão' in d and 'Área do polígono' in L and 'Situação' in L, [d[:120],L])
     fset('faz','Boa Vista'); save(); al=alerts()
     chk('5 T3 com parcelas na safra aberta não muda de fazenda (erro no campo Fazenda)', aberto() and 'T3 tem parcelas na Safra 2026/27 da Santa Rita. Tire-as no Planejar safra antes de mudar de fazenda.' in al
@@ -63,10 +61,10 @@ try:
     chk('6 depois de cancelar: T3 segue na Santa Rita (1.165,0 ha) e verde no mapa', '1.165,0 ha' in (sr or '') and '120,0 ha' in (bv or '') and fill(3)=='#8FD67F', [sr,bv,fill(3)])
     vis('Lista')
     # ---------- talhão sem parcelas muda de fazenda ----------
-    openrow1(0,'B1'); fset('faz','Santa Rita'); save()
+    openrow(0,'B1 Sequeiro'); fset('faz','Santa Rita'); save()
     chk('7 B1 sem parcelas muda para a Santa Rita', not aberto() and 'Salvo: B1 · Santa Rita.' in toast() and '1.285,0 ha' in (rowtxt(0,'Santa Rita 9 talhões') or ''), [toast(),rowtxt(0,'Santa Rita')])
     # ---------- reativar com toast próprio ----------
-    openrow1(0,'B1'); fset('sit','Inativo'); save(); openrow1(0,'B1'); fset('sit','Ativo'); save()
+    openrow(0,'B1 Sequeiro'); fset('sit','Inativo'); save(); openrow(0,'B1 Sequeiro'); fset('sit','Ativo'); save()
     chk('8 reativar o B1 avisa que volta ao Planejar safra e ao Mapa', 'B1 reativado: volta ao Planejar safra e ao Mapa.' in toast(), toast())
     # ---------- sem rolagem de página: cadastrar fazendas e talhões não faz a página rolar; lista e mapa rolam no bloco ----------
     novafaz(); fset('nome','Nova Esperança'); fset('mun','Jataí'); fset('area','600'); save(); aba('Talhões')

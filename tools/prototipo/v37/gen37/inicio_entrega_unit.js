@@ -64,7 +64,6 @@ ok('N4b app: inicia com os três; fecha 20 ha e o Óleo zera', iniApp('OS-0430')
 ok('N4b app: só o Óleo falta: "Óleo mineral 60 L a entregar"', iniApp('OS-0430') === 'Iniciar bloqueado: REQ-041 sem entrega · Óleo mineral 60 L a entregar. ' + Q1, iniApp('OS-0430'));
 
 // N5 · componente esgotado: consumo acima da custódia aceito pela gestora (CTL-3, padrão 2) zera o saldo a entregar; a área continua → dono é a agrônoma
-// B-R8 (09/10): 80 L de Fungicida A e 0 L de Adjuvante informados em 100 ha (planejado 50 L e 25 L) também abrem a divergência de dose (selo vermelho)
 reset(); iniApp('OS-0421'); fechar(100, { 'Fungicida A': 80, 'Adjuvante espalhante': 0 }); mud(W, "return cenConciliar(c,'CC-301',true,undefined,'Ana')");
 const it5 = st("(()=>{const i=c.reqs['REQ-035'].itens[0];return [i.solicitado,i.consumido,i.custodia,cenSaldoEntregar(i),c.ordens['OS-0421'].saldo]})()");
 const T5 = 'Iniciar bloqueado: Fungicida A: todo o solicitado na REQ-035 já foi consumido e nada está com Marcos. Ana (agrônoma) decide a área restante: Dispensar saldo na O.S. e, se ainda precisar aplicar, emitir nova ordem.';
@@ -72,7 +71,7 @@ ok('N5 estado: 175 solicitados, 175 consumidos, custódia 0, nada a entregar, 60
 ok('N5 app: recusa com dono Ana (agrônoma); cartão "Insumo esgotado", não "Retirar"', iniApp('OS-0421') === T5 && JSON.stringify(passo('OS-0421')) === JSON.stringify(['rever', 'Insumo esgotado · Ana (agrônoma)']), [iniApp('OS-0421'), passo('OS-0421')]);
 const MG = id => w(`(()=>{const c=cenGet(),co=c.ordens['${id}'];const o=osMerge(Object.assign(cenClone(co),{selos:[]}),co,c);const pb=osProx(o);return [o.selos.map(s=>s.t+'/'+s.c).join(', '),o.dono,o.prazo,pb.P.btn,pb.b?pb.b.t+' | '+pb.b.q:null]})()`);
 const mg5 = MG('OS-0421');
-ok('N5 web: a dona vê a pendência na lista/Kanban/Mapa (selo vermelho "Insumo esgotado · Fungicida A", Ana, decidir a área restante; painel com o impedimento no lugar do primário)', JSON.stringify(mg5) === JSON.stringify(['Parcial · dia 4 de 7/yellow, Divergência de consumo/dose · Fungicida A, Adjuvante espalhante/red, Insumo esgotado · Fungicida A/red', 'Ana (agrônoma)', 'decidir a área restante', 'Registrar apontamento', 'Apontar bloqueado: Fungicida A: todo o solicitado na REQ-035 já foi consumido e nada está com Marcos. | Ana (agrônoma) decide a área restante: Dispensar saldo na O.S. e, se ainda precisar aplicar, emitir nova ordem.']), mg5);
+ok('N5 web: a dona vê a pendência na lista/Kanban/Mapa (selo vermelho "Insumo esgotado · Fungicida A", Ana, decidir a área restante; painel com o impedimento no lugar do primário)', JSON.stringify(mg5) === JSON.stringify(['Parcial · dia 4 de 7/yellow, Insumo esgotado · Fungicida A/red', 'Ana (agrônoma)', 'decidir a área restante', 'Registrar apontamento', 'Apontar bloqueado: Fungicida A: todo o solicitado na REQ-035 já foi consumido e nada está com Marcos. | Ana (agrônoma) decide a área restante: Dispensar saldo na O.S. e, se ainda precisar aplicar, emitir nova ordem.']), mg5);
 ok('N5 Rui não resolve: entregar mais é recusado (saldo a entregar 0 L)', ent('REQ-035', 'Fungicida A', 1) === 'Acima do saldo a entregar: 0 L.', ent('REQ-035', 'Fungicida A', 1));
 
 // P5 · caminho feliz: entrega completa, 160 ha num turno, custódia 0/0/0 → próximo passo é Enviar para conferência, sem selo vermelho
