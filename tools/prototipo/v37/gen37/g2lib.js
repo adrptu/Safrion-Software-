@@ -243,7 +243,10 @@ function g2sicoPart(r,sp){ const k=sp.sico.k, cores=sp.sico.cores||['red','orang
   if(ch){ cor=ch.c; t=String(ch.t||''); d=String(ch.dica||ch.dv||''); } else { t=g2text(r,c); cor=(c.chips||{})[t]||null; }
   t=t.trim(); if(!cor||!t||cores.indexOf(cor)<0) return null;
   return {k:'ico',c:cor,t:c.l+': '+t+(d?' · '+d:''),curto:cor==='red'?t:''}; }   // texto curto ao lado só no bloqueio (vermelho, visual_corte C2); atenção fica no ícone e na dica
-function g2cvTem(sp){ return !!(sp&&sp.cols&&sp.cols.some(c=>c.ess)); }
+// V2-3: tela que troca sp.cols em tempo de execução (CD-05 pelo papel; Irrigação sem a Fazenda) recebe de volta as marcas da coluna
+// pela chave (sp.marcas, do quadro): a coluna nova não perde a posição no padrão nem a pergunta
+function g2marca(sp){ if(!sp||!sp.marcas||!sp.cols) return; sp.cols.forEach(c=>{ const m=sp.marcas[c.k]; if(!m) return; if(c.ess==null&&m.ess) c.ess=m.ess; if(!c.pq&&m.pq) c.pq=m.pq; }); }
+function g2cvTem(sp){ g2marca(sp); return !!(sp&&sp.cols&&sp.cols.some(c=>c.ess)); }
 function g2cvChave(sp){ let pg=''; try{ pg=String(location.pathname).split('/').pop(); }catch(e){} let pf=''; try{ pf=g2perfil().k; }catch(e){} return 'g2cv:'+pg+':'+sp.id+':'+pf; }
 function g2cvPadrao(sp){ return sp.cols.filter(c=>c.ess).sort((a,b)=>a.ess-b.ess).map(c=>c.k); }
 function g2cvLer(self,sp){ if(typeof window!=='undefined'&&window.__g2cvTodasSempre) return sp.cols.map(c=>c.k);   // só teste de domínio (comp_lib.cv_todas_sempre)
@@ -300,10 +303,19 @@ function g2agGrava(self,sp,a){ try{ if(a) localStorage.setItem(g2agChave(sp),JSO
   try{ history.replaceState(history.state,'',g2agUrl(location.pathname,location.search,location.hash,a)); }catch(e){}
   g2set(self,sp.id,{ag:a,agm:false,agx:null}); }
 // lista vazia (O.S. de processo sem talhão) vira "Sem talhão", como o valor ausente: a linha nunca some do agrupamento (Σ grupos = total)
-function g2agVals_(r,a,D,i){ const g=(r.g||{})[a.d]; const x=g?g[i]:undefined; const xs=Array.isArray(x)?(x.length?x:[undefined]):[x]; return xs.map(y=>(y===undefined||y===null||y==='')?'Sem '+D.niv[i].toLowerCase():String(y)); }
+// V2-3: grade marcada pelo quadro (visoes_marcas) agrupa pela própria coluna (D.ck[i]); data agrupa por mês (D.dt[i]); multivalor conta em
+// cada membro. Sem D.ck, os níveis vêm da linha (r.g), como na O.S.
+const G2_MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+function g2agCol(r,D,i,sp){ const c=sp&&sp.cols.find(x=>x.k===D.ck[i]); if(!c) return [undefined];
+  if(D.dt&&D.dt[i]){ const m=String((r.v||{})[c.k]||'').match(/^(\d{4})-(\d{2})/); return [m?(G2_MES[Number(m[2])-1]+'/'+m[1].slice(2)):undefined]; }
+  const mm=g2mem(r,c); if(mm&&mm.length) return mm.map(x=>String(x.l||x.id)); const t=g2text(r,c); return [(t==='—'||t==='-')?undefined:t]; }
+function g2agSo(r,a,D,i,sp){ if(D.ck&&D.ck[i]&&D.dt&&D.dt[i]){ const c=sp&&sp.cols.find(x=>x.k===D.ck[i]); const m=c&&String((r.v||{})[c.k]||'').match(/^(\d{4}-\d{2})/); return m?m[1]:undefined; }
+  return ((r.gs||{})[a.d]||[])[i]; }
+function g2agVals_(r,a,D,i,sp){ if(D.ck&&D.ck[i]) return g2agCol(r,D,i,sp).map(y=>(y===undefined||y===null||String(y).trim()==='')?'Sem '+D.niv[i].toLowerCase():String(y));
+  const g=(r.g||{})[a.d]; const x=g?g[i]:undefined; const xs=Array.isArray(x)?(x.length?x:[undefined]):[x]; return xs.map(y=>(y===undefined||y===null||y==='')?'Sem '+D.niv[i].toLowerCase():String(y)); }
 // a O.S. de T1 e T2 sob o filtro Talhão = T1 entra só no grupo T1 (Codex 6168779649, achado 2): o nível com coluna de filtro (D.fc[i]) usa só
 // os membros escolhidos no filtro; o vínculo completo continua no detalhe da O.S., e o total conta cada O.S. uma vez
-function g2agValsF(r,a,D,i,sp,st){ const vs=g2agVals_(r,a,D,i), fk=(D.fc||[])[i], f=fk&&st&&st.f&&st.f[fk];
+function g2agValsF(r,a,D,i,sp,st){ const vs=g2agVals_(r,a,D,i,sp), fk=(D.fc||[])[i], f=fk&&st&&st.f&&st.f[fk];
   if(!f||!f.length) return vs; const c=sp.cols.find(x=>x.k===fk), m=c?g2mem(r,c):null; if(!m||!m.length) return vs;
   const k=m.filter(x=>f.indexOf(x.id)>=0).map(x=>String(x.l||x.id)); return k.length?k:vs; }
 // recorte da trilha para as outras formas (Kanban, Calendário, Carga): as linhas dentro da trilha escolhida, com o mesmo filtro por nível
@@ -318,7 +330,7 @@ function g2agRows(self,sp,st,rows){ const a=g2agLer(self,sp); if(!a) return {row
   const path=a.t.slice(0,Math.min(a.t.length,niv)).concat(auto);
   if(lv>=niv) return {rows:base,a,D,lv,base,path};   // último nível: as linhas, filtradas pela trilha
   const gs={}, ord=[], ok={}, c0=sp.cols[0].k, somas=sp.cols.filter(c=>c.agg==='sum');
-  base.filter(r=>g2match(r,sp,st)).forEach(r=>{ const vs=g2agValsF(r,a,D,lv,sp,st), so=((r.gs||{})[a.d]||[])[lv];
+  base.filter(r=>g2match(r,sp,st)).forEach(r=>{ const vs=g2agValsF(r,a,D,lv,sp,st), so=g2agSo(r,a,D,lv,sp);
     vs.forEach(k=>{ if(!gs[k]){ gs[k]=[]; ord.push(k); } gs[k].push(Object.assign({},r,{id:r.id+'@'+k})); if(so!==undefined&&so!==null&&(ok[k]===undefined||String(so)<String(ok[k]))) ok[k]=so; }); });
   // ordem: a chave própria do nível quando a linha traz (r.gs: mês e semana em ordem de calendário), senão o nome
   ord.sort((x,y)=>(ok[x]!==undefined&&ok[y]!==undefined&&String(ok[x])!==String(ok[y]))?(String(ok[x])<String(ok[y])?-1:1):x.localeCompare(y,'pt-BR',{numeric:true}));
@@ -371,6 +383,7 @@ function g2vals(self,sp,v,mask){
   const susp=(x)=>sp.suspende?Object.assign({},x,{q:'',f:{},qv:''}):x;
   const st0=susp(g2stBusca(self,id,g2st(self,id)));
   const AG=(g2agTem(sp)&&!sp.suspende)?g2agRows(self,sp,st0,rows0):{rows:rows0,a:null}, rows=AG.rows, st=susp(g2stBusca(self,id,g2st(self,id)));   // VISOES-2 §3.3
+  const arv=!!(sp.tree||AG.a);   // V2-3: grade plana do quadro só ganha a seta do grupo quando está agrupada
   const flat=g2flat(sp,st,g2qrows(sp,st,rows),mask,added); const ed=sp.edit||{m:'none'}; const editable=ed.m&&ed.m!=='none';
   g2qvals(self,sp,v,st,rows,added);
   const so=st.so||sp.so||{};
@@ -425,8 +438,8 @@ function g2vals(self,sp,v,mask){
       const raw1=c.un?raw0.map(p=>(p&&typeof p.t==='string'&&['txt','b','cn','chip'].indexOf(p.k)>=0)?Object.assign({},p,{t:g2unf(p.t,c)}):p):raw0;
       const raw=(ci===0&&sicoP)?[sicoP].concat(raw1):raw1;
       const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':'')+(c.nr?' g2nr':'')+(c.a==='r'?' g2celn':''),parts:(ci===0&&casou?raw.concat([{k:'br'},{k:'mut',t:casou}]):raw).map((p,i,arr)=>g2part(g2semSep(arr,i),v)),pw:'max-width:'+(c.w||340)+'px;',
-        st:(c.nr?'padding:0 2px;':'padding:6px 8px;')+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&sp.tree?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:inherit;box-shadow:1px 0 0 #E4E9E5;':'')};
-      if(ci===0 && sp.tree){ cell.hasCaret=true; cell.caretOk=has; cell.caretNo=!has; const open=!!exp[r.id]||(g2filtering(st)&&has);
+        st:(c.nr?'padding:0 2px;':'padding:6px 8px;')+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&arv?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:inherit;box-shadow:1px 0 0 #E4E9E5;':'')};
+      if(ci===0 && arv){ cell.hasCaret=true; cell.caretOk=has; cell.caretNo=!has; const open=!!exp[r.id]||(g2filtering(st)&&has);
         cell.caretSym=open?'▾':'▸'; cell.caretExp=String(open); cell.caretLabel=(open?'Recolher ':'Expandir ')+g2text(r,c);
         cell.toggle=()=>{ const x=Object.assign({},g2st(self,id).x||sp.x0||{}); x[r.id]=!x[r.id]; g2set(self,id,{x}); }; }
       else { cell.hasCaret=false; }

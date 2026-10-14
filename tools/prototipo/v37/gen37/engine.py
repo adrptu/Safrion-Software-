@@ -1485,6 +1485,8 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     cols=[(dict(c,l=c['l']+' '+c['un']) if (c.get('un') and _ls.count(c.get('l'))>1) else c) for c in cols]
     _ed=edit if isinstance(edit,dict) else {}
     cols=_ajuda_auto(cols,_ed.get('calc'),_ed.get('fields') or ())   # DS-DICA: sigla, unidade e fórmula no cabeçalho
+    import visoes_marcas as _VM   # VISOES-2 V2-3: ess, pq, sico e Agrupar por das listagens do menu, num quadro só
+    cols,ag,sico=_VM.marcar(CUR,gid,cols,ag,tree,sico); ag_gen=bool(ag) and bool(ag[0].get('ck'))
     """Grade interativa. cols: [dict(k,l,t='txt'|'num',a='r',u,d,agg='sum'|'avg',chips={valor:cor},w,pre)];
     rows: [dict(id,v={},s={},p={k:[partes]},ro=False,kids=[...],o=[dict(t,h)],dr='d3_open',sh='d2')];
     edit: dict(m='form'|'ro'|'origin'|'none', title, sub, fields=[dict(k,l,t='txt'|'num'|'sel'|'date'|'area',opts,req,min,max,u,cond=dict(k,eq),help,def,ro)], calc, newTitle, leafOnly)."""
@@ -1493,7 +1495,8 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     n=len(cols)+(1 if sel else 0)+(1 if dele else 0)
     # qf: filtro rápido por uma coluna, k (chave), cut (fica o texto antes do separador), sep (vários valores na célula), todas ('Todas'|'Todos')
     qf=(dict(k=qf) if isinstance(qf,str) else qf) or None
-    spec=dict(id=gid,cols=cols,rows=rows,edit=edit,sel=sel,del_=dele,tree=(tree or bool(ag)),so=so or {},total=total,x0=x0 or {},qf=qf)
+    spec=dict(id=gid,cols=cols,rows=rows,edit=edit,sel=sel,del_=dele,tree=(tree or (bool(ag) and not ag_gen)),so=so or {},total=total,x0=x0 or {},qf=qf)
+    if any(c.get('ess') for c in cols): spec['marcas']={c['k']:dict(ess=c.get('ess'),pq=c.get('pq')) for c in cols if c.get('ess') or c.get('pq')}   # V2-3: g2marca
     if sico: spec['sico']=sico   # VISOES-2 §3.6: a coluna de situação (k) oculta vira ícone antes da identidade, só nas cores que pedem atenção (cores)
     if ag: spec['ag']=ag   # VISOES-2 §3.3: [dict(pq, l, niv=[...], fc=[coluna de filtro por nível], um, plural)]; as linhas trazem r.g[pq]
     spec['del']=spec.pop('del_'); GRIDS.append(spec)

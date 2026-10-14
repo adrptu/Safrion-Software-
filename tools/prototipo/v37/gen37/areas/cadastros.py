@@ -209,7 +209,9 @@ def ncol_dinamico(fname,holes):
     partes=s.split(alvo); assert len(partes)-1>=len(holes), (fname,len(partes)-1,holes)
     for i,h in enumerate(holes):
         if h is None: continue
-        q=partes[i+1]; j=q.index(','); assert q[:j].isdigit(), (fname,q[:20]); partes[i+1]='{{'+h+'}}'+q[j:]
+        q=partes[i+1]; j=q.index(',')
+        if q.startswith('{{') and q[:j].endswith('_ncols}}'): continue   # VISOES-2 V2-3: grade com colunas essenciais já segue as colunas visíveis (g2lib)
+        assert q[:j].isdigit(), (fname,q[:20]); partes[i+1]='{{'+h+'}}'+q[j:]
     open(p,'w',encoding='utf-8').write(alvo.join(partes))
 def estado_html(key):
     return f'<span class="cadx-estado" style="{H(key+"_stst")}"><span style="{H(key+"_stdot")}"></span>{H(key)}</span>'
