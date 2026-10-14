@@ -68,5 +68,5 @@ try:
 finally:
     c.close(); srv.terminate()
 for k in sorted(achados): print(f'TOTAL {k}: {len(achados[k])}' + (' (informativo: reticências de propósito, não conta)' if k == 'R' else ''))
-print(f'RESULTADO: {total} achado(s) em {len(PAGS)} páginas + {len(EXTRA)} visões × {len(TAMS)} tamanhos')
+print(f'RESULTADO: {total} achado(s) em {len(PAGS)} páginas + {len([x for x in EXTRA if x.startswith(FILTRO)])} visões × {len(TAMS)} tamanhos')
 sys.exit(1 if total else 0)
