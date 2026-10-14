@@ -45,7 +45,7 @@ Mocks só na fronteira do sistema (APIs de terceiros, relógio, aleatoriedade, e
 ## Como escrever testes bons
 - **Nome descreve comportamento**: `deve rejeitar pedido com quantidade zero` / `test_rejects_zero_quantity`. Um comportamento por teste.
 - Estrutura **Arrange–Act–Assert**, sem lógica (if/loop) dentro do teste.
-- **Determinístico**: relógio falso, seed fixa, sem `sleep`, sem depender de ordem ou de rede; cada teste cria e limpa seus dados (transação com rollback ou banco por teste).
+- **Determinístico**: relógio controlado, seed fixa e espera por condição observável; espera fixa somente quando o tempo real for objeto do teste, com motivo e limite explícitos, sem depender de ordem ou de rede; cada teste cria e limpa seus dados (transação com rollback ou banco por teste).
 - Dados via **factories/builders** (`buildPedido({ total: 0 })`), não fixtures gigantes.
 - Asserções específicas (`toEqual({...})`, não `toBeTruthy`); mensagens de erro verificadas por conteúdo.
 - Testar comportamento observável, não implementação (não asserta chamadas internas nem estado privado).
@@ -75,7 +75,7 @@ Configurações prontas: [assets/vitest.config.ts](assets/vitest.config.ts), [as
 ## Checklist do PR
 - [ ] Comportamentos e riscos alterados têm testes no nível adequado; fronteiras críticas têm integração e jornadas críticas têm E2E
 - [ ] Bug corrigido tem teste que falhava antes
-- [ ] Nenhum `skip`/`only`/`xit`; nenhum teste com `sleep` ou dependência de ordem
+- [ ] Nenhum `skip`/`only`/`xit`; nenhuma dependência de ordem ou espera fixa sem justificativa de tempo real e limite
 - [ ] Limites, erros e permissões cobertos
 - [ ] Gates de cobertura pertinentes atendidos; duração medida; nenhum agregado mascara falha ou ausência de testes
 - [ ] Testes legíveis: alguém entende o comportamento só lendo os nomes

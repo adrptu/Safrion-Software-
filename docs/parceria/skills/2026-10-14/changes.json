@@ -17,7 +17,7 @@
   {
     "file": "gemini/revisao-terceira-opiniao/SKILL.md",
     "before": "995272ed1c13b94c7bb70599c40d835861ee99ee497b8a8279a71bd501695297",
-    "after": "fe95fed6da672f2d351518203cee718d598aabe7d04d428df26f6c4a3ad74c23"
+    "after": "39617949b32ecf703d0de9c387abcf53cbf43cc8bee4da13b03bd62170416d00"
   },
   {
     "file": "gemini-consult.py",
@@ -27,7 +27,12 @@
   {
     "file": "shared/agro-gestao-conhecimento/SKILL.md",
     "before": "70eea322cc5c72674f89d73d3a9a9c679409d8c53824ffb368228a6d354290b6",
-    "after": "cd7fe21a0a167cda2802a25548aae3a261d80fcfcb703795a87d03a29747d5f5"
+    "after": "228165df3835602ce7f9342ece476feea583a90d8c89904d515c7bcdc2b4a6ef"
+  },
+  {
+    "file": "shared/agro-gestao-conhecimento/assets/agronomia.md",
+    "before": "aac9afab74d62d3a3eaf15da4da2085a8cb6ca5d0ce611ba0af4f94f1a1284de",
+    "after": "db2719b248ff8f56a756913c3e047059e415f86d15b782aff7abfa0628f98634"
   },
   {
     "file": "shared/benchmark-top5/SKILL.md",
@@ -37,12 +42,17 @@
   {
     "file": "shared/dev-backend/SKILL.md",
     "before": "63e02d40954bcff20a5ad7cb70dd5652550c9f4838138d7f21fc765f5ad81104",
-    "after": "4c74ee96aa57298253eb9e0548b639a2294f7945d304b575370a203f2bad6981"
+    "after": "2472accdab68d2e0be9bc50d2954479bab18343d32486aa9696f4291875c00a6"
   },
   {
     "file": "shared/dev-ciclo-completo/SKILL.md",
     "before": "5e3cb17ecbb6e9cff8d7d178ad58e24a31d5793e1c0bacab93fd8f7a0dfa83bf",
-    "after": "88c4e422009e10cbccd4a8ac7ea62a04b2a7829dec3f12585a6847906bfe3c73"
+    "after": "7ff9d82cc2673017083fb3eb72971cdba7429cf25079e25f6ef04389d04e387c"
+  },
+  {
+    "file": "shared/dev-ciclo-completo/assets/ADR-template.md",
+    "before": "f1096e77e626a218ef30b9275aa2b7693ae20afa95c63a0d0233b92ccabff3cd",
+    "after": "c8f6e67f9bcf083ce367420c92a84780ff6e7af63c5b6d86adcfd4433ccb1e76"
   },
   {
     "file": "shared/dev-ciclo-completo/assets/definition-of-done.md",
@@ -52,7 +62,7 @@
   {
     "file": "shared/dev-frontend-mobile/SKILL.md",
     "before": "eb83b188ad071601d5ff438a45e31f59c9df95da4fbd930f4a665e7e8d42425e",
-    "after": "b60e7cdcc2f359563052bb59018b2c1057c66f215145b0f6b294b0e05bc37b9f"
+    "after": "58418c0419693cc9b0b3e05221ee031cd72442ff18fd38e068bce36364736742"
   },
   {
     "file": "shared/dev-infra/SKILL.md",
@@ -77,17 +87,17 @@
   {
     "file": "shared/dev-testes/SKILL.md",
     "before": "7a93f851546be1380b3fda8e76c19e7ac04f2c63a4ab802770e0ac880a68cea6",
-    "after": "ed0e60b96d350fd0929e2bb0467440c4ca519cc3ccca2f969a3ffb1b152689d7"
+    "after": "8d069e074e78f3a50c05cd25d822b2ab1a6c20a25bde5aedd107efd162f02dea"
   },
   {
     "file": "shared/growth-receita-implantacao/SKILL.md",
     "before": "2ce9a4db1cd6b2efd10bf9ed16194a0080b6d7dcc8800eb5800790c62dabfa29",
-    "after": "ac2014ccf11f6e2b29426f11f8f3b1cc723ae74ae87508c6ef734f7577153436"
+    "after": "c8b9ef7b20ff93bcec91977206d3f089af2f3e5f1c09c42db56c8912dd8d6c63"
   },
   {
     "file": "shared/indicadores-satelite/SKILL.md",
     "before": "4a4a4dd7f2ba13edd494262ffae05310e4cee89674b0889b035467d1550603f6",
-    "after": "6592b7e24eebd601c59be687ccfdec5288a61ada08bdf2781db6ecd28ec3d9c1"
+    "after": "e8216a3ff73804919cb8f47a44d1a34635d2250e404c777e384bd72727b8802e"
   },
   {
     "file": "shared/master-detail-ux/SKILL.md",
@@ -122,12 +132,12 @@
   {
     "file": "shared/tabelas-interativas/SKILL.md",
     "before": "1ea66fdfe858c5af60e6a7ced9025f4c1483825c5eabc5a96de4c960955df2c7",
-    "after": "a049894af494893ed5d73298f3e7653b213a51fc73926d80386e87d0bc371462"
+    "after": "2172452b87188145a5605aec28a792fb0baeb0df43f4e562393c47fa1c538a71"
   },
   {
     "file": "shared/ux-essencial/SKILL.md",
     "before": "10972bdbf98af75313e6c21ebd6586fefc08918972fd792ca83c315b40a5ffe6",
-    "after": "a478dc6c90f318a260b45fea199589b4caf2d2c0c0a63eeda6ee3ca12d60e75b"
+    "after": "ad47ad7c7acc74cb5edcc2a2c39757582bf408e097c4811d2ecc584e1e77eef8"
   },
   {
     "file": "test_gemini_consult.py",

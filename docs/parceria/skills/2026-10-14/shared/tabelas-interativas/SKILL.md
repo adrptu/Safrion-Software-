@@ -117,7 +117,7 @@ Planilha não tem drill-down igual ao da web, então reproduza o equivalente nat
 - Se o usuário usa Excel desktop, sugerir também uma Tabela Dinâmica sobre a Tabela.
 
 ### Terminal / chat em Markdown
-Markdown não é interativo. Para tabelas pequenas (até ~15 linhas) mostre normalmente. Para dados maiores, ou quando o usuário for explorar, **gere a versão interativa** (artifact/HTML com `tabela.js`) e dê o link.
+Markdown não é interativo. Para tabelas pequenas (até ~15 linhas) mostre normalmente. Para dados maiores, ou quando o usuário for explorar, **gere a versão interativa** (artifact/HTML com `tabela.js`) e dê o link, somente com dados sintéticos ou explicitamente autorizados para esse destino. Se o projeto proibir dados reais em artefatos, mantenha-os no ambiente autorizado; autorização genérica de desenvolvimento não libera exportação.
 
 ---
 

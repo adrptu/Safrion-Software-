@@ -6,7 +6,7 @@
 Qual problema ou força motivou a decisão (1 parágrafo). Restrições relevantes: escala, prazo, equipe, custo, stack existente.
 
 ## Decisão
-O que foi decidido, em uma frase afirmativa. ("Usaremos PostgreSQL com Prisma como camada de persistência.")
+O que foi decidido, em uma frase afirmativa. ("Usaremos a opção A para atender aos critérios descritos, preservando os contratos vigentes.")
 
 ## Alternativas consideradas
 - **Opção A** — por que não.

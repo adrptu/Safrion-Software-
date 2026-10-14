@@ -16,8 +16,8 @@
   },
   {
     "file": "gemini/revisao-terceira-opiniao/SKILL.md",
-    "sha256": "fe95fed6da672f2d351518203cee718d598aabe7d04d428df26f6c4a3ad74c23",
-    "bytes": 3234
+    "sha256": "39617949b32ecf703d0de9c387abcf53cbf43cc8bee4da13b03bd62170416d00",
+    "bytes": 3240
   },
   {
     "file": "gemini-consult.py",
@@ -26,8 +26,8 @@
   },
   {
     "file": "shared/agro-gestao-conhecimento/SKILL.md",
-    "sha256": "cd7fe21a0a167cda2802a25548aae3a261d80fcfcb703795a87d03a29747d5f5",
-    "bytes": 7569
+    "sha256": "228165df3835602ce7f9342ece476feea583a90d8c89904d515c7bcdc2b4a6ef",
+    "bytes": 7629
   },
   {
     "file": "shared/agro-gestao-conhecimento/assets/administracao-economia.md",
@@ -36,8 +36,8 @@
   },
   {
     "file": "shared/agro-gestao-conhecimento/assets/agronomia.md",
-    "sha256": "aac9afab74d62d3a3eaf15da4da2085a8cb6ca5d0ce611ba0af4f94f1a1284de",
-    "bytes": 7100
+    "sha256": "db2719b248ff8f56a756913c3e047059e415f86d15b782aff7abfa0628f98634",
+    "bytes": 7618
   },
   {
     "file": "shared/agro-gestao-conhecimento/assets/contabilidade-financas.md",
@@ -76,8 +76,8 @@
   },
   {
     "file": "shared/dev-backend/SKILL.md",
-    "sha256": "4c74ee96aa57298253eb9e0548b639a2294f7945d304b575370a203f2bad6981",
-    "bytes": 9071
+    "sha256": "2472accdab68d2e0be9bc50d2954479bab18343d32486aa9696f4291875c00a6",
+    "bytes": 9296
   },
   {
     "file": "shared/dev-backend/assets/estrutura-modular.md",
@@ -86,13 +86,13 @@
   },
   {
     "file": "shared/dev-ciclo-completo/SKILL.md",
-    "sha256": "88c4e422009e10cbccd4a8ac7ea62a04b2a7829dec3f12585a6847906bfe3c73",
-    "bytes": 9293
+    "sha256": "7ff9d82cc2673017083fb3eb72971cdba7429cf25079e25f6ef04389d04e387c",
+    "bytes": 9457
   },
   {
     "file": "shared/dev-ciclo-completo/assets/ADR-template.md",
-    "sha256": "f1096e77e626a218ef30b9275aa2b7693ae20afa95c63a0d0233b92ccabff3cd",
-    "bytes": 646
+    "sha256": "c8f6e67f9bcf083ce367420c92a84780ff6e7af63c5b6d86adcfd4433ccb1e76",
+    "bytes": 680
   },
   {
     "file": "shared/dev-ciclo-completo/assets/definition-of-done.md",
@@ -101,8 +101,8 @@
   },
   {
     "file": "shared/dev-frontend-mobile/SKILL.md",
-    "sha256": "b60e7cdcc2f359563052bb59018b2c1057c66f215145b0f6b294b0e05bc37b9f",
-    "bytes": 9897
+    "sha256": "58418c0419693cc9b0b3e05221ee031cd72442ff18fd38e068bce36364736742",
+    "bytes": 10122
   },
   {
     "file": "shared/dev-infra/SKILL.md",
@@ -156,8 +156,8 @@
   },
   {
     "file": "shared/dev-testes/SKILL.md",
-    "sha256": "ed0e60b96d350fd0929e2bb0467440c4ca519cc3ccca2f969a3ffb1b152689d7",
-    "bytes": 7811
+    "sha256": "8d069e074e78f3a50c05cd25d822b2ab1a6c20a25bde5aedd107efd162f02dea",
+    "bytes": 7969
   },
   {
     "file": "shared/dev-testes/assets/playwright.config.ts",
@@ -176,13 +176,13 @@
   },
   {
     "file": "shared/growth-receita-implantacao/SKILL.md",
-    "sha256": "ac2014ccf11f6e2b29426f11f8f3b1cc723ae74ae87508c6ef734f7577153436",
-    "bytes": 3934
+    "sha256": "c8b9ef7b20ff93bcec91977206d3f089af2f3e5f1c09c42db56c8912dd8d6c63",
+    "bytes": 4381
   },
   {
     "file": "shared/indicadores-satelite/SKILL.md",
-    "sha256": "6592b7e24eebd601c59be687ccfdec5288a61ada08bdf2781db6ecd28ec3d9c1",
-    "bytes": 10068
+    "sha256": "e8216a3ff73804919cb8f47a44d1a34635d2250e404c777e384bd72727b8802e",
+    "bytes": 10434
   },
   {
     "file": "shared/indicadores-satelite/assets/referencia-implementacao.md",
@@ -226,8 +226,8 @@
   },
   {
     "file": "shared/tabelas-interativas/SKILL.md",
-    "sha256": "a049894af494893ed5d73298f3e7653b213a51fc73926d80386e87d0bc371462",
-    "bytes": 10905
+    "sha256": "2172452b87188145a5605aec28a792fb0baeb0df43f4e562393c47fa1c538a71",
+    "bytes": 11136
   },
   {
     "file": "shared/tabelas-interativas/assets/exemplo.html",
@@ -241,8 +241,8 @@
   },
   {
     "file": "shared/ux-essencial/SKILL.md",
-    "sha256": "a478dc6c90f318a260b45fea199589b4caf2d2c0c0a63eeda6ee3ca12d60e75b",
-    "bytes": 16062
+    "sha256": "ad47ad7c7acc74cb5edcc2a2c39757582bf408e097c4811d2ecc584e1e77eef8",
+    "bytes": 16143
   },
   {
     "file": "shared/ux-essencial/assets/exemplo.html",

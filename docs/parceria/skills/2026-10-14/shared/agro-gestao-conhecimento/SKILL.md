@@ -48,7 +48,7 @@ Em MIP, cobertura da amostragem, presença, incidência/intensidade e critério 
 - **Offline-first** no campo, GPS, fotos, leitura de código de barras/QR (`dev-frontend-mobile`).
 
 ## Checklist por módulo
-- [ ] Entidades, unidades e vocabulário do setor (glossário no `docs/benchmark.md`)
+- [ ] Entidades, unidades e vocabulário do setor (glossário na fonte adotada pelo projeto; `docs/benchmark.md` é apenas um caminho de exemplo)
 - [ ] Fórmulas dos arquivos implementadas como funções puras com testes (inclusive limites e arredondamento)
 - [ ] Validações de domínio ativas (carência, dose máxima, estoque, umidade, idade/categoria, prazos fiscais)
 - [ ] Indicadores da fatia com origem, período e base de comparação válida

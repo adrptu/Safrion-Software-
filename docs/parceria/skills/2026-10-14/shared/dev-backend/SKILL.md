@@ -5,6 +5,8 @@ description: Implemente e revise APIs, serviços, dados, integrações e jobs co
 
 # Backend — meta: correto, seguro, rápido e pronto para escalar
 
+A arquitetura, a estrutura de arquivos, os ADRs e as exigências vigentes do projeto prevalecem sobre os exemplos e padrões deste guia; confira-os antes de escolher stack, organização ou mecanismos de entrega de eventos.
+
 ## Contrato de estado, cálculo e recuperação
 
 Concentre regras e agregações em funções de domínio compartilhadas; a UI formata os resultados sem recalcular contadores por caminhos divergentes. Defina universo autorizado, período, unidade, precisão, denominador e tratamento de ausência. Nulo/desconhecido não vira zero; subtotal parcial não representa total conhecido; razões usam numerador/denominador compatíveis, não soma de taxas ou média sem ponderação definida.

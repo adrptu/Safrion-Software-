@@ -42,20 +42,27 @@
  
 --- before/gemini/revisao-terceira-opiniao/SKILL.md
 +++ candidate/gemini/revisao-terceira-opiniao/SKILL.md
-@@ -4,6 +4,13 @@
- ---
+@@ -5,12 +5,19 @@
  
  # Terceira opinião útil
-+
+ 
 +## Contribuição material na equipe atual
 +
 +Codex e Claude implementam e revisam reciprocamente com autoria delimitada; o revisor integra o trabalho do outro. Gemini contribui com crítica independente de fluxo, acessibilidade, domínio e contraexemplos, além de infraestrutura. Grok não participa. Use somente o pacote mínimo inspecionado enviado pelo adaptador oficial Pro/HIGH; não pressuponha ter lido arquivos referenciados ou realizado ações por API.
 +
 +Em UX, teste a lógica de origem/contexto, estado, ação, consequência e recuperação; uma primária por contexto ativo e preservação de filtros/rascunho/foco. Contraexemplos úteis: ausência não é zero, percentual não é estado, provisório não duplica confirmado, recorte temporário não apaga preferências, desfazer não apaga edição posterior. Separe análise textual de teste executado e peça somente a prova faltante que muda o parecer. Publicação parcial não dispara auditoria integral; consulte o gatilho vigente em `safrion-equipe` quando fornecido.
 +
- 
++
  Analise a pergunta e a evidência fornecida sobre produto, UX, código, dados, domínio agrícola ou gestão do projeto. Sua especialidade adicional em Google Cloud não transforma assuntos de outras áreas em problemas de infraestrutura. Não se acione para repetir toda revisão de rotina.
  
+ Trabalhe com resultado esperado/persona, restrições do PRD, versão do artefato, alternativas e evidência disponível. Falta de um dado só bloqueia a conclusão que depende dele; diga o que pode concluir e qual menor verificação falta. Avalie o conteúdo, não quem propôs a alternativa. Quando existir teste ou fonte que resolva a divergência, indique-o em vez de propor votação entre modelos.
+ 
+ Entregue recomendação, evidência a favor/contra, risco, incerteza e teste de aceite no detalhe necessário à decisão. Separe defeito reproduzível, hipótese e preferência. Cálculos relevantes precisam de conferência determinística. Não invente análise de arquivo, execução, navegação ou fatos ausentes. Fontes atuais para legislação, agronomia, segurança e preços devem ser fornecidas ou verificadas por quem tem a ferramenta adequada. Consenso das três IAs não substitui validação agronômica exigida nem a realidade do campo.
+ 
+-O autor continua responsável pelo artefato e o revisor pelo parecer; oferecer ajuda não autoriza edição concorrente. Codex organiza a integração e o registro da decisão no protocolo existente. Um resultado pode ser aceitar, adaptar, rejeitar com motivo ou investigar; concordar não é obrigatório. Não declarar decisão do proprietário, aceite de produção ou conclusão de tarefa em nome de outra pessoa/agente.
++O autor continua responsável pelo artefato e o revisor pelo parecer; oferecer ajuda não autoriza edição concorrente. O revisor integra o PR do outro; o registro da decisão segue o protocolo existente. Um resultado pode ser aceitar, adaptar, rejeitar com motivo ou investigar; concordar não é obrigatório. Não declarar decisão do proprietário, aceite de produção ou conclusão de tarefa em nome de outra pessoa/agente.
+ 
+ Peça revisão adicional somente quando uma mudança, evidência nova ou risco não resolvido justificar. Preserve contexto, simplicidade, trabalho já concluído e autorizações existentes; não crie novas cerimônias para parecer rigoroso.
 --- before/gemini-consult.py
 +++ candidate/gemini-consult.py
 @@ -28,11 +28,14 @@
@@ -101,7 +108,7 @@
  4. **Selecionar indicadores que resolvem a tarefa da fatia**, com origem, período, unidade e base de comparação válida; não inventar benchmark nem adicionar painel sem decisão concreta.
  5. **Fontes oficiais como referência** (Embrapa, CONAB, MAPA, CEPEA/Esalq, IMEA, B3, CFM/NRC, Receita Federal, CPC). Valores legais/fiscais e alíquotas mudam: marcar `verificar vigência` e parametrizar no sistema (nunca hardcode).
  6. **Benchmark do setor** (`benchmark-top5`): referências típicas — Aegro, Climate FieldView, John Deere Operations Center, Solinftec, Siagri/Totvs Agro, Datacoper/Agrimanager, Prodap, JetBov, Conta Azul, Omie. UX segue `ux-essencial` e a organização das telas segue `master-detail-ux`.
-@@ -32,9 +41,9 @@
+@@ -32,14 +41,14 @@
  - **Produção com umidade e impurezas**: armazenar bruto, umidade, impurezas e peso líquido corrigido ao padrão.
  - **Rastreabilidade por processo**: manter data, responsável, origem e destino e vínculos necessários. Aplicação de insumo, movimentação animal e colheita têm campos e exigências diferentes; verificar normas atuais pertinentes antes de torná-los obrigatórios.
  - **Categorias animais** por espécie/sexo/idade/fase; movimentações (nascimento, compra, transferência, venda, morte, mudança de categoria) fecham o inventário mensal.
@@ -114,6 +121,23 @@
  - **Parâmetros técnicos editáveis** (tabelas de Kc, exigências nutricionais, PRNT, alíquotas, preços de referência) versionados, com valor padrão de fonte oficial.
  - **Offline-first** no campo, GPS, fotos, leitura de código de barras/QR (`dev-frontend-mobile`).
  
+ ## Checklist por módulo
+-- [ ] Entidades, unidades e vocabulário do setor (glossário no `docs/benchmark.md`)
++- [ ] Entidades, unidades e vocabulário do setor (glossário na fonte adotada pelo projeto; `docs/benchmark.md` é apenas um caminho de exemplo)
+ - [ ] Fórmulas dos arquivos implementadas como funções puras com testes (inclusive limites e arredondamento)
+ - [ ] Validações de domínio ativas (carência, dose máxima, estoque, umidade, idade/categoria, prazos fiscais)
+ - [ ] Indicadores da fatia com origem, período e base de comparação válida
+--- before/shared/agro-gestao-conhecimento/assets/agronomia.md
++++ candidate/shared/agro-gestao-conhecimento/assets/agronomia.md
+@@ -19,7 +19,7 @@
+ 
+ ## Manejo fitossanitário
+ - **MIP/MID**: monitoramento com amostragem (pano-de-batida, armadilhas), **nível de ação / nível de dano econômico** por praga (ex. soja: percevejo 2/pano em R; lagartas 20/pano ou 30 % desfolha vegetativo, 15 % reprodutivo) — alerta quando atinge.
+-- **Receituário agronômico obrigatório** (Lei 7.802/89): produto registrado no MAPA (AGROFIT) para cultura × alvo, dose dentro do rótulo, **intervalo de segurança (carência)**, intervalo de reentrada, classe toxicológica, EPI, tríplice lavagem/devolução de embalagens (inpEV). Validar: cultura autorizada, dose máxima, nº máximo de aplicações, carência antes da colheita, mistura em tanque.
++- **Receita agronômica na comercialização ao usuário**, emitida por profissional legalmente habilitado, ressalvadas exceções regulamentadas: [Lei 14.785/2023, art. 39 e texto consolidado](https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2023/lei/l14785.htm), consultado em 14/10/2026. A Lei 7.802/1989 foi revogada pelo art. 65; não a usar como fundamento vigente. Antes de modelar conformidade, conferir regulamentação aplicável, regras estaduais e registro/rótulo/bula atuais, inclusive enquadramento específico de bioinsumos. Controles operacionais a validar: produto registrado no MAPA (AGROFIT) para cultura × alvo, dose dentro do rótulo, **intervalo de segurança (carência)**, intervalo de reentrada, classe toxicológica, EPI, tríplice lavagem/devolução de embalagens (inpEV). Validar: cultura autorizada, dose máxima, nº máximo de aplicações, carência antes da colheita, mistura em tanque.
+ - **Condições de aplicação**: temperatura < 30 °C, UR > 55 %, vento 3–10 km/h (Δ-T ideal 2–8); registrar e alertar deriva.
+ - **Rotação de mecanismos de ação** (IRAC/FRAC/HRAC) por talhão/safra — alerta de repetição.
+ - **Vazio sanitário e calendário de semeadura** (soja: por estado) — validar datas.
 --- before/shared/benchmark-top5/SKILL.md
 +++ candidate/shared/benchmark-top5/SKILL.md
 @@ -4,6 +4,13 @@
@@ -154,10 +178,12 @@
  ## Checklist (antes de iniciar a Fase 1 de dev-ciclo-completo)
 --- before/shared/dev-backend/SKILL.md
 +++ candidate/shared/dev-backend/SKILL.md
-@@ -4,6 +4,15 @@
+@@ -4,6 +4,17 @@
  ---
  
  # Backend — meta: correto, seguro, rápido e pronto para escalar
++
++A arquitetura, a estrutura de arquivos, os ADRs e as exigências vigentes do projeto prevalecem sobre os exemplos e padrões deste guia; confira-os antes de escolher stack, organização ou mecanismos de entrega de eventos.
 +
 +## Contrato de estado, cálculo e recuperação
 +
@@ -219,7 +245,14 @@
  4. **Testes** configurados com um teste real passando (`dev-testes`).
  5. **Pre-commit** (lint-staged) e **CI** rodando lint → tipos → testes → build em todo PR (`dev-infra/assets/ci.yml`).
  6. `.env.example` + validação das variáveis no boot; nunca segredo no repositório.
-@@ -70,13 +77,13 @@
+@@ -65,18 +72,18 @@
+ - **Feature flags** para o que não pode ir ao ar de uma vez; nada de branch de meses.
+ - **Sem redundância**: antes de escrever, procurar se já existe (função, componente, util, pacote). Regra dos 3: na terceira repetição, extrair. Sem copiar/colar blocos.
+ - **Sem código morto**: sem arquivos/funções/flags não usados, sem `TODO` sem issue, sem código comentado.
+-- **Tratamento de erro obrigatório**: toda chamada externa (rede, disco, banco) tem timeout, erro tratado e mensagem útil; nada de `catch {}` vazio, `any`, `// eslint-disable`, `@ts-ignore`, `as unknown as`.
+-- **Aritmética e tempo corretos**: dinheiro e taxas com precisão definida (inteiro/decimal); instantes em UTC com fuso na exibição; datas civis sem conversão indevida de dia; identificadores conforme o contrato do projeto.
++- **Tratamento de erro obrigatório**: toda chamada externa (rede, disco, banco) tem timeout, erro tratado e mensagem útil; não use `catch {}` vazio nem supressão de tipos/lint para esconder defeito. Exceções estreitas só quando a política do projeto permitir, com justificativa e revisão; siga `dev-revisao`.
++- **Aritmética e tempo corretos**: dinheiro e taxas com aritmética decimal e escala explícita conforme o contrato do projeto (no Safrion, ENG-013); instantes em UTC com fuso na exibição; datas civis sem conversão indevida de dia; identificadores conforme o contrato do projeto.
  - Atualizar docs/ADR/README no mesmo PR que muda o comportamento.
  
  ## Fase 4 — Revisão (`dev-revisao`)
@@ -243,6 +276,17 @@
 +4. Proteja os comportamentos alterados com verificações proporcionais. Para defeito, reproduza o cenário e acrescente regressão quando viável; não crie testes que só espelhem texto ou implementação.
  5. Preferir remover código a adicionar. Cada abstração precisa justificar-se com uso real (≥ 2 chamadores).
  6. Se algo do padrão não se aplicar (script descartável, protótipo explícito), dizer isso e o que foi omitido.
+--- before/shared/dev-ciclo-completo/assets/ADR-template.md
++++ candidate/shared/dev-ciclo-completo/assets/ADR-template.md
+@@ -6,7 +6,7 @@
+ Qual problema ou força motivou a decisão (1 parágrafo). Restrições relevantes: escala, prazo, equipe, custo, stack existente.
+ 
+ ## Decisão
+-O que foi decidido, em uma frase afirmativa. ("Usaremos PostgreSQL com Prisma como camada de persistência.")
++O que foi decidido, em uma frase afirmativa. ("Usaremos a opção A para atender aos critérios descritos, preservando os contratos vigentes.")
+ 
+ ## Alternativas consideradas
+ - **Opção A** — por que não.
 --- before/shared/dev-ciclo-completo/assets/definition-of-done.md
 +++ candidate/shared/dev-ciclo-completo/assets/definition-of-done.md
 @@ -5,7 +5,7 @@
@@ -277,10 +321,12 @@
 +- [ ] Estado da entrega identifica protótipo, implementação real, teste, publicação e HML sem confundir conclusão parcial com funcional
 --- before/shared/dev-frontend-mobile/SKILL.md
 +++ candidate/shared/dev-frontend-mobile/SKILL.md
-@@ -5,7 +5,19 @@
+@@ -5,7 +5,21 @@
  
  # Frontend e mobile — meta: rápido, robusto, sem bug de tela
  
++A arquitetura, a estrutura de arquivos, os ADRs e as exigências vigentes do projeto prevalecem sobre os exemplos e padrões deste guia; confira-os antes de escolher stack, organização ou mecanismos de entrega de eventos.
++
 +## Contexto, fontes e recuperação
 +
 +Derive indicadores e listas do mesmo contrato de domínio; não esconda mocks atrás de indicadores reais nem interprete números já formatados. Preserve ausência e parcialidade no texto. Em tabelas legadas, declare agregação explicitamente; use `agg: null` para grandeza sem resumo validado ou a função de domínio adequada para razões/ponderações. Percentual completo não altera sozinho o estado de negócio.
@@ -297,7 +343,7 @@
  
  ## Estrutura e código
  - **Organização por feature**, não por tipo: `src/features/pedidos/{components,hooks,api,schemas,index.ts}`; `src/shared/{ui,lib,hooks}` só para o que é realmente genérico. Feature exporta só pelo `index.ts`; sem import cruzado entre features (usar `shared` ou compor na página).
-@@ -25,8 +37,8 @@
+@@ -25,8 +39,8 @@
  
  ## Formulários e dados
  - Reutilizar a biblioteca do projeto; schema, validação útil, teclado e autocomplete corretos. Autosave preserva rascunho; comandos de negócio exigem envio explícito. Atualização otimista só onde reversível, com pendência visível e sem afirmar aceite antes do recibo.
@@ -308,7 +354,7 @@
  
  ## Rotas, erros e carregamento
  - Rotas com **lazy loading** por página; **error boundary** por rota e por widget crítico com ação de tentar de novo; `Suspense` com skeleton no formato do conteúdo.
-@@ -68,4 +80,4 @@
+@@ -68,4 +82,4 @@
  - [ ] Lighthouse/Web Vitals ou fps dentro do orçamento; bundle não cresceu
  - [ ] Acessibilidade com axe passando; teclado/leitor de tela
  - [ ] Testes: unit + componente (Testing Library) + E2E se fluxo crítico
@@ -487,6 +533,24 @@
  - Caminho feliz, **limites** (0, 1, máximo, vazio, nulo, unicode, negativo), **erros** (entrada inválida, rede falha, timeout, concorrência).
  - Dinheiro, arredondamento, datas/timezones/horário de verão, ordenação com acentos.
  - **Permissões**: cada endpoint com usuário sem permissão → 403; sem login → 401; outro tenant → 404.
+@@ -36,7 +45,7 @@
+ ## Como escrever testes bons
+ - **Nome descreve comportamento**: `deve rejeitar pedido com quantidade zero` / `test_rejects_zero_quantity`. Um comportamento por teste.
+ - Estrutura **Arrange–Act–Assert**, sem lógica (if/loop) dentro do teste.
+-- **Determinístico**: relógio falso, seed fixa, sem `sleep`, sem depender de ordem ou de rede; cada teste cria e limpa seus dados (transação com rollback ou banco por teste).
++- **Determinístico**: relógio controlado, seed fixa e espera por condição observável; espera fixa somente quando o tempo real for objeto do teste, com motivo e limite explícitos, sem depender de ordem ou de rede; cada teste cria e limpa seus dados (transação com rollback ou banco por teste).
+ - Dados via **factories/builders** (`buildPedido({ total: 0 })`), não fixtures gigantes.
+ - Asserções específicas (`toEqual({...})`, não `toBeTruthy`); mensagens de erro verificadas por conteúdo.
+ - Testar comportamento observável, não implementação (não asserta chamadas internas nem estado privado).
+@@ -66,7 +75,7 @@
+ ## Checklist do PR
+ - [ ] Comportamentos e riscos alterados têm testes no nível adequado; fronteiras críticas têm integração e jornadas críticas têm E2E
+ - [ ] Bug corrigido tem teste que falhava antes
+-- [ ] Nenhum `skip`/`only`/`xit`; nenhum teste com `sleep` ou dependência de ordem
++- [ ] Nenhum `skip`/`only`/`xit`; nenhuma dependência de ordem ou espera fixa sem justificativa de tempo real e limite
+ - [ ] Limites, erros e permissões cobertos
+ - [ ] Gates de cobertura pertinentes atendidos; duração medida; nenhum agregado mascara falha ou ausência de testes
+ - [ ] Testes legíveis: alguém entende o comportamento só lendo os nomes
 --- before/shared/growth-receita-implantacao/SKILL.md
 +++ candidate/shared/growth-receita-implantacao/SKILL.md
 @@ -4,6 +4,13 @@
@@ -498,7 +562,7 @@
 +
 +Antes de ativar um experimento externo, confira a oferta operável, versão validada, capacidade de implantação/suporte e autorização vigente de canal, público e gasto. CI verde, protótipo publicado ou avanço técnico não demonstram prontidão vendável. Não use acesso institucional para mensagens pessoais nem trate acesso à conta como autorização de campanha.
 +
-+No Safrion, consulte a política comercial e os adiamentos registrados em `outputs/estrategia-growth.md` e no checkpoint vigente: SITE/marketing e painel de contas preservam rascunhos e não avançam por automatismo. Mídia permanece sem execução antecipada; regras monetárias e gatilho de concordância ficam na fonte aprovada, sem duplicar valores aqui. Atualizar skills não reativa agente retirado, campanha ou automação comercial.
++No Safrion, recupere a política comercial aprovada e os adiamentos pelo [checkpoint da issue #1](https://github.com/adrptu/Safrion-Software-/issues/1), [decisões versionadas](https://github.com/adrptu/Safrion-Software-/blob/main/docs/DECISIONS.md) e recibos ali indicados. `outputs/estrategia-growth.md` é uma fonte adicional somente no executor onde existir; não pertence a este pacote. Sem fonte recuperável que comprove teto e gatilho vigentes, mantenha gasto e ativação bloqueados e solicite o recibo no canal existente, sem inventar números. Na política vigente: SITE/marketing e painel de contas preservam rascunhos e não avançam por automatismo. Mídia permanece sem execução antecipada; regras monetárias e gatilho de concordância ficam na fonte aprovada, sem duplicar valores aqui. Atualizar skills não reativa agente retirado, campanha ou automação comercial.
 +
  
  Parta do segmento, tarefa e versão realmente entregue. Reaproveite estratégia, CRM e eventos existentes. PLG, parceiros, conteúdo e mídia são mecanismos a testar; nenhuma ferramenta, número de agentes ou volume de peças prova produtividade.
@@ -519,7 +583,7 @@
  
  **Norte:** tornar a variabilidade legível, com cores vivas e pixels dentro do talhão. Índice baixo ou cor vermelha indica valor/variação a investigar, não comprova praga, morte ou perda. Escala relativa mostra contraste interno, não gravidade: uma lavoura saudável também pode conter pixels vermelhos nesse modo.
  
-@@ -16,7 +23,7 @@
+@@ -16,13 +23,13 @@
  | Nível | O que mostra | Como |
  |---|---|---|
  | **Fazenda** (listagem) | Todos os talhões/pivôs sobre imagem real (true color ou basemap de satélite). Cada polígono preenchido com o raster do índice em cores vivas, opacidade 85 %. **Número/nome do talhão grande no centro** (fonte bold, halo branco ou escuro), legível em qualquer zoom. Manchas fracas aparecem como "ilhas" vermelho/laranja dentro do verde. | Escala **absoluta** (mesma cor = mesmo valor em toda a fazenda) para comparar talhões. Fora dos polígonos, sem overlay. |
@@ -527,6 +591,22 @@
 +| **Talhão** (detalhe) | Um talhão em tela cheia, raster na resolução efetiva das bandas e do processamento, explicitada por fonte/índice, **sem suavização** (`image-rendering: pixelated`, nunca interpolação bilinear/blur). Legenda com as classes e os valores reais. Falhas e zonas fracas delimitadas. | Escala **relativa ao talhão** por padrão (estica percentil 2–98 do próprio talhão), que é o que revela variabilidade dentro de uma lavoura uniforme — ex. 0,84 a 0,93 vira vermelho→verde completo. |
  
  Alternador único e sempre visível: **Contraste: Talhão | Fazenda | Absoluto**. Trocar escala recolore no cliente, sem nova requisição.
+ 
+ ## 2. Paleta viva (única em todo o sistema)
+ 
+-6 classes, gradiente contínuo entre elas. Nunca dessaturar, nunca usar paleta "viridis"/azul para vigor.
++O design system e o contrato do projeto prevalecem; a rampa abaixo é uma referência para projetos sem decisão vigente. 6 classes, gradiente contínuo entre elas. Nunca dessaturar, nunca usar paleta "viridis"/azul para vigor.
+ 
+ | Classe | Significado | Cor | NDVI absoluto (padrão, editável por cultura/estádio) |
+ |---|---|---|---|
+@@ -45,7 +52,7 @@
+ 1. **Estatística por talhão e data**: média, mediana, desvio, P2/P10/P90/P98, % de área por classe, % nuvem. Excluir borda de 1 pixel do polígono (efeito de borda) da estatística.
+ 2. **Pixel de baixo índice relativo**: definir explicitamente o algoritmo. No exemplo conservador, valor < min(média − 1,5 DP, P10), equivalente a atender ambos os cortes, não ao OU. Excluir nodata, tratar dispersão nula e amostra insuficiente. Classe 1 absoluta é indício para investigar, não falha comprovada.
+ 3. **Mancha**: pixels candidatos contíguos (8-vizinhos) acima da área mínima definida. Três pixels inteiros de 10 × 10 m = 300 m² = **0,03 ha**; em 20 m são 0,12 ha. Calcular pela resolução/transformação real e recorte, sem fixar área pelo nome do sensor. Cada mancha tem geometria, área válida, classe, valor, ponto de vistoria dentro do polígono e evolução em cenas comparáveis.
+-4. **Queda temporal**: talhão ou mancha com índice médio caindo > 15 % vs. cena anterior válida (mesma fase da cultura) → alerta.
++4. **Queda temporal**: aplicar os níveis da tabela de estados abaixo (atenção de 10–15 %, crítico acima de 15 %) somente como exemplo configurável e validado por cultura/estádio; comparar cenas válidas e comparáveis. Definir denominador e tratar índice anterior zero/negativo ou ausente antes de usar percentual; não gerar diagnóstico agronômico pela queda isolada.
+ 5. **Padrões espaciais** geram hipóteses de vistoria, não causa nem recomendação de aplicação automática. Forma, cor ou consenso de modelos não substituem dados de campo e validação técnica.
+ 6. **Estado do talhão** derivado, visível na listagem e no mapa:
  
 @@ -59,7 +66,7 @@
  
@@ -776,6 +856,15 @@
        { key: 'obs', label: 'Observação', hidden: true },     // só no painel de detalhe
      ],
      groupBy: ['regiao'],        // agrupamento inicial opcional; datas: 'data:ano' | 'data:mes' | 'data:dia'
+@@ -108,7 +117,7 @@
+ - Se o usuário usa Excel desktop, sugerir também uma Tabela Dinâmica sobre a Tabela.
+ 
+ ### Terminal / chat em Markdown
+-Markdown não é interativo. Para tabelas pequenas (até ~15 linhas) mostre normalmente. Para dados maiores, ou quando o usuário for explorar, **gere a versão interativa** (artifact/HTML com `tabela.js`) e dê o link.
++Markdown não é interativo. Para tabelas pequenas (até ~15 linhas) mostre normalmente. Para dados maiores, ou quando o usuário for explorar, **gere a versão interativa** (artifact/HTML com `tabela.js`) e dê o link, somente com dados sintéticos ou explicitamente autorizados para esse destino. Se o projeto proibir dados reais em artefatos, mantenha-os no ambiente autorizado; autorização genérica de desenvolvimento não libera exportação.
+ 
+ ---
+ 
 @@ -121,4 +130,4 @@
  - [ ] Drill-down: expandir grupo, "Detalhar" com trilha e Voltar, painel de detalhe da linha com "Filtrar por este"
  - [ ] Contador "X de Y linhas", filtros ativos destacados, estado vazio com "Limpar filtros"
@@ -808,15 +897,18 @@
  
  ## 1. Processo — pensar antes de desenhar
  1. **Tarefa principal** de cada tela em uma frase ("Registrar pedido de um cliente conhecido").
-@@ -20,7 +32,7 @@
+@@ -20,9 +32,9 @@
  
  ## 2. Leis da fricção zero
  **Menos passos**
 -- **Uma ação primária por tela**, óbvia (botão preenchido ou FAB). Secundárias discretas (tonal/texto). Nunca duas primárias.
 +- **Uma ação primária por contexto ativo**, óbvia (botão preenchido ou FAB). Secundárias discretas (tonal/texto). Ao abrir modal/subdetalhe, a primária do contexto ativo não compete com a tela de fundo.
  - A tarefa mais frequente fica **na primeira tela, sem navegar**. Nada de "home" decorativa: a home é o trabalho (lista, caixa de entrada, próximo passo).
- - **Padrões inteligentes**: lembrar escolhas no contexto correto de pessoa, empresa, fazenda e safra; mostrar o valor e permitir revisão. Data atual e usuário logado não são necessariamente data da operação e executor.
+-- **Padrões inteligentes**: lembrar escolhas no contexto correto de pessoa, empresa, fazenda e safra; mostrar o valor e permitir revisão. Data atual e usuário logado não são necessariamente data da operação e executor.
++- **Padrões inteligentes**: lembrar escolhas no contexto correto de pessoa, empresa, fazenda e safra; mostrar o valor e permitir revisão. Nunca reaproveitar o último valor para lote, dose, quantidade ou autorização. Data atual e usuário logado não são necessariamente data da operação e executor.
  - **Autocompletar com fonte**: cadastro autorizado → entidade/unidade/preço vigente; quantidade × preço → total calculado. Não inferir nome/identidade pelo e-mail. Seleções mostram dados suficientes para distinguir homônimos.
+ - **Criação rápida inline**: campo "Adicionar…" + Enter. Detalhes opcionais depois, na própria linha.
+ - **Edição inline** (clicar no valor e editar). Modal só para fluxo realmente separado.
 @@ -48,8 +60,8 @@
  - Busca contextual acessível; busca global e paleta Ctrl/⌘+K quando reduzem esforço real. Atalhos complementam controles visíveis.
  - **Atalhos de teclado** para as ações frequentes (N = novo, / = buscar, E = editar, Esc = fechar), exibidos nos tooltips e na paleta.

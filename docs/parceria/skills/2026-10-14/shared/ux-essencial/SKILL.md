@@ -34,7 +34,7 @@ Toda ação relevante, inclusive salvar e cancelar, tem retorno inequívoco no c
 **Menos passos**
 - **Uma ação primária por contexto ativo**, óbvia (botão preenchido ou FAB). Secundárias discretas (tonal/texto). Ao abrir modal/subdetalhe, a primária do contexto ativo não compete com a tela de fundo.
 - A tarefa mais frequente fica **na primeira tela, sem navegar**. Nada de "home" decorativa: a home é o trabalho (lista, caixa de entrada, próximo passo).
-- **Padrões inteligentes**: lembrar escolhas no contexto correto de pessoa, empresa, fazenda e safra; mostrar o valor e permitir revisão. Data atual e usuário logado não são necessariamente data da operação e executor.
+- **Padrões inteligentes**: lembrar escolhas no contexto correto de pessoa, empresa, fazenda e safra; mostrar o valor e permitir revisão. Nunca reaproveitar o último valor para lote, dose, quantidade ou autorização. Data atual e usuário logado não são necessariamente data da operação e executor.
 - **Autocompletar com fonte**: cadastro autorizado → entidade/unidade/preço vigente; quantidade × preço → total calculado. Não inferir nome/identidade pelo e-mail. Seleções mostram dados suficientes para distinguir homônimos.
 - **Criação rápida inline**: campo "Adicionar…" + Enter. Detalhes opcionais depois, na própria linha.
 - **Edição inline** (clicar no valor e editar). Modal só para fluxo realmente separado.

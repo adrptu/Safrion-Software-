@@ -29,7 +29,7 @@ Alternador único e sempre visível: **Contraste: Talhão | Fazenda | Absoluto**
 
 ## 2. Paleta viva (única em todo o sistema)
 
-6 classes, gradiente contínuo entre elas. Nunca dessaturar, nunca usar paleta "viridis"/azul para vigor.
+O design system e o contrato do projeto prevalecem; a rampa abaixo é uma referência para projetos sem decisão vigente. 6 classes, gradiente contínuo entre elas. Nunca dessaturar, nunca usar paleta "viridis"/azul para vigor.
 
 | Classe | Significado | Cor | NDVI absoluto (padrão, editável por cultura/estádio) |
 |---|---|---|---|
@@ -52,7 +52,7 @@ O mapa não é só imagem: o sistema **encontra e lista as manchas**.
 1. **Estatística por talhão e data**: média, mediana, desvio, P2/P10/P90/P98, % de área por classe, % nuvem. Excluir borda de 1 pixel do polígono (efeito de borda) da estatística.
 2. **Pixel de baixo índice relativo**: definir explicitamente o algoritmo. No exemplo conservador, valor < min(média − 1,5 DP, P10), equivalente a atender ambos os cortes, não ao OU. Excluir nodata, tratar dispersão nula e amostra insuficiente. Classe 1 absoluta é indício para investigar, não falha comprovada.
 3. **Mancha**: pixels candidatos contíguos (8-vizinhos) acima da área mínima definida. Três pixels inteiros de 10 × 10 m = 300 m² = **0,03 ha**; em 20 m são 0,12 ha. Calcular pela resolução/transformação real e recorte, sem fixar área pelo nome do sensor. Cada mancha tem geometria, área válida, classe, valor, ponto de vistoria dentro do polígono e evolução em cenas comparáveis.
-4. **Queda temporal**: talhão ou mancha com índice médio caindo > 15 % vs. cena anterior válida (mesma fase da cultura) → alerta.
+4. **Queda temporal**: aplicar os níveis da tabela de estados abaixo (atenção de 10–15 %, crítico acima de 15 %) somente como exemplo configurável e validado por cultura/estádio; comparar cenas válidas e comparáveis. Definir denominador e tratar índice anterior zero/negativo ou ausente antes de usar percentual; não gerar diagnóstico agronômico pela queda isolada.
 5. **Padrões espaciais** geram hipóteses de vistoria, não causa nem recomendação de aplicação automática. Forma, cor ou consenso de modelos não substituem dados de campo e validação técnica.
 6. **Estado do talhão** derivado, visível na listagem e no mapa:
 

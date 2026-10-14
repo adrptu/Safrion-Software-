@@ -5,6 +5,8 @@ description: Implemente e revise interfaces web, PWA e mobile com estado, formul
 
 # Frontend e mobile — meta: rápido, robusto, sem bug de tela
 
+A arquitetura, a estrutura de arquivos, os ADRs e as exigências vigentes do projeto prevalecem sobre os exemplos e padrões deste guia; confira-os antes de escolher stack, organização ou mecanismos de entrega de eventos.
+
 ## Contexto, fontes e recuperação
 
 Derive indicadores e listas do mesmo contrato de domínio; não esconda mocks atrás de indicadores reais nem interprete números já formatados. Preserve ausência e parcialidade no texto. Em tabelas legadas, declare agregação explicitamente; use `agg: null` para grandeza sem resumo validado ou a função de domínio adequada para razões/ponderações. Percentual completo não altera sozinho o estado de negócio.

@@ -72,8 +72,8 @@ Checks aplicáveis configurados e executados antes de liberar a fatia. Se a CI r
 - **Feature flags** para o que não pode ir ao ar de uma vez; nada de branch de meses.
 - **Sem redundância**: antes de escrever, procurar se já existe (função, componente, util, pacote). Regra dos 3: na terceira repetição, extrair. Sem copiar/colar blocos.
 - **Sem código morto**: sem arquivos/funções/flags não usados, sem `TODO` sem issue, sem código comentado.
-- **Tratamento de erro obrigatório**: toda chamada externa (rede, disco, banco) tem timeout, erro tratado e mensagem útil; nada de `catch {}` vazio, `any`, `// eslint-disable`, `@ts-ignore`, `as unknown as`.
-- **Aritmética e tempo corretos**: dinheiro e taxas com precisão definida (inteiro/decimal); instantes em UTC com fuso na exibição; datas civis sem conversão indevida de dia; identificadores conforme o contrato do projeto.
+- **Tratamento de erro obrigatório**: toda chamada externa (rede, disco, banco) tem timeout, erro tratado e mensagem útil; não use `catch {}` vazio nem supressão de tipos/lint para esconder defeito. Exceções estreitas só quando a política do projeto permitir, com justificativa e revisão; siga `dev-revisao`.
+- **Aritmética e tempo corretos**: dinheiro e taxas com aritmética decimal e escala explícita conforme o contrato do projeto (no Safrion, ENG-013); instantes em UTC com fuso na exibição; datas civis sem conversão indevida de dia; identificadores conforme o contrato do projeto.
 - Atualizar docs/ADR/README no mesmo PR que muda o comportamento.
 
 ## Fase 4 — Revisão (`dev-revisao`)

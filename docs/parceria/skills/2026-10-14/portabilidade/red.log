@@ -43,10 +43,10 @@ Traceback (most recent call last):
   File "/private/tmp/safrion-skills-portable/package/test_gemini_consult.py", line 164, in test_receipt_binds_exact_payload_and_keeps_token_out_of_logs
     receipt = json.loads(destination.read_text())
                          ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/adrianussanders/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1027, in read_text
+  File "<LOCAL_USER>/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1027, in read_text
     with self.open(mode='r', encoding=encoding, errors=errors) as f:
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/adrianussanders/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+  File "<LOCAL_USER>/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
     return io.open(self, mode, buffering, encoding, errors, newline)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 FileNotFoundError: [Errno 2] No such file or directory: '/var/folders/5g/ybtmq25j1f5dcc4sy11n6d0w0000gn/T/tmpj5pfnsqj/receipt.json'
