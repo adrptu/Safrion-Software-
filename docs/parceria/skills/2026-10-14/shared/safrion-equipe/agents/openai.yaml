@@ -1,0 +1,4 @@
+interface:
+  display_name: "Equipe Safrion"
+  short_description: "Cooperação, revisão e homologação do Safrion"
+  default_prompt: "Use $safrion-equipe para conduzir a próxima entrega do Safrion com implementação e revisão cruzada de Codex e Claude, crítica pertinente do Gemini real e evidências de validação."

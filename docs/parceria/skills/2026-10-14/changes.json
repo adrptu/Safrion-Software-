@@ -1,0 +1,137 @@
+[
+  {
+    "file": "gemini/gcp-custos/SKILL.md",
+    "before": "c524c3aa80a7dd3aca3b2c74fa7d10214a3bca70f75ae3133143402e44cbe98c",
+    "after": "6c7dc2c80aa12cb2d17eba455ac525ce783408f055f6dc153d610f019aede0e1"
+  },
+  {
+    "file": "gemini/gcp-desempenho-incidentes/SKILL.md",
+    "before": "8f5116b72e4efc2787a0d877c53beecca094b7525dbb02f6a84cf0a37c953a0e",
+    "after": "52e5bf5a61ce9a0da698302008a17325bb4445922e5ab574f211b6eefe4898c8"
+  },
+  {
+    "file": "gemini/gcp-infra-essencial/SKILL.md",
+    "before": "633e61e82a1be5b1c1da266d0671b2349e8c158987ce0efb1d26b3a3396194f1",
+    "after": "9733964e9af650b47896ca7c4b518290147ba09efdfbbdc206bb2cb3fe3aeb48"
+  },
+  {
+    "file": "gemini/revisao-terceira-opiniao/SKILL.md",
+    "before": "995272ed1c13b94c7bb70599c40d835861ee99ee497b8a8279a71bd501695297",
+    "after": "fe95fed6da672f2d351518203cee718d598aabe7d04d428df26f6c4a3ad74c23"
+  },
+  {
+    "file": "gemini-consult.py",
+    "before": "c52e760c6141547c3048f4f34e2d089ad7937603b116e22e4ae08f17988cdb8e",
+    "after": "3da14c38a810d346dfe2c1fa79f821f9022640459bce770c393bda9107fcd42c"
+  },
+  {
+    "file": "shared/agro-gestao-conhecimento/SKILL.md",
+    "before": "70eea322cc5c72674f89d73d3a9a9c679409d8c53824ffb368228a6d354290b6",
+    "after": "cd7fe21a0a167cda2802a25548aae3a261d80fcfcb703795a87d03a29747d5f5"
+  },
+  {
+    "file": "shared/benchmark-top5/SKILL.md",
+    "before": "9d260a256095606bad69f1a164d24f34414eb76a7b3074a66707d70c18316c69",
+    "after": "f140283350ab8f767414ec5c2f94524d8001f882760906083746c5033ae7d8b4"
+  },
+  {
+    "file": "shared/dev-backend/SKILL.md",
+    "before": "63e02d40954bcff20a5ad7cb70dd5652550c9f4838138d7f21fc765f5ad81104",
+    "after": "4c74ee96aa57298253eb9e0548b639a2294f7945d304b575370a203f2bad6981"
+  },
+  {
+    "file": "shared/dev-ciclo-completo/SKILL.md",
+    "before": "5e3cb17ecbb6e9cff8d7d178ad58e24a31d5793e1c0bacab93fd8f7a0dfa83bf",
+    "after": "88c4e422009e10cbccd4a8ac7ea62a04b2a7829dec3f12585a6847906bfe3c73"
+  },
+  {
+    "file": "shared/dev-ciclo-completo/assets/definition-of-done.md",
+    "before": "14cd26a2474eee56dedb269db51569fbb621babe791bbaeecb47f5559146cfc1",
+    "after": "06dcd1bd4d1449e54a237cfc0a47c4a6b3a7c79e963efe5b2ac4b74fa7328d8b"
+  },
+  {
+    "file": "shared/dev-frontend-mobile/SKILL.md",
+    "before": "eb83b188ad071601d5ff438a45e31f59c9df95da4fbd930f4a665e7e8d42425e",
+    "after": "b60e7cdcc2f359563052bb59018b2c1057c66f215145b0f6b294b0e05bc37b9f"
+  },
+  {
+    "file": "shared/dev-infra/SKILL.md",
+    "before": "10f255cdba0a55ea315cea3cee00a83fa835dfb14c4ed839e9fa5c8ffadf5d41",
+    "after": "b44d72f67853921b729d217443e0e2223bec6f943ed21d0038ec2e365b01ac3d"
+  },
+  {
+    "file": "shared/dev-revisao/SKILL.md",
+    "before": "7ad2ac80af3d907d8dbaf3e7e2539cc63656dfcc0b6545dfb9bae11efcc34a57",
+    "after": "1824ad5f30ec2c6770e03510f0bafd83927efeb423bf4412cd79284d735a891f"
+  },
+  {
+    "file": "shared/dev-revisao/assets/PULL_REQUEST_TEMPLATE.md",
+    "before": "29329fe89f07c25c316b565e36cb5f1b3753bbf88ca0db6e5b11d81023024f33",
+    "after": "450870ce2c3b2be5412038523d3584c6f455d5edcb6f2f2673607fa86271f482"
+  },
+  {
+    "file": "shared/dev-revisao/assets/checklist-revisao.md",
+    "before": "53343a400482f94931fb235bff60fd3a37ac157aa855c8e6d94432b3e4ee0a61",
+    "after": "f1776100561d20516cd0f1dad409b4d1b9d88e11814b6f17e395f7b43c6c6182"
+  },
+  {
+    "file": "shared/dev-testes/SKILL.md",
+    "before": "7a93f851546be1380b3fda8e76c19e7ac04f2c63a4ab802770e0ac880a68cea6",
+    "after": "ed0e60b96d350fd0929e2bb0467440c4ca519cc3ccca2f969a3ffb1b152689d7"
+  },
+  {
+    "file": "shared/growth-receita-implantacao/SKILL.md",
+    "before": "2ce9a4db1cd6b2efd10bf9ed16194a0080b6d7dcc8800eb5800790c62dabfa29",
+    "after": "ac2014ccf11f6e2b29426f11f8f3b1cc723ae74ae87508c6ef734f7577153436"
+  },
+  {
+    "file": "shared/indicadores-satelite/SKILL.md",
+    "before": "4a4a4dd7f2ba13edd494262ffae05310e4cee89674b0889b035467d1550603f6",
+    "after": "6592b7e24eebd601c59be687ccfdec5288a61ada08bdf2781db6ecd28ec3d9c1"
+  },
+  {
+    "file": "shared/master-detail-ux/SKILL.md",
+    "before": "296cbd094e1aa7461a0f3dc95e583e47d6fc737e7e78104f4de9ab1941aa8b52",
+    "after": "d55339ccf43287736920584955ef638a866745dad4fc13797ca3d0b2ff2e2813"
+  },
+  {
+    "file": "shared/master-detail-ux/references/checklist.md",
+    "before": "4b28d6a0ca7d0e47f088f35045456a4bba00dc1ef2aa76d103f66bb1000e6c9a",
+    "after": "9785e5542c5b38883068d2478b409b3ebc48ae1d63b6932e8cb222b412c4ecf7"
+  },
+  {
+    "file": "shared/minimalismo-essencial/SKILL.md",
+    "before": "e8edcc15958eb51607a5ddb0ccb6b979060865dc6141da1adc66781a87e69757",
+    "after": "ea3ae62aa85873cf8c22e16f6668b6611bfe5d5ed0b4683143092951c1eec6e9"
+  },
+  {
+    "file": "shared/negocios-ecossistema/SKILL.md",
+    "before": "a43788e323db1c16f501a0c84bf20b2facf807ee8008d2628796efab7a2f1a58",
+    "after": "cdac1ccbd57ee51829f9226d937eab550d64ad57dc3ef2f6e0d8b4657514c264"
+  },
+  {
+    "file": "shared/safrion-equipe/SKILL.md",
+    "before": "4dcd62d7041096d3e4687ef16703f03ceb30495e2bef8dbd009726058a12d404",
+    "after": "a0b371d00ea2f998ad71369ee65a768b736509134dafe4dbaee18403fd081dd5"
+  },
+  {
+    "file": "shared/safrion-equipe/agents/openai.yaml",
+    "before": "36047610c4a002130d6a510f62694a3cdaaf2629b1104415d42626d20fedf147",
+    "after": "dfde0e9cc73c23512416e5267cdfebf381866df2970e13b4b1a6af0db8339d9d"
+  },
+  {
+    "file": "shared/tabelas-interativas/SKILL.md",
+    "before": "1ea66fdfe858c5af60e6a7ced9025f4c1483825c5eabc5a96de4c960955df2c7",
+    "after": "a049894af494893ed5d73298f3e7653b213a51fc73926d80386e87d0bc371462"
+  },
+  {
+    "file": "shared/ux-essencial/SKILL.md",
+    "before": "10972bdbf98af75313e6c21ebd6586fefc08918972fd792ca83c315b40a5ffe6",
+    "after": "a478dc6c90f318a260b45fea199589b4caf2d2c0c0a63eeda6ee3ca12d60e75b"
+  },
+  {
+    "file": "test_gemini_consult.py",
+    "before": "2bb0541a674468f8d1bd5df94eeac4332a6370f532989ee40c20afa8ea9da474",
+    "after": "e3fe4b875da87fcee31e17c1fd5271915dbf079cbe6c6ff9688e8ecea0316c84"
+  }
+]

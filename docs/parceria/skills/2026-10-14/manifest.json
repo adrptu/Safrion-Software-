@@ -1,0 +1,267 @@
+[
+  {
+    "file": "gemini/gcp-custos/SKILL.md",
+    "sha256": "6c7dc2c80aa12cb2d17eba455ac525ce783408f055f6dc153d610f019aede0e1",
+    "bytes": 2709
+  },
+  {
+    "file": "gemini/gcp-desempenho-incidentes/SKILL.md",
+    "sha256": "52e5bf5a61ce9a0da698302008a17325bb4445922e5ab574f211b6eefe4898c8",
+    "bytes": 2678
+  },
+  {
+    "file": "gemini/gcp-infra-essencial/SKILL.md",
+    "sha256": "9733964e9af650b47896ca7c4b518290147ba09efdfbbdc206bb2cb3fe3aeb48",
+    "bytes": 2933
+  },
+  {
+    "file": "gemini/revisao-terceira-opiniao/SKILL.md",
+    "sha256": "fe95fed6da672f2d351518203cee718d598aabe7d04d428df26f6c4a3ad74c23",
+    "bytes": 3234
+  },
+  {
+    "file": "gemini-consult.py",
+    "sha256": "3da14c38a810d346dfe2c1fa79f821f9022640459bce770c393bda9107fcd42c",
+    "bytes": 10050
+  },
+  {
+    "file": "shared/agro-gestao-conhecimento/SKILL.md",
+    "sha256": "cd7fe21a0a167cda2802a25548aae3a261d80fcfcb703795a87d03a29747d5f5",
+    "bytes": 7569
+  },
+  {
+    "file": "shared/agro-gestao-conhecimento/assets/administracao-economia.md",
+    "sha256": "bf8e8ad7c28ae34a96b25586b60aa61e073926db919f036c55a655aaed6f101a",
+    "bytes": 7533
+  },
+  {
+    "file": "shared/agro-gestao-conhecimento/assets/agronomia.md",
+    "sha256": "aac9afab74d62d3a3eaf15da4da2085a8cb6ca5d0ce611ba0af4f94f1a1284de",
+    "bytes": 7100
+  },
+  {
+    "file": "shared/agro-gestao-conhecimento/assets/contabilidade-financas.md",
+    "sha256": "27a5d184f060a7459a6178f7ec0355d3a89e91d11337b9539781a28fb0596dca",
+    "bytes": 8536
+  },
+  {
+    "file": "shared/agro-gestao-conhecimento/assets/engenharia-agricola.md",
+    "sha256": "120f7877859f09252e7f8d75a0087b9d4f4a739bf293a872848e2fa89d6d053d",
+    "bytes": 7039
+  },
+  {
+    "file": "shared/agro-gestao-conhecimento/assets/engenharia-producao-mecanica.md",
+    "sha256": "274cfa54ab7373b6327c884654d41699dca7a64cecb51f2fa7b0b439a2ec4d56",
+    "bytes": 6465
+  },
+  {
+    "file": "shared/agro-gestao-conhecimento/assets/geo-precisao.md",
+    "sha256": "cb6fc1b5d96c667eb2ee0cd1e923d648aaee23d5ee45f845743066a2ce6dfd9e",
+    "bytes": 11684
+  },
+  {
+    "file": "shared/agro-gestao-conhecimento/assets/zootecnia.md",
+    "sha256": "26d24d696737559690e78ee968dd9a82cb1629629d5d11696325d4313b336346",
+    "bytes": 8513
+  },
+  {
+    "file": "shared/benchmark-top5/SKILL.md",
+    "sha256": "f140283350ab8f767414ec5c2f94524d8001f882760906083746c5033ae7d8b4",
+    "bytes": 7683
+  },
+  {
+    "file": "shared/benchmark-top5/assets/benchmark-template.md",
+    "sha256": "522214a14f6a38bd755f324d58c82e9ca6001bd91720fe4020616e2d85aaaeb4",
+    "bytes": 2299
+  },
+  {
+    "file": "shared/dev-backend/SKILL.md",
+    "sha256": "4c74ee96aa57298253eb9e0548b639a2294f7945d304b575370a203f2bad6981",
+    "bytes": 9071
+  },
+  {
+    "file": "shared/dev-backend/assets/estrutura-modular.md",
+    "sha256": "6acc613211a09434c4b2c34c6424b8cf194bcc3a55d1b05bd340fd394c68b52c",
+    "bytes": 3962
+  },
+  {
+    "file": "shared/dev-ciclo-completo/SKILL.md",
+    "sha256": "88c4e422009e10cbccd4a8ac7ea62a04b2a7829dec3f12585a6847906bfe3c73",
+    "bytes": 9293
+  },
+  {
+    "file": "shared/dev-ciclo-completo/assets/ADR-template.md",
+    "sha256": "f1096e77e626a218ef30b9275aa2b7693ae20afa95c63a0d0233b92ccabff3cd",
+    "bytes": 646
+  },
+  {
+    "file": "shared/dev-ciclo-completo/assets/definition-of-done.md",
+    "sha256": "06dcd1bd4d1449e54a237cfc0a47c4a6b3a7c79e963efe5b2ac4b74fa7328d8b",
+    "bytes": 3282
+  },
+  {
+    "file": "shared/dev-frontend-mobile/SKILL.md",
+    "sha256": "b60e7cdcc2f359563052bb59018b2c1057c66f215145b0f6b294b0e05bc37b9f",
+    "bytes": 9897
+  },
+  {
+    "file": "shared/dev-infra/SKILL.md",
+    "sha256": "b44d72f67853921b729d217443e0e2223bec6f943ed21d0038ec2e365b01ac3d",
+    "bytes": 8973
+  },
+  {
+    "file": "shared/dev-infra/assets/Dockerfile",
+    "sha256": "eb35106936e385356c79d74799677cc872d631dc4750d1e8b852eacbe18cf033",
+    "bytes": 1101
+  },
+  {
+    "file": "shared/dev-infra/assets/ci.yml",
+    "sha256": "dc8c0029dbc5010aacb145f526a6dc6843409791e2a56467d260732caae69ece",
+    "bytes": 5442
+  },
+  {
+    "file": "shared/dev-infra/assets/docker-compose.yml",
+    "sha256": "e8d560692df6f72d70db18fed067ddaf93c3193fa7b14740f7d1d3f68d17938a",
+    "bytes": 1216
+  },
+  {
+    "file": "shared/dev-revisao/SKILL.md",
+    "sha256": "1824ad5f30ec2c6770e03510f0bafd83927efeb423bf4412cd79284d735a891f",
+    "bytes": 6643
+  },
+  {
+    "file": "shared/dev-revisao/assets/PULL_REQUEST_TEMPLATE.md",
+    "sha256": "450870ce2c3b2be5412038523d3584c6f455d5edcb6f2f2673607fa86271f482",
+    "bytes": 944
+  },
+  {
+    "file": "shared/dev-revisao/assets/checklist-revisao.md",
+    "sha256": "f1776100561d20516cd0f1dad409b4d1b9d88e11814b6f17e395f7b43c6c6182",
+    "bytes": 3351
+  },
+  {
+    "file": "shared/dev-revisao/assets/eslint.config.js",
+    "sha256": "7c9ad148b8b4e805eede71eca9ce26893b846320c5feb3974e508977c68e0325",
+    "bytes": 2806
+  },
+  {
+    "file": "shared/dev-revisao/assets/lint-staged.config.js",
+    "sha256": "0ba24530f7686f35dd84343ba33d0bb57bfcbc09798506df0d6632986dcc68d6",
+    "bytes": 453
+  },
+  {
+    "file": "shared/dev-revisao/assets/tsconfig.strict.json",
+    "sha256": "b020156df547d5eba5119c0fe510297f9266d384e699e97b3f5e17b1de54ca6f",
+    "bytes": 882
+  },
+  {
+    "file": "shared/dev-testes/SKILL.md",
+    "sha256": "ed0e60b96d350fd0929e2bb0467440c4ca519cc3ccca2f969a3ffb1b152689d7",
+    "bytes": 7811
+  },
+  {
+    "file": "shared/dev-testes/assets/playwright.config.ts",
+    "sha256": "e10f9f02280dcc4b5493fe66e720b104cfd8eb13eaa5d0200ba39f605540eac9",
+    "bytes": 1338
+  },
+  {
+    "file": "shared/dev-testes/assets/pytest.ini",
+    "sha256": "ac2716e1f7a6f323b97b8fbd33390de6396317080181778dddfdfa618363f7c4",
+    "bytes": 527
+  },
+  {
+    "file": "shared/dev-testes/assets/vitest.config.ts",
+    "sha256": "5733ce45fd3821a0a1bb5b43543d4b450bb144c5ba172af576f0c4f25e50fd11",
+    "bytes": 1245
+  },
+  {
+    "file": "shared/growth-receita-implantacao/SKILL.md",
+    "sha256": "ac2014ccf11f6e2b29426f11f8f3b1cc723ae74ae87508c6ef734f7577153436",
+    "bytes": 3934
+  },
+  {
+    "file": "shared/indicadores-satelite/SKILL.md",
+    "sha256": "6592b7e24eebd601c59be687ccfdec5288a61ada08bdf2781db6ecd28ec3d9c1",
+    "bytes": 10068
+  },
+  {
+    "file": "shared/indicadores-satelite/assets/referencia-implementacao.md",
+    "sha256": "3a765737dc09288725ae42629acb781dd55168ab5ba591e38d4564de27f31579",
+    "bytes": 6574
+  },
+  {
+    "file": "shared/master-detail-ux/SKILL.md",
+    "sha256": "d55339ccf43287736920584955ef638a866745dad4fc13797ca3d0b2ff2e2813",
+    "bytes": 4632
+  },
+  {
+    "file": "shared/master-detail-ux/references/anatomia.md",
+    "sha256": "ecdef3ab64b66cb4297850650d38f15111141f582e6fe1faac35d3bf3d33ae1e",
+    "bytes": 1293
+  },
+  {
+    "file": "shared/master-detail-ux/references/checklist.md",
+    "sha256": "9785e5542c5b38883068d2478b409b3ebc48ae1d63b6932e8cb222b412c4ecf7",
+    "bytes": 1042
+  },
+  {
+    "file": "shared/minimalismo-essencial/SKILL.md",
+    "sha256": "ea3ae62aa85873cf8c22e16f6668b6611bfe5d5ed0b4683143092951c1eec6e9",
+    "bytes": 5579
+  },
+  {
+    "file": "shared/negocios-ecossistema/SKILL.md",
+    "sha256": "cdac1ccbd57ee51829f9226d937eab550d64ad57dc3ef2f6e0d8b4657514c264",
+    "bytes": 4192
+  },
+  {
+    "file": "shared/safrion-equipe/SKILL.md",
+    "sha256": "a0b371d00ea2f998ad71369ee65a768b736509134dafe4dbaee18403fd081dd5",
+    "bytes": 6743
+  },
+  {
+    "file": "shared/safrion-equipe/agents/openai.yaml",
+    "sha256": "dfde0e9cc73c23512416e5267cdfebf381866df2970e13b4b1a6af0db8339d9d",
+    "bytes": 324
+  },
+  {
+    "file": "shared/tabelas-interativas/SKILL.md",
+    "sha256": "a049894af494893ed5d73298f3e7653b213a51fc73926d80386e87d0bc371462",
+    "bytes": 10905
+  },
+  {
+    "file": "shared/tabelas-interativas/assets/exemplo.html",
+    "sha256": "3279a44536c648f02bb3198d3ca09e3f31f19fbd3f605cd564ca57d88b20a154",
+    "bytes": 2285
+  },
+  {
+    "file": "shared/tabelas-interativas/assets/tabela.js",
+    "sha256": "1605033d45dd8f6b040dcedf54269907d21d647f2fdcbd92a65ca9910b345c31",
+    "bytes": 44213
+  },
+  {
+    "file": "shared/ux-essencial/SKILL.md",
+    "sha256": "a478dc6c90f318a260b45fea199589b4caf2d2c0c0a63eeda6ee3ca12d60e75b",
+    "bytes": 16062
+  },
+  {
+    "file": "shared/ux-essencial/assets/exemplo.html",
+    "sha256": "b15ce0c2cee25ec27fa488d63ddc149a57156b4ba451b107bdb66e3d5d60ebfe",
+    "bytes": 6501
+  },
+  {
+    "file": "shared/ux-essencial/assets/m3-kit.js",
+    "sha256": "035eef47c47ef6016b47edabd2dd80c7b4df4949064edee85bfe9543a4a67efd",
+    "bytes": 6774
+  },
+  {
+    "file": "shared/ux-essencial/assets/m3.css",
+    "sha256": "447779ffcd7a7b98b28b1ce2a3b2ecf1daf5e3af385896cb8e78592c3c4abb26",
+    "bytes": 16418
+  },
+  {
+    "file": "test_gemini_consult.py",
+    "sha256": "e3fe4b875da87fcee31e17c1fd5271915dbf079cbe6c6ff9688e8ecea0316c84",
+    "bytes": 15782
+  }
+]

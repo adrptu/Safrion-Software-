@@ -1,0 +1,882 @@
+--- before/gemini/gcp-custos/SKILL.md
++++ candidate/gemini/gcp-custos/SKILL.md
+@@ -4,6 +4,11 @@
+ ---
+ 
+ # Custos verificáveis
++
++## Custo da decisão e limites de execução
++
++Use a autorização vigente por ambiente, preservando sua referência e exclusões; não duplique valores de orçamento mutáveis nesta skill. Consulta adicional ao modelo precisa resolver decisão material, não repetir parecer por rotina. Inclua tokens, execução e custos indiretos pertinentes e diferencie limite do adaptador, cota técnica, alerta e cobrança possível. Prontidão comercial e política de mídia ficam nas fontes de negócio; custo técnico baixo não libera campanha.
++
+ 
+ Diferencie fatura observada, consumo medido, estimativa e hipótese. Use serviço/SKU, região, unidade, quantidade, período, preço e data. Sem preço atual fornecido ou verificável, mostre a fórmula e as variáveis faltantes; não invente uma cotação.
+ 
+--- before/gemini/gcp-desempenho-incidentes/SKILL.md
++++ candidate/gemini/gcp-desempenho-incidentes/SKILL.md
+@@ -4,6 +4,11 @@
+ ---
+ 
+ # Desempenho e incidentes
++
++## Retomada sem repetição cega
++
++Identifique executor local/remoto e distinga timeout de transporte, cota/permissão, falha de ferramenta, relato e prova. Antes de reenviar mutação incerta, peça readback do estado/recibo. Duas falhas pela mesma causa exigem outra hipótese/abordagem ou bloqueio com gatilho. Preserve rascunhos, dados e brutos; verificação encerrada só reabre por novo indício. Reteste a jornada e o delta afetados, reutilizando provas válidas.
++
+ 
+ Comece pelo impacto no usuário, início/duração, ambiente/versão e mudanças recentes. Separe fato observado, hipótese e causa comprovada. Correlacione latência p95/p99, erros e volume com traces, consultas lentas, pool de conexões e saturação disponíveis; média isolada não representa a experiência.
+ 
+--- before/gemini/gcp-infra-essencial/SKILL.md
++++ candidate/gemini/gcp-infra-essencial/SKILL.md
+@@ -4,6 +4,11 @@
+ ---
+ 
+ # Infraestrutura essencial
++
++## Reutilizar a base comprovada
++
++Confira executor, ambiente e versão antes de sugerir nova infraestrutura. Independência do Mac requer prova remota de aplicação/banco; agendamento local não a fornece. Reutilize autorizações e verificações equivalentes já válidas. Não reabra inspeção encerrada sem incidente ou delta novo e não altere controles para destravar ferramenta. Uma falha de transporte não é defeito da aplicação; duas falhas pela mesma causa exigem nova abordagem ou impedimento explícito.
++
+ 
+ Parta do PRD, ADR e implementação fornecidos; não substitua a stack por preferência. Identifique ambiente, fluxo crítico, dependências, carga prevista ou medida e requisitos de recuperação. Na falta de dados, declare a hipótese e a evidência que muda a decisão; não bloqueie a análise inteira por ausência de previsão exata.
+ 
+--- before/gemini/revisao-terceira-opiniao/SKILL.md
++++ candidate/gemini/revisao-terceira-opiniao/SKILL.md
+@@ -4,6 +4,13 @@
+ ---
+ 
+ # Terceira opinião útil
++
++## Contribuição material na equipe atual
++
++Codex e Claude implementam e revisam reciprocamente com autoria delimitada; o revisor integra o trabalho do outro. Gemini contribui com crítica independente de fluxo, acessibilidade, domínio e contraexemplos, além de infraestrutura. Grok não participa. Use somente o pacote mínimo inspecionado enviado pelo adaptador oficial Pro/HIGH; não pressuponha ter lido arquivos referenciados ou realizado ações por API.
++
++Em UX, teste a lógica de origem/contexto, estado, ação, consequência e recuperação; uma primária por contexto ativo e preservação de filtros/rascunho/foco. Contraexemplos úteis: ausência não é zero, percentual não é estado, provisório não duplica confirmado, recorte temporário não apaga preferências, desfazer não apaga edição posterior. Separe análise textual de teste executado e peça somente a prova faltante que muda o parecer. Publicação parcial não dispara auditoria integral; consulte o gatilho vigente em `safrion-equipe` quando fornecido.
++
+ 
+ Analise a pergunta e a evidência fornecida sobre produto, UX, código, dados, domínio agrícola ou gestão do projeto. Sua especialidade adicional em Google Cloud não transforma assuntos de outras áreas em problemas de infraestrutura. Não se acione para repetir toda revisão de rotina.
+ 
+--- before/gemini-consult.py
++++ candidate/gemini-consult.py
+@@ -28,11 +28,14 @@
+                       for name in ("dev-infra", "dev-testes", "dev-revisao",
+                                    "negocios-ecossistema", "growth-receita-implantacao",
+                                    "ux-essencial", "master-detail-ux",
+-                                   "minimalismo-essencial", "tabelas-interativas")})
++                                   "minimalismo-essencial", "tabelas-interativas",
++                                   "agro-gestao-conhecimento", "benchmark-top5", "dev-backend",
++                                   "dev-ciclo-completo", "dev-frontend-mobile",
++                                   "indicadores-satelite", "safrion-equipe")})
+ SKILL_REFERENCES = {"master-detail-ux": ("references/anatomia.md", "references/checklist.md")}
+ SYSTEM = ("Você colabora com o Safrion como terceira opinião por tarefa, com especialidade em Google Cloud, custos, desempenho e incidentes. "
+-          "Codex coordena produto/UX/QA; Claude é autor da arquitetura/implementação. "
+-          "Uma fatia por vez e um autor por artefato. Produção depende do aceite do proprietário. "
++          "Codex dirige produto/UX/QA; Codex e Claude implementam partes delimitadas e revisam reciprocamente. O revisor integra o PR do outro. "
++          "Uma autoria ativa por agente, com contratos/arquivos separados. Você também critica fluxo, acessibilidade e contraexemplos materiais, sem consultas por rotina. Produção depende do aceite do proprietário. "
+           "Você só conhece o contexto enviado; não tem ferramentas nem acesso direto ao ambiente. "
+           "Distinga fatos fornecidos, hipóteses e evidência faltante. Proponha a menor solução "
+           "que atende ao requisito; não acrescente serviços sem necessidade demonstrada. "
+--- before/shared/agro-gestao-conhecimento/SKILL.md
++++ candidate/shared/agro-gestao-conhecimento/SKILL.md
+@@ -5,12 +5,21 @@
+ 
+ # Conhecimento aplicado: agro + gestão
+ 
++## Estados e cálculos com significado operacional
++
++Regra validada fica no domínio canônico, com unidade, período, origem e denominador explícitos. Planejado e realizado precisam do mesmo recorte para comparação. Área de aplicações acumuladas difere de hectares físicos únicos; custo/ha não se soma. Ausência de preço, apontamento ou cobertura torna o resultado parcial/desconhecido, não zero. Dados provisórios e confirmados não entram duas vezes.
++
++Estado é contrato: 100% da área não encerra O.S. automaticamente; plano publicado não significa adotado na safra; cadastro de produto não comprova execução. Preserve vínculos entre planejamento, compra, reserva, retirada, aplicação, devolução e custo conforme a fatia e o PRD. Revalide transições, concorrência e cancelamento no domínio.
++
++Em MIP, cobertura da amostragem, presença, incidência/intensidade e critério técnico são grandezas distintas. Percentual NC não é percentual de área; critério de presença não ganha percentual inventado. Parcial/offline não vira completo; cancelamento da O.S. de controle deve respeitar a decisão pendente e a rastreabilidade da origem/RT. Não transforme um exemplo de implementação em regra agronômica universal.
++
++
+ **Norte:** apoiar decisões com cálculos rastreáveis, unidades corretas e linguagem do produtor. Referências deste skill são ponto de partida, não prescrição nem validação vigente. Conferir fonte, cultura/estádio, região, premissas e responsabilidade técnica antes de incorporar recomendações materiais.
+ 
+ ## Como aplicar
+ 1. **Mapear cada módulo às disciplinas** (tabela abaixo) e ler os arquivos correspondentes antes de modelar dados ou telas.
+ 2. **Modelar com as entidades e unidades do setor** (safra, talhão, lote, categoria animal, sc, @, ha, L/ha) — nunca genéricos.
+-3. **Embutir fórmulas e validações** dos arquivos como regras do domínio, com teste unitário para cada (`dev-testes`): cálculo errado de calagem, umidade ou custo é bug grave.
++3. **Validar fórmulas e premissas** dos arquivos contra o contrato do projeto e fontes pertinentes antes de incorporá-las ao domínio. Testar unidades, limites e precisão (`dev-testes`); exemplos não são prescrições agronômicas.
+ 4. **Selecionar indicadores que resolvem a tarefa da fatia**, com origem, período, unidade e base de comparação válida; não inventar benchmark nem adicionar painel sem decisão concreta.
+ 5. **Fontes oficiais como referência** (Embrapa, CONAB, MAPA, CEPEA/Esalq, IMEA, B3, CFM/NRC, Receita Federal, CPC). Valores legais/fiscais e alíquotas mudam: marcar `verificar vigência` e parametrizar no sistema (nunca hardcode).
+ 6. **Benchmark do setor** (`benchmark-top5`): referências típicas — Aegro, Climate FieldView, John Deere Operations Center, Solinftec, Siagri/Totvs Agro, Datacoper/Agrimanager, Prodap, JetBov, Conta Azul, Omie. UX segue `ux-essencial` e a organização das telas segue `master-detail-ux`.
+@@ -32,9 +41,9 @@
+ - **Produção com umidade e impurezas**: armazenar bruto, umidade, impurezas e peso líquido corrigido ao padrão.
+ - **Rastreabilidade por processo**: manter data, responsável, origem e destino e vínculos necessários. Aplicação de insumo, movimentação animal e colheita têm campos e exigências diferentes; verificar normas atuais pertinentes antes de torná-los obrigatórios.
+ - **Categorias animais** por espécie/sexo/idade/fase; movimentações (nascimento, compra, transferência, venda, morte, mudança de categoria) fecham o inventário mensal.
+-- **Estoque de insumos** por depósito, lote e validade; baixa automática pela aplicação; saldo nunca negativo (alerta antes).
+-- **Custos rateados** com critério declarado (ha, horas-máquina, cabeça, litro) e auditável; toda operação gera custo (insumo + máquina + mão de obra).
+-- **Indicadores sempre com contexto**: valor, meta, benchmark regional/histórico, tendência e drill-down até a operação (`tabelas-interativas`).
++- **Estoque de insumos** por depósito, lote e validade; movimentos conforme comando e estado validado, distinguindo reserva, custódia, consumo e devolução. Impedir saldo inválido de forma atômica; alerta visual sozinho não garante integridade.
++- **Custos rateados** com critério declarado (ha, horas-máquina, cabeça, litro) e auditável; insumo, máquina e mão de obra entram conforme o contrato; componentes desconhecidos mantêm o custo explicitamente parcial.
++- **Indicadores sempre com contexto**: valor, unidade, origem e recorte; meta, benchmark e tendência somente quando existirem dados confiáveis, com drill-down até a operação (`tabelas-interativas`).
+ - **Parâmetros técnicos editáveis** (tabelas de Kc, exigências nutricionais, PRNT, alíquotas, preços de referência) versionados, com valor padrão de fonte oficial.
+ - **Offline-first** no campo, GPS, fotos, leitura de código de barras/QR (`dev-frontend-mobile`).
+ 
+--- before/shared/benchmark-top5/SKILL.md
++++ candidate/shared/benchmark-top5/SKILL.md
+@@ -4,6 +4,13 @@
+ ---
+ 
+ # Benchmark de cinco referências — aprender antes de construir
++
++## Pesquisa dirigida pela decisão
++
++Comece pela pergunta que a mudança precisa resolver e pelos achados já registrados. Nova evidência pode atualizar uma prática sem refazer cinco pesquisas completas. Diferencie comportamento observado, afirmação comercial e inferência; ausência de acesso permanece limitação. Fonte de concorrente inspira, mas não substitui PRD, decisões NAV/DS, regras de domínio e validação de campo.
++
++Compare esforço total, erro, recuperação e clareza por persona e contexto/safra. Menos cliques, mais recursos ou consenso de IAs não comprovam benefício. Registre adoção/adaptação/descarte na fonte existente e mantenha requisitos pendentes; não transforme lista de funções em novos menus ou amplie o produto pela pesquisa.
++
+ 
+ **Norte:** estudar referências relevantes, com evidência de fluxos, regras e práticas, e adaptar o que serve à tarefa. Buscar menos esforço e mais clareza (`ux-essencial`), sem presumir liderança, escala de uso ou superioridade sem dados.
+ 
+@@ -29,7 +36,7 @@
+ 5. **Gestão e métricas** — dashboards padrão, KPIs, relatórios que o gestor usa, alertas.
+ 6. **Etapas de onboarding/configuração** — o que pedem no primeiro uso, importação de dados, templates.
+ 7. **Integrações e ecossistema** — o que conectam por padrão (pagamentos, fiscal, WhatsApp, e-mail, ERP, marketplaces).
+-8. **Diferencial** — o que só ele faz bem e por que é líder.
++8. **Diferencial** — prática diferenciada e evidência do benefício, sem presumir liderança.
+ 9. **Reclamações recorrentes** — fricção, burocracia, lentidão, complexidade (nossa chance de fazer melhor).
+ 10. **Padrões de UX específicos do setor** — convenções que o usuário do setor já espera (nomenclatura, atalhos, layouts) e que não devemos quebrar sem motivo.
+ 
+@@ -49,10 +56,10 @@
+ 
+ ## Filtros ao incorporar (nossa filosofia vence)
+ - **Essencialismo**: avaliar utilidade, frequência por oportunidade e criticidade por persona/safra; não excluir tarefas raras essenciais por porcentagem arbitrária.
+-- **Fricção zero**: se o player exige 5 telas, encontrar a versão de 1 tela com padrões inteligentes. Cada campo do concorrente passa pela pergunta "o sistema pode inferir isso?".
++- **Fricção zero**: se o player exige várias telas, reduzir etapas sem perder decisões, aprovações e contexto. Cada campo do concorrente passa pela pergunta "o sistema pode inferir isso?".
+ - **Lógica e regras**: verificar fórmulas, unidades, legislação e premissas com fontes técnicas e requisitos locais; uma regra de concorrente não é evidência de correção para nossa operação.
+ - **Convenções do setor** (termos, ordem das etapas, documentos obrigatórios, regras fiscais/legais BR): respeitar.
+-- **Estética**: nossa (Material 3, `ux-essencial`), não a deles.
++- **Estética**: do design system vigente (`ux-essencial`), sem copiar a identidade deles.
+ - **Nunca copiar** textos, ícones, layouts ou marca; inspiração de funcionalidade e lógica é legítima, cópia de expressão não é.
+ 
+ ## Checklist (antes de iniciar a Fase 1 de dev-ciclo-completo)
+--- before/shared/dev-backend/SKILL.md
++++ candidate/shared/dev-backend/SKILL.md
+@@ -4,6 +4,15 @@
+ ---
+ 
+ # Backend — meta: correto, seguro, rápido e pronto para escalar
++
++## Contrato de estado, cálculo e recuperação
++
++Concentre regras e agregações em funções de domínio compartilhadas; a UI formata os resultados sem recalcular contadores por caminhos divergentes. Defina universo autorizado, período, unidade, precisão, denominador e tratamento de ausência. Nulo/desconhecido não vira zero; subtotal parcial não representa total conhecido; razões usam numerador/denominador compatíveis, não soma de taxas ou média sem ponderação definida.
++
++Comandos revalidam permissão, escopo, estado e versão no momento da execução. Contexto de navegação não concede acesso nem autoriza ação. Propostas da IA têm prévia e aprovação específica conforme política, comando de domínio e recibo; consenso entre modelos não substitui essas verificações.
++
++Desfazer aplica inversão delimitada ou compensação validada; não restaura um snapshot global que apague alterações posteriores. Timeout de escrita requer consulta do estado/recibo antes de reenviar. Distinguir rascunho, envio pendente, aceito, aplicado e cancelado evita afirmar sucesso antes do efeito autoritativo.
++
+ 
+ ## Arquitetura
+ - **Monólito modular por domínio**: `src/modules/<dominio>/{routes,service,repository,schema,events}`; módulo só fala com outro via interface pública (service) ou evento — nunca acessa a tabela alheia. Estrutura em [assets/estrutura-modular.md](assets/estrutura-modular.md).
+--- before/shared/dev-ciclo-completo/SKILL.md
++++ candidate/shared/dev-ciclo-completo/SKILL.md
+@@ -5,11 +5,18 @@
+ 
+ # Ciclo completo de desenvolvimento
+ 
++## Entrega identificada e continuidade
++
++Antes de editar, delimite resultado, IDs vigentes, base, arquivos/trechos, autor, revisor e aceite na tarefa existente. Em colaboração, mantenha uma autoria ativa por agente e contratos separados; encaminhe entregas prontas imediatamente e avance no próximo trabalho autorizado e independente. Não confunda ausência de ACK com ociosidade nem crie outra fila para retomar.
++
++Registre estados distintos: implementado, revisado, integrado, publicado e homologado. Uma camada sintética, CI verde ou publicação parcial não conclui o produto. Preserve o trabalho válido e os requisitos pendentes. A revisão de PRD confronta decisões aprovadas e comportamento validado, sem legitimar defeitos já implementados; reutilize referências do design system. Os gatilhos específicos do Safrion ficam em `safrion-equipe`.
++
++
+ **Norte:** entregar uma fatia útil, verificável e operável por vez, com controles proporcionais ao risco. O primeiro commit prepara o necessário para a próxima entrega; não antecipa todo o produto.
+ 
+ PRD, arquitetura e instruções do projeto prevalecem sobre os exemplos deste guia. Assets são pontos de partida: conferir versões, permissões e adequação antes de incorporá-los. Um protótipo deve permanecer identificado como protótipo.
+ 
+-**"Pronto" = Definition of Done ([assets/definition-of-done.md](assets/definition-of-done.md)) cumprida e verificada rodando.** Nunca dizer "funciona" sem ter executado lint, tipos e testes e visto a saída.
++**"Pronto" = Definition of Done ([assets/definition-of-done.md](assets/definition-of-done.md)) cumprida e verificada rodando.** Nunca dizer "funciona" sem evidência pertinente: comportamento executável pede execução; alteração documental pede leitura e validação documental. Execute os checks aplicáveis e exigidos pelo projeto.
+ 
+ ---
+ 
+@@ -29,7 +36,7 @@
+ - Registrar decisões em ADRs curtos ([assets/ADR-template.md](assets/ADR-template.md)) em `docs/adr/`.
+ - **Monólito modular primeiro** (módulos por domínio, fronteiras claras); microsserviços só com motivo concreto (times separados, escala desigual).
+ - **Tecnologia "chata" e comprovada**; novidade só quando resolve um problema real.
+-- Stack padrão quando o usuário não tem preferência:
++- Exemplos para projeto sem stack definida; decisão vigente prevalece, sem instalar a tabela inteira:
+ 
+ | Camada | Padrão |
+ |---|---|
+@@ -37,7 +44,7 @@
+ | Web | Next.js (App Router) ou Vite + React; Tailwind + tokens M3 (`ux-essencial`) |
+ | API | Fastify/NestJS (TS) ou FastAPI (Py); OpenAPI gerado do código |
+ | Mobile | Expo (React Native) ou Flutter; nativo só por exigência de plataforma |
+-| Dados | PostgreSQL; Prisma/Drizzle (TS) ou SQLAlchemy (Py); Redis para cache/filas |
++| Dados | PostgreSQL; Prisma/Drizzle (TS) ou SQLAlchemy (Py); Redis somente se houver necessidade de cache/filas |
+ | Testes | Vitest + Testing Library + Playwright; pytest; Maestro/Detox (mobile) |
+ | Infra | Docker; GitHub Actions; PaaS (Vercel/Fly.io/Cloud Run) → Kubernetes só quando necessário |
+ | Observabilidade | Sentry + OpenTelemetry + logs estruturados |
+@@ -48,7 +55,7 @@
+ No produto novo, preparar a fundação necessária à primeira fatia. Em projeto existente, verificar antes de acrescentar:
+ 1. `git init`, `.gitignore`, `.editorconfig`, `README.md` (como rodar em 3 comandos).
+ 2. Gerenciador de pacotes com lockfile e versões fixadas; `.nvmrc`/`.python-version`.
+-3. **Lint + formatação + tipos estritos** (`dev-revisao`, assets prontos) — zero warnings tolerados.
++3. **Lint + formatação + tipos estritos** (`dev-revisao`, assets prontos) — conforme a política do projeto, sem ocultar avisos para liberar a entrega.
+ 4. **Testes** configurados com um teste real passando (`dev-testes`).
+ 5. **Pre-commit** (lint-staged) e **CI** rodando lint → tipos → testes → build em todo PR (`dev-infra/assets/ci.yml`).
+ 6. `.env.example` + validação das variáveis no boot; nunca segredo no repositório.
+@@ -70,13 +77,13 @@
+ - Atualizar docs/ADR/README no mesmo PR que muda o comportamento.
+ 
+ ## Fase 4 — Revisão (`dev-revisao`)
+-Self-review → automação (lint, tipos, testes, cobertura, segurança, duplicação) → revisão com checklist → squash merge. Nada entra com pipeline vermelho ou com "arrumo depois".
++Autorrevisão → checks aplicáveis → revisão independente → integração segundo a política do projeto. O revisor integra o PR do outro quando esse for o contrato; ninguém aprova ou integra o próprio PR no Safrion. Check exigido falho ou indisponível permanece pendente.
+ 
+ ## Fase 5 — Entrega (`dev-infra`)
+ Deploy automatizado; migrações versionadas com recuperação testada e compatibilidade; homologação isolada com o mesmo artefato candidato. Produção segue os gates do projeto, incluindo aceite humano quando exigido. No Safrion, o proprietário aprova explicitamente a versão após homologação.
+ 
+ ## Fase 6 — Operação
+-SLOs definidos (disponibilidade, p95 de latência, taxa de erro) com alertas que acordam alguém só quando o usuário sente; dashboards; backups testados com restauração; post-mortem sem culpa para todo incidente, gerando teste + correção; dependências atualizadas semanalmente (Renovate/Dependabot).
++SLOs definidos (disponibilidade, p95 de latência, taxa de erro) com alertas que acordam alguém só quando o usuário sente; dashboards; backups testados com restauração; análise sem culpa e ações proporcionais ao incidente; manutenção de dependências conforme política do projeto.
+ 
+ ---
+ 
+@@ -84,6 +91,6 @@
+ 1. Dimensionar a fundação ao escopo: uma tela em sistema existente reutiliza a base; um protótipo explícito não implica provisionar produção.
+ 2. Ao mexer em projeto existente: respeitar as convenções dele; se faltar lint/testes/CI, propor e adicionar de forma incremental (não reescrever tudo).
+ 3. Antes de declarar concluído: executar os checks aplicáveis à mudança e informar resultado, versão e limitações. Comando configurado não equivale a executado; não inventar comandos ausentes.
+-4. Toda funcionalidade nova vem com testes no mesmo commit; todo bug vem com teste de regressão.
++4. Proteja os comportamentos alterados com verificações proporcionais. Para defeito, reproduza o cenário e acrescente regressão quando viável; não crie testes que só espelhem texto ou implementação.
+ 5. Preferir remover código a adicionar. Cada abstração precisa justificar-se com uso real (≥ 2 chamadores).
+ 6. Se algo do padrão não se aplicar (script descartável, protótipo explícito), dizer isso e o que foi omitido.
+--- before/shared/dev-ciclo-completo/assets/definition-of-done.md
++++ candidate/shared/dev-ciclo-completo/assets/definition-of-done.md
+@@ -5,7 +5,7 @@
+ ## Código
+ - [ ] Faz exatamente o que a tarefa pede — nem mais (sem funcionalidade "de brinde"), nem menos
+ - [ ] Tipagem estrita sem `any`, `@ts-ignore`, `eslint-disable`, `# type: ignore` sem justificativa em comentário
+-- [ ] Zero warnings de lint/formatação/tipos (`lint`, `typecheck`, `format --check` passam)
++- [ ] Checks aplicáveis de lint/formatação/tipos passam conforme política do projeto
+ - [ ] Sem código morto, duplicado, comentado ou `TODO` sem issue vinculada
+ - [ ] Erros tratados em toda fronteira (rede, banco, disco, entrada do usuário) com timeout e mensagem acionável
+ - [ ] Sem segredo, credencial ou dado pessoal no código, log ou teste
+@@ -22,11 +22,11 @@
+ ## Revisão
+ - [ ] PR focado e revisável, com problema, resultado, evidências e capturas pertinentes
+ - [ ] Self-review feito (ler o diff inteiro como se fosse de outra pessoa)
+-- [ ] Pipeline verde: lint, tipos, testes, build, cobertura, segurança (deps + segredos), duplicação
++- [ ] Checks exigidos e pertinentes aprovados na candidata identificada
+ - [ ] Revisado por pessoa ou agente com o checklist de `dev-revisao`; comentários resolvidos
+ 
+ ## Produto e UX
+-- [ ] Segue `ux-essencial` (uma ação primária, fricção zero, estados vazio/carregando/erro, acessível, claro/escuro)
++- [ ] Segue `ux-essencial` (uma primária por contexto ativo, estados e recuperação, acessibilidade e temas adotados)
+ - [ ] Passou pelo procedimento de corte de `minimalismo-essencial`; lista de cortes entregue; nada supérfluo na tela
+ - [ ] Tabelas seguem `tabelas-interativas`
+ - [ ] Textos em pt-BR revisados; formatação de número/data/moeda correta
+@@ -38,3 +38,6 @@
+ - [ ] Feature flag/rollback definidos para mudança arriscada
+ - [ ] Documentação atualizada no mesmo PR (artefatos afetados, como README, ADR, OpenAPI e AGENTS.md; CLAUDE.md referencia a mesma fonte)
+ - [ ] Quando houver entrega executável: homologação verificada, desempenho contra metas e aceite humano exigido antes de produção
++
++- [ ] Fonte/diff, base e versão recuperáveis; relato e prova distintos; revisão cruzada e integração pelo revisor quando exigidas
++- [ ] Estado da entrega identifica protótipo, implementação real, teste, publicação e HML sem confundir conclusão parcial com funcional
+--- before/shared/dev-frontend-mobile/SKILL.md
++++ candidate/shared/dev-frontend-mobile/SKILL.md
+@@ -5,7 +5,19 @@
+ 
+ # Frontend e mobile — meta: rápido, robusto, sem bug de tela
+ 
++## Contexto, fontes e recuperação
++
++Derive indicadores e listas do mesmo contrato de domínio; não esconda mocks atrás de indicadores reais nem interprete números já formatados. Preserve ausência e parcialidade no texto. Em tabelas legadas, declare agregação explicitamente; use `agg: null` para grandeza sem resumo validado ou a função de domínio adequada para razões/ponderações. Percentual completo não altera sozinho o estado de negócio.
++
++Ao abrir um recorte por painel/mapa, carregue exatamente o conjunto autorizado, sem um filtro antigo invisível restringir o destino. Separe recorte temporário dos filtros pessoais persistidos; valide fazenda/safra/perfil e validade do contexto. Voltar restaura filtros, posição, rascunho e foco; contexto inválido oferece recuperação clara. Não reutilize recibo/contexto consumido nem vaze dados ao trocar usuário.
++
++Tabela, raias e calendário são projeções coerentes das mesmas entidades e estados. Explique contagem de eventos com vários dias para não confundir cartões visíveis com registros únicos. Desfazer aplica inversão delimitada e preserva alterações posteriores fora desse escopo; conflito de versão bloqueia a inversão e oferece recuperação, sem exigir event sourcing/CRDT. A ação expira conforme versão/publicação/descarte e permanece acessível mesmo quando a lista fica vazia. Teste as transições alteradas com teclado e viewport móvel, incluindo foco após erro e controles que se sobrepõem.
++
++
+ UX/UI é `ux-essencial`; organização das telas (listagem → detalhe → sub-detalhe, rotas `/entidade`, `/entidade/:id`) é `master-detail-ux`; tabelas é `tabelas-interativas`. Aqui é a engenharia por trás.
++
++Toda ação relevante, inclusive salvar e cancelar, tem retorno inequívoco no contexto: processamento, salvo/pendente ou erro e próximo passo. Cancelar informa se preservou rascunho ou descartou alterações; navegar para fora não significa salvar. Reutilize a camada de feedback do design system, sem toast duplicado nem confirmação modal em toda ação; confirmação adicional depende de risco real. Nunca mostrar sucesso antes do recibo.
++
+ 
+ ## Estrutura e código
+ - **Organização por feature**, não por tipo: `src/features/pedidos/{components,hooks,api,schemas,index.ts}`; `src/shared/{ui,lib,hooks}` só para o que é realmente genérico. Feature exporta só pelo `index.ts`; sem import cruzado entre features (usar `shared` ou compor na página).
+@@ -25,8 +37,8 @@
+ 
+ ## Formulários e dados
+ - Reutilizar a biblioteca do projeto; schema, validação útil, teclado e autocomplete corretos. Autosave preserva rascunho; comandos de negócio exigem envio explícito. Atualização otimista só onde reversível, com pendência visível e sem afirmar aceite antes do recibo.
+-- Datas: `Intl`/`date-fns` com fuso explícito; números/moeda com `Intl.NumberFormat('pt-BR')`. Nunca `toFixed` para dinheiro.
+-- Listas > 200 itens virtualizadas (TanStack Virtual / FlashList / `ListView.builder`).
++- Datas: `Intl`/`date-fns` com fuso explícito; números/moeda com `Intl.NumberFormat('pt-BR')`. Não usar formatação como cálculo ou armazenamento monetário; precisão e arredondamento pertencem ao contrato de domínio.
++- Virtualizar listas quando a medição justificar, preservando teclado, leitores de tela, busca e altura/posição de retorno.
+ 
+ ## Rotas, erros e carregamento
+ - Rotas com **lazy loading** por página; **error boundary** por rota e por widget crítico com ação de tentar de novo; `Suspense` com skeleton no formato do conteúdo.
+@@ -68,4 +80,4 @@
+ - [ ] Lighthouse/Web Vitals ou fps dentro do orçamento; bundle não cresceu
+ - [ ] Acessibilidade com axe passando; teclado/leitor de tela
+ - [ ] Testes: unit + componente (Testing Library) + E2E se fluxo crítico
+-- [ ] Claro/escuro, responsivo (compacto/médio/expandido), pt-BR
++- [ ] Temas e dispositivos adotados, responsivo, pt-BR
+--- before/shared/dev-infra/SKILL.md
++++ candidate/shared/dev-infra/SKILL.md
+@@ -4,6 +4,15 @@
+ ---
+ 
+ # Infra e operação — disponibilidade e recuperação verificáveis
++
++## Execução comprovada e autorização vigente
++
++Identifique executor e dependências reais: comando disparado no Mac continua local até prova de execução remota. Agenda/heartbeat retoma uma sessão disponível; não garante continuidade com aplicativo/computador indisponível. Aplicação e banco independentes precisam de execução e recuperação verificadas, não apenas plano, container construído ou CI verde.
++
++Reaproveite autorização concreta de desenvolvimento/QA/HML, orçamento e ferramentas. Alerta de orçamento não limita cobrança. Produção, efeitos em dados reais e mudanças de proteção seguem os limites vigentes; não desative controles para resolver falha. Distinguir transporte, autenticação, permissão, cota, custo e defeito evita repetição cega. Antes de reenviar mutação incerta, confira recibo/estado.
++
++Não reabra incidente ou verificação encerrada sem novo indício. Escolha checks equivalentes ao delta; publicação incremental não exige reconstruir a infraestrutura. Preserve artefato, dados e logs úteis; duas falhas pela mesma causa pedem abordagem diferente ou bloqueio com gatilho explícito.
++
+ 
+ Escolha a menor infraestrutura que cumpra requisitos, carga e orçamento. Exemplos de provedores, versões e assets não são contratação nem receita pronta; verificar suporte e configuração antes de usar. Haver monitoramento não significa haver plantão: nomear o responsável e testar o acionamento.
+ 
+@@ -32,7 +41,7 @@
+ - Imagens escaneadas (Trivy) no CI; SBOM gerado; assinadas (cosign) quando houver exigência.
+ 
+ ## CI/CD — [assets/ci.yml](assets/ci.yml)
+-Pipeline de todo PR (< 10 min, com cache):
++Exemplo de pipeline a selecionar pelo escopo e pelos gates do projeto, com duração medida e cache seguro:
+ `install → lint + format → typecheck → testes unit (cobertura) → build → testes integração (serviços via Docker) → E2E (sharded) → segurança (gitleaks, osv-scanner, Trivy, Semgrep) → deploy preview`
+ 
+ Trunk (`main`): checks aplicáveis → homologação → smoke tests e validação humana exigida pelo projeto → promoção do mesmo artefato à produção → verificação pós-deploy. No Safrion, produção exige o aceite explícito do proprietário sobre a versão. Recuperação automática só por procedimento previamente autorizado e testado, compatível com migrações e dados.
+@@ -70,7 +79,7 @@
+ - Custo monitorado com alerta de orçamento; recursos ociosos removidos; rightsizing mensal.
+ 
+ ## Checklist de lançamento
+-- [ ] Pipeline completo verde; imagem promovida de staging; migração compatível; rollback testado
++- [ ] Checks exigidos e pertinentes verdes; imagem promovida de staging; migração compatível; rollback testado
+ - [ ] TLS, domínio, rate limiting e cabeçalhos; CDN/WAF conforme arquitetura e risco
+ - [ ] Segredos no cofre; acesso mínimo; banco em rede privada
+ - [ ] `/health` e `/ready`; monitoramento externo; rastreador de erros e telemetria adotados pelo projeto recebendo dados
+--- before/shared/dev-revisao/SKILL.md
++++ candidate/shared/dev-revisao/SKILL.md
+@@ -5,13 +5,20 @@
+ 
+ # Revisão de código — correção, clareza e evidência
+ 
++## Vincular parecer à candidata
++
++Confira base, autoria, arquivos, dependências e versão exata antes da revisão; leia fontes recuperáveis, diff e saídas brutas pertinentes. Hash sem fonte não permite revisar; relato do autor, teste proposto e resultado verificado são evidências diferentes. Em PRs empilhados, declare a ordem de integração e revise novamente apenas o delta material após rebase/retarget.
++
++Reproduza o comportamento afetado e os contraexemplos relevantes. Consolide um retorno por candidata, com versão, cenário, impacto, localização, severidade do projeto, prioridade separada e aceite observável. Não transforme preferência em bloqueio. Ao chegar correção, confira o novo delta e reteste o afetado, preservando provas equivalentes válidas. Ninguém aprova ou integra o próprio PR quando a revisão cruzada for exigida.
++
++
+ Aplicar ao diff e seus riscos. Reutilizar ferramentas do projeto; os assets são exemplos a validar, não uma lista de dependências obrigatórias. Não abrir uma refatoração ampla para satisfazer preferências estilísticas.
+ 
+ ## Fluxo
+-1. **Self-review** — antes de abrir o PR, ler o diff inteiro como revisor hostil, com o checklist abaixo. Rodar `lint`, `typecheck`, `test`, `build` localmente.
++1. **Self-review** — antes de abrir o PR, ler o diff inteiro como revisor hostil, com o checklist abaixo. Rodar os checks existentes aplicáveis à mudança e os exigidos pelo projeto.
+ 2. **PR focado** — um assunto revisável; tamanho é sinal de complexidade, não limite que obriga a fragmentar uma mudança coerente. Template: [assets/PULL_REQUEST_TEMPLATE.md](assets/PULL_REQUEST_TEMPLATE.md).
+-3. **Automação bloqueante** no CI (nada é mesclado com falha): formatação, lint, tipos, testes + cobertura, duplicação, código morto, dependências vulneráveis, segredos, build.
+-4. **Revisão humana/agente** com [assets/checklist-revisao.md](assets/checklist-revisao.md). Comentários com severidade: **bloqueia** / **sugestão** / **nit**. Elogiar o que está bom.
++3. **Automação bloqueante**: cumprir os checks exigidos e pertinentes. Formatação, tipos, testes, build e verificações de segurança são opções segundo o risco; não instalar ferramentas ou ampliar infraestrutura por rotina.
++4. **Revisão humana/agente** com [assets/checklist-revisao.md](assets/checklist-revisao.md). Usar a escala de severidade do projeto e distinguir defeito, sugestão e preferência; prioridade de trabalho é outro eixo.
+ 5. Merge conforme a política e autorização do projeto; não publicar, mesclar ou apagar branch só por seguir este checklist.
+ 
+ Ao revisar como agente: ler o código de verdade (não só o diff), executar os testes, procurar o que **falta** (erro não tratado, caso limite, permissão), e reportar cada achado com arquivo:linha, cenário concreto de falha e correção sugerida. Não aprovar com pipeline vermelho.
+@@ -51,5 +58,5 @@
+ 4. **Testes**: existem, testam comportamento, cobrem erro/limite, são determinísticos?
+ 5. **Legibilidade**: entendo em uma leitura? Nomes? Tamanho? Duplicação? Código morto?
+ 6. **Desempenho**: N+1, índices, paginação, memória, bundle.
+-7. **Compatibilidade**: migração reversível, API retrocompatível, feature flag, dados existentes.
++7. **Compatibilidade**: migração compatível e recuperação testada sem perda indevida, API retrocompatível, feature flag, dados existentes.
+ 8. **Produto**: segue `ux-essencial` / `tabelas-interativas`; textos pt-BR.
+--- before/shared/dev-revisao/assets/PULL_REQUEST_TEMPLATE.md
++++ candidate/shared/dev-revisao/assets/PULL_REQUEST_TEMPLATE.md
+@@ -5,15 +5,15 @@
+ <!-- Passos reprodutíveis. Comandos. Dados de exemplo. -->
+ 
+ ## Evidências
+-<!-- Capturas/vídeo para UI (claro e escuro, mobile e desktop). Saída resumida dos testes. -->
++<!-- Versão/base, fontes/diff e resultados executados. UI: capturas nos contextos, temas e dispositivos pertinentes. Distinguir limitações e testes não executados. -->
+ 
+ ## Riscos e reversão
+ <!-- Migração? Feature flag? Como desfazer em produção? Impacto em dados existentes? -->
+ 
+ ## Checklist
+-- [ ] Self-review feito; diff só contém o assunto do PR (< 400 linhas)
++- [ ] Self-review feito; diff só contém o assunto do PR 
+ - [ ] Testes novos cobrem comportamento, limites e erros; bug tem regressão
+-- [ ] `lint` · `typecheck` · `test` · `build` verdes localmente
++- [ ] Checks aplicáveis e exigidos aprovados; resultados vinculados à candidata
+ - [ ] Sem `any`/`ignore`/`skip`/código morto/duplicação
+-- [ ] Migração reversível; `.env.example` e docs atualizados
++- [ ] Migração compatível e recuperação verificada; `.env.example` e docs atualizados
+ - [ ] UX conforme `ux-essencial`; tabelas conforme `tabelas-interativas`
+--- before/shared/dev-revisao/assets/checklist-revisao.md
++++ candidate/shared/dev-revisao/assets/checklist-revisao.md
+@@ -1,6 +1,6 @@
+ # Checklist de revisão de código
+ 
+-Marque severidade em cada comentário: **[bloqueia]** · **[sugestão]** · **[nit]**.
++Use severidade e prioridade separadas conforme o projeto; diferencie defeito, risco e preferência. Cada achado identifica candidata, cenário, impacto e aceite.
+ 
+ ## 1. Correção
+ - [ ] Implementa exatamente o pedido; comportamento anterior preservado onde não deveria mudar
+@@ -24,14 +24,14 @@
+ - [ ] Upload: tipo/tamanho validados; arquivos fora do webroot; nomes sanitizados
+ 
+ ## 4. Testes
+-- [ ] Existem para todo comportamento novo/alterado; nomes descrevem comportamento
++- [ ] Protegem os comportamentos alterados segundo o risco; nomes descrevem comportamento
+ - [ ] Testam limites e erros, não só o caminho feliz
+ - [ ] Determinísticos (sem tempo real, rede, ordem); banco real em integração
+-- [ ] Nenhum `skip`/`only`; cobertura não caiu
++- [ ] Nenhum `only` acidental; skips e cobertura avaliados contra os gates, sem aprovação falsa
+ 
+ ## 5. Legibilidade e estrutura
+ - [ ] Entendo cada função em uma leitura; nomes revelam intenção
+-- [ ] Funções curtas, um propósito, ≤ 3 parâmetros, sem flag booleana
++- [ ] Funções coesas e legíveis, sem extrações por quota de linhas/parâmetros
+ - [ ] Sem duplicação de conhecimento (existe util/componente que já faz isso?)
+ - [ ] Sem código morto, comentado, `TODO` solto, `console.log`
+ - [ ] Sem números/strings mágicos; sem `any`/`ignore`
+@@ -43,11 +43,11 @@
+ - [ ] Frontend: sem re-render desnecessário, bundle não cresceu sem motivo, imagens dimensionadas
+ 
+ ## 7. Compatibilidade e operação
+-- [ ] Migração expand/contract, reversível, testada com dados
++- [ ] Migração compatível, testada com dados e recuperação sem perda indevida
+ - [ ] API retrocompatível ou versionada; clientes antigos continuam funcionando
+ - [ ] Variáveis de ambiente novas documentadas e validadas; feature flag onde há risco
+ - [ ] Logs/métricas cobrem o novo caminho; documentação atualizada
+ 
+ ## 8. Produto
+-- [ ] Segue `ux-essencial` (ação primária única, fricção zero, estados, acessibilidade, claro/escuro)
++- [ ] Segue `ux-essencial` (primária por contexto ativo, estados, recuperação, acessibilidade e temas adotados)
+ - [ ] Tabelas conforme `tabelas-interativas`; textos pt-BR, formatos locais
+--- before/shared/dev-testes/SKILL.md
++++ candidate/shared/dev-testes/SKILL.md
+@@ -4,6 +4,15 @@
+ ---
+ 
+ # Testes automatizados — reduzir falhas com evidência
++
++## Prova proporcional e reutilizável
++
++Vincule cada resultado à candidata, comando, ambiente, dados/perfil isolados e saída recuperável. Classifique falha do produto, fixture/precondição, ferramenta, transporte e resultado inconclusivo antes de alterar código. Proposta, relato, ajuda, zero testes e suíte interrompida não equivalem a execução aprovada.
++
++Selecione contraexemplos pelo delta: ausência versus zero, parcial versus completo, estado versus percentual, repetição/concorrência, filtro antigo ao entrar por outro contexto, retorno com rascunho/foco, e desfazer após uma edição posterior. Teclado e celular são pertinentes ao trecho de UI alterado. Reuse provas equivalentes e válidas; mudança invalida o que afeta, sem disparar auditoria integral por publicação parcial. Leia os brutos e explique divergências; não resolva por votação de modelos.
++
++Duas falhas pela mesma causa exigem mudar a abordagem ou registrar impedimento e gatilho, preservando rascunhos e evidências. Retry diagnóstico fica explícito e nunca transforma falha em sucesso silencioso.
++
+ 
+ Teste comportamentos e riscos, não contagens. Nenhuma suíte garante ausência absoluta de bugs. Ajustes de texto/instruções ou visuais reversíveis sem mudança de comportamento podem ser verificados por leitura/inspeção; não criar testes que só repetem a implementação.
+ 
+@@ -16,17 +25,17 @@
+ ## Pirâmide (referência, não quota)
+ | Nível | O que cobre | Velocidade | Quanto |
+ |---|---|---|---|
+-| **Unitário** | regras de negócio, cálculos, validações, reducers, utils, componentes isolados | ms | 70 % |
+-| **Integração** | módulo + banco real (Testcontainers/Docker), handlers HTTP, filas, repositórios, componentes com dados | ~100 ms–1 s | 20 % |
++| **Unitário** | regras de negócio, cálculos, validações, reducers, utils, componentes isolados | ms | conforme o risco |
++| **Integração** | módulo + banco real (Testcontainers/Docker), handlers HTTP, filas, repositórios, componentes com dados | ~100 ms–1 s | conforme fronteiras alteradas |
+ | **Contrato** | forma das APIs entre front/back e serviços (OpenAPI/Pact); schema do banco vs. ORM | rápido | por API |
+-| **E2E** | 5–15 fluxos críticos completos no navegador/dispositivo (login, cadastro, compra, fluxo principal) | s | 10 % |
++| **E2E** | fluxos críticos afetados, completos no navegador/dispositivo (login, cadastro, compra, fluxo principal) | s | conforme jornadas alteradas |
+ | **Propriedade** | invariantes com dados gerados (fast-check / Hypothesis) para parsers, cálculos, serialização | — | onde há lógica densa |
+ | **Mutação** | Stryker / mutmut no núcleo de domínio: prova que os testes detectam mudanças | lento, CI noturno | domínio |
+ | **Carga** | k6 nos endpoints críticos antes de lançar e antes de picos | — | pré-lançamento |
+ 
+ Mocks só na fronteira do sistema (APIs de terceiros, relógio, aleatoriedade, e-mail). **Banco de dados é real** nos testes de integração (Docker), nunca mockado.
+ 
+-## O que obrigatoriamente testar
++## Riscos a selecionar conforme a mudança
+ - Caminho feliz, **limites** (0, 1, máximo, vazio, nulo, unicode, negativo), **erros** (entrada inválida, rede falha, timeout, concorrência).
+ - Dinheiro, arredondamento, datas/timezones/horário de verão, ordenação com acentos.
+ - **Permissões**: cada endpoint com usuário sem permissão → 403; sem login → 401; outro tenant → 404.
+--- before/shared/growth-receita-implantacao/SKILL.md
++++ candidate/shared/growth-receita-implantacao/SKILL.md
+@@ -4,6 +4,13 @@
+ ---
+ 
+ # Crescer com clientes bem atendidos
++
++## Prontidão e limites comerciais
++
++Antes de ativar um experimento externo, confira a oferta operável, versão validada, capacidade de implantação/suporte e autorização vigente de canal, público e gasto. CI verde, protótipo publicado ou avanço técnico não demonstram prontidão vendável. Não use acesso institucional para mensagens pessoais nem trate acesso à conta como autorização de campanha.
++
++No Safrion, consulte a política comercial e os adiamentos registrados em `outputs/estrategia-growth.md` e no checkpoint vigente: SITE/marketing e painel de contas preservam rascunhos e não avançam por automatismo. Mídia permanece sem execução antecipada; regras monetárias e gatilho de concordância ficam na fonte aprovada, sem duplicar valores aqui. Atualizar skills não reativa agente retirado, campanha ou automação comercial.
++
+ 
+ Parta do segmento, tarefa e versão realmente entregue. Reaproveite estratégia, CRM e eventos existentes. PLG, parceiros, conteúdo e mídia são mecanismos a testar; nenhuma ferramenta, número de agentes ou volume de peças prova produtividade.
+ 
+--- before/shared/indicadores-satelite/SKILL.md
++++ candidate/shared/indicadores-satelite/SKILL.md
+@@ -4,6 +4,13 @@
+ ---
+ 
+ # Indicadores de satélite: cores vivas, falhas visíveis
++
++## Integração ao mapa e prova de suporte
++
++Reutilize mapa, navegação, tokens e contrato de índices do projeto. No Safrion, C4 é a fonte do escopo e dos aceites de NDVI, NDRE, EVI, SAVI e NDMI; não acrescente menu separado por seguir um exemplo desta skill. Cada índice exige bandas, fórmula, resolução efetiva, qualidade e fonte verificáveis; suporte a NDVI não comprova suporte aos demais.
++
++Mantenha cena/data, resolução, máscara, área válida e escala absoluta/relativa visíveis no contexto necessário. Sem dado/nuvem não é zero nem área de baixo vigor. Não transforme contraste relativo em diagnóstico ou recomendação automática. Raster sintético demonstra interação e deve ser identificado; não comprova integração com provedor nem observação real. Revalide somente índices/caminhos afetados por uma mudança.
++
+ 
+ **Norte:** tornar a variabilidade legível, com cores vivas e pixels dentro do talhão. Índice baixo ou cor vermelha indica valor/variação a investigar, não comprova praga, morte ou perda. Escala relativa mostra contraste interno, não gravidade: uma lavoura saudável também pode conter pixels vermelhos nesse modo.
+ 
+@@ -16,7 +23,7 @@
+ | Nível | O que mostra | Como |
+ |---|---|---|
+ | **Fazenda** (listagem) | Todos os talhões/pivôs sobre imagem real (true color ou basemap de satélite). Cada polígono preenchido com o raster do índice em cores vivas, opacidade 85 %. **Número/nome do talhão grande no centro** (fonte bold, halo branco ou escuro), legível em qualquer zoom. Manchas fracas aparecem como "ilhas" vermelho/laranja dentro do verde. | Escala **absoluta** (mesma cor = mesmo valor em toda a fazenda) para comparar talhões. Fora dos polígonos, sem overlay. |
+-| **Talhão** (detalhe) | Um talhão em tela cheia, raster na resolução nativa (10 m Sentinel-2, cm no drone), **sem suavização** (`image-rendering: pixelated`, nunca interpolação bilinear/blur). Legenda com as classes e os valores reais. Falhas e zonas fracas delimitadas. | Escala **relativa ao talhão** por padrão (estica percentil 2–98 do próprio talhão), que é o que revela variabilidade dentro de uma lavoura uniforme — ex. 0,84 a 0,93 vira vermelho→verde completo. |
++| **Talhão** (detalhe) | Um talhão em tela cheia, raster na resolução efetiva das bandas e do processamento, explicitada por fonte/índice, **sem suavização** (`image-rendering: pixelated`, nunca interpolação bilinear/blur). Legenda com as classes e os valores reais. Falhas e zonas fracas delimitadas. | Escala **relativa ao talhão** por padrão (estica percentil 2–98 do próprio talhão), que é o que revela variabilidade dentro de uma lavoura uniforme — ex. 0,84 a 0,93 vira vermelho→verde completo. |
+ 
+ Alternador único e sempre visível: **Contraste: Talhão | Fazenda | Absoluto**. Trocar escala recolore no cliente, sem nova requisição.
+ 
+@@ -59,7 +66,7 @@
+ 
+ ## 4. Telas (master-detail)
+ 
+-- **Menu → Satélite (listagem)**: mapa da fazenda (§1) + tabela de talhões com colunas: talhão, cultura/estádio, data da cena, índice médio, variação vs. anterior (seta e %), % área fraca, nº de manchas, % nuvem, estado, próximo passo. Filtro/ordenação no cabeçalho, agrupar por fazenda/cultura/estado, clique na linha ou no polígono abre o detalhe (`tabelas-interativas`). Seletor de data e de índice no topo, um só.
++- **Menu → mapa/listagem vigente do projeto**: mapa da fazenda (§1) + tabela de talhões com colunas: talhão, cultura/estádio, data da cena, índice médio, variação vs. anterior (seta e %), % área fraca, nº de manchas, % nuvem, estado, próximo passo. Filtro/ordenação no cabeçalho, agrupar por fazenda/cultura/estado, clique na linha ou no polígono abre o detalhe (`tabelas-interativas`). Seletor de data e de índice no topo, um só.
+ - **Detalhe do talhão**: raster grande (§1) com legenda e alternador de contraste; ao lado: estado + ação primária; **lista de manchas** (área, classe, evolução, botão "Ir para" que centraliza o mapa e "Criar vistoria" que gera ocorrência com GPS); histograma das classes (% de área); série temporal do índice médio com faixa P10–P90, lacunas de nuvem explícitas, marcos de plantio/aplicações; comparar duas datas lado a lado (slider ou split).
+ - **Sub-detalhe: mancha**: recorte do raster centrado na mancha, área e evolução por data, tipo provável, fotos/laudo da vistoria, status (detectada → vistoriada → causa identificada → resolvida/ignorada). Uma ação primária por status.
+ - Toque/hover em qualquer pixel mostra valor do índice, classe e coordenada. Exportar: PNG do mapa com legenda, GeoTIFF/Shapefile das manchas para o monitor.
+@@ -70,7 +77,7 @@
+ - **Dados**: `cena` (sensor, data, nuvem %, versão do processamento), `indice_talhao_cena` (estatísticas, % por classe, referência do COG), `mancha` (geometria, área, classe, valor, centroide, status, vínculo à vistoria).
+ - **Frontend**: mapa (MapLibre/Leaflet) + camada raster colorizada **no cliente** por função pura `corDoIndice(valor, escala)` — permite trocar contraste sem nova requisição; rótulos dos talhões em camada própria sempre acima do raster; renderização sem suavização.
+ - **Testes** (`dev-testes`): classificação por faixa (limites inclusivos), stretch por percentil, detecção de manchas em raster sintético (mancha de 3 px conta, 2 px não; borda excluída), regra de estado, cores/hex iguais em mapa e legenda.
+-- **Performance**: raster do talhão ≤ 1 MB (COG com overview, ou PNG paletizado), fazenda inteira via tiles; primeira pintura < 1 s em 4G.
++- **Performance**: usar COG/overviews, tiles ou formato adequado ao recorte; medir transferência, primeira pintura e interação no dispositivo/rede-alvo contra as metas do projeto. Não reduzir qualidade analítica para atingir um número arbitrário.
+ 
+ ## 6. Checklist de entrega
+ - [ ] Mapa da fazenda com número grande em cada talhão e manchas vermelhas/laranjas visíveis de longe.
+--- before/shared/master-detail-ux/SKILL.md
++++ candidate/shared/master-detail-ux/SKILL.md
+@@ -5,14 +5,21 @@
+ 
+ # Master-detail: localizar, entender e agir
+ 
++## Origem, destino e contexto ativo
++
++Cada tela esclarece origem/contexto, estado atual, ação possível, consequência/destino e recuperação. Modal ou subdetalhe ativo concentra a primária; a tela de fundo não compete. Preserve rascunho, filtros, foco e posição ao abrir/fechar ou voltar. Drill-down temporário pode substituir o recorte visível sem sobrescrever preferências persistidas.
++
++Classificar funções da pessoa não cria novos menus. Reutilize a navegação acordada; corte submenus, telas intermediárias e ações equivalentes. Painéis, mapas e alternâncias de visualização não exigem entidades ou níveis artificiais. Preserve visão global necessária e acesso ao detalhe; estado de negócio não é inferido apenas de cor, percentual ou existência de dados.
++
++
+ **Menu → Listagem → Detalhe → Sub-detalhe.** Toda entidade de gestão tem listagem e detalhe. A estrutura organiza o trabalho; não exige adicionar componentes sem função.
+ 
+ ## Princípios
+ 
+ 1. **Estado visível:** mostrar a situação com vocabulário consistente e texto, sem depender só de cor. Barra de etapas e percentual apenas quando representam progresso real e ajudam a decidir.
+ 2. **Próximo passo com verbo:** indicar a ação adequada ao estado e à permissão. Deixar claro onde está no processo, o que falta e como avançar. Se estiver impedida, mostrar a causa e quem pode resolver, sem oferecer execução inválida. Avançar conserva o contexto e não dispara sozinho a operação da etapa seguinte.
+-3. **Uma ação primária por tela:** posição consistente e acessível. Secundárias junto do conteúdo a que pertencem; destrutivas separadas. Manter a primária alcançável em tela longa; repetir em rodapé apenas se a distância justificar, sem cobrir dados, campo ativo, teclado virtual ou controles. Conferir toque, teclado e posição após erros.
+-4. **Contexto preservado:** título, vínculo ao pai e retorno claro; voltar conserva filtros, posição e estado útil. Detalhe pode ser página ou painel acessível, com referência estável.
++3. **Uma ação primária por contexto ativo:** posição consistente e acessível. Secundárias junto do conteúdo a que pertencem; destrutivas separadas. Manter a primária alcançável em tela longa; repetir em rodapé apenas se a distância justificar, sem cobrir dados, campo ativo, teclado virtual ou controles. Conferir toque, teclado e posição após erros.
++4. **Contexto preservado:** título, vínculo ao pai e retorno claro; voltar conserva filtros, posição e estado útil. Detalhe pode ser página, painel ou expansão acessível com referência estável; no celular, não exige empilhar rotas quando o detalhe pode permanecer no contexto.
+ 5. **Vocabulário e cores consistentes:** usar os mesmos nomes e tokens do design system para o mesmo significado; classificação não se confunde com estado.
+ 
+ ## Por nível
+--- before/shared/master-detail-ux/references/checklist.md
++++ candidate/shared/master-detail-ux/references/checklist.md
+@@ -4,7 +4,7 @@
+ - [ ] Cada entidade de gestão tem listagem e detalhe acessíveis.
+ - [ ] Estado visível e vocabulário/cores consistentes, sem depender só de cor.
+ - [ ] Próximo passo nomeado com verbo; impedimento e permissão respeitados.
+-- [ ] Uma ação primária por tela; secundárias e destrutivas não competem.
++- [ ] Uma ação primária por contexto ativo; secundárias e destrutivas não competem.
+ - [ ] Retorno e vínculo ao pai claros; contexto preservado ao navegar.
+ - [ ] Seções e sub-detalhes pertencem à entidade; cada componente tem função real.
+ - [ ] Etapas, percentuais e indicadores só aparecem quando têm significado verificável.
+--- before/shared/minimalismo-essencial/SKILL.md
++++ candidate/shared/minimalismo-essencial/SKILL.md
+@@ -4,6 +4,13 @@
+ ---
+ 
+ # Só o que ajuda a tarefa
++
++## Simplificação que preserva o trabalho
++
++Cadastros devem reutilizar contexto confiável, seleção rápida e autocomplete acessível dentro das permissões. Campos da mesma tarefa ficam juntos, com validação local e confirmação clara. Não repartir preenchimento entre cards, submenus ou wizards sem etapa real. Resumo, card, tooltip e rodapé só permanecem quando ajudam uma decisão ou recuperação que ainda não está atendida.
++
++No código e nos documentos, referencie contratos e design system vigentes em vez de copiá-los. Remova instruções obsoletas que contradizem a regra nova; não acumule adendos incompatíveis. Encerrar uma correção não exige nova infraestrutura, pesquisa completa ou auditoria integral sem motivo material.
++
+ 
+ Cada elemento deve ajudar o usuário a agir, entender, decidir ou recuperar-se de erro, ou ser necessário ao funcionamento e aos controles do processo. Menos elementos não prova melhor usabilidade: medir conclusão, tempo, erro e esforço.
+ 
+@@ -19,7 +26,7 @@
+ 
+ ## Direção visual
+ 
+-- Uma ação primária; secundárias úteis junto de seu contexto, sem competição.
++- Uma ação primária por contexto ativo; secundárias úteis junto de seu contexto, sem competição.
+ - Título curto e linguagem do usuário; ajuda curta quando evita erro ou dúvida real. Não impor zero explicações a pessoas que precisam de orientação.
+ - Campos necessários ao processo, com rótulo visível e unidade acessível. Não esconder campo obrigatório só para cumprir uma quota.
+ - Colunas para localizar, comparar e decidir; dados complementares no detalhe. Indicadores apenas quando sustentam uma decisão.
+@@ -28,7 +35,7 @@
+ 
+ ## Metas de concisão e exceções
+ 
+-Uma ação primária é regra. Como metas iniciais, buscar até duas secundárias visíveis, título de até quatro palavras, criação com até cinco campos, listagem com até seis colunas e painel com até quatro indicadores. São sinais para revisar, não limites que autorizam esconder informação necessária ou quebrar uma tarefa em etapas. Exceder quando o processo, a persona, a acessibilidade ou o design system justificar; explicar brevemente na revisão existente.
++Uma ação primária por contexto ativo é regra. Quantidade de campos, colunas, indicadores e secundárias depende da decisão e da tarefa; não imponha quotas que escondam dados ou fabriquem etapas. Corte redundância antes de deslocar informação necessária para outro lugar. Preserve unidades, aprovações, visão global, origem e recuperação.
+ 
+ Microcopy: verbo + objeto nos botões; erro = o que houve + como corrigir, preferindo até duas frases; vazio = uma frase e uma ação; unidade junto do campo. Evitar exclamações, emojis, jargão e palavras de cortesia repetidas nos controles. Não abreviar a ponto de perder sentido.
+ 
+@@ -48,6 +55,6 @@
+ 
+ ## Procedimento final
+ 
+-Inventarie o que importa ao fluxo, classifique e execute os cortes com justificativa. Tente cortar mais um elemento; mantenha-o se passar no teste de essencialidade. Só reintroduza ruído removido com evidência de necessidade. Verifique que a tarefa continua completa, acessível e segura; reverifique o comportamento afetado. Entregue três listas curtas: **aplicado**, **deixado de fora**, **cortado**, com motivo.
++Inventarie o que importa ao fluxo, classifique e execute os cortes com justificativa. Reveja somente elementos cuja utilidade esteja em dúvida; não faça cortes por ritual. Só reintroduza ruído removido com evidência de necessidade. Verifique que a tarefa continua completa, acessível e segura; reverifique o comportamento afetado. Entregue três listas curtas: **aplicado**, **deixado de fora**, **cortado**, com motivo.
+ 
+ Não cortar por estética: aprovações exigidas, isolamento/permissões, unidades, incerteza relevante, distinção entre rascunho/pendente/aceito, contexto de ambiente, avisos necessários ou caminhos de recuperação.
+--- before/shared/negocios-ecossistema/SKILL.md
++++ candidate/shared/negocios-ecossistema/SKILL.md
+@@ -4,6 +4,13 @@
+ ---
+ 
+ # Negócios que remuneram valor
++
++## Oferta validada e receita distinta de volume
++
++Separe completude técnica, funcional, homologação e prontidão comercial. Fatia de estoque concluída não significa fase comercial inteira concluída. Oferta e promessa ao cliente dependem do inventário de requisitos e provas, sem prazo garantido ou ganho fabricado por consenso de modelos.
++
++Política futura de investimento não autoriza antecipar gasto. Use a fonte aprovada para base, período, percentuais, limites e condições de ativação; não substitua receita por GMV, crédito ou saldo de terceiros. Preserve adiamentos e rascunhos comerciais enquanto o produto é validado. Revalidar uma hipótese financeira não altera por si só contrato, campanha ou acesso de conta.
++
+ 
+ No Safrion, adote a missão do proprietário: **Juntos pelo sucesso total do agro brasileiro.** Transforme-a em benefícios verificáveis para produtor, equipe de campo, consultoria, fornecedor, comprador, financiador e plataforma. Não prometa satisfação universal, domínio de mercado ou lucro garantido.
+ 
+--- before/shared/safrion-equipe/SKILL.md
++++ candidate/shared/safrion-equipe/SKILL.md
+@@ -1,59 +1,48 @@
+ ---
+ name: safrion-equipe
+-description: Coordene entregas do Safrion (Do Talhão à O.S.) entre Codex e Claude Code, desde feedback do agricultor até revisão, testes e homologação. Use ao dividir trabalho, retomar pendências ou avaliar se uma fatia está pronta neste projeto. Não se aplica a projetos sem essa parceria.
++description: Coordene entregas do Safrion (Do Talhão à O.S.) com implementação e revisão cruzada de Codex e Claude e crítica delimitada do Gemini real, desde feedback do agricultor até revisão, testes e homologação. Use ao dividir trabalho, retomar pendências ou avaliar se uma fatia está pronta neste projeto. Não se aplica a projetos sem essa parceria.
+ metadata:
+-  version: "1.0.0"
++  version: "2.0.0"
+ ---
+ 
+ # Equipe Safrion (Do Talhão à O.S.)
+ 
+-Use os skills existentes para executar a tarefa; este skill organiza a passagem entre os dois agentes. Não muda permissões nem substitui o PRD.
++Codex dirige produto/UX/QA; Codex e Claude implementam partes delimitadas e revisam reciprocamente. O revisor integra o PR do outro; ninguém aprova ou integra o próprio PR. Gemini real participa de decisões, deltas materiais e contraexemplos, inclusive fluxo, acessibilidade e domínio. Não simule modelos. Grok saiu da equipe; preserve seu histórico sem acioná-lo.
+ 
+-## Começar pelo estado real
++## Retomar pelo registro vigente
+ 
+-Localize a raiz do projeto pelo contexto e leia apenas o necessário: `AGENTS.md`, `docs/STATUS.md`, requisitos citados de `docs/PRD.md` e a rodada atual em `docs/parceria/rodadas/`. `CLAUDE.md` pode apontar para `AGENTS.md`; mantenha uma fonte de regras. Se o repositório não estiver identificado, confirme-o antes de editar; não crie outro.
++Leia `AGENTS.md`, o cabeçalho do checkpoint da issue #1 de `adrptu/Safrion-Software-` e os deltas depois do último recibo de cada IA. Use `outputs/revisao-f0a.md`, `work/fontes-claude/`, PRs e o [protocolo canônico](https://github.com/adrptu/Safrion-Software-/blob/main/docs/parceria/protocolo.md). Requisitos vêm do PRD e decisões NAV/DS da fonte vigente, sem copiar suas regras aqui. Se uma fonte não estiver acessível, declare o limite e preserve o trabalho independente possível.
+ 
+-Identifique a fatia ativa, base (commit ou hashes), mudanças em curso e responsável pelos arquivos. Reaproveite a solução existente. Não implemente nos mesmos arquivos do outro agente sem combinar a integração.
++Priorize risco crítico, correção ou revisão devolvida pronta, dependência imediata e próximo item apto. Confira pedidos enviados, recebidos, em execução e devolvidos: ACK não é entrega, ausência de ACK não prova ociosidade. Só Codex edita o checkpoint; releia antes de editar, preserve histórico e não crie outra fila ou automação.
+ 
+-## Carregar somente o que a tarefa exige
++## Autoria e passagem imediata
+ 
+-Leia os skills abaixo pelo catálogo do ambiente. No uso local, confira os diretórios de skills do Codex ou do Claude; não pressuponha que a instalação local está disponível em sessões na nuvem. Se faltar uma dependência necessária, declare a ausência e preserve o trabalho possível.
++Registre na mesma tarefa: IDs, resultado/persona, base/arquivos/trechos, autor, revisor/integrador e aceite. Uma autoria ativa por agente; paralelismo somente com contratos e arquivos/trechos separados. Preserve trabalho e rascunhos da sessão existente do Claude. Enquanto o outro revisa, avance na implementação delimitada já combinada, sem invadir sua autoria.
+ 
+-| Trabalho da fatia | Skills pertinentes |
+-|---|---|
+-| Construir ou evoluir produto | `dev-ciclo-completo`; `agro-gestao-conhecimento` para regras agro |
+-| Definir módulo ou comparar práticas | `benchmark-top5`; reutilizar pesquisa atual pertinente |
+-| Criar ou revisar interface | `ux-essencial`, `master-detail-ux`, `minimalismo-essencial`; `tabelas-interativas` quando houver tabela |
+-| Implementar interface ou app | `dev-frontend-mobile` |
+-| API, dados ou integrações | `dev-backend` |
+-| Testar ou revisar código | `dev-testes`, `dev-revisao` |
+-| Ambientes, entrega ou incidentes | `dev-infra` |
+-| Indicadores de satélite ou drone | `indicadores-satelite` |
++Passe entrega pronta ao próximo responsável imediatamente durante trabalho ativo. A agenda retoma a sessão; não é intervalo obrigatório entre agentes nem garantia de execução remota. Antes de encerrar por dependência externa, confira correção própria, entrega do outro e implementação apta. Se não houver, deixe pedido concreto de próxima divisão e gatilho exato de retomada. Não invente conclusão nem prazo garantido.
+ 
+-Não carregue todos por rotina nem instale dependências ou ferramentas só porque aparecem como exemplos. Decisões, contratos e regras de negócio ficam nos documentos do projeto, não neste skill.
++Envio incerto exige readback antes de reenviar. Duas falhas pela mesma causa pedem abordagem diferente ou bloqueio documentado. Respeite interface bloqueada, cotas, permissões e controles; não contorne nem faça consultas pagas repetitivas. Falha de transporte, bloqueio de ferramenta e falta de retorno são estados diferentes.
+ 
+-## Entregar e revisar sem retrabalho
++## Revisar a mesma candidata
+ 
+-Registre na rodada existente, de forma curta: **resultado/persona e IDs do PRD; autor/revisor/integrador; base/arquivos; aceite/teste; estado/próximo passo**. Uma fatia útil por vez. Paralelismo só quando necessário e autorizado, com arquivos e saídas delimitados.
++Confira base, autor e arquivos; leia fontes recuperáveis/diff e saídas pertinentes; reproduza o comportamento alterado. Hash sem fontes, teste proposto e relato do autor não comprovam execução independente. Use perfis, dados e portas isolados e preserve provas válidas. Consolide um retorno por candidata: cenário, versão, evidência, impacto, severidade S1–S4 conforme PRD 22.1, prioridade separada e aceite observável.
+ 
+-- O autor faz a menor mudança coerente, verifica o comportamento e entrega caminho/diff, versão, comandos, resultados e limites.
+-- O outro agente procura contraexemplos na versão entregue. Distingue defeito demonstrado, risco a investigar e preferência; cada achado tem cenário, impacto e aceite observável.
+-- O integrador confere a base antes de aplicar. Depois da integração, execute a regressão afetada; não repita toda a bateria sem uma mudança ou dúvida que justifique.
+-- Revisão do Claude significa revisão pelo Claude real, e vice-versa. Confirme envio e retorno por evidência. Sem acesso, deixe pedido preparado e revisão pendente; não simule concordância.
+-- Encerre quando o aceite do escopo e a revisão estiverem resolvidos. Melhorias opcionais vão para a fila, sem abrir ciclos infinitos de polimento.
++Solicite ao Claude real crítica das entregas substantivas do Codex e revise as do Claude. Gemini real Pro/HIGH usa o adaptador oficial Vertex verificado, com pacote mínimo inspecionado, sem segredos/dados reais; cada consulta resolve decisão ou contraexemplo material. Referências não enviadas permanecem indisponíveis; não consulte por ritual. Divergência se resolve por fonte/reprodução, não votação. Após correção, reteste o afetado; integre o PR do outro quando checks e pareceres pertinentes estiverem resolvidos.
+ 
+-## Verificação que não produz aprovação falsa
++## Produto, publicação e transição
+ 
+-Uma saída zero com ajuda, nenhum teste executado, asserção mascarada ou resumo contraditório não comprova sucesso. Separe falha do produto, teste obsoleto, precondição ausente, artefato antigo, problema da ferramenta e bloqueio externo antes de corrigir.
++Conclua todo o conjunto vigente do protótipo, usando IDs/estados atuais. Publique incrementos operáveis no protótipo existente após os aceites pertinentes, com versão, URL e mudança concreta. Publicação parcial, ACK, camada sintética e tarefa técnica encerrada não concluem o conjunto nem disparam auditoria integral.
+ 
+-Em jornadas com estado, registre a ordem e as precondições; ordem alfabética não é uma sequência funcional. Não reutilize perfil de navegador, porta ou dados de teste que outro agente esteja alterando sem coordenação. Preserve evidências válidas ao retomar; dois fracassos pela mesma causa exigem outra hipótese ou uma tarefa menor.
++Somente com todas as melhorias concluídas e candidata completa/operável identificada por versão, URL, fontes, diff e provas, realize auditoria integral de Codex, Claude e Gemini reais na mesma candidata, com inventário comum e análise dos brutos. Ferramenta indisponível permanece bloqueada. Corrija divergências reproduzidas e reteste só o afetado.
+ 
+-## Feedback e homologação desde cedo
++Depois da conclusão e validação, transfira à aplicação Next existente por fatias tela → domínio → banco, comprovando fidelidade e HML. Registre no mesmo ID: protótipo → implementado no real → testado → HML. Preserve trabalhos reais anteriores; não inicie nova evolução paralela do protótipo. F1 técnico não equivale à Fase 1 comercial; o escopo é o do PRD/registro vigente.
+ 
+-Transforme a explicação do agricultor em tarefa curta: **o que tentou, o que aconteceu, o esperado e a evidência disponível**. Registre o que foi efetivamente visto/ouvido; não invente conteúdo inacessível de áudio ou vídeo. Aproveite o relato original e peça complemento só quando mudar a correção. Preserve o requisito de print e comentário do fluxo de feedback do produto.
++O confronto do PRD após as implantações só começa quando todas as implantações vigentes estiverem concluídas com evidências. Corrija divergências, lacunas, ambiguidades e redundâncias necessárias sem ampliar escopo, perder IDs/histórico/pendências ou legitimar defeito por estar implementado. Referencie o design system. Se não houver mudança, registre conferência e mantenha versão; se houver, combine autoria e solicite revisão real, com integração pelo revisor. Gemini participa quando o domínio/fluxo mudar materialmente.
+ 
+-Priorize acesso à primeira fatia funcional verificada. Diferencie protótipo, homologação e produção pelo que realmente está disponível. Para teste humano, entregue versão, acesso testado, dados de demonstração e roteiro curto baseado nos aceites; indique limitações materiais. Use os critérios de liberação e o aceite explícito do proprietário definidos no projeto. Não confunda aprovação do plano com aprovação de produção.
++## Autorizações e fontes
+ 
+-## Melhorar com evidência
++Reutilize autorizações concretas de desenvolvimento/QA/HML, sem pedir novamente. Orçamento/alerta não limita cobrança; produção exige aceite explícito de Adrianus sobre a candidata e pareceres pertinentes. Não altere proteções nem realize efeitos reais de produção sem autorização. Executor local continua local até prova remota; aplicativo/computador indisponível impede retomada.
+ 
+-Corrija o método quando uma falha real revelar lacuna; prefira corrigir a ferramenta ou o teste responsável a acrescentar regras genéricas. Revise alterações deste skill com o outro agente. Meça pelos registros existentes esforço do agricultor, defeitos escapados e retrabalho; número de skills, agentes ou testes não mede sucesso.
++Marketing/SITE, contas e mídia seguem adiamentos e gatilhos comerciais registrados; preserve rascunhos. Nenhum CI verde libera campanhas. Não copie valores mutáveis de orçamento, IDs de PRs atuais ou estado do backlog para esta skill.
++
++Carregue só skills pertinentes: `dev-ciclo-completo`, `dev-revisao`, `dev-testes`; por camada `dev-frontend-mobile`, `dev-backend`, `dev-infra`; por UX `master-detail-ux`, `ux-essencial`, `minimalismo-essencial`, `tabelas-interativas`; por domínio `agro-gestao-conhecimento`, `indicadores-satelite`; `benchmark-top5` reutiliza pesquisa vigente; negócio/growth somente no escopo autorizado. Instalação local não comprova disponibilidade em sessão na nuvem; confira leitura/recibo, não apenas catálogo.
+--- before/shared/safrion-equipe/agents/openai.yaml
++++ candidate/shared/safrion-equipe/agents/openai.yaml
+@@ -1,4 +1,4 @@
+ interface:
+   display_name: "Equipe Safrion"
+   short_description: "Cooperação, revisão e homologação do Safrion"
+-  default_prompt: "Use $safrion-equipe para conduzir a próxima entrega do Safrion com revisão entre Codex e Claude e evidências de validação."
++  default_prompt: "Use $safrion-equipe para conduzir a próxima entrega do Safrion com implementação e revisão cruzada de Codex e Claude, crítica pertinente do Gemini real e evidências de validação."
+--- before/shared/tabelas-interativas/SKILL.md
++++ candidate/shared/tabelas-interativas/SKILL.md
+@@ -5,7 +5,16 @@
+ 
+ # Tabelas interativas
+ 
+-Toda tabela de dados entregue tem **quatro recursos obrigatórios**. Não são opcionais e não dependem do usuário pedir.
++## Universo, agregação e continuidade
++
++Filtro, grupo, total, contador e drill-down precisam se referir ao mesmo universo autorizado. Declare se o valor representa página, recorte ou total global. Mantenha valores tipados separados da apresentação; ausentes permanecem distintos de zero e sua posição na ordenação deve ser explícita e consistente nos dois sentidos.
++
++Agregação é regra de domínio, não consequência do formato da coluna: moeda pode representar preço unitário, percentual pode exigir razão ponderada. Some apenas grandezas aditivas compatíveis; taxas e custos/ha não se somam. Faça o resumo pela fonte canônica e exponha parcialidade quando faltar dado. Exemplos de assets não definem regra de negócio. O asset legado infere agregação pelo tipo; ao usá-lo, defina `agg` explicitamente em toda coluna, inclusive `null` quando não houver resumo validado.
++
++Ao detalhar e voltar, preserve busca, filtros, ordem, grupos abertos, página/posição e foco. Recorte recebido de painel/mapa tem contexto explícito e recuperação, sem ser silenciosamente limitado por busca antiga ou sobrescrever preferências persistidas. Alternâncias tabela/raias/calendário conservam entidade, permissão e semântica de contagem.
++
++
++Listagens interativas de gestão seguem os **quatro recursos** abaixo. Adapte a semântica e os controles ao formato e ao conjunto; uma tabela curta de comparação em texto não exige construir uma aplicação.
+ 
+ ## 1. Ordenação no cabeçalho
+ - Clicar no título da coluna ordena: crescente → decrescente → sem ordenação.
+@@ -50,7 +59,7 @@
+ ### HTML, artifact, relatório web (padrão)
+ O componente [assets/tabela.js](assets/tabela.js) e [assets/exemplo.html](assets/exemplo.html) são referências a inspecionar e testar; não presumir conformidade, segurança ou agregação correta. Prefira o componente existente do projeto quando ele atende ao contrato. Para grandes bases, filtro/ordenação/agrupamento devem operar no conjunto autorizado no servidor, sem fingir totais globais sobre uma página local.
+ 
+-1. Leia `assets/tabela.js` e **cole o conteúdo inteiro em um `<script>` inline** (artifacts bloqueiam scripts de hosts não permitidos; em projetos com build, copie o arquivo para o repositório).
++1. Somente se o asset for a solução escolhida, inspecione `assets/tabela.js` e integre conforme build/CSP do projeto; não copie o componente inteiro para substituir um componente existente adequado.
+ 2. Crie a tabela:
+ 
+ ```html
+@@ -63,8 +72,8 @@
+       { key: 'pedido', label: 'Pedido', type: 'text' },
+       { key: 'data', label: 'Data', type: 'date' },          // 'AAAA-MM-DD', dd/mm/aaaa ou Date
+       { key: 'regiao', label: 'Região' },
+-      { key: 'valor', label: 'Valor', type: 'currency' },   // agg padrão: sum
+-      { key: 'margem', label: 'Margem', type: 'percent' },  // 0.23 → 23,0%; agg padrão: avg
++      { key: 'valor', label: 'Valor total', type: 'currency', agg: 'sum' }, // valores aditivos do exemplo
++      { key: 'margem', label: 'Margem', type: 'percent', agg: null }, // resumo exige razão de totais do domínio
+       { key: 'obs', label: 'Observação', hidden: true },     // só no painel de detalhe
+     ],
+     groupBy: ['regiao'],        // agrupamento inicial opcional; datas: 'data:ano' | 'data:mes' | 'data:dia'
+@@ -121,4 +130,4 @@
+ - [ ] Drill-down: expandir grupo, "Detalhar" com trilha e Voltar, painel de detalhe da linha com "Filtrar por este"
+ - [ ] Contador "X de Y linhas", filtros ativos destacados, estado vazio com "Limpar filtros"
+ - [ ] Tipos corretos (códigos como texto, moeda BRL, percentuais, datas pt-BR)
+-- [ ] Funciona com teclado e nos temas claro e escuro
++- [ ] Funciona com teclado e nos temas adotados pelo projeto
+--- before/shared/ux-essencial/SKILL.md
++++ candidate/shared/ux-essencial/SKILL.md
+@@ -5,11 +5,23 @@
+ 
+ # UX Essencial — o sistema como braço direito
+ 
++## Fluxo contínuo com consequência clara
++
++Na entrada de cada contexto, torne reconhecíveis origem, estado, o que fazer, destino/consequência e recuperação, usando a informação mínima necessária. Nomeie comandos pelo objetivo da pessoa; detalhes internos de implementação não pertencem ao fluxo. Preserve valores, filtros e foco quando o contexto mudar; avançar não executa automaticamente a operação seguinte.
++
++Use o design system vigente também para densidade, tipografia, cores de estado e alvos de toque. No Safrion, consulte as decisões NAV/DS na fonte do projeto; não duplique suas regras no PRD ou crie menus pela classificação das funções do usuário. Ajuda aparece onde previne erro, sem repetir título e estado em vários cards.
++
++Recuperação precisa ser verdadeira: desfazer não apaga edições posteriores; vazio mantém a ação de recuperar quando aplicável; falha conserva rascunho e indica o próximo passo. Verifique teclado, foco, celular e teclado virtual no fluxo alterado; redução de cliques não comprova ganho sem tarefa concluída e erros observados.
++
++
+ **Norte:** o usuário chega, faz o que veio fazer no menor tempo possível, sem pensar, sem medo de errar, e sai com a sensação de que o sistema trabalhou por ele.
+ 
+ Teste de cada tela: **"Qual é a única coisa que a pessoa veio fazer aqui? Ela consegue fazer isso agora, com o mínimo de passos?"** Se não, redesenhe antes de codar.
+ 
+ ---
++
++Toda ação relevante, inclusive salvar e cancelar, tem retorno inequívoco no contexto: processamento, salvo/pendente ou erro e próximo passo. Cancelar informa se preservou rascunho ou descartou alterações; navegar para fora não significa salvar. Reutilize a camada de feedback do design system, sem toast duplicado nem confirmação modal em toda ação; confirmação adicional depende de risco real. Nunca mostrar sucesso antes do recibo.
++
+ 
+ ## 1. Processo — pensar antes de desenhar
+ 1. **Tarefa principal** de cada tela em uma frase ("Registrar pedido de um cliente conhecido").
+@@ -20,7 +32,7 @@
+ 
+ ## 2. Leis da fricção zero
+ **Menos passos**
+-- **Uma ação primária por tela**, óbvia (botão preenchido ou FAB). Secundárias discretas (tonal/texto). Nunca duas primárias.
++- **Uma ação primária por contexto ativo**, óbvia (botão preenchido ou FAB). Secundárias discretas (tonal/texto). Ao abrir modal/subdetalhe, a primária do contexto ativo não compete com a tela de fundo.
+ - A tarefa mais frequente fica **na primeira tela, sem navegar**. Nada de "home" decorativa: a home é o trabalho (lista, caixa de entrada, próximo passo).
+ - **Padrões inteligentes**: lembrar escolhas no contexto correto de pessoa, empresa, fazenda e safra; mostrar o valor e permitir revisão. Data atual e usuário logado não são necessariamente data da operação e executor.
+ - **Autocompletar com fonte**: cadastro autorizado → entidade/unidade/preço vigente; quantidade × preço → total calculado. Não inferir nome/identidade pelo e-mail. Seleções mostram dados suficientes para distinguir homônimos.
+@@ -48,8 +60,8 @@
+ - Busca contextual acessível; busca global e paleta Ctrl/⌘+K quando reduzem esforço real. Atalhos complementam controles visíveis.
+ - **Atalhos de teclado** para as ações frequentes (N = novo, / = buscar, E = editar, Esc = fechar), exibidos nos tooltips e na paleta.
+ - **URL reflete o estado** (filtros, aba, item aberto): dá para compartilhar, recarregar e voltar sem perder nada.
+-- Navegação: **3 a 5 destinos principais**, profundidade máxima de 3 níveis, caminho sempre visível.
+-- **Organização das telas** segue a skill **`master-detail-ux`** (Menu → Listagem → Detalhe → Sub-detalhe; estado visível, próximo passo nomeado, uma ação primária por tela).
++- Navegação: destinos e níveis nascem das entidades e tarefas segundo `master-detail-ux`; preserve caminho visível, sem quotas que criem agrupamentos artificiais.
++- **Organização das telas** segue a skill **`master-detail-ux`** (Menu → Listagem → Detalhe → Sub-detalhe; estado visível, próximo passo nomeado, uma ação primária por contexto ativo).
+ - **Tabelas** seguem a skill **`tabelas-interativas`** (filtro e ordenação no cabeçalho, agrupamento, drill-down).
+ 
+ **Notificações e mensagens**
+@@ -87,7 +99,7 @@
+ 
+ Exemplos: **[assets/m3.css](assets/m3.css)**, **[assets/m3-kit.js](assets/m3-kit.js)** e **[assets/exemplo.html](assets/exemplo.html)**. Inspecione acessibilidade, segurança e compatibilidade antes de reutilizar; não são componentes certificados nem substituem o design system vigente. Respeite a política de recursos externos do ambiente.
+ 
+-- **Cor por papéis** (`primary`, `on-primary`, `secondary-container`, `surface-container-*`, `on-surface-variant`, `outline`, `error`) — nunca hex solto no componente. Paleta padrão GM3 azul; para a marca, gerar o esquema no Material Theme Builder e trocar só os tokens. **Uma cor de destaque**; o resto são superfícies neutras. Claro e escuro sempre.
++- **Cor por papéis** (`primary`, `on-primary`, `secondary-container`, `surface-container-*`, `on-surface-variant`, `outline`, `error`) — nunca hex solto no componente. Paleta padrão GM3 azul; para a marca, gerar o esquema no Material Theme Builder e trocar só os tokens. **Uma cor de destaque**; o resto são superfícies neutras. Verificar os temas adotados pelo projeto; não criar outro tema por rotina.
+ - **Tipografia**: escala M3 (Display, Headline, Title, Body, Label); Roboto Flex/Roboto; **sentence case** em títulos e botões ("Criar pedido", não "CRIAR PEDIDO" nem "Criar Pedido"). Máx. 2–3 tamanhos por tela.
+ - **Espaço**: grade de 4/8 px; respiro generoso separa grupos melhor que linhas e caixas.
+ - **Forma**: 4 (campos) · 8 (chips) · 12 (cards) · 16 (FAB) · 28 (diálogos) · pílula (botões).
+@@ -98,7 +110,7 @@
+ - **Layout adaptativo (classes de janela M3)**: compacto < 600 px → barra de navegação inferior; médio 600–839 → navigation rail; expandido ≥ 840 → rail/drawer + painéis lista-detalhe lado a lado. Densidade maior em desktop para dados.
+ 
+ ## 5. Minimalismo e essencialismo
+-A lei de corte completa (5 testes de essencialidade, orçamentos por tela, lista de proibidos, procedimento de corte e lista de cortes na entrega) está na skill **`minimalismo-essencial`** — aplicar sempre, ao fechar toda tela.
++A lei de corte completa (5 testes de essencialidade, concisão por tarefa, exclusões justificadas, procedimento de corte e lista de cortes na entrega) está na skill **`minimalismo-essencial`** — aplicar sempre, ao fechar toda tela.
+ - Para cada elemento: **"se eu remover, alguém sente falta?"** Se não, remove.
+ - Nada decorativo: sem ilustrações de enfeite, gradientes, sombras gratuitas, textos de boas-vindas, ícones sem função.
+ - **Hierarquia clara**: o olho cai primeiro na informação/ação principal; secundário em `on-surface-variant`.
+@@ -110,7 +122,7 @@
+ 
+ ## 7. Plataformas
+ Na ausência de design system do projeto, usar as referências abaixo, respeitando a stack e as convenções já adotadas.
+-- **Web (HTML/React/Vue/Next)**: `m3.css` + `m3-kit.js` ou tokens M3 mapeados no Tailwind/CSS do projeto. Evite `@material/web` (em modo de manutenção). MUI só se já existir no projeto, ajustando tema para M3.
++- **Web (HTML/React/Vue/Next)**: `m3.css` + `m3-kit.js` ou tokens M3 mapeados no Tailwind/CSS do projeto. Verifique manutenção, licença e adequação atuais antes de adotar uma biblioteca. MUI só se já existir no projeto, ajustando tema para M3.
+ - **Android**: Jetpack Compose Material 3. **Multiplataforma**: Flutter com `useMaterial3: true` e `ColorScheme.fromSeed`.
+ - **iOS**: manter os princípios deste guia, respeitando convenções nativas (navegação, gestos).
+ 
+--- before/test_gemini_consult.py
++++ candidate/test_gemini_consult.py
+@@ -65,6 +65,24 @@
+         auth.assert_not_called()
+         http.assert_not_called()
+         return err
++
++    def test_all_twenty_owned_skills_are_available_without_loading_them_together(self):
++        shared = {"agro-gestao-conhecimento", "benchmark-top5", "dev-backend",
++                  "dev-ciclo-completo", "dev-frontend-mobile", "dev-infra",
++                  "dev-revisao", "dev-testes", "growth-receita-implantacao",
++                  "indicadores-satelite", "master-detail-ux", "minimalismo-essencial",
++                  "negocios-ecossistema", "safrion-equipe", "tabelas-interativas", "ux-essencial"}
++        specific = {"gcp-infra-essencial", "gcp-custos", "gcp-desempenho-incidentes", "revisao-terceira-opiniao"}
++        self.assertEqual(set(consult.SKILL_CATALOG), shared | specific)
++        for name in sorted(shared | specific):
++            with self.subTest(skill=name):
++                code, out, err, auth, http = self.invoke(["--dry-run", "--skill", name])
++                self.assertEqual((code, err), (0, ""))
++                receipt = json.loads(out)
++                self.assertEqual({item["name"] for item in receipt["skills"]}, {name})
++                self.assertEqual(receipt["payload"]["generationConfig"]["thinkingConfig"]["thinkingLevel"], "HIGH")
++                auth.assert_not_called()
++                http.assert_not_called()
+ 
+     def test_remote_preserves_session_identity_and_runtime(self):
+         session = {"CLOUD_SHELL": "true", "PATH": "/google/bin", "CLOUDSDK_CONFIG": "/session/config", "CLOUDSDK_PYTHON": "/session/python"}

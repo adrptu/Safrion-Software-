@@ -1,0 +1,158 @@
+# .github/workflows/ci.yml — pipeline padrão (Node/TypeScript; adapte os comandos para Python/Go)
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+
+env:
+  NODE_VERSION: 22
+
+jobs:
+  quality:
+    name: Lint · tipos · unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: ${{ env.NODE_VERSION }}, cache: npm }
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint -- --max-warnings=0
+      - run: npm run typecheck
+      - run: npm run test:unit -- --coverage
+      - name: Cobertura no PR
+        if: github.event_name == 'pull_request'
+        uses: davelosert/vitest-coverage-report-action@v2
+      - run: npx knip            # código/dependências mortas
+      - run: npx jscpd src --threshold 3 --exitCode 1   # duplicação > 3 % falha
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: reports-unit, path: reports/, retention-days: 7 }
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: ${{ env.NODE_VERSION }}, cache: npm }
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with: { name: build, path: dist/, retention-days: 1 }
+
+  integration:
+    name: Integração (banco real)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: quality
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_USER: app, POSTGRES_PASSWORD: app, POSTGRES_DB: app_test }
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U app" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://app:app@localhost:5432/app_test
+      REDIS_URL: redis://localhost:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: ${{ env.NODE_VERSION }}, cache: npm }
+      - run: npm ci
+      - run: npm run db:migrate
+      - run: npm run test:integration
+
+  e2e:
+    name: E2E (shard ${{ matrix.shard }}/4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix: { shard: [1, 2, 3, 4] }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: ${{ env.NODE_VERSION }}, cache: npm }
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with: { name: build, path: dist/ }
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --shard=${{ matrix.shard }}/4
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: playwright-${{ matrix.shard }}, path: test-results/, retention-days: 7 }
+
+  security:
+    name: Segurança
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Segredos vazados
+        uses: gitleaks/gitleaks-action@v2
+      - name: Vulnerabilidades em dependências
+        uses: google/osv-scanner-action/osv-scanner-action@v1
+        with: { scan-args: --lockfile=package-lock.json }
+      - name: Análise estática (OWASP)
+        uses: semgrep/semgrep-action@v1
+        with: { config: p/owasp-top-ten }
+      - name: Imagem
+        run: docker build -t app:ci . && docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --exit-code 1 --severity HIGH,CRITICAL app:ci
+
+  lighthouse:
+    name: Web Vitals
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: ${{ env.NODE_VERSION }}, cache: npm }
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with: { name: build, path: dist/ }
+      - run: npx @lhci/cli autorun   # lighthouserc.json com asserções: LCP < 2500, INP < 200, CLS < 0.1, performance ≥ 90
+
+  deploy-staging:
+    name: Deploy staging
+    runs-on: ubuntu-latest
+    needs: [quality, build, integration, e2e, security]
+    if: github.ref == 'refs/heads/main'
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "docker build + push com tag ${{ github.sha }}; migrar; deploy (fly deploy / gcloud run deploy / kubectl set image)"
+      - run: echo "smoke: curl -f https://staging.exemplo.com/health"
+
+  deploy-prod:
+    name: Deploy produção
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main'
+    environment: production   # aprovação manual configurada no GitHub → Settings → Environments
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "promover a MESMA imagem ${{ github.sha }} para produção; migrar; deploy canário/rolling"
+      - run: echo "verificar: health, taxa de erro e p95 por 10 min; rollback automático se degradar"

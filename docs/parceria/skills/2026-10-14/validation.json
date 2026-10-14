@@ -1,0 +1,111 @@
+{
+  "skills": [
+    {
+      "skill": "agro-gestao-conhecimento",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "benchmark-top5",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "dev-backend",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "dev-ciclo-completo",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "dev-frontend-mobile",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "dev-infra",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "dev-revisao",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "dev-testes",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "growth-receita-implantacao",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "indicadores-satelite",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "master-detail-ux",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "minimalismo-essencial",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "negocios-ecossistema",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "safrion-equipe",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "tabelas-interativas",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "ux-essencial",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "gcp-custos",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "gcp-desempenho-incidentes",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "gcp-infra-essencial",
+      "valid": true,
+      "result": "Skill is valid!"
+    },
+    {
+      "skill": "revisao-terceira-opiniao",
+      "valid": true,
+      "result": "Skill is valid!"
+    }
+  ],
+  "missingLinks": [],
+  "adapterTests": {
+    "run": 17,
+    "failures": 0,
+    "errors": 0
+  },
+  "manifestSha256": "7e255bae2591c8b2d85eaef57787c655628a2cdffc96ac0e7673c888f5b19724"
+}
