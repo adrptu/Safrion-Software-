@@ -229,7 +229,7 @@ function g2persiste(self,id,g2_0,volta,pre){ if(!self.g2persist) return true; co
   self.setState({g2:all,g2toast:pre+': '+er}); return false; }
 function g2dirty(fm){ if(!fm) return false; for(const k in fm.draft){ if(String(fm.draft[k])!==String(fm.orig[k])) return true; } return false; }
 function g2close(self,sp){ const fm=g2st(self,sp.id).fm; if(fm && !fm.ro && g2dirty(fm)) { g2set(self,sp.id,{fm:Object.assign({},fm,{warn:true})}); return; } g2set(self,sp.id,{fm:null});
-  if(fm && !fm.ro) self.setState({g2toast:'Cancelado · nada foi alterado'}); }   /* 14/10: cancelar também confirma (salvar já confirmava) */
+  if(fm && !fm.ro) self.setState({g2toast:'Edição cancelada'}); }   /* 14/10: cancelar também confirma (salvar já confirmava); sem afirmar o que outra ação já gravou (Codex) */
 // VISOES-2 §3.6 · colunas só o essencial. c.ess = posição no padrão ("Abre com"); c.pq = pergunta (oque, quem, quando, onde, medida,
 // situacao) que agrupa o painel de colunas. Grade sem nenhum ess mostra todas, como antes. A escolha é por perfil × tela × grade (no
 // protótipo, perfil = usuário) e guarda o conjunto, não a ordem: a ordem é sempre a do desenho (identidade, padrão pelo ess, depois as
@@ -481,7 +481,7 @@ function g2vals(self,sp,v,mask){
         set:(e)=>{ const cur=g2st(self,id).fm; if(!cur) return; let d=Object.assign({},cur.draft,{[f.k]:e.target.value}); if(self.g2draft){ const d2=self.g2draft(id,f.k,d,cur); if(d2) d=d2; } const er=Object.assign({},cur.errs||{}); delete er[f.k]; g2set(self,id,{fm:Object.assign({},cur,{draft:d,errs:er,warn:false})}); }}; });
     F.nerr=Object.keys(fm.errs||{}).length; F.hasErr=F.nerr>0; F.errG=fm.errG||''; F.errP=fm.errP||'Não salvo'; F.hasErrG=!!fm.errG;
     F.save=()=>g2save(self,sp); F.cancel=()=>g2close(self,sp); F.close=()=>g2close(self,sp);
-    F.discard=()=>{ g2set(self,id,{fm:null}); self.setState({g2toast:'Alterações descartadas · nada foi salvo'}); }; F.keep=()=>{ const cur=g2st(self,id).fm; g2set(self,id,{fm:Object.assign({},cur,{warn:false})}); };
+    F.discard=()=>{ g2set(self,id,{fm:null}); self.setState({g2toast:'Alterações descartadas'}); }; F.keep=()=>{ const cur=g2st(self,id).fm; g2set(self,id,{fm:Object.assign({},cur,{warn:false})}); };
     F.key=(e)=>{ if(e && e.key==='Escape'){ e.preventDefault(); g2close(self,sp); } };
   }
   v[id+'_F']=F; }
@@ -803,7 +803,7 @@ function g2blocoAtual(){ const m=document.querySelector('main'); if(!m) return n
   if(h) return h.closest('section')||h.parentElement; return [...m.children].find(g2vis)||m; }
 // contexto do conteúdo: o 1º título visível do main (o mesmo bloco que g2blocoAtual realça); '' sem título
 function g2contexto(){ if(typeof document==='undefined') return ''; const m=document.querySelector('main'); if(!m) return '';
-  const h=[...m.querySelectorAll('h2,h3')].find(g2vis); return h?g2txt(h).slice(0,80):''; }
+  const h=[...m.querySelectorAll('h2,h3')].find(x=>g2vis(x)&&!x.closest('aside,[role=dialog]')); return h?g2txt(h).slice(0,80):''; }   // painel e diálogo não mudam o contexto da tela
 // filhos com caixa (sc-if e sc-for são display:contents)
 function g2blocos(p){ const out=[]; for(const c of p.children){ if(/^SC-/.test(c.tagName)) out.push(...g2blocos(c)); else out.push(c); } return out; }
 // foto do que está na tela, por chave estável e nível (1 = linha/cartão, 2 = região rotulada/estado do cabeçalho, 3 = bloco do conteúdo)
@@ -848,7 +848,7 @@ function g2mudou(self){ if(typeof document==='undefined') return; g2buscaUnica(s
   /* 14/10 (proprietário: "não está dando flash de feedback quando muda para a tela de destino"): abrir um detalhe ou trocar a visão na mesma
      tela (o 1º título do conteúdo muda) realça o bloco novo e anuncia, como a troca de etapa; o foco vai ao título se o botão sumiu */
   const cx=g2contexto();
-  if(cx&&self.__g2ctx&&cx!==self.__g2ctx){ self.__g2ctx=cx; if(tNovo) self.__g2toastVisto=t; self.__g2mud=[]; const b=g2blocoAtual(); g2flash(b,cx+(tNovo?'. '+t:''));
+  if(cx&&self.__g2ctx&&cx!==self.__g2ctx){ self.__g2ctx=cx; if(tNovo) self.__g2toastVisto=t; self.__g2mud=[]; const b=g2blocoAtual(); g2flash(b,tNovo?t:cx);   /* o aviso da ação, quando há, é o que se anuncia */
     const ae=document.activeElement; if(!ae||ae===document.body||!ae.isConnected){ const hh=b&&b.querySelector('h2,h3'); if(hh){ if(!hh.hasAttribute('tabindex')) hh.setAttribute('tabindex','-1'); hh.focus({preventScroll:true}); } }
     return; }
   if(cx) self.__g2ctx=cx;
