@@ -144,4 +144,4 @@ Na ausência de design system do projeto, usar as referências abaixo, respeitan
 - [ ] Telas de gestão/cadastro conforme `master-detail-ux` (listagem + detalhe, estado, próximo passo, ação primária única)
 - [ ] Tabelas conforme `tabelas-interativas`
 
-O autosave do kit serializa gravações e só confirma após o retorno de `save`. Use-o para rascunhos quando apropriado. A fila é local à instância; concorrência entre abas/dispositivos exige versão e revalidação no domínio. `beforeunload` não garante conclusão assíncrona: não dependa dele como única proteção do rascunho.
+O autosave do kit serializa gravações e só confirma após o retorno de `save`. Use-o para rascunhos quando apropriado. A fila é local à instância; concorrência entre abas/dispositivos exige versão e revalidação no domínio. O kit solicita confirmação de saída enquanto houver edição ou envio sem recibo, sem iniciar gravação assíncrona durante `beforeunload`. O navegador pode não emitir esse evento (por exemplo, encerramento no celular): quando o produto exigir recuperação após encerramento, forneça armazenamento local autorizado e sincronização, além da proteção de navegação.

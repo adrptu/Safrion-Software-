@@ -1091,7 +1091,7 @@
  - [ ] Telas de gestão/cadastro conforme `master-detail-ux` (listagem + detalhe, estado, próximo passo, ação primária única)
  - [ ] Tabelas conforme `tabelas-interativas`
 +
-+O autosave do kit serializa gravações e só confirma após o retorno de `save`. Use-o para rascunhos quando apropriado. A fila é local à instância; concorrência entre abas/dispositivos exige versão e revalidação no domínio. `beforeunload` não garante conclusão assíncrona: não dependa dele como única proteção do rascunho.
++O autosave do kit serializa gravações e só confirma após o retorno de `save`. Use-o para rascunhos quando apropriado. A fila é local à instância; concorrência entre abas/dispositivos exige versão e revalidação no domínio. O kit solicita confirmação de saída enquanto houver edição ou envio sem recibo, sem iniciar gravação assíncrona durante `beforeunload`. O navegador pode não emitir esse evento (por exemplo, encerramento no celular): quando o produto exigir recuperação após encerramento, forneça armazenamento local autorizado e sincronização, além da proteção de navegação.
 --- before/shared/ux-essencial/assets/m3-kit.js
 +++ candidate/shared/ux-essencial/assets/m3-kit.js
 @@ -27,7 +27,7 @@
@@ -1123,12 +1123,12 @@
      if (scrim) return;
      for (const c of registry) {
        if (!c.keys) continue;
-@@ -106,12 +106,23 @@
+@@ -106,16 +106,34 @@
    // ---------- autosave ----------
    function autosave(form, save, { delay = 600, message = 'Salvo' } = {}) {
      let t = null, last = JSON.stringify(Object.fromEntries(new FormData(form)));
 -    const flush = async () => {
-+    let queue = Promise.resolve();
++    let queue = Promise.resolve(), pending = 0;
 +    const flush = () => {
        const data = Object.fromEntries(new FormData(form)), json = JSON.stringify(data);
 -      if (json === last) return;
@@ -1137,6 +1137,7 @@
 -      catch (err) { snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush }); last = null; }
 +      // Capture cada versão, mas compare com o último recibo somente ao executar.
 +      // Assim B pendente seguido de retorno a A não perde a reversão.
++      pending++;
 +      queue = queue.then(async () => {
 +        if (json === last) return;
 +        try {
@@ -1147,11 +1148,22 @@
 +          last = null;
 +          snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush });
 +        }
-+      });
++      }).finally(() => { pending--; });
 +      return queue;
      };
      form.addEventListener('input', () => { clearTimeout(t); t = setTimeout(flush, delay); });
      form.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(t); flush(); });
+-    window.addEventListener('beforeunload', () => { clearTimeout(t); flush(); });
++    window.addEventListener('beforeunload', (event) => {
++      // O navegador não aguarda save: peça confirmação de saída se houver edição sem recibo.
++      if (pending || JSON.stringify(Object.fromEntries(new FormData(form))) !== last) {
++        event.preventDefault();
++        event.returnValue = '';
++      }
++    });
+     return { flush };
+   }
+ 
 --- before/test_gemini_consult.py
 +++ candidate/test_gemini_consult.py
 @@ -20,6 +20,17 @@

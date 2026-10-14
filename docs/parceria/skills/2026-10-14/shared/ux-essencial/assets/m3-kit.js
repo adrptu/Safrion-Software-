@@ -106,11 +106,12 @@
   // ---------- autosave ----------
   function autosave(form, save, { delay = 600, message = 'Salvo' } = {}) {
     let t = null, last = JSON.stringify(Object.fromEntries(new FormData(form)));
-    let queue = Promise.resolve();
+    let queue = Promise.resolve(), pending = 0;
     const flush = () => {
       const data = Object.fromEntries(new FormData(form)), json = JSON.stringify(data);
       // Capture cada versão, mas compare com o último recibo somente ao executar.
       // Assim B pendente seguido de retorno a A não perde a reversão.
+      pending++;
       queue = queue.then(async () => {
         if (json === last) return;
         try {
@@ -121,12 +122,18 @@
           last = null;
           snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush });
         }
-      });
+      }).finally(() => { pending--; });
       return queue;
     };
     form.addEventListener('input', () => { clearTimeout(t); t = setTimeout(flush, delay); });
     form.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(t); flush(); });
-    window.addEventListener('beforeunload', () => { clearTimeout(t); flush(); });
+    window.addEventListener('beforeunload', (event) => {
+      // O navegador não aguarda save: peça confirmação de saída se houver edição sem recibo.
+      if (pending || JSON.stringify(Object.fromEntries(new FormData(form))) !== last) {
+        event.preventDefault();
+        event.returnValue = '';
+      }
+    });
     return { flush };
   }
 

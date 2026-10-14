@@ -52,3 +52,8 @@ Os seis pedidos anteriores foram aceitos pelo Claude. Esta rodada corrige os nov
 Renomear o modelo resolveu a procura indevida de sonarjs, mas o lint revelou 62 erros dos assets/modelos. Corrigidos os usos de expressões e deletes, e acrescentado ao eslint.config.js da raiz um override somente do pacote versionado: globais browser nos dois assets; modelos sem projeto TS usam lint sem verificação de tipos. Lint continua ativo; regras de produto e segurança não foram desabilitadas. ESLint 10.11.0 executado com configuração da raiz e dependências existentes: zero erros/avisos no pacote e config. Isso não substitui o CI integral.
 
 Validação: 20/20 skills, 17/17 adaptador, 53 arquivos no manifesto; Gitleaks dir do pacote sem achado. Gitleaks histórico geral é pendência separada relatada por Claude, commit207f362; nenhuma allowlist/proteção/branch foi alterada. Revisão, integração e recibo cloud continuam pendentes.
+
+
+### Complemento de saída e formatação
+Achado4275898120 tratado: beforeunload não inicia save assíncrono; pede confirmação quando existe edição sem recibo ou gravação pendente. Teste do guard em eventos canceláveis no navegador: 10/10; a versão46e6ded falha nos dois casos de saída. Não prova comportamento de encerramento forçado/mobile, cujos limites estão na skill. Gatilho de persistência local depende da autorização e contrato do produto.
+CI Código do46e6ded falhou em Prettier (log116086875772), no eslint.config.js: corrigido com .prettierrc.json canônico (singleQuote true, printWidth110). Prettier e lint do pacote/config executados com sucesso;20/20skills e17/17adaptador. Demais provas continuam válidas.

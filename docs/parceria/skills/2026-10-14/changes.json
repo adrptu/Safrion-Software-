@@ -147,12 +147,12 @@
   {
     "file": "shared/ux-essencial/SKILL.md",
     "before": "10972bdbf98af75313e6c21ebd6586fefc08918972fd792ca83c315b40a5ffe6",
-    "after": "66769798eeb3873c5a4de9d4122009eb138986c2ccdbc8d7f88c9483d3ca63c6"
+    "after": "49f502963d21c5f1b5ca70081835aebc3dd7e13d18b30fe7b41f8aa604755c01"
   },
   {
     "file": "shared/ux-essencial/assets/m3-kit.js",
     "before": "035eef47c47ef6016b47edabd2dd80c7b4df4949064edee85bfe9543a4a67efd",
-    "after": "1c779ef8c4e678451c1fa1e81587caeb5f986eed377c8d2d006334db1e75588b"
+    "after": "6c86f68526e2220c5b27a37c221f982c4cc85c0584b197f34ef89471fc105eb6"
   },
   {
     "file": "test_gemini_consult.py",
