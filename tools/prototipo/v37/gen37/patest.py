@@ -119,8 +119,9 @@ try:
     check('salvar 25 dias antes grava DAP −25', not DLG() and gats()[:2] == ['DAP −25', 'DAP −1'], gats())
     # ---- diferenças e publicar
     body = MAIN()
+    selos = lambda: set(J("[...document.querySelectorAll('main span')].filter(e=>!e.children.length&&e.offsetParent).map(e=>e.innerText.trim()).filter(t=>t==='Nova'||t==='Alterada')") or [])
     # 14/10 (proprietário: "tire essa parte de alterações de rascunho. lá embaixo deixe o botão salvar"): sem o bloco; a mudança fica na atividade
-    check('sem o bloco "Alterações do rascunho"; a atividade nova e a alterada ficam marcadas nela mesma', 'Alterações do rascunho' not in body and 'Incluída' in body and 'Alterada' in body, body[-900:])
+    check('sem o bloco "Alterações do rascunho"; a atividade nova e a alterada ficam marcadas nela mesma', 'Alterações do rascunho' not in body and selos() >= {'Nova', 'Alterada'}, [selos(), body[-600:]])
     check('uma primária: "Salvar alterações", sem nota ao lado', prims() == ['Salvar alterações'] and not (J("(document.querySelector('[data-acoes] .acoes-nota')||{}).innerText||''") or '').strip(), prims())
     clk('Salvar alterações', '[data-acoes]', .6)
     t7 = T()
