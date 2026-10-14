@@ -55,3 +55,14 @@ afetadas: `tabelas_os` 40/40, `ostest` 33/33, `os_cenario` 22/22, `filtros_cultu
 
 Publicado nas versões 74 e 75 do artefato (1791983077-f225), duas partes de 71 e 76 páginas (render de 392cb92, 147 páginas
 mudadas). Conferido por hash: `OS.dc.html` 404e75da… e `AG-01.dc.html` 64277d8f…, iguais aos da render.
+
+## PR #64 (Codex) e registro do PR #63
+
+- **PR #64** (autor Codex, 5165373; revisor e integrador Claude): no Painel Agrícola, o título e a contagem de cada grupo
+  ("Por causa", "Por quem resolve") abrem as O.S. do grupo (`OS.dc.html#painel=IDs`, com a ponte corrigida em 392cb92); ao voltar,
+  o foco retorna ao grupo. Junta em 517f567. Executado na composição: `painel_agricola` 57/57, `--ui` 24/24, `--grupos-ui` 28/28
+  (1440 e 390, Enter e toque, alvo de 44 px, busca anterior preservada), `--custos-ui` 18/18, `--os-contract-ui` 18/18,
+  `painel_modulos` 74/74 e `--ui` 61/61, `os_recurso` 16/16, `links_ocultos` 16/16, `nav_modulos` 15/15, `visual_corte` PAGR sem achado.
+  Única página mudada na render: `PAGR.dc.html`.
+- **Registro do PR #63:** a mensagem do merge 5785a51 cita "r5 e5b8acc", mas o HEAD juntado e revisado foi **d7ba2da (r7)**, que inclui
+  r6 (custos) e r7. O histórico publicado não é reescrito; vale este registro.
