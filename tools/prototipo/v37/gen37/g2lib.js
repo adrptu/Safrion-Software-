@@ -226,7 +226,9 @@ function g2persiste(self,id,g2_0,volta,pre){ if(!self.g2persist) return true; co
 function g2dirty(fm){ if(!fm) return false; for(const k in fm.draft){ if(String(fm.draft[k])!==String(fm.orig[k])) return true; } return false; }
 function g2close(self,sp){ const fm=g2st(self,sp.id).fm; if(fm && !fm.ro && g2dirty(fm)) { g2set(self,sp.id,{fm:Object.assign({},fm,{warn:true})}); return; } g2set(self,sp.id,{fm:null}); }
 function g2vals(self,sp,v,mask){
-  const id=sp.id, st=g2stBusca(self,id,g2st(self,id)), rows=g2disp(self,sp), added=self.state.added||{};
+  const id=sp.id, rows=g2disp(self,sp), added=self.state.added||{};
+  // sp.suspende (posto pela tela: recorte do Painel na O.S.): a grade lê o estado sem busca nem filtros, sem apagá-los; a busca some até o recorte acabar
+  let st=g2stBusca(self,id,g2st(self,id)); if(sp.suspende) st=Object.assign({},st,{q:'',f:{},qv:''});
   const flat=g2flat(sp,st,g2qrows(sp,st,rows),mask,added); const ed=sp.edit||{m:'none'}; const editable=ed.m&&ed.m!=='none';
   g2qvals(self,sp,v,st,rows,added);
   const so=st.so||sp.so||{};
@@ -289,7 +291,7 @@ function g2vals(self,sp,v,mask){
   v[id+'_count']=flat.filter(x=>x.lvl===0).length; v[id+'_all']=rows.length;
   v[id+'_empty']=flat.length===0; v[id+'_some']=flat.length>0;
   v[id+'_q']=st.q||''; v[id+'_setq']=(e)=>g2set(self,id,{q:e.target.value});
-  v[id+'_qon']=!g2qSeg(self,id); v[id+'_qlab']=(self.__g2qL===id&&self.__g2qS)?'Buscar nesta tela':'Buscar nesta tabela';
+  v[id+'_qon']=!g2qSeg(self,id)&&!sp.suspende; v[id+'_qlab']=(self.__g2qL===id&&self.__g2qS)?'Buscar nesta tela':'Buscar nesta tabela';
   v[id+'_filtered']=g2filtering(st)||!!(sp.qf&&st.qv);
   v[id+'_clear']=()=>{ g2set(self,id,{q:'',f:{},qv:''}); if(g2qSeg(self,id)) g2set(self,self.__g2qL,{q:''}); };   // a busca da tela também filtra esta tabela
   v[id+'_fchips']=Object.keys(st.f||{}).filter(k=>(st.f[k]||[]).length).map(k=>{ const c=sp.cols.find(x=>x.k===k)||{l:k}; return {t:c.l+': '+st.f[k].map(x=>g2flab(rows,c,x)).join(', '), rm:()=>{ const f=Object.assign({},g2st(self,id).f||{}); delete f[k]; g2set(self,id,{f}); }}; });

@@ -67,6 +67,27 @@ try:
     J("(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.trim()==='Ver todas as O.S.'); if(b) b.click();})()"); time.sleep(.8)
     n2 = J("[...new Set([...document.querySelectorAll('[data-rid]')].filter(e=>e.offsetParent).map(e=>e.getAttribute('data-rid')).filter(x=>/^OS-/.test(x||'')))].length") or 0
     chk('R13 "Ver todas as O.S." encerra o recorte do Painel e limpa o endereço', n2 > 2 and 'painel=' not in (J('location.hash') or ''), n2)
+    # revisão Codex 6167883199: o recorte suspende (não apaga) busca, fase e filtros da lista e do topo; "Ver todas" devolve o estado guardado
+    abrir('Caio')
+    J("(()=>{const b=document.querySelector('[role=toolbar] [data-visao=lista]'); if(b) b.click();})()"); time.sleep(.6)
+    J("(()=>{const i=document.querySelector('input[type=search]'); const set=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set; set.call(i,'OS-0430'); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.8)
+    vis_ids = lambda: json.loads(J("JSON.stringify([...new Set([...document.querySelectorAll('[data-rid]')].filter(e=>e.offsetParent).map(e=>e.getAttribute('data-rid')).filter(x=>/^O[SB]-/.test(x||'')))])") or '[]')
+    antes = vis_ids()
+    c.goto(f'http://127.0.0.1:{p}/OS.dc.html#painel=OS-0418,OS-0420', espera=1.6)
+    J("(()=>{const b=document.querySelector('[role=toolbar] [data-visao=lista]'); if(b) b.click();})()"); time.sleep(.6)
+    dur = vis_ids(); faz_dis = J("(()=>{const s=document.querySelector('select[aria-label=\"Filtrar por fazenda\"]'); return s?s.disabled:null})()")
+    busca_vis = J("!!(document.querySelector('input[type=search]')&&document.querySelector('input[type=search]').offsetParent)")
+    nota2 = J("(()=>{const n=document.querySelector('[aria-label=\"Recorte do Painel Agrícola\"]'); return n?n.innerText:''})()") or ''
+    chk('R14 busca guardada (OS-0430): o recorte mostra 0418 e 0420, com busca e Fazenda suspensas e a faixa dizendo isso',
+        antes == ['OS-0430'] and dur == ['OS-0418', 'OS-0420'] and faz_dis is True and not busca_vis and 'suspensos' in nota2, [antes, dur, faz_dis, busca_vis, nota2])
+    J("(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.innerText.trim()==='Ver todas as O.S.'); if(b) b.click();})()"); time.sleep(.8)
+    J("(()=>{const b=document.querySelector('[role=toolbar] [data-visao=lista]'); if(b) b.click();})()"); time.sleep(.5)
+    depois = vis_ids(); q = J("(document.querySelector('input[type=search]')||{}).value||''"); faz = J("(()=>{const s=document.querySelector('select[aria-label=\"Filtrar por fazenda\"]'); return s?[s.value,s.disabled]:null})()")
+    chk('R15 "Ver todas as O.S." devolve a busca guardada (OS-0430) e a Fazenda habilitada, sem nada sobrescrito', depois == ['OS-0430'] and q == 'OS-0430' and faz == ['Santa Rita', False], [depois, q, faz])
+    c.goto(f'http://127.0.0.1:{p}/OS.dc.html#painel=OS-0507', espera=1.6)
+    J("(()=>{const b=document.querySelector('[role=toolbar] [data-visao=lista]'); if(b) b.click();})()"); time.sleep(.6)
+    lg = vis_ids(); faz2 = J("(()=>{const s=document.querySelector('select[aria-label=\"Filtrar por fazenda\"]'); return s?[s.value,s.disabled]:null})()")
+    chk('R16 OS-0507 (Lagoa Grande) com Fazenda Santa Rita guardada: a O.S. aparece e o filtro de Fazenda fica suspenso, não fingindo governar o recorte', lg == ['OS-0507'] and faz2 == ['Santa Rita', True], [lg, faz2])
     errs = J("(window.__errs||[]).length") or 0
     chk('R11 sem erro de JS', not errs, errs)
 finally:

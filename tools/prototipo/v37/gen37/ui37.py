@@ -298,13 +298,13 @@ def _macro_html(fname, ctx, sep=True):
     out = ''
     if cfg.get('faz') == 'filtro':
         out += (f'<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: {MUTED}; font-weight: 700;">Fazenda'
-                f'<select aria-label="Filtrar por fazenda" value="{{{{mf_faz}}}}" onChange="{{{{mf_setfaz}}}}" style="' + sel.format(LINE=LINE, SURF=SURF, INK=INK) + '">'
+                f'<select aria-label="Filtrar por fazenda" value="{{{{mf_faz}}}}" disabled="{{{{mf_susp}}}}" onChange="{{{{mf_setfaz}}}}" style="' + sel.format(LINE=LINE, SURF=SURF, INK=INK) + '">'
                 + ''.join(f'<option value="{f}">{f}</option>' for f in ['Todas'] + FAZENDAS) + '</select></label>')
     elif cfg.get('faz') == 'contexto':
         out += f'<span title="Fazenda da safra aberta" style="{lab}">{esc(ctx[0]) if ctx and ctx[0] else "Fazenda Santa Rita"}</span>'
     if cfg.get('saf') == 'filtro':
         out += (f'<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: {MUTED}; font-weight: 700;">Safra'
-                f'<select aria-label="Filtrar por safra" value="{{{{mf_saf}}}}" onChange="{{{{mf_setsaf}}}}" style="' + sel.format(LINE=LINE, SURF=SURF, INK=INK) + '">'
+                f'<select aria-label="Filtrar por safra" value="{{{{mf_saf}}}}" disabled="{{{{mf_susp}}}}" onChange="{{{{mf_setsaf}}}}" style="' + sel.format(LINE=LINE, SURF=SURF, INK=INK) + '">'
                 + ''.join(f'<option value="{f}">{f}</option>' for f in ['Todas'] + SAFRAS_MF) + '</select></label>')
     elif cfg.get('saf') == 'contexto':
         out += (f'<span style="{lab}">{ctx[1] if ctx and len(ctx) > 1 and ctx[1] else ""}</span>'
@@ -314,7 +314,7 @@ def _macro_html(fname, ctx, sep=True):
     for k, rot, al in (('cult', 'Cultura', 'Filtrar por cultura'), ('tal', 'Talhão', 'Filtrar por talhão')):
         if cfg.get(k) == 'filtro':
             out += (f'<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: {MUTED}; font-weight: 700;">{rot}'
-                    f'<select aria-label="{al}" value="{{{{mf_{k}}}}}" onChange="{{{{mf_set{k}}}}}" style="' + sel.format(LINE=LINE, SURF=SURF, INK=INK) + '">'
+                    f'<select aria-label="{al}" value="{{{{mf_{k}}}}}" disabled="{{{{mf_susp}}}}" onChange="{{{{mf_set{k}}}}}" style="' + sel.format(LINE=LINE, SURF=SURF, INK=INK) + '">'
                     f'<sc-for list="{{{{mf_{k}_opts}}}}" as="o" hint-placeholder-count="3"><option value="{{{{o.v}}}}">{{{{o.t}}}}</option></sc-for></select></label>')
     return out + (f'<span style="width: 1px; height: 18px; background: {LINE};"></span>' if sep else '')
 
