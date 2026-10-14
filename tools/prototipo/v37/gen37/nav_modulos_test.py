@@ -121,7 +121,8 @@ try:
     t8 = json.loads(J("""JSON.stringify((()=>{ const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const fx=t.parentElement;
       const ch=[...t.querySelectorAll('[role=cell]')].filter(c=>/^(Encerradas|Em execução|Liberadas|A liberar|Em conferência)$/.test(c.innerText.trim())).map(c=>{ const s=[...c.querySelectorAll('span')].pop(); return s?s.getClientRects().length:0; });
       return [Math.round(t.getBoundingClientRect().width), fx.clientWidth, ch]; })())"""))
-    chk('N8 O.S.: tabela na largura natural (rola de lado) e cada selo de Fase em uma linha', t8[0] > t8[1] and t8[2] and max(t8[2]) == 1, t8)
+    # 14/10 (colunas essenciais): com 6 colunas a tabela cabe na tela e não rola de lado; o que se protege é não espremer abaixo do contêiner nem quebrar o selo
+    chk('N8 O.S.: tabela na largura natural (nunca menor que o contêiner) e cada selo de Fase em uma linha', t8[0] >= t8[1] and t8[2] and max(t8[2]) == 1, t8)
     # N9 celular
     c.aparelho(390, 844, 2, True)
     lgs = {}

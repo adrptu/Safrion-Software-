@@ -80,7 +80,7 @@ try:
     # lista × Kanban
     troca_visao(J,'lista'); lista={}
     for r_ in J("[...document.querySelectorAll('[role=row].g2ed')].map(r=>r.innerText.replace(/\\n/g,' | '))"):
-        lista[r_.split(' | ')[0].strip()]=fase_de(r_)
+        _m=re.search(r'\bO[SB]-\d+',r_); lista[_m.group(0) if _m else r_.split(' | ')[0].strip()]=fase_de(r_)   # VISOES-2 (C2): o código visível, não a 1ª linha
     check('Lista = Kanban', lista==kb, {k:(lista.get(k),kb.get(k)) for k in kb if lista.get(k)!=kb.get(k)})
     # Nova ordem
     clk('Nova ordem'); check('form Nova ordem', 'Nova ordem' in pan())

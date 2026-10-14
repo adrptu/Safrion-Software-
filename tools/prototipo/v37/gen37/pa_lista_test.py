@@ -264,7 +264,7 @@ try:
             aberta['dis'] and aberta['txt'] == 'Confirme (Enter) ou cancele (Esc) a dose de Glifosato 480 para publicar a v7.'
             and 'Versão v7 publicada' not in t14 and 'A dose de Glifosato 480: 2 → 6 L/ha entrou no rascunho agora' in t14
             and n14['txt'].startswith('2 alterações na v7:') and 'Glifosato 480: 2 → 6 L/ha' in n14['txt'] and 'Fungicida A: 0,5 → 0,6 L/ha' in n14['txt'] and not n14['dis'] and n14['naTela']
-            and 'Publicado · v6' in v14 and 'Publicado · v7' not in v14, [aberta, t14, n14, v14[:400]])
+            and 'Rascunho v7 · v6 em vigor' in v14 and 'Publicado · v7' not in v14, [aberta, t14, n14, v14[:400]])
         clique(PUB, w=.1); espera("[...document.querySelectorAll('[role=status]')].some(x=>/Versão v7 publicada/.test(x.innerText))", 4); t14b = toast()
         clique(lab('Mostrar insumos de Dessecação pré-plantio'), w=.3) if J(f"!!{lab('Mostrar insumos de Dessecação pré-plantio')}") else None
         g14 = J(f"(()=>{{const b={lab('Alterar a dose de Glifosato 480')}; return b?b.innerText.trim():'';}})()")

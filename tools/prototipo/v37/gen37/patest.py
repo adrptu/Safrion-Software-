@@ -153,7 +153,7 @@ try:
     mais('Herbicida pós-emergente'); clk('Excluir atividade', 'main [role=menu]', w=.4); dose('Fungicida A', '0,6'); clk('Desfazer', w=.4)
     check('PA-DESFAZER-01: excluir (cria o rascunho) → mudar outra dose → Desfazer: a atividade volta uma vez e a dose nova (0,6) fica; o rascunho v7 continua',
           tem_atv('Herbicida pós-emergente') and J("[...document.querySelectorAll('main button.pa-titulo')].filter(b=>b.innerText.trim()==='Herbicida pós-emergente').length") == 1
-          and any(x.startswith('Fungicida A=0,6') for x in doses()) and prims() == ['Publicar versão v7'], [doses(), prims()])
+          and any(x.split(', hoje')[0] == 'Fungicida A' and x.split('=')[-1].startswith('0,6') for x in doses()) and prims() == ['Publicar versão v7'], [doses(), prims()])
     plano('Soja alta tecnologia'); ordem0 = J("[...document.querySelectorAll('main button.pa-titulo')].map(b=>b.innerText.trim())")
     mais('Herbicida pós-emergente'); clk('Excluir atividade', 'main [role=menu]', w=.4); clk('Desfazer', w=.4)
     check('controle: excluir → Desfazer sem outra edição volta à v6 publicada (sem rascunho), na mesma posição; foco no nome da atividade',

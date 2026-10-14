@@ -20,13 +20,14 @@ def nimp(t):   # '2 em execução · 3 impedidas' -> 3; 'nenhuma impedida' -> 0
 # ordens abertas (fora de Encerradas/Canceladas) com selo vermelho na linha
 IMP = """[...document.querySelectorAll('[role=row].g2ed')].filter(r=>!/Encerrad|Cancelad/.test(r.innerText))
   .filter(r=>[...r.querySelectorAll('span')].some(s=>!s.children.length&&s.innerText.trim()&&getComputedStyle(s).color==='rgb(180, 35, 24)'))
-  .map(r=>r.innerText.split('\\n')[0].trim())"""
-def ids(): return J("[...document.querySelectorAll('[role=row].g2ed')].map(r=>r.innerText.split('\\n')[0].trim())") or []
+  .map(r=>{const m=r.innerText.match(/\\bO[SB]-\\d+/); return m?m[0]:r.innerText.split('\\n')[0].trim();})"""
+def ids(): return J("[...document.querySelectorAll('[role=row].g2ed')].map(r=>{const m=r.innerText.match(/\\bO[SB]-\\d+/); return m?m[0]:r.innerText.split('\\n')[0].trim();})") or []   # VISOES-2 (C2): o código visível
 def kanban(): return J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].map(b=>b.innerText.split('\\n')[0].trim())") or []
 def chips(): return J("[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] button')].map(b=>b.innerText.replace(/\\s+/g,' ').trim())") or []
 def agua_txt(): return re.findall(r'OS-04(?:19|22|23)', J("document.body.innerText") or '')
 def clica(t): J(f"(()=>{{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==={json.dumps(t)}); b&&b.click();}})()"); time.sleep(.4)
-def cor(id_, t): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); const s=r&&[...r.querySelectorAll('span')].filter(x=>x.innerText.trim().startsWith({json.dumps(t)})).pop(); return s?getComputedStyle(s).color:'';}})()") or ''
+# VISOES-2 (C2): a linha é achada pelo código visível da O.S. (o estado curto vem antes do código)
+def cor(id_, t): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>((r.innerText.match(/\\bO[SB]-\\d+/)||[''])[0])==={json.dumps(id_)}); const s=r&&[...r.querySelectorAll('span')].filter(x=>x.innerText.trim().startsWith({json.dumps(t)})).pop(); return s?getComputedStyle(s).color:'';}})()") or ''
 ERR = []
 try:
     T.abrir(wait=1.3)

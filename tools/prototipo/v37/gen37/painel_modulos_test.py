@@ -175,8 +175,11 @@ def ui():
             c.aparelho(width,844,1,touch)
             for fid,(mod,_,items,links) in P.PAINEIS.items():
                 c.goto(U(ui37.HUB37[mod]),.4)
-                chk(fid+' primeiro cartão '+str(width),J("document.querySelector('a.mod-cartao').getAttribute('href')")==fid+'.dc.html')
-                J("document.querySelector('a.mod-cartao').click()")
+                # 14/10 (fluxo do Agrícola): o Painel fecha o fluxo (último cartão); nos demais módulos segue primeiro
+                primeiro=J("document.querySelector('a.mod-cartao').getAttribute('href')")
+                ultimo=J("[...document.querySelectorAll('a.mod-cartao')].pop().getAttribute('href')")
+                chk(fid+' cartão do painel '+('no fim do fluxo ' if mod in ui37.FLUXO37 else 'primeiro ')+str(width),(ultimo if mod in ui37.FLUXO37 else primeiro)==fid+'.dc.html',[primeiro,ultimo])
+                J("document.querySelector('a.mod-cartao[href=\""+fid+".dc.html\"]').click()")
                 chk(fid+' quatro indicadores renderizados '+str(width),wait("document.querySelectorAll('.pn-value').length===4 && !document.querySelector('.pn-value').textContent.includes('{{')"))
                 data=J("({err:__pnErrors,overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth, vals:[...document.querySelectorAll('.pn-value')].map(x=>x.textContent), links:[...document.querySelectorAll('.pn-link')].map(a=>a.getAttribute('href'))})")
                 chk(fid+' sem JS/overflow '+str(width),not data['err'] and not data['overflow'],data)

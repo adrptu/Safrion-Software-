@@ -280,7 +280,8 @@ function paS2(self,v,p){ const todas=paWork(p); const ops=paOps(todas); const of
   v.x_none=()=>self.setState({xa:{}});
   // um só botão: "Expandir tudo" até todas as atividades visíveis estarem abertas; aí vira "Recolher tudo"
   const xa0=self.state.xa||{}; const todasAb=atv.length>0&&atv.every(a=>xa0[a.id]); v.x_lab=todasAb?'Recolher tudo':'Expandir tudo'; v.x_tog=todasAb?v.x_none:v.x_all; v.x_up=todasAb; v.x_down=!todasAb;
-  const est=p.versao===0?['Rascunho v1 · ainda não publicado','y']:(p.rasc?['Rascunho v'+p.rasc.v+' em edição','y']:['Publicado · v'+p.versao,'g']);
+  // 14/10 (Versões saiu do detalhe): com rascunho, o selo diz também a versão que segue valendo para as O.S.
+  const est=p.versao===0?['Rascunho v1 · ainda não publicado','y']:(p.rasc?['Rascunho v'+p.rasc.v+' · v'+p.versao+' em vigor','y']:['Publicado · v'+p.versao,'g']);
   v.p_nome=p.nome; v.p_est=est[0]; v.p_est_st=paChip(est[1]);
   const tp=[]; todas.forEach(a=>{ const t=PA_TAG[a.g.tipo]; if(tp.indexOf(t)<0) tp.push(t); }); tp.sort((a,b)=>PA_TORD.indexOf(a)-PA_TORD.indexOf(b));
   v.k2=p.cultura+' · '+todas.length+(todas.length===1?' atividade':' atividades')+' · '+paRS(paCt(todas))+'/ha de insumos'+(tp.length?' · gatilhos: '+tp.join(', '):'');
