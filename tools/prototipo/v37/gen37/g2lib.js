@@ -241,7 +241,7 @@ const G2_CV_PERG=[['oque','O quê'],['quem','Quem'],['quando','Quando'],['onde',
 // sp.sico.ks: mais de uma coluna de situação oculta (ex.: Pendência e Situação); cada uma dá o seu ícone, na ordem do quadro
 function g2sicoPart(r,sp,k){ k=k||sp.sico.k; const cores=sp.sico.cores||['red','orange','yellow'], c=sp.cols.find(x=>x.k===k); if(!c) return null;
   const ps=(r.p&&r.p[k])||[], ch=ps.find(p=>p&&p.c&&['chip','ico','cn'].indexOf(p.k)>=0); let cor=null, t='', d='';
-  if(ch){ cor=ch.c; t=String(ch.t||''); d=String(ch.dica||ch.dv||''); } else { t=g2text(r,c); cor=(c.chips||{})[t]||null; }
+  if(ch){ cor=ch.c; t=String(ch.t||''); d=String(ch.dica||ch.dv||(ch.de?g2dicaDe(ch.t):'')||''); }   // selo de estado (de): o ícone leva o significado e o próximo passo (G2_DICAS), como o selo else { t=g2text(r,c); cor=(c.chips||{})[t]||null; }
   t=t.trim(); if(!cor||!t||cores.indexOf(cor)<0) return null;
   return {k:'ico',c:cor,t:c.l+': '+t+(d?' · '+d:''),curto:cor==='red'?t:''}; }   // texto curto ao lado só no bloqueio (vermelho, visual_corte C2); atenção fica no ícone e na dica
 // V2-3: tela que troca sp.cols em tempo de execução (CD-05 pelo papel; Irrigação sem a Fazenda) recebe de volta as marcas da coluna
@@ -256,10 +256,14 @@ function g2cvLer(self,sp){ if(typeof window!=='undefined'&&window.__g2cvTodasSem
 function g2cvCel(){ try{ return window.matchMedia('(max-width: 640px)').matches; }catch(e){ return false; } }
 function g2colsVis(self,sp){ if(!g2cvTem(sp)) return sp.cols; const esc=g2cvLer(self,sp), pad=g2cvPadrao(sp), k0=sp.cols[0].k;
   let S=new Set(esc||pad); S.add(k0);
-  // o padrão vem na ordem do "Abre com"; cada coluna a mais entra logo depois da vizinha anterior da grade já à vista, para a tabela completa
-  // manter a ordem desenhada (Custo total no fim, decisão do proprietário de 13/10; "1º uso" ao lado do insumo; R$/ha ao lado do total)
-  let ord=[k0].concat(pad.filter(k=>k!==k0&&S.has(k))); const gk=sp.cols.map(c=>c.k);
-  gk.forEach((k,i)=>{ if(k===k0||ord.indexOf(k)>=0||!S.has(k)) return; let j=-1; for(let a=i-1;a>=0&&j<0;a--) j=ord.indexOf(gk[a]); ord.splice(j+1,0,k); });
+  // o padrão vem na ordem do "Abre com"; cada coluna a mais gruda na vizinha da grade que está no padrão (a anterior; senão a seguinte) e, sem
+  // vizinha no padrão, entra depois da anterior já à vista: a tabela completa mantém os pares desenhados (Custo total no fim, decisão do
+  // proprietário de 13/10; "1º uso" ao lado do insumo; R$/ha ao lado do total; NR-31 junto da validade; vínculo junto da vigência)
+  let ord=[k0].concat(pad.filter(k=>k!==k0&&S.has(k))); const gk=sp.cols.map(c=>c.k), base=new Set(ord);
+  gk.forEach((k,i)=>{ if(k===k0||ord.indexOf(k)>=0||!S.has(k)) return; const pv=gk[i-1], nx=gk[i+1]; let at;
+    if(base.has(pv)) at=ord.indexOf(pv)+1; else if(base.has(nx)) at=ord.indexOf(nx);
+    else { let j=-1; for(let a=i-1;a>=0&&j<0;a--) j=ord.indexOf(gk[a]); at=j+1; }
+    ord.splice(at,0,k); });
   if(!esc&&g2cvCel()) ord=ord.slice(0,3);   // celular: as 3 primeiras do padrão; a escolha explícita vale em qualquer tela
   return ord.map(k=>sp.cols.find(c=>c.k===k)).filter(Boolean); }
 function g2cvGrava(self,sp,ks){ try{ if(ks) localStorage.setItem(g2cvChave(sp),JSON.stringify(ks)); else localStorage.removeItem(g2cvChave(sp)); }catch(e){}
