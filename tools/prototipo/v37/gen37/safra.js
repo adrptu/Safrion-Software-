@@ -1609,7 +1609,7 @@ function safAcoes(self,v,x){ const st=self.state, step=x.step, ro=x.ro, corr=st.
   else if(step===4){ c={volta:ir(3)};
     if(!ro){ c.prim=x.p6; if(nSp){ c.nota=semTxt+' ficam fora desta demanda.'; c.ctx={t:'Corrigir cultivos',fn:()=>safCorrigir(self,x.sp.map(r=>r.id))}; } } }
   // 14/10/2026 (proprietário): "Trocar safra" sai da faixa do topo e fica aqui, nos botões do fluxo, à esquerda (etapas 2 a 4)
-  if(step>1&&x.saf) c.troca={t:'Trocar safra',fn:()=>g2etapa(self,{step:1,atv:null,rec:null,corr:null,cap:null,rsOpen:false,g2toast:'Escolha a safra.'})};
+  if(step>1&&x.saf) c.troca={t:'‹ Trocar safra',fn:()=>g2etapa(self,{step:1,atv:null,rec:null,corr:null,cap:null,rsOpen:false,g2toast:'Escolha a safra.'})};
   g2acoes(v,'aa',c); }
 function openApply(self,ids){ const saf=self.state.saf; if(!saf){ self.setState({g2toast:'Escolha a safra primeiro.'}); return; }
   const safObj=g2rows(self,GR('g_saf')).find(r=>r.id===saf); if(safObj&&safObj.ro){ self.setState({g2toast:'Safra encerrada: somente consulta.'}); return; }

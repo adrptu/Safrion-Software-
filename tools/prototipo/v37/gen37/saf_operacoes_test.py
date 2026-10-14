@@ -126,7 +126,7 @@ try:
         chk('O4 S2627: 8 operações "Janela não informada", nenhum "Cabe na janela"; sem chips do filtro rápido', all(r['SITUAÇÃO'] == 'Janela não informada' for r in n0) and 'Cabe na janela' not in c.js("document.body.innerText") and not c.js("[...document.querySelectorAll('[role=group][aria-label^=\"Filtro rápido\"]')].some(g=>g.offsetParent)"), [r['SITUAÇÃO'] for r in n0])
         chk('Total da g_op só em horas-conjunto = espelho (561,8 h)', total_h() == fmt(pc['hconj'], 1) + ' h', total_h())
         chk('O18 negativo: "/ha da safra" não aparece', '/ha da safra' not in c.js("document.body.innerText"))
-        ac = acoes(); chk('§5.2 área de ações: Aplicar plano em 4 cultivos, ‹ Cultivos e planos, Trocar safra (14/10: embaixo, no fluxo), Conferir demanda de insumos ›', sorted(ac) == sorted(['Aplicar plano em 4 cultivos', '‹ Cultivos e planos', 'Trocar safra', 'Conferir demanda de insumos ›']), ac)
+        ac = acoes(); chk('§5.2 área de ações: Aplicar plano em 4 cultivos, ‹ Cultivos e planos, ‹ Trocar safra (14/10: embaixo, no fluxo, com a seta de voltar), Conferir demanda de insumos ›', sorted(ac) == sorted(['Aplicar plano em 4 cultivos', '‹ Cultivos e planos', '‹ Trocar safra', 'Conferir demanda de insumos ›']), ac)
         # L1: as operações aparecem acima da área de ações (a página não rola)
         vis = c.js("""(()=>{ const a=document.querySelector('[data-acoes]'); const lim=a?a.getBoundingClientRect().top:innerHeight; const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent&&/^OPERA/i.test(t.querySelector('[role=columnheader]').innerText));
           return [...t.querySelectorAll('[role=row]')].slice(1).filter(r=>{ const b=r.getBoundingClientRect(); return b.top>=0&&b.bottom<=lim+1; }).length; })()""")
