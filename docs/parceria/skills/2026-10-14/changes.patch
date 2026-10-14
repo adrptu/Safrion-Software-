@@ -643,14 +643,14 @@
  
 --- before/shared/safrion-equipe/SKILL.md
 +++ candidate/shared/safrion-equipe/SKILL.md
-@@ -1,59 +1,48 @@
+@@ -1,59 +1,50 @@
  ---
  name: safrion-equipe
 -description: Coordene entregas do Safrion (Do Talhão à O.S.) entre Codex e Claude Code, desde feedback do agricultor até revisão, testes e homologação. Use ao dividir trabalho, retomar pendências ou avaliar se uma fatia está pronta neste projeto. Não se aplica a projetos sem essa parceria.
 +description: Coordene entregas do Safrion (Do Talhão à O.S.) com implementação e revisão cruzada de Codex e Claude e crítica delimitada do Gemini real, desde feedback do agricultor até revisão, testes e homologação. Use ao dividir trabalho, retomar pendências ou avaliar se uma fatia está pronta neste projeto. Não se aplica a projetos sem essa parceria.
  metadata:
 -  version: "1.0.0"
-+  version: "2.0.0"
++  version: "2.0.1"
  ---
  
  # Equipe Safrion (Do Talhão à O.S.)
@@ -662,16 +662,16 @@
 +## Retomar pelo registro vigente
  
 -Localize a raiz do projeto pelo contexto e leia apenas o necessário: `AGENTS.md`, `docs/STATUS.md`, requisitos citados de `docs/PRD.md` e a rodada atual em `docs/parceria/rodadas/`. `CLAUDE.md` pode apontar para `AGENTS.md`; mantenha uma fonte de regras. Se o repositório não estiver identificado, confirme-o antes de editar; não crie outro.
-+Leia `AGENTS.md`, o cabeçalho do checkpoint da issue #1 de `adrptu/Safrion-Software-` e os deltas depois do último recibo de cada IA. Use `outputs/revisao-f0a.md`, `work/fontes-claude/`, PRs e o [protocolo canônico](https://github.com/adrptu/Safrion-Software-/blob/main/docs/parceria/protocolo.md). Requisitos vêm do PRD e decisões NAV/DS da fonte vigente, sem copiar suas regras aqui. Se uma fonte não estiver acessível, declare o limite e preserve o trabalho independente possível.
++Leia `AGENTS.md`, [docs/STATUS.md](https://github.com/adrptu/Safrion-Software-/blob/main/docs/STATUS.md), o cabeçalho do checkpoint da [issue #1](https://github.com/adrptu/Safrion-Software-/issues/1) e os deltas dos PRs depois do último recibo de cada IA. Siga o [protocolo canônico](https://github.com/adrptu/Safrion-Software-/blob/main/docs/parceria/protocolo.md) e recupere fontes/diffs/provas pelos commits e recibos indicados nesses registros. Requisitos vêm do PRD e decisões NAV/DS da fonte vigente, sem copiar suas regras aqui.
  
 -Identifique a fatia ativa, base (commit ou hashes), mudanças em curso e responsável pelos arquivos. Reaproveite a solução existente. Não implemente nos mesmos arquivos do outro agente sem combinar a integração.
-+Priorize risco crítico, correção ou revisão devolvida pronta, dependência imediata e próximo item apto. Confira pedidos enviados, recebidos, em execução e devolvidos: ACK não é entrega, ausência de ACK não prova ociosidade. Só Codex edita o checkpoint; releia antes de editar, preserve histórico e não crie outra fila ou automação.
++No executor local do proprietário, `outputs/revisao-f0a.md` e `work/fontes-claude/` são canais adicionais quando existem e estão acessíveis; não fazem parte deste pacote nem são pré-requisitos de uma sessão limpa. Na nuvem ou sem esses diretórios, use os registros versionados, checkpoint e PRs acima. Se a prova necessária existir apenas no Mac, solicite ao autor sua fonte recuperável no canal existente e mantenha o aceite dependente bloqueado; não reconstrua nem presuma a evidência. Preserve o trabalho independente possível.
  
 -## Carregar somente o que a tarefa exige
-+## Autoria e passagem imediata
++Priorize risco crítico, correção ou revisão devolvida pronta, dependência imediata e próximo item apto. Confira pedidos enviados, recebidos, em execução e devolvidos: ACK não é entrega, ausência de ACK não prova ociosidade. Só Codex edita o checkpoint; releia antes de editar, preserve histórico e não crie outra fila ou automação.
  
 -Leia os skills abaixo pelo catálogo do ambiente. No uso local, confira os diretórios de skills do Codex ou do Claude; não pressuponha que a instalação local está disponível em sessões na nuvem. Se faltar uma dependência necessária, declare a ausência e preserve o trabalho possível.
-+Registre na mesma tarefa: IDs, resultado/persona, base/arquivos/trechos, autor, revisor/integrador e aceite. Uma autoria ativa por agente; paralelismo somente com contratos e arquivos/trechos separados. Preserve trabalho e rascunhos da sessão existente do Claude. Enquanto o outro revisa, avance na implementação delimitada já combinada, sem invadir sua autoria.
++## Autoria e passagem imediata
  
 -| Trabalho da fatia | Skills pertinentes |
 -|---|---|
@@ -683,46 +683,48 @@
 -| Testar ou revisar código | `dev-testes`, `dev-revisao` |
 -| Ambientes, entrega ou incidentes | `dev-infra` |
 -| Indicadores de satélite ou drone | `indicadores-satelite` |
-+Passe entrega pronta ao próximo responsável imediatamente durante trabalho ativo. A agenda retoma a sessão; não é intervalo obrigatório entre agentes nem garantia de execução remota. Antes de encerrar por dependência externa, confira correção própria, entrega do outro e implementação apta. Se não houver, deixe pedido concreto de próxima divisão e gatilho exato de retomada. Não invente conclusão nem prazo garantido.
++Registre na mesma tarefa: IDs, resultado/persona, base/arquivos/trechos, autor, revisor/integrador e aceite. Uma autoria ativa por agente; paralelismo somente com contratos e arquivos/trechos separados. Preserve trabalho e rascunhos da sessão existente do Claude. Enquanto o outro revisa, avance na implementação delimitada já combinada, sem invadir sua autoria.
  
 -Não carregue todos por rotina nem instale dependências ou ferramentas só porque aparecem como exemplos. Decisões, contratos e regras de negócio ficam nos documentos do projeto, não neste skill.
-+Envio incerto exige readback antes de reenviar. Duas falhas pela mesma causa pedem abordagem diferente ou bloqueio documentado. Respeite interface bloqueada, cotas, permissões e controles; não contorne nem faça consultas pagas repetitivas. Falha de transporte, bloqueio de ferramenta e falta de retorno são estados diferentes.
++Passe entrega pronta ao próximo responsável imediatamente durante trabalho ativo. A agenda retoma a sessão; não é intervalo obrigatório entre agentes nem garantia de execução remota. Antes de encerrar por dependência externa, confira correção própria, entrega do outro e implementação apta. Se não houver, deixe pedido concreto de próxima divisão e gatilho exato de retomada. Não invente conclusão nem prazo garantido.
  
 -## Entregar e revisar sem retrabalho
-+## Revisar a mesma candidata
++Envio incerto exige readback antes de reenviar. Duas falhas pela mesma causa pedem abordagem diferente ou bloqueio documentado. Respeite interface bloqueada, cotas, permissões e controles; não contorne nem faça consultas pagas repetitivas. Falha de transporte, bloqueio de ferramenta e falta de retorno são estados diferentes.
  
 -Registre na rodada existente, de forma curta: **resultado/persona e IDs do PRD; autor/revisor/integrador; base/arquivos; aceite/teste; estado/próximo passo**. Uma fatia útil por vez. Paralelismo só quando necessário e autorizado, com arquivos e saídas delimitados.
-+Confira base, autor e arquivos; leia fontes recuperáveis/diff e saídas pertinentes; reproduza o comportamento alterado. Hash sem fontes, teste proposto e relato do autor não comprovam execução independente. Use perfis, dados e portas isolados e preserve provas válidas. Consolide um retorno por candidata: cenário, versão, evidência, impacto, severidade S1–S4 conforme PRD 22.1, prioridade separada e aceite observável.
++## Revisar a mesma candidata
  
 -- O autor faz a menor mudança coerente, verifica o comportamento e entrega caminho/diff, versão, comandos, resultados e limites.
 -- O outro agente procura contraexemplos na versão entregue. Distingue defeito demonstrado, risco a investigar e preferência; cada achado tem cenário, impacto e aceite observável.
 -- O integrador confere a base antes de aplicar. Depois da integração, execute a regressão afetada; não repita toda a bateria sem uma mudança ou dúvida que justifique.
 -- Revisão do Claude significa revisão pelo Claude real, e vice-versa. Confirme envio e retorno por evidência. Sem acesso, deixe pedido preparado e revisão pendente; não simule concordância.
 -- Encerre quando o aceite do escopo e a revisão estiverem resolvidos. Melhorias opcionais vão para a fila, sem abrir ciclos infinitos de polimento.
-+Solicite ao Claude real crítica das entregas substantivas do Codex e revise as do Claude. Gemini real Pro/HIGH usa o adaptador oficial Vertex verificado, com pacote mínimo inspecionado, sem segredos/dados reais; cada consulta resolve decisão ou contraexemplo material. Referências não enviadas permanecem indisponíveis; não consulte por ritual. Divergência se resolve por fonte/reprodução, não votação. Após correção, reteste o afetado; integre o PR do outro quando checks e pareceres pertinentes estiverem resolvidos.
++Confira base, autor e arquivos; leia fontes recuperáveis/diff e saídas pertinentes; reproduza o comportamento alterado. Hash sem fontes, teste proposto e relato do autor não comprovam execução independente. Use perfis, dados e portas isolados e preserve provas válidas. Consolide um retorno por candidata: cenário, versão, evidência, impacto, severidade S1–S4 conforme PRD 22.1, prioridade separada e aceite observável.
  
 -## Verificação que não produz aprovação falsa
-+## Produto, publicação e transição
++Solicite ao Claude real crítica das entregas substantivas do Codex e revise as do Claude. Gemini real Pro/HIGH usa o adaptador oficial Vertex verificado, com pacote mínimo inspecionado, sem segredos/dados reais; cada consulta resolve decisão ou contraexemplo material. Referências não enviadas permanecem indisponíveis; não consulte por ritual. Divergência se resolve por fonte/reprodução, não votação. Após correção, reteste o afetado; integre o PR do outro quando checks e pareceres pertinentes estiverem resolvidos.
  
 -Uma saída zero com ajuda, nenhum teste executado, asserção mascarada ou resumo contraditório não comprova sucesso. Separe falha do produto, teste obsoleto, precondição ausente, artefato antigo, problema da ferramenta e bloqueio externo antes de corrigir.
-+Conclua todo o conjunto vigente do protótipo, usando IDs/estados atuais. Publique incrementos operáveis no protótipo existente após os aceites pertinentes, com versão, URL e mudança concreta. Publicação parcial, ACK, camada sintética e tarefa técnica encerrada não concluem o conjunto nem disparam auditoria integral.
++## Produto, publicação e transição
  
 -Em jornadas com estado, registre a ordem e as precondições; ordem alfabética não é uma sequência funcional. Não reutilize perfil de navegador, porta ou dados de teste que outro agente esteja alterando sem coordenação. Preserve evidências válidas ao retomar; dois fracassos pela mesma causa exigem outra hipótese ou uma tarefa menor.
-+Somente com todas as melhorias concluídas e candidata completa/operável identificada por versão, URL, fontes, diff e provas, realize auditoria integral de Codex, Claude e Gemini reais na mesma candidata, com inventário comum e análise dos brutos. Ferramenta indisponível permanece bloqueada. Corrija divergências reproduzidas e reteste só o afetado.
++Conclua todo o conjunto vigente do protótipo, usando IDs/estados atuais. Publique incrementos operáveis no protótipo existente após os aceites pertinentes, com versão, URL e mudança concreta. Publicação parcial, ACK, camada sintética e tarefa técnica encerrada não concluem o conjunto nem disparam auditoria integral.
  
 -## Feedback e homologação desde cedo
-+Depois da conclusão e validação, transfira à aplicação Next existente por fatias tela → domínio → banco, comprovando fidelidade e HML. Registre no mesmo ID: protótipo → implementado no real → testado → HML. Preserve trabalhos reais anteriores; não inicie nova evolução paralela do protótipo. F1 técnico não equivale à Fase 1 comercial; o escopo é o do PRD/registro vigente.
++Somente com todas as melhorias concluídas e candidata completa/operável identificada por versão, URL, fontes, diff e provas, realize auditoria integral de Codex, Claude e Gemini reais na mesma candidata, com inventário comum e análise dos brutos. Ferramenta indisponível permanece bloqueada. Corrija divergências reproduzidas e reteste só o afetado.
  
 -Transforme a explicação do agricultor em tarefa curta: **o que tentou, o que aconteceu, o esperado e a evidência disponível**. Registre o que foi efetivamente visto/ouvido; não invente conteúdo inacessível de áudio ou vídeo. Aproveite o relato original e peça complemento só quando mudar a correção. Preserve o requisito de print e comentário do fluxo de feedback do produto.
-+O confronto do PRD após as implantações só começa quando todas as implantações vigentes estiverem concluídas com evidências. Corrija divergências, lacunas, ambiguidades e redundâncias necessárias sem ampliar escopo, perder IDs/histórico/pendências ou legitimar defeito por estar implementado. Referencie o design system. Se não houver mudança, registre conferência e mantenha versão; se houver, combine autoria e solicite revisão real, com integração pelo revisor. Gemini participa quando o domínio/fluxo mudar materialmente.
++Depois da conclusão e validação, transfira à aplicação Next existente por fatias tela → domínio → banco, comprovando fidelidade e HML. Registre no mesmo ID: protótipo → implementado no real → testado → HML. Preserve trabalhos reais anteriores; não inicie nova evolução paralela do protótipo. F1 técnico não equivale à Fase 1 comercial; o escopo é o do PRD/registro vigente.
  
 -Priorize acesso à primeira fatia funcional verificada. Diferencie protótipo, homologação e produção pelo que realmente está disponível. Para teste humano, entregue versão, acesso testado, dados de demonstração e roteiro curto baseado nos aceites; indique limitações materiais. Use os critérios de liberação e o aceite explícito do proprietário definidos no projeto. Não confunda aprovação do plano com aprovação de produção.
-+## Autorizações e fontes
++O confronto do PRD após as implantações só começa quando todas as implantações vigentes estiverem concluídas com evidências. Corrija divergências, lacunas, ambiguidades e redundâncias necessárias sem ampliar escopo, perder IDs/histórico/pendências ou legitimar defeito por estar implementado. Referencie o design system. Se não houver mudança, registre conferência e mantenha versão; se houver, combine autoria e solicite revisão real, com integração pelo revisor. Gemini participa quando o domínio/fluxo mudar materialmente.
  
 -## Melhorar com evidência
-+Reutilize autorizações concretas de desenvolvimento/QA/HML, sem pedir novamente. Orçamento/alerta não limita cobrança; produção exige aceite explícito de Adrianus sobre a candidata e pareceres pertinentes. Não altere proteções nem realize efeitos reais de produção sem autorização. Executor local continua local até prova remota; aplicativo/computador indisponível impede retomada.
++## Autorizações e fontes
  
 -Corrija o método quando uma falha real revelar lacuna; prefira corrigir a ferramenta ou o teste responsável a acrescentar regras genéricas. Revise alterações deste skill com o outro agente. Meça pelos registros existentes esforço do agricultor, defeitos escapados e retrabalho; número de skills, agentes ou testes não mede sucesso.
++Reutilize autorizações concretas de desenvolvimento/QA/HML, sem pedir novamente. Orçamento/alerta não limita cobrança; produção exige aceite explícito de Adrianus sobre a candidata e pareceres pertinentes. Não altere proteções nem realize efeitos reais de produção sem autorização. Executor local continua local até prova remota; aplicativo/computador indisponível impede retomada.
++
 +Marketing/SITE, contas e mídia seguem adiamentos e gatilhos comerciais registrados; preserve rascunhos. Nenhum CI verde libera campanhas. Não copie valores mutáveis de orçamento, IDs de PRs atuais ou estado do backlog para esta skill.
 +
 +Carregue só skills pertinentes: `dev-ciclo-completo`, `dev-revisao`, `dev-testes`; por camada `dev-frontend-mobile`, `dev-backend`, `dev-infra`; por UX `master-detail-ux`, `ux-essencial`, `minimalismo-essencial`, `tabelas-interativas`; por domínio `agro-gestao-conhecimento`, `indicadores-satelite`; `benchmark-top5` reutiliza pesquisa vigente; negócio/growth somente no escopo autorizado. Instalação local não comprova disponibilidade em sessão na nuvem; confira leitura/recibo, não apenas catálogo.

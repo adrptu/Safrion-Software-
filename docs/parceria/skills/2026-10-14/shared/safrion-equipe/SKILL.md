@@ -2,7 +2,7 @@
 name: safrion-equipe
 description: Coordene entregas do Safrion (Do Talhão à O.S.) com implementação e revisão cruzada de Codex e Claude e crítica delimitada do Gemini real, desde feedback do agricultor até revisão, testes e homologação. Use ao dividir trabalho, retomar pendências ou avaliar se uma fatia está pronta neste projeto. Não se aplica a projetos sem essa parceria.
 metadata:
-  version: "2.0.0"
+  version: "2.0.1"
 ---
 
 # Equipe Safrion (Do Talhão à O.S.)
@@ -11,7 +11,9 @@ Codex dirige produto/UX/QA; Codex e Claude implementam partes delimitadas e revi
 
 ## Retomar pelo registro vigente
 
-Leia `AGENTS.md`, o cabeçalho do checkpoint da issue #1 de `adrptu/Safrion-Software-` e os deltas depois do último recibo de cada IA. Use `outputs/revisao-f0a.md`, `work/fontes-claude/`, PRs e o [protocolo canônico](https://github.com/adrptu/Safrion-Software-/blob/main/docs/parceria/protocolo.md). Requisitos vêm do PRD e decisões NAV/DS da fonte vigente, sem copiar suas regras aqui. Se uma fonte não estiver acessível, declare o limite e preserve o trabalho independente possível.
+Leia `AGENTS.md`, [docs/STATUS.md](https://github.com/adrptu/Safrion-Software-/blob/main/docs/STATUS.md), o cabeçalho do checkpoint da [issue #1](https://github.com/adrptu/Safrion-Software-/issues/1) e os deltas dos PRs depois do último recibo de cada IA. Siga o [protocolo canônico](https://github.com/adrptu/Safrion-Software-/blob/main/docs/parceria/protocolo.md) e recupere fontes/diffs/provas pelos commits e recibos indicados nesses registros. Requisitos vêm do PRD e decisões NAV/DS da fonte vigente, sem copiar suas regras aqui.
+
+No executor local do proprietário, `outputs/revisao-f0a.md` e `work/fontes-claude/` são canais adicionais quando existem e estão acessíveis; não fazem parte deste pacote nem são pré-requisitos de uma sessão limpa. Na nuvem ou sem esses diretórios, use os registros versionados, checkpoint e PRs acima. Se a prova necessária existir apenas no Mac, solicite ao autor sua fonte recuperável no canal existente e mantenha o aceite dependente bloqueado; não reconstrua nem presuma a evidência. Preserve o trabalho independente possível.
 
 Priorize risco crítico, correção ou revisão devolvida pronta, dependência imediata e próximo item apto. Confira pedidos enviados, recebidos, em execução e devolvidos: ACK não é entrega, ausência de ACK não prova ociosidade. Só Codex edita o checkpoint; releia antes de editar, preserve histórico e não crie outra fila ou automação.
 

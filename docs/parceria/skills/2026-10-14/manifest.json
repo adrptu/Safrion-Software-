@@ -216,8 +216,8 @@
   },
   {
     "file": "shared/safrion-equipe/SKILL.md",
-    "sha256": "a0b371d00ea2f998ad71369ee65a768b736509134dafe4dbaee18403fd081dd5",
-    "bytes": 6743
+    "sha256": "a7cb8152c42fda5fe822689c172bbafb6d9584848d6d29315b01f7017e4263b0",
+    "bytes": 7338
   },
   {
     "file": "shared/safrion-equipe/agents/openai.yaml",
