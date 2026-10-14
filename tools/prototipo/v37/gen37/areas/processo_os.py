@@ -687,7 +687,10 @@ function pctTxt(o){ return (o.area&&(o.realizado||0)>0)?' · '+Math.round(100*o.
 function salTxt(o){ return 'saldo '+nf(o.saldo)+' ha'+(o.disp?' · dispensado '+nf(o.disp)+' ha':''); }
 function brd(s){ if(!s) return ''; const a=s.split('-'); return a[2]+'/'+a[1]+'/'+a[0]; }
 // canceladas ficam fora da lista e do quadro; aparecem só no chip "Canceladas"
-function vendoCanc(self){ return ((((g2st(self,'g_os').f||{}).fase)||[]).indexOf('Canceladas'))>=0; }
+// recorte do Painel (#painel=IDs, revisão Codex 6167883199): busca, fase e filtros da lista e do topo ficam suspensos (não apagados) enquanto ele vale
+function osPn(self){ const pn=self.state&&self.state.pnIds; return !!(pn&&pn.length); }
+function osSt(self){ const st=g2st(self,'g_os'); return osPn(self)?Object.assign({},st,{q:'',f:{},qv:''}):st; }
+function vendoCanc(self){ return ((((osSt(self).f||{}).fase)||[]).indexOf('Canceladas'))>=0; }
 function PREVALS(self,v){
   cenOuvir(self);  // Estoque e App (outros quadros) mudam o cenário: a tela redesenha sem recarregar
   const canc=vendoCanc(self); const os=vis(self).filter(o=>o.etapa!=='Canceladas'||canc);
@@ -725,6 +728,7 @@ function PREVALS(self,v){
   // O.S. distintas e soma a área das O.S. vinculadas (não é área física do talhão); o total geral conta cada O.S. uma vez (abaixo, os_gtot)
   /* VISOES-2 §3.3: o agrupamento é o Agrupar por da Tabela (motor g2agRows), com descer e trilha; a visão "agrupada" saiu (fundida na Tabela) */
   GR('g_os').rows=base;
+  GR('g_os').suspende=osPn(self);   /* g2vals: a grade lê o estado sem busca, filtros nem agrupamento enquanto o recorte do Painel vale */
   self.__osBase=base;
 }
 // turnos previstos acompanham o saldo depois de uma dispensa (corta do último para o primeiro)
@@ -986,7 +990,7 @@ function EXTRAVALS(self,v){
   self.g2pick=(gid,rid)=>{ if(gid==='g_os'&&String(rid).indexOf('grp@')!==0) self.setState({pan:String(rid).split('@')[0]}); };
   // agrupar por talhão: liga/desliga; grupos começam abertos; total geral de O.S. distintas (cada O.S. uma vez)
   const osAg=g2agLer(self,GR('g_os')); v.os_agr=g2visao(self,'g_os')==='lista'&&!!osAg&&osAg.d==='onde';   /* VISOES-2: por Onde, a O.S. de vários talhões aparece em cada um */
-  { const spB=GR('g_os'), stB=g2st(self,'g_os'); const dist=(self.__osBase||[]).filter(r=>g2match(r,spB,stB)); const ar=dist.reduce((a,r)=>a+(Number(r.v.area)||0),0);
+  { const spB=GR('g_os'), stB=osSt(self); const dist=(self.__osBase||[]).filter(r=>g2match(r,spB,stB)); const ar=dist.reduce((a,r)=>a+(Number(r.v.area)||0),0);
     self.__osDist=dist.length;   // contador da grade agrupada = O.S. distintas (g2vals)
     v.os_gtot=dist.length+' O.S. · '+nf(ar)+' ha · a O.S. de vários talhões aparece em cada um e conta uma vez no total'; }
   const openPan=(id)=>self.setState({pan:id});
@@ -1004,23 +1008,24 @@ function EXTRAVALS(self,v){
   const stc=nIm?'red':(nEx?'green':'gray');  // vermelho só com impedidas (mesma cor do estado nas outras telas)
   v.os_stst=chipSt(stc).replace('padding:2px 9px;','padding:3px 10px;'); v.os_stdot=dotSt(stc);
   // ---- chips de fase (filtro real da grade: mesma chave do filtro da coluna Fase) ----
-  const gst=g2st(self,'g_os'); const ff=((gst.f||{}).fase)||[];
+  const gst=osSt(self); const ff=((gst.f||{}).fase)||[];
   const chip=(t,n,on,fn)=>({t,n,on:on?'true':'false',fn,st:'display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;'+(on?'border:1px solid #15201A;background:#15201A;color:#fff;':'border:1px solid #E4E9E5;background:#FFFFFF;color:#15201A;'),
     nst:'font-size:11.5px;font-weight:800;padding:0 7px;border-radius:999px;'+(on?'background:rgba(255,255,255,.2);color:#fff;':'background:#EEF1EE;color:#15201A;')});
   const setF=(f)=>()=>{ const cur=Object.assign({},g2st(self,'g_os').f||{}); if(f) cur.fase=[f]; else delete cur.fase; g2set(self,'g_os',{f:cur,fmc:null}); };
   v.fchips=[chip('Todas',os.filter(o=>o.etapa!=='Canceladas').length,ff.length===0,setF(null))].concat(FASES.concat(['Canceladas']).map(f=>chip(f,os.filter(o=>o.etapa===f).length,ff.length===1&&ff[0]===f,setF(f))));
+  if(osPn(self)) v.fchips=[];   /* recorte do Painel: fase suspensa, sem chips que pareçam filtrar */
   // ---- Kanban: cinco colunas fixas; selos no cartão ----
   // UX-ACAO-UNICA-20261003 (DS-33 §74.5.7.1, DS-40): Lista e Kanban são o mesmo trabalho e partilham os filtros (fase pelos chips,
   // colunas e busca da lista). Antes o Kanban ignorava o filtro (reproduzido: Liberadas → lista 2 ordens, Kanban 10). O filtro ativo
   // fica escrito no Kanban, com "Limpar filtros"; Recursos (recurso × dia) diz que o filtro não se aplica, sem descartá-lo em silêncio.
-  const spO=GR('g_os'), stO=g2st(self,'g_os'); const filtrando=g2filtering(stO);
+  const spO=GR('g_os'), stO=osSt(self); const filtrando=g2filtering(stO);
   const osRows=self.__osBase||spO.rows||[];   // linhas canônicas (no agrupado, spO.rows são os grupos)
   const okId=filtrando?new Set(osRows.filter(r=>g2match(r,spO,stO)).map(r=>r.id)):null; const osK=okId?os.filter(o=>okId.has(o.id)):os;
   const fDesc=[].concat(((stO.f||{}).fase||[]).length?['fase '+((stO.f||{}).fase||[]).join(', ')]:[])
     .concat(Object.keys(stO.f||{}).filter(k=>k!=='fase'&&((stO.f||{})[k]||[]).length).map(k=>{ const c=spO.cols.find(x=>x.k===k); const vs=(stO.f||{})[k]||[];
       return (c?c.l.toLowerCase():k)+(k==='tal'?' '+vs.map(x=>x==='(vazio)'?'sem talhão':x.split('|')[1]).join(', '):' ('+vs.length+')'); }))
     .concat((stO.q||'').trim()?['busca “'+(stO.q||'').trim()+'”']:[]).join(' · ');
-  { const pn=self.state.pnIds||null; v.pn_on=!!(pn&&pn.length); v.pn_txt=v.pn_on?('Do Painel Agrícola: '+pn.length+' O.S. ('+pn.join(', ')+'). Fazenda, Safra e filtros da lista ficam como estavam.'):'';
+  { const pn=self.state.pnIds||null; v.pn_on=!!(pn&&pn.length); v.pn_txt=v.pn_on?('Do Painel Agrícola: '+pn.length+' O.S. ('+pn.join(', ')+'). Busca, fase e filtros da tela ficam suspensos neste recorte; "Ver todas as O.S." volta a eles.'):''; v.mf_susp=v.pn_on;
     v.pn_sair=()=>{ try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} self.setState({pnIds:null,g2toast:'Todas as O.S. do recorte da tela.'}); }; }
   v.kb_filtro=filtrando&&(self.__osDist||0)>0; v.kb_nota='Filtro da lista aplicado: '+fDesc+' · '+osK.filter(o=>FASES.indexOf(o.etapa)>=0).length+' de '+os.filter(o=>FASES.indexOf(o.etapa)>=0).length+' ordens';
   v.os_limpar=()=>g2set(self,'g_os',{f:{},q:'',fmc:null});

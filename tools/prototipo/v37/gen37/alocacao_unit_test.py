@@ -38,6 +38,13 @@ chk('voltar ao original apaga a troca e registra no histórico (perfil com todos
 const lib=cenClone(CEN0); lib.man.ativos.a01.cond='Disponível';
 chk('Trator T1 apto na Manutenção: deixa de ser bloqueado e o bloco de manutenção não conta',alCandidatos(lib,'OS-0430','T03').find(x=>x.r==='T1').ok,true);
 chk('OS-0431 (T1 em 24/09): com o T1 bloqueado, alerta de manutenção; apto, sem alerta',[alDaOrdem(CEN0,'OS-0431').find(x=>x.r==='T1').alertas.length>0,alDaOrdem(lib,'OS-0431').find(x=>x.r==='T1').alertas.length],[true,0]);
+// revisão Codex 6167883199 (S2): cancelar libera o compromisso futuro; ordem que saiu do estado não volta; evento externo fica
+{ const cc=cenClone(CEN0); const antes=alVigente(cc).filter(a=>a.os==='OS-0430').length;
+  osc_cancelar(cc,'OS-0430','teste de cancelamento',null,P('Proprietário'));
+  chk('cancelar a OS-0430 (comando real) libera os 4 blocos dela; o Trator 03 fica só com a OS-0421',[antes,cc.ordens['OS-0430'].etapa,alVigente(cc).filter(a=>a.os==='OS-0430').length,[...new Set(alVigente(cc).filter(a=>a.r==='T03').map(a=>a.os))]],[4,'Canceladas',0,['OS-0421']]);
+  chk('com a OS-0430 cancelada, o Trator 03 deixa de ser ocupado nela: substituto da OS-0421 vê só os choques reais',alChoques(cc,'T03','OS-0421',AL0.aloc.filter(a=>a.os==='OS-0421'&&a.r==='T03')).some(x=>x.com==='OS-0430'),false);
+  const rm=cenClone(CEN0); delete rm.ordens['OS-0430'];
+  chk('ordem que saiu do estado não ressuscita na alocação; eventos de fora do cenário (OS-0419, OS-0423) e a manutenção ficam',[alVigente(rm).some(a=>a.os==='OS-0430'),alVigente(rm).some(a=>a.os==='OS-0419'),alVigente(rm).some(a=>a.os==='OS-0423'),alVigente(rm).some(a=>a.sit==='manutenção')],[false,true,true,true]); }
 console.log('RESULTADO '+(n-f)+'/'+n);
 process.exit(f?1:0);
 '''

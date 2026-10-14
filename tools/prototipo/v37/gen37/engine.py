@@ -1771,7 +1771,7 @@ def table(headers,rows,widths=None,sort=0,desc=False,filters=None,total=None,gro
 ENGINE_JS2=ENGINE_JS.replace("this.state = { sel: {}, open: null, sort: {}, msg: {}, added: {} };",
                              "this.state = { sel: {}, open: null, sort: {}, msg: {}, added: {}, g2: {}, nav: {}, g2toast: '' };")
 ENGINE_JS2=ENGINE_JS2.replace("    return v;\n  }\n}","""    v.g2toast = this.state.g2toast || ''; v.g2toastst = this.state.g2toast ? '' : 'display: none;';
-    v.mf_faz = this.state.mf_faz || 'Santa Rita'; v.mf_saf = this.state.mf_saf || 'Todas';
+    v.mf_faz = this.state.mf_faz || 'Santa Rita'; v.mf_saf = this.state.mf_saf || 'Todas'; v.mf_susp = false;   // mf_susp: filtros do topo suspensos (recorte do Painel na O.S.)
     v.mf_setfaz = (e) => this.setState({ mf_faz: e.target.value, g2toast: 'Fazenda: ' + e.target.value });
     v.mf_setsaf = (e) => this.setState({ mf_saf: e.target.value, g2toast: 'Safra: ' + e.target.value });
     if (!v.mf_trocar) v.mf_trocar = () => this.setState({ step: 1, g2toast: 'Escolha a safra na etapa 1.' });

@@ -56,7 +56,6 @@ Cada linha corta um controle, um conceito ou uma tela que não muda decisão (mi
 | Seletor de colunas que também reordena por arraste e tem busca acima de 12 colunas | **Mostrar e ocultar, com "Restaurar padrão".** A ordem é a do desenho: identidade, pergunta de entrada, números da decisão e próximo passo. No painel, as colunas ficam agrupadas pela pergunta, que já dispensa a busca. | Ordem fixa é linguagem comum ("a 3ª coluna é o Prazo") para quem trabalha junto e para o suporte. Arrastar exige alternativa por teclado. Com até 18 colunas em 5 grupos, dá para achar sem busca. |
 | ⋯ do cabeçalho com "Ocultar coluna" | "Ocultar coluna" entra no menu ▾ que o cabeçalho já tem ("Agrupar por esta coluna", filtro, valores) | Um menu de coluna só |
 | Coluna com o mesmo valor em todo o recorte sai da linha e vai para o título | Sai **só a coluna fixada por escolha da pessoa:** Fazenda ou Safra do "Trabalhando em", trilha, agrupamento ou filtro de coluna num valor. Coincidência (todas as linhas por acaso "A liberar") não esconde coluna. | Coluna que some por acaso parece defeito. Com causa visível, a pessoa entende. |
-| Unidade junto do número, nunca coluna "Un" | Sem coluna "Un". **Com uma unidade só na coluna, ela vai no cabeçalho ("Área ha"); com unidades diferentes, vai em cada número ("120 L", "40 kg").** | Repetir "ha" em cada linha é ruído; misturar sem unidade é erro. |
 | Telas sem chegada, famílias duplicadas, menu de Finanças | **Fora desta frente**, numa frente de navegação própria. MB-08 primeiro: o irrigante não chega à tarefa dele. | É navegação, não visão. Misturar atrasa as duas. |
 
 ## 3. Especificação
@@ -250,7 +249,7 @@ Os gráficos e as matrizes de gestão do pedido entram nos **Painéis por módul
 
 Uma fatia por vez (AGENTS §3.1). Cada uma é útil sozinha.
 
-| Fatia | Entrega | Aceite (executado, por listagem) |
+| Fatia | Entrega | Aceite (a executar, por listagem; provas na pasta quando houver) |
 |---|---|---|
 | **V2-1 · Motor e O.S.** | Marcas em `g_os` (com `ess`); seletor de colunas; barra única; Tabela única; descer com trilha, Esc e endereço; chips de Situação; raias no Kanban; preferência e padrão por perfil; rubrica na O.S. | (a) Σ grupos = total da Tabela, para cada dimensão e medida somável; unidades diferentes não somam. (b) Descer e voltar preserva os totais; o link com trilha abre no mesmo ponto. (c) Cada visão abre para cada agrupamento válido, e o clique abre a O.S. certa. (d) Trocar de agrupamento, visão ou tela e voltar preserva o estado. (e) `?view=lista` e `?view=agrupada` abrem a Tabela. (f) Nenhum seletor mostra "Lista" ou "Tabela agrupada". (h) A O.S. abre com exatamente as 6 colunas de "Abre com", na ordem; ocultar, mostrar e restaurar funcionam e voltam no próximo acesso; os totais e o "X de Y" não mudam. Medição (§3.3): cliques para chegar a "O.S. atrasadas do T4 por responsável", antes e depois. |
 | **V2-2 · Atividades do plano e SAF** | Cartões compartilhado; o exemplo hoje × passa a ser; Linha do tempo da ocupação | (a)–(f) na PA e na SAF; rubrica visual da PA com captura antes e depois a 1440 e 390 px |
@@ -283,7 +282,28 @@ Peço que tente quebrar, como a persona faria, estas decisões:
 - CARGA sem Kanban;
 - Lucide mantido;
 - seletor de colunas sem reordenar;
-- coluna só sai da linha por escolha da pessoa, não por coincidência;
-- unidade no cabeçalho quando é uma só.
+- coluna só sai da linha por escolha da pessoa, não por coincidência.
+
+A unidade fica junto do número na célula ("160 ha", "120 L"), sem coluna "Un": é a decisão do proprietário de 05/10, que o motor já aplica (`engine._col_un`). Uma primeira redação desta revisão propunha a unidade no cabeçalho; foi retirada.
 
 Cada achado é aceito, ajustado ou recusado com fundamento, nesta pasta.
+
+## 8. Revisão do Codex: decisões (pareceres 6167738735 e 6167853796)
+
+Cada ponto foi aceito, ajustado ou recusado com fundamento. O que muda o motor entra na V2-1; o resto, na fatia indicada.
+
+| # | Ponto do Codex | Decisão | Como fica |
+|---|---|---|---|
+| 1 | Quando: a safra vem do vínculo, não da data; semana não é filha estrita de mês | Aceito | Níveis do Quando: Safra (vínculo) › Mês › Semana. Cada item cai num só período, pela data de início; a semana dentro do mês é a interseção ("Semana de 28/09" em setembro só tem os dias de setembro). Sem vínculo de safra: grupo "Sem safra", explícito. Aceite: sem dupla contagem, duas safras no mesmo dia, virada de mês e de ano. |
+| 2 | Controle e forma escolhidos não somem depois de filtrar ou descer | Aceito | As opções do Agrupar por e do Ver como vêm das marcas da listagem (fixas), não da contagem de valores no recorte; a escolha ativa nunca some. Os critérios da §3.4 (3 locais, 1 ou 2 valores) decidem se a listagem oferece a forma no desenho, não em tempo de execução. Kanban pelas fases fixas do fluxo. CARGA fica em Tabela com chips pela tarefa (registro do dia, decisão por carga), não pelo número de estados. |
+| 3 | Filtro, ordenação e unidade não podem existir só no cabeçalho da Tabela | Aceito | Em toda forma, o resumo dos filtros ativos aparece como chips removíveis acima do conteúdo, com "Limpar filtros" por teclado e toque; ordenação e unidade ficam no menu do Agrupar por nas formas sem cabeçalho. Carga no celular: cartões por recurso com conflitos e janelas vindos do domínio; espaço vazio não vira cartão "Livre". |
+| 4 | Gesto de descer por eixo; editar não é clicar na linha | Aceito | Desce só onde o eixo tem filho com o atributo (polígono de talhão sem geometria das parcelas abre a ficha ou a Tabela do recorte, mantendo trilha e volta à forma anterior). Clicar na linha abre o detalhe; editar é ação explícita no detalhe, quando permitida. A §2 deixa de dizer "editar é clicar na linha". |
+| 5 | Permissão vale para dados, medidas, totais, chips, filtros e endereço | Aceito | Recusada a frase "papel muda ações, não visões". Teste por classe de permissão do trecho alterado (no mínimo: perfil sem custo não recebe valor nem contagem de outro escopo). Trocar de perfil descarta preferência incompatível e mantém o contexto permitido. A Tabela equivalente não dispensa foco, nome e teclado na forma gráfica. |
+| 6 | Cortar redundância, não instrução que muda decisão; desfazer não é a única recuperação | Aceito | Incompletude, bloqueio, motivo e próximo passo ficam visíveis; fórmula e detalhe vão ao ⓘ. Remoção sem efeito: desfazer por 5 s e também o caminho de restauração no detalhe; o que não se recupera pede confirmação. |
+| 7 | 12 para 7 formas é direção, não licença para apagar comparações | Aceito | Ficam com componente próprio, no detalhe e sem menu novo: CD-05 cobertura fornecedor × grupo, CF-01 pessoa × papel, SAF e CMP demanda × tempo. A MA chega à Carga com o contexto de manutenção já aplicado (filtro "manutenção"), não manda procurar na O.S. COLH troca o agrupamento sem misturar previsão publicada, semana e recebido. PA: Cartões e Tabela no Ver como (a Tabela é o equivalente acessível). |
+| — | "Aceite (executado)" na §5 | Aceito | Passa a "a executar" até haver prova. NAV e MB-08 seguem no registro vigente. |
+| C1 | Celular com 3 colunas × listagem de até 5 inteira | Aceito | No celular: identidade, até 2 colunas e o estado da linha; o resto pelo seletor (que aparece no celular também nas listagens de até 5). Prazo e bloqueio nunca saem por posição: o estado vem na identidade (C2). |
+| C2 | Ícone com dica não basta no toque | Aceito | Bloqueio, erro e ação necessária (estado vermelho) mostram texto curto junto do ícone; os demais, ícone com o texto acessível e o detalhe ao tocar a linha. Nunca só cor. |
+| C3 | Ordenação ou busca em coluna oculta | Aceito | Ordenação por coluna oculta aparece como chip "Ordenado por Prazo ▲ ×"; busca que casa só em coluna oculta mostra na linha "encontrado em: Observação". |
+| C4 | Preferência por usuário e perfil; restaurar não apaga o resto | Aceito | Chave: usuário + perfil + tela + grade (no protótipo, o perfil é o usuário). "Restaurar padrão" mexe só nas colunas: filtros, trilha e rascunho ficam. |
+| C5 | Ocultar coluna pelo agrupamento | Aceito | A coluna do agrupamento não é ocultada: o valor do grupo continua na linha, para teclado e leitor de tela. |

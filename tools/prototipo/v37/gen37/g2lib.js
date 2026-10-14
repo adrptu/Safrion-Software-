@@ -339,8 +339,12 @@ function g2agMenuVals(self,sp,v,R){ const id=sp.id; if(!g2agTem(sp)){ v[id+'_agh
       if(t&&t.closest&&t.closest('input,select,textarea,[role=dialog],aside,[role=menu]')) return; if(document.querySelector('aside[role=dialog],[role=dialog][aria-modal=true]')) return;
       for(const k in window.__g2agSobe){ if(window.__g2agSobe[k]()){ e.preventDefault(); return; } } }); } } }
 function g2vals(self,sp,v,mask){
-  const id=sp.id, st0=g2stBusca(self,id,g2st(self,id)), rows0=g2disp(self,sp), added=self.state.added||{};
-  const AG=g2agTem(sp)?g2agRows(self,sp,st0,rows0):{rows:rows0,a:null}, rows=AG.rows, st=g2stBusca(self,id,g2st(self,id));   // VISOES-2 §3.3
+  const id=sp.id, rows0=g2disp(self,sp), added=self.state.added||{};
+  // sp.suspende (posto pela tela: recorte do Painel na O.S.): a grade lê o estado sem busca, filtros nem agrupamento, sem apagá-los; a busca
+  // some até o recorte acabar. O agrupamento e a trilha também ficam suspensos: senão a trilha esconderia O.S. do recorte (mesma classe do S3 6167883199)
+  const susp=(x)=>sp.suspende?Object.assign({},x,{q:'',f:{},qv:''}):x;
+  const st0=susp(g2stBusca(self,id,g2st(self,id)));
+  const AG=(g2agTem(sp)&&!sp.suspende)?g2agRows(self,sp,st0,rows0):{rows:rows0,a:null}, rows=AG.rows, st=susp(g2stBusca(self,id,g2st(self,id)));   // VISOES-2 §3.3
   const flat=g2flat(sp,st,g2qrows(sp,st,rows),mask,added); const ed=sp.edit||{m:'none'}; const editable=ed.m&&ed.m!=='none';
   g2qvals(self,sp,v,st,rows,added);
   const so=st.so||sp.so||{};
@@ -410,7 +414,7 @@ function g2vals(self,sp,v,mask){
   g2agMenuVals(self,sp,v,AG);
   v[id+'_empty']=flat.length===0; v[id+'_some']=flat.length>0;
   v[id+'_q']=st.q||''; v[id+'_setq']=(e)=>g2set(self,id,{q:e.target.value});
-  v[id+'_qon']=!g2qSeg(self,id); v[id+'_qlab']=(self.__g2qL===id&&self.__g2qS)?'Buscar nesta tela':'Buscar nesta tabela';
+  v[id+'_qon']=!g2qSeg(self,id)&&!sp.suspende; v[id+'_qlab']=(self.__g2qL===id&&self.__g2qS)?'Buscar nesta tela':'Buscar nesta tabela';
   v[id+'_filtered']=g2filtering(st)||!!(sp.qf&&st.qv);
   v[id+'_clear']=()=>{ g2set(self,id,{q:'',f:{},qv:''}); if(g2qSeg(self,id)) g2set(self,self.__g2qL,{q:''}); };   // a busca da tela também filtra esta tabela
   v[id+'_fchips']=Object.keys(st.f||{}).filter(k=>(st.f[k]||[]).length).map(k=>{ const c=sp.cols.find(x=>x.k===k)||{l:k}; return {t:c.l+': '+st.f[k].map(x=>g2flab(rows,c,x)).join(', '), rm:()=>{ const f=Object.assign({},g2st(self,id).f||{}); delete f[k]; g2set(self,id,{f}); }}; });

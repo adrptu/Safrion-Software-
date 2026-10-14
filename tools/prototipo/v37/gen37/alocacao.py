@@ -42,7 +42,11 @@ REC_DO_ATIVO = {'a01': 'T1', 'a02': 'T02', 'a03': 'T03', 'a04': 'T04', 'a08': 'C
 JS = r"""
 // ===== alocação de recursos às O.S. (alocacao.py): a semana do PCP (AL0) + as trocas gravadas no cenário (c.ordens[os].rec = {original: substituto}) =====
 // Fonte única de quem e o que está em cada O.S.: painel da O.S., Carga do PCP, conflito com a Manutenção e app de campo. Não muda c.
-function alVigente(c){ const O=(c&&c.ordens)||{}; return AL0.aloc.map(a=>{ const t=O[a.os]&&O[a.os].rec&&O[a.os].rec[a.r]; return t?Object.assign({},a,{r:t,de:a.r}):a; }); }
+// alocação vigente: a semana do PCP com as trocas de recurso da O.S. (rec). Ordem cancelada ou que saiu do estado (existia no cenário inicial)
+// deixa de ocupar o recurso (revisão Codex 6167883199: o compromisso futuro é liberado); eventos que nunca foram O.S. do cenário (irrigação,
+// OS-0419/0423) e a manutenção válida continuam. O realizado não vem daqui: fica nos apontamentos da ordem.
+function alVigente(c){ const O=(c&&c.ordens)||{}, S0=(typeof CEN0!=='undefined'&&CEN0&&CEN0.ordens)||{};
+  return AL0.aloc.filter(a=>!(O[a.os]?O[a.os].etapa==='Canceladas':!!S0[a.os])).map(a=>{ const t=O[a.os]&&O[a.os].rec&&O[a.os].rec[a.r]; return t?Object.assign({},a,{r:t,de:a.r}):a; }); }
 function alHh(x){ const h=Math.floor(x), m=Math.round((x-h)*60); return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); }
 function alDm(iso){ return String(iso).slice(8,10)+'/'+String(iso).slice(5,7); }
 function alAtivo(c,r){ const aid=AL0.ativo[r]; return (aid&&c&&c.man&&c.man.ativos&&c.man.ativos[aid])||null; }
