@@ -1318,11 +1318,13 @@
 +`destroy()` recusa desmontagem com edição/pendência (`ok:false`). Para salvar, confira `flush().ok` e o recibo antes de destruir. Somente após preservar o rascunho em armazenamento autorizado ou decisão explícita de descartá-lo use `destroy({discard:true})`. Isso cancela debounce/envios ainda na fila, remove ouvintes e fecha o snackbar da instância; não cancela gravação já recebida pelo servidor. A aplicação deve conferir o retorno e manter a tela aberta quando houver recusa.
 --- before/shared/ux-essencial/assets/m3-kit.js
 +++ candidate/shared/ux-essencial/assets/m3-kit.js
-@@ -3,7 +3,7 @@
+@@ -2,8 +2,8 @@
+  * m3-kit.js — ajudantes de fricção zero (usa as classes de m3.css).
   *   Kit.snackbar('Mensagem', { action: 'Desfazer', onAction, timeout })
   *   Kit.undoable({ message, run, undo })            → executa já, oferece Desfazer (sem diálogo de confirmação)
-  *   Kit.commands([{ title, icon, keys, keywords, run }])  → paleta Ctrl/⌘+K + atalhos de teclado
+- *   Kit.commands([{ title, icon, keys, keywords, run }])  → paleta Ctrl/⌘+K + atalhos de teclado
 - *   Kit.autosave(form, save, { delay })              → salva sozinho, sem botão "Salvar"
++ *   Kit.commands([{ title, icon, keys, keywords, run }])  → open/destroy; paleta Ctrl/⌘+K + atalhos de teclado
 + *   Kit.autosave(form, save, { delay, timeoutMs })   → flush: {ok, reason}; dirty/pending; reconcile: recibo remoto terminal
   */
  (function (global) {
@@ -1343,18 +1345,55 @@
      return close;
    }
  
-@@ -77,8 +78,8 @@
+@@ -54,11 +55,25 @@
+   const label = (keys) => parseKeys(keys).map((p) => (p === 'mod' ? (isMac ? '⌘' : 'Ctrl') : p === 'shift' ? '⇧' : p === 'alt' ? (isMac ? '⌥' : 'Alt') : p.toUpperCase())).join(isMac ? '' : '+');
+ 
+   function commands(list) {
+-    registry.push(...list);
+-    return { open: openPalette };
+-  }
+-
+-  let scrim = null;
++    const entries = list.map(command => ({ ...command }));
++    registry.push(...entries);
++    let disposed = false;
++    refreshPalette?.();
++    return {
++      open: () => { if (!disposed) openPalette(); },
++      destroy: () => {
++        if (disposed) return;
++        disposed = true;
++        for (const entry of entries) {
++          const index = registry.indexOf(entry);
++          if (index !== -1) registry.splice(index, 1);
++        }
++        refreshPalette?.();
++      }
++    };
++  }
++
++  let scrim = null, refreshPalette = null;
+   function openPalette() {
+     if (scrim) return;
+     const back = document.activeElement;
+@@ -77,8 +92,8 @@
          : '<div class="empty">Nenhum comando encontrado</div>';
        ul.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
      };
 -    const close = () => { scrim.remove(); scrim = null; back && back.focus && back.focus(); };
 -    const exec = (c) => { close(); c && c.run(); };
-+    const close = () => { scrim.remove(); scrim = null; if (back && back.focus) back.focus(); };
++    const close = () => { scrim.remove(); scrim = null; refreshPalette = null; if (back && back.focus) back.focus(); };
 +    const exec = (c) => { close(); if (c) c.run(); };
      input.addEventListener('input', () => { sel = 0; draw(); });
      input.addEventListener('keydown', (e) => {
        if (e.key === 'ArrowDown') { e.preventDefault(); sel = Math.min(sel + 1, shown.length - 1); draw(); }
-@@ -93,7 +94,7 @@
+@@ -88,12 +103,13 @@
+     });
+     ul.addEventListener('click', (e) => { const li = e.target.closest('li'); if (li) exec(shown[+li.dataset.i]); });
+     scrim.addEventListener('mousedown', (e) => { if (e.target === scrim) close(); });
++    refreshPalette = draw;
+     draw();
+     input.focus();
    }
  
    document.addEventListener('keydown', (e) => {
@@ -1363,7 +1402,7 @@
      if (scrim) return;
      for (const c of registry) {
        if (!c.keys) continue;
-@@ -104,19 +105,105 @@
+@@ -104,19 +120,105 @@
    });
  
    // ---------- autosave ----------
@@ -1421,7 +1460,7 @@
 +                const ownsNotice = closeNotice?.isCurrent();
 +                closeNotice?.();
 +                if (dirty()) { clearTimeout(t); t = setTimeout(flush, delay); }
-+                else if (ownsNotice && message) notice(message, { timeout: 2000 });
++                else if ((ownsNotice || !live) && message) notice(message, { timeout: 2000 });
 +              }
 +            }
 +            return receipt;

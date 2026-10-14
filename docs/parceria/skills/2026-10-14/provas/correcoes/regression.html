@@ -81,6 +81,35 @@ check('Recibo tardio retoma autosave do rascunho recente sem nova tecla',rsent.j
 const zf1=document.createElement('form'),zf2=document.createElement('form');for(const f of [zf1,zf2]){f.innerHTML='<input name="x" value="A">';document.body.appendChild(f)}let zdone;const zsent=[];
 const za1=Kit.autosave(zf1,d=>{zsent.push(d.x);return d.x==='B'?new Promise(r=>{zdone=r}):Promise.resolve()},{delay:10,timeoutMs:20});const za2=Kit.autosave(zf2,()=>new Promise(()=>{}),{timeoutMs:20});zf1.elements.x.value='B';await za1.flush();zf1.elements.x.value='C';await za1.flush();zf2.elements.x.value='B';await za2.flush();const zwarn=[...document.querySelectorAll('.snackbar')].at(-1);zdone();await new Promise(r=>setTimeout(r,80));
 check('Reenvio retomado não substitui aviso incerto do outro formulário',zsent.join()==='B,C'&&!za1.dirty&&!za1.pending&&za2.pending&&zwarn.isConnected&&[...document.querySelectorAll('.snackbar')].at(-1)===zwarn&&zwarn.textContent.includes('sem confirmação'));await za1.destroy();await za2.destroy({discard:true});zf1.remove();zf2.remove();
+
+for (const mode of ['fechado','expirado']) {
+ await new Promise(r=>setTimeout(r,280));
+ const f=document.createElement('form');f.innerHTML='<input name="x" value="A">';document.body.appendChild(f);let resolveSave;
+ const a=Kit.autosave(f,()=>new Promise(r=>{resolveSave=r}),{timeoutMs:20,message:'Recibo confirmado'});f.elements.x.value='B';
+ const nativeTimeout=window.setTimeout;
+ if(mode==='expirado')window.setTimeout=(fn,ms,...args)=>nativeTimeout(fn,ms===60000?10:ms,...args);
+ try { await a.flush(); } finally {window.setTimeout=nativeTimeout;}
+ if(mode==='fechado')[...document.querySelectorAll('.snackbar')].at(-1).querySelector('[aria-label="Fechar"]').click();
+ await new Promise(r=>setTimeout(r,280));resolveSave();await tick();
+ check('Recibo tardio informa sucesso após aviso '+mode,!a.pending&&!a.dirty&&[...document.querySelectorAll('.snackbar')].at(-1)?.textContent.includes('Recibo confirmado'));
+ await a.destroy();f.remove();
+}
+let oldCalls=0,newCalls=0;
+const oldCommands=Kit.commands([{title:'Tela antiga',keys:'alt+j',run:()=>oldCalls++}]);oldCommands.destroy?.();
+const newCommands=Kit.commands([{title:'Tela atual',keys:'alt+j',run:()=>newCalls++}]);
+document.dispatchEvent(new KeyboardEvent('keydown',{key:'j',altKey:true,bubbles:true}));
+check('Remontagem executa somente callback atual',oldCalls===0&&newCalls===1);
+newCommands.open();check('Remontagem não duplica comandos na paleta',document.querySelectorAll('#kit-cmds [role=option]').length===1&&document.querySelector('#kit-cmds').textContent.includes('Tela atual'));
+newCommands.destroy?.();check('Desmontagem remove comando da paleta já aberta',document.querySelectorAll('#kit-cmds [role=option]').length===0);
+let sameCalls=0;const sharedCommand={title:'Mesmo comando',keys:'alt+l',run:()=>sameCalls++};
+const same1=Kit.commands([sharedCommand]),same2=Kit.commands([sharedCommand]);same1.destroy?.();same1.destroy?.();
+document.dispatchEvent(new KeyboardEvent('keydown',{key:'l',altKey:true,bubbles:true}));
+// Paleta aberta bloqueia atalhos; fechar antes de verificar a inscrição restante.
+document.querySelector('.palette input').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
+document.dispatchEvent(new KeyboardEvent('keydown',{key:'l',altKey:true,bubbles:true}));
+check('Destroy idempotente preserva inscrição independente do mesmo objeto',sameCalls===1);
+same2.destroy?.();document.dispatchEvent(new KeyboardEvent('keydown',{key:'l',altKey:true,bubbles:true}));
+check('Destroy final remove o atalho registrado',sameCalls===1);
 window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS '+results.length+'/'+results.length:'FAIL';
 })().catch(error=>{window.testResults=[{ok:false,error:String(error)}]});
 </script></html>

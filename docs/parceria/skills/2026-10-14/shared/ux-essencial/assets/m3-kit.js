@@ -2,7 +2,7 @@
  * m3-kit.js — ajudantes de fricção zero (usa as classes de m3.css).
  *   Kit.snackbar('Mensagem', { action: 'Desfazer', onAction, timeout })
  *   Kit.undoable({ message, run, undo })            → executa já, oferece Desfazer (sem diálogo de confirmação)
- *   Kit.commands([{ title, icon, keys, keywords, run }])  → paleta Ctrl/⌘+K + atalhos de teclado
+ *   Kit.commands([{ title, icon, keys, keywords, run }])  → open/destroy; paleta Ctrl/⌘+K + atalhos de teclado
  *   Kit.autosave(form, save, { delay, timeoutMs })   → flush: {ok, reason}; dirty/pending; reconcile: recibo remoto terminal
  */
 (function (global) {
@@ -55,11 +55,25 @@
   const label = (keys) => parseKeys(keys).map((p) => (p === 'mod' ? (isMac ? '⌘' : 'Ctrl') : p === 'shift' ? '⇧' : p === 'alt' ? (isMac ? '⌥' : 'Alt') : p.toUpperCase())).join(isMac ? '' : '+');
 
   function commands(list) {
-    registry.push(...list);
-    return { open: openPalette };
+    const entries = list.map(command => ({ ...command }));
+    registry.push(...entries);
+    let disposed = false;
+    refreshPalette?.();
+    return {
+      open: () => { if (!disposed) openPalette(); },
+      destroy: () => {
+        if (disposed) return;
+        disposed = true;
+        for (const entry of entries) {
+          const index = registry.indexOf(entry);
+          if (index !== -1) registry.splice(index, 1);
+        }
+        refreshPalette?.();
+      }
+    };
   }
 
-  let scrim = null;
+  let scrim = null, refreshPalette = null;
   function openPalette() {
     if (scrim) return;
     const back = document.activeElement;
@@ -78,7 +92,7 @@
         : '<div class="empty">Nenhum comando encontrado</div>';
       ul.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
     };
-    const close = () => { scrim.remove(); scrim = null; if (back && back.focus) back.focus(); };
+    const close = () => { scrim.remove(); scrim = null; refreshPalette = null; if (back && back.focus) back.focus(); };
     const exec = (c) => { close(); if (c) c.run(); };
     input.addEventListener('input', () => { sel = 0; draw(); });
     input.addEventListener('keydown', (e) => {
@@ -89,6 +103,7 @@
     });
     ul.addEventListener('click', (e) => { const li = e.target.closest('li'); if (li) exec(shown[+li.dataset.i]); });
     scrim.addEventListener('mousedown', (e) => { if (e.target === scrim) close(); });
+    refreshPalette = draw;
     draw();
     input.focus();
   }
@@ -146,7 +161,7 @@
                 const ownsNotice = closeNotice?.isCurrent();
                 closeNotice?.();
                 if (dirty()) { clearTimeout(t); t = setTimeout(flush, delay); }
-                else if (ownsNotice && message) notice(message, { timeout: 2000 });
+                else if ((ownsNotice || !live) && message) notice(message, { timeout: 2000 });
               }
             }
             return receipt;
