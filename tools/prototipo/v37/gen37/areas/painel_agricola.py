@@ -169,6 +169,7 @@ function pnaMip(ref) {
 }
 
 function pnaVals(self,v) {
+ if(typeof mipOuvir==='function')mipOuvir(self);
  g2keep(self,'g_pna');
  if(!self.__pnaFocus){self.__pnaFocus=true;
   const restaura=()=>{const h=history.state||{},grupo=h.pnaGrupo,id=h.pnaFoco;if(!grupo&&!id)return;let n=0;

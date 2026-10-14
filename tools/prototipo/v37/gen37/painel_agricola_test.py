@@ -438,6 +438,10 @@ def mip_ui():
     hook="window.__pnaMipReset=()=>{mipReset();cenReset()};if(window.__pnaMipMode){const f=agrPainelRef;agrPainelRef=(...a)=>({...f(...a),mip:window.__pnaMipMode==='empty'?{referencia:'2026-09-23',decidir:[],atrasadas:[],coleta:[]}:null})};\n"
     assert html.count('function pnaVals(self,v)')==1
     (root/'PAGR.dc.html').write_text(html.replace('function pnaVals(self,v)',hook+'function pnaVals(self,v)',1))
+    other_html=(root/'AG-01.dc.html').read_text()
+    sync_hook="window.__pnaSyncChange=()=>mipMudar(null,s=>{s.vis['VIS-006'].resp='Responsável atualizado na outra aba'});window.__pnaSyncReset=()=>mipReset();\n"
+    assert other_html.count('function mipMudar(self, fn)')==1
+    (root/'AG-01.dc.html').write_text(other_html.replace('function mipMudar(self, fn)',sync_hook+'function mipMudar(self, fn)',1))
     port,srv=servir(str(root));c=Chrome();J=c.js;checks=[]
     def chk(t,v):checks.append(bool(v));print(('OK ' if v else 'FALHA ')+t,flush=True)
     def wait(e):
@@ -459,6 +463,21 @@ def mip_ui():
             J("document.querySelector('[aria-label=\"Como ler o MIP\"]').focus()");c.tecla('Enter','Enter',13)
             chk('Explicação acessível por teclado '+str(w),wait("(()=>{let e=document.querySelector('#g2-dica');return e&&!e.hidden&&e.innerText.includes('não é percentual de área afetada')})()"));c.tecla('Escape','Escape',27)
             J("(()=>{let i=document.querySelector('main input[type=search]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'Café');i.dispatchEvent(new Event('input',{bubbles:true}))})()")
+            # Outra aba real, mesmo perfil isolado: gravação pelo domínio dispara storage nativo.
+            old_port=os.environ.get('CDP_PORT');os.environ['CDP_PORT']=str(c.port)
+            try:other=Chrome()
+            finally:
+                if old_port is None:os.environ.pop('CDP_PORT',None)
+                else:os.environ['CDP_PORT']=old_port
+            try:
+                other.goto(f'http://127.0.0.1:{port}/AG-01.dc.html',1)
+                J("window.__pnaSyncDocument=1;document.querySelector('main input[type=search]').focus()")
+                other.js('__pnaSyncChange()')
+                chk('MIP atualiza sem recarregar após outra aba '+str(w),wait("document.querySelector('[data-pna-mip=\"VIS-006\"]').innerText.includes('Responsável atualizado na outra aba')"))
+                chk('Sincronização preserva documento, busca e foco '+str(w),J("__pnaSyncDocument===1&&document.querySelector('main input[type=search]').value==='Café'&&document.activeElement===document.querySelector('main input[type=search]')"))
+                other.js('__pnaSyncReset()')
+                chk('Reset externo também atualiza sem recarregar '+str(w),wait("!document.querySelector('[data-pna-mip=\"VIS-006\"]').innerText.includes('Responsável atualizado na outra aba')"))
+            finally:other.close()
             sel='a[data-pna-grupo="mip:VIS-055"]'
             J('document.querySelector('+json.dumps(sel)+').scrollIntoView({block:"center"})')
             if os.environ.get('PNA_SHOTS'):
