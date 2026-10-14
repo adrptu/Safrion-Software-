@@ -1,0 +1,101 @@
+# -*- coding: utf-8 -*-
+"""PAINEL-01: oráculos explícitos e UI real isolada. python3 painel_modulos_test.py [--ui].
+Dados sintéticos. Sem alterar cenários do usuário. --ui requer build + montar_render.
+"""
+import os, sys, json, subprocess, tempfile, time
+from pathlib import Path
+os.environ.setdefault('SAFRION_DADOS','sintetico')
+from areas import paineis as P
+import cenario
+import dados_manutencao as DM
+TEST = r'''
+const assert=require('node:assert/strict'); let n=0;
+function chk(nome,actual,expected){assert.deepEqual(actual,expected,nome);console.log('OK '+nome);n++;}
+const c={ordens:{a:{id:'OS-1',etapa:'A liberar'},b:{id:'OS-2',etapa:'Liberadas'},c:{id:'OS-3',etapa:'Em execução'},d:{id:'OS-4',etapa:'Em execução'},e:{id:'OS-5',etapa:'Em conferência'},f:{id:'OS-6',etapa:'Encerradas'},g:{id:'OS-7',etapa:'Canceladas'},ben:{id:'OB-1',fam:'BEN',etapa:'Em execução'}},lotes:{a:{fisico:100,reservado:30,quarentena:20},b:{fisico:10,reservado:10,quarentena:0},c:{fisico:80,reservado:0,quarentena:0},d:{fisico:0,reservado:0,quarentena:0}},reqs:{
+ r1:{os:'b',itens:[{solicitado:20,consumido:5,custodia:15}]},
+ r2:{os:'c',itens:[{solicitado:20,consumido:5,custodia:10}]},
+ r3:{os:'d',itens:[{solicitado:20,consumido:20,custodia:0},{solicitado:1,consumido:0,custodia:0}]},
+ r4:{os:'g',itens:[{solicitado:100,consumido:0,custodia:0}]},
+ r5:{os:'a',itens:[{solicitado:100,consumido:0,custodia:0}]}}};
+const before=JSON.stringify(c);
+chk('Agrícola: quatro estados; não conta cancelada, encerrada nem BEN',pnValores(c,'PAGR').vals,[1,1,2,1]);
+chk('Suprimentos: lote sobreposto conta nos indicadores pertinentes; requisição por registro, item coberto e cancelada excluídos',pnValores(c,'PSUP').vals,[3,2,1,2]);
+chk('Gráfico de estoque: cada lote físico conta uma só vez',pnValores(c,'PSUP').bars,[1,1,1]);
+chk('Painéis não alteram cenário',JSON.stringify(c),before);
+const m={hoje:'2026-10-13',horiz:7,ativos:{a:{id:'a',cond:'Bloqueado',un:'h',leit:null,ritmo:0},b:{id:'b',cond:'Disponível'}},planos:{p:{id:'p',versao:1,estado:'Ativo',servicos:[{id:'s',nome:'Revisão',gat:{d:10},tol:{d:0}}]}},vinc:{'p|a':{marco:{data:'2026-10-01',leit:null}}},oms:{a:{etapa:'A liberar'},b:{etapa:'Liberadas'},c:{etapa:'Em execução'},d:{etapa:'Em conferência'},e:{etapa:'Encerradas'},f:{etapa:'Canceladas'}}};
+c.man=m;
+chk('Manutenção: serviço vencido sem ordem; quatro abertas, uma executando e um ativo bloqueado',pnValores(c,'PMAN').vals,[1,4,1,1]);
+chk('Gráfico manutenção: fases abertas',pnValores(c,'PMAN').bars,[1,1,1,1]);
+m.planos.p.estado='Inativo';chk('Plano inativo não cria pendência',pnValores(c,'PMAN').vals[0],0);
+m.planos.p.estado='Ativo';m.vinc['p|a'].marco.data='2026-11-01';chk('Próxima revisão fora da janela não cria pendência',pnValores(c,'PMAN').vals[0],0);
+for(const k of ['PAGR','PMAN','PSUP'])chk(k+' ausente nunca vira zero',pnValores({},k).vals,[null,null,null,null]);
+chk('Coleções vazias válidas: zero agrícola',pnValores({ordens:{}},'PAGR').vals,[0,0,0,0]);
+chk('Coleções vazias válidas: zero suprimentos',pnValores({ordens:{},lotes:{},reqs:{}},'PSUP').vals,[0,0,0,0]);
+c.lotes.a.fisico=null;chk('Saldo físico ausente não produz total parcial',pnValores(c,'PSUP').vals.slice(0,3),[null,null,null]);
+c.reqs.r2.itens[0].custodia=null;chk('Custódia ausente não vira demanda falsa',pnValores(c,'PSUP').vals[3],null);
+c.ordens.c.etapa=null;chk('Estado ausente impede contagem parcial de O.S.',pnValores(c,'PAGR').vals,[null,null,null,null]);
+console.log('RESULTADO '+n+'/'+n);
+'''
+
+def unit():
+    src=cenario.perfis_js()+cenario.js_prefixo()+DM.js_regras()+P.JS+TEST
+    with tempfile.TemporaryDirectory(prefix='painel01-') as d:
+        p=Path(d)/'oracle.js';p.write_text(src)
+        r=subprocess.run(['node',str(p)],text=True,capture_output=True)
+        print(r.stdout);print(r.stderr,end='');return r.returncode
+
+def ui():
+    from comp_lib import Chrome, servir
+    import ui37
+    port,srv=servir(os.environ.get('RENDER_DIR') or str(Path(__file__).parent/'_render'));c=Chrome();J=c.js;checks=[]
+    def chk(n,yes,detail=''):
+        checks.append(bool(yes));print(('OK ' if yes else 'FALHA ')+n+('' if yes else ' '+str(detail)),flush=True)
+    def wait(expr):
+        end=time.monotonic()+4
+        while time.monotonic()<end:
+            if J(expr):return True
+            time.sleep(.05)
+        return False
+    U=lambda p:f'http://127.0.0.1:{port}/{p}'
+    c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__pnErrors=[];addEventListener('error',e=>__pnErrors.push(e.message));addEventListener('unhandledrejection',e=>__pnErrors.push(String(e.reason)));"})
+    try:
+        for width,touch in [(1440,False),(390,True)]:
+            c.aparelho(width,844,1,touch)
+            for fid,(mod,_,items,links) in P.PAINEIS.items():
+                c.goto(U(ui37.HUB37[mod]),.4)
+                chk(fid+' primeiro cartão '+str(width),J("document.querySelector('a.mod-cartao').getAttribute('href')")==fid+'.dc.html')
+                J("document.querySelector('a.mod-cartao').click()")
+                chk(fid+' quatro indicadores renderizados '+str(width),wait("document.querySelectorAll('.pn-value').length===4 && !document.querySelector('.pn-value').textContent.includes('{{')"))
+                data=J("({err:__pnErrors,overflow:document.documentElement.scrollWidth>document.documentElement.clientWidth, vals:[...document.querySelectorAll('.pn-value')].map(x=>x.textContent), links:[...document.querySelectorAll('.pn-link')].map(a=>a.getAttribute('href'))})")
+                chk(fid+' sem JS/overflow '+str(width),not data['err'] and not data['overflow'],data)
+                chk(fid+' destinos existentes '+str(width),data['links']==[h for _,h in links])
+                chk(fid+' fonte completa no seed '+str(width),'Sem dados' not in data['vals'],data)
+                J("document.querySelector('main').scrollTop=100000")
+                chk(fid+' ação primária alcançável ao rolar '+str(width),J("(()=>{let a=document.querySelector('header .pn-link'),r=a.getBoundingClientRect();return r.height>=40&&r.top>=0&&r.bottom<=innerHeight&&a.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))})()"))
+                J("document.querySelector('main').scrollTop=0;document.querySelector('.pn-tip').focus()")
+                c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Enter','code':'Enter','windowsVirtualKeyCode':13});c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':'Enter','code':'Enter','windowsVirtualKeyCode':13})
+                chk(fid+' fórmula por teclado '+str(width),wait("(()=>{let d=document.querySelector('#g2-dica');return d&&!d.hidden&&d.textContent.includes('Fonte:')})()"))
+                c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Escape','code':'Escape','windowsVirtualKeyCode':27})
+                chk(fid+' Escape fecha dica '+str(width),wait("!document.querySelector('#g2-dica')||document.querySelector('#g2-dica').hidden"))
+                if touch:
+                    xy=J("(()=>{let r=document.querySelector('.pn-tip').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2,w:r.width,h:r.height}})()")
+                    c.call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':xy['x'],'y':xy['y']}]});c.call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
+                    chk(fid+' toque abre fórmula e alvo44',xy['w']>=44 and xy['h']>=44 and wait("(()=>{let d=document.querySelector('#g2-dica');return d&&!d.hidden&&d.textContent.includes('Fonte:')})()"))
+                J("document.querySelector('.volta37').click()")
+                chk(fid+' volta devolve foco ao cartão '+str(width),wait("document.activeElement.getAttribute('href')==="+json.dumps(fid+'.dc.html')))
+        seed=cenario.seed();seed['ordens']={}
+        c.goto(U('PAGR.dc.html'),.4)
+        J("localStorage.setItem('talhao-os-cenario-v1',"+json.dumps(json.dumps(seed))+ ");location.reload()")
+        chk('Vazio é zero com mensagem explícita',wait("document.querySelector('.pn-value')&&[...document.querySelectorAll('.pn-value')].every(x=>x.textContent==='0')&&document.body.innerText.includes('Nenhum registro neste recorte')"))
+        seed['ordens']={'OS-QA':{'id':'OS-QA','etapa':'A liberar'}}
+        J("localStorage.setItem('talhao-os-cenario-v1',"+json.dumps(json.dumps(seed))+");dispatchEvent(new StorageEvent('storage',{key:'talhao-os-cenario-v1'}))")
+        chk('Mudança do cenário atualiza painel sem recarregar',wait("document.querySelector('.pn-value').textContent==='1'"))
+        del seed['ordens']
+        J("localStorage.setItem('talhao-os-cenario-v1',"+json.dumps(json.dumps(seed))+");location.reload()")
+        chk('Fonte ausente: sem dados e caminho de recuperação',wait("document.querySelector('.pn-value')&&[...document.querySelectorAll('.pn-value')].every(x=>x.textContent==='Sem dados')&&document.body.innerText.includes('Há dados incompletos')&&document.querySelector('.pn-link').getAttribute('href')==='OS.dc.html'"))
+        c.goto(U('MOD-COM.dc.html'),.4)
+        chk('Comercial reutiliza PCOM como primeiro cartão',J("document.querySelector('a.mod-cartao').getAttribute('href')")=='PCOM.dc.html')
+    finally:c.close();srv.terminate()
+    print(f'RESULTADO {sum(checks)}/{len(checks)}');return 0 if all(checks) else 1
+
+if __name__=='__main__':sys.exit(ui() if '--ui' in sys.argv else unit())
