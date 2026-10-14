@@ -17,13 +17,20 @@ p, srv = servir(R); c = Chrome(); J = c.js
 c.call('Page.addScriptToEvaluateOnNewDocument', {'source': "window.__e=[];addEventListener('error',e=>window.__e.push(String(e.message)))"})
 U = lambda x: f'http://127.0.0.1:{p}/{x}'
 BLOCOS = ['Solicitações e contratos', 'Acompanhamento do CRE-0102', 'Dossiê e consentimento']
+def espera(cond, lim=8.0):
+    # espera a condição observável (AGENTS §3.6), com limite explícito: sob carga, 1,2 s fixos não bastavam para a tela renderizar
+    t0 = time.time()
+    while time.time() - t0 < lim:
+        if J("(()=>{try{return !!(%s)}catch(e){return false}})()" % cond): return True
+        time.sleep(.15)
+    return False
 def blocos(): return [b for b in BLOCOS if J("[...document.querySelectorAll('main h2,main h3')].some(h=>h.offsetParent&&h.innerText.trim()===%s)" % json.dumps(b))]
 def kpis(): return J("[...document.querySelectorAll('main')].some(m=>/DÍVIDA ATIVA/i.test(m.innerText))")
 try:
     for w, toque in [(1440, False), (390, True)]:
         c.aparelho(w, 900 if w > 400 else 844, 1 if w > 400 else 2, toque)
         c.goto(U('IN-04.dc.html'), 1.2)
-        J("(()=>{const a=[...document.querySelectorAll('nav[aria-label=Menu] a')].find(a=>(a.getAttribute('aria-label')||a.title||a.innerText).trim().startsWith('Crédito')); a.click();})()"); time.sleep(1.2)
+        J("(()=>{const a=[...document.querySelectorAll('nav[aria-label=Menu] a')].find(a=>(a.getAttribute('aria-label')||a.title||a.innerText).trim().startsWith('Crédito')); a.click();})()"); espera("location.pathname.endsWith('MOD-CRE.dc.html')&&[...document.querySelectorAll('main a.mod-cartao')].filter(a=>a.offsetParent).length>=3")
         cards = J("[...document.querySelectorAll('main a.mod-cartao')].filter(a=>a.offsetParent).map(a=>[a.innerText.trim(),a.getAttribute('href')])") or []
         chk(f'C1 {w}: o Crédito na barra abre a tela de entrada com um cartão por visão da GE-08',
             J("location.pathname").endswith('MOD-CRE.dc.html') and cards == [['Contratos', 'GE-08.dc.html#vis=contratos'], ['Liberações', 'GE-08.dc.html#vis=liberacoes'], ['Dossiê', 'GE-08.dc.html#vis=dossie']], [J("location.pathname"), cards])
@@ -31,7 +38,7 @@ try:
             c.goto(U('MOD-CRE.dc.html'), 1.0); J("[...document.querySelectorAll('main a.mod-cartao')].filter(a=>a.offsetParent)[%d].click()" % i); time.sleep(1.2)
             vol = J("[...document.querySelectorAll('a')].some(a=>a.offsetParent&&/Crédito/.test(a.innerText)&&/MOD-CRE/.test(a.getAttribute('href')||''))")
             chk(f'C2 {w} {nome}: só a parte do cartão ({BLOCOS[i]}), com os indicadores e "‹ Crédito"', blocos() == [BLOCOS[i]] and kpis() and vol, [blocos(), kpis(), vol])
-        J("location.hash='vis=dossie'"); time.sleep(.6)
+        J("location.hash='vis=dossie'"); espera("[...document.querySelectorAll('main h2,main h3')].filter(h=>h.offsetParent).length===1")
         chk(f'C3 {w}: trocar a visão pelo endereço troca a parte sem recarregar', blocos() == [BLOCOS[2]], blocos())
         c.goto(U('GE-08.dc.html'), 1.2)
         chk(f'C4 {w}: GE-08 sem visão no endereço (links de outras telas) mostra as três partes', blocos() == BLOCOS, blocos())
