@@ -478,7 +478,10 @@ function g2toastLugar(){ try{ const t=document.querySelector('.g2toast'); if(!t)
   const m=document.querySelector('main'); const mq=m&&m.getBoundingClientRect();
   if(mq&&mq.width>200){ const l=Math.max(mq.left,0), r=Math.min(mq.right,W); t.style.left=((l+r)/2)+'px'; t.style.maxWidth=Math.min(560,r-l-24)+'px'; }
   const ctl=g2ctl(t,H,W);
-  const r0=t.getBoundingClientRect(), h=r0.height, b0=H-r0.bottom, topo=Math.max(mq&&mq.width>200?mq.top:0,8);   // nunca acima da área de conteúdo
+  const topo=Math.max(mq&&mq.width>200?mq.top:0,8);   // nunca acima da área de conteúdo
+  // âncora acima do conteúdo (área de ações presa mais alta que a tela, ex.: painel do Beneficiamento): volta ao pé da janela
+  if(t.getBoundingClientRect().top<topo) t.style.bottom='22px';
+  const r0=t.getBoundingClientRect(), h=r0.height, b0=H-r0.bottom;
   const sob=(b)=>{ const top=H-b-h, bot=H-b; return ctl.filter(c=>c.q.left<r0.right&&c.q.right>r0.left&&c.q.top<bot&&c.q.bottom>top); };
   if(!sob(b0).length) return;
   for(let b=b0+1;H-b-h>=topo;b++){ if(!sob(b).length){ t.style.bottom=b+'px'; return; } }
