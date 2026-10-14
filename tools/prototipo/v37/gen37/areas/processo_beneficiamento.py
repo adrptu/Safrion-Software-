@@ -24,9 +24,9 @@ def build():
     nova = f'<button type="button" onClick="{H("nova_go")}" style="{_MINI}">+ Nova ordem</button>'
     kb = (f'<style>@media (max-width:479px){{.bn-kb>div{{flex-direction:column!important}}.bn-kb>div>div{{width:100%!important}}}}</style>'
           f'<div class="bn-kb" style="overflow-x: auto;">{_kanban()}</div>')
-    # aviso (role=status) acima do conteúdo e sem receber toque com o painel aberto (rodada 3, I-g4: cobria a primária do rodapé 2 a 4 s a 390 px)
-    aviso = '<style>body:has(aside[role=dialog]) div[role=status]{top:calc(12px + env(safe-area-inset-top, 0px))!important;bottom:auto!important;pointer-events:none;}</style>'
-    corpo = aviso + (bloco('Ordens de beneficiamento', 'Da matéria-prima recebida ao produto beneficiado: entradas, saídas pesadas, embalagens e balanço na mesma ordem. Clique numa ordem para o próximo passo.',
+    # o aviso (role=status) segue o posicionamento único do g2lib (g2toastLugar, UX-BEN35-AVISO-01); a regra local da rodada 3 (I-g4), que o
+    # mandava ao topo com o painel aberto e cobria o cabeçalho do painel, saiu
+    corpo = (bloco('Ordens de beneficiamento', 'Da matéria-prima recebida ao produto beneficiado: entradas, saídas pesadas, embalagens e balanço na mesma ordem. Clique numa ordem para o próximo passo.',
                    IF('vl', g_ob + cartoes('cards_ob'), d=True) + IF('vk', kb), acao=f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">{vis}{nova}</div>'))
     _shell('BEN', 'Beneficiamento', 'Processe as ordens: autorize a rota, registre as saídas pesadas, confira o balanço e feche. Fechar não libera o lote: a Qualidade libera.',
            corpo, fname, 1100,
