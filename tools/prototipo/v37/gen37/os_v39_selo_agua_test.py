@@ -7,7 +7,7 @@ linha, e a OS-0419 abre na IR-03det. Lê a _render/ como está (não copia proje
 import sys, os, time, json, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from os_lib import Os
-from comp_lib import troca_visao   # VISOES-1: troca de visão pelo seletor (data-visao), não pelo texto
+from comp_lib import troca_visao, cv_todas_sempre, cv_padrao   # VISOES-1: troca de visão pelo seletor (data-visao), não pelo texto
 T = Os(copiar=False); J = T.J
 VERM, AMAR = 'rgb(180, 35, 24)', 'rgb(138, 90, 0)'
 AGUA = ('OS-0419', 'OS-0422', 'OS-0423')
@@ -57,6 +57,8 @@ try:
          'OS-0418 (fertirrigação) continua na O.S.: produto Ureia 45% com requisição em Insumos, liberação pela agrônoma, liberar bloqueado sem lote', (l, ins[:200], p[:200]))
     T.fechar(); ERR += T.erros()
     # ---- ordens de água na IR-03: cada fato uma vez por linha ----
+    # V2-3: a Pendência fica fora do "Abre com"; o formato do selo é conferido com todas as colunas, e o ícone do padrão no fim
+    cv_todas_sempre(T.c)
     T.c.goto(f'http://127.0.0.1:{T.p}/IR-03.dc.html', wait=1.0)
     # revisão TABR (09/10/2026): na Pendência o chip diz o tipo ("Conflito") e o detalhe ("parada da B3 · 14:00–15:00") vai na dica e no texto do
     # leitor de tela (A11); avisos (a nota de ET) e passadas saíram da grade da IR-03 para o detalhe da ordem (A1): cada fato continua uma vez só
@@ -72,6 +74,15 @@ try:
     T.c.goto(f'http://127.0.0.1:{T.p}/IR-03det.dc.html', wait=1.0); b = J("document.body.innerText") or ''
     T.ok('Liberadas' in l9 and l9.count('10,81 mm') == 1 and J("document.querySelector('h1').innerText.trim()") == 'OS-0419 · Irrigação · Pivô 2' and '10,81 mm' in b
          and 'olítica' not in b and 'agrônom' not in b, 'IR-03 · OS-0419 liberada com 10,81 mm uma vez na linha; IR-03det abre a OS-0419 sem citar política nem agrônomo', (l9, b[:160]))
+    ERR += T.erros()
+    # V2-3: no padrão (Pendência oculta) o alerta não some: ícone antes da Ordem, vermelho com o texto curto, amarelo só ícone; o detalhe na dica
+    cv_padrao(T.c); T.c.goto(f'http://127.0.0.1:{T.p}/IR-03.dc.html', wait=1.0)
+    ICO = "(id_=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>((r.innerText.match(/\\bOS-\\d+/)||[''])[0])===id_); const c0=r&&r.querySelector('[role=cell]'); return c0?[c0.innerText.replace(/\\s+/g,' ').trim(),[...c0.querySelectorAll('[title],[aria-label]')].map(e=>e.getAttribute('title')||e.getAttribute('aria-label'))]:null;})"
+    i23 = J(f"({ICO})('OS-0423')") or [None, []]; i22 = J(f"({ICO})('OS-0422')") or [None, []]
+    hs = J("[...document.querySelectorAll('[role=columnheader]')].filter(h=>h.getClientRects().length).map(h=>h.innerText.replace(/[⇅▾▴▲▼]/g,'').trim())") or []
+    T.ok('Pendência' not in ' '.join(hs) and (i23[0] or '').startswith('Conflito OS-0423') and any(t.startswith('Pendência: Conflito · parada da B3') for t in i23[1])
+         and (i22[0] or '').startswith('OS-0422') and 'Pendência: Janela a definir' in i22[1],
+         'IR-03 padrão (Pendência oculta): "Conflito" vermelho vira ícone com texto antes da OS-0423 (detalhe na dica); "Janela a definir" vira ícone amarelo na OS-0422', (hs, i23, i22))
     ERR += T.erros()
     T.ok(not ERR, 'sem erro JS (O.S., IR-03 e IR-03det)', ERR)
 finally:

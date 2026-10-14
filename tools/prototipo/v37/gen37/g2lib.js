@@ -238,7 +238,8 @@ function g2close(self,sp){ const fm=g2st(self,sp.id).fm; if(fm && !fm.ro && g2di
 const G2_CV_PERG=[['oque','O quê'],['quem','Quem'],['quando','Quando'],['onde','Onde'],['medida','Medidas'],['situacao','Situação'],['','Outras']];
 // VISOES-2 §3.6 · Situação oculta vira ícone antes da identidade (sp.sico = {k, cores}): só nas cores que pedem atenção (padrão vermelho,
 // laranja e amarelo), com o texto completo na dica e no leitor; o estado normal (Planejado, Livre) fica sem ícone
-function g2sicoPart(r,sp){ const k=sp.sico.k, cores=sp.sico.cores||['red','orange','yellow'], c=sp.cols.find(x=>x.k===k); if(!c) return null;
+// sp.sico.ks: mais de uma coluna de situação oculta (ex.: Pendência e Situação); cada uma dá o seu ícone, na ordem do quadro
+function g2sicoPart(r,sp,k){ k=k||sp.sico.k; const cores=sp.sico.cores||['red','orange','yellow'], c=sp.cols.find(x=>x.k===k); if(!c) return null;
   const ps=(r.p&&r.p[k])||[], ch=ps.find(p=>p&&p.c&&['chip','ico','cn'].indexOf(p.k)>=0); let cor=null, t='', d='';
   if(ch){ cor=ch.c; t=String(ch.t||''); d=String(ch.dica||ch.dv||''); } else { t=g2text(r,c); cor=(c.chips||{})[t]||null; }
   t=t.trim(); if(!cor||!t||cores.indexOf(cor)<0) return null;
@@ -255,7 +256,10 @@ function g2cvLer(self,sp){ if(typeof window!=='undefined'&&window.__g2cvTodasSem
 function g2cvCel(){ try{ return window.matchMedia('(max-width: 640px)').matches; }catch(e){ return false; } }
 function g2colsVis(self,sp){ if(!g2cvTem(sp)) return sp.cols; const esc=g2cvLer(self,sp), pad=g2cvPadrao(sp), k0=sp.cols[0].k;
   let S=new Set(esc||pad); S.add(k0);
-  let ord=[k0].concat(pad.filter(k=>k!==k0&&S.has(k))).concat(sp.cols.map(c=>c.k).filter(k=>k!==k0&&pad.indexOf(k)<0&&S.has(k)));
+  // o padrão vem na ordem do "Abre com"; cada coluna a mais entra logo depois da vizinha anterior da grade já à vista, para a tabela completa
+  // manter a ordem desenhada (Custo total no fim, decisão do proprietário de 13/10; "1º uso" ao lado do insumo; R$/ha ao lado do total)
+  let ord=[k0].concat(pad.filter(k=>k!==k0&&S.has(k))); const gk=sp.cols.map(c=>c.k);
+  gk.forEach((k,i)=>{ if(k===k0||ord.indexOf(k)>=0||!S.has(k)) return; let j=-1; for(let a=i-1;a>=0&&j<0;a--) j=ord.indexOf(gk[a]); ord.splice(j+1,0,k); });
   if(!esc&&g2cvCel()) ord=ord.slice(0,3);   // celular: as 3 primeiras do padrão; a escolha explícita vale em qualquer tela
   return ord.map(k=>sp.cols.find(c=>c.k===k)).filter(Boolean); }
 function g2cvGrava(self,sp,ks){ try{ if(ks) localStorage.setItem(g2cvChave(sp),JSON.stringify(ks)); else localStorage.removeItem(g2cvChave(sp)); }catch(e){}
@@ -297,7 +301,7 @@ function g2agTrilha(search){ const p=String(search||'').replace(/^\?/,'').split(
 // o estado em memória guarda o perfil de quem escolheu (agpf, cvpf): trocar o perfil sem recarregar (aqui ou em outra aba) relê a preferência
 // do novo perfil e o endereço passa a refletir o agrupamento dele; o ?ag= do endereço só vale na chegada (V2-3-PERFIL-01, Codex 6179592748)
 function g2pfk(){ try{ return g2perfil().k; }catch(e){ return ''; } }
-function g2agLer(self,sp){ const st=g2st(self,sp.id), pf=g2pfk(); if(st.ag!==undefined&&st.agpf===pf) return st.ag;
+function g2agLer(self,sp){ const st=g2st(self,sp.id), pf=g2pfk(); if(st.ag!==undefined&&(st.agpf===undefined||st.agpf===pf)) return st.ag;   // sem marca de perfil (estado montado pela própria tela): vale como está
   const troca=st.agpf!==undefined&&st.agpf!==pf; let a=null;
   if(!troca) try{ const q=new URLSearchParams(location.search), d=q.get('ag'); if(d) a={d,t:g2agTrilha(location.search)};
     else if(q.get('view')==='agrupada'&&sp.ag.some(x=>x.pq==='onde')) a={d:'onde',t:[]}; }catch(e){ a=null; }
@@ -431,9 +435,9 @@ function g2vals(self,sp,v,mask){
   const qn=g2norm((st.q||'').trim()), visK=new Set(cols.map(c=>c.k));
   // VISOES-2 C3: busca que casa só em coluna oculta diz na linha onde casou (a coluna continua valendo para a busca)
   const ondeCasou=(r)=>{ if(!qn||!g2cvTem(sp)||r.grp) return ''; if(cols.some(c=>g2norm(g2text(r,c)).indexOf(qn)>=0)) return ''; const oc=sp.cols.filter(c=>!visK.has(c.k)&&g2norm(g2text(r,c)).indexOf(qn)>=0).map(c=>c.l); return oc.length?'encontrado em: '+oc.join(', '):''; };
-  const sicoOn=!!(sp.sico&&!visK.has(sp.sico.k));
+  const sicoKs=sp.sico?(sp.sico.ks||[sp.sico.k]).filter(k=>!visK.has(k)):[];
   v[id+'_rows']=flat.map(({r,lvl,has})=>{
-    const cells=[]; const exp=(st.x||sp.x0||{}); const casou=ondeCasou(r); const sicoP=sicoOn?g2sicoPart(r,sp):null;
+    const cells=[]; const exp=(st.x||sp.x0||{}); const casou=ondeCasou(r); const sicoP=sicoKs.map(k=>g2sicoPart(r,sp,k)).filter(Boolean);
     // linha livre (convite para cadastrar, ex.: talhão sem cultivo): sem seleção e sem lixeira
     if(sp.sel&&(r.livre||r.fora||r.nosel)) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.sel) cells.push({isSel:true,isData:false,isDel:false,cls:'',on:!!(st.sel||{})[r.id],selLabel:'Selecionar '+g2text(r,sp.cols[0]),
       tog:()=>{ const s2=Object.assign({},g2st(self,id).sel||{}); s2[r.id]=!s2[r.id]; g2set(self,id,{sel:s2}); },st:'padding:6px 4px 6px 12px;'});
@@ -442,7 +446,7 @@ function g2vals(self,sp,v,mask){
       const raw0=empty?[]:((r.p&&r.p[c.k]&&r.p[c.k].length)?r.p[c.k]:[{k:(ci===0&&lvl===0&&has?'b':'txt'),t:g2fmt(r.v?r.v[c.k]:'',c)}]);
       // partes próprias (p) com número puro ganham a unidade (cópia: r.p não muda)
       const raw1=c.un?raw0.map(p=>(p&&typeof p.t==='string'&&['txt','b','cn','chip'].indexOf(p.k)>=0)?Object.assign({},p,{t:g2unf(p.t,c)}):p):raw0;
-      const raw=(ci===0&&sicoP)?[sicoP].concat(raw1):raw1;
+      const raw=(ci===0&&sicoP.length)?sicoP.concat(raw1):raw1;
       const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':'')+(c.nr?' g2nr':'')+(c.a==='r'?' g2celn':''),parts:(ci===0&&casou?raw.concat([{k:'br'},{k:'mut',t:casou}]):raw).map((p,i,arr)=>g2part(g2semSep(arr,i),v)),pw:'max-width:'+(c.w||340)+'px;',
         st:(c.nr?'padding:0 2px;':'padding:6px 8px;')+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&arv?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:inherit;box-shadow:1px 0 0 #E4E9E5;':'')};
       if(ci===0 && arv){ cell.hasCaret=true; cell.caretOk=has; cell.caretNo=!has; const open=!!exp[r.id]||(g2filtering(st)&&has);

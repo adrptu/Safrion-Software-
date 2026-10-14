@@ -5,7 +5,8 @@ pedido-1410.md, "Colunas: só o essencial", aprovada pelo proprietário em 14/10
 O motor (engine.grid) chama marcar() em cada grade. Para as grades deste quadro:
 - ess: posição de cada coluna de "Abre com" (a 1ª é a identidade, travada); as outras ficam em "Colunas +N" (g2lib.g2colsVis);
 - pq: a pergunta de cada coluna (oque, quem, quando, onde, medida, situacao), que agrupa o painel de colunas e o "Agrupar por";
-- sico: a coluna de situação (Situação, Estado, Condição) que sai do padrão vira ícone antes da identidade, só quando pede atenção;
+- sico: as colunas de situação (Situação, Estado, Condição; Pendência, Qualidade, Avisos, Resultado, Sinal do app) que saem do padrão viram
+  ícone antes da identidade, só quando pedem atenção;
 - ag: "Agrupar por" com um nível por dimensão (O quê, Quem, Quando, Onde), lido da própria coluna (g2lib.g2agVals_, D.ck); data agrupa
   por mês. Grade em árvore não ganha: a árvore já agrupa.
 Grade que já traz as próprias marcas (O.S., Planejar safra › talhões) fica como está. Rótulo do quadro que não casar com nenhuma coluna
@@ -104,6 +105,9 @@ _QUANDO = re.compile(r'(^data|^prazo|vencimento|^início|^fim\b|janela|^mês|sem
 _QUEM = re.compile(r'(responsável|^quem|executante|equipe|operador|fornecedor|cliente|parceiro|^pessoa|credor|dono|com quem|líder|transportador|prestador|contraparte|papéis|usuário|organização)', re.I)
 _ONDE = re.compile(r'(talhão|fazenda|^local|setor|depósito|captação|ponto de água|zona|destino|praça|região|doca|rota)', re.I)
 SICO_ROT = re.compile(r'^(situação|estado|condição)( do (lote|papel))?$', re.I)
+# outras colunas de situação que levam selo de atenção (Pendência "Conflito", Qualidade, Avisos, Resultado, Sinal do app): ocultas, também viram
+# ícone; o normal continua sem ícone (Codex/bateria V2-3: o "Conflito" vermelho da IR-03 sumia do padrão)
+SICO_MAIS = re.compile(r'^(pendência|qualidade|avisos|resultado|sinal do app)$', re.I)
 
 def pergunta(c, i):
     """Pergunta da coluna (ESPEC §3.1): a identidade é O quê; número é medida; data é Quando; o resto pelo rótulo."""
@@ -132,8 +136,9 @@ def marcar(pagina, gid, cols, ag=None, tree=False, sico=None):
         out.append(c)
     vis = set(abre)
     if sico is None:
-        s = next((c for c in out if SICO_ROT.match(c.get('l') or '') and c['l'] not in vis), None)
-        if s: sico = dict(k=s['k'])
+        ks = [c['k'] for c in out if SICO_ROT.match(c.get('l') or '') and c['l'] not in vis][:1]
+        ks += [c['k'] for c in out if SICO_MAIS.match(c.get('l') or '') and c['l'] not in vis]
+        if ks: sico = dict(k=ks[0], ks=ks) if len(ks) > 1 else dict(k=ks[0])
     if ag is None and not tree:
         ag2 = []
         for pq in ('oque', 'quem', 'quando', 'onde'):

@@ -69,6 +69,10 @@ try:
     chk('P8 Caio chega por link com ?ag=: o link vale', perfil_atual() == 'Caio' and grupos() > 0, [perfil_atual(), grupos(), busca()])
     c.goto(U + '?ag=quem', .4); espera(f"document.querySelector('[data-g2g=\"{G}\"]')"); perfil('Ana'); perfil('Caio')
     chk('P9 depois do link, trocar de perfil segue a preferência do novo perfil (Caio: sem agrupamento)', grupos() == 0 and 'ag=' not in busca(), [grupos(), busca()])
+    # colunas escolhidas e troca imediata, sem recarregar (o estado em memória da escolha não pode passar ao outro perfil)
+    perfil('Ana'); abre(); col2 = mais_coluna(); cols_ana2 = cabec(); perfil('Caio')
+    chk('P10 Ana acrescenta outra coluna e troca para Caio sem recarregar: Caio vê as colunas dele', bool(col2) and cabec() == padrao, [col2, cols_ana2, cabec()])
+    perfil('Ana'); chk('P11 volta para Ana sem recarregar: as colunas que ela acabou de escolher', cabec() == cols_ana2, [cabec(), cols_ana2])
     chk('J sem erro de JS', not J("(window.__e||[]).length"), J("window.__e"))
 finally:
     c.close() if hasattr(c, 'close') else None
