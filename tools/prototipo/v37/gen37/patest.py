@@ -43,7 +43,10 @@ try:
     cards = J("[...document.querySelectorAll('main .g2card')].map(b=>b.innerText.replace(/\\s+/g,' '))")
     check(f'biblioteca com um cartão por plano da fonte ({len(D2.PLANOS)}), sem faixa de etapas', len(cards) == len(D2.PLANOS) and not J("!!document.querySelector('.etp-ind')"), (len(cards), [x['nome'] for x in D2.PLANOS]))
     soja = [x for x in cards if x.startswith('Soja alta tecnologia')][0]
-    check('cartão mostra versão, estado, atividades, gatilhos, custo e cultivos', all(k in soja for k in ['v6', 'Publicado', '8 atividades', 'DAP', 'R$ 2.099,90', 'Aplicado em 5 cultivos', '3 na v6 · 2 na v5']), soja)
+    # 14/10 (proprietário): "Abrir plano" no alto do cartão e nada da linha para baixo (sem o rodapé dos cultivos); a versão vai no selo
+    topo = J("(()=>{const b=document.querySelector('main .g2card[aria-label=\"Abrir plano Soja alta tecnologia\"]'); const r=e=>e.getBoundingClientRect(); const cta=b.querySelector('.g2card-cta'), sel=[...b.querySelectorAll('span')].find(x=>/^Publicado/.test(x.innerText.trim())); return [cta.innerText.replace(/\\s+/g,' ').trim(), r(cta).top<r(sel).top, [...b.querySelectorAll('*')].some(x=>{const k=getComputedStyle(x); return k.borderTopStyle!=='none'&&k.borderBottomStyle==='none';})];})()")
+    check('cartão enxuto: nome e "Abrir plano →" no alto; selo "Publicado · v6", atividades, custo e gatilhos; sem cultivos nem linha de rodapé',
+          all(k in soja for k in ['Publicado · v6', '8 atividades', 'DAP', 'R$ 2.099,90']) and 'Aplicado em' not in soja and 'na v5' not in soja and topo == ['Abrir plano →', True, False], [soja, topo])
     cafe = [x for x in cards if x.startswith('Café')][0]
     check('cartão do café com gatilhos Data e Após a colheita', 'Após a colheita' in cafe and 'Data' in cafe, cafe)
     # ---- detalhe
@@ -127,7 +130,7 @@ try:
           'Publicado · v7' in body and 'Cultivos que usam este plano' not in body and 'Mostrar as versões' not in body and prims() == [], [body[:300], prims()])
     clk('‹ Biblioteca de planos', '[data-acoes]', .6)
     soja = J("[...document.querySelectorAll('main .g2card')].map(b=>b.innerText.replace(/\\s+/g,' ')).find(t=>t.startsWith('Soja alta'))")
-    check('o cartão passa à v7 publicada, com os cultivos ainda na v6 e na v5', 'v7' in soja and 'Publicado' in soja and '3 na v6 · 2 na v5' in soja and '8 atividades' in soja, soja)
+    check('o cartão passa a "Publicado · v7"', 'Publicado · v7' in soja and '8 atividades' in soja and 'Aplicado em' not in soja, soja)
     # ---- descartar o rascunho de um plano publicado
     J("document.querySelector('main .g2card[aria-label=\"Abrir plano Milho safrinha\"]').click()"); time.sleep(.6)
     mostra(J("[...document.querySelectorAll('main button.pa-titulo')].filter(b=>b.closest('.pa-atividade').querySelector('.pa-contagem').innerText!=='Só operação')[0].innerText"))

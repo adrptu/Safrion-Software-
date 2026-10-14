@@ -228,11 +228,13 @@ try:
     # ---------------- L10 · posição ----------------
     with secao('L10'):
         abre('PA.dc.html', 1440, 700); ult = J("[...document.querySelectorAll('main .g2card')].pop().getAttribute('aria-label')")
-        clique("[...document.querySelectorAll('main .g2card')].pop()", w=.7)
         ROL = "[...document.querySelectorAll('main[data-scroll],.ml-tog+div')].map(e=>Math.round(e.scrollTop))"
+        # 14/10 (cartão sem o rodapé dos cultivos): a biblioteca ficou mais curta; a prova é voltar à mesma rolagem de antes de abrir, não um valor fixo
+        J("[...document.querySelectorAll('main .g2card')].pop().scrollIntoView({block:'end'})"); time.sleep(.3); antes = J(ROL)
+        clique("[...document.querySelectorAll('main .g2card')].pop()", w=.7)
         clique("document.querySelector('[data-acoes] [data-acao=voltar]')", w=.7); dep = J(ROL); fcs = J("(document.activeElement&&document.activeElement.getAttribute('aria-label'))||''")
         cur = J("(document.querySelector('main .g2card[aria-current=true]')||{getAttribute:()=>''}).getAttribute('aria-label')")
-        chk('L10 "‹ Biblioteca de planos" volta à posição de rolagem da biblioteca, com o foco e a marca no último cartão aberto', max(dep) > 100 and fcs == ult and cur == ult, [dep, fcs, ult, cur])
+        chk('L10 "‹ Biblioteca de planos" volta à posição de rolagem da biblioteca, com o foco e a marca no último cartão aberto', max(antes) > 0 and dep == antes and fcs == ult and cur == ult, [antes, dep, fcs, ult, cur])
     # ---------------- L11 · 390 px (toque) ----------------
     with secao('L11'):
         abre('PA.dc.html', 390, 844, 3, True); a = J(r"""(()=>{const b=[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Criar plano'); const r=b?b.getBoundingClientRect():null;
