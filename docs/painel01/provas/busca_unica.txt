@@ -1,0 +1,7 @@
+OK    B1 156 telas: nenhuma com mais de um campo de busca à vista ao abrir
+OK    B2 18 telas com várias tabelas, 12 abas ou visões abertas: no máximo um campo de busca à vista em cada
+OK    B3 IC: 4 tabelas à vista e um campo só, "Buscar nesta tela"; o termo "Acaricida" filtra todas (oráculo pelas linhas que já tinham o termo)
+OK    B4 limpar o termo devolve todas as linhas de todas as tabelas; tela com uma tabela só (O.S.) segue "Buscar nesta tabela"
+OK    B5 Consulta Agrofit (Soja): Cultura e Praga-alvo como listas de escolha; o único campo de texto é a busca da lista
+OK    B6 sem erro de JS (abertura das telas)
+RESULTADO: 6 ok · 0 falhas
