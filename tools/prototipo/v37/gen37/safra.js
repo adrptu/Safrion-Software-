@@ -894,9 +894,55 @@ function metaUnTxt(d){ const un=metaUnTela(d); const pad=(D2.unMeta||{})[d.cult]
 // gancho de abertura do formulário (g2open → self.g2openDraft): a meta entra no rascunho na unidade escolhida, com a origem guardada (R-U06, RC-02)
 // SAF-FAZ-1-CONTEXTO-01 (Codex 6174131920, S3): "Nova safra" com o chip de uma fazenda escolhido nasce nessa fazenda; sem chip, o padrão do
 // campo. Editar não passa por aqui: a safra existente conserva a própria fazenda
-function safNovaDraft(self,gid){ if(gid!=='g_saf') return null; const fq=g2st(self,'g_saf').qv; const fd=((GR('g_saf').edit||{}).fields||[]).find(f=>f.k==='faz');
-  return (fq&&fd&&(fd.opts||[]).indexOf(fq)>=0)?{faz:fq}:null; }
-function safOpenDraft(self,gid,r,d){ if(String(gid).indexOf('g_cult_')!==0||!r||!r.v) return d; return Object.assign({},d,metaRascunho(r.v.cult,r.v.meta,r.v.unm)); }
+function safNovaDraft(self,gid){ if(gid!=='g_saf') return null; const fq=g2st(self,'g_saf').qv; const fd=((GR('g_saf').edit||{}).fields||[]).find(f=>f.k==='fazs');
+  self.__sgCh='saf-form:'+Date.now()+':'+Math.random().toString(36).slice(2,8);   // chave do comando, gerada por quem abre o formulário (ENG-021)
+  return (fq&&fd&&(fd.opts||[]).indexOf(fq)>=0)?{fazs:fq}:null; }
+// ---- SAF-FAZ-2 · safra com várias fazendas: a tela chama o domínio único (safra_grupo.js); cada fazenda segue com a própria sub-safra ----
+function sgLista(self){ return g2rows(self,GR('g_saf')).map(r=>Object.assign({id:r.id,nome:r.v.nome,ini:r.v.ini,fim:r.v.fim,faz:r.v.faz||'Santa Rita',estado:r.v.estado||'Rascunho'},r.v.mae?{mae:r.v.mae}:{},r.ro?{ro:true}:{})); }
+function sgFazsTxt(d){ return String((d&&d.fazs)||'').split(';').map(x=>x.trim()).filter(Boolean); }
+// o que prende a fazenda à safra: cultivos, solicitação enviada e O.S. (o protótipo não registra aprovação de plano e de orçamento por safra nova)
+function sgDeps(self){ return (saf)=>{ const sol=solMap(self)[saf]; return {cultivos:cultsDe(self,saf).length,sol:sol?{id:sol.id,estado:sol.estado||''}:null,os:[]}; }; }
+function sgPed(self,r,d,isNew){ return {chave:self.__sgCh||('saf-form:'+(r?r.id:'novo')),nome:d.nome,ini:d.ini,fim:d.fim,fazendas:sgFazsTxt(d),saf:isNew?undefined:(r&&r.id)}; }
+function sgMotivos(b){ return b.map(x=>x.faz+' não pode sair da safra: '+x.motivos.map(m=>m.t.replace(/\.$/,'')+(m.destino?' (resolva em '+m.destino+')':'')).join('; ')+'.').join(' '); }
+// antes de gravar: a mesma composição, sem efeito, para recusar com o motivo no próprio campo (nada muda)
+function sgChecar(self,rows,r,d,isNew){ const e={}; let k=0; const lista=sgLista(self).filter(x=>!(isNew&&r&&x.id===r.id));
+  const res=sgCompor(lista,Object.assign(sgPed(self,r,d,isNew),{chave:'conferir'}),{rec:{},deps:sgDeps(self),novoId:(t)=>'conf'+(++k)});
+  if(res.ok) return e; if(res.bloqueios) e.fazs=sgMotivos(res.bloqueios); const er=res.erros||{}; if(er.fazendas) e.fazs=er.fazendas; if(er.fim&&!e.fim) e.fim=er.fim; if(er.ini) e.ini=er.ini; if(er.saf) e.fazs=er.saf; return e; }
+// depois de gravar o formulário: aplica a composição nas linhas (as que ficam conservam o objeto, o ID e o estado; as novas nascem em rascunho)
+function sgAplicar(self,rows,r,isNew){ const d={nome:r.v.nome,ini:r.v.ini,fim:r.v.fim,fazs:r.v.fazs||r.v.faz};
+  const lista=sgLista(self).filter(x=>!(isNew&&x.id===r.id)); let usado=false, k=0;
+  const novoId=(t,faz)=>{ if(t==='mae') return 'M'+String(Date.now()).slice(-6); if(isNew&&!usado){ usado=true; return r.id; } return 'n'+(rows.length+(++k))+'_'+String(Date.now()).slice(-5); };
+  self.__sgRec=self.__sgRec||{};
+  const res=sgCompor(lista,sgPed(self,r,d,isNew),{rec:self.__sgRec,deps:sgDeps(self),novoId}); self.__sgCh=null;
+  if(!res.ok||res.repetido){ delete r.v.fazs; return res.ok?'':(res.bloqueios?sgMotivos(res.bloqueios):'Não salvo.'); }
+  const por={}; rows.forEach(x=>{ por[x.id]=x; }); if(isNew) por[r.id]=r;
+  const novas=res.safs.map(s=>{ const x=por[s.id]||{id:s.id,v:{},s:{},p:{}}; Object.assign(x.v,{nome:s.nome,ini:s.ini,fim:s.fim,faz:s.faz,estado:s.estado||'Rascunho'});
+    if(s.mae) x.v.mae=s.mae; else delete x.v.mae; delete x.v.fazs; x.v.periodo=safPeriodo(s.ini,s.fim)||x.v.periodo||''; return x; });
+  g2set(self,'g_saf',{rows:novas});
+  const sb=res.recibo.subs, ent=sb.filter(x=>x.acao==='criada'||x.acao==='trocada').map(x=>x.faz), sai=sb.filter(x=>x.acao==='removida').map(x=>x.faz).concat(sb.filter(x=>x.acao==='trocada').map(x=>x.de));
+  const lst=(a)=>a.length>1?a.slice(0,-1).join(', ')+' e '+a[a.length-1]:a[0];
+  if(isNew) return sb.length>1?(res.recibo.nome+' criada em '+sb.length+' fazendas: '+lst(sb.map(x=>x.faz))+'. Cada fazenda planeja os próprios talhões, recursos e demanda.'):'';
+  return [ent.length?lst(ent)+(ent.length>1?' entraram':' entrou')+' na safra em rascunho.':'',sai.length?lst(sai)+(sai.length>1?' saíram':' saiu')+' da safra.':''].filter(Boolean).join(' '); }   // sem fazenda entrando ou saindo, fica o aviso de sempre ("Salvo · linha e totais atualizados")
+// leitura reunida das fazendas da safra aberta (sgLeitura): área dos cultivos, estado, solicitação e demanda de cada uma
+function sgInfo(self,G,comDem){ const o={}; G.subs.forEach(s=>{ const cs=cultsDe(self,s.id); const sol=solMap(self)[s.id];
+  let dem=null; if(comDem){ try{ const dm=demanda(self,s.id); dem=Object.values(dm).filter(x=>x&&x.nome).map(x=>({insumo:x.nome,un:x.un,qtd:x.liq,destino:(dm._ent&&dm._ent.local)||('Almoxarifado '+s.faz)})); }catch(e){ dem=null; } }
+  o[s.id]={area_ha:cs.reduce((a,c)=>a+(Number(c.v.area)||0),0),cultivos:cs.length,estado:s.estado,sol:sol?{id:sol.id,estado:sol.estado||''}:null,demanda:dem}; }); return o; }
+// envio das fazendas da safra: uma solicitação por sub-safra pelo comando de sempre; a chave fica até tudo dar certo (repetir só tenta o que falhou)
+function sgEnviarUm(self,saf){ const cap={msg:''}; const ant=(self.__solTmp||{})[saf]; self.__envCap=cap; try{ enviar(self,saf); }finally{ self.__envCap=null; }
+  const m=cap.msg||''; const volta=()=>{ if(!self.__solTmp) return; if(ant) self.__solTmp[saf]=ant; else delete self.__solTmp[saf]; };   // o que não foi gravado não fica como enviado
+  const sol=solMap(self)[saf];
+  if(/^Safra encerrada/.test(m)||/Nada foi alterado/.test(m)){ volta(); return {ok:false,erro:m}; }
+  if(/não guarda dados/.test(m)){ volta(); return {ok:false,erro:'este navegador não guardou a solicitação; a Compra de insumos não a veria'}; }
+  return {ok:true,recibo:sol?(sol.id+(sol.comp?'-C'+sol.comp:'')):'nada a cotar'}; }
+function sgEnviarTela(self,G){ self.__sgEnvRec=self.__sgEnvRec||{}; if(!self.__sgEnvCh) self.__sgEnvCh='env:'+(G.mae||'')+':'+Date.now();
+  self.__solTmp=Object.assign({},solMap(self));
+  let r; try{ r=sgEnviar(G,self.__sgEnvCh,self.__sgEnvRec,(saf)=>sgEnviarUm(self,saf)); }finally{ var sols=self.__solTmp; self.__solTmp=null; }
+  const rec=r.recibos.map(x=>x.faz+': '+(x.recibo==='nada a cotar'?'nada a cotar':x.recibo)+(x.repetido?' (já enviada)':'')).join(' · ');
+  const fal=r.falhas.map(x=>x.faz+': '+x.erro).join(' · ');
+  if(r.ok) self.__sgEnvCh=null;
+  self.setState({sol:sols,g2toast:r.ok?('Demanda das '+G.subs.length+' fazendas enviada. '+rec+'.'):((r.parcial?'Envio parcial. Enviado: '+rec+'. ':'Nada foi enviado. ')+'Falhou: '+fal+'. Tente de novo: só a que falhou é enviada.')}); }
+function safOpenDraft(self,gid,r,d){ if(gid==='g_saf'&&r){ self.__sgCh='saf-form:'+r.id+':'+Date.now(); const G=sgGrupo(sgLista(self),r.id); return Object.assign({},d,{fazs:G?G.subs.map(x=>x.faz).join('; '):(r.v.faz||'')}); }
+  if(String(gid).indexOf('g_cult_')!==0||!r||!r.v) return d; return Object.assign({},d,metaRascunho(r.v.cult,r.v.meta,r.v.unm)); }
 /* UNID-PROD · seletor "Unidade de produtividade" da tabela de cultivos (D-U01): contexto = cultura do cultivo com o painel aberto; sem painel,
    a 1ª cultura visível com os filtros aplicados. Trocar a unidade muda a tabela, não o rascunho aberto (D-U20); nada vai para o estado da safra */
 function safUnidOk(cu){ try{ prUn(cu); return true; }catch(e){ return false; } }
@@ -1335,7 +1381,7 @@ function solLer(){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'
 function solGravar(rec){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null')||{v:1,sols:{}}; o.sols=o.sols||{}; o.sols[rec.safra]=rec; localStorage.setItem(SOL_KEY,JSON.stringify(o)); return true; }catch(e){ return false; } }
 // a versão nova da SOL que só baixou itens (DEM-09) não muda o número de complementos: o andamento gravado era da versão anterior e sai
 function solProcLimpar(saf){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); if(o&&o.proc&&o.proc[saf]){ delete o.proc[saf]; localStorage.setItem(SOL_KEY,JSON.stringify(o)); } }catch(e){} }
-function solMap(self){ if(self.state.sol) return self.state.sol; if(!self._sol0) self._sol0=Object.assign({},D2.sol,solLer()); return self._sol0; }
+function solMap(self){ if(self.__solTmp) return self.__solTmp; if(self.state.sol) return self.state.sol; if(!self._sol0) self._sol0=Object.assign({},D2.sol,solLer()); return self._sol0; }
 // andamento gravado pela Compra de insumos (talhao-os-compras-v1 · proc): o planejamento vê em que pé está a compra da mesma solicitação
 function solEstado(saf,sol){ try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); const p=o&&o.proc&&o.proc[saf];
   return (p&&sol&&p.sol===sol.id&&(p.comp||0)===(sol.comp||0)&&p.estado&&p.estado!=='A cotar')?p.estado:''; }catch(e){ return ''; } }
@@ -1355,7 +1401,7 @@ function PREVALS(self,v){ cenOuvir(self); compRend(self,self.state.saf||null);
   // ---- etapa 1: contagens por safra ----
   g2rows(self,GR('g_saf')).forEach(r=>{ const cs=cultsDe(self,r.id); r.v.n=cs.length; r.v.area=cs.reduce((s,c)=>s+(Number(c.v.area)||0),0);
     const est=r.v.estado||'Rascunho'; r.p.estado=[{k:'chip',t:est,c:(est==='Encerrada'?'gray':(est==='Em planejamento'?'green':'yellow'))}].concat(r.id===saf?[{k:'chip',t:'Selecionada',c:'blue'}]:[]);
-    r.v.periodo=safPeriodo(r.v.ini,r.v.fim)||r.v.periodo||''; r.p.nome=[{k:'b',t:r.v.nome},{k:'mut',t:r.v.periodo}].concat(r.ro?[]:[{k:'act',t:'Editar',fn:'safedit:'+r.id,lk:true}]); r.s.nome=r.v.nome;
+    r.v.periodo=safPeriodo(r.v.ini,r.v.fim)||r.v.periodo||''; r.p.nome=[{k:'b',t:r.v.nome},{k:'mut',t:r.v.periodo}].concat(r.v.mae?[{k:'mut',t:g2rows(self,GR('g_saf')).filter(x=>x.v.mae===r.v.mae).length+' fazendas'}]:[]).concat(r.ro?[]:[{k:'act',t:'Editar',fn:'safedit:'+r.id,lk:true}]); r.s.nome=r.v.nome;
     const px=proxSaf(self,r); r._prox=px[1]; r.dr='open_'+r.id; r.drDup=true;   // o clique na linha repete o botão "Continuar" da linha: uma parada de Tab só (v3.1)
     r.p.acao=[{k:'act',t:px[0],fn:'pickat:'+r.id+'|'+px[1],u:false}]; r.s.acao=px[0]; });
   // ---- etapa 2: partes calculadas do cultivo (plano aplicado, ajustes) ----
@@ -1438,6 +1484,12 @@ function EXTRAVALS(self,v){ try{ window.__safSelf=self; self.__cultivos=(k)=>lea
   // com SOL enviada e insumo acima da demanda, a primária diz "Atualizar" também quando há complemento junto (ela baixa e sobe na mesma versão)
   const p6=(enviado&&!v.k6pend)?{t:'Abrir Compra de insumos ›',h:solHref(saf,solA),a:'abrir'}:((enviado&&v.k6exc)?{t:'Atualizar '+solA.id,fn:()=>enviar(self),a:'comando'}:{t:'Enviar para cotação',fn:()=>enviar(self),a:'comando'});
   v.sol_link=v.sol_link&&!p6.h;   // "Abrir em Compra de insumos ›" do bloco só quando a primária é enviar (complemento pendente): sem cópia do mesmo link
+  { const G=saf?sgGrupo(sgLista(self),saf):null; v.sg_tem=!!(G&&G.mae)&&step>=2;
+    v.sg_fz=v.sg_tem?G.subs.map(s=>({t:s.faz,on:s.id===saf?'true':'false',al:s.id===saf?'Fazenda '+s.faz+', aberta':'Abrir a fazenda '+s.faz+' nesta etapa',
+      go:()=>{ if(s.id===saf) return; g2etapa(self,{saf:s.id,step,atv:null,rec:null,corr:null,cap:null,rsOpen:false,g2toast:'Fazenda '+s.faz+' · '+SAF_CURTO[step-1]}); }})):[];
+    if(v.sg_tem){ const L=sgLeitura(G,sgInfo(self,G,false)); const nf2=(x)=>nf(x);
+      v.sg_res=nf2(L.area.ha)+' ha'+(L.area.completa?'':' (falta área de '+L.area.faltam.join(', ')+')')+' · '+L.estados.map(e=>e.n+' '+(e.t==='Rascunho'?'em rascunho':String(e.t).toLowerCase())).join(' · ')+' · '+L.sol.enviadas+' de '+L.sol.de+' solicitações enviadas'; }
+    v.sg_env=v.sg_tem&&step===4&&!ro; v.sg_envT='Enviar as '+(G?G.subs.length:0)+' fazendas para cotação'; v.sg_envGo=()=>sgEnviarTela(self,G); }
   safAcoes(self,v,{step,saf,ro,cs,sp,apIds,apT,cultSp,temPlano,p6});
   // escolher safra (botão da linha)
   v.pick=(id)=>{ g2etapa(self,{saf:id,step:2,atv:null,rec:null,corr:null,cap:null,rsOpen:false,g2toast:'Safra aberta: '+((safRows.find(r=>r.id===id)||{v:{}}).v.nome||'')}); };
@@ -1450,7 +1502,7 @@ function EXTRAVALS(self,v){ try{ window.__safSelf=self; self.__cultivos=(k)=>lea
   v.abrirsaf=(arg)=>{ const a=String(arg).split('|'); abrirCultivo(self,a[0],a[1]||''); };
   // painéis
   apVals(self,v); lpVals(self,v); divVals(self,v); sgVals(self,v); pqSafVals(self,v);
-  try{ window.__safRef={impedimentos:(saf)=>safImpedimentosRef(self,saf||self.state.saf,cenGet())}; }catch(e){}   /* adaptador do comando da F2 (PR #58) e teste */
+  try{ window.__safRef={impedimentos:(saf)=>safImpedimentosRef(self,saf||self.state.saf,cenGet()),linhas:()=>sgLista(self)}; }catch(e){}   /* adaptador do comando da F2 (PR #58) e teste */
   try{ window.__solo={cen:()=>cenGet(),aceitarLote:(itens,ch,a)=>cenMudar(self,c=>soloAceitarLote(c,itens,ch,a||'Ana')),desfazer:(k,ch,a)=>cenMudar(self,c=>soloDesfazer(c,k,'desfeito',ch,a||'Ana')),
     registrar:(d,ch,a)=>cenMudar(self,c=>soloRegistrar(c,d,ch,a||'Ana')),validar:(id,ch,a)=>cenMudar(self,c=>soloValidar(c,id,ch,a||'Ana')),   /* teste: o que outra aba (AG-02) grava */
     sugs:(saf)=>sgSugs(self,saf||self.state.saf).map(x=>x.s),
@@ -1467,7 +1519,7 @@ function EXTRAVALS(self,v){ try{ window.__safSelf=self; self.__cultivos=(k)=>lea
 }
 // ---- UX-ACAO-UNICA-20261003 · área de ações do Planejar safra (DS-02, DS-33 §74.5.7.1, DS-61) ----
 // Uma primária e uma rota de avanço por etapa; a faixa só informa. Retorno secundário nomeia a etapa anterior (na etapa 2, voltar à
-// escolha é o "Trocar safra" do topo: sem cópia aqui). Pendência mostra a causa e um passo que resolve (Aplicar plano), sem aplicar e
+// escolha é o "Trocar safra" desta mesma área, à esquerda: sem cópia). Pendência mostra a causa e um passo que resolve (Aplicar plano), sem aplicar e
 // avançar em silêncio. Avançar só troca de etapa: não envia cotação, não publica, não aprova. Na revisão (etapa 4), "Corrigir cultivos"
 // leva aos cultivos sem plano e "Voltar à revisão" devolve à mesma posição, com filtros e rascunho da tela preservados (estado).
 const SAF_CURTO=['Escolha da safra','Cultivos e planos','Operações e recursos','Demanda de insumos'];
@@ -1555,6 +1607,8 @@ function safAcoes(self,v,x){ const st=self.state, step=x.step, ro=x.ro, corr=st.
   else if(step===3) c=Object.assign({volta:ir(2),prim:av(4,ro?'Ver demanda de insumos':'Conferir demanda de insumos')},(!ro&&x.apIds.length)?{lnks:[{t:x.apT,fn:()=>openApply(self,x.apIds)}]}:{});
   else if(step===4){ c={volta:ir(3)};
     if(!ro){ c.prim=x.p6; if(nSp){ c.nota=semTxt+' ficam fora desta demanda.'; c.ctx={t:'Corrigir cultivos',fn:()=>safCorrigir(self,x.sp.map(r=>r.id))}; } } }
+  // 14/10/2026 (proprietário): "Trocar safra" sai da faixa do topo e fica aqui, nos botões do fluxo, à esquerda (etapas 2 a 4)
+  if(step>1&&x.saf) c.troca={t:'Trocar safra',fn:()=>g2etapa(self,{step:1,atv:null,rec:null,corr:null,cap:null,rsOpen:false,g2toast:'Escolha a safra.'})};
   g2acoes(v,'aa',c); }
 function openApply(self,ids){ const saf=self.state.saf; if(!saf){ self.setState({g2toast:'Escolha a safra primeiro.'}); return; }
   const safObj=g2rows(self,GR('g_saf')).find(r=>r.id===saf); if(safObj&&safObj.ro){ self.setState({g2toast:'Safra encerrada: somente consulta.'}); return; }
@@ -1777,13 +1831,16 @@ function lpUsarPq(self,s){ const lp=self.state.lp; if(!lp) return; if(s.tipo==='
   const key=String(a.id)+'|'+i; const d=Object.assign({},lp.draft), rr=Object.assign({},lp.rm||{}), sr=Object.assign({},lp.src||{});
   if(s.tipo==='retirar'){ rr[key]=true; delete d[key]; } else { d[key]=String(s.sug).replace('.',','); delete rr[key]; } sr[key]={laudo:s.laudo.id,dose:s.tipo==='retirar'?'-':s.sug,s};
   self.setState({lp:Object.assign({},lp,{draft:d,rm:rr,src:sr,warn:false}),pq:null}); }
-function enviar(self){ const saf=self.state.saf; const safObj=g2rows(self,GR('g_saf')).find(r=>r.id===saf); if(safObj&&safObj.ro){ self.setState({g2toast:'Safra encerrada: não gera solicitações.'}); return; }
+// SAF-FAZ-2: o envio de cada sub-safra é este mesmo comando; com self.__envCap (envio das fazendas da safra) o resultado volta para quem chamou
+// em vez de virar aviso, e a solicitação gravada fica em self.__solTmp até o fim do lote (o estado só recebe o conjunto inteiro)
+function enviar(self,safArg){ const saf=safArg||self.state.saf; const cap=self.__envCap||null;
+  const SET=(o)=>{ if(!cap){ self.setState(o); return; } if(o.sol) self.__solTmp=o.sol; if(o.g2toast) cap.msg=o.g2toast; }; const safObj=g2rows(self,GR('g_saf')).find(r=>r.id===saf); if(safObj&&safObj.ro){ SET({g2toast:'Safra encerrada: não gera solicitações.'}); return; }
   const dm=demanda(self,saf); const sols=Object.assign({},solMap(self)); const sol=sols[saf];
   const itens=Object.values(dm).filter(d=>d.liq>0.001);
-  if(!itens.length&&!sol){ self.setState({g2toast:'Nada a cotar: o estoque e os recebimentos cobrem a demanda.'}); return; }   // com SOL enviada, a demanda que zerou ainda baixa a SOL (DEM-09)
+  if(!itens.length&&!sol){ SET({g2toast:'Nada a cotar: o estoque e os recebimentos cobrem a demanda.'}); return; }   // com SOL enviada, a demanda que zerou ainda baixa a SOL (DEM-09)
   // revisão do CTL-4, achado 3: enviar, complementar ou baixar a solicitação é decisão de quem planeja (gestor ou agrônomo; padrão do CTL-3, cenExigeUm):
   // grava quem agiu (perfil de demonstração) e quando; sem o papel, recusa e nada muda (dano: compra reduzida ou aumentada em nome de quem não decidiu)
-  const quem=(acao)=>{ try{ return cenExigeUm(g2perfil(),['gestor','agronomo'],acao); }catch(e){ self.setState({g2toast:String(e.message||e)}); return ''; } };
+  const quem=(acao)=>{ try{ return cenExigeUm(g2perfil(),['gestor','agronomo'],acao); }catch(e){ SET({g2toast:String(e.message||e)}); return ''; } };
   // registro único da solicitação: o que a Compra de insumos mostra (mesmos itens, quantidades, valores e memória CAL-01)
   const det=Object.values(dm).map(d=>({nome:d.nome,grupo:d.grupo,un:d.un,preco:d.preco,bruta:d.bruta,est:d.est,cust:d.cust||0,custT:d.custT||[],quarC:d.quarC||0,quarRef:d.quarRef||[],cond:d.cond||0,condFalta:d.condFalta||'',res:d.res,rec:d.rec,liq:d.liq,valor:d.valor,falta:d.falta,uso:d.uso,quar:d.quar,evs:d.evs}));
   const EM='23/09/2026 11:05';   // horário do cenário de demonstração (a SOL-2026-07 inicial é de 10:40)
@@ -1796,10 +1853,10 @@ function enviar(self){ const saf=self.state.saf; const safObj=g2rows(self,GR('g_
     const it={}; itens.forEach(d=>{ it[d.nome]=d.liq; }); const tot=itens.reduce((a,d)=>a+d.valor,0);
     sols[saf]=Object.assign({},base,{id,at:'23/09/2026',em:EM,por,itens:it,comp:0,total:tot});
     const av=grava(sols[saf]);
-    self.setState({sol:sols,g2toast:'Solicitação '+id+' enviada a Compras: '+itens.length+' insumos, '+rs(tot)+'. Origem: '+safObj.v.nome+' · Planejar safra, demanda de insumos.'+av}); return; }
+    SET({sol:sols,g2toast:'Solicitação '+id+' enviada a Compras: '+itens.length+' insumos, '+rs(tot)+'. Origem: '+safObj.v.nome+' · Planejar safra, demanda de insumos.'+av}); return; }
   // DEM-09 (cal01.js): sobe o que a demanda pede a mais (complemento) e baixa o que ela pede a menos; com pedido emitido nada baixa
   const pe=solPedEmit(saf,sol); const R=demSolRevisar(sol.itens,dm,pe);
-  if(!R.novos.length&&!R.menos.length){ self.setState({g2toast:'Nada novo para cotar: tudo já está na '+sol.id+'. Nenhuma solicitação duplicada foi criada.'}); return; }
+  if(!R.novos.length&&!R.menos.length){ SET({g2toast:'Nada novo para cotar: tudo já está na '+sol.id+'. Nenhuma solicitação duplicada foi criada.'}); return; }
   const por=quem('Atualizar a '+sol.id); if(!por) return; const est0=solEstado(saf,sol); const agora='23/09/2026 '+cenAgora();
   const it=R.it; const comp=(sol.comp||0)+(R.novos.length?1:0);
   const pr=(n)=>{ const x=dm[n]||demFora(self,saf,n,sol); return {un:x.un,preco:Number(x.preco)||0,dec:x.un==='L'?1:0}; };
@@ -1816,7 +1873,7 @@ function enviar(self){ const saf=self.state.saf; const safObj=g2rows(self,GR('g_
   const tM=dif.length?(sol.id+' atualizada: '+(dif.length===1?(dif[0].n+(dif[0].sai?' sai (':' baixa ')+dif[0].t+(dif[0].sai?' · ':' · −')+rs(dif[0].v)+(dif[0].sai?')':'')):
     (dif.length+' insumos a menos ('+dif.map(x=>x.n+' −'+x.t).join('; ')+') · −'+rs(valM)))+', porque a demanda de agora pede menos. A Compra de insumos cota a versão nova.'
     +((est0&&!R.novos.length)?' O andamento da compra da versão anterior ('+est0+') recomeça nesta versão.':'')):'';
-  self.setState({sol:sols,g2toast:[tC,tM].filter(Boolean).join(' ')+' Atualizada por '+por+'.'+av}); }
+  SET({sol:sols,g2toast:[tC,tM].filter(Boolean).join(' ')+' Atualizada por '+por+'.'+av}); }
 // insumo que a solicitação pede e a demanda de agora não pede mais (DEM-09): linha própria, para a diferença não sumir da tela
 function demFora(self,saf,n,sol){ const me=g2rows(self,GR('g_saf')).find(r=>r.id===saf); const faz=(me&&me.v.faz)||'Santa Rita';
   const k=((D2.osb||{}).cat||{})[n]||{}; const dt=((sol&&sol.det)||[]).find(x=>x.nome===n)||{};

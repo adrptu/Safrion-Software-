@@ -21,7 +21,9 @@ U = lambda x: f'http://127.0.0.1:{p}/{x}'
 BOT = lambda txt, dentro='main': "[...document.querySelectorAll(%s)].map(r=>[...r.querySelectorAll('button')]).flat().find(b=>b.offsetParent&&b.innerText.trim()===%s)" % (json.dumps(dentro), json.dumps(txt))
 def clica_js(sel): return J("(()=>{const b=%s; if(!b) return false; b.click(); return true;})()" % sel)
 def chip(nome): return clica_js("[...document.querySelectorAll('main button')].find(b=>b.offsetParent&&b.innerText.trim().startsWith(%s))" % json.dumps(nome))
-def campo(k): return J("(()=>{const e=document.getElementById('fx_g_saf_%s'); return e?e.value:null;})()" % k)
+def campo(k):   # SAF-FAZ-2: 'faz' passou a ser o campo Fazendas (múltiplo); vale a única marcada (ou todas, unidas por '; ')
+    if k == 'faz': return '; '.join(J("[...document.querySelectorAll('aside[role=dialog] label')].filter(l=>{const i=l.querySelector('input[type=checkbox]'); return i&&i.checked;}).map(l=>l.innerText.trim())") or []) or None
+    return J("(()=>{const e=document.getElementById('fx_g_saf_%s'); return e?e.value:null;})()" % k)
 def preenche(k, v): J("(()=>{const i=document.getElementById('fx_g_saf_%s'); i.focus(); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,%s); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()" % (k, json.dumps(v)))
 def linha(nome): return J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.indexOf(%s)>=0); return r?r.innerText.replace(/\\s+/g,' '):null;})()" % json.dumps(nome))
 try:
@@ -35,7 +37,7 @@ try:
         nome = f'Contraprova de contexto {w}'
         preenche('nome', nome); preenche('ini', '2027-09-01'); preenche('fim', '2028-08-31'); time.sleep(.2)
         clica_js(BOT('Salvar', 'aside[role=dialog]')); time.sleep(1.0)
-        faz = J("(()=>{try{ return (window.__safSelf.state.g2.g_saf.rows||[]).filter(r=>r.v.nome===%s).map(r=>r.v.faz); }catch(e){ return null; }})()" % json.dumps(nome))
+        faz = J("(()=>{try{ return window.__safRef.linhas().filter(r=>r.nome===%s).map(r=>r.faz); }catch(e){ return null; }})()" % json.dumps(nome))
         ctx = J("document.body.innerText.indexOf('Fazenda Lagoa Grande')>=0")
         chk(f'C1b {w}: salvar cria a safra em Lagoa Grande e a faixa diz Fazenda Lagoa Grande', faz == ['Lagoa Grande'] and ctx, [faz, ctx])
         c.goto(U('SAF.dc.html'), 1.4)

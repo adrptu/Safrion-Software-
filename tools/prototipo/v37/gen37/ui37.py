@@ -281,7 +281,7 @@ def perfil_pill(perfil):
 MACRO = {
     'IN-04.dc.html': dict(faz='filtro'),
     'OS.dc.html': dict(faz='filtro', saf='filtro', cult='filtro', tal='filtro'),   # 13/10 (proprietário): Cultura e Talhão no filtro principal da O.S.
-    'SAF.dc.html': dict(faz='contexto', saf='contexto'),
+    'SAF.dc.html': dict(faz='contexto', saf='contexto', trocar=False),   # 14/10/2026 (proprietário): "Trocar safra" fica embaixo, nos botões do fluxo
     'CMP.dc.html': dict(faz='contexto', saf='contexto'),
     'EST.dc.html': dict(faz='filtro'),
     'COLH.dc.html': dict(faz='filtro', saf='filtro', cult='filtro', tal='filtro'),   # 13/10: Cultura e Talhão onde ajudam (colheita é por cultura e talhão)
@@ -319,7 +319,7 @@ def _macro_html(fname, ctx, sep=True):
                 + ''.join(f'<option value="{f}">{f}</option>' for f in ['Todas'] + SAFRAS_MF) + '</select></label>')
     elif cfg.get('saf') == 'contexto':
         out += (f'<span style="{lab}">{ctx[1] if ctx and len(ctx) > 1 and ctx[1] else ""}</span>'
-                f'<button type="button" onClick="{{{{mf_trocar}}}}" title="Voltar à etapa 1 para escolher outra safra" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">Trocar safra</button>')
+                + (f'<button type="button" onClick="{{{{mf_trocar}}}}" title="Voltar à etapa 1 para escolher outra safra" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">Trocar safra</button>' if cfg.get('trocar', True) else ''))
     # Cultura e Talhão (13/10/2026, proprietário: "em ordem de serviço coloque no filtro principal da tela... também cultura e talhão"): as opções
     # vêm da tela (mf_cult_opts, mf_tal_opts: só o que existe no recorte de Fazenda e Safra); o Talhão é o mesmo filtro da coluna Talhão
     for k, rot, al in (('cult', 'Cultura', 'Filtrar por cultura'), ('tal', 'Talhão', 'Filtrar por talhão')):

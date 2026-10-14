@@ -1171,6 +1171,7 @@ def area_acoes(pre='aa',rotulo='Ações da etapa'):
             f'<sc-for list="{h("_lnks")}" as="al" hint-placeholder-count="0"><button type="button" class="acoes-lnk" data-acao="atalho" onClick="{{{{al.fn}}}}">{{{{al.t}}}}</button></sc-for></p></sc-if>'
             f'<div class="acoes-linha">'
             f'<sc-if value="{h("_hasVolta")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-sec" data-acao="{h("_voltaA")}" onClick="{h("_volta")}">{h("_voltaT")}</button></sc-if>'
+            f'<sc-if value="{h("_hasTroca")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-sec" data-acao="trocar" onClick="{h("_troca")}">{h("_trocaT")}</button></sc-if>'
             f'<span class="acoes-esp"></span>'
             f'<sc-if value="{h("_hasSec")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-sec" data-acao="{h("_secA")}" onClick="{h("_secFn")}">{h("_secT")}</button></sc-if>'
             f'<sc-if value="{h("_hasPrim")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-prim" data-acao="{h("_primA")}" aria-describedby="{h("_desc")}" onClick="{h("_primFn")}">{h("_primT")}</button></sc-if>'

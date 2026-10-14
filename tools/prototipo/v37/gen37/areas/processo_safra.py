@@ -29,9 +29,9 @@ def build():
     # ---------- etapa 1 · safras ----------
     g_saf=grid([dict(k='nome',l='Safra'),dict(k='faz',l='Fazenda'),dict(k='n',l='Cultivos',t='num',a='r'),dict(k='area',l='Área',t='num',a='r',u='ha'),dict(k='estado',l='Estado'),dict(k='acao',l='Próximo passo',w=290)],
        [dict(id=s['id'],ro=s['ro'],v=dict(nome=s['nome'],ini=s['ini'],fim=s['fim'],periodo=s['periodo'],faz=s['fazenda'],estado=s['estado']),s={},p={}) for s in D2.SAFRAS],
-       edit=dict(m='form',title='Safra',newTitle='Nova safra',sub='Altere nome, início, fim e fazenda. Cultivos e planos ficam nas etapas seguintes.',
+       edit=dict(m='form',title='Safra',newTitle='Nova safra',sub='Altere nome, início, fim e fazendas. Cultivos e planos ficam nas etapas seguintes, por fazenda.',
                  fields=[dict(k='nome',l='Nome da safra',t='txt',req=True,def_='' ),dict(k='ini',l='Início',t='date',req=True),dict(k='fim',l='Fim',t='date',req=True,help='O fim precisa ser depois do início.'),
-                         dict(k='faz',l='Fazenda',t='sel',opts=OCEN.fazendas(),req=True,**{'def':'Santa Rita'}),dict(k='estado',l='Estado',t='sel',opts=['Rascunho','Em planejamento'],**{'def':'Rascunho'})]),
+                         dict(k='fazs',l='Fazendas',t='multi',opts=OCEN.fazendas(),req=True,**{'def':'Santa Rita'}),dict(k='estado',l='Estado',t='sel',opts=['Rascunho','Em planejamento'],**{'def':'Rascunho'})]),
        add=None,gid='g_saf',total=False,qf=dict(k='faz',l='fazenda',todas='Todas'))   # 14/10 (proprietário: "não dá para escolher ou mudar de fazenda"): chips por fazenda na escolha da safra
     # ---------- etapa 2 · talhões e cultivos (ESPECIFICACAO etapa-2-talhoes) ----------
     # todos os talhões Ativos do CD-01 da fazenda da safra (com o B1 da Boa Vista e os pivôs da Lagoa Grande); a ocupação no tempo sai do
@@ -242,8 +242,9 @@ def build():
     # CTL-4: o mesmo cenário compartilhado (O.S., requisições, lotes) entra na demanda (cenDemEntradas/cenOsDem): emitir, liberar, apontar, cancelar ou devolver muda a conta
     # UNID-PROD (D-U14): o conversor único (producao.js) com o prefixo do estado, o mesmo das telas do estado; a tela não chama cenGet nem cenSave
     EXTRA.append('<style>'+UNP.CSS+'</style>')
-    EXTRAJS[0]=cenario.js_prefixo()+DSO.js_prefixo()+SOLO_UI_JS+UNP.JS+'\nconst D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
-function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' && r && String(r.id).indexOf('n')===0 && !self.state.saf){ if(!r.v.estado) r.v.estado='Rascunho'; self.setState({saf:r.id,step:2,g2toast:'Safra criada: '+r.v.nome+'. Planeje os talhões livres na tabela.'}); }
+    EXTRAJS[0]=cenario.js_prefixo()+DSO.js_prefixo()+SOLO_UI_JS+UNP.JS+'\nconst D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra_grupo.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
+function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' && r){ const msg=sgAplicar(self,rows,r,isNew);   /* SAF-FAZ-2: uma sub-safra por fazenda */
+      if(isNew && !self.state.saf){ if(!r.v.estado) r.v.estado='Rascunho'; self.setState({saf:r.id,step:2,g2toast:msg||('Safra criada: '+r.v.nome+'. Planeje os talhões livres na tabela.')}); } else if(msg) self.setState({g2toast:msg}); }
     if(String(gid).indexOf('g_cult_')===0) cultAfter(self,gid,rows,r,isNew);
     if(String(gid).indexOf('g_rend_')===0&&r) rendAfter(self,gid,rows,r,isNew);
     if(String(gid).indexOf('g_recp_')===0&&r) recAfter(self,gid,rows,r); };
@@ -253,7 +254,7 @@ function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' &&
   self.g2formSub=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultSub(self,gid,r,fm):(String(gid).indexOf('g_recp_')===0?recSub(self):null));
   self.g2opts=(gid,k,d,rid)=>(String(gid).indexOf('g_cult_')===0&&k==='plano'?planOpts(d):(String(gid).indexOf('g_cult_')===0&&k==='cult'?cultOpts(d):(String(gid).indexOf('g_rend_')===0&&k==='conj_id'?conjOpts(rid||d.base):null)));
   self.g2formActs=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultActs(self,gid,r):(String(gid).indexOf('g_rend_')===0?rendActs(self,gid,r):null));
-  self.g2check=(gid,rows,r,d,isNew)=>(String(gid).indexOf('g_cult_')===0?cultCheck(self,gid,rows,r,d,isNew):(String(gid).indexOf('g_rend_')===0?(self._conjAntes=(r?String(r.v.conj_id||''):null),opAntes(self,r),rendCheck(self,rows,r,d,isNew)):(String(gid).indexOf('g_recp_')===0?(opAntes(self,r),null):(gid==='g_saf'?safCheck(d):null))));
+  self.g2check=(gid,rows,r,d,isNew)=>(String(gid).indexOf('g_cult_')===0?cultCheck(self,gid,rows,r,d,isNew):(String(gid).indexOf('g_rend_')===0?(self._conjAntes=(r?String(r.v.conj_id||''):null),opAntes(self,r),rendCheck(self,rows,r,d,isNew)):(String(gid).indexOf('g_recp_')===0?(opAntes(self,r),null):(gid==='g_saf'?Object.assign({},sgChecar(self,rows,r,d,isNew),safCheck(d)):null))));
   self.g2pick=(gid,rid,r)=>{ if(gid==='g_op') abrirRend(self,rid); if(String(gid).indexOf('g_cap_')===0) abrirRec(self,rid); }; }
 const _EV=EXTRAVALS; EXTRAVALS=function(self,v){ _safhooks(self); cenOuvir(self); _EV(self,v); };
 const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)=>rendNova(self,rid); resumoVals(self,v); safUnidVals(self,v); };   // + Outra configuração e Resumo da safra (etapa 3)'''
@@ -284,7 +285,16 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
     s3=bloco('Operações e recursos','',corpo3,acao=custo)
     s4=bloco('Demanda de insumos por grupo',H('k6'),g_dem,desc_hole=True,
                 acao=f'<span style="display: inline-flex; align-items: center; gap: 8px;"><sc-if value="{H("sol_link")}" hint-placeholder-val="{F()}"><a href="{H("sol_href")}" style="{_MINI} text-decoration: none;">Abrir em Compra de insumos ›</a></sc-if></span>')
-    corpo=''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{H("true") if i==1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}</div></sc-if>'
+    # SAF-FAZ-2: safra de várias fazendas mostra as fazendas dela; um toque troca de fazenda na mesma etapa (cada uma com a própria sub-safra)
+    sg_faixa=(f'<sc-if value="{H("sg_tem")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Fazendas desta safra" id="saf-fazendas" '
+              f'style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 12px; border: 1px solid {LINE}; border-radius: 12px; background: {SURF};">'
+              f'<span style="font-size: 12.5px; font-weight: 700; color: {MUTED};">Fazendas</span>'
+              f'<sc-for list="{H("sg_fz")}" as="fz" hint-placeholder-count="2"><button type="button" aria-pressed="{H("fz.on")}" aria-label="{H("fz.al")}" onClick="{H("fz.go")}" style="{_MINI} min-height: 36px;">{H("fz.t")}</button></sc-for>'
+              f'<span style="font-size: 12.5px; color: {MUTED}; flex: 1 1 220px;">{H("sg_res")}</span>'
+              f'<sc-if value="{H("sg_env")}" hint-placeholder-val="{F()}"><button type="button" id="sg-env" onClick="{H("sg_envGo")}" style="{E.BTN_ST(False,True)}">{H("sg_envT")}</button></sc-if>'
+              f'</div></sc-if>')
+    EXTRA.append('<style>#saf-fazendas button[aria-pressed="true"]{background:#E4F3E9!important;border-color:#1E7A4C!important;color:#14532D!important;box-shadow:inset 0 0 0 1px #1E7A4C}</style>')   # a fazenda aberta, como o chip escolhido
+    corpo=sg_faixa+''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{H("true") if i==1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}</div></sc-if>'
                   for i,s in enumerate([s1,s2,s3,s4],1)) + E.area_acoes('aa','Ações da etapa')
     # ---------- painel: Resumo da safra (§4.3) ----------
     rs_lin=(f'<div style="display: grid; grid-template-columns: minmax(0,1.2fr) 90px minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr); gap: 8px; padding: 7px 0; border-top: 1px solid {LINE}; font-size: 12.8px; align-items: baseline;">'
@@ -425,4 +435,4 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
     shell37('SAF','Planejar safra',corpo,fname=fname,subtitle='',
             steps=steps_state(NOMES),primary_html=None,  # faixa só informa; avanço/retorno/primária na área de ações (UX-ACAO-UNICA-20261003)
             ctx=(H('ctx_faz'),H('ctx_saf'),None),search=False,
-            mf_fim=PR.entrada())   # na faixa "Trabalhando em": devolve ao Total a altura que a faixa nova tomou (L1 a 1440 × 1040; diagnóstico 13/10)
+            mf_fim='')   # 14/10/2026 (proprietário: "tire comparar versões do plano"): a entrada saiu da faixa; o painel (CONTROLE-02) segue no código   # na faixa "Trabalhando em": devolve ao Total a altura que a faixa nova tomou (L1 a 1440 × 1040; diagnóstico 13/10)

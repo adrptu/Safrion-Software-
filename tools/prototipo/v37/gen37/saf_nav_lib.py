@@ -28,7 +28,12 @@ def painel(): return c.js(f"(()=>{{const a=[...document.querySelectorAll('aside[
 def erros(): return c.js("(window.__errs||[]).join(' | ')") or ''
 def campos(gid):
     return c.js(f"Object.fromEntries([...document.querySelectorAll('aside[role=dialog] input,aside[role=dialog] select')].filter(x=>x.offsetParent&&x.id.indexOf('fx_{gid}_')===0).map(x=>[x.id.slice({len('fx_' + gid + '_')}),x.value]))") or {}
+def fazendas(vals):   # SAF-FAZ-2: o campo Fazendas é de caixas de marcar; marca só as pedidas
+    w = [x.strip() for x in str(vals).split(';') if x.strip()]
+    r = c.js(f"""(()=>{{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); if(!a) return 'sem painel'; const w={json.dumps(w)}; let n=0;
+      [...a.querySelectorAll('label')].forEach(l=>{{const i=l.querySelector('input[type=checkbox]'); if(!i) return; const q=w.indexOf(l.innerText.trim())>=0; if(i.checked!==q){{ i.click(); }} if(q) n++; }}); return n===w.length?'ok':'faltou fazenda';}})()"""); time.sleep(.25); return r
 def fset(gid, k, val):
+    if gid == 'g_saf' and k == 'fazs': return fazendas(val)
     r = c.js(f"""(()=>{{const e=document.getElementById('fx_{gid}_{k}'); if(!e) return 'sem campo {k}'; const pr=e.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;
       Object.getOwnPropertyDescriptor(pr,'value').set.call(e,{json.dumps(val)}); e.dispatchEvent(new Event(e.tagName==='SELECT'?'change':'input',{{bubbles:true}})); return 'ok';}})()"""); time.sleep(.25); return r
 def botao(lab, raiz='document'):
@@ -54,14 +59,14 @@ FX27SF = 'Nesta safra 553 · Livre 152 · A conferir 380 · Perene 80 · de 1.16
 FX2627 = 'Nesta safra 1.165 · de 1.165 ha · 1 sucessão a conferir'
 def nova_safra(nome, ini, fim, faz='Santa Rita'):
     abre('#saf=S2627&passo=safra'); botao('Nova safra'); time.sleep(.3)
-    for k, v in (('nome', nome), ('ini', ini), ('fim', fim), ('faz', faz)): fset('g_saf', k, v)
+    for k, v in (('nome', nome), ('ini', ini), ('fim', fim), ('fazs', faz)): fset('g_saf', k, v)   # SAF-FAZ-2: o campo é Fazendas (uma ou mais)
     salvar(); time.sleep(.8)
     r = c.js(f"""(()=>{{const rs=[...document.querySelectorAll('[role=row]')].filter(r=>r.offsetParent&&r.innerText.indexOf({json.dumps(nome)})>=0); const b=rs.length&&[...rs[rs.length-1].querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())); if(!b) return 'sem continuar'; b.click(); return 'ok';}})()"""); time.sleep(.8); return r
 # safra nova SEM recarregar a página (o estado continua): é o caso de duas safras novas no mesmo estado (R-22)
 def etapa1(): return c.js("(()=>{const s=window.__safSelf; s.setState({step:1}); return 'ok';})()")
 def cria_safra(nome, ini, fim, faz='Santa Rita'):
     etapa1(); time.sleep(.5); botao('Nova safra'); time.sleep(.3)
-    for k, v in (('nome', nome), ('ini', ini), ('fim', fim), ('faz', faz)): fset('g_saf', k, v)
+    for k, v in (('nome', nome), ('ini', ini), ('fim', fim), ('fazs', faz)): fset('g_saf', k, v)   # SAF-FAZ-2: o campo é Fazendas (uma ou mais)
     salvar(); time.sleep(.6); etapa1(); time.sleep(.5)
     c.js(f"""(()=>{{const rs=[...document.querySelectorAll('[role=row]')].filter(r=>r.offsetParent&&r.innerText.indexOf({json.dumps(nome)})>=0); const b=rs.length&&[...rs[rs.length-1].querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())); if(b) b.click();}})()"""); time.sleep(.8)
     return c.js("window.__safSelf.state.saf")
