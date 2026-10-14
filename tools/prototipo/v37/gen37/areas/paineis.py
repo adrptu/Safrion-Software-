@@ -137,6 +137,8 @@ def build():
             from areas.processo_os import JS_NUCLEO as _OSN, _ordens as _ords
             import dados2 as _D2
             E.EXTRAJS[0] += 'const OSD = '+json.dumps(dict(ords=_ords(),hoje=_D2.HOJE_ISO),ensure_ascii=False).replace('</','<\\/')+';\n'+_OSN
+            import areas.custo_dominio as _CUS   # agrCustoRef: custo por cultura com as regras da camada Custos do Mapa
+            E.EXTRAJS[0] += _CUS.js_prefixo()
         cards=''.join('<section class="pn-card"><h2>'+E.esc(nome)+
           '<button type="button" class="pn-tip g2dica-i" aria-label="Como calcular: '+E.esc(nome)+'" data-dica="'+E.esc(formula)+'">ⓘ</button></h2>'+
           '<strong class="pn-value" data-alert="'+H('pn_alert'+str(i))+'">'+H('pn_v'+str(i))+'</strong></section>' for i,(nome,formula,_) in enumerate(itens))

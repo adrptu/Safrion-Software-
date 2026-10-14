@@ -55,6 +55,7 @@ from ui37 import shell37, HEIGHTS37, LCOR
 import dados as D
 import dados2 as D2
 from areas.processo_os import JS_NUCLEO, _ordens as _ordens_os
+import areas.custo_dominio as _CUS   # custo das O.S.: regras únicas do Mapa e do Painel Agrícola
 
 H=lambda s: '{{'+s+'}}'
 F=lambda: H('false')
@@ -671,19 +672,10 @@ function necAgg(t,per){ const m={}; (insFaz().nec[t]||[]).filter(x=>per==='Safra
   return Object.values(m).sort((a,b)=>a.dt<b.dt?-1:(a.dt>b.dt?1:0)); }
 function brIso(s){ if(!s) return ''; const a=s.split('-'); return a[2]+'/'+a[1]; }
 // ---- custos: previsto (plano ou O.S.) × realizado provisório (apontamentos aceitos) × conferido; preço ausente não vira zero ----
-function precoDe(p){ if(M.preco[p]!==undefined) return M.preco[p]; for(const k in M.gen){ if(p.indexOf(k)===0) return M.preco[M.gen[k]]!==undefined?M.preco[M.gen[k]]:null; } return null; }
-function ordCusto(o){ const r={ins:0,op:0,ha:0,haConf:0,rs:0,rsConf:0,prevExec:0,pend:[]}; const op=(o.atv||{}).op||''; const cop=M.cop[op];
-  if(cop===undefined) r.pend.push('Operação '+(op||'—')+' sem rendimento na safra: custo de operação não somado');
-  const prHa=(o.ins||[]).reduce((s,x)=>{ const p=precoDe(x.p); if(p===null){ r.pend.push('Sem preço: '+x.p+' (não somado)'); return s; } return s+x.dose*p; },0);
-  (o.ap||[]).forEach(a=>{ if(!cenApSomado(a)) return; const ha=Number(a.ha)||0; let vi=0;   // duplicidade retida ou guardada não vira custo
-    if(a.cons&&Object.keys(a.cons).length) Object.keys(a.cons).forEach(p=>{ const pr=precoDe(p); if(pr!==null) vi+=(Number(a.cons[p])||0)*pr; }); else vi=prHa*ha;
-    const vo=(cop||0)*ha; r.ins+=vi; r.op+=vo; r.ha+=ha; r.rs+=vi+vo; r.prevExec+=(prHa+(cop||0))*ha; if(a.st==='Conferido'){ r.haConf+=ha; r.rsConf+=vi+vo; } });
-  r.pend=r.pend.filter((x,i,a)=>a.indexOf(x)===i); return r; }
-function cusReal(t){ const R={ins:0,op:0,ha:0,haConf:0,rs:0,rsConf:0,prevExec:0,pend:[],ords:[],shared:[]};
-  M.ord.forEach(mo=>{ if(mo.tal.indexOf(t)<0) return; const o=OSN.find(x=>x.id===mo.id); if(!o) return; const c=ordCusto(o); if(!c.ha) return;
-    if(mo.tal.length>1){ R.shared.push({o,c,tal:mo.tal}); return; }
-    ['ins','op','ha','haConf','rs','rsConf','prevExec'].forEach(k=>{ R[k]+=c[k]; }); R.ords.push({o,c}); c.pend.forEach(p=>R.pend.push(o.id+' · '+p)); });
-  return R; }
+// custo: as regras moram em custo_dominio.py (fonte única do Mapa e do Painel Agrícola); aqui só o atalho com os dados do Mapa (M) e a projeção OSN
+function precoDe(p){ return cusPreco(M,p); }
+function ordCusto(o){ return cusOrdem(M,o); }
+function cusReal(t){ return cusTalhao(M,t,OSN); }
 // ---- classe e rótulo de cada talhão na camada ativa ----
 // ---- pragas e doenças (MIP/MID): vistorias do período; a pior situação colore o talhão ----
 // mesma base do AG-01 (mip.js): vistorias do período + as abertas e as decisões pendentes, da pior para a melhor situação
@@ -1387,7 +1379,7 @@ def build_in04(HCARD=742):
     osd=dict(ords=_ordens_os())   # as mesmas ordens da tela O.S. (o Mapa usa o núcleo dela: próximo passo, impedimentos e comandos)
     import dados_mip
     import dados_solo as DSO   # Análises de solo: a mesma semente (SOLO0) do AG-02; regras em solo.js (no prefixo do cenário)
-    EXTRAJS[0]=(pref+DI.js_prefixo()+dados_mip.js_prefixo()+DSO.js_prefixo()+JS_COMUM+open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','cal01.js'),encoding='utf-8').read()+'\n'+'const OSD = '+json.dumps(osd,ensure_ascii=False).replace('</','<\\/')+';\n'+JS_NUCLEO
+    EXTRAJS[0]=(pref+DI.js_prefixo()+dados_mip.js_prefixo()+DSO.js_prefixo()+JS_COMUM+open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','cal01.js'),encoding='utf-8').read()+'\n'+'const OSD = '+json.dumps(osd,ensure_ascii=False).replace('</','<\\/')+';\n'+JS_NUCLEO+_CUS.JS
                 +'const M = '+json.dumps(MDATA,ensure_ascii=False).replace('</','<\\/')+';\n'+MAP_JS
                 +open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','talgeo.js'),encoding='utf-8').read()+'\n'
                 +open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','talmapa.js'),encoding='utf-8').read()+r'''

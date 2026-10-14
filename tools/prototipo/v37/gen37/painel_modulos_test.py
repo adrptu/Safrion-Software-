@@ -93,6 +93,20 @@ chk('agrPainelRef: beneficiamento fora do registro não invalida o estado',agrPa
 const em=cenClone(CEN0); const bz=JSON.parse(JSON.stringify(OSD.ords.find(o=>o.id==='OS-0431'))); bz.id='OS-0600';
 em.ordens['OS-0600']={id:'OS-0600',etapa:'A liberar',osc:{novo:bz}};
 chk('agrPainelRef: ordem emitida na tela (osc.novo) entra pela base dela',agrPainelRef(em).os.impedidas.map(x=>x.id).includes('OS-0600'),true);
+// PAINEL-02 · agrCustoRef (contrato 6166150698): mesmas regras da camada Custos do Mapa (custo_dominio.js)
+{ const k0=cenClone(CEN0), j0=JSON.stringify(k0), K=agrCustoRef(k0);
+  chk('agrCustoRef: não muda o estado',JSON.stringify(k0),j0);
+  chk('agrCustoRef: seed = 4 culturas (fazenda · cultura)',K.cultivos.map(x=>x.faz+' · '+x.cultura),['Santa Rita · Soja','Santa Rita · Mamão Formosa','Santa Rita · Café','Lagoa Grande · Mamão Formosa']);
+  const so=K.cultivos[0];
+  chk('agrCustoRef: Soja com talhões sem plano = R$/ha orçado null, sem_orc listado e parcial',[so.orcado_rs_ha,so.sem_orc,so.parcial],[null,['T4','T3','P1','P2'],true]);
+  chk('agrCustoRef: realizado = soma de cusTalhao por talhão (mesma conta do Mapa)',so.real_prov_rs,Math.round(so.talhoes.reduce((s,t)=>s+cusTalhao(CUSD,t,osProjecaoEstado(k0,id=>/^OB-/.test(id))).rs,0)*100)/100);
+  chk('agrCustoRef: O.S. de vários talhões (OS-0421, T1 + T2) fica em sem_rateio',K.sem_rateio.map(x=>[x.os,x.talhoes]),[['OS-0421',['T1','T2']]]);
+  chk('agrCustoRef: recorte Lagoa Grande = só a cultura da Lagoa',agrCustoRef(k0,{faz:'Lagoa Grande'}).cultivos.map(x=>x.cultura),['Mamão Formosa']);
+  const pr=CUSD.preco, semP=Object.assign({},pr); const prodLG=Object.keys(pr)[0]; delete semP[prodLG]; CUSD.preco=semP;
+  const Kp=agrCustoRef(cenClone(CEN0)); CUSD.preco=pr;
+  chk('agrCustoRef: preço removido não vira zero: alguma cultura fica parcial com o item em pend',Kp.cultivos.some(x=>x.parcial&&x.pend.some(p=>p.indexOf(prodLG)>=0)),true);
+  chk('agrCustoRef: estado vazio = custos zerados (válido), não null',agrCustoRef({ordens:{}}).cultivos.every(x=>x.real_prov_rs===0&&x.ha_exec===0),true);
+  chk('agrCustoRef: estado inválido = Sem dados',[agrCustoRef({}),agrCustoRef({ordens:{x:{id:'OS-9',etapa:'A liberar'}}})],[null,null]); }
 chk('agrPainelRef: estado não objeto = Sem dados',[agrPainelRef({ordens:[]}).os,agrPainelRef(null).os],[null,null]);
 console.log('RESULTADO '+n+'/'+n);
 '''
@@ -101,7 +115,8 @@ def unit():
     from areas.processo_os import JS_NUCLEO, _ordens
     import dados2 as D2
     osd='const OSD = '+json.dumps(dict(ords=_ordens(),hoje=D2.HOJE_ISO),ensure_ascii=False)+';\n'
-    src=cenario.perfis_js()+cenario.js_prefixo()+DM.js_regras()+osd+JS_NUCLEO+P.JS+TEST
+    import areas.custo_dominio as CU
+    src=cenario.perfis_js()+cenario.js_prefixo()+DM.js_regras()+osd+JS_NUCLEO+CU.js_prefixo()+P.JS+TEST
     with tempfile.TemporaryDirectory(prefix='painel01-') as d:
         p=Path(d)/'oracle.js';p.write_text(src)
         r=subprocess.run(['node',str(p)],text=True,capture_output=True)
