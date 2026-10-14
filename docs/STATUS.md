@@ -113,3 +113,6 @@ Corrigido P1 do autosave: rejeição após AbortSignal mantém estado incerto; r
 
 ### Rodada R10 — retorno observável e legibilidade (Claude 6179465714)
 O ramo de gravação incerta renova o aviso a cada tentativa, mesmo após expiração, fechamento ou substituição do snackbar. Mantém o bloqueio da escrita e o rascunho; não afirma sucesso. Contraprova 36/37 antes, 37/37 depois. Validação 20/20 skills, 17/17 adaptador e lint passaram. Manifesto 9c4eb391308ca9d5c225eff4803b02288feb948d2d6754b129b22dccdce9b1b5. Textos correntes revisados e README distingue as contagens históricas das atuais. Revisão final Claude e recibo cloud pendentes.
+
+### Rodada R11 — confirmação tardia observável (4276852743)
+O recibo tardio da gravação vigente fecha o aviso de incerteza e mostra o sucesso configurado apenas se o rascunho coincide com o confirmado. Rascunho mais recente continua sujo e protegido; mensagem vazia não cria sucesso visual. Contraprova 37/40 antes, 40/40 depois. Validação 20/20 skills, 17/17 adaptador e lint passaram. Manifesto 962db749dca35be349d10d33f2ffd9221e3cf81598a15eacfb9526113cbd2561. Textos correntes revisados e README distingue as contagens históricas das atuais. Revisão final Claude e recibo cloud pendentes.

@@ -1325,7 +1325,7 @@
      if (scrim) return;
      for (const c of registry) {
        if (!c.keys) continue;
-@@ -104,19 +104,99 @@
+@@ -104,19 +104,103 @@
    });
  
    // ---------- autosave ----------
@@ -1377,8 +1377,12 @@
 +          receipt => {
 +            if (receipt?.ok === false) throw new Error('Gravação recusada');
 +            if (serial === writeSerial && !destroyed) {
-+              if (timedOut) uncertain = false;
 +              last = json;
++              if (timedOut) {
++                uncertain = false;
++                closeNotice?.();
++                if (message && !dirty()) notice(message, { timeout: 2000 });
++              }
 +            }
 +            return receipt;
 +          },

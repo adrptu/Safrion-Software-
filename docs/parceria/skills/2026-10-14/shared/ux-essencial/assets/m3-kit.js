@@ -139,8 +139,12 @@
           receipt => {
             if (receipt?.ok === false) throw new Error('Gravação recusada');
             if (serial === writeSerial && !destroyed) {
-              if (timedOut) uncertain = false;
               last = json;
+              if (timedOut) {
+                uncertain = false;
+                closeNotice?.();
+                if (message && !dirty()) notice(message, { timeout: 2000 });
+              }
             }
             return receipt;
           },

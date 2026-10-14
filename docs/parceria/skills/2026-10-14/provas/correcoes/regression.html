@@ -64,6 +64,14 @@ const uf=document.createElement('form');uf.innerHTML='<input name="x" value="A">
 const ua=Kit.autosave(uf,()=>{ucount++;return new Promise(()=>{})},{message:'',timeoutMs:20});uf.elements.x.value='B';await ua.flush();
 Kit.snackbar('Outro retorno',{timeout:10});await new Promise(r=>setTimeout(r,280));uf.elements.x.value='C';const ur=await ua.flush();
 check('Nova tentativa incerta renova aviso mesmo após outro snackbar',ur.ok===false&&ur.reason==='pending'&&ucount===1&&document.querySelector('.snackbar')?.textContent.includes('sem confirmação'));await ua.destroy({discard:true});uf.remove();
+for(const [msg,edit,label] of [['Confirmado',false,'sucesso'],['',false,'sem mensagem'],['Confirmado',true,'rascunho mais recente']]) {
+ const f=document.createElement('form');f.innerHTML='<input name="x" value="A">';document.body.appendChild(f);let resolveLate;
+ const a=Kit.autosave(f,()=>new Promise(resolve=>{resolveLate=resolve}),{message:msg,timeoutMs:20});f.elements.x.value='B';await a.flush();
+ if(edit)f.elements.x.value='C';resolveLate();await new Promise(r=>setTimeout(r,280));
+ const feedback=[...document.querySelectorAll('.snackbar')].map(e=>e.textContent).join(' ');
+ check('Recibo tardio atualiza aviso: '+label,!a.pending&&a.dirty===edit&&!feedback.includes('sem confirmação')&&((msg&&!edit)?feedback.includes(msg):!feedback.includes('Confirmado')));
+ await a.destroy({discard:edit});f.remove();await new Promise(r=>setTimeout(r,280));
+}
 window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS '+results.length+'/'+results.length:'FAIL';
 })().catch(error=>{window.testResults=[{ok:false,error:String(error)}]});
 </script></html>
