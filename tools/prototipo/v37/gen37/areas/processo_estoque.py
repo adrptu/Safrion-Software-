@@ -516,7 +516,7 @@ function PREVALS(self,v){
     const fis=S(l=>l.fisico), blq=S(l=>l.quarentena), res=S(l=>l.reservado), dp=S(cenDisp); if(blq>1e-9) quarTxt.push(pr+' '+eq(blq,un));
     const bv=S(l=>evenc(l)?l.quarentena:0); if(blq-bv>1e-9) inspTxt.push(pr+' '+eq(blq-bv,un)); if(bv>1e-9) vencTxt.push(pr+' '+eq(bv,un));
     const id='I|'+pr; x0[id]=true; const locs=[...new Set(ls.map(l=>l.local))].join(', '); const ex=eexp(pr);
-    const o=[{t:'Disponível = físico − reservado − bloqueado = '+eq(fis,un)+' − '+eq(res,un)+' − '+eq(blq,un)+' = '+eq(dp,un)}]
+    const o=[{t:'Disponível: '+eq(dp,un)+'. Soma do saldo livre dos lotes não vencidos. Em cada lote: físico − reservado − bloqueado, com mínimo de zero.'}]
       .concat(cr.map(x=>({t:'Em custódia (fora do depósito, não soma no físico): '+x.rid+' · '+x.os+' · '+eq(x.it.custodia,un)+' com '+x.quem,h:'OS.dc.html'})))
       .concat(ex.q>1e-9?[{t:'Em conferência (exposição, fora do saldo até a decisão): '+ex.ids.join(', ')+' · '+eq(ex.q,un)+' além da custódia'}]:[]);
     const cos=cr.map(x=>x.os).join(', ');
