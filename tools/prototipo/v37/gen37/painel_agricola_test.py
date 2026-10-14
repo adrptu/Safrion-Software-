@@ -138,7 +138,15 @@ def ui():
 def os_contract_ui():
     """Prova UI com retorno sintético: não constitui integração de agrPainelRef."""
     from comp_lib import Chrome,servir
-    port,srv=servir(str(Path(__file__).parent/'_render'));c=Chrome();J=c.js;checks=[]
+    # Isola a fronteira do getter só no HTML temporário servido pelo teste.
+    # O bundle fecha funções no escopo local; window.agrPainelRef não substitui a função real.
+    render=Path(__file__).parent/'_render'; tmp=tempfile.TemporaryDirectory(prefix='pn02-contrato-'); root=Path(tmp.name)
+    for item in render.iterdir():
+        if item.name!='PAGR.dc.html': (root/item.name).symlink_to(item.resolve(),target_is_directory=item.is_dir())
+    html=(render/'PAGR.dc.html').read_text(); marker='function pnaVals(self,v) {'
+    assert html.count(marker)==1, 'Gancho de apresentação ausente ou ambíguo'
+    (root/'PAGR.dc.html').write_text(html.replace(marker,marker+'\n const agrPainelRef=window.__pnOSFixture;',1))
+    port,srv=servir(str(root));c=Chrome();J=c.js;checks=[]
     def chk(t,v):
         checks.append(bool(v));print(('OK ' if v else 'FALHA ')+t,flush=True)
     def wait(e):
@@ -150,11 +158,13 @@ def os_contract_ui():
     fixture={"os":{"impedidas":[{"id":"OS-0420","talhao":"T4","faz":"Santa Rita","saf":"Safra 2026/27","motivo":"Falta máquina","dono":"Caio","desde":None,"origem":"OS.dc.html#OS-0420"}],"atrasadas":[{"id":"OS-0420","prevista":"2026-09-22","dias":1,"origem":"OS.dc.html#OS-0420"}]},"custos":None}
     try:
         for w,touch in [(1440,False),(390,True)]:
+            absence=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>null;'})['identifier']
             c.aparelho(w,844,1,touch);c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
             chk('Fonte ausente explícita '+str(w),wait("document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]').innerText.includes('Dados de impedimentos e prazos indisponíveis')"))
             J("(()=>{let e=document.querySelector('main input[type=search]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(e,'');e.dispatchEvent(new Event('input',{bubbles:true}));})()")
+            c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':absence})
             # O adaptador é fixture exclusiva desta prova; montagem do produto não recebe seed paralelo.
-            fixture_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.agrPainelRef=()=>('+json.dumps(fixture,ensure_ascii=False)+');'})['identifier']
+            fixture_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>('+json.dumps(fixture,ensure_ascii=False)+');'})['identifier']
             c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
             chk('Uma linha para dois motivos '+str(w),wait("document.querySelectorAll('[data-rid=\"os:OS-0420\"]').length===1"))
             chk('Motivo, responsável e prazo '+str(w),J("(()=>{let r=document.querySelector('[data-rid=\"os:OS-0420\"]');return !!r&&['Impedida · Atrasada','Falta máquina','Caio','22/09/2026'].every(t=>r.innerText.includes(t))})()"))
@@ -172,12 +182,12 @@ def os_contract_ui():
             chk('Volta preserva filtro e foco '+str(w),wait("location.pathname.endsWith('PAGR.dc.html')&&document.querySelectorAll('[data-rid]').length===1&&document.activeElement.getAttribute('data-rid')==='os:OS-0420'"))
             c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':fixture_script})
             parcial=json.loads(json.dumps(fixture));parcial['os']['atrasadas']=None
-            partial_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.agrPainelRef=()=>('+json.dumps(parcial,ensure_ascii=False)+');'})['identifier']
+            partial_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>('+json.dumps(parcial,ensure_ascii=False)+');'})['identifier']
             c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
             chk('Atrasos sem dados preservam impedimento e explicação '+str(w),wait("(()=>{let s=document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]');return s&&s.innerText.includes('Prazos indisponíveis')&&s.innerText.includes('Falta máquina')&&!s.innerText.includes('Nenhuma O.S. impedida')})()"))
             c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':partial_script})
         Path('_probe').mkdir(exist_ok=True);c.shot(str(Path('_probe/painel-os-contrato-390.png').resolve()))
-    finally:c.close();srv.terminate()
+    finally:c.close();srv.terminate();tmp.cleanup()
     print('RESULTADO contrato sintético '+str(sum(checks))+'/'+str(len(checks)));return 0 if all(checks) else 1
 
 if __name__=='__main__':sys.exit(os_contract_ui() if '--os-contract-ui' in sys.argv else prepare() if '--prepare' in sys.argv else ui() if '--ui' in sys.argv else unit())
