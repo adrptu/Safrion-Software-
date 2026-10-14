@@ -217,10 +217,14 @@ def _nova_ordem_dados():
 JS_NUCLEO=r'''
 // ===== núcleo da O.S. (dados do registro + cenário compartilhado, próximo passo e comandos osc_*): usado pela tela O.S. e pelo Mapa =====
 function nf(n){ return Number(n||0).toLocaleString('pt-BR'); }
-function ords(self){ const c=cenGet(); const ids={};
+// projeção única das ordens (registro OSD + cenário c): a tela O.S., o Mapa e o Painel Agrícola (agrPainelRef) leem a mesma; não muda c
+function osProjecao(c){ const ids={};
   const out=OSD.ords.map(b=>{ ids[b.id]=1; return osMerge(b,c.ordens[b.id],c); });
   Object.keys(c.ordens).forEach(k=>{ const co=c.ordens[k]; if(!ids[k]&&co.osc&&co.osc.novo) out.push(osMerge(co.osc.novo,co,c)); });  // emitidas nesta tela
   return out; }
+function ords(self){ return osProjecao(cenGet()); }
+// impedida: o selo da projeção (o mesmo do cabeçalho da O.S. e do Painel Agrícola)
+const OS_IMP_RE=/impedida|falta máquina|falta insumo/i;
 // turno fechado sem sinal: o consumo ainda está no aparelho (fila AP|…); o escritório vê consumo e área juntos, quando o app envia.
 // cenFecharTurno já baixa a custódia no aparelho; aqui a requisição exibida devolve essa baixa até o envio (CEN_BAIXA_NO_SINAL desliga).
 function osPendCons(co,prod){ if(typeof CEN_BAIXA_NO_SINAL!=='undefined') return 0;
@@ -960,7 +964,7 @@ function EXTRAVALS(self,v){
   v.os_vgo=()=>self.setState(soCult?{mf_cult:'Todas',g2toast:'Cultura: Todas'}:(semFaz?{mf_faz:'Santa Rita',g2toast:'Fazenda: Santa Rita'}:{mf_saf:'Todas',g2toast:'Safra: Todas'}));
   // selo do cabeçalho: recalculado do estado (cancelar, iniciar ou enviar para conferência muda as contagens)
   const nEx=os.filter(o=>o.etapa==='Em execução').length;
-  const nIm=os.filter(o=>o.etapa!=='Canceladas'&&o.selos.some(s=>/impedida|falta máquina|falta insumo/i.test(s.t))).length;
+  const nIm=os.filter(o=>o.etapa!=='Canceladas'&&o.selos.some(s=>OS_IMP_RE.test(s.t))).length;
   v.os_st=nEx+' em execução · '+(nIm?nIm+' impedida'+(nIm!==1?'s':''):'nenhuma impedida');
   const stc=nIm?'red':(nEx?'green':'gray');  // vermelho só com impedidas (mesma cor do estado nas outras telas)
   v.os_stst=chipSt(stc).replace('padding:2px 9px;','padding:3px 10px;'); v.os_stdot=dotSt(stc);

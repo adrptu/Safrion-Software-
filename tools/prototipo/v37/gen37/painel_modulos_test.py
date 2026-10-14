@@ -41,24 +41,36 @@ chk('Coleções vazias válidas: zero suprimentos',pnValores({ordens:{},lotes:{}
 c.lotes.a.fisico=null;chk('Saldo físico ausente não produz total parcial',pnValores(c,'PSUP').vals.slice(0,3),[null,null,null]);
 c.reqs.r2.itens[0].custodia=null;chk('Custódia ausente não vira demanda falsa',pnValores(c,'PSUP').vals[3],null);
 c.ordens.c.etapa=null;chk('Estado ausente impede contagem parcial de O.S.',pnValores(c,'PAGR').vals,[null,null,null,null]);
-// PAINEL-02 · agrPainelRef (contrato 6163002343/6163029779)
-const ag=cenClone(CEN0), r0=agrPainelRef(ag), antes=JSON.stringify(ag);
-chk('agrPainelRef: impedidas do seed = selos da tela (abertas, sem OB-), motivo vigente, origem na O.S.',r0.os.impedidas.map(x=>[x.id,x.motivo,x.origem]),
- Object.values(ag.ordens).filter(o=>!/^OB-/.test(o.id)&&!['Encerradas','Canceladas'].includes(o.etapa)&&o.selos.some(s=>/impedida|falta máquina|falta insumo/i.test(s.t))).map(o=>[o.id,o.selos.find(s=>/impedida|falta máquina|falta insumo/i.test(s.t)).t,'OS.dc.html#'+o.id]));
-chk('agrPainelRef: seed = OS-0420 (ativo bloqueado), OS-0431 (falta máquina), OS-0507 (bomba em manutenção)',r0.os.impedidas.map(x=>x.id),['OS-0420','OS-0431','OS-0507']);
-chk('agrPainelRef: inclui falta máquina (A liberar) e n confere',[r0.os.impedidas.some(x=>/Falta máquina/.test(x.motivo)),r0.os.n.impedidas],[true,r0.os.impedidas.length]);
-chk('agrPainelRef: sem data canônica, atrasadas e custos = null (Sem dados), dono/desde sem invenção',[r0.os.atrasadas,r0.os.n.atrasadas,r0.custos,r0.os.impedidas.every(x=>x.dono===null&&x.desde===null)],[null,null,null,true]);
-const id0=r0.os.impedidas[0].id; ag.ordens[id0].etapa='Encerradas';chk('agrPainelRef: encerrada sai da lista',agrPainelRef(ag).os.impedidas.some(x=>x.id===id0),false);
-ag.ordens[id0].etapa='Canceladas';chk('agrPainelRef: cancelada sai da lista',agrPainelRef(ag).os.impedidas.some(x=>x.id===id0),false);
-chk('agrPainelRef: não altera o estado (só a etapa mudada pelo teste)',JSON.stringify(agrPainelRef(ag))!==''&&Object.keys(ag.ordens).length===Object.keys(JSON.parse(antes).ordens).length,true);
+// PAINEL-02 · agrPainelRef (contrato 6163002343/6163029779; revisão Codex 6163287732: projeção da O.S. e recorte)
+const ag=cenClone(CEN0), antes=JSON.stringify(ag), r0=agrPainelRef(ag);
+chk('agrPainelRef: não muda o estado (JSON igual antes e depois)',JSON.stringify(ag),antes);
+chk('agrPainelRef: seed = OS-0418 e OS-0502 (falta insumo no Estoque), OS-0420 (ativo bloqueado), OS-0431 (falta máquina), OS-0507 (bomba)',r0.os.impedidas.map(x=>[x.id,x.dono]),[['OS-0418','Suprimentos'],['OS-0420','Manutenção'],['OS-0431','PCP'],['OS-0502','Suprimentos'],['OS-0507','Manutenção']]);
+chk('agrPainelRef: mesma lista e mesmo motivo que a projeção da tela O.S. (osProjecao + OS_IMP_RE)',r0.os.impedidas.map(x=>[x.id,x.motivo]),
+ osProjecao(ag).filter(o=>!/^OB-/.test(o.id)&&!['Encerradas','Canceladas'].includes(o.etapa)).map(o=>[o.id,(o.selos.find(s=>OS_IMP_RE.test(s.t))||{}).t]).filter(x=>x[1]));
+chk('agrPainelRef: origem na O.S. e n confere',[r0.os.impedidas[0].origem,r0.os.n.impedidas],['OS.dc.html#OS-0418',5]);
+chk('agrPainelRef: atrasadas e custos = null; desde = null (dono vem da projeção)',[r0.os.atrasadas,r0.os.n.atrasadas,r0.custos,r0.os.impedidas.every(x=>x.desde===null)],[null,null,null,true]);
+// S2: máquina apta (CMD-19) tira só o impedimento dela, como na tela O.S.
+const ap=cenClone(CEN0); ap.man.ativos.a01.cond='Disponível'; const rA=agrPainelRef(ap);
+chk('agrPainelRef: Trator T1 apto → OS-0420 e OS-0431 saem; falta de insumo e bomba ficam',rA.os.impedidas.map(x=>x.id),['OS-0418','OS-0502','OS-0507']);
+chk('agrPainelRef: apto = a mesma projeção da tela O.S. (sem selo de impedimento na OS-0420)',osProjecao(ap).find(o=>o.id==='OS-0420').selos.some(s=>OS_IMP_RE.test(s.t)),false);
+// S3: recorte por fazenda e safra
+chk('agrPainelRef: recorte Lagoa Grande = OS-0502 e OS-0507',agrPainelRef(ag,{faz:'Lagoa Grande'}).os.impedidas.map(x=>x.id),['OS-0502','OS-0507']);
+chk('agrPainelRef: recorte Santa Rita = OS-0418, OS-0420 e OS-0431',agrPainelRef(ag,{faz:'Santa Rita'}).os.impedidas.map(x=>x.id),['OS-0418','OS-0420','OS-0431']);
+chk('agrPainelRef: recorte safra 2025/26 = nenhuma',agrPainelRef(ag,{saf:'2025/26'}).os.impedidas,[]);
+chk('agrPainelRef: recorte Santa Rita · 2026/27 = OS-0418, OS-0420 e OS-0431',agrPainelRef(ag,{faz:'Santa Rita',saf:'2026/27'}).os.impedidas.map(x=>x.id),['OS-0418','OS-0420','OS-0431']);
+const sf=cenClone(CEN0); const k0=OSD.ords.find(o=>o.id==='OS-0507'); const fz0=k0.faz; k0.faz='';
+chk('agrPainelRef: ordem aberta sem fazenda com recorte pedido = Sem dados',agrPainelRef(sf,{faz:'Lagoa Grande'}).os,null);
+chk('agrPainelRef: sem recorte, a mesma ordem conta',agrPainelRef(sf).os.n.impedidas,5); k0.faz=fz0;
+const en=cenClone(CEN0); en.ordens['OS-0420'].etapa='Encerradas';chk('agrPainelRef: encerrada sai da lista',agrPainelRef(en).os.impedidas.some(x=>x.id==='OS-0420'),false);
+en.ordens['OS-0420'].etapa='Canceladas';chk('agrPainelRef: cancelada sai da lista',agrPainelRef(en).os.impedidas.some(x=>x.id==='OS-0420'),false);
 chk('agrPainelRef: ordens ausentes = Sem dados',agrPainelRef({}).os,null);
-chk('agrPainelRef: ordens vazias = lista vazia e 0',[agrPainelRef({ordens:{}}).os.impedidas,agrPainelRef({ordens:{}}).os.n.impedidas],[[],0]);
-chk('agrPainelRef: selos ausentes numa ordem = Sem dados',agrPainelRef({ordens:{x:{id:'OS-1',etapa:'Liberadas'}}}).os,null);
 console.log('RESULTADO '+n+'/'+n);
 '''
 
 def unit():
-    src=cenario.perfis_js()+cenario.js_prefixo()+DM.js_regras()+P.JS+TEST
+    from areas.processo_os import JS_NUCLEO, _ordens
+    osd='const OSD = '+json.dumps(dict(ords=_ordens()),ensure_ascii=False)+';\n'
+    src=cenario.perfis_js()+cenario.js_prefixo()+DM.js_regras()+osd+JS_NUCLEO+P.JS+TEST
     with tempfile.TemporaryDirectory(prefix='painel01-') as d:
         p=Path(d)/'oracle.js';p.write_text(src)
         r=subprocess.run(['node',str(p)],text=True,capture_output=True)
