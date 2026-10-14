@@ -99,6 +99,23 @@ chk('Razão inválida é indisponível',pnaCustos({...cr,cultivos:[{...cost,real
 chk('Zero válido permanece zero',pnaCustos({...cr,cultivos:[{...cost,real_rs_ha:0}]}).rows[0].realizado,'0,00 R$/ha');
 chk('Sem rateio listado sem somar ao grupo',pnaCustos({...cr,sem_rateio:[{os:'OS-9001',rs:200,real_conf_rs:100,real_prov_rs:100,pend:[]}]}).fora[0].titulo,'OS-9001 · Sem rateio por talhão');
 
+const ordem={id:'OS-0421',talhao:'T1 + T2',faz:'Santa Rita',saf:'Safra 2026/27',tipo:'Aplicação',etapa:'Em execução',
+ prevista_ha:350,realizada_ha:190,pct:54,sinal_ha:12,pendencia:null,dono:'Caio',prazo:'23/09',origem:'OS.dc.html#OS-0421'};
+const er={execucao:{ordens:[ordem]}}, erAntes=JSON.stringify(er), ev=pnaExecucao(er)[0];
+chk('Execução enviada não soma sinal local',ev.area,'Enviada: 190,00 ha de 350,00 ha previstos');
+chk('Sinal local separado com consequência',ev.sinal,'12,00 ha no aparelho · ainda sem envio');
+chk('Percentual vem do domínio sem nova conta',ev.progresso,'54% da área prevista enviada');
+chk('Destino e recuperação exatos',[ev.href,ev.foco],['OS.dc.html#OS-0421','execucao:OS-0421']);
+chk('Leitura de execução imutável',JSON.stringify(er),erAntes);
+const ex=o=>pnaExecucao({execucao:{ordens:[{...ordem,...o}]}})[0];
+chk('100% não encerra ordem em conferência',[ex({etapa:'Em conferência',pct:100,realizada_ha:350}).etapa,ex({etapa:'Em conferência'}).acao],['Em conferência','Conferir O.S.']);
+chk('Pendência de domínio preservada',ex({pendencia:'Sobra em custódia'}).pendencia,'Sobra em custódia');
+chk('Sem área não vira zero ou barra',[ex({prevista_ha:null,realizada_ha:null,pct:null}).area,ex({prevista_ha:null}).progresso],['Área de execução indisponível','']);
+chk('Zero enviado legítimo',ex({realizada_ha:0,pct:0,sinal_ha:0}).area,'Enviada: 0,00 ha de 350,00 ha previstos');
+chk('Ausência e vazio distintos',[pnaExecucao(null),pnaExecucao({execucao:{ordens:[]}})],[null,[]]);
+chk('Origem ou estado inválidos recusados',[pnaExecucao({execucao:{ordens:[{...ordem,origem:'javascript:alert(1)'}]}}),pnaExecucao({execucao:{ordens:[{...ordem,etapa:'Encerrada'}]}})],[null,null]);
+chk('Não mascara ordem duplicada como dois trabalhos',pnaExecucao({execucao:{ordens:[ordem,ordem]}}),null);
+chk('Percentual inválido não mostra barra',ex({pct:Infinity}).progresso,'');
 console.log('RESULTADO '+n+'/'+n);
 '''
 
@@ -335,4 +352,65 @@ def grupos_ui():
     finally:c.close();srv.terminate()
     print('RESULTADO grupos '+str(sum(checks))+'/'+str(len(checks)));return 0 if all(checks) else 1
 
-if __name__=='__main__':sys.exit(grupos_ui() if '--grupos-ui' in sys.argv else custos_ui() if '--custos-ui' in sys.argv else os_contract_ui() if '--os-contract-ui' in sys.argv else prepare() if '--prepare' in sys.argv else ui() if '--ui' in sys.argv else unit())
+def execucao_ui():
+    from comp_lib import Chrome,servir
+    import shutil
+    temp=tempfile.TemporaryDirectory(prefix='pna-exec-ui-');root=Path(temp.name)
+    for name in ['PAGR.dc.html','OS.dc.html','support.js']:
+        shutil.copy2(Path(__file__).parent/'_render'/name,root/name)
+    html=(root/'PAGR.dc.html').read_text()
+    fixture="window.__pnaTest={reset:cenReset,get:cenGet,save:cenSave,mode:m=>{const f=agrPainelRef;agrPainelRef=(...a)=>({...f(...a),execucao:m==='empty'?{ordens:[]}:null})}};if(window.__pnaMode)__pnaTest.mode(window.__pnaMode);\n"
+    assert html.count('function pnaVals(self,v)')==1
+    (root/'PAGR.dc.html').write_text(html.replace('function pnaVals(self,v)',fixture+'function pnaVals(self,v)',1))
+    port,srv=servir(str(root));c=Chrome();J=c.js;checks=[]
+    def chk(t,v):
+        checks.append(bool(v));print(('OK ' if v else 'FALHA ')+t,flush=True)
+    def wait(e):
+        end=time.monotonic()+8
+        while time.monotonic()<end:
+            if J(e):return True
+            time.sleep(.1)
+        return False
+    try:
+        c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__errors=[];addEventListener('error',e=>__errors.push(e.message));"})
+        for w,touch in [(1440,False),(390,True)]:
+            c.aparelho(w,844,1,touch);c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+            J('__pnaTest.reset()');c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+            chk('Sete ordens e etapas '+str(w),wait("document.querySelectorAll('.pna-exec').length===7"))
+            chk('Domínio refletido e conferência não encerrada '+str(w),J("(()=>{let a=document.querySelector('[data-pna-exec=\"OS-0417\"]'),b=document.querySelector('[data-pna-exec=\"OS-0421\"]');return a.innerText.includes('Em conferência')&&a.innerText.includes('Sobra em custódia')&&a.innerText.includes('100%')&&b.innerText.includes('190,00 ha de 350,00 ha')})()"))
+            chk('Contexto e alvo44 '+str(w),J("[...document.querySelectorAll('.pna-exec')].every(e=>e.innerText.includes('Safra')&&e.querySelector('a').getBoundingClientRect().height>=44)"))
+            J("document.querySelector('[aria-label=\"Como comparar a execução\"]').focus()")
+            c.tecla('Enter','Enter',13)
+            chk('Fórmula pelo teclado distingue área de encerramento '+str(w),wait("(()=>{let d=document.querySelector('#g2-dica');return d&&!d.hidden&&d.innerText.includes('100% da área não significa')})()"))
+            c.tecla('Escape','Escape',27)
+            # Apenas fixture sintética: simula apontamento ainda no aparelho, sem chamar comando de produção.
+            J("(()=>{let s=__pnaTest.get();s.ordens['OS-0421'].ap.push({dia:9,ha:12,sinc:false});__pnaTest.save(s)})()")
+            c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+            chk('Sinal não aumenta enviada '+str(w),wait("(()=>{let e=document.querySelector('[data-pna-exec=\"OS-0421\"]');return e&&e.innerText.includes('12,00 ha no aparelho')&&e.innerText.includes('190,00 ha de 350,00 ha')})()"))
+            J("(()=>{let i=document.querySelector('main input[type=search]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'Café');i.dispatchEvent(new Event('input',{bubbles:true}))})()")
+            sel='a[data-pna-grupo="execucao:OS-0421"]'
+            J('document.querySelector('+json.dumps(sel)+').scrollIntoView({block:"center"})')
+            if os.environ.get('PNA_SHOTS'):
+                Path(os.environ['PNA_SHOTS']).mkdir(parents=True,exist_ok=True)
+                c.shot(str(Path(os.environ['PNA_SHOTS'])/('execucao-'+str(w)+'.png')))
+            if touch:
+                xy=J('(()=>{let r=document.querySelector('+json.dumps(sel)+').getBoundingClientRect();return {x:r.left+25,y:r.top+22}})()');c.toque(xy['x'],xy['y'])
+            else:
+                J('document.querySelector('+json.dumps(sel)+').focus()');c.tecla('Enter','Enter',13)
+            chk('Toque ou Enter abre O.S. exata '+str(w),wait("location.pathname.endsWith('OS.dc.html')&&location.hash==='#OS-0421'&&!!document.querySelector('aside[role=dialog]')"))
+            J('history.back()')
+            chk('Volta ao ponto de execução '+str(w),wait("location.pathname.endsWith('PAGR.dc.html')&&document.activeElement.getAttribute('data-pna-grupo')==='execucao:OS-0421'"))
+            chk('Busca de colheita preservada '+str(w),J("document.querySelector('main input[type=search]').value==='Café'"))
+            chk('Sem erro e sem overflow '+str(w),J('__errors.length===0&&document.documentElement.scrollWidth<=innerWidth'))
+        # Ausência e coleção vazia na composição real, fixture no getter sem alterar o domínio.
+        absent=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__pnaMode='missing';"})['identifier']
+        c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+        chk('Ausência mostra indisponível sem cartões',wait("document.querySelector('[aria-label=\"Execução das O.S.\"]').innerText.includes('Execução indisponível')&&document.querySelectorAll('.pna-exec').length===0"))
+        c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':absent})
+        c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__pnaMode='empty';"})
+        c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+        chk('Vazio válido mostra nenhuma ordem',wait("document.querySelector('[aria-label=\"Execução das O.S.\"]').innerText.includes('Nenhuma O.S. em execução')"))
+    finally:c.close();srv.terminate();temp.cleanup()
+    print('RESULTADO execução '+str(sum(checks))+'/'+str(len(checks)));return 0 if all(checks) else 1
+
+if __name__=='__main__':sys.exit(execucao_ui() if '--execucao-ui' in sys.argv else grupos_ui() if '--grupos-ui' in sys.argv else custos_ui() if '--custos-ui' in sys.argv else os_contract_ui() if '--os-contract-ui' in sys.argv else prepare() if '--prepare' in sys.argv else ui() if '--ui' in sys.argv else unit())

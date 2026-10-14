@@ -116,6 +116,28 @@ function pnaCustos(ref) {
  return {rows,fora};
 }
 
+// Apresentação do contrato agrPainelRef.execucao; não estima área nem soma apontamentos.
+function pnaExecucao(ref) {
+ const e=ref&&ref.execucao;
+ if(!e||!Array.isArray(e.ordens)||!e.ordens.every(x=>x&&typeof x.id==='string'&&
+   ['Em execução','Em conferência'].includes(x.etapa)&&x.origem==='OS.dc.html#'+encodeURIComponent(x.id))||
+   new Set(e.ordens.map(x=>x.id)).size!==e.ordens.length)return null;
+ return e.ordens.map(x=>{
+  const area=pnaCustoNumero(x.prevista_ha)&&x.prevista_ha>0&&pnaCustoNumero(x.realizada_ha);
+  const percentual=area&&Number.isInteger(x.pct)&&x.pct>=0&&x.pct<=100;
+  return {id:x.id,href:x.origem,foco:'execucao:'+x.id,
+   titulo:x.id+' · '+(x.talhao||'Talhão não informado'),
+   contexto:[x.faz||'Fazenda não informada',x.saf?(/^Safra\s/i.test(x.saf)?x.saf:'Safra '+x.saf):'Safra não informada',x.tipo].filter(Boolean).join(' · '),
+   etapa:x.etapa,dono:x.dono||'Responsável não informado',prazo:x.prazo||'Prazo não informado',
+   area:area?'Enviada: '+pnaCustoValor(x.realizada_ha,'ha')+' de '+pnaCustoValor(x.prevista_ha,'ha previstos'):'Área de execução indisponível',
+   progresso:percentual?x.pct+'% da área prevista enviada':'',
+   barra:'display:block;height:8px;background:#4976A8;width:'+(percentual?x.pct:0)+'%',
+   sinal:pnaCustoNumero(x.sinal_ha)?(x.sinal_ha>0?pnaCustoValor(x.sinal_ha,'ha no aparelho · ainda sem envio'):''):'Envio dos apontamentos indisponível',
+   pendencia:x.pendencia||'',acao:x.etapa==='Em conferência'?'Conferir O.S.':'Acompanhar O.S.',
+   abrir:(x.etapa==='Em conferência'?'Conferir ':'Acompanhar ')+x.id};
+ });
+}
+
 function pnaVals(self,v) {
  g2keep(self,'g_pna');
  if(!self.__pnaFocus){self.__pnaFocus=true;
@@ -133,6 +155,9 @@ function pnaVals(self,v) {
  const ref=typeof agrPainelRef==='function'?agrPainelRef(c,{}):null, os=pnaOSLinhas(ref);
  v.pna_causas=pnaOSGrupos(os,'causa')||[];v.pna_donos=pnaOSGrupos(os,'dono')||[];
  v.pna_os_referencia=pnaOSReferencia(ref);
+ const execucao=pnaExecucao(ref);
+ v.pna_execucao=execucao||[];v.pna_exec_missing=execucao===null;
+ v.pna_exec_empty=execucao!==null&&!execucao.length;
  const custos=pnaCustos(typeof agrCustoRef==='function'?agrCustoRef(c,{}):null);
  v.pna_custos=custos?custos.rows:[];v.pna_custos_fora=custos?custos.fora:[];
  v.pna_custo_missing=custos===null;v.pna_custo_empty=custos!==null&&!custos.rows.length;
@@ -226,4 +251,27 @@ def secao():
         '<li style="margin-bottom:12px;overflow-wrap:anywhere"><strong>'+H('f.titulo')+'</strong> · '+H('f.valor')+
         '<br>'+H('f.estados')+'<br>'+H('f.motivo')+'</li></sc-for></ul></section>'
         '<a href="GE-03.dc.html" style="display:inline-flex;align-items:center;min-height:44px">Conferir composição dos custos</a></section>')
-    return osbody+custos+body, JS
+    exec_formula=('Área enviada e prevista pela mesma projeção da O.S., incluindo ajustes da liberação. '
+                  'Apontamentos ainda no aparelho não entram na enviada. 100% da área não significa O.S. encerrada. '
+                  'Uma mesma área pode receber mais de uma operação; não representa área única da fazenda. '
+                  'Fonte: O.S., todas as fazendas e safras disponíveis.')
+    execucao=('<section aria-label="Execução das O.S.">'
+        f'<h2 style="font-size:16px;color:{E.INK}">Execução · prevista e enviada '
+        '<button type="button" class="g2dica-i" aria-label="Como comparar a execução" data-dica="'+E.esc(exec_formula)+'" style="width:44px;height:44px;border:0;background:transparent">ⓘ</button></h2>'
+        '<p role="status" hidden="'+H('!pna_exec_missing')+'">Execução indisponível. Consulte a origem em O.S.</p>'
+        '<p role="status" hidden="'+H('!pna_exec_empty')+'">Nenhuma O.S. em execução ou em conferência neste recorte.</p>'
+        '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">'
+        '<sc-for list="'+H('pna_execucao')+'" as="exec" hint-placeholder-count="3">'
+        '<section class="pn-chart pna-exec" style="overflow-wrap:anywhere" data-pna-exec="'+H('exec.id')+'">'
+        '<h3 style="font-size:15px;margin:0 0 8px">'+H('exec.titulo')+'</h3>'
+        '<p>'+H('exec.contexto')+'</p><strong>'+H('exec.etapa')+'</strong>'
+        '<p>'+H('exec.area')+'</p>'
+        '<div hidden="'+H('!exec.progresso')+'"><span>'+H('exec.progresso')+'</span>'
+        '<div aria-hidden="true" style="height:8px;background:#EEF1EE;margin-top:6px"><span style="'+H('exec.barra')+'"></span></div></div>'
+        '<p hidden="'+H('!exec.sinal')+'">'+H('exec.sinal')+'</p>'
+        '<p hidden="'+H('!exec.pendencia')+'">'+H('exec.pendencia')+'</p>'
+        '<p style="font-size:12px">'+H('exec.dono')+' · '+H('exec.prazo')+'</p>'
+        '<a href="'+H('exec.href')+'" data-pna-grupo="'+H('exec.foco')+'" aria-label="'+H('exec.abrir')+'" '
+        'style="display:inline-flex;align-items:center;min-height:44px">'+H('exec.acao')+'</a>'
+        '</section></sc-for></div></section>')
+    return osbody+execucao+custos+body, JS
