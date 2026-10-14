@@ -50,7 +50,7 @@ function agrCustoRef(c,rec) { rec=rec||{};
   ((P&&P.pend)||[]).forEach(p=>g.pend.push(t+' · '+p));
   const R=cusTalhao(CUSD,t,osn); g.tot+=R.rs; g.conf+=R.rsConf; g.ha_exec+=R.ha; g.prev_exec_rs+=R.prevExec; R.pend.forEach(p=>g.pend.push(p));
   /* ordem de vários talhões sem apontamento por talhão (Codex 6167447191): não é rateada, mas o grupo de cada talhão dela fica parcial */
-  R.shared.forEach(s=>{ sem[s.o.id]=Object.assign({os:s.o.id,talhoes:s.tal},est(s.c)); g.pend.push(s.o.id+' · vários talhões ('+s.tal.join(', ')+') sem apontamento por talhão: R$ '+r2(s.c.rs).toFixed(2)+' fora do total'); }); });
+  R.shared.forEach(s=>{ sem[s.o.id]=Object.assign({os:s.o.id,talhoes:s.tal},est(s.c)); g.pend.push(s.o.id+' · vários talhões ('+s.tal.join(', ')+') sem apontamento por talhão: R$ '+r2(s.c.rs).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' fora do total'); }); });
  const fora=osn.filter(o=>!noOrd.has(o.id)&&(!rec.faz||o.faz===rec.faz)&&(!rec.saf||o.saf===rec.saf)).map(o=>Object.assign({os:o.id,talhao:o.talhao||''},est(cusOrdem(CUSD,o)),{motivo:'ordem emitida na tela sem vínculo de talhão no custo'}));
  // ordem executada fora da cobertura (apontamento aceito, com ou sem preço): não se sabe a cultura, então o recorte inteiro fica com cobertura incerta
  const cobertura_incerta=fora.some(f=>f.executada);

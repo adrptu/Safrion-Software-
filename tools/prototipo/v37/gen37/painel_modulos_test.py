@@ -137,7 +137,7 @@ chk('agrPainelRef: ordem emitida na tela (osc.novo) entra pela base dela',agrPai
   chk('agrCustoRef: fora com estados (provisório 100 + conferido 100)',[m4.fora[0].real_prov_rs,m4.fora[0].real_conf_rs,m4.fora[0].ha,m4.cobertura_incerta],[100,100,20,true]);
   const m6=mini(A2,['T','U']);
   chk('agrCustoRef: O.S. em T e U sem apontamento por talhão = sem_rateio R$ 200, grupo parcial com o motivo e desvio indisponível (sem rateio automático)',
-    [m6.sem_rateio.map(x=>[x.os,x.rs,x.real_prov_rs,x.real_conf_rs]),m6.cultivos[0].real_total_rs,m6.cultivos[0].parcial,m6.cultivos[0].desvio_exec_pct,m6.cultivos[0].pend.some(p=>/OS-9001 · vários talhões \(T, U\)/.test(p))],
+    [m6.sem_rateio.map(x=>[x.os,x.rs,x.real_prov_rs,x.real_conf_rs]),m6.cultivos[0].real_total_rs,m6.cultivos[0].parcial,m6.cultivos[0].desvio_exec_pct,m6.cultivos[0].pend.some(p=>/OS-9001 · vários talhões \(T, U\) sem apontamento por talhão: R\$ 200,00 fora do total/.test(p))],
     [[['OS-9001',200,100,100]],0,true,null,true]);
   chk('agrCustoRef: com a ordem vinculada a um talhão só, nada de cobertura incerta nem sem_rateio',[mini(A2).cobertura_incerta,mini(A2).sem_rateio,mini(A2).cultivos[0].parcial],[false,[],false]);
   chk('agrCustoRef: estado inválido = Sem dados',[agrCustoRef({}),agrCustoRef({ordens:{x:{id:'OS-9',etapa:'A liberar'}}})],[null,null]); }
