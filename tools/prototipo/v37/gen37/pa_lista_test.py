@@ -230,7 +230,7 @@ try:
         abre('PA.dc.html', 1440, 700); ult = J("[...document.querySelectorAll('main .g2card')].pop().getAttribute('aria-label')")
         ROL = "[...document.querySelectorAll('main[data-scroll],.ml-tog+div')].map(e=>Math.round(e.scrollTop))"
         # 14/10 (cartão sem o rodapé dos cultivos): a biblioteca ficou mais curta; a prova é voltar à mesma rolagem de antes de abrir, não um valor fixo
-        J("[...document.querySelectorAll('main .g2card')].pop().scrollIntoView({block:'end'})"); time.sleep(.3); antes = J(ROL)
+        centro("[...document.querySelectorAll('main .g2card')].pop()"); time.sleep(.3); antes = J(ROL)   # a mesma rolagem do clique (o clique centraliza o cartão)
         clique("[...document.querySelectorAll('main .g2card')].pop()", w=.7)
         clique("document.querySelector('[data-acoes] [data-acao=voltar]')", w=.7); dep = J(ROL); fcs = J("(document.activeElement&&document.activeElement.getAttribute('aria-label'))||''")
         cur = J("(document.querySelector('main .g2card[aria-current=true]')||{getAttribute:()=>''}).getAttribute('aria-label')")
