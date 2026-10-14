@@ -17,7 +17,7 @@ Uso: python3 ds_test.py · DS_RENDER=<dir> serve outro _render (ex.: o da base e
 · DS_ANTES=<dir> liga as capturas "antes"."""
 import os, sys, time, json, glob
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir, troca_visao
+from comp_lib import Chrome, servir, troca_visao, cv_todas_sempre, cv_padrao
 R = os.environ.get('DS_RENDER') or os.path.join(HERE, '_render')
 ANTES = os.environ.get('DS_ANTES') or ''
 PARTES = set((os.environ.get('DS_PARTES') or 'A,B,C,D,E,F,G').split(','))
@@ -328,12 +328,13 @@ try:
         chk('D11 unidade no cabeçalho da coluna (R$/ha): a dica explica a conta no foco do botão de ordenar', d['vis'] and 'reais por hectare' in d['t'] and 'g2-dica' in db, [d, db, foc])
         c.tecla('Escape', 'Escape', 27); time.sleep(.2)
         # revisão DS (achado 8): a sigla ou a unidade que está na célula (unidade junto do valor) dá a dica do cabeçalho da coluna
-        hs = {}
+        hs = {}; cv_todas_sempre(c)   # V2-3: Premissas (GE-02) fica fora do "Abre com"; aqui se confere a dica do cabeçalho, não o padrão
         for pg, rx in (('PL-02.dc.html', 'Gatilho por extenso'), ('GE-02.dc.html', 'Premissas')):
             abre(pg); hs[pg] = J(f"(()=>{{const h=[...document.querySelectorAll('[role=columnheader]')].find(h=>h.innerText.trim().toLowerCase().startsWith({json.dumps(rx.lower())})); return h?(h.getAttribute('data-dica')||''):null;}})()")
         foc = J("(()=>{const h=[...document.querySelectorAll('[role=columnheader]')].find(h=>/^premissas/i.test(h.innerText.trim())); const b=h&&h.querySelector('button.g2hb'); if(b) b.focus(); return !!b;})()"); time.sleep(.3); d = J(DICA)
         chk('D14 sigla ou unidade na célula vira dica do cabeçalho: DAP (PL-02 Gatilho por extenso) e sc/ha (GE-02 Premissas, "rendimento 62 sc/ha"), aberta no foco do botão de ordenar',
             (hs.get('GE-02.dc.html') or '').startswith('sc/ha:') and (hs.get('PL-02.dc.html') or '').startswith('DAP:') and foc and d['vis'] and 'sacas por hectare' in d['t'], [hs, foc, d])
+        cv_padrao(c)
         c.tecla('Escape', 'Escape', 27); time.sleep(.2)
         # revisão DS (achado 2): o selo não recebe foco; com foco de teclado (Tab) na linha ou no cartão, a dica é a do selo e descreve a linha
         abre('OS.dc.html')

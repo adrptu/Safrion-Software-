@@ -27,6 +27,7 @@ OK=[]; FAIL=[]
 def chk(nome,cond,det=''):
     (OK if cond else FAIL).append(nome); print(('OK    · ' if cond else 'FALHA · ')+nome+('' if cond else f' · {str(det)[:2500]}'),flush=True)
 c=Chrome(port=free()); J=c.js; B=f'http://127.0.0.1:{p}/'
+c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__g2cvTodasSempre=true'})   # V2-3: teste de domínio lê colunas fora do "Abre com"
 c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__err=[];addEventListener('error',e=>window.__err.push(String(e.message)));addEventListener('unhandledrejection',e=>window.__err.push(String(e.reason)));"})
 ERR=[]
 def col():

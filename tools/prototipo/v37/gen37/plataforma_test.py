@@ -9,7 +9,7 @@ navegador, simular acima de 5.000 ha recusado (erro). Desktop 1440 × 900 e celu
 Uso (de gen37/, depois de build.py e montar_render.py): python3 plataforma_test.py"""
 import sys, os, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir, MEDE
+from comp_lib import Chrome, servir, MEDE, cv_todas_sempre
 PROBE = os.path.join(HERE, '_probe'); os.makedirs(PROBE, exist_ok=True)
 OK = []; FA = []
 def cad_mais(t):
@@ -47,7 +47,7 @@ def abre_linha(i, txt):
 def selo(): return J("(()=>{const h=document.querySelector('header h1'); const s=h&&h.nextElementSibling; return s?s.innerText.trim():'';})()") or ''
 GRADES = """(()=>[...document.querySelectorAll('main .g2caixa')].map(x=>({busca:!!x.querySelector('input[type=search]'),ord:x.querySelectorAll('.g2hb').length,fil:x.querySelectorAll('.g2fb').length})))()"""
 try:
-    c = Chrome(); c.aparelho(1440, 900)
+    c = Chrome(); c.aparelho(1440, 900); cv_todas_sempre(c)   # V2-3: o teste lê colunas fora do "Abre com"
     # ============ BO-02 ============
     go('BO-02.dc.html', limpa=True); b = body()
     chk('A12a BO-02 em 23/09: mensalidades vigentes R$ 6.278,46 · 2 faturas abertas R$ 939,00 · área cobrada 2.945,23 ha (medida 2.958,23 ha)',
