@@ -138,9 +138,9 @@ try:
     # Agrícola começa pela Consulta Agrofit: "‹ Agrícola" da O.S. → tela de entrada, cujos cartões seguem a ordem do menu (antes: subitens do menu lateral)
     J("(document.querySelector('a.volta37')||{click:()=>0}).click()"); hub=espera("location.pathname.endsWith('/MOD-AGR.dc.html') && document.readyState==='complete' && document.querySelectorAll('a.mod-cartao').length>0")
     m=json.loads(J(CARDS) or '[]'); junta('MOD-AGR')
-    chk('1 O.S.: Agrícola começa por Agrofit (cartão antes de Planos agronômicos na tela de entrada, aberta por "‹ Agrícola"); OS-0430 › Ajustar: "Agrofit ›" → AG-07.dc.html#<ficha>, nova aba',
-        hub and nv.get('cur')==['Agrícola'] and nv.get('volta')==['MOD-AGR.dc.html','‹ Agrícola'] and m[:2]==[['AG-07.dc.html','Agrofit'],['PA.dc.html','Planos agronômicos']]
-        and esp and sorted(h for h,_,_ in lk)==esp and all(t=='_blank' and 'noopener' in (r or '') for _,t,r in lk), [nv,hub,m[:2],esp,lk])
+    chk('1 O.S.: Agrícola começa pelo Painel e depois Agrofit (antes de Planos agronômicos na tela de entrada, aberta por "‹ Agrícola"); OS-0430 › Ajustar: "Agrofit ›" → AG-07.dc.html#<ficha>, nova aba',
+        hub and nv.get('cur')==['Agrícola'] and nv.get('volta')==['MOD-AGR.dc.html','‹ Agrícola'] and m[:3]==[['PAGR.dc.html','Painel'],['AG-07.dc.html','Agrofit'],['PA.dc.html','Planos agronômicos']]
+        and esp and sorted(h for h,_,_ in lk)==esp and all(t=='_blank' and 'noopener' in (r or '') for _,t,r in lk), [nv,hub,m[:3],esp,lk])
 
     # ---------- 2 · o link antigo da O.S. abre a lista filtrada pelo mesmo ingrediente ----------
     alvo=esp[0]; r0=REF[alvo.split('#')[1]]; k0=gk(r0); L0=[x for x in P if x['key']==k0]; n0=len(L0)
@@ -158,8 +158,12 @@ try:
     head=J("document.querySelector('header').innerText.replace(/\\n/g,' | ')") or ''
     ln=J("[...document.querySelectorAll('header a')].map(a=>[a.innerText.trim(),a.getAttribute('href'),a.target,a.rel])") or []
     NP=META['contagens']['registros']
-    chk(f'3 cabeçalho: "Base atualizada · {DT}" e "Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de {DT} · {nf(NP,0)} produtos com registro" + AGROFIT oficial (nova aba)',
-        carregou and NP==len(P) and f'Base atualizada · {DT}' in head and f'Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de {DT} · {nf(NP,0)} produtos com registro' in head
+    # o selo depende da idade do arquivo no relógio real (agDiasArq: mais de 7 dias = desatualizada); o oráculo calcula a idade aqui
+    import email.utils, datetime as _dt
+    IDADE=(_dt.datetime.now(_dt.timezone.utc)-email.utils.parsedate_to_datetime(META['fontes']['formulados']['last_modified'])).days
+    SELO=f'Base de {DT} · desatualizada' if IDADE>7 else f'Base atualizada · {DT}'
+    chk(f'3 cabeçalho: "{SELO}" (arquivo com {IDADE} dias) e "Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de {DT} · {nf(NP,0)} produtos com registro" + AGROFIT oficial (nova aba)',
+        carregou and NP==len(P) and SELO in head and f'Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de {DT} · {nf(NP,0)} produtos com registro' in head
         and any(t.startswith('Abrir no AGROFIT oficial') and h==OFICIAL and tg=='_blank' and 'noopener' in (rl or '') for t,h,tg,rl in ln), [head,ln])
     # ---------- 4 · listagem: todos os registros, 7 colunas, render incremental ----------
     cols=[nz(x).replace('⇅','').replace('▾','').strip() for x in (J("[...document.querySelectorAll('main [role=columnheader]')].map(h=>h.innerText.replace(/\\s+/g,' '))") or [])]

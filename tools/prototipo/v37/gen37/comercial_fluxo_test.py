@@ -92,8 +92,8 @@ try:
         t.chk('AC-01 ícone Comercial logo depois de Suprimentos (antes de Configurações) na barra; na VEN o Comercial marcado e "‹ Comercial"',
               0 <= i_pr and i_co == i_pr + 1 and i_co < i_ma and nv.get('cur') == ['Comercial'] and nv.get('volta') == ['MOD-COM.dc.html', '‹ Comercial'], nv)
         vt = volta_com(); cs = json.loads(J(CARDS) or '[]'); e0 = t.errs(); shot('menu')
-        ESP = [['VEN.dc.html', 'Contratos e pedidos'], ['EXPED.dc.html', 'Expedição'], ['PCOM.dc.html', 'Painel'], ['IV.dc.html', 'Inteligência']]
-        t.chk('AC-01 "‹ Comercial" abre a tela de entrada com os cartões Contratos e pedidos · Expedição · Painel (+ Inteligência, INTEL-01), na ordem do menu, sem erro de JS',
+        ESP = [['PCOM.dc.html', 'Painel'], ['VEN.dc.html', 'Contratos e pedidos'], ['EXPED.dc.html', 'Expedição'], ['IV.dc.html', 'Inteligência']]   # PAINEL-01 (v65): o Painel é o 1º cartão de cada módulo
+        t.chk('AC-01 "‹ Comercial" abre a tela de entrada com os cartões Painel · Contratos e pedidos · Expedição (+ Inteligência, INTEL-01), na ordem do menu, sem erro de JS',
               vt and cs == ESP and not e0, [vt, cs, e0])
         for h, nome in ESP:
             pg = h.replace('.dc.html', '')
