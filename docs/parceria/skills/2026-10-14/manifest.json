@@ -36,8 +36,8 @@
   },
   {
     "file": "shared/agro-gestao-conhecimento/assets/agronomia.md",
-    "sha256": "6ecba881e03a3c47f5f8a01dfc5d9b56030eb62f0c68f0b3224522ea0cc41d01",
-    "bytes": 7853
+    "sha256": "8371104cf5df7e2706d679f49b15b61bd42667b7537244ee716201f5bac6186f",
+    "bytes": 8729
   },
   {
     "file": "shared/agro-gestao-conhecimento/assets/contabilidade-financas.md",
@@ -181,13 +181,13 @@
   },
   {
     "file": "shared/indicadores-satelite/SKILL.md",
-    "sha256": "e8216a3ff73804919cb8f47a44d1a34635d2250e404c777e384bd72727b8802e",
-    "bytes": 10434
+    "sha256": "6de9daa8a5918ba81513d18d9860df01bce94a2ad81ee4d033020e42d0ddce2f",
+    "bytes": 10843
   },
   {
     "file": "shared/indicadores-satelite/assets/referencia-implementacao.md",
-    "sha256": "3f61539c9f099c4976f30cf2f3cdae5535e206b5fafd9d578bfd5331e1a0cbb3",
-    "bytes": 7410
+    "sha256": "6e1b4ce4fdd20e435d8265fa000a87156aa115b790f36e0beb6e3dc4903ea25a",
+    "bytes": 8428
   },
   {
     "file": "shared/master-detail-ux/SKILL.md",
@@ -241,8 +241,8 @@
   },
   {
     "file": "shared/ux-essencial/SKILL.md",
-    "sha256": "49f502963d21c5f1b5ca70081835aebc3dd7e13d18b30fe7b41f8aa604755c01",
-    "bytes": 16756
+    "sha256": "1da69bdf057bc2e2774dd75eae6753ab1c5957a8e2fd77b673ff0d989915da27",
+    "bytes": 17140
   },
   {
     "file": "shared/ux-essencial/assets/exemplo.html",
@@ -251,8 +251,8 @@
   },
   {
     "file": "shared/ux-essencial/assets/m3-kit.js",
-    "sha256": "6c86f68526e2220c5b27a37c221f982c4cc85c0584b197f34ef89471fc105eb6",
-    "bytes": 7466
+    "sha256": "1a1f3bfaabe7013d156f20b0058d3a2002e2ac9cf20b5042b7d6ca7f6f1948c6",
+    "bytes": 7616
   },
   {
     "file": "shared/ux-essencial/assets/m3.css",

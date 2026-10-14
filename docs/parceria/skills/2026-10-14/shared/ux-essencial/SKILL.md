@@ -145,3 +145,5 @@ Na ausência de design system do projeto, usar as referências abaixo, respeitan
 - [ ] Tabelas conforme `tabelas-interativas`
 
 O autosave do kit serializa gravações e só confirma após o retorno de `save`. Use-o para rascunhos quando apropriado. A fila é local à instância; concorrência entre abas/dispositivos exige versão e revalidação no domínio. O kit solicita confirmação de saída enquanto houver edição ou envio sem recibo, sem iniciar gravação assíncrona durante `beforeunload`. O navegador pode não emitir esse evento (por exemplo, encerramento no celular): quando o produto exigir recuperação após encerramento, forneça armazenamento local autorizado e sincronização, além da proteção de navegação.
+
+O snapshot do autosave preserva todos os valores de nomes repetidos: uma entrada permanece escalar, várias entradas são array em ordem. O domínio deve aceitar essa cardinalidade; nenhum valor anterior da mesma chave pode ser descartado silenciosamente. Uploads de arquivos exigem contrato próprio de persistência e comparação; o kit de rascunhos não fornece upload durável.

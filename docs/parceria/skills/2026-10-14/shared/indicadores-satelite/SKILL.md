@@ -34,11 +34,11 @@ O design system e o contrato do projeto prevalecem; a rampa abaixo é uma refer�
 | Classe | Significado | Cor | NDVI absoluto (padrão, editável por cultura/estádio) |
 |---|---|---|---|
 | 1 | Índice muito baixo — investigar | `#E4002B` vermelho | < 0,30 |
-| 2 | Fraco | `#FF6A00` laranja | 0,30–0,45 |
-| 3 | Atenção | `#FFD500` amarelo | 0,45–0,60 |
-| 4 | Médio | `#B5E61D` verde-limão | 0,60–0,72 |
-| 5 | Bom | `#3FBF2A` verde vivo | 0,72–0,82 |
-| 6 | Vigor alto | `#0B7A1E` verde escuro | > 0,82 |
+| 2 | Fraco | `#FF6A00` laranja | 0,30 ≤ índice < 0,45 |
+| 3 | Atenção | `#FFD500` amarelo | 0,45 ≤ índice < 0,60 |
+| 4 | Médio | `#B5E61D` verde-limão | 0,60 ≤ índice < 0,72 |
+| 5 | Bom | `#3FBF2A` verde vivo | 0,72 ≤ índice < 0,82 |
+| 6 | Vigor alto | `#0B7A1E` verde escuro | ≥ 0,82 |
 
 - **Nuvem, sombra, neve, sem dado**: cinza `#9E9E9E` hachurado, nunca cor de índice; % de nuvem do talhão sempre exibido. Cena com > 20 % de nuvem no talhão não entra na série sem aviso.
 - **Legenda sempre com os valores reais** de cada faixa (no modo relativo os limites mudam por talhão e a legenda acompanha).
@@ -46,6 +46,8 @@ O design system e o contrato do projeto prevalecem; a rampa abaixo é uma refer�
 - Índices que não são vigor (NDWI/NDMI umidade, térmico/CWSI) usam a mesma lógica de 6 classes, mas com paleta própria declarada uma vez (azul para água, vermelho para estresse térmico) — nunca reaproveitar a rampa de vigor.
 
 ## 3. Falhas e partes fracas (detecção automática)
+
+A classe absoluta usa os limites configurados da paleta; a classe relativa usa os cortes da escala vigente. A cor contínua deve ser calculada pela mesma função para pixel e legenda, sem inferir classe pela posição visual na rampa.
 
 O mapa não é só imagem: o sistema **encontra e lista as manchas**.
 
@@ -59,6 +61,7 @@ O mapa não é só imagem: o sistema **encontra e lista as manchas**.
 | Estado | Regra | Ação primária |
 |---|---|---|
 | Sem imagem | nenhuma cena válida ≤ 15 dias | Buscar imagens |
+| Sem dado | cena sem estatísticas confiáveis, amostra insuficiente ou valores indisponíveis | Ver qualidade da cena |
 | Nuvem | última cena com > 20 % nuvem no talhão | Aguardar próxima cena |
 | Normal | área fraca < 5 % e sem queda | Ver histórico |
 | Atenção | área fraca 5–15 % ou queda 10–15 % | Ver manchas |

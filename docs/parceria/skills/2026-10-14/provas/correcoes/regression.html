@@ -21,6 +21,10 @@ r=await sequence(['B','B']);check('Conteúdo igual não duplica gravação confi
 const form=document.querySelector('#form');form.elements.nome.value='A';let attempts=0,stored='A';const api=Kit.autosave(form,async data=>{attempts++;if(attempts===1)throw Error('falha sintética');stored=data.nome},{message:''});form.elements.nome.value='B';await api.flush();await api.flush();check('Falha permite reenviar o mesmo conteúdo',attempts===2&&stored==='B');
 const clean=new Event('beforeunload',{cancelable:true});window.dispatchEvent(clean);check('Recibo concluído libera saída',!clean.defaultPrevented);
 form.elements.nome.value='C';const dirty=new Event('beforeunload',{cancelable:true});window.dispatchEvent(dirty);check('Edição anterior ao debounce pede confirmação',dirty.defaultPrevented);
-window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS 10/10':'FAIL';
+const multi=document.createElement('form');multi.innerHTML='<input name="nome" value="simples"><input type="checkbox" name="fazenda" value="A" checked><input type="checkbox" name="fazenda" value="B" checked><select name="talhao" multiple><option value="T1" selected>T1</option><option value="T2" selected>T2</option></select>';
+document.body.appendChild(multi);const snapshots=[];const ma=Kit.autosave(multi,async data=>snapshots.push(data),{message:''});
+multi.elements.nome.value='novo';await ma.flush();check('Checkboxes com mesmo nome preservam todos os valores',JSON.stringify(snapshots[0]?.fazenda)==='["A","B"]');check('Select múltiplo preserva todos os valores',JSON.stringify(snapshots[0]?.talhao)==='["T1","T2"]');check('Campo simples preserva contrato string',snapshots[0]?.nome==='novo');
+multi.querySelector('input[value=A]').checked=false;await ma.flush();check('Alteração anterior ao último valor também é gravada',snapshots.length===2&&snapshots[1].fazenda==='B');multi.remove();
+window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS '+results.length+'/'+results.length:'FAIL';
 })().catch(error=>{window.testResults=[{ok:false,error:String(error)}]});
 </script></html>

@@ -105,10 +105,17 @@
 
   // ---------- autosave ----------
   function autosave(form, save, { delay = 600, message = 'Salvo' } = {}) {
-    let t = null, last = JSON.stringify(Object.fromEntries(new FormData(form)));
+    const snapshot = () => {
+      const data = new FormData(form);
+      return Object.fromEntries([...new Set(data.keys())].map(key => {
+        const values = data.getAll(key);
+        return [key, values.length === 1 ? values[0] : values];
+      }));
+    };
+    let t = null, last = JSON.stringify(snapshot());
     let queue = Promise.resolve(), pending = 0;
     const flush = () => {
-      const data = Object.fromEntries(new FormData(form)), json = JSON.stringify(data);
+      const data = snapshot(), json = JSON.stringify(data);
       // Capture cada versão, mas compare com o último recibo somente ao executar.
       // Assim B pendente seguido de retorno a A não perde a reversão.
       pending++;
@@ -117,7 +124,7 @@
         try {
           await save(data);
           last = json;
-          if (message && JSON.stringify(Object.fromEntries(new FormData(form))) === json) snackbar(message, { timeout: 2000 });
+          if (message && JSON.stringify(snapshot()) === json) snackbar(message, { timeout: 2000 });
         } catch {
           last = null;
           snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush });
@@ -129,7 +136,7 @@
     form.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(t); flush(); });
     window.addEventListener('beforeunload', (event) => {
       // O navegador não aguarda save: peça confirmação de saída se houver edição sem recibo.
-      if (pending || JSON.stringify(Object.fromEntries(new FormData(form))) !== last) {
+      if (pending || JSON.stringify(snapshot()) !== last) {
         event.preventDefault();
         event.returnValue = '';
       }

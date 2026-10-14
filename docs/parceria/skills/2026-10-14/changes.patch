@@ -148,6 +148,15 @@
  - **Condições de aplicação**: temperatura < 30 °C, UR > 55 %, vento 3–10 km/h (Δ-T ideal 2–8); registrar e alertar deriva.
  - **Rotação de mecanismos de ação** (IRAC/FRAC/HRAC) por talhão/safra — alerta de repetição.
  - **Vazio sanitário e calendário de semeadura** (soja: por estado) — validar datas.
+@@ -32,7 +33,7 @@
+ - Fertirrigação: dose por injeção, condutividade elétrica, compatibilidade.
+ 
+ ## Colheita e produção
+-- **Peso corrigido** = Peso bruto × (100 − U_colheita)/(100 − U_padrão) − impurezas; padrões: soja 14 %, milho 14 %, trigo 13 %, arroz 13 %, feijão 14 %, café 11–12 % (beneficiado); desconto de impurezas acima de 1 %; **tabela de descontos** parametrizável (armazém/cooperativa).
++- **Peso corrigido (balanço físico, não desconto comercial)**: declarar peso bruto em kg, impureza `I_pct` como percentual em massa sobre esse bruto, e umidades em base úmida do grão limpo. `P_limpo_kg = P_bruto_kg × (1 − I_pct/100)`; depois `P_corrigido_kg = P_limpo_kg × (100 − U_atual_pct)/(100 − U_padrao_pct)`. Não subtrair um percentual de um peso. Se a entrada já for peso limpo, não remover impurezas outra vez. Exemplo: 1 000 kg, 2% de impurezas, 20% de umidade atual e 14% de referência → 980 kg limpos e 911,6279 kg corrigidos. Peso ≥ 0, impurezas entre 0 e 100%, umidades entre 0 e <100%; dados ausentes/inválidos impedem cálculo. A referência de umidade deve ser a contratada por produto; tabelas de descontos/tolerâncias e perdas de secagem são regras comerciais separadas, parametrizadas e versionadas, não um desconto universal de 1%. Base da correção por umidade: [Embrapa — Padronização da umidade dos grãos na experimentação agrícola](https://www.alice.cnptia.embrapa.br/alice/bitstream/doc/158702/1/RESUMO.1.pdf), consultada em14/10/2026; a remoção percentual acima explicita a hipótese dimensional do exemplo.
+ - **Produtividade** = peso líquido / área colhida: sc/ha (60 kg; café 60 kg beneficiado; arroz 50 kg), kg/ha, t/ha, @/ha (algodão em caroço). Comparar com histórico do talhão, média regional (CONAB/IMEA) e potencial.
+ - **Perdas na colheita**: medição por área conhecida (copo/quadro) → kg/ha; meta soja ≤ 1 sc/ha.
+ - **Ponto de colheita**: umidade, maturação fisiológica (R8 soja, R6 milho), dessecação.
 --- before/shared/benchmark-top5/SKILL.md
 +++ candidate/shared/benchmark-top5/SKILL.md
 @@ -4,6 +4,13 @@
@@ -608,7 +617,7 @@
  
  **Norte:** tornar a variabilidade legível, com cores vivas e pixels dentro do talhão. Índice baixo ou cor vermelha indica valor/variação a investigar, não comprova praga, morte ou perda. Escala relativa mostra contraste interno, não gravidade: uma lavoura saudável também pode conter pixels vermelhos nesse modo.
  
-@@ -16,13 +23,13 @@
+@@ -16,22 +23,22 @@
  | Nível | O que mostra | Como |
  |---|---|---|
  | **Fazenda** (listagem) | Todos os talhões/pivôs sobre imagem real (true color ou basemap de satélite). Cada polígono preenchido com o raster do índice em cores vivas, opacidade 85 %. **Número/nome do talhão grande no centro** (fonte bold, halo branco ou escuro), legível em qualquer zoom. Manchas fracas aparecem como "ilhas" vermelho/laranja dentro do verde. | Escala **absoluta** (mesma cor = mesmo valor em toda a fazenda) para comparar talhões. Fora dos polígonos, sem overlay. |
@@ -624,7 +633,28 @@
  
  | Classe | Significado | Cor | NDVI absoluto (padrão, editável por cultura/estádio) |
  |---|---|---|---|
-@@ -45,7 +52,7 @@
+ | 1 | Índice muito baixo — investigar | `#E4002B` vermelho | < 0,30 |
+-| 2 | Fraco | `#FF6A00` laranja | 0,30–0,45 |
+-| 3 | Atenção | `#FFD500` amarelo | 0,45–0,60 |
+-| 4 | Médio | `#B5E61D` verde-limão | 0,60–0,72 |
+-| 5 | Bom | `#3FBF2A` verde vivo | 0,72–0,82 |
+-| 6 | Vigor alto | `#0B7A1E` verde escuro | > 0,82 |
++| 2 | Fraco | `#FF6A00` laranja | 0,30 ≤ índice < 0,45 |
++| 3 | Atenção | `#FFD500` amarelo | 0,45 ≤ índice < 0,60 |
++| 4 | Médio | `#B5E61D` verde-limão | 0,60 ≤ índice < 0,72 |
++| 5 | Bom | `#3FBF2A` verde vivo | 0,72 ≤ índice < 0,82 |
++| 6 | Vigor alto | `#0B7A1E` verde escuro | ≥ 0,82 |
+ 
+ - **Nuvem, sombra, neve, sem dado**: cinza `#9E9E9E` hachurado, nunca cor de índice; % de nuvem do talhão sempre exibido. Cena com > 20 % de nuvem no talhão não entra na série sem aviso.
+ - **Legenda sempre com os valores reais** de cada faixa (no modo relativo os limites mudam por talhão e a legenda acompanha).
+@@ -40,18 +47,21 @@
+ 
+ ## 3. Falhas e partes fracas (detecção automática)
+ 
++A classe absoluta usa os limites configurados da paleta; a classe relativa usa os cortes da escala vigente. A cor contínua deve ser calculada pela mesma função para pixel e legenda, sem inferir classe pela posição visual na rampa.
++
+ O mapa não é só imagem: o sistema **encontra e lista as manchas**.
+ 
  1. **Estatística por talhão e data**: média, mediana, desvio, P2/P10/P90/P98, % de área por classe, % nuvem. Excluir borda de 1 pixel do polígono (efeito de borda) da estatística.
  2. **Pixel de baixo índice relativo**: definir explicitamente o algoritmo. No exemplo conservador, valor < min(média − 1,5 DP, P10), equivalente a atender ambos os cortes, não ao OU. Excluir nodata, tratar dispersão nula e amostra insuficiente. Classe 1 absoluta é indício para investigar, não falha comprovada.
  3. **Mancha**: pixels candidatos contíguos (8-vizinhos) acima da área mínima definida. Três pixels inteiros de 10 × 10 m = 300 m² = **0,03 ha**; em 20 m são 0,12 ha. Calcular pela resolução/transformação real e recorte, sem fixar área pelo nome do sensor. Cada mancha tem geometria, área válida, classe, valor, ponto de vistoria dentro do polígono e evolução em cenas comparáveis.
@@ -633,7 +663,14 @@
  5. **Padrões espaciais** geram hipóteses de vistoria, não causa nem recomendação de aplicação automática. Forma, cor ou consenso de modelos não substituem dados de campo e validação técnica.
  6. **Estado do talhão** derivado, visível na listagem e no mapa:
  
-@@ -59,7 +66,7 @@
+ | Estado | Regra | Ação primária |
+ |---|---|---|
+ | Sem imagem | nenhuma cena válida ≤ 15 dias | Buscar imagens |
++| Sem dado | cena sem estatísticas confiáveis, amostra insuficiente ou valores indisponíveis | Ver qualidade da cena |
+ | Nuvem | última cena com > 20 % nuvem no talhão | Aguardar próxima cena |
+ | Normal | área fraca < 5 % e sem queda | Ver histórico |
+ | Atenção | área fraca 5–15 % ou queda 10–15 % | Ver manchas |
+@@ -59,7 +69,7 @@
  
  ## 4. Telas (master-detail)
  
@@ -642,7 +679,7 @@
  - **Detalhe do talhão**: raster grande (§1) com legenda e alternador de contraste; ao lado: estado + ação primária; **lista de manchas** (área, classe, evolução, botão "Ir para" que centraliza o mapa e "Criar vistoria" que gera ocorrência com GPS); histograma das classes (% de área); série temporal do índice médio com faixa P10–P90, lacunas de nuvem explícitas, marcos de plantio/aplicações; comparar duas datas lado a lado (slider ou split).
  - **Sub-detalhe: mancha**: recorte do raster centrado na mancha, área e evolução por data, tipo provável, fotos/laudo da vistoria, status (detectada → vistoriada → causa identificada → resolvida/ignorada). Uma ação primária por status.
  - Toque/hover em qualquer pixel mostra valor do índice, classe e coordenada. Exportar: PNG do mapa com legenda, GeoTIFF/Shapefile das manchas para o monitor.
-@@ -70,7 +77,7 @@
+@@ -70,7 +80,7 @@
  - **Dados**: `cena` (sensor, data, nuvem %, versão do processamento), `indice_talhao_cena` (estatísticas, % por classe, referência do COG), `mancha` (geometria, área, classe, valor, centroide, status, vínculo à vistoria).
  - **Frontend**: mapa (MapLibre/Leaflet) + camada raster colorizada **no cliente** por função pura `corDoIndice(valor, escala)` — permite trocar contraste sem nova requisição; rótulos dos talhões em camada própria sempre acima do raster; renderização sem suavização.
  - **Testes** (`dev-testes`): classificação por faixa (limites inclusivos), stretch por percentil, detecção de manchas em raster sintético (mancha de 3 px conta, 2 px não; borda excluída), regra de estado, cores/hex iguais em mapa e legenda.
@@ -653,8 +690,15 @@
  - [ ] Mapa da fazenda com número grande em cada talhão e manchas vermelhas/laranjas visíveis de longe.
 --- before/shared/indicadores-satelite/assets/referencia-implementacao.md
 +++ candidate/shared/indicadores-satelite/assets/referencia-implementacao.md
-@@ -24,29 +24,32 @@
- export const escalaAbsoluta: Escala = { min: 0.30, max: 0.82 }; // limites da classe 1 e 6
+@@ -19,34 +19,39 @@
+ ## Escala: absoluta × relativa
+ 
+ ```ts
+-export type Escala = { min: number; max: number };            // valores que viram 0 % e 100 % da rampa
++export type Escala = { modo: 'absoluta' | 'relativa'; min: number; max: number };            // valores que viram 0 % e 100 % da rampa
+ 
+-export const escalaAbsoluta: Escala = { min: 0.30, max: 0.82 }; // limites da classe 1 e 6
++export const escalaAbsoluta: Escala = { modo: 'absoluta', min: 0.30, max: 0.82 }; // limites da classe 1 e 6
  
  /** Estica o contraste ao próprio talhão (ou à fazenda): percentil 2–98 dos pixels válidos. */
 -export function escalaRelativa(valores: Float32Array, p = [0.02, 0.98]): Escala {
@@ -663,12 +707,13 @@
 +  if (v.length < Math.max(2, minAmostra)) return null; // sem dado ou amostra insuficiente
    const q = (t: number) => v[Math.min(v.length - 1, Math.floor(t * (v.length - 1)))];
    const min = q(p[0]), max = q(p[1]);
-   return max - min < 0.02 ? { min: min - 0.01, max: max + 0.01 } : { min, max }; // talhão uniforme não vira ruído
+-  return max - min < 0.02 ? { min: min - 0.01, max: max + 0.01 } : { min, max }; // talhão uniforme não vira ruído
++  return max - min < 0.02 ? { modo: 'relativa', min: min - 0.01, max: max + 0.01 } : { modo: 'relativa', min, max }; // talhão uniforme não vira ruído
  }
  ```
- 
-+`null` significa sem escala/estatística confiável: mostrar “Sem dado” ou “Amostra insuficiente”, sem classificar vigor ou ausência de manchas. O mínimo de 2 no exemplo evita uma amostra única; o mínimo operacional deve ser definido por fonte, resolução e cobertura exigida, sem presumir validade agronômica por atingir esse número.
 +
++`null` significa sem escala/estatística confiável: mostrar “Sem dado” ou “Amostra insuficiente”, sem classificar vigor ou ausência de manchas. O mínimo de 2 no exemplo evita uma amostra única; o mínimo operacional deve ser definido por fonte, resolução e cobertura exigida, sem presumir validade agronômica por atingir esse número.
+ 
  ## Colorização no cliente (rampa contínua, sem suavização espacial)
  
  ```ts
@@ -683,15 +728,18 @@
    return i >= STOPS.length - 1 ? STOPS[i] : misturaHex(STOPS[i], STOPS[i + 1], f);
  }
  
- /** Classe para legenda, tabela e histograma: no modo relativo, os limites são os 6 cortes da escala. */
+-/** Classe para legenda, tabela e histograma: no modo relativo, os limites são os 6 cortes da escala. */
 -export function classeDoIndice(valor: number, escala: Escala) {
 -  if (!Number.isFinite(valor)) return null;
++/** Classe para legenda, tabela e histograma. Absoluto usa os limites configurados; relativo usa seis cortes iguais. A rampa contínua não define a classe. */
 +export function classeDoIndice(valor: number, escala: Escala | null) {
 +  if (!Number.isFinite(valor) || !escala || !Number.isFinite(escala.min) || !Number.isFinite(escala.max) || escala.max <= escala.min) return null;
++  // Intervalos absolutos com limite superior exclusivo; a última classe inclui o limite final.
++  if (escala.modo === 'absoluta') return CLASSES_VIGOR.find(c => valor < c.max) || CLASSES_VIGOR[CLASSES_VIGOR.length - 1];
    const t = (valor - escala.min) / (escala.max - escala.min);
    return CLASSES_VIGOR[Math.min(5, Math.max(0, Math.floor(t * 6)))];
  }
-@@ -56,8 +59,9 @@
+@@ -56,8 +61,9 @@
  ## Estatística e manchas
  
  ```ts
@@ -702,7 +750,7 @@
    const q = (t: number) => s[Math.floor(t * (s.length - 1))];
    const media = s.reduce((a, b) => a + b, 0) / s.length;
    const dp = Math.sqrt(s.reduce((a, b) => a + (b - media) ** 2, 0) / s.length);
-@@ -66,8 +70,9 @@
+@@ -66,8 +72,9 @@
  
  /** Exemplo conservador: abaixo de ambos os cortes (min), não OU; candidatos a vistoria, sem diagnóstico causal. Validar limiares, nodata e amostra. */
  export function mascaraFraco(v: Float32Array, st: ReturnType<typeof estatisticas>) {
@@ -713,6 +761,28 @@
  }
  
  /** Componentes conexos (8 vizinhos) com área mínima; retorna manchas com área, média e centroide em índice de pixel. */
+@@ -98,10 +105,14 @@
+ 
+ ## Estado do talhão
+ 
++Derivados ausentes entram como NaN no exemplo numérico abaixo (não converter null para zero). Estatística insuficiente mantém “Sem dado”; não significa “Normal”.
++
+ ```ts
+ export function estadoTalhao(a: { diasDesdeCena: number | null; nuvemPct: number; areaFracaPct: number; quedaPct: number; maiorManchaNovaHa: number }) {
+   if (a.diasDesdeCena === null || a.diasDesdeCena > 15) return { estado: 'Sem imagem', acao: 'Buscar imagens' };
++  if (!Number.isFinite(a.diasDesdeCena) || a.diasDesdeCena < 0 || !Number.isFinite(a.nuvemPct) || a.nuvemPct < 0 || a.nuvemPct > 100) return { estado: 'Sem dado', acao: 'Ver qualidade da cena' };
+   if (a.nuvemPct > 20) return { estado: 'Nuvem', acao: 'Aguardar próxima cena' };
++  if (![a.areaFracaPct, a.quedaPct, a.maiorManchaNovaHa].every(Number.isFinite) || a.areaFracaPct < 0 || a.areaFracaPct > 100 || a.maiorManchaNovaHa < 0) return { estado: 'Sem dado', acao: 'Ver qualidade da cena' };
+   if (a.areaFracaPct > 15 || a.quedaPct > 15 || a.maiorManchaNovaHa > 1) return { estado: 'Crítico', acao: 'Criar vistoria' };
+   if (a.areaFracaPct >= 5 || a.quedaPct >= 10) return { estado: 'Atenção', acao: 'Ver manchas' };
+   return { estado: 'Normal', acao: 'Ver histórico' };
+@@ -112,5 +123,5 @@
+ - `corDoIndice(0.30, absoluta)` → `#E4002B`; `corDoIndice(0.82, absoluta)` → `#0B7A1E`; `NaN` → cinza.
+ - `escalaRelativa` de um talhão com valores 0,84–0,93 devolve min≈0,84 e max≈0,93 (o mapa usa a rampa inteira).
+ - Raster sintético 10×10 com bloco de 3 px fracos → 1 mancha; bloco de 2 px → 0 manchas; dois blocos separados → 2 manchas.
+-- `estadoTalhao` cobre os 5 estados e a precedência (Sem imagem > Nuvem > Crítico > Atenção > Normal).
++- `estadoTalhao` cobre também estatística ausente/NaN e amostra insuficiente, sem cair em Normal; Sem imagem e Nuvem preservam a precedência quando seus dados são válidos.
+ - Mesma cor na legenda e no pixel para um valor dado (snapshot).
 --- before/shared/master-detail-ux/SKILL.md
 +++ candidate/shared/master-detail-ux/SKILL.md
 @@ -5,14 +5,21 @@
@@ -1158,12 +1228,14 @@
  - **Android**: Jetpack Compose Material 3. **Multiplataforma**: Flutter com `useMaterial3: true` e `ColorScheme.fromSeed`.
  - **iOS**: manter os princípios deste guia, respeitando convenções nativas (navegação, gestos).
  
-@@ -131,3 +143,5 @@
+@@ -131,3 +143,7 @@
  - [ ] Acessível (contraste, teclado, foco não encoberto, alvos conforme design system/plataforma)
  - [ ] Telas de gestão/cadastro conforme `master-detail-ux` (listagem + detalhe, estado, próximo passo, ação primária única)
  - [ ] Tabelas conforme `tabelas-interativas`
 +
 +O autosave do kit serializa gravações e só confirma após o retorno de `save`. Use-o para rascunhos quando apropriado. A fila é local à instância; concorrência entre abas/dispositivos exige versão e revalidação no domínio. O kit solicita confirmação de saída enquanto houver edição ou envio sem recibo, sem iniciar gravação assíncrona durante `beforeunload`. O navegador pode não emitir esse evento (por exemplo, encerramento no celular): quando o produto exigir recuperação após encerramento, forneça armazenamento local autorizado e sincronização, além da proteção de navegação.
++
++O snapshot do autosave preserva todos os valores de nomes repetidos: uma entrada permanece escalar, várias entradas são array em ordem. O domínio deve aceitar essa cardinalidade; nenhum valor anterior da mesma chave pode ser descartado silenciosamente. Uploads de arquivos exigem contrato próprio de persistência e comparação; o kit de rascunhos não fornece upload durável.
 --- before/shared/ux-essencial/assets/m3-kit.js
 +++ candidate/shared/ux-essencial/assets/m3-kit.js
 @@ -27,7 +27,7 @@
@@ -1195,18 +1267,28 @@
      if (scrim) return;
      for (const c of registry) {
        if (!c.keys) continue;
-@@ -106,16 +106,34 @@
+@@ -105,17 +105,42 @@
+ 
    // ---------- autosave ----------
    function autosave(form, save, { delay = 600, message = 'Salvo' } = {}) {
-     let t = null, last = JSON.stringify(Object.fromEntries(new FormData(form)));
+-    let t = null, last = JSON.stringify(Object.fromEntries(new FormData(form)));
 -    const flush = async () => {
-+    let queue = Promise.resolve(), pending = 0;
-+    const flush = () => {
-       const data = Object.fromEntries(new FormData(form)), json = JSON.stringify(data);
+-      const data = Object.fromEntries(new FormData(form)), json = JSON.stringify(data);
 -      if (json === last) return;
 -      last = json;
 -      try { await save(data); if (message) snackbar(message, { timeout: 2000 }); }
 -      catch (err) { snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush }); last = null; }
++    const snapshot = () => {
++      const data = new FormData(form);
++      return Object.fromEntries([...new Set(data.keys())].map(key => {
++        const values = data.getAll(key);
++        return [key, values.length === 1 ? values[0] : values];
++      }));
++    };
++    let t = null, last = JSON.stringify(snapshot());
++    let queue = Promise.resolve(), pending = 0;
++    const flush = () => {
++      const data = snapshot(), json = JSON.stringify(data);
 +      // Capture cada versão, mas compare com o último recibo somente ao executar.
 +      // Assim B pendente seguido de retorno a A não perde a reversão.
 +      pending++;
@@ -1215,7 +1297,7 @@
 +        try {
 +          await save(data);
 +          last = json;
-+          if (message && JSON.stringify(Object.fromEntries(new FormData(form))) === json) snackbar(message, { timeout: 2000 });
++          if (message && JSON.stringify(snapshot()) === json) snackbar(message, { timeout: 2000 });
 +        } catch {
 +          last = null;
 +          snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush });
@@ -1228,7 +1310,7 @@
 -    window.addEventListener('beforeunload', () => { clearTimeout(t); flush(); });
 +    window.addEventListener('beforeunload', (event) => {
 +      // O navegador não aguarda save: peça confirmação de saída se houver edição sem recibo.
-+      if (pending || JSON.stringify(Object.fromEntries(new FormData(form))) !== last) {
++      if (pending || JSON.stringify(snapshot()) !== last) {
 +        event.preventDefault();
 +        event.returnValue = '';
 +      }

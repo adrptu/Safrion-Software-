@@ -19,9 +19,9 @@ export const COR_SEM_DADO = '#9E9E9E'; // nuvem, sombra, fora do talhão: hachur
 ## Escala: absoluta × relativa
 
 ```ts
-export type Escala = { min: number; max: number };            // valores que viram 0 % e 100 % da rampa
+export type Escala = { modo: 'absoluta' | 'relativa'; min: number; max: number };            // valores que viram 0 % e 100 % da rampa
 
-export const escalaAbsoluta: Escala = { min: 0.30, max: 0.82 }; // limites da classe 1 e 6
+export const escalaAbsoluta: Escala = { modo: 'absoluta', min: 0.30, max: 0.82 }; // limites da classe 1 e 6
 
 /** Estica o contraste ao próprio talhão (ou à fazenda): percentil 2–98 dos pixels válidos. */
 export function escalaRelativa(valores: Float32Array, p = [0.02, 0.98], minAmostra = 2): Escala | null {
@@ -29,7 +29,7 @@ export function escalaRelativa(valores: Float32Array, p = [0.02, 0.98], minAmost
   if (v.length < Math.max(2, minAmostra)) return null; // sem dado ou amostra insuficiente
   const q = (t: number) => v[Math.min(v.length - 1, Math.floor(t * (v.length - 1)))];
   const min = q(p[0]), max = q(p[1]);
-  return max - min < 0.02 ? { min: min - 0.01, max: max + 0.01 } : { min, max }; // talhão uniforme não vira ruído
+  return max - min < 0.02 ? { modo: 'relativa', min: min - 0.01, max: max + 0.01 } : { modo: 'relativa', min, max }; // talhão uniforme não vira ruído
 }
 ```
 
@@ -47,9 +47,11 @@ export function corDoIndice(valor: number, escala: Escala | null): string {
   return i >= STOPS.length - 1 ? STOPS[i] : misturaHex(STOPS[i], STOPS[i + 1], f);
 }
 
-/** Classe para legenda, tabela e histograma: no modo relativo, os limites são os 6 cortes da escala. */
+/** Classe para legenda, tabela e histograma. Absoluto usa os limites configurados; relativo usa seis cortes iguais. A rampa contínua não define a classe. */
 export function classeDoIndice(valor: number, escala: Escala | null) {
   if (!Number.isFinite(valor) || !escala || !Number.isFinite(escala.min) || !Number.isFinite(escala.max) || escala.max <= escala.min) return null;
+  // Intervalos absolutos com limite superior exclusivo; a última classe inclui o limite final.
+  if (escala.modo === 'absoluta') return CLASSES_VIGOR.find(c => valor < c.max) || CLASSES_VIGOR[CLASSES_VIGOR.length - 1];
   const t = (valor - escala.min) / (escala.max - escala.min);
   return CLASSES_VIGOR[Math.min(5, Math.max(0, Math.floor(t * 6)))];
 }
@@ -103,10 +105,14 @@ export function manchas(mask: Uint8Array, v: Float32Array, largura: number, altu
 
 ## Estado do talhão
 
+Derivados ausentes entram como NaN no exemplo numérico abaixo (não converter null para zero). Estatística insuficiente mantém “Sem dado”; não significa “Normal”.
+
 ```ts
 export function estadoTalhao(a: { diasDesdeCena: number | null; nuvemPct: number; areaFracaPct: number; quedaPct: number; maiorManchaNovaHa: number }) {
   if (a.diasDesdeCena === null || a.diasDesdeCena > 15) return { estado: 'Sem imagem', acao: 'Buscar imagens' };
+  if (!Number.isFinite(a.diasDesdeCena) || a.diasDesdeCena < 0 || !Number.isFinite(a.nuvemPct) || a.nuvemPct < 0 || a.nuvemPct > 100) return { estado: 'Sem dado', acao: 'Ver qualidade da cena' };
   if (a.nuvemPct > 20) return { estado: 'Nuvem', acao: 'Aguardar próxima cena' };
+  if (![a.areaFracaPct, a.quedaPct, a.maiorManchaNovaHa].every(Number.isFinite) || a.areaFracaPct < 0 || a.areaFracaPct > 100 || a.maiorManchaNovaHa < 0) return { estado: 'Sem dado', acao: 'Ver qualidade da cena' };
   if (a.areaFracaPct > 15 || a.quedaPct > 15 || a.maiorManchaNovaHa > 1) return { estado: 'Crítico', acao: 'Criar vistoria' };
   if (a.areaFracaPct >= 5 || a.quedaPct >= 10) return { estado: 'Atenção', acao: 'Ver manchas' };
   return { estado: 'Normal', acao: 'Ver histórico' };
@@ -117,5 +123,5 @@ export function estadoTalhao(a: { diasDesdeCena: number | null; nuvemPct: number
 - `corDoIndice(0.30, absoluta)` → `#E4002B`; `corDoIndice(0.82, absoluta)` → `#0B7A1E`; `NaN` → cinza.
 - `escalaRelativa` de um talhão com valores 0,84–0,93 devolve min≈0,84 e max≈0,93 (o mapa usa a rampa inteira).
 - Raster sintético 10×10 com bloco de 3 px fracos → 1 mancha; bloco de 2 px → 0 manchas; dois blocos separados → 2 manchas.
-- `estadoTalhao` cobre os 5 estados e a precedência (Sem imagem > Nuvem > Crítico > Atenção > Normal).
+- `estadoTalhao` cobre também estatística ausente/NaN e amostra insuficiente, sem cair em Normal; Sem imagem e Nuvem preservam a precedência quando seus dados são válidos.
 - Mesma cor na legenda e no pixel para um valor dado (snapshot).
