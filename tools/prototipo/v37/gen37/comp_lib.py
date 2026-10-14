@@ -159,8 +159,40 @@ def cv_todas_js(gid='g_os'):
     return "(window.__g2cvTodas?window.__g2cvTodas(%s):false)" % _j.dumps(gid)
 
 
+# ---------- VISOES-2 §3.3: "Agrupar por" da Tabela ----------
+# O botão button[data-g2agb=<gid>] abre o menu [data-g2agm=<gid>] com os itens role=menuitemradio ("Sem agrupar" e as perguntas da grade, pelo
+# nome: na O.S., Atividade, Responsável, Início e Talhão). O alvo é o texto do item (a 1ª linha; a 2ª são os níveis, ex.: "Fazenda › Talhão").
+AGRUPAR = r"""((gid)=>{ const vis=e=>!!e&&e.getClientRects().length>0; const b=[...document.querySelectorAll('[data-g2agb="'+gid+'"]')].find(vis);
+  if(!b) return 'NÃO ACHEI "Agrupar por" da grade '+gid; if(b.getAttribute('aria-expanded')!=='true') b.click(); return 'menu'; })"""
+AGRUPAR_ITEM = r"""((rot,gid)=>{ const m=[...document.querySelectorAll('[data-g2agm="'+gid+'"]')].find(e=>e.getClientRects().length>0); if(!m) return 'menu "Agrupar por" fechado';
+  const i=[...m.querySelectorAll('[role=menuitemradio]')].find(x=>(x.innerText||'').trim().split('\n')[0].trim()===rot); if(!i) return 'NÃO ACHEI "'+rot+'" no "Agrupar por"'; i.click(); return 'ok'; })"""
+# item da pergunta Onde no "Agrupar por" de cada grade com visões (o antigo "agrupada" da VISOES-1); na O.S., "Talhão" (Fazenda › Talhão),
+# como em areas/processo_os.py (g_os, ag=[… dict(pq='onde', l='Talhão', …)]). O GRIDS da página não fica no escopo global: o nome vem daqui.
+AGRUPADA_ROT = {'g_os': 'Talhão'}
+def agrupar_por(J, rotulo, gid='g_os', espera=.45):
+    """VISOES-2 §3.3: escolhe rotulo ("Sem agrupar", "Talhão"…) no "Agrupar por" da grade gid, como a pessoa (abre o menu e clica no item).
+    Devolve 'ok' ou o motivo."""
+    r = J(f"({AGRUPAR})({json.dumps(gid)})"); time.sleep(.3)
+    if r != 'menu': return r
+    r = J(f"({AGRUPAR_ITEM})({json.dumps(rotulo)},{json.dumps(gid)})"); time.sleep(espera); return r
+def agrupado_por(J, gid='g_os'):
+    """Nome do agrupamento escolhido na grade gid, como o botão "Agrupar por" mostra ('' = Sem agrupar; None = sem o botão à vista)."""
+    return J("(()=>{const b=[...document.querySelectorAll('[data-g2agb=\"%s\"]')].find(e=>e.getClientRects().length>0); if(!b) return null;"
+             " return (b.innerText||'').replace(/\\s+/g,' ').replace(/^\\s*Agrupar por\\s*/,'').replace(/\\s*▾\\s*$/,'').trim();})()" % gid)
+
 def troca_visao(J, k, raiz=None, espera=.45):
-    """Aciona a visão k e espera o redesenho; no estreito escolhe pelo menu "mais" quando o botão não está na barra. Devolve 'ok' ou o motivo."""
+    """Aciona a visão k e espera o redesenho; no estreito escolhe pelo menu "mais" quando o botão não está na barra. Devolve 'ok' ou o motivo.
+    VISOES-2 §2 (14/10): a "Tabela agrupada" saiu do seletor (a Tabela é data-visao=lista; agrupar é o "Agrupar por" da grade). k='agrupada'
+    continua aceito como atalho do mesmo resultado, pelo caminho da pessoa: clica na Tabela e escolhe, no "Agrupar por" da grade da barra
+    (data-visoes-gid), a pergunta Onde (na O.S., "Talhão": Fazenda › Talhão). k='lista' só clica na Tabela e mantém o agrupamento escolhido
+    (ele é estado da grade, guardado por perfil); para desagrupar, agrupar_por(J, 'Sem agrupar')."""
+    if k == 'agrupada':
+        gid = J("(()=>{const R=%s; const t=R&&[...R.querySelectorAll('[role=toolbar][data-visoes-gid]')].find(e=>e.getClientRects().length>0); return t?t.getAttribute('data-visoes-gid'):'g_os';})()"
+                % (f"document.querySelector({json.dumps(raiz)})" if raiz else 'document'))
+        r = troca_visao(J, 'lista', raiz, espera)
+        if r != 'ok': return r
+        rot = AGRUPADA_ROT.get(gid)
+        return agrupar_por(J, rot, gid, espera) if rot else f'a grade {gid} não tem o "agrupada" (Onde) em AGRUPADA_ROT'
     r = J(visao(k, raiz)); time.sleep(.3)
     if r == 'mais': r = J(f"({VISAO_MENU})({json.dumps(k)})")
     time.sleep(espera); return r

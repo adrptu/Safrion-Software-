@@ -4,6 +4,8 @@ A irrigação só com água (OS-0419/0422/0423) deixou de ser O.S. agrícola: n�
 e Safra (lista, Kanban, chips de fase, contadores e selo do cabeçalho) e vive no módulo Irrigação (IR-02 programação, IR-03 Ordens de
 irrigação, IR-03det = OS-0419). A fertirrigação OS-0418 continua na O.S., liberada pela agrônoma (produto + requisição).
 Os filtros do topo seguem cobertos com as ordens que restam (lista, Kanban, chips, selo e estado vazio de uma frase + uma ação).
+VISOES-2 (14/10): a célula O.S. pode trazer antes do código o texto curto do estado vermelho ("Falta insumo"); a O.S. da linha é o código
+visível (OS-/OB-) da 1ª célula, não a 1ª linha do texto.
 Uso: python3 os_irrig_filtro_test.py [pasta _render]   (15 verificações; < 60 s)"""
 import sys, os, time, subprocess, json, re
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
@@ -18,11 +20,13 @@ def chk(n,cond,info=''): (OK if cond else FAIL).append(n); print(('  ok  ' if co
 def pan():
     if J('(()=>{const bs=[...document.querySelectorAll(\'aside[role=dialog] section[aria-label] > button[aria-expanded="false"]\')]; bs.forEach(b=>b.click()); return bs.length;})()'): time.sleep(.3)
     return J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
+# código visível da O.S. na 1ª célula da linha (VISOES-2: o texto curto do estado vermelho pode vir antes)
+RID="(r=>{const c=r.querySelector('[role=cell]'); const m=((c||r).innerText||'').match(/\\bO[SB]-\\d+/); return m?m[0]:'';})"
 def temb(t): return bool(J(f"[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==={json.dumps(t)})"))
-def ids(): return J("[...document.querySelectorAll('[role=row].g2ed')].map(r=>r.innerText.split('\\n')[0].trim())") or []
-def linha(id_): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
-def cor(id_,t): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); const s=r&&[...r.querySelectorAll('span')].filter(x=>x.innerText.trim().startsWith({json.dumps(t)})).pop(); return s?getComputedStyle(s).color:'';}})()") or ''
-def rlink(id_,t): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); const a=r&&[...r.querySelectorAll('a')].find(a=>a.innerText.trim().startsWith({json.dumps(t)})); return a?a.getAttribute('href'):'';}})()") or ''
+def ids(): return J(f"[...document.querySelectorAll('[role=row].g2ed')].map({RID})") or []
+def linha(id_): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>({RID})(r)==={json.dumps(id_)}); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
+def cor(id_,t): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>({RID})(r)==={json.dumps(id_)}); const s=r&&[...r.querySelectorAll('span')].filter(x=>x.innerText.trim().startsWith({json.dumps(t)})).pop(); return s?getComputedStyle(s).color:'';}})()") or ''
+def rlink(id_,t): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>({RID})(r)==={json.dumps(id_)}); const a=r&&[...r.querySelectorAll('a')].find(a=>a.innerText.trim().startsWith({json.dumps(t)})); return a?a.getAttribute('href'):'';}})()") or ''
 def fechar(): J("(()=>{const b=document.querySelector('aside[role=dialog] button[aria-label=Fechar]'); b&&b.click();})()"); time.sleep(.3)
 def filtro(lab,val,w=.4):
     J(f"""(()=>{{const i=document.querySelector('select[aria-label={json.dumps(lab)}]'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(i,{json.dumps(val)});
@@ -39,7 +43,7 @@ def esperar(pag):   # navegação por clique em link: espera a página nova carr
         if pag in (J("location.href") or '') and J("document.readyState")=='complete' and J("!!document.body && document.body.innerText.length>50"): break
     time.sleep(.8)
 # estado da tela num filtro: linhas, cartões do Kanban, chips, cabeçalho e ids de água no texto visível
-EST=r"""(()=>{const ids=[...document.querySelectorAll('[role=row].g2ed')].map(r=>r.innerText.split('\n')[0].trim());
+EST=r"""(()=>{const ids=[...document.querySelectorAll('[role=row].g2ed')].map(r=>{const c=r.querySelector('[role=cell]'); const m=((c||r).innerText||'').match(/\bO[SB]-\d+/); return m?m[0]:'';});
   const kb=[...document.querySelectorAll('[aria-label="Kanban das ordens"] [role=button]')].map(b=>b.innerText.split('\n')[0].trim());
   const ch=[...document.querySelectorAll('[aria-label="Filtrar por fase"] button')].map(b=>b.innerText.replace(/\s+/g,' ').trim());
   const h=document.querySelector('header h1'); let s=h&&h.nextElementSibling; while(s&&s.classList&&s.classList.contains('g2-info')) s=s.nextElementSibling;

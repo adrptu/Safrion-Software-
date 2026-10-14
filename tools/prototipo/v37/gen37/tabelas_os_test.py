@@ -8,10 +8,14 @@ talhão com contagem distinta e total sem somar grupos sobrepostos; TF07 Cultura
 "Filtrar por talhão" da faixa "Filtros desta tela" (Todos, os talhões do recorte e, com mais de um marcado na coluna, "N talhões"), ligada ao
 MESMO filtro da coluna Talhão da grade (f.tal), que segue no cabeçalho para escolher vários. Entrou "Filtrar por cultura" (a do cultivo de
 cada talhão da ordem na safra dela). As verificações de talhão andam pela faixa e pelo filtro da coluna, e conferem um contra o outro.
+14/10/2026 (VISOES-2, pedido do proprietário): Lista e Tabela agrupada viraram a Tabela; agrupar por talhão é o "Agrupar por" › Talhão da grade
+(troca_visao(J, 'agrupada') faz Tabela + Talhão; desagrupar é "Sem agrupar"); o grupo leva o nome do talhão com "›" (o nome desce um nível) e a
+nota do total diz "N O.S. · X ha · a O.S. de vários talhões aparece em cada um e conta uma vez no total". A célula O.S. pode trazer antes o texto
+curto do estado vermelho ("Falta insumo"): a O.S. da linha é o código visível (OS-/OB-) da célula.
 Uso: python3 tabelas_os_test.py [pasta de capturas]   (< 90 s)"""
 import sys, os, re, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir, troca_visao, cv_todas_js
+from comp_lib import Chrome, servir, troca_visao, cv_todas_js, agrupar_por
 OUT = sys.argv[1] if len(sys.argv) > 1 else None
 if OUT: os.makedirs(OUT, exist_ok=True)
 OK, FAIL = [], []
@@ -20,7 +24,8 @@ def chk(n, cond, info=''):
 
 p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js
 URL = f'http://127.0.0.1:{p}/OS.dc.html'
-def ids(): return J("[...document.querySelectorAll('[role=row].g2ed')].filter(r=>r.offsetParent).map(r=>r.querySelector('[role=cell]').innerText.trim())") or []
+# código visível da O.S. na 1ª célula (VISOES-2: o texto curto do estado vermelho, ex. "Falta insumo", pode vir antes do código)
+def ids(): return J("[...document.querySelectorAll('[role=row].g2ed')].filter(r=>r.offsetParent).map(r=>{const t=r.querySelector('[role=cell]').innerText.trim(); const m=t.match(/\\bO[SB]-\\d+/); return m?m[0]:t;})") or []
 TAL, CUL = 'Filtrar por talhão', 'Filtrar por cultura'
 def _s(lab): return f"document.querySelector('select[aria-label={json.dumps(lab)}]')"
 def esc_txt(lab=TAL):   # texto da opção escolhida na faixa (Todos, T1, "2 talhões"…); None sem a lista
@@ -157,22 +162,26 @@ try:
     pr = dict(zip(ids(), cel_col('Prazo'))); ac = dict(zip(ids(), cel_col('Próxima ação')))
     chk('TF03 Próxima ação separada do prazo ("entrega" | "até 15/10")', ac.get('OS-0425') == 'entrega' and pr.get('OS-0425') == 'até 15/10', (ac.get('OS-0425'), pr.get('OS-0425')))
     # ---------------- TF06 ----------------
-    aba('Agrupada'); time.sleep(.2)   # VISOES-1: agrupar por talhão é a visão Tabela agrupada
-    g = J("""(()=>{ const out={}; let cur=null; [...document.querySelectorAll('[role=row].g2r')].filter(r=>r.offsetParent).forEach(r=>{ const t=r.querySelector('[role=cell]').innerText.replace('▾','').replace('▸','').trim();
-      if(/^O[SB]-/.test(t)) out[cur].push(t); else { cur=t; out[cur]=[]; } }); return out; })()""") or {}
-    tot = next((x for x in notas() if x.startswith('Total')), '')
+    aba('Agrupada'); time.sleep(.2)   # VISOES-2: agrupar por talhão é a Tabela + "Agrupar por" › Talhão
+    # grupo = linha grp@ (nome sem a seta e sem o "›" de descer); O.S. = código visível da linha filha
+    GRP = """(()=>{ const out={}; let cur=null; [...document.querySelectorAll('[role=row].g2r')].filter(r=>r.offsetParent).forEach(r=>{ const t=r.querySelector('[role=cell]').innerText.replace(/[▾▸]/g,'').replace(/\\s*›\\s*$/,'').trim();
+      if(/^grp@/.test(r.getAttribute('data-rid')||'')){ cur=t; out[cur]=[]; } else { const m=t.match(/\\bO[SB]-\\d+/); (out[cur]=out[cur]||[]).push(m?m[0]:t); } }); return out; })()"""
+    g = J(GRP) or {}
+    TOT = re.compile(r'^\d+ O\.S\. · ')   # nota do total do agrupamento por Talhão
+    tot = next((x for x in notas() if TOT.match(x)), '')
     soma = sum(len(v) for v in g.values()); dist = len({x for v in g.values() for x in v})
     chk('TF06 OS-0421 aparece nos grupos T1 e T2 com a mesma identidade', 'OS-0421' in g.get('T1', []) and 'OS-0421' in g.get('T2', []), g)
-    chk('TF06 total geral conta O.S. distintas (10), não a soma dos grupos (11)', soma == dist + 1 and tot.startswith(f'Total: {dist} O.S. distintas'), (soma, dist, tot))
+    chk('TF06 total geral conta O.S. distintas (10), não a soma dos grupos (11): "10 O.S. · … · a O.S. de vários talhões aparece em cada um e conta uma vez no total"',
+        soma == dist + 1 and tot.startswith(f'{dist} O.S. · ') and tot.endswith('a O.S. de vários talhões aparece em cada um e conta uma vez no total'), (soma, dist, tot))
     cont = J("(()=>{const s=[...document.querySelectorAll('span')].find(s=>s.offsetParent&&/^\\d+ de \\d+$/.test(s.innerText.trim())); return s?s.innerText.trim():'';})()")
     chk('TF06 contador da grade no agrupado conta O.S. distintas (10 de 10), não grupos (9)', cont == f'{dist} de {len(todas)}', cont)
     shot('tf06-1440-agrupado')
-    col_tal(['T1', 'T2']); g2 = J("[...document.querySelectorAll('[role=row].g2r')].filter(r=>r.offsetParent).map(r=>r.querySelector('[role=cell]').innerText.replace('▾','').trim())"); tot = next((x for x in notas() if x.startswith('Total')), '')
-    chk('TF06 com T1 ou T2: só grupos T1 e T2; total 2 O.S. · 452 ha (350 + 102, cada O.S. uma vez)', [x for x in g2 if not x.startswith('O')] == ['T1', 'T2'] and tot.startswith('Total: 2 O.S. distintas · 452 ha'), (g2, tot))
+    col_tal(['T1', 'T2']); g2 = J(GRP) or {}; tot = next((x for x in notas() if TOT.match(x)), '')
+    chk('TF06 com T1 ou T2: só grupos T1 e T2; total 2 O.S. · 452 ha (350 + 102, cada O.S. uma vez)', list(g2) == ['T1', 'T2'] and tot.startswith('2 O.S. · 452 ha · '), (g2, tot))
     J("[...document.querySelectorAll('[role=row].g2r')].filter(r=>r.offsetParent).find(r=>/^OS-0421/.test(r.innerText.trim())).querySelector('[role=cell]').click()"); time.sleep(.5)
     chk('TF06 clicar na O.S. dentro do grupo abre o detalhe da própria O.S.', (J("(document.querySelector('aside[role=dialog]')||{}).innerText||''") or '').startswith('OS-0421'))
     J("(()=>{const b=document.querySelector('aside[role=dialog] button[aria-label=Fechar]'); b&&b.click();})()"); time.sleep(.3)
-    aba('Lista'); todos()   # VISOES-1: desagrupar = voltar à Lista
+    aba('Lista'); agrupar_por(J, 'Sem agrupar'); todos()   # VISOES-2: desagrupar = "Agrupar por" › Sem agrupar (a Tabela guarda o agrupamento)
     chk('TF06 desagrupar volta às linhas canônicas', sorted(ids()) == sorted(todas), len(ids()))
     chk('sem botão Expandir/Recolher na lista sem grupos', not J("[...document.querySelectorAll('.g2xtog')].some(b=>b.offsetParent)"))
     chk('sem erro de script (1440)', not J("window.__e"), J("window.__e"))

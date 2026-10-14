@@ -6,7 +6,7 @@ Modos (DESENHO.md, F1):
             C6 controle negativo da verificação.
  celular  · 390 × 844, escala 2, toque: M1 alvos ≥ 44 px (com e sem toque); M2 3 + "mais" (menu com nome, Esc devolve o foco, ativa no
             "mais" marcada); M3 nada cortado, primária alcançável, 0 duplicata; M4 toque longo mostra a dica sem trocar a visão.
- e2e      · em 1440 × 900 e 390 × 844: E1 filtro → Agrupada (clique e teclado); E2 painel → Esc → foco na linha; E3 volta do detalhe
+ e2e      · em 1440 × 900 e 390 × 844: E1 filtro → Tabela agrupada por Talhão (clique e teclado); E2 painel → Esc → foco na linha; E3 volta do detalhe
             (link "Voltar", trilha, history.back(), nova aba, deep-link); E3b vazio por regra (Canceladas no Kanban) e "Ver em lista";
             E3c erro da visão (Kanban e Carga) e cenário ilegível; E4 precedência (URL › preferência › Lista; Lista explícita e F5; perfil);
             E5 trocar de visão não grava no cenário; E6 entrada por endereço (hash e outros parâmetros intactos).
@@ -16,11 +16,15 @@ Revisão VISOES-1 (lentes independentes, 10/10): C4b dica só no foco de teclado
 Tab depois de mudar a largura ou girar; M7 menu do "mais" ao alargar; M8 Kanban a 390 px; E1b subtotal do grupo = Total; E3 pela regra 02 (Voltar
 sempre canônico; contexto antigo, de outro perfil, de outra safra e já usado; foco reafirmado); E3b2 recorte só com canceladas; E3d foco depois da
 ação do estado; E5 trocar de visão não cria histórico; E6b entrada por endereço com a Safra guardada; E8 Carga com o mesmo recorte e "Sem alocação".
+VISOES-2 (pedido do proprietário, 14/10): Lista e Tabela agrupada viraram uma visão só, a Tabela (data-visao=lista, "Ver em tabela"); agrupar é o
+"Agrupar por" da grade (Atividade, Responsável, Início, Talhão), com descer e trilha, no endereço ?ag=&trilha= e guardado por perfil × tela × grade
+(g2ag:<tela>:<grade>:<perfil>). A antiga "agrupada" é a Tabela + Agrupar por Talhão (?ag=onde): troca_visao(J, 'agrupada') faz esse caminho.
 Uso: python3 visoes_test.py comp|celular|e2e|e7 · VISOES_RENDER=<dir> serve outro _render · VISOES_SAIDA=<dir> grava as capturas ·
 VISOES_SO=E3,E8 roda só os passos cujo rótulo começa por um desses prefixos."""
 import os, sys, time, json, re, subprocess, tempfile, urllib.request
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir, MEDE, resumo, troca_visao
+from comp_lib import Chrome, servir, MEDE, resumo, troca_visao, agrupar_por, agrupado_por, cv_todas_js
+from urllib.parse import parse_qsl
 from cdp import WS, CH
 from journeys import free
 R = os.environ.get('VISOES_RENDER') or os.path.join(HERE, '_render')
@@ -97,7 +101,12 @@ def kanban_ids(): return J("[...document.querySelectorAll('[aria-label=\"Kanban 
 def kb_cols(): return J("(()=>{const l=document.querySelector('[aria-label=\"Kanban das ordens\"]'); if(!l||!l.getClientRects().length) return -1; return l.querySelectorAll(':scope>sc-for>div,:scope>div').length;})()")
 def carga_on(): return bool(J("(()=>{const t=document.querySelector('[aria-label=\"Alocação de recursos na semana\"]'); return !!t&&t.getClientRects().length>0;})()"))
 def chip_on(): return J("[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] [aria-pressed=true]')].map(b=>b.innerText.replace(/\\s+\\d+$/,'').trim())") or []
-def tal_btn(): return J("(document.getElementById('ost_btn')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()") or ''
+# talhão escolhido na faixa "Filtros desta tela" (13/10: o botão "Talhão: …" da barra, ost_btn, saiu; o mesmo filtro f.tal da coluna Talhão)
+def tal_faixa(): return J("(()=>{const s=document.querySelector('select[aria-label=\"Filtrar por talhão\"]'); return s&&s.selectedIndex>=0?s.options[s.selectedIndex].text.trim():'';})()") or ''
+def ag(): return agrupado_por(J)   # VISOES-2: nome no botão "Agrupar por" ('' = Sem agrupar)
+def gpref(perfil='Ana'): return J(f"localStorage.getItem('g2ag:OS.dc.html:g_os:{perfil}')")   # agrupamento guardado por perfil × tela × grade
+def params(s): return sorted(parse_qsl(str(s or '').lstrip('?'), keep_blank_values=True))   # parâmetros do endereço, sem depender da ordem
+AG_ONDE = [('ag', 'onde'), ('view', 'lista')]   # endereço da Tabela agrupada por Talhão com a visão escolhida (sem ficha nem outro parâmetro)
 def sel(lab): return J(f"(document.querySelector('select[aria-label={json.dumps(lab)}]')||{{value:''}}).value") or ''
 def setsel(lab, val):
     J(f"""(()=>{{const i=document.querySelector('select[aria-label={json.dumps(lab)}]'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(i,{json.dumps(val)});
@@ -143,7 +152,8 @@ def num_br(t):
     return float(m.group(1).replace('.', '').replace(',', '.')) if m else None
 GRUPOS_AREA = r"""(()=>{ const g=document.querySelector('[data-g2g=g_os]'); if(!g) return null; const hs=[...g.querySelectorAll('[role=columnheader]')]; const ia=hs.findIndex(h=>/^área/i.test(h.innerText.trim()));
  return [...g.querySelectorAll('[role=row][data-rid^="grp@"]')].filter(r=>r.getClientRects().length).map(r=>{ const cs=[...r.querySelectorAll('[role=cell]')]; return [r.getAttribute('data-rid').slice(4),(cs[ia]||{innerText:''}).innerText.trim()]; }); })()"""
-def total_nota(): return J("[...document.querySelectorAll('main [role=note]')].filter(n=>n.getClientRects().length).map(n=>n.innerText).find(t=>/^Total:/.test(t))||''") or ''
+# nota do total do agrupamento por Talhão (VISOES-2): "N O.S. · X ha · a O.S. de vários talhões aparece em cada um e conta uma vez no total"
+def total_nota(): return J("[...document.querySelectorAll('main [role=note]')].filter(n=>n.getClientRects().length).map(n=>n.innerText.trim()).find(t=>/^\\d+ O\\.S\\. · .* · a O\\.S\\. de vários talhões/.test(t))||''") or ''
 def blocos(): return sorted(set(J("[...document.querySelectorAll('[aria-label=\"Alocação de recursos na semana\"] button,[aria-label=\"Alocação de recursos na semana\"] a')].filter(b=>b.getClientRects().length).map(b=>b.innerText.split(' ')[0]).filter(x=>/^O[SB]-/.test(x))") or []))
 def sem_aloc(): return J("(()=>{const g=document.querySelector('[role=group][aria-label^=\"Ordens do recorte sem alocação\"]'); return g&&g.getClientRects().length?g.innerText.replace(/\\s+/g,' ').trim():'';})()") or ''
 def nav_tipo(): return J("(((performance.getEntriesByType('navigation')||[])[0]||{}).type)||''") or ''
@@ -163,9 +173,10 @@ def modo_comp():
         labs = [x['lab'] for x in (b or {}).get('bs', []) if x['k'] != 'mais']
         chips = J("(()=>{const g=document.querySelector('[aria-label=\"Filtrar por fase\"]'); return g?Math.round(g.getBoundingClientRect().right):0;})()")
         # VISOES-2 F2a (13/10): o Calendário entra entre o Kanban e a Carga (ordem do registro, visoes.ORDEM)
-        chk('C1 barra role=toolbar "Visão das ordens" à direita dos filtros: 5 botões data-visao (lista, agrupada, kanban, calendario, carga), aria-label "Ver em …", sem texto visível nem title, svg aria-hidden',
-            bool(b) and b['role'] == 'toolbar' and b['lab'] == 'Visão das ordens' and b['vs'] == 'lista agrupada kanban calendario carga' and ks == ['lista', 'agrupada', 'kanban', 'calendario', 'carga']
-            and labs == ['Ver em lista', 'Ver em tabela agrupada', 'Ver em kanban', 'Ver em calendário', 'Ver em carga por recurso'] and all(x['txt'] == '' and not x['tit'] and x['svg'] for x in b['bs'])
+        # VISOES-2 (14/10): Lista e Tabela agrupada viraram a Tabela (agrupar é o "Agrupar por" da grade)
+        chk('C1 barra role=toolbar "Visão das ordens" à direita dos filtros: 4 botões data-visao (lista = Tabela, kanban, calendario, carga), aria-label "Ver em …", sem texto visível nem title, svg aria-hidden',
+            bool(b) and b['role'] == 'toolbar' and b['lab'] == 'Visão das ordens' and b['vs'] == 'lista kanban calendario carga' and ks == ['lista', 'kanban', 'calendario', 'carga']
+            and labs == ['Ver em tabela', 'Ver em kanban', 'Ver em calendário', 'Ver em carga por recurso'] and all(x['txt'] == '' and not x['tit'] and x['svg'] for x in b['bs'])
             and b['esq'] >= chips - 1, b)
         # C2
         f = J(CHK_C); at = [x for x in b['bs'] if x['p'] == 'true'] if b else []
@@ -186,10 +197,10 @@ def modo_comp():
         tecla('ArrowRight'); tecla(' '); time.sleep(.4); e2 = (ativa(), foco(), busca())
         tecla('Tab'); fora_ = foco(); c.tab(1, True); time.sleep(.25); volta = foco()
         chk('C3 Tab para uma vez na barra (entra na ativa e sai com o próximo Tab); ← → com volta, Home/End, ↑ ↓ não movem; seta não ativa (Lista segue ativa, sem ?view); Enter e Espaço ativam e o foco fica no botão; Shift+Tab volta à mesma parada',
-            f1 == 'lista' and f2 not in ('lista', 'agrupada', 'kanban', 'calendario', 'carga', 'mais') and f3 == 'lista'
-            and seq == ['agrupada', 'kanban', 'calendario', 'carga', 'calendario', 'lista', 'carga', 'carga', 'carga'] and sem_ativar
-            and e1[0] == 'agrupada' and e1[1] == 'agrupada' and 'view=agrupada' in e1[2] and e2[0] == 'kanban' and e2[1] == 'kanban' and 'view=kanban' in e2[2]
-            and fora_ not in ('lista', 'agrupada', 'kanban', 'carga') and volta == 'kanban', [f1, f2, f3, seq, sem_ativar, e1, e2, fora_, volta])
+            f1 == 'lista' and f2 not in ('lista', 'kanban', 'calendario', 'carga', 'mais') and f3 == 'lista'
+            and seq == ['kanban', 'calendario', 'carga', 'lista', 'carga', 'lista', 'carga', 'carga', 'carga'] and sem_ativar
+            and e1[0] == 'kanban' and e1[1] == 'kanban' and 'view=kanban' in e1[2] and e2[0] == 'calendario' and e2[1] == 'calendario' and 'view=calendario' in e2[2]
+            and fora_ not in ('lista', 'kanban', 'calendario', 'carga') and volta == 'calendario', [f1, f2, f3, seq, sem_ativar, e1, e2, fora_, volta])
     passo('C3', _c3)
     def _c4():
         # C4 dica (g2dica da DS): no foco de teclado na hora; Esc fecha sem tirar o foco; sem aria-describedby repetindo o nome; hover de 300 ms
@@ -200,15 +211,15 @@ def modo_comp():
         if not J("document.querySelector('[role=toolbar] [data-visao=carga]').matches(':hover')"):
             J("document.querySelector('[role=toolbar] [data-visao=carga]').dispatchEvent(new PointerEvent('pointerover',{bubbles:true,composed:true,pointerType:'mouse'}))")
         time.sleep(.6); d3 = J(DICA); c.mouse(1430, 890); time.sleep(.3)
-        chk('C4 foco de teclado em "tabela agrupada" abre #g2-dica (role=tooltip) "Ver em tabela agrupada", sem aria-describedby repetido; Esc fecha e o foco fica; hover abre "Ver em carga por recurso"',
-            d['vis'] and d['t'] == 'Ver em tabela agrupada' and d['role'] == 'tooltip' and 'g2-dica' not in db and not d2['vis'] and fo == 'agrupada' and d3['vis'] and d3['t'] == 'Ver em carga por recurso', [d, db, d2, fo, d3])
+        chk('C4 foco de teclado em "kanban" abre #g2-dica (role=tooltip) "Ver em kanban", sem aria-describedby repetido; Esc fecha e o foco fica; hover abre "Ver em carga por recurso"',
+            d['vis'] and d['t'] == 'Ver em kanban' and d['role'] == 'tooltip' and 'g2-dica' not in db and not d2['vis'] and fo == 'kanban' and d3['vis'] and d3['t'] == 'Ver em carga por recurso', [d, db, d2, fo, d3])
     passo('C4', _c4)
     def _c4b():
         # C4b (revisão, achado B1): o clique do mouse não deixa a dica aberta (ela cobria "Nova ordem" e engolia o 1º clique); o teclado continua
         abre('OS.dc.html')
         neutro = J("(()=>{const h=document.querySelector('h1'); const r=h.getBoundingClientRect(); return [r.right+300, r.top+r.height/2];})()")
         c.mouse(neutro[0], neutro[1]); time.sleep(.3); res = {}
-        for k in ('agrupada', 'kanban', 'lista', 'carga'):
+        for k in ('kanban', 'lista', 'calendario', 'carga'):
             mclique(centro(f"document.querySelector('[role=toolbar] [data-visao={k}]')")); c.mouse(neutro[0], neutro[1]); time.sleep(.7); res[k] = (ativa(), J(DICA)['vis'])
         nb = J("(()=>{const b=[...document.querySelectorAll('main button,header button')].find(b=>b.innerText.trim()==='Nova ordem'&&b.getClientRects().length); if(!b) return null; const r=b.getBoundingClientRect(); return [r.left+r.width/2, r.bottom-3];})()")
         form = False
@@ -222,7 +233,7 @@ def modo_comp():
     def _c5():
         # C5 uma primária, 0 duplicata, nenhum arrastar, em cada visão
         res = {}
-        for k in ('lista', 'agrupada', 'kanban', 'carga'):
+        for k in ('lista', 'kanban', 'calendario', 'carga'):
             troca_visao(J, k); n, dd = dup(); res[k] = (J(EST), n, drag(), ativa()); shot('comp_1440_' + k)
         chk('C5 em cada visão (1440): só "Nova ordem" como primária, 0 duplicata (acoes_duplicadas) e nenhum [draggable=true]',
             all(v[0] == ['Nova ordem'] and v[1] == 0 and v[2] == 0 and v[3] == k for k, v in res.items()), res)
@@ -269,19 +280,43 @@ def modo_celular():
         tecla('ArrowDown'); time.sleep(.4); fd = foco(); tecla('Enter'); time.sleep(.6)
         b3 = bar(); mais = next((x for x in b3['bs'] if x['k'] == 'mais'), {}); pressed_vis = [x['k'] for x in b3['bs'] if x['vis'] and x['p'] == 'true']
         shot('cel_390_carga')
-        chk('M2 390 px: Lista, Tabela agrupada e Kanban na barra + "mais"; o menu mostra "Carga por recurso" em texto; Esc fecha e devolve o foco ao "mais"; ↓ no "mais" abre o menu; com a Carga escolhida o "mais" leva a marca e diz o nome',
-            vis == ['lista', 'agrupada', 'kanban', 'mais'] and menu == [['carga', 'Carga por recurso', 'false']] and fm == 'menu:carga' and fechado and fe == 'mais' and fd == 'menu:carga'
+        # VISOES-2 (14/10): com 4 visões (Tabela, Kanban, Calendário, Carga) a barra mostra as 3 primeiras e o "mais" fica com a Carga
+        chk('M2 390 px: Tabela, Kanban e Calendário na barra + "mais"; o menu mostra "Carga por recurso" em texto; Esc fecha e devolve o foco ao "mais"; ↓ no "mais" abre o menu; com a Carga escolhida o "mais" leva a marca e diz o nome',
+            vis == ['lista', 'kanban', 'calendario', 'mais'] and menu == [['carga', 'Carga por recurso', 'false']] and fm == 'menu:carga' and fechado and fe == 'mais' and fd == 'menu:carga'
             and ativa() == 'carga' and carga_on() and mais.get('ativo') == 'true' and mais.get('lab') == 'Mais visões (atual: carga por recurso)' and mais.get('bg') == 'rgb(228, 243, 233)'
             and not pressed_vis and 'view=carga' in busca(), [vis, menu, fm, fechado, fe, fd, ativa(), mais, pressed_vis, busca()])
     passo('M2', _m2)
     def _m3():
-        # M3 nada cortado em cada visão; primária única alcançável; 0 duplicata
+        # M3 nada cortado em cada visão; primária única alcançável; 0 duplicata. VISOES-2: a Tabela sem agrupar e a Tabela agrupada por Talhão
+        # (o "Agrupar por" e a trilha também cabem a 390 px) contam como dois estados da mesma visão; o Calendário entrou (4 visões).
+        # Página nova: depois do teclado da M2, a troca por clique deixa o foco no botão com a dica de teclado aberta (C4), e a 390 px a dica de
+        # "Ver em kanban" (o Kanban agora é o 2º botão) caía sobre "Nova ordem"; a medida aqui é a do layout de cada visão, não a da dica
+        abre('OS.dc.html', 390, 844, True, 2)
         res = {}
-        for k in ('lista', 'agrupada', 'kanban', 'carga'):
-            troca_visao(J, k); m = J(MEDE); res[k] = (resumo(m), J(EST), dup()[0], ativa()); shot('cel_390_' + k)
-        chk('M3 390 px, em cada visão: nada cortado, sem rolagem lateral, título e "Nova ordem" alcançáveis (MEDE/resumo vazio), uma primária e 0 duplicata',
-            all(v[0] == [] and v[1] == ['Nova ordem'] and v[2] == 0 and v[3] == k for k, v in res.items()), res)
+        for k in ('lista', 'agrupada', 'kanban', 'calendario', 'carga'):
+            troca_visao(J, k); m = J(MEDE); res[k] = (resumo(m), J(EST), dup()[0], ativa(), ag()); shot('cel_390_' + k)
+        esperado = {'lista': ('lista', ''), 'agrupada': ('lista', 'Talhão')}
+        chk('M3 390 px, em cada visão (Tabela, Tabela agrupada por Talhão, Kanban, Calendário, Carga): nada cortado, sem rolagem lateral, título e "Nova ordem" alcançáveis (MEDE/resumo vazio), uma primária e 0 duplicata',
+            all(v[0] == [] and v[1] == ['Nova ordem'] and v[2] == 0 and (v[3], v[4] if k in esperado else None) == esperado.get(k, (k, None)) for k, v in res.items()), res)
     passo('M3', _m3)
+    def _m3b():
+        # M3b (VISOES-2, novo): a 390 px com toque, a antiga "Tabela agrupada" (um botão da barra, ≥ 44 px, M1) passou a ser o "Agrupar por" da
+        # Tabela. O mesmo caminho tem de caber na tela: tocar em "Agrupar por" abre o menu com todos os itens dentro da janela e tocáveis
+        # (elementFromPoint no próprio item); tocar em "Talhão" agrupa (?ag=onde). Página recém-aberta, sem rolar, como a pessoa chega
+        abre('OS.dc.html', 390, 844, True, 2); troca_visao(J, 'lista')
+        pb = J("(()=>{const b=[...document.querySelectorAll('[data-g2agb=g_os]')].find(b=>b.getClientRects().length); if(!b) return null; const r=b.getBoundingClientRect(); return [r.left+Math.min(r.width/2,40), r.top+r.height/2];})()")
+        if pb and 0 < pb[1] < 844: c.toque(pb[0], pb[1]); time.sleep(.4)   # toque onde o botão está, sem rolar a página (clique() centraliza antes)
+        its = J("[...document.querySelectorAll('[data-g2agm=g_os] [role=menuitemradio]')].map(i=>{const r=i.getBoundingClientRect(); const e=document.elementFromPoint(Math.min(r.left+20,innerWidth-2),r.top+r.height/2);"
+                " return {t:i.innerText.split('\\n')[0].trim(), top:Math.round(r.top), bottom:Math.round(r.bottom), left:Math.round(r.left), right:Math.round(r.right), toca:!!e&&i.contains(e)};})") or []
+        bt = J("(()=>{const b=document.querySelector('[data-g2agb=g_os]'); const r=b.getBoundingClientRect(); return [Math.round(r.top),Math.round(r.bottom),innerHeight,innerWidth];})()")
+        shot('cel_390_agrupar_menu')
+        tal = next((x for x in its if x['t'] == 'Talhão'), None)
+        if tal and tal['toca']: c.toque(tal['left'] + 20, (tal['top'] + tal['bottom']) / 2); time.sleep(.6)
+        else: tecla('Escape')
+        chk('M3b 390 px com toque: "Agrupar por" abre o menu com os 5 itens dentro da janela (390 × 844) e tocáveis; tocar em "Talhão" agrupa (?ag=onde)',
+            len(its) == 5 and all(x['toca'] and x['top'] >= 0 and x['bottom'] <= 844 and x['left'] >= 0 and x['right'] <= 390 for x in its) and ag() == 'Talhão' and 'ag=onde' in busca(),
+            {'botão (top, bottom, janela h, w)': bt, 'itens': its, 'ag': ag(), 'busca': busca()})
+    passo('M3b', _m3b)
     def _m4():
         # M4 toque longo: dica sem trocar a visão
         troca_visao(J, 'lista'); p = centro("document.querySelector('[role=toolbar] [data-visao=kanban]')")
@@ -365,47 +400,68 @@ def espera_pag(pag):
     time.sleep(.9); pronto()
 
 def prepara_e3(w, h, toque):
-    """Fazenda Todas, Safra 2026/27, fase Em execução, Tabela agrupada; rola a lista; abre a OS-0421 no painel (só ela e a OS-0420 têm página de detalhe)."""
+    """Fazenda Todas, Safra 2026/27, fase Em execução, Tabela agrupada por Talhão (VISOES-2: Tabela + "Agrupar por" Talhão); rola a lista; abre a OS-0421
+    no painel (só ela e a OS-0420 têm página de detalhe)."""
     abre('OS.dc.html', w, h, toque, 2 if toque else 1)
     setsel('Filtrar por fazenda', 'Todas'); setsel('Filtrar por safra', '2026/27'); fase('Em execução'); troca_visao(J, 'agrupada')
     J("(()=>{const m=document.querySelector('main[data-scroll]'); const col=document.querySelector('.ml-tog+div'); const r=[...document.querySelectorAll('main .g2rola')].find(x=>x.getClientRects().length); if(r) r.scrollTop=Math.min(60,r.scrollHeight); if(m) m.scrollTop=Math.min(90,m.scrollHeight); if(col) col.scrollTop=Math.min(40,col.scrollHeight);})()")
     time.sleep(.3); r0 = rolagem()
     J(f"(()=>{{const r={LINHA('OS-0421')}; r&&r.focus({{preventScroll:true}}); return !!r;}})()"); tecla('Enter'); time.sleep(.6)
+    ok = painel().startswith('OS-0421'); PREP.setdefault(w, []).append(ok)
+    if not ok:
+        # VISOES-2: Enter na O.S. da Tabela agrupada não abriu o painel (conferido à parte, chk "E3 … Enter na OS-0421"). Para seguir conferindo a
+        # volta do detalhe, o painel abre pela entrada por endereço (#OS-0421, a mesma da E6), sem nova entrada no histórico
+        J("location.replace(location.pathname+location.search+'#OS-0421'); 1"); time.sleep(.9)
     return r0
+PREP = {}   # largura → o Enter na OS-0421 da Tabela agrupada abriu o painel? (uma entrada por prepara_e3)
 def confere_volta(tag, r0, extra=None):
     time.sleep(.6)
-    st = {'ativa': ativa(), 'faz': sel('Filtrar por fazenda'), 'saf': sel('Filtrar por safra'), 'chip': chip_on(), 'rol': rolagem(), 'r0': r0, 'foco': foco(), 'painel': painel(),
+    st = {'ativa': ativa(), 'ag': ag(), 'faz': sel('Filtrar por fazenda'), 'saf': sel('Filtrar por safra'), 'chip': chip_on(), 'rol': rolagem(), 'r0': r0, 'foco': foco(), 'painel': painel(),
           'busca': busca(), 'grupos': grupos()[:4]}
     if extra: st.update(extra)
     time.sleep(2.2); st['foco_2s'] = foco(); st['painel_2s'] = painel()   # revisão, achado A4: o redesenho do runtime ~2 s depois não toma o foco
     ok_f = lambda f, pa: f.startswith('linha:OS-0421') or pa.startswith('OS-0421')
-    chk(f'E3 {tag}: volta à Tabela agrupada com Fazenda Todas, Safra 2026/27, fase Em execução, rolagem ±4 px e o foco na OS-0421 (ou o painel dela, se a página voltou da memória), também 2 s depois',
-        st['ativa'] == 'agrupada' and st['faz'] == 'Todas' and st['saf'] == '2026/27' and st['chip'] == ['Em execução'] and abs(st['rol'] - r0) <= 4
+    chk(f'E3 {tag}: volta à Tabela agrupada por Talhão com Fazenda Todas, Safra 2026/27, fase Em execução, rolagem ±4 px e o foco na OS-0421 (ou o painel dela, se a página voltou da memória), também 2 s depois',
+        st['ativa'] == 'lista' and st['ag'] == 'Talhão' and len(st['grupos']) > 0 and st['faz'] == 'Todas' and st['saf'] == '2026/27' and st['chip'] == ['Em execução'] and abs(st['rol'] - r0) <= 4
         and ok_f(st['foco'], st['painel']) and ok_f(st['foco_2s'], st['painel_2s']), st)
     return st
 ABRE_COMPLETA = "(()=>{const a=[...document.querySelectorAll('aside[role=dialog] a')].find(a=>/Abrir ordem completa/.test(a.innerText)); a&&a.click(); return !!a;})()"
 def canonica():
-    return {'url': J("location.pathname.split('/').pop()+location.search"), 'ativa': ativa(), 'chip': chip_on(), 'faz': sel('Filtrar por fazenda'), 'saf': sel('Filtrar por safra'),
+    return {'url': J("location.pathname.split('/').pop()+location.search"), 'ativa': ativa(), 'ag': ag(), 'chip': chip_on(), 'faz': sel('Filtrar por fazenda'), 'saf': sel('Filtrar por safra'),
             'foco': foco(), 'linhas': len(ids())}
+
+def agrupar_teclado(rot='Talhão'):
+    """VISOES-2: só teclado, da barra de visões até o agrupamento: Home + Enter (Tabela), Tab até o "Agrupar por", Enter abre o menu (foco no item
+    marcado), Tab até o item rot e Enter. Devolve onde o foco ficou depois de escolher."""
+    foca(ativa()); tecla('Home'); tecla('Enter'); time.sleep(.4)
+    for _ in range(12):
+        if J("!!(document.activeElement&&document.activeElement.hasAttribute('data-g2agb'))"): break
+        tecla('Tab')
+    tecla('Enter'); time.sleep(.4)
+    for _ in range(8):
+        if J(f"(document.activeElement&&document.activeElement.getAttribute('role')==='menuitemradio'&&(document.activeElement.innerText||'').trim().split('\\n')[0].trim()==={json.dumps(rot)})"): break
+        tecla('Tab')
+    tecla('Enter'); time.sleep(.6)
+    return J("(()=>{const a=document.activeElement; return a?(a.getAttribute('data-g2agb')?'agrupar:'+a.getAttribute('data-g2agb'):a.tagName):'';})()")
 
 def modo_e2e():
     for (w, h, toque, tag) in ((1440, 900, False, '1440'), (390, 844, True, '390')):
         def _e12():
-            # E1 · filtro → Agrupada, por clique e por teclado; hash intacto
+            # E1 · filtro → Tabela agrupada por Talhão, por clique e por teclado; hash intacto. VISOES-2 (14/10): a "agrupada" é a Tabela + "Agrupar
+            # por" Talhão: no endereço ?ag=onde, junto com o ?view=lista da visão escolhida; o grupo leva o nome do talhão (grp@T1; a Fazenda, com
+            # um valor só no recorte, desce sozinha). Entre as rodadas, "Sem agrupar" e o Kanban: o teclado escolhe a Tabela e o agrupamento de novo
             abre('OS.dc.html#tal=Santa Rita|T1', w, h, toque, 2 if toque else 1); time.sleep(.4)
-            fase('Em execução'); l0 = sorted(x.split('@')[0] for x in ids()); t0 = tal_btn()
+            fase('Em execução'); l0 = sorted(x.split('@')[0] for x in ids()); t0 = tal_faixa()
             rodadas = []
             for como in ('clique', 'teclado'):
-                if como == 'clique': troca_visao(J, 'agrupada')
-                else:
-                    foca(ativa()); tecla('Home'); tecla('Enter'); time.sleep(.4); tecla('ArrowRight'); tecla(' '); time.sleep(.5)
-                kids = sorted({x.split('@')[0] for x in ids() if not x.startswith('grp@')}); gt = J("[...document.querySelectorAll('main [role=note]')].filter(n=>n.getClientRects().length).map(n=>n.innerText).find(t=>/^Total:/.test(t))||''")
-                rodadas.append({'como': como, 'ativa': ativa(), 'chip': chip_on(), 'tal': tal_btn(), 'grupos': grupos(), 'kids': kids, 'tot': gt, 'busca': busca(), 'hash': hashd()})
-                if como == 'clique': troca_visao(J, 'lista')
-            ok1 = all(r['ativa'] == 'agrupada' and r['chip'] == ['Em execução'] and r['tal'] == t0 and r['grupos'] == ['Santa Rita|T1'] and r['kids'] == l0
-                      and r['tot'].startswith(f'Total: {len(l0)} O.S.') and 'view=agrupada' in r['busca'] and r['hash'] == '#tal=Santa Rita|T1' for r in rodadas)
-            chk(f'E1 {tag}: talhão T1 (pelo endereço) + fase Em execução → Tabela agrupada por clique e por teclado: os mesmos chips, talhão e linhas, subtotal só do recorte, ?view=agrupada e o hash intacto',
-                ok1 and len(l0) >= 1 and t0.startswith('Talhão: T1'), [l0, t0, rodadas])
+                fo = troca_visao(J, 'agrupada') if como == 'clique' else agrupar_teclado('Talhão')
+                kids = sorted({x.split('@')[0] for x in ids() if not x.startswith('grp@')}); gt = total_nota()
+                rodadas.append({'como': como, 'ativa': ativa(), 'ag': ag(), 'chip': chip_on(), 'tal': tal_faixa(), 'grupos': grupos(), 'kids': kids, 'tot': gt, 'busca': busca(), 'hash': hashd(), 'foco': fo})
+                if como == 'clique': agrupar_por(J, 'Sem agrupar'); troca_visao(J, 'kanban')
+            ok1 = all(r['ativa'] == 'lista' and r['ag'] == 'Talhão' and r['chip'] == ['Em execução'] and r['tal'] == t0 and r['grupos'] == ['T1'] and r['kids'] == l0
+                      and r['tot'].startswith(f'{len(l0)} O.S. ·') and params(r['busca']) == AG_ONDE and r['hash'] == '#tal=Santa Rita|T1' for r in rodadas)
+            chk(f'E1 {tag}: talhão T1 (pelo endereço) + fase Em execução → Tabela + Agrupar por Talhão por clique e por teclado: os mesmos chips, talhão e linhas, só o grupo T1 (o do filtro), total só do recorte, ?view=lista&ag=onde e o hash intacto',
+                ok1 and len(l0) >= 1 and t0 == 'T1' and rodadas[1]['foco'] == 'agrupar:g_os', [l0, t0, rodadas])
             shot(f'e2e_{tag}_agrupada')
             # E2 · abrir a O.S. do grupo → painel → Esc → foco volta à linha
             alvo = l0[0]
@@ -415,7 +471,8 @@ def modo_e2e():
         passo(f'E1–E2 {tag}', _e12)
         def _e3():
             # E3 · volta do detalhe pela regra 02 (DESENHO §2.11; VISOES-REV-20261010-02/03): o link "Voltar" e a trilha SEMPRE navegam ao destino
-            # canônico (nova entrada, ?view=agrupada; a ficha ?volta sai do endereço), nunca pelo histórico; o Voltar nativo do navegador restaura
+            # canônico (nova entrada, ?view=lista&ag=onde; a ficha ?volta sai do endereço), nunca pelo histórico; o Voltar nativo do navegador restaura.
+            # VISOES-2: a visão é a Tabela e o agrupamento (?ag=onde) vem junto no endereço do destino canônico
             for como in ('link Voltar', 'trilha', 'Voltar nativo'):
                 r0 = prepara_e3(w, h, toque); pa = painel()
                 J(ABRE_COMPLETA); espera_pag('CA-01det.dc.html'); h0 = J("history.length")
@@ -425,8 +482,8 @@ def modo_e2e():
                 espera_pag('OS.dc.html'); h1 = J("history.length"); nt = nav_tipo()
                 st = confere_volta(f'{tag} · {como} (mesma aba)', r0, {'painel_antes': pa, 'hist': [h0, h1], 'nav': nt})
                 if como != 'Voltar nativo':
-                    chk(f'E3 {tag} · {como}: navegação nova ao destino canônico (history.length {h0} → {h0 + 1}, tipo navigate), nunca o voltar do histórico; endereço OS.dc.html?view=agrupada sem a ficha',
-                        h1 == h0 + 1 and nt == 'navigate' and st['busca'] == '?view=agrupada', [h0, h1, nt, st['busca']])
+                    chk(f'E3 {tag} · {como}: navegação nova ao destino canônico (history.length {h0} → {h0 + 1}, tipo navigate), nunca o voltar do histórico; endereço OS.dc.html?view=lista&ag=onde sem a ficha',
+                        h1 == h0 + 1 and nt == 'navigate' and params(st['busca']) == AG_ONDE, [h0, h1, nt, st['busca']])
                 if tag == '1440' and como == 'link Voltar': shot('e2e_1440_volta_detalhe')
         passo(f'E3 {tag} mesma aba', _e3)
         def _e3n():
@@ -441,13 +498,14 @@ def modo_e2e():
                 if toque: a.call('Emulation.setDeviceMetricsOverride', {'width': w, 'height': h, 'deviceScaleFactor': 2, 'mobile': True})
                 a.js("document.querySelector('a[aria-label=Voltar]').click()"); a.espera('OS.dc.html'); time.sleep(.8)
                 q = lambda: a.js("(document.activeElement&&document.activeElement.getAttribute('data-rid'))||''")
-                st = {'url': a.js("location.pathname.split('/').pop()+location.search"), 'ativa': a.js("(document.querySelector('[role=toolbar] [data-visao][aria-pressed=true]')||{getAttribute:()=>''}).getAttribute('data-visao')"),
+                st = {'url': a.js("location.pathname.split('/').pop()+location.search"), 'ativa': a.js("(document.querySelector('[role=toolbar] [data-visao][aria-pressed=true]')||{getAttribute:()=>''}).getAttribute('data-visao')"), 'ag': agrupado_por(a.js),
                       'faz': a.js("document.querySelector('select[aria-label=\"Filtrar por fazenda\"]').value"), 'saf': a.js("document.querySelector('select[aria-label=\"Filtrar por safra\"]').value"),
                       'chip': a.js("[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] [aria-pressed=true]')].map(b=>b.innerText.replace(/\\s+\\d+$/,'').trim())"), 'foco': q()}
                 time.sleep(2.2); st['foco_2s'] = q()
                 a.fecha(); c.call('Page.bringToFront')
-                chk(f'E3 {tag} · nova aba COM opener: o "Voltar" vai a OS.dc.html?view=agrupada (sem a ficha) com Fazenda, Safra, fase e o foco na OS-0421, também 2 s depois',
-                    st['url'] == 'OS.dc.html?view=agrupada' and st['ativa'] == 'agrupada' and st['faz'] == 'Todas' and st['saf'] == '2026/27' and st['chip'] == ['Em execução']
+                u0, _, u1 = st['url'].partition('?')
+                chk(f'E3 {tag} · nova aba COM opener: o "Voltar" vai a OS.dc.html?view=lista&ag=onde (sem a ficha), na Tabela agrupada por Talhão, com Fazenda, Safra, fase e o foco na OS-0421, também 2 s depois',
+                    u0 == 'OS.dc.html' and params(u1) == AG_ONDE and st['ativa'] == 'lista' and st['ag'] == 'Talhão' and st['faz'] == 'Todas' and st['saf'] == '2026/27' and st['chip'] == ['Em execução']
                     and str(st['foco']).startswith('OS-0421') and str(st['foco_2s']).startswith('OS-0421'), st)
             else: chk(f'E3 {tag} · nova aba COM opener', False, 'o Chrome não abriu a aba (window.open)')
         passo(f'E3 {tag} nova aba', _e3n)
@@ -470,7 +528,8 @@ def modo_e2e():
         passo(f'E3 {tag} link direto', _e3e)
         def _e3f():
             # contexto recusado (regra 02): antigo (2 h), de outro perfil, de outro escopo (Safra da sessão mudou) e já usado → lista canônica
-            # funcional, sem a visão, os filtros nem o foco antigos (revisão, achados A3/C2)
+            # funcional, sem a visão, os filtros nem o foco antigos (revisão, achados A3/C2). VISOES-2: o agrupamento antigo (?ag=onde) também não volta pelo
+            # endereço; a entrada usa a preferência do perfil (Ana: Tabela + Talhão, guardados na prepara_e3; Caio, sem preferência: Tabela sem agrupar)
             res = {}
             for caso in ('antigo', 'perfil', 'safra', 'usado'):
                 prepara_e3(w, h, toque); J(ABRE_COMPLETA); espera_pag('CA-01det.dc.html')
@@ -482,25 +541,31 @@ def modo_e2e():
                 res[caso] = canonica()
                 if caso == 'perfil': setsel('Trocar perfil de demonstração', 'Ana')
             sem = lambda r: r['url'] == 'OS.dc.html' and not str(r['foco']).startswith('linha:OS-0421') and r['linhas'] > 0
-            chk(f'E3 {tag} · contexto antigo (2 h), de outro perfil (Caio), de outro escopo (Safra 2025/26 na sessão) e já usado: lista canônica (OS.dc.html, sem ?view nem ficha), funcional e sem o foco antigo; '
-                'filtros limpos nos recusados (antigo e safra: preferência da Ana = Tabela agrupada; Caio sem preferência: Lista; safra: 2025/26)',
-                all(sem(r) for r in res.values()) and res['antigo']['chip'] == ['Todas'] and res['antigo']['ativa'] == 'agrupada'
-                and res['perfil']['ativa'] == 'lista' and res['perfil']['chip'] == ['Todas'] and res['safra']['chip'] == ['Todas'] and res['safra']['saf'] == '2025/26', res)
+            chk(f'E3 {tag} · contexto antigo (2 h), de outro perfil (Caio), de outro escopo (Safra 2025/26 na sessão) e já usado: lista canônica (OS.dc.html, sem ?view, ?ag nem ficha), funcional e sem o foco antigo; '
+                'filtros limpos nos recusados (antigo e safra: preferência da Ana = Tabela + Agrupar por Talhão; Caio sem preferência: Tabela sem agrupar; safra: 2025/26)',
+                all(sem(r) for r in res.values()) and res['antigo']['chip'] == ['Todas'] and (res['antigo']['ativa'], res['antigo']['ag']) == ('lista', 'Talhão')
+                and (res['safra']['ativa'], res['safra']['ag']) == ('lista', 'Talhão')
+                and (res['perfil']['ativa'], res['perfil']['ag']) == ('lista', '') and res['perfil']['chip'] == ['Todas'] and res['safra']['chip'] == ['Todas'] and res['safra']['saf'] == '2025/26', res)
         passo(f'E3 {tag} recusado', _e3f)
+        def _e3p():
+            # VISOES-2: na Tabela agrupada, Enter na linha da O.S. abre o painel dela (como na Tabela sem agrupar), em cada preparação da E3
+            chk(f'E3 {tag} · Enter na OS-0421 da Tabela agrupada por Talhão abre o painel dela (em todas as preparações da E3)', bool(PREP.get(w)) and all(PREP[w]), PREP.get(w))
+        passo(f'E3 {tag} Enter na agrupada', _e3p)
     # ---------------- 1440 daqui em diante ----------------
     def _e5():
-        # E5 · trocar de visão não grava no cenário (antes da E3b, que cancela uma ordem para montar o caso)
+        # E5 · trocar de visão não grava no cenário (antes da E3b, que cancela uma ordem para montar o caso). VISOES-2: a "agrupada" é a Tabela + o
+        # "Agrupar por" Talhão, que guarda a escolha por perfil (g2ag:…, preferência como a da visão, safrion.pref.); nenhuma outra chave muda
         abre('OS.dc.html')
-        NEG = "JSON.stringify(Object.keys(localStorage).filter(k=>k.indexOf('safrion.pref.')!==0).sort().map(k=>[k,localStorage.getItem(k)]))"
+        NEG = "JSON.stringify(Object.keys(localStorage).filter(k=>k.indexOf('safrion.pref.')!==0&&k.indexOf('g2ag:')!==0).sort().map(k=>[k,localStorage.getItem(k)]))"
         c0 = J("localStorage.getItem('talhao-os-cenario-v1')"); n0 = J(NEG); hl0 = J("history.length")
         for k in ('agrupada', 'kanban', 'carga', 'lista', 'kanban', 'agrupada'): troca_visao(J, k)
         foca(ativa()); tecla('End'); tecla('Enter'); tecla('Home'); tecla(' ')
-        chk('E5 trocar de visão (clique e teclado, 8 trocas) não muda o cenário talhao-os-cenario-v1 nem outra chave de negócio, byte a byte; só a preferência (safrion.pref.)',
-            J("localStorage.getItem('talhao-os-cenario-v1')") == c0 and J(NEG) == n0 and bool(pref()), [c0 is None, len(n0 or ''), pref()])
+        chk('E5 trocar de visão e agrupar (clique e teclado, 8 trocas, 2 delas com o "Agrupar por" Talhão) não muda o cenário talhao-os-cenario-v1 nem outra chave de negócio, byte a byte; só as preferências (safrion.pref. e o agrupamento g2ag: da Ana = Talhão)',
+            J("localStorage.getItem('talhao-os-cenario-v1')") == c0 and J(NEG) == n0 and bool(pref()) and json.loads(gpref() or 'null') == {'d': 'onde', 't': []}, [c0 is None, len(n0 or ''), J(NEG) == n0, pref(), gpref()])
         # revisão, achado A7: trocar de visão não cria entrada no histórico (replaceState, nunca pushState); o Voltar do navegador sai da O.S.
         hl1 = J("history.length"); J("history.back()"); time.sleep(1.5)
         saiu = J("location.pathname.split('/').pop()")
-        chk('E5b 8 trocas de visão não mudam history.length e o Voltar do navegador sai da O.S. (para a tela anterior, Main)', hl1 == hl0 and saiu == 'Main.dc.html', [hl0, hl1, saiu])
+        chk('E5b 8 trocas de visão (com o "Agrupar por") não mudam history.length e o Voltar do navegador sai da O.S. (para a tela anterior, Main)', hl1 == hl0 and saiu == 'Main.dc.html', [hl0, hl1, saiu])
     passo('E5', _e5)
     def _e3b():
         # E3b · vazio por regra da visão: Canceladas no Kanban
@@ -541,23 +606,29 @@ def modo_e2e():
         vai('OS.dc.html?view=xyz'); time.sleep(.3); p3 = (ativa(), toast(), busca()); c.goto(J("location.href"), .6); pronto(); p3b = (ativa(), toast())
         vai('OS.dc.html'); troca_visao(J, 'lista'); u = busca(); c.goto(J("location.href"), .6); pronto(); p4 = (u, ativa(), pref())
         vai('OS.dc.html'); troca_visao(J, 'kanban'); setsel('Trocar perfil de demonstração', 'Caio'); p5 = ativa()
-        vai('OS.dc.html'); p6 = ativa(); troca_visao(J, 'agrupada'); setsel('Trocar perfil de demonstração', 'Ana'); p7 = ativa(); vai('OS.dc.html'); p8 = (ativa(), pref('Ana'), pref('Caio'))
-        J("localStorage.clear(); 1"); vai('OS.dc.html'); p9 = ativa()
+        # VISOES-2: o Caio escolhe a Tabela agrupada por Talhão (Tabela + "Agrupar por"): a preferência de visão dele vira a Tabela e o agrupamento fica
+        # guardado só no perfil dele (g2ag:…:Caio); a Ana segue sem agrupamento guardado
+        vai('OS.dc.html'); p6 = ativa(); troca_visao(J, 'agrupada'); setsel('Trocar perfil de demonstração', 'Ana'); p7 = (ativa(), ag()); vai('OS.dc.html')
+        p8 = (ativa(), pref('Ana'), pref('Caio'), gpref('Ana'), json.loads(gpref('Caio') or 'null'))
+        J("localStorage.clear(); 1"); vai('OS.dc.html'); p9 = (ativa(), ag())
         chk('E4 sem ?view abre a preferência (Kanban); ?view=lista vence a preferência e não a grava; ?view=xyz abre a preferência com aviso sem o valor e o endereço perde o valor (F5 sem aviso)',
             p1 == ('kanban', '') and p2 == ('lista', 'kanban') and p3[0] == 'kanban' and 'não existe nesta lista: aberta em Kanban (sua última escolha)' in p3[1] and 'xyz' not in p3[1]
             and 'view' not in p3[2] and p3b[0] == 'kanban' and 'não existe' not in p3b[1], [p1, p2, p3, p3b])
         chk('E4b (Codex, item 1) preferência Kanban → escolher Lista grava ?view=lista → F5 continua na Lista (e a Lista vira a preferência)', p4 == ('?view=lista', 'lista', 'lista'), p4)
-        chk('E4c (Codex, item 3) trocar o perfil não muda a visão aberta; a próxima entrada sem ?view usa a preferência do perfil (Caio sem preferência: Lista; Ana: Kanban); localStorage limpo abre a Lista',
-            p5 == 'kanban' and p6 == 'lista' and p7 == 'agrupada' and p8 == ('kanban', 'kanban', 'agrupada') and p9 == 'lista', [p5, p6, p7, p8, p9])
+        chk('E4c (Codex, item 3) trocar o perfil não muda a visão aberta nem o agrupamento; a próxima entrada sem ?view usa a preferência do perfil (Caio sem preferência: Tabela; Ana: Kanban; Caio depois de agrupar: Tabela + Talhão, só no perfil dele); localStorage limpo abre a Tabela sem agrupar',
+            p5 == 'kanban' and p6 == 'lista' and p7 == ('lista', 'Talhão') and p8 == ('kanban', 'kanban', 'lista', None, {'d': 'onde', 't': []}) and p9 == ('lista', ''), [p5, p6, p7, p8, p9])
     passo('E4', _e4)
     def _e6():
         # E6 · entrada por endereço
         abre('OS.dc.html?view=kanban#OS-0418'); time.sleep(.5); q1 = (ativa(), painel(), hashd())
         vai('OS.dc.html#OS-0430:ajustar'); time.sleep(.6); q2 = (ativa(), painel(), J("!!document.querySelector('aside[role=dialog] input')"))
-        vai('OS.dc.html?theme=dark&view=agrupada#tal=Santa Rita|T1'); time.sleep(.6); q3 = (ativa(), tal_btn(), busca(), hashd(), grupos())
-        chk('E6 OS.dc.html?view=kanban#OS-0418 abre o Kanban e a OS-0418; #OS-0430:ajustar abre a ordem para ajustar; ?theme=dark&view=agrupada#tal=Santa Rita|T1 abre a Agrupada com T1, theme e hash intactos',
+        # VISOES-2: o endereço antigo ?view=agrupada (compatibilidade) e o novo ?ag=onde abrem a Tabela agrupada por Talhão, com o filtro T1 e só o grupo T1
+        vai('OS.dc.html?theme=dark&view=agrupada#tal=Santa Rita|T1'); time.sleep(.6); q3 = (ativa(), tal_faixa(), busca(), hashd(), grupos(), ag())
+        vai('Main.dc.html'); vai('OS.dc.html?theme=dark&ag=onde#tal=Santa Rita|T1'); time.sleep(.6); q4 = (ativa(), tal_faixa(), busca(), hashd(), grupos(), ag())
+        chk('E6 OS.dc.html?view=kanban#OS-0418 abre o Kanban e a OS-0418; #OS-0430:ajustar abre a ordem para ajustar; ?theme=dark&view=agrupada#tal=Santa Rita|T1 (endereço antigo) e ?theme=dark&ag=onde#tal=Santa Rita|T1 abrem a Tabela agrupada por Talhão com T1 (só o grupo T1), theme e hash intactos',
             q1[0] == 'kanban' and q1[1].startswith('OS-0418') and q1[2] == '#OS-0418' and q2[1].startswith('OS-0430') and q2[2]
-            and q3[0] == 'agrupada' and q3[1].startswith('Talhão: T1') and 'theme=dark' in q3[2] and 'view=agrupada' in q3[2] and q3[3] == '#tal=Santa Rita|T1' and q3[4] == ['Santa Rita|T1'], [q1, q2, q3])
+            and all(q[0] == 'lista' and q[5] == 'Talhão' and q[1] == 'T1' and 'theme=dark' in q[2] and q[3] == '#tal=Santa Rita|T1' and q[4] == ['T1'] for q in (q3, q4))
+            and ('view=agrupada' in q3[2] or 'ag=onde' in q3[2]) and 'ag=onde' in q4[2], [q1, q2, q3, q4])
         guarda_erros('E4-E6')
     passo('E6', _e6)
     def _e6b():
@@ -574,28 +645,42 @@ def modo_e2e():
             and r3['painel'].startswith('OS-0505') and 'OS-0505' in r3['linhas'] and r3['faz'] == 'Lagoa Grande', res)
         guarda_erros('E6b')
     passo('E6b', _e6b)
+    def abre_todas(f):
+        """abre f (1440) com todas as colunas da grade da O.S.: a Área (ha), somada no grupo, não está no padrão "Abre com" (VISOES-2 §3.6)"""
+        abre('OS.dc.html'); J(cv_todas_js('g_os')); vai('Main.dc.html'); vai(f)
     def _e1b():
-        # E1b (revisão, achado C1, S2): o grupo da Tabela agrupada conta só as O.S. do recorte; sem sobreposição, a soma dos grupos = Total
-        abre('OS.dc.html#tal=Santa Rita|T2'); time.sleep(.4); fase('A liberar'); troca_visao(J, 'agrupada'); time.sleep(.5)
+        # E1b (revisão, achado C1, S2): o grupo da Tabela agrupada conta só as O.S. do recorte; sem sobreposição, a soma dos grupos = Total.
+        # VISOES-2: com Fazenda Todas o 1º nível do Agrupar por Talhão é a Fazenda (Fazenda › Talhão): a soma dos grupos de fazenda = Total; descer
+        # numa fazenda (o nome do grupo vira filtro, com a trilha) mostra os talhões dela, cuja soma = o subtotal da fazenda = o Total da tela
+        abre_todas('OS.dc.html#tal=Santa Rita|T2'); time.sleep(.4); fase('A liberar'); troca_visao(J, 'agrupada'); time.sleep(.5)
         g1 = J(GRUPOS_AREA) or []; t1 = total_nota()
-        abre('OS.dc.html'); setsel('Filtrar por fazenda', 'Todas'); fase('A liberar'); troca_visao(J, 'agrupada'); time.sleep(.5)
+        abre_todas('OS.dc.html'); setsel('Filtrar por fazenda', 'Todas'); fase('A liberar'); troca_visao(J, 'agrupada'); time.sleep(.5)
         g2 = J(GRUPOS_AREA) or []; t2 = total_nota(); shot('e2e_1440_agrupada_aliberar_todas')
         a1 = num_br((t1.split('·') + ['', ''])[1]); a2 = num_br((t2.split('·') + ['', ''])[1]); s2 = round(sum(num_br(x) or 0 for _, x in g2), 2)
-        chk('E1b fase A liberar + talhão T2 → Agrupada: o grupo T2 soma só a OS-0431 (= Total, 102 ha); A liberar + Fazenda Todas: a soma dos grupos = Total (490,95 ha, sem O.S. em dois talhões)',
-            len(g1) == 1 and g1[0][0] == 'Santa Rita|T2' and a1 is not None and abs((num_br(g1[0][1]) or -1) - a1) < .01 and abs(a1 - 102) < .01
-            and a2 is not None and abs(s2 - a2) < .01 and abs(a2 - 490.95) < .01, [g1, t1, g2, s2, t2])
+        chk('E1b fase A liberar + talhão T2 → Tabela agrupada por Talhão: o grupo T2 soma só a OS-0431 (= Total, 102 ha); A liberar + Fazenda Todas: grupos por fazenda e a soma dos grupos = Total (490,95 ha)',
+            len(g1) == 1 and g1[0][0] == 'T2' and a1 is not None and abs((num_br(g1[0][1]) or -1) - a1) < .01 and abs(a1 - 102) < .01
+            and len(g2) >= 2 and a2 is not None and abs(s2 - a2) < .01 and abs(a2 - 490.95) < .01, [g1, t1, g2, s2, t2])
+        sr = num_br(dict(g2).get('Santa Rita', ''))
+        J("(()=>{const b=[...document.querySelectorAll('[data-g2g=g_os] .g2desce')].find(b=>b.getClientRects().length&&b.innerText.trim()==='Santa Rita ›'); b&&b.click();})()"); time.sleep(.6)
+        g3 = J(GRUPOS_AREA) or []; t3 = total_nota(); tr = J("(document.querySelector('[data-g2agtr=g_os]')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim()") or ''
+        cont = J("(()=>{const s=[...document.querySelectorAll('[data-g2g=g_os] span, main span')].find(s=>s.getClientRects().length&&/^\\d+ de \\d+$/.test(s.innerText.trim())); return s?s.innerText.trim():'';})()") or ''
+        a3 = num_br((t3.split('·') + ['', ''])[1]); s3 = round(sum(num_br(x) or 0 for _, x in g3), 2); n3 = len({x.split('@')[0] for x in ids() if not x.startswith('grp@')})
+        shot('e2e_1440_agrupada_aliberar_desce_santarita')
+        chk('E1b descer em Santa Rita (A liberar, Fazenda Todas): trilha "Todas › Santa Rita", grupos por talhão cuja soma = subtotal de Santa Rita no nível de cima; o Total da tela (O.S. e ha) e o contador da grade seguem o recorte da trilha',
+            tr.startswith('Todas › Santa Rita') and len(g3) >= 1 and sr is not None and abs(s3 - sr) < .01
+            and a3 is not None and abs(a3 - s3) < .01 and t3.startswith(f'{n3} O.S. ·') and cont.startswith(f'{n3} de '), [sr, g3, s3, t3, tr, cont, n3])
     passo('E1b', _e1b)
     def _e1c():
         # E1c (revisão, achado C1, S2, a parte da busca): sem fase, a busca "0431" deixa só a OS-0431 no recorte; o grupo T2 soma só ela (= Total,
         # 102 ha), e não as 452 ha de todas as O.S. do talhão; a soma dos grupos = Total
-        abre('OS.dc.html')
+        abre_todas('OS.dc.html')
         J("""(()=>{const i=[...document.querySelectorAll('main input[aria-label="Buscar nesta tabela"]')].find(x=>x.getClientRects().length);
           Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'0431'); i.dispatchEvent(new Event('input',{bubbles:true})); return 1;})()"""); time.sleep(.6)
         troca_visao(J, 'agrupada'); time.sleep(.5)
         g = J(GRUPOS_AREA) or []; t = total_nota(); a = num_br((t.split('·') + ['', ''])[1]); s = round(sum(num_br(x) or 0 for _, x in g), 2)
         lin = sorted(set(x.split('@')[0] for x in ids() if not x.startswith('grp@')))
-        chk('E1c busca "0431" (sem fase) → Agrupada: só o grupo T2, com a OS-0431, e o subtotal = Total (102 ha); a soma dos grupos = Total',
-            lin == ['OS-0431'] and [k for k, _ in g] == ['Santa Rita|T2'] and a is not None and abs(a - 102) < .01 and abs(s - a) < .01, [lin, g, s, t])
+        chk('E1c busca "0431" (sem fase) → Tabela agrupada por Talhão: só o grupo T2, com a OS-0431, e o subtotal = Total (102 ha); a soma dos grupos = Total',
+            lin == ['OS-0431'] and [k for k, _ in g] == ['T2'] and a is not None and abs(a - 102) < .01 and abs(s - a) < .01, [lin, g, s, t])
     passo('E1c', _e1c)
     def _e3b2():
         # E3b2 (revisão, achado A2): recorte só com ordens canceladas (Santa Rita · Safrinha 2027 depois de emitir e cancelar a OS nova):
@@ -613,14 +698,16 @@ def modo_e2e():
         for o in novos:
             J(f"(()=>{{ window.__cen.cenMudar(null,c=>window.__cen.osc_cancelar(c,{json.dumps(o)},'teste VISOES-1',['','',''],{{k:'Ana'}})); window.dispatchEvent(new StorageEvent('storage',{{key:'talhao-os-cenario-v1'}})); return 1; }})()"); time.sleep(.5)
         vai('OS.dc.html'); setsel('Filtrar por safra', 'Safrinha 2027')
+        # VISOES-2: a Tabela agrupada por Talhão é a Tabela com "Agrupar por"; o Calendário entrou nas visões. Antes do "Ver canceladas", a Tabela
+        # volta a "Sem agrupar" (o que a antiga "Lista" mostrava)
         est = {}
-        for k in ('lista', 'agrupada', 'kanban', 'carga'):
+        for k in ('lista', 'agrupada', 'kanban', 'calendario', 'carga'):
             troca_visao(J, k); est[k] = estado()
-        shot('e2e_1440_so_canceladas_carga'); troca_visao(J, 'lista')
+        shot('e2e_1440_so_canceladas_carga'); troca_visao(J, 'lista'); agrupar_por(J, 'Sem agrupar')
         J("(()=>{const b=[...document.querySelectorAll('[data-visoes-estado] button')].find(b=>b.innerText.trim()==='Ver canceladas'); b&&b.click();})()"); time.sleep(.6)
         dep = (chip_on(), [x.split('@')[0] for x in ids()])
         txt = f'Só há ordens canceladas neste recorte (Santa Rita · safra Safrinha 2027): {len(novos)} ordem. Ver canceladas'
-        chk('E3b2 Santa Rita · Safrinha 2027 só com a ordem cancelada: Lista, Agrupada, Kanban e Carga dizem "Só há ordens canceladas neste recorte (…): 1 ordem." com "Ver canceladas", que filtra a fase Canceladas e mostra a ordem',
+        chk('E3b2 Santa Rita · Safrinha 2027 só com a ordem cancelada: Tabela, Tabela agrupada por Talhão, Kanban, Calendário e Carga dizem "Só há ordens canceladas neste recorte (…): 1 ordem." com "Ver canceladas", que filtra a fase Canceladas e mostra a ordem',
             len(novos) == 1 and all(e and e['tipo'] == 'regra' and e['t'] == txt for e in est.values()) and dep[0] == ['Canceladas'] and dep[1] == novos, [novos, est, dep])
     passo('E3b2', _e3b2)
     def _e3d():
@@ -665,6 +752,10 @@ def modo_e7():
     def liga(): J("window.__cl=0; if(!window.__clOn){ window.__clOn=1; document.addEventListener('click',()=>{ window.__cl=(window.__cl||0)+1; },true); } 1")
     def agrupar():
         if J("!!document.querySelector('[role=toolbar] [data-visao=agrupada]')"): J("document.querySelector('[role=toolbar] [data-visao=agrupada]').click()")
+        elif J("!!document.querySelector('[data-g2agb=g_os]')"):
+            # VISOES-2: Tabela (só se outra visão estiver aberta) + "Agrupar por" › Talhão: 2 cliques no menu
+            if ativa() != 'lista': J("document.querySelector('[role=toolbar] [data-visao=lista]').click()"); time.sleep(.4)
+            agrupar_por(J, 'Talhão')
         else: J("[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Agrupar por talhão').click()")
         time.sleep(.6)
     def agrupado(): return len(grupos()) > 0
@@ -673,6 +764,8 @@ def modo_e7():
     # é contado à parte (+1): o contador da página que sai não sobrevive à navegação
     fase('Em execução'); agrupar()
     J(f"{LINHA('OS-0421')}.click()"); time.sleep(.5); n1 = conta()
+    if not painel().startswith('OS-0421'):
+        chk('E7 clicar na OS-0421 da tela agrupada abre o painel (sem ele não há "Abrir ordem completa" para medir a volta)', False, [painel(), grupos()[:4], ids()[:4]]); return
     J("[...document.querySelectorAll('aside[role=dialog] a')].find(a=>/Abrir ordem completa/.test(a.innerText)).click()"); espera_pag('CA-01det.dc.html'); liga()
     J("document.querySelector('a[aria-label=Voltar]').click()"); espera_pag('OS.dc.html'); liga()
     extra = 0
@@ -683,7 +776,8 @@ def modo_e7():
     if not achou: vai('OS.dc.html')
     espera_pag('OS.dc.html'); liga()
     if not agrupado(): agrupar()
-    b0 = 1; b = b0 + conta(); tela = 'seletor' if J("!!document.querySelector('[role=toolbar][data-visoes]')") else 'botão Agrupar por talhão'
+    b0 = 1; b = b0 + conta()
+    tela = ('seletor + Agrupar por' if J("!!document.querySelector('[data-g2agb=g_os]')") else 'seletor') if J("!!document.querySelector('[role=toolbar][data-visoes]')") else 'botão Agrupar por talhão'
     print(f'CLIQUES · tela: {tela} · A (filtrar → agrupar → abrir → voltar e estar agrupado): {a} (dos quais {extra} para reagrupar) · B (outra entrada até agrupado): {b} (dos quais {b0} para entrar)', flush=True)
     chk(f'E7 cliques medidos ({tela}): A = {a}, B = {b}', ok_a and agrupado(), [a, b, ok_a])
 

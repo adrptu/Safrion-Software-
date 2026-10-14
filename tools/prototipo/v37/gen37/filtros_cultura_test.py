@@ -4,8 +4,9 @@ talhão. nas demais telas que isso for bastante essencial e ajudar o usuário, p
   F1 Produção (Colheita, Recebimento e Estoque de produto): a faixa "Filtros desta tela" tem Cultura; escolher uma cultura deixa só linhas
      dela (e menos que antes quando há outras); "Todas" volta tudo
   F2 Colheita: Talhão segue a Cultura (só talhões dela) e filtra as linhas pelo talhão
-  F3 O.S.: os avisos que eram do seletor de talhão da barra voltaram (revisão do agente de testes, 13/10): "Total: N O.S. distintas" na Tabela
-     agrupada e o aviso de talhão que sai do filtro ao trocar a fazenda, com o nome do talhão (não o ID)
+  F3 O.S.: os avisos que eram do seletor de talhão da barra voltaram (revisão do agente de testes, 13/10): o total de O.S. distintas na Tabela
+     agrupada por Talhão (VISOES-2, 14/10: Tabela + "Agrupar por" Talhão; a nota diz "N O.S. · X ha · a O.S. de vários talhões aparece em cada
+     um e conta uma vez no total") e o aviso de talhão que sai do filtro ao trocar a fazenda, com o nome do talhão (não o ID)
   F4 390 px: as listas da faixa com alvo de toque ≥ 44 px (aceite de campo, NAV-2CB-TOQUE-01 do Codex); sem rolagem lateral; sem erro de JS
   F5 Pragas e doenças (AG-01): Cultura e Talhão na faixa, com oráculo pelos dados do MIP (dados_mip.VIS × TAL): opções = o que tem vistoria
      na fazenda; Cultura deixa só as vistorias dela (lista e chip "Todas"); o Talhão segue a Cultura; trocar a fazenda tira o talhão de
@@ -15,7 +16,7 @@ talhão. nas demais telas que isso for bastante essencial e ajudar o usuário, p
 Uso: python3 filtros_cultura_test.py (lê _render ou RENDER_DIR)."""
 import os, sys, json, time
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir
+from comp_lib import Chrome, servir, troca_visao
 import dados_mip as DM
 
 OK, FAIL = [], []
@@ -52,9 +53,11 @@ try:
     chk('F2 Colheita: o Talhão segue a Cultura (Café → só C1) e "T2" deixa só linhas do T2', t0[:1] == ['Todos'] and len(t0) > 3 and t1 == ['Todos', 'C1'] and folhas and all('T2' in x for x in folhas),
         [t0[:6], t1, folhas[:3]])
     # F3 · O.S.: total do agrupado e aviso do talhão que sai do filtro
-    limpa(); c.goto(U('OS.dc.html'), 1.4); J("document.querySelector('[data-visao=\"agrupada\"]').click()"); time.sleep(.8)
-    gt = J("(()=>{const n=[...document.querySelectorAll('[role=note]')].find(x=>/O\\.S\\. distintas/.test(x.innerText)&&x.getClientRects().length); return n?n.innerText:'';})()") or ''
-    chk('F3 O.S. › Tabela agrupada: "Total: N O.S. distintas" à vista', 'O.S. distintas' in gt, gt)
+    limpa(); c.goto(U('OS.dc.html'), 1.4); ag = troca_visao(J, 'agrupada'); time.sleep(.8)   # VISOES-2: Tabela + "Agrupar por" Talhão
+    gt = J("(()=>{const n=[...document.querySelectorAll('[role=note]')].find(x=>/O\\.S\\. · .* ha · a O\\.S\\. de vários talhões aparece em cada um e conta uma vez no total/.test(x.innerText)&&x.getClientRects().length); return n?n.innerText.trim():'';})()") or ''
+    # a conta de O.S. distintas contra as linhas dos grupos é do tabelas_os_test (TF06); aqui, como antes, a nota à vista
+    chk('F3 O.S. › Tabela agrupada por Talhão: o total de O.S. distintas à vista ("N O.S. · X ha · a O.S. de vários talhões aparece em cada um e conta uma vez no total")',
+        ag == 'ok' and bool(gt) and int(gt.split(' ')[0]) > 0, [ag, gt])
     limpa(); c.goto(U('OS.dc.html'), 1.4); sel('Filtrar por fazenda', 'Lagoa Grande'); sel('Filtrar por talhão', 'Lagoa Grande|PV04'); sel('Filtrar por fazenda', 'Santa Rita')
     msg = J("(()=>{const n=[...document.querySelectorAll('[role=status]')].find(x=>/saiu do filtro/.test(x.innerText)&&x.getClientRects().length); return n?n.innerText:'';})()") or ''
     chk('F3 O.S.: trocar a fazenda tira o talhão do filtro com aviso, pelo nome ("Pivô 4"), não pelo ID', 'Pivô 4' in msg and 'PV04' not in msg, msg)
