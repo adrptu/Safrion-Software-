@@ -1,0 +1,1 @@
+[{"name": "Vazio transitório preserva agrupamento", "ok": true}, {"name": "Retorno dos dados preserva agrupamento", "ok": true}, {"name": "Mudança real de esquema remove estado inválido", "ok": true}, {"name": "Destruir remove ouvintes persistentes", "ok": true}, {"name": "Destruir com menu aberto remove ouvintes globais", "ok": true}]

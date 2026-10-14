@@ -1,0 +1,7 @@
+{"error": "TypeError: Cannot read properties of null (reading 'label')"}
+FAIL empty grouped result preserves usable state
+{"error": "TypeError: Cannot read properties of null (reading 'label')"}
+FAIL changed inferred schema prunes invalid state
+FAIL destroy removes persistent listeners
+FAIL destroy with open column menu removes global listeners
+FAILURES 4

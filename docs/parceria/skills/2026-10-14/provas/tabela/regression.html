@@ -1,0 +1,16 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Regressão da tabela</title><pre id="result"></pre><div id="table"></div><script>
+window.listeners=[];const add=EventTarget.prototype.addEventListener,rm=EventTarget.prototype.removeEventListener;
+EventTarget.prototype.addEventListener=function(type,fn,options){listeners.push({target:this,type,fn,options,active:true});return add.call(this,type,fn,options)};
+EventTarget.prototype.removeEventListener=function(type,fn,options){for(const x of listeners)if(x.target===this&&x.type===type&&x.fn===fn)x.active=false;return rm.call(this,type,fn,options)};
+</script><script src="../../shared/tabelas-interativas/assets/tabela.js"></script><script>
+const results=[];let t;function check(name,fn){try{if(!fn())throw Error('expectativa não satisfeita');results.push({name,ok:true})}catch(e){results.push({name,ok:false,error:String(e)})}}
+const persistent=()=>listeners.filter(x=>x.active&&(x.target===document||x.target===window||x.target.id==='table')).length;
+t=Tabela.create('#table',{rows:[{fazenda:'A',area:1},{fazenda:'B',area:2}],groupBy:['fazenda']});
+check('Vazio transitório preserva agrupamento',()=>{t.setRows([]);return t.getRows().length===0&&t.getState().groupBy[0]==='fazenda'});
+check('Retorno dos dados preserva agrupamento',()=>{t.setRows([{fazenda:'C',area:3}]);return t.getRows().length===1&&t.getState().groupBy[0]==='fazenda'});
+t.destroy();t=Tabela.create('#table',{rows:[{fazenda:'A',area:1}],groupBy:['fazenda']});
+check('Mudança real de esquema remove estado inválido',()=>{t.drillTo([{spec:'fazenda',key:'A'}]);t.sort('area',1);t.filter('fazenda','A');t.setRows([{novo:'X'}]);const s=t.getState();return !s.groupBy.length&&!s.sort.length&&!s.focus.length&&!Object.keys(s.filters).length});
+t.destroy();check('Destruir remove ouvintes persistentes',()=>persistent()===0);
+t=Tabela.create('#table',{rows:[{fazenda:'A'}]});document.querySelector('.dt-mbtn').click();t.destroy();check('Destruir com menu aberto remove ouvintes globais',()=>persistent()===0);
+window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS 5/5':'FAIL';
+</script></html>

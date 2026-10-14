@@ -871,6 +871,77 @@
  - [ ] Tipos corretos (códigos como texto, moeda BRL, percentuais, datas pt-BR)
 -- [ ] Funciona com teclado e nos temas claro e escuro
 +- [ ] Funciona com teclado e nos temas adotados pelo projeto
+--- before/shared/tabelas-interativas/assets/tabela.js
++++ candidate/shared/tabelas-interativas/assets/tabela.js
+@@ -169,7 +169,8 @@
+     function setData(rows) {
+       data = rows || [];
+       rowIdx = new Map(data.map((r, i) => [r, i]));
+-      const src = opts.columns || [...new Set(data.slice(0, 50).flatMap((r) => Object.keys(r)))];
++      // Uma resposta vazia transitória preserva o esquema e o contexto da tabela.
++      const src = opts.columns || (data.length ? [...new Set(data.slice(0, 50).flatMap((r) => Object.keys(r)))] : cols);
+       cols = src.map((c) => {
+         c = typeof c === 'string' ? { key: c } : Object.assign({}, c);
+         c.label = c.label || prettify(c.key);
+@@ -180,6 +181,13 @@
+       colMap = {};
+       cols.forEach((c) => (colMap[c.key] = c));
+       specCache.clear();
++      st.groupBy = st.groupBy.filter((id) => gspec(id));
++      st.focus = st.focus.filter((f) => gspec(f.spec));
++      st.sort = st.sort.filter((s) => colMap[s.key]);
++      for (const state of [st.filters, st.values]) {
++        for (const key of Object.keys(state)) if (!colMap[key]) delete state[key];
++      }
++      st.trail = []; st.limits = {};
+     }
+     const vis = () => cols.filter((c) => !c.hidden);
+     const raw = (c, r) => (c.value ? c.value(r) : r[c.key]);
+@@ -667,7 +675,8 @@
+       e.dataTransfer.effectAllowed = 'move';
+       e.dataTransfer.setData('text/plain', 'chip');
+     });
+-    document.addEventListener('dragend', () => { drag = null; zone.classList.remove('dt-over'); });
++    const onDragEnd = () => { drag = null; zone.classList.remove('dt-over'); };
++    document.addEventListener('dragend', onDragEnd);
+     zone.addEventListener('dragover', (e) => { if (drag) { e.preventDefault(); zone.classList.add('dt-over'); } });
+     zone.addEventListener('dragleave', (e) => { if (!zone.contains(e.relatedTarget)) zone.classList.remove('dt-over'); });
+     zone.addEventListener('drop', (e) => {
+@@ -684,13 +693,14 @@
+       if (b) { st.groupBy.splice(+b.dataset.ungroup, 1); st.limits = {}; renderBody(); }
+     });
+     addSel.addEventListener('change', () => { if (addSel.value) addGroup(addSel.value); });
+-    root.addEventListener('click', (e) => {
++    const onRootClick = (e) => {
+       const a = e.target.closest('[data-act]');
+       if (!a) return;
+       if (a.dataset.act === 'clear') clearFilters();
+       else if (a.dataset.act === 'expand') { walk(tree, (g) => st.open.add(g.id)); renderBody(); }
+       else if (a.dataset.act === 'collapse') { st.open.clear(); st.limits = {}; renderBody(); }
+-    });
++    };
++    root.addEventListener('click', onRootClick);
+     crumbs.addEventListener('click', (e) => { const b = e.target.closest('[data-crumb]'); if (b) goCrumb(+b.dataset.crumb); });
+ 
+     tbody.addEventListener('click', (e) => {
+@@ -744,7 +754,7 @@
+     renderBody();
+ 
+     return {
+-      setRows(rows) { closePanel(); setData(rows); if (!opts.columns) renderHead(); st.open.clear(); renderBody(); },
++      setRows(rows) { closeMenu(); closePanel(); setData(rows); if (!opts.columns) renderHead(); st.open.clear(); renderBody(); },
+       groupBy(ids) { st.groupBy = (ids || []).filter((id) => gspec(id)); st.limits = {}; renderBody(); },
+       filter(key, text) { st.filters[key] = text || ''; renderBody(); },
+       sort(key, dir) { toggleSort(key, false, dir); },
+@@ -752,7 +762,7 @@
+       clearFilters,
+       getRows: () => current.slice(),
+       getState: () => ({ sort: st.sort.slice(), filters: Object.assign({}, st.filters), groupBy: st.groupBy.slice(), focus: st.focus.slice() }),
+-      destroy() { closeMenu(); closePanel(); document.removeEventListener('keydown', onDocKey); root.innerHTML = ''; root.classList.remove('dt'); },
++      destroy() { closeMenu(); closePanel(); document.removeEventListener('keydown', onDocKey); document.removeEventListener('dragend', onDragEnd); root.removeEventListener('click', onRootClick); root.innerHTML = ''; root.classList.remove('dt'); },
+     };
+   }
+ 
 --- before/shared/ux-essencial/SKILL.md
 +++ candidate/shared/ux-essencial/SKILL.md
 @@ -5,11 +5,23 @@

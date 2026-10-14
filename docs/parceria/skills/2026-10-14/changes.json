@@ -135,6 +135,11 @@
     "after": "2172452b87188145a5605aec28a792fb0baeb0df43f4e562393c47fa1c538a71"
   },
   {
+    "file": "shared/tabelas-interativas/assets/tabela.js",
+    "before": "1605033d45dd8f6b040dcedf54269907d21d647f2fdcbd92a65ca9910b345c31",
+    "after": "8710203e9cfa662480f64e3b2141cc521444f6d8b440d95599d3009898f9aec1"
+  },
+  {
     "file": "shared/ux-essencial/SKILL.md",
     "before": "10972bdbf98af75313e6c21ebd6586fefc08918972fd792ca83c315b40a5ffe6",
     "after": "ad47ad7c7acc74cb5edcc2a2c39757582bf408e097c4811d2ecc584e1e77eef8"

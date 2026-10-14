@@ -1,0 +1,8 @@
+{"error": null, "state": {"sort": [], "filters": {}, "groupBy": ["fazenda"], "focus": []}, "text": "Fazenda\n×\n+ Agrupar por…\nArea\nExpandir tudo\nRecolher tudo\nLimpar filtros\n0 linhas\nFazenda\n⇅\n▾\n\t\nArea\n⇅\n▾\n\nNenhuma linha corresponde aos filtros. Limpar filtros"}
+OK empty grouped result preserves usable state
+OK rows return grouped
+{"error": null, "state": {"sort": [], "filters": {}, "groupBy": [], "focus": []}}
+OK changed inferred schema prunes invalid state
+OK destroy removes persistent listeners
+OK destroy with open column menu removes global listeners
+FAILURES 0
