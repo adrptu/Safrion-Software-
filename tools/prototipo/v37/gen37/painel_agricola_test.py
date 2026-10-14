@@ -1,0 +1,90 @@
+# -*- coding: utf-8 -*-
+"""PAINEL02: unidade e navegador sintético; --ui após build, render() e montar_render.
+Oráculos explícitos: não confundir semana corrente, seguinte e acumulado.
+"""
+import os,sys,json,tempfile,subprocess,time
+from pathlib import Path
+os.environ.setdefault('SAFRION_DADOS','sintetico')
+from areas import painel_agricola as P
+import cenario
+
+TEST=r'''
+const assert=require('node:assert/strict');let n=0;
+function chk(t,a,b){assert.deepEqual(a,b,t);console.log('OK '+t);n++;}
+const c=cenClone(CEN0), before=JSON.stringify(c);
+const x=pnaLeitura(c,'lg19');
+chk('Pivô19: 72.9t publicadas e 36.42t recebidas na S39',[x.prev,x.medido.kg],[72900,36420]);
+chk('Perene identifica semana em curso',x.periodo,'S39 · 21/09–27/09 (em curso)');
+chk('Recebido conserva unidade de produção',x.recebido,'36,42 t');
+chk('Cultivo abre a origem exata',x.href,'COLH.dc.html#lg19');
+chk('Anual lê a previsão da safra',pnaLeitura(c,'c1').prev,614400);
+chk('Safra tem nome sem prefixo repetido',pnaLeitura(c,'c1').periodo,'Safra 2026/27');
+chk('Ausência de previsão não é zero',pnaLeitura(c,'lg02').prev,null);
+chk('Leitura não altera cenário',JSON.stringify(c),before);
+chk('Fonte ausente fica indisponível',pnaLinhas({}),null);
+// Versão futura não substitui a previsão da semana que está sendo comparada.
+const seguinte=prSemMais(prSem(prHoje()),1);
+c.producao.previsoes.lg19.push({v:99,sem:{[seguinte]:999999}});
+chk('Previsão de outra semana não contamina S39',pnaLeitura(c,'lg19').prev,72900);
+// Contraprova de projeção: domínio fornece passes de semanas distintas e café a apurar.
+const realTal=prTal;
+prTal=(c,id)=>{const z=realTal(c,id);z.R.passes=z.R.passes.concat([{sem:seguinte,kg:900000,area:0,cafe:0,apurar:false,aPesar:[]}]);return z;};
+chk('Recebido futuro não vira acumulado da semana',pnaLeitura(c,'lg19').medido.kg,36420);
+prTal=(c,id)=>{const z=realTal(c,id);z.R.apurar=true;z.R.kg=0;z.R.cafe=1200;z.R.comecou=true;return z;};
+const cafe=pnaLeitura(c,'c9');
+chk('Café a apurar permanece explícito',cafe.recebido.includes('a apurar'),true);
+chk('Café a apurar não ordena como zero medido',pnaRow(cafe).v.recebido,null);
+prTal=realTal;
+console.log('RESULTADO '+n+'/'+n);
+'''
+
+def unit():
+    with tempfile.TemporaryDirectory(prefix='pn02-') as d:
+        p=Path(d)/'probe.js';p.write_text(cenario.perfis_js()+cenario.js_prefixo()+P.JS+TEST)
+        r=subprocess.run(['node',str(p)],capture_output=True,text=True)
+        print(r.stdout);print(r.stderr,end='');return r.returncode
+
+def ui():
+    from comp_lib import Chrome,servir
+    port,srv=servir(str(Path(__file__).parent/'_render'));c=Chrome();J=c.js;checks=[]
+    def chk(t,v,detail=''):
+        checks.append(bool(v));print(('OK ' if v else 'FALHA ')+t+(' '+str(detail) if not v else ''),flush=True)
+    def wait(e):
+        end=time.monotonic()+8
+        while time.monotonic()<end:
+            if J(e):return True
+            time.sleep(.1)
+        return False
+    url=lambda p:f'http://127.0.0.1:{port}/{p}'
+    try:
+        c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__errors=[];addEventListener('error',e=>__errors.push(e.message));"})
+        for w,touch in [(1440,False),(390,True)]:
+            c.aparelho(w,844,1,touch);c.goto(url('PAGR.dc.html'),1)
+            chk('Linhas renderizadas '+str(w),wait("document.querySelectorAll('[data-rid]').length>=23"))
+            chk('Valores comparáveis '+str(w),J("(()=>{let r=document.querySelector('[data-rid=lg19]');return !!r&&r.innerText.includes('72,9 t')&&r.innerText.includes('36,42 t')&&r.innerText.includes('S39')})()"))
+            chk('Sem JS nem overflow da página '+str(w),J("__errors.length===0&&document.documentElement.scrollWidth<=innerWidth"),J('__errors'))
+            chk('Sem total somando culturas '+str(w),not J("document.querySelector('[role=table]').innerText.includes('Total')"))
+            J("document.querySelector('[aria-label=\"Como comparar a colheita\"]').focus()")
+            c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Enter','code':'Enter','windowsVirtualKeyCode':13});c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':'Enter','code':'Enter','windowsVirtualKeyCode':13})
+            chk('Origem e período por teclado '+str(w),wait("(()=>{let t=document.querySelector('#g2-dica');return t&&!t.hidden&&t.innerText.includes('semana em curso')})()"))
+            c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Escape','code':'Escape','windowsVirtualKeyCode':27})
+            chk('Escape fecha fórmula '+str(w),wait("document.querySelector('#g2-dica').hidden"))
+            # Busca pelo controle real, não alterando o estado interno da aplicação.
+            J("(()=>{let i=document.querySelector('main input[type=search]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'Pivô 19');i.dispatchEvent(new Event('input',{bubbles:true}));})()")
+            chk('Recorte do cultivo '+str(w),wait("document.querySelectorAll('[data-rid]').length===1&&!!document.querySelector('[data-rid=lg19]')"))
+            if touch:
+                xy=J("(()=>{let e=document.querySelector('[data-rid=lg19] [role=cell]');e.scrollIntoView({block:'center',inline:'start'});let r=e.getBoundingClientRect();return {x:r.left+30,y:r.top+30}})()")
+                c.call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[xy]});c.call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
+            else:
+                J("document.querySelector('[data-rid=lg19]').focus()")
+                c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Enter','code':'Enter','windowsVirtualKeyCode':13});c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':'Enter','code':'Enter','windowsVirtualKeyCode':13})
+            chk('Toque/Enter abre cultivo na origem '+str(w),wait("location.pathname.endsWith('COLH.dc.html')&&location.hash==='#lg19'&&!!document.querySelector('aside[role=dialog]')"))
+            J('history.back()');time.sleep(1)
+            chk('Voltar preserva busca '+str(w),wait("location.pathname.endsWith('PAGR.dc.html')&&document.querySelectorAll('[data-rid]').length===1&&!!document.querySelector('[data-rid=lg19]')"))
+            chk('Voltar restaura foco no cultivo '+str(w),wait("!!document.activeElement&&document.activeElement.getAttribute('data-rid')==='lg19'"))
+            J("(()=>{let i=document.querySelector('main input[type=search]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'');i.dispatchEvent(new Event('input',{bubbles:true}));})()")
+        Path('_probe').mkdir(exist_ok=True);c.shot(str(Path('_probe/painel02-390.png').resolve()))
+    finally:c.close();srv.terminate()
+    print('RESULTADO '+str(sum(checks))+'/'+str(len(checks)));return 0 if all(checks) else 1
+
+if __name__=='__main__':sys.exit(ui() if '--ui' in sys.argv else unit())
