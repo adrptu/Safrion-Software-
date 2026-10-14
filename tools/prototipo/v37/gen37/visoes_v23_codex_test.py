@@ -10,7 +10,6 @@ import re
 import sys
 import time
 from pathlib import Path
-from comp_lib import Chrome, servir
 from visoes_marcas import QUADRO
 
 HERE = Path(__file__).resolve().parent
@@ -33,6 +32,9 @@ for (page, gid), expected in QUADRO.items():
         if got != expected: errors.append([page,g['id'],got,expected])
 check('Quadro completo: Abre com na ordem e nenhuma grade omitida', not errors, errors)
 if '--quadro' in sys.argv: raise SystemExit(1 if errors else 0)
+
+# O modo estático não exige navegador nem importa a descoberta do executável.
+from comp_lib import Chrome, servir
 
 p, server = servir(str(R))
 c = Chrome()
