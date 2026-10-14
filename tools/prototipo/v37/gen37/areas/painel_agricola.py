@@ -42,18 +42,51 @@ function pnaRow(x) {
    situacao:[{k:'chip',t:x.situacao,c:PR_SITCOR[x.situacao]||'gray'},
     {k:'br'},{k:'mut',t:x.recebimentos?x.recebimentos+' carga(s) a receber':x.proximo}]}};
 }
+// Apresentação do contrato agrPainelRef; regras, prazos e bloqueios pertencem ao domínio.
+function pnaOSLinhas(ref) {
+ const os=ref&&ref.os;
+ if(!os||!Array.isArray(os.impedidas)||!Array.isArray(os.atrasadas)) return null;
+ const itens=os.impedidas.concat(os.atrasadas);
+ if(!itens.every(x=>x&&typeof x.id==='string'&&/^OS-[A-Za-z0-9-]+$/.test(x.id)&&
+   typeof x.origem==='string'&&x.origem==='OS.dc.html#'+x.id)) return null;
+ const m=new Map();
+ os.impedidas.forEach(x=>m.set(x.id,{...x,impedida:true,atrasada:false}));
+ os.atrasadas.forEach(x=>{const a=m.get(x.id);m.set(x.id,a?{...a,atrasada:true,prevista:x.prevista,dias:x.dias}:{...x,impedida:false,atrasada:true});});
+ return [...m.values()];
+}
+function pnaOSRow(x) {
+ const txt=(v,ausente)=>typeof v==='string'&&v.trim()?v:ausente;
+ const id='os:'+x.id, local=txt(x.talhao,'Talhão não informado'), faz=txt(x.faz,'Fazenda não informada');
+ const saf=txt(x.saf,'Safra não informada');
+ const situacao=[x.impedida?'Impedida':'',x.atrasada?'Atrasada':''].filter(Boolean).join(' · ');
+ const motivo=x.impedida?txt(x.motivo,'Consulte o impedimento na O.S.'):'Janela prevista ultrapassada';
+ const dono=txt(x.dono,'Responsável não informado');
+ const iso=typeof x.prevista==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x.prevista)?x.prevista:null;
+ const data=iso?iso.split('-').reverse().join('/'):'Data não informada';
+ const dias=typeof x.dias==='number'&&Number.isInteger(x.dias)&&x.dias>0?x.dias:null;
+ const prazo=x.atrasada?data+(dias===null?'':' · '+dias+' dia(s) de atraso'):'Consulte a janela na O.S.';
+ return {id,ro:true,href:x.origem,v:{ordem:x.id,local,contexto:faz+' · '+saf,situacao,motivo,dono,prazo},
+  s:{ordem:x.id+' · Abrir O.S.',local:local+' · '+faz+' · '+saf,situacao:situacao+' · '+motivo,dono,prazo},
+  p:{ordem:[{k:'b',t:x.id},{k:'br'},{k:'chip',t:situacao,c:'yellow'},{k:'br'},{k:'txt',t:motivo},{k:'br'},{k:'mut',t:'Abrir O.S.'}],
+   local:[{k:'txt',t:local},{k:'br'},{k:'mut',t:faz+' · '+saf}],
+   situacao:[{k:'chip',t:situacao,c:'yellow'},{k:'br'},{k:'txt',t:motivo}],
+   dono:[{k:'txt',t:dono}],prazo:[{k:'txt',t:prazo}]}};
+}
 function pnaVals(self,v) {
- g2keep(self,'g_pna');
+ g2keep(self,'g_pna');g2keep(self,'g_pna_os');
  if(!self.__pnaFocus){self.__pnaFocus=true;
   const restaura=()=>{const id=(history.state||{}).pnaFoco;if(!id)return;let n=0;
    const f=()=>{const r=[...document.querySelectorAll('[data-rid]')].find(e=>e.getAttribute('data-rid')===id);
     if(r){r.focus({preventScroll:true});return;}if(++n<40)setTimeout(f,50);};setTimeout(f,0);};
   restaura();window.addEventListener('pageshow',restaura);
  }
- const rows=pnaLinhas(cenGet());
+ const c=cenGet(), rows=pnaLinhas(c);
+ const os=pnaOSLinhas(typeof agrPainelRef==='function'?agrPainelRef(c,{}):null);
+ GRIDS.find(g=>g.id==='g_pna_os').rows=(os||[]).map(pnaOSRow);
+ v.pna_os_missing=os===null;v.pna_os_empty=os!==null&&os.length===0;
  GRIDS.find(g=>g.id==='g_pna').rows=(rows||[]).map(pnaRow);
  v.pna_missing=rows===null;
- self.g2pick=(gid,id)=>{const x=(rows||[]).find(x=>x.id===id);if(x){
+ self.g2pick=(gid,id)=>{const x=gid==='g_pna_os'?(os||[]).map(pnaOSRow).find(x=>x.id===id):gid==='g_pna'?(rows||[]).find(x=>x.id===id):null;if(x){
   history.replaceState(Object.assign({},history.state||{},{pnaFoco:id}),'',location.href);location.href=x.href;}};
 }
 '''
@@ -77,4 +110,15 @@ def secao():
           f'style="width:44px;height:44px;border:0;background:transparent;color:{E.MUTED};font:inherit">ⓘ</button></h2>'
           '<p role="status" hidden="'+H('!pna_missing')+'">Dados de produção indisponíveis. Abra Previsão e colheita para conferir a origem.</p>'+
           table+'</section>')
-    return body, JS
+    pendencias=E.grid([
+        dict(k='ordem',l='O.S. · situação · motivo',w=240),
+        dict(k='local',l='Talhão · fazenda · safra',w=210),
+        dict(k='dono',l='Quem resolve',w=170),
+        dict(k='prazo',l='Prazo',w=185),
+    ],[],gid='g_pna_os',edit=dict(m='pick'),total=False)
+    osbody=('<section aria-label="O.S. que precisam de atenção">'
+        f'<h2 style="font-size:16px;color:{E.INK}">O.S. · impedimentos e atrasos</h2>'
+        '<p role="status" hidden="'+H('!pna_os_missing')+'">Dados de impedimentos e prazos indisponíveis. Consulte a origem em O.S.</p>'
+        '<p role="status" hidden="'+H('!pna_os_empty')+'">Nenhuma O.S. impedida ou atrasada neste recorte.</p>'+
+        pendencias+'</section>')
+    return osbody+body, JS
