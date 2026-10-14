@@ -60,6 +60,10 @@ const staleForm=document.createElement('form');staleForm.innerHTML='<input name=
 const stale=Kit.autosave(staleForm,d=>d.x==='B'?new Promise(resolve=>{late=resolve}):Promise.resolve(),{message:'',timeoutMs:20});staleForm.elements.x.value='B';await stale.flush();
 const rejected=await stale.reconcile(async()=>{throw Error('sem rede')});check('Falha de readback mantém escrita incerta',rejected.ok===false&&stale.pending);
 await stale.reconcile(async()=>({settled:true,data:{x:'B'}}));staleForm.elements.x.value='C';await stale.flush();late();await tick();check('Recibo antigo após reconciliação não substitui confirmação C',stale.dirty===false&&stale.pending===false);await stale.destroy();staleForm.remove();
+const uf=document.createElement('form');uf.innerHTML='<input name="x" value="A">';document.body.appendChild(uf);let ucount=0;
+const ua=Kit.autosave(uf,()=>{ucount++;return new Promise(()=>{})},{message:'',timeoutMs:20});uf.elements.x.value='B';await ua.flush();
+Kit.snackbar('Outro retorno',{timeout:10});await new Promise(r=>setTimeout(r,280));uf.elements.x.value='C';const ur=await ua.flush();
+check('Nova tentativa incerta renova aviso mesmo após outro snackbar',ur.ok===false&&ur.reason==='pending'&&ucount===1&&document.querySelector('.snackbar')?.textContent.includes('sem confirmação'));await ua.destroy({discard:true});uf.remove();
 window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS '+results.length+'/'+results.length:'FAIL';
 })().catch(error=>{window.testResults=[{ok:false,error:String(error)}]});
 </script></html>

@@ -3,7 +3,7 @@
  *   Kit.snackbar('Mensagem', { action: 'Desfazer', onAction, timeout })
  *   Kit.undoable({ message, run, undo })            → executa já, oferece Desfazer (sem diálogo de confirmação)
  *   Kit.commands([{ title, icon, keys, keywords, run }])  → paleta Ctrl/⌘+K + atalhos de teclado
- *   Kit.autosave(form, save, { delay })              → salva sozinho, sem botão "Salvar"
+ *   Kit.autosave(form, save, { delay, timeoutMs })   → flush: {ok, reason}; dirty/pending; reconcile: recibo remoto terminal
  */
 (function (global) {
   'use strict';
@@ -127,7 +127,10 @@
       pending++;
       queue = queue.then(async () => {
         if (destroyed) return { ok: false, reason: 'destroyed' };
-        if (uncertain) return { ok: false, reason: 'pending' };
+        if (uncertain) {
+          notice('Salvamento sem confirmação. Preserve o rascunho e confira o estado antes de sair.', { timeout: 60000 });
+          return { ok: false, reason: 'pending' };
+        }
         if (json === last) return { ok: true };
         const serial = ++writeSerial;
         const controller = new window.AbortController();

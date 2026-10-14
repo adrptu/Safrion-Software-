@@ -1287,6 +1287,15 @@
 +`destroy()` recusa desmontagem com edição/pendência (`ok:false`). Para salvar, confira `flush().ok` e o recibo antes de destruir. Somente após preservar o rascunho em armazenamento autorizado ou decisão explícita de descartá-lo use `destroy({discard:true})`. Isso cancela debounce/envios ainda na fila, remove ouvintes e fecha o snackbar da instância; não cancela gravação já recebida pelo servidor. A aplicação deve conferir o retorno e manter a tela aberta quando houver recusa.
 --- before/shared/ux-essencial/assets/m3-kit.js
 +++ candidate/shared/ux-essencial/assets/m3-kit.js
+@@ -3,7 +3,7 @@
+  *   Kit.snackbar('Mensagem', { action: 'Desfazer', onAction, timeout })
+  *   Kit.undoable({ message, run, undo })            → executa já, oferece Desfazer (sem diálogo de confirmação)
+  *   Kit.commands([{ title, icon, keys, keywords, run }])  → paleta Ctrl/⌘+K + atalhos de teclado
+- *   Kit.autosave(form, save, { delay })              → salva sozinho, sem botão "Salvar"
++ *   Kit.autosave(form, save, { delay, timeoutMs })   → flush: {ok, reason}; dirty/pending; reconcile: recibo remoto terminal
+  */
+ (function (global) {
+   'use strict';
 @@ -27,7 +27,7 @@
      requestAnimationFrame(() => el.classList.add('show'));
      const close = () => { el.classList.remove('show'); setTimeout(() => el.remove(), 250); if (live === el) live = null; };
@@ -1316,7 +1325,7 @@
      if (scrim) return;
      for (const c of registry) {
        if (!c.keys) continue;
-@@ -104,19 +104,96 @@
+@@ -104,19 +104,99 @@
    });
  
    // ---------- autosave ----------
@@ -1356,7 +1365,10 @@
 +      pending++;
 +      queue = queue.then(async () => {
 +        if (destroyed) return { ok: false, reason: 'destroyed' };
-+        if (uncertain) return { ok: false, reason: 'pending' };
++        if (uncertain) {
++          notice('Salvamento sem confirmação. Preserve o rascunho e confira o estado antes de sair.', { timeout: 60000 });
++          return { ok: false, reason: 'pending' };
++        }
 +        if (json === last) return { ok: true };
 +        const serial = ++writeSerial;
 +        const controller = new window.AbortController();
