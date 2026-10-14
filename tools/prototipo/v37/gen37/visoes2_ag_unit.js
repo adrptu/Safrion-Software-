@@ -37,5 +37,11 @@ chk('A6 sem filtro: T1, T2 e T3 com a O.S. de dois talhões nos dois', () => JSO
 chk('A7 descer em T1 sob o filtro T1: a linha da O.S. continua inteira (os dois talhões no detalhe)', () => {
   const self = { state: { g2: {} } }, st = { ag: { d: 'onde', t: ['Lagoa', 'T1'] }, f: { tal: ['T1'] } }; self.state.g2.g_t = st;
   const R = F('g2agRows')(self, SP, st, ROWS); return R.rows.length === 1 && R.rows[0].id === 'OS-1' && R.rows[0].m.tal.length === 2; });
+chk('A8 O.S. sem talhão (lista vazia) entra no grupo "Sem talhão"; Σ das O.S. distintas dos grupos = total', () => {
+  const rows = ROWS.concat([{ id: 'OB-9', v: { id: 'OB-9', area: 0 }, s: { id: 'OB-9', tal: '' }, m: { tal: [] }, g: { onde: ['Lagoa', []] } }]);
+  const self = { state: { g2: { g_t: { ag: { d: 'onde', t: [] } } } } }; const R = F('g2agRows')(self, SP, { ag: { d: 'onde', t: [] }, agx: 'x' }, rows);
+  const ids = new Set(); R.rows.forEach(g => g.kids.forEach(k => ids.add(k.id.split('@')[0])));
+  return R.rows.some(g => g.grp.k === 'Sem talhão' && g.kids.length === 1) && ids.size === rows.length; }, () => { const self = { state: { g2: {} } };
+  return 'ver A8'; });
 console.log(`TOTAL ${ok + falhas} · OK ${ok} · FALHAS ${falhas}`);
 process.exit(falhas ? 1 : 0);

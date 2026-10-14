@@ -187,7 +187,8 @@ try:
         # 15 · O.S.: Lista e Kanban com o mesmo filtro (reproduzido antes: 2 × 10); Recursos explica a granularidade; fase não muda por clique
         abre('OS'); o0=est(); clk('Liberadas','[aria-label="Filtrar por fase"]'); lis=J("[...document.querySelectorAll('main [role=row].g2ed')].filter(e=>e.getClientRects().length).map(r=>r.innerText.split('\\n')[0].trim())")
         troca_visao(J,'kanban','[aria-label="Visão das ordens"]'); kb=J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].filter(e=>e.getClientRects().length).map(b=>b.getAttribute('aria-label').split(' ')[1])")
-        nota=J("(()=>{const n=[...document.querySelectorAll('main [role=note]')].find(e=>e.getClientRects().length); return n?n.innerText.replace(/\\s+/g,' ').trim():'';})()"); shot('os_kanban_filtro')
+        # VISOES-2 §8 ponto 3: o recorte vira a faixa [data-os-recorte] (contagem, chips removíveis e "Limpar filtros"); a fase fica nos chips de fase
+        nota=J("(()=>{const n=[...document.querySelectorAll('main [data-os-recorte]')].find(e=>e.getClientRects().length); return n?n.innerText.replace(/\\s+/g,' ').trim():'';})()"); shot('os_kanban_filtro')
         troca_visao(J,'carga','[aria-label="Visão das ordens"]'); rc=J("(()=>{const n=[...document.querySelectorAll('main [role=note]')].find(e=>e.getClientRects().length); return n?n.innerText.replace(/\\s+/g,' ').trim():'';})()")
         troca_visao(J,'kanban','[aria-label="Visão das ordens"]'); clk('Limpar filtros'); kb2=J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].filter(e=>e.getClientRects().length).length")
         troca_visao(J,'lista','[aria-label="Visão das ordens"]'); J("(()=>{const r=document.querySelector('[role=row].g2ed'); (r.querySelector('[role=cell] b')||r).click();})()"); time.sleep(.5)
@@ -195,7 +196,7 @@ try:
         ctl=J("(()=>{const d=document.querySelector('aside[role=dialog]'); if(!d) return -1; return [...d.querySelectorAll('button,a,[role=button]')].filter(b=>/^(A liberar|Liberadas|Em execução|Em conferência|Encerradas)$/.test(b.innerText.trim())).length;})()")
         o1=est()
         chk('15 O.S. · Lista e Kanban com o mesmo filtro de fase (Liberadas: 2 = 2, antes 2 × 10), Kanban diz o filtro e oferece "Limpar filtros" (volta a 10), Recursos segue o mesmo recorte e diz qual (TABELAS-FOCO); "Nova ordem" a única primária; no painel a fase é texto, não comando',
-            sorted(lis)==sorted(kb) and len(kb)==2 and 'Filtro da lista aplicado: fase Liberadas' in nota and 'só os blocos das ordens de Santa Rita no filtro da lista (fase Liberadas)' in rc and kb2==10 and o0['prims']==['Nova ordem'] and fase0 and ctl==0 and len(o1['prims'])<=1, [lis,kb,nota,rc,kb2,o0['prims'],fase0,ctl,o1['prims']])
+            sorted(lis)==sorted(kb) and len(kb)==2 and '2 de 10 ordens no recorte' in nota and 'Limpar filtros' in nota and 'só os blocos das ordens de Santa Rita no recorte' in rc and kb2==10 and o0['prims']==['Nova ordem'] and fase0 and ctl==0 and len(o1['prims'])<=1, [lis,kb,nota,rc,kb2,o0['prims'],fase0,ctl,o1['prims']])
         # 15b · O.S. "Ajustar antes de liberar" (360×800, toque): rodapé do formulário preso ao pé do painel, Voltar à esquerda e a
         #       primária à direita, alcançável sem rolar até o fim e sem cobrir o campo focado
         abre('OS',360,800,3,True); aj='sem ordem'

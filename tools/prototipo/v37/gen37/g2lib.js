@@ -286,12 +286,17 @@ function g2agLer(self,sp){ const st=g2st(self,sp.id); if(st.ag!==undefined) retu
 function g2agGrava(self,sp,a){ try{ if(a) localStorage.setItem(g2agChave(sp),JSON.stringify(a)); else localStorage.setItem(g2agChave(sp),'null'); }catch(e){}
   try{ history.replaceState(history.state,'',g2agUrl(location.pathname,location.search,location.hash,a)); }catch(e){}
   g2set(self,sp.id,{ag:a,agm:false,agx:null}); }
-function g2agVals_(r,a,D,i){ const g=(r.g||{})[a.d]; const x=g?g[i]:undefined; return (Array.isArray(x)?x:[x]).map(y=>(y===undefined||y===null||y==='')?'Sem '+D.niv[i].toLowerCase():String(y)); }
+// lista vazia (O.S. de processo sem talhão) vira "Sem talhão", como o valor ausente: a linha nunca some do agrupamento (Σ grupos = total)
+function g2agVals_(r,a,D,i){ const g=(r.g||{})[a.d]; const x=g?g[i]:undefined; const xs=Array.isArray(x)?(x.length?x:[undefined]):[x]; return xs.map(y=>(y===undefined||y===null||y==='')?'Sem '+D.niv[i].toLowerCase():String(y)); }
 // a O.S. de T1 e T2 sob o filtro Talhão = T1 entra só no grupo T1 (Codex 6168779649, achado 2): o nível com coluna de filtro (D.fc[i]) usa só
 // os membros escolhidos no filtro; o vínculo completo continua no detalhe da O.S., e o total conta cada O.S. uma vez
 function g2agValsF(r,a,D,i,sp,st){ const vs=g2agVals_(r,a,D,i), fk=(D.fc||[])[i], f=fk&&st&&st.f&&st.f[fk];
   if(!f||!f.length) return vs; const c=sp.cols.find(x=>x.k===fk), m=c?g2mem(r,c):null; if(!m||!m.length) return vs;
   const k=m.filter(x=>f.indexOf(x.id)>=0).map(x=>String(x.l||x.id)); return k.length?k:vs; }
+// recorte da trilha para as outras formas (Kanban, Calendário, Carga): as linhas dentro da trilha escolhida, com o mesmo filtro por nível
+// (D.fc) da Tabela; null sem agrupamento ou sem trilha. Sem efeito colateral (VISOES-2 §3.4: toda visão lê o mesmo recorte)
+function g2agNoTrilha(self,sp,st,rows){ if(!g2agTem(sp)||sp.suspende) return null; const a=g2agLer(self,sp); if(!a||!a.t.length) return null; const D=sp.ag.find(x=>x.pq===a.d); if(!D) return null;
+  const lv=Math.min(a.t.length,D.niv.length); return rows.filter(r=>a.t.slice(0,lv).every((t,i)=>g2agValsF(r,a,D,i,sp,st).indexOf(t)>=0)); }
 function g2agRows(self,sp,st,rows){ const a=g2agLer(self,sp); if(!a) return {rows,a:null}; const D=sp.ag.find(x=>x.pq===a.d), niv=D.niv.length; let lv=Math.min(a.t.length,niv);
   let base=rows.filter(r=>a.t.slice(0,lv).every((t,i)=>g2agValsF(r,a,D,i,sp,st).indexOf(t)>=0)); const auto=[];
   // nível com um valor só no recorte (uma fazenda) não pede escolha: desce sozinho, e o valor aparece na trilha

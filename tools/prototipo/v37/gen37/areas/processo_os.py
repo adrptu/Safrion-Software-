@@ -990,7 +990,9 @@ function EXTRAVALS(self,v){
   self.g2pick=(gid,rid)=>{ if(gid==='g_os'&&String(rid).indexOf('grp@')!==0) self.setState({pan:String(rid).split('@')[0]}); };
   // agrupar por talhão: liga/desliga; grupos começam abertos; total geral de O.S. distintas (cada O.S. uma vez)
   const osAg=g2agLer(self,GR('g_os')); v.os_agr=g2visao(self,'g_os')==='lista'&&!!osAg&&osAg.d==='onde';   /* VISOES-2: por Onde, a O.S. de vários talhões aparece em cada um */
-  { const spB=GR('g_os'), stB=osSt(self); const dist=(self.__osBase||[]).filter(r=>g2match(r,spB,stB)); const ar=dist.reduce((a,r)=>a+(Number(r.v.area)||0),0);
+  /* VISOES-2 §3.4: toda forma lê o mesmo recorte, inclusive a trilha do Agrupar por (self.__osTr: IDs dentro da trilha; null sem trilha) */
+  { const spB=GR('g_os'), stB=osSt(self); const trB=g2agNoTrilha(self,spB,stB,self.__osBase||[]); self.__osTr=trB?new Set(trB.map(r=>r.id)):null;
+    const dist=(self.__osBase||[]).filter(r=>(!self.__osTr||self.__osTr.has(r.id))&&g2match(r,spB,stB)); const ar=dist.reduce((a,r)=>a+(Number(r.v.area)||0),0);
     self.__osDist=dist.length;   // contador da grade agrupada = O.S. distintas (g2vals)
     v.os_gtot=dist.length+' O.S. · '+nf(ar)+' ha · a O.S. de vários talhões aparece em cada um e conta uma vez no total'; }
   const openPan=(id)=>self.setState({pan:id});
@@ -1018,23 +1020,33 @@ function EXTRAVALS(self,v){
   // UX-ACAO-UNICA-20261003 (DS-33 §74.5.7.1, DS-40): Lista e Kanban são o mesmo trabalho e partilham os filtros (fase pelos chips,
   // colunas e busca da lista). Antes o Kanban ignorava o filtro (reproduzido: Liberadas → lista 2 ordens, Kanban 10). O filtro ativo
   // fica escrito no Kanban, com "Limpar filtros"; Recursos (recurso × dia) diz que o filtro não se aplica, sem descartá-lo em silêncio.
-  const spO=GR('g_os'), stO=osSt(self); const filtrando=g2filtering(stO);
+  const spO=GR('g_os'), stO=osSt(self), trS=self.__osTr||null; const filtrando=g2filtering(stO)||!!trS;
   const osRows=self.__osBase||spO.rows||[];   // linhas canônicas (no agrupado, spO.rows são os grupos)
-  const okId=filtrando?new Set(osRows.filter(r=>g2match(r,spO,stO)).map(r=>r.id)):null; const osK=okId?os.filter(o=>okId.has(o.id)):os;
+  const okId=filtrando?new Set(osRows.filter(r=>(!trS||trS.has(r.id))&&g2match(r,spO,stO)).map(r=>r.id)):null; const osK=okId?os.filter(o=>okId.has(o.id)):os;
+  const agA=g2agLer(self,spO), agD=agA&&spO.ag.find(x=>x.pq===agA.d), trTxt=(trS&&agD)?agD.l+': '+agA.t.join(' › '):'';
   const fDesc=[].concat(((stO.f||{}).fase||[]).length?['fase '+((stO.f||{}).fase||[]).join(', ')]:[])
     .concat(Object.keys(stO.f||{}).filter(k=>k!=='fase'&&((stO.f||{})[k]||[]).length).map(k=>{ const c=spO.cols.find(x=>x.k===k); const vs=(stO.f||{})[k]||[];
       return (c?c.l.toLowerCase():k)+(k==='tal'?' '+vs.map(x=>x==='(vazio)'?'sem talhão':x.split('|')[1]).join(', '):' ('+vs.length+')'); }))
-    .concat((stO.q||'').trim()?['busca “'+(stO.q||'').trim()+'”']:[]).join(' · ');
+    .concat((stO.q||'').trim()?['busca “'+(stO.q||'').trim()+'”']:[]).concat(trTxt?[trTxt.toLowerCase()]:[]).join(' · ');
+  /* VISOES-2 §8 ponto 3: em toda forma, o recorte ativo em chips removíveis acima do conteúdo (trilha, filtros de coluna e busca), com
+     "Limpar filtros"; a fase fica nos chips de fase, acima, que já mostram a escolhida */
+  { const tlab=(c,x)=>x==='(vazio)'?'vazio':(c.k==='tal'?(String(x).split('|')[1]||x):g2flab(osRows,c,x)); const rch=[];
+    if(trTxt) rch.push({t:trTxt,lab:'Tirar a trilha '+trTxt,rm:()=>g2agGrava(self,spO,{d:agA.d,t:[]})});
+    Object.keys(stO.f||{}).filter(k=>k!=='fase'&&((stO.f||{})[k]||[]).length).forEach(k=>{ const c=spO.cols.find(x=>x.k===k)||{k,l:k};
+      const t=c.l+': '+((stO.f||{})[k]||[]).map(x=>tlab(c,x)).join(', ');
+      rch.push({t,lab:'Remover filtro '+t,rm:()=>{ const f=Object.assign({},g2st(self,'g_os').f||{}); delete f[k]; g2set(self,'g_os',{f,fmc:null}); }}); });
+    if((stO.q||'').trim()) rch.push({t:'Busca: “'+(stO.q||'').trim()+'”',lab:'Limpar a busca',rm:()=>g2set(self,'g_os',{q:''})});
+    v.os_rchips=rch; }
   { const pn=self.state.pnIds||null; v.pn_on=!!(pn&&pn.length); v.pn_txt=v.pn_on?('Do Painel Agrícola: '+pn.length+' O.S. ('+pn.join(', ')+'). Busca, fase e filtros da tela ficam suspensos neste recorte; "Ver todas as O.S." volta a eles.'):''; v.mf_susp=v.pn_on;
     v.pn_sair=()=>{ try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} self.setState({pnIds:null,g2toast:'Todas as O.S. do recorte da tela.'}); }; }
-  v.kb_filtro=filtrando&&(self.__osDist||0)>0; v.kb_nota='Filtro da lista aplicado: '+fDesc+' · '+osK.filter(o=>FASES.indexOf(o.etapa)>=0).length+' de '+os.filter(o=>FASES.indexOf(o.etapa)>=0).length+' ordens';
-  v.os_limpar=()=>g2set(self,'g_os',{f:{},q:'',fmc:null});
+  v.kb_filtro=filtrando&&(self.__osDist||0)>0&&!v.pn_on; v.kb_nota=osK.filter(o=>FASES.indexOf(o.etapa)>=0).length+' de '+os.filter(o=>FASES.indexOf(o.etapa)>=0).length+' ordens no recorte';
+  v.os_limpar=()=>{ g2set(self,'g_os',{f:{},q:'',fmc:null}); if(trS&&agA) g2agGrava(self,spO,{d:agA.d,t:[]}); };
   // Carga por recurso (TABELAS-FOCO; revisão VISOES-1, achados A5 e C3): os blocos, o estado e a faixa "Sem alocação" contam o MESMO recorte
   // da lista (Fazenda e Safra do topo + filtro da grade). Os blocos da irrigação só com água (do módulo Irrigação, fora da lista) seguem a
   // Fazenda e a Safra e somem com filtro da grade, como antes. Conflitos, manutenção e uso continuam da semana inteira.
-  const recR=(self.__osBase||[]).filter(r=>g2match(r,spO,stO)), recIds=new Set(recR.map(r=>r.id));
+  const recR=(self.__osBase||[]).filter(r=>(!trS||trS.has(r.id))&&g2match(r,spO,stO)), recIds=new Set(recR.map(r=>r.id));
   const escD=[mfFaz(self)==='Todas'?'todas as fazendas':mfFaz(self)].concat(mfSaf(self)==='Todas'?[]:['safra '+mfSaf(self)]).join(' · ');
-  const rDesc=escD+(filtrando?' no filtro da lista ('+fDesc+')':'');
+  const rDesc=escD+(filtrando?' no recorte':'');
   const extOk=(id)=>{ const x=RC_EXT[id]; return !!x&&!filtrando&&(mfFaz(self)==='Todas'||mfFaz(self)===x[0])&&(mfSaf(self)==='Todas'||mfSaf(self)===x[1]); };
   v.rc_nota='A carga por recurso mostra a semana do PCP por recurso e dia: só os blocos das ordens de '+rDesc+'; conflitos, manutenção e uso continuam da semana inteira.';
   g2visaoTenta(self,'g_os','carga',()=>{ RC_OS.forEach(id=>{ v['rcv_'+id.replace('-','')]=recIds.has(id)||extOk(id); }); rcVals(self,v,(id)=>recIds.has(id)||extOk(id)); });   /* 14/10: Carga pela alocação vigente (trocas de recurso) */   /* VISOES-1 §2.8: a falha desta visão não derruba a Lista */
@@ -1087,7 +1099,9 @@ function EXTRAVALS(self,v){
     v.ost_semres=!v.ost_vals.length; v.ost_todos=()=>setT([]); v.ost_limpa=tsel.length>0;
     v.ost_conta=tsel.length?(osK.length+(osK.length===1?' ordem':' ordens')+' no filtro'):'';
     v.os_tmsg=self.__osMsg||''; v.os_temmsg=!!self.__osMsg; }
-  v.kb=[]; g2visaoTenta(self,'g_os','kanban',()=>{ v.kb=FASES.map(f=>{ const cs=osK.filter(o=>o.etapa===f); const sal=cs.filter(o=>o.area).reduce((s,o)=>s+(o.saldo||0),0);
+  /* VISOES-2 §3.3: com Agrupar por, o Kanban ganha uma raia por grupo do nível atual (a mesma O.S. de dois talhões aparece nas duas raias,
+     como na Tabela); o nome da raia desce. No último nível, um quadro só, do recorte da trilha */
+  v.kb=[]; v.kb_raias=[]; v.kb_temraias=false; g2visaoTenta(self,'g_os','kanban',()=>{ const kbCols=(lst)=>FASES.map(f=>{ const cs=lst.filter(o=>o.etapa===f); const sal=cs.filter(o=>o.area).reduce((s,o)=>s+(o.saldo||0),0);
     return {t:f,n:String(cs.length),nst:chipSt(FCOR[f]),carga:(f==='Encerradas'?osPeriodo(cs):(sal?'saldo '+nf(sal)+' ha':'')),vazio:cs.length===0,
       cards:cs.map(o=>{ const pct=o.area?Math.round(100*(o.realizado||0)/o.area):0;
         const ini=!!o.area&&(o.realizado||0)>0;
@@ -1095,7 +1109,13 @@ function EXTRAVALS(self,v){
           hasReal:!(o.area&&!ini),hasBar:ini,bar:'display:block;height:100%;border-radius:999px;background:'+(o.selos.some(s=>s.c==='red')?'#B42318':'#1E7A4C')+';width:'+pct+'%;',
           selos:o.selos.map(s=>({t:s.t,dica:osSeloDica(o,s.t)||g2dicaDe(s.t),st:chipSt(s.c).replace('white-space:nowrap;','white-space:normal;line-height:1.3;align-items:baseline;').replace('border-radius:999px;','border-radius:8px;'),dot:dotSt(s.c)+'transform:translateY(-1px);'})),meta:o.resp+' · '+o.janela,dp:(o.dono?o.dono+' · '+o.prazo:''),hasDp:!!o.dono,lab:'Abrir '+o.id+' · '+o.tipo,
           st:'display:flex;flex-direction:column;gap:6px;text-align:left;width:100%;box-sizing:border-box;background:#FFFFFF;border-radius:10px;padding:9px 10px;cursor:pointer;font-family:inherit;color:#15201A;'+(st.pan===o.id?'border:2px solid #1E7A4C;':'border:1px solid #E4E9E5;box-shadow:0 1px 2px rgba(21,32,26,.05);'),
-          open:()=>openPan(o.id), key:(e)=>{ if(e&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); openPan(o.id); } }}; })}; }); });
+          open:()=>openPan(o.id), key:(e)=>{ if(e&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); openPan(o.id); } }}; })}; });
+    const R=(agA&&!v.pn_on)?g2agRows(self,spO,g2stBusca(self,'g_os',stO),osRows):null;
+    if(R&&R.a&&R.D&&R.lv<R.D.niv.length){ const niv=R.D.niv[R.lv].toLowerCase();
+      v.kb_raias=R.rows.map(g=>{ const ids=new Set(g.kids.map(x=>String(x.id).split('@')[0])), lst=osK.filter(o=>ids.has(o.id)), n=lst.filter(o=>FASES.indexOf(o.etapa)>=0).length;
+        return {k:g.grp.k,n:n+(n===1?' ordem':' ordens'),lab:'Descer em '+g.grp.k+' ('+niv+'): '+n+(n===1?' ordem':' ordens'),desce:()=>g2agGrava(self,spO,{d:agA.d,t:(R.path||[]).concat([g.grp.k])}),cols:kbCols(lst),tem:n>0}; }).filter(r=>r.tem);
+      v.kb_temraias=v.kb_raias.length>0; }
+    v.kb=kbCols(osK); });
   /* VISOES-2 (F2a) · Calendário, só leitura: a semana de segunda a domingo com o mesmo recorte do Kanban (filtros, busca, Talhão; Canceladas
      fora); a ordem aparece em cada dia da sua janela; sem início, na faixa "Sem data"; o clique abre o mesmo painel. Programar fica no detalhe. */
   v.cal=[]; v.cal_sem=[]; self.__cal=null; g2visaoTenta(self,'g_os','calendario',()=>{ const hoje=(typeof CEN_DIA_OP!=='undefined'?CEN_DIA_OP:'2026-09-26'); const seg0=g2segunda(hoje);
@@ -1241,7 +1261,7 @@ def _chip_hole(t,st,dot,dica=None):   # selo de estado: a dica (significado e pr
     at=f'data-dica="{H(dica)}"' if dica else f'data-dica-de="{H(t)}"'
     return f'<span {at} style="{H(st)}"><span style="{H(dot)}"></span>{H(t)}</span>'
 
-def _kanban(celular_rola=False):
+def _kanban(celular_rola=False,lista="kb"):
     """Quadro das 5 fases. celular_rola (O.S., revisão VISOES-1 achado B6): até 640 px cada coluna guarda 148 px e o quadro rola na horizontal,
     em vez de 5 colunas de ~45 px com títulos e cartões encobertos (a página não rola de lado). A Manutenção (MA) usa o quadro sem isso."""
     card=(f'<div role="button" tabIndex="0" aria-label="{H("k.lab")}" onClick="{H("k.open")}" onKeyDown="{H("k.key")}" style="{H("k.st")}">'
@@ -1259,10 +1279,23 @@ def _kanban(celular_rola=False):
          f'<span style="{H("c.nst")} padding: 1px 8px; font-size: 11.5px;">{H("c.n")}</span></div>'
          f'<div style="font-size: 11.5px; color: {MUTED}; margin-top: -4px; min-height: 14px;">{H("c.carga")}</div>'
          f'<sc-for list="{H("c.cards")}" as="k" hint-placeholder-count="2">{card}</sc-for>'
-         f'<sc-if value="{H("c.vazio")}" hint-placeholder-val="{F()}"><div style="font-size: 12px; color: {MUTED}; padding: 10px 4px; text-align: center; border: 1px dashed {LINE}; border-radius: 10px;">Nenhuma ordem nesta fase</div></sc-if></div>')
+         f'<sc-if value="{H("c.vazio")}" hint-placeholder-val="{F()}"><div class="os-kbvazio" style="font-size: 12px; color: {MUTED}; padding: 10px 4px; text-align: center; border: 1px dashed {LINE}; border-radius: 10px;">Nenhuma ordem nesta fase</div></sc-if></div>')
     rola = ('<style>@media (max-width:640px){.os-kb{overflow-x:auto;padding-bottom:6px}.os-kb .os-kbcol{flex:0 0 148px!important;min-width:148px!important}}</style>'
             if celular_rola else '')
-    return rola + f'<div role="list" aria-label="Kanban das ordens" class="{"os-kb" if celular_rola else ""}" style="display: flex; gap: 10px; align-items: flex-start;"><sc-for list="{H("kb")}" as="c" hint-placeholder-count="5">{col}</sc-for></div>'
+    return rola + f'<div role="list" aria-label="Kanban das ordens" class="{"os-kb" if celular_rola else ""}" style="display: flex; gap: 10px; align-items: flex-start;"><sc-for list="{H(lista)}" as="c" hint-placeholder-count="5">{col}</sc-for></div>'
+
+def _kanban_raias():
+    """VISOES-2 §3.3: Kanban com Agrupar por = uma raia por grupo do nível atual; o nome da raia desce (mesmo gesto do nome do grupo na Tabela).
+    Sem agrupamento, ou no último nível, o quadro único de sempre."""
+    # na raia, a fase vazia fica só com o título e o 0 (sem a caixa "Nenhuma ordem"): 8 raias × 5 fases não viram 40 caixas vazias
+    raia=(f'<section class="os-raia" style="display: flex; flex-direction: column; gap: 8px;">'
+          f'<button type="button" class="os-raia-cab" aria-label="{H("r.lab")}" onClick="{H("r.desce")}" style="align-self: flex-start; display: inline-flex; align-items: baseline; gap: 8px; min-height: 36px; padding: 4px 8px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; font-family: inherit; color: {ACC};">'
+          f'<b style="font-size: 14px;">{H("r.k")}</b><span style="font-size: 12.5px; color: {MUTED};">{H("r.n")}</span><span aria-hidden="true">›</span></button>'
+          + _kanban(celular_rola=False,lista='r.cols') + '</section>')
+    return ('<style>.os-raia .os-kbvazio{display:none}</style>'
+            f'<sc-if value="{H("kb_temraias")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-direction: column; gap: 16px;">'
+            f'<sc-for list="{H("kb_raias")}" as="r" hint-placeholder-count="2">{raia}</sc-for></div></sc-if>'
+            f'<sc-if value="{H("!kb_temraias")}" hint-placeholder-val="{T()}">' + _kanban(celular_rola=True) + '</sc-if>')
 
 def _culturas_da(o):
     sid=next((s['id'] for s in D2.SAFRAS if s.get('fazenda')==o.get('faz') and str(s.get('nome','')).endswith(str(o.get('saf','')))),None)
@@ -1588,8 +1621,12 @@ def build():
               ag=[dict(pq='oque',l='Atividade',niv=['Operação','Atividade'],um='O.S.',plural='O.S.'),dict(pq='quem',l='Responsável',niv=['Responsável'],um='O.S.',plural='O.S.'),
                   dict(pq='quando',l='Início',niv=['Safra','Mês','Semana'],um='O.S.',plural='O.S.'),dict(pq='onde',l='Talhão',niv=['Fazenda','Talhão'],fc=['','tal'],um='O.S.',plural='O.S.')])   # vazio de filtro: estado comum das visões (VISOES-1 §2.8)
     # barra da coleção (DS-33 §74.5.7.1): filtros rápidos no começo, seletor de visão no fim; vale para Lista e Kanban (mesmo filtro)
-    kb_nota=(f'<sc-if value="{H("kb_filtro")}" hint-placeholder-val="{F()}"><div role="note" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: {MUTED}; margin-bottom: 8px;">'
-             f'<span>{H("kb_nota")}</span><button type="button" onClick="{H("os_limpar")}" style="{_MINI}">Limpar filtros</button></div></sc-if>')
+    # VISOES-2 §8 ponto 3: o recorte ativo em chips removíveis (trilha, filtros de coluna, busca) e "Limpar filtros", em toda forma
+    rchip=(f'<span style="display: inline-flex; align-items: center; gap: 2px; padding: 2px 4px 2px 10px; border-radius: 999px; background: {ACCS}; color: {ACC}; font-size: 12px; font-weight: 700;">{H("rc.t")}'
+           f'<button type="button" aria-label="{H("rc.lab")}" title="{H("rc.lab")}" onClick="{H("rc.rm")}" style="width: 28px; height: 28px; border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 14px; border-radius: 999px;">×</button></span>')
+    kb_nota=(f'<sc-if value="{H("kb_filtro")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Recorte desta visão" data-os-recorte="1" style="display: flex; align-items: center; gap: 6px 8px; flex-wrap: wrap; font-size: 12.5px; color: {MUTED}; margin-bottom: 8px;">'
+             f'<span>{H("kb_nota")}</span><sc-for list="{H("os_rchips")}" as="rc" hint-placeholder-count="1">{rchip}</sc-for>'
+             f'<button type="button" onClick="{H("os_limpar")}" style="{_MINI}">Limpar filtros</button></div></sc-if>')
     rc_nota=f'<div role="note" style="font-size: 12.5px; color: {MUTED}; margin-bottom: 8px;">{H("rc_nota")}</div>'
     # revisão VISOES-1, achado C3 (§2.8 "Parcial"): ordens do recorte sem bloco na semana do PCP, cada uma abre o mesmo painel
     rc_nota+=(f'<sc-if value="{H("rc_semtem")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Ordens do recorte sem alocação na semana do PCP" '
@@ -1597,7 +1634,7 @@ def build():
               f'<sc-for list="{H("rc_sem")}" as="s" hint-placeholder-count="2"><button type="button" onClick="{H("s.go")}" style="{_MINI}">{H("s.id")}</button></sc-for></div></sc-if>')
     # VISOES-1 (proprietário, 10/10/2026): seletor por ícone; Lista e Tabela agrupada na mesma grade (o agrupamento é estado da grade),
     # Kanban e Carga por recurso migram sem mudança de regra. Visões válidas: visoes.py (fonte única; O.S. sem Mapa: DEC-2609-09)
-    bar,panes=visoes('g_os','os',{'lista':g_os,'kanban':kb_nota+_kanban(celular_rola=True),'calendario':kb_nota+_calendario(),'carga':rc_nota+_recursos_tab()},rotulo='Visão das ordens')
+    bar,panes=visoes('g_os','os',{'lista':g_os,'kanban':kb_nota+_kanban_raias(),'calendario':kb_nota+_calendario(),'carga':kb_nota+rc_nota+_recursos_tab()},rotulo='Visão das ordens')
     colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_chips()}{_notas_tal()}</div>'   # o Talhão subiu para a faixa "Filtros desta tela" (13/10); os avisos dele ficam aqui
             f'<div style="flex: 0 0 auto; margin-left: auto;">{bar}</div></div>')
     # recorte vazio (Fazenda/Safra do topo): uma frase e uma ação no lugar das visões
