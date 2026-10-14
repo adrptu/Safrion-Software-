@@ -103,11 +103,12 @@ def build():
         labels=(['Com quarentena','Com reserva, sem quarentena','Sem reserva nem quarentena'] if fid=='PSUP' else ['A liberar','Liberadas','Em execução','Em conferência'])
         rows=''.join('<div class="pn-row"><span>'+E.esc(l)+'</span><svg viewBox="0 0 100 8" preserveAspectRatio="none" aria-hidden="true"><rect width="100" height="8" rx="2" fill="#EEF1EE"/><rect width="'+H('pn_w'+str(i))+'" height="8" rx="2" fill="#65736A"/></svg><strong>'+H('pn_b'+str(i))+'</strong></div>' for i,l in enumerate(labels))
         links=''.join('<a class="mod-cartao pn-link" href="'+h+'">'+E.esc(n)+'</a>' for n,h in atalhos[1:])
+        empty='<p hidden="'+H('!pn_empty')+'">Nenhum registro neste recorte.</p>'
+        chart=(empty if fid=='PAGR' else '<section class="pn-chart" aria-label="'+E.esc(titulo)+'"><h2>'+E.esc(titulo)+'</h2>'+rows+empty+'</section>')
         body=(CSS+'<div class="pn"><p class="pn-context">'+E.esc(mod)+' · Todas as fazendas e safras · Estado atual</p>'+
           '<div class="pn-grid" aria-label="Indicadores">'+cards+'</div>'+
           '<p hidden="'+H('!pn_missing')+'" role="status">Há dados incompletos. Consulte a origem pelos acessos abaixo.</p>'+
-          '<section class="pn-chart" aria-label="'+E.esc(titulo)+'"><h2>'+E.esc(titulo)+'</h2>'+rows+
-          '<p hidden="'+H('!pn_empty')+'">Nenhum registro neste recorte.</p></section>'+
+          chart+
           '<nav class="pn-links" aria-label="Acessos do painel">'+links+'</nav></div>')
         prim=E.btn(atalhos[0][0],True,href=atalhos[0][1]).replace('<a ', '<a class="pn-link mod-cartao" ')
         shell37(fid,'Painel',body,fname=fname,status=None,primary_html=prim,search=False)
