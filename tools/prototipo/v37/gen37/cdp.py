@@ -79,7 +79,12 @@ class Chrome:
             self.close(); raise RuntimeError(f'Chrome headless não respondeu em 60 s na porta {port} (máquina carregada?)')
         self.ws=WS(pages[0]['webSocketDebuggerUrl']); self.i=0
         self.call('Page.enable'); self.call('Runtime.enable')
-        if os.environ.get('G2CV_TODAS')=='1': self.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__g2cvTodasSempre=true'})   # só diagnóstico (V2-3)
+        # V2-3: os testes que usam este Chrome direto são de domínio e leem colunas fora do "Abre com"; o padrão de cada tela é conferido nos
+        # testes da VISOES-2 (comp_lib.Chrome). comp_lib.cv_padrao(c) volta ao padrão no trecho que confere a tela; G2CV_PADRAO=1 desliga
+        self._cv_todas_ids=[]
+        if os.environ.get('G2CV_PADRAO')!='1':
+            r=self.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__g2cvTodasSempre=true'})
+            if isinstance(r,dict) and r.get('identifier'): self._cv_todas_ids.append(r['identifier'])
     def call(self,method,params=None,timeout=60):
         self.i+=1; mid=self.i; self.ws.send(json.dumps({'id':mid,'method':method,'params':params or {}}))
         deadline=time.monotonic()+timeout
