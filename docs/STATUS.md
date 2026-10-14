@@ -6,6 +6,12 @@ Base do retrato histórico abaixo: 09/10/2026, Claude, `main` `266a682`. Estados
 
 PR #54, complemento VEL: revisão apontou lacuna em exceções concorrentes e harness ausente. Corrigidos com referência estrutural exata das cinco exceções, regra única sem sobrescritas, herança padrão intacta, fonte portátil e prova antes/depois (8 testes e 15 mutações recusadas; 16/16 execuções); aguardam revisão do Claude e checks da nova candidata. Sem alteração funcional do protótipo.
 
+## Skills da equipe — incremento de 14/10/2026 (PR #67)
+
+Pacote [SKILLS-20261014](parceria/skills/2026-10-14/revisao.md): 16 skills compartilhadas Codex/Claude e quatro específicas do Gemini, com fontes, diff e manifesto. Autoria Codex; Claude revisa e integra. Instalações locais foram conferidas; revisão/integração e distribuição/leitura na sessão Claude cloud continuam pendentes (recibos6173812429/6173991485). O pacote no repositório não é carregado automaticamente.
+
+Validação: 20/20 skills, zero links locais ausentes; adaptador17/17 sem rede/autenticação. Correção da revisão4273864164: a suíte agora usa as raízes `shared/` e `gemini/` do próprio pacote, confere caminho/hash de cada seleção e passa17/17 com diretório pessoal simulado inexistente; a versão anterior falhou nessa contraprova. Comando reproduzível: `python3 -m unittest -v docs/parceria/skills/2026-10-14/test_gemini_consult.py` (Python3.12). Próximo passo: Claude critica a candidata atual, integra após os checks e confirma os caminhos/hashes efetivamente disponíveis na sessão. Não altera autenticação, permissões, limites de consulta, produto, HML ou produção. Estado e instalação local não equivalem a distribuição remota concluída.
+
 ## Onde estamos
 
 | Frente | Estado | Evidência |

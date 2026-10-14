@@ -855,7 +855,25 @@
  
 --- before/test_gemini_consult.py
 +++ candidate/test_gemini_consult.py
-@@ -65,6 +65,24 @@
+@@ -20,6 +20,17 @@
+         session = patch.dict(os.environ, {"CLOUD_SHELL": "true"})
+         session.start()
+         self.addCleanup(session.stop)
++        # O pacote versionado tem raízes próprias; nunca validar cópias instaladas
++        # no lugar dos arquivos em revisão. Na instalação, conservar o catálogo real.
++        package = Path(__file__).resolve().parent
++        shared, specific = package / "shared", package / "gemini"
++        if shared.is_dir() or specific.is_dir():
++            catalog = {name: (shared if path.is_relative_to(consult.SHARED_SKILLS_DIR)
++                              else specific) / name / "SKILL.md"
++                       for name, path in consult.SKILL_CATALOG.items()}
++            self.enterContext(patch.object(consult, "SHARED_SKILLS_DIR", shared))
++            self.enterContext(patch.object(consult, "SKILLS_DIR", specific))
++            self.enterContext(patch.dict(consult.SKILL_CATALOG, catalog, clear=True))
+ 
+     def invoke(self, arguments, auth=None, response=None):
+         stdin = io.TextIOWrapper(io.BytesIO(b"Revisar apenas esta fixture sintetica."), encoding="utf-8")
+@@ -65,6 +76,28 @@
          auth.assert_not_called()
          http.assert_not_called()
          return err
@@ -874,6 +892,10 @@
 +                self.assertEqual((code, err), (0, ""))
 +                receipt = json.loads(out)
 +                self.assertEqual({item["name"] for item in receipt["skills"]}, {name})
++                for item in receipt["skills"]:
++                    source = (consult.SKILL_CATALOG[name].parent / item["file"]).resolve()
++                    self.assertEqual(item["resolvedPath"], str(source))
++                    self.assertEqual(item["sha256"], hashlib.sha256(source.read_bytes()).hexdigest())
 +                self.assertEqual(receipt["payload"]["generationConfig"]["thinkingConfig"]["thinkingLevel"], "HIGH")
 +                auth.assert_not_called()
 +                http.assert_not_called()
