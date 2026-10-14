@@ -86,20 +86,25 @@ window.PTO=(t,root)=>{ const e=ACHA(t,root); if(!e) return null; e.scrollIntoVie
   const top=document.elementFromPoint(x,y);
   // UX-BEN35-AVISO-01: além de não capturar o toque, o aviso não fica desenhado por cima do alvo (sob = algum aviso fixo à vista cruza o retângulo do alvo)
   const sob=[...document.querySelectorAll('[role=status]')].some(a=>{ if(getComputedStyle(a).position!=='fixed'||!VIS(a)||!N(a.innerText)||+getComputedStyle(a).opacity<=0.1) return false; const q=a.getBoundingClientRect(), s=e.getBoundingClientRect(); return q.left<s.right&&q.right>s.left&&q.top<s.bottom&&q.bottom>s.top; });
-  // revisão Codex 6159767011: o aviso não cobre a navegação nem o cabeçalho (o que fica fora da área de conteúdo, main), não sai da tela e só
-  // fica sobre um controle do conteúdo quando não há faixa livre da altura dele (aí se apaga no próximo toque; apagado não conta). Coberto =
-  // o aviso pintado por cima de um ponto do controle (teste de clique com o aviso momentaneamente clicável: respeita a ordem das camadas)
-  const av=[...document.querySelectorAll('[role=status]')].find(a=>getComputedStyle(a).position==='fixed'&&VIS(a)&&N(a.innerText)&&+getComputedStyle(a).opacity>0.1); let tc=[], nav=[], fora=false, faixa=false;
+  // revisões Codex 6159767011 e 6160359100: o aviso não cobre NENHUM controle visível (a navegação e o cabeçalho, fora da área de conteúdo,
+  // ficam em nav) nem sai da tela. Coberto = o controle aparece naquele ponto sem o aviso (o que a faixa reservada recorta não aparece) e,
+  // com o aviso, é o aviso que está por cima (respeita a ordem das camadas). Aviso apagado não conta
+  const av=[...document.querySelectorAll('[role=status]')].find(a=>getComputedStyle(a).position==='fixed'&&VIS(a)&&N(a.innerText)&&+getComputedStyle(a).opacity>0.1); let tc=[], nav=[], fora=false, res=false, vaza=[];
   if(av){ const q=av.getBoundingClientRect(); fora=q.top<0||q.bottom>innerHeight||q.left<0||q.right>innerWidth; const m=document.querySelector('main'), mq=m?m.getBoundingClientRect():{top:0,left:0,width:0};
-    const ctl=[]; document.querySelectorAll('button,a[href],[role=button],input,select,textarea').forEach(c=>{ if(av.contains(c)) return; const s=c.getBoundingClientRect(); if(!(s.width>0&&s.height>0)||s.bottom<0||s.top>innerHeight||s.right<0||s.left>innerWidth||(s.width>=innerWidth*.9&&s.height>=innerHeight*.5)) return;   /* fundo de tela inteira do painel */
-      const cx=Math.min(Math.max(s.left+s.width/2,0),innerWidth-1), cy=Math.min(Math.max(s.top+s.height/2,0),innerHeight-1); const h=document.elementFromPoint(cx,cy); if(h&&(h===c||c.contains(h))) ctl.push([c,s]); });
-    const pe=av.style.pointerEvents; av.style.pointerEvents='auto';
-    ctl.forEach(([c,s])=>{ if(!(s.left<q.right&&s.right>q.left&&s.top<q.bottom&&s.bottom>q.top)) return; const x=(Math.max(s.left,q.left)+Math.min(s.right,q.right))/2, y=(Math.max(s.top,q.top)+Math.min(s.bottom,q.bottom))/2;
-      const h=document.elementFromPoint(x,y); if(!(h&&av.contains(h))) return; const nm=N(c.innerText||c.getAttribute('aria-label')||c.tagName).slice(0,30);
+    const cand=[]; document.querySelectorAll('button,a[href],[role=button],input,select,textarea').forEach(c=>{ if(av.contains(c)) return; const s=c.getBoundingClientRect(); if(!(s.width>0&&s.height>0)) return;
+      if(s.width>=innerWidth*.9&&s.height>=innerHeight*.5) return;   /* fundo de tela inteira do painel */
+      if(!(s.left<q.right&&s.right>q.left&&s.top<q.bottom&&s.bottom>q.top)) return; cand.push([c,(Math.max(s.left,q.left)+Math.min(s.right,q.right))/2,(Math.max(s.top,q.top)+Math.min(s.bottom,q.bottom))/2,s]); });
+    const vi=av.style.visibility, pe=av.style.pointerEvents; av.style.visibility='hidden';
+    const viv=cand.filter(([c,x,y])=>{ const h=document.elementFromPoint(x,y); return h&&(h===c||c.contains(h)); });
+    av.style.visibility=vi; av.style.pointerEvents='auto';
+    viv.forEach(([c,x,y,s])=>{ const h=document.elementFromPoint(x,y); if(!(h&&av.contains(h))) return; const nm=N(c.innerText||c.getAttribute('aria-label')||c.tagName).slice(0,30);
       if(mq.width>200&&(s.bottom<=mq.top+1||s.right<=mq.left+1)) nav.push(nm); else tc.push(nm); });
     av.style.pointerEvents=pe;
-    if(tc.length){ const hq=q.height, topo=Math.max(mq.width>200?mq.top:0,8); for(let top=topo;top+hq<=innerHeight-8&&!faixa;top++){ if(!ctl.some(([c,s])=>s.left<q.right&&s.right>q.left&&s.top<top+hq&&s.bottom>top)) faixa=true; } } }
-  return {x,y,sob,tc,nav,faixa,fora,cob:!(top&&(top===e||e.contains(top))),aviso:!!(top&&top.closest&&top.closest('[role=status]')),top:top?top.tagName+' '+N(top.innerText).slice(0,40):''}; };
+    // faixa reservada (sem faixa livre: o aviso recebe o toque): um toque no aviso ou ao lado dele, na faixa, não aciona controle escondido
+    if(getComputedStyle(av).pointerEvents==='auto'){ res=true; const y=(q.top+q.bottom)/2, l=mq.width>200?mq.left:0, r=mq.width>200?mq.left+mq.width:innerWidth;
+      [l+2,q.left-2,(q.left+q.right)/2,q.right+2,r-2].filter(x=>x>l&&x<r).forEach(x=>{ const h=document.elementFromPoint(x,y); const c=h&&!av.contains(h)&&h.closest('button,a[href],[role=button],input,select,textarea');
+        if(c&&!(c.getBoundingClientRect().width>=innerWidth*.9)) vaza.push(N(c.innerText||c.getAttribute('aria-label')||c.tagName).slice(0,30)); }); } }
+  return {x,y,sob,tc,nav,fora,res,vaza,cob:!(top&&(top===e||e.contains(top))),aviso:!!(top&&top.closest&&top.closest('[role=status]')),top:top?top.tagName+' '+N(top.innerText).slice(0,40):''}; };
 window.PERFIL=(k)=>{ localStorage.setItem('safrion.perfilDemo',k); return k; };
 'ok'"""
 def lib(): J(LIB)
@@ -129,6 +134,7 @@ AGR_ESP = [['COLH.dc.html', 'Colheita'], ['CARGA.dc.html', 'Recebimento']] + ([[
 def nav_clk(x, root):   # toque que navega (link): conta o toque e recarrega o apoio na página nova
     cl, tx = J("[window.__cl||0, window.__tx||0]") or [0, 0]; r = J(f"CLK({json.dumps(x)},{json.dumps(root)})"); time.sleep(1.4); lib(); J(f"window.__cl={cl + 1}; window.__tx={tx};"); return r
 MOBILE = [False]
+RESERVA = []   # toques em que o aviso estava na faixa reservada (sem faixa livre): só registro, a verificação é a AV
 AVISO = []   # UX-BEN35-AVISO-01 (revisão Codex de 14/10, S3): toques que esperaram o aviso sair ou em que o aviso estava desenhado por cima do alvo
 def tamanho(w, h):   # a 390 px o Chrome emula toque (Input.dispatchTouchEvent); no desktop, mouse
     MOBILE[0] = w < 500; t.c.size(w, h); t.c.call('Emulation.setTouchEmulationEnabled', {'enabled': MOBILE[0], 'maxTouchPoints': 5 if MOBILE[0] else 1})
@@ -144,10 +150,11 @@ def tocar(x, root=None, w=.6, nav=False):
     if n: print(f'   (esperou {n} s o aviso sair de cima de "{x}")'); AVISO.append(f'esperou {n} s: {x}')
     if not p: return 'NÃO ACHEI: ' + x
     if p.get('sob'): print(f'   (o aviso está desenhado por cima de "{x}")'); AVISO.append('sob: ' + x)
-    if p.get('nav') or p.get('fora') or (p.get('tc') and p.get('faixa')):
-        print(f'   (antes de tocar "{x}": aviso sobre a navegação {p.get("nav")} · sobre o conteúdo {p.get("tc")} com faixa livre: {p.get("faixa")} · fora da tela: {p.get("fora")})')
-        AVISO.append(f'nav={p.get("nav")} conteudo={p.get("tc")} faixa={p.get("faixa")} fora={p.get("fora")} ao tocar {x}')
-    elif p.get('tc'): print(f'   (antes de tocar "{x}": sem faixa livre, o aviso está no pé sobre {p.get("tc")}; apaga-se no toque)')
+    if p.get('res'): RESERVA.append(x); print(f'   (antes de tocar "{x}": sem faixa livre, o aviso reserva a faixa no pé; toque na faixa aciona: {p.get("vaza") or "nada"})')
+    if p.get('vaza'): AVISO.append(f'toque na faixa reservada aciona {p.get("vaza")} ao tocar {x}')
+    if p.get('nav') or p.get('fora') or p.get('tc'):
+        print(f'   (antes de tocar "{x}": aviso sobre a navegação {p.get("nav")} · sobre o conteúdo {p.get("tc")} · fora da tela: {p.get("fora")})')
+        AVISO.append(f'nav={p.get("nav")} conteudo={p.get("tc")} fora={p.get("fora")} ao tocar {x}')
     if p['cob']: return 'COBERTO: ' + x + ' por ' + p['top']
     cl, tx = J("[window.__cl||0, window.__tx||0]") or [0, 0]
     if MOBILE[0]:
@@ -948,7 +955,7 @@ try:
             tc = toast(); lv = J(LIVRES) or []
             t.chk(f'R4 {W} · logo depois de "Retirar L39-119" o aviso está à vista e cada botão do rodapé recebe o toque no centro (elementFromPoint): ' + ', '.join(lv), 'L39-119 sai da ordem' in tc and lv and all(x.endswith(': livre') for x in lv), [tc, lv])
         tamanho(1440, 1000); t.chk('rodape sem erro de JS', not t.errs(), t.errs())
-    t.chk('AV · UX-BEN35-AVISO-01: nenhum toque esperou o aviso sair; o aviso nunca ficou sobre o alvo, a navegação ou o cabeçalho, nem fora da tela, nem sobre um controle quando havia faixa livre', not AVISO, AVISO)
+    t.chk('AV · UX-BEN35-AVISO-01: nenhum toque esperou o aviso sair; o aviso nunca ficou sobre o alvo, sobre outro controle visível (navegação, cabeçalho ou conteúdo) nem fora da tela; na faixa reservada o toque não aciona controle escondido', not AVISO, [AVISO, 'reserva em: ' + ', '.join(RESERVA)])
 finally:
     t.fim()
 sys.exit(0 if all(t.ok) else 1)   # juízo pela linha RESULTADO e pelo código de saída

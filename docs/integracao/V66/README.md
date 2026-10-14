@@ -25,17 +25,26 @@ Autor e integrador: Claude. Revisor: Codex (regime leve do protótipo, AGENTS §
 ## Defeitos corrigidos
 - O seletor Grupo das visões Ativos e Planos não filtrava: o estado só era aplicado à lista Sem ordem.
 - Botão indisponível mostrava o cursor de "mão": o estilo do próprio botão vencia a regra comum. Agora vale o cursor de proibido.
-- Aviso (UX-BEN35-AVISO-01, revisão Codex 6159767011): a primeira correção apagava a âncora inferior do aviso, que ia para o topo e cobria "‹ Suprimentos", "Início" e "Mapa". Regra agora:
+- Aviso (UX-BEN35-AVISO-01, revisões Codex 6159767011 e 6160359100): a primeira correção apagava a âncora inferior do aviso, que ia para o topo e cobria "‹ Suprimentos", "Início" e "Mapa". Regra agora:
   - fica centrado na área de conteúdo, nunca sobre o cabeçalho, o retorno do módulo ou a barra lateral;
   - a âncora do pé é guardada e restaurada;
   - se cobrir um controle visível, sobe até a primeira faixa livre da altura dele;
-  - sem faixa livre (aviso de 4 linhas a 390 px sobre uma lista com um link a cada 44 px), fica no pé e some no primeiro toque, clique, tecla ou rolagem da pessoa; o mesmo texto depois volta a aparecer;
-  - o fundo escuro de tela inteira atrás de um painel não conta como controle.
+  - sem faixa livre (aviso de 4 linhas a 390 px sobre uma lista com um link a cada 44 px), **reserva a faixa**:
+    - o contêiner que rola debaixo dela deixa de desenhar e de receber toque ali (`clip-path` com um vão);
+    - o contêiner ganha folga no fim para o conteúdo subir acima dela;
+    - o aviso passa a receber o toque, então um toque na faixa não aciona controle escondido;
+    - a reserva sai quando o aviso some, muda de texto, o contêiner muda ou aparece algo visível novo debaixo dele (ex.: um painel aberto);
+  - com o menu de etapas aberto no celular, o aviso fica atrás do fundo do menu;
+  - o fundo de tela inteira atrás de um painel não conta como controle.
 
-  Por que não "nunca sobre controle nenhum": a 390 px, um aviso de 94 px sobre uma lista densa não tem lugar livre, e qualquer aviso sobreposto cobriria algo. A alternativa sem sobreposição empurraria o conteúdo (o alvo muda de lugar sob o dedo). A verificação AV do `ben_fluxo` mede a cobertura pela ordem das camadas, não só pela geometria. Ela reprova:
+  Descartado antes de enviar: "sem faixa livre, cobrir o conteúdo e sumir no próximo toque". O Codex apontou (6160359100) que o toque no aviso acionaria o link escondido debaixo dele.
+
+  A verificação AV do `ben_fluxo` reprova:
   - a espera para tocar;
-  - o aviso sobre o alvo, a navegação ou o cabeçalho, ou fora da tela;
-  - o aviso sobre um controle quando havia faixa livre.
+  - o aviso sobre o alvo, sobre qualquer controle visível (navegação, cabeçalho ou conteúdo) ou fora da tela;
+  - o toque na faixa reservada que acione um controle.
+
+  "Coberto" é medido pela ordem das camadas: o controle aparece no ponto sem o aviso e, com o aviso, é o aviso que está por cima.
 - MAN-LIMPA-GRUPO-01 (S3, revisão Codex 6160153073): em Ativos › Abastecimentos o seletor Grupo aparecia e as 8 linhas ficavam. Agora o Grupo filtra os lançamentos pelo ativo de cada um. Limpar o filtro restaura todos, e o grupo continua ao voltar a Ativos (`man_limpa` L8).
 
 ## Para o Painel (PAINEL-02, Codex, `areas/paineis.py`)
@@ -57,7 +66,7 @@ Divergência a alinhar: o Painel conta "Pendências sem ordem" com `manSemOm` (s
 |---|---|---|
 | `man_limpa_test` (novo) | 8/8 | 1/7 (sem o L8) |
 | `botoes_retorno_test` (novo) | 6/6 | 5/6: o cursor do botão indisponível |
-| `ben_fluxo sobra390 conferencia390` (AV) | 16/16 | aviso da v65 (`4f222e8`): 8/9, sobre "Início (Mapa)", "Mapa", "‹ Suprimentos" e o "×" do painel |
+| `ben_fluxo sobra390 conferencia390` (AV) | 16/16; faixa reservada em 3 toques (REQ-041, Entregue por O.S., Receba devoluções), sem acionar nada | aviso da v65 (`4f222e8`): 8/9, sobre "Início (Mapa)", "Mapa", "‹ Suprimentos" e o "×" do painel |
 | `ben_fluxo sobra conferencia` (desktop) | 16/16 | — |
 | Manutenção, navegação e filtros | ver `bateria.md` | — |
 

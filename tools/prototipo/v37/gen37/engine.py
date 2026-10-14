@@ -1073,6 +1073,8 @@ INTERACAO_CSS=(
     # (14/10: o estilo do próprio botão trazia cursor:pointer e vencia a regra; !important garante o cursor de proibido em todo indisponível)
     "button:disabled{opacity:.55;cursor:not-allowed!important;filter:none;box-shadow:none}"
     "[aria-disabled=true]{cursor:not-allowed!important}"
+    # menu de etapas aberto (folha do celular): o aviso fica atrás do fundo dele, sem cobrir as etapas (UX-BEN35-AVISO-01)
+    "body:has(.etp-chk:checked) .g2toast{z-index:25!important}"
     # cartão navegável (variante .g2card, ex.: planos agronômicos): pista permanente "Abrir … →" no próprio botão
     ".g2card{background:#FFFFFF;border:1px solid #E4E9E5;position:relative}"
     ".g2card-cta{display:inline-flex;align-items:center;gap:4px;color:#1E7A4C;font-weight:700;font-size:12.5px;white-space:nowrap}"
@@ -1723,8 +1725,7 @@ ENGINE_JS2=ENGINE_JS2.replace("    return v;\n  }\n}","""    v.g2toast = this.st
     if (typeof assinAvisoVals === 'function') assinAvisoVals(this, v);   // faixa de cobrança (PLAT-01, R11): só as telas da organização têm o buraco
     return v;
   }
-  componentDidMount() { g2montou(this);   /* DS-RETORNO-20261009: tela nova (realce do título, fim da barra de carga, anúncio) */
-    document.addEventListener('g2toastsai', (e) => { if (this.state.g2toast && this.state.g2toast === (e.detail || '')) this.setState({ g2toast: '' }); }); }   /* UX-BEN35-AVISO-01: aviso apagado pelo toque (g2toastSai) sai do estado; o mesmo texto depois volta a aparecer */
+  componentDidMount() { g2montou(this); }   /* DS-RETORNO-20261009: tela nova (realce do título, fim da barra de carga, anúncio) */
   componentDidUpdate(pp, ps) { if (this.state.g2toast !== (ps || {}).g2toast && typeof g2avisoH === 'function') g2avisoH();   /* V55-RESP-01: altura do aviso medida na troca */
     if (this.state.g2toast && this.state.g2toast !== (ps || {}).g2toast) { clearTimeout(this._g2t); this._g2t = setTimeout(() => this.setState({ g2toast: '' }), 4500); }
     g2mudou(this); }   /* DS-RETORNO-20261009: etapa/seção nova ou aviso novo realça o que mudou e anuncia (ponto central, não por tela) */
