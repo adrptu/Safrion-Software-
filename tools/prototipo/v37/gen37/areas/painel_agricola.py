@@ -70,6 +70,8 @@ function pnaOSGrupos(os,campo) {
  const groups=[...m.values()].sort((a,b)=>b.ids.length-a.ids.length||a.label.localeCompare(b.label,'pt-BR'));
  const max=Math.max(1,...groups.map(g=>g.ids.length));
  return groups.map(g=>({...g,n:g.ids.length,
+  href:'OS.dc.html#painel='+g.ids.join(','),foco:campo+':'+g.label,
+  abrir:'Abrir '+g.ids.length+' O.S. '+(campo==='causa'?'por causa: ':'por quem resolve: ')+g.label,
   situacao:g.impedidas&&g.atrasadas?[g.impedidas+' impedida(s)',g.atrasadas+' atrasada(s)'].join(' · '):'',
   barra:'display:block;height:8px;border-radius:3px;width:'+(100*g.ids.length/max)+'%;background:'+(g.impedidas?PNA_CORES.impedida:PNA_CORES.atrasada)}));
 }
@@ -117,9 +119,14 @@ function pnaCustos(ref) {
 function pnaVals(self,v) {
  g2keep(self,'g_pna');
  if(!self.__pnaFocus){self.__pnaFocus=true;
-  const restaura=()=>{const id=(history.state||{}).pnaFoco;if(!id)return;let n=0;
-   const f=()=>{const r=[...document.querySelectorAll('[data-rid]')].find(e=>e.getAttribute('data-rid')===id);
-    if(r){r.focus({preventScroll:true});return;}if(++n<40)setTimeout(f,50);};setTimeout(f,0);};
+  const restaura=()=>{const h=history.state||{},grupo=h.pnaGrupo,id=h.pnaFoco;if(!grupo&&!id)return;let n=0;
+   const f=()=>{const atributo=grupo?'data-pna-grupo':'data-rid',valor=grupo||id;
+    const r=[...document.querySelectorAll('['+atributo+']')].find(e=>e.getAttribute(atributo)===valor);
+    if(r){r.focus({preventScroll:true});return;}if(++n<40)setTimeout(f,50);
+    else if(grupo){const titulo=document.querySelector('#pna-os-titulo');if(titulo)titulo.focus();}};setTimeout(f,0);};
+  document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[data-pna-grupo]');
+   if(a&&!e.ctrlKey&&!e.metaKey&&!e.shiftKey&&!e.altKey&&e.button===0)
+    history.replaceState(Object.assign({},history.state||{},{pnaGrupo:a.getAttribute('data-pna-grupo'),pnaFoco:null}),'',location.href);});
   restaura();window.addEventListener('pageshow',restaura);
  }
  const c=cenGet(), rows=pnaLinhas(c);
@@ -141,7 +148,7 @@ function pnaVals(self,v) {
  GRIDS.find(g=>g.id==='g_pna').rows=(rows||[]).map(pnaRow);
  v.pna_missing=rows===null;
  self.g2pick=(gid,id)=>{const x=gid==='g_pna'?(rows||[]).find(x=>x.id===id):null;if(x){
-  history.replaceState(Object.assign({},history.state||{},{pnaFoco:id}),'',location.href);location.href=x.href;}};
+  history.replaceState(Object.assign({},history.state||{},{pnaFoco:id,pnaGrupo:null}),'',location.href);location.href=x.href;}};
 }
 '''
 
@@ -173,14 +180,15 @@ def secao():
         return ('<section class="pn-chart"><h3 style="font-size:15px;margin:0 0 12px">'+titulo+'</h3>'
                 '<ul style="list-style:none;padding:0;margin:0"><sc-for list="'+H(campo)+'" as="g" hint-placeholder-count="3">'
                 '<li class="pna-grupo" style="margin:16px 0;overflow-wrap:anywhere">'
-                '<div style="display:flex;justify-content:space-between;gap:12px"><span>'+H('g.label')+'</span>'
-                '<strong style="white-space:nowrap">'+H('g.n')+' O.S.</strong></div>'
+                '<a href="'+H('g.href')+'" data-pna-grupo="'+H('g.foco')+'" aria-label="'+H('g.abrir')+'" '
+                'style="display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;color:inherit">'
+                '<span>'+H('g.label')+'</span><strong style="white-space:nowrap">'+H('g.n')+' O.S.</strong></a>'
                 '<div aria-hidden="true" style="height:8px;background:#EEF1EE;border-radius:3px;margin:6px 0"><span style="'+H('g.barra')+'"></span></div>'
                 '<span hidden="'+H('!g.situacao')+'" style="font-size:12px">'+H('g.situacao')+'</span></li></sc-for></ul></section>')
     pendencias=('<sc-if value="'+H('pna_os_has_data')+'" hint-placeholder-val="{{true}}"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">'+
                 grafico('Por causa','pna_causas')+grafico('Por quem resolve','pna_donos')+'</div></sc-if>')
     osbody=('<section aria-label="O.S. que precisam de atenção">'
-        f'<h2 style="font-size:16px;color:{E.INK}">O.S. · onde agir primeiro</h2>'
+        f'<h2 id="pna-os-titulo" tabindex="-1" style="font-size:16px;color:{E.INK}">O.S. · onde agir primeiro</h2>'
         '<p>'+H('pna_os_total')+' <button type="button" class="g2dica-i" aria-label="Como ler os impedimentos e atrasos" data-dica="'+E.esc(explicacao)+'" style="width:44px;height:44px;border:0;background:transparent">ⓘ</button></p>'
         '<p style="font-size:12px">'+H('pna_os_referencia')+'</p>'
         '<p role="status" hidden="'+H('!pna_os_missing')+'">Dados de impedimentos e prazos indisponíveis. Consulte a origem em O.S.</p>'
