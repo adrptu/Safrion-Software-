@@ -1,0 +1,24 @@
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Regressão dos assets</title><pre id="result"></pre><div id="table"></div><form id="form"><input name="nome" value="A"></form>
+<script src="../../shared/tabelas-interativas/assets/tabela.js"></script><script src="../../shared/ux-essencial/assets/m3-kit.js"></script><script>
+(async()=>{
+const results=[];const tick=async()=>{for(let i=0;i<8;i++)await Promise.resolve()};
+function check(name,ok){results.push({name,ok:!!ok})}
+let t=Tabela.create('#table',{rows:[{preco:10,margem:0.2},{preco:20,margem:0.4}],columns:[{key:'preco',type:'currency'},{key:'margem',type:'percent'}]});
+check('Preço e taxa não agregam por tipo',!document.querySelector('tfoot').textContent.trim());t.destroy();
+t=Tabela.create('#table',{rows:[{grupo:'A',qtd:10},{grupo:'A',qtd:20}],columns:[{key:'grupo'},{key:'qtd',agg:'sum'}],groupBy:['grupo']});
+check('Soma explícita permanece disponível',document.querySelector('tfoot').textContent.includes('30'));t.destroy();
+async function sequence(values){
+ const form=document.querySelector('#form').cloneNode(true);document.body.appendChild(form);const input=form.elements.nome;input.value='A';
+ const calls=[],pending=[];let stored='A';const api=Kit.autosave(form,data=>new Promise(resolve=>{calls.push(data.nome);pending.push(()=>{stored=data.nome;resolve()})}),{message:''});
+ const promises=[];for(const value of values){input.value=value;promises.push(api.flush());await tick()}
+ const concurrent=calls.length;
+ for(let i=0;i<12;i++){while(pending.length)pending.pop()();await tick()}
+ await Promise.all(promises);form.remove();return {calls,stored,concurrent};
+}
+let r=await sequence(['B','C']);check('Gravações são serializadas',r.concurrent===1);check('Versão recente vence conclusão tardia',r.stored==='C'&&r.calls.join()==='B,C');
+r=await sequence(['B','A']);check('Reversão ao valor inicial é persistida após envio pendente',r.stored==='A'&&r.calls.join()==='B,A');
+r=await sequence(['B','B']);check('Conteúdo igual não duplica gravação confirmada',r.calls.join()==='B');
+const form=document.querySelector('#form');form.elements.nome.value='A';let attempts=0,stored='A';const api=Kit.autosave(form,async data=>{attempts++;if(attempts===1)throw Error('falha sintética');stored=data.nome},{message:''});form.elements.nome.value='B';await api.flush();await api.flush();check('Falha permite reenviar o mesmo conteúdo',attempts===2&&stored==='B');
+window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS 7/7':'FAIL';
+})().catch(error=>{window.testResults=[{ok:false,error:String(error)}]});
+</script></html>

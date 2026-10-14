@@ -178,11 +178,10 @@
  ## Checklist (antes de iniciar a Fase 1 de dev-ciclo-completo)
 --- before/shared/dev-backend/SKILL.md
 +++ candidate/shared/dev-backend/SKILL.md
-@@ -4,6 +4,17 @@
- ---
+@@ -5,11 +5,22 @@
  
  # Backend — meta: correto, seguro, rápido e pronto para escalar
-+
+ 
 +A arquitetura, a estrutura de arquivos, os ADRs e as exigências vigentes do projeto prevalecem sobre os exemplos e padrões deste guia; confira-os antes de escolher stack, organização ou mecanismos de entrega de eventos.
 +
 +## Contrato de estado, cálculo e recuperação
@@ -193,9 +192,16 @@
 +
 +Desfazer aplica inversão delimitada ou compensação validada; não restaura um snapshot global que apague alterações posteriores. Timeout de escrita requer consulta do estado/recibo antes de reenviar. Distinguir rascunho, envio pendente, aceito, aplicado e cancelado evita afirmar sucesso antes do efeito autoritativo.
 +
- 
++
  ## Arquitetura
  - **Monólito modular por domínio**: `src/modules/<dominio>/{routes,service,repository,schema,events}`; módulo só fala com outro via interface pública (service) ou evento — nunca acessa a tabela alheia. Estrutura em [assets/estrutura-modular.md](assets/estrutura-modular.md).
+ - **Camadas**: rota (HTTP, validação, auth) → serviço (regra de negócio, transação) → repositório (SQL/ORM). Domínio não importa framework nem infra. Sem "hexagonal completo" onde não há necessidade; sem lógica de negócio em controller.
+ - Estado durável e autoritativo não depende de memória do processo. Cache em memória pode ser descartável e limitado; Redis/objetos/filas entram por necessidade, não por padrão.
+-- Trabalho assíncrono ou demorado usa fila quando melhora prazo de resposta/recuperação. Retry limitado, idempotência e tratamento de falha conforme o comando. **Outbox** quando é necessário garantir evento junto da transação.
++- Trabalho assíncrono ou demorado usa fila quando melhora prazo de resposta/recuperação. Retry limitado, idempotência e tratamento de falha conforme o comando. **Outbox** quando é necessário garantir evento junto da transação. No Safrion, conforme o contrato vigente de comandos (AGENTS §4), todo comando grava efeito, recibo e outbox na mesma transação; essa exigência não é opcional.
+ - **Multi-tenant**: `tenant_id` em toda tabela de negócio, filtro obrigatório no repositório (ou RLS no Postgres), teste que prova isolamento.
+ 
+ ## API
 --- before/shared/dev-ciclo-completo/SKILL.md
 +++ candidate/shared/dev-ciclo-completo/SKILL.md
 @@ -5,11 +5,18 @@
@@ -422,6 +428,15 @@
  5. Merge conforme a política e autorização do projeto; não publicar, mesclar ou apagar branch só por seguir este checklist.
  
  Ao revisar como agente: ler o código de verdade (não só o diff), executar os testes, procurar o que **falta** (erro não tratado, caso limite, permissão), e reportar cada achado com arquivo:linha, cenário concreto de falha e correção sugerida. Não aprovar com pipeline vermelho.
+@@ -40,7 +47,7 @@
+ | Swift | swift-format | SwiftLint | compilador | — |
+ | Todos | EditorConfig | Semgrep (regras OWASP), CodeQL (GitHub) | — | Renovate/Dependabot semanal, commitlint |
+ 
+-Prontos: [assets/eslint.config.js](assets/eslint.config.js), [assets/tsconfig.strict.json](assets/tsconfig.strict.json), [assets/lint-staged.config.js](assets/lint-staged.config.js) (pre-commit com husky: `npx husky init` e no hook `npx lint-staged`).
++Modelos para adaptar ao projeto (o arquivo `eslint.config.exemplo.js` só vira configuração quando copiado e renomeado explicitamente): [assets/eslint.config.exemplo.js](assets/eslint.config.exemplo.js), [assets/tsconfig.strict.json](assets/tsconfig.strict.json), [assets/lint-staged.config.js](assets/lint-staged.config.js) (pre-commit com husky: `npx husky init` e no hook `npx lint-staged`).
+ 
+ Cumprir a política de warnings do projeto; configurar regras relevantes de forma consistente. Exceções precisam de motivo concreto e revisão, sem desativar checks para ocultar defeitos. Uma mudança global justificada de configuração não é automaticamente proibida.
+ 
 @@ -51,5 +58,5 @@
  4. **Testes**: existem, testam comportamento, cobrem erro/limite, são determinísticos?
  5. **Legibilidade**: entendo em uma leitura? Nomes? Tamanho? Duplicação? Código morto?
@@ -827,7 +842,7 @@
 +
 +Filtro, grupo, total, contador e drill-down precisam se referir ao mesmo universo autorizado. Declare se o valor representa página, recorte ou total global. Mantenha valores tipados separados da apresentação; ausentes permanecem distintos de zero e sua posição na ordenação deve ser explícita e consistente nos dois sentidos.
 +
-+Agregação é regra de domínio, não consequência do formato da coluna: moeda pode representar preço unitário, percentual pode exigir razão ponderada. Some apenas grandezas aditivas compatíveis; taxas e custos/ha não se somam. Faça o resumo pela fonte canônica e exponha parcialidade quando faltar dado. Exemplos de assets não definem regra de negócio. O asset legado infere agregação pelo tipo; ao usá-lo, defina `agg` explicitamente em toda coluna, inclusive `null` quando não houver resumo validado.
++Agregação é regra de domínio, não consequência do formato da coluna: moeda pode representar preço unitário, percentual pode exigir razão ponderada. Some apenas grandezas aditivas compatíveis; taxas e custos/ha não se somam. Faça o resumo pela fonte canônica e exponha parcialidade quando faltar dado. Exemplos de assets não definem regra de negócio. O asset usa `agg: null` por padrão. Ative agregação somente com regra validada do domínio.
 +
 +Ao detalhar e voltar, preserve busca, filtros, ordem, grupos abertos, página/posição e foco. Recorte recebido de painel/mapa tem contexto explícito e recuperação, sem ser silenciosamente limitado por busca antiga ou sobrescrever preferências persistidas. Alternâncias tabela/raias/calendário conservam entidade, permissão e semântica de contagem.
 +
@@ -856,6 +871,15 @@
        { key: 'obs', label: 'Observação', hidden: true },     // só no painel de detalhe
      ],
      groupBy: ['regiao'],        // agrupamento inicial opcional; datas: 'data:ano' | 'data:mes' | 'data:dia'
+@@ -78,7 +87,7 @@
+ 
+ Opções de coluna: `key`, `label`, `type` (`text` | `integer` | `number` | `currency` | `percent` | `date`), `agg` (`sum` | `avg` | `min` | `max` | `count` | função `(rows)=>valor` | `null`), `decimals`, `currency` (padrão `BRL`), `format(v,row)`, `render(v,row)` (retorna HTML — escape você mesmo), `value(row)` (coluna calculada), `width`, `hidden`.
+ 
+-Defina tipos explicitamente: ID, CPF, CEP e nº de pedido são códigos, não medidas. Use `agg: null` quando não houver agregado válido; preços/percentuais exigem regra explícita e denominador conhecido, sobrescrevendo qualquer média automática do exemplo.
++Defina tipos explicitamente: ID, CPF, CEP e nº de pedido são códigos, não medidas. Use `agg: null` quando não houver agregado válido; preços/percentuais exigem regra explícita e denominador conhecido, sem inferir soma ou média pelo formato da coluna.
+ 
+ API retornada: `setRows(rows)`, `groupBy([...])`, `filter(key, texto)`, `sort(key, 1|-1|0)`, `drillTo([{spec, key, label}])`, `clearFilters()`, `getRows()`, `getState()`, `destroy()`.
+ 
 @@ -108,7 +117,7 @@
  - Se o usuário usa Excel desktop, sugerir também uma Tabela Dinâmica sobre a Tabela.
  
@@ -871,9 +895,20 @@
  - [ ] Tipos corretos (códigos como texto, moeda BRL, percentuais, datas pt-BR)
 -- [ ] Funciona com teclado e nos temas claro e escuro
 +- [ ] Funciona com teclado e nos temas adotados pelo projeto
+--- before/shared/tabelas-interativas/assets/exemplo.html
++++ candidate/shared/tabelas-interativas/assets/exemplo.html
+@@ -41,7 +41,7 @@
+       { key: 'categoria', label: 'Categoria' },
+       { key: 'quantidade', label: 'Qtd.', type: 'integer', agg: 'sum' },
+       { key: 'valor', label: 'Valor', type: 'currency', agg: 'sum' },
+-      { key: 'margem', label: 'Margem', type: 'percent', agg: 'avg' },
++      { key: 'margem', label: 'Margem', type: 'percent', agg: null },
+     ],
+     groupBy: ['regiao', 'uf'],
+     sort: ['-valor'],
 --- before/shared/tabelas-interativas/assets/tabela.js
 +++ candidate/shared/tabelas-interativas/assets/tabela.js
-@@ -169,7 +169,8 @@
+@@ -169,17 +169,25 @@
      function setData(rows) {
        data = rows || [];
        rowIdx = new Map(data.map((r, i) => [r, i]));
@@ -883,7 +918,11 @@
        cols = src.map((c) => {
          c = typeof c === 'string' ? { key: c } : Object.assign({}, c);
          c.label = c.label || prettify(c.key);
-@@ -180,6 +181,13 @@
+         c.type = c.type || inferType(c.key, data.slice(0, 200).map((r) => r[c.key]));
+-        if (c.agg === undefined) c.agg = c.type === 'percent' ? 'avg' : isNum(c.type) ? 'sum' : null;
++        if (c.agg === undefined) c.agg = null; // Agregação exige regra explícita do domínio.
+         return c;
+       });
        colMap = {};
        cols.forEach((c) => (colMap[c.key] = c));
        specCache.clear();
@@ -891,12 +930,32 @@
 +      st.focus = st.focus.filter((f) => gspec(f.spec));
 +      st.sort = st.sort.filter((s) => colMap[s.key]);
 +      for (const state of [st.filters, st.values]) {
-+        for (const key of Object.keys(state)) if (!colMap[key]) delete state[key];
++        for (const key of Object.keys(state)) if (!colMap[key]) Reflect.deleteProperty(state, key);
 +      }
 +      st.trail = []; st.limits = {};
      }
      const vis = () => cols.filter((c) => !c.hidden);
      const raw = (c, r) => (c.value ? c.value(r) : r[c.key]);
+@@ -558,8 +566,8 @@
+       valsEl.addEventListener('change', (e) => {
+         let set = st.values[key] || new Set(universe.map((u) => u.key));
+         if (e.target.hasAttribute('data-all')) shown.forEach((u) => (e.target.checked ? set.add(u.key) : set.delete(u.key)));
+-        else { const u = shown[+e.target.dataset.vi]; e.target.checked ? set.add(u.key) : set.delete(u.key); }
+-        if (universe.every((u) => set.has(u.key))) delete st.values[key]; else st.values[key] = set;
++        else { const u = shown[+e.target.dataset.vi]; if (e.target.checked) set.add(u.key); else set.delete(u.key); }
++        if (universe.every((u) => set.has(u.key))) Reflect.deleteProperty(st.values, key); else st.values[key] = set;
+         st.limits = {};
+         renderBody(); drawVals();
+       });
+@@ -568,7 +576,7 @@
+         if (!b) return;
+         if (b.dataset.s !== undefined) { closeMenu(); toggleSort(key, e.shiftKey, +b.dataset.s); }
+         else if (b.dataset.gp) { closeMenu(); addGroup(b.dataset.gp); }
+-        else if (b.hasAttribute('data-clr')) { delete st.filters[key]; delete st.values[key]; closeMenu(); renderBody(); }
++        else if (b.hasAttribute('data-clr')) { Reflect.deleteProperty(st.filters, key); Reflect.deleteProperty(st.values, key); closeMenu(); renderBody(); }
+       });
+ 
+       const rect = btn.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
 @@ -667,7 +675,8 @@
        e.dataTransfer.effectAllowed = 'move';
        e.dataTransfer.setData('text/plain', 'chip');
@@ -924,6 +983,15 @@
      crumbs.addEventListener('click', (e) => { const b = e.target.closest('[data-crumb]'); if (b) goCrumb(+b.dataset.crumb); });
  
      tbody.addEventListener('click', (e) => {
+@@ -711,7 +721,7 @@
+     function toggleGroup(id, force) {
+       const open = force ?? !st.open.has(id);
+       if (open === st.open.has(id)) return;
+-      open ? st.open.add(id) : st.open.delete(id);
++      if (open) st.open.add(id); else st.open.delete(id);
+       renderBody();
+       refocus({ g: id });
+     }
 @@ -744,7 +754,7 @@
      renderBody();
  
@@ -1018,6 +1086,72 @@
  - **Android**: Jetpack Compose Material 3. **Multiplataforma**: Flutter com `useMaterial3: true` e `ColorScheme.fromSeed`.
  - **iOS**: manter os princípios deste guia, respeitando convenções nativas (navegação, gestos).
  
+@@ -131,3 +143,5 @@
+ - [ ] Acessível (contraste, teclado, foco não encoberto, alvos conforme design system/plataforma)
+ - [ ] Telas de gestão/cadastro conforme `master-detail-ux` (listagem + detalhe, estado, próximo passo, ação primária única)
+ - [ ] Tabelas conforme `tabelas-interativas`
++
++O autosave do kit serializa gravações e só confirma após o retorno de `save`. Use-o para rascunhos quando apropriado. A fila é local à instância; concorrência entre abas/dispositivos exige versão e revalidação no domínio. `beforeunload` não garante conclusão assíncrona: não dependa dele como única proteção do rascunho.
+--- before/shared/ux-essencial/assets/m3-kit.js
++++ candidate/shared/ux-essencial/assets/m3-kit.js
+@@ -27,7 +27,7 @@
+     requestAnimationFrame(() => el.classList.add('show'));
+     const close = () => { el.classList.remove('show'); setTimeout(() => el.remove(), 250); if (live === el) live = null; };
+     const [a, x] = action ? el.querySelectorAll('button') : [null, el.querySelector('button')];
+-    if (a) a.addEventListener('click', () => { close(); onAction && onAction(); });
++    if (a) a.addEventListener('click', () => { close(); if (onAction) onAction(); });
+     x.addEventListener('click', close);
+     let remaining = timeout, started = Date.now();
+     const arm = () => { started = Date.now(); timer = setTimeout(close, remaining); };
+@@ -77,8 +77,8 @@
+         : '<div class="empty">Nenhum comando encontrado</div>';
+       ul.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
+     };
+-    const close = () => { scrim.remove(); scrim = null; back && back.focus && back.focus(); };
+-    const exec = (c) => { close(); c && c.run(); };
++    const close = () => { scrim.remove(); scrim = null; if (back && back.focus) back.focus(); };
++    const exec = (c) => { close(); if (c) c.run(); };
+     input.addEventListener('input', () => { sel = 0; draw(); });
+     input.addEventListener('keydown', (e) => {
+       if (e.key === 'ArrowDown') { e.preventDefault(); sel = Math.min(sel + 1, shown.length - 1); draw(); }
+@@ -93,7 +93,7 @@
+   }
+ 
+   document.addEventListener('keydown', (e) => {
+-    if (matches(e, 'mod+k')) { e.preventDefault(); scrim ? scrim.querySelector('input').focus() : openPalette(); return; }
++    if (matches(e, 'mod+k')) { e.preventDefault(); if (scrim) scrim.querySelector('input').focus(); else openPalette(); return; }
+     if (scrim) return;
+     for (const c of registry) {
+       if (!c.keys) continue;
+@@ -106,12 +106,23 @@
+   // ---------- autosave ----------
+   function autosave(form, save, { delay = 600, message = 'Salvo' } = {}) {
+     let t = null, last = JSON.stringify(Object.fromEntries(new FormData(form)));
+-    const flush = async () => {
++    let queue = Promise.resolve();
++    const flush = () => {
+       const data = Object.fromEntries(new FormData(form)), json = JSON.stringify(data);
+-      if (json === last) return;
+-      last = json;
+-      try { await save(data); if (message) snackbar(message, { timeout: 2000 }); }
+-      catch (err) { snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush }); last = null; }
++      // Capture cada versão, mas compare com o último recibo somente ao executar.
++      // Assim B pendente seguido de retorno a A não perde a reversão.
++      queue = queue.then(async () => {
++        if (json === last) return;
++        try {
++          await save(data);
++          last = json;
++          if (message && JSON.stringify(Object.fromEntries(new FormData(form))) === json) snackbar(message, { timeout: 2000 });
++        } catch {
++          last = null;
++          snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush });
++        }
++      });
++      return queue;
+     };
+     form.addEventListener('input', () => { clearTimeout(t); t = setTimeout(flush, delay); });
+     form.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(t); flush(); });
 --- before/test_gemini_consult.py
 +++ candidate/test_gemini_consult.py
 @@ -20,6 +20,17 @@

@@ -175,7 +175,7 @@
         c = typeof c === 'string' ? { key: c } : Object.assign({}, c);
         c.label = c.label || prettify(c.key);
         c.type = c.type || inferType(c.key, data.slice(0, 200).map((r) => r[c.key]));
-        if (c.agg === undefined) c.agg = c.type === 'percent' ? 'avg' : isNum(c.type) ? 'sum' : null;
+        if (c.agg === undefined) c.agg = null; // Agregação exige regra explícita do domínio.
         return c;
       });
       colMap = {};
@@ -185,7 +185,7 @@
       st.focus = st.focus.filter((f) => gspec(f.spec));
       st.sort = st.sort.filter((s) => colMap[s.key]);
       for (const state of [st.filters, st.values]) {
-        for (const key of Object.keys(state)) if (!colMap[key]) delete state[key];
+        for (const key of Object.keys(state)) if (!colMap[key]) Reflect.deleteProperty(state, key);
       }
       st.trail = []; st.limits = {};
     }
@@ -566,8 +566,8 @@
       valsEl.addEventListener('change', (e) => {
         let set = st.values[key] || new Set(universe.map((u) => u.key));
         if (e.target.hasAttribute('data-all')) shown.forEach((u) => (e.target.checked ? set.add(u.key) : set.delete(u.key)));
-        else { const u = shown[+e.target.dataset.vi]; e.target.checked ? set.add(u.key) : set.delete(u.key); }
-        if (universe.every((u) => set.has(u.key))) delete st.values[key]; else st.values[key] = set;
+        else { const u = shown[+e.target.dataset.vi]; if (e.target.checked) set.add(u.key); else set.delete(u.key); }
+        if (universe.every((u) => set.has(u.key))) Reflect.deleteProperty(st.values, key); else st.values[key] = set;
         st.limits = {};
         renderBody(); drawVals();
       });
@@ -576,7 +576,7 @@
         if (!b) return;
         if (b.dataset.s !== undefined) { closeMenu(); toggleSort(key, e.shiftKey, +b.dataset.s); }
         else if (b.dataset.gp) { closeMenu(); addGroup(b.dataset.gp); }
-        else if (b.hasAttribute('data-clr')) { delete st.filters[key]; delete st.values[key]; closeMenu(); renderBody(); }
+        else if (b.hasAttribute('data-clr')) { Reflect.deleteProperty(st.filters, key); Reflect.deleteProperty(st.values, key); closeMenu(); renderBody(); }
       });
 
       const rect = btn.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
@@ -721,7 +721,7 @@
     function toggleGroup(id, force) {
       const open = force ?? !st.open.has(id);
       if (open === st.open.has(id)) return;
-      open ? st.open.add(id) : st.open.delete(id);
+      if (open) st.open.add(id); else st.open.delete(id);
       renderBody();
       refocus({ g: id });
     }

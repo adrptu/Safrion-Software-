@@ -43,3 +43,12 @@ Claude confirmou que as skills não estão carregadas na sessão cloud atual; in
 
 ### Correção da biblioteca de tabelas — 14/10, 4274262618/4274262629
 Reproduzidos quatro cenários vermelhos no navegador: agrupamento com setRows([]), troca real de esquema, destruição simples e com menu aberto. Correção preserva esquema inferido durante vazio transitório, remove somente referências a colunas desaparecidas, fecha menu ao atualizar linhas e remove ouvintes persistentes de click/dragend além dos já tratados. Cinco cenários verdes, incluindo retorno de dados agrupados. Contraprova portátil em provas/tabela/regression.html; abrir via servidor estático na raiz deste pacote. Título PASS5/5 e window.testResults identificam resultado. Teste sintético, sem dependência externa; não equivale a validar todas as opções da biblioteca. Fonte original e brutos preservados localmente. 20/20 skills,17/17 adaptador; manifesto atualizado,53 arquivos.
+
+
+### Revisão devolvida 6177603041 — 14/10, Codex
+
+Os seis pedidos anteriores foram aceitos pelo Claude. Esta rodada corrige os novos pontos: agg nulo por padrão (soma exige escolha explícita), autosave em fila com confirmação após save, outbox obrigatório nos comandos Safrion e modelo ESLint renomeado para eslint.config.exemplo.js. O teste portátil provas/correcoes/regression.html reproduziu quatro falhas antes; agora passa 7/7 (ordem, reversão, retry, duplicata e agregação). As regressões anteriores da tabela passam 5/5.
+
+Renomear o modelo resolveu a procura indevida de sonarjs, mas o lint revelou 62 erros dos assets/modelos. Corrigidos os usos de expressões e deletes, e acrescentado ao eslint.config.js da raiz um override somente do pacote versionado: globais browser nos dois assets; modelos sem projeto TS usam lint sem verificação de tipos. Lint continua ativo; regras de produto e segurança não foram desabilitadas. ESLint 10.11.0 executado com configuração da raiz e dependências existentes: zero erros/avisos no pacote e config. Isso não substitui o CI integral.
+
+Validação: 20/20 skills, 17/17 adaptador, 53 arquivos no manifesto; Gitleaks dir do pacote sem achado. Gitleaks histórico geral é pendência separada relatada por Claude, commit207f362; nenhuma allowlist/proteção/branch foi alterada. Revisão, integração e recibo cloud continuam pendentes.

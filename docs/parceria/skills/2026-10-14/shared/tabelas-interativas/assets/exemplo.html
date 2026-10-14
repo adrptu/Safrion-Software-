@@ -41,7 +41,7 @@
       { key: 'categoria', label: 'Categoria' },
       { key: 'quantidade', label: 'Qtd.', type: 'integer', agg: 'sum' },
       { key: 'valor', label: 'Valor', type: 'currency', agg: 'sum' },
-      { key: 'margem', label: 'Margem', type: 'percent', agg: 'avg' },
+      { key: 'margem', label: 'Margem', type: 'percent', agg: null },
     ],
     groupBy: ['regiao', 'uf'],
     sort: ['-valor'],

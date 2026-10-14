@@ -42,7 +42,7 @@
   {
     "file": "shared/dev-backend/SKILL.md",
     "before": "63e02d40954bcff20a5ad7cb70dd5652550c9f4838138d7f21fc765f5ad81104",
-    "after": "2472accdab68d2e0be9bc50d2954479bab18343d32486aa9696f4291875c00a6"
+    "after": "8d92a48e92fd89c6b6005a62e02caf8ae3e5faeda4a9effe19c735150964972a"
   },
   {
     "file": "shared/dev-ciclo-completo/SKILL.md",
@@ -72,7 +72,7 @@
   {
     "file": "shared/dev-revisao/SKILL.md",
     "before": "7ad2ac80af3d907d8dbaf3e7e2539cc63656dfcc0b6545dfb9bae11efcc34a57",
-    "after": "1824ad5f30ec2c6770e03510f0bafd83927efeb423bf4412cd79284d735a891f"
+    "after": "91d16f4063e2c9279afcd314e576ce287822b6cee378016d4262cc09adcaa6a3"
   },
   {
     "file": "shared/dev-revisao/assets/PULL_REQUEST_TEMPLATE.md",
@@ -132,17 +132,27 @@
   {
     "file": "shared/tabelas-interativas/SKILL.md",
     "before": "1ea66fdfe858c5af60e6a7ced9025f4c1483825c5eabc5a96de4c960955df2c7",
-    "after": "2172452b87188145a5605aec28a792fb0baeb0df43f4e562393c47fa1c538a71"
+    "after": "e988bd73f0e74bb6c5e84cd3b1d65ccde5a7119529d0defa2ba80d32decef446"
+  },
+  {
+    "file": "shared/tabelas-interativas/assets/exemplo.html",
+    "before": "3279a44536c648f02bb3198d3ca09e3f31f19fbd3f605cd564ca57d88b20a154",
+    "after": "5875855fd34c4fa72591dd085d52980a02d552538f74832edd85e7aaf3aa9f93"
   },
   {
     "file": "shared/tabelas-interativas/assets/tabela.js",
     "before": "1605033d45dd8f6b040dcedf54269907d21d647f2fdcbd92a65ca9910b345c31",
-    "after": "8710203e9cfa662480f64e3b2141cc521444f6d8b440d95599d3009898f9aec1"
+    "after": "b4f073b4ee63cdf01cfbabcaccf1f2f3d9b1a24358fa068d95131660acbbe704"
   },
   {
     "file": "shared/ux-essencial/SKILL.md",
     "before": "10972bdbf98af75313e6c21ebd6586fefc08918972fd792ca83c315b40a5ffe6",
-    "after": "ad47ad7c7acc74cb5edcc2a2c39757582bf408e097c4811d2ecc584e1e77eef8"
+    "after": "66769798eeb3873c5a4de9d4122009eb138986c2ccdbc8d7f88c9483d3ca63c6"
+  },
+  {
+    "file": "shared/ux-essencial/assets/m3-kit.js",
+    "before": "035eef47c47ef6016b47edabd2dd80c7b4df4949064edee85bfe9543a4a67efd",
+    "after": "1c779ef8c4e678451c1fa1e81587caeb5f986eed377c8d2d006334db1e75588b"
   },
   {
     "file": "test_gemini_consult.py",

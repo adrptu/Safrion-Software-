@@ -20,7 +20,7 @@ Desfazer aplica inversão delimitada ou compensação validada; não restaura um
 - **Monólito modular por domínio**: `src/modules/<dominio>/{routes,service,repository,schema,events}`; módulo só fala com outro via interface pública (service) ou evento — nunca acessa a tabela alheia. Estrutura em [assets/estrutura-modular.md](assets/estrutura-modular.md).
 - **Camadas**: rota (HTTP, validação, auth) → serviço (regra de negócio, transação) → repositório (SQL/ORM). Domínio não importa framework nem infra. Sem "hexagonal completo" onde não há necessidade; sem lógica de negócio em controller.
 - Estado durável e autoritativo não depende de memória do processo. Cache em memória pode ser descartável e limitado; Redis/objetos/filas entram por necessidade, não por padrão.
-- Trabalho assíncrono ou demorado usa fila quando melhora prazo de resposta/recuperação. Retry limitado, idempotência e tratamento de falha conforme o comando. **Outbox** quando é necessário garantir evento junto da transação.
+- Trabalho assíncrono ou demorado usa fila quando melhora prazo de resposta/recuperação. Retry limitado, idempotência e tratamento de falha conforme o comando. **Outbox** quando é necessário garantir evento junto da transação. No Safrion, conforme o contrato vigente de comandos (AGENTS §4), todo comando grava efeito, recibo e outbox na mesma transação; essa exigência não é opcional.
 - **Multi-tenant**: `tenant_id` em toda tabela de negócio, filtro obrigatório no repositório (ou RLS no Postgres), teste que prova isolamento.
 
 ## API

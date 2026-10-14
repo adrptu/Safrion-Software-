@@ -1,0 +1,73 @@
+
+[workspace]/candidate/shared/dev-testes/assets/playwright.config.ts
+  0:0  error  Parsing error: [workspace]/candidate/shared/dev-testes/assets/playwright.config.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+[workspace]/candidate/shared/dev-testes/assets/vitest.config.ts
+  0:0  error  Parsing error: [workspace]/candidate/shared/dev-testes/assets/vitest.config.ts was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+[workspace]/candidate/shared/tabelas-interativas/assets/tabela.js
+   98:9   error  'document' is not defined                                              no-undef
+   99:15  error  'document' is not defined                                              no-undef
+  102:5   error  'document' is not defined                                              no-undef
+  159:47  error  'document' is not defined                                              no-undef
+  188:78  error  Do not delete dynamically computed property keys                       @typescript-eslint/no-dynamic-delete
+  390:13  error  'document' is not defined                                              no-undef
+  525:7   error  'document' is not defined                                              no-undef
+  526:7   error  'window' is not defined                                                no-undef
+  527:7   error  'window' is not defined                                                no-undef
+  535:13  error  'document' is not defined                                              no-undef
+  543:7   error  'document' is not defined                                              no-undef
+  569:55  error  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  570:69  error  Do not delete dynamically computed property keys                       @typescript-eslint/no-dynamic-delete
+  579:66  error  Do not delete dynamically computed property keys                       @typescript-eslint/no-dynamic-delete
+  579:89  error  Do not delete dynamically computed property keys                       @typescript-eslint/no-dynamic-delete
+  583:61  error  'innerWidth' is not defined                                            no-undef
+  584:46  error  'innerHeight' is not defined                                           no-undef
+  586:7   error  'document' is not defined                                              no-undef
+  587:7   error  'window' is not defined                                                no-undef
+  588:7   error  'window' is not defined                                                no-undef
+  600:17  error  'document' is not defined                                              no-undef
+  604:9   error  'document' is not defined                                              no-undef
+  661:7   error  'clearTimeout' is not defined                                          no-undef
+  662:18  error  'setTimeout' is not defined                                            no-undef
+  679:5   error  'document' is not defined                                              no-undef
+  719:54  error  'window' is not defined                                                no-undef
+  724:7   error  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  745:40  error  'document' is not defined                                              no-undef
+  747:5   error  'document' is not defined                                              no-undef
+  765:46  error  'document' is not defined                                              no-undef
+  765:97  error  'document' is not defined                                              no-undef
+  770:36  error  'window' is not defined                                                no-undef
+
+[workspace]/candidate/shared/ux-essencial/assets/m3-kit.js
+   13:40  error  'navigator' is not defined                                             no-undef
+   13:62  error  'navigator' is not defined                                             no-undef
+   20:5   error  'clearTimeout' is not defined                                          no-undef
+   21:16  error  'document' is not defined                                              no-undef
+   25:5   error  'document' is not defined                                              no-undef
+   27:5   error  'requestAnimationFrame' is not defined                                 no-undef
+   28:56  error  'setTimeout' is not defined                                            no-undef
+   30:57  error  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+   33:55  error  'setTimeout' is not defined                                            no-undef
+   34:47  error  'clearTimeout' is not defined                                          no-undef
+   64:18  error  'document' is not defined                                              no-undef
+   65:13  error  'document' is not defined                                              no-undef
+   68:5   error  'document' is not defined                                              no-undef
+   80:57  error  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+   81:36  error  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+   95:3   error  'document' is not defined                                              no-undef
+   96:52  error  Expected an assignment or function call and instead saw an expression  @typescript-eslint/no-unused-expressions
+  101:29  error  'document' is not defined                                              no-undef
+  108:64  error  'FormData' is not defined                                              no-undef
+  111:43  error  'FormData' is not defined                                              no-undef
+  119:64  error  'FormData' is not defined                                              no-undef
+  120:18  error  'err' is defined but never used                                        @typescript-eslint/no-unused-vars
+  127:44  error  'clearTimeout' is not defined                                          no-undef
+  127:65  error  'setTimeout' is not defined                                            no-undef
+  128:66  error  'clearTimeout' is not defined                                          no-undef
+  129:5   error  'window' is not defined                                                no-undef
+  129:53  error  'clearTimeout' is not defined                                          no-undef
+  134:4   error  'window' is not defined                                                no-undef
+
+✖ 62 problems (62 errors, 0 warnings)
+

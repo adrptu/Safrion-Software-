@@ -47,7 +47,7 @@ Ao revisar como agente: ler o código de verdade (não só o diff), executar os 
 | Swift | swift-format | SwiftLint | compilador | — |
 | Todos | EditorConfig | Semgrep (regras OWASP), CodeQL (GitHub) | — | Renovate/Dependabot semanal, commitlint |
 
-Prontos: [assets/eslint.config.js](assets/eslint.config.js), [assets/tsconfig.strict.json](assets/tsconfig.strict.json), [assets/lint-staged.config.js](assets/lint-staged.config.js) (pre-commit com husky: `npx husky init` e no hook `npx lint-staged`).
+Modelos para adaptar ao projeto (o arquivo `eslint.config.exemplo.js` só vira configuração quando copiado e renomeado explicitamente): [assets/eslint.config.exemplo.js](assets/eslint.config.exemplo.js), [assets/tsconfig.strict.json](assets/tsconfig.strict.json), [assets/lint-staged.config.js](assets/lint-staged.config.js) (pre-commit com husky: `npx husky init` e no hook `npx lint-staged`).
 
 Cumprir a política de warnings do projeto; configurar regras relevantes de forma consistente. Exceções precisam de motivo concreto e revisão, sem desativar checks para ocultar defeitos. Uma mudança global justificada de configuração não é automaticamente proibida.
 

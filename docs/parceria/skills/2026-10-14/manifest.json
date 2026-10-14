@@ -76,8 +76,8 @@
   },
   {
     "file": "shared/dev-backend/SKILL.md",
-    "sha256": "2472accdab68d2e0be9bc50d2954479bab18343d32486aa9696f4291875c00a6",
-    "bytes": 9296
+    "sha256": "8d92a48e92fd89c6b6005a62e02caf8ae3e5faeda4a9effe19c735150964972a",
+    "bytes": 9461
   },
   {
     "file": "shared/dev-backend/assets/estrutura-modular.md",
@@ -126,8 +126,8 @@
   },
   {
     "file": "shared/dev-revisao/SKILL.md",
-    "sha256": "1824ad5f30ec2c6770e03510f0bafd83927efeb423bf4412cd79284d735a891f",
-    "bytes": 6643
+    "sha256": "91d16f4063e2c9279afcd314e576ce287822b6cee378016d4262cc09adcaa6a3",
+    "bytes": 6788
   },
   {
     "file": "shared/dev-revisao/assets/PULL_REQUEST_TEMPLATE.md",
@@ -140,7 +140,7 @@
     "bytes": 3351
   },
   {
-    "file": "shared/dev-revisao/assets/eslint.config.js",
+    "file": "shared/dev-revisao/assets/eslint.config.exemplo.js",
     "sha256": "7c9ad148b8b4e805eede71eca9ce26893b846320c5feb3974e508977c68e0325",
     "bytes": 2806
   },
@@ -226,23 +226,23 @@
   },
   {
     "file": "shared/tabelas-interativas/SKILL.md",
-    "sha256": "2172452b87188145a5605aec28a792fb0baeb0df43f4e562393c47fa1c538a71",
-    "bytes": 11136
+    "sha256": "e988bd73f0e74bb6c5e84cd3b1d65ccde5a7119529d0defa2ba80d32decef446",
+    "bytes": 11073
   },
   {
     "file": "shared/tabelas-interativas/assets/exemplo.html",
-    "sha256": "3279a44536c648f02bb3198d3ca09e3f31f19fbd3f605cd564ca57d88b20a154",
-    "bytes": 2285
+    "sha256": "5875855fd34c4fa72591dd085d52980a02d552538f74832edd85e7aaf3aa9f93",
+    "bytes": 2284
   },
   {
     "file": "shared/tabelas-interativas/assets/tabela.js",
-    "sha256": "8710203e9cfa662480f64e3b2141cc521444f6d8b440d95599d3009898f9aec1",
-    "bytes": 44851
+    "sha256": "b4f073b4ee63cdf01cfbabcaccf1f2f3d9b1a24358fa068d95131660acbbe704",
+    "bytes": 44929
   },
   {
     "file": "shared/ux-essencial/SKILL.md",
-    "sha256": "ad47ad7c7acc74cb5edcc2a2c39757582bf408e097c4811d2ecc584e1e77eef8",
-    "bytes": 16143
+    "sha256": "66769798eeb3873c5a4de9d4122009eb138986c2ccdbc8d7f88c9483d3ca63c6",
+    "bytes": 16484
   },
   {
     "file": "shared/ux-essencial/assets/exemplo.html",
@@ -251,8 +251,8 @@
   },
   {
     "file": "shared/ux-essencial/assets/m3-kit.js",
-    "sha256": "035eef47c47ef6016b47edabd2dd80c7b4df4949064edee85bfe9543a4a67efd",
-    "bytes": 6774
+    "sha256": "1c779ef8c4e678451c1fa1e81587caeb5f986eed377c8d2d006334db1e75588b",
+    "bytes": 7162
   },
   {
     "file": "shared/ux-essencial/assets/m3.css",

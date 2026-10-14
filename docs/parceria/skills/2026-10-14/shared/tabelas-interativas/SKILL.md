@@ -9,7 +9,7 @@ description: Crie e revise tabelas de gestão com filtro e ordenação no cabeç
 
 Filtro, grupo, total, contador e drill-down precisam se referir ao mesmo universo autorizado. Declare se o valor representa página, recorte ou total global. Mantenha valores tipados separados da apresentação; ausentes permanecem distintos de zero e sua posição na ordenação deve ser explícita e consistente nos dois sentidos.
 
-Agregação é regra de domínio, não consequência do formato da coluna: moeda pode representar preço unitário, percentual pode exigir razão ponderada. Some apenas grandezas aditivas compatíveis; taxas e custos/ha não se somam. Faça o resumo pela fonte canônica e exponha parcialidade quando faltar dado. Exemplos de assets não definem regra de negócio. O asset legado infere agregação pelo tipo; ao usá-lo, defina `agg` explicitamente em toda coluna, inclusive `null` quando não houver resumo validado.
+Agregação é regra de domínio, não consequência do formato da coluna: moeda pode representar preço unitário, percentual pode exigir razão ponderada. Some apenas grandezas aditivas compatíveis; taxas e custos/ha não se somam. Faça o resumo pela fonte canônica e exponha parcialidade quando faltar dado. Exemplos de assets não definem regra de negócio. O asset usa `agg: null` por padrão. Ative agregação somente com regra validada do domínio.
 
 Ao detalhar e voltar, preserve busca, filtros, ordem, grupos abertos, página/posição e foco. Recorte recebido de painel/mapa tem contexto explícito e recuperação, sem ser silenciosamente limitado por busca antiga ou sobrescrever preferências persistidas. Alternâncias tabela/raias/calendário conservam entidade, permissão e semântica de contagem.
 
@@ -87,7 +87,7 @@ O componente [assets/tabela.js](assets/tabela.js) e [assets/exemplo.html](assets
 
 Opções de coluna: `key`, `label`, `type` (`text` | `integer` | `number` | `currency` | `percent` | `date`), `agg` (`sum` | `avg` | `min` | `max` | `count` | função `(rows)=>valor` | `null`), `decimals`, `currency` (padrão `BRL`), `format(v,row)`, `render(v,row)` (retorna HTML — escape você mesmo), `value(row)` (coluna calculada), `width`, `hidden`.
 
-Defina tipos explicitamente: ID, CPF, CEP e nº de pedido são códigos, não medidas. Use `agg: null` quando não houver agregado válido; preços/percentuais exigem regra explícita e denominador conhecido, sobrescrevendo qualquer média automática do exemplo.
+Defina tipos explicitamente: ID, CPF, CEP e nº de pedido são códigos, não medidas. Use `agg: null` quando não houver agregado válido; preços/percentuais exigem regra explícita e denominador conhecido, sem inferir soma ou média pelo formato da coluna.
 
 API retornada: `setRows(rows)`, `groupBy([...])`, `filter(key, texto)`, `sort(key, 1|-1|0)`, `drillTo([{spec, key, label}])`, `clearFilters()`, `getRows()`, `getState()`, `destroy()`.
 

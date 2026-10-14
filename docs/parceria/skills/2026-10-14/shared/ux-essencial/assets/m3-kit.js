@@ -27,7 +27,7 @@
     requestAnimationFrame(() => el.classList.add('show'));
     const close = () => { el.classList.remove('show'); setTimeout(() => el.remove(), 250); if (live === el) live = null; };
     const [a, x] = action ? el.querySelectorAll('button') : [null, el.querySelector('button')];
-    if (a) a.addEventListener('click', () => { close(); onAction && onAction(); });
+    if (a) a.addEventListener('click', () => { close(); if (onAction) onAction(); });
     x.addEventListener('click', close);
     let remaining = timeout, started = Date.now();
     const arm = () => { started = Date.now(); timer = setTimeout(close, remaining); };
@@ -77,8 +77,8 @@
         : '<div class="empty">Nenhum comando encontrado</div>';
       ul.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
     };
-    const close = () => { scrim.remove(); scrim = null; back && back.focus && back.focus(); };
-    const exec = (c) => { close(); c && c.run(); };
+    const close = () => { scrim.remove(); scrim = null; if (back && back.focus) back.focus(); };
+    const exec = (c) => { close(); if (c) c.run(); };
     input.addEventListener('input', () => { sel = 0; draw(); });
     input.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowDown') { e.preventDefault(); sel = Math.min(sel + 1, shown.length - 1); draw(); }
@@ -93,7 +93,7 @@
   }
 
   document.addEventListener('keydown', (e) => {
-    if (matches(e, 'mod+k')) { e.preventDefault(); scrim ? scrim.querySelector('input').focus() : openPalette(); return; }
+    if (matches(e, 'mod+k')) { e.preventDefault(); if (scrim) scrim.querySelector('input').focus(); else openPalette(); return; }
     if (scrim) return;
     for (const c of registry) {
       if (!c.keys) continue;
@@ -106,12 +106,23 @@
   // ---------- autosave ----------
   function autosave(form, save, { delay = 600, message = 'Salvo' } = {}) {
     let t = null, last = JSON.stringify(Object.fromEntries(new FormData(form)));
-    const flush = async () => {
+    let queue = Promise.resolve();
+    const flush = () => {
       const data = Object.fromEntries(new FormData(form)), json = JSON.stringify(data);
-      if (json === last) return;
-      last = json;
-      try { await save(data); if (message) snackbar(message, { timeout: 2000 }); }
-      catch (err) { snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush }); last = null; }
+      // Capture cada versão, mas compare com o último recibo somente ao executar.
+      // Assim B pendente seguido de retorno a A não perde a reversão.
+      queue = queue.then(async () => {
+        if (json === last) return;
+        try {
+          await save(data);
+          last = json;
+          if (message && JSON.stringify(Object.fromEntries(new FormData(form))) === json) snackbar(message, { timeout: 2000 });
+        } catch {
+          last = null;
+          snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush });
+        }
+      });
+      return queue;
     };
     form.addEventListener('input', () => { clearTimeout(t); t = setTimeout(flush, delay); });
     form.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(t); flush(); });
