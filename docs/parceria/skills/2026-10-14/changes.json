@@ -82,7 +82,7 @@
   {
     "file": "shared/dev-infra/assets/ci.yml",
     "before": "dc8c0029dbc5010aacb145f526a6dc6843409791e2a56467d260732caae69ece",
-    "after": "9f66dee37ce1092477a98a5218f36cd6c79b8b5df79ea2a65353df995eb489f1"
+    "after": "234f136701c10a48b68710029c605cc370b58db6d3089b9e57adfc4a45881dba"
   },
   {
     "file": "shared/dev-revisao/SKILL.md",

@@ -116,6 +116,9 @@ jobs:
         with: { name: "playwright-${{ matrix.shard }}", path: test-results/, retention-days: 7 }
 
   security:
+    outputs:
+      image-id: ${{ steps.scan.outputs.image-id }}
+      archive-sha: ${{ steps.scan.outputs.archive-sha }}
     name: Segurança
     permissions:
       contents: read
@@ -140,13 +143,24 @@ jobs:
           docker run --rm -v "$PWD:/src:ro" -w /src
           semgrep/semgrep@sha256:529ee8a277ec8adc5b534d7c74eea0a47e9de21d62852b6ba7ac6ba9566845c3
           semgrep scan --config p/owasp-top-ten --error --metrics=off /src
-      - name: Imagem
+      - name: Construir e verificar a imagem uma vez
+        id: scan
         run: |
+          set -euo pipefail
           docker build -t app:ci .
           docker save app:ci -o "$RUNNER_TEMP/app-ci.tar"
           docker run --rm -v "$RUNNER_TEMP/app-ci.tar:/scan/app.tar:ro" \
             aquasec/trivy@sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222 \
             image --input /scan/app.tar --exit-code 1 --severity HIGH,CRITICAL
+          printf 'image-id=%s\n' "$(docker image inspect app:ci --format '{{.Id}}')" >> "$GITHUB_OUTPUT"
+          printf 'archive-sha=%s\n' "$(sha256sum "$RUNNER_TEMP/app-ci.tar" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+      - name: Guardar exatamente o arquivo aprovado pelo scanner
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: scanned-image
+          path: ${{ runner.temp }}/app-ci.tar
+          retention-days: 7
+          if-no-files-found: error
 
   lighthouse:
     name: Web Vitals
@@ -166,32 +180,80 @@ jobs:
         with: { name: build, path: dist/ }
       - run: npx --no-install lhci autorun   # lighthouserc.json com asserções: LCP < 2500, INP < 200, CLS < 0.1, performance ≥ 90
 
+  # Antes de adotar: configurar autenticação de curta duração do registry/provedor,
+  # IMAGE_REPOSITORY canônico (sem tag) e ci/deploy.sh + ci/smoke.sh.
+  # Os adaptadores recebem ambiente e referência repo@sha256; não constroem imagens.
+  # Ausência de configuração/recibo falha o job; este template não anuncia deploy por echo.
   deploy-staging:
-    name: Deploy staging
+    name: Deploy staging da imagem verificada
     permissions:
       contents: read
     runs-on: ubuntu-latest
     needs: [quality, build, integration, e2e, security]
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment: staging
+    outputs:
+      image-ref: ${{ steps.publish.outputs.image-ref }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with: { persist-credentials: false }
-      - run: echo "docker build + push com tag ${{ github.sha }}; migrar; deploy (fly deploy / gcloud run deploy / kubectl set image)"
-      - run: |
-          echo "smoke: curl -f https://staging.exemplo.com/health"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with: { name: scanned-image, path: '${{ runner.temp }}/scanned' }
+      - name: Publicar o arquivo verificado e fixar a referência por digest
+        id: publish
+        env:
+          IMAGE_REPOSITORY: ${{ vars.IMAGE_REPOSITORY }}
+          EXPECTED_ARCHIVE_SHA: ${{ needs.security.outputs.archive-sha }}
+          EXPECTED_IMAGE_ID: ${{ needs.security.outputs.image-id }}
+        run: |
+          set -euo pipefail
+          [[ "$IMAGE_REPOSITORY" =~ ^[a-z0-9.-]+(:[0-9]+)?/[a-z0-9._/-]+$ ]]
+          [[ "$EXPECTED_ARCHIVE_SHA" =~ ^[a-f0-9]{64}$ ]]
+          [[ "$EXPECTED_IMAGE_ID" =~ ^sha256:[a-f0-9]{64}$ ]]
+          cd "$RUNNER_TEMP/scanned"
+          printf '%s  app-ci.tar\n' "$EXPECTED_ARCHIVE_SHA" | sha256sum -c -
+          docker load --input app-ci.tar
+          test "$(docker image inspect app:ci --format '{{.Id}}')" = "$EXPECTED_IMAGE_ID"
+          target="$IMAGE_REPOSITORY:ci-$GITHUB_SHA"
+          docker tag "$EXPECTED_IMAGE_ID" "$target"
+          docker push "$target"
+          image_ref=''
+          while IFS= read -r ref; do
+            if [[ "$ref" == "$IMAGE_REPOSITORY"@sha256:* ]]; then image_ref="$ref"; fi
+          done < <(docker image inspect "$target" --format '{{range .RepoDigests}}{{println .}}{{end}}')
+          test -n "$image_ref"
+          digest="${image_ref#"$IMAGE_REPOSITORY"@}"
+          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+          docker pull "$image_ref"
+          test "$(docker image inspect "$image_ref" --format '{{.Id}}')" = "$EXPECTED_IMAGE_ID"
+          printf 'image-ref=%s\n' "$image_ref" >> "$GITHUB_OUTPUT"
+      - name: Implantar e testar staging com a referência publicada
+        env:
+          IMAGE_REF: ${{ steps.publish.outputs.image-ref }}
+        run: |
+          set -euo pipefail
+          test -x ci/deploy.sh && test -x ci/smoke.sh
+          ci/deploy.sh staging "$IMAGE_REF"
+          ci/smoke.sh staging "$IMAGE_REF"
 
   deploy-prod:
-    name: Deploy produção
+    name: Promover a imagem validada em staging
     permissions:
       contents: read
     runs-on: ubuntu-latest
     needs: deploy-staging
-    if: github.ref == 'refs/heads/main'
-    environment: production   # aprovação manual configurada no GitHub → Settings → Environments
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production   # configurar aprovação explícita da candidata antes de adotar
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with: { persist-credentials: false }
-      - run: echo "promover a MESMA imagem ${{ github.sha }} para produção; migrar; deploy canário/rolling"
-      - run: |
-          echo "verificar: health, taxa de erro e p95 por 10 min; rollback automático se degradar"
+      - name: Implantar e testar produção com o mesmo digest
+        env:
+          IMAGE_REF: ${{ needs.deploy-staging.outputs.image-ref }}
+        run: |
+          set -euo pipefail
+          test -n "$IMAGE_REF"
+          [[ "$IMAGE_REF" =~ @sha256:[a-f0-9]{64}$ ]]
+          test -x ci/deploy.sh && test -x ci/smoke.sh
+          ci/deploy.sh production "$IMAGE_REF"
+          ci/smoke.sh production "$IMAGE_REF"

@@ -107,7 +107,7 @@
     "failures": 0,
     "errors": 0
   },
-  "manifestSha256": "3b5e447771864e17813c687121d81d1d124d0967b2fb6e13ba92db50d97ebf70",
+  "manifestSha256": "7e3eeabd652c8b5b9ef8803078448941cb189c0960db3be9f18fda6122b0ff49",
   "r18": {
     "staticCI": {
       "before": "0/8 exit1",
@@ -123,5 +123,11 @@
     },
     "pipelineExecuted": false,
     "scope": "Dockerfile base digests; independent existing test extended"
+  },
+  "r20": {
+    "baseline": "0/6 exit1; publishing step absent",
+    "candidate": "10/10 exit0: 5 graph assertions + 5 shell scenarios with fake Docker",
+    "existingStaticCI": "9/9 exit0",
+    "pipelineExecuted": false
   }
 }

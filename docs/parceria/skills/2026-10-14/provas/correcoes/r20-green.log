@@ -1,0 +1,43 @@
+[
+  {
+    "name": "Uma construção Docker, no job de segurança",
+    "pass": true
+  },
+  {
+    "name": "Arquivo do scan só é publicado após sucesso",
+    "pass": true
+  },
+  {
+    "name": "Identidades vêm do job de segurança",
+    "pass": true
+  },
+  {
+    "name": "Staging recupera o mesmo artefato",
+    "pass": true
+  },
+  {
+    "name": "Staging e produção usam exatamente o digest publicado",
+    "pass": true
+  },
+  {
+    "name": "Shell publicação simulada: valid",
+    "pass": true
+  },
+  {
+    "name": "Shell publicação simulada: corrupt",
+    "pass": true
+  },
+  {
+    "name": "Shell publicação simulada: wrongimage",
+    "pass": true
+  },
+  {
+    "name": "Shell publicação simulada: nodigest",
+    "pass": false
+  },
+  {
+    "name": "Shell publicação simulada: wrongremote",
+    "pass": true
+  }
+]
+9/10
