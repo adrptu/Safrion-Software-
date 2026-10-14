@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Contrato Codex 6178891896: integração SAF-TAB sobre c8fe804; dados sintéticos.
+"""Contrato Codex 6179422559: integração SAF-TAB sobre 758a396; dados sintéticos.
 Complementa saf_fazendas_test (criar/remover/envio parcial) sem editar autoria Claude.
 Executar: python3 saf_faz2_integracao_codex_test.py; RENDER_DIR escolhe contraprova.
 Emulação Chrome a 1440/390; não comprova aparelho físico. Sem hook de todas as colunas.
@@ -54,16 +54,24 @@ try:
         check(f'{width}: pendência tem destino visível sem hover', 'a conferir' in text.lower(), text[-550:])
         # O teclado chega à linha e ao botão oculto por hover, sem chamar click no botão.
         J('(()=>{const r=' + ROW + ';r.scrollIntoView({block:"center"});r.focus()})()')
-        c.tab()
-        wait("document.activeElement.innerText==='Dividir'&&getComputedStyle(document.activeElement).opacity==='1'")
-        focused = J("({text:document.activeElement.innerText,opacity:getComputedStyle(document.activeElement).opacity})")
-        check(f'{width}: Tab alcança Dividir visível', focused.get('text') == 'Dividir' and focused.get('opacity') == '1', focused)
         if width == 1440:
+            c.tab()
+            wait("document.activeElement.innerText==='Dividir'&&getComputedStyle(document.activeElement).opacity==='1'")
+            focused = J("({text:document.activeElement.innerText,opacity:getComputedStyle(document.activeElement).opacity})")
+            check(f'{width}: Tab alcança Dividir visível', focused.get('text') == 'Dividir' and focused.get('opacity') == '1', focused)
             c.tecla('Enter', 'Enter', 13, '\r')
         else:
-            point = J("(()=>{const b=document.activeElement; b.scrollIntoView({block:'center'});const r=b.getBoundingClientRect();return [r.x+r.width/2,r.y+r.height/2,r.width,r.height]})()")
-            c.toque(point[0], point[1])
-        check(f'{width}: ativar Dividir abre diálogo', wait("document.querySelector('aside[role=dialog]')"), J("(document.querySelector('aside[role=dialog]')||{}).getAttribute?.('aria-label')"))
+            c.tecla('Enter', 'Enter', 13, '\r')
+            button = "[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Dividir T7 em parcelas')"
+            wait(button)
+            # Percorre o painel com Tab; não dá foco diretamente à ação.
+            for _ in range(35):
+                if J("document.activeElement?.innerText?.trim()==='Dividir T7 em parcelas'"): break
+                c.tab()
+            point = J("(()=>{const b="+button+";if(!b)return null;b.scrollIntoView({block:'center'});const r=b.getBoundingClientRect();return [r.x+r.width/2,r.y+r.height/2,r.width,r.height,document.activeElement===b]})()")
+            check(f'{width}: Tab alcança Dividir no painel do talhão', point and point[2]>0 and point[3]>0 and point[4], point)
+            if point: c.toque(point[0], point[1])
+        check(f'{width}: ativar Dividir abre diálogo', wait("document.querySelector('aside[role=dialog]')?.getAttribute('aria-label')?.includes('Dividir')"), J("(document.querySelector('aside[role=dialog]')||{}).getAttribute?.('aria-label')"))
         # Nova entrada limpa: painel por Enter na linha, depois rascunho sem salvar.
         open_seed(width)
         J('('+ROW+').focus()')
