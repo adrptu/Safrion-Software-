@@ -61,8 +61,8 @@ function pnaOSGrupos(os,campo) {
  if(os===null)return null;
  const m=new Map();
  os.forEach(x=>{
-  const raw=campo==='motivo'?(x.impedida?x.motivo:'Janela prevista ultrapassada'):x.dono;
-  const label=typeof raw==='string'&&raw.trim()?raw.trim():campo==='motivo'?'Impedimento não informado':'Responsável não informado';
+  const raw=campo==='causa'?(x.impedida?x.causa:'Janela prevista ultrapassada'):x.dono;
+  const label=typeof raw==='string'&&raw.trim()?raw.trim():campo==='causa'?'Causa não informada':'Responsável não informado';
   if(!m.has(label))m.set(label,{label,ids:[],impedidas:0,atrasadas:0});
   const g=m.get(label);g.ids.push(x.id);g.impedidas+=x.impedida?1:0;g.atrasadas+=x.atrasada?1:0;
  });
@@ -71,6 +71,11 @@ function pnaOSGrupos(os,campo) {
  return groups.map(g=>({...g,n:g.ids.length,
   situacao:[g.impedidas?g.impedidas+' impedida(s)':'',g.atrasadas?g.atrasadas+' atrasada(s)':''].filter(Boolean).join(' · '),
   barra:'display:block;height:8px;border-radius:3px;width:'+(100*g.ids.length/max)+'%;background:'+(g.impedidas?'#B42318':'#8A5A00')}));
+}
+// O getter valida o calendário; a apresentação apenas formata a referência devolvida.
+function pnaOSReferencia(ref) {
+ const data=ref&&ref.os&&ref.os.referencia;
+ return typeof data==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(data)?'Referência '+data.split('-').reverse().join('/'):'Referência de prazos indisponível';
 }
 function pnaVals(self,v) {
  g2keep(self,'g_pna');
@@ -82,7 +87,8 @@ function pnaVals(self,v) {
  }
  const c=cenGet(), rows=pnaLinhas(c);
  const ref=typeof agrPainelRef==='function'?agrPainelRef(c,{}):null, os=pnaOSLinhas(ref);
- v.pna_causas=pnaOSGrupos(os,'motivo')||[];v.pna_donos=pnaOSGrupos(os,'dono')||[];
+ v.pna_causas=pnaOSGrupos(os,'causa')||[];v.pna_donos=pnaOSGrupos(os,'dono')||[];
+ v.pna_os_referencia=pnaOSReferencia(ref);
  v.pna_os_total=os===null?'Indisponível':os.length+' O.S. com atenção identificada';
  v.pna_os_missing=os===null;
  v.pna_os_has_data=os!==null&&os.length>0;
@@ -117,7 +123,7 @@ def secao():
           '<p role="status" hidden="'+H('!pna_missing')+'">Dados de produção indisponíveis. Abra Previsão e colheita para conferir a origem.</p>'+
           table+'</section>')
     explicacao=('Cada O.S. é contada uma vez em cada gráfico, mesmo impedida e atrasada. '
-                'Motivo e responsável vêm da O.S.; o motivo é o impedimento informado, ou atraso quando não há impedimento. '
+                'Causa e responsável vêm da projeção da O.S.; a causa agrupa os impedimentos pela classificação da origem, ou atraso quando não há impedimento. '
                 'As duas distribuições descrevem as mesmas ordens e não devem ser somadas. '
                 'Barras relativas ao maior grupo. Fonte: O.S., todas as fazendas e safras disponíveis. '
                 'Área afetada não fornecida pela origem; não estimamos hectares por contagem de ordens.')
@@ -130,11 +136,11 @@ def secao():
                 '<div aria-hidden="true" style="height:8px;background:#EEF1EE;border-radius:3px;margin:6px 0"><span style="'+H('g.barra')+'"></span></div>'
                 '<span style="font-size:12px">'+H('g.situacao')+'</span></li></sc-for></ul></section>')
     pendencias=('<sc-if value="'+H('pna_os_has_data')+'" hint-placeholder-val="{{true}}"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">'+
-                grafico('Por motivo informado','pna_causas')+grafico('Por quem resolve','pna_donos')+'</div></sc-if>')
+                grafico('Por causa','pna_causas')+grafico('Por quem resolve','pna_donos')+'</div></sc-if>')
     osbody=('<section aria-label="O.S. que precisam de atenção">'
         f'<h2 style="font-size:16px;color:{E.INK}">O.S. · onde agir primeiro</h2>'
         '<p>'+H('pna_os_total')+' <button type="button" class="g2dica-i" aria-label="Como ler os impedimentos e atrasos" data-dica="'+E.esc(explicacao)+'" style="width:44px;height:44px;border:0;background:transparent">ⓘ</button></p>'
-        '<p style="font-size:12px">Todas as fazendas e safras disponíveis · Fonte: O.S.</p>'
+        '<p style="font-size:12px">Todas as fazendas e safras disponíveis · Fonte: O.S. · '+H('pna_os_referencia')+'</p>'
         '<p role="status" hidden="'+H('!pna_os_missing')+'">Dados de impedimentos e prazos indisponíveis. Consulte a origem em O.S.</p>'
         '<p role="status" hidden="'+H('!pna_os_atraso_missing')+'">Prazos indisponíveis para verificar atrasos. Consulte a janela na O.S.; os impedimentos disponíveis seguem abaixo.</p>'
         '<p role="status" hidden="'+H('!pna_os_imp_missing')+'">Impedimentos indisponíveis. Os atrasos disponíveis seguem abaixo.</p>'

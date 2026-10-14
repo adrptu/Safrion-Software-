@@ -45,14 +45,14 @@ for(const d of [0,1]) {
  const medido={id:'medido',ordk:{recebido:500},v:{recebido:500}};
  chk('G2 café a apurar não usa 1200 do rótulo direção '+d,g2sort([pnaRow(cafe),medido],{cols:[{k:'recebido',t:'num'}]},{so:{k:'recebido',d}}).map(r=>r.id),['medido','c9']);
 }
-// Contrato sintético da apresentação; NÃO valida o getter de domínio ainda não entregue.
-const impedida={id:'OS-0420',talhao:'T4',faz:'Santa Rita',saf:'Safra 2026/27',motivo:'Falta máquina',dono:'Caio',desde:null,origem:'OS.dc.html#OS-0420'};
+// Contrato sintético da apresentação; não substitui os testes do getter de domínio.
+const impedida={id:'OS-0420',talhao:'T4',faz:'Santa Rita',saf:'Safra 2026/27',motivo:'Falta máquina',causa:'Máquina ou equipamento',dono:'Caio',desde:null,origem:'OS.dc.html#OS-0420'};
 const atrasada={...impedida,prevista:'2026-09-22',dias:1};
 const ref={os:{impedidas:[impedida],atrasadas:[atrasada],n:{impedidas:1,atrasadas:1}},custos:null};
-const refAntes=JSON.stringify(ref), leitura=pnaOSLinhas(ref), grupo=pnaOSGrupos(leitura,'motivo')[0];
+const refAntes=JSON.stringify(ref), leitura=pnaOSLinhas(ref), grupo=pnaOSGrupos(leitura,'causa')[0];
 chk('Mesma O.S. impedida e atrasada é contada uma vez',leitura.length,1);
 chk('Duas situações não duplicam a contagem',[grupo.n,grupo.impedidas,grupo.atrasadas],[1,1,1]);
-chk('Motivo literal e IDs recuperáveis',[grupo.label,grupo.ids],['Falta máquina',['OS-0420']]);
+chk('Causa da origem e IDs recuperáveis',[grupo.label,grupo.ids],['Máquina ou equipamento',['OS-0420']]);
 chk('Impedimento tem vermelho do DS',grupo.barra.endsWith('background:#B42318'),true);
 chk('Sem mutação do retorno do domínio',JSON.stringify(ref),refAntes);
 chk('Ausente não significa sem pendência',pnaOSLinhas(null),null);
@@ -60,13 +60,16 @@ chk('Vazio válido permite mensagem sem pendência',pnaOSLinhas({os:{impedidas:[
 chk('Lista inválida não mostra zero',pnaOSLinhas({os:{impedidas:{},atrasadas:[]}}),null);
 chk('Origem inválida não cria navegação',pnaOSLinhas({os:{impedidas:[{...impedida,origem:'javascript:alert(1)'}],atrasadas:[]}}),null);
 chk('Responsável ausente explícito',pnaOSGrupos([{...leitura[0],dono:null}],'dono')[0].label,'Responsável não informado');
-const outras=pnaOSLinhas({os:{impedidas:[impedida,{...impedida,id:'OS-0421',origem:'OS.dc.html#OS-0421'},
- {...impedida,id:'OS-0422',origem:'OS.dc.html#OS-0422',dono:'Lia',motivo:'Outra causa'}],atrasadas:[atrasada]}});
+const outras=pnaOSLinhas({os:{impedidas:[impedida,{...impedida,id:'OS-0421',origem:'OS.dc.html#OS-0421',motivo:'Outra máquina indisponível'},
+ {...impedida,id:'OS-0422',origem:'OS.dc.html#OS-0422',dono:'Lia',motivo:'Falta insumo',causa:'Insumo no Estoque'}],atrasadas:[atrasada]}});
 chk('Agrupa responsável sem duplicar OS em duas situações',pnaOSGrupos(outras,'dono').map(g=>[g.label,g.n]),[['Caio',2],['Lia',1]]);
-chk('Maior causa primeiro e barra proporcional',pnaOSGrupos(outras,'motivo').map(g=>[g.n,/width:([\d.]+)%/.exec(g.barra)[1]]),[[2,'100'],[1,'50']]);
+chk('Maior causa primeiro e barra proporcional',pnaOSGrupos(outras,'causa').map(g=>[g.n,/width:([\d.]+)%/.exec(g.barra)[1]]),[[2,'100'],[1,'50']]);
 chk('Não soma as duas distribuições',pnaOSGrupos(outras,'dono').reduce((a,g)=>a+g.n,0),3);
 chk('Gráfico ausente não vira zero',pnaOSGrupos(null,'dono'),null);
-chk('Gráfico vazio preservado',pnaOSGrupos([],'motivo'),[]);
+chk('Causa ausente não é inventada a partir do selo',pnaOSGrupos([{...leitura[0],causa:null}],'causa')[0].label,'Causa não informada');
+chk('Referência vem da origem',pnaOSReferencia({os:{referencia:'2026-09-23'}}),'Referência 23/09/2026');
+chk('Referência ausente explícita',pnaOSReferencia({os:{referencia:null}}),'Referência de prazos indisponível');
+chk('Gráfico vazio preservado',pnaOSGrupos([],'causa'),[]);
 chk('Atraso ausente não esconde impedimento conhecido',pnaOSLinhas({os:{impedidas:[impedida],atrasadas:null}}).length,1);
 chk('Ambos ausentes não viram vazio',pnaOSLinhas({os:{impedidas:null,atrasadas:null}}),null);
 console.log('RESULTADO '+n+'/'+n);
@@ -161,7 +164,7 @@ def os_contract_ui():
             if J(e):return True
             time.sleep(.1)
         return False
-    fixture={"os":{"impedidas":[{"id":"OS-0420","talhao":"T4","faz":"Santa Rita","saf":"Safra 2026/27","motivo":"Falta máquina","dono":"Caio","desde":None,"origem":"OS.dc.html#OS-0420"}],"atrasadas":[{"id":"OS-0420","prevista":"2026-09-22","dias":1,"origem":"OS.dc.html#OS-0420"}]},"custos":None}
+    fixture={"os":{"referencia":"2026-09-23","impedidas":[{"id":"OS-0420","talhao":"T4","faz":"Santa Rita","saf":"Safra 2026/27","motivo":"Falta máquina","causa":"Máquina ou equipamento","dono":"Caio","desde":None,"origem":"OS.dc.html#OS-0420"}],"atrasadas":[{"id":"OS-0420","prevista":"2026-09-22","dias":1,"origem":"OS.dc.html#OS-0420"}]},"custos":None}
     try:
         for w,touch in [(1440,False),(390,True)]:
             absence=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>null;'})['identifier']
@@ -173,7 +176,7 @@ def os_contract_ui():
             fixture_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>('+json.dumps(fixture,ensure_ascii=False)+');'})['identifier']
             c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
             chk('Dois gráficos sem lista operacional '+str(w),wait("document.querySelectorAll('.pna-grupo').length===2&&!document.querySelector('[data-rid^=\"os:\"]')"))
-            chk('Contagem única e situações textuais '+str(w),J("(()=>{let s=document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]');return ['1 O.S. com atenção','Falta máquina','Caio','1 impedida(s) · 1 atrasada(s)'].every(t=>s.innerText.includes(t))&&!s.querySelector('[role=table]')})()"))
+            chk('Contagem única e situações textuais '+str(w),J("(()=>{let s=document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]');return ['1 O.S. com atenção','Máquina ou equipamento','Referência 23/09/2026','Caio','1 impedida(s) · 1 atrasada(s)'].every(t=>s.innerText.includes(t))&&!s.querySelector('[role=table]')})()"))
             chk('Impedimento vermelho '+str(w),J("[...document.querySelectorAll('.pna-grupo [aria-hidden] span')].every(e=>getComputedStyle(e).backgroundColor==='rgb(180, 35, 24)')"))
             chk('Cartões e colheita preservados '+str(w),J("document.querySelectorAll('.pn-card').length===4&&!!document.querySelector('[data-rid=lg19]')&&document.documentElement.scrollWidth<=innerWidth"))
             button="document.querySelector('[aria-label=\"Como ler os impedimentos e atrasos\"]')"
@@ -187,10 +190,10 @@ def os_contract_ui():
             c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Escape','code':'Escape','windowsVirtualKeyCode':27})
             chk('Escape fecha explicação '+str(w),wait("document.querySelector('#g2-dica').hidden"))
             c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':fixture_script})
-            parcial=json.loads(json.dumps(fixture));parcial['os']['atrasadas']=None
+            parcial=json.loads(json.dumps(fixture));parcial['os']['atrasadas']=None;parcial['os']['referencia']=None
             partial_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>('+json.dumps(parcial,ensure_ascii=False)+');'})['identifier']
             c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
-            chk('Atrasos sem dados preservam impedimento e explicação '+str(w),wait("(()=>{let s=document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]');return s&&s.innerText.includes('Prazos indisponíveis')&&s.innerText.includes('Falta máquina')&&!s.innerText.includes('Nenhuma O.S. impedida')})()"))
+            chk('Atrasos sem dados preservam impedimento e explicação '+str(w),wait("(()=>{let s=document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]');return s&&s.innerText.includes('Prazos indisponíveis')&&s.innerText.includes('Máquina ou equipamento')&&s.innerText.includes('Referência de prazos indisponível')&&!s.innerText.includes('Nenhuma O.S. impedida')})()"))
             c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':partial_script})
             incomplete={"os":{"impedidas":[],"atrasadas":[],"n":{"sem_prazo":2}}}
             incomplete_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>('+json.dumps(incomplete)+');'})['identifier']
