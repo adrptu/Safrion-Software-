@@ -135,11 +135,13 @@ try:
     lk=J("(()=>{const g=document.querySelector('[role=group][aria-label=\"Ajustar antes de liberar\"]'); return g?[...g.querySelectorAll('a')].filter(a=>a.innerText.trim()==='Agrofit ›').map(a=>[a.getAttribute('href'),a.target,a.rel]):[];})()") or []
     esp=sorted('AG-07.dc.html#'+r['id'] for n in cen['ins430'] for r in AGF['ref'] if n in r['nomes_fazenda'])
     J("window.__cen.cenMudar(null,c=>({msg:''}))"); junta('OS')
-    # Agrícola começa pela Consulta Agrofit: "‹ Agrícola" da O.S. → tela de entrada, cujos cartões seguem a ordem do menu (antes: subitens do menu lateral)
+    # Agrícola começa pela Consulta Agrofit: "‹ Agrícola" da O.S. → tela de entrada (antes: subitens do menu lateral). Desde 14/10/2026 a tela de
+    # entrada é o fluxo do processo (ui37.FLUXO37, mod_fluxo_test.py): o Agrofit abre o 1º bloco, antes de Planos agronômicos; o Painel fecha o último
     J("(document.querySelector('a.volta37')||{click:()=>0}).click()"); hub=espera("location.pathname.endsWith('/MOD-AGR.dc.html') && document.readyState==='complete' && document.querySelectorAll('a.mod-cartao').length>0")
     m=json.loads(J(CARDS) or '[]'); junta('MOD-AGR')
-    chk('1 O.S.: Agrícola começa pelo Painel e depois Agrofit (antes de Planos agronômicos na tela de entrada, aberta por "‹ Agrícola"); OS-0430 › Ajustar: "Agrofit ›" → AG-07.dc.html#<ficha>, nova aba',
-        hub and nv.get('cur')==['Agrícola'] and nv.get('volta')==['MOD-AGR.dc.html','‹ Agrícola'] and m[:3]==[['PAGR.dc.html','Painel'],['AG-07.dc.html','Agrofit'],['PA.dc.html','Planos agronômicos']]
+    ix=lambda h: [x[0] for x in m].index(h) if h in [x[0] for x in m] else -1
+    chk('1 O.S.: o fluxo do Agrícola começa pelo Agrofit, antes de Planos agronômicos (tela de entrada, aberta por "‹ Agrícola"); OS-0430 › Ajustar: "Agrofit ›" → AG-07.dc.html#<ficha>, nova aba',
+        hub and nv.get('cur')==['Agrícola'] and nv.get('volta')==['MOD-AGR.dc.html','‹ Agrícola'] and m[:1]==[['AG-07.dc.html','Agrofit']] and 0<ix('PA.dc.html') and ix('PAGR.dc.html')==len(m)-1
         and esp and sorted(h for h,_,_ in lk)==esp and all(t=='_blank' and 'noopener' in (r or '') for _,t,r in lk), [nv,hub,m[:3],esp,lk])
 
     # ---------- 2 · o link antigo da O.S. abre a lista filtrada pelo mesmo ingrediente ----------

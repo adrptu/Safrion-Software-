@@ -68,13 +68,15 @@ try:
     if 'desktop' in MODOS:
         print('== desktop · AG-02 Análises de solo')
         ir('AG-02.dc.html', limpa=True, perfil='Ana')
-        # D-01 como o usuário navega agora: "‹ Agrícola" → tela de entrada (cartões na ordem do menu) → cartão "Análises de solo" de volta ao AG-02
+        # D-01 como o usuário navega agora: "‹ Agrícola" → tela de entrada → cartão "Análises de solo" de volta ao AG-02. Desde 14/10/2026 a tela de
+        # entrada é o fluxo do processo (ui37.FLUXO37, mod_fluxo_test.py): Agrofit → Análises de solo → Planos agronômicos → Planejar safra (o laudo
+        # vem antes do plano, cujas doses ele sugere); a ordem do menu (MENU2) não muda
         nv = json.loads(J(NAV) or '{}'); clk('Voltar para Agrícola', w=0); h0 = espera(pronta('MOD-AGR.dc.html', "document.querySelectorAll('a.mod-cartao').length>0"))
         menu = [x[1] for x in json.loads(J(CARDS) or '[]')]; e0 = t.errs(); lib(); clk('Análises de solo', '.mod-grade', w=0)
         h1 = espera(pronta('AG-02.dc.html', "document.querySelectorAll('[role=table] [role=row]').length>1")); time.sleep(.3); lib()
         i_pa, i_as, i_sf = [menu.index(x) if x in menu else -1 for x in ('Planos agronômicos', 'Análises de solo', 'Planejar safra')]
-        t.chk('D-01 Agrícola: cartão Análises de solo entre Planos agronômicos e Planejar safra; ícone Agrícola marcado, "‹ Agrícola" e o cartão volta ao AG-02 sem erro de JS',
-              0 <= i_pa < i_as < i_sf and nv.get('cur') == ['Agrícola'] and nv.get('volta') == ['MOD-AGR.dc.html', '‹ Agrícola'] and h0 and h1 and not e0 and not t.errs(), [menu, nv, h0, h1, e0, t.errs()])
+        t.chk('D-01 Agrícola: no fluxo, cartão Análises de solo antes de Planos agronômicos e de Planejar safra; ícone Agrícola marcado, "‹ Agrícola" e o cartão volta ao AG-02 sem erro de JS',
+              0 <= i_as < i_pa < i_sf and nv.get('cur') == ['Agrícola'] and nv.get('volta') == ['MOD-AGR.dc.html', '‹ Agrícola'] and h0 and h1 and not e0 and not t.errs(), [menu, nv, h0, h1, e0, t.errs()])
         t.chk('cabeçalho: "1 inconsistente · 1 aguardando validação" e uma só ação primária (Registrar laudo)', '1 inconsistente · 1 aguardando validação' in t.header() and J("PRIMS()") == ['Registrar laudo'], [t.header(), J("PRIMS()")])
         nb = J("[...document.querySelectorAll('[role=table]')].slice(0,2).map(tb=>{ const g=tb.closest('section')||tb.parentElement; return [!!g.querySelector('input[placeholder^=\"Buscar\"]'), g.querySelectorAll('[role=columnheader]').length, (g.innerText.match(/▾/g)||[]).length]; })")
         # um campo de busca por tela (proprietário, 13/10/2026): o dos laudos busca também na água no solo (mesmo grupo, data-g2q)
