@@ -34,18 +34,19 @@ try:
         chk('OC-18 Situação com texto e motivo do A conferir na dica', t3['SITUAÇÃO'] == 'A conferir' and 'saída da soja' in (t3['_dica'] or ''), t3.get('_dica'))
         chk('OC-18 motivo também no texto para leitor de tela', bool(c.js("!!document.querySelector('[role=row] .g2sr')")))
         T7 = linha('T7', L0); chk('OC-05 negativo: T7 e C1 Perene sem Planejar nem Vincular (a S2627 cruza)', 'Planejar' not in T7['TALHÃO OU PARCELA'] and 'Vincular' not in T7['TALHÃO OU PARCELA'] and T7['OCUPA ATÉ'] == 'sem fim', T7)
-        todas = rows(); t1k = [r for r in todas if r['_kid'] and r['TALHÃO OU PARCELA'] in ('T1-A', 'T1-B')]
+        expande_tudo(); todas = rows(); t1k = [r for r in todas if r['_kid'] and r['TALHÃO OU PARCELA'] in ('T1-A', 'T1-B')]   # SAF-TAB: talhão de um cultivo abre recolhido
         chk('OC-02 grupo T1: c1 e c2 (Safra 2026/27) e d1 desta safra, por data de início', [(r['TALHÃO OU PARCELA'], r['CULTURA'], r['SAFRA']) for r in t1k] ==
             [('T1-A', 'Soja', 'Safra 2026/27 ›'), ('T1-B', 'Soja', 'Safra 2026/27 ›'), ('T1-A', 'Milho', '—')], t1k)
         chk('R-13 total da Área só desta safra (553 ha)', c.js("(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const r=t.querySelector('.g2tot'); return r?r.innerText.replace(/\\s+/g,' '):'';})()").find('553 ha') >= 0)
         chk('R-23 sem caixas de seleção nos cultivos (proprietário, 13/10/2026): o plano entra pela primária ou pela linha', c.js("document.querySelectorAll('[role=table] input[type=checkbox]').length") == 0)
-        botao('Livre 1'); L = nivel0()
+        botao('Livre 1'); L = nivel0(); expande_tudo()   # SAF-TAB: abre o T1 para ver as filhas
         chk('OC-04 chip Livre mostra só o T1 (com as filhas ao abrir)', [r['TALHÃO OU PARCELA'].split(' ')[0] for r in L] == ['T1'] and len(rows()) == 4, [r['TALHÃO OU PARCELA'] for r in rows()])
         botao('Todas 8')
         abre('#saf=S2627&passo=cultivos')
         chk('OC-03 faixa S2627 com "1 sucessão a conferir"', faixa() == FX2627, faixa())
         chk('OC-04 chips S2627', chips() == ['Todas 8', 'Planejado 7', 'A conferir 1'], chips())
-        chk('§3.2 S2627 com 18 linhas de grupos abertos', len(rows()) == 18, len(rows()))
+        n0 = len(rows()); expande_tudo(); n1 = len(rows())
+        chk('§3.2 S2627: 14 linhas ao abrir (T2 e P2, de um cultivo só, recolhidos; SAF-TAB) e 18 com "Expandir tudo"', (n0, n1) == (14, 18), (n0, n1))
         n2627 = nota(); chk('§5.1 nota da S2627 cita a sucessão do P1 com a saída', 'P1: o Feijão da Safrinha 2027 começa em 15/04/2027; a saída da soja é estimada em 08/03/2027.' in n2627 and 'Informar colheita de P1 ›' in n2627, n2627)
         abre('#saf=S2526&passo=cultivos'); L = rows()
         chk('OC-16 S2526 encerrada: 5 cultivos, sem Planejar nem Dividir, Situação "—"', len(L) == 5 and all(r['SITUAÇÃO'] == '—' for r in L) and not any('Planejar' in r['TALHÃO OU PARCELA'] or 'Dividir' in r['TALHÃO OU PARCELA'] for r in L), L[:2])

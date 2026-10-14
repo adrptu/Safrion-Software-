@@ -90,16 +90,26 @@ function sgCompor(safs, ped, op) {
   return Object.assign({}, res, { safs: out, repetido: false });
 }
 
-// leitura reunida: o que cada fazenda tem e a soma só do que se soma. info[saf] = {area_ha: número|null, cultivos, estado,
+// leitura reunida: o que cada fazenda tem e a soma só do que se soma. info[saf] = {area_ha: número|null, area_incompleta?: true quando
+// area_ha é só o subtotal conhecido (sgAreaDe), cultivos, estado,
 // plano?: 'Aprovado'|'Pendente'|null, orcamento?: idem, demanda: [{insumo, un, qtd, talhao, ciclo, destino}]|null, sol: {id, estado}|null}
 // Sem estado geral herdado: a safra mostra a contagem de estados e diz quando está parcial. Falta de dado não vira zero.
+// área de uma fazenda a partir das áreas dos cultivos (Codex 6179070575, SAF-GRUPO-AREA-INTEGRACAO-01): vazio, nulo, não finito ou negativo é
+// desconhecido e não vira zero. Sem cultivo: 0 ha, completa. Todos desconhecidos: null. Mistura: o subtotal conhecido, marcado incompleto.
+function sgAreaDe(areas) {
+  const L = Array.isArray(areas) ? areas : []; const k = L.map(sgNum).filter(n => n !== null && n >= 0);
+  if (!L.length) return { area_ha: 0, area_incompleta: false };
+  if (!k.length) return { area_ha: null, area_incompleta: false };
+  return { area_ha: k.reduce((a, n) => sgSoma(a, n), 0), area_incompleta: k.length < L.length };
+}
 function sgLeitura(grupo, info) {
   const I = info || {}; const fz = grupo.subs.map(s => { const x = I[s.id] || {};
     const area = sgNum(x.area_ha);
-    return { faz: s.faz, saf: s.id, area_ha: area, cultivos: Number(x.cultivos) || 0, estado: x.estado || s.estado || SG_ESTADO_NOVA,
+    return { faz: s.faz, saf: s.id, area_ha: area, area_incompleta: area !== null && x.area_incompleta === true, cultivos: Number(x.cultivos) || 0, estado: x.estado || s.estado || SG_ESTADO_NOVA,
       plano: x.plano || null, orcamento: x.orcamento || null, sol: x.sol || null, demanda: Array.isArray(x.demanda) ? x.demanda : null }; });
   const conh = fz.filter(f => f.area_ha !== null);
-  const area = { ha: conh.reduce((a, f) => sgSoma(a, f.area_ha), 0), completa: conh.length === fz.length, faltam: fz.filter(f => f.area_ha === null).map(f => f.faz) };
+  const falta = (f) => f.area_ha === null || f.area_incompleta;   // área desconhecida ou só em parte conhecida: o total fica incompleto
+  const area = { ha: conh.reduce((a, f) => sgSoma(a, f.area_ha), 0), completa: !fz.some(falta), faltam: fz.filter(falta).map(f => f.faz) };
   const cont = (k) => { const m = {}; fz.forEach(f => { const t = f[k] || 'sem registro'; m[t] = (m[t] || 0) + 1; }); return Object.keys(m).map(t => ({ t, n: m[t] })); };
   const estados = cont('estado'), planos = cont('plano'), orcamentos = cont('orcamento');
   const sol = { enviadas: fz.filter(f => f.sol).length, de: fz.length };

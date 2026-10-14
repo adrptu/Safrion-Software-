@@ -926,7 +926,8 @@ function sgAplicar(self,rows,r,isNew){ const d={nome:r.v.nome,ini:r.v.ini,fim:r.
 // leitura reunida das fazendas da safra aberta (sgLeitura): área dos cultivos, estado, solicitação e demanda de cada uma
 function sgInfo(self,G,comDem){ const o={}; G.subs.forEach(s=>{ const cs=cultsDe(self,s.id); const sol=solMap(self)[s.id];
   let dem=null; if(comDem){ try{ const dm=demanda(self,s.id); dem=Object.values(dm).filter(x=>x&&x.nome).map(x=>({insumo:x.nome,un:x.un,qtd:x.liq,destino:(dm._ent&&dm._ent.local)||('Almoxarifado '+s.faz)})); }catch(e){ dem=null; } }
-  o[s.id]={area_ha:cs.reduce((a,c)=>a+(Number(c.v.area)||0),0),cultivos:cs.length,estado:s.estado,sol:sol?{id:sol.id,estado:sol.estado||''}:null,demanda:dem}; }); return o; }
+  const ar=sgAreaDe(cs.map(c=>c.v.area));   // Codex 6179070575: área vazia não vira zero
+  o[s.id]={area_ha:ar.area_ha,area_incompleta:ar.area_incompleta,cultivos:cs.length,estado:s.estado,sol:sol?{id:sol.id,estado:sol.estado||''}:null,demanda:dem}; }); return o; }
 // envio das fazendas da safra: uma solicitação por sub-safra pelo comando de sempre; a chave fica até tudo dar certo (repetir só tenta o que falhou)
 function sgEnviarUm(self,saf){ const cap={msg:''}; const ant=(self.__solTmp||{})[saf]; self.__envCap=cap; try{ enviar(self,saf); }finally{ self.__envCap=null; }
   const m=cap.msg||''; const volta=()=>{ if(!self.__solTmp) return; if(ant) self.__solTmp[saf]=ant; else delete self.__solTmp[saf]; };   // o que não foi gravado não fica como enviado

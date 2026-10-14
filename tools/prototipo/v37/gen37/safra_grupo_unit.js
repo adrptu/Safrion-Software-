@@ -3,7 +3,7 @@
 // SG_ARQ=<arquivo> roda contra outra versão do domínio (contraprova).
 const fs = require('fs'), path = require('path');
 const src = fs.readFileSync(process.env.SG_ARQ || path.join(__dirname, 'safra_grupo.js'), 'utf8');
-const NOMES = ['sgMaeDe', 'sgGrupo', 'sgImpedeRemover', 'sgCompor', 'sgLeitura', 'sgEnviar'];
+const NOMES = ['sgMaeDe', 'sgGrupo', 'sgImpedeRemover', 'sgCompor', 'sgLeitura', 'sgEnviar', 'sgAreaDe'];
 const G = new Function(src + '\nreturn {' + NOMES.map(n => n + ': (typeof ' + n + "==='function'?" + n + ':null)').join(',') + '};')();
 const FX = JSON.parse(fs.readFileSync(path.join(__dirname, 'safra_grupo_fixtures.json'), 'utf8'));
 let ok = 0, falhas = 0;
@@ -103,5 +103,17 @@ const i17 = cp(FX.leitura.uma_aprovada_outra_pendente); i17.B.demanda[0].qtd = n
 const L17 = F('sgLeitura')(g10, i17);
 chk('G17 quantidade nula marca a fazenda incompleta e mantém as outras linhas; quantidade zero não marca nem vira linha', () => L17.demanda.incompleta.join() === 'Lagoa Grande'
   && L17.demanda.linhas.some(l => l.faz === 'Lagoa Grande' && l.un === 'kg') && !L17.demanda.linhas.some(l => l.insumo === 'Ureia') && L17.parcial, () => L17.demanda);
+// 18–19 · Codex 6179070575 (SAF-GRUPO-AREA-INTEGRACAO-01): a área da fazenda vinda dos cultivos não transforma vazio em zero
+const A = (xs) => F('sgAreaDe')(xs);
+chk('G18 área dos cultivos: vazio/nulo/NaN/negativo são desconhecidos; zero informado é zero; sem cultivo é 0 completo; todos desconhecidos é null; mistura é o subtotal incompleto',
+  () => JSON.stringify(A([])) === '{"area_ha":0,"area_incompleta":false}' && JSON.stringify(A([0])) === '{"area_ha":0,"area_incompleta":false}'
+    && JSON.stringify(A(['', null])) === '{"area_ha":null,"area_incompleta":false}' && JSON.stringify(A([5, ''])) === '{"area_ha":5,"area_incompleta":true}'
+    && JSON.stringify(A([5, 'x', NaN, -2, Infinity])) === '{"area_ha":5,"area_incompleta":true}' && JSON.stringify(A([1.1, 2.2])) === '{"area_ha":3.3,"area_incompleta":false}',
+  () => [A([]), A([0]), A(['', null]), A([5, '']), A([5, 'x', NaN, -2, Infinity]), A([1.1, 2.2])]);
+const L19f = (a, b) => F('sgLeitura')(g10, { A: Object.assign({ demanda: [] }, A(a)), B: Object.assign({ demanda: [] }, A(b)) });
+let L19 = null, L19b = null;
+chk('G19 leitura: fazenda A só com área vazia e B com 5 ha → 5 ha incompleto, falta A (antes: completo); A com 3 conhecidos e 1 vazio → 8 ha incompleto, falta A',
+  () => (L19 = L19f(['', null], [5]), L19b = L19f([3, ''], [5]), true) && L19.area.ha === 5 && !L19.area.completa && L19.area.faltam.join() === 'Santa Rita' && L19.parcial
+    && L19b.area.ha === 8 && !L19b.area.completa && L19b.area.faltam.join() === 'Santa Rita', () => [L19 && L19.area, L19b && L19b.area]);
 console.log(`TOTAL ${ok + falhas} · OK ${ok} · FALHAS ${falhas}`);
 process.exit(falhas ? 1 : 0);
