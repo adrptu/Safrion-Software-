@@ -278,9 +278,19 @@ MACRO = {
 }
 FAZENDAS = ['Lagoa Grande', 'Santa Rita', 'Boa Vista']
 SAFRAS_MF = ['2026/27', 'Safrinha 2027', '2025/26']
+# faixa "Filtros" (funil + seletores): o mesmo desenho em toda tela que filtra dados (14/10/2026, proprietário: "em manutenção os filtros não
+# estavam seguindo o padrão que definimos"). MF_SEL e MF_LBL são o seletor e o rótulo; faixa_filtros monta a faixa (shell37 e telas com filtros próprios)
+MF_SEL = ('font-family: inherit; font-size: 12px; font-weight: 700; padding: 4px 26px 4px 10px; min-height: 32px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer;')   # alvo de toque ≥ 32 px
+MF_LBL = 'display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: {MUTED}; font-weight: 700;'
+def faixa_filtros(inner, rot='Filtros', fim=''):
+    cab = (f'<span class="mf-rot" data-dica="Filtros" style="display: inline-flex; align-items: center; color: {MUTED};">{icon("filtro",18,MUTED)}</span>' if rot == 'Filtros'
+           else f'<span class="mf-rot" style="font-size: 11.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: {MUTED};">{rot}</span>')
+    return (f'<div class="mf-tela" role="group" aria-label="{rot}" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex-shrink: 0; '
+            f'padding: {"0 14px" if fim else "8px 14px"}; border: 1px solid {LINE}; border-radius: 12px; background: {SURF};">'
+            f'{cab}{inner}' + (f'<span style="margin-left: auto;">{fim}</span>' if fim else '') + '</div>')
 def _macro_html(fname, ctx, sep=True):
     cfg = MACRO.get(fname)
-    sel = ('font-family: inherit; font-size: 12px; font-weight: 700; padding: 4px 26px 4px 10px; min-height: 32px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer;')   # alvo de toque ≥ 32 px
+    sel = MF_SEL
     lab = f'display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: {GRAYS}; font-weight: 700; font-size: 11.5px;'
     if cfg is None:
         return ''
@@ -353,11 +363,7 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
             # (texto, funil + texto, só o funil); fica só o funil, com a dica "Filtros" (cada filtro já tem o nome ao lado; no celular sobra largura).
             # O grupo continua com o nome acessível "Filtros". Só contexto (Planejar safra, Compra) segue "Trabalhando em".
             _rot='Filtros' if _filtra else 'Trabalhando em'
-            _cab=(f'<span class="mf-rot" data-dica="Filtros" style="display: inline-flex; align-items: center; color: {MUTED};">{icon("filtro",18,MUTED)}</span>' if _filtra
-                  else f'<span class="mf-rot" style="font-size: 11.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: {MUTED};">{_rot}</span>')
-            body=(f'<div class="mf-tela" role="group" aria-label="{_rot}" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex-shrink: 0; '
-                  f'padding: {"0 14px" if mf_fim else "8px 14px"}; border: 1px solid {LINE}; border-radius: 12px; background: {SURF};">'
-                  f'{_cab}{mf}' + (f'<span style="margin-left: auto;">{mf_fim}</span>' if mf_fim else '') + '</div>') + body   # mf_fim: ação da tela que cabe na faixa (Planejar safra: Comparar versões do plano), sem uma linha a mais
+            body=faixa_filtros(mf,_rot,mf_fim) + body   # mf_fim: ação da tela que cabe na faixa (Planejar safra: Comparar versões do plano), sem uma linha a mais
         search=False
     st=chip(status[0],status[1]) if status else ''
     srch=(f'<span style="flex-grow: 1;"></span><span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid {LINE}; border-radius: 999px; background: {SURF}; color: {MUTED}; font-size: 12.5px; min-width: 220px;">'

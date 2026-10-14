@@ -1070,8 +1070,9 @@ INTERACAO_CSS=(
     "aside[role=dialog]>div[style*=\"justify-content: flex-end; gap: 8px; padding-top: 6px; border-top\"]{position:sticky;bottom:0;z-index:2;background:#FFFFFF;padding-bottom:2px}"
     "svg [role=button]:focus-visible{outline:none;stroke:#15201A;stroke-width:4px;stroke-dasharray:7 4}"
     # indisponível: aparência diferente e cursor de proibido; o motivo fica no texto/rótulo do próprio componente
-    "button:disabled{opacity:.55;cursor:not-allowed;filter:none;box-shadow:none}"
-    "[aria-disabled=true]{cursor:not-allowed}"
+    # (14/10: o estilo do próprio botão trazia cursor:pointer e vencia a regra; !important garante o cursor de proibido em todo indisponível)
+    "button:disabled{opacity:.55;cursor:not-allowed!important;filter:none;box-shadow:none}"
+    "[aria-disabled=true]{cursor:not-allowed!important}"
     # cartão navegável (variante .g2card, ex.: planos agronômicos): pista permanente "Abrir … →" no próprio botão
     ".g2card{background:#FFFFFF;border:1px solid #E4E9E5;position:relative}"
     ".g2card-cta{display:inline-flex;align-items:center;gap:4px;color:#1E7A4C;font-weight:700;font-size:12.5px;white-space:nowrap}"
