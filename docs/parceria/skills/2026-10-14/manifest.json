@@ -36,8 +36,8 @@
   },
   {
     "file": "shared/agro-gestao-conhecimento/assets/agronomia.md",
-    "sha256": "db2719b248ff8f56a756913c3e047059e415f86d15b782aff7abfa0628f98634",
-    "bytes": 7618
+    "sha256": "6ecba881e03a3c47f5f8a01dfc5d9b56030eb62f0c68f0b3224522ea0cc41d01",
+    "bytes": 7853
   },
   {
     "file": "shared/agro-gestao-conhecimento/assets/contabilidade-financas.md",
@@ -186,8 +186,8 @@
   },
   {
     "file": "shared/indicadores-satelite/assets/referencia-implementacao.md",
-    "sha256": "3a765737dc09288725ae42629acb781dd55168ab5ba591e38d4564de27f31579",
-    "bytes": 6574
+    "sha256": "3f61539c9f099c4976f30cf2f3cdae5535e206b5fafd9d578bfd5331e1a0cbb3",
+    "bytes": 7410
   },
   {
     "file": "shared/master-detail-ux/SKILL.md",

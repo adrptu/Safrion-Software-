@@ -24,29 +24,32 @@ export type Escala = { min: number; max: number };            // valores que vir
 export const escalaAbsoluta: Escala = { min: 0.30, max: 0.82 }; // limites da classe 1 e 6
 
 /** Estica o contraste ao próprio talhão (ou à fazenda): percentil 2–98 dos pixels válidos. */
-export function escalaRelativa(valores: Float32Array, p = [0.02, 0.98]): Escala {
+export function escalaRelativa(valores: Float32Array, p = [0.02, 0.98], minAmostra = 2): Escala | null {
   const v = Array.from(valores).filter(Number.isFinite).sort((a, b) => a - b);
+  if (v.length < Math.max(2, minAmostra)) return null; // sem dado ou amostra insuficiente
   const q = (t: number) => v[Math.min(v.length - 1, Math.floor(t * (v.length - 1)))];
   const min = q(p[0]), max = q(p[1]);
   return max - min < 0.02 ? { min: min - 0.01, max: max + 0.01 } : { min, max }; // talhão uniforme não vira ruído
 }
 ```
 
+`null` significa sem escala/estatística confiável: mostrar “Sem dado” ou “Amostra insuficiente”, sem classificar vigor ou ausência de manchas. O mínimo de 2 no exemplo evita uma amostra única; o mínimo operacional deve ser definido por fonte, resolução e cobertura exigida, sem presumir validade agronômica por atingir esse número.
+
 ## Colorização no cliente (rampa contínua, sem suavização espacial)
 
 ```ts
 const STOPS = CLASSES_VIGOR.map(c => c.cor);   // 6 paradas igualmente espaçadas em t ∈ [0,1]
 
-export function corDoIndice(valor: number, escala: Escala): string {
-  if (!Number.isFinite(valor)) return COR_SEM_DADO;
+export function corDoIndice(valor: number, escala: Escala | null): string {
+  if (!Number.isFinite(valor) || !escala || !Number.isFinite(escala.min) || !Number.isFinite(escala.max) || escala.max <= escala.min) return COR_SEM_DADO;
   const t = Math.min(1, Math.max(0, (valor - escala.min) / (escala.max - escala.min)));
   const pos = t * (STOPS.length - 1), i = Math.floor(pos), f = pos - i;
   return i >= STOPS.length - 1 ? STOPS[i] : misturaHex(STOPS[i], STOPS[i + 1], f);
 }
 
 /** Classe para legenda, tabela e histograma: no modo relativo, os limites são os 6 cortes da escala. */
-export function classeDoIndice(valor: number, escala: Escala) {
-  if (!Number.isFinite(valor)) return null;
+export function classeDoIndice(valor: number, escala: Escala | null) {
+  if (!Number.isFinite(valor) || !escala || !Number.isFinite(escala.min) || !Number.isFinite(escala.max) || escala.max <= escala.min) return null;
   const t = (valor - escala.min) / (escala.max - escala.min);
   return CLASSES_VIGOR[Math.min(5, Math.max(0, Math.floor(t * 6)))];
 }
@@ -56,8 +59,9 @@ Renderizar em `<canvas>` pixel a pixel (ImageData) ou tile PNG; CSS `image-rende
 ## Estatística e manchas
 
 ```ts
-export function estatisticas(v: Float32Array) {
+export function estatisticas(v: Float32Array, minAmostra = 2) {
   const s = Array.from(v).filter(Number.isFinite).sort((a, b) => a - b);
+  if (s.length < Math.max(2, minAmostra)) return null;
   const q = (t: number) => s[Math.floor(t * (s.length - 1))];
   const media = s.reduce((a, b) => a + b, 0) / s.length;
   const dp = Math.sqrt(s.reduce((a, b) => a + (b - media) ** 2, 0) / s.length);
@@ -66,8 +70,9 @@ export function estatisticas(v: Float32Array) {
 
 /** Exemplo conservador: abaixo de ambos os cortes (min), não OU; candidatos a vistoria, sem diagnóstico causal. Validar limiares, nodata e amostra. */
 export function mascaraFraco(v: Float32Array, st: ReturnType<typeof estatisticas>) {
+  if (!st) return null; // não interpretar falta de estatística como ausência de manchas
   const corte = Math.min(st.media - 1.5 * st.dp, st.p10);
-  return v.map(x => (Number.isFinite(x) && x < corte ? 1 : 0)) as unknown as Uint8Array;
+  return Uint8Array.from(v, x => (Number.isFinite(x) && x < corte ? 1 : 0));
 }
 
 /** Componentes conexos (8 vizinhos) com área mínima; retorna manchas com área, média e centroide em índice de pixel. */

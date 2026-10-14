@@ -57,3 +57,9 @@ Validação: 20/20 skills, 17/17 adaptador, 53 arquivos no manifesto; Gitleaks d
 ### Complemento de saída e formatação
 Achado4275898120 tratado: beforeunload não inicia save assíncrono; pede confirmação quando existe edição sem recibo ou gravação pendente. Teste do guard em eventos canceláveis no navegador: 10/10; a versão46e6ded falha nos dois casos de saída. Não prova comportamento de encerramento forçado/mobile, cujos limites estão na skill. Gatilho de persistência local depende da autorização e contrato do produto.
 CI Código do46e6ded falhou em Prettier (log116086875772), no eslint.config.js: corrigido com .prettierrc.json canônico (singleQuote true, printWidth110). Prettier e lint do pacote/config executados com sucesso;20/20skills e17/17adaptador. Demais provas continuam válidas.
+
+
+### Correção dimensional e nodata — 14/10, após 8d08d81
+Achados 4275977677/4275977687: população agora usa 10 000 m²/ha e espaçamento em metros; exemplo 10 plantas/m a 0,50 m = 200 000 plantas/ha, massa de sementes expressa por hectare. Escala/estatística retornam null sem amostra suficiente; cor/classe/máscara preservam o estado desconhecido. Mínimo operacional é configurável e não implica validade agronômica. Máscara retorna Uint8Array real, sem cast enganoso.
+Contraprova extraída das próprias referências: antes 2/22, depois 22/22; nodata, vazio, único, uniforme, mínimo configurado, escala inválida e conversão dimensional. Teste portátil em provas/dominio/; usa TypeScript já instalado, sem consulta paga ou dado real. 20/20 skills, 17/17 adaptador, 53 arquivos, 33 alterados versus origem. Manifesto d730419fce7bc2dfe105c8c370db0839f82dee0dee6e46852479d4adf47b2029.
+CI Código no8d08d81 verde; Gitleaks histórico permanece separado, sem alteração de proteção/ignore/branches. Revisão crítica, integração e recibo de carregamento cloud pelo Claude continuam pendentes.

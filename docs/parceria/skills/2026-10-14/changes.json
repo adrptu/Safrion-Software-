@@ -32,7 +32,7 @@
   {
     "file": "shared/agro-gestao-conhecimento/assets/agronomia.md",
     "before": "aac9afab74d62d3a3eaf15da4da2085a8cb6ca5d0ce611ba0af4f94f1a1284de",
-    "after": "db2719b248ff8f56a756913c3e047059e415f86d15b782aff7abfa0628f98634"
+    "after": "6ecba881e03a3c47f5f8a01dfc5d9b56030eb62f0c68f0b3224522ea0cc41d01"
   },
   {
     "file": "shared/benchmark-top5/SKILL.md",
@@ -98,6 +98,11 @@
     "file": "shared/indicadores-satelite/SKILL.md",
     "before": "4a4a4dd7f2ba13edd494262ffae05310e4cee89674b0889b035467d1550603f6",
     "after": "e8216a3ff73804919cb8f47a44d1a34635d2250e404c777e384bd72727b8802e"
+  },
+  {
+    "file": "shared/indicadores-satelite/assets/referencia-implementacao.md",
+    "before": "3a765737dc09288725ae42629acb781dd55168ab5ba591e38d4564de27f31579",
+    "after": "3f61539c9f099c4976f30cf2f3cdae5535e206b5fafd9d578bfd5331e1a0cbb3"
   },
   {
     "file": "shared/master-detail-ux/SKILL.md",

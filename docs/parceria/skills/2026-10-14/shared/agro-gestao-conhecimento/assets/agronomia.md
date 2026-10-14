@@ -6,7 +6,8 @@
 ## Planejamento de safra
 - **ZARC** (Zoneamento Agrícola de Risco Climático, MAPA): janela de plantio por cultura/município/solo/ciclo — condição para crédito e Proagro. Alertar plantio fora da janela.
 - **Rotação/sucessão**: histórico do talhão (cultura, cultivar, defensivos usados — rotação de mecanismos de ação IRAC/FRAC/HRAC).
-- **População de plantas**: plantas/ha = (1 000 000 / espaçamento m) × plantas/m linear; sementes/ha = população / (germinação × vigor/emergência); kg sementes = sementes/ha × PMS (g) / 1000 / 1000.
+- **População de plantas**: plantas/ha = (10 000 m²/ha / espaçamento entre linhas em m) × plantas/m linear; sementes/ha = população / (germinação × vigor/emergência); kg sementes/ha = sementes/ha × PMS (g) / 1000 / 1000.
+  Exemplo dimensional: 10 plantas/m e 0,50 m entre linhas → 200 000 plantas/ha. Germinação e emergência são frações (0–1), com denominador positivo; ausência ou zero não permite calcular sementes/ha.
 - **Graus-dia** (GD) = (Tmáx + Tmín)/2 − Tb (Tb soja 10 °C, milho 10 °C); previsão de estágios e colheita por acúmulo térmico.
 - **Balanço hídrico climatológico** (Thornthwaite-Mather) para risco; **ETc = Kc × ETo** (ETo Penman-Monteith FAO-56; Kc por estágio, tabela FAO/Embrapa parametrizável).
 

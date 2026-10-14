@@ -1,0 +1,1 @@
+Execute com Node e TypeScript já instalados no repositório: `node docs/parceria/skills/2026-10-14/provas/dominio/domain-test.mjs`. O teste extrai os blocos TypeScript do asset e o numerador documentado, sem copiar uma implementação. Limite: exemplos matemáticos/sintéticos; não é validação agronômica de recomendação ou sensor.

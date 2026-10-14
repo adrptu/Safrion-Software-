@@ -1,0 +1,23 @@
+FAIL 10 plantas/m a 0,5m = 200000 plantas/ha
+FAIL espaçamento 1m, 5 plantas/m = 50000/ha
+FAIL vazio: sem escala
+FAIL vazio: sem estatística
+FAIL vazio: cor sem dado
+FAIL vazio: sem classe
+FAIL vazio: máscara desconhecida
+FAIL nodata: sem escala
+FAIL nodata: sem estatística
+FAIL nodata: cor sem dado
+FAIL nodata: sem classe
+FAIL nodata: máscara desconhecida
+FAIL único: sem escala
+FAIL único: sem estatística
+FAIL único: cor sem dado
+FAIL único: sem classe
+FAIL único: máscara desconhecida
+PASS uniforme tem escala finita não degenerada
+FAIL mínimo operacional configurado respeitado
+PASS amostra válida mantém média
+FAIL máscara é Uint8Array, ignora nodata
+FAIL escala inválida não classifica
+2/22
