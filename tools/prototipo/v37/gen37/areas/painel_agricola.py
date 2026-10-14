@@ -6,10 +6,11 @@ Sem build() automático: o compositor chama pnaVals no EXTRAVALS existente.
 Regras e unidades vêm de producao.js. Esta leitura não executa comandos.
 """
 import engine as E
+import json
 
 H = lambda s: '{{' + s + '}}'
 
-JS = r'''
+JS = 'const PNA_CORES='+json.dumps(dict(impedida=E.RED,atrasada=E.YEL))+';\n'+r'''
 function pnaLeitura(c,id) {
  const X=prTal(c,id), k=X.k, R=X.R;
  const semana=k.semanal?prSem(prHoje()):null;
@@ -69,13 +70,13 @@ function pnaOSGrupos(os,campo) {
  const groups=[...m.values()].sort((a,b)=>b.ids.length-a.ids.length||a.label.localeCompare(b.label,'pt-BR'));
  const max=Math.max(1,...groups.map(g=>g.ids.length));
  return groups.map(g=>({...g,n:g.ids.length,
-  situacao:[g.impedidas?g.impedidas+' impedida(s)':'',g.atrasadas?g.atrasadas+' atrasada(s)':''].filter(Boolean).join(' · '),
-  barra:'display:block;height:8px;border-radius:3px;width:'+(100*g.ids.length/max)+'%;background:'+(g.impedidas?'#B42318':'#8A5A00')}));
+  situacao:g.impedidas&&g.atrasadas?[g.impedidas+' impedida(s)',g.atrasadas+' atrasada(s)'].join(' · '):'',
+  barra:'display:block;height:8px;border-radius:3px;width:'+(100*g.ids.length/max)+'%;background:'+(g.impedidas?PNA_CORES.impedida:PNA_CORES.atrasada)}));
 }
 // O getter valida o calendário; a apresentação apenas formata a referência devolvida.
 function pnaOSReferencia(ref) {
  const data=ref&&ref.os&&ref.os.referencia;
- return typeof data==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(data)?'Referência '+data.split('-').reverse().join('/'):'Referência de prazos indisponível';
+ return typeof data==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(data)?'Prazos até '+data.split('-').reverse().join('/'):'Referência de prazos indisponível';
 }
 
 // Só formatação do contrato agrCustoRef. Nenhuma soma, rateio ou desvio de negócio aqui.
@@ -130,7 +131,7 @@ function pnaVals(self,v) {
  v.pna_custo_missing=custos===null;v.pna_custo_empty=custos!==null&&!custos.rows.length;
  v.pna_custo_fora=!!custos&&custos.fora.length>0;
 
- v.pna_os_total=os===null?'Indisponível':os.length+' O.S. com atenção identificada';
+ v.pna_os_total=os===null?'Indisponível':os.length+' O.S. precisam de ação';
  v.pna_os_missing=os===null;
  v.pna_os_has_data=os!==null&&os.length>0;
  v.pna_os_atraso_missing=os!==null&&ref.os.atrasadas===null;
@@ -175,13 +176,13 @@ def secao():
                 '<div style="display:flex;justify-content:space-between;gap:12px"><span>'+H('g.label')+'</span>'
                 '<strong style="white-space:nowrap">'+H('g.n')+' O.S.</strong></div>'
                 '<div aria-hidden="true" style="height:8px;background:#EEF1EE;border-radius:3px;margin:6px 0"><span style="'+H('g.barra')+'"></span></div>'
-                '<span style="font-size:12px">'+H('g.situacao')+'</span></li></sc-for></ul></section>')
+                '<span hidden="'+H('!g.situacao')+'" style="font-size:12px">'+H('g.situacao')+'</span></li></sc-for></ul></section>')
     pendencias=('<sc-if value="'+H('pna_os_has_data')+'" hint-placeholder-val="{{true}}"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">'+
                 grafico('Por causa','pna_causas')+grafico('Por quem resolve','pna_donos')+'</div></sc-if>')
     osbody=('<section aria-label="O.S. que precisam de atenção">'
         f'<h2 style="font-size:16px;color:{E.INK}">O.S. · onde agir primeiro</h2>'
         '<p>'+H('pna_os_total')+' <button type="button" class="g2dica-i" aria-label="Como ler os impedimentos e atrasos" data-dica="'+E.esc(explicacao)+'" style="width:44px;height:44px;border:0;background:transparent">ⓘ</button></p>'
-        '<p style="font-size:12px">Todas as fazendas e safras disponíveis · Fonte: O.S. · '+H('pna_os_referencia')+'</p>'
+        '<p style="font-size:12px">'+H('pna_os_referencia')+'</p>'
         '<p role="status" hidden="'+H('!pna_os_missing')+'">Dados de impedimentos e prazos indisponíveis. Consulte a origem em O.S.</p>'
         '<p role="status" hidden="'+H('!pna_os_atraso_missing')+'">Prazos indisponíveis para verificar atrasos. Consulte a janela na O.S.; os impedimentos disponíveis seguem abaixo.</p>'
         '<p role="status" hidden="'+H('!pna_os_imp_missing')+'">Impedimentos indisponíveis. Os atrasos disponíveis seguem abaixo.</p>'

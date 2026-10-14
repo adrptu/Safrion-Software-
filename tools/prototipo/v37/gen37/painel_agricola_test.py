@@ -66,8 +66,9 @@ chk('Agrupa responsável sem duplicar OS em duas situações',pnaOSGrupos(outras
 chk('Maior causa primeiro e barra proporcional',pnaOSGrupos(outras,'causa').map(g=>[g.n,/width:([\d.]+)%/.exec(g.barra)[1]]),[[2,'100'],[1,'50']]);
 chk('Não soma as duas distribuições',pnaOSGrupos(outras,'dono').reduce((a,g)=>a+g.n,0),3);
 chk('Gráfico ausente não vira zero',pnaOSGrupos(null,'dono'),null);
+chk('Situação homogênea não repete contagem sob a barra',pnaOSGrupos([{...leitura[0],atrasada:false}],'causa')[0].situacao,'');
 chk('Causa ausente não é inventada a partir do selo',pnaOSGrupos([{...leitura[0],causa:null}],'causa')[0].label,'Causa não informada');
-chk('Referência vem da origem',pnaOSReferencia({os:{referencia:'2026-09-23'}}),'Referência 23/09/2026');
+chk('Referência vem da origem',pnaOSReferencia({os:{referencia:'2026-09-23'}}),'Prazos até 23/09/2026');
 chk('Referência ausente explícita',pnaOSReferencia({os:{referencia:null}}),'Referência de prazos indisponível');
 chk('Gráfico vazio preservado',pnaOSGrupos([],'causa'),[]);
 chk('Atraso ausente não esconde impedimento conhecido',pnaOSLinhas({os:{impedidas:[impedida],atrasadas:null}}).length,1);
@@ -199,7 +200,7 @@ def os_contract_ui():
             fixture_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>('+json.dumps(fixture,ensure_ascii=False)+');'})['identifier']
             c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
             chk('Dois gráficos sem lista operacional '+str(w),wait("document.querySelectorAll('.pna-grupo').length===2&&!document.querySelector('[data-rid^=\"os:\"]')"))
-            chk('Contagem única e situações textuais '+str(w),J("(()=>{let s=document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]');return ['1 O.S. com atenção','Máquina ou equipamento','Referência 23/09/2026','Caio','1 impedida(s) · 1 atrasada(s)'].every(t=>s.innerText.includes(t))&&!s.querySelector('[role=table]')})()"))
+            chk('Contagem única e situações textuais '+str(w),J("(()=>{let s=document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]');return ['1 O.S. precisam de ação','Máquina ou equipamento','Prazos até 23/09/2026','Caio','1 impedida(s) · 1 atrasada(s)'].every(t=>s.innerText.includes(t))&&!s.querySelector('[role=table]')})()"))
             chk('Impedimento vermelho '+str(w),J("[...document.querySelectorAll('.pna-grupo [aria-hidden] span')].every(e=>getComputedStyle(e).backgroundColor==='rgb(180, 35, 24)')"))
             chk('Cartões e colheita preservados '+str(w),J("document.querySelectorAll('.pn-card').length===4&&!!document.querySelector('[data-rid=lg19]')&&document.documentElement.scrollWidth<=innerWidth"))
             button="document.querySelector('[aria-label=\"Como ler os impedimentos e atrasos\"]')"
