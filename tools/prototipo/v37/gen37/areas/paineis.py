@@ -36,14 +36,15 @@ PAINEIS = {
 JS = r'''
 // Indicadores leem somente a fonte canônica. Coleção vazia = zero; ausente/inválida = sem dados.
 // PAINEL-02 · leitura agrícola única para o Painel (contrato 6163002343/6163029779): sem comando nem mutação; null = Sem dados.
-// O.S. impedidas pela projeção da tela de O.S. (osProjecao: registro OSD + cenário, com osMerge e osManCond) e pelo mesmo selo do cabeçalho
-// dela (OS_IMP_RE): só abertas e só agrícolas (sem OB-); motivo = o selo vigente; dono = o da projeção; desde: o estado não tem (null).
+// O.S. impedidas pela projeção do estado (osProjecaoEstado: as ordens de c.ordens, cada uma com a base do registro e o mesmo osMerge/osManCond
+// da tela de O.S.; vazio = [], ordem fora do estado não volta, estado inconsistente = null) e pelo selo do cabeçalho da O.S. (OS_IMP_RE):
+// só abertas e só agrícolas (sem OB-); motivo = o selo vigente; dono = o da projeção; desde: o estado não tem (null).
 // Recorte por fazenda e safra do registro; ordem aberta sem fazenda ou safra com recorte pedido = Sem dados (não some nem entra por engano).
 // Atrasadas: não há data canônica de hoje nem regra de atraso na O.S. (null até existir). Custos: etapa seguinte (null).
 function agrPainelRef(c,rec) { rec=rec||{};
  let os=null;
- if(c&&c.ordens&&typeof c.ordens==='object'&&!Array.isArray(c.ordens)&&typeof osProjecao==='function'&&typeof OSD!=='undefined') {
-  let pj=null; try { pj=osProjecao(c); } catch(e) { pj=null; }
+ if(typeof osProjecaoEstado==='function'&&typeof OSD!=='undefined') {
+  let pj=null; try { pj=osProjecaoEstado(c,id=>/^OB-/.test(id)); } catch(e) { pj=null; }
   const ok=pj&&pj.every(o=>o&&typeof o.id==='string'&&typeof o.etapa==='string'&&Array.isArray(o.selos));
   const ab=ok?pj.filter(o=>!/^OB-/.test(o.id)&&o.etapa!=='Encerradas'&&o.etapa!=='Canceladas'):null;
   const semCtx=ab&&((rec.faz&&ab.some(o=>typeof o.faz!=='string'||!o.faz))||(rec.saf&&ab.some(o=>typeof o.saf!=='string'||!o.saf)));
@@ -124,7 +125,7 @@ def build():
         if fid=='PAGR':   # PAINEL-02 (Codex, PR #62): colheita por cultivo e período, abaixo dos cartões; pnaVals no EXTRAVALS
             from areas.painel_agricola import secao
             pna, pna_js = secao(); E.EXTRAJS[0] += pna_js
-            # agrPainelRef lê a projeção da O.S. (osProjecao no núcleo dela), com as mesmas ordens do registro que a tela O.S. e o Mapa usam
+            # agrPainelRef lê a projeção do estado (osProjecaoEstado no núcleo da O.S.), com as mesmas ordens do registro que a tela O.S. e o Mapa usam
             from areas.processo_os import JS_NUCLEO as _OSN, _ordens as _ords
             E.EXTRAJS[0] += 'const OSD = '+json.dumps(dict(ords=_ords()),ensure_ascii=False).replace('</','<\\/')+';\n'+_OSN
         cards=''.join('<section class="pn-card"><h2>'+E.esc(nome)+

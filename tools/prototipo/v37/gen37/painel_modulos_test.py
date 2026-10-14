@@ -65,6 +65,24 @@ chk('agrPainelRef: sem recorte, a mesma ordem conta',agrPainelRef(sf).os.n.imped
 const en=cenClone(CEN0); en.ordens['OS-0420'].etapa='Encerradas';chk('agrPainelRef: encerrada sai da lista',agrPainelRef(en).os.impedidas.some(x=>x.id==='OS-0420'),false);
 en.ordens['OS-0420'].etapa='Canceladas';chk('agrPainelRef: cancelada sai da lista',agrPainelRef(en).os.impedidas.some(x=>x.id==='OS-0420'),false);
 chk('agrPainelRef: ordens ausentes = Sem dados',agrPainelRef({}).os,null);
+// revisão Codex 6163849078: o estado decide quais ordens existem; o registro não ressuscita ordem nem transforma vazio em impedida
+chk('agrPainelRef: ordens vazias = lista vazia e 0',[agrPainelRef({ordens:{}}).os.impedidas,agrPainelRef({ordens:{}}).os.n.impedidas],[[],0]);
+const dl=cenClone(CEN0); dl.man.ativos.a01.cond='Disponível'; delete dl.ordens['OS-0420'];
+chk('agrPainelRef: ordem fora do estado não volta (a01 apto, OS-0420 apagada)',agrPainelRef(dl).os.impedidas.map(x=>x.id),['OS-0418','OS-0502','OS-0507']);
+const dl2=cenClone(CEN0); delete dl2.ordens['OS-0420'];
+chk('agrPainelRef: OS-0420 apagada com a01 bloqueado também não volta',agrPainelRef(dl2).os.impedidas.map(x=>x.id),['OS-0418','OS-0431','OS-0502','OS-0507']);
+const sb=cenClone(CEN0); sb.ordens['OS-9999']={id:'OS-9999',etapa:'A liberar'};
+chk('agrPainelRef: ordem do estado sem registro nem emissão = Sem dados',agrPainelRef(sb).os,null);
+const ce=cenClone(CEN0); ce.ordens['OS-0507'].id='OS-0508';
+chk('agrPainelRef: chave diferente do id = Sem dados',agrPainelRef(ce).os,null);
+const se=cenClone(CEN0); delete se.ordens['OS-0418'].etapa;
+chk('agrPainelRef: ordem sem etapa = Sem dados',agrPainelRef(se).os,null);
+const ob=cenClone(CEN0);
+chk('agrPainelRef: beneficiamento fora do registro não invalida o estado',agrPainelRef(ob).os.n.impedidas,5);
+const em=cenClone(CEN0); const bz=JSON.parse(JSON.stringify(OSD.ords.find(o=>o.id==='OS-0431'))); bz.id='OS-0600';
+em.ordens['OS-0600']={id:'OS-0600',etapa:'A liberar',osc:{novo:bz}};
+chk('agrPainelRef: ordem emitida na tela (osc.novo) entra pela base dela',agrPainelRef(em).os.impedidas.map(x=>x.id).includes('OS-0600'),true);
+chk('agrPainelRef: estado não objeto = Sem dados',[agrPainelRef({ordens:[]}).os,agrPainelRef(null).os],[null,null]);
 console.log('RESULTADO '+n+'/'+n);
 '''
 

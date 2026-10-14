@@ -223,6 +223,14 @@ function osProjecao(c){ const ids={};
   Object.keys(c.ordens).forEach(k=>{ const co=c.ordens[k]; if(!ids[k]&&co.osc&&co.osc.novo) out.push(osMerge(co.osc.novo,co,c)); });  // emitidas nesta tela
   return out; }
 function ords(self){ return osProjecao(cenGet()); }
+// projeção só do estado (Painel): c.ordens decide quais ordens existem; o registro OSD só dá a base de cada uma (mesmo osMerge).
+// Estado vazio = []; ordem do registro fora do estado não volta; ordem do estado sem base (nem registro nem emissão) ou sem id/etapa = null.
+// pula(id): ordens fora do escopo de quem lê (ex.: beneficiamento OB-), descartadas antes de procurar a base.
+function osProjecaoEstado(c,pula){ const E=c&&c.ordens; if(!E||typeof E!=='object'||Array.isArray(E)) return null;
+  const reg={}; OSD.ords.forEach(b=>{ reg[b.id]=b; }); const out=[];
+  for(const k of Object.keys(E)){ const co=E[k]; if(!co||typeof co.id!=='string'||co.id!==k||typeof co.etapa!=='string') return null;
+    if(pula&&pula(k)) continue; const b=reg[k]||(co.osc&&co.osc.novo)||null; if(!b) return null; out.push(osMerge(b,co,c)); }
+  return out; }
 // impedida: o selo da projeção (o mesmo do cabeçalho da O.S. e do Painel Agrícola)
 const OS_IMP_RE=/impedida|falta máquina|falta insumo/i;
 // turno fechado sem sinal: o consumo ainda está no aparelho (fila AP|…); o escritório vê consumo e área juntos, quando o app envia.
