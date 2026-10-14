@@ -1373,7 +1373,10 @@ _TRASH='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="curr
 _MINI=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap;'
 _MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {ACC}; background: {ACC}; color: #fff; cursor: pointer; white-space: nowrap;'
 _SEPD=f'<sc-if value="{{{{p.sepL}}}}" hint-placeholder-val="{{{{false}}}}"><span class="g2sepd" aria-hidden="true">· </span></sc-if>'
-_PARTS=(f'<sc-if value="{{{{p.isTxt}}}}" hint-placeholder-val="{{{{false}}}}"><span>{_SEPD}{{{{p.t}}}}</span></sc-if>'
+_ICO_ALERTA='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>'   # lucide triangle-alert (ISC)
+_ICO_COLUNAS='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>'   # lucide columns-3 (ISC)
+_PARTS=(f'<sc-if value="{{{{p.isIco}}}}" hint-placeholder-val="{{{{false}}}}"><span role="img" aria-label="{{{{p.dica}}}}" data-dica="{{{{p.dica}}}}" style="{{{{p.st}}}}">{_ICO_ALERTA}</span></sc-if>'
+        f'<sc-if value="{{{{p.isTxt}}}}" hint-placeholder-val="{{{{false}}}}"><span>{_SEPD}{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isCn}}}}" hint-placeholder-val="{{{{false}}}}"><span style="{{{{p.st}}}}">{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isB}}}}" hint-placeholder-val="{{{{false}}}}"><b>{_SEPD}{{{{p.t}}}}</b></sc-if>'
         f'<sc-if value="{{{{p.isMut}}}}" hint-placeholder-val="{{{{false}}}}"><span style="color: {MUTED}; font-size: 12px;">{_SEPD}{{{{p.t}}}}</span></sc-if>'
@@ -1481,7 +1484,10 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     H=lambda s: _h(gid+s)
     sicon=f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="{MUTED}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>'
     tb=''
-    if search or add or tree or sel or tools or qf:
+    ess=any(c.get('ess') for c in cols) and len(cols)>5
+    cvb=(f'<sc-if value="{H("_cvhas")}" hint-placeholder-val="{{{{false}}}}"><button type="button" data-g2cvb="{gid}" aria-haspopup="dialog" aria-expanded="{H("_cvexp")}" aria-label="{H("_cvlab")}" title="{H("_cvlab")}" onClick="{H("_cvtog")}" '
+         f'style="{_MINI} display: inline-flex; align-items: center; gap: 6px; min-height: 32px;">{_ICO_COLUNAS}Colunas<span style="color: {MUTED};">{H("_cvn")}</span></button></sc-if>') if ess else ''
+    if search or add or tree or sel or tools or qf or ess:
         tb=(f'<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid {LINE}; flex-wrap: wrap;">'
             + (f'<span data-g2q="{gid}" hidden></span><sc-if value="{H("_qon")}" hint-placeholder-val="{{{{true}}}}"><label style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; background: {BG}; min-width: 160px;">{sicon}<input type="search" aria-label="{H("_qlab")}" placeholder="Buscar…" value="{H("_q")}" onChange="{H("_setq")}" style="font-family: inherit; font-size: 12.5px; border: 0; background: transparent; outline: none; width: 100%;"></label></sc-if>'
                f'<span style="font-size: 12px; color: {MUTED}; font-weight: 600; white-space: nowrap;">{H("_count")} de {H("_all")}</span>' if search else '')
@@ -1489,7 +1495,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
                f'<sc-for list="{H("_qf")}" as="qc" hint-placeholder-count="4"><button type="button" aria-pressed="{_h("qc.on")}" title="{_h("qc.lab")}" onClick="{_h("qc.go")}" style="{_h("qc.st")}">{_h("qc.t")} <span style="opacity: .75;">{_h("qc.n")}</span></button></sc-for></div></sc-if>' if qf else '')
             + f'<sc-for list="{H("_fchips")}" as="fc" hint-placeholder-count="0"><span style="display: inline-flex; align-items: center; gap: 2px; padding: 2px 4px 2px 9px; border-radius: 999px; background: {ACCS}; color: {ACC}; font-size: 11.5px; font-weight: 700;">{_h("fc.t")}<button type="button" aria-label="Remover filtro" onClick="{_h("fc.rm")}" style="border: 0; background: transparent; color: {ACC}; cursor: pointer; font-size: 13px; padding: 0 4px;">×</button></span></sc-for>'
             + f'<sc-if value="{H("_filtered")}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{H("_clear")}" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;">Limpar filtros</button></sc-if>'
-            + '<span style="flex-grow: 1;"></span>' + tools
+            + '<span style="flex-grow: 1;"></span>' + tools + cvb
             + (f'<sc-if value="{H("_hassel")}" hint-placeholder-val="{{{{false}}}}"><span role="status" style="font-size: 12px; font-weight: 700; color: {ACC};">{H("_selmsg")}</span>{bulk}<button type="button" onClick="{H("_selclear")}" style="{_MINI}">Limpar seleção</button></sc-if>' if sel else '')
             + (f'<sc-if value="{H("_xhas")}" hint-placeholder-val="{HL("true")}"><button type="button" onClick="{H("_xtog")}" class="g2xtog">{seta_xtog(H("_xup"),H("_xdown"))}{H("_xlab")}</button></sc-if>' if tree else '')   # visão/apresentação: fim da barra, texto discreto (v3)
             + (f'<sc-if value="{H("_semsel")}" hint-placeholder-val="{{{{true}}}}"><button type="button" onClick="{H("_new")}" style="{_MINI}">+ {esc(add)}</button></sc-if>' if add else '')   # com seleção, a região de ações dá lugar à do lote (DS-40)
@@ -1502,6 +1508,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
             f'<button type="button" aria-label="Fechar filtro" tabIndex="-1" onClick="{FM("cancel")}" style="position: absolute; inset: 0; border: 0; background: transparent; cursor: default;"></button>'
             f'<div role="dialog" aria-label="{FM("titulo")}" onKeyDown="{FM("key")}" style="{FM("pos")} position: fixed; width: 280px; background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 8px; display: flex; flex-direction: column; gap: 6px; z-index: 71;">'
             f'<button type="button" class="g2fi" onClick="{FM("asc")}" style="{it}">{FM("ascT")}</button><button type="button" class="g2fi" onClick="{FM("desc")}" style="{it}">{FM("descT")}</button>'
+            f'<sc-if value="{FM("podeOcultar")}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="g2fi" onClick="{FM("ocultar")}" style="{it}">Ocultar coluna</button></sc-if>'   # VISOES-2 §3.6 (falso em grade sem colunas essenciais)
             f'<div style="height: 1px; background: {LINE}; margin: 2px 0;"></div>'
             f'<div style="padding: 2px 8px 0; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; color: {MUTED}; text-transform: uppercase;">Filtrar por valores</div>'
             f'<div style="display: flex; align-items: center; gap: 12px; padding: 0 8px;"><button type="button" onClick="{FM("todos")}" style="{lk}">Selecionar tudo</button><button type="button" onClick="{FM("nenhum")}" style="{lk}">Limpar</button>'
@@ -1535,10 +1542,23 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
         tot=(f'<div role="row" class="g2tot" tabIndex="0" onClick="{H("_totopen")}" title="Ver a composição do total" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 2px solid {INK}; background: {BG}; font-size: 13px;">'
              + ('<div role="cell"></div>' if sel else '') + f'<sc-for list="{H("_tot")}" as="t" hint-placeholder-count="{len(cols)}"><div role="cell" class="{_h("t.cls")}" style="{_h("t.st")}">{_h("t.t")}</div></sc-for>' + ('<div role="cell"></div>' if dele else '') + '</div>')
     empty='' if not vazio else f'<sc-if value="{H("_empty")}" hint-placeholder-val="{{{{false}}}}"><div style="padding: 16px; font-size: 13px; color: {MUTED};">Nenhuma linha corresponde aos filtros · <button type="button" onClick="{H("_clear")}" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-weight: 700; cursor: pointer;">Limpar filtros</button></div></sc-if>'
-    tbl=(f'<div class="g2rola"><div role="table" data-g2g="{gid}" style="display: grid; grid-template-columns: var(--g2cols, repeat({n}, auto)); min-width: 100%; width: max-content;">{head}{body}{tot}</div></div>{empty}')
+    ntr=H('_ncols') if ess else n   # VISOES-2 §3.6: com colunas essenciais, as trilhas seguem as colunas visíveis
+    tbl=(f'<div class="g2rola"><div role="table" data-g2g="{gid}" style="display: grid; grid-template-columns: var(--g2cols, repeat({ntr}, auto)); min-width: 100%; width: max-content;">{head}{body}{tot}</div></div>{empty}')
     EXTRA.append(_g2form(gid))
     box=f'background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; min-width: 0; overflow: hidden;' if frame else 'min-width: 0;'
-    return f'<div class="g2caixa" style="{box}">{tb}{fpanel}{tbl}</div>'
+    # VISOES-2 §3.6: painel de colunas (fixo, como o filtro: a caixa da grade corta o que transborda); grupos pela pergunta, marcar mostra,
+    # desmarcar oculta, a identidade fica travada; "Restaurar padrão" volta às colunas de "Abre com"
+    cvp=(f'<sc-if value="{H("_cvopen")}" hint-placeholder-val="{{{{false}}}}"><div style="position: fixed; inset: 0; z-index: 70;">'
+         f'<button type="button" aria-label="Fechar colunas" tabIndex="-1" onClick="{H("_cvfecha")}" style="position: absolute; inset: 0; border: 0; background: transparent; cursor: default;"></button>'
+         f'<div role="dialog" aria-label="Colunas desta tabela" data-g2cv="{gid}" onKeyDown="{H("_cvkey")}" style="{H("_cvpos")} position: fixed; width: 290px; overflow-y: auto; background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 8px; display: flex; flex-direction: column; gap: 2px; z-index: 71;">'
+         f'<sc-for list="{H("_cvg")}" as="cg" hint-placeholder-count="3"><div role="group" aria-label="{_h("cg.t")}" style="display: flex; flex-direction: column;">'
+         f'<div style="padding: 8px 8px 2px; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; color: {MUTED}; text-transform: uppercase;">{_h("cg.t")}</div>'
+         f'<sc-for list="{_h("cg.cols")}" as="cc" hint-placeholder-count="2"><label style="display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 0 8px; border-radius: 8px; font-size: 13px; cursor: pointer;">'
+         f'<input type="checkbox" checked="{_h("cc.on")}" disabled="{_h("cc.dis")}" onChange="{_h("cc.tog")}" style="width: 16px; height: 16px; accent-color: {ACC}; margin: 0;"><span>{_h("cc.l")}</span></label></sc-for></div></sc-for>'
+         f'<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px solid {LINE}; margin-top: 6px; padding: 8px 4px 2px;">'
+         f'<sc-if value="{H("_cvmudou")}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{H("_cvrest")}" style="{lk}">Restaurar padrão</button></sc-if><span style="flex-grow: 1;"></span>'
+         f'<button type="button" onClick="{H("_cvfecha")}" style="{_MINI}">Fechar</button></div></div></div></sc-if>') if ess else ''
+    return f'<div class="g2caixa" style="{box}">{tb}{fpanel}{cvp}{tbl}</div>'
 def seta_xtog(sobe,desce):
     """Seta à esquerda de "Expandir tudo"/"Recolher tudo": ícone SVG (não entra no texto nem é lido); sobe/desce = buracos booleanos."""
     ic=lambda d: f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="{d}"/></svg>'

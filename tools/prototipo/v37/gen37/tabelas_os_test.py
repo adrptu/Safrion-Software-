@@ -11,7 +11,7 @@ cada talhão da ordem na safra dela). As verificações de talhão andam pela fa
 Uso: python3 tabelas_os_test.py [pasta de capturas]   (< 90 s)"""
 import sys, os, re, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir, troca_visao
+from comp_lib import Chrome, servir, troca_visao, cv_todas_js
 OUT = sys.argv[1] if len(sys.argv) > 1 else None
 if OUT: os.makedirs(OUT, exist_ok=True)
 OK, FAIL = [], []
@@ -74,6 +74,7 @@ def shot(n):
 try:
     c.aparelho(1440, 900, 1, False)
     c.goto(URL.replace('OS.dc.html', 'Main.dc.html'), .3); J("localStorage.clear(); sessionStorage.clear()")
+    c.goto(URL, 1.2); J(cv_todas_js('g_os'))   # VISOES-2 §3.6: este teste confere todas as colunas da O.S. (a pessoa escolhe "todas")
     c.goto(URL, 1.2); J("window.__e=[];addEventListener('error',e=>window.__e.push(String(e.message)))")
     todas = ids(); neg0 = negocio(); shot('tf04-1440-antes')
     print('linhas', todas)

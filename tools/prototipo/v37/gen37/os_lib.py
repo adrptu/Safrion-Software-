@@ -6,6 +6,7 @@ import time, sys, os, time, subprocess, json
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
 from journeys import free
+from comp_lib import cv_todas_js   # VISOES-2 §3.6
 HERE = os.path.dirname(os.path.abspath(__file__)); R = os.path.join(HERE, '_render')
 
 
@@ -20,6 +21,9 @@ class Os:
 
     def abrir(self, wait=1.0):
         self.c.goto(f'http://127.0.0.1:{self.p}/OS.dc.html', wait=wait)
+        # VISOES-2 §3.6: estes testes leem colunas fora do padrão (Situação, Realizado, Local...): a pessoa escolhe "todas as colunas"
+        if not self.J("!!(window.__g2cvEscolha&&window.__g2cvEscolha('g_os'))"):
+            self.J(cv_todas_js('g_os')); self.c.goto(f'http://127.0.0.1:{self.p}/OS.dc.html', wait=wait)
         self.J("window.__errs=window.__errs||[]; if(!window.__ouve){ window.__ouve=1; window.addEventListener('error',e=>window.__errs.push(e.message)); }")
 
     # ---- tela ----

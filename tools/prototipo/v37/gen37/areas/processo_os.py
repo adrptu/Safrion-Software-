@@ -712,7 +712,7 @@ function PREVALS(self,v){
     v:{id:o.id,ativ:o.tipo,tal:'',local:o.local||'',area:nfx(o.area),ini:o.ini||'',fim:o.fim||'',fase:o.etapa,sit:'',obs:o.obs||'',dono:o.dono||'',acao:pzx(o.prazo)[0],prazo:pzx(o.prazo)[1],
        real:(o.area?o.realizado:null),saldo:(o.area?o.saldo:null),disp:(o.disp||null),prog:(o.area?Math.round(1000*(o.realizado||0)/o.area)/10:null),resp:o.resp},
     s:{id:o.id,tal:tl.map(t=>t.l).join(', '),sit:sel.map(x=>x.l).join(' · ')},
-    p:{id:[{k:'b',t:o.id}],tal:(tl.length?tl.map(t=>({k:'txt',t:t.l})).reduce((a,x,i)=>a.concat(i?[{k:'br'},x]:[x]),[]):[{k:'mut',t:'—'}]),
+    p:{id:(o.selos.length?[{k:'ico',t:'Situação: '+o.selos.map(x=>x.t).join(' · '),c:['red','orange','yellow','blue','gray','green'].find(c=>o.selos.some(x=>x.c===c))||'gray'}]:[]).concat([{k:'b',t:o.id}]),tal:(tl.length?tl.map(t=>({k:'txt',t:t.l})).reduce((a,x,i)=>a.concat(i?[{k:'br'},x]:[x]),[]):[{k:'mut',t:'—'}]),
        fase:[{k:'chip',t:o.etapa,c:FCOR[o.etapa],de:1}],sit:(o.selos.length?o.selos.map(x=>({k:'chip',t:x.t,c:x.c,de:1,dv:osSeloDica(o,x.t)})):[{k:'mut',t:'—'}])}}; });   /* de: dica de estado (g2lib G2_DICAS); dv: a do bloqueio do encerramento (osSeloDica) */
   // Agrupar por talhão (TABELAS-FOCO item 7, TF06): a mesma O.S. aparece em cada talhão vinculado, com a mesma identidade; o grupo conta
   // O.S. distintas e soma a área das O.S. vinculadas (não é área física do talhão); o total geral conta cada O.S. uma vez (abaixo, os_gtot)
@@ -1575,13 +1575,15 @@ def build():
     fname='OS.dc.html'; E._reset_screen(fname)
     ordens=_ordens()
     # TABELAS-FOCO (5983172395): uma variável de negócio por coluna, valor tipado (data ISO, número) e Talhão/Situação multivalorados
-    g_os=grid([dict(k='id',l='O.S.'),dict(k='ativ',l='Atividade',w=190),dict(k='tal',l='Talhão',multi=True,w=120),dict(k='local',l='Local',w=110,zdash=True),
-               dict(k='area',l='Área (ha)',t='num',a='r',d=2,zdash=False),dict(k='ini',l='Início',t='date'),dict(k='fim',l='Fim',t='date'),
-               dict(k='fase',l='Fase'),dict(k='sit',l='Situação',multi=True,w=200),dict(k='obs',l='Observação',w=200),
-               dict(k='dono',l='Quem resolve'),dict(k='acao',l='Próxima ação',w=150),dict(k='prazo',l='Prazo'),
-               dict(k='real',l='Realizado (ha)',t='num',a='r',d=2),dict(k='saldo',l='Saldo (ha)',t='num',a='r',d=2),
-               dict(k='disp',l='Dispensado (ha)',t='num',a='r',d=2,zdash=True),dict(k='prog',l='Progresso (%)',t='num',a='r',d=1),
-               dict(k='resp',l='Responsável')],   # sem coluna Lâmina: a O.S. só com água saiu para a Irrigação (01/10), onde a lâmina tem colunas próprias (IR-03); aqui ela ficava sempre vazia
+    # VISOES-2 §3.6 (pedido do proprietário, 14/10): abre com O.S., Atividade, Talhão, Prazo, Fase e Progresso (ess = posição); as outras 12
+    # ficam em "Mais colunas". pq = pergunta que agrupa o painel de colunas. A Situação sai do padrão e vira ícone com cor antes da O.S.
+    g_os=grid([dict(k='id',l='O.S.',ess=1,pq='oque'),dict(k='ativ',l='Atividade',w=190,ess=2,pq='oque'),dict(k='tal',l='Talhão',multi=True,w=120,ess=3,pq='onde'),dict(k='local',l='Local',w=110,zdash=True,pq='onde'),
+               dict(k='area',l='Área (ha)',t='num',a='r',d=2,zdash=False,pq='medida'),dict(k='ini',l='Início',t='date',pq='quando'),dict(k='fim',l='Fim',t='date',pq='quando'),
+               dict(k='fase',l='Fase',ess=5,pq='situacao'),dict(k='sit',l='Situação',multi=True,w=200,pq='situacao'),dict(k='obs',l='Observação',w=200),
+               dict(k='dono',l='Quem resolve',pq='quem'),dict(k='acao',l='Próxima ação',w=150,pq='situacao'),dict(k='prazo',l='Prazo',ess=4,pq='quando'),
+               dict(k='real',l='Realizado (ha)',t='num',a='r',d=2,pq='medida'),dict(k='saldo',l='Saldo (ha)',t='num',a='r',d=2,pq='medida'),
+               dict(k='disp',l='Dispensado (ha)',t='num',a='r',d=2,zdash=True,pq='medida'),dict(k='prog',l='Progresso (%)',t='num',a='r',d=1,ess=6,pq='medida'),
+               dict(k='resp',l='Responsável',pq='quem')],   # sem coluna Lâmina: a O.S. só com água saiu para a Irrigação (01/10), onde a lâmina tem colunas próprias (IR-03); aqui ela ficava sempre vazia
               [],edit=dict(m='pick'),gid='g_os',total=False,tree=True,vazio=False)   # vazio de filtro: estado comum das visões (VISOES-1 §2.8)
     # barra da coleção (DS-33 §74.5.7.1): filtros rápidos no começo, seletor de visão no fim; vale para Lista e Kanban (mesmo filtro)
     kb_nota=(f'<sc-if value="{H("kb_filtro")}" hint-placeholder-val="{F()}"><div role="note" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: {MUTED}; margin-bottom: 8px;">'

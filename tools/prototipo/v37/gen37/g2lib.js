@@ -136,9 +136,10 @@ const G2_DICAS={
 function g2dicaDe(t){ const s=String(t||'').trim(); return G2_DICAS[s]||G2_DICAS[s.split(' · ')[0].trim()]||''; }
 /* cortes visuais (13/10): parte que abre linha (1ª da célula ou depois de uma quebra) não começa com o separador "·" */
 function g2semSep(raw,i){ const p=raw[i]; if(!p||typeof p.t!=='string'||!/^\s*·\s/.test(p.t)) return p; if(i>0&&!(raw[i-1]&&raw[i-1].k==='br')) return p; return Object.assign({},p,{t:p.t.replace(/^\s*·\s*/,'')}); }
-function g2part(p,v){ const o={isCn:false,isTxt:false,isB:false,isMut:false,isChip:false,isTag:false,isLink:false,isCta:false,isAct:false,isBr:false,t:p.t||'',st:'',cls:'',dot:'',href:p.h||'#',fn:null,title:p.t||'',dica:'',hasDica:false};
+function g2part(p,v){ const o={isIco:false,isCn:false,isTxt:false,isB:false,isMut:false,isChip:false,isTag:false,isLink:false,isCta:false,isAct:false,isBr:false,t:p.t||'',st:'',cls:'',dot:'',href:p.h||'#',fn:null,title:p.t||'',dica:'',hasDica:false};
   switch(p.k){ case 'b': o.isB=true; break; case 'mut': o.isMut=true; break;
     case 'chip': { const cc=G2C[p.c]||G2C.gray; o.isChip=true; o.dica=p.dica||p.dv||(p.de?g2dicaDe(p.t):''); o.hasDica=!!p.dica;   /* p.de: dica de estado do dicionário; p.dv: texto pronto da tela (selo do bloqueio, osSeloDica); os dois só visuais (o leitor de tela lê o motivo explícito p.dica; a linha focada recebe a dica do selo, g2dicaSelo) */ o.st='display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:normal;max-width:100%;min-width:0;overflow-wrap:anywhere;line-height:1.3;color:'+cc[0]+';background:'+cc[1]+';';   /* cortes visuais (13/10): selo longo quebra na própria célula, nunca invade a vizinha */ o.dot='width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'; break; }
+    case 'ico': { const cc=G2C[p.c]||G2C.gray; o.isIco=true; o.dica=p.t||''; o.st='display:inline-flex;align-items:center;flex-shrink:0;color:'+cc[0]+';'; break; }   /* VISOES-2 §3.6: situação como ícone com cor, texto na dica e no leitor */
     case 'cn': { const cc=G2C[p.c]||G2C.gray; o.isCn=true; o.st='font-weight:800;white-space:nowrap;color:'+cc[0]+';'; break; }
     case 'tag': o.isTag=true; break; case 'link': o.isLink=true; break;
     case 'cta': o.isCta=true; o.cls='g2cta'; o.st=p.u?G2CTAU:G2CTA; break;
@@ -225,12 +226,49 @@ function g2persiste(self,id,g2_0,volta,pre){ if(!self.g2persist) return true; co
   self.setState({g2:all,g2toast:pre+': '+er}); return false; }
 function g2dirty(fm){ if(!fm) return false; for(const k in fm.draft){ if(String(fm.draft[k])!==String(fm.orig[k])) return true; } return false; }
 function g2close(self,sp){ const fm=g2st(self,sp.id).fm; if(fm && !fm.ro && g2dirty(fm)) { g2set(self,sp.id,{fm:Object.assign({},fm,{warn:true})}); return; } g2set(self,sp.id,{fm:null}); }
+// VISOES-2 §3.6 · colunas só o essencial. c.ess = posição no padrão ("Abre com"); c.pq = pergunta (oque, quem, quando, onde, medida,
+// situacao) que agrupa o painel de colunas. Grade sem nenhum ess mostra todas, como antes. A escolha é por perfil × tela × grade (no
+// protótipo, perfil = usuário) e guarda o conjunto, não a ordem: a ordem é sempre a do desenho (identidade, padrão pelo ess, depois as
+// demais na ordem da grade). Coluna oculta continua valendo para busca, filtro e agrupamento (g2match usa sp.cols).
+const G2_CV_PERG=[['oque','O quê'],['quem','Quem'],['quando','Quando'],['onde','Onde'],['medida','Medidas'],['situacao','Situação'],['','Outras']];
+function g2cvTem(sp){ return !!(sp&&sp.cols&&sp.cols.some(c=>c.ess)); }
+function g2cvChave(sp){ let pg=''; try{ pg=String(location.pathname).split('/').pop(); }catch(e){} let pf=''; try{ pf=g2perfil().k; }catch(e){} return 'g2cv:'+pg+':'+sp.id+':'+pf; }
+function g2cvPadrao(sp){ return sp.cols.filter(c=>c.ess).sort((a,b)=>a.ess-b.ess).map(c=>c.k); }
+function g2cvLer(self,sp){ const st=g2st(self,sp.id); if(Array.isArray(st.cv)) return st.cv; if(st.cv===false) return null; let x=null;
+  try{ x=JSON.parse(localStorage.getItem(g2cvChave(sp))||'null'); }catch(e){ x=null; } return Array.isArray(x)?x.filter(k=>sp.cols.some(c=>c.k===k)):null; }
+function g2cvCel(){ try{ return window.matchMedia('(max-width: 640px)').matches; }catch(e){ return false; } }
+function g2colsVis(self,sp){ if(!g2cvTem(sp)) return sp.cols; const esc=g2cvLer(self,sp), pad=g2cvPadrao(sp), k0=sp.cols[0].k;
+  let S=new Set(esc||pad); S.add(k0);
+  let ord=[k0].concat(pad.filter(k=>k!==k0&&S.has(k))).concat(sp.cols.map(c=>c.k).filter(k=>k!==k0&&pad.indexOf(k)<0&&S.has(k)));
+  if(!esc&&g2cvCel()) ord=ord.slice(0,3);   // celular: as 3 primeiras do padrão; a escolha explícita vale em qualquer tela
+  return ord.map(k=>sp.cols.find(c=>c.k===k)).filter(Boolean); }
+function g2cvGrava(self,sp,ks){ try{ if(ks) localStorage.setItem(g2cvChave(sp),JSON.stringify(ks)); else localStorage.removeItem(g2cvChave(sp)); }catch(e){}
+  g2set(self,sp.id,{cv:ks?ks.slice():false}); }
+// ganchos de teste (como window.__cen): "todas as colunas" para todos os perfis da tela (testes de domínio que leem colunas fora do padrão) e se
+// o perfil atual já tem escolha; o padrão em si é conferido no teste da VISOES-2
+if(typeof window!=='undefined'&&!window.__g2cvTodas){ window.__g2cvTodas=(gid)=>{ const sp=(typeof GRIDS!=='undefined'?GRIDS:[]).find(g=>g.id===gid); if(!sp) return false; const ks=sp.cols.map(c=>c.k);
+    g2perfis().concat([g2todos()]).forEach(pf=>{ try{ localStorage.setItem(g2cvChave(sp).replace(/:[^:]*$/,':'+pf.k),JSON.stringify(ks)); }catch(e){} }); return true; };
+  window.__g2cvEscolha=(gid)=>{ try{ return localStorage.getItem(g2cvChave({id:gid})); }catch(e){ return null; } }; }
+function g2cvVals(self,sp,v,cols){ const id=sp.id; if(!g2cvTem(sp)||sp.cols.length<=5){ v[id+'_cvhas']=false; v[id+'_cvopen']=false; v[id+'_cvg']=[]; return; }
+  const st=g2st(self,id), vis=new Set(cols.map(c=>c.k)), n=sp.cols.length-vis.size, k0=sp.cols[0].k, open=!!st.cvo;
+  v[id+'_cvhas']=true; v[id+'_cvn']=n?'+'+n:''; v[id+'_cvlab']='Colunas'+(n?' · '+n+(n>1?' ocultas':' oculta'):' · todas visíveis'); v[id+'_cvopen']=open; v[id+'_cvexp']=String(open);
+  const P=st.cvpos||{xr:0,y:0}, W=290, vw=(typeof window!=='undefined'?window.innerWidth:1440), vh=(typeof window!=='undefined'?window.innerHeight:900);
+  const top=Math.max(8,Math.min(P.y+6,vh-260)); v[id+'_cvpos']='top:'+top+'px;left:'+Math.max(8,Math.min(P.xr-W,vw-W-8))+'px;max-height:'+Math.max(240,vh-top-16)+'px;';
+  v[id+'_cvtog']=(e)=>{ const el=e&&e.currentTarget; const rr=el&&el.getBoundingClientRect?el.getBoundingClientRect():{right:0,bottom:0}; const ab=!g2st(self,id).cvo;
+    g2set(self,id,ab?{cvo:true,cvpos:{xr:rr.right,y:rr.bottom}}:{cvo:false}); if(ab) setTimeout(()=>{ const c=document.querySelector('[data-g2cv="'+id+'"] input:not([disabled])'); if(c) c.focus(); },0); };
+  v[id+'_cvfecha']=()=>{ g2set(self,id,{cvo:false}); setTimeout(()=>{ const b=document.querySelector('[data-g2cvb="'+id+'"]'); if(b) b.focus(); },0); };
+  v[id+'_cvkey']=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); v[id+'_cvfecha'](); } };
+  v[id+'_cvg']=G2_CV_PERG.map(([pk,t])=>({t,cols:sp.cols.filter(c=>pk?c.pq===pk:!G2_CV_PERG.some(x=>x[0]&&x[0]===c.pq)).map(c=>({l:c.l,on:vis.has(c.k),dis:c.k===k0,
+    tog:()=>{ if(c.k===k0) return; const cur=new Set(g2colsVis(self,sp).map(x=>x.k)); if(cur.has(c.k)) cur.delete(c.k); else cur.add(c.k); g2cvGrava(self,sp,[...cur]); }}))})).filter(g=>g.cols.length);
+  const pad=g2cvPadrao(sp), esc=g2cvLer(self,sp); v[id+'_cvmudou']=!!esc;
+  v[id+'_cvrest']=()=>g2cvGrava(self,sp,null); }
 function g2vals(self,sp,v,mask){
   const id=sp.id, st=g2stBusca(self,id,g2st(self,id)), rows=g2disp(self,sp), added=self.state.added||{};
   const flat=g2flat(sp,st,g2qrows(sp,st,rows),mask,added); const ed=sp.edit||{m:'none'}; const editable=ed.m&&ed.m!=='none';
   g2qvals(self,sp,v,st,rows,added);
   const so=st.so||sp.so||{};
-  v[id+'_head']=sp.cols.map((c,ci)=>({l:c.l, tt:c.ajuda||g2glossCol(sp,c,rows), un:c.un||'', cls:(ci===0?'g2c0':''), st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;box-shadow:1px 0 0 #E4E9E5;':''),
+  const cols=g2colsVis(self,sp); g2cvVals(self,sp,v,cols); v[id+'_ncols']=cols.length+(sp.sel?1:0)+(sp.del?1:0);   // trilhas da grade = colunas visíveis
+  v[id+'_head']=cols.map((c,ci)=>({l:c.l, tt:c.ajuda||g2glossCol(sp,c,rows), un:c.un||'', cls:(ci===0?'g2c0':''), st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;box-shadow:1px 0 0 #E4E9E5;':''),
      arrow:(so.k===c.k?(so.d?'▼':'▲'):'⇅'), astyle:(so.k===c.k?'color:#1E7A4C;':'color:#B7C1BA;'), sortLabel:'Ordenar por '+c.l,
      sort:()=>{ const cur=g2st(self,id).so||sp.so||{}; let nx; if(cur.k!==c.k) nx={k:c.k,d:false}; else if(!cur.d) nx={k:c.k,d:true}; else nx={}; g2set(self,id,{so:nx}); },
      fil:(((st.f||{})[c.k]||[]).length?' · '+((st.f||{})[c.k]||[]).length:''), fcolor:(((st.f||{})[c.k]||[]).length?'#1E7A4C':'#8A968E'),
@@ -260,7 +298,8 @@ function g2vals(self,sp,v,mask){
       descT:tipo==='num'?'↓ Classificar do maior para o menor':(tipo==='data'?'↓ Classificar do mais recente para o mais antigo':'↓ Classificar de Z a A'),
       asc:()=>g2set(self,id,{so:{k:fmc,d:false},fmc:null,fmd:null,fmq:''}), desc:()=>g2set(self,id,{so:{k:fmc,d:true},fmc:null,fmd:null,fmq:''}),
       ok:aplicar, cancel:fechar, key:(e)=>{ if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); fechar(); } else if(e.key==='Enter'&&e.target.type!=='checkbox'){ e.preventDefault(); aplicar(); } },
-      clear:()=>{ const f=Object.assign({},g2st(self,id).f||{}); delete f[fmc]; g2set(self,id,{f,fmc:null,fmd:null,fmq:''}); }, close:fechar};
+      clear:()=>{ const f=Object.assign({},g2st(self,id).f||{}); delete f[fmc]; g2set(self,id,{f,fmc:null,fmd:null,fmq:''}); }, close:fechar,
+      podeOcultar:g2cvTem(sp)&&sp.cols.length>5&&fmc!==sp.cols[0].k, ocultar:()=>{ const cur=new Set(g2colsVis(self,sp).map(x=>x.k)); cur.delete(fmc); fechar(); g2cvGrava(self,sp,[...cur]); }};
   } else v[id+'_fm']={open:false,vals:[]};
   const total=(sp.total!==false) && sp.cols.some(c=>c.agg);
   v[id+'_rows']=flat.map(({r,lvl,has})=>{
@@ -268,7 +307,7 @@ function g2vals(self,sp,v,mask){
     // linha livre (convite para cadastrar, ex.: talhão sem cultivo): sem seleção e sem lixeira
     if(sp.sel&&(r.livre||r.fora||r.nosel)) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.sel) cells.push({isSel:true,isData:false,isDel:false,cls:'',on:!!(st.sel||{})[r.id],selLabel:'Selecionar '+g2text(r,sp.cols[0]),
       tog:()=>{ const s2=Object.assign({},g2st(self,id).sel||{}); s2[r.id]=!s2[r.id]; g2set(self,id,{sel:s2}); },st:'padding:6px 4px 6px 12px;'});
-    sp.cols.forEach((c,ci)=>{
+    cols.forEach((c,ci)=>{
       const empty=(has && ci>0 && !(r.p&&r.p[c.k]) && (!r.v || r.v[c.k]===undefined || r.v[c.k]===''));
       const raw0=empty?[]:((r.p&&r.p[c.k]&&r.p[c.k].length)?r.p[c.k]:[{k:(ci===0&&lvl===0&&has?'b':'txt'),t:g2fmt(r.v?r.v[c.k]:'',c)}]);
       // partes próprias (p) com número puro ganham a unidade (cópia: r.p não muda)
@@ -316,7 +355,7 @@ function g2vals(self,sp,v,mask){
   // recebe a coluna, as linhas de 1º nível visíveis e o critério do filtro da grade (F.filt, F.match: a mesma regra da lista, para o serviço
   // totalizar o recorte filtrado e não a linha-pai inteira — revisão Codex V58-TOTAL-FILTRO-01); undefined = soma padrão. agg 'fn' = só o serviço.
   if(total){ const topo=flat.filter(x=>x.lvl===0).map(x=>x.r); const F={filt:g2filtering(st),match:(r)=>g2match(r,sp,st,mask,added)};
-    v[id+'_tot']=sp.cols.map((c,ci)=>{ const h=(ci&&c.agg&&typeof sp.totf==='function')?sp.totf(c,topo,F):undefined;
+    v[id+'_tot']=cols.map((c,ci)=>{ const h=(ci&&c.agg&&typeof sp.totf==='function')?sp.totf(c,topo,F):undefined;
       const s=(h===undefined&&c.agg&&c.agg!=='fn')?g2sum(sp,flat,c):null; return {t:(ci===0?'Total':(h!==undefined?h:(s===null?'':g2fmt(s,c)))), cls:(ci===0?'g2c0':''), st:'padding:8px 10px;font-weight:800;'+(ci===0?'position:sticky;left:0;z-index:1;background:#F4F6F3;':'')+(c.a==='r'?'text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;':'')}; });
     v[id+'_totopen']=()=>g2set(self,id,{fm:{tot:true,ro:true,mode:'total',draft:{},orig:{},errs:{}},fmc:null}); }
   // formulário lateral

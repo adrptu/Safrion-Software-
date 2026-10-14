@@ -152,6 +152,13 @@ VISAO_MENU = r"""((k)=>{ const i=[...document.querySelectorAll('[data-visao-menu
 def visao(k, raiz=None):
     """Expressão JS que aciona a visão k pelo seletor (data-visao), opcionalmente dentro de raiz (ex.: '[aria-label="Visão das ordens"]')."""
     return f"({VISAO})({json.dumps(k)},{json.dumps(raiz)})"
+def cv_todas_js(gid='g_os'):
+    """VISOES-2 §3.6: a pessoa escolhe ver todas as colunas da grade (a escolha do seletor "Colunas", gravada para todos os perfis da tela).
+    Para testes de domínio que leem colunas fora do padrão "Abre com"; o padrão em si é conferido no teste da VISOES-2."""
+    import json as _j
+    return "(window.__g2cvTodas?window.__g2cvTodas(%s):false)" % _j.dumps(gid)
+
+
 def troca_visao(J, k, raiz=None, espera=.45):
     """Aciona a visão k e espera o redesenho; no estreito escolhe pelo menu "mais" quando o botão não está na barra. Devolve 'ok' ou o motivo."""
     r = J(visao(k, raiz)); time.sleep(.3)
