@@ -40,7 +40,9 @@ JS = r'''
 // da tela de O.S.; vazio = [], ordem fora do estado não volta, estado inconsistente = null) e pelo selo do cabeçalho da O.S. (OS_IMP_RE):
 // só abertas e só agrícolas (sem OB-); motivo = o selo vigente; dono = o da projeção; desde: o estado não tem (null).
 // Recorte por fazenda e safra do registro; ordem aberta sem fazenda ou safra com recorte pedido = Sem dados (não some nem entra por engano).
-// Atrasadas: não há data canônica de hoje nem regra de atraso na O.S. (null até existir). Custos: etapa seguinte (null).
+// Atrasadas: A liberar, Liberadas ou Em execução com o fim da janela (fim, ISO, do registro) antes de OSD.hoje (D2.HOJE_ISO, a data das telas e
+// do Mapa; não a DIA_OP, que é só a data padrão do apontamento). Em conferência já foi executada. Ordem aberta sem fim (emitida na tela) não é
+// julgada: conta em n.sem_prazo. Sem hoje válido = null. Custos: etapa seguinte (null).
 function agrPainelRef(c,rec) { rec=rec||{};
  let os=null;
  if(typeof osProjecaoEstado==='function'&&typeof OSD!=='undefined') {
@@ -52,7 +54,13 @@ function agrPainelRef(c,rec) { rec=rec||{};
    const imp=ab.filter(o=>(!rec.faz||o.faz===rec.faz)&&(!rec.saf||o.saf===rec.saf))
     .map(o=>[o,o.selos.find(s=>s&&OS_IMP_RE.test(s.t||''))]).filter(x=>x[1])
     .map(([o,s])=>({id:o.id,talhao:o.talhao||'',faz:o.faz||null,saf:o.saf||null,etapa:o.etapa,motivo:s.t,dono:o.dono||null,desde:null,origem:'OS.dc.html#'+encodeURIComponent(o.id)}));
-   os={impedidas:imp,atrasadas:null,n:{impedidas:imp.length,atrasadas:null}};
+   const iso=x=>typeof x==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x), hoje=OSD.hoje;
+   let atr=null, semPrazo=null;
+   if(iso(hoje)) { const rc=ab.filter(o=>(!rec.faz||o.faz===rec.faz)&&(!rec.saf||o.saf===rec.saf)&&['A liberar','Liberadas','Em execução'].includes(o.etapa));
+    semPrazo=rc.filter(o=>!iso(o.fim)).length;
+    atr=rc.filter(o=>iso(o.fim)&&o.fim<hoje).map(o=>({id:o.id,talhao:o.talhao||'',faz:o.faz||null,saf:o.saf||null,etapa:o.etapa,prevista:o.fim,
+     dias:Math.round((Date.parse(hoje)-Date.parse(o.fim))/864e5),dono:o.dono||null,origem:'OS.dc.html#'+encodeURIComponent(o.id)})); }
+   os={impedidas:imp,atrasadas:atr,n:{impedidas:imp.length,atrasadas:atr?atr.length:null,sem_prazo:semPrazo}};
   }
  }
  return {os,custos:null};
@@ -127,7 +135,8 @@ def build():
             pna, pna_js = secao(); E.EXTRAJS[0] += pna_js
             # agrPainelRef lê a projeção do estado (osProjecaoEstado no núcleo da O.S.), com as mesmas ordens do registro que a tela O.S. e o Mapa usam
             from areas.processo_os import JS_NUCLEO as _OSN, _ordens as _ords
-            E.EXTRAJS[0] += 'const OSD = '+json.dumps(dict(ords=_ords()),ensure_ascii=False).replace('</','<\\/')+';\n'+_OSN
+            import dados2 as _D2
+            E.EXTRAJS[0] += 'const OSD = '+json.dumps(dict(ords=_ords(),hoje=_D2.HOJE_ISO),ensure_ascii=False).replace('</','<\\/')+';\n'+_OSN
         cards=''.join('<section class="pn-card"><h2>'+E.esc(nome)+
           '<button type="button" class="pn-tip g2dica-i" aria-label="Como calcular: '+E.esc(nome)+'" data-dica="'+E.esc(formula)+'">ⓘ</button></h2>'+
           '<strong class="pn-value" data-alert="'+H('pn_alert'+str(i))+'">'+H('pn_v'+str(i))+'</strong></section>' for i,(nome,formula,_) in enumerate(itens))

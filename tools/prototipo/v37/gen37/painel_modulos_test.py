@@ -49,7 +49,18 @@ chk('agrPainelRef: mesma lista e mesmo motivo que a projeção da tela O.S. (osP
  osProjecao(ag).filter(o=>!/^OB-/.test(o.id)&&!['Encerradas','Canceladas'].includes(o.etapa)).map(o=>[o.id,(o.selos.find(s=>OS_IMP_RE.test(s.t))||{}).t]).filter(x=>x[1]));
 chk('agrPainelRef: origem na O.S. e n confere',[r0.os.impedidas[0].origem,r0.os.n.impedidas],['OS.dc.html#OS-0418',5]);
 chk('agrPainelRef: cada impedida traz fazenda e safra do registro',r0.os.impedidas.map(x=>[x.id,x.faz,x.saf]),[['OS-0418','Santa Rita','2026/27'],['OS-0420','Santa Rita','2026/27'],['OS-0431','Santa Rita','2026/27'],['OS-0502','Lagoa Grande','2026/27'],['OS-0507','Lagoa Grande','2026/27']]);
-chk('agrPainelRef: atrasadas e custos = null; desde = null (dono vem da projeção)',[r0.os.atrasadas,r0.os.n.atrasadas,r0.custos,r0.os.impedidas.every(x=>x.desde===null)],[null,null,null,true]);
+chk('agrPainelRef: hoje 23/09 (D2.HOJE_ISO) = nenhuma atrasada, nenhuma sem prazo; custos null; desde null',[r0.os.atrasadas,r0.os.n.atrasadas,r0.os.n.sem_prazo,r0.custos,r0.os.impedidas.every(x=>x.desde===null)],[[],0,0,null,true]);
+{ const h0=OSD.hoje; OSD.hoje='2026-09-25'; const ra=agrPainelRef(cenClone(CEN0));
+  chk('agrPainelRef: hoje 25/09 → atrasadas = abertas com fim antes de hoje (Em conferência fora)',ra.os.atrasadas.map(x=>[x.id,x.etapa,x.prevista,x.dias]),
+   [['OS-0424','Liberadas','2026-09-24',1],['OS-0431','A liberar','2026-09-24',1],['OS-0505','Em execução','2026-09-24',1],['OS-0506','Em execução','2026-09-24',1],['OS-0507','Em execução','2026-09-23',2]]);
+  chk('agrPainelRef: atrasadas com recorte Lagoa Grande',agrPainelRef(cenClone(CEN0),{faz:'Lagoa Grande'}).os.atrasadas.map(x=>x.id),
+   ra.os.atrasadas.filter(x=>x.faz==='Lagoa Grande').map(x=>x.id));
+  const ec=cenClone(CEN0); ec.ordens['OS-0505'].etapa='Em conferência';
+  chk('agrPainelRef: enviada para conferência deixa de ser atrasada',agrPainelRef(ec).os.atrasadas.some(x=>x.id==='OS-0505'),false);
+  const bz=JSON.parse(JSON.stringify(OSD.ords.find(o=>o.id==='OS-0430'))); bz.id='OS-0601'; delete bz.fim; const ne=cenClone(CEN0); ne.ordens['OS-0601']={id:'OS-0601',etapa:'A liberar',osc:{novo:bz}};
+  chk('agrPainelRef: ordem emitida sem fim não é julgada: conta em sem_prazo',[agrPainelRef(ne).os.n.sem_prazo,agrPainelRef(ne).os.atrasadas.some(x=>x.id==='OS-0601')],[1,false]);
+  OSD.hoje='23/09/2026'; chk('agrPainelRef: hoje fora do formato ISO = atrasadas Sem dados, impedidas mantidas',[agrPainelRef(cenClone(CEN0)).os.atrasadas,agrPainelRef(cenClone(CEN0)).os.n.impedidas],[null,5]);
+  OSD.hoje=h0; }
 // S2: máquina apta (CMD-19) tira só o impedimento dela, como na tela O.S.
 const ap=cenClone(CEN0); ap.man.ativos.a01.cond='Disponível'; const rA=agrPainelRef(ap);
 chk('agrPainelRef: Trator T1 apto → OS-0420 e OS-0431 saem; falta de insumo e bomba ficam',rA.os.impedidas.map(x=>x.id),['OS-0418','OS-0502','OS-0507']);
@@ -88,7 +99,8 @@ console.log('RESULTADO '+n+'/'+n);
 
 def unit():
     from areas.processo_os import JS_NUCLEO, _ordens
-    osd='const OSD = '+json.dumps(dict(ords=_ordens()),ensure_ascii=False)+';\n'
+    import dados2 as D2
+    osd='const OSD = '+json.dumps(dict(ords=_ordens(),hoje=D2.HOJE_ISO),ensure_ascii=False)+';\n'
     src=cenario.perfis_js()+cenario.js_prefixo()+DM.js_regras()+osd+JS_NUCLEO+P.JS+TEST
     with tempfile.TemporaryDirectory(prefix='painel01-') as d:
         p=Path(d)/'oracle.js';p.write_text(src)
