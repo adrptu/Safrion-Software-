@@ -3,6 +3,7 @@
 Uso nas áreas: EXTRAJS[0] = cenario.js_prefixo() + <js da tela>; a tela chama cenOuvir(self) e lê cenGet()."""
 import json, os
 import dados2 as D2
+from dados_config import DIA_OP
 import dados_lagoa_safra as DL
 import quantidade as _QTD   # regra única de quantidade (SINT-C03)
 
@@ -92,7 +93,7 @@ def seed():
     # as vendas do Comercial) voltam ao seed
     import dados_manutencao as DM
     import dados_producao, dados_ben, dados_comercial
-    est = dict(v=7, rev=0, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
+    est = dict(v=7, rev=0, diaOperacional=DIA_OP, ordens=ordens, reqs=reqs, lotes=lotes, movs=[], ocorr=[],
                # S4 (PCM §3.7): usuario = Ver como do app (Marcos · Zé, simulação); manFila = comandos da manutenção feitos sem sinal
                app=dict(online=True, fila=[], turno=None, operador='Marcos', usuario='Marcos', manFila=[]),
                man=DM.seed(), producao=dados_producao.seed())
@@ -101,11 +102,22 @@ def seed():
     return est
 
 
+# Validade mensal é inclusiva até o último dia; ausência aplicável (—) conserva o comportamento do cadastro.
+# O físico permanece registrado mesmo vencido. Tela e motor usam a mesma comparação, sem relógio do navegador.
+VALIDADE_JS = r"""
+function cenLoteVencido(l, hoje) {
+  const m = /^(\d{2})\/(\d{4})$/.exec(String((l || {}).validade || ''));
+  if (!m) return false;
+  return m[2] + '-' + m[1] < String(hoje || CEN_DIA_OP).slice(0, 7);
+}
+"""
+
+
 def js_prefixo():
     import dados_producao   # regras da produção (producao.js) em toda página do estado (D-22): O.S., Mapa, Estoque e app têm prPodeEncerrar
     import dados_ben        # regras do beneficiamento (ben.js) depois: a qualidade do lote de produção e as decisões valem em toda página do estado
     # análise de solo (SOLO-01): só as funções de solo.js (regras e comandos sobre c.solo); os dados (SOLO0) entram só no AG-02 e no Planejar safra
-    return ('const CEN0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read() + '\n'
+    return ('const CEN0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + VALIDADE_JS + open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read() + '\n'
             + dados_producao.js_regras() + dados_ben.js_regras() + open(os.path.join(HERE, 'solo.js'), encoding='utf-8').read() + '\n')
 
 

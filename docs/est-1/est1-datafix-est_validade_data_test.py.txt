@@ -1,0 +1,7 @@
+OK data do cenário conserva data operacional da configuração e produção
+OK Estoque usa a mesma data operacional sem reaproveitar data do planejamento
+OK novo turno e apontamento preservam 26/09, sem antecipar três dias
+RESULTADO 3/3
+RESULTADO 3/3
+
+EXIT=0

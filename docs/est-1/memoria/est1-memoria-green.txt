@@ -1,0 +1,11 @@
+MEMORIA 1440 Saldo · Memória sintética × Saldo calculado pelos movimentos abaixo. Para mudar, receba, entregue, devolva ou conte. Item ou lote Local ORIGEM Disponível: 25 L. Soma do saldo livre dos lotes não vencidos. Em cada lote: físico − reservado − bloqueado, com mínimo de zero. Fechar
+  OK  1440: não mostra igualdade falsa de totais
+  OK  1440: explica exclusão por validade e saldo não negativo por lote
+  OK  1440: consulta preserva lotes/reservas/quarentena
+  OK  1440: sem erro de execução
+MEMORIA 390 Saldo · Memória sintética × Saldo calculado pelos movimentos abaixo. Para mudar, receba, entregue, devolva ou conte. Item ou lote Local ORIGEM Disponível: 25 L. Soma do saldo livre dos lotes não vencidos. Em cada lote: físico − reservado − bloqueado, com mínimo de zero. Fechar
+  OK  390: não mostra igualdade falsa de totais
+  OK  390: explica exclusão por validade e saldo não negativo por lote
+  OK  390: consulta preserva lotes/reservas/quarentena
+  OK  390: sem erro de execução
+RESULTADO: 8/8 ok

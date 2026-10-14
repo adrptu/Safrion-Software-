@@ -1,0 +1,17 @@
+OK recebimento vencido recusa parte apta 5 sem escrita parcial
+OK recebimento vencido recusa parte apta 2 sem escrita parcial
+OK data futura informada não libera lote existente vencido
+CONTRAPROVA {"recebimento":{"msg":"Recebimento NF 99997 conferido: 5 kg de Semente de soja 58 W no lote EST1-ENTRADA (validade 01/2000). Disponível 12.100 kg → 12.100 kg; 5 kg em quarentena ficam fora do disponível."},"liberacao":{"msg":"5 kg do lote EST1-ENTRADA liberados com o laudo LAUDO-TESTE por Ana (gestora)."},"lote":{"prod":"Semente de soja 58 W","lote":"EST1-ENTRADA","un":"kg","local":"Galpão 1","validade":"12/2099","fisico":105,"reservado":0,"quarentena":0},"disponivel":105}
+FALHA entrada vencida em quarentena não herda validade futura de lote homônimo: lote com outra validade foi misturado
+FALHA formulário indica conflito de validade no campo sem apagar rascunho: sem conflito junto da validade
+OK recebimento na mesma validade conserva lote e soma apenas entrada
+OK recebimento vencido em quarentena conserva físico e replay
+OK devolução vencida apta é recusada sem baixar custódia
+OK devolução vencida em quarentena recupera físico e baixa custódia
+OK formulário da devolução explica quarentena sem apagar rascunho
+OK limite mensal 31/12/2026 validade 12/2026
+OK limite mensal 01/01/2027 validade 12/2026
+OK limite mensal 29/02/2028 validade 02/2028
+OK limite mensal 01/03/2028 validade 02/2028
+RESULTADO 12/14
+RESULTADO 12/14

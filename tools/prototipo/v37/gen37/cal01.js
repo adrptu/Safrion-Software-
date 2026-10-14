@@ -42,7 +42,7 @@ function cal01(fis, evs, seg, opt){
 // da Compra e no Mapa › Insumos: motivo (lote, documento e o motivo registrado na entrada), responsável (o gestor decide com o laudo no Estoque),
 // prazo (a data em que a falta começa se o laudo reprovar) e a decisão fora da compra. o: {quarC, quarRef, condFalta, un}
 function demCondTxt(o){ o=o||{}; const u=' '+(o.un||''); const d4=(s)=>s?String(s).slice(8,10)+'/'+String(s).slice(5,7)+'/'+String(s).slice(0,4):'';
-  const ls=(o.quarRef||[]).filter(x=>!x.rep).map(x=>'lote '+x.lote+(x.doc?' · '+x.doc:'')+(x.mot?': '+x.mot:'')).join('; ');
+  const ls=(o.quarRef||[]).filter(x=>!x.rep&&!x.vencido).map(x=>'lote '+x.lote+(x.doc?' · '+x.doc:'')+(x.mot?': '+x.mot:'')).join('; ');
   return 'motivo: '+calNfa(Number(o.quarC)||0)+u+' em quarentena aguardam laudo'+(ls?' ('+ls+')':'')
     +' · responsável: o gestor libera ou reprova com o laudo no Estoque (reprovado, vira falta firme)'
     +' · prazo: '+(o.condFalta?'decidir antes de '+d4(o.condFalta)+', quando a falta começa se reprovar':'decidir antes do uso')
@@ -55,10 +55,12 @@ function cal01Memo(r, o){ o=o||{}; const u=' '+(o.un||'');
   const d=(s)=>s?String(s).slice(8,10)+'/'+String(s).slice(5,7)+'/'+String(s).slice(0,4):'—';
   const cu=Number(o.cust)||0;   // custódia sem uso nas O.S. (revisão do 853a6a8, achado 1): suprimento que volta na devolução
   const qc=Number(o.quarC)||0;   // quarentena com laudo pendente: cobertura condicionada à qualidade (revisão do 853a6a8, achado 2; PRD 65.4)
-  const qd=(rep)=>(o.quarRef||[]).filter(x=>!!x.rep===rep).map(x=>'lote '+x.lote+(x.doc?' · '+x.doc:'')).join('; ');
+  const quarNaoVencida=Math.max(0,(Number(o.quar)||0)-(o.quarRef||[]).filter(x=>x.vencido).reduce((s,x)=>s+(Number(x.q)||0),0));
+  const qd=(rep)=>(o.quarRef||[]).filter(x=>!!x.rep===rep&&!x.vencido).map(x=>'lote '+x.lote+(x.doc?' · '+x.doc:'')).join('; ');
   const out=['Estoque apto hoje: '+n(r.fis-cu-qc)+u+(o.res?' (inclui '+n(o.res)+u+' reservados)':'')+(cu>1e-9?' + '+n(cu)+u+' em custódia sem uso nas O.S., a devolver ao Estoque ('+(o.custT||[]).join('; ')+')':'')
     +(qc>1e-9?' + '+n(qc)+u+' em quarentena, cobertura condicionada à qualidade ('+(qd(false)||'laudo pendente')+': laudo pendente)':'')+((cu>1e-9||qc>1e-9)?' = '+n(r.fis)+u:'')
-    +(!qc&&o.quar?' · '+n(o.quar)+u+' em quarentena não contam até o laudo':'')];
+    +(!qc&&quarNaoVencida?' · '+n(quarNaoVencida)+u+' em quarentena não contam até o laudo':'')];
+  (o.quarRef||[]).filter(x=>x.vencido).forEach(x=>out.push('Vencido: '+n(x.q)+u+' em quarentena no lote '+x.lote+' (validade '+x.validade+')'+(x.doc?' · '+x.doc:'')+(x.mot?' · '+x.mot:'')+' · não cobre a demanda e não pode ser liberado por laudo; físico e quarentena preservados.'));
   if(r.real>1e-9) out.push('Antes de '+d(r.hoje)+' sem O.S. · '+r.nreal+(r.nreal>1?' usos':' uso')+' · '+n(r.real)+u+' · fora da demanda (histórico do plano; se ainda vai acontecer, emita a O.S.)');   // DEM-06 (RN-003)
   r.linhas.filter(l=>l.ate).forEach(l=>{ const sx=' → saldo '+n(l.saldo)+u; const t=d(l.dt)+' · '+(l.t||'Uso')+' · ';
     if(l.tipo==='rec') out.push(t+'+'+n1(l.q)+u+sx+(l.cobre>1e-9?' · cobre a ruptura':''));

@@ -1,0 +1,5 @@
+{"disponivel":0,"suprimento":{"fisico":{"Sintético":100},"quar":{},"quarRep":{},"quarRef":[],"reservas":[],"recebDt":[],"sobra":[]}}
+FALHA vencido cobre demanda no CTL4
+RESULTADO 0/1
+
+EXIT=1
