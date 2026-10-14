@@ -13,7 +13,7 @@ async function sequence(values){
  const promises=[];for(const value of values){input.value=value;promises.push(api.flush());await tick()}
  const concurrent=calls.length;const unload=new Event('beforeunload',{cancelable:true});window.dispatchEvent(unload);const blocked=unload.defaultPrevented;
  for(let i=0;i<12;i++){while(pending.length)pending.pop()();await tick()}
- await Promise.all(promises);form.remove();return {calls,stored,concurrent,blocked};
+ await Promise.all(promises);api.destroy?.();form.remove();return {calls,stored,concurrent,blocked};
 }
 let r=await sequence(['B','C']);check('Gravações são serializadas',r.concurrent===1);check('Saída com gravação pendente pede confirmação',r.blocked);check('Versão recente vence conclusão tardia',r.stored==='C'&&r.calls.join()==='B,C');
 r=await sequence(['B','A']);check('Reversão ao valor inicial é persistida após envio pendente',r.stored==='A'&&r.calls.join()==='B,A');
@@ -24,7 +24,15 @@ form.elements.nome.value='C';const dirty=new Event('beforeunload',{cancelable:tr
 const multi=document.createElement('form');multi.innerHTML='<input name="nome" value="simples"><input type="checkbox" name="fazenda" value="A" checked><input type="checkbox" name="fazenda" value="B" checked><select name="talhao" multiple><option value="T1" selected>T1</option><option value="T2" selected>T2</option></select>';
 document.body.appendChild(multi);const snapshots=[];const ma=Kit.autosave(multi,async data=>snapshots.push(data),{message:''});
 multi.elements.nome.value='novo';await ma.flush();check('Checkboxes com mesmo nome preservam todos os valores',JSON.stringify(snapshots[0]?.fazenda)==='["A","B"]');check('Select múltiplo preserva todos os valores',JSON.stringify(snapshots[0]?.talhao)==='["T1","T2"]');check('Campo simples preserva contrato string',snapshots[0]?.nome==='novo');
-multi.querySelector('input[value=A]').checked=false;await ma.flush();check('Alteração anterior ao último valor também é gravada',snapshots.length===2&&snapshots[1].fazenda==='B');multi.remove();
+multi.querySelector('input[value=A]').checked=false;await ma.flush();check('Alteração anterior ao último valor também é gravada',snapshots.length===2&&snapshots[1].fazenda==='B');ma.destroy?.();multi.remove();
+api.destroy?.();
+const mounted=document.createElement('form');mounted.innerHTML='<input name="nome" value="A">';document.body.appendChild(mounted);
+let saves=0;const life=Kit.autosave(mounted,async()=>{saves++},{delay:20,message:''});mounted.elements.nome.value='B';mounted.dispatchEvent(new Event('input'));life.destroy?.();mounted.remove();
+const gone=new Event('beforeunload',{cancelable:true});window.dispatchEvent(gone);check('Desmontar formulário remove guarda de saída',!gone.defaultPrevented);
+await new Promise(r=>setTimeout(r,40));check('Destruir cancela debounce pendente',saves===0);
+mounted.dispatchEvent(new Event('input'));mounted.dispatchEvent(new Event('submit',{cancelable:true}));await life.flush();await new Promise(r=>setTimeout(r,40));check('Formulário destruído não inicia novos envios',saves===0);
+const queued=document.createElement('form');queued.innerHTML='<input name="nome" value="A">';document.body.appendChild(queued);let releases;const versions=[];
+const qa=Kit.autosave(queued,data=>new Promise(resolve=>{versions.push(data.nome);releases=resolve}),{message:''});queued.elements.nome.value='B';const first=qa.flush();await tick();queued.elements.nome.value='C';const second=qa.flush();qa.destroy?.();releases();await tick();if(versions.length>1)releases();await Promise.all([first,second]);check('Destruir descarta envio ainda na fila',versions.join()==='B');queued.remove();
 window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS '+results.length+'/'+results.length:'FAIL';
 })().catch(error=>{window.testResults=[{ok:false,error:String(error)}]});
 </script></html>

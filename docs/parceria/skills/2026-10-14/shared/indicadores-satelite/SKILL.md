@@ -89,6 +89,6 @@ O mapa não é só imagem: o sistema **encontra e lista as manchas**.
 - [ ] Paleta de 6 cores exatas (§2) reutilizada em mapa, tabela, badge e gráfico.
 - [ ] Nuvem em cinza hachurado, nunca com cor de índice; % nuvem visível.
 - [ ] Manchas detectadas, listadas com área/ha, centroide e ação "Criar vistoria".
-- [ ] Estado do talhão (5 estados) com uma ação primária cada, na listagem e no detalhe.
+- [ ] Estados do talhão conforme §3, incluindo Sem dado, com uma ação primária cada, na listagem e no detalhe.
 - [ ] Série temporal com lacunas explícitas e comparação de duas datas.
 - [ ] Testes unitários das funções de cor, stretch, manchas e estado.

@@ -12,5 +12,10 @@ t.destroy();t=Tabela.create('#table',{rows:[{fazenda:'A',area:1}],groupBy:['faze
 check('Mudança real de esquema remove estado inválido',()=>{t.drillTo([{spec:'fazenda',key:'A'}]);t.sort('area',1);t.filter('fazenda','A');t.setRows([{novo:'X'}]);const s=t.getState();return !s.groupBy.length&&!s.sort.length&&!s.focus.length&&!Object.keys(s.filters).length});
 t.destroy();check('Destruir remove ouvintes persistentes',()=>persistent()===0);
 t=Tabela.create('#table',{rows:[{fazenda:'A'}]});document.querySelector('.dt-mbtn').click();t.destroy();check('Destruir com menu aberto remove ouvintes globais',()=>persistent()===0);
-window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS 5/5':'FAIL';
+t=Tabela.create('#table',{rows:Array.from({length:601},(_,i)=>({nome:i<600?'Grupo '+String(i).padStart(3,'0'):'Outro'}))});document.querySelector('.dt-mbtn').click();
+const toggleAll=()=>document.querySelector('[data-all]').click();
+toggleAll();check('Desmarcar tudo inclui valores além dos 500 visíveis',()=>t.getRows().length===0);
+toggleAll();check('Selecionar tudo restaura universo completo',()=>t.getRows().length===601);
+const search=document.querySelector('[data-vs]');search.value='Grupo';search.dispatchEvent(new Event('input'));toggleAll();check('Desmarcar resultados inclui todos os 600 correspondentes',()=>t.getRows().length===1&&t.getRows()[0].nome==='Outro');toggleAll();check('Selecionar resultados restaura todos os correspondentes',()=>t.getRows().length===601);t.destroy();
+window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS '+results.length+'/'+results.length:'FAIL';
 </script></html>

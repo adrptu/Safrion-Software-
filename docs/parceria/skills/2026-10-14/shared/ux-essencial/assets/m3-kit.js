@@ -113,35 +113,47 @@
       }));
     };
     let t = null, last = JSON.stringify(snapshot());
-    let queue = Promise.resolve(), pending = 0;
+    let queue = Promise.resolve(), pending = 0, destroyed = false;
     const flush = () => {
+      if (destroyed) return queue;
       const data = snapshot(), json = JSON.stringify(data);
       // Capture cada versão, mas compare com o último recibo somente ao executar.
       // Assim B pendente seguido de retorno a A não perde a reversão.
       pending++;
       queue = queue.then(async () => {
-        if (json === last) return;
+        if (destroyed || json === last) return;
         try {
           await save(data);
           last = json;
-          if (message && JSON.stringify(snapshot()) === json) snackbar(message, { timeout: 2000 });
+          if (!destroyed && message && JSON.stringify(snapshot()) === json) snackbar(message, { timeout: 2000 });
         } catch {
           last = null;
-          snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush });
+          if (!destroyed) snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush });
         }
       }).finally(() => { pending--; });
       return queue;
     };
-    form.addEventListener('input', () => { clearTimeout(t); t = setTimeout(flush, delay); });
-    form.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(t); flush(); });
-    window.addEventListener('beforeunload', (event) => {
+    const onInput = () => { clearTimeout(t); t = setTimeout(flush, delay); };
+    const onSubmit = (event) => { event.preventDefault(); clearTimeout(t); flush(); };
+    const onBeforeUnload = (event) => {
       // O navegador não aguarda save: peça confirmação de saída se houver edição sem recibo.
       if (pending || JSON.stringify(snapshot()) !== last) {
         event.preventDefault();
         event.returnValue = '';
       }
-    });
-    return { flush };
+    };
+    form.addEventListener('input', onInput);
+    form.addEventListener('submit', onSubmit);
+    window.addEventListener('beforeunload', onBeforeUnload);
+    const destroy = () => {
+      destroyed = true;
+      clearTimeout(t);
+      form.removeEventListener('input', onInput);
+      form.removeEventListener('submit', onSubmit);
+      window.removeEventListener('beforeunload', onBeforeUnload);
+      return queue;
+    };
+    return { flush, destroy };
   }
 
   global.Kit = { snackbar, undoable, commands, openPalette, autosave, shortcutLabel: label };

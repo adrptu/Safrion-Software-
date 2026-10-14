@@ -688,6 +688,14 @@
  
  ## 6. Checklist de entrega
  - [ ] Mapa da fazenda com número grande em cada talhão e manchas vermelhas/laranjas visíveis de longe.
+@@ -79,6 +89,6 @@
+ - [ ] Paleta de 6 cores exatas (§2) reutilizada em mapa, tabela, badge e gráfico.
+ - [ ] Nuvem em cinza hachurado, nunca com cor de índice; % nuvem visível.
+ - [ ] Manchas detectadas, listadas com área/ha, centroide e ação "Criar vistoria".
+-- [ ] Estado do talhão (5 estados) com uma ação primária cada, na listagem e no detalhe.
++- [ ] Estados do talhão conforme §3, incluindo Sem dado, com uma ação primária cada, na listagem e no detalhe.
+ - [ ] Série temporal com lacunas explícitas e comparação de duas datas.
+ - [ ] Testes unitários das funções de cor, stretch, manchas e estado.
 --- before/shared/indicadores-satelite/assets/referencia-implementacao.md
 +++ candidate/shared/indicadores-satelite/assets/referencia-implementacao.md
 @@ -19,34 +19,39 @@
@@ -1078,18 +1086,36 @@
      }
      const vis = () => cols.filter((c) => !c.hidden);
      const raw = (c, r) => (c.value ? c.value(r) : r[c.key]);
-@@ -558,8 +566,8 @@
+@@ -542,12 +550,13 @@
+       }
+       const universe = [...counts.values()].sort((a, b) => (a.sort == null ? 1 : b.sort == null ? -1 : cmp(a.sort, b.sort)));
+       const valsEl = pop.querySelector('.dt-vals'), search = pop.querySelector('[data-vs]');
+-      let shown = [];
++      let shown = [], matched = [];
+       function drawVals() {
+         const q = norm(search.value.trim()), set = st.values[key];
+         const match = q ? universe.filter((u) => norm(u.label).includes(q)) : universe;
++        matched = match;
+         shown = match.slice(0, 500);
+-        const all = shown.length > 0 && shown.every((u) => !set || set.has(u.key));
++        const all = matched.length > 0 && matched.every((u) => !set || set.has(u.key));
+         valsEl.innerHTML = `<label><input type="checkbox" data-all ${all ? 'checked' : ''}><span class="dt-v"><b>(Selecionar ${q ? 'resultados' : 'tudo'})</b></span></label>` +
+           shown.map((u, i) => `<label><input type="checkbox" data-vi="${i}" ${!set || set.has(u.key) ? 'checked' : ''}><span class="dt-v">${esc(u.label)}</span><span class="dt-c">${fmtInt(u.n)}</span></label>`).join('') +
+           (match.length > shown.length ? `<div class="dt-note">+${fmtInt(match.length - shown.length)} valores — refine a busca</div>` : '') +
+@@ -557,9 +566,9 @@
+       search.addEventListener('input', drawVals);
        valsEl.addEventListener('change', (e) => {
          let set = st.values[key] || new Set(universe.map((u) => u.key));
-         if (e.target.hasAttribute('data-all')) shown.forEach((u) => (e.target.checked ? set.add(u.key) : set.delete(u.key)));
+-        if (e.target.hasAttribute('data-all')) shown.forEach((u) => (e.target.checked ? set.add(u.key) : set.delete(u.key)));
 -        else { const u = shown[+e.target.dataset.vi]; e.target.checked ? set.add(u.key) : set.delete(u.key); }
 -        if (universe.every((u) => set.has(u.key))) delete st.values[key]; else st.values[key] = set;
++        if (e.target.hasAttribute('data-all')) matched.forEach((u) => (e.target.checked ? set.add(u.key) : set.delete(u.key)));
 +        else { const u = shown[+e.target.dataset.vi]; if (e.target.checked) set.add(u.key); else set.delete(u.key); }
 +        if (universe.every((u) => set.has(u.key))) Reflect.deleteProperty(st.values, key); else st.values[key] = set;
          st.limits = {};
          renderBody(); drawVals();
        });
-@@ -568,7 +576,7 @@
+@@ -568,7 +577,7 @@
          if (!b) return;
          if (b.dataset.s !== undefined) { closeMenu(); toggleSort(key, e.shiftKey, +b.dataset.s); }
          else if (b.dataset.gp) { closeMenu(); addGroup(b.dataset.gp); }
@@ -1098,7 +1124,7 @@
        });
  
        const rect = btn.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
-@@ -667,7 +675,8 @@
+@@ -667,7 +676,8 @@
        e.dataTransfer.effectAllowed = 'move';
        e.dataTransfer.setData('text/plain', 'chip');
      });
@@ -1108,7 +1134,7 @@
      zone.addEventListener('dragover', (e) => { if (drag) { e.preventDefault(); zone.classList.add('dt-over'); } });
      zone.addEventListener('dragleave', (e) => { if (!zone.contains(e.relatedTarget)) zone.classList.remove('dt-over'); });
      zone.addEventListener('drop', (e) => {
-@@ -684,13 +693,14 @@
+@@ -684,13 +694,14 @@
        if (b) { st.groupBy.splice(+b.dataset.ungroup, 1); st.limits = {}; renderBody(); }
      });
      addSel.addEventListener('change', () => { if (addSel.value) addGroup(addSel.value); });
@@ -1125,7 +1151,7 @@
      crumbs.addEventListener('click', (e) => { const b = e.target.closest('[data-crumb]'); if (b) goCrumb(+b.dataset.crumb); });
  
      tbody.addEventListener('click', (e) => {
-@@ -711,7 +721,7 @@
+@@ -711,7 +722,7 @@
      function toggleGroup(id, force) {
        const open = force ?? !st.open.has(id);
        if (open === st.open.has(id)) return;
@@ -1134,7 +1160,7 @@
        renderBody();
        refocus({ g: id });
      }
-@@ -744,7 +754,7 @@
+@@ -744,7 +755,7 @@
      renderBody();
  
      return {
@@ -1143,7 +1169,7 @@
        groupBy(ids) { st.groupBy = (ids || []).filter((id) => gspec(id)); st.limits = {}; renderBody(); },
        filter(key, text) { st.filters[key] = text || ''; renderBody(); },
        sort(key, dir) { toggleSort(key, false, dir); },
-@@ -752,7 +762,7 @@
+@@ -752,7 +763,7 @@
        clearFilters,
        getRows: () => current.slice(),
        getState: () => ({ sort: st.sort.slice(), filters: Object.assign({}, st.filters), groupBy: st.groupBy.slice(), focus: st.focus.slice() }),
@@ -1228,7 +1254,7 @@
  - **Android**: Jetpack Compose Material 3. **Multiplataforma**: Flutter com `useMaterial3: true` e `ColorScheme.fromSeed`.
  - **iOS**: manter os princípios deste guia, respeitando convenções nativas (navegação, gestos).
  
-@@ -131,3 +143,7 @@
+@@ -131,3 +143,9 @@
  - [ ] Acessível (contraste, teclado, foco não encoberto, alvos conforme design system/plataforma)
  - [ ] Telas de gestão/cadastro conforme `master-detail-ux` (listagem + detalhe, estado, próximo passo, ação primária única)
  - [ ] Tabelas conforme `tabelas-interativas`
@@ -1236,6 +1262,8 @@
 +O autosave do kit serializa gravações e só confirma após o retorno de `save`. Use-o para rascunhos quando apropriado. A fila é local à instância; concorrência entre abas/dispositivos exige versão e revalidação no domínio. O kit solicita confirmação de saída enquanto houver edição ou envio sem recibo, sem iniciar gravação assíncrona durante `beforeunload`. O navegador pode não emitir esse evento (por exemplo, encerramento no celular): quando o produto exigir recuperação após encerramento, forneça armazenamento local autorizado e sincronização, além da proteção de navegação.
 +
 +O snapshot do autosave preserva todos os valores de nomes repetidos: uma entrada permanece escalar, várias entradas são array em ordem. O domínio deve aceitar essa cardinalidade; nenhum valor anterior da mesma chave pode ser descartado silenciosamente. Uploads de arquivos exigem contrato próprio de persistência e comparação; o kit de rascunhos não fornece upload durável.
++
++Ao desmontar o formulário, chame `destroy()` para cancelar debounce, remover ouvintes e descartar envios ainda na fila. A gravação já iniciada pode terminar, sem feedback na tela desmontada; `destroy()` retorna a fila para observar esse término. Resolva antes o destino do rascunho: para salvar, aguarde `flush()` e o recibo do domínio antes de destruir; para preservar ou descartar, use a decisão explícita e o armazenamento do produto. `destroy()` não confirma persistência nem cancela uma operação já recebida pelo servidor.
 --- before/shared/ux-essencial/assets/m3-kit.js
 +++ candidate/shared/ux-essencial/assets/m3-kit.js
 @@ -27,7 +27,7 @@
@@ -1267,7 +1295,7 @@
      if (scrim) return;
      for (const c of registry) {
        if (!c.keys) continue;
-@@ -105,17 +105,42 @@
+@@ -105,18 +105,55 @@
  
    // ---------- autosave ----------
    function autosave(form, save, { delay = 600, message = 'Salvo' } = {}) {
@@ -1284,40 +1312,56 @@
 +        const values = data.getAll(key);
 +        return [key, values.length === 1 ? values[0] : values];
 +      }));
-+    };
+     };
+-    form.addEventListener('input', () => { clearTimeout(t); t = setTimeout(flush, delay); });
+-    form.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(t); flush(); });
+-    window.addEventListener('beforeunload', () => { clearTimeout(t); flush(); });
+-    return { flush };
 +    let t = null, last = JSON.stringify(snapshot());
-+    let queue = Promise.resolve(), pending = 0;
++    let queue = Promise.resolve(), pending = 0, destroyed = false;
 +    const flush = () => {
++      if (destroyed) return queue;
 +      const data = snapshot(), json = JSON.stringify(data);
 +      // Capture cada versão, mas compare com o último recibo somente ao executar.
 +      // Assim B pendente seguido de retorno a A não perde a reversão.
 +      pending++;
 +      queue = queue.then(async () => {
-+        if (json === last) return;
++        if (destroyed || json === last) return;
 +        try {
 +          await save(data);
 +          last = json;
-+          if (message && JSON.stringify(snapshot()) === json) snackbar(message, { timeout: 2000 });
++          if (!destroyed && message && JSON.stringify(snapshot()) === json) snackbar(message, { timeout: 2000 });
 +        } catch {
 +          last = null;
-+          snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush });
++          if (!destroyed) snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush });
 +        }
 +      }).finally(() => { pending--; });
 +      return queue;
-     };
-     form.addEventListener('input', () => { clearTimeout(t); t = setTimeout(flush, delay); });
-     form.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(t); flush(); });
--    window.addEventListener('beforeunload', () => { clearTimeout(t); flush(); });
-+    window.addEventListener('beforeunload', (event) => {
++    };
++    const onInput = () => { clearTimeout(t); t = setTimeout(flush, delay); };
++    const onSubmit = (event) => { event.preventDefault(); clearTimeout(t); flush(); };
++    const onBeforeUnload = (event) => {
 +      // O navegador não aguarda save: peça confirmação de saída se houver edição sem recibo.
 +      if (pending || JSON.stringify(snapshot()) !== last) {
 +        event.preventDefault();
 +        event.returnValue = '';
 +      }
-+    });
-     return { flush };
++    };
++    form.addEventListener('input', onInput);
++    form.addEventListener('submit', onSubmit);
++    window.addEventListener('beforeunload', onBeforeUnload);
++    const destroy = () => {
++      destroyed = true;
++      clearTimeout(t);
++      form.removeEventListener('input', onInput);
++      form.removeEventListener('submit', onSubmit);
++      window.removeEventListener('beforeunload', onBeforeUnload);
++      return queue;
++    };
++    return { flush, destroy };
    }
  
+   global.Kit = { snackbar, undoable, commands, openPalette, autosave, shortcutLabel: label };
 --- before/test_gemini_consult.py
 +++ candidate/test_gemini_consult.py
 @@ -20,6 +20,17 @@

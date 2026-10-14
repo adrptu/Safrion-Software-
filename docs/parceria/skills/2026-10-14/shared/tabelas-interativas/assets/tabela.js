@@ -550,12 +550,13 @@
       }
       const universe = [...counts.values()].sort((a, b) => (a.sort == null ? 1 : b.sort == null ? -1 : cmp(a.sort, b.sort)));
       const valsEl = pop.querySelector('.dt-vals'), search = pop.querySelector('[data-vs]');
-      let shown = [];
+      let shown = [], matched = [];
       function drawVals() {
         const q = norm(search.value.trim()), set = st.values[key];
         const match = q ? universe.filter((u) => norm(u.label).includes(q)) : universe;
+        matched = match;
         shown = match.slice(0, 500);
-        const all = shown.length > 0 && shown.every((u) => !set || set.has(u.key));
+        const all = matched.length > 0 && matched.every((u) => !set || set.has(u.key));
         valsEl.innerHTML = `<label><input type="checkbox" data-all ${all ? 'checked' : ''}><span class="dt-v"><b>(Selecionar ${q ? 'resultados' : 'tudo'})</b></span></label>` +
           shown.map((u, i) => `<label><input type="checkbox" data-vi="${i}" ${!set || set.has(u.key) ? 'checked' : ''}><span class="dt-v">${esc(u.label)}</span><span class="dt-c">${fmtInt(u.n)}</span></label>`).join('') +
           (match.length > shown.length ? `<div class="dt-note">+${fmtInt(match.length - shown.length)} valores — refine a busca</div>` : '') +
@@ -565,7 +566,7 @@
       search.addEventListener('input', drawVals);
       valsEl.addEventListener('change', (e) => {
         let set = st.values[key] || new Set(universe.map((u) => u.key));
-        if (e.target.hasAttribute('data-all')) shown.forEach((u) => (e.target.checked ? set.add(u.key) : set.delete(u.key)));
+        if (e.target.hasAttribute('data-all')) matched.forEach((u) => (e.target.checked ? set.add(u.key) : set.delete(u.key)));
         else { const u = shown[+e.target.dataset.vi]; if (e.target.checked) set.add(u.key); else set.delete(u.key); }
         if (universe.every((u) => set.has(u.key))) Reflect.deleteProperty(st.values, key); else st.values[key] = set;
         st.limits = {};
