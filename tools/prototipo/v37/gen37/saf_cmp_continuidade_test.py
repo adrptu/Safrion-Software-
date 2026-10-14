@@ -10,6 +10,7 @@ import sys, os, time, subprocess, json
 HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
 from cdp import Chrome
 from journeys import free
+from comp_lib import cv_todas_sempre
 R=os.path.join(HERE,'_render'); OUT=sys.argv[1] if len(sys.argv)>1 else os.path.join(HERE,'_probe'); os.makedirs(OUT,exist_ok=True)
 p=free(); srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(0.8)
 OK=[]; FAIL=[]
@@ -49,7 +50,7 @@ try:
         time.sleep(1.0)
     def nav(t,pg): col(); clk(t,w=.2); esperar(pg)
     trail=lambda: (J("(document.body.innerText.match(/DOCUMENTOS DA COMPRA[^\\n]*(\\n[^\\n]+){0,6}/)||[''])[0]") or '').replace('\n',' ')
-    from comp_lib import IR_ETAPA, cv_todas_sempre
+    from comp_lib import IR_ETAPA
     def etapa(i): J(f"({IR_ETAPA})({i})"); time.sleep(.5)   # a faixa só informa: anda pela área de ações (UX-ACAO-UNICA-20261003)
     def foto(nome): c.shot(os.path.join(OUT,f'q_saf-cmp_{nome}.png'))
     def ls(): return json.loads(J("localStorage.getItem('talhao-os-compras-v1')||'null'") or 'null')

@@ -7,7 +7,7 @@ os da especificação (os mesmos do ocupacao_unit.py). Emulação no Chrome head
 Uso: python3 ocupacao_test.py [desktop|celular|tudo]   (padrão: tudo)"""
 import sys, os, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, cv_todas_sempre
+from comp_lib import Chrome, cv_todas_sempre, cv_padrao
 MODO = sys.argv[1] if len(sys.argv) > 1 else 'tudo'
 PROBE = os.path.join(HERE, '_probe'); os.makedirs(PROBE, exist_ok=True)
 import saf_nav_lib as L
@@ -136,16 +136,18 @@ try:
         chk('sem erro de JS (desktop)', erros() == '', erros())
     if MODO in ('celular', 'tudo'):
         # ---------- OC-17 layout 390 × 844 e 360 × 800; fluxo principal no celular ----------
+        cv_padrao(c)   # SAF-TAB: o celular confere a tela como a pessoa a vê (colunas padrão; a Situação é ícone na coluna presa)
         for w, h in ((390, 844), (360, 800)):
             abre('#saf=S27SF&passo=cultivos', w, h, True); time.sleep(.4)
             m = c.js(r"""(()=>{ const vw=innerWidth; const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const caixa=t.closest('.g2rola'); const q=caixa.getBoundingClientRect();
-              const hs=[...t.querySelectorAll('[role=columnheader]')]; const iS=hs.findIndex(h=>/SITUAÇÃO/i.test(h.innerText)); const si=hs[iS].getBoundingClientRect();
-              const chs=[...t.querySelectorAll('[role=row]')].slice(1).map(r=>r.querySelectorAll('[role=cell]')[iS]).filter(Boolean).map(c=>c.getBoundingClientRect());
+              const hs=[...t.querySelectorAll('[role=columnheader]')]; const iS=hs.findIndex(h=>/SITUAÇÃO/i.test(h.innerText));
+              const ics=[...t.querySelectorAll('.g2c0 [role=img]')].filter(x=>/^Situação: /.test(x.getAttribute('aria-label')||'')).map(x=>x.getBoundingClientRect());
               const pl=[...t.querySelectorAll('button')].find(b=>b.innerText.trim()==='Planejar ›'); const pr=pl?pl.getBoundingClientRect():null;
-              return {pag:document.documentElement.scrollWidth>vw+1, caixas:t.querySelectorAll('input[type=checkbox]').length, sitIn:si.right<=q.left+caixa.clientWidth+1, chipsIn:chs.every(r=>r.right<=q.left+caixa.clientWidth+1),
+              return {pag:document.documentElement.scrollWidth>vw+1, caixas:t.querySelectorAll('input[type=checkbox]').length, sitIn:iS<0, chipsIn:ics.every(r=>r.right<=q.left+caixa.clientWidth+1),
                       planejar:!!pr&&pr.right<=q.left+caixa.clientWidth+1&&!!pl.closest('.g2c0'), grupos:[...t.querySelectorAll('[aria-expanded]')].filter(b=>b.offsetParent).every(b=>b.getAttribute('aria-expanded')==='false')}; })()""")
-            chk(f'OC-17 {w}×{h}: sem rolagem lateral da página; sem caixas de seleção; Situação inteira sem rolar a caixa; Planejar › na coluna presa; grupos recolhidos', not m['pag'] and m['caixas'] == 0 and m['sitIn'] and m['chipsIn'] and m['planejar'] and m['grupos'], m)
+            chk(f'OC-17 {w}×{h}: sem rolagem lateral da página; sem caixas de seleção; Situação como ícone na coluna presa (sem a coluna, SAF-TAB); Planejar › na coluna presa; grupos recolhidos', not m['pag'] and m['caixas'] == 0 and m['sitIn'] and m['chipsIn'] and m['planejar'] and m['grupos'], m)
             c.shot(os.path.join(PROBE, f'oc_etapa2_{w}.png'))
+        cv_todas_sempre(c)
         abre('#saf=S27SF&passo=cultivos', 390, 844, True); cliques = 0
         na_linha('T1', 'Planejar ›'); cliques += 1
         pw = c.js("(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); const r=a.getBoundingClientRect(); return [Math.round(r.left),Math.round(r.width)];})()")

@@ -39,12 +39,19 @@ def fset(gid, k, val):
 def botao(lab, raiz='document'):
     r = c.js(f"""(()=>{{const R={raiz}; const bs=[...R.querySelectorAll('button,a')].filter(b=>b.offsetParent); const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const b=bs.find(b=>n(b.innerText)==={json.dumps(lab)})||bs.find(b=>n(b.innerText).startsWith({json.dumps(lab)})); if(!b) return 'sem botão '+{json.dumps(lab)}; b.click(); return 'ok';}})()"""); time.sleep(.45); return r
 def salvar(): return botao('Salvar', "[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent)||document")
-def na_linha(t, lab):
+def expande_tudo():
+    """SAF-TAB (14/10): talhão com um só cultivo abre recolhido; o teste abre tudo, como a pessoa faria, antes de procurar a linha de dentro."""
+    r = c.js("(()=>{const b=[...document.querySelectorAll('button.g2xtog')].find(b=>b.offsetParent&&/Expandir tudo/.test(b.innerText)); if(!b) return 'sem'; b.click(); return 'ok';})()"); time.sleep(.4); return r
+def na_linha(t, lab, _de_novo=True):
     r = c.js(f"""(()=>{{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const rs=[...document.querySelectorAll('[role=table]')].filter(x=>x.offsetParent).flatMap(x=>[...x.querySelectorAll('[role=row]')]);
       const r=rs.find(x=>{{const c=[...x.querySelectorAll('[role=cell]')].find(z=>z.classList.contains('g2c0')); return c&&n(c.innerText).replace(/^[▾▸] ?/,'').split(' ')[0]==={json.dumps(t)};}}); if(!r) return 'sem linha '+{json.dumps(t)};
-      const b=[...r.querySelectorAll('button')].find(b=>n(b.innerText)==={json.dumps(lab)}); if(!b) return 'sem botão '+{json.dumps(lab)}+' em '+{json.dumps(t)}; b.click(); return 'ok';}})()"""); time.sleep(.5); return r
-def clica_linha(rid):
-    r = c.js(f"""(()=>{{const r=document.querySelector('[role=row][data-rid="{rid}"]'); if(!r) return 'sem linha'; const cs=[...r.querySelectorAll('[role=cell]')]; const x=cs.find(z=>!z.querySelector('input,button')&&z.innerText.trim()&&!z.classList.contains('g2c0'))||cs[2]; x.click(); return 'ok';}})()"""); time.sleep(.5); return r
+      const b=[...r.querySelectorAll('button')].find(b=>n(b.innerText)==={json.dumps(lab)}); if(!b) return 'sem botão '+{json.dumps(lab)}+' em '+{json.dumps(t)}; b.click(); return 'ok';}})()"""); time.sleep(.5)
+    if _de_novo and str(r).startswith('sem linha') and expande_tudo() == 'ok': return na_linha(t, lab, False)
+    return r
+def clica_linha(rid, _de_novo=True):
+    r = c.js(f"""(()=>{{const r=document.querySelector('[role=row][data-rid="{rid}"]'); if(!r) return 'sem linha'; const cs=[...r.querySelectorAll('[role=cell]')]; const x=cs.find(z=>!z.querySelector('input,button')&&z.innerText.trim()&&!z.classList.contains('g2c0'))||cs[2]; x.click(); return 'ok';}})()"""); time.sleep(.5)
+    if _de_novo and r == 'sem linha' and expande_tudo() == 'ok': return clica_linha(rid, False)
+    return r
 def seleciona(rid): return c.js(f"(()=>{{const r=document.querySelector('[role=row][data-rid=\"{rid}\"]'); const i=r&&r.querySelector('input[type=checkbox]'); if(!i) return 'sem caixa'; i.click(); return 'ok';}})()")
 NAV = [0]
 def abre(h, w=1440, hh=900, toque=False):

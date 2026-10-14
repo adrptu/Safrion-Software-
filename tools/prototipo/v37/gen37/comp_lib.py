@@ -155,7 +155,12 @@ def visao(k, raiz=None):
 def cv_todas_sempre(c):
     """VISOES-2 §3.6: em toda página aberta por este navegador, todas as grades com colunas essenciais mostram todas as colunas (a pessoa
     escolheria "todas" no seletor). Só para testes de domínio que leem colunas fora do padrão; vale depois de localStorage.clear() e recarga."""
-    c.call('Page.addScriptToEvaluateOnNewDocument', {'source': 'window.__g2cvTodasSempre=true'})
+    r = c.call('Page.addScriptToEvaluateOnNewDocument', {'source': 'window.__g2cvTodasSempre=true'})
+    c._cv_todas_id = (r or {}).get('identifier') if isinstance(r, dict) else None
+def cv_padrao(c):
+    """Desfaz cv_todas_sempre para as próximas páginas (o trecho do teste que confere a tela como a pessoa a vê, com as colunas padrão)."""
+    i = getattr(c, '_cv_todas_id', None)
+    if i: c.call('Page.removeScriptToEvaluateOnNewDocument', {'identifier': i}); c._cv_todas_id = None
 def cv_todas_js(gid='g_os'):
     """VISOES-2 §3.6: a pessoa escolhe ver todas as colunas da grade (a escolha do seletor "Colunas", gravada para todos os perfis da tela).
     Para testes de domínio que leem colunas fora do padrão "Abre com"; o padrão em si é conferido no teste da VISOES-2."""

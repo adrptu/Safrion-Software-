@@ -153,16 +153,16 @@ try:
             a2['prims']==['Solicitar cotações ›'] and a2['avancos']==1 and a3['prims']==['Enviar convites (simulado)'] and a3['avancos']==0 and a5['prims']==['Enviar à Direção'] and a5['avancos']==1 and a6['etapa']==6 and 'Compra aprovada' not in b and 'PC-101' not in b,
             [a2,a3,a5,a6['etapa']])
         # 11 · PA (NAV-1: lista → detalhe, sem etapas; design system 09/10, BOT-01/02/03/06): lista com o único verde "Criar plano" no
-        #      cabeçalho; detalhe sem rascunho sem primária ("Incluir atividade" secundário no bloco); com rascunho, "Publicar versão v7"
+        #      cabeçalho; detalhe sem rascunho sem primária ("Incluir atividade" secundário no bloco); com rascunho, "Salvar alterações"
         #      a única primária, no Próximo passo; nenhum avanço que só navega ("Revisar e publicar", "Ver versões e cultivos")
         abre('PA'); p1=est(); novo=J(f"(()=>{{const b=[...document.querySelectorAll('header button')].find(b=>{N}(b.innerText)==='Criar plano'); return b?getComputedStyle(b).backgroundColor:null;}})()")
         J("document.querySelector('main .g2card').click()"); time.sleep(.5); p2=est(); inc=J(f"[...document.querySelectorAll('main button')].filter(b=>b.getClientRects().length&&{N}(b.innerText)==='Incluir atividade').map(b=>getComputedStyle(b).backgroundColor)")
         rp=J(f"[...document.querySelectorAll('main button,[data-acoes] button')].filter(b=>b.getClientRects().length&&/Revisar e publicar|Ver versões e cultivos/.test(b.innerText)).length")
         J("(()=>{const b=[...document.querySelectorAll('main button')].find(b=>(b.getAttribute('aria-label')||'').startsWith('Mostrar insumos de Fungicida 1ª aplicação')); b.click();})()"); time.sleep(.3)
         J("[...document.querySelectorAll('main button.pa-dose')][0].click()"); time.sleep(.3); c.call('Input.insertText',{'text':'0,6'}); c.tecla('Enter','Enter',13,text='\r'); time.sleep(.5); p3=est(); shot('pa_detalhe_rascunho')
-        chk('11 PA · lista: "Criar plano" o único verde, no cabeçalho; detalhe sem rascunho: sem primária, "Incluir atividade" secundário e só "‹ Biblioteca de planos" na área; com rascunho: "Publicar versão v7" a única primária, como comando; nenhum avanço que só navega',
+        chk('11 PA · lista: "Criar plano" o único verde, no cabeçalho; detalhe sem rascunho: sem primária, "Incluir atividade" secundário e só "‹ Biblioteca de planos" na área; com rascunho: "Salvar alterações" a única primária, como comando; nenhum avanço que só navega',
             p1['prims']==['Criar plano'] and novo=='rgb(30, 122, 76)' and p1['etapa']==0 and p2['etapa']==0 and inc==['rgb(255, 255, 255)'] and rp==0 and p2['prims']==[] and p2['avancos']==0 and p2['area']==['voltar:‹ Biblioteca de planos']
-            and p3['prims']==['Publicar versão v7'] and p3['avancos']==0 and 'comando:Publicar versão v7' in p3['area'],
+            and p3['prims']==['Salvar alterações'] and p3['avancos']==0 and 'comando:Salvar alterações' in p3['area'],   # PA-SALVAR (14/10): "lá embaixo deixe o botão salvar"
             [p1,novo,p2,inc,rp,p3])
         # 12 · Planos (PCM simplificado S1: PM.dc.html virou a visão Planos da tela MA, ESPECIFICACAO §3.5 "primária: Novo plano"): uma primária na visão;
         #      plano aberto: retorno "‹ Planos", sem etapas e no máximo uma primária ("Publicar vN" só com rascunho)
