@@ -56,7 +56,6 @@ Cada linha corta um controle, um conceito ou uma tela que não muda decisão (mi
 | Seletor de colunas que também reordena por arraste e tem busca acima de 12 colunas | **Mostrar e ocultar, com "Restaurar padrão".** A ordem é a do desenho: identidade, pergunta de entrada, números da decisão e próximo passo. No painel, as colunas ficam agrupadas pela pergunta, que já dispensa a busca. | Ordem fixa é linguagem comum ("a 3ª coluna é o Prazo") para quem trabalha junto e para o suporte. Arrastar exige alternativa por teclado. Com até 18 colunas em 5 grupos, dá para achar sem busca. |
 | ⋯ do cabeçalho com "Ocultar coluna" | "Ocultar coluna" entra no menu ▾ que o cabeçalho já tem ("Agrupar por esta coluna", filtro, valores) | Um menu de coluna só |
 | Coluna com o mesmo valor em todo o recorte sai da linha e vai para o título | Sai **só a coluna fixada por escolha da pessoa:** Fazenda ou Safra do "Trabalhando em", trilha, agrupamento ou filtro de coluna num valor. Coincidência (todas as linhas por acaso "A liberar") não esconde coluna. | Coluna que some por acaso parece defeito. Com causa visível, a pessoa entende. |
-| Unidade junto do número, nunca coluna "Un" | Sem coluna "Un". **Com uma unidade só na coluna, ela vai no cabeçalho ("Área ha"); com unidades diferentes, vai em cada número ("120 L", "40 kg").** | Repetir "ha" em cada linha é ruído; misturar sem unidade é erro. |
 | Telas sem chegada, famílias duplicadas, menu de Finanças | **Fora desta frente**, numa frente de navegação própria. MB-08 primeiro: o irrigante não chega à tarefa dele. | É navegação, não visão. Misturar atrasa as duas. |
 
 ## 3. Especificação
@@ -283,7 +282,8 @@ Peço que tente quebrar, como a persona faria, estas decisões:
 - CARGA sem Kanban;
 - Lucide mantido;
 - seletor de colunas sem reordenar;
-- coluna só sai da linha por escolha da pessoa, não por coincidência;
-- unidade no cabeçalho quando é uma só.
+- coluna só sai da linha por escolha da pessoa, não por coincidência.
+
+A unidade fica junto do número na célula ("160 ha", "120 L"), sem coluna "Un": é a decisão do proprietário de 05/10, que o motor já aplica (`engine._col_un`). Uma primeira redação desta revisão propunha a unidade no cabeçalho; foi retirada.
 
 Cada achado é aceito, ajustado ou recusado com fundamento, nesta pasta.
