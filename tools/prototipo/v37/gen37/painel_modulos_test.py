@@ -82,7 +82,7 @@ def ui():
                     c.call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':xy['x'],'y':xy['y']}]});c.call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
                     chk(fid+' toque abre fórmula e alvo44',xy['w']>=44 and xy['h']>=44 and wait("(()=>{let d=document.querySelector('#g2-dica');return d&&!d.hidden&&d.textContent.includes('Fonte:')})()"))
                 J("document.querySelector('.volta37').click()")
-                chk(fid+' volta devolve foco ao cartão '+str(width),wait("document.activeElement.getAttribute('href')==="+json.dumps(fid+'.dc.html')))
+                chk(fid+' volta devolve foco ao cartão '+str(width),wait("!!document.activeElement && document.activeElement.getAttribute('href')==="+json.dumps(fid+'.dc.html')))
         seed=cenario.seed();seed['ordens']={}
         c.goto(U('PAGR.dc.html'),.4)
         J("localStorage.setItem('talhao-os-cenario-v1',"+json.dumps(json.dumps(seed))+ ");location.reload()")
