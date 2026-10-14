@@ -52,3 +52,6 @@ Prova (executada, render de 392cb92 idêntica byte a byte à testada): `alocacao
 afetadas: `tabelas_os` 40/40, `ostest` 33/33, `os_cenario` 22/22, `filtros_cultura` 10/10, `visoes` 9/9, `ma_unica` 23/23,
 `matest` 40/40, `mbtest` sem falha, `ma_rastreio` 58/58, `ma_app_fluxo` 24/24, `nav_modulos` 15/15, `os_ator` 15/15,
 `paginas_scan` 4/4 (147 páginas).
+
+Publicado nas versões 74 e 75 do artefato (1791983077-f225), duas partes de 71 e 76 páginas (render de 392cb92, 147 páginas
+mudadas). Conferido por hash: `OS.dc.html` 404e75da… e `AG-01.dc.html` 64277d8f…, iguais aos da render.
