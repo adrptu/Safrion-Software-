@@ -79,7 +79,9 @@ try:
         if i == 1:
             nf = next((r for r in d if r.get('NOTA FISCAL') == 'NF 4501'), {}); n33 = next((r for r in d if r.get('NOTA FISCAL') == 'NF 4533'), {})
             chk('seção 1: NF 4501 = 19/09/2026 | PC-088 | Fertisul | KCl 60% | K26-11 | 60.000 kg', [nf.get(k) for k in ('DATA DA NOTA', 'FORNECEDOR', 'ITEM', 'LOTE', 'NA NOTA')] == ['19/09/2026', 'Fertisul', 'KCl 60%', 'K26-11', '60.000 kg'] and nf.get('PEDIDO', '').startswith('PC-088'), nf)
-            chk('seção 1: NF 4533 conferida hoje: Conferida em 23/09/2026 (data, não "hoje"), validade 12/2026, quarentena 2.000 kg', [n33.get(k) for k in ('CONFERIDA EM', 'VALIDADE', 'QUARENTENA')] == ['23/09/2026', '12/2026', '2.000 kg'], n33)
+            # "hoje" é a data operacional única da demonstração (dados_config.DIA_OP, 26/09; EST-1 8d0a86c), não mais 23/09
+            HOJE = '/'.join(reversed(__import__('dados_config').DIA_OP.split('-')))
+            chk(f'seção 1: NF 4533 conferida hoje: Conferida em {HOJE} (data, não "hoje"), validade 12/2026, quarentena 2.000 kg', [n33.get(k) for k in ('CONFERIDA EM', 'VALIDADE', 'QUARENTENA')] == [HOJE, '12/2026', '2.000 kg'], n33)
             filtra('Na nota', ['60.000 kg']); r1 = [r.get('NOTA FISCAL') for r in dicts()]
             chk('seção 1: filtro Na nota = "60.000 kg" (o menu oferece o texto da célula, com a unidade): só a NF 4501', r1 == ['NF 4501'], r1)
             limpa(); ordena('Data da nota'); o1 = [r.get('NOTA FISCAL') for r in dicts()]
