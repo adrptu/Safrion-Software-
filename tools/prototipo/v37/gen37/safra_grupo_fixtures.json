@@ -1,0 +1,40 @@
+{
+  "_sobre": "SAF-FAZ-2 · fixtures sintéticas para os testes de contrato (safra_grupo.js). Sem dado real. Fazendas e talhões do cenário de demonstração.",
+  "safs": [
+    {"id": "S2627", "nome": "Safra 2026/27", "ini": "2026-09-01", "fim": "2027-08-31", "faz": "Santa Rita", "estado": "Em planejamento"},
+    {"id": "S27SF", "nome": "Safrinha 2027", "ini": "2027-02-01", "fim": "2027-07-31", "faz": "Santa Rita", "estado": "Rascunho"},
+    {"id": "S2526", "nome": "Safra 2025/26", "ini": "2025-09-01", "fim": "2026-08-31", "faz": "Santa Rita", "estado": "Encerrada", "ro": true},
+    {"id": "LG2627", "nome": "Safra Mamão 2026/27", "ini": "2026-09-01", "fim": "2027-08-31", "faz": "Lagoa Grande", "estado": "Em planejamento"}
+  ],
+  "fazendas": ["Santa Rita", "Lagoa Grande"],
+  "deps": {
+    "S2627": {"cultivos": 9, "sol": {"id": "SOL-2026-07", "estado": "Enviada · a cotar"}, "os": ["OS-0417", "OS-0420"]},
+    "S27SF": {"cultivos": 4, "sol": null, "os": []},
+    "LG2627": {"cultivos": 13, "sol": null, "os": ["OS-0505"]},
+    "vazia": {"cultivos": 0, "sol": null, "os": []},
+    "aprovada": {"cultivos": 0, "sol": null, "os": [], "plano_aprovado": true, "orcamento_aprovado": false}
+  },
+  "pedidos": {
+    "uma_fazenda": {"chave": "k-uma", "nome": "Safra 2027/28", "ini": "2027-09-01", "fim": "2028-08-31", "fazendas": ["Santa Rita"]},
+    "duas_fazendas": {"chave": "k-duas", "nome": "Safra 2027/28", "ini": "2027-09-01", "fim": "2028-08-31", "fazendas": ["Santa Rita", "Lagoa Grande"]},
+    "fazenda_repetida": {"chave": "k-rep", "nome": "Safra 2027/28", "ini": "2027-09-01", "fim": "2028-08-31", "fazendas": ["Santa Rita", " Santa Rita ", "Lagoa Grande"]},
+    "sem_fazenda": {"chave": "k-vazia", "nome": "Safra 2027/28", "ini": "2027-09-01", "fim": "2028-08-31", "fazendas": []},
+    "periodo_invertido": {"chave": "k-inv", "nome": "Safra 2027/28", "ini": "2028-08-31", "fim": "2027-09-01", "fazendas": ["Santa Rita"]}
+  },
+  "leitura": {
+    "uma_aprovada_outra_pendente": {
+      "A": {"area_ha": 160, "cultivos": 2, "estado": "Em planejamento", "plano": "Aprovado", "orcamento": "Aprovado",
+            "demanda": [{"insumo": "Glifosato 480", "un": "L", "qtd": 320, "talhao": "T1-A", "ciclo": "c1", "destino": "Almoxarifado Santa Rita"},
+                        {"insumo": "Semente de soja", "un": "sc", "qtd": 80.5, "talhao": "T1-A", "ciclo": "c1", "destino": "Almoxarifado Santa Rita"}],
+            "sol": {"id": "SOL-2026-10", "estado": "Enviada · a cotar"}},
+      "B": {"area_ha": 75.11, "cultivos": 1, "estado": "Rascunho", "plano": "Pendente", "orcamento": null,
+            "demanda": [{"insumo": "Glifosato 480", "un": "L", "qtd": 150.25, "talhao": "Pivô 19", "ciclo": "p19", "destino": "Almoxarifado Lagoa Grande"},
+                        {"insumo": "Glifosato 480", "un": "kg", "qtd": 10, "talhao": "Pivô 19", "ciclo": "p19", "destino": "Almoxarifado Lagoa Grande"}],
+            "sol": null}
+    },
+    "area_desconhecida": {
+      "A": {"area_ha": 160, "cultivos": 2, "estado": "Em planejamento", "demanda": []},
+      "B": {"area_ha": null, "cultivos": 0, "estado": "Rascunho", "demanda": null}
+    }
+  }
+}
