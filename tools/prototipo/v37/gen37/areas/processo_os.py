@@ -1268,6 +1268,7 @@ def _chip_hole(t,st,dot,dica=None):   # selo de estado: a dica (significado e pr
     at=f'data-dica="{H(dica)}"' if dica else f'data-dica-de="{H(t)}"'
     return f'<span {at} style="{H(st)}"><span style="{H(dot)}"></span>{H(t)}</span>'
 
+_KB_ROLA=('<style>@media (max-width:640px){.os-kb{overflow-x:auto;padding-bottom:6px}.os-kb .os-kbcol{flex:0 0 148px!important;min-width:148px!important}}</style>')
 def _kanban(celular_rola=False,lista="kb"):
     """Quadro das 5 fases. celular_rola (O.S., revisão VISOES-1 achado B6): até 640 px cada coluna guarda 148 px e o quadro rola na horizontal,
     em vez de 5 colunas de ~45 px com títulos e cartões encobertos (a página não rola de lado). A Manutenção (MA) usa o quadro sem isso."""
@@ -1288,8 +1289,7 @@ def _kanban(celular_rola=False,lista="kb"):
          f'<div style="font-size: 11.5px; color: {MUTED}; margin-top: -4px; min-height: 14px;">{H("c.carga")}</div>'
          f'<sc-for list="{H("c.cards")}" as="k" hint-placeholder-count="2">{card}</sc-for>'
          f'<sc-if value="{H("c.vazio")}" hint-placeholder-val="{F()}"><div class="os-kbvazio" style="font-size: 12px; color: {MUTED}; padding: 10px 4px; text-align: center; border: 1px dashed {LINE}; border-radius: 10px;">Nenhuma ordem nesta fase</div></sc-if></div>')
-    rola = ('<style>@media (max-width:640px){.os-kb{overflow-x:auto;padding-bottom:6px}.os-kb .os-kbcol{flex:0 0 148px!important;min-width:148px!important}}</style>'
-            if celular_rola else '')
+    rola = _KB_ROLA if celular_rola is True else ''   # 'sem_estilo': rola igual, com o estilo já posto por quem chama (_kanban_raias)
     return rola + f'<div role="list" aria-label="Kanban das ordens" class="{"os-kb" if celular_rola else ""}" style="display: flex; gap: 10px; align-items: flex-start;"><sc-for list="{H(lista)}" as="c" hint-placeholder-count="5">{col}</sc-for></div>'
 
 def _kanban_raias():
@@ -1299,11 +1299,13 @@ def _kanban_raias():
     raia=(f'<section class="os-raia" style="display: flex; flex-direction: column; gap: 8px;">'
           f'<button type="button" class="os-raia-cab" aria-label="{H("r.lab")}" onClick="{H("r.desce")}" style="align-self: flex-start; display: inline-flex; align-items: baseline; gap: 8px; min-height: 36px; padding: 4px 8px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; font-family: inherit; color: {ACC};">'
           f'<b style="font-size: 14px;">{H("r.k")}</b><span style="font-size: 12.5px; color: {MUTED};">{H("r.n")}</span><span aria-hidden="true">›</span></button>'
-          + _kanban(celular_rola=False,lista='r.cols') + '</section>')
-    return ('<style>.os-raia .os-kbvazio{display:none}</style>'
+          + _kanban(celular_rola='sem_estilo',lista='r.cols') + '</section>')
+    # Codex 6170116165 V2-RAIAS-MOBILE-01: a raia usa a mesma coluna de 148 px com rolagem local do quadro único (antes, 5 colunas de ~45 px);
+    # V2-RAIAS-TOQUE-01: no toque, nome da raia, × do chip e "Limpar filtros" com 44 px
+    return (_KB_ROLA+'<style>.os-raia .os-kbvazio{display:none}@media (pointer:coarse){.os-raia-cab{min-height:44px!important}}</style>'
             f'<sc-if value="{H("kb_temraias")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-direction: column; gap: 16px;">'
             f'<sc-for list="{H("kb_raias")}" as="r" hint-placeholder-count="2">{raia}</sc-for></div></sc-if>'
-            f'<sc-if value="{H("!kb_temraias")}" hint-placeholder-val="{T()}">' + _kanban(celular_rola=True) + '</sc-if>')
+            f'<sc-if value="{H("!kb_temraias")}" hint-placeholder-val="{T()}">' + _kanban(celular_rola='sem_estilo') + '</sc-if>')
 
 def _culturas_da(o):
     sid=next((s['id'] for s in D2.SAFRAS if s.get('fazenda')==o.get('faz') and str(s.get('nome','')).endswith(str(o.get('saf','')))),None)
@@ -1632,7 +1634,9 @@ def build():
     # VISOES-2 §8 ponto 3: o recorte ativo em chips removíveis (trilha, filtros de coluna, busca) e "Limpar filtros", em toda forma
     rchip=(f'<span style="display: inline-flex; align-items: center; gap: 2px; padding: 2px 4px 2px 10px; border-radius: 999px; background: {ACCS}; color: {ACC}; font-size: 12px; font-weight: 700;">{H("rc.t")}'
            f'<button type="button" aria-label="{H("rc.lab")}" title="{H("rc.lab")}" onClick="{H("rc.rm")}" style="width: 28px; height: 28px; border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 14px; border-radius: 999px;">×</button></span>')
-    kb_nota=(f'<sc-if value="{H("kb_filtro")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Recorte desta visão" data-os-recorte="1" style="display: flex; align-items: center; gap: 6px 8px; flex-wrap: wrap; font-size: 12.5px; color: {MUTED}; margin-bottom: 8px;">'
+    # V2-RAIAS-TOQUE-01 (Codex 6170116165): no toque, × do chip e "Limpar filtros" com 44 px, em toda forma que mostra o recorte
+    kb_nota=(f'<style>@media (pointer:coarse){{[data-os-recorte] button{{min-height:44px!important;min-width:44px!important}}}}</style>'
+             f'<sc-if value="{H("kb_filtro")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Recorte desta visão" data-os-recorte="1" style="display: flex; align-items: center; gap: 6px 8px; flex-wrap: wrap; font-size: 12.5px; color: {MUTED}; margin-bottom: 8px;">'
              f'<span>{H("kb_nota")}</span><sc-for list="{H("os_rchips")}" as="rc" hint-placeholder-count="1">{rchip}</sc-for>'
              f'<button type="button" onClick="{H("os_limpar")}" style="{_MINI}">Limpar filtros</button></div></sc-if>')
     rc_nota=f'<div role="note" style="font-size: 12.5px; color: {MUTED}; margin-bottom: 8px;">{H("rc_nota")}</div>'

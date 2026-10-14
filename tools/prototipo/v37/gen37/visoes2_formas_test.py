@@ -60,6 +60,13 @@ try:
     chk('F10 "Ver todas as O.S." devolve a trilha guardada (C1)', '› C1' in faixa() and not raias(), [faixa(), raias()])
     c.aparelho(390, 844, 2, True); abre('?view=kanban&ag=onde')
     chk('F11 celular: raias sem rolagem lateral da página', len(raias()) >= 3 and J("document.documentElement.scrollWidth<=innerWidth"), J("[document.documentElement.scrollWidth,innerWidth]"))
+    # Codex 6170116165: F11 mede só a página; V2-RAIAS-MOBILE-01 mede a coluna da raia e o que há dentro, V2-RAIAS-TOQUE-01 os alvos de toque
+    med = J("[...document.querySelectorAll('.os-raia .os-kbcol')].filter(x=>x.offsetParent).map(c=>[c.clientWidth,c.scrollWidth])") or []
+    chk('F11b celular: coluna da raia com 148 px e nada encoberto (o quadro rola dentro, a página não)', med and min(w for w, _ in med) >= 140 and all(sw <= w + 1 for w, sw in med) and J("document.documentElement.scrollWidth<=innerWidth"), med[:6])
+    cab = J("[...document.querySelectorAll('.os-raia-cab')].filter(x=>x.offsetParent).map(b=>Math.round(b.getBoundingClientRect().height))") or []
+    J("[...document.querySelectorAll('.os-raia-cab')].find(x=>x.offsetParent).click()"); time.sleep(.8)
+    alv = J("[...document.querySelectorAll('[data-os-recorte] button')].filter(x=>x.offsetParent).map(b=>{const r=b.getBoundingClientRect(); return [b.getAttribute('aria-label')||b.innerText.trim(), Math.round(r.width), Math.round(r.height)];})") or []
+    chk('F11c toque: nome da raia, × da trilha e "Limpar filtros" com 44 px', cab and min(cab) >= 44 and any(a[0].startswith('Tirar a trilha') for a in alv) and all(a[1] >= 44 and a[2] >= 44 for a in alv), [cab, alv])
     chk('F12 sem erro de JS', not J("(window.__e||[]).length"), J("window.__e"))
 finally:
     c.close(); srv.terminate()
