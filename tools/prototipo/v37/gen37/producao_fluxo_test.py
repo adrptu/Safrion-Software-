@@ -28,6 +28,7 @@ from cadc_lib import T
 MODOS = [a for a in sys.argv[1:] if a in ('os', 'fluxo', 'erros', 'celular', 'revisao', 'unid')] or ['os', 'fluxo', 'erros', 'celular', 'revisao', 'unid']
 PR = os.path.join(HERE, '_probe'); os.makedirs(PR, exist_ok=True)
 t = T(); J = t.J
+from comp_lib import cv_todas_sempre; cv_todas_sempre(t.c)   # VISOES-2 §3.6 / SAF-TAB: lê colunas fora do padrão (Meta, unidade)
 LIB = r"""
 window.N=s=>(s||'').replace(/\s+/g,' ').trim();
 window.VIS=e=>{ if(!e) return false; const r=e.getBoundingClientRect(); const cs=getComputedStyle(e); return r.width>1&&r.height>1&&cs.visibility!=='hidden'&&cs.display!=='none'; };

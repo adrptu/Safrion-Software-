@@ -7,13 +7,14 @@ os da especificação (os mesmos do ocupacao_unit.py). Emulação no Chrome head
 Uso: python3 ocupacao_test.py [desktop|celular|tudo]   (padrão: tudo)"""
 import sys, os, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome
+from comp_lib import Chrome, cv_todas_sempre
 MODO = sys.argv[1] if len(sys.argv) > 1 else 'tudo'
 PROBE = os.path.join(HERE, '_probe'); os.makedirs(PROBE, exist_ok=True)
 import saf_nav_lib as L
 from saf_nav_lib import *   # chk, rows, nivel0, faixa, chips, toast, nota, painel, campos, fset, botao, salvar, na_linha, abre, estado, linha, sit, nova_safra…
 try:
     c = L.c = Chrome()
+    cv_todas_sempre(c)   # VISOES-2 §3.6 / SAF-TAB: o teste lê colunas fora do padrão
     if MODO in ('desktop', 'tudo'):
         # ---------- OC-14, OC-01, OC-03, OC-04, OC-02 (leitura) ----------
         for h in ('#saf=S2627&passo=cultivos', '#saf=S27SF&passo=cultivos', '#saf=S2526&passo=cultivos', '#saf=LG2627&passo=cultivos'):
@@ -45,7 +46,7 @@ try:
         chk('OC-03 faixa S2627 com "1 sucessão a conferir"', faixa() == FX2627, faixa())
         chk('OC-04 chips S2627', chips() == ['Todas 8', 'Planejado 7', 'A conferir 1'], chips())
         chk('§3.2 S2627 com 18 linhas de grupos abertos', len(rows()) == 18, len(rows()))
-        n2627 = nota(); chk('§5.1 nota da S2627 cita a sucessão do P1 com a saída', 'P1: o Feijão da Safrinha 2027 começa em 15/04/2027; a saída da soja é estimada em 08/03/2027 (sem plano, CD-02).' in n2627 and 'Informar colheita de P1 ›' in n2627, n2627)
+        n2627 = nota(); chk('§5.1 nota da S2627 cita a sucessão do P1 com a saída', 'P1: o Feijão da Safrinha 2027 começa em 15/04/2027; a saída da soja é estimada em 08/03/2027.' in n2627 and 'Informar colheita de P1 ›' in n2627, n2627)
         abre('#saf=S2526&passo=cultivos'); L = rows()
         chk('OC-16 S2526 encerrada: 5 cultivos, sem Planejar nem Dividir, Situação "—"', len(L) == 5 and all(r['SITUAÇÃO'] == '—' for r in L) and not any('Planejar' in r['TALHÃO OU PARCELA'] or 'Dividir' in r['TALHÃO OU PARCELA'] for r in L), L[:2])
         chk('OC-20 lavouras em campo e4/e5 na S2526 com colheita informada', [(r['TALHÃO OU PARCELA'], r['OCUPA ATÉ'], r['FIM POR']) for r in L[3:]] == [('P1 lavoura em campo', '10/10/2026', 'Colheita informada'), ('P2 lavoura em campo', '15/11/2026', 'Colheita informada')], L[3:])

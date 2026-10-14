@@ -6,13 +6,14 @@ e passam a recusar; sem eles, nada recusa. Conferido também: o adaptador não e
 Uso: python3 saf_impedimentos_test.py (lê _render)."""
 import sys, os, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome
+from comp_lib import Chrome, cv_todas_sempre
 import saf_nav_lib as L
 from saf_nav_lib import *   # chk, abre, clica_linha, salvar, FAIL, OK
 IMP = "JSON.stringify(window.__safRef.impedimentos('%s'))"
 ESTADO = "JSON.stringify([window.__safSelf.state.g2, (JSON.parse(localStorage.getItem('talhao-os-cenario-v1')||'{}').rev||0)])"
 try:
     c = L.c = Chrome()
+    cv_todas_sempre(c)   # VISOES-2 §3.6 / SAF-TAB: o teste lê colunas fora do padrão
     abre('#saf=S2627&passo=cultivos'); r = json.loads(c.js(IMP % 'S2627'))
     chk('I1 semente S2627: nenhum impedimento; avisos dizem os 4 sem plano (fora da referência), 1 a conferir e 4 sugestões opcionais',
         r['impedimentos'] == [] and any('4 cultivos sem plano ficam fora da referência (T4, T3, P1, P2)' in a for a in r['avisos'])

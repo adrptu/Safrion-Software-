@@ -14,7 +14,7 @@ saldo) abre a etapa 3 da Safra 2026/27 e nenhuma página leva mais ao PL-03.
 1440 × 900 e 390 × 844 (toque). Emulação no Chrome headless: não é aparelho físico. Uso: python3 saf_capacidade_simetrica_test.py"""
 import sys, os, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, IR_ETAPA
+from comp_lib import Chrome, IR_ETAPA, cv_todas_sempre
 import dados2 as D2
 import saf_nav_lib as L
 from saf_nav_lib import chk, OK, FAIL, abre, botao, fset, salvar, toast, painel, erros, PROBE
@@ -68,6 +68,7 @@ ESP = {k: GA[k]['cells'][JUL] for k in ('trator', 'oper')}
 assert all(abs(GA[k]['cells'][JUL]['d'] - GB[k]['cells'][JUL]['d']) < 1e-9 for k in ESP), 'espelho assimétrico'
 try:
     c = L.c = Chrome()
+    cv_todas_sempre(c)   # VISOES-2 §3.6 / SAF-TAB: o teste lê colunas fora do padrão
     for w, hh, toque in ((1440, 900, False), (390, 844, True)):
         tg = f'{w}px'
         abre('#saf=S2627&passo=safra', w, hh, toque)

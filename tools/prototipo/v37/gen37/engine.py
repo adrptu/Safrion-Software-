@@ -1355,6 +1355,9 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         ".g2rola{--g2cols:initial;scroll-padding:calc(var(--g2hh,0px) + 6px) 6px 6px calc(var(--g2c0w,0px) + 6px)}"
         ".g2rola [role=columnheader] button:focus-visible{outline-offset:-2px}"   # cabeçalho rente à borda da caixa: o anel fica por dentro, inteiro
         ".g2cta{white-space:nowrap}"
+        # SAF-TAB (proprietário, 14/10: "mais minimalistas"): ação secundária repetida em toda linha (Dividir) aparece ao passar o mouse ou
+        # com o foco na linha; no toque fica sempre visível. Ocupa o mesmo lugar (opacidade), sem pular a linha
+        "@media (hover:hover){[role=row] .g2sec{opacity:0;transition:opacity .12s}[role=row]:hover .g2sec,[role=row]:focus-within .g2sec{opacity:1}}"
         # coluna de número (a='r', célula sem quebra): o número curto fica numa linha; o texto que passa da largura da coluna (linha de apoio
         # "01/09 · Sementes Vale", "R$ 131,00/sc (saca a conferir)") quebra dentro dela em vez de invadir a vizinha (proprietário, 13/10/2026).
         # Os cadastros (CADX) mantêm uma linha com reticências, de propósito.
@@ -1474,7 +1477,7 @@ def _ajuda_auto(cols,calc,campos=()):
 # do cabeçalho da coluna. A regra roda no navegador (g2lib.g2glossCol), sobre as linhas que a grade mostra (as do build e as montadas na tela), com
 # estas entradas do GLOSSARIO (as de "^" valem só para o rótulo): fonte única do texto, aqui.
 _GLOSS_CEL=[(rx,t) for rx,t in GLOSSARIO if not rx.startswith('^')]
-def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None,vazio=True,ag=None):
+def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None,vazio=True,ag=None,sico=None):
     cols=[_col_un(c) for c in cols]
     # rótulos que ficariam iguais sem a unidade ("Custo (R$/h)" e "Custo (R$/ha)") mantêm a unidade, sem parênteses: "Custo R$/h", "Custo R$/ha"
     # (proprietário, 05/10/2026: "Custo R$/h e R$/ha é melhor e mais intuitivo")
@@ -1491,6 +1494,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     # qf: filtro rápido por uma coluna, k (chave), cut (fica o texto antes do separador), sep (vários valores na célula), todas ('Todas'|'Todos')
     qf=(dict(k=qf) if isinstance(qf,str) else qf) or None
     spec=dict(id=gid,cols=cols,rows=rows,edit=edit,sel=sel,del_=dele,tree=(tree or bool(ag)),so=so or {},total=total,x0=x0 or {},qf=qf)
+    if sico: spec['sico']=sico   # VISOES-2 §3.6: a coluna de situação (k) oculta vira ícone antes da identidade, só nas cores que pedem atenção (cores)
     if ag: spec['ag']=ag   # VISOES-2 §3.3: [dict(pq, l, niv=[...], fc=[coluna de filtro por nível], um, plural)]; as linhas trazem r.g[pq]
     spec['del']=spec.pop('del_'); GRIDS.append(spec)
     H=lambda s: _h(gid+s)

@@ -7,14 +7,14 @@ cobertura (só esta atividade) recalcula rendimento e R$/ha na mesma linha; a bu
 sem rolagem da página. Uso: python3 tabelas_saf_test.py [pasta de capturas]   (< 90 s)"""
 import sys, os, time, json, re
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir
+from comp_lib import Chrome, servir, cv_todas_sempre
 OUT = sys.argv[1] if len(sys.argv) > 1 else None
 if OUT: os.makedirs(OUT, exist_ok=True)
 OK, FAIL = [], []
 def chk(n, cond, info=''):
     (OK if cond else FAIL).append(n); print(('  ok  ' if cond else '  FALHOU ') + n + (' · ' + str(info)[:300] if info != '' else ''))
 
-p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js
+p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js; cv_todas_sempre(c)   # VISOES-2 §3.6 / SAF-TAB
 URL = f'http://127.0.0.1:{p}/SAF.dc.html#saf=S2627&passo=operacoes'
 # etapa única (§3.4): 9 colunas (Custo total desde 13/10/2026); a unidade fixa vai na célula ("21,60 ha/h", "2.520 ha-op", "116,7 h", "R$ 14,49/ha-op")
 COLS = ['Operação › atividade › talhão', 'Situação', 'Data', 'Conjunto', 'Rendimento', 'Área trabalhada', 'Horas-conjunto', 'Custo R$/ha', 'Custo total']

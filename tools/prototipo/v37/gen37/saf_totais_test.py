@@ -13,7 +13,7 @@ devolve o Total cheio. Uso: python3 saf_totais_test.py (lê _render ou RENDER_DI
 import sys, os, json, re, time
 from decimal import Decimal as D
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome
+from comp_lib import Chrome, cv_todas_sempre
 import saf_nav_lib as L
 from saf_nav_lib import chk, info, abre, OK, FAIL
 
@@ -39,7 +39,7 @@ def grade():
 
 
 try:
-    L.c = Chrome(); abre('#saf=S2627&passo=operacoes'); time.sleep(.6)
+    L.c = Chrome(); cv_todas_sempre(L.c); abre('#saf=S2627&passo=operacoes'); time.sleep(.6)
     g, ix = grade(); oc = json.loads(L.c.js(OC) or '[]')
     chk('T0 a grade da etapa 3 abriu, com ocorrências', bool(g) and len(oc) > 0, [bool(g), len(oc)])
     chk('T1 coluna nova "Custo total" ao lado do Custo R$/ha', 'CUSTO TOTAL' in ix and ix.get('CUSTO TOTAL') == ix.get('CUSTO R$/HA', -9) + 1, g.get('hs'))

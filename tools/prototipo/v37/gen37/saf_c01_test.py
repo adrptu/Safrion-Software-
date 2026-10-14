@@ -19,7 +19,7 @@ Em 1440 × 900 e 390 × 844 (toque). Emulação no Chrome headless, não aparelh
 Uso: python3 saf_c01_test.py [desktop|celular|tudo]   (padrão: tudo)"""
 import sys, os, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome
+from comp_lib import Chrome, cv_todas_sempre
 import saf_nav_lib as L
 from saf_nav_lib import *   # chk, info, rows, nivel0, faixa, toast, nota, painel, campos, fset, botao, salvar, na_linha, clica_linha, abre, cria_safra, folhas, alerta, linha…
 MODO = sys.argv[1] if len(sys.argv) > 1 else 'tudo'
@@ -159,6 +159,7 @@ def fluxo_perene_antes(w, h, toque):
     chk(f'{tag}: sem erro de JS', erros() == '', erros())
 try:
     c = L.c = Chrome()
+    cv_todas_sempre(c)   # VISOES-2 §3.6 / SAF-TAB: o teste lê colunas fora do padrão
     for w, h, toque in ((1440, 900, False),) * (MODO in ('desktop', 'tudo')) + ((390, 844, True),) * (MODO in ('celular', 'tudo')):
         fluxo_gravar_editar(w, h, toque); fluxo_dividir(w, h, toque); fluxo_adendo(w, h, toque); fluxo_perene_antes(w, h, toque)
 finally:

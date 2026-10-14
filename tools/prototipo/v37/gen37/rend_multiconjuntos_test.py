@@ -19,7 +19,7 @@ configuração, B6 prestador fora das horas-homem). Capturas: _probe/rend_*.png.
 import sys, os, time, json, re
 MODO = (sys.argv[1] if len(sys.argv) > 1 else 'fluxo')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir, IR_ETAPA
+from comp_lib import Chrome, servir, IR_ETAPA, cv_todas_sempre
 import dados2 as D2
 PROBE = os.path.join(HERE, '_probe'); os.makedirs(PROBE, exist_ok=True)
 p, srv = servir(os.environ.get('RENDER_DIR') or os.path.join(HERE, '_render'))
@@ -90,6 +90,7 @@ def ver_T2(part=None):
     return okv and okk and abs(soma - 298) < 1e-9, [o, ks, [(nfa(x['q']), fmt(x['h'], 1), rs(x['custo'] / x['q'])) for x in e['itens']]], rid, e
 try:
     c = Chrome()
+    cv_todas_sempre(c)   # VISOES-2 §3.6 / SAF-TAB: o teste lê colunas fora do padrão
     if MODO == 'fluxo':
         abre('#saf=S2627&passo=operacoes')
         # ---------- 1 · totais iniciais × espelho ----------

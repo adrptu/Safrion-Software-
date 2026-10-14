@@ -3,10 +3,11 @@ import sys, os, time, subprocess, json
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
 from journeys import free
+from comp_lib import cv_todas_sempre
 HERE=os.path.dirname(os.path.abspath(__file__))
 R=sys.argv[1] if len(sys.argv)>1 else os.path.join(HERE,'_render')
 p=free(); srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(0.8)
-c=Chrome(port=free()); J=c.js
+c=Chrome(port=free()); J=c.js; cv_todas_sempre(c)   # VISOES-2 §3.6 / SAF-TAB: o teste lê colunas fora do padrão
 OK=[]; FAIL=[]
 def chk(nome,cond,det=''):
     (OK if cond else FAIL).append(nome); print(('  ok  ' if cond else '  FALHOU ')+nome+(' · '+str(det) if det else ''))

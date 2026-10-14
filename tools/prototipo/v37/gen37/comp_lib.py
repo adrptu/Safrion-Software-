@@ -152,6 +152,10 @@ VISAO_MENU = r"""((k)=>{ const i=[...document.querySelectorAll('[data-visao-menu
 def visao(k, raiz=None):
     """Expressão JS que aciona a visão k pelo seletor (data-visao), opcionalmente dentro de raiz (ex.: '[aria-label="Visão das ordens"]')."""
     return f"({VISAO})({json.dumps(k)},{json.dumps(raiz)})"
+def cv_todas_sempre(c):
+    """VISOES-2 §3.6: em toda página aberta por este navegador, todas as grades com colunas essenciais mostram todas as colunas (a pessoa
+    escolheria "todas" no seletor). Só para testes de domínio que leem colunas fora do padrão; vale depois de localStorage.clear() e recarga."""
+    c.call('Page.addScriptToEvaluateOnNewDocument', {'source': 'window.__g2cvTodasSempre=true'})
 def cv_todas_js(gid='g_os'):
     """VISOES-2 §3.6: a pessoa escolhe ver todas as colunas da grade (a escolha do seletor "Colunas", gravada para todos os perfis da tela).
     Para testes de domínio que leem colunas fora do padrão "Abre com"; o padrão em si é conferido no teste da VISOES-2."""

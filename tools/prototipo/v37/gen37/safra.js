@@ -427,7 +427,7 @@ function syncTalhoes(self,saf,v){ const k=sk(saf); const sp=GR('g_cult_'+k); con
       const pe=L&&(L.pend[o.id]||[]); const tv=L&&L.trav.some(x=>x[1]===o.id||x[2]===o.id);
       if(tv){ r.p.sit=[{k:'chip',t:'Sobreposição',c:'red',dica:ocMotivo(L,info)}]; r.s.sit='Sobreposição'; }
       else if(pe&&pe.length){ const d=pe.map(p=>ocPendCurta(ctx,o,p,byO)).join(' · '); r.p.sit=[{k:'chip',t:'A conferir',c:'yellow',dica:d}]; r.s.sit='A conferir'; }
-      if(o.avisos.length){ const a=o.avisos[0]; r.p.plano=(r.p.plano||[]).concat([{k:'br'},{k:'mut',t:'O plano '+a[1]+' tem datas fixas fora desta safra (ex.: '+ocBr(a[2])+'). Revise o plano ou troque o gatilho para DAP/DAPC.'}]); } }
+      if(o.avisos.length){ const a=o.avisos[0]; r.p.plano=(r.p.plano||[]).concat([{k:'ico',c:'yellow',t:'O plano '+a[1]+' tem datas fixas fora desta safra (ex.: '+ocBr(a[2])+'). Revise o plano ou troque o gatilho para DAP/DAPC.'}]); } }   // SAF-TAB: ícone com a dica
     else { r.v.ate=''; r.p.ate=[{k:'mut',t:'—'}]; r.s.ate=''; r.v.fimpor=''; r.p.fimpor=[{k:'mut',t:'—'}]; r.s.fimpor=''; } };
   const foraRow=(o)=>{ const pl=planById(o.plano); const r={id:'fora_'+o.id,fora:true,ro:true,v:{talhao:o.t,local:o.faixa,cult:o.cult,var:o.var,area:'',ver:'',meta:'',aj:'',tipo:o.tipo},s:{},p:{}};
     r.p.local=[{k:'mut',t:o.faixa}]; r.s.local=o.faixa; r.p.sit=[{k:'mut',t:''}]; r.s.sit=''; r.p.livre=[{k:'mut',t:'—'}]; r.p.desde=[{k:'mut',t:'—'}];
@@ -448,7 +448,7 @@ function syncTalhoes(self,saf,v){ const k=sk(saf); const sp=GR('g_cult_'+k); con
     const acts=[]; let dr=null;
     if(L.planejar){ acts.push({k:'act',t:'Planejar ›',fn:'planejar:'+t,lk:true}); dr='plan_'+t; }
     else if(L.vinc.length){ acts.push({k:'act',t:'Vincular ciclo ›',fn:'vincular:'+t+'|'+L.vinc[0],lk:true}); dr='vinc_'+t; }
-    else if(mine.length&&!mine.some(r=>r.v.ciclo)){ acts.push({k:'act',t:'Dividir',fn:'divide:'+t,lk:true}); dr='div_'+t; }   // ciclo vinculado não se divide (R-24)
+    else if(mine.length&&!mine.some(r=>r.v.ciclo)){ acts.push({k:'act',t:'Dividir',fn:'divide:'+t,lk:true,sec:true}); dr='div_'+t; }   // ciclo vinculado não se divide (R-24)
     v['plan_'+t]=()=>abrirPlanejar(self,t); if(L.vinc.length) v['vinc_'+t]=()=>abrirVincular(self,t,L.vinc[0]);
     const tal=(r)=>{ r.tal=t; r.p.sit=sitP; r.s.sit=L.sit; r.v.sit=L.sit;
       if(L.area_livre>0.005){ r.v.livre=L.area_livre; r.p.livre=[{k:'txt',t:nfa(L.area_livre)}]; r.s.livre=nfa(L.area_livre);
@@ -468,7 +468,7 @@ function syncTalhoes(self,saf,v){ const k=sk(saf); const sp=GR('g_cult_'+k); con
     if(mine.length){ grpParts(Object.assign(g,{kids:mine}),adj); g.kids=kids;
       if(mine.length===1&&mine[0].v.tipo!=='Parcela'){ const m=mine[0]; g.v.tipo='Talhão inteiro'; g.p.tipo=[{k:'txt',t:'Talhão inteiro'}]; g.s.tipo='Talhão inteiro'; g.v.meta=m.v.meta; g.p.meta=m.p.meta; g.s.meta=m.s.meta; g.ordk=Object.assign({},g.ordk||{},{meta:(m.ordk||{}).meta}); } } else { ['cult','var','plano','ver','dt_plantio','meta','aj'].forEach(f=>{ g.p[f]=[{k:'mut',t:''}]; g.s[f]=''; }); g.v.area=''; g.p.area=[{k:'mut',t:'—'}]; g.p.tipo=[{k:'mut',t:'—'}]; g.s.tipo=''; }
     g.p.local=[{k:'b',t}].concat(acts); g.s.local=t; ['ate','fimpor','saf'].forEach(f=>{ g.p[f]=[{k:'mut',t:''}]; g.s[f]=''; g.v[f]=''; });
-    tal(g); rows.push(g); x0[g.id]=!estreito; });
+    tal(g); rows.push(g); x0[g.id]=!estreito&&(mine.length>1||L.sit==='A conferir'||L.sit==='Sobreposição'); });   // SAF-TAB: abre aberto só o talhão com parcelas ou com pendência
   sp.x0=x0; G2DISP[sp.id]=rows; return info; }
 // fazenda e talhões da safra para os textos do painel
 function talhaoArea(t){ return Number((D2.talhoes||{})[t])||0; }
@@ -748,11 +748,11 @@ function rendActs(self,gid,r){ if(!r||r.grp) return []; const saf=self.state.saf
   return out; }
 function leafParts(r,adj,kid){ const pl=planById(r.v.plano); const na=Object.keys(adj[r.id]||{}).length; const t=r.v.talhao||r.v.local;
   // TABELAS-FOCO (5983172395): local | tipo | … | meta (com a unidade junto, decisão de 05/10/2026) | plano | versão | ajustes; a ação fica com a entidade
-  r.p.local=[{k:'b',t:r.v.local||'—'}].concat((!kid&&!r.ro&&!r.v.ciclo)?[{k:'act',t:'Dividir',fn:'divide:'+t,lk:true}]:[]); r.s.local=r.v.local;
+  r.p.local=[{k:'b',t:r.v.local||'—'}].concat((!kid&&!r.ro&&!r.v.ciclo)?[{k:'act',t:'Dividir',fn:'divide:'+t,lk:true,sec:true}]:[]); r.s.local=r.v.local;
   r.v.tipo=(r.v.tipo==='Parcela'||(kid&&r.v.tipo!=='Talhão inteiro')?'Parcela':'Talhão inteiro'); const tp=r.v.tipo+(r.decl?' (sem polígono)':''); r.p.tipo=[{k:'txt',t:tp}]; r.s.tipo=tp; r.v.livre=''; r.p.livre=[{k:'mut',t:'—'}]; r.s.livre='';
   const mt=metaTela(r); r.p.meta=[{k:'txt',t:mt.t}]; r.s.meta=mt.t; r.ordk=Object.assign({},r.ordk||{},{meta:mt.k}); dcol(r,'dt_plantio',r.v.plantio);   // meta (até 2 casas) com a unidade junto (decisão do proprietário, 05/10/2026), na unidade escolhida (UNID-PROD)
   r.v.ver=(pl&&pl.cultura===r.v.cult)?pl.versao:''; r.p.ver=r.v.ver?[{k:'txt',t:'v'+r.v.ver}]:[{k:'mut',t:'—'}]; r.s.ver=r.v.ver?'v'+r.v.ver:'';
-  if(pl && pl.cultura===r.v.cult){ r.p.plano=[{k:'txt',t:pl.nome},{k:'br'},{k:'act',t:(r.ro?'Ver insumos':'Ajustar insumos'),fn:'openlp:'+r.id,lk:true}]; r.s.plano=pl.nome; }
+  if(pl && pl.cultura===r.v.cult){ r.p.plano=[{k:'txt',t:pl.nome}]; r.s.plano=pl.nome; }   // SAF-TAB: "Ajustar insumos" saiu da célula; fica no painel da linha (cultActs)
   else if(pl){ r.p.plano=[{k:'chip',t:'Plano de '+pl.cultura+' incompatível',c:'red'},{k:'act',t:'Reaplicar',fn:'applyone:'+r.id}]; r.s.plano='incompatível'; }
   else { r.p.plano=r.ro?[{k:'mut',t:'sem plano'}]:[{k:'act',t:'Aplicar plano',fn:'applyone:'+r.id}]; r.s.plano=''; }
   r.v.aj=na; r.p.aj=na?[{k:'chip',t:String(na),c:'yellow'}]:[{k:'mut',t:'—'}]; r.s.aj=String(na); }
@@ -767,7 +767,7 @@ function grpParts(r,adj){ const ks=r.kids||[]; const t=r.v.talhao; const T=talha
   // área livre (ha) do talhão dividido: positiva = livre, negativa = excede (aviso em vermelho)
   r.v.livre=Math.abs(L)<=0.005?0:r2(L); r.p.livre=[{k:L< -0.005?'cn':'txt',t:nfa(Math.abs(L)<=0.005?0:L),c:'red'}]; r.s.livre=nfa(Math.abs(L)<=0.005?0:L);
   r.v.tipo=ks.length+(ks.length>1?' parcelas':' parcela'); r.p.tipo=[{k:'txt',t:r.v.tipo}]; r.s.tipo=r.v.tipo;
-  r.p.local=[{k:'b',t:t}].concat(r.ro?[]:[{k:'act',t:'Dividir',fn:'divide:'+t,lk:true}]); r.s.local=t; }
+  r.p.local=[{k:'b',t:t}].concat(r.ro?[]:[{k:'act',t:'Dividir',fn:'divide:'+t,lk:true,sec:true}]); r.s.local=t; }
 // Uma parcela com a área toda volta a talhão inteiro; talhão inteiro com área menor vira parcela com área livre visível.
 // Um grupo por talhão (e, na g_cult_NOVA, por safra: R-22); parcelas do mesmo talhão entram no mesmo grupo, sem id repetido.
 function grpId(t,saf){ return 'grp_'+(saf?saf+'_':'')+t; }
@@ -947,10 +947,10 @@ function safOpenDraft(self,gid,r,d){ if(gid==='g_saf'&&r){ self.__sgCh='saf-form
    a 1ª cultura visível com os filtros aplicados. Trocar a unidade muda a tabela, não o rascunho aberto (D-U20); nada vai para o estado da safra */
 function safUnidOk(cu){ try{ prUn(cu); return true; }catch(e){ return false; } }
 function safUnidVals(self,v){ const saf=self.state.saf; const ga=(saf&&(self.state.step||1)===2)?('g_cult_'+sk(saf)):'';
-  GRIDS.filter(g=>String(g.id).indexOf('g_cult_')===0).forEach(g=>{ const px='us_'+g.id.slice(7); if(g.id!==ga){ unpVals(self,v,px,'',''); return; }
+  GRIDS.filter(g=>String(g.id).indexOf('g_cult_')===0).forEach(g=>{ const px='us_'+g.id.slice(7); if(g.id!==ga){ unpVals(self,v,px,'',''); v[px+'_vis']=false; return; }
     const fm=g2st(self,g.id).fm; const rf=fm&&fm.rid?g2find(g2rows(self,g),fm.rid):null;
     const cu=(fm&&fm.draft&&fm.draft.cult)||(rf&&rf.v&&rf.v.cult)||unpCultVis(self,g.id,r=>(r&&r.v&&r.v.cult)?String(r.v.cult).split(', ')[0]:'');
-    unpVals(self,v,px,(cu&&safUnidOk(cu))?cu:'',''); }); }
+    unpVals(self,v,px,(cu&&safUnidOk(cu))?cu:'',''); v[px+'_vis']=g2colsVis(self,g).some(c=>c.k==='meta'); }); }   // SAF-TAB: o seletor vale para a Meta; sem ela à vista, sai da barra
 function dvRow(c){ return Object.assign({id:c.id||null,local:c.v.local||'',area:(c.v.area===''||c.v.area===undefined)?'':String(r2(c.v.area)).replace('.',','),cult:c.v.cult||'Soja',var:c.v.var||'',plantio:c.v.plantio||'',
   unm:unMetaDe(c.v.cult,c.v.unm),plano:c.v.plano||'',colheita:c.v.colheita||'',adj:null,from:'',decl:!!c.decl,ask:false},metaRascunho(c.v.cult||'Soja',c.v.meta,c.v.unm)); }
 function dvDist(lst,T){ const n=lst.length; if(!n) return lst; const each=Math.floor(T*100/n)/100; return lst.map((x,i)=>Object.assign({},x,{area:String(i<n-1?each:r2(T-each*(n-1))).replace('.',',')})); }
@@ -1550,10 +1550,10 @@ function ocFrase(self,info,saf){ const out={t:'',lnks:[]}; if(!info||!info.linha
       if(o&&A){ ps.push(o.faixa+': sobreposição prevista de '+ocDias(p[4])+' entre '+ocArt(A.cult)+' '+A.cult+nomeSaf(A).replace(' na ',' da ')+' e '+ocArt(o.cult)+' '+o.cult+nomeSaf(o).replace(' na ',' da ')+'.');
         const meu=A.safs.indexOf(saf)>=0?A:o; out.lnks.push(lnkSaida(self,S,meu,saf)); return; } }
     if(l.seq.length){ const x=by[l.seq[0][0]], y=by[l.seq[0][1]]; if(x&&y){
-      ps.push(l.t+': '+ocArt(y.cult)+' '+y.cult+' '+(y.safs.indexOf(saf)>=0?'desta safra':'da '+y.safnome)+' começa em '+ocBr(y.ini)+'; a saída '+ocDe(x.cult)+' '+ocMinus(x.cult)+' é estimada em '+(x.fim!==null?ocBr(x.fim):'sem data')+' (sem plano, CD-02).');
+      ps.push(l.t+': '+ocArt(y.cult)+' '+y.cult+' '+(y.safs.indexOf(saf)>=0?'desta safra':'da '+y.safnome)+' começa em '+ocBr(y.ini)+'; a saída '+ocDe(x.cult)+' '+ocMinus(x.cult)+' é estimada em '+(x.fim!==null?ocBr(x.fim):'sem data')+'.');   // SAF-TAB: sem a referência técnica
       out.lnks.push(lnkSaida(self,S,x,saf)); return; } }
     if(l.conf>0.005){ const e=l.fora.find(o=>o.classe==='estimado'||o.classe==='semdata'); if(e){
-      ps.push(l.t+': '+ocHa(l.conf)+' ha a conferir a partir de '+ocBr(l.desde)+'; a saída '+ocDe(e.cult)+' '+ocMinus(e.cult)+' da '+e.safnome+' é estimada (sem plano, CD-02).');
+      ps.push(l.t+': '+ocHa(l.conf)+' ha a conferir a partir de '+ocBr(l.desde)+'; a saída '+ocDe(e.cult)+' '+ocMinus(e.cult)+' da '+e.safnome+' é estimada.');
       out.lnks.push(lnkSaida(self,S,e,saf)); } } });
   out.t=ps.join(' ')+(L.length>NMAX?' +'+(L.length-NMAX)+' a conferir (ver Situação).':''); return out; }
 // abre a safra (outra ou a mesma) na etapa 2 com o painel do cultivo; pmin: "Mudar plantio" já com o plantio mínimo (R-17)
@@ -1599,7 +1599,7 @@ function safAcoes(self,v,x){ const st=self.state, step=x.step, ro=x.ro, corr=st.
           c={nota:'Todos os talhões estão com perenes da '+(o?o.safnome:'outra safra')+' neste período ('+ocHa(per)+' ha).',lnks:o?[{t:'Planeje por ela ›',fn:()=>abrirCultivo(self,o.saf,'')}]:[]}; }
         else { const ps=[]; if(nl.length) ps.push(nl.length+(nl.length>1?' talhões livres':' talhão livre')+' ('+ocHa(b.livre||0)+' ha)'); if(nc.length) ps.push(nc.length+' a conferir ('+ocHa(b.conf||0)+' ha)'); if(nv) ps.push(nv+(nv>1?' ciclos perenes a vincular':' ciclo perene a vincular'));
           c={nota:'Nenhum cultivo nesta safra'+(ps.length?': '+ps.join(', '):'')+'. Use Planejar ›'+(nv?' ou Vincular ciclo ›':'')+' na linha.'+(fr.t?' '+fr.t:''),lnks:fr.lnks}; } }
-      else if(x.apIds.length) c={nota:semTxt+': sem plano não entram operações nem insumos.'+(fr.t?' '+fr.t:''),lnks:fr.lnks,prim:aplicar,sec:av(3,'Dimensionar operações')};
+      else if(x.apIds.length) c={nota:semTxt+'.'+(fr.t?' '+fr.t:''),lnks:fr.lnks,prim:aplicar,sec:av(3,'Dimensionar operações')};
       else c={nota:fr.t||'',lnks:fr.lnks,prim:av(3,'Dimensionar operações')}; } }
   else if(!ro&&step===3&&!x.temPlano) c={volta:ir(2),nota:'Nenhum cultivo tem plano agronômico: operações, recursos e demanda dependem dele.',prim:x.apIds.length?aplicar:null};
   // etapa 3: cultivo sem plano vira só o atalho "Aplicar plano em N cultivos" (o veredito já diz o que ficou fora); falta de recurso é aviso,

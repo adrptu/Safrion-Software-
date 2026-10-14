@@ -42,11 +42,14 @@ def build():
     TALFAZ={t:f for f,lst in TAL_FAZ.items() for t,_ in lst}
     # TABELAS-FOCO (5983172395): uma variável por coluna; as cinco primeiras respondem onde, quanto e quando; Cultura, Ocupa até, Fim por e
     # Safra logo depois respondem o que ocupa e até quando (§3.1)
-    CULT_COLS=[dict(k='local',l='Talhão ou parcela',w=130),dict(k='sit',l='Situação',w=150,niv0=True),dict(k='livre',l='Área livre (ha)',t='num',a='r',d=2,dmin=0,niv0=True),
-               dict(k='desde',l='Livre a partir de',t='num',w=130,niv0=True),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum',d=2,dmin=0),dict(k='cult',l='Cultura'),
-               dict(k='ate',l='Ocupa até',t='num'),dict(k='fimpor',l='Fim por',w=150,ajuda='Pelo plano e Colheita informada são previsões. Estimado: ciclo da cultivar ou plano mais longo da cultura (CD-02), sem plano no cultivo. Observado: colheita registrada.'),
-               dict(k='saf',l='Safra',w=150),dict(k='var',l='Variedade'),dict(k='plano',l='Plano agronômico',w=190),dict(k='ver',l='Versão'),dict(k='dt_plantio',l='Plantio',t='num'),
-               dict(k='meta',l='Meta',t='num',a='r'),dict(k='aj',l='Ajustes locais',t='num',a='r'),dict(k='tipo',l='Tipo',w=120)]
+    # SAF-TAB (proprietário, 14/10: "muitas colunas, confuso… mais minimalistas"): abre com o que decide a etapa (ess = posição: talhão,
+    # cultura, plano, área, plantio); as outras 11 ficam em "Colunas +11" (VISOES-2 §3.6). A Situação sai do padrão e vira ícone antes do
+    # talhão só quando pede atenção (sico: Sobreposição, A conferir); Planejado, Livre e Perene não ganham ícone. No celular, as 3 primeiras.
+    CULT_COLS=[dict(k='local',l='Talhão ou parcela',w=130,ess=1,pq='onde'),dict(k='sit',l='Situação',w=150,niv0=True,pq='situacao'),dict(k='livre',l='Área livre (ha)',t='num',a='r',d=2,dmin=0,niv0=True,pq='medida'),
+               dict(k='desde',l='Livre a partir de',t='num',w=130,niv0=True,pq='quando'),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum',d=2,dmin=0,ess=4,pq='medida'),dict(k='cult',l='Cultura',ess=2,pq='oque'),
+               dict(k='ate',l='Ocupa até',t='num',pq='quando'),dict(k='fimpor',l='Fim por',w=150,pq='quando',ajuda='Pelo plano e Colheita informada são previsões. Estimado: ciclo da cultivar ou plano mais longo da cultura (CD-02), sem plano no cultivo. Observado: colheita registrada.'),
+               dict(k='saf',l='Safra',w=150,pq='quando'),dict(k='var',l='Variedade',pq='oque'),dict(k='plano',l='Plano agronômico',w=190,ess=3,pq='oque'),dict(k='ver',l='Versão',pq='oque'),dict(k='dt_plantio',l='Plantio',t='num',ess=5,pq='quando'),
+               dict(k='meta',l='Meta',t='num',a='r',pq='medida'),dict(k='aj',l='Ajustes locais',t='num',a='r',pq='medida'),dict(k='tipo',l='Tipo',w=120,pq='oque')]
     NUNCA_C=dict(k='modo',eq='__nunca'); PLAN=dict(k='modo',ne='vinc'); VINC=dict(k='modo',eq='vinc')
     # painel "Planejar T1" (§2): contexto herdado no subtítulo; Plano antes do Plantio; Plantio = PlantioMin; Colheita prevista editável só sem
     # plano; meta na unidade escolhida no seletor da tabela (UNID-PROD), Padrão = unidade de mercado da cultura (DEC-0510-03).
@@ -87,7 +90,8 @@ def build():
         # "Aplicar plano" / "Reaplicar" da linha; trocar o plano de um cultivo é pelo formulário da linha
         g=grid(CULT_COLS,rows,edit=dict(m='form',title='Cultivo',newTitle='Novo cultivo',sub='Altere o cultivo e o plano agronômico e salve.',fields=CULT_FIELDS),
                sel=False,dele=not ro,add=None,gid=f'g_cult_{k}',qf=dict(k='sit',l='situação',nivel0=True),total=True,tree=True,x0={},
-               tools=UNP.sel_html('us_'+k))   # UNID-PROD: um seletor por tabela, na barra (D-U01)
+               sico=dict(k='sit',cores=['red','yellow']),
+               tools=f'<sc-if value="{H("us_"+k+"_vis")}" hint-placeholder-val="{F()}">'+UNP.sel_html('us_'+k)+'</sc-if>')   # UNID-PROD: um seletor por tabela (D-U01), só com a Meta à vista (SAF-TAB)
         cult_html+=f'<sc-if value="{H("cult_"+k)}" hint-placeholder-val="{F()}">{g}</sc-if>'
     # ---------- etapa 3 · rendimentos (uma grade por safra: a edição vale só para a safra aberta; safra encerrada abre só em consulta) ----------
     ops={}

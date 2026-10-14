@@ -143,7 +143,7 @@ function g2part(p,v){ const o={isIco:false,isCn:false,isTxt:false,isB:false,isMu
     case 'cn': { const cc=G2C[p.c]||G2C.gray; o.isCn=true; o.st='font-weight:800;white-space:nowrap;color:'+cc[0]+';'; break; }
     case 'tag': o.isTag=true; break; case 'link': o.isLink=true; break;
     case 'cta': o.isCta=true; o.cls='g2cta'; o.st=p.u?G2CTAU:G2CTA; break;
-    case 'act': o.isAct=true; o.al=p.al||p.t; if(p.lk) { o.lk=true; } if(p.fn&&p.fn.indexOf(':')>0){ const nm=p.fn.split(':')[0], ar=p.fn.slice(nm.length+1); o.fn=()=>{ if(v&&v[nm]) v[nm](ar); }; } else o.fn=(v&&p.fn&&v[p.fn])||(()=>{}); o.cls=p.lk?'':'g2cta'; if(p.desce){ o.cls='g2desce'; o.st='border:0;background:transparent;padding:0;color:#15201A;font-weight:800;cursor:pointer;font-family:inherit;font-size:13px;text-align:left;'; o.t=p.t+' ›'; } else o.st=p.lk?'border:0;background:transparent;padding:0;color:#1E7A4C;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;text-align:left;':(p.u?G2CTAU:G2CTA);
+    case 'act': o.isAct=true; o.al=p.al||p.t; if(p.lk) { o.lk=true; } if(p.fn&&p.fn.indexOf(':')>0){ const nm=p.fn.split(':')[0], ar=p.fn.slice(nm.length+1); o.fn=()=>{ if(v&&v[nm]) v[nm](ar); }; } else o.fn=(v&&p.fn&&v[p.fn])||(()=>{}); o.cls=(p.lk?'':'g2cta')+(p.sec?' g2sec':''); if(p.desce){ o.cls='g2desce'; o.st='border:0;background:transparent;padding:0;color:#15201A;font-weight:800;cursor:pointer;font-family:inherit;font-size:13px;text-align:left;'; o.t=p.t+' ›'; } else o.st=p.lk?'border:0;background:transparent;padding:0;color:#1E7A4C;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;text-align:left;':(p.u?G2CTAU:G2CTA);
       // célula inteira tocável (DS: alvo ≥ 44 px): texto da célula, sem negrito, na cor do estado; aria-pressed quando é o filtro ativo
       if(p.full){ o.cls='g2full'; o.st='width:100%;min-height:44px;border:0;background:'+(p.on?'#E4F3E9':'transparent')+';padding:0 6px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:'+(p.on?'700':'400')+';text-align:right;font-variant-numeric:tabular-nums;color:'+((G2C[p.c]||[])[0]||'#15201A')+';'+(p.on?'outline:2px solid #1E7A4C;outline-offset:-2px;border-radius:6px;':''); } break;
     case 'br': o.isBr=true; break; default: o.isTxt=true; }
@@ -236,10 +236,18 @@ function g2close(self,sp){ const fm=g2st(self,sp.id).fm; if(fm && !fm.ro && g2di
 // protótipo, perfil = usuário) e guarda o conjunto, não a ordem: a ordem é sempre a do desenho (identidade, padrão pelo ess, depois as
 // demais na ordem da grade). Coluna oculta continua valendo para busca, filtro e agrupamento (g2match usa sp.cols).
 const G2_CV_PERG=[['oque','O quê'],['quem','Quem'],['quando','Quando'],['onde','Onde'],['medida','Medidas'],['situacao','Situação'],['','Outras']];
+// VISOES-2 §3.6 · Situação oculta vira ícone antes da identidade (sp.sico = {k, cores}): só nas cores que pedem atenção (padrão vermelho,
+// laranja e amarelo), com o texto completo na dica e no leitor; o estado normal (Planejado, Livre) fica sem ícone
+function g2sicoPart(r,sp){ const k=sp.sico.k, cores=sp.sico.cores||['red','orange','yellow'], c=sp.cols.find(x=>x.k===k); if(!c) return null;
+  const ps=(r.p&&r.p[k])||[], ch=ps.find(p=>p&&p.c&&['chip','ico','cn'].indexOf(p.k)>=0); let cor=null, t='', d='';
+  if(ch){ cor=ch.c; t=String(ch.t||''); d=String(ch.dica||ch.dv||''); } else { t=g2text(r,c); cor=(c.chips||{})[t]||null; }
+  t=t.trim(); if(!cor||!t||cores.indexOf(cor)<0) return null;
+  return {k:'ico',c:cor,t:c.l+': '+t+(d?' · '+d:''),curto:cor==='red'?t:''}; }   // texto curto ao lado só no bloqueio (vermelho, visual_corte C2); atenção fica no ícone e na dica
 function g2cvTem(sp){ return !!(sp&&sp.cols&&sp.cols.some(c=>c.ess)); }
 function g2cvChave(sp){ let pg=''; try{ pg=String(location.pathname).split('/').pop(); }catch(e){} let pf=''; try{ pf=g2perfil().k; }catch(e){} return 'g2cv:'+pg+':'+sp.id+':'+pf; }
 function g2cvPadrao(sp){ return sp.cols.filter(c=>c.ess).sort((a,b)=>a.ess-b.ess).map(c=>c.k); }
-function g2cvLer(self,sp){ const st=g2st(self,sp.id); if(Array.isArray(st.cv)) return st.cv; if(st.cv===false) return null; let x=null;
+function g2cvLer(self,sp){ if(typeof window!=='undefined'&&window.__g2cvTodasSempre) return sp.cols.map(c=>c.k);   // só teste de domínio (comp_lib.cv_todas_sempre)
+  const st=g2st(self,sp.id); if(Array.isArray(st.cv)) return st.cv; if(st.cv===false) return null; let x=null;
   try{ x=JSON.parse(localStorage.getItem(g2cvChave(sp))||'null'); }catch(e){ x=null; } return Array.isArray(x)?x.filter(k=>sp.cols.some(c=>c.k===k)):null; }
 function g2cvCel(){ try{ return window.matchMedia('(max-width: 640px)').matches; }catch(e){ return false; } }
 function g2colsVis(self,sp){ if(!g2cvTem(sp)) return sp.cols; const esc=g2cvLer(self,sp), pad=g2cvPadrao(sp), k0=sp.cols[0].k;
@@ -404,8 +412,9 @@ function g2vals(self,sp,v,mask){
   const qn=g2norm((st.q||'').trim()), visK=new Set(cols.map(c=>c.k));
   // VISOES-2 C3: busca que casa só em coluna oculta diz na linha onde casou (a coluna continua valendo para a busca)
   const ondeCasou=(r)=>{ if(!qn||!g2cvTem(sp)||r.grp) return ''; if(cols.some(c=>g2norm(g2text(r,c)).indexOf(qn)>=0)) return ''; const oc=sp.cols.filter(c=>!visK.has(c.k)&&g2norm(g2text(r,c)).indexOf(qn)>=0).map(c=>c.l); return oc.length?'encontrado em: '+oc.join(', '):''; };
+  const sicoOn=!!(sp.sico&&!visK.has(sp.sico.k));
   v[id+'_rows']=flat.map(({r,lvl,has})=>{
-    const cells=[]; const exp=(st.x||sp.x0||{}); const casou=ondeCasou(r);
+    const cells=[]; const exp=(st.x||sp.x0||{}); const casou=ondeCasou(r); const sicoP=sicoOn?g2sicoPart(r,sp):null;
     // linha livre (convite para cadastrar, ex.: talhão sem cultivo): sem seleção e sem lixeira
     if(sp.sel&&(r.livre||r.fora||r.nosel)) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.sel) cells.push({isSel:true,isData:false,isDel:false,cls:'',on:!!(st.sel||{})[r.id],selLabel:'Selecionar '+g2text(r,sp.cols[0]),
       tog:()=>{ const s2=Object.assign({},g2st(self,id).sel||{}); s2[r.id]=!s2[r.id]; g2set(self,id,{sel:s2}); },st:'padding:6px 4px 6px 12px;'});
@@ -413,7 +422,8 @@ function g2vals(self,sp,v,mask){
       const empty=(has && ci>0 && !(r.p&&r.p[c.k]) && (!r.v || r.v[c.k]===undefined || r.v[c.k]===''));
       const raw0=empty?[]:((r.p&&r.p[c.k]&&r.p[c.k].length)?r.p[c.k]:[{k:(ci===0&&lvl===0&&has?'b':'txt'),t:g2fmt(r.v?r.v[c.k]:'',c)}]);
       // partes próprias (p) com número puro ganham a unidade (cópia: r.p não muda)
-      const raw=c.un?raw0.map(p=>(p&&typeof p.t==='string'&&['txt','b','cn','chip'].indexOf(p.k)>=0)?Object.assign({},p,{t:g2unf(p.t,c)}):p):raw0;
+      const raw1=c.un?raw0.map(p=>(p&&typeof p.t==='string'&&['txt','b','cn','chip'].indexOf(p.k)>=0)?Object.assign({},p,{t:g2unf(p.t,c)}):p):raw0;
+      const raw=(ci===0&&sicoP)?[sicoP].concat(raw1):raw1;
       const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':'')+(c.nr?' g2nr':'')+(c.a==='r'?' g2celn':''),parts:(ci===0&&casou?raw.concat([{k:'br'},{k:'mut',t:casou}]):raw).map((p,i,arr)=>g2part(g2semSep(arr,i),v)),pw:'max-width:'+(c.w||340)+'px;',
         st:(c.nr?'padding:0 2px;':'padding:6px 8px;')+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&sp.tree?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:inherit;box-shadow:1px 0 0 #E4E9E5;':'')};
       if(ci===0 && sp.tree){ cell.hasCaret=true; cell.caretOk=has; cell.caretNo=!has; const open=!!exp[r.id]||(g2filtering(st)&&has);
