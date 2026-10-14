@@ -10,6 +10,7 @@ from comp_lib import cv_todas_js   # VISOES-2 §3.6
 HERE = os.path.dirname(os.path.abspath(__file__)); R = os.path.join(HERE, '_render')
 
 
+# VISOES-2 (C2): a linha da O.S. é achada pelo código visível (OS-/OB-), não pelo começo do texto (o estado curto vem antes)
 class Os:
     def __init__(self, copiar=True):
         if copiar:
@@ -28,13 +29,13 @@ class Os:
 
     # ---- tela ----
     def linha(self, id_):
-        return self.J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
+        return self.J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>((r.innerText.match(/\\bO[SB]-\\d+/)||[''])[0])==={json.dumps(id_)}); return r?r.innerText.replace(/\\s+/g,' '):'';}})()") or ''
     def cel(self, id_, col):   # TABELAS-FOCO: valor de uma coluna (uma variável por coluna) na linha da O.S.
         return self.J(f"""(()=>{{const hs=[...document.querySelectorAll('[role=columnheader]')].filter(h=>h.offsetParent).map(h=>h.innerText.replace(/[⇅▾▴▲▼]/g,'').replace(/\\s+/g,' ').trim().toUpperCase());
-          const i=hs.indexOf({json.dumps(col)}.toUpperCase()); const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)}));
+          const i=hs.indexOf({json.dumps(col)}.toUpperCase()); const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>((r.innerText.match(/\\bO[SB]-\\d+/)||[''])[0])==={json.dumps(id_)});
           const c=r&&[...r.querySelectorAll('[role=cell]')][i]; return c?c.innerText.replace(/\\s+/g,' ').trim():'';}})()""") or ''
     def ordem(self, id_):
-        self.J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(id_)})); r&&r.click();}})()"); time.sleep(.4)
+        self.J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>((r.innerText.match(/\\bO[SB]-\\d+/)||[''])[0])==={json.dumps(id_)}); r&&r.click();}})()"); time.sleep(.4)
     def pan(self):   # 01/10: abre as seções recolhidas do painel antes de ler
         if self.J('(()=>{const bs=[...document.querySelectorAll(\'aside[role=dialog] section[aria-label] > button[aria-expanded="false"]\')]; bs.forEach(b=>b.click()); return bs.length;})()'): time.sleep(.3)
         return self.J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''

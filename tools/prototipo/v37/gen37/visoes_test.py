@@ -7,7 +7,7 @@ Modos (DESENHO.md, F1):
  celular  · 390 × 844, escala 2, toque: M1 alvos ≥ 44 px (com e sem toque); M2 3 + "mais" (menu com nome, Esc devolve o foco, ativa no
             "mais" marcada); M3 nada cortado, primária alcançável, 0 duplicata; M4 toque longo mostra a dica sem trocar a visão.
  e2e      · em 1440 × 900 e 390 × 844: E1 filtro → Tabela agrupada por Talhão (clique e teclado); E2 painel → Esc → foco na linha; E3 volta do detalhe
-            (link "Voltar", trilha, history.back(), nova aba, deep-link); E3b vazio por regra (Canceladas no Kanban) e "Ver em lista";
+            (link "Voltar", trilha, history.back(), nova aba, deep-link); E3b vazio por regra (Canceladas no Kanban) e "Ver em tabela";
             E3c erro da visão (Kanban e Carga) e cenário ilegível; E4 precedência (URL › preferência › Lista; Lista explícita e F5; perfil);
             E5 trocar de visão não grava no cenário; E6 entrada por endereço (hash e outros parâmetros intactos).
  e7       · cliques medidos (window.__cl) em "filtrar → agrupar → abrir → voltar" e "voltar à O.S. em outra entrada", na tela que houver
@@ -572,21 +572,21 @@ def modo_e2e():
         abre('OS.dc.html')
         r = J("(()=>{ const r=window.__cen.cenMudar(null,c=>window.__cen.osc_cancelar(c,'OS-0424','teste VISOES-1',['','',''],{k:'Ana'})); window.dispatchEvent(new StorageEvent('storage',{key:'talhao-os-cenario-v1'})); return JSON.stringify(r); })()"); time.sleep(.5)
         fase('Canceladas'); nl = len(ids()); troca_visao(J, 'kanban'); es = estado(); cols = kb_cols(); pk = pref(); shot('e2e_1440_kanban_canceladas')
-        J("(()=>{const b=[...document.querySelectorAll('[data-visoes-estado] button')].find(b=>b.innerText.trim()==='Ver em lista'); b&&b.click();})()"); time.sleep(.6)
+        J("(()=>{const b=[...document.querySelectorAll('[data-visoes-estado] button')].find(b=>b.innerText.trim()==='Ver em tabela'); b&&b.click();})()"); time.sleep(.6)
         a1 = (ativa(), busca(), pref(), len(ids()))
         c.goto(J("location.href"), .6); pronto(); a2 = (ativa(), busca())
         vai('OS.dc.html'); a3 = ativa()
-        chk('E3b fase Canceladas → Kanban: "Canceladas ficam fora do quadro: 1 ordem no filtro." com "Ver em lista" (o quadro segue com 5 colunas); "Ver em lista" abre a Lista com ?view=lista sem mudar a preferência; F5 continua na Lista; nova entrada sem ?view abre o Kanban (preferência)',
-            nl == 1 and es and es['tipo'] == 'regra' and es['t'] == 'Canceladas ficam fora do quadro: 1 ordem no filtro. Ver em lista' and cols == 5 and pk == 'kanban'
+        chk('E3b fase Canceladas → Kanban: "Canceladas ficam fora do quadro: 1 ordem no filtro." com "Ver em tabela" (o quadro segue com 5 colunas); "Ver em tabela" abre a Lista com ?view=lista sem mudar a preferência; F5 continua na Lista; nova entrada sem ?view abre o Kanban (preferência)',
+            nl == 1 and es and es['tipo'] == 'regra' and es['t'] == 'Canceladas ficam fora do quadro: 1 ordem no filtro. Ver em tabela' and cols == 5 and pk == 'kanban'
             and a1[0] == 'lista' and 'view=lista' in a1[1] and a1[2] == 'kanban' and a1[3] == 1 and a2 == ('lista', a1[1]) and a3 == 'kanban', [r, nl, es, cols, pk, a1, a2, a3])
     passo('E3b', _e3b)
     def _e3c():
-        # E3c · erro da visão (Kanban, Carga): o estado diz o motivo e "Ver em lista" leva à Lista, que funciona; cenário ilegível: recuperação sem apagar
+        # E3c · erro da visão (Kanban, Carga): o estado diz o motivo e "Ver em tabela" leva à Lista, que funciona; cenário ilegível: recuperação sem apagar
         for k, nome in (('kanban', 'Kanban'), ('carga', 'Carga por recurso')):
             abre('OS.dc.html?view=lista'); J(f"window.__g2visaoFalha={json.dumps(k)}"); p0 = pref(); troca_visao(J, k); es = estado(); sem = (kb_cols() == -1) if k == 'kanban' else (not carga_on())
             shot(f'e2e_1440_erro_{k}')
-            J("(()=>{const b=[...document.querySelectorAll('[data-visoes-estado] button')].find(b=>b.innerText.trim()==='Ver em lista'); b&&b.click();})()"); time.sleep(.6)
-            chk(f'E3c erro ao montar a visão {nome}: "Não foi possível mostrar a visão {nome}: …" + "Ver em lista" (painel não aparece); a Lista abre e funciona (linhas, ?view=lista), sem gravar preferência no fallback',
+            J("(()=>{const b=[...document.querySelectorAll('[data-visoes-estado] button')].find(b=>b.innerText.trim()==='Ver em tabela'); b&&b.click();})()"); time.sleep(.6)
+            chk(f'E3c erro ao montar a visão {nome}: "Não foi possível mostrar a visão {nome}: …" + "Ver em tabela" (painel não aparece); a Lista abre e funciona (linhas, ?view=lista), sem gravar preferência no fallback',
                 es and es['tipo'] == 'erro' and es['t'].startswith(f'Não foi possível mostrar a visão {nome}: falha simulada pelo teste') and sem and ativa() == 'lista' and len(ids()) >= 5 and 'view=lista' in busca()
                 and pref() == k and estado() is None, [es, sem, ativa(), len(ids()), busca(), p0, pref()])
         abre('OS.dc.html?view=lista'); J("localStorage.setItem('talhao-os-cenario-v1','{corrompido'); 1"); c.goto(BASE + 'OS.dc.html?view=lista', .6); pronto()
@@ -711,15 +711,15 @@ def modo_e2e():
             len(novos) == 1 and all(e and e['tipo'] == 'regra' and e['t'] == txt for e in est.values()) and dep[0] == ['Canceladas'] and dep[1] == novos, [novos, est, dep])
     passo('E3b2', _e3b2)
     def _e3d():
-        # E3d (revisão, achados B4/C4): depois da ação do estado (Enter em "Limpar filtros" e em "Ver em lista"), o foco fica num controle à vista,
+        # E3d (revisão, achados B4/C4): depois da ação do estado (Enter em "Limpar filtros" e em "Ver em tabela"), o foco fica num controle à vista,
         # o botão da visão aberta, e não no <body>
         abre('OS.dc.html?view=kanban'); fase('Canceladas'); e1 = estado()
         J("(()=>{const b=[...document.querySelectorAll('[data-visoes-estado] button')].find(b=>b.innerText.trim()==='Limpar filtros'); b&&b.focus();})()"); tecla('Enter'); time.sleep(.6)
         f1 = foco(); s1 = estado()
         J("window.__g2visaoFalha='carga'"); troca_visao(J, 'carga'); e2 = estado()
-        J("(()=>{const b=[...document.querySelectorAll('[data-visoes-estado] button')].find(b=>b.innerText.trim()==='Ver em lista'); b&&b.focus();})()"); tecla('Enter'); time.sleep(.6)
+        J("(()=>{const b=[...document.querySelectorAll('[data-visoes-estado] button')].find(b=>b.innerText.trim()==='Ver em tabela'); b&&b.focus();})()"); tecla('Enter'); time.sleep(.6)
         f2 = foco(); J("window.__g2visaoFalha=null")
-        chk('E3d teclado: Enter em "Limpar filtros" (vazio de filtro no Kanban) deixa o foco no botão Kanban; Enter em "Ver em lista" (erro da Carga) deixa o foco no botão Lista; nunca no BODY',
+        chk('E3d teclado: Enter em "Limpar filtros" (vazio de filtro no Kanban) deixa o foco no botão Kanban; Enter em "Ver em tabela" (erro da Carga) deixa o foco no botão Lista; nunca no BODY',
             bool(e1) and e1['tipo'] == 'vazio' and s1 is None and f1 == 'kanban' and bool(e2) and e2['tipo'] == 'erro' and f2 == 'lista' and ativa() == 'lista', [e1, f1, s1, e2, f2, ativa()])
     passo('E3d', _e3d)
     def _e8():

@@ -18,7 +18,8 @@ SETV="""((sel,val)=>{const i=document.querySelector(sel); const P=i.tagName==='S
 def clk(t,root=None): r=J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.4); return r
 def setv(sel,val): J(f"({SETV})({json.dumps(sel)},{json.dumps(val)})"); time.sleep(.3)
 toast=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')")
-rows=lambda: J("[...document.querySelectorAll('[role=table] [role=row].g2ed')].map(r=>r.innerText.split('\\n')[0].trim())")
+# VISOES-2 (C2): o estado vermelho curto ("Falta insumo") vem antes do código na célula; a O.S. da linha é o código visível (OS-/OB-)
+rows=lambda: J("[...document.querySelectorAll('[role=table] [role=row].g2ed')].map(r=>{const t=r.innerText; const m=t.match(/\\bO[SB]-\\d+/); return m?m[0]:t.split('\\n')[0].trim();})")
 def pan():   # 01/10: abre as seções recolhidas do painel antes de ler
     if J('(()=>{const bs=[...document.querySelectorAll(\'aside[role=dialog] section[aria-label] > button[aria-expanded="false"]\')]; bs.forEach(b=>b.click()); return bs.length;})()'): time.sleep(.3)
     return J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText")

@@ -139,7 +139,7 @@ function g2semSep(raw,i){ const p=raw[i]; if(!p||typeof p.t!=='string'||!/^\s*·
 function g2part(p,v){ const o={isIco:false,isCn:false,isTxt:false,isB:false,isMut:false,isChip:false,isTag:false,isLink:false,isCta:false,isAct:false,isBr:false,t:p.t||'',st:'',cls:'',dot:'',href:p.h||'#',fn:null,title:p.t||'',dica:'',hasDica:false};
   switch(p.k){ case 'b': o.isB=true; break; case 'mut': o.isMut=true; break;
     case 'chip': { const cc=G2C[p.c]||G2C.gray; o.isChip=true; o.dica=p.dica||p.dv||(p.de?g2dicaDe(p.t):''); o.hasDica=!!p.dica;   /* p.de: dica de estado do dicionário; p.dv: texto pronto da tela (selo do bloqueio, osSeloDica); os dois só visuais (o leitor de tela lê o motivo explícito p.dica; a linha focada recebe a dica do selo, g2dicaSelo) */ o.st='display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:normal;max-width:100%;min-width:0;overflow-wrap:anywhere;line-height:1.3;color:'+cc[0]+';background:'+cc[1]+';';   /* cortes visuais (13/10): selo longo quebra na própria célula, nunca invade a vizinha */ o.dot='width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'; break; }
-    case 'ico': { const cc=G2C[p.c]||G2C.gray; o.isIco=true; o.dica=p.t||''; o.st='display:inline-flex;align-items:center;gap:4px;flex-shrink:0;color:'+cc[0]+';font-size:11.5px;font-weight:700;'; o.icoTxt=p.curto||''; o.icoTem=!!p.curto; break; }   /* C2: bloqueio/erro com texto curto, não só cor e dica */   /* VISOES-2 §3.6: situação como ícone com cor, texto na dica e no leitor */
+    case 'ico': { const cc=G2C[p.c]||G2C.gray; o.isIco=true; o.dica=p.t||''; o.st='display:inline-flex;align-items:center;gap:4px;flex-shrink:'+(p.curto?'1;min-width:0;line-height:1.2;':'0;')+'color:'+cc[0]+';font-size:11.5px;font-weight:700;';   /* texto curto quebra linha no celular em vez de sair da célula (visual_corte C1) */ o.icoTxt=p.curto||''; o.icoTem=!!p.curto; break; }   /* C2: bloqueio/erro com texto curto, não só cor e dica */   /* VISOES-2 §3.6: situação como ícone com cor, texto na dica e no leitor */
     case 'cn': { const cc=G2C[p.c]||G2C.gray; o.isCn=true; o.st='font-weight:800;white-space:nowrap;color:'+cc[0]+';'; break; }
     case 'tag': o.isTag=true; break; case 'link': o.isLink=true; break;
     case 'cta': o.isCta=true; o.cls='g2cta'; o.st=p.u?G2CTAU:G2CTA; break;
@@ -185,7 +185,10 @@ function g2disp(self,sp){ return G2DISP[sp.id]||g2rows(self,sp); }
 function g2open(self,sp,rid,e){
   if(e&&e.target&&e.target.closest&&e.target.closest('a,button,input,select,textarea,label,[data-noedit],.g2nr')) return;
   const ed=sp.edit||{m:'none'}; if(ed.m==='none') return;
-  const r=g2find(g2disp(self,sp),rid)||g2find(g2rows(self,sp),rid); if(!r||r.fora) return;
+  let r=g2find(g2disp(self,sp),rid)||g2find(g2rows(self,sp),rid);
+  // VISOES-2 (defeito F do teste adaptado): dentro de um grupo a linha é uma cópia com id "OS-0421@T1"; abre a linha original (OS-0421)
+  if(!r&&String(rid).indexOf('@')>0&&String(rid).indexOf('grp@')!==0){ rid=String(rid).split('@')[0]; r=g2find(g2disp(self,sp),rid)||g2find(g2rows(self,sp),rid); }
+  if(!r||r.fora) return;
   if(r.dr && self.__v && self.__v[r.dr]){ self.__v[r.dr](); return; }
   if(ed.m==='pick'){ if(self.g2pick) self.g2pick(sp.id,rid,r); g2set(self,sp.id,{fl:rid}); return; }
   let draft={}; (ed.fields||[]).forEach(f=>{ let val=''; if(r.v&&r.v[f.k]!==undefined&&r.v[f.k]!==null&&r.v[f.k]!=='') val=(f.t==='num'? String(r.v[f.k]).replace('.',','):String(r.v[f.k])); else if(r.s&&r.s[f.k]!==undefined) val=String(r.s[f.k]); draft[f.k]=val; });
@@ -315,18 +318,26 @@ function g2agRows(self,sp,st,rows){ const a=g2agLer(self,sp); if(!a) return {row
     somas.forEach(c=>{ const tot=kids.reduce((s2,x)=>s2+(Number((x.v||{})[c.k])||0),0); row.v[c.k]=tot; });
     return row; });
   // grupos começam abertos a cada novo agrupamento ou nível (a seta recolhe no lugar)
-  const ch=a.d+'|'+a.t.join('/'); if(st.agx!==ch){ const x={}; out.forEach(r=>{ x[r.id]=true; }); const all=Object.assign({},self.state.g2||{}); all[sp.id]=Object.assign({},all[sp.id]||{},{x,agx:ch}); self.state.g2=all; }
+  // defeito G: a chave inclui o nível que desceu sozinho (trocar Fazenda muda o nível e os grupos novos nascem abertos)
+  const ch=a.d+'|'+path.join('/')+'|'+lv; if(st.agx!==ch){ const x={}; out.forEach(r=>{ x[r.id]=true; }); const all=Object.assign({},self.state.g2||{}); all[sp.id]=Object.assign({},all[sp.id]||{},{x,agx:ch}); self.state.g2=all; }
   return {rows:out,a,D,lv,base,path}; }
 const G2_AG_ICO={oque:'O quê',quem:'Quem',quando:'Quando',onde:'Onde'};
 function g2agMenuVals(self,sp,v,R){ const id=sp.id; if(!g2agTem(sp)){ v[id+'_aghas']=false; v[id+'_agmenu']=false; v[id+'_agtr']=[]; v[id+'_agtrilha']=false; return; }
   const st=g2st(self,id), a=R.a, D=R.D;
   v[id+'_aghas']=true; v[id+'_agl']=a?D.l:''; v[id+'_agexp']=String(!!st.agm); v[id+'_agmenu']=!!st.agm;
   ['oque','quem','quando','onde'].forEach(k=>{ v[id+'_agi_'+k]=!!a&&a.d===k; }); v[id+'_agi_0']=!a;
-  const P=st.agpos||{x:0,y:0}, W=260, vw=(typeof window!=='undefined'?window.innerWidth:1440); v[id+'_agpos']='top:'+(P.y+6)+'px;left:'+Math.max(8,Math.min(P.x,vw-W-8))+'px;';
+  // defeito D (390 × 844): o menu abria abaixo da borda; agora cabe na janela (sobe quando falta espaço embaixo; rola por dentro se ainda faltar)
+  const P=st.agpos||{x:0,y:0,t:0}, W=260, vw=(typeof window!=='undefined'?window.innerWidth:1440), vh=(typeof window!=='undefined'?window.innerHeight:900);
+  const Hm=(sp.ag.length+1)*50+16; let top=P.y+6; if(top+Hm>vh-8) top=Math.max(8,Math.min((P.t||P.y)-Hm-6,vh-Hm-8));
+  v[id+'_agpos']='top:'+top+'px;left:'+Math.max(8,Math.min(P.x,vw-W-8))+'px;max-height:'+Math.max(160,vh-top-8)+'px;overflow-y:auto;';
   v[id+'_agtog']=(e)=>{ const el=e&&e.currentTarget; const rr=el&&el.getBoundingClientRect?el.getBoundingClientRect():{left:0,bottom:0}; const ab=!g2st(self,id).agm;
-    g2set(self,id,ab?{agm:true,agpos:{x:rr.left,y:rr.bottom}}:{agm:false}); if(ab) setTimeout(()=>{ const b=document.querySelector('[data-g2agm="'+id+'"] [aria-checked=true]')||document.querySelector('[data-g2agm="'+id+'"] button'); if(b) b.focus(); },0); };
+    g2set(self,id,ab?{agm:true,agpos:{x:rr.left,y:rr.bottom,t:rr.top||0}}:{agm:false}); if(ab) setTimeout(()=>{ const b=document.querySelector('[data-g2agm="'+id+'"] [aria-checked=true]')||document.querySelector('[data-g2agm="'+id+'"] button'); if(b) b.focus(); },0); };
   const fecha=()=>{ g2set(self,id,{agm:false}); setTimeout(()=>{ const b=document.querySelector('[data-g2agb="'+id+'"]'); if(b) b.focus(); },0); };
-  v[id+'_agfecha']=fecha; v[id+'_agkey']=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); fecha(); } };
+  v[id+'_agfecha']=fecha; v[id+'_agkey']=(e)=>{ if(!e) return; if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); fecha(); return; }
+    // defeito H: menu (role=menu) anda por ↓ ↑ Home End, como o padrão ARIA de menu; Tab continua saindo
+    const m=document.querySelector('[data-g2agm="'+id+'"]'), its=m?[...m.querySelectorAll('[role^=menuitem]')]:[], i=its.indexOf(document.activeElement); let j=null;
+    if(e.key==='ArrowDown') j=(i+1)%its.length; else if(e.key==='ArrowUp') j=(i-1+its.length)%its.length; else if(e.key==='Home') j=0; else if(e.key==='End') j=its.length-1;
+    if(j!==null&&its[j]){ e.preventDefault(); its[j].focus(); } };
   v[id+'_agops']=[{pq:'',t:'Sem agrupar',niv:''}].concat(sp.ag.map(x=>({pq:x.pq,t:x.l,niv:x.niv.length>1?x.niv.join(' › '):''}))).map(o=>({t:o.t,niv:o.niv,temNiv:!!o.niv,on:String((a?a.d:'')===o.pq),
     i0:!o.pq,iOque:o.pq==='oque',iQuem:o.pq==='quem',iQuando:o.pq==='quando',iOnde:o.pq==='onde',perg:G2_AG_ICO[o.pq]||'',
     go:()=>{ g2agGrava(self,sp,o.pq?{d:o.pq,t:[]}:null); setTimeout(()=>{ const b=document.querySelector('[data-g2agb="'+id+'"]'); if(b) b.focus(); },0); }}));
@@ -1032,7 +1043,7 @@ function g2rolLe(gid){ if(typeof document==='undefined') return null; const col=
 function g2rolPoe(r,gid){ if(!r||typeof document==='undefined') return; const col=document.querySelector('.ml-tog+div'), m=document.querySelector('main[data-scroll]')||document.querySelector('main');
   if(col) col.scrollTop=r.col||0; if(m) m.scrollTop=r.main||0; g2rolCaixas(gid).forEach((e,i)=>{ const x=(r.cx||[])[i]; if(x){ e.scrollTop=x[0]; e.scrollLeft=x[1]; } }); }
 // trocar de visão: grava o endereço (?view, replaceState: o Voltar sai da tela, não percorre visões) e, só na escolha pelo seletor, a preferência;
-// "Ver em lista" de um estado (origem fallback) não grava a preferência. A rolagem da visão de saída fica guardada e a da nova volta.
+// "Ver em tabela" de um estado (origem fallback) não grava a preferência. A rolagem da visão de saída fica guardada e a da nova volta.
 function g2visaoIr(self,gid,k,origem){ const sp=g2visaoSpec(gid); if(!sp||sp.validas.indexOf(k)<0) return; const ant=g2visao(self,gid);
   if(k!==ant){ (self.__g2rol=self.__g2rol||{})[gid+':'+ant]=g2rolLe(gid); }
   if(origem==='seletor') g2visaoPrefGrava(g2visaoChave(g2perfil().k,sp.ent),k);
@@ -1043,7 +1054,7 @@ function g2visaoIr(self,gid,k,origem){ const sp=g2visaoSpec(gid); if(!sp||sp.val
 // o botão visível da visão k na barra (no estreito, a visão do "mais" é o próprio "mais")
 function g2visaoBotao(gid,k){ if(typeof document==='undefined') return null; const bar=document.querySelector('[data-visoes-gid="'+gid+'"]'); if(!bar) return null;
   const b=[...bar.querySelectorAll('[data-visao="'+k+'"]')].find(g2vis)||bar.querySelector('[data-visao-mais]'); return b&&g2vis(b)?b:null; }
-// a visão não montou: o erro fica no estado da visão (§2.8) e o painel some; "Ver em lista" leva à Lista, que não depende dela.
+// a visão não montou: o erro fica no estado da visão (§2.8) e o painel some; "Ver em tabela" leva à Lista, que não depende dela.
 // window.__g2visaoFalha = '<k>' simula a falha (teste), como o ?falha=1 do AGROFIT
 function g2visaoTenta(self,gid,k,fn){ const e=(self.__g2vErr=self.__g2vErr||{}); const m=(e[gid]=e[gid]||{}); delete m[k];
   try{ if(typeof window!=='undefined'&&window.__g2visaoFalha===k) throw new Error('falha simulada pelo teste'); fn(); return true; }
@@ -1079,7 +1090,7 @@ function g2visoesFim(self,v){ if(typeof G2_VISOES==='undefined'||!G2_VISOES) ret
     v[gid+'_vk']=(e)=>g2visaoTeclaBarra(self,gid,e); v[gid+'_vmk']=(e)=>g2visaoTeclaMenu(self,gid,e);
     // estado em toda visão (§2.8): o erro da visão vem primeiro (a Lista continua disponível); depois o que a tela informa
     let es=null;
-    if(err[k]) es={tipo:'erro',texto:'Não foi possível mostrar a visão '+((sp.nomes||{})[k]||k)+': '+err[k]+'.',acao:'Ver em lista',fn:()=>g2visaoIr(self,gid,sp.validas[0],'fallback')};
+    if(err[k]) es={tipo:'erro',texto:'Não foi possível mostrar a visão '+((sp.nomes||{})[k]||k)+': '+err[k]+'.',acao:'Ver em tabela',fn:()=>g2visaoIr(self,gid,sp.validas[0],'fallback')};
     else if(self.g2visaoEstado) es=self.g2visaoEstado(gid,k)||null;
     v[gid+'_vest_on']=!!es; v[gid+'_vest_t']=es?es.texto:''; v[gid+'_vest_tipo']=es?es.tipo:''; v[gid+'_vest_a']=(es&&es.acao)||'';
     // a ação do estado some no redesenho e levava o foco ao <body> (revisão VISOES-1, achados B4/C4): o foco vai ao botão da visão aberta
@@ -1110,11 +1121,13 @@ function g2voltaChegada(self,gid,sp){ if(self.__g2chegou) return; self.__g2chego
   const c=g2voltaLer(), es=g2escopo(self);
   const mot=g2voltaValida(c,{nt,origem:String(location.origin),arq:g2arq(),ent:sp.ent,perfil:g2perfil().k,faz:es.faz,saf:es.saf,agora:Date.now()});
   // a ficha sai do endereço; recusada, sai também a visão (g2visaoUrl troca só o view= e mantém o resto da query cru)
-  const q=String(location.search||'').replace(/^\?/,'').split('&').filter(p=>p&&!/^volta(=|$)/.test(p)).join('&');
+  // recusada (defeito B): sai também o agrupamento que veio com a ficha (ag, trilha); vale a preferência do perfil, como a visão
+  const q=String(location.search||'').replace(/^\?/,'').split('&').filter(p=>p&&!/^volta(=|$)/.test(p)&&!(mot&&/^(ag|trilha)(=|$)/.test(p))).join('&');
   let vw=''; try{ vw=mot?'':(new URLSearchParams(location.search).get('view')||''); }catch(e){}
   try{ history.replaceState(history.state,'',g2visaoUrl(location.pathname,q,location.hash,vw)); }catch(e){}
   self.__g2voltaMotivo=mot; const all=Object.assign({},self.state.g2||{});
-  if(mot){ all[gid]=Object.assign({},all[gid]||{},{f:{},q:'',so:null,qv:'',sel:{}}); self.state.g2=all; g2keepGrava(self,gid,all[gid]); return; }
+  // recusada: também o agrupamento da sessão sai (ag/agx/x); vale a preferência do perfil atual, como a visão (defeito B, perfil Caio)
+  if(mot){ all[gid]=Object.assign({},all[gid]||{},{f:{},q:'',so:null,qv:'',sel:{}}); delete all[gid].ag; delete all[gid].agx; delete all[gid].x; self.state.g2=all; g2keepGrava(self,gid,all[gid]); return; }
   c.usado=Date.now(); try{ sessionStorage.setItem(G2_VOLTA,JSON.stringify(c)); }catch(e){}
   const kp=(c.keep&&typeof c.keep==='object')?c.keep:{}; all[gid]=Object.assign({},all[gid]||{},{f:kp.f||{},q:kp.q||'',so:kp.so||null,qv:kp.qv||''}); self.state.g2=all; g2keepGrava(self,gid,all[gid]);
   self.__g2voltaAlvo={foco:c.foco||'',rol:c.rol||null}; }

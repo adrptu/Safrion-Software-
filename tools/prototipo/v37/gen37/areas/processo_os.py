@@ -1065,12 +1065,12 @@ function EXTRAVALS(self,v){
       if(filtrando&&nDist===0) return {tipo:'vazio',texto:'Nenhuma ordem no filtro: '+fDesc+'.',acao:'Limpar filtros',fn:v.os_limpar};
       /* revisão VISOES-1, achado A2: recorte só com canceladas (fora da lista e do quadro por regra) diz o motivo em toda visão */
       if(!filtrando&&nDist===0&&nCanc>0) return {tipo:'regra',texto:'Só há ordens canceladas neste recorte ('+escD+'): '+ord(nCanc)+'.',acao:'Ver canceladas',fn:setF('Canceladas')};
-      if(k==='kanban'&&nDist>0&&nKb===0) return {tipo:'regra',texto:'Canceladas ficam fora do quadro: '+ord(nDist)+' no filtro.',acao:'Ver em lista',fn:lista};
-      if(k==='calendario'&&nDist>0&&nKb===0) return {tipo:'regra',texto:'Canceladas ficam fora do calendário: '+ord(nDist)+' no filtro.',acao:'Ver em lista',fn:lista};
+      if(k==='kanban'&&nDist>0&&nKb===0) return {tipo:'regra',texto:'Canceladas ficam fora do quadro: '+ord(nDist)+' no filtro.',acao:'Ver em tabela',fn:lista};
+      if(k==='calendario'&&nDist>0&&nKb===0) return {tipo:'regra',texto:'Canceladas ficam fora do calendário: '+ord(nDist)+' no filtro.',acao:'Ver em tabela',fn:lista};
       /* VISOES-2: semana sem ordem do recorte (há ordem em outra semana): diz e leva à próxima (ou à anterior) */
       if(k==='calendario'&&self.__cal&&nKb>0&&self.__cal.n===0&&self.__cal.sem===0){ const C=self.__cal, d=C.prox||C.ant;
-        return {tipo:'regra',texto:'Nenhuma ordem do recorte nesta semana.',acao:d?(C.prox?'Ir para a semana de ':'Voltar para a semana de ')+brd(d).slice(0,5):'Ver em lista',fn:d?()=>C.ir(d):lista}; }
-      if(k==='carga'&&nDist>0&&nAl===0) return {tipo:'regra',texto:'Nenhuma ordem de '+rDesc+' tem alocação na semana do PCP: '+ord(nDist)+'.',acao:'Ver em lista',fn:lista};
+        return {tipo:'regra',texto:'Nenhuma ordem do recorte nesta semana.',acao:d?(C.prox?'Ir para a semana de ':'Voltar para a semana de ')+brd(d).slice(0,5):'Ver em tabela',fn:d?()=>C.ir(d):lista}; }
+      if(k==='carga'&&nDist>0&&nAl===0) return {tipo:'regra',texto:'Nenhuma ordem de '+rDesc+' tem alocação na semana do PCP: '+ord(nDist)+'.',acao:'Ver em tabela',fn:lista};
       return null; }; }
   // ---- Talhão (TABELAS-FOCO): seletor na barra da coleção, fora das abas; o mesmo estado do filtro da coluna Talhão (f.tal) ----
   { const spc=spO.cols.find(c=>c.k==='tal'); const tcnt={}, tlab={};
@@ -1114,6 +1114,8 @@ function EXTRAVALS(self,v){
     if(R&&R.a&&R.D&&R.lv<R.D.niv.length){ const niv=R.D.niv[R.lv].toLowerCase();
       v.kb_raias=R.rows.map(g=>{ const ids=new Set(g.kids.map(x=>String(x.id).split('@')[0])), lst=osK.filter(o=>ids.has(o.id)), n=lst.filter(o=>FASES.indexOf(o.etapa)>=0).length;
         return {k:g.grp.k,n:n+(n===1?' ordem':' ordens'),lab:'Descer em '+g.grp.k+' ('+niv+'): '+n+(n===1?' ordem':' ordens'),desce:()=>g2agGrava(self,spO,{d:agA.d,t:(R.path||[]).concat([g.grp.k])}),cols:kbCols(lst),tem:n>0}; }).filter(r=>r.tem);
+      /* a O.S. de dois talhões aparece nas duas raias: a 2ª vez diz onde mais está (não é um segundo botão igual ao primeiro) */
+      const visto={}; v.kb_raias.forEach(r=>r.cols.forEach(c=>c.cards.forEach(k=>{ if(visto[k.id]){ k.hasRep=true; k.rep='Também na raia '+visto[k.id]; k.lab+=' · também na raia '+visto[k.id]; } else visto[k.id]=r.k; })));
       v.kb_temraias=v.kb_raias.length>0; }
     v.kb=kbCols(osK); });
   /* VISOES-2 (F2a) · Calendário, só leitura: a semana de segunda a domingo com o mesmo recorte do Kanban (filtros, busca, Talhão; Canceladas
@@ -1123,8 +1125,13 @@ function EXTRAVALS(self,v){
     const card=o=>({id:o.id,tipo:o.tipo,local:localTxt(o),fase:o.etapa,fst:chipSt(FCOR[o.etapa]),fdot:dotSt(FCOR[o.etapa]),open:()=>openPan(o.id),
       lab:'Abrir '+o.id+' · '+o.tipo+' · '+o.etapa+(o.ini?' · janela '+brd(o.ini)+(o.fim&&o.fim!==o.ini?' a '+brd(o.fim):''):' · sem data')});
     const naSem=new Set();
+    /* ordem de vários dias na semana: uma faixa só, sobre as colunas dos seus dias (antes, um botão igual em cada dia: ação duplicada) */
+    const diasDe=o=>dias.filter(d=>g2noDia(o.ini,o.fim,d));
+    v.cal_multi=cs.filter(o=>diasDe(o).length>1).map(o=>{ const ds=diasDe(o), a=dias.indexOf(ds[0]), k=card(o); ds.forEach(()=>naSem.add(o.id));
+      k.col='grid-column:'+(a+1)+' / span '+ds.length+';'; k.per=brd(o.ini).slice(0,5)+(o.fim&&o.fim!==o.ini?' → '+brd(o.fim).slice(0,5):''); return k; });
+    v.cal_temmulti=v.cal_multi.length>0;
     v.cal=dias.map((d,i)=>{ const ds=cs.filter(o=>g2noDia(o.ini,o.fim,d)); ds.forEach(o=>naSem.add(o.id)); const ehHoje=d===hoje;
-      return {d,t:DS[i]+' '+d.slice(8,10)+'/'+d.slice(5,7)+(ehHoje?' · hoje':''),hoje:ehHoje?'true':'false',vazio:ds.length===0,vz:ds.length===0?'true':'false',nt:ds.length?String(ds.length):'',ords:ds.map(card)}; });
+      return {d,t:DS[i]+' '+d.slice(8,10)+'/'+d.slice(5,7)+(ehHoje?' · hoje':''),hoje:ehHoje?'true':'false',vazio:ds.length===0,vz:ds.length===0?'true':'false',nt:ds.length?String(ds.length):'',ords:ds.filter(o=>diasDe(o).length<=1).map(card)}; });
     v.cal_sem=cs.filter(o=>!o.ini).map(card); v.cal_temsem=v.cal_sem.length>0;
     v.cal_tit=brd(dias[0]).slice(0,5)+' a '+brd(dias[6]); v.cal_n=naSem.size+(naSem.size===1?' ordem':' ordens')+' nesta semana'+(v.cal_sem.length?' · '+v.cal_sem.length+' sem data':'');
     v.cal_naoHoje=seg!==seg0;
@@ -1273,7 +1280,8 @@ def _kanban(celular_rola=False,lista="kb"):
           f'<div style="display: flex; flex-wrap: wrap; gap: 4px;"><sc-for list="{H("k.selos")}" as="s" hint-placeholder-count="1">{_chip_hole("s.t","s.st","s.dot","s.dica")}</sc-for></div>'
           f'<sc-if value="{H("k.hasObs")}" hint-placeholder-val="{F()}"><div style="font-size: 11.5px; color: {MUTED};">{H("k.obs")}</div></sc-if>'
           f'<sc-if value="{H("k.hasDp")}" hint-placeholder-val="{F()}"><div style="font-size: 11.5px; font-weight: 700; color: {INK};">{H("k.dp")}</div></sc-if>'
-          f'<div style="font-size: 11.5px; color: {MUTED};">{H("k.meta")}</div></div>')
+          f'<div style="font-size: 11.5px; color: {MUTED};">{H("k.meta")}</div>'
+          f'<sc-if value="{H("k.hasRep")}" hint-placeholder-val="{F()}"><div style="font-size: 11.5px; font-weight: 700; color: {MUTED};">{H("k.rep")}</div></sc-if></div>')
     col=(f'<div class="os-kbcol" style="flex: 1 1 0; min-width: 0; background: {BG}; border: 1px solid {LINE}; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">'
          f'<div style="display: flex; align-items: center; gap: 6px;"><span data-dica-de="{H("c.t")}" style="font-size: 11px; font-weight: 800; letter-spacing: .05em; color: {INK}; text-transform: uppercase;">{H("c.t")}</span>'
          f'<span style="{H("c.nst")} padding: 1px 8px; font-size: 11.5px;">{H("c.n")}</span></div>'
@@ -1674,7 +1682,8 @@ def _calendario():
            '.oscal-o{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;width:100%;box-sizing:border-box;padding:7px 8px;border:1px solid #E4E9E5;'
            'border-radius:10px;background:#FFFFFF;cursor:pointer;font-family:inherit;color:#15201A;min-height:44px;min-width:0;overflow-wrap:anywhere}'
            '@media (hover:hover){.oscal-o:hover{border-color:#1E7A4C;background:#F2F8F4}}.oscal-o:focus-visible{outline:2px solid #1E7A4C;outline-offset:1px}'
-           '@media (max-width:900px){.oscal{grid-template-columns:1fr}.oscal-dia{min-height:0}.oscal-dia[data-vazio=true]{display:none}}</style>')
+           '.oscal-faixa{grid-auto-flow:row dense;margin-bottom:8px}.oscal-multi{flex-direction:row;align-items:center;flex-wrap:wrap;gap:4px 8px;border-left:3px solid #1E7A4C}'
+           '@media (max-width:900px){.oscal{grid-template-columns:1fr}.oscal-dia{min-height:0}.oscal-dia[data-vazio=true]{display:none}.oscal-faixa>*{grid-column:auto!important}}</style>')
     cab = (f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">'
            f'<button type="button" aria-label="Semana anterior" onClick="{H("cal_prev")}" style="{_MINI}">‹</button>'
            f'<b style="font-size: 14px;" aria-live="polite">{H("cal_tit")}</b>'
@@ -1684,13 +1693,17 @@ def _calendario():
     sem = (f'<sc-if value="{H("cal_temsem")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Sem data" style="display: flex; align-items: center; gap: 6px 8px; flex-wrap: wrap; '
            f'padding: 8px 10px; margin-bottom: 8px; border: 1px dashed {LINE}; border-radius: 10px; font-size: 12.5px;"><b>Sem data</b>'
            f'<sc-for list="{H("cal_sem")}" as="o" hint-placeholder-count="1"><button type="button" aria-label="{H("o.lab")}" onClick="{H("o.open")}" style="{_MINI}">{H("o.id")} · {H("o.tipo")}</button></sc-for></div></sc-if>')
+    faixa = (f'<sc-if value="{H("cal_temmulti")}" hint-placeholder-val="{F()}"><div class="oscal oscal-faixa" role="group" aria-label="Ordens de vários dias">'
+             f'<sc-for list="{H("cal_multi")}" as="o" hint-placeholder-count="2"><button type="button" class="oscal-o oscal-multi" style="{H("o.col")}" aria-label="{H("o.lab")}" onClick="{H("o.open")}">'
+             f'<b style="font-size: 12.5px;">{H("o.id")}</b><span style="font-size: 12px;">{H("o.tipo")}</span><span style="font-size: 11.5px; color: {MUTED};">{H("o.per")} · {H("o.local")}</span>'
+             f'<span style="{H("o.fst")}"><span style="{H("o.fdot")}"></span>{H("o.fase")}</span></button></sc-for></div></sc-if>')
     dias = (f'<div class="oscal" role="list" aria-label="Semana das ordens"><sc-for list="{H("cal")}" as="d" hint-placeholder-count="7">'
             f'<div class="oscal-dia" role="listitem" data-hoje="{H("d.hoje")}" data-vazio="{H("d.vz")}" aria-label="{H("d.t")}"><div class="oscal-dt"><span>{H("d.t")}</span><span>{H("d.nt")}</span></div>'
             f'<sc-for list="{H("d.ords")}" as="o" hint-placeholder-count="1"><button type="button" class="oscal-o" aria-label="{H("o.lab")}" onClick="{H("o.open")}">'
             f'<b style="font-size: 12.5px;">{H("o.id")}</b><span style="font-size: 12px; line-height: 1.3;">{H("o.tipo")}</span>'
             f'<span style="font-size: 11.5px; color: {MUTED};">{H("o.local")}</span><span style="{H("o.fst")}"><span style="{H("o.fdot")}"></span>{H("o.fase")}</span></button></sc-for>'
             f'<sc-if value="{H("d.vazio")}" hint-placeholder-val="{F()}"><span style="font-size: 12px; color: {MUTED};">sem ordem</span></sc-if></div></sc-for></div>')
-    return css + cab + sem + dias
+    return css + cab + sem + faixa + dias
 
 def _agf_fichas():
     """Nome usado na fazenda → ficha do Consulta Agrofit (AG-07): id, classe e grupo de ação. Fertilizante, semente e muda ficam fora."""

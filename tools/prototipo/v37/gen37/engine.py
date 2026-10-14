@@ -1157,7 +1157,8 @@ ACOES_CSS=(".acoes{position:sticky;bottom:-22px;z-index:6;display:flex;flex-dire
     # expandir/recolher global (v3 · tabela 1): controle discreto de texto na barra da coleção, com menos ênfase que qualquer botão
     ".g2xtog{border:0;background:transparent;color:#1E7A4C;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:4px 2px;white-space:nowrap}"
     "@media (hover:hover){.g2xtog:hover{text-decoration:underline;text-underline-offset:3px}}.g2xtog:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:6px}"
-    "@media (pointer:coarse){.g2xtog{min-height:44px}}")
+    "@media (pointer:coarse){.g2xtog{min-height:44px}}"
+    "@media (pointer:coarse){[data-g2agb],[data-g2cvb]{min-height:44px!important}}")   # defeito D: Agrupar por e Colunas com alvo de toque de 44 px
 def area_acoes(pre='aa',rotulo='Ações da etapa'):
     """Área de ações única do processo guiado (DS-33/DS-61). Buracos vêm de g2acoes(v,pre,cfg) em g2lib.js.
     Nota opcional (causa da pendência + atalho contextual), retorno secundário à esquerda, avanço secundário quando a primária
@@ -1375,7 +1376,7 @@ _MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 1
 _SEPD=f'<sc-if value="{{{{p.sepL}}}}" hint-placeholder-val="{{{{false}}}}"><span class="g2sepd" aria-hidden="true">· </span></sc-if>'
 _ICO_ALERTA='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>'   # lucide triangle-alert (ISC)
 _ICO_COLUNAS='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>'   # lucide columns-3 (ISC)
-_PARTS=(f'<sc-if value="{{{{p.isIco}}}}" hint-placeholder-val="{{{{false}}}}"><span role="img" aria-label="{{{{p.dica}}}}" data-dica="{{{{p.dica}}}}" style="{{{{p.st}}}}">{_ICO_ALERTA}<sc-if value="{{{{p.icoTem}}}}" hint-placeholder-val="{{{{false}}}}"><span aria-hidden="true">{{{{p.icoTxt}}}}</span></sc-if></span></sc-if>'
+_PARTS=(f'<sc-if value="{{{{p.isIco}}}}" hint-placeholder-val="{{{{false}}}}"><span role="img" aria-label="{{{{p.dica}}}}" data-dica="{{{{p.dica}}}}" style="{{{{p.st}}}}">{_ICO_ALERTA}<sc-if value="{{{{p.icoTem}}}}" hint-placeholder-val="{{{{false}}}}"><span aria-hidden="true" style="white-space: normal; min-width: 0;">{{{{p.icoTxt}}}}</span></sc-if></span></sc-if>'
         f'<sc-if value="{{{{p.isTxt}}}}" hint-placeholder-val="{{{{false}}}}"><span>{_SEPD}{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isCn}}}}" hint-placeholder-val="{{{{false}}}}"><span style="{{{{p.st}}}}">{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isB}}}}" hint-placeholder-val="{{{{false}}}}"><b>{_SEPD}{{{{p.t}}}}</b></sc-if>'
@@ -1510,7 +1511,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     agm=(f'<sc-if value="{H("_agmenu")}" hint-placeholder-val="{{{{false}}}}"><div style="position: fixed; inset: 0; z-index: 70;">'
          f'<button type="button" aria-label="Fechar Agrupar por" tabIndex="-1" onClick="{H("_agfecha")}" style="position: absolute; inset: 0; border: 0; background: transparent; cursor: default;"></button>'
          f'<div role="menu" aria-label="Agrupar por" data-g2agm="{gid}" onKeyDown="{H("_agkey")}" style="{H("_agpos")} position: fixed; width: 260px; background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 6px; display: flex; flex-direction: column; gap: 2px; z-index: 71;">'
-         f'<sc-for list="{H("_agops")}" as="ao" hint-placeholder-count="5"><button type="button" role="menuitemradio" aria-checked="{_h("ao.on")}" onClick="{_h("ao.go")}" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 4px 10px; border: 0; border-radius: 8px; background: transparent; font-family: inherit; font-size: 13px; color: {INK}; text-align: left; cursor: pointer;">'
+         f'<sc-for list="{H("_agops")}" as="ao" hint-placeholder-count="5"><button type="button" role="menuitemradio" aria-checked="{_h("ao.on")}" onClick="{_h("ao.go")}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 4px 10px; border: 0; border-radius: 8px; background: transparent; font-family: inherit; font-size: 13px; color: {INK}; text-align: left; cursor: pointer;">'
          + _icos + f'<span style="display: flex; flex-direction: column; gap: 1px;"><span style="font-weight: 700;">{_h("ao.t")}</span><sc-if value="{_h("ao.temNiv")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11.5px; color: {MUTED};">{_h("ao.niv")}</span></sc-if></span></button></sc-for>'
          f'</div></div></sc-if>') if ag else ''
     if search or add or tree or sel or tools or qf or ess or ag:
