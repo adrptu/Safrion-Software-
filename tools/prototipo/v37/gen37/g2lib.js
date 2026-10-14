@@ -384,6 +384,11 @@ const G2_ALCADAS=[
   {id:'AL-17',t:'Publicar previsão de colheita',cmd:'Colheita (R-17)',papeis:['agronomo'],modo:'todos',edita:'papel',opc:['agronomo','gestor','pcp'],obs:'a contagem do campo não muda a previsão: só quem publica (a oferta do Comercial lê a publicada)'},
   {id:'AL-18',t:'Publicar referência técnica do plano operacional',cmd:'CONTROLE-02 F2 (comando do PR #58)',papeis:['gestor'],modo:'todos',edita:'',fixa:'contrato da CONTROLE-02 F2 (6147460986): gestor, fixo nesta fatia',obs:'publicar registra a versão de referência: não aprova orçamento nem libera O.S. (alçada própria, sem reaproveitar a de orçamento ou de O.S.)'}];
 const G2_PERFIL_KEY='safrion.perfilDemo'; let G2_PERFIL_MEM='';
+// 14/10 (proprietário: "me coloque sempre no perfil que tem todos acessos para testar tudo"): perfil de teste com todos os papéis do catálogo.
+// Fica fora das pessoas (g2perfis): não entra em "quem decide", no cadastro nem nas alçadas; a casca do artefato o põe a cada abertura.
+// Não é segurança de acesso; para testar um papel isolado, troca-se o perfil no avatar.
+const G2_TODOS_K='Proprietário';
+function g2todos(){ if(!g2todos._v){ const papeis={}; G2_PAPEIS.forEach(x=>{ papeis[x.k]=x.m; }); g2todos._v={k:G2_TODOS_K,t:'Proprietário · todos os papéis (teste)',papeis,todos:true}; } return g2todos._v; }
 // estado de Configurações: c.conf do cenário salvo (talhao-os-cenario-v1), válido só com a versão deste build (CONF0.v); ausente → padrão.
 // Cache pelo texto salvo e pelo tamanho de G2_PERFIS (os testes injetam perfis): g2pf roda muitas vezes por desenho. Nunca chamado no carregamento.
 const G2_CF={raw:null,conf:null,src:undefined,np:-1,pf:null};
@@ -404,7 +409,7 @@ function g2perfisDe(conf){ if(!conf||typeof CONF0==='undefined') return G2_PERFI
   CONF0.pessoas.forEach(add); return out; }
 function g2perfis(){ const conf=g2conf(); if(!conf) return G2_PERFIS;
   if(G2_CF.src!==conf||G2_CF.np!==G2_PERFIS.length){ G2_CF.src=conf; G2_CF.np=G2_PERFIS.length; G2_CF.pf=g2perfisDe(conf); } return G2_CF.pf; }
-function g2pf(p){ const k=(typeof p==='string')?p:(p&&p.k); return g2perfis().find(x=>x.k===k)||null; }   // perfil efetivo pela chave ("Ana" ou {k:'Ana'})
+function g2pf(p){ const k=(typeof p==='string')?p:(p&&p.k); if(k===G2_TODOS_K) return g2todos(); return g2perfis().find(x=>x.k===k)||null; }   // perfil efetivo pela chave ("Ana" ou {k:'Ana'})
 function g2perfil(){ let k=G2_PERFIL_MEM; try{ k=localStorage.getItem(G2_PERFIL_KEY)||k; }catch(e){} return g2pf(k)||g2perfis()[0]||G2_PERFIS[0]; }   // o desativado cai no 1º efetivo
 function g2papel(p,papel){ const q=g2pf(p); return !!q&&[].concat(papel).every(x=>!!q.papeis[x]); }   // papel ou lista (todos exigidos)
 function g2ator(p,papel){ const q=g2pf(p); if(!q) return ''; const n=[].concat(papel).map(x=>q.papeis[x]).filter(Boolean);
@@ -431,7 +436,7 @@ function g2unidSet(cultura,op){ const k=g2unidChave(cultura); G2_UNID_MEM[k]=Str
 // trocar o perfil (aqui ou em outra aba) fecha a confirmação ou o formulário de decisão aberto, montado para o perfil anterior (revisão do CTL-3,
 // achado 1; dano evitado: a tela afirmar que decide quem não tem o papel). Cada tela diz o que fecha em self.g2perfilFecha (O.S., Mapa, Estoque)
 function g2navvals(self,v,nav){ const rec=g2menuRec();
-  const pf=g2perfil(); v.perfil_k=pf.k; v.perfil_ini=pf.k.charAt(0); v.perfil_opts=g2perfis().map(p=>({v:p.k,t:p.t}));
+  const pf=g2perfil(); v.perfil_k=pf.k; v.perfil_ini=pf.k.charAt(0); v.perfil_opts=[{v:G2_TODOS_K,t:g2todos().t}].concat(g2perfis().map(p=>({v:p.k,t:p.t})));
   v.perfil_set=(e)=>{ const k=e.target.value; G2_PERFIL_MEM=k; try{ localStorage.setItem(G2_PERFIL_KEY,k); }catch(er){} self.setState(Object.assign({perfil:k,g2toast:'Perfil de demonstração: '+((g2pf(k)||{}).t||k)+' (não é segurança de acesso).'},self.g2perfilFecha||{})); };
   if(!self.__g2pf){ self.__g2pf=1; try{ window.addEventListener('storage',(e)=>{ if(e.key===G2_PERFIL_KEY) self.setState(Object.assign({perfil:e.newValue},self.g2perfilFecha||{})); }); }catch(er){} }
   const fixa=(n)=>{ if(g2estreito()) return; try{ localStorage.setItem('safrion.menuRecolhido',n?'1':'0'); }catch(e){} };

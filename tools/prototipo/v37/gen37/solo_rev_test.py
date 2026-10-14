@@ -26,10 +26,11 @@ window.EXP=(local)=>{ const g=local.split('-')[0]; const gr=[...document.querySe
 window.INS=(local)=>{ const row=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>N(x.innerText).startsWith(local+' ')); if(!row) return 'sem linha '+local;
   const b=[...row.querySelectorAll('button')].find(b=>/^(Ajustar|Ver) insumos$/.test(N(b.innerText))); if(!b) return 'sem botão'; b.click(); return 'ok'; };
 window.PAN=()=>{ const a=TOP(); if(!a) return ''; [...a.querySelectorAll('section[aria-label] > button[aria-expanded="false"]')].forEach(b=>b.click()); return N(a.innerText); };
-window.BTNS=()=>{ const a=TOP(); return a?[...a.querySelectorAll('button,a')].filter(VIS).map(e=>N(e.innerText)):[]; };
+window.BTNS=()=>{ const a=TOP(); return a?[...a.querySelectorAll('button,a')].filter(e=>VIS(e)&&e.getAttribute('aria-disabled')!=='true').map(e=>N(e.innerText)):[]; };   /* acionáveis */
+window.OFFS=()=>{ const a=TOP(); return a?[...a.querySelectorAll('button')].filter(e=>VIS(e)&&e.getAttribute('aria-disabled')==='true').map(e=>N(e.innerText)):[]; };   /* sem o papel: indisponíveis com motivo */
 window.TOAST=()=>[...document.querySelectorAll('[role=status]')].map(x=>N(x.innerText)).filter(Boolean).join(' | ');
 window.ALERT=()=>{ const a=TOP(); return a?[...a.querySelectorAll('[role=alert]')].filter(VIS).map(x=>N(x.innerText)).join(' | '):''; };
-window.PRIMS=()=>{ const a=TOP(); return a?[...a.querySelectorAll('button,a')].filter(e=>VIS(e)&&getComputedStyle(e).backgroundColor==='rgb(30, 122, 76)').map(e=>N(e.innerText)):[]; };
+window.PRIMS=()=>{ const a=TOP(); return a?[...a.querySelectorAll('button,a')].filter(e=>VIS(e)&&e.getAttribute('aria-disabled')!=='true'&&getComputedStyle(e).backgroundColor==='rgb(30, 122, 76)').map(e=>N(e.innerText)):[]; };
 window.KCLI=()=>{ const a=TOP(); return a&&[...a.querySelectorAll('input')].find(x=>(x.getAttribute('aria-label')||'')==='Dose local de KCl 60%'); };
 window.SETKCL=(v)=>{ const i=KCLI(); if(!i) return 'sem campo'; Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,v); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true})); return 'ok'; };
 window.SETV=(sel,val)=>{ const i=document.querySelector(sel); if(!i) return 'sem '+sel; const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;
@@ -133,7 +134,7 @@ try:
     t.chk('A6 Caio (PCP) na OS-0502 com o plano mudado: nenhum primário, o texto do plano mudado e o bloqueio de estoque com quem resolve (Suprimentos)',
           pr == [] and 'O plano mudou pela análise (LAU-2071)' in p and 'Liberar bloqueado: saldo insuficiente' in p and 'Quem resolve: Suprimentos' in p and 'Ajustar antes de liberar' not in (J("BTNS()") or []), [pr, p[p.find('PRÓXIMO'):][:400]])
     J("CENW(c=>{ c.lotes['Calcário dolomítico filler|LG26-03'].fisico=110000; })"); ir('OS.dc.html#OS-0502', perfil='Caio'); p = pan()
-    t.chk('A6 Caio com o estoque coberto: o impedimento passa a ser de papel ("decisão de Ana …") e não há primário', J("PRIMS()") == [] and 'Liberar para execução: decisão de Ana' in p, [J("PRIMS()"), p[p.find('PRÓXIMO'):][:300]])
+    t.chk('A6 Caio com o estoque coberto: o impedimento passa a ser de papel ("decisão de Ana …"), sem primário acionável; "Liberar para execução" indisponível com o motivo', J("PRIMS()") == [] and 'Liberar para execução: decisão de Ana' in p and 'Liberar para execução' in (J("OFFS()") or []) and 'troque no avatar do menu' in p, [J("PRIMS()"), J("OFFS()"), p[p.find('PRÓXIMO'):][:300]])
     ir('OS.dc.html#OS-0502', perfil='Ana'); p = pan()
     t.chk('A6 Ana com o estoque coberto: primário "Ajustar antes de liberar", secundário "Liberar com 2.000 kg/ha" e nenhum bloqueio',
           J("PRIMS()") == ['Ajustar antes de liberar'] and 'Liberar com 2.000 kg/ha' in p and 'Liberar bloqueado' not in p, [J("PRIMS()"), p[p.find('PRÓXIMO'):][:300]])

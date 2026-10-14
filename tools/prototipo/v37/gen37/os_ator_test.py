@@ -25,8 +25,9 @@ try:
     T.ordem('OS-0430'); p = T.pan()
     T.ok('Perfil de demonstração: Caio · PCP (não é segurança de acesso).' in tt and 'Liberar para execução: decisão de Ana (agrônoma e gestora).' in p
          and 'Quem resolve: Ana (agrônoma) aprova esta versão e Ana (gestora) libera; o perfil Caio · PCP não tem esses papéis.' in p
-         and not T.temb('Liberar para execução') and not T.temb('Ajustar antes de liberar'),
-         'Caio: no lugar de "Liberar para execução" a tela diz quem aprova e quem libera; sem Ajustar antes de liberar', (tt, p[p.find('PRÓXIMO'):][:300]))
+         and not T.temb('Liberar para execução') and not T.temb('Ajustar antes de liberar')
+         and T.temb_off('Liberar para execução') and T.temb_off('Ajustar antes de liberar') and 'troque no avatar do menu' in p,
+         'Caio: a tela diz quem aprova e quem libera; "Liberar para execução" e "Ajustar antes de liberar" ficam indisponíveis, com o motivo (sem ação)', (tt, p[p.find('PRÓXIMO'):][:300]))
     r = cmd("X.osc_liberar(c,'OS-0430',false,'',{k:'Caio'})")
     st = T.cen("[c.ordens['OS-0430'].etapa,((c.ordens['OS-0430'].osc||{}).ev||[]).length,c.lotes['Glifosato 480|G26-14'].reservado,c.ordens['OS-0430'].req||'']")
     T.ok(r == 'Aprovar a v1 da OS-0430 (CMD-42): decisão de Ana (agrônoma). Nada foi alterado.' and st == ['A liberar', 0, 0, ''],

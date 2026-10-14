@@ -21,9 +21,10 @@ try:
     # 1 · A liberar sem etapa de revisão: próximo passo Liberar para execução (Ana pode ajustar antes); ajuste inválido não libera
     T.ordem(OS); p = T.pan(); st = T.cen(f"[c.ordens['{OS}'].etapa, 'aprov' in c.ordens['{OS}'], c.v]")
     T.btn('Ajustar antes de liberar'); setin('Área da ordem (ha)', '0'); T.btn('Salvar e liberar'); pa = T.pan(); T.btn('Voltar'); print('  ', st)
-    T.ok(st == ['A liberar', False, 2] and T.temb('Liberar para execução') and T.temb('Ajustar antes de liberar') and not T.temb('Revisar versão') and not T.temb('Aprovar versão')
+    # v>=2: formato sem revisão (01/10); o seed segue subindo de versão (v=7 em 10/10), então o oráculo não fixa o número
+    T.ok(st[:2] == ['A liberar', False] and st[2] >= 2 and T.temb('Liberar para execução') and T.temb('Ajustar antes de liberar') and not T.temb('Revisar versão') and not T.temb('Aprovar versão')
          and 'Aguardando agrônomo' not in p and 'Aprovada pelo agrônomo' not in p and 'APV-' not in p and 'Informe a área maior que 0 ha.' in pa and T.cen(f"c.ordens['{OS}'].etapa") == 'A liberar',
-         'A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov', (st, p[p.find('PRÓXIMO'):][:300], pa[-300:]))
+         'A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário (v≥2) sem aprov', (st, p[p.find('PRÓXIMO'):][:300], pa[-300:]))
     # 2 · liberar: a requisição nova reserva por lote (Glifosato 320 L, 2,4-D 160 L, Óleo 80 L)
     T.btn('Liberar para execução'); ct = T.pan(); T.btn('Confirmar liberação'); tt = T.toast()
     RQ = T.cen(f"c.ordens['{OS}'].req"); st = T.cen(f"[c.ordens['{OS}'].etapa, c.reqs['{RQ}'].itens.map(i=>i.prod+' '+i.solicitado+' '+i.lote).join(' | '), c.lotes['Glifosato 480|G26-14'].reservado]")

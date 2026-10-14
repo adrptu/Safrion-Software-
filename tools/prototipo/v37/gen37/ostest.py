@@ -89,7 +89,9 @@ try:
     clk('Cancelar','aside[role=dialog]'); check('aviso não salvo', 'Há alterações não salvas' in pan())
     clk('Continuar editando','aside[role=dialog]'); clk('Emitir ordem','aside[role=dialog]')
     tt=toast(); check('emite em A liberar', 'OS-0440' in tt and 'A liberar' in tt and 'Não foi liberada' in tt, tt)
-    t=pan(); check('painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo', 'OS-0440' in t and 'Liberar para execução' in t and 'Ajustar antes de liberar' in t and 'Aguardando agrônomo' not in t and 'Revisar versão' not in t, t[:120])
+    # a atividade a7 traz o Inseticida B em L/ha e a bula em kg/ha: a trava legal única (CTL-1) troca "Liberar para execução" por "Liberar bloqueado"
+    # com o motivo e quem resolve; o que este caso protege é a ausência de etapa de revisão do agrônomo (O.S. sem revisão, 01/10)
+    t=pan(); check('painel da nova ordem A liberar: Liberar (ou a trava legal com o motivo) e Ajustar antes de liberar, sem selo de agrônomo', 'OS-0440' in t and ('Liberar para execução' in t or ('Liberar bloqueado' in t and 'Quem resolve' in t)) and 'Ajustar antes de liberar' in t and 'Aguardando agrônomo' not in t and 'Revisar versão' not in t, t[:400])
     J("document.querySelector('aside[role=dialog] button[aria-label=Fechar]').click()"); time.sleep(.3); check(f'{N+1} ordens', len(rows())==N+1)
     cs=chips(); check('contador A liberar 4 e Todas sobe junto', cs[1]=='A liberar 4' and cs[0]==f'Todas {N+1}', cs)
     clk('Nova ordem'); setv('#nv_saf','S2627'); setv('#nv_cult','c1'); setv('#nv_atv','a7'); setv('#nv_jan','2026-12-02'); clk('Emitir ordem','aside[role=dialog]')

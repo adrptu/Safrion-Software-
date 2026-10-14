@@ -1112,7 +1112,10 @@ MOBILE_CSS=("[data-mroot]{max-width:var(--mw);max-height:100vh;max-height:100dvh
 # aviso temporário sobe acima dela. No estreito, empilha mantendo a ordem: nota, retorno, avanço/primária.
 # =====================================================================================
 AVISO_PE='22px'   # distância do aviso temporário (G2_TOAST) ao pé da janela, sem a área de ações presa; a reserva da área em fluxo usa a mesma
-ACOES_CSS=(".acoes{position:sticky;bottom:0;z-index:6;display:flex;flex-direction:column;gap:6px;margin-top:2px;padding:10px 0 2px;"
+# 14/10 (proprietário: "Biblioteca de planos ainda com bug visual"): o main tem 22 px de respiro no pé (18 px no estreito); com bottom:0 a área
+# ficava presa 22 px acima do pé e o conteúdo rolava visível nessa faixa, embaixo dela. A área desce sobre o respiro (bottom negativo) e o
+# repõe por dentro: encosta no pé da janela em toda tela com área de ações.
+ACOES_CSS=(".acoes{position:sticky;bottom:-22px;z-index:6;display:flex;flex-direction:column;gap:6px;margin-top:2px;margin-bottom:-22px;padding:10px 0 24px;"   # margem negativa: no fim da rolagem a área também cobre o respiro
     "background:#F4F6F3;border-top:1px solid #E4E9E5;box-shadow:0 -8px 12px -12px rgba(21,32,26,.35)}"
     ".acoes-nota{margin:0;font-size:12.8px;line-height:1.4;color:#5B4300;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}"
     ".acoes-nota b{color:#15201A}"
@@ -1126,6 +1129,7 @@ ACOES_CSS=(".acoes{position:sticky;bottom:0;z-index:6;display:flex;flex-directio
     "main>div.acoes:last-child{flex:0 0 auto;min-height:auto}main>div:has(+div.acoes:last-child){flex:1 1 auto;min-height:0;display:flex;flex-direction:column}"
     "@media (max-width:640px),(max-height:560px){main[data-scroll]>div.acoes:last-child{flex:0 0 auto!important}main[data-scroll]>div:has(+div.acoes:last-child){flex:1 0 auto!important}}"
     "@media (pointer:coarse){.acoes :is(.acoes-sec,.acoes-prim){min-height:44px}}"
+    "@media (max-width:640px){.acoes{bottom:-18px;margin-bottom:-18px;padding-bottom:20px}}"   # respiro do main no estreito (ui37: 18 px)
     # estreito: botões na largura disponível, sem comprimir a barra; ordem visual = ordem de leitura/Tab (retorno, avanço, primária)
     "@media (max-width:640px){.acoes-linha{flex-wrap:wrap}.acoes-esp{display:none}.acoes :is(.acoes-sec,.acoes-prim){flex:1 1 140px;white-space:normal;text-align:center}}"
     # altura curta: a casca rola inteira (ui37) e a área volta ao fluxo, no fim do conteúdo. V55-RESP-01: em fluxo, o aviso temporário

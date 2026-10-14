@@ -328,7 +328,7 @@ def _leituras():
 
 
 # ---------- conflito com a produção (D-38): a alocação da semana (alocacao.py), a mesma fonte de O.S. › Recursos ----------
-REC_DO_ATIVO = {'a01': 'T1', 'a02': 'T02', 'a03': 'T03', 'a04': 'T04', 'a08': 'COL', 'a15': 'PV1', 'a11': 'PV2', 'a05': 'PJ', 'a06': 'PL', 'a07': 'DI', 'a10': 'ES'}
+REC_DO_ATIVO = AL.REC_DO_ATIVO   # fonte: alocacao.py (o mesmo mapa da troca de recurso na O.S.)
 
 
 def al_js():
@@ -543,16 +543,18 @@ function manDupServ(c,pid,aid,nomes){ const ns=nomes.map(x=>String(x).toLowerCas
 function manSelosLinha(c,l){ const s=[]; if(l.a.cond==='Bloqueado'){ s.push({t:'Ativo bloqueado',c:'red'}); }
   if(manAntiga(c,l.a)) s.push({t:'Leitura de '+manBr(l.a.leit.data),c:'yellow'}); if(l.a.suspeita) s.push({t:'Leitura a confirmar',c:'yellow'}); if(l.est) s.push({t:'Marco estimado',c:'yellow'}); return s; }
 /* ---------- conflito com a produção (D-38): horas livres do recurso no dia (jornada − O.S. firme ou condicional) < tempo previsto ---------- */
+// alocação vigente (alocacao.py: semana do PCP + trocas de recurso das O.S. no cenário); sem o cenário (motor isolado), a semana fixa
+function manAloc(){ try{ if(typeof alVigente==='function'&&typeof cenGet==='function') return alVigente(cenGet()); }catch(e){} return MAN_AL.aloc; }
 function manLivre(c,aid,iso){ const r=MAN_AL.rec[aid]; if(!r) return null; const jor=(MAN_AL.jorRec||{})[r]||MAN_AL.jor;
-  const its=MAN_AL.aloc.filter(a=>a.r===r&&a.dia===iso&&a.sit!=='manutenção'); const h=its.reduce((s,a)=>s+a.h,0); const os=[];
+  const its=manAloc().filter(a=>a.r===r&&a.dia===iso&&a.sit!=='manutenção'); const h=its.reduce((s,a)=>s+a.h,0); const os=[];
   its.forEach(a=>{ if(os.indexOf(a.os)<0) os.push(a.os); }); return {r,jor,h,livre:Math.round((jor-h)*100)/100,os}; }
 function manConflito(c,o,iso){ if(!o) return null; iso=iso||o.janIso; if(!iso) return null; const L=manLivre(c,o.aid,iso); if(!L||!L.os.length) return null;
   const t=Number(o.tempo)>0?Number(o.tempo):1; if(L.livre+1e-9>=t) return null;
   return {os:L.os,dia:iso,livre:Math.max(0,L.livre),t:'Conflito · '+L.os.join(' e ')+' '+manBr(iso),det:manN(Math.max(0,L.livre),1)+' h livres de '+manN(L.jor,1)+' h para '+manN(t,1)+' h previstas'}; }
 function manProxLivre(c,o){ for(let i=1;i<=7;i++){ const d=manAdd(c.hoje,i); if(!manConflito(c,o,d)) return d; } return null; }
 /* operador da alocação do ativo no dia (AL): pessoa da mesma O.S. no mesmo dia; sem alocação, nenhum (D-19) */
-function manOperadorDia(c,aid,iso){ const r=MAN_AL.rec[aid]; if(!r) return ''; const oss=MAN_AL.aloc.filter(a=>a.r===r&&a.dia===iso&&a.sit!=='manutenção').map(a=>a.os);
-  const ps=MAN_AL.aloc.filter(a=>a.dia===iso&&oss.indexOf(a.os)>=0&&MAN_AL.tipo[a.r]==='Pessoa').map(a=>MAN_AL.nome[a.r]);
+function manOperadorDia(c,aid,iso){ const r=MAN_AL.rec[aid]; if(!r) return ''; const oss=manAloc().filter(a=>a.r===r&&a.dia===iso&&a.sit!=='manutenção').map(a=>a.os);
+  const ps=manAloc().filter(a=>a.dia===iso&&oss.indexOf(a.os)>=0&&MAN_AL.tipo[a.r]==='Pessoa').map(a=>MAN_AL.nome[a.r]);
   const op=ps.find(n=>/operador|irrigante/.test(n))||''; return op?op.split(' · ')[0]:''; }
 function manTanques(c,aid){ const a=c.ativos[aid]; const campo=!!a&&/^(Santa Rita|Pivô|Talhão)/.test(a.local||''); return MAN_TQ.filter(t=>campo?t.onde==='campo':true).map(t=>t.id); }
 /* limite da tolerância de uma preventiva aberta (data) e se já venceu */
@@ -674,7 +676,7 @@ function manMotCond(a){ const ms=manMots(a); if(!ms.length) return 'Apto'; retur
 /* novo motivo: o bloqueio passa à frente de uma restrição; num ativo já bloqueado, acrescenta (o principal segue o primeiro) */
 function manMotAdd(a,m){ const ms=manMots(a); if(!ms.length||a.cond==='Apto'){ manMotSet(a,[m]); return; } if(a.cond==='Restrito'&&m.cond==='Bloqueado') manMotSet(a,[m].concat(ms)); else manMotSet(a,ms.concat([m])); }
 /* O.S. com o recurso do ativo alocado de hoje em diante (alocação do PCP, O.S. › Recursos): aviso, nunca promessa de impedimento (A9) */
-function manOsAloc(c,aid){ const r=MAN_AL.rec[aid]; if(!r) return []; return [...new Set(MAN_AL.aloc.filter(x=>x.r===r&&x.sit!=='manutenção'&&x.dia>=c.hoje).map(x=>x.os))]; }
+function manOsAloc(c,aid){ const r=MAN_AL.rec[aid]; if(!r) return []; return [...new Set(manAloc().filter(x=>x.r===r&&x.sit!=='manutenção'&&x.dia>=c.hoje).map(x=>x.os))]; }
 /* a OM que trata a condição (D-34): trata um motivo (o do achado; senão um sem achado e sem ordem); Teste do reparo entra sozinho se ainda não há Teste (no Restrito, Medição também vale) */
 function manTratar(c,o,ach,mot){ const a=c.ativos[o.aid]; if(!a||a.cond==='Apto') return false; const ms=manMots(a);
   const m=mot||ms.find(x=>ach&&x.achado===ach&&!manMotOm(c,x))||ms.find(x=>!x.achado&&!manMotOm(c,x)); if(!m) return false;
@@ -978,7 +980,7 @@ function manCumprimento(c,k){ const P=manPeriodo(c,k); const os=Object.values(c.
 /* ---------- "Propor substituto" (ponte até o 1b, ESPECIFICACAO §0.1: sai com a PCMS-M09b): o ativo parado afeta O.S. na alocação;
    Otávio registra a proposta de um substituto apto da mesma classe e o PCP decide em O.S. › Recursos (simulado) ---------- */
 function manPropAfeta(c,o){ const a=c.ativos[o.aid]; const r=MAN_AL.rec[o.aid]; if(!a||!r) return []; const de=(a.condInfo&&a.condInfo.desde)||c.hoje;
-  return [...new Set(MAN_AL.aloc.filter(x=>x.r===r&&x.sit!=='manutenção'&&x.dia>=de).map(x=>x.os))]; }
+  return [...new Set(manAloc().filter(x=>x.r===r&&x.sit!=='manutenção'&&x.dia>=de).map(x=>x.os))]; }
 function manPropSub(c,o){ const a=c.ativos[o.aid]; if(!a) return null; return Object.values(c.ativos).filter(x=>x.id!==a.id&&x.classe===a.classe&&x.cond==='Apto').sort((x,y)=>x.id.localeCompare(y.id))[0]||null; }
 function manPropor(c,id,pf){ const o=c.oms[id]; if(!o) throw new Error('Ordem não encontrada.'); if(pf!==undefined) manExige(c,pf,'ponte');
   const a=c.ativos[o.aid]; if(!a||a.cond!=='Bloqueado'||!manAberta(o)) throw new Error('Só para ativo bloqueado com ordem aberta.');

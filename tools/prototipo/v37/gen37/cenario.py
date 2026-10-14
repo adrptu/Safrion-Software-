@@ -115,10 +115,12 @@ function cenLoteVencido(l, hoje) {
 
 def js_prefixo():
     import dados_producao   # regras da produção (producao.js) em toda página do estado (D-22): O.S., Mapa, Estoque e app têm prPodeEncerrar
+    import alocacao as _AL  # 14/10: troca de recurso na O.S. vale no painel, na Carga do PCP, na Manutenção e no app
     import dados_ben        # regras do beneficiamento (ben.js) depois: a qualidade do lote de produção e as decisões valem em toda página do estado
     # análise de solo (SOLO-01): só as funções de solo.js (regras e comandos sobre c.solo); os dados (SOLO0) entram só no AG-02 e no Planejar safra
     return ('const CEN0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + VALIDADE_JS + open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read() + '\n'
-            + dados_producao.js_regras() + dados_ben.js_regras() + open(os.path.join(HERE, 'solo.js'), encoding='utf-8').read() + '\n')
+            + dados_producao.js_regras() + dados_ben.js_regras() + open(os.path.join(HERE, 'solo.js'), encoding='utf-8').read() + '\n'
+            + _AL.js())   # alocação vigente (semana do PCP + trocas de recurso das O.S.) em toda página do estado
 
 
 def perfis_js():

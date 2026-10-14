@@ -54,6 +54,7 @@ MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
  ('Manutenção','wrench',[('Painel','PMAN.dc.html'),('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')]),   # 13/10/2026 (pedido do proprietário: subitens de novo, enxutos): um subitem por visão da tela única, sem tela nova
  ('Suprimentos','cart',[('Painel','PSUP.dc.html'),('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html'),('Inteligência de compras','IC.dc.html')]),   # INTEL-01 (13/10)
  ('Comercial','Vendas',[('Painel','PCOM.dc.html'),('Contratos e pedidos','VEN.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Inteligência de vendas','IV.dc.html')]),   # INTEL-01 (13/10): inteligência comercial de vendas
+ ('Crédito','cash',[('Crédito e garantias','GE-08.dc.html')]),   # 14/10/2026 (proprietário: "crie o menu de crédito"): GE-08 (PRD; DEMO-10) já existia sem entrada no menu; uma tela só, abre direto como o Mapa
  ('Configurações','engrenagem',[('Usuários e alçadas','CF-01.dc.html'),('Auditoria','CF-04.dc.html'),('Integrações','CF-03.dc.html'),('Assinatura e cobrança','CF-05.dc.html')])]   # 06/10/2026 (PLAT-01): grupo por último; CONF-01 (CONF-D01/D02): Usuários e alçadas · Auditoria · Integrações · Assinatura e cobrança, cada item entra no passo que entrega a tela
 # 13/10/2026 (proprietário: "troque a posição do menu comercial com suprimentos. e manutenção logo abaixo de agrícola"): Agrícola ·
 #   Manutenção · Suprimentos · Comercial.

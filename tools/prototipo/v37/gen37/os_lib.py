@@ -36,9 +36,11 @@ class Os:
         return self.J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
     def ins(self): return self.J("(()=>{const a=document.querySelector('aside[role=dialog]'); if(!a) return ''; const t=a.innerText; return t.slice(t.indexOf('INSUMOS'),t.indexOf('APONTAMENTOS')).replace(/\\s+/g,' ');})()") or ''
     def aps(self): return self.J("[...document.querySelectorAll('aside[role=dialog] [style*=\"grid-template-columns: 64px\"]')].slice(1).map(r=>r.innerText.replace(/\\s+/g,' '))") or []
-    def temb(self, t): return bool(self.J(f"[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==={json.dumps(t)})"))
+    # botão acionável (14/10: sem o papel, a ação fica visível mas indisponível, aria-disabled, com o motivo ao lado; temb_off a encontra)
+    def temb(self, t): return bool(self.J(f"[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==={json.dumps(t)}&&b.getAttribute('aria-disabled')!=='true')"))
+    def temb_off(self, t): return bool(self.J(f"[...document.querySelectorAll('aside[role=dialog] button')].some(b=>b.innerText.trim()==={json.dumps(t)}&&b.getAttribute('aria-disabled')==='true'&&b.offsetParent!==null)"))
     def btn(self, t, root='aside[role=dialog]'):
-        r = self.J(f"(()=>{{const b=[...document.querySelectorAll({json.dumps(root + ' button')})].find(b=>b.innerText.trim()==={json.dumps(t)}); if(!b) return false; b.click(); return true;}})()"); time.sleep(.35); return r
+        r = self.J(f"(()=>{{const b=[...document.querySelectorAll({json.dumps(root + ' button')})].find(b=>b.innerText.trim()==={json.dumps(t)}&&b.getAttribute('aria-disabled')!=='true'); if(!b) return false; b.click(); return true;}})()"); time.sleep(.35); return r
     def link(self, t): return self.J(f"(()=>{{const a=[...document.querySelectorAll('aside[role=dialog] a')].find(a=>a.innerText.trim().startsWith({json.dumps(t)})); return a?a.getAttribute('href'):'';}})()") or ''
     def toast(self): return self.J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
     def fechar(self): self.J("(()=>{const b=document.querySelector('aside[role=dialog] button[aria-label=Fechar]'); b&&b.click();})()"); time.sleep(.3)

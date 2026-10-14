@@ -34,7 +34,7 @@ MEDE = r"""(()=>{ const out=[]; const vis=e=>{ const r=e.getBoundingClientRect()
   document.querySelectorAll('.acoes,.acoes-form').forEach(b=>{ if(!vis(b)) return; const r=b.getBoundingClientRect(); if(r.bottom>=innerHeight-2) return;
     const y=Math.min(innerHeight-4,r.bottom+14); const xs=[r.left+20,(r.left+r.right)/2,r.right-20];
     const debaixo=xs.map(x=>document.elementFromPoint(x,y)).filter(el=>el&&!b.contains(el)&&el!==document.body&&el!==document.documentElement&&(el.innerText||'').trim()&&getComputedStyle(b).position==='sticky');
-    if(debaixo.length&&r.bottom<innerHeight-30) out.push(['C3',nome(b).slice(0,40),Math.round(innerHeight-r.bottom)]); });
+    if(debaixo.length&&r.bottom<innerHeight-2) out.push(['C3',nome(b).slice(0,40),Math.round(innerHeight-r.bottom)]); });   /* 14/10: a faixa de 22 px sob a área (Biblioteca de planos) passava no limite de 30 px */
   // C4 · linha que começa com "·"
   // começa a linha = nada visível à esquerda na mesma linha, subindo pelos irmãos até o bloco que contém (item flexível ao lado do título não conta;
   // texto só para leitor de tela também não)

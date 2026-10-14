@@ -672,7 +672,7 @@ const TIPOS=['Equipamento','Clima','Praga ou doença','Falha de aplicação','Se
 v.oc_tipos=TIPOS.map(x=>({t:x,on:x===tipo,st:mbPill(x===tipo),fn:()=>self.setState({oc_tipo:x,oc_err:''}),tt:'Tipo: '+x}));
 // PCM S4: máquina da O.S. (alocação) ou do turno; a que veio do MB-09 (#ativo=) já vem escolhida; Segurança pode ser "Sem máquina" (fica na O.S.)
 const hm=(String(location.hash||'').match(/ativo=([\\w-]+)/)||[])[1]; const maq=tipo==='Equipamento'||tipo==='Segurança';
-const rsO=osSel?MAN_AL.aloc.filter(x=>x.os===osSel).map(x=>x.r):[]; const ids=Object.keys(MAN_AL.rec).filter(id=>rsO.indexOf(MAN_AL.rec[id])>=0&&mv.ativos[id]);
+const rsO=osSel?manAloc().filter(x=>x.os===osSel).map(x=>x.r):[]; const ids=Object.keys(MAN_AL.rec).filter(id=>rsO.indexOf(MAN_AL.rec[id])>=0&&mv.ativos[id]);
 mbAtvCurtos(c,mv,us).ids.forEach(id=>{ if(ids.indexOf(id)<0) ids.push(id); }); if(hm&&mv.ativos[hm]&&ids.indexOf(hm)<0) ids.unshift(hm);
 const aid=s.oc_aid!==undefined?s.oc_aid:((hm&&mv.ativos[hm])?hm:(tipo==='Equipamento'&&ids.length===1?ids[0]:''));
 v.oc_maq=maq; v.oc_atvs=(tipo==='Segurança'?[{id:'',t:'Sem máquina'}]:[]).concat(ids.map(id=>({id,t:mv.ativos[id].nome})))
@@ -1387,8 +1387,8 @@ function mbCondSt(k){ const x = MBC[k] || MBC.gray; return 'font-size: 15px; fon
 // Máquinas herdadas: as da O.S. do turno aberto; sem turno, as da O.S. do usuário alocada hoje (O.S. › Recursos); depois as das OMs do mecânico.
 function mbAtvCurtos(c, m, u){ const hoje = m.hoje; const t = mbTurno(c); let os = t ? [t.os] : [];
   if (!os.length) { const mine = Object.values(c.ordens).filter(o => o.resp === u && (o.etapa === 'Liberadas' || o.etapa === 'Em execução')).map(o => o.id);
-    os = [...new Set(MAN_AL.aloc.filter(x => x.dia === hoje && mine.indexOf(x.os) >= 0).map(x => x.os))]; }
-  const rs = MAN_AL.aloc.filter(x => x.dia === hoje && os.indexOf(x.os) >= 0).map(x => x.r);
+    os = [...new Set(manAloc().filter(x => x.dia === hoje && mine.indexOf(x.os) >= 0).map(x => x.os))]; }
+  const rs = manAloc().filter(x => x.dia === hoje && os.indexOf(x.os) >= 0).map(x => x.r);
   const ids = Object.keys(MAN_AL.rec).filter(id => rs.indexOf(MAN_AL.rec[id]) >= 0 && m.ativos[id]);
   ids.sort((x, y) => (m.ativos[x].classe === 'Trator' ? 0 : 1) - (m.ativos[y].classe === 'Trator' ? 0 : 1));
   const oms = mbOmsDe(m, u); oms.forEach(o => { if (ids.indexOf(o.aid) < 0 && m.ativos[o.aid]) ids.push(o.aid); });

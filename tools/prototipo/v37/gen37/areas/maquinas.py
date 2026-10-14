@@ -339,7 +339,7 @@ function ma_hprim(self,v,c,pf,vis,lista,panAberto){ let t='',fn=null,dis='',sec=
 # ---------- detalhe do ativo (página) ----------
 MA_JS+=r'''
 function ma_motor(a){ return ['Trator','Colhedora','Pulverizador','Veículo'].indexOf(a.classe)>=0; }
-function ma_agenda(c,aid){ const r=MAN_AL.rec[aid]; if(!r) return []; return MAN_AL.aloc.filter(x=>x.r===r&&x.dia>=c.hoje).map(x=>manBr(x.dia)+' '+x.os+' '+String(Math.floor(x.ini)).padStart(2,'0')+':'+String(Math.round((x.ini%1)*60)).padStart(2,'0')+'–'+String(Math.floor(x.fim)).padStart(2,'0')+':'+String(Math.round((x.fim%1)*60)).padStart(2,'0')+(x.sit==='firme'?'':' · '+x.sit)); }
+function ma_agenda(c,aid){ const r=MAN_AL.rec[aid]; if(!r) return []; return manAloc().filter(x=>x.r===r&&x.dia>=c.hoje).map(x=>manBr(x.dia)+' '+x.os+' '+String(Math.floor(x.ini)).padStart(2,'0')+':'+String(Math.round((x.ini%1)*60)).padStart(2,'0')+'–'+String(Math.floor(x.fim)).padStart(2,'0')+':'+String(Math.round((x.fim%1)*60)).padStart(2,'0')+(x.sit==='firme'?'':' · '+x.sit)); }
 function ma_custoNat(c,aid,per){ const P=manPeriodo(c,per); const n={pecas:0,lub:0,ofi:0,terc:0};
   Object.values(c.oms).filter(o=>o.aid===aid&&o.etapa==='Encerradas'&&o.exec&&o.exec.data>=P.de&&o.exec.data<=P.ate).forEach(o=>{ (o.pecas||[]).forEach(p=>{ const v=(p.apl||0)*(p.preco||0); if(/^(OL|GR)-/.test(p.item||'')) n.lub+=v; else n.pecas+=v; });
     n.ofi+=((o.exec&&o.exec.horas)||0)*c.custoh; n.terc+=Number(o.terc)||0; }); return n; }
@@ -473,7 +473,7 @@ function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const 
   /* janela e equipe */
   const podeJ=(o.etapa==='A liberar'||o.etapa==='Liberadas'); const pm=manPode(c,pf,'mover'); v.om_janEd=podeJ&&!pm; v.om_janRo=!v.om_janEd;
   v.om_jan=(o.jan||'—')+(o.vencOrig&&o.vencOrig!==o.janIso?' · vencimento original '+manBr(o.vencOrig):''); v.om_conf=!!cf; v.om_conft=cf?(cf.t+' · '+cf.det):'';
-  const usa=MAN_AL.rec[o.aid]?MAN_AL.aloc.filter(x=>x.r===MAN_AL.rec[o.aid]&&x.dia>=c.hoje&&x.sit!=='manutenção').map(x=>x.os):[];
+  const usa=MAN_AL.rec[o.aid]?manAloc().filter(x=>x.r===MAN_AL.rec[o.aid]&&x.dia>=c.hoje&&x.sit!=='manutenção').map(x=>x.os):[];
   /* substituto proposto (ponte até o 1b): o PCP decide em O.S. › Recursos */
   const pp=(c.prop||{})[o.id]; const ps=pp?c.ativos[pp.sub]:null; const pa=(a&&a.cond==='Bloqueado'&&manAberta(o))?manPropAfeta(c,o):[];
   v.om_prop=pp?('Substituto proposto: '+(ps?manNome(ps):pp.sub)+' para '+pp.os.join(' e ')+' · por '+pp.por+' · aguarda PCP (simulado)'):''; v.om_hasProp=!!pp;
