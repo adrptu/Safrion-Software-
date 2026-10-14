@@ -40,7 +40,7 @@ const failed=await fa.flush();check('Falha de flush retorna ok false',failed?.ok
 const refused=await fa.destroy();check('Destroy recusa rascunho sem decisão',refused?.ok===false&&fa.dirty===true);
 check('Select múltiplo com um valor continua array',JSON.stringify(payload?.s)==='["T10"]');
 ff.elements.f.checked=false;ff.elements.s.options[0].selected=false;await fa.flush();check('Desmarcar último checkbox envia array vazio',JSON.stringify(payload?.f)==='[]');check('Select múltiplo vazio envia chave vazia',JSON.stringify(payload?.s)==='[]');
-await fa.destroy({discard:true});await new Promise(r=>setTimeout(r,280));check('Destroy fecha snackbar da própria instância',!document.querySelector('.snackbar'));ff.remove();
+await fa.destroy({discard:true});await new Promise(r=>setTimeout(r,280));check('Destroy fecha snackbar da própria instância',![...document.querySelectorAll('.snackbar')].at(-1));ff.remove();
 const tf=document.createElement('form');tf.innerHTML='<input name="x" value="A">';document.body.appendChild(tf);let finish,signal;const sent=[];
 const ta=Kit.autosave(tf,(d,o)=>{sent.push(d.x);signal=o?.signal;return new Promise(resolve=>{finish=resolve})},{message:'',timeoutMs:20});tf.elements.x.value='B';const tb=ta.flush();await tick();tf.elements.x.value='C';const tc=ta.flush();
 const timeoutResult=await Promise.race([tb,new Promise(r=>setTimeout(()=>r(null),80))]);check('Envio travado retorna timeout observável',timeoutResult?.ok===false&&timeoutResult?.reason==='timeout');
@@ -63,21 +63,24 @@ await stale.reconcile(async()=>({settled:true,data:{x:'B'}}));staleForm.elements
 const uf=document.createElement('form');uf.innerHTML='<input name="x" value="A">';document.body.appendChild(uf);let ucount=0;
 const ua=Kit.autosave(uf,()=>{ucount++;return new Promise(()=>{})},{message:'',timeoutMs:20});uf.elements.x.value='B';await ua.flush();
 Kit.snackbar('Outro retorno',{timeout:10});await new Promise(r=>setTimeout(r,280));uf.elements.x.value='C';const ur=await ua.flush();
-check('Nova tentativa incerta renova aviso mesmo após outro snackbar',ur.ok===false&&ur.reason==='pending'&&ucount===1&&document.querySelector('.snackbar')?.textContent.includes('sem confirmação'));await ua.destroy({discard:true});uf.remove();
+check('Nova tentativa incerta renova aviso mesmo após outro snackbar',ur.ok===false&&ur.reason==='pending'&&ucount===1&&[...document.querySelectorAll('.snackbar')].at(-1)?.textContent.includes('sem confirmação'));await ua.destroy({discard:true});uf.remove();
 for(const [msg,edit,label] of [['Confirmado',false,'sucesso'],['',false,'sem mensagem'],['Confirmado',true,'rascunho mais recente']]) {
  const f=document.createElement('form');f.innerHTML='<input name="x" value="A">';document.body.appendChild(f);let resolveLate;
- const a=Kit.autosave(f,()=>new Promise(resolve=>{resolveLate=resolve}),{message:msg,timeoutMs:20});f.elements.x.value='B';await a.flush();
+ const a=Kit.autosave(f,()=>new Promise(resolve=>{resolveLate=resolve}),{message:msg,delay:1000,timeoutMs:20});f.elements.x.value='B';await a.flush();
  if(edit)f.elements.x.value='C';resolveLate();await new Promise(r=>setTimeout(r,280));
  const feedback=[...document.querySelectorAll('.snackbar')].map(e=>e.textContent).join(' ');
- check('Recibo tardio atualiza aviso: '+label,!a.pending&&a.dirty===edit&&!feedback.includes('sem confirmação')&&((msg&&!edit)?feedback.includes(msg):!feedback.includes('Confirmado')));
+ check('Recibo tardio atualiza aviso: '+label,a.pending===edit&&a.dirty===edit&&!feedback.includes('sem confirmação')&&((msg&&!edit)?feedback.includes(msg):!feedback.includes('Confirmado')));
  await a.destroy({discard:edit});f.remove();await new Promise(r=>setTimeout(r,280));
 }
 const f1=document.createElement('form'),f2=document.createElement('form');for(const f of [f1,f2]){f.innerHTML='<input name="x" value="A">';document.body.appendChild(f)}let finish1;
-const a1=Kit.autosave(f1,()=>new Promise(r=>{finish1=r}),{timeoutMs:20});const a2=Kit.autosave(f2,()=>new Promise(()=>{}),{timeoutMs:20});f1.elements.x.value='B';await a1.flush();f2.elements.x.value='B';await a2.flush();const warning2=document.querySelector('.snackbar');finish1();await tick();
-check('Recibo de um formulário não substitui aviso incerto de outro',a2.pending&&warning2.isConnected&&document.querySelector('.snackbar')===warning2&&warning2.textContent.includes('sem confirmação'));await a1.destroy();await a2.destroy({discard:true});f1.remove();f2.remove();
+const a1=Kit.autosave(f1,()=>new Promise(r=>{finish1=r}),{timeoutMs:20});const a2=Kit.autosave(f2,()=>new Promise(()=>{}),{timeoutMs:20});f1.elements.x.value='B';await a1.flush();f2.elements.x.value='B';await a2.flush();const warning2=[...document.querySelectorAll('.snackbar')].at(-1);finish1();await tick();
+check('Recibo de um formulário não substitui aviso incerto de outro',a2.pending&&warning2.isConnected&&[...document.querySelectorAll('.snackbar')].at(-1)===warning2&&warning2.textContent.includes('sem confirmação'));await a1.destroy();await a2.destroy({discard:true});f1.remove();f2.remove();
 const rf=document.createElement('form');rf.innerHTML='<input name="x" value="A">';document.body.appendChild(rf);let rdone;const rsent=[];
 const ra=Kit.autosave(rf,d=>{rsent.push(d.x);return d.x==='B'?new Promise(r=>{rdone=r}):Promise.resolve()},{delay:10,timeoutMs:20});rf.elements.x.value='B';await ra.flush();rf.elements.x.value='C';await ra.flush();rdone();await new Promise(r=>setTimeout(r,80));
-check('Recibo tardio retoma autosave do rascunho recente sem nova tecla',rsent.join()==='B,C'&&!ra.dirty&&!ra.pending&&document.querySelector('.snackbar')?.textContent.includes('Salvo'));await ra.destroy();rf.remove();
+check('Recibo tardio retoma autosave do rascunho recente sem nova tecla',rsent.join()==='B,C'&&!ra.dirty&&!ra.pending&&[...document.querySelectorAll('.snackbar')].at(-1)?.textContent.includes('Salvo'));await ra.destroy();rf.remove();
+const zf1=document.createElement('form'),zf2=document.createElement('form');for(const f of [zf1,zf2]){f.innerHTML='<input name="x" value="A">';document.body.appendChild(f)}let zdone;const zsent=[];
+const za1=Kit.autosave(zf1,d=>{zsent.push(d.x);return d.x==='B'?new Promise(r=>{zdone=r}):Promise.resolve()},{delay:10,timeoutMs:20});const za2=Kit.autosave(zf2,()=>new Promise(()=>{}),{timeoutMs:20});zf1.elements.x.value='B';await za1.flush();zf1.elements.x.value='C';await za1.flush();zf2.elements.x.value='B';await za2.flush();const zwarn=[...document.querySelectorAll('.snackbar')].at(-1);zdone();await new Promise(r=>setTimeout(r,80));
+check('Reenvio retomado não substitui aviso incerto do outro formulário',zsent.join()==='B,C'&&!za1.dirty&&!za1.pending&&za2.pending&&zwarn.isConnected&&[...document.querySelectorAll('.snackbar')].at(-1)===zwarn&&zwarn.textContent.includes('sem confirmação'));await za1.destroy();await za2.destroy({discard:true});zf1.remove();zf2.remove();
 window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS '+results.length+'/'+results.length:'FAIL';
 })().catch(error=>{window.testResults=[{ok:false,error:String(error)}]});
 </script></html>

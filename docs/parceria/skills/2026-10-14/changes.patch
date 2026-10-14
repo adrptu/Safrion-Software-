@@ -1435,7 +1435,7 @@
 +              reject(new Error('timeout'));
 +            }, timeoutMs);
 +          })]);
-+          if (message && !dirty()) notice(message, { timeout: 2000 });
++          if (message && !dirty() && (!live || closeNotice?.isCurrent())) notice(message, { timeout: 2000 });
 +          return { ok: true };
 +        } catch {
 +          if (timedOut) notice('Salvamento sem confirmação. Preserve o rascunho e confira o estado antes de sair.', { timeout: 60000 });
