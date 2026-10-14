@@ -1,5 +1,5 @@
---- a/work/prototipo-fase1/gen37/ui37.py
-+++ b/work/prototipo-fase1/gen37/ui37.py
+--- a/tools/prototipo/v37/gen37/ui37.py
++++ b/tools/prototipo/v37/gen37/ui37.py
 @@ -46,10 +46,10 @@
  BEN_PUBLICADO=False
  MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),

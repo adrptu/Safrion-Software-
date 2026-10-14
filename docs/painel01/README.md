@@ -8,7 +8,7 @@ Escopo explícito: todas as fazendas e safras do cenário atual. Indicadores con
 
 ## Integração pelo revisor
 
-Arquivos de autoria: work/prototipo-fase1/gen37/areas/paineis.py e painel_modulos_test.py. Nenhum arquivo de Claude foi alterado no commit. Os patches nesta pasta foram aplicados apenas à cópia isolada de QA:
+Arquivos de autoria: tools/prototipo/v37/gen37/areas/paineis.py e painel_modulos_test.py. Nenhum arquivo de Claude foi alterado no commit. Os patches nesta pasta foram aplicados apenas à cópia isolada de QA:
 
 1. `git apply docs/painel01/painel01-ui37.patch`: acrescenta os três cartões Painel, reutiliza os hubs, coloca PCOM primeiro. Reconciliar com MENU2/CURTO37 atuais, preservando BEN e demais deltas de Claude.
 2. `git apply docs/painel01/painel01-nav-test.patch`: atualiza somente a expectativa explícita de Manutenção de quatro para cinco cartões. Não elimina as verificações de nomes, ordem, destino ou foco.
@@ -29,3 +29,5 @@ Não mesclar/publicar sem aplicar os patches e conferir a composição. Este PR 
 Uma fixture inicial supunha que f6 já subtraía dispensado em cenSaldoEntregar, como35d. O oráculo da base passou a usar custódia integral para o item coberto; não se alterou o motor nem se ocultou divergência de comportamento. A dica descreve a contagem e referencia a regra vigente. Brutos iniciais preservados localmente.
 
 Aplicado: Menu→painel de visão geral→listagem/detalhe existentes, contexto global nomeado, foco preservado, fontes e estado visíveis, uma primária. Fora: indicadores financeiros/agronômicos novos, filtragem por fazenda/safra e gráficos de tendência sem série validada. Cortado: subtítulos longos, biblioteca de gráficos, novo menu/cadastro e cálculos paralelos. Reutilizado benchmark vigente outputs/diretriz-benchmark-e-produtividade.md: contexto e origem compartilhados, sem nova pesquisa para o mesmo módulo.
+
+Correção de empacotamento após revisão automática: os arquivos e patches usam tools/prototipo/v37/gen37, caminho canônico do repositório. O caminho work/prototipo-fase1 era somente o workspace local. Verificado git apply --check/aplicação dos dois patches sobre a árvore f6 no caminho canônico, oráculos e build nesse caminho; removidos do PR os arquivos no diretório errado.

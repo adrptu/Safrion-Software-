@@ -1,5 +1,5 @@
---- a/work/prototipo-fase1/gen37/nav_modulos_test.py
-+++ b/work/prototipo-fase1/gen37/nav_modulos_test.py
+--- a/tools/prototipo/v37/gen37/nav_modulos_test.py
++++ b/tools/prototipo/v37/gen37/nav_modulos_test.py
 @@ -83,9 +83,9 @@
          if nome in ('Mapa', 'Manutenção'):
              c.goto(U('OS.dc.html'), 1.0); J(f"[...document.querySelectorAll('nav[aria-label=Menu] a')].find(a=>a.getAttribute('aria-label')=={json.dumps(nome)}).click()"); time.sleep(1.2); dir_[nome] = J("location.pathname")
