@@ -100,6 +100,9 @@ ESCOPO=(p('IN-04','PL-05','CA-02','CO-06det')|p('OS','CA-02','CO-06det')|p('MA',
 ok('L1 nenhum elo do escopo (PL-04/PL-05/PL-05det, CA-02, CO-06det, GE-07, MB-05det, MB-07..MB-10, SU-03det a partir de telas visíveis)', not (pares & ESCOPO), sorted(pares & ESCOPO))
 # 13/10: o índice saiu do Main (só leva ao Mapa), e os pares dele saíram da lista; as pontas de "Outros acessos" levam às próprias telas internas
 RESIDUAL={  # por PAR: um elo novo, mesmo numa tela já listada, quebra o teste; um par que não existe mais também (L2b)
+ **{x:'Orçamento e Custos entraram em Agrícola (proprietário, 13/10/2026: "coloque orçamento e custos dentro do menu agrícola"): telas antigas de '
+      'exemplo; o detalhe da versão (GE-02det) e as origens dos lançamentos de custo seguem no canvas oculto'
+    for x in p('GE-02','GE-02det')|p('GE-03','CA-01','CA-02','LO-04','SU-06','SU-07')},
  **{x:'navegação interna da ponta aberta por Outros acessos (portal do parceiro, onboarding, backoffice): telas dela, fora do menu da organização'
     for x in p('PT-01','PT-02det','PT-03','PT-04','PT-05','PT-05det','PT-07')|p('ON-01','ON-01det')|p('BO-02','BO-01')},
  **{x:'vivo (cenário ou MIP), só falta pôr na página visível (build.py VIS_ROWS)' for x in p('MB-01','MB-02det','MB-03x-recibo','MB-06')|p('MB-02','MB-02det','MB-03x-recibo')

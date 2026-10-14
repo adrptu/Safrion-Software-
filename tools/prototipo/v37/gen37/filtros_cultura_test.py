@@ -10,6 +10,8 @@ talhão. nas demais telas que isso for bastante essencial e ajudar o usuário, p
   F5 Pragas e doenças (AG-01): Cultura e Talhão na faixa, com oráculo pelos dados do MIP (dados_mip.VIS × TAL): opções = o que tem vistoria
      na fazenda; Cultura deixa só as vistorias dela (lista e chip "Todas"); o Talhão segue a Cultura; trocar a fazenda tira o talhão de
      outra fazenda com aviso pelo nome; abrir pelo link uma vistoria escondida pela Cultura tira só esse filtro e mostra a linha
+  F6 PROD-C961-CONTEXTO-01 (revisão Codex de 13/10): Cultura e Talhão escolhidos na faixa voltam ao recarregar a tela e ao sair e
+     voltar (Colheita, Recebimento e Estoque de produto; Colheita também a 390 px)
 Uso: python3 filtros_cultura_test.py (lê _render ou RENDER_DIR)."""
 import os, sys, json, time
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -77,6 +79,21 @@ try:
     limpa(); c.goto(U('AG-01.dc.html'), 1.4); sel('Filtrar por fazenda', 'Santa Rita'); sel('Filtrar por cultura', 'Feijão')
     J(f"location.hash='#{soja}'; 1"); time.sleep(1.0); cv = val('Filtrar por cultura'); r6 = json.loads(J(VR) or '[]')
     chk(f'F5 Pragas e doenças: abrir {soja} (soja) pelo link com "Feijão" no filtro tira só a Cultura e mostra a linha', cv == 'Todas' and soja in r6 and val('Filtrar por fazenda') == 'Santa Rita', [cv, r6])
+    # F6 · contexto guardado (sair e voltar, recarregar; 1440 e 390 px na Colheita)
+    val = lambda al: J(f"(document.querySelector('select[aria-label=\"{al}\"]')||{{}}).value")
+    f6 = {}
+    for pg, w, m in (('COLH.dc.html', 1440, False), ('COLH.dc.html', 390, True), ('CARGA.dc.html', 1440, False), ('PROD.dc.html', 1440, False)):
+        c.aparelho(w, 900 if w > 400 else 844, 2 if m else 1, m); limpa(); c.goto(U(pg), 1.4); sel('Filtrar por cultura', 'Soja')
+        tal = ''
+        if pg == 'COLH.dc.html':
+            ts = [o for o in json.loads(J("JSON.stringify([...document.querySelectorAll('select[aria-label=\"Filtrar por talhão\"] option')].map(o=>o.value))") or '[]') if o]
+            tal = ts[0] if ts else ''; sel('Filtrar por talhão', tal)
+        c.goto(U(pg), 1.4); r1 = [val('Filtrar por cultura'), val('Filtrar por talhão') if tal else '']
+        c.goto(U('MOD-AGR.dc.html'), .8); c.goto(U(pg), 1.4); r2 = [val('Filtrar por cultura'), val('Filtrar por talhão') if tal else '']
+        f6[f'{pg}@{w}'] = (tal, r1, r2)
+    chk('F6 Cultura e Talhão voltam ao recarregar e ao sair e voltar (Colheita 1440 e 390 px, Recebimento, Estoque de produto)',
+        all(t[1] == ['Soja', t[0]] and t[2] == ['Soja', t[0]] for t in f6.values()) and f6['COLH.dc.html@1440'][0] != '', f6)
+    c.aparelho(1440, 900, 1, False)
     # F4 · celular
     c.aparelho(390, 844, 2, True); alt = {}
     for pg in ('OS.dc.html', 'COLH.dc.html', 'PROD.dc.html', 'AG-01.dc.html'):

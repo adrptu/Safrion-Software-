@@ -60,6 +60,7 @@ def ibtn(label,hole,ic,title,primary=False):
 def ilink(label,href,ic,title):
     return (f'<a href="{href}" title="{esc(title)}" style="{BTN_ST(False,True)} text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">{icon(ic,14)}{esc(label)}</a>')
 def bloco(titulo,desc,corpo,acao='',state='green'):
+    desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     dot={'green':ACC,'yellow':YEL,'red':RED,'gray':'#8A968E'}[state]
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
             f'<div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px; flex-wrap: wrap;">'

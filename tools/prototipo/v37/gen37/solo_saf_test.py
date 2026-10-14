@@ -149,7 +149,13 @@ try:
               'Não gravadas (1)' in toast() and 'não gravada: OS-0502 já liberada' in p and J("!!AC('lg12|i2|Gesso agrícola')") and not J("!!AC('lg12|i1|Calcário dolomítico filler')"), [toast(), p[-500:]])
         clk('Fechar', True)
         # ---- AG-02 → Ver no plano abre o lote
-        ir('AG-02.dc.html#LAU-2063', limpa=True, espera=1.0); clk('Ver no plano', True, 2.0); lib(); p = pan()
+        ir('AG-02.dc.html#LAU-2063', limpa=True, espera=1.0); clk('Ver no plano', True, 0.3)
+        t0 = time.time()   # espera a condição observável (painel das sugestões aberto na SAF), até 12 s; sob carga 2 s fixos não bastavam
+        def pan_ok():
+            try: return 'Sugestões pelas análises' in (pan() or '')
+            except RuntimeError: return False   # página nova ainda sem as funções do teste
+        while time.time() - t0 < 12 and not pan_ok(): time.sleep(.25)
+        lib(); p = pan()
         t.chk('"Ver no plano" do AG-02 abre o Planejar safra na etapa 2 com as Sugestões pelas análises', 'Sugestões pelas análises · Safra 2026/27' in p, p[:200])
         shot('desktop')
         t.chk('nenhum erro de JS (desktop)', not t.errs(), t.errs())

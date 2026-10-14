@@ -41,6 +41,7 @@ def nf(n,d=0):
 
 # ---------- vocabulário visual local ----------
 def bloco(titulo,desc,corpo,acao='',tone=None):
+    desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     dot={'yellow':YEL,'red':RED,'gray':GRAY}.get(tone,ACC)
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; box-shadow: {SH}; display: flex; flex-direction: column; min-width: 0;">'
             f'<div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px 10px; flex-wrap: wrap;">'

@@ -122,8 +122,8 @@ try:
         vt = volta_pro(); cs = json.loads(J(CARDS) or '[]'); e0 = t.errs()
         # BEN-D14 (09/10): o Beneficiamento é tela irmã de Cargas (e, com BEN_PUBLICADO=False, fica fora da navegação)
         ESP = [['COLH.dc.html', 'Colheita'], ['CARGA.dc.html', 'Recebimento'], ['PROD.dc.html', 'Estoque de produto']]
-        t.chk('AC-01 "‹ Agrícola" abre a tela de entrada com Colheita · Recebimento · Estoque de produto como os 3 últimos cartões (sem Beneficiamento), sem erro de JS',
-              vt and cs[-3:] == ESP and not any(x[0] == 'BEN.dc.html' for x in cs) and not e0, [vt, cs, e0])
+        t.chk('AC-01 "‹ Agrícola" abre a tela de entrada com Colheita · Recebimento · Estoque de produto em sequência (sem Beneficiamento), sem erro de JS',
+              vt and any(cs[i:i + 3] == ESP for i in range(len(cs))) and not any(x[0] == 'BEN.dc.html' for x in cs) and not e0, [vt, cs, e0])
         for h, nome in ESP:
             pg = h.replace('.dc.html', '')
             if not J(pronta('MOD-AGR.dc.html', HUB)): volta_pro()

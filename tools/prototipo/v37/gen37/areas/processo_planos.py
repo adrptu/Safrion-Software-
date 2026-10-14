@@ -467,6 +467,7 @@ function EXTRAVALS(self,v){ paHashIni(self); const st=self.state; const pid=st.p
 
 
 def bloco(titulo, desc, corpo, acao='', hole=False):
+    if not hole: desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     t = titulo if hole else esc(titulo)
     d = desc if hole else esc(desc)
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'

@@ -39,6 +39,7 @@ CSS=('.pr-cards{display:none;flex-direction:column;gap:8px}'
      '.pr-vis button[aria-pressed=true]{background:#FFFFFF;color:#15201A;box-shadow:0 1px 2px rgba(21,32,26,.12)}')
 
 def bloco(titulo,desc,corpo,acao=''):
+    desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
             f'<div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px; flex-wrap: wrap;"><div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">'
             f'<h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">{esc(titulo)}</h3><div style="font-size: 12.8px; color: {MUTED};">{esc(desc)}</div></div>{acao}</div>'
@@ -146,7 +147,8 @@ function prPill(on){ return 'font-family:inherit;font-size:13px;font-weight:700;
 function prInSt(err){ return 'font-family:inherit;font-size:15px;padding:9px 11px;border-radius:10px;box-sizing:border-box;width:100%;max-width:240px;background:#FFFFFF;color:#15201A;border:1px solid '+(err?'#B42318':'#E4E9E5')+';'; }
 function prCel(t,k){ return {t:String(t==null?'':t), st:k==='b'?'font-weight:800;color:#15201A;':(k==='mut'?'color:#65736A;':(k==='red'?'color:#B42318;font-weight:700;':(k==='ok'?'color:#1E7A4C;font-weight:700;':'color:#15201A;')))}; }
 /* filtros do topo (DEC-2609-11): nestas telas a fazenda começa em Todas (a colheita em curso é da Lagoa Grande e o estoque de grão da Santa Rita) */
-function prTopo(self,v){ if(self.state.mf_faz===undefined){ self.state.mf_faz='Todas'; } v.mf_faz=self.state.mf_faz; v.mf_saf=self.state.mf_saf||'Todas';
+function prTopo(self,v){ g2keep(self,'pr_topo',{topo:true,v});   /* PROD-C961-CONTEXTO-01 (Codex, 13/10): Fazenda, Safra, Cultura e Talhão voltam ao sair e voltar ou recarregar */
+  if(self.state.mf_faz===undefined){ self.state.mf_faz='Todas'; } v.mf_faz=self.state.mf_faz; v.mf_saf=self.state.mf_saf||'Todas';
   /* Cultura e Talhão (proprietário, 13/10/2026: "nas demais telas que isso for bastante essencial e ajudar o usuário"): as opções são as dos cultivos
      com produção no recorte de Fazenda e Safra; o Talhão segue a Cultura escolhida. Colheita usa os dois; Cargas e Estoque de produto, a Cultura. */
   const cu=self.state.mf_cult||'Todas', cs=[], ts=[];

@@ -7,6 +7,7 @@
   B4 limpar o termo devolve todas as linhas de todas as tabelas; tela com uma tabela só segue "Buscar nesta tabela"
   B5 Consulta Agrofit: Cultura e Praga-alvo são listas de escolha (sem digitar); o único campo de texto é a busca da lista
   B6 sem erro de JS
+  B7 diálogo com tabela (Sugestões pelas análises, no Planejar safra): a busca do diálogo aparece e filtra a tabela dele (AC-SOLO-18)
 Uso: python3 busca_unica_test.py (lê _render ou RENDER_DIR)."""
 import os, sys, json, time, glob, re
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -81,6 +82,15 @@ try:
     b5 = json.loads(J(BUSCAS) or '[]')
     chk('B5 Consulta Agrofit (Soja): Cultura e Praga-alvo como listas de escolha; o único campo de texto é a busca da lista', sel5 == [['SELECT', True], ['SELECT', True]] and len(b5) == 1, [sel5, b5])
     chk('B6 sem erro de JS (abertura das telas)', not errs, errs)
+    # B7 · diálogo com tabela: a busca da tela passa a ser a do diálogo
+    limpa(); c.goto(U('SAF.dc.html#saf=S2627&passo=cultivos&sug=1'), 2.0); t7 = time.time()
+    while time.time() - t7 < 10 and not J("!!document.querySelector('[role=dialog] input[type=search]')"): time.sleep(.3)
+    q7 = J("(()=>{const i=[...document.querySelectorAll('[role=dialog] input[type=search]')].find(x=>x.getClientRects().length); return i?i.getAttribute('aria-label'):'';})()") or ''
+    n0 = J("[...document.querySelectorAll('[role=dialog] [role=row][data-rid]')].filter(r=>r.getClientRects().length).length") or 0
+    J("""(()=>{const i=[...document.querySelectorAll('[role=dialog] input[type=search]')].find(x=>x.getClientRects().length); if(!i) return; const P=HTMLInputElement.prototype;
+      Object.getOwnPropertyDescriptor(P,'value').set.call(i,'zzzz-nada'); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"""); time.sleep(.8)
+    n1 = J("[...document.querySelectorAll('[role=dialog] [role=row][data-rid]')].filter(r=>r.getClientRects().length).length") or 0
+    chk('B7 diálogo com tabela (Sugestões pelas análises): a busca do diálogo aparece e filtra a tabela dele', bool(q7) and n0 > 0 and n1 == 0, [q7, n0, n1])
 finally:
     try: c.close()
     except Exception: pass

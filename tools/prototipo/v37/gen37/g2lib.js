@@ -16,26 +16,31 @@ function g2st(self,id){ return ((self.state.g2||{})[id])||{}; }
 function g2qSeg(self,id){ return !!self.__g2qS&&(' '+self.__g2qS+' ').indexOf(' '+id+' ')>=0; }
 function g2stBusca(self,id,st){ return g2qSeg(self,id)?Object.assign({},st,{q:(g2st(self,self.__g2qL).q||'')}):st; }
 function g2buscaUnica(self){ if(typeof document==='undefined') return;
-  const ids=[...document.querySelectorAll('[data-g2q]')].filter(m=>m.parentElement&&m.parentElement.getClientRects().length>0).map(m=>m.getAttribute('data-g2q'));
+  const vis=[...document.querySelectorAll('[data-g2q]')].filter(m=>m.parentElement&&m.parentElement.getClientRects().length>0);
+  const dlg=vis.filter(m=>m.closest('[role=dialog]'));   // com um diálogo aberto (fundo inerte), a busca da tela é a do diálogo (AC-SOLO-18)
+  const ids=(dlg.length?dlg:vis).map(m=>m.getAttribute('data-g2q'));
   const L=ids[0]||'', S=ids.slice(1).join(' '); if(L===(self.__g2qL||'')&&S===(self.__g2qS||'')) return;
   self.__g2qL=L; self.__g2qS=S; self.setState({g2qrev:(self.state.g2qrev||0)+1}); }
 function g2set(self,id,patch){ const all=Object.assign({},self.state.g2||{}); all[id]=Object.assign({},all[id]||{},patch); self.setState({g2:all});
   if(G2KEEP[id]) g2keepGrava(self,id,all[id]); }
 // grava o recorte guardado (g2keep): filtros, busca, ordenação, filtro rápido e, quando a tela pede (VISOES-1), Fazenda e Safra do topo
 function g2keepGrava(self,id,x){ if(!G2KEEP[id]) return; x=x||g2st(self,id); const o={f:x.f||{},q:x.q||'',so:x.so||null,qv:x.qv||''};
-  if(G2KEEP_TOPO[id]){ const s=self.state||{}; if(s.mf_faz) o.mf_faz=s.mf_faz; if(s.mf_saf) o.mf_saf=s.mf_saf; if(s.mf_cult) o.mf_cult=s.mf_cult; }
+  if(G2KEEP_TOPO[id]){ const s=self.state||{}; G2TOPO.forEach(c=>{ if(s[c]) o[c]=s[c]; }); }
   try{ sessionStorage.setItem(G2KEEP[id],JSON.stringify(o)); }catch(e){} }
 // recorte guardado na sessão (TABELAS-FOCO): filtros, busca e ordenação sobrevivem a abrir o detalhe e voltar; só a tabela que pede (g2keep)
 const G2KEEP={}, G2KEEP_TOPO={};
+// filtros da faixa guardados com a grade (VISOES-1 §2.3; Cultura e Talhão desde 13/10, PROD-C961-CONTEXTO-01 da revisão Codex)
+const G2TOPO=['mf_faz','mf_saf','mf_cult','mf_tal'];
+function g2topoK(s){ return G2TOPO.map(c=>(s&&s[c])||'').join('|'); }
 // opt.topo (VISOES-1, §2.3): guarda também a Fazenda e a Safra do topo (mf_faz, mf_saf); opt.v: valores da tela já montados (o seletor do topo
 // mostra o valor restaurado no mesmo desenho). Na volta do detalhe, um talhão de outra fazenda não esvazia a lista com "filtro ativo".
 function g2keep(self,id,opt){ let key='g2:'+id; try{ key='g2:'+String(location.pathname).split('/').pop()+':'+id; }catch(e){} G2KEEP[id]=key;
   if(opt&&opt.topo) G2KEEP_TOPO[id]=1;
-  if(self.__g2kept&&self.__g2kept[id]){ if(G2KEEP_TOPO[id]){ const s=self.state||{}, k=(s.mf_faz||'')+'|'+(s.mf_saf||'')+'|'+(s.mf_cult||''); if(self.__g2keptTopo!==k){ self.__g2keptTopo=k; g2keepGrava(self,id); } } return; }
+  if(self.__g2kept&&self.__g2kept[id]){ if(G2KEEP_TOPO[id]){ const k=g2topoK(self.state); if(self.__g2keptTopo!==k){ self.__g2keptTopo=k; g2keepGrava(self,id); } } return; }
   (self.__g2kept=self.__g2kept||{})[id]=1;
   try{ const o=JSON.parse(sessionStorage.getItem(key)||'null'); if(o&&typeof o==='object'){ const all=Object.assign({},self.state.g2||{}); all[id]=Object.assign({},all[id]||{},{f:o.f||{},q:o.q||'',so:o.so||null,qv:o.qv||''}); self.state.g2=all;
-    if(G2KEEP_TOPO[id]){ ['mf_faz','mf_saf','mf_cult'].forEach(c=>{ if(typeof o[c]==='string'&&o[c]&&self.state[c]===undefined){ self.state[c]=o[c]; if(opt&&opt.v) opt.v[c]=o[c]; } }); } } }catch(e){}
-  if(G2KEEP_TOPO[id]){ const s=self.state||{}; self.__g2keptTopo=(s.mf_faz||'')+'|'+(s.mf_saf||'')+'|'+(s.mf_cult||''); } }
+    if(G2KEEP_TOPO[id]){ G2TOPO.forEach(c=>{ if(typeof o[c]==='string'&&o[c]&&self.state[c]===undefined){ self.state[c]=o[c]; if(opt&&opt.v) opt.v[c]=o[c]; } }); } } }catch(e){}
+  if(G2KEEP_TOPO[id]){ self.__g2keptTopo=g2topoK(self.state); } }
 function g2rows(self,sp){ const st=g2st(self,sp.id); return st.rows||sp.rows; }
 function g2find(list,id){ for(const r of list){ if(r.id===id) return r; if(r.kids){ const k=g2find(r.kids,id); if(k) return k; } } return null; }
 function g2text(r,c){ if(r.s&&r.s[c.k]!==undefined&&r.s[c.k]!==null) return (c&&c.un)?g2unf(r.s[c.k],c):String(r.s[c.k]); if(r.v&&r.v[c.k]!==undefined&&r.v[c.k]!==null) return g2fmt(r.v[c.k],c); return ''; }

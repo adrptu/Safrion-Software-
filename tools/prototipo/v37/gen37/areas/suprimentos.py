@@ -79,6 +79,7 @@ CONFL_FA=SOL_FA>0.05
 
 # ======================= blocos, botões e KPIs =======================
 def bloco(titulo,desc,corpo,acao='',tit_hole=False):
+    desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     t=titulo if tit_hole else esc(titulo)
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
             f'<div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px; flex-wrap: wrap;"><div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 260px;">'

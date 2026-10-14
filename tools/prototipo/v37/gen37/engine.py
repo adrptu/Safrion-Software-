@@ -619,6 +619,7 @@ def colmenu(hd,fil):
             + item('Agrupar por esta coluna') + item('Limpar filtro desta coluna')
             + '</div>')
 def section(title,summary,action,body,state='green'):
+    if '{{' not in str(summary): summary=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos e os demais soltos pela tela ... somos minimalistas e essencialistas"): só fica o resumo que mostra estado (buraco dinâmico)
     dot={'green':ACC,'yellow':YEL,'red':RED,'gray':GRAY}[state]
     return (f'<div style="background: {SURF}; border: 1px solid {LINE}; border-radius: 16px; box-shadow: {SH}; display: flex; flex-direction: column; flex: 1 1 0; min-width: 0;">'
             f'<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 18px; border-bottom: 1px solid {LINE};"><div style="display: flex; align-items: center; gap: 10px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: {dot}; flex-shrink: 0; box-shadow: 0 0 0 3px {dot}22;"></span><div style="font-size: 15px; font-weight: 700; letter-spacing: -.01em; flex-grow: 1;">{esc(title)}</div>{"".join((a if a.startswith("<") else btn(a,small=True)) for a in ([action] if isinstance(action,str) else action) if a)}</div>' + (f'<div style="font-size: 13px; color: {MUTED}; padding-left: 20px; line-height: 1.35;">{esc(summary)}</div>' if summary else '') + '</div>'

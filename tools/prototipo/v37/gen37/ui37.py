@@ -46,7 +46,7 @@ VOLTA37={f'CD-0{i}.dc.html':('Cadastros','CD.dc.html') for i in range(1,9)}   # 
 BEN_PUBLICADO=False
 MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
  ('Cadastros','pasta',[('Cadastros','CD.dc.html')]),   # 13/10/2026 (proprietário): sem submenus; a tela CD mostra os 7 cadastros em cartões e cada um volta por "‹ Cadastros"
- ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html'),('Previsão e colheita','COLH.dc.html'),('Recebimento e beneficiamento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html')]),   # 13/10/2026 (proprietário: "coloque o submenu colheita dentro de agrícola"; "coloque tudo de produção, dentro de Agrícola"): o ciclo da lavoura até o produto em estoque
+ ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Orçamento e previsões','GE-02.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html'),('Previsão e colheita','COLH.dc.html'),('Recebimento e beneficiamento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html'),('Custos e fechamento','GE-03.dc.html')]),   # 13/10/2026 (proprietário: "coloque orçamento e custos dentro do menu agrícola"; "coloque o submenu colheita dentro de agrícola"; "coloque tudo de produção, dentro de Agrícola"): o ciclo da lavoura até o produto em estoque
  ('Manutenção','wrench',[('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')]),   # 13/10/2026 (pedido do proprietário: subitens de novo, enxutos): um subitem por visão da tela única, sem tela nova
  ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html'),('Inteligência de compras','IC.dc.html')]),   # INTEL-01 (13/10)
  ('Comercial','Vendas',[('Contratos e pedidos','VEN.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Painel comercial','PCOM.dc.html'),('Inteligência de vendas','IV.dc.html')]),   # INTEL-01 (13/10): inteligência comercial de vendas
@@ -62,6 +62,7 @@ MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
 HUB37={'Agrícola':'MOD-AGR.dc.html','Comercial':'MOD-COM.dc.html','Suprimentos':'MOD-SUP.dc.html','Configurações':'MOD-CFG.dc.html','Manutenção':'MOD-MAN.dc.html'}
 CURTO37={'AG-07.dc.html':('Agrofit','livro'),'PA.dc.html':('Planos agronômicos','prancheta'),'AG-02.dc.html':('Análises de solo','frasco'),
  'SAF.dc.html':('Planejar safra','calendar'),'OS.dc.html':('Ordens de serviço','prancheta_ok'),'AG-01.dc.html':('Pragas e doenças','inseto'),'IR-01.dc.html':('Irrigação','drop'),
+ 'GE-02.dc.html':('Orçamento','cash'),'GE-03.dc.html':('Custos','calc'),
  'COLH.dc.html':('Colheita','Colheita'),'CARGA.dc.html':('Recebimento','scale'),'PROD.dc.html':('Estoque de produto','armazem'),
  'VEN.dc.html':('Contratos e pedidos','doc'),'EXPED.dc.html':('Expedição','truck'),'PCOM.dc.html':('Painel','grafico'),'IV.dc.html':('Inteligência','trend'),
  'MA.dc.html#vis=semordem':('Sem ordem','clock'),'MA.dc.html#vis=ordens':('Ordens','wrench'),'MA.dc.html#vis=ativos':('Ativos','truck'),'MA.dc.html#vis=planos':('Planos','calendar'),
@@ -184,7 +185,7 @@ _CSS_RESP=('[data-root]{height:100vh;height:100dvh;padding:env(safe-area-inset-t
     '}'
     '@media (pointer: coarse){.menu-lat a,.menu-lat>button{min-height:44px;box-sizing:border-box;display:flex!important;align-items:center}'
     '.ml-tog{width:32px;height:32px}.menu-lat.rec+.ml-tog{left:calc(52px + env(safe-area-inset-left,0px))}.ml-tog{left:calc(216px + env(safe-area-inset-left,0px))}}')
-_CSS_ESTREITA=(f'@media (max-width: 640px){{.mf-tela select{{min-height:44px!important}}}}'   # NAV-2CB-TOQUE-01 (Codex, 13/10): listas da faixa com alvo de 44 px no celular
+_CSS_ESTREITA=(f'@media (max-width: 640px){{.mf-tela select{{min-height:44px!important}}.g2-info{{width:44px!important;height:44px!important}}}}'   # NAV-2CB-TOQUE-01 (Codex, 13/10): listas da faixa com alvo de 44 px no celular
     f'{_RAIZ}>div:nth-child(2){{flex-wrap:wrap}}'          # linha do título: o comando principal desce em vez de sair da tela
     f'@media (max-width: 1279px){{{_RAIZ}>div{{flex-wrap:wrap}}}}'    # demais linhas do cabeçalho; em 1440 px igual à base
     f'@media (max-width: 640px){{{_RAIZ}{{padding:10px 14px!important;gap:8px!important}}'
@@ -314,7 +315,8 @@ def faixa_cobranca(fid,fname):
             f'<span class="assin-fx-w">{{{{assin_fx_t}}}}</span><span class="assin-fx-m">{{{{assin_fx_m}}}}</span><a href="CF-05.dc.html#pagar" style="color: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: 3px;">Pagar fatura ›</a></div></sc-if>')
 def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=None,crumbs_extra=None,
             ctx=('Fazenda Santa Rita','Safra 2026/27',None),cont=None,chipsrow='',footer=None,
-            fname=None,W=1440,H=880,perfil='Ana · Gestora',search=True,steps=None,primary_html=None,mf_fim=''):
+            fname=None,W=1440,H=880,perfil='Ana · Gestora',search=False,steps=None,primary_html=None,mf_fim=''):
+    # subtítulo sob o título não aparece mais# 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas"); o parâmetro fica por compatibilidade
     fname=fname or ffile(fid)
     H=_h(fname,H)
     if steps: H=max(900,min(H,1000))  # processos: tela de trabalho com rolagem interna; faixa de etapas sempre visível
@@ -354,7 +356,11 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
           f'{icon("lista",13,MUTED)}Buscar ID, talhão, ativo, lote, pessoa…</span>') if search else '<span style="flex-grow: 1;"></span>'
     prim=primary_html or (btn(primary,True,href=primary_href) if primary else '')
     controw=cont if cont else ''
-    foot=f'<div style="display: flex; align-items: center; gap: 10px; padding: 12px 32px; border-top: 1px solid {LINE}; background: {SURF};"><span style="width: 8px; height: 8px; border-radius: 999px; background: {ACC};"></span><div style="font-size: 13px; color: {MUTED};">{esc(footer)}</div></div>' if footer else ''
+    # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos e os demais soltos pela tela ... somos minimalistas e essencialistas"):
+    # a regra que ficava numa faixa no rodapé vira uma dica (ⓘ ao lado do título, com nome acessível; abre no hover, no foco e no toque)
+    foot=''
+    info=(f'<button type="button" class="g2-info" aria-label="Regras desta tela" data-dica="{esc(footer)}" style="flex-shrink: 0; width: 32px; height: 32px; border-radius: 999px; '
+          f'border: 1px solid {LINE}; background: {SURF}; color: {MUTED}; font-family: inherit; font-size: 15px; font-weight: 700; cursor: help; display: inline-flex; align-items: center; justify-content: center;">i</button>') if footer else ''
     voltar=f'<a href="{back}" aria-label="Voltar" style="text-decoration: none; display: inline-flex; align-items: center;">{chev()}</a>' if crumbs_extra else ''
     if not crumbs_extra and fname in VOLTA37:
         _vr,_vh=VOLTA37[fname]
@@ -398,12 +404,12 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 <header style="padding: 14px 32px 14px; background: {SURF}; border-bottom: 1px solid {LINE}; display: flex; flex-direction: column; gap: 10px;">
 <div style="display: flex; align-items: center; gap: 10px; font-size: 12.5px; font-weight: 500;">{ctxp}<span>{crumb}</span>{srch}</div>
 <div style="display: flex; align-items: center; gap: 12px;">
-{voltar}<h1 style="margin: 0; font-family: {DISP}; font-size: 23px; font-weight: 700; letter-spacing: -.02em; white-space: nowrap; flex-shrink: 0;">{esc(title)}</h1>
+{voltar}<h1 style="margin: 0; font-family: {DISP}; font-size: 23px; font-weight: 700; letter-spacing: -.02em; white-space: nowrap; flex-shrink: 0;">{esc(title)}</h1>{info}
 <span style="flex-shrink: 0; max-width: 300px;">{st}</span>
 <span style="flex-grow: 1;"></span>
 {prim}
 </div>
-{f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.35; max-width: 900px; margin-top: -4px;">{esc(subtitle)}</div>' if subtitle else ''}
+
 {faixa_cobranca(fid,fname)}
 {controw}
 {chipsrow}
