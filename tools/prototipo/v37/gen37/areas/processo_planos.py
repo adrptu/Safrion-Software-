@@ -416,13 +416,16 @@ function paNovoFaz(ps,dd,id){ const nome=String(dd.nome||'').trim(); const base=
 // - com a inclusão de insumo aberta (o insumo que está sendo digitado ficaria de fora);
 // - com o rascunho igual à versão publicada (R3: uma versão vazia marcaria os cultivos como desatualizados sem mudança nenhuma).
 // Habilitado, a nota resume as alterações ao lado do botão (paResumo).
-function paAcoes(p,ui){ ui=ui||{}; if(!p||!p.rasc) return {prim:null,nota:''}; const v=p.rasc.v; const t='Publicar versão v'+v;
+// 14/10/2026 (proprietário: "tire essa parte de alterações de rascunho. lá embaixo deixe o botão salvar (as mudanças)"): a primária é
+// "Salvar alterações" (cria a versão vN, imutável; os cultivos não mudam) e, habilitada, vem sem nota; o que mudou fica na própria
+// atividade (selo Alterada/Incluída) e no aviso depois de salvar. Desabilitada, segue com o motivo (VIS-04).
+function paAcoes(p,ui){ ui=ui||{}; if(!p||!p.rasc) return {prim:null,nota:''}; const v=p.rasc.v; const t='Salvar alterações';
   const no=(w)=>({prim:{t,dis:w},nota:w});
-  if(!p.rasc.atividades.length) return no('Inclua ao menos uma atividade para publicar a v'+v+'.');
-  if(ui.ied) return no('Confirme (Enter) ou cancele (Esc) a dose de '+ui.ied.prod+' para publicar a v'+v+'.');
-  if(ui.iadd) return no('Conclua ou cancele a inclusão do insumo para publicar a v'+v+'.');
+  if(!p.rasc.atividades.length) return no('Inclua ao menos uma atividade para salvar.');
+  if(ui.ied) return no('Confirme (Enter) ou cancele (Esc) a dose de '+ui.ied.prod+' para salvar.');
+  if(ui.iadd) return no('Conclua ou cancele a inclusão do insumo para salvar.');
   if(p.versao>0&&!paDiff(p).length) return no('O rascunho v'+v+' está igual à v'+p.versao+': altere algo ou descarte o rascunho.');
-  return {prim:{t,dis:''},nota:paResumo(p)}; }
+  return {prim:{t,dis:''},nota:''}; }
 // resumo das alterações na nota do Próximo passo, ao lado de "Publicar" (R1): até 2 itens e "e mais N"; o bloco "Alterações" tem todas,
 // o custo e o impacto nos cultivos
 function paResumo(p){ const d=paDiff(p); if(!p||!p.rasc||!d.length) return ''; const n=d.length;
@@ -438,11 +441,12 @@ function paPubFaz(ps0,pid,hoje){ const ps=paClone(ps0); const p=ps.find(x=>x.id=
 const PA_SAI_MS=1000;
 function paPubAgora(self,agora){ const tarde=!self.__paSaiT||(agora-self.__paSaiT)>=PA_SAI_MS; if(!self.__paPubDis&&tarde) return '';
   const txt=self.__paSaiTxt; self.__paPubDis=false; self.__paSaiT=0; self.__paSaiTxt='';
-  return (txt?'A dose de '+txt+' entrou no rascunho agora':'O rascunho mudou neste clique')+': confira as alterações ao lado de Publicar e clique de novo.'; }
+  return (txt?'A dose de '+txt+' entrou no rascunho agora':'O rascunho mudou neste clique')+': confira e clique em Salvar alterações de novo.'; }
 function paPub(self){ const pid=self.state.pid; const st=self.state; const ac=paAcoes(paPlan(self,pid),{iadd:!!st.iadd,ied:st.ied}); if(!ac.prim||ac.prim.dis) return;
   const ag=paPubAgora(self,Date.now()); if(ag){ self.setState({g2toast:ag}); return; }
-  const r=paPubFaz(paPlans(self),pid,PA0.hoje); if(r.erro){ self.setState({g2toast:r.erro}); return; } const apl=paApl(pid);
-  self.setState({pl:r.ps,disc:false,del:null,paUndo:null,g2toast:'Versão v'+r.p.versao+' publicada.'+(apl?' Os cultivos continuam como estavam ('+apl+').':'')+' '+PA_PROTO});
+  const res=paResumo(paPlan(self,pid)); const r=paPubFaz(paPlans(self),pid,PA0.hoje); if(r.erro){ self.setState({g2toast:r.erro}); return; } const apl=paApl(pid);
+  /* o aviso diz o que foi salvo (o bloco de alterações saiu) e que os cultivos não mudam */
+  self.setState({pl:r.ps,disc:false,del:null,paUndo:null,g2toast:'Alterações salvas na v'+r.p.versao+'. '+(res&&r.p.versao>1?res+' ':'')+(apl?'Os cultivos continuam como estavam ('+apl+'); a troca de versão é por cultivo, no Planejar safra. ':'')+PA_PROTO});
   /* o comando sai da tela com o rascunho: o foco vai ao nome do plano (o aviso diz que os cultivos continuam como estavam) */
   setTimeout(()=>{ try{ const h=document.getElementById('pa-det-tit'); if(h){ h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); h.scrollIntoView({block:'start'}); } }catch(e){} },40); }
 // R5: a troca de versão por cultivo (PRD 40.3) ainda não existe no Planejar safra do protótipo, e a PA não grava no cenário: o texto
@@ -490,7 +494,7 @@ function EXTRAVALS(self,v){ paHashIni(self); const st=self.state; const pid=st.p
     /* aviso de saída (R8) no lugar da nota, ao lado do botão que levou a sair; sem ele, com alterações, o atalho para o bloco completo */
     if(sa){ const pd=paPend(st); const pp=sa.pid?paPlan(self,sa.pid):null; A.nota=pd.charAt(0).toUpperCase()+pd.slice(1)+' não foi concluída: o que foi digitado se perde ao sair.';
       A.lnks=[{t:pp?'Descartar e abrir '+pp.nome:'Descartar e voltar à biblioteca',fn:()=>paSaiOk(self)},{t:'Continuar editando',fn:()=>paSaiNao(self)}]; }
-    else if(ac.prim&&!ac.prim.dis&&ac.nota) A.lnks=[{t:'Ver alterações',fn:()=>{ try{ const h=document.getElementById('pa-alt-tit'); if(h){ h.setAttribute('tabindex','-1'); h.scrollIntoView({block:'start'}); h.focus({preventScroll:true}); } }catch(e){} }}]; }
+  }
   g2acoes(v,'aa',A); v.aa_pdis=!!(ac&&ac.prim&&ac.prim.dis); v.aa_pwhy=(ac&&ac.prim&&ac.prim.dis)||''; }
 '''
 
@@ -651,15 +655,9 @@ def build():
     # 14/10/2026 (proprietário: "tire cultivos que usam esse plano e versões. não agregam quase nada"): os blocos saíram do detalhe.
     # A regra continua no domínio: publicar cria a versão nova e o cultivo fica na versão em que foi aplicado (a troca é no Planejar safra);
     # o cabeçalho e o aviso de "Editar cria o rascunho" dizem isso, e o cartão da biblioteca diz em quantos cultivos o plano está aplicado.
-    imp = f'<div style="{H("imp_st")}">{H("imp")}</div>'
-    dif = (FOR('dif', 'd', f'<div style="display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 10px; align-items: baseline; padding: 7px 0; border-top: 1px solid {LINE}; font-size: 13px;">'
-                           f'<span><span style="{H("d.st")}">{H("d.k")}</span></span><span><b>{H("d.n")}</b> <span style="color: {MUTED};">· {H("d.t")}</span></span></div>', 2)
-           + IF('dif_vazio', f'<div style="font-size: 13px; color: {MUTED};">O rascunho está igual à versão publicada.</div>')
-           + f'<div style="font-size: 13px; font-weight: 700; padding-top: 6px; border-top: 1px solid {LINE};">{H("dif_custo")}</div>' + imp)
-    alteracoes = IF('alt_tem', bloco(f'<span id="pa-alt-tit">{H("dif_tit")}</span>', 'Confira cada alteração antes de publicar; publicar cria a nova versão sem mudar os cultivos.', dif, hole=True))
-    s2 = head2 + banner + atividades + alteracoes
+    s2 = head2 + banner + atividades   # o bloco de alterações saiu (proprietário, 14/10/2026); o que mudou fica no selo da atividade e no aviso ao salvar
 
-    # Próximo passo do detalhe (BOT-01/02): "‹ Biblioteca de planos" à esquerda e "Publicar versão vN" à direita, com o motivo quando
+    # Próximo passo do detalhe (BOT-01/02): "‹ Biblioteca de planos" à esquerda e "Salvar alterações" à direita, com o motivo quando
     # desabilitado (VIS-04). O componente comum (engine.area_acoes) ainda não leva "disabled": o atributo entra aqui, conferido no build.
     area = E.area_acoes('aa', 'Próximo passo')
     alvo = 'class="acoes-prim" data-acao="{{aa_primA}}"'

@@ -119,11 +119,13 @@ try:
     check('salvar 25 dias antes grava DAP −25', not DLG() and gats()[:2] == ['DAP −25', 'DAP −1'], gats())
     # ---- diferenças e publicar
     body = MAIN()
-    check('o bloco de alterações v7 × v6 lista dose, inclusão, exclusão, atividade nova e gatilho', all(k in body for k in ['Alterações do rascunho v7 em relação à v6', 'Fungicida A: 0,5 → 0,6 L/ha', 'inclui Inseticida B', 'Excluída', 'Incluída', 'Dessecação pré-colheita', 'gatilho: DAP −20 → DAP −25']), body[-900:])
-    check('antes de publicar, o bloco de alterações diz que os cultivos não mudam (3 na v6, 2 na v5)', 'Aplicado em 3 cultivos na v6 e 2 na v5 (safra encerrada): publicar não os altera' in body, body[-600:])
-    check('uma primária: "Publicar versão v7"', prims() == ['Publicar versão v7'], prims())
-    clk('Publicar versão v7', '[data-acoes]', .6)
-    check('publicar cria a v7 e avisa que os cultivos ficam', 'Versão v7 publicada' in T() and '3 cultivos na v6' in T(), T())
+    # 14/10 (proprietário: "tire essa parte de alterações de rascunho. lá embaixo deixe o botão salvar"): sem o bloco; a mudança fica na atividade
+    check('sem o bloco "Alterações do rascunho"; a atividade nova e a alterada ficam marcadas nela mesma', 'Alterações do rascunho' not in body and 'Incluída' in body and 'Alterada' in body, body[-900:])
+    check('uma primária: "Salvar alterações", sem nota ao lado', prims() == ['Salvar alterações'] and not (J("(document.querySelector('[data-acoes] .acoes-nota')||{}).innerText||''") or '').strip(), prims())
+    clk('Salvar alterações', '[data-acoes]', .6)
+    t7 = T()
+    check('salvar cria a v7 e o aviso diz o que mudou (dose, inclusão, exclusão, atividade nova, gatilho) e que os cultivos ficam (3 na v6, 2 na v5)', 'Alterações salvas na v7' in t7
+          and all(k in t7 for k in ['Fungicida A: 0,5 → 0,6 L/ha', 'inclui Inseticida B']) and '3 cultivos na v6' in t7 and 'Os cultivos continuam como estavam' in t7, t7)
     body = MAIN()
     # 14/10 (proprietário): Cultivos e Versões saíram do detalhe; o cabeçalho diz a versão em vigor
     check('depois de publicar: cabeçalho "Publicado · v7", sem os blocos Cultivos e Versões, sem primária',
@@ -135,7 +137,7 @@ try:
     J("document.querySelector('main .g2card[aria-label=\"Abrir plano Milho safrinha\"]').click()"); time.sleep(.6)
     mostra(J("[...document.querySelectorAll('main button.pa-titulo')].filter(b=>b.closest('.pa-atividade').querySelector('.pa-contagem').innerText!=='Só operação')[0].innerText"))
     J("document.querySelector('main button.pa-dose').click()"); time.sleep(.3); J("document.activeElement.select()"); digita('9'); enter()
-    check('mudar a dose do milho cria o rascunho v5', 'Rascunho v5 criado' in T() and prims() == ['Publicar versão v5'], [T(), prims()])
+    check('mudar a dose do milho cria o rascunho v5', 'Rascunho v5 criado' in T() and prims() == ['Salvar alterações'], [T(), prims()])
     clk('Descartar rascunho'); clk('Descartar rascunho', 'main [role=alert]')
     check('descartar o rascunho volta à v4 publicada, sem primária', 'Rascunho v5 descartado. A v4 publicada continua valendo.' in T() and prims() == [] and 'Publicado · v4' in MAIN(), [T(), prims()])
     # ---- novo plano: copiar de uma base; nome repetido recusado
@@ -143,7 +145,7 @@ try:
     setv('#np_cult', 'Soja'); setv('#np_nome', 'Soja padrão'); clk('Criar plano', 'aside[role=dialog]')
     check('nome repetido na cultura é recusado', DLG() and 'Já existe um plano com este nome nesta cultura.' in J("document.querySelector('aside[role=dialog]').innerText"))
     setv('#np_nome', 'Soja teste'); setv('#np_base', 'SOJA-PD'); clk('Criar plano', 'aside[role=dialog]', .7)
-    check('plano novo nasce como rascunho v1 com a cópia das atividades e abre no detalhe', 'rascunho v1' in T() and '4 atividades' in MAIN() and J("location.hash").startswith('#plano=NP') and prims() == ['Publicar versão v1'], [T(), prims()])
+    check('plano novo nasce como rascunho v1 com a cópia das atividades e abre no detalhe', 'rascunho v1' in T() and '4 atividades' in MAIN() and J("location.hash").startswith('#plano=NP') and prims() == ['Salvar alterações'], [T(), prims()])
     clk('Descartar rascunho'); clk('Descartar rascunho', 'main [role=alert]')
     check('descartar o plano novo volta à biblioteca', J("location.hash") == '' and 'Plano novo descartado' in T() and J("document.querySelectorAll('main .g2card').length") == len(D2.PLANOS), T())
     check('sem erros JS', not J("window.__errs&&window.__errs.length"), J("window.__errs"))
@@ -156,7 +158,7 @@ try:
     mais('Herbicida pós-emergente'); clk('Excluir atividade', 'main [role=menu]', w=.4); dose('Fungicida A', '0,6'); clk('Desfazer', w=.4)
     check('PA-DESFAZER-01: excluir (cria o rascunho) → mudar outra dose → Desfazer: a atividade volta uma vez e a dose nova (0,6) fica; o rascunho v7 continua',
           tem_atv('Herbicida pós-emergente') and J("[...document.querySelectorAll('main button.pa-titulo')].filter(b=>b.innerText.trim()==='Herbicida pós-emergente').length") == 1
-          and any(x.split(', hoje')[0] == 'Fungicida A' and x.split('=')[-1].startswith('0,6') for x in doses()) and prims() == ['Publicar versão v7'], [doses(), prims()])
+          and any(x.split(', hoje')[0] == 'Fungicida A' and x.split('=')[-1].startswith('0,6') for x in doses()) and prims() == ['Salvar alterações'], [doses(), prims()])
     plano('Soja alta tecnologia'); ordem0 = J("[...document.querySelectorAll('main button.pa-titulo')].map(b=>b.innerText.trim())")
     mais('Herbicida pós-emergente'); clk('Excluir atividade', 'main [role=menu]', w=.4); clk('Desfazer', w=.4)
     check('controle: excluir → Desfazer sem outra edição volta à v6 publicada (sem rascunho), na mesma posição; foco no nome da atividade',
