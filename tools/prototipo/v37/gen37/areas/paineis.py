@@ -35,6 +35,22 @@ PAINEIS = {
 
 JS = r'''
 // Indicadores leem somente a fonte canônica. Coleção vazia = zero; ausente/inválida = sem dados.
+// PAINEL-02 · leitura agrícola única para o Painel (contrato 6163002343/6163029779): sem comando nem mutação; null = Sem dados.
+// O.S. impedidas pelos mesmos selos da tela de O.S. (processo_os: impedida, falta máquina, falta insumo), só abertas e só agrícolas
+// (sem OB-); motivo = o selo vigente; dono e desde só quando o estado os tiver (hoje não tem: null, sem inventar). Atrasadas: o estado
+// não tem data canônica de fim da janela (só texto no registro), então null até existir esse campo. Custos: etapa seguinte (null).
+const AGR_IMP=/impedida|falta máquina|falta insumo/i;
+function agrPainelRef(c,rec) { rec=rec||{};
+ const ords=c&&c.ordens&&typeof c.ordens==='object'&&!Array.isArray(c.ordens)?Object.values(c.ordens):null;
+ let os=null;
+ if(ords&&ords.every(o=>o&&typeof o.id==='string'&&typeof o.etapa==='string'&&Array.isArray(o.selos))) {
+  const ab=ords.filter(o=>!/^OB-/.test(o.id)&&o.etapa!=='Encerradas'&&o.etapa!=='Canceladas'&&(!rec.faz||!o.faz||o.faz===rec.faz)&&(!rec.saf||!o.saf||o.saf===rec.saf));
+  const imp=ab.map(o=>[o,o.selos.find(s=>s&&AGR_IMP.test(s.t||''))]).filter(x=>x[1])
+   .map(([o,s])=>({id:o.id,talhao:o.talhao||'',etapa:o.etapa,motivo:s.t,dono:o.dono||null,desde:o.desde||null,origem:'OS.dc.html#'+encodeURIComponent(o.id)}));
+  os={impedidas:imp,atrasadas:null,n:{impedidas:imp.length,atrasadas:null}};
+ }
+ return {os,custos:null};
+}
 function pnObjs(x) { return x && typeof x==='object' && !Array.isArray(x) ? Object.values(x) : null; }
 function pnNum(x) { return typeof x==='number' && Number.isFinite(x) && x>=0; }
 function pnConta(xs, pred) { return xs===null ? null : xs.filter(pred).length; }

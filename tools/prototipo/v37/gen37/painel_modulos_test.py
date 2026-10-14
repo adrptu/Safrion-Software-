@@ -41,6 +41,19 @@ chk('Coleções vazias válidas: zero suprimentos',pnValores({ordens:{},lotes:{}
 c.lotes.a.fisico=null;chk('Saldo físico ausente não produz total parcial',pnValores(c,'PSUP').vals.slice(0,3),[null,null,null]);
 c.reqs.r2.itens[0].custodia=null;chk('Custódia ausente não vira demanda falsa',pnValores(c,'PSUP').vals[3],null);
 c.ordens.c.etapa=null;chk('Estado ausente impede contagem parcial de O.S.',pnValores(c,'PAGR').vals,[null,null,null,null]);
+// PAINEL-02 · agrPainelRef (contrato 6163002343/6163029779)
+const ag=cenClone(CEN0), r0=agrPainelRef(ag), antes=JSON.stringify(ag);
+chk('agrPainelRef: impedidas do seed = selos da tela (abertas, sem OB-), motivo vigente, origem na O.S.',r0.os.impedidas.map(x=>[x.id,x.motivo,x.origem]),
+ Object.values(ag.ordens).filter(o=>!/^OB-/.test(o.id)&&!['Encerradas','Canceladas'].includes(o.etapa)&&o.selos.some(s=>/impedida|falta máquina|falta insumo/i.test(s.t))).map(o=>[o.id,o.selos.find(s=>/impedida|falta máquina|falta insumo/i.test(s.t)).t,'OS.dc.html#'+o.id]));
+chk('agrPainelRef: seed = OS-0420 (ativo bloqueado), OS-0431 (falta máquina), OS-0507 (bomba em manutenção)',r0.os.impedidas.map(x=>x.id),['OS-0420','OS-0431','OS-0507']);
+chk('agrPainelRef: inclui falta máquina (A liberar) e n confere',[r0.os.impedidas.some(x=>/Falta máquina/.test(x.motivo)),r0.os.n.impedidas],[true,r0.os.impedidas.length]);
+chk('agrPainelRef: sem data canônica, atrasadas e custos = null (Sem dados), dono/desde sem invenção',[r0.os.atrasadas,r0.os.n.atrasadas,r0.custos,r0.os.impedidas.every(x=>x.dono===null&&x.desde===null)],[null,null,null,true]);
+const id0=r0.os.impedidas[0].id; ag.ordens[id0].etapa='Encerradas';chk('agrPainelRef: encerrada sai da lista',agrPainelRef(ag).os.impedidas.some(x=>x.id===id0),false);
+ag.ordens[id0].etapa='Canceladas';chk('agrPainelRef: cancelada sai da lista',agrPainelRef(ag).os.impedidas.some(x=>x.id===id0),false);
+chk('agrPainelRef: não altera o estado (só a etapa mudada pelo teste)',JSON.stringify(agrPainelRef(ag))!==''&&Object.keys(ag.ordens).length===Object.keys(JSON.parse(antes).ordens).length,true);
+chk('agrPainelRef: ordens ausentes = Sem dados',agrPainelRef({}).os,null);
+chk('agrPainelRef: ordens vazias = lista vazia e 0',[agrPainelRef({ordens:{}}).os.impedidas,agrPainelRef({ordens:{}}).os.n.impedidas],[[],0]);
+chk('agrPainelRef: selos ausentes numa ordem = Sem dados',agrPainelRef({ordens:{x:{id:'OS-1',etapa:'Liberadas'}}}).os,null);
 console.log('RESULTADO '+n+'/'+n);
 '''
 
