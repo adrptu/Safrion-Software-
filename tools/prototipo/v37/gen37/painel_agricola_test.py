@@ -61,6 +61,8 @@ chk('Lista inválida não mostra zero',pnaOSLinhas({os:{impedidas:{},atrasadas:[
 chk('Origem inválida não cria navegação',pnaOSLinhas({os:{impedidas:[{...impedida,origem:'javascript:alert(1)'}],atrasadas:[]}}),null);
 const semDono=pnaOSRow({...leitura[0],dono:null,prevista:null,dias:null});
 chk('Ausência de dono e prazo explícita',[semDono.v.dono,semDono.v.prazo],['Responsável não informado','Data não informada']);
+chk('Atraso ausente não esconde impedimento conhecido',pnaOSLinhas({os:{impedidas:[impedida],atrasadas:null}}).length,1);
+chk('Ambos ausentes não viram vazio',pnaOSLinhas({os:{impedidas:null,atrasadas:null}}),null);
 console.log('RESULTADO '+n+'/'+n);
 '''
 
@@ -169,6 +171,11 @@ def os_contract_ui():
             J('history.back()');time.sleep(1)
             chk('Volta preserva filtro e foco '+str(w),wait("location.pathname.endsWith('PAGR.dc.html')&&document.querySelectorAll('[data-rid]').length===1&&document.activeElement.getAttribute('data-rid')==='os:OS-0420'"))
             c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':fixture_script})
+            parcial=json.loads(json.dumps(fixture));parcial['os']['atrasadas']=None
+            partial_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.agrPainelRef=()=>('+json.dumps(parcial,ensure_ascii=False)+');'})['identifier']
+            c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+            chk('Atrasos sem dados preservam impedimento e explicação '+str(w),wait("(()=>{let s=document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]');return s&&s.innerText.includes('Prazos indisponíveis')&&s.innerText.includes('Falta máquina')&&!s.innerText.includes('Nenhuma O.S. impedida')})()"))
+            c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':partial_script})
         Path('_probe').mkdir(exist_ok=True);c.shot(str(Path('_probe/painel-os-contrato-390.png').resolve()))
     finally:c.close();srv.terminate()
     print('RESULTADO contrato sintético '+str(sum(checks))+'/'+str(len(checks)));return 0 if all(checks) else 1

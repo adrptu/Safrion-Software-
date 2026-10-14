@@ -45,13 +45,16 @@ function pnaRow(x) {
 // Apresentação do contrato agrPainelRef; regras, prazos e bloqueios pertencem ao domínio.
 function pnaOSLinhas(ref) {
  const os=ref&&ref.os;
- if(!os||!Array.isArray(os.impedidas)||!Array.isArray(os.atrasadas)) return null;
- const itens=os.impedidas.concat(os.atrasadas);
+ if(!os) return null;
+ const imp=Array.isArray(os.impedidas)?os.impedidas:os.impedidas===null?[]:null;
+ const atr=Array.isArray(os.atrasadas)?os.atrasadas:os.atrasadas===null?[]:null;
+ if(!imp||!atr||(os.impedidas===null&&os.atrasadas===null)) return null;
+ const itens=imp.concat(atr);
  if(!itens.every(x=>x&&typeof x.id==='string'&&/^OS-[A-Za-z0-9-]+$/.test(x.id)&&
    typeof x.origem==='string'&&x.origem==='OS.dc.html#'+x.id)) return null;
  const m=new Map();
- os.impedidas.forEach(x=>m.set(x.id,{...x,impedida:true,atrasada:false}));
- os.atrasadas.forEach(x=>{const a=m.get(x.id);m.set(x.id,a?{...a,atrasada:true,prevista:x.prevista,dias:x.dias}:{...x,impedida:false,atrasada:true});});
+ imp.forEach(x=>m.set(x.id,{...x,impedida:true,atrasada:false}));
+ atr.forEach(x=>{const a=m.get(x.id);m.set(x.id,a?{...a,atrasada:true,prevista:x.prevista,dias:x.dias}:{...x,impedida:false,atrasada:true});});
  return [...m.values()];
 }
 function pnaOSRow(x) {
@@ -81,9 +84,12 @@ function pnaVals(self,v) {
   restaura();window.addEventListener('pageshow',restaura);
  }
  const c=cenGet(), rows=pnaLinhas(c);
- const os=pnaOSLinhas(typeof agrPainelRef==='function'?agrPainelRef(c,{}):null);
+ const ref=typeof agrPainelRef==='function'?agrPainelRef(c,{}):null, os=pnaOSLinhas(ref);
  GRIDS.find(g=>g.id==='g_pna_os').rows=(os||[]).map(pnaOSRow);
- v.pna_os_missing=os===null;v.pna_os_empty=os!==null&&os.length===0;
+ v.pna_os_missing=os===null;
+ v.pna_os_atraso_missing=os!==null&&ref.os.atrasadas===null;
+ v.pna_os_imp_missing=os!==null&&ref.os.impedidas===null;
+ v.pna_os_empty=os!==null&&os.length===0&&!v.pna_os_atraso_missing&&!v.pna_os_imp_missing;
  GRIDS.find(g=>g.id==='g_pna').rows=(rows||[]).map(pnaRow);
  v.pna_missing=rows===null;
  self.g2pick=(gid,id)=>{const x=gid==='g_pna_os'?(os||[]).map(pnaOSRow).find(x=>x.id===id):gid==='g_pna'?(rows||[]).find(x=>x.id===id):null;if(x){
@@ -119,6 +125,8 @@ def secao():
     osbody=('<section aria-label="O.S. que precisam de atenção">'
         f'<h2 style="font-size:16px;color:{E.INK}">O.S. · impedimentos e atrasos</h2>'
         '<p role="status" hidden="'+H('!pna_os_missing')+'">Dados de impedimentos e prazos indisponíveis. Consulte a origem em O.S.</p>'
+        '<p role="status" hidden="'+H('!pna_os_atraso_missing')+'">Prazos indisponíveis para verificar atrasos. Consulte a janela na O.S.; os impedimentos disponíveis seguem abaixo.</p>'
+        '<p role="status" hidden="'+H('!pna_os_imp_missing')+'">Impedimentos indisponíveis. Os atrasos disponíveis seguem abaixo.</p>'
         '<p role="status" hidden="'+H('!pna_os_empty')+'">Nenhuma O.S. impedida ou atrasada neste recorte.</p>'+
         pendencias+'</section>')
     return osbody+body, JS
