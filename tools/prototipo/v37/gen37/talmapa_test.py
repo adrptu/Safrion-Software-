@@ -32,9 +32,12 @@ try:
       "function nfx(n,d){ return Number(n).toFixed(d===undefined?1:d).replace('.',','); }\n"
       + open(os.path.join(HERE, 'talgeo.js'), encoding='utf-8').read() + '\n' + open(os.path.join(HERE, 'talmapa.js'), encoding='utf-8').read() + '\n;1')
     corpo = J("document.body.innerText") or ''
-    t.chk('2 rótulo visível "Demonstração sintética · pivôs, imagem e índices fictícios"; mapa rotulado; sem "imagem real", "Sentinel-2 real" nem "KML do proprietário"',
-          'Demonstração sintética · pivôs, imagem e índices fictícios' in corpo and 'Demonstração sintética' in (J("document.getElementById('mapa-real').getAttribute('aria-label')") or '')
-          and not any(x in corpo for x in ('imagem real', 'Sentinel-2 real', 'KML do proprietário')) and J("window.__M.lg.rot") == F.ROTULO, corpo[:300])
+    # menos texto (proprietário, 13/10/2026): a legenda leva só o selo "Demonstração sintética"; o detalhe (pivôs, imagem e índices fictícios) fica na dica ⓘ da camada
+    INFO = "(()=>{const b=document.querySelector('main button.g2-info[aria-label=\"Fonte e regra da camada\"]'); return b?b.getAttribute('data-dica'):'';})()"
+    dica = J(INFO) or ''
+    t.chk('2 selo visível "Demonstração sintética" e, na dica ⓘ da camada, "pivôs, imagem e índices fictícios"; mapa rotulado; sem "imagem real", "Sentinel-2 real" nem "KML do proprietário"',
+          'Demonstração sintética' in corpo and dica.startswith('Demonstração sintética · pivôs, imagem e índices fictícios') and not any(x in corpo + dica for x in ('imagem real', 'Sentinel-2 real', 'KML do proprietário')) and 'Demonstração sintética' in (J("document.getElementById('mapa-real').getAttribute('aria-label')") or '')
+          and not any(x in corpo for x in ('imagem real', 'Sentinel-2 real', 'KML do proprietário')) and J("window.__M.lg.rot") == F.ROTULO, [corpo[:300], dica])
     pg = J("M.lg.pivos.map(p=>({id:p.id,ha:p.ha,lon:p.lon,lat:p.lat}))")
     t.chk('3 23 pivôs no mapa = dados_lagoa_fonte (id, ha, lon, lat) e 23 marcadores', pg == PV and J("Object.keys(window.__LGI.markers).length") == 23, [len(pg or []), J("Object.keys(window.__LGI.markers).length")])
     an = J("tmAneis('Lagoa Grande').map(a=>[a.id,a.nome,tgAreaHa(a.ring)])") or []
@@ -53,7 +56,7 @@ try:
           and J("tmAneis('Lagoa Grande').length") == 24 and 'LGT01' in (J("Object.keys(JSON.parse(localStorage.getItem('talhao-os-cd01-v1')).geom)") or []), [e_ok, sv, e_dup])
     # camada Satélite pela barra do mapa: a página carrega lagoa_s2.json em __LGI.px e escreve a legenda da cena
     J("[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')].find(b=>(b.getAttribute('title')||'').startsWith('Mostrar Satélite')).click()")
-    espera("!!(window.__LGI.px)", 30); time.sleep(1); sat = J("document.body.innerText") or ''
+    espera("!!(window.__LGI.px)", 30); time.sleep(1); sat = (J("document.body.innerText") or '') + ' | ' + (J(INFO) or '')
     J("window.__pxok=1")
     px = J("""(()=>{const P=window.__LGI.px; const k=M.lg.ids.indexOf('PV12'); const m=(dt)=>{let s=0,n=0; const q=P.cen[dt].NDVI; for(let i=0;i<q.length;i++){ if(P.dono[i]===k&&q[i]!==255){ s+=q[i]/125-1; n++; } } return n?s/n:null; };
       return {ok:window.__pxok,n:P.dono.length,a:m('10/09'),b:m('25/09'),proc:M.sat['25/09'].proc};})()""") or {}

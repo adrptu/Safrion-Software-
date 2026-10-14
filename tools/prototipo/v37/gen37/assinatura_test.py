@@ -85,8 +85,10 @@ try:
     chk('A7a 23/09: selo Ativa; resumo Completo · 2.570,23 ha de 2.600 ha · R$ 5.140,46 (set/2026 fecha em 30/09) · próxima 01/10/2026',
         selo() == 'Ativa' and all(x in b for x in ('Completo', '2.570,23 ha', 'de 2.600 ha contratados', 'R$ 5.140,46', 'set/2026 fecha em 30/09', '01/10/2026')), [selo(), b[:600]])
     chk('A11a uma primária (verde cheio) em repouso: Alterar plano ou área', J(PRIMS) == ['Alterar plano ou área'], J(PRIMS))
-    g = J("""(()=>[...document.querySelectorAll('main .g2caixa')].map(x=>({busca:!!x.querySelector('input[type=search]'),ord:x.querySelectorAll('.g2hb').length,fil:x.querySelectorAll('.g2fb').length,linhas:x.querySelectorAll('[role=row]').length})))()""")
-    chk('A14a as 3 grades (uso, faturas, planos) têm busca, ordenação e filtro por coluna', len(g) == 3 and all(x['busca'] and x['ord'] >= 4 and x['fil'] >= 4 for x in g), g)
+    g = J("""(()=>[...document.querySelectorAll('main .g2caixa')].map(x=>({busca:!!x.querySelector('input[type=search]'),grupo:!!x.querySelector('[data-g2q]'),ord:x.querySelectorAll('.g2hb').length,fil:x.querySelectorAll('.g2fb').length,linhas:x.querySelectorAll('[role=row]').length})))()""")
+    # um campo de busca por tela (proprietário, 13/10/2026): o da 1ª grade busca nas 3 (as outras estão no mesmo grupo, data-g2q)
+    chk('A14a as 3 grades (uso, faturas, planos) têm ordenação e filtro por coluna; um campo de busca só, o da 1ª grade, para as 3', len(g) == 3 and [x['busca'] for x in g] == [True, False, False]
+        and all(x['grupo'] and x['ord'] >= 4 and x['fil'] >= 4 for x in g), g)
     chk('A14b unidade na célula: "312 ha" no uso, "R$ 2.330,00" nas faturas, total 2.570,23 ha no rodapé', '312 ha' in tabela(0) and 'R$ 2.330,00' in tabela(1) and '2.570,23 ha' in tabela(0), [tabela(0)[:200], tabela(1)[:200]])
     chk('A14c filtro rápido por fazenda e ordenação padrão por área decrescente (1ª linha T1 312 ha)', J("[...document.querySelectorAll('main .g2caixa')][0].innerText.indexOf('Lagoa Grande')>=0") and 'T1' in (J("(()=>{const r=document.querySelectorAll('main [role=table]')[0].querySelectorAll('[role=row]')[1]; return r?r.innerText:'';})()") or ''))
     chk('A13a CF-05 sem cultura e sem safra (nenhum nome de cultura nem 2026/27)', not any(x in b for x in ('Soja', 'Milho', 'Feijão', 'Café', 'Mamão', '2026/27')))

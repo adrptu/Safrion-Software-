@@ -32,6 +32,8 @@ try:
     clk=lambda t,root=None,w=.45: (J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"),time.sleep(w))[0]
     T=lambda: J("[...document.querySelectorAll('[role=status],[role=alert]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
     body=lambda: J("document.body.innerText") or ''
+    # a fonte da camada do Mapa fica na dica ⓘ ao lado do nome da camada (menos texto, 13/10/2026)
+    fonte=lambda: J("(()=>{const b=document.querySelector('main button.g2-info[aria-label=\"Fonte e regra da camada\"]'); return b?b.getAttribute('data-dica'):'';})()") or ''
     def ir(f,w=1.3): col(); c.goto('about:blank',wait=.1); c.goto(B+f,wait=w)
     def cel(nome,coluna):   # valor de uma coluna (cabeçalho) na linha cujo Insumo é nome
         return J(f"""(()=>{{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); if(!t) return ''; const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim().toUpperCase());
@@ -87,12 +89,12 @@ try:
     rowclick('MAP 11-52'); mc=memo(); fechar(); ur2=J("(()=>{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf('Ureia 45%')>=0); return r?r.innerText.replace(/\\s+/g,' '):'';})()") or ''; foto('2_cmp_etapa2')
     chk('N4 Compra › etapa 2 lê a mesma demanda: total R$ 428.305,00, Ureia 1.140 kg e a memória do MAP igual, linha a linha, à do Planejar safra (com a OS-0420 e a OS-0431)',
         '428.305,00' in tot and '1.140' in ur2 and mc==ms and any('OS-0420' in l for l in ms) and any('OS-0431' in l for l in ms),(tot,ur2,ms[:4],mc[:4]))
-    mapa(); n0=nums(); f0=body(); tap('T4'); p4=pan('T4'); tap('T4'); tap('T1'); p1=pan('T1'); tap('T1'); foto('3_mapa_sr')
-    chk('N5 Mapa › Insumos (Santa Rita, safra toda): 19 produtos · 14 faltam · 3 aguardando pedido · 2 estoque cobre; T4 "MAP 11-52 · 17.500 kg" com "Falta 79.500 kg"; T1 Fungicida A "Estoque cobre"; a fonte diz que é a necessidade líquida da Safra 2026/27, a mesma do Planejar safra e da Compra',
+    mapa(); n0=nums(); f0=fonte(); tap('T4'); p4=pan('T4'); tap('T4'); tap('T1'); p1=pan('T1'); tap('T1'); foto('3_mapa_sr')
+    chk('N5 Mapa › Insumos (Santa Rita, safra toda): 19 produtos · 14 faltam · 3 aguardando pedido · 2 estoque cobre; T4 "MAP 11-52 · 17.500 kg" com "Falta 79.500 kg"; T1 Fungicida A "Estoque cobre"; a fonte (dica ⓘ da camada) diz que é a necessidade líquida da Safra 2026/27, a mesma do Planejar safra e da Compra',
         all(x in n0 for x in ('Produtos no período 19','Faltam 14','Aguardando pedido 3','Estoque cobre 2')) and 'MAP 11-52 · 17.500 kg' in p4 and 'Falta 79.500 kg' in p4
         and 'Fungicida A' in p1 and 'Falta 145' not in p1 and 'Falta 130' not in p1
         and 'necessidade líquida da Safra 2026/27' in f0 and 'a mesma do Planejar safra e da Compra' in f0 and 'sem plano: O.S. abertas' not in f0,(n0,p4[:400],p1[:300]))
-    mapa('Lagoa Grande',tsel=['PV13']); p13=pan1(); f13=body(); foto('4_mapa_lg')
+    mapa('Lagoa Grande',tsel=['PV13']); p13=pan1(); f13=fonte(); foto('4_mapa_lg')
     chk('N6 Mapa › Insumos (Lagoa Grande): PV13 Glifosato "Falta 293 L" — o estoque da Santa Rita não cobre outra fazenda',
         'Glifosato 480' in p13 and 'Falta 293 L' in p13 and 'necessidade líquida da Safra Mamão 2026/27' in f13,p13[:400])
     # ================= recusa =================
