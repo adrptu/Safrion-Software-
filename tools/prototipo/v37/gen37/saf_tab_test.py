@@ -7,7 +7,8 @@ T4 o seletor "Unidade de produtividade" só aparece com a Meta à vista; mostrar
 T5 "Dividir" é ação secundária (g2sec): some no computador fora do passar do mouse ou do foco (regra de CSS presente); no toque fica.
 T6 talhão com um só cultivo abre recolhido; com parcelas ou pendência, aberto.
 T7 nota da área de ações sem a frase repetida ("sem plano não entram…") e sem referência técnica ("CD-02").
-T8 a 390 as 3 primeiras (Talhão, Cultura, Plano agronômico). T9 sem erro de JS.
+T8 a 390 as 3 primeiras (Talhão, Cultura, Plano agronômico). T11 a 390 o "Dividir" sai da linha e fica no painel do talhão.
+T9 sem erro de JS.
 Uso: python3 saf_tab_test.py (RENDER_DIR=<dir> serve outro _render)."""
 import sys, os, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -76,6 +77,14 @@ try:
     abre(390)
     h3 = head()
     chk('T8 390: as 3 primeiras (Talhão, Cultura, Plano agronômico)', h3 == ['TALHÃO OU PARCELA', 'CULTURA', 'PLANO AGRONÔMICO'], h3)
+    # print do proprietário (14/10, celular): "Dividir" em toda linha ocupa a coluna; no celular sai da linha e fica no painel do talhão
+    dv = J("[...document.querySelectorAll('%s [role=row] button')].filter(b=>b.getClientRects().length&&b.innerText.trim()==='Dividir').length" % G)
+    J("(()=>{const r=[...document.querySelectorAll('%s [role=row].g2ed')].find(r=>{const c=r.querySelector('.g2c0'); return c&&c.innerText.trim().split(/\\s+/)[0]==='T7';}); const x=r&&[...r.querySelectorAll('[role=cell]')].find(z=>!z.querySelector('button,input')&&z.innerText.trim()&&!z.classList.contains('g2c0')); if(x) x.click();})()" % G)
+    espera("document.querySelector('aside[role=dialog]')")
+    ok_b = J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Dividir T7 em parcelas'); if(!b) return false; b.click(); return true;})()")
+    espera("/Dividir T7 em parcelas/.test((document.querySelector('aside[role=dialog]')||{}).innerText||'')")
+    tit = J("(document.querySelector('aside[role=dialog] h2')||{}).innerText||''") or ''
+    chk('T11 390: sem "Dividir" nas linhas; o toque no T7 abre o painel com "Dividir T7 em parcelas", que abre a divisão', dv == 0 and ok_b and 'Dividir T7 em parcelas' in tit, [dv, ok_b, tit])
     chk('T9 sem erro de JS', not J("(window.__e||[]).length"), J("window.__e"))
 finally:
     c.close() if hasattr(c, 'close') else None

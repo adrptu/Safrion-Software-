@@ -318,7 +318,9 @@ try:
                 bool(fim['aviso']) and (av!='longo' or fim['aviso'][0]>300) and fim['controles'] and not any(x[4] for x in fim['controles']) and livres and all(fim['alcancaveis']) and fim['noPonto'] and fim['avisoNoToque'] and e0==2 and e1==3, [prep,fim,e0,e1])
         # 19 · inserção repetitiva com o teclado aberto (contraprova Gemini): 16ª parcela no "Dividir" do T4; uma instância de "+ Adicionar parcela",
         #      foco no nome da parcela nova, à vista e fora do rodapé do painel; contexto (talhão) mantido
-        abre('SAF',360,420,3,True,hash='#saf=S2627&etapa=2'); r=J("(()=>{const b=[...document.querySelectorAll('main button')].filter(b=>b.getClientRects().length&&b.innerText.trim()==='Dividir')[0]; if(!b) return 'sem Dividir'; b.click(); return 'ok';})()"); time.sleep(.6)
+        # no celular o "Dividir" sai da linha (print do proprietário, 14/10): o toque na linha do T4 abre o painel com "Dividir T4 em parcelas"
+        abre('SAF',360,420,3,True,hash='#saf=S2627&etapa=2'); r=J("(()=>{const rw=[...document.querySelectorAll('main [role=row].g2ed')].find(x=>{const c=x.querySelector('.g2c0'); return c&&c.innerText.trim().split(/\\s+/)[0]==='T4';}); const z=rw&&[...rw.querySelectorAll('[role=cell]')].find(q=>!q.querySelector('button,input')&&q.innerText.trim()&&!q.classList.contains('g2c0')); if(!z) return 'sem T4'; z.click(); return 'ok';})()"); time.sleep(.6)
+        r=J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Dividir T4 em parcelas'); if(!b) return 'sem Dividir'; b.click(); return 'ok';})()") if r=='ok' else r; time.sleep(.6)
         tit=J("(document.querySelector('aside[role=dialog] h2')||{innerText:''}).innerText.trim()"); ruins=[]
         n0=J("document.querySelectorAll('aside[role=dialog] input[aria-label^=\"Nome da parcela\"]').length")
         for k in range(max(0,16-n0)):

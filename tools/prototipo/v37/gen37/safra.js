@@ -1658,9 +1658,13 @@ function catalogo(){ if(catalogo._c) return catalogo._c; const m={}; D2.planos.f
 function cultActs(self,gid,r){ if(!r||r.grp) return []; const pl=planById(r.v.plano); const na=Object.keys(adjOf(self)[r.id]||{}).length+soloNacSaf(self,r); const ro=!!r.ro;
   const t=(ro?'Ver insumos e doses de ':'Ajustar insumos e doses de ')+r.v.local;
   if(!pl||pl.cultura!==r.v.cult) return [{t, h:'Escolha um plano agronômico de '+r.v.cult+' e salve; depois ajuste os insumos só deste talhão.',
-    go:()=>self.setState({g2toast:'Escolha e salve um plano agronômico de '+r.v.cult+' antes de ajustar os insumos.'})}];
+    go:()=>self.setState({g2toast:'Escolha e salve um plano agronômico de '+r.v.cult+' antes de ajustar os insumos.'})}].concat(cultDividir(self,gid,r));
   return [{t, h:(na?(na+(na>1?' ajustes deste talhão':' ajuste deste talhão')+' · '):'')+'Mude dose, retire ou inclua insumos só neste talhão; o plano padrão não muda.',
-    go:()=>{ const cur=g2st(self,gid).fm; if(cur&&!cur.ro&&g2dirty(cur)){ self.setState({g2toast:'Salve ou descarte as alterações do cultivo antes de ajustar os insumos.'}); return; } g2set(self,gid,{fm:null}); openLP(self,r.id); }}]; }
+    go:()=>{ const cur=g2st(self,gid).fm; if(cur&&!cur.ro&&g2dirty(cur)){ self.setState({g2toast:'Salve ou descarte as alterações do cultivo antes de ajustar os insumos.'}); return; } g2set(self,gid,{fm:null}); openLP(self,r.id); }}].concat(cultDividir(self,gid,r)); }
+// "Dividir" no painel do cultivo de talhão inteiro: no celular a linha não mostra a ação (g2sec), e o toque na linha chega aqui
+function cultDividir(self,gid,r){ if(!r||r.ro||r.v.ciclo||r.v.tipo==='Parcela') return []; const t=r.v.talhao||r.v.local;
+  return [{t:'Dividir '+t+' em parcelas', h:'Planta parte do talhão com outra cultura ou data; cada parcela tem o próprio plano.',
+    go:()=>{ const cur=g2st(self,gid).fm; if(cur&&!cur.ro&&g2dirty(cur)){ self.setState({g2toast:'Salve ou descarte as alterações do cultivo antes de dividir o talhão.'}); return; } g2set(self,gid,{fm:null}); openDiv(self,t); }}]; }
 /* painel de insumos (PRD 40): o rascunho marca a origem de cada dose (src: pela análise). Os aceites gravados entram no rascunho com a origem
    e nunca viram ajuste da sessão (R14); "Usar", "Retirar pela análise" e "Incluir calagem" só preenchem o rascunho; o Salvar grava (D-25) */
 function openLP(self,cid){ const saf=self.state.saf; const c=cultRows(self,saf).find(r=>r.id===cid); if(!c) return; const a=adjOf(self)[cid]||{}; const d={}, rm={}, add={}, src={};

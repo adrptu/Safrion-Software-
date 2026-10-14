@@ -1358,6 +1358,8 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         # SAF-TAB (proprietário, 14/10: "mais minimalistas"): ação secundária repetida em toda linha (Dividir) aparece ao passar o mouse ou
         # com o foco na linha; no toque fica sempre visível. Ocupa o mesmo lugar (opacidade), sem pular a linha
         "@media (hover:hover){[role=row] .g2sec{opacity:0;transition:opacity .12s}[role=row]:hover .g2sec,[role=row]:focus-within .g2sec{opacity:1}}"
+        # no celular (até 640 px) a ação secundária sai da linha: o toque na linha abre o painel, que oferece a mesma ação (print do proprietário, 14/10)
+        "@media (max-width:640px){[role=row] .g2sec{display:none}}"
         # coluna de número (a='r', célula sem quebra): o número curto fica numa linha; o texto que passa da largura da coluna (linha de apoio
         # "01/09 · Sementes Vale", "R$ 131,00/sc (saca a conferir)") quebra dentro dela em vez de invadir a vizinha (proprietário, 13/10/2026).
         # Os cadastros (CADX) mantêm uma linha com reticências, de propósito.
