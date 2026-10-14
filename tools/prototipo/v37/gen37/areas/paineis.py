@@ -46,8 +46,40 @@ JS = r'''
 // causa estruturada da impedida (Codex 6166235821: agrupar sem ler o texto do selo): vem dos campos da projeção da O.S. —
 // libErr (o Estoque segura a liberação: saldo, lote ou insumo) e bloq (máquina, implemento ou equipamento do registro ou da Manutenção)
 function agrCausa(o){ if(o.libErr) return 'Insumo no Estoque'; if(o.bloq) return 'Máquina ou equipamento'; return 'Outro impedimento'; }
+/* PAINEL-02 · execução (contrato desta função; apresentação no painel_agricola.py): O.S. agrícolas Em execução e Em conferência do recorte,
+   da mesma projeção da tela O.S.; área em ha (prevista = a da O.S., já com o ajuste da liberação; realizada = apontada e enviada; sinal =
+   apontada no aparelho, ainda sem envio, fora do realizado); pendencia = o texto do domínio que segura o apontamento ou o encerramento. */
+function agrExecucao(ab,rec,ref){
+ const r2=x=>Math.round(x*100)/100, num=x=>typeof x==='number'&&Number.isFinite(x);
+ const ordens=ab.filter(o=>(!rec.faz||o.faz===rec.faz)&&(!rec.saf||o.saf===rec.saf)&&['Em execução','Em conferência'].includes(o.etapa)).map(o=>{
+  const tem=num(o.area)&&o.area>0, real=tem?(num(o.realizado)?o.realizado:0):null;
+  return {id:o.id,talhao:o.talhao||'',faz:o.faz||null,saf:o.saf||null,tipo:o.tipo||'',etapa:o.etapa,prevista_ha:tem?r2(o.area):null,realizada_ha:tem?r2(real):null,
+   pct:tem?Math.round(real/o.area*100):null,sinal_ha:r2(osApPend(o)),pendencia:(o.etapa==='Em conferência'?o.encM:(o.esg&&o.esg.t))||null,dono:o.dono||null,prazo:o.prazo||null,
+   origem:'OS.dc.html#'+encodeURIComponent(o.id)}; });
+ const ar=ordens.filter(x=>x.prevista_ha!==null);
+ return {referencia:ref,ordens,total:{prevista_ha:r2(ar.reduce((s,x)=>s+x.prevista_ha,0)),realizada_ha:r2(ar.reduce((s,x)=>s+x.realizada_ha,0)),sinal_ha:r2(ordens.reduce((s,x)=>s+x.sinal_ha,0))},
+  n:{em_execucao:ordens.filter(x=>x.etapa==='Em execução').length,em_conferencia:ordens.filter(x=>x.etapa==='Em conferência').length,com_pendencia:ordens.filter(x=>x.pendencia).length,sem_area:ordens.length-ar.length}};
+}
+/* PAINEL-02 · MIP: a situação de cada vistoria pela mesma regra do AG-01 (mipSit, com as O.S. do cenário c). decidir = acima do NC, foco ou
+   O.S. de controle cancelada (decisão do RT); atrasadas = ritmo vencido; coleta = no aparelho ou incompleta (parcial = o resultado com o que já
+   foi coletado). A vistoria não tem safra no registro do MIP: com recorte de safra = Sem dados (null), como a O.S. sem safra. */
+function agrMip(c,rec){
+ if(typeof mipGet!=='function'||typeof mipSit!=='function'||typeof MIPD==='undefined'||rec.saf) return null;
+ let s=null; try { s=mipGet(); } catch(e) { return null; }
+ const vs=s&&s.vis&&typeof s.vis==='object'&&!Array.isArray(s.vis)?Object.values(s.vis):null;
+ if(!vs||!vs.every(v=>v&&typeof v.id==='string'&&MIPD.tal[v.tal]&&MIPD.prot[v.prot]&&typeof v.data==='string')) return null;
+ const fazDe=v=>v.faz||MIPD.tal[v.tal].faz||null; if(rec.faz&&vs.some(v=>!fazDe(v))) return null;
+ const its=[]; for(const v of vs.filter(v=>!rec.faz||fazDe(v)===rec.faz)) { let S=null; try { S=mipSit(s,v,c); } catch(e) { return null; } its.push([v,S]); }
+ const ref=MIPD.hoje, base=v=>({vis:v.id,talhao:MIPD.tal[v.tal].rot||v.tal,faz:fazDe(v),cultura:MIPD.tal[v.tal].cultura||null,alvo:MIPD.prot[v.prot].alvo,origem:'AG-01.dc.html#'+encodeURIComponent(v.id)});
+ const de=ks=>its.filter(([v,S])=>ks.includes(S.k)).sort((a,b)=>(a[1].ord-b[1].ord)||(a[0].data<b[0].data?-1:1));
+ const decidir=de(['acima','foco','cancelada']).map(([v,S])=>Object.assign(base(v),{sit:S.k,rotulo:S.t,leitura:S.R.ctxt,unidade:S.R.un||null,
+  pct_nc:S.R.pct===null?null:mipPct(S.R.pct),data:v.data,dias:mipDif(v.data,ref),detalhe:S.sub||null,dono:MIPD.rt||null}));
+ const atrasadas=de(['atrasada']).map(([v,S])=>Object.assign(base(v),{prevista:S.prev,dias:mipDif(S.prev,ref),dono:v.resp||null}));
+ const coleta=de(['sinc','incompleta']).map(([v,S])=>Object.assign(base(v),{sit:S.k,rotulo:S.t,pontos:S.R.ptxt,parcial:S.R.kr||null,dono:v.resp||null}));
+ return {referencia:ref,decidir,atrasadas,coleta,n:{decidir:decidir.length,atrasadas:atrasadas.length,coleta:coleta.length,em_controle:its.filter(([v,S])=>['controle','pos','avaliacao'].includes(S.k)).length}};
+}
 function agrPainelRef(c,rec) { rec=rec||{};
- let os=null;
+ let os=null, execucao=null;
  if(typeof osProjecaoEstado==='function'&&typeof OSD!=='undefined') {
   let pj=null; try { pj=osProjecaoEstado(c,id=>/^OB-/.test(id)); } catch(e) { pj=null; }
   const ok=pj&&pj.every(o=>o&&typeof o.id==='string'&&typeof o.etapa==='string'&&Array.isArray(o.selos));
@@ -64,10 +96,11 @@ function agrPainelRef(c,rec) { rec=rec||{};
     semPrazo=rc.filter(o=>!iso(o.fim)).length;
     atr=rc.filter(o=>iso(o.fim)&&o.fim<hoje).map(o=>({id:o.id,talhao:o.talhao||'',faz:o.faz||null,saf:o.saf||null,etapa:o.etapa,prevista:o.fim,
      dias:Math.round((Date.parse(hoje)-Date.parse(o.fim))/864e5),dono:o.dono||null,origem:'OS.dc.html#'+encodeURIComponent(o.id)})); }
-   os={impedidas:imp,atrasadas:atr,referencia:iso(hoje)?hoje:null,n:{impedidas:imp.length,atrasadas:atr?atr.length:null,sem_prazo:semPrazo}};   /* referencia: a data contra a qual o atraso é medido (a apresentação diz "Referência dd/mm/aaaa", não "hoje") */
+   os={impedidas:imp,atrasadas:atr,referencia:iso(hoje)?hoje:null,n:{impedidas:imp.length,atrasadas:atr?atr.length:null,sem_prazo:semPrazo}};
+   execucao=agrExecucao(ab,rec,iso(hoje)?hoje:null);   /* referencia: a data contra a qual o atraso é medido (a apresentação diz "Referência dd/mm/aaaa", não "hoje") */
   }
  }
- return {os,custos:null};
+ return {os,custos:null,execucao,mip:agrMip(c,rec)};
 }
 function pnObjs(x) { return x && typeof x==='object' && !Array.isArray(x) ? Object.values(x) : null; }
 function pnNum(x) { return typeof x==='number' && Number.isFinite(x) && x>=0; }
@@ -143,6 +176,8 @@ def build():
             E.EXTRAJS[0] += 'const OSD = '+json.dumps(dict(ords=_ords(),hoje=_D2.HOJE_ISO),ensure_ascii=False).replace('</','<\\/')+';\n'+_OSN
             import areas.custo_dominio as _CUS   # agrCustoRef: custo por cultura com as regras da camada Custos do Mapa
             E.EXTRAJS[0] += _CUS.js_prefixo()
+            import dados_mip as _MIP   # agrPainelRef().mip: a mesma base do AG-01 (MIPD, MIP0 e mip.js)
+            E.EXTRAJS[0] += _MIP.js_prefixo()
         cards=''.join('<section class="pn-card"><h2>'+E.esc(nome)+
           '<button type="button" class="pn-tip g2dica-i" aria-label="Como calcular: '+E.esc(nome)+'" data-dica="'+E.esc(formula)+'">ⓘ</button></h2>'+
           '<strong class="pn-value" data-alert="'+H('pn_alert'+str(i))+'">'+H('pn_v'+str(i))+'</strong></section>' for i,(nome,formula,_) in enumerate(itens))

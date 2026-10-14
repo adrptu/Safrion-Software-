@@ -142,6 +142,31 @@ chk('agrPainelRef: ordem emitida na tela (osc.novo) entra pela base dela',agrPai
   chk('agrCustoRef: com a ordem vinculada a um talhão só, nada de cobertura incerta nem sem_rateio',[mini(A2).cobertura_incerta,mini(A2).sem_rateio,mini(A2).cultivos[0].parcial],[false,[],false]);
   chk('agrCustoRef: estado inválido = Sem dados',[agrCustoRef({}),agrCustoRef({ordens:{x:{id:'OS-9',etapa:'A liberar'}}})],[null,null]); }
 chk('agrPainelRef: estado não objeto = Sem dados',[agrPainelRef({ordens:[]}).os,agrPainelRef(null).os],[null,null]);
+// PAINEL-02 · execução e MIP (contrato agrExecucao/agrMip em paineis.py; apresentação do Codex em painel_agricola.py)
+{ const c0=cenClone(CEN0), antes=JSON.stringify(c0), E=agrPainelRef(c0).execucao;
+  chk('execucao: não muda o estado',JSON.stringify(c0),antes);
+  chk('execucao: seed = O.S. Em execução e Em conferência, com área prevista e realizada (ha) da projeção',E.ordens.map(x=>[x.id,x.etapa,x.prevista_ha,x.realizada_ha,x.pct]),
+    [['OS-0417','Em conferência',95,95,100],['OS-0420','Em execução',100,30,30],['OS-0421','Em execução',350,190,54],['OS-0505','Em execução',75.11,50,67],
+     ['OS-0506','Em execução',73.18,36,49],['OS-0507','Em execução',71.11,25.4,36],['OS-0508','Em conferência',63.99,63.99,100]]);
+  chk('execucao: totais em ha e contagens',[E.total,E.n,E.referencia],[{prevista_ha:828.39,realizada_ha:490.39,sinal_ha:0},{em_execucao:5,em_conferencia:2,com_pendencia:1,sem_area:0},'2026-09-23']);
+  chk('execucao: pendência = o texto do domínio que segura o encerramento (OS-0417, sobra em custódia), com dono',[E.ordens[0].pendencia.indexOf('Sobra em custódia'),E.ordens[0].dono],[0,'Rui (almoxarife)']);
+  chk('execucao: recorte Lagoa Grande',agrPainelRef(cenClone(CEN0),{faz:'Lagoa Grande'}).execucao.ordens.map(x=>x.id),['OS-0505','OS-0506','OS-0507','OS-0508']);
+  const c1=cenClone(CEN0); c1.ordens['OS-0421'].ap=(c1.ordens['OS-0421'].ap||[]).concat([{dia:9,ha:12,sinc:false}]);
+  const x1=agrPainelRef(c1).execucao.ordens.find(x=>x.id==='OS-0421');
+  chk('execucao: área no aparelho sem envio fica em sinal_ha, fora do realizado',[x1.sinal_ha,x1.realizada_ha],[12,190]);
+  chk('execucao: estado inválido = Sem dados (null), como os',[agrPainelRef({ordens:[]}).execucao,agrPainelRef(null).execucao],[null,null]); }
+{ mipReset(); const M=agrPainelRef(cenClone(CEN0)).mip;
+  chk('mip: decidir = acima do NC ou foco, pela regra do AG-01 (mipSit), dono = RT',M.decidir.map(x=>[x.vis,x.sit,x.leitura,x.pct_nc,x.dias,x.dono]),
+    [['VIS-013','acima','5,1 / 4',128,5,'Ana'],['VIS-053','foco','3 de 20 com sintoma',null,2,'Ana'],['VIS-055','foco','1 de 20 com sintoma',null,2,'Ana']]);
+  chk('mip: atrasadas (prevista vencida, dias até a referência) e coleta no aparelho',[M.atrasadas.map(x=>[x.vis,x.prevista,x.dias]),M.coleta.map(x=>[x.vis,x.sit,x.pontos])],
+    [[['VIS-006','2026-09-11',12],['VIS-060','2026-09-17',6]],[['VIS-016','sinc','0/12 pontos · 6 no aparelho']]]);
+  chk('mip: contagens, referência e origem',[M.n,M.referencia,M.decidir[0].origem],[{decidir:3,atrasadas:2,coleta:1,em_controle:3},'2026-09-23','AG-01.dc.html#VIS-013']);
+  chk('mip: recorte Lagoa Grande; com recorte de safra = Sem dados (a vistoria não tem safra)',[agrPainelRef(cenClone(CEN0),{faz:'Lagoa Grande'}).mip.decidir.map(x=>x.vis),agrPainelRef(cenClone(CEN0),{saf:'2026/27'}).mip],[['VIS-053','VIS-055'],null]);
+  const c2=cenClone(CEN0), vc=Object.values(MIP0.vis).find(v=>v.dec&&v.dec.os&&c2.ordens[v.dec.os]); c2.ordens[vc.dec.os].etapa='Canceladas';
+  const M2=agrPainelRef(c2).mip;
+  chk('mip: O.S. de controle cancelada devolve a decisão ao RT (sit cancelada em decidir)',[M2.decidir.some(x=>x.vis===vc.id&&x.sit==='cancelada'),M2.n.em_controle],[true,2]);
+  MIP_MEM=Object.assign(mipClone(MIP0),{vis:{X:{id:'X',tal:'??',prot:'??',data:'2026-09-01'}}});
+  chk('mip: vistoria com talhão ou protocolo fora do MIP = Sem dados',agrPainelRef(cenClone(CEN0)).mip,null); mipReset(); }
 console.log('RESULTADO '+n+'/'+n);
 '''
 
@@ -150,7 +175,8 @@ def unit():
     import dados2 as D2
     osd='const OSD = '+json.dumps(dict(ords=_ordens(),hoje=D2.HOJE_ISO),ensure_ascii=False)+';\n'
     import areas.custo_dominio as CU
-    src=cenario.perfis_js()+cenario.js_prefixo()+DM.js_regras()+osd+JS_NUCLEO+CU.js_prefixo()+P.JS+TEST
+    import dados_mip as MI   # agrPainelRef().mip lê a mesma base do AG-01
+    src=cenario.perfis_js()+cenario.js_prefixo()+DM.js_regras()+osd+JS_NUCLEO+CU.js_prefixo()+MI.js_prefixo()+P.JS+TEST
     with tempfile.TemporaryDirectory(prefix='painel01-') as d:
         p=Path(d)/'oracle.js';p.write_text(src)
         r=subprocess.run(['node',str(p)],text=True,capture_output=True)
