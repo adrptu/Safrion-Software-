@@ -544,32 +544,7 @@ def colh():
 COLH_JS=r'''
 const PR_GRIDS={g_tal:1,g_sem:1};
 const _g2rows0=g2rows; g2rows=function(self,sp){ return PR_GRIDS[sp.id]?sp.rows:_g2rows0(self,sp); };
-const PR_SITORD={'Em colheita':0,'Programada':1,'Prevista':2,'Colhida':3,'Sem previsão':4};
-const PR_SITCOR={'Em colheita':'green','Programada':'blue','Prevista':'gray','Colhida':'gray','Sem previsão':'yellow'};
-/* janela de colheita do cultivo anual: a data do cultivo ou plantio + 120 dias */
-function prJanAnual(k){ return k.colheita||(k.plantio?prDiaMais(k.plantio,120):''); }
-/* situação, próximo passo e ação do talhão (spec §3.1): perene manda a próxima semana ainda sem ordem; anual, a safra */
-function prTal(c,cid){ const k=PRDC.cult[cid]; const R=prResultado(c,cid); const oss=prOsCult(c,cid); const vs=prP(c).previsoes[cid]||[]; const ult=vs[vs.length-1]||null;
-  const abertas=oss.filter(o=>o.etapa!=='Encerradas'); const exec=abertas.find(o=>o.etapa==='Em execução'||o.etapa==='Em conferência'); const prog=abertas.find(o=>o.etapa==='A liberar'||o.etapa==='Liberadas');
-  let sit; if(exec) sit='Em colheita'; else if(prog) sit='Programada'; else if(R.passes.some(p=>p.final)&&!(ult&&Object.keys(ult.sem||{}).some(w=>!prSemComecou(w)))) sit='Colhida'; else if(ult) sit='Prevista'; else sit='Sem previsão';
-  const cnt=k.semanal?prContagem(c,cid):null; const pub=prPublicavel(c,cid); const ag=prQuem('ag'); const agO=g2alcQuem('AL-02')||ag; let ac=null;   /* publicar: AL-17; emitir a O.S. e acompanhar: o agrônomo da O.S. (AL-02) */
-  if(k.semanal){ let w=prSemMais(prSem(prHoje()),1); while(oss.some(o=>prSemDaOS(o)===w)) w=prSemMais(w,1);
-    const atv=(PRDC.colhAtv||{})[k.plano];
-    if(!cnt) ac={k:'contar',t:'Coletar contagem',h:'MB-07.dc.html#'+cid,q:'equipe de colheita (app)',x:'contar os frutos de 20 plantas'};
-    else if(pub) ac={k:'publicar',t:'Publicar previsão',q:ag,x:'publicar '+Object.keys(pub.sem).map(prSemTxt).join(' e ')};
-    else if(atv&&prVersaoSem(c,cid,w)) ac={k:'programar',t:'Programar colheita '+prSemTxt(w),h:'OS.dc.html#nova:'+cid+':'+atv+':'+prSemIni(w),q:agO,x:'emitir a O.S. da '+prSemTxt(w)};
-    else if(exec||prog) ac={k:'abrir',t:'Abrir '+(exec||prog).id,h:'OS.dc.html#'+(exec||prog).id,q:(exec||prog).resp||agO,x:(exec?'acompanhar a '+exec.id:'liberar a '+prog.id)}; }
-  else { const jan=prJanAnual(k); const perto=jan&&jan<=prDiaMais(prHoje(),30); const atv=(PRDC.colhAtv||{})[k.plano];
-    if(pub&&!(R.comecou)) ac={k:'publicar',t:'Publicar previsão',q:ag,x:'publicar a previsão da safra pela meta'};
-    else if(exec||prog) ac={k:'abrir',t:'Abrir '+(exec||prog).id,h:'OS.dc.html#'+(exec||prog).id,q:(exec||prog).resp||agO,x:'acompanhar a '+(exec||prog).id};
-    else if(perto&&atv) ac={k:'programar',t:'Programar colheita',h:'OS.dc.html#nova:'+cid+':'+atv+':'+jan,q:agO,x:'emitir a O.S. de colheita'}; }
-  const nx=ac?(ac.x.charAt(0).toUpperCase()+ac.x.slice(1)+' · '+ac.q):(k.semanal?'acompanhar':(prJanAnual(k)?'colheita a partir de '+prBr(prJanAnual(k))+'/'+prJanAnual(k).slice(2,4)+' · nada a fazer agora':'sem janela de colheita'));
-  return {k,R,sit,ac,nx,ult,cnt,pub,exec,prog,oss}; }
-/* previsão vigente na linha: semana em curso ou a próxima publicada; anual, a safra */
-function prPrevTxt(c,X){ const k=X.k; const vs=prP(c).previsoes[k.id]||[];
-  if(!k.semanal){ const v=vs.filter(x=>x.safra!==undefined).slice(-1)[0]; return v?{t:prUnTxt(k.cultura,v.safra,0)+' · safra (v'+v.v+')',v:v.safra}:{t:'sem previsão publicada',v:null}; }
-  const s0=prSem(prHoje()); const ws=[...new Set([].concat(...vs.map(v=>Object.keys(v.sem||{}))))].sort(); const w=ws.find(x=>x>=s0)||ws[ws.length-1];
-  if(!w) return {t:X.cnt?'rascunho pela contagem':'sem previsão publicada',v:null}; const v=prVersaoSem(c,k.id,w); return {t:prUnTxt(k.cultura,v.sem[w],1)+' · '+prSemTxt(w)+' (v'+v.v+')',v:v.sem[w]}; }
+/* PR_SITORD, PR_SITCOR, prJanAnual, prTal e prPrevTxt estão em producao.js (14/10/2026): o Mapa (camada Colheita) usa os mesmos */
 /* UNID-PROD: indicador e meta na unidade escolhida para a cultura (preferência do perfil, D-U01); a chave de ordenação e de filtro é a
    base por ha, igual em qualquer unidade (R-U11); estados ordenam no fim */
 function prIndTxt(ind,suf){ return ind.st==='medido'?prUnpTxt(Object.assign({},ind,{estim:false}))+(suf||'')+(ind.estim?' · estimativa':''):prUnpTxt(ind); }

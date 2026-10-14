@@ -349,10 +349,15 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
         mf=_macro_html(fname,ctx,sep=False)
         if mf:
             _filtra='filtro' in (MACRO.get(fname) or {}).values()   # só contexto (Planejar safra, Compra): a faixa diz onde se trabalha, não "filtros"
-            _rot='Filtros desta tela' if _filtra else 'Trabalhando em'
+            # 14/10/2026 (proprietário: "Em vez de filtros desta tela… coloque Filtros: · teste o símbolo de filtro junto ou sozinho"): testadas as três
+            # (texto, funil + texto, só o funil); fica só o funil, com a dica "Filtros" (cada filtro já tem o nome ao lado; no celular sobra largura).
+            # O grupo continua com o nome acessível "Filtros". Só contexto (Planejar safra, Compra) segue "Trabalhando em".
+            _rot='Filtros' if _filtra else 'Trabalhando em'
+            _cab=(f'<span class="mf-rot" data-dica="Filtros" style="display: inline-flex; align-items: center; color: {MUTED};">{icon("filtro",18,MUTED)}</span>' if _filtra
+                  else f'<span class="mf-rot" style="font-size: 11.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: {MUTED};">{_rot}</span>')
             body=(f'<div class="mf-tela" role="group" aria-label="{_rot}" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex-shrink: 0; '
                   f'padding: {"0 14px" if mf_fim else "8px 14px"}; border: 1px solid {LINE}; border-radius: 12px; background: {SURF};">'
-                  f'<span style="font-size: 11.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: {MUTED};">{_rot}</span>{mf}' + (f'<span style="margin-left: auto;">{mf_fim}</span>' if mf_fim else '') + '</div>') + body   # mf_fim: ação da tela que cabe na faixa (Planejar safra: Comparar versões do plano), sem uma linha a mais
+                  f'{_cab}{mf}' + (f'<span style="margin-left: auto;">{mf_fim}</span>' if mf_fim else '') + '</div>') + body   # mf_fim: ação da tela que cabe na faixa (Planejar safra: Comparar versões do plano), sem uma linha a mais
         search=False
     st=chip(status[0],status[1]) if status else ''
     srch=(f'<span style="flex-grow: 1;"></span><span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid {LINE}; border-radius: 999px; background: {SURF}; color: {MUTED}; font-size: 12.5px; min-width: 220px;">'

@@ -302,15 +302,17 @@ try:
         fora(); t2 = J(f"({ICO}).getAttribute('title')"); d2 = J(DICA)
         chk('D7 ícone sem texto (ícone "Mapa" da barra recolhida): a dica mostra o nome do módulo e não vira descrição repetida; a dica nativa sai enquanto ela está aberta e volta quando o ponteiro sai',
             d['vis'] and d['t'] == 'Mapa' and 'g2-dica' not in db and t0 == 'Mapa' and t1 is None and t2 == 'Mapa' and not d2['vis'], [d, db, t0, t1, t2, d2])
-        # título igual ao rótulo visível: a barra recolhida não tem mais rótulo visível (antes: item "Mapa" do menu aberto); o caso da tela é a
-        # fonte do mapa (IN-04: texto cortado com reticências e o mesmo texto no title, areas/inicio.py)
+        # título igual ao rótulo visível: a barra recolhida não tem mais rótulo visível (antes: item "Mapa" do menu aberto) e a fonte do mapa,
+        # o último caso real, foi para a dica ⓘ da camada (menos texto, 13/10/2026). A regra é da biblioteca (g2lib: g2ttTira/g2ttVolta):
+        # o teste põe na tela um rótulo cortado com o mesmo texto no title e confere o comportamento
         abre('IN-04.dc.html'); FON = "window.__d8"
-        t0 = J("(()=>{const e=[...document.querySelectorAll('main div[title]')].find(e=>e.getClientRects().length&&e.getAttribute('title').trim()&&e.getAttribute('title').trim()===e.innerText.trim()); window.__d8=e||null; return e?e.getAttribute('title'):null;})()")
+        t0 = J("(()=>{const m=document.querySelector('main'); const e=document.createElement('div'); e.textContent='Rótulo cortado de teste do D8'; e.title='Rótulo cortado de teste do D8';"
+               " e.style.cssText='position:fixed;left:420px;top:420px;padding:8px;background:#fff;z-index:99;white-space:nowrap;'; m.appendChild(e); window.__d8=e; return e.getAttribute('title');})()")
         hover(FON, .7); d = J(DICA); t1 = J(f"(({FON})||{{getAttribute:()=>'sem fonte'}}).getAttribute('title')")
-        chk('D8 título igual ao rótulo visível (fonte do mapa no IN-04): sem dica', bool(t0) and not d['vis'], [t0, d])
+        chk('D8 título igual ao rótulo visível (rótulo cortado no IN-04): sem dica', bool(t0) and not d['vis'], [t0, d])
         # revisão DS (achado 9): o title igual ao rótulo faria o navegador mostrar a dica nativa repetida: ele sai enquanto o ponteiro está em cima
         fora(); t2 = J(f"(({FON})||{{getAttribute:()=>'sem fonte'}}).getAttribute('title')")
-        chk('D8b ponteiro na fonte do mapa (title igual ao texto): o title sai (sem a dica nativa repetida) e volta quando o ponteiro sai', bool(t0) and t1 is None and t2 == t0, [t0, t1, t2])
+        chk('D8b ponteiro no rótulo cortado (title igual ao texto): o title sai (sem a dica nativa repetida) e volta quando o ponteiro sai', bool(t0) and t1 is None and t2 == t0, [t0, t1, t2])
         abre('OS.dc.html')
         fora(); troca_visao(J, 'kanban')
         COLT = "[...document.querySelectorAll('[role=list] [data-dica-de]')].find(s=>s.textContent.trim()==='A liberar')"   # textContent: o título da coluna é maiúsculo só no CSS

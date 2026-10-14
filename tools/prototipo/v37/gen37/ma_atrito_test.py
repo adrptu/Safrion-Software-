@@ -23,7 +23,9 @@ class Conta:
     def menu(s, item):
         """menu Manutenção com subitens (pedido do proprietário, 13/10/2026): abre o grupo e toca a visão (2 cliques; antes 1, o item
         único "Manutenção"). A página nova não conta como troca: é o destino da tarefa. As metas abaixo sobem 1 clique só por isso."""
-        m.clk('Manutenção', 'nav[aria-label=Menu]', w=.6); m.clk(item, 'nav[aria-label=Menu]', w=1.4); s.c += 2; s.marca()
+        # v60 (13/10/2026): os subitens viraram cartões da tela de entrada da Manutenção (Sem ordem, Ordens, Ativos, Planos); continuam 2 toques
+        m.clk('Manutenção', 'nav[aria-label=Menu]', w=.9); m.clk(CARTAO[item], 'main', w=1.4); s.c += 2; s.marca()
+CARTAO = {'Pendências sem ordem': 'Sem ordem', 'Ordens de manutenção': 'Ordens', 'Ativos e disponibilidade': 'Ativos', 'Planos preventivos': 'Planos'}
 RES = []
 def tarefa(nome, c, esperado, ok_estado, info=''):
     tot = (c.c, c.k, c.t); RES.append((nome, tot, esperado))

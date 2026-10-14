@@ -149,7 +149,9 @@ try:
             and h0 and len(cs) <= 4 and cs[:1] == ORD[:1] and cs[-1:] == ORD[-1:] and cs == [x for x in ORD if x in cs] and not e0 and r1 == 'ok' and h1, [nv, h0, cs, e0, r1, h1])
         chk('CF-01 seed: "14 com acesso · 1 sem acesso" (Igor e Marta do BEN-1; Otávio e Dora da v56 entram) e a primária "Convidar pessoa"; sem erro de JS', '14 com acesso · 1 sem acesso' in hdr() and prims()['prims'] == ['Convidar pessoa'] and not errs(), [hdr(), prims(), errs()])
         tbl = J("[...document.querySelectorAll('[role=table]')].map(t=>t.querySelectorAll('[role=columnheader] button').length)")
-        chk('A14 as duas grades têm busca, filtro rápido e ordenação/filtro por coluna; "%" na célula da AL-05', len(tbl) == 2 and all(x >= 8 for x in tbl) and J("document.querySelectorAll('main input[type=search]').length") == 2
+        # um campo de busca por tela (proprietário, 13/10/2026): o da 1ª grade busca nas duas (a 2ª está no mesmo grupo, data-g2q)
+        chk('A14 as duas grades têm filtro rápido e ordenação/filtro por coluna e um campo de busca só, para as duas; "%" na célula da AL-05', len(tbl) == 2 and all(x >= 8 for x in tbl)
+            and J("[...document.querySelectorAll('main input[type=search]')].filter(i=>i.getClientRects().length).length") == 1 and J("document.querySelectorAll('main [data-g2q]').length") == 2
             and 'até 20 % da área da ordem' in (linha(1, 'AL-05 · Dispensar') or ''), [tbl, linha(1, 'AL-05 · Dispensar')])
         l = linha(1, 'AL-01 · Liberar') or ''
         chk('AL-01 alinhada ao comando (CONF-D10): gestor · Ana, editável; nenhum "Caio (PCP)" como liberador', 'gestor · Ana' in l and 'Editável: papel' in l and 'Liberador do domínio' not in J("document.body.innerText"), l)

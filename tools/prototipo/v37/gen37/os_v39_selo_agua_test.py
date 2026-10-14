@@ -14,7 +14,7 @@ AGUA = ('OS-0419', 'OS-0422', 'OS-0423')
 def filtro(lab, val):
     J(f"""(()=>{{const i=document.querySelector('select[aria-label={json.dumps(lab)}]'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(i,{json.dumps(val)});
       i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"""); time.sleep(.4)
-def hdr(): return J("(()=>{const s=document.querySelector('header h1').nextElementSibling; const c=s&&s.firstElementChild; return c?[c.innerText.trim(),getComputedStyle(c).color,getComputedStyle(c).backgroundColor]:['','',''];})()")
+def hdr(): return J("(()=>{let s=document.querySelector('header h1').nextElementSibling; while(s&&s.classList&&s.classList.contains('g2-info')) s=s.nextElementSibling;    const c=s&&s.firstElementChild; return c?[c.innerText.trim(),getComputedStyle(c).color,getComputedStyle(c).backgroundColor]:['','',''];})()")
 def nimp(t):   # '2 em execução · 3 impedidas' -> 3; 'nenhuma impedida' -> 0
     m = re.search(r'(\d+) impedidas?$', t); return int(m.group(1)) if m else (0 if t.endswith('nenhuma impedida') else None)
 # ordens abertas (fora de Encerradas/Canceladas) com selo vermelho na linha

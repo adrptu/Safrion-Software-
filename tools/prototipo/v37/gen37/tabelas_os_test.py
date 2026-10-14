@@ -79,8 +79,8 @@ try:
     print('linhas', todas)
     # ---------------- TF01 ----------------
     op = opcoes(); cv = col_valores(); print('opções', op, cv)
-    vis_t = J(f"(()=>{{const s={_s(TAL)}; return !!s&&!!s.offsetParent&&!!s.closest('[aria-label=\"Filtros desta tela\"]');}})()")
-    chk('TF01 faixa "Filtros desta tela": Talhão visível em Todos, com Sem talhão e os mesmos talhões do filtro da coluna (que mostra a contagem por valor)',
+    vis_t = J(f"(()=>{{const s={_s(TAL)}; return !!s&&!!s.offsetParent&&!!s.closest('[aria-label=\"Filtros\"]');}})()")
+    chk('TF01 faixa "Filtros": Talhão visível em Todos, com Sem talhão e os mesmos talhões do filtro da coluna (que mostra a contagem por valor)',
         vis_t and tal() == 'Todos' and op[:1] == ['Todos'] and 'Sem talhão' in op and bool(cv) and all(x.split()[-1].isdigit() for x in cv)
         and sorted('(vazio)' if o == 'Sem talhão' else o for o in op[1:]) == sorted(x.rsplit(' ', 1)[0] for x in cv), (vis_t, tal(), op, cv))
     escolhe('P1'); chk('TF01 P1 devolve os vínculos P1 (OS-0417, OS-0418)', sorted(ids()) == ['OS-0417', 'OS-0418'], ids()); todos()

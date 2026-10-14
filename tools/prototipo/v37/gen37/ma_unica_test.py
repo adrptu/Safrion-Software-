@@ -23,12 +23,14 @@ try:
     # 13/10 (proprietário): barra lateral só com ícones, sem submenus nem expandir; as 4 visões ficam no seletor da própria MA (v57: 4 subitens no menu).
     # O índice central saiu (Main.dc.html é página técnica sem menu): o caminho de entrada é o ícone Manutenção na página inicial (Mapa).
     VIS_OK = {'', 'vis=semordem', 'vis=ordens', 'vis=ativos', 'vis=planos'}
-    lk = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>a.getAttribute('href')).filter(h=>/^MA/.test(h||''))")
+    # v60 (13/10/2026, proprietário: "o menu de manutenção está sem os submenus na tela igual os demais"): o ícone abre a tela de entrada da
+    # Manutenção (MOD-MAN) com os 4 atalhos, como os outros módulos; cada atalho leva à visão da MA
+    lk = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>a.getAttribute('href')).filter(h=>/^(MA|MOD-MAN)/.test(h||''))")
     vs = J("[...document.querySelectorAll('main .ma-vis button')].map(b=>b.innerText.replace(/\\s*\\d+\\s*$/,'').trim())")
-    li = re.findall(r'<a [^>]*href="(MA[^"]*)"', ini)
-    m.ok(all(h.split('#')[0] == 'MA.dc.html' and (h.split('#', 1) + [''])[1] in VIS_OK for _, h in g[2]) and lk == ['MA.dc.html'] and mn == [['MA.dc.html', 'Manutenção', 'page', '']]
-         and tog == 0 and vs == ['Sem ordem', 'Ordens', 'Ativos', 'Planos'] and li == ['MA.dc.html'] and not re.search(r'(MA-0[1-5]|PM|MA-04det)\.dc\.html', idx + ini),
-         'AC-PCM-01 · menu: um só ícone Manutenção, link direto para a tela única MA (destacado, sem subitens nem expandir), as 4 visões no seletor da tela; nenhuma rota antiga; o início (Mapa) leva à MA num toque', [lk, mn, tog, vs, li])
+    li = re.findall(r'<a [^>]*href="((?:MA|MOD-MAN)[^"]*)"', ini)
+    m.ok(all(h.split('#')[0] == 'MA.dc.html' and (h.split('#', 1) + [''])[1] in VIS_OK for _, h in g[2]) and lk == ['MOD-MAN.dc.html'] and mn == [['MOD-MAN.dc.html', 'Manutenção', 'page', '']]
+         and tog == 0 and vs == ['Sem ordem', 'Ordens', 'Ativos', 'Planos'] and li == ['MOD-MAN.dc.html'] and not re.search(r'(MA-0[1-5]|PM|MA-04det)\.dc\.html', idx + ini),
+         'AC-PCM-01 · menu: um só ícone Manutenção (destacado, sem subitens nem expandir) que abre a tela de entrada com os atalhos das 4 visões; as 4 visões no seletor da MA; nenhuma rota antiga; o início (Mapa) leva à Manutenção num toque', [lk, mn, tog, vs, li])
     # ---------- AC-PCM-02 · rotas antigas (com e sem âncora) e fora do canvas ----------
     rotas = [('PM.dc.html', 'vis=planos'), ('MA-01.dc.html', 'vis=ativos'), ('MA-02.dc.html', 'vis=semordem&tipo=achados'), ('MA-03.dc.html', 'vis=semordem'),
              ('MA-04.dc.html', 'vis=ordens'), ('MA-05.dc.html', 'vis=ativos&modo=abastecimentos'), ('MA-04det.dc.html', 'om=OM-0233'),

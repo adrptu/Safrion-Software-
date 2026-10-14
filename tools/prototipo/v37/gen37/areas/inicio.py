@@ -108,6 +108,7 @@ LAYS=['Integrado','Satélite','Lavoura','MIP/MID','Irrigação','O.S./prazos','I
 LAYS_F2=['Colheita/produtividade']               # Fase 2: dados preservados abaixo, fora da barra
 LAYS.insert(LAYS.index('Lavoura')+1,'Análises de solo')   # 13/10/2026 (proprietário): laudos do AG-02 no mapa, depois da Lavoura
 LAYS.insert(LAYS.index('MIP/MID')+1,'Carência e destino')   # MAPA-CARENCIA-LMR-20261003 (motor e regras em dados_carencia.py)
+LAYS.insert(LAYS.index('Carência e destino')+1,'Colheita')   # 14/10/2026 (proprietário: o que de Agrícola faltava no mapa): situação da colheita por talhão
 # filtros da camada ativa (k, rótulo, opções) — o primeiro valor é o padrão
 FILT={
  'Integrado':[('mostrar','Mostrar',['Todas as condições','Só pendências'])],
@@ -694,6 +695,7 @@ function semCultura(t){ return ['gray','none'].indexOf((M.lav[t]||{}).c)>=0; }
 function cls(l,f,t){
   if(l===CAR_L) return carCls(t,f);   // MAPA-CARENCIA-LMR-20261003
   if(l===SOLO_L) return soloCls(t);   // Análises de solo (13/10/2026)
+  if(l===COLH_L) return colhCls(t);   // Colheita (14/10/2026)
   if(l==='Integrado'){ const x=integ(t); if(f.mostrar==='Só pendências' && ['ok','gray','blue','none'].indexOf(x[0])>=0) return {c:'none',l:'sem pendência'}; return {c:x[0],l:x[1]}; }
   if(l==='Satélite'){ const v=satVal(f.dt,t,f.idx); if(v===null) return {c:'gray',l:M.semcult[t]||'sem cultura'}; if(v==='cloud') return {c:'cloud',l:'nuvem · sem leitura'};
     const k=kOf(v,satLims(f,t)); return {c:'sat',hex:satCor(f.idx,k),k,ka:kOf(v,M.idx[f.idx].lim),l:f.idx+' '+nfx(v,2)}; }
@@ -720,6 +722,7 @@ function Lc(l,c,t){ const pl=M.lcop[c]||M.lcop.none; return {t,st:'display:inlin
 function Lh(hx,t){ return {t,st:'display:inline-flex;align-items:center;gap:5px;white-space:nowrap;',dot:'width:11px;height:11px;border-radius:3px;flex-shrink:0;background:'+hx+';'}; }
 function legend(self,l,f,sel){
   if(l===CAR_L) return carLegend();   // MAPA-CARENCIA-LMR-20261003
+  if(l===COLH_L) return colhLegend();
   if(l===SOLO_L) return [Lc(l,'orange','V abaixo da meta'),Lc(l,'ok','em dia'),Lc(l,'yellow','a validar'),Lc(l,'gray','vencida'),Lc(l,'none','sem análise')];
   if(l==='Integrado') return [Lc(l,'ok','em dia'),Lc(l,'yellow','atenção ou a liberar'),Lc(l,'red','impedida ou conflito'),Lc(l,'gray','encerrada'),Lc(l,'none','sem pendência')];
   if(l==='Satélite'){ const t0=sel[0]||''; const t=(f.ctr==='Talhão'&&t0&&typeof satVal(f.dt,t0,f.idx)==='number')?t0:''; const L=satLims(f,t||null); const d=(L[4]-L[0]<0.06)?3:2; const nm=M.clsn[M.idx[f.idx].pal];
@@ -736,6 +739,7 @@ function legend(self,l,f,sel){
   return []; }
 function fonte(l,f){
   if(l===CAR_L) return carFonte(f);   // MAPA-CARENCIA-LMR-20261003
+  if(l===COLH_L) return colhFonte();
   if(l===SOLO_L) return 'laudo de solo de 0–20 cm mais recente de cada talhão (Análises de solo) · V = 100 × SB ÷ T · meta = V₂ da cultura do próximo cultivo · '+SOLO0.regra.rotulo+' · laudos sintéticos';
   if(l==='Integrado') return FAZ==='Lagoa Grande'?(M.lg.rot?(M.lg.rot+' · pivôs, imagem e índices fictícios · O.S. e safra do cenário · cena de '+M.lg.cenas[0].k):('Pivôs do KML do proprietário · O.S. e safra do cenário · imagem Sentinel-2 de '+M.lg.cenas[0].k)):('O.S. do PCP e cenário de execução · satélite 21/09 · hoje '+M.hoje);
   if(l==='Satélite'){ const s=M.sat[f.dt]; return (s.real&&M.lg.rot?M.lg.rot+' · imagem e índices fictícios':'Sentinel-2 L2A'+(s.real?' · imagem real (Copernicus/ESA)':''))+' · 10 m · aquisição '+s.aq+' · '+f.idx+': '+M.idx[f.idx].o+' · contraste '+f.ctr.toLowerCase(); }
@@ -749,6 +753,7 @@ function fonte(l,f){
 function strip(self,l,f){ const N=(k,val,d)=>({k,val,d:d||''}); const tids=TIDS(); const ordF=M.ord.filter(o=>!irrAgua(o)&&o.tal.some(t=>tids.indexOf(t)>=0)); const area=(ts)=>ts.reduce((a,t)=>a+M.tal[t].ha,0);
   if(l===CAR_L) return carStrip(f);   // MAPA-CARENCIA-LMR-20261003
   if(l===SOLO_L) return soloStrip();
+  if(l===COLH_L) return colhStrip();
   if(l==='Integrado'){ const ab=ordF.filter(o=>o.fase!=='Encerradas'); return [N('',nfx(area(tids))+' ha','Área dos talhões'),N('Ordens abertas',ab.length),N('Impedidas',ordF.filter(o=>o.selos.some(s=>/^(Impedida|Falta máquina)/.test(s[0]))).length,'Ordens impedidas'),N('A liberar',ordF.filter(o=>o.act&&o.act.k==='lib').length,'A liberar pelo agrônomo')]; }
   if(l==='Satélite'){ let s=0,a=0,n=0; tids.forEach(t=>{ const v=satVal(f.dt,t,f.idx); if(typeof v==='number'){ s+=v*M.tal[t].ha; a+=M.tal[t].ha; } if(v==='cloud') n++; });
     const ms=M.sat[f.dt].manchas; const out=[N(f.idx,a?nfx(s/a,2):'—',f.idx+' médio dos talhões com cultura (ponderado pela área)')];   // manchas e talhões sob nuvem só quando há
@@ -924,19 +929,22 @@ function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=M.
     P.secs.push(SEC(self,l,'mip','Pragas e doenças',cm.l,{kv,items,note:semP?'Sem cultura no talhão: sem protocolo de monitoramento.':'',lk:'AG-01.dc.html',lkt:'Abrir Pragas e doenças'})); }
   P.secs.push(carSec(self,l,t));   // MAPA-CARENCIA-LMR-20261003
   P.secs.push(soloSec(self,t));   // Análises de solo (13/10/2026)
+  P.secs.push(colhSec(self,t));   // Colheita (14/10/2026)
   // foco: o painel mostra só a funcionalidade escolhida na barra; no Integrado, uma linha por funcionalidade que leva até ela
   const KL={'Satélite':'sat','Lavoura':'lav','MIP/MID':'mip','Irrigação':'irr','Insumos':'ins','Custos':'cus'}; const byK={}; P.secs.forEach(x=>{ byK[x.k]=x; });
   KL[CAR_L]='car';   // MAPA-CARENCIA-LMR-20261003
-  KL[SOLO_L]='solo';
+  KL[SOLO_L]='solo'; KL[COLH_L]='colh';
   if(l==='O.S./prazos'){ P.secs=[]; P.acts=[A('Nova O.S. neste talhão',{h:'OS.dc.html',ic:'doc',tt:'Abrir Ordem de Serviço para emitir uma ordem'})]; return P; }
   const semRep=(P0)=>{ const hs=P0.acts.filter(a=>a.isH).map(a=>a.h); P0.secs.forEach(x=>{ const lh=x.lk?[x.lk]:[];
       x.items.forEach(it=>{ it.acts=(it.acts||[]).filter(a=>!(a.isH&&(hs.indexOf(a.h)>=0||lh.indexOf(a.h)>=0))); }); if(x.lk&&hs.indexOf(x.lk)>=0){ x.lk=''; x.hasLk=false; } }); return P0; };
-  if(l===SOLO_L){ P.secs=[byK.solo]; P.acts=[soloAc(t)]; return semRep(P); }   // um próximo passo: abrir, validar ou registrar o laudo
+  if(l===SOLO_L){ P.secs=[byK.solo]; P.acts=[soloAc(t)]; return semRep(P); }
+  if(l===COLH_L){ P.secs=[byK.colh]; P.acts=[colhAc(t)]; return semRep(P); }   // um próximo passo: o da tela Previsão e colheita   // um próximo passo: abrir, validar ou registrar o laudo
   if(l===CAR_L){ P.secs=[byK.car]; const ca=carAc(t,flt(self,CAR_L)); P.acts=ca?[A(ca[0],Object.assign({ic:'calendar',prim:true},ca[1]))]:[]; return semRep(P); }   // MAPA-CARENCIA-LMR-20261003
   if(KL[l]){ P.secs=[byK[KL[l]]]; P.acts=(l==='Irrigação'&&xi.ac)?[A(xi.ac[0],{h:xi.ac[1],ic:'drop',prim:true})]:((l==='MIP/MID'&&mipAc)?[A(mipAc[0],Object.assign({ic:'alert',prim:true},mipAc[1]))]:[]); return semRep(P); }
   const VER={'Satélite':['Ver satélite','satelite'],'Lavoura':['Ver lavoura','leaf'],'MIP/MID':['Ver pragas e doenças','inseto'],'O.S./prazos':['Ver ordens','doc'],'Irrigação':['Ver irrigação','drop'],'Insumos':['Ver insumos','box'],'Custos':['Ver custos','cash']};
   VER[CAR_L]=['Ver carência','calendar'];   // MAPA-CARENCIA-LMR-20261003
   VER[SOLO_L]=['Ver análises de solo','frasco'];
+  VER[COLH_L]=['Ver colheita','Colheita'];
   const ab=os.filter(o=>['Encerradas','Canceladas'].indexOf(o.etapa)<0).length;
   const osRes=os.length?(os.length+(os.length>1?' ordens':' ordem')+' · '+ab+(ab===1?' aberta':' abertas')):'nenhuma ordem neste talhão';
   const hub=M.lays.filter(x=>x!=='Integrado').map(x=>{ const fx=flt(self,x); const c=cls(x,fx,t); const nm=M.nome[x]||x;
@@ -1125,6 +1133,42 @@ function soloAc(t){ const x=soloLeit(t); const ft=M.soloTal[t]||['',t];
   if(!x.l||x.k==='vencida') return A('Registrar laudo',{h:'AG-02.dc.html#registrar='+encodeURIComponent(ft[0]+'/'+ft[1]),ic:'frasco',prim:true,tt:'Abrir Análises de solo com '+ft[1]+' no formulário'});
   const v=x.l.sit==='Aguardando validação'?'Validar laudo':(x.l.sit==='Inconsistente'?'Corrigir laudo':'Abrir laudo');
   return A(v,{h:'AG-02.dc.html#'+x.l.id,ic:'frasco',prim:true,tt:'Abrir o '+x.l.id+' em Análises de solo'}); }
+/* ---------- Colheita (14/10/2026, proprietário: "veja se tem algum submenu/funcionalidade em agrícola importante que ainda não tem ícone e
+   funcionalidade no mapa e adicione. O mapa é um modo de visão geográfico dos dados de tudo que acontece na fazenda") ----------
+   A mesma leitura da tela Previsão e colheita (COLH): prTal (situação, previsão, produção recebida e próximo passo) e prPrevTxt, em producao.js.
+   Talhão = cultivos em produção (k.prod) da fazenda naquele local (Santa Rita: T1 junta T1-A e T1-B). Sem cultivo em produção: "sem colheita". */
+const COLH_L='Colheita';
+const COLHCOR={'Em colheita':'ok','Programada':'blue','Prevista':'gray','Colhida':'navy','Sem previsão':'yellow'};
+let COLHC={c:null,m:{}};
+function colhMap(){ const c=MAPC||cenGet(); if(COLHC.c!==c) COLHC={c,m:{}}; return COLHC; }   // uma leitura por desenho
+function colhCults(t){ const ft=M.soloTal[t]; if(!ft) return []; return Object.keys(PRDC.cult).filter(id=>{ const k=PRDC.cult[id];
+  return k.prod&&k.faz===ft[0]&&(k.local===ft[1]||String(k.local).indexOf(ft[1]+'-')===0); }); }
+function colhLeit(t){ const S=colhMap(); if(S.m[t]) return S.m[t];
+  const xs=colhCults(t).map(id=>prTal(S.c,id)).sort((a,b)=>(PR_SITORD[a.sit]-PR_SITORD[b.sit])||String(a.k.local).localeCompare(String(b.k.local),'pt-BR',{numeric:true}));
+  return (S.m[t]={xs,x:xs[0]||null,c:S.c}); }
+function colhNum(L,x){ return x.R.comecou?prProdTxt(x.k.cultura,x.R):(x.sit==='Prevista'?prPrevTxt(L.c,x).t.split(' · ')[0]:''); }
+function colhCls(t){ const L=colhLeit(t); const x=L.x; if(!x) return {c:'none',l:'sem colheita'}; const n=colhNum(L,x);
+  return {c:COLHCOR[x.sit]||'gray',l:x.sit.toLowerCase()+(n?' · '+n:'')+(L.xs.length>1?' · +'+(L.xs.length-1):'')}; }
+function colhLegend(){ return Object.keys(COLHCOR).map(k=>Lc(COLH_L,COLHCOR[k],k.toLowerCase())).concat([Lc(COLH_L,'none','sem colheita')]); }
+function colhFonte(){ return 'Previsão e colheita: situação, previsão publicada, produção recebida e próximo passo de cada cultivo em produção · produtividade na unidade escolhida para a cultura'+(M.lg.rot&&FAZ==='Lagoa Grande'?' · '+M.lg.rot:''); }
+function colhStrip(){ const N=(k,val,d)=>({k,val,d:d||''}); const xs=TIDS().map(t=>colhLeit(t).x); const n=(s)=>xs.filter(x=>x&&x.sit===s).length;
+  const rec=TIDS().reduce((a,t)=>a+colhLeit(t).xs.reduce((q,x)=>q+x.R.aPesar.length,0),0);
+  return [N('Em colheita',n('Em colheita'),'Talhões em colheita'),N('Programada',n('Programada'),'Talhões com colheita programada'),N('Prevista',n('Prevista'),'Talhões com previsão publicada'),
+    N('Sem previsão',n('Sem previsão'),'Talhões em produção sem previsão publicada'),N('Colhida',n('Colhida'),'Talhões com a colheita encerrada')].concat(rec?[N('A receber',rec,'Cargas colhidas a receber na balança')]:[]); }
+function colhKv(L,x){ const k=x.k, R=x.R; const op=g2unidPref(k.cultura); const mt=k.meta?prUnpMeta(k.cultura,k.meta,k.un_meta,op):null; const kv=[];
+  kv.push({l:'Previsão',t:prPrevTxt(L.c,x).t});
+  kv.push({l:'Colhido',t:prProdTxt(k.cultura,R)+(R.comecou?' · '+prFmtT(R.area,2)+' ha':'')});
+  if(R.comecou) kv.push({l:'Produtividade',t:prPrtvResTxt(k.cultura,R,op)+(mt?' · meta '+mt.txt:'')}); else if(mt) kv.push({l:'Meta',t:mt.txt});
+  if(R.aPesar.length) kv.push({l:'A receber',t:R.aPesar.length+(R.aPesar.length>1?' cargas na balança':' carga na balança')});
+  kv.push({l:'Próximo passo',t:x.nx}); return kv; }
+function colhSec(self,t){ const L=colhLeit(t); const x=L.x;
+  if(!x) return SEC(self,COLH_L,'colh','Colheita','sem colheita',{note:'Sem cultivo em produção neste talhão.'});
+  const nome=(y)=>y.k.local+' · '+y.k.cultura+(y.k.var?' '+y.k.var:'')+' · '+((PRDC.safras[y.k.saf]||{}).nome||y.k.saf);
+  const items=L.xs.slice(1).map(y=>({t:nome(y),sub:prPrevTxt(L.c,y).t+' · colhido '+prProdTxt(y.k.cultura,y.R),ch:[CH(y.sit,CCH[COLHCOR[y.sit]]||'gray')],acts:[]}));
+  return SEC(self,COLH_L,'colh','Colheita',x.sit.toLowerCase(),{kv:[{l:'Cultivo',t:nome(x)}].concat(colhKv(L,x)),items,lk:'COLH.dc.html#'+x.k.id,lkt:'Abrir na Previsão e colheita'}); }
+function colhAc(t){ const L=colhLeit(t); const x=L.x; if(!x) return A('Abrir Previsão e colheita',{h:'COLH.dc.html',ic:'Colheita',tt:'Sem cultivo em produção neste talhão'});
+  const ac=x.ac; if(ac) return A(ac.t,{h:ac.h||('COLH.dc.html#'+x.k.id),ic:'Colheita',prim:true,tt:ac.x.charAt(0).toUpperCase()+ac.x.slice(1)+' · '+ac.q});
+  return A('Abrir na Previsão e colheita',{h:'COLH.dc.html#'+x.k.id,ic:'Colheita',prim:true,tt:x.nx}); }
 '''
 
 _LBL=('font-family: Manrope, sans-serif; font-size: 15px; font-weight: 800; color: #15201A; text-align: center; line-height: 1.2; '
@@ -1325,6 +1369,7 @@ def _rail():
     ICON={'Integrado': 'layers', 'Satélite': 'satelite', 'Lavoura': 'leaf', 'O.S./prazos': 'doc', 'Insumos': 'box', 'Custos': 'cash',
           'Solo': 'lab', 'MIP/MID': 'inseto', 'Irrigação': 'drop', 'Colheita/produtividade': 'Colheita'}
     ICON['Análises de solo']='frasco'   # 13/10/2026: o mesmo frasco do cartão Análises de solo em Agrícola
+    ICON['Colheita']='Colheita'   # 14/10/2026: o mesmo desenho do cartão Previsão e colheita
     ICON['Carência e destino']='clock'   # prazo (relógio); o triângulo fica reservado a alerta real · MAPA-CARENCIA-LMR-20261003
     # pedido do proprietário (13/10/2026): "nos ícones à esquerda na barra coloque só o ícone e tooltip". O nome fica para o leitor de tela
     # (g2sr) e aparece na dica (g2dica: hover, foco de teclado e toque longo); o título "Mostrar … no mapa" continua (a dica nativa sai no hover)

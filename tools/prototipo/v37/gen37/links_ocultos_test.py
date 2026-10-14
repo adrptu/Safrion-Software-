@@ -10,7 +10,7 @@ import areas.processo_os as P, cenario
 # (integração COMP, 10/10: o dose_divergente_nav.py da DOM monta o cenário com osc_liberar e caía no E1); um X_nav.py sem o X_test.py segue lido
 def _nav_de_teste(f): return f.endswith('_nav.py') and os.path.exists(f[:-len('_nav.py')]+'_test.py')
 fontes=[f for f in glob.glob('*.py')+glob.glob('*.js')+glob.glob('areas/*.py')
-        if not re.search(r'test|_unit|unit_|repro|probe|verif|qa37|_lib\.py$',os.path.basename(f)) and not _nav_de_teste(f)]
+        if not re.search(r'test|_unit|unit_|repro|probe|verif|qa37|_pendente|_lib\.py$',os.path.basename(f)) and not _nav_de_teste(f)]   # *_pendente.js: cenários de teste do EST-1 (Codex, PR #60), não produto
 src={f:open(f,encoding='utf-8').read() for f in fontes}
 cham=sorted(f for f,s in src.items() if re.search(r'\bosc_liberar\(',s))
 ok('E1 em todo o código de produto, só a O.S. e o Mapa chamam osc_liberar', cham==['areas/inicio.py','areas/processo_os.py'], cham)

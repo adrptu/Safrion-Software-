@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Mapa (IN-04) · barra de camadas só com ícone e dica (pedido do proprietário, 13/10/2026: "nos ícones à esquerda na barra coloque só o
 ícone e tooltip. na parte de pragas e doenças mude ícone para um inseto intuitivo"). Confere no navegador:
-  I1 1440 px: as 10 camadas (com Análises de solo, 13/10/2026) sem texto visível, cada botão com o nome acessível da camada, alvo ≥ 44 × 44 px e ícone de 22 px;
+  I1 1440 px: as 11 camadas (com Análises de solo, 13/10/2026, e Colheita, 14/10/2026) sem texto visível, cada botão com o nome acessível da camada, alvo ≥ 44 × 44 px e ícone de 22 px;
   I2 a barra ocupa ≤ 72 px (antes 108) e o mapa ganha a largura;
   I3 Pragas e doenças = inseto (engine.ICONS['inseto']), único na barra; "Ver pragas e doenças" do painel usa o mesmo desenho;
   I4 hover: a dica (role=tooltip) mostra o nome da camada; I5 foco de teclado (Tab): a dica abre com o nome e não descreve o botão
@@ -18,7 +18,7 @@ OK, FAIL = [], []
 def chk(n, c, info=''):
     (OK if c else FAIL).append(n); print(('OK    ' if c else 'FALHA ') + n + ('' if c else ' · ' + str(info)[:700]), flush=True)
 
-NOMES = ['Integrado', 'Satélite', 'Lavoura', 'Análises de solo', 'Pragas e doenças', 'Carência e destino', 'Irrigação', 'Ordens de serviço', 'Insumos', 'Custos']
+NOMES = ['Integrado', 'Satélite', 'Lavoura', 'Análises de solo', 'Pragas e doenças', 'Carência e destino', 'Colheita', 'Irrigação', 'Ordens de serviço', 'Insumos', 'Custos']
 TRI = "[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')]"
 # texto visível = texto dos nós de texto cujo pai tem área > 2 × 2 px (o g2sr tem 1 × 1 e clip)
 INFO = TRI + r""".map(b=>{ const r=b.getBoundingClientRect(); const s=b.querySelector('svg'); const sr=s?s.getBoundingClientRect():{width:0};
