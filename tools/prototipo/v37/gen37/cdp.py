@@ -79,6 +79,7 @@ class Chrome:
             self.close(); raise RuntimeError(f'Chrome headless não respondeu em 60 s na porta {port} (máquina carregada?)')
         self.ws=WS(pages[0]['webSocketDebuggerUrl']); self.i=0
         self.call('Page.enable'); self.call('Runtime.enable')
+        if os.environ.get('G2CV_TODAS')=='1': self.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__g2cvTodasSempre=true'})   # só diagnóstico (V2-3)
     def call(self,method,params=None,timeout=60):
         self.i+=1; mid=self.i; self.ws.send(json.dumps({'id':mid,'method':method,'params':params or {}}))
         deadline=time.monotonic()+timeout

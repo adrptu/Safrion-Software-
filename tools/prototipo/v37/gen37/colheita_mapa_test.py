@@ -15,7 +15,7 @@ Uso: python3 colheita_mapa_test.py (lê _render ou RENDER_DIR)."""
 import os, sys, json, time, re
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 os.environ.setdefault('CDP_GL', '1')
-from comp_lib import Chrome, servir
+from comp_lib import Chrome, servir, cv_todas_sempre
 import engine as E
 import dados_producao as DP
 
@@ -23,7 +23,7 @@ OK, FAIL = [], []
 def chk(n, c, info=''):
     (OK if c else FAIL).append(n); print(('OK    ' if c else 'FALHA ') + n + ('' if c else ' · ' + str(info)[:900]), flush=True)
 R = os.environ.get('RENDER_DIR') or os.path.join(HERE, '_render')
-p, srv = servir(R); c = Chrome(); J = c.js
+p, srv = servir(R); c = Chrome(); J = c.js; cv_todas_sempre(c)   # teste de domínio: lê colunas fora do "Abre com"
 U = lambda pg: f'http://127.0.0.1:{p}/{pg}'
 ORD = ['Em colheita', 'Programada', 'Prevista', 'Colhida', 'Sem previsão']
 def espera(e, s=45):
@@ -52,10 +52,13 @@ try:
     J("(()=>{const b=[...document.querySelectorAll('button')].find(b=>/Expandir tudo/.test(b.innerText)); if(b) b.click();})()"); time.sleep(.8)
     linhas = json.loads(J("JSON.stringify([...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row][data-rid]')].filter(r=>!/^grp:/.test(r.getAttribute('data-rid'))).map(r=>[r.getAttribute('data-rid'),[...r.querySelectorAll('[role=cell],[role=gridcell]')].map(x=>x.innerText.replace(/\\s+/g,' ').trim())]))") or '[]')
     cat = {k: [v['faz'], v['local']] for k, v in DP.catalogo()['cult'].items()}   # fazenda e local do cultivo (dado do catálogo, não a regra testada)
+    # V2-3: a ordem das colunas segue o "Abre com"; a leitura é pelo nome do cabeçalho, com todas as colunas (cv_todas_sempre)
+    cab = [h.split('\n')[0].strip().upper() for h in (J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=columnheader]')].map(h=>h.innerText.trim())") or [])]
+    iS, iP, iC = cab.index('SITUAÇÃO · PRÓXIMO PASSO'), cab.index('PREVISÃO'), cab.index('COLHIDO')
     col = {}
     for cid, cel in linhas:
-        sit = next((s for s in ORD if cel[-1].startswith(s)), None); rec = re.search(r'(\d+) cargas? a receber', cel[-1])
-        col[cid] = dict(sit=sit, prev=cel[3], colh=cel[4], rec=int(rec.group(1)) if rec else 0, faz=cat.get(cid, ['', ''])[0], local=cat.get(cid, ['', ''])[1])
+        st_ = cel[iS]; sit = next((s for s in ORD if st_.startswith(s)), None); rec = re.search(r'(\d+) cargas? a receber', st_)
+        col[cid] = dict(sit=sit, prev=cel[iP], colh=cel[iC], rec=int(rec.group(1)) if rec else 0, faz=cat.get(cid, ['', ''])[0], local=cat.get(cid, ['', ''])[1])
     # Mapa · Lagoa Grande
     limpa(); J("sessionStorage.setItem('mapa-ctx','{\"mf_faz\":\"Lagoa Grande\"}'); 1"); c.goto(U('IN-04.dc.html'), 1.0); pronto = espera("!!(window.__LGI&&window.__LGI.pronto)")
     f_mapa = json.loads(J(FILTROS) or 'null')

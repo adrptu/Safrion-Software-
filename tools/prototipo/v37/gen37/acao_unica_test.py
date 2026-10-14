@@ -55,6 +55,8 @@ def rolagem():   # posição de leitura: a soma das rolagens da casca, do conte�
     return J("(()=>{const col=document.querySelector('.ml-tog+div'); const m=document.querySelector('main[data-scroll]'); return Math.round((col?col.scrollTop:0)+(m?m.scrollTop:0)+[...document.querySelectorAll('main .g2rola,main .rola')].reduce((a,x)=>a+x.scrollTop,0));})()")
 try:
     c=Chrome()
+    if MODO=='saf':   # SAF-TAB: o 5 lê Situação, Área livre e Livre a partir de, fora do padrão das colunas
+        from comp_lib import cv_todas_sempre; cv_todas_sempre(c)
     if MODO=='saf':
         # 1 · faixa só informa: lista ordenada sem botão, link, handler ou parada de Tab; palavra do estado; clicar não navega; sem setas
         abre('SAF',hash='#saf=S2627&etapa=2'); time.sleep(.3)

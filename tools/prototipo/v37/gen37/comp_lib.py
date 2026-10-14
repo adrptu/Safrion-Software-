@@ -35,6 +35,8 @@ class Chrome:
         t=json.load(urllib.request.urlopen(urllib.request.Request(f'http://127.0.0.1:{self.port}/json/new?about:blank',method='PUT'),timeout=30)); self.alvo=t['id']
         self.ws=WS(t['webSocketDebuggerUrl']); self.i=0
         self.call('Page.enable'); self.call('Runtime.enable'); self.call('Page.addScriptToEvaluateOnNewDocument',{'source':ERRS})
+        # só diagnóstico (classificar vermelho da V2-3): G2CV_TODAS=1 mostra todas as colunas; a correção permanente é cv_todas_sempre no teste
+        if os.environ.get('G2CV_TODAS')=='1': self.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__g2cvTodasSempre=true'})
         try: self.call('Emulation.setFocusEmulationEnabled',{'enabled':True})   # página com foco, como a janela ativa de quem usa
         except Exception: pass
     def call(self,method,params=None,timeout=60):

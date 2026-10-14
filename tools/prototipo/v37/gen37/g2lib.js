@@ -250,7 +250,7 @@ function g2cvTem(sp){ g2marca(sp); return !!(sp&&sp.cols&&sp.cols.some(c=>c.ess)
 function g2cvChave(sp){ let pg=''; try{ pg=String(location.pathname).split('/').pop(); }catch(e){} let pf=''; try{ pf=g2perfil().k; }catch(e){} return 'g2cv:'+pg+':'+sp.id+':'+pf; }
 function g2cvPadrao(sp){ return sp.cols.filter(c=>c.ess).sort((a,b)=>a.ess-b.ess).map(c=>c.k); }
 function g2cvLer(self,sp){ if(typeof window!=='undefined'&&window.__g2cvTodasSempre) return sp.cols.map(c=>c.k);   // só teste de domínio (comp_lib.cv_todas_sempre)
-  const st=g2st(self,sp.id); if(Array.isArray(st.cv)) return st.cv; if(st.cv===false) return null; let x=null;
+  const st=g2st(self,sp.id); if(st.cvpf===undefined||st.cvpf===g2pfk()){ if(Array.isArray(st.cv)) return st.cv; if(st.cv===false) return null; } let x=null;
   try{ x=JSON.parse(localStorage.getItem(g2cvChave(sp))||'null'); }catch(e){ x=null; } return Array.isArray(x)?x.filter(k=>sp.cols.some(c=>c.k===k)):null; }
 function g2cvCel(){ try{ return window.matchMedia('(max-width: 640px)').matches; }catch(e){ return false; } }
 function g2colsVis(self,sp){ if(!g2cvTem(sp)) return sp.cols; const esc=g2cvLer(self,sp), pad=g2cvPadrao(sp), k0=sp.cols[0].k;
@@ -259,7 +259,7 @@ function g2colsVis(self,sp){ if(!g2cvTem(sp)) return sp.cols; const esc=g2cvLer(
   if(!esc&&g2cvCel()) ord=ord.slice(0,3);   // celular: as 3 primeiras do padrão; a escolha explícita vale em qualquer tela
   return ord.map(k=>sp.cols.find(c=>c.k===k)).filter(Boolean); }
 function g2cvGrava(self,sp,ks){ try{ if(ks) localStorage.setItem(g2cvChave(sp),JSON.stringify(ks)); else localStorage.removeItem(g2cvChave(sp)); }catch(e){}
-  g2set(self,sp.id,{cv:ks?ks.slice():false}); }
+  g2set(self,sp.id,{cv:ks?ks.slice():false,cvpf:g2pfk()}); }
 // ganchos de teste (como window.__cen): "todas as colunas" para todos os perfis da tela (testes de domínio que leem colunas fora do padrão) e se
 // o perfil atual já tem escolha; o padrão em si é conferido no teste da VISOES-2
 if(typeof window!=='undefined'&&!window.__g2cvTodas){ window.__g2cvTodas=(gid)=>{ const sp=(typeof GRIDS!=='undefined'?GRIDS:[]).find(g=>g.id===gid); if(!sp) return false; const ks=sp.cols.map(c=>c.k);
@@ -294,14 +294,20 @@ function g2agUrl(pathname,search,hash,a){ const s=String(search||'').replace(/^\
 // decodifica %2F antes da divisão e "Safra 2026/27" viraria dois níveis (Codex 6168779649, achado 1)
 function g2agTrilha(search){ const p=String(search||'').replace(/^\?/,'').split('&').find(x=>x.slice(0,7)==='trilha='); if(!p) return [];
   return p.slice(7).split('/').filter(Boolean).map(x=>{ try{ return decodeURIComponent(x); }catch(e){ return x; } }); }
-function g2agLer(self,sp){ const st=g2st(self,sp.id); if(st.ag!==undefined) return st.ag; let a=null;
-  try{ const q=new URLSearchParams(location.search), d=q.get('ag'); if(d) a={d,t:g2agTrilha(location.search)};
+// o estado em memória guarda o perfil de quem escolheu (agpf, cvpf): trocar o perfil sem recarregar (aqui ou em outra aba) relê a preferência
+// do novo perfil e o endereço passa a refletir o agrupamento dele; o ?ag= do endereço só vale na chegada (V2-3-PERFIL-01, Codex 6179592748)
+function g2pfk(){ try{ return g2perfil().k; }catch(e){ return ''; } }
+function g2agLer(self,sp){ const st=g2st(self,sp.id), pf=g2pfk(); if(st.ag!==undefined&&st.agpf===pf) return st.ag;
+  const troca=st.agpf!==undefined&&st.agpf!==pf; let a=null;
+  if(!troca) try{ const q=new URLSearchParams(location.search), d=q.get('ag'); if(d) a={d,t:g2agTrilha(location.search)};
     else if(q.get('view')==='agrupada'&&sp.ag.some(x=>x.pq==='onde')) a={d:'onde',t:[]}; }catch(e){ a=null; }
   if(!g2agOk(sp,a)){ a=null; try{ const x=JSON.parse(localStorage.getItem(g2agChave(sp))||'null'); if(g2agOk(sp,x)) a={d:x.d,t:x.t}; }catch(e){ a=null; } }
-  const all=Object.assign({},self.state.g2||{}); all[sp.id]=Object.assign({},all[sp.id]||{},{ag:a}); self.state.g2=all; return a; }
+  const all=Object.assign({},self.state.g2||{}); all[sp.id]=Object.assign({},all[sp.id]||{},{ag:a,agpf:pf},troca?{agm:false,agx:null}:{}); self.state.g2=all;
+  if(troca) try{ history.replaceState(history.state,'',g2agUrl(location.pathname,location.search,location.hash,a)); }catch(e){}
+  return a; }
 function g2agGrava(self,sp,a){ try{ if(a) localStorage.setItem(g2agChave(sp),JSON.stringify(a)); else localStorage.setItem(g2agChave(sp),'null'); }catch(e){}
   try{ history.replaceState(history.state,'',g2agUrl(location.pathname,location.search,location.hash,a)); }catch(e){}
-  g2set(self,sp.id,{ag:a,agm:false,agx:null}); }
+  g2set(self,sp.id,{ag:a,agpf:g2pfk(),agm:false,agx:null}); }
 // lista vazia (O.S. de processo sem talhão) vira "Sem talhão", como o valor ausente: a linha nunca some do agrupamento (Σ grupos = total)
 // V2-3: grade marcada pelo quadro (visoes_marcas) agrupa pela própria coluna (D.ck[i]); data agrupa por mês (D.dt[i]); multivalor conta em
 // cada membro. Sem D.ck, os níveis vêm da linha (r.g), como na O.S.

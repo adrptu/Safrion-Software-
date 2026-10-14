@@ -11,7 +11,7 @@ período seguinte. Uso (de gen37/, depois de build.py e montar_render.py): pytho
 import sys, os, time, json, tempfile
 os.environ.setdefault('CDP_GL', '1')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir, MEDE
+from comp_lib import Chrome, servir, MEDE, cv_todas_sempre
 import dados_lagoa_fonte as LF
 PROBE = os.path.join(HERE, '_probe'); os.makedirs(PROBE, exist_ok=True)
 OK = []; FA = []
@@ -63,7 +63,7 @@ def selo(): return J("(()=>{const h=document.querySelector('header h1'); const s
 ALERTA = "(()=>{const a=[...document.querySelectorAll('aside[role=dialog] [role=alert]')].map(x=>x.innerText.trim()).filter(Boolean); return a.join(' | ');})()"
 CAMPO_PAG = "[...document.querySelectorAll('input,textarea,select')].map(i=>[i.getAttribute('aria-label'),i.id,i.name,i.placeholder,i.getAttribute('autocomplete')].join(' ')).filter(t=>/cart|card|cpf|cnpj|conta|ag[eê]ncia|cvv|cvc|validade|cc-/i.test(t))"
 try:
-    c = Chrome(); c.aparelho(1440, 900)
+    c = Chrome(); c.aparelho(1440, 900); cv_todas_sempre(c)   # V2-3: o teste lê Área medida, Estado e Regra, fora do padrão das colunas
     # ============ cenário A · 23/09: menu, estado, uma primária, grades, prévia, aceite, desfazer, talhão de 50 ha ============
     go('CF-05.dc.html', limpa=True)
     # navegação sem submenus (13/10/2026, ui37.MENU2/HUB37/CURTO37): barra só com ícones (aria-label = módulo) e, por último, "Outros acessos";
