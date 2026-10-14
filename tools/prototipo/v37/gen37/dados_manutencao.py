@@ -529,6 +529,12 @@ function manLinhas(c,pid){ const out=[];
   return out; }
 function manDevida(l){ return l.x.sit==='Vencida'||l.x.sit==='Vence em breve'; }
 function manSemOm(c){ return manLinhas(c).filter(l=>manDevida(l)&&!l.om&&!l.dup); }
+// a lista "Sem ordem" do PCM (fonte única da visão Sem ordem e do Painel de Manutenção): vencimentos de plano ativo sem ordem que já venceram
+// ou cuja janela abre até o horizonte (c.horiz dias, ou hz), e achados (inspeção, relato, alerta) ainda sem ordem de um ativo cadastrado
+function manSemOrdem(c,hz){ const h=hz===undefined?c.horiz:hz;
+  const venc=manLinhas(c).filter(l=>l.s&&!l.om&&!l.dup&&l.p.estado!=='Inativo'&&(l.x.sit==='Vencida'||manIniJanela(l.x)<=h));
+  const ach=Object.values(c.achados||{}).filter(q=>q.estado==='Sem ordem'&&c.ativos[q.aid]);
+  return {venc,ach,n:venc.length+ach.length}; }
 function manLinhaOm(c,o){ if(!o||!o.pid) return null; return manLinhas(c,o.pid).find(x=>x.aid===o.aid&&x.sid===o.sid&&x.om&&x.om.id===o.id)||null; }
 function manDupServ(c,pid,aid,nomes){ const ns=nomes.map(x=>String(x).toLowerCase());
   for(const k of Object.keys(c.vinc)){ const q=k.split('|'); if(q[1]!==aid||q[0]===pid) continue; const o=c.planos[q[0]]; if(!o||o.estado==='Inativo') continue;
@@ -1041,7 +1047,7 @@ function manAppConfDescartar(c,id,motivo,pf){ manExige(c,pf,'decidir'); const x=
   if(manVazio(motivo)) throw new Error('Informe o motivo para descartar.'); x.estado='Descartado'; x.dec={por:manPor(pf),em:c.hoje,motivo:String(motivo).trim()}; manAppConfBaixa(c,x);
   return {msg:'Registro do app descartado: '+x.desc+' ('+String(motivo).trim()+') · fica no histórico da ordem.'}; }
 /* acesso para os testes de navegador (mesmo padrão do window.__cen da O.S.) */
-try { window.__man = { manPropor, manAppCmd, manAppSinal, manAppProj, manAppConfAplicar, manAppConfDescartar, manMudar, manRetirada, manIncluir, manGet, manClone, manLinhas, manVenc, manGerar, manGerarTodas, manLiberar, manConcluir, manReset, manLeitura, manLeituraOk, manLeituraDescartar, manSolicitar, manReceber, manPlaus, manNum,
+try { window.__man = { manPropor, manAppCmd, manAppSinal, manAppProj, manAppConfAplicar, manAppConfDescartar, manMudar, manRetirada, manIncluir, manGet, manClone, manLinhas, manSemOrdem, manVenc, manGerar, manGerarTodas, manLiberar, manConcluir, manReset, manLeitura, manLeituraOk, manLeituraDescartar, manSolicitar, manReceber, manPlaus, manNum,
   manConflito, manProxLivre, manMover, manPode, manAchOpcoes, manCusto, manCustoFinal, manTesteValido, manFaltaEncerrar, manFaltaConcluir, manMarcoSug,
   manTentativa, manDeclararApto, manAchRegistrar, manAchCorretiva, manAbastecer, manCondicao, manMots, manAptoRot }; } catch (e) {}
 '''

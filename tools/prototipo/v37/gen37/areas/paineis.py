@@ -20,7 +20,7 @@ PAINEIS = {
   ('Em conferência', 'Contagem das O.S. agrícolas com etapa Em conferência. Fonte: cenário compartilhado de O.S.', False)],
   [('Consultar O.S.', 'OS.dc.html'), ('Planejar safra', 'SAF.dc.html'), ('Consultar colheita', 'COLH.dc.html')]),
  'PMAN': ('Manutenção', 'Ordens por estado', [
-  ('Pendências sem ordem', 'Contagem de serviços devidos sem ordem do ciclo nem outra ordem preventiva equivalente. Fonte: manSemOm, planos publicados e leituras da Manutenção.', True),
+  ('Pendências sem ordem', 'A lista Sem ordem da Manutenção: vencimentos de plano vencidos ou com janela até o horizonte, mais achados de inspeção, relatos e alertas ainda sem ordem. Fonte: manSemOrdem, a mesma da visão Sem ordem.', True),   # 14/10 (Claude, integrador): antes contava só os devidos (manSemOm, 3) e a visão mostrava 6
   ('Ordens abertas', 'Contagem de ordens não encerradas nem canceladas. Fonte: manAberta, cenário da Manutenção.', False),
   ('Em execução', 'Contagem de ordens com etapa Em execução. Fonte: cenário da Manutenção.', False),
   ('Ativos bloqueados', 'Contagem de ativos com condição Bloqueado. Fonte: cenário da Manutenção.', True)],
@@ -51,7 +51,7 @@ function pnValores(c,k) {
   const ativos=aa&&aa.every(x=>x&&typeof x.cond==='string')?aa:null;
   let sem=null;
   if(m&&oms&&ativos&&pnObjs(m.planos)&&pnObjs(m.vinc)&&typeof m.hoje==='string'&&pnNum(m.horiz)) {
-   try { sem=manSemOm(m).length; } catch(e) { sem=null; }
+   try { sem=manSemOrdem(m).n; } catch(e) { sem=null; }
   }
   vals=[sem,pnConta(oms,manAberta),pnConta(oms,o=>o.etapa==='Em execução'),pnConta(ativos,a=>a.cond==='Bloqueado')];
   labels=['A liberar','Liberadas','Em execução','Em conferência']; bars=labels.map(s=>pnConta(oms,o=>o.etapa===s));

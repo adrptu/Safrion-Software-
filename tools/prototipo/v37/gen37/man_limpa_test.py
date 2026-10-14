@@ -11,6 +11,7 @@ manutenção, vamos focar os cards na área de gráficos e relatórios · telas 
   L7 sem erro de JS
   L8 Ativos › Abastecimentos: o Grupo filtra os lançamentos pelo ativo de cada um; limpar restaura todos; o grupo continua ao voltar a Ativos
      (revisão Codex 6160153073, MAN-LIMPA-GRUPO-01: antes o seletor aparecia e as 8 linhas ficavam)
+  L9 "Pendências sem ordem" tem uma conta só: o cartão do Painel de Manutenção = as linhas da visão Sem ordem = manSemOrdem (antes 3 × 6)
 Uso: python3 man_limpa_test.py (lê _render ou RENDER_DIR)."""
 import os, sys, json, time
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -92,6 +93,12 @@ try:
         setf('grupo', ''); b2 = J(RIDS) or []
     chk('L8 Abastecimentos: o Grupo filtra pelo ativo do lançamento; limpar restaura; o grupo continua ao voltar a Ativos',
         bool(ga) and sorted(b1) == sorted(ga[1]) and len(b1) < len(b0) and sorted(b2) == sorted(b0) and ga_vol == ga[0], [ga, len(b0), b1, ga_vol, len(b2)])
+    # L9 · a mesma conta no Painel e na visão (oráculo: manSemOrdem do domínio)
+    c.goto(U('PMAN.dc.html'), 1.6)
+    pm = J("(()=>{ const m=document.querySelector('main').innerText.match(/Pendências sem ordem\\s*(?:ⓘ\\s*)?(\\d+)/); return m?+m[1]:null; })()")
+    vis('semordem'); setf('tipo', ''); setf('criticidade', ''); setf('grupo', '')
+    so = len(J(RIDS) or []); n = J("window.__man.manSemOrdem?window.__man.manSemOrdem(window.__man.manGet()).n:null")
+    chk('L9 "Pendências sem ordem": cartão do Painel = linhas da visão Sem ordem = manSemOrdem', pm is not None and pm == so == n and n > 0, [pm, so, n])
     chk('L7 sem erro de JS', not (J("window.__err") or ''), J("window.__err"))
 finally:
     try: c.close()

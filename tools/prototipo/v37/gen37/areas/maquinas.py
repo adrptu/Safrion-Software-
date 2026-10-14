@@ -137,8 +137,8 @@ function ma_selosAtv(c,a){ const s=[]; if(a.cond==='Bloqueado') s.push(ma_ch('At
 function ma_pecasTxt(c,s){ const fs=(s.pecas||[]).filter(x=>{ const it=c.itens[x.item]; return it&&(it.saldo-it.reservado)<x.qtd; });
   if(!(s.pecas||[]).length) return {t:'—',c:''}; if(!fs.length) return {t:'Com saldo',c:''}; const x=fs[0], it=c.itens[x.item]; return {t:'Falta '+manN(x.qtd-Math.max(0,it.saldo-it.reservado),1)+' '+it.un+' · '+it.nome,c:'red'}; }
 function ma_linhasSemOrdem(self,c,st){ const rows=[]; const hz=st.prazo==='venc'?-1e9:(st.prazo==='30'?30:c.horiz);
-  if(st.tipo!=='achados') manLinhas(c).filter(l=>l.s&&!l.om&&!l.dup&&l.p.estado!=='Inativo').forEach(l=>{ const ini=manIniJanela(l.x); const venc=l.x.sit==='Vencida';
-    if(!(venc||(st.prazo!=='venc'&&ini<=hz))) return;
+  const SO=manSemOrdem(c,st.prazo==='venc'?-1e9:hz);   /* a mesma lista do Painel de Manutenção (fonte única) */
+  if(st.tipo!=='achados') SO.venc.forEach(l=>{ const ini=manIniJanela(l.x); const venc=l.x.sit==='Vencida';
     if(st.fgrupo&&l.a.grupo!==st.fgrupo) return; if(st.fplano&&l.pid!==st.fplano) return; if(st.fcrit) return;
     const pc=ma_pecasTxt(c,l.s); const prz=venc?manSitTxt(c,l.x):(l.x.sit==='Vence em breve'?'Em breve · janela abre '+(ini<=0?'hoje':'em '+Math.ceil(ini)+' d'):'Em dia · janela abre em '+Math.ceil(ini)+' d');
     const a=l.a; const k=l.vk+'#'+l.sid; const vid=l.pid+'|'+l.aid+'|'+l.sid;
@@ -146,7 +146,7 @@ function ma_linhasSemOrdem(self,c,st){ const rows=[]; const hz=st.prazo==='venc'
       p:{item:[{k:'link',t:l.pid+' v'+l.p.versao,h:'#venc='+vid},{k:'mut',t:'· vencimento'}],ativo:[{k:'b',t:a.nome},{k:'mut',t:'· '+manLeitTxt(a)}].concat(ma_selosAtv(c,a)).concat(l.est?[ma_ch('Marco estimado','yellow')]:[]),
          oque:[{k:'txt',t:l.s.nome},{k:'br',t:''},{k:'mut',t:manGatTxt(l.s)}],prazo:[ma_ch(prz,venc?'red':(l.x.sit==='Vence em breve'?'yellow':'gray'))],pecas:pc.c?[ma_ch(pc.t,'red')]:[{k:'mut',t:pc.t}],
          prox:[{k:'txt',t:manDevida(l)?'Gerar ordem preventiva':'Aguardar a janela'}]}}); });
-  if(st.tipo!=='venc') Object.values(c.achados).filter(q=>q.estado==='Sem ordem').forEach(q=>{ const a=c.ativos[q.aid]; if(!a) return;
+  if(st.tipo!=='venc') SO.ach.forEach(q=>{ const a=c.ativos[q.aid];
     if(st.fgrupo&&a.grupo!==st.fgrupo) return; if(st.fplano) return; if(st.fcrit&&q.crit!==st.fcrit) return;
     const op=manAchOpcoes(c,q.id); const grave=q.crit==='Alta'||q.sug==='Bloqueado'; const prz=q.voltou?('Voltou da '+q.voltou):(q.crit+' · desde '+manBr(q.oc[0]||q.em));
     rows.push({id:'a:'+q.id,k:'achado',tp:q.origem==='Inspeção'?'Inspeção':'Corretiva',crit:grave,v:{prazo:(grave?0:3000)+manDias(q.em,c.hoje)*-1,item:q.id},s:{item:q.id+' '+q.origem,ativo:a.nome,oque:q.comp+' '+q.sint,prazo:prz,pecas:'—',prox:op.prim?op.prim.t:''},
