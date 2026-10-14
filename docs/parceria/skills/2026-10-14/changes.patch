@@ -1282,7 +1282,7 @@
 +
 +O snapshot preserva nomes repetidos. Checkbox (inclusive único) e select múltiplo usam sempre arrays, inclusive `[]` ao desmarcar tudo; controles desabilitados não são enviados. Outros nomes repetidos usam escalar com um valor e array com vários; o domínio deve aceitar essa cardinalidade. Uploads exigem contrato próprio de persistência/comparação, ausente deste kit.
 +
-+`flush()` retorna `{ok:true}` somente após confirmação (ou conteúdo já confirmado); falha retorna `{ok:false, reason}`. Confira esse resultado antes de navegar. `dirty` e `pending` expõem edição sem recibo e atividade/incerteza. `save(data, {signal})` deve rejeitar falhas ou retornar `{ok:false}` e usar transporte com prazo finito, cancelamento e versão/idempotência no domínio. O kit dá prazo `timeoutMs` (15 s por padrão) e AbortSignal: timeout é resultado incerto, não prova que o servidor cancelou. A fila devolve falha observável em vez de ficar pendurada; não envia a próxima versão enquanto a operação incerta não terminar. Ao terminar, uma nova tentativa explícita pode salvar o rascunho atual. Se o transporte ignorar cancelamento e nunca terminar, preserve o rascunho e reconcilie no domínio antes de remontar; não faça retry cego nem suponha cancelamento remoto.
++`flush()` retorna `{ok:true}` somente após confirmação (ou conteúdo já confirmado); falha retorna `{ok:false, reason}`. Confira esse resultado antes de navegar. `dirty` e `pending` expõem edição sem recibo e atividade/incerteza. `save(data, {signal})` deve rejeitar falhas ou retornar `{ok:false}` e usar transporte com prazo finito, cancelamento e versão/idempotência no domínio. O kit dá prazo `timeoutMs` (15 s por padrão) e AbortSignal: timeout é resultado incerto, não prova que o servidor cancelou. A fila devolve falha observável em vez de ficar pendurada; não envia a próxima versão até recibo remoto de sucesso ou reconciliação que prove término no servidor. Rejeição local após abort mantém a incerteza, mesmo que a promise termine. `reconcile(readback)` só libera com `{settled:true, data}`: o adaptador deve consultar o resultado terminal da operação e a versão vigente no servidor, devolvendo o snapshot completo confirmado. Um GET de valor momentâneo, sem comprovar que a escrita anterior não pode concluir depois, NÃO autoriza settled:true. A reconciliação mantém o formulário/rascunho e não envia automaticamente; nova tentativa explícita usa versão/idempotência do domínio. Readback sem confirmação ou rejeitado mantém o bloqueio. Se o transporte ignorar cancelamento e nunca terminar, preserve o rascunho e reconcilie no domínio antes de remontar; não faça retry cego nem suponha cancelamento remoto.
 +
 +`destroy()` recusa desmontagem com edição/pendência (`ok:false`). Para salvar, confira `flush().ok` e o recibo antes de destruir. Somente após preservar o rascunho em armazenamento autorizado ou decisão explícita de descartá-lo use `destroy({discard:true})`. Isso cancela debounce/envios ainda na fila, remove ouvintes e fecha o snackbar da instância; não cancela gravação já recebida pelo servidor. A aplicação deve conferir o retorno e manter a tela aberta quando houver recusa.
 --- before/shared/ux-essencial/assets/m3-kit.js
@@ -1316,7 +1316,7 @@
      if (scrim) return;
      for (const c of registry) {
        if (!c.keys) continue;
-@@ -104,19 +104,78 @@
+@@ -104,19 +104,96 @@
    });
  
    // ---------- autosave ----------
@@ -1328,6 +1328,11 @@
 -      last = json;
 -      try { await save(data); if (message) snackbar(message, { timeout: 2000 }); }
 -      catch (err) { snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush }); last = null; }
+-    };
+-    form.addEventListener('input', () => { clearTimeout(t); t = setTimeout(flush, delay); });
+-    form.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(t); flush(); });
+-    window.addEventListener('beforeunload', () => { clearTimeout(t); flush(); });
+-    return { flush };
 +  function autosave(form, save, { delay = 600, message = 'Salvo', timeoutMs = 15000 } = {}) {
 +    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new RangeError('timeoutMs deve ser positivo');
 +    const snapshot = () => {
@@ -1339,13 +1344,9 @@
 +        const values = data.getAll(key);
 +        return [key, multi.has(key) || values.length !== 1 ? values : values[0]];
 +      }));
-     };
--    form.addEventListener('input', () => { clearTimeout(t); t = setTimeout(flush, delay); });
--    form.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(t); flush(); });
--    window.addEventListener('beforeunload', () => { clearTimeout(t); flush(); });
--    return { flush };
++    };
 +    let t = null, last = JSON.stringify(snapshot());
-+    let queue = Promise.resolve(), pending = 0, destroyed = false, uncertain = false, closeNotice = null;
++    let queue = Promise.resolve(), pending = 0, destroyed = false, uncertain = false, closeNotice = null, writeSerial = 0;
 +    const dirty = () => JSON.stringify(snapshot()) !== last;
 +    const notice = (text, options = {}) => { if (!destroyed) closeNotice = snackbar(text, options); };
 +    const flush = () => {
@@ -1357,16 +1358,19 @@
 +        if (destroyed) return { ok: false, reason: 'destroyed' };
 +        if (uncertain) return { ok: false, reason: 'pending' };
 +        if (json === last) return { ok: true };
++        const serial = ++writeSerial;
 +        const controller = new window.AbortController();
 +        let timer, timedOut = false;
 +        const operation = Promise.resolve().then(() => save(data, { signal: controller.signal })).then(
 +          receipt => {
-+            if (timedOut) uncertain = false;
 +            if (receipt?.ok === false) throw new Error('Gravação recusada');
-+            last = json;
++            if (serial === writeSerial && !destroyed) {
++              if (timedOut) uncertain = false;
++              last = json;
++            }
 +            return receipt;
 +          },
-+          error => { if (timedOut) uncertain = false; throw error; },
++          error => { throw error; },
 +        );
 +        try {
 +          await Promise.race([operation, new Promise((_, reject) => {
@@ -1384,6 +1388,21 @@
 +        } finally { clearTimeout(timer); }
 +      }).finally(() => { pending--; });
 +      return queue;
++    };
++    // Somente o domínio pode comprovar término remoto; rejeição local/abort não basta.
++    const reconcile = async (readback) => {
++      if (destroyed) return { ok: false, reason: 'destroyed' };
++      if (!uncertain) return { ok: true };
++      const serial = writeSerial;
++      try {
++        const receipt = await readback();
++        if (destroyed || serial !== writeSerial || receipt?.settled !== true || !receipt.data || typeof receipt.data !== 'object' || Array.isArray(receipt.data)) return { ok: false, reason: 'pending' };
++        last = JSON.stringify(receipt.data);
++        writeSerial++;
++        uncertain = false;
++        closeNotice?.();
++        return { ok: true };
++      } catch { return { ok: false, reason: 'readback' }; }
 +    };
 +    const onInput = () => { clearTimeout(t); t = setTimeout(flush, delay); };
 +    const onSubmit = (event) => { event.preventDefault(); flush(); };
@@ -1403,7 +1422,7 @@
 +      closeNotice?.();
 +      return Promise.resolve({ ok: true });
 +    };
-+    return { flush, destroy, get dirty() { return dirty(); }, get pending() { return !!(pending || t || uncertain); } };
++    return { flush, destroy, reconcile, get dirty() { return dirty(); }, get pending() { return !!(pending || t || uncertain); } };
    }
  
    global.Kit = { snackbar, undoable, commands, openPalette, autosave, shortcutLabel: label };

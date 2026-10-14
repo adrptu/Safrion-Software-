@@ -48,6 +48,18 @@ check('Timeout sinaliza abort ao transporte',signal?.aborted===true);check('Ince
 const queuedResult=await Promise.race([tc,new Promise(r=>setTimeout(()=>r(null),80))]);check('Fila não trava nem envia sobre escrita incerta',queuedResult?.ok===false&&sent.join()==='B');
 finish();await tick();const retry=ta.flush();await tick();finish();await retry;check('Após resolução do transporte versão recente pode salvar',sent.join()==='B,C'&&ta.dirty===false);await ta.destroy({discard:true});tf.remove();
 
+
+const af=document.createElement('form');af.innerHTML='<input name="x" value="A">';document.body.appendChild(af);let remote='A',commitB;const acalls=[];
+const aa=Kit.autosave(af,(d,{signal})=>{acalls.push(d.x);if(d.x==='C'){remote='C';return Promise.resolve()};commitB=()=>{remote='B'};return new Promise((resolve,reject)=>signal.addEventListener('abort',()=>reject(Error('aborted')),{once:true}))},{message:'',timeoutMs:20});af.elements.x.value='B';await aa.flush();af.elements.x.value='C';const blocked=await aa.flush();
+check('Abort local não libera escrita enquanto servidor pode concluir B',blocked?.ok===false&&acalls.join()==='B'&&aa.pending===true);
+const unknown=await aa.reconcile?.(async()=>({settled:false,data:{x:remote}}));check('Readback ainda pendente mantém bloqueio',unknown?.ok===false&&aa.pending===true);
+commitB();const settled=await aa.reconcile?.(async()=>({settled:true,data:{x:remote}}));check('Readback terminal preserva rascunho C e libera tentativa explícita',settled?.ok===true&&af.elements.x.value==='C'&&aa.dirty===true);
+await aa.flush();check('Após readback B confirmado, C prevalece sem ultrapassagem',acalls.join()==='B,C'&&remote==='C'&&aa.dirty===false);await aa.destroy({discard:true});af.remove();
+
+const staleForm=document.createElement('form');staleForm.innerHTML='<input name="x" value="A">';document.body.appendChild(staleForm);let late;
+const stale=Kit.autosave(staleForm,d=>d.x==='B'?new Promise(resolve=>{late=resolve}):Promise.resolve(),{message:'',timeoutMs:20});staleForm.elements.x.value='B';await stale.flush();
+const rejected=await stale.reconcile(async()=>{throw Error('sem rede')});check('Falha de readback mantém escrita incerta',rejected.ok===false&&stale.pending);
+await stale.reconcile(async()=>({settled:true,data:{x:'B'}}));staleForm.elements.x.value='C';await stale.flush();late();await tick();check('Recibo antigo após reconciliação não substitui confirmação C',stale.dirty===false&&stale.pending===false);await stale.destroy();staleForm.remove();
 window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS '+results.length+'/'+results.length:'FAIL';
 })().catch(error=>{window.testResults=[{ok:false,error:String(error)}]});
 </script></html>

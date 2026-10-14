@@ -117,7 +117,7 @@
       }));
     };
     let t = null, last = JSON.stringify(snapshot());
-    let queue = Promise.resolve(), pending = 0, destroyed = false, uncertain = false, closeNotice = null;
+    let queue = Promise.resolve(), pending = 0, destroyed = false, uncertain = false, closeNotice = null, writeSerial = 0;
     const dirty = () => JSON.stringify(snapshot()) !== last;
     const notice = (text, options = {}) => { if (!destroyed) closeNotice = snackbar(text, options); };
     const flush = () => {
@@ -129,16 +129,19 @@
         if (destroyed) return { ok: false, reason: 'destroyed' };
         if (uncertain) return { ok: false, reason: 'pending' };
         if (json === last) return { ok: true };
+        const serial = ++writeSerial;
         const controller = new window.AbortController();
         let timer, timedOut = false;
         const operation = Promise.resolve().then(() => save(data, { signal: controller.signal })).then(
           receipt => {
-            if (timedOut) uncertain = false;
             if (receipt?.ok === false) throw new Error('Gravação recusada');
-            last = json;
+            if (serial === writeSerial && !destroyed) {
+              if (timedOut) uncertain = false;
+              last = json;
+            }
             return receipt;
           },
-          error => { if (timedOut) uncertain = false; throw error; },
+          error => { throw error; },
         );
         try {
           await Promise.race([operation, new Promise((_, reject) => {
@@ -156,6 +159,21 @@
         } finally { clearTimeout(timer); }
       }).finally(() => { pending--; });
       return queue;
+    };
+    // Somente o domínio pode comprovar término remoto; rejeição local/abort não basta.
+    const reconcile = async (readback) => {
+      if (destroyed) return { ok: false, reason: 'destroyed' };
+      if (!uncertain) return { ok: true };
+      const serial = writeSerial;
+      try {
+        const receipt = await readback();
+        if (destroyed || serial !== writeSerial || receipt?.settled !== true || !receipt.data || typeof receipt.data !== 'object' || Array.isArray(receipt.data)) return { ok: false, reason: 'pending' };
+        last = JSON.stringify(receipt.data);
+        writeSerial++;
+        uncertain = false;
+        closeNotice?.();
+        return { ok: true };
+      } catch { return { ok: false, reason: 'readback' }; }
     };
     const onInput = () => { clearTimeout(t); t = setTimeout(flush, delay); };
     const onSubmit = (event) => { event.preventDefault(); flush(); };
@@ -175,7 +193,7 @@
       closeNotice?.();
       return Promise.resolve({ ok: true });
     };
-    return { flush, destroy, get dirty() { return dirty(); }, get pending() { return !!(pending || t || uncertain); } };
+    return { flush, destroy, reconcile, get dirty() { return dirty(); }, get pending() { return !!(pending || t || uncertain); } };
   }
 
   global.Kit = { snackbar, undoable, commands, openPalette, autosave, shortcutLabel: label };
