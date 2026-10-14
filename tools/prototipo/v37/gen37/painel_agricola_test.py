@@ -53,6 +53,8 @@ const refAntes=JSON.stringify(ref), leitura=pnaOSLinhas(ref), grupo=pnaOSGrupos(
 chk('Mesma O.S. impedida e atrasada é contada uma vez',leitura.length,1);
 chk('Duas situações não duplicam a contagem',[grupo.n,grupo.impedidas,grupo.atrasadas],[1,1,1]);
 chk('Causa da origem e IDs recuperáveis',[grupo.label,grupo.ids],['Máquina ou equipamento',['OS-0420']]);
+chk('Destino do grupo não duplica ordem em duas situações',grupo.href,'OS.dc.html#painel=OS-0420');
+chk('Foco distingue causa de responsável',grupo.foco,'causa:Máquina ou equipamento');
 chk('Impedimento tem vermelho do DS',grupo.barra.endsWith('background:#B42318'),true);
 chk('Sem mutação do retorno do domínio',JSON.stringify(ref),refAntes);
 chk('Ausente não significa sem pendência',pnaOSLinhas(null),null);
@@ -63,6 +65,7 @@ chk('Responsável ausente explícito',pnaOSGrupos([{...leitura[0],dono:null}],'d
 const outras=pnaOSLinhas({os:{impedidas:[impedida,{...impedida,id:'OS-0421',origem:'OS.dc.html#OS-0421',motivo:'Outra máquina indisponível'},
  {...impedida,id:'OS-0422',origem:'OS.dc.html#OS-0422',dono:'Lia',motivo:'Falta insumo',causa:'Insumo no Estoque'}],atrasadas:[atrasada]}});
 chk('Agrupa responsável sem duplicar OS em duas situações',pnaOSGrupos(outras,'dono').map(g=>[g.label,g.n]),[['Caio',2],['Lia',1]]);
+chk('Destino leva exatamente o subconjunto por responsável',pnaOSGrupos(outras,'dono').map(g=>g.href),['OS.dc.html#painel=OS-0420,OS-0421','OS.dc.html#painel=OS-0422']);
 chk('Maior causa primeiro e barra proporcional',pnaOSGrupos(outras,'causa').map(g=>[g.n,/width:([\d.]+)%/.exec(g.barra)[1]]),[[2,'100'],[1,'50']]);
 chk('Não soma as duas distribuições',pnaOSGrupos(outras,'dono').reduce((a,g)=>a+g.n,0),3);
 chk('Gráfico ausente não vira zero',pnaOSGrupos(null,'dono'),null);
@@ -287,4 +290,49 @@ def custos_ui():
     print('RESULTADO custos '+str(sum(checks))+'/'+str(len(checks)));return 0 if all(checks) else 1
 
 
-if __name__=='__main__':sys.exit(custos_ui() if '--custos-ui' in sys.argv else os_contract_ui() if '--os-contract-ui' in sys.argv else prepare() if '--prepare' in sys.argv else ui() if '--ui' in sys.argv else unit())
+def grupos_ui():
+    """Ponte real: grupo, busca anterior da O.S., retorno e foco nas duas larguras."""
+    from comp_lib import Chrome,servir
+    port,srv=servir(str(Path(__file__).parent/'_render'));c=Chrome();J=c.js;checks=[]
+    def chk(t,v):
+        checks.append(bool(v));print(('OK ' if v else 'FALHA ')+t,flush=True)
+    def wait(e):
+        end=time.monotonic()+8
+        while time.monotonic()<end:
+            if J(e):return True
+            time.sleep(.1)
+        return False
+    def busca(valor):
+        J("(()=>{let i=document.querySelector('main input[type=search]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,"+json.dumps(valor)+");i.dispatchEvent(new Event('input',{bubbles:true}));})()")
+    try:
+        c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__errors=[];addEventListener('error',e=>__errors.push(e.message));"})
+        for w,touch in [(1440,False),(390,True)]:
+            c.aparelho(w,844,1,touch);c.goto(f'http://127.0.0.1:{port}/OS.dc.html',1)
+            J("(()=>{let b=document.querySelector('[data-visao=lista]');if(b)b.click();})()")
+            busca('OS-0430');time.sleep(.2)
+            guardado=J("sessionStorage.getItem('g2:OS.dc.html:g_os')")
+            c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1);busca('Café');time.sleep(.2)
+            chk('Grupos independem da busca de colheita '+str(w),wait("document.querySelectorAll('a[data-pna-grupo]').length>1"))
+            for campo in ['causa','dono']:
+                sel='a[data-pna-grupo^="'+campo+':"]'
+                dados=J("(()=>{let e=document.querySelector("+json.dumps(sel)+");let r=e.getBoundingClientRect();return {href:e.getAttribute('href'),foco:e.getAttribute('data-pna-grupo'),aria:e.getAttribute('aria-label'),h:r.height}})()")
+                chk('Link nomeado e alvo44 '+campo+' '+str(w),dados['aria'].startswith('Abrir ') and dados['h']>=44)
+                if touch:
+                    xy=J("(()=>{let e=document.querySelector("+json.dumps(sel)+");e.scrollIntoView({block:'center'});let r=e.getBoundingClientRect();return {x:r.left+20,y:r.top+22}})()")
+                    c.call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[xy]});c.call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
+                else:
+                    J('document.querySelector('+json.dumps(sel)+').focus()')
+                    c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Enter','code':'Enter','windowsVirtualKeyCode':13});c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':'Enter','code':'Enter','windowsVirtualKeyCode':13})
+                chk('Destino exato '+campo+' '+str(w),wait('location.hash==='+json.dumps('#'+dados['href'].split('#')[1])))
+                ids=sorted(dados['href'].split('=')[1].split(','))
+                expr="JSON.stringify([...new Set([...document.querySelectorAll('[data-rid]')].filter(e=>e.offsetParent).map(e=>e.getAttribute('data-rid')).filter(x=>/^OS-/.test(x)))].sort())==="+json.dumps(json.dumps(ids,separators=(',',':')))
+                chk('Subconjunto visível apesar da busca anterior '+campo+' '+str(w),wait(expr))
+                chk('Busca de OS não sobrescrita '+campo+' '+str(w),J("sessionStorage.getItem('g2:OS.dc.html:g_os')")==guardado)
+                J('history.back()')
+                chk('Retorno ao grupo com foco '+campo+' '+str(w),wait("location.pathname.endsWith('PAGR.dc.html')&&document.activeElement.getAttribute('data-pna-grupo')==="+json.dumps(dados['foco'])))
+                chk('Busca Café preservada '+campo+' '+str(w),J("document.querySelector('main input[type=search]').value==='Café'"))
+            chk('Sem erro ou overflow '+str(w),J('__errors.length===0&&document.documentElement.scrollWidth<=innerWidth'))
+    finally:c.close();srv.terminate()
+    print('RESULTADO grupos '+str(sum(checks))+'/'+str(len(checks)));return 0 if all(checks) else 1
+
+if __name__=='__main__':sys.exit(grupos_ui() if '--grupos-ui' in sys.argv else custos_ui() if '--custos-ui' in sys.argv else os_contract_ui() if '--os-contract-ui' in sys.argv else prepare() if '--prepare' in sys.argv else ui() if '--ui' in sys.argv else unit())
