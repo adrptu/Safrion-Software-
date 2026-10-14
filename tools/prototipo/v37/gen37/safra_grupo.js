@@ -9,7 +9,11 @@
 const SG_ESTADO_NOVA = 'Rascunho';
 
 function sgTxt(x) { return String(x === undefined || x === null ? '' : x).trim(); }
-function sgData(x) { return /^\d{4}-\d{2}-\d{2}$/.test(sgTxt(x)); }
+// data civil real (31/02 não existe): o formato sozinho não basta (Codex SAF-GRUPO-DATA-01)
+function sgData(x) { const t = sgTxt(x); if (!/^\d{4}-\d{2}-\d{2}$/.test(t)) return false; const [a, m, d] = t.split('-').map(Number);
+  const dt = new Date(Date.UTC(a, m - 1, d)); return dt.getUTCFullYear() === a && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d; }
+// número conhecido ou null: vazio, nulo, texto e não finito são desconhecidos (Number('') daria 0); zero legítimo continua zero
+function sgNum(x) { if (x === null || x === undefined || (typeof x === 'string' && !x.trim()) || typeof x === 'boolean') return null; const n = Number(x); return isFinite(n) ? n : null; }
 // arredonda somas de quantidade sem arrastar erro binário (0,1 + 0,2): 6 casas bastam para kg, L, sc e ha
 function sgSoma(a, b) { return Math.round((Number(a) + Number(b)) * 1e6) / 1e6; }
 
@@ -91,7 +95,7 @@ function sgCompor(safs, ped, op) {
 // Sem estado geral herdado: a safra mostra a contagem de estados e diz quando está parcial. Falta de dado não vira zero.
 function sgLeitura(grupo, info) {
   const I = info || {}; const fz = grupo.subs.map(s => { const x = I[s.id] || {};
-    const area = (x.area_ha === null || x.area_ha === undefined || isNaN(Number(x.area_ha))) ? null : Number(x.area_ha);
+    const area = sgNum(x.area_ha);
     return { faz: s.faz, saf: s.id, area_ha: area, cultivos: Number(x.cultivos) || 0, estado: x.estado || s.estado || SG_ESTADO_NOVA,
       plano: x.plano || null, orcamento: x.orcamento || null, sol: x.sol || null, demanda: Array.isArray(x.demanda) ? x.demanda : null }; });
   const conh = fz.filter(f => f.area_ha !== null);
@@ -101,7 +105,9 @@ function sgLeitura(grupo, info) {
   const sol = { enviadas: fz.filter(f => f.sol).length, de: fz.length };
   const linhas = [], por = {}, inc = [];
   fz.forEach(f => { if (!f.demanda) { inc.push(f.faz); return; }
-    f.demanda.forEach(d => { const q = Number(d.qtd); if (!(q > 0)) return;
+    f.demanda.forEach(d => { const q = sgNum(d.qtd);
+      if (q === null || q < 0) { if (inc.indexOf(f.faz) < 0) inc.push(f.faz); return; }   // quantidade desconhecida não some: a fazenda fica incompleta
+      if (q === 0) return;
       linhas.push({ faz: f.faz, saf: f.saf, talhao: d.talhao || '', ciclo: d.ciclo || '', insumo: d.insumo, un: d.un, qtd: q, destino: d.destino || '' });
       const k = d.insumo + '\u0001' + d.un; const p = por[k] || (por[k] = { insumo: d.insumo, un: d.un, qtd: 0, fazendas: [] });
       p.qtd = sgSoma(p.qtd, q); if (p.fazendas.indexOf(f.faz) < 0) p.fazendas.push(f.faz); }); });

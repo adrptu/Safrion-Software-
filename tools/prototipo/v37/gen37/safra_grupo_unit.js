@@ -93,5 +93,15 @@ chk('G13 envio sem chave é recusado para todas as fazendas, sem chamar o envio'
 const g14 = F('sgGrupo')(e5.safs, lg.id), g14b = F('sgGrupo')(cp(FX.safs), 'S27SF');
 chk('G14 o grupo de qualquer sub-safra traz as duas fazendas; safra de uma fazenda é um grupo de uma, sem mãe', () => g14.subs.map(s => s.faz).join('|') === 'Santa Rita|Lagoa Grande' && g14.mae === sr.mae
   && g14b.subs.length === 1 && g14b.mae === null && F('sgMaeDe')(e5.safs, sr.mae) === sr.mae, () => [g14, g14b]);
+// 15–17 · achados do revisor (Codex 6174603770): data civil, área vazia e quantidade desconhecida
+const d15 = compor(cp(FX.safs), Object.assign({}, FX.pedidos.duas_fazendas, { ini: '2027-02-31' }));
+chk('G15 31/02 é recusado (data civil), sem criar safra', () => !d15.ok && d15.erros.ini && d15.safs.length === 4, () => d15.erros);
+const L15 = F('sgLeitura')(g10, { A: { area_ha: 160, demanda: [] }, B: { area_ha: '', demanda: [] } }), L15z = F('sgLeitura')(g10, { A: { area_ha: 0, demanda: [] }, B: { area_ha: '  ', demanda: [] } });
+chk('G16 área vazia é desconhecida (não vira zero): total incompleto com a fazenda que falta; zero informado continua zero', () => L15.fazendas[1].area_ha === null && !L15.area.completa
+  && L15.area.faltam.join() === 'Lagoa Grande' && L15z.fazendas[0].area_ha === 0 && L15z.fazendas[1].area_ha === null, () => [L15.area, L15z.fazendas]);
+const i17 = cp(FX.leitura.uma_aprovada_outra_pendente); i17.B.demanda[0].qtd = null; i17.A.demanda.push({ insumo: 'Ureia', un: 'kg', qtd: 0, talhao: 'T1-A', destino: 'Almoxarifado Santa Rita' });
+const L17 = F('sgLeitura')(g10, i17);
+chk('G17 quantidade nula marca a fazenda incompleta e mantém as outras linhas; quantidade zero não marca nem vira linha', () => L17.demanda.incompleta.join() === 'Lagoa Grande'
+  && L17.demanda.linhas.some(l => l.faz === 'Lagoa Grande' && l.un === 'kg') && !L17.demanda.linhas.some(l => l.insumo === 'Ureia') && L17.parcial, () => L17.demanda);
 console.log(`TOTAL ${ok + falhas} · OK ${ok} · FALHAS ${falhas}`);
 process.exit(falhas ? 1 : 0);
