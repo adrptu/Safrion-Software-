@@ -158,7 +158,7 @@
     injectCss();
     const root = typeof target === 'string' ? document.querySelector(target) : target;
     if (!root) throw new Error('Tabela: container não encontrado');
-    const opts = Object.assign({ rows: [], columns: null, groupBy: [], sort: [], pageSize: 200, maxHeight: '70vh', expandLevels: 0, rowTitle: null, detail: null }, options);
+    const opts = Object.assign({ rows: [], columns: null, groupBy: [], sort: [], pageSize: 200, maxHeight: '70vh', expandLevels: 0, rowTitle: null, rowKey: 'id', detail: null }, options);
 
     let data = [], rowIdx = new Map(), cols = [], colMap = {};
     let current = [], tree = null, groupIndex = new Map(), pendingExpand = opts.expandLevels > 0;
@@ -182,12 +182,12 @@
       cols.forEach((c) => (colMap[c.key] = c));
       specCache.clear();
       st.groupBy = st.groupBy.filter((id) => gspec(id));
+      if (st.focus.some((f) => !gspec(f.spec))) st.trail = [];
       st.focus = st.focus.filter((f) => gspec(f.spec));
       st.sort = st.sort.filter((s) => colMap[s.key]);
       for (const state of [st.filters, st.values]) {
         for (const key of Object.keys(state)) if (!colMap[key]) Reflect.deleteProperty(state, key);
       }
-      st.trail = []; st.limits = {};
     }
     const vis = () => cols.filter((c) => !c.hidden);
     const raw = (c, r) => (c.value ? c.value(r) : r[c.key]);
@@ -755,7 +755,27 @@
     renderBody();
 
     return {
-      setRows(rows) { closeMenu(); closePanel(); setData(rows); if (!opts.columns) renderHead(); st.open.clear(); renderBody(); },
+      setRows(rows) {
+        const selected = st.sel == null ? null : data[st.sel];
+        const identity = (row) => typeof opts.rowKey === 'function' ? opts.rowKey(row) : row?.[opts.rowKey];
+        const key = selected && identity(selected);
+        const active = document.activeElement;
+        const panelFocus = panel?.contains(active);
+        const focusAttr = panelFocus && ['data-close', 'data-nav', 'data-fk', 'id', 'name'].find((attr) => active.hasAttribute(attr));
+        const focusValue = focusAttr && active.getAttribute(focusAttr);
+        const scroll = panel?.querySelector('.dt-pb').scrollTop;
+        closeMenu(); setData(rows);
+        const matches = selected ? data.map((row, i) => ({ row, i })).filter(({ row }) => key == null ? row === selected : identity(row) === key) : [];
+        if (matches.length === 1) st.sel = matches[0].i;
+        else closePanel();
+        if (!opts.columns) renderHead();
+        renderBody();
+        if (panel && panelFocus) {
+          const next = focusAttr && [...panel.querySelectorAll('[' + focusAttr + ']')].find((el) => el.getAttribute(focusAttr) === focusValue && !el.disabled);
+          (next || panel.querySelector('[data-close]')).focus();
+          panel.querySelector('.dt-pb').scrollTop = scroll;
+        }
+      },
       groupBy(ids) { st.groupBy = (ids || []).filter((id) => gspec(id)); st.limits = {}; renderBody(); },
       filter(key, text) { st.filters[key] = text || ''; renderBody(); },
       sort(key, dir) { toggleSort(key, false, dir); },

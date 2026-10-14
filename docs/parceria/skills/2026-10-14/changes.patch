@@ -1058,12 +1058,14 @@
  
  ---
  
-@@ -121,4 +130,4 @@
+@@ -121,4 +130,6 @@
  - [ ] Drill-down: expandir grupo, "Detalhar" com trilha e Voltar, painel de detalhe da linha com "Filtrar por este"
  - [ ] Contador "X de Y linhas", filtros ativos destacados, estado vazio com "Limpar filtros"
  - [ ] Tipos corretos (códigos como texto, moeda BRL, percentuais, datas pt-BR)
 -- [ ] Funciona com teclado e nos temas claro e escuro
 +- [ ] Funciona com teclado e nos temas adotados pelo projeto
++
++O asset `Tabela.create` aceita `rowKey` (nome de campo ou função; padrão `id`) para preservar o detalhe em `setRows` com objetos novos. Use uma identidade estável e única. Sem chave, somente o mesmo objeto pode manter seleção; registro removido ou chave duplicada fecha o detalhe, sem escolher outro registro. Atualização conserva grupos expandidos e contexto ainda válido.
 --- before/shared/tabelas-interativas/assets/exemplo.html
 +++ candidate/shared/tabelas-interativas/assets/exemplo.html
 @@ -41,7 +41,7 @@
@@ -1077,6 +1079,15 @@
      sort: ['-valor'],
 --- before/shared/tabelas-interativas/assets/tabela.js
 +++ candidate/shared/tabelas-interativas/assets/tabela.js
+@@ -158,7 +158,7 @@
+     injectCss();
+     const root = typeof target === 'string' ? document.querySelector(target) : target;
+     if (!root) throw new Error('Tabela: container não encontrado');
+-    const opts = Object.assign({ rows: [], columns: null, groupBy: [], sort: [], pageSize: 200, maxHeight: '70vh', expandLevels: 0, rowTitle: null, detail: null }, options);
++    const opts = Object.assign({ rows: [], columns: null, groupBy: [], sort: [], pageSize: 200, maxHeight: '70vh', expandLevels: 0, rowTitle: null, rowKey: 'id', detail: null }, options);
+ 
+     let data = [], rowIdx = new Map(), cols = [], colMap = {};
+     let current = [], tree = null, groupIndex = new Map(), pendingExpand = opts.expandLevels > 0;
 @@ -169,17 +169,25 @@
      function setData(rows) {
        data = rows || [];
@@ -1096,12 +1107,12 @@
        cols.forEach((c) => (colMap[c.key] = c));
        specCache.clear();
 +      st.groupBy = st.groupBy.filter((id) => gspec(id));
++      if (st.focus.some((f) => !gspec(f.spec))) st.trail = [];
 +      st.focus = st.focus.filter((f) => gspec(f.spec));
 +      st.sort = st.sort.filter((s) => colMap[s.key]);
 +      for (const state of [st.filters, st.values]) {
 +        for (const key of Object.keys(state)) if (!colMap[key]) Reflect.deleteProperty(state, key);
 +      }
-+      st.trail = []; st.limits = {};
      }
      const vis = () => cols.filter((c) => !c.hidden);
      const raw = (c, r) => (c.value ? c.value(r) : r[c.key]);
@@ -1179,16 +1190,36 @@
        renderBody();
        refocus({ g: id });
      }
-@@ -744,7 +755,7 @@
+@@ -744,7 +755,27 @@
      renderBody();
  
      return {
 -      setRows(rows) { closePanel(); setData(rows); if (!opts.columns) renderHead(); st.open.clear(); renderBody(); },
-+      setRows(rows) { closeMenu(); closePanel(); setData(rows); if (!opts.columns) renderHead(); st.open.clear(); renderBody(); },
++      setRows(rows) {
++        const selected = st.sel == null ? null : data[st.sel];
++        const identity = (row) => typeof opts.rowKey === 'function' ? opts.rowKey(row) : row?.[opts.rowKey];
++        const key = selected && identity(selected);
++        const active = document.activeElement;
++        const panelFocus = panel?.contains(active);
++        const focusAttr = panelFocus && ['data-close', 'data-nav', 'data-fk', 'id', 'name'].find((attr) => active.hasAttribute(attr));
++        const focusValue = focusAttr && active.getAttribute(focusAttr);
++        const scroll = panel?.querySelector('.dt-pb').scrollTop;
++        closeMenu(); setData(rows);
++        const matches = selected ? data.map((row, i) => ({ row, i })).filter(({ row }) => key == null ? row === selected : identity(row) === key) : [];
++        if (matches.length === 1) st.sel = matches[0].i;
++        else closePanel();
++        if (!opts.columns) renderHead();
++        renderBody();
++        if (panel && panelFocus) {
++          const next = focusAttr && [...panel.querySelectorAll('[' + focusAttr + ']')].find((el) => el.getAttribute(focusAttr) === focusValue && !el.disabled);
++          (next || panel.querySelector('[data-close]')).focus();
++          panel.querySelector('.dt-pb').scrollTop = scroll;
++        }
++      },
        groupBy(ids) { st.groupBy = (ids || []).filter((id) => gspec(id)); st.limits = {}; renderBody(); },
        filter(key, text) { st.filters[key] = text || ''; renderBody(); },
        sort(key, dir) { toggleSort(key, false, dir); },
-@@ -752,7 +763,7 @@
+@@ -752,7 +783,7 @@
        clearFilters,
        getRows: () => current.slice(),
        getState: () => ({ sort: st.sort.slice(), filters: Object.assign({}, st.filters), groupBy: st.groupBy.slice(), focus: st.focus.slice() }),
@@ -1296,7 +1327,7 @@
   */
  (function (global) {
    'use strict';
-@@ -27,7 +27,7 @@
+@@ -27,13 +27,14 @@
      requestAnimationFrame(() => el.classList.add('show'));
      const close = () => { el.classList.remove('show'); setTimeout(() => el.remove(), 250); if (live === el) live = null; };
      const [a, x] = action ? el.querySelectorAll('button') : [null, el.querySelector('button')];
@@ -1305,7 +1336,14 @@
      x.addEventListener('click', close);
      let remaining = timeout, started = Date.now();
      const arm = () => { started = Date.now(); timer = setTimeout(close, remaining); };
-@@ -77,8 +77,8 @@
+     el.addEventListener('mouseenter', () => { clearTimeout(timer); remaining -= Date.now() - started; });
+     el.addEventListener('mouseleave', arm);
+     arm();
++    close.isCurrent = () => live === el;
+     return close;
+   }
+ 
+@@ -77,8 +78,8 @@
          : '<div class="empty">Nenhum comando encontrado</div>';
        ul.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
      };
@@ -1316,7 +1354,7 @@
      input.addEventListener('input', () => { sel = 0; draw(); });
      input.addEventListener('keydown', (e) => {
        if (e.key === 'ArrowDown') { e.preventDefault(); sel = Math.min(sel + 1, shown.length - 1); draw(); }
-@@ -93,7 +93,7 @@
+@@ -93,7 +94,7 @@
    }
  
    document.addEventListener('keydown', (e) => {
@@ -1325,7 +1363,7 @@
      if (scrim) return;
      for (const c of registry) {
        if (!c.keys) continue;
-@@ -104,19 +104,103 @@
+@@ -104,19 +105,104 @@
    });
  
    // ---------- autosave ----------
@@ -1380,8 +1418,9 @@
 +              last = json;
 +              if (timedOut) {
 +                uncertain = false;
++                const ownsNotice = closeNotice?.isCurrent();
 +                closeNotice?.();
-+                if (message && !dirty()) notice(message, { timeout: 2000 });
++                if (ownsNotice && message && !dirty()) notice(message, { timeout: 2000 });
 +              }
 +            }
 +            return receipt;

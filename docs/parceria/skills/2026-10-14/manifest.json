@@ -226,8 +226,8 @@
   },
   {
     "file": "shared/tabelas-interativas/SKILL.md",
-    "sha256": "e988bd73f0e74bb6c5e84cd3b1d65ccde5a7119529d0defa2ba80d32decef446",
-    "bytes": 11073
+    "sha256": "4f39b87bd07012be82194a321176daffb7ffacc2b84752c470d6a43b709dd392",
+    "bytes": 11458
   },
   {
     "file": "shared/tabelas-interativas/assets/exemplo.html",
@@ -236,8 +236,8 @@
   },
   {
     "file": "shared/tabelas-interativas/assets/tabela.js",
-    "sha256": "5bd0fcaef29d7da262228b20d5bfd77a7c90cbc594366c2cdccde29ce3443947",
-    "bytes": 44974
+    "sha256": "69d6d2f13efb7e037bdd973496bc076ff6497134f5af978d2c749dd41ab0153b",
+    "bytes": 46174
   },
   {
     "file": "shared/ux-essencial/SKILL.md",
@@ -251,8 +251,8 @@
   },
   {
     "file": "shared/ux-essencial/assets/m3-kit.js",
-    "sha256": "7381f8039566f017e7e35b2be2b3b456112e060c1e45dd9b34d2d53952d88202",
-    "bytes": 10930
+    "sha256": "611d0a488e5384b056c34bf1ed4769de4a21b55ca5a4fea32ba4c28fb74fdba2",
+    "bytes": 11046
   },
   {
     "file": "shared/ux-essencial/assets/m3.css",

@@ -131,3 +131,5 @@ Markdown não é interativo. Para tabelas pequenas (até ~15 linhas) mostre norm
 - [ ] Contador "X de Y linhas", filtros ativos destacados, estado vazio com "Limpar filtros"
 - [ ] Tipos corretos (códigos como texto, moeda BRL, percentuais, datas pt-BR)
 - [ ] Funciona com teclado e nos temas adotados pelo projeto
+
+O asset `Tabela.create` aceita `rowKey` (nome de campo ou função; padrão `id`) para preservar o detalhe em `setRows` com objetos novos. Use uma identidade estável e única. Sem chave, somente o mesmo objeto pode manter seleção; registro removido ou chave duplicada fecha o detalhe, sem escolher outro registro. Atualização conserva grupos expandidos e contexto ainda válido.

@@ -137,7 +137,7 @@
   {
     "file": "shared/tabelas-interativas/SKILL.md",
     "before": "1ea66fdfe858c5af60e6a7ced9025f4c1483825c5eabc5a96de4c960955df2c7",
-    "after": "e988bd73f0e74bb6c5e84cd3b1d65ccde5a7119529d0defa2ba80d32decef446"
+    "after": "4f39b87bd07012be82194a321176daffb7ffacc2b84752c470d6a43b709dd392"
   },
   {
     "file": "shared/tabelas-interativas/assets/exemplo.html",
@@ -147,7 +147,7 @@
   {
     "file": "shared/tabelas-interativas/assets/tabela.js",
     "before": "1605033d45dd8f6b040dcedf54269907d21d647f2fdcbd92a65ca9910b345c31",
-    "after": "5bd0fcaef29d7da262228b20d5bfd77a7c90cbc594366c2cdccde29ce3443947"
+    "after": "69d6d2f13efb7e037bdd973496bc076ff6497134f5af978d2c749dd41ab0153b"
   },
   {
     "file": "shared/ux-essencial/SKILL.md",
@@ -157,7 +157,7 @@
   {
     "file": "shared/ux-essencial/assets/m3-kit.js",
     "before": "035eef47c47ef6016b47edabd2dd80c7b4df4949064edee85bfe9543a4a67efd",
-    "after": "7381f8039566f017e7e35b2be2b3b456112e060c1e45dd9b34d2d53952d88202"
+    "after": "611d0a488e5384b056c34bf1ed4769de4a21b55ca5a4fea32ba4c28fb74fdba2"
   },
   {
     "file": "test_gemini_consult.py",

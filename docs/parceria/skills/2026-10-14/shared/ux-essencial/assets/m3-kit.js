@@ -34,6 +34,7 @@
     el.addEventListener('mouseenter', () => { clearTimeout(timer); remaining -= Date.now() - started; });
     el.addEventListener('mouseleave', arm);
     arm();
+    close.isCurrent = () => live === el;
     return close;
   }
 
@@ -142,8 +143,9 @@
               last = json;
               if (timedOut) {
                 uncertain = false;
+                const ownsNotice = closeNotice?.isCurrent();
                 closeNotice?.();
-                if (message && !dirty()) notice(message, { timeout: 2000 });
+                if (ownsNotice && message && !dirty()) notice(message, { timeout: 2000 });
               }
             }
             return receipt;

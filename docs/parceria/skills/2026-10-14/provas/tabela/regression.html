@@ -17,5 +17,11 @@ const toggleAll=()=>document.querySelector('[data-all]').click();
 toggleAll();check('Desmarcar tudo inclui valores além dos 500 visíveis',()=>t.getRows().length===0);
 toggleAll();check('Selecionar tudo restaura universo completo',()=>t.getRows().length===601);
 const search=document.querySelector('[data-vs]');search.value='Grupo';search.dispatchEvent(new Event('input'));toggleAll();check('Desmarcar resultados inclui todos os 600 correspondentes',()=>t.getRows().length===1&&t.getRows()[0].nome==='Outro');toggleAll();check('Selecionar resultados restaura todos os correspondentes',()=>t.getRows().length===601);t.destroy();
+t=Tabela.create('#table',{rows:[{id:'a',nome:'Ana',fazenda:'A'},{id:'b',nome:'Bia',fazenda:'B'}],columns:['nome','fazenda'],groupBy:['fazenda'],rowTitle:r=>r.nome});document.querySelector('.dt-grp').click();document.querySelector('.dt-leaf').click();
+t.setRows([{id:'b',nome:'Bia',fazenda:'B'},{id:'a',nome:'Ana atualizada',fazenda:'A'}]);
+check('Refresh preserva grupo expandido e seleção por identidade',()=>document.querySelector('.dt-open')&&document.querySelector('.dt-sel')?.textContent.includes('Ana atualizada')&&document.querySelector('.dt-panel h3')?.textContent==='Ana atualizada');
+check('Refresh preserva foco no detalhe',()=>document.activeElement.matches('.dt-panel [data-close]'));
+t.setRows([{id:'b',nome:'Bia',fazenda:'B'}]);check('Registro removido fecha detalhe sem selecionar outro',()=>!document.querySelector('.dt-panel')&&!document.querySelector('.dt-sel'));t.destroy();
+t=Tabela.create('#table',{rows:[{codigo:0,nome:'Zero'}],rowKey:'codigo',rowTitle:r=>r.nome});document.querySelector('.dt-leaf').click();t.setRows([{codigo:0,nome:'Novo zero'}]);check('Chave configurável aceita zero',()=>document.querySelector('.dt-panel h3')?.textContent==='Novo zero');t.setRows([{codigo:0,nome:'Duplicado A'},{codigo:0,nome:'Duplicado B'}]);check('Identidade ambígua não seleciona registro arbitrário',()=>!document.querySelector('.dt-panel'));t.destroy();
 window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS '+results.length+'/'+results.length:'FAIL';
 </script></html>

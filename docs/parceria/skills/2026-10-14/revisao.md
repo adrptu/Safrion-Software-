@@ -87,3 +87,6 @@ O ramo de gravação incerta renova o aviso a cada tentativa, mesmo após expira
 
 ### Rodada R11 — confirmação tardia observável (4276852743)
 O recibo tardio da gravação vigente fecha o aviso de incerteza e mostra o sucesso configurado apenas se o rascunho coincide com o confirmado. Rascunho mais recente continua sujo e protegido; mensagem vazia não cria sucesso visual. Contraprova 37/40 antes, 40/40 depois. Validação 20/20 skills, 17/17 adaptador e lint passaram. Manifesto 962db749dca35be349d10d33f2ffd9221e3cf81598a15eacfb9526113cbd2561. Textos correntes revisados e README distingue as contagens históricas das atuais. Revisão final Claude e recibo cloud pendentes.
+
+### Rodada R12 — contexto da tabela e avisos por instância
+Achados 4276922580/4276922586 corrigidos: setRows preserva seleção por rowKey estável (padrão id), expansão e foco; registro removido ou identidade duplicada não seleciona outra linha. Confirmação tardia somente substitui aviso ainda pertencente ao próprio autosave. Contraprovas navegador 40/41→41/41 e tabela 11/14→14/14; 20/20 skills, 17/17 adaptador e lint dos dois assets passaram. Manifesto d68ae7528d520728b54226e85c738c58950c8e4638d65903c1b53f8fce1b2fb0. Revisão Claude, integração e recibo cloud pendentes.
