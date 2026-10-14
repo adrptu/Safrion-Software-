@@ -432,6 +432,28 @@
  - [ ] TLS, domínio, rate limiting e cabeçalhos; CDN/WAF conforme arquitetura e risco
  - [ ] Segredos no cofre; acesso mínimo; banco em rede privada
  - [ ] `/health` e `/ready`; monitoramento externo; rastreador de erros e telemetria adotados pelo projeto recebendo dados
+--- before/shared/dev-infra/assets/Dockerfile
++++ candidate/shared/dev-infra/assets/Dockerfile
+@@ -1,8 +1,9 @@
+ # Dockerfile — Node/TypeScript multi-stage, produção mínima e não-root.
+ # Python: troque por python:3.12-slim + uv; Go: build estático + distroless/static.
+ 
++# Digest do índice oficial conferido em 14/10/2026; atualizar por PR revisado.
+ # ---- dependências ----
+-FROM node:22-alpine AS deps
++FROM node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 AS deps
+ WORKDIR /app
+ COPY package.json package-lock.json ./
+ RUN npm ci --ignore-scripts
+@@ -13,7 +14,7 @@
+ RUN npm run build && npm prune --omit=dev
+ 
+ # ---- produção ----
+-FROM node:22-alpine AS runner
++FROM node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 AS runner
+ ENV NODE_ENV=production \
+     PORT=3000
+ WORKDIR /app
 --- before/shared/dev-infra/assets/ci.yml
 +++ candidate/shared/dev-infra/assets/ci.yml
 @@ -1,3 +1,7 @@

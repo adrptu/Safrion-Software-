@@ -75,6 +75,11 @@
     "after": "b44d72f67853921b729d217443e0e2223bec6f943ed21d0038ec2e365b01ac3d"
   },
   {
+    "file": "shared/dev-infra/assets/Dockerfile",
+    "before": "eb35106936e385356c79d74799677cc872d631dc4750d1e8b852eacbe18cf033",
+    "after": "c8ba67bd9f44de13a1ccc20a9e2299e7936ba2e6515c8411fe8d99d51793965c"
+  },
+  {
     "file": "shared/dev-infra/assets/ci.yml",
     "before": "dc8c0029dbc5010aacb145f526a6dc6843409791e2a56467d260732caae69ece",
     "after": "9f66dee37ce1092477a98a5218f36cd6c79b8b5df79ea2a65353df995eb489f1"

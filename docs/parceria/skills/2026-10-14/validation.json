@@ -107,7 +107,7 @@
     "failures": 0,
     "errors": 0
   },
-  "manifestSha256": "0b494706cb86acae33324fc3be0ee62d12422989a6bc1f4759bfa3e4bbf05edf",
+  "manifestSha256": "3b5e447771864e17813c687121d81d1d124d0967b2fb6e13ba92db50d97ebf70",
   "r18": {
     "staticCI": {
       "before": "0/8 exit1",
@@ -115,5 +115,13 @@
     },
     "pipelineExecuted": false,
     "unchangedSkillsAndAdapter": "R17 proofs preserved; no SKILL.md or adapter delta"
+  },
+  "r19": {
+    "staticCI": {
+      "before": "8/9 exit1",
+      "after": "9/9 exit0"
+    },
+    "pipelineExecuted": false,
+    "scope": "Dockerfile base digests; independent existing test extended"
   }
 }
