@@ -1375,7 +1375,7 @@ _MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 1
 _SEPD=f'<sc-if value="{{{{p.sepL}}}}" hint-placeholder-val="{{{{false}}}}"><span class="g2sepd" aria-hidden="true">· </span></sc-if>'
 _ICO_ALERTA='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>'   # lucide triangle-alert (ISC)
 _ICO_COLUNAS='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>'   # lucide columns-3 (ISC)
-_PARTS=(f'<sc-if value="{{{{p.isIco}}}}" hint-placeholder-val="{{{{false}}}}"><span role="img" aria-label="{{{{p.dica}}}}" data-dica="{{{{p.dica}}}}" style="{{{{p.st}}}}">{_ICO_ALERTA}</span></sc-if>'
+_PARTS=(f'<sc-if value="{{{{p.isIco}}}}" hint-placeholder-val="{{{{false}}}}"><span role="img" aria-label="{{{{p.dica}}}}" data-dica="{{{{p.dica}}}}" style="{{{{p.st}}}}">{_ICO_ALERTA}<sc-if value="{{{{p.icoTem}}}}" hint-placeholder-val="{{{{false}}}}"><span aria-hidden="true">{{{{p.icoTxt}}}}</span></sc-if></span></sc-if>'
         f'<sc-if value="{{{{p.isTxt}}}}" hint-placeholder-val="{{{{false}}}}"><span>{_SEPD}{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isCn}}}}" hint-placeholder-val="{{{{false}}}}"><span style="{{{{p.st}}}}">{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isB}}}}" hint-placeholder-val="{{{{false}}}}"><b>{_SEPD}{{{{p.t}}}}</b></sc-if>'
@@ -1463,7 +1463,7 @@ def _ajuda_auto(cols,calc,campos=()):
 # do cabeçalho da coluna. A regra roda no navegador (g2lib.g2glossCol), sobre as linhas que a grade mostra (as do build e as montadas na tela), com
 # estas entradas do GLOSSARIO (as de "^" valem só para o rótulo): fonte única do texto, aqui.
 _GLOSS_CEL=[(rx,t) for rx,t in GLOSSARIO if not rx.startswith('^')]
-def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None,vazio=True):
+def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None,vazio=True,ag=None):
     cols=[_col_un(c) for c in cols]
     # rótulos que ficariam iguais sem a unidade ("Custo (R$/h)" e "Custo (R$/ha)") mantêm a unidade, sem parênteses: "Custo R$/h", "Custo R$/ha"
     # (proprietário, 05/10/2026: "Custo R$/h e R$/ha é melhor e mais intuitivo")
@@ -1479,7 +1479,8 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     n=len(cols)+(1 if sel else 0)+(1 if dele else 0)
     # qf: filtro rápido por uma coluna, k (chave), cut (fica o texto antes do separador), sep (vários valores na célula), todas ('Todas'|'Todos')
     qf=(dict(k=qf) if isinstance(qf,str) else qf) or None
-    spec=dict(id=gid,cols=cols,rows=rows,edit=edit,sel=sel,del_=dele,tree=tree,so=so or {},total=total,x0=x0 or {},qf=qf)
+    spec=dict(id=gid,cols=cols,rows=rows,edit=edit,sel=sel,del_=dele,tree=(tree or bool(ag)),so=so or {},total=total,x0=x0 or {},qf=qf)
+    if ag: spec['ag']=ag   # VISOES-2 §3.3: [dict(pq, l, niv=[...], um, plural)]; as linhas trazem r.g[pq]
     spec['del']=spec.pop('del_'); GRIDS.append(spec)
     H=lambda s: _h(gid+s)
     sicon=f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="{MUTED}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>'
@@ -1487,10 +1488,33 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     ess=any(c.get('ess') for c in cols) and len(cols)>5
     cvb=(f'<sc-if value="{H("_cvhas")}" hint-placeholder-val="{{{{false}}}}"><button type="button" data-g2cvb="{gid}" aria-haspopup="dialog" aria-expanded="{H("_cvexp")}" aria-label="{H("_cvlab")}" title="{H("_cvlab")}" onClick="{H("_cvtog")}" '
          f'style="{_MINI} display: inline-flex; align-items: center; gap: 6px; min-height: 32px;">{_ICO_COLUNAS}Colunas<span style="color: {MUTED};">{H("_cvn")}</span></button></sc-if>') if ess else ''
-    if search or add or tree or sel or tools or qf or ess:
+    # VISOES-2 §3.3: "Agrupar por" (ícone da pergunta + nome da coluna) e a trilha do descer, na barra da grade
+    _ip=lambda d: f'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{d}</svg>'
+    _IPQ={'oque':_ip('<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>'),   # lucide layers
+          'quem':_ip('<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'),   # lucide user
+          'quando':_ip('<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>'),   # lucide calendar
+          'onde':_ip('<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>'),   # lucide map-pin
+          '0':_ip('<path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h18"/>')}   # lucide menu (sem agrupar)
+    _icos=''.join(f'<sc-if value="{{{{ao.{k}}}}}" hint-placeholder-val="{{{{false}}}}">{_IPQ[k2]}</sc-if>' for k,k2 in [('i0','0'),('iOque','oque'),('iQuem','quem'),('iQuando','quando'),('iOnde','onde')])
+    agb=''
+    if ag:
+        agb=(f'<sc-if value="{H("_aghas")}" hint-placeholder-val="{{{{false}}}}"><span style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0;">'
+             f'<button type="button" data-g2agb="{gid}" aria-haspopup="menu" aria-expanded="{H("_agexp")}" onClick="{H("_agtog")}" style="{_MINI} display: inline-flex; align-items: center; gap: 6px; min-height: 32px;">'
+             + ''.join(f'<sc-if value="{H("_agi_"+k)}" hint-placeholder-val="{{{{false}}}}">{_IPQ[k]}</sc-if>' for k in ['0','oque','quem','quando','onde'])
+             + f'<span style="color: {MUTED}; font-weight: 600;">Agrupar por</span> {H("_agl")} <span aria-hidden="true" style="font-size: 9px;">▾</span></button>'
+             f'<sc-if value="{H("_agtrilha")}" hint-placeholder-val="{{{{false}}}}"><nav aria-label="Trilha do agrupamento" data-g2agtr="{gid}" style="display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; font-size: 12.5px;">'
+             f'<sc-for list="{H("_agtr")}" as="tr" hint-placeholder-count="1"><button type="button" onClick="{_h("tr.go")}" style="border: 0; background: transparent; padding: 4px 2px; min-height: 32px; color: {ACC}; font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer;">{_h("tr.t")}</button><span aria-hidden="true" style="color: {MUTED};">›</span></sc-for>'
+             f'<b aria-current="location" style="padding: 4px 2px; outline: none;">{H("_agatual")}</b><span style="color: {MUTED};">{H("_agnivel")}</span></nav></sc-if></span></sc-if>')
+    agm=(f'<sc-if value="{H("_agmenu")}" hint-placeholder-val="{{{{false}}}}"><div style="position: fixed; inset: 0; z-index: 70;">'
+         f'<button type="button" aria-label="Fechar Agrupar por" tabIndex="-1" onClick="{H("_agfecha")}" style="position: absolute; inset: 0; border: 0; background: transparent; cursor: default;"></button>'
+         f'<div role="menu" aria-label="Agrupar por" data-g2agm="{gid}" onKeyDown="{H("_agkey")}" style="{H("_agpos")} position: fixed; width: 260px; background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 6px; display: flex; flex-direction: column; gap: 2px; z-index: 71;">'
+         f'<sc-for list="{H("_agops")}" as="ao" hint-placeholder-count="5"><button type="button" role="menuitemradio" aria-checked="{_h("ao.on")}" onClick="{_h("ao.go")}" style="display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 4px 10px; border: 0; border-radius: 8px; background: transparent; font-family: inherit; font-size: 13px; color: {INK}; text-align: left; cursor: pointer;">'
+         + _icos + f'<span style="display: flex; flex-direction: column; gap: 1px;"><span style="font-weight: 700;">{_h("ao.t")}</span><sc-if value="{_h("ao.temNiv")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11.5px; color: {MUTED};">{_h("ao.niv")}</span></sc-if></span></button></sc-for>'
+         f'</div></div></sc-if>') if ag else ''
+    if search or add or tree or sel or tools or qf or ess or ag:
         tb=(f'<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid {LINE}; flex-wrap: wrap;">'
             + (f'<span data-g2q="{gid}" hidden></span><sc-if value="{H("_qon")}" hint-placeholder-val="{{{{true}}}}"><label style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; background: {BG}; min-width: 160px;">{sicon}<input type="search" aria-label="{H("_qlab")}" placeholder="Buscar…" value="{H("_q")}" onChange="{H("_setq")}" style="font-family: inherit; font-size: 12.5px; border: 0; background: transparent; outline: none; width: 100%;"></label></sc-if>'
-               f'<span style="font-size: 12px; color: {MUTED}; font-weight: 600; white-space: nowrap;">{H("_count")} de {H("_all")}</span>' if search else '')
+               f'<span style="font-size: 12px; color: {MUTED}; font-weight: 600; white-space: nowrap;">{H("_count")} de {H("_all")}</span>' if search else '') + agb
             + (f'<sc-if value="{H("_hasqf")}" hint-placeholder-val="{{{{false}}}}"><div role="group" aria-label="{H("_qfl")}" style="display: flex; flex-wrap: wrap; gap: 6px;">'
                f'<sc-for list="{H("_qf")}" as="qc" hint-placeholder-count="4"><button type="button" aria-pressed="{_h("qc.on")}" title="{_h("qc.lab")}" onClick="{_h("qc.go")}" style="{_h("qc.st")}">{_h("qc.t")} <span style="opacity: .75;">{_h("qc.n")}</span></button></sc-for></div></sc-if>' if qf else '')
             + f'<sc-for list="{H("_fchips")}" as="fc" hint-placeholder-count="0"><span style="display: inline-flex; align-items: center; gap: 2px; padding: 2px 4px 2px 9px; border-radius: 999px; background: {ACCS}; color: {ACC}; font-size: 11.5px; font-weight: 700;">{_h("fc.t")}<button type="button" aria-label="Remover filtro" onClick="{_h("fc.rm")}" style="border: 0; background: transparent; color: {ACC}; cursor: pointer; font-size: 13px; padding: 0 4px;">×</button></span></sc-for>'
@@ -1558,7 +1582,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
          f'<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px solid {LINE}; margin-top: 6px; padding: 8px 4px 2px;">'
          f'<sc-if value="{H("_cvmudou")}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{H("_cvrest")}" style="{lk}">Restaurar padrão</button></sc-if><span style="flex-grow: 1;"></span>'
          f'<button type="button" onClick="{H("_cvfecha")}" style="{_MINI}">Fechar</button></div></div></div></sc-if>') if ess else ''
-    return f'<div class="g2caixa" style="{box}">{tb}{fpanel}{cvp}{tbl}</div>'
+    return f'<div class="g2caixa" style="{box}">{tb}{fpanel}{cvp}{agm}{tbl}</div>'
 def seta_xtog(sobe,desce):
     """Seta à esquerda de "Expandir tudo"/"Recolher tudo": ícone SVG (não entra no texto nem é lido); sobe/desce = buracos booleanos."""
     ic=lambda d: f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="{d}"/></svg>'

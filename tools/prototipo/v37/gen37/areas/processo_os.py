@@ -707,30 +707,24 @@ function PREVALS(self,v){
   const pzx=(t)=>{ t=String(t||''); const m=t.match(/(?:vence\s+)?(?:hoje\s*)?(?:(?:até|antes de|antes das|em)\s+)?(?:\d{2}\/\d{2}(?:\s+\d{2}:\d{2})?|\d{2}:\d{2})|(?:vence\s+)?hoje/);
     if(!m) return [t.trim(),'']; return [(t.slice(0,m.index)+' '+t.slice(m.index+m[0].length)).replace(/\s+/g,' ').trim(), m[0].replace(/^vence\s+/,'').trim()]; };
   const base=os.map(o=>{ const tl=tals(o), sel=o.selos.map(x=>({id:x.t,l:x.t}));
+   const MES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'], ini=/^\d{4}-\d{2}-\d{2}$/.test(o.ini||'')?o.ini:'';
+   const seg=ini?g2segunda(ini):'';
    return {id:o.id,
+    g:{oque:[(o.atv&&o.atv.op)||String(o.tipo||'').split(' · ')[0],o.tipo],quem:[String(o.resp||'').split(' · ')[0]],
+       quando:[o.saf?'Safra '+o.saf:'',ini?MES[Number(ini.slice(5,7))-1]+' de '+ini.slice(0,4):'',seg?'Semana de '+(seg<ini.slice(0,7)+'-01'?'01/'+ini.slice(5,7):seg.slice(8,10)+'/'+seg.slice(5,7)):''],onde:[o.faz||'',tl.map(t=>t.l)]},   /* VISOES-2 §3.3 */
+    /* Quando (revisão Codex 6167738735, 1): a safra vem do vínculo, não da data; cada O.S. cai num só mês e numa só semana, pela data de início;
+       a semana dentro do mês é a interseção (semana que começa no mês anterior aparece como "Semana de 01/MM") */
+    gs:{quando:[o.saf||'',ini.slice(0,7),seg]},   /* ordem de calendário dos grupos */
     m:{tal:tl,sit:sel},
     v:{id:o.id,ativ:o.tipo,tal:'',local:o.local||'',area:nfx(o.area),ini:o.ini||'',fim:o.fim||'',fase:o.etapa,sit:'',obs:o.obs||'',dono:o.dono||'',acao:pzx(o.prazo)[0],prazo:pzx(o.prazo)[1],
        real:(o.area?o.realizado:null),saldo:(o.area?o.saldo:null),disp:(o.disp||null),prog:(o.area?Math.round(1000*(o.realizado||0)/o.area)/10:null),resp:o.resp},
     s:{id:o.id,tal:tl.map(t=>t.l).join(', '),sit:sel.map(x=>x.l).join(' · ')},
-    p:{id:(o.selos.length?[{k:'ico',t:'Situação: '+o.selos.map(x=>x.t).join(' · '),c:['red','orange','yellow','blue','gray','green'].find(c=>o.selos.some(x=>x.c===c))||'gray'}]:[]).concat([{k:'b',t:o.id}]),tal:(tl.length?tl.map(t=>({k:'txt',t:t.l})).reduce((a,x,i)=>a.concat(i?[{k:'br'},x]:[x]),[]):[{k:'mut',t:'—'}]),
+    p:{id:(o.selos.length?[(()=>{ const cor=['red','orange','yellow','blue','gray','green'].find(c=>o.selos.some(x=>x.c===c))||'gray', s0=o.selos.find(x=>x.c==='red'); return {k:'ico',t:'Situação: '+o.selos.map(x=>x.t).join(' · '),c:cor,curto:s0?String(s0.t).split(' · ')[0]:''}; })()]:[]).concat([{k:'b',t:o.id}]),tal:(tl.length?tl.map(t=>({k:'txt',t:t.l})).reduce((a,x,i)=>a.concat(i?[{k:'br'},x]:[x]),[]):[{k:'mut',t:'—'}]),
        fase:[{k:'chip',t:o.etapa,c:FCOR[o.etapa],de:1}],sit:(o.selos.length?o.selos.map(x=>({k:'chip',t:x.t,c:x.c,de:1,dv:osSeloDica(o,x.t)})):[{k:'mut',t:'—'}])}}; });   /* de: dica de estado (g2lib G2_DICAS); dv: a do bloqueio do encerramento (osSeloDica) */
   // Agrupar por talhão (TABELAS-FOCO item 7, TF06): a mesma O.S. aparece em cada talhão vinculado, com a mesma identidade; o grupo conta
   // O.S. distintas e soma a área das O.S. vinculadas (não é área física do talhão); o total geral conta cada O.S. uma vez (abaixo, os_gtot)
-  /* VISOES-1: a Tabela agrupada é a visão "agrupada" do seletor (o mesmo painel da Lista); os grupos começam abertos ao entrar nela */
-  const agr=g2visao(self,'g_os')==='agrupada';
-  if(agr!==!!self.__osAgrX){ self.__osAgrX=agr; const x={}; if(agr) base.forEach(r=>(r.m.tal.length?r.m.tal:[{id:'(vazio)'}]).forEach(t=>{ x['grp@'+t.id]=true; }));
-    const all=Object.assign({},self.state.g2||{}); all.g_os=Object.assign({},all.g_os||{},{x}); self.state.g2=all; }
-  if(agr){ const stG=g2st(self,'g_os'), ft=((stG.f||{}).tal)||[]; const gs={}, ord=[];
-    // revisão VISOES-1, achado C1 (S2): o grupo nasce só das O.S. do recorte (fase, busca e filtros de coluna, o mesmo g2match do Total):
-    // antes ele somava todas as O.S. do talhão e o subtotal desmentia o Total na mesma tela
-    base.filter(r=>g2match(r,GR('g_os'),stG)).forEach(r=>{ const ms=r.m.tal.length?r.m.tal:[{id:'(vazio)',l:'Sem talhão'}];
-      ms.forEach(t=>{ if(ft.length&&ft.indexOf(t.id)<0) return; if(!gs[t.id]){ gs[t.id]={t,kids:[]}; ord.push(t.id); } gs[t.id].kids.push(Object.assign({},r,{id:r.id+'@'+t.id})); }); });
-    ord.sort((a,b)=>gs[a].t.l.localeCompare(gs[b].t.l,'pt-BR',{numeric:true}));
-    GR('g_os').rows=ord.map(k=>{ const g=gs[k], n=g.kids.length, ar=g.kids.reduce((a,x)=>a+(Number(x.v.area)||0),0);
-      return {id:'grp@'+k,ro:true,m:{tal:(k==='(vazio)'?[]:[g.t]),sit:[]},kids:g.kids,
-        v:{id:g.t.l,ativ:'',tal:'',area:ar||null},s:{id:g.t.l,tal:g.t.l},
-        p:{id:[{k:'b',t:g.t.l}],ativ:[{k:'mut',t:n+(n>1?' O.S. vinculadas · área somada das O.S.':' O.S. vinculada · área da O.S.')}],area:(ar?[{k:'txt',t:nf(ar)}]:[{k:'mut',t:'—'}])}}; });
-  } else GR('g_os').rows=base;
+  /* VISOES-2 §3.3: o agrupamento é o Agrupar por da Tabela (motor g2agRows), com descer e trilha; a visão "agrupada" saiu (fundida na Tabela) */
+  GR('g_os').rows=base;
   self.__osBase=base;
 }
 // turnos previstos acompanham o saldo depois de uma dispensa (corta do último para o primeiro)
@@ -991,10 +985,10 @@ function EXTRAVALS(self,v){
   all.forEach(o=>{ v['op_'+o.id.replace('-','')]=()=>self.setState({pan:o.id,pa:null}); });
   self.g2pick=(gid,rid)=>{ if(gid==='g_os'&&String(rid).indexOf('grp@')!==0) self.setState({pan:String(rid).split('@')[0]}); };
   // agrupar por talhão: liga/desliga; grupos começam abertos; total geral de O.S. distintas (cada O.S. uma vez)
-  const osVis=g2visao(self,'g_os'); v.os_agr=osVis==='agrupada';   /* VISOES-1: agrupar é a visão Tabela agrupada do seletor */
+  const osAg=g2agLer(self,GR('g_os')); v.os_agr=g2visao(self,'g_os')==='lista'&&!!osAg&&osAg.d==='onde';   /* VISOES-2: por Onde, a O.S. de vários talhões aparece em cada um */
   { const spB=GR('g_os'), stB=g2st(self,'g_os'); const dist=(self.__osBase||[]).filter(r=>g2match(r,spB,stB)); const ar=dist.reduce((a,r)=>a+(Number(r.v.area)||0),0);
-    self.__osDist=dist.length; if(v.os_agr){ v.g_os_count=dist.length; v.g_os_all=(self.__osBase||[]).length; }   // contador da grade = O.S. distintas, não grupos
-    v.os_gtot='Total: '+dist.length+(dist.length===1?' O.S.':' O.S. distintas')+' · '+nf(ar)+' ha (cada O.S. contada uma vez; os grupos se sobrepõem quando a O.S. tem mais de um talhão)'; }
+    self.__osDist=dist.length;   // contador da grade agrupada = O.S. distintas (g2vals)
+    v.os_gtot=dist.length+' O.S. · '+nf(ar)+' ha · a O.S. de vários talhões aparece em cada um e conta uma vez no total'; }
   const openPan=(id)=>self.setState({pan:id});
   // estado vazio do recorte: uma frase e uma ação que troca o filtro que zerou a tela
   const fz=mfFaz(self), sf=mfSaf(self), semFaz=!all.some(o=>fz==='Todas'||o.faz===fz);
@@ -1578,13 +1572,16 @@ def build():
     # VISOES-2 §3.6 (pedido do proprietário, 14/10): abre com O.S., Atividade, Talhão, Prazo, Fase e Progresso (ess = posição); as outras 12
     # ficam em "Mais colunas". pq = pergunta que agrupa o painel de colunas. A Situação sai do padrão e vira ícone com cor antes da O.S.
     g_os=grid([dict(k='id',l='O.S.',ess=1,pq='oque'),dict(k='ativ',l='Atividade',w=190,ess=2,pq='oque'),dict(k='tal',l='Talhão',multi=True,w=120,ess=3,pq='onde'),dict(k='local',l='Local',w=110,zdash=True,pq='onde'),
-               dict(k='area',l='Área (ha)',t='num',a='r',d=2,zdash=False,pq='medida'),dict(k='ini',l='Início',t='date',pq='quando'),dict(k='fim',l='Fim',t='date',pq='quando'),
+               dict(k='area',l='Área (ha)',t='num',a='r',d=2,zdash=False,pq='medida',agg='sum'),dict(k='ini',l='Início',t='date',pq='quando'),dict(k='fim',l='Fim',t='date',pq='quando'),
                dict(k='fase',l='Fase',ess=5,pq='situacao'),dict(k='sit',l='Situação',multi=True,w=200,pq='situacao'),dict(k='obs',l='Observação',w=200),
                dict(k='dono',l='Quem resolve',pq='quem'),dict(k='acao',l='Próxima ação',w=150,pq='situacao'),dict(k='prazo',l='Prazo',ess=4,pq='quando'),
-               dict(k='real',l='Realizado (ha)',t='num',a='r',d=2,pq='medida'),dict(k='saldo',l='Saldo (ha)',t='num',a='r',d=2,pq='medida'),
+               dict(k='real',l='Realizado (ha)',t='num',a='r',d=2,pq='medida',agg='sum'),dict(k='saldo',l='Saldo (ha)',t='num',a='r',d=2,pq='medida',agg='sum'),
                dict(k='disp',l='Dispensado (ha)',t='num',a='r',d=2,zdash=True,pq='medida'),dict(k='prog',l='Progresso (%)',t='num',a='r',d=1,ess=6,pq='medida'),
                dict(k='resp',l='Responsável',pq='quem')],   # sem coluna Lâmina: a O.S. só com água saiu para a Irrigação (01/10), onde a lâmina tem colunas próprias (IR-03); aqui ela ficava sempre vazia
-              [],edit=dict(m='pick'),gid='g_os',total=False,tree=True,vazio=False)   # vazio de filtro: estado comum das visões (VISOES-1 §2.8)
+              [],edit=dict(m='pick'),gid='g_os',total=False,tree=True,vazio=False,
+              # VISOES-2 §3.3: Agrupar por (O quê, Quem, Quando, Onde) com os níveis do descer; a linha traz r.g (osLinhas)
+              ag=[dict(pq='oque',l='Atividade',niv=['Operação','Atividade'],um='O.S.',plural='O.S.'),dict(pq='quem',l='Responsável',niv=['Responsável'],um='O.S.',plural='O.S.'),
+                  dict(pq='quando',l='Início',niv=['Safra','Mês','Semana'],um='O.S.',plural='O.S.'),dict(pq='onde',l='Talhão',niv=['Fazenda','Talhão'],um='O.S.',plural='O.S.')])   # vazio de filtro: estado comum das visões (VISOES-1 §2.8)
     # barra da coleção (DS-33 §74.5.7.1): filtros rápidos no começo, seletor de visão no fim; vale para Lista e Kanban (mesmo filtro)
     kb_nota=(f'<sc-if value="{H("kb_filtro")}" hint-placeholder-val="{F()}"><div role="note" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: {MUTED}; margin-bottom: 8px;">'
              f'<span>{H("kb_nota")}</span><button type="button" onClick="{H("os_limpar")}" style="{_MINI}">Limpar filtros</button></div></sc-if>')
@@ -1595,7 +1592,7 @@ def build():
               f'<sc-for list="{H("rc_sem")}" as="s" hint-placeholder-count="2"><button type="button" onClick="{H("s.go")}" style="{_MINI}">{H("s.id")}</button></sc-for></div></sc-if>')
     # VISOES-1 (proprietário, 10/10/2026): seletor por ícone; Lista e Tabela agrupada na mesma grade (o agrupamento é estado da grade),
     # Kanban e Carga por recurso migram sem mudança de regra. Visões válidas: visoes.py (fonte única; O.S. sem Mapa: DEC-2609-09)
-    bar,panes=visoes('g_os','os',{'lista':g_os,'agrupada':'lista','kanban':kb_nota+_kanban(celular_rola=True),'calendario':kb_nota+_calendario(),'carga':rc_nota+_recursos_tab()},rotulo='Visão das ordens')
+    bar,panes=visoes('g_os','os',{'lista':g_os,'kanban':kb_nota+_kanban(celular_rola=True),'calendario':kb_nota+_calendario(),'carga':rc_nota+_recursos_tab()},rotulo='Visão das ordens')
     colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_chips()}{_notas_tal()}</div>'   # o Talhão subiu para a faixa "Filtros desta tela" (13/10); os avisos dele ficam aqui
             f'<div style="flex: 0 0 auto; margin-left: auto;">{bar}</div></div>')
     # recorte vazio (Fazenda/Safra do topo): uma frase e uma ação no lugar das visões

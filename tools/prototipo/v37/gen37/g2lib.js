@@ -139,11 +139,11 @@ function g2semSep(raw,i){ const p=raw[i]; if(!p||typeof p.t!=='string'||!/^\s*·
 function g2part(p,v){ const o={isIco:false,isCn:false,isTxt:false,isB:false,isMut:false,isChip:false,isTag:false,isLink:false,isCta:false,isAct:false,isBr:false,t:p.t||'',st:'',cls:'',dot:'',href:p.h||'#',fn:null,title:p.t||'',dica:'',hasDica:false};
   switch(p.k){ case 'b': o.isB=true; break; case 'mut': o.isMut=true; break;
     case 'chip': { const cc=G2C[p.c]||G2C.gray; o.isChip=true; o.dica=p.dica||p.dv||(p.de?g2dicaDe(p.t):''); o.hasDica=!!p.dica;   /* p.de: dica de estado do dicionário; p.dv: texto pronto da tela (selo do bloqueio, osSeloDica); os dois só visuais (o leitor de tela lê o motivo explícito p.dica; a linha focada recebe a dica do selo, g2dicaSelo) */ o.st='display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:normal;max-width:100%;min-width:0;overflow-wrap:anywhere;line-height:1.3;color:'+cc[0]+';background:'+cc[1]+';';   /* cortes visuais (13/10): selo longo quebra na própria célula, nunca invade a vizinha */ o.dot='width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+cc[0]+';'; break; }
-    case 'ico': { const cc=G2C[p.c]||G2C.gray; o.isIco=true; o.dica=p.t||''; o.st='display:inline-flex;align-items:center;flex-shrink:0;color:'+cc[0]+';'; break; }   /* VISOES-2 §3.6: situação como ícone com cor, texto na dica e no leitor */
+    case 'ico': { const cc=G2C[p.c]||G2C.gray; o.isIco=true; o.dica=p.t||''; o.st='display:inline-flex;align-items:center;gap:4px;flex-shrink:0;color:'+cc[0]+';font-size:11.5px;font-weight:700;'; o.icoTxt=p.curto||''; o.icoTem=!!p.curto; break; }   /* C2: bloqueio/erro com texto curto, não só cor e dica */   /* VISOES-2 §3.6: situação como ícone com cor, texto na dica e no leitor */
     case 'cn': { const cc=G2C[p.c]||G2C.gray; o.isCn=true; o.st='font-weight:800;white-space:nowrap;color:'+cc[0]+';'; break; }
     case 'tag': o.isTag=true; break; case 'link': o.isLink=true; break;
     case 'cta': o.isCta=true; o.cls='g2cta'; o.st=p.u?G2CTAU:G2CTA; break;
-    case 'act': o.isAct=true; o.al=p.al||p.t; if(p.lk) { o.lk=true; } if(p.fn&&p.fn.indexOf(':')>0){ const nm=p.fn.split(':')[0], ar=p.fn.slice(nm.length+1); o.fn=()=>{ if(v&&v[nm]) v[nm](ar); }; } else o.fn=(v&&p.fn&&v[p.fn])||(()=>{}); o.cls=p.lk?'':'g2cta'; o.st=p.lk?'border:0;background:transparent;padding:0;color:#1E7A4C;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;text-align:left;':(p.u?G2CTAU:G2CTA);
+    case 'act': o.isAct=true; o.al=p.al||p.t; if(p.lk) { o.lk=true; } if(p.fn&&p.fn.indexOf(':')>0){ const nm=p.fn.split(':')[0], ar=p.fn.slice(nm.length+1); o.fn=()=>{ if(v&&v[nm]) v[nm](ar); }; } else o.fn=(v&&p.fn&&v[p.fn])||(()=>{}); o.cls=p.lk?'':'g2cta'; if(p.desce){ o.cls='g2desce'; o.st='border:0;background:transparent;padding:0;color:#15201A;font-weight:800;cursor:pointer;font-family:inherit;font-size:13px;text-align:left;'; o.t=p.t+' ›'; } else o.st=p.lk?'border:0;background:transparent;padding:0;color:#1E7A4C;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;text-decoration:underline;text-underline-offset:3px;text-align:left;':(p.u?G2CTAU:G2CTA);
       // célula inteira tocável (DS: alvo ≥ 44 px): texto da célula, sem negrito, na cor do estado; aria-pressed quando é o filtro ativo
       if(p.full){ o.cls='g2full'; o.st='width:100%;min-height:44px;border:0;background:'+(p.on?'#E4F3E9':'transparent')+';padding:0 6px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:'+(p.on?'700':'400')+';text-align:right;font-variant-numeric:tabular-nums;color:'+((G2C[p.c]||[])[0]||'#15201A')+';'+(p.on?'outline:2px solid #1E7A4C;outline-offset:-2px;border-radius:6px;':''); } break;
     case 'br': o.isBr=true; break; default: o.isTxt=true; }
@@ -249,7 +249,7 @@ function g2cvGrava(self,sp,ks){ try{ if(ks) localStorage.setItem(g2cvChave(sp),J
 if(typeof window!=='undefined'&&!window.__g2cvTodas){ window.__g2cvTodas=(gid)=>{ const sp=(typeof GRIDS!=='undefined'?GRIDS:[]).find(g=>g.id===gid); if(!sp) return false; const ks=sp.cols.map(c=>c.k);
     g2perfis().concat([g2todos()]).forEach(pf=>{ try{ localStorage.setItem(g2cvChave(sp).replace(/:[^:]*$/,':'+pf.k),JSON.stringify(ks)); }catch(e){} }); return true; };
   window.__g2cvEscolha=(gid)=>{ try{ return localStorage.getItem(g2cvChave({id:gid})); }catch(e){ return null; } }; }
-function g2cvVals(self,sp,v,cols){ const id=sp.id; if(!g2cvTem(sp)||sp.cols.length<=5){ v[id+'_cvhas']=false; v[id+'_cvopen']=false; v[id+'_cvg']=[]; return; }
+function g2cvVals(self,sp,v,cols){ const id=sp.id; if(!g2cvTem(sp)||(sp.cols.length<=5&&cols.length>=sp.cols.length)){ v[id+'_cvhas']=false; v[id+'_cvopen']=false; v[id+'_cvg']=[]; return; }
   const st=g2st(self,id), vis=new Set(cols.map(c=>c.k)), n=sp.cols.length-vis.size, k0=sp.cols[0].k, open=!!st.cvo;
   v[id+'_cvhas']=true; v[id+'_cvn']=n?'+'+n:''; v[id+'_cvlab']='Colunas'+(n?' · '+n+(n>1?' ocultas':' oculta'):' · todas visíveis'); v[id+'_cvopen']=open; v[id+'_cvexp']=String(open);
   const P=st.cvpos||{xr:0,y:0}, W=290, vw=(typeof window!=='undefined'?window.innerWidth:1440), vh=(typeof window!=='undefined'?window.innerHeight:900);
@@ -262,8 +262,76 @@ function g2cvVals(self,sp,v,cols){ const id=sp.id; if(!g2cvTem(sp)||sp.cols.leng
     tog:()=>{ if(c.k===k0) return; const cur=new Set(g2colsVis(self,sp).map(x=>x.k)); if(cur.has(c.k)) cur.delete(c.k); else cur.add(c.k); g2cvGrava(self,sp,[...cur]); }}))})).filter(g=>g.cols.length);
   const pad=g2cvPadrao(sp), esc=g2cvLer(self,sp); v[id+'_cvmudou']=!!esc;
   v[id+'_cvrest']=()=>g2cvGrava(self,sp,null); }
+// VISOES-2 §3.3 · Agrupar por e descer. sp.ag = [{pq, l, niv:[nomes dos níveis]}] (engine.grid ag=); cada linha traz r.g[pq] = [valor do
+// nível 0, valor do nível 1, ...] (valor pode ser lista: a linha entra em cada grupo, e o grupo conta itens distintos). Estado {d, t}: a pergunta
+// e a trilha (valores já descidos). O grupo nasce só das linhas do recorte (busca, filtros); clicar no nome desce um nível (vira filtro), a
+// seta expande no lugar; no último nível ficam as linhas. Endereço ?ag=&trilha= (replaceState) e preferência por perfil × tela × grade.
+// ?view=agrupada (VISOES-1) chega como Agrupar por Onde.
+function g2agTem(sp){ return !!(sp&&sp.ag&&sp.ag.length); }
+function g2agChave(sp){ let pf=''; try{ pf=g2perfil().k; }catch(e){} return 'g2ag:'+g2arq()+':'+sp.id+':'+pf; }
+function g2agOk(sp,a){ return !!a&&typeof a==='object'&&sp.ag.some(x=>x.pq===a.d)&&Array.isArray(a.t)&&a.t.every(x=>typeof x==='string'); }
+function g2agUrl(pathname,search,hash,a){ const s=String(search||'').replace(/^\?/,''); const nome=p=>p.indexOf('=')<0?p:p.slice(0,p.indexOf('='));
+  const ps=s?s.split('&').filter(p=>p&&['ag','trilha'].indexOf(nome(p))<0&&!(nome(p)==='view'&&p==='view=agrupada')):[];
+  if(a){ ps.push('ag='+encodeURIComponent(a.d)); if(a.t.length) ps.push('trilha='+a.t.map(encodeURIComponent).join('/')); }
+  return String(pathname||'')+(ps.length?'?'+ps.join('&'):'')+String(hash||''); }
+function g2agLer(self,sp){ const st=g2st(self,sp.id); if(st.ag!==undefined) return st.ag; let a=null;
+  try{ const q=new URLSearchParams(location.search), d=q.get('ag'); if(d) a={d,t:String(q.get('trilha')||'').split('/').filter(Boolean).map(x=>{ try{ return decodeURIComponent(x); }catch(e){ return x; } })};
+    else if(q.get('view')==='agrupada'&&sp.ag.some(x=>x.pq==='onde')) a={d:'onde',t:[]}; }catch(e){ a=null; }
+  if(!g2agOk(sp,a)){ a=null; try{ const x=JSON.parse(localStorage.getItem(g2agChave(sp))||'null'); if(g2agOk(sp,x)) a={d:x.d,t:x.t}; }catch(e){ a=null; } }
+  const all=Object.assign({},self.state.g2||{}); all[sp.id]=Object.assign({},all[sp.id]||{},{ag:a}); self.state.g2=all; return a; }
+function g2agGrava(self,sp,a){ try{ if(a) localStorage.setItem(g2agChave(sp),JSON.stringify(a)); else localStorage.setItem(g2agChave(sp),'null'); }catch(e){}
+  try{ history.replaceState(history.state,'',g2agUrl(location.pathname,location.search,location.hash,a)); }catch(e){}
+  g2set(self,sp.id,{ag:a,agm:false,agx:null}); }
+function g2agVals_(r,a,D,i){ const g=(r.g||{})[a.d]; const x=g?g[i]:undefined; return (Array.isArray(x)?x:[x]).map(y=>(y===undefined||y===null||y==='')?'Sem '+D.niv[i].toLowerCase():String(y)); }
+function g2agRows(self,sp,st,rows){ const a=g2agLer(self,sp); if(!a) return {rows,a:null}; const D=sp.ag.find(x=>x.pq===a.d), niv=D.niv.length; let lv=Math.min(a.t.length,niv);
+  let base=rows.filter(r=>a.t.slice(0,lv).every((t,i)=>g2agVals_(r,a,D,i).indexOf(t)>=0)); const auto=[];
+  // nível com um valor só no recorte (uma fazenda) não pede escolha: desce sozinho, e o valor aparece na trilha
+  while(lv<niv-1){ const vs=new Set(); base.filter(r=>g2match(r,sp,st)).forEach(r=>g2agVals_(r,a,D,lv).forEach(k=>vs.add(k))); if(vs.size!==1) break;
+    const k=[...vs][0]; auto.push(k); base=base.filter(r=>g2agVals_(r,a,D,lv).indexOf(k)>=0); lv++; }
+  const path=a.t.slice(0,Math.min(a.t.length,niv)).concat(auto);
+  if(lv>=niv) return {rows:base,a,D,lv,base,path};   // último nível: as linhas, filtradas pela trilha
+  const gs={}, ord=[], ok={}, c0=sp.cols[0].k, somas=sp.cols.filter(c=>c.agg==='sum');
+  base.filter(r=>g2match(r,sp,st)).forEach(r=>{ const vs=g2agVals_(r,a,D,lv), so=((r.gs||{})[a.d]||[])[lv];
+    vs.forEach(k=>{ if(!gs[k]){ gs[k]=[]; ord.push(k); } gs[k].push(Object.assign({},r,{id:r.id+'@'+k})); if(so!==undefined&&so!==null&&(ok[k]===undefined||String(so)<String(ok[k]))) ok[k]=so; }); });
+  // ordem: a chave própria do nível quando a linha traz (r.gs: mês e semana em ordem de calendário), senão o nome
+  ord.sort((x,y)=>(ok[x]!==undefined&&ok[y]!==undefined&&String(ok[x])!==String(ok[y]))?(String(ok[x])<String(ok[y])?-1:1):x.localeCompare(y,'pt-BR',{numeric:true}));
+  const out=ord.map(k=>{ const kids=gs[k], n=new Set(kids.map(x=>x.id.split('@')[0])).size; const row={id:'grp@'+k,ro:true,nosel:true,grp:{k,lv},kids,v:{},s:{},p:{},m:{}};
+    row.v[c0]=k; row.s[c0]=k; row.p[c0]=[{k:'act',t:k,fn:sp.id+'_agdesce:'+encodeURIComponent(k),desce:true,al:'Descer em '+k+' ('+D.niv[lv].toLowerCase()+')'}];
+    const c1=g2colsVis(self,sp)[1]; if(c1){ row.p[c1.k]=[{k:'mut',t:n+' '+(n>1?(D.plural||'itens'):(D.um||'item'))}]; }
+    somas.forEach(c=>{ const tot=kids.reduce((s2,x)=>s2+(Number((x.v||{})[c.k])||0),0); row.v[c.k]=tot; });
+    return row; });
+  // grupos começam abertos a cada novo agrupamento ou nível (a seta recolhe no lugar)
+  const ch=a.d+'|'+a.t.join('/'); if(st.agx!==ch){ const x={}; out.forEach(r=>{ x[r.id]=true; }); const all=Object.assign({},self.state.g2||{}); all[sp.id]=Object.assign({},all[sp.id]||{},{x,agx:ch}); self.state.g2=all; }
+  return {rows:out,a,D,lv,base,path}; }
+const G2_AG_ICO={oque:'O quê',quem:'Quem',quando:'Quando',onde:'Onde'};
+function g2agMenuVals(self,sp,v,R){ const id=sp.id; if(!g2agTem(sp)){ v[id+'_aghas']=false; v[id+'_agmenu']=false; v[id+'_agtr']=[]; v[id+'_agtrilha']=false; return; }
+  const st=g2st(self,id), a=R.a, D=R.D;
+  v[id+'_aghas']=true; v[id+'_agl']=a?D.l:''; v[id+'_agexp']=String(!!st.agm); v[id+'_agmenu']=!!st.agm;
+  ['oque','quem','quando','onde'].forEach(k=>{ v[id+'_agi_'+k]=!!a&&a.d===k; }); v[id+'_agi_0']=!a;
+  const P=st.agpos||{x:0,y:0}, W=260, vw=(typeof window!=='undefined'?window.innerWidth:1440); v[id+'_agpos']='top:'+(P.y+6)+'px;left:'+Math.max(8,Math.min(P.x,vw-W-8))+'px;';
+  v[id+'_agtog']=(e)=>{ const el=e&&e.currentTarget; const rr=el&&el.getBoundingClientRect?el.getBoundingClientRect():{left:0,bottom:0}; const ab=!g2st(self,id).agm;
+    g2set(self,id,ab?{agm:true,agpos:{x:rr.left,y:rr.bottom}}:{agm:false}); if(ab) setTimeout(()=>{ const b=document.querySelector('[data-g2agm="'+id+'"] [aria-checked=true]')||document.querySelector('[data-g2agm="'+id+'"] button'); if(b) b.focus(); },0); };
+  const fecha=()=>{ g2set(self,id,{agm:false}); setTimeout(()=>{ const b=document.querySelector('[data-g2agb="'+id+'"]'); if(b) b.focus(); },0); };
+  v[id+'_agfecha']=fecha; v[id+'_agkey']=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); fecha(); } };
+  v[id+'_agops']=[{pq:'',t:'Sem agrupar',niv:''}].concat(sp.ag.map(x=>({pq:x.pq,t:x.l,niv:x.niv.length>1?x.niv.join(' › '):''}))).map(o=>({t:o.t,niv:o.niv,temNiv:!!o.niv,on:String((a?a.d:'')===o.pq),
+    i0:!o.pq,iOque:o.pq==='oque',iQuem:o.pq==='quem',iQuando:o.pq==='quando',iOnde:o.pq==='onde',perg:G2_AG_ICO[o.pq]||'',
+    go:()=>{ g2agGrava(self,sp,o.pq?{d:o.pq,t:[]}:null); setTimeout(()=>{ const b=document.querySelector('[data-g2agb="'+id+'"]'); if(b) b.focus(); },0); }}));
+  // trilha: "Todas › Lagoa Grande › T4"; cada item volta ao nível dele; o último é onde se está
+  const sobe=(n)=>{ const a2=g2st(self,id).ag; if(!a2) return; g2agGrava(self,sp,{d:a2.d,t:a2.t.slice(0,n)}); };
+  const path=(R.path||[]); v[id+'_agtrilha']=!!a&&path.length>0;
+  v[id+'_agtr']=a?[{t:'Todas',go:()=>sobe(0)}].concat(path.slice(0,-1).map((x,i)=>({t:x,go:()=>sobe(i+1)}))):[];
+  v[id+'_agatual']=a&&path.length?path[path.length-1]:'';
+  v[id+'_agnivel']=a?(R.lv<D.niv.length?'por '+D.niv[R.lv].toLowerCase():''):'';
+  v[id+'_agdesce']=(kEnc)=>{ const a2=g2st(self,id).ag; if(!a2) return; let k=kEnc; try{ k=decodeURIComponent(kEnc); }catch(e){} g2agGrava(self,sp,{d:a2.d,t:path.concat([k])});
+    setTimeout(()=>{ const n=document.querySelector('[data-g2agtr="'+id+'"] b'); if(n){ n.setAttribute('tabindex','-1'); n.focus(); } },0); };
+  // Esc sobe um nível (fora de campo, menu ou painel aberto)
+  if(typeof window!=='undefined'){ window.__g2agSobe=window.__g2agSobe||{}; window.__g2agSobe[id]=()=>{ const a2=g2st(self,id).ag; if(a2&&a2.t.length){ sobe(a2.t.length-1); return true; } return false; };
+    if(!window.__g2agEsc){ window.__g2agEsc=1; document.addEventListener('keydown',(e)=>{ if(e.key!=='Escape'||e.defaultPrevented) return; const t=e.target;
+      if(t&&t.closest&&t.closest('input,select,textarea,[role=dialog],aside,[role=menu]')) return; if(document.querySelector('aside[role=dialog],[role=dialog][aria-modal=true]')) return;
+      for(const k in window.__g2agSobe){ if(window.__g2agSobe[k]()){ e.preventDefault(); return; } } }); } } }
 function g2vals(self,sp,v,mask){
-  const id=sp.id, st=g2stBusca(self,id,g2st(self,id)), rows=g2disp(self,sp), added=self.state.added||{};
+  const id=sp.id, st0=g2stBusca(self,id,g2st(self,id)), rows0=g2disp(self,sp), added=self.state.added||{};
+  const AG=g2agTem(sp)?g2agRows(self,sp,st0,rows0):{rows:rows0,a:null}, rows=AG.rows, st=g2stBusca(self,id,g2st(self,id));   // VISOES-2 §3.3
   const flat=g2flat(sp,st,g2qrows(sp,st,rows),mask,added); const ed=sp.edit||{m:'none'}; const editable=ed.m&&ed.m!=='none';
   g2qvals(self,sp,v,st,rows,added);
   const so=st.so||sp.so||{};
@@ -302,8 +370,11 @@ function g2vals(self,sp,v,mask){
       podeOcultar:g2cvTem(sp)&&sp.cols.length>5&&fmc!==sp.cols[0].k, ocultar:()=>{ const cur=new Set(g2colsVis(self,sp).map(x=>x.k)); cur.delete(fmc); fechar(); g2cvGrava(self,sp,[...cur]); }};
   } else v[id+'_fm']={open:false,vals:[]};
   const total=(sp.total!==false) && sp.cols.some(c=>c.agg);
+  const qn=g2norm((st.q||'').trim()), visK=new Set(cols.map(c=>c.k));
+  // VISOES-2 C3: busca que casa só em coluna oculta diz na linha onde casou (a coluna continua valendo para a busca)
+  const ondeCasou=(r)=>{ if(!qn||!g2cvTem(sp)||r.grp) return ''; if(cols.some(c=>g2norm(g2text(r,c)).indexOf(qn)>=0)) return ''; const oc=sp.cols.filter(c=>!visK.has(c.k)&&g2norm(g2text(r,c)).indexOf(qn)>=0).map(c=>c.l); return oc.length?'encontrado em: '+oc.join(', '):''; };
   v[id+'_rows']=flat.map(({r,lvl,has})=>{
-    const cells=[]; const exp=(st.x||sp.x0||{});
+    const cells=[]; const exp=(st.x||sp.x0||{}); const casou=ondeCasou(r);
     // linha livre (convite para cadastrar, ex.: talhão sem cultivo): sem seleção e sem lixeira
     if(sp.sel&&(r.livre||r.fora||r.nosel)) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.sel) cells.push({isSel:true,isData:false,isDel:false,cls:'',on:!!(st.sel||{})[r.id],selLabel:'Selecionar '+g2text(r,sp.cols[0]),
       tog:()=>{ const s2=Object.assign({},g2st(self,id).sel||{}); s2[r.id]=!s2[r.id]; g2set(self,id,{sel:s2}); },st:'padding:6px 4px 6px 12px;'});
@@ -312,7 +383,7 @@ function g2vals(self,sp,v,mask){
       const raw0=empty?[]:((r.p&&r.p[c.k]&&r.p[c.k].length)?r.p[c.k]:[{k:(ci===0&&lvl===0&&has?'b':'txt'),t:g2fmt(r.v?r.v[c.k]:'',c)}]);
       // partes próprias (p) com número puro ganham a unidade (cópia: r.p não muda)
       const raw=c.un?raw0.map(p=>(p&&typeof p.t==='string'&&['txt','b','cn','chip'].indexOf(p.k)>=0)?Object.assign({},p,{t:g2unf(p.t,c)}):p):raw0;
-      const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':'')+(c.nr?' g2nr':'')+(c.a==='r'?' g2celn':''),parts:raw.map((p,i)=>g2part(g2semSep(raw,i),v)),pw:'max-width:'+(c.w||340)+'px;',
+      const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':'')+(c.nr?' g2nr':'')+(c.a==='r'?' g2celn':''),parts:(ci===0&&casou?raw.concat([{k:'br'},{k:'mut',t:casou}]):raw).map((p,i,arr)=>g2part(g2semSep(arr,i),v)),pw:'max-width:'+(c.w||340)+'px;',
         st:(c.nr?'padding:0 2px;':'padding:6px 8px;')+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&sp.tree?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:inherit;box-shadow:1px 0 0 #E4E9E5;':'')};
       if(ci===0 && sp.tree){ cell.hasCaret=true; cell.caretOk=has; cell.caretNo=!has; const open=!!exp[r.id]||(g2filtering(st)&&has);
         cell.caretSym=open?'▾':'▸'; cell.caretExp=String(open); cell.caretLabel=(open?'Recolher ':'Expandir ')+g2text(r,c);
@@ -326,12 +397,15 @@ function g2vals(self,sp,v,mask){
     return {id:r.id, cls:'g2r'+(canOpen?' g2ed':'')+(st.fl===r.id?' g2flash':'')+(lvl>0?' g2kid':''), tab:(canOpen&&!r.drDup)?'0':'-1',
       open:(e)=>{ if(canOpen) g2open(self,sp,r.id,e); }, key:(e)=>{ if(!canOpen || !e || (e.key!=='Enter'&&e.key!==' ')) return; const t=e.target; if(t&&t.closest&&t.closest('a,button,input,select,textarea,label,[data-noedit],.g2nr')) return; e.preventDefault(); g2open(self,sp,r.id,null); }, cells}; });
   v[id+'_count']=flat.filter(x=>x.lvl===0).length; v[id+'_all']=rows.length;
+  if(AG.a){ const ids=new Set(); (AG.base||[]).forEach(r=>{ if(g2match(r,sp,st,mask,added)) ids.add(String(r.id)); }); v[id+'_count']=ids.size; v[id+'_all']=rows0.length; }   // agrupado: itens distintos do recorte, não grupos
+  g2agMenuVals(self,sp,v,AG);
   v[id+'_empty']=flat.length===0; v[id+'_some']=flat.length>0;
   v[id+'_q']=st.q||''; v[id+'_setq']=(e)=>g2set(self,id,{q:e.target.value});
   v[id+'_qon']=!g2qSeg(self,id); v[id+'_qlab']=(self.__g2qL===id&&self.__g2qS)?'Buscar nesta tela':'Buscar nesta tabela';
   v[id+'_filtered']=g2filtering(st)||!!(sp.qf&&st.qv);
   v[id+'_clear']=()=>{ g2set(self,id,{q:'',f:{},qv:''}); if(g2qSeg(self,id)) g2set(self,self.__g2qL,{q:''}); };   // a busca da tela também filtra esta tabela
   v[id+'_fchips']=Object.keys(st.f||{}).filter(k=>(st.f[k]||[]).length).map(k=>{ const c=sp.cols.find(x=>x.k===k)||{l:k}; return {t:c.l+': '+st.f[k].map(x=>g2flab(rows,c,x)).join(', '), rm:()=>{ const f=Object.assign({},g2st(self,id).f||{}); delete f[k]; g2set(self,id,{f}); }}; });
+  { const soA=st.so||sp.so||{}, cs=soA.k&&sp.cols.find(c=>c.k===soA.k); if(cs&&!cols.some(c=>c.k===cs.k)) v[id+'_fchips'].push({t:'Ordenado por '+cs.l+(soA.d?' ▼':' ▲'), rm:()=>g2set(self,id,{so:{}})}); }   // VISOES-2 C3: ordenação por coluna oculta à vista
   v[id+'_selcount']=Object.values(st.sel||{}).filter(Boolean).length; v[id+'_hassel']=v[id+'_selcount']>0;
   // barra de seleção (DS-40 · UX-ACAO-UNICA-20261003): seleção por IDs; diz quantos estão fora da vista (filtro ou grupo recolhido),
   // sem perder nem ampliar a seleção; a prévia do comando de lote lista todos os incluídos
@@ -878,6 +952,8 @@ function g2noDia(ini,fim,dia){ if(!ini) return false; const f=(fim&&fim>=ini)?fi
 function g2visaoValida(k,validas){ return typeof k==='string'&&/^[a-z]+$/.test(k)&&(validas||[]).indexOf(k)>=0; }
 // precedência (pura): ?view válida › preferência válida › a primeira das válidas (Lista); valor fora das válidas ou fora de ^[a-z]+$: aviso
 function g2visaoInicial(search,pref,validas){ let q=null; try{ q=new URLSearchParams(String(search||'')).get('view'); }catch(e){ q=null; }
+  if((q==='tabela'||q==='agrupada')&&(validas||[]).indexOf('lista')>=0&&(validas||[]).indexOf(q)<0) q='lista';   // VISOES-2: Tabela única (agrupada → Agrupar por Onde, g2agLer)
+  if(pref==='agrupada'&&(validas||[]).indexOf('agrupada')<0) pref='lista';
   if(q!==null&&g2visaoValida(q,validas)) return {k:q,fonte:'url',aviso:false};
   const lista=(validas&&validas.length)?validas[0]:'lista', p=g2visaoValida(pref,validas)?pref:'';
   return {k:p||lista,fonte:p?'pref':'lista',aviso:q!==null}; }

@@ -40,7 +40,8 @@ temV, temE = not isinstance(V, Exception), not isinstance(E, Exception) and hasa
 def p1():
     if not temV: return ['visoes.py ausente']
     f = []
-    if V.validas('os') != ['lista', 'agrupada', 'kanban', 'calendario', 'carga']: f.append(('validas', V.validas('os')))
+    if V.validas('os') != ['lista', 'kanban', 'calendario', 'carga']: f.append(('validas', V.validas('os')))
+    if 'Fundida na Tabela' not in V.REGISTRO['os']['cortes'].get('agrupada', ''): f.append('agrupada sem o motivo da fusão (VISOES-2)')
     for k, at in V.REGISTRO['os']['ativas'].items():
         if not all(str(at.get(a) or '').strip() for a in V.EXIGE[k]): f.append(('sem fonte', k))
     for k, m in V.REGISTRO['os']['cortes'].items():
@@ -48,7 +49,7 @@ def p1():
     if 'DEC-2609-09' not in V.REGISTRO['os']['cortes'].get('mapa', ''): f.append('O.S. sem Mapa: DEC-2609-09 mantida')
     if V.ORDEM[0] != 'lista': f.append('Lista não é a primeira')
     return f
-f1 = p1(); chk('P1 validas(os) = lista, agrupada, kanban, calendario, carga; cada visão com os atributos que EXIGE pede, com fonte; cortes com motivo (Mapa: DEC-2609-09)', not f1, f1)
+f1 = p1(); chk('P1 validas(os) = lista (Tabela), kanban, calendario, carga; a Tabela agrupada foi fundida na Tabela (VISOES-2), com motivo; cada visão com os atributos que EXIGE pede, com fonte; cortes com motivo (Mapa: DEC-2609-09)', not f1, f1)
 def p2():
     if not temV: return ['visoes.py ausente']
     s = V.sustenta; f = []
@@ -71,9 +72,9 @@ def p2b():
 r2b = tenta(p2b); chk('P2b uma visão só: sem barra (devolve só o painel)', r2b == ('', '<i>X</i>'), r2b)
 def p3():
     if not (temV and temE): return ['componente ausente']
-    f = []; P = {'lista': 'L', 'agrupada': 'lista', 'kanban': 'K', 'carga': 'C'}
+    f = []; P = {'lista': 'L', 'kanban': 'K', 'carga': 'C'}
     for nome, pn in (('painel de Mapa (não sustentado na O.S.)', dict(P, mapa='M')), ('painel faltando (carga)', {k: v for k, v in P.items() if k != 'carga'}),
-                     ('apelido para visão sem painel', dict(P, agrupada='calendario'))):
+                     ('apelido para visão sem painel', dict(P, kanban='calendario'))):
         try: E.visoes('g_p3', 'os', pn, 'r'); f.append(nome + ': não falhou')
         except ValueError: pass
     V.REGISTRO['_cal'] = {'ativas': {'lista': {}, 'calendario': {'data': ''}}, 'cortes': {}}
@@ -85,7 +86,7 @@ f3 = p3(); chk('P3 painel para visão não sustentada, painel faltando ou apelid
 
 # 3 · componente
 def barra_os():
-    E.VISOES_SPEC.pop('g_c', None); b, c = E.visoes('g_c', 'os', {'lista': '<i>L</i>', 'agrupada': 'lista', 'kanban': '<i>K</i>', 'calendario': '<i>Cal</i>', 'carga': '<i>C</i>'}, 'Visão das ordens'); E.VISOES_SPEC.pop('g_c', None); return b, c
+    E.VISOES_SPEC.pop('g_c', None); b, c = E.visoes('g_c', 'os', {'lista': '<i>L</i>', 'kanban': '<i>K</i>', 'calendario': '<i>Cal</i>', 'carga': '<i>C</i>'}, 'Visão das ordens'); E.VISOES_SPEC.pop('g_c', None); return b, c
 def checa_barra(b, val):
     f = []
     if 'role="toolbar"' not in b or 'aria-label="Visão das ordens"' not in b: f.append('toolbar com rótulo')
@@ -166,7 +167,7 @@ if os.path.isdir(P):
     pags = {f: open(os.path.join(P, f), encoding='utf-8').read() for f in os.listdir(P) if f.endswith('.dc.html')}
     com = sorted(f for f, s in pags.items() if 'data-visoes=' in s)
     s = pags.get('OS.dc.html', '')
-    chk('B1 só a O.S. tem o seletor nesta fatia, com as 5 visões; G2_VISOES vai na página', com == ['OS.dc.html'] and 'data-visoes="lista agrupada kanban calendario carga"' in s and 'const G2_VISOES = {"g_os"' in s, com)
+    chk('B1 só a O.S. tem o seletor nesta fatia, com as 4 visões (Tabela, Kanban, Calendário, Carga; VISOES-2 fundiu a agrupada); G2_VISOES vai na página', com == ['OS.dc.html'] and 'data-visoes="lista kanban calendario carga"' in s and 'const G2_VISOES = {"g_os"' in s, com)
     chk('B2 um caminho só: o botão "Agrupar por talhão" (os_agrgo) e as abas de texto Lista | Kanban | Recursos saíram', 'os_agrgo' not in s and '>Recursos</button>' not in s and '>Kanban</button>' not in s, '')
     chk('B3 nenhum arrastar (Kanban e Carga sem draggable)', 'draggable' not in s)
     # §2.4: toda escrita de URL nas telas com seletor preserva location.search (a regra de visoes.escritas_sem_query)
