@@ -109,8 +109,10 @@ def cd02():
     dados=json.dumps(dict(unid=DC.UNID_PROD,sem=SEMENTES_BASE,son=SEG_ON(),soff=SEG_OFF(),
                       defc=next(r['id'] for r in cul_rows if r['v']['nome']=='Soja')),ensure_ascii=False)
     js({},CADC_JS+f"\nconst C2={dados}; const OUTRA_C={json.dumps(OUTRA_C)}, CRIAR={json.dumps(CRIAR,ensure_ascii=False)};\n"+r'''
-// item de semente criado aqui chega ao CD-06 pelo armazenamento do navegador (chave própria dos cadastros, CAD_LS; o CD-06 lê ao abrir)
-function c2lsSemente(n){ try{ const o=JSON.parse(localStorage.getItem(CAD_LS)||'{}'); o.sementes=o.sementes||[]; if(o.sementes.indexOf(n)<0) o.sementes.push(n); localStorage.setItem(CAD_LS,JSON.stringify(o)); }catch(e){} }
+// item de semente criado aqui chega ao CD-06 pelo armazenamento do navegador (chave própria dos cadastros, CAD_LS; o CD-06 lê ao abrir).
+// CD08-GRAVA-01 residual (revisão Codex de 14/10, S2): a semente nova não grava sozinha; fica pendente e vai na MESMA gravação das culturas e
+// cultivares (c2grava). Se a gravação falhar, nada entra (nem a semente) e a pendência some com o rascunho devolvido.
+function c2lsSemente(self,n){ self.__c2semNova=self.__c2semNova||[]; if(self.__c2semNova.indexOf(n)<0) self.__c2semNova.push(n); }
 function c2rm(list,id){ const i=list.findIndex(x=>x.id===id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&c2rm(x.kids,id)); }
 function c2opts(gid,k,opts){ const f=(GR(gid).edit.fields||[]).find(x=>x.k===k); if(f) f.opts=opts; }
 function c2sem(cult,cv){ return 'Semente de '+String(cult).toLowerCase()+' '+String(cv).replace(/^Híbrido /,''); }
@@ -146,7 +148,10 @@ function PREVALS(self,v){ cadActsIni(self); c2culIni(self);
   c2opts('g_cv','sem',sems.sort((a,b)=>a.localeCompare(b,'pt-BR')).concat([CRIAR]));
   // filtro rápido de cada aba (dentro do bloco)
   cadQf(self,v,'g_cv','c2qf0',[{k:'res',t:'A resolver',f:r=>!!cvSit(r.v).res},{k:'inat',t:'Inativas',f:r=>r.v.sit==='Inativa',oz:true}]); }
-function c2grava(self){ return cadLsGrava(self,{culturas:RW(self,'g_cult').map(c=>({id:c.id,v:Object.assign({},c.v)})),cultivares:RW(self,'g_cv')}); }
+function c2grava(self){ const nov=self.__c2semNova||[]; self.__c2semNova=[];
+  const obj={culturas:RW(self,'g_cult').map(c=>({id:c.id,v:Object.assign({},c.v)})),cultivares:RW(self,'g_cv')};
+  if(nov.length){ const ss=(cadLsLer('sementes')||[]).slice(); nov.forEach(n=>{ if(ss.indexOf(n)<0) ss.push(n); }); obj.sementes=ss; }
+  return cadLsGrava(self,obj); }
 function EXTRAVALS(self,v){ simv(self,v); self.g2persist=()=>c2grava(self); c2grava(self);
   const cvs=cadRegs(RW(self,'g_cv'));
   const semL=cvs.filter(r=>cvFalta(r.v)); const semF=semL.length;
@@ -185,7 +190,7 @@ function EXTRAVALS(self,v){ simv(self,v); self.g2persist=()=>c2grava(self); c2gr
       else c=cul.find(x=>x.v.nome===r.v.cult);
       if(!c) return;
       r.v.cult=c.v.nome; r.v.ncult=''; r.v.tipo=c.v.tipo;
-      if(c.v.tipo==='Anual'){ if(!r.v.sem||r.v.sem===CRIAR){ r.v.sem=c2sem(c.v.nome,r.v.nome); c2lsSemente(r.v.sem); msg.push('item '+r.v.sem+' criado em Produtos, unidades e locais (Sementes · kg)'); } else msg.push('semente '+r.v.sem); }
+      if(c.v.tipo==='Anual'){ if(!r.v.sem||r.v.sem===CRIAR){ r.v.sem=c2sem(c.v.nome,r.v.nome); c2lsSemente(self,r.v.sem); msg.push('item '+r.v.sem+' criado em Produtos, unidades e locais (Sementes · kg)'); } else msg.push('semente '+r.v.sem); }
       else r.v.sem='';
       soPai('g_cv',rows,r,c.id); self.setState({g2toast:'Salvo: '+r.v.nome+' em '+c.v.nome+' · '+msg.join(' · ')+'.'}); return; }
     if(gid==='g_cult'){
