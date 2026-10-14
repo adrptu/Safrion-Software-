@@ -83,7 +83,10 @@ window.CEN=()=>JSON.parse(localStorage.getItem('talhao-os-cenario-v1')||'null');
 window.ACHA=(t,root)=>{ const r=root?document.querySelector(root):document; if(!r) return null; const els=[...r.querySelectorAll('button,a,[role=tab],[role=button],[role=row],.pr-card,label')].filter(VIS);
   return els.find(x=>N(x.innerText)===t)||els.find(x=>N(x.innerText).startsWith(t))||els.find(x=>(x.getAttribute('aria-label')||'')===t)||null; };
 window.PTO=(t,root)=>{ const e=ACHA(t,root); if(!e) return null; e.scrollIntoView({block:'center',inline:'nearest'}); const r=e.getBoundingClientRect(); const x=Math.round(r.left+Math.min(r.width/2,40)), y=Math.round(r.top+r.height/2);
-  const top=document.elementFromPoint(x,y); return {x,y,cob:!(top&&(top===e||e.contains(top))),aviso:!!(top&&top.closest&&top.closest('[role=status]')),top:top?top.tagName+' '+N(top.innerText).slice(0,40):''}; };
+  const top=document.elementFromPoint(x,y);
+  // UX-BEN35-AVISO-01: além de não capturar o toque, o aviso não fica desenhado por cima do alvo (sob = algum aviso fixo à vista cruza o retângulo do alvo)
+  const sob=[...document.querySelectorAll('[role=status]')].some(a=>{ if(getComputedStyle(a).position!=='fixed'||!VIS(a)||!N(a.innerText)) return false; const q=a.getBoundingClientRect(), s=e.getBoundingClientRect(); return q.left<s.right&&q.right>s.left&&q.top<s.bottom&&q.bottom>s.top; });
+  return {x,y,sob,cob:!(top&&(top===e||e.contains(top))),aviso:!!(top&&top.closest&&top.closest('[role=status]')),top:top?top.tagName+' '+N(top.innerText).slice(0,40):''}; };
 window.PERFIL=(k)=>{ localStorage.setItem('safrion.perfilDemo',k); return k; };
 'ok'"""
 def lib(): J(LIB)
@@ -113,6 +116,7 @@ AGR_ESP = [['COLH.dc.html', 'Colheita'], ['CARGA.dc.html', 'Recebimento']] + ([[
 def nav_clk(x, root):   # toque que navega (link): conta o toque e recarrega o apoio na página nova
     cl, tx = J("[window.__cl||0, window.__tx||0]") or [0, 0]; r = J(f"CLK({json.dumps(x)},{json.dumps(root)})"); time.sleep(1.4); lib(); J(f"window.__cl={cl + 1}; window.__tx={tx};"); return r
 MOBILE = [False]
+AVISO = []   # UX-BEN35-AVISO-01 (revisão Codex de 14/10, S3): toques que esperaram o aviso sair ou em que o aviso estava desenhado por cima do alvo
 def tamanho(w, h):   # a 390 px o Chrome emula toque (Input.dispatchTouchEvent); no desktop, mouse
     MOBILE[0] = w < 500; t.c.size(w, h); t.c.call('Emulation.setTouchEmulationEnabled', {'enabled': MOBILE[0], 'maxTouchPoints': 5 if MOBILE[0] else 1})
 def tocar(x, root=None, w=.6, nav=False):
@@ -122,8 +126,9 @@ def tocar(x, root=None, w=.6, nav=False):
     n = 0
     while p and p['cob'] and p.get('aviso') and n < 10:   # o aviso (role=status) por cima do alvo: a pessoa espera ele sair
         time.sleep(1); n += 1; p = J(f"PTO({json.dumps(x)},{json.dumps(root)})")
-    if n: print(f'   (esperou {n} s o aviso sair de cima de "{x}")')
+    if n: print(f'   (esperou {n} s o aviso sair de cima de "{x}")'); AVISO.append(f'esperou {n} s: {x}')
     if not p: return 'NÃO ACHEI: ' + x
+    if p.get('sob'): print(f'   (o aviso está desenhado por cima de "{x}")'); AVISO.append('sob: ' + x)
     if p['cob']: return 'COBERTO: ' + x + ' por ' + p['top']
     cl, tx = J("[window.__cl||0, window.__tx||0]") or [0, 0]
     if MOBILE[0]:
@@ -924,6 +929,7 @@ try:
             tc = toast(); lv = J(LIVRES) or []
             t.chk(f'R4 {W} · logo depois de "Retirar L39-119" o aviso está à vista e cada botão do rodapé recebe o toque no centro (elementFromPoint): ' + ', '.join(lv), 'L39-119 sai da ordem' in tc and lv and all(x.endswith(': livre') for x in lv), [tc, lv])
         tamanho(1440, 1000); t.chk('rodape sem erro de JS', not t.errs(), t.errs())
+    t.chk('AV · UX-BEN35-AVISO-01: nenhum toque esperou o aviso sair nem o tocou com o aviso desenhado por cima do alvo', not AVISO, AVISO)
 finally:
     t.fim()
 sys.exit(0 if all(t.ok) else 1)   # juízo pela linha RESULTADO e pelo código de saída

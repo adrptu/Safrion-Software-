@@ -447,9 +447,16 @@ function g2navvals(self,v,nav){ const rec=g2menuRec();
 // aviso. Com a área de ações em fluxo (altura curta) a área reserva a faixa dele no fim da rolagem e nos controles (ACOES_CSS: distância
 // do pé + safe-area + esta altura), em vez de uma altura estimada. Não depende da altura da janela (abrir o teclado não a muda). Medida a
 // cada troca do aviso (componentDidUpdate, no mesmo quadro) e no quadro do g2glob (redimensionar, rolar, mudar a página)
-function g2avisoH(){ try{ let h=0; document.querySelectorAll('[role=status]').forEach(t=>{ const cs=getComputedStyle(t); if(cs.position!=='fixed'||cs.bottom==='auto') return;
+function g2avisoH(){ g2toastLugar(); try{ let h=0; document.querySelectorAll('[role=status]').forEach(t=>{ const cs=getComputedStyle(t); if(cs.position!=='fixed'||cs.bottom==='auto') return;
     const r=t.getBoundingClientRect(); if(r.height>2&&r.width>2) h=Math.max(h,Math.ceil(r.height)); });
   const v=h+'px', de=document.documentElement; if(de.style.getPropertyValue('--aviso-h')!==v) de.style.setProperty('--aviso-h',v); }catch(e){} }
+// o aviso não cobre controle (UX-BEN35-AVISO-01, revisão Codex de 14/10, S3): no pé, se ficar sobre um botão, link ou campo à vista (rodapé de
+// painel, barra de ações), sobe para o topo; se lá também cobrir, volta ao pé. Nunca captura toque (pointer-events: none no aviso).
+// Roda antes da medida do g2avisoH, que só reserva o pé (--aviso-h) quando o aviso fica embaixo.
+function g2toastLugar(){ try{ const t=document.querySelector('.g2toast'); if(!t||!t.getClientRects().length) return; t.style.top=''; t.style.bottom='';
+  const cobre=()=>{ const r=t.getBoundingClientRect(); return [...document.querySelectorAll('button,a[href],[role=button],input,select,textarea')].some(e=>{ if(t.contains(e)||!e.getClientRects().length) return false;
+    const q=e.getBoundingClientRect(); return q.width>0&&q.height>0&&q.left<r.right&&q.right>r.left&&q.top<r.bottom&&q.bottom>r.top; }); };
+  if(!cobre()) return; t.style.bottom='auto'; t.style.top='calc(env(safe-area-inset-top, 0px) + 12px)'; if(cobre()){ t.style.top=''; t.style.bottom=''; } }catch(e){} }
 (function g2glob(){ if(typeof document==='undefined'||window.__g2glob) return; window.__g2glob=1;
   const vis=(e)=>!!e&&e.getClientRects().length>0;
   const rotulo=()=>[...document.querySelectorAll('.etp-chk')].find(vis);

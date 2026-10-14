@@ -112,7 +112,7 @@ chk('U1 a página tem a lista por uso: agModoUso, agVisUso, agUsoLeaf e agUsoTot
 ks = [c['k'] for c in (COLS_U or [])]; ls = [c['l'] for c in (COLS_U or [])]
 chk('U2 colunas por uso: Produto · registro | Praga-alvo | Nome científico | Cultura do uso | Ingrediente | Classe | Tox · amb | Na fazenda (Praga-alvo multivalorada; até 7 úteis + identificador)',
     ks == ['prod', 'alvo', 'cien', 'ucul', 'ing', 'cls', 'tox', 'faz'] and ls[1:3] == ['Praga-alvo', 'Nome científico'] and (COLS_U or [{}, {}])[1].get('multi') is True
-    and not any('(' in l for l in ls) and [c['k'] for c in COLS_P] == ['prod', 'ing', 'cls', 'cult', 'tox', 'faz'], [ks, ls])
+    and not any('(' in l for l in ls) and [c['k'] for c in COLS_P] == ['prod', 'ing', 'cls', 'cult', 'alvo', 'tox', 'faz'], [ks, ls, [c['k'] for c in COLS_P]])   # Alvos na lista por produto (proprietário, 13/10)
 chk('U3 modo: sem cultura = por produto; com cultura e usos carregados = por uso; usos ainda carregando = por produto',
     O.get('modoSemCul') is False and O.get('modoCul') is True and O.get('modoSemUsos') is False, [O.get('modoSemCul'), O.get('modoCul'), O.get('modoSemUsos')])
 E1 = usos((SJ, TD)); s1 = O.get('s1') or []

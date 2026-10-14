@@ -41,7 +41,8 @@ try:
         J(f"sessionStorage.setItem('mapa-ctx',{json.dumps(json.dumps(ctx))})"); c.size(1440,900); c.goto(f'http://127.0.0.1:{p}/IN-04.dc.html',wait=1.2)
     c.goto(f'http://127.0.0.1:{p}/Main.dc.html'); J("localStorage.removeItem('talhao-os-cenario-v1'); localStorage.removeItem('talhao-os-irrigacao-v1')"); mapa()
     # 1-2 · nenhuma O.S. conta como decisão; OS-0418 e OS-0430 a liberar pelo agrônomo (cabeçalho = indicador) deixam o T1 amarelo
-    chk('1 cabeçalho e indicador: 2 a liberar (OS-0418 e OS-0430), sem "decisões"', '2 a liberar' in head() and 'decis' not in head() and 'A liberar (agrônomo) 2' in nums() and 'Decisões' not in nums(), [head(),nums()])
+    # o indicador diz "A liberar", a fase do Kanban ("(agrônomo)" saiu com o menos texto no Mapa, 14/10)
+    chk('1 cabeçalho e indicador: 2 a liberar (OS-0418 e OS-0430), sem "decisões"', '2 a liberar' in head() and 'decis' not in head() and 'A liberar 2' in nums() and 'Decisões' not in nums(), [head(),nums()])
     l1,f1=lab('T1'); chk('2 Integrado: T1 amarelo "OS-0430 a liberar" (mesma contagem do cabeçalho)', l1=='T1: OS-0430 a liberar' and f1==AMAR, [l1,f1])
     # 3 · Integrado (01/10): "NESTE TALHÃO" com uma linha por funcionalidade e um "Ver …"; sem cartões de O.S., próximo passo nem "Nova O.S."; nada recolhível
     tap('T1'); t1=pan('T1')
@@ -49,8 +50,9 @@ try:
     sem_os=(J("document.querySelectorAll('aside[aria-label^=\"T1\"] [role=radio], aside[aria-label^=\"T1\"] [aria-label=\"Próximo passo\"], aside [aria-expanded], aside details').length")==0
             and 'Nova O.S. neste talhão' not in t1 and 'Liberar para execução' not in t1)
     r=ver('T1','Ver ordens'); a=ativa(); tsel=json.loads(J("sessionStorage.getItem('mapa-ctx')") or '{}').get('tsel'); t1=pan('T1')
-    chk('3 Integrado T1: "NESTE TALHÃO" com Satélite, Lavoura, Pragas e doenças, Carência e destino, Irrigação, Ordens de serviço, Insumos e Custos (um "Ver …" cada), sem O.S. nem recolher · "Ver ordens" troca para Ordens de serviço com o T1 aberto',
-        [n for n,_ in lin]==['Satélite','Lavoura','Pragas e doenças','Carência e destino','Irrigação','Ordens de serviço','Insumos','Custos'] and all(len(b)==1 and b[0].startswith('Ver ') for _,b in lin)
+    # camadas novas: Análises de solo (afb2f46) e Colheita (0346e66, pedido do proprietário de 14/10 = DEC-0910-36); a ordem é a da barra
+    chk('3 Integrado T1: "NESTE TALHÃO" com Satélite, Lavoura, Análises de solo, Pragas e doenças, Carência e destino, Colheita, Irrigação, Ordens de serviço, Insumos e Custos (um "Ver …" cada), sem O.S. nem recolher · "Ver ordens" troca para Ordens de serviço com o T1 aberto',
+        [n for n,_ in lin]==['Satélite','Lavoura','Análises de solo','Pragas e doenças','Carência e destino','Colheita','Irrigação','Ordens de serviço','Insumos','Custos'] and all(len(b)==1 and b[0].startswith('Ver ') for _,b in lin)
         and sem_os and r=='ok' and a==['Ordens de serviço'] and tsel==['T1'] and 'ORDENS DE SERVIÇO' in t1 and 'NESTE TALHÃO' not in t1, [lin,sem_os,r,a,tsel,t1[:200]])
     # 4-7 · camada Ordens de serviço: primário = próximo passo da ordem mais urgente, sem outro botão para o mesmo destino
     lk=links('T1')
@@ -90,7 +92,7 @@ try:
     clk('Liberar para execução','aside[role=dialog]'); clk('Confirmar liberação','aside[role=dialog]'); t=T()
     chk('10 O.S.: OS-0430 liberada direto pela tela O.S.', 'OS-0430 liberada' in t, t)
     mapa()
-    chk('11 mapa após a liberação: 1 a liberar no cabeçalho e no indicador', '1 a liberar' in head() and 'A liberar (agrônomo) 1' in nums(), [head(),nums()])
+    chk('11 mapa após a liberação: 1 a liberar no cabeçalho e no indicador', '1 a liberar' in head() and 'A liberar 1' in nums(), [head(),nums()])
     l1,f1=lab('T1'); tap('T1'); r=ver('T1','Ver ordens'); t1=pan('T1'); lk=links('T1')
     chk('12 T1 volta ao verde no Integrado; em Ordens de serviço ("Ver ordens") a OS-0430 está Liberadas, sem "Ajustar antes de liberar", sem repetir destino',
         l1=='T1: OS-0421 · 190/350 ha' and f1==VERDE and r=='ok' and 'Liberadas' in t1 and 'Ajustar antes de liberar' not in t1 and unico(lk), [l1,f1,r,lk])
