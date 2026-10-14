@@ -1,0 +1,26 @@
+--- a/tools/prototipo/v37/gen37/ui37.py
++++ b/tools/prototipo/v37/gen37/ui37.py
+@@ -46,10 +46,10 @@
+ BEN_PUBLICADO=False
+ MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
+  ('Cadastros','pasta',[('Cadastros','CD.dc.html')]),   # 13/10/2026 (proprietário): sem submenus; a tela CD mostra os 7 cadastros em cartões e cada um volta por "‹ Cadastros"
+- ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html'),('Previsão e colheita','COLH.dc.html'),('Recebimento e beneficiamento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html')]),   # 13/10/2026 (proprietário: "coloque o submenu colheita dentro de agrícola"; "coloque tudo de produção, dentro de Agrícola"): o ciclo da lavoura até o produto em estoque
+- ('Manutenção','wrench',[('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')]),   # 13/10/2026 (pedido do proprietário: subitens de novo, enxutos): um subitem por visão da tela única, sem tela nova
+- ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html'),('Inteligência de compras','IC.dc.html')]),   # INTEL-01 (13/10)
+- ('Comercial','Vendas',[('Contratos e pedidos','VEN.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Painel comercial','PCOM.dc.html'),('Inteligência de vendas','IV.dc.html')]),   # INTEL-01 (13/10): inteligência comercial de vendas
++ ('Agrícola','leaf',[('Painel','PAGR.dc.html'),('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html'),('Previsão e colheita','COLH.dc.html'),('Recebimento e beneficiamento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html')]),   # 13/10/2026 (proprietário: "coloque o submenu colheita dentro de agrícola"; "coloque tudo de produção, dentro de Agrícola"): o ciclo da lavoura até o produto em estoque
++ ('Manutenção','wrench',[('Painel','PMAN.dc.html'),('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')]),   # 13/10/2026 (pedido do proprietário: subitens de novo, enxutos): um subitem por visão da tela única, sem tela nova
++ ('Suprimentos','cart',[('Painel','PSUP.dc.html'),('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html'),('Inteligência de compras','IC.dc.html')]),   # INTEL-01 (13/10)
++ ('Comercial','Vendas',[('Painel','PCOM.dc.html'),('Contratos e pedidos','VEN.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Inteligência de vendas','IV.dc.html')]),   # INTEL-01 (13/10): inteligência comercial de vendas
+  ('Configurações','engrenagem',[('Usuários e alçadas','CF-01.dc.html'),('Auditoria','CF-04.dc.html'),('Integrações','CF-03.dc.html'),('Assinatura e cobrança','CF-05.dc.html')])]   # 06/10/2026 (PLAT-01): grupo por último; CONF-01 (CONF-D01/D02): Usuários e alçadas · Auditoria · Integrações · Assinatura e cobrança, cada item entra no passo que entrega a tela
+ # 13/10/2026 (proprietário: "troque a posição do menu comercial com suprimentos. e manutenção logo abaixo de agrícola"): Agrícola ·
+ #   Manutenção · Suprimentos · Comercial.
+@@ -60,7 +60,7 @@
+ # 13/10/2026 (proprietário: "o menu de manutenção está sem os submenus na tela igual os demais"): a Manutenção também abre a sua tela de
+ # entrada, um cartão por visão da tela única MA (Sem ordem · Ordens · Ativos · Planos); a chave do CURTO37 com #vis= vale para o cartão.
+ HUB37={'Agrícola':'MOD-AGR.dc.html','Comercial':'MOD-COM.dc.html','Suprimentos':'MOD-SUP.dc.html','Configurações':'MOD-CFG.dc.html','Manutenção':'MOD-MAN.dc.html'}
+-CURTO37={'AG-07.dc.html':('Agrofit','livro'),'PA.dc.html':('Planos agronômicos','prancheta'),'AG-02.dc.html':('Análises de solo','frasco'),
++CURTO37={'PAGR.dc.html':('Painel','grafico'),'PMAN.dc.html':('Painel','grafico'),'PSUP.dc.html':('Painel','grafico'),'AG-07.dc.html':('Agrofit','livro'),'PA.dc.html':('Planos agronômicos','prancheta'),'AG-02.dc.html':('Análises de solo','frasco'),
+  'SAF.dc.html':('Planejar safra','calendar'),'OS.dc.html':('Ordens de serviço','prancheta_ok'),'AG-01.dc.html':('Pragas e doenças','inseto'),'IR-01.dc.html':('Irrigação','drop'),
+  'COLH.dc.html':('Colheita','Colheita'),'CARGA.dc.html':('Recebimento','scale'),'PROD.dc.html':('Estoque de produto','armazem'),
+  'VEN.dc.html':('Contratos e pedidos','doc'),'EXPED.dc.html':('Expedição','truck'),'PCOM.dc.html':('Painel','grafico'),'IV.dc.html':('Inteligência','trend'),
