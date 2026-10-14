@@ -121,14 +121,20 @@
     else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
     return Number(s);
   }
+  function calendarDate(y, m, day) {
+    const d = new Date(0);
+    d.setFullYear(y, m - 1, day);
+    d.setHours(0, 0, 0, 0);
+    return d.getFullYear() === y && d.getMonth() === m - 1 && d.getDate() === day ? d : null;
+  }
   function toDate(v) {
     if (v instanceof Date) return isNaN(v) ? null : v;
     if (typeof v === 'number') return new Date(v);
     const s = String(v);
     const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (m) return new Date(+m[1], m[2] - 1, +m[3]);
+    if (m) return calendarDate(+m[1], +m[2], +m[3]);
     const b = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (b) return new Date(+b[3], b[2] - 1, +b[1]);
+    if (b) return calendarDate(+b[3], +b[2], +b[1]);
     const d = new Date(s);
     return isNaN(d) ? null : d;
   }
@@ -263,11 +269,13 @@
         let m = t.match(/^(.+?)\.\.(.+)$/);
         if (m) {
           const a = typed.parse(m[1]), b = typed.parse(m[2]);
+          if (c.type === 'date' && (isNaN(a) || isNaN(b))) return () => false;
           if (!isNaN(a) && !isNaN(b)) return (r) => { const v = typed.get(r); return v != null && v >= a && v <= b; };
         }
         m = t.match(/^(>=|<=|!=|<>|>|<|=)\s*(.+)$/);
         if (m) {
           const x = typed.parse(m[2]), op = m[1];
+          if (c.type === 'date' && isNaN(x)) return () => false;
           if (!isNaN(x)) return (r) => {
             const v = typed.get(r);
             if (v == null) return op === '!=' || op === '<>';

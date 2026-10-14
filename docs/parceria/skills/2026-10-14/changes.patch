@@ -157,6 +157,17 @@
  - **Produtividade** = peso líquido / área colhida: sc/ha (60 kg; café 60 kg beneficiado; arroz 50 kg), kg/ha, t/ha, @/ha (algodão em caroço). Comparar com histórico do talhão, média regional (CONAB/IMEA) e potencial.
  - **Perdas na colheita**: medição por área conhecida (copo/quadro) → kg/ha; meta soja ≤ 1 sc/ha.
  - **Ponto de colheita**: umidade, maturação fisiológica (R8 soja, R6 milho), dessecação.
+--- before/shared/agro-gestao-conhecimento/assets/zootecnia.md
++++ candidate/shared/agro-gestao-conhecimento/assets/zootecnia.md
+@@ -44,7 +44,7 @@
+ 
+ ## Sanidade e conformidade
+ - **Calendário sanitário** por espécie/região (aftosa conforme status, brucelose B19 fêmeas 3–8 m, clostridioses, raiva, IBR/BVD, leptospirose; aves: Marek, Gumboro, Newcastle; suínos: circovírus, micoplasma) parametrizável; alerta de dose de reforço.
+-- **GTA** (Guia de Trânsito Animal) para toda movimentação; **SISBOV/rastreabilidade** (quando exigido, ex. cota Hilton), identificação individual; **PNCEBT** exames; **carência** de carne/leite por produto — bloqueio de venda/ordenha; registro de receitas veterinárias.
++- **GTA** (Guia de Trânsito Animal) nos trânsitos de animais em que seja exigida pela norma aplicável à espécie, origem/destino e jurisdição. Nascimento, morte e mudança de categoria não exigem GTA apenas por serem eventos de inventário; transferência de piquete exige avaliar se há trânsito sujeito à norma. Validar a exigência com o serviço veterinário oficial antes de bloquear a operação ([MAPA, consultado em 14/10/2026](https://www.gov.br/pt-br/servicos/habilitar-se-para-emissao-da-guia-de-transito-animal)); **SISBOV/rastreabilidade** (quando exigido, ex. cota Hilton), identificação individual; **PNCEBT** exames; **carência** de carne/leite por produto — bloqueio de venda/ordenha; registro de receitas veterinárias.
+ - Mortalidade com causa, necropsia, destinação (compostagem); biosseguridade (fluxo, quarentena); **bem-estar** (indicadores: escore de locomoção, lesões, densidade, sombra/água).
+ 
+ ## Indicadores (síntese)
 --- before/shared/benchmark-top5/SKILL.md
 +++ candidate/shared/benchmark-top5/SKILL.md
 @@ -4,6 +4,13 @@
@@ -1079,7 +1090,30 @@
      sort: ['-valor'],
 --- before/shared/tabelas-interativas/assets/tabela.js
 +++ candidate/shared/tabelas-interativas/assets/tabela.js
-@@ -158,7 +158,7 @@
+@@ -121,14 +121,20 @@
+     else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+     return Number(s);
+   }
++  function calendarDate(y, m, day) {
++    const d = new Date(0);
++    d.setFullYear(y, m - 1, day);
++    d.setHours(0, 0, 0, 0);
++    return d.getFullYear() === y && d.getMonth() === m - 1 && d.getDate() === day ? d : null;
++  }
+   function toDate(v) {
+     if (v instanceof Date) return isNaN(v) ? null : v;
+     if (typeof v === 'number') return new Date(v);
+     const s = String(v);
+     const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+-    if (m) return new Date(+m[1], m[2] - 1, +m[3]);
++    if (m) return calendarDate(+m[1], +m[2], +m[3]);
+     const b = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+-    if (b) return new Date(+b[3], b[2] - 1, +b[1]);
++    if (b) return calendarDate(+b[3], +b[2], +b[1]);
+     const d = new Date(s);
+     return isNaN(d) ? null : d;
+   }
+@@ -158,7 +164,7 @@
      injectCss();
      const root = typeof target === 'string' ? document.querySelector(target) : target;
      if (!root) throw new Error('Tabela: container não encontrado');
@@ -1088,7 +1122,7 @@
  
      let data = [], rowIdx = new Map(), cols = [], colMap = {};
      let current = [], tree = null, groupIndex = new Map(), pendingExpand = opts.expandLevels > 0;
-@@ -169,17 +169,25 @@
+@@ -169,17 +175,25 @@
      function setData(rows) {
        data = rows || [];
        rowIdx = new Map(data.map((r, i) => [r, i]));
@@ -1116,7 +1150,21 @@
      }
      const vis = () => cols.filter((c) => !c.hidden);
      const raw = (c, r) => (c.value ? c.value(r) : r[c.key]);
-@@ -427,7 +435,7 @@
+@@ -255,11 +269,13 @@
+         let m = t.match(/^(.+?)\.\.(.+)$/);
+         if (m) {
+           const a = typed.parse(m[1]), b = typed.parse(m[2]);
++          if (c.type === 'date' && (isNaN(a) || isNaN(b))) return () => false;
+           if (!isNaN(a) && !isNaN(b)) return (r) => { const v = typed.get(r); return v != null && v >= a && v <= b; };
+         }
+         m = t.match(/^(>=|<=|!=|<>|>|<|=)\s*(.+)$/);
+         if (m) {
+           const x = typed.parse(m[2]), op = m[1];
++          if (c.type === 'date' && isNaN(x)) return () => false;
+           if (!isNaN(x)) return (r) => {
+             const v = typed.get(r);
+             if (v == null) return op === '!=' || op === '<>';
+@@ -427,7 +443,7 @@
          groupIndex.set(g.id, g);
          const open = st.open.has(g.id);
          h += `<tr class="dt-grp${open ? ' dt-open' : ''}" tabindex="0" data-g="${esc(g.id)}" aria-expanded="${open}">` +
@@ -1125,7 +1173,7 @@
            V.slice(span).map((c) => `<td${isNum(c.type) ? ' class="dt-n"' : ''}>${c.agg ? esc(fmtAgg(c, g.aggs[c.key])) : ''}</td>`).join('') + '</tr>';
          if (open) h += g.children ? renderGroups(g.children, V) : renderLeaves(g.rows, g.depth + 1, g.id, V);
        }
-@@ -542,12 +550,13 @@
+@@ -542,12 +558,13 @@
        }
        const universe = [...counts.values()].sort((a, b) => (a.sort == null ? 1 : b.sort == null ? -1 : cmp(a.sort, b.sort)));
        const valsEl = pop.querySelector('.dt-vals'), search = pop.querySelector('[data-vs]');
@@ -1141,7 +1189,7 @@
          valsEl.innerHTML = `<label><input type="checkbox" data-all ${all ? 'checked' : ''}><span class="dt-v"><b>(Selecionar ${q ? 'resultados' : 'tudo'})</b></span></label>` +
            shown.map((u, i) => `<label><input type="checkbox" data-vi="${i}" ${!set || set.has(u.key) ? 'checked' : ''}><span class="dt-v">${esc(u.label)}</span><span class="dt-c">${fmtInt(u.n)}</span></label>`).join('') +
            (match.length > shown.length ? `<div class="dt-note">+${fmtInt(match.length - shown.length)} valores — refine a busca</div>` : '') +
-@@ -557,9 +566,9 @@
+@@ -557,9 +574,9 @@
        search.addEventListener('input', drawVals);
        valsEl.addEventListener('change', (e) => {
          let set = st.values[key] || new Set(universe.map((u) => u.key));
@@ -1154,7 +1202,7 @@
          st.limits = {};
          renderBody(); drawVals();
        });
-@@ -568,7 +577,7 @@
+@@ -568,7 +585,7 @@
          if (!b) return;
          if (b.dataset.s !== undefined) { closeMenu(); toggleSort(key, e.shiftKey, +b.dataset.s); }
          else if (b.dataset.gp) { closeMenu(); addGroup(b.dataset.gp); }
@@ -1163,7 +1211,7 @@
        });
  
        const rect = btn.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
-@@ -667,7 +676,8 @@
+@@ -667,7 +684,8 @@
        e.dataTransfer.effectAllowed = 'move';
        e.dataTransfer.setData('text/plain', 'chip');
      });
@@ -1173,7 +1221,7 @@
      zone.addEventListener('dragover', (e) => { if (drag) { e.preventDefault(); zone.classList.add('dt-over'); } });
      zone.addEventListener('dragleave', (e) => { if (!zone.contains(e.relatedTarget)) zone.classList.remove('dt-over'); });
      zone.addEventListener('drop', (e) => {
-@@ -684,13 +694,14 @@
+@@ -684,13 +702,14 @@
        if (b) { st.groupBy.splice(+b.dataset.ungroup, 1); st.limits = {}; renderBody(); }
      });
      addSel.addEventListener('change', () => { if (addSel.value) addGroup(addSel.value); });
@@ -1190,7 +1238,7 @@
      crumbs.addEventListener('click', (e) => { const b = e.target.closest('[data-crumb]'); if (b) goCrumb(+b.dataset.crumb); });
  
      tbody.addEventListener('click', (e) => {
-@@ -711,7 +722,7 @@
+@@ -711,7 +730,7 @@
      function toggleGroup(id, force) {
        const open = force ?? !st.open.has(id);
        if (open === st.open.has(id)) return;
@@ -1199,7 +1247,7 @@
        renderBody();
        refocus({ g: id });
      }
-@@ -744,7 +755,27 @@
+@@ -744,7 +763,27 @@
      renderBody();
  
      return {
@@ -1228,7 +1276,7 @@
        groupBy(ids) { st.groupBy = (ids || []).filter((id) => gspec(id)); st.limits = {}; renderBody(); },
        filter(key, text) { st.filters[key] = text || ''; renderBody(); },
        sort(key, dir) { toggleSort(key, false, dir); },
-@@ -752,7 +783,7 @@
+@@ -752,7 +791,7 @@
        clearFilters,
        getRows: () => current.slice(),
        getState: () => ({ sort: st.sort.slice(), filters: Object.assign({}, st.filters), groupBy: st.groupBy.slice(), focus: st.focus.slice() }),

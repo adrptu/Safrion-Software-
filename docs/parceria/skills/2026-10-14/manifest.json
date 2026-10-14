@@ -61,8 +61,8 @@
   },
   {
     "file": "shared/agro-gestao-conhecimento/assets/zootecnia.md",
-    "sha256": "26d24d696737559690e78ee968dd9a82cb1629629d5d11696325d4313b336346",
-    "bytes": 8513
+    "sha256": "b8488a1fc54ddebef2db39ed06f8572330c8bf1270ec97e623ac0e7df38f77b2",
+    "bytes": 8985
   },
   {
     "file": "shared/benchmark-top5/SKILL.md",
@@ -236,8 +236,8 @@
   },
   {
     "file": "shared/tabelas-interativas/assets/tabela.js",
-    "sha256": "7c0588198d2d27f27a7284e780d0402c94fd75d26da1739f0aab8febc06b4acf",
-    "bytes": 46263
+    "sha256": "e4a34048a2414875109c4f170c0f247d52f644acd6a77337bb85c2c07b79818d",
+    "bytes": 46633
   },
   {
     "file": "shared/ux-essencial/SKILL.md",

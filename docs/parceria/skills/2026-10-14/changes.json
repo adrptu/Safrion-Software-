@@ -35,6 +35,11 @@
     "after": "8371104cf5df7e2706d679f49b15b61bd42667b7537244ee716201f5bac6186f"
   },
   {
+    "file": "shared/agro-gestao-conhecimento/assets/zootecnia.md",
+    "before": "26d24d696737559690e78ee968dd9a82cb1629629d5d11696325d4313b336346",
+    "after": "b8488a1fc54ddebef2db39ed06f8572330c8bf1270ec97e623ac0e7df38f77b2"
+  },
+  {
     "file": "shared/benchmark-top5/SKILL.md",
     "before": "9d260a256095606bad69f1a164d24f34414eb76a7b3074a66707d70c18316c69",
     "after": "f140283350ab8f767414ec5c2f94524d8001f882760906083746c5033ae7d8b4"
@@ -147,7 +152,7 @@
   {
     "file": "shared/tabelas-interativas/assets/tabela.js",
     "before": "1605033d45dd8f6b040dcedf54269907d21d647f2fdcbd92a65ca9910b345c31",
-    "after": "7c0588198d2d27f27a7284e780d0402c94fd75d26da1739f0aab8febc06b4acf"
+    "after": "e4a34048a2414875109c4f170c0f247d52f644acd6a77337bb85c2c07b79818d"
   },
   {
     "file": "shared/ux-essencial/SKILL.md",

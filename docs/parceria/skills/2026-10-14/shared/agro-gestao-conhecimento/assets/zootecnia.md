@@ -44,7 +44,7 @@ Inventário mensal fecha: **estoque final = inicial + nascimentos + compras + tr
 
 ## Sanidade e conformidade
 - **Calendário sanitário** por espécie/região (aftosa conforme status, brucelose B19 fêmeas 3–8 m, clostridioses, raiva, IBR/BVD, leptospirose; aves: Marek, Gumboro, Newcastle; suínos: circovírus, micoplasma) parametrizável; alerta de dose de reforço.
-- **GTA** (Guia de Trânsito Animal) para toda movimentação; **SISBOV/rastreabilidade** (quando exigido, ex. cota Hilton), identificação individual; **PNCEBT** exames; **carência** de carne/leite por produto — bloqueio de venda/ordenha; registro de receitas veterinárias.
+- **GTA** (Guia de Trânsito Animal) nos trânsitos de animais em que seja exigida pela norma aplicável à espécie, origem/destino e jurisdição. Nascimento, morte e mudança de categoria não exigem GTA apenas por serem eventos de inventário; transferência de piquete exige avaliar se há trânsito sujeito à norma. Validar a exigência com o serviço veterinário oficial antes de bloquear a operação ([MAPA, consultado em 14/10/2026](https://www.gov.br/pt-br/servicos/habilitar-se-para-emissao-da-guia-de-transito-animal)); **SISBOV/rastreabilidade** (quando exigido, ex. cota Hilton), identificação individual; **PNCEBT** exames; **carência** de carne/leite por produto — bloqueio de venda/ordenha; registro de receitas veterinárias.
 - Mortalidade com causa, necropsia, destinação (compostagem); biosseguridade (fluxo, quarentena); **bem-estar** (indicadores: escore de locomoção, lesões, densidade, sombra/água).
 
 ## Indicadores (síntese)

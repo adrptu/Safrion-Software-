@@ -31,5 +31,10 @@ const numericGroup=document.querySelector('.dt-grp');numericGroup.focus();numeri
 check('Agrupamento numérico preserva expansão por teclado e total',()=>document.querySelectorAll('.dt-leaf').length===2&&document.querySelector('.dt-grp td .dt-n')?.textContent==='30');t.destroy();
 t=Tabela.create('#table',{rows:[{farm:'A',amount:10},{farm:'A',amount:20}],columns:[{key:'amount',type:'number',agg:'avg'},{key:'farm',hidden:true}],groupBy:['farm']});
 check('Grupo de coluna única apresenta agregação configurada',()=>document.querySelector('.dt-grp').cells.length===1&&document.querySelector('.dt-grp td .dt-n')?.textContent==='15'&&document.querySelector('tfoot td').textContent==='15');t.destroy();
+
+t=Tabela.create('#table',{rows:[{date:'2025-03-03'},{date:'2024-02-29'},{date:'2025-05-01'},{date:'2025-01-01'}],columns:[{key:'date',type:'date'}]});
+for(const invalid of ['=31/02/2025','=2025-02-31','=29/02/2025','=31/04/2025','=2025-13-01','!=31/02/2025','01/02/2025..31/02/2025'])check('Filtro rejeita data impossível '+invalid,()=>{t.filter('date',invalid);return t.getRows().length===0});
+check('Ano bissexto válido em formato brasileiro',()=>{t.filter('date','=29/02/2024');return t.getRows().length===1&&t.getRows()[0].date==='2024-02-29'});
+check('Intervalo de datas ISO válidas conserva limites',()=>{t.filter('date','2025-01-01..2025-03-03');return t.getRows().length===2});t.destroy();
 window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS '+results.length+'/'+results.length:'FAIL';
 </script></html>
