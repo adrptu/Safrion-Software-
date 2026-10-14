@@ -286,8 +286,10 @@ const CAD_BTN_DEL2=CAD_BTN+'background:#B42318;color:#FFFFFF;border:1px solid #B
 const CAD_BTN_OFF=CAD_BTN+'background:#F4F6F3;color:#8A968E;border:1px solid #E4E9E5;cursor:not-allowed;';
 function cadActsIni(self){ self.g2formActs=(gid,r,fm)=>{ const f=CAD_ACTS[gid]; return f?(f(self,r,fm)||[]).filter(Boolean).map(a=>Object.assign({st:CAD_BTN_SEC,h:''},a)):[]; }; }
 function cadApaga(self,gid,id){ const sp=GR(gid); const r0=g2find(RW(self,gid),id); const nome=r0?g2text(r0,sp.cols[0]):''; const rs=g2clone(RW(self,gid));
+  const g2_0=self.state.g2, fm0=g2st(self,gid).fm;   // gravação falhou (CD08-GRAVA-01): a linha volta e o registro reabre com o motivo
   const rm=(l)=>{ const i=l.findIndex(x=>x.id===id); if(i>=0){ l.splice(i,1); return true; } return l.some(x=>x.kids&&rm(x.kids)); }; rm(rs);
-  g2set(self,gid,{rows:rs,fm:null,cfp:null}); self.setState({g2toast:'Excluído: '+nome}); if(self.g2after) self.g2after(gid,rs,null); }
+  g2set(self,gid,{rows:rs,fm:null,cfp:null}); self.setState({g2toast:'Excluído: '+nome}); if(self.g2after) self.g2after(gid,rs,null);
+  g2persiste(self,gid,g2_0,fm0?{fm:Object.assign({},fm0,{errs:{},warn:false}),cfp:null}:{cfp:null},'Não excluído'); }
 // ent: 'cultivar'; motivo: por que não pode (vazio = pode); fazer: exclusão própria da tela (ex.: rascunho da estrutura)
 function cadExcluir(self,gid,r,ent,motivo,fazer){
   if(motivo) return {t:'Excluir '+ent,h:'Não dá para excluir: '+motivo+'.',st:CAD_BTN_OFF,go:()=>self.setState({g2toast:'Não dá para excluir: '+motivo+'.'})};

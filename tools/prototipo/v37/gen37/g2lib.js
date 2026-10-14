@@ -198,7 +198,7 @@ function g2calc(r,calc){ (calc||[]).forEach(cx=>{ const a=(cx.a||[]).map(k=>Numb
    else if(cx.op==='sub') x=a.slice(1).reduce((p,q)=>p-q,a[0]); else if(cx.op==='max0sub') x=Math.max(0,a.slice(1).reduce((p,q)=>p-q,a[0]));
    if(x!==null){ r.v[cx.k]=Math.round(x*100)/100; if(r.s) delete r.s[cx.k]; if(r.p) delete r.p[cx.k]; } }); }
 function g2clone(list){ return list.map(r=>Object.assign({},r,{v:Object.assign({},r.v||{}),s:Object.assign({},r.s||{}),p:Object.assign({},r.p||{}),kids:r.kids?g2clone(r.kids):undefined})); }
-function g2save(self,sp){ const st=g2st(self,sp.id); const fm=st.fm; if(!fm) return; const ed=sp.edit||{}; const errs={};
+function g2save(self,sp){ const st=g2st(self,sp.id); const fm=st.fm; if(!fm) return; const ed=sp.edit||{}; const errs={}; const g2_0=self.state.g2;
   const vis=(ed.fields||[]).filter(f=>g2cond(f,fm.draft));
   vis.forEach(f=>{ const val=(fm.draft[f.k]||'').trim(); if(f.ro||(f.newOnly&&!fm.isNew)) return;
     if(f.req && !val) { errs[f.k]='Informe '+f.l.toLowerCase().replace(/ \(.*\)$/,'')+'.'; return; }
@@ -216,7 +216,13 @@ function g2save(self,sp){ const st=g2st(self,sp.id); const fm=st.fm; if(!fm) ret
   g2calc(r,ed.calc);
   const patch={rows,fm:null,fl:r.id};
   g2set(self,sp.id,patch); self.setState({g2toast:(fm.isNew?'Registro incluído':'Salvo · linha e totais atualizados')});
-  if(self.g2after) self.g2after(sp.id,rows,r,fm.isNew); }
+  if(self.g2after) self.g2after(sp.id,rows,r,fm.isNew);
+  g2persiste(self,sp.id,g2_0,{fm:Object.assign({},fm,{errs:{},warn:false})},'Não salvo'); }
+// gravação da tela (CD08-GRAVA-01, revisão Codex de 14/10, S2): quando a tela grava no navegador (self.g2persist), o "salvo" só vale se a
+// gravação deu certo. Falhou: o estado volta ao de antes do comando, o formulário reabre com o rascunho e o motivo, e nada é confirmado.
+function g2persiste(self,id,g2_0,volta,pre){ if(!self.g2persist) return true; const er=self.g2persist(id); if(!er) return true;
+  const all=Object.assign({},g2_0||{}); all[id]=Object.assign({},all[id]||{},volta||{},volta&&volta.fm?{fm:Object.assign({},volta.fm,{errG:er,errP:pre})}:{});
+  self.setState({g2:all,g2toast:pre+': '+er}); return false; }
 function g2dirty(fm){ if(!fm) return false; for(const k in fm.draft){ if(String(fm.draft[k])!==String(fm.orig[k])) return true; } return false; }
 function g2close(self,sp){ const fm=g2st(self,sp.id).fm; if(fm && !fm.ro && g2dirty(fm)) { g2set(self,sp.id,{fm:Object.assign({},fm,{warn:true})}); return; } g2set(self,sp.id,{fm:null}); }
 function g2vals(self,sp,v,mask){
@@ -276,7 +282,7 @@ function g2vals(self,sp,v,mask){
       cells.push(cell); });
     if(sp.del&&(r.livre||r.fora||r.nosel)) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.del){ const asking=(st.cf===r.id); cells.push({isSel:false,isData:false,isDel:true,cls:'',asking,notAsking:!asking,st:'padding:4px 10px;white-space:nowrap;',
         delLabel:'Excluir '+g2text(r,sp.cols[0]), ask:()=>g2set(self,id,{cf:r.id}), no:()=>g2set(self,id,{cf:null}),
-        yes:()=>{ const rs=g2clone(g2rows(self,sp)); const rm=(list)=>{ const i=list.findIndex(x=>x.id===r.id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&rm(x.kids)); }; rm(rs); g2set(self,id,{rows:rs,cf:null}); self.setState({g2toast:'Excluído: '+g2text(r,sp.cols[0])}); if(self.g2after) self.g2after(id,rs,null); }}); }
+        yes:()=>{ const g2_0=self.state.g2; const rs=g2clone(g2rows(self,sp)); const rm=(list)=>{ const i=list.findIndex(x=>x.id===r.id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&rm(x.kids)); }; rm(rs); g2set(self,id,{rows:rs,cf:null}); self.setState({g2toast:'Excluído: '+g2text(r,sp.cols[0])}); if(self.g2after) self.g2after(id,rs,null); g2persiste(self,id,g2_0,{cf:null},'Não excluído'); }}); }
     const canOpen=editable && !(ed.leafOnly && has) && !r.fora && !(r.nosel && !r.dr);
     return {id:r.id, cls:'g2r'+(canOpen?' g2ed':'')+(st.fl===r.id?' g2flash':'')+(lvl>0?' g2kid':''), tab:(canOpen&&!r.drDup)?'0':'-1',
       open:(e)=>{ if(canOpen) g2open(self,sp,r.id,e); }, key:(e)=>{ if(!canOpen || !e || (e.key!=='Enter'&&e.key!==' ')) return; const t=e.target; if(t&&t.closest&&t.closest('a,button,input,select,textarea,label,[data-noedit],.g2nr')) return; e.preventDefault(); g2open(self,sp,r.id,null); }, cells}; });
@@ -330,7 +336,7 @@ function g2vals(self,sp,v,mask){
         dis, err:!!err, errMsg:err||'', ist:'font-family:inherit;font-size:14px;padding:9px 11px;border-radius:10px;box-sizing:border-box;width:100%;border:1px solid '+(err?'#B42318':'#E4E9E5')+';background:'+(dis?'#F4F6F3':'#FFFFFF')+';color:#15201A;',
         opts:(f.dyn&&self.g2opts)?(self.g2opts(id,f.k,fm.draft,fm.rid)||[]):(f.opts||[]).map(o=>({v:o,t:o})),
         set:(e)=>{ const cur=g2st(self,id).fm; if(!cur) return; let d=Object.assign({},cur.draft,{[f.k]:e.target.value}); if(self.g2draft){ const d2=self.g2draft(id,f.k,d,cur); if(d2) d=d2; } const er=Object.assign({},cur.errs||{}); delete er[f.k]; g2set(self,id,{fm:Object.assign({},cur,{draft:d,errs:er,warn:false})}); }}; });
-    F.nerr=Object.keys(fm.errs||{}).length; F.hasErr=F.nerr>0;
+    F.nerr=Object.keys(fm.errs||{}).length; F.hasErr=F.nerr>0; F.errG=fm.errG||''; F.errP=fm.errP||'Não salvo'; F.hasErrG=!!fm.errG;
     F.save=()=>g2save(self,sp); F.cancel=()=>g2close(self,sp); F.close=()=>g2close(self,sp);
     F.discard=()=>g2set(self,id,{fm:null}); F.keep=()=>{ const cur=g2st(self,id).fm; g2set(self,id,{fm:Object.assign({},cur,{warn:false})}); };
     F.key=(e)=>{ if(e && e.key==='Escape'){ e.preventDefault(); g2close(self,sp); } };
@@ -753,7 +759,7 @@ function g2ttTira(n){ if(G2D.tt&&n&&G2D.tt.contains(n)) return; g2ttVolta();
     if(G2D.toque&&Date.now()-G2D.toque<900){ G2D.toque=0; e.preventDefault(); e.stopPropagation(); return; }   // o toque longo foi para ler a dica
     const t=e.target;
     // ícone ⓘ: tocar (ou Enter) abre e fecha a dica; não é comando
-    const i=t&&t.closest&&t.closest('.g2dica-i'); if(i){ e.preventDefault(); e.stopPropagation(); if(G2D.el===i) g2dicaFecha(); else { g2dicaMostra(i,g2dicaTexto(i),'toque'); g2dicaSai(6000); } return; }
+    const i=t&&t.closest&&t.closest('.g2dica-i,.g2-info'); if(i){ e.preventDefault(); e.stopPropagation(); if(G2D.el===i) g2dicaFecha(); else { g2dicaMostra(i,g2dicaTexto(i),'toque'); g2dicaSai(6000); } return; }
     // indisponível com motivo (aria-disabled="true"): o comando não roda; a dica diz o porquê e o leitor de tela ouve a recusa
     const b=t&&t.closest&&t.closest('[aria-disabled="true"]'); if(b&&b.matches('button,a,[role=button]')){ e.preventDefault(); e.stopPropagation();
       const m=g2dicaTexto(b)||'Indisponível agora.'; g2dicaMostra(b,m,'recusa'); g2dicaSai(4000);

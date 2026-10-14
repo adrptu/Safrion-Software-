@@ -52,8 +52,14 @@ const CAD_LS='talhao-os-cadastros-v1';
 // (cultId) e, ao abrir, mostra o nome atual dela: renomear no CD-02 muda o nome no CD-08 sem perder custos (sem catálogo paralelo)
 function cadCulLer(){ try{ const o=JSON.parse(localStorage.getItem(CAD_LS)||'{}'); return Array.isArray(o.culturas)&&o.culturas.length?o.culturas:null; }catch(e){ return null; } }
 // grava a chave k do CAD_LS só quando o valor muda (cada desenho compara com o último gravado): salvar, excluir e criar entram iguais
-function cadLsSe(self,k,val){ const j=JSON.stringify(val); self.__lsU=self.__lsU||{}; if(self.__lsU[k]===j) return; self.__lsU[k]=j;
-  if(j.length>4e5) return; try{ const o=JSON.parse(localStorage.getItem(CAD_LS)||'{}'); o[k]=val; localStorage.setItem(CAD_LS,JSON.stringify(o)); }catch(e){} }
+// CD08-GRAVA-01 (revisão Codex de 14/10, S2): a marca do último gravado só muda depois da gravação; a falha volta como motivo (o salvar da
+// tela chama cadLsGrava pelo g2persist e, se falhar, não confirma e devolve o rascunho); as chaves do mesmo salvar vão numa gravação só
+function cadLsGrava(self,obj){ self.__lsU=self.__lsU||{}; const ks=Object.keys(obj).filter(k=>self.__lsU[k]!==JSON.stringify(obj[k])); if(!ks.length) return '';
+  try{ const o=JSON.parse(localStorage.getItem(CAD_LS)||'{}'); ks.forEach(k=>{ o[k]=obj[k]; }); const j=JSON.stringify(o); if(j.length>4e6) throw new Error('cadastro grande demais');
+    localStorage.setItem(CAD_LS,j); }
+  catch(e){ return 'o navegador não gravou o cadastro ('+((e&&e.name&&e.name!=='Error')?e.name:(e&&e.message)||'erro')+').'; }
+  ks.forEach(k=>{ self.__lsU[k]=JSON.stringify(obj[k]); }); return ''; }
+function cadLsSe(self,k,val){ return !cadLsGrava(self,{[k]:val}); }
 function cadLsLer(k){ try{ const o=JSON.parse(localStorage.getItem(CAD_LS)||'{}'); return o[k]||null; }catch(e){ return null; } }
 '''
 
@@ -140,7 +146,8 @@ function PREVALS(self,v){ cadActsIni(self); c2culIni(self);
   c2opts('g_cv','sem',sems.sort((a,b)=>a.localeCompare(b,'pt-BR')).concat([CRIAR]));
   // filtro rápido de cada aba (dentro do bloco)
   cadQf(self,v,'g_cv','c2qf0',[{k:'res',t:'A resolver',f:r=>!!cvSit(r.v).res},{k:'inat',t:'Inativas',f:r=>r.v.sit==='Inativa',oz:true}]); }
-function EXTRAVALS(self,v){ simv(self,v); cadLsSe(self,'culturas',RW(self,'g_cult').map(c=>({id:c.id,v:Object.assign({},c.v)}))); cadLsSe(self,'cultivares',RW(self,'g_cv'));
+function c2grava(self){ return cadLsGrava(self,{culturas:RW(self,'g_cult').map(c=>({id:c.id,v:Object.assign({},c.v)})),cultivares:RW(self,'g_cv')}); }
+function EXTRAVALS(self,v){ simv(self,v); self.g2persist=()=>c2grava(self); c2grava(self);
   const cvs=cadRegs(RW(self,'g_cv'));
   const semL=cvs.filter(r=>cvFalta(r.v)); const semF=semL.length;
   v.c2e=semF?semF+(semF>1?' cultivares':' cultivar')+' sem semente':'Sem pendências';
@@ -270,7 +277,7 @@ function PREVALS(self,v){ cadActsIni(self); c8culIni(self);
   c2opts('g_rend','op',ops.map(o=>o.v.nome).concat([OUTRA_O]));
   c2opts('g_rend','cult',['Todas'].concat(c8cul()));
   cadQf(self,v,'g_rend','c2qf1',[{k:'res',t:'A resolver',f:r=>!!rdSit(r.v).res}]); }
-function EXTRAVALS(self,v){ simv(self,v); cadLsSe(self,'cd08',{rend:RW(self,'g_rend'),op:RW(self,'g_op')});
+function EXTRAVALS(self,v){ simv(self,v); const c8grava=()=>cadLsGrava(self,{cd08:{rend:RW(self,'g_rend'),op:RW(self,'g_op')}}); self.g2persist=c8grava; c8grava();
   const rds=cadRegs(RW(self,'g_rend')); const premL=rds.filter(r=>r.v.fonte==='Premissa a validar'); const prem=premL.length;
   v.c8e=prem?prem+(prem>1?' premissas':' premissa')+' a validar':'Sem pendências';
   cadEstado(v,'c8e',v.c8e,prem?'yellow':'green');
