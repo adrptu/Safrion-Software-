@@ -116,8 +116,8 @@
   },
   {
     "file": "shared/dev-infra/assets/ci.yml",
-    "sha256": "dc8c0029dbc5010aacb145f526a6dc6843409791e2a56467d260732caae69ece",
-    "bytes": 5442
+    "sha256": "9f66dee37ce1092477a98a5218f36cd6c79b8b5df79ea2a65353df995eb489f1",
+    "bytes": 8796
   },
   {
     "file": "shared/dev-infra/assets/docker-compose.yml",

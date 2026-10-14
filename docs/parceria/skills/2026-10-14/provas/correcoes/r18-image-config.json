@@ -1,0 +1,39 @@
+[
+  {
+    "repo": "aquasec/trivy",
+    "digest": "sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222",
+    "entrypoint": [
+      "trivy"
+    ],
+    "cmd": null,
+    "version": "0.76.0"
+  },
+  {
+    "repo": "semgrep/semgrep",
+    "digest": "sha256:529ee8a277ec8adc5b534d7c74eea0a47e9de21d62852b6ba7ac6ba9566845c3",
+    "entrypoint": null,
+    "cmd": [
+      "semgrep",
+      "--help"
+    ],
+    "version": null
+  },
+  {
+    "repo": "zricethezav/gitleaks",
+    "digest": "sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f",
+    "entrypoint": [
+      "gitleaks"
+    ],
+    "cmd": null,
+    "version": "v8.30.1"
+  },
+  {
+    "repo": "google/osv-scanner",
+    "digest": "sha256:4f3b7e2c64b9d38a5febc5a7e4a3dfef1d1362f726dea7a2ef4762b46469fcd0",
+    "entrypoint": [
+      "/osv-scanner"
+    ],
+    "cmd": null,
+    "version": "2.7.0"
+  }
+]

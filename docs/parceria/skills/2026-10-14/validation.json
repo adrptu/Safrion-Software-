@@ -107,5 +107,13 @@
     "failures": 0,
     "errors": 0
   },
-  "manifestSha256": "7ef59739ce656c624f636b7c4d45a31649eb29dde0f96aa4ceb49b28da6727ef"
+  "manifestSha256": "0b494706cb86acae33324fc3be0ee62d12422989a6bc1f4759bfa3e4bbf05edf",
+  "r18": {
+    "staticCI": {
+      "before": "0/8 exit1",
+      "after": "8/8 exit0"
+    },
+    "pipelineExecuted": false,
+    "unchangedSkillsAndAdapter": "R17 proofs preserved; no SKILL.md or adapter delta"
+  }
 }

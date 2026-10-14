@@ -1,3 +1,7 @@
+# Template opt-in, não é o workflow ativo do Safrion. Validar a execução no projeto antes de adotar.
+# npm ci requer lockfile e ferramentas declaradas (knip, jscpd, playwright, @lhci/cli).
+# SHAs/digests públicos conferidos em 2026-10-14; atualizar por PR revisado, nunca por tag mutável.
+# Regras OWASP e bases de vulnerabilidades são dados atualizados pelos scanners; binários são fixos.
 # .github/workflows/ci.yml — pipeline padrão (Node/TypeScript; adapte os comandos para Python/Go)
 name: CI
 
@@ -10,10 +14,7 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-  pull-requests: write
-  security-events: write
+permissions: {}  # cada job declara só o acesso que usa; nenhum token de escrita nos PRs
 
 env:
   NODE_VERSION: 22
@@ -21,68 +22,79 @@ env:
 jobs:
   quality:
     name: Lint · tipos · unit
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-      - uses: actions/setup-node@v4
-        with: { node-version: ${{ env.NODE_VERSION }}, cache: npm }
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
+        with: { fetch-depth: 0, persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 · conferido 2026-10-14
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
       - run: npm ci
       - run: npm run format:check
       - run: npm run lint -- --max-warnings=0
       - run: npm run typecheck
       - run: npm run test:unit -- --coverage
-      - name: Cobertura no PR
+      - name: Cobertura no resumo da execução
         if: github.event_name == 'pull_request'
-        uses: davelosert/vitest-coverage-report-action@v2
-      - run: npx knip            # código/dependências mortas
-      - run: npx jscpd src --threshold 3 --exitCode 1   # duplicação > 3 % falha
-      - uses: actions/upload-artifact@v4
+        uses: davelosert/vitest-coverage-report-action@8f86cfb56ed6d5613ea8cdc5259f207fbfd51ece # v2 · conferido 2026-10-14
+        with: { comment-on: none, file-coverage-mode: all }
+      - run: npx --no-install knip            # código/dependências mortas
+      - run: npx --no-install jscpd src --threshold 3 --exitCode 1   # duplicação > 3 % falha
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 · conferido 2026-10-14
         if: always()
         with: { name: reports-unit, path: reports/, retention-days: 7 }
 
   build:
     name: Build
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: ${{ env.NODE_VERSION }}, cache: npm }
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 · conferido 2026-10-14
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
       - run: npm ci
       - run: npm run build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 · conferido 2026-10-14
         with: { name: build, path: dist/, retention-days: 1 }
 
   integration:
     name: Integração (banco real)
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: quality
     services:
       postgres:
-        image: postgres:16-alpine
+        image: postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea # 16-alpine
         env: { POSTGRES_USER: app, POSTGRES_PASSWORD: app, POSTGRES_DB: app_test }
         ports: ['5432:5432']
         options: --health-cmd "pg_isready -U app" --health-interval 5s --health-timeout 5s --health-retries 10
       redis:
-        image: redis:7-alpine
+        image: redis@sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499 # 7-alpine
         ports: ['6379:6379']
         options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       DATABASE_URL: postgres://app:app@localhost:5432/app_test
       REDIS_URL: redis://localhost:6379
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: ${{ env.NODE_VERSION }}, cache: npm }
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 · conferido 2026-10-14
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
       - run: npm ci
       - run: npm run db:migrate
       - run: npm run test:integration
 
   e2e:
     name: E2E (shard ${{ matrix.shard }}/4)
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: build
@@ -90,69 +102,96 @@ jobs:
       fail-fast: false
       matrix: { shard: [1, 2, 3, 4] }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: ${{ env.NODE_VERSION }}, cache: npm }
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 · conferido 2026-10-14
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
       - run: npm ci
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4 · conferido 2026-10-14
         with: { name: build, path: dist/ }
-      - run: npx playwright install --with-deps chromium
-      - run: npx playwright test --shard=${{ matrix.shard }}/4
-      - uses: actions/upload-artifact@v4
+      - run: npx --no-install playwright install --with-deps chromium
+      - run: npx --no-install playwright test --shard=${{ matrix.shard }}/4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4 · conferido 2026-10-14
         if: failure()
-        with: { name: playwright-${{ matrix.shard }}, path: test-results/, retention-days: 7 }
+        with: { name: "playwright-${{ matrix.shard }}", path: test-results/, retention-days: 7 }
 
   security:
     name: Segurança
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
+        with: { fetch-depth: 0, persist-credentials: false }
+      # Scanners sem token, sem socket Docker e com fonte montada somente para leitura.
       - name: Segredos vazados
-        uses: gitleaks/gitleaks-action@v2
+        run: >-
+          docker run --rm -v "$PWD:/repo:ro"
+          zricethezav/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+          git /repo --redact --exit-code 1
       - name: Vulnerabilidades em dependências
-        uses: google/osv-scanner-action/osv-scanner-action@v1
-        with: { scan-args: --lockfile=package-lock.json }
+        run: >-
+          docker run --rm -v "$PWD:/src:ro" -w /src
+          ghcr.io/google/osv-scanner@sha256:4f3b7e2c64b9d38a5febc5a7e4a3dfef1d1362f726dea7a2ef4762b46469fcd0
+          scan source --lockfile=/src/package-lock.json
       - name: Análise estática (OWASP)
-        uses: semgrep/semgrep-action@v1
-        with: { config: p/owasp-top-ten }
+        run: >-
+          docker run --rm -v "$PWD:/src:ro" -w /src
+          semgrep/semgrep@sha256:529ee8a277ec8adc5b534d7c74eea0a47e9de21d62852b6ba7ac6ba9566845c3
+          semgrep scan --config p/owasp-top-ten --error --metrics=off /src
       - name: Imagem
-        run: docker build -t app:ci . && docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --exit-code 1 --severity HIGH,CRITICAL app:ci
+        run: |
+          docker build -t app:ci .
+          docker save app:ci -o "$RUNNER_TEMP/app-ci.tar"
+          docker run --rm -v "$RUNNER_TEMP/app-ci.tar:/scan/app.tar:ro" \
+            aquasec/trivy@sha256:2416d1f74045b57274df1a340eee6b510cacd73c66a6ccb8da092b117eb7d222 \
+            image --input /scan/app.tar --exit-code 1 --severity HIGH,CRITICAL
 
   lighthouse:
     name: Web Vitals
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: build
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: ${{ env.NODE_VERSION }}, cache: npm }
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4 · conferido 2026-10-14
+        with: { node-version: "${{ env.NODE_VERSION }}", cache: npm }
       - run: npm ci
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4 · conferido 2026-10-14
         with: { name: build, path: dist/ }
-      - run: npx @lhci/cli autorun   # lighthouserc.json com asserções: LCP < 2500, INP < 200, CLS < 0.1, performance ≥ 90
+      - run: npx --no-install lhci autorun   # lighthouserc.json com asserções: LCP < 2500, INP < 200, CLS < 0.1, performance ≥ 90
 
   deploy-staging:
     name: Deploy staging
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     needs: [quality, build, integration, e2e, security]
     if: github.ref == 'refs/heads/main'
     environment: staging
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
+        with: { persist-credentials: false }
       - run: echo "docker build + push com tag ${{ github.sha }}; migrar; deploy (fly deploy / gcloud run deploy / kubectl set image)"
-      - run: echo "smoke: curl -f https://staging.exemplo.com/health"
+      - run: |
+          echo "smoke: curl -f https://staging.exemplo.com/health"
 
   deploy-prod:
     name: Deploy produção
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     needs: deploy-staging
     if: github.ref == 'refs/heads/main'
     environment: production   # aprovação manual configurada no GitHub → Settings → Environments
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4 · conferido 2026-10-14
+        with: { persist-credentials: false }
       - run: echo "promover a MESMA imagem ${{ github.sha }} para produção; migrar; deploy canário/rolling"
-      - run: echo "verificar: health, taxa de erro e p95 por 10 min; rollback automático se degradar"
+      - run: |
+          echo "verificar: health, taxa de erro e p95 por 10 min; rollback automático se degradar"

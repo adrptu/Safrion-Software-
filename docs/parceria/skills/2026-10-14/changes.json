@@ -75,6 +75,11 @@
     "after": "b44d72f67853921b729d217443e0e2223bec6f943ed21d0038ec2e365b01ac3d"
   },
   {
+    "file": "shared/dev-infra/assets/ci.yml",
+    "before": "dc8c0029dbc5010aacb145f526a6dc6843409791e2a56467d260732caae69ece",
+    "after": "9f66dee37ce1092477a98a5218f36cd6c79b8b5df79ea2a65353df995eb489f1"
+  },
+  {
     "file": "shared/dev-revisao/SKILL.md",
     "before": "7ad2ac80af3d907d8dbaf3e7e2539cc63656dfcc0b6545dfb9bae11efcc34a57",
     "after": "91d16f4063e2c9279afcd314e576ce287822b6cee378016d4262cc09adcaa6a3"
