@@ -286,7 +286,7 @@ def faixa_filtros(inner, rot='Filtros', fim=''):
     cab = (f'<span class="mf-rot" data-dica="Filtros" style="display: inline-flex; align-items: center; color: {MUTED};">{icon("filtro",18,MUTED)}</span>' if rot == 'Filtros'
            else f'<span class="mf-rot" style="font-size: 11.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: {MUTED};">{rot}</span>')
     return (f'<div class="mf-tela" role="group" aria-label="{rot}" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex-shrink: 0; '
-            f'padding: {"0 14px" if fim else "8px 14px"}; border: 1px solid {LINE}; border-radius: 12px; background: {SURF};">'
+            f'padding: 8px 14px; min-height: 48px; box-sizing: border-box; border: 1px solid {LINE}; border-radius: 12px; background: {SURF};">'   # 14/10 (proprietário: "trabalhando em… ficou muito estreito"): o mesmo respiro com ou sem ação no fim
             f'{cab}{inner}' + (f'<span style="margin-left: auto;">{fim}</span>' if fim else '') + '</div>')
 def _macro_html(fname, ctx, sep=True):
     cfg = MACRO.get(fname)

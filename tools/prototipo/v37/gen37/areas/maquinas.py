@@ -50,9 +50,9 @@ CSS=('.ma-vis-m{display:none}'
      '.ma-gat [role=row][data-rid]>[role=cell] .g2pw>*+*{display:none}.ma-gat [role=row][data-rid]>[role=cell]{min-height:46px;box-sizing:border-box}'   # no celular a linha do ativo mostra o essencial de cada coluna; o resto fica no detalhe
      '.ma-cards .ma-card>span:last-child{display:none}.ma-cards .ma-card>span:nth-child(2){font-size:18px!important}'
      '.ma-flt{flex-wrap:nowrap!important;overflow-x:auto;padding-bottom:2px}.ma-flt>*{flex:0 0 auto}'
-     # faixa Filtros (MAN-LIMPA-01) no celular: uma linha que rola de lado; o rótulo visível sai (as opções dizem "Todos os tipos", "Toda
-     # criticidade"…; o nome acessível fica no aria-label do seletor), para a lista começar acima da dobra (AC-PCM-22)
-     '.ma-fx .mf-tela{flex-wrap:nowrap!important;overflow-x:auto;padding:6px 10px!important;gap:8px!important}.ma-fx .mf-tela>label{flex:0 0 auto;font-size:0!important;gap:0!important}'
+     # faixa Filtros (MAN-LIMPA-01) no celular: uma linha que rola de lado, com o título de cada filtro (proprietário, 14/10: "precisa manter o
+     # título de cada filtro para o usuário não se perder"), para a lista começar acima da dobra (AC-PCM-22)
+     '.ma-fx .mf-tela{flex-wrap:nowrap!important;overflow-x:auto;padding:6px 10px!important;gap:8px!important}.ma-fx .mf-tela>label{flex:0 0 auto}'
      '.ma-vc-l{display:none}.ma-vc-s{display:inline}.ma-hb{padding:7px 12px!important;font-size:13px!important}'
      '.ma-pan{width:100%!important;max-width:100%!important;left:0!important}.ma-hide-m{display:none!important}.ma-flt{flex-wrap:wrap}}'
      '.ma-pan{position:fixed;top:0;right:0;bottom:0;z-index:60;width:620px;max-width:100%;background:#fff;box-shadow:-12px 0 40px -12px rgba(21,32,26,.35);'
@@ -195,11 +195,8 @@ function ma_linhaPl(c,p){ const e=pmEst(p); const nv=pmVincs(c,p.id).length; con
     p:{nome:[{k:'link',t:p.id,h:'#plano='+p.id},{k:'mut',t:'· '+p.nome}],est:[ma_ch(e[0],e[1])],apl:[{k:'txt',t:manAplTxt(c,p)}],svs:[{k:'txt',t:manWork(p).map(s=>s.nome).join(' · ')||'—'}],
        atv:[{k:'txt',t:nv+(nv===1?' vinculado de ':' vinculados de ')+(nv+cand)}],sit:[ma_ch(si.t,si.c)].concat(sem?[{k:'link',t:sem+' sem ordem',h:'#vis=semordem&plano='+p.id}]:[])}}; }
 /* ---------- Ver como (simulação) e menu ⋯ ---------- */
-function ma_verComo(self,v){ const pf=g2perfil();
-  v.vc=MA_PERFIS.map(k=>{ const q=g2pf(k)||{k,t:k}; const on=pf.k===k; return {t:k,on:String(on),tit:'Ver como '+q.t+' (simulação; não é segurança de acesso)',st:ma_pill(on),
-    go:()=>{ try{ localStorage.setItem(G2_PERFIL_KEY,k); }catch(e){} G2_PERFIL_MEM=k; const ab=ma_abertura(manGet(),g2pf(k));
-      self.setState({perfil:k,vis:ab.vis,rot:ab.rot,pg:null,pan:null,rec:null,card:'',fase:'',g2toast:'Ver como '+q.t+' (simulação): o estado da demonstração não muda.'}); if(ab.vis==='ordens') setTimeout(()=>ma_autoAbre(self),0); }}; });
-  v.vc_fora=MA_PERFIS.indexOf(pf.k)<0; v.vc_fora_t=pf.t+' · sem papel na manutenção';
+/* sem a faixa "Ver como" (proprietário, 14/10): o perfil de quem age é o do avatar do menu lateral (g2perfil), lido a cada desenho */
+function ma_verComo(self,v){
   v.mais_open=!!self.state.mais; v.mais_tog=()=>self.setState({mais:!self.state.mais,rst:false}); v.mais_x=()=>self.setState({mais:false,rst:false});
   v.rst_no=!self.state.rst; v.rst_ask=!!self.state.rst; v.rst=()=>self.setState({rst:true}); v.rst_cancel=()=>self.setState({rst:false,mais:false});
   v.rst_ok=()=>{ manReset(self); self.setState({rst:false,mais:false,pan:null,pg:null,rec:null,sv:null,np:null,vk:null}); }; }
@@ -231,7 +228,7 @@ function PREVALS(self,v){ manOuvir(self); const c=manGet(); const st=self.state;
   /* Ativos e abastecimentos */
   const at=c.ordem.map(id=>c.ativos[id]).filter(a=>a&&(!st.fgrupo||a.grupo===st.fgrupo)).map(a=>ma_linhaAtv(c,a,per)).filter(r=>!st.fpend||r.pend.indexOf(st.fpend)>=0)
     .sort((a,b)=>(a.v.cond-b.v.cond)||(a.v.prox-b.v.prox));
-  ma_G('g_at').rows=at; ma_G('g_ab').rows=(c.abast||[]).slice().sort((x,y)=>(y.data+(y.hora||'')).localeCompare(x.data+(x.hora||''))).map(b=>ma_linhaAb(c,b));
+  ma_G('g_at').rows=at; ma_G('g_ab').rows=(c.abast||[]).filter(b=>!st.fgrupo||(c.ativos[b.aid]||{}).grupo===st.fgrupo).sort((x,y)=>(y.data+(y.hora||'')).localeCompare(x.data+(x.hora||''))).map(b=>ma_linhaAb(c,b));   /* o Grupo vale também para os lançamentos, pelo ativo de cada um (MAN-LIMPA-GRUPO-01) */
   /* Planos */
   ma_G('g_pl').rows=pmPlans(c).filter(p=>!st.fgrupo||p.grupo===st.fgrupo).map(p=>ma_linhaPl(c,p));
   /* detalhe do ativo */
@@ -913,10 +910,7 @@ def _btns(lst):
     return FOR(lst,'b',f'<button type="button" disabled="{H("b.dis")}" title="{H("b.why")}" onClick="{H("b.fn")}" style="{H("b.st")}">{H("b.t")}</button>',2)
 
 def _cabecalho():
-    vc=(f'<span role="group" aria-label="Ver como (simulação)" style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;">'
-        f'<span class="ma-vc-l" style="font-size: 12px; font-weight: 700; color: {MUTED};">Ver como (simulação)</span><span class="ma-vc-s" style="font-size: 12px; font-weight: 700; color: {MUTED};">Ver como</span>'
-        + FOR('vc','p',f'<button type="button" aria-pressed="{H("p.on")}" title="{H("p.tit")}" onClick="{H("p.go")}" style="{H("p.st")}">{H("p.t")}</button>',3)
-        + IF('vc_fora',f'<span style="font-size: 12px; color: {MUTED};">{H("vc_fora_t")}</span>') + '</span>')
+    """menu ⋯ (Restaurar demonstração) no fim dos comandos do cabeçalho"""
     mais=(f'<span style="position: relative; display: inline-flex;"><button type="button" aria-label="Mais ações" title="Mais ações" aria-expanded="{H("mais_open")}" onClick="{H("mais_tog")}" '
           f'style="border: 1px solid {LINE}; background: {SURF}; border-radius: 9px; width: 34px; height: 30px; cursor: pointer; font-size: 16px; font-weight: 800; color: {INK};">⋯</button>'
           + IF('mais_open',f'<div role="menu" aria-label="Mais ações" style="position: absolute; right: 0; top: 36px; z-index: 50; width: 300px; background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 8px; display: flex; flex-direction: column; gap: 6px;">'
@@ -925,7 +919,7 @@ def _cabecalho():
                + IF('rst_ask',f'<span role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">Restaurar toda a demonstração (manutenção, O.S., Estoque e App)?</span>'
                     f'<span style="display: flex; gap: 6px;"><button type="button" onClick="{H("rst_ok")}" style="{_MINI} color: {RED}; border-color: {RED};">Restaurar</button><button type="button" onClick="{H("rst_cancel")}" style="{_MINI}">Manter</button></span>')
                + '</div>') + '</span>')
-    return f'<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">{vc}<span style="flex-grow: 1;"></span>{mais}</div>'
+    return mais
 
 def _prim_cab():
     return (IF('hs_tem',f'<button type="button" class="ma-hb" onClick="{H("hs_fn")}" style="{SEC}">{H("hs_t")}</button>')
@@ -1298,7 +1292,9 @@ def ma():
     EXTRA.append(_painel()); EXTRA.append(_paineis_plano())
     EXTRAJS[0]=(DM.js_prefixo()+MA_JS.replace('__NAVST__',json.dumps([ui37.subnav_st(False),ui37.subnav_st(True)],ensure_ascii=False)).replace('__PRIM__',json.dumps(PRIM)).replace('__SEC__',json.dumps(SEC))+PM_JS)
     HEIGHTS37[FNAME]=1000
-    shell37('MA','Manutenção',corpo,fname=FNAME,status=(H('st_ma'),'red'),primary_html=_prim_cab(),chipsrow=_cabecalho(),search=False)
+    # 14/10/2026 (proprietário: "tire das telas ver como simulação"): sem a faixa "Ver como"; quem age é o perfil do avatar do menu lateral (a
+    # mesma fonte, g2perfil). O menu ⋯ (Restaurar demonstração) vai para o fim dos comandos do cabeçalho, sem uma linha só para ele.
+    shell37('MA','Manutenção',corpo,fname=FNAME,status=(H('st_ma'),'red'),primary_html=_prim_cab()+_cabecalho(),search=False)
     _status_dyn(FNAME,'st_ma')
     for f,d in REDIRECIONA.items(): _redirect(f,d)
     return FNAME

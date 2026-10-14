@@ -85,8 +85,21 @@ window.ACHA=(t,root)=>{ const r=root?document.querySelector(root):document; if(!
 window.PTO=(t,root)=>{ const e=ACHA(t,root); if(!e) return null; e.scrollIntoView({block:'center',inline:'nearest'}); const r=e.getBoundingClientRect(); const x=Math.round(r.left+Math.min(r.width/2,40)), y=Math.round(r.top+r.height/2);
   const top=document.elementFromPoint(x,y);
   // UX-BEN35-AVISO-01: além de não capturar o toque, o aviso não fica desenhado por cima do alvo (sob = algum aviso fixo à vista cruza o retângulo do alvo)
-  const sob=[...document.querySelectorAll('[role=status]')].some(a=>{ if(getComputedStyle(a).position!=='fixed'||!VIS(a)||!N(a.innerText)) return false; const q=a.getBoundingClientRect(), s=e.getBoundingClientRect(); return q.left<s.right&&q.right>s.left&&q.top<s.bottom&&q.bottom>s.top; });
-  return {x,y,sob,cob:!(top&&(top===e||e.contains(top))),aviso:!!(top&&top.closest&&top.closest('[role=status]')),top:top?top.tagName+' '+N(top.innerText).slice(0,40):''}; };
+  const sob=[...document.querySelectorAll('[role=status]')].some(a=>{ if(getComputedStyle(a).position!=='fixed'||!VIS(a)||!N(a.innerText)||+getComputedStyle(a).opacity<=0.1) return false; const q=a.getBoundingClientRect(), s=e.getBoundingClientRect(); return q.left<s.right&&q.right>s.left&&q.top<s.bottom&&q.bottom>s.top; });
+  // revisão Codex 6159767011: o aviso não cobre a navegação nem o cabeçalho (o que fica fora da área de conteúdo, main), não sai da tela e só
+  // fica sobre um controle do conteúdo quando não há faixa livre da altura dele (aí se apaga no próximo toque; apagado não conta). Coberto =
+  // o aviso pintado por cima de um ponto do controle (teste de clique com o aviso momentaneamente clicável: respeita a ordem das camadas)
+  const av=[...document.querySelectorAll('[role=status]')].find(a=>getComputedStyle(a).position==='fixed'&&VIS(a)&&N(a.innerText)&&+getComputedStyle(a).opacity>0.1); let tc=[], nav=[], fora=false, faixa=false;
+  if(av){ const q=av.getBoundingClientRect(); fora=q.top<0||q.bottom>innerHeight||q.left<0||q.right>innerWidth; const m=document.querySelector('main'), mq=m?m.getBoundingClientRect():{top:0,left:0,width:0};
+    const ctl=[]; document.querySelectorAll('button,a[href],[role=button],input,select,textarea').forEach(c=>{ if(av.contains(c)) return; const s=c.getBoundingClientRect(); if(!(s.width>0&&s.height>0)||s.bottom<0||s.top>innerHeight||s.right<0||s.left>innerWidth||(s.width>=innerWidth*.9&&s.height>=innerHeight*.5)) return;   /* fundo de tela inteira do painel */
+      const cx=Math.min(Math.max(s.left+s.width/2,0),innerWidth-1), cy=Math.min(Math.max(s.top+s.height/2,0),innerHeight-1); const h=document.elementFromPoint(cx,cy); if(h&&(h===c||c.contains(h))) ctl.push([c,s]); });
+    const pe=av.style.pointerEvents; av.style.pointerEvents='auto';
+    ctl.forEach(([c,s])=>{ if(!(s.left<q.right&&s.right>q.left&&s.top<q.bottom&&s.bottom>q.top)) return; const x=(Math.max(s.left,q.left)+Math.min(s.right,q.right))/2, y=(Math.max(s.top,q.top)+Math.min(s.bottom,q.bottom))/2;
+      const h=document.elementFromPoint(x,y); if(!(h&&av.contains(h))) return; const nm=N(c.innerText||c.getAttribute('aria-label')||c.tagName).slice(0,30);
+      if(mq.width>200&&(s.bottom<=mq.top+1||s.right<=mq.left+1)) nav.push(nm); else tc.push(nm); });
+    av.style.pointerEvents=pe;
+    if(tc.length){ const hq=q.height, topo=Math.max(mq.width>200?mq.top:0,8); for(let top=topo;top+hq<=innerHeight-8&&!faixa;top++){ if(!ctl.some(([c,s])=>s.left<q.right&&s.right>q.left&&s.top<top+hq&&s.bottom>top)) faixa=true; } } }
+  return {x,y,sob,tc,nav,faixa,fora,cob:!(top&&(top===e||e.contains(top))),aviso:!!(top&&top.closest&&top.closest('[role=status]')),top:top?top.tagName+' '+N(top.innerText).slice(0,40):''}; };
 window.PERFIL=(k)=>{ localStorage.setItem('safrion.perfilDemo',k); return k; };
 'ok'"""
 def lib(): J(LIB)
@@ -123,12 +136,18 @@ def tocar(x, root=None, w=.6, nav=False):
     """toque (390) ou clique (desktop) real no ponto do elemento, como a pessoa: recusa se outro elemento cobre o ponto; conta o toque"""
     p = J(f"PTO({json.dumps(x)},{json.dumps(root)})")
     if not p: return 'NÃO ACHEI: ' + x
+    # o PTO rola o alvo até o centro; a pessoa vê a tela já assentada (o aviso se reposiciona no quadro seguinte à rolagem) e só então toca
+    time.sleep(.25); p = J(f"PTO({json.dumps(x)},{json.dumps(root)})") or p
     n = 0
     while p and p['cob'] and p.get('aviso') and n < 10:   # o aviso (role=status) por cima do alvo: a pessoa espera ele sair
         time.sleep(1); n += 1; p = J(f"PTO({json.dumps(x)},{json.dumps(root)})")
     if n: print(f'   (esperou {n} s o aviso sair de cima de "{x}")'); AVISO.append(f'esperou {n} s: {x}')
     if not p: return 'NÃO ACHEI: ' + x
     if p.get('sob'): print(f'   (o aviso está desenhado por cima de "{x}")'); AVISO.append('sob: ' + x)
+    if p.get('nav') or p.get('fora') or (p.get('tc') and p.get('faixa')):
+        print(f'   (antes de tocar "{x}": aviso sobre a navegação {p.get("nav")} · sobre o conteúdo {p.get("tc")} com faixa livre: {p.get("faixa")} · fora da tela: {p.get("fora")})')
+        AVISO.append(f'nav={p.get("nav")} conteudo={p.get("tc")} faixa={p.get("faixa")} fora={p.get("fora")} ao tocar {x}')
+    elif p.get('tc'): print(f'   (antes de tocar "{x}": sem faixa livre, o aviso está no pé sobre {p.get("tc")}; apaga-se no toque)')
     if p['cob']: return 'COBERTO: ' + x + ' por ' + p['top']
     cl, tx = J("[window.__cl||0, window.__tx||0]") or [0, 0]
     if MOBILE[0]:
@@ -929,7 +948,7 @@ try:
             tc = toast(); lv = J(LIVRES) or []
             t.chk(f'R4 {W} · logo depois de "Retirar L39-119" o aviso está à vista e cada botão do rodapé recebe o toque no centro (elementFromPoint): ' + ', '.join(lv), 'L39-119 sai da ordem' in tc and lv and all(x.endswith(': livre') for x in lv), [tc, lv])
         tamanho(1440, 1000); t.chk('rodape sem erro de JS', not t.errs(), t.errs())
-    t.chk('AV · UX-BEN35-AVISO-01: nenhum toque esperou o aviso sair nem o tocou com o aviso desenhado por cima do alvo', not AVISO, AVISO)
+    t.chk('AV · UX-BEN35-AVISO-01: nenhum toque esperou o aviso sair; o aviso nunca ficou sobre o alvo, a navegação ou o cabeçalho, nem fora da tela, nem sobre um controle quando havia faixa livre', not AVISO, AVISO)
 finally:
     t.fim()
 sys.exit(0 if all(t.ok) else 1)   # juízo pela linha RESULTADO e pelo código de saída

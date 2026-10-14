@@ -277,11 +277,6 @@ def sigbar(envios=True):
             f'<button type="button" aria-pressed="{H("sg_off")}" onClick="{H("sg_sem")}" title="Simular aparelho sem sinal: registros ficam no aparelho" style="{H("sg_st0")}">Sem sinal</button></span>'
             f'<span aria-live="polite" style="{H("sg_tst")}">{H("sg_t")}</span></div>'
             + row2 + '</div>')
-def vercomo():
-    """Ver como (simulação) do app: Marcos · Zé em c.app.usuario (PCM S4); não é login."""
-    return (f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"><span style="font-size: 12px; font-weight: 600; color: {MUTED};">Ver como (simulação)</span>'
-            f'<span role="group" aria-label="Ver como (simulação)" style="display: inline-flex; padding: 2px; border-radius: 999px; background: {GRAYS}; gap: 2px;">'
-            f'<sc-for list="{H("vc_us")}" as="u" hint-placeholder-count="2"><button type="button" aria-pressed="{H("u.on")}" onClick="{H("u.fn")}" title="{H("u.tt")}" style="{H("u.st")}">{H("u.t")}</button></sc-for></span></div>')
 def pills(lst,label,count=3,a='o'):
     """Lista curta em pílulas (um toque), com aria-pressed."""
     return (f'<div role="group" aria-label="{esc(label)}" style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{H(lst)}" as="{a}" hint-placeholder-count="{count}">'
@@ -325,7 +320,7 @@ def ffield(label,fid,val,setfn,err,hint='',big=False,area=False,ph=''):
             + (IF(err+'_has',f'<span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H(err)}</span>') if err else '') + '</div>')
 
 _PRIM_RE=re.compile(r'(<div style="padding: 12px 20px 28px;[^"]*">)<a href="[^"]*" style="([^"]*)">.*?</a>(</div>)',re.S)
-def emit(fid,title,sub,status,primary,body,H_=900,fname=None,back='MB-01.dc.html',primary_href=None,js='',dyn_status=False,prim=None,cen=False,dyn_head=None,sem_prim=False,pre_extra=''):
+def emit(fid,title,sub,status,primary,body,H_=900,fname=None,back='MB-01.dc.html',primary_href=None,js='',dyn_status=False,prim=None,cen=False,dyn_head=None,sem_prim=False,pre_extra='',sub_html=None):
     """Gera a tela. dyn_status: selo do cabeçalho vem de v.hdr_* (JS). prim: variantes do botão primário
     [(condição|None,'a'|'b'|'ac',rótulo,href|função|(href,função))] — link navega, botão executa na própria tela, 'ac' = link que também
     executa (ex.: escolher a ordem antes de abrir o detalhe). cen: tela ligada ao cenário compartilhado (cenario.js_prefixo() + JS do app).
@@ -341,7 +336,7 @@ def emit(fid,title,sub,status,primary,body,H_=900,fname=None,back='MB-01.dc.html
         path=os.path.join(E.P,f); s=open(path).read()
         if sem_prim: n0=len(s); s=_PRIM_RE.sub('',s,count=1); assert len(s)<n0, 'rodapé não encontrado'
         if dyn_status: s=s.replace(chip('§ST§','yellow'),dchip('hdr'))
-        if dyn_head: s=s.replace('<title>§TT§</title>',f'<title>{esc(dyn_head)}</title>').replace('§TT§',H('hdr_ttl')).replace('§SB§',H('hdr_sub'))
+        if dyn_head: s=s.replace('<title>§TT§</title>',f'<title>{esc(dyn_head)}</title>').replace('§TT§',H('hdr_ttl')).replace('§SB§',sub_html if sub_html else H('hdr_sub'))
         if prim:
             m=_PRIM_RE.search(s); pst=m.group(2)+' cursor: pointer;'
             out=''
@@ -360,7 +355,7 @@ def build():
 
     # ================= MB-01 · Hoje no campo (lista · minha fila) =================
     corpo=(
-      sigbar() + vercomo()
+      sigbar()
       + IF('us_mar',h2('Minha fila','Siga a ordem da janela; o botão diz o próximo passo.')
            + IF('fila_vazia',card('Nada liberado para você',[note('Quando o escritório liberar uma ordem sua, ela aparece aqui com os insumos a retirar.')]))
            + qcards('fila',count=2))
@@ -391,8 +386,12 @@ v.pk_sel=()=>{ if(pk.o) mbSelSet(pk.o.id); };
 v.pk_go=()=>{ if(pk.o){ mbSelSet(pk.o.id); cenMudar(self,c=>mbIniciar(c,pk.o.id)); } };
 // cenReset só apaga a chave: grava o cenário inicial para que os outros quadros abertos também voltem ao início (e não regravem o antigo).
 v.restaurar=()=>{ cenReset(); cenSave(cenGet()); mbSelSet(''); mbOmSet(''); self.setState({cenrev:Date.now(),ft:{},ft_err:{},g2toast:'Demonstração restaurada: ordens, estoque, manutenção, colheita e app voltaram ao início.'}); };'''
+    # 14/10/2026 (proprietário: "tire das telas ver como simulação"): quem usa o app é escolhido no próprio nome do cabeçalho (como o avatar da web)
+    us_sel=(f'<span style="display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap;"><select aria-label="Usuário do app (demonstração)" value="{H("us_k")}" onChange="{H("us_set")}" '
+            f'style="font: inherit; color: inherit; border: 0; border-bottom: 1px dashed currentColor; background: transparent; padding: 0 2px; min-height: 32px; cursor: pointer;">'
+            f'<sc-for list="{H("us_opts")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select><span>· Santa Rita</span></span>')
     emit('MB-01','Hoje no campo','Marcos · operador · Santa Rita',None,'Abrir próxima tarefa',corpo,H_=1800,back='IN-01.dc.html',
-         js=js,dyn_status=True,cen=True,dyn_head='Hoje no campo',
+         js=js,dyn_status=True,cen=True,dyn_head='Hoje no campo',sub_html=us_sel,
          prim=[('pk_isA','ac',H('pk_lab'),(H('pk_href'),'pk_sel')),('pk_ini','b',H('pk_lab'),'pk_go'),('pk_none','a','Ver minhas ordens','MB-02.dc.html'),
                ('zk_a','ac',H('zk_lab'),(H('zk_href'),'zk_sel')),('zk_b','b',H('zk_lab'),'zk_go'),('zk_none','a','Abrir Máquina','MB-09.dc.html')])
 
@@ -635,7 +634,7 @@ v.reenviar=()=>{ const cc=cenGet(); const nn=(cc.app.fila||[]).length; if(!nn) r
 
     # ================= MB-04 · Ocorrência móvel (detalhe/formulário) =================
     corpo=(
-      sigbar() + vercomo()
+      sigbar()
       + mcont('Minha fila',H('oc_aqui'),H('ct_f'),H('ct_p'))
       + IF('oc_novo',
           f'<div style="display: flex; flex-direction: column; gap: 6px;"><span style="font-size: 12px; font-weight: 600; color: {MUTED};">Ordem</span>'
@@ -1001,7 +1000,7 @@ DCH(v,'hdr',k?(k.local+' · planta '+(n+1)):(s.m7ok?'contagem gravada':'escolha 
     # Grava pelas mesmas funções da tela MA (manAbastecer, manLeituraAvulsa) com a chave do aparelho; sem sinal, vai para a fila.
     recst=f'display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; line-height: 1.4;'
     corpo=(
-      sigbar() + vercomo()
+      sigbar()
       + h2('Máquina','Herdada do seu turno; toque noutra ou busque pelo nome.')
       + pills('mq_curtos','Máquinas do turno',2)
       + f'<input id="mq-busca" type="search" aria-label="Buscar máquina" placeholder="Buscar máquina" value="{H("mq_q")}" onChange="{H("mq_setq")}" style="{INP}">'
@@ -1104,7 +1103,7 @@ v.mq_hist=hist.slice(0,4); v.mq_hasHist=hist.length>0;'''
         + IF('t.treg',f'<div><button type="button" onClick="{H("t.tgo")}" title="Anexar a foto do teste (simulada) e registrar a tentativa" style="{_NXST}">{icon("doc",14)}{H("t.tgot")}</button></div>')
         + IF('t.hasWhy',f'<span style="font-size: 12px; font-weight: 700; color: {MUTED};">{H("t.why")}</span>') + '</div>')
     corpo=(
-      sigbar() + vercomo()
+      sigbar()
       + f'<div style="{CARD_ST}"><div role="status" style="{H("dp_cst")}">{H("dp_cond")}</div>'
         f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: {MUTED};"><span>{H("dp_leit")}</span>'
         f'<a href="{H("dp_ath")}" title="Abrir a máquina desta ordem (condição, leitura e abastecimento)" style="color: {ACC}; font-weight: 700; text-decoration: none;">{H("dp_att")}</a></div>'
@@ -1341,6 +1340,8 @@ function mbUsuario(c){ const u = c && c.app && c.app.usuario; return MB_US.some(
 function mbPapelUs(u){ return (MB_US.find(x => x.k === u) || MB_US[0]).p; }
 // Ver como (simulação, não é login): troca quem usa o app; o estado da demonstração não muda além de c.app.usuario.
 function mbVerComo(self, v, c){ const u = mbUsuario(c);
+  v.us_k = u; v.us_opts = MB_US.map(x => ({ v: x.k, t: x.k + ' · ' + x.p }));
+  v.us_set = (e) => { const k = e && e.target ? e.target.value : ''; const it = (v.vc_us || [])[MB_US.findIndex(x => x.k === k)]; if (it) it.fn(); };
   v.vc_us = MB_US.map(x => ({ t: x.k + ' · ' + x.p, on: String(x.k === u), st: mbSeg(x.k === u, false), tt: 'Ver o app como ' + x.k + ' (' + x.p + ') · simulação, não é login',
     fn: () => { if (mbUsuario(cenGet()) === x.k) return; cenMudar(self, c2 => { c2.app.usuario = x.k; return { msg: 'Ver como ' + x.k + ' (' + x.p + ') · simulação, não é login.' }; });
       self.setState({ mq_aid: '', mq_rec: null, mq_opk: undefined, dp: {}, dp_rec: null, dp_aviso: null, oc_aid: undefined }); } })); }

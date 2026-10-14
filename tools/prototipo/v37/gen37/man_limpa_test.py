@@ -9,6 +9,8 @@ manutenção, vamos focar os cards na área de gráficos e relatórios · telas 
   L5 Grupo filtra também em Ativos e Planos (antes o seletor não tinha efeito nessas visões)
   L6 Lista e Kanban das ordens são ícones com nome (como na O.S.); o Kanban abre pelo ícone
   L7 sem erro de JS
+  L8 Ativos › Abastecimentos: o Grupo filtra os lançamentos pelo ativo de cada um; limpar restaura todos; o grupo continua ao voltar a Ativos
+     (revisão Codex 6160153073, MAN-LIMPA-GRUPO-01: antes o seletor aparecia e as 8 linhas ficavam)
 Uso: python3 man_limpa_test.py (lê _render ou RENDER_DIR)."""
 import os, sys, json, time
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -77,6 +79,19 @@ try:
     J("(()=>{const b=[...document.querySelectorAll('[role=toolbar][aria-label=\"Visão das ordens\"] button')].find(b=>b.getAttribute('aria-label')==='Kanban'); if(b) b.click();})()"); time.sleep(.6)
     kb = J("!!document.querySelector('[aria-label=\"Kanban das ordens\"]')&&document.querySelector('[aria-label=\"Kanban das ordens\"]').getClientRects().length>0")
     chk('L6 Lista e Kanban em ícones com nome; o ícone Kanban abre o quadro', tb == [['Lista', '', True, 'true'], ['Kanban', '', True, 'false']] and kb, [tb, kb])
+    # L8 · Abastecimentos (oráculo: c.abast cujo ativo é do grupo; o grupo com mais lançamentos, que não seja o total)
+    vis('ativos&modo=abastecimentos'); setf('grupo', ''); b0 = J(RIDS) or []
+    ga = J("(()=>{ const c=window.__man.manGet(); const g={}; (c.abast||[]).forEach(b=>{ const k=(c.ativos[b.aid]||{}).grupo; if(k) (g[k]=g[k]||[]).push(b.id); });"
+           " const k=Object.keys(g).sort((x,y)=>g[y].length-g[x].length).find(k=>g[k].length<(c.abast||[]).length); return k?[k,g[k]]:null; })()")
+    b1 = []; b2 = []; ga_vol = None
+    if ga:
+        setf('grupo', ga[0]); b1 = J(RIDS) or []
+        J("(()=>{const b=[...document.querySelectorAll('main button')].find(b=>b.innerText.trim()==='Ativos'&&b.getClientRects().length); if(b) b.click();})()"); time.sleep(.5)
+        ga_vol = J("(()=>{const s=[...document.querySelectorAll('[role=group][aria-label=Filtros] select')].find(s=>s.getAttribute('aria-label')==='Filtrar por grupo'&&s.getClientRects().length); return s?s.value:null;})()")
+        J("(()=>{const b=[...document.querySelectorAll('main button')].find(b=>b.innerText.trim()==='Abastecimentos'&&b.getClientRects().length); if(b) b.click();})()"); time.sleep(.5)
+        setf('grupo', ''); b2 = J(RIDS) or []
+    chk('L8 Abastecimentos: o Grupo filtra pelo ativo do lançamento; limpar restaura; o grupo continua ao voltar a Ativos',
+        bool(ga) and sorted(b1) == sorted(ga[1]) and len(b1) < len(b0) and sorted(b2) == sorted(b0) and ga_vol == ga[0], [ga, len(b0), b1, ga_vol, len(b2)])
     chk('L7 sem erro de JS', not (J("window.__err") or ''), J("window.__err"))
 finally:
     try: c.close()

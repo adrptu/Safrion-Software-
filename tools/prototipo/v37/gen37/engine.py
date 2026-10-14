@@ -1723,7 +1723,8 @@ ENGINE_JS2=ENGINE_JS2.replace("    return v;\n  }\n}","""    v.g2toast = this.st
     if (typeof assinAvisoVals === 'function') assinAvisoVals(this, v);   // faixa de cobrança (PLAT-01, R11): só as telas da organização têm o buraco
     return v;
   }
-  componentDidMount() { g2montou(this); }   /* DS-RETORNO-20261009: tela nova (realce do título, fim da barra de carga, anúncio) */
+  componentDidMount() { g2montou(this);   /* DS-RETORNO-20261009: tela nova (realce do título, fim da barra de carga, anúncio) */
+    document.addEventListener('g2toastsai', (e) => { if (this.state.g2toast && this.state.g2toast === (e.detail || '')) this.setState({ g2toast: '' }); }); }   /* UX-BEN35-AVISO-01: aviso apagado pelo toque (g2toastSai) sai do estado; o mesmo texto depois volta a aparecer */
   componentDidUpdate(pp, ps) { if (this.state.g2toast !== (ps || {}).g2toast && typeof g2avisoH === 'function') g2avisoH();   /* V55-RESP-01: altura do aviso medida na troca */
     if (this.state.g2toast && this.state.g2toast !== (ps || {}).g2toast) { clearTimeout(this._g2t); this._g2t = setTimeout(() => this.setState({ g2toast: '' }), 4500); }
     g2mudou(this); }   /* DS-RETORNO-20261009: etapa/seção nova ou aviso novo realça o que mudou e anuncia (ponto central, não por tela) */

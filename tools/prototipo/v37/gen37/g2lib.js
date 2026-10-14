@@ -450,13 +450,33 @@ function g2navvals(self,v,nav){ const rec=g2menuRec();
 function g2avisoH(){ g2toastLugar(); try{ let h=0; document.querySelectorAll('[role=status]').forEach(t=>{ const cs=getComputedStyle(t); if(cs.position!=='fixed'||cs.bottom==='auto') return;
     const r=t.getBoundingClientRect(); if(r.height>2&&r.width>2) h=Math.max(h,Math.ceil(r.height)); });
   const v=h+'px', de=document.documentElement; if(de.style.getPropertyValue('--aviso-h')!==v) de.style.setProperty('--aviso-h',v); }catch(e){} }
-// o aviso não cobre controle (UX-BEN35-AVISO-01, revisão Codex de 14/10, S3): no pé, se ficar sobre um botão, link ou campo à vista (rodapé de
-// painel, barra de ações), sobe para o topo; se lá também cobrir, volta ao pé. Nunca captura toque (pointer-events: none no aviso).
-// Roda antes da medida do g2avisoH, que só reserva o pé (--aviso-h) quando o aviso fica embaixo.
-function g2toastLugar(){ try{ const t=document.querySelector('.g2toast'); if(!t||!t.getClientRects().length) return; t.style.top=''; t.style.bottom='';
-  const cobre=()=>{ const r=t.getBoundingClientRect(); return [...document.querySelectorAll('button,a[href],[role=button],input,select,textarea')].some(e=>{ if(t.contains(e)||!e.getClientRects().length) return false;
-    const q=e.getBoundingClientRect(); return q.width>0&&q.height>0&&q.left<r.right&&q.right>r.left&&q.top<r.bottom&&q.bottom>r.top; }); };
-  if(!cobre()) return; t.style.bottom='auto'; t.style.top='calc(env(safe-area-inset-top, 0px) + 12px)'; if(cobre()){ t.style.top=''; t.style.bottom=''; } }catch(e){} }
+// o aviso não cobre controle (UX-BEN35-AVISO-01, revisões Codex de 14/10, S3): fica centrado na área de conteúdo (main), nunca sobre a barra
+// lateral, e no pé (a âncora do G2_TOAST, guardada na 1ª vez e sempre restaurada; antes ela se perdia e o aviso ia ao topo, cobrindo o
+// "‹ Módulo" e a barra, 6159767011). Se ali ficar sobre um botão, link ou campo VISÍVEL (o que está no topo naquele ponto: o que um painel
+// aberto esconde não conta), sobe em passos de 6 px até a primeira faixa livre, sem sair da tela. Sem faixa livre (ex.: aviso de 4 linhas
+// a 390 px sobre uma lista com um link a cada 44 px), fica no pé, nunca sobre o cabeçalho ou a navegação, e se apaga no primeiro toque,
+// clique, tecla ou rolagem da pessoa (g2toastSai), para não ficar sobre o que ela vai usar. Aviso novo volta a aparecer inteiro.
+// Nunca captura toque (pointer-events: none no aviso). Roda antes da medida do g2avisoH, que reserva o pé (--aviso-h).
+function g2toastLugar(){ try{ const t=document.querySelector('.g2toast'); if(!t) return; if(!t.getClientRects().length){ t.__tx=null; return; }
+  if(t.__b0===undefined){ t.__b0=t.style.bottom; t.__l0=t.style.left; t.__w0=t.style.maxWidth; }
+  const tx=t.textContent; if(tx!==t.__tx){ t.__tx=tx; t.__desde=Date.now(); t.style.opacity=''; t.style.transition=''; }
+  delete t.dataset.sobre;
+  t.style.top=''; t.style.bottom=t.__b0; t.style.left=t.__l0; t.style.maxWidth=t.__w0;
+  const H=window.innerHeight||document.documentElement.clientHeight, W=window.innerWidth||document.documentElement.clientWidth;
+  const m=document.querySelector('main'); const mq=m&&m.getBoundingClientRect();
+  if(mq&&mq.width>200){ const l=Math.max(mq.left,0), r=Math.min(mq.right,W); t.style.left=((l+r)/2)+'px'; t.style.maxWidth=Math.min(560,r-l-24)+'px'; }
+  const ctl=[]; document.querySelectorAll('button,a[href],[role=button],input,select,textarea').forEach(e=>{ if(t.contains(e)) return; const q=e.getBoundingClientRect();
+    if(!(q.width>0&&q.height>0)||q.bottom<0||q.top>H||q.right<0||q.left>W||(q.width>=W*.9&&q.height>=H*.5)) return;   /* o fundo de tela inteira atrás do painel não conta */ const x=Math.min(Math.max(q.left+q.width/2,0),W-1), y=Math.min(Math.max(q.top+q.height/2,0),H-1);
+    const h=document.elementFromPoint(x,y); if(h&&(h===e||e.contains(h))) ctl.push(q); });
+  const r0=t.getBoundingClientRect(), h=r0.height, b0=H-r0.bottom, topo=Math.max(mq&&mq.width>200?mq.top:0,8);   // nunca acima da área de conteúdo
+  const livre=(b)=>{ const top=H-b-h, bot=H-b; return !ctl.some(q=>q.left<r0.right&&q.right>r0.left&&q.top<bot&&q.bottom>top); };
+  if(livre(b0)) return;
+  for(let b=b0+1;H-b-h>=topo;b++){ if(livre(b)){ t.style.bottom=b+'px'; return; } }
+  t.dataset.sobre='1'; }catch(e){} }
+function g2toastSai(){ try{ const t=document.querySelector('.g2toast'); if(!t||t.dataset.sobre!=='1'||t.style.opacity==='0'||Date.now()-(t.__desde||0)<300) return;
+  t.style.transition='opacity .15s'; t.style.opacity='0'; const tx=t.textContent;
+  setTimeout(()=>{ if(t.style.opacity==='0'&&t.textContent===tx) document.dispatchEvent(new CustomEvent('g2toastsai',{detail:tx})); },160); }catch(e){} }
+if(typeof document!=='undefined'&&!window.__g2toastSai){ window.__g2toastSai=1; ['pointerdown','touchstart','click','keydown','wheel'].forEach(k=>document.addEventListener(k,g2toastSai,{capture:true,passive:true})); }
 (function g2glob(){ if(typeof document==='undefined'||window.__g2glob) return; window.__g2glob=1;
   const vis=(e)=>!!e&&e.getClientRects().length>0;
   const rotulo=()=>[...document.querySelectorAll('.etp-chk')].find(vis);
