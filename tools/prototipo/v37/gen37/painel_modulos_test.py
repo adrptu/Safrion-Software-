@@ -48,6 +48,7 @@ chk('agrPainelRef: seed = OS-0418 e OS-0502 (falta insumo no Estoque), OS-0420 (
 chk('agrPainelRef: mesma lista e mesmo motivo que a projeção da tela O.S. (osProjecao + OS_IMP_RE)',r0.os.impedidas.map(x=>[x.id,x.motivo]),
  osProjecao(ag).filter(o=>!/^OB-/.test(o.id)&&!['Encerradas','Canceladas'].includes(o.etapa)).map(o=>[o.id,(o.selos.find(s=>OS_IMP_RE.test(s.t))||{}).t]).filter(x=>x[1]));
 chk('agrPainelRef: origem na O.S. e n confere',[r0.os.impedidas[0].origem,r0.os.n.impedidas],['OS.dc.html#OS-0418',5]);
+chk('agrPainelRef: cada impedida traz fazenda e safra do registro',r0.os.impedidas.map(x=>[x.id,x.faz,x.saf]),[['OS-0418','Santa Rita','2026/27'],['OS-0420','Santa Rita','2026/27'],['OS-0431','Santa Rita','2026/27'],['OS-0502','Lagoa Grande','2026/27'],['OS-0507','Lagoa Grande','2026/27']]);
 chk('agrPainelRef: atrasadas e custos = null; desde = null (dono vem da projeção)',[r0.os.atrasadas,r0.os.n.atrasadas,r0.custos,r0.os.impedidas.every(x=>x.desde===null)],[null,null,null,true]);
 // S2: máquina apta (CMD-19) tira só o impedimento dela, como na tela O.S.
 const ap=cenClone(CEN0); ap.man.ativos.a01.cond='Disponível'; const rA=agrPainelRef(ap);

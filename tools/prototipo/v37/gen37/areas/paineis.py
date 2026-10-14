@@ -50,7 +50,7 @@ function agrPainelRef(c,rec) { rec=rec||{};
   if(ab&&!semCtx) {
    const imp=ab.filter(o=>(!rec.faz||o.faz===rec.faz)&&(!rec.saf||o.saf===rec.saf))
     .map(o=>[o,o.selos.find(s=>s&&OS_IMP_RE.test(s.t||''))]).filter(x=>x[1])
-    .map(([o,s])=>({id:o.id,talhao:o.talhao||'',etapa:o.etapa,motivo:s.t,dono:o.dono||null,desde:null,origem:'OS.dc.html#'+encodeURIComponent(o.id)}));
+    .map(([o,s])=>({id:o.id,talhao:o.talhao||'',faz:o.faz||null,saf:o.saf||null,etapa:o.etapa,motivo:s.t,dono:o.dono||null,desde:null,origem:'OS.dc.html#'+encodeURIComponent(o.id)}));
    os={impedidas:imp,atrasadas:null,n:{impedidas:imp.length,atrasadas:null}};
   }
  }
