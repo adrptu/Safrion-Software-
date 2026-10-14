@@ -23,5 +23,13 @@ check('Refresh preserva grupo expandido e seleção por identidade',()=>document
 check('Refresh preserva foco no detalhe',()=>document.activeElement.matches('.dt-panel [data-close]'));
 t.setRows([{id:'b',nome:'Bia',fazenda:'B'}]);check('Registro removido fecha detalhe sem selecionar outro',()=>!document.querySelector('.dt-panel')&&!document.querySelector('.dt-sel'));t.destroy();
 t=Tabela.create('#table',{rows:[{codigo:0,nome:'Zero'}],rowKey:'codigo',rowTitle:r=>r.nome});document.querySelector('.dt-leaf').click();t.setRows([{codigo:0,nome:'Novo zero'}]);check('Chave configurável aceita zero',()=>document.querySelector('.dt-panel h3')?.textContent==='Novo zero');t.setRows([{codigo:0,nome:'Duplicado A'},{codigo:0,nome:'Duplicado B'}]);check('Identidade ambígua não seleciona registro arbitrário',()=>!document.querySelector('.dt-panel'));t.destroy();
+
+t=Tabela.create('#table',{rows:[{farm:'A',area:10,cost:7},{farm:'A',area:20,cost:11}],columns:[{key:'area',label:'Área',type:'number',agg:'sum'},{key:'cost',label:'Custo',type:'number',agg:'sum'},{key:'farm',hidden:true}],groupBy:['farm']});
+check('Grupo apresenta soma da primeira coluna visível',()=>document.querySelector('.dt-grp td .dt-n')?.textContent==='30');
+check('Grupo mantém alinhamento e segundo agregado',()=>document.querySelector('.dt-grp').cells.length===2&&document.querySelector('.dt-grp').cells[1].textContent==='18');
+const numericGroup=document.querySelector('.dt-grp');numericGroup.focus();numericGroup.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
+check('Agrupamento numérico preserva expansão por teclado e total',()=>document.querySelectorAll('.dt-leaf').length===2&&document.querySelector('.dt-grp td .dt-n')?.textContent==='30');t.destroy();
+t=Tabela.create('#table',{rows:[{farm:'A',amount:10},{farm:'A',amount:20}],columns:[{key:'amount',type:'number',agg:'avg'},{key:'farm',hidden:true}],groupBy:['farm']});
+check('Grupo de coluna única apresenta agregação configurada',()=>document.querySelector('.dt-grp').cells.length===1&&document.querySelector('.dt-grp td .dt-n')?.textContent==='15'&&document.querySelector('tfoot td').textContent==='15');t.destroy();
 window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS '+results.length+'/'+results.length:'FAIL';
 </script></html>

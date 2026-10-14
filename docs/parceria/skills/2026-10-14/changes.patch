@@ -1116,6 +1116,15 @@
      }
      const vis = () => cols.filter((c) => !c.hidden);
      const raw = (c, r) => (c.value ? c.value(r) : r[c.key]);
+@@ -427,7 +435,7 @@
+         groupIndex.set(g.id, g);
+         const open = st.open.has(g.id);
+         h += `<tr class="dt-grp${open ? ' dt-open' : ''}" tabindex="0" data-g="${esc(g.id)}" aria-expanded="${open}">` +
+-          `<td colspan="${span}" style="padding-left:${8 + g.depth * 20}px"><div class="dt-gl"><span class="dt-caret">▶</span><span class="dt-gk">${esc(g.spec.label)}:</span><span>${esc(g.label)}</span><span class="dt-badge" title="linhas">${fmtInt(g.rows.length)}</span><button class="dt-drill" data-drill title="Abrir somente este grupo (duplo clique)">Detalhar ›</button></div></td>` +
++          `<td colspan="${span}" style="padding-left:${8 + g.depth * 20}px"><div class="dt-gl"><span class="dt-caret">▶</span><span class="dt-gk">${esc(g.spec.label)}:</span><span>${esc(g.label)}</span><span class="dt-badge" title="linhas">${fmtInt(g.rows.length)}</span><button class="dt-drill" data-drill title="Abrir somente este grupo (duplo clique)">Detalhar ›</button></div>${firstAgg === 0 ? `<div class="dt-n">${esc(fmtAgg(V[0], g.aggs[V[0].key]))}</div>` : ''}</td>` +
+           V.slice(span).map((c) => `<td${isNum(c.type) ? ' class="dt-n"' : ''}>${c.agg ? esc(fmtAgg(c, g.aggs[c.key])) : ''}</td>`).join('') + '</tr>';
+         if (open) h += g.children ? renderGroups(g.children, V) : renderLeaves(g.rows, g.depth + 1, g.id, V);
+       }
 @@ -542,12 +550,13 @@
        }
        const universe = [...counts.values()].sort((a, b) => (a.sort == null ? 1 : b.sort == null ? -1 : cmp(a.sort, b.sort)));
