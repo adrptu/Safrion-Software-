@@ -49,18 +49,24 @@ for(const d of [0,1]) {
 const impedida={id:'OS-0420',talhao:'T4',faz:'Santa Rita',saf:'Safra 2026/27',motivo:'Falta máquina',dono:'Caio',desde:null,origem:'OS.dc.html#OS-0420'};
 const atrasada={...impedida,prevista:'2026-09-22',dias:1};
 const ref={os:{impedidas:[impedida],atrasadas:[atrasada],n:{impedidas:1,atrasadas:1}},custos:null};
-const refAntes=JSON.stringify(ref), leitura=pnaOSLinhas(ref), row=pnaOSRow(leitura[0]);
-chk('Mesma O.S. impedida e atrasada ocupa uma linha',leitura.length,1);
-chk('Ambas situações e dono permanecem visíveis',[row.v.situacao,row.v.motivo,row.v.dono],['Impedida · Atrasada','Falta máquina','Caio']);
-chk('Janela ISO apresentada sem cálculo novo',row.v.prazo,'22/09/2026 · 1 dia(s) de atraso');
-chk('Origem exata e ID sem colisão com cultivo',[row.href,row.id],['OS.dc.html#OS-0420','os:OS-0420']);
+const refAntes=JSON.stringify(ref), leitura=pnaOSLinhas(ref), grupo=pnaOSGrupos(leitura,'motivo')[0];
+chk('Mesma O.S. impedida e atrasada é contada uma vez',leitura.length,1);
+chk('Duas situações não duplicam a contagem',[grupo.n,grupo.impedidas,grupo.atrasadas],[1,1,1]);
+chk('Motivo literal e IDs recuperáveis',[grupo.label,grupo.ids],['Falta máquina',['OS-0420']]);
+chk('Impedimento tem vermelho do DS',grupo.barra.endsWith('background:#B42318'),true);
 chk('Sem mutação do retorno do domínio',JSON.stringify(ref),refAntes);
 chk('Ausente não significa sem pendência',pnaOSLinhas(null),null);
 chk('Vazio válido permite mensagem sem pendência',pnaOSLinhas({os:{impedidas:[],atrasadas:[]}}),[]);
 chk('Lista inválida não mostra zero',pnaOSLinhas({os:{impedidas:{},atrasadas:[]}}),null);
 chk('Origem inválida não cria navegação',pnaOSLinhas({os:{impedidas:[{...impedida,origem:'javascript:alert(1)'}],atrasadas:[]}}),null);
-const semDono=pnaOSRow({...leitura[0],dono:null,prevista:null,dias:null});
-chk('Ausência de dono e prazo explícita',[semDono.v.dono,semDono.v.prazo],['Responsável não informado','Data não informada']);
+chk('Responsável ausente explícito',pnaOSGrupos([{...leitura[0],dono:null}],'dono')[0].label,'Responsável não informado');
+const outras=pnaOSLinhas({os:{impedidas:[impedida,{...impedida,id:'OS-0421',origem:'OS.dc.html#OS-0421'},
+ {...impedida,id:'OS-0422',origem:'OS.dc.html#OS-0422',dono:'Lia',motivo:'Outra causa'}],atrasadas:[atrasada]}});
+chk('Agrupa responsável sem duplicar OS em duas situações',pnaOSGrupos(outras,'dono').map(g=>[g.label,g.n]),[['Caio',2],['Lia',1]]);
+chk('Maior causa primeiro e barra proporcional',pnaOSGrupos(outras,'motivo').map(g=>[g.n,/width:([\d.]+)%/.exec(g.barra)[1]]),[[2,'100'],[1,'50']]);
+chk('Não soma as duas distribuições',pnaOSGrupos(outras,'dono').reduce((a,g)=>a+g.n,0),3);
+chk('Gráfico ausente não vira zero',pnaOSGrupos(null,'dono'),null);
+chk('Gráfico vazio preservado',pnaOSGrupos([],'motivo'),[]);
 chk('Atraso ausente não esconde impedimento conhecido',pnaOSLinhas({os:{impedidas:[impedida],atrasadas:null}}).length,1);
 chk('Ambos ausentes não viram vazio',pnaOSLinhas({os:{impedidas:null,atrasadas:null}}),null);
 console.log('RESULTADO '+n+'/'+n);
@@ -160,32 +166,40 @@ def os_contract_ui():
         for w,touch in [(1440,False),(390,True)]:
             absence=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>null;'})['identifier']
             c.aparelho(w,844,1,touch);c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
-            chk('Fonte ausente explícita '+str(w),wait("document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]').innerText.includes('Dados de impedimentos e prazos indisponíveis')"))
+            chk('Fonte ausente explícita '+str(w),wait("document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]').innerText.includes('Dados de impedimentos e prazos indisponíveis')&&!document.querySelector('.pna-grupo')"))
             J("(()=>{let e=document.querySelector('main input[type=search]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(e,'');e.dispatchEvent(new Event('input',{bubbles:true}));})()")
             c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':absence})
             # O adaptador é fixture exclusiva desta prova; montagem do produto não recebe seed paralelo.
             fixture_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>('+json.dumps(fixture,ensure_ascii=False)+');'})['identifier']
             c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
-            chk('Uma linha para dois motivos '+str(w),wait("document.querySelectorAll('[data-rid=\"os:OS-0420\"]').length===1"))
-            chk('Motivo, responsável e prazo '+str(w),J("(()=>{let r=document.querySelector('[data-rid=\"os:OS-0420\"]');return !!r&&['Impedida · Atrasada','Falta máquina','Caio','22/09/2026'].every(t=>r.innerText.includes(t))})()"))
+            chk('Dois gráficos sem lista operacional '+str(w),wait("document.querySelectorAll('.pna-grupo').length===2&&!document.querySelector('[data-rid^=\"os:\"]')"))
+            chk('Contagem única e situações textuais '+str(w),J("(()=>{let s=document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]');return ['1 O.S. com atenção','Falta máquina','Caio','1 impedida(s) · 1 atrasada(s)'].every(t=>s.innerText.includes(t))&&!s.querySelector('[role=table]')})()"))
+            chk('Impedimento vermelho '+str(w),J("[...document.querySelectorAll('.pna-grupo [aria-hidden] span')].every(e=>getComputedStyle(e).backgroundColor==='rgb(180, 35, 24)')"))
             chk('Cartões e colheita preservados '+str(w),J("document.querySelectorAll('.pn-card').length===4&&!!document.querySelector('[data-rid=lg19]')&&document.documentElement.scrollWidth<=innerWidth"))
-            J("(()=>{let e=document.querySelector('main input[type=search]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(e,'OS-0420');e.dispatchEvent(new Event('input',{bubbles:true}));})()")
-            chk('Busca na tarefa '+str(w),wait("document.querySelectorAll('[data-rid]').length===1"))
+            button="document.querySelector('[aria-label=\"Como ler os impedimentos e atrasos\"]')"
             if touch:
-                xy=J("(()=>{let e=document.querySelector('[data-rid=\"os:OS-0420\"] [role=cell]');e.scrollIntoView({block:'center',inline:'start'});let r=e.getBoundingClientRect();return {x:r.left+25,y:r.top+25}})()")
+                xy=J("(()=>{let e="+button+";e.scrollIntoView({block:'center'});let r=e.getBoundingClientRect();return {x:r.left+20,y:r.top+20}})()")
                 c.call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[xy]});c.call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
             else:
-                J("document.querySelector('[data-rid=\"os:OS-0420\"]').focus()")
+                J(button+'.focus()')
                 c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Enter','code':'Enter','windowsVirtualKeyCode':13});c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':'Enter','code':'Enter','windowsVirtualKeyCode':13})
-            chk('Abre O.S. por teclado/toque '+str(w),wait("location.pathname.endsWith('OS.dc.html')&&location.hash==='#OS-0420'&&!!document.querySelector('aside[role=dialog]')"))
-            J('history.back()');time.sleep(1)
-            chk('Volta preserva filtro e foco '+str(w),wait("location.pathname.endsWith('PAGR.dc.html')&&document.querySelectorAll('[data-rid]').length===1&&document.activeElement.getAttribute('data-rid')==='os:OS-0420'"))
+            chk('Fórmula por teclado/toque '+str(w),wait("(()=>{let e=document.querySelector('#g2-dica');return e&&!e.hidden&&e.innerText.includes('não devem ser somadas')&&e.innerText.includes('Área afetada não fornecida')})()"))
+            c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Escape','code':'Escape','windowsVirtualKeyCode':27})
+            chk('Escape fecha explicação '+str(w),wait("document.querySelector('#g2-dica').hidden"))
             c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':fixture_script})
             parcial=json.loads(json.dumps(fixture));parcial['os']['atrasadas']=None
             partial_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>('+json.dumps(parcial,ensure_ascii=False)+');'})['identifier']
             c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
             chk('Atrasos sem dados preservam impedimento e explicação '+str(w),wait("(()=>{let s=document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]');return s&&s.innerText.includes('Prazos indisponíveis')&&s.innerText.includes('Falta máquina')&&!s.innerText.includes('Nenhuma O.S. impedida')})()"))
             c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':partial_script})
+            incomplete={"os":{"impedidas":[],"atrasadas":[],"n":{"sem_prazo":2}}}
+            incomplete_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>('+json.dumps(incomplete)+');'})['identifier']
+            c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+            chk('Sem prazo não permite falsa ausência de pendência '+str(w),wait("(()=>{let s=document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]');return s.innerText.includes('2 O.S. sem prazo válido')&&!s.innerText.includes('Nenhuma O.S. impedida')})()"))
+            c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':incomplete_script})
+        final_script=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__pnOSFixture=()=>('+json.dumps(fixture,ensure_ascii=False)+');'})['identifier']
+        c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+        J("document.querySelector('[aria-label=\"O.S. que precisam de atenção\"]').scrollIntoView({block:'start'})")
         Path('_probe').mkdir(exist_ok=True);c.shot(str(Path('_probe/painel-os-contrato-390.png').resolve()))
     finally:c.close();srv.terminate();tmp.cleanup()
     print('RESULTADO contrato sintético '+str(sum(checks))+'/'+str(len(checks)));return 0 if all(checks) else 1

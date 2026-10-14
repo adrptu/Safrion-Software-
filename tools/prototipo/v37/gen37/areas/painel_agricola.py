@@ -57,26 +57,23 @@ function pnaOSLinhas(ref) {
  atr.forEach(x=>{const a=m.get(x.id);m.set(x.id,a?{...a,atrasada:true,prevista:x.prevista,dias:x.dias}:{...x,impedida:false,atrasada:true});});
  return [...m.values()];
 }
-function pnaOSRow(x) {
- const txt=(v,ausente)=>typeof v==='string'&&v.trim()?v:ausente;
- const id='os:'+x.id, local=txt(x.talhao,'Talhão não informado'), faz=txt(x.faz,'Fazenda não informada');
- const saf=txt(x.saf,'Safra não informada');
- const situacao=[x.impedida?'Impedida':'',x.atrasada?'Atrasada':''].filter(Boolean).join(' · ');
- const motivo=x.impedida?txt(x.motivo,'Consulte o impedimento na O.S.'):'Janela prevista ultrapassada';
- const dono=txt(x.dono,'Responsável não informado');
- const iso=typeof x.prevista==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x.prevista)?x.prevista:null;
- const data=iso?iso.split('-').reverse().join('/'):'Data não informada';
- const dias=typeof x.dias==='number'&&Number.isInteger(x.dias)&&x.dias>0?x.dias:null;
- const prazo=x.atrasada?data+(dias===null?'':' · '+dias+' dia(s) de atraso'):'Consulte a janela na O.S.';
- return {id,ro:true,href:x.origem,v:{ordem:x.id,local,contexto:faz+' · '+saf,situacao,motivo,dono,prazo},
-  s:{ordem:x.id+' · Abrir O.S.',local:local+' · '+faz+' · '+saf,situacao:situacao+' · '+motivo,dono,prazo},
-  p:{ordem:[{k:'b',t:x.id},{k:'br'},{k:'chip',t:situacao,c:'yellow'},{k:'br'},{k:'txt',t:motivo},{k:'br'},{k:'mut',t:'Abrir O.S.'}],
-   local:[{k:'txt',t:local},{k:'br'},{k:'mut',t:faz+' · '+saf}],
-   situacao:[{k:'chip',t:situacao,c:'yellow'},{k:'br'},{k:'txt',t:motivo}],
-   dono:[{k:'txt',t:dono}],prazo:[{k:'txt',t:prazo}]}};
+function pnaOSGrupos(os,campo) {
+ if(os===null)return null;
+ const m=new Map();
+ os.forEach(x=>{
+  const raw=campo==='motivo'?(x.impedida?x.motivo:'Janela prevista ultrapassada'):x.dono;
+  const label=typeof raw==='string'&&raw.trim()?raw.trim():campo==='motivo'?'Impedimento não informado':'Responsável não informado';
+  if(!m.has(label))m.set(label,{label,ids:[],impedidas:0,atrasadas:0});
+  const g=m.get(label);g.ids.push(x.id);g.impedidas+=x.impedida?1:0;g.atrasadas+=x.atrasada?1:0;
+ });
+ const groups=[...m.values()].sort((a,b)=>b.ids.length-a.ids.length||a.label.localeCompare(b.label,'pt-BR'));
+ const max=Math.max(1,...groups.map(g=>g.ids.length));
+ return groups.map(g=>({...g,n:g.ids.length,
+  situacao:[g.impedidas?g.impedidas+' impedida(s)':'',g.atrasadas?g.atrasadas+' atrasada(s)':''].filter(Boolean).join(' · '),
+  barra:'display:block;height:8px;border-radius:3px;width:'+(100*g.ids.length/max)+'%;background:'+(g.impedidas?'#B42318':'#8A5A00')}));
 }
 function pnaVals(self,v) {
- g2keep(self,'g_pna');g2keep(self,'g_pna_os');
+ g2keep(self,'g_pna');
  if(!self.__pnaFocus){self.__pnaFocus=true;
   const restaura=()=>{const id=(history.state||{}).pnaFoco;if(!id)return;let n=0;
    const f=()=>{const r=[...document.querySelectorAll('[data-rid]')].find(e=>e.getAttribute('data-rid')===id);
@@ -85,14 +82,17 @@ function pnaVals(self,v) {
  }
  const c=cenGet(), rows=pnaLinhas(c);
  const ref=typeof agrPainelRef==='function'?agrPainelRef(c,{}):null, os=pnaOSLinhas(ref);
- GRIDS.find(g=>g.id==='g_pna_os').rows=(os||[]).map(pnaOSRow);
+ v.pna_causas=pnaOSGrupos(os,'motivo')||[];v.pna_donos=pnaOSGrupos(os,'dono')||[];
+ v.pna_os_total=os===null?'Indisponível':os.length+' O.S. com atenção identificada';
  v.pna_os_missing=os===null;
+ v.pna_os_has_data=os!==null&&os.length>0;
  v.pna_os_atraso_missing=os!==null&&ref.os.atrasadas===null;
  v.pna_os_imp_missing=os!==null&&ref.os.impedidas===null;
- v.pna_os_empty=os!==null&&os.length===0&&!v.pna_os_atraso_missing&&!v.pna_os_imp_missing;
+ v.pna_sem_prazo=ref&&ref.os&&ref.os.n&&Number.isInteger(ref.os.n.sem_prazo)&&ref.os.n.sem_prazo>0?ref.os.n.sem_prazo:0;
+ v.pna_os_empty=os!==null&&os.length===0&&!v.pna_os_atraso_missing&&!v.pna_os_imp_missing&&!v.pna_sem_prazo;
  GRIDS.find(g=>g.id==='g_pna').rows=(rows||[]).map(pnaRow);
  v.pna_missing=rows===null;
- self.g2pick=(gid,id)=>{const x=gid==='g_pna_os'?(os||[]).map(pnaOSRow).find(x=>x.id===id):gid==='g_pna'?(rows||[]).find(x=>x.id===id):null;if(x){
+ self.g2pick=(gid,id)=>{const x=gid==='g_pna'?(rows||[]).find(x=>x.id===id):null;if(x){
   history.replaceState(Object.assign({},history.state||{},{pnaFoco:id}),'',location.href);location.href=x.href;}};
 }
 '''
@@ -116,17 +116,29 @@ def secao():
           f'style="width:44px;height:44px;border:0;background:transparent;color:{E.MUTED};font:inherit">ⓘ</button></h2>'
           '<p role="status" hidden="'+H('!pna_missing')+'">Dados de produção indisponíveis. Abra Previsão e colheita para conferir a origem.</p>'+
           table+'</section>')
-    pendencias=E.grid([
-        dict(k='ordem',l='O.S. · situação · motivo',w=240),
-        dict(k='local',l='Talhão · fazenda · safra',w=210),
-        dict(k='dono',l='Quem resolve',w=170),
-        dict(k='prazo',l='Prazo',w=185),
-    ],[],gid='g_pna_os',edit=dict(m='pick'),total=False)
+    explicacao=('Cada O.S. é contada uma vez em cada gráfico, mesmo impedida e atrasada. '
+                'Motivo e responsável vêm da O.S.; o motivo é o impedimento informado, ou atraso quando não há impedimento. '
+                'As duas distribuições descrevem as mesmas ordens e não devem ser somadas. '
+                'Barras relativas ao maior grupo. Fonte: O.S., todas as fazendas e safras disponíveis. '
+                'Área afetada não fornecida pela origem; não estimamos hectares por contagem de ordens.')
+    def grafico(titulo, campo):
+        return ('<section class="pn-chart"><h3 style="font-size:15px;margin:0 0 12px">'+titulo+'</h3>'
+                '<ul style="list-style:none;padding:0;margin:0"><sc-for list="'+H(campo)+'" as="g" hint-placeholder-count="3">'
+                '<li class="pna-grupo" style="margin:16px 0;overflow-wrap:anywhere">'
+                '<div style="display:flex;justify-content:space-between;gap:12px"><span>'+H('g.label')+'</span>'
+                '<strong style="white-space:nowrap">'+H('g.n')+' O.S.</strong></div>'
+                '<div aria-hidden="true" style="height:8px;background:#EEF1EE;border-radius:3px;margin:6px 0"><span style="'+H('g.barra')+'"></span></div>'
+                '<span style="font-size:12px">'+H('g.situacao')+'</span></li></sc-for></ul></section>')
+    pendencias=('<sc-if value="'+H('pna_os_has_data')+'" hint-placeholder-val="{{true}}"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">'+
+                grafico('Por motivo informado','pna_causas')+grafico('Por quem resolve','pna_donos')+'</div></sc-if>')
     osbody=('<section aria-label="O.S. que precisam de atenção">'
-        f'<h2 style="font-size:16px;color:{E.INK}">O.S. · impedimentos e atrasos</h2>'
+        f'<h2 style="font-size:16px;color:{E.INK}">O.S. · onde agir primeiro</h2>'
+        '<p>'+H('pna_os_total')+' <button type="button" class="g2dica-i" aria-label="Como ler os impedimentos e atrasos" data-dica="'+E.esc(explicacao)+'" style="width:44px;height:44px;border:0;background:transparent">ⓘ</button></p>'
+        '<p style="font-size:12px">Todas as fazendas e safras disponíveis · Fonte: O.S.</p>'
         '<p role="status" hidden="'+H('!pna_os_missing')+'">Dados de impedimentos e prazos indisponíveis. Consulte a origem em O.S.</p>'
         '<p role="status" hidden="'+H('!pna_os_atraso_missing')+'">Prazos indisponíveis para verificar atrasos. Consulte a janela na O.S.; os impedimentos disponíveis seguem abaixo.</p>'
         '<p role="status" hidden="'+H('!pna_os_imp_missing')+'">Impedimentos indisponíveis. Os atrasos disponíveis seguem abaixo.</p>'
+        '<p role="status" hidden="'+H('!pna_sem_prazo')+'">'+H('pna_sem_prazo')+' O.S. sem prazo válido; não avaliadas quanto a atraso. Confira a janela na O.S.</p>'
         '<p role="status" hidden="'+H('!pna_os_empty')+'">Nenhuma O.S. impedida ou atrasada neste recorte.</p>'+
         pendencias+'</section>')
     return osbody+body, JS
