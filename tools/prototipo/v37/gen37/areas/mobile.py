@@ -390,8 +390,8 @@ v.pk_go=()=>{ if(pk.o){ mbSelSet(pk.o.id); cenMudar(self,c=>mbIniciar(c,pk.o.id)
 // cenReset só apaga a chave: grava o cenário inicial para que os outros quadros abertos também voltem ao início (e não regravem o antigo).
 v.restaurar=()=>{ cenReset(); cenSave(cenGet()); mbSelSet(''); mbOmSet(''); self.setState({cenrev:Date.now(),ft:{},ft_err:{},g2toast:'Demonstração restaurada: ordens, estoque, manutenção, colheita e app voltaram ao início.'}); };'''
     # 14/10/2026 (proprietário: "tire das telas ver como simulação"): quem usa o app é escolhido no próprio nome do cabeçalho (como o avatar da web)
-    us_sel=(f'<span style="display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap;"><select aria-label="Usuário do app (demonstração)" value="{H("us_k")}" onChange="{H("us_set")}" '
-            f'style="font: inherit; color: inherit; border: 0; border-bottom: 1px dashed currentColor; background: transparent; padding: 0 2px; min-height: 32px; cursor: pointer;">'
+    us_sel=(f'<span style="white-space: nowrap;"><select aria-label="Usuário do app (demonstração)" value="{H("us_k")}" onChange="{H("us_set")}" '
+            f'style="font: inherit; color: inherit; border: 0; border-bottom: 1px dashed currentColor; background: transparent; padding: 0 2px; min-height: 32px; cursor: pointer; vertical-align: middle; margin-right: 4px;">'
             f'<sc-for list="{H("us_opts")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select><span>· Santa Rita</span></span>')
     emit('MB-01','Hoje no campo','Marcos · operador · Santa Rita',None,'Abrir próxima tarefa',corpo,H_=1800,back='IN-01.dc.html',
          js=js,dyn_status=True,cen=True,dyn_head='Hoje no campo',sub_html=us_sel,

@@ -1,0 +1,10 @@
+OK    S1 barra do mapa: "Análises de solo" entre Lavoura e Pragas e doenças; tocar mostra a camada "Análises de solo"
+OK    S2 Lagoa Grande: faixa {'Com análise': 1, 'V abaixo': 1, 'A validar': 0, 'Sem análise': 22} pelo oráculo dos laudos; Pivô 12 "P12 V 50 % · meta 70 %"; os outros 22 pivôs "sem análise"
+OK    S3 tocar o Pivô 12: painel com LAU-2071 · 0–20 cm, CTC 8,10 cmolc/dm³ e V 50 %; atalho "Abrir laudo"
+OK    T1 11 camadas: a fonte técnica fica na dica ⓘ ao lado do nome; nenhuma linha solta acima de 60 caracteres no bloco do mapa
+OK    T2 o selo "Demonstração sintética" segue à vista na legenda de toda camada da Lagoa Grande
+OK    T3 o ⓘ da camada (Satélite) abre a dica com a fonte ao passar o mouse; sem a etiqueta "clique no talhão"
+OK    S4 Santa Rita: {'Com análise': 4, 'A validar': 1, 'Sem análise': 4} pelo oráculo (T1, T2, T4 e C1 com laudo 0–20; C1 aguardando validação)
+OK    S5 Santa Rita T3 (sem análise): painel "sem análise" com "Registrar laudo"; o AG-02 abre o formulário com Santa Rita e T3 já escolhidos
+OK    T4 celular 390 px sem rolagem horizontal; sem erro de JS
+RESULTADO: 9 ok · 0 falhas

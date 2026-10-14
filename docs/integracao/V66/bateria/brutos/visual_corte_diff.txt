@@ -1,0 +1,26 @@
+# visual_corte: v66 × v63 (texto normalizado; o registro da v63 corta o texto em 40 caracteres)
+## Só na v66
+C1|AG-07.dc.html|390px|acetamida + alquilenobis(ditiocarbamato) · FRAC 27 + FRAC M3
+C1|CD-08.dc.html|1024px|Colhedora Axial-Flow 7250 + trator com graneleiro
+C1|CD-08.dc.html|1024px|Equipe de colheita (10 pessoas) + trator com carreta
+C1|CD-08.dc.html|1440px|Equipe de colheita (10 pessoas) + trator com carreta
+C1|PCOM.dc.html|1024px|fora da média: PV-030, CT-203 (saca a conferir)
+C1|PCOM.dc.html|1440px|fora da média: PV-030, CT-203 (saca a conferir)
+C1|PT-04det.dc.html|390px|Exclusivo para esta finalidade · proibido revender ou repass
+C1|SAF.dc.html#saf=S2627&passo=cultivos|1024px|Sucessão a conferir: soja sem fim confirmado (08/03/2027 est
+C1|SAF.dc.html#saf=S2627&passo=cultivos|1440px|Sucessão a conferir: soja sem fim confirmado (08/03/2027 est
+C1|SAF.dc.html#saf=S2627&passo=cultivos|390px|A conferir: Sucessão a conferir: soja sem fim confirmado (08
+C4|MB-01.dc.html|1024px|· Santa Rita
+C4|MB-01.dc.html|1440px|· Santa Rita
+C4|MB-01.dc.html|390px|· Santa Rita
+## Só na v63
+C1|AG-07.dc.html|390px|acetamida + alquilenobis(ditiocarbamato
+C1|CD-08.dc.html|1024px|Colhedora Axial-Flow 7250 + trator com
+C1|CD-08.dc.html|1024px|Equipe de colheita (10 pessoas) + trato
+C1|CD-08.dc.html|1440px|Equipe de colheita (10 pessoas) + trato
+C1|PCOM.dc.html|1024px|fora da média: PV-030, CT-203 (saca a
+C1|PCOM.dc.html|1440px|fora da média: PV-030, CT-203 (saca a
+C1|PT-04det.dc.html|390px|Exclusivo para esta finalidade · proib
+C1|SAF.dc.html#saf=S2627&passo=cultivos|1024px|Sucessão a conferir: soja sem fim conf
+C1|SAF.dc.html#saf=S2627&passo=cultivos|1440px|Sucessão a conferir: soja sem fim conf
+C1|SAF.dc.html#saf=S2627&passo=cultivos|390px|A conferir: Sucessão a conferir: soja

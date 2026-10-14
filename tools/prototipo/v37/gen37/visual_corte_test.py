@@ -39,7 +39,9 @@ MEDE = r"""(()=>{ const out=[]; const vis=e=>{ const r=e.getBoundingClientRect()
   // começa a linha = nada visível à esquerda na mesma linha, subindo pelos irmãos até o bloco que contém (item flexível ao lado do título não conta;
   // texto só para leitor de tela também não)
   const naLinha=(x,rr)=>{ while(x&&x!==document.body){ for(let s=x.previousSibling;s;s=s.previousSibling){ const g=document.createRange(); g.selectNodeContents(s);
-        if([...g.getClientRects()].some(q=>q.width>0&&q.height>0&&q.bottom>rr.top+2&&q.top<rr.bottom-2&&q.right<=rr.left+2)) return false; }
+        /* campo de formulário (select, input, botão) não tem texto medível por faixa: conta a própria caixa */
+        const qs=[...g.getClientRects()]; if(s.nodeType===1&&s.matches('select,input,button,textarea')) qs.push(s.getBoundingClientRect());
+        if(qs.some(q=>q.width>0&&q.height>0&&q.bottom>rr.top+2&&q.top<rr.bottom-2&&q.right<=rr.left+2)) return false; }
       const pe=x.parentElement; if(!pe) break; if(['block','list-item','table-cell','grid','flow-root','flex','inline-flex'].includes(getComputedStyle(pe).display)) return true; x=pe; } return true; };
   const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT); let n; while((n=w.nextNode())){ const t=n.textContent; if(!/^\s*·\s/.test(t)) continue; const p=n.parentElement; if(!p||!vis(p)) continue;
     if(p.closest('.etp-sr,.g2sr,.sr-only,.ma-sr')||getComputedStyle(p).opacity==='0') continue;   // escondido no começo da linha (g2sepIni)

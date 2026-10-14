@@ -37,3 +37,8 @@
 | `textos_soltos` | 263/263 |
 | `paginas_scan` | 4/4 (147 páginas) |
 | `ben_fluxo` completo (todos os modos) | 224/224 |
+
+## Varredura visual (`visual_corte`) e brutos
+- v66 × v63: único achado novo, o C4 "· Santa Rita" no MB-01. Era regressão minha e está corrigido (MB-01: 0 achados; VE-04 continua com os mesmos 8). O detector agora conta campo de formulário à esquerda.
+- Os 9 vermelhos antigos dão o mesmo resultado na v63 e na v66.
+- Brutos, origem, rc e sha256 em [`brutos/README.md`](brutos/README.md).
