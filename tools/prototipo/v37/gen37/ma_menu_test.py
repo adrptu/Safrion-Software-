@@ -68,10 +68,10 @@ try:
     CARDS = "JSON.stringify([...document.querySelectorAll('a.mod-cartao')].filter(a=>a.getClientRects().length).map(a=>[a.getAttribute('href'),a.innerText.trim(),!!a.querySelector('svg path')]))"
     m.ir('', perfil='Otávio', pagina=INICIO37); ini = espera(lambda: J(f"location.pathname.split('/').pop()==='{INICIO37}'&&document.readyState==='complete'"), 10)
     J("window.__antes=1"); r = m.clk('Manutenção', 'nav[aria-label=Menu]', w=0)
-    foi = ini and espera(lambda: J(f"!window.__antes&&location.pathname.split('/').pop()==='{HUB}'&&document.readyState==='complete'&&document.querySelectorAll('a.mod-cartao').length===4"), 10)
+    foi = ini and espera(lambda: J(f"!window.__antes&&location.pathname.split('/').pop()==='{HUB}'&&document.readyState==='complete'&&document.querySelectorAll('a.mod-cartao').length===5"), 10)
     cs = json.loads(J(CARDS) or '[]'); cur = [x[0] for x in json.loads(J(NAV) or '[]') if x[3] == 'page']
-    m.ok(r == 'ok' and foi and cs == [['MA.dc.html#vis=' + v, t, True] for v, t in zip(VIS, TIT)] and cur == ['Manutenção'],
-         f'no início ({INICIO37}), tocar o ícone Manutenção abre a tela de entrada ({HUB}) com os 4 cartões (ícone e nome curto: Sem ordem · Ordens · Ativos · Planos), ícone destacado', [r, foi, cs, cur])
+    m.ok(r == 'ok' and foi and cs == [['PMAN.dc.html', 'Painel', True]] + [['MA.dc.html#vis=' + v, t, True] for v, t in zip(VIS, TIT)] and cur == ['Manutenção'],
+         f'no início ({INICIO37}), tocar o ícone Manutenção abre a tela de entrada ({HUB}) com o Painel e os 4 cartões (ícone e nome curto: Sem ordem · Ordens · Ativos · Planos), ícone destacado', [r, foi, cs, cur])
     # o cartão "Ordens" abre a MA na visão Ordens; "‹ Manutenção" volta à tela de entrada com o foco no cartão aberto
     J("[...document.querySelectorAll('a.mod-cartao')].find(a=>a.innerText.trim()==='Ordens').click()")
     foi = espera(lambda: J("location.pathname.split('/').pop()==='MA.dc.html'&&document.readyState==='complete'"), 10) and espera(lambda: mostra('ordens'), 10)

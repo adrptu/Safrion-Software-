@@ -30,7 +30,7 @@ try:
     m.ok(sorted(js) == py, f'vencimento: manVenc (JS) = vencimento() (Python) nos {len(py)} ativo × serviço')
     # 4 · Sem ordem: 2 vencidas, primária pelo estado
     m.ir('vis=semordem'); b = m.body()
-    m.ok('VENCIDAS SEM ORDEM\n2' in b and 'Gerar 3 ordens preventivas' in m.hdr(), 'Sem ordem: 2 vencidas · primária "Gerar 3 ordens preventivas"', m.hdr())
+    m.ok(m.man("window.__man.manSemOrdem(m).venc.filter(l=>l.x.sit==='Vencida').length") == 2 and 'GERAR ORDEM PREVENTIVA' in b.upper() and 'Gerar 3 ordens preventivas' in m.hdr(), 'Sem ordem: 2 vencidas · primária "Gerar 3 ordens preventivas"', m.hdr())
     # 5 · gerar sem duplicar
     n0 = m.man("Object.keys(m.oms).length"); m.clk('Gerar 3 ordens preventivas'); tt = m.toast()
     n1 = m.man("Object.keys(m.oms).length"); r = J("(()=>{ const M=window.__man; const c=M.manClone(M.manGet()); const x=M.manGerarTodas(c); return x.msg||''; })()")

@@ -39,8 +39,8 @@ try:
     m.ir('', pagina='IV.dc.html', limpa=True); m.sem_erro('IV 1440')
     nv, cs, e_hub, chegou, e_iv = pelo_modulo('Voltar para Comercial', 'MOD-COM.dc.html', 'Inteligência', 'IV.dc.html')
     par = [['PCOM.dc.html', 'Painel'], ['IV.dc.html', 'Inteligência']]
-    m.ok(nv.get('cur') == ['Comercial'] and nv.get('volta') == ['MOD-COM.dc.html', '‹ Comercial'] and any(cs[i:i + 2] == par for i in range(len(cs))) and chegou and not e_hub and not e_iv,
-         'IV na tela de entrada do Comercial, logo depois do Painel (ícone Comercial marcado; "‹ Comercial" → cartão "Inteligência" abre a IV sem erro de JS)', [nv, cs, chegou, e_hub, e_iv])
+    m.ok(nv.get('cur') == ['Comercial'] and nv.get('volta') == ['MOD-COM.dc.html', '‹ Comercial'] and cs[:1] == par[:1] and par[1] in cs and chegou and not e_hub and not e_iv,
+         'IV na tela de entrada do Comercial, que começa pelo Painel (PAINEL-01) (ícone Comercial marcado; "‹ Comercial" → cartão "Inteligência" abre a IV sem erro de JS)', [nv, cs, chegou, e_hub, e_iv])
     k1 = J(KPI1) or ''
     m.ok('produtos em alta 1' in k1 and 'vender agora 1' in k1 and 'soja set · milho fev · mamão jul' in k1, 'INTEL-02 IV: indicadores de preço no topo (1 em alta, 1 vender agora, melhor mês de cada produto)', k1)
     sj = m.linha('m:Soja em grão'); mi = m.linha('m:Milho em grão'); ma = m.linha('m:Mamão Formosa · fruta de campo'); fj = m.linha('m:Feijão em grão')
