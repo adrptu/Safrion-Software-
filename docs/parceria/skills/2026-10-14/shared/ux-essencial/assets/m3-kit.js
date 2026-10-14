@@ -104,56 +104,78 @@
   });
 
   // ---------- autosave ----------
-  function autosave(form, save, { delay = 600, message = 'Salvo' } = {}) {
+  function autosave(form, save, { delay = 600, message = 'Salvo', timeoutMs = 15000 } = {}) {
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new RangeError('timeoutMs deve ser positivo');
     const snapshot = () => {
-      const data = new FormData(form);
-      return Object.fromEntries([...new Set(data.keys())].map(key => {
+      const data = new FormData(form), multi = new Set();
+      for (const field of form.elements) {
+        if (field.name && !field.matches(':disabled') && (field.type === 'checkbox' || field.multiple)) multi.add(field.name);
+      }
+      return Object.fromEntries([...new Set([...data.keys(), ...multi])].map(key => {
         const values = data.getAll(key);
-        return [key, values.length === 1 ? values[0] : values];
+        return [key, multi.has(key) || values.length !== 1 ? values : values[0]];
       }));
     };
     let t = null, last = JSON.stringify(snapshot());
-    let queue = Promise.resolve(), pending = 0, destroyed = false;
+    let queue = Promise.resolve(), pending = 0, destroyed = false, uncertain = false, closeNotice = null;
+    const dirty = () => JSON.stringify(snapshot()) !== last;
+    const notice = (text, options = {}) => { if (!destroyed) closeNotice = snackbar(text, options); };
     const flush = () => {
-      if (destroyed) return queue;
+      clearTimeout(t); t = null;
+      if (destroyed) return Promise.resolve({ ok: false, reason: 'destroyed' });
       const data = snapshot(), json = JSON.stringify(data);
-      // Capture cada versão, mas compare com o último recibo somente ao executar.
-      // Assim B pendente seguido de retorno a A não perde a reversão.
       pending++;
       queue = queue.then(async () => {
-        if (destroyed || json === last) return;
+        if (destroyed) return { ok: false, reason: 'destroyed' };
+        if (uncertain) return { ok: false, reason: 'pending' };
+        if (json === last) return { ok: true };
+        const controller = new window.AbortController();
+        let timer, timedOut = false;
+        const operation = Promise.resolve().then(() => save(data, { signal: controller.signal })).then(
+          receipt => {
+            if (timedOut) uncertain = false;
+            if (receipt?.ok === false) throw new Error('Gravação recusada');
+            last = json;
+            return receipt;
+          },
+          error => { if (timedOut) uncertain = false; throw error; },
+        );
         try {
-          await save(data);
-          last = json;
-          if (!destroyed && message && JSON.stringify(snapshot()) === json) snackbar(message, { timeout: 2000 });
+          await Promise.race([operation, new Promise((_, reject) => {
+            timer = setTimeout(() => {
+              timedOut = true; uncertain = true; controller.abort();
+              reject(new Error('timeout'));
+            }, timeoutMs);
+          })]);
+          if (message && !dirty()) notice(message, { timeout: 2000 });
+          return { ok: true };
         } catch {
-          last = null;
-          if (!destroyed) snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush });
-        }
+          if (timedOut) notice('Salvamento sem confirmação. Preserve o rascunho e confira o estado antes de sair.', { timeout: 60000 });
+          else notice('Não foi possível salvar', { action: 'Tentar agora', onAction: flush });
+          return { ok: false, reason: timedOut ? 'timeout' : 'save' };
+        } finally { clearTimeout(timer); }
       }).finally(() => { pending--; });
       return queue;
     };
     const onInput = () => { clearTimeout(t); t = setTimeout(flush, delay); };
-    const onSubmit = (event) => { event.preventDefault(); clearTimeout(t); flush(); };
+    const onSubmit = (event) => { event.preventDefault(); flush(); };
     const onBeforeUnload = (event) => {
-      // O navegador não aguarda save: peça confirmação de saída se houver edição sem recibo.
-      if (pending || JSON.stringify(snapshot()) !== last) {
-        event.preventDefault();
-        event.returnValue = '';
-      }
+      if (pending || uncertain || dirty()) { event.preventDefault(); event.returnValue = ''; }
     };
     form.addEventListener('input', onInput);
     form.addEventListener('submit', onSubmit);
     window.addEventListener('beforeunload', onBeforeUnload);
-    const destroy = () => {
+    const destroy = ({ discard = false } = {}) => {
+      if (!discard && (pending || uncertain || dirty())) return Promise.resolve({ ok: false, reason: 'pending' });
       destroyed = true;
-      clearTimeout(t);
+      clearTimeout(t); t = null;
       form.removeEventListener('input', onInput);
       form.removeEventListener('submit', onSubmit);
       window.removeEventListener('beforeunload', onBeforeUnload);
-      return queue;
+      closeNotice?.();
+      return Promise.resolve({ ok: true });
     };
-    return { flush, destroy };
+    return { flush, destroy, get dirty() { return dirty(); }, get pending() { return !!(pending || t || uncertain); } };
   }
 
   global.Kit = { snackbar, undoable, commands, openPalette, autosave, shortcutLabel: label };

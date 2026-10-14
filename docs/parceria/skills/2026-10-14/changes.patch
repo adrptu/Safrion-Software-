@@ -698,7 +698,16 @@
  - [ ] Testes unitários das funções de cor, stretch, manchas e estado.
 --- before/shared/indicadores-satelite/assets/referencia-implementacao.md
 +++ candidate/shared/indicadores-satelite/assets/referencia-implementacao.md
-@@ -19,34 +19,39 @@
+@@ -1,6 +1,8 @@
+ # Referência de implementação: cor, contraste, manchas, estado
+ 
+ Exemplos de funções puras, não implementação validada para produção. Conferir nodata, amostra, escala, resolução e limiares contra o SKILL.md e dados conhecidos antes de adaptar. Cores relativas não são diagnóstico; área depende da transformação real do raster. Resoluções do sensor: [Copernicus S2 Mission](https://sentiwiki.copernicus.eu/web/s2-mission).
++
++Normalizar nodata (incluindo sentinelas como −9999), nuvem e sombra para `NaN` antes destas funções. Este exemplo usa NDVI em [−1, 1]; outros índices exigem seus próprios intervalos e classes. A máscara de qualidade da fonte é obrigatória: um valor finito sob nuvem não pode ser detectado só pelo número.
+ 
+ ## Paleta e classes (fonte única)
+ 
+@@ -19,34 +21,44 @@
  ## Escala: absoluta × relativa
  
  ```ts
@@ -712,25 +721,31 @@
 -export function escalaRelativa(valores: Float32Array, p = [0.02, 0.98]): Escala {
 +export function escalaRelativa(valores: Float32Array, p = [0.02, 0.98], minAmostra = 2): Escala | null {
    const v = Array.from(valores).filter(Number.isFinite).sort((a, b) => a - b);
-+  if (v.length < Math.max(2, minAmostra)) return null; // sem dado ou amostra insuficiente
++  if (!Number.isFinite(minAmostra) || v.length < Math.max(2, minAmostra)) return null; // sem dado ou amostra insuficiente
    const q = (t: number) => v[Math.min(v.length - 1, Math.floor(t * (v.length - 1)))];
    const min = q(p[0]), max = q(p[1]);
 -  return max - min < 0.02 ? { min: min - 0.01, max: max + 0.01 } : { min, max }; // talhão uniforme não vira ruído
 +  return max - min < 0.02 ? { modo: 'relativa', min: min - 0.01, max: max + 0.01 } : { modo: 'relativa', min, max }; // talhão uniforme não vira ruído
  }
  ```
-+
-+`null` significa sem escala/estatística confiável: mostrar “Sem dado” ou “Amostra insuficiente”, sem classificar vigor ou ausência de manchas. O mínimo de 2 no exemplo evita uma amostra única; o mínimo operacional deve ser definido por fonte, resolução e cobertura exigida, sem presumir validade agronômica por atingir esse número.
  
- ## Colorização no cliente (rampa contínua, sem suavização espacial)
+-## Colorização no cliente (rampa contínua, sem suavização espacial)
++`null` significa sem escala/estatística confiável: mostrar “Sem dado” ou “Amostra insuficiente”, sem classificar vigor ou ausência de manchas. O mínimo de 2 no exemplo evita uma amostra única; o mínimo operacional deve ser definido por fonte, resolução e cobertura exigida, sem presumir validade agronômica por atingir esse número.
++
++## Colorização no cliente (classes absolutas; rampa relativa sem suavização espacial)
  
  ```ts
++function misturaHex(a: string, b: string, t: number): string {
++  const canal = (hex: string, i: number) => parseInt(hex.slice(i, i + 2), 16);
++  return '#' + [1, 3, 5].map(i => Math.round(canal(a, i) * (1 - t) + canal(b, i) * t).toString(16).padStart(2, '0')).join('');
++}
  const STOPS = CLASSES_VIGOR.map(c => c.cor);   // 6 paradas igualmente espaçadas em t ∈ [0,1]
  
 -export function corDoIndice(valor: number, escala: Escala): string {
 -  if (!Number.isFinite(valor)) return COR_SEM_DADO;
 +export function corDoIndice(valor: number, escala: Escala | null): string {
-+  if (!Number.isFinite(valor) || !escala || !Number.isFinite(escala.min) || !Number.isFinite(escala.max) || escala.max <= escala.min) return COR_SEM_DADO;
++  if (!Number.isFinite(valor) || valor < -1 || valor > 1 || !escala || !Number.isFinite(escala.min) || !Number.isFinite(escala.max) || escala.max <= escala.min) return COR_SEM_DADO;
++  if (escala.modo === 'absoluta') return classeDoIndice(valor, escala)?.cor || COR_SEM_DADO;
    const t = Math.min(1, Math.max(0, (valor - escala.min) / (escala.max - escala.min)));
    const pos = t * (STOPS.length - 1), i = Math.floor(pos), f = pos - i;
    return i >= STOPS.length - 1 ? STOPS[i] : misturaHex(STOPS[i], STOPS[i + 1], f);
@@ -739,26 +754,26 @@
 -/** Classe para legenda, tabela e histograma: no modo relativo, os limites são os 6 cortes da escala. */
 -export function classeDoIndice(valor: number, escala: Escala) {
 -  if (!Number.isFinite(valor)) return null;
-+/** Classe para legenda, tabela e histograma. Absoluto usa os limites configurados; relativo usa seis cortes iguais. A rampa contínua não define a classe. */
++/** Classe para legenda, tabela e histograma. Absoluto usa os limites configurados; relativo usa seis cortes iguais. A cor absoluta é exatamente a cor da classe; a rampa relativa não define diagnóstico. */
 +export function classeDoIndice(valor: number, escala: Escala | null) {
-+  if (!Number.isFinite(valor) || !escala || !Number.isFinite(escala.min) || !Number.isFinite(escala.max) || escala.max <= escala.min) return null;
++  if (!Number.isFinite(valor) || valor < -1 || valor > 1 || !escala || !Number.isFinite(escala.min) || !Number.isFinite(escala.max) || escala.max <= escala.min) return null;
 +  // Intervalos absolutos com limite superior exclusivo; a última classe inclui o limite final.
 +  if (escala.modo === 'absoluta') return CLASSES_VIGOR.find(c => valor < c.max) || CLASSES_VIGOR[CLASSES_VIGOR.length - 1];
    const t = (valor - escala.min) / (escala.max - escala.min);
    return CLASSES_VIGOR[Math.min(5, Math.max(0, Math.floor(t * 6)))];
  }
-@@ -56,8 +61,9 @@
+@@ -56,8 +68,9 @@
  ## Estatística e manchas
  
  ```ts
 -export function estatisticas(v: Float32Array) {
 +export function estatisticas(v: Float32Array, minAmostra = 2) {
    const s = Array.from(v).filter(Number.isFinite).sort((a, b) => a - b);
-+  if (s.length < Math.max(2, minAmostra)) return null;
++  if (!Number.isFinite(minAmostra) || s.length < Math.max(2, minAmostra)) return null;
    const q = (t: number) => s[Math.floor(t * (s.length - 1))];
    const media = s.reduce((a, b) => a + b, 0) / s.length;
    const dp = Math.sqrt(s.reduce((a, b) => a + (b - media) ** 2, 0) / s.length);
-@@ -66,8 +72,9 @@
+@@ -66,8 +79,9 @@
  
  /** Exemplo conservador: abaixo de ambos os cortes (min), não OU; candidatos a vistoria, sem diagnóstico causal. Validar limiares, nodata e amostra. */
  export function mascaraFraco(v: Float32Array, st: ReturnType<typeof estatisticas>) {
@@ -769,7 +784,7 @@
  }
  
  /** Componentes conexos (8 vizinhos) com área mínima; retorna manchas com área, média e centroide em índice de pixel. */
-@@ -98,10 +105,14 @@
+@@ -98,10 +112,14 @@
  
  ## Estado do talhão
  
@@ -784,8 +799,12 @@
    if (a.areaFracaPct > 15 || a.quedaPct > 15 || a.maiorManchaNovaHa > 1) return { estado: 'Crítico', acao: 'Criar vistoria' };
    if (a.areaFracaPct >= 5 || a.quedaPct >= 10) return { estado: 'Atenção', acao: 'Ver manchas' };
    return { estado: 'Normal', acao: 'Ver histórico' };
-@@ -112,5 +123,5 @@
- - `corDoIndice(0.30, absoluta)` → `#E4002B`; `corDoIndice(0.82, absoluta)` → `#0B7A1E`; `NaN` → cinza.
+@@ -109,8 +127,8 @@
+ ```
+ 
+ ## Casos de teste mínimos
+-- `corDoIndice(0.30, absoluta)` → `#E4002B`; `corDoIndice(0.82, absoluta)` → `#0B7A1E`; `NaN` → cinza.
++- `corDoIndice(0.30, absoluta)` → `#FF6A00` (classe Fraco); `corDoIndice(0.82, absoluta)` → `#0B7A1E`; `NaN` → cinza.
  - `escalaRelativa` de um talhão com valores 0,84–0,93 devolve min≈0,84 e max≈0,93 (o mapa usa a rampa inteira).
  - Raster sintético 10×10 com bloco de 3 px fracos → 1 mancha; bloco de 2 px → 0 manchas; dois blocos separados → 2 manchas.
 -- `estadoTalhao` cobre os 5 estados e a precedência (Sem imagem > Nuvem > Crítico > Atenção > Normal).
@@ -1254,16 +1273,18 @@
  - **Android**: Jetpack Compose Material 3. **Multiplataforma**: Flutter com `useMaterial3: true` e `ColorScheme.fromSeed`.
  - **iOS**: manter os princípios deste guia, respeitando convenções nativas (navegação, gestos).
  
-@@ -131,3 +143,9 @@
+@@ -131,3 +143,11 @@
  - [ ] Acessível (contraste, teclado, foco não encoberto, alvos conforme design system/plataforma)
  - [ ] Telas de gestão/cadastro conforme `master-detail-ux` (listagem + detalhe, estado, próximo passo, ação primária única)
  - [ ] Tabelas conforme `tabelas-interativas`
 +
 +O autosave do kit serializa gravações e só confirma após o retorno de `save`. Use-o para rascunhos quando apropriado. A fila é local à instância; concorrência entre abas/dispositivos exige versão e revalidação no domínio. O kit solicita confirmação de saída enquanto houver edição ou envio sem recibo, sem iniciar gravação assíncrona durante `beforeunload`. O navegador pode não emitir esse evento (por exemplo, encerramento no celular): quando o produto exigir recuperação após encerramento, forneça armazenamento local autorizado e sincronização, além da proteção de navegação.
 +
-+O snapshot do autosave preserva todos os valores de nomes repetidos: uma entrada permanece escalar, várias entradas são array em ordem. O domínio deve aceitar essa cardinalidade; nenhum valor anterior da mesma chave pode ser descartado silenciosamente. Uploads de arquivos exigem contrato próprio de persistência e comparação; o kit de rascunhos não fornece upload durável.
++O snapshot preserva nomes repetidos. Checkbox (inclusive único) e select múltiplo usam sempre arrays, inclusive `[]` ao desmarcar tudo; controles desabilitados não são enviados. Outros nomes repetidos usam escalar com um valor e array com vários; o domínio deve aceitar essa cardinalidade. Uploads exigem contrato próprio de persistência/comparação, ausente deste kit.
 +
-+Ao desmontar o formulário, chame `destroy()` para cancelar debounce, remover ouvintes e descartar envios ainda na fila. A gravação já iniciada pode terminar, sem feedback na tela desmontada; `destroy()` retorna a fila para observar esse término. Resolva antes o destino do rascunho: para salvar, aguarde `flush()` e o recibo do domínio antes de destruir; para preservar ou descartar, use a decisão explícita e o armazenamento do produto. `destroy()` não confirma persistência nem cancela uma operação já recebida pelo servidor.
++`flush()` retorna `{ok:true}` somente após confirmação (ou conteúdo já confirmado); falha retorna `{ok:false, reason}`. Confira esse resultado antes de navegar. `dirty` e `pending` expõem edição sem recibo e atividade/incerteza. `save(data, {signal})` deve rejeitar falhas ou retornar `{ok:false}` e usar transporte com prazo finito, cancelamento e versão/idempotência no domínio. O kit dá prazo `timeoutMs` (15 s por padrão) e AbortSignal: timeout é resultado incerto, não prova que o servidor cancelou. A fila devolve falha observável em vez de ficar pendurada; não envia a próxima versão enquanto a operação incerta não terminar. Ao terminar, uma nova tentativa explícita pode salvar o rascunho atual. Se o transporte ignorar cancelamento e nunca terminar, preserve o rascunho e reconcilie no domínio antes de remontar; não faça retry cego nem suponha cancelamento remoto.
++
++`destroy()` recusa desmontagem com edição/pendência (`ok:false`). Para salvar, confira `flush().ok` e o recibo antes de destruir. Somente após preservar o rascunho em armazenamento autorizado ou decisão explícita de descartá-lo use `destroy({discard:true})`. Isso cancela debounce/envios ainda na fila, remove ouvintes e fecha o snackbar da instância; não cancela gravação já recebida pelo servidor. A aplicação deve conferir o retorno e manter a tela aberta quando houver recusa.
 --- before/shared/ux-essencial/assets/m3-kit.js
 +++ candidate/shared/ux-essencial/assets/m3-kit.js
 @@ -27,7 +27,7 @@
@@ -1295,10 +1316,11 @@
      if (scrim) return;
      for (const c of registry) {
        if (!c.keys) continue;
-@@ -105,18 +105,55 @@
+@@ -104,19 +104,78 @@
+   });
  
    // ---------- autosave ----------
-   function autosave(form, save, { delay = 600, message = 'Salvo' } = {}) {
+-  function autosave(form, save, { delay = 600, message = 'Salvo' } = {}) {
 -    let t = null, last = JSON.stringify(Object.fromEntries(new FormData(form)));
 -    const flush = async () => {
 -      const data = Object.fromEntries(new FormData(form)), json = JSON.stringify(data);
@@ -1306,11 +1328,16 @@
 -      last = json;
 -      try { await save(data); if (message) snackbar(message, { timeout: 2000 }); }
 -      catch (err) { snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush }); last = null; }
++  function autosave(form, save, { delay = 600, message = 'Salvo', timeoutMs = 15000 } = {}) {
++    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new RangeError('timeoutMs deve ser positivo');
 +    const snapshot = () => {
-+      const data = new FormData(form);
-+      return Object.fromEntries([...new Set(data.keys())].map(key => {
++      const data = new FormData(form), multi = new Set();
++      for (const field of form.elements) {
++        if (field.name && !field.matches(':disabled') && (field.type === 'checkbox' || field.multiple)) multi.add(field.name);
++      }
++      return Object.fromEntries([...new Set([...data.keys(), ...multi])].map(key => {
 +        const values = data.getAll(key);
-+        return [key, values.length === 1 ? values[0] : values];
++        return [key, multi.has(key) || values.length !== 1 ? values : values[0]];
 +      }));
      };
 -    form.addEventListener('input', () => { clearTimeout(t); t = setTimeout(flush, delay); });
@@ -1318,47 +1345,65 @@
 -    window.addEventListener('beforeunload', () => { clearTimeout(t); flush(); });
 -    return { flush };
 +    let t = null, last = JSON.stringify(snapshot());
-+    let queue = Promise.resolve(), pending = 0, destroyed = false;
++    let queue = Promise.resolve(), pending = 0, destroyed = false, uncertain = false, closeNotice = null;
++    const dirty = () => JSON.stringify(snapshot()) !== last;
++    const notice = (text, options = {}) => { if (!destroyed) closeNotice = snackbar(text, options); };
 +    const flush = () => {
-+      if (destroyed) return queue;
++      clearTimeout(t); t = null;
++      if (destroyed) return Promise.resolve({ ok: false, reason: 'destroyed' });
 +      const data = snapshot(), json = JSON.stringify(data);
-+      // Capture cada versão, mas compare com o último recibo somente ao executar.
-+      // Assim B pendente seguido de retorno a A não perde a reversão.
 +      pending++;
 +      queue = queue.then(async () => {
-+        if (destroyed || json === last) return;
++        if (destroyed) return { ok: false, reason: 'destroyed' };
++        if (uncertain) return { ok: false, reason: 'pending' };
++        if (json === last) return { ok: true };
++        const controller = new window.AbortController();
++        let timer, timedOut = false;
++        const operation = Promise.resolve().then(() => save(data, { signal: controller.signal })).then(
++          receipt => {
++            if (timedOut) uncertain = false;
++            if (receipt?.ok === false) throw new Error('Gravação recusada');
++            last = json;
++            return receipt;
++          },
++          error => { if (timedOut) uncertain = false; throw error; },
++        );
 +        try {
-+          await save(data);
-+          last = json;
-+          if (!destroyed && message && JSON.stringify(snapshot()) === json) snackbar(message, { timeout: 2000 });
++          await Promise.race([operation, new Promise((_, reject) => {
++            timer = setTimeout(() => {
++              timedOut = true; uncertain = true; controller.abort();
++              reject(new Error('timeout'));
++            }, timeoutMs);
++          })]);
++          if (message && !dirty()) notice(message, { timeout: 2000 });
++          return { ok: true };
 +        } catch {
-+          last = null;
-+          if (!destroyed) snackbar('Não foi possível salvar', { action: 'Tentar agora', onAction: flush });
-+        }
++          if (timedOut) notice('Salvamento sem confirmação. Preserve o rascunho e confira o estado antes de sair.', { timeout: 60000 });
++          else notice('Não foi possível salvar', { action: 'Tentar agora', onAction: flush });
++          return { ok: false, reason: timedOut ? 'timeout' : 'save' };
++        } finally { clearTimeout(timer); }
 +      }).finally(() => { pending--; });
 +      return queue;
 +    };
 +    const onInput = () => { clearTimeout(t); t = setTimeout(flush, delay); };
-+    const onSubmit = (event) => { event.preventDefault(); clearTimeout(t); flush(); };
++    const onSubmit = (event) => { event.preventDefault(); flush(); };
 +    const onBeforeUnload = (event) => {
-+      // O navegador não aguarda save: peça confirmação de saída se houver edição sem recibo.
-+      if (pending || JSON.stringify(snapshot()) !== last) {
-+        event.preventDefault();
-+        event.returnValue = '';
-+      }
++      if (pending || uncertain || dirty()) { event.preventDefault(); event.returnValue = ''; }
 +    };
 +    form.addEventListener('input', onInput);
 +    form.addEventListener('submit', onSubmit);
 +    window.addEventListener('beforeunload', onBeforeUnload);
-+    const destroy = () => {
++    const destroy = ({ discard = false } = {}) => {
++      if (!discard && (pending || uncertain || dirty())) return Promise.resolve({ ok: false, reason: 'pending' });
 +      destroyed = true;
-+      clearTimeout(t);
++      clearTimeout(t); t = null;
 +      form.removeEventListener('input', onInput);
 +      form.removeEventListener('submit', onSubmit);
 +      window.removeEventListener('beforeunload', onBeforeUnload);
-+      return queue;
++      closeNotice?.();
++      return Promise.resolve({ ok: true });
 +    };
-+    return { flush, destroy };
++    return { flush, destroy, get dirty() { return dirty(); }, get pending() { return !!(pending || t || uncertain); } };
    }
  
    global.Kit = { snackbar, undoable, commands, openPalette, autosave, shortcutLabel: label };

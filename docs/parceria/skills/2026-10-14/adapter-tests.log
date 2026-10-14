@@ -17,6 +17,6 @@ test_selected_order_is_stable_deduplicated_and_hashes_bind_each_supplied_file (t
 test_utf8_final_text_budget_accepts_exact_limit_and_rejects_one_more_byte (tests.ConsultaPortatil.test_utf8_final_text_budget_accepts_exact_limit_and_rejects_one_more_byte) ... ok
 
 ----------------------------------------------------------------------
-Ran 17 tests in 0.041s
+Ran 17 tests in 0.068s
 
 OK

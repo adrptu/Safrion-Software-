@@ -102,7 +102,7 @@
   {
     "file": "shared/indicadores-satelite/assets/referencia-implementacao.md",
     "before": "3a765737dc09288725ae42629acb781dd55168ab5ba591e38d4564de27f31579",
-    "after": "6e1b4ce4fdd20e435d8265fa000a87156aa115b790f36e0beb6e3dc4903ea25a"
+    "after": "15e8f2b6e446e9f6e57679f1f65329e573e75c12ddbbb20d7fa5f603db21fad8"
   },
   {
     "file": "shared/master-detail-ux/SKILL.md",
@@ -152,12 +152,12 @@
   {
     "file": "shared/ux-essencial/SKILL.md",
     "before": "10972bdbf98af75313e6c21ebd6586fefc08918972fd792ca83c315b40a5ffe6",
-    "after": "3b8364b9486b196a4a2e45c78f0d6010bd2041e2fc6d1cdf65b9b83704f2e957"
+    "after": "015eb1060bc53b74d878b49c06c9ae7767d86725ec114b6b1bf235dd9528a475"
   },
   {
     "file": "shared/ux-essencial/assets/m3-kit.js",
     "before": "035eef47c47ef6016b47edabd2dd80c7b4df4949064edee85bfe9543a4a67efd",
-    "after": "f023ca61ac432b12ad83a2f0db97c49fd9aa6c6ba03b0e759b045e4a9cda3484"
+    "after": "43922db091b308ebde2894ed7d6642b446e75973f4df6634e97d6b3205d347f1"
   },
   {
     "file": "test_gemini_consult.py",

@@ -108,5 +108,20 @@ check(
 );
 check('impureza zero e mesma umidade preservam massa', peso(1000, 0, 14, 14) === 1000);
 
+for (const v of [-1, 0.29, 0.3, 0.449, 0.45, 0.6, 0.7, 0.72, 0.82, 1])
+  check(
+    'cor absoluta corresponde à classe ' + v,
+    attempt(() => api.corDoIndice(v, api.escalaAbsoluta)) === api.classeDoIndice(v, api.escalaAbsoluta)?.cor,
+  );
+check('classe NDVI fora do intervalo é sem dado', api.classeDoIndice(1.1, api.escalaAbsoluta) === null);
+check(
+  'cor NDVI fora do intervalo é sem dado',
+  attempt(() => api.corDoIndice(-9999, api.escalaAbsoluta)) === api.COR_SEM_DADO,
+);
+check('minAmostra NaN não contorna mínimo', api.estatisticas(new Float32Array([0.5]), NaN) === null);
+check(
+  'rampa relativa intermediária executável',
+  typeof attempt(() => api.corDoIndice(0.5, { modo: 'relativa', min: 0.2, max: 0.9 })) === 'string',
+);
 console.log(`${n - fail}/${n}`);
 process.exitCode = fail ? 1 : 0;
