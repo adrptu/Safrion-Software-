@@ -155,7 +155,7 @@ try:
     fixture=r'''
 const rows=[{id:'a',v:{nome:'A',tipo:'I',qtd:2,un:'kg'}},{id:'b',v:{nome:'B',tipo:'I',qtd:3,un:'L'}}];
 const sp={id:'probe',cols:[{k:'nome',l:'Item',ess:1},{k:'tipo',l:'Tipo',ess:2},{k:'qtd',l:'Quantidade'},{k:'un',l:'Unidade'}],ag:[{pq:'oque',l:'Tipo',niv:['Tipo'],ck:['tipo']}],tree:false};
-const self={state:{g2:{probe:{ag:{d:'oque',t:[]},f:{}}}}};
+const self={state:{g2:{probe:{ag:{d:'oque',t:[]},agpf:g2pfk(),f:{}}}}};
 const result=g2agRows(self,sp,self.state.g2.probe,rows);
 return {aggregate:result.rows[0].v.qtd??null,children:result.rows[0].kids.map(r=>[r.v.qtd,r.v.un])};
 '''
