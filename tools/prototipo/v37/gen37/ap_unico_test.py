@@ -15,9 +15,9 @@ def unit():
     est = open(os.path.join(HERE, 'areas', 'processo_estoque.py'), encoding='utf-8').read()
     econs = re.search(r'function econsDet\(c,m\)\{.*?\.filter\(Boolean\); \}', est, re.S).group(0)
     g2 = [l for l in open(os.path.join(HERE, 'g2lib.js'), encoding='utf-8') if l.startswith('function g2num')][0]
-    ini = open(os.path.join(HERE, 'areas', 'inicio.py'), encoding='utf-8').read()   # custo do Mapa (ordCusto) com preços sintéticos isolados em M
-    custo = ('const CUSTO=(function(M){ ' + re.search(r'function precoDe\(p\)\{.*?\n', ini).group(0) + re.search(r'function ordCusto\(o\)\{.*?return r; \}\n', ini, re.S).group(0)
-             + ' return {ordCusto}; })({cop:{"Pulverização":10},preco:{"Fungicida A":100},gen:{}});\n')
+    from areas.custo_dominio import JS as CUSTO_JS
+    # PAINEL-02 moveu a regra comum do Mapa para custo_dominio; executar essa fonte, sem copiar a fórmula.
+    custo = (CUSTO_JS + '\nconst CUSTO={ordCusto:o=>cusOrdem({cop:{"Pulverização":10},preco:{"Fungicida A":100},gen:{}},o)};\n')
     pre = "var window={addEventListener(){}}; var localStorage=undefined; var location={hash:''};\n" + g2 + cenario.perfis_js()   # CTL-3: decisões com papel (cenExige)
     osd = dict(ords=P._ordens(), nova=P._nova_ordem_dados(), aloc={}, agf={})
     src = (pre + cenario.js_prefixo() + 'const OSD = ' + json.dumps(osd, ensure_ascii=False) + ';\nconst RC_OS=[];\n' + P.JS_NUCLEO + '\n' + econs + '\n' + custo
