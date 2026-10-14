@@ -120,10 +120,13 @@ try:
         t.chk('AC-01 sem o ícone Produção na barra; no Estoque de produto o ícone Agrícola marcado e "‹ Agrícola"',
               'Produção' not in mods and 'Agrícola' in mods and nv.get('cur') == ['Agrícola'] and nv.get('volta') == ['MOD-AGR.dc.html', '‹ Agrícola'], nv)
         vt = volta_pro(); cs = json.loads(J(CARDS) or '[]'); e0 = t.errs()
-        # BEN-D14 (09/10): o Beneficiamento é tela irmã de Cargas (e, com BEN_PUBLICADO=False, fica fora da navegação)
-        ESP = [['COLH.dc.html', 'Colheita'], ['CARGA.dc.html', 'Recebimento'], ['PROD.dc.html', 'Estoque de produto']]
-        t.chk('AC-01 "‹ Agrícola" abre a tela de entrada com Colheita · Recebimento · Estoque de produto em sequência (sem Beneficiamento), sem erro de JS',
-              vt and any(cs[i:i + 3] == ESP for i in range(len(cs))) and not any(x[0] == 'BEN.dc.html' for x in cs) and not e0, [vt, cs, e0])
+        # BEN-D39 (13/10/2026, proprietário: "coloque beneficiamento dentro de menu produção"): publicado (ui37.BEN_PUBLICADO), o Beneficiamento é
+        # cartão próprio logo depois de Recebimento; oculto (v55), não aparece. A conferência é a mesma nos dois estados
+        import ui37
+        ESP = [['COLH.dc.html', 'Colheita'], ['CARGA.dc.html', 'Recebimento']] + ([['BEN.dc.html', 'Beneficiamento']] if ui37.BEN_PUBLICADO else []) + [['PROD.dc.html', 'Estoque de produto']]
+        t.chk('AC-01 "‹ Agrícola" abre a tela de entrada com ' + ' · '.join(x[1] for x in ESP) + f' como os {len(ESP)} últimos cartões'
+              + ('' if ui37.BEN_PUBLICADO else ' (sem Beneficiamento)') + ', sem erro de JS',
+              vt and cs[-len(ESP):] == ESP and cs.count(['BEN.dc.html', 'Beneficiamento']) == (1 if ui37.BEN_PUBLICADO else 0) and not any(x[0] == 'BEN.dc.html' and x[1] != 'Beneficiamento' for x in cs) and not e0, [vt, cs, e0])
         for h, nome in ESP:
             pg = h.replace('.dc.html', '')
             if not J(pronta('MOD-AGR.dc.html', HUB)): volta_pro()

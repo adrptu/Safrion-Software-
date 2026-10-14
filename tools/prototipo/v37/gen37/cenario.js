@@ -256,8 +256,10 @@ function cenLiberar(c, id) {
 }
 
 // ---------- Estoque (almoxarife) ----------
-// Saldo a entregar = solicitado − consumido − em custódia (PRD 42.1); só para O.S. Liberadas ou Em execução.
-function cenSaldoEntregar(it) { return Math.max(0, it.solicitado - it.consumido - it.custodia); }
+// Saldo a entregar = solicitado − dispensado − consumido − em custódia (PRD 42.1); só para O.S. Liberadas ou Em execução. "dispensado" é o que
+// saiu da necessidade sem reposição e só o beneficiamento grava (sobra devolvida livre, caixa avariada, reserva baixada no Fechar; rodada 3,
+// BEN-D33): nas linhas de O.S., app e SUP o termo é 0 e a conta é a de sempre. Dano evitado: "a entregar" fantasma, sem reserva por trás.
+function cenSaldoEntregar(it) { return Math.max(0, it.solicitado - (it.dispensado || 0) - it.consumido - it.custodia); }
 function cenEntregar(c, rid, prod, qtd, quem, ator, chave) {   // ator: quem entrega (perfil); o movimento grava quem agiu, nunca um nome fixo; chave: de quem inicia (cenIdem)
   return cenIdem(c, chave, JSON.stringify(['entrega', rid, prod, Number(qtd), quem || '', (g2pf(ator) || {}).k || '']), 'Entrega', () => cenEntregar0(c, rid, prod, qtd, quem, ator)); }
 function cenEntregar0(c, rid, prod, qtd, quem, ator) {
@@ -268,19 +270,26 @@ function cenEntregar0(c, rid, prod, qtd, quem, ator) {
   if (cenLoteVencido(l)) throw new Error('Lote ' + l.lote + ' vencido em ' + l.validade + ': não pode ser entregue. Revise a reserva com o responsável pela O.S.; o físico permanece no estoque.');
   if (!(qtd > 0)) throw new Error('Informe a quantidade.');
   if (qtd > cenSaldoEntregar(it) + 1e-9) throw new Error('Acima do saldo a entregar: ' + cenNum(cenSaldoEntregar(it)) + ' ' + it.un + '.');
-  if (qtd > l.fisico - l.quarentena + 1e-9) throw new Error('O lote ' + it.lote + ' não tem ' + cenNum(qtd) + ' ' + it.un + ' livres.');
-  l.fisico -= qtd; l.reservado = Math.max(0, l.reservado - qtd); it.entregue += qtd; it.custodia += qtd; it.quem = quem || o.resp;
+  if (qtd > l.fisico - l.quarentena + 1e-9) throw new Error('O lote ' + it.lote + ' não tem ' + cenNum(qtd) + ' ' + it.un + ' livres.');   // trava física: nunca estoque negativo, nem com ajuste aprovado depois da reserva
+  // a entrega baixa só a reserva desta requisição; o que passar dela sai do livre, nunca da reserva de outra requisição (rodada 3, I-d3; reprodução 3 do Codex)
+  const own = cenResPropria(c, rid, it, l); if (qtd > own + cenDisp(l) + 1e-9) throw new Error('O lote ' + it.lote + ' tem ' + cenNum(own + cenDisp(l)) + ' ' + it.un + ' para a ' + rid + ' (' + cenNum(own) + ' reservados para ela e ' + cenNum(cenDisp(l)) + ' livres): o resto está reservado para outras requisições.');
+  l.fisico -= qtd; l.reservado = Math.max(0, l.reservado - Math.min(qtd, own)); it.entregue += qtd; it.custodia += qtd; it.quem = quem || o.resp;
   r.estado = 'Entregue'; cenMov(c, { tipo: 'entrega', req: rid, os: r.os, prod, lote: it.lote, qtd, un: it.un, quem: qa + ' → ' + (quem || o.resp), origem: 'web' });
-  return { msg: cenNum(qtd) + ' ' + it.un + ' de ' + prod + ' entregues a ' + (quem || o.resp) + ' (' + r.os + '). Aguarda confirmação no app.' };
+  return { msg: cenNum(qtd) + ' ' + it.un + ' de ' + prod + ' entregues a ' + (quem || o.resp) + ' (' + r.os + ').' + (o.fam === 'BEN' ? ' Recebidas no balcão (o beneficiamento não confirma no app).' : ' Aguarda confirmação no app.') };
 }
 // Devolução conferida: só o recebido e conferido volta ao disponível; material bloqueado não volta.
 function cenDevolver(c, rid, prod, qtd, apto, ator) {   // ator: quem recebe e confere a devolução (perfil)
   const qa = cenQuem(ator, 'almoxarife', 'Receber a devolução de ' + prod + ' da ' + rid); const r = c.reqs[rid]; const it = r && r.itens.find(i => i.prod === prod); if (!it) throw new Error('Item não encontrado.');
   if (!(qtd > 0) || qtd > it.custodia + 1e-9) throw new Error('Devolva até ' + cenNum(it.custodia) + ' ' + it.un + ' em custódia.');
   const l = c.lotes[prod + '|' + it.lote]; if (!l) throw new Error('Lote ' + it.lote + ' de ' + prod + ' não encontrado no Estoque.');
+  // linha de ordem do beneficiamento (rodada 3, BEN-D33): a regra de divisão (sobra livre; caixa em uso volta reservada à linha) é do ben.js e é
+  // calculada antes de baixar a custódia; sem ela na página a devolução é recusada (falha fechada), nunca devolve tudo ao livre em silêncio
+  const o = c.ordens[r.os]; const ben = !!o && o.fam === 'BEN';
+  if (ben && typeof benSobraDev !== 'function') throw new Error('Devolução de ' + prod + ' da ' + rid + ' (' + r.os + '): regra do beneficiamento ausente nesta página; nada foi gravado.'); const dv = ben ? benSobraDev(c, o, it, qtd, apto) : null;
   it.custodia -= qtd; it.devolvido += qtd;
   if (apto) l.fisico += qtd; else { l.fisico += qtd; l.quarentena += qtd; }
-  cenMov(c, { tipo: 'devolucao', req: rid, os: r.os, prod, lote: it.lote, qtd, un: it.un, quem: qa, origem: 'web', apto: !!apto });
+  const m = cenMov(c, { tipo: 'devolucao', req: rid, os: r.os, prod, lote: it.lote, qtd, un: it.un, quem: qa, origem: 'web', apto: !!apto });
+  if (dv) return benAposDevolver(c, o, rid, it, l, qtd, apto, dv, m, qa);
   return { msg: cenNum(qtd) + ' ' + it.un + ' de ' + prod + ' devolvidos' + (apto ? ' ao disponível.' : ' e bloqueados para inspeção.') };
 }
 
@@ -309,8 +318,12 @@ function cenLiberarQuarentena(c, key, laudo, ator) { const l = c.lotes[key]; if 
   const quem = cenExigeAlc(ator, 'AL-11', 'Liberar a quarentena do lote ' + l.lote); const doc = String(laudo || '').trim();
   if (!doc) throw new Error('Informe o nº do laudo ou relatório de inspeção do lote ' + l.lote + '. Sem laudo o lote continua bloqueado.');
   const rev = cenRevEntrada(c, l, ator);
+  // caixas em uso de ordem do beneficiamento esperando o laudo (revisão A2 da rodada 3): a regra é do ben.js; sem ela na página, recusa sem gravar
+  const usoBen = Object.values(c.reqs || {}).some(r => (r.itens || []).some(i => i.prod === l.prod && i.lote === l.lote && (i.quarUso || 0) > 1e-9));
+  if (usoBen && typeof benAposLaudo !== 'function') throw new Error('Quarentena do lote ' + l.lote + ' com caixas em uso do beneficiamento: regra do beneficiamento ausente nesta página; nada foi gravado.');
   const q = l.quarentena - (l.quarRep || 0); l.quarentena = l.quarRep || 0; cenMov(c, Object.assign({ tipo: 'inspecao', prod: l.prod, lote: l.lote, qtd: q, un: l.un, quem, origem: 'web', doc }, rev ? { rev } : {}));
-  return { msg: cenNum(q) + ' ' + l.un + ' do lote ' + l.lote + ' liberados com o laudo ' + doc + ' por ' + quem + '.' + (rev ? ' Fica ' + rev + '.' : '') }; }
+  const bx = usoBen ? benAposLaudo(c, l, quem) : '';
+  return { msg: cenNum(q) + ' ' + l.un + ' do lote ' + l.lote + ' liberados com o laudo ' + doc + ' por ' + quem + '.' + (bx ? ' ' + bx + '.' : '') + (rev ? ' Fica ' + rev + '.' : '') }; }
 // Reprovar a qualidade (RN-015; PRD 65.4: "reprovação reconcilia obrigação de reposição/devolução e falta antes de gerar nova proposta"): o gestor
 // registra o laudo que reprova; o material continua segregado (fora do disponível) para a devolução ao fornecedor e deixa de ser fornecimento
 // condicionado — a demanda passa a contar a falta como firme, com o laudo e o motivo (revisão do 853a6a8, achado 2). Sem laudo, nada muda.
@@ -320,6 +333,7 @@ function cenReprovarQuarentena(c, key, laudo, motivo, ator) { const l = c.lotes[
   if (!doc) throw new Error('Informe o nº do laudo que reprova o lote ' + l.lote + '. Sem laudo o lote continua aguardando a decisão.');
   const mot = String(motivo || '').trim() || 'reprovado no laudo'; const rev = cenRevEntrada(c, l, ator);   // acúmulo: a mesma regra de liberar (ajuste 4)
   l.quarRep = (l.quarRep || 0) + pend; l.rep = Object.assign({ laudo: doc, motivo: mot, quem, em: cenAgora() }, rev ? { rev } : {});
+  if (typeof benAposReprovar === 'function') benAposReprovar(c, l);   // caixas em uso do beneficiamento que esperavam o laudo não voltam (revisão A2)
   cenMov(c, Object.assign({ tipo: 'inspecao-reprovada', prod: l.prod, lote: l.lote, qtd: pend, un: l.un, quem, origem: 'web', doc, motivo: mot }, rev ? { rev } : {}));
   return { msg: cenNum(pend) + ' ' + l.un + ' do lote ' + l.lote + ' reprovados com o laudo ' + doc + ' por ' + quem + ' (' + mot + '): ficam segregados para a devolução ao fornecedor e a falta deixa de ser condicionada.' + (rev ? ' Fica ' + rev + '.' : '') }; }
 // Inventário: contagem cega por lote; diferença vira ajuste pendente (o saldo só muda com a aprovação do gestor).
@@ -435,10 +449,12 @@ function cenConfCust(c, k) { if (!c || k.estado !== 'Em conferência') return k.
   const r = k.req && c.reqs && c.reqs[k.req]; const it = r && r.itens.find(i => i.prod === k.prod); return it ? it.custodia : 0; }
 function cenConfTxt(k, c) { const cu = cenConfCust(c, k);
   return k.prod + ' ' + cenNum(k.relatado) + ' ' + k.un + cenPl(k.relatado, ' relatado', ' relatados') + ', ' + (cu > 1e-9 ? cenNum(cu) + ' ' + k.un + ' em custódia' : 'nada em custódia'); }
-// reserva feita para o item (na liberação da O.S. ou no início da demonstração); a mesma conta do Estoque (eresTot)
-function cenResTot(c, rid, prod) { const s0 = (typeof CEN0 !== 'undefined' && CEN0 && CEN0.reqs) ? CEN0.reqs[rid] : null;
-  if (s0 && s0.estado === 'Reservada') { const i = s0.itens.find(x => x.prod === prod); return i ? i.solicitado : 0; }
-  return (c.movs || []).filter(m => m.tipo === 'reserva' && m.req === rid && m.prod === prod).reduce((a, m) => a + (m.qtd || 0), 0); }
+// reserva feita para o item (na liberação da O.S. ou no início da demonstração); a mesma conta do Estoque (eresTot). Base da semente: o
+// solicitado da REQ Reservada; senão o entregue da semente (a reserva já consumida pela entrega). Mais as reservas e menos as baixas
+// (reserva-baixa, Fechar do beneficiamento) gravadas depois (rodada 3: a caixa em uso devolvida volta reservada também à REQ da semente)
+function cenResTot(c, rid, prod) { const s0 = (typeof CEN0 !== 'undefined' && CEN0 && CEN0.reqs) ? CEN0.reqs[rid] : null; const i0 = s0 ? s0.itens.find(x => x.prod === prod) : null;
+  const b = i0 ? (s0.estado === 'Reservada' ? i0.solicitado : (i0.entregue || 0)) : 0;
+  return b + (c.movs || []).filter(m => (m.tipo === 'reserva' || m.tipo === 'reserva-baixa') && m.req === rid && m.prod === prod).reduce((a, m) => a + (m.tipo === 'reserva' ? (m.qtd || 0) : -(m.qtd || 0)), 0); }
 function cenResPropria(c, rid, it, l) { return (l && it) ? Math.max(0, Math.min(l.reservado || 0, cenResTot(c, rid, it.prod) - (it.entregue || 0))) : 0; }
 // ---------- Apontamento: comando único da web (O.S. e Mapa) e do app (PRD 8.5; OSDIA-03/04) ----------
 // k = {os, d:'dd/mm' (data operacional), parc (talhão/parcela; vazio = a ordem toda), ha, h, cons {produto: usado informado},

@@ -1,0 +1,17 @@
+build rc=0
+montar_render rc=0 :: _render montado: 152 páginas + 20 arquivos do site · dados da Lagoa Grande: sintéticos 5/5
+build rc=0
+montar_render rc=0 :: _render montado: 152 páginas + 20 arquivos do site · dados da Lagoa Grande: sintéticos 5/5
+nav_modulos_test.py rc=0 111s carga=12.55 :: RESULTADO: 15 ok · 0 falhas
+producao_fluxo_test.py rc=0 585s carga=30.73 :: RESULTADO: OK 92/92
+paginas_scan_test.py rc=0 410s carga=16.46 :: RESULTADO: 4 ok · 0 falhas (144 páginas)
+busca_unica_test.py rc=0 366s carga=14.99 :: RESULTADO: 6 ok · 0 falhas
+tabelas_ben_test.py rc=0 32s carga=20.86 :: RESULTADO: OK 12/12
+ben_fluxo_test.py_fluxo_erros_celular_revisao rc=0 234s carga=16.91 :: RESULTADO: OK 66/66
+ben_fluxo_test.py_roteiro_roteiro390 rc=0 151s carga=12.30 :: RESULTADO: OK 34/34
+ben_fluxo_test.py_faixa390_teclado_cancelar rc=0 205s carga=12.96 :: RESULTADO: OK 33/33
+ben_fluxo_test.py_sobra_sobra390_conferencia_conferencia390 rc=0 389s carga=8.22 :: RESULTADO: OK 30/30
+ben_fluxo_test.py_complemento_lotes_duplo_criada rc=0 155s carga=14.15 :: RESULTADO: OK 26/26
+ben_fluxo_test.py_cadeia_cadeia390 rc=0 287s carga=12.70 :: RESULTADO: OK 16/16
+ben_fluxo_test.py_multilote_multilote390_rodape_manutencao rc=0 436s carga=14.27 :: RESULTADO: OK 18/18
+FIM

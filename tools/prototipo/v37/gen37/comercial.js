@@ -99,6 +99,18 @@ function comAvisoCred(cliente, hoje) { const L = comCp(cliente) || {}; hoje = ho
 
 /* ---------- impedimento da saída (R-C07): a mesma conta para a venda, a carga e a saída (CE-07) ---------- */
 function comNucleo() { return typeof CARD !== 'undefined' && typeof carAvaliar === 'function'; }
+/* origem de campo pela genealogia (BEN-D09; integração BEN3 × COM, BEN-D37): o lote embalado no beneficiamento aponta os lotes de entrada
+   ({lote, kg, modo:'rateio'}), e a origem de campo está neles, até a colheita. campo = origens de campo (com OS e data, ou sem lote conhecido:
+   falha fechada); abert = alguma folha é saldo de abertura (origem anterior ao sistema); sem = lotes da cadeia sem origem nem abertura.
+   Dano evitado: todo lote do beneficiamento ficava com a expedição impedida ("origem — colhida em — sem lote de campo"). ciclo = lotes que
+   reaparecem no próprio caminho (A→B→A ou autorreferência): origem não verificável, impede (revisão A6: o "já visto" sozinho deixava o ramo
+   sumir e a saída passava sem avaliação); o lote visto por outro caminho (losango) é avaliado uma vez */
+function comOrigens(c, L) { const P = prP(c); const out = { campo: [], abert: false, sem: [], ciclo: [] }; const vis = {}, cam = {};
+  (function rec(X) { if (!X) return; if (cam[X.id]) { if (out.ciclo.indexOf(X.id) < 0) out.ciclo.push(X.id); return; } if (vis[X.id]) return; vis[X.id] = 1; cam[X.id] = 1;
+    const o = (X.origem || []).filter(x => !x.est);
+    if (!o.length) { if (X.abertura) out.abert = true; else out.sem.push(X.id); delete cam[X.id]; return; }
+    o.forEach(x => { const F = x.lote ? P.lotes[x.lote] : null; if (F) rec(F); else out.campo.push(x); }); delete cam[X.id]; })(L);
+  return out; }
 function comImpede(c, v, L) { const out = { imp: [], aviso: [], aval: [] }; const qual = prQuem('qual'); const com = g2quemUm(['comercial', 'gestor']);
   if (v && prAmb(v)) out.imp.push({ t: v.id + ': saca do contrato a conferir (' + v.fatAmb.join(' ou ') + ' kg): valor, crédito e falta dependem dela', q: com });
   else if (v && !v.enc && v.qtd !== null && v.qtd !== undefined) { const acima = prSub(prSoma([prExpedido(c, v.id), comResKg(c, v.id)]), v.qtd);
@@ -107,8 +119,10 @@ function comImpede(c, v, L) { const out = { imp: [], aviso: [], aval: [] }; cons
   /* sem o núcleo da carência na página, nada passa por falta de dado (CE-01) */
   if (!comNucleo()) { out.imp.push({ t: 'avaliação de carência e destino indisponível nesta página (núcleo da carência ausente): a saída não é avaliada', q: 'Suporte do protótipo' }); return out; }
   const S = prSaldos(c, L); if (S.q !== 'Liberado') out.imp.push({ t: L.id + ' ' + S.q.toLowerCase() + ': ' + S.mot, q: S.dono || qual });
-  const dest = (v && v.dest) || 'MI-BR'; const orig = (L.origem || []).filter(x => !x.est);
-  if (!orig.length) { if (L.abertura) out.aval.push({ lc: '', st: 'abertura', rot: 'origem anterior ao sistema' }); else out.imp.push({ t: L.id + ' sem origem registrada', q: qual }); }
+  const dest = (v && v.dest) || 'MI-BR'; const G = comOrigens(c, L); const orig = G.campo;
+  if (G.abert) out.aval.push({ lc: '', st: 'abertura', rot: 'origem anterior ao sistema' });
+  G.sem.forEach(id => out.imp.push({ t: id + ' sem origem registrada', q: qual }));
+  G.ciclo.forEach(id => out.imp.push({ t: L.id + ': ciclo na genealogia em ' + id + ' (origem não verificável)', q: qual }));
   orig.forEach(x => { const lc = prLc(c, x.os, x.dcol);
     if (!lc) { out.imp.push({ t: L.id + ': origem ' + (x.os || '—') + ' colhida em ' + prBr(x.dcol) + ' sem lote de campo (falta o apontamento da data)', q: prResp((c.ordens || {})[x.os]) }); return; }
     if (out.aval.some(a => a.lc === lc)) return;
@@ -352,7 +366,10 @@ function comDevolverEf(c, rm, lote, kg, motivo, quem, d, chave, imp) { const P =
   if ((COMC.motivos || []).indexOf(motivo) < 0) throw new Error('Escolha o motivo da devolução.');
   const L0 = P.lotes[l.lote]; const id = prNovoLote(c, d);
   const L = P.lotes[id] = { id, prod: L0.prod, cultura: L0.cultura, classe: L0.classe, saf: L0.saf, faz: L0.faz, local: L0.local, drec: d, dcol: L0.dcol, validade: L0.validade,
-    q0: 'Em inspeção', cond: 'Devolvido', misto: !!L0.misto, origem: (L0.origem || []).filter(x => !x.est).map(x => ({ os: x.os, cult: x.cult, tal: x.tal, dcol: x.dcol, dev: { lote: L0.id, rm: rm.id } })),
+    /* origem: a de campo como estava; a genealogia de lote (lote embalado no beneficiamento, BEN-D09) vira uma parte só, apontando o lote
+       vendido com o kg devolvido (revisão A5: copiar só {os, dcol} apagava a genealogia e o lote devolvido nunca mais podia sair) */
+    q0: 'Em inspeção', cond: 'Devolvido', misto: !!L0.misto, origem: (L0.origem || []).filter(x => !x.est && !x.lote).map(x => ({ os: x.os, cult: x.cult, tal: x.tal, dcol: x.dcol, dev: { lote: L0.id, rm: rm.id } }))
+      .concat((L0.origem || []).some(x => !x.est && x.lote) ? [{ lote: L0.id, kg: q, modo: 'devolucao', dev: { lote: L0.id, rm: rm.id } }] : []),
     cargas: [], dev: { lote: L0.id, rm: rm.id, motivo } };
   if (L0.abertura) L.abertura = true;
   prMov(c, { tipo: 'devolução', lote: id, kg: q, pedido: v.id, rm: rm.id, quem, obs: motivo, d });

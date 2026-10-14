@@ -43,10 +43,14 @@ VOLTA37={f'CD-0{i}.dc.html':('Cadastros','CD.dc.html') for i in range(1,9)}   # 
 #   estão em correção em outra frente e a tela não estreia no artefato. O código fica na branch, sem perda; só deixa de ser alcançável:
 #   sem aba irmã em Cargas (CARGA vira tela única), sem link de tela visível (Cargas e Estoque de produto mostram a ordem em texto) e,
 #   no canvas, na página "Módulos ocultos". Chave única, lida por ui37, areas/producao.py e build.py: reativar é BEN_PUBLICADO=True.
-BEN_PUBLICADO=False
+# 13/10/2026 (proprietário: "coloque beneficiamento dentro de menu produção. Packing house, industria, etc" e "coloque tudo de produção, dentro
+#   de Agrícola"): rodada 3 do BEN e os 3 S2 da revisão (A1, A2, A8) corrigidos com teste de regressão (BEN-D33 a BEN-D39): o Beneficiamento
+#   volta à navegação como cartão próprio de Agrícola, logo depois de Recebimento; Cargas aponta a ordem do lote em processo (atalho e linha),
+#   sem a faixa de telas (seria um 2º caminho para o mesmo cartão).
+BEN_PUBLICADO=True
 MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
  ('Cadastros','pasta',[('Cadastros','CD.dc.html')]),   # 13/10/2026 (proprietário): sem submenus; a tela CD mostra os 7 cadastros em cartões e cada um volta por "‹ Cadastros"
- ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Orçamento e previsões','GE-02.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html'),('Previsão e colheita','COLH.dc.html'),('Recebimento e beneficiamento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html'),('Custos e fechamento','GE-03.dc.html')]),   # 13/10/2026 (proprietário: "coloque orçamento e custos dentro do menu agrícola"; "coloque o submenu colheita dentro de agrícola"; "coloque tudo de produção, dentro de Agrícola"): o ciclo da lavoura até o produto em estoque
+ ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Orçamento e previsões','GE-02.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html'),('Previsão e colheita','COLH.dc.html'),('Recebimento','CARGA.dc.html')]+([('Beneficiamento','BEN.dc.html')] if BEN_PUBLICADO else [])+[('Estoque de produto','PROD.dc.html'),('Custos e fechamento','GE-03.dc.html')]),   # 13/10/2026 (proprietário: "coloque orçamento e custos dentro do menu agrícola"; "coloque o submenu colheita dentro de agrícola"; "coloque tudo de produção, dentro de Agrícola"): o ciclo da lavoura até o produto em estoque
  ('Manutenção','wrench',[('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')]),   # 13/10/2026 (pedido do proprietário: subitens de novo, enxutos): um subitem por visão da tela única, sem tela nova
  ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html'),('Inteligência de compras','IC.dc.html')]),   # INTEL-01 (13/10)
  ('Comercial','Vendas',[('Contratos e pedidos','VEN.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Painel comercial','PCOM.dc.html'),('Inteligência de vendas','IV.dc.html')]),   # INTEL-01 (13/10): inteligência comercial de vendas
@@ -63,7 +67,7 @@ HUB37={'Agrícola':'MOD-AGR.dc.html','Comercial':'MOD-COM.dc.html','Suprimentos'
 CURTO37={'AG-07.dc.html':('Agrofit','livro'),'PA.dc.html':('Planos agronômicos','prancheta'),'AG-02.dc.html':('Análises de solo','frasco'),
  'SAF.dc.html':('Planejar safra','calendar'),'OS.dc.html':('Ordens de serviço','prancheta_ok'),'AG-01.dc.html':('Pragas e doenças','inseto'),'IR-01.dc.html':('Irrigação','drop'),
  'GE-02.dc.html':('Orçamento','cash'),'GE-03.dc.html':('Custos','calc'),
- 'COLH.dc.html':('Colheita','Colheita'),'CARGA.dc.html':('Recebimento','scale'),'PROD.dc.html':('Estoque de produto','armazem'),
+ 'COLH.dc.html':('Colheita','Colheita'),'CARGA.dc.html':('Recebimento','scale'),'BEN.dc.html':('Beneficiamento','fabrica'),'PROD.dc.html':('Estoque de produto','armazem'),
  'VEN.dc.html':('Contratos e pedidos','doc'),'EXPED.dc.html':('Expedição','truck'),'PCOM.dc.html':('Painel','grafico'),'IV.dc.html':('Inteligência','trend'),
  'MA.dc.html#vis=semordem':('Sem ordem','clock'),'MA.dc.html#vis=ordens':('Ordens','wrench'),'MA.dc.html#vis=ativos':('Ativos','truck'),'MA.dc.html#vis=planos':('Planos','calendar'),
  'CMP.dc.html':('Compras','cart'),'EST.dc.html':('Estoque','box'),'IC.dc.html':('Inteligência','trend'),
@@ -74,8 +78,7 @@ OUTROS37=('Outros acessos','grid','MOD-OUT.dc.html',[('App de campo','MB-01.dc.h
 VOLTA37.update({_hv.split('#')[0]:(_nv,HUB37[_nv]) for _nv,_iv,_itv in MENU2 if _nv in HUB37 for _lv,_hv in _itv})
 INICIO37='IN-04.dc.html'   # o protótipo começa no Mapa (1º item do menu)
 MENU_OF={'CA-01det.dc.html':'OS.dc.html','CA-02.dc.html':'OS.dc.html','CA-01x-os0420.dc.html':'OS.dc.html',
- 'IR-02.dc.html':'IR-01.dc.html','IR-03.dc.html':'IR-01.dc.html','IR-03det.dc.html':'IR-01.dc.html','IR-04.dc.html':'IR-01.dc.html',
- **({'BEN.dc.html':'CARGA.dc.html'} if BEN_PUBLICADO else {})}  # detalhes e telas irmãs que pertencem a um item do menu (BEN: só publicado)
+ 'IR-02.dc.html':'IR-01.dc.html','IR-03.dc.html':'IR-01.dc.html','IR-03det.dc.html':'IR-01.dc.html','IR-04.dc.html':'IR-01.dc.html'}  # detalhes e telas irmãs que pertencem a um item do menu (o BEN é item próprio de Agrícola desde 13/10)
 def menu_item(fname):
     f=MENU_OF.get(fname,fname)
     for i,(nome,ic,items) in enumerate(MENU2):

@@ -1,0 +1,176 @@
+{
+ "passos": [
+  {
+   "n": "A após a devolução bloqueada",
+   "est": {
+    "etapa": "Em execução",
+    "kgAberto": "7300",
+    "usoMax": 730,
+    "sobra": 0,
+    "falta": 300,
+    "livreTot": 571,
+    "selos": [
+     "Faltam 300 caixas"
+    ],
+    "prox": "Enviar para conferência",
+    "nota": "O que não foi registrado (7.300 kg) vira diferença na conferência. Faltam 300 caixas para os 7.300 kg em processo (369 un em custódia, 0 un a entregar): Pedir mais caixas."
+   },
+   "A": [
+    {
+     "rid": "REQ-041",
+     "lote": "CX26-02",
+     "sol": 1169,
+     "ent": 1169,
+     "cust": 369,
+     "cons": 500,
+     "dev": 300,
+     "disp": 300,
+     "pend": 0
+    }
+   ],
+   "cx02": [
+    331,
+    300,
+    0,
+    0
+   ],
+   "cx01": [
+    540,
+    0,
+    0,
+    0
+   ],
+   "V": []
+  },
+  {
+   "n": "recomendação de B",
+   "t": "Caixa de mamão Formosa 10 kg: 571 un disponíveis para 800 un · Estoque",
+   "why": "Faltam 229 un. A OB-0110 tem sobra de 60 un em custódia (Receba devoluções). Ainda faltam 169 un: a compra de caixas entra no BEN-2. Sem caixa, Cancelar a ordem (nada foi reservado).",
+   "fontes": [
+    {
+     "tipo": "sobra",
+     "os": "OB-0110",
+     "ver": 1,
+     "qtd": 60,
+     "linhas": [
+      {
+       "rid": "REQ-030",
+       "lote": "CX26-01",
+       "qtd": 60
+      }
+     ]
+    }
+   ],
+   "cobre": false,
+   "V": []
+  },
+  {
+   "n": "após laudo",
+   "r": "300 un do lote CX26-02 liberados com o laudo LAUDO-OK por Ana (gestora). 300 un voltam reservadas à OB-0113 (caixas em uso; a falta dela baixa).",
+   "cx02": [
+    331,
+    0,
+    300,
+    0
+   ],
+   "livre": 571,
+   "estA": {
+    "etapa": "Em execução",
+    "kgAberto": "7300",
+    "usoMax": 730,
+    "sobra": 0,
+    "falta": 0,
+    "livreTot": 571,
+    "selos": [],
+    "prox": "Enviar para conferência",
+    "nota": "O que não foi registrado (7.300 kg) vira diferença na conferência."
+   },
+   "V": []
+  },
+  {
+   "n": "após liberar B",
+   "r": "Liberação recusada · 1 causa: Caixa de mamão Formosa 10 kg: 571 un disponíveis para 800 un · Estoque (resolve: Rui (almoxarife) ou Paula (almoxarife)). Nada foi gravado.",
+   "estA": {
+    "etapa": "Em execução",
+    "kgAberto": "7300",
+    "usoMax": 730,
+    "sobra": 0,
+    "falta": 0,
+    "livreTot": 571,
+    "selos": [],
+    "prox": "Enviar para conferência",
+    "nota": "O que não foi registrado (7.300 kg) vira diferença na conferência."
+   },
+   "cx02": [
+    331,
+    0,
+    300,
+    0
+   ],
+   "V": []
+  },
+  {
+   "n": "A pede",
+   "r": "Caixas: número inteiro de unidades (ao menos 1).",
+   "V": []
+  }
+ ],
+ "log": [
+  {
+   "nome": "NF 7731 1200",
+   "ok": true,
+   "msg": "1.200 un de Caixa de mamão Formosa 10 kg recebidos no lote CX26-02 (Packing)."
+  },
+  {
+   "nome": "nova A L39-132",
+   "ok": true,
+   "msg": "OB-0113 criada (A liberar): PACK-FRU v3 · L39-132 · 12.300 kg · 1.169 un de caixa (sugestão confirmada) · fruta da Lagoa Grande processada na Packing linha 1 · Packing (Santa Rita). Próximo passo: Autorizar rota e liberar."
+  },
+  {
+   "nome": "liberar A",
+   "ok": true,
+   "msg": "OB-0113 v1 autorizada (CMD-42) e liberada (CMD-06) por Igor (responsável de produção): REQ-041 reservou 1.169 un de Caixa de mamão Formosa 10 kg; entradas reservadas à ordem. O Estoque entrega as caixas no balcão."
+  },
+  {
+   "nome": "entregar A",
+   "ok": true,
+   "msg": "1.169 un de Caixa de mamão Formosa 10 kg entregues a Igor (OB-0113). Recebidas no balcão (o beneficiamento não confirma no app)."
+  },
+  {
+   "nome": "iniciar A",
+   "ok": true,
+   "msg": "OB-0113 em execução: registre as saídas pesadas (produto com caixas e bruto, descarte, outro destino e perda identificada)."
+  },
+  {
+   "nome": "A: Produto 500",
+   "ok": true,
+   "msg": "S-01 registrada na OB-0113: Produto A · 500 cx · bruto 5.300 kg − tara 300 kg = 5.000 kg → L39-133."
+  },
+  {
+   "nome": "Rui recebe 300 de A como bloqueadas para inspeção",
+   "ok": true,
+   "msg": "300 un de Caixa de mamão Formosa 10 kg devolvidos e bloqueados para inspeção: 300 un estavam em uso e continuam da OB-0113 (se o laudo aprovar, voltam reservadas a ela)."
+  },
+  {
+   "nome": "nova B L38-132 com 800 cx",
+   "ok": true,
+   "msg": "OB-0114 criada (A liberar): PACK-FRU v3 · L38-132 · 29.830 kg · 800 un de caixa (sugestão 2834) · fruta da Lagoa Grande processada na Packing linha 1 · Packing (Santa Rita). Próximo passo: Autorizar rota e liberar. Atenção: 571 un livres no Estoque para 800 un: a liberação fica impedida até o Estoque receber as caixas (Rui (almoxarife) ou Paula (almoxarife) · a compra de caixas entra no BEN-2)."
+  },
+  {
+   "nome": "Ana libera a quarentena com laudo (segue a fonte)",
+   "ok": true,
+   "msg": "300 un do lote CX26-02 liberados com o laudo LAUDO-OK por Ana (gestora). 300 un voltam reservadas à OB-0113 (caixas em uso; a falta dela baixa)."
+  },
+  {
+   "nome": "liberar B",
+   "ok": false,
+   "msg": "Liberação recusada · 1 causa: Caixa de mamão Formosa 10 kg: 571 un disponíveis para 800 un · Estoque (resolve: Rui (almoxarife) ou Paula (almoxarife)). Nada foi gravado."
+  },
+  {
+   "nome": "A: pedir a falta 0",
+   "ok": false,
+   "msg": "Caixas: número inteiro de unidades (ao menos 1)."
+  }
+ ],
+ "violacoes": []
+}

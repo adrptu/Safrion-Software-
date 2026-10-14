@@ -334,11 +334,14 @@ ok('U18 K29 condição do a13: "Apto" da semente; "Restrito · monitorado" → a
      && JSON.stringify(ev) === '["Caiu: conferência","Execução reaberta"]' && /^Já feito: OB-0110 está em Em execução/.test(rep.erro || '') && O(c, 'OB-0110').ben.hist.length === n, [s0, a, r, ev, rep]); }
 
 // ---- U29 · BEN-D15 e BEN-D14: em processo só entre Iniciar e Concluir; próximo passo do lote de entrada e pendências da faixa, do mesmo estado ----
-{ const c = NOVO(); const ep12 = benEmProc(O(c, 'OB-0112')); const pr0 = benPendRec(c); const px = benProxEntrada(c, LT(c, 'L39-131'));
-  const nv = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 24120 }] }, IG)); const px2 = benProxEntrada(c, LT(c, 'L39-131')); const pr1 = benPendRec(c);
-  ok('U29 OB-0112 (A liberar) com 0 kg em processo; L39-131 aponta "Abrir ordem de beneficiamento" (#nova=L39-131) e, criada a OB-0113, "na OB-0113 (A liberar)"; faixa "1 a pesar" e "1 a liberar · 3 lotes a beneficiar" → "2 a liberar · 2 lotes a beneficiar"',
+/* BEN-D39 (13/10): a faixa Cargas | Beneficiamento saiu (o BEN é cartão próprio de Agrícola); a pendência da faixa (benPendRec) saiu com ela.
+   Fica a contagem da tela (barra de estado do BEN: "1 a liberar · 3 lotes a beneficiar"), do mesmo estado (benOrdens, benLotesAptos) */
+{ const c = NOVO(); const ep12 = benEmProc(O(c, 'OB-0112')); const px = benProxEntrada(c, LT(c, 'L39-131'));
+  const ap0 = benLotesAptos(c).length; const nv = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 24120 }] }, IG)); const px2 = benProxEntrada(c, LT(c, 'L39-131'));
+  const al = benOrdens(c).filter(o => o.etapa === 'A liberar').length; const ap1 = benLotesAptos(c).length;
+  ok('U29 OB-0112 (A liberar) com 0 kg em processo; L39-131 aponta "Abrir ordem de beneficiamento" (#nova=L39-131) e, criada a OB-0113, "na OB-0113 (A liberar)"; 3 lotes a beneficiar → 2 a liberar e 2 lotes',
      ep12 === 0 && px && px.h === 'BEN.dc.html#nova=L39-131' && px2 && /^na OB-0113 \(A liberar\)/.test(px2.t) && px2.h === 'BEN.dc.html#OB-0113'
-     && pr0.carga === '1 a pesar' && pr0.ben === '1 a liberar · 3 lotes a beneficiar' && pr1.ben === '2 a liberar · 2 lotes a beneficiar', [ep12, px, px2, pr0, pr1, nv.erro]); }
+     && ap0 === 3 && al === 2 && ap1 === 2, [ep12, px, px2, ap0, al, ap1, nv.erro]); }
 
 // ===== Revisão adversarial do BEN-1 (BEN-REV-01..09, 09/10/2026): cada achado com proteção de regressão =====
 function OSX(c, id, tal, etapa, ap) { c.ordens[id] = { id, tipo: 'Colheita · semana 39', talhao: tal, area: 0, etapa, versao: 'v1', realizado: 0, saldo: 0, resp: 'Sérgio', ins: [], req: null, selos: [],
@@ -450,10 +453,12 @@ function T7(c, cond, tk) { if (!c.ordens['OS-0932']) OSX(c, 'OS-0932', 'T7', 'Em
 // ---- U39 · caixas da ordem nova = a necessidade da rota (rodada 1 da integração, S2 do bc0e76f): a falta de caixa aparece como impedimento
 //      com recuperação real (NF de caixas a conferir no Estoque); recebida a nota, a ordem libera e o balanço fecha os 12.300 kg sem perda fictícia ----
 /* Rui confere a NF 7731 no Estoque: o mesmo cenReceber do estReceber (Confira recebimentos), com a conferência gravada no movimento */
+/* livre de caixas: o total dos lotes elegíveis (rodada 3, BEN-D34); no código anterior, o lote de maior livre */
+const LIVRE = c => typeof benLivreCx === 'function' ? benLivreCx(c) : benCaixasLivres(c);
 function RECEBE_NF(c, conf) { const r = MUD(c, x => { const n0 = x.movs.length; const m = cenReceber(x, CX, 'CX26-02', conf, 'un', 'Packing', '—', 'NF 7731', true, RU);
   x.movs[n0].estRec = { id: 'r7731', nf: 'NF 7731', ped: 'PC-096 · ' + CX + ' · Embalagens Açu', conf, apto: conf, quar: 0, lote: 'CX26-02' }; return m; }); return r; }
 { const c = NOVO(); const r = benRota('PACK-FRU|3'); const pd = benCaixasPadrao(c, 12300, r);
-  ok('U39a L39-132 (12.300 kg): o valor inicial é a necessidade da rota, 1.169 un, mesmo com só 540 livres no Estoque (CX26-01)', pd.sug === 1169 && pd.livre === 540 && pd.cx === 1169 && benCaixasLivres(c) === 540, pd);
+  ok('U39a L39-132 (12.300 kg): o valor inicial é a necessidade da rota, 1.169 un, mesmo com só 540 livres no Estoque (CX26-01)', pd.sug === 1169 && pd.livre === 540 && pd.cx === 1169 && LIVRE(c) === 540, pd);
   const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); const o = O(c, n.id || 'OB-0113') || { ins: [{}], ben: { hist: [{}] } };
   ok('U39b criar sem informar caixas: 1.169 un (sugestão confirmada) e o aviso diz que a liberação fica impedida até o Estoque receber as caixas, com a NF 7731 e quem confere',
      !n.erro && o.ins[0].tot === 1169 && /1\.169 un de caixa \(sugestão confirmada\)/.test(o.ben.hist[0].det)
@@ -461,7 +466,7 @@ function RECEBE_NF(c, conf) { const r = MUD(c, x => { const n0 = x.movs.length; 
   const im = n.id ? benImpedimentos(c, o) : []; const x = im.find(y => y.cx) || {}; const r0 = c.rev || 0; const l = MUD(c, y => benAutorizarLiberar(y, n.id, IG));
   ok('U39c impedimento das caixas com quem resolve e a recuperação real (conferir a NF 7731 no Estoque); a liberação é recusada e nada é gravado',
      x.t === CX + ': 540 un disponíveis para 1.169 un · Estoque' && x.dono === 'Rui (almoxarife) ou Paula (almoxarife)' && x.link && x.link.t === 'Conferir a NF 7731 das caixas no Estoque' && x.link.h === 'EST.dc.html'
-     && /Faltam 629 un\. A NF 7731 \(PC-096 · Embalagens Açu\) traz 1\.200 un: Rui \(almoxarife\) ou Paula \(almoxarife\) confere em Estoque › Confira recebimentos\./.test(x.link.why || '')
+     && /Faltam 629 un\. A NF 7731 \(PC-096 · Embalagens Açu\) traz até 1\.200 un: Rui \(almoxarife\) ou Paula \(almoxarife\) confere em Estoque › Confira recebimentos\./.test(x.link.why || '')
      && /540 un disponíveis para 1\.169 un/.test(l.erro || '') && O(c, n.id).etapa === 'A liberar' && !O(c, n.id).req && (c.rev || 0) === r0, [x, l]);
   const rc = RECEBE_NF(c, 1200); const im2 = benImpedimentos(c, O(c, n.id)); const l2 = MUD(c, y => benAutorizarLiberar(y, n.id, IG)); const o2 = O(c, n.id) || {};
   ok('U39d recebida a NF 7731 (1.200 un no CX26-02): sem impedimento; a ordem libera com a necessidade inteira (REQ-041 1.169 un do CX26-02) e o L39-132 preso à ordem',
@@ -475,9 +480,9 @@ function RECEBE_NF(c, conf) { const r = MUD(c, x => { const n0 = x.movs.length; 
      && REQ(c, 'REQ-041').custodia === 0 && REQ(c, 'REQ-041').consumido === 1169 && prFis(c, 'L39-132') === 0 && prSoma(nv.map(L => prFis(c, L.id))) === 11690, [st.map(y => y.erro || ''), b, REQ(c, 'REQ-041')]);
   const c4 = NOVO(); c4.lotes[CX + '|CX26-01'].reservado = c4.lotes[CX + '|CX26-01'].fisico; const p4 = benCaixasPadrao(c4, 12300, r);
   const c5 = NOVO(); RECEBE_NF(c5, 1200); MUD(c5, y => cenDevolver(y, 'REQ-030', CX, 60, true, RU)); const n5 = MUD(c5, y => benNova(y, { lotes: [{ lote: 'L39-131', kg: 24120 }] }, IG)); const x5 = benImpedimentos(c5, O(c5, n5.id)).find(y => y.cx) || {};
-  ok('U39f sem caixa livre a necessidade continua inteira; com a NF já conferida e sem sobra em custódia, a falta (2.292 para 1.200) diz que a compra de caixas é do BEN-2 e que a ordem pode ser cancelada',
+  ok('U39f sem caixa livre a necessidade continua inteira; com a NF já conferida e sem sobra em custódia, a falta (2.292 para 1.800 em dois lotes, rodada 3) diz que a compra de caixas é do BEN-2 e que a ordem pode ser cancelada',
      p4.livre === 0 && p4.cx === 1169 && n5.id && O(c5, n5.id).ins[0].tot === 2292 && x5.link && x5.link.t === 'Ver saldo de caixas no Estoque'
-     && /Faltam 1\.092 un e não há nota de caixas a conferir nem sobra em custódia: a compra de caixas entra no BEN-2\. Sem caixa, Cancelar a ordem \(nada foi reservado\)\./.test(x5.link.why || ''), [p4, n5, x5]); }
+     && x5.t === CX + ': 1.800 un disponíveis para 2.292 un · Estoque' && /Faltam 492 un e não há nota de caixas a conferir nem sobra em custódia: a compra de caixas entra no BEN-2\. Sem caixa, Cancelar a ordem \(nada foi reservado\)\./.test(x5.link.why || ''), [p4, n5, x5]); }
 
 // ---- U40 · BEN-D22 · ordem em A liberar que não libera tem saída: Cancelar a ordem (motivo; rascunho, nada reservado) ----
 { const c = NOVO(); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }], cx: 1169 }, IG)); const id = n.id || 'OB-0113';
@@ -491,9 +496,9 @@ function RECEBE_NF(c, conf) { const r = MUD(c, x => { const n0 = x.movs.length; 
      !cc.erro && o.etapa === 'Canceladas' && o.ben.canc.quem === 'Igor (responsável de produção)' && o.ben.canc.motivo === 'caixas insuficientes' && /^\d{4}-\d\d-\d\d \d\d:\d\d$/.test(o.ben.canc.em) && /^Ordem cancelada · v1$/.test(h.ev)
      && !o.req && !LT(c, 'L39-132').ordem && rp.nada && /^Já feito/.test(rp.msg || '') && r2.erro === 'Já feito: OB-0113 cancelada.' && o.ben.hist.filter(x => /cancelada/.test(x.ev)).length === 1, [cc, rp, r2, o.ben.canc, h]);
   const ap = benLotesAptos(c).map(L => L.id); const p = benProx(c, o); const ss = benSelos(c, Object.assign({}, o, { ben: Object.assign({}, o.ben, { fim: '2026-01-01' }) }));
-  const et = benEtapas(c, o).find(e => e.nome === 'Recepção'); const pr = benPendRec(c);
-  ok('U40c cancelada: o L39-132 volta aos aptos; sem passo (acao null) com o motivo à vista; nunca "Atrasada"; Recepção não cumprida; a faixa não conta a cancelada',
-     ap.indexOf('L39-132') >= 0 && p.acao === null && p.t === 'Cancelada: caixas insuficientes' && !ss.some(x => x.t === 'Atrasada') && et && et.sit !== 'Cumprida' && /^1 a liberar/.test(pr.ben), [ap, p, ss, et, pr]);
+  const et = benEtapas(c, o).find(e => e.nome === 'Recepção'); const al = benOrdens(c).filter(x => x.etapa === 'A liberar').length;   /* BEN-D39: sem a faixa, a contagem é a da tela */
+  ok('U40c cancelada: o L39-132 volta aos aptos; sem passo (acao null) com o motivo à vista; nunca "Atrasada"; Recepção não cumprida; a contagem "a liberar" não conta a cancelada',
+     ap.indexOf('L39-132') >= 0 && p.acao === null && p.t === 'Cancelada: caixas insuficientes' && !ss.some(x => x.t === 'Atrasada') && et && et.sit !== 'Cumprida' && al === 1, [ap, p, ss, et, al]);
   const n2 = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); const l1 = MUD(c, x => benAutorizarLiberar(x, n2.id, IG)); RECEBE_NF(c, 1200); const l2 = MUD(c, x => benAutorizarLiberar(x, n2.id, IG));
   ok('U40d a ordem nova do L39-132 (OB-0114) vem com a necessidade (1.169 un): impedida até a NF 7731 ser conferida; depois libera', n2.id === 'OB-0114' && O(c, 'OB-0114').ins[0].tot === 1169 && /540 un disponíveis para 1\.169 un/.test(l1.erro || '') && !l2.erro && O(c, 'OB-0114').etapa === 'Liberadas' && LT(c, 'L39-132').ordem === 'OB-0114', [n2, l1, l2]);
   const fx = MUD(c, x => benCancelar(x, 'OB-0110', 'teste', IG)); const fl = MUD(c, x => benCancelar(x, 'OB-0114', 'teste', IG)); const an = MUD(c, x => benCancelar(x, 'OB-0112', 'rota trocada', AN));
@@ -572,13 +577,15 @@ function OB113(c) { const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132'
 //      consumo, estorno e devolução no lote de origem; saldos, reservas e trilha por lote fecham; recibo, versão e perfil continuam valendo ----
 const LOT = (c, l) => c.lotes[CX + '|' + l] || {};
 /* trilha do lote de caixa: físico = físico inicial + recebido − entregue + devolvido; entregue, devolvido e consumido líquido dos movimentos
-   = o que as linhas desse lote mudaram desde a semente; custódia de cada linha = entregue − devolvido − consumido; reserva = solicitado − entregue */
+   = o que as linhas desse lote mudaram desde a semente; custódia de cada linha = entregue − devolvido − consumido; reserva = o "a entregar" das linhas
+   de ordem aberta (solicitado − dispensado − consumido − custódia: a caixa em uso devolvida volta reservada; rodada 3, BEN-D33) */
 function TRILHA(c, lote) { const ini = LOT(CEN0, lote).fisico || 0; const mv = c.movs.filter(m => m.prod === CX && m.lote === lote); const S = t => mv.filter(m => m.tipo === t).reduce((a, m) => a + m.qtd, 0);
   const lin = x => Object.values(x.reqs).reduce((a, r) => a.concat(r.itens.filter(i => i.prod === CX && i.lote === lote)), []); const L = lin(c), L0 = lin(CEN0);
   const D = f => L.reduce((a, i) => a + (i[f] || 0), 0) - L0.reduce((a, i) => a + (i[f] || 0), 0);
   const r = { fis: ini + S('recebimento-nf') - S('entrega') + S('devolucao') === LOT(c, lote).fisico, ent: S('entrega') === D('entregue'), dev: S('devolucao') === D('devolvido'),
     cons: S('consumo') - S('estorno-consumo') === D('consumido'), cust: L.every(i => i.entregue - i.devolvido - i.consumido === i.custodia),
-    res: (LOT(c, lote).reservado || 0) === L.reduce((a, i) => a + Math.max(0, i.solicitado - i.entregue), 0) };
+    res: (LOT(c, lote).reservado || 0) === Object.values(c.reqs).reduce((a, r) => a + r.itens.filter(i => i.prod === CX && i.lote === lote && ['Encerradas', 'Canceladas'].indexOf((c.ordens[r.os] || {}).etapa) < 0)
+      .reduce((b, i) => b + Math.max(0, i.solicitado - (i.dispensado || 0) - i.consumido - i.custodia), 0), 0) };
   r.ok = Object.values(r).every(Boolean); return r; }
 /* a reprodução do Codex: ordem do L39-132 com 540 caixas explícitas, entregues do CX26-01 e usadas na S-01; 1.000 caixas novas no QA-CX-02 */
 function OB540(c) { const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }], cx: 540 }, IG)); MUD(c, x => benAutorizarLiberar(x, n.id, IG)); const rid = O(c, n.id).req;
@@ -639,9 +646,9 @@ function CADEIA(c) { const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132
     MUD(c, x => benResultado(x, 'L39-119', 'Conforme', '', MA)), MUD(c, x => benDecidir(x, 'L39-119', 'Liberar', {}, MA))]; return { id: n.id, st }; }
 const CXIMP = (c, id) => benImpedimentos(c, O(c, id)).find(y => y.cx) || {};
 { const c = NOVO(); const z = CADEIA(c); const im = CXIMP(c, 'OB-0112'); const l = im.link || {};
-  ok('U46a OB-0113 liberada com as 1.169 caixas do L39-132: a falta da OB-0112 (600 para 881) não aponta a custódia dela; sem nota nem sobra, a saída é a compra (BEN-2) ou Cancelar a ordem em A liberar',
+  ok('U46a OB-0113 liberada com as 1.169 caixas do L39-132: a falta da OB-0112 (631 para 881, os dois lotes) não aponta a custódia dela; sem nota nem sobra, a saída é a compra (BEN-2) ou Cancelar a ordem em A liberar',
      z.id === 'OB-0113' && z.st.every(y => !y.erro) && O(c, 'OB-0113').etapa === 'Liberadas' && REQ(c, 'REQ-041').custodia === 1169 && SOB(c, 'OB-0113') === 0
-     && /600 un disponíveis para 881 un/.test(im.t || '') && l.t === 'Ver saldo de caixas no Estoque' && !/OB-0113/.test(l.why || '') && /^Faltam 281 un e não há nota/.test(l.why || '') && /Cancelar a ordem/.test(l.why || ''), [z.st.map(y => y.erro || ''), SOB(c, 'OB-0113'), im]);
+     && /631 un disponíveis para 881 un/.test(im.t || '') && l.t === 'Ver saldo de caixas no Estoque' && !/OB-0113/.test(l.why || '') && /^Faltam 250 un e não há nota/.test(l.why || '') && /Cancelar a ordem/.test(l.why || ''), [z.st.map(y => y.erro || ''), SOB(c, 'OB-0113'), im]);
   const i0 = MUD(c, x => benIniciar(x, 'OB-0113', IG)); const imx = CXIMP(c, 'OB-0112'); const s0 = SOB(c, 'OB-0113');
   const a = MUD(c, x => benSaida(x, 'OB-0113', { fluxo: 'Produto', classe: 'A', cx: 1100, bruto: 11660 }, IG)); const s1 = SOB(c, 'OB-0113'); const ima = CXIMP(c, 'OB-0112');
   ok('U46b em execução a OB-0113 guarda as caixas que ainda pode usar: antes das saídas (1.169 un para 12.300 kg) e com 1.300 kg a registrar e 69 un em custódia (até 130 cx), sobra 0 e nenhuma recomendação de devolução',
@@ -650,7 +657,7 @@ const CXIMP = (c, id) => benImpedimentos(c, O(c, id)).find(y => y.cx) || {};
   const d = MUD(c, x => benSaida(x, 'OB-0113', { fluxo: 'Descarte', destino: 'Compostagem', kg: 1300 }, IG)); const imd = CXIMP(c, 'OB-0112');
   const e = MUD(c, x => benConcluir(x, 'OB-0113', IG)); const ime = CXIMP(c, 'OB-0112');
   ok('U46c com tudo registrado (nada a embalar) as 69 un são sobra, e em conferência também: a OB-0112 recebe o atalho "Receber a devolução da OB-0113" com a sobra (69 un)',
-     !d.erro && !e.erro && (imd.link || {}).t === 'Receber a devolução da OB-0113 no Estoque' && /^Faltam 281 un\. A OB-0113 tem sobra de 69 un em custódia \(Receba devoluções\)\./.test((imd.link || {}).why || '')
+     !d.erro && !e.erro && (imd.link || {}).t === 'Receber a devolução da OB-0113 no Estoque' && /^Faltam 250 un\. A OB-0113 tem sobra de 69 un em custódia \(Receba devoluções\)\. Ainda faltam 181 un/.test((imd.link || {}).why || '')
      && O(c, 'OB-0113').etapa === 'Em conferência' && SOB(c, 'OB-0113') === 69 && (ime.link || {}).t === 'Receber a devolução da OB-0113 no Estoque', [d, e, imd, ime]); }
 { /* a OB-0113 liberada com caixas acima do que pode usar (1.300 un para 12.300 kg, até 1.230 cx): só as 70 un acima contam como sobra */
   const c = NOVO(); RECEBE_NF(c, 1400); MUD(c, x => cenDevolver(x, 'REQ-030', CX, 60, true, RU)); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }], cx: 1300 }, IG));
@@ -663,8 +670,269 @@ const CXIMP = (c, id) => benImpedimentos(c, O(c, id)).find(y => y.cx) || {};
   const st = [MUD(c, x => benAutorizarLiberar(x, n.id, IG)), MUD(c, x => cenEntregar(x, 'REQ-041', CX, 1169, null, RU)), MUD(c, x => benIniciar(x, n.id, IG)),
     MUD(c, x => benSaida(x, n.id, { fluxo: 'Produto', classe: 'A', cx: 1169, bruto: 12391.4 }, IG))]; const j0 = JSON.stringify(c);
   const p = MUD(c, x => benComplementar(x, n.id, 700, IG, { chave: 'W-BNX-46E', ver: O(c, n.id).ver }));
-  ok('U46e em execução, pedir 700 com 600 livres e sem nota nem sobra: recusa sem gravar que diz a compra (BEN-2) e o caminho da nota no Estoque, sem "Cancelar a ordem"',
-     st.every(y => !y.erro) && /^Pedir 700 un: 600 un livres no Estoque\. Faltam 100 un e não há nota de caixas a conferir nem sobra em custódia: a compra de caixas entra no BEN-2\./.test(p.erro || '')
+  ok('U46e em execução, pedir 700 com 631 livres (dois lotes) e sem nota nem sobra: recusa sem gravar que diz a compra (BEN-2) e o caminho da nota no Estoque, sem "Cancelar a ordem"',
+     st.every(y => !y.erro) && /^Pedir 700 un: 631 un livres no Estoque\. Faltam 69 un e não há nota de caixas a conferir nem sobra em custódia: a compra de caixas entra no BEN-2\./.test(p.erro || '')
      && /Confira recebimentos/.test(p.erro || '') && /Pedir mais caixas/.test(p.erro || '') && !/Cancelar a ordem/.test(p.erro || '') && JSON.stringify(c) === j0, [st.map(y => y.erro || ''), p]); }
+
+// ===== Integração BEN, rodada 3 (10/10/2026): recuperação de caixas entre ordens e lotes (BEN-D33..D36). Cada achado da rodada 2 tem um
+//       teste que reprova no 0139898; as funções novas são lidas com guarda (typeof) para o teste rodar também no código anterior =====
+function T3(nome, fn) { try { fn(); } catch (e) { ok(nome + ' (exceção no teste)', false, String((e && e.stack) || e).slice(0, 400)); } }
+/* oráculo independente das funções sob teste: livre total, "a entregar" com o termo da sobra devolvida, reserva própria */
+const LIVRETOT = c => Object.values(c.lotes).filter(l => l.prod === CX).reduce((a, l) => a + Math.floor(Math.max(0, l.fisico - l.quarentena - l.reservado) + 1e-9), 0);
+const PEND = it => Math.max(0, it.solicitado - (it.dispensado || 0) - it.consumido - it.custodia);
+const OWN = (c, rid) => { const it = REQ(c, rid); return cenResPropria(c, rid, it, c.lotes[CX + '|' + it.lote]); };
+const FALTA = (c, id) => typeof benFaltaCx === 'function' ? benFaltaCx(c, O(c, id)) : 'sem benFaltaCx';
+const DEVP = (c, id, rid) => typeof benDevPadrao === 'function' ? benDevPadrao(c, O(c, id), REQ(c, rid), rid) : 'sem benDevPadrao';
+const LINHAS = (c, id) => benLinhas(c, O(c, id)).map(x => [x.rid, x.it.lote, x.it.solicitado]);
+const SOMA = (c, id, f) => benLinhas(c, O(c, id)).reduce((a, x) => a + f(x), 0);
+/* a cadeia da rodada 2 (OB-0113 liberada com 1.169 caixas do CX26-02 entregues; OB-0110 devolveu 60 ao CX26-01; L39-119 liberado: a OB-0112
+   só fica impedida pelas caixas) seguida do início e de saídas */
+function CAD(c, sai) { const z = CADEIA(c); const st = z.st.concat([MUD(c, x => benIniciar(x, z.id, IG))]).concat((sai || []).map(k => MUD(c, x => benSaida(x, z.id, k, IG)))); return { id: z.id, st }; }
+const SA = (cx, br, cl) => ({ fluxo: 'Produto', classe: cl || 'A', cx, bruto: br }), SD = kg => ({ fluxo: 'Descarte', destino: 'Compostagem', kg });
+
+// ---- U47 · S2-1: em conferência a sobra é a custódia acima do teto do kg ainda aberto (entrada − saídas válidas, com ou sem conferência
+//      dada); antes a custódia inteira virava sobra e a OB-0112 levava as caixas que a OB-0113 precisa para relançar o estornado ----
+T3('U47a', () => { const c = NOVO(); const z = CAD(c, [SA(1000, 10600), SA(169, 1791.4, 'B'), SD(610)]); const id = z.id;
+  const st = z.st.concat([MUD(c, x => benConcluir(x, id, IG)), MUD(c, x => benConferir(x, id, PA))]); const e = MUD(c, x => benEstornar(x, id, 'S-01', 'Pesagem refeita', '', IG));
+  const l = CXIMP(c, 'OB-0112').link || {};
+  ok('U47a OB-0113 conferida com diferença 0; estorno da S-01 na conferência: as 1.000 caixas voltam à custódia e a sobra é 0 (10.000 kg a registrar); a OB-0112 não aponta a OB-0113',
+     st.every(y => !y.erro) && !e.erro && O(c, id).etapa === 'Em conferência' && REQ(c, 'REQ-041').custodia === 1000 && SOB(c, id) === 0 && !/OB-0113/.test(l.why || '') && !/OB-0113/.test(l.t || ''), [st.map(y => y.erro || ''), e, SOB(c, id), l]); });
+T3('U47b', () => { const c = NOVO(); const z = CAD(c, [SA(1000, 10600), SD(610)]); const cc = MUD(c, x => benConcluir(x, z.id, IG)); const l = CXIMP(c, 'OB-0112').link || {};
+  ok('U47b "faltou a classe B": enviada para conferência com 1.690 kg sem registro e 169 caixas em custódia, a sobra é 0 (antes 169) e a OB-0112 não as aponta',
+     z.st.every(y => !y.erro) && !cc.erro && REQ(c, 'REQ-041').custodia === 169 && SOB(c, z.id) === 0 && !/OB-0113/.test(l.why || ''), [cc, SOB(c, z.id), l]); });
+T3('U47c', () => { const c = NOVO(); const o = O(c, 'OB-0110'); o.ben.ent = [{ lote: o.ben.ent[0].lote, kg: 600 }];
+  o.ben.sai = [{ id: 'S-01', fluxo: 'Descarte', destino: 'Compostagem', kg: 10, cx: 0, estorno: { quem: IG, em: '', motivo: 'Pesagem refeita' }, ev: {} }]; o.ben.nsai = 1; o.etapa = 'Em conferência'; o.ben.conc = { quem: IG, em: '', dif0: 600 };
+  ok('U47c reprodução 1 do Codex: OB-0110 em conferência com 600 kg de entrada, a única saída (10 kg) estornada e 60 caixas em custódia: sobra 0 (antes 60)', REQ(c, 'REQ-030').custodia === 60 && SOB(c, 'OB-0110') === 0, SOB(c, 'OB-0110')); });
+T3('U47d', () => { const c = NOVO(); const a = MUD(c, x => benConcluir(x, 'OB-0110', IG));
+  ok('U47d controle: OB-0110 em conferência com tudo registrado (diferença 0): a sobra é a custódia inteira (60)', !a.erro && SOB(c, 'OB-0110') === 60, [a, SOB(c, 'OB-0110')]); });
+T3('U47e', () => { const c = NOVO(); const z = CAD(c, [SA(1000, 10600), SA(160, 1696, 'B'), SD(695)]); const id = z.id; const cc = MUD(c, x => benConcluir(x, id, IG));
+  const b = benBal(O(c, id)); const q = DEVP(c, id, 'REQ-041'); const L0 = LIVRETOT(c); const r0 = (LOT(c, 'CX26-02').reservado || 0);
+  const d = MUD(c, x => cenDevolver(x, 'REQ-041', CX, typeof q === 'number' ? q : REQ(c, 'REQ-041').custodia, true, RU));
+  const f = [MUD(c, x => benConferir(x, id, PA)), MUD(c, x => benFechar(x, id, IG))];
+  ok('U47e conferência com +5 kg dentro da faixa (12,3 kg): custódia 9, sobra 8, o Estoque traz 9; recebidas, 8 ficam livres e 1 volta reservada à linha; o Fechar encerra e baixa a reserva numa visita só',
+     z.st.every(y => !y.erro) && !cc.erro && b.dif === 5 && b.dentro && REQ(c, 'REQ-041').custodia === 0 && q === 9 && SOB(c, id) === 0 && !d.erro && LIVRETOT(c) - L0 >= 8
+     && f.every(y => !y.erro) && O(c, id).etapa === 'Encerradas' && (LOT(c, 'CX26-02').reservado || 0) === 0 && PEND(REQ(c, 'REQ-041')) === 0, [cc, b.dif, q, d, f, L0, LIVRETOT(c), r0, LOT(c, 'CX26-02')]); });
+
+// ---- U48 · S2-2: sobra parcial em execução. A devolução se divide: a sobra volta livre (dispensada); a caixa em uso volta reservada à
+//      própria linha. Sem "a entregar" fantasma, e a entrega baixa só a reserva própria (nunca a de outra requisição) ----
+function PARCIAL(c) { return CAD(c, [SA(300, 3180), SD(2000)]); }   /* OB-0113 em execução: 869 caixas em custódia e 7.300 kg a registrar (até 730 cx): sobra 139 */
+T3('U48a', () => { const c = NOVO(); const z = PARCIAL(c); const L0 = LIVRETOT(c), s0 = SOB(c, z.id); const d = MUD(c, x => cenDevolver(x, 'REQ-041', CX, 869, true, RU)); const it = REQ(c, 'REQ-041');
+  ok('U48a devolvidas as 869 caixas da OB-0113 em execução (sobra 139): o livre total sobe só 139; 730 voltam reservadas à REQ-041 (a entregar = reserva própria = 730); a mensagem diz as duas partes',
+     z.st.every(y => !y.erro) && s0 === 139 && !d.erro && LIVRETOT(c) - L0 === 139 && LOT(c, 'CX26-02').fisico === 900 && LOT(c, 'CX26-02').reservado === 730 && PEND(it) === 730 && OWN(c, 'REQ-041') === 730
+     && cenSaldoEntregar(it) === 730 && /139 un ao disponível \(sobra da OB-0113\)/.test(d.msg || '') && /730 un voltam reservadas à OB-0113/.test(d.msg || ''), [s0, d, L0, LIVRETOT(c), LOT(c, 'CX26-02'), PEND(it), OWN(c, 'REQ-041'), cenSaldoEntregar(it)]); });
+T3('U48b', () => { const c = NOVO(); const z = PARCIAL(c); MUD(c, x => cenDevolver(x, 'REQ-041', CX, 869, true, RU)); const im0 = CXIMP(c, 'OB-0112');
+  const nf = MUD(c, x => cenReceber(x, CX, 'QA-CX-02', 120, 'un', 'Packing', '—', 'NF-QA-120', true, RU)); const lv = MUD(c, x => benAutorizarLiberar(x, 'OB-0112', IG));
+  const own2 = () => O(c, 'OB-0112').req ? SOMA(c, 'OB-0112', x => cenResPropria(c, x.rid, x.it, c.lotes[CX + '|' + x.it.lote])) : -1;
+  const a0 = own2(); const e = MUD(c, x => cenEntregar(x, 'REQ-041', CX, 730, null, RU)); const a1 = own2();
+  ok('U48b com a sobra recebida (livre 770 < 881) a OB-0112 continua impedida; recebidas mais 120 un, ela libera; a entrega das 730 un da REQ-041 baixa só a reserva dela e a OB-0112 continua com 881 reservadas',
+     /770 un disponíveis para 881 un/.test(im0.t || '') && !nf.error && !lv.erro && O(c, 'OB-0112').etapa === 'Liberadas' && SOMA(c, 'OB-0112', x => x.it.solicitado) === 881 && a0 === 881 && !e.erro && a1 === 881
+     && REQ(c, 'REQ-041').custodia === 730 && OWN(c, 'REQ-041') === 0, [im0.t, lv, a0, e, a1, LINHAS(c, 'OB-0112')]); });
+T3('U48c', () => { const c = NOVO(); const z = PARCIAL(c); const q = DEVP(c, z.id, 'REQ-041'); const L0 = LIVRETOT(c);
+  const d = MUD(c, x => cenDevolver(x, 'REQ-041', CX, typeof q === 'number' && q > 0 ? q : REQ(c, 'REQ-041').custodia, true, RU)); const it = REQ(c, 'REQ-041');
+  ok('U48c devolução guiada: o Estoque traz 139 (a sobra, nunca a custódia 869); recebida, a REQ-041 fica sem "a entregar" (0) e a sugestão do Pedir mais caixas é 0 (antes 1)',
+     q === 139 && !d.erro && it.custodia === 730 && PEND(it) === 0 && cenSaldoEntregar(it) === 0 && FALTA(c, z.id) === 0 && LIVRETOT(c) - L0 === 139 && (LOT(c, 'CX26-02').reservado || 0) === 0, [q, d, it, FALTA(c, z.id)]); });
+T3('U48d', () => { /* reprodução 3 do Codex (O.S.): QA-A solicitou, recebeu e devolveu 60 (custódia 0); o lote tem 100 físicos e 80 reservados à QA-B */
+  const c = NOVO(); const P = 'Insumo QA'; c.lotes[P + '|QA-L1'] = { prod: P, lote: 'QA-L1', local: 'Galpão 1', un: 'un', fisico: 100, quarentena: 0, reservado: 80, validade: '—' };
+  ['QA-OA', 'QA-OB'].forEach(id => { c.ordens[id] = { id, tipo: 'teste', talhao: 'T', area: 0, etapa: 'Em execução', versao: 'v1', realizado: 0, saldo: 0, resp: 'Sérgio', ins: [], req: id === 'QA-OA' ? 'QA-A' : 'QA-B', selos: [], ap: [] }; });
+  c.reqs['QA-A'] = { id: 'QA-A', os: 'QA-OA', estado: 'Entregue', itens: [{ prod: P, lote: 'QA-L1', un: 'un', solicitado: 60, entregue: 60, consumido: 0, devolvido: 60, custodia: 0 }] };
+  c.reqs['QA-B'] = { id: 'QA-B', os: 'QA-OB', estado: 'Reservada', itens: [{ prod: P, lote: 'QA-L1', un: 'un', solicitado: 80, entregue: 0, consumido: 0, devolvido: 0, custodia: 0 }] };
+  c.movs.push({ id: 'MV-QA1', tipo: 'reserva', req: 'QA-A', os: 'QA-OA', prod: P, lote: 'QA-L1', qtd: 60 }, { id: 'MV-QA2', tipo: 'reserva', req: 'QA-B', os: 'QA-OB', prod: P, lote: 'QA-L1', qtd: 80 });
+  const e = MUD(c, x => cenEntregar(x, 'QA-A', P, 60, null, RU)); const l = c.lotes[P + '|QA-L1']; const e0 = JSON.stringify(l);
+  const e2 = MUD(c, x => cenEntregar(x, 'QA-A', P, 20, null, RU)); const l2 = c.lotes[P + '|QA-L1'];
+  ok('U48d reprodução 3 do Codex: entregar de novo 60 à QA-A (reserva própria 0, livre 20) é recusado e a QA-B continua com as 80 reservadas (antes: aceito, físico 40 e reserva 20); 20 saem do livre sem tocar na reserva da QA-B',
+     !!e.erro && e0 === JSON.stringify({ prod: P, lote: 'QA-L1', local: 'Galpão 1', un: 'un', fisico: 100, quarentena: 0, reservado: 80, validade: '—' }) && !e2.erro && l2.fisico === 80 && l2.reservado === 80, [e, e0, e2, l2]); });
+T3('U48e', () => { /* sobra de 150 em duas linhas (REQ-041 100 e REQ-042 100 em custódia; teto 50): a fonte traz as duas linhas e Σ = 150 */
+  const c = NOVO(); const z = OB540(c); const id = z.id;
+  const st = [MUD(c, x => benEstornar(x, id, 'S-01', 'Pesagem refeita', '', IG)), MUD(c, x => benSaida(x, id, SA(440, 4664), IG)), MUD(c, x => benComplementar(x, id, 100, IG, { chave: 'W-BNX-48E' })),
+    MUD(c, x => cenEntregar(x, 'REQ-042', CX, 100, null, RU)), MUD(c, x => benSaida(x, id, SD(7400), IG))];
+  const sl = typeof benSobraLinhas === 'function' ? benSobraLinhas(c, O(c, id)) : null; const L0 = LIVRETOT(c);
+  const tem = () => SOMA(c, id, x => x.it.custodia + cenResPropria(c, x.rid, x.it, c.lotes[CX + '|' + x.it.lote]));
+  (sl || []).forEach(p => MUD(c, x => cenDevolver(x, p.rid, CX, p.qtd, true, RU)));
+  ok('U48e sobra de 150 em duas linhas (100 + 100 em custódia, 500 kg a registrar): as linhas da fonte são REQ-042 100 e REQ-041 50 (Σ 150); seguidas, o livre total sobe 150 e a ordem fica com 50 (custódia + reserva própria)',
+     st.every(y => !y.erro) && SOB(c, id) === 0 && !!sl && JSON.stringify(sl.map(p => [p.rid, p.qtd])) === '[["REQ-042",100],["REQ-041",50]]' && LIVRETOT(c) - L0 === 150 && tem() === 50, [st.map(y => y.erro || ''), sl, LIVRETOT(c) - L0, tem()]); });
+
+// ---- U49 · S2-3: caixas em mais de um lote. Liberação, impedimento e complemento contam e reservam no mesmo conjunto de lotes elegíveis,
+//      uma linha por lote, tudo ou nada; a quarentena é citada com quem libera ----
+function NF_PARTE(c, apto, quar) { return MUD(c, x => { const n0 = x.movs.length; if (apto > 0) cenReceber(x, CX, 'CX26-02', apto, 'un', 'Packing', '—', 'NF 7731', true, RU); if (quar > 0) cenReceber(x, CX, 'CX26-02', quar, 'un', 'Packing', '—', 'NF 7731', false, RU);
+  x.movs[n0].estRec = { id: 'r7731', nf: 'NF 7731', ped: 'PC-096 · ' + CX + ' · Embalagens Açu', conf: apto + quar, apto, quar, lote: 'CX26-02' }; }); }
+T3('U49a', () => { const c = NOVO(); MUD(c, x => cenDevolver(x, 'REQ-030', CX, 60, true, RU)); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); NF_PARTE(c, 1100, 100);
+  const im = CXIMP(c, n.id); const lv = MUD(c, x => benAutorizarLiberar(x, n.id, IG));
+  ok('U49a NF 7731 conferida com 1.100 aptas e 100 em quarentena, CX26-01 com 600: 1.700 livres no total, sem impedimento; a liberação grava REQ-041 1.100 (CX26-02) e REQ-042 69 (CX26-01)',
+     !im.t && !lv.erro && O(c, n.id).etapa === 'Liberadas' && JSON.stringify(LINHAS(c, n.id)) === '[["REQ-041","CX26-02",1100],["REQ-042","CX26-01",69]]' && LOT(c, 'CX26-02').reservado === 1100 && LOT(c, 'CX26-01').reservado === 69, [im.t, lv, O(c, n.id).req && LINHAS(c, n.id)]); });
+T3('U49b', () => { const c = NOVO(); const z = CAD(c, [SA(800, 8480), SD(3500)]); const s = SOB(c, z.id); const d = MUD(c, x => cenDevolver(x, 'REQ-041', CX, typeof s === 'number' ? s : 0, true, RU));
+  const im = CXIMP(c, 'OB-0112'); const lv = MUD(c, x => benAutorizarLiberar(x, 'OB-0112', IG));
+  ok('U49b a sobra de 289 da OB-0113 recebida volta ao CX26-02 (o lote de origem) e o livre total chega a 920 ≥ 881: a OB-0112 libera (antes: recusa, o lote do CX26-01 só tinha 600)',
+     s === 289 && !d.erro && !im.t && !lv.erro && O(c, 'OB-0112').etapa === 'Liberadas' && SOMA(c, 'OB-0112', x => x.it.solicitado) === 881, [s, d, im.t, lv]); });
+T3('U49c', () => { const c = NOVO(); RECEBE_NF(c, 1200); MUD(c, x => cenDevolver(x, 'REQ-030', CX, 60, true, RU)); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 24120 }] }, IG)); const im = CXIMP(c, n.id);
+  ok('U49c L39-131 (2.292 un) com 600 + 1.200 livres em dois lotes: "1.800 un disponíveis" e "Faltam 492" (antes 1.200 e 1.092)', /1\.800 un disponíveis para 2\.292 un/.test(im.t || '') && /^Faltam 492 un/.test((im.link || {}).why || ''), im); });
+T3('U49d', () => { const mk = cx => { const c = NOVO(); c.lotes[CX + '|CX26-01'].fisico = 500; MUD(c, x => cenReceber(x, CX, 'QA-CX-02', 420, 'un', 'Packing', '—', 'NF-QA-420', true, RU)); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }], cx }, IG)); return { c, id: n.id }; };
+  const a = mk(900); const lt0 = LIVRE(a.c); const la = MUD(a.c, x => benAutorizarLiberar(x, a.id, IG)); const b = mk(921); const r0 = JSON.stringify(b.c.lotes); const lb = MUD(b.c, x => benAutorizarLiberar(x, b.id, IG));
+  ok('U49d reprodução 2 do Codex (500 + 420 livres): livre total 920; liberar 900 grava as linhas 500 (CX26-01) e 400 (QA-CX-02); liberar 921 é recusado sem nenhuma reserva',
+     lt0 === 920 && !la.erro && JSON.stringify(LINHAS(a.c, a.id)) === '[["REQ-041","CX26-01",500],["REQ-042","QA-CX-02",400]]' && !!lb.erro && JSON.stringify(b.c.lotes) === r0 && !O(b.c, b.id).req, [lt0, la, O(a.c, a.id).req && LINHAS(a.c, a.id), lb]); });
+T3('U49e', () => { /* a ordem do L39-132 com 540 caixas do CX26-01, todas usadas (como a OB540, sem as 1.000 do QA-CX-02) */
+  const c = NOVO(); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }], cx: 540 }, IG)); const z = { id: n.id };
+  [x => benAutorizarLiberar(x, n.id, IG), x => cenEntregar(x, 'REQ-041', CX, 540, 'Igor', RU), x => benIniciar(x, n.id, IG), x => benSaida(x, n.id, SA(540, 5724), IG)].forEach(f => MUD(c, f));
+  const g = [MUD(c, x => cenReceber(x, CX, 'QA-CX-02', 540, 'un', 'Packing', '—', 'NF-QA-540', true, RU)), MUD(c, x => cenReceber(x, CX, 'QA-CX-03', 100, 'un', 'Packing', '—', 'NF-QA-100', true, RU))];
+  const p = MUD(c, x => benComplementar(x, z.id, 600, IG, { chave: 'W-BNX-49E' }));
+  ok('U49e complemento de 600 com 640 livres em dois lotes (QA-CX-02 540, QA-CX-03 100; nenhum cobre sozinho): duas linhas novas, 540 + 60 (antes: "Pedir 600 un: 540 un livres")',
+     g.every(y => !y.erro) && LOT(c, 'CX26-01').fisico === 0 && !p.erro && JSON.stringify(LINHAS(c, z.id)) === '[["REQ-041","CX26-01",540],["REQ-042","QA-CX-02",540],["REQ-043","QA-CX-03",60]]' && O(c, z.id).ins[0].tot === 1140 && LOT(c, 'QA-CX-02').reservado === 540 && LOT(c, 'QA-CX-03').reservado === 60, [p, LINHAS(c, z.id)]); });
+T3('U49f', () => { const c = NOVO(); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); NF_PARTE(c, 500, 600); const im = CXIMP(c, n.id); const l = im.link || {};
+  const lq = MUD(c, x => cenLiberarQuarentena(x, CX + '|CX26-02', 'LAUDO-49F', AN)); const im2 = CXIMP(c, n.id); const lv = MUD(c, x => benAutorizarLiberar(x, n.id, IG));
+  ok('U49f 600 caixas em quarentena no CX26-02: a falta (1.040 para 1.169) cita o lote, a quantidade e quem libera (Ana, com o laudo); liberada a quarentena, a ordem libera',
+     /1\.040 un disponíveis para 1\.169 un/.test(im.t || '') && /600 un em quarentena no CX26-02: se a inspeção aprovar, Ana \(gestora\) libera com o laudo em Estoque › Confira saldos/.test(l.why || '') && !lq.erro && !im2.t && !lv.erro, [im, lq, im2.t, lv]); });
+
+// ---- U50 · S4: mutantes da rodada 2 que sobreviviam (A1 piso no teto, A6 a própria ordem como fonte) e as fontes estruturadas (I-f1) ----
+T3('U50a', () => { const c = NOVO(); const z = CAD(c, [SA(300, 3180), SD(1995)]);
+  ok('U50a 7.305 kg a registrar: o teto é ⌈730,5⌉ = 731 caixas e a sobra de 869 é 138 (com o piso seria 139)', z.st.every(y => !y.erro) && SOB(c, z.id) === 138, SOB(c, z.id)); });
+T3('U50b', () => { const c = NOVO(); MUD(c, x => cenReceber(x, CX, 'QA-CX-02', 1200, 'un', 'Packing', '—', 'NF-QA-1200', true, RU)); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG));
+  const st = [MUD(c, x => benAutorizarLiberar(x, n.id, IG)), MUD(c, x => cenEntregar(x, 'REQ-041', CX, 1169, null, RU)), MUD(c, x => benIniciar(x, n.id, IG)), MUD(c, x => benSaida(x, n.id, SA(1100, 11660), IG)), MUD(c, x => benSaida(x, n.id, SD(1300), IG))];
+  const k1 = CXIMP(c, 'OB-0112').link || {}; const tp = f => (f || []).map(x => x.tipo + ':' + (x.os || x.id || x.lote) + ':' + x.qtd);
+  const n2 = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-131', kg: 24120 }] }, IG)); const k3 = CXIMP(c, n2.id).link || {};
+  MUD(c, x => benRetirar(x, 'OB-0112', 'L39-119', IG)); const k2 = CXIMP(c, 'OB-0112').link || {};
+  ok('U50b fontes estruturadas: falta 310 com sobras de 69 (OB-0113) e 60 (OB-0110) e a NF de 1.200: vale a nota, que cobre sozinha; falta 13: vale a maior sobra (OB-0113), com o atalho guiado; falta 1.721: todas (cobre = não, "Ainda faltam 392 un")',
+     st.every(y => !y.erro) && k1.falta === 310 && JSON.stringify(tp(k1.fontes)) === '["nf:NF 7731:1200"]' && k1.cobre === true && k1.t === 'Conferir a NF 7731 das caixas no Estoque'
+     && k2.falta === 13 && JSON.stringify(tp(k2.fontes)) === '["sobra:OB-0113:69"]' && k2.cobre === true && /^EST\.dc\.html#dev=REQ-041&para=OB-0112&ver=\d+&sob=69$/.test(k2.h || '')
+     && k3.falta === 1721 && JSON.stringify(tp(k3.fontes)) === '["sobra:OB-0113:69","sobra:OB-0110:60","nf:NF 7731:1200"]' && k3.cobre === false && /Ainda faltam 392 un/.test(k3.why || ''),
+     [st.map(y => y.erro || ''), [k1.falta, tp(k1.fontes), k1.t], [k2.falta, tp(k2.fontes), k2.h], [k3.falta, tp(k3.fontes), k3.cobre, k3.why]]); });
+T3('U50c', () => { const c = NOVO(); const p = MUD(c, x => benComplementar(x, 'OB-0110', 700, IG, { chave: 'W-BNX-50C' }));
+  ok('U50c a OB-0110 (sobra 60) pede 700 com 540 livres: recusado, e a recusa não cita a própria ordem como fonte', /^Pedir 700 un: 540 un livres no Estoque/.test(p.erro || '') && !/OB-0110 tem sobra/.test(p.erro || ''), p); });
+
+// ---- U51 · rodada 1 (S3, relacionado): o Fechar baixa a reserva não entregue (antes ficava presa no lote) ----
+T3('U51', () => { const c = NOVO(); const id = OB113(c); const st = [MUD(c, x => benComplementar(x, id, 5, IG, { chave: 'W-BNX-51' })), MUD(c, x => benSaida(x, id, SA(1000, 10600), IG)), MUD(c, x => benSaida(x, id, SA(169, 1791.4, 'B'), IG)),
+    MUD(c, x => benSaida(x, id, SD(610), IG)), MUD(c, x => benConcluir(x, id, IG)), MUD(c, x => benConferir(x, id, PA)), MUD(c, x => benFechar(x, id, IG))];
+  const mv = c.movs.filter(m => m.tipo === 'reserva-baixa' && m.req === 'REQ-041');
+  ok('U51 pedir 5, usar as 1.169 entregues e fechar: a reserva das 5 não entregues é baixada (movimento reserva-baixa), CX26-02 com reserva 0 e a REQ-041 sem "a entregar" (antes: físico 31, reserva 5)',
+     st.every(y => !y.erro) && O(c, id).etapa === 'Encerradas' && LOT(c, 'CX26-02').reservado === 0 && PEND(REQ(c, 'REQ-041')) === 0 && OWN(c, 'REQ-041') === 0 && mv.length === 1 && mv[0].qtd === 5, [st.map(y => y.erro || ''), LOT(c, 'CX26-02'), REQ(c, 'REQ-041'), mv]); });
+
+// ---- U52 · limite adicional do Codex: devolução válida → outra ordem reserva → estorno do descarte. O estorno passa, a outra ordem fica
+//      intacta e a falta nasce na própria ordem, com a recuperação da fase (Pedir mais caixas; em conferência, Reabrir a execução) ----
+T3('U52a', () => { const c = NOVO(); const z = PARCIAL(c); const id = z.id; const q = DEVP(c, id, 'REQ-041');
+  const d = MUD(c, x => cenDevolver(x, 'REQ-041', CX, typeof q === 'number' && q > 0 ? q : REQ(c, 'REQ-041').custodia, true, RU)); const nf = MUD(c, x => cenReceber(x, CX, 'QA-CX-02', 120, 'un', 'Packing', '—', 'NF-QA-120', true, RU));
+  const lv = MUD(c, x => benAutorizarLiberar(x, 'OB-0112', IG)); const b0 = JSON.stringify(LINHAS(c, 'OB-0112')); const e = MUD(c, x => benEstornar(x, id, 'S-02', 'Pesagem refeita', '', IG));
+  const nx = benProx(c, O(c, id)); const ss = benSelos(c, O(c, id)).map(s => s.t); const f0 = FALTA(c, id);
+  const p1 = MUD(c, x => benComplementar(x, id, 139, IG, { chave: 'W-BNX-52A' })); const p2 = MUD(c, x => benComplementar(x, id, 9, IG, { chave: 'W-BNX-52B' })); const f1 = FALTA(c, id);
+  ok('U52a sobra de 139 recebida, a OB-0112 libera com ela, e a OB-0113 estorna o descarte de 2.000 kg: o estorno passa, a OB-0112 fica intacta, a OB-0113 mostra "Faltam 139 caixas" com Pedir mais caixas; pedir 139 com 9 livres é recusado, pedir 9 é aceito',
+     q === 139 && !d.erro && !lv.erro && !e.erro && JSON.stringify(LINHAS(c, 'OB-0112')) === b0 && f0 === 139 && /Faltam 139 caixas/.test(nx.nota || '') && /Pedir mais caixas/.test(nx.nota || '')
+     && ss.indexOf('Faltam 139 caixas') >= 0 && !!p1.erro && !p2.erro, [q, d, lv, e, f0, nx, ss, p1, p2]);
+  /* revisão A1 (S2): a reposição baixa a falta. Antes, pedir 9 deixava 139 e pedir a falta inteira deixava "Faltam 61" (o pedido entrava no planejado) */
+  const nfy = MUD(c, x => cenReceber(x, CX, 'CX26-01', 1000, 'un', 'Packing', '—', 'NF-Y', true, RU)); const p3 = MUD(c, x => benComplementar(x, id, 130, IG, { chave: 'W-BNX-52C' })); const f2 = FALTA(c, id);
+  const s2 = benSelos(c, O(c, id)).map(s => s.t); const n2 = benProx(c, O(c, id)).nota || ''; const p4 = MUD(c, x => benComplementar(x, id, 10, IG, { chave: 'W-BNX-52D' })); const f3 = FALTA(c, id);
+  ok('U52a2 revisão A1: pedir 9 baixa a falta a 130; pedir as 130 a zera (sem selo nem nota "Faltam"); um pedido acima da falta (10) é planejamento e não recria falta',
+     f1 === 130 && !nfy.erro && !p3.erro && f2 === 0 && !s2.some(t => /Faltam/.test(t)) && !/Faltam/.test(n2) && !p4.erro && f3 === 0, [f1, nfy.erro, p3.erro, f2, s2, n2, p4.erro, f3]); });
+T3('U52c', () => { /* revisão A1: avaria de caixas em uso → pedir a falta → zero, também depois de usar as caixas com o descarte ainda por pesar (o caso da C-1) */
+  const c = NOVO(); const z = CAD(c, [SA(500, 5300)]); const id = z.id; const d = MUD(c, x => cenDevolver(x, 'REQ-041', CX, 50, false, RU)); const f0 = FALTA(c, id);
+  const p = MUD(c, x => benComplementar(x, id, f0, IG, { chave: 'W-BNX-52E' })); const f1 = FALTA(c, id);
+  const en = benLinhas(c, O(c, id)).map(x => { const q = cenSaldoEntregar(x.it); return q > 0 ? MUD(c, y => cenEntregar(y, x.rid, CX, q, null, RU)) : {}; }); const f2 = FALTA(c, id);
+  const u = MUD(c, x => benSaida(x, id, SA(669, 7091.4, 'B'), IG)); const f3 = FALTA(c, id); const ss = benSelos(c, O(c, id)).map(s => s.t);
+  ok('U52c avaria de 50 caixas em uso: falta 50; pedir 50 a zera; entregues, 0; usadas as 669 com 610 kg ainda por pesar, 0 (antes: "Faltam 50 caixas")',
+     z.st.every(y => !y.erro) && !d.erro && f0 === 50 && !p.erro && f1 === 0 && en.every(y => !y.erro) && f2 === 0 && !u.erro && f3 === 0 && !ss.some(t => /Faltam/.test(t)), [z.st.map(y => y.erro || ''), d, f0, p.erro, f1, en, f2, u.erro, f3, ss]); });
+T3('U52b', () => { const c = NOVO(); const z = PARCIAL(c); const id = z.id; const cc = MUD(c, x => benConcluir(x, id, IG)); const q = DEVP(c, id, 'REQ-041');
+  const d = MUD(c, x => cenDevolver(x, 'REQ-041', CX, typeof q === 'number' && q > 0 ? q : REQ(c, 'REQ-041').custodia, true, RU)); const e = MUD(c, x => benEstornar(x, id, 'S-02', 'Pesagem refeita', '', IG));
+  const nx = benProx(c, O(c, id)); const sx = MUD(c, x => benSaida(x, id, Object.assign(SA(800, 8480), { motivo: 'teste', subst: 'S-02' }), IG));
+  ok('U52b o mesmo em conferência: o Estoque traz a sobra (139, o kg aberto passa da faixa); o estorno do descarte passa; o painel mostra "Faltam 139 caixas" com Reabrir a execução; a recusa da saída acima da custódia manda reabrir',
+     !cc.erro && q === 139 && !d.erro && !e.erro && FALTA(c, id) === 139 && /Faltam 139 caixas/.test(nx.nota || '') && /Reabrir a execução/.test(nx.nota || '') && /Reabrir a execução/.test(sx.erro || '') && !/entrega no balcão/.test(sx.erro || ''), [cc, q, d, e, FALTA(c, id), nx, sx]); });
+
+// ---- U54 · o falso alarme da crítica (C-1): no roteiro do proprietário e na cadeia não falta caixa em nenhum passo ----
+T3('U54', () => { const c = NOVO(); const id = OB113(c); const f = [], sel = [], nt = [];
+  [SA(1000, 10600), SA(169, 1791.4, 'B')].forEach(k => { MUD(c, x => benSaida(x, id, k, IG)); f.push(FALTA(c, id)); sel.push(benSelos(c, O(c, id)).map(s => s.t).join('|')); nt.push(benProx(c, O(c, id)).nota || ''); });
+  const c2 = NOVO(); const z = CAD(c2, [SA(1100, 11660)]); f.push(FALTA(c2, z.id));
+  ok('U54 roteiro do proprietário depois da S-01 (A 1.000 cx) e da S-02 (B 169 cx), e a cadeia depois do A 1.100 cx: nenhuma falta (0, 0, 0; com a fórmula pela necessidade da rota daria 50, 58 e 55)',
+     JSON.stringify(f) === '[0,0,0]' && sel.every(s => !/Faltam/.test(s)) && nt.every(s => !/Faltam/.test(s)), [f, sel, nt]); });
+
+// ---- U55 · C-2: ajuste de inventário aprovado depois da reserva (físico 1.100, reserva 1.169): a trava física continua (nunca estoque negativo)
+//      e o painel avisa a reserva sem físico ----
+T3('U55', () => { const c = NOVO(); const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); RECEBE_NF(c, 1200); const K2 = CX + '|CX26-02';
+  const ct = MUD(c, x => cenContar(x, K2, 1100)); const lv = MUD(c, x => benAutorizarLiberar(x, n.id, IG)); const aj = (c.ajustes || []).slice(-1)[0] || {}; const ap = MUD(c, x => cenAprovarAjuste(x, aj.id, true, AN));
+  const e = MUD(c, x => cenEntregar(x, 'REQ-041', CX, 1169, null, RU)); const nx = benProx(c, O(c, n.id));
+  ok('U55 contagem de 1.100 aprovada depois da reserva de 1.169: a entrega de 1.169 é recusada e o físico fica em 1.100 (sem a trava física iria a −69); o painel diz "Reserva sem físico: 69 caixas da REQ-041"',
+     !ct.erro && !lv.erro && !ap.erro && LOT(c, 'CX26-02').fisico === 1100 && !!e.erro && LOT(c, 'CX26-02').fisico === 1100 && /Reserva sem físico: 69 caixas da REQ-041/.test(nx.nota || ''), [ct, lv, ap, e, LOT(c, 'CX26-02'), nx]); });
+
+// ---- U56 · C-10: o gancho da devolução falha fechado: sem a regra do beneficiamento na página, a linha BEN não é devolvida (nada gravado) ----
+T3('U56', () => { /* o cenDevolver da página sem o ben.js: a mesma função, montada num escopo em que benSobraDev não existe */
+  const c = NOVO(); const semBen = new Function('cenQuem', 'cenNum', 'cenMov', 'benAposDevolver', 'benSobraDev', 'return ' + cenDevolver.toString())(cenQuem, cenNum, cenMov, typeof benAposDevolver === 'function' ? benAposDevolver : undefined, undefined);
+  const r = MUD(c, x => semBen(x, 'REQ-030', CX, 60, true, RU));
+  ok('U56 sem benSobraDev a devolução da REQ-030 (OB-0110) é recusada sem gravar ("regra do beneficiamento ausente")', !!(r && r.erro) && /beneficiamento/.test(r.erro) && REQ(c, 'REQ-030').custodia === 60 && LOT(c, 'CX26-01').fisico === 540, r); });
+
+// ---- U57 · rodada 3, integração na v56: regras do desenho que nenhum teste de unidade prendia (sonda de mutantes X10-X24 sobreviveu). Cada
+//      caso reprova no 3f9e4f6 e mata um mutante novo (M96-M102) ----
+T3('U57a', () => { /* I-e4/I-a4: a reserva baixada no Fechar não volta como reserva própria da linha encerrada quando outra ordem reserva no lote */
+  const c = NOVO(); const id = OB113(c); const st = [MUD(c, x => benComplementar(x, id, 5, IG, { chave: 'W-BNX-57A' })), MUD(c, x => benSaida(x, id, SA(1000, 10600), IG)), MUD(c, x => benSaida(x, id, SA(169, 1791.4, 'B'), IG)),
+    MUD(c, x => benSaida(x, id, SD(610), IG)), MUD(c, x => benConcluir(x, id, IG)), MUD(c, x => benConferir(x, id, PA)), MUD(c, x => benFechar(x, id, IG))];
+  const rt = cenResTot(c, 'REQ-041', CX);
+  const lib = [MUD(c, x => benResultado(x, 'L39-119', 'Conforme', '', MA)), MUD(c, x => benDecidir(x, 'L39-119', 'Liberar', {}, MA)), MUD(c, x => cenReceber(x, CX, 'CX26-02', 1000, 'un', 'Packing', '—', 'NF-QA-57A', true, RU)),
+    MUD(c, x => benAutorizarLiberar(x, 'OB-0112', IG))];
+  ok('U57a pedir 5, usar 1.169 e fechar (reserva-baixa de 5): a reserva total da REQ-041 é 1.169 (1.174 reservadas − 5 baixadas); a OB-0112 reserva 881 no CX26-02 e a REQ-041 encerrada continua sem reserva própria (0)',
+     st.every(y => !y.erro) && rt === 1169 && lib.every(y => !y.erro) && LOT(c, 'CX26-02').reservado === 881 && OWN(c, 'REQ-041') === 0, [st.map(y => y.erro || ''), rt, lib.map(y => y.erro || ''), LOT(c, 'CX26-02'), OWN(c, 'REQ-041')]); });
+T3('U57b', () => { /* I-d2 na REQ da semente (REQ-030 Entregue, 1.200): a caixa em uso devolvida volta reservada a ela, e a entrega seguinte baixa essa reserva */
+  const c = NOVO(); const e = MUD(c, x => benEstornar(x, 'OB-0110', 'S-03', 'Pesagem refeita', '', IG)); const s = SOB(c, 'OB-0110');
+  const d = MUD(c, x => cenDevolver(x, 'REQ-030', CX, 60, true, RU)); const it = REQ(c, 'REQ-030'); const p = PEND(it), w = OWN(c, 'REQ-030'); const l0 = JSON.stringify([LOT(c, 'CX26-01').fisico, LOT(c, 'CX26-01').reservado]);
+  const en = MUD(c, x => cenEntregar(x, 'REQ-030', CX, 60, null, RU));
+  ok('U57b OB-0110 estorna o descarte de 600 kg (sobra 0) e devolve as 60 caixas em uso: voltam reservadas à REQ-030 (a entregar = reserva própria = 60; CX26-01 físico 600, reserva 60); entregues de novo, a reserva volta a 0',
+     !e.erro && s === 0 && !d.erro && p === 60 && w === 60 && l0 === '[600,60]' && !en.erro && LOT(c, 'CX26-01').fisico === 540 && LOT(c, 'CX26-01').reservado === 0 && OWN(c, 'REQ-030') === 0,
+     [e, s, d, p, w, l0, en, LOT(c, 'CX26-01')]); });
+T3('U57c', () => { /* regra de divisão, avaria: tudo à quarentena e fora do "a entregar"; a falta nasce como benFaltaCx (Pedir mais caixas), nunca como entrega sem reserva */
+  const c = NOVO(); const z = PARCIAL(c); const L0 = LIVRETOT(c); const q0 = LOT(c, 'CX26-02').quarentena || 0;
+  const d = MUD(c, x => cenDevolver(x, 'REQ-041', CX, 200, false, RU)); const it = REQ(c, 'REQ-041'); const en = MUD(c, x => cenEntregar(x, 'REQ-041', CX, 61, null, RU));
+  ok('U57c 200 caixas avariadas da OB-0113 em execução (custódia 869, teto 730): vão à quarentena, saem do "a entregar" (0 = reserva própria), o livre não muda e a falta é 61; entregar 61 sem reserva é recusado',
+     !d.erro && it.custodia === 669 && (LOT(c, 'CX26-02').quarentena || 0) - q0 === 200 && LIVRETOT(c) === L0 && PEND(it) === 0 && OWN(c, 'REQ-041') === 0 && FALTA(c, z.id) === 61 && !!en.erro,
+     [d, it, LOT(c, 'CX26-02'), PEND(it), OWN(c, 'REQ-041'), FALTA(c, z.id), en]); });
+T3('U57d', () => { /* I-f2: em conferência não entra caixa; a recuperação sem fonte que cubra manda Reabrir a execução, nunca Cancelar */
+  const c = NOVO(); const z = PARCIAL(c); const cc = MUD(c, x => benConcluir(x, z.id, IG)); const w = benCaixasRec(c, O(c, z.id), 0, 10000).why || '';
+  ok('U57d recuperação de uma ordem em conferência sem fonte que cubra: diz "Reabrir a execução" e não "Cancelar a ordem"', !cc.erro && O(c, z.id).etapa === 'Em conferência' && /Reabrir a execução/.test(w) && !/Cancelar a ordem/.test(w), [cc, w]); });
+T3('U57e', () => { /* I-a1 no selo: "Sobra em custódia" só com sobra provada */
+  const c = NOVO(); const z = CAD(c, [SA(1000, 10600), SA(169, 1791.4, 'B'), SD(610)]); const id = z.id;
+  const st = [MUD(c, x => benConcluir(x, id, IG)), MUD(c, x => benConferir(x, id, PA)), MUD(c, x => benEstornar(x, id, 'S-01', 'Pesagem refeita', '', IG))]; const s1 = benSelos(c, O(c, id)).map(s => s.t);
+  const c2 = NOVO(); const a = MUD(c2, x => benConcluir(x, 'OB-0110', IG)); const s2 = benSelos(c2, O(c2, 'OB-0110')).map(s => s.t);
+  ok('U57e selo "Sobra em custódia": a OB-0113 em conferência com a S-01 estornada (1.000 em custódia, sobra 0) não o mostra; a OB-0110 com tudo registrado (sobra 60) mostra',
+     st.every(y => !y.erro) && REQ(c, 'REQ-041').custodia === 1000 && s1.indexOf('Sobra em custódia') < 0 && !a.erro && s2.indexOf('Sobra em custódia') >= 0, [st.map(y => y.erro || ''), s1, a, s2]); });
+T3('U57f', () => { /* I-a1 com a conferência dada: o kg aberto continua valendo (um estorno derruba a conferência e a ordem volta a precisar das caixas) */
+  const c = NOVO(); const z = CAD(c, [SA(1000, 10600), SD(610)]); const id = z.id;
+  const st = [MUD(c, x => benConcluir(x, id, IG)), MUD(c, x => benJustificar(x, id, 'Perda não identificada', 'teste U57f', AN)), MUD(c, x => benConferir(x, id, PA))];
+  const l = CXIMP(c, 'OB-0112').link || {}; const q = DEVP(c, id, 'REQ-041');
+  ok('U57f "faltou a classe B" justificada e conferida (1.690 kg abertos, 169 caixas em custódia): a sobra continua 0 e a OB-0112 não aponta a OB-0113; para o Fechar o Estoque traz a custódia inteira (169)',
+     st.every(y => !y.erro) && !!O(c, id).ben.conf && SOB(c, id) === 0 && !/OB-0113/.test((l.why || '') + (l.t || '')) && q === 169, [st.map(y => y.erro || ''), SOB(c, id), l, q]); });
+T3('U57g', () => { /* I-f1: todas as notas a conferir são fontes (nenhuma cobre sozinha: entram todas, com a sobra) */
+  const nf0 = BENC.nfcx; try { BENC.nfcx = [{ id: 'NF 9101', rid: 'r9101', ped: 'PC-201', forn: 'Embalagens Teste', qtd: 200, lote: 'QA-CX-02' }, { id: 'NF 9102', rid: 'r9102', ped: 'PC-202', forn: 'Embalagens Teste', qtd: 200, lote: 'QA-CX-03' }];
+    const c = NOVO(); const l = CXIMP(c, 'OB-0112').link || {}; const tp = (l.fontes || []).map(f => f.tipo + ':' + (f.os || f.id) + ':' + f.qtd);
+    ok('U57g duas notas de caixa a conferir (200 + 200) e a sobra de 60 da OB-0110 para a falta de 341 da OB-0112: nenhuma cobre sozinha e a recomendação traz as três (Σ 460, cobre)',
+       l.falta === 341 && JSON.stringify(tp) === '["sobra:OB-0110:60","nf:NF 9101:200","nf:NF 9102:200"]' && l.cobre === true, [l.falta, tp, l.cobre]); } finally { BENC.nfcx = nf0; } });
+
+// ---- U58 · revisão A2 (S2): caixas em uso devolvidas "bloqueadas para inspeção" continuam da ordem. Não viram fonte de outra ordem; se o
+//      laudo aprova, voltam reservadas à linha até a falta dela. Antes: a OB-0114 era mandada liberar a quarentena e levava as caixas da OB-0113 ----
+function QUAR300(c) { const id = OB113(c); const st = [MUD(c, x => benSaida(x, id, SA(500, 5300), IG)), MUD(c, x => cenDevolver(x, 'REQ-041', CX, 300, false, RU))]; return { id, st }; }
+T3('U58a', () => { const c = NOVO(); const z = QUAR300(c); const id = z.id; const f0 = FALTA(c, id);
+  const nb = MUD(c, x => benNova(x, { lotes: [{ lote: 'L38-132', kg: prFis(x, 'L38-132') }], cx: 800 }, IG)); const im = CXIMP(c, nb.id); const l = im.link || {};
+  const lq = MUD(c, x => cenLiberarQuarentena(x, CX + '|CX26-02', 'LAUDO-58A', AN)); const it = REQ(c, 'REQ-041'); const f1 = FALTA(c, id); const im2 = CXIMP(c, nb.id);
+  const lb = MUD(c, x => benAutorizarLiberar(x, nb.id, IG));
+  ok('U58a OB-0113 devolve 300 caixas em uso bloqueadas: falta 300; a OB-0114 (800) não recebe a quarentena como fonte; com o laudo, as 300 voltam reservadas à REQ-041 (falta 0, a entregar = reserva própria = 300) e a OB-0114 continua impedida',
+     z.st.every(y => !y.erro) && f0 === 300 && !!im.t && !(l.fontes || []).some(f => f.tipo === 'quarentena') && !/quarentena no CX26-02/.test(l.why || '') && !lq.erro && /300 un voltam reservadas à OB-0113/.test(lq.msg || '')
+     && f1 === 0 && PEND(it) === 300 && OWN(c, 'REQ-041') === 300 && LOT(c, 'CX26-02').reservado === 300 && !!im2.t && !!lb.erro && !O(c, nb.id).req,
+     [z.st.map(y => y.erro || ''), f0, l.fontes, l.why, lq, f1, PEND(it), OWN(c, 'REQ-041'), LOT(c, 'CX26-02'), im2.t, lb.erro]); });
+T3('U58b', () => { const c = NOVO(); const z = QUAR300(c); const id = z.id; const p = MUD(c, x => benComplementar(x, id, 300, IG, { chave: 'W-BNX-58B' })); const f0 = FALTA(c, id); const L0 = LIVRETOT(c);
+  const lq = MUD(c, x => cenLiberarQuarentena(x, CX + '|CX26-02', 'LAUDO-58B', AN)); const f1 = FALTA(c, id);
+  const c2 = NOVO(); QUAR300(c2); const rp = MUD(c2, x => cenReprovarQuarentena(x, CX + '|CX26-02', 'LAUDO-REP-58', 'caixas quebradas', AN)); const qu = REQ(c2, 'REQ-041').quarUso || 0;
+  ok('U58b a OB-0113 já pediu as 300 antes do laudo: o laudo solta as 300 no livre (nada volta reservado, falta 0); com o laudo reprovado, o vínculo com a linha se desfaz',
+     !p.erro && f0 === 0 && !lq.erro && !/voltam reservadas/.test(lq.msg || '') && f1 === 0 && LIVRETOT(c) - L0 === 300 && !rp.erro && qu === 0, [p.erro, f0, lq, f1, LIVRETOT(c) - L0, rp, qu]); });
+
+// ---- U59 · revisão A3 (S3): quarentena reprovada (quarRep, CTL-4) não é fonte. Antes: "700 un em quarentena: se a inspeção aprovar…", cobre,
+//      e o Estoque recusava liberar ("só tem material reprovado") ----
+T3('U59', () => { const NFQ = NF_PARTE;   /* a NF 7731 conferida com parte apta e parte em quarentena */
+  const c = NOVO(); NFQ(c, 500, 700); const rp = MUD(c, x => cenReprovarQuarentena(x, CX + '|CX26-02', 'LAUDO-REP', 'caixas mofadas', AN));
+  const n = MUD(c, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); const l = CXIMP(c, n.id).link || {};
+  const c2 = NOVO(); NFQ(c2, 500, 200); MUD(c2, x => cenReprovarQuarentena(x, CX + '|CX26-02', 'LAUDO-REP', 'mofo', AN)); const d2 = MUD(c2, x => cenDevolver(x, 'REQ-030', CX, 30, false, RU));
+  const n2 = MUD(c2, x => benNova(x, { lotes: [{ lote: 'L39-132', kg: 12300 }] }, IG)); const l2 = CXIMP(c2, n2.id).link || {}; const q2 = (l2.fontes || []).filter(f => f.tipo === 'quarentena').map(f => f.lote + ':' + f.qtd);
+  ok('U59 com as 700 un do CX26-02 reprovadas, a recomendação não cita a quarentena nem leva a "Ver a quarentena" (cobre só com fonte real); com 200 reprovadas no CX26-02 e 30 pendentes no CX26-01, a fonte é só CX26-01 30',
+     !rp.erro && !(l.fontes || []).some(f => f.tipo === 'quarentena') && !/quarentena no CX26-02/.test(l.why || '') && l.t !== 'Ver a quarentena das caixas no Estoque' && l.cobre === false
+     && !d2.erro && JSON.stringify(q2) === '["CX26-01:30"]', [rp.erro, l.fontes, l.t, l.cobre, d2.erro, q2]); });
+
+// ---- U60 · revisão A7 (S4): a mensagem da devolução segue a fase. Ordem conferida (perda justificada): o que volta reservado fica até o Fechar,
+//      não é "caixas em uso"; em execução o texto continua "caixas em uso" ----
+T3('U60', () => { const c = NOVO(); const z = CAD(c, [SA(1100, 11660)]); const id = z.id;
+  const st = [MUD(c, x => benConcluir(x, id, IG)), MUD(c, x => benJustificar(x, id, 'Perda não identificada', 'fruta mole retirada', AN)), MUD(c, x => benConferir(x, id, PA))];
+  const q = DEVP(c, id, 'REQ-041'); const d = MUD(c, x => cenDevolver(x, 'REQ-041', CX, q, true, RU)); const mv = c.movs.filter(m => m.tipo === 'reserva' && m.req === 'REQ-041').pop() || {};
+  const c2 = NOVO(); const z2 = PARCIAL(c2); const d2 = MUD(c2, x => cenDevolver(x, 'REQ-041', CX, 869, true, RU));
+  ok('U60 conferida com 1.200 kg justificados: devolvidas as 69, "69 un ficam reservadas à OB-0113 até o Fechar" (sem "caixas em uso"); em execução a mensagem continua "caixas em uso"',
+     st.every(y => !y.erro) && q === 69 && !d.erro && /69 un ficam reservadas à OB-0113 até o Fechar/.test(d.msg || '') && !/caixas em uso/.test(d.msg || '') && !/caixas em uso/.test(mv.det || '')
+     && !d2.erro && /730 un voltam reservadas à OB-0113 \(caixas em uso\)/.test(d2.msg || ''), [st.map(y => y.erro || ''), q, d, mv.det, d2.msg]); });
 
 print(JSON.stringify(R));

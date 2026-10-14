@@ -393,7 +393,7 @@ function prOfertaSafra(c, prod, saf) { let pub = 0, tem = false; Object.keys(PRD
 /* ---------- encerrar a O.S. de colheita (R-18): presente em toda página do estado (cenPodeEncerrar chama) ---------- */
 function prPodeEncerrar(c, id) { const o = (c.ordens || {})[id]; if (!o || !prEhColheita(o)) return '';
   const ap = prAPesar(c, id); if (!ap.length) return ''; const sem = ap.filter(g => g.sinc === false), pes = ap.filter(g => g.sinc !== false);
-  return [pes.length ? 'Carga a pesar: ' + pes.map(g => g.id).join(', ') + '. ' + prRec(prFazDaOS(c, o)) + ' pesa em Produção › Recebimento e beneficiamento (Cargas) antes de encerrar a colheita.' : '',
+  return [pes.length ? 'Carga a pesar: ' + pes.map(g => g.id).join(', ') + '. ' + prRec(prFazDaOS(c, o)) + ' pesa em Agrícola › Recebimento antes de encerrar a colheita.' : '',
           sem.length ? 'Carga no aparelho aguardando sinal: ' + sem.map(g => g.id).join(', ') + '.' : ''].filter(Boolean).join(' '); }
 
 /* =====================================================================================================================

@@ -87,7 +87,7 @@ def painel():
           f'<sc-if value="{H("pp_hasErr")}" hint-placeholder-val="{F()}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700; line-height: 1.4;">{H("pp_err")}</div></sc-if></div></sc-if>')
     pe=(f'<div style="position: sticky; bottom: -20px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 -22px -20px; padding: 12px 22px; background: {SURF}; border-top: 1px solid {LINE};">'
         f'<sc-for list="{H("pp_sec")}" as="b" hint-placeholder-count="0"><button type="button" onClick="{H("b.go")}" style="{BTN_ST(False,True)}">{H("b.t")}</button></sc-for>'
-        f'<span style="flex-grow: 1;"></span><button type="button" onClick="{H("pp_close")}" style="{BTN_ST(False,True)}">{H("pp_closeT")}</button>'
+        f'<span style="flex-grow: 1;"></span><sc-if value="{H("pp_closeOn")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("pp_close")}" style="{BTN_ST(False,True)}">{H("pp_closeT")}</button></sc-if>'
         f'<sc-if value="{H("pp_hasPB")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("pp_pgo")}" style="{BTN_ST(True,True)}">{H("pp_pt")}</button></sc-if>'
         f'<sc-if value="{H("pp_hasPA")}" hint-placeholder-val="{F()}"><a href="{H("pp_ph")}" style="{BTN_ST(True,True)} text-decoration: none;">{H("pp_pt")}</a></sc-if></div>')
     return (f'<sc-if value="{H("pp_open")}" hint-placeholder-val="{F()}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
@@ -120,15 +120,10 @@ def _shell(fid,title,sub,corpo,fname,altura,foot,steps=None):
     shell37(fid,title,corpo,fname=fname,subtitle=sub,status=(H('st_t'),'yellow'),primary_html=prim_html(),search=False,footer=foot,steps=steps)
     _status(fname)
 
-# Recebimento e beneficiamento (BEN-D14, 09/10): o grupo Produção fica com 3 itens (colheita D-01); Cargas e Beneficiamento são telas
-# irmãs do mesmo item, ligadas pela faixa de telas (o mesmo componente da Irrigação: navegação, sem número de etapa, pendência escrita)
-# v55: com o Beneficiamento fora da navegação até a rodada 3 (ui37.BEN_PUBLICADO=False), Cargas vira tela única, sem faixa de uma opção
-# só; a tela do BEN (oculta) segue com a faixa e o link de volta a Cargas
-REC_TELAS=[('Cargas e recebimento','CARGA.dc.html'),('Beneficiamento','BEN.dc.html')]
-def faixa_rec(cur):
-    if cur==1 and not ui37.BEN_PUBLICADO: return None
-    itens=''.join(ui37.secao_item(t,i==cur,href=h,why_hole=f'rs{i}') for i,(t,h) in enumerate(REC_TELAS,1))
-    return ui37.secoes_nav(itens,len(REC_TELAS),cur,REC_TELAS[cur-1][0],'Telas de recebimento e beneficiamento')
+# Recebimento e Beneficiamento (BEN-D39, 13/10/2026, proprietário: "coloque beneficiamento dentro de menu produção" e "coloque tudo de
+# produção, dentro de Agrícola"): cada um é cartão próprio de Agrícola e volta por "‹ Agrícola". A faixa de telas Cargas | Beneficiamento
+# (BEN-D14) saiu: seria um 2º caminho para o mesmo cartão. Cargas aponta o Beneficiamento só onde faz sentido: o lote em processo diz a
+# ordem ("na OB-0110") ou o atalho "Abrir ordem de beneficiamento" (prBenProx, PR_BEN_H)
 
 def _js(tela):
     return cenario.js_prefixo()+DCAR.js_nucleo()+PR_UI_JS+tela
@@ -182,6 +177,7 @@ function prPainel(self,v,P){ v.pp_open=!!P; P=P||{chip:['','gray']};
   v.pp_hasErr=!!P.err; v.pp_err=P.err||''; v.pp_sec=(P.sec||[]).map(b=>Object.assign({},b,{go:prGuarda(self,b.go)}));
   v.pp_hasPB=!!(P.prim&&P.prim.go); v.pp_hasPA=!!(P.prim&&P.prim.h&&!P.prim.go); v.pp_pt=P.prim?P.prim.t:''; v.pp_ph=(P.prim&&P.prim.h)||'#'; v.pp_pgo=prGuarda(self,(P.prim&&P.prim.go)||(()=>{}));
   v.pp_close=()=>self.setState({pr_pan:null,pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null}); v.pp_closeT=P.form&&!P.form.aviso?'Cancelar':'Fechar';   /* form.aviso: recusa mostrada no lugar do formulário (nada a cancelar) */
+  v.pp_closeOn=!P.closeHide;   /* closeHide (opcional, só o BEN usa): o formulário já tem "Voltar"; o fechar do rodapé repetiria a saída (rodada 3, S4) */
   v.pp_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); v.pp_close(); } }; }
 /* executa um comando no estado (atômico) e mostra o resultado; erro fica no painel, junto da ação */
 function prRun(self,fn,ok){ const r=cenMudar(null,fn); if(r.erro){ self.setState({pr_err:r.erro,g2toast:''}); return r; }
@@ -202,8 +198,6 @@ function prCards(self,v,gid,mk){ const ids=(v[gid+'_rows']||[]).map(r=>r.id); co
 function prCard(o){ return {grp:!!o.grp,reg:!o.grp,t1:o.t1||'',num:o.num||'',t2:o.t2||'',ct:(o.chip||['',''])[0],cst:prChs((o.chip||['','gray'])[1]),cdot:prDot((o.chip||['','gray'])[1]),nx:o.nx||'',go:o.go||(()=>{}),cur:'false'}; }
 /* números com unidade na célula (decisão de 05/10/2026): valor tipado em v (base kg) para ordenar, texto em p */
 function prTx(t){ return [{k:'txt',t}]; }
-/* faixa de Recebimento e beneficiamento (CARGA | BEN, BEN-D14): a pendência de cada tela, lida do mesmo estado e do filtro de fazenda */
-function prFaixaRec(self,v,c){ const W=benPendRec(c,f=>prFazOk(self,f)); v.rs1_why=W.carga; v.rs1_has=!!W.carga; v.rs2_why=W.ben; v.rs2_has=!!W.ben; }
 '''
 # v55: Beneficiamento fora da navegação até a rodada 3 (ui37.BEN_PUBLICADO). Cargas e Estoque de produto só tiram o endereço da tela do BEN
 # desta constante: vazia, o próximo passo do lote em processo fica em texto (ex.: "na OB-0110 (Em execução) · Igor"), sem link e sem ação
@@ -404,7 +398,7 @@ def carga():
     corpo=bloco('Cargas','O que chegou de cada talhão, quanto pesou e em que lote está. Clique numa carga a pesar para pesar; numa recebida, para ver descontos, lote e trilha.',
                 g_cg+cartoes('cards_cg'))
     _shell('CARGA','Cargas e recebimento','Pese e receba a carga do campo: o talhão vem da O.S., o lote nasce na hora e a produção do talhão muda só com a carga recebida.',corpo,fname,1000,
-           'Produção só nasce de carga recebida; caixas ou kg estimados no campo nunca somam. Ticket repetido não duplica (R-03, R-07).',steps=faixa_rec(1))
+           'Produção só nasce de carga recebida; caixas ou kg estimados no campo nunca somam. Ticket repetido não duplica (R-03, R-07).')
 
 CARGA_JS=r'''
 const PR_GRIDS={g_cg:1};
@@ -500,7 +494,7 @@ function prPanCarga(self,c,g){ const P=prP(c); const s=prCgSit(c,g); const cu=g.
       if(ob) PPx.next=s.nx+'. Sem estorno enquanto a '+ob.id+' não fecha: erro de pesagem entra no balanço da ordem e se justifica na conferência (alçada).';
       else PPx.sec=[{t:'Estornar',go:()=>self.setState({pr_modo:'estorno',pr_form:null,pr_err:''})}]; } }
   return PPx; }
-function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=prP(c); const st=self.state; prFaixaRec(self,v,c);
+function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=prP(c); const st=self.state;
   v.cards_cg=prCards(self,v,'g_cg',id=>{ const g=P.cargas[id]; if(!g) return null; const s=prCgSit(c,g);
     return prCard({t1:g.id+(g.ticket?' · '+g.ticket:''),num:g.st==='Descartada'?'descartada':(g.liq===null?'a pesar':prFmtT(g.liq,2)+' kg'),t2:prCgOrig(g).join(' + ')+' · colhida '+prBr(g.dcol)+(g.lote?' · '+g.lote:''),chip:[s.t,s.c],nx:s.nx,go:()=>self.g2pick('g_cg',id)}); });
   const sel=st.pr_sel; const gs=sel&&P.cargas[sel.id]; let prim;

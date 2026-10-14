@@ -264,7 +264,7 @@ function osMerge(b,co,c){ if(!co) return b;
   if(co.etapa==='Em conferência'){ o.encM=cenPodeEncerrar(c,co.id)||cdPendente(c,co.id); esp=!!o.encM;   /* bloqueio do encerramento: carga, divergência, sinal, duplicidade ou sobra */
     if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal|Conferência diária pendente/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
     else if(/^Conferência diária pendente/.test(o.encM)){ o.dono=CEN_CONF_AP(); o.prazo='rever a conferência diária'; o.selos=o.selos.filter(s=>s.t!=='Conferência diária pendente').concat([{t:'Conferência diária pendente',c:'yellow'}]); }
-    else if(/^Carga a pesar/.test(o.encM)){ const t=osEncSelo(o.encM);   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Produção › Recebimento e beneficiamento (Cargas) */
+    else if(/^Carga a pesar/.test(o.encM)){ const t=osEncSelo(o.encM);   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Agrícola › Recebimento */
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]); o.dono=(typeof prRec==='function'?prRec(prFazDaOS(c,co)):'Recebimento'); o.prazo='pesar e receber a carga'; }
     else if(o.encM.indexOf(CEN_DIV)===0){ o.dono=OS_AGRO(); o.prazo='revisar a divergência de dose'; }   /* B-R8: o selo vem do cenário (cenSeloDiv) */
     else { const sin=/sinal/.test(o.encM); const t=osEncSelo(o.encM);  // o bloqueio também na lista e no Kanban
@@ -556,7 +556,7 @@ function osc_cancTxt(c,id,cx){ cx=cx||['','','']; const o=c.ordens[id]; const r=
     r.id+' cancelada · '+ct+' em custódia · receber devolução']; }
 function osc_cancelar(c,id,mot,cx,ator){ const o=osc_o(c,id); const quem=cenExigeAlc(ator,'AL-04','Cancelar a '+id+' sem execução (CMD-46)');
   if((o.realizado||0)>0||['A liberar','Liberadas'].indexOf(o.etapa)<0) throw new Error('Só ordem sem realizado, em A liberar ou Liberadas, é cancelada sem execução.');
-  { const cg=osCargasVivas(c,id); if(cg.length) throw new Error('Cancelar recusado: a '+id+' tem carga '+cg.map(g=>g.id+' '+String(g.st).toLowerCase()).join(', ')+'. Colheita com carga é fato executado: estorne a carga recebida ou descarte a carga a pesar (com motivo) em Produção › Recebimento e beneficiamento (Cargas) antes de cancelar.'); }
+  { const cg=osCargasVivas(c,id); if(cg.length) throw new Error('Cancelar recusado: a '+id+' tem carga '+cg.map(g=>g.id+' '+String(g.st).toLowerCase()).join(', ')+'. Colheita com carga é fato executado: estorne a carga recebida ou descarte a carga a pesar (com motivo) em Agrícola › Recebimento antes de cancelar.'); }
   cx=osc_cancTxt(c,id,cx); const cust=osc_cancCust(c,id).length>0; const r=o.req&&c.reqs[o.req];
   if(r){ if(o.reservado) r.itens.forEach(it=>{ const l=c.lotes[it.prod+'|'+it.lote]; const res=Math.max(0,it.solicitado-it.entregue); if(l&&res>0) l.reservado=Math.max(0,l.reservado-res); }); r.estado='Cancelada'; }
   const hr=cenAgora(); o.etapa='Canceladas'; o.reservado=false; o.selos=[]; osc_txt(o,{canPor:quem,canEm:hr,cond:'Cancelada sem execução por '+quem+' às '+hr+': '+mot+'. '+cx[1],dono:cust?CEN_CONC_RESP():'',prazo:cust?'receber a devolução':'',insx:cx[2]});

@@ -15,13 +15,14 @@ src={f:open(f,encoding='utf-8').read() for f in fontes}
 cham=sorted(f for f,s in src.items() if re.search(r'\bosc_liberar\(',s))
 ok('E1 em todo o código de produto, só a O.S. e o Mapa chamam osc_liberar', cham==['areas/inicio.py','areas/processo_os.py'], cham)
 cl=sorted(f for f,s in src.items() if re.search(r'\bcenLiberar\(c',s) and not f.endswith('cenario.js'))
-ok('E1b só osc_liberar (processo_os) e a liberação da ordem de beneficiamento (ben.js, BEN-D05) chamam cenLiberar: nenhum atalho libera sem gravar CMD-42/CMD-06', cl==['areas/processo_os.py','ben.js'], cl)
-# BEN-D05 (integração BEN, 09/10): a OB (fam 'BEN', responsável próprio: Igor) reaproveita cenLiberar. Em ben.js a única função que chama
-# cenLiberar é benAutorizarLiberar, que exige o perfil de produção, recusa ordem que não é de beneficiamento (benO) e grava CMD-42 e CMD-06.
-# rodada 1 da integração (S4): o E1d antigo dividia o arquivo em "\nfunction " e procurava "cenLiberar(c": um atalho logo depois de
-# benAutorizarLiberar (const x = (c, id) => cenLiberar(c, id)) ficava no mesmo pedaço, e uma chamada com outra variável escapava. Agora,
-# sem comentários, o nome cenLiberar aparece exatamente uma vez em ben.js, como cenLiberar(c, id), dentro do corpo (chaves casadas) de
-# benAutorizarLiberar; e nenhuma outra fonte do Beneficiamento o cita
+ok('E1b só osc_liberar (processo_os) chama cenLiberar: nenhum atalho libera sem gravar CMD-42/CMD-06 (o Beneficiamento libera pelo benAutorizarLiberar, E1d)', cl==['areas/processo_os.py'], cl)
+# BEN-D05 (integração BEN, 09/10): a OB (fam 'BEN', responsável próprio: Igor) reaproveitava cenLiberar, chamado só por benAutorizarLiberar.
+# BEN-D34 (rodada 3, 10/10): a liberação da OB deixa de chamar cenLiberar (que reserva de um lote só): benAutorizarLiberar aloca no livre total
+# dos lotes (benAlocarCx, tudo ou nada) e grava com benReservaCx. A trava continua a mesma: em ben.js, sem comentários, o nome cenLiberar não
+# aparece (nem chamada, nem apelido), e a única passagem para Liberadas (etapa = 'Liberadas' ou etapa: 'Liberadas') fica dentro do corpo
+# (chaves casadas) de benAutorizarLiberar, que exige o perfil de produção, recusa ordem que não é de beneficiamento (benO) e grava CMD-42 e
+# CMD-06; nenhuma outra fonte do Beneficiamento cita cenLiberar. Rodada 1 (S4): o E1d antigo dividia o arquivo em "\nfunction " e um atalho
+# colado a benAutorizarLiberar ficava no mesmo pedaço; as chaves casadas seguem valendo
 def _sem_coment(t): return re.sub(r'^[ \t]*//[^\n]*', '', re.sub(r'/\*.*?\*/', '', t, flags=re.S), flags=re.M)
 def _corpo(t, nome):
     i = t.find('function ' + nome + '('); j = t.find('{', i) if i >= 0 else -1
@@ -33,25 +34,28 @@ def _corpo(t, nome):
     return (-1, -1)
 def e1d(texto):
     t = _sem_coment(texto); usos = [m.start() for m in re.finditer(r'\bcenLiberar\b', t)]; a, b = _corpo(t, 'benAutorizarLiberar'); f = t[a:b + 1] if a >= 0 else ''
-    return (len(usos) == 1 and a < usos[0] < b and t[usos[0]:usos[0] + len('cenLiberar(c, id)')] == 'cenLiberar(c, id)'
-            and all(x in f for x in ("cenExige(ator, 'producao'", 'benO(c, id)', "benHist(o, quem, 'Versão ' + o.versao + ' da ordem autorizada (CMD-42)'", "benHist(o, quem, 'Liberada (CMD-06)'")), usos)
+    lib = [m.start() for m in re.finditer(r"\betapa\s*(?:=(?!=)|:)\s*['\"]Liberadas['\"]", t)]
+    return (not usos and len(lib) == 1 and a < lib[0] < b
+            and all(x in f for x in ("cenExige(ator, 'producao'", 'benO(c, id)', "benHist(o, quem, 'Versão ' + o.versao + ' da ordem autorizada (CMD-42)'", "benHist(o, quem, 'Liberada (CMD-06)'")), [usos, lib])
 _ok, _usos = e1d(src.get('ben.js', ''))
 def _sem_coment_py(t): return _sem_coment(re.sub(r'^[ \t]*#[^\n]*', '', re.sub(r'\"\"\".*?\"\"\"', '', t, flags=re.S), flags=re.M))   # docstrings e # fora; o JS da tela (r''') fica
 _outros = [f for f in ('areas/processo_beneficiamento.py', 'dados_ben.py') if re.search(r'\bcenLiberar\b', _sem_coment_py(src.get(f, '')))]
-ok('E1d em ben.js o nome cenLiberar aparece uma vez só, como cenLiberar(c, id) dentro de benAutorizarLiberar (perfil de produção, benO, CMD-42 e CMD-06); a tela e a semente do BEN não o citam',
+ok('E1d em ben.js o nome cenLiberar não aparece e a única passagem para Liberadas fica dentro de benAutorizarLiberar (perfil de produção, benO, CMD-42 e CMD-06); a tela e a semente do BEN não citam cenLiberar',
    _ok and not _outros, [_usos, _outros])
 _b = src.get('ben.js', ''); _m = _b.find('\nfunction benIniciar(')
 _mut = [('atalho logo depois de benAutorizarLiberar', _b[:_m] + '\nconst benLibDireto = (c, id) => cenLiberar(c, id);' + _b[_m:]),
         ('chamada com outra variável', _b.replace("o.etapa = 'Em execução'; const T = benCxTot(c, o);", "o.etapa = 'Em execução'; cenLiberar(x, id); const T = benCxTot(c, o);", 1)),
-        ('apelido do nome', _b[:_m] + '\nconst benL = cenLiberar;' + _b[_m:])]
-ok('E1e o E1d derruba os atalhos de cenLiberar entre funções do ben.js (3 mutantes: atalho colado, outra variável, apelido)',
+        ('apelido do nome', _b[:_m] + '\nconst benL = cenLiberar;' + _b[_m:]),
+        ('atalho que põe Liberadas fora de benAutorizarLiberar', _b[:_m] + "\nfunction benLibDireto(c, id) { c.ordens[id].etapa = 'Liberadas'; }" + _b[_m:]),
+        ('objeto com etapa Liberadas fora de benAutorizarLiberar', _b[:_m] + "\nconst benLibObj = (o) => Object.assign(o, { etapa: 'Liberadas' });" + _b[_m:])]
+ok('E1e o E1d derruba os atalhos de liberação no ben.js (5 mutantes: cenLiberar colado, com outra variável e por apelido; Liberadas por atribuição e por objeto)',
    _m > 0 and all(not e1d(t)[0] for _, t in _mut) and all(t != _b for _, t in _mut), [(n, e1d(t)[1]) for n, t in _mut])
 ef=[(f,len(re.findall(r'\bosc_libEfeito\(',s))) for f,s in src.items() if re.search(r'\bosc_libEfeito\(',s)]   # CTL-3: definição + 2 chamadas
 ok('E1c o efeito sem o registro de quem decide (osc_libEfeito) só é chamado por osc_liberar e pela prévia osLibErro (cópia)', ef==[('areas/processo_os.py',3)], ef)
 # rodada 1 da integração (S4): o caminho escrito nas mensagens é o do menu (BEN-D14: Produção › Recebimento e beneficiamento); "Produção ›
 # Cargas e recebimento" não existe mais no menu. Só o texto que a pessoa lê conta (comentários e docstrings ficam de fora)
 _vel = sorted(f for f, t in src.items() if 'Produção › Cargas e recebimento' in (_sem_coment_py(t) if f.endswith('.py') else _sem_coment(t)))
-ok('E4 nenhuma mensagem de produto aponta "Produção › Cargas e recebimento" (o menu diz "Produção › Recebimento e beneficiamento")', not _vel, _vel)
+ok('E4 nenhuma mensagem de produto aponta "Produção › Cargas e recebimento" (o caminho é "Agrícola › Recebimento", 13/10)', not _vel, _vel)
 seed=cenario.seed()['ordens']
 # BEN-D05: a OB em A liberar da semente (OB-0112) é de beneficiamento (fam 'BEN') e fica fora da lista da O.S.: libera pelo Beneficiamento, nunca por osc_liberar
 _os_ids={o['id'] for o in P._ordens()}
@@ -121,16 +125,30 @@ ok('L2b a lista residual só tem pares que a varredura ainda acha (par que sumiu
 # conta é própria. O ben.js entra igual em toda página do estado (regras; o endereço que benProxEntrada devolve as telas descartam): o texto
 # dele sai antes da busca, e qualquer outra menção a BEN.dc.html numa tela visível (link, ação, faixa, título) quebra o teste
 OCULTOS_MOTIVO={'BEN.dc.html':'rodada 3 do BEN; reativar com BEN_PUBLICADO'}
+_cg=open(os.path.join(PJ,'CARGA.dc.html'),encoding='utf-8').read()
 if not ui37.BEN_PUBLICADO:
     _bj=_BENJS
     for h,mot in OCULTOS_MOTIVO.items():
         ok(f'L4a {h} oculto ({mot}): fora do menu (ui37.oculto), fora das telas de entrada e no canvas na página "ocultos"', ui37.oculto(h) and pag.get(h)=='ocultos' and h in oc, [ui37.oculto(h), pag.get(h), h in oc])
         _el=sorted(f for f in VISIVEIS if h in open(os.path.join(PJ,f),encoding='utf-8').read().replace(_bj,''))
         ok(f'L4b nenhuma tela visível aponta para {h} ({mot}) fora do ben.js embutido', not _el, _el)
-    _cg=open(os.path.join(PJ,'CARGA.dc.html'),encoding='utf-8').read()
-    ok('L4c Cargas e recebimento é tela única: sem a faixa "Telas de recebimento e beneficiamento" (seletor de uma opção só)',
-       'Telas de recebimento e beneficiamento' not in _cg and 'class="etp ' not in _cg, [_cg.count('Telas de recebimento'), _cg.count('class="etp ')])
-else: ok('L4 BEN publicado (ui37.BEN_PUBLICADO=True): fora da conta de ocultos', True)
+else:
+    # 13/10/2026 (BEN-D39; proprietário: "coloque beneficiamento dentro de menu produção" e "coloque tudo de produção, dentro de Agrícola"): com
+    # a rodada 3 e os 3 S2 da revisão corrigidos, BEN_PUBLICADO=True. A mesma verificação passa a exigir o contrário: a tela visível por um
+    # caminho só (o cartão próprio em Agrícola, logo depois de Recebimento, com "‹ Agrícola" de volta) e o elo de Cargas para ela ligado
+    # (PR_BEN_H: a carga em processo aponta a ordem ou "Abrir ordem de beneficiamento"), sem a faixa de telas (2º caminho para o mesmo cartão)
+    h='BEN.dc.html'; _hub=_rd(ui37.HUB37['Agrícola']); _cards=re.findall(r'class="mod-cartao" href="([^"#]+)',_hub)
+    _i=_cards.index('CARGA.dc.html') if 'CARGA.dc.html' in _cards else -9
+    ok(f'L4a {h} publicado: no menu (não oculto), no canvas na página "menu", fora da conta de ocultos e com cartão próprio em Agrícola logo depois de Recebimento',
+       not ui37.oculto(h) and pag.get(h)=='menu' and h not in oc and _cards[_i+1:_i+2]==[h] and _cards.count(h)==1, [ui37.oculto(h), pag.get(h), h in oc, _cards])
+    _bn=_rd(h)
+    ok(f'L4b {h} publicado: volta por "‹ Agrícola"; Cargas aponta o Beneficiamento pelo lote em processo (PR_BEN_H ligado) e o Estoque pela devolução guiada (EST_BEN_H)',
+       '<a href="MOD-AGR.dc.html" class="volta37" aria-label="Voltar para Agrícola"' in _bn and 'const PR_BEN_H="BEN.dc.html"' in _cg and 'const EST_BEN_H="BEN.dc.html"' in _rd('EST.dc.html'),
+       ['volta37' in _bn, 'const PR_BEN_H="BEN.dc.html"' in _cg, 'const EST_BEN_H="BEN.dc.html"' in _rd('EST.dc.html')])
+# um caminho só para cada tela (v55 com o BEN oculto; BEN-D39 com o BEN publicado): Cargas sem a faixa de telas; com o BEN publicado, ele também
+ok('L4c Cargas e recebimento sem a faixa "Telas de recebimento e beneficiamento"'+('; o Beneficiamento também' if ui37.BEN_PUBLICADO else ' (seletor de uma opção só)'),
+   all('Telas de recebimento e beneficiamento' not in t and 'class="etp ' not in t for t in [_cg]+([_rd('BEN.dc.html')] if ui37.BEN_PUBLICADO else [])),
+   [_cg.count('Telas de recebimento'), _cg.count('class="etp ')])
 import areas.inicio as I, dados_manutencao as DM
 a420=[a for a in I._ORD_MAPA if a[0]=='OS-0420'][0][4]
 ok('L3 Mapa · OS-0420: o passo vai para a OM-0233 viva (tela MA, visível e com âncora no registro: MA#om=), não para PL-05',

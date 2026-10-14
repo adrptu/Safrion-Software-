@@ -49,8 +49,8 @@ VIS_ROWS.append((OUTROS37[0],[OUTROS37[2]]+[h for _,h,_ in OUTROS37[3] if not h.
 VIS_ROWS.append(('App de campo',['MB-01.dc.html','MB-02.dc.html','MB-03.dc.html','MB-04.dc.html','MB-05.dc.html','MB-07.dc.html','MB-10.dc.html',
                                  'MB-09.dc.html','MB-09det.dc.html']))   # MB-07 e MB-10 no estado (colheita, 06/10)
 detalhes={'Agrícola':['CA-01det.dc.html','CA-01x-os0420.dc.html','OS-0424-app.dc.html','OS-0424-ficha.dc.html','AG-01det.dc.html','IR-02.dc.html','IR-03.dc.html','IR-03det.dc.html','IR-04.dc.html']
-          +(['BEN.dc.html'] if BEN_PUBLICADO else []),   # 13/10: a Produção entrou em Agrícola (BEN, quando publicado, junto)
-          'Cadastros':[f for f in files if f.startswith('CD-') and 'det' in f]}   # v55: BEN só publicado (ui37.BEN_PUBLICADO)
+          ,   # 13/10: a Produção entrou em Agrícola; o BEN publicado é item próprio do menu (ui37.MENU2, BEN-D39), não detalhe
+          'Cadastros':[f for f in files if f.startswith('CD-') and 'det' in f]}
 y=0; placed=set()
 for nome,fs in VIS_ROWS:
     fs=[f for f in fs+detalhes.get(nome,[]) if f in files]
@@ -61,7 +61,6 @@ for nome,fs in VIS_ROWS:
         w,h=_wh(f); boards[f]={'x':x,'y':y,'w':w,'h':h,'title':CAT.get(f[:5],{}).get('titulo',f.replace('.dc.html','')) if f[:5] in CAT else f.replace('.dc.html',''),'is_interactive':_interactive(f),'page':'menu'}
         if f=='OS-0424-app.dc.html': boards[f]['title']='Agrícola › Ordem de Serviço › OS-0424 · ficha no app (funciona sem internet)'
         if f=='OS-0424-ficha.dc.html': boards[f]['title']='Agrícola › Ordem de Serviço › OS-0424 · ficha impressa'
-        if f=='BEN.dc.html': boards[f]['title']='Produção › Recebimento e beneficiamento › Beneficiamento'   # tela irmã de Cargas (BEN-D14)
         if nome=='App de campo': boards[f]['title']='App de campo › '+boards[f]['title']
         for nm,ic,items in MENU2:
             for l,hh in items:

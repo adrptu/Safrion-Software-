@@ -7,7 +7,9 @@ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from comp_lib import Chrome, servir
 from areas.maquinas import REDIRECIONA
 R = os.environ.get('RENDER_DIR') or os.path.join(HERE, '_render')
-FORA = set(REDIRECIONA) | {'Main.dc.html', 'BEN.dc.html'}
+import ui37
+# o BEN ficava fora enquanto oculto (v55); publicado (BEN_PUBLICADO=True, BEN-D39, 13/10/2026) é tela da equipe e entra na varredura
+FORA = set(REDIRECIONA) | {'Main.dc.html'} | (set() if ui37.BEN_PUBLICADO else {'BEN.dc.html'})
 pags = sorted(os.path.basename(f) for f in glob.glob(os.path.join(R, '*.dc.html')) if os.path.basename(f) not in FORA)
 p, srv = servir(R); c = Chrome(); J = c.js
 ERR, LARG, SUB = [], [], []

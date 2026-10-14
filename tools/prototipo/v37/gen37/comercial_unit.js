@@ -135,6 +135,45 @@ caso('C06', () => { const c = NOVO60(); COLHEITA(c); MUD(c, x => comAprovarCredi
   const c5 = cenClone(c); c5.producao.lotes['L39-133'].origem[0].dcol = '2026-09-24'; const I5 = comImpede(c5, v, c5.producao.lotes['L39-133']); const e5 = MUD(c5, x => comSair(x, Object.assign({ chave: 'T-E5' }, k)));
   ok('C06f origem sem lote de campo (colheita sem apontamento da data): impedido e recusado', I5.imp.some(i => /sem lote de campo/.test(i.t)) && !!e5.erro, [I5.imp, e5.erro]);
   ok('C06g a mesma recusa aparece "Em risco" na venda e impede a carga (mesma função)', comSitVenda(c1, c1.producao.pedidos['PV-036']).t === 'Em risco' && comImpede(c1, v, c1.producao.lotes['L39-133']).imp.length > 0); });
+/* integração BEN3 × COM (BEN-D37): o lote embalado no beneficiamento aponta os lotes de entrada (genealogia, BEN-D09); a origem de campo e a
+   carência são lidas nessa cadeia. Antes: todo lote do beneficiamento ficava "Em risco" com "origem — colhida em — sem lote de campo" */
+caso('C06j', () => { const c = NOVO60();
+  const st = [MUD(c, x => benConcluir(x, 'OB-0110', 'Igor')), MUD(c, x => benConferir(x, 'OB-0110', 'Paula')), MUD(c, x => cenDevolver(x, 'REQ-030', BENC.cx.item, 60, true, 'Rui')),
+    MUD(c, x => benFechar(x, 'OB-0110', 'Igor')), MUD(c, x => benResultado(x, 'L39-120', 'Conforme', '', 'Marta')), MUD(c, x => benDecidir(x, 'L39-120', 'Liberar', {}, 'Marta'))];
+  const L = c.producao.lotes['L39-120']; const I = comImpede(c, c.producao.pedidos['PV-031'], L);
+  ok('C06j L39-120 embalado na OB-0110 (entradas L38-115 a L38-118, saldo de abertura do packing): liberado, sem impedimento de origem; a avaliação diz "origem anterior ao sistema"',
+     st.every(y => !y.erro) && !!L && (L.origem || []).every(x => !!x.lote) && !I.imp.length && I.aval.length === 1 && I.aval[0].st === 'abertura', [st.map(y => y.erro || ''), L && L.origem, I]); });
+caso('C06k', () => { const c = NOVO60(); COLHEITA(c); const v = c.producao.pedidos['PV-036']; const F = c.producao.lotes['L39-133']; const I0 = comImpede(c, v, F);
+  c.producao.lotes['LX-BEN'] = Object.assign({}, F, { id: 'LX-BEN', origem: [{ lote: 'L39-133', kg: 100, modo: 'rateio' }], benef: 'OB-T', abertura: false });
+  const I1 = comImpede(c, v, c.producao.lotes['LX-BEN']);
+  c.producao.lotes['LX-SEM'] = Object.assign({}, F, { id: 'LX-SEM', origem: [{ lote: 'L-INEXISTENTE', kg: 100, modo: 'rateio' }], benef: 'OB-T', abertura: false });
+  const I2 = comImpede(c, v, c.producao.lotes['LX-SEM']);
+  ok('C06k lote embalado a partir do L39-133 (colheita com LC): a mesma avaliação de carência do lote de campo; cadeia para um lote inexistente fica impedida (falha fechada)',
+     !I0.imp.length && JSON.stringify(I1.aval) === JSON.stringify(I0.aval) && !I1.imp.length && I2.imp.some(i => /sem lote de campo/.test(i.t)), [I0, I1, I2]); });
+/* revisão A5 (S3): o lote do beneficiamento vendido e devolvido pelo cliente mantém a genealogia: o lote devolvido aponta o lote vendido
+   ({lote, kg devolvido, modo 'devolucao'}), e a origem de campo (ou a abertura) continua chegando pela cadeia. Antes: 4× "origem — colhida em —
+   sem lote de campo" e o lote devolvido nunca mais podia sair */
+caso('C06l', () => { const c = NOVO60();
+  const st = [MUD(c, x => benConcluir(x, 'OB-0110', 'Igor')), MUD(c, x => benConferir(x, 'OB-0110', 'Paula')), MUD(c, x => cenDevolver(x, 'REQ-030', BENC.cx.item, 60, true, 'Rui')),
+    MUD(c, x => benFechar(x, 'OB-0110', 'Igor')), MUD(c, x => benResultado(x, 'L39-120', 'Conforme', '', 'Marta')), MUD(c, x => benDecidir(x, 'L39-120', 'Liberar', {}, 'Marta')),
+    MUD(c, x => comAprovarCredito(x, { venda: 'PV-031', ator: 'Ana' })), MUD(c, x => prReservar(x, { pedido: 'PV-031', lote: 'L39-120', kg: 1000, ator: 'Dora' })),
+    MUD(c, x => comProgramar(x, { venda: 'PV-031', lotes: [{ lote: 'L39-120', prev: 1000 }], veic: 'Baú refrigerado 12 t', transp: 'Rota Sul Transportes', placa: 'ABC1D23', dprev: '2026-09-26', ator: 'Ana', chave: 'C06L-P' }))];
+  const rm = Object.values(c.producao.expedicoes || {}).filter(r => r.pedido === 'PV-031').pop() || {};
+  st.push(MUD(c, x => comSair(x, { rm: rm.id, bruto: '15.000', tara: '14.000', ator: 'Ana', chave: 'C06L-S' })), MUD(c, x => comEntregar(x, { rm: rm.id, d: '2026-09-26', dev: { kg: 100, motivo: (COMC.motivos || [])[0] }, ator: 'Rui', chave: 'C06L-E' })));
+  const L = Object.values(c.producao.lotes).filter(x => x.dev && x.dev.lote === 'L39-120').pop(); const I = L ? comImpede(c, c.producao.pedidos['PV-031'], L) : { imp: [{ t: 'sem lote devolvido' }], aval: [] };
+  const pf = typeof benParaFrente === 'function' ? benParaFrente(c, 'L39-120').filter(x => L && x.lote === L.id) : [];
+  ok('C06l lote do BEN (L39-120) vendido e devolvido (100 kg): o lote devolvido aponta o L39-120 (100 kg, devolução), sem "sem lote de campo"; a origem segue a abertura do packing; a genealogia para frente do L39-120 mostra os 100 kg uma vez',
+     st.every(y => !y.erro) && !!L && JSON.stringify(L.origem.map(x => [x.lote, String(x.kg), x.modo])) === JSON.stringify([['L39-120', '100', 'devolucao']]) && !I.imp.some(i => /sem lote de campo|sem origem/.test(i.t))
+     && I.aval.some(a => a.st === 'abertura') && pf.length === 1 && String(pf[0].kg) === '100', [st.map(y => y.erro || ''), L && L.origem, I, pf]); });
+/* revisão A6 (S4): ciclo ou autorreferência na genealogia impede a saída (falha fechada); antes passava sem impedimento nem avaliação */
+caso('C06m', () => { const c = NOVO60(); COLHEITA(c); const v = c.producao.pedidos['PV-036']; const F = c.producao.lotes['L39-133']; const P = c.producao.lotes;
+  const mk = (id, orig) => { P[id] = Object.assign({}, F, { id, origem: orig, benef: 'OB-T', abertura: false }); return P[id]; };
+  mk('LX-CA', [{ lote: 'LX-CB', kg: 100, modo: 'rateio' }]); mk('LX-CB', [{ lote: 'LX-CA', kg: 100, modo: 'rateio' }]); mk('LX-SELF', [{ lote: 'LX-SELF', kg: 100, modo: 'rateio' }]);
+  mk('LX-MIX', [{ lote: 'LX-CA', kg: 50, modo: 'rateio' }, { lote: 'L39-133', kg: 50, modo: 'rateio' }]);
+  mk('LX-DIA', [{ lote: 'LX-D1', kg: 50, modo: 'rateio' }, { lote: 'LX-D2', kg: 50, modo: 'rateio' }]); mk('LX-D1', [{ lote: 'L39-133', kg: 50, modo: 'rateio' }]); mk('LX-D2', [{ lote: 'L39-133', kg: 50, modo: 'rateio' }]);
+  const I = id => comImpede(c, v, P[id]); const cic = id => I(id).imp.some(i => /ciclo/.test(i.t));
+  ok('C06m genealogia com ciclo (A→B→A), autorreferência e ciclo misturado com lote de campo: impedidos ("ciclo na genealogia"); losango sem ciclo (dois caminhos para o mesmo lote de campo) passa',
+     cic('LX-CA') && cic('LX-SELF') && cic('LX-MIX') && !I('LX-DIA').imp.length && I('LX-DIA').aval.length === 1, [I('LX-CA'), I('LX-SELF'), I('LX-MIX'), I('LX-DIA')]); });
 caso('C07', () => { const c = NOVO60(); COLHEITA(c); const v = c.producao.pedidos['PV-036'];
   const s0 = comSitVenda(c, v); const cr = comCredito(c, v, 10000);
   ok('C07 AC-08 KC09 Frutas Real: a receber R$ 91.470 + saída R$ 30.500 = R$ 121.970 > R$ 120.000 → PV-036 "Aguardando crédito"', s0.t === 'Aguardando crédito' && !cr.ok && cr.expo === 121970 && /121\.970,00, acima do limite de R\$ 120\.000,00/.test(cr.prob), [s0.t, cr]);
