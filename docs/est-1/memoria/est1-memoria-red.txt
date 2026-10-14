@@ -1,0 +1,11 @@
+MEMORIA 1440 
+  FALHA 1440: não mostra igualdade falsa de totais
+  FALHA 1440: explica exclusão por validade e saldo não negativo por lote
+  OK  1440: consulta preserva lotes/reservas/quarentena
+  OK  1440: sem erro de execução
+MEMORIA 390 
+  FALHA 390: não mostra igualdade falsa de totais
+  FALHA 390: explica exclusão por validade e saldo não negativo por lote
+  OK  390: consulta preserva lotes/reservas/quarentena
+  OK  390: sem erro de execução
+RESULTADO: 4/8 ok · FALHAS: 1440: não mostra igualdade falsa de totais; 1440: explica exclusão por validade e saldo não negativo por lote; 390: não mostra igualdade falsa de totais; 390: explica exclusão por validade e saldo não negativo por lote

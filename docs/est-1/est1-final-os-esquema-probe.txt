@@ -1,0 +1,3 @@
+   ['A liberar', False, 7]
+  OK  A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v7 sem aprov (probe Codex; teste original preservado)
+RESULTADO: 1/1 ok

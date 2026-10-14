@@ -1,0 +1,15 @@
+  OK  1440: abre prévia de aceite
+PREVIA 1440 REQ-53 OS-0430 Glifosato 480 lote G26-14 1 L 0 L 0 L 1 L com Marcos Consumo em conferência CC-301 · Glifosato 480 3 L relatados, 1 L em custódia · Rui (almoxarife) Lote G26-14 vencido em 01/2000: não pode fornecer a retirada complementar. Revise a origem física ou recuse o relato; a custódia já entregue permanece preservada. Recusar relato Voltar —
+  OK  1440: motivo e recuperação, sem confirmação inválida
+  OK  1440: prévia não altera físico, requisição ou movimentos
+  OK  1440: recuperação por teclado recusa relato
+  OK  1440: recusa preserva físico, reserva e custódia
+  OK  1440: sem erro de execução
+  FALHA 390: abre prévia de aceite
+PREVIA 390 sem linha
+  FALHA 390: motivo e recuperação, sem confirmação inválida · sem linha
+  OK  390: prévia não altera físico, requisição ou movimentos
+  FALHA 390: recuperação por teclado recusa relato
+  OK  390: recusa preserva físico, reserva e custódia
+  OK  390: sem erro de execução
+RESULTADO: 9/12 ok · FALHAS: 390: abre prévia de aceite; 390: motivo e recuperação, sem confirmação inválida; 390: recuperação por teclado recusa relato

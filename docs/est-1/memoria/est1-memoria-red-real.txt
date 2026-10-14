@@ -1,0 +1,11 @@
+MEMORIA 1440 Saldo · Memória sintética × Saldo calculado pelos movimentos abaixo. Para mudar, receba, entregue, devolva ou conte. Item ou lote Local ORIGEM Disponível = físico − reservado − bloqueado = 150 L − 30 L − 5 L = 25 L Fechar
+  FALHA 1440: não mostra igualdade falsa de totais · Saldo · Memória sintética × Saldo calculado pelos movimentos abaixo. Para mudar, receba, entregue, devolva ou conte. Item ou lote Local ORIGEM Disponível = físico − reservado − bloqueado = 150 L − 30 L − 5 L = 25 L Fechar
+  FALHA 1440: explica exclusão por validade e saldo não negativo por lote · Saldo · Memória sintética × Saldo calculado pelos movimentos abaixo. Para mudar, receba, entregue, devolva ou conte. Item ou lote Local ORIGEM Disponível = físico − reservado − bloqueado = 150 L − 30 L − 5 L = 25 L Fechar
+  OK  1440: consulta preserva lotes/reservas/quarentena
+  OK  1440: sem erro de execução
+MEMORIA 390 Saldo · Memória sintética × Saldo calculado pelos movimentos abaixo. Para mudar, receba, entregue, devolva ou conte. Item ou lote Local ORIGEM Disponível = físico − reservado − bloqueado = 150 L − 30 L − 5 L = 25 L Fechar
+  FALHA 390: não mostra igualdade falsa de totais · Saldo · Memória sintética × Saldo calculado pelos movimentos abaixo. Para mudar, receba, entregue, devolva ou conte. Item ou lote Local ORIGEM Disponível = físico − reservado − bloqueado = 150 L − 30 L − 5 L = 25 L Fechar
+  FALHA 390: explica exclusão por validade e saldo não negativo por lote · Saldo · Memória sintética × Saldo calculado pelos movimentos abaixo. Para mudar, receba, entregue, devolva ou conte. Item ou lote Local ORIGEM Disponível = físico − reservado − bloqueado = 150 L − 30 L − 5 L = 25 L Fechar
+  OK  390: consulta preserva lotes/reservas/quarentena
+  OK  390: sem erro de execução
+RESULTADO: 4/8 ok · FALHAS: 1440: não mostra igualdade falsa de totais; 1440: explica exclusão por validade e saldo não negativo por lote; 390: não mostra igualdade falsa de totais; 390: explica exclusão por validade e saldo não negativo por lote
