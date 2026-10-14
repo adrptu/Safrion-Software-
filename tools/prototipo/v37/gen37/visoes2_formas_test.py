@@ -67,6 +67,24 @@ try:
     J("[...document.querySelectorAll('.os-raia-cab')].find(x=>x.offsetParent).click()"); time.sleep(.8)
     alv = J("[...document.querySelectorAll('[data-os-recorte] button')].filter(x=>x.offsetParent).map(b=>{const r=b.getBoundingClientRect(); return [b.getAttribute('aria-label')||b.innerText.trim(), Math.round(r.width), Math.round(r.height)];})") or []
     chk('F11c toque: nome da raia, × da trilha e "Limpar filtros" com 44 px', cab and min(cab) >= 44 and any(a[0].startswith('Tirar a trilha') for a in alv) and all(a[1] >= 44 and a[2] >= 44 for a in alv), [cab, alv])
+    # Codex V68-CAL-DIA-01: na agenda do celular cada dia mostra as ordens que correm nele (as de vários dias com "dia N de M") e abre
+    # a ordem dali; a contagem do dia = as linhas do dia; no computador vale a faixa única, cada O.S. uma vez; o conjunto da semana é o mesmo
+    J("localStorage.clear();sessionStorage.clear()"); abre('?view=calendario')
+    DIAS = """[...document.querySelectorAll('.oscal-dia')].filter(d=>d.offsetParent).map(d=>[d.getAttribute('aria-label'),((d.querySelector('.oscal-dt > span:last-child')||{}).innerText||'').trim(),[...d.querySelectorAll('button[aria-label^=Abrir]')].filter(b=>b.offsetParent).map(b=>b.getAttribute('aria-label'))])"""
+    dias = J(DIAS) or []
+    so_multi = [d for d in dias if d[2] and all(' · dia ' in x for x in d[2])]
+    sem390 = sorted(set(x.split(' · ')[0].replace('Abrir ', '') for d in dias for x in d[2]))
+    chk('F13 celular: cada dia lista as suas ordens (contagem = linhas; as de vários dias com "dia N de M"), sem a faixa do topo; há dia só com ordens de vários dias',
+        dias and all(d[1] == str(len(d[2])) for d in dias) and so_multi and not J("[...document.querySelectorAll('.oscal-faixa')].some(x=>x.offsetParent)"), dias)
+    alvo = so_multi[-1][2][0] if so_multi else ''
+    J("(()=>{const b=[...document.querySelectorAll('.oscal-dia button[aria-label^=Abrir]')].filter(b=>b.offsetParent).find(b=>b.getAttribute('aria-label')===%s); b&&b.click();})()" % json.dumps(alvo)); time.sleep(.8)
+    pan = J("(()=>{const d=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); return d?d.innerText.slice(0,80):'';})()") or ''
+    chk('F13b celular: no dia só com ordens de vários dias, o toque abre a ordem certa', alvo and alvo.split(' · ')[0].replace('Abrir ', '') in pan, [alvo, pan])
+    c.aparelho(1440, 1000, 1, False); abre('?view=calendario')
+    labs = J("[...document.querySelectorAll('.oscal button[aria-label^=Abrir]')].filter(b=>b.offsetParent).map(b=>b.getAttribute('aria-label').split(' · ')[0].replace('Abrir ',''))") or []
+    chk('F14 computador: faixa única das ordens de vários dias, cada O.S. uma vez, sem as linhas do celular; o conjunto da semana = o do celular',
+        labs and len(labs) == len(set(labs)) and sorted(set(labs)) == sem390 and J("[...document.querySelectorAll('.oscal-faixa')].some(x=>x.offsetParent)")
+        and not J("[...document.querySelectorAll('.oscal-cont')].some(x=>x.offsetParent)"), [labs, sem390])
     chk('F12 sem erro de JS', not J("(window.__e||[]).length"), J("window.__e"))
 finally:
     c.close(); srv.terminate()

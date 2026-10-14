@@ -1126,12 +1126,16 @@ function EXTRAVALS(self,v){
       lab:'Abrir '+o.id+' · '+o.tipo+' · '+o.etapa+(o.ini?' · janela '+brd(o.ini)+(o.fim&&o.fim!==o.ini?' a '+brd(o.fim):''):' · sem data')});
     const naSem=new Set();
     /* ordem de vários dias na semana: uma faixa só, sobre as colunas dos seus dias (antes, um botão igual em cada dia: ação duplicada) */
-    const diasDe=o=>dias.filter(d=>g2noDia(o.ini,o.fim,d));
+    const diasDe=o=>dias.filter(d=>g2noDia(o.ini,o.fim,d)), perDe=o=>brd(o.ini).slice(0,5)+(o.fim&&o.fim!==o.ini?' → '+brd(o.fim).slice(0,5):'');
     v.cal_multi=cs.filter(o=>diasDe(o).length>1).map(o=>{ const ds=diasDe(o), a=dias.indexOf(ds[0]), k=card(o); ds.forEach(()=>naSem.add(o.id));
-      k.col='grid-column:'+(a+1)+' / span '+ds.length+';'; k.per=brd(o.ini).slice(0,5)+(o.fim&&o.fim!==o.ini?' → '+brd(o.fim).slice(0,5):''); return k; });
+      k.col='grid-column:'+(a+1)+' / span '+ds.length+';'; k.per=perDe(o); return k; });
     v.cal_temmulti=v.cal_multi.length>0;
     v.cal=dias.map((d,i)=>{ const ds=cs.filter(o=>g2noDia(o.ini,o.fim,d)); ds.forEach(o=>naSem.add(o.id)); const ehHoje=d===hoje;
-      return {d,t:DS[i]+' '+d.slice(8,10)+'/'+d.slice(5,7)+(ehHoje?' · hoje':''),hoje:ehHoje?'true':'false',vazio:ds.length===0,vz:ds.length===0?'true':'false',nt:ds.length?String(ds.length):'',ords:ds.filter(o=>diasDe(o).length<=1).map(card)}; });
+      /* Codex V68-CAL-DIA-01: na agenda do celular (≤ 900 px) a faixa perde o alinhamento com os dias; ali cada dia lista também a ordem de
+         vários dias que corre nele, com a posição na janela ("dia 2 de 3"). No computador essas linhas ficam ocultas e vale a faixa. */
+      const nd=(x,y)=>Math.round((Date.parse(y)-Date.parse(x))/864e5)+1;   // posição na janela inteira da ordem, não só nesta semana
+      const mult=ds.filter(o=>diasDe(o).length>1).map(o=>{ const k=card(o); k.pos='dia '+nd(o.ini,d)+' de '+nd(o.ini,o.fim||o.ini); k.per=perDe(o); k.lab+=' · '+k.pos; return k; });
+      return {d,t:DS[i]+' '+d.slice(8,10)+'/'+d.slice(5,7)+(ehHoje?' · hoje':''),hoje:ehHoje?'true':'false',vazio:ds.length===0,vz:ds.length===0?'true':'false',nt:ds.length?String(ds.length):'',ords:ds.filter(o=>diasDe(o).length<=1).map(card),mult}; });
     v.cal_sem=cs.filter(o=>!o.ini).map(card); v.cal_temsem=v.cal_sem.length>0;
     v.cal_tit=brd(dias[0]).slice(0,5)+' a '+brd(dias[6]); v.cal_n=naSem.size+(naSem.size===1?' ordem':' ordens')+' nesta semana'+(v.cal_sem.length?' · '+v.cal_sem.length+' sem data':'');
     v.cal_naoHoje=seg!==seg0;
@@ -1687,7 +1691,8 @@ def _calendario():
            'border-radius:10px;background:#FFFFFF;cursor:pointer;font-family:inherit;color:#15201A;min-height:44px;min-width:0;overflow-wrap:anywhere}'
            '@media (hover:hover){.oscal-o:hover{border-color:#1E7A4C;background:#F2F8F4}}.oscal-o:focus-visible{outline:2px solid #1E7A4C;outline-offset:1px}'
            '.oscal-faixa{grid-auto-flow:row dense;margin-bottom:8px}.oscal-multi{flex-direction:row;align-items:center;flex-wrap:wrap;gap:4px 8px;border-left:3px solid #1E7A4C}'
-           '@media (max-width:900px){.oscal{grid-template-columns:1fr}.oscal-dia{min-height:0}.oscal-dia[data-vazio=true]{display:none}.oscal-faixa>*{grid-column:auto!important}}</style>')
+           '.oscal-cont{display:none!important}'
+           '@media (max-width:900px){.oscal{grid-template-columns:1fr}.oscal-dia{min-height:0}.oscal-dia[data-vazio=true]{display:none}.oscal-faixa{display:none}.oscal-cont{display:flex!important}}</style>')
     cab = (f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">'
            f'<button type="button" aria-label="Semana anterior" onClick="{H("cal_prev")}" style="{_MINI}">‹</button>'
            f'<b style="font-size: 14px;" aria-live="polite">{H("cal_tit")}</b>'
@@ -1706,6 +1711,9 @@ def _calendario():
             f'<sc-for list="{H("d.ords")}" as="o" hint-placeholder-count="1"><button type="button" class="oscal-o" aria-label="{H("o.lab")}" onClick="{H("o.open")}">'
             f'<b style="font-size: 12.5px;">{H("o.id")}</b><span style="font-size: 12px; line-height: 1.3;">{H("o.tipo")}</span>'
             f'<span style="font-size: 11.5px; color: {MUTED};">{H("o.local")}</span><span style="{H("o.fst")}"><span style="{H("o.fdot")}"></span>{H("o.fase")}</span></button></sc-for>'
+            f'<sc-for list="{H("d.mult")}" as="o" hint-placeholder-count="1"><button type="button" class="oscal-o oscal-multi oscal-cont" aria-label="{H("o.lab")}" onClick="{H("o.open")}">'
+            f'<b style="font-size: 12.5px;">{H("o.id")}</b><span style="font-size: 12px;">{H("o.tipo")}</span><span style="font-size: 11.5px; color: {MUTED};">{H("o.pos")} · {H("o.per")}</span>'
+            f'<span style="{H("o.fst")}"><span style="{H("o.fdot")}"></span>{H("o.fase")}</span></button></sc-for>'
             f'<sc-if value="{H("d.vazio")}" hint-placeholder-val="{F()}"><span style="font-size: 12px; color: {MUTED};">sem ordem</span></sc-if></div></sc-for></div>')
     return css + cab + sem + faixa + dias
 
