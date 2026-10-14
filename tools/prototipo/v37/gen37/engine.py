@@ -1218,6 +1218,15 @@ RETORNO_CSS=(
     "#g2-carga.ini{opacity:1;width:82%;transition:width 1.4s cubic-bezier(.08,.6,.2,1)}#g2-carga.chega{opacity:1;width:82%}"
     "#g2-carga.fim{opacity:0;width:100%;transition:width .22s ease-out,opacity .28s ease .22s}"
     "@media (prefers-reduced-motion:reduce){#g2-carga.ini,#g2-carga.chega{width:100%;transition:none}#g2-carga.fim{transition:none}}"
+    # 14/10 (proprietário: feedback em todas as telas e botões): o controle acionado pulsa um anel verde de 320 ms (g2lib, clique/toque/Enter);
+    # com "menos movimento", o anel fica parado o mesmo tempo
+    # contorno (outline) e não sombra: chips e botões com sombra própria (!important) não escondem o retorno
+    "@keyframes g2acionado{0%{outline:2px solid rgba(30,122,76,.75);outline-offset:0}100%{outline:2px solid rgba(30,122,76,0);outline-offset:5px}}"
+    ".g2-acionado{animation:g2acionado .32s ease-out}"
+    ".g2card.g2-acionado,a.mod-cartao.g2-acionado{background:#E4F3E9!important;border-color:#1E7A4C!important}"
+    "@media (prefers-reduced-motion:reduce){.g2-acionado{animation:none!important;outline:2px solid #1E7A4C!important;outline-offset:2px}}"
+    # chegada na tela: o conteúdo entra em 180 ms (só opacidade: sem transform, a barra de ações fixa não pula); sem animação com "menos movimento"
+    "@keyframes g2entra{from{opacity:.25}to{opacity:1}}@media (prefers-reduced-motion:no-preference){main{animation:g2entra .18s ease-out}}"
 )
 # =====================================================================================
 # DS-DICA-20261009 (g2lib: g2dica, G2_DICAS): dica acessível (role=tooltip), ícone ⓘ, termo com dica e indisponível com motivo.

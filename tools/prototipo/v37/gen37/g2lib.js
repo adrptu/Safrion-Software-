@@ -228,7 +228,8 @@ function g2persiste(self,id,g2_0,volta,pre){ if(!self.g2persist) return true; co
   const all=Object.assign({},g2_0||{}); all[id]=Object.assign({},all[id]||{},volta||{},volta&&volta.fm?{fm:Object.assign({},volta.fm,{errG:er,errP:pre})}:{});
   self.setState({g2:all,g2toast:pre+': '+er}); return false; }
 function g2dirty(fm){ if(!fm) return false; for(const k in fm.draft){ if(String(fm.draft[k])!==String(fm.orig[k])) return true; } return false; }
-function g2close(self,sp){ const fm=g2st(self,sp.id).fm; if(fm && !fm.ro && g2dirty(fm)) { g2set(self,sp.id,{fm:Object.assign({},fm,{warn:true})}); return; } g2set(self,sp.id,{fm:null}); }
+function g2close(self,sp){ const fm=g2st(self,sp.id).fm; if(fm && !fm.ro && g2dirty(fm)) { g2set(self,sp.id,{fm:Object.assign({},fm,{warn:true})}); return; } g2set(self,sp.id,{fm:null});
+  if(fm && !fm.ro) self.setState({g2toast:'Cancelado · nada foi alterado'}); }   /* 14/10: cancelar também confirma (salvar já confirmava) */
 // VISOES-2 §3.6 · colunas só o essencial. c.ess = posição no padrão ("Abre com"); c.pq = pergunta (oque, quem, quando, onde, medida,
 // situacao) que agrupa o painel de colunas. Grade sem nenhum ess mostra todas, como antes. A escolha é por perfil × tela × grade (no
 // protótipo, perfil = usuário) e guarda o conjunto, não a ordem: a ordem é sempre a do desenho (identidade, padrão pelo ess, depois as
@@ -480,7 +481,7 @@ function g2vals(self,sp,v,mask){
         set:(e)=>{ const cur=g2st(self,id).fm; if(!cur) return; let d=Object.assign({},cur.draft,{[f.k]:e.target.value}); if(self.g2draft){ const d2=self.g2draft(id,f.k,d,cur); if(d2) d=d2; } const er=Object.assign({},cur.errs||{}); delete er[f.k]; g2set(self,id,{fm:Object.assign({},cur,{draft:d,errs:er,warn:false})}); }}; });
     F.nerr=Object.keys(fm.errs||{}).length; F.hasErr=F.nerr>0; F.errG=fm.errG||''; F.errP=fm.errP||'Não salvo'; F.hasErrG=!!fm.errG;
     F.save=()=>g2save(self,sp); F.cancel=()=>g2close(self,sp); F.close=()=>g2close(self,sp);
-    F.discard=()=>g2set(self,id,{fm:null}); F.keep=()=>{ const cur=g2st(self,id).fm; g2set(self,id,{fm:Object.assign({},cur,{warn:false})}); };
+    F.discard=()=>{ g2set(self,id,{fm:null}); self.setState({g2toast:'Alterações descartadas · nada foi salvo'}); }; F.keep=()=>{ const cur=g2st(self,id).fm; g2set(self,id,{fm:Object.assign({},cur,{warn:false})}); };
     F.key=(e)=>{ if(e && e.key==='Escape'){ e.preventDefault(); g2close(self,sp); } };
   }
   v[id+'_F']=F; }
@@ -800,6 +801,9 @@ function g2passo(){ if(typeof document==='undefined') return '';
 // bloco do contexto atual: o cartão do 1º título visível do conteúdo (o mesmo que g2etapa foca)
 function g2blocoAtual(){ const m=document.querySelector('main'); if(!m) return null; const h=[...m.querySelectorAll('h2,h3')].find(g2vis);
   if(h) return h.closest('section')||h.parentElement; return [...m.children].find(g2vis)||m; }
+// contexto do conteúdo: o 1º título visível do main (o mesmo bloco que g2blocoAtual realça); '' sem título
+function g2contexto(){ if(typeof document==='undefined') return ''; const m=document.querySelector('main'); if(!m) return '';
+  const h=[...m.querySelectorAll('h2,h3')].find(g2vis); return h?g2txt(h).slice(0,80):''; }
 // filhos com caixa (sc-if e sc-for são display:contents)
 function g2blocos(p){ const out=[]; for(const c of p.children){ if(/^SC-/.test(c.tagName)) out.push(...g2blocos(c)); else out.push(c); } return out; }
 // foto do que está na tela, por chave estável e nível (1 = linha/cartão, 2 = região rotulada/estado do cabeçalho, 3 = bloco do conteúdo)
@@ -828,7 +832,7 @@ function g2montou(self){ if(typeof document==='undefined') return; g2buscaUnica(
     /* revisão DS (achado 10): com o foco no título o leitor de tela já lê o título; o anúncio leva só o estado (sem ler o título duas vezes) */
     g2flash(h,foca?stT:('Tela: '+tit+(stT?' · '+stT:'')));
     if(foca){ if(!h.hasAttribute('tabindex')) h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); }
-    self.__g2foto=g2foto(); self.__g2passo=g2passo(); self.__g2toastVisto=(self.state&&self.state.g2toast)||''; }catch(e){} },60); }
+    self.__g2foto=g2foto(); self.__g2passo=g2passo(); self.__g2ctx=g2contexto(); self.__g2toastVisto=(self.state&&self.state.g2toast)||''; }catch(e){} },60); }
 // depois de cada desenho: troca de etapa/seção realça o bloco do novo contexto; aviso novo (g2toast) realça o que mudou e anuncia
 function g2mudou(self){ if(typeof document==='undefined') return; g2buscaUnica(self); if(!self.__g2foto) return;   // antes da 1ª foto (montagem) não compara
   const f=g2foto(), ant=self.__g2foto, agora=Date.now(); self.__g2foto=f;
@@ -841,6 +845,13 @@ function g2mudou(self){ if(typeof document==='undefined') return; g2buscaUnica(s
     const ae=document.activeElement; if(!ae||ae===document.body||!ae.isConnected){ const hh=b&&b.querySelector('h2,h3'); if(hh){ if(!hh.hasAttribute('tabindex')) hh.setAttribute('tabindex','-1'); hh.focus({preventScroll:false}); } }
     return; }
   if(p) self.__g2passo=p;
+  /* 14/10 (proprietário: "não está dando flash de feedback quando muda para a tela de destino"): abrir um detalhe ou trocar a visão na mesma
+     tela (o 1º título do conteúdo muda) realça o bloco novo e anuncia, como a troca de etapa; o foco vai ao título se o botão sumiu */
+  const cx=g2contexto();
+  if(cx&&self.__g2ctx&&cx!==self.__g2ctx){ self.__g2ctx=cx; if(tNovo) self.__g2toastVisto=t; self.__g2mud=[]; const b=g2blocoAtual(); g2flash(b,cx+(tNovo?'. '+t:''));
+    const ae=document.activeElement; if(!ae||ae===document.body||!ae.isConnected){ const hh=b&&b.querySelector('h2,h3'); if(hh){ if(!hh.hasAttribute('tabindex')) hh.setAttribute('tabindex','-1'); hh.focus({preventScroll:true}); } }
+    return; }
+  if(cx) self.__g2ctx=cx;
   if(!tNovo) return; self.__g2toastVisto=t;
   const ks=[...new Set(mud.map(x=>x.k).concat(Object.keys(f).filter(k=>!ant[k]&&f[k].nv===1&&f[k].el.classList.contains('g2flash'))))]; self.__g2mud=[];
   const nivel=(n)=>ks.filter(k=>f[k]&&f[k].nv===n).map(k=>f[k].el).filter(g2vis);
@@ -849,6 +860,11 @@ function g2mudou(self){ if(typeof document==='undefined') return; g2buscaUnica(s
 (function g2retGlob(){ if(typeof document==='undefined'||window.__g2ret) return; window.__g2ret=1;
   // revisão DS (achado 1): a tela que volta da memória do navegador (voltar/avançar, bfcache) não monta de novo: a barra ligada no clique termina aqui
   window.addEventListener('pageshow',(e)=>{ if(!e.persisted) return; g2carga('fim'); try{ sessionStorage.removeItem('g2nav'); }catch(er){} });
+  // 14/10 (proprietário: "faça o mesmo para todas telas e botoes"): o controle acionado pulsa um anel verde (320 ms) — o usuário vê que o
+  // clique pegou mesmo quando a resposta vem noutro lugar da tela ou noutra tela; indisponível não pulsa (a recusa tem o próprio retorno)
+  document.addEventListener('click',(e)=>{ const el=e.target&&e.target.closest&&e.target.closest('button,a[href],[role=button],[role=tab],[role=menuitem],[role=option],summary,.g2card,a.mod-cartao');
+    if(!el||el.disabled||el.getAttribute('aria-disabled')==='true'||el.closest('.g2dica')) return;
+    el.classList.remove('g2-acionado'); void el.offsetWidth; el.classList.add('g2-acionado'); clearTimeout(el.__g2ac); el.__g2ac=setTimeout(()=>el.classList.remove('g2-acionado'),360); },true);
   // clique num link para outra tela do protótipo: a barra começa já (a navegação segue sem espera); a tela nova termina a barra e foca o título
   document.addEventListener('click',(e)=>{ if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey) return;
     const a=e.target&&e.target.closest&&e.target.closest('a[href]'); if(!a||(a.target&&a.target!=='_self')||a.hasAttribute('download')) return;
