@@ -157,7 +157,7 @@
   {
     "file": "shared/ux-essencial/assets/m3-kit.js",
     "before": "035eef47c47ef6016b47edabd2dd80c7b4df4949064edee85bfe9543a4a67efd",
-    "after": "611d0a488e5384b056c34bf1ed4769de4a21b55ca5a4fea32ba4c28fb74fdba2"
+    "after": "7296d430bd65ccb0869df06247866c7246d594a168858cda5665325faefd1c7b"
   },
   {
     "file": "test_gemini_consult.py",

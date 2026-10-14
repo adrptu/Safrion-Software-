@@ -90,3 +90,6 @@ O recibo tardio da gravação vigente fecha o aviso de incerteza e mostra o suce
 
 ### Rodada R12 — contexto da tabela e avisos por instância
 Achados 4276922580/4276922586 corrigidos: setRows preserva seleção por rowKey estável (padrão id), expansão e foco; registro removido ou identidade duplicada não seleciona outra linha. Confirmação tardia somente substitui aviso ainda pertencente ao próprio autosave. Contraprovas navegador 40/41→41/41 e tabela 11/14→14/14; 20/20 skills, 17/17 adaptador e lint dos dois assets passaram. Manifesto d68ae7528d520728b54226e85c738c58950c8e4638d65903c1b53f8fce1b2fb0. Revisão Claude, integração e recibo cloud pendentes.
+
+### Rodada R13 — retomada após recibo tardio (Claude 6179948396)
+AUTOSAVE-TARDIO-01: ao confirmar B, se houver rascunho C, reagenda flush serializado sem nova tecla. Não reenvia antes da confirmação remota e não substitui aviso de outra instância. Contraprova 41/42→42/42, 20/20 skills, 17/17 adaptador, lint passou; tabela R12 14/14 e domínio 68/68 preservados. Manifesto 6a37ee6479abe23fcfee01ae5f515ecd4401b11ed0f61b686faace714e557c7e. Revisão final Claude e recibo cloud pendentes.

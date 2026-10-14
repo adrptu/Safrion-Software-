@@ -145,7 +145,8 @@
                 uncertain = false;
                 const ownsNotice = closeNotice?.isCurrent();
                 closeNotice?.();
-                if (ownsNotice && message && !dirty()) notice(message, { timeout: 2000 });
+                if (dirty()) { clearTimeout(t); t = setTimeout(flush, delay); }
+                else if (ownsNotice && message) notice(message, { timeout: 2000 });
               }
             }
             return receipt;

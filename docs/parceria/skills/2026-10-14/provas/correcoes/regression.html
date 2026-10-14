@@ -75,6 +75,9 @@ for(const [msg,edit,label] of [['Confirmado',false,'sucesso'],['',false,'sem men
 const f1=document.createElement('form'),f2=document.createElement('form');for(const f of [f1,f2]){f.innerHTML='<input name="x" value="A">';document.body.appendChild(f)}let finish1;
 const a1=Kit.autosave(f1,()=>new Promise(r=>{finish1=r}),{timeoutMs:20});const a2=Kit.autosave(f2,()=>new Promise(()=>{}),{timeoutMs:20});f1.elements.x.value='B';await a1.flush();f2.elements.x.value='B';await a2.flush();const warning2=document.querySelector('.snackbar');finish1();await tick();
 check('Recibo de um formulário não substitui aviso incerto de outro',a2.pending&&warning2.isConnected&&document.querySelector('.snackbar')===warning2&&warning2.textContent.includes('sem confirmação'));await a1.destroy();await a2.destroy({discard:true});f1.remove();f2.remove();
+const rf=document.createElement('form');rf.innerHTML='<input name="x" value="A">';document.body.appendChild(rf);let rdone;const rsent=[];
+const ra=Kit.autosave(rf,d=>{rsent.push(d.x);return d.x==='B'?new Promise(r=>{rdone=r}):Promise.resolve()},{delay:10,timeoutMs:20});rf.elements.x.value='B';await ra.flush();rf.elements.x.value='C';await ra.flush();rdone();await new Promise(r=>setTimeout(r,80));
+check('Recibo tardio retoma autosave do rascunho recente sem nova tecla',rsent.join()==='B,C'&&!ra.dirty&&!ra.pending&&document.querySelector('.snackbar')?.textContent.includes('Salvo'));await ra.destroy();rf.remove();
 window.testResults=results;document.querySelector('#result').textContent=JSON.stringify(results,null,2);document.title=results.every(x=>x.ok)?'PASS '+results.length+'/'+results.length:'FAIL';
 })().catch(error=>{window.testResults=[{ok:false,error:String(error)}]});
 </script></html>
