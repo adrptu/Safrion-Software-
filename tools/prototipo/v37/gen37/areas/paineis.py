@@ -43,6 +43,9 @@ JS = r'''
 // Atrasadas: A liberar, Liberadas ou Em execução com o fim da janela (fim, ISO, do registro) antes de OSD.hoje (D2.HOJE_ISO, a data das telas e
 // do Mapa; não a DIA_OP, que é só a data padrão do apontamento). Em conferência já foi executada. Ordem aberta sem fim (emitida na tela) não é
 // julgada: conta em n.sem_prazo. Sem hoje válido = null. Custos: etapa seguinte (null).
+// causa estruturada da impedida (Codex 6166235821: agrupar sem ler o texto do selo): vem dos campos da projeção da O.S. —
+// libErr (o Estoque segura a liberação: saldo, lote ou insumo) e bloq (máquina, implemento ou equipamento do registro ou da Manutenção)
+function agrCausa(o){ if(o.libErr) return 'Insumo no Estoque'; if(o.bloq) return 'Máquina ou equipamento'; return 'Outro impedimento'; }
 function agrPainelRef(c,rec) { rec=rec||{};
  let os=null;
  if(typeof osProjecaoEstado==='function'&&typeof OSD!=='undefined') {
@@ -53,14 +56,15 @@ function agrPainelRef(c,rec) { rec=rec||{};
   if(ab&&!semCtx) {
    const imp=ab.filter(o=>(!rec.faz||o.faz===rec.faz)&&(!rec.saf||o.saf===rec.saf))
     .map(o=>[o,o.selos.find(s=>s&&OS_IMP_RE.test(s.t||''))]).filter(x=>x[1])
-    .map(([o,s])=>({id:o.id,talhao:o.talhao||'',faz:o.faz||null,saf:o.saf||null,etapa:o.etapa,motivo:s.t,dono:o.dono||null,desde:null,origem:'OS.dc.html#'+encodeURIComponent(o.id)}));
-   const iso=x=>typeof x==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x), hoje=OSD.hoje;
+    .map(([o,s])=>({id:o.id,talhao:o.talhao||'',faz:o.faz||null,saf:o.saf||null,etapa:o.etapa,motivo:s.t,causa:agrCausa(o),dono:o.dono||null,desde:null,origem:'OS.dc.html#'+encodeURIComponent(o.id)}));
+   /* data de calendário de verdade (Codex 6166305618): formato e ida e volta UTC (2026-99-99 e 2026-02-30 não passam; 2028-02-29 passa) */
+   const iso=x=>{ if(typeof x!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(x)) return false; const d=new Date(x+'T00:00:00Z'); return !isNaN(d.getTime())&&d.toISOString().slice(0,10)===x; }, hoje=OSD.hoje;
    let atr=null, semPrazo=null;
    if(iso(hoje)) { const rc=ab.filter(o=>(!rec.faz||o.faz===rec.faz)&&(!rec.saf||o.saf===rec.saf)&&['A liberar','Liberadas','Em execução'].includes(o.etapa));
     semPrazo=rc.filter(o=>!iso(o.fim)).length;
     atr=rc.filter(o=>iso(o.fim)&&o.fim<hoje).map(o=>({id:o.id,talhao:o.talhao||'',faz:o.faz||null,saf:o.saf||null,etapa:o.etapa,prevista:o.fim,
      dias:Math.round((Date.parse(hoje)-Date.parse(o.fim))/864e5),dono:o.dono||null,origem:'OS.dc.html#'+encodeURIComponent(o.id)})); }
-   os={impedidas:imp,atrasadas:atr,n:{impedidas:imp.length,atrasadas:atr?atr.length:null,sem_prazo:semPrazo}};
+   os={impedidas:imp,atrasadas:atr,referencia:iso(hoje)?hoje:null,n:{impedidas:imp.length,atrasadas:atr?atr.length:null,sem_prazo:semPrazo}};   /* referencia: a data contra a qual o atraso é medido (a apresentação diz "Referência dd/mm/aaaa", não "hoje") */
   }
  }
  return {os,custos:null};

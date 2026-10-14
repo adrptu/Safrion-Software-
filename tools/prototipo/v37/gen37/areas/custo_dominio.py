@@ -17,7 +17,8 @@ function cusOrdem(D,o){ const r={ins:0,op:0,ha:0,haConf:0,rs:0,rsConf:0,prevExec
   if(cop===undefined) r.pend.push('Operação '+(op||'—')+' sem rendimento na safra: custo de operação não somado');
   const prHa=(o.ins||[]).reduce((s,x)=>{ const p=cusPreco(D,x.p); if(p===null){ r.pend.push('Sem preço: '+x.p+' (não somado)'); return s; } return s+x.dose*p; },0);
   (o.ap||[]).forEach(a=>{ if(!cenApSomado(a)) return; const ha=Number(a.ha)||0; let vi=0;   // duplicidade retida ou guardada não vira custo
-    if(a.cons&&Object.keys(a.cons).length) Object.keys(a.cons).forEach(p=>{ const pr=cusPreco(D,p); if(pr!==null) vi+=(Number(a.cons[p])||0)*pr; }); else vi=prHa*ha;
+    /* consumo informado sem preço não vira zero calado (Codex 6166518949, achado 2): entra em pend e torna o resultado parcial (Mapa e Painel) */
+    if(a.cons&&Object.keys(a.cons).length) Object.keys(a.cons).forEach(p=>{ const pr=cusPreco(D,p); if(pr!==null) vi+=(Number(a.cons[p])||0)*pr; else if((Number(a.cons[p])||0)>0) r.pend.push('Sem preço: '+p+' (consumo não somado)'); }); else vi=prHa*ha;
     const vo=(cop||0)*ha; r.ins+=vi; r.op+=vo; r.ha+=ha; r.rs+=vi+vo; r.prevExec+=(prHa+(cop||0))*ha; if(a.st==='Conferido'){ r.haConf+=ha; r.rsConf+=vi+vo; } });
   r.pend=r.pend.filter((x,i,a)=>a.indexOf(x)===i); return r; }
 // realizado do talhão t sobre as ordens projetadas osn; D.ord = [{id, tal:[talhões]}]
@@ -26,27 +27,34 @@ function cusTalhao(D,t,osn){ const R={ins:0,op:0,ha:0,haConf:0,rs:0,rsConf:0,pre
     if(mo.tal.length>1){ R.shared.push({o,c,tal:mo.tal}); return; }
     ['ins','op','ha','haConf','rs','rsConf','prevExec'].forEach(k=>{ R[k]+=c[k]; }); R.ords.push({o,c}); c.pend.forEach(p=>R.pend.push(o.id+' · '+p)); });
   return R; }
-// PAINEL-02 · custo por cultura (fazenda · safra · cultura) para o Painel; sem comando nem mutação; null = Sem dados.
-// orcado: previsto do plano dos talhões (talhão sem plano vai em sem_orc e o R$/ha orçado fica null); real_*: cusTalhao sobre a projeção
-// do estado (osProjecaoEstado); desvio_pct: realizado × previsto da área executada (a mesma conta da camada Custos do Mapa).
+// PAINEL-02 · custo por cultura para o Painel (contrato 6166150698; revisão Codex 6166518949). Agrupamento: fazenda · safra · cultura (identidade
+// estável faz|saf|cultura + talhões; não separa cultivar nem ciclo). Sem comando nem mutação; null = Sem dados.
+//   orcado_rs: previsto do plano dos talhões (talhão sem plano em sem_orc; R$/ha orçado null);
+//   real_total_rs = real_prov_rs (apontamentos aceitos ainda não conferidos) + real_conf_rs (conferidos): confirmar move de um para o outro sem mudar o total;
+//   real_rs_ha = real_total_rs / area_ha (custo acumulado por hectare PLANTADO, comparável ao orçado por ha); null com área 0 ou ausente;
+//   ha_exec e desvio_exec_pct: execução (soma das passagens apontadas) contra o previsto da mesma área executada, a conta da camada Custos do Mapa;
+//     não é o comparativo da safra; null quando parcial (preço ausente ou ordem fora da cobertura);
+//   fora: ordens emitidas na tela sem vínculo de talhão no custo (fora da cobertura, com o realizado delas), nunca somadas caladas.
 function agrCustoRef(c,rec) { rec=rec||{};
  if(typeof CUSD==='undefined'||typeof osProjecaoEstado!=='function') return null;
  let osn=null; try { osn=osProjecaoEstado(c,id=>/^OB-/.test(id)); } catch(e) { osn=null; } if(!osn) return null;
- const r2=x=>Math.round(x*100)/100, G={}, sem={};
+ const r2=x=>Math.round(x*100)/100, G={}, sem={}, noOrd=new Set(CUSD.ord.map(o=>o.id));
  Object.keys(CUSD.tal).forEach(t=>{ const x=CUSD.tal[t]; if((rec.faz&&x.faz!==rec.faz)||(rec.saf&&x.saf!==rec.saf)) return;
   const k=x.faz+'|'+x.saf+'|'+x.cultura;
-  const g=G[k]||(G[k]={cultura:x.cultura,faz:x.faz,saf:x.saf,talhoes:[],area_ha:0,orcado_rs:0,sem_orc:[],real_prov_rs:0,real_conf_rs:0,ha_exec:0,prev_exec_rs:0,pend:[]});
+  const g=G[k]||(G[k]={id:k,cultura:x.cultura,faz:x.faz,saf:x.saf,talhoes:[],area_ha:0,orcado_rs:0,sem_orc:[],tot:0,conf:0,ha_exec:0,prev_exec_rs:0,pend:[]});
   g.talhoes.push(t); g.area_ha+=x.area; const P=CUSD.prev[t];
   if(P&&P.fonte==='plano') g.orcado_rs+=P.tot; else g.sem_orc.push(t);
   ((P&&P.pend)||[]).forEach(p=>g.pend.push(t+' · '+p));
-  const R=cusTalhao(CUSD,t,osn); g.real_prov_rs+=R.rs; g.real_conf_rs+=R.rsConf; g.ha_exec+=R.ha; g.prev_exec_rs+=R.prevExec; R.pend.forEach(p=>g.pend.push(p));
+  const R=cusTalhao(CUSD,t,osn); g.tot+=R.rs; g.conf+=R.rsConf; g.ha_exec+=R.ha; g.prev_exec_rs+=R.prevExec; R.pend.forEach(p=>g.pend.push(p));
   R.shared.forEach(s=>{ sem[s.o.id]={os:s.o.id,talhoes:s.tal,rs:r2(s.c.rs)}; }); });
- const cultivos=Object.values(G).map(g=>{ const pend=g.pend.filter((p,i,a)=>a.indexOf(p)===i);
-  return {cultura:g.cultura,faz:g.faz,saf:g.saf,talhoes:g.talhoes,area_ha:r2(g.area_ha),orcado_rs:g.sem_orc.length&&!g.orcado_rs?null:r2(g.orcado_rs),
-   orcado_rs_ha:g.sem_orc.length||!(g.area_ha>0)?null:r2(g.orcado_rs/g.area_ha),sem_orc:g.sem_orc,real_prov_rs:r2(g.real_prov_rs),real_conf_rs:r2(g.real_conf_rs),
-   ha_exec:r2(g.ha_exec),real_rs_ha:g.ha_exec>0?r2(g.real_prov_rs/g.ha_exec):null,prev_exec_rs:r2(g.prev_exec_rs),
-   desvio_pct:g.prev_exec_rs>0?Math.round((g.real_prov_rs-g.prev_exec_rs)/g.prev_exec_rs*1000)/10:null,parcial:pend.length>0||g.sem_orc.length>0,pend}; });
- return {cultivos,sem_rateio:Object.values(sem)};
+ const fora=osn.filter(o=>!noOrd.has(o.id)&&(!rec.faz||o.faz===rec.faz)&&(!rec.saf||o.saf===rec.saf)).map(o=>({os:o.id,talhao:o.talhao||'',rs:r2(cusOrdem(CUSD,o).rs),motivo:'ordem emitida na tela sem vínculo de talhão no custo'}));
+ const cultivos=Object.values(G).map(g=>{ const pend=g.pend.filter((p,i,a)=>a.indexOf(p)===i), parcial=pend.length>0||g.sem_orc.length>0||fora.some(f=>f.rs>0);
+  return {id:g.id,cultura:g.cultura,faz:g.faz,saf:g.saf,talhoes:g.talhoes,area_ha:r2(g.area_ha),
+   orcado_rs:g.sem_orc.length&&!g.orcado_rs?null:r2(g.orcado_rs),orcado_rs_ha:g.sem_orc.length||!(g.area_ha>0)?null:r2(g.orcado_rs/g.area_ha),sem_orc:g.sem_orc,
+   real_total_rs:r2(g.tot),real_prov_rs:r2(g.tot-g.conf),real_conf_rs:r2(g.conf),real_rs_ha:g.area_ha>0?r2(g.tot/g.area_ha):null,
+   ha_exec:r2(g.ha_exec),prev_exec_rs:r2(g.prev_exec_rs),desvio_exec_pct:(!parcial&&g.prev_exec_rs>0)?Math.round((g.tot-g.prev_exec_rs)/g.prev_exec_rs*1000)/10:null,
+   parcial,pend}; });
+ return {cultivos,sem_rateio:Object.values(sem),fora};
 }
 '''
 

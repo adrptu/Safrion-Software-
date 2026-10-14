@@ -48,6 +48,7 @@ chk('agrPainelRef: seed = OS-0418 e OS-0502 (falta insumo no Estoque), OS-0420 (
 chk('agrPainelRef: mesma lista e mesmo motivo que a projeção da tela O.S. (osProjecao + OS_IMP_RE)',r0.os.impedidas.map(x=>[x.id,x.motivo]),
  osProjecao(ag).filter(o=>!/^OB-/.test(o.id)&&!['Encerradas','Canceladas'].includes(o.etapa)).map(o=>[o.id,(o.selos.find(s=>OS_IMP_RE.test(s.t))||{}).t]).filter(x=>x[1]));
 chk('agrPainelRef: origem na O.S. e n confere',[r0.os.impedidas[0].origem,r0.os.n.impedidas],['OS.dc.html#OS-0418',5]);
+chk('agrPainelRef: causa estruturada pela projeção (não pelo texto do selo)',r0.os.impedidas.map(x=>[x.id,x.causa]),[['OS-0418','Insumo no Estoque'],['OS-0420','Máquina ou equipamento'],['OS-0431','Máquina ou equipamento'],['OS-0502','Insumo no Estoque'],['OS-0507','Máquina ou equipamento']]);
 chk('agrPainelRef: cada impedida traz fazenda e safra do registro',r0.os.impedidas.map(x=>[x.id,x.faz,x.saf]),[['OS-0418','Santa Rita','2026/27'],['OS-0420','Santa Rita','2026/27'],['OS-0431','Santa Rita','2026/27'],['OS-0502','Lagoa Grande','2026/27'],['OS-0507','Lagoa Grande','2026/27']]);
 chk('agrPainelRef: hoje 23/09 (D2.HOJE_ISO) = nenhuma atrasada, nenhuma sem prazo; custos null; desde null',[r0.os.atrasadas,r0.os.n.atrasadas,r0.os.n.sem_prazo,r0.custos,r0.os.impedidas.every(x=>x.desde===null)],[[],0,0,null,true]);
 { const h0=OSD.hoje; OSD.hoje='2026-09-25'; const ra=agrPainelRef(cenClone(CEN0));
@@ -59,6 +60,12 @@ chk('agrPainelRef: hoje 23/09 (D2.HOJE_ISO) = nenhuma atrasada, nenhuma sem praz
   chk('agrPainelRef: enviada para conferência deixa de ser atrasada',agrPainelRef(ec).os.atrasadas.some(x=>x.id==='OS-0505'),false);
   const bz=JSON.parse(JSON.stringify(OSD.ords.find(o=>o.id==='OS-0430'))); bz.id='OS-0601'; delete bz.fim; const ne=cenClone(CEN0); ne.ordens['OS-0601']={id:'OS-0601',etapa:'A liberar',osc:{novo:bz}};
   chk('agrPainelRef: ordem emitida sem fim não é julgada: conta em sem_prazo',[agrPainelRef(ne).os.n.sem_prazo,agrPainelRef(ne).os.atrasadas.some(x=>x.id==='OS-0601')],[1,false]);
+  chk('agrPainelRef: referência devolvida para a apresentação (não "hoje")',ra.os.referencia,'2026-09-25');
+  OSD.hoje='2026-99-99'; chk('agrPainelRef: data impossível (2026-99-99) = atrasadas Sem dados, impedidas mantidas',[agrPainelRef(cenClone(CEN0)).os.atrasadas,agrPainelRef(cenClone(CEN0)).os.referencia,agrPainelRef(cenClone(CEN0)).os.n.impedidas],[null,null,5]);
+  OSD.hoje='2026-03-03'; { const k=OSD.ords.find(o=>o.id==='OS-0424'), f0=k.fim; k.fim='2026-02-30'; const rb=agrPainelRef(cenClone(CEN0)); k.fim=f0;
+    chk('agrPainelRef: fim inexistente (2026-02-30) não é julgado: vai para sem_prazo',[rb.os.atrasadas.some(x=>x.id==='OS-0424'),rb.os.n.sem_prazo],[false,1]); }
+  OSD.hoje='2028-03-01'; { const k=OSD.ords.find(o=>o.id==='OS-0424'), f0=k.fim; k.fim='2028-02-29'; const rb=agrPainelRef(cenClone(CEN0)); k.fim=f0;
+    chk('agrPainelRef: ano bissexto (2028-02-29) é data válida: 1 dia de atraso',(rb.os.atrasadas.find(x=>x.id==='OS-0424')||{}).dias,1); }
   OSD.hoje='23/09/2026'; chk('agrPainelRef: hoje fora do formato ISO = atrasadas Sem dados, impedidas mantidas',[agrPainelRef(cenClone(CEN0)).os.atrasadas,agrPainelRef(cenClone(CEN0)).os.n.impedidas],[null,5]);
   OSD.hoje=h0; }
 // S2: máquina apta (CMD-19) tira só o impedimento dela, como na tela O.S.
@@ -99,13 +106,29 @@ chk('agrPainelRef: ordem emitida na tela (osc.novo) entra pela base dela',agrPai
   chk('agrCustoRef: seed = 4 culturas (fazenda · cultura)',K.cultivos.map(x=>x.faz+' · '+x.cultura),['Santa Rita · Soja','Santa Rita · Mamão Formosa','Santa Rita · Café','Lagoa Grande · Mamão Formosa']);
   const so=K.cultivos[0];
   chk('agrCustoRef: Soja com talhões sem plano = R$/ha orçado null, sem_orc listado e parcial',[so.orcado_rs_ha,so.sem_orc,so.parcial],[null,['T4','T3','P1','P2'],true]);
-  chk('agrCustoRef: realizado = soma de cusTalhao por talhão (mesma conta do Mapa)',so.real_prov_rs,Math.round(so.talhoes.reduce((s,t)=>s+cusTalhao(CUSD,t,osProjecaoEstado(k0,id=>/^OB-/.test(id))).rs,0)*100)/100);
+  chk('agrCustoRef: realizado total = soma de cusTalhao por talhão (mesma conta do Mapa)',so.real_total_rs,Math.round(so.talhoes.reduce((s,t)=>s+cusTalhao(CUSD,t,osProjecaoEstado(k0,id=>/^OB-/.test(id))).rs,0)*100)/100);
   chk('agrCustoRef: O.S. de vários talhões (OS-0421, T1 + T2) fica em sem_rateio',K.sem_rateio.map(x=>[x.os,x.talhoes]),[['OS-0421',['T1','T2']]]);
   chk('agrCustoRef: recorte Lagoa Grande = só a cultura da Lagoa',agrCustoRef(k0,{faz:'Lagoa Grande'}).cultivos.map(x=>x.cultura),['Mamão Formosa']);
   const pr=CUSD.preco, semP=Object.assign({},pr); const prodLG=Object.keys(pr)[0]; delete semP[prodLG]; CUSD.preco=semP;
   const Kp=agrCustoRef(cenClone(CEN0)); CUSD.preco=pr;
   chk('agrCustoRef: preço removido não vira zero: alguma cultura fica parcial com o item em pend',Kp.cultivos.some(x=>x.parcial&&x.pend.some(p=>p.indexOf(prodLG)>=0)),true);
-  chk('agrCustoRef: estado vazio = custos zerados (válido), não null',agrCustoRef({ordens:{}}).cultivos.every(x=>x.real_prov_rs===0&&x.ha_exec===0),true);
+  chk('agrCustoRef: estado vazio = custos zerados (válido), não null',agrCustoRef({ordens:{}}).cultivos.every(x=>x.real_total_rs===0&&x.ha_exec===0),true);
+  // revisão Codex 6166518949: cenário mínimo sintético (talhão X de 10 ha, plano R$ 100, preço P = 10/L, operação sem custo)
+  const mini=(aps,naOrd)=>{ const sv=JSON.parse(JSON.stringify(CUSD)); CUSD.tal={X:{faz:'F',saf:'S',cultura:'C',area:10}}; CUSD.prev={X:{fonte:'plano',tot:100,base:10,pend:[]}};
+    CUSD.ord=naOrd===false?[]:[{id:'OS-9001',tal:['X']}]; CUSD.preco={P:10}; CUSD.gen={}; CUSD.cop={Op:0};
+    const b={id:'OS-9001',tipo:'Pulverização',talhao:'X',area:10,etapa:'Em execução',selos:[],faz:'F',saf:'S',atv:{op:'Op',nome:'Teste'},ins:[{p:'P',dose:1,un:'L',tot:10}],orig:[],cond:''};
+    const cc={ordens:{'OS-9001':{id:'OS-9001',etapa:'Em execução',area:10,saldo:0,realizado:20,ap:aps,ins:[{p:'P',dose:1,un:'L',tot:10}],selos:[],osc:{novo:b}}},reqs:{},lotes:{},man:{ativos:{}}};
+    let r=null; try{ r=agrCustoRef(cc); } finally { Object.keys(CUSD).forEach(k=>delete CUSD[k]); Object.assign(CUSD,sv); } return r; };
+  const A2=[{dia:'20/09',ha:10,st:'Provisório',cons:{P:10}},{dia:'21/09',ha:10,st:'Conferido',cons:{P:10}}];
+  const m1=mini(A2).cultivos[0];
+  chk('agrCustoRef: 10 ha, duas passadas de 10 ha (100 + 100) = R$ 20/ha plantado; execução em 20 ha à parte',[m1.area_ha,m1.real_rs_ha,m1.ha_exec,m1.orcado_rs_ha],[10,20,20,10]);
+  chk('agrCustoRef: provisório 100 + conferido 100 = total 200 (sem soma dupla)',[m1.real_prov_rs,m1.real_conf_rs,m1.real_total_rs],[100,100,200]);
+  const m2=mini([{dia:'20/09',ha:10,st:'Conferido',cons:{P:10}},{dia:'21/09',ha:10,st:'Conferido',cons:{P:10}}]).cultivos[0];
+  chk('agrCustoRef: conferir move provisório para conferido sem mudar o total',[m2.real_prov_rs,m2.real_conf_rs,m2.real_total_rs],[0,200,200]);
+  const m3=mini([{dia:'20/09',ha:10,st:'Provisório',cons:{SemPreco:5}}]).cultivos[0];
+  chk('agrCustoRef: consumo sem preço = parcial, item em pend e desvio de execução indisponível',[m3.parcial,m3.desvio_exec_pct,m3.pend.some(p=>/Sem preço: SemPreco/.test(p))],[true,null,true]);
+  const m4=mini(A2,false);
+  chk('agrCustoRef: ordem emitida sem vínculo de talhão fica em fora (com o realizado) e torna parcial, não some calada',[m4.fora.map(f=>[f.os,f.rs]),m4.cultivos[0].parcial,m4.cultivos[0].real_total_rs],[[['OS-9001',200]],true,0]);
   chk('agrCustoRef: estado inválido = Sem dados',[agrCustoRef({}),agrCustoRef({ordens:{x:{id:'OS-9',etapa:'A liberar'}}})],[null,null]); }
 chk('agrPainelRef: estado não objeto = Sem dados',[agrPainelRef({ordens:[]}).os,agrPainelRef(null).os],[null,null]);
 console.log('RESULTADO '+n+'/'+n);
