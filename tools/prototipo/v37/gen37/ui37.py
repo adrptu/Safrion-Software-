@@ -70,9 +70,11 @@ HUB37={'Agrícola':'MOD-AGR.dc.html','Comercial':'MOD-COM.dc.html','Suprimentos'
 #   começam e terminam e a ordem correta do fluxo de processos"): a tela de entrada do módulo com fluxo mostra os cartões em blocos, na ordem
 #   do processo, ligados por setas curvas (areas/modulos.py), sem título de bloco. Teste só no Agrícola; os demais módulos seguem em grade.
 #   Cada cartão do módulo aparece uma vez (o build confere); um href fora do menu (BEN_PUBLICADO=False) fica de fora.
-FLUXO37={'Agrícola':[['AG-07.dc.html','AG-02.dc.html','PA.dc.html','SAF.dc.html','GE-02.dc.html'],   # planejar
-                     ['AG-01.dc.html','OS.dc.html','IR-01.dc.html','COLH.dc.html'],                   # executar
-                     ['CARGA.dc.html','BEN.dc.html','PROD.dc.html','GE-03.dc.html','PAGR.dc.html']]}  # resultado
+# 14/10/2026 (depois, proprietário: "Tire as setas, alinhe cada submenu no seu macro contexto e coloque titulos em cima dos blocos visuais de
+#   cada macro contexto"): sem setas; cartões alinhados no bloco; cada bloco com o título do macro contexto.
+FLUXO37={'Agrícola':[('Planejamento',['AG-07.dc.html','AG-02.dc.html','PA.dc.html','SAF.dc.html','GE-02.dc.html']),
+                     ('Execução',['AG-01.dc.html','OS.dc.html','IR-01.dc.html','COLH.dc.html']),
+                     ('Resultados',['CARGA.dc.html','BEN.dc.html','PROD.dc.html','GE-03.dc.html','PAGR.dc.html'])]}
 CURTO37={'PAGR.dc.html':('Painel','grafico'),'PMAN.dc.html':('Painel','grafico'),'PSUP.dc.html':('Painel','grafico'),'AG-07.dc.html':('Agrofit','livro'),'PA.dc.html':('Planos agronômicos','prancheta'),'AG-02.dc.html':('Análises de solo','frasco'),
  'SAF.dc.html':('Planejar safra','calendar'),'OS.dc.html':('Ordens de serviço','prancheta_ok'),'AG-01.dc.html':('Pragas e doenças','inseto'),'IR-01.dc.html':('Irrigação','drop'),
  'GE-02.dc.html':('Orçamento','cash'),'GE-03.dc.html':('Custos','calc'),
