@@ -1,0 +1,42 @@
+# -*- coding: utf-8 -*-
+"""Crédito com submenus como os demais módulos (proprietário, 14/10/2026: "coloque os submenus de crédito como os demais"), no navegador:
+o ícone do Crédito na barra abre a tela de entrada (MOD-CRE) com um cartão por visão da GE-08; cada cartão abre só a sua parte (os
+indicadores ficam em todas); sem visão no endereço a GE-08 mostra tudo (links de outras telas); "‹ Crédito" volta. Dados sintéticos."""
+import sys, os, time, json
+HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
+from comp_lib import Chrome, servir
+
+R = os.environ.get('RENDER_DIR') or os.path.join(HERE, '_render')
+ok_n = 0; falhas = []
+def chk(nome, cond, det=''):
+    global ok_n
+    if cond: ok_n += 1; print('OK  ' + nome, flush=True)
+    else: falhas.append(nome); print('FALHA ' + nome + ' · ' + str(det)[:500], flush=True)
+
+p, srv = servir(R); c = Chrome(); J = c.js
+c.call('Page.addScriptToEvaluateOnNewDocument', {'source': "window.__e=[];addEventListener('error',e=>window.__e.push(String(e.message)))"})
+U = lambda x: f'http://127.0.0.1:{p}/{x}'
+BLOCOS = ['Solicitações e contratos', 'Acompanhamento do CRE-0102', 'Dossiê e consentimento']
+def blocos(): return [b for b in BLOCOS if J("[...document.querySelectorAll('main h2,main h3')].some(h=>h.offsetParent&&h.innerText.trim()===%s)" % json.dumps(b))]
+def kpis(): return J("[...document.querySelectorAll('main')].some(m=>/DÍVIDA ATIVA/i.test(m.innerText))")
+try:
+    for w, toque in [(1440, False), (390, True)]:
+        c.aparelho(w, 900 if w > 400 else 844, 1 if w > 400 else 2, toque)
+        c.goto(U('IN-04.dc.html'), 1.2)
+        J("(()=>{const a=[...document.querySelectorAll('nav[aria-label=Menu] a')].find(a=>(a.getAttribute('aria-label')||a.title||a.innerText).trim().startsWith('Crédito')); a.click();})()"); time.sleep(1.2)
+        cards = J("[...document.querySelectorAll('main a.mod-cartao')].filter(a=>a.offsetParent).map(a=>[a.innerText.trim(),a.getAttribute('href')])") or []
+        chk(f'C1 {w}: o Crédito na barra abre a tela de entrada com um cartão por visão da GE-08',
+            J("location.pathname").endswith('MOD-CRE.dc.html') and cards == [['Contratos', 'GE-08.dc.html#vis=contratos'], ['Liberações', 'GE-08.dc.html#vis=liberacoes'], ['Dossiê', 'GE-08.dc.html#vis=dossie']], [J("location.pathname"), cards])
+        for i, (nome, href) in enumerate(cards):
+            c.goto(U('MOD-CRE.dc.html'), 1.0); J("[...document.querySelectorAll('main a.mod-cartao')].filter(a=>a.offsetParent)[%d].click()" % i); time.sleep(1.2)
+            vol = J("[...document.querySelectorAll('a')].some(a=>a.offsetParent&&/Crédito/.test(a.innerText)&&/MOD-CRE/.test(a.getAttribute('href')||''))")
+            chk(f'C2 {w} {nome}: só a parte do cartão ({BLOCOS[i]}), com os indicadores e "‹ Crédito"', blocos() == [BLOCOS[i]] and kpis() and vol, [blocos(), kpis(), vol])
+        J("location.hash='vis=dossie'"); time.sleep(.6)
+        chk(f'C3 {w}: trocar a visão pelo endereço troca a parte sem recarregar', blocos() == [BLOCOS[2]], blocos())
+        c.goto(U('GE-08.dc.html'), 1.2)
+        chk(f'C4 {w}: GE-08 sem visão no endereço (links de outras telas) mostra as três partes', blocos() == BLOCOS, blocos())
+        chk(f'C5 {w}: sem rolagem lateral e sem erro de JS', J("document.documentElement.scrollWidth<=innerWidth") and not J("(window.__e||[]).length"), [J("[document.documentElement.scrollWidth,innerWidth]"), J("window.__e")])
+finally:
+    c.close() if hasattr(c, 'close') else None
+print(f'RESULTADO: {ok_n}/{ok_n + len(falhas)}' + (' · FALHAS: ' + '; '.join(falhas) if falhas else ''))
+sys.exit(1 if falhas else 0)

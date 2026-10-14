@@ -617,6 +617,9 @@ def _ge08():
     EXTRAJS[0]=JS_BASE+'''
 const DDID='''+json.dumps(DDID)+''', LIB='''+json.dumps(c['liberado'])+''', VAL='''+json.dumps(c['valor'])+r''';
 function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
+  const hv=(String(location.hash).match(/vis=([a-z]+)/)||[])[1]||'', VIS=['contratos','liberacoes','dossie'], vis=VIS.indexOf(hv)>=0?hv:'';
+  VIS.forEach(k=>{ v['cv_'+k]=!vis||vis===k; });
+  if(!self.__creHash){ self.__creHash=true; addEventListener('hashchange',()=>self.setState({}),false); }
   v.cre_hint=sent?('liberado '+LIB+' de '+VAL+' · certidão em conferência pelo credor (responsável: Banco Terra) — a 2ª parcela libera quando o Banco Terra aceitar o documento')
                  :('liberado '+LIB+' de '+VAL+' · próximas parcelas só liberam com a certidão do imóvel atualizada — anexe o documento para destravar');
   v.lib2=()=>self.setState({g2toast:sent?('Bloqueado · certidão em conferência pelo credor (responsável: Banco Terra) — a 2ª parcela aguarda a conferência do credor; liberado até agora '+LIB+' de '+VAL+'.')
@@ -627,17 +630,20 @@ function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
     self.setState({aut:true,g2toast:'Autorizado pela Direção · Banco Terra acessa “Compromissos e garantias” até 31/12/2026, só para análise do '+'''+json.dumps(c['id'])+r'''+'.'}); };
   self.g2after=(gid,rows,r)=>{ if(!r) return; if(gid==='g_dos'){ undate(r,['prz']); self.setState({g2toast:'Acesso do bloco '+r.v.blk+' atualizado · novo consentimento registrado; o credor vê após confirmar.'}); }
     if(gid==='g_cre'){ self.setState({g2toast:'Rascunho '+r.id+' salvo · nada é enviado ao credor sem convite confirmado.'}); } }; }'''
+    # 14/10/2026 (proprietário: "coloque os submenus de crédito como os demais"): a tela de entrada do Crédito abre uma visão por cartão
+    # (GE-08.dc.html#vis=contratos|liberacoes|dossie), como a Manutenção; os indicadores ficam em todas; sem visão no endereço, tudo
+    CV=lambda k: f'<sc-if value="{H("cv_"+k)}" hint-placeholder-val="{H("true")}">'
     acomp=(stepper([('Solicitação','done'),('Dossiê','done'),('Propostas','done'),('Aprovação do credor','done'),('Condição documental','now'),('Liberações','todo'),('Serviço da dívida','todo')],'')
            + f'<div role="status" style="font-size: 13.5px; color: {MUTED};">{H("cre_hint")}</div>'
            + nota(f'Garantias sob controle: penhor de 30% da soja ({nf(penhor)} sc) + CPR de {nf(cpr)} sc (barter CRE-0095) = '
                   f'<b style="color:{INK};">{nf(comp,0)}% da soja prevista (V2 · {nf(SOJA_V2_SC)} sc) comprometida</b>.'))
     corpo=(kpis([('DÍVIDA ATIVA · 3 CONTRATOS','R$ 1,90 mi',''),('SERVIÇO DA DÍVIDA 26/27','R$ 610 mil','pico jul/27'),
                  ('CAPACIDADE LIVRE NO PERÍODO','R$ 480 mil',''),('A LIBERAR · '+c['id'],'R$ 550 mil','condicionado')])
-        + bloco('Solicitações e contratos','Compare propostas e acompanhe cada contrato; clique numa solicitação em rascunho para prepará-la.',g_cre,
+        + CV('contratos') + bloco('Solicitações e contratos','Compare propostas e acompanhe cada contrato; clique numa solicitação em rascunho para prepará-la.',g_cre,
                 acao=imsg('Comparar propostas',f'Comparadas 2 propostas do {c["id"]} por CET/CETCR e valor presente com premissas declaradas · Banco Terra 14,2% a.a. vs. Coop Crédito 13,8% a.a. + tarifa.','scale','Comparar propostas por CET/CETCR e valor presente'))
-        + bloco(f'Acompanhamento do {c["id"]}','Cumpra a condição documental para liberar as próximas parcelas; o pedido não aparece pago nem liberado antes do fato financeiro.',acomp,
+        + '</sc-if>' + CV('liberacoes') + bloco(f'Acompanhamento do {c["id"]}','Cumpra a condição documental para liberar as próximas parcelas; o pedido não aparece pago nem liberado antes do fato financeiro.',acomp,
                 acao=doc+ibtn('Registrar liberação da 2ª parcela','lib2','cash','Registrar a 2ª liberação (exige a condição documental aceita)'),tone='yellow')
-        + bloco('Dossiê e consentimento','Autorize cada bloco com finalidade e prazo; clique num bloco para ajustar quem acessa.',g_dos,tone='gray'))
+        + '</sc-if>' + CV('dossie') + bloco('Dossiê e consentimento','Autorize cada bloco com finalidade e prazo; clique num bloco para ajustar quem acessa.',g_dos,tone='gray') + '</sc-if>')
     shell37('GE-08','Crédito e garantias',corpo,
       subtitle='Solicitações, dossiês autorizados, propostas, decisões, contratos, liberações e serviço da dívida.',
       status=(f'{c["id"]} · condição documental pendente','yellow'),
