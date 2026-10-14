@@ -91,7 +91,8 @@ chk('5.1 o teste de contraste mede os tokens do engine (realce, linha, camada do
 # integração V56 (DS × PCM simplificado): PM e MA-01..05/MA-04det são só redirecionamento para a tela MA (areas/maquinas.REDIRECIONA, fora do
 # canvas e do Índice): não desenham tela, então ficam fora da conta; a sonda 6r confere que continuam sendo só redirecionamento
 from areas.maquinas import REDIRECIONA
-pags = sorted(p for p in glob.glob(os.path.join(E.P, '*.dc.html')) if os.path.basename(p) not in REDIRECIONA)
+# 13/10/2026: o índice saiu; Main.dc.html é página técnica mínima (areas/indice.py, sem cabeçalho nem tela de uso), fora desta conta
+pags = sorted(p for p in glob.glob(os.path.join(E.P, '*.dc.html')) if os.path.basename(p) not in REDIRECIONA and os.path.basename(p) != 'Main.dc.html')
 red = sorted(p for p in glob.glob(os.path.join(E.P, '*.dc.html')) if os.path.basename(p) in REDIRECIONA)
 if pags:
     sem = [os.path.basename(p) for p in pags if '@keyframes g2realce' not in open(p, encoding='utf-8').read() or '.g2-cab{' not in open(p, encoding='utf-8').read()]

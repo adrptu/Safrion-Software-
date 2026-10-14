@@ -41,7 +41,8 @@ try:
     corpo=J("document.body.innerText")
     check('ordens só de água fora da página O.S. (lista e texto)', not any(x in r0 or x in corpo for x in AGUA), [x for x in AGUA if x in corpo])
     # TABELAS-FOCO (5983172395 item 6): uma variável por coluna; a rolagem horizontal fica dentro da caixa da tabela e não esconde o filtro Talhão
-    ov=J("(()=>{const b=document.getElementById('ost_btn').getBoundingClientRect(); return [document.documentElement.scrollWidth,innerWidth,b.left>=0&&b.right<=innerWidth&&b.width>0];})()"); check('página sem rolagem horizontal e filtro Talhão visível (a tabela rola dentro da caixa)', ov[0]<=ov[1]+1 and ov[2], ov)
+    # 13/10/2026: o seletor de talhão da barra (ost_btn) virou o filtro Talhão da faixa "Filtros desta tela" (Cultura e Talhão no filtro principal)
+    ov=J("(()=>{const b=document.querySelector('select[aria-label=\"Filtrar por talhão\"]').getBoundingClientRect(); return [document.documentElement.scrollWidth,innerWidth,b.left>=0&&b.right<=innerWidth&&b.width>0];})()"); check('página sem rolagem horizontal e filtro Talhão visível (a tabela rola dentro da caixa)', ov[0]<=ov[1]+1 and ov[2], ov)
     # chips de fase
     clk('Em execução'); r=rows(); check('chip Em execução filtra', r==['OS-0421','OS-0420'] or sorted(r)==['OS-0420','OS-0421'], r)
     check('chip marcado', J("[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] button')].filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>b.innerText.replace(/\\s+/g,' '))")==['Em execução 2'])

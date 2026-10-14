@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Comercial e logística · teste de navegador do fluxo principal (docs/comercial/ESPECIFICACAO.md §8; AC-01, AC-11, AC-12, AC-14..AC-17).
 Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T):
-  menu     AC-01 (navegação sem submenus, 13/10/2026): ícone Comercial logo depois de Produção na barra; a tela de entrada do Comercial
+  menu     AC-01 (navegação sem submenus, 13/10/2026): ícone Comercial logo depois de Suprimentos na barra; a tela de entrada do Comercial
            com os cartões Contratos e pedidos · Expedição · Painel (+ Inteligência, INTEL-01); cada cartão abre sem erro de JS e volta
            por "‹ Comercial"; nenhum elo para tela oculta
   tarefa   AC-14: tarefa do proprietário (§8.1, perfil Ana) de ponta a ponta no desktop, com cliques e campos medidos (≤ 16 e ≤ 3);
@@ -87,8 +87,9 @@ try:
         print('== menu · AC-01')
         ir('VEN.dc.html', limpa=True)
         nv = json.loads(J(NAV) or '{}'); mods = nv.get('mods') or []
-        i_pr, i_co, i_ma = [mods.index(x) if x in mods else -1 for x in ('Produção', 'Comercial', 'Manutenção')]
-        t.chk('AC-01 ícone Comercial logo depois de Produção (antes de Manutenção) na barra; na VEN o Comercial marcado e "‹ Comercial"',
+        # 13/10/2026 (proprietário): a Produção entrou em Agrícola; ordem Agrícola · Manutenção · Suprimentos · Comercial · Configurações
+        i_pr, i_co, i_ma = [mods.index(x) if x in mods else -1 for x in ('Suprimentos', 'Comercial', 'Configurações')]
+        t.chk('AC-01 ícone Comercial logo depois de Suprimentos (antes de Configurações) na barra; na VEN o Comercial marcado e "‹ Comercial"',
               0 <= i_pr and i_co == i_pr + 1 and i_co < i_ma and nv.get('cur') == ['Comercial'] and nv.get('volta') == ['MOD-COM.dc.html', '‹ Comercial'], nv)
         vt = volta_com(); cs = json.loads(J(CARDS) or '[]'); e0 = t.errs(); shot('menu')
         ESP = [['VEN.dc.html', 'Contratos e pedidos'], ['EXPED.dc.html', 'Expedição'], ['PCOM.dc.html', 'Painel'], ['IV.dc.html', 'Inteligência']]

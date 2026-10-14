@@ -107,9 +107,12 @@ try:
             if cnt() and J("document.body.innerText.indexOf('Carregando culturas e alvos')<0"): J(J0); return True
             time.sleep(.25)
         J(J0); return False
-    def combo(rot,txt):
-        J(f"document.querySelector('input[aria-label={json.dumps(rot)}]').focus()"); time.sleep(.2); setv(f'input[aria-label={json.dumps(rot)}]',txt)
-        J(f"document.querySelector('input[aria-label={json.dumps(rot)}]').dispatchEvent(new KeyboardEvent('keydown',{{key:'Enter',bubbles:true}}))"); time.sleep(.4)
+    def combo(rot, txt):   # Cultura e Praga-alvo são listas de escolha (13/10: um campo de busca por tela): a 1ª opção que começa com o texto (ou o contém)
+        r = J(f"""(()=>{{const s=document.querySelector('select[aria-label={json.dumps(rot)}]'); if(!s) return 'sem lista';
+          const n=x=>String(x||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().trim(); const q=n({json.dumps(txt)}); const os=[...s.options];
+          const o=q===''?os.find(o=>o.value===''):(os.find(o=>o.value!==''&&n(o.text).startsWith(q))||os.find(o=>o.value!==''&&n(o.text).indexOf(q)>=0));
+          if(!o) return 'sem opção'; s.value=o.value; s.dispatchEvent(new Event('change',{{bubbles:true}})); return 'ok';}})()"""); time.sleep(.4)
+        return r
     shot=lambda n: c.shot(os.path.join(PROBE,f'agrofit_real_{n}.png'))
     # navegação sem submenus (13/10/2026, ui37.MENU2/HUB37/CURTO37/VOLTA37): módulo marcado, "‹ Módulo" e os cartões da tela de entrada
     NAV="JSON.stringify((()=>{const n=document.querySelector('nav[aria-label=Menu]'); const v=document.querySelector('a.volta37'); return {cur:n?[...n.querySelectorAll('a[aria-current=page]')].map(a=>a.getAttribute('aria-label')):[], volta:v?[v.getAttribute('href'),v.innerText.replace(/\\s+/g,' ').trim()]:null};})())"
@@ -158,12 +161,12 @@ try:
     chk(f'3 cabeçalho: "Base atualizada · {DT}" e "Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de {DT} · {nf(NP,0)} produtos com registro" + AGROFIT oficial (nova aba)',
         carregou and NP==len(P) and f'Base atualizada · {DT}' in head and f'Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de {DT} · {nf(NP,0)} produtos com registro' in head
         and any(t.startswith('Abrir no AGROFIT oficial') and h==OFICIAL and tg=='_blank' and 'noopener' in (rl or '') for t,h,tg,rl in ln), [head,ln])
-    # ---------- 4 · listagem: todos os registros, 6 colunas, render incremental ----------
+    # ---------- 4 · listagem: todos os registros, 7 colunas, render incremental ----------
     cols=[nz(x).replace('⇅','').replace('▾','').strip() for x in (J("[...document.querySelectorAll('main [role=columnheader]')].map(h=>h.innerText.replace(/\\s+/g,' '))") or [])]
     n50=len(rows()); clica('main','Mostrar mais'); time.sleep(.4); n150=len(rows())
-    chk(f'4 lista: "{nf(NP,0)} de {nf(NP,0)} produtos", 6 colunas do desenho, 50 linhas e "Mostrar mais" → 150',
+    chk(f'4 lista: "{nf(NP,0)} de {nf(NP,0)} produtos", 7 colunas (com Alvos, 13/10), 50 linhas e "Mostrar mais" → 150',
         cnt()==f'{nf(NP,0)} de {nf(NP,0)} produtos' and n50==50 and n150==150
-        and cols==['produto · registro','ingrediente ativo · grupo quimico','classe · modo de acao','culturas','tox · amb','na fazenda'], [cnt(),cols,n50,n150])
+        and cols==['produto · registro','ingrediente ativo · grupo quimico','classe · modo de acao','culturas','alvos','tox · amb','na fazenda'], [cnt(),cols,n50,n150])
     shot('lista')
     # ---------- 5 · busca sem acento, cultura e alvo no MESMO uso ----------
     E5=busca('feijão percevejo'); setv('main input[type=search]','feijão percevejo'); a1=cnt(); setv('main input[type=search]','FEIJAO percevejo'); a2=cnt()

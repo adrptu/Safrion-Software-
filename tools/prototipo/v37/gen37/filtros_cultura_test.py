@@ -6,11 +6,15 @@ talhão. nas demais telas que isso for bastante essencial e ajudar o usuário, p
   F2 Colheita: Talhão segue a Cultura (só talhões dela) e filtra as linhas pelo talhão
   F3 O.S.: os avisos que eram do seletor de talhão da barra voltaram (revisão do agente de testes, 13/10): "Total: N O.S. distintas" na Tabela
      agrupada e o aviso de talhão que sai do filtro ao trocar a fazenda, com o nome do talhão (não o ID)
-  F4 390 px: as listas da faixa com alvo de toque ≥ 32 px; sem rolagem lateral; sem erro de JS
+  F4 390 px: as listas da faixa com alvo de toque ≥ 44 px (aceite de campo, NAV-2CB-TOQUE-01 do Codex); sem rolagem lateral; sem erro de JS
+  F5 Pragas e doenças (AG-01): Cultura e Talhão na faixa, com oráculo pelos dados do MIP (dados_mip.VIS × TAL): opções = o que tem vistoria
+     na fazenda; Cultura deixa só as vistorias dela (lista e chip "Todas"); o Talhão segue a Cultura; trocar a fazenda tira o talhão de
+     outra fazenda com aviso pelo nome; abrir pelo link uma vistoria escondida pela Cultura tira só esse filtro e mostra a linha
 Uso: python3 filtros_cultura_test.py (lê _render ou RENDER_DIR)."""
 import os, sys, json, time
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from comp_lib import Chrome, servir
+import dados_mip as DM
 
 OK, FAIL = [], []
 def chk(n, c, info=''):
@@ -52,13 +56,34 @@ try:
     limpa(); c.goto(U('OS.dc.html'), 1.4); sel('Filtrar por fazenda', 'Lagoa Grande'); sel('Filtrar por talhão', 'Lagoa Grande|PV04'); sel('Filtrar por fazenda', 'Santa Rita')
     msg = J("(()=>{const n=[...document.querySelectorAll('[role=status]')].find(x=>/saiu do filtro/.test(x.innerText)&&x.getClientRects().length); return n?n.innerText:'';})()") or ''
     chk('F3 O.S.: trocar a fazenda tira o talhão do filtro com aviso, pelo nome ("Pivô 4"), não pelo ID', 'Pivô 4' in msg and 'PV04' not in msg, msg)
+    # F5 · Pragas e doenças: oráculo pelos dados do MIP
+    VR = "JSON.stringify([...document.querySelectorAll('[role=row][data-rid]')].filter(r=>r.offsetParent&&/^VIS-/.test(r.getAttribute('data-rid'))).map(r=>r.getAttribute('data-rid')).sort())"
+    tot = lambda: J("(()=>{const b=[...document.querySelectorAll('[aria-label=\"Filtrar por situação\"] button')][0]; return b?b.innerText.replace(/\\s+/g,' '):'';})()") or ''
+    val = lambda al: J(f"(document.querySelector('select[aria-label=\"{al}\"]')||{{}}).value") 
+    cul = lambda v: DM.TAL[v['tal']]['cultura']
+    sr = [v for v in DM.VIS if v['faz'] == 'Santa Rita']
+    esp_c = ['Todas'] + sorted({cul(v) for v in sr if cul(v)})
+    fei = sorted(v['id'] for v in sr if cul(v) == 'Feijão'); fei_t = ['Todos'] + sorted({DM.TAL[v['tal']]['rot'] for v in sr if cul(v) == 'Feijão'})
+    limpa(); c.goto(U('AG-01.dc.html'), 1.4); sel('Filtrar por fazenda', 'Santa Rita')
+    o5 = opts('Filtrar por cultura'); r0 = json.loads(J(VR) or '[]'); sel('Filtrar por cultura', 'Feijão'); r1 = json.loads(J(VR) or '[]'); t5 = opts('Filtrar por talhão'); tt = tot()
+    chk('F5 Pragas e doenças: Cultura com as culturas que têm vistoria na fazenda; "Feijão" deixa só as vistorias de feijão (lista e chip "Todas"); o Talhão segue a Cultura',
+        o5 == esp_c and len(r0) == len(sr) and r1 == fei and tt == f'Todas {len(fei)}' and t5 == fei_t, [o5, esp_c, len(r0), r1, fei, tt, t5, fei_t])
+    lg4 = sorted(v['id'] for v in DM.VIS if v['tal'] == 'PV04')
+    limpa(); c.goto(U('AG-01.dc.html'), 1.4); sel('Filtrar por fazenda', 'Lagoa Grande'); sel('Filtrar por talhão', 'PV04'); r4 = json.loads(J(VR) or '[]')
+    sel('Filtrar por fazenda', 'Santa Rita'); tv = val('Filtrar por talhão'); toast = J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).join(' | ')") or ''; r5 = json.loads(J(VR) or '[]')
+    chk('F5 Pragas e doenças: Talhão "Pivô 4" deixa só as vistorias dele; trocar para Santa Rita tira o talhão do filtro com aviso pelo nome',
+        r4 == lg4 and tv == '' and 'Pivô 4' in toast and 'saiu do filtro' in toast and len(r5) == len(sr), [r4, lg4, tv, toast[:160], len(r5)])
+    soja = next(v['id'] for v in sr if cul(v) == 'Soja')
+    limpa(); c.goto(U('AG-01.dc.html'), 1.4); sel('Filtrar por fazenda', 'Santa Rita'); sel('Filtrar por cultura', 'Feijão')
+    J(f"location.hash='#{soja}'; 1"); time.sleep(1.0); cv = val('Filtrar por cultura'); r6 = json.loads(J(VR) or '[]')
+    chk(f'F5 Pragas e doenças: abrir {soja} (soja) pelo link com "Feijão" no filtro tira só a Cultura e mostra a linha', cv == 'Todas' and soja in r6 and val('Filtrar por fazenda') == 'Santa Rita', [cv, r6])
     # F4 · celular
     c.aparelho(390, 844, 2, True); alt = {}
-    for pg in ('OS.dc.html', 'COLH.dc.html', 'PROD.dc.html'):
+    for pg in ('OS.dc.html', 'COLH.dc.html', 'PROD.dc.html', 'AG-01.dc.html'):
         limpa(); c.goto(U(pg), 1.4)
         alt[pg] = [json.loads(J("JSON.stringify([...document.querySelectorAll('.mf-tela select')].map(s=>Math.round(s.getBoundingClientRect().height)))") or '[]'),
                    J("document.documentElement.scrollWidth-document.documentElement.clientWidth")]
-    chk('F4 390 px: listas da faixa com alvo ≥ 32 px e sem rolagem lateral', all(v[0] and min(v[0]) >= 32 and (v[1] or 0) <= 0 for v in alt.values()), alt)
+    chk('F4 390 px: listas da faixa com alvo ≥ 44 px e sem rolagem lateral', all(v[0] and min(v[0]) >= 44 and (v[1] or 0) <= 0 for v in alt.values()), alt)
     chk('F4 sem erro de JS', not (J("window.__err||''") or ''), J("window.__err||''"))
 finally:
     try: c.close()

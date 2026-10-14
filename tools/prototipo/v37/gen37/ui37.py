@@ -46,21 +46,25 @@ VOLTA37={f'CD-0{i}.dc.html':('Cadastros','CD.dc.html') for i in range(1,9)}   # 
 BEN_PUBLICADO=False
 MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
  ('Cadastros','pasta',[('Cadastros','CD.dc.html')]),   # 13/10/2026 (proprietário): sem submenus; a tela CD mostra os 7 cadastros em cartões e cada um volta por "‹ Cadastros"
- ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html')]),
- ('Produção','Colheita',[('Previsão e colheita','COLH.dc.html'),('Recebimento e beneficiamento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html')]),   # 3 itens (colheita D-01); Beneficiamento é tela irmã de Cargas (BEN-D14)
- ('Comercial','Vendas',[('Contratos e pedidos','VEN.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Painel comercial','PCOM.dc.html'),('Inteligência de vendas','IV.dc.html')]),   # INTEL-01 (13/10): inteligência comercial de vendas
+ ('Agrícola','leaf',[('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html'),('Previsão e colheita','COLH.dc.html'),('Recebimento e beneficiamento','CARGA.dc.html'),('Estoque de produto','PROD.dc.html')]),   # 13/10/2026 (proprietário: "coloque o submenu colheita dentro de agrícola"; "coloque tudo de produção, dentro de Agrícola"): o ciclo da lavoura até o produto em estoque
  ('Manutenção','wrench',[('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')]),   # 13/10/2026 (pedido do proprietário: subitens de novo, enxutos): um subitem por visão da tela única, sem tela nova
  ('Suprimentos','cart',[('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html'),('Inteligência de compras','IC.dc.html')]),   # INTEL-01 (13/10)
+ ('Comercial','Vendas',[('Contratos e pedidos','VEN.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Painel comercial','PCOM.dc.html'),('Inteligência de vendas','IV.dc.html')]),   # INTEL-01 (13/10): inteligência comercial de vendas
  ('Configurações','engrenagem',[('Usuários e alçadas','CF-01.dc.html'),('Auditoria','CF-04.dc.html'),('Integrações','CF-03.dc.html'),('Assinatura e cobrança','CF-05.dc.html')])]   # 06/10/2026 (PLAT-01): grupo por último; CONF-01 (CONF-D01/D02): Usuários e alçadas · Auditoria · Integrações · Assinatura e cobrança, cada item entra no passo que entrega a tela
+# 13/10/2026 (proprietário: "troque a posição do menu comercial com suprimentos. e manutenção logo abaixo de agrícola"): Agrícola ·
+#   Manutenção · Suprimentos · Comercial.
 # 13/10/2026 (proprietário: "tire todos submenus de todos os módulos e coloque na tela como fizemos com cadastros e deixe a barra lateral dos
 # menus somente recolhido com os ícones e tooltip sem opção de expandir. Mas reduza texto ao mínimo essencial de cada submenu ... sempre com
 # opção de voltar rápido e fácil. use sempre ícones mais intuitivos"): cada módulo com mais de uma tela abre a sua tela de entrada (cartões
-# com ícone e nome curto, areas/modulos.py); Mapa e Manutenção (uma tela com visões) abrem direto. Cada tela do módulo volta por "‹ Módulo".
-HUB37={'Agrícola':'MOD-AGR.dc.html','Produção':'MOD-PRO.dc.html','Comercial':'MOD-COM.dc.html','Suprimentos':'MOD-SUP.dc.html','Configurações':'MOD-CFG.dc.html'}
+# com ícone e nome curto, areas/modulos.py); o Mapa abre direto. Cada tela do módulo volta por "‹ Módulo".
+# 13/10/2026 (proprietário: "o menu de manutenção está sem os submenus na tela igual os demais"): a Manutenção também abre a sua tela de
+# entrada, um cartão por visão da tela única MA (Sem ordem · Ordens · Ativos · Planos); a chave do CURTO37 com #vis= vale para o cartão.
+HUB37={'Agrícola':'MOD-AGR.dc.html','Comercial':'MOD-COM.dc.html','Suprimentos':'MOD-SUP.dc.html','Configurações':'MOD-CFG.dc.html','Manutenção':'MOD-MAN.dc.html'}
 CURTO37={'AG-07.dc.html':('Agrofit','livro'),'PA.dc.html':('Planos agronômicos','prancheta'),'AG-02.dc.html':('Análises de solo','frasco'),
  'SAF.dc.html':('Planejar safra','calendar'),'OS.dc.html':('Ordens de serviço','prancheta_ok'),'AG-01.dc.html':('Pragas e doenças','inseto'),'IR-01.dc.html':('Irrigação','drop'),
  'COLH.dc.html':('Colheita','Colheita'),'CARGA.dc.html':('Recebimento','scale'),'PROD.dc.html':('Estoque de produto','armazem'),
  'VEN.dc.html':('Contratos e pedidos','doc'),'EXPED.dc.html':('Expedição','truck'),'PCOM.dc.html':('Painel','grafico'),'IV.dc.html':('Inteligência','trend'),
+ 'MA.dc.html#vis=semordem':('Sem ordem','clock'),'MA.dc.html#vis=ordens':('Ordens','wrench'),'MA.dc.html#vis=ativos':('Ativos','truck'),'MA.dc.html#vis=planos':('Planos','calendar'),
  'CMP.dc.html':('Compras','cart'),'EST.dc.html':('Estoque','box'),'IC.dc.html':('Inteligência','trend'),
  'CF-01.dc.html':('Usuários e alçadas','users'),'CF-04.dc.html':('Auditoria','historico'),'CF-03.dc.html':('Integrações','tomada'),'CF-05.dc.html':('Assinatura','card')}
 # outras pontas do protótipo (antes só no índice, que saiu em 13/10: o artefato abre direto no Mapa)
@@ -92,7 +96,7 @@ def navbar(fid,fname=None):
     fname=fname or ffile(fid)
     act_i,_=menu_item(fname)
     def item(nome,ic,h,on):
-        st=('display: flex; align-items: center; justify-content: center; gap: 10px; padding: 8px 12px; border-radius: 10px; min-height: 40px; text-decoration: none; '
+        st=('display: flex; align-items: center; justify-content: center; gap: 10px; padding: 8px 12px; border-radius: 10px; min-height: 44px; text-decoration: none; '
             + (f'background: {ACC}; color: #fff;' if on else f'color: {SIDE_TX};'))
         return (f'<a href="{h}" title="{esc(nome)}" aria-label="{esc(nome)}"' + (' aria-current="page"' if on else '') + f' style="{st}">'
                 f'{icon(ic,20,"#fff" if on else SIDE_TX)}<span class="ml-txt">{esc(nome)}</span></a>')
@@ -180,7 +184,8 @@ _CSS_RESP=('[data-root]{height:100vh;height:100dvh;padding:env(safe-area-inset-t
     '}'
     '@media (pointer: coarse){.menu-lat a,.menu-lat>button{min-height:44px;box-sizing:border-box;display:flex!important;align-items:center}'
     '.ml-tog{width:32px;height:32px}.menu-lat.rec+.ml-tog{left:calc(52px + env(safe-area-inset-left,0px))}.ml-tog{left:calc(216px + env(safe-area-inset-left,0px))}}')
-_CSS_ESTREITA=(f'{_RAIZ}>div:nth-child(2){{flex-wrap:wrap}}'          # linha do título: o comando principal desce em vez de sair da tela
+_CSS_ESTREITA=(f'@media (max-width: 640px){{.mf-tela select{{min-height:44px!important}}}}'   # NAV-2CB-TOQUE-01 (Codex, 13/10): listas da faixa com alvo de 44 px no celular
+    f'{_RAIZ}>div:nth-child(2){{flex-wrap:wrap}}'          # linha do título: o comando principal desce em vez de sair da tela
     f'@media (max-width: 1279px){{{_RAIZ}>div{{flex-wrap:wrap}}}}'    # demais linhas do cabeçalho; em 1440 px igual à base
     f'@media (max-width: 640px){{{_RAIZ}{{padding:10px 14px!important;gap:8px!important}}'
     f'{_RAIZ} h1{{white-space:normal!important;flex-shrink:1!important;min-width:0;font-size:20px!important}}'

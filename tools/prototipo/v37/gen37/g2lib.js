@@ -10,6 +10,15 @@ function g2unf(t,c){ const s=String(t==null?'':t).trim(); if(!c||!c.un||!/^[+−
   const u=c.un; if(u.indexOf('R$')===0){ const neg=/^[−-]/.test(s); return (neg?'−':'')+'R$ '+s.replace(/^[+−-]/,'')+u.slice(2); } return s+' '+u; }
 function g2fmt(v,c){ if(v===null||v===undefined||v==='') return '—'; if(c&&c.t==='date'&&/^\d{4}-\d{2}-\d{2}$/.test(String(v))){ const a=String(v).split('-'); return a[2]+'/'+a[1]+'/'+a[0]; } if(c&&c.zdash&&Number(v)===0) return '—'; if(c&&c.t==='num'){ const n=Number(v); if(isNaN(n)) return String(v); const t=(c.pre||'')+g2fmtn(n,c.d,c.dmin)+(c.u?' '+c.u:''); return c.un?g2unf(t,c):t; } return String(v); }
 function g2st(self,id){ return ((self.state.g2||{})[id])||{}; }
+// Um campo de busca por tela (proprietário, 13/10/2026: "quero somente 1 campo de busca por tela. 2 fica confuso"): das tabelas à vista com
+// busca, só a primeira mostra o campo ("Buscar nesta tela") e o termo dela vale para todas as outras à vista. Recalculado depois de cada
+// desenho, porque abas, etapas e visões mudam o que está à vista; cada tabela guarda o próprio termo para quando voltar a ser a primeira.
+function g2qSeg(self,id){ return !!self.__g2qS&&(' '+self.__g2qS+' ').indexOf(' '+id+' ')>=0; }
+function g2stBusca(self,id,st){ return g2qSeg(self,id)?Object.assign({},st,{q:(g2st(self,self.__g2qL).q||'')}):st; }
+function g2buscaUnica(self){ if(typeof document==='undefined') return;
+  const ids=[...document.querySelectorAll('[data-g2q]')].filter(m=>m.parentElement&&m.parentElement.getClientRects().length>0).map(m=>m.getAttribute('data-g2q'));
+  const L=ids[0]||'', S=ids.slice(1).join(' '); if(L===(self.__g2qL||'')&&S===(self.__g2qS||'')) return;
+  self.__g2qL=L; self.__g2qS=S; self.setState({g2qrev:(self.state.g2qrev||0)+1}); }
 function g2set(self,id,patch){ const all=Object.assign({},self.state.g2||{}); all[id]=Object.assign({},all[id]||{},patch); self.setState({g2:all});
   if(G2KEEP[id]) g2keepGrava(self,id,all[id]); }
 // grava o recorte guardado (g2keep): filtros, busca, ordenação, filtro rápido e, quando a tela pede (VISOES-1), Fazenda e Safra do topo
@@ -206,7 +215,7 @@ function g2save(self,sp){ const st=g2st(self,sp.id); const fm=st.fm; if(!fm) ret
 function g2dirty(fm){ if(!fm) return false; for(const k in fm.draft){ if(String(fm.draft[k])!==String(fm.orig[k])) return true; } return false; }
 function g2close(self,sp){ const fm=g2st(self,sp.id).fm; if(fm && !fm.ro && g2dirty(fm)) { g2set(self,sp.id,{fm:Object.assign({},fm,{warn:true})}); return; } g2set(self,sp.id,{fm:null}); }
 function g2vals(self,sp,v,mask){
-  const id=sp.id, st=g2st(self,id), rows=g2disp(self,sp), added=self.state.added||{};
+  const id=sp.id, st=g2stBusca(self,id,g2st(self,id)), rows=g2disp(self,sp), added=self.state.added||{};
   const flat=g2flat(sp,st,g2qrows(sp,st,rows),mask,added); const ed=sp.edit||{m:'none'}; const editable=ed.m&&ed.m!=='none';
   g2qvals(self,sp,v,st,rows,added);
   const so=st.so||sp.so||{};
@@ -269,7 +278,9 @@ function g2vals(self,sp,v,mask){
   v[id+'_count']=flat.filter(x=>x.lvl===0).length; v[id+'_all']=rows.length;
   v[id+'_empty']=flat.length===0; v[id+'_some']=flat.length>0;
   v[id+'_q']=st.q||''; v[id+'_setq']=(e)=>g2set(self,id,{q:e.target.value});
-  v[id+'_filtered']=g2filtering(st)||!!(sp.qf&&st.qv); v[id+'_clear']=()=>g2set(self,id,{q:'',f:{},qv:''});
+  v[id+'_qon']=!g2qSeg(self,id); v[id+'_qlab']=(self.__g2qL===id&&self.__g2qS)?'Buscar nesta tela':'Buscar nesta tabela';
+  v[id+'_filtered']=g2filtering(st)||!!(sp.qf&&st.qv);
+  v[id+'_clear']=()=>{ g2set(self,id,{q:'',f:{},qv:''}); if(g2qSeg(self,id)) g2set(self,self.__g2qL,{q:''}); };   // a busca da tela também filtra esta tabela
   v[id+'_fchips']=Object.keys(st.f||{}).filter(k=>(st.f[k]||[]).length).map(k=>{ const c=sp.cols.find(x=>x.k===k)||{l:k}; return {t:c.l+': '+st.f[k].map(x=>g2flab(rows,c,x)).join(', '), rm:()=>{ const f=Object.assign({},g2st(self,id).f||{}); delete f[k]; g2set(self,id,{f}); }}; });
   v[id+'_selcount']=Object.values(st.sel||{}).filter(Boolean).length; v[id+'_hassel']=v[id+'_selcount']>0;
   // barra de seleção (DS-40 · UX-ACAO-UNICA-20261003): seleção por IDs; diz quantos estão fora da vista (filtro ou grupo recolhido),
@@ -599,7 +610,8 @@ function g2foto(){ const f={}; if(typeof document==='undefined') return f;
   document.querySelectorAll('main section').forEach((s,i)=>{ const t=s.querySelector('h2,h3'); add('s:'+(t?g2txt(t).slice(0,60):i),s,3); });
   return f; }
 // tela montada: barra de carga termina, título realçado e anunciado; vindo de um link do protótipo, o foco vai ao título da tela nova
-function g2montou(self){ if(typeof document==='undefined') return; setTimeout(()=>{ try{
+function g2montou(self){ if(typeof document==='undefined') return; g2buscaUnica(self);   /* um campo de busca por tela (13/10) */
+  setTimeout(()=>{ try{
     const h=document.querySelector('header h1')||document.querySelector('h1');
     let veio=false; try{ const t=Number(sessionStorage.getItem('g2nav')||0); sessionStorage.removeItem('g2nav'); veio=t>0&&Date.now()-t<15000; }catch(e){}
     g2carga('chega'); setTimeout(()=>g2carga('fim'),g2menos()?300:40);
@@ -610,7 +622,7 @@ function g2montou(self){ if(typeof document==='undefined') return; setTimeout(()
     if(foca){ if(!h.hasAttribute('tabindex')) h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); }
     self.__g2foto=g2foto(); self.__g2passo=g2passo(); self.__g2toastVisto=(self.state&&self.state.g2toast)||''; }catch(e){} },60); }
 // depois de cada desenho: troca de etapa/seção realça o bloco do novo contexto; aviso novo (g2toast) realça o que mudou e anuncia
-function g2mudou(self){ if(typeof document==='undefined'||!self.__g2foto) return;   // antes da 1ª foto (montagem) não compara
+function g2mudou(self){ if(typeof document==='undefined') return; g2buscaUnica(self); if(!self.__g2foto) return;   // antes da 1ª foto (montagem) não compara
   const f=g2foto(), ant=self.__g2foto, agora=Date.now(); self.__g2foto=f;
   const mud=self.__g2mud=(self.__g2mud||[]).filter(x=>agora-x.t<1200);   // mudanças recentes (o aviso pode vir num desenho seguinte ao do dado)
   for(const k in f){ if(ant[k]&&ant[k].s!==f[k].s) mud.push({k,t:agora}); }

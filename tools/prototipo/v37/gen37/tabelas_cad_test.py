@@ -341,19 +341,20 @@ try:
     chk('CD-02: filtro Unidade de produtividade = t/ha/ano vale na cultivar (Mamão Formosa › Formosa)', len(fl) == 2 and fl[0].startswith('Mamão Formosa') and fl[1] == 'Formosa', fl)
     limpa(J); g.ordena('Ciclo', desc=True); bl = por_grupo(g, 'Ciclo')
     chk('CD-02: ordenar Ciclo (dias) pelo número dentro da cultura', bl and all(crescente([num(x) for x in b], True) for b in bl), bl[:2])
-    aba('Operações'); g = Grade(J, 0)
-    d = tf03('CD-02 Rendimentos', g, ['Operação › conjunto', 'Fonte', 'Processo', 'Cultura', 'Rendimento', 'Custo R$/h', 'Custo R$/ha'])
+    # 13/10/2026 (proprietário: "tire cadastro de operações de culturas e cultivares"): os rendimentos estão no CD-08, não numa aba do CD-02
+    abre('CD-08.dc.html'); g = Grade(J, 0)
+    d = tf03('CD-08 Rendimentos', g, ['Operação › conjunto', 'Fonte', 'Processo', 'Cultura', 'Rendimento', 'Custo R$/h', 'Custo R$/ha'])
     pz = next((r for r in d if r.get('Operação › conjunto', '').startswith('Trator 02')), {})
-    chk('CD-02: pulverização Medição local | Tratos culturais | 21,60 ha/h | R$ 313,00/h | R$ 14,49/ha',
+    chk('CD-08: pulverização Medição local | Tratos culturais | 21,60 ha/h | R$ 313,00/h | R$ 14,49/ha',
         [pz.get(k) for k in ('Fonte', 'Processo', 'Rendimento', 'Custo R$/h', 'Custo R$/ha')] == ['Medição local', 'Tratos culturais', '21,60 ha/h', 'R$ 313,00/h', 'R$ 14,49/ha'], pz)
     fch = [(r.get('Operação › conjunto'), c) for r, c in zip(g.dicts(), g.chips('Fonte')) if c]
-    chk('CD-02 (A11): a Fonte é texto; só a premissa a validar é chip (pendência com "Validar ›")', [x for x, _ in fch] == ['Derriçadeiras portáteis · equipe de 6'], fch)
+    chk('CD-08 (A11): a Fonte é texto; só a premissa a validar é chip (pendência com "Validar ›")', [x for x, _ in fch] == ['Derriçadeiras portáteis · equipe de 6'], fch)
     J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(x=>x.innerText.indexOf('Trator 02')===0); r&&r.querySelector('[role=cell] span').click();})()"); time.sleep(.5)
     fv = lambda k: J(f"(document.querySelector('#fx_g_rend_{k}')||{{}}).value") or ''
-    chk('CD-02 (A1): largura 36 m, velocidade 8 km/h e eficiência 75 % no painel do rendimento (saíram da grade)', [fv('larg'), fv('vel'), fv('efic')] == ['36', '8', '75'], [fv('larg'), fv('vel'), fv('efic')])
+    chk('CD-08 (A1): largura 36 m, velocidade 8 km/h e eficiência 75 % no painel do rendimento (saíram da grade)', [fv('larg'), fv('vel'), fv('efic')] == ['36', '8', '75'], [fv('larg'), fv('vel'), fv('efic')])
     J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); b&&b.click();})()"); time.sleep(.3)
     g.filtra('Processo', ['Colheita']); fl = {r.get('Processo') for r in g.dicts(True)}
-    chk('CD-02: filtro Processo = Colheita vale no conjunto', fl == {'Colheita'} and len(g.dicts(True)) == 2, [r.get('Operação › conjunto') for r in g.dicts(True)])
+    chk('CD-08: filtro Processo = Colheita vale no conjunto', fl == {'Colheita'} and len(g.dicts(True)) == 2, [r.get('Operação › conjunto') for r in g.dicts(True)])
     limpa(J)
     # ================= CD-03 =================
     abre('CD-03.dc.html'); g = Grade(J, 0)

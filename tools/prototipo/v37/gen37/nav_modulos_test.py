@@ -6,7 +6,8 @@ retângulo estranho de todos campos de busca"). Confere no navegador:
   N1 barra lateral: um ícone por módulo (+ Outros acessos), sem submenu, sem botão de expandir, recolhida (≤ 72 px), sem texto visível;
      cada ícone com nome acessível e dica com o nome (hover); o módulo da tela aberta marcado (aria-current)
   N2 cada módulo com mais de uma tela abre a tela de entrada: cartões só com ícone e nome curto (ui37.CURTO37), na ordem do menu;
-     Mapa e Manutenção abrem direto; o caminho não repete o título
+     o Mapa abre direto; a Manutenção (uma tela com visões) tem um cartão por visão (13/10, proprietário: "o menu de manutenção está
+     sem os submenus na tela igual os demais"); o caminho não repete o título
   N3 cada cartão abre a tela; cada tela do módulo tem "‹ Módulo" (alvo ≥ 36 px) que volta à tela de entrada
   N4 Outros acessos: app de campo, portal, onboarding e backoffice
   N5 o índice saiu: nenhuma tela aponta para Main.dc.html; o logotipo leva ao Mapa
@@ -60,16 +61,16 @@ try:
         c.goto(U(hub), 1.0); cs = json.loads(J(CARDS) or '[]')
         es = []; vistos = set()
         for l, h in items:
-            h0 = h.split('#')[0]
-            if h0 in vistos: continue
-            vistos.add(h0); es.append([h, ui37.CURTO37[h0][0], True])
+            k = h if h in ui37.CURTO37 else h.split('#')[0]   # visão com nome próprio (Manutenção: MA.dc.html#vis=…) tem o seu cartão
+            if k in vistos: continue
+            vistos.add(k); es.append([h, ui37.CURTO37[k][0], True])
         cr = J("(document.querySelector('header span')||{innerText:''}).innerText.trim()") or ''
         if cs != es or J("document.querySelector('h1').innerText") != nome or cr == nome: ruins.append([nome, cs, es, cr])
         for h, curto, _ in es:
             c.goto(U(h), 1.0)
             v = json.loads(J("JSON.stringify((()=>{const a=document.querySelector('a.volta37'); const r=a&&a.getBoundingClientRect(); return a?[a.getAttribute('href'),a.innerText.replace(/\\s+/g,' ').trim(),Math.round(r.height)]:null;})())") or 'null')
             if not v or v[0] != hub or v[1] != '‹ ' + nome or v[2] < 36: voltas.append([h, v])
-    chk('N2 5 telas de entrada (Agrícola, Produção, Comercial, Suprimentos, Configurações): cartões só com ícone e nome curto, na ordem do menu; caminho sem repetir o título', not ruins, ruins[:2])
+    chk(f'N2 {len(ui37.HUB37)} telas de entrada ({", ".join(ui37.HUB37)}): cartões só com ícone e nome curto, na ordem do menu; caminho sem repetir o título', not ruins, ruins[:2])
     chk('N3 cada tela dos módulos tem "‹ Módulo" (≥ 36 px) para a tela de entrada', not voltas, voltas[:4])
     c.goto(U('MOD-AGR.dc.html'), 1.0); J("[...document.querySelectorAll('a.mod-cartao')].find(a=>a.innerText.trim()==='Ordens de serviço').click()"); time.sleep(1.2)
     p1 = J("location.pathname"); J("document.querySelector('a.volta37').click()"); time.sleep(1.0); p2 = J("location.pathname")
@@ -81,7 +82,10 @@ try:
     for nome, ic, items in ui37.MENU2:
         if nome in ('Mapa', 'Manutenção'):
             c.goto(U('OS.dc.html'), 1.0); J(f"[...document.querySelectorAll('nav[aria-label=Menu] a')].find(a=>a.getAttribute('aria-label')=={json.dumps(nome)}).click()"); time.sleep(1.2); dir_[nome] = J("location.pathname")
-    chk('N2 Mapa e Manutenção (uma tela) abrem direto, sem tela de entrada', (dir_.get('Mapa') or '').endswith('/IN-04.dc.html') and (dir_.get('Manutenção') or '').endswith('/MA.dc.html'), dir_)
+    cman = json.loads(J(CARDS) or '[]')
+    chk('N2 o Mapa abre direto; a Manutenção abre a sua tela de entrada com um cartão por visão (Sem ordem · Ordens · Ativos · Planos)',
+        (dir_.get('Mapa') or '').endswith('/IN-04.dc.html') and (dir_.get('Manutenção') or '').endswith('/MOD-MAN.dc.html')
+        and [x[:2] for x in cman] == [['MA.dc.html#vis=semordem', 'Sem ordem'], ['MA.dc.html#vis=ordens', 'Ordens'], ['MA.dc.html#vis=ativos', 'Ativos'], ['MA.dc.html#vis=planos', 'Planos']], [dir_, cman])
     c.goto(U(ui37.OUTROS37[2]), 1.0); cs = json.loads(J(CARDS) or '[]')
     chk('N4 Outros acessos: app de campo, portal do parceiro, onboarding e backoffice', [x[0] for x in cs] == [h for n, h, i in ui37.OUTROS37[3]] and all(x[2] for x in cs), cs)
     # N5 índice fora

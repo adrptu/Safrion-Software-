@@ -8,6 +8,8 @@ sem início, na faixa "Sem data"; o clique abre o mesmo painel; programar fica n
   K5 semana sem ordem do recorte: o estado diz isso e leva à próxima semana com ordem
   K6 o clique no cartão abre o painel da ordem; nada é arrastável
   K7 390 px: agenda por dia (só os dias com ordem), sem rolagem lateral; K8 sem erro de JS
+  K9 teclado (CAL-C961-FOCO-01, revisão Codex de 13/10): Enter no cartão abre o painel com o foco dentro dele; Esc fecha e o foco volta ao
+     cartão (1440 e 390 px)
 Uso: python3 visoes_calendario_test.py (lê _render ou RENDER_DIR)."""
 import os, sys, json, time, datetime as dt
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -86,6 +88,18 @@ try:
     larg = json.loads(J("JSON.stringify([Math.round(document.querySelector('.oscal').getBoundingClientRect().width)].concat([...document.querySelectorAll('.oscal-dia')].filter(d=>d.getClientRects().length).map(d=>Math.round(d.getBoundingClientRect().width))))") or '[]')
     chk('K7 390 px: agenda só com os dias que têm ordem (semana de 15/10, Café: só quinta 15/10), coluna única, sem rolagem lateral',
         len(vis7) == 1 and vis7[0]['ids'] == ['OS-0425'] and (vis7[0]['t'] or '').startswith('qui 15/10') and len(larg) == 2 and larg[1] >= larg[0] - 2 and (lg or 0) <= 0, [[(d['t'], d['ids']) for d in vis7], larg, lg])
+    # K9 · teclado: Enter abre o painel com o foco dentro; Esc fecha e devolve o foco ao cartão
+    k9 = []
+    for w, h, m in ((1440, 900, False), (390, 844, True)):
+        c.aparelho(w, h, 2 if m else 1, m); limpa(); c.goto(U('OS.dc.html'), 1.4); troca_visao(J, 'calendario')
+        J("(()=>{const b=[...document.querySelectorAll('.oscal-o')].find(x=>x.getClientRects().length); if(b) b.focus();})()"); a0 = J("(document.activeElement&&document.activeElement.getAttribute('aria-label'))||''") or ''
+        c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.8)
+        dentro = J("!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('aside[role=dialog]'))")
+        c.tecla('Escape', 'Escape', 27); time.sleep(.8)
+        fechou = not J("[...document.querySelectorAll('aside[role=dialog]')].some(a=>a.getClientRects().length)")
+        a1 = J("(document.activeElement&&document.activeElement.getAttribute('aria-label'))||''") or ''
+        k9.append([w, a0[:30], dentro, fechou, a1 == a0 and bool(a0)])
+    chk('K9 teclado: Enter no cartão abre o painel com o foco dentro; Esc fecha e o foco volta ao mesmo cartão (1440 e 390 px)', all(x[2] and x[3] and x[4] for x in k9), k9)
     chk('K8 sem erro de JS', not (J("window.__err||''") or ''), J("window.__err||''"))
 finally:
     try: c.close()

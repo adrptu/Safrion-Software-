@@ -4,7 +4,8 @@ cadastros ... reduza texto ao mínimo essencial de cada submenu ... sempre com o
 intuitivos para eliminar necessidade de textos longos. Mais minimalista e essencialista").
 - Um cartão por tela do módulo, só com o ícone e o nome curto (fonte única: ui37.CURTO37); um toque abre a tela.
 - Cada tela do módulo volta por "‹ Módulo" ao lado do título (ui37.VOLTA37).
-- A barra lateral fica recolhida, um ícone por módulo com dica (ui37.navbar). Mapa e Manutenção (uma tela com visões) abrem direto.
+- A barra lateral fica recolhida, um ícone por módulo com dica (ui37.navbar). O Mapa abre direto; a Manutenção (uma tela com visões)
+  tem um cartão por visão (13/10, proprietário: "o menu de manutenção está sem os submenus na tela igual os demais").
 - "Outros acessos" reúne as pontas que antes só o índice abria (app de campo, portal do parceiro, onboarding e backoffice).
 O cartão (cartao) e o seu CSS também servem à tela Cadastros (areas/cad_inicio.py). Nada é gravado aqui."""
 import engine as E
@@ -52,13 +53,13 @@ def _hub(fname, titulo, itens):
 
 
 def itens_do(nome):
-    """cartões de um módulo: uma tela por cartão (visões da mesma tela contam uma vez), na ordem do menu."""
+    """cartões de um módulo, na ordem do menu: uma tela por cartão; a visão com nome próprio no CURTO37 (MA.dc.html#vis=…) tem o seu."""
     its, vistos = [], set()
     for _, ic, items in [m for m in MENU2 if m[0] == nome]:
         for l, h in items:
-            h0 = h.split('#')[0]
-            if h0 in vistos: continue
-            vistos.add(h0); curto, ic2 = CURTO37[h0]; its.append((h, curto, ic2))
+            k = h if h in CURTO37 else h.split('#')[0]
+            if k in vistos: continue
+            vistos.add(k); curto, ic2 = CURTO37[k]; its.append((h, curto, ic2))
     return its
 
 

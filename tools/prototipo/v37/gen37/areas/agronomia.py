@@ -554,8 +554,8 @@ function agRow(s,v,c,S){ const R=S.R, p=mipP(v), t=mipT(v), P=mipProx(s,v,c);
          .concat([{k:'br'},{k:'mut',t:R.col+'/'+R.tot+' pontos'+(R.rec?' · '+R.rec+' recoleta':(R.pend?' · '+R.pend+' no aparelho':''))}]),
        data:[{k:'txt',t:mipBrA(v.data)},{k:'br'},{k:'mut',t:v.resp}],
        sit:[{k:'chip',t:S.t,c:S.c}].concat(S.sub?[{k:'br'},{k:'mut',t:S.sub}]:[]),prox:nx}}; }
-function agRows(self,v){ const s=mipGet(), c=agC(), f=agFaz(self); const sk=self.state.ag_sit||'';
-  const all=Object.values(s.vis).filter(x=>f==='Todas'||x.faz===f).map(x=>({v:x,S:mipSit(s,x,c)})).sort((a,b)=>(a.S.ord-b.S.ord)||(a.v.data<b.v.data?1:-1));
+function agRows(self,v){ const s=mipGet(), c=agC(); const sk=self.state.ag_sit||'';
+  const all=Object.values(s.vis).filter(x=>agRec(self,x)).map(x=>({v:x,S:mipSit(s,x,c)})).sort((a,b)=>(a.S.ord-b.S.ord)||(a.v.data<b.v.data?1:-1));
   if(v){ const cnt={}; all.forEach(x=>{ cnt[x.S.k]=(cnt[x.S.k]||0)+1; }); const ST='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;';
     const ch=(k,t,n)=>({t,n:String(n),on:String(sk===k),go:()=>self.setState({ag_sit:(sk===k&&k)?'':k}),st:ST+(sk===k?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')});
     v.ag_chips=[ch('','Todas',all.length)].concat(MIP_ORD.filter(k=>cnt[k]).map(k=>ch(k,MIP_SIT[k][0],cnt[k]))); }
@@ -563,11 +563,31 @@ function agRows(self,v){ const s=mipGet(), c=agC(), f=agFaz(self); const sk=self
   const g=self.state.ag_grp||''; if(!g) return rows;
   const gs={}, ord=[]; rows.forEach(r=>{ const k=r.gk[g]; if(!gs[k]){ gs[k]=[]; ord.push(k); } gs[k].push(r); });
   return ord.map(k=>({id:'g:'+k,v:{id:k},s:{id:k},p:{id:[{k:'b',t:k},{k:'mut',t:'· '+gs[k].length+(gs[k].length>1?' vistorias':' vistoria')}]},kids:gs[k]})); }
+// Cultura e Talhão na faixa "Filtros desta tela" (proprietário, 13/10/2026: "nas demais telas que isso for bastante essencial e ajudar o usuário"):
+// opções = culturas e talhões com vistoria na fazenda do filtro; o Talhão segue a Cultura. Valem para a lista, os chips de situação e o selo.
+function agRec(self,x){ const f=agFaz(self), cu=self.state.mf_cult||'Todas', tl=self.state.mf_tal||'', t=MIPD.tal[x.tal]||{};
+  return (f==='Todas'||x.faz===f)&&(cu==='Todas'||t.cultura===cu)&&(!tl||x.tal===tl); }
+// abrir uma vistoria fora do recorte tira só o filtro que a esconde (a fazenda segue a regra de cada chamada)
+function agInclui(self,x){ const t=MIPD.tal[x.tal]||{}, cu=self.state.mf_cult||'Todas', tl=self.state.mf_tal||'', o={};
+  if(cu!=='Todas'&&t.cultura!==cu) o.mf_cult='Todas'; if(tl&&x.tal!==tl) o.mf_tal=''; return o; }
+function agTopo(self,v){ const s=mipGet(), f=agFaz(self), cu=self.state.mf_cult||'Todas', tl=self.state.mf_tal||'', cs=[], ts=[];
+  const rot=k=>(MIPD.tal[k]||{}).rot||k;
+  Object.values(s.vis).forEach(x=>{ if(f!=='Todas'&&x.faz!==f) return; const t=MIPD.tal[x.tal]||{}; if(t.cultura&&cs.indexOf(t.cultura)<0) cs.push(t.cultura);
+    if((cu==='Todas'||t.cultura===cu)&&ts.indexOf(x.tal)<0) ts.push(x.tal); });
+  cs.sort((a,b)=>a.localeCompare(b,'pt-BR')); if(cu!=='Todas'&&cs.indexOf(cu)<0) cs.push(cu);
+  if(tl&&ts.indexOf(tl)<0) ts.push(tl); ts.sort((a,b)=>rot(a).localeCompare(rot(b),'pt-BR',{numeric:true}));
+  v.mf_cult=cu; v.mf_cult_opts=[{v:'Todas',t:'Todas'}].concat(cs.map(c=>({v:c,t:c})));
+  v.mf_setcult=(e)=>self.setState({mf_cult:e.target.value,mf_tal:'',g2toast:'Cultura: '+e.target.value});
+  v.mf_tal=tl; v.mf_tal_opts=[{v:'',t:'Todos'}].concat(ts.map(k=>({v:k,t:rot(k)})));
+  v.mf_settal=(e)=>self.setState({mf_tal:e.target.value,g2toast:'Talhão: '+(e.target.value?rot(e.target.value):'Todos')});
+  // talhão é de uma fazenda só: trocar para outra fazenda tira o talhão do filtro, com aviso pelo nome
+  v.mf_setfaz=(e)=>{ const faz=e.target.value, t=MIPD.tal[self.state.mf_tal||'']; const sai=!!t&&faz!=='Todas'&&t.faz!==faz;
+    self.setState(Object.assign({mf_faz:faz,g2toast:'Fazenda: '+faz},sai?{mf_tal:'',g2toast:'Fazenda: '+faz+' · o talhão '+t.rot+' ('+t.faz+') saiu do filtro.'}:{})); }; }
 // abrir a vistoria pelo hash (#VIS-xxx): painel aberto e fazenda do filtro trocada para a da vistoria
 function agHash(self){ let h=''; try{ h=decodeURIComponent(location.hash||''); }catch(e){ h=''; } const m=/^#(VIS-\d+)(?::(decidir|programar))?$/.exec(h); if(!m) return;
   const v=mipGet().vis[m[1]]; if(!v){ self.setState({g2toast:m[1]+' não encontrada.'}); return; }
   // miprev: a navegação por hash na mesma página sempre redesenha com o estado atual (MIP e O.S. podem ter mudado em outra tela)
-  const f=agFaz(self); self.setState({pan:v.id,dec:null,pv:null,mf_faz:(f==='Todas'||f===v.faz)?f:v.faz,miprev:Date.now()});
+  const f=agFaz(self); self.setState(Object.assign({pan:v.id,dec:null,pv:null,mf_faz:(f==='Todas'||f===v.faz)?f:v.faz,miprev:Date.now()},agInclui(self,v)));
   // "#VIS-xxx:decidir" (vindo do Mapa) abre direto o formulário da decisão, sem registrar nada
   // "#VIS-xxx:programar" (vistoria atrasada, vindo do sub-detalhe) abre o formulário da próxima vistoria do mesmo talhão × alvo
   const fn=m[2]?mipProx(mipGet(),v,agC()).fn:'';
@@ -730,8 +750,8 @@ function agPv(self,v){ const pv=self.state.pv; v.pv_open=!!pv; const fecha=()=>{
   v.pv_save=()=>{ const cur=self.state.pv; if(cur.data&&cur.data<MIPD.hoje){ self.setState({pv:Object.assign({},cur,{err:'Data no passado: programe a partir de hoje ('+mipBr(MIPD.hoje)+').'})}); return; }
     const r=mipMudar(null,s2=>mipNovaVis(s2,cur.tal,cur.prot,cur.data,cur.resp,'ag01'));
     if(r.erro){ const m=/^(VIS-\d+) já está aberta/.exec(r.erro); self.setState({pv:Object.assign({},cur,{err:r.erro,ab:m?m[1]:''})}); return; }
-    agSetHash(r.id); self.setState({pv:null,pan:r.id,miprev:Date.now(),g2toast:r.msg,mf_faz:(agFaz(self)==='Todas'?'Todas':MIPD.tal[cur.tal].faz)}); agFoco(); }; }
-function PREVALS(self,v){ cenOuvir(self); mipOuvir(self); agIni(self); v.mf_faz=agFaz(self); agFazSalvar(self);
+    agSetHash(r.id); self.setState(Object.assign({pv:null,pan:r.id,miprev:Date.now(),g2toast:r.msg,mf_faz:(agFaz(self)==='Todas'?'Todas':MIPD.tal[cur.tal].faz)},agInclui(self,{tal:cur.tal}))); agFoco(); }; }
+function PREVALS(self,v){ cenOuvir(self); mipOuvir(self); agIni(self); v.mf_faz=agFaz(self); agFazSalvar(self); agTopo(self,v);
   const sp=GRIDS.find(g=>g.id==='g_vis'); sp.rows=agRows(self,v);
   const x0={}; sp.rows.forEach(r=>{ if(r.kids) x0[r.id]=true; }); sp.x0=x0; }
 function EXTRAVALS(self,v){ const st=self.state; const s=mipGet(), c=agC(), f=agFaz(self);
@@ -740,8 +760,8 @@ function EXTRAVALS(self,v){ const st=self.state; const s=mipGet(), c=agC(), f=ag
   v.ag_grp=st.ag_grp||''; v.ag_grpOn=!!st.ag_grp; v.ag_setgrp=(e)=>{ self.setState({ag_grp:e.target.value}); g2set(self,'g_vis',{x:null}); };
   v.pv_new=()=>agPvOpen(self);
   agPanel(self,v); agPv(self,v);
-  // selo do cabeçalho: acima do NC sem decisão e focos a confirmar na fazenda do filtro
-  const vs=Object.values(s.vis).filter(x=>f==='Todas'||x.faz===f).map(x=>mipSit(s,x,c).k);
+  // selo do cabeçalho: acima do NC sem decisão e focos a confirmar no recorte da faixa (fazenda, cultura e talhão)
+  const vs=Object.values(s.vis).filter(x=>agRec(self,x)).map(x=>mipSit(s,x,c).k);
   const na=vs.filter(k=>k==='acima').length, nf=vs.filter(k=>k==='foco').length, ns=vs.filter(k=>k==='sinc'||k==='incompleta').length;
   v.ag_st=[na?na+' acima do NC sem decisão':'',nf?nf+(nf>1?' focos a confirmar':' foco a confirmar'):'',(!na&&!nf&&ns)?ns+' coleta a completar':''].filter(Boolean).join(' · ')||'Em dia';
   const cs=agCh(na?'red':((nf||ns)?'yellow':'green')); v.ag_stst=cs.st; v.ag_stdot=cs.dot;
@@ -761,7 +781,7 @@ def _menu_mip():
     """AG-01det, AG-03 e AG-04 (+ detalhes) pertencem ao item Pragas e doenças (MIP/MID) do menu; AG-01 tem o filtro Fazenda no topo."""
     import ui37
     for f in ('AG-03.dc.html','AG-03det.dc.html','AG-04.dc.html','AG-04det.dc.html'): ui37.MENU_OF.setdefault(f,'AG-01.dc.html')
-    ui37.MACRO.setdefault('AG-01.dc.html',dict(faz='filtro'))
+    ui37.MACRO.setdefault('AG-01.dc.html',dict(faz='filtro',cult='filtro',tal='filtro'))   # 13/10: Cultura e Talhão (vistoria é por talhão e cultura)
 
 def ag01():
     import cenario, dados_mip as DM
@@ -775,7 +795,7 @@ def ag01():
          f'<select aria-label="Agrupar vistorias por" value="{H("ag_grp")}" onChange="{H("ag_setgrp")}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK};">'
          + ''.join(f'<option value="{k}">{t}</option>' for k,t in (('','Nenhum'),('tal','Talhão'),('alvo','Alvo'),('sit','Situação'),('faz','Fazenda'))) + '</select></label>')
     g=grid(cols,[],edit=dict(m='pick',leafOnly=True),tree=True,gid='g_vis',total=False,tools=grp)
-    # filtro rápido por situação, na ordem de gravidade (acima do NC primeiro), com a contagem da fazenda do filtro
+    # filtro rápido por situação, na ordem de gravidade (acima do NC primeiro), com a contagem do recorte da faixa
     chips=(f'<div role="group" aria-label="Filtrar por situação" style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{H("ag_chips")}" as="q" hint-placeholder-count="5">'
            f'<button type="button" aria-pressed="{H("q.on")}" onClick="{H("q.go")}" style="{H("q.st")}">{H("q.t")} <span style="opacity: .75;">{H("q.n")}</span></button></sc-for></div>')
     corpo=bloco('Vistorias','',f'<div style="display: flex; flex-direction: column; gap: 10px; min-height: 0; flex: 1 1 auto;">{chips}{g}</div>'+_ag01_restaurar())
@@ -904,8 +924,10 @@ AGF_CULTURAS=['Soja','Milho','Feijão','Café','Mamão']
 # alvos do agrofit_indice.json (nada inventado): Praga-alvo (nomes comuns; coluna multivalorada, o filtro marca o nome) e Nome científico, uma
 # variável por coluna, com filtro e ordenação no cabeçalho; "Cultura do uso" separa o uso registrado na cultura do uso em "Todas as culturas".
 # Sem cultura, a lista continua com uma linha por produto (AGF_COLS_P, as 6 colunas do desenho).
-AGF_COLS_P=[dict(k='prod',l='Produto · registro',w=180),dict(k='ing',l='Ingrediente ativo · grupo químico',w=190),dict(k='cls',l='Classe · modo de ação',w=130),
-            dict(k='cult',l='Culturas',t='num',w=115),dict(k='tox',l='Tox · amb',w=120),dict(k='faz',l='Na fazenda',t='num',w=125)]
+AGF_COLS_P=[dict(k='prod',l='Produto · registro',w=170),dict(k='ing',l='Ingrediente ativo · grupo químico',w=180),dict(k='cls',l='Classe · modo de ação',w=130),
+            dict(k='cult',l='Culturas',t='num',w=115),dict(k='alvo',l='Alvos',t='num',w=125,multi=True),dict(k='tox',l='Tox · amb',w=120),dict(k='faz',l='Na fazenda',t='num',w=125)]
+# Alvos (proprietário, 13/10/2026: "coloque coluna dos alvos na planilha/modos de visão"): sem cultura, cada produto mostra quantos alvos tem
+# registrados e os mais frequentes (nomes comuns do AGROFIT, lidos dos usos); o filtro do cabeçalho escolhe pelo nome do alvo.
 AGF_COLS_U=[dict(k='prod',l='Produto · registro',w=170),dict(k='alvo',l='Praga-alvo',w=170,multi=True),dict(k='cien',l='Nome científico',w=160),
             dict(k='ucul',l='Cultura do uso',w=110),dict(k='ing',l='Ingrediente ativo · grupo químico',w=180),dict(k='cls',l='Classe · modo de ação',w=130),
             dict(k='tox',l='Tox · amb',w=120),dict(k='faz',l='Na fazenda',t='num',w=125)]
@@ -972,9 +994,16 @@ def _agf_filtros():
            f'{H("qc.t")} <span style="opacity: .75;">{H("qc.n")}</span></button></sc-for>'
            f'<sc-if value="{H("agf_temClsO")}" hint-placeholder-val="{T_()}"><select aria-label="Outras classes" value="{H("agf_clsO")}" onChange="{H("agf_setClsO")}" style="{H("agf_clsOSt")}">'
            f'<sc-for list="{H("agf_clsOs")}" as="o" hint-placeholder-count="4"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></sc-if></div>')
-    cul=f'<div style="display: flex; flex-direction: column; gap: 4px;">{_LAB("Cultura")}{E.ac_campo("agc.","Cultura","250px")}</div>'
+    # um campo de busca por tela (proprietário, 13/10/2026: "quero somente 1 campo de busca por tela. 2 fica confuso"): Cultura e Praga-alvo
+    # viram listas de escolha (sem digitar); a busca de texto da tela é só a da lista. Culturas da fazenda primeiro.
+    SELF=f'font-family: inherit; font-size: 14px; padding: 8px 10px; border-radius: 9px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; max-width: 100%; min-height: 44px;'   # alvo de 44 px (NAV-2CB-TOQUE-01)
+    cul=(f'<div style="display: flex; flex-direction: column; gap: 4px;">{_LAB("Cultura")}<select aria-label="Cultura" value="{H("agf_culV")}" onChange="{H("agf_setCul")}" style="{SELF} width: 250px;">'
+         f'<option value="">{H("agf_cul0")}</option>'
+         f'<optgroup label="Na fazenda"><sc-for list="{H("agf_culFaz")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></optgroup>'
+         f'<optgroup label="Outras culturas"><sc-for list="{H("agf_culOut")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></optgroup></select></div>')
     alvo=(f'<sc-if value="{H("agf_temCul")}" hint-placeholder-val="{F_()}"><div style="display: flex; flex-direction: column; gap: 4px;">{_LAB("Praga-alvo")}'
-          f'{E.ac_campo("aga.","Praga-alvo","330px")}</div></sc-if>')   # o mesmo rótulo da coluna (revisão de 10/10, A6)
+          f'<select aria-label="Praga-alvo" value="{H("agf_alV")}" onChange="{H("agf_setAl")}" style="{SELF} width: 330px;"><sc-for list="{H("agf_alOpts")}" as="o" hint-placeholder-count="3">'
+          f'<option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></div></sc-if>')   # o mesmo rótulo da coluna (revisão de 10/10, A6)
     org=(f'<div style="display: flex; flex-direction: column; gap: 4px;">{_LAB("Orgânicos")}<button type="button" aria-pressed="{H("agf_orgOn")}" onClick="{H("agf_orgTog")}" '
          f'title="Mostrar só produtos marcados como aprovados para agricultura orgânica no AGROFIT" style="{H("agf_orgSt")}">Aprovados para orgânicos <span style="opacity: .75;">{H("agf_orgN")}</span></button></div>')
     faixa=lambda cond,bg,t,d,bt,go: (f'<sc-if value="{H(cond)}" hint-placeholder-val="{F_()}"><div role="status" style="display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; '
@@ -1254,7 +1283,7 @@ function agMesmo(p,q){ const P=p.rot, Q=q.rot; for(const k of Q.s) if(P.s.has(k)
 function agPrepUsos(arr){ const U={}; arr.forEach(s=>{ Object.keys(s.culturas).forEach(k=>{ U[k]=s.culturas[k]; }); });
   const PU=AGX.P.map(()=>[]), pairs=[];
   Object.keys(U).forEach(k=>{ const c=Number(k); U[k].forEach(x=>{ pairs.push({c:c,a:x[0],ps:x[1],h:null}); x[1].forEach(pi=>{ if(PU[pi]) PU[pi].push([c,x[0]]); }); }); });
-  AGX.U=U; AGX.PU=PU; AGX.pairs=pairs; AGX.UA={}; AGX.uleaf={}; AGX.vk=null; AGX.uvk=null; AGX.gk=null; agPrepH(pairs); }
+  AGX.U=U; AGX.PU=PU; AGX.pairs=pairs; AGX.UA={}; AGX.uleaf={}; AGX.leaf={}; AGX.vk=null; AGX.uvk=null; AGX.gk=null; agPrepH(pairs); }   // leaf: a coluna Alvos ganha os nomes
 // texto pesquisável dos ~280 mil usos montado em fatias de ~12 ms logo após a carga (a 1ª busca não paga a montagem)
 function agPrepH(pairs){ let i=0; const passo=()=>{ if(AGX.pairs!==pairs) return; const t0=Date.now();
     while(i<pairs.length){ agPairH(pairs[i++]); if((i&511)===0&&Date.now()-t0>12) break; } if(i<pairs.length) setTimeout(passo,0); };
@@ -1302,15 +1331,21 @@ function agFaz(p,c){ const refs=AGX.FK[p.key]||[]; if(!refs.length) return null;
   const pl=[].concat.apply([],refs.map(r=>AGF.planos[r.id]||[])); const rf=[].concat.apply([],refs.map(r=>r.refs_fazenda||[]));
   const disp=por.reduce((a,x)=>a+x.disp,0);
   return {refs:refs,nf:nf,L:L,por:por,disp:disp,os:os,pl:pl,rf:rf,cat:disp>0?AG_FAZ[0]:AG_FAZ[1]}; }
+// alvos de um produto (todas as culturas), do mais frequente nos usos ao menos frequente; null enquanto os usos carregam
+function agAlvosP(p){ const PU=AGX.PU&&AGX.PU[p.i]; if(!PU) return null; const n=new Map(); PU.forEach(x=>n.set(x[1],(n.get(x[1])||0)+1));
+  return Array.from(n.keys()).sort((a,b)=>(n.get(b)-n.get(a))||AGC.compare(agAlvoT(a,true),agAlvoT(b,true))); }
 function agLeaf(p){ let L=AGX.leaf[p.i]; if(L) return L; const I=AGX.I;
   const cs=p.cul.slice().sort(AGX.culCmp).map(c=>I.culturas[c][0]); const n=p.cul.length;
-  const cT=n===1?cs[0]:(agNf(n)+' culturas'), cM=n===1?(agNf(p.nAlvos)+(p.nAlvos===1?' alvo':' alvos')):(cs.slice(0,3).join(', ')+(n>3?' +'+(n-3):''));
+  const cT=n===1?cs[0]:(agNf(n)+' culturas'), cM=n===1?'1 cultura':(cs.slice(0,3).join(', ')+(n>3?' +'+(n-3):''));
+  const as=agAlvosP(p), na=as?as.length:p.nAlvos, aT=agNf(na)+(na===1?' alvo':' alvos');
+  const aM=as?(as.slice(0,3).map(a=>agAlvoT(a,true)).join(', ')+(as.length>3?' +'+(as.length-3):'')):'nomes em instantes';
   const tox=agToxT(p), amb=agAmbT(p);
   const gm=(p.gqT||'grupo químico não informado')+(p.moaT?(' · '+p.moaT):'');
-  L={id:p.reg, dr:'agf_op_'+p.reg, v:{cult:n,faz:null}, s:{prod:p.nome+' · '+p.reg, ing:p.ingT+' · '+gm, cls:p.clsT+' · '+(p.modoT||'—'), tox:tox+' · '+amb, faz:AG_FAZ[2]},
+  L={id:p.reg, dr:'agf_op_'+p.reg, v:{cult:n,alvo:na,faz:null}, s:{prod:p.nome+' · '+p.reg, ing:p.ingT+' · '+gm, cls:p.clsT+' · '+(p.modoT||'—'), alvo:aT, tox:tox+' · '+amb, faz:AG_FAZ[2]},
+    m:{alvo:(as||[]).map(a=>({id:String(a),l:agAlvoT(a,true)}))},
     p:{prod:[{k:'b',t:p.nome},{k:'br'},{k:'mut',t:'Reg. '+p.reg+' · '+p.titC}], ing:[{k:'txt',t:p.ingT},{k:'br'},{k:'mut',t:gm}],
        cls:[{k:'txt',t:p.clsT},{k:'br'},{k:'mut',t:p.modoT||'modo de ação não informado'}], cult:[{k:'txt',t:cT},{k:'br'},{k:'mut',t:cM}],
-       tox:[{k:'txt',t:tox},{k:'br'},{k:'mut',t:amb}], faz:[{k:'mut',t:'—'}]}};
+       alvo:[{k:'txt',t:aT},{k:'br'},{k:'mut',t:aM}], tox:[{k:'txt',t:tox},{k:'br'},{k:'mut',t:amb}], faz:[{k:'mut',t:'—'}]}};
   return (AGX.leaf[p.i]=L); }
 function agLeafFaz(L,F){ if(!F){ L.v.faz=null; L.s.faz=AG_FAZ[2]; L.p.faz=[{k:'mut',t:'—'}]; return; }
   const com=F.por.filter(x=>x.L.length), x0=com[0]||F.por[0]; L.v.faz=F.disp; L.s.faz=F.cat;
@@ -1468,11 +1503,14 @@ function PREVALS(self,v){
   sp.lim=st.agf_lim||AG_LIM;
   if(!AG_COLS_P) AG_COLS_P=sp.cols.slice();
   const mu=ok&&agModoUso(st); sp.cols=mu?AGF_COLS_U:AG_COLS_P; v.agf_ncol=sp.cols.length;
-  if(!ok){ sp.rows=[]; sp.tree=false; v.agc=agAc(self,'agf_cul',[],'',()=>{}); v.aga=agAc(self,'agf_alvo',[],'',()=>{}); v.agf_orgOn='false'; v.agf_orgN=''; v.agf_orgSt=''; return; }
+  if(!ok){ sp.rows=[]; sp.tree=false; v.agf_culV=''; v.agf_cul0='Carregando culturas…'; v.agf_culFaz=[]; v.agf_culOut=[]; v.agf_setCul=()=>{}; v.agf_alV=''; v.agf_alOpts=[]; v.agf_setAl=()=>{};
+    v.agf_orgOn='false'; v.agf_orgN=''; v.agf_orgSt=''; return; }
   const I=AGX.I, TD=I.todasCulturas, cul=st.agf_cul||'', al=st.agf_alvo||'', cls=st.agf_cls||'', gb=st.agf_gb||'';
   const V=agVis(st);
-  // filtros: cultura (combobox), praga ou alvo (com a cultura), classe por componente (+ Biológico), orgânicos
-  v.agc=agAc(self,'agf_cul',AGX.culItems,cul,(x)=>{ agColsLimpa(self,x!==''); agSetF(self,{agf_cul:x,agf_alvo:''}); },{ph:'Todas as culturas · digite para buscar'});
+  // filtros: cultura (lista: as da fazenda primeiro), praga-alvo (lista, com a cultura), classe por componente (+ Biológico), orgânicos
+  const cOpt=x=>({v:x.v,t:Number(x.v)===TD?'Registro em "Todas as culturas"':x.t}), naFaz=x=>AGX.fazCul.indexOf(Number(x.v))>=0;
+  v.agf_culV=cul; v.agf_cul0='Todas as culturas'; v.agf_culFaz=AGX.culItems.filter(naFaz).map(cOpt); v.agf_culOut=AGX.culItems.filter(x=>!naFaz(x)).map(cOpt);
+  v.agf_setCul=(e)=>{ const x=e.target.value; agColsLimpa(self,x!==''); agSetF(self,{agf_cul:x,agf_alvo:''}); };
   v.agf_temCul=cul!=='';
   const semTD=!!st.agf_semTD, cn0=cul!==''?I.culturas[Number(cul)][0]:''; v.agf_hasTD=cul!==''&&Number(cul)!==TD&&(V.nTD>0||semTD);
   const VU=mu?agVisUso(st):null; if(mu&&Number(cul)!==TD) v.agf_hasTD=semTD||VU.rows.length>VU.nCul;
@@ -1483,8 +1521,10 @@ function PREVALS(self,v){
   let alItems=[]; if(cul!==''&&AGX.uSt==='ok'){ const mm=new Map(); agUA(cul).forEach((ps,a)=>{ mm.set(a,{n:ps.length,todas:false}); });
       if(Number(cul)!==TD&&!st.agf_semTD) agUA(TD).forEach((ps,a)=>{ const x=mm.get(a); if(x) x.n+=ps.length; else mm.set(a,{n:ps.length,todas:true}); });
       alItems=Array.from(mm.keys()).sort((a,b)=>(mm.get(b).n-mm.get(a).n)||AGC.compare(agAlvoT(a,true),agAlvoT(b,true))).map(a=>{ const x=mm.get(a), ali=I.alvos[a]||['',[],'',0];
-        return {v:String(a),t:agAlvoT(a,true),sub:(ali[0]||'—')+' · '+(AG_TIPO[ali[2]]||'alvo')+' · '+agNf(x.n)+(x.n===1?' produto':' produtos')+(x.todas?' · registro em "Todas as culturas"':''),k:(ali[1]||[]).join(' ')}; }); }
-  v.aga=agAc(self,'agf_alvo',alItems,al,(x)=>{ agSetF(self,{agf_alvo:x}); },{ph:AGX.uSt==='ok'?('Todos os alvos de '+(cul!==''?I.culturas[Number(cul)][0]:'')+' · digite para buscar'):'Carregando alvos…'});
+        const t=agAlvoT(a,true); return {v:String(a),t:t+((ali[0]&&ali[0]!==t)?' · '+ali[0]:'')+' ('+agNf(x.n)+')'}; }); }
+  if(al!==''&&!alItems.some(x=>x.v===al)) alItems.push({v:al,t:agAlvoT(al,true)+' (0)'});   // escolha sem produtos continua à vista para poder ser trocada
+  v.agf_alV=al; v.agf_alOpts=[{v:'',t:AGX.uSt==='ok'?('Todos os alvos ('+agNf(alItems.length)+')'):'Carregando alvos…'}].concat(alItems);
+  v.agf_setAl=(e)=>agSetF(self,{agf_alvo:e.target.value});
   const chip=(t,n,on,go,lab)=>({t:t,n:agNf(n),on:String(!!on),go:go,lab:lab,st:AG_QST+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')});
   // classes principais em chips (contagem com os demais filtros); as outras num seletor compacto
   const CN=agChipsCol(st,g2st(self,AGF_G))||(mu?VU:V), nCls=(k)=>k==='Biológico'?CN.bio:(CN.cnt[k]||0);
@@ -1727,7 +1767,7 @@ def _agf_pos(fname):
     from engine import chip as _chip
     p=_os.path.join(E.P,fname); s=open(p,encoding='utf-8').read()
     alvo='value="{{'+AGF_ID+'_q}}"'
-    pat=re.compile(r'min-width: 160px;(">(?:(?!<label).)*?<input type="search" aria-label=")Buscar nesta tabela(" placeholder=")Buscar…("\s*'+re.escape(alvo)+')',re.S)
+    pat=re.compile(r'min-width: 160px;(">(?:(?!<label).)*?<input type="search" aria-label=")\{\{'+AGF_ID+r'_qlab\}\}(" placeholder=")Buscar…("\s*'+re.escape(alvo)+')',re.S)   # o rótulo vem do g2 (um campo de busca por tela)
     s,n=pat.subn(r'min-width: min(380px, 100%);" class="agf-busca\1Buscar produto, registro, ingrediente, titular, cultura ou praga\2Buscar produto, ingrediente, titular, cultura ou praga…\3',s)
     assert n==1, 'busca da grade não encontrada em '+fname
     assert s.count('</style>')>=1; s=s.replace('</style>','.agf-busca:focus-within{outline:2px solid #1E7A4C;outline-offset:1px}</style>',1)

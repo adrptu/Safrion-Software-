@@ -48,8 +48,9 @@ VIS_ROWS.append((OUTROS37[0],[OUTROS37[2]]+[h for _,h,_ in OUTROS37[3] if not h.
 # PCM S4 (§1, §3.7): MB-09 "Máquina" e MB-09det "Ordem de manutenção" deixam de ser ocultos: ligados ao MB-01, gravam no cenário e funcionam sem sinal
 VIS_ROWS.append(('App de campo',['MB-01.dc.html','MB-02.dc.html','MB-03.dc.html','MB-04.dc.html','MB-05.dc.html','MB-07.dc.html','MB-10.dc.html',
                                  'MB-09.dc.html','MB-09det.dc.html']))   # MB-07 e MB-10 no estado (colheita, 06/10)
-detalhes={'Agrícola':['CA-01det.dc.html','CA-01x-os0420.dc.html','OS-0424-app.dc.html','OS-0424-ficha.dc.html','AG-01det.dc.html','IR-02.dc.html','IR-03.dc.html','IR-03det.dc.html','IR-04.dc.html'],
-          'Produção':['BEN.dc.html'] if BEN_PUBLICADO else [],'Cadastros':[f for f in files if f.startswith('CD-') and 'det' in f]}   # v55: BEN só publicado (ui37.BEN_PUBLICADO)
+detalhes={'Agrícola':['CA-01det.dc.html','CA-01x-os0420.dc.html','OS-0424-app.dc.html','OS-0424-ficha.dc.html','AG-01det.dc.html','IR-02.dc.html','IR-03.dc.html','IR-03det.dc.html','IR-04.dc.html']
+          +(['BEN.dc.html'] if BEN_PUBLICADO else []),   # 13/10: a Produção entrou em Agrícola (BEN, quando publicado, junto)
+          'Cadastros':[f for f in files if f.startswith('CD-') and 'det' in f]}   # v55: BEN só publicado (ui37.BEN_PUBLICADO)
 y=0; placed=set()
 for nome,fs in VIS_ROWS:
     fs=[f for f in fs+detalhes.get(nome,[]) if f in files]

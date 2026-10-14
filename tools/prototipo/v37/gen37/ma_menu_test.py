@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 """Navegação da Manutenção (proprietário, 13/10/2026: barra lateral sempre recolhida, um ícone por módulo, sem submenus).
-Confere: o ícone Manutenção é um link direto para a tela única MA.dc.html e fica destacado (aria-current="page" e fundo verde) em
-qualquer visão, sem subitens nem expandir; tocar o ícone no início (Mapa) abre a MA; as 4 visões (Sem ordem · Ordens · Ativos · Planos)
-ficam no seletor da própria tela (botões; lista no celular) e no endereço #vis=…; trocar de visão muda a lista sem recarregar.
+Confere: o ícone Manutenção leva à tela de entrada MOD-MAN.dc.html (13/10, proprietário: "o menu de manutenção está sem os submenus na
+tela igual os demais"), um cartão por visão (Sem ordem · Ordens · Ativos · Planos → MA.dc.html#vis=…), e fica destacado (aria-current="page"
+e fundo verde) em qualquer visão, sem subitens nem expandir; o cartão abre a MA na visão dele e "‹ Manutenção" volta ao cartão; as 4 visões
+ficam também no seletor da própria tela (botões; lista no celular) e no endereço #vis=…; trocar de visão muda a lista sem recarregar.
 Corrida da v57: com o painel da OM aberto ao lado, a troca de visão logo após abrir às vezes se perdia (o # antigo voltava); aqui a troca
 é repetida pelo seletor e pelo endereço #vis= e precisa valer e ficar. Uso: python3 ma_menu_test.py (lê _render)."""
 import sys, json, re, time
 from ma_lib import MA
-from ui37 import INICIO37
+from ui37 import INICIO37, HUB37
+HUB = HUB37['Manutenção']
 
 m = MA(1440, 900); J = m.J
 VIS = ['semordem', 'ordens', 'ativos', 'planos']
@@ -57,20 +59,26 @@ try:
         m.ir('vis=' + v, perfil='Otávio', limpa=(i == 0)); na = espera(lambda: mostra(v), 10)   # sob carga a MA demora a montar
         L = json.loads(J(NAV) or '[]')
         man = [x for x in L if x[0] == 'Manutenção']; cur = [x[0] for x in L if x[3] == 'page']; sub = J(SUB)
-        m.ok(man == [['Manutenção', 'Manutenção', 'MA.dc.html', 'page', '', VERDE]] and cur == ['Manutenção']
-             and all(x[5] != VERDE for x in L if x[0] != 'Manutenção') and [x[2] for x in L if (x[2] or '').startswith('MA')] == ['MA.dc.html']
+        m.ok(man == [['Manutenção', 'Manutenção', HUB, 'page', '', VERDE]] and cur == ['Manutenção']
+             and all(x[5] != VERDE for x in L if x[0] != 'Manutenção') and [x[2] for x in L if (x[2] or '').startswith(('MA', 'MOD-MAN'))] == [HUB]
              and sub == 0 and na,
-             f'visão {v}: um só ícone Manutenção → MA.dc.html, destacado, sem texto e sem subitens; o seletor da tela com as 4 visões e só "{TIT[i]}" marcado; a lista é a da visão',
+             f'visão {v}: um só ícone Manutenção → {HUB}, destacado, sem texto e sem subitens; o seletor da tela com as 4 visões e só "{TIT[i]}" marcado; a lista é a da visão',
              [man, cur, sub, tela()])
-    # o ícone Manutenção abre a tela única a partir do início (Mapa), na visão do papel, e fica destacado
+    # o ícone Manutenção abre, a partir do início (Mapa), a tela de entrada: um cartão por visão, na ordem do seletor, ícone destacado
+    CARDS = "JSON.stringify([...document.querySelectorAll('a.mod-cartao')].filter(a=>a.getClientRects().length).map(a=>[a.getAttribute('href'),a.innerText.trim(),!!a.querySelector('svg path')]))"
     m.ir('', perfil='Otávio', pagina=INICIO37); ini = espera(lambda: J(f"location.pathname.split('/').pop()==='{INICIO37}'&&document.readyState==='complete'"), 10)
     J("window.__antes=1"); r = m.clk('Manutenção', 'nav[aria-label=Menu]', w=0)
-    foi = ini and espera(lambda: J("!window.__antes&&location.pathname.split('/').pop()==='MA.dc.html'&&document.readyState==='complete'&&/^#vis=/.test(location.hash)"
-                                   "&&!!document.querySelector('main .ma-vis button[aria-pressed=true]')"), 10)
-    h = tela()[0]; v0 = h.split('&')[0][5:] if h.startswith('#vis=') else ''
-    foi = foi and v0 in VIS and espera(lambda: mostra(v0))
-    cur = [x[0] for x in json.loads(J(NAV) or '[]') if x[3] == 'page']
-    m.ok(r == 'ok' and foi and cur == ['Manutenção'], f'no início ({INICIO37}), tocar o ícone Manutenção abre a MA.dc.html na visão do papel ({v0 or "?"}), com o ícone destacado', [r, h, cur])
+    foi = ini and espera(lambda: J(f"!window.__antes&&location.pathname.split('/').pop()==='{HUB}'&&document.readyState==='complete'&&document.querySelectorAll('a.mod-cartao').length===4"), 10)
+    cs = json.loads(J(CARDS) or '[]'); cur = [x[0] for x in json.loads(J(NAV) or '[]') if x[3] == 'page']
+    m.ok(r == 'ok' and foi and cs == [['MA.dc.html#vis=' + v, t, True] for v, t in zip(VIS, TIT)] and cur == ['Manutenção'],
+         f'no início ({INICIO37}), tocar o ícone Manutenção abre a tela de entrada ({HUB}) com os 4 cartões (ícone e nome curto: Sem ordem · Ordens · Ativos · Planos), ícone destacado', [r, foi, cs, cur])
+    # o cartão "Ordens" abre a MA na visão Ordens; "‹ Manutenção" volta à tela de entrada com o foco no cartão aberto
+    J("[...document.querySelectorAll('a.mod-cartao')].find(a=>a.innerText.trim()==='Ordens').click()")
+    foi = espera(lambda: J("location.pathname.split('/').pop()==='MA.dc.html'&&document.readyState==='complete'"), 10) and espera(lambda: mostra('ordens'), 10)
+    vt = J("(()=>{const a=document.querySelector('a.volta37'); return a?[a.getAttribute('href'),a.innerText.replace(/\\s+/g,' ').trim()].join(' | '):'';})()") or ''
+    J("document.querySelector('a.volta37').click()")
+    de = espera(lambda: J(f"location.pathname.split('/').pop()==='{HUB}'&&(document.activeElement&&document.activeElement.getAttribute('href'))==='MA.dc.html#vis=ordens'"), 6)
+    m.ok(foi and vt == HUB + ' | ‹ Manutenção' and de, 'o cartão "Ordens" abre a MA na visão Ordens (só "Ordens" marcado); "‹ Manutenção" volta à tela de entrada com o foco no cartão', [foi, vt, tela()[0], de])
     # trocar de visão pelo seletor da própria tela: mesma tela (sem recarregar); endereço, marca e lista mudam
     m.ir('vis=ordens', perfil='Otávio'); pan = espera(lambda: m.pan().startswith('OM-') and mostra('ordens'), 10); J("window.__mesma=1")
     r = m.clk('Planos', 'main .ma-vis', w=0); foi = vale_e_fica('planos')

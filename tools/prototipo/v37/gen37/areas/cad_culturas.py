@@ -45,6 +45,16 @@ function cadcAbrir(self,gid,rid){ const sp=GR(gid); const r=g2find(RW(self,gid),
   g2set(self,gid,{fm:{rid,draft:d,orig:Object.assign({},d),errs:{},warn:false,ro:!!r.ro,isNew:false,mode:'form'},fl:null,fmc:null}); }
 // valor-padrão que acompanha o registro de origem pelo id: renomear a cultura, o grupo ou o local não deixa o padrão órfão
 function cadcPadrao(gid,k,val){ const f=(GR(gid).edit.fields||[]).find(x=>x.k===k); if(f) f.def=val; }
+// chave dos cadastros no navegador (o CD-06 lê as sementes; CD-02 e CD-08 leem as culturas)
+const CAD_LS='talhao-os-cadastros-v1';
+// fonte única de culturas entre telas (CD08-CULTURA-01, revisão Codex de 13/10): o CD-02 grava a lista atual a cada mudança (cadLsSe) e o
+// CD-02 e o CD-08 leem ao abrir. O CD-08 guarda os seus rendimentos e operações do mesmo jeito; cada rendimento guarda o id da cultura
+// (cultId) e, ao abrir, mostra o nome atual dela: renomear no CD-02 muda o nome no CD-08 sem perder custos (sem catálogo paralelo)
+function cadCulLer(){ try{ const o=JSON.parse(localStorage.getItem(CAD_LS)||'{}'); return Array.isArray(o.culturas)&&o.culturas.length?o.culturas:null; }catch(e){ return null; } }
+// grava a chave k do CAD_LS só quando o valor muda (cada desenho compara com o último gravado): salvar, excluir e criar entram iguais
+function cadLsSe(self,k,val){ const j=JSON.stringify(val); self.__lsU=self.__lsU||{}; if(self.__lsU[k]===j) return; self.__lsU[k]=j;
+  if(j.length>4e5) return; try{ const o=JSON.parse(localStorage.getItem(CAD_LS)||'{}'); o[k]=val; localStorage.setItem(CAD_LS,JSON.stringify(o)); }catch(e){} }
+function cadLsLer(k){ try{ const o=JSON.parse(localStorage.getItem(CAD_LS)||'{}'); return o[k]||null; }catch(e){ return null; } }
 '''
 
 def cd02():
@@ -93,8 +103,7 @@ def cd02():
     dados=json.dumps(dict(unid=DC.UNID_PROD,sem=SEMENTES_BASE,son=SEG_ON(),soff=SEG_OFF(),
                       defc=next(r['id'] for r in cul_rows if r['v']['nome']=='Soja')),ensure_ascii=False)
     js({},CADC_JS+f"\nconst C2={dados}; const OUTRA_C={json.dumps(OUTRA_C)}, CRIAR={json.dumps(CRIAR,ensure_ascii=False)};\n"+r'''
-// item de semente criado aqui chega ao CD-06 pelo armazenamento do navegador (chave própria dos cadastros; o CD-06 lê ao abrir)
-const CAD_LS='talhao-os-cadastros-v1';
+// item de semente criado aqui chega ao CD-06 pelo armazenamento do navegador (chave própria dos cadastros, CAD_LS; o CD-06 lê ao abrir)
 function c2lsSemente(n){ try{ const o=JSON.parse(localStorage.getItem(CAD_LS)||'{}'); o.sementes=o.sementes||[]; if(o.sementes.indexOf(n)<0) o.sementes.push(n); localStorage.setItem(CAD_LS,JSON.stringify(o)); }catch(e){} }
 function c2rm(list,id){ const i=list.findIndex(x=>x.id===id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&c2rm(x.kids,id)); }
 function c2opts(gid,k,opts){ const f=(GR(gid).edit.fields||[]).find(x=>x.k===k); if(f) f.opts=opts; }
@@ -106,7 +115,13 @@ function cvFalta(V){ return V.tipo==='Anual'&&V.sit!=='Inativa'&&(!V.sem||V.sem=
 function cvSit(V){ if(V.sit==='Inativa') return {t:'Inativa',p:[chipc('Inativa','gray')]}; if(cvFalta(V)) return {t:'Sem semente',p:sitX('Sem semente','yellow','Vincular semente'),res:true};
   return {t:'Em dia',p:sitOk('Em dia')}; }
 CAD_ACTS.g_cv=(self,r)=>{ const n=Number(r.v.uso)||0; return [cadExcluir(self,'g_cv',r,'cultivar',n?('usada em '+n+(n>1?' cultivos':' cultivo')+'; inative em vez de excluir'):'')]; };
-function PREVALS(self,v){ cadActsIni(self);
+function c2culIni(self){ if(self.__culLido) return; self.__culLido=1; const L=cadCulLer(); if(!L) return;
+  const all=Object.assign({},self.state.g2||{}); const cvG=cadLsLer('cultivares'); const cv=g2clone(Array.isArray(cvG)?cvG:RW(self,'g_cv')); const ant={};   /* cultivares gravadas junto */ RW(self,'g_cult').forEach(c=>{ ant[c.id]=c.v.nome; });
+  L.forEach(c=>{ const p=cv.find(x=>x.id===c.id), velho=ant[c.id];
+    if(!p) cv.push({id:c.id,v:{nome:c.v.nome},s:{},p:{},kids:[]});
+    else if(velho&&velho!==c.v.nome) (p.kids||[]).forEach(k=>{ if(k.v.cult===velho) k.v.cult=c.v.nome; }); });
+  all.g_cult=Object.assign({},all.g_cult||{},{rows:L.map(c=>({id:c.id,v:Object.assign({},c.v),s:{},p:{}}))}); all.g_cv=Object.assign({},all.g_cv||{},{rows:cv}); self.state.g2=all; }
+function PREVALS(self,v){ cadActsIni(self); c2culIni(self);
   const cul=RW(self,'g_cult'); const dc=cul.find(c=>c.id===C2.defc); cadcPadrao('g_cv','cult',dc?dc.v.nome:'');
   RW(self,'g_cv').forEach(p=>{ const c=cul.find(x=>x.id===p.id); if(!c) return; const C=c.v; const ks=p.kids||[]; p.dr='c2oc_'+p.id; p.v.nome=C.nome;
     p.p.nome=[{k:'b',t:C.nome},{k:'mut',t:ks.length+(ks.length===1?' cultivar':' cultivares')}]; p.s.nome=C.nome;
@@ -125,7 +140,7 @@ function PREVALS(self,v){ cadActsIni(self);
   c2opts('g_cv','sem',sems.sort((a,b)=>a.localeCompare(b,'pt-BR')).concat([CRIAR]));
   // filtro rápido de cada aba (dentro do bloco)
   cadQf(self,v,'g_cv','c2qf0',[{k:'res',t:'A resolver',f:r=>!!cvSit(r.v).res},{k:'inat',t:'Inativas',f:r=>r.v.sit==='Inativa',oz:true}]); }
-function EXTRAVALS(self,v){ simv(self,v);
+function EXTRAVALS(self,v){ simv(self,v); cadLsSe(self,'culturas',RW(self,'g_cult').map(c=>({id:c.id,v:Object.assign({},c.v)}))); cadLsSe(self,'cultivares',RW(self,'g_cv'));
   const cvs=cadRegs(RW(self,'g_cv'));
   const semL=cvs.filter(r=>cvFalta(r.v)); const semF=semL.length;
   v.c2e=semF?semF+(semF>1?' cultivares':' cultivar')+' sem semente':'Sem pendências';
@@ -166,8 +181,8 @@ function EXTRAVALS(self,v){ simv(self,v);
       if(c.v.tipo==='Anual'){ if(!r.v.sem||r.v.sem===CRIAR){ r.v.sem=c2sem(c.v.nome,r.v.nome); c2lsSemente(r.v.sem); msg.push('item '+r.v.sem+' criado em Produtos, unidades e locais (Sementes · kg)'); } else msg.push('semente '+r.v.sem); }
       else r.v.sem='';
       soPai('g_cv',rows,r,c.id); self.setState({g2toast:'Salvo: '+r.v.nome+' em '+c.v.nome+' · '+msg.join(' · ')+'.'}); return; }
-    if(gid==='g_cult'){ const o=self.__c2old; let n=0;
-      self.setState({g2toast:'Salvo: cultura '+r.v.nome+' · produtividade em '+r.v.unid+(n?' · '+n+(n>1?' rendimentos passam':' rendimento passa')+' a '+r.v.nome:'')+'. É o Padrão da cultura na meta do Planejar safra.'}); return; }
+    if(gid==='g_cult'){
+      self.setState({g2toast:'Salvo: cultura '+r.v.nome+' · produtividade em '+r.v.unid+'. É o Padrão da cultura na meta do Planejar safra.'}); return; }
   }; }
 ''')
     HEIGHTS37[fname]=1000   # sem rolagem de página: só a tabela rola
@@ -221,7 +236,7 @@ def cd08():
                      dict(k='atvs',l='Atividades usuais',t='area',req=False,help='Separe por ponto e vírgula; no plano, a operação vem primeiro e filtra estas atividades.')]))
     cadx_css()
     corpo=bloco_cad('',faixa('c2_fx1')+arv(rend),'Operações e rendimentos')
-    dados=json.dumps(dict(cul=[n for n,*_ in DC.CULTURAS],defo='OP1'),ensure_ascii=False)
+    dados=json.dumps(dict(cul=[dict(id=f'CU{i}',nome=n) for i,(n,*_) in enumerate(DC.CULTURAS,1)],defo='OP1'),ensure_ascii=False)   # mesmos ids do CD-02
     js(dict(cmp='Pulverização: padrão 21,6 ha/h × realizado 19,8 ha/h (OS-0421, 4 dias) · revisão sugerida, nada alterado.'),REND_JS
        +CADC_JS+f"\nconst C8={dados}; const OUTRA_O={json.dumps(OUTRA_O)};\n"+r'''
 function c2rm(list,id){ const i=list.findIndex(x=>x.id===id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&c2rm(x.kids,id)); }
@@ -231,7 +246,16 @@ function c2opts(gid,k,opts){ const f=(GR(gid).edit.fields||[]).find(x=>x.k===k);
 function c2pais(self,gid){ return RW(self,gid).filter(p=>/^OP/.test(p.id)); }
 // a fonte do dado é texto; só a premissa a validar é pendência (chip com o verbo). Antes a fonte saía em chip verde de estado (revisão TABR A11)
 function rdSit(V){ if(V.fonte==='Premissa a validar') return {t:'Premissa a validar',p:sitX('Premissa a validar','yellow','Validar'),res:true}; return {t:V.fonte||'—',p:[V.fonte?{k:'txt',t:V.fonte}:{k:'mut',t:'—'}]}; }
-function PREVALS(self,v){ cadActsIni(self);
+// culturas da fonte única (CD-02, cadCulLer) ou, sem ela, as do cenário; ao abrir, os rendimentos seguem o id da cultura renomeada
+function c8culs(){ return C8.lista||C8.cul; }   // [{id,nome}] atuais
+function c8cul(){ return c8culs().map(c=>c.nome); }
+function c8culIni(self){ if(self.__culLido) return; self.__culLido=1; const L=cadCulLer(); if(L) C8.lista=L.map(c=>({id:c.id,nome:c.v.nome}));
+  const G=cadLsLer('cd08'), all=Object.assign({},self.state.g2||{}); const rr=g2clone(G&&Array.isArray(G.rend)?G.rend:RW(self,'g_rend'));
+  if(G&&Array.isArray(G.op)) all.g_op=Object.assign({},all.g_op||{},{rows:G.op});
+  const porId={}, seedId={}; c8culs().forEach(c=>{ porId[c.id]=c.nome; }); C8.cul.forEach(c=>{ seedId[c.nome]=c.id; });
+  leaves(rr).forEach(x=>{ const V=x.v; if(!V.cult||V.cult==='Todas') return; const id=V.cultId||seedId[V.cult]; if(id&&porId[id]){ V.cultId=id; V.cult=porId[id]; } });
+  all.g_rend=Object.assign({},all.g_rend||{},{rows:rr}); self.state.g2=all; }
+function PREVALS(self,v){ cadActsIni(self); c8culIni(self);
   const ops=RW(self,'g_op'); const dop=ops.find(o=>o.id===C8.defo); cadcPadrao('g_rend','op',dop?dop.v.nome:'');
   RW(self,'g_rend').forEach(p=>{ const o=ops.find(x=>x.id===p.id); if(!o) return; const O=o.v; const ks=p.kids||[]; p.dr='c2oo_'+p.id; p.v.nome=O.nome;
     p.p.nome=[{k:'b',t:O.nome},{k:'mut',t:ks.length+(ks.length===1?' conjunto':' conjuntos')}]; p.s.nome=O.nome;
@@ -244,9 +268,9 @@ function PREVALS(self,v){ cadActsIni(self);
       r.p.custo_h=[{k:'txt',t:nf(V.custo_h,2)}]; r.s.custo_h=nf(V.custo_h,2);   // a coluna põe "R$ …/h" (unidade na célula)
       const S=rdSit(V); r.p.fonte=S.p; r.s.fonte=V.fonte||''; }); });
   c2opts('g_rend','op',ops.map(o=>o.v.nome).concat([OUTRA_O]));
-  c2opts('g_rend','cult',['Todas'].concat(C8.cul));
+  c2opts('g_rend','cult',['Todas'].concat(c8cul()));
   cadQf(self,v,'g_rend','c2qf1',[{k:'res',t:'A resolver',f:r=>!!rdSit(r.v).res}]); }
-function EXTRAVALS(self,v){ simv(self,v);
+function EXTRAVALS(self,v){ simv(self,v); cadLsSe(self,'cd08',{rend:RW(self,'g_rend'),op:RW(self,'g_op')});
   const rds=cadRegs(RW(self,'g_rend')); const premL=rds.filter(r=>r.v.fonte==='Premissa a validar'); const prem=premL.length;
   v.c8e=prem?prem+(prem>1?' premissas':' premissa')+' a validar':'Sem pendências';
   cadEstado(v,'c8e',v.c8e,prem?'yellow':'green');
@@ -258,7 +282,7 @@ function EXTRAVALS(self,v){ simv(self,v);
   valida(self,v,'g_rend',(d,fm)=>{ const e={}; const nova=d.op===OUTRA_O; const on=nova?String(d.nop||'').trim():d.op;
     if(nova&&on&&RW(self,'g_op').some(o=>o.v.nome.toLowerCase()===on.toLowerCase())) e.nop=on+' já existe; escolha na lista Operação.';
     if(!nova&&d.op&&!RW(self,'g_op').some(o=>o.v.nome===d.op)) e.op='Escolha a operação.';
-    if(d.cult&&d.cult!=='Todas'&&C8.cul.indexOf(d.cult)<0) e.cult='Escolha a cultura.';
+    if(d.cult&&d.cult!=='Todas'&&c8cul().indexOf(d.cult)<0) e.cult='Escolha a cultura.';
     const cu=d.cult||'Todas'; const dup=leaves(RW(self,'g_rend')).find(r=>r.id!==fm.rid&&r.v.op===on&&(r.v.cult||'Todas')===cu&&String(r.v.conj).trim().toLowerCase()===String(d.conj||'').trim().toLowerCase());
     if(dup) e.conj='Este conjunto já tem rendimento em '+on+' para '+(cu==='Todas'?'todas as culturas':cu)+'.'; return e; });
   valida(self,v,'g_op',(d,fm)=>{ const e={}; const n=String(d.nome||'').trim().toLowerCase(); if(RW(self,'g_op').some(o=>o.id!==fm.rid&&o.v.nome.toLowerCase()===n)) e.nome='Já existe a operação '+d.nome+'.'; return e; });
@@ -276,7 +300,7 @@ function EXTRAVALS(self,v){ simv(self,v);
         ops.push(o); g2set(self,'g_op',{rows:ops}); rows.push({id:o.id,v:{nome:nm},s:{},p:{},kids:[]}); pre='Operação '+nm+' cadastrada ('+o.v.proc+') · '; }
       else o=ops.find(x=>x.v.nome===r.v.op);
       if(!o) return;
-      r.v.op=o.v.nome; r.v.nop=''; r.v.cult=r.v.cult||'Todas'; const V=rendCalc(r.v);
+      r.v.op=o.v.nome; r.v.nop=''; r.v.cult=r.v.cult||'Todas'; const cx=c8culs().find(c=>c.nome===r.v.cult); r.v.cultId=cx?cx.id:''; const V=rendCalc(r.v);
       soPai('g_rend',rows,r,o.id);
       self.setState({g2toast:pre+'Salvo: '+V.op+' rende '+nf(V.rend,2)+' ha/h a R$ '+nf(V.custo_h,2)+'/h e R$ '+nf(V.custo_ha,2)+'/ha. Novos planejamentos usam este padrão.'}); } }; }
 ''')

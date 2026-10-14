@@ -5,7 +5,7 @@ filtro e ordenação no cabeçalho, busca por praga-alvo e a ficha aberta já co
 ficha tem uma variável por coluna e ordena pelo cabeçalho. Esperados recalculados dos arquivos servidos (agrofit_*.json).
 Fluxos: normal (1440 e 390 px), recusa (busca sem resultado; usos que não carregam → lista por produto + "Tentar de novo"), repetição
 (trocar e voltar a cultura, recarregar). Capturas em _probe/praga_alvo_*.png. Uso: python3 praga_alvo_test.py"""
-import sys, os, time, subprocess, json, unicodedata
+import sys, os, re, time, subprocess, json, unicodedata
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cdp import Chrome
 from journeys import free
@@ -49,27 +49,47 @@ try:
             if J("!!(window.__agx&&__agx.AGX.st==='ok')") and (not usos or J("__agx.AGX.uSt==='ok'")): J(J0); return True
             time.sleep(.25)
         J(J0); return False
-    def combo(rot, txt):
-        J(f"document.querySelector('input[aria-label={json.dumps(rot)}]').focus()"); time.sleep(.2); setv(f'input[aria-label={json.dumps(rot)}]', txt)
-        J(f"document.querySelector('input[aria-label={json.dumps(rot)}]').dispatchEvent(new KeyboardEvent('keydown',{{key:'Enter',bubbles:true}}))"); time.sleep(.6)
+    def combo(rot, txt):   # Cultura e Praga-alvo são listas de escolha (13/10: um campo de busca por tela): a 1ª opção que começa com o texto (ou o contém)
+        r = J(f"""(()=>{{const s=document.querySelector('select[aria-label={json.dumps(rot)}]'); if(!s) return 'sem lista';
+          const n=x=>String(x||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().trim(); const q=n({json.dumps(txt)}); const os=[...s.options];
+          const o=q===''?os.find(o=>o.value===''):(os.find(o=>o.value!==''&&n(o.text).startsWith(q))||os.find(o=>o.value!==''&&n(o.text).indexOf(q)>=0));
+          if(!o) return 'sem opção'; s.value=o.value; s.dispatchEvent(new Event('change',{{bubbles:true}})); return 'ok';}})()"""); time.sleep(.6)
+        return r
     clica = lambda raiz, txt: J(f"(()=>{{const b=[...document.querySelectorAll({json.dumps(raiz + ' button')})].find(x=>x.innerText.replace(/\\s+/g,' ').trim().startsWith({json.dumps(txt)})); if(!b) return 'NÃO ACHEI'; b.click(); return 'ok';}})()")
     # trilhas reais da grade (o desenho em colunas não quebra: cada linha com N células numa mesma faixa)
     trilhas = lambda: J("(()=>{const t=document.querySelector('main .g2rola [role=table]'); return t?getComputedStyle(t).gridTemplateColumns.split(' ').length:0;})()")
     alinhado = lambda: J("(()=>{const rs=[...document.querySelectorAll('main [role=table] [role=row].g2ed')].slice(0,12); return rs.length>0&&rs.every(r=>{const cs=[...r.querySelectorAll('[role=cell]')]; const l=cs.map(x=>Math.round(x.getBoundingClientRect().left)); return cs.length&&l.every((x,i)=>i===0||x>l[i-1]);});})()")   # célula que quebra de faixa volta à esquerda
     shot = lambda n: c.shot(os.path.join(PROBE, f'praga_alvo_{n}.png'))
     COLS_U = ['produto · registro', 'praga-alvo', 'nome cientifico', 'cultura do uso', 'ingrediente ativo · grupo quimico', 'classe · modo de acao', 'tox · amb', 'na fazenda']
-    COLS_P = ['produto · registro', 'ingrediente ativo · grupo quimico', 'classe · modo de acao', 'culturas', 'tox · amb', 'na fazenda']
+    COLS_P = ['produto · registro', 'ingrediente ativo · grupo quimico', 'classe · modo de acao', 'culturas', 'alvos', 'tox · amb', 'na fazenda']   # Alvos: 13/10 (proprietário)
 
     # ---------- 1 · normal (1440): sem cultura, por produto; com Soja, uma linha por uso com Praga-alvo e Nome científico ----------
     c.goto(U_('AG-07.dc.html'), wait=1.0); pr = pronto()
-    a0 = cab(); n0 = cnt()
+    a0 = cab(); n0 = cnt(); L0 = linhas()
     combo('Cultura', 'soja'); a1 = cab(); n1 = cnt(); L = linhas(); tr = trilhas(); al1 = alinhado()
     pp = [r[1] for r in L]; cc = [r[2] for r in L]; uc = {r[3] for r in L}
-    chk(f'1 sem cultura: 6 colunas por produto ("{nf(NP)} de {nf(NP)} produtos"); Cultura = Soja: 8 colunas por uso, "{nf(N_SJ)} de {nf(N_SJ)} usos em Soja", Praga-alvo e Nome científico preenchidos, grade em 8 trilhas',
+    chk(f'1 sem cultura: 7 colunas por produto ("{nf(NP)} de {nf(NP)} produtos"); Cultura = Soja: 8 colunas por uso, "{nf(N_SJ)} de {nf(N_SJ)} usos em Soja", Praga-alvo e Nome científico preenchidos, grade em 8 trilhas',
         pr and a0 == COLS_P and n0 == f'{nf(NP)} de {nf(NP)} produtos' and a1 == COLS_U and n1 == f'{nf(N_SJ)} de {nf(N_SJ)} usos em Soja'
         and len(L) == 50 and all(len(r) == 8 for r in L) and any(x and x != '—' for x in pp) and all(x for x in cc) and uc <= {'Soja', 'Todas as culturas'} and tr == 8 and al1,
         [tr, al1, pr, a0, n0, a1, n1, len(L), L[:1]])
     shot('soja_1440')
+    # Alvos (proprietário, 13/10/2026: "coloque coluna dos alvos na planilha"): oráculo pelos usos publicados (agrofit_usos_cultura_*.json):
+    # o produto tem os alvos de todos os seus usos, em qualquer cultura; a célula diz quantos e mostra até 3 nomes comuns (+ o resto)
+    REG = {str(r[0]): k for k, r in enumerate(IDX['produtos'])}
+    def alvos_de(pi): return {a for cu_ in U for a, ps in U[cu_] if pi in ps}
+    def nome_alvo(a): al = AL[a] if a < len(AL) else ['', []]; return (al[1][0] if al[1] else al[0]) or '(alvo não informado)'
+    ruins = []
+    for r in L0[:12]:
+        reg = re.search(r'Reg\. (\d+)', r[0] if r else ''); pi = REG.get(reg.group(1)) if reg else None
+        if pi is None: ruins.append(('sem registro', r[:1])); continue
+        az = alvos_de(pi); t = (r[4] if len(r) > 4 else '').split('\n'); nm = [x.strip() for x in (t[-1] if len(t) > 1 else '').split(',') if x.strip()]
+        mais = re.match(r'(.*) \+(\d+)$', nm[-1]) if nm else None
+        if mais: nm[-1] = mais.group(1)
+        if t[0] != f'{nf(len(az))} {"alvo" if len(az) == 1 else "alvos"}' or not set(nm) <= {nome_alvo(a) for a in az} or len(nm) != min(3, len(az)) or (len(az) > 3) != bool(mais) or (mais and int(mais.group(2)) != len(az) - 3):
+            ruins.append((reg.group(1), t, len(az)))
+    chk('1b sem cultura, coluna Alvos: cada produto com o número de alvos dos seus usos (todas as culturas) e até 3 nomes comuns + o resto (oráculo pelos usos publicados)',
+        L0 and not ruins, ruins[:3])
+
     # ---------- 2 · ordenação pelo cabeçalho (Praga-alvo A → Z) ----------
     J("document.querySelector('main [role=columnheader] button[aria-label=\"Ordenar por Praga-alvo\"]').click()"); time.sleep(.8)
     srt = [r[1] for r in linhas()][:30]
@@ -124,7 +144,7 @@ try:
     setv('main input[type=search]', 'zzzz praga inexistente'); vazio = J("(document.querySelector('main')||{}).innerText.indexOf('Nenhuma linha corresponde aos filtros')>=0")
     n6 = cnt(); clica('main', 'Limpar filtros'); time.sleep(.6); n6b = cnt(); a6 = cab()
     chk(f'6 RECUSA busca sem resultado em Soja: "0 de {nf(N_SJ)} usos em Soja" + "Nenhuma linha corresponde aos filtros"; "Limpar filtros" volta a {nf(NP)} produtos e 6 colunas',
-        vazio is True and n6 == f'0 de {nf(N_SJ)} usos em Soja' and n6b == f'{nf(NP)} de {nf(NP)} produtos' and a6 == COLS_P and trilhas() == 6, [vazio, n6, n6b, a6])
+        vazio is True and n6 == f'0 de {nf(N_SJ)} usos em Soja' and n6b == f'{nf(NP)} de {nf(NP)} produtos' and a6 == COLS_P and trilhas() == 7, [vazio, n6, n6b, a6])
     # ---------- 7 · REPETIÇÃO: Soja de novo e recarregar dão a mesma lista ----------
     combo('Cultura', 'soja'); n7 = cnt(); c.goto(U_('AG-07.dc.html'), wait=1.0); pronto(); combo('Cultura', 'soja'); n7b = cnt()
     combo('Cultura', 'mamão'); n7c = cnt(); NM = sum(len(ps) for c_ in (MA, TD) for a, ps in U[str(c_)])
@@ -143,10 +163,10 @@ try:
     g9 = J("(()=>{const r=document.querySelector('main .g2rola'); const t=r.querySelector('[role=table]'); const h=t.querySelector('[role=columnheader]');"
            " return [document.scrollingElement.scrollWidth, innerWidth, r.scrollWidth>r.clientWidth, getComputedStyle(t).gridTemplateColumns.split(' ').length, getComputedStyle(h).position];})()") or []
     al9 = alinhado(); a9 = cab(); shot('soja_390')
-    combo('Cultura', ''); J("(()=>{const i=document.querySelector('input[aria-label=\"Cultura\"]'); i.focus();})()"); setv('input[aria-label="Cultura"]', ''); time.sleep(.8)
+    combo('Cultura', ''); time.sleep(.2)
     a9b = cab(); tr9b = trilhas(); al9b = alinhado()
-    chk('9 390 px · Soja: 8 colunas (Praga-alvo e Nome científico), 1ª coluna presa, rolagem lateral só dentro da tabela, linhas sem quebrar; sem cultura volta a 6 trilhas',
-        len(g9) == 5 and g9[0] <= g9[1] and g9[2] is True and g9[3] == 8 and g9[4] == 'sticky' and al9 and a9 == COLS_U and a9b == COLS_P and tr9b == 6 and al9b, [g9, al9, a9, a9b, tr9b, al9b])
+    chk('9 390 px · Soja: 8 colunas (Praga-alvo e Nome científico), 1ª coluna presa, rolagem lateral só dentro da tabela, linhas sem quebrar; sem cultura volta a 7 trilhas (com Alvos)',
+        len(g9) == 5 and g9[0] <= g9[1] and g9[2] is True and g9[3] == 8 and g9[4] == 'sticky' and al9 and a9 == COLS_U and a9b == COLS_P and tr9b == 7 and al9b, [g9, al9, a9, a9b, tr9b, al9b])
     combo('Cultura', 'soja'); setv('main input[type=search]', 'ferrugem asiatica')
     J("(()=>{const r=document.querySelector('main [role=table] [role=row].g2ed'); r.click();})()"); time.sleep(1.0)
     g9c = J(f"(()=>{{const a=document.querySelector('{FX}'); const t=a.querySelector('[role=table][aria-label^=\"Alvos em\"]'); return a&&t?[a.scrollWidth,a.clientWidth,Math.round(t.getBoundingClientRect().right),Math.round(a.getBoundingClientRect().right)]:null;}})()")

@@ -67,7 +67,7 @@ pag={k:v.get('page') for k,v in c['boards'].items()}
 # app de campo, portal, onboarding e backoffice. Essas telas são alcançáveis, ainda que o canvas deixe CD-01..CD-08, PT-01, ON-01 e BO-02
 # na página "ocultos" e o MOD-OUT fora dele; o Main (página técnica mínima, que ui37.oculto exclui) também é origem. Só o resto da página
 # "ocultos" segue oculto. O L0 confere no HTML que cada caminho declarado existe (entrada na barra lateral, cartão na entrada, "‹ Módulo"
-# de volta): a noção de visível não cresce sem caminho real, e as telas que essas pontas abrem por dentro continuam ocultas (lista residual)
+# de volta; o papel de item de lista fica no contêiner do cartão, revisão Codex CAD-INICIO-AX-01): a noção de visível não cresce sem caminho real, e as telas que essas pontas abrem por dentro continuam ocultas (lista residual)
 import ui37
 ENTRADAS=set(ui37.HUB37.values())|{h for _,h in ui37.VOLTA37.values()}|{ui37.OUTROS37[2]}
 ABERTAS=set(ui37.VOLTA37)|{h for _,h,_ in ui37.OUTROS37[3]}
@@ -78,9 +78,9 @@ _l0=[('arquivo ausente',f) for f in sorted(VISIVEIS) if not os.path.exists(os.pa
 if not _l0:
     _ini=_rd(ui37.INICIO37)
     _l0+=[('sem a entrada na barra lateral',h) for h in sorted(ENTRADAS) if not re.search(r'<a href="'+re.escape(h)+r'" title=',_ini)]
-    _l0+=[('sem cartão em '+hub,f) for f,(_,hub) in sorted(ui37.VOLTA37.items()) if not re.search(r'class="mod-cartao" role="listitem" href="'+re.escape(f)+r'(#[^"]*)?"',_rd(hub))]
+    _l0+=[('sem cartão em '+hub,f) for f,(_,hub) in sorted(ui37.VOLTA37.items()) if not re.search(r'class="mod-cartao" href="'+re.escape(f)+r'(#[^"]*)?"',_rd(hub))]
     _l0+=[('sem "‹ '+rot+'" de volta',f) for f,(rot,hub) in sorted(ui37.VOLTA37.items()) if f'<a href="{hub}" class="volta37" aria-label="Voltar para {rot}"' not in _rd(f)]
-    _l0+=[('sem cartão em '+ui37.OUTROS37[2],h) for _,h,_ in ui37.OUTROS37[3] if not re.search(r'class="mod-cartao" role="listitem" href="'+re.escape(h)+r'"',_rd(ui37.OUTROS37[2]))]
+    _l0+=[('sem cartão em '+ui37.OUTROS37[2],h) for _,h,_ in ui37.OUTROS37[3] if not re.search(r'class="mod-cartao" href="'+re.escape(h)+r'"',_rd(ui37.OUTROS37[2]))]
 ok(f'L0 navegação nova: {len(ENTRADAS)} telas de entrada na barra lateral, {len(ui37.VOLTA37)} telas com cartão na entrada e "‹ Módulo" de volta, '
    f'{len(ui37.OUTROS37[3])} em Outros acessos; {len(oc)} telas seguem ocultas', not _l0 and len(oc)>0, _l0)
 pares=set()

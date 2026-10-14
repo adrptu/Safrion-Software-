@@ -45,7 +45,10 @@ try:
     m.ok('produtos em alta 1' in k1 and 'vender agora 1' in k1 and 'soja set · milho fev · mamão jul' in k1, 'INTEL-02 IV: indicadores de preço no topo (1 em alta, 1 vender agora, melhor mês de cada produto)', k1)
     sj = m.linha('m:Soja em grão'); mi = m.linha('m:Milho em grão'); ma = m.linha('m:Mamão Formosa · fruta de campo'); fj = m.linha('m:Feijão em grão')
     m.ok('R$ 129,40/sc' in sj and 'Alta' in sj and 'Vender agora' in sj and 'set' in sj, 'INTEL-02 IV: soja R$ 129,40/sc em alta, melhor mês set, "Vender agora"', sj)
-    m.ok('Queda' in mi and 'Sem ganho em esperar' in mi and 'custo do dinheiro' in mi, 'INTEL-02 IV: milho em queda; esperar até fev não compensa o custo do dinheiro', mi)
+    # regra do ganho líquido (revisão Codex de 13/10, INTEL-02; oráculo e contraprova em inteligencia_unit P5/P11–P13): o alvo é o mês de maior
+    # ganho depois do custo do dinheiro (1,2% a.m.), não o de maior ganho bruto (fev); o milho tem ganho líquido até dez
+    m.ok('Queda' in mi and 'Esperar até dez' in mi and '+7,2% na época' in mi and '3,6% depois do custo do dinheiro' in mi and 'Sem ganho em esperar' not in mi,
+         'INTEL-02 IV: milho em queda; o melhor mês depois do custo do dinheiro é dez (+7,2% na época, 3,6% líquido)', mi)
     m.ok('Vender na colheita' in ma and 'perecível' in ma, 'INTEL-02 IV: mamão perecível vende na colheita (a época orienta o plano)', ma)
     m.ok('Sem série de preço' in fj and 'R$ 0' not in fj, 'INTEL-02 IV: feijão sem fonte de preço fica sem série (ausente ≠ zero)', fj)
     m.abre('m:Soja em grão'); p = J(PAN) or ''

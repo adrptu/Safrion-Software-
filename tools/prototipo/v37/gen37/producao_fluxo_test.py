@@ -5,7 +5,7 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T):
            Lagoa Grande · 2026/27); a mesma semana não duplica; "Aprovar e liberar" da S40 do Pivô 6 recusado por carência
            sem dados (dono Wesley). Roda também na base (a parte A-05 falha lá: é o defeito reproduzido).
   fluxo    AC-17: tarefa do proprietário (§8.1) de ponta a ponta no desktop, com cliques e campos digitados medidos
-           (limite 30 cliques e 5 campos); AC-01 navegação (sem submenus, 13/10/2026: ícone Produção logo depois de Agrícola; tela de
+           (limite 30 cliques e 5 campos); AC-01 navegação (sem submenus, 13/10/2026: a Produção dentro de Agrícola; tela de
            entrada com 3 cartões, cada um abre sem erro de JS); AC-04; AC-15 (encerrar com carga a pesar recusado no OS.dc.html).
   erros    recusas e repetição: pesagem sem condição, ticket repetido com outro conteúdo, reserva acima da falta, mesma
            pesagem repetida não duplica, carga sem sinal do app só entra ao voltar o sinal (AC-16).
@@ -65,8 +65,8 @@ NAV = "JSON.stringify((()=>{const n=document.querySelector('nav[aria-label=Menu]
 CARDS = "JSON.stringify([...document.querySelectorAll('a.mod-cartao')].filter(a=>a.getClientRects().length).map(a=>[a.getAttribute('href'),a.innerText.replace(/\\s+/g,' ').trim()]))"
 HUB = "document.querySelectorAll('a.mod-cartao').length>0"
 def volta_pro():
-    """"‹ Produção" → tela de entrada da Produção pronta"""
-    r = clk('Voltar para Produção', w=0); ok = espera(pronta('MOD-PRO.dc.html', HUB)); lib(); return r == 'ok' and ok
+    """"‹ Agrícola" → tela de entrada de Agrícola pronta (13/10/2026, proprietário: "coloque tudo de produção, dentro de Agrícola")"""
+    r = clk('Voltar para Agrícola', w=0); ok = espera(pronta('MOD-AGR.dc.html', HUB)); lib(); return r == 'ok' and ok
 def clk(x, root=None, w=.45): r = J(f"CLK({json.dumps(x)},{json.dumps(root)})"); time.sleep(w); return r
 def setv(sel, val, conta=True): r = J(f"SETV({json.dumps(sel)},{json.dumps(val)},{'true' if conta else 'false'})"); time.sleep(.25); return r
 def row(x): r = J(f"ROW({json.dumps(x)})"); time.sleep(.45); return r
@@ -115,18 +115,21 @@ try:
         print('== fluxo · AC-01 menu e AC-17 tarefa do proprietário (§8.1), cliques e campos medidos')
         ir('PROD.dc.html', limpa=True)
         nv = json.loads(J(NAV) or '{}'); mods = nv.get('mods') or []
-        i_ag, i_pr, i_ma = [mods.index(x) if x in mods else -1 for x in ('Agrícola', 'Produção', 'Manutenção')]
-        t.chk('AC-01 ícone Produção logo depois de Agrícola (antes de Manutenção) na barra; no Estoque de produto a Produção marcada e "‹ Produção"',
-              0 <= i_ag and i_pr == i_ag + 1 and i_pr < i_ma and nv.get('cur') == ['Produção'] and nv.get('volta') == ['MOD-PRO.dc.html', '‹ Produção'], nv)
-        # BEN-D14 (09/10): o módulo continua com 3 telas (D-01); o Beneficiamento é tela irmã de Cargas (e, com BEN_PUBLICADO=False, fica fora da navegação)
+        # 13/10/2026 (proprietário: "coloque o submenu colheita dentro de agrícola"; "coloque tudo de produção, dentro de Agrícola"): sem o ícone
+        # Produção; Colheita, Recebimento e Estoque de produto são os 3 últimos cartões de Agrícola, e cada tela volta por "‹ Agrícola"
+        t.chk('AC-01 sem o ícone Produção na barra; no Estoque de produto o ícone Agrícola marcado e "‹ Agrícola"',
+              'Produção' not in mods and 'Agrícola' in mods and nv.get('cur') == ['Agrícola'] and nv.get('volta') == ['MOD-AGR.dc.html', '‹ Agrícola'], nv)
         vt = volta_pro(); cs = json.loads(J(CARDS) or '[]'); e0 = t.errs()
+        # BEN-D14 (09/10): o Beneficiamento é tela irmã de Cargas (e, com BEN_PUBLICADO=False, fica fora da navegação)
         ESP = [['COLH.dc.html', 'Colheita'], ['CARGA.dc.html', 'Recebimento'], ['PROD.dc.html', 'Estoque de produto']]
-        t.chk('AC-01 "‹ Produção" abre a tela de entrada com 3 cartões: Colheita · Recebimento · Estoque de produto (sem Beneficiamento), sem erro de JS', vt and cs == ESP and not e0, [vt, cs, e0])
+        t.chk('AC-01 "‹ Agrícola" abre a tela de entrada com Colheita · Recebimento · Estoque de produto como os 3 últimos cartões (sem Beneficiamento), sem erro de JS',
+              vt and cs[-3:] == ESP and not any(x[0] == 'BEN.dc.html' for x in cs) and not e0, [vt, cs, e0])
         for h, nome in ESP:
             pg = h.replace('.dc.html', '')
-            if not J(pronta('MOD-PRO.dc.html', HUB)): volta_pro()
+            if not J(pronta('MOD-AGR.dc.html', HUB)): volta_pro()
             r = clk(nome, '.mod-grade', w=0); ok = espera(pronta(h, "!!document.querySelector('main') && document.querySelector('main').innerText.trim().length>50")); time.sleep(.3); lib()
-            t.chk(f'AC-01 cartão "{nome}" abre {pg} sem erro de JS', r == 'ok' and ok and not t.errs(), [r, ok, J("location.pathname"), t.errs()])
+            vv = (json.loads(J(NAV) or '{}') or {}).get('volta')
+            t.chk(f'AC-01 cartão "{nome}" abre {pg} com "‹ Agrícola", sem erro de JS', r == 'ok' and ok and vv == ['MOD-AGR.dc.html', '‹ Agrícola'] and not t.errs(), [r, ok, J("location.pathname"), vv, t.errs()])
         ir('COLH.dc.html', limpa=True)
         t.chk('§8.1 sem seleção, a ação primária é "Publicar previsão" do Pivô 19', J("PRIM()") == ['Publicar previsão do Pivô 19'], J("PRIM()"))
         r = row('Pivô 19'); p = pan()
