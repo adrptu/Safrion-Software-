@@ -448,13 +448,13 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
     _reset_screen(fname)  # engine() NÃO limpa o registro; sem isto, widgets/drawers vazam para a tela seguinte
     return fname
 
-def mobile37(fid,title,sub,status,primary,body,fname=None,H=844,back='MB-01.dc.html',primary_href=None):
+def mobile37(fid,title,sub,status,primary,body,fname=None,H=844,back='MB-01.dc.html',primary_href=None,dica=''):
     """Tela móvel MB: cabeçalho simples, CTA grande, badge de demonstração; reseta o registro após gravar."""
     fname=fname or ffile(fid)
     E.HEIGHTS[fname]=_h(fname,H)
     E.MPARENT[fname]=back
     if primary_href: E.PHREF[fname]=primary_href
-    E.mobile(fname,title,sub,status,primary,body)
+    E.mobile(fname,title,sub,status,primary,body,dica=dica)   # dica: regras da tela no ⓘ do cabeçalho (14/10/2026)
     _reset_screen(fname)
     return fname
 

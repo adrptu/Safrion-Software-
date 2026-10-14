@@ -48,8 +48,8 @@ function EXTRAVALS(self,v){ const {A,cart}=self._bo; const st=self.state;
   aSelo(self,v,'bo_st',pend?(pend+(pend===1?' evento a conciliar':' eventos a conciliar')):'Pagamentos conciliados',pend?'yellow':'green');
   v.bo_k0v=assinR(cart.vig); v.bo_k0s=(cart.linhas.filter(L=>L.m).length)+' organizações pagantes · contrato de hoje';
   v.bo_k1v=String(cart.linhas.length); v.bo_k1s=['Ativa','Em atraso','Inadimplente','Em avaliação','Cancelada'].filter(t=>n[t]).map(t=>t+' '+n[t]).join(' · ');
-  v.bo_k2v=cart.abertas+' · '+assinR(cart.abertasV); v.bo_k2s='a vencer, vencidas, pendentes ou em contestação';
-  v.bo_k3v=assinHa(cart.cobrada); v.bo_k3s='medida '+assinHa(cart.medida)+' · cobrada = mín(medida; contratada)';
+  v.bo_k2v=cart.abertas+' · '+assinR(cart.abertasV); v.bo_k2s='';   /* 14/10/2026: o que conta como aberta foi para a dica ⓘ */
+  v.bo_k3v=assinHa(cart.cobrada); v.bo_k3s='medida '+assinHa(cart.medida);   /* a fórmula (cobrada = mín(medida; contratada)) foi para a dica ⓘ */
   const abreOrg=(id)=>self.setState({bo_org:id,bo_res:'',bo_cred:'',bo_rchave:assinChave('res'),bo_rerr:''});
   const ctL=cart.linhas.find(x=>(x.org.faturas||[]).some(f=>f.st==='contestada'));
   if(!self.__boCon) self.__boCon=assinChave('con'); const kc=self.__boCon;   /* a mesma chave no clique repetido (R8); renova depois do efeito */
@@ -119,7 +119,7 @@ def bo02():
              + kpis_dyn('bo_k', ['Mensalidades vigentes', 'Organizações', 'Faturas abertas', 'Área cobrada'])
              + section('Organizações', 'Abra a organização para ver plano, área por fazenda, faturas e eventos; resolva a contestação no detalhe.', '', g_org)
              + section('Eventos do provedor (simulado)', 'Concilie para aplicar cada evento uma vez: aprovado paga a fatura, recusado fica registrado e a fatura segue aberta.', '', g_fila)
-             + f'<div style="font-size: 12.5px; color: {MUTED};">{esc(PRIV)}</div></div>')
+             + '</div>')
     fat = (f'<div><sc-for list="{H("bo_ofat")}" as="fa" hint-placeholder-count="2"><div style="display: flex; flex-direction: column; gap: 4px; padding: 8px 0; border-bottom: 1px solid {LINE};">'
            f'<div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700;"><span style="flex-grow: 1;">{H("fa.t")}</span><span style="{H("fa.st")}"><span style="{H("fa.dot")}"></span>{H("fa.e")}</span></div>'
            f'<div style="font-size: 12px; color: {MUTED}; white-space: pre-line; line-height: 1.45;">{H("fa.evs")}</div></div></sc-for></div>')
@@ -142,7 +142,8 @@ def bo02():
     shell37('BO-02', 'Assinaturas e cobrança', corpo, fname=fname, ctx=CTX_BO, perfil=PERFIL_BO, steps=telas(1), search=False,
             subtitle='Plataforma · cobrança simulada, nenhum provedor real. Todas as organizações no mesmo estado; a da demonstração é medida ao vivo no cadastro.',
             primary_html=E.acao_motivo(f'<button type="button" class="assin-prim" aria-disabled="{H("bo_prim_dis")}" data-dica="{H("bo_prim_tit")}" title="{H("bo_prim_tit")}" onClick="{H("bo_prim_fn")}" style="{BTN_ST(True)}">{H("bo_prim_t")}</button>', H("bo_prim_dis"), H("bo_prim_tit")),   # DS-06/VIS-04: motivo visível junto do botão
-            footer='Fatura só fica Paga por evento do provedor (simulado), aplicado uma vez. Nada é apagado.')
+            footer='Fatura só fica Paga por evento do provedor (simulado), aplicado uma vez. Nada é apagado. '
+                   'Faturas abertas: a vencer, vencidas, pendentes ou em contestação. Área cobrada = mín(medida; contratada). ' + PRIV)
     injeta(fname, 'Assinaturas e cobrança', chip_dyn('bo_st'))
 
 
@@ -168,8 +169,8 @@ def bo01():
                                                          ro('pre_t', 'Preço por ha e mês'), ro('min_t', 'Mínimo por mês'), ro('ano', 'Equivalente por ha e ano'), ro('obs', 'Observação'), ro('dec', 'Decisão pendente')]))
     cols = [dict(k='ha', l='Área (ha)', t='num', a='r', d=2, dmin=0)] + [dict(k=P['id'], l=P['nome'] + ' (R$)', t='num', a='r', d=2) for P in DA.PLANOS if P['pago']]
     g_sim = grid(cols, [], gid='g_sim', search=True, total=False, edit=dict(m='none'))
-    texto = (f'<div style="font-size: 13px; color: {INK}; line-height: 1.6;"><b>PRECO-01:</b> R$ 2,00/ha·mês = R$ 24,00/ha·ano. <b>Mínimo:</b> cobra-se o maior entre o mínimo e preço × área (não se soma). '
-             f'<b>Mudança:</b> vale do dia 1 do próximo ciclo e nunca retroage. <b>Base (DEC-01):</b> área medida no cadastro (a maior entre a abertura e o fechamento do mês), limitada pela contratada. '
+    # 14/10/2026 (proprietário: "reduza ou elimine ... os demais soltos pela tela"): mínimo, mudança e base foram para a dica ⓘ; à vista o preço e o selo de exemplo
+    texto = (f'<div style="font-size: 13px; color: {INK}; line-height: 1.6;"><b>PRECO-01:</b> R$ 2,00/ha·mês = R$ 24,00/ha·ano. '
              f'<span style="color: {YEL}; font-weight: 700;">Todos os valores são exemplo, a decidir pelo proprietário (DEC-01, DEC-05, DEC-09).</span></div>'
              f'<div style="font-size: 12.5px; color: {MUTED}; padding-top: 6px;">{H("bo_trial")}</div>')
     corpo = ('<div class="assin" style="display: flex; flex-direction: column; gap: 18px;">' + CSS
@@ -188,7 +189,9 @@ def bo01():
     shell37('BO-01', 'Planos e preços', corpo, fname=fname, ctx=CTX_BO, perfil=PERFIL_BO, steps=telas(2), search=False,
             subtitle='Parâmetros de exemplo dos planos (a decidir pelo proprietário) e simulação por área. Nada aqui gera cobrança real.',
             primary_html=f'<button type="button" onClick="{H("bo_simular")}" style="{BTN_ST(True)}">Simular área</button>',
-            footer='Versões de plano (criar, aprovar) voltam quando o proprietário decidir DEC-01/05/09.')
+            footer='Versões de plano (criar, aprovar) voltam quando o proprietário decidir DEC-01/05/09. '
+                   'Mínimo: cobra-se o maior entre o mínimo e preço × área (não se soma). Mudança: vale do dia 1 do próximo ciclo e nunca retroage. '
+                   'Base (DEC-01): área medida no cadastro (a maior entre a abertura e o fechamento do mês), limitada pela contratada.')
 
 
 def build():

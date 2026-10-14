@@ -302,7 +302,9 @@ try:
         chk('CF-03 sem erro de JS', not errs(), errs())
     if 'cf05' in PARTES:
         go('CF-05.dc.html'); reset('Rui'); go('CF-05.dc.html')
-        chk('A9 CF-05 conta as pessoas com acesso do estado de Configurações (14 no seed, com Igor, Marta, Otávio e Dora)', 'Pessoas com acesso: 14 (Configurações › Usuários e alçadas)' in J("document.body.innerText"), J("document.body.innerText")[:200])
+        # 14/10/2026 (TEXTO-2): a origem "(Configurações › Usuários e alçadas)" saiu da tela para a dica ⓘ; a contagem (14) segue conferida à vista
+        chk('A9 CF-05 conta as pessoas com acesso do estado de Configurações (14 no seed, com Igor, Marta, Otávio e Dora)', 'Pessoas com acesso: 14 · fora da cobrança' in J("document.body.innerText")
+            and 'Configurações › Usuários e alçadas' in (J("(document.querySelector('header button.g2-info')||{}).getAttribute?document.querySelector('header button.g2-info').getAttribute('data-dica'):''") or ''), J("document.body.innerText")[:200])
         clk('01/10/2026'); clk('Pagar fatura'); clk('Pix · simulado', 'aside[role=dialog]'); clk('Confirmar pagamento (simulado)', 'aside[role=dialog]'); d = dlg()
         pago = J("(()=>{ const c=JSON.parse(localStorage.getItem('talhao-os-cenario-v1')); return c.assin.orgs.sr.faturas.find(f=>f.comp==='2026-09').st; })()")
         chk('A18 Ver como Rui: pagar a fatura é recusado "decisão de Ana (gestora)" e nada é pago', 'decisão de Ana (gestora)' in d and pago == 'aberta', [d[-300:], pago])

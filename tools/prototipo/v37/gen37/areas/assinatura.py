@@ -154,7 +154,7 @@ function EXTRAVALS(self,v){ const X=self._cf; const {A,org,hoje,med,k,ag,P,pv}=X
   // acima do contratado: não entra na cobrança sem aceite (R2)
   const lim=(ag||k).ha; const exc=assinCent(med.ha)-assinCent(k.ha);
   v.cf_acima=exc>0; v.cf_acima_t=exc>0?(assinHa(exc/100)+' acima da área contratada não entram na cobrança de '+assinComp(pv.comp)+(assinCent(med.ha)>assinCent(lim)||!ag?'; com o aceite da ampliação, entram a partir de '+assinBr(assinMesSeg(hoje))+'.':'; a ampliação já está agendada para '+assinBr(ag.desde)+'.')):'';
-  v.cf_pessoas='Pessoas com acesso: '+confComAcesso()+' (Configurações › Usuários e alçadas) · usuários sem limite · não entram na cobrança';
+  v.cf_pessoas='Pessoas com acesso: '+confComAcesso()+' · fora da cobrança';   /* 14/10/2026: a origem (Configurações › Usuários e alçadas) foi para a dica ⓘ */
   // primária única (R14)
   v.cf_prim_dis=false; v.cf_prim_tit='';
   if(prim==='pagar'){ v.cf_prim_t='Pagar fatura'; v.cf_prim_fn=()=>cfAbreFat(self,ab.id); }
@@ -240,17 +240,16 @@ def build():
              f'<span style="flex-grow: 1;"></span><button type="button" onClick="{H("cf_restaurar")}" style="{SEC}">Restaurar assinatura da demonstração</button></div>')
     demo = (f'<div style="background: {YELS}; border: 1px solid #F1DDA8; border-radius: 16px; padding: 14px 18px; display: flex; flex-direction: column; gap: 10px;">'
             f'<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;"><span style="font-size: 15px; font-weight: 800; color: {YEL};">Demonstração</span>'
-            f'<span style="font-size: 12px; font-weight: 700; color: {YEL};">só demonstração · avança a data da cobrança, não a dos outros módulos</span></div>'
-            f'<div style="font-size: 13px; color: {INK};">Data simulada da cobrança: <b>{H("cf_hoje")}</b>. O período fecha no último dia do mês e a fatura vence no dia 1 (exemplo, a decidir pelo proprietário).</div>'
+            f'</div>'
+            f'<div style="font-size: 13px; color: {INK};">Data simulada da cobrança: <b>{H("cf_hoje")}</b></div>'
             + datas + '</div>')
     corpo = ('<div class="assin" style="display: flex; flex-direction: column; gap: 18px;">' + CSS
              + kpis_dyn('cf_k', ['Plano', 'Área medida', 'Prévia do período', 'Próxima cobrança']) + aviso
              + section('Uso medido', 'Confira a área que define a cobrança; ela vem do cadastro e não se digita aqui. Clique no talhão para abrir a origem.', '',
-                       nota(f'Origem: Cadastros › Fazendas, áreas e talhões · conta a área cultivável dos talhões ativos de fazendas ativas; safra, parcela e operação não entram.').replace('padding-top: 10px;', 'padding: 0 0 10px;')
-                       + g_uso + nota(H('cf_pessoas')))
+                       g_uso + nota(H('cf_pessoas')))
              + section('Faturas', 'Abra a fatura para ver a memória da cobrança, pagar (simulado), contestar ou baixar em CSV.', '', g_fat)
              + section('Planos', 'Compare os planos com o valor para a sua área; clique no plano para ver a prévia e aceitar a mudança.', '',
-                       nota(f'Preço, mínimo, franquias e cancelamento: <b>exemplo · a decidir pelo proprietário</b> (DEC-01, DEC-05, DEC-09). Usuários sem limite e fora da cobrança.', YEL).replace('padding-top: 10px;', 'padding: 0 0 10px;')
+                       nota(f'Preço, mínimo, franquias e cancelamento: <b>exemplo · a decidir pelo proprietário</b> (DEC-01, DEC-05, DEC-09).', YEL).replace('padding-top: 10px;', 'padding: 0 0 10px;')
                        + g_pl)
              + demo + '</div>')
     # painel da fatura
@@ -293,5 +292,8 @@ def build():
     shell37('CF-05', 'Assinatura e cobrança', corpo, fname=fname, search=False, perfil=PERFIL_CF,
             subtitle='Cobrança simulada · nenhum valor é cobrado. Plano, uso medido no cadastro, faturas e mudança de plano ou área com prévia.',
             primary_html=E.acao_motivo(f'<button type="button" class="assin-prim" aria-disabled="{H("cf_prim_dis")}" data-dica="{H("cf_prim_tit")}" title="{H("cf_prim_tit")}" onClick="{H("cf_prim_fn")}" style="{BTN_ST(True)}">{H("cf_prim_t")}</button>', H("cf_prim_dis"), H("cf_prim_tit")),   # DS-06/VIS-04: motivo visível junto do botão
-            footer='Preços, trial e régua são exemplos a decidir pelo proprietário (DEC-01/05/09). Inadimplência nunca apaga dado.')
+            footer='Preços, trial e régua são exemplos a decidir pelo proprietário (DEC-01/05/09). Inadimplência nunca apaga dado. '
+                   'Uso medido: vem de Cadastros › Fazendas, áreas e talhões e conta a área cultivável dos talhões ativos de fazendas ativas; safra, parcela e operação não entram. '
+                   'Pessoas com acesso vêm de Configurações › Usuários e alçadas: usuários sem limite e fora da cobrança. '
+                   'A data simulada avança só a cobrança, não os outros módulos; o período fecha no último dia do mês e a fatura vence no dia 1 (exemplo, a decidir pelo proprietário).')
     injeta(fname, 'Assinatura e cobrança', chip_dyn('cf_st'))

@@ -624,9 +624,10 @@ def colmenu(hd,fil):
 def section(title,summary,action,body,state='green'):
     if '{{' not in str(summary): summary=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos e os demais soltos pela tela ... somos minimalistas e essencialistas"): só fica o resumo que mostra estado (buraco dinâmico)
     dot={'green':ACC,'yellow':YEL,'red':RED,'gray':GRAY}[state]
+    vazio=not str(body).strip()   # 14/10/2026: bloco só com ações (a regra foi para a dica ⓘ) não deixa corpo vazio nem linha solta
     return (f'<div style="background: {SURF}; border: 1px solid {LINE}; border-radius: 16px; box-shadow: {SH}; display: flex; flex-direction: column; flex: 1 1 0; min-width: 0;">'
-            f'<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 18px; border-bottom: 1px solid {LINE};"><div style="display: flex; align-items: center; gap: 10px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: {dot}; flex-shrink: 0; box-shadow: 0 0 0 3px {dot}22;"></span><div style="font-size: 15px; font-weight: 700; letter-spacing: -.01em; flex-grow: 1;">{esc(title)}</div>{"".join((a if a.startswith("<") else btn(a,small=True)) for a in ([action] if isinstance(action,str) else action) if a)}</div>' + (f'<div style="font-size: 13px; color: {MUTED}; padding-left: 20px; line-height: 1.35;">{esc(summary)}</div>' if summary else '') + '</div>'
-            f'<div style="padding: 14px 18px;">{body}</div></div>')
+            f'<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 18px;{"" if vazio else f" border-bottom: 1px solid {LINE};"}"><div style="display: flex; align-items: center; gap: 10px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: {dot}; flex-shrink: 0; box-shadow: 0 0 0 3px {dot}22;"></span><div style="font-size: 15px; font-weight: 700; letter-spacing: -.01em; flex-grow: 1;">{esc(title)}</div>{"".join((a if a.startswith("<") else btn(a,small=True)) for a in ([action] if isinstance(action,str) else action) if a)}</div>' + (f'<div style="font-size: 13px; color: {MUTED}; padding-left: 20px; line-height: 1.35;">{esc(summary)}</div>' if summary else '') + '</div>'
+            + ('' if vazio else f'<div style="padding: 14px 18px;">{body}</div>') + '</div>')
 SELECT_KEYS=['se recusar','divisão','cobertura por','risco de roubo','ação do ajuste','atividade','decisão','análise de crédito','indexador','frete','cobrança','garantia','liberação','cultura','variedade','plano','máquina','implemento','operação','talhão','fazenda','insumo','produto','fornecedor','cliente','laborat','depósito','lote','grupo','categoria','marca','modelo','polític','fase','praça','condição','unidade','gatilho','método','tabela','extrator','profundidade','item','peça','operador','mecânico','pessoa','sensor','motivo','avisar por','canal','prioridade','pagamento','retirada','base','tipo','estado','origem','pivô','armazém','cultivar','múltiplo','responsável','alvo','estádio']
 TEXT_HINTS=['(ler qr','r$','kg','(ha','dias','(h)','data','quantidade','preço','valor','litros','umidade','%','horas','km','(m)','l/ha','sc)','rendimento','custo','frete','área','velocidade','largura','eficiência','ciclo','consumo','potência','vida','câmbio','leitura','turno','antecipar','validade','entrega','arquivo','nome','observação','lâmina','horímetro','intervalo','itens','peso','contado','complemento']
 OPTIONS={
@@ -735,7 +736,8 @@ def stepper(steps,hint):
         color=INK if st!='todo' else MUTED
         line=f'<span style="flex-grow: 1; height: 2px; background: {ACC if st=="done" else LINE}; margin: 0 10px; min-width: 24px;"></span>' if i<n-1 else ''
         parts+=f'<div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: {color}; font-weight: {700 if st=="now" else 600}; white-space: nowrap;">{dot}{esc(name)}</div>{line}'
-    return f'<div style="display: flex; flex-direction: column; gap: 8px;"><div style="display: flex; align-items: center;">{parts}</div><div style="font-size: 13.5px; color: {MUTED};">{esc(hint)}</div></div>'
+    hint_=f'<div style="font-size: 13.5px; color: {MUTED};">{esc(hint)}</div>' if hint else ''   # 14/10/2026: sem legenda vazia (a regra vai para a dica ⓘ)
+    return f'<div style="display: flex; flex-direction: column; gap: 8px;"><div style="display: flex; align-items: center;">{parts}</div>{hint_}</div>'
 def linechart(vals,w=760,h=240,fut=None,ymin=None,ymax=None,labels=None,color=ACC,unit=''):
     n=len(vals); lo=ymin if ymin is not None else min(vals+(fut or []))*0.96; hi=ymax if ymax is not None else max(vals+(fut or []))*1.04
     L,R,T,B=44,16,14,30; iw=w-L-R; ih=h-T-B
@@ -939,7 +941,13 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 '''
     open(os.path.join(P,fname),'w').write(html)
 
-def mobile(fname,title,sub,status,primary,body,W=390,H=844,module=None):
+def mobile(fname,title,sub,status,primary,body,W=390,H=844,module=None,dica=''):
+    # 14/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos titulos e os demais soltos pela tela"): sem subtítulo vazio;
+    # a regra da tela vai para a dica ⓘ (o mesmo .g2-info do shell37), depois do selo, com alvo de toque de 44 px
+    info=(f'<button type="button" class="g2-info" aria-label="Regras desta tela" data-dica="{esc(dica)}" style="flex-shrink: 0; width: 44px; height: 44px; margin: -8px -10px -8px -6px; '
+          f'border: 0; background: transparent; padding: 0; cursor: help; display: inline-flex; align-items: center; justify-content: center; font-family: inherit;">'
+          f'<span aria-hidden="true" style="width: 26px; height: 26px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {MUTED}; font-size: 14px; font-weight: 700; '
+          f'display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;">i</span></button>') if dica else ''
     _mn=re.search(r'<!--MNAV-->.*?<!--/MNAV-->',body,flags=re.S)
     _nav=_mn.group(0) if _mn else ''
     body=body.replace(_nav,'') if _nav else body
@@ -966,8 +974,8 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 </helmet>
 <div data-mroot="1" style="position: relative; width: 100%; height: {H}px; --mw: {W}px; box-sizing: border-box; display: flex; flex-direction: column; background: {BG}; font-family: {FONT}; color: {INK}; overflow: clip;">
 <header style="padding-right: 20px; padding-bottom: 14px; padding-left: 20px; background: {SURF}; border-bottom: 1px solid {LINE}; display: flex; flex-direction: column; gap: 6px;">
-<div style="display: flex; align-items: center; gap: 10px;"><a href="{back}" aria-label="Voltar" style="text-decoration: none; display: inline-flex; align-items: center;">{chev()}</a><h1 style="margin: 0; font-family: {DISP}; font-size: 20px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">{esc(title)}</h1>{chip(status[0],status[1]) if status else ''}</div>
-<div style="font-size: 13px; color: {MUTED};">{esc(sub)}</div>
+<div style="display: flex; align-items: center; gap: 10px;"><a href="{back}" aria-label="Voltar" style="text-decoration: none; display: inline-flex; align-items: center;">{chev()}</a><h1 style="margin: 0; font-family: {DISP}; font-size: 20px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">{esc(title)}</h1>{chip(status[0],status[1]) if status else ''}{info}</div>
+{f'<div style="font-size: 13px; color: {MUTED};">{esc(sub)}</div>' if sub else ''}
 </header>
 <main style="flex-grow: 1; min-height: 0; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box;">
 {body}

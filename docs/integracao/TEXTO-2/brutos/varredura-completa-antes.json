@@ -1,0 +1,351 @@
+{
+ "AG-07.dc.html": [
+  "Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de 02/10/2026 · 4.409 produtos com registro"
+ ],
+ "BO-01.dc.html": [
+  "PRECO-01: R$ 2,00/ha·mês = R$ 24,00/ha·ano. Mínimo: cobra-se o maior entre o mínimo e preço × área (não se soma). Mudança: vale do dia 1 do próximo ciclo e nunca retroage. Base (DEC-01): área medida no cadastro (a maior entre a abertura e o fechamento do mês), limitada pela contratada. Todos os valores são exemplo, a decidir pelo proprietário (DEC-01, DEC-05, DEC-09).",
+  "Todos os valores são exemplo, a decidir pelo proprietário (DEC-01, DEC-05, DEC-09).",
+  "Avaliação em curso: Org. Boa Esperança · 480 ha declarados · 19/09/2026 → 18/10/2026 · sem cartão · 30 dias."
+ ],
+ "BO-02.dc.html": [
+  "Ativa 3 · Inadimplente 1 · Em avaliação 1 · Cancelada 1",
+  "a vencer, vencidas, pendentes ou em contestação",
+  "medida 2.958,23 ha · cobrada = mín(medida; contratada)",
+  "Isolamento: a plataforma vê área e cobrança por organização (e por fazenda na consulta contratual), nunca cultura, safra, operação ou insumo."
+ ],
+ "CA-01.dc.html": [
+  "3 com produto (o agrônomo libera) · 2 só água"
+ ],
+ "CA-01det.dc.html": [
+  "término físico do escopo (ou dispensa autorizada do saldo) entra automaticamente em Em conferência — nenhum botão pula etapa",
+  "Recomendação de origem: fungicida 1ª aplicação · protocolo do plano técnico · v2 aprovada. O agrônomo ajusta e libera a v3 só para o saldo; as fichas do saldo passam à v3."
+ ],
+ "CA-01x-os0420.dc.html": [
+  "reparo da OM-0233 ou substituto (Trator 02 a partir de 24/09)",
+  "impedimento é selo: a ordem segue Em execução e nenhum botão pula etapa",
+  "Janela da recomendação 20/09 a 05/10 · janela da ordem 22–28/09 · T4, 1ª onda de 100 ha dos 204 ha da necessidade NEC-028.",
+  "OC-114 · pressão hidráulica baixa no Trator T1 em 22/09 06:40 → OM-0233 em execução (Zé · mecânico). Substituto proposto: Trator 02 · MF 7719, apto e livre a partir de 24/09 06:00 — elegível só após confirmação do PCP.",
+  "v3 em vigor desde 23/09, ajustada por Ana (agrônoma): KCl −12 % só no saldo de 70 ha (105,6 kg/ha). A v2 continua valendo apenas para os 30 ha já realizados."
+ ],
+ "CA-02.dc.html": [
+  "Se a liberação não estiver mais vigente, o saldo reaberto recebe o selo Pausada até renovar as condições. Correção só documental permanece Em conferência — não reabre período contábil nem reescreve fatos.",
+  "Concluir execução não encerra a ordem com custódia, divergência ou conferência pendente."
+ ],
+ "CA-04.dc.html": [
+  "Balanço da REQ-031: 100 sc entregues − 70 consumidos − 20 recebidos = 10 sc com Paula (equipe de campo), prazo 24/09; Rui recebe no almoxarifado. Declarar o retorno não aumenta o estoque utilizável: só a quantidade medida e recebida entra no local e na condição registrados. Sem ajuste automático pela diferença."
+ ],
+ "CF-01.dc.html": [
+  "Origem: Cadastros › Pessoas e equipes (nome, função, habilidade e CREA). Aqui não se cadastra pessoa. Papel é permissão de decidir; quem tem acesso sem papel só usa o app de campo.",
+  "Os comandos da O.S., do Estoque e do app leem esta tabela. Mudança vale para o próximo comando e nunca reescreve registro antigo."
+ ],
+ "CF-03.dc.html": [
+  "Fila do ERP: 0 movimentos · app de campo: Com sinal (simulado) · nenhuma credencial existe nesta demonstração",
+  "Sincronizar envia ao ERP cada movimento uma vez por conteúdo: repetir não reenvia; um consumo estornado depois de enviado volta uma vez, como estorno. O app de campo envia pelo próprio aparelho quando há sinal."
+ ],
+ "CF-05.dc.html": [
+  "fatura de set/2026 · Pix, boleto ou cartão (simulado)",
+  "Origem: Cadastros › Fazendas, áreas e talhões · conta a área cultivável dos talhões ativos de fazendas ativas; safra, parcela e operação não entram.",
+  "Pessoas com acesso: 14 (Configurações › Usuários e alçadas) · usuários sem limite · não entram na cobrança",
+  "Preço, mínimo, franquias e cancelamento: exemplo · a decidir pelo proprietário (DEC-01, DEC-05, DEC-09). Usuários sem limite e fora da cobrança.",
+  "só demonstração · avança a data da cobrança, não a dos outros módulos",
+  "Data simulada da cobrança: 23/09/2026. O período fecha no último dia do mês e a fatura vence no dia 1 (exemplo, a decidir pelo proprietário)."
+ ],
+ "CO-02.dc.html": [
+  "Hectares concluídos não geram quilogramas de estoque, e pesagens não duplicam a produção da mesma carga. Ex.: avanço de 30 ha numa ordem de 100 ha fica como 30 ha realizados e 70 ha de saldo; a pesagem é conciliada depois, sem impedir o registro do turno."
+ ],
+ "CO-02det.dc.html": [
+  "Término físico entra automaticamente em Em conferência; encerrar exige cargas e apontamentos conciliados."
+ ],
+ "CO-04.dc.html": [
+  "1 carga a segregar · 1 retorno a receber bloqueado",
+  "A entrada NÃO equivale a liberação comercial: produto em processo continua identificado (CG-0988 segue no secador como OB-0106) e retorno de cliente entra bloqueado até a decisão da qualidade (CO-06). A quantidade recebida substitui a estimativa conforme a regra de medição — nunca soma com ela."
+ ],
+ "CO-05.dc.html": [
+  "OB-0104 fechou com balanço conciliado e perdas de 4,1%, e foi Encerrada — fechar processo não libera lote. O lote L27-013 (3.690 sc 60 kg) segue Bloqueado pela inspeção INSP-88 — indisponível para reserva e expedição em CO-07 até a decisão da qualidade; decisão posterior de qualidade não reabre a ordem encerrada."
+ ],
+ "CO-05det.dc.html": [
+  "CO-04 · lotes L38-115 a L38-118 · OC-0507 (S38)",
+  "Concluir execução leva a Em conferência; fechar processo exige balanço conferido.",
+  "OC-0507 (T7 · S38, encerrada) → lotes de campo L38-115 a L38-118 (12,0 t recebidos em CO-04) → packing OB-0110 → L39-120 (9,6 t A) · L39-121 (1,8 t B) → pedido PV-031 / estoque CO-07",
+  "L39-120/121 seguem Aguardando inspeção até a decisão em CO-06, mesmo com o processo encerrado."
+ ],
+ "CO-06.dc.html": [
+  "1 lote bloqueado · decisão até 25/09 · 1 retorno a destinar",
+  "Lotes de campo vêm dos apontamentos das O.S. de colheita (parcela + data). Pós-colheita, mistura, divisão, laudo e destinos iniciais são registros demonstrativos. LMR Brasil: ANVISA (monografias, extração 02/10/2026). Regras de exportação não carregadas; o \"Mercado sintético\" usa valores sintéticos.",
+  "7 lotes · 1 não conforme · 2 pendentes · 3 sem destino · 1 conforme no escopo",
+  "Bloqueio invalida a elegibilidade das reservas afetadas e avisa o Comercial automaticamente — tentativas de reservar ou expedir o lote falham com motivo (ver CO-07). A simulação de recolhimento usa a mesma árvore, mesmo com saldo zero."
+ ],
+ "CO-07.dc.html": [
+  "Soja: físico apto 38.420 sc − reserva 3.875 sc = disponível 34.545 sc; o contrato barter que originou a reserva não é subtraído de novo. A oferta futura (previsão em CO-01) não soma como estoque; café em sc 60 kg não soma com grãos em sc 50 kg; retorno bloqueado não aumenta o vendável."
+ ],
+ "GE-02.dc.html": [
+  "Autorizar versão: só a Direção, pela caixa de Aprovações."
+ ],
+ "GE-02det.dc.html": [
+  "Comparação V1 × V2 × real — fungicida no feijão P1 (OS-0409)",
+  "Orçamento flexível para os 120 ha·op ao padrão original = R$ 4.800; desvio contra essa base = R$ 1.008. A matemática explica o desvio, mas não prova desperdício: pode ser ajuste técnico autorizado, condição operacional ou erro de registro a investigar.",
+  "Nenhuma proposta em revisão para esta operação."
+ ],
+ "GE-04.dc.html": [
+  "Fonte oficial: ERP designado — aqui se propõe, aprova e concilia; a liquidação vem confirmada do banco. PC-088: título único de R$ 233.000, sem barter — a mesma obrigação nunca conta duas vezes. Antecipação da Cooperativa Central (CT-77) criou crédito vinculado abatido nas retiradas — o sistema não finge recebimento de venda futura."
+ ],
+ "GE-06det.dc.html": [
+  "Custo de pulverização por ha tratado — R$ 48,40 vs. meta R$ 40,00",
+  "custo total da operação ÷ ha efetivamente tratados (apontados)",
+  "R$/ha · 120 ha·operação (95 ha do P1 + 25 ha reaplicados)",
+  "lançamentos de custo documento a documento + apontamentos da O.S.",
+  "100% dos apontamentos sincronizados · 0 conflitos",
+  "R$ 40,00/ha (base V1 aprovada) · Ana (gestora)"
+ ],
+ "GE-08.dc.html": [
+  "Garantias sob controle: penhor de 30% da soja (15.384 sc) + CPR de 6.900 sc (barter CRE-0095) = 43% da soja prevista (V2 · 51.280 sc) comprometida — o mesmo saco nunca garante dois contratos."
+ ],
+ "IC.dc.html": [
+  "4 insumo(s) para comprar agora · cotações dentro da referência",
+  "KCl 60% · MAP 11-52 · NPK 20-05-20 · Nitrato de cálcio · Nitrato de potássio · Ureia 45%",
+  "necessidade próxima: Óleo mineral · Nitrato de cálcio · 2,4-D 806 · Glifosato 480",
+  "9 insumo(s) mais baratos esperando o mês certo, antes da necessidade",
+  "comprando pela melhor cotação, contra a referência da safra"
+ ],
+ "LO-02.dc.html": [
+  "Política v4: elegibilidade (presença, prontidão, doca livre, documentos) › janela em risco › perecibilidade › pontualidade › espera acumulada. Tolerância de chegada: 30 min.",
+  "A preparar → Em separação → Conferência → Pronta p/ carregar → Carregada → Saída confirmada. Qualidade, financeiro e documentos são dimensões separadas."
+ ],
+ "LO-02det.dc.html": [
+  "Frete: retirada pelo cliente — custo e transportador do cliente; o rateio da instalação não se aplica a esta carga."
+ ],
+ "LO-04.dc.html": [
+  "Mesma base: 9,6 t · 512 km · refrigerado. Sugestão não despacha transportador."
+ ],
+ "MA-01.dc.html": [
+  "sem encerradas com vencimento registrado · set/2026",
+  "das OMs encerradas no sistema · em andamento R$ 12.572,00 est."
+ ],
+ "MA-05.dc.html": [
+  "sem encerradas com vencimento registrado · set/2026",
+  "das OMs encerradas no sistema · em andamento R$ 12.572,00 est."
+ ],
+ "MA.dc.html": [
+  "sem encerradas com vencimento registrado · set/2026",
+  "das OMs encerradas no sistema · em andamento R$ 12.572,00 est."
+ ],
+ "MB-01.dc.html": [
+  "Siga a ordem da janela; o botão diz o próximo passo.",
+  "Escolha o trabalho para abrir o formulário do seu domínio.",
+  "Tela: Hoje no campo · 2 ordens · envios em dia"
+ ],
+ "MB-02.dc.html": [
+  "suas (Marcos) e da equipe · mesma ordem do escritório",
+  "Abra a ordem para ver instrução, insumos e apontamentos.",
+  "Consulte; quem executa é o responsável indicado.",
+  "Contexto: T4 · Santa Rita · resp. Carlos · Realizado: 30/100 ha (18 conferidos + 12 provisórios) · saldo 70 ha parado",
+  "Aviso: Fichas do saldo revogadas pelo ajuste da v3 (KCl −12 % só nos 70 ha, por Ana) · 23/09 08:05",
+  "Impedimento: OM-0233 · Trator T1 bloqueado · substituto Trator 02 · MF 7719 a partir de 24/09 06:00",
+  "Contexto: P1 · 95 ha · resp. João · Motivo: água reclassificada para fertirrigação · v2 a liberar por Ana (agrônoma)",
+  "Relato no aparelho: 23/09 07:40 · “pivô 1 ligado 20 min para teste de pressão”",
+  "Relato fora da autorização atual · aguarda decisão",
+  "Contexto: Pivô 2 · Santa Rita · janela hoje 20:00–amanhã 10:31 · resp. João",
+  "Água simplificada: abre em Irrigação, sem materiais e sem requisição.",
+  "Fechar o turno não encerra a ordem. Encerrar é no escritório, com apontamentos enviados e nada em custódia.",
+  "Tela: Minhas ordens · 1 impedida · 1 revogada"
+ ],
+ "MB-02det.dc.html": [
+  "Pulverização · Fungicida 1ª aplicação · T1+T2 · 350 ha",
+  "Siga dose, janela e preparo da versão autorizada.",
+  "2.000 L de calda · 120 L/ha · cobre 16,7 ha · 8,3 L de Fungicida A (0,5 L/ha de Fungicida A)",
+  "Use só o material autorizado; a sobra volta pela devolução.",
+  "lote F26-02 · galão 5 L · entregue 160 L · consumido 95 L",
+  "Adjuvante espalhante · 0,25 L/ha × 350 ha = 87,5 L",
+  "Confira o que já foi enviado e o que está só no aparelho."
+ ],
+ "MB-03.dc.html": [
+  "iniciar, pausar e fechar · hectares, horas e consumo",
+  "Inicie o turno na ordem em que vai trabalhar.",
+  "Tela: Apontamento do turno · sem turno aberto"
+ ],
+ "MB-03x-recibo.dc.html": [
+  "fila do aparelho · cada registro entra uma vez",
+  "Reenvios devolvem o mesmo recibo; a conferência decide o realizado.",
+  "APT-1187 · OS-0421 · dia 4 · 40 ha · identidade c9e2-…-4f1a · confirmado uma vez",
+  "Conflito com outro aparelho abre reconciliação sem somar em dobro. Pacote revogado ou vencido vira relato para decisão, sem aprovação retroativa."
+ ],
+ "MB-04.dc.html": [
+  "tipo e texto · foto e voz simuladas · funciona sem sinal",
+  "Escolha a máquina: a falha vai para a Manutenção.",
+  "Sem foto · a foto e a voz são simuladas neste protótipo."
+ ],
+ "MB-05.dc.html": [
+  "retiradas do operador e tarefas do almoxarife · por lote e embalagem",
+  "Use na ordem; a sobra volta pela devolução ao Rui.",
+  "lote F26-02 · val. 03/2028 · Almox. defensivos · OS-0421 · consumido 95 L",
+  "Leve a O.S.; Rui entrega por lote e embalagem.",
+  "lote F26-02 · val. 03/2028 · Almox. defensivos · 13 × galão 5 L · REQ-039 · OS-0424",
+  "Confirmar o recebimento põe o material sob sua custódia; o apontamento do turno baixa o consumo."
+ ],
+ "MB-05det.dc.html": [
+  "REQ-031 · sobras da OS-0417 · conferência física contra QR",
+  "Confira as sacas contra o QR antes de confirmar.",
+  "O.S./versão: OS-0417 · v1 · adubação de cobertura P1",
+  "Responsável pela custódia: Paula (equipe de campo)",
+  "Ao confirmar: custódia zera, a conta 100 = 70 + 30 fecha e a OS-0417 segue para o fechamento da conferência · sobras íntegras entram no lote M26-05 (sobras) até inspeção.",
+  "Material preparado não retorna como produto original disponível; só sobra íntegra volta ao estoque."
+ ],
+ "MB-07.dc.html": [
+  "previsão de colheita · conta por planta e estádio",
+  "Toque no talhão de fruta em produção que vai contar."
+ ],
+ "MB-08.dc.html": [
+  "Origem: balanço de 23/09 · déficit 11,2 mm → 10,81 mm brutos em 1 passada (máx. 12,0 mm por passada)",
+  "Água sem produto: sem materiais, sem requisição, sem custódia e sem devolução.",
+  "Acompanhe a volta e confirme o término no fim.",
+  "Janela: hoje 20:00–amanhã 10:31 · 1 volta de 14,5 h · iniciada 20:02 (EX-5120) · término previsto amanhã 10:33",
+  "Percentímetro: 62% → lâmina 10,81 mm (100% = 6,7 mm)",
+  "Andamento: ≈11,6 de 80 ha (14,47% da volta) · 2,1 de 14,5 h executadas",
+  "Medidores: Bomba do Pivô 2 · 166 L/s · pressão 2,8 bar · ponta parcial 20–21 h",
+  "Registre pausas e avanço sem encerrar a ordem.",
+  "13,5 mm (OS-0422) passam do máximo de 12,0 mm por passada: o sistema divide em 2 passadas de 6,75 mm. Sem aprovação; libera quando a janela for definida.",
+  "Só a fertirrigação (OS-0418) é liberada pelo agrônomo, com materiais e requisição próprios.",
+  "Área/volume insuficientes? Registra-se o tempo e a estimativa fica pendente — a lâmina não é afirmada como medida. Não existe “Encerrar e apontar”.",
+  "Tela: Irrigação de hoje · Em execução · irrigando"
+ ],
+ "MB-08x-recibo.dc.html": [
+  "mapa, lista, quadro e app leem o mesmo evento",
+  "próximo ciclo: OS-0422 (13,5 mm em 2 passadas)",
+  "Execução · 10,81 mm nos 80 ha (volta completa)",
+  "Fatos consistentes → conferência e encerramento automáticos, com recibos separados.",
+  "Confira os recibos e a área realmente atendida.",
+  "Origem da lâmina: AU-3098 · balanço de 23/09 · memória de cálculo",
+  "Liberação: LIB-2287 · prontidão validada às 06:12, antes de iniciar",
+  "Execução: EX-5120 · 20:02–24/09 10:33 · 14,5 h · 10,81 mm nos 80 ha (volta completa · estimativa por percentímetro)",
+  "Conferência: 10,6 mm medidos × 10,81 mm estimados (−1,9%, tolerância 3%)",
+  "Balanço hídrico atualizado uma vez por aplicação · 10,6 mm creditados nos 80 ha do pivô.",
+  "Horímetro divergente da lâmina calculada → a ordem fica Em conferência com o motivo exibido; corrigir a calibração do pivô substitui a fórmula anterior.",
+  "Tela: Irrigação · recibo do término · Encerradas"
+ ],
+ "MB-09.dc.html": [
+  "condição, leitura e abastecimento · funciona sem sinal",
+  "Herdada do seu turno; toque noutra ou busque pelo nome.",
+  "Herdada do turno da OS-0421 (alocação de hoje) · toque noutra para trocar",
+  "Tanque, volume e leitura; a foto do tíquete é a evidência.",
+  "Sem foto · a foto é simulada neste protótipo."
+ ],
+ "MB-09det.dc.html": [
+  "Corretiva · pressão hidráulica · executante Zé",
+  "Janela 23/09 · criticidade Alta · retorno 24/09 12:00",
+  "Ação de Zé, executante · você vê a ordem, sem alterar.",
+  "1ª tentativa · Reprovado · manômetro 120 bar (mínimo 180 bar) · Zé (mecânico) · 23/09 09:00",
+  "Nunca voltam ao estoque livre: destino e responsável.",
+  "Tela: OM-0233 · Trator T1 · Em execução · ativo bloqueado"
+ ],
+ "MB-10.dc.html": [
+  "colheita: área e cargas do talhão · motorista: viagem",
+  "Aponte a área do turno e registre cada carga que sai do talhão; a balança pesa e recebe.",
+  "Área não gera produção: a produção do talhão nasce só da carga pesada e recebida.",
+  "Tela: Cargas e entregas · 1 colheita em execução · 1 a pesar"
+ ],
+ "ON-01det.dc.html": [
+  "Estoque, análise ou plantio nunca são completados com dados inventados. Área importada maior que a declarada (480 ha) abre revisão transparente do limite do trial, sem cobrança automática."
+ ],
+ "OS-0424-app.dc.html": [
+  "T1-B · Soja 62 X · 128 ha · 24/09 · 06:00–11:00",
+  "Complete com água até o volume do tanque, na ordem da instrução liberada."
+ ],
+ "OS-0424-ficha.dc.html": [
+  "FICHA DE PREPARO E APLICAÇÃO · USO SEM INTERNET",
+  "128 ha · janela 24/09 · 06:00–11:00 · responsável Marcos",
+  "Versão: v1 liberada por Ana (agrônoma) em 23/09 17:40 · Válida até: 24/09 18:00",
+  "Tanque útil 3.000 L · vazão 100 L/ha · área por carga 30 ha. Coloque o produto indicado e complete com água até o volume da carga, na ordem da instrução liberada. A última carga é proporcional à área que falta.",
+  "APONTAMENTO (LANCE NO APP QUANDO HOUVER SINAL)",
+  "Ficha impressa em 24/09 06:10 a partir da versão liberada. Se a versão mudar, esta ficha perde a validade: o app avisa e o QR mostra a versão vigente. Calda preparada não é área aplicada.",
+  "Tela: OS-0424 · Fungicida · T1-B · Soja 62 X · 128 ha · janela 24/09 · 06:00–11:00 · responsável Marcos"
+ ],
+ "PL-02.dc.html": [
+  "“20 dias antes do plantio · DAP −20 · previsto para 25/09” — o produtor não digita sinal negativo. “Dias antes da colheita” e “dias após a colheita” são opções distintas, com a colheita escolhida. Operação vencida exige consulta ao realizado e decisão sobre a pendência, não descarte automático."
+ ],
+ "PL-03.dc.html": [
+  "livre hoje · 25/09 reservado (OS-0430) elegível só após confirmação do PCP · preventiva 28/09",
+  "fim previsto 26/09 (dia 7) reserva futura: dessecação T1-B 05/10",
+  "retorno previsto 14h — aguardando teste não ofertado como livre",
+  "elegível sob condição validada restrição registrada pelo PCM",
+  "trator livre + implemento reservado ≠ conjunto livre revisão pré-plantio 25/09",
+  "informação vencida pela política não fica verde por falta de notícia",
+  "Contadores são recortes que se sobrepõem — não somam o total da frota. Última atualização 07:42 · fonte: PCM + eventos da operação."
+ ],
+ "PL-05.dc.html": [
+  "Resolver compra ou manutenção revalida prontidão; não inicia máquina nem muda a agenda automaticamente. A liberação técnica do ativo após teste válido não reassume a agenda antiga — o PCP reconfirma o saldo necessário. A adubação pós-colheita do C1 (NEC-019) não entra nesta fila: aguarda a decisão da pendência no plano operacional, sem compra."
+ ],
+ "PL-05det.dc.html": [
+  "OS-0431 · Plantio · Soja 58 W · T2 · 102 ha · janela amanhã (24/09) 06:00",
+  "Ativo bloqueado pelo PCM Pressão hidráulica baixa · inspeção de manutenção · caso OM-0233",
+  "Retirada de Liberadas para A liberar · nenhum início registrado",
+  "Conservada · v1 Ana (agrônoma) libera de novo, sem mudar o conteúdo",
+  "PCP (alocação) + PCM (reparo, Nilton) · decidir hoje",
+  "OS-0420 · plantio T4 · em execução · saldo 70 ha · substituto Trator 02 proposto, aguarda PCP",
+  "Apta Livre 24/09 Proposto · aguarda PCP Mesma classe e implemento compatível → sem ajuste técnico; o agrônomo só libera de novo Início mantido: 24/09 06:00 · custo estimado +R$ 0,9 mil (deslocamento) Uso limitado até 27/09: preventiva 250 h em 28/09 (OM-0234)",
+  "Retorno previsto 14h — aguardando teste Capacidade provisória, não confirmada Risco: perder 1 dia da janela de plantio · teste reprovado mantém o bloqueio",
+  "Prestador disponível 26/09 · custo estimado +R$ 4,2 mil Exige contrato ativo e conferência do padrão de plantio 2 dias além do plano",
+  "A parada do Trator T1 reduz a capacidade da janela uma única vez (já refletida em Capacidade e recursos); o PCP não remove o bloqueio técnico do PCM."
+ ],
+ "PL-06.dc.html": [
+  "T1 · 312 ha — proposta v2 de parcelamento T1-A · 160 ha · Soja 58 W · plantio 15/10 T1-B · 152 ha · Soja 62 X · plantio 25/10 Soma 312 ha = talhão ✓ Sem sobreposição ✓",
+  "Proposta · não divide a área vigente Parcelas não duplicam hectares de cobrança (312 ha); operações e materiais seguem a parcela correta."
+ ],
+ "PT-02.dc.html": [
+  "Cada versão submetida fica preservada — revisar antes do prazo cria nova versão; motivo de não seleção é agregado."
+ ],
+ "PT-05det.dc.html": [
+  "Entregue dentro da janela com NF-e e laudo por carga — recusa no recebimento abre divergência, não devolve ao estoque apto."
+ ],
+ "SU-01.dc.html": [
+  "SOL-2026-07 em cotação + KCl, diesel e rolamento",
+  "KCl 60%: falta firme 140 − 50 − 40 = 50 t; as 10 t em quarentena não entram e ficam como coberto se o laudo aprovar, somadas uma única vez. Clique na linha para ver a memória de cálculo."
+ ],
+ "SU-02.dc.html": [
+  "Classe ABC financeira não substitui criticidade: Diesel é B em valor e Alta em criticidade. Limites do depósito e validade restringem a entrega, sem equivaler ao tamanho do contrato.",
+  "Propostas e exceções aguardando: Diesel S10 v5 (gestor, vence em 5 dias)."
+ ],
+ "SU-03.dc.html": [
+  "F26-02 · uso da safra e pendência de compra na demanda única",
+  "Físico ≠ utilizável ≠ disponível. Custódia em campo fica fora do físico do depósito e não soma duas vezes; consignado aparece identificado e obedece à autorização do proprietário."
+ ],
+ "SU-04.dc.html": [
+  "O fornecedor responde pelo portal externo com convite próprio, nunca por esta lista. A SOL-2026-07 veio de Planejar safra e é a mesma de Compra de insumos.",
+  "Itens: MAP 11-52 79.500 kg, Nitrato de cálcio 680 kg, Nitrato de potássio 870 kg, NPK 20-05-20 14.800 kg, Ureia 45% 1.140 kg. Alçada pelo valor: Direção (até R$ 300 mil)."
+ ],
+ "SU-05.dc.html": [
+  "O recebido já está dentro das liberações acumuladas e não é subtraído de novo do saldo contratual.",
+  "Recebimento parcial mantém o saldo do pedido aberto; o aceite físico acontece em Recebimentos."
+ ],
+ "SU-06.dc.html": [
+  "Aceite físico não aprova o título: o título segue para Contas a pagar à parte. O retido em quarentena alimenta só a cobertura condicionada em Necessidades até o laudo, e soma uma única vez."
+ ],
+ "SU-07.dc.html": [
+  "Material entregue sai do disponível e passa à custódia da ordem; o consumo apontado no campo não repete a saída. Entrega parcial libera só a parcela executável."
+ ],
+ "SU-07det.dc.html": [
+  "É o mesmo balanço que a conferência da ordem usa. Declarar a devolução não aumenta o utilizável do depósito; só o recebimento conferido transfere a custódia.",
+  "18/09 · 100 sc entregues à custódia de Paula (MV-8760, lote M26-07)",
+  "22/09 · término físico · consumo apontado 70 sc em 95 ha",
+  "22/09 · devolução declarada 20 sc · 23/09 09:41 20 sc recebidas e conferidas por Rui"
+ ],
+ "SU-08.dc.html": [
+  "Correção não apaga a operação original: o estorno cria movimento novo com vínculo. Movimentos entre empresas seguem a NF; devoluções de campo entram pela requisição com o mesmo documento."
+ ],
+ "SU-09.dc.html": [
+  "1 ajuste aguardando gestor · 1 diferença a submeter",
+  "O contador não vê o saldo do sistema e os movimentos do escopo ficam suspensos entre o corte e o encerramento: movimentação durante a contagem não vira diferença fictícia. Quem conta não aprova o ajuste."
+ ],
+ "VE-01.dc.html": [
+  "Saldo final é o máximo factível sob capacidade e prazo — folga de outra classe ou dia não cobre esta janela. Atualizado hoje 06:30 · condição prevista, não garantia.",
+  "Mamão A · 28/09: −0,4 t · causa: rendimento A de 80% sobre 12,0 t brutas · pedido em risco: PV-031 (a confirmar; 9,6 t prometíveis). Saídas com aceite: revisão v3 com 9,6 t, deslocar 0,4 t para 05/10 ou origem parceira elegível e rastreável."
+ ],
+ "VE-02.dc.html": [
+  "1 sc soja = 50 kg · 1 bushel soja = 27,216 kg (≈ 0,5443 sc) · 1 lb = 0,4536 kg. Câmbio da simulação: R$ 5,32/US$ (PTAX D-1) — hipótese de simulação, vira premissa só ao usar na gestão. Contrato futuro não é inventado: só instrumentos existentes nas fontes acima."
+ ],
+ "VE-03.dc.html": [
+  "Aceite registrado pelas duas partes, por versão. Confirmação automática só sob política prévia explícita do produtor. Alteração de preço fora da política volta à negociação como nova versão."
+ ],
+ "VE-06.dc.html": [
+  "300 kg retornaram e foram recebidos como bloqueados: o estoque vendável não aumentou e o lote L26-118 segue indisponível para reserva e expedição. O ajuste financeiro fica vinculado ao caso — crédito não é emitido pelo retorno em si. Recolhimento, se decidido, usa a genealogia do lote para listar clientes afetados."
+ ]
+}

@@ -225,12 +225,12 @@ function PREVALS(self, v) { cenOuvir(self); prTopo(self, v); const I = intCompra
   const al = M.compras.filter(x => x.tend === 'Alta'), ag = M.compras.filter(x => x.rec === 'Comprar agora'), es = M.compras.filter(x => x.rec === 'Esperar');
   v.k_al = String(al.length); v.k_aln = al.length ? al.map(x => x.nome).join(' · ') : 'nenhum insumo em alta (sem a época)';
   v.k_ag = String(ag.length); v.k_agn = ag.length ? 'necessidade próxima: ' + ag.map(x => x.nome).join(' · ') : 'nada urgente';
-  v.k_es = ipRS(M.economia); v.k_esn = es.length + ' insumo(s) mais baratos esperando o mês certo, antes da necessidade';
+  v.k_es = ipRS(M.economia); v.k_esn = es.length + ' insumo(s) mais baratos';   /* 14/10/2026: "esperando o mês certo, antes da necessidade" repetia o título do indicador */
   self.g2pick = (gid, rid) => self.setState({ pr_sel: { g: gid, id: rid }, pr_pan: { g: gid, id: rid } });
   GR('g_ici').rows = I.itens.slice().sort((a, b) => (b.acima - a.acima) || prCmp(icN(b.vRef), icN(a.vRef))).map(icIRow);
   GR('g_icf').rows = I.forn.slice().sort((a, b) => prCmp(icN(a.rel), icN(b.rel))).map(icFRow); GR('g_ich').rows = I.porHa.map(g => icHRow(g, I.area));
   v.k_ac = String(I.acima); v.k_acn = I.acima ? I.itens.filter(i => i.acima).map(i => i.nome).join(' · ') : 'nenhuma cotação 5% acima da referência';
-  v.k_ec = icRS(I.economia, 0); v.k_ecn = 'comprando pela melhor cotação, contra a referência da safra';
+  v.k_ec = icRS(I.economia, 0); v.k_ecn = 'contra a referência da safra';   /* 14/10/2026: "comprando pela melhor cotação" repetia o título do indicador */
   v.k_ha = icRS(I.rshaTot) + '/ha'; v.k_han = 'insumos orçados ÷ ' + prFmt(I.area, 0) + ' ha da safra ' + INTC.safra; }
 function icPan(self, pan) { const I = self._ic;
   if (pan.g === 'g_icm') { const x = (self._icm || intPrecos(INTP)).compras.find(y => 'm:' + y.nome === pan.id); if (!x) return null; const un = x.un;
