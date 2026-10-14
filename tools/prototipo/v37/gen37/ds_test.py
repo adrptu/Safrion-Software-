@@ -17,7 +17,7 @@ Uso: python3 ds_test.py · DS_RENDER=<dir> serve outro _render (ex.: o da base e
 · DS_ANTES=<dir> liga as capturas "antes"."""
 import os, sys, time, json, glob
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir, troca_visao, cv_todas_sempre, cv_padrao
+from comp_lib import Chrome, servir, troca_visao, cv_todas_sempre
 R = os.environ.get('DS_RENDER') or os.path.join(HERE, '_render')
 ANTES = os.environ.get('DS_ANTES') or ''
 PARTES = set((os.environ.get('DS_PARTES') or 'A,B,C,D,E,F,G').split(','))
@@ -44,6 +44,7 @@ def _chrome_com_hover():
         else: os.environ['CDP_PORT'] = ant
     return ch, pr, d
 c, _proc, _pdir = _chrome_com_hover(); port, srv = servir(R); U = lambda f: f'http://127.0.0.1:{port}/{f}'
+cv_todas_sempre(c)  # Dicas/estados com todas as colunas; visibilidade padrão é coberta em V2-3.
 srv2 = None
 J = lambda x: c.js(x)
 TOQUE = [False]
@@ -319,7 +320,9 @@ try:
         hover(COLT, .7); d = J(DICA)
         chk('D9 selo de estado (coluna A liberar do Kanban): significado e próximo passo (Aprovar e liberar)', d['vis'] and 'Aprovar e liberar' in d['t'] and 'gestor libera' in d['t'], [d, J(f"!!{COLT}")])
         fora(); troca_visao(J, 'lista')
-        hover("[...document.querySelectorAll('[role=table] [data-dica]')].find(s=>/Falta insumo/.test(s.innerText))", .7); d = J(DICA)
+        alvo = "[...document.querySelectorAll('[role=table] [data-dica]')].find(e=>(e.innerText||'').includes('Falta insumo'))"
+        fora(); ponto = hover(alvo, .7); d = J(DICA)
+        if not ponto: d = {'vis':False, 't':'Selo Falta insumo ausente na lista'}
         chk('D10 selo da lista (Falta insumo · …): o que falta e quem resolve', d['vis'] and 'Estoque' in d['t'] and 'agrônomo' in d['t'], d)
         fora(); abre('BO-01.dc.html')
         hb = "[...document.querySelectorAll('[role=columnheader][data-dica]')].find(h=>/R\\$\\/ha/.test(h.getAttribute('data-dica')))"
@@ -334,7 +337,7 @@ try:
         foc = J("(()=>{const h=[...document.querySelectorAll('[role=columnheader]')].find(h=>/^premissas/i.test(h.innerText.trim())); const b=h&&h.querySelector('button.g2hb'); if(b) b.focus(); return !!b;})()"); time.sleep(.3); d = J(DICA)
         chk('D14 sigla ou unidade na célula vira dica do cabeçalho: DAP (PL-02 Gatilho por extenso) e sc/ha (GE-02 Premissas, "rendimento 62 sc/ha"), aberta no foco do botão de ordenar',
             (hs.get('GE-02.dc.html') or '').startswith('sc/ha:') and (hs.get('PL-02.dc.html') or '').startswith('DAP:') and foc and d['vis'] and 'sacas por hectare' in d['t'], [hs, foc, d])
-        cv_padrao(c)
+        cv_todas_sempre(c)
         c.tecla('Escape', 'Escape', 27); time.sleep(.2)
         # revisão DS (achado 2): o selo não recebe foco; com foco de teclado (Tab) na linha ou no cartão, a dica é a do selo e descreve a linha
         abre('OS.dc.html')

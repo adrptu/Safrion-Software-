@@ -24,7 +24,7 @@ window.CLK=(t,inPan)=>{ const r=inPan?TOP():document; if(!r) return 'SEM PAINEL'
   const e=els.find(x=>N(x.innerText)===t)||els.find(x=>N(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok'; };
 window.EXP=(local)=>{ const g=local.split('-')[0]; const gr=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>N(x.innerText).startsWith('▸ '+g+' ')); if(!gr) return false; const b=[...gr.querySelectorAll('button')].find(b=>N(b.innerText)==='▸'); if(b){ b.click(); return true; } return false; };
 window.INS=(local)=>{ const row=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>N(x.innerText).startsWith(local+' ')); if(!row) return 'sem linha '+local;
-  const b=[...row.querySelectorAll('button')].find(b=>/^(Ajustar|Ver) insumos$/.test(N(b.innerText))); if(!b) return 'sem botão'; b.click(); return 'ok'; };
+  (row.querySelector('.g2pw')||row).click(); return 'ok'; };
 window.PAN=()=>{ const a=TOP(); if(!a) return ''; [...a.querySelectorAll('section[aria-label] > button[aria-expanded="false"]')].forEach(b=>b.click()); return N(a.innerText); };
 window.BTNS=()=>{ const a=TOP(); return a?[...a.querySelectorAll('button,a')].filter(e=>VIS(e)&&e.getAttribute('aria-disabled')!=='true').map(e=>N(e.innerText)):[]; };   /* acionáveis */
 window.OFFS=()=>{ const a=TOP(); return a?[...a.querySelectorAll('button')].filter(e=>VIS(e)&&e.getAttribute('aria-disabled')==='true').map(e=>N(e.innerText)):[]; };   /* sem o papel: indisponíveis com motivo */
@@ -52,7 +52,10 @@ def clk(x, pan=False, w=.6): r = J(f"CLK({json.dumps(x)},{'true' if pan else 'fa
 def ins(local):
     r = J(f"INS({json.dumps(local)})")
     if str(r).startswith('sem linha') and J(f"EXP({json.dumps(local)})"): time.sleep(.5); r = J(f"INS({json.dumps(local)})")
-    time.sleep(.8); return r
+    time.sleep(.4)
+    if r == 'ok': r = clk('Ajustar insumos e doses de '+local, True, .4)
+    if r != 'ok': raise AssertionError('Abrir insumos de '+local+': '+str(r))
+    time.sleep(.4); return r
 def pan(): return J("PAN()") or ''
 def toast(): return J("TOAST()") or ''
 def cen(expr): return J(f"(()=>{{ const c=CENO(); return ({expr}); }})()")
@@ -163,3 +166,6 @@ try:
     t.chk('nenhum erro de JS', not t.errs(), t.errs())
 finally:
     t.fim()
+
+# Uma execução vazia ou com aceite vermelho não pode produzir exit0.
+sys.exit(0 if t.ok and all(t.ok) else 1)

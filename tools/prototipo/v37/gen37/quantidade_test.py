@@ -195,7 +195,7 @@ chk(f'9 "Decidir controle" (agDecIni em {len(ar)} vistorias da Lagoa): a área q
 import glob
 PROD = re.compile(r'(?:\b[\w.]*dose\s*\*\s*[\w.(\[\'\]]+|[\w.)\]]+\s*\*\s*[\w.]*\.dose\b|\bd\s*\*\s*(?:ar|ajA)\b'
                   r'|\b(?:[\w.]*area|ar|ajA)\s*\*\s*(?:[\w.]*dose|d)\b|c\[\'area\'\]\s*\*\s*\w*dose)')   # nos dois sentidos (PRE-REV Z5)
-EXC = {('areas/inicio.py', 'x.dose*p'): 'custo por ha', ('areas/processo_os.py', 'x.dose*ac'): 'carga do tanque', ('areas/processo_planos.py', 'x.dose*x.preco'): 'custo',
+EXC = {('areas/custo_dominio.py', 'x.dose*p'): 'custo por ha (fonte única PAINEL-02: dose × preço, não dose × área)', ('areas/processo_os.py', 'x.dose*ac'): 'carga do tanque', ('areas/processo_planos.py', 'x.dose*x.preco'): 'custo',
        ('areas/suprimentos.py', "dose*c['area']"): 'demanda do planejamento', ('dados2.py', "dose*c['area']"): 'demanda do planejamento',
        ('safra.js', 'dose*area'): 'demanda do planejamento (CAL-01)',
        ('cal01.js', 'p.dose*ar'): 'demanda do planejamento (CAL-01; CTL-4 DEM-01: a parte do plano sem O.S. saiu do safra.js para demFazenda)'}
