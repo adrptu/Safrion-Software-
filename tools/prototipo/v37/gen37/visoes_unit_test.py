@@ -35,6 +35,8 @@ ra = subprocess.run(['node', os.path.join(HERE, 'visoes2_ag_unit.js')], capture_
 for l in ra.stdout.strip().splitlines():
     if l.startswith('FALHOU'): print('   ' + l)
 chk('1b node visoes2_ag_unit.js (A1–A7: trilha com "/" no endereço; filtro de Talhão limita os grupos)', ra.returncode == 0, ra.stdout[-400:] + ra.stderr[-300:])
+rs = subprocess.run(['node', os.path.join(HERE, 'visoes_sico_unit.js')], capture_output=True, text=True, env=dict(os.environ, VISOES_G2LIB=os.path.join(D, 'g2lib.js')))
+chk('1c node visoes_sico_unit.js (S1–S4: ícone da situação oculta, com selo e pela cor da coluna)', rs.returncode == 0, rs.stdout[-400:] + rs.stderr[-300:])
 
 V = tenta(lambda: importlib.import_module('visoes'))
 E = tenta(lambda: importlib.import_module('engine'))

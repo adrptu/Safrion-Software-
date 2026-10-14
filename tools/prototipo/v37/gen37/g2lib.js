@@ -241,7 +241,8 @@ const G2_CV_PERG=[['oque','O quê'],['quem','Quem'],['quando','Quando'],['onde',
 // sp.sico.ks: mais de uma coluna de situação oculta (ex.: Pendência e Situação); cada uma dá o seu ícone, na ordem do quadro
 function g2sicoPart(r,sp,k){ k=k||sp.sico.k; const cores=sp.sico.cores||['red','orange','yellow'], c=sp.cols.find(x=>x.k===k); if(!c) return null;
   const ps=(r.p&&r.p[k])||[], ch=ps.find(p=>p&&p.c&&['chip','ico','cn'].indexOf(p.k)>=0); let cor=null, t='', d='';
-  if(ch){ cor=ch.c; t=String(ch.t||''); d=String(ch.dica||ch.dv||(ch.de?g2dicaDe(ch.t):'')||''); }   // selo de estado (de): o ícone leva o significado e o próximo passo (G2_DICAS), como o selo else { t=g2text(r,c); cor=(c.chips||{})[t]||null; }
+  // selo de estado (de): o ícone leva o significado e o próximo passo (G2_DICAS), como o selo
+  if(ch){ cor=ch.c; t=String(ch.t||''); d=String(ch.dica||ch.dv||(ch.de?g2dicaDe(ch.t):'')||''); } else { t=g2text(r,c); cor=(c.chips||{})[t]||null; }
   t=t.trim(); if(!cor||!t||cores.indexOf(cor)<0) return null;
   return {k:'ico',c:cor,t:c.l+': '+t+(d?' · '+d:''),curto:cor==='red'?t:''}; }   // texto curto ao lado só no bloqueio (vermelho, visual_corte C2); atenção fica no ícone e na dica
 // V2-3: tela que troca sp.cols em tempo de execução (CD-05 pelo papel; Irrigação sem a Fazenda) recebe de volta as marcas da coluna
