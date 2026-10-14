@@ -285,7 +285,8 @@ try:
             len(e15['prims']) == 1 and e15['prims'][0]['dis'] and n15['txt'] == 'O rascunho v7 está igual à v6: altere algo ou descarte o rascunho.' and e15['prims'][0]['why'] == n15['txt'], [n15, e15])
     # ---------------- L16 · R4: endereço trocado com o painel aberto ----------------
     with secao('L16'):
-        abre('PA.dc.html#plano=SOJA-AT'); clique("[...document.querySelectorAll('main .pa-editar')].find(b=>b.getClientRects().length)", w=.5)
+        abre('PA.dc.html#plano=SOJA-AT'); clique("[...document.querySelectorAll('main .pa-mais')].find(b=>b.getClientRects().length)", w=.3)   # VISOES-2: editar está no menu ⋯
+        clique("[...document.querySelectorAll('main [role=menu] button')].find(b=>b.innerText.trim()==='Editar atividade')", w=.5)
         p0 = J("(document.querySelector('aside[role=dialog] h2')||{innerText:''}).innerText")
         J("location.hash='#plano=MILHO-SF'"); espera("location.hash==='#plano=SOJA-AT'", 3); time.sleep(.3)
         p1 = J("(document.querySelector('aside[role=dialog] h2')||{innerText:''}).innerText"); h16 = J("location.hash"); t16 = toast()

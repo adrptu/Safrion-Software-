@@ -27,11 +27,15 @@ def check(nome, ok, info=''):
     else: FAIL.append(nome)
 def digita(txt): c.call('Input.insertText', {'text': txt}); time.sleep(.2)
 def enter(): c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.45)
-def atv(nome): J(f"[...document.querySelectorAll('main button.pa-editar')].find(b=>b.innerText.trim()==={json.dumps(nome)}).click()"); time.sleep(.45)
+# VISOES-2 (padrão visual das Atividades do plano): o título expande os insumos; editar e excluir ficam no menu ⋯ da atividade
+def mais(nome): J(f"[...document.querySelectorAll('main button.pa-titulo')].find(b=>b.innerText.trim()==={json.dumps(nome)}).closest('.pa-atividade').querySelector('.pa-mais').click()"); time.sleep(.3)
+def atv(nome): mais(nome); clk('Editar atividade', 'main [role=menu]', w=.45)
+def tem_atv(nome): return J(f"[...document.querySelectorAll('main button.pa-titulo')].some(b=>b.innerText.trim()==={json.dumps(nome)})")
 def mostra(nome): clk('Mostrar insumos de ' + nome, w=.35)
 def dose(prod, val):
     clk('Alterar a dose de ' + prod, w=.3); J("document.activeElement.select&&document.activeElement.select()"); digita(val); enter()
-def gats(): return J("[...document.querySelectorAll('main .pa-gatilho b')].map(b=>b.innerText).filter(t=>/^DAP /.test(t))")
+def gats(): return J("[...document.querySelectorAll('main .pa-gatilho')].map(g=>(g.getAttribute('title')||'').split(' · ')[0]).filter(t=>/^DAP /.test(t))")   # o texto inteiro fica na dica e no leitor
+def gats_vis(): return J("[...document.querySelectorAll('main .pa-gatilho b')].map(b=>b.innerText.trim())")
 def prims(): return J("[...document.querySelectorAll('header button,main button,[data-acoes] button')].filter(b=>b.getClientRects().length&&getComputedStyle(b).backgroundColor==='rgb(30, 122, 76)'&&b.getAttribute('aria-pressed')===null).map(b=>b.innerText.trim())")
 try:
     c.aparelho(1440, 1000); c.goto(f'http://127.0.0.1:{p}/Main.dc.html', .2); J("localStorage.clear()"); c.goto(f'http://127.0.0.1:{p}/PA.dc.html', .8)
@@ -46,6 +50,11 @@ try:
     J("document.querySelector('main .g2card[aria-label=\"Abrir plano Soja alta tecnologia\"]').click()"); time.sleep(.6)
     check('abrir o cartão leva ao detalhe do plano (#plano=SOJA-AT), sem primária enquanto não há rascunho', J("location.hash") == '#plano=SOJA-AT' and J("document.querySelector('main h2').innerText") == 'Soja alta tecnologia' and prims() == [], [J("location.hash"), prims()])
     check('gatilhos DAP em ordem numérica com negativos', gats() == ['DAP −20', 'DAP −1', 'DAP 0', 'DAP 20', 'DAP 25', 'DAP 45', 'DAP 60', 'DAP 118'], gats())
+    # VISOES-2 "hoje × passa a ser": só o número na coluna (a seção já diz DAP), ícone do tipo, sem linha de operação, total da seção
+    check('VISOES-2: só o número na coluna do gatilho; seção com "8 atividades · R$ 2.099,90/ha"; título sem sublinhado; ícone do tipo',
+        gats_vis()[:3] == ['−20', '−1', '0'] and J("[...document.querySelectorAll('main .pa-grp-cab')].map(x=>x.innerText.replace(/\\s+/g,' ').trim())") == ['Dias após o plantio (DAP) ⓘ 8 atividades R$ 2.099,90/ha']
+        and J("getComputedStyle(document.querySelector('main .pa-titulo')).textDecorationLine") == 'none' and J("document.querySelectorAll('main .pa-op-ico svg').length") >= 8,
+        [gats_vis()[:3], J("[...document.querySelectorAll('main .pa-grp-cab')].map(x=>x.innerText.replace(/\\s+/g,' ').trim())"), J("document.querySelectorAll('main .pa-op-ico svg').length")])
     check('o detalhe informa que editar cria o rascunho v7', 'Editar cria o rascunho v7' in MAIN())
     mostra('Fungicida 1ª aplicação'); txt = MAIN()
     check('a seta da atividade mostra os insumos sem abrir edição', not DLG() and 'Adjuvante espalhante' in txt and 'R$ 145,00/L' in txt and 'R$ 72,50/ha' in txt)
@@ -65,12 +74,12 @@ try:
     clk('Incluir insumo em Fungicida 1ª aplicação', w=.35); digita('Inseticida B'); enter(); digita('0,2'); enter(); t2 = T()
     check('incluir insumo pelo cadastro (busca, escolha, dose) grava no mesmo rascunho v7', 'Inseticida B incluído em Fungicida 1ª aplicação: 0,2 L/ha' in t2 and 'rascunho v7' in t2, t2)
     check('a atividade fica marcada como alterada', J("[...document.querySelectorAll('main span')].some(s=>s.innerText==='Alterada')"))
-    # ---- excluir com confirmação
-    clk('Excluir atividade Herbicida pós-emergente', w=.3)
-    check('excluir pede confirmação', 'Excluir “Herbicida pós-emergente” do rascunho v7?' in MAIN() and not DLG())
-    clk('Manter'); check('manter não exclui', J("[...document.querySelectorAll('main button.pa-editar')].some(b=>b.innerText==='Herbicida pós-emergente')"))
-    clk('Excluir atividade Herbicida pós-emergente', w=.3); clk('Excluir atividade', 'main [role=alert]')
-    check('excluir confirmado remove a atividade do rascunho', not J("[...document.querySelectorAll('main button.pa-editar')].some(b=>b.innerText==='Herbicida pós-emergente')") and 'excluída do rascunho v7' in T(), T())
+    # ---- excluir com desfazer (VISOES-2: sem janela de confirmação; o rascunho é recuperável)
+    mais('Herbicida pós-emergente'); clk('Excluir atividade', 'main [role=menu]', w=.4)
+    check('excluir tira a atividade na hora e oferece "Desfazer", sem janela de confirmação', not tem_atv('Herbicida pós-emergente') and 'excluída do rascunho' in MAIN() and not DLG(), MAIN()[:300])
+    clk('Desfazer'); check('desfazer devolve a atividade ao rascunho', tem_atv('Herbicida pós-emergente'))
+    mais('Herbicida pós-emergente'); clk('Excluir atividade', 'main [role=menu]', w=.4)
+    check('excluir remove a atividade do rascunho', not tem_atv('Herbicida pós-emergente') and 'excluída do rascunho v7' in T(), T())
     # ---- incluir atividade nova (ancorada na colheita)
     clk('Incluir atividade')
     ordem = J("[...document.querySelectorAll('aside[role=dialog] label')].map(l=>l.innerText.trim()).slice(0,2).join(' → ')")
@@ -120,7 +129,7 @@ try:
     check('o cartão passa à v7 publicada, com os cultivos ainda na v6 e na v5', 'v7' in soja and 'Publicado' in soja and '3 na v6 · 2 na v5' in soja and '8 atividades' in soja, soja)
     # ---- descartar o rascunho de um plano publicado
     J("document.querySelector('main .g2card[aria-label=\"Abrir plano Milho safrinha\"]').click()"); time.sleep(.6)
-    mostra(J("[...document.querySelectorAll('main button.pa-editar')].filter(b=>b.closest('.pa-atividade').querySelector('.pa-contagem').innerText!=='Só operação')[0].innerText"))
+    mostra(J("[...document.querySelectorAll('main button.pa-titulo')].filter(b=>b.closest('.pa-atividade').querySelector('.pa-contagem').innerText!=='Só operação')[0].innerText"))
     J("document.querySelector('main button.pa-dose').click()"); time.sleep(.3); J("document.activeElement.select()"); digita('9'); enter()
     check('mudar a dose do milho cria o rascunho v5', 'Rascunho v5 criado' in T() and prims() == ['Publicar versão v5'], [T(), prims()])
     clk('Descartar rascunho'); clk('Descartar rascunho', 'main [role=alert]')
@@ -134,6 +143,15 @@ try:
     clk('Descartar rascunho'); clk('Descartar rascunho', 'main [role=alert]')
     check('descartar o plano novo volta à biblioteca', J("location.hash") == '' and 'Plano novo descartado' in T() and J("document.querySelectorAll('main .g2card').length") == len(D2.PLANOS), T())
     check('sem erros JS', not J("window.__errs&&window.__errs.length"), J("window.__errs"))
+    # ---- celular (390 px, toque): a atividade em duas linhas (nome; gatilho · insumos · custo), nome com espaço útil, ⋯ visível sem hover
+    c.aparelho(390, 844, 2, True); c.goto(f'http://127.0.0.1:{p}/PA.dc.html', .8)
+    J("document.querySelector('main .g2card[aria-label=\"Abrir plano Soja alta tecnologia\"]').click()"); time.sleep(.6)
+    m = J("""(()=>{const a=document.querySelector('main .pa-atividade'); const r=x=>a.querySelector(x).getBoundingClientRect();
+      return {nome:Math.round(r('.pa-titulo').width), gy:Math.round(r('.pa-gatilho').top-r('.pa-titulo').top), ky:Math.round(r('.pa-custo').top-r('.pa-gatilho').top),
+              op:getComputedStyle(a.querySelector('.pa-mais')).opacity, sw:document.documentElement.scrollWidth, w:innerWidth,
+              tot:[...document.querySelectorAll('main .pa-grp-tot')].every(t=>t.getBoundingClientRect().right<=innerWidth)}})()""")
+    check('celular: nome da atividade com ≥ 120 px, gatilho e custo na linha de baixo, ⋯ visível sem hover, sem rolagem lateral',
+          m['nome'] >= 120 and m['gy'] > 0 and abs(m['ky']) <= 4 and m['op'] == '1' and m['sw'] == m['w'] and m['tot'], m)
 finally:
     c.close(); srv.terminate()
 print(f'\nRESULTADO: {NOK[0]} ok · ' + ('OK' if not FAIL else 'FALHAS: ' + '; '.join(FAIL)))

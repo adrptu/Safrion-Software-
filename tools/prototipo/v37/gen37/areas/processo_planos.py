@@ -184,16 +184,23 @@ function paLib(self){ const ps=paPlans(self); const cu=paCulturas(ps); const f=p
 // as operações seguem a ordem do catálogo (PA0.ops); a escolha vale entre planos e cai para "Todas" se o plano não tiver a operação
 function paOps(atv){ const tem={}; atv.forEach(a=>{ tem[a.op]=(tem[a.op]||0)+1; }); const ord=PA0.ops.filter(o=>tem[o]).concat(Object.keys(tem).filter(o=>PA0.ops.indexOf(o)<0).sort()); return ord.map(o=>({op:o,n:tem[o]})); }
 function paOpf(self,ops){ const f=self.state.opf||''; return ops.some(o=>o.op===f)?f:''; }
+// VISOES-2 §3.5 (exemplo "hoje × passa a ser" do proprietário): o tipo da operação vira ícone, o mesmo no chip e na atividade (Lucide, ISC)
+function paOpIco(op){ const s=String(op||'').toLowerCase(); const k=/pulveriz|dessec|herbic|fungic|inset/.test(s)?'pulv':(/plant/.test(s)?'plant':(/adub|calag|gess|fertil/.test(s)?'adub':(/semente/.test(s)?'sem':(/colheit/.test(s)?'colh':(/irriga|água|agua/.test(s)?'agua':'outra')))));
+  const o={}; ['pulv','plant','adub','sem','colh','agua','outra'].forEach(x=>{ o['io_'+x]=(x===k); }); return o; }
 function paOpChips(self,todas,ops,f){
-  const ch=(t,n,on,go,lab)=>({t:t,n:String(n),on:String(!!on),go:go,lab:lab,st:PA_QCH+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')});
-  return [ch('Todas',todas.length,!f,()=>self.setState({opf:''}),'Mostrar todas as operações')].concat(ops.map(o=>ch(o.op,o.n,f===o.op,()=>self.setState({opf:f===o.op?'':o.op}),(f===o.op?'Mostrar todas as operações':'Mostrar só '+o.op)))); }
+  const ch=(t,n,on,go,lab,op)=>Object.assign({t:t,n:String(n),on:String(!!on),go:go,lab:lab,temIco:!!op,st:PA_QCH+'display:inline-flex;align-items:center;gap:6px;'+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')},paOpIco(op||''));
+  return [ch('Todas',todas.length,!f,()=>self.setState({opf:''}),'Mostrar todas as operações')].concat(ops.map(o=>ch(o.op,o.n,f===o.op,()=>self.setState({opf:f===o.op?'':o.op}),(f===o.op?'Mostrar todas as operações':'Mostrar só '+o.op),o.op))); }
 // ---------- detalhe · gatilho e atividade na mesma linha; expansão direta dos insumos ----------
 function paAtvV(self,p,a,pub){ const xa=self.state.xa||{}; const open=!!xa[a.id]; const del=self.state.del===a.id; const o=pub[a.id];
   let chg=''; if(p.rasc&&p.versao){ if(!o) chg='Nova'; else if(paNorm(o)!==paNorm(a)) chg='Alterada'; }
   const gat=paGat(a.g); const np=a.prods.length; const nv=p.rasc?p.rasc.v:p.versao+1; const fl=self.state.flash===a.id;
-  return Object.assign({nome:a.nome, op:a.op, gatilho:gat.t, gatilhoFull:gat.full, hasFull:!!gat.full, detalhesId:'pa-insumos-'+p.id+'-'+a.id, detalhesLab:'Insumos de '+a.nome, np:np?(np+(np>1?' insumos':' insumo')):'Só operação', custo:np?paRS(paCa(a))+'/ha':'—', open, sym:open?'▾':'▸', lab:(open?'Recolher insumos de ':'Mostrar insumos de ')+a.nome,
+  const d0=Number(a.g.dias), gatC=a.g.tipo==='DAP'?((d0<0?'−':'')+Math.abs(d0)):gat.t;   /* só o número: a seção já diz DAP; o texto inteiro fica na dica e no leitor */
+  const menu=self.state.pam===a.id;
+  return Object.assign({nome:a.nome, op:a.op, gatilho:gatC, gatlab:gat.t+(gat.full?' · '+gat.full:''), gatilhoFull:gat.full, hasFull:false, detalhesId:'pa-insumos-'+p.id+'-'+a.id, detalhesLab:'Insumos de '+a.nome, np:np?(np+(np>1?' insumos':' insumo')):'Só operação', custo:np?paRS(paCa(a))+'/ha':'—', open, sym:open?'▾':'▸', lab:(open?'Recolher insumos de ':'Mostrar insumos de ')+a.nome,
     tog:()=>{ const n=Object.assign({},self.state.xa||{}); n[a.id]=!open; self.setState({xa:n}); },
-    edit:()=>paEdit(self,a.id), rst:fl?'background:#E4F3E9;':'',
+    edit:()=>{ self.setState({pam:null}); paEdit(self,a.id); }, rst:fl?'background:#E4F3E9;':'',
+    menu, mtog:()=>self.setState({pam:menu?null:a.id}), mlab:'Mais ações de '+a.nome, excluir:()=>paDelDesf(self,p.id,a.id),
+    rowtog:(e)=>{ const t=e&&e.target; if(t&&t.closest&&t.closest('button,input,a,[role=menu]')) return; const n=Object.assign({},self.state.xa||{}); n[a.id]=!open; self.setState({xa:n}); },
     chg, hasChg:!!chg, chgst:paChip(chg==='Nova'?'g':'y'),
     asking:del, notAsking:!del, ask:()=>self.setState({del:a.id}), no:()=>self.setState({del:null}), yes:()=>paDel(self,p.id,a.id), dlab:'Excluir atividade '+a.nome,
     delmsg:'Excluir “'+a.nome+'”'+(p.versao?' do rascunho v'+nv+'? A v'+p.versao+' publicada e os cultivos que a usam não mudam.':' do rascunho?'),
@@ -253,16 +260,18 @@ function paAddV(self,a){ const ad=self.state.iadd; const on=!!ad&&ad.aid===a.id;
     addSetD:(ev)=>self.setState({iadd:Object.assign({},self.state.iadd,{dose:ev.target.value,err:''})}),
     addTecla:(ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); paAddOk(self,a); } else if(ev.key==='Escape'){ ev.preventDefault(); ev.stopPropagation(); self.setState({iadd:null}); } },
     addOk:()=>paAddOk(self,a), addNao:()=>self.setState({iadd:null}), addErr:e, addTemErr:!!e,
-    addIst:paIst(e&&!!(on&&ad.prod),'84px')+'text-align:right;'}, ac); }
+    addIst:paIst(e&&!!(on&&ad.prod),'84px')+'text-align:right;'}, ac, paOpIco(a.op)); }
 function paS2(self,v,p){ const todas=paWork(p); const ops=paOps(todas); const of=paOpf(self,ops); const atv=of?todas.filter(a=>a.op===of):todas; const pub={};
   v.pa_opf=paOpChips(self,todas,ops,of); v.tem_opf=ops.length>1; (p.atividades||[]).forEach(a=>{ pub[a.id]=a; });
   const G={}; atv.forEach(a=>{ const g=paGrp(a.g); const k=paGkey(a.g); const m=G[g]||(G[g]={}); (m[k]||(m[k]={g:a.g,atvs:[]})).atvs.push(a); });
   v.grp=['DAP','DATA','COL'].filter(g=>G[g]).map(g=>{ const list=Object.values(G[g]).sort((A,B)=>{ const a=paOrd(A.g), b=paOrd(B.g);
       if(g==='DATA') return a<b?-1:(a>b?1:0); if(a!==b) return a-b; return A.g.tipo<B.g.tipo?-1:1; });
-    const nat=list.reduce((s,t)=>s+t.atvs.length,0);
-    return {t:PA_GRP[g].t, d:PA_GRP[g].d, n:list.length+(list.length>1?' gatilhos':' gatilho')+' · '+nat+(nat>1?' atividades':' atividade'),
+    const nat=list.reduce((s,t)=>s+t.atvs.length,0), tot=list.reduce((s,t)=>s+t.atvs.reduce((s2,a)=>s2+(a.prods.length?paCa(a):0),0),0);
+    /* "8 atividades" e o custo por ha da seção, à direita e alinhado aos custos; gatilhos só quando diferem das atividades */
+    return {t:PA_GRP[g].t, d:PA_GRP[g].d, n:nat+(nat>1?' atividades':' atividade')+(list.length!==nat?' · '+list.length+(list.length>1?' gatilhos':' gatilho'):''), tot:paRS(tot)+'/ha',
       gats:list.map(t=>({atvs:t.atvs.map(a=>paAtvV(self,p,a,pub))}))}; });
   v.vazio=!todas.length; v.tem_atv=!!todas.length;
+  const u=self.state.paUndo; v.pa_undo=!!(u&&u.pid===p.id); v.pa_undo_t=u?u.t:''; v.pa_desfaz=()=>paDesfaz(self);
   v.x_all=()=>{ const xa={}; atv.forEach(a=>{ xa[a.id]=true; }); self.setState({xg:{},xa}); };
   v.x_none=()=>self.setState({xa:{}});
   // um só botão: "Expandir tudo" até todas as atividades visíveis estarem abertas; aí vira "Recolher tudo"
@@ -289,6 +298,15 @@ function paDiscard(self,pid){ const r=paDescartaNo(paPlans(self),pid); if(r.erro
 function paDel(self,pid,aid){ const ps=paClone(paPlans(self)); const p=ps.find(x=>x.id===pid); const novo=!p.rasc;
   if(novo) p.rasc={v:p.versao+1,atividades:paClone(p.atividades)}; const a=p.rasc.atividades.find(x=>x.id===aid); p.rasc.atividades=p.rasc.atividades.filter(x=>x.id!==aid);
   self.setState({pl:ps,del:null,g2toast:'“'+a.nome+'” excluída do rascunho v'+p.rasc.v+(novo&&p.versao?' (criado agora)':'')+'.'+(p.versao?' A v'+p.versao+' publicada não muda.':'')}); }
+// VISOES-2 §3.5/§8.6: excluir do rascunho sem janela de confirmação, com "Desfazer" por 5 s (o rascunho também pode ser descartado inteiro)
+function paDelDesf(self,pid,aid){ const ps0=paPlans(self), p0=ps0.find(x=>x.id===pid), lista=paWork(p0), idx=lista.findIndex(x=>x.id===aid); if(idx<0) return;
+  const atv=paClone(lista[idx]), tinhaRasc=!!p0.rasc, tok=Date.now();
+  paDel(self,pid,aid); self.setState({pam:null,paUndo:{pid,atv,idx,tinhaRasc,tok,t:'“'+atv.nome+'” excluída do rascunho.'}});
+  setTimeout(()=>{ if(self.state.paUndo&&self.state.paUndo.tok===tok) self.setState({paUndo:null}); },5000); }
+function paDesfaz(self){ const u=self.state.paUndo; if(!u) return; const ps=paClone(paPlans(self)); const p=ps.find(x=>x.id===u.pid);
+  if(!u.tinhaRasc&&p.rasc&&p.rasc.atividades.length===p.atividades.length-1&&p.atividades.some(x=>x.id===u.atv.id)) delete p.rasc;   /* a exclusão criou o rascunho e nada mais mudou: volta à versão publicada */
+  else if(p.rasc){ p.rasc.atividades.splice(u.idx,0,u.atv); }
+  self.setState({pl:ps,paUndo:null,flash:u.atv.id,g2toast:'“'+u.atv.nome+'” voltou ao plano.'}); }
 // ---------- formulário lateral da atividade ----------
 function paEdit(self,aid){ const p=paPlan(self,self.state.pid); if(!p) return; const a=aid?paWork(p).find(x=>x.id===aid):null;
   // DAP negativo abre como "Dias antes do plantio" com o número positivo: o sentido fica no tipo, nunca no sinal
@@ -503,7 +521,18 @@ ERR = f'font-size: 12px; font-weight: 700; color: {RED};'
 def err(hole_has, hole_msg): return IF(hole_has, f'<span role="alert" style="{ERR}">{H(hole_msg)}</span>')
 
 
-PA_LINHA_CSS = '\n.pa-atividade{border:1px solid #E4E9E5;border-radius:12px;background:#fff;container-type:inline-size}\n.pa-atividade-linha{display:grid;grid-template-columns:38px 175px minmax(0,1fr) 80px 115px 38px;gap:10px;align-items:center;padding:8px 10px;font-size:13px}\n.pa-gatilho,.pa-atividade-nome{display:flex;flex-direction:column;gap:3px;min-width:0;overflow-wrap:anywhere}\n.pa-gatilho b{font-size:13px}.pa-gatilho>span,.pa-operacao,.pa-contagem{font-size:12px;color:#65736A}\n.pa-editar{border:0;background:transparent;padding:6px 0;font:inherit;font-size:13.5px;font-weight:700;color:#1E7A4C;cursor:pointer;text-align:left;text-decoration:underline;text-underline-offset:3px}\n.pa-contagem,.pa-custo{text-align:right}.pa-custo{font-weight:700;font-variant-numeric:tabular-nums}\n.pa-expandir.g2car,.pa-excluir.g2del{width:38px;height:44px}.pa-atividade button:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:4px}\n.pa-insumos{padding:8px 16px 12px 58px;background:#FBFCFA;border-top:1px solid #E4E9E5;border-radius:0 0 12px 12px}\n.pa-insumos-rolagem{overflow-x:auto}.pa-insumos-rolagem>div,.pa-insumos-rolagem>sc-for>div{min-width:720px}\n.pa-dose{font:inherit;font-variant-numeric:tabular-nums;color:inherit;background:transparent;border:0;border-bottom:1px dashed #A9B4AC;border-radius:4px 4px 0 0;padding:3px 5px;cursor:text}\n@media (hover:hover){.pa-dose:hover{background:#EEF5F0;border-bottom-color:#1E7A4C}}.pa-dose:focus-visible{background:#EEF5F0;border-bottom-color:#1E7A4C}\n@container (max-width:760px){.pa-atividade-linha{grid-template-columns:38px minmax(90px,1fr) minmax(0,2fr) 38px;gap:4px 8px}.pa-expandir{grid-column:1;grid-row:1 / 3}.pa-gatilho{grid-column:2;grid-row:1 / 3}.pa-atividade-nome{grid-column:3;grid-row:1}.pa-excluir{grid-column:4;grid-row:1 / 3}.pa-contagem{grid-column:3;grid-row:2;text-align:left}.pa-custo{grid-column:3;grid-row:3;text-align:left}.pa-insumos{padding:8px 12px}}\n.pa-disc{border:0;background:transparent;padding:0;font:inherit;color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-align:left}.pa-disc:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:4px}\n'
+PA_LINHA_CSS = '\n.pa-atividade{border:1px solid #E4E9E5;border-radius:12px;background:#fff;container-type:inline-size}\n.pa-atividade-linha{display:grid;grid-template-columns:38px 56px minmax(0,1fr) 80px 115px 44px;gap:10px;align-items:center;padding:8px 10px;font-size:13px;cursor:pointer}\n.pa-gatilho,.pa-atividade-nome{display:flex;flex-direction:column;gap:3px;min-width:0;overflow-wrap:anywhere}\n.pa-gatilho b{font-size:13px}.pa-gatilho>span,.pa-operacao,.pa-contagem{font-size:12px;color:#65736A}\n.pa-titulo{border:0;background:transparent;padding:6px 0;min-height:32px;font:inherit;font-size:13.5px;font-weight:700;color:#15201A;cursor:pointer;text-align:left}.pa-op-ico{display:inline-flex;color:#4B5A51;flex-shrink:0}.pa-gatilho b{font-variant-numeric:tabular-nums;text-align:right}.pa-mais-w{position:relative;display:flex;justify-content:center}.pa-mais{width:44px;height:44px;border:0;background:transparent;border-radius:8px;font-size:18px;color:#4B5A51;cursor:pointer;opacity:.35}.pa-atividade:hover .pa-mais,.pa-atividade:focus-within .pa-mais,.pa-mais[aria-expanded=true]{opacity:1}@media (hover:none){.pa-mais{opacity:1}}.pa-menu{position:absolute;right:0;top:44px;z-index:5;display:flex;flex-direction:column;min-width:170px;background:#fff;border:1px solid #E4E9E5;border-radius:10px;box-shadow:0 12px 28px -12px rgba(21,32,26,.35);padding:4px}.pa-menu button{border:0;background:transparent;text-align:left;font:inherit;font-size:13px;padding:10px 12px;border-radius:8px;cursor:pointer;color:#15201A}.pa-grp-tot{width:115px;text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;padding-right:64px}.pa-grp{container-type:inline-size}.pa-opf{white-space:nowrap}@container (max-width:760px){.pa-grp-cab{flex-wrap:wrap;row-gap:2px}.pa-grp-cab>div:first-child{flex-basis:100%}.pa-grp-tot{width:auto;padding-right:0}}\n.pa-contagem,.pa-custo{text-align:right}.pa-custo{font-weight:700;font-variant-numeric:tabular-nums}\n.pa-expandir.g2car,.pa-excluir.g2del{width:38px;height:44px}.pa-atividade button:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:4px}\n.pa-insumos{padding:8px 16px 12px 58px;background:#FBFCFA;border-top:1px solid #E4E9E5;border-radius:0 0 12px 12px}\n.pa-insumos-rolagem{overflow-x:auto}.pa-insumos-rolagem>div,.pa-insumos-rolagem>sc-for>div{min-width:720px}\n.pa-dose{font:inherit;font-variant-numeric:tabular-nums;color:inherit;background:transparent;border:0;border-bottom:1px dashed #A9B4AC;border-radius:4px 4px 0 0;padding:3px 5px;cursor:text}\n@media (hover:hover){.pa-dose:hover{background:#EEF5F0;border-bottom-color:#1E7A4C}}.pa-dose:focus-visible{background:#EEF5F0;border-bottom-color:#1E7A4C}\n@container (max-width:760px){.pa-atividade-linha{grid-template-columns:38px minmax(36px,64px) minmax(0,1fr) 44px;gap:4px 8px}.pa-expandir{grid-column:1;grid-row:1 / 4}.pa-gatilho{grid-column:2;grid-row:1 / 4}.pa-atividade-nome{grid-column:3;grid-row:1}.pa-excluir,.pa-mais-w{grid-column:4;grid-row:1 / 4}.pa-contagem{grid-column:3;grid-row:2;text-align:left}.pa-custo{grid-column:3;grid-row:3;text-align:left}.pa-insumos{padding:8px 12px}}\n.pa-disc{border:0;background:transparent;padding:0;font:inherit;color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-align:left}.pa-disc:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:4px}\n@container (max-width:480px){.pa-atividade-linha{grid-template-columns:32px auto auto minmax(0,1fr) 44px;grid-template-areas:"e n n n m" "e g c k m";gap:2px 10px;padding:6px 6px 8px}.pa-expandir{grid-area:e}.pa-atividade-nome{grid-area:n}.pa-gatilho{grid-area:g}.pa-gatilho b{text-align:left}.pa-contagem{grid-area:c;text-align:left}.pa-custo{grid-area:k;text-align:right;white-space:nowrap}.pa-excluir,.pa-mais-w{grid-area:m}}\n'
+
+# ícones do tipo de operação (Lucide, ISC; LICENSES/lucide-ISC.txt): o mesmo no chip e na atividade (VISOES-2 §3.5)
+_OPI = {'pulv': 'M3 3h.01M7 5h.01M11 7h.01M3 7h.01M7 9h.01M3 11h.01M15 5h4v4h-4zM19 9l2 2v10c0 .6-.4 1-1 1h-6c-.6 0-1-.4-1-1V11l2-2M13 14l8-2M13 19l8-2',   # spray-can
+        'plant': 'M7 20h10M10 20c5.5-2.5.8-6.4 3-10M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8zM14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z',   # sprout
+        'adub': 'M2 22v-5l5-5 5 5-5 5zM9.5 14.5L16 8M17 2l5 5-.5.5a3.53 3.53 0 0 1-5 0 3.53 3.53 0 0 1 0-5L17 2',   # shovel
+        'sem': 'M10.165 6.598C9.954 7.478 9.64 8.36 9 9c-.64.64-1.521.954-2.402 1.165A6 6 0 0 0 8 22c7.732 0 14-6.268 14-14a6 6 0 0 0-11.835-1.402zM5.341 10.62a4 4 0 1 0 5.279-5.28',   # bean
+        'colh': 'M10 11l11 .9a1 1 0 0 1 .8 1.1l-.665 4.158a1 1 0 0 1-.988.842H20M16 18h-5M18 5a1 1 0 0 0-1 1v5.573M3 4h8.129a1 1 0 0 1 .99.863L13 11.246M4 11V4M7 15h.01M8 10.1V4M16 18a2 2 0 1 0 4 0 2 2 0 1 0-4 0M2 15a5 5 0 1 0 10 0 5 5 0 1 0-10 0',   # tractor
+        'agua': E.ICONS['drop'], 'outra': E.ICONS['leaf']}
+def _opico(pre):
+    svg = lambda d: f'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{d}"/></svg>'
+    return ''.join(IF(f'{pre}.io_{k}', svg(d)) for k, d in _OPI.items())
 
 def build():
     fname = 'PA.dc.html'; E._reset_screen(fname)
@@ -568,25 +597,25 @@ def build():
            + IF('a.addOff', f'<div style="padding-top: 8px;"><button type="button" aria-label="{H("a.addLab")}" onClick="{H("a.addIni")}" style="{_MINI} {ICO} gap: 4px;">{MAIS(12)}Incluir insumo</button></div>', True)
            + IF('a.addOn', add_row))
     atv = (f'<div class="pa-atividade" style="{H("a.rst")}">'
-           f'<div class="pa-atividade-linha">'
+           f'<div class="pa-atividade-linha" onClick="{H("a.rowtog")}">'
            f'<button type="button" class="g2car pa-expandir" aria-label="{H("a.lab")}" title="{H("a.lab")}" aria-expanded="{H("a.open")}" aria-controls="{H("a.detalhesId")}" onClick="{H("a.tog")}">{H("a.sym")}</button>'
-           f'<span class="pa-gatilho"><b>{H("a.gatilho")}</b>' + IF('a.hasFull', f'<span>{H("a.gatilhoFull")}</span>') + '</span>'
-           f'<span class="pa-atividade-nome"><button type="button" class="pa-editar" onClick="{H("a.edit")}" title="Editar atividade">{H("a.nome")}</button>'
-           f'<span style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0;"><span class="pa-operacao">{H("a.op")}</span>' + IF('a.hasChg', f'<span style="{H("a.chgst")} padding: 0 8px; font-size: 11px; line-height: 16px;">{H("a.chg")}</span>') + '</span></span>'
+           f'<span class="pa-gatilho" title="{H("a.gatlab")}"><b aria-hidden="true">{H("a.gatilho")}</b><span class="g2sr">{H("a.gatlab")}</span></span>'
+           f'<span class="pa-atividade-nome"><span style="display: flex; align-items: center; gap: 8px; min-width: 0;"><span class="pa-op-ico" role="img" aria-label="{H("a.op")}" title="{H("a.op")}">' + _opico('a') + '</span>'
+           f'<button type="button" class="pa-titulo" aria-expanded="{H("a.open")}" aria-controls="{H("a.detalhesId")}" onClick="{H("a.tog")}">{H("a.nome")}</button>'
+           + IF('a.hasChg', f'<span style="{H("a.chgst")} padding: 0 8px; font-size: 11px; line-height: 16px;">{H("a.chg")}</span>') + '</span></span>'
            f'<span class="pa-contagem">{H("a.np")}</span><span class="pa-custo">{H("a.custo")}</span>'
-           + IF('a.notAsking', f'<button type="button" class="g2del pa-excluir" aria-label="{H("a.dlab")}" title="Excluir atividade" onClick="{H("a.ask")}">{E._TRASH}</button>', True)
-           + IF('a.asking', '<span class="pa-excluir"></span>') + '</div>'
-           + IF('a.asking', f'<div role="alert" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 12px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">'
-                f'<span style="flex-grow: 1;">{H("a.delmsg")}</span><button type="button" onClick="{H("a.yes")}" style="{_MINI} color: {RED}; border-color: {RED};">Excluir atividade</button><button type="button" onClick="{H("a.no")}" style="{_MINI}">Manter</button></div>')
+           f'<span class="pa-mais-w"><button type="button" class="pa-mais" aria-haspopup="menu" aria-expanded="{H("a.menu")}" aria-label="{H("a.mlab")}" title="{H("a.mlab")}" onClick="{H("a.mtog")}">⋯</button>'
+           + IF('a.menu', f'<span role="menu" class="pa-menu"><button type="button" role="menuitem" onClick="{H("a.edit")}">Editar atividade</button>'
+                f'<button type="button" role="menuitem" onClick="{H("a.excluir")}" style="color: {RED};">Excluir atividade</button></span>') + '</span></div>'
            + f'<div id="{H("a.detalhesId")}" role="region" aria-label="{H("a.detalhesLab")}">'
            + IF('a.open', '<div class="pa-insumos">'
                 + IF('a.semProd', f'<div style="font-size: 12.5px; color: {MUTED}; padding: 6px 0;">Sem insumos · só operação</div>')
                 + IF('a.temProd', '<div class="pa-insumos-rolagem">' + prod_hdr + FOR('a.prods', 'p', prod_row, 2) + '</div>') + inl + '</div>') + '</div></div>')
     gat = FOR('t.atvs', 'a', atv, 1)
-    grp = FOR('grp', 'g', f'<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 4px;">'
-                          f'<div style="display: flex; align-items: baseline; gap: 10px; border-top: 1px solid {LINE}; padding-top: 10px;"><div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1; min-width: 0;">'
-                          f'<span style="font-size: 13.5px; font-weight: 800;">{H("g.t")}</span><span style="font-size: 12.3px; color: {MUTED};">{H("g.d")}</span></div>'
-                          f'<span style="font-size: 12px; color: {MUTED}; white-space: nowrap;">{H("g.n")}</span></div>'
+    grp = FOR('grp', 'g', f'<div class="pa-grp" style="display: flex; flex-direction: column; gap: 8px; padding-top: 4px;">'
+                          f'<div class="pa-grp-cab" style="display: flex; align-items: baseline; gap: 10px; border-top: 1px solid {LINE}; padding-top: 10px;"><div style="display: flex; align-items: center; gap: 4px; flex-grow: 1; min-width: 0;">'
+                          f'<span style="font-size: 13.5px; font-weight: 800;">{H("g.t")}</span><button type="button" class="g2dica-i" aria-label="Como ler: {H("g.t")}" data-dica="{H("g.d")}" style="width: 32px; height: 32px; border: 0; background: transparent; color: {MUTED}; cursor: help;">ⓘ</button></div>'
+                          f'<span style="font-size: 12px; color: {MUTED}; white-space: nowrap;">{H("g.n")}</span><span class="pa-grp-tot">{H("g.tot")}</span></div>'
                           + FOR('g.gats', 't', gat, 2) + '</div>', 1)
     head2 = (f'<div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;"><h2 id="pa-det-tit" style="margin: 0; font-family: {DISP}; font-size: 20px; letter-spacing: -.02em;">{H("p_nome")}</h2>'
              f'<span style="{H("p_est_st")}">{H("p_est")}</span><span style="font-size: 13px; color: {MUTED};">{H("k2")}</span></div>'
@@ -601,13 +630,13 @@ def build():
     # plano vazio: o bloco Atividades continua com "Incluir atividade" no mesmo lugar; o Próximo passo diz o que falta para publicar
     vazio = f'<div style="padding: 12px 14px; border: 1px dashed {LINE}; border-radius: 12px; font-size: 13px; color: {MUTED};">Nenhuma atividade ainda. Inclua a primeira: defina o gatilho e a operação; depois, os insumos com dose por hectare.</div>'
     qf_op = (f'<div role="group" aria-label="Filtrar atividades por operação" style="display: flex; flex-wrap: wrap; gap: 6px;">'
-             + FOR('pa_opf', 'qo', f'<button type="button" aria-pressed="{H("qo.on")}" title="{H("qo.lab")}" onClick="{H("qo.go")}" style="{H("qo.st")}">{H("qo.t")} <span style="opacity: .75;">{H("qo.n")}</span></button>', 5)
+             + FOR('pa_opf', 'qo', f'<button type="button" class="pa-opf" aria-pressed="{H("qo.on")}" title="{H("qo.lab")}" onClick="{H("qo.go")}" style="{H("qo.st")}">' + IF('qo.temIco', _opico('qo')) + f'{H("qo.t")} <span style="opacity: .75;">{H("qo.n")}</span></button>', 5)
              + '</div>')
     # barra da coleção (v3 · DS-33): filtros rápidos no começo, expandir/recolher (apresentação) no fim; "Incluir atividade" (filho) no
     # cabeçalho da seção, à direita, separado do avanço
-    barra = (f'<div style="display: flex; align-items: flex-start; gap: 10px;"><div style="flex-grow: 1; min-width: 0;">' + IF('tem_opf', qf_op) + '</div>' + xbtn + '</div>')
+    barra = (f'<div style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 280px; min-width: 0;">' + IF('tem_opf', qf_op) + '</div>' + xbtn + '</div>')
     atividades = bloco('Atividades do plano', 'Na seta, altere dose e insumos direto na tabela. Clique na atividade para mudar gatilho e operação.',
-                       IF('vazio', vazio) + IF('tem_atv', barra + f'<div class="rola" style="display: flex; flex-direction: column; gap: 10px;">{grp}</div>', True), acao=incl_sec)
+                       IF('vazio', vazio) + IF('tem_atv', barra + IF('pa_undo', f'<div role="status" style="display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 8px; background: {GRAYS}; font-size: 12.5px;"><span style="flex-grow: 1;">{H("pa_undo_t")}</span><button type="button" onClick="{H("pa_desfaz")}" style="{_MINI}">Desfazer</button></div>') + f'<div class="rola" style="display: flex; flex-direction: column; gap: 10px;">{grp}</div>', True), acao=incl_sec)
 
     # ---------- detalhe · cultivos, versões e, com rascunho, as alterações logo acima do Próximo passo ----------
     g_cv = grid([dict(k='saf', l='Safra'), dict(k='local', l='Talhão ou parcela'), dict(k='cult', l='Cultura e variedade'),
