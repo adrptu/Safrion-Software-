@@ -22,8 +22,8 @@ Não mesclar/publicar sem aplicar os patches e conferir a composição. Este PR 
 - Oráculos16/16: contagens controladas, BEN/canceladas/encerradas excluídas, serviços devidos/fora da janela/plano inativo, partição de lotes, requisições por registro, zero/ausente/inválido e leitura sem mutação.
 - UI61/61: desktop1440 e celular390, cartão primeiro, quatro indicadores, dicas com teclado/Enter/Escape/toque e alvo44px, ação primária alcançável com scroll, destinos e volta com foco; fonte ausente, vazio e atualização pelo cenário sem recarga.
 - links_ocultos16/16.
-- nav_modulos original14/15: única divergência era a expectativa antiga de quatro cartões da Manutenção. Patch de expectativa entregue; reexecução em andamento.
-- busca_unica e paginas_scan em execução; resultados finais no retorno de revisão do PR.
+- nav_modulos original14/15: única divergência era a expectativa antiga de quatro cartões da Manutenção. Patch de expectativa aplicado na cópia de QA; reexecução15/15.
+- busca_unica6/6 em156páginas; paginas_scan4/4 em147páginas não técnicas ×2larguras, incluindo contraprova da captura de erro. Sem JS/overflow/submenu. A inspeção final focal dos três painéis61/61 cobre a mudança posterior da primária para o cabeçalho, sem repetir páginas intactas.
 - Inspeção visual desktop/celular executada; corrigido acesso principal antes abaixo da dobra. Sem teste em aparelho físico/Safari, nem prova de software real.
 
 Uma fixture inicial supunha que f6 já subtraía dispensado em cenSaldoEntregar, como35d. O oráculo da base passou a usar custódia integral para o item coberto; não se alterou o motor nem se ocultou divergência de comportamento. A dica descreve a contagem e referencia a regra vigente. Brutos iniciais preservados localmente.
