@@ -72,6 +72,29 @@ chk('Referência ausente explícita',pnaOSReferencia({os:{referencia:null}}),'Re
 chk('Gráfico vazio preservado',pnaOSGrupos([],'causa'),[]);
 chk('Atraso ausente não esconde impedimento conhecido',pnaOSLinhas({os:{impedidas:[impedida],atrasadas:null}}).length,1);
 chk('Ambos ausentes não viram vazio',pnaOSLinhas({os:{impedidas:null,atrasadas:null}}),null);
+
+const cost={id:'F|2026/27|Soja',cultura:'Soja',faz:'F',saf:'2026/27',area_ha:10,orcado_rs_ha:10,
+ real_rs_ha:20,real_conf_rs:100,real_prov_rs:100,parcial:false,sem_orc:[],pend:[]};
+const cr={cultivos:[cost],sem_rateio:[],fora:[],cobertura_incerta:false}, crAntes=JSON.stringify(cr);
+const cv=pnaCustos(cr).rows[0];
+chk('Custo apresenta razões do domínio, sem dividir por passagens',[cv.orcado,cv.realizado],['10,00 R$/ha','20,00 R$/ha']);
+chk('Conferido e provisório separados',[cv.conferido,cv.provisorio],['100,00 R$','100,00 R$']);
+chk('Mesmo par usa uma escala',[cv.barOrcado.includes('width:50%'),cv.barReal.includes('width:100%')],[true,true]);
+chk('Custo leitura sem mutação',JSON.stringify(cr),crAntes);
+chk('Custo ausente não vira vazio',pnaCustos(null),null);
+chk('Custo vazio válido',pnaCustos({cultivos:[],sem_rateio:[],fora:[]}),{rows:[],fora:[]});
+const parc=pnaCustos({...cr,cultivos:[{...cost,parcial:true,real_rs_ha:0,orcado_rs_ha:null,
+ sem_orc:['T4'],pend:['Sem preço: X']}],cobertura_incerta:true,
+ fora:[{os:'OS-9002',rs:0,real_conf_rs:0,real_prov_rs:0,executada:true,pend:['Sem preço: X'],motivo:'Sem vínculo'}]} );
+chk('Orçamento nulo não vira zero',parc.rows[0].orcado,'Orçamento por hectare indisponível');
+chk('Zero parcial não se apresenta como total',parc.rows[0].realizado,'Subtotal conhecido: 0,00 R$/ha');
+chk('Cobertura e preço ausente visíveis',parc.rows[0].pend.map(x=>x.texto),
+ ['Sem orçamento de plano: T4','Sem preço: X','Há O.S. executada fora da cobertura do custo; o subtotal não cobre todo o realizado.']);
+chk('Fora sem preço ainda aparece',[parc.fora.length,parc.fora[0].valor,parc.fora[0].motivo],[1,'0,00 R$ conhecidos · parcial','Sem vínculo · Sem preço: X']);
+chk('Razão inválida é indisponível',pnaCustos({...cr,cultivos:[{...cost,real_rs_ha:null}]}).rows[0].realizado,'Realizado por hectare indisponível');
+chk('Zero válido permanece zero',pnaCustos({...cr,cultivos:[{...cost,real_rs_ha:0}]}).rows[0].realizado,'0,00 R$/ha');
+chk('Sem rateio listado sem somar ao grupo',pnaCustos({...cr,sem_rateio:[{os:'OS-9001',rs:200,real_conf_rs:100,real_prov_rs:100,pend:[]}]}).fora[0].titulo,'OS-9001 · Sem rateio por talhão');
+
 console.log('RESULTADO '+n+'/'+n);
 '''
 
@@ -207,4 +230,60 @@ def os_contract_ui():
     finally:c.close();srv.terminate();tmp.cleanup()
     print('RESULTADO contrato sintético '+str(sum(checks))+'/'+str(len(checks)));return 0 if all(checks) else 1
 
-if __name__=='__main__':sys.exit(os_contract_ui() if '--os-contract-ui' in sys.argv else prepare() if '--prepare' in sys.argv else ui() if '--ui' in sys.argv else unit())
+
+def custos_ui():
+    """Composição real 1b6 + apresentação; ausência exercitada em fixture isolada."""
+    from comp_lib import Chrome,servir
+    render=Path(__file__).parent/'_render';tmp=tempfile.TemporaryDirectory(prefix='pn02-custos-');root=Path(tmp.name)
+    for item in render.iterdir():
+        if item.name!='PAGR.dc.html':(root/item.name).symlink_to(item.resolve(),target_is_directory=item.is_dir())
+    html=(render/'PAGR.dc.html').read_text();marker='function pnaVals(self,v) {'
+    assert html.count(marker)==1
+    (root/'PAGR.dc.html').write_text(html.replace(marker,marker+"\n const agrCustoRef=window.__semCusto?()=>null:globalCusto;\n",1).replace(
+        'function pnaVals(self,v)', 'const globalCusto=agrCustoRef;\nfunction pnaVals(self,v)',1))
+    port,srv=servir(str(root));c=Chrome();J=c.js;checks=[]
+    def chk(t,v):
+        checks.append(bool(v));print(('OK ' if v else 'FALHA ')+t,flush=True)
+    def wait(e):
+        end=time.monotonic()+8
+        while time.monotonic()<end:
+            if J(e):return True
+            time.sleep(.1)
+        return False
+    try:
+        c.call('Page.addScriptToEvaluateOnNewDocument',{'source':"window.__errors=[];addEventListener('error',e=>__errors.push(e.message));"})
+        for w,touch in [(1440,False),(390,True)]:
+            c.aparelho(w,844,1,touch);c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+            chk('Quatro culturas do getter '+str(w),wait("document.querySelectorAll('.pna-custo').length===4"))
+            chk('Soja: área plantada, razão e estados corretos '+str(w),J("""(()=>{let t=document.querySelector('.pna-custo').innerText;
+              return ['Soja · Santa Rita · Safra 2026/27','1.085,00 ha plantados','62,18 R$/ha','49.135,88 R$','18.326,88 R$','Parcial','Orçamento por hectare indisponível','Sem orçamento de plano: T4, T3, P1, P2'].every(x=>t.includes(x))})()"""))
+            chk('Sem rateio explícito '+str(w),J("""document.querySelector('[aria-label="Custos por cultura"]').innerText.includes('OS-0421 · Sem rateio por talhão')"""))
+            chk('Sem JS/overflow '+str(w),J("__errors.length===0&&document.documentElement.scrollWidth<=innerWidth"))
+            J("""document.querySelector('[aria-label="Como comparar os custos"]').focus()""")
+            c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Enter','code':'Enter','windowsVirtualKeyCode':13})
+            c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':'Enter','code':'Enter','windowsVirtualKeyCode':13})
+            chk('Fórmula pelo teclado '+str(w),wait("document.querySelector('#g2-dica')&&!document.querySelector('#g2-dica').hidden&&document.querySelector('#g2-dica').innerText.includes('Não representa economia')"))
+            c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Escape','code':'Escape','windowsVirtualKeyCode':27})
+            chk('Escape fecha fórmula '+str(w),wait("document.querySelector('#g2-dica').hidden"))
+            J("""document.querySelector('[aria-label="Custos por cultura"]').scrollIntoView({block:'start'})""")
+            Path('_probe').mkdir(exist_ok=True);c.shot(str(Path('_probe/painel-custos-'+str(w)+'.png').resolve()))
+            link="""document.querySelector('[aria-label="Custos por cultura"] a')"""
+            if touch:
+                xy=J("(()=>{let e="+link+";e.scrollIntoView({block:'center'});let r=e.getBoundingClientRect();return {x:r.left+30,y:r.top+22}})()")
+                c.call('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[xy]});c.call('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
+            else:
+                J(link+".focus()")
+                c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Enter','code':'Enter','windowsVirtualKeyCode':13})
+                c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':'Enter','code':'Enter','windowsVirtualKeyCode':13})
+            chk('Conferir composição abre origem '+str(w),wait("location.pathname.endsWith('GE-03.dc.html')"))
+            J('history.back()')
+            chk('Volta aos quatro grupos '+str(w),wait("document.querySelectorAll('.pna-custo').length===4"))
+            absent=c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__semCusto=true;'})['identifier']
+            c.goto(f'http://127.0.0.1:{port}/PAGR.dc.html',1)
+            chk('Ausência explícita sem falso zero '+str(w),wait("""(()=>{let e=document.querySelector('[aria-label="Custos por cultura"]');return e&&e.innerText.includes('Dados de custos indisponíveis')&&e.querySelectorAll('.pna-custo').length===0})()"""))
+            c.call('Page.removeScriptToEvaluateOnNewDocument',{'identifier':absent})
+    finally:c.close();srv.terminate();tmp.cleanup()
+    print('RESULTADO custos '+str(sum(checks))+'/'+str(len(checks)));return 0 if all(checks) else 1
+
+
+if __name__=='__main__':sys.exit(custos_ui() if '--custos-ui' in sys.argv else os_contract_ui() if '--os-contract-ui' in sys.argv else prepare() if '--prepare' in sys.argv else ui() if '--ui' in sys.argv else unit())

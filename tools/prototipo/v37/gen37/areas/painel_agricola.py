@@ -77,6 +77,42 @@ function pnaOSReferencia(ref) {
  const data=ref&&ref.os&&ref.os.referencia;
  return typeof data==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(data)?'Referência '+data.split('-').reverse().join('/'):'Referência de prazos indisponível';
 }
+
+// Só formatação do contrato agrCustoRef. Nenhuma soma, rateio ou desvio de negócio aqui.
+function pnaCustoNumero(n) {return typeof n==='number'&&Number.isFinite(n)&&n>=0;}
+function pnaCustoValor(n,unidade) {
+ return pnaCustoNumero(n)?n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' '+unidade:'Indisponível';
+}
+function pnaCustos(ref) {
+ if(!ref||!Array.isArray(ref.cultivos)||!Array.isArray(ref.sem_rateio)||!Array.isArray(ref.fora))return null;
+ if(!ref.cultivos.every(x=>x&&typeof x.id==='string'&&typeof x.cultura==='string'&&
+   Array.isArray(x.pend)&&Array.isArray(x.sem_orc)))return null;
+ const rows=ref.cultivos.map(x=>{
+  const parcial=!!x.parcial||!!ref.cobertura_incerta;
+  const r=x.real_rs_ha,b=x.orcado_rs_ha,max=Math.max(1,pnaCustoNumero(r)?r:0,pnaCustoNumero(b)?b:0);
+  const barra=(n,cor)=>'display:block;height:8px;border-radius:3px;width:'+(pnaCustoNumero(n)?100*n/max:0)+'%;background:'+cor;
+  const pend=x.pend.slice();
+  if(x.sem_orc.length)pend.unshift('Sem orçamento de plano: '+x.sem_orc.join(', '));
+  if(ref.cobertura_incerta)pend.push('Há O.S. executada fora da cobertura do custo; o subtotal não cobre todo o realizado.');
+  return {id:x.id,titulo:x.cultura+' · '+x.faz+' · Safra '+x.saf,
+   area:pnaCustoValor(x.area_ha,'ha plantados'),parcial,
+   estado:parcial?'Parcial · conferir cobertura':'Acumulado da safra',
+   orcado:pnaCustoNumero(b)?pnaCustoValor(b,'R$/ha'):'Orçamento por hectare indisponível',
+   realizado:pnaCustoNumero(r)?(parcial?'Subtotal conhecido: ':'')+pnaCustoValor(r,'R$/ha'):'Realizado por hectare indisponível',
+   barOrcado:barra(b,'#65736A'),barReal:barra(r,'#4976A8'),
+   conferido:pnaCustoValor(x.real_conf_rs,'R$'),provisorio:pnaCustoValor(x.real_prov_rs,'R$'),
+   pend:pend.map(t=>({texto:t})),temPend:pend.length>0};
+ });
+ const fora=ref.sem_rateio.map(x=>({...x,tipo:'Sem rateio por talhão'})).concat(
+  ref.fora.map(x=>({...x,tipo:'Fora da cobertura do custo'}))).map(x=>({
+   titulo:x.os+' · '+x.tipo,
+   valor:pnaCustoValor(x.rs,'R$')+(x.pend&&x.pend.length?' conhecidos · parcial':' conhecidos'),
+   motivo:[x.motivo||'',...(x.pend||[])].filter(Boolean).join(' · '),
+   estados:'Conferido: '+pnaCustoValor(x.real_conf_rs,'R$')+' · Provisório: '+pnaCustoValor(x.real_prov_rs,'R$')
+  }));
+ return {rows,fora};
+}
+
 function pnaVals(self,v) {
  g2keep(self,'g_pna');
  if(!self.__pnaFocus){self.__pnaFocus=true;
@@ -89,6 +125,11 @@ function pnaVals(self,v) {
  const ref=typeof agrPainelRef==='function'?agrPainelRef(c,{}):null, os=pnaOSLinhas(ref);
  v.pna_causas=pnaOSGrupos(os,'causa')||[];v.pna_donos=pnaOSGrupos(os,'dono')||[];
  v.pna_os_referencia=pnaOSReferencia(ref);
+ const custos=pnaCustos(typeof agrCustoRef==='function'?agrCustoRef(c,{}):null);
+ v.pna_custos=custos?custos.rows:[];v.pna_custos_fora=custos?custos.fora:[];
+ v.pna_custo_missing=custos===null;v.pna_custo_empty=custos!==null&&!custos.rows.length;
+ v.pna_custo_fora=!!custos&&custos.fora.length>0;
+
  v.pna_os_total=os===null?'Indisponível':os.length+' O.S. com atenção identificada';
  v.pna_os_missing=os===null;
  v.pna_os_has_data=os!==null&&os.length>0;
@@ -147,4 +188,33 @@ def secao():
         '<p role="status" hidden="'+H('!pna_sem_prazo')+'">'+H('pna_sem_prazo')+' O.S. sem prazo válido; não avaliadas quanto a atraso. Confira a janela na O.S.</p>'
         '<p role="status" hidden="'+H('!pna_os_empty')+'">Nenhuma O.S. impedida ou atrasada neste recorte.</p>'+
         pendencias+'</section>')
-    return osbody+body, JS
+
+    custo_formula=('Orçado por hectare vem do plano da safra; realizado é acumulado até o estado atual, dividido pela área plantada. '
+                   'Não representa economia ou desvio final da safra. Provisório e conferido são partes distintas do realizado. '
+                   'Barras comparam valores dentro da mesma cultura, fazenda e safra; cada par tem sua própria escala. '
+                   'Custos sem preço, sem vínculo ou sem rateio ficam identificados e não são distribuídos automaticamente. '
+                   'Fonte: mesma conta da camada Custos do Mapa. Não soma razões entre culturas.')
+    custos=('<section aria-label="Custos por cultura">'
+        f'<h2 style="font-size:16px;color:{E.INK}">Custos · orçado e realizado '
+        '<button type="button" class="g2dica-i" aria-label="Como comparar os custos" data-dica="'+E.esc(custo_formula)+'" style="width:44px;height:44px;border:0;background:transparent">ⓘ</button></h2>'
+        '<p>Orçamento da safra × realizado acumulado · R$/ha plantado · Fonte: Custos do Mapa</p>'
+        '<p role="status" hidden="'+H('!pna_custo_missing')+'">Dados de custos indisponíveis. Consulte Custos para conferir a origem.</p>'
+        '<p role="status" hidden="'+H('!pna_custo_empty')+'">Nenhuma cultura com custo disponível neste recorte.</p>'
+        '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">'
+        '<sc-for list="'+H('pna_custos')+'" as="custo" hint-placeholder-count="2">'
+        '<section class="pn-chart pna-custo" style="overflow-wrap:anywhere">'
+        '<h3 style="font-size:15px;margin:0 0 8px">'+H('custo.titulo')+'</h3>'
+        '<p>'+H('custo.estado')+' · '+H('custo.area')+'</p>'
+        '<p>Orçado: '+H('custo.orcado')+'</p>'
+        '<div aria-hidden="true" style="height:8px;background:#EEF1EE"><span style="'+H('custo.barOrcado')+'"></span></div>'
+        '<p>Realizado: '+H('custo.realizado')+'</p>'
+        '<div aria-hidden="true" style="height:8px;background:#EEF1EE"><span style="'+H('custo.barReal')+'"></span></div>'
+        '<p style="font-size:12px;font-variant-numeric:tabular-nums">Conferido: '+H('custo.conferido')+' · Provisório: '+H('custo.provisorio')+'</p>'
+        '<ul hidden="'+H('!custo.temPend')+'" style="padding-left:18px;font-size:12px"><sc-for list="'+H('custo.pend')+'" as="p">'
+        '<li>'+H('p.texto')+'</li></sc-for></ul></section></sc-for></div>'
+        '<section hidden="'+H('!pna_custo_fora')+'"><h3 style="font-size:15px">O.S. fora dos totais por cultura</h3>'
+        '<ul style="padding-left:18px"><sc-for list="'+H('pna_custos_fora')+'" as="f">'
+        '<li style="margin-bottom:12px;overflow-wrap:anywhere"><strong>'+H('f.titulo')+'</strong> · '+H('f.valor')+
+        '<br>'+H('f.estados')+'<br>'+H('f.motivo')+'</li></sc-for></ul></section>'
+        '<a href="GE-03.dc.html" style="display:inline-flex;align-items:center;min-height:44px">Conferir composição dos custos</a></section>')
+    return osbody+custos+body, JS
