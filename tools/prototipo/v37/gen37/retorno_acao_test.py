@@ -62,7 +62,8 @@ try:
     # 5 · menos movimento: o pulso vira anel parado (sem animação)
     c.call('Emulation.setEmulatedMedia', {'features': [{'name': 'prefers-reduced-motion', 'value': 'reduce'}]})
     c.goto(U('PA.dc.html'), 1.0); clica(sel); time.sleep(.05)
-    chk('R6 com "menos movimento" o acionado fica com anel parado, sem animação', J("(()=>{const e=document.querySelector('.g2-acionado'); if(!e) return false; const s=getComputedStyle(e); return s.animationName==='none'&&s.outlineStyle==='solid'&&s.outlineColor==='rgb(30, 122, 76)';})()"))
+    est = J("(()=>{const e=document.querySelector('.g2-acionado'); if(!e) return null; const s=getComputedStyle(e); return [s.animationName,s.outlineStyle,s.outlineColor];})()")
+    chk('R6 com "menos movimento" o acionado fica com anel parado, sem animação', est == ['none', 'solid', 'rgb(30, 122, 76)'], [est, J("matchMedia('(prefers-reduced-motion: reduce)').matches"), J("!!(%s)" % sel)])
     c.call('Emulation.setEmulatedMedia', {'features': []})
     chk('R7 sem erro de JS', not J("(window.__e||[]).length"), J("window.__e"))
 finally:

@@ -1224,7 +1224,7 @@ RETORNO_CSS=(
     "@keyframes g2acionado{0%{outline:2px solid rgba(30,122,76,.75);outline-offset:0}100%{outline:2px solid rgba(30,122,76,0);outline-offset:5px}}"
     ".g2-acionado{animation:g2acionado .32s ease-out}"
     ".g2card.g2-acionado,a.mod-cartao.g2-acionado{background:#E4F3E9!important;border-color:#1E7A4C!important}"
-    "@media (prefers-reduced-motion:reduce){.g2-acionado{animation:none!important;outline:2px solid #1E7A4C!important;outline-offset:2px}}"
+    "@media (prefers-reduced-motion:reduce){.g2-acionado{animation:none!important;transition:none!important;outline:2px solid #1E7A4C!important;outline-offset:2px}}"
     # chegada na tela: o conteúdo entra em 180 ms (só opacidade: sem transform, a barra de ações fixa não pula); sem animação com "menos movimento"
     "@keyframes g2entra{from{opacity:.25}to{opacity:1}}@media (prefers-reduced-motion:no-preference){main{animation:g2entra .18s ease-out}}"
 )
