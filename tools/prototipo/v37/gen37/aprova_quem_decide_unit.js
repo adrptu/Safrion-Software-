@@ -24,7 +24,8 @@ caso('perfil', () => {
   ok('mesma pessoa pelo nome (Ana × "Ana (gestora)")', g2mesma('Ana', 'Ana (gestora)') && !g2mesma('Ana', 'Paula (almoxarife)') && !g2mesma('', ''));
   ok('papel vem do cadastro: objeto forjado {k:"Caio", papeis:{gestor}} não vira gestor; chave "Ana" vale', !g2papel({ k: 'Caio', papeis: { gestor: 'gestora' } }, 'gestor') && g2papel('Ana', 'gestor') && !g2papel({ k: 'Xyz', papeis: { gestor: 'g' } }, 'gestor'));
   const self = { state: {}, setState(o) { Object.assign(this.state, o); } }; const v = {}; g2navvals(self, v, []);
-  ok('menu lateral: seletor inclui Proprietário e todos os perfis do cadastro (Otávio e João da manutenção; Igor e Marta do beneficiamento; Dora do Comercial), Ana marcada', v.perfil_k === 'Ana' && (v.perfil_opts || []).length === 11 && ['Proprietário', 'Ana', 'Caio', 'Rui', 'Paula', 'Zé', 'Otávio', 'João', 'Igor', 'Marta', 'Dora'].every(k => (v.perfil_opts || []).some(o => o.v === k)), [v.perfil_k, (v.perfil_opts || []).map(o => o.v)]);
+  const esperados = [...new Set(['Proprietário', ...G2_PERFIS.map(p => p.k)])];
+  ok('menu lateral: seletor inclui Proprietário e todos os perfis do cadastro (Otávio e João da manutenção; Igor e Marta do beneficiamento; Dora do Comercial), Ana marcada', v.perfil_k === 'Ana' && (v.perfil_opts || []).length === esperados.length && esperados.every(k => (v.perfil_opts || []).some(o => o.v === k)), [v.perfil_k, (v.perfil_opts || []).map(o => o.v)]);
   self.g2perfilFecha = { pa: null }; self.state.pa = { id: 'OS-0430', fn: 'liberar' };   // confirmação aberta pela Ana
   v.perfil_set({ target: { value: 'Caio' } });
   ok('trocar para Caio grava e avisa que não é segurança', __ls['safrion.perfilDemo'] === 'Caio' && g2perfil().k === 'Caio' && /Caio · PCP \(não é segurança de acesso\)/.test(self.state.g2toast || ''), self.state.g2toast);
