@@ -55,7 +55,7 @@ try:
         gats_vis()[:3] == ['−20', '−1', '0'] and J("[...document.querySelectorAll('main .pa-grp-cab')].map(x=>x.innerText.replace(/\\s+/g,' ').trim())") == ['Dias após o plantio (DAP) ⓘ 8 atividades R$ 2.099,90/ha']
         and J("getComputedStyle(document.querySelector('main .pa-titulo')).textDecorationLine") == 'none' and J("document.querySelectorAll('main .pa-op-ico svg').length") >= 8,
         [gats_vis()[:3], J("[...document.querySelectorAll('main .pa-grp-cab')].map(x=>x.innerText.replace(/\\s+/g,' ').trim())"), J("document.querySelectorAll('main .pa-op-ico svg').length")])
-    check('o detalhe informa que editar cria o rascunho v7', 'Editar cria o rascunho v7' in MAIN())
+    check('menos é mais (14/10): sem a linha "cultura · atividades · R$/ha · gatilhos" nem "Editar cria o rascunho" abaixo do título', 'Editar cria o rascunho' not in MAIN() and 'gatilhos: DAP' not in MAIN() and 'de insumos ·' not in MAIN(), MAIN()[:300])
     mostra('Fungicida 1ª aplicação'); txt = MAIN()
     check('a seta da atividade mostra os insumos sem abrir edição', not DLG() and 'Adjuvante espalhante' in txt and 'R$ 145,00/L' in txt and 'R$ 72,50/ha' in txt)
     atv('Fungicida 1ª aplicação')
@@ -117,13 +117,14 @@ try:
     # ---- diferenças e publicar
     body = MAIN()
     check('o bloco de alterações v7 × v6 lista dose, inclusão, exclusão, atividade nova e gatilho', all(k in body for k in ['Alterações do rascunho v7 em relação à v6', 'Fungicida A: 0,5 → 0,6 L/ha', 'inclui Inseticida B', 'Excluída', 'Incluída', 'Dessecação pré-colheita', 'gatilho: DAP −20 → DAP −25']), body[-900:])
-    check('cultivos continuam na v6 ao publicar (safra encerrada fica na v5)', 'Continua na v6 ao publicar' in body and 'Safra encerrada · fica na v5' in body)
+    check('antes de publicar, o bloco de alterações diz que os cultivos não mudam (3 na v6, 2 na v5)', 'Aplicado em 3 cultivos na v6 e 2 na v5 (safra encerrada): publicar não os altera' in body, body[-600:])
     check('uma primária: "Publicar versão v7"', prims() == ['Publicar versão v7'], prims())
     clk('Publicar versão v7', '[data-acoes]', .6)
     check('publicar cria a v7 e avisa que os cultivos ficam', 'Versão v7 publicada' in T() and '3 cultivos na v6' in T(), T())
-    body = MAIN(); clk('Mostrar as versões', w=.35); vs = J("(document.getElementById('pa-versoes')||{innerText:''}).innerText")
-    check('depois de publicar: v7 em vigor, v6 substituída com 3 cultivos; cultivos "Na v6 · v7 publicada" com o link ao Planejar safra; sem primária',
-          'Em vigor' in vs and 'Substituída' in vs and 'Na v6 · v7 publicada' in body and 'Abrir cultivo no Planejar safra ›' in body and prims() == [], [vs, prims()])
+    body = MAIN()
+    # 14/10 (proprietário): Cultivos e Versões saíram do detalhe; o cabeçalho diz a versão em vigor
+    check('depois de publicar: cabeçalho "Publicado · v7", sem os blocos Cultivos e Versões, sem primária',
+          'Publicado · v7' in body and 'Cultivos que usam este plano' not in body and 'Mostrar as versões' not in body and prims() == [], [body[:300], prims()])
     clk('‹ Biblioteca de planos', '[data-acoes]', .6)
     soja = J("[...document.querySelectorAll('main .g2card')].map(b=>b.innerText.replace(/\\s+/g,' ')).find(t=>t.startsWith('Soja alta'))")
     check('o cartão passa à v7 publicada, com os cultivos ainda na v6 e na v5', 'v7' in soja and 'Publicado' in soja and '3 na v6 · 2 na v5' in soja and '8 atividades' in soja, soja)
@@ -143,6 +144,28 @@ try:
     clk('Descartar rascunho'); clk('Descartar rascunho', 'main [role=alert]')
     check('descartar o plano novo volta à biblioteca', J("location.hash") == '' and 'Plano novo descartado' in T() and J("document.querySelectorAll('main .g2card').length") == len(D2.PLANOS), T())
     check('sem erros JS', not J("window.__errs&&window.__errs.length"), J("window.__errs"))
+    # ---- Desfazer a exclusão (Codex 6169663018): PA-DESFAZER-01 preserva o que mudou depois; PA-DESFAZER-02 recupera a última atividade
+    def plano(nome):
+        c.goto(f'http://127.0.0.1:{p}/Main.dc.html', .2); J("localStorage.clear()"); c.goto(f'http://127.0.0.1:{p}/PA.dc.html', .8)
+        J("document.querySelector('main .g2card[aria-label=\"Abrir plano %s\"]').click()" % nome); time.sleep(.6)
+    def doses(): return J("[...document.querySelectorAll('main button.pa-dose')].map(b=>(b.getAttribute('aria-label')||'').replace('Alterar a dose de ','')+'='+b.innerText.trim())")
+    plano('Soja alta tecnologia'); mostra('Fungicida 1ª aplicação')
+    mais('Herbicida pós-emergente'); clk('Excluir atividade', 'main [role=menu]', w=.4); dose('Fungicida A', '0,6'); clk('Desfazer', w=.4)
+    check('PA-DESFAZER-01: excluir (cria o rascunho) → mudar outra dose → Desfazer: a atividade volta uma vez e a dose nova (0,6) fica; o rascunho v7 continua',
+          tem_atv('Herbicida pós-emergente') and J("[...document.querySelectorAll('main button.pa-titulo')].filter(b=>b.innerText.trim()==='Herbicida pós-emergente').length") == 1
+          and any(x.startswith('Fungicida A=0,6') for x in doses()) and prims() == ['Publicar versão v7'], [doses(), prims()])
+    plano('Soja alta tecnologia'); ordem0 = J("[...document.querySelectorAll('main button.pa-titulo')].map(b=>b.innerText.trim())")
+    mais('Herbicida pós-emergente'); clk('Excluir atividade', 'main [role=menu]', w=.4); clk('Desfazer', w=.4)
+    check('controle: excluir → Desfazer sem outra edição volta à v6 publicada (sem rascunho), na mesma posição; foco no nome da atividade',
+          prims() == [] and J("[...document.querySelectorAll('main button.pa-titulo')].map(b=>b.innerText.trim())") == ordem0 and 'Publicado · v6' in MAIN()
+          and J("(document.activeElement&&document.activeElement.innerText||'').trim()") == 'Herbicida pós-emergente', [prims(), J("document.activeElement&&document.activeElement.innerText")])
+    menor = min(D2.PLANOS, key=lambda x: len(x.get('atividades') or []))
+    plano(menor['nome']); nomes = J("[...document.querySelectorAll('main button.pa-titulo')].map(b=>b.innerText.trim())") or []
+    for n in nomes: mais(n); clk('Excluir atividade', 'main [role=menu]', w=.4)
+    vazio = 'Nenhuma atividade ainda' in MAIN(); des = J("[...document.querySelectorAll('main button')].filter(b=>b.getClientRects().length&&b.innerText.trim()==='Desfazer').length")
+    clk('Desfazer', w=.4)
+    check('PA-DESFAZER-02: excluir a última atividade mostra o estado vazio E o "Desfazer"; Desfazer devolve a atividade',
+          bool(nomes) and vazio and des == 1 and tem_atv(nomes[-1]), [menor['nome'], nomes, vazio, des])
     # ---- celular (390 px, toque): a atividade em duas linhas (nome; gatilho · insumos · custo), nome com espaço útil, ⋯ visível sem hover
     c.aparelho(390, 844, 2, True); c.goto(f'http://127.0.0.1:{p}/PA.dc.html', .8)
     J("document.querySelector('main .g2card[aria-label=\"Abrir plano Soja alta tecnologia\"]').click()"); time.sleep(.6)

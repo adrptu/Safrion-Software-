@@ -43,9 +43,10 @@ try:
     c.aparelho(1440, 900, 1, False); c.goto(U('Main.dc.html'), .3); J("localStorage.clear(); sessionStorage.clear()")
     c.goto(U('OS.dc.html'), 1.4); J("window.__e=[];addEventListener('error',e=>window.__e.push(String(e.message)))")
     nv = json.loads(J(NAV) or '{}'); its = nv.get('itens', [])
-    esp = [ui37.INICIO37] + [ui37.HUB37.get(n) or items[0][1].split('#')[0] for n, ic, items in ui37.MENU2] + [ui37.OUTROS37[2]]
-    nomes = ['Início (Mapa)'] + [n for n, ic, items in ui37.MENU2] + [ui37.OUTROS37[0]]
-    chk('N1 barra: logotipo + um ícone por módulo + Outros acessos, sem submenu nem expandir, ≤ 72 px, sem texto visível, nome acessível e dica',
+    # 14/10/2026 (proprietário: "eliminar esse primeiro botão de início mapa porque faz a mesma função do ícone do próprio mapa"): sem logotipo
+    esp = [ui37.HUB37.get(n) or items[0][1].split('#')[0] for n, ic, items in ui37.MENU2] + [ui37.OUTROS37[2]]
+    nomes = [n for n, ic, items in ui37.MENU2] + [ui37.OUTROS37[0]]
+    chk('N1 barra: um ícone por módulo (o Mapa primeiro, sem o logotipo repetido) + Outros acessos, sem submenu nem expandir, ≤ 72 px, sem texto visível, nome acessível e dica',
         [x['h'] for x in its] == esp and [x['al'] for x in its] == nomes and all(x['t'] == x['al'] and x['vis'] == '' for x in its)
         and nv.get('sub') == 0 and nv.get('tog') == 0 and nv.get('w', 999) <= 72, nv)
     chk('N1 O.S. aberta: o ícone Agrícola marcado (aria-current) e só ele', [x['al'] for x in its if x['cur'] == 'page'] == ['Agrícola'], [(x['al'], x['cur']) for x in its])
@@ -90,8 +91,8 @@ try:
     chk('N4 Outros acessos: app de campo, portal do parceiro, onboarding e backoffice', [x[0] for x in cs] == [h for n, h, i in ui37.OUTROS37[3]] and all(x[2] for x in cs), cs)
     # N5 índice fora
     apont = sorted(os.path.basename(f) for f in glob.glob(os.path.join(R, '*.dc.html')) if os.path.basename(f) != 'Main.dc.html' and 'href="Main.dc.html' in open(f, encoding='utf-8', errors='ignore').read())
-    c.goto(U('CD.dc.html'), 1.0); lg = J("(document.querySelector('.ml-topo a')||{getAttribute:()=>''}).getAttribute('href')")
-    chk('N5 nenhuma tela aponta para o índice (Main.dc.html); o logotipo leva ao Mapa', not apont and lg == ui37.INICIO37, [apont[:5], lg])
+    c.goto(U('CD.dc.html'), 1.0); lg = J("(()=>{const a=document.querySelector('nav[aria-label=Menu] a'); return [document.querySelectorAll('.ml-topo').length, a?a.getAttribute('aria-label'):'', a?a.getAttribute('href'):''];})()")
+    chk('N5 nenhuma tela aponta para o índice (Main.dc.html); sem o logotipo "Início (Mapa)": o 1º ícone da barra é o Mapa', not apont and lg == [0, 'Mapa', ui37.INICIO37], [apont[:5], lg])
     # N6 perfil no avatar
     c.goto(U('OS.dc.html'), 1.0)
     J("(()=>{const s=document.querySelector('select[aria-label=\"Trocar perfil de demonstração\"]'); s.value='Rui'; s.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.6)

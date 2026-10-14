@@ -353,7 +353,7 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
     crumb=_sep.join(parts)
     if crumbs==[title]: crumb=''   # tela de entrada do módulo: o caminho repetiria o título (13/10, mais essencial)
     if oculto(fname):
-        ctxp=''.join(f'<span style="font-size: 11.5px; color: {MUTED}; font-weight: 600;">{esc(c)}</span>' for c in (tuple(ctx)+('Módulo oculto no menu · preservado',)) if c)
+        ctxp=''.join(f'<span style="font-size: 11.5px; color: {MUTED}; font-weight: 600;">{esc(c)}</span>' for c in tuple(ctx) if c)   # 14/10 (menos é mais): saiu o rótulo "Módulo oculto no menu · preservado"
         ctxp+=f'<span style="width: 1px; height: 18px; background: {LINE};"></span>'
     else:
         ctxp=''   # Fazenda e Safra não ficam mais no topo (13/10/2026): vão para a tela, junto dos dados
@@ -397,7 +397,7 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
 <style>
 html,body{{height:100%;overflow:hidden}}
 .menu-lat{{width:232px;transition:width .18s ease}}.menu-lat.rec{{width:68px}}.menu-lat.rec .ml-txt,.menu-lat.rec .ml-sub{{display:none!important}}
-.menu-lat.rec a,.menu-lat.rec button{{justify-content:center}}.menu-lat.rec .ml-topo{{flex-direction:column;gap:8px;padding:2px 0 8px}}.menu-lat.rec .ml-topo>a{{padding:0;flex-grow:0}}
+.menu-lat.rec a,.menu-lat.rec button{{justify-content:center}}
 .ml-tog{{position:absolute;top:calc(22px + env(safe-area-inset-top,0px));left:calc(219px + env(safe-area-inset-left,0px));z-index:40;width:26px;height:26px;border:1px solid {LINE};border-radius:999px;background:#fff;color:{INK};cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;box-shadow:0 1px 4px rgba(21,32,26,.22);transition:left .18s ease}}
 .menu-lat.rec+.ml-tog{{left:calc(55px + env(safe-area-inset-left,0px))}}@media (hover:hover){{.ml-tog:hover{{background:{ACCS};color:{ACC}}}}}.ml-tog:focus-visible{{outline:2px solid {ACC};outline-offset:2px}}body{{margin:0;font-family:{FONT};color:{INK};background:{BG}}}
 a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
@@ -407,8 +407,6 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 </helmet>
 <div data-root="1" style="position: relative; width: 100%; box-sizing: border-box; display: flex; background: {BG}; font-family: {FONT}; color: {INK}; overflow: clip;">
 <nav aria-label="Menu" class="menu-lat {{{{menu_cls}}}}" style="flex-shrink: 0; background: {SIDE}; display: flex; flex-direction: column; padding: 16px 12px 12px; gap: 2px; box-sizing: border-box; overflow-x: clip; overflow-y: auto;">
-<div class="ml-topo" style="display: flex; align-items: center; gap: 6px; padding: 2px 4px 8px 0;"><a href="{INICIO37}" aria-label="Início (Mapa)" title="Início (Mapa)" style="display: flex; align-items: center; gap: 10px; padding: 0 0 0 12px; font-family: {DISP}; font-weight: 700; font-size: 15px; letter-spacing: -.01em; color: #fff; text-decoration: none; flex-grow: 1; min-width: 0;"><span style="width: 28px; height: 28px; border-radius: 9px; background: {ACC}; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;">{icon("Agronomia",16,"#fff")}</span><span class="ml-txt" style="white-space: nowrap;">Talhão à O.S.</span></a>
-</div>
 {navbar(fid,fname)}
 <div style="flex-grow: 1;"></div>
 {demo_badge()}

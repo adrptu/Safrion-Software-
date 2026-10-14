@@ -17,6 +17,12 @@ R = os.environ.get('RENDER_DIR') or os.path.join(G, '_render')
 
 # (tela, frase tirada (como estava à vista), trecho que não pode mais aparecer, trecho que tem de estar na dica ⓘ ou None se apagada, origem na base 48f570b)
 TIRADAS = [
+    # 14/10/2026, 3ª passada (proprietário: "termine de tirar essas descrições abaixo dos títulos e também textos soltos na tela. menos é mais")
+    ('PAGR', 'Agrícola · Todas as fazendas e safras · Estado atual', 'todas as fazendas e safras · estado atual', None, 'areas/paineis.py:154'),
+    ('PMAN', 'Manutenção · Todas as fazendas e safras · Estado atual', 'todas as fazendas e safras · estado atual', None, 'areas/paineis.py:154'),
+    ('PSUP', 'Suprimentos · Todas as fazendas e safras · Estado atual', 'todas as fazendas e safras · estado atual', None, 'areas/paineis.py:154'),
+    ('CA-01', 'Módulo oculto no menu · preservado', 'módulo oculto no menu', None, 'ui37.py:356'),
+    ('SU-01', 'Módulo oculto no menu · preservado', 'módulo oculto no menu', None, 'ui37.py:356'),
     ('MB-01', 'Siga a ordem da janela; o botão diz o próximo passo.', 'siga a ordem da janela', 'segue a ordem da janela', 'areas/mobile.py:364'),
     ('MB-01', 'Escolha o trabalho para abrir o formulário do seu domínio.', 'escolha o trabalho para abrir o formulário', None, 'areas/mobile.py:370'),
     ('MB-02', 'suas (Marcos) e da equipe · mesma ordem do escritório', 'suas (marcos) e da equipe', 'mesma ordem do escritório', 'areas/mobile.py:430'),

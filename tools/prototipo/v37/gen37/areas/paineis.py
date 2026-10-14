@@ -151,7 +151,7 @@ def build():
         links=''.join('<a class="mod-cartao pn-link" href="'+h+'">'+E.esc(n)+'</a>' for n,h in atalhos[1:])
         empty='<p hidden="'+H('!pn_empty')+'">Nenhum registro neste recorte.</p>'
         chart=(empty if fid=='PAGR' else '<section class="pn-chart" aria-label="'+E.esc(titulo)+'"><h2>'+E.esc(titulo)+'</h2>'+rows+empty+'</section>')
-        body=(CSS+'<div class="pn"><p class="pn-context">'+E.esc(mod)+' · Todas as fazendas e safras · Estado atual</p>'+
+        body=(CSS+'<div class="pn">'+   # 14/10 (menos é mais): saiu "<Módulo> · Todas as fazendas e safras · Estado atual"; o recorte está na faixa de filtros
           '<div class="pn-grid" aria-label="Indicadores">'+cards+'</div>'+
           '<p hidden="'+H('!pn_missing')+'" role="status">Há dados incompletos. Consulte a origem pelos acessos abaixo.</p>'+
           chart+pna+
