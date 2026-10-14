@@ -50,7 +50,8 @@ function pnValores(c,k) {
   const oms=oo&&oo.every(x=>x&&typeof x.etapa==='string')?oo:null;
   const ativos=aa&&aa.every(x=>x&&typeof x.cond==='string')?aa:null;
   let sem=null;
-  if(m&&oms&&ativos&&pnObjs(m.planos)&&pnObjs(m.vinc)&&typeof m.hoje==='string'&&pnNum(m.horiz)) {
+  const ach=pnObjs(m&&m.achados);   /* a lista Sem ordem inclui os achados: sem a coleção, a contagem fica Sem dados (ausente não vira parcial) */
+  if(m&&oms&&ativos&&pnObjs(m.planos)&&pnObjs(m.vinc)&&ach&&ach.every(q=>q&&typeof q.estado==='string')&&typeof m.hoje==='string'&&pnNum(m.horiz)) {
    try { sem=manSemOrdem(m).n; } catch(e) { sem=null; }
   }
   vals=[sem,pnConta(oms,manAberta),pnConta(oms,o=>o.etapa==='Em execução'),pnConta(ativos,a=>a.cond==='Bloqueado')];

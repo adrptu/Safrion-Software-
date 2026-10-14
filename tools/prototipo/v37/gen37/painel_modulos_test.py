@@ -22,13 +22,20 @@ chk('Agrícola: quatro estados; não conta cancelada, encerrada nem BEN',pnValor
 chk('Suprimentos: lote sobreposto conta nos indicadores pertinentes; requisição por registro, item coberto e cancelada excluídos',pnValores(c,'PSUP').vals,[3,2,1,2]);
 chk('Gráfico de estoque: cada lote físico conta uma só vez',pnValores(c,'PSUP').bars,[1,1,1]);
 chk('Painéis não alteram cenário',JSON.stringify(c),before);
-const m={hoje:'2026-10-13',horiz:7,ativos:{a:{id:'a',cond:'Bloqueado',un:'h',leit:null,ritmo:0},b:{id:'b',cond:'Disponível'}},planos:{p:{id:'p',versao:1,estado:'Ativo',servicos:[{id:'s',nome:'Revisão',gat:{d:10},tol:{d:0}}]}},vinc:{'p|a':{marco:{data:'2026-10-01',leit:null}}},oms:{a:{etapa:'A liberar'},b:{etapa:'Liberadas'},c:{etapa:'Em execução'},d:{etapa:'Em conferência'},e:{etapa:'Encerradas'},f:{etapa:'Canceladas'}}};
+const m={hoje:'2026-10-13',horiz:7,achados:{},ativos:{a:{id:'a',cond:'Bloqueado',un:'h',leit:null,ritmo:0},b:{id:'b',cond:'Disponível'}},planos:{p:{id:'p',versao:1,estado:'Ativo',servicos:[{id:'s',nome:'Revisão',gat:{d:10},tol:{d:0}}]}},vinc:{'p|a':{marco:{data:'2026-10-01',leit:null}}},oms:{a:{etapa:'A liberar'},b:{etapa:'Liberadas'},c:{etapa:'Em execução'},d:{etapa:'Em conferência'},e:{etapa:'Encerradas'},f:{etapa:'Canceladas'}}};
 c.man=m;
 chk('Manutenção: serviço vencido sem ordem; quatro abertas, uma executando e um ativo bloqueado',pnValores(c,'PMAN').vals,[1,4,1,1]);
 chk('Gráfico manutenção: fases abertas',pnValores(c,'PMAN').bars,[1,1,1,1]);
 m.planos.p.estado='Inativo';chk('Plano inativo não cria pendência',pnValores(c,'PMAN').vals[0],0);
 m.planos.p.estado='Ativo';m.vinc['p|a'].marco.data='2026-11-01';chk('Próxima revisão fora da janela não cria pendência',pnValores(c,'PMAN').vals[0],0);
 for(const k of ['PAGR','PMAN','PSUP'])chk(k+' ausente nunca vira zero',pnValores({},k).vals,[null,null,null,null]);
+// MAN-SEMORDEM-01 (revisão Codex 6161081449): a lista Sem ordem depende dos achados; sem a coleção, Sem dados (os outros indicadores seguem)
+const sd=cenClone(CEN0), n0=pnValores(sd,'PMAN').vals[0], nv=manSemOrdem(sd.man).n;
+chk('Sem ordem com o seed: a mesma conta da visão (manSemOrdem)',[n0===nv,n0>0],[true,true]);
+const nAch=Object.values(sd.man.achados).filter(q=>q.estado==='Sem ordem'&&sd.man.ativos[q.aid]).length;
+sd.man.achados={};chk('Sem ordem com achados vazios (coleção válida): só os vencimentos',pnValores(sd,'PMAN').vals[0],n0-nAch);
+delete sd.man.achados;const va=pnValores(sd,'PMAN').vals;chk('Sem ordem sem a coleção de achados: Sem dados, e os demais indicadores seguem',[va[0],va.slice(1).every(x=>x!==null)],[null,true]);
+sd.man.achados={x:{estado:null}};chk('Achado sem estado: Sem dados',pnValores(sd,'PMAN').vals[0],null);
 chk('Coleções vazias válidas: zero agrícola',pnValores({ordens:{}},'PAGR').vals,[0,0,0,0]);
 chk('Coleções vazias válidas: zero suprimentos',pnValores({ordens:{},lotes:{},reqs:{}},'PSUP').vals,[0,0,0,0]);
 c.lotes.a.fisico=null;chk('Saldo físico ausente não produz total parcial',pnValores(c,'PSUP').vals.slice(0,3),[null,null,null]);
