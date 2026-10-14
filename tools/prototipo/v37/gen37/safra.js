@@ -1419,7 +1419,8 @@ function EXTRAVALS(self,v){ try{ window.__safSelf=self; self.__cultivos=(k)=>lea
   g2steps(self,v,'stp',4,step,whys);   // só informa (UX-ACAO-UNICA-20261003): avanço e retorno na área de ações
   v.saf_nome=safObj?safObj.v.nome:'nenhuma safra escolhida'; v.saf_ro=ro; v.saf_ok=!!saf; v.saf_none=!saf;
   v.ctx_saf=safObj?(safObj.v.nome+(ro?' · consulta':'')):'Nenhuma safra escolhida';
-  v.ctx_faz='Fazenda '+((safObj&&safObj.v.faz)||'Santa Rita');
+  // a faixa diz a fazenda da safra aberta; sem safra, a fazenda escolhida nos chips da etapa 1 (ou todas): antes dizia sempre Santa Rita
+  const fq=g2st(self,'g_saf').qv; v.ctx_faz=safObj?('Fazenda '+(safObj.v.faz||'Santa Rita')):(fq?'Fazenda '+fq:'Todas as fazendas');
   for(const k of ['S2627','S27SF','S2526','LG2627','NOVA']){ v['cult_'+k]=(saf&&sk(saf)===k); v['cap_'+k]=(saf&&sk(saf)===k); }
   const cs=cultRows(self,saf); const area=cs.reduce((a,c)=>a+(Number(c.v.area)||0),0); const comp=cs.filter(c=>{ const pl=planById(c.v.plano); return pl&&pl.cultura===c.v.cult; }).length;
   const adj=adjOf(self); const naj=cs.reduce((a,c)=>a+Object.keys(adj[c.id]||{}).length,0);
