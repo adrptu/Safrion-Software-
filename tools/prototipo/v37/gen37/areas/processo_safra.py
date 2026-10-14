@@ -249,7 +249,7 @@ function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' &&
     if(String(gid).indexOf('g_recp_')===0&&r) recAfter(self,gid,rows,r); };
   self.g2live=(gid,k,d)=>(String(gid).indexOf('g_rend_')===0?rendLive(k,d,self):(String(gid).indexOf('g_cult_')===0?cultLive(self,gid,k,d):(String(gid).indexOf('g_recp_')===0?recLive(self,gid,k,d):null)));
   self.g2draft=(gid,k,d,fm)=>(String(gid).indexOf('g_cult_')===0?cultDraft(self,gid,k,d,fm):null);
-  self.g2openDraft=(gid,r,d)=>safOpenDraft(self,gid,r,d);
+  self.g2openDraft=(gid,r,d)=>safOpenDraft(self,gid,r,d); self.g2newDraft=(gid)=>safNovaDraft(self,gid);
   self.g2formSub=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultSub(self,gid,r,fm):(String(gid).indexOf('g_recp_')===0?recSub(self):null));
   self.g2opts=(gid,k,d,rid)=>(String(gid).indexOf('g_cult_')===0&&k==='plano'?planOpts(d):(String(gid).indexOf('g_cult_')===0&&k==='cult'?cultOpts(d):(String(gid).indexOf('g_rend_')===0&&k==='conj_id'?conjOpts(rid||d.base):null)));
   self.g2formActs=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultActs(self,gid,r):(String(gid).indexOf('g_rend_')===0?rendActs(self,gid,r):null));

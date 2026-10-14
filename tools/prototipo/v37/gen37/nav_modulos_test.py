@@ -67,7 +67,7 @@ try:
             if k in vistos: continue
             vistos.add(k); es.append([h, ui37.CURTO37[k][0], True])
         if nome in ui37.FLUXO37:   # 14/10/2026 (proprietário: fluxograma nos submenus): a ordem dos cartões é a do processo (blocos de FLUXO37)
-            pos = {h: i for i, h in enumerate(h for b in ui37.FLUXO37[nome] for h in b)}; es.sort(key=lambda x: pos[x[0]])
+            pos = {h: i for i, h in enumerate(h for _t, b in ui37.FLUXO37[nome] for h in b)}; es.sort(key=lambda x: pos[x[0]])   # blocos com título (14/10): (título, cartões)
         cr = J("(document.querySelector('header span')||{innerText:''}).innerText.trim()") or ''
         if cs != es or J("document.querySelector('h1').innerText") != nome or cr == nome: ruins.append([nome, cs, es, cr])
         for h, curto, _ in es:

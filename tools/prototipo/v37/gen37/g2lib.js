@@ -196,6 +196,7 @@ function g2open(self,sp,rid,e){
   if(self.g2openDraft) draft=self.g2openDraft(sp.id,r,draft)||draft;
   g2set(self,sp.id,{fm:{rid,draft,orig:Object.assign({},draft),errs:{},warn:false,ro:(ed.m!=='form'||!!r.ro),isNew:false,mode:ed.m},fl:null,fmc:null}); }
 function g2new(self,sp){ const ed=sp.edit||{}; const draft={}; (ed.fields||[]).forEach(f=>{ draft[f.k]=(f.def!==undefined?String(f.def):''); });
+  if(self.g2newDraft) Object.assign(draft,self.g2newDraft(sp.id,draft)||{});   // contexto da tela no registro novo (SAF-FAZ-1-CONTEXTO-01: a fazenda do filtro)
   g2set(self,sp.id,{fm:{rid:null,draft,orig:Object.assign({},draft),errs:{},warn:false,ro:false,isNew:true,mode:'form'},fl:null,fmc:null}); }
 function g2calc(r,calc){ (calc||[]).forEach(cx=>{ const a=(cx.a||[]).map(k=>Number(r.v[k])||0); let x=null;
    if(cx.op==='mul') x=a.reduce((p,q)=>p*q,1); else if(cx.op==='div') x=a[1]?a[0]/a[1]:0; else if(cx.op==='sum') x=a.reduce((p,q)=>p+q,0);
@@ -843,11 +844,14 @@ function g2mudou(self){ if(typeof document==='undefined') return; g2buscaUnica(s
   if(p&&self.__g2passo&&p!==self.__g2passo){ self.__g2passo=p; if(tNovo) self.__g2toastVisto=t; self.__g2mud=[]; const b=g2blocoAtual(); g2flash(b,p+(tNovo?'. '+t:''));
     /* revisão DS (achado 3): o botão que trocou a etapa sumiu (foco no BODY ou fora da página): o foco vai ao título do novo contexto (rola só se ele estiver fora da vista) */
     const ae=document.activeElement; if(!ae||ae===document.body||!ae.isConnected){ const hh=b&&b.querySelector('h2,h3'); if(hh){ if(!hh.hasAttribute('tabindex')) hh.setAttribute('tabindex','-1'); hh.focus({preventScroll:false}); } }
+    /* DS-RETORNO-2-DUP-01 (Codex 6174131920): a troca de etapa já anunciou; o título novo que chega no desenho seguinte não é outra mudança */
+    self.__g2ctx=g2contexto(); self.__g2ctxCalmo=agora+800;
     return; }
   if(p) self.__g2passo=p;
   /* 14/10 (proprietário: "não está dando flash de feedback quando muda para a tela de destino"): abrir um detalhe ou trocar a visão na mesma
      tela (o 1º título do conteúdo muda) realça o bloco novo e anuncia, como a troca de etapa; o foco vai ao título se o botão sumiu */
   const cx=g2contexto();
+  if(cx&&self.__g2ctx&&cx!==self.__g2ctx&&agora<(self.__g2ctxCalmo||0)) self.__g2ctx=cx;   // ainda é a mesma troca de etapa: um anúncio só
   if(cx&&self.__g2ctx&&cx!==self.__g2ctx){ self.__g2ctx=cx; if(tNovo) self.__g2toastVisto=t; self.__g2mud=[]; const b=g2blocoAtual(); g2flash(b,tNovo?t:cx);   /* o aviso da ação, quando há, é o que se anuncia */
     const ae=document.activeElement; if(!ae||ae===document.body||!ae.isConnected){ const hh=b&&b.querySelector('h2,h3'); if(hh){ if(!hh.hasAttribute('tabindex')) hh.setAttribute('tabindex','-1'); hh.focus({preventScroll:true}); } }
     return; }

@@ -892,6 +892,10 @@ function metaUnTxt(d){ const un=metaUnTela(d); const pad=(D2.unMeta||{})[d.cult]
   try{ rot=prUnpOpcoes(d.cult,'base')[0].rot.replace('Padrão da cultura · ','').replace(/^(\S+)/,'$1'+metaPer(d.cult)); }catch(e){}
   return un===pad?un+' · Padrão da cultura':un+' · Padrão da cultura: '+rot; }
 // gancho de abertura do formulário (g2open → self.g2openDraft): a meta entra no rascunho na unidade escolhida, com a origem guardada (R-U06, RC-02)
+// SAF-FAZ-1-CONTEXTO-01 (Codex 6174131920, S3): "Nova safra" com o chip de uma fazenda escolhido nasce nessa fazenda; sem chip, o padrão do
+// campo. Editar não passa por aqui: a safra existente conserva a própria fazenda
+function safNovaDraft(self,gid){ if(gid!=='g_saf') return null; const fq=g2st(self,'g_saf').qv; const fd=((GR('g_saf').edit||{}).fields||[]).find(f=>f.k==='faz');
+  return (fq&&fd&&(fd.opts||[]).indexOf(fq)>=0)?{faz:fq}:null; }
 function safOpenDraft(self,gid,r,d){ if(String(gid).indexOf('g_cult_')!==0||!r||!r.v) return d; return Object.assign({},d,metaRascunho(r.v.cult,r.v.meta,r.v.unm)); }
 /* UNID-PROD · seletor "Unidade de produtividade" da tabela de cultivos (D-U01): contexto = cultura do cultivo com o painel aberto; sem painel,
    a 1ª cultura visível com os filtros aplicados. Trocar a unidade muda a tabela, não o rascunho aberto (D-U20); nada vai para o estado da safra */

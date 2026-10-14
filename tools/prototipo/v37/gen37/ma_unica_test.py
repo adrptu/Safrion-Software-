@@ -119,6 +119,7 @@ try:
         ct = J("(()=>{const i=document.querySelector('aside[role=dialog] [id$=\"_cond_t\"]'); return i?i.value:'';})()") or ''
         x2 = 'Bloqueado' if ct.startswith('Bloqueado') else ('Apto' if ct.startswith('Apto') else '?' + ct)
         m.ir('', pagina='OS.dc.html'); o = J("document.body.innerText") or ''
+        o += ' ' + (J("[...document.querySelectorAll('[data-dica]')].map(e=>e.getAttribute('data-dica')).join(' | ')") or '')   # TEXTO-2 (v66): o motivo do selo vive na dica
         oc = J("(()=>{ try{ const c=window.__cen.cenGet(); const a=c.man.ativos.a01; return a?a.cond:''; }catch(e){ return ''; } })()") or ''
         x3 = 'Bloqueado' if ('Trator T1 bloqueado' in o and oc == 'Bloqueado') else ('Apto' if ('Trator T1 bloqueado' not in o and oc == 'Apto' and 'OS-0431' in o) else '?')
         return [x1, x2, x3]
