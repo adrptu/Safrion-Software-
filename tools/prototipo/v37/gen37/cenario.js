@@ -169,16 +169,17 @@ function cenRepsLote(c, l, qr) { let pend = []; const reps = [];
   return Math.abs(sh - qr) < 1e-6 ? reps : [Object.assign({ q: qr, doc: '' }, l.rep || {}, { q: qr })]; }
 function cenEstDem(c, faz, b, osd) { b = b || {}; const lf = b.locFaz || {}; const fz = (l) => lf[l.local] || b.faz0 || 'Santa Rita';
   const fisico = {}, quar = {}, quarRep = {}, quarRef = [], reservas = [], recebDt = [], sobra = []; const lotes = (c && c.lotes) || {};
-  Object.values(lotes).forEach(l => { if (fz(l) !== faz) return; if (!cenLoteVencido(l)) fisico[l.prod] = (fisico[l.prod] || 0) + (l.fisico || 0) - (l.quarentena || 0);
+  Object.values(lotes).forEach(l => { if (fz(l) !== faz) return; const vencido = cenLoteVencido(l); if (!vencido) fisico[l.prod] = (fisico[l.prod] || 0) + (l.fisico || 0) - (l.quarentena || 0);
     const qr = Math.min(l.quarentena || 0, l.quarRep || 0), qp = (l.quarentena || 0) - qr;
     const doc = (((c && c.movs) || []).filter(m => m.prod === l.prod && m.lote === l.lote && !m.apto && (m.tipo === 'recebimento-nf' || m.tipo === 'devolucao'))
       .map(m => m.tipo === 'devolucao' ? 'devolução da ' + m.req : m.doc).filter(Boolean).pop()) || '';
     // motivo registrado na entrada (observação da conferência da NF ou da devolução bloqueada): a falta condicionada mostra por que o lote está bloqueado
     const mot = (((c && c.movs) || []).filter(m => m.prod === l.prod && m.lote === l.lote && (m.tipo === 'recebimento-nf' || m.tipo === 'devolucao'))
       .map(m => String(m.obs || (m.estRec && m.estRec.obs) || '').trim()).filter(Boolean).pop()) || '';
-    if (qp > 1e-9) { quar[l.prod] = (quar[l.prod] || 0) + qp; quarRef.push({ item: l.prod, q: qp, lote: l.lote, doc, mot, rep: null }); }
+    if (qp > 1e-9) { if (!vencido) quar[l.prod] = (quar[l.prod] || 0) + qp;
+      quarRef.push(Object.assign({ item: l.prod, q: qp, lote: l.lote, doc, mot, rep: null }, vencido ? { vencido: true, validade: l.validade } : {})); }
     if (qr > 1e-9) { quarRep[l.prod] = (quarRep[l.prod] || 0) + qr; const reps = cenRepsLote(c, l, qr);
-      quarRef.push({ item: l.prod, q: qr, lote: l.lote, doc: reps.map(r => r.doc).filter((v, i, a) => v && a.indexOf(v) === i).join(', ') || doc, mot, rep: l.rep || {}, reps }); } });
+      quarRef.push(Object.assign({ item: l.prod, q: qr, lote: l.lote, doc: reps.map(r => r.doc).filter((v, i, a) => v && a.indexOf(v) === i).join(', ') || doc, mot, rep: l.rep || {}, reps }, vencido ? { vencido: true, validade: l.validade } : {})); } });
   Object.keys((c && c.reqs) || {}).forEach(rid => { const r = c.reqs[rid]; const o = ((c && c.ordens) || {})[r.os]; if (!o) return;
     const l0 = (r.itens || []).map(it => lotes[it.prod + '|' + it.lote]).find(Boolean); const fo = (b.ofaz || {})[r.os] || (l0 ? fz(l0) : (b.faz0 || 'Santa Rita'));
     if (fo === faz) { const S = cenOsSup(c, o, r);
