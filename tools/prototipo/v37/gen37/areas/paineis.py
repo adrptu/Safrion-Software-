@@ -68,6 +68,7 @@ function pnValores(c,k) {
 }
 function EXTRAVALS(self,v) {
  cenOuvir(self); modVolta(self);
+ if(PN_ID==='PAGR'&&typeof pnaVals==='function') pnaVals(self,v);   /* PAINEL-02: seção de colheita (painel_agricola.py) */
  const p=pnValores(cenGet(),PN_ID), max=Math.max(1,...p.bars.filter(x=>x!==null));
  const fmt=x=>x===null?'Sem dados':x.toLocaleString('pt-BR');
  p.vals.forEach((x,i)=>{v['pn_v'+i]=fmt(x);v['pn_alert'+i]=PN_ALERT[i]&&x>0;});
@@ -98,6 +99,10 @@ def build():
         fname=fid+'.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1050
         E.EXTRAJS[0]=(cenario.js_prefixo()+DM.js_regras()+JS_VOLTA+
                        'const PN_ID='+json.dumps(fid)+';const PN_ALERT='+json.dumps([i[2] for i in itens])+';\n'+JS)
+        pna=''
+        if fid=='PAGR':   # PAINEL-02 (Codex, PR #62): colheita por cultivo e período, abaixo dos cartões; pnaVals no EXTRAVALS
+            from areas.painel_agricola import secao
+            pna, pna_js = secao(); E.EXTRAJS[0] += pna_js
         cards=''.join('<section class="pn-card"><h2>'+E.esc(nome)+
           '<button type="button" class="pn-tip g2dica-i" aria-label="Como calcular: '+E.esc(nome)+'" data-dica="'+E.esc(formula)+'">ⓘ</button></h2>'+
           '<strong class="pn-value" data-alert="'+H('pn_alert'+str(i))+'">'+H('pn_v'+str(i))+'</strong></section>' for i,(nome,formula,_) in enumerate(itens))
@@ -109,7 +114,7 @@ def build():
         body=(CSS+'<div class="pn"><p class="pn-context">'+E.esc(mod)+' · Todas as fazendas e safras · Estado atual</p>'+
           '<div class="pn-grid" aria-label="Indicadores">'+cards+'</div>'+
           '<p hidden="'+H('!pn_missing')+'" role="status">Há dados incompletos. Consulte a origem pelos acessos abaixo.</p>'+
-          chart+
+          chart+pna+
           '<nav class="pn-links" aria-label="Acessos do painel">'+links+'</nav></div>')
         prim=E.btn(atalhos[0][0],True,href=atalhos[0][1]).replace('<a ', '<a class="pn-link mod-cartao" ')
         shell37(fid,'Painel',body,fname=fname,status=None,primary_html=prim,search=False)
