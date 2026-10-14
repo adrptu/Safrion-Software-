@@ -1,4 +1,4 @@
-# VISOES-2 · Foco (o quê, quem e como, quando, onde, quanto), agrupar e descer, Tabela, Cartões e padrão visual
+# VISOES-2 · Foco (o quê, quem e como, quando, onde, quanto), agrupar e descer, colunas essenciais, Tabela, Cartões e padrão visual
 
 Arquivo único para o Claude Code: a Parte 1 é a ordem de execução; a Parte 2 é a especificação que ela cita. Fonte: documento "Modos de visão por tela · Do Talhão à O.S.", versão de 14/10/2026.
 
@@ -6,26 +6,27 @@ Arquivo único para o Claude Code: a Parte 1 é a ordem de execução; a Parte 2
 
 ## Parte 1 · Ordem de execução
 
-Contexto: o protótipo "Do Talhão à O.S." tem 155 arquivos .dc.html, 8 itens de menu e 41 telas no menu. Só g_os (OS.dc.html) declara G2_VISOES: lista, agrupada, kanban, calendario, carga. A especificação completa está na Parte 2 deste arquivo (seções Foco: cinco perguntas; Agrupar e descer; Visões; Tabela, Cartões e o Agrupar por; Padrão visual das visões; Telas e focos). Siga-a sem acrescentar visões.
+Contexto: o protótipo "Do Talhão à O.S." tem 155 arquivos .dc.html, 8 itens de menu e 41 telas no menu. Só g_os (OS.dc.html) declara G2_VISOES: lista, agrupada, kanban, calendario, carga. A especificação completa está na Parte 2 deste arquivo (seções Foco: cinco perguntas; Agrupar e descer; Visões; Tabela, Cartões e o Agrupar por; Padrão visual das visões; Telas e focos; Colunas: só o essencial). Siga-a sem acrescentar visões.
 
 1. Marcas: cada coluna de GRIDS ganha foco (oque, quem, quando, onde, quanto, situacao) e tipo (data, intervalo, dap, geometria, numero); hierarquias ganham níveis (Fazenda > talhão > parcela; Grupo > insumo > lote; Safra > mês > semana > dia; Total > componente > natureza > documento). O motor deduz focos e visões dessas marcas; G2_VISOES deixa de ser escrito tela a tela.
 2. Barra única em toda Tabela e Cartões: busca, filtros, foco com ícone e rótulo (só os que a listagem tem, sempre na ordem O quê, Quem e como, Quando, Onde, Quanto), "Ver como" com até 4 formas válidas para o foco, ordenação. O menu do foco escolhe o nível de partida e um segundo foco opcional.
-3. Cruzamento: quem × quando = carga; oque ou onde × quando com intervalo = linha_tempo; quanto × quando = grafico; dois focos com número = matriz, com quanto na cor.
-4. Descer em toda visão que agrupa: clique no nome do grupo, barra, célula, polígono, raia ou mês desce um nível e filtra; a forma se mantém; na matriz desce nos dois focos; a seta da Tabela e dos Cartões só expande no lugar. Trilha no topo volta a qualquer nível; Esc sobe um. Totais fecham em cada nível. Feed, galeria e comparar não descem. O último nível abre a ficha com a origem (Por quê).
-5. Quando alterna DAP, DAE e data (conversão pela data de plantio de cada talhão, como PL-02det); Quanto alterna R$, R$/ha e quantidade.
-6. Situação: chips com contagem e cor com ícone em todo foco; kanban com colunas por fase e raias pelo foco.
-7. Preferência por perfil × listagem guarda foco, trilha, visão e grupos recolhidos; o foco segue para a próxima tela que o tenha. Início: PCP em Quem e como, agrônomo em O quê, encarregado em Onde, gestor em Quanto; sem perfil, a coluna "Abre em" da Parte 2. Endereço: ?foco=onde&trilha=LG/T4&view=mapa.
-8. Tabela única: funda lista e agrupada (k=tabela, rótulo "Tabela"); ?view=lista e ?view=agrupada redirecionam; árvores viram Tabela agrupada pelo pai. Cartões: promova as Atividades do plano (PA) a componente compartilhado (k=cartoes).
-9. Motor: acrescente mapa, matriz, linha_tempo, grafico, galeria, feed e comparar como componentes compartilhados e reaproveite o calendario e a carga da O.S. O mapa reaproveita o IN-04; a matriz usa escala de cor única, com legenda e valor no foco; a linha do tempo aceita eixo de datas ou DAP/DAE.
-10. Telas: marque as colunas de cada listagem conforme a seção Telas e focos da Parte 2 (colunas de GRIDS em 14/10/2026; se alguma mudou, use a equivalente e registre no PRD).
-11. Seletores próprios: COLH (Por talhão/Por semana) e AG-01 (Agrupar vistorias por) viram foco; CD-01 (Lista/Mapa), BEN (Lista/Kanban) e CA-01 (Lista/Kanban/Mapa) vão para o Ver como; o seletor "Visão" da MA vira abas (Sem ordem, Ordens, Ativos, Planos); o "Agrupar por" sem opções do AG-07 sai. "Hoje/Esta semana" da EXPED continua filtro.
-12. Padrão visual em todas as visões, conforme a seção Padrão visual das visões da Parte 2: ícones Material Symbols Rounded conferidos no catálogo; texto só onde muda decisão; cor de estado sempre com ícone; números à direita em fonte tabular; menu ⋯ com desfazer de 5 s; esqueleto no carregamento; transições de 150 a 200 ms; alvo de 44 px; contraste AA; tema claro e escuro. Comece pelas Atividades do plano, seguindo o exemplo hoje × passa a ser.
-13. Regras de toda visão: Tabela sempre no Ver como e retorno de erro; mesmo recorte e mesmos totais; nenhuma visão grava dado; o clique abre a mesma ficha; estados do §2.8 em toda visão; teclado e leitor de tela com equivalente em Tabela. Celular (<= 640 px): 1 nível por vez com trilha; mapa e matriz com rolagem própria e legenda fixa; linha do tempo, calendário e carga viram Cartões por dia ou por recurso.
-14. Fora do menu (AG-03 a AG-06, CA, CO, GE fora do menu, IN, LO, PL, SU, VE, PT-02 a PT-07, MB-02 a MB-10): só barra e padrão visual, sem focos novos; as consolidadas redirecionam como MA-01 a MA-05.
-15. Corrija as telas sem link de chegada: GE-01, IN-03, PL-03, PT-06, MB-05det, MB-08 e MB-08x-recibo; prioridade MB-08.
-16. Nenhum seletor exibe "Lista" ou "Tabela agrupada"; o crawler falha se encontrar algum.
+3. Colunas: cada listagem abre só com as colunas de "Abre com" da seção Colunas: só o essencial da Parte 2, na ordem dela (a primeira é a identidade e fica travada); as demais vão para "Mais colunas". Seletor de colunas (view_column) na barra, com o número de ocultas ("+6"): painel agrupado por foco, marcar mostra, desmarcar oculta, arrastar reordena, busca acima de 12 colunas, "Restaurar padrão"; o menu ⋯ do cabeçalho tem "Ocultar coluna". A escolha fica por usuário × listagem. Ocultas seguem valendo para busca, filtros e foco; exportar leva as visíveis, com opção "Todas as colunas". Situação, Estado e Condição viram ícone com cor antes do nome; unidade vai junto do número; coluna do grupo ou com o mesmo valor em todo o recorte sai da linha. Celular mostra as 3 primeiras. Listagens com até 5 colunas ficam inteiras; o app de campo não ganha seletor.
+4. Cruzamento: quem × quando = carga; oque ou onde × quando com intervalo = linha_tempo; quanto × quando = grafico; dois focos com número = matriz, com quanto na cor.
+5. Descer em toda visão que agrupa: clique no nome do grupo, barra, célula, polígono, raia ou mês desce um nível e filtra; a forma se mantém; na matriz desce nos dois focos; a seta da Tabela e dos Cartões só expande no lugar. Trilha no topo volta a qualquer nível; Esc sobe um. Totais fecham em cada nível. Feed, galeria e comparar não descem. O último nível abre a ficha com a origem (Por quê).
+6. Quando alterna DAP, DAE e data (conversão pela data de plantio de cada talhão, como PL-02det); Quanto alterna R$, R$/ha e quantidade.
+7. Situação: chips com contagem e cor com ícone em todo foco; kanban com colunas por fase e raias pelo foco.
+8. Preferência por perfil × listagem guarda foco, trilha, visão e grupos recolhidos; o foco segue para a próxima tela que o tenha. Início: PCP em Quem e como, agrônomo em O quê, encarregado em Onde, gestor em Quanto; sem perfil, a coluna "Abre em" da Parte 2. Endereço: ?foco=onde&trilha=LG/T4&view=mapa.
+9. Tabela única: funda lista e agrupada (k=tabela, rótulo "Tabela"); ?view=lista e ?view=agrupada redirecionam; árvores viram Tabela agrupada pelo pai. Cartões: promova as Atividades do plano (PA) a componente compartilhado (k=cartoes).
+10. Motor: acrescente mapa, matriz, linha_tempo, grafico, galeria, feed e comparar como componentes compartilhados e reaproveite o calendario e a carga da O.S. O mapa reaproveita o IN-04; a matriz usa escala de cor única, com legenda e valor no foco; a linha do tempo aceita eixo de datas ou DAP/DAE.
+11. Telas: marque as colunas de cada listagem conforme a seção Telas e focos da Parte 2 (colunas de GRIDS em 14/10/2026; se alguma mudou, use a equivalente e registre no PRD).
+12. Seletores próprios: COLH (Por talhão/Por semana) e AG-01 (Agrupar vistorias por) viram foco; CD-01 (Lista/Mapa), BEN (Lista/Kanban) e CA-01 (Lista/Kanban/Mapa) vão para o Ver como; o seletor "Visão" da MA vira abas (Sem ordem, Ordens, Ativos, Planos); o "Agrupar por" sem opções do AG-07 sai. "Hoje/Esta semana" da EXPED continua filtro.
+13. Padrão visual em todas as visões, conforme a seção Padrão visual das visões da Parte 2: ícones Material Symbols Rounded conferidos no catálogo; texto só onde muda decisão; cor de estado sempre com ícone; números à direita em fonte tabular; menu ⋯ com desfazer de 5 s; esqueleto no carregamento; transições de 150 a 200 ms; alvo de 44 px; contraste AA; tema claro e escuro. Comece pelas Atividades do plano, seguindo o exemplo hoje × passa a ser.
+14. Regras de toda visão: Tabela sempre no Ver como e retorno de erro; mesmo recorte e mesmos totais; nenhuma visão grava dado; o clique abre a mesma ficha; estados do §2.8 em toda visão; teclado e leitor de tela com equivalente em Tabela. Celular (<= 640 px): 1 nível por vez com trilha; mapa e matriz com rolagem própria e legenda fixa; linha do tempo, calendário e carga viram Cartões por dia ou por recurso.
+15. Fora do menu (AG-03 a AG-06, CA, CO, GE fora do menu, IN, LO, PL, SU, VE, PT-02 a PT-07, MB-02 a MB-10): só barra e padrão visual, sem focos novos; as consolidadas redirecionam como MA-01 a MA-05.
+16. Corrija as telas sem link de chegada: GE-01, IN-03, PL-03, PT-06, MB-05det, MB-08 e MB-08x-recibo; prioridade MB-08.
+17. Nenhum seletor exibe "Lista" ou "Tabela agrupada"; o crawler falha se encontrar algum.
 
-Aceite, por listagem: (a) cada foco marcado agrupa, e a soma dos grupos e a contagem dos chips batem com o total da Tabela; (b) descer e voltar pela trilha preserva os totais em cada nível, e o link com a trilha abre no mesmo ponto; (c) cada forma do Ver como abre sem erro para cada foco válido e o clique abre o registro certo; (d) trocar foco, visão ou tela e voltar preserva foco, trilha, filtros, grupos recolhidos e rolagem; (e) ?view=lista e ?view=agrupada abrem a Tabela; (f) cada tela passa na rubrica do padrão visual; (g) o crawler por papel percorre todos os focos, níveis e formas. Registre a matriz de aceite no PRD e entregue antes/depois com capturas de cada tela alterada.
+Aceite, por listagem: (a) cada foco marcado agrupa, e a soma dos grupos e a contagem dos chips batem com o total da Tabela; (b) descer e voltar pela trilha preserva os totais em cada nível, e o link com a trilha abre no mesmo ponto; (c) cada forma do Ver como abre sem erro para cada foco válido e o clique abre o registro certo; (d) trocar foco, visão ou tela e voltar preserva foco, trilha, filtros, grupos recolhidos e rolagem; (e) ?view=lista e ?view=agrupada abrem a Tabela; (f) cada tela passa na rubrica do padrão visual; (g) o crawler por papel percorre todos os focos, níveis e formas; (h) cada listagem abre com exatamente as colunas de "Abre com", na ordem da Parte 2, e o seletor mostra, oculta, reordena e restaura, com a escolha de volta no próximo acesso. Registre a matriz de aceite no PRD e entregue antes/depois com capturas de cada tela alterada.
 
 ---
 
@@ -111,7 +112,7 @@ Lista e Tabela agrupada são uma visão só, a Tabela. Cartões é outra visão,
 | Tabela | Grade com cabeçalho de colunas. Sem grupo é a antiga Lista; a antiga árvore é a Tabela agrupada pelo pai. | Comparar, ordenar e somar colunas; editar e exportar | Talhões por fazenda |
 | Cartões | Um cartão por item com ícone do tipo, título e até 2 números; a seta abre os filhos; "Expandir tudo"; chips de filtro rápido com ícone e contagem. | Ler em sequência e conferir a composição de cada item | Atividades do plano por DAP, cada uma com seus insumos e o custo por ha |
 
-- Barra única em Tabela e Cartões: busca, filtros, foco (que agrupa e desce) e ordenação.
+- Barra única em Tabela e Cartões: busca, filtros, foco (que agrupa e desce), ordenação e colunas.
 - O menu de cada foco escolhe o nível de partida (Onde: Fazenda ou Talhão) e um segundo foco opcional. No celular, 1 nível por vez, com a trilha no topo.
 - Cada grupo mostra contagem e subtotais e ordena por nome ou subtotal; a soma dos grupos fecha com o total.
 - Chips de filtro rápido filtram, não agrupam: "Pulverização 4" mostra quantos itens há daquele tipo no recorte.
@@ -140,7 +141,7 @@ O mesmo ícone aparece no chip, no cartão, na linha da Tabela, no Calendário e
 | Visão | Tabela `table_rows` · Cartões `view_agenda` · Kanban `view_kanban` · Carga `view_week` · Linha do tempo `view_timeline` · Calendário `calendar_month` · Mapa `map` · Matriz `grid_on` · Gráfico `show_chart` · Galeria `photo_library` · Feed `dynamic_feed` · Comparar `compare_arrows` |
 | Tipo de operação | Pulverização `sprinkler` · Plantio `psychiatry` · Adubação `compost` · Tratamento de sementes `grain` · Colheita `agriculture` · Irrigação `water_drop` · Manutenção `build` · Transporte `local_shipping` |
 | Estado | Planejada `schedule` · Liberada `play_circle` · Em execução `pending` · Concluída `check_circle` · Atrasada `error` · Bloqueada `block` |
-| Barra e ações | Busca `search` · Filtros `filter_list` · Ordenar `swap_vert` · Expandir `expand_more` · Trilha `chevron_right` · Mais ações `more_vert` · Incluir `add` |
+| Barra e ações | Busca `search` · Filtros `filter_list` · Ordenar `swap_vert` · Colunas `view_column` · Expandir `expand_more` · Trilha `chevron_right` · Mais ações `more_vert` · Incluir `add` |
 
 #### Exemplo: Atividades do plano
 
@@ -289,6 +290,133 @@ Cada linha é uma listagem que existe hoje no protótipo, com as colunas reais q
 | BO-02 Backoffice · organizações | Quem e como · Tabela | Plano | Organização | Próximo evento | — | Área medida, Área contratada, Mensalidade |
 | BO-02 Fila de cobrança | Quando · Feed | Evento, Fatura | Organização | — | — | Valor |
 
+### Colunas: só o essencial
+
+Toda Tabela abre só com as colunas que decidem; o resto fica a um clique, no seletor de colunas. Nas 86 listagens do menu, 380 de 658 colunas abrem visíveis e 278 vão para Mais colunas.
+
+- **Essencial é o que decide.** Fica a coluna que identifica o item, a do foco de entrada, até 3 números que mudam a decisão e o próximo passo. No máximo 6 colunas no computador; no celular, as 3 primeiras.
+- **Situação vira ícone.** As colunas Situação, Estado e Condição saem do padrão: o estado aparece como ícone com cor antes do nome. Fica escrita só quando traz o próximo passo ("Situação · próximo passo").
+- **O grupo já diz, a linha não repete.** A coluna usada pelo foco ou pela árvore sai das linhas e vai para o cabeçalho do grupo; coluna com o mesmo valor em todo o recorte (uma só fazenda filtrada) vai para o título.
+- **Unidade vai junto do número:** "120 L", não uma coluna Un.
+- **Saem do padrão:** contatos e documentos (WhatsApp, e-mail, CPF/CNPJ), datas de cadastro e de vigência, versões, parâmetros técnicos e colunas que se calculam das que ficaram (Polígono, quando Área e Diferença estão).
+- **Listagem com até 5 colunas fica inteira.** O app de campo não ganha seletor: cada tarefa já mostra só o essencial.
+
+#### Seletor de colunas
+
+- **Um ícone na barra:** `view_column`, com o número de colunas ocultas ("+6"). Abre um painel com as colunas agrupadas por foco (O quê, Quem e como, Quando, Onde, Quanto, Situação), com os mesmos ícones.
+- **Marcar mostra, desmarcar oculta, arrastar reordena.** A primeira coluna (identidade) fica travada; "Restaurar padrão" volta ao essencial; busca no painel quando houver mais de 12 colunas.
+- **Atalho no cabeçalho:** o menu ⋯ de cada coluna tem "Ocultar coluna".
+- **A escolha é de cada usuário.** Fica por usuário × listagem e volta igual no próximo acesso.
+- **Oculta não é apagada.** Colunas ocultas seguem valendo para busca, filtros e foco; exportar leva as visíveis, com a opção "Todas as colunas".
+- **Cartões usam o mesmo seletor:** ele escolhe os até 2 números do cartão fechado; os demais aparecem ao abrir.
+
+#### Colunas · Mapa e Cadastros
+
+| Tela · listagem | Abre com | Em Mais colunas |
+| --- | --- | --- |
+| CD-01 Talhões | Fazenda › talhão, Área cultivável, Diferença, Parcelas na safra 2026/27 | Situação, Sistema, Polígono |
+| CD-01 Água | Ponto de água, Vencimento, Vazão, Uso | Situação, Fazenda, Documento, Curso d’água |
+| CD-01det Parcelas | Safra › parcela, Cultura, Área, Plantio | Situação, Tipo, Cultivar, Livre |
+| CD-02 Culturas e cultivares | Cultura › cultivar, Ciclo, Cultivos | Situação, Tipo de ciclo, Unidade de produtividade, Item de semente |
+| CD-03 Máquinas e instalações | Máquina ou instalação, Custo R$/h, Próxima calibração | Situação, Classe, Conjuntos |
+| CD-03 Conjuntos | Conjunto, Operações, Rendimento | Largura, Condição, Operadores alocáveis |
+| CD-04 Pessoas | Pessoa, Equipe, Validade da habilitação, Habilidades | Situação, Vínculo, Disponível até, Custo R$/h, Habilitação |
+| CD-05 Parceiros | Parceiro, Papéis, Contato | Situação do papel, CPF/CNPJ, WhatsApp, E-mail, Canais autorizados |
+| CD-06 Itens | Grupo › item, Unidade, Preço de referência | Situação, Natureza de custo, Embalagem, Data do preço |
+| CD-07 Estrutura gerencial | Dimensão › código, Nome, Conta no ERP (Sankhya) | Situação, Início da vigência, Fim da vigência, No rascunho |
+| CD-08 Operações e rendimentos | Operação › conjunto, Cultura, Rendimento, Custo R$/ha | Fonte, Processo, Custo R$/h |
+
+#### Colunas · Agrícola
+
+| Tela · listagem | Abre com | Em Mais colunas |
+| --- | --- | --- |
+| AG-07 Produtos | Produto · registro, Ingrediente ativo · grupo químico, Classe · modo de ação, Na fazenda | Culturas, Alvos, Tox · amb |
+| PA Atividades do plano (Cartões) | Gatilho, Atividade, Insumos, Custo/ha; ao abrir: Produto, Dose/ha, Custo/ha | Grupo e Preço unitário do insumo |
+| PA Cultivos que usam o plano | Talhão ou parcela, Área, Versão aplicada | Safra, Cultura e variedade, Situação |
+| AG-02 Laudos | Laudo, Fazenda · talhão, V %, K, Coleta | Profundidade, Situação, No plano |
+| AG-02 Água no solo | Medição, Talhão · zona, Data, CAD | Profundidade, Método, Capacidade de campo, Ponto de murcha, Fonte · responsável |
+| SAF Safras | Safra, Fazenda, Próximo passo, Área | Cultivos, Estado |
+| SAF Talhões e cultivos | Talhão ou parcela, Cultura, Plantio, Plano agronômico, Área, Ocupa até | Situação, Área livre, Livre a partir de, Fim por, Safra, Variedade, Versão, Meta, Ajustes locais, Tipo |
+| SAF Operações | Operação › atividade › talhão, Data, Conjunto, Horas-conjunto, Custo total | Situação, Rendimento, Área trabalhada, Custo R$/ha |
+| SAF Rendimentos | Operação, Conjunto, Rendimento, Custo R$/ha, Janela por talhão | Atividade, Custo R$/h, Custo R$/kg, Modo, Largura, Velocidade, Eficiência, Parte da área, Trabalha, Planos |
+| SAF Recursos no pico · máquinas | Recurso, Unidades, Necessárias no pico, Mês do pico | Jornada, Turnos, Disponibilidade |
+| SAF Recursos no pico · pessoas | Recurso, Pessoas, Necessárias no pico, Mês do pico | Jornada, Absenteísmo |
+| SAF Demanda de insumos | Grupo, Insumo, Falta em, Necessidade líquida, Valor | 1º uso, Situação, Solicitação, A complementar, Demanda bruta, Antes de hoje sem O.S., Estoque apto, Usado antes da compra, Reservado, Recebimentos previstos, Recebido após a falta, Coberta em, Preço |
+| SAF Sugestões do laudo | Talhão, Atividade · produto, Padrão, Sugestão | Diferença no talhão, Laudo, Tipo, Resultado |
+| GE-02 Orçamento · versões | Versão, Custo total, Pico de caixa, Estado · aprovação | Premissas, Volume soja, Preço soja |
+| OS Ordens de serviço | O.S., Atividade, Talhão, Prazo, Fase, Progresso | Local, Área, Início, Fim, Situação, Observação, Quem resolve, Próxima ação, Realizado, Saldo, Dispensado, Responsável |
+| AG-01 Vistorias | Vistoria, Alvo, Contagem × NC, Talhão · cultura, Próximo passo | Data, Situação |
+| AG-01det Pontos da rota | Ponto, Contagem, × NC, Fotos | GPS, Hora, Qualidade |
+| IR-01 Setores | Setor, Déficit hoje, Próximo passo, Próxima passada | Fazenda, Situação, Pendência, Necessidade bruta, Ordem, Cobertura |
+| IR-02 Programação | Captação › ordem, Início, Lâmina, Setor, Fim, Próximo passo | Etapa, Pendência, Avisos |
+| IR-03 Ordens de irrigação | Ordem, Setor, Próximo passo, Início, Lâmina, Etapa | Fazenda, Pendência, Responsável, Tipo, Fim |
+| IR-04 Fontes de clima | Fonte, Grandeza, Atualização, Efeito no balanço | Fazenda, Estado, Unidade, Calibração, Validade da calibração, Cobertura |
+| IR-04 Captações | Captação, Vazão outorgada, Uso do dia, Vencimento | Fazenda, Situação, Outorga, Regime, Volume hoje, Setores ligados |
+| IR-04 Desempenho por setor | Setor, Lâmina aplicada, Eficiência, Variação da eficiência | Cultura, Volume, Energia |
+| COLH Previsão por talhão | Talhão · variedade, Situação · próximo passo, Previsão, Colhido, Referência · desvio | Cultura, Área, Produtividade |
+| CARGA Cargas | Carga · ticket, Situação · próximo passo, Líquido, Origem | Cultura, Colheita · recebimento, Comercial, Lote · local |
+| BEN Ordens de beneficiamento | Ordem, Produto, Próximo passo, Fase, Em processo | Condição, Quem resolve |
+| PROD Lotes de produto | Lote · produto, Disponível, Qualidade · próximo passo, Físico, Local · validade | Produto, Bloqueado, Em processo, Apto, Reservado |
+| GE-03 Composição de custos | Origem (documento), Componente, Dimensões, Valor | Qtd × preço, Rateio, Estado |
+
+#### Colunas · Manutenção
+
+| Tela · listagem | Abre com | Em Mais colunas |
+| --- | --- | --- |
+| MA Sem ordem | Item, Ativo · leitura, O que, Prazo, Próximo passo | Peças |
+| MA Ordens | Ordem · ativo, Serviço · tipo, Janela, Executante, Fase | Pendência, Tempo, Custo |
+| MA Ativos | Ativo · local, Em aberto, Próxima manutenção, Leitura | Condição, Custo no mês, Consumo |
+| MA Abastecimentos | Lançamento · operador, Ativo, Data · leitura, Volume, Consumo | Tanque/lote, Método, Qualidade |
+| MA Planos | Plano, Aplica-se a, Serviços, Ativos | Estado, Situação |
+
+#### Colunas · Suprimentos
+
+| Tela · listagem | Abre com | Em Mais colunas |
+| --- | --- | --- |
+| CMP Demanda por grupo | Grupo · insumo, Falta a partir de, Necessidade (com a unidade), Valor, Na compra | Bruta, Estoque apto, A receber, Preço ref. |
+| CMP Fornecedores homologados | Grupo · fornecedor, Convite, Responder até, Resposta | Homologação, Canal e contato |
+| CMP Propostas | Grupo · insumo · proposta, Custo, Escolha, Preço, A pedir, Entrega | Frete, Pagamento, Validade |
+| CMP Alçada de aprovação | Pedido · fornecedor · insumo, Quantidade, Preço, Entrega, Valor | Frete, Pagamento |
+| CMP Pedidos e entregas | Pedido · fornecedor · insumo, A entregar, Previsão, Ação | Pedido, Recebido, Valor, Situação |
+| EST Recebimentos | Nota fiscal, Item, Divergência, Fornecedor, Na nota, Conferida | Data da nota, Conferida em, Pedido, Lote, Apta, Quarentena, Situação, Validade |
+| EST Entregas por O.S. | Requisição, Item, A entregar em embalagens, O.S., Lote, A entregar | Fase da O.S., Embalagem, Solicitado, Entregue, Situação, Detalhe |
+| EST Custódia e devoluções | Requisição, O.S., Item, Em custódia, Com quem | Lote, Entregue, Consumido, Devolvido, Encerramento da O.S., Detalhe |
+| EST Saldos por lote e local | Item › lote, Local, Físico, Disponível, Validade | Item, Reservado, Bloqueado, Em conferência, Em custódia (fora do depósito), O.S. com custódia, Situação do lote |
+| EST Contagens | Contagem, Item, Local, Diferença, Ação | Ajuste, Lote, Sistema na data de corte, Contado, Situação |
+| EST Movimentos | Hora, Movimento, Item, Quantidade, Quem | Registro, Condição, Documento, O.S., Lote, Origem, Sinal do app |
+| IC Preço e melhor mês | Insumo, O que fazer, Economia estimada, Preço agora, Mês mais barato | 12 meses, Tendência, Próxima necessidade |
+| IC Preço por insumo | Insumo, Último pago, Melhor cotação, vs último, Sinal | Grupo, Referência, vs referência |
+
+#### Colunas · Comercial
+
+| Tela · listagem | Abre com | Em Mais colunas |
+| --- | --- | --- |
+| PCOM Oferta e compromissos | Produto › período, Oferta, Compromissos, Livre para vender | Coberto por lote, Situação |
+| PCOM Preço e recebimento | Produto, Preço médio realizado, A receber, Preço médio contratado, Referência de mercado, Vencido | Vendido, Entregue |
+| VEN Vendas | Venda · cliente, Situação · próximo passo, Falta, Produto, Quantidade, Preço | Tipo · janela, Entregue, Reservado |
+| EXPED Cargas de saída | Carga · romaneio, Data, Situação · próximo passo, Venda · cliente, Previsto | Produto · lotes, Saída, Modalidade · veículo |
+| IV Preço e melhor mês | Produto, O que fazer, Preço agora, Agora vs normal do mês, Melhor mês para vender | 1 mês, 12 meses, Tendência |
+| IV Safra comercializada | Produto, Oferta da safra, Comercializado, Livre para vender | Vendido, Situação |
+| IV Recebimento líquido | Venda, Cliente, Preço, Líquido | Produto, Frete, Prazo, Custo do prazo |
+
+#### Colunas · Configurações
+
+| Tela · listagem | Abre com | Em Mais colunas |
+| --- | --- | --- |
+| CF-04 Trilha | Quando, Quem, O quê, Objeto, Antes → depois / efeito | Origem |
+| CF-03 Conexões | Conexão, Última sincronização, Pendências | Traz / leva, Estado, Credencial |
+| CF-05 Faturas | Competência, Área cobrada, Valor, Vencimento | Regra, Estado |
+| CF-05 Planos | Plano, Módulos, Preço R$/ha·mês, Valor para a sua área | Limite de área, Usuários, Franquias, Mínimo R$/mês, Situação |
+
+#### Colunas · Outros acessos
+
+| Tela · listagem | Abre com | Em Mais colunas |
+| --- | --- | --- |
+| BO-02 Organizações | Organização, Plano, Mensalidade, Fatura aberta, Próximo evento | Estado, Área medida, Área contratada |
+| BO-02 Fila de cobrança | Evento, Organização, Valor, Resultado | Fatura, Situação |
+
+Ficam inteiras, por terem até 5 colunas: CD-01 Fazendas; CD-01 Ambiental; CD-04 Equipes; CD-05 Cobertura de cotação; CD-06 Locais de estoque; PAGR Colheita prevista e recebida; GE-02 Cronograma de caixa; COLH Previsão por semana; CMP Safras e solicitações; IC Fornecedores; IC Custo por hectare; IV Preço × mercado; CF-01 Pessoas; CF-01 Alçadas; CF-05 Uso por talhão; PT-01 Oportunidades; PT-01 Avisos.
+
 ### Telas fora do menu
 
 Dos 155 arquivos, 41 estão no menu, 7 são índices (Cadastros e os 6 módulos), 8 redirecionam (MA-01 a MA-05, MA-04det, PM e Main) e os demais se abrem por link. As famílias abaixo repetem telas do menu; não vale investir foco nelas, exceto Finanças, que é única.
@@ -322,7 +450,7 @@ O inventário de 14/10/2026 leu os 155 arquivos: o menu mudou, há seletores pr�
 
 Começar pelo motor e pela O.S., que já tem 5 visões, e seguir pelas listagens que mudam decisões de maior valor.
 
-1. Motor: marcas de foco, tipo e níveis nas colunas; barra única; descer com trilha; Tabela e Cartões; padrão visual.
+1. Motor: marcas de foco, tipo e níveis nas colunas; barra única com seletor de colunas e padrão essencial; descer com trilha; Tabela e Cartões; padrão visual.
 2. O.S. como piloto: as 5 visões passam a sair do foco, e a O.S. abre pelo foco do perfil.
 3. Planejar safra e Planos agronômicos: ocupação (Onde × Quando), capacidade (Quem e como × Quando), demanda (O quê × Quando) e as Atividades do plano em Cartões por DAP.
 4. Pragas (Onde × O quê) e Colheita (Onde × Quando): decisões semanais de maior custo.
