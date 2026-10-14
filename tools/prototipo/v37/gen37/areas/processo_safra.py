@@ -32,7 +32,7 @@ def build():
        edit=dict(m='form',title='Safra',newTitle='Nova safra',sub='Altere nome, início, fim e fazenda. Cultivos e planos ficam nas etapas seguintes.',
                  fields=[dict(k='nome',l='Nome da safra',t='txt',req=True,def_='' ),dict(k='ini',l='Início',t='date',req=True),dict(k='fim',l='Fim',t='date',req=True,help='O fim precisa ser depois do início.'),
                          dict(k='faz',l='Fazenda',t='sel',opts=OCEN.fazendas(),req=True,**{'def':'Santa Rita'}),dict(k='estado',l='Estado',t='sel',opts=['Rascunho','Em planejamento'],**{'def':'Rascunho'})]),
-       add=None,gid='g_saf',total=False)
+       add=None,gid='g_saf',total=False,qf=dict(k='faz',l='fazenda',todas='Todas'))   # 14/10 (proprietário: "não dá para escolher ou mudar de fazenda"): chips por fazenda na escolha da safra
     # ---------- etapa 2 · talhões e cultivos (ESPECIFICACAO etapa-2-talhoes) ----------
     # todos os talhões Ativos do CD-01 da fazenda da safra (com o B1 da Boa Vista e os pivôs da Lagoa Grande); a ocupação no tempo sai do
     # serviço único ocupacao.js (ENG-011). Linhas de talhão e de outras safras são só de exibição (safra.js · syncTalhoes); o estado guarda
