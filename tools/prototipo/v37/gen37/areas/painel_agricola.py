@@ -138,7 +138,38 @@ function pnaExecucao(ref) {
  });
 }
 
+function pnaMip(ref) {
+ const m=ref&&ref.mip, keys=['decidir','atrasadas','coleta'];
+ if(!m||!keys.every(k=>Array.isArray(m[k])))return null;
+ const all=keys.flatMap(k=>m[k]);
+ if(!all.every(x=>x&&/^VIS-\d+$/.test(x.vis)&&x.origem==='AG-01.dc.html#'+x.vis)||
+   new Set(all.map(x=>x.vis)).size!==all.length)return null;
+ const data=x=>typeof x==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x)?x.split('-').reverse().join('/'):'Data indisponível';
+ const dias=x=>Number.isInteger(x)&&x>=0?x+(x===1?' dia':' dias'):'Tempo indisponível';
+ const row=(x,k)=>{
+  let leitura='',tempo='',estado=x.rotulo||'',detalhe=x.detalhe||'';
+  if(k==='decidir') {
+   leitura=x.leitura||'Leitura indisponível';
+   if(x.unidade)leitura+=' · '+x.unidade;
+   if(Number.isInteger(x.pct_nc)&&x.pct_nc>=0)leitura+=' · '+x.pct_nc+'% do NC';
+   tempo='Vistoria '+data(x.data)+' · '+dias(x.dias)+' até a referência';
+  } else if(k==='atrasadas') {
+   estado='Vistoria atrasada';tempo='Prevista '+data(x.prevista)+' · '+dias(x.dias)+' de atraso';
+  } else {
+   leitura=x.pontos||'Pontos indisponíveis';
+   if(x.parcial)detalhe='Resultado parcial: '+(typeof MIP_SIT!=='undefined'&&MIP_SIT[x.parcial]?MIP_SIT[x.parcial][0]:'consulte a vistoria');
+  }
+  return {id:x.vis,titulo:x.vis+' · '+(x.talhao||'Talhão não informado'),
+   contexto:[x.faz||'Fazenda não informada',x.cultura,x.alvo].filter(Boolean).join(' · '),
+   estado,leitura,tempo,detalhe,dono:x.dono||'Responsável não informado',
+   href:x.origem,foco:'mip:'+x.vis,abrir:'Conferir vistoria '+x.vis};
+ };
+ return {referencia:'Referência '+data(m.referencia),decidir:m.decidir.map(x=>row(x,'decidir')),
+  atrasadas:m.atrasadas.map(x=>row(x,'atrasadas')),coleta:m.coleta.map(x=>row(x,'coleta'))};
+}
+
 function pnaVals(self,v) {
+ if(typeof mipOuvir==='function')mipOuvir(self);
  g2keep(self,'g_pna');
  if(!self.__pnaFocus){self.__pnaFocus=true;
   const restaura=()=>{const h=history.state||{},grupo=h.pnaGrupo,id=h.pnaFoco;if(!grupo&&!id)return;let n=0;
@@ -158,6 +189,9 @@ function pnaVals(self,v) {
  const execucao=pnaExecucao(ref);
  v.pna_execucao=execucao||[];v.pna_exec_missing=execucao===null;
  v.pna_exec_empty=execucao!==null&&!execucao.length;
+ const mip=pnaMip(ref);v.pna_mip_missing=mip===null;
+ v.pna_mip_referencia=mip?mip.referencia:'';
+ ['decidir','atrasadas','coleta'].forEach(k=>{v['pna_mip_'+k]=mip?mip[k]:[];v['pna_mip_'+k+'_empty']=!!mip&&!mip[k].length;});
  const custos=pnaCustos(typeof agrCustoRef==='function'?agrCustoRef(c,{}):null);
  v.pna_custos=custos?custos.rows:[];v.pna_custos_fora=custos?custos.fora:[];
  v.pna_custo_missing=custos===null;v.pna_custo_empty=custos!==null&&!custos.rows.length;
@@ -274,4 +308,30 @@ def secao():
         '<a href="'+H('exec.href')+'" data-pna-grupo="'+H('exec.foco')+'" aria-label="'+H('exec.abrir')+'" '
         'style="display:inline-flex;align-items:center;min-height:44px">'+H('exec.acao')+'</a>'
         '</section></sc-for></div></section>')
-    return osbody+execucao+custos+body, JS
+    def mip_lista(titulo,key,vazio):
+        return ('<section class="pn-chart"><h3 style="font-size:15px;margin:0 0 12px">'+titulo+'</h3>'
+            '<p hidden="'+H('!pna_mip_'+key+'_empty')+'">'+vazio+'</p>'
+            '<ul style="list-style:none;padding:0;margin:0"><sc-for list="'+H('pna_mip_'+key)+'" as="vis" hint-placeholder-count="2">'
+            '<li class="pna-mip" data-pna-mip="'+H('vis.id')+'" style="padding:12px 0;border-top:1px solid #E4E9E5;overflow-wrap:anywhere">'
+            '<strong>'+H('vis.titulo')+'</strong><p>'+H('vis.contexto')+'</p><strong>'+H('vis.estado')+'</strong>'
+            '<p hidden="'+H('!vis.leitura')+'">'+H('vis.leitura')+'</p>'
+            '<p hidden="'+H('!vis.tempo')+'" style="font-size:12px">'+H('vis.tempo')+'</p>'
+            '<p hidden="'+H('!vis.detalhe')+'">'+H('vis.detalhe')+'</p><p style="font-size:12px">'+H('vis.dono')+'</p>'
+            '<a href="'+H('vis.href')+'" data-pna-grupo="'+H('vis.foco')+'" aria-label="'+H('vis.abrir')+'" '
+            'style="display:inline-flex;align-items:center;min-height:44px">Conferir vistoria</a></li></sc-for></ul></section>')
+    mip_formula=('Situação pela mesma regra do Monitoramento (MIP). NC = nível de controle do protocolo. '
+                 'Percentual do NC não é percentual de área afetada; critério por presença não tem percentual do NC. '
+                 'Coleta parcial ou no aparelho não significa vistoria concluída. '
+                 'A O.S. de controle cancelada devolve a decisão ao responsável técnico. '
+                 'Fonte: Monitoramento, todas as fazendas. A origem não informa safra por vistoria.')
+    mip=('<section aria-label="Atenção no MIP">'
+        f'<h2 style="font-size:16px;color:{E.INK}">MIP · onde agir '
+        '<button type="button" class="g2dica-i" aria-label="Como ler o MIP" data-dica="'+E.esc(mip_formula)+'" style="width:44px;height:44px;border:0;background:transparent">ⓘ</button></h2>'
+        '<p role="status" hidden="'+H('!pna_mip_missing')+'">Dados de MIP indisponíveis neste recorte. Consulte Monitoramento; a vistoria não informa safra.</p>'
+        '<sc-if value="'+H('!pna_mip_missing')+'" hint-placeholder-val="{{true}}"><p style="font-size:12px">'+H('pna_mip_referencia')+'</p>'
+        '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;align-items:start">'+
+        mip_lista('Decisão do responsável técnico','decidir','Nenhuma decisão pendente neste recorte.')+
+        mip_lista('Vistorias atrasadas','atrasadas','Nenhuma vistoria atrasada neste recorte.')+
+        mip_lista('Coleta a resolver','coleta','Nenhuma coleta pendente neste recorte.')+
+        '</div></sc-if></section>')
+    return osbody+execucao+mip+custos+body, JS
