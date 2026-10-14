@@ -115,7 +115,8 @@ chk('agrPainelRef: ordem emitida na tela (osc.novo) entra pela base dela',agrPai
   chk('agrCustoRef: estado vazio = custos zerados (válido), não null',agrCustoRef({ordens:{}}).cultivos.every(x=>x.real_total_rs===0&&x.ha_exec===0),true);
   // revisão Codex 6166518949: cenário mínimo sintético (talhão X de 10 ha, plano R$ 100, preço P = 10/L, operação sem custo)
   const mini=(aps,naOrd)=>{ const sv=JSON.parse(JSON.stringify(CUSD)); CUSD.tal={X:{faz:'F',saf:'S',cultura:'C',area:10}}; CUSD.prev={X:{fonte:'plano',tot:100,base:10,pend:[]}};
-    CUSD.ord=naOrd===false?[]:[{id:'OS-9001',tal:['X']}]; CUSD.preco={P:10}; CUSD.gen={}; CUSD.cop={Op:0};
+    if(Array.isArray(naOrd)){ CUSD.tal={}; CUSD.prev={}; naOrd.forEach(t=>{ CUSD.tal[t]={faz:'F',saf:'S',cultura:'C',area:10}; CUSD.prev[t]={fonte:'plano',tot:100,base:10,pend:[]}; }); }
+    CUSD.ord=naOrd===false?[]:[{id:'OS-9001',tal:Array.isArray(naOrd)?naOrd:['X']}]; CUSD.preco={P:10}; CUSD.gen={}; CUSD.cop={Op:0};
     const b={id:'OS-9001',tipo:'Pulverização',talhao:'X',area:10,etapa:'Em execução',selos:[],faz:'F',saf:'S',atv:{op:'Op',nome:'Teste'},ins:[{p:'P',dose:1,un:'L',tot:10}],orig:[],cond:''};
     const cc={ordens:{'OS-9001':{id:'OS-9001',etapa:'Em execução',area:10,saldo:0,realizado:20,ap:aps,ins:[{p:'P',dose:1,un:'L',tot:10}],selos:[],osc:{novo:b}}},reqs:{},lotes:{},man:{ativos:{}}};
     let r=null; try{ r=agrCustoRef(cc); } finally { Object.keys(CUSD).forEach(k=>delete CUSD[k]); Object.assign(CUSD,sv); } return r; };
@@ -129,6 +130,16 @@ chk('agrPainelRef: ordem emitida na tela (osc.novo) entra pela base dela',agrPai
   chk('agrCustoRef: consumo sem preço = parcial, item em pend e desvio de execução indisponível',[m3.parcial,m3.desvio_exec_pct,m3.pend.some(p=>/Sem preço: SemPreco/.test(p))],[true,null,true]);
   const m4=mini(A2,false);
   chk('agrCustoRef: ordem emitida sem vínculo de talhão fica em fora (com o realizado) e torna parcial, não some calada',[m4.fora.map(f=>[f.os,f.rs]),m4.cultivos[0].parcial,m4.cultivos[0].real_total_rs],[[['OS-9001',200]],true,0]);
+  // revisão Codex 6167447191 (residual S2 de cobertura): fora com consumo sem preço e vários talhões sem rateio nunca são "completo com R$ 0"
+  const m5=mini([{dia:'20/09',ha:10,st:'Provisório',cons:{SemPreco:5}}],false);
+  chk('agrCustoRef: fora com consumo sem preço = pend preservada, executada, cobertura incerta, grupo parcial e desvio indisponível',
+    [m5.fora.map(f=>[f.os,f.rs,f.executada,f.pend.some(p=>/Sem preço: SemPreco/.test(p))]),m5.cobertura_incerta,m5.cultivos[0].parcial,m5.cultivos[0].desvio_exec_pct],[[['OS-9001',0,true,true]],true,true,null]);
+  chk('agrCustoRef: fora com estados (provisório 100 + conferido 100)',[m4.fora[0].real_prov_rs,m4.fora[0].real_conf_rs,m4.fora[0].ha,m4.cobertura_incerta],[100,100,20,true]);
+  const m6=mini(A2,['T','U']);
+  chk('agrCustoRef: O.S. em T e U sem apontamento por talhão = sem_rateio R$ 200, grupo parcial com o motivo e desvio indisponível (sem rateio automático)',
+    [m6.sem_rateio.map(x=>[x.os,x.rs,x.real_prov_rs,x.real_conf_rs]),m6.cultivos[0].real_total_rs,m6.cultivos[0].parcial,m6.cultivos[0].desvio_exec_pct,m6.cultivos[0].pend.some(p=>/OS-9001 · vários talhões \(T, U\)/.test(p))],
+    [[['OS-9001',200,100,100]],0,true,null,true]);
+  chk('agrCustoRef: com a ordem vinculada a um talhão só, nada de cobertura incerta nem sem_rateio',[mini(A2).cobertura_incerta,mini(A2).sem_rateio,mini(A2).cultivos[0].parcial],[false,[],false]);
   chk('agrCustoRef: estado inválido = Sem dados',[agrCustoRef({}),agrCustoRef({ordens:{x:{id:'OS-9',etapa:'A liberar'}}})],[null,null]); }
 chk('agrPainelRef: estado não objeto = Sem dados',[agrPainelRef({ordens:[]}).os,agrPainelRef(null).os],[null,null]);
 console.log('RESULTADO '+n+'/'+n);
