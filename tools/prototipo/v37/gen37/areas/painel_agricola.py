@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 """PAINEL02 / PN-DECISAO: colheita por cultivo e período comparável.
 
-Autoria Codex, base 4f222e8; Claude integra render() no ramo PAGR de paineis.build.
-Sem build() automático: a composição vigente continua íntegra até a revisão.
+Autoria Codex; Claude integra secao() abaixo dos cartões no ramo PAGR.
+Sem build() automático: o compositor chama pnaVals no EXTRAVALS existente.
 Regras e unidades vêm de producao.js. Esta leitura não executa comandos.
 """
 import engine as E
-import cenario
-from ui37 import shell37, HEIGHTS37
-from areas.modulos import JS_VOLTA
 
 H = lambda s: '{{' + s + '}}'
 
@@ -37,7 +34,7 @@ function pnaLinhas(c) {
 function pnaRow(x) {
  const cultivo=x.k.local+' · '+x.k.cultura+(x.k.var?' '+x.k.var:'');
  const situacao=x.situacao+(x.recebimentos?' · '+x.recebimentos+' carga(s) a receber':'');
- return {id:x.id,ro:true,v:{cultivo,periodo:x.periodo,prev:x.prev,
+ return {id:x.id,ro:true,ordk:{prev:x.prev,recebido:x.medido.apurar&&!(x.medido.kg>0)?null:x.medido.kg},v:{cultivo,periodo:x.periodo,prev:x.prev,
   recebido:x.medido.apurar&&!(x.medido.kg>0)?null:x.medido.kg,situacao},
   s:{cultivo:cultivo+' · '+x.k.faz,periodo:x.periodo,prev:x.previsao,recebido:x.recebido,situacao:situacao+' · '+x.proximo},
   p:{cultivo:[{k:'b',t:cultivo},{k:'br'},{k:'mut',t:x.k.faz}],periodo:[{k:'txt',t:x.periodo}],
@@ -45,8 +42,8 @@ function pnaRow(x) {
    situacao:[{k:'chip',t:x.situacao,c:PR_SITCOR[x.situacao]||'gray'},
     {k:'br'},{k:'mut',t:x.recebimentos?x.recebimentos+' carga(s) a receber':x.proximo}]}};
 }
-function EXTRAVALS(self,v) {
- cenOuvir(self);modVolta(self);g2keep(self,'g_pna');
+function pnaVals(self,v) {
+ g2keep(self,'g_pna');
  if(!self.__pnaFocus){self.__pnaFocus=true;
   const restaura=()=>{const id=(history.state||{}).pnaFoco;if(!id)return;let n=0;
    const f=()=>{const r=[...document.querySelectorAll('[data-rid]')].find(e=>e.getAttribute('data-rid')===id);
@@ -62,9 +59,8 @@ function EXTRAVALS(self,v) {
 '''
 
 
-def render():
-    """Renderiza PAGR; integração chama em lugar do antigo ramo PAGR."""
-    fname='PAGR.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1050
+def secao():
+    """Retorna (HTML, JS) para a tela já iniciada; não substitui cartões/shell."""
     table=E.grid([
         dict(k='cultivo',l='Cultivo · fazenda',w=220),
         dict(k='periodo',l='Período',w=170),
@@ -72,7 +68,6 @@ def render():
         dict(k='recebido',l='Recebido',t='num',a='r',w=145),
         dict(k='situacao',l='Situação · próximo passo',w=245),
     ],[],gid='g_pna',edit=dict(m='pick'),total=False)
-    E.EXTRAJS[0]=cenario.js_prefixo()+JS_VOLTA+JS
     formula=('Previsão publicada e cargas recebidas do mesmo cultivo: semana em curso para culturas semanais; safra para anuais. '
              'Recebido soma os passes daquele período pelas regras de Previsão e colheita. '
              'Sem previsão não significa zero; café sem rendimento medido fica a apurar. '
@@ -80,8 +75,6 @@ def render():
     body=(f'<section aria-label="Colheita por cultivo"><h2 style="font-size:16px;color:{E.INK}">Colheita · previsto e recebido '
           f'<button type="button" class="g2dica-i" aria-label="Como comparar a colheita" data-dica="{E.esc(formula)}" '
           f'style="width:44px;height:44px;border:0;background:transparent;color:{E.MUTED};font:inherit">ⓘ</button></h2>'
-          f'<p style="color:{E.MUTED};font-size:13px">Todas as fazendas e safras · Abra o cultivo para conferir a origem e agir.</p>'
           '<p role="status" hidden="'+H('!pna_missing')+'">Dados de produção indisponíveis. Abra Previsão e colheita para conferir a origem.</p>'+
           table+'</section>')
-    shell37('PAGR','Painel',body,fname=fname,status=None,
-            primary_html=E.btn('Conferir colheita',True,href='COLH.dc.html'),search=False)
+    return body, JS

@@ -1,0 +1,25 @@
+OK Linhas renderizadas 1440
+OK Quatro cartões e ação originais preservados 1440
+OK Seção abaixo dos cartões sem frase redundante 1440
+OK Valores comparáveis 1440
+OK Sem JS nem overflow da página 1440
+OK Sem total somando culturas 1440
+OK Origem e período por teclado 1440
+OK Escape fecha fórmula 1440
+OK Recorte do cultivo 1440
+OK Toque/Enter abre cultivo na origem 1440
+OK Voltar preserva busca 1440
+OK Voltar restaura foco no cultivo 1440
+OK Linhas renderizadas 390
+OK Quatro cartões e ação originais preservados 390
+OK Seção abaixo dos cartões sem frase redundante 390
+OK Valores comparáveis 390
+OK Sem JS nem overflow da página 390
+OK Sem total somando culturas 390
+OK Origem e período por teclado 390
+OK Escape fecha fórmula 390
+OK Recorte do cultivo 390
+OK Toque/Enter abre cultivo na origem 390
+OK Voltar preserva busca 390
+OK Voltar restaura foco no cultivo 390
+RESULTADO 24/24

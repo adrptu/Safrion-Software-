@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""PAINEL02: unidade e navegador sintético; --ui após build, render() e montar_render.
+"""PAINEL02: unidade; --prepare compõe em memória; --ui após montar_render.
 Oráculos explícitos: não confundir semana corrente, seguinte e acumulado.
 """
 import os,sys,json,tempfile,subprocess,time
@@ -35,14 +35,42 @@ const cafe=pnaLeitura(c,'c9');
 chk('Café a apurar permanece explícito',cafe.recebido.includes('a apurar'),true);
 chk('Café a apurar não ordena como zero medido',pnaRow(cafe).v.recebido,null);
 prTal=realTal;
+const sem=cenClone(CEN0);sem.producao.previsoes.c1=[];
+const anual=pnaRow(pnaLeitura(sem,'c1'));
+chk('Anual sem previsão publicada preserva nulo',anual.ordk.prev,null);
+for(const d of [0,1]) {
+ const sp={cols:[{k:'prev',t:'num'}]}, rows=[anual,pnaRow(pnaLeitura(CEN0,'lg19')),pnaRow(pnaLeitura(CEN0,'c1'))];
+ chk('G2 anual ausente por último direção '+d,g2sort(rows,sp,{so:{k:'prev',d}}).map(r=>r.id),d?['c1','lg19','c1']:['lg19','c1','c1']);
+ chk('G2 último é o objeto sem previsão direção '+d,g2sort(rows,sp,{so:{k:'prev',d}}).at(-1)===anual,true);
+ const medido={id:'medido',ordk:{recebido:500},v:{recebido:500}};
+ chk('G2 café a apurar não usa 1200 do rótulo direção '+d,g2sort([pnaRow(cafe),medido],{cols:[{k:'recebido',t:'num'}]},{so:{k:'recebido',d}}).map(r=>r.id),['medido','c9']);
+}
 console.log('RESULTADO '+n+'/'+n);
 '''
 
 def unit():
     with tempfile.TemporaryDirectory(prefix='pn02-') as d:
-        p=Path(d)/'probe.js';p.write_text(cenario.perfis_js()+cenario.js_prefixo()+P.JS+TEST)
+        # Usa o comparador de produção, sem reimplementar seu algoritmo no teste.
+        g2=Path(__file__).with_name('g2lib.js').read_text().split('function g2filtering(')[0]
+        p=Path(d)/'probe.js';p.write_text(cenario.perfis_js()+cenario.js_prefixo()+g2+P.JS+TEST)
         r=subprocess.run(['node',str(p)],capture_output=True,text=True)
         print(r.stdout);print(r.stderr,end='');return r.returncode
+
+def prepare():
+    """Contrato de composição exercitado sem editar paineis.py do Claude."""
+    import engine as E
+    from areas import paineis
+    original=paineis.shell37
+    def composto(fid,title,body,**kwargs):
+        if fid=='PAGR':
+            html,js=P.secao()
+            body=body.replace('<nav class="pn-links"',html+'<nav class="pn-links"',1)
+            E.EXTRAJS[0]=E.EXTRAJS[0].replace('function EXTRAVALS(', 'function pnBaseVals(',1)+js+'\nfunction EXTRAVALS(self,v){pnBaseVals(self,v);pnaVals(self,v);}'
+        return original(fid,title,body,**kwargs)
+    paineis.shell37=composto
+    try:paineis.build()
+    finally:paineis.shell37=original
+    return 0
 
 def ui():
     from comp_lib import Chrome,servir
@@ -61,6 +89,8 @@ def ui():
         for w,touch in [(1440,False),(390,True)]:
             c.aparelho(w,844,1,touch);c.goto(url('PAGR.dc.html'),1)
             chk('Linhas renderizadas '+str(w),wait("document.querySelectorAll('[data-rid]').length>=23"))
+            chk('Quatro cartões e ação originais preservados '+str(w),J("document.querySelectorAll('.pn-card').length===4&&[...document.querySelectorAll('a')].some(a=>a.textContent.trim()==='Consultar O.S.')"))
+            chk('Seção abaixo dos cartões sem frase redundante '+str(w),J("(()=>{let s=document.querySelector('[aria-label=\"Colheita por cultivo\"]'),g=document.querySelector('.pn-grid');return g.getBoundingClientRect().bottom<=s.getBoundingClientRect().top&&!s.innerText.includes('Todas as fazendas e safras')})()"))
             chk('Valores comparáveis '+str(w),J("(()=>{let r=document.querySelector('[data-rid=lg19]');return !!r&&r.innerText.includes('72,9 t')&&r.innerText.includes('36,42 t')&&r.innerText.includes('S39')})()"))
             chk('Sem JS nem overflow da página '+str(w),J("__errors.length===0&&document.documentElement.scrollWidth<=innerWidth"),J('__errors'))
             chk('Sem total somando culturas '+str(w),not J("document.querySelector('[role=table]').innerText.includes('Total')"))
@@ -87,4 +117,4 @@ def ui():
     finally:c.close();srv.terminate()
     print('RESULTADO '+str(sum(checks))+'/'+str(len(checks)));return 0 if all(checks) else 1
 
-if __name__=='__main__':sys.exit(ui() if '--ui' in sys.argv else unit())
+if __name__=='__main__':sys.exit(prepare() if '--prepare' in sys.argv else ui() if '--ui' in sys.argv else unit())

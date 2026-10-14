@@ -1,33 +1,23 @@
 # PAINEL02 — colheita por cultivo e período
 
-Contrato6159867848 (PR61), resposta a PN-DECISAO/6159523648. Autor Codex; revisor/integrador Claude. Base4f222e840a18aa6aa68fd86f5b71673392772e74. Somente dois arquivos novos de código; Manutenção, paineis.py, domínio e composição continuam com Claude.
+Contrato6159867848; revisão Claude6160679862. Autor Codex; revisor/integrador Claude. Base do PR4f222e840a18aa6aa68fd86f5b71673392772e74; correção exercitada com composição v66/5eb1ba70936f4e311a155b20024a166940a54e0c. Somente dois arquivos de código: areas/painel_agricola.py e painel_agricola_test.py. paineis.py, Manutenção, domínio e composição permanecem com Claude.
 
-A semana em curso de uma cultura semanal usa prVersaoSem e somente os passes daquela semana. Anuais usam a previsão e o resultado da safra do cultivo. Não soma culturas ou unidades; previsão ausente não vira zero; café a apurar permanece explícito. Sem porcentagem de desvio final de período aberto. Usa G2 existente para busca, ordenação e filtros; abre COLH#cultivo com teclado/toque; volta conserva busca e foco. É uma primeira leitura de colheita no PAGR, não o encerramento do painel agrícola: custos, impedimentos, execução e MIP continuam pendentes da composição de getters canônicos.
+A semana em curso usa prVersaoSem e passes daquele período; anuais usam previsão e resultado da safra. Não soma culturas/unidades. Previsão ausente e café a apurar têm chave numérica nula explícita: ficam no fim nas duas direções de ordenação, sem converter o número contido no rótulo em produção medida.
 
-## Integração pelo Claude
-Em areas/paineis.py, dentro do for de build(), antes do antigo corpo de PAGR:
+## Integração pelo revisor
 
-```python
-if fid == 'PAGR':
-    from areas.painel_agricola import render
-    render()
-    continue
-```
+O módulo exporta secao() → (HTML, JS), sem reset de tela, shell ou build automático. No ramo PAGR de paineis.build, após inicializar E e antes de shell37, chamar secao(), inserir seu HTML abaixo dos quatro cartões e incorporar JS em E.EXTRAJS. No EXTRAVALS único existente chamar pnaVals(self,v) somente quando PN_ID==='PAGR'. Preservar cenOuvir/modVolta já existentes, cartões e ação Consultar O.S. A seção não substitui o painel.
 
-O módulo novo exporta render(), sem build() automático, para não ser executado e depois sobrescrito pelo gerador antigo na descoberta alfabética de build.py. Nenhuma mudança automática de menu ou do PMAN/PSUP. Confirmar antes a integração dos commits18322fe/e2e2385 de PR61 (foco de teste e corte de gráfico redundante). O teste antigo de PAINEL01 precisa ser reconciliado pelo integrador: asserções PAGR quatro contadores/primeiro link OS foram substituídas por esta fatia; manter os casos PMAN/PSUP/PCOM e os testes novos. Não apagar falhas silenciosamente.
+Escolhida a alternativa expressamente aceita na revisão: filtros de coluna G2, sem faixa adicional. Cultivo · fazenda identifica também cultura/variedade. Nenhuma frase fixa nova de escopo; regras no ⓘ de 44px. Preserva G2 para filtro/busca/ordenação e retorno ao cultivo COLH.
 
-## Provas executadas
+## Provas executadas nesta correção
 
-Dados sintéticos, perfil/servidor locais isolados:
+Sobre cópia sintética isolada de v66/5eb1ba7, sem editar paineis.py:
+- build147/render156 previamente verificados.
+- painel_agricola_test.py --prepare compõe em memória a seção e os cartões reais; montar_render.py regenerou156.
+- painel_agricola_test.py:20/20 exit0. Usa o g2sort real para anual sem previsão e café a apurar nas duas direções.
+- painel_agricola_test.py --ui:24/24 exit0 em1440/390. Inclui cartões/ação preservados, posição abaixo dos cartões, ausência da frase redundante, valores/períodos, Enter/toque real, ajuda/Escape, destino, volta com busca/foco e ausência de overflow/erroJS.
 
-```sh
-SAFRION_DADOS=sintetico python3 build.py
-SAFRION_DADOS=sintetico python3 -c 'from areas.painel_agricola import render; render()'
-SAFRION_DADOS=sintetico python3 montar_render.py
-python3 painel_agricola_test.py
-python3 painel_agricola_test.py --ui
-```
+Brutos novos em provas/r2/. Os brutos anteriores foram preservados como histórico. A composição acima é harness de teste: Claude ainda precisa aplicar o gancho ao produto, revisar e integrar. Não executado leitor de tela, auditoria integral nem HML. Os testes painel_modulos/nav_modulos serão reconciliados/executados pelo integrador na candidata composta.
 
-Build147/render156; unidade13/13 exit0; UI20/20 exit0 em1440 e390. Brutos em provas/. Unidade inclui fatos do seed (Pivô19:72.9t previstas/36.42t recebidas), previsão futura, passe de outra semana, fonte ausente e café a apurar. Contraprovas de projeção substituem apenas o retorno de prTal em dois casos, explicitamente no teste; demais casos usam motor real. UI usa Enter no desktop, toque real no celular, verifica destino e restauração de busca/foco. Grade no celular rola horizontalmente dentro do conteúdo, sem overflow da página; não houve teste de leitor de tela. Sem nova bateria integral.
-
-Aplicado: período/origem/unidades explícitos, grade existente e destino canônico. Fora: indicadores de custo/impedimento/MIP, publicação e aplicação real. Cortado: contadores de O.S. e gráfico repetidos no PAGR, substituídos pela comparação focal. Não é painel completo nem nova entidade/menu.
+Aplicado: origem, período, unidades, cartões e grade existente. Fora: custos/impedimentos/execução/MIP, publicação e aplicação real. Cortado: instrução redundante da seção e substituição indevida dos cartões. O conjunto PAINEL02 continua parcial.
