@@ -5,7 +5,8 @@ sempre com opção de voltar rápido e fácil. use sempre ícones mais intuitivo
 retângulo estranho de todos campos de busca"). Confere no navegador:
   N1 barra lateral: um ícone por módulo (+ Outros acessos), sem submenu, sem botão de expandir, recolhida (≤ 72 px), sem texto visível;
      cada ícone com nome acessível e dica com o nome (hover); o módulo da tela aberta marcado (aria-current)
-  N2 cada módulo com mais de uma tela abre a tela de entrada: cartões só com ícone e nome curto (ui37.CURTO37), na ordem do menu;
+  N2 cada módulo com mais de uma tela abre a tela de entrada: cartões só com ícone e nome curto (ui37.CURTO37), na ordem do menu
+     (o módulo com fluxo, ui37.FLUXO37, na ordem do fluxo: 14/10/2026, mod_fluxo_test.py);
      o Mapa abre direto; a Manutenção (uma tela com visões) tem um cartão por visão (13/10, proprietário: "o menu de manutenção está
      sem os submenus na tela igual os demais"); o caminho não repete o título
   N3 cada cartão abre a tela; cada tela do módulo tem "‹ Módulo" (alvo ≥ 36 px) que volta à tela de entrada
@@ -65,19 +66,22 @@ try:
             k = h if h in ui37.CURTO37 else h.split('#')[0]   # visão com nome próprio (Manutenção: MA.dc.html#vis=…) tem o seu cartão
             if k in vistos: continue
             vistos.add(k); es.append([h, ui37.CURTO37[k][0], True])
+        if nome in ui37.FLUXO37:   # 14/10/2026 (proprietário: fluxograma nos submenus): a ordem dos cartões é a do processo (blocos de FLUXO37)
+            pos = {h: i for i, h in enumerate(h for b in ui37.FLUXO37[nome] for h in b)}; es.sort(key=lambda x: pos[x[0]])
         cr = J("(document.querySelector('header span')||{innerText:''}).innerText.trim()") or ''
         if cs != es or J("document.querySelector('h1').innerText") != nome or cr == nome: ruins.append([nome, cs, es, cr])
         for h, curto, _ in es:
             c.goto(U(h), 1.0)
             v = json.loads(J("JSON.stringify((()=>{const a=document.querySelector('a.volta37'); const r=a&&a.getBoundingClientRect(); return a?[a.getAttribute('href'),a.innerText.replace(/\\s+/g,' ').trim(),Math.round(r.height)]:null;})())") or 'null')
             if not v or v[0] != hub or v[1] != '‹ ' + nome or v[2] < 36: voltas.append([h, v])
-    chk(f'N2 {len(ui37.HUB37)} telas de entrada ({", ".join(ui37.HUB37)}): cartões só com ícone e nome curto, na ordem do menu; caminho sem repetir o título', not ruins, ruins[:2])
+    chk(f'N2 {len(ui37.HUB37)} telas de entrada ({", ".join(ui37.HUB37)}): cartões só com ícone e nome curto, na ordem do menu (Agrícola: do fluxo); caminho sem repetir o título', not ruins, ruins[:2])
     chk('N3 cada tela dos módulos tem "‹ Módulo" (≥ 36 px) para a tela de entrada', not voltas, voltas[:4])
     c.goto(U('MOD-AGR.dc.html'), 1.0); J("[...document.querySelectorAll('a.mod-cartao')].find(a=>a.innerText.trim()==='Ordens de serviço').click()"); time.sleep(1.2)
     p1 = J("location.pathname"); J("document.querySelector('a.volta37').click()"); time.sleep(1.0); p2 = J("location.pathname")
     fo = J("(document.activeElement&&document.activeElement.getAttribute('href'))||''")
     chk('N3 um toque no cartão abre a tela e "‹ Agrícola" volta, com o foco no cartão aberto (ponto útil da volta)', (p1 or '').endswith('/OS.dc.html') and (p2 or '').endswith('/MOD-AGR.dc.html') and fo == 'OS.dc.html', [p1, p2, fo])
-    ax = json.loads(J("JSON.stringify([...document.querySelectorAll('a.mod-cartao')].map(a=>[a.getAttribute('role'), a.parentElement.getAttribute('role'), !!a.parentElement.closest('[role=list]')]))") or '[]')
+    # item de lista: role="listitem" na grade ou <li> nativo da lista ordenada do fluxo (14/10/2026: <ol role="list"> por bloco, sem role redundante no <li>)
+    ax = json.loads(J("JSON.stringify([...document.querySelectorAll('a.mod-cartao')].map(a=>{ const it=a.parentElement; return [a.getAttribute('role'), it.getAttribute('role')||(it.tagName==='LI'&&it.parentElement.matches('ol,ul')?'listitem':null), !!it.closest('[role=list],ol,ul')]; }))") or '[]')
     chk('N3 cartões das telas de entrada: link nativo dentro de item de lista', ax and all(x == [None, 'listitem', True] for x in ax), ax)
     dir_ = {}
     for nome, ic, items in ui37.MENU2:
