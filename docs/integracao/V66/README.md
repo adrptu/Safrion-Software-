@@ -47,6 +47,8 @@ Autor e integrador: Claude. Revisor: Codex (regime leve do protótipo, AGENTS §
   "Coberto" é medido pela ordem das camadas: o controle aparece no ponto sem o aviso e, com o aviso, é o aviso que está por cima.
 - MAN-LIMPA-GRUPO-01 (S3, revisão Codex 6160153073): em Ativos › Abastecimentos o seletor Grupo aparecia e as 8 linhas ficavam. Agora o Grupo filtra os lançamentos pelo ativo de cada um. Limpar o filtro restaura todos, e o grupo continua ao voltar a Ativos (`man_limpa` L8).
 
+- MAN-SEMORDEM-01 (S3, divergência que este registro apontou): o cartão "Pendências sem ordem" do Painel contava só os serviços devidos (`manSemOm`, 3), e a visão Sem ordem, aberta pelo cartão de mesmo nome na entrada da Manutenção, listava 6. Agora as duas usam `manSemOrdem(c,hz)` do domínio (vencimentos vencidos ou com janela até o horizonte, mais achados sem ordem). Mudou uma linha e o ⓘ em `paineis.py` (PAINEL-01, Codex), com aviso no PR #47. `man_limpa` L9: Painel = visão = domínio; contraprova na v66 `5eb1ba7`: [3, 6, sem getter].
+
 ## Para o Painel (PAINEL-02, Codex, `areas/paineis.py`)
 Indicadores que saíram da tela e devem aparecer no Painel de Manutenção, com a fórmula no ⓘ e a mesma fonte da tela:
 - vencidas sem ordem e em breve sem ordem;
@@ -59,12 +61,12 @@ Indicadores que saíram da tela e devem aparecer no Painel de Manutenção, com 
 - custo de manutenção do período;
 - MTBF e MTTR (hoje "não estimável", sem histórico de falhas).
 
-Divergência a alinhar: o Painel conta "Pendências sem ordem" com `manSemOm` (só serviços preventivos devidos; 3 na demonstração), e a tela conta Sem ordem com vencimentos até 10 dias mais achados de inspeção, relatos e alertas (6). O mesmo nome precisa da mesma conta.
+A divergência "Pendências sem ordem" (Painel 3 × visão 6) foi resolvida pelo MAN-SEMORDEM-01 acima.
 
 ## Testes (executados na v66 montada)
 | Teste | Resultado | Contraprova (v65 montada) |
 |---|---|---|
-| `man_limpa_test` (novo) | 8/8 | 1/7 (sem o L8) |
+| `man_limpa_test` (novo) | 9/9 | 1/7 (sem o L8 e o L9); L9 na v66 `5eb1ba7`: [3, 6, sem getter] |
 | `botoes_retorno_test` (novo) | 6/6 | 5/6: o cursor do botão indisponível |
 | `ben_fluxo sobra390 conferencia390` (AV) | 16/16; faixa reservada em 3 toques (REQ-041, Entregue por O.S., Receba devoluções), sem acionar nada | aviso da v65 (`4f222e8`): 8/9, sobre "Início (Mapa)", "Mapa", "‹ Suprimentos" e o "×" do painel |
 | `ben_fluxo sobra conferencia` (desktop) | 16/16 | — |
