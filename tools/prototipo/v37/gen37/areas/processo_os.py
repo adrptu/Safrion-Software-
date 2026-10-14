@@ -1581,7 +1581,7 @@ def build():
               [],edit=dict(m='pick'),gid='g_os',total=False,tree=True,vazio=False,
               # VISOES-2 §3.3: Agrupar por (O quê, Quem, Quando, Onde) com os níveis do descer; a linha traz r.g (osLinhas)
               ag=[dict(pq='oque',l='Atividade',niv=['Operação','Atividade'],um='O.S.',plural='O.S.'),dict(pq='quem',l='Responsável',niv=['Responsável'],um='O.S.',plural='O.S.'),
-                  dict(pq='quando',l='Início',niv=['Safra','Mês','Semana'],um='O.S.',plural='O.S.'),dict(pq='onde',l='Talhão',niv=['Fazenda','Talhão'],um='O.S.',plural='O.S.')])   # vazio de filtro: estado comum das visões (VISOES-1 §2.8)
+                  dict(pq='quando',l='Início',niv=['Safra','Mês','Semana'],um='O.S.',plural='O.S.'),dict(pq='onde',l='Talhão',niv=['Fazenda','Talhão'],fc=['','tal'],um='O.S.',plural='O.S.')])   # vazio de filtro: estado comum das visões (VISOES-1 §2.8)
     # barra da coleção (DS-33 §74.5.7.1): filtros rápidos no começo, seletor de visão no fim; vale para Lista e Kanban (mesmo filtro)
     kb_nota=(f'<sc-if value="{H("kb_filtro")}" hint-placeholder-val="{F()}"><div role="note" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: {MUTED}; margin-bottom: 8px;">'
              f'<span>{H("kb_nota")}</span><button type="button" onClick="{H("os_limpar")}" style="{_MINI}">Limpar filtros</button></div></sc-if>')

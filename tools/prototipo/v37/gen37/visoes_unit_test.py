@@ -31,6 +31,10 @@ for l in r.stdout.strip().splitlines():
     if l.startswith('FALHOU'): print('   ' + l)
 print('   ' + (r.stdout.strip().splitlines()[-1] if r.stdout.strip() else r.stderr[-300:]))
 chk('1 node visoes_unit.js (U1–U10)', r.returncode == 0, r.stdout[-400:] + r.stderr[-300:])
+ra = subprocess.run(['node', os.path.join(HERE, 'visoes2_ag_unit.js')], capture_output=True, text=True, env=dict(os.environ, VISOES_G2LIB=os.path.join(D, 'g2lib.js')))
+for l in ra.stdout.strip().splitlines():
+    if l.startswith('FALHOU'): print('   ' + l)
+chk('1b node visoes2_ag_unit.js (A1–A7: trilha com "/" no endereço; filtro de Talhão limita os grupos)', ra.returncode == 0, ra.stdout[-400:] + ra.stderr[-300:])
 
 V = tenta(lambda: importlib.import_module('visoes'))
 E = tenta(lambda: importlib.import_module('engine'))
@@ -168,6 +172,7 @@ if os.path.isdir(P):
     com = sorted(f for f, s in pags.items() if 'data-visoes=' in s)
     s = pags.get('OS.dc.html', '')
     chk('B1 só a O.S. tem o seletor nesta fatia, com as 4 visões (Tabela, Kanban, Calendário, Carga; VISOES-2 fundiu a agrupada); G2_VISOES vai na página', com == ['OS.dc.html'] and 'data-visoes="lista kanban calendario carga"' in s and 'const G2_VISOES = {"g_os"' in s, com)
+    chk('B1b o nível Talhão do "Agrupar por" da O.S. declara a coluna de filtro (fc = tal): o filtro de Talhão limita os grupos', '"niv": ["Fazenda", "Talhão"], "fc": ["", "tal"]' in s)
     chk('B2 um caminho só: o botão "Agrupar por talhão" (os_agrgo) e as abas de texto Lista | Kanban | Recursos saíram', 'os_agrgo' not in s and '>Recursos</button>' not in s and '>Kanban</button>' not in s, '')
     chk('B3 nenhum arrastar (Kanban e Carga sem draggable)', 'draggable' not in s)
     # §2.4: toda escrita de URL nas telas com seletor preserva location.search (a regra de visoes.escritas_sem_query)

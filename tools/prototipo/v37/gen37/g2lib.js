@@ -274,8 +274,12 @@ function g2agUrl(pathname,search,hash,a){ const s=String(search||'').replace(/^\
   const ps=s?s.split('&').filter(p=>p&&['ag','trilha'].indexOf(nome(p))<0&&!(nome(p)==='view'&&p==='view=agrupada')):[];
   if(a){ ps.push('ag='+encodeURIComponent(a.d)); if(a.t.length) ps.push('trilha='+a.t.map(encodeURIComponent).join('/')); }
   return String(pathname||'')+(ps.length?'?'+ps.join('&'):'')+String(hash||''); }
+// trilha no endereço: cada nível com encodeURIComponent, unidos por "/"; a leitura usa o texto cru do parâmetro, porque URLSearchParams
+// decodifica %2F antes da divisão e "Safra 2026/27" viraria dois níveis (Codex 6168779649, achado 1)
+function g2agTrilha(search){ const p=String(search||'').replace(/^\?/,'').split('&').find(x=>x.slice(0,7)==='trilha='); if(!p) return [];
+  return p.slice(7).split('/').filter(Boolean).map(x=>{ try{ return decodeURIComponent(x); }catch(e){ return x; } }); }
 function g2agLer(self,sp){ const st=g2st(self,sp.id); if(st.ag!==undefined) return st.ag; let a=null;
-  try{ const q=new URLSearchParams(location.search), d=q.get('ag'); if(d) a={d,t:String(q.get('trilha')||'').split('/').filter(Boolean).map(x=>{ try{ return decodeURIComponent(x); }catch(e){ return x; } })};
+  try{ const q=new URLSearchParams(location.search), d=q.get('ag'); if(d) a={d,t:g2agTrilha(location.search)};
     else if(q.get('view')==='agrupada'&&sp.ag.some(x=>x.pq==='onde')) a={d:'onde',t:[]}; }catch(e){ a=null; }
   if(!g2agOk(sp,a)){ a=null; try{ const x=JSON.parse(localStorage.getItem(g2agChave(sp))||'null'); if(g2agOk(sp,x)) a={d:x.d,t:x.t}; }catch(e){ a=null; } }
   const all=Object.assign({},self.state.g2||{}); all[sp.id]=Object.assign({},all[sp.id]||{},{ag:a}); self.state.g2=all; return a; }
@@ -283,15 +287,20 @@ function g2agGrava(self,sp,a){ try{ if(a) localStorage.setItem(g2agChave(sp),JSO
   try{ history.replaceState(history.state,'',g2agUrl(location.pathname,location.search,location.hash,a)); }catch(e){}
   g2set(self,sp.id,{ag:a,agm:false,agx:null}); }
 function g2agVals_(r,a,D,i){ const g=(r.g||{})[a.d]; const x=g?g[i]:undefined; return (Array.isArray(x)?x:[x]).map(y=>(y===undefined||y===null||y==='')?'Sem '+D.niv[i].toLowerCase():String(y)); }
+// a O.S. de T1 e T2 sob o filtro Talhão = T1 entra só no grupo T1 (Codex 6168779649, achado 2): o nível com coluna de filtro (D.fc[i]) usa só
+// os membros escolhidos no filtro; o vínculo completo continua no detalhe da O.S., e o total conta cada O.S. uma vez
+function g2agValsF(r,a,D,i,sp,st){ const vs=g2agVals_(r,a,D,i), fk=(D.fc||[])[i], f=fk&&st&&st.f&&st.f[fk];
+  if(!f||!f.length) return vs; const c=sp.cols.find(x=>x.k===fk), m=c?g2mem(r,c):null; if(!m||!m.length) return vs;
+  const k=m.filter(x=>f.indexOf(x.id)>=0).map(x=>String(x.l||x.id)); return k.length?k:vs; }
 function g2agRows(self,sp,st,rows){ const a=g2agLer(self,sp); if(!a) return {rows,a:null}; const D=sp.ag.find(x=>x.pq===a.d), niv=D.niv.length; let lv=Math.min(a.t.length,niv);
-  let base=rows.filter(r=>a.t.slice(0,lv).every((t,i)=>g2agVals_(r,a,D,i).indexOf(t)>=0)); const auto=[];
+  let base=rows.filter(r=>a.t.slice(0,lv).every((t,i)=>g2agValsF(r,a,D,i,sp,st).indexOf(t)>=0)); const auto=[];
   // nível com um valor só no recorte (uma fazenda) não pede escolha: desce sozinho, e o valor aparece na trilha
-  while(lv<niv-1){ const vs=new Set(); base.filter(r=>g2match(r,sp,st)).forEach(r=>g2agVals_(r,a,D,lv).forEach(k=>vs.add(k))); if(vs.size!==1) break;
-    const k=[...vs][0]; auto.push(k); base=base.filter(r=>g2agVals_(r,a,D,lv).indexOf(k)>=0); lv++; }
+  while(lv<niv-1){ const vs=new Set(); base.filter(r=>g2match(r,sp,st)).forEach(r=>g2agValsF(r,a,D,lv,sp,st).forEach(k=>vs.add(k))); if(vs.size!==1) break;
+    const k=[...vs][0]; auto.push(k); base=base.filter(r=>g2agValsF(r,a,D,lv,sp,st).indexOf(k)>=0); lv++; }
   const path=a.t.slice(0,Math.min(a.t.length,niv)).concat(auto);
   if(lv>=niv) return {rows:base,a,D,lv,base,path};   // último nível: as linhas, filtradas pela trilha
   const gs={}, ord=[], ok={}, c0=sp.cols[0].k, somas=sp.cols.filter(c=>c.agg==='sum');
-  base.filter(r=>g2match(r,sp,st)).forEach(r=>{ const vs=g2agVals_(r,a,D,lv), so=((r.gs||{})[a.d]||[])[lv];
+  base.filter(r=>g2match(r,sp,st)).forEach(r=>{ const vs=g2agValsF(r,a,D,lv,sp,st), so=((r.gs||{})[a.d]||[])[lv];
     vs.forEach(k=>{ if(!gs[k]){ gs[k]=[]; ord.push(k); } gs[k].push(Object.assign({},r,{id:r.id+'@'+k})); if(so!==undefined&&so!==null&&(ok[k]===undefined||String(so)<String(ok[k]))) ok[k]=so; }); });
   // ordem: a chave própria do nível quando a linha traz (r.gs: mês e semana em ordem de calendário), senão o nome
   ord.sort((x,y)=>(ok[x]!==undefined&&ok[y]!==undefined&&String(ok[x])!==String(ok[y]))?(String(ok[x])<String(ok[y])?-1:1):x.localeCompare(y,'pt-BR',{numeric:true}));

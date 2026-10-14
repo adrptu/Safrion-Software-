@@ -1480,12 +1480,14 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     # qf: filtro rápido por uma coluna, k (chave), cut (fica o texto antes do separador), sep (vários valores na célula), todas ('Todas'|'Todos')
     qf=(dict(k=qf) if isinstance(qf,str) else qf) or None
     spec=dict(id=gid,cols=cols,rows=rows,edit=edit,sel=sel,del_=dele,tree=(tree or bool(ag)),so=so or {},total=total,x0=x0 or {},qf=qf)
-    if ag: spec['ag']=ag   # VISOES-2 §3.3: [dict(pq, l, niv=[...], um, plural)]; as linhas trazem r.g[pq]
+    if ag: spec['ag']=ag   # VISOES-2 §3.3: [dict(pq, l, niv=[...], fc=[coluna de filtro por nível], um, plural)]; as linhas trazem r.g[pq]
     spec['del']=spec.pop('del_'); GRIDS.append(spec)
     H=lambda s: _h(gid+s)
     sicon=f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="{MUTED}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>'
     tb=''
-    ess=any(c.get('ess') for c in cols) and len(cols)>5
+    # VISOES-2 §8 C1: o botão nasce em toda grade com ess; no computador, até 5 colunas ficam inteiras e g2cvVals o esconde; no celular
+    # (3 primeiras) ele aparece também nas de até 5, para recuperar as ocultas (Codex 6168779649, residual)
+    ess=any(c.get('ess') for c in cols)
     cvb=(f'<sc-if value="{H("_cvhas")}" hint-placeholder-val="{{{{false}}}}"><button type="button" data-g2cvb="{gid}" aria-haspopup="dialog" aria-expanded="{H("_cvexp")}" aria-label="{H("_cvlab")}" title="{H("_cvlab")}" onClick="{H("_cvtog")}" '
          f'style="{_MINI} display: inline-flex; align-items: center; gap: 6px; min-height: 32px;">{_ICO_COLUNAS}Colunas<span style="color: {MUTED};">{H("_cvn")}</span></button></sc-if>') if ess else ''
     # VISOES-2 §3.3: "Agrupar por" (ícone da pergunta + nome da coluna) e a trilha do descer, na barra da grade
