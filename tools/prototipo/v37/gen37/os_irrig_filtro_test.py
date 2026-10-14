@@ -30,7 +30,7 @@ def filtro(lab,val,w=.4):
 def sel(lab): return J(f"document.querySelector('select[aria-label={json.dumps(lab)}]').value") or ''
 def opcoes(lab): return J(f"[...document.querySelector('select[aria-label={json.dumps(lab)}]').options].map(o=>o.value)") or []
 def chips(): return J("[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] button')].map(b=>b.innerText.replace(/\\s+/g,' ').trim())") or []
-def hdr(): return J("(()=>{const h=document.querySelector('header h1'); const s=h&&h.nextElementSibling; return s?s.innerText.trim():'';})()") or ''
+def hdr(): return J("(()=>{const h=document.querySelector('header h1'); let s=h&&h.nextElementSibling; while(s&&s.classList&&s.classList.contains('g2-info')) s=s.nextElementSibling; return s?s.innerText.trim():'';})()") or ''
 def vazio(): return J("(()=>{const d=document.querySelector('[aria-label=\"Sem ordens no filtro\"]'); return d?d.innerText.replace(/\\s+/g,' ').trim():'';})()") or ''
 def clica(t): J(f"(()=>{{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==={json.dumps(t)}); b&&b.click();}})()"); time.sleep(.4)
 def esperar(pag):   # navegação por clique em link: espera a página nova carregar
@@ -42,7 +42,7 @@ def esperar(pag):   # navegação por clique em link: espera a página nova carr
 EST=r"""(()=>{const ids=[...document.querySelectorAll('[role=row].g2ed')].map(r=>r.innerText.split('\n')[0].trim());
   const kb=[...document.querySelectorAll('[aria-label="Kanban das ordens"] [role=button]')].map(b=>b.innerText.split('\n')[0].trim());
   const ch=[...document.querySelectorAll('[aria-label="Filtrar por fase"] button')].map(b=>b.innerText.replace(/\s+/g,' ').trim());
-  const h=document.querySelector('header h1'); const s=h&&h.nextElementSibling;
+  const h=document.querySelector('header h1'); let s=h&&h.nextElementSibling; while(s&&s.classList&&s.classList.contains('g2-info')) s=s.nextElementSibling;
   return {ids,kb,ch,hd:s?s.innerText.trim():'',agua:(document.body.innerText.match(/OS-04(19|22|23)/g)||[])};})()"""
 AGUA=('OS-0419','OS-0422','OS-0423')
 PROIB=re.compile(r'política de água|PA-07|exceção|revisão individual',re.I)
