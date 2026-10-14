@@ -487,7 +487,13 @@ function g2toastLugar(){ try{ const t=document.querySelector('.g2toast'); if(!t)
     const q=S.getBoundingClientRect(), y1=Math.max(Math.floor(H-b-h-4-q.top),0), y2=Math.min(Math.ceil(H-b+4-q.top),q.height); if(y2<=y1) continue;
     const pb0=S.style.paddingBottom, cp0=S.style.clipPath, pb=parseFloat(getComputedStyle(S).paddingBottom)||0;
     S.style.clipPath="path(evenodd,'M0 0H"+q.width+"V"+q.height+"H0Z M0 "+y1+"H"+q.width+"V"+y2+"H0Z')"; S.style.paddingBottom=(pb+q.height-y1)+'px';
-    if(b!==b0) t.style.bottom=b+'px'; t.style.pointerEvents='auto'; t.__res={S,pb0,cp0,q:S.getBoundingClientRect()}; return; } }catch(e){} }
+    if(b!==b0) t.style.bottom=b+'px'; t.style.pointerEvents='auto'; t.__res={S,pb0,cp0,q:S.getBoundingClientRect(),y1,y2}; return; } }catch(e){} }
+// foco (Tab ou programático) num elemento debaixo da faixa reservada: o contêiner rola até ele ficar inteiro acima dela (revisão Codex
+// 6160750498: o foco ia para a linha recortada e ficava invisível). Roda na hora e de novo no quadro seguinte, depois da rolagem do navegador
+function g2toastFoco(el){ try{ const t=document.querySelector('.g2toast'), rs=t&&t.__res; if(!rs||!el||!rs.S.contains(el)||el===rs.S) return;
+  const q=rs.S.getBoundingClientRect(), r=el.getBoundingClientRect(), topo=q.top+rs.y1; if(r.bottom>topo&&r.top<q.bottom) rs.S.scrollTop+=r.bottom-topo+8; }catch(e){} }
+if(typeof document!=='undefined'&&!window.__g2toastFoco){ window.__g2toastFoco=1;
+  document.addEventListener('focusin',(e)=>{ const el=e.target; g2toastFoco(el); requestAnimationFrame(()=>{ if(document.activeElement===el) g2toastFoco(el); }); },true); }
 (function g2glob(){ if(typeof document==='undefined'||window.__g2glob) return; window.__g2glob=1;
   const vis=(e)=>!!e&&e.getClientRects().length>0;
   const rotulo=()=>[...document.querySelectorAll('.etp-chk')].find(vis);

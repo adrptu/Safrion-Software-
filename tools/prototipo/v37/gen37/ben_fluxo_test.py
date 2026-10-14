@@ -134,6 +134,14 @@ AGR_ESP = [['COLH.dc.html', 'Colheita'], ['CARGA.dc.html', 'Recebimento']] + ([[
 def nav_clk(x, root):   # toque que navega (link): conta o toque e recarrega o apoio na página nova
     cl, tx = J("[window.__cl||0, window.__tx||0]") or [0, 0]; r = J(f"CLK({json.dumps(x)},{json.dumps(root)})"); time.sleep(1.4); lib(); J(f"window.__cl={cl + 1}; window.__tx={tx};"); return r
 MOBILE = [False]
+KB_PREP = ("(()=>{ const t=document.querySelector('.g2toast'); if(!t||getComputedStyle(t).pointerEvents!=='auto') return null; const a=t.getBoundingClientRect();"
+           " const F=[...document.querySelectorAll('a[href],button,input,select,textarea,[tabindex]:not([tabindex=\"-1\"])')].filter(e=>!e.disabled&&e.getClientRects().length&&!t.contains(e)&&getComputedStyle(e).visibility!=='hidden');"
+           " const i=F.findIndex(e=>{ const r=e.getBoundingClientRect(); return r.top>=a.top-6&&r.bottom<=a.bottom+6&&r.left<a.right&&r.right>a.left; });"   # inteiro dentro da faixa (o navegador não rola sozinho: caso do Codex)
+           " if(i<1) return null; F[i-1].focus(); return [N(F[i-1].innerText||F[i-1].getAttribute('aria-label')||'').slice(0,30),N(F[i].innerText||F[i].getAttribute('aria-label')||'').slice(0,30)]; })()")
+KB_VIS = ("(()=>{ const e=document.activeElement; if(!e||e===document.body) return null; const t=document.querySelector('.g2toast'); const pe=t?t.style.pointerEvents:'';"
+          " const r=e.getBoundingClientRect(); const x=Math.min(Math.max(r.left,0)+Math.min(r.width/2,40),innerWidth-1), y=Math.min(Math.max(r.top+r.height/2,0),innerHeight-1);"
+          " if(t) t.style.pointerEvents='none'; const h=document.elementFromPoint(x,y); if(t) t.style.pointerEvents='auto'; const h2=document.elementFromPoint(x,y); if(t) t.style.pointerEvents=pe;"
+          " return [N(e.innerText||e.getAttribute('aria-label')||e.tagName).slice(0,40), !!h&&(h===e||e.contains(h)), !!t&&!!h2&&t.contains(h2)]; })()")   # [nome, aparece (início da linha, meio da altura), aviso pintado por cima desse ponto]
 RESERVA = []   # toques em que o aviso estava na faixa reservada (sem faixa livre): só registro, a verificação é a AV
 AVISO = []   # UX-BEN35-AVISO-01 (revisão Codex de 14/10, S3): toques que esperaram o aviso sair ou em que o aviso estava desenhado por cima do alvo
 def tamanho(w, h):   # a 390 px o Chrome emula toque (Input.dispatchTouchEvent); no desktop, mouse
@@ -152,6 +160,13 @@ def tocar(x, root=None, w=.6, nav=False):
     if p.get('sob'): print(f'   (o aviso está desenhado por cima de "{x}")'); AVISO.append('sob: ' + x)
     if p.get('res'): RESERVA.append(x); print(f'   (antes de tocar "{x}": sem faixa livre, o aviso reserva a faixa no pé; toque na faixa aciona: {p.get("vaza") or "nada"})')
     if p.get('vaza'): AVISO.append(f'toque na faixa reservada aciona {p.get("vaza")} ao tocar {x}')
+    if p.get('res'):   # teclado (revisão Codex 6160750498): Tab real até o controle debaixo da faixa reservada deixa o foco visível, fora do aviso
+        pr = J(KB_PREP)
+        if pr:
+            tecla('Tab'); time.sleep(.3); kv = J(KB_VIS)
+            print(f'   (faixa reservada · Tab de "{pr[0]}" para o controle debaixo dela "{pr[1]}": foco em {kv})')
+            if not kv or not kv[1] or kv[2]: AVISO.append(f'foco escondido pela faixa reservada: {kv} ao tocar {x}')
+            p = J(f"PTO({json.dumps(x)},{json.dumps(root)})") or p
     if p.get('nav') or p.get('fora') or p.get('tc'):
         print(f'   (antes de tocar "{x}": aviso sobre a navegação {p.get("nav")} · sobre o conteúdo {p.get("tc")} · fora da tela: {p.get("fora")})')
         AVISO.append(f'nav={p.get("nav")} conteudo={p.get("tc")} fora={p.get("fora")} ao tocar {x}')

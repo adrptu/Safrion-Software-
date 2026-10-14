@@ -34,6 +34,7 @@ Autor e integrador: Claude. Revisor: Codex (regime leve do protótipo, AGENTS §
     - o contêiner ganha folga no fim para o conteúdo subir acima dela;
     - o aviso passa a receber o toque, então um toque na faixa não aciona controle escondido;
     - a reserva sai quando o aviso some, muda de texto, o contêiner muda ou aparece algo visível novo debaixo dele (ex.: um painel aberto);
+    - o foco que cai num controle debaixo da faixa (Tab ou programático) faz o contêiner rolar até ele ficar inteiro acima dela (revisão Codex 6160750498: o Tab levava o foco à linha recortada, invisível);
   - com o menu de etapas aberto no celular, o aviso fica atrás do fundo do menu;
   - o fundo de tela inteira atrás de um painel não conta como controle.
 
@@ -42,14 +43,15 @@ Autor e integrador: Claude. Revisor: Codex (regime leve do protótipo, AGENTS §
   A verificação AV do `ben_fluxo` reprova:
   - a espera para tocar;
   - o aviso sobre o alvo, sobre qualquer controle visível (navegação, cabeçalho ou conteúdo) ou fora da tela;
-  - o toque na faixa reservada que acione um controle.
+  - o toque na faixa reservada que acione um controle;
+  - o foco escondido: com a faixa reservada, um Tab real até o controle que está inteiro dentro dela tem de deixar o foco visível e sem o aviso por cima. Contraprova na `5eb1ba7`: Tab de OS-0417 para REQ-036/OS-0420 deixa o foco escondido, 8/9.
 
   "Coberto" é medido pela ordem das camadas: o controle aparece no ponto sem o aviso e, com o aviso, é o aviso que está por cima.
 - MAN-LIMPA-GRUPO-01 (S3, revisão Codex 6160153073): em Ativos › Abastecimentos o seletor Grupo aparecia e as 8 linhas ficavam. Agora o Grupo filtra os lançamentos pelo ativo de cada um. Limpar o filtro restaura todos, e o grupo continua ao voltar a Ativos (`man_limpa` L8).
 
-- MAN-SEMORDEM-01 (S3, divergência que este registro apontou): o cartão "Pendências sem ordem" do Painel contava só os serviços devidos (`manSemOm`, 3), e a visão Sem ordem, aberta pelo cartão de mesmo nome na entrada da Manutenção, listava 6. Agora as duas usam `manSemOrdem(c,hz)` do domínio (vencimentos vencidos ou com janela até o horizonte, mais achados sem ordem). Mudou uma linha e o ⓘ em `paineis.py` (PAINEL-01, Codex), com aviso no PR #47. `man_limpa` L9: Painel = visão = domínio; contraprova na v66 `5eb1ba7`: [3, 6, sem getter].
+- MAN-SEMORDEM-01 (S3, divergência que este registro apontou): o cartão "Pendências sem ordem" do Painel contava só os serviços devidos (`manSemOm`, 3), e a visão Sem ordem, aberta pelo cartão de mesmo nome na entrada da Manutenção, listava 6. Agora as duas usam `manSemOrdem(c,hz)` do domínio (vencimentos vencidos ou com janela até o horizonte, mais achados sem ordem). Mudou uma linha e o ⓘ do PMAN em `paineis.py` (com o Claude pelo contrato 6159867848). `man_limpa` L9: Painel = visão = domínio; contraprova na v66 `5eb1ba7`: [3, 6, sem getter].
 
-## Para o Painel (PAINEL-02, Codex, `areas/paineis.py`)
+## Para o Painel (PAINEL-02: `areas/paineis.py`, PMAN e composição com o Claude; o Codex faz a seção de colheita em `areas/painel_agricola.py`, PR #62)
 Indicadores que saíram da tela e devem aparecer no Painel de Manutenção, com a fórmula no ⓘ e a mesma fonte da tela:
 - vencidas sem ordem e em breve sem ordem;
 - achados críticos sem ação;
