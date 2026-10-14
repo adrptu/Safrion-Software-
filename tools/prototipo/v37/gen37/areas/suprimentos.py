@@ -292,13 +292,14 @@ function EXTRAVALS(self,v){ pnVals(self,v); }''')
     corpo=(kpis([('Itens com falta firme',str(nfalta),'SOL-2026-07 em cotação + KCl, diesel e rolamento'),('Pedido atrasado',str(natr),'o “pedir até” já passou'),
                  ('Condicionado à qualidade','10 t','KCl 60% · K26-11 · laudo 27/09'),('Valor da falta firme',f'R$ {nf(valor/1000,1)} mil','SOL-2026-07 · preço de referência')])
            + bloco('Necessidade líquida por data','Confira a falta firme de cada item e abra a cotação; expanda o item para ver a origem da demanda.',g
-                   + nota('KCl 60%: falta firme 140 − 50 − 40 = 50 t; as 10 t em quarentena não entram e ficam como coberto se o laudo aprovar, somadas uma única vez. Clique na linha para ver a memória de cálculo.'),
+                   + nota('KCl 60%: falta firme 140 − 50 − 40 = 50 t.'),
                    acao=mini('open_rep','Reprogramar proposta','Muda a data necessária de um item sem enviar nova cotação','calendar')))
     HEIGHTS37[fname]=1760
     shell37('SU-01','Necessidades e cobertura',corpo,fname=fname,
       subtitle='Necessidade líquida por data com origem, físico apto, reservas, entregas firmes e data limite de compra.',
       status=(f'{nfalta} itens com falta firme · {natr} atrasados','red'),primary_html=prima('CMP.dc.html','Abrir cotação da SOL-2026-07'),
-      footer='Revisar uma falta não envia cotação; cobertura prevista e estoque físico aparecem em colunas separadas (SU-01 · CAL-01).')
+      footer='Revisar uma falta não envia cotação; cobertura prevista e estoque físico aparecem em colunas separadas (SU-01 · CAL-01). '
+             'As toneladas em quarentena não entram na falta firme e ficam como coberto se o laudo aprovar, somadas uma única vez; a linha abre a memória de cálculo.')
 
 # ================= SU-02 · Políticas de estoque =================
 DEPOS=['Galpão 1','Galpão 2','Câmara fria','Almox. defensivos','Tanque Sede','Almox. oficina']
@@ -340,7 +341,7 @@ function EXTRAVALS(self,v){ pnVals(self,v); sims(self,v);
                pub='Ainda não publicável · a proposta v5 do Diesel S10 aguarda o gestor (vence em 5 dias). Depois da aprovação, publique aqui; a versão vigente não é sobrescrita.'))
     painel()
     corpo=(bloco('Políticas por item e depósito','Confira segurança, prazo e limites de cada política; clique na linha para propor uma nova versão.',
-                 g+nota('Classe ABC financeira não substitui criticidade: Diesel é B em valor e Alta em criticidade. Limites do depósito e validade restringem a entrega, sem equivaler ao tamanho do contrato.'),
+                 g,
                  acao=mini('sim_sim','Simular cobertura','Simula o efeito de uma política sem alterá-la','calc')+alink('SU-01.dc.html','Ver efeito em Necessidades','Abre Necessidades com a cobertura calculada','trend'))
            + bloco('Publicação de vigência','Publique só a versão aprovada; a simulação e as propostas não alteram a política vigente.',
                    nota('Propostas e exceções aguardando: Diesel S10 v5 (gestor, vence em 5 dias).'),acao=mini('sim_pub','Publicar vigência','Publica a versão aprovada','check')))
@@ -348,7 +349,8 @@ function EXTRAVALS(self,v){ pnVals(self,v); sims(self,v);
     shell37('SU-02','Políticas de estoque',corpo,fname=fname,
       subtitle='Política por item e local com segurança, prazo, lote, múltiplo, validade e justificativa; exceções versionadas.',
       status=('1 proposta aguardando gestor','yellow'),primary_html=primb('open_exc','Submeter exceção'),
-      footer='Publicar vigência exige aprovação (FO-31); simulação nunca altera a política vigente (SU-02, cap. 65).')
+      footer='Publicar vigência exige aprovação (FO-31); simulação nunca altera a política vigente (SU-02, cap. 65). '
+             'Classe ABC financeira não substitui criticidade: Diesel é B em valor e Alta em criticidade. Limites do depósito e validade restringem a entrega, sem equivaler ao tamanho do contrato.')
 
 # ================= SU-03 · Saldos e lotes de materiais =================
 LOTES_X=[  # além de dados2.LOTES: sobras da REQ-031, lote zerado com custódia da OS-0420, consignado, diesel e café (produção)
@@ -413,13 +415,14 @@ function EXTRAVALS(self,v){ pnVals(self,v); }''' % (R35['solicitado']-R35['entre
     corpo=(kpis([('Conflito de reserva','1',f'F26-02 · pendência {nq(SOL_FA)} L') if CONFL_FA else ('Conflito de reserva','0','F26-02 · uso da safra e pendência de compra na demanda única'),('Lotes retidos','3','K26-11 · M26-05 · L27-013'),
                  ('Custódia em campo',f'{ncust} ordens','OS-0417 · OS-0421 · OS-0420'),('Valor em insumos',f'R$ {nf(tot/1e6,2)} mi','próprio · sem café e consignado')])
            + bloco('Estoque por item, lote, proprietário e local','Confira físico, retido, reservado e disponível de cada lote; clique na linha para ver a origem do saldo.',
-                   g+nota('Físico ≠ utilizável ≠ disponível. Custódia em campo fica fora do físico do depósito e não soma duas vezes; consignado aparece identificado e obedece à autorização do proprietário.'),
+                   g,
                    acao=alink('SU-08.dc.html','Ver movimentos','Abre o extrato de movimentos','lista')))
     HEIGHTS37[fname]=1000
     shell37('SU-03','Saldos e lotes de materiais',corpo,fname=fname,
       subtitle='Estoque por item, lote, proprietário e local com custódias; cada saldo mostra fonte e documento de origem.',
       status=('1 conflito de reserva · 3 lotes retidos','red') if CONFL_FA else ('3 lotes retidos','yellow'),primary_html=primb('open_res','Reservar para ordem','box'),
-      footer='Os saldos são os mesmos do processo Estoque; requisitar, transferir e inspecionar abrem o registro de destino (SU-07, SU-08, SU-06).')
+      footer='Os saldos são os mesmos do processo Estoque; requisitar, transferir e inspecionar abrem o registro de destino (SU-07, SU-08, SU-06). '
+             'Físico ≠ utilizável ≠ disponível. Custódia em campo fica fora do físico do depósito e não soma duas vezes; consignado aparece identificado e obedece à autorização do proprietário.')
 
 # ---- SU-03det · F26-02 · reserva em conflito (DEMO-18 nos saldos de dados2) ----
 def su03det():
@@ -581,7 +584,7 @@ function EXTRAVALS(self,v){
   v.env113=()=>{ if(self.state.env113) return toast(self,'COT-113 já foi enviada · nada reenviado'); const c=RF(self,'g_cot','COT-113'); const n=String(c.v.dest||'').split(';').filter(x=>x.trim()).length;
     if(!n) return toast(self,'Escolha ao menos um destinatário: clique na linha da COT-113'); self.setState({env113:true,g2toast:'COT-113 enviada a '+n+' convidados · respostas até 26/09 (simulado · nenhuma mensagem real enviada)'}); }; }''' % (json.dumps(dict(id=best['f'],nome=best['nome'],tot=round(best['tot']))),json.dumps(_alcada(best['tot']))))
     corpo=(bloco('Cotações em andamento','Confira as respostas de cada cotação; clique no rascunho para revisar destinatários antes de enviar.',g
-                 + nota('O fornecedor responde pelo portal externo com convite próprio, nunca por esta lista. A SOL-2026-07 veio de Planejar safra e é a mesma de Compra de insumos.'),
+                 ,
                  acao=mini('env113','Enviar COT-113','Envia o rascunho aos destinatários escolhidos (simulado)','doc'))
            + bloco(f'Comparação equalizada · SOL-2026-07 · Fertilizantes','Compare mercadoria, frete, prazo e condição no mesmo critério e selecione a proposta.',gc
                    + nota('Itens: '+', '.join(n+' '+nf(o['qtd'])+' '+o['un'] for n,o in fert.items())+f". Alçada pelo valor: {_alcada(best['tot'])} (até R$ 300 mil)."),
@@ -591,7 +594,8 @@ function EXTRAVALS(self,v){
       subtitle='Cotações nascem da necessidade (SOL-2026-07 e faltas de manutenção); a comparação equaliza propostas e a seleção registra justificativa.',
       status=(f'{sum(1 for gname in grupos if len(_cotacao(gname,grupos[gname]))==len([f for f in D2.FORNECEDORES if f["homologado"] and gname in f["grupos"]]))} prontas para comparar · 1 rascunho','yellow'),
       primary_html=primb('sel_prop',f"Selecionar {best['nome']}",'check'),
-      footer='Token externo do fornecedor abre o portal PT-02, não esta lista; aprovar contratação segue em Contratos e pedidos (FO-16/FO-17).')
+      footer='Token externo do fornecedor abre o portal PT-02, não esta lista; aprovar contratação segue em Contratos e pedidos (FO-16/FO-17). '
+             'O fornecedor responde pelo portal externo com convite próprio, nunca por esta lista. A SOL-2026-07 veio de Planejar safra e é a mesma de Compra de insumos.')
 
 # ================= SU-05 · Contratos, pedidos e entregas =================
 C=dict(id='CT-2026-11',f=FORN['F01'],item='KCl 60%',contratado=140,liberado=PC88['qtd']//1000,recebido=PC88['recebido']//1000,apto=PC88['apto']//1000,
@@ -670,10 +674,10 @@ function EXTRAVALS(self,v){ pnVals(self,v); sims(self,v); }''',
     painel()
     corpo=(kpis([('Conflitos','1','carga 4 · CT-2026-11'),('A receber até 26/09','3','NF 4533 · PC-093 · PC-094'),('Liberado a entregar',_rs(C['exp']+DIESEL_EXP),'KCl · diesel'),('Contratos vigentes','3','Fertisul · Ipiranga · Santa Rita Insumos')])
            + bloco('Contratos de fornecimento','Confira contratado, liberado e exposição de cada contrato; clique na linha para ajustar condição e vigência.',gctr
-                   + nota('O recebido já está dentro das liberações acumuladas e não é subtraído de novo do saldo contratual.'),
+                   ,
                    acao=mini('open_ctr','Formalizar contrato','Cria o contrato a partir da proposta selecionada','doc'))
            + bloco('Pedidos','Confira o que falta entregar em cada pedido; clique na linha para ajustar chegada, uso e depósito.',gped
-                   + nota('Recebimento parcial mantém o saldo do pedido aberto; o aceite físico acontece em Recebimentos.'),
+                   ,
                    acao=mini('sim_ped','Emitir pedido','Programa o próximo pedido de diesel contra o contrato','cart')+mini('sim_conf','Confirmar fornecedor','Registra a confirmação da carga pelo fornecedor','check')+alink('SU-06.dc.html','Receber','Abre Recebimentos para conferir a entrega','truck'))
            + bloco('Programação de entregas','Simule o pico de exposição e o ritmo de cargas antes de liberar; o que passa do limite vira conflito.',
                    f'<div style="padding: 0 0 10px;">{bar}</div>'+panes,acao=mini('sim_pico','Simular pico de exposição','Calcula o pico por data sem liberar nada','trend')))
@@ -681,7 +685,8 @@ function EXTRAVALS(self,v){ pnVals(self,v); sims(self,v); }''',
     shell37('SU-05','Contratos, pedidos e entregas',corpo,fname=fname,
       subtitle='Contratos, pedidos e programação de entregas com saldos explícitos e exposição em R$ quando há limite.',
       status=('1 conflito de liberação','red'),primary_html=prima('SU-05det.dc.html','Resolver conflito da carga 4'),
-      footer='Proposta de carga não equivale a entrega confirmada; capacidade do depósito e validade seguem 65.5 / PCE-08. Antecipação e prazo têm títulos próprios (GE-04).')
+      footer='Proposta de carga não equivale a entrega confirmada; capacidade do depósito e validade seguem 65.5 / PCE-08. Antecipação e prazo têm títulos próprios (GE-04). '
+             'O recebido já está dentro das liberações acumuladas e não é subtraído de novo do saldo contratual. Recebimento parcial mantém o saldo do pedido aberto; o aceite físico acontece em Recebimentos.')
 
 # ---- SU-05det · contrato CT-2026-11 · Fertisul · KCl 60% ----
 def su05det():
@@ -825,7 +830,7 @@ function EXTRAVALS(self,v){ pnVals(self,v); sims(self,v); const rs=RW(self,'g_re
     painel()
     corpo=(kpis([('Divergências abertas',H('k_div'),H('k_div_s')),('Em quarentena',H('k_quar'),H('k_quar_s')),('A receber',H('k_pend'),H('k_pend_s')),('Pedidos com saldo aberto',H('k_ab'),H('k_ab_s'))])
            + bloco('Conferência de pedido, documento e material','Confira cada entrega contra o pedido e a NF; clique na linha pendente para registrar o conferido.',
-                   g+nota('Aceite físico não aprova o título: o título segue para Contas a pagar à parte. O retido em quarentena alimenta só a cobertura condicionada em Necessidades até o laudo, e soma uma única vez.'),
+                   g,
                    acao=mini('ler','Ler documento/QR','Lê a chave da NF e localiza o pedido (simulado)','doc')+mini('open_seg','Segregar lote','Retém parte do apto de um lote','alert')
                         +mini('open_div','Resolver diferença','Decide a divergência de preço da NF 8812','cash')))
     HEIGHTS37[fname]=880
@@ -834,7 +839,8 @@ function EXTRAVALS(self,v){ pnVals(self,v); sims(self,v); const rs=RW(self,'g_re
     shell37('SU-06','Recebimentos e divergências',corpo,fname=fname,
       subtitle='Conferência de pedido, documento e material; parcial mantém o saldo aberto e documento duplicado não cria segunda entrada.',
       status=(MARK,'gray'),primary_html=prim,
-      footer='DEMO-02: PC-088 100 t → 60 recebidas (50 aptas + 10 em quarentena) e 40 a entregar; liberar qualidade soma as 10 t uma única vez (SU-06 · FO-18).')
+      footer='DEMO-02: PC-088 100 t → 60 recebidas (50 aptas + 10 em quarentena) e 40 a entregar; liberar qualidade soma as 10 t uma única vez (SU-06 · FO-18). '
+             'Aceite físico não aprova o título: o título segue para Contas a pagar à parte. O retido em quarentena alimenta só a cobertura condicionada em Necessidades até o laudo, e soma uma única vez.')
     dyn_status(fname)
 
 # ================= SU-07 · Requisições e entregas =================
@@ -929,13 +935,14 @@ function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_req');
     painel()
     corpo=(kpis([('Em custódia',H('k_cu'),H('k_cu_s')),('Fila de separação',H('k_se'),H('k_se_s')),('Impedidas',H('k_im'),H('k_im_s')),('Sobras a receber',f"{R31['custodia']} sc",'REQ-031 · OS-0417 em conferência')])
            + bloco('Fila de separação por ordem','Separe e entregue só o saldo autorizado da versão aprovada; clique na linha para ajustar recebedor, local e data.',
-                   g+nota('Material entregue sai do disponível e passa à custódia da ordem; o consumo apontado no campo não repete a saída. Entrega parcial libera só a parcela executável.'),
+                   g,
                    acao=mini('open_sol','Solicitar','Cria requisição a partir da versão aprovada da O.S.','doc')+alink('MB-05.dc.html','Ler QR no app','Confere a entrega pelo app de campo','box')))
     HEIGHTS37[fname]=1080
     shell37('SU-07','Requisições e entregas',corpo,fname=fname,
       subtitle='Fila de separação por ordem com solicitado, entregue, consumido e custódia; o detalhe concilia a devolução.',
       status=('2 impedidas · 10 sc de sobras a receber','red'),primary_html=prima('SU-07det.dc.html','Receber devolução da REQ-031'),
-      footer='Entrega só da versão aprovada pelo agrônomo; excesso e substituição exigem revisão (SU-07 · FO-09 · cap. 42).')
+      footer='Entrega só da versão aprovada pelo agrônomo; excesso e substituição exigem revisão (SU-07 · FO-09 · cap. 42). '
+             'Material entregue sai do disponível e passa à custódia da ordem; o consumo apontado no campo não repete a saída. Entrega parcial libera só a parcela executável.')
 
 # ---- SU-07det · REQ-031 · OS-0417 · MAP 11-52 (DEMO-03) ----
 def su07det():
@@ -992,7 +999,7 @@ function EXTRAVALS(self,v){ pnVals(self,v); const k=cust(self), conc=!!self.stat
           +mini('do_conc','Conciliar custódia','Tenta conciliar; recusa enquanto houver saldo em custódia','check')+'</sc-if>')
     corpo=(continuity('Término físico · consumo 70 sc','OS-0417 em conferência',H('ct_falta'),H('ct_prox'))
            + bloco('Balanço da requisição','Confira entregue, consumido, devolvido e o saldo em custódia; clique na linha para ver a origem.',g
-                   + nota('É o mesmo balanço que a conferência da ordem usa. Declarar a devolução não aumenta o utilizável do depósito; só o recebimento conferido transfere a custódia.'),acao=acts)
+                   ,acao=acts)
            + bloco('Linha do tempo','Acompanhe cada entrega, apontamento e devolução desta requisição.',tl))
     prim=(f'<sc-if value="{H("open")}" hint-placeholder-val="{T()}">{primb("try_rec","Receber devolução","truck")}</sc-if>'
           f'<sc-if value="{H("zero")}" hint-placeholder-val="{F()}">{primb("do_conc","Conciliar custódia","check")}</sc-if>'
@@ -1001,7 +1008,8 @@ function EXTRAVALS(self,v){ pnVals(self,v); const k=cust(self), conc=!!self.stat
     shell37('SU-07',f"REQ-031 · OS-0417 · {R31['item']}",corpo,fname=fname,crumbs_extra=['REQ-031'],
       subtitle=f'Devolução parcial: {E0} entregues − {C0} consumidas − {V0} recebidas = {K0} sc sob custódia; o encerramento espera a conciliação.',
       status=(MARK,'gray'),primary_html=prim,
-      footer='DEMO-03 · item recebido em quarentena não vira apto; calda pronta não volta como produto puro (ESTOS-04/05/06 · OSFASE-05).')
+      footer='DEMO-03 · item recebido em quarentena não vira apto; calda pronta não volta como produto puro (ESTOS-04/05/06 · OSFASE-05). '
+             'É o mesmo balanço que a conferência da ordem usa. Declarar a devolução não aumenta o utilizável do depósito; só o recebimento conferido transfere a custódia.')
     dyn_status(fname)
 
 # ================= SU-08 · Transferências e movimentos =================
@@ -1080,14 +1088,15 @@ function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_mov');
     painel()
     corpo=(kpis([('Em trânsito',H('k_tr'),H('k_tr_s')),('Perdas aguardando gestor',H('k_pe'),H('k_pe_s')),('Estornos lançados',H('k_es'),H('k_es_s'))])
            + bloco('Extrato imutável','Confira cada movimento com documento, origem e destino; clique na linha para ver o vínculo e a origem.',
-                   g+nota('Correção não apaga a operação original: o estorno cria movimento novo com vínculo. Movimentos entre empresas seguem a NF; devoluções de campo entram pela requisição com o mesmo documento.'),
+                   g,
                    acao=mini('open_per','Registrar perda','Submete perda à alçada do gestor','alert')+mini('open_est','Estornar com vínculo','Cria estorno que referencia o movimento original','doc')
                         +alink('SU-07.dc.html','Devolver','Devoluções de campo entram pela requisição','truck')))
     HEIGHTS37[fname]=1180
     shell37('SU-08','Transferências e movimentos',corpo,fname=fname,
       subtitle='Extrato imutável e transferências entre locais, custódias e empresas; cada linha com documento e confirmação.',
       status=(MARK,'gray'),primary_html=primb('open_trf','Transferir entre locais','truck'),
-      footer='Transferência tem trânsito e confirmação no destino; estorno referencia o movimento estornado (SU-08 · FO-32).')
+      footer='Transferência tem trânsito e confirmação no destino; estorno referencia o movimento estornado (SU-08 · FO-32). '
+             'Correção não apaga a operação original: o estorno cria movimento novo com vínculo. Movimentos entre empresas seguem a NF; devoluções de campo entram pela requisição com o mesmo documento.')
     dyn_status(fname)
 
 # ================= SU-09 · Inventários e ajustes =================
@@ -1159,7 +1168,7 @@ function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_inv');
     painel()
     corpo=(kpis([('Ajustes aguardando gestor',H('k_ag'),H('k_ag_s')),('Diferenças a submeter',H('k_di'),H('k_di_s')),('Contagens planejadas',H('k_pl'),H('k_pl_s'))])
            + bloco('Contagens cegas por local, item e lote','Planeje, conte e trate cada diferença com causa, evidência e aprovador; clique na linha para completar os dados.',
-                   g+nota('O contador não vê o saldo do sistema e os movimentos do escopo ficam suspensos entre o corte e o encerramento: movimentação durante a contagem não vira diferença fictícia. Quem conta não aprova o ajuste.'),
+                   g,
                    acao=mini('open_plan','Planejar contagem','Cria contagem cega com corte de movimentos','calendar')+alink('MB-05.dc.html','Contar no app','Abre a contagem no app de campo','box')))
     prim=(f'<sc-if value="{H("has2609")}" hint-placeholder-val="{T()}">{primb("apr2609","Aprovar ajuste INV-2609","check")}</sc-if>'
           f'<sc-if value="{H("no2609")}" hint-placeholder-val="{F()}">{prima("SU-08.dc.html","Ver efeito no extrato")}</sc-if>')
@@ -1167,5 +1176,6 @@ function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_inv');
     shell37('SU-09','Inventários e ajustes',corpo,fname=fname,
       subtitle='Contagens cegas com corte de movimentos, recontagem, causa e alçada; ajuste aprovado vira movimento no extrato.',
       status=(MARK,'gray'),primary_html=prim,
-      footer='Diferença vira ajuste com causa, evidência e alçada, nunca correção silenciosa; limite e segregação seguem Configurações › Usuários e alçadas (SU-09 · FO-32).')
+      footer='Diferença vira ajuste com causa, evidência e alçada, nunca correção silenciosa; limite e segregação seguem Configurações › Usuários e alçadas (SU-09 · FO-32). '
+             'O contador não vê o saldo do sistema e os movimentos do escopo ficam suspensos entre o corte e o encerramento: movimentação durante a contagem não vira diferença fictícia. Quem conta não aprova o ajuste.')
     dyn_status(fname)

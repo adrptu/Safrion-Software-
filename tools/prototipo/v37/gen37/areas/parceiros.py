@@ -172,12 +172,13 @@ def pt02():
           acao=[Pt.act('Baixar comprovante','Comprovante da v2 (PDF) · motivo agregado da não seleção: condição comercial — sem proposta concorrente nem dado reservado.')]),
       ],edit=dict(m='ro',title='Cotação'),search=False,total=False,gid='g_cot')
     corpo=section('Minhas cotações','Abra a cotação para revisar sua proposta; outros fornecedores nunca aparecem aqui.','',
-        g+nota('Cada versão submetida fica preservada — revisar antes do prazo cria nova versão; motivo de não seleção é agregado.'))
+        g)
     shell37('PT-02','Cotações concedidas',corpo,ctx=CTX_F,perfil=PERFIL_F,
       subtitle='Você responde pelo convite recebido — o dossiê mostra só o que foi concedido, com finalidade e prazo de acesso.',
       status=('1 aberta · revisa até '+COT['revisa'],'yellow'),
       primary='Abrir proposta '+COT['sol'],primary_href='PT-02det.dc.html',
-      footer=f"Convite nasce da correspondência categoria/cultura/região do seu perfil (57.4.2); acesso ao dossiê da {COT['sol']} expira em {COT['acesso']}.")
+      footer=f"Convite nasce da correspondência categoria/cultura/região do seu perfil (57.4.2); acesso ao dossiê da {COT['sol']} expira em {COT['acesso']}. "
+             "Cada versão submetida fica preservada: revisar antes do prazo cria nova versão; motivo de não seleção é agregado.")
 
 # ---- PT-02det · dossiê + proposta da SOL-2026-07 · Fertilizantes ----
 def pt02det():
@@ -395,13 +396,13 @@ def pt05det():
     corpo=(continuity('Negócios e documentos',f"PC-088 · {CT['recebido']} t recebidas",f"NF-e da carga 3 ({CT['prev3']}) · laudo até {CT['laudo']}",'Enviar documento da carga 3')
       +section('Entregas','Clique na carga liberada para atualizar data prevista e placa.','',
         stepper([('Cotação respondida','done'),('Proposta selecionada','done'),('Pedido confirmado','done'),('Entrega e documentos','now'),('Recebimento','todo'),('Pagamento','todo')],
-                'Entregue dentro da janela com NF-e e laudo por carga — recusa no recebimento abre divergência, não devolve ao estoque apto.')
+                'Entregue dentro da janela com NF-e e laudo por carga')
         +'<div style="height: 12px;"></div>'+cg,state='yellow')
       +section('Documentos','Envie NF-e e laudo de cada carga; o comprador confere no recebimento.',[div],dc)
       +section('Condição aceita','Confira a condição acordada; mudar exige novo aceite do comprador.','',cond,state='gray'))
     shell37('PT-05',f"Negócio · {CT['id']} KCl 60%",corpo,fname=fname,ctx=CTX_F,perfil=PERFIL_F,
       crumbs_extra=['PC-088'],status=('Carga 3 a entregar · NF-e pendente','yellow'),primary_html=env,
-      footer='Revisão de pedido preserva versões e exige novo aceite; recusa no recebimento não recoloca produto em estoque apto (FO-35).')
+      footer='Revisão de pedido preserva versões e exige novo aceite; recusa no recebimento abre divergência e não recoloca produto em estoque apto (FO-35).')
 
 # ============ PT-06 · Indicadores do parceiro (Fertisul) ============
 def pt06():

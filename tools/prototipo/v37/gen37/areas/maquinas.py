@@ -317,7 +317,7 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2pe
   const aptos=c.ordem.filter(id=>(c.ativos[id]||{}).cond==='Apto').length; const cp=manCustoPeriodo(c,per); const cu=manCumprimento(c,per);
   v.c_at=[card('naoaptos','Aptos agora',aptos+' de '+c.ordem.length,'condição, não disponibilidade · toque: os não aptos',st.card==='naoaptos'),
     card('','Cumprimento de preventiva',cu?(cu.pct+' %'):'não calculável',cu?(cu.ok+' de '+cu.n+' no prazo · '+P.t):'sem encerradas com vencimento registrado · '+P.t),
-    card('','Custo de manutenção · '+P.t,manRS(cp.enc),'das OMs encerradas no sistema · em andamento '+manRS(cp.and)+' est.'),card('','MTBF · MTTR','não estimável','sem histórico de falhas (KPI-PCM-02)')];
+    card('','Custo de manutenção · '+P.t,manRS(cp.enc),'em andamento '+manRS(cp.and)+' est.'),card('','MTBF · MTTR','não estimável','sem histórico de falhas (KPI-PCM-02)')];
   v.at_ativos=(st.amodo||'ativos')==='ativos'; v.at_abast=st.amodo==='abast';
   v.at_modos=[['ativos','Ativos'],['abast','Abastecimentos']].map(([k,t])=>({t,on:String((st.amodo||'ativos')===k),st:ma_pill((st.amodo||'ativos')===k),go:()=>self.setState({amodo:k})}));
   v.f_pends=[{v:'',t:'Toda pendência'}].concat(['Leitura a confirmar','Sem plano','Achado sem ordem','Desvio de consumo','Vence em 30 d','Restrição vencida'].map(x=>({v:x,t:x}))); v.f_pend=st.fpend||''; v.f_setpend=(e)=>self.setState({fpend:e.target.value});

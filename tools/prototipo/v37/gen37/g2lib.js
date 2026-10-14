@@ -615,18 +615,21 @@ function g2foto(){ const f={}; if(typeof document==='undefined') return f;
   document.querySelectorAll('[role=list]').forEach(l=>g2blocos(l).forEach((col,ci)=>col.querySelectorAll('[role=button],[role=listitem]').forEach(k=>{
     const b=k.querySelector('b'); add('k:'+(b?g2txt(b):(k.getAttribute('aria-label')||g2txt(k).slice(0,40))),k,1,ci+'|'+g2txt(k)); })));
   document.querySelectorAll('[data-g2k]').forEach(e=>add('x:'+e.getAttribute('data-g2k'),e,1));
-  const h=document.querySelector('header h1'); if(h&&h.nextElementSibling) add('h:estado',h.nextElementSibling,2);
+  const h=document.querySelector('header h1'); const he=g2estadoCab(h); if(he) add('h:estado',he,2);
   document.querySelectorAll('[role=region][aria-label],section[aria-label]').forEach(e=>add('g:'+e.getAttribute('aria-label'),e,2));
   document.querySelectorAll('aside[role=dialog] h2').forEach(t=>add('d:'+g2txt(t).slice(0,60),t.parentElement,2));
   document.querySelectorAll('main section').forEach((s,i)=>{ const t=s.querySelector('h2,h3'); add('s:'+(t?g2txt(t).slice(0,60):i),s,3); });
   return f; }
+// estado do cabeçalho: o irmão do título, pulando o ⓘ "Regras desta tela" (TEXTO-2, 14/10/2026: com o ⓘ logo depois do h1, o anúncio dizia
+// "Tela: … · i" e o realce do estado olhava o ⓘ em vez do selo)
+function g2estadoCab(h){ let e=h&&h.nextElementSibling; while(e&&e.classList&&e.classList.contains('g2-info')) e=e.nextElementSibling; return e||null; }
 // tela montada: barra de carga termina, título realçado e anunciado; vindo de um link do protótipo, o foco vai ao título da tela nova
 function g2montou(self){ if(typeof document==='undefined') return; g2buscaUnica(self);   /* um campo de busca por tela (13/10) */
   setTimeout(()=>{ try{
     const h=document.querySelector('header h1')||document.querySelector('h1');
     let veio=false; try{ const t=Number(sessionStorage.getItem('g2nav')||0); sessionStorage.removeItem('g2nav'); veio=t>0&&Date.now()-t<15000; }catch(e){}
     g2carga('chega'); setTimeout(()=>g2carga('fim'),g2menos()?300:40);
-    const st=h&&h.nextElementSibling; const stT=st?g2txt(st):''; const tit=h?g2txt(h):document.title;
+    const st=g2estadoCab(h); const stT=st?g2txt(st):''; const tit=h?g2txt(h):document.title;
     const ae=document.activeElement; const foca=veio&&h&&!location.hash&&(!ae||ae===document.body);
     /* revisão DS (achado 10): com o foco no título o leitor de tela já lê o título; o anúncio leva só o estado (sem ler o título duas vezes) */
     g2flash(h,foca?stT:('Tela: '+tit+(stT?' · '+stT:'')));

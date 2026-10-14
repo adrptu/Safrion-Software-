@@ -75,7 +75,7 @@ try:
       print('DEMO-05/15 · MB-08')
       open_('MB-08'); b=BODY()
       ok('hoje 20:00–amanhã 10:31 · 1 volta de 14,5 h' in b and 'iniciada 20:02' in b and '2,1 de 14,5 h executadas' in b and '21:04' not in b and '21:32' not in b,'janela da volta inteira (14,5 h), início e andamento')
-      ok('13,5 mm (OS-0422)' in b and '14 mm' not in b,'13,5 mm da OS-0422')
+      ok('OS-0422 · 13,5 mm' in b and '14 mm' not in b,'13,5 mm da OS-0422')   # TEXTO-2 (14/10/2026): a nota virou o dado "OS-0422 · 13,5 mm em 2 passadas"; a regra da divisão foi para a dica ⓘ
       open_('MB-08x-recibo'); b=BODY()
       ok('LIB-2287' in b and 'LB-2205' not in b,'liberação LIB-2287')
       ok('10,81 mm nos 80 ha (volta completa' in b and '20:02–24/09 10:33' in b,'execução da volta completa')

@@ -218,10 +218,9 @@ def cf01():
     nota = lambda t: f'<div class="conf-nota" style="padding: 0 0 10px;">{t}</div>'
     corpo = ('<div style="display: flex; flex-direction: column; gap: 18px;">' + CF1_CSS
              + section('Pessoas', 'Conceda e retire papéis, convide e desative acesso; clique na pessoa para abrir.', '',
-                       nota(f'Origem: Cadastros › Pessoas e equipes (nome, função, habilidade e CREA). Aqui não se cadastra pessoa. '
-                            f'Papel é permissão de decidir; quem tem acesso sem papel só usa o app de campo.') + g_pes)
+                       g_pes)
              + section('Alçadas', 'Confira quem decide cada comando; clique na alçada para ver as versões, as ordens afetadas e mudar o que é editável.', '',
-                       nota('Os comandos da O.S., do Estoque e do app leem esta tabela. Mudança vale para o próximo comando e nunca reescreve registro antigo.') + g_alc)
+                       g_alc)
              + '</div>')
     # painel Convidar (lista curta)
     cvl = (f'<div style="display: flex; flex-direction: column; gap: 8px;"><sc-for list="{H("cf1_cvl")}" as="cv" hint-placeholder-count="1">'
@@ -275,7 +274,9 @@ def cf01():
     shell37('CF-01', 'Usuários e alçadas', corpo, fname=fname, search=False,
             subtitle='Quem entra e quem decide cada comando. Pessoas vêm do cadastro; papéis e alçadas valem para o próximo comando, na hora.',
             primary_html=f'<button type="button" class="conf-prim" disabled="{H("cf1_prim_dis")}" title="{H("cf1_prim_lab")}" onClick="{H("cf1_prim_fn")}" style="{BTN_ST(True)}">{H("cf1_prim_t")}</button>',
-            footer='O perfil de demonstração (Ver como) mostra a experiência e não é segurança: no software o servidor tira o ator da sessão.')
+            footer='O perfil de demonstração (Ver como) mostra a experiência e não é segurança: no software o servidor tira o ator da sessão. '
+                   'Pessoas vêm de Cadastros › Pessoas e equipes (nome, função, habilidade e CREA); aqui não se cadastra pessoa. Papel é permissão de decidir; quem tem acesso sem papel só usa o app de campo. '
+                   'Os comandos da O.S., do Estoque e do app leem a tabela de alçadas; mudança vale para o próximo comando e nunca reescreve registro antigo.')
     injeta(fname, 'Usuários e alçadas', chip_dyn('cf1_st'))
 
 # ===================================== CF-03 · Integrações (CONF-01 §3.3) =====================================
@@ -322,9 +323,7 @@ def cf03():
                  qf=dict(k='pend', cut=' · ', todas='Todas'), edit=dict(m='ro', title='Conexão', fields=[]))
     corpo = ('<div style="display: flex; flex-direction: column; gap: 18px;">' + CF1_CSS
              + section('Conexões', 'Confira o que entra e sai e se está em dia; clique na conexão para ver quem escreve cada objeto e as pendências.', '',
-                       f'<div class="conf-nota" style="padding: 0 0 10px; font-weight: 700; color: {INK};">{H("cf3_res")}</div>' + g_con
-                       + '<div class="conf-nota" style="padding-top: 10px;">Sincronizar envia ao ERP cada movimento uma vez por conteúdo: repetir não reenvia; um consumo estornado depois de enviado volta uma vez, como estorno. '
-                       'O app de campo envia pelo próprio aparelho quando há sinal.</div>')
+                       f'<div class="conf-nota" style="padding: 0 0 10px; font-weight: 700; color: {INK};">{H("cf3_res")}</div>' + g_con)
              + '</div>')
     corpo_c = (f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">{chip_dyn("cf3_cest")}<span class="conf-nota">Demonstração · nenhuma conexão real</span></div>'
                + _lin('cf3_cl') + titulo('Pendências')
@@ -337,7 +336,8 @@ def cf03():
     shell37('CF-03', 'Integrações', corpo, fname=fname, search=False,
             subtitle='O que entra e sai, de onde e se está em dia. Só demonstração: nenhuma conexão real e nenhuma credencial.',
             primary_html=f'<button type="button" class="conf-prim" onClick="{H("cf3_prim_fn")}" style="{BTN_ST(True)}">Sincronizar agora (simulado)</button>',
-            footer='Homologação, produção e credenciais reais só com autorização e custo aprovados pelo proprietário (AGENTS §2; ENG-017).')
+            footer='Homologação, produção e credenciais reais só com autorização e custo aprovados pelo proprietário (AGENTS §2; ENG-017). '
+                   'Sincronizar envia ao ERP cada movimento uma vez por conteúdo: repetir não reenvia; um consumo estornado depois de enviado volta uma vez, como estorno. O app de campo envia pelo próprio aparelho quando há sinal.')
     injeta(fname, 'Integrações', chip_dyn('cf3_st'))
 
 # ===================================== CF-04 · Auditoria (CONF-01 §3.2) =====================================

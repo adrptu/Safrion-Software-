@@ -1,0 +1,79 @@
+=== final_busca_unica_test.py.txt
+RESULTADO: 7 ok · 0 falhas
+=== final_ds_test.py.txt
+FALHOU D8 título igual ao rótulo visível (fonte do mapa no IN-04): sem dica · [None, {'vis': False, 't': '', 'role': ''}]
+FALHOU D8b ponteiro na fonte do mapa (title igual ao texto): o title sai (sem a dica nativa repetida) e volta quando o ponteiro sai · [None, 'sem fonte', 'sem fonte']
+RESULTADO: FALHOU 67/69
+=== final_ds_unit_test.py.txt
+RESULTADO: OK 44/44
+RESULTADO: OK 29/29
+=== final_links_ocultos_test.py.txt
+FALHA E1b só osc_liberar (processo_os) chama cenLiberar: nenhum atalho libera sem gravar CMD-42/CMD-06 (o Beneficiamento libera pelo benAutorizarLiberar, E1d) · ['areas/processo_os.py', 'est_validade_conc_pendente.js']
+TOTAL 16 · falhas 1
+=== final_mbtest.py.txt
+FALHAS: 0
+=== final_nav_modulos_test.py.txt
+RESULTADO: 15 ok · 0 falhas
+=== final_paginas_scan_test.py.txt
+RESULTADO: 4 ok · 0 falhas (144 páginas)
+=== final_regras_toque_test.py.txt
+RESULTADO: 5 ok · 0 falhas
+=== t_config_test.py.txt
+=== t_cotest.py.txt
+FALHOU CO-01: faixa com 7 etapas por link e etapa 1 atual
+FALHOU CO-02: faixa com 7 etapas por link e etapa 2 atual
+FALHOU CO-02det: faixa com 7 etapas por link e etapa 2 atual
+FALHOU CO-03: faixa com 7 etapas por link e etapa 3 atual
+FALHOU CO-04: faixa com 7 etapas por link e etapa 4 atual
+FALHOU CO-05: faixa com 7 etapas por link e etapa 5 atual
+FALHOU CO-05det: faixa com 7 etapas por link e etapa 5 atual
+FALHOU CO-06: faixa com 7 etapas por link e etapa 6 atual
+FALHOU CO-06det: faixa com 7 etapas por link e etapa 6 atual
+FALHOU CO-07: faixa com 7 etapas por link e etapa 7 atual
+FALHOU CO-05: OB-0110 com origem OC-0510 (sem OC-0507)
+FALHOU CO-04: âncoras DEMO-07 · Encaminhar processo abre o beneficiamento (CO-05); solicitar inspeção abre a qualidade (CO-06) — sempre preservando a carga de origem. A entrada não equivale a liberação comercial: produto em processo
+FALHOU CO-07: âncoras DEMO-07/19
+40/53 verificações OK
+=== t_cotest_base.txt
+FALHOU CO-01: faixa com 7 etapas por link e etapa 1 atual
+FALHOU CO-02: faixa com 7 etapas por link e etapa 2 atual
+FALHOU CO-02det: faixa com 7 etapas por link e etapa 2 atual
+FALHOU CO-03: faixa com 7 etapas por link e etapa 3 atual
+FALHOU CO-04: faixa com 7 etapas por link e etapa 4 atual
+FALHOU CO-05: faixa com 7 etapas por link e etapa 5 atual
+FALHOU CO-05det: faixa com 7 etapas por link e etapa 5 atual
+FALHOU CO-06: faixa com 7 etapas por link e etapa 6 atual
+FALHOU CO-06det: faixa com 7 etapas por link e etapa 6 atual
+FALHOU CO-07: faixa com 7 etapas por link e etapa 7 atual
+FALHOU CO-05: OB-0110 com origem OC-0510 (sem OC-0507)
+FALHOU CO-04: âncoras DEMO-07
+FALHOU CO-07: âncoras DEMO-07/19
+40/53 verificações OK
+=== t_config_base_cf01.txt
+FALHOU A14 as duas grades têm busca, filtro rápido e ordenação/filtro por coluna; "%" na célula da AL-05 · [[8, 10], 'AL-05 · Dispensar saldo da O.S. CMD-47 gestor e agrônomo · Ana até 20 % da área da ordem · acima: direção e agrônomo Vigente v1 desde 01/07/2026 Editável: limite em %']
+RESULTADO: FALHOU 38/39
+=== t_plataforma_test.py.txt
+FALHA A14a BO-02: as 2 grades têm busca, ordenação e filtro por coluna; R$ e ha na célula · [[{'busca': True, 'ord': 8, 'fil': 8}, {'busca': False, 'ord': 6, 'fil': 6}], 'Grupo Santa Rita demonstração · medida no cadastro Completo Ativa 2.570,23 ha 2.600 ha R$ 5.140,46 — próxima fatura 01/10/2026']
+FALHA A14d BO-01: as 2 grades têm busca, ordenação e filtro · [{'busca': True, 'ord': 9, 'fil': 9}, {'busca': False, 'ord': 3, 'fil': 3}]
+RESULTADO: 20 ok · 2 falhas
+=== t_plataforma_base.txt
+FALHA A14a BO-02: as 2 grades têm busca, ordenação e filtro por coluna; R$ e ha na célula · [[{'busca': True, 'ord': 8, 'fil': 8}, {'busca': False, 'ord': 6, 'fil': 6}], 'Grupo Santa Rita demonstração · medida no cadastro Completo Ativa 2.570,23 ha 2.600 ha R$ 5.140,46 — próxima fatura 01/10/2026']
+FALHA A14d BO-01: as 2 grades têm busca, ordenação e filtro · [{'busca': True, 'ord': 9, 'fil': 9}, {'busca': False, 'ord': 3, 'fil': 3}]
+RESULTADO: 20 ok · 2 falhas
+=== t_ds_base_D.txt
+FALHOU D8 título igual ao rótulo visível (fonte do mapa no IN-04): sem dica · [None, {'vis': False, 't': '', 'role': ''}]
+FALHOU D8b ponteiro na fonte do mapa (title igual ao texto): o title sai (sem a dica nativa repetida) e volta quando o ponteiro sai · [None, 'sem fonte', 'sem fonte']
+RESULTADO: FALHOU 16/18
+=== t_links_base.txt
+FALHA E1b só osc_liberar (processo_os) chama cenLiberar: nenhum atalho libera sem gravar CMD-42/CMD-06 (o Beneficiamento libera pelo benAutorizarLiberar, E1d) · ['areas/processo_os.py', 'est_validade_conc_pendente.js']
+TOTAL 16 · falhas 1
+=== t_getest.py.txt
+FALHAS: [('GE-04', 'pc088_unico')]
+=== t_getest_base.py.txt
+FALHAS: [('GE-04', 'pc088_unico')]
+=== t_vetest.py.txt
+FALHA OF-103 editada: OF-103 · enviada Mamão Formosa A 2.000 kg 05/10–11/10 CIF região Sudeste Frutas Real R$ 3,05/kg · 28 d Enviada · reservada pela RT-0112 válida até 30/09 Ver reserva
+RESULTADO: 1 FALHA(S)
+=== t_vetest_base.py.txt
+FALHA OF-103 editada: OF-103 · enviada Mamão Formosa A 2.000 kg 05/10–11/10 CIF região Sudeste Frutas Real R$ 3,05/kg · 28 d Enviada · reservada pela RT-0112 válida até 30/09 Ver reserva
+RESULTADO: 1 FALHA(S)

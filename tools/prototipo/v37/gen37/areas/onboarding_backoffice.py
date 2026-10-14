@@ -176,16 +176,15 @@ def on01det():
        search=False,gid='g_imp',total=False)
     corpo=(
       continuity('Assistente de implantação (passo 5)','Prévia da importação',H('imp_falta'),'Validar prévia')
-      + section('Erros e mapeamento por objeto','Clique no objeto para corrigir o erro na própria linha; depois valide para gravar o que passou.','',g,state='yellow')
-      + section('Regra da importação','Grave somente o que foi validado; a IA sugere mapeamentos, mas não completa dados.','',
-        texto(f'Estoque, análise ou plantio {B("nunca")} são completados com dados inventados. Área importada maior que a declarada ({TRIAL["area_ha"]} ha) '
-              f'abre {B("revisão transparente do limite do trial")}, sem cobrança automática.'),state='gray'))
+      + section('Erros e mapeamento por objeto','Clique no objeto para corrigir o erro na própria linha; depois valide para gravar o que passou.','',g,state='yellow'))
     EXTRAJS[0]=ON_JS
     shell37('ON-01','Importação · prévia e erros',corpo,fname=fn,crumbs_extra=['Importação'],ctx=CTX_ON,perfil=PERFIL_ON,
       subtitle='Prévia com mapeamento, sistema de coordenadas e erros por objeto; duplicidade detectada e relatório corrigível.',
       status=('3 objetos com erro','yellow'),
       primary_html=f'<button type="button" onClick="{H("val_fn")}" title="Gravar o que passou na validação" style="{BTN_ST(True)}">Validar prévia</button>',
-      footer='Validar grava somente o que passou; o erro permanece preenchido na prévia com correção localizada (cap. 58.3).')
+      footer='Validar grava somente o que passou; o erro permanece preenchido na prévia com correção localizada (cap. 58.3). '
+             f'A IA sugere mapeamentos, mas não completa dados: estoque, análise ou plantio nunca são completados com dados inventados. Área importada maior que a declarada ({TRIAL["area_ha"]} ha) '
+             'abre revisão transparente do limite do trial, sem cobrança automática.')
 
 def build():
     on01(); on01det()
