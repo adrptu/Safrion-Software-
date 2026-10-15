@@ -50,7 +50,7 @@ MEDIR = r"""(()=>{
   const corte=[...m.querySelectorAll('*')].filter(e=>vis(e)&&(e.children.length===0||e.matches('button,a,input,select,textarea'))&&(n(e.innerText||e.value||'')||e.matches('input,select,svg'))).filter(e=>{ const r=e.getBoundingClientRect(); return (r.right>mr.right+1||r.left<mr.left-1)&&!rolavel(e); });
   out.cortados=corte.length; out.cortadosEx=corte.slice(0,5).map(e=>n(e.innerText||e.value||e.tagName).slice(0,30));
   const tabs=[...m.querySelectorAll('[role=table]')].filter(vis); out.tabelas=tabs.length;
-  const fol=[...m.querySelectorAll('*')].filter(e=>e.getClientRects().length&&[...e.childNodes].some(x=>x.nodeType===3&&x.textContent.trim())&&!e.closest('[role=table]'));
+  const fol=[...m.querySelectorAll('*')].filter(e=>e.getClientRects().length&&[...e.childNodes].some(x=>x.nodeType===3&&x.textContent.trim())&&!e.closest('[role=table]')&&!e.closest('.acoes-sr,.etp-sr,.sr-only'));   // texto só para leitor de tela não ocupa a tela
   const RR=fol.map(e=>{const rg=document.createRange(); rg.selectNodeContents(e); return [...rg.getClientRects()].filter(r=>r.width>1);}); const sm=[];
   // conteúdo que rola por baixo da área de ações presa (sticky, fundo opaco, por cima no ponto) fica escondido: não é texto sobre texto
   const ac=document.querySelector('[data-acoes]'), acCs=ac&&getComputedStyle(ac), acOpaca=!!acCs&&acCs.position==='sticky'&&/^rgb\(/.test(acCs.backgroundColor);
@@ -124,7 +124,7 @@ p,srv=serve(os.path.join(HERE,'_render')); srv2=None; time.sleep(.6)
 c=None
 NOMES={'CMP':['Escolha a safra','Confira a demanda','Solicite cotações','Compare propostas','Aprove a compra','Acompanhe a entrega'],
        'SAF':['Escolha a safra'],'PA':['Escolha o plano'],'EST':['Confira recebimentos'],'IR-02':['Confira a necessidade','Programe a irrigação']}   # PCM simplificado (S1): MA-01 sai das faixas (tela única MA, sem etapas)
-GUIADO=('CMP','SAF','PA')   # progresso informativo; EST, IR e MA são telas/seções de trabalho paralelo (navegação, sem número de etapa)
+GUIADO=('CMP','SAF','PA')   # progresso numerado (desde 15/10 a etapa também leva à tela); EST, IR e MA são telas/seções de trabalho paralelo (navegação, sem número de etapa)
 ATUAL={'CMP':(1,6),'SAF':(1,4),'PA':(1,3),'EST':(1,6),'IR-02':(2,4)}
 P8=['CMP','SAF','PA','EST','OS','IR-02','MA','AG-07']   # MA: a tela única da Manutenção (sem faixa) segue nos itens 3 e 4
 CLK="""((t,root)=>{const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ'; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a,label')].filter(e=>e.getClientRects().length); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
@@ -175,14 +175,18 @@ try:
         while k<60 and not J("document.activeElement&&document.activeElement.classList.contains('etp-chk')"): tab(); k+=1
         c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':' ','code':'Space','windowsVirtualKeyCode':32,'text':' '}); c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':' ','code':'Space','windowsVirtualKeyCode':32}); time.sleep(.3)
         m=J(MEDIR); tab(); dent=J("(()=>{const a=document.activeElement; return !!(a&&a.closest('.etp-itens'))&&a.innerText.replace(/\\s+/g,' ').trim();})()"); shot('CMP_390_lista_teclado')
-        chk('9 teclado · Tab chega ao rótulo da etapa atual, Espaço abre a lista em folha (6 etapas, sem sobreposição) e o Tab seguinte não entra nela: a lista só informa (UX-ACAO-UNICA)', k<60 and m['folha'] and m['etapasVis']==6 and m['sobrepoe']==0 and not m['vazam'] and not dent, [k,m['folha'],m['etapasVis'],m['sobrepoe'],m['vazam'],dent])
-        # 10 · toque: escolher a safra, abrir a lista, ir à etapa 3; a lista fecha sozinha e a safra continua no contexto
+        chk('9 teclado · Tab chega ao rótulo da etapa atual, Espaço abre a lista em folha (6 etapas, sem sobreposição) e o Tab seguinte entra nela, na etapa 1 (15/10: a etapa leva à tela)', k<60 and m['folha'] and m['etapasVis']==6 and m['sobrepoe']==0 and not m['vazam'] and bool(dent) and dent.startswith('1'), [k,m['folha'],m['etapasVis'],m['sobrepoe'],m['vazam'],dent])
+        # 10 · toque: Abrir compra (etapa 2); o avanço da área de ações leva à etapa 3; pela lista aberta, tocar na etapa 2 volta a ela,
+        #      a lista fecha sozinha e a safra continua no contexto (15/10/2026: a etapa leva à tela)
         abre('CMP'); clk('Abrir compra'); m1=J(MEDIR)
-        clk('Etapa 2 de 6'); aberta=J(MEDIR)['etapasVis']; r=clk('3 Solicite cotações','.etp-itens'); m15=J(MEDIR)
         r2=J("(()=>{const b=document.querySelector('[data-acoes] [data-acao=avancar]'); if(!b) return 'sem avanço'; b.scrollIntoView({block:'center'}); b.click(); return b.innerText.trim();})()"); time.sleep(.5)
-        m2=J(MEDIR); hd=J("[...document.querySelectorAll('header,.mf-tela')].map(e=>e.innerText).join(' ').replace(/\\s+/g,' ')"); shot('CMP_390_etapa3')
-        chk('10 toque · Abrir compra → "Etapa 2 de 6 · Confira a demanda"; a lista aberta só informa (a etapa 3 não é alvo de toque e a etapa não muda); o avanço "Solicitar cotações ›" da área de ações leva à etapa 3, sem texto sobre texto; Safra 2026/27 no contexto (UX-ACAO-UNICA)',
-            m1['progresso'].startswith('Etapa 2 de 6 · Confira a demanda') and aberta==6 and r!='ok' and m15['progresso'].startswith('Etapa 2 de 6') and r2.startswith('Solicitar cotações') and m2['progresso'].startswith('Etapa 3 de 6 · Solicite cotações') and m2['etapasVis']==0 and not m2['textoSobreTexto'] and 'Safra 2026/27' in hd, [m1['progresso'],aberta,r,m15['progresso'],r2,m2['progresso'],m2['etapasVis'],m2['textoSobreTexto'],hd[:120]])
+        m2=J(MEDIR); shot('CMP_390_etapa3')
+        clk('Etapa 3 de 6'); aberta=J(MEDIR)['etapasVis']; r=clk('✓ Confira a demanda','.etp-itens'); m15=J(MEDIR)
+        clk('Etapa 2 de 6'); r3=clk('3 Solicite cotações','.etp-itens'); m16=J(MEDIR)   # e de volta à 3 pela lista: o 11 parte da etapa 3
+        hd=J("[...document.querySelectorAll('header,.mf-tela')].map(e=>e.innerText).join(' ').replace(/\\s+/g,' ')")
+        chk('10 toque · Abrir compra → "Etapa 2 de 6 · Confira a demanda"; o avanço "Solicitar cotações ›" leva à etapa 3, sem texto sobre texto; na lista aberta, tocar na etapa 2 (✓) volta a ela e a lista fecha, e na 3 leva de novo; Safra 2026/27 no contexto',
+            m1['progresso'].startswith('Etapa 2 de 6 · Confira a demanda') and r2.startswith('Solicitar cotações') and m2['progresso'].startswith('Etapa 3 de 6 · Solicite cotações') and m2['etapasVis']==0 and not m2['textoSobreTexto']
+            and aberta==6 and r=='ok' and m15['progresso'].startswith('Etapa 2 de 6 · Confira a demanda') and m15['etapasVis']==0 and r3=='ok' and m16['progresso'].startswith('Etapa 3 de 6') and 'Safra 2026/27' in hd, [m1['progresso'],r2,m2['progresso'],m2['etapasVis'],m2['textoSobreTexto'],aberta,r,m15['progresso'],m15['etapasVis'],r3,m16['progresso'],hd[:120]])
         # 11 · ‹ volta uma etapa; mudar de 390 para 1440 e voltar mantém etapa e safra (troca de zoom não perde contexto)
         J("document.querySelector('[data-acoes] [data-acao=voltar]').click()"); time.sleep(.4); m3=J(MEDIR)
         vp(1440,900); m4=J(MEDIR); cur=J("(document.querySelector('[aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ')"); shot('CMP_1440_mesma_sessao')
@@ -241,7 +245,7 @@ try:
         alvo={'CO-01':['Coletar contagem','Publicar versão']}   # PCM simplificado (S1): o seletor "Tarefa" do MA-01 saiu com os elegíveis (F40, D-25)   # MA-01 sem "Ver agenda" (PL-04 oculta e fixa · CTL-1, Frente F) · IR-02 da v43: o bloco "Agenda por captação" não tem ação própria (deriva do teste, não da tela)
         res={}
         for pg,t in alvo.items(): abre(pg); res[pg]=J(f"({ALC})({json.dumps(t)})")
-        abre('IR-02'); lin=J("(()=>{const e=[...document.querySelectorAll('main *')].find(x=>x.children.length===0&&x.innerText.trim()==='Agenda por captação'); const lh=parseFloat(getComputedStyle(e).lineHeight)||19; return Math.round(e.getBoundingClientRect().height/lh);})()")
+        abre('IR-02'); lin=J("(()=>{const e=[...document.querySelectorAll('main *')].find(x=>x.children.length===0&&(x.innerText||'').trim()==='Agenda por captação'); if(!e) return 99; const lh=parseFloat(getComputedStyle(e).lineHeight)||19; return Math.round(e.getBoundingClientRect().height/lh);})()")
         shot('CO-01_390_titulo_bloco')
         chk('18 390 px · título de bloco com ação (CO-01): seletor e comandos dentro da largura e tocáveis; título "Agenda por captação" (IR-02) em até 2 linhas',
             all(all(v=='ok' for k,v in r.items() if k!='_lado') and not r['_lado'] for r in res.values()) and lin<=2, [res,lin])
@@ -259,8 +263,8 @@ try:
         shot('EST_568x320_folha')
         abre('IR-02',800,360); u=J(UTIL); pr=J("(()=>{const e=[...document.querySelectorAll('header a,header button')].find(x=>x.innerText.trim()==='Programar irrigação'); e.scrollIntoView({block:'center'}); const r=e.getBoundingClientRect(); const h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2); return r.bottom<=innerHeight&&!!h&&e.contains(h);})()")
         shot('IR-02_800x360')
-        chk('20 tela baixa (800×360 e 568×320) · folha com a última etapa à vista (CMP, SAF: só informa) ou tocável (EST: seções); IR-02 com ≥ 280 px úteis (cabeçalho rola, faixa fica) e "Programar irrigação" alcançável',
-            all(r['aberta'] and r['folha'] and (r['ultTocavel'] or (k.split()[0] in GUIADO and r['ultVisivel'])) for k,r in res.items()) and u['rolaColuna'] and u['util']>=280 and pr, [res,u,pr])
+        chk('20 tela baixa (800×360 e 568×320) · folha com a última etapa tocável (CMP, SAF: etapas; EST: seções); IR-02 com ≥ 280 px úteis (cabeçalho rola, faixa fica) e "Programar irrigação" alcançável',
+            all(r['aberta'] and r['folha'] and r['ultTocavel'] for k,r in res.items()) and u['rolaColuna'] and u['util']>=280 and pr, [res,u,pr])
         # 21 · zoom de 200 % nas telas de cabeçalho alto (antes 95–111 px de conteúdo)
         res={}
         for pg in ('CO-02','CO-02det','CO-06','CO-06det','LO-02det'): abre(pg,720,450,2); res[pg]=J(UTIL)
@@ -273,7 +277,7 @@ try:
         toque(cen("document.querySelector('.etp-atual')")); toque(cen("document.querySelector('.etp-itens [aria-current=step]')")); f2=not J(ABERTA); at2=J(MEDIR)['progresso']
         toque(cen("document.querySelector('.etp-atual')")); toque(cen("[...document.querySelectorAll('.etp-itens>*')][2]")); f3=not J(ABERTA); at3=J(MEDIR)['progresso']
         c.call('Emulation.setTouchEmulationEnabled',{'enabled':False}); time.sleep(.2)
-        chk('22 toque · folha abre; tocar fora fecha; tocar na etapa atual fecha sem mudar; tocar na etapa 3 fecha sem navegar (a lista só informa · UX-ACAO-UNICA)', a1 and f1 and f2 and at2.startswith('Etapa 2 de 6') and f3 and at3.startswith('Etapa 2 de 6'), [a1,f1,f2,at2,f3,at3])
+        chk('22 toque · folha abre; tocar fora fecha; tocar na etapa atual fecha sem mudar; tocar na etapa 3 fecha e leva a ela (15/10: a etapa leva à tela)', a1 and f1 and f2 and at2.startswith('Etapa 2 de 6') and f3 and at3.startswith('Etapa 3 de 6'), [a1,f1,f2,at2,f3,at3])
         # 23 · alvos de toque da faixa compacta ≥ 44 px (PRD: ações de campo); itens da folha também
         abre('IR-02'); al=J("(()=>{const r=e=>{const b=e.getBoundingClientRect(); return [Math.round(b.width),Math.round(b.height)];}; const nav=document.querySelector('nav.etp'); return {rotulo:r(nav.querySelector('.etp-atual')),setas:[...nav.querySelectorAll('[aria-label^=\"Etapa anterior\"],[aria-label^=\"Próxima etapa\"]')].filter(e=>e.getClientRects().length).map(r)};})()")
         J("document.querySelector('.etp-atual').click()"); time.sleep(.2); fo=J(FOLHA)

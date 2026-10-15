@@ -134,6 +134,9 @@ def navbar(fid,fname=None):
 #    É o único caminho entre as telas irmãs (as do menu também estão no menu lateral, que é o nível Menu do master-detail).
 _ETP_LIM={3:520,4:640,5:740}
 def _etp_lim(n): return _ETP_LIM.get(n,520 if n<3 else 900)
+# cartões do processo (15/10): abaixo da soma dos cartões no mínimo (número, nome em até 2 linhas, contagem, setas) a faixa vira rótulo + folha
+_ETP_LIM_IND={4:820,6:1180}
+def _etp_lim_ind(n): return _ETP_LIM_IND.get(n,_etp_lim(n))
 def _etp_abre(i,n,nome,secao=False):
     """Rótulo da faixa estreita + caixa que abre a lista completa (só aparece na faixa estreita); o fundo escurecido fecha ao toque.
     Progresso: "Etapa i de n · Nome". Telas do módulo: o nome da tela atual (não é etapa)."""
@@ -150,7 +153,7 @@ def _etp_lista(abre,itens,tag='div',attrs=''):
 _ETP_CX=f'position: sticky; top: 0; z-index: 30; background: {SURF}; border-bottom: 1px solid {LINE}; box-shadow: 0 6px 12px -10px rgba(21,32,26,.25); padding: 6px 24px;'
 def _etp_progresso(n,corpo):
     # sem nav: indicador não é navegação (DS-31 v2); o nome acessível "Etapas do processo" fica na lista ordenada
-    return f'<div class="etp etp-ind etp-l{_etp_lim(n)}" style="{_ETP_CX}">{corpo}</div>'
+    return f'<div class="etp etp-ind etp-l{_etp_lim_ind(n)}" style="{_ETP_CX}">{corpo}</div>'
 def _etp_telas(label,n,corpo):
     return f'<nav aria-label="{esc(label)}" class="etp etp-sec etp-l{_etp_lim(n)}" style="{_ETP_CX}">{corpo}</nav>'
 _SEC_IT=('display: flex; flex-direction: column; justify-content: center; gap: 1px; padding: 6px 10px; border-radius: 10px; text-decoration: none; color: '+INK+'; '
@@ -219,7 +222,7 @@ _CSS_ESTREITA=(f'@media (max-width: 640px){{.mf-tela select{{min-height:44px!imp
 def _etp_css():
     """Regras das duas faixas: base (desktop igual) + modo estreito por container query, um bloco por limite.
     No modo estreito a lista abre como folha presa à base da janela (cabe em qualquer altura), com fundo que fecha ao toque.
-    Progresso: a folha só informa (tocar nela ou fora fecha). Telas do módulo: tocar noutra tela leva a ela; na atual, fecha.
+    Progresso (15/10): tocar numa etapa leva a ela e fecha a folha; travada, diz o motivo. Telas do módulo: tocar noutra tela leva a ela; na atual, fecha.
     Alvos de toque de 44 px (PRD, ações de campo)."""
     def estreita(p):
         r=[('.etp-itens','display:none!important'),
@@ -230,12 +233,16 @@ def _etp_css():
            ('.etp-chk:checked~.etp-fundo','display:block;position:fixed;inset:0;z-index:30;background:rgba(21,32,26,.32);cursor:default'),
            ('.etp-chk:checked~.etp-itens',f'display:flex!important;flex-direction:column;position:fixed;left:8px;right:8px;bottom:8px;max-width:560px;margin:0 auto;box-sizing:border-box;gap:2px;padding:6px;background:{SURF};border:1px solid {LINE};border-radius:14px;box-shadow:0 18px 40px -12px rgba(21,32,26,.5);max-height:calc(100% - 16px);overflow-y:auto;z-index:31;pointer-events:none'),
            ('.etp-chk:checked~.etp-itens>*','min-width:0!important;min-height:44px;box-sizing:border-box'),
-           ('.etp-chk:checked~.etp-itens>a:not([aria-current]),.etp-chk:checked~.etp-itens>button:not([aria-current=true])','pointer-events:auto')]
+           ('.etp-chk:checked~.etp-itens>a:not([aria-current]),.etp-chk:checked~.etp-itens>button:not([aria-current=true]),.etp-chk:checked~.etp-itens .etp-ir','pointer-events:auto')]
         return ''.join(f'{p} {s}{{{d}}}' for s,d in r)
-    lims=sorted(set(_ETP_LIM.values())|{520,900})
+    lims=sorted(set(_ETP_LIM.values())|set(_ETP_LIM_IND.values())|{520,900})
     return ('.etp{container:etp/inline-size}.etp-chk,.etp-atual,.etp-fundo{display:none}.etp-seta{transition:transform .15s ease}'
             '.etp-itens>*{min-width:min-content!important}'   # nenhuma etapa fica mais estreita que a maior palavra: sem texto por cima da vizinha
-            '.etp-ind .etp-itens>li{cursor:default}'          # progresso: inerte (sem cursor de ação, sem hover de ação, sem foco)
+            '.etp-ind .etp-ir{display:flex;align-items:center;gap:10px;width:100%;min-width:0;box-sizing:border-box;padding:8px 12px;border:0;border-radius:12px;background:transparent;'
+            'font:inherit;color:inherit;text-align:left;cursor:pointer}'   # o cartão inteiro leva à etapa (15/10)
+            '.etp-ind .etp-ir[aria-disabled=true]{cursor:not-allowed}.etp-ind [aria-current=step] .etp-ir{cursor:default}'
+            '.etp-ind .etp-ir:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}'
+            '@media (hover:hover){.etp-ind .etp-it:not([aria-current=step]):has(.etp-ir[aria-disabled=false]):hover{border-color:#1E7A4C!important;background:#F2F8F4!important}}'   # hover verde só onde leva (VIS-02)
             '.etp-ind .etp-itens{gap:22px!important}.etp-ind .etp-it:not(:last-child)::after{content:"›" / "";position:absolute;right:-16px;top:50%;transform:translateY(-52%);'
             'font-size:20px;font-weight:700;color:#9AA59E;pointer-events:none}'   # seta entre os cartões (15/10), sem entrar na leitura
             '@media (hover:hover){.etp-sec .etp-itens>:not([aria-current=page]):not([aria-current=true]):hover{background:#F2F8F4!important;text-decoration:underline;text-underline-offset:3px}}'
@@ -584,11 +591,14 @@ def steps_state(names,pre='stp',label='Etapas do processo'):
         h=lambda k,i=i: '{{'+f'{pre}{i}_{k}'+'}}'
         # 15/10/2026 (proprietário, referência de fluxo em cartões: "esses ícones e setas para fluxo de processos ficou melhor, mais intuitivo, torne
         # mais bonito com nosso design system e substitua o atual"): cartão por etapa com número (ou ✓ / !), nome, linha de situação com ponto de
-        # cor e, quando a tela informa, a contagem à direita; seta › entre os cartões (CSS, fora da leitura). Continua só informando (DS-31 v2).
-        items+=(f'<li aria-current="{h("cur")}" class="etp-it" style="{h("st")}"><span aria-hidden="true" style="{h("bst")}">{h("num")}</span>'
-                f'<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto;"><span style="{h("tst")}">{esc(t)}<span class="etp-sr"> · {h("sr")}</span></span>'
+        # cor e, quando a tela informa, a contagem à direita; seta › entre os cartões (CSS, fora da leitura). O nome quebra em até 2 linhas; o cartão encolhe até ~92 px de texto.
+        # 15/10/2026, depois (proprietário: "permita clicar diretamente na etapa do fluxo de processos desejado e ir para a tela"): cada cartão é
+        # um botão que leva à etapa (revoga o "só informa" de 03/10, DS-31 v2); etapa travada diz o motivo ao toque (aria-disabled + dica)
+        items+=(f'<li aria-current="{h("cur")}" class="etp-it" style="{h("st")}"><button type="button" class="etp-ir" onClick="{h("go")}" aria-disabled="{h("dis")}" data-dica="{h("tt")}">'
+                f'<span aria-hidden="true" style="{h("bst")}">{h("num")}</span>'
+                f'<span style="display: flex; flex-direction: column; gap: 2px; min-width: 92px; flex: 1 1 auto; contain: inline-size;"><span style="{h("tst")}">{esc(t)}<span class="etp-sr"> · {h("sr")}</span></span>'
                 f'<span aria-hidden="true" style="{h("sst")}"><span style="{h("dot")}"></span>{h("sub")}</span></span>'
-                f'<sc-if value="{h("hasCnt")}" hint-placeholder-val="{{{{false}}}}"><span aria-hidden="true" style="{h("cst")}">{h("cnt")}</span></sc-if></li>')
+                f'<sc-if value="{h("hasCnt")}" hint-placeholder-val="{{{{false}}}}"><span aria-hidden="true" style="{h("cst")}">{h("cnt")}</span></sc-if></button></li>')
     # etapa atual em texto para a faixa estreita: um bloco por etapa, montado só na atual; ao trocar de etapa a caixa nasce fechada
     abre=''.join(f'<sc-if value="{{{{{pre}{i}_cur === \'step\'}}}}" hint-placeholder-val="{{{{false}}}}">{_etp_abre(i,n,t)}</sc-if>' for i,t in enumerate(names,1))
     return _etp_progresso(n,_etp_lista(abre,items,'ol',f' aria-label="{esc(label)}"'))

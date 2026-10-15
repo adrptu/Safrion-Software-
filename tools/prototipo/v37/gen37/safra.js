@@ -1470,7 +1470,7 @@ function EXTRAVALS(self,v){ try{ window.__safSelf=self; self.__cultivos=(k)=>lea
   // cartões do fluxo (15/10/2026): o número da etapa e a frase curta (safras abertas e a escolhida; cultivos da safra e quantos sem plano)
   const csx=saf?cultRows(self,saf):[]; const semP=csx.filter(c=>{ const pl=planById(c.v.plano); return !(pl&&pl.cultura===c.v.cult); }).length;
   const info={1:{cnt:safRows.length,sub:safObj?String((safObj.s&&safObj.s.nome)||safObj.v.nome||''):''},2:saf?{cnt:csx.length,sub:semP?semP+' sem plano':''}:{}};
-  g2steps(self,v,'stp',4,step,whys,null,info);   // só informa (UX-ACAO-UNICA-20261003): avanço e retorno na área de ações
+  g2steps(self,v,'stp',4,step,whys,(i)=>{ if(whys[i]){ self.setState({g2toast:whys[i]}); return; } g2etapa(self,{step:i,corr:null}); },info);   // cartão leva à etapa (15/10); avanço e retorno também na área de ações
   v.saf_nome=safObj?safObj.v.nome:'nenhuma safra escolhida'; v.saf_ro=ro; v.saf_ok=!!saf; v.saf_none=!saf;
   v.ctx_saf=safObj?(safObj.v.nome+(ro?' · consulta':'')):'Nenhuma safra escolhida';
   // a faixa diz a fazenda da safra aberta; sem safra, a fazenda escolhida nos chips da etapa 1 (ou todas): antes dizia sempre Santa Rita

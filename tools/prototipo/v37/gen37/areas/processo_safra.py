@@ -437,6 +437,6 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
     EXTRA.append('<style>@media (max-width:640px){.so-sug button{min-height:44px!important}.so-pan{padding:16px 14px!important}.so-pe{margin:0 -14px -16px!important;padding:12px 14px!important}.so-pe button{min-height:44px}}</style>')
     HEIGHTS37[fname]=1500
     shell37('SAF','Planejar safra',corpo,fname=fname,subtitle='',
-            steps=steps_state(NOMES),primary_html=None,  # faixa só informa; avanço/retorno/primária na área de ações (UX-ACAO-UNICA-20261003)
+            steps=steps_state(NOMES),primary_html=None,  # cartão da faixa leva à etapa (15/10); avanço/retorno/primária também na área de ações
             ctx=(H('ctx_faz'),H('ctx_saf'),None),search=False,
             mf_fim='')   # 14/10/2026 (proprietário: "tire comparar versões do plano"): a entrada saiu da faixa; o painel (CONTROLE-02) segue no código   # na faixa "Trabalhando em": devolve ao Total a altura que a faixa nova tomou (L1 a 1440 × 1040; diagnóstico 13/10)

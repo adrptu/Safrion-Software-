@@ -770,19 +770,23 @@ if(typeof document!=='undefined'&&!window.__g2toastFoco){ window.__g2toastFoco=1
 // de tela; não navega (sem handler, sem foco, sem hover de ação). O argumento go fica por compatibilidade e não é usado.
 // Progresso do processo em cartões (15/10/2026): número (✓ concluída, ! impedida), nome, situação com ponto de cor e contagem opcional
 // (info[i] = {cnt, sub}: a tela informa o número da etapa e a frase curta); a seta › entre os cartões vem do CSS (ui37._etp_css).
-function g2steps(self,v,pre,n,cur,whys,go,info){ for(let i=1;i<=n;i++){ const on=(i===cur); const w=(i<=cur&&whys&&whys[i])||''; const feita=(!on&&i<cur&&!w); const x=(info&&info[i])||{};   // etapa futura neutra (ETP-01)
-  v[pre+i+'_st']='position:relative;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;min-width:0;flex:1 1 0;box-sizing:border-box;color:#15201A;cursor:default;'
+// Clicar no cartão leva à etapa (15/10/2026, proprietário: "permita clicar diretamente na etapa do fluxo de processos desejado e ir para a tela"):
+// go(i) da tela valida a etapa; sem go, a etapa travada mostra o motivo e as outras vão por g2etapa. A etapa atual não faz nada.
+function g2steps(self,v,pre,n,cur,whys,go,info){ const ir=go||((i)=>{ if(whys&&whys[i]){ self.setState({g2toast:whys[i]}); return; } g2etapa(self,{step:i}); });
+ for(let i=1;i<=n;i++){ const on=(i===cur); const w=(i<=cur&&whys&&whys[i])||''; const feita=(!on&&i<cur&&!w); const x=(info&&info[i])||{};   // etapa futura neutra (ETP-01)
+  const trava=!on&&!!(whys&&whys[i]); v[pre+i+'_go']=()=>{ try{ document.querySelectorAll('.etp-chk:checked').forEach(c=>{ c.checked=false; }); }catch(e){} if(i!==cur) ir(i); };   /* na faixa estreita, fecha a folha */ v[pre+i+'_dis']=trava?'true':'false'; v[pre+i+'_tt']=trava?whys[i]:'';
+  v[pre+i+'_st']='position:relative;display:flex;align-items:stretch;padding:0;border-radius:12px;min-width:0;flex:1 1 0;box-sizing:border-box;color:#15201A;'
     +(on?'background:#E4F3E9;border:1.5px solid #1E7A4C;box-shadow:0 2px 8px -2px rgba(30,122,76,.25);':(w?'background:#FFFFFF;border:1px solid #F3C4BE;':'background:#FFFFFF;border:1px solid #E4E9E5;'));
   v[pre+i+'_bst']='width:26px;height:26px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;'
     +(on?'background:#1E7A4C;color:#fff;':(w?'background:#FDE8E6;color:#B42318;':(feita?'background:#E3F2E8;color:#1E6B47;':'background:#EEF1EE;color:#4B5A51;')));
-  v[pre+i+'_tst']='font-size:13px;line-height:1.2;font-weight:'+(on?'800':'700')+';color:'+(on||feita||w?'#15201A':'#4B5A51')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+  v[pre+i+'_tst']='font-size:13px;line-height:1.2;font-weight:'+(on?'800':'700')+';color:'+(on||feita||w?'#15201A':'#4B5A51')+';display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;';   // nome em até 2 linhas (cartão estreito)
   const cor=w?'#B42318':(on?'#1E7A4C':(feita?'#3FBF2A':'#C4CCC6'));
   v[pre+i+'_sst']='display:flex;align-items:center;gap:5px;font-size:11.5px;line-height:1.2;font-weight:600;color:'+(w?'#B42318':'#5F6B64')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
   v[pre+i+'_dot']='width:7px;height:7px;border-radius:999px;flex-shrink:0;background:'+cor+';';
   v[pre+i+'_sub']=w||x.sub||(on?'em andamento':(feita?'concluída':'a fazer'));
   v[pre+i+'_hasCnt']=x.cnt!==undefined&&x.cnt!==null&&x.cnt!==''; v[pre+i+'_cnt']=v[pre+i+'_hasCnt']?String(x.cnt):'';
   v[pre+i+'_cst']='margin-left:auto;padding-left:8px;font-size:20px;font-weight:800;letter-spacing:-.02em;color:'+(on?'#1E6B47':'#15201A')+';font-variant-numeric:tabular-nums;';
-  v[pre+i+'_num']=w?'!':(feita?'✓':String(i)); v[pre+i+'_sr']=on?'etapa atual':(w?'impedida':(feita?'concluída':'pendente'));
+  v[pre+i+'_num']=w?'!':(feita?'✓':String(i)); v[pre+i+'_sr']=on?'etapa atual':(w?'impedida':(feita?'concluída':(trava?'travada: '+whys[i]:'pendente')));   // o motivo da trava também para o leitor de tela
   v[pre+i+'_why']=w; v[pre+i+'_hasWhy']=!!w; v[pre+i+'_cur']=on?'step':'false'; } }
 // Seções de uma tela de trabalho paralelo (Estoque): navegação em qualquer ordem, sem número de etapa; pendência escrita
 function g2secoes(self,v,pre,n,cur,whys,go){ for(let i=1;i<=n;i++){ const on=(i===cur); const w=(whys&&whys[i])||'';

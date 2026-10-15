@@ -223,8 +223,9 @@ try:
         mouse_em(CHP); fam['chip hover']=estilo(CHP,['background-image','filter'])   # DS-HOVER-20261009: camada verde por background-image (antes: camada cinza por box-shadow)
         INE="[...document.querySelectorAll('main div')].find(d=>/^soja\s*·/i.test(d.textContent.trim()))"; mouse_em(INE); fam['texto inerte']=estilo(INE,['cursor','filter','box-shadow'])
         abre('SAF',1440,900); BUS="document.querySelector('main input[type=search]')"
-        STP="document.querySelectorAll('.etp-itens>*')[1]"   # NAV-1: a PA não tem mais faixa; a etapa inerte é medida no Planejar safra
-        mouse_em(STP); fam['etapa inerte']=estilo(STP,['filter','cursor','box-shadow'])   # UX-ACAO-UNICA: a faixa só informa
+        # 15/10/2026: a etapa da faixa leva à tela (proprietário); a etapa 1, já feita, responde com cursor de ação e hover verde (VIS-02)
+        c.goto(f'http://127.0.0.1:{p}/SAF.dc.html#saf=S2627&etapa=2',.6); STP="document.querySelectorAll('.etp-itens>*')[0]"
+        mouse_em(STP); fam['etapa']=estilo(STP,['border-top-color','background-color'])+estilo(STP+".querySelector('button')",['cursor'])
         mouse_em(BUS); fam['busca hover']=estilo(f"{BUS}.closest('label')",['box-shadow'])[0]
         c.js(f"{BUS}.focus()"); fam['busca foco']=estilo(f"{BUS}.closest('label')",['outline-style','outline-color'])
         abre('IN-04',1440,900); c.js("(()=>{const s=document.querySelector('select[aria-label=\"Filtrar por fazenda\"]'); s.value='Santa Rita'; s.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.5)
@@ -235,9 +236,9 @@ try:
         mouse_em(TB); fam['trilha hover']=estilo(TB,['background-image'])[0]   # DS-HOVER-20261009
         print('     (informativo) famílias:',fam)
         fam_ok=(fam['texto inerte'][0]!='pointer' and fam['texto inerte'][1]=='none' and fam['texto inerte'][2]=='none'
-                and 'brightness(0.92)' in fam['botão primário hover'] and '255, 255, 255' in fam['menu hover'] and '30, 122, 76' in fam['chip hover'][0] and fam['chip hover'][1]=='none' and fam['etapa inerte'][0]=='none' and fam['etapa inerte'][1]!='pointer' and fam['etapa inerte'][2]=='none'
+                and 'brightness(0.92)' in fam['botão primário hover'] and '255, 255, 255' in fam['menu hover'] and '30, 122, 76' in fam['chip hover'][0] and fam['chip hover'][1]=='none' and '30, 122, 76' in fam['etapa'][0] and fam['etapa'][2]=='pointer'
                 and 'rgb(157, 191, 170)' in fam['busca hover'] and fam['busca foco'][0]=='solid' and fam['talhão foco'][0].replace(' ','').replace('px','').startswith('7,4') and '30, 122, 76' in fam['trilha hover'])
-        chk('14 famílias · botão, menu, chip, busca (hover e foco), talhão do mapa (foco tracejado) e trilha do mapa respondem; título de seção e etapa da faixa (inertes) sem cursor de ação nem hover', fam_ok, fam)
+        chk('14 famílias · botão, menu, chip, busca (hover e foco), talhão do mapa (foco tracejado), trilha do mapa e etapa da faixa (cursor de ação, borda verde) respondem; título de seção (inerte) sem cursor de ação nem hover', fam_ok, fam)
         # 15 · indisponível: OK do filtro sem valor marcado fica diferente, cursor de proibido e motivo em texto (role=alert)
         abre('OS',1440,900); c.js("document.querySelector('.g2fb').click()"); time.sleep(.3)
         c.js("[...document.querySelectorAll('[role=dialog] button')].find(b=>b.innerText.trim()==='Limpar'||b.innerText.trim()==='Nenhum'||/desmarcar/i.test(b.innerText))?.click()"); time.sleep(.25)
@@ -255,9 +256,9 @@ try:
         f1=c.js("[...document.querySelectorAll('.etp-chk')].find(x=>x.getClientRects().length).checked"); c.tecla('Escape','Escape',27); time.sleep(.25)
         f2=c.js("(()=>{const k=[...document.querySelectorAll('.etp-chk')].find(x=>x.getClientRects().length); return [k.checked, document.activeElement===k];})()")
         c.tecla('Enter','Enter',13,text='\r'); time.sleep(.25); shot('CMP_390_folha_teclado'); c.tab()
-        dentro=c.js("!!(document.activeElement&&document.activeElement.closest('.etp-itens'))"); c.tecla('Escape','Escape',27); time.sleep(.25)
-        f3=c.js("(()=>{const k=[...document.querySelectorAll('.etp-chk')].find(x=>x.getClientRects().length); return [k.checked, (document.querySelector('.etp-atual:not([style*=none])')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim().slice(0,30), document.querySelectorAll('.etp-itens button,.etp-itens a,.etp-itens [tabindex]').length];})()")
-        chk('17 folha de etapas pelo teclado · Enter abre, Esc fecha e o foco fica no rótulo; a lista só informa: o Tab não entra nela, nenhum item é botão/link e a etapa continua a 2 (UX-ACAO-UNICA)', f1 and f2==[False,True] and not dentro and f3[0]==False and f3[1].startswith('Etapa 2 de 6') and f3[2]==0, [f1,f2,dentro,f3])
+        dentro=c.js("(()=>{const a=document.activeElement; return !!(a&&a.closest('.etp-itens'))&&a.innerText.replace(/\\s+/g,' ').trim().slice(0,30);})()"); c.tecla('Enter','Enter',13,text='\r'); time.sleep(.5)
+        f3=c.js("(()=>{const k=[...document.querySelectorAll('.etp-chk')].find(x=>x.getClientRects().length); return [k.checked, (document.querySelector('.etp-atual:not([style*=none])')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim().slice(0,30), document.querySelectorAll('.etp-itens button.etp-ir').length, document.activeElement===k];})()")
+        chk('17 folha de etapas pelo teclado · Enter abre, Esc fecha e o foco fica no rótulo; o Tab entra na lista (etapa 1, ✓) e Enter leva à etapa 1, fecha a folha e devolve o foco ao rótulo (15/10: a etapa leva à tela)', f1 and f2==[False,True] and bool(dentro) and 'Escolha a safra' in dentro and f3[0]==False and f3[1].startswith('Etapa 1 de 6') and f3[2]==6 and f3[3], [f1,f2,dentro,f3])
         # 18 · ícone da barra pelo teclado (390 px, com "aberto" guardado; antes: menu sobreposto, Esc fechava e o foco voltava ao botão do
         #      menu): o Tab chega ao ícone "Mapa" e a dica mostra o nome, sem virar descrição repetida do nome acessível; Esc fecha só a dica, o
         #      foco fica no ícone, a tela não muda e a barra continua com 68 px

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Teste CDP · UX-ACAO-UNICA-20261003 v2 (padrão de comandos, patch c691c431 · cap. 74 DS-02/26/29/31/33/40/54/61/63, DS-AC-08/17).
 Pedido do Adrianus: no Planejar safra, clicar nas etapas, usar as setas e clicar em "Definir rendimentos" mudavam a etapa por três
-caminhos; "com tantas opções o usuário fica perdido". Uma tarefa ativa = uma primária e uma rota de avanço; a faixa só informa.
+caminhos; "com tantas opções o usuário fica perdido". Uma tarefa ativa = uma primária e uma rota de avanço; a faixa leva à etapa (15/10).
 Modos (cada um < 90 s; capturas em _probe/acao_*.png):
   python3 acao_unica_test.py saf          1-9   Planejar safra: faixa informativa, uma primária por estado, Planejar › na linha do talhão, falta de
                                                 plano, vazio, filtro sem resultado, Corrigir cultivos → revisão, avançar não envia
@@ -58,20 +58,26 @@ try:
     if MODO=='saf':   # SAF-TAB: o 5 lê Situação, Área livre e Livre a partir de, fora do padrão das colunas
         from comp_lib import cv_todas_sempre; cv_todas_sempre(c)
     if MODO=='saf':
-        # 1 · faixa só informa: lista ordenada sem botão, link, handler ou parada de Tab; palavra do estado; clicar não navega; sem setas
+        # 1 · faixa leva à etapa (15/10/2026, proprietário: "permita clicar diretamente na etapa do fluxo de processos desejado e ir para a tela";
+        #     revoga o "só informa" de 03/10): lista ordenada, um botão por cartão, palavra do estado; clicar na etapa 1 vai a ela e na 2 volta;
+        #     etapa travada não navega e diz o motivo; o Tab passa pela faixa; sem setas ‹ › soltas
         abre('SAF',hash='#saf=S2627&etapa=2'); time.sleep(.3)
         fx=J(r"""(()=>{const f=document.querySelector('.etp-ind'); const ol=f&&f.querySelector('ol[aria-label="Etapas do processo"]'); const lis=ol?[...ol.children]:[];
-          return {tag:f?f.tagName:'', ol:!!ol, n:lis.length, li:lis.every(x=>x.tagName==='LI'), ctl:f?f.querySelectorAll('button,a,[tabindex],[onclick],[role=button]').length:-1,
+          return {tag:f?f.tagName:'', ol:!!ol, n:lis.length, li:lis.every(x=>x.tagName==='LI'), btn:lis.map(x=>x.querySelectorAll(':scope>button.etp-ir').length).join(''), lnk:f?f.querySelectorAll('a').length:-1,
             atual:(ol&&ol.querySelector('[aria-current=step]')||{innerText:''}).innerText.replace(/\s+/g,' ').trim(), sr:[...(f?f.querySelectorAll('.etp-sr'):[])].map(x=>x.textContent.trim()),
-            setas:document.querySelectorAll('[aria-label^="Etapa anterior"],[aria-label^="Próxima etapa"]').length, cursor:lis[2]?getComputedStyle(lis[2]).cursor:''};})()""")
-        J("document.querySelectorAll('.etp-ind ol>li')[2].click()"); time.sleep(.4); e1=est()
-        J("document.activeElement&&document.activeElement.blur()"); paradas=[]
-        for _ in range(45):
-            c.tab(); paradas.append(J("(()=>{const a=document.activeElement; return a?(a.closest('.etp-ind')?'FAIXA':(a.closest('[data-acoes]')?'AREA':'')):'';})()"))
+            setas:document.querySelectorAll('[aria-label^="Etapa anterior"],[aria-label^="Próxima etapa"]').length, cursor:lis[0]?getComputedStyle(lis[0].querySelector('button')||lis[0]).cursor:''};})()""")
+        J("document.querySelectorAll('.etp-ind ol>li')[0].querySelector('button').click()"); time.sleep(.5); e1=est()
+        J("document.querySelectorAll('.etp-ind ol>li')[1].querySelector('button').click()"); time.sleep(.5); e2=est()
+        foco=J("[...document.querySelectorAll('.etp-ind .etp-ir')].map(b=>{ b.focus(); return document.activeElement===b&&b.tabIndex===0; }).every(Boolean)"); J("document.activeElement&&document.activeElement.blur()")
         shot('saf_faixa_1440')
-        chk('1 SAF · faixa só informa: lista ordenada de 4 etapas sem botão/link/handler/Tab (0 controles), palavra do estado (concluída/etapa atual/pendente), cursor comum, clicar na etapa 3 não navega, nenhuma seta ‹ › e 45 Tabs nunca param na faixa',
-            fx['tag']=='DIV' and fx['ol'] and fx['n']==4 and fx['li'] and fx['ctl']==0 and fx['atual'].startswith('2 ') and 'concluída' in ' '.join(fx['sr']) and 'etapa atual' in ' '.join(fx['sr']) and 'pendente' in ' '.join(fx['sr'])
-            and fx['cursor']!='pointer' and fx['setas']==0 and e1['etapa']==2 and 'FAIXA' not in paradas, [fx,e1,paradas])
+        abre('SAF',hash='#etapa=1'); time.sleep(.3)
+        tr=J(r"""(()=>{const b=document.querySelectorAll('.etp-ind ol>li')[2].querySelector('button'); const r={dis:b.getAttribute('aria-disabled'), dica:b.dataset.dica||''}; b.click(); return r;})()"""); time.sleep(.5)
+        trv=dict(tr or {}, etapa=est()['etapa'], dica=J("(()=>{const d=document.querySelector('[data-modo=recusa]:not([hidden])'); return d?d.textContent.replace(/\\s+/g,' ').trim():'';})()"))
+        chk('1 SAF · faixa leva à etapa: 4 cartões-botão, palavra do estado (concluída/etapa atual/pendente), cursor de ação; clicar na etapa 1 vai a ela e na 2 volta; '
+            'etapa 3 travada sem safra não navega e diz o motivo na dica (recusa do DS); os cartões recebem foco pelo Tab; nenhuma seta ‹ › solta',
+            fx['tag']=='DIV' and fx['ol'] and fx['n']==4 and fx['li'] and fx['btn']=='1111' and fx['lnk']==0 and fx['atual'].startswith('2 ') and 'concluída' in ' '.join(fx['sr']) and 'etapa atual' in ' '.join(fx['sr']) and 'pendente' in ' '.join(fx['sr'])
+            and fx['cursor']=='pointer' and fx['setas']==0 and e1['etapa']==1 and e2['etapa']==2 and foco
+            and trv.get('dis')=='true' and trv.get('dica')=='Escolha a safra' and trv.get('etapa')==1 and 'Escolha a safra' in trv.get('dica',''), [fx,e1['etapa'],e2['etapa'],foco,trv])
         # 2 · uma primária e uma rota de avanço por estado, sem cópia do mesmo comando (cabeçalho, bloco, faixa, área)
         estados={}
         abre('SAF'); estados['1 sem safra']=est()

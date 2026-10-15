@@ -539,7 +539,7 @@ function EXTRAVALS(self,v){ hooks(self);
   const whys={}; for(let i=2;i<=6;i++){ if(!saf) whys[i]='Escolha a safra'; else if(saf==='S2526'){ if(i<6) whys[i]='Safra encerrada'; } else if(!SX) whys[i]='Sem solicitação'; }
   if(SX){ if(!m.env){ whys[4]='Envie os convites'; whys[5]='Envie os convites'; } else if(!m.nresp){ whys[4]='Aguarde propostas'; whys[5]='Aguarde propostas'; } }
   const go=(i)=>{ const w=whys[i]; if(w){ toast(self,w==='Sem solicitação'?(safNome(saf)+' ainda não tem solicitação: envie a demanda em Planejar safra › demanda de insumos.'):WHYMSG[w]); return; } g2etapa(self,{step:i,conf5:false}); };
-  g2steps(self,v,'stp',6,step,whys);   // só informa (UX-ACAO-UNICA-20261003): avanço e retorno na área de ações
+  g2steps(self,v,'stp',6,step,whys,go);   // cartão leva à etapa (15/10: go valida e explica a etapa travada); avanço e retorno também na área de ações
   v.pick=(id)=>pick(self,id);
   const safObj=safras().find(s=>s.id===saf);
   v.ctx_saf=safObj?(safObj.nome+(SX?' · '+SX.sol.id:(saf==='S2526'?' · consulta':' · sem solicitação'))):'Nenhuma safra escolhida';
