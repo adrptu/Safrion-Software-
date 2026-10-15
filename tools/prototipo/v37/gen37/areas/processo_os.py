@@ -1294,7 +1294,7 @@ def _kanban(celular_rola=False,lista="kb"):
          f'<span style="{H("c.nst")} padding: 1px 8px; font-size: 11.5px;">{H("c.n")}</span></div>'
          f'<div style="font-size: 11.5px; color: {MUTED}; margin-top: -4px; min-height: 14px;">{H("c.carga")}</div>'
          f'<sc-for list="{H("c.cards")}" as="k" hint-placeholder-count="2">{card}</sc-for>'
-         f'<sc-if value="{H("c.vazio")}" hint-placeholder-val="{F()}"><div class="os-kbvazio" style="font-size: 12px; color: {MUTED}; padding: 10px 4px; text-align: center; border: 1px dashed {LINE}; border-radius: 10px;">Nenhuma ordem nesta fase</div></sc-if></div>')
+         f'<sc-if value="{H("c.vazio")}" hint-placeholder-val="{F()}"><div class="os-kbvazio" style="font-size: 12px; color: {MUTED}; padding: 10px 4px; text-align: center; background: {BG}; border-radius: 10px;">Nenhuma ordem nesta fase</div></sc-if></div>')
     rola = _KB_ROLA if celular_rola is True else ''   # 'sem_estilo': rola igual, com o estilo já posto por quem chama (_kanban_raias)
     return rola + f'<div role="list" aria-label="Kanban das ordens" class="{"os-kb" if celular_rola else ""}" style="display: flex; gap: 10px; align-items: flex-start;"><sc-for list="{H(lista)}" as="c" hint-placeholder-count="5">{col}</sc-for></div>'
 
@@ -1656,7 +1656,7 @@ def build():
     colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_notas_tal()}</div>'   # o Talhão subiu para a faixa "Filtros desta tela" (13/10); os avisos dele ficam aqui
             f'<div style="flex: 0 0 auto; margin-left: auto;">{bar}</div></div>')
     # recorte vazio (Fazenda/Safra do topo): uma frase e uma ação no lugar das visões
-    vazio=(f'<sc-if value="{H("os_vazio")}" hint-placeholder-val="{F()}"><div aria-label="Sem ordens no filtro" style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 36px 16px; border: 1px dashed {LINE}; border-radius: 12px;">'
+    vazio=(f'<sc-if value="{H("os_vazio")}" hint-placeholder-val="{F()}"><div aria-label="Sem ordens no filtro" style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 36px 16px; background: {BG}; border-radius: 12px;">'
            f'<span style="font-size: 14px; font-weight: 700;">{H("os_vt")}</span><button type="button" onClick="{H("os_vgo")}" style="{_MINIP}">{H("os_va")}</button></div></sc-if>')
     tem=lambda x: f'<sc-if value="{H("os_tem")}" hint-placeholder-val="{T()}">{x}</sc-if>'
     pn_nota=(f'<sc-if value="{H("pn_on")}" hint-placeholder-val="{F()}"><div role="note" aria-label="Recorte do Painel Agrícola" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.8px; '
@@ -1702,7 +1702,7 @@ def _calendario():
            f'<sc-if value="{H("cal_naoHoje")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("cal_hoje")}" style="{_MINI}">Hoje</button></sc-if>'
            f'<span style="font-size: 12.5px; color: {MUTED};">{H("cal_n")}</span></div>')
     sem = (f'<sc-if value="{H("cal_temsem")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Sem data" style="display: flex; align-items: center; gap: 6px 8px; flex-wrap: wrap; '
-           f'padding: 8px 10px; margin-bottom: 8px; border: 1px dashed {LINE}; border-radius: 10px; font-size: 12.5px;"><b>Sem data</b>'
+           f'padding: 8px 10px; margin-bottom: 8px; background: {BG}; border-radius: 10px; font-size: 12.5px;"><b>Sem data</b>'
            f'<sc-for list="{H("cal_sem")}" as="o" hint-placeholder-count="1"><button type="button" aria-label="{H("o.lab")}" onClick="{H("o.open")}" style="{_MINI}">{H("o.id")} · {H("o.tipo")}</button></sc-for></div></sc-if>')
     faixa = (f'<sc-if value="{H("cal_temmulti")}" hint-placeholder-val="{F()}"><div class="oscal oscal-faixa" role="group" aria-label="Ordens de vários dias">'
              f'<sc-for list="{H("cal_multi")}" as="o" hint-placeholder-count="2"><button type="button" class="oscal-o oscal-multi" style="{H("o.col")}" aria-label="{H("o.lab")}" onClick="{H("o.open")}">'

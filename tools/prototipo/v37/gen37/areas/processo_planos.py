@@ -636,7 +636,7 @@ def build():
                  + '</div>'))
     xbtn = f'<button type="button" class="g2xtog" onClick="{H("x_tog")}" style="flex-shrink: 0;">{E.seta_xtog(H("x_up"),H("x_down"))}{H("x_lab")}</button>'
     # plano vazio: o bloco Atividades continua com "Incluir atividade" no mesmo lugar; o Próximo passo diz o que falta para publicar
-    vazio = f'<div style="padding: 12px 14px; border: 1px dashed {LINE}; border-radius: 12px; font-size: 13px; color: {MUTED};">Nenhuma atividade ainda. Inclua a primeira: defina o gatilho e a operação; depois, os insumos com dose por hectare.</div>'
+    vazio = f'<div style="padding: 12px 14px; background: {BG}; border-radius: 12px; font-size: 13px; color: {MUTED};">Nenhuma atividade ainda. Inclua a primeira: defina o gatilho e a operação; depois, os insumos com dose por hectare.</div>'
     qf_op = (f'<div role="group" aria-label="Filtrar atividades por operação" style="display: flex; flex-wrap: wrap; gap: 6px;">'
              + FOR('pa_opf', 'qo', f'<button type="button" class="pa-opf" aria-pressed="{H("qo.on")}" title="{H("qo.lab")}" onClick="{H("qo.go")}" style="{H("qo.st")}">' + IF('qo.temIco', _opico('qo')) + f'{H("qo.t")} <span style="opacity: .75;">{H("qo.n")}</span></button>', 5)
              + '</div>')

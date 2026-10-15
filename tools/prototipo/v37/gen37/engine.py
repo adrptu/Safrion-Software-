@@ -1431,7 +1431,7 @@ VISOES_CSS=(
     "@media (forced-colors:active){.g2visoes>button[aria-pressed=true],.g2visoes>button[data-ativo=true],.g2vmenu>button[aria-checked=true]"
     "{forced-color-adjust:none;background:Highlight;color:HighlightText;border-color:Highlight}}"
     # estado em toda visão (§2.8): uma frase e a ação nomeada, no topo do painel
-    ".g2vest{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding:10px 12px;border:1px dashed #E4E9E5;border-radius:10px;background:#FFFFFF;"
+    ".g2vest{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding:10px 12px;border:1px solid transparent;border-radius:10px;background:#F4F6F3;"
     "font-size:13px;font-weight:600;line-height:1.4;color:#15201A}"
     ".g2vest[data-tipo=erro],.g2vest[data-tipo=cenario]{border-style:solid;border-color:#F4C7C1;background:#FDE8E6;color:#8F1C13}"
     ".g2vest[data-tipo=regra]{border-style:solid;border-color:#EAD6A8;background:#FFF3D6;color:#5B4300}"
