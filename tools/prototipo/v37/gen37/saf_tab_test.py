@@ -69,7 +69,7 @@ try:
     chk('T5 "Dividir" é ação secundária (g2sec) e a regra "some fora do passar do mouse e do foco" está na página', 'g2sec' in sec and regra, [sec, regra])
     exp = J("(()=>{const ex=t=>{const r=[...document.querySelectorAll('%s [role=row].g2ed')].find(r=>{const c=r.querySelector('.g2c0'); return c&&c.innerText.replace(/[▾▸]/g,'').trim().split(/\\s+/)[0]===t;}); const b=r&&r.querySelector('[aria-expanded]'); return b?b.getAttribute('aria-expanded'):null;}; return [ex('T1'),ex('T2'),ex('P1'),ex('P2')];})()" % G)
     chk('T6 T1 (parcelas) e P1 (a conferir) abertos; T2 e P2 (um cultivo) recolhidos', exp == ['true', 'false', 'true', 'false'], exp)
-    nota = J("(()=>{const a=document.querySelector('[data-acoes]'); return a?a.innerText.replace(/\\s+/g,' '):''})()") or ''
+    nota = J("(()=>{const a=document.querySelector('[data-acoes]'); return a?(a.innerText+' '+[...a.querySelectorAll('.acoes-menu [role=menuitem]')].map(b=>b.textContent).join(' ')).replace(/\\s+/g,' '):''})()") or ''
     tro = J("[...document.querySelectorAll('[data-acoes] button')].filter(b=>b.getClientRects().length).map(b=>b.innerText.replace(/\\s+/g,' ').trim()).filter(t=>/Trocar safra/.test(t))") or []
     chk('T10 "‹ Trocar safra" embaixo, com a seta de voltar (14/10: "faltou setinha pra trás")', tro == ['‹ Trocar safra'], tro)
     # 15/10 ("retire essas descrições"): a área de ações não descreve; fica o atalho que resolve e os botões

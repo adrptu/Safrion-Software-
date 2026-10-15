@@ -114,7 +114,6 @@ LAYS.insert(LAYS.index('Carência e destino')+1,'Colheita')   # 14/10/2026 (prop
 FILT={
  'Integrado':[('mostrar','Mostrar',['Todas as condições','Só pendências'])],
  'Satélite':[('idx','Índice',['NDVI','NDRE','EVI','SAVI','NDMI']),('dt','Cena',['21/09','16/09','06/09']),('ctr','Contraste',['Talhão','Fazenda','Absoluto'])],
- 'Lavoura':[('cult','Cultura',['Todas','Soja','Milho','Feijão','Mamão','Café'])],
  'O.S./prazos':[('fase','Fase',['Todas','A liberar','Liberadas','Em execução','Em conferência','Encerradas'])],
  'MIP/MID':[('per','Período',['Últimos 7 dias','Últimos 30 dias'])],
  'Irrigação':[('ver','Mostrar',['Hoje','Balanço hídrico'])],
@@ -122,6 +121,8 @@ FILT={
  'Custos':[('most','Mostrar',['Previsto R$/ha','Realizado × previsto'])],
 }
 FILT['Carência e destino']=[('qd','Consultar em',['Hoje','Em 7 dias','Em 14 dias'])]   # MAPA-CARENCIA-LMR-20261003
+# Análises de solo (15/10/2026): laudo, camada, indicador e contraste; Laudo e Indicador vêm dos laudos da fazenda (soloFopts)
+FILT['Análises de solo']=[('lau','Laudo',['Mais recente']),('prof','Camada',['0–20 cm','20–40 cm']),('ind','Indicador',['V %']),('ctr','Contraste',['Talhão','Fazenda','Absoluto'])]
 # ordens no mapa = dados.ORDENS (menos OB-0104, do armazém). Tipo, selo, janela, responsável e link de detalhe vêm do registro
 # canônico; fase, realizado, saldo e custódia vêm do cenário compartilhado no navegador (cenGet), com o registro como semente.
 # Aqui ficam só os campos do mapa: talhões da geometria, complemento do realizado, prazo e a próxima ação da ordem
@@ -157,7 +158,7 @@ def _ord_mapa():
         o=D.ORDEM[oid]; ts=([o['selo']] if o['selo'] else [])+list(o.get('selos_extra') or [])
         real=f"{nfb(o.get('realizado') or 0)}/{nfb(o.get('area') or 0)} ha"+(f" · saldo {nfb(o['saldo'])} ha" if o.get('realizado') and o.get('saldo') else '')+(f' · {suf}' if suf else '')
         d=dict(id=oid,tal=tal,tipo=o['tipo'],fase=o['etapa'],selos=[[t,_selo_cor(t)] for t in ts],area=o.get('area') or 0,suf=suf,
-               jan=o['janela'],real=real,saldo=o['saldo'] or 0,resp=o['resp'],pz=pz,h=o['detalhe'] or 'OS.dc.html')
+               jan=o['janela'],real=real,saldo=o['saldo'] or 0,resp=o['resp'],pz=pz,h=o['detalhe'] or 'OS.dc.html',saf=o.get('saf') or '2026/27')
         if oid in IRR_OS: d.update(IRR_OS[oid])
         if act: d['act']=dict(t=act[0],h=act[1],k=act[2],c=act[3])
         out.append(d)
@@ -360,7 +361,6 @@ def _pixels():
         return ins
     out={}
     for k,(tid,tp,geo) in enumerate(GEO):
-        if tid not in ('P1','P2','T7','C1'): continue   # só onde há cultura com dossel (os demais: solo exposto, semeadura ou colhido)
         cel=[]
         for gy in range(0,620,CS):
             for gx in range(0,1000,CS):
@@ -436,13 +436,13 @@ _SEMPLANO.update({t:(not any(c['plano'] for c in D2.CULTIVOS[DLS.SAFRA['id']] if
 # duas vezes) e, depois, estoque fixo da semente ao lado das ordens vivas (revisão do CTL-4, achado 1).
 def _dem_mapa():
     tid={**{t:t for t in TIDS},**_LG_ROT}; faz={}
-    for f,saf in (('Santa Rita','S2627'),('Lagoa Grande',DLS.SAFRA['id'])):
+    for f,saf in (('Santa Rita','S2627'),('Santa Rita','S27SF'),('Lagoa Grande',DLS.SAFRA['id'])):
         x=D2.dem_fixas(saf); aT={}; vistos=set()
         for o in x['occ']:
             cid=o['k'].split('|')[0]
             if o['saf']!=saf or cid in vistos: continue
             vistos.add(cid); k=tid.get(o['local'],o['local'].split('-')[0]); aT[k]=aT.get(k,0)+o['area']
-        x['areaT']=aT; faz[f]=x
+        x['areaT']=aT; faz[saf]=x   # por safra (filtro Safra da faixa, 15/10/2026)
     return dict(faz=faz,b=dict(osb=D2.os_base(),est=D2.est_base()),tid=tid)
 SEMCULT.update({t:'sem lavoura' for t in LG_IDS if LAV[t]['c']=='gray'})
 _GEO_TXT=_geo(); _GEO_TXT.update({p['id']:f"círculo pelo centro do KML e pela área declarada · raio {nfb(p['r_m'])} m" for p in LG['pivos']})
@@ -459,7 +459,50 @@ MDATA=dict(cad0=_cad0(),hoje_iso=HOJE.isoformat(),motivos=DC.MOTIVOS_DIF,tal={t:
                      ['Cultivos',str(len(D2.CULTIVOS["S2627"])),'Cultivos na safra 2026/27']],   # rótulo curto; o completo na dica (13/10)
            geo=_GEO_TXT,lcop=LCOR_OP,nome=NOME_LAY,
            # camada Análises de solo: talhão do mapa → (fazenda, talhão dos laudos do AG-02); a Lagoa Grande usa o nome do pivô ('Pivô 12')
-           soloTal={**{t:['Santa Rita',t] for t in TIDS},**{pid:['Lagoa Grande',nome] for nome,pid in _LG_ROT.items()}})
+           soloTal={**{t:['Santa Rita',t] for t in TIDS},**{pid:['Lagoa Grande',nome] for nome,pid in _LG_ROT.items()}},
+           geoc={t:[tp,geo] for t,tp,geo in GEO})   # geometria do desenho da Santa Rita: pontos do laudo no polígono ou no círculo
+
+# ---- filtros da faixa Safra e Cultura (15/10/2026, proprietário: "Falta filtro de safra e cultura"): cultivos de cada safra por talhão do
+# mapa; Lavoura, Custos (previsto do plano) e "sem plano" das outras safras. A safra corrente segue com LAV/PREV (ocupação atual + plano).
+_SAFK={'Santa Rita':{'2026/27':'S2627','Safrinha 2027':'S27SF','2025/26':'S2526'},'Lagoa Grande':{'2026/27':DLS.SAFRA['id']}}
+_SAFN={sk:n for m in _SAFK.values() for n,sk in m.items()}
+def _tid_de(loc): return DLS.PID_DE.get(loc) or loc.split('-')[0]
+def _cs_saf():
+    out={}
+    for sk in _SAFN:
+        d=out.setdefault(sk,{})
+        for c in D2.CULTIVOS[sk]:
+            t=_tid_de(c['local'])
+            if t not in TAL: continue
+            d.setdefault(t,[]).append(dict(cult=c['cultura'].split()[0],loc=c['local'],var=c.get('variedade') or '',area=c['area'],
+                                           plantio=c.get('plantio') or '',colheita=c.get('colheita') or '',plano=c.get('plano') or ''))
+    return out
+CS_SAF=_cs_saf()
+def _plano_nome(pid):
+    pl=next((p for p in D2.PLANOS if p['id']==pid),None); return f"plano {pl['nome']} v{pl['versao']}" if pl else 'sem plano aplicado'
+def _lav_saf(sk):
+    L={}; fim=sk=='S2526'
+    for t,cs in CS_SAF[sk].items():
+        cults=sorted({c['cult'] for c in cs}); c0=min(cs,key=lambda c:c['plantio'] or '9')
+        lab=' + '.join(cults)+((' · plantio '+_br(_iso(c0['plantio']))) if c0['plantio'] else '')
+        rows=[dict(t=f"{c['loc']} · {c['cult']}{(' '+c['var']) if c['var'] else ''} · {nfb(c['area'])} ha",
+                   sub=(('Plantio '+_br(_iso(c['plantio']))) if c['plantio'] else 'Plantio a definir')+((' · colheita '+_br(_iso(c['colheita']))) if c['colheita'] else '')+' · '+_plano_nome(c['plano']),
+                   ch=[['safra encerrada' if fim else 'planejado','gray']]) for c in cs]
+        L[t]=dict(c='none' if fim else 'gray',l=lab,cults=cults,sum=lab,rows=rows)
+    return L
+def _prev_saf(sk):
+    out={}
+    for t in CS_SAF[sk]:
+        P=dict(fonte='',tot=0,ins=0,op=0,base=0,orig='',pend=[],lin=[])
+        cp=[c for c in D2.CULTIVOS[sk] if _tid_de(c['local'])==t and c['plano']]
+        if cp: _somar_plano(P,cp,f'área dos cultivos da safra {_SAFN[sk]} (declarada no planejamento)')
+        out[t]=_fechar(P)
+    return out
+_OUTRAS=[sk for sk in _SAFN if sk not in ('S2627',DLS.SAFRA['id'])]
+MDATA.update(safk=_SAFK,safcur={'Santa Rita':'S2627','Lagoa Grande':DLS.SAFRA['id']},csaf=CS_SAF,   # csaf: M.cs é o lado da célula do desenho
+            
+             lavS={sk:_lav_saf(sk) for sk in _OUTRAS},prevS={sk:_prev_saf(sk) for sk in _OUTRAS},
+             semplanoS={sk:{t:not any(c['plano'] for c in cs) for t,cs in CS_SAF[sk].items()} for sk in _OUTRAS})
 
 # ---- camada Irrigação: balanço hídrico e situação de hoje por área (IR-01..IR-04 no menu Agrícola) ----
 # Fonte única: dados_irrigacao.py (semente) + irrigacao_estado.js (estado gravado 'talhao-os-irrigacao-v1'); irrMapa() no cliente.
@@ -473,8 +516,28 @@ const IDXN=M.idxn;
 // ===== fazenda do mapa: Lagoa Grande (real: MapLibre GL + Sentinel-2) · Santa Rita (desenho demonstrativo) =====
 let FAZ='Lagoa Grande';
 function TIDS(){ return FAZ==='Lagoa Grande'?M.lg.ids:M.tids; }
+// ===== faixa de filtros (15/10/2026): Safra escolhe os cultivos (Lavoura, Custos, Insumos, O.S. e Colheita da safra); Cultura deixa só os
+// talhões com aquela cultura (na safra corrente: a ocupação atual e o planejado); os demais ficam neutros, "fora do filtro", em toda camada.
+// ALV: alvos escolhidos na camada Pragas e doenças (null = todos).
+let SAF='2026/27', CULT='Todas', ALV=null;
+function safOpts(){ return Object.keys(M.safk[FAZ]||{}); }
+function safK(){ return (M.safk[FAZ]||{})[SAF]||''; }
+function safCur(){ return safK()===M.safcur[FAZ]; }
+function cultsDe(t){ const cs=((M.csaf[safK()]||{})[t]||[]).map(c=>c.cult); const a=safCur()?((M.lav[t]||{}).cults||[]).concat(cs):cs; return a.filter((x,i)=>a.indexOf(x)===i); }
+function cultOpts(){ const s={}; TIDS().forEach(t=>cultsDe(t).forEach(c=>{ s[c]=1; })); return ['Todas'].concat(Object.keys(s).sort((a,b)=>a.localeCompare(b,'pt-BR'))); }
+function inF(t){ return CULT==='Todas'||cultsDe(t).indexOf(CULT)>=0; }
+function lavOf(t){ if(safCur()) return M.lav[t]; return ((M.lavS[safK()]||{})[t])||{c:'none',l:'sem cultivo na safra',cults:[],sum:'sem cultivo na safra '+SAF,rows:[]}; }
+const PREV0={fonte:'',tot:0,ins:0,op:0,base:0,orig:'',pend:[],lin:[]};
+function prevOf(t){ return safCur()?M.prev[t]:(((M.prevS[safK()]||{})[t])||PREV0); }
+function semPlanoOf(t){ return safCur()?!!M.semplano[t]:!!((M.semplanoS[safK()]||{})[t]); }
+// na safra corrente vale o que está no campo agora (todas as ordens e cultivos em produção, como antes do filtro); outra safra: só as dela
+function osSaf(o){ return safCur()||(o.saf||'2026/27')===SAF; }
+function alvOk(v){ return !ALV||ALV.indexOf((mipP(v)||{}).alvo)>=0; }
+function alvTxt(){ return ALV.length===1?ALV[0].toLowerCase():ALV.length+' alvos'; }
+function alvosFaz(){ const s={}; const ts=TIDS(); ts.forEach(t=>(MIPD.prots[t]||[]).forEach(p=>{ const a=(MIPD.prot[p]||{}).alvo; if(a) s[a]=1; }));
+  Object.values(mipGet().vis).forEach(v=>{ if(ts.indexOf(v.tal)>=0){ const a=(mipP(v)||{}).alvo; if(a) s[a]=1; } }); return Object.keys(s).sort((a,b)=>a.localeCompare(b,'pt-BR')); }
 function isLG(t){ return String(t).indexOf('PV')===0; }
-function fopts(l){ const gs=M.filt[l]||[]; if(l!=='Satélite') return gs; const ks=(FAZ==='Lagoa Grande')?M.lg.cenas.map(c=>c.k):Object.keys(M.sat).filter(k=>!M.sat[k].real);
+function fopts(l){ const gs=M.filt[l]||[]; if(l===SOLO_L) return soloFopts(gs); if(l!=='Satélite') return gs; const ks=(FAZ==='Lagoa Grande')?M.lg.cenas.map(c=>c.k):Object.keys(M.sat).filter(k=>!M.sat[k].real);
   return gs.map(g=>g.k==='dt'?Object.assign({},g,{o:ks}):g); }
 const LGI={map:null,carregando:false,pronto:false,px:null,pxP:null,el:null,markers:{},png:'',pxKey:'',lims:{},css:false,erro:''};
 const LG_VAZIO='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
@@ -506,6 +569,14 @@ function lgCanvas(fs){ const P=LGI.px; const q=P.cen[fs.dt][fs.idx]; const cv=LG
   for(let i=0;i<q.length;i++){ if(q[i]===255) continue; const t=M.lg.ids[P.dono[i]]; if(M.semcult[t]) continue; const L=LF||lims[t]||(lims[t]=lgLims(fs,t)); const k=kOf(lgDeq(q[i]),L); const c=rgb[k]||(rgb[k]=hx(satCor(fs.idx,k)));
     const o=4*(P.pix[2*i]*P.W+P.pix[2*i+1]); img.data[o]=c[0]; img.data[o+1]=c[1]; img.data[o+2]=c[2]; img.data[o+3]=240; }
   ctx.putImageData(img,0,0); lgPisca(); }
+function lgSoloCanvas(f){ const P=LGI.px; const cv=LGI.cv; const ctx=cv.getContext('2d'); const img=ctx.createImageData(P.W,P.H); const G=soloGrade(f); const ind=SOLO_IND[f.ind];
+  const hx=(h)=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]; const rgb={}; const LF=f.ctr==='Fazenda'?soloLims(f,null,G):null;
+  const pinta=(i,c,a)=>{ const o=4*(P.pix[2*i]*P.W+P.pix[2*i+1]); img.data[o]=c[0]; img.data[o+1]=c[1]; img.data[o+2]=c[2]; img.data[o+3]=a; };
+  Object.keys(G).forEach(t=>{ const o=G[t]; if(!o.ix||!o.vals.length||!inF(t)) return; const L=f.ctr==='Talhão'?soloLims(f,t,G):LF;
+    o.ix.forEach((i,j)=>{ const h=soloCor(f,ind,o.vals[j],L); pinta(i,rgb[h]||(rgb[h]=hx(h)),240); }); });
+  ctx.putImageData(img,0,0);
+  Object.keys(G).forEach(t=>{ const o=G[t]; if(!o.ix||!inF(t)) return; o.pts.forEach(p=>{ ctx.fillStyle='#FFFFFF'; ctx.fillRect(Math.round(p.x)-2,Math.round(p.y)-2,5,5); ctx.fillStyle='#15201A'; ctx.fillRect(Math.round(p.x)-1,Math.round(p.y)-1,3,3); }); });
+  lgPisca(); }
 function lgLimpa(){ const cv=LGI.cv; cv.getContext('2d').clearRect(0,0,cv.width,cv.height); lgPisca(); }
 // a fonte canvas reenvia a textura só enquanto toca: toca um instante depois de cada redesenho
 function lgPisca(){ const src=LGI.map&&LGI.map.getSource('px'); if(!src) return; try{ src.play(); clearTimeout(LGI._pz); LGI._pz=setTimeout(()=>{ try{ src.pause(); }catch(e){} },250); }catch(e){} }
@@ -560,6 +631,8 @@ function lgSync(self){ const m=LGI.map; if(!m||!LGI.pronto) return; const st=sel
   m.setFilter('pv-sel',['in',['get','id'],['literal',sel]]);
   if(l==='Satélite'){ if(!LGI.px){ lgPix().then(()=>self.setState({lgpx:Date.now()})).catch(e=>self.setState({g2toast:'Pixels do satélite indisponíveis: '+e.message})); }
     else { const key=[fs.dt,fs.idx,fs.ctr].join('|'); if(LGI.pxKey!==key){ LGI.pxKey=key; lgCanvas(fs); } } }
+  else if(l===SOLO_L){ if(!LGI.px){ lgPix().then(()=>self.setState({lgpx:Date.now()})).catch(e=>self.setState({g2toast:'Pixels do mapa indisponíveis: '+e.message})); }
+    else { const key='solo|'+[f.lau,f.prof,f.ind,f.ctr,CULT,SAF].join('|')+'|'+((soloMapLs().c||{}).rev||0); if(LGI.pxKey!==key){ LGI.pxKey=key; lgSoloCanvas(f); } } }
   else if(LGI.pxKey!=='none'){ LGI.pxKey='none'; lgLimpa(); }
   const px=st.px; let feats=[];
   if(l==='Satélite'&&px&&px.lg!==undefined&&LGI.px){ const r=LGI.px.pix[2*px.lg], c=LGI.px.pix[2*px.lg+1]; feats=[{type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[[lgLL(r,c),lgLL(r,c+1),lgLL(r+1,c+1),lgLL(r+1,c),lgLL(r,c)]]}}]; }
@@ -577,7 +650,7 @@ function flt(self,l){ const gs=fopts(l); const d={}; gs.forEach(g=>{ d[g.k]=g.o[
   return s; }
 // irrigação só com água é do módulo Irrigação (IR-03): fica fora da camada O.S. e das contagens de ordens; aparece na camada Irrigação
 function irrAgua(o){ return /^Irrigação/.test(o.tipo||''); }
-function ordsOf(t,fase){ return M.ord.filter(o=>!irrAgua(o) && o.tal.indexOf(t)>=0 && (!fase||fase==='Todas'||o.fase===fase)); }
+function ordsOf(t,fase){ return M.ord.filter(o=>!irrAgua(o) && osSaf(o) && o.tal.indexOf(t)>=0 && (!fase||fase==='Todas'||o.fase===fase)); }
 function satVal(dt,t,ix){ if(M.semcult[t]) return null; const s=M.sat[dt]; const x=s.v[t]; if(x===undefined) return null; if(x==='cloud') return 'cloud'; return x[IDXN.indexOf(ix)]; }
 function satPrev(dt,t,ix){ const ds=Object.keys(M.sat); const i=ds.indexOf(dt); for(let j=i+1;j<ds.length;j++){ const v=satVal(ds[j],t,ix); if(typeof v==='number') return [ds[j],v]; } return null; }
 function money(n){ return 'R$ '+nfx(n,0); }
@@ -628,9 +701,20 @@ function integ(t){ const x=M.integ[t];
   if(lib&&['ok','gray','blue','none'].indexOf(x[0])>=0) return ['yellow',lib.id+' a liberar'];
   return [x[0],lb]; }
 // camada Irrigação: o mesmo estado das telas IR-01..IR-04 (situação, déficit, ordens e próximo passo)
+// lâmina recomendada e percentímetro (irrPerc, irrigacao_estado.js: a mesma conta da programação da Irrigação + a ficha do pivô)
+function irrRecTxt(x){ const r=x&&x.rec; if(!r||!(r.br>0.05)) return ''; return (r.np>1?r.np+'× '+nfx(r.pct?r.lamP:r.por,1):nfx(r.pct?r.lamP:r.por,1))+' mm'+(r.pct?' a '+r.pct+' %':''); }
+function irrRecKv(xi){ const r=xi.rec; const kv=[]; if(!r) return kv;
+  if(xi.etcd) kv.push({l:'Necessidade da cultura',t:'ETc ≈ '+nfx(xi.etcd,1)+' mm/dia'+(xi.kc?' (ETo '+nfx(xi.etcd/xi.kc,1)+' mm/dia × Kc '+nfx(xi.kc,2)+')':'')});
+  if(!(r.br>0.05)){ kv.push({l:'Lâmina recomendada',t:'sem reposição: déficit zerado'}); return kv; }
+  kv.push({l:'Lâmina recomendada',t:nfx(r.br,1)+' mm brutos = '+nfx(r.liq,1)+' mm de déficit ÷ eficiência de '+xi.ef+' %'+(r.np>1?' · em '+r.np+' passadas (limite de '+nfx(xi.lmax,1)+' mm por passada)':'')});
+  if(xi.tipo!=='pivô') kv.push({l:'Turno',t:'gotejo: '+irrH(r.dur)+' por turno pela vazão do setor'});
+  else if(r.pct) kv.push({l:'Velocidade do pivô',t:'percentímetro '+r.pct+' % · '+nfx(r.lamP,1)+' mm por volta · volta de '+nfx(r.volta,1)+' h'+(r.np>1?' · '+r.np+' voltas':'')},
+    {l:r.demo?'Ficha demonstrativa (sintética)':'Ficha do pivô',t:nfx(r.l100,2)+' mm e volta de '+nfx(r.v100,1)+' h a 100 % · lâmina = lâmina a 100 % × 100 ÷ percentímetro'});
+  else kv.push({l:'Velocidade do pivô',t:'sem ficha do pivô: registre a ficha para calcular o percentímetro'});
+  return kv; }
 function irrMapa(){ let s=null; try{ s=irrGet(); }catch(e){ s=null; } const out={};
   M.tids.concat(M.lg.ids).forEach(t=>{ const x=s&&s.setores[t]; if(!x){ out[t]={c:'gray',l:isLG(t)?'preparo · sem rega':'sequeiro',d:null,est:false,hoje:'',ac:null,ords:[]}; return; }
-    const si=irrSituacao(s,t); out[t]={c:si.c,l:si.l,d:si.d,est:si.est,hoje:si.hoje,ac:si.acao,fon:si.fon,limt:si.limt,lam:si.lam,eq:si.eq,ult:si.ult,faixa:si.faixa||'',ords:si.ords||[],top:si.top?{sit:si.top.sit,agua:!!(si.top.o&&!si.top.o.fert)}:null}; });
+    const si=irrSituacao(s,t); const rp=si.d!==null?irrPerc(s,t):null; out[t]={rec:rp,kc:x.kc||null,etcd:x.bal?x.bal.etc/x.bal.dias:null,tipo:x.tipo,ef:x.efic,lmax:x.lmax,c:si.c,l:si.l,d:si.d,est:si.est,hoje:si.hoje,ac:si.acao,fon:si.fon,limt:si.limt,lam:si.lam,eq:si.eq,ult:si.ult,faixa:si.faixa||'',ords:si.ords||[],top:si.top?{sit:si.top.sit,agua:!!(si.top.o&&!si.top.o.fert)}:null}; });
   return out; }
 // ---- satélite: classe absoluta do índice ou contraste esticado (P2–P98) da fazenda ou do talhão; pixels dentro do polígono ----
 function kOf(v,L){ let k=0; while(k<5&&v>=L[k]) k++; return k; }
@@ -664,8 +748,8 @@ function satEstado(t,f){ const v=satVal(f.dt,t,f.idx); const nt=(M.sat[f.dt].nt|
 // ---- insumos: necessidade do talhão × situação da fazenda (estoque compartilhado não é dividido por talhão) ----
 // CTL-4 (DEM-05): a mesma conta do Planejar safra e da Compra (demFazenda, cal01.js) com ordens e estoque do cenário vivo (cenDemEntradas):
 // liberar, apontar, cancelar ou emitir uma O.S. muda a necessidade e a situação; entregar, devolver e receber não mudam a compra (revisão, achado 1)
-function insFaz(){ const D=M.dem; const F=D.faz[FAZ]; if(!F) return {nec:{},st:{}}; const X=cenDemEntradas(cenGet(),F,D.b);
-  const k=FAZ+'|'+JSON.stringify([X.osd,X.fisico,X.reservas,X.recebDt,X.sobra,X.quar,X.quarRep]); if(insFaz._k===k) return insFaz._v;   /* custódia sem uso e quarentena (revisão do 853a6a8) também mudam a conta */ const m=demFazenda(X); const tid=(t)=>D.tid[t]||demTal(t);
+function insFaz(){ const D=M.dem; const F=D.faz[safK()]; if(!F) return {nec:{},st:{}}; const X=cenDemEntradas(cenGet(),F,D.b);
+  const k=safK()+'|'+JSON.stringify([X.osd,X.fisico,X.reservas,X.recebDt,X.sobra,X.quar,X.quarRep]); if(insFaz._k===k) return insFaz._v;   /* custódia sem uso e quarentena (revisão do 853a6a8) também mudam a conta */ const m=demFazenda(X); const tid=(t)=>D.tid[t]||demTal(t);
   const v={nec:demPorLocal(m,tid,F.areaT,F.hoje),st:{'Safra toda':demSituacao(m,null,F.hoje,F.viavel),'Próximos 30 dias':demSituacao(m,M.lim30,F.hoje,F.viavel)}};
   insFaz._k=k; insFaz._v=v; return v; }
 function necAgg(t,per){ const m={}; (insFaz().nec[t]||[]).filter(x=>per==='Safra toda'||x.dt<=M.lim30).forEach(x=>{ const a=m[x.p]||(m[x.p]={p:x.p,q:0,un:x.un,dt:x.dt,orig:[]}); a.q+=x.q; if(x.dt<a.dt) a.dt=x.dt; a.orig.push(x.orig); });
@@ -675,37 +759,41 @@ function brIso(s){ if(!s) return ''; const a=s.split('-'); return a[2]+'/'+a[1];
 // custo: as regras moram em custo_dominio.py (fonte única do Mapa e do Painel Agrícola); aqui só o atalho com os dados do Mapa (M) e a projeção OSN
 function precoDe(p){ return cusPreco(M,p); }
 function ordCusto(o){ return cusOrdem(M,o); }
-function cusReal(t){ return cusTalhao(M,t,OSN); }
+function cusReal(t){ return cusTalhao(M,t,OSN.filter(osSaf)); }
 // ---- classe e rótulo de cada talhão na camada ativa ----
 // ---- pragas e doenças (MIP/MID): vistorias do período; a pior situação colore o talhão ----
 // mesma base do AG-01 (mip.js): vistorias do período + as abertas e as decisões pendentes, da pior para a melhor situação
 function mipPer(per){ return per==='Últimos 30 dias'?30:7; }
-function mipOf(t,per){ return mipDoTal(mipGet(),t,mipPer(per),MAPC); }
+function mipOf(t,per){ return mipDoTal(mipGet(),t,mipPer(per),MAPC).filter(x=>alvOk(x.v)); }
 function mipSemProt(t){ return !(MIPD.prots[t]||[]).length; }
 function mipMin(t0){ return t0.charAt(0).toLowerCase()+t0.slice(1); }
-function semCultura(t){ return ['gray','none'].indexOf((M.lav[t]||{}).c)>=0; }
-function cls(l,f,t){
+function semCultura(t){ return ['gray','none'].indexOf((lavOf(t)||{}).c)>=0; }
+// fora da Cultura escolhida na faixa: neutro em toda camada
+function cls(l,f,t){ if(!inF(t)) return {c:'none',l:'fora do filtro'}; return cls0(l,f,t); }
+function cls0(l,f,t){
   if(l===CAR_L) return carCls(t,f);   // MAPA-CARENCIA-LMR-20261003
-  if(l===SOLO_L) return soloCls(t);   // Análises de solo (13/10/2026)
+  if(l===SOLO_L) return soloCls(t,f);   // Análises de solo (13/10/2026; mapa de calor 15/10/2026)
   if(l===COLH_L) return colhCls(t);   // Colheita (14/10/2026)
   if(l==='Integrado'){ const x=integ(t); if(f.mostrar==='Só pendências' && ['ok','gray','blue','none'].indexOf(x[0])>=0) return {c:'none',l:'sem pendência'}; return {c:x[0],l:x[1]}; }
   if(l==='Satélite'){ const v=satVal(f.dt,t,f.idx); if(v===null) return {c:'gray',l:M.semcult[t]||'sem cultura'}; if(v==='cloud') return {c:'cloud',l:'nuvem · sem leitura'};
     const k=kOf(v,satLims(f,t)); return {c:'sat',hex:satCor(f.idx,k),k,ka:kOf(v,M.idx[f.idx].lim),l:f.idx+' '+nfx(v,2)}; }
-  if(l==='Lavoura'){ const x=M.lav[t]; if(f.cult!=='Todas'&&x.cults.indexOf(f.cult)<0) return {c:'none',l:'fora do filtro'}; return {c:x.c,l:x.l}; }
+  if(l==='Lavoura'){ const x=lavOf(t); return {c:x.c,l:x.l}; }
   if(l==='O.S./prazos'){ const os=ordsOf(t,f.fase); if(!os.length) return {c:'none',l:'sem ordem'+(f.fase==='Todas'?'':' na fase')}; const c=worstC(os.map(o=>PZC[o.pz])); const o=os.find(x=>PZC[x.pz]===c);
     return {c,l:o.id+' · '+o.pz+(os.length>1?' · +'+(os.length-1):'')}; }
   if(l==='MIP/MID'){ const vs=mipOf(t,f.per);
-    if(!vs.length){ if(mipSemProt(t)) return {c:'none',l:'sem cultura'}; const r=mipRitmo(mipGet(),t); return {c:'gray',l:r.atras?('vistoria atrasada '+r.atras+(r.atras>1?' dias':' dia')):'sem vistoria em '+mipPer(f.per)+' dias'}; }
+    if(!vs.length){ if(mipSemProt(t)) return {c:'none',l:'sem cultura'};
+      if(ALV){ if(!(MIPD.prots[t]||[]).some(p=>ALV.indexOf((MIPD.prot[p]||{}).alvo)>=0)) return {c:'none',l:'sem '+alvTxt()+' no protocolo'}; return {c:'gray',l:'sem vistoria de '+alvTxt()+' em '+mipPer(f.per)+' dias'}; }
+      const r=mipRitmo(mipGet(),t); return {c:'gray',l:r.atras?('vistoria atrasada '+r.atras+(r.atras>1?' dias':' dia')):'sem vistoria em '+mipPer(f.per)+' dias'}; }
     const x=vs[0]; return {c:x.S.mc,l:mipP(x.v).alvo+' · '+mipMin(x.S.t)+(vs.length>1?' · +'+(vs.length-1):'')}; }
   if(l==='Irrigação'){ const x=M.irr[t]; if(!x) return {c:'none',l:''};
-    if(f.ver==='Balanço hídrico'){ if(x.d===null) return {c:'gray',l:x.l}; if(x.est) return {c:'cloud',l:'≈'+nfx(x.d,1)+' mm · estimado'};
-      return {c:x.d<5?'ok':(x.d<10?'yellow':(x.d<15?'orange':'red')),l:'déficit '+nfx(x.d,1)+' mm'}; }
+    if(f.ver==='Balanço hídrico'){ if(x.d===null) return {c:'gray',l:x.l}; if(x.est){ const rt=irrRecTxt(x); return {c:'cloud',l:'≈'+nfx(x.d,1)+' mm · estimado'+(rt?' → '+rt:'')}; }
+      const rt=irrRecTxt(x); return {c:x.d<5?'ok':(x.d<10?'yellow':(x.d<15?'orange':'red')),l:'déficit '+nfx(x.d,1)+' mm'+(rt?' → '+rt:'')}; }
     return {c:x.c,l:x.l}; }
   if(l==='Insumos'){ const its=necAgg(t,f.per); const st=insFaz().st[f.per]||{};
-    if(!its.length) return M.semplano[t]?{c:'gray',l:'sem plano na safra'}:{c:'none',l:'sem necessidade'};
+    if(!its.length) return semPlanoOf(t)?{c:'gray',l:'sem plano na safra'}:{c:'none',l:'sem necessidade'};
     const c=worstC(its.map(x=>(st[x.p]||['','none'])[1])); const fal=its.filter(x=>(st[x.p]||[])[1]==='red');
     return {c,l:fal.length?('falta '+fal[0].p+(fal.length>1?' +'+(fal.length-1):'')):(c==='yellow'?'aguardando pedido':'estoque cobre')}; }
-  if(l==='Custos'){ const P=M.prev[t];
+  if(l==='Custos'){ const P=prevOf(t);
     if(f.most==='Previsto R$/ha'){ if(!P.fonte||!P.base) return {c:'gray',l:'sem previsto'}; return {c:'blue',l:money(P.tot/P.base)+'/ha'}; }
     const R=cusReal(t); if(!R.ha) return {c:'none',l:R.shared.length?('só '+R.shared.map(x=>x.o.id).join(', ')+' compartilhada'):'sem execução'}; const dv=R.prevExec?(R.rs-R.prevExec)/R.prevExec*100:0; const c=dv<=0.5?'ok':(dv<=10?'yellow':'red');
     return {c,l:mil(R.rs)+' · '+(dv>0.5?'+'+nfx(dv,1)+' %':'no previsto')}; }
@@ -715,7 +803,7 @@ function Lh(hx,t){ return {t,st:'display:inline-flex;align-items:center;gap:5px;
 function legend(self,l,f,sel){
   if(l===CAR_L) return carLegend();   // MAPA-CARENCIA-LMR-20261003
   if(l===COLH_L) return colhLegend();
-  if(l===SOLO_L) return [Lc(l,'orange','V abaixo da meta'),Lc(l,'ok','em dia'),Lc(l,'yellow','a validar'),Lc(l,'gray','vencida'),Lc(l,'none','sem análise')];
+  if(l===SOLO_L) return soloLegend(f);
   if(l==='Integrado') return [Lc(l,'ok','em dia'),Lc(l,'yellow','atenção ou a liberar'),Lc(l,'red','impedida ou conflito'),Lc(l,'gray','encerrada'),Lc(l,'none','sem pendência')];
   if(l==='Satélite'){ const t0=sel[0]||''; const t=(f.ctr==='Talhão'&&t0&&typeof satVal(f.dt,t0,f.idx)==='number')?t0:''; const L=satLims(f,t||null); const d=(L[4]-L[0]<0.06)?3:2; const nm=M.clsn[M.idx[f.idx].pal];
     const fx=(x)=>nfx(x,d); const out=[0,1,2,3,4,5].map(k=>Lh(satCor(f.idx,k),nm[k]+' '+(k===0?'< '+fx(L[0]):(k===5?'≥ '+fx(L[4]):fx(L[k-1])+'–'+fx(L[k])))));
@@ -732,35 +820,37 @@ function legend(self,l,f,sel){
 function fonte(l,f){
   if(l===CAR_L) return carFonte(f);   // MAPA-CARENCIA-LMR-20261003
   if(l===COLH_L) return colhFonte();
-  if(l===SOLO_L) return 'laudo de solo de 0–20 cm mais recente de cada talhão (Análises de solo) · V = 100 × SB ÷ T · meta = V₂ da cultura do próximo cultivo · '+SOLO0.regra.rotulo+' · laudos sintéticos';
+  if(l===SOLO_L){ const ind=SOLO_IND[f.ind]||{}; return 'pontos georreferenciados da amostragem em grade de cada laudo (Análises de solo) · camada '+f.prof+' · mapa de calor por interpolação (inverso do quadrado da distância) dentro do talhão · '+(f.ctr==='Absoluto'?'classes da tabela demonstrativa ('+SOLO0.regra.rotulo+')':(f.ctr==='Talhão'?'contraste do talhão: sextos dos valores dele':'contraste da fazenda: P2–P98 de todos os talhões'))+(ind.idx?' · '+ind.l+' calculado no ponto (soloIdx)':'')+' · laudos sintéticos'; }
   if(l==='Integrado') return FAZ==='Lagoa Grande'?(M.lg.rot?(M.lg.rot+' · pivôs, imagem e índices fictícios · O.S. e safra do cenário · cena de '+M.lg.cenas[0].k):('Pivôs do KML do proprietário · O.S. e safra do cenário · imagem Sentinel-2 de '+M.lg.cenas[0].k)):('O.S. do PCP e cenário de execução · satélite 21/09 · hoje '+M.hoje);
   if(l==='Satélite'){ const s=M.sat[f.dt]; return (s.real&&M.lg.rot?M.lg.rot+' · imagem e índices fictícios':'Sentinel-2 L2A'+(s.real?' · imagem real (Copernicus/ESA)':''))+' · 10 m · aquisição '+s.aq+' · '+f.idx+': '+M.idx[f.idx].o+' · contraste '+f.ctr.toLowerCase(); }
-  if(l==='Lavoura') return 'ocupação atual e cultivos da safra 2026/27 · DAP e idade pela data real de plantio · hoje '+M.hoje;
+  if(l==='Lavoura') return (safCur()?'ocupação atual e cultivos da safra '+SAF+' · DAP e idade pela data real de plantio':'cultivos da safra '+SAF+' · plantio e colheita do planejamento')+' · hoje '+M.hoje;
   if(l==='O.S./prazos') return 'O.S. do PCP · prazo pela janela de cada ordem · fase do cenário de execução';
   if(l==='MIP/MID') return 'vistorias de Pragas e doenças · NC por alvo e fase · '+(FAZ==='Lagoa Grande'?'pivôs reais, vistorias demonstrativas':'talhões desenhados')+' · hoje '+M.hoje;
   if(l==='Irrigação') return FAZ==='Lagoa Grande'?('balanço hídrico demonstrativo sobre os pivôs reais · ETo 5,5 mm/dia × Kc do mamão por fase · tarefas do dia geradas pelo balanço · hoje '+M.hoje):'balanço hídrico 23/09 06:00 · Estação Santa Rita e sondas P1, P2 e T7 · ≈ = estimativa por ET · ordens do módulo Irrigação';
-  if(l==='Insumos'){ const F=M.dem.faz[FAZ]; return 'necessidade líquida da '+(F?F.nomes[F.saf]:'safra')+' (plano sem O.S. + O.S. abertas pelo que falta tirar do almoxarifado): a mesma do Planejar safra e da Compra · estoque apto e pedidos da fazenda, não divididos por talhão'; }
+  if(l==='Insumos'){ const F=M.dem.faz[safK()]; if(!F) return 'safra '+SAF+' encerrada: sem necessidade a comprar'; return 'necessidade líquida da '+(F?F.nomes[F.saf]:'safra')+' (plano sem O.S. + O.S. abertas pelo que falta tirar do almoxarifado): a mesma do Planejar safra e da Compra · estoque apto e pedidos da fazenda, não divididos por talhão'; }
   if(l==='Custos') return 'previsto = dose × preço + operação (rendimento da safra) · realizado provisório dos apontamentos aceitos · conferido à parte';
   return ''; }
-function strip(self,l,f){ const N=(k,val,d)=>({k,val,d:d||''}); const tids=TIDS(); const ordF=M.ord.filter(o=>!irrAgua(o)&&o.tal.some(t=>tids.indexOf(t)>=0)); const area=(ts)=>ts.reduce((a,t)=>a+M.tal[t].ha,0);
+function strip(self,l,f){ const N=(k,val,d)=>({k,val,d:d||''}); const tids=TIDS().filter(inF); const ordF=M.ord.filter(o=>!irrAgua(o)&&osSaf(o)&&o.tal.some(t=>tids.indexOf(t)>=0)); const area=(ts)=>ts.reduce((a,t)=>a+M.tal[t].ha,0);
   if(l===CAR_L) return carStrip(f);   // MAPA-CARENCIA-LMR-20261003
-  if(l===SOLO_L) return soloStrip();
+  if(l===SOLO_L) return soloStrip(f);
   if(l===COLH_L) return colhStrip();
   if(l==='Integrado'){ const ab=ordF.filter(o=>o.fase!=='Encerradas'); return [N('',nfx(area(tids))+' ha','Área dos talhões'),N('Ordens abertas',ab.length),N('Impedidas',ordF.filter(o=>o.selos.some(s=>/^(Impedida|Falta máquina)/.test(s[0]))).length,'Ordens impedidas'),N('A liberar',ordF.filter(o=>o.act&&o.act.k==='lib').length,'A liberar pelo agrônomo')]; }
   if(l==='Satélite'){ let s=0,a=0,n=0; tids.forEach(t=>{ const v=satVal(f.dt,t,f.idx); if(typeof v==='number'){ s+=v*M.tal[t].ha; a+=M.tal[t].ha; } if(v==='cloud') n++; });
     const ms=M.sat[f.dt].manchas; const out=[N(f.idx,a?nfx(s/a,2):'—',f.idx+' médio dos talhões com cultura (ponderado pela área)')];   // manchas e talhões sob nuvem só quando há
     if(ms.length) out.push(N('Manchas',ms.length+' · '+nfx(ms.reduce((x,m)=>x+m.ha,0),1)+' ha','Manchas na cena'));
     out.push(N('Nuvem',nfx(M.sat[f.dt].nuvem,2)+' %','Nuvem na cena')); if(n) out.push(N('Sob nuvem',n,'Talhões sob nuvem na cena')); return out; }
-  if(l==='Lavoura') return FAZ==='Lagoa Grande'?[N('Pivôs',tids.length),N('',nfx(area(tids))+' ha','Área irrigada'),N('Com cultivo',tids.filter(t=>M.lav[t].c!=='gray').length,'Pivôs com cultivo na safra')]:M.lavstrip.map(x=>N(x[0],x[1],x[2]));
+  if(l==='Lavoura'){ if(safCur()&&CULT==='Todas') return FAZ==='Lagoa Grande'?[N('Pivôs',tids.length),N('',nfx(area(tids))+' ha','Área irrigada'),N('Com cultivo',tids.filter(t=>M.lav[t].c!=='gray').length,'Pivôs com cultivo na safra')]:M.lavstrip.map(x=>N(x[0],x[1],x[2]));
+    const cs=[].concat(...tids.map(t=>(M.csaf[safK()]||{})[t]||[])).filter(c=>CULT==='Todas'||c.cult===CULT);
+    return [N('Cultivos',cs.length,'Cultivos na safra '+SAF+(CULT==='Todas'?'':' · '+CULT)),N('',nfx(cs.reduce((a,c)=>a+c.area,0))+' ha','Área dos cultivos na safra'),N(FAZ==='Lagoa Grande'?'Pivôs':'Talhões',tids.length)]; }
   if(l==='O.S./prazos'){ const os=ordF.filter(o=>f.fase==='Todas'||o.fase===f.fase); return [N('Ordens',os.length),N('Atrasadas',os.filter(o=>o.pz==='atrasada').length),N('Vencem hoje',os.filter(o=>o.pz==='vence hoje').length),N('Saldo',nfx(os.reduce((a,o)=>a+(o.saldo||0),0))+' ha','Saldo a executar')]; }
   if(l==='MIP/MID'){ const cs=tids.map(t=>cls(l,f,t).c); const sm=mipGet(); const lim=mipAdd(M.hoje_iso,-mipPer(f.per));
-    return [N('Vistorias',Object.values(sm.vis).filter(v=>tids.indexOf(v.tal)>=0&&v.data>=lim&&v.data<=M.hoje_iso).length,'Vistorias no período'),N('Acima do NC',cs.filter(c=>c==='red').length,'Talhões acima do nível de controle'),N('Atenção',cs.filter(c=>c==='orange'||c==='yellow').length,'Talhões com foco ou atenção'),N('Em controle',cs.filter(c=>c==='blue').length,'Talhões em controle')]; }
+    return [N('Vistorias',Object.values(sm.vis).filter(v=>tids.indexOf(v.tal)>=0&&v.data>=lim&&v.data<=M.hoje_iso&&alvOk(v)).length,'Vistorias no período'),N('Acima do NC',cs.filter(c=>c==='red').length,'Talhões acima do nível de controle'),N('Atenção',cs.filter(c=>c==='orange'||c==='yellow').length,'Talhões com foco ou atenção'),N('Em controle',cs.filter(c=>c==='blue').length,'Talhões em controle')]; }
   if(l==='Irrigação'){ const xs=tids.filter(t=>M.irr[t]&&M.irr[t].d!==null); const n=(c)=>xs.filter(t=>M.irr[t].c===c).length; const nest=xs.filter(t=>M.irr[t].est).length;
     if(f.ver==='Balanço hídrico'){ const a=area(xs); const dm=a?xs.reduce((q,t)=>q+M.irr[t].d*M.tal[t].ha,0)/a:0; const mx=xs.slice().sort((p,q)=>M.irr[q].d-M.irr[p].d)[0];
       return [N('',nfx(a)+' ha','Área com balanço hídrico'),N('Déficit',nfx(dm,1)+' mm','Déficit médio (ponderado pela área)'),N('Maior',mx?(rotT(mx)+' · '+nfx(M.irr[mx].d,1)+' mm'):'—','Maior déficit'),N('Estimados',nest,'Estimados por ET (sonda sem dado ou suspeita)')]; }
     return [N('Programadas',n('blue')+n('lime'),'Irrigando ou programadas'),N('Pendentes',n('yellow'),'Pendentes: janela, conferência ou liberação'),N('Impedidas',n('red'),'Impedidas ou em conflito'),N('Estimados',nest,'Estimados por ET (≈)')]; }
   if(l==='Insumos'){ const st=insFaz().st[f.per]||{}; const vs=Object.values(st); return [N('Produtos',vs.length,'Produtos no período'),N('Faltam',vs.filter(x=>x[1]==='red').length,'Faltam comprar'),N('A receber',vs.filter(x=>x[1]==='yellow').length,'Aguardando pedido a receber'),N('Estoque cobre',vs.filter(x=>x[1]==='ok').length)]; }
-  if(l==='Custos'){ let p=0,r=0,c=0,sh={}; tids.forEach(t=>{ p+=M.prev[t].tot; const R=cusReal(t); r+=R.rs; c+=R.rsConf; R.shared.forEach(s=>{ sh[s.o.id]=s.c; }); });
+  if(l==='Custos'){ let p=0,r=0,c=0,sh={}; tids.forEach(t=>{ p+=prevOf(t).tot; const R=cusReal(t); r+=R.rs; c+=R.rsConf; R.shared.forEach(s=>{ sh[s.o.id]=s.c; }); });
     Object.values(sh).forEach(x=>{ r+=x.rs; c+=x.rsConf; });
     return [N('Previsto',mil(p)),N('Realizado',mil(r),'Realizado provisório (apontamentos aceitos)'),N('Conferido',mil(c)),N('Execução',p?nfx(r/p*100,1)+' %':'—','Realizado ÷ previsto')]; }
   return []; }
@@ -839,9 +929,9 @@ function SEC(self,l,k,t,sum,b){ const s=Object.assign({k,t,sum,kv:[],items:[],no
   s.hasKv=s.kv.length>0; s.kvTop=s.hasKv&&!s.kvEnd; s.kvBot=s.hasKv&&!!s.kvEnd; s.hasNote=!!s.note; s.hasLk=!!s.lk; s.hasActs=s.acts.length>0;
   s.hasHd=!!s.hd; s.hd=s.hd||''; s.hdc=s.hdc||''; s.hdst=s.hdst||'';
   s.items=s.items.map(it=>Object.assign({cap:'',bst:''},it,{hasCap:!!it.cap})); return s; }
-function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=M.lav[t];
+function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=lavOf(t);
   const nomeT=isLG(t)?('Pivô '+String((M.lg.pivos.find(p=>p.id===t)||{}).rot||t).replace(/^P/,'')):t;
-  const P={title:nomeT+' · '+nfx(T.ha)+' ha',sub:lv.sum.replace(/^Pivô \d+ · /,'')+' · '+(isLG(t)?'Lagoa Grande':'Santa Rita'),ch:[c.c==='sat'?CHs(c.l,satChipSt(f.idx,c.ka)):CH(c.l,CCH[c.c]||'gray')],os:[],hasOs:false,nx:null,hasNx:false,secs:[],acts:[]};
+  const P={title:nomeT+' · '+nfx(T.ha)+' ha',sub:lv.sum.replace(/^Pivô \d+ · /,'')+' · '+(isLG(t)?'Lagoa Grande':'Santa Rita'),ch:[c.c==='sat'?CHs(c.l,c.solo?soloChipSt(c.hex):satChipSt(f.idx,c.ka)):CH(c.l,CCH[c.c]||'gray')],os:[],hasOs:false,nx:null,hasNx:false,secs:[],acts:[]};
   // ordens de serviço (cartões e próximo passo só na camada O.S.)
   const os=osMapa(t); P.os_t=os.length?('Ordens de serviço · '+os.length):'Nenhuma ordem neste talhão';
   if(os.length&&l==='O.S./prazos'){ let sel=((self.state.osel||{})[t]); if(!os.some(o=>o.id===sel)){ const ab=os.filter(o=>o.etapa!=='Encerradas'); sel=(ab[0]||os[0]).id; }
@@ -878,11 +968,11 @@ function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=M.
     const reqs=[]; osMapa(t).forEach(o=>{ if(!o.r||!o.r.itens||!o.r.itens.length||['Encerradas','Canceladas'].indexOf(o.etapa)>=0) return;
       o.r.itens.forEach(i=>reqs.push({t:o.r.id+' · '+o.id+' · '+i.prod,sub:'reservado '+nd(i.solicitado)+' '+i.un+' · lote '+i.lote+' · entregue '+nd(i.entregue)+' · em custódia '+nd(i.custodia)+' · consumido '+nd(i.consumido),ch:[CH(i.custodia>0.001?'em custódia':(i.entregue>0?'entregue':'reservado'),i.custodia>0.001?'yellow':'gray')],acts:[]})); });
     const fal=items.filter(x=>x.ch[0].t.indexOf('Falta')===0).length;
-    const sum=its.length?(its.length+(its.length>1?' insumos':' insumo')+' · '+(fal?fal+(fal>1?' faltas':' falta'):'sem falta')+' · '+fi.per.toLowerCase()):(M.semplano[t]?'Sem plano na safra 2026/27':'Sem necessidade no período');
+    const sum=its.length?(its.length+(its.length>1?' insumos':' insumo')+' · '+(fal?fal+(fal>1?' faltas':' falta'):'sem falta')+' · '+fi.per.toLowerCase()):(semPlanoOf(t)?'Sem plano na safra '+SAF:'Sem necessidade no período');
     P.secs.push(SEC(self,l,'ins','Insumos',sum,{items:items.concat(reqs),kv:[{l:'Período',t:fi.per+' (filtro da camada Insumos)'},{l:'Estoque',t:'compartilhado da fazenda · não é dividido por talhão'}],
-      note:M.semplano[t]?'Cultivo da safra 2026/27 sem plano: a necessidade vem só das O.S. abertas.':'',lk:'CMP.dc.html',lkt:'Abrir Compra de insumos'})); }
+      note:semPlanoOf(t)?'Cultivo da safra '+SAF+' sem plano: a necessidade vem só das O.S. abertas.':'',lk:'CMP.dc.html',lkt:'Abrir Compra de insumos'})); }
   // custos
-  { const Pv=M.prev[t]; const R=cusReal(t); const kv=[];
+  { const Pv=prevOf(t); const R=cusReal(t); const kv=[];
     if(Pv.fonte){ kv.push({l:'Previsto',t:money(Pv.tot)+' · '+money(Pv.tot/Pv.base)+'/ha'}); kv.push({l:'Área-base',t:nfx(Pv.base)+' ha · '+Pv.orig}); kv.push({l:'Composição',t:'insumos '+money(Pv.ins)+' · operação '+money(Pv.op)}); }
     else kv.push({l:'Previsto',t:'sem plano e sem O.S. no talhão'});
     kv.push({l:'Realizado provisório',t:R.ha?(money(R.rs)+' em '+nfx(R.ha,R.ha%1?1:0)+' ha executados · '+money(R.rs/R.ha)+'/ha-operação'):'sem apontamento aceito'});
@@ -895,7 +985,7 @@ function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=M.
     P.secs.push(SEC(self,l,'cus','Custos',sum,{kv,items,lk:Pv.fonte==='plano'?'SAF.dc.html':'OS.dc.html',lkt:Pv.fonte==='plano'?'Abrir origem no Planejar safra':'Abrir origem nas O.S.'})); }
   // irrigação: rega de hoje, balanço hídrico e as ordens de irrigação do talhão
   const xi=M.irr[t]||{c:'none',l:'',d:null,hoje:'',ac:null};
-  { const kv=[]; if(xi.d!==null){ kv.push({l:'Balanço hídrico',t:(xi.est?'≈ ':'')+'déficit '+nfx(xi.d,1)+' mm · '+xi.fon}); if(xi.faixa) kv.push({l:'Passagem parcial',t:xi.faixa}); kv.push({l:xi.limt,t:xi.lam}); kv.push({l:'Equipamento',t:xi.eq}); kv.push({l:'Última rega',t:xi.ult}); }
+  { const kv=[]; if(xi.d!==null){ kv.push({l:'Balanço hídrico',t:(xi.est?'≈ ':'')+'déficit '+nfx(xi.d,1)+' mm · '+xi.fon}); irrRecKv(xi).forEach(z=>kv.push(z)); if(xi.faixa) kv.push({l:'Passagem parcial',t:xi.faixa}); kv.push({l:xi.limt,t:xi.lam}); kv.push({l:'Equipamento',t:xi.eq}); kv.push({l:'Última rega',t:xi.ult}); }
     const IS=(()=>{ try{ return irrGet(); }catch(e){ return null; } })();
     const items=(xi.ords||[]).map(o=>{ const et=irrEtapa(IS,o); return {t:o.id+' · Irrigação · '+(o.fert?'v2 com produto':'água'),sub:'Janela '+irrJanO(o)+' · '+irrMm(o.lam)+' mm'+(o.passadas.length>1?' em '+o.passadas.length+' passadas':''),
         ch:[CH(et,FCOR[et]||'gray')].concat(irrSelos(IS,o).filter(z=>!z.mut).map(z=>CH(z.t,z.c))),acts:[A('Abrir ordem',{h:'IR-03det.dc.html#'+o.id,ic:'doc',tt:'Ordem de irrigação (módulo Irrigação)'})]}; })
@@ -941,12 +1031,12 @@ function panelTal(self,l,f,t){ const T=M.tal[t]; const c=cls(l,f,t); const lv=M.
   const osRes=os.length?(os.length+(os.length>1?' ordens':' ordem')+' · '+ab+(ab===1?' aberta':' abertas')):'nenhuma ordem neste talhão';
   const hub=M.lays.filter(x=>x!=='Integrado').map(x=>{ const fx=flt(self,x); const c=cls(x,fx,t); const nm=M.nome[x]||x;
     const sb=x==='O.S./prazos'?osRes:((byK[KL[x]]||{}).sum||'');
-    return {t:nm,sub:sb===c.l?'':sb,ch:[c.c==='sat'?CHs(c.l,satChipSt(fx.idx,c.ka)):CH(c.l||'—',CCH[c.c]||'gray')],
+    return {t:nm,sub:sb===c.l?'':sb,ch:[c.c==='sat'?CHs(c.l,c.solo?soloChipSt(c.hex):satChipSt(fx.idx,c.ka)):CH(c.l||'—',CCH[c.c]||'gray')],
       acts:[A(VER[x][0],{fn:()=>self.setState({lay:x,cvis:false,mpa:null}),ic:VER[x][1],tt:'Mostrar no painel só '+nm.toLowerCase()+' deste talhão'})]}; });
   P.secs=[SEC(self,l,'hub','Neste talhão','',{items:hub})]; P.acts=[]; return P; }
 function panelArea(self,l,f,sel){ const ha=sel.reduce((a,t)=>a+M.tal[t].ha,0); const vs={}; sel.forEach(t=>{ const id=mapVisAb(t,l==='Satélite'); if(id) vs[t]=id; });
   const P={title:'Área selecionada · '+sel.length+' talhões',sub:sel.join(' + ')+' · '+nfx(ha)+' ha',ch:[],os:[],hasOs:false,nx:null,hasNx:false,secs:[],acts:[]};
-  P.secs.push(SEC(self,'','are','Talhões',sel.length+' talhões · '+nfx(ha)+' ha',{items:sel.map(t=>{ const c=cls(l,f,t); return {t:t+' · '+M.lav[t].sum,sub:nfx(M.tal[t].ha)+' ha',ch:[c.c==='sat'?CHs(c.l,satChipSt(f.idx,c.ka)):CH(c.l,CCH[c.c]||'gray')].concat(vs[t]?[CH(vs[t],'green')]:[]),acts:[]}; })}));
+  P.secs.push(SEC(self,'','are','Talhões',sel.length+' talhões · '+nfx(ha)+' ha',{items:sel.map(t=>{ const c=cls(l,f,t); return {t:t+' · '+lavOf(t).sum,sub:nfx(M.tal[t].ha)+' ha',ch:[c.c==='sat'?CHs(c.l,c.solo?soloChipSt(c.hex):satChipSt(f.idx,c.ka)):CH(c.l,CCH[c.c]||'gray')].concat(vs[t]?[CH(vs[t],'green')]:[]),acts:[]}; })}));
   const os=M.ord.filter(o=>!irrAgua(o)&&o.tal.some(t=>sel.indexOf(t)>=0)); if(l==='O.S./prazos') P.secs.push(SEC(self,'','aos','Ordens na área · '+os.length,os.map(o=>o.id).join(', ')||'nenhuma',{items:os.map(o=>({t:o.id+' · '+o.tipo,sub:'Janela '+o.jan+' · '+o.real,ch:[CH(o.fase,FCOR[o.fase])].concat(o.selos.map(s=>CH(s[0],s[1]))),acts:[A('Abrir ordem',{h:'OS.dc.html#'+o.id,ic:'doc'})]}))}));
   P.acts=((l==='Satélite'||l==='MIP/MID')?[A('Programar vistoria nas áreas',{fn:()=>criarVis(self,sel),ic:'alert',tt:'Programar uma vistoria por talhão: '+sel.join(', ')})]:[]).concat([A('Limpar seleção',{fn:()=>self.setState({tsel:[]}),ic:'map'})]); return P; }
 function svgPt(e){ try{ const el=e&&(e.currentTarget||e.target); const svg=el&&el.ownerSVGElement; if(!svg||!svg.getScreenCTM) return null; const p=svg.createSVGPoint(); p.x=e.clientX; p.y=e.clientY;
@@ -954,17 +1044,23 @@ function svgPt(e){ try{ const el=e&&(e.currentTarget||e.target); const svg=el&&e
 function MAPVALS(self,v){
   M.ord=mapOrdsCen(); OSN=ords(self); M.irr=irrMapa();
   const faz0=self.state.mf_faz||'Lagoa Grande'; FAZ=(faz0==='Lagoa Grande')?'Lagoa Grande':'Santa Rita';
+  { const s0=self.state; SAF=safOpts().indexOf(s0.mf_saf)>=0?s0.mf_saf:'2026/27'; CULT=cultOpts().indexOf(s0.mf_cult)>=0?s0.mf_cult:'Todas';
+    const av=alvosFaz(); const a=(s0.mipAlvos||[]).filter(x=>av.indexOf(x)>=0); ALV=a.length?a:null; }
   // contexto do mapa (camada, seleção, filtros, zoom, ordem escolhida) preservado ao voltar de outra tela
   if(!self.__ctx){ self.__ctx=1; let s=null; try{ s=JSON.parse(sessionStorage.getItem('mapa-ctx')||'null'); }catch(e){ s=null; }
     if(s){ setTimeout(()=>{ self.__ctxOk=1; self.setState(s); },0); } else self.__ctxOk=1; }
   carHash(self);   // MAPA-CARENCIA-LMR-20261003
+  SOLOST=((self.state.flt||{})[SOLO_L])||{};   // camada do solo escolhida: as opções de Laudo e Indicador dependem dela
   const st=self.state; const l=lay(self); const f=flt(self,l); const sel=(st.tsel||[]).filter(t=>TIDS().indexOf(t)>=0);
-  if(self.__ctxOk){ try{ sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:st.mf_faz||'Lagoa Grande',lay:st.lay||'Integrado',tsel:st.tsel||[],flt:st.flt||{},zoom:st.zoom||1,osel:st.osel||{},px:st.px||null})); }catch(e){} }
+  if(self.__ctxOk){ try{ sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:st.mf_faz||'Lagoa Grande',mf_saf:st.mf_saf||'2026/27',mf_cult:st.mf_cult||'Todas',mipAlvos:st.mipAlvos||[],lay:st.lay||'Integrado',tsel:st.tsel||[],flt:st.flt||{},zoom:st.zoom||1,osel:st.osel||{},px:st.px||null})); }catch(e){} }
   const CTRD={'Talhão':'Cores dentro de cada talhão: mostra onde ele está melhor e pior.','Fazenda':'Uma escala para a fazenda inteira: compara um talhão com o outro.','Absoluto':'Limites fixos do índice: compara cenas e safras.'};
   const VERD={'Hoje':'O que fazer hoje em cada área: irrigando, programada, a programar, impedida ou sem necessidade.','Balanço hídrico':'Falta de água no solo em mm: evapotranspiração menos chuva e irrigação desde a última reposição.'};
   VERD['Últimos 7 dias']='Vistorias da última semana: o ritmo recomendado de monitoramento.'; VERD['Últimos 30 dias']='Vistorias do último mês, inclusive as que já passaram do ritmo semanal.';
   const dica=(k,o)=>(k==='per'&&l==='MIP/MID')?(VERD[o]||''):k==='idx'?((M.idx[o]||{}).d||''):(k==='ctr'?(CTRD[o]||''):(k==='ver'?(VERD[o]||''):(k==='dt'?'Imagem de satélite de '+o:'')));
-  v.flt=fopts(l).map(g=>({l:g.l,opts:g.o.map(o=>({t:o,tt:dica(g.k,o),on:(f[g.k]===o)?'true':'false',go:()=>{ const all=Object.assign({},self.state.flt||{}); all[l]=Object.assign({},all[l]||{},{[g.k]:o}); self.setState({flt:all}); },
+  v.flt=fopts(l).map(g=>({l:g.l,sel:!!g.sel,seg:!g.sel,val:f[g.k],sopts:g.sel?g.o.map(o=>({v:o,t:(g.t||{})[o]||o})):[],
+    set:(e)=>{ const x=e.target.value; const all=Object.assign({},self.state.flt||{}); all[l]=Object.assign({},all[l]||{},{[g.k]:x}); const st0={flt:all,g2toast:g.l+': '+((g.t||{})[x]||x)};
+      if(l===SOLO_L&&g.k==='lau'&&x!=='Mais recente'){ const t=soloTalDe(x); if(t) Object.assign(st0,{tsel:[t],px:null,mpa:null}); } self.setState(st0); },
+    opts:g.sel?[]:g.o.map(o=>({t:o,tt:dica(g.k,o),on:(f[g.k]===o)?'true':'false',go:()=>{ const all=Object.assign({},self.state.flt||{}); all[l]=Object.assign({},all[l]||{},{[g.k]:o}); self.setState({flt:all}); },
     st:'font-family:inherit;font-size:11.8px;font-weight:700;padding:4px 9px;border:0;border-radius:7px;cursor:pointer;white-space:nowrap;'+(f[g.k]===o?'background:#1E7A4C;color:#fff;':'background:transparent;color:#15201A;')}))}));
   v.fonte=fonte(l,f); v.leg=legend(self,l,f,sel); v.nums=strip(self,l,f); v.lay_t=(M.nome[l]||l); const z=st.zoom||1;
   v.zst='transform:scale('+z+');transform-origin:50% 50%;transition:transform .2s;width:100%;height:100%;'; v.zin=()=>{ if(FAZ==='Lagoa Grande'&&LGI.map){ LGI.map.zoomIn(); return; } self.setState({zoom:Math.min(2,(self.state.zoom||1)+0.25)}); }; v.zout=()=>{ if(FAZ==='Lagoa Grande'&&LGI.map){ LGI.map.zoomOut(); return; } self.setState({zoom:Math.max(1,(self.state.zoom||1)-0.25)}); };
@@ -972,7 +1068,7 @@ function MAPVALS(self,v){
   FL[CAR_L]=['Abrir qualidade dos lotes','CO-06.dc.html'];   // MAPA-CARENCIA-LMR-20261003
   v.flink=(FL[l]||['',''])[1]; v.flinkt=(FL[l]||['',''])[0]; v.hasFlink=!!FL[l]; v.hasFvis=(l==='MIP/MID');
   const lst=(on)=>'width:48px;height:48px;box-sizing:border-box;padding:0;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;cursor:pointer;position:relative;flex-shrink:0;font-family:inherit;border:0;'+(on?'background:#1E6B47;color:#FFFFFF;':'background:transparent;color:#4B5A51;');
-  M.lays.forEach((x,i)=>{ v['ly'+i+'_st']=lst(x===l); v['ly'+i+'_on']=(x===l)?'true':'false'; v['ly'+i+'_go']=()=>self.setState({lay:x,cvis:false,mpa:null}); });
+  M.lays.forEach((x,i)=>{ v['ly'+i+'_st']=lst(x===l); v['ly'+i+'_on']=(x===l)?'true':'false'; v['ly'+i+'_go']=()=>self.setState({lay:x,cvis:false,mpa:null,alvAb:false}); });
   const ms=(l==='Satélite')?M.sat[f.dt].manchas:[];
   M.tids.forEach(t=>{ const c=cls(l,f,t); const on=sel.indexOf(t)>=0; const lc=M.lcop[c.c]||M.lcop.none;
     v['fl_'+t]=c.c==='cloud'?'url(#hatch)':(c.c==='sat'?c.hex:lc[0]); v['fo_'+t]=(c.c==='none'||c.c==='cloud'||c.c==='sat')?'1':'0.88';
@@ -989,6 +1085,11 @@ function MAPVALS(self,v){
     Object.keys(M.px).forEach(t=>{ const vals=pv[t]; const L=vals?(LF||satLims(fs,t)):null; v['pxo_'+t]=(on&&vals)?'1':'0';
       M.px[t].forEach((c,i)=>{ v['px_'+t+'_'+i]=vals?satCor(fs.idx,kOf(vals[i],L)):'none'; }); });
     const px=st.px; const okp=on&&px&&M.px[px.t]&&M.px[px.t][px.i]&&pv[px.t]; v.pxs_o=okp?'1':'0'; v.pxs_x=okp?String(M.px[px.t][px.i][0]):'0'; v.pxs_y=okp?String(M.px[px.t][px.i][1]):'0'; }
+  // mapa de calor do solo (15/10/2026): cada célula do talhão com laudo recebe o valor interpolado dos pontos; os pontos aparecem por cima
+  v.solo_pts=[];
+  if(l===SOLO_L&&FAZ!=='Lagoa Grande'){ const G=soloGrade(f); const ind=SOLO_IND[f.ind]; const LF=f.ctr==='Fazenda'?soloLims(f,null,G):null;
+    Object.keys(M.px).forEach(t=>{ const o=G[t]; const ok=!!(o&&o.vals.length&&inF(t)); if(!ok) return; v['pxo_'+t]='1'; const L=f.ctr==='Talhão'?soloLims(f,t,G):LF;
+      M.px[t].forEach((c,i)=>{ v['px_'+t+'_'+i]=soloCor(f,ind,o.vals[i],L); }); o.pts.forEach(p=>v.solo_pts.push({x:String(Math.round(p.x*10)/10),y:String(Math.round(p.y*10)/10)})); }); }
   v.pan_open=sel.length>0; v.pan_close=()=>self.setState({tsel:[],px:null,mpa:null});
   const E0={title:'',sub:'',ch:[],os:[],hasOs:false,nx:null,hasNx:false,secs:[],acts:[],os_t:''};
   const P=sel.length===1?panelTal(self,l,f,sel[0]):(sel.length>1?panelArea(self,l,f,sel):E0);
@@ -1008,6 +1109,17 @@ function MAPVALS(self,v){
   // filtro Fazenda do topo: só a Santa Rita tem geometria; Boa Vista = estado vazio no lugar do mapa; Todas = Santa Rita + aviso
   const faz=st.mf_faz||'Lagoa Grande'; const semGeo=(faz==='Boa Vista');
   v.mf_faz=faz; v.mf_setfaz=(e)=>self.setState({mf_faz:e.target.value,tsel:[],px:null,mpa:null,g2toast:'Fazenda: '+e.target.value});
+  v.mf_saf=SAF; v.mf_saf_opts=safOpts().map(x=>({v:x,t:x})); v.mf_setsaf=(e)=>self.setState({mf_saf:e.target.value,px:null,mpa:null,g2toast:'Safra: '+e.target.value});
+  v.mf_cult=CULT; v.mf_cult_opts=cultOpts().map(x=>({v:x,t:x})); v.mf_setcult=(e)=>self.setState({mf_cult:e.target.value,px:null,mpa:null,g2toast:'Cultura: '+e.target.value});
+  // alvos da camada Pragas e doenças (15/10/2026, proprietário: "selecionar qual alvo se deseja focar ... 1 só, todos ou mais de 1"): marcar um alvo
+  // com "Todos" ligado foca só nele; marcar outros soma; desmarcar o último volta a Todos
+  { const alvs=alvosFaz(); v.alv_on=(l==='MIP/MID')&&alvs.length>0; v.alv_open=v.alv_on&&!!st.alvAb; v.alv_exp=v.alv_open?'true':'false';
+    v.alv_t=ALV?(ALV.length===1?ALV[0]:ALV.length+' de '+alvs.length):'Todos'; v.alv_tog=()=>self.setState({alvAb:!self.state.alvAb});
+    v.alv_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); self.setState({alvAb:false}); setTimeout(()=>{ const b=document.querySelector('[aria-haspopup][data-alv]'); if(b) b.focus(); },0); } };
+    const op=(t,on,go)=>({t,on:on?'true':'false',go,ck:'✓',st:'display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:7px 10px;min-height:36px;border:0;border-radius:8px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;color:#15201A;background:'+(on?'#E4F3E9':'transparent')+';',
+      bx:'width:16px;height:16px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;box-sizing:border-box;'+(on?'background:#1E7A4C;color:#FFFFFF;border:1px solid #1E7A4C;':'background:#FFFFFF;color:transparent;border:1.5px solid #9AA59E;')});
+    v.alv_opts=[op('Todos',!ALV,()=>self.setState({mipAlvos:[],alvAb:false,g2toast:'Alvos: todos'}))].concat(alvs.map(a=>op(a,!!(ALV&&ALV.indexOf(a)>=0),()=>{ const cur=(ALV||[]).slice(); const i=cur.indexOf(a); if(i>=0) cur.splice(i,1); else cur.push(a);
+      self.setState({mipAlvos:cur,g2toast:cur.length?('Alvos: '+cur.join(', ')):'Alvos: todos'}); }))); }
   v.map_on=!semGeo; v.map_vazio=semGeo; v.aviso_bv=(faz==='Todas');
   // Lagoa Grande: mapa real (MapLibre GL + Sentinel-2) · Santa Rita (e Todas): desenho demonstrativo
   v.map_lg=(FAZ==='Lagoa Grande')&&!semGeo; v.map_sr=!v.map_lg; v.has_full=!v.map_lg; v.lg_err=!!(v.map_lg&&LGI.erro); v.lg_errt=LGI.erro?('Mapa real indisponível: '+LGI.erro+'. Recarregue a página.'):'';
@@ -1093,14 +1205,64 @@ function soloMapLs(){ const c=MAPC||cenGet(); if(SOLOC.c!==c) SOLOC={c,ls:soloLa
 function soloLeit(t){ const S=soloMapLs(); if(S.m[t]) return S.m[t]; const ft=M.soloTal[t];
   return (S.m[t]=ft?soloLeituraTal(S.ls,SOLO0,ft[0],ft[1]):{k:'sem',l:null,sub:null,outros:[],cu:null,V:null,V2:undefined,abaixo:null}); }
 function soloPct(v){ return prFmtT(v,1)+' %'; }
-function soloCls(t){ const x=soloLeit(t); const c=SOLOCOR[x.k];
-  if(x.k==='sem') return {c,l:'sem análise'};
-  if(x.k==='vencida') return {c,l:'vencida'};
-  if(x.k==='validar') return {c,l:x.l.sit==='Inconsistente'?'inconsistente':'a validar'};
-  return {c,l:x.V===null?'V não calculável':('V '+soloPct(x.V)+(x.k==='corrigir'?' · meta '+x.V2+' %':''))}; }
-function soloStrip(){ const N=(k,val,d)=>({k,val,d:d||''}); const ks=TIDS().map(t=>soloLeit(t).k); const n=(k)=>ks.filter(x=>x===k).length;
-  return [N('Com análise',ks.length-n('sem'),'Talhões com laudo de solo'),N('V abaixo',n('corrigir'),'V abaixo da meta da cultura (laudo validado)'),N('A validar',n('validar'),'Laudos aguardando validação ou inconsistentes')]
-    .concat(n('vencida')?[N('Vencidas',n('vencida'),'Laudos vencidos')]:[]).concat([N('Sem análise',n('sem'),'Talhões sem laudo de solo')]); }
+// ===== mapa de calor do solo (15/10/2026, proprietário: "cada indicador da análise de solo escolhido tem que gerar esse mapa de calor das manchas
+// boas e ruins por todo o talhão com contraste"; "escolher as camadas de solo disponíveis no laudo, selecionar o laudo, e qual indicador"):
+// os pontos georreferenciados do laudo (dados_solo.pontos) viram valor em cada célula do talhão pelo inverso do quadrado da distância; o índice
+// calculado (V, CTC, SB, m) usa o soloIdx de solo.js no próprio ponto (ENG-011). Cores: Absoluto = classes da tabela demonstrativa (d '+': do
+// vermelho ao verde; '-': ao contrário; textura: tons de terra); Talhão = sextos do talhão; Fazenda = P2–P98 da fazenda em 6 faixas.
+const SOLO_IND={}; (SOLO0.ind||[]).forEach(i=>{ SOLO_IND[i.l]=i; });
+const SOLOPAL={'+':['#E4002B','#FF6A00','#FFD500','#B5E61D','#3FBF2A','#0B7A1E'],'0':['#F3E3C3','#E0C38E','#C79A5B','#A0703A','#7A4E22','#523312']};
+let SOLOST={}, SOLOG={k:'',g:null};
+function soloPal(d,n){ const b=SOLOPAL[d==='0'?'0':'+']; const ix=n>=6?[0,1,2,3,4,5]:(n===5?[0,1,2,4,5]:(n===4?[0,2,4,5]:[0,2,5])); const c=ix.map(i=>b[i]); return d==='-'?c.reverse():c; }
+function soloK(v,cs){ let k=0; while(k<cs.length&&v>=Number(cs[k])) k++; return k; }
+function soloFmt(v,ind){ return nfx(v,ind.dec)+(ind.un==='%'?' %':(ind.un==='CaCl₂'?'':' '+ind.un)); }
+function soloRuim(ind,v){ const k=soloK(v,ind.cortes), n=ind.cortes.length+1; if(ind.d==='+') return k<=(n>=5?1:0); if(ind.d==='-') return k>=n-2; return false; }
+function soloChipSt(hx){ const c=[1,3,5].map(i=>parseInt(hx.slice(i,i+2),16)); const esc=(0.299*c[0]+0.587*c[1]+0.114*c[2])<150; return 'background:'+hx+';color:'+(esc?'#FFFFFF':'#15201A')+';border:1px solid rgba(21,32,26,.15);'; }
+function soloLsCam(prof){ const pr=String(prof||'0–20 cm').replace(' cm',''); const fz=FAZ==='Lagoa Grande'?'Lagoa Grande':'Santa Rita';
+  return soloMapLs().ls.filter(l=>l.tipo==='solo'&&l.prof===pr&&l.faz===fz&&l.sit!=='Substituído'); }
+function soloTalDe(id){ const l=soloMapLs().ls.find(x=>x.id===id); if(!l) return ''; return TIDS().find(t=>{ const ft=M.soloTal[t]; return ft&&ft[0]===l.faz&&ft[1]===l.tal; })||''; }
+function soloFopts(gs){ const ls=soloLsCam(SOLOST.prof); const has=(i)=>ls.some(l=>soloIndVal(l,i)!==null);
+  const inds=(SOLO0.ind||[]).filter(has).map(i=>i.l); const lau=['Mais recente'].concat(ls.slice().sort((a,b)=>String(a.tal).localeCompare(String(b.tal),'pt-BR',{numeric:true})).map(l=>l.id));
+  const tl={}; ls.forEach(l=>{ tl[l.id]=l.id+' · '+l.tal+' · '+soloBr(l.coleta)+(l.sit==='Validado'?'':' · '+l.sit.toLowerCase()); });
+  return gs.map(g=>g.k==='lau'?Object.assign({},g,{o:lau,sel:true,t:tl}):(g.k==='ind'?Object.assign({},g,{o:inds.length?inds:['V %'],sel:true}):g)); }
+function soloLaudoT(t,f){ const ft=M.soloTal[t]; if(!ft) return null; const ls=soloLsCam(f.prof).filter(l=>l.tal===ft[1]);
+  if(f.lau&&f.lau!=='Mais recente') return ls.find(l=>l.id===f.lau)||null;
+  return ls.slice().sort((a,b)=>((b.sit==='Validado')-(a.sit==='Validado'))||String(b.coleta).localeCompare(String(a.coleta)))[0]||null; }
+function soloXY(t,u,v){ const g=M.geoc[t]; if(!g) return null; if(g[0]==='circ'){ const a=g[1].split(',').map(Number); return [a[0]+(2*u-1)*a[2],a[1]+(2*v-1)*a[2]]; }
+  const p=g[1].split(' ').map(z=>z.split(',').map(Number)); const bl=(i)=>(1-u)*(1-v)*p[0][i]+u*(1-v)*p[1][i]+u*v*p[2][i]+(1-u)*v*p[3][i]; return [bl(0),bl(1)]; }
+function soloIdw(xs,ys,vs,x,y){ let a=0,b=0; for(let i=0;i<xs.length;i++){ const d2=(xs[i]-x)*(xs[i]-x)+(ys[i]-y)*(ys[i]-y); if(d2<1e-6) return vs[i]; a+=vs[i]/d2; b+=1/d2; } return a/b; }
+function lgPvPix(){ if(LGI.pvp) return LGI.pvp; const P=LGI.px; const o={}; for(let i=0;i<P.dono.length;i++){ const t=M.lg.ids[P.dono[i]]; if(t) (o[t]=o[t]||[]).push(i); }
+  const g={}; Object.keys(o).forEach(t=>{ const ix=o[t]; let r=0,c=0; ix.forEach(i=>{ r+=P.pix[2*i]; c+=P.pix[2*i+1]; }); g[t]={ix,r:r/ix.length,c:c/ix.length,rad:Math.sqrt(ix.length/Math.PI)}; }); return (LGI.pvp=g); }
+function soloGrade(f){ const ind=SOLO_IND[f.ind]; const k=[FAZ,f.prof,f.lau,f.ind,(soloMapLs().c||{}).rev||0,LGI.px?1:0].join('|'); if(SOLOG.k===k) return SOLOG.g; const g={};
+  if(ind) TIDS().forEach(t=>{ const L=soloLaudoT(t,f); if(!L) return; const pts=(L.pts||[]).map(p=>({id:p.id,u:p.u,v:p.v,val:soloIndPt(L,ind,p)})).filter(p=>p.val!==null&&isFinite(p.val));
+    const o={L,ind,vl:soloIndVal(L,ind),pts,vals:[],ha:M.tal[t].ha};
+    if(pts.length>=3){ const vs=pts.map(p=>p.val);
+      if(isLG(t)){ const G=LGI.px?lgPvPix()[t]:null; if(G){ pts.forEach(p=>{ p.x=G.c+(2*p.u-1)*G.rad; p.y=G.r+(2*p.v-1)*G.rad; p.ll=lgLL(p.y+.5,p.x+.5); });
+          const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y); o.ix=G.ix; o.vals=G.ix.map(i=>soloIdw(xs,ys,vs,LGI.px.pix[2*i+1],LGI.px.pix[2*i])); } }
+      else if(M.px[t]){ pts.forEach(p=>{ const q=soloXY(t,p.u,p.v); p.x=q[0]; p.y=q[1]; p.lt=pxCoord([q[0]-M.cs/2,q[1]-M.cs/2]); }); const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y); o.vals=M.px[t].map(c=>soloIdw(xs,ys,vs,c[0]+M.cs/2,c[1]+M.cs/2)); } }
+    g[t]=o; });
+  SOLOG={k,g}; return g; }
+function soloLims(f,t,G){ const pega=(o)=>o.vals.length?o.vals:o.pts.map(p=>p.val);
+  const vals=t?pega(G[t]):[].concat(...Object.keys(G).filter(x=>inF(x)).map(x=>pega(G[x]))); const s=vals.slice().sort((a,b)=>a-b); if(!s.length) return [0,0,0,0,0];
+  const q=(p)=>s[Math.round(p*(s.length-1))]; if(t) return [1,2,3,4,5].map(i=>q(i/6)); const lo=q(.02),hi=q(.98),st=(hi-lo)/6||1e-6; return [1,2,3,4,5].map(i=>lo+st*i); }
+function soloCor(f,ind,v,L){ if(f.ctr==='Absoluto'){ const n=ind.cortes.length+1; return soloPal(ind.d,n)[soloK(v,ind.cortes)]; } return soloPal(ind.d,6)[soloK(v,L)]; }
+function soloCls(t,f){ const G=soloGrade(f); const o=G[t]; const ind=SOLO_IND[f.ind]||{l:f.ind};
+  if(!o){ const ft=M.soloTal[t]; const tem=ft&&soloMapLs().ls.some(l=>l.tipo==='solo'&&l.faz===ft[0]&&l.tal===ft[1]);
+    return {c:'none',l:(f.lau&&f.lau!=='Mais recente')?'fora do laudo escolhido':(tem?'sem laudo '+f.prof:'sem análise')}; }
+  if(o.vl===null) return {c:'gray',l:ind.l+' não calculável'};
+  const kk=soloK(o.vl,ind.cortes); const hx=soloPal(ind.d,ind.cortes.length+1)[kk];
+  return {c:'sat',solo:true,hex:hx,l:ind.l+' '+soloFmt(o.vl,ind)+(o.L.sit==='Validado'?'':' · a validar')+(o.pts.length?'':' · sem pontos')}; }
+function soloLegend(f){ const ind=SOLO_IND[f.ind]; if(!ind) return [];
+  if(f.ctr==='Absoluto'){ const pal=soloPal(ind.d,ind.cortes.length+1); const c=ind.cortes.map(Number); const fx=(x)=>nfx(x,ind.dec);
+    return ind.classes.map((nm,i)=>Lh(pal[i],nm+' '+(i===0?'< '+fx(c[0]):(i===c.length?'≥ '+fx(c[c.length-1]):fx(c[i-1])+'–'+fx(c[i]))))).concat([Lc(SOLO_L,'none','sem laudo na camada')]); }
+  const pal=soloPal(ind.d,6); const nm=ind.d==='0'?['menor','','','','','maior']:(ind.d==='-'?['menor (melhor)','','','','','maior (pior)']:['menor (pior)','','','','','maior (melhor)']);
+  return pal.map((h,i)=>Lh(h,nm[i])).concat([{t:(f.ctr==='Talhão'?'sextos de cada talhão':'escala da fazenda')+' · '+ind.l+' '+ind.un,st:'font-weight:700;',dot:'display:none;'},Lc(SOLO_L,'none','sem laudo na camada')]); }
+function soloStrip(f){ const N=(k,val,d)=>({k,val,d:d||''}); const G=soloGrade(f); const ind=SOLO_IND[f.ind]; if(!ind) return [];
+  const ts=Object.keys(G).filter(t=>inF(t)); let haR=0, ha=0, sm=0, sw=0, np=0;
+  ts.forEach(t=>{ const o=G[t]; np+=o.pts.length; if(o.vl!==null){ sm+=o.vl*o.ha; sw+=o.ha; } const vs=o.vals.length?o.vals:o.pts.map(p=>p.val); if(!vs.length) return;
+    haR+=vs.filter(v=>soloRuim(ind,v)).length/vs.length*o.ha; ha+=o.ha; });
+  return [N('Laudos',ts.length,'Talhões com laudo na camada '+f.prof),N('Pontos',np,'Pontos georreferenciados da amostragem'),N(ind.l,sw?soloFmt(sm/sw,ind):'—','Média ponderada pela área')]
+    .concat(ind.d==='0'?[]:[N('Manchas ruins',nfx(haR,0)+' ha'+(ha?' · '+nfx(100*haR/ha,0)+' %':''),'Área nas classes ruins da tabela demonstrativa')]); }
 // painel do talhão: laudo, coleta, situação, uso no plano e 3 atributos-chave com a faixa; os outros laudos do talhão só como linha
 function soloSec(self,t){ const x=soloLeit(t); const l=x.l; const R=SOLO0.regra; const kv=[], items=[];
   const lin=(q)=>({t:q.id+' · '+(q.tipo==='folha'?'foliar':q.prof+' cm'),sub:'coleta '+soloBr(q.coleta)+' · '+q.lab+(q.motivo?' · '+q.motivo:''),ch:[CH(q.sit,SOLO_SITC[q.sit]||'gray')],
@@ -1118,8 +1280,14 @@ function soloSec(self,t){ const x=soloLeit(t); const l=x.l; const R=SOLO0.regra;
     items.push({t:'K '+(km.v===null?'— ('+km.nc+')':prFmtT(km.v,2)+' mg/dm³'),sub:l.ext+(cl?' · classes '+R.k.cortes.join(' / ')+' mg/dm³':' · sem classe da regra para este extrator'),
       ch:cl?[CH(cl,{baixo:'orange','médio':'yellow',adequado:'green',alto:'green'}[cl]||'gray')]:[],acts:[]}); }
   if(ix.T) items.push({t:'CTC '+(ix.T.v===null?'não calculável':prFmt(ix.T.v,2)+' cmolc/dm³'),sub:ix.T.v===null?ix.T.nc:'',ch:[],acts:[]});
+  { const f=flt(self,SOLO_L); const o=soloGrade(f)[t]; const ind=SOLO_IND[f.ind];
+    if(o&&ind&&o.pts.length){ const vs=o.vals.length?o.vals:o.pts.map(p=>p.val); const pv=o.pts.map(p=>p.val); const n=ind.cortes.length+1; const pal=soloPal(ind.d,n);
+      kv.push({l:'Mapa de calor',t:ind.l+' · '+o.L.id+' · '+o.pts.length+' pontos · '+soloFmt(Math.min.apply(null,pv),ind)+' a '+soloFmt(Math.max.apply(null,pv),ind)+' nos pontos'});
+      ind.classes.forEach((nm,k)=>{ const fr=vs.filter(v=>soloK(v,ind.cortes)===k).length/vs.length; if(fr>0) items.push({t:nm+' · '+nfx(fr*o.ha,1)+' ha ('+nfx(100*fr,0)+' %)',sub:'área do talhão nesta classe ('+ind.l+')',ch:[CHs('■',soloChipSt(pal[k]))],acts:[]}); });
+      o.pts.slice().sort((a,b)=>ind.d==='-'?b.val-a.val:a.val-b.val).slice(0,6).forEach(p=>items.push({t:'Ponto '+p.id+' · '+ind.l+' '+soloFmt(p.val,ind),sub:(p.ll?fmtLL(p.ll):(p.lt||'ponto da grade'))+' · '+ind.classes[soloK(p.val,ind.cortes)],ch:[],acts:[]}));
+      if(o.pts.length>6) items.push({t:'+'+(o.pts.length-6)+' pontos no laudo',sub:'os 6 acima são os de pior '+ind.l,ch:[],acts:[A('Abrir '+o.L.id,{h:'AG-02.dc.html#'+o.L.id,ic:'frasco',tt:'Abrir o laudo em Análises de solo'})]}); } }
   if(x.sub) items.push(lin(x.sub)); x.outros.forEach(q=>items.push(lin(q)));
-  return SEC(self,SOLO_L,'solo','Análises de solo',soloCls(t).l,{kv,items}); }
+  return SEC(self,SOLO_L,'solo','Análises de solo',soloCls(t,flt(self,SOLO_L)).l,{kv,items}); }
 // próximo passo (uma ação primária): o laudo aberto no AG-02; sem laudo (ou vencido), Registrar laudo com fazenda e talhão já escolhidos
 function soloAc(t){ const x=soloLeit(t); const ft=M.soloTal[t]||['',t];
   if(!x.l||x.k==='vencida') return A('Registrar laudo',{h:'AG-02.dc.html#registrar='+encodeURIComponent(ft[0]+'/'+ft[1]),ic:'frasco',prim:true,tt:'Abrir Análises de solo com '+ft[1]+' no formulário'});
@@ -1132,9 +1300,9 @@ function soloAc(t){ const x=soloLeit(t); const ft=M.soloTal[t]||['',t];
 const COLH_L='Colheita';
 const COLHCOR={'Em colheita':'ok','Programada':'blue','Prevista':'gray','Colhida':'navy','Sem previsão':'yellow'};
 let COLHC={c:null,m:{}};
-function colhMap(){ const c=MAPC||cenGet(); if(COLHC.c!==c) COLHC={c,m:{}}; return COLHC; }   // uma leitura por desenho
+function colhMap(){ const c=MAPC||cenGet(); if(COLHC.c!==c||COLHC.s!==SAF) COLHC={c,s:SAF,m:{}}; return COLHC; }   // uma leitura por desenho
 function colhCults(t){ const ft=M.soloTal[t]; if(!ft) return []; return Object.keys(PRDC.cult).filter(id=>{ const k=PRDC.cult[id];
-  return k.prod&&k.faz===ft[0]&&(k.local===ft[1]||String(k.local).indexOf(ft[1]+'-')===0); }); }
+  return k.prod&&k.faz===ft[0]&&(safCur()||!k.saf||((PRDC.safras[k.saf]||{}).mf||SAF)===SAF)&&(k.local===ft[1]||String(k.local).indexOf(ft[1]+'-')===0); }); }
 function colhLeit(t){ const S=colhMap(); if(S.m[t]) return S.m[t];
   const xs=colhCults(t).map(id=>prTal(S.c,id)).sort((a,b)=>(PR_SITORD[a.sit]-PR_SITORD[b.sit])||String(a.k.local).localeCompare(String(b.k.local),'pt-BR',{numeric:true}));
   return (S.m[t]={xs,x:xs[0]||null,c:S.c}); }
@@ -1197,6 +1365,7 @@ def _mapsvg(defs=True):
     return (f'<svg viewBox="0 0 1000 620" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Mapa da fazenda Santa Rita" style="display: block;">'
             + defs + '<rect width="1000" height="620" fill="url(#grade)"/><path d="M0 314 C 250 308, 520 320, 1000 314" stroke="#FFFFFF" stroke-width="10" fill="none" opacity=".9"/>'
             + '<path d="M318 0 L322 620" stroke="#FFFFFF" stroke-width="7" fill="none" opacity=".8"/>' + ''.join(g)
+            + f'<sc-for list="{H("solo_pts")}" as="q" hint-placeholder-count="2"><circle cx="{H("q.x")}" cy="{H("q.y")}" r="3.4" fill="#15201A" stroke="#FFFFFF" stroke-width="1.5" style="pointer-events: none;"/></sc-for>'
             + f'<rect x="{H("pxs_x")}" y="{H("pxs_y")}" width="{CS}" height="{CS}" fill="none" stroke="#15201A" stroke-width="3" opacity="{H("pxs_o")}" style="pointer-events: none;"/></svg>')
 def _cel(tid):
     if tid not in PX: return ''
@@ -1260,10 +1429,23 @@ def _panel_html():
       f'<sc-if value="{H("pan_hasacts")}" hint-placeholder-val="{T()}"><div style="display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 14px; border-top: 1px solid {LINE}; background: {SURF};">{actions("pan.acts")}</div></sc-if></aside>')
 
 def _mapcard(h,full=False):
-    fgroups=(f'<sc-for list="{H("flt")}" as="g" hint-placeholder-count="2"><span style="display: inline-flex; align-items: center; gap: 6px;">'
+    fgroups=(f'<sc-for list="{H("flt")}" as="g" hint-placeholder-count="2">'
+             f'<sc-if value="{H("g.sel")}" hint-placeholder-val="{F()}"><label style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: {MUTED};">{H("g.l")}'
+             f'<select aria-label="{H("g.l")}" value="{H("g.val")}" onChange="{H("g.set")}" style="font-family: inherit; font-size: 12px; font-weight: 700; padding: 4px 26px 4px 10px; min-height: 32px; max-width: 260px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer;">'
+             f'<sc-for list="{H("g.sopts")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label></sc-if>'
+             f'<sc-if value="{H("g.seg")}" hint-placeholder-val="{T()}"><span style="display: inline-flex; align-items: center; gap: 6px;">'
              f'<span style="font-size: 11.5px; font-weight: 700; color: {MUTED};">{H("g.l")}</span>'
              f'<span role="group" aria-label="{H("g.l")}" style="display: inline-flex; gap: 2px; padding: 2px; border-radius: 9px; background: {GRAYS};"><sc-for list="{H("g.opts")}" as="o" hint-placeholder-count="3">'
-             f'<button type="button" aria-pressed="{H("o.on")}" onClick="{H("o.go")}" title="{H("o.tt")}" style="{H("o.st")}">{H("o.t")}</button></sc-for></span></span></sc-for>')
+             f'<button type="button" aria-pressed="{H("o.on")}" onClick="{H("o.go")}" title="{H("o.tt")}" style="{H("o.st")}">{H("o.t")}</button></sc-for></span></span></sc-if></sc-for>')
+    fgroups+=(f'<sc-if value="{H("alv_on")}" hint-placeholder-val="{F()}"><span style="position: relative; display: inline-flex; align-items: center; gap: 6px;">'
+             f'<span style="font-size: 11.5px; font-weight: 700; color: {MUTED};">Alvos</span>'
+             f'<button type="button" data-alv="1" aria-haspopup="true" aria-expanded="{H("alv_exp")}" onClick="{H("alv_tog")}" title="Escolher os alvos: um, vários ou todos" '
+             f'style="position: relative; font-family: inherit; font-size: 11.8px; font-weight: 700; padding: 4px 28px 4px 10px; min-height: 32px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap;">'
+             f'{H("alv_t")}<span aria-hidden="true" style="position: absolute; right: 11px; top: 50%; transform: translateY(-50%); font-size: 10px;">▾</span></button>'
+             f'<sc-if value="{H("alv_open")}" hint-placeholder-val="{F()}"><div role="menu" aria-label="Alvos" onKeyDown="{H("alv_key")}" style="position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; min-width: 240px; '
+             f'max-height: 340px; overflow-y: auto; background: {SURF}; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 8px 24px rgba(21,32,26,.18); padding: 6px; display: flex; flex-direction: column; gap: 2px;">'
+             f'<sc-for list="{H("alv_opts")}" as="o" hint-placeholder-count="4"><button type="button" role="menuitemcheckbox" aria-checked="{H("o.on")}" onClick="{H("o.go")}" style="{H("o.st")}">'
+             f'<span aria-hidden="true" style="{H("o.bx")}">{H("o.ck")}</span>{H("o.t")}</button></sc-for></div></sc-if></span></sc-if>')
     nums=(f'<div role="group" aria-label="Indicadores de {H("lay_t")}" style="display: flex; gap: 14px; flex-wrap: wrap;"><sc-for list="{H("nums")}" as="n" hint-placeholder-count="4">'
           f'<span style="white-space: nowrap; font-size: 11.5px; color: {MUTED};">{H("n.k")} <b style="color: {INK}; font-size: 13.5px;">{H("n.val")}</b></span></sc-for></div>')
     tool=lambda ic,t,fn,st,tt: f'<button type="button" onClick="{H(fn)}" title="{tt}" aria-pressed="{H(st.replace("_st","_on"))}" style="{H(st)}">{icon(ic,15,INK)}{t}</button>'

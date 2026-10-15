@@ -1119,6 +1119,11 @@ ACOES_CSS=(".acoes{position:sticky;bottom:-22px;z-index:6;display:flex;flex-dire
     "background:#F4F6F3;border-top:1px solid #E4E9E5;box-shadow:0 -8px 12px -12px rgba(21,32,26,.35)}"
     ".acoes-nota{margin:0;font-size:12.8px;line-height:1.4;color:#5B4300;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}"
     ".acoes-nota b{color:#15201A}"
+    ".acoes-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}"
+    ".acoes-mais{position:relative}.acoes-mais:not([open])>.acoes-menu{display:none}.acoes-mais>summary{list-style:none;min-width:44px;justify-content:center;font-size:18px;line-height:1;letter-spacing:1px}.acoes-mais>summary::-webkit-details-marker{display:none}"
+    ".acoes-menu{position:absolute;right:0;bottom:calc(100% + 6px);z-index:30;min-width:240px;display:flex;flex-direction:column;gap:2px;padding:6px;background:#FFFFFF;border:1px solid #E4E9E5;border-radius:12px;box-shadow:0 8px 24px rgba(21,32,26,.18)}"
+    ".acoes-menu>button{display:block;width:100%;text-align:left;border:0;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:#15201A;padding:9px 12px;min-height:40px;border-radius:8px;cursor:pointer}"
+    "@media (hover:hover){.acoes-menu>button:hover{background:#E4F3E9}}.acoes-menu>button:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
     ".acoes-linha{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.acoes-esp{flex:1 1 auto}"
     ".acoes :is(.acoes-sec,.acoes-prim){font-family:inherit;font-size:13.5px;font-weight:700;line-height:1.25;padding:9px 16px;border-radius:10px;cursor:pointer;white-space:nowrap;min-height:40px;box-sizing:border-box;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}"
     ".acoes-sec{background:#FFFFFF;color:#15201A;border:1px solid #E4E9E5}"
@@ -1166,15 +1171,23 @@ def area_acoes(pre='aa',rotulo='Ações da etapa'):
     h=lambda s: '{{'+pre+s+'}}'
     F_='{{false}}'
     return (f'<sc-if value="{h("_has")}" hint-placeholder-val="{F_}"><div class="acoes" role="group" aria-label="{rotulo}" data-acoes="{pre}">'
-            f'<sc-if value="{h("_hasNota")}" hint-placeholder-val="{F_}"><p class="acoes-nota" id="{pre}-nota"><span>{h("_nota")}</span>'
+            # barra limpa (proprietário, 15/10/2026: "tire todos esses avisos chatos da barra de ações que fica embaixo na tela. deixar tudo clean e
+            # minimalista"): a nota só aparece quando é a decisão do momento (c.decide, ex.: sair sem salvar); fora disso vira a dica do botão
+            # principal (e a descrição dele para o leitor de tela) e os atalhos vão para o "⋯ Mais ações"
+            f'<sc-if value="{h("_hasNotaSr")}" hint-placeholder-val="{F_}"><span class="acoes-sr" id="{pre}-nota">{h("_nota")}</span></sc-if>'
+            f'<sc-if value="{h("_hasNotaVis")}" hint-placeholder-val="{F_}"><p class="acoes-nota" id="{pre}-nota"><span>{h("_nota")}</span>'
             f'<sc-if value="{h("_hasCtx")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-lnk" data-acao="corrigir" onClick="{h("_ctxFn")}">{h("_ctxT")}</button></sc-if>'
             f'<sc-for list="{h("_lnks")}" as="al" hint-placeholder-count="0"><button type="button" class="acoes-lnk" data-acao="atalho" onClick="{{{{al.fn}}}}">{{{{al.t}}}}</button></sc-for></p></sc-if>'
             f'<div class="acoes-linha">'
             f'<sc-if value="{h("_hasVolta")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-sec" data-acao="{h("_voltaA")}" onClick="{h("_volta")}">{h("_voltaT")}</button></sc-if>'
             f'<sc-if value="{h("_hasTroca")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-sec" data-acao="trocar" onClick="{h("_troca")}">{h("_trocaT")}</button></sc-if>'
             f'<span class="acoes-esp"></span>'
+            f'<sc-if value="{h("_hasMais")}" hint-placeholder-val="{F_}"><details class="acoes-mais"><summary class="acoes-sec" data-acao="mais" aria-label="Mais ações" title="Mais ações">⋯</summary>'
+            f'<div class="acoes-menu" role="menu" aria-label="Mais ações">'
+            f'<sc-if value="{h("_hasCtx")}" hint-placeholder-val="{F_}"><button type="button" role="menuitem" data-acao="corrigir" onClick="{h("_ctxFn")}">{h("_ctxT")}</button></sc-if>'
+            f'<sc-for list="{h("_lnks")}" as="am" hint-placeholder-count="0"><button type="button" role="menuitem" data-acao="atalho" onClick="{{{{am.fn}}}}">{{{{am.t}}}}</button></sc-for></div></details></sc-if>'
             f'<sc-if value="{h("_hasSec")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-sec" data-acao="{h("_secA")}" onClick="{h("_secFn")}">{h("_secT")}</button></sc-if>'
-            f'<sc-if value="{h("_hasPrim")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-prim" data-acao="{h("_primA")}" aria-describedby="{h("_desc")}" onClick="{h("_primFn")}">{h("_primT")}</button></sc-if>'
+            f'<sc-if value="{h("_hasPrim")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-prim" data-acao="{h("_primA")}" aria-describedby="{h("_desc")}" data-dica="{h("_dica")}" onClick="{h("_primFn")}">{h("_primT")}</button></sc-if>'
             f'<sc-if value="{h("_hasLink")}" hint-placeholder-val="{F_}"><a class="acoes-prim" data-acao="abrir" href="{h("_href")}">{h("_primT")}</a></sc-if>'
             f'</div></div></sc-if>')
 # =====================================================================================

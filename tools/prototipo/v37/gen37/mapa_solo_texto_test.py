@@ -23,6 +23,7 @@ OK, FAIL = [], []
 def chk(n, c, info=''):
     (OK if c else FAIL).append(n); print(('OK    ' if c else 'FALHA ') + n + ('' if c else ' · ' + str(info)[:900]), flush=True)
 
+from decimal import ROUND_HALF_UP
 # ---------- oráculo ----------
 def v_pct(an):
     g = {a['a']: Dc(a['v']) for a in an}; sb = g['Ca'] + g['Mg'] + g['K'] / Dc('391'); t = sb + g['H+Al']
@@ -78,12 +79,16 @@ try:
     i = rail.index('Análises de solo') if 'Análises de solo' in rail else -1
     chk('S1 barra do mapa: "Análises de solo" entre Lavoura e Pragas e doenças; tocar mostra a camada "Análises de solo"',
         pronto and i > 0 and rail[i - 1] == 'Lavoura' and rail[i + 1] == 'Pragas e doenças' and nome == 'Análises de solo', [pronto, rail, nome])
-    fx = json.loads(J(FAIXA) or '{}'); ids = [q[0] for q in F.LG_PIVOS]; rots = {q: mk(q) for q in ids}
+    # 15/10/2026 (mapa de calor do solo): a faixa conta laudos e pontos da camada; o rótulo é o indicador escolhido (padrão: V %)
+    fxt = (J("(document.querySelector('[role=group][aria-label^=Indicadores]')||{}).innerText||''") or '').replace('\n', ' ')
+    ids = [q[0] for q in F.LG_PIVOS]; rots = {q: mk(q) for q in ids}
     p12k = next(q for q in ids if q.endswith('12'))
-    esp12 = f'P12 V {fmt(V12)} % · meta {fmt(META12)} %'
-    sem = [q for q in ids if q != p12k and (rots[q] or '').endswith('sem análise')]
-    chk(f'S2 Lagoa Grande: faixa {ESP_LG} pelo oráculo dos laudos; Pivô 12 "{esp12}"; os outros {NPIV - 1} pivôs "sem análise"',
-        fx == ESP_LG and rots[p12k] == esp12 and len(sem) == NPIV - 1, [fx, rots[p12k], len(sem)])
+    esp12 = f'P12 V % {fmt(V12.quantize(Dc("1"), rounding=ROUND_HALF_UP))} %'
+    sem = [q for q in ids if (rots[q] or '').endswith('sem análise')]
+    import re as _re
+    nl = int((_re.search(r'Laudos (\d+)', fxt) or [0, -1])[1]); npt = int((_re.search(r'Pontos (\d+)', fxt) or [0, -1])[1])
+    chk(f'S2 Lagoa Grande: faixa com {len(LG020)} laudos 0–20 e {sum(len(l["pts"]) for l in LG020.values())} pontos pelo oráculo; Pivô 12 "{esp12}"; os {NPIV - len(LG020)} pivôs sem laudo "sem análise"',
+        nl == len(LG020) and npt == sum(len(l['pts']) for l in LG020.values()) and rots[p12k] == esp12 and len(sem) == NPIV - len(LG020), [fxt, rots[p12k], len(sem)])
     toca_piv(p12k); time.sleep(1.4)
     pan = J("(()=>{const a=[...document.querySelectorAll('main aside')].find(x=>x.getClientRects().length); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
     lk = J("(()=>{const a=[...document.querySelectorAll('main aside a, main aside button')].find(x=>x.getClientRects().length&&x.innerText.trim()==='Abrir laudo'); return a?(a.getAttribute('href')||a.getAttribute('data-h')||'botão'):'';})()") or ''
@@ -109,9 +114,10 @@ try:
         'imagem e índices fictícios' in dica and 'aquisição' in dica and 'clique no talhão' not in corpo, [dica[:200], 'clique no talhão' in corpo])
     # S4 · Santa Rita
     c.goto(U('Main.dc.html'), .3); J("sessionStorage.setItem('mapa-ctx','{\"mf_faz\":\"Santa Rita\"}'); 1"); c.goto(U('IN-04.dc.html'), 1.6)
-    camada('Análises de solo'); fs = json.loads(J(FAIXA) or '{}')
-    chk(f'S4 Santa Rita: {ESP_SR} pelo oráculo (T1, T2, T4 e C1 com laudo 0–20; C1 aguardando validação)',
-        all(fs.get(k) == v for k, v in ESP_SR.items()) and fs.get('V abaixo', 0) >= 1, fs)
+    camada('Análises de solo'); fxs = (J("(document.querySelector('[role=group][aria-label^=Indicadores]')||{}).innerText||''") or '').replace('\n', ' ')
+    c1 = J("(()=>{const e=[...document.querySelectorAll('svg [aria-label]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('C1:')); return e?e.getAttribute('aria-label'):'';})()") or ''
+    chk(f'S4 Santa Rita: {ESP_SR["Com análise"]} laudos 0–20 (T1, T2, T4 e C1) pelo oráculo; C1 aguardando validação e sem H+Al: V não calculável',
+        f'Laudos {ESP_SR["Com análise"]}' in fxs and 'não calculável' in c1, [fxs, c1])
     # S5 · talhão sem análise: "Registrar laudo" leva ao AG-02 com fazenda e talhão no formulário (contexto herdado, visível e corrigível)
     J("sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:'Santa Rita',lay:'Análises de solo',tsel:['T3']})); 1"); c.goto(U('IN-04.dc.html'), 1.8)
     p5 = (J("(document.querySelector('aside[aria-label^=\"T3\"]')||{innerText:''}).innerText") or '').replace('\n', ' · ')

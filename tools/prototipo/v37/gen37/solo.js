@@ -36,6 +36,19 @@ function soloCmolc(x) {
   if (x.un === 'mmolc/dm³') return { v: prDiv(x.v, 10) };
   if (x.un === 'mg/dm³' && SOLO_MG[x.a]) return { v: prDiv(x.v, SOLO_MG[x.a]) };
   return { v: null, nc: 'unidade incompatível (' + x.un + ')' }; }
+// indicadores do laudo (15/10/2026): valor do indicador (analito do laudo ou índice do soloIdx: V, T, SB, m) no laudo e num ponto da
+// amostragem em grade (dados_solo.pontos). Fonte única do AG-02 (colunas) e do Mapa (mapa de calor). K sempre em mg/dm³ (soloKmg).
+function soloIndVal(l, ind) {
+  if (ind.idx) { const r = (l.idx || {})[ind.k]; return r && r.v !== null && r.v !== undefined ? Number(r.v) : null; }
+  const x = soloAn(l, ind.k); if (!x || x.v === null || x.v === undefined) return null;
+  if (ind.k === 'K') { const km = soloKmg(x); return km.v === null ? null : Number(km.v); } return Number(x.v);
+}
+function soloIndPt(l, ind, p) {
+  if (ind.idx) { const pl = Object.assign({}, l, { an: l.an.map(x => (p.an[x.a] !== undefined) ? Object.assign({}, x, { v: p.an[x.a] }) : x) }); const r = soloIdx(pl, SOLO0.regra.tol)[ind.k];
+    return r && r.v !== null && r.v !== undefined ? Number(r.v) : null; }
+  if (p.an[ind.k] === undefined) return null;
+  if (ind.k === 'K') { const km = soloKmg(Object.assign({}, soloAn(l, 'K'), { v: p.an.K })); return km.v === null ? null : Number(km.v); } return Number(p.an[ind.k]);
+}
 function soloKmg(x) {   /* K em mg/dm³ para a classe de teor (R07) */
   if (!x) return { v: null, nc: 'K não analisado' }; if (x.q === '<') return { v: null, nc: 'K abaixo do limite de detecção' }; if (!x.un) return { v: null, nc: 'K sem unidade' };
   if (x.un === 'mg/dm³') return { v: prN(prM(x.v)) }; if (x.un === 'cmolc/dm³') return { v: prMul(x.v, SOLO_MG.K) }; if (x.un === 'mmolc/dm³') return { v: prMulDiv(x.v, SOLO_MG.K, 10) };

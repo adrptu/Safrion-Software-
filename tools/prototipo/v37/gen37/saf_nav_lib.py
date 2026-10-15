@@ -23,7 +23,8 @@ def nivel0(): return [r for r in rows() if not r['_kid']]
 def faixa(): return c.js("(document.body.innerText.match(/Nesta safra[^\\n]+/)||[''])[0]") or ''
 def chips(): return c.js(f"[...document.querySelectorAll('[role=group][aria-label^=\"Filtro rápido\"] button')].filter(b=>b.offsetParent).map(b=>{N}(b.innerText))") or []
 def toast(): return c.js("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
-def nota(): return c.js(f"(()=>{{const a=document.querySelector('[data-acoes]'); return a?{N}(a.innerText):'';}})()") or ''
+# barra limpa (15/10/2026): a nota vira dica do principal (texto para o leitor de tela) e os atalhos ficam no "⋯ Mais ações"; a leitura junta os três
+def nota(): return c.js(f"(()=>{{const a=document.querySelector('[data-acoes]'); if(!a) return ''; const m=[...a.querySelectorAll('.acoes-menu [role=menuitem]')].map(b=>b.textContent); return {N}(a.innerText+' '+m.join(' '));}})()") or ''
 def painel(): return c.js(f"(()=>{{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); return a?{N}(a.innerText):'';}})()") or ''
 def erros(): return c.js("(window.__errs||[]).join(' | ')") or ''
 def campos(gid):
@@ -37,6 +38,7 @@ def fset(gid, k, val):
     r = c.js(f"""(()=>{{const e=document.getElementById('fx_{gid}_{k}'); if(!e) return 'sem campo {k}'; const pr=e.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;
       Object.getOwnPropertyDescriptor(pr,'value').set.call(e,{json.dumps(val)}); e.dispatchEvent(new Event(e.tagName==='SELECT'?'change':'input',{{bubbles:true}})); return 'ok';}})()"""); time.sleep(.25); return r
 def botao(lab, raiz='document'):
+    c.js("document.querySelectorAll('[data-acoes] details.acoes-mais').forEach(d=>{ d.open=true; })")   # atalho no ⋯: a pessoa abre o menu antes
     r = c.js(f"""(()=>{{const R={raiz}; const bs=[...R.querySelectorAll('button,a')].filter(b=>b.offsetParent); const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const b=bs.find(b=>n(b.innerText)==={json.dumps(lab)})||bs.find(b=>n(b.innerText).startsWith({json.dumps(lab)})); if(!b) return 'sem botão '+{json.dumps(lab)}; b.click(); return 'ok';}})()"""); time.sleep(.45); return r
 def salvar(): return botao('Salvar', "[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent)||document")
 def expande_tudo():
@@ -80,5 +82,5 @@ def cria_safra(nome, ini, fim, faz='Santa Rita'):
 def vai_safra(sid, passo=2): etapa1(); time.sleep(.4); c.js(f"window.__safSelf.setState({{saf:{json.dumps(sid)},step:{passo}}})"); time.sleep(.9)
 def alerta(): return c.js("(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); return a?[...a.querySelectorAll('[role=alert]')].map(e=>e.innerText).join(' | '):'(painel fechado)';})()")
 def folhas(gid): return [x for r in (estado(gid) or []) for x in [r] + (r.get('kids') or []) if not x.get('grp')]
-def links_nota(): return c.js("[...document.querySelectorAll('[data-acoes] [data-acao=atalho]')].filter(b=>b.offsetParent).map(b=>b.innerText.trim())") or []
+def links_nota(): return c.js("[...document.querySelectorAll('[data-acoes] [data-acao=atalho]')].map(b=>b.textContent.trim())") or []
 def clica_link(t): return c.js(f"(()=>{{const b=[...document.querySelectorAll('[data-acoes] [data-acao=atalho]')].filter(b=>b.offsetParent).find(b=>b.innerText.trim()==={json.dumps(t)}); if(!b) return 'sem link'; b.click(); return 'ok';}})()")

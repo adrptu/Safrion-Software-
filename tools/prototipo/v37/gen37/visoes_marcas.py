@@ -28,7 +28,7 @@ CD-05 g_forn ; Parceiro ; Papéis ; Contato
 CD-06 g_itm ; Grupo › item ; Unidade ; Preço de referência
 CD-07 g_dim ; Dimensão › código ; Nome ; Conta no ERP (Sankhya)
 CD-08 g_rend ; Operação › conjunto ; Cultura ; Rendimento ; Custo R$/ha
-AG-02 g_lau ; Laudo ; Fazenda · talhão ; V % ; K ; Coleta
+AG-02 g_lau ; Laudo ; Fazenda · talhão ; V % ; pH ; P ; K ; MO ; Coleta
 AG-02 g_agua ; Medição ; Talhão · zona ; Data ; CAD
 AG-01 g_vis ; Vistoria ; Alvo ; Contagem × NC ; Talhão · cultura ; Próximo passo
 AG-01det g_pts ; Ponto ; Contagem ; × NC ; Fotos

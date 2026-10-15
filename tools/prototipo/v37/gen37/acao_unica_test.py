@@ -31,7 +31,7 @@ EST=r"""(()=>{const n=s=>(s||'').replace(/\s+/g,' ').trim(); const vis=e=>{ if(!
  const dlg=[...document.querySelectorAll('aside[role=dialog]')].find(vis);
  const verde=e=>getComputedStyle(e).backgroundColor==='rgb(30, 122, 76)';
  const prims=[...document.querySelectorAll('header button,header a,main button,main a')].filter(e=>vis(e)&&verde(e)&&!e.closest('.menu-lat')).map(e=>n(e.innerText).slice(0,48));
- const a=document.querySelector('[data-acoes]'); const area=a&&vis(a)?[...a.querySelectorAll('button,a,.acoes-nota')].filter(vis).map(e=>(e.dataset.acao||'nota')+':'+n(e.innerText).slice(0,90)):[];
+ const a=document.querySelector('[data-acoes]'); const area=a&&vis(a)?[...a.querySelectorAll('button,a,.acoes-nota')].filter(e=>vis(e)||e.closest('.acoes-menu')).map(e=>(e.dataset.acao||'nota')+':'+n(e.textContent).slice(0,90)):[];
  const cur=document.querySelector('.etp-ind [aria-current=step]'); const k=cur?Number((n(cur.innerText).match(/\d+/)||[0])[0]):0;
  return {etapa:k, prims, area, avancos:area.filter(x=>x.startsWith('avancar:')).length, dialogo:!!dlg};})()"""
 def errs(): return [e for e in (c.js("window.__errs||[]") or []) if "reading 'g2toast'" not in e]
@@ -103,11 +103,13 @@ try:
             nadd==0 and b and b[0]=='Planejar ›' and b[1]=='Talhões e cultivos' and bool(campo) and aviso and val=='Teste ação única' and e3['etapa']==2, [nadd,b,campo,aviso,val,e3['etapa']])
         # 4 · falta de plano: causa escrita + passo que resolve; avançar não aplica plano em silêncio
         abre('SAF',hash='#saf=S2627&passo=cultivos'); time.sleep(.3)
-        e4=est(); k2a=' '.join(a for a in e4['area'] if a.startswith('nota:'))
-        acao('avancar'); e4b=est(); etapa(2); k2b=' '.join(a for a in est()['area'] if a.startswith('nota:'))
-        chk('4 SAF · falta de plano: sem descrição na área de ações (15/10), "Aplicar plano em 4 cultivos" é a primária (resolver) e "Dimensionar operações ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (4 sem plano antes e depois, na nota)',
-            not any(a.startswith('nota:') and 'sem plano' in a for a in e4['area']) and 'resolver:Aplicar plano em 4 cultivos' in e4['area'] and 'avancar:Dimensionar operações ›' in e4['area']
-            and e4b['etapa']==3 and 'sem plano' not in k2a and 'sem plano' not in k2b, [e4['area'],e4b['etapa'],k2a,k2b])
+        # oráculo direto (revisão Codex 6181957223): as linhas dos cultivos (plano de cada um) antes do avanço e depois do retorno à etapa 2
+        LIN="JSON.stringify([...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row][data-rid]')].map(r=>r.innerText.replace(/\\s+/g,' ').trim())))"
+        e4=est(); l4a=json.loads(J(LIN) or '[]'); sp4a=[x for x in l4a if 'Aplicar plano' in x]   # cultivo sem plano: a linha oferece "Aplicar plano"
+        acao('avancar'); e4b=est(); etapa(2); time.sleep(.4); l4b=json.loads(J(LIN) or '[]'); sp4b=[x for x in l4b if 'Aplicar plano' in x]
+        chk('4 SAF · falta de plano: sem descrição visível na área de ações (15/10), "Aplicar plano em 4 cultivos" é a primária (resolver) e "Dimensionar operações ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (as 4 linhas com "Aplicar plano" iguais antes e depois)',
+            not any(a.startswith('nota:') for a in e4['area']) and 'resolver:Aplicar plano em 4 cultivos' in e4['area'] and 'avancar:Dimensionar operações ›' in e4['area']
+            and e4b['etapa']==3 and len(sp4a)==4 and sp4a==sp4b and l4a==l4b, [e4['area'],e4b['etapa'],sp4a,sp4b])
         # 5 · vazio: safra nova sem cultivos → nenhuma primária e nenhum avanço; a nota diz o que está livre e a conferir e manda planejar na linha
         abre('SAF'); clk('Nova safra'); time.sleep(.3)
         for k,vl in (('nome','Safra teste ação única'),('ini','2027-01-10'),('fim','2027-08-30')): setv(f'#fx_g_saf_{k}',vl)

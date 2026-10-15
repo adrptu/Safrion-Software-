@@ -39,7 +39,8 @@ def veredito(): return c.js(f"(()=>{{const e=document.querySelector('#saf-v3-ver
 def atalhos(): return c.js(f"[...document.querySelectorAll('[data-acao=atalho]')].filter(b=>b.offsetParent&&!b.closest('[data-acoes]')).map(b=>{N}(b.innerText))") or []
 def filtro(): return c.js(f"(()=>{{const e=document.getElementById('saf-cap-filtro'); return e&&e.offsetParent?{N}(e.innerText):'';}})()") or ''
 def custo(): return c.js(f"(()=>{{const b=document.querySelector('[data-acao=resumo]'); const s=b&&b.parentElement; return s?{N}(s.innerText):'';}})()") or ''
-def acoes(): return c.js(f"(()=>{{const a=document.querySelector('[data-acoes]'); return a?[...a.querySelectorAll('button,a')].filter(b=>b.offsetParent).map(b=>{N}(b.innerText)):[];}})()") or []
+# barra limpa (15/10/2026): os atalhos ficam no "⋯ Mais ações" (fechado); a leitura junta os botões à vista e os itens do menu
+def acoes(): return c.js(f"(()=>{{const a=document.querySelector('[data-acoes]'); return a?[...a.querySelectorAll('button,a')].filter(b=>b.offsetParent||b.closest('.acoes-menu')).map(b=>{N}(b.textContent)):[];}})()") or []
 def painel(): return c.js(f"(()=>{{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); return a?{N}(a.innerText):'';}})()") or ''
 def erros(): return c.js("(window.__errs||[]).join(' | ')") or ''
 def faixa_atual(): return c.js(f"(()=>{{const e=document.querySelector('.etp-ind [aria-current=step]'); return e?{N}(e.innerText):'';}})()") or ''

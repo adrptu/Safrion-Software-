@@ -236,6 +236,8 @@ def _etp_css():
     return ('.etp{container:etp/inline-size}.etp-chk,.etp-atual,.etp-fundo{display:none}.etp-seta{transition:transform .15s ease}'
             '.etp-itens>*{min-width:min-content!important}'   # nenhuma etapa fica mais estreita que a maior palavra: sem texto por cima da vizinha
             '.etp-ind .etp-itens>li{cursor:default}'          # progresso: inerte (sem cursor de ação, sem hover de ação, sem foco)
+            '.etp-ind .etp-itens{gap:22px!important}.etp-ind .etp-it:not(:last-child)::after{content:"›" / "";position:absolute;right:-16px;top:50%;transform:translateY(-52%);'
+            'font-size:20px;font-weight:700;color:#9AA59E;pointer-events:none}'   # seta entre os cartões (15/10), sem entrar na leitura
             '@media (hover:hover){.etp-sec .etp-itens>:not([aria-current=page]):not([aria-current=true]):hover{background:#F2F8F4!important;text-decoration:underline;text-underline-offset:3px}}'
             + ''.join(f'@container etp (max-width: {L-1}px){{{estreita(f".etp-l{L}")}}}' for L in lims))
 def steps_bar(steps,current=None,label=None):
@@ -279,7 +281,7 @@ def perfil_pill(perfil):
 # 13/10/2026 (proprietário: "tire o macro filtro fazenda e safra do topo e coloque nas telas para evitar confusão"): saem da barra do topo e
 # ficam na própria tela, numa faixa "Filtros desta tela" acima dos dados que filtram (shell37); as ligações (mf_*) não mudam.
 MACRO = {
-    'IN-04.dc.html': dict(faz='filtro'),
+    'IN-04.dc.html': dict(faz='filtro', saf='lista', cult='filtro'),   # 15/10/2026 (proprietário): Safra e Cultura no Mapa; as safras vêm da fazenda (mf_saf_opts)
     'OS.dc.html': dict(faz='filtro', saf='filtro', cult='filtro', tal='filtro'),   # 13/10 (proprietário): Cultura e Talhão no filtro principal da O.S.
     'SAF.dc.html': dict(faz='contexto', saf='contexto', trocar=False),   # 14/10/2026 (proprietário): "Trocar safra" fica embaixo, nos botões do fluxo
     'CMP.dc.html': dict(faz='contexto', saf='contexto'),
@@ -317,6 +319,10 @@ def _macro_html(fname, ctx, sep=True):
         out += (f'<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: {MUTED}; font-weight: 700;">Safra'
                 f'<select aria-label="Filtrar por safra" value="{{{{mf_saf}}}}" disabled="{{{{mf_susp}}}}" onChange="{{{{mf_setsaf}}}}" style="' + sel.format(LINE=LINE, SURF=SURF, INK=INK) + '">'
                 + ''.join(f'<option value="{f}">{f}</option>' for f in ['Todas'] + SAFRAS_MF) + '</select></label>')
+    elif cfg.get('saf') == 'lista':   # opções da tela (mf_saf_opts), sem "Todas"
+        out += (f'<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: {MUTED}; font-weight: 700;">Safra'
+                f'<select aria-label="Filtrar por safra" value="{{{{mf_saf}}}}" disabled="{{{{mf_susp}}}}" onChange="{{{{mf_setsaf}}}}" style="' + sel.format(LINE=LINE, SURF=SURF, INK=INK) + '">'
+                f'<sc-for list="{{{{mf_saf_opts}}}}" as="o" hint-placeholder-count="3"><option value="{{{{o.v}}}}">{{{{o.t}}}}</option></sc-for></select></label>')
     elif cfg.get('saf') == 'contexto':
         out += (f'<span style="{lab}">{ctx[1] if ctx and len(ctx) > 1 and ctx[1] else ""}</span>'
                 + (f'<button type="button" onClick="{{{{mf_trocar}}}}" title="Voltar à etapa 1 para escolher outra safra" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">Trocar safra</button>' if cfg.get('trocar', True) else ''))
@@ -576,9 +582,13 @@ def steps_state(names,pre='stp',label='Etapas do processo'):
     n=len(names); items=''
     for i,t in enumerate(names,1):
         h=lambda k,i=i: '{{'+f'{pre}{i}_{k}'+'}}'
+        # 15/10/2026 (proprietário, referência de fluxo em cartões: "esses ícones e setas para fluxo de processos ficou melhor, mais intuitivo, torne
+        # mais bonito com nosso design system e substitua o atual"): cartão por etapa com número (ou ✓ / !), nome, linha de situação com ponto de
+        # cor e, quando a tela informa, a contagem à direita; seta › entre os cartões (CSS, fora da leitura). Continua só informando (DS-31 v2).
         items+=(f'<li aria-current="{h("cur")}" class="etp-it" style="{h("st")}"><span aria-hidden="true" style="{h("bst")}">{h("num")}</span>'
-                f'<span style="display: flex; flex-direction: column; min-width: 0;"><span style="{h("tst")}">{esc(t)}<span class="etp-sr"> · {h("sr")}</span></span>'
-                f'<sc-if value="{h("hasWhy")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11px; font-weight: 700; color: {RED}; line-height: 1.2;">{h("why")}</span></sc-if></span></li>')
+                f'<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto;"><span style="{h("tst")}">{esc(t)}<span class="etp-sr"> · {h("sr")}</span></span>'
+                f'<span aria-hidden="true" style="{h("sst")}"><span style="{h("dot")}"></span>{h("sub")}</span></span>'
+                f'<sc-if value="{h("hasCnt")}" hint-placeholder-val="{{{{false}}}}"><span aria-hidden="true" style="{h("cst")}">{h("cnt")}</span></sc-if></li>')
     # etapa atual em texto para a faixa estreita: um bloco por etapa, montado só na atual; ao trocar de etapa a caixa nasce fechada
     abre=''.join(f'<sc-if value="{{{{{pre}{i}_cur === \'step\'}}}}" hint-placeholder-val="{{{{false}}}}">{_etp_abre(i,n,t)}</sc-if>' for i,t in enumerate(names,1))
     return _etp_progresso(n,_etp_lista(abre,items,'ol',f' aria-label="{esc(label)}"'))

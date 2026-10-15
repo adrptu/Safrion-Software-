@@ -10,6 +10,8 @@ import engine as E
 import ui37
 from ui37 import shell37, HEIGHTS37, MACRO
 import cenario, dados_solo as DS, ocupacao_cen as OCEN
+import re as _re
+def _ik(i): return 'i_'+_re.sub(r'\W','_',i['k'],flags=_re.ASCII)   # chave da coluna do indicador (a mesma do JS: ind.k com \W → _)
 
 H=lambda s: '{{'+s+'}}'
 F=lambda: H('false')
@@ -119,6 +121,10 @@ function PREVALS(self,v){ cenOuvir(self); if(self.state.mf_faz===undefined) self
     if(ix){ const V=ix.V; r.v.V=V.v===null?'':V.v; r.p.V=V.v===null?[{k:'mut',t:'não calculável'}]:[{k:'txt',t:prFmtT(V.v,2)+' %'}].concat(V.difere?[{k:'br'},{k:'chip',t:'difere do laboratório',c:'yellow'}]:[]); r.s.V=V.v===null?'não calculável':prFmtT(V.v,2)+' %'; }
     else { r.v.V=''; r.p.V=[{k:'mut',t:'—'}]; r.s.V=''; }
     if(K){ const t=prFmtT(K.v,2)+(K.un?' '+K.un:''); r.p.K=K.un?[{k:'txt',t}]:[{k:'txt',t:prFmtT(K.v,2)},{k:'chip',t:'sem unidade',c:'red'}]; r.s.K=K.un?t:prFmtT(K.v,2)+' sem unidade'; r.v.K=Number(K.v); } else { r.p.K=[{k:'mut',t:'—'}]; r.s.K=''; r.v.K=''; }
+    // os demais indicadores do laudo (15/10/2026, proprietário: "falta vários indicadores chave... pegar automático do que vier"): coluna por indicador
+    (SOLO0.ind||[]).forEach(ind=>{ if(ind.k==='V'||ind.k==='K') return; const k='i_'+ind.k.replace(/\W/g,'_'); const x=l.tipo==='solo'?soloIndVal(l,ind):null;
+      if(x===null||!isFinite(x)){ r.v[k]=''; r.p[k]=[{k:'mut',t:'—'}]; r.s[k]=''; return; }
+      const t=cenNum(x,ind.dec)+(ind.un==='%'?' %':(ind.un==='CaCl₂'?'':' '+ind.un)); r.v[k]=x; r.p[k]=[{k:'txt',t}]; r.s[k]=t; });
     r.p.sit=[{k:'chip',t:l.sit,c:SOLO_SITC[l.sit]||'gray'}].concat(l.motivo?[{k:'br'},{k:'mut',t:l.motivo}]:[]); r.s.sit=l.sit;
     r.p.plano=np.c?[{k:'chip',t:np.t,c:np.c}]:[{k:'mut',t:np.t}]; r.s.plano=np.t; return r; });
   /* ---- água no solo ---- */
@@ -259,7 +265,8 @@ def _painel_registro():
 def build():
     fname='AG-02.dc.html'; E._reset_screen(fname)
     g_lau=grid([dict(k='lau',l='Laudo',w=120),dict(k='tal',l='Fazenda · talhão',w=170),dict(k='prof',l='Profundidade',w=110),dict(k='coleta',l='Coleta',t='num',w=110),
-                dict(k='V',l='V %',t='num',a='r',w=120),dict(k='K',l='K',t='num',a='r',w=140),dict(k='sit',l='Situação',w=190),dict(k='plano',l='No plano',w=170)],[],
+                *[dict(k='V',l='V %',t='num',a='r',w=120) if i['k']=='V' else (dict(k='K',l='K',t='num',a='r',w=140) if i['k']=='K' else dict(k=_ik(i),l=i['l'],t='num',a='r',w=100)) for i in DS.IND],
+                dict(k='sit',l='Situação',w=190),dict(k='plano',l='No plano',w=170)],[],
                edit=dict(m='pick'),gid='g_lau',total=False,so=dict(k='coleta',d=True),qf=dict(k='sit',l='situação',todas='Todos'))
     g_agua=grid([dict(k='med',l='Medição',w=100),dict(k='tal',l='Talhão · zona',w=120),dict(k='data',l='Data',t='num',w=110),dict(k='prof',l='Profundidade',w=150),
                  dict(k='met',l='Método',w=200),dict(k='cc',l='Capacidade de campo',t='num',a='r',w=140),dict(k='pmp',l='Ponto de murcha',t='num',a='r',w=130),

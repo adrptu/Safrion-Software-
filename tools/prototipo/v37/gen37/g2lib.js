@@ -768,11 +768,21 @@ if(typeof document!=='undefined'&&!window.__g2toastFoco){ window.__g2toastFoco=1
   try{ new MutationObserver(olha).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){} })();
 // Indicador de progresso do processo guiado: só informa (atual, concluída, pendente, impedida) com a palavra do estado para o leitor
 // de tela; não navega (sem handler, sem foco, sem hover de ação). O argumento go fica por compatibilidade e não é usado.
-function g2steps(self,v,pre,n,cur,whys,go){ for(let i=1;i<=n;i++){ const on=(i===cur); const w=(whys&&whys[i])||''; const feita=(!on&&i<cur&&!w);
-  v[pre+i+'_st']='display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:10px;min-width:0;color:#15201A;cursor:default;'+(on?'background:#E4F3E9;box-shadow:inset 0 -2px 0 #1E7A4C;':'background:transparent;');
-  v[pre+i+'_bst']='width:22px;height:22px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;flex-shrink:0;'+(on?'background:#1E7A4C;color:#fff;':(w?'background:#FDE8E6;color:#B42318;':(feita?'background:#E3F2E8;color:#1E6B47;':'background:#EEF1EE;color:#15201A;')));
-  v[pre+i+'_tst']='font-size:12px;line-height:1.2;font-weight:'+(on?'800':'600')+';color:'+(on||feita||w?'#15201A':'#4B5A51')+';';
-  v[pre+i+'_num']=feita?'✓':String(i); v[pre+i+'_sr']=on?'etapa atual':(w?'impedida':(feita?'concluída':'pendente'));
+// Progresso do processo em cartões (15/10/2026): número (✓ concluída, ! impedida), nome, situação com ponto de cor e contagem opcional
+// (info[i] = {cnt, sub}: a tela informa o número da etapa e a frase curta); a seta › entre os cartões vem do CSS (ui37._etp_css).
+function g2steps(self,v,pre,n,cur,whys,go,info){ for(let i=1;i<=n;i++){ const on=(i===cur); const w=(i<=cur&&whys&&whys[i])||''; const feita=(!on&&i<cur&&!w); const x=(info&&info[i])||{};   // etapa futura neutra (ETP-01)
+  v[pre+i+'_st']='position:relative;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;min-width:0;flex:1 1 0;box-sizing:border-box;color:#15201A;cursor:default;'
+    +(on?'background:#E4F3E9;border:1.5px solid #1E7A4C;box-shadow:0 2px 8px -2px rgba(30,122,76,.25);':(w?'background:#FFFFFF;border:1px solid #F3C4BE;':'background:#FFFFFF;border:1px solid #E4E9E5;'));
+  v[pre+i+'_bst']='width:26px;height:26px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;'
+    +(on?'background:#1E7A4C;color:#fff;':(w?'background:#FDE8E6;color:#B42318;':(feita?'background:#E3F2E8;color:#1E6B47;':'background:#EEF1EE;color:#4B5A51;')));
+  v[pre+i+'_tst']='font-size:13px;line-height:1.2;font-weight:'+(on?'800':'700')+';color:'+(on||feita||w?'#15201A':'#4B5A51')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+  const cor=w?'#B42318':(on?'#1E7A4C':(feita?'#3FBF2A':'#C4CCC6'));
+  v[pre+i+'_sst']='display:flex;align-items:center;gap:5px;font-size:11.5px;line-height:1.2;font-weight:600;color:'+(w?'#B42318':'#5F6B64')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+  v[pre+i+'_dot']='width:7px;height:7px;border-radius:999px;flex-shrink:0;background:'+cor+';';
+  v[pre+i+'_sub']=w||x.sub||(on?'em andamento':(feita?'concluída':'a fazer'));
+  v[pre+i+'_hasCnt']=x.cnt!==undefined&&x.cnt!==null&&x.cnt!==''; v[pre+i+'_cnt']=v[pre+i+'_hasCnt']?String(x.cnt):'';
+  v[pre+i+'_cst']='margin-left:auto;padding-left:8px;font-size:20px;font-weight:800;letter-spacing:-.02em;color:'+(on?'#1E6B47':'#15201A')+';font-variant-numeric:tabular-nums;';
+  v[pre+i+'_num']=w?'!':(feita?'✓':String(i)); v[pre+i+'_sr']=on?'etapa atual':(w?'impedida':(feita?'concluída':'pendente'));
   v[pre+i+'_why']=w; v[pre+i+'_hasWhy']=!!w; v[pre+i+'_cur']=on?'step':'false'; } }
 // Seções de uma tela de trabalho paralelo (Estoque): navegação em qualquer ordem, sem número de etapa; pendência escrita
 function g2secoes(self,v,pre,n,cur,whys,go){ for(let i=1;i<=n;i++){ const on=(i===cur); const w=(whys&&whys[i])||'';
@@ -803,7 +813,15 @@ function g2acoes(v,pre,c){ c=c||{}; const nada=()=>{};
   v[pre+'_hasSec']=!!sec; v[pre+'_secT']=sec?sec.t:''; v[pre+'_secFn']=sec?sec.fn:nada; v[pre+'_secA']=(sec&&sec.a)||'avancar';
   const lk=!!(prim&&prim.h); v[pre+'_hasPrim']=!!prim&&!lk; v[pre+'_hasLink']=lk; v[pre+'_primT']=prim?prim.t:''; v[pre+'_primFn']=(prim&&prim.fn)||nada; v[pre+'_href']=lk?prim.h:'#';
   v[pre+'_primA']=(prim&&prim.a)||'avancar'; v[pre+'_desc']=c.nota?(pre+'-nota'):'';
+  /* barra limpa (15/10/2026): nota visível só na decisão do momento (c.decide); senão, dica do principal; atalhos no "⋯ Mais ações" */
+  const dec=!!c.decide; v[pre+'_hasNotaVis']=dec&&!!(c.nota||lnks.length); v[pre+'_hasNotaSr']=!dec&&!!c.nota; v[pre+'_dica']=(!dec&&c.nota)?c.nota:'';
+  v[pre+'_hasMais']=!dec&&(lnks.length>0||!!c.ctx);
   v[pre+'_has']=!!(c.nota||lnks.length||volta||c.troca||sec||prim); }
+// "⋯ Mais ações" da barra (details.acoes-mais): fecha com Esc (o foco volta ao ⋯), ao clicar fora e depois de escolher um item
+try{ if(!window.__g2mais){ window.__g2mais=1;
+  document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; const a=document.activeElement; const d=a&&a.closest&&a.closest('details.acoes-mais[open]'); if(!d) return;
+    e.preventDefault(); e.stopPropagation(); d.open=false; const sm=d.querySelector('summary'); if(sm) sm.focus(); },true);
+  document.addEventListener('click',e=>{ document.querySelectorAll('details.acoes-mais[open]').forEach(d=>{ if(!d.contains(e.target)||(e.target.closest&&e.target.closest('[role=menuitem]'))) d.open=false; }); },true); } }catch(e){}
 // ===== DS-RETORNO-20261009 · retorno visual de mudança (g2flash) =====
 // Proprietário (09/10/2026): "quando muda de tela e avança no processo não está dando aquele feedback ao usuário em tempo real como se fosse um
 // flash de atualização e mudança de contexto". Uma só função de realce (g2flash), chamada só pelos pontos centrais do motor (engine.ENGINE_JS2):
