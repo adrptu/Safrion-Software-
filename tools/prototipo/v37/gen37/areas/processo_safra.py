@@ -90,7 +90,7 @@ def build():
         # sem caixas de seleção (proprietário, 13/10/2026): o plano entra pela primária "Aplicar plano em N cultivos" (os sem plano) ou pelo
         # "Aplicar plano" / "Reaplicar" da linha; trocar o plano de um cultivo é pelo formulário da linha
         g=grid(CULT_COLS,rows,edit=dict(m='form',title='Cultivo',newTitle='Novo cultivo',sub='Altere o cultivo e o plano agronômico e salve.',fields=CULT_FIELDS),
-               sel=False,dele=not ro,add=None,gid=f'g_cult_{k}',qf=dict(k='sit',l='situação',nivel0=True),total=True,tree=True,x0={},
+               sel=False,dele=not ro,add=None,gid=f'g_cult_{k}',qf=dict(k='sit',l='situação',nivel0=True),total=True,tree=True,x0={},menu_linha=True,
                sico=dict(k='sit',cores=['red','yellow']),
                tools=f'<sc-if value="{H("us_"+k+"_vis")}" hint-placeholder-val="{F()}">'+UNP.sel_html('us_'+k)+'</sc-if>')   # UNID-PROD: um seletor por tabela (D-U01), só com a Meta à vista (SAF-TAB)
         cult_html+=f'<sc-if value="{H("cult_"+k)}" hint-placeholder-val="{F()}">{g}</sc-if>'
@@ -194,7 +194,7 @@ def build():
                dict(k='horas',l='Horas-conjunto (h)',t='num',a='r',d=1,agg='sum'),
                dict(k='rha',l='Custo R$/ha',t='num',a='r',agg='fn',ajuda='Na linha: custo ÷ área trabalhada. No Total: custo ÷ hectares dos talhões (cada talhão conta uma vez, como no Resumo da safra)'),
                dict(k='custo',l='Custo total',t='num',a='r',agg='sum',ajuda='Máquinas e pessoas, sem insumos. O Total é o Custo de operação do topo')],
-       [],edit=dict(m='pick',leafOnly=False),tree=True,gid='g_op',total=True,qf=dict(k='sit',l='situação',nivel0=True))
+       [],edit=dict(m='pick',leafOnly=False),tree=True,gid='g_op',total=True,qf=dict(k='sit',l='situação',nivel0=True),sico_so_icone=True)
     # g_cap: capacidade por mês (recurso × mês, ocupação), uma por safra; recolhida por padrão.
     # Recurso, Maior uso e Mês abrem o formulário do recurso; as células de mês (nr) só filtram (toque na célula com demanda desta safra)
     def cap_cols(mis):
@@ -281,11 +281,12 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
            f'<span>Custo de operação <b style="color: {INK};">{H("v3_cop")}</b> · {H("v3_copq")}</span>'
            f'<button type="button" class="acoes-lnk" data-acao="resumo" onClick="{H("rs_abrir")}" style="min-height: 24px;">Resumo da safra</button></span>')
     linha_cap=(f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 0 4px 8px;">'
-               f'<sc-for list="{H("v3_atalhos")}" as="at" hint-placeholder-count="1"><button type="button" class="acoes-lnk" data-acao="atalho" aria-label="{H("at.al")}" onClick="{H("at.go")}" style="{H("at.st")}">{H("at.t")}</button></sc-for>'
                f'<span style="flex-grow: 1;"></span><button type="button" class="acoes-lnk" aria-expanded="{H("v3_capexp")}" onClick="{H("v3_captog")}">{H("v3_capt")}</button></div>')
     filtro=(f'<sc-if value="{H("v3_fil")}" hint-placeholder-val="{F()}"><div role="status" tabIndex="-1" id="saf-cap-filtro" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 0 4px 8px; font-size: 12.8px;">'
             f'<span>Mostrando <b>{H("v3_filn")}</b>: {H("v3_filt")}</span><button type="button" onClick="{H("v3_filx")}" style="{_MINI}">Ver todas</button></div></sc-if>')
-    corpo3=(f'<p id="saf-v3-ver" style="margin: 0 4px 8px; font-size: 13.4px; line-height: 1.45;"><span role="status" style="{H("v3_vst")}">{H("v3_ver")}</span></p>'
+    # 15/10/2026 (proprietário: "esses avisos e alertas deixe apenas dentro da tabela de forma visual, não fora dela"): o veredito fica para o
+    # leitor de tela (role=status, sem ocupar a tela) e os atalhos de recurso saíram; o recurso em falta aparece só como ⚠ na linha (dica com o mês)
+    corpo3=(f'<p id="saf-v3-ver" class="acoes-sr" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0;"><span role="status" style="{H("v3_vst")}">{H("v3_ver")}</span></p>'
             + linha_cap + f'<sc-if value="{H("v3_capab")}" hint-placeholder-val="{F()}"><div id="saf-cap" style="padding-bottom: 10px;">{cap_html}</div></sc-if>' + filtro + g_op)
     s3=bloco('Operações e recursos','',corpo3,acao=custo)
     s4=bloco('Demanda de insumos por grupo',H('k6'),g_dem,desc_hole=True,

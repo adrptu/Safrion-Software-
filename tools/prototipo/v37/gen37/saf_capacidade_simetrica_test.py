@@ -112,6 +112,8 @@ try:
         chk(f'{tg} sem erro de JS', erros() == '', erros())
     # PL-03 (verificação SAF-C02, S3): a capacidade tem uma fonte só (capCalc). Os links das telas de Planejamento levam à etapa 3 da S2627
     def ver_capacidade():
+        L.c.js("""(()=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const v=[...document.querySelectorAll('a,button')].some(b=>b.offsetParent&&n(b.innerText)==='Ver capacidade'); if(v) return;
+          const b=[...document.querySelectorAll('button.g2mais')].find(b=>{const m=b.nextElementSibling; return m&&[...m.querySelectorAll('[role=menuitem]')].some(i=>n(i.textContent)==='Ver capacidade');}); if(b) b.click();})()"""); time.sleep(.3)   # DS-PADRAO L3: no ⋯ do bloco
         r = L.c.js("""(()=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const a=[...document.querySelectorAll('a,button')].filter(b=>b.offsetParent&&n(b.innerText)==='Ver capacidade');
           if(!a.length) return 'sem link'; const h=a[0].getAttribute('href')||''; a[0].click(); return 'ok '+h;})()"""); time.sleep(1.6)
         return r, L.c.js("location.pathname.split('/').pop()+location.hash"), estado(), veredito(), erros()

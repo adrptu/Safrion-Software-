@@ -754,7 +754,7 @@ function leafParts(r,adj,kid){ const pl=planById(r.v.plano); const na=Object.key
   r.v.ver=(pl&&pl.cultura===r.v.cult)?pl.versao:''; r.p.ver=r.v.ver?[{k:'txt',t:'v'+r.v.ver}]:[{k:'mut',t:'—'}]; r.s.ver=r.v.ver?'v'+r.v.ver:'';
   if(pl && pl.cultura===r.v.cult){ r.p.plano=[{k:'txt',t:pl.nome}]; r.s.plano=pl.nome; }   // SAF-TAB: "Ajustar insumos" saiu da célula; fica no painel da linha (cultActs)
   else if(pl){ r.p.plano=[{k:'chip',t:'Plano de '+pl.cultura+' incompatível',c:'red'},{k:'act',t:'Reaplicar',fn:'applyone:'+r.id}]; r.s.plano='incompatível'; }
-  else { r.p.plano=r.ro?[{k:'mut',t:'sem plano'}]:[{k:'act',t:'Aplicar plano',fn:'applyone:'+r.id}]; r.s.plano=''; }
+  else { r.p.plano=r.ro?[{k:'mut',t:'sem plano'}]:[{k:'mut',t:'sem plano'},{k:'act',t:'Aplicar plano',fn:'applyone:'+r.id}]; r.s.plano=''; }   // a ação vai para o ⋯ da linha (15/10)
   r.v.aj=na; r.p.aj=na?[{k:'chip',t:String(na),c:'yellow'}]:[{k:'mut',t:'—'}]; r.s.aj=String(na); }
 function grpParts(r,adj){ const ks=r.kids||[]; const t=r.v.talhao; const T=talhaoArea(t); const A=ks.reduce((a,c)=>a+(Number(c.v.area)||0),0); const L=T-A;
   const uniq=(f)=>[...new Set(ks.map(c=>c.v[f]).filter(x=>x!==''&&x!==undefined&&x!==null))];

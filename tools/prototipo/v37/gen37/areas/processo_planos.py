@@ -439,9 +439,9 @@ function paPubAgora(self,agora){ const tarde=!self.__paSaiT||(agora-self.__paSai
   return (txt?'A dose de '+txt+' entrou no rascunho agora':'O rascunho mudou neste clique')+': confira e clique em Salvar alterações de novo.'; }
 function paPub(self){ const pid=self.state.pid; const st=self.state; const ac=paAcoes(paPlan(self,pid),{iadd:!!st.iadd,ied:st.ied}); if(!ac.prim||ac.prim.dis) return;
   const ag=paPubAgora(self,Date.now()); if(ag){ self.setState({g2toast:ag}); return; }
-  const res=paResumo(paPlan(self,pid)); const r=paPubFaz(paPlans(self),pid,PA0.hoje); if(r.erro){ self.setState({g2toast:r.erro}); return; } const apl=paApl(pid);
+  const r=paPubFaz(paPlans(self),pid,PA0.hoje); if(r.erro){ self.setState({g2toast:r.erro}); return; } const apl=paApl(pid);
   /* o aviso diz o que foi salvo (o bloco de alterações saiu) e que os cultivos não mudam */
-  self.setState({pl:r.ps,disc:false,del:null,paUndo:null,g2toast:'Alterações salvas na v'+r.p.versao+'. '+(res&&r.p.versao>1?res+' ':'')+(apl?'Os cultivos continuam como estavam ('+apl+'); a troca de versão é por cultivo, no Planejar safra. ':'')+PA_PROTO});
+  self.setState({pl:r.ps,disc:false,del:null,paUndo:null,g2toast:'Plano salvo · v'+r.p.versao+(apl?' · cultivos seguem na versão deles':'')});   /* 15/10 (proprietário: "caixa pequena, pouco texto"): só a versão salva; o resumo das doses saiu do aviso */
   /* o comando sai da tela com o rascunho: o foco vai ao nome do plano (o aviso diz que os cultivos continuam como estavam) */
   setTimeout(()=>{ try{ const h=document.getElementById('pa-det-tit'); if(h){ h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); h.scrollIntoView({block:'start'}); } }catch(e){} },40); }
 // R5: a troca de versão por cultivo (PRD 40.3) ainda não existe no Planejar safra do protótipo, e a PA não grava no cenário: o texto
@@ -598,7 +598,7 @@ def build():
                f'<span style="display: inline-flex; align-items: center; gap: 5px;"><input id="{H("a.addDoseId")}" aria-label="Dose por hectare" value="{H("a.addDose")}" onChange="{H("a.addSetD")}" onKeyDown="{H("a.addTecla")}" inputMode="decimal" style="{H("a.addIst")}">'
                f'<span style="font-size: 12px; color: {MUTED}; white-space: nowrap;">{H("a.addUn")}</span></span>'
                f'<span style="font-size: 12px; color: {MUTED}; flex-grow: 1; min-width: 120px;">{H("a.addInfo")}</span>'
-               f'<button type="button" onClick="{H("a.addOk")}" style="{_MINI}">Incluir</button><button type="button" onClick="{H("a.addNao")}" style="{_MINI}">Cancelar</button></div>'
+               f'<button type="button" onClick="{H("a.addOk")}" style="{_MINIP}">Incluir</button><button type="button" onClick="{H("a.addNao")}" style="{_MINI}">Cancelar</button></div>'
                + IF('a.addTemErr', f'<div role="alert" style="font-size: 12px; color: {RED}; padding-top: 4px;">{H("a.addErr")}</div>'))
     inl = (IF('a.rmvTem', f'<div role="status" style="display: flex; align-items: center; gap: 10px; margin-top: 6px; padding: 6px 10px; border-radius: 8px; background: {GRAYS}; font-size: 12.5px;"><span style="flex-grow: 1;">{H("a.rmvT")}</span>'
                           f'<button type="button" onClick="{H("a.volta")}" style="{_MINI}">Desfazer</button></div>')

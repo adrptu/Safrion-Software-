@@ -40,10 +40,10 @@ ERRS=f'font-size: 12px; font-weight: 700; color: {RED};'
 LNK=f'border: 0; background: transparent; padding: 4px 2px; font-family: inherit; font-size: 12.5px; font-weight: 700; color: {ACC}; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;'
 INP=f'font-family: inherit; font-size: 13.5px; padding: 7px 9px; border-radius: 8px; border: 1px solid {LINE}; box-sizing: border-box; background: #fff; color: {INK};'
 
-CSS=('.ma-vis-m{display:none}.ma-fsel-m{display:none!important}'
+CSS=('.ma-vis-m{display:none}'
      '.ma-vc-s{display:none}'
      # 390 px (AC-PCM-22): cartões numa faixa que rola de lado, filtros numa linha, "Ver como" curto e botões do cabeçalho menores: ≥ 5 linhas da grade acima da dobra
-     '@media (max-width:640px){.ma-vis,.ma-fch{display:none!important}.ma-vis-m,.ma-fsel-m{display:inline-flex!important}'
+     '@media (max-width:640px){.ma-vis{display:none!important}.ma-vis-m{display:flex!important}'
      '.ma-cards{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto;gap:8px!important;order:9}.ma-cards .ma-card{flex:0 0 auto!important;min-width:132px;padding:6px 10px!important}.ma-sem{order:9}'
      '.ma-top{gap:6px!important}.ma-top button{padding:4px 9px!important;font-size:12px!important}.ma-top .ma-lbl{font-size:0!important;gap:0!important}'
      '.g2caixa div[role=group]{flex-wrap:nowrap!important;overflow-x:auto}.g2caixa div[role=group]>button{flex:0 0 auto}.g2rola [role=row][data-rid]>[role=cell]{padding-top:6px!important;padding-bottom:6px!important}'
@@ -52,9 +52,7 @@ CSS=('.ma-vis-m{display:none}.ma-fsel-m{display:none!important}'
      '.ma-flt{flex-wrap:nowrap!important;overflow-x:auto;padding-bottom:2px}.ma-flt>*{flex:0 0 auto}'
      # faixa Filtros (MAN-LIMPA-01) no celular: uma linha que rola de lado, com o título de cada filtro (proprietário, 14/10: "precisa manter o
      # título de cada filtro para o usuário não se perder"), para a lista começar acima da dobra (AC-PCM-22)
-     # 15/10/2026: a auditoria pediu a faixa quebrando linha (M390-02), mas a linha única que rola de lado é decisão do proprietário de 14/10 e
-     # o AC-PCM-22 (≥ 5 linhas acima da dobra a 390 px) reprova a faixa em 3 linhas; fica a rolagem lateral, agora com Prazo, Fase e Rotina dentro
-     '.ma-fx .mf-tela{flex-wrap:nowrap!important;overflow-x:auto;padding:6px 10px!important;gap:8px!important}.ma-fx .mf-tela>*{flex:0 0 auto}'
+     '.ma-fx .mf-tela{flex-wrap:nowrap!important;overflow-x:auto;padding:6px 10px!important;gap:8px!important}.ma-fx .mf-tela>label{flex:0 0 auto}'
      '.ma-vc-l{display:none}.ma-vc-s{display:inline}.ma-hb{padding:7px 12px!important;font-size:13px!important}'
      '.ma-pan{width:100%!important;max-width:100%!important;left:0!important}.ma-hide-m{display:none!important}.ma-flt{flex-wrap:wrap}}'
      '.ma-pan{position:fixed;top:0;right:0;bottom:0;z-index:60;width:620px;max-width:100%;background:#fff;box-shadow:-12px 0 40px -12px rgba(21,32,26,.35);'
@@ -78,10 +76,6 @@ const MA_ETC={'A liberar':'gray','Liberadas':'green','Em execução':'green','Em
 const MA_VIS=[{k:'semordem',t:'Sem ordem'},{k:'ordens',t:'Ordens'},{k:'ativos',t:'Ativos'},{k:'planos',t:'Planos'}];
 const MA_NAVST=__NAVST__;   /* menu Manutenção (13/10): estilo do subitem [inativo, ativo]; o destaque segue a visão aberta */
 function ma_G(id){ return GRIDS.find(g=>g.id===id); }
-/* chips de filtro da faixa → seletor no celular (15/10/2026): mesma lista, mesma ação; nenhum = 1ª opção "todas" quando os chips desligam */
-function ma_chSel(v,k,todas){ const a=v[k]||[]; const i=a.findIndex(x=>x.on==='true'); const o=a.map((x,j)=>({v:String(j),t:x.t+(x.n!==undefined&&x.n!==''?' · '+x.n:'')}));
-  v[k+'_sv']=i<0?'':String(i); v[k+'_so']=todas?[{v:'',t:todas}].concat(o):o;
-  v[k+'_sset']=(e)=>{ const j=e&&e.target?e.target.value:''; if(j===''){ if(i>=0&&a[i].go) a[i].go(); return; } const x=a[Number(j)]; if(x&&x.on!=='true'&&x.go) x.go(); }; }
 function ma_chipSt(c){ const k=MA_CH[c]||MA_CH.gray; return 'display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+k[0]+';background:'+k[1]+';'; }
 function ma_dotSt(c){ const k=MA_CH[c]||MA_CH.gray; return 'width:6px;height:6px;border-radius:999px;flex-shrink:0;background:'+k[0]+';'; }
 function ma_pill(on){ return 'font-family:inherit;font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:999px;cursor:pointer;white-space:nowrap;'+(on?'border:1px solid #1E7A4C;background:#E4F3E9;color:#1E6B47;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;'); }
@@ -306,7 +300,6 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2pe
   v.rotinas=[{t:'Aguardam você · '+nVoce,on:String(st.rot==='voce'),st:ma_pill(st.rot==='voce'),go:()=>self.setState({rot:st.rot==='voce'?'':'voce'})},{t:'Esta semana',on:String(st.rot==='semana'),st:ma_pill(st.rot==='semana'),go:()=>self.setState({rot:st.rot==='semana'?'':'semana'})},
     {t:'Com conflito · '+os.filter(o=>ma_temConf(c,o)).length,on:String(st.rot==='conf'),st:ma_pill(st.rot==='conf'),go:()=>self.setState({rot:st.rot==='conf'?'':'conf'})},
     {t:'Espera por peça · '+ab.filter(o=>manFalta(c,o).length).length,on:String(st.rot==='peca'),st:ma_pill(st.rot==='peca'),go:()=>self.setState({rot:st.rot==='peca'?'':'peca'})}];
-  ma_chSel(v,'fchips',''); ma_chSel(v,'rotinas','Todas as rotinas'); ma_chSel(v,'so_prazo','');   /* FIL-02 · celular: os chips da faixa viram seletor */
   v.om_lista=(st.omodo||'lista')==='lista'; v.om_kanban=st.omodo==='kanban';
   v.om_modos=[['lista','Lista','v_lista'],['kanban','Kanban','v_kanban']].map(([k,t],i)=>({k,t,i:String(i),li:k==='lista',ka:k==='kanban',on:String((st.omodo||'lista')===k),go:()=>self.setState({omodo:k})}));
   v.semana=st.rot==='semana'; const dias={}; os.filter(o=>manAberta(o)&&o.janIso&&o.janIso<=dom).forEach(o=>{ const d=o.janIso<c.hoje?'vencidas':o.janIso; (dias[d]=dias[d]||[]).push(o); });
@@ -945,7 +938,7 @@ def _visoes():
             dict(k='data',l='Data · leitura',w=100),dict(k='met',l='Método',w=110),dict(k='lh',l='Consumo',t='num',a='r',w=80),dict(k='qual',l='Qualidade',w=105)],'g_ab',qf=dict(k='qual',l='qualidade'))
     g_pl=G([dict(k='nome',l='Plano',w=150),dict(k='grupo',l='Grupo de máquina',w=130),dict(k='est',l='Estado',w=140),dict(k='apl',l='Aplica-se a',w=140),dict(k='svs',l='Serviços',w=140),dict(k='atv',l='Ativos',w=110),dict(k='sit',l='Situação',w=165)],'g_pl')
     flt=lambda *xs: '<div class="ma-flt" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">'+''.join(xs)+'</div>'
-    semordem=g_so   # FIL-02: o Prazo está na faixa Filtros
+    semordem=(flt(_chips('so_prazo','Prazo pelo início da janela')) + g_so)
     semana=IF('semana',f'<div role="note" aria-label="Esta semana" style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border: 1px solid {LINE}; border-radius: 12px; background: {SURF};">'
               f'<div style="{SECT}">Esta semana · por dia · capacidade da oficina não calculável (sem P10)</div>'
               + FOR('sem_dias','d',f'<div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 12.8px;"><b style="min-width: 90px;">{H("d.t")}</b><span>{H("d.oms")}</span><span style="color: {MUTED};">{H("d.hh")}</span></div>',3) + '</div>')
@@ -953,9 +946,9 @@ def _visoes():
     modos=(f'<div class="g2visoes-w"><div class="g2visoes" role="toolbar" aria-label="Visão das ordens">'
            + FOR('om_modos','x',f'<button type="button" data-i="{H("x.i")}" aria-label="{H("x.t")}" data-dica="{H("x.t")}" aria-pressed="{H("x.on")}" onClick="{H("x.go")}">'
                  + IF('x.li',icon('v_lista',16),True) + IF('x.ka',icon('v_kanban',16)) + '</button>',2) + '</div></div>')
-    fase_ch=(f'<div role="group" aria-label="Filtrar por fase" style="display: flex; flex-wrap: wrap; gap: 6px;">'
-             + FOR('fchips','fc',f'<button type="button" aria-pressed="{H("fc.on")}" onClick="{H("fc.go")}" style="{H("fc.st")}">{H("fc.t")} <span style="opacity: .75;">{H("fc.n")}</span></button>',6) + '</div>')
-    ordens=(flt('<span style="flex-grow: 1;"></span>',modos)   # FIL-02: Fase e Rotina estão na faixa Filtros; aqui fica a troca de visão
+    ordens=(flt(f'<div role="group" aria-label="Filtrar por fase" style="display: flex; flex-wrap: wrap; gap: 6px;">'
+                  + FOR('fchips','fc',f'<button type="button" aria-pressed="{H("fc.on")}" onClick="{H("fc.go")}" style="{H("fc.st")}">{H("fc.t")} <span style="opacity: .75;">{H("fc.n")}</span></button>',6) + '</div>',
+                  _chips('rotinas','Rotina'),'<span style="flex-grow: 1;"></span>',modos)
             + semana + IF('om_lista',g_om,True) + IF('om_kanban',_kanban()))
     ativos=(f'<div class="ma-top" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">{_chips("at_modos","Modo")}</div>'
             + IF('at_ativos',f'<div class="ma-gat">{g_at}</div>',True) + IF('at_abast',g_ab))
@@ -970,13 +963,8 @@ def _visoes():
     L_=ui37.MF_LBL.format(MUTED=MUTED); S_=ui37.MF_SEL.format(LINE=LINE,SURF=SURF,INK=INK)
     fsel=lambda rot,val,setfn,lst: (f'<label style="{L_}">{rot}<select aria-label="Filtrar por {rot.lower()}" value="{H(val)}" onChange="{H(setfn)}" style="{S_}">'
                                     + FOR(lst,'o',f'<option value="{H("o.v")}">{H("o.t")}</option>',3) + '</select></label>')
-    fch=lambda rot,chips,k: (f'<span class="ma-fch">{ui37.faixa_campo(rot,chips)}</span>'
-                             + f'<label class="ma-fsel-m" style="{L_}">{rot}<select aria-label="Filtrar por {rot.lower()}" value="{H(k+"_sv")}" onChange="{H(k+"_sset")}" style="{S_}">'
-                             + FOR(k+'_so','o',f'<option value="{H("o.v")}">{H("o.t")}</option>',3) + '</select></label>')
     faixa=ui37.faixa_filtros(IF('flt_tipo',fsel('Tipo','f_tipo','f_settipo','f_tipos'),True) + IF('flt_crit',fsel('Criticidade','f_crit','f_setcrit','f_crits'),True)
-                             + fsel('Grupo','f_grupo','f_setgrupo','f_grupos') + IF('flt_pend',fsel('Pendência','f_pend','f_setpend','f_pends'))
-                             + IF('v_semordem',fch('Prazo',_chips('so_prazo','Prazo pelo início da janela'),'so_prazo'))
-                             + IF('v_ordens',fch('Fase',fase_ch,'fchips')+fch('Rotina',_chips('rotinas','Rotina',4),'rotinas')))
+                             + fsel('Grupo','f_grupo','f_setgrupo','f_grupos') + IF('flt_pend',fsel('Pendência','f_pend','f_setpend','f_pends')))
     col=lambda x: f'<div style="display: flex; flex-direction: column; gap: 10px; min-width: 0;">{x}</div>'
     return (IF('lista',col(sel + f'<div class="ma-fx">{faixa}</div>' + IF('v_semordem',col(semordem),True) + IF('v_ordens',col(ordens)) + IF('v_ativos',col(ativos)) + IF('v_planos',col(planos))),True))
 

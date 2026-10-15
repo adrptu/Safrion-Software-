@@ -240,12 +240,24 @@ const G2_CV_PERG=[['oque','O quê'],['quem','Quem'],['quando','Quando'],['onde',
 // VISOES-2 §3.6 · Situação oculta vira ícone antes da identidade (sp.sico = {k, cores}): só nas cores que pedem atenção (padrão vermelho,
 // laranja e amarelo), com o texto completo na dica e no leitor; o estado normal (Planejado, Livre) fica sem ícone
 // sp.sico.ks: mais de uma coluna de situação oculta (ex.: Pendência e Situação); cada uma dá o seu ícone, na ordem do quadro
+// ⋯ da linha (15/10/2026, proprietário: "coloque os 3 pontinhos e coloque todos botões de ação ali com ícones intuitivos"): ícone pelo verbo
+function g2acaoIco(t){ t=String(t||'').toLowerCase();
+  if(/exclu|remov|apagar/.test(t)) return 'M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6';
+  if(/dividir/.test(t)) return 'M6 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12';
+  if(/plano|aplicar/.test(t)) return 'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 14l2 2 4-4';
+  if(/vincular|ciclo/.test(t)) return 'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71';
+  if(/editar|alterar|ajustar/.test(t)) return 'M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z';
+  if(/planejar|incluir|criar|nov[ao]/.test(t)) return 'M12 5v14M5 12h14';
+  return 'M9 18l6-6-6-6'; }
 function g2sicoPart(r,sp,k){ k=k||sp.sico.k; const cores=sp.sico.cores||['red','orange','yellow'], c=sp.cols.find(x=>x.k===k); if(!c) return null;
   const ps=(r.p&&r.p[k])||[], ch=ps.find(p=>p&&p.c&&['chip','ico','cn'].indexOf(p.k)>=0); let cor=null, t='', d='';
   // selo de estado (de): o ícone leva o significado e o próximo passo (G2_DICAS), como o selo
-  if(ch){ cor=ch.c; t=String(ch.t||''); d=String(ch.dica||ch.dv||(ch.de?g2dicaDe(ch.t):'')||''); } else { t=g2text(r,c); cor=(c.chips||{})[t]||null; }
+  if(ch){ cor=ch.c; t=String(ch.t||''); d=String(ch.dica||ch.dv||(ch.de?g2dicaDe(ch.t):'')||'');
+    // 15/10: só o ícone na linha (sico.so) → a dica leva todos os avisos da célula, do mais grave; nada some da linha
+    if(sp.sico.so){ const at=ps.filter(p=>p&&p.c&&['chip','ico','cn'].indexOf(p.k)>=0&&cores.indexOf(p.c)>=0); if(at.length>1){ cor=at.some(p=>p.c==='red')?'red':at[0].c; t=at.map(p=>String(p.t||'')).join(' · '); } } }
+  else { t=g2text(r,c); cor=(c.chips||{})[t]||null; }
   t=t.trim(); if(!cor||!t||cores.indexOf(cor)<0) return null;
-  return {k:'ico',c:cor,t:c.l+': '+t+(d?' · '+d:''),curto:cor==='red'?t:''}; }   // texto curto ao lado só no bloqueio (vermelho, visual_corte C2); atenção fica no ícone e na dica
+  return {k:'ico',c:cor,t:c.l+': '+t+(d?' · '+d:''),curto:(cor==='red'&&!sp.sico.so)?t:''}; }   // texto curto ao lado só no bloqueio (vermelho, visual_corte C2); atenção fica no ícone e na dica
 // V2-3: tela que troca sp.cols em tempo de execução (CD-05 pelo papel; Irrigação sem a Fazenda) recebe de volta as marcas da coluna
 // pela chave (sp.marcas, do quadro): a coluna nova não perde a posição no padrão nem a pergunta
 function g2marca(sp){ if(!sp||!sp.marcas||!sp.cols) return; sp.cols.forEach(c=>{ const m=sp.marcas[c.k]; if(!m) return; if(c.ess==null&&m.ess) c.ess=m.ess; if(!c.pq&&m.pq) c.pq=m.pq; }); }
@@ -447,7 +459,7 @@ function g2vals(self,sp,v,mask){
   const ondeCasou=(r)=>{ if(!qn||!g2cvTem(sp)||r.grp) return ''; if(cols.some(c=>g2norm(g2text(r,c)).indexOf(qn)>=0)) return ''; const oc=sp.cols.filter(c=>!visK.has(c.k)&&g2norm(g2text(r,c)).indexOf(qn)>=0).map(c=>c.l); return oc.length?'encontrado em: '+oc.join(', '):''; };
   const sicoKs=sp.sico?(sp.sico.ks||[sp.sico.k]).filter(k=>!visK.has(k)):[];
   v[id+'_rows']=flat.map(({r,lvl,has})=>{
-    const cells=[]; const exp=(st.x||sp.x0||{}); const casou=ondeCasou(r); const sicoP=sicoKs.map(k=>g2sicoPart(r,sp,k)).filter(Boolean);
+    const cells=[]; const exp=(st.x||sp.x0||{}); const casou=ondeCasou(r); const sicoP=sicoKs.map(k=>g2sicoPart(r,sp,k)).filter(Boolean); const acts=[];
     // linha livre (convite para cadastrar, ex.: talhão sem cultivo): sem seleção e sem lixeira
     if(sp.sel&&(r.livre||r.fora||r.nosel)) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.sel) cells.push({isSel:true,isData:false,isDel:false,cls:'',on:!!(st.sel||{})[r.id],selLabel:'Selecionar '+g2text(r,sp.cols[0]),
       tog:()=>{ const s2=Object.assign({},g2st(self,id).sel||{}); s2[r.id]=!s2[r.id]; g2set(self,id,{sel:s2}); },st:'padding:6px 4px 6px 12px;'});
@@ -456,7 +468,9 @@ function g2vals(self,sp,v,mask){
       const raw0=empty?[]:((r.p&&r.p[c.k]&&r.p[c.k].length)?r.p[c.k]:[{k:(ci===0&&lvl===0&&has?'b':'txt'),t:g2fmt(r.v?r.v[c.k]:'',c)}]);
       // partes próprias (p) com número puro ganham a unidade (cópia: r.p não muda)
       const raw1=c.un?raw0.map(p=>(p&&typeof p.t==='string'&&['txt','b','cn','chip'].indexOf(p.k)>=0)?Object.assign({},p,{t:g2unf(p.t,c)}):p):raw0;
-      const raw=(ci===0&&sicoP.length)?sicoP.concat(raw1):raw1;
+      let raw=(ci===0&&sicoP.length)?sicoP.concat(raw1):raw1;
+      // 15/10 (proprietário): os botões da linha vão para o ⋯; o atalho de navegação ("Planejar ›", "Safra 2026/27 ›") fica na célula: diz onde a coisa mora
+      if(sp.rmenu){ const vai=p=>p&&p.k==='act'&&!p.desce&&!p.full&&!/›\s*$/.test(String(p.t||'')); const fica=raw.filter(p=>!vai(p)); if(fica.length<raw.length){ raw.forEach(p=>{ if(vai(p)) acts.push(p); }); raw=fica; } }
       const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':'')+(c.nr?' g2nr':'')+(c.a==='r'?' g2celn':''),parts:(ci===0&&casou?raw.concat([{k:'br'},{k:'mut',t:casou}]):raw).map((p,i,arr)=>g2part(g2semSep(arr,i),v)),pw:'max-width:'+(c.w||340)+'px;',
         st:(c.nr?'padding:0 2px;':'padding:6px 8px;')+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&arv?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:inherit;box-shadow:1px 0 0 #E4E9E5;':'')};
       if(ci===0 && arv){ cell.hasCaret=true; cell.caretOk=has; cell.caretNo=!has; const open=!!exp[r.id]||(g2filtering(st)&&has);
@@ -464,7 +478,15 @@ function g2vals(self,sp,v,mask){
         cell.toggle=()=>{ const x=Object.assign({},g2st(self,id).x||sp.x0||{}); x[r.id]=!x[r.id]; g2set(self,id,{x}); }; }
       else { cell.hasCaret=false; }
       cells.push(cell); });
-    if(sp.del&&(r.livre||r.fora||r.nosel)) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.del){ const asking=(st.cf===r.id); cells.push({isSel:false,isData:false,isDel:true,cls:'',asking,notAsking:!asking,st:'padding:4px 10px;white-space:nowrap;',
+    const semDel=!sp.del||r.livre||r.fora||r.nosel||!!r.ro;
+    if(sp.rmenu&&sp.del&&(!semDel||acts.length)){   // ⋯ da linha: as ações da linha com ícone e, por último, Excluir (com a confirmação de sempre)
+      const asking=(st.cf===r.id), nome=g2text(r,sp.cols[0]), fnDe=(p)=>{ if(p.fn&&p.fn.indexOf(':')>0){ const nm=p.fn.split(':')[0], ar=p.fn.slice(nm.length+1); return ()=>{ if(v&&v[nm]) v[nm](ar); }; } return (v&&p.fn&&v[p.fn])||(()=>{}); };
+      const its=acts.map(p=>({t:p.al||p.t, ico:g2acaoIco(p.al||p.t), cls:'', fn:fnDe(p)}));
+      if(!semDel) its.push({t:'Excluir', ico:g2acaoIco('Excluir'), cls:'g2mais-destr', fn:()=>g2set(self,id,{cf:r.id})});
+      cells.push({isSel:false,isData:false,isDel:true,cls:'',asking,notAsking:!asking,trash:false,rm:true,rmLabel:'Mais ações de '+nome,rmItems:its,st:'padding:4px 6px;white-space:nowrap;',
+        delLabel:'Excluir '+nome, ask:()=>g2set(self,id,{cf:r.id}), no:()=>g2set(self,id,{cf:null}),
+        yes:()=>{ const g2_0=self.state.g2; const rs=g2clone(g2rows(self,sp)); const rm=(list)=>{ const i=list.findIndex(x=>x.id===r.id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&rm(x.kids)); }; rm(rs); g2set(self,id,{rows:rs,cf:null}); self.setState({g2toast:'Excluído: '+nome}); if(self.g2after) self.g2after(id,rs,null); g2persiste(self,id,g2_0,{cf:null},'Não excluído'); } }); }
+    else if(sp.del&&(r.livre||r.fora||r.nosel)) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.del){ const asking=(st.cf===r.id); cells.push({isSel:false,isData:false,isDel:true,trash:true,rm:false,cls:'',asking,notAsking:!asking,st:'padding:4px 10px;white-space:nowrap;',
         delLabel:'Excluir '+g2text(r,sp.cols[0]), ask:()=>g2set(self,id,{cf:r.id}), no:()=>g2set(self,id,{cf:null}),
         yes:()=>{ const g2_0=self.state.g2; const rs=g2clone(g2rows(self,sp)); const rm=(list)=>{ const i=list.findIndex(x=>x.id===r.id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&rm(x.kids)); }; rm(rs); g2set(self,id,{rows:rs,cf:null}); self.setState({g2toast:'Excluído: '+g2text(r,sp.cols[0])}); if(self.g2after) self.g2after(id,rs,null); g2persiste(self,id,g2_0,{cf:null},'Não excluído'); }}); }
     const canOpen=editable && !(ed.leafOnly && has) && !r.fora && !(r.nosel && !r.dr);
@@ -838,6 +860,9 @@ function g2maisAbre(b,ult){ document.querySelectorAll('.g2mais[aria-expanded=tru
   const r=b.getBoundingClientRect(), h=m.offsetHeight, w=m.offsetWidth;
   if(r.bottom+4+h>innerHeight-8&&r.top-4-h>=8) m.setAttribute('data-cima','');   // falta espaço embaixo: sobe
   if(r.right-w<8) m.setAttribute('data-esq','');                                  // falta espaço à esquerda: abre para a direita
+  // ⋯ da linha de tabela (15/10): a tabela rola e cortaria o menu; ele fica preso à janela, no lugar do botão, e fecha ao rolar
+  if(b.closest('[role=table]')){ const cima=m.hasAttribute('data-cima'); Object.assign(m.style,{position:'fixed',right:'auto',bottom:'auto',
+    top:Math.round(cima?r.top-4-h:r.bottom+4)+'px',left:Math.round(Math.max(8,Math.min(r.right-w,innerWidth-w-8)))+'px'}); }
   const its=g2maisItens(m); if(its.length) (ult?its[its.length-1]:its[0]).focus(); }
 try{ if(!window.__g2maisC){ window.__g2maisC=1;
   document.addEventListener('click',e=>{ const t=e.target&&e.target.closest?e.target:null; const b=t&&t.closest('button.g2mais');
@@ -855,6 +880,7 @@ try{ if(!window.__g2maisC){ window.__g2maisC=1;
     const its=g2maisItens(m); if(!its.length) return; const i=its.indexOf(a);
     if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault(); const n=its.length; its[i<0?(e.key==='ArrowDown'?0:n-1):(i+(e.key==='ArrowDown'?1:n-1))%n].focus(); }
     else if(e.key==='Home'||e.key==='End'){ e.preventDefault(); its[e.key==='Home'?0:its.length-1].focus(); } },true);
+  document.addEventListener('scroll',e=>{ document.querySelectorAll('[role=table] .g2mais[aria-expanded=true]').forEach(x=>{ const m=g2maisMenu(x); if(!(m&&e.target&&e.target.nodeType===1&&m.contains(e.target))) g2maisFecha(x); }); },true);
   // a barra de ações (details.acoes-mais): o ⋯ diz se está aberto (aria-expanded), como o do componente
   document.addEventListener('toggle',e=>{ const d=e.target; if(d&&d.matches&&d.matches('details.acoes-mais')){ const sm=d.querySelector('summary'); if(sm) sm.setAttribute('aria-expanded',d.open?'true':'false'); } },true);
 } }catch(e){}
@@ -1289,4 +1315,47 @@ function g2visaoLiga(self,gid){ if(typeof window==='undefined'||window.__g2visao
     const l=lnk(e); if(!l) return; const a=l.a; if(!(a.getAttribute('aria-label')==='Voltar'||(a.closest('header')&&!a.closest('.menu-lat')))) return;
     const c=g2voltaLer(); if(!c||c.usado||c.arq!==l.dest||c.dest!==g2arq()) return;
     a.setAttribute('href',g2voltaUrl(c)); },true);
+})();
+// Lista suspensa no desenho do DS (15/10/2026, proprietário: "não está abrindo as opções de filtro e agrupar por com nosso design system
+// como as demais telas. Padronize em todas"): todo <select> simples abre uma lista do DS (verde no item escolhido, ✓, hover verde,
+// teclado: setas, Home/End, letra, Enter/Espaço, Esc). O <select> continua sendo o campo (valor, change, leitor de tela); no toque fica o
+// seletor do aparelho, que é melhor no dedo. data-nativo num ancestral mantém o nativo.
+(function g2dsel(){ if(typeof document==='undefined'||window.__g2dsel) return; window.__g2dsel=1;
+  const toque=()=>{ try{ return matchMedia('(pointer:coarse)').matches; }catch(e){ return false; } };
+  let ab=null;
+  const fecha=(foco)=>{ if(!ab) return; const o=ab; ab=null; o.box.remove(); o.sel.removeAttribute('aria-expanded'); if(foco&&o.sel.isConnected) o.sel.focus({preventScroll:true}); };
+  const escolhe=(sel,i)=>{ const o=sel.options[i]; if(!o||o.disabled||sel.selectedIndex===i) return;
+    Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(sel,o.value);
+    sel.dispatchEvent(new Event('input',{bubbles:true})); sel.dispatchEvent(new Event('change',{bubbles:true})); };
+  const abre=(sel)=>{ fecha(false); if(!sel.options.length) return;
+    const box=document.createElement('div'); box.className='g2dsel'; box.setAttribute('role','listbox'); box.tabIndex=-1;
+    const lab=sel.getAttribute('aria-label')||(sel.labels&&sel.labels[0]?sel.labels[0].textContent.trim():''); if(lab) box.setAttribute('aria-label',lab);
+    const its=[]; [...sel.options].forEach((o,i)=>{ if(o.hidden) return; const it=document.createElement('div'); it.setAttribute('role','option'); it.dataset.i=String(i); it.id='g2dsel-o'+i;
+      const on=i===sel.selectedIndex; it.setAttribute('aria-selected',on?'true':'false'); if(o.disabled) it.setAttribute('aria-disabled','true');
+      const ck=document.createElement('span'); ck.className='g2dsel-ck'; ck.setAttribute('aria-hidden','true'); ck.textContent=on?'✓':''; it.appendChild(ck); it.appendChild(document.createTextNode(o.textContent)); box.appendChild(it); its.push(it); });
+    document.body.appendChild(box);
+    const r=sel.getBoundingClientRect(), H=innerHeight, W=innerWidth, abaixo=H-r.bottom-12, acima=r.top-12, mh=Math.max(160,Math.min(360,Math.max(abaixo,acima)));
+    box.style.maxHeight=mh+'px'; box.style.minWidth=Math.round(r.width)+'px'; const bw=box.offsetWidth, bh=Math.min(box.scrollHeight,mh);
+    box.style.left=Math.round(Math.max(8,Math.min(r.left,W-bw-8)))+'px'; box.style.top=Math.round((abaixo>=bh||abaixo>=acima)?r.bottom+4:r.top-4-bh)+'px';
+    ab={sel,box}; sel.setAttribute('aria-expanded','true');
+    const marca=(k)=>{ its.forEach(x=>x.classList.toggle('g2dsel-at',x===k)); if(k){ box.setAttribute('aria-activedescendant',k.id); k.scrollIntoView({block:'nearest'}); } };
+    marca(its.find(x=>x.getAttribute('aria-selected')==='true')||its[0]); box.focus({preventScroll:true});
+    box.addEventListener('mousedown',e=>e.preventDefault());
+    box.addEventListener('mousemove',e=>{ const it=e.target.closest&&e.target.closest('[role=option]'); if(it) marca(it); });
+    box.addEventListener('click',e=>{ const it=e.target.closest&&e.target.closest('[role=option]'); if(!it||it.getAttribute('aria-disabled')==='true') return; escolhe(sel,Number(it.dataset.i)); fecha(true); });
+    box.addEventListener('keydown',e=>{ const at=box.querySelector('.g2dsel-at'); const j=its.indexOf(at);
+      if(e.key==='Escape'||e.key==='Tab'){ e.preventDefault(); e.stopPropagation(); fecha(true); return; }
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault(); const d=e.key==='ArrowDown'?1:-1; let k=j; for(let n=0;n<its.length;n++){ k=(k+d+its.length)%its.length; if(its[k].getAttribute('aria-disabled')!=='true') break; } marca(its[k]); return; }
+      if(e.key==='Home'||e.key==='End'){ e.preventDefault(); marca(its[e.key==='Home'?0:its.length-1]); return; }
+      if(e.key==='Enter'||e.key===' '){ e.preventDefault(); if(at&&at.getAttribute('aria-disabled')!=='true') escolhe(sel,Number(at.dataset.i)); fecha(true); return; }
+      if(e.key.length===1&&!e.ctrlKey&&!e.metaKey){ const q=e.key.toLowerCase(), t=x=>x.textContent.replace('✓','').trim().toLowerCase();
+        const k=its.findIndex((x,ii)=>ii>j&&t(x).startsWith(q)); const k2=k>=0?k:its.findIndex(x=>t(x).startsWith(q)); if(k2>=0) marca(its[k2]); } });
+  };
+  const alvo=(t)=>!!t&&t.tagName==='SELECT'&&!t.multiple&&!(t.size>1)&&!t.disabled&&!(t.closest&&t.closest('[data-nativo]'));
+  document.addEventListener('mousedown',e=>{ const t=e.target; if(ab&&!ab.box.contains(t)&&t!==ab.sel) fecha(false);
+    if(!alvo(t)||toque()||e.button!==0) return; e.preventDefault(); if(ab&&ab.sel===t){ fecha(true); return; } t.focus({preventScroll:true}); abre(t); },true);
+  document.addEventListener('keydown',e=>{ const t=e.target; if(!alvo(t)||toque()) return;
+    if(e.key===' '||e.key==='Enter'||e.key==='F4'||(e.altKey&&(e.key==='ArrowDown'||e.key==='ArrowUp'))){ e.preventDefault(); abre(t); } },true);
+  window.addEventListener('resize',()=>fecha(false)); document.addEventListener('scroll',e=>{ if(ab&&!(e.target&&e.target.nodeType===1&&ab.box.contains(e.target))) fecha(false); },true);
+  window.g2dselAbre=abre;   // teste e sonda
 })();

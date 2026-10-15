@@ -4,7 +4,7 @@ T1 a 1440 a etapa 2 abre só com Talhão, Cultura, Plano agronômico, Área e Pl
 T2 sem coluna Situação: só o talhão que pede atenção (A conferir, Sobreposição) ganha ícone, com o estado no nome acessível; Planejado não.
 T3 a célula do plano mostra só o plano (sem "Ajustar insumos"); o ajuste segue no painel da linha ("Ajustar insumos e doses de T7").
 T4 o seletor "Unidade de produtividade" só aparece com a Meta à vista; mostrar a Meta pelo seletor de colunas traz o seletor.
-T5 "Dividir" é ação secundária (g2sec): some no computador fora do passar do mouse ou do foco (regra de CSS presente); no toque fica.
+T5 (15/10) linha sem botão solto: Dividir, Aplicar plano e Excluir no ⋯ da linha, com ícone.
 T6 talhão com um só cultivo abre recolhido; com parcelas ou pendência, aberto.
 T7 nota da área de ações sem a frase repetida ("sem plano não entram…") e sem referência técnica ("CD-02").
 T8 a 390 as 3 primeiras (Talhão, Cultura, Plano agronômico). T11 a 390 o "Dividir" sai da linha e fica no painel do talhão.
@@ -64,9 +64,9 @@ try:
     chk('T4b mostrar a Meta pelo seletor de colunas traz a coluna e o seletor de unidade', 'META' in h2 and seletor_un(), [h2, seletor_un()])
     J("(()=>{const b=[...document.querySelectorAll('[data-g2cv=g_cult_S2627] button')].find(b=>/Restaurar padrão/.test(b.innerText)); if(b) b.click();})()"); time.sleep(.4)
     J("(()=>{const b=[...document.querySelectorAll('[data-g2cv=g_cult_S2627] button')].find(b=>/^Fechar$/.test(b.innerText.trim())); if(b) b.click();})()"); time.sleep(.3)
-    sec = J("(()=>{const r=[...document.querySelectorAll('%s [role=row].g2ed')].find(r=>/^T3/.test((r.querySelector('.g2c0')||{}).innerText||'')); const b=r&&[...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Dividir'); return b?b.className:'';})()" % G) or ''
-    regra = J("[...document.styleSheets].some(s=>{try{return [...s.cssRules].some(r=>/hover:\\s*hover/.test(r.cssText||'')&&/\\.g2sec/.test(r.cssText||'')&&/opacity:\\s*0/.test(r.cssText||''));}catch(e){return false}})")
-    chk('T5 "Dividir" é ação secundária (g2sec) e a regra "some fora do passar do mouse e do foco" está na página', 'g2sec' in sec and regra, [sec, regra])
+    # 15/10/2026 (proprietário: "coloque os 3 pontinhos e coloque todos botões de ação ali com ícones"): Dividir, Aplicar plano e Excluir no ⋯ da linha
+    sec = J("(()=>{const r=[...document.querySelectorAll('%s [role=row].g2ed')].find(r=>/^T3/.test((r.querySelector('.g2c0')||{}).innerText||'')); if(!r) return null; const m=r.querySelector('.g2mais'); const its=m?[...m.nextElementSibling.querySelectorAll('[role=menuitem]')]:[]; return {solto:[...r.querySelectorAll('button')].filter(b=>b.offsetParent&&!b.classList.contains('g2mais')&&!b.classList.contains('g2car')).map(b=>b.innerText.trim()), menu:its.map(i=>[i.textContent.trim(),!!i.querySelector('svg')])};})()" % G) or {}
+    chk('T5 linha T3: nenhum botão solto; o ⋯ tem Dividir, Aplicar plano e Excluir, cada um com ícone', sec.get('solto') == [] and [x[0] for x in sec.get('menu', [])] == ['Dividir', 'Aplicar plano', 'Excluir'] and all(x[1] for x in sec.get('menu', [])), sec)
     exp = J("(()=>{const ex=t=>{const r=[...document.querySelectorAll('%s [role=row].g2ed')].find(r=>{const c=r.querySelector('.g2c0'); return c&&c.innerText.replace(/[▾▸]/g,'').trim().split(/\\s+/)[0]===t;}); const b=r&&r.querySelector('[aria-expanded]'); return b?b.getAttribute('aria-expanded'):null;}; return [ex('T1'),ex('T2'),ex('P1'),ex('P2')];})()" % G)
     chk('T6 T1 (parcelas) e P1 (a conferir) abertos; T2 e P2 (um cultivo) recolhidos', exp == ['true', 'false', 'true', 'false'], exp)
     nota = J("(()=>{const a=document.querySelector('[data-acoes]'); return a?(a.innerText+' '+[...a.querySelectorAll('.acoes-menu [role=menuitem]')].map(b=>b.textContent).join(' ')).replace(/\\s+/g,' '):''})()") or ''

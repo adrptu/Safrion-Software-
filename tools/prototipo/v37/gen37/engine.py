@@ -1443,7 +1443,11 @@ def acao_motivo(botao, dis, motivo):
     só enquanto indisponível, o motivo em texto visível logo abaixo, na cor do texto secundário. A dica no ponteiro, no foco e no toque longo
     complementa; não substitui o texto. Ativar o botão indisponível realça este motivo e anuncia a recusa (g2lib)."""
     return f'<span class="g2ind">{botao}<sc-if value="{dis}" hint-placeholder-val="{{{{false}}}}"><span class="g2motivo">{motivo}</span></sc-if></span>'
-G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
+G2_CSS=(".g2dsel{position:fixed;z-index:90;box-sizing:border-box;overflow-y:auto;max-width:min(420px,calc(100vw - 16px));padding:6px;background:#FFFFFF;border:1px solid #E4E9E5;border-radius:12px;box-shadow:0 12px 28px -12px rgba(21,32,26,.35);font-family:inherit;outline:none}"   # lista suspensa do DS (15/10)
+    ".g2dsel [role=option]{display:flex;align-items:center;gap:6px;min-height:36px;padding:7px 12px 7px 8px;border-radius:8px;font-size:13.5px;font-weight:600;color:#15201A;cursor:pointer;white-space:nowrap}"
+    ".g2dsel .g2dsel-ck{width:16px;flex-shrink:0;color:#1E7A4C;font-weight:800}.g2dsel [aria-selected=true]{color:#1E7A4C;font-weight:800}"
+    ".g2dsel .g2dsel-at{background:#F2F8F4}.g2dsel [aria-disabled=true]{color:#8A968E;cursor:not-allowed}"
+    ".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
         # hover dos controles pequenos da grade só onde existe ponteiro com hover (no toque o fundo não fica "grudado")
         "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover,.g2car:hover{background:#E4F3E9}.g2del:hover{background:#FDE8E6;color:#B42318}}"   # DS-HOVER: verde, não cinza
         ".g2kid{background:#FBFCFA}.g2flash{background:#E4F3E9}.g2tot{cursor:pointer}"
@@ -1599,7 +1603,8 @@ _NOVO_RE=re.compile(r'^\s*\+?\s*Nov[oa]s?\s+',re.I)
 def rotulo_criar(t):
     """BOT-03 (15/10/2026): o botão de criar diz o verbo do efeito: \"Novo pedido\" vira \"Criar pedido\" (o título do painel continua o nome)"""
     return _NOVO_RE.sub('Criar ',t) if t else t
-def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None,vazio=True,ag=None,sico=None):
+AG_CTRL={}   # gid: (botão Agrupar por com a trilha, menu), para o mesmo controle fora da Tabela (Kanban da O.S.)
+def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None,vazio=True,ag=None,sico=None,sico_so_icone=False,menu_linha=False):
     cols=[_col_un(c) for c in cols]
     # rótulos que ficariam iguais sem a unidade ("Custo (R$/h)" e "Custo (R$/ha)") mantêm a unidade, sem parênteses: "Custo R$/h", "Custo R$/ha"
     # (proprietário, 05/10/2026: "Custo R$/h e R$/ha é melhor e mais intuitivo")
@@ -1609,6 +1614,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     cols=_ajuda_auto(cols,_ed.get('calc'),_ed.get('fields') or ())   # DS-DICA: sigla, unidade e fórmula no cabeçalho
     import visoes_marcas as _VM   # VISOES-2 V2-3: ess, pq, sico e Agrupar por das listagens do menu, num quadro só
     cols,ag,sico=_VM.marcar(CUR,gid,cols,ag,tree,sico); ag_gen=bool(ag) and bool(ag[0].get('ck'))
+    if sico and sico_so_icone: sico=dict(sico,so=True)   # 15/10 (proprietário: "avisos só dentro da tabela, de forma visual"): só o ícone, texto na dica
     """Grade interativa. cols: [dict(k,l,t='txt'|'num',a='r',u,d,agg='sum'|'avg',chips={valor:cor},w,pre)];
     rows: [dict(id,v={},s={},p={k:[partes]},ro=False,kids=[...],o=[dict(t,h)],dr='d3_open',sh='d2')];
     edit: dict(m='form'|'ro'|'origin'|'none', title, sub, fields=[dict(k,l,t='txt'|'num'|'sel'|'date'|'area',opts,req,min,max,u,cond=dict(k,eq),help,def,ro)], calc, newTitle, leafOnly)."""
@@ -1619,6 +1625,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     qf=(dict(k=qf) if isinstance(qf,str) else qf) or None
     spec=dict(id=gid,cols=cols,rows=rows,edit=edit,sel=sel,del_=dele,tree=(tree or (bool(ag) and not ag_gen)),so=so or {},total=total,x0=x0 or {},qf=qf)
     if any(c.get('ess') for c in cols): spec['marcas']={c['k']:dict(ess=c.get('ess'),pq=c.get('pq')) for c in cols if c.get('ess') or c.get('pq')}   # V2-3: g2marca
+    if menu_linha: spec['rmenu']=True   # 15/10/2026: ações da linha no ⋯ (com ícone), Excluir por último
     if sico: spec['sico']=sico   # VISOES-2 §3.6: a coluna de situação (k) oculta vira ícone antes da identidade, só nas cores que pedem atenção (cores)
     if ag: spec['ag']=ag   # VISOES-2 §3.3: [dict(pq, l, niv=[...], fc=[coluna de filtro por nível], um, plural)]; as linhas trazem r.g[pq]
     spec['del']=spec.pop('del_'); GRIDS.append(spec)
@@ -1653,15 +1660,18 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
          f'<sc-for list="{H("_agops")}" as="ao" hint-placeholder-count="5"><button type="button" role="menuitemradio" aria-checked="{_h("ao.on")}" onClick="{_h("ao.go")}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 4px 10px; border: 0; border-radius: 8px; background: transparent; font-family: inherit; font-size: 13px; color: {INK}; text-align: left; cursor: pointer;">'
          + _icos + f'<span style="display: flex; flex-direction: column; gap: 1px;"><span style="font-weight: 700;">{_h("ao.t")}</span><sc-if value="{_h("ao.temNiv")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11.5px; color: {MUTED};">{_h("ao.niv")}</span></sc-if></span></button></sc-for>'
          f'</div></div></sc-if>') if ag else ''
+    if ag: AG_CTRL[gid]=(agb,agm)   # 15/10/2026 (proprietário: "tabela e kanban devem manter o agrupar por"): outra visão da mesma grade reusa o controle
     if search or add or tree or sel or tools or qf or ess or ag:
         tb=(f'<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid {LINE}; flex-wrap: wrap;">'
             + (f'<span data-g2q="{gid}" hidden></span><sc-if value="{H("_qon")}" hint-placeholder-val="{{{{true}}}}"><label style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; background: {BG}; min-width: 160px;">{sicon}<input type="search" aria-label="{H("_qlab")}" placeholder="Buscar…" value="{H("_q")}" onChange="{H("_setq")}" style="font-family: inherit; font-size: 12.5px; border: 0; background: transparent; outline: none; width: 100%;"></label></sc-if>'
-               f'<span style="font-size: 12px; color: {MUTED}; font-weight: 600; white-space: nowrap;">{H("_count")} de {H("_all")}</span>' if search else '') + agb
+               '' if search else '')
             + (f'<sc-if value="{H("_hasqf")}" hint-placeholder-val="{{{{false}}}}"><div role="group" aria-label="{H("_qfl")}" style="display: flex; flex-wrap: wrap; gap: 6px;">'
                f'<sc-for list="{H("_qf")}" as="qc" hint-placeholder-count="4"><button type="button" aria-pressed="{_h("qc.on")}" title="{_h("qc.lab")}" onClick="{_h("qc.go")}" style="{_h("qc.st")}">{_h("qc.t")} <span style="opacity: .75;">{_h("qc.n")}</span></button></sc-for></div></sc-if>' if qf else '')
+            # 15/10/2026 (proprietário: "tire os números como 8 de 8, no filtro rápido já tem as quantidades"): a contagem só sem filtro rápido
+            + (f'<sc-if value="{{{{{gid}_hasqf !== true}}}}" hint-placeholder-val="{{{{false}}}}"><span data-g2cnt="{gid}" style="font-size: 12px; color: {MUTED}; font-weight: 600; white-space: nowrap;">{H("_count")} de {H("_all")}</span></sc-if>' if search else '')
             + f'<sc-for list="{H("_fchips")}" as="fc" hint-placeholder-count="0"><span style="display: inline-flex; align-items: center; gap: 2px; padding: 2px 4px 2px 9px; border-radius: 999px; background: {ACCS}; color: {ACC}; font-size: 11.5px; font-weight: 700;">{_h("fc.t")}<button type="button" aria-label="Remover filtro" onClick="{_h("fc.rm")}" style="border: 0; background: transparent; color: {ACC}; cursor: pointer; font-size: 13px; padding: 0 4px;">×</button></span></sc-for>'
             + f'<sc-if value="{H("_filtered")}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{H("_clear")}" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;">Limpar filtros</button></sc-if>'
-            + '<span style="flex-grow: 1;"></span>' + tools + cvb
+            + '<span style="flex-grow: 1;"></span>' + tools + agb + cvb   # 15/10/2026 (proprietário): filtros rápidos ao lado da busca; Agrupar por à esquerda de Colunas
             + (f'<sc-if value="{H("_hassel")}" hint-placeholder-val="{{{{false}}}}"><span role="status" style="font-size: 12px; font-weight: 700; color: {ACC};">{H("_selmsg")}</span>{bulk}<button type="button" onClick="{H("_selclear")}" style="{_MINI}">Limpar seleção</button></sc-if>' if sel else '')
             + (f'<sc-if value="{H("_xhas")}" hint-placeholder-val="{HL("true")}"><button type="button" onClick="{H("_xtog")}" class="g2xtog">{seta_xtog(H("_xup"),H("_xdown"))}{H("_xlab")}</button></sc-if>' if tree else '')   # visão/apresentação: fim da barra, texto discreto (v3)
             + (f'<sc-if value="{H("_semsel")}" hint-placeholder-val="{{{{true}}}}"><button type="button" onClick="{H("_new")}" style="{_MINI}">+ {esc(rotulo_criar(add))}</button></sc-if>' if add else '')   # com seleção, a região de ações dá lugar à do lote (DS-40)
@@ -1700,7 +1710,10 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
           f'<sc-if value="{_h("c.isSel")}" hint-placeholder-val="{{{{false}}}}"><input type="checkbox" aria-label="{_h("c.selLabel")}" checked="{_h("c.on")}" onChange="{_h("c.tog")}" style="width: 16px; height: 16px; accent-color: {ACC}; margin: 0;"></sc-if>'
           f'<sc-if value="{_h("c.hasCaret")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.caretOk")}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="g2car" aria-label="{_h("c.caretLabel")}" aria-expanded="{_h("c.caretExp")}" title="{_h("c.caretLabel")}" onClick="{_h("c.toggle")}">{_h("c.caretSym")}</button></sc-if><sc-if value="{_h("c.caretNo")}" hint-placeholder-val="{{{{false}}}}"><span style="width: 22px; flex-shrink: 0;"></span></sc-if></sc-if>'
           f'<sc-if value="{_h("c.isData")}" hint-placeholder-val="{{{{true}}}}"><span class="g2pw" style="{_h("c.pw")}"><sc-for list="{_h("c.parts")}" as="p" hint-placeholder-count="1">{_PARTS}</sc-for></span></sc-if>'
-          f'<sc-if value="{_h("c.isDel")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.notAsking")}" hint-placeholder-val="{{{{true}}}}"><button type="button" class="g2del" aria-label="{_h("c.delLabel")}" title="Excluir" onClick="{_h("c.ask")}">{_TRASH}</button></sc-if>'
+          f'<sc-if value="{_h("c.isDel")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.notAsking")}" hint-placeholder-val="{{{{true}}}}"><sc-if value="{_h("c.trash")}" hint-placeholder-val="{{{{true}}}}"><button type="button" class="g2del" aria-label="{_h("c.delLabel")}" title="Excluir" onClick="{_h("c.ask")}">{_TRASH}</button></sc-if>'
+          f'<sc-if value="{_h("c.rm")}" hint-placeholder-val="{{{{false}}}}"><span class="g2mais-w"><button type="button" class="g2mais g2mais-l" aria-haspopup="menu" aria-expanded="false" aria-label="{_h("c.rmLabel")}" data-dica="{_h("c.rmLabel")}">⋯</button>'
+          f'<span role="menu" class="g2mais-menu" aria-label="{_h("c.rmLabel")}"><sc-for list="{_h("c.rmItems")}" as="it" hint-placeholder-count="2"><button type="button" role="menuitem" class="{_h("it.cls")}" onClick="{_h("it.fn")}">'
+          f'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="{_h("it.ico")}"/></svg>{_h("it.t")}</button></sc-for></span></span></sc-if></sc-if>'
           f'<sc-if value="{_h("c.asking")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 12px; font-weight: 700; color: {RED};">Excluir?</span><button type="button" onClick="{_h("c.yes")}" style="{_MINI} color: {RED}; border-color: {RED};">Excluir</button><button type="button" onClick="{_h("c.no")}" style="{_MINI}">Manter</button></sc-if></sc-if>'
           f'</div></sc-for></div></sc-for>')
     tot=''
@@ -1911,6 +1924,7 @@ def table(headers,rows,widths=None,sort=0,desc=False,filters=None,total=None,gro
 ENGINE_JS2=ENGINE_JS.replace("this.state = { sel: {}, open: null, sort: {}, msg: {}, added: {} };",
                              "this.state = { sel: {}, open: null, sort: {}, msg: {}, added: {}, g2: {}, nav: {}, g2toast: '' };")
 ENGINE_JS2=ENGINE_JS2.replace("    return v;\n  }\n}","""    v.g2toast = this.state.g2toast || ''; v.g2toastst = this.state.g2toast ? '' : 'display: none;';
+    { const T = G2_TOAST_TOM(v.g2toast); v.g2toastcx = T.cx; v.g2toastico = T.d; v.g2toastic = T.ic; }   // 15/10/2026 (proprietário): aviso pequeno, cor pelo tom e ícone
     v.mf_faz = this.state.mf_faz || 'Santa Rita'; v.mf_saf = this.state.mf_saf || 'Todas'; v.mf_susp = false;   // mf_susp: filtros do topo suspensos (recorte do Painel na O.S.)
     v.mf_setfaz = (e) => this.setState({ mf_faz: e.target.value, g2toast: 'Fazenda: ' + e.target.value });
     v.mf_setsaf = (e) => this.setState({ mf_saf: e.target.value, g2toast: 'Safra: ' + e.target.value });
@@ -1952,8 +1966,16 @@ def engine():
     nav=json.dumps(NAVSPEC,ensure_ascii=False)
     gloss=json.dumps(_GLOSS_CEL,ensure_ascii=False)   # glossário da célula (revisão DS, achado 8): g2glossCol no g2lib
     vis=json.dumps(VISOES_SPEC,ensure_ascii=False)
-    return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\nconst G2_GLOSS = '+gloss+';\nconst G2_VISOES = '+vis+';\n'+G2LIB+'\n'+_assin_prefixo()+_conf_prefixo()+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
+    return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\nconst G2_GLOSS = '+gloss+';\nconst G2_VISOES = '+vis+';\n'+G2LIB+'\n'+G2_TOAST_JS+'\n'+_assin_prefixo()+_conf_prefixo()+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
 # o aviso é visto aqui e anunciado uma vez pela região viva do g2lib (g2vivo, DS-RETORNO-20261009): aria-live=off evita a leitura em dobro
 # aviso temporário: largura do texto até min(560 px, janela − 32); sem o width, o left:50% limitava a caixa a meia janela (180 px a 360 px)
 # e o aviso quebrava em 3 a 17 linhas (medido: 47 e 345 caracteres), cobrindo o pé da tela (V55-RESP-01)
-G2_TOAST=f'<div role="status" aria-live="off" class="g2toast" style="pointer-events: none; position: fixed; left: 50%; transform: translateX(-50%); bottom: calc({AVISO_PE} + var(--acoes-h, 0px) + env(safe-area-inset-bottom, 0px)); z-index: 70; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); width: max-content; max-width: min(560px, calc(100vw - 32px)); box-sizing: border-box; {{{{g2toastst}}}}">{{{{g2toast}}}}</div>'
+G2_TOAST=f'<div role="status" aria-live="off" class="g2toast" style="pointer-events: none; position: fixed; left: 50%; transform: translateX(-50%); bottom: calc({AVISO_PE} + var(--acoes-h, 0px) + env(safe-area-inset-bottom, 0px)); z-index: 70; display: flex; align-items: center; gap: 8px; padding: 8px 14px 8px 10px; border-radius: 10px; font-size: 13px; font-weight: 600; line-height: 1.35; box-shadow: 0 6px 18px -8px rgba(21,32,26,.28); width: max-content; max-width: min(420px, calc(100vw - 32px)); box-sizing: border-box; {{{{g2toastcx}}}} {{{{g2toastst}}}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{{{g2toastic}}}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="{{{{g2toastico}}}}"/></svg><span>{{{{g2toast}}}}</span></div>'
+# 15/10/2026 (proprietário: "o feedback é em preto com letras brancas, e cheio de texto; deveria ser uma caixa pequena, pouco texto, verdinho leve e um ícone"):
+# o tom sai do próprio texto: feito (verde-claro, ✓), impedido ou a corrigir (âmbar, !), o resto informa (branco, i). Uma regra, todas as telas.
+G2_TOAST_JS=r'''function G2_TOAST_TOM(t){ t=String(t||'');
+  const av=/^(N[ãa]o |Nada |Sem |Erro|Recus|Impedid|Indispon|Bloque|Falta|Corrija|Escolha|Salve ou|Informe|Conclua|Preencha|Selecione|Feche|Ainda |Aten[çc][ãa]o|Fora |Somente|S[óo] )|n[ãa]o foi |n[ãa]o pode|nada foi gravado|impedid|recusad|bloquead|indispon[íi]vel|somente consulta/i;
+  const ok=/(salv[oa]s?\b|gravad|registrad|inclu[íi]d|criad|emitid|liberad|publicad|enviad|aplicad|removid|retirad|exclu[íi]d|atualizad|confirmad|recebid|conclu[íi]d|gerad|aprovad|descartad|restaurad|copiad|importad|vinculad|reservad|devolvid|ajustad|voltou|pronto|feito)/i;
+  if(av.test(t)) return {cx:'background: #FFF7E8; border: 1px solid #F0D7A6; color: #6B4200;', ic:'#B7791F', d:'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01'};
+  if(ok.test(t)) return {cx:'background: #EAF6EE; border: 1px solid #B9DEC7; color: #14532D;', ic:'#1E7A4C', d:'M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4 12 14.01l-3-3'};
+  return {cx:'background: #FFFFFF; border: 1px solid #DDE3DE; color: #15201A;', ic:'#4B5A51', d:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-4M12 8h.01'}; }'''

@@ -113,7 +113,7 @@ try:
         # ---------- V1, O1, O2, O4: S2627 no topo e na g_op ----------
         abre('#saf=S2627&passo=operacoes', 1440, 1040)
         chk('V1 veredito S2627 (R4, âmbar)', veredito() == VER['S2627'], veredito())
-        chk('V1 atalho "Maior uso: Colhedoras 81 % · fev/27"', atalhos() == ['Maior uso: Colhedoras 81 % · fev/27'], atalhos())
+        chk('V1 sem atalho fora da tabela (15/10, proprietário: avisos só dentro da tabela)', atalhos() == [], atalhos())
         pc = D2.plano_op('S2627'); chk('V1 custo de operação = espelho, "máquinas e pessoas, sem insumos"', custo().startswith('Custo de operação ' + rs(pc['cop']) + ' · máquinas e pessoas, sem insumos'), custo())
         G = gop()
         chk('O1 g_op: 9 colunas na ordem do §3.4 (Custo total no fim: proprietário, 13/10/2026)', G['hs'] == ['OPERAÇÃO › ATIVIDADE › TALHÃO', 'SITUAÇÃO', 'DATA', 'CONJUNTO', 'RENDIMENTO', 'ÁREA TRABALHADA', 'HORAS-CONJUNTO', 'CUSTO R$/HA', 'CUSTO TOTAL'], G['hs'])
@@ -236,7 +236,7 @@ try:
         c.tecla('Escape', 'Escape', 27); time.sleep(.5); foco = c.js("document.activeElement&&document.activeElement.getAttribute('data-acao')")
         chk('P4 Esc fecha o Resumo e o foco volta ao link', painel() == '' and foco == 'resumo', (painel()[:80], foco))
         # ---------- V12, V11, V8 ----------
-        abre('#saf=S27SF&passo=operacoes'); chk('V12 S27SF veredito R5 (verde) e atalho Colhedoras 56 % · jul/27', veredito() == VER['S27SF'] and atalhos() == ['Maior uso: Colhedoras 56 % · jul/27'], (veredito(), atalhos()))
+        abre('#saf=S27SF&passo=operacoes'); chk('V12 S27SF veredito R5 (verde, para o leitor de tela) e nenhum atalho fora da tabela', veredito() == VER['S27SF'] and atalhos() == [], (veredito(), atalhos()))
         abre('#saf=S2526&passo=operacoes'); ac = acoes()
         chk('V11 S2526: veredito R1; sem atalho; primária "Ver demanda de insumos ›"', veredito() == VER['S2526'] and atalhos() == [] and 'Ver demanda de insumos ›' in ac, (veredito(), atalhos(), ac))
         botao('Capacidade por mês ▾'); K = gcap(); clica_rid('trator'); pn = painel()
@@ -244,7 +244,8 @@ try:
         fechar(); clica_rid('op:Pulverização'); pn = painel(); chk('V11 S2526: rendimento só em consulta', pn and 'Salvar' not in pn, pn[:200]); fechar()
         abre('#saf=LG2627&passo=operacoes'); vlg = veredito()
         chk('V8 LG2627 veredito R2', vlg.startswith('Falta recurso: Operadores e equipe precisam de 127 em nov/26 e você tem 8 (9 meses); Tratores, 10 em out/26 e você tem 4 (4 meses). Inclui 56 ocorrências ainda sem alocação. Fora da conta: 75 ocorrências antes do início da safra (01/09/2026).'), vlg)
-        chk('V8 atalhos "Operadores e equipe 1.584 % · nov/26" e "Tratores 234 % · out/26"', atalhos() == ['Operadores e equipe 1.584 % · nov/26', 'Tratores 234 % · out/26'], atalhos())
+        ico = c.js("[...document.querySelectorAll('[data-g2g^=g_op] [role=row]')].filter(r=>r.offsetParent).map(r=>[...r.querySelectorAll('[data-dica]')].map(e=>e.dataset.dica).filter(d=>/Operadores e equipe 1.584 %|Tratores 234 %/.test(d)).join('|')).filter(Boolean).join('|')") or ''
+        chk('V8 sem atalho fora da tabela; Operadores e equipe 1.584 % e Tratores 234 % ficam na dica do ⚠ das linhas', atalhos() == [] and 'Operadores e equipe 1.584 %' in ico and 'Tratores 234 %' in ico, [atalhos(), ico[:300]])
         chk('V8 qualificador do custo (antes do início e pendentes)', 'inclui ' + rs(919906.51) + ' de antes de 01/09/2026; não inclui as ocorrências pendentes' in custo(), custo())
         txt = c.js("document.body.innerText"); chk('V8 Colheita de frutas: "sem recurso na fazenda · precisa de 10, tem 8"', 'sem recurso na fazenda · precisa de 10, tem 8' in txt, '')
         botao('Capacidade por mês ▾'); op_ = next(r for r in gcap()['rows'] if r['_id'] == 'oper')
