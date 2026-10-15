@@ -40,7 +40,7 @@ try:
         c.goto(U('Main.dc.html'), .2); J("localStorage.clear();sessionStorage.clear()")
         c.goto(U('SAF.dc.html'), 1.4)
         # F1 · nova safra com Santa Rita + Lagoa Grande
-        clica(BOT('Nova safra')); time.sleep(.6)
+        clica(BOT('Criar safra')); time.sleep(.6)
         m0 = marcadas(); marca('Lagoa Grande'); time.sleep(.2)
         nome = f'Safra 2027/28 · {w}'
         preenche('nome', nome); preenche('ini', '2027-09-01'); preenche('fim', '2028-08-31'); time.sleep(.2); salvar()

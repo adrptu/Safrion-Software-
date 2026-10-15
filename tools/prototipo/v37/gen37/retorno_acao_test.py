@@ -50,10 +50,10 @@ try:
         J("sessionStorage.getItem('carga')") == 'ini' and J("location.pathname").endswith('GE-08.dc.html') and any('Crédito e garantias' in x for x in realces()), [J("sessionStorage.getItem('carga')"), J("location.pathname"), realces()])
     # 4 · formulário: cancelar sem mudar confirma; mudar e descartar confirma; salvar confirma
     c.goto(U('SAF.dc.html'), 1.4)
-    clica(BOT('Nova safra')); time.sleep(.6)
+    clica(BOT('Criar safra')); time.sleep(.6)
     clica(BOT('Cancelar', 'aside[role=dialog]')); time.sleep(.4)
     chk('R4 cancelar o formulário sem mudar nada confirma "Edição cancelada" (sem prometer desfazer o que já foi gravado)', toast() == 'Edição cancelada', toast())
-    clica(BOT('Nova safra')); time.sleep(.6)
+    clica(BOT('Criar safra')); time.sleep(.6)
     J("(()=>{const i=document.querySelector('aside[role=dialog] input[type=text],aside[role=dialog] input:not([type])'); i.focus(); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'Safra teste'); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.3)
     clica(BOT('Cancelar', 'aside[role=dialog]')); time.sleep(.4)
     desc = J("[...document.querySelectorAll('aside[role=dialog] button')].map(b=>b.innerText.trim()).filter(t=>/Descartar/.test(t))")

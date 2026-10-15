@@ -32,7 +32,7 @@ try:
         c.goto(U('Main.dc.html'), .2); J("localStorage.clear();sessionStorage.clear()")
         c.goto(U('SAF.dc.html'), 1.4)
         chip('Lagoa Grande'); time.sleep(.4)
-        clica_js(BOT('Nova safra')); time.sleep(.6)
+        clica_js(BOT('Criar safra')); time.sleep(.6)
         chk(f'C1 {w}: chip Lagoa Grande → "Nova safra" já vem com a Fazenda Lagoa Grande', campo('faz') == 'Lagoa Grande', campo('faz'))
         nome = f'Contraprova de contexto {w}'
         preenche('nome', nome); preenche('ini', '2027-09-01'); preenche('fim', '2028-08-31'); time.sleep(.2)
@@ -41,7 +41,7 @@ try:
         ctx = J("document.body.innerText.indexOf('Fazenda Lagoa Grande')>=0")
         chk(f'C1b {w}: salvar cria a safra em Lagoa Grande e a faixa diz Fazenda Lagoa Grande', faz == ['Lagoa Grande'] and ctx, [faz, ctx])
         c.goto(U('SAF.dc.html'), 1.4)
-        clica_js(BOT('Nova safra')); time.sleep(.6)
+        clica_js(BOT('Criar safra')); time.sleep(.6)
         chk(f'C2 {w}: sem chip, "Nova safra" vem com o padrão (Santa Rita)', campo('faz') == 'Santa Rita', campo('faz'))
         clica_js(BOT('Cancelar', 'aside[role=dialog]')); time.sleep(.4)
         chip('Lagoa Grande'); time.sleep(.4); chip('Todas'); time.sleep(.3); chip('Santa Rita'); time.sleep(.3); chip('Lagoa Grande'); time.sleep(.3)

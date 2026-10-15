@@ -67,14 +67,14 @@ def sit(t): r = linha(t); return r and r.get('SITUAÇÃO')
 FX27SF = 'Nesta safra 553 · Livre 152 · A conferir 380 · Perene 80 · de 1.165 ha · 1 sucessão a conferir'
 FX2627 = 'Nesta safra 1.165 · de 1.165 ha · 1 sucessão a conferir'
 def nova_safra(nome, ini, fim, faz='Santa Rita'):
-    abre('#saf=S2627&passo=safra'); botao('Nova safra'); time.sleep(.3)
+    abre('#saf=S2627&passo=safra'); botao('Criar safra'); time.sleep(.3)
     for k, v in (('nome', nome), ('ini', ini), ('fim', fim), ('fazs', faz)): fset('g_saf', k, v)   # SAF-FAZ-2: o campo é Fazendas (uma ou mais)
     salvar(); time.sleep(.8)
     r = c.js(f"""(()=>{{const rs=[...document.querySelectorAll('[role=row]')].filter(r=>r.offsetParent&&r.innerText.indexOf({json.dumps(nome)})>=0); const b=rs.length&&[...rs[rs.length-1].querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())); if(!b) return 'sem continuar'; b.click(); return 'ok';}})()"""); time.sleep(.8); return r
 # safra nova SEM recarregar a página (o estado continua): é o caso de duas safras novas no mesmo estado (R-22)
 def etapa1(): return c.js("(()=>{const s=window.__safSelf; s.setState({step:1}); return 'ok';})()")
 def cria_safra(nome, ini, fim, faz='Santa Rita'):
-    etapa1(); time.sleep(.5); botao('Nova safra'); time.sleep(.3)
+    etapa1(); time.sleep(.5); botao('Criar safra'); time.sleep(.3)
     for k, v in (('nome', nome), ('ini', ini), ('fim', fim), ('fazs', faz)): fset('g_saf', k, v)   # SAF-FAZ-2: o campo é Fazendas (uma ou mais)
     salvar(); time.sleep(.6); etapa1(); time.sleep(.5)
     c.js(f"""(()=>{{const rs=[...document.querySelectorAll('[role=row]')].filter(r=>r.offsetParent&&r.innerText.indexOf({json.dumps(nome)})>=0); const b=rs.length&&[...rs[rs.length-1].querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())); if(b) b.click();}})()"""); time.sleep(.8)

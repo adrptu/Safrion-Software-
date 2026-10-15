@@ -242,7 +242,7 @@ try:
         chk('17 lista da tela alcançável (O.S. e AG-07 em 390 px e zoom de 200 %, EST em 320 px): caixa não espremida e última linha tocável rolando a tela',
             all(r and r['alt']>=min(r['cont'],200)-1 and r['ultNaJanela'] and r['ultTocavel'] for r in res.values()), res)
         # 18 · título de bloco com ação em 390 px (bloco em DIV): comandos dentro da largura, sem rolar o conteúdo de lado
-        alvo={'CO-01':['Coletar contagem','Publicar versão']}   # PCM simplificado (S1): o seletor "Tarefa" do MA-01 saiu com os elegíveis (F40, D-25)   # MA-01 sem "Ver agenda" (PL-04 oculta e fixa · CTL-1, Frente F) · IR-02 da v43: o bloco "Agenda por captação" não tem ação própria (deriva do teste, não da tela)
+        alvo={'CO-01':['Coletar contagem','Mais ações']}   # 15/10 (DS-PADRAO L3, MAIS-01): "Publicar versão" mora no ⋯ do bloco; confere o ⋯   # PCM simplificado (S1): o seletor "Tarefa" do MA-01 saiu com os elegíveis (F40, D-25)   # MA-01 sem "Ver agenda" (PL-04 oculta e fixa · CTL-1, Frente F) · IR-02 da v43: o bloco "Agenda por captação" não tem ação própria (deriva do teste, não da tela)
         res={}
         for pg,t in alvo.items(): abre(pg); res[pg]=J(f"({ALC})({json.dumps(t)})")
         abre('IR-02'); lin=J("(()=>{const e=[...document.querySelectorAll('main *')].find(x=>x.children.length===0&&(x.innerText||'').trim()==='Agenda por captação'); if(!e) return 99; const lh=parseFloat(getComputedStyle(e).lineHeight)||19; return Math.round(e.getBoundingClientRect().height/lh);})()")
