@@ -15,32 +15,48 @@ Proposta para o capítulo 74 do PRD, que está em revisão. Os tokens abaixo sã
 
 **Pedido:** «tem telas sem essas linhas separadoras visuais que ficam abaixo do título e do botão no topo à direita como no caso nova safra. [...] acho melhor ter para organizar a visão e a mente em blocos. Faça em todas telas e padronize no design system.»
 
-**Regra.** Uma linha de 1 px separa o cabeçalho do conteúdo, em três lugares:
+**Revisão de 15/10/2026** (proprietário: «retire em todas telas onde tem excesso de linhas separadoras visuais, deixe somente as que geram efetiva organização visual e intuitividade»). Fica a linha que separa duas zonas que nada mais separa; sai a que repete um espaço, um título, um fundo ou outra borda.
 
-1. **Cabeçalho da página** (título e ação do topo à direita). É a borda inferior do `header` da casca, em todas as telas. O índice e a ficha impressa, que não usam a casca, usam `.g2-cab`.
-2. **Linha de título do bloco** (`section` com título, descrição e ação à direita). A linha fica recuada 12 px dos lados, como a moldura da tabela da tela Planejar safra. Quando o conteúdo do bloco já começa por uma borda no topo (tabela emoldurada `.g2caixa`, caixa com borda como a «Memória de cálculo», ficha de rótulo × valor cuja 1ª célula tem `border-top`), essa borda é a linha. Assim não há linha dupla (revisão DS de 09/10: AG-04det, GE-05 e GE-06det tinham duas).
-3. **Painel lateral** (`aside[role=dialog]`): abaixo do título e do × do topo à direita. É o caso do formulário «Nova safra».
+**Regra.** Ficam:
+
+1. **Cabeçalho da página** (título e ação do topo à direita): a borda inferior do `header` da casca, em todas as telas. O índice e a ficha impressa, que não usam a casca, usam `.g2-cab`.
+2. **Painel lateral** (`aside[role=dialog]`): abaixo do título e do × do topo à direita (formulário «Nova safra»).
+3. **Linhas da própria tabela**: cabeçalho, entre linhas e a linha do total.
+4. **Linha de título do bloco** (`section` com título e ação à direita), recuada 12 px dos lados, **só quando logo abaixo vem conteúdo solto** (texto, formulário, botões, lista ou ficha sem moldura).
+
+Saem, pelo componente comum (`engine.SEP_CSS`, `engine.section`, `engine.grid`, `ui37`) e pelas fichas e estados vazios das áreas:
+
+| | Linha que sai | No lugar |
+|---|---|---|
+| a | colada (≤ 16 px) em outra linha, borda ou mudança de fundo (faixa de etapas, pé fixo do app, barra do Mapa, 1ª linha de lista que abre uma caixa) | fundo; sombra na barra presa |
+| b | do título, quando abaixo já vem tabela, caixa, cartões, faixa com fundo, gráfico/mapa ou a barra de modos de visão | o próprio conteúdo |
+| c | entre a barra da tabela (busca, chips, Colunas, Agrupar por) e o cabeçalho, que já tem fundo | fundo do cabeçalho |
+| d | borda da caixa de dentro (tabela em bloco com borda; memória de cálculo, indicadores, dias da agenda) | espaço e fundo |
+| e | entre pares rótulo × valor e entre itens de lista curta (2 a 3 itens, contados na hora) | espaço |
+| f | tracejada decorativa (estados vazios, aviso, estado da visão) | fundo `#F4F6F3` |
+
+Continuam, por proteger algo concreto: borda colorida de estado (aviso, etapa atual, carga parcial), selos e campos, cartões clicáveis, a tracejada que separa a lista do «Incluir produto», a linha do pé fixo de ações do painel quando o fundo é o mesmo e a ficha impressa.
 
 | Token | Valor |
 |---|---|
 | cor | `#E4E9E5` (a mesma linha de tabelas e cartões) |
 | recuo no bloco | 12 px de cada lado |
 | espaço depois da linha | 10 px no bloco, 12 px no painel, 14 px em `.g2-cab` |
+| espaço onde a linha saiu | 10 a 14 px (o espaçamento do bloco; o título do `engine.section` perde o respiro de baixo) |
 
 **Amostra** (o bloco não precisa de nada além da estrutura comum):
 
 ```html
 <section>                                  <!-- bloco -->
-  <div>                                    <!-- linha de título: a linha vem do CSS comum -->
-    <div><h3>Ordens por fase</h3><div>Clique numa ordem…</div></div>
-    <button>Nova ordem</button>
+  <div>                                    <!-- linha de título: a linha vem do CSS comum, só com conteúdo solto abaixo -->
+    <div><h3>Crédito solicitado pelo caso RC-12</h3></div>
   </div>
-  <div>… conteúdo …</div>
+  <div>… pares rótulo × valor …</div>      <!-- com <div class="g2caixa"> aqui, a linha não é traçada -->
 </section>
 <header class="g2-cab">…</header>          <!-- tela fora da casca -->
 ```
 
-![Separador abaixo do título do bloco](amostras/separador-bloco.png)
+![Separador abaixo do título do bloco com conteúdo solto (GE-05)](amostras/separador-bloco.png)
 
 ## 2. Hover verde
 
@@ -156,4 +172,4 @@ Nada de dica que repita o rótulo visível.
 |---|---|
 | `node ds_unit.js` | regra do texto da dica, dicionário de estados e contraste AA |
 | `python3 ds_unit_test.py` | CSS comum, ausência de hover cinza, pontos centrais do motor, glossário e fórmula, tokens e páginas geradas |
-| `python3 ds_test.py` | navegador: separador nas 140 páginas e a 390 px (sem linha dupla), hover computado, realce e anúncio (tela, etapa, O.S. no Kanban, BO-02), barra de carga que termina (também ao voltar pelo navegador), foco no título da etapa nova, menos movimento, dica (hover, foco, Esc, aria-describedby, toque longo, linha e cartão focados, selo do bloqueio, sigla na célula, title redundante), motivo do indisponível visível em texto a 1440 e 390 px (G) e, com `DS_ANTES=<_render da base>`, capturas antes/depois a 1440 e 390 px de OS, PA, PM, AG-01, AG-01det e AG-07 em `_probe/ds/` (telas onde faltava a linha; o teste confere que antes ≠ depois) |
+| `python3 ds_test.py` | navegador: separador nas páginas a 1440 e a 390 px (A2: linha do título só com conteúdo solto; A2b: sem linha dupla; A2c: sem linha antes de tabela, caixa, faixa, gráfico ou visões; A7: barra da tabela sem linha; A8: tabela dentro de caixa sem moldura), hover computado, realce e anúncio (tela, etapa, O.S. no Kanban, BO-02), barra de carga que termina (também ao voltar pelo navegador), foco no título da etapa nova, menos movimento, dica (hover, foco, Esc, aria-describedby, toque longo, linha e cartão focados, selo do bloqueio, sigla na célula, title redundante), motivo do indisponível visível em texto a 1440 e 390 px (G) e, com `DS_ANTES=<_render da base>`, capturas antes/depois a 1440 e 390 px de OS, PA, PM, AG-01, AG-01det e AG-07 em `_probe/ds/` (telas onde faltava a linha; o teste confere que antes ≠ depois) |

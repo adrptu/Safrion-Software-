@@ -2,7 +2,8 @@
 """DS-SEPARADOR, DS-HOVER, DS-RETORNO e DS-DICA (09/10/2026) · teste de navegador do módulo de design system.
 Chrome headless por CDP (comp_lib.Chrome), servindo o _render:
  A · separador: todas as páginas a 1440 px (cabeçalho da página e linha de título de cada bloco), 8 telas a 390 px e o painel lateral
-     (formulário "Nova safra" e registro do Cadastro);
+     (formulário "Nova safra" e registro do Cadastro); desde 15/10 (SEP-20261015) a linha do título só fica com conteúdo solto abaixo, a barra
+     da tabela não tem linha sobre o cabeçalho e a tabela dentro de caixa com borda não tem moldura própria;
  B · hover verde: linha de grade (O.S. e Cadastros) e controles (secundário, opção de visão, primária) pela cor computada;
  C · retorno visual: tela nova (título realçado, anúncio, barra de carga, foco no título vindo de link); etapa do Planejar safra (avançar
      e voltar); liberar uma O.S. no Kanban (o cartão muda de coluna); normal, repetição e recusa no BO-02; menos movimento;
@@ -110,20 +111,41 @@ SEP = r"""(()=>{ const vis=e=>!!e&&e.getClientRects().length>0;
   const hd=document.querySelector('[data-root]>div>header,[data-mroot]>header,header.g2-cab');
   const hs=hd?getComputedStyle(hd):null; const cab=!!hs&&parseFloat(hs.borderBottomWidth)>=1&&hs.borderBottomStyle!=='none'&&hs.borderBottomColor!=='rgba(0, 0, 0, 0)';
   const linha=(e)=>{ const s=getComputedStyle(e); return /linear-gradient\(rgb\(228, 233, 229\)/.test(s.backgroundImage)||(parseFloat(s.borderBottomWidth)>=1&&s.borderBottomStyle!=='none'); };
-  const borda=(e)=>{ const s=getComputedStyle(e); return parseFloat(s.borderTopWidth)>=1&&s.borderTopStyle!=='none'; };
+  const borda=(e)=>{ const s=getComputedStyle(e); return parseFloat(s.borderTopWidth)>=1&&s.borderTopStyle!=='none'&&!/rgba\(0, 0, 0, 0\)/.test(s.borderTopColor); };   /* borda visível */
   const prim=(e)=>{ let f=e&&e.firstElementChild; while(f&&getComputedStyle(f).display==='contents') f=f.firstElementChild; return f; };
   /* o conteúdo começa por uma borda no topo (tabela emoldurada, caixa com borda, ficha cuja 1ª célula tem border-top): ela é a linha */
   const moldura=(nx)=>{ const f=prim(nx); if(!f) return false; if(borda(f)) return true; const g=prim(f); return !!g&&borda(g); };
   /* linha dupla (revisão DS, achado 5): a linha do título e, até 14 px abaixo dela, outra borda larga no topo do conteúdo */
   const dupla=(row)=>{ const r=row.getBoundingClientRect(), nx=row.nextElementSibling; if(!nx) return false;
     return [nx,...nx.querySelectorAll('*')].filter(vis).slice(0,40).some(k=>{ const q=k.getBoundingClientRect(); return q.top-r.bottom<=14&&q.top>=r.bottom-1&&borda(k)&&q.width>r.width*0.5; }); };
-  const fora=[], duplas=[]; let n=0;
+  /* SEP-20261015 (proprietário, 15/10): a linha do título só fica com conteúdo solto logo abaixo (texto, formulário, lista sem moldura);
+     sai quando o corpo começa por tabela, barra de visões, gráfico, caixa (ou cartões), borda no topo ou faixa com fundo próprio */
+  const ctrl=e=>!!e.closest('button,input,select,textarea,a[href],label,[role=button],[role=tab],[role=group],[role=tablist]');
+  const tr=c=>/rgba\(0, 0, 0, 0\)|transparent/.test(c);
+  const caixaVis=e=>{ const s=getComputedStyle(e); return ['Top','Right','Bottom','Left'].every(l=>parseFloat(s['border'+l+'Width'])>=1&&s['border'+l+'Style']!=='none'&&!tr(s['border'+l+'Color'])); };
+  const bordaVis=e=>borda(e)&&!tr(getComputedStyle(e).borderTopColor);
+  const estrut=(row)=>{ const r0=row.getBoundingClientRect(), nx=row.nextElementSibling, fs=getComputedStyle(row.parentElement).backgroundColor;
+    for(const k of [nx,...nx.querySelectorAll('*')].filter(vis).slice(0,80)){ const s=getComputedStyle(k); if(s.display==='contents') continue; const q=k.getBoundingClientRect(); if(q.top-r0.bottom>40) break;
+      if(k.matches('.g2visoes-w')) return 'visões'; if(k.matches('.g2caixa,[role=table],table')) return 'tabela';
+      if(k.matches('svg,[role=img]')&&q.width>r0.width*0.4) return 'gráfico'; if(ctrl(k)) continue;
+      if(caixaVis(k)) return 'caixa'; if(bordaVis(k)&&q.width>r0.width*0.5) return 'borda';
+      const fundo=!tr(s.backgroundColor)&&s.backgroundColor!==fs&&q.height>=16&&!(parseFloat(s.borderTopLeftRadius)>=14&&q.height<=48)&&!k.matches('[aria-current]');
+      if(fundo&&q.width>r0.width*0.5) return 'faixa';
+      if(fundo&&[...k.parentElement.children].some(x=>x!==k&&vis(x)&&getComputedStyle(x).backgroundColor!==fs&&!tr(getComputedStyle(x).backgroundColor))) return 'cartões';
+      if([...k.childNodes].some(t=>t.nodeType===3&&t.textContent.trim().length>2)) return ''; }
+    return ''; };
+  const fora=[], duplas=[], sobra=[]; let n=0, nsolto=0;
   for(const s of document.querySelectorAll('main section')){ const row=s.firstElementChild; if(!vis(row)||!row.nextElementSibling) continue;
     if(!row.querySelector(':scope>h2,:scope>h3,:scope>div>h2,:scope>div>h3')) continue; n++;
-    const ln=linha(row), t=(row.querySelector('h2,h3').innerText||'').slice(0,40);
-    if(!(ln||moldura(row.nextElementSibling))) fora.push(t);
+    const ln=linha(row), t=(row.querySelector('h2,h3').innerText||'').slice(0,40), es=estrut(row);
+    if(!es){ nsolto++; if(!ln) fora.push(t); }
+    else if(ln) sobra.push(t+' ('+es+')');
     if(ln&&dupla(row)) duplas.push(t); }
-  return {cab, n, fora, duplas, h1:!!document.querySelector('h1')}; })()"""
+  /* (c) barra da tabela sem linha sobre o cabeçalho; (d) tabela dentro de caixa com borda sem moldura própria */
+  const barra=[...document.querySelectorAll('.g2caixa')].filter(vis).map(c=>c.firstElementChild).filter(b=>b&&vis(b)&&b.nextElementSibling&&!b.classList.contains('g2rola')
+    &&(()=>{ const x=getComputedStyle(b); return parseFloat(x.borderBottomWidth)>=1&&x.borderBottomStyle!=='none'&&!tr(x.borderBottomColor); })()).map(b=>(b.innerText||'').slice(0,30));
+  const dentro=[...document.querySelectorAll('.g2caixa')].filter(c=>vis(c)&&caixaVis(c)&&(()=>{ for(let p=c.parentElement;p&&p.tagName!=='MAIN';p=p.parentElement) if(caixaVis(p)) return true; return false; })()).map(c=>(c.innerText||'').slice(0,30));
+  return {cab, n, nsolto, fora, duplas, sobra, barra, dentro, h1:!!document.querySelector('h1')}; })()"""
 PAINEL = "(()=>{const d=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); if(!d) return null; const r=d.firstElementChild; const s=getComputedStyle(r); return {t:(d.querySelector('h2')||{}).innerText||'',b:parseFloat(s.borderBottomWidth)>=1&&s.borderBottomColor==='rgb(228, 233, 229)'};})()"
 try:
     # ======================= A · separador =======================
@@ -133,23 +155,33 @@ try:
         # tela; sai da varredura só enquanto não tiver cabeçalho (se voltar a ser tela, volta a ser medida)
         pags = [p for p in pags if not (p == 'Main.dc.html' and '<header' not in open(os.path.join(R, p), encoding='utf-8').read())]
         janela(1440, 900); media()
-        semcab, semlin, nblocos, duplas = [], [], 0, []
+        semcab, semlin, nblocos, duplas, nsolto, sobra, barras, dentro = [], [], 0, [], 0, [], [], []
         for p in pags:
             c.goto(U(p), .3); time.sleep(.25)
             r = J(SEP) or {}
-            nblocos += r.get('n', 0)
+            nblocos += r.get('n', 0); nsolto += r.get('nsolto', 0)
             if not r.get('cab'): semcab.append(p)
             if r.get('fora'): semlin.append((p, r['fora']))
             if r.get('duplas'): duplas.append((p, r['duplas']))
+            if r.get('sobra'): sobra.append((p, r['sobra']))
+            if r.get('barra'): barras.append((p, r['barra']))
+            if r.get('dentro'): dentro.append((p, r['dentro']))
         chk(f'A1 separador abaixo do cabeçalho da página (título + ação do topo à direita) nas {len(pags)} páginas a 1440 px', not semcab and len(pags) >= 100, semcab)
-        chk(f'A2 linha abaixo do título de cada bloco ({nblocos} blocos com título): própria ou a borda no topo do conteúdo (tabela emoldurada, caixa, ficha)', not semlin and nblocos > 50, semlin[:12])
+        # SEP-20261015 (proprietário, 15/10: "deixe somente as que geram efetiva organização visual"): a linha do título fica só com conteúdo
+        # solto logo abaixo; antes desta data o oráculo pedia linha (ou borda no topo do conteúdo) em todo bloco com título
+        chk(f'A2 linha abaixo do título do bloco com conteúdo solto logo abaixo ({nsolto} de {nblocos} blocos com título)', not semlin and nblocos > 50 and nsolto > 5, semlin[:12])
+        chk('A2c sem linha do título quando o corpo começa por tabela, barra de visões, gráfico, caixa ou cartões, borda no topo ou faixa com fundo (SEP-20261015 b)', not sobra, sobra[:12])
         chk('A2b sem linha dupla: a linha do título não fica sobre outra borda larga até 14 px abaixo (revisão DS, achado 5: AG-04det, GE-05, GE-06det)', not duplas, duplas[:12])
+        chk('A7 barra da tabela (busca, Agrupar por, Colunas) sem linha sobre o cabeçalho da tabela, que já tem fundo (SEP-20261015 c)', not barras, barras[:12])
+        chk('A8 tabela dentro de caixa com borda sem moldura própria (caixa dentro de caixa, SEP-20261015 d)', not dentro, dentro[:12])
         janela(390, 844); media()   # largura do celular sem a emulação de toque (o separador não depende dela; o hover das partes B a D, sim)
         cel = ['SAF.dc.html', 'OS.dc.html', 'EST.dc.html', 'CD-01.dc.html', 'CF-05.dc.html', 'PA.dc.html', 'AG-01.dc.html', 'MB-01.dc.html']
         r390 = {}
         for p in cel:
             c.goto(U(p), .3); time.sleep(.25); r390[p] = J(SEP) or {}
-        chk('A3 a 390 px (8 telas): separador do cabeçalho e dos blocos, sem linha dupla', all(x.get('cab') and not x.get('fora') and not x.get('duplas') for x in r390.values()), {k: v for k, v in r390.items() if not (v.get('cab') and not v.get('fora') and not v.get('duplas'))})
+        chk('A3 a 390 px (8 telas): separador do cabeçalho e dos blocos (com a mesma regra do título), sem linha dupla nem linha de barra de tabela',
+            all(x.get('cab') and not x.get('fora') and not x.get('duplas') and not x.get('sobra') and not x.get('barra') and not x.get('dentro') for x in r390.values()),
+            {k: {kk: vv for kk, vv in v.items() if vv and kk in ('fora', 'duplas', 'sobra', 'barra', 'dentro')} for k, v in r390.items() if not (v.get('cab') and not v.get('fora') and not v.get('duplas') and not v.get('sobra') and not v.get('barra') and not v.get('dentro'))})
         abre('SAF.dc.html'); clk('Criar safra'); time.sleep(.4); pn = J(PAINEL)
         chk('A4 painel "Nova safra": linha abaixo do título e do × do topo à direita', bool(pn) and pn['t'] == 'Nova safra' and pn['b'], pn)
         abre('CD-03.dc.html'); J("(()=>{const r=document.querySelector('[role=row].g2ed'); (r.querySelector('.g2pw')||r).click(); return 1;})()"); time.sleep(.4); pn = J(PAINEL)
@@ -377,7 +409,9 @@ try:
                 d = c.call('Page.captureScreenshot', {'format': 'png', 'clip': {'x': max(0, b[0] - m), 'y': max(0, b[1] - m), 'width': b[2] + 2 * m, 'height': (h or b[3]) + 2 * m, 'scale': 1}})
                 open(os.path.join(AM, nome), 'wb').write(base64.b64decode(d['data'])); return True
             fe = []
-            abre('OS.dc.html'); fe.append(recorte('separador-bloco.png', "document.querySelector('main section')", 6, 150))
+            # SEP-20261015: a amostra é um bloco que mantém a linha (conteúdo solto abaixo do título); o bloco da O.S. (barra de visões) ficou sem ela
+            abre('GE-05.dc.html'); fe.append(recorte('separador-bloco.png', "[...document.querySelectorAll('main section')].find(s=>/Crédito solicitado pelo caso/.test(s.innerText))", 6))
+            abre('OS.dc.html')
             hover("[...document.querySelectorAll('main button')].find(b=>b.innerText.trim()==='Agrupar por talhão')", .6)
             fe.append(recorte('hover-secundario.png', "[...document.querySelectorAll('main button')].find(b=>b.innerText.trim()==='Agrupar por talhão').parentElement", 12))
             abre('BO-02.dc.html'); clk('Conciliar pagamentos'); time.sleep(.6); fora(); time.sleep(.3)
