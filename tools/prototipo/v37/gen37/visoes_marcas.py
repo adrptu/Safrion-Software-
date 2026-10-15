@@ -61,6 +61,7 @@ CMP g_conv ; Grupo · fornecedor ; Convite ; Responder até ; Resposta
 CMP g_cmp ; Grupo · insumo · proposta ; Custo ; Escolha ; Preço ; A pedir ; Entrega
 CMP g_apr ; Pedido · fornecedor · insumo ; Quantidade ; Preço ; Entrega ; Valor
 CMP g_ent ; Pedido · fornecedor · insumo ; A entregar ; Previsão ; Ação
+CMP g_mat ; Requisição ; Situação · próximo passo ; Urgência ; Origem · destino ; Valor
 EST g_rec ; Nota fiscal ; Item ; Divergência ; Fornecedor ; Na nota ; Conferida
 EST g_ent ; Requisição ; Item ; A entregar em embalagens ; O.S. ; Lote ; A entregar
 EST g_dev ; Requisição ; O.S. ; Item ; Em custódia ; Com quem
