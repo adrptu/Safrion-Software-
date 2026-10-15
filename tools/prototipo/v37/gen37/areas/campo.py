@@ -354,7 +354,8 @@ def _ca01x_0420():
                f'Substituto proposto: <b style="color:{INK};">{D.OM["substituto"]}</b>, apto e livre a partir de 24/09 06:00 — elegível só após confirmação do PCP.'),
           ilink('Ver ocorrência','CA-03det.dc.html','alert','Abrir a ocorrência OC-114') + ilink('Reprogramar saldo','PL-05.dc.html','calendar','Confirmar substituto e reprogramar o saldo no PCP'),tone='red')
       + bloco('Ajuste do saldo · v3','Confira o ajuste que Ana (agrônoma) fez no saldo; o realizado continua na v2.',
-          nota(f'v3 em vigor desde 23/09, ajustada por Ana (agrônoma): KCl −12 % só no saldo de {saldo} ha (105,6 kg/ha). A v2 continua valendo apenas para os {real} ha já realizados.'),
+          nota(f'<b style="color:{INK};">v3 · KCl −12 %</b> no saldo de {saldo} ha (105,6 kg/ha)'   # TXT-02: o resto vai para a dica ⓘ
+               + E.dica_i('Sobre a v3',f'v3 em vigor desde 23/09, ajustada por Ana (agrônoma). A v2 continua valendo apenas para os {real} ha já realizados.')),
           imsg('Ver fichas',f'Fichas do saldo de {saldo} ha na v3 (KCl 105,6 kg/ha) · as fichas dos {real} ha realizados permanecem no histórico da v2.','doc','Consultar as fichas do caldeiro, do operador e do almoxarife'))
       + bloco('Materiais e custo','Confira a requisição da ordem e o custo dos hectares realizados; clique na linha para ver a origem.',g_req))
     HEIGHTS37[fname]=1900; PARENT37[fname]='OS.dc.html'  # "Voltar" leva à tela de O.S. do menu, não ao CA-01 oculto
@@ -560,7 +561,7 @@ def _ca04():
       bloco('Requisições e custódia da equipe','Confira entregue, consumido e em custódia por ordem; clique na linha para ver a origem do saldo.',g_req,
           ilink('Ver em Suprimentos','SU-07.dc.html','box','Abrir o mesmo registro em Requisições e entregas'))
       + bloco('Encerramento bloqueado pela custódia','Devolva as sobras da OS-0417 para liberar o encerramento.',
-          nota(f'Balanço da REQ-031: {R["entregue"]} sc entregues − {R["consumido"]} consumidos − {R["dev_recebida"]} recebidos = <b style="color:{INK};">{R["custodia"]} sc com Paula (equipe de campo)</b>, prazo 24/09; Rui recebe no almoxarifado.'),
+          nota(f'Balanço da REQ-031: {R["entregue"]} sc entregues − {R["consumido"]} consumidos − {R["dev_recebida"]} recebidos = <b style="color:{INK};">{R["custodia"]} sc com Paula (equipe de campo)</b>, prazo 24/09; Rui recebe no almoxarifado.'),   # é o dado da trava: fica à vista (TEXTO-2, textos_soltos F)
           imsg('Encerrar OS-0417',f'Indisponível: {R["custodia"]} sc de MAP 11-52 sob custódia de Paula (equipe de campo) · prazo 24/09. Declarar devolução não aumenta o utilizável — Rui recebe as {R["custodia"]} sc no almoxarifado, ou documente a destinação competente para liberar o encerramento.',
                'check','Encerrar a ordem (exige custódia zero)'),tone='yellow'))
     prim=idrawer('Solicitar material da ordem',dict(title='Solicitar material da ordem',sub='A requisição nasce da ordem liberada; itens e doses vêm da versão vigente.',

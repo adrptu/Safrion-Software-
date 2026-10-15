@@ -14,6 +14,8 @@ definimos e evoluimos"). Confere no navegador as regras dos componentes comuns, 
   F · filtros só na faixa padrão (FIL-02): na O.S. e na Manutenção (Sem ordem, Ordens) nenhum grupo de chips de filtro nem seletor fora
       da faixa .mf-tela (a troca de visão e o filtro rápido da grade não contam); Fase da O.S. e Fase/Rotina/Prazo da Manutenção dentro dela;
       a 390 px os da Manutenção viram seletor, na mesma faixa.
+  X · menos texto (TXT-02/04): rótulo do indicador (engine.kpis) em caixa normal, sem CAIXA ALTA; a conta do bloqueio do CA-04 e o porquê
+      do ajuste do PL-02det ficam na dica ⓘ (data-dica), fora do texto à vista.
 Uso (de gen37/, depois de build.py e montar_render.py): python3 ds_padrao_test.py · RENDER_DIR=<dir> serve outro _render."""
 import os, sys, json, time
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -162,13 +164,28 @@ def parte_f():
     chk('F2 390 px: Manutenção › Ordens com Fase e Rotina como seletores dentro da faixa, nada fora dela',
         not m['grupos'] and not m['sels'] and {'Filtrar por fase', 'Filtrar por rotina'} <= set(m['dentro']), m)
 
-PARTES = set((os.environ.get('DS_PARTES') or 'T,M,V,F').split(','))
+KPIS = r"""JSON.stringify([...document.querySelectorAll('main div')].filter(d=>d.getClientRects().length&&d.children.length===0&&getComputedStyle(d).fontSize==='12.5px'&&d.parentElement&&getComputedStyle(d.parentElement).borderTopLeftRadius==='16px'&&d.parentElement.children.length===2).map(d=>[d.innerText,getComputedStyle(d).textTransform]))"""
+def parte_x():
+    c.aparelho(1440, 900, 1, False); r = {}
+    for pg in ['CA-01.dc.html', 'PL-03.dc.html', 'GE-01.dc.html']:
+        abre(pg, 1.4); r[pg] = json.loads(J(KPIS) or '[]')
+    ruins = {pg: [k for k in v if k[1] == 'uppercase' or (k[0] == k[0].upper() and len(k[0]) > 4 and any(ch.isalpha() for ch in k[0]))] for pg, v in r.items()}
+    chk('X1 rótulo dos indicadores (engine.kpis) em caixa normal (CA-01, PL-03, GE-01)', all(r.values()) and not any(ruins.values()), [r, ruins])
+    abre('CA-01x-os0420.dc.html', 1.4)
+    d = json.loads(J("JSON.stringify((()=>{const b=[...document.querySelectorAll('button.g2dica-i')].find(b=>b.getAttribute('aria-label')==='Sobre a v3'); return [b?b.getAttribute('data-dica'):'', document.querySelector('main').innerText];})())") or '["",""]')
+    abre('PL-02det.dc.html', 1.4)
+    e = json.loads(J("JSON.stringify((()=>{const b=[...document.querySelectorAll('button.g2dica-i')].find(b=>b.getAttribute('aria-label')==='Sobre o ajuste local'); return [b?b.getAttribute('data-dica'):'', document.querySelector('main').innerText];})())") or '["",""]')
+    chk('X2 o histórico da v3 (CA-01x) e o porquê do ajuste (PL-02det) estão na dica ⓘ, não no texto à vista; o número que importa continua à vista',
+        'A v2 continua valendo apenas' in d[0] and 'A v2 continua valendo apenas' not in d[1] and 'KCl −12 %' in d[1] and 'solo arenoso' in e[0] and 'solo arenoso' not in e[1] and 'Cletodim 240 0,36 L/ha' in e[1], [d[0][:90], e[0][:90]])
+
+PARTES = set((os.environ.get('DS_PARTES') or 'T,M,V,F,X').split(','))
 try:
     c.call('Page.addScriptToEvaluateOnNewDocument', {'source': "window.__err='';addEventListener('error',e=>{window.__err+=(e.message||'erro')+' | ';});"})
     if 'T' in PARTES: parte_t()
     if 'M' in PARTES: parte_m(); parte_r()
     if 'V' in PARTES: parte_v()
     if 'F' in PARTES: parte_f()
+    if 'X' in PARTES: parte_x()
     erros(); chk('Z sem erro de JS nas telas abertas', not ERRS, ERRS[:3])
 finally:
     try: c.close()
