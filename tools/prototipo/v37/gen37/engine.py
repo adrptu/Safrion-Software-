@@ -1347,7 +1347,8 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         ".g2kid{background:#FBFCFA}.g2flash{background:#E4F3E9}.g2tot{cursor:pointer}"
         ".g2sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}"   # texto só para leitor de tela (motivo do chip)
         ".g2hb{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;padding:7px 2px 7px 0;text-align:left;white-space:normal;max-width:104px;line-height:1.2}"
-        ".g2fb{border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;padding:4px 3px;border-radius:6px}"
+        ".g2fb{border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:800;padding:4px 4px;border-radius:6px;display:inline-flex;align-items:center;gap:2px;line-height:1}"   # funil de filtro da coluna (15/10)
+        ".g2fb .g2fi-ico{flex-shrink:0;display:block}"
         ".g2car{width:22px;height:22px;border:0;border-radius:6px;background:transparent;cursor:pointer;font-size:13px;color:#15201A;flex-shrink:0;padding:0}"
         ".g2del{width:28px;height:28px;border:0;border-radius:8px;background:transparent;cursor:pointer;color:#8A968E;display:inline-flex;align-items:center;justify-content:center}"
         ".g2pw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;flex:0 1 auto;justify-content:inherit;text-align:inherit}"
@@ -1585,7 +1586,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     head=(f'<div role="row" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; background: {BG}; border-radius: 0;">{hsel}'
           f'<sc-for list="{H("_head")}" as="h" hint-placeholder-count="{len(cols)}"><div role="columnheader" class="{_h("h.cls")}" data-un="{_h("h.un")}" data-dica="{_h("h.tt")}" style="{_h("h.st")} padding: 0 4px 0 8px;">'
           + (f'<button type="button" class="g2hb" onClick="{_h("h.sort")}" aria-label="{_h("h.sortLabel")}">{_h("h.l")} <span aria-hidden="true" style="{_h("h.astyle")} font-size: 9px;">{_h("h.arrow")}</span></button>'
-             f'<button type="button" class="g2fb" onClick="{_h("h.fmenu")}" aria-label="{_h("h.flabel")}" title="{_h("h.flabel")}" style="color: {_h("h.fcolor")};">▾{_h("h.fil")}</button>' if headtools else
+             f'<button type="button" class="g2fb" onClick="{_h("h.fmenu")}" aria-label="{_h("h.flabel")}" title="{_h("h.ftit")}" style="color: {_h("h.fcolor")};"><svg class="g2fi-ico" width="13" height="13" viewBox="0 0 24 24" fill="{_h("h.ffill")}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+ICONS['filtro']+'"/></svg></button>' if headtools else
              f'<span class="g2hb" style="cursor: default;">{_h("h.l")}</span>')
           + f'</div></sc-for>{hdel}</div>')
     body=(f'<sc-for list="{H("_rows")}" as="r" hint-placeholder-count="3"><div role="row" data-rid="{_h("r.id")}" class="{_h("r.cls")}" tabIndex="{_h("r.tab")}" onClick="{_h("r.open")}" onKeyDown="{_h("r.key")}" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 1px solid {LINE}; align-items: center; font-size: 13px;">'

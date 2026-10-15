@@ -596,7 +596,7 @@ def steps_state(names,pre='stp',label='Etapas do processo'):
         # um botão que leva à etapa (revoga o "só informa" de 03/10, DS-31 v2); etapa travada diz o motivo ao toque (aria-disabled + dica)
         items+=(f'<li aria-current="{h("cur")}" class="etp-it" style="{h("st")}"><button type="button" class="etp-ir" onClick="{h("go")}" aria-disabled="{h("dis")}" data-dica="{h("tt")}">'
                 f'<span aria-hidden="true" style="{h("bst")}">{h("num")}</span>'
-                f'<span style="display: flex; flex-direction: column; gap: 2px; min-width: 92px; flex: 1 1 auto; contain: inline-size;"><span style="{h("tst")}">{esc(t)}<span class="etp-sr"> · {h("sr")}</span></span>'
+                f'<span style="display: flex; flex-direction: column; gap: 2px; min-width: 92px; flex: 1 1 auto; contain: inline-size;"><span class="etp-nome" style="{h("tst")}">{esc(t)}<span class="etp-sr"> · {h("sr")}</span></span>'
                 f'<span aria-hidden="true" style="{h("sst")}"><span style="{h("dot")}"></span>{h("sub")}</span></span>'
                 f'<sc-if value="{h("hasCnt")}" hint-placeholder-val="{{{{false}}}}"><span aria-hidden="true" style="{h("cst")}">{h("cnt")}</span></sc-if></button></li>')
     # etapa atual em texto para a faixa estreita: um bloco por etapa, montado só na atual; ao trocar de etapa a caixa nasce fechada

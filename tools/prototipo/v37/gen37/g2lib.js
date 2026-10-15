@@ -407,11 +407,14 @@ function g2vals(self,sp,v,mask){
   v[id+'_head']=cols.map((c,ci)=>({l:c.l, tt:c.ajuda||g2glossCol(sp,c,rows), un:c.un||'', cls:(ci===0?'g2c0':''), st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;box-shadow:1px 0 0 #E4E9E5;':''),
      arrow:(so.k===c.k?(so.d?'▼':'▲'):'⇅'), astyle:(so.k===c.k?'color:#1E7A4C;':'color:#B7C1BA;'), sortLabel:'Ordenar por '+c.l,
      sort:()=>{ const cur=g2st(self,id).so||sp.so||{}; let nx; if(cur.k!==c.k) nx={k:c.k,d:false}; else if(!cur.d) nx={k:c.k,d:true}; else nx={}; g2set(self,id,{so:nx}); },
-     fil:(((st.f||{})[c.k]||[]).length?' · '+((st.f||{})[c.k]||[]).length:''), fcolor:(((st.f||{})[c.k]||[]).length?'#1E7A4C':'#8A968E'),
+     // 15/10/2026 (proprietário: "troque o ícone de filtrar a coluna por um ícone mais intuitivo de filtro"): funil vazado sem filtro;
+     // com filtro, funil cheio verde (sem número: o funil cheio basta; a dica e o leitor de tela dizem "filtro ativo")
+     fcolor:(((st.f||{})[c.k]||[]).length?'#1E7A4C':'#8A968E'),
+     ffill:(((st.f||{})[c.k]||[]).length?'currentColor':'none'),
+     flabel:'Filtrar '+c.l, ftit:'Filtrar '+c.l+(((st.f||{})[c.k]||[]).length?' · filtro ativo':''),   // nome fixo; o estado vai na dica (descrição)
      fmenu:(e)=>{ const cur=g2st(self,id).fmc; if(cur===c.k){ g2set(self,id,{fmc:null}); return; }
        const el=e&&e.currentTarget; const rr=el&&el.getBoundingClientRect?el.getBoundingClientRect():{left:0,right:0,bottom:0};
-       g2set(self,id,{fmc:c.k,fpos:{x:rr.left,xr:rr.right,y:rr.bottom,dir:c.a==='r'},fmd:null,fmq:''}); setTimeout(()=>{ const q=document.getElementById('g2fq_'+id); if(q) q.focus(); },0); },
-     flabel:'Filtrar '+c.l}));
+       g2set(self,id,{fmc:c.k,fpos:{x:rr.left,xr:rr.right,y:rr.bottom,dir:c.a==='r'},fmd:null,fmq:''}); setTimeout(()=>{ const q=document.getElementById('g2fq_'+id); if(q) q.focus(); },0); }}));
   // valores do filtro aberto
   const fmc=st.fmc; const fcol=sp.cols.find(c=>c.k===fmc);
   if(fcol){ const cnt={}, lab={}; const leaf=(list)=>list.forEach(r=>{ if(r.livre||r.fora) return; if(r.kids&&r.kids.length) leaf(r.kids); if(!(r.kids&&r.kids.length)||sp.tree===false||!sp.tree||(fcol.niv0&&r.tal)){
@@ -858,7 +861,7 @@ function g2carga(fase){ if(typeof document==='undefined'||!document.body) return
 // etapa ou seção atual (faixa de progresso SAF/CMP/PA/PM ou seções do Estoque): '' se a tela não tem faixa
 function g2passo(){ if(typeof document==='undefined') return '';
   const e=document.querySelector('.etp-ind li[aria-current="step"],.etp-sec .etp-itens>[aria-current="true"]'); if(!e) return '';
-  const nm=e.querySelector(':scope>span:not([aria-hidden="true"])>span')||e.querySelector('span'); const c=nm?nm.cloneNode(true):null;
+  const nm=e.querySelector('.etp-nome')||e.querySelector(':scope>span:not([aria-hidden="true"])>span')||e.querySelector('span');   /* cartão-botão (15/10): o nome tem classe própria */ const c=nm?nm.cloneNode(true):null;
   if(c) c.querySelectorAll('.etp-sr').forEach(x=>x.remove()); const nome=c?g2txt(c):g2txt(e);
   if(e.tagName==='LI'){ const ls=[...e.parentElement.children].filter(x=>x.tagName==='LI'); return 'Etapa '+(ls.indexOf(e)+1)+' de '+ls.length+': '+nome; }
   return 'Seção: '+nome; }
