@@ -164,13 +164,18 @@ ITEM_OFF=lambda: f'display: block; width: 100%; text-align: left; padding: 8px 1
 LIST_ST=lambda right=False: f'position: absolute; top: calc(100% + 6px); {"right: 0;" if right else "left: 0;"} z-index: 25; min-width: 200px; background: {SURF}; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 12px 32px -8px rgba(21,32,26,.28); padding: 6px; flex-direction: column; gap: 2px; display: flex;'
 CMENU_ST=lambda: f'position: absolute; top: 102px; left: 14px; z-index: 25; width: 270px; background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; box-shadow: 0 12px 32px -8px rgba(21,32,26,.28); padding: 8px; flex-direction: column; gap: 2px; display: flex;'
 GCHIP_ST=lambda: f'display: inline-flex; align-items: center; gap: 6px; padding: 3px 4px 3px 10px; border-radius: 999px; background: {INK}; color: #fff; font-size: 12px; font-weight: 700;'
-CHIP_ON=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 1px solid {ACC}; background: {ACCS}; color: {ACC}; cursor: pointer;'   # escolha tonal (DS-36): não imita o primário
-CHIP_OFF=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer;'
+CHIP_ON=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 1px solid {ACC}; background: {ACCS}; color: {ACC}; cursor: pointer; {ALVO_ST}'   # escolha tonal (DS-36): não imita o primário
+CHIP_OFF=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; {ALVO_ST}'
 SEG_ON=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 0; cursor: pointer; background: {SURF}; color: {INK}; box-shadow: 0 1px 2px rgba(21,32,26,.12); white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;'
 SEG_OFF=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 0; cursor: pointer; background: transparent; color: {MUTED}; box-shadow: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;'
 TOAST_ST=lambda: f'position: absolute; left: max(16px, min(248px, calc(100% - 536px))); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); z-index: 40; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: min(520px, calc(100% - 32px)); box-sizing: border-box;'
 DRAWER_ST=lambda: 'position: absolute; inset: 0; z-index: 30; display: flex; justify-content: flex-end;'
-BTN_ST=lambda primary=False,small=False: (f"padding: {'7px 14px' if small else '11px 20px'}; border-radius: 10px; font-size: {'13px' if small else '14px'}; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; "
+# DS-ALVO-20261015 (proprietário, 15/10/2026: "padronize tudo de melhor que definimos"): alvo de toque de 44 px no componente, não tela a
+# tela. O estilo inline lê a variável --g2-alvo, que o CSS comum (ALVO_CSS, dentro do G2_CSS) liga só com ponteiro grosso; no ponteiro fino
+# vale 0 e nada muda de tamanho. Vale para BTN_ST/btn, _MINI/_MINIP, a ação de célula da grade (G2CTA, g2lib) e os chips de filtro.
+DS_ALVO=dict(toque='44px')
+ALVO_ST='min-height: var(--g2-alvo, 0px); box-sizing: border-box; '
+BTN_ST=lambda primary=False,small=False: (f"padding: {'7px 14px' if small else '11px 20px'}; border-radius: 10px; font-size: {'13px' if small else '14px'}; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; {ALVO_ST}"
         + (f"background: {ACC}; color: #fff; border: 1px solid {ACC}; box-shadow: 0 1px 2px rgba(30,122,76,.25);" if primary else f"background: {SURF}; color: {INK}; border: 1px solid {LINE};"))
 def msgbtn(text,message,primary=False,small=True):
     """botão que age na própria tela: mostra o resultado numa mensagem (toast)."""
@@ -361,7 +366,7 @@ def act(text=None,href=None,urgent=False,open=False,menu=False,edit=None):
         items=f'<button type="button" onClick="{ehole}" style="{ITEM_ON()}">Editar</button>'+''.join(f'<button type="button" onClick="{HL("closeAll")}" style="{ITEM_OFF()}{" color: "+RED+";" if t=="Excluir" else ""}">{t}</button>' for t in ('Duplicar','Mover para cima','Mover para baixo','Excluir'))
         b=f'<span style="position: relative; display: inline-flex;"><button type="button" aria-label="Mais ações" aria-haspopup="menu" onClick="{HL(m+"_open")}" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; color: {MUTED}; border: 0; background: transparent; cursor: pointer; font-size: 18px; letter-spacing: 1px;">⋯</button><div role="menu" style="{HL(m+"_st")}">{items}</div></span>'
     elif text:
-        st=(f"padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; white-space: nowrap; text-decoration: none; display: inline-block; background: {SURF}; "
+        st=(f"padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; white-space: nowrap; text-decoration: none; display: inline-block; {ALVO_ST}background: {SURF}; "
             + (f"color: {RED}; border: 1px solid {RED};" if urgent else f"color: {INK}; border: 1px solid {LINE};"))
         dest=href or ROW or TABLEHREF.get(CUR) or BTNHREF.get((CUR,text)) or BTNHREF.get(text)
         if dest: b=f'<a href="{dest}" style="{st}">{esc(text)}</a>'
@@ -414,9 +419,7 @@ def btn(text,primary=False,small=False,href=None):
         if d: return drawer_button(text,d,primary,small)
         m=MSGS.get((CUR,text)) or MSGS.get(text)
         if m: return msgbtn(text,m,primary,small)
-    pad='7px 14px' if small else '11px 20px'; fs='13px' if small else '14px'
-    st=(f"padding: {pad}; border-radius: 10px; font-size: {fs}; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; "
-        + (f"background: {ACC}; color: #fff; border: 1px solid {ACC}; box-shadow: 0 1px 2px rgba(30,122,76,.25);" if primary else f"background: {SURF}; color: {INK}; border: 1px solid {LINE};"))
+    st=BTN_ST(primary,small)   # o mesmo componente (antes era uma cópia do estilo)
     if href: return f'<a href="{href}" style="text-decoration: none; display: inline-block; {st}">{esc(text)}</a>'
     return f'<button type="button" style="{st}">{esc(text)}</button>'
 def integ(items,out=None):
@@ -1164,6 +1167,13 @@ ACOES_CSS=(".acoes{position:sticky;bottom:-22px;z-index:6;display:flex;flex-dire
     "@media (hover:hover){.g2xtog:hover{text-decoration:underline;text-underline-offset:3px}}.g2xtog:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:6px}"
     "@media (pointer:coarse){.g2xtog{min-height:44px}}"
     "@media (pointer:coarse){[data-g2agb],[data-g2cvb]{min-height:44px!important}}")   # defeito D: Agrupar por e Colunas com alvo de toque de 44 px
+# DS-ALVO-20261015: liga o alvo de toque dos componentes (ALVO_ST) só com ponteiro grosso. Um link com cara de botão (inline-block) passa
+# a flex para o texto ficar no meio da altura maior; um link em bloco continua em bloco (flex). A escolha em pílula com estado (chip de
+# filtro rápido, segmento, aria-pressed) também ganha os 44 px, inclusive as cópias do estilo do chip feitas nas telas
+ALVO_CSS=("@media (pointer:coarse){:root{--g2-alvo:"+DS_ALVO['toque']+"}"
+          "main :is(button,a)[aria-pressed][style*='border-radius: 999px']{min-height:"+DS_ALVO['toque']+";box-sizing:border-box}"
+          "a[style*='--g2-alvo'][style*='display: inline-block']{display:inline-flex!important;align-items:center;justify-content:center}"
+          "a[style*='--g2-alvo'][style*='display: block']{display:flex!important;align-items:center;justify-content:center}}")
 def area_acoes(pre='aa',rotulo='Ações da etapa'):
     """Área de ações única do processo guiado (DS-33/DS-61). Buracos vêm de g2acoes(v,pre,cfg) em g2lib.js.
     Nota opcional (causa da pendência + atalho contextual), retorno secundário à esquerda, avanço secundário quando a primária
@@ -1397,10 +1407,10 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         # separador "·" no começo de uma parte da célula: fica num elemento próprio e some (opacidade, sem mudar a largura) quando a parte
         # começa a linha; o texto lido (innerText, leitor de tela sem o ponto) não muda (g2sepIni em g2lib.js)
         ".g2sepd[data-ini]{opacity:0}"
-        + INTERACAO_CSS + ACOES_CSS + SEP_CSS + RETORNO_CSS + DICA_CSS + VISOES_CSS)
+        + INTERACAO_CSS + ACOES_CSS + ALVO_CSS + SEP_CSS + RETORNO_CSS + DICA_CSS + VISOES_CSS)
 _TRASH='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>'
-_MINI=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap;'
-_MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {ACC}; background: {ACC}; color: #fff; cursor: pointer; white-space: nowrap;'
+_MINI=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap; {ALVO_ST}'
+_MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {ACC}; background: {ACC}; color: #fff; cursor: pointer; white-space: nowrap; {ALVO_ST}'
 _SEPD=f'<sc-if value="{{{{p.sepL}}}}" hint-placeholder-val="{{{{false}}}}"><span class="g2sepd" aria-hidden="true">· </span></sc-if>'
 _ICO_ALERTA='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>'   # lucide triangle-alert (ISC)
 _ICO_COLUNAS='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>'   # lucide columns-3 (ISC)

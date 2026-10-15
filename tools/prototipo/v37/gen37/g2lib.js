@@ -1,8 +1,9 @@
 // ===== G2 · grade interativa, formulário lateral e navegação (motor do protótipo v3.7) =====
 const G2C={green:['#1E7A4C','#E4F3E9'],yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],blue:['#1E5F8F','#E3F0FB'],orange:['#9A3F00','#FFE8D6']};
 // a não quebra de linha das ações da célula vem da classe g2cta (engine): numa tabela com a 1ª coluna limitada (celular) elas quebram
-const G2CTA='display:inline-flex;align-items:center;gap:6px;padding:5px 11px;max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:left;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;background:#FFFFFF;color:#15201A;border:1px solid #E4E9E5;cursor:pointer;font-family:inherit;line-height:1.25;';
-const G2CTAU='display:inline-flex;align-items:center;gap:6px;padding:5px 11px;max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:left;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;background:#FFFFFF;color:#B42318;border:1px solid #B42318;cursor:pointer;font-family:inherit;line-height:1.25;';
+// DS-ALVO-20261015: a ação de célula é o _MINI do engine (5px 10px, raio 8, 12 px/700) e ganha 44 px no toque (--g2-alvo, ALVO_CSS)
+const G2CTA='display:inline-flex;align-items:center;gap:6px;padding:5px 10px;max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:left;border-radius:8px;font-size:12px;font-weight:700;min-height:var(--g2-alvo,0px);box-sizing:border-box;text-decoration:none;background:#FFFFFF;color:#15201A;border:1px solid #E4E9E5;cursor:pointer;font-family:inherit;line-height:1.25;';
+const G2CTAU='display:inline-flex;align-items:center;gap:6px;padding:5px 10px;max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:left;border-radius:8px;font-size:12px;font-weight:700;min-height:var(--g2-alvo,0px);box-sizing:border-box;text-decoration:none;background:#FFFFFF;color:#B42318;border:1px solid #B42318;cursor:pointer;font-family:inherit;line-height:1.25;';
 function g2num(s){ if(typeof s==='number') return s; if(s===null||s===undefined) return NaN; let t=String(s).trim(); if(!t) return NaN; t=t.replace(/[^0-9,.\-]/g,''); if(t.indexOf(',')>=0){ t=t.replace(/\./g,'').replace(',','.'); } else if((t.match(/\./g)||[]).length>1 || /^\-?\d{1,3}(\.\d{3})+$/.test(t)){ t=t.replace(/\./g,''); } return parseFloat(t); }
 function g2fmtn(n,d,dmin){ return Number(n).toLocaleString('pt-BR',{minimumFractionDigits:(dmin!==undefined?dmin:(d||0)),maximumFractionDigits:d||0}); }
 // unidade junto do valor (c.un, decisão de 05/10/2026): "160 ha", "54 %", "R$ 14,49/ha"; só em texto que é um número puro
@@ -79,7 +80,7 @@ function g2qvals(self,sp,v,st,rows0,added){ const id=sp.id, qf=sp.qf; const rows
   const cur=st.qv||''; if(cur&&!(cur in cnt)) cnt[cur]=0;   // escolha sem linhas continua à vista (com 0) para poder ser limpa
   let ks=Object.keys(cnt).sort((a,b)=>(cnt[b]-cnt[a])||a.localeCompare(b,'pt-BR',{numeric:true}));
   if(ks.length<2&&!cur) return; const MAX=10; if(ks.length>MAX){ const top=ks.slice(0,MAX); if(cur&&top.indexOf(cur)<0) top[MAX-1]=cur; ks=top; }
-  const ST='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;';
+  const ST='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;min-height:var(--g2-alvo,0px);box-sizing:border-box;';   /* 44 px no toque (DS-ALVO) */
   const ch=(t,n,on,go,lab)=>({t,n:String(n),on:String(!!on),go,lab,st:ST+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')});
   v[id+'_qf']=[ch(qf.todas||'Todas',rows.length,!cur,()=>g2set(self,id,{qv:''}),'Mostrar todas as linhas')].concat(ks.map(k=>ch(k,cnt[k],cur===k,()=>g2set(self,id,{qv:cur===k?'':k}),cur===k?'Mostrar todas as linhas':('Mostrar só '+k))));
   v[id+'_qfl']='Filtro rápido por '+String(qf.l||c.l).toLowerCase(); v[id+'_hasqf']=true; }
