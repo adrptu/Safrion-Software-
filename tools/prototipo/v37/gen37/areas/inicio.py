@@ -1407,6 +1407,8 @@ def _panel_html():
       f'<div style="display: flex; gap: 8px;"><button type="button" onClick="{H("nx.asave")}" style="{_MINIP}">Salvar apontamento</button><button type="button" onClick="{H("nx.back")}" style="{_MINI}">Voltar</button></div></sc-if>'
       f'<sc-if value="{H("nx.hasErr")}" hint-placeholder-val="{F()}"><div role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">{H("nx.err")}</div></sc-if>'
       f'</div></sc-if>')
+    # SEP-20261015 (proprietário, 15/10: menos linhas separadoras): pares rótulo → valor separados pelo espaço; o rodapé de ações (branco sobre
+    # o painel cinza) e a barra da camada (sobre o mapa) ficam sem linha, porque a mudança de fundo já separa
     secs=(f'<sc-for list="{H("pan.secs")}" as="s" hint-placeholder-count="2"><section aria-label="{H("s.t")}" style="display: flex; flex-direction: column; gap: 6px;">'
       f'<div style="{cap} padding-top: 2px;">{H("s.t")}</div>'
       f'<sc-if value="{H("s.hasHd")}" hint-placeholder-val="{F()}"><div role="status" style="{H("s.hdst")}"><div style="{cap}">{H("s.hdc")}</div><div style="font-size: 13.5px; font-weight: 800; line-height: 1.35;">{H("s.hd")}</div></div></sc-if>'
@@ -1426,7 +1428,7 @@ def _panel_html():
       f'<div style="font-size: 12.3px; color: {MUTED}; margin-top: 2px;">{H("pan.sub")}</div><div style="margin-top: 6px;">{chips("pan.ch","c")}</div></div>'
       f'<button type="button" onClick="{H("pan_close")}" aria-label="Fechar painel" title="Fechar painel" style="border: 0; background: {BG}; width: 30px; height: 30px; border-radius: 999px; cursor: pointer; font-size: 17px; color: {MUTED}; flex-shrink: 0;">×</button></div>'
       f'<div style="flex-grow: 1; min-height: 0; overflow-y: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;">{os_html}{secs}</div>'
-      f'<sc-if value="{H("pan_hasacts")}" hint-placeholder-val="{T()}"><div style="display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 14px; border-top: 1px solid {LINE}; background: {SURF};">{actions("pan.acts")}</div></sc-if></aside>')
+      f'<sc-if value="{H("pan_hasacts")}" hint-placeholder-val="{T()}"><div style="display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 14px; background: {SURF};">{actions("pan.acts")}</div></sc-if></aside>')
 
 def _mapcard(h,full=False):
     fgroups=(f'<sc-for list="{H("flt")}" as="g" hint-placeholder-count="2">'
@@ -1460,7 +1462,7 @@ def _mapcard(h,full=False):
     alt=f'height: {h}px;' if h else 'min-height: 0; align-self: stretch;'
     caixa='' if not h else f'border: 1px solid {LINE}; border-radius: 16px;'   # embutido no bloco do mapa: sem borda própria
     return (f'<div style="{alt} min-width: 0; flex-grow: 1; display: flex; flex-direction: column; background: {SURF}; {caixa} overflow: hidden;">'
-      f'<div style="display: flex; align-items: center; gap: 10px 16px; padding: 10px 12px 8px; flex-wrap: wrap; border-bottom: 1px solid {LINE};">'
+      f'<div style="display: flex; align-items: center; gap: 10px 16px; padding: 10px 12px 8px; flex-wrap: wrap;">'
       f'<b style="font-size: 14px; white-space: nowrap;">{H("lay_t")}</b>'
       f'<button type="button" class="g2-info" aria-label="Fonte e regra da camada" data-dica="{H("fonte")}" style="flex-shrink: 0; width: 24px; height: 24px; border-radius: 999px; '
       f'border: 1px solid {LINE}; background: {SURF}; color: {MUTED}; font-family: inherit; font-size: 13px; font-weight: 700; cursor: help; display: inline-flex; align-items: center; justify-content: center;">i</button>{fgroups}<span style="flex-grow: 1;"></span>{nums}'
@@ -1523,7 +1525,7 @@ def _tm_painel():
     tal=(f'<sc-if value="{H("tm_tal")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-direction: column; border-top: 1px solid {LINE};"><sc-for list="{H("tm_kv")}" as="k" hint-placeholder-count="3">'
       f'<div style="display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid {LINE}; font-size: 12.5px;"><span style="width: 120px; flex-shrink: 0; color: {MUTED};">{H("k.l")}</span><b style="font-weight: 700; min-width: 0;">{H("k.t")}</b></div></sc-for></div>'
       f'<div style="font-size: 12.5px; color: {MUTED}; padding-top: 8px;">Próximo passo: planejar o cultivo deste talhão na safra.</div></sc-if>')
-    rodape=(f'<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 14px; border-top: 1px solid {LINE}; background: {SURF};">'
+    rodape=(f'<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 14px; background: {SURF};">'
       f'<sc-if value="{H("tm_form")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("tm_descartar")}" style="border: 0; background: transparent; font-family: inherit; font-size: 12.5px; font-weight: 700; color: {RED}; text-decoration: underline; cursor: pointer;">Descartar</button>'
       f'<span style="flex-grow: 1;"></span><button type="button" onClick="{H("tm_redes")}" style="{_MINI}">Voltar ao desenho</button><button type="button" onClick="{H("tm_salvar")}" style="{_MINIP}">Salvar no cadastro</button></sc-if>'
       f'<sc-if value="{H("tm_impr")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("tm_outro")}" style="{_MINI}">Escolher outro arquivo</button><span style="flex-grow: 1;"></span>'
@@ -1570,7 +1572,7 @@ function EXTRAVALS(self,v){ self.g2perfilFecha={mpa:null}; cenOuvir(self); irrOu
     corpo=f'<div class="mapa-corpo" style="display: flex; flex-direction: row; align-items: stretch; min-width: 0; min-height: 0; background: {SURF}; border: 1px solid {LINE}; border-radius: 16px; overflow: hidden;">{_rail()}{_mapcard(None)}</div>'
     # IN-04 no celular/tablet/zoom 200 % (pendência de componentes 03/10): a proposta comp_in04_proposta.css, validada por injeção no
     # componentes_test (8 e 31), passa a valer de fato; decide pela largura do main e do próprio mapa (container queries)
-    EXTRA.append('<style>'+'main:has(>.mapa-corpo){container:in04/inline-size} .mapa-area{container:in04mapa/inline-size} @container in04 (max-width: 760px){ .mapa-corpo{flex-direction:column!important} .mapa-trilha{flex-direction:row!important;overflow-x:auto;border-right:0!important;border-bottom:1px solid #E4E9E5;flex-shrink:0} .mapa-trilha>button{flex:0 0 auto;width:48px!important;min-height:48px} .mapa-corpo [role=group]{flex-wrap:wrap} } @container in04 (max-width: 919px){ .mapa-corpo{flex:1 0 auto!important} .mapa-linha{flex-direction:column} .mapa-area{min-height:max(62vh,280px)} .mapa-linha aside[aria-label]{width:auto!important;border-left:0!important;border-top:1px solid #E4E9E5} } @container in04mapa (max-width: 700px){ [role=toolbar][aria-label="Ferramentas do mapa"]{left:12px;right:12px!important;top:52px!important;max-width:none!important;flex-wrap:nowrap!important;justify-content:flex-start!important;overflow-x:auto;padding:2px;scrollbar-width:thin} [role=toolbar][aria-label="Ferramentas do mapa"] button{flex-shrink:0;white-space:nowrap} .mapa-area span[style*="top: 10px"]{max-width:calc(100% - 24px);box-sizing:border-box} .mapa-area>div[style*="bottom: 12px"]{max-height:30%;overflow-y:auto;box-sizing:border-box} }'+'</style>')
+    EXTRA.append('<style>'+'main:has(>.mapa-corpo){container:in04/inline-size} .mapa-area{container:in04mapa/inline-size} @container in04 (max-width: 760px){ .mapa-corpo{flex-direction:column!important} .mapa-trilha{flex-direction:row!important;overflow-x:auto;border-right:0!important;flex-shrink:0} .mapa-trilha>button{flex:0 0 auto;width:48px!important;min-height:48px} .mapa-corpo [role=group]{flex-wrap:wrap} } @container in04 (max-width: 919px){ .mapa-corpo{flex:1 0 auto!important} .mapa-linha{flex-direction:column} .mapa-area{min-height:max(62vh,280px)} .mapa-linha aside[aria-label]{width:auto!important;border-left:0!important;border-top:1px solid #E4E9E5} } @container in04mapa (max-width: 700px){ [role=toolbar][aria-label="Ferramentas do mapa"]{left:12px;right:12px!important;top:52px!important;max-width:none!important;flex-wrap:nowrap!important;justify-content:flex-start!important;overflow-x:auto;padding:2px;scrollbar-width:thin} [role=toolbar][aria-label="Ferramentas do mapa"] button{flex-shrink:0;white-space:nowrap} .mapa-area span[style*="top: 10px"]{max-width:calc(100% - 24px);box-sizing:border-box} .mapa-area>div[style*="bottom: 12px"]{max-height:30%;overflow-y:auto;box-sizing:border-box} }'+'</style>')
     EXTRA.append(f'<sc-if value="{H("full")}" hint-placeholder-val="{F()}"><div role="dialog" aria-label="Mapa em tela cheia" style="position: fixed; inset: 0; z-index: 55; background: {BG}; padding: 14px; box-sizing: border-box; display: flex; gap: 12px;">{_rail()}{_mapcard(872,full=True)}</div></sc-if>')
     shell37('IN-04','Mapa da fazenda',corpo,primary_html=f'<span style="{H("hs_st")}">{H("hs_t")}</span>')
 

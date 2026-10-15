@@ -1000,7 +1000,7 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 <main style="flex-grow: 1; min-height: 0; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box;">
 {body}
 </main>
-<div style="padding: 12px 20px 28px; background: {SURF}; border-top: 1px solid {LINE};"><a href="{PHREF.get(fname,'#')}" style="display: block; text-align: center; text-decoration: none; box-sizing: border-box; width: 100%; padding: 18px; border-radius: 16px; box-shadow: 0 1px 2px rgba(30,122,76,.25); font-size: 17px; font-weight: 800; letter-spacing: -.01em; font-family: inherit; background: {ACC}; color: #fff; border: 1px solid {ACC};">{esc(primary)}</a></div>
+<div style="padding: 12px 20px 28px; background: {SURF}; box-shadow: 0 -6px 12px -10px rgba(21,32,26,.25);"><a href="{PHREF.get(fname,'#')}" style="display: block; text-align: center; text-decoration: none; box-sizing: border-box; width: 100%; padding: 18px; border-radius: 16px; box-shadow: 0 1px 2px rgba(30,122,76,.25); font-size: 17px; font-weight: 800; letter-spacing: -.01em; font-family: inherit; background: {ACC}; color: #fff; border: 1px solid {ACC};">{esc(primary)}</a></div>
 {_nav}
 {extra_html().replace('left: max(16px, min(248px, calc(100% - 536px)));','left: 16px; right: 16px;')}
 {G2_TOAST}
@@ -1334,10 +1334,13 @@ _SEM_MOLDURA=(f':not(:has(+*>{_BORDA_TOPO}:first-child))'
               ':not(:has(+*>:first-child>[style*="border: 1px"]:first-child:not(button,a,label,input,select,span),+*>:is([role=img],svg):first-child))')
 # caixa com borda (seção, cartão, painel, bloco do cadastro, grade): a tabela de dentro fica sem moldura; o cabeçalho com fundo e o espaço separam
 _MOLDURA=':is([style*="border: 1px solid"],.cadx,.g2caixa)'
+_BT='[style*="border-top: 1px solid"]'
 SEP_CSS=(
     f"{_MOLDURA} .g2caixa{{border-color:transparent!important}}"
     # caixa com fundo próprio dentro de outra caixa (memória de cálculo, indicador, evidência): fica o fundo, sai a borda neutra
     ":is([style*=\"border: 1px solid\"],.cadx) :is(div,section)[style*=\"border: 1px solid rgb(228, 233, 229)\"][style*=\"background: rgb\"]:not([style*=\"background: rgb(255, 255, 255)\"]){border-color:transparent!important}"
+    # 1ª linha de uma lista que abre a caixa com borda: a borda da caixa já está ali, a poucos px (linha dupla)
+    f"[style*=\"border: 1px solid\"]>:first-child{_BT}{{border-top-color:transparent!important}}"
     f"{_CAB_BLOCO}{_SEM_MOLDURA}{{background-image:linear-gradient({DS_SEP['cor']},{DS_SEP['cor']})!important;background-size:calc(100% - 2 * {DS_SEP['recuo']}) 1px!important;"
     "background-position:50% 100%!important;background-repeat:no-repeat!important}"
     f"{_CAB_BLOCO}{_SEM_MOLDURA}+*{{margin-top:{DS_SEP['espaco']}}}"

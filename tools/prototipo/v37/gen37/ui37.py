@@ -150,7 +150,8 @@ def _etp_abre(i,n,nome,secao=False):
 def _etp_lista(abre,itens,tag='div',attrs=''):
     return (f'<div style="display: flex; align-items: center; gap: 6px;">{abre}'
             f'<{tag} id="etp-lista" class="etp-itens"{attrs} style="flex-grow: 1; min-width: 0; display: flex; align-items: stretch; gap: 4px; margin: 0; padding: 0; list-style: none;">{itens}</{tag}></div>')
-_ETP_CX=f'position: sticky; top: 0; z-index: 30; background: {SURF}; border-bottom: 1px solid {LINE}; box-shadow: 0 6px 12px -10px rgba(21,32,26,.25); padding: 6px 24px;'
+# SEP-20261015 (a): sem borda inferior; a faixa branca sobre o fundo cinza e a sombra já separam (a borda ficava colada na mudança de fundo)
+_ETP_CX=f'position: sticky; top: 0; z-index: 30; background: {SURF}; box-shadow: 0 6px 12px -10px rgba(21,32,26,.25); padding: 6px 24px;'
 def _etp_progresso(n,corpo):
     # sem nav: indicador não é navegação (DS-31 v2); o nome acessível "Etapas do processo" fica na lista ordenada
     return f'<div class="etp etp-ind etp-l{_etp_lim_ind(n)}" style="{_ETP_CX}">{corpo}</div>'
