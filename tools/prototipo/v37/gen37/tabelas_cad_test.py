@@ -123,8 +123,12 @@ def menu_tecla(col, busca, valor):
     lab = J("(()=>{const l=document.activeElement&&document.activeElement.closest('label'); return l?l.innerText.replace(/\\s+\\d+$/,'').trim():'';})()")
     ESPACO(); time.sleep(.2); c.tab(1, True); ENTER(); time.sleep(.5); return lab == valor
 def ordena_tecla(col):
-    """↓ maior para menor pelo teclado: Enter no ▾, Shift+Tab 3× até "↓ Classificar…" e Espaço (Enter no menu é o OK do filtro)."""
-    foca(f'button[aria-label="Filtrar {col}"]'); ENTER(); time.sleep(.45); c.tab(3, True)
+    """↓ maior para menor pelo teclado: Enter no ▾, Shift+Tab até "↓ Classificar…" (no máximo 6; a V2-3 pôs "Ocultar coluna" no caminho) e Espaço
+    (Enter no menu é o OK do filtro)."""
+    foca(f'button[aria-label="Filtrar {col}"]'); ENTER(); time.sleep(.45)
+    for _ in range(6):
+        c.tab(1, True)
+        if (J("document.activeElement.innerText") or '').startswith('↓'): break
     ok = (J("document.activeElement.innerText") or '').startswith('↓'); ESPACO(); time.sleep(.5); return ok
 def tira_chip(pref, tec):
     """o × do chip do filtro (Classe): pelo teclado, Tab a partir da busca até ele e Enter; por clique, o clique nele."""
