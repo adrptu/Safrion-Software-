@@ -83,4 +83,4 @@ def vai_safra(sid, passo=2): etapa1(); time.sleep(.4); c.js(f"window.__safSelf.s
 def alerta(): return c.js("(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); return a?[...a.querySelectorAll('[role=alert]')].map(e=>e.innerText).join(' | '):'(painel fechado)';})()")
 def folhas(gid): return [x for r in (estado(gid) or []) for x in [r] + (r.get('kids') or []) if not x.get('grp')]
 def links_nota(): return c.js("[...document.querySelectorAll('[data-acoes] [data-acao=atalho]')].map(b=>b.textContent.trim())") or []
-def clica_link(t): return c.js(f"(()=>{{const b=[...document.querySelectorAll('[data-acoes] [data-acao=atalho]')].filter(b=>b.offsetParent).find(b=>b.innerText.trim()==={json.dumps(t)}); if(!b) return 'sem link'; b.click(); return 'ok';}})()")
+def clica_link(t): return c.js(f"(()=>{{const b=[...document.querySelectorAll('[data-acoes] [data-acao=atalho]')].find(b=>b.textContent.trim()==={json.dumps(t)}); if(!b) return 'sem link'; const d=b.closest('details'); if(d) d.open=true; b.click(); return 'ok';}})()")   # atalho no ⋯ (15/10)

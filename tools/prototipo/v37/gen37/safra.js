@@ -1467,7 +1467,10 @@ function EXTRAVALS(self,v){ try{ window.__safSelf=self; self.__cultivos=(k)=>lea
   // 4 etapas (05/10/2026: as antigas 3, 4 e 5 viraram "Dimensione operações e recursos"); sem plano (R0) o bloco da etapa 3 não aparece
   for(let i=1;i<=4;i++) v['s'+i]=(step===i); v.s3=step===3&&!!temPlano;
   const whys={}; for(let i=2;i<=4;i++){ if(!saf) whys[i]='Escolha a safra'; else if(i>=3 && !temPlano) whys[i]='Aplique um plano'; }
-  g2steps(self,v,'stp',4,step,whys);   // só informa (UX-ACAO-UNICA-20261003): avanço e retorno na área de ações
+  // cartões do fluxo (15/10/2026): o número da etapa e a frase curta (safras abertas e a escolhida; cultivos da safra e quantos sem plano)
+  const csx=saf?cultRows(self,saf):[]; const semP=csx.filter(c=>{ const pl=planById(c.v.plano); return !(pl&&pl.cultura===c.v.cult); }).length;
+  const info={1:{cnt:safRows.length,sub:safObj?String((safObj.s&&safObj.s.nome)||safObj.v.nome||''):''},2:saf?{cnt:csx.length,sub:semP?semP+' sem plano':''}:{}};
+  g2steps(self,v,'stp',4,step,whys,null,info);   // só informa (UX-ACAO-UNICA-20261003): avanço e retorno na área de ações
   v.saf_nome=safObj?safObj.v.nome:'nenhuma safra escolhida'; v.saf_ro=ro; v.saf_ok=!!saf; v.saf_none=!saf;
   v.ctx_saf=safObj?(safObj.v.nome+(ro?' · consulta':'')):'Nenhuma safra escolhida';
   // a faixa diz a fazenda da safra aberta; sem safra, a fazenda escolhida nos chips da etapa 1 (ou todas): antes dizia sempre Santa Rita
