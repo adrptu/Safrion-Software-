@@ -1341,6 +1341,9 @@ SEP_CSS=(
     ":is([style*=\"border: 1px solid\"],.cadx) :is(div,section)[style*=\"border: 1px solid rgb(228, 233, 229)\"][style*=\"background: rgb\"]:not([style*=\"background: rgb(255, 255, 255)\"]){border-color:transparent!important}"
     # 1ª linha de uma lista que abre a caixa com borda: a borda da caixa já está ali, a poucos px (linha dupla)
     f"[style*=\"border: 1px solid\"]>:first-child{_BT}{{border-top-color:transparent!important}}"
+    # lista curta (2 ou 3 itens com linha no topo, contados na hora: a lista cresce e a linha volta): itens separados pelo espaço, sem linha;
+    # o sc-for não fica no DOM (os itens são filhos diretos do contêiner); linha de tabela (role=row) fica
+    f":has(>{_BT}~{_BT}):not(:has(>{_BT}~{_BT}~{_BT}~{_BT}))>:is(div,li){_BT}:not([role=row]){{border-top-color:transparent!important}}"
     f"{_CAB_BLOCO}{_SEM_MOLDURA}{{background-image:linear-gradient({DS_SEP['cor']},{DS_SEP['cor']})!important;background-size:calc(100% - 2 * {DS_SEP['recuo']}) 1px!important;"
     "background-position:50% 100%!important;background-repeat:no-repeat!important}"
     f"{_CAB_BLOCO}{_SEM_MOLDURA}+*{{margin-top:{DS_SEP['espaco']}}}"

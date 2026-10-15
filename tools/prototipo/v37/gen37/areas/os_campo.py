@@ -115,7 +115,7 @@ def app():
     prep = card('Caldeiro · preparo',
                 f'<div style="{H("cg_st")}"><b style="font-size: 16px;">{H("cg_t")}</b>'
                 f'<div style="display: flex; gap: 14px; font-size: 13px;"><span>Tanque: <b>{H("cg_vol")}</b></span><span>Área: <b>{H("cg_area")}</b></span></div>'
-                f'<sc-for list="{H("cg_prods")}" as="p" hint-placeholder-count="1"><div style="display: flex; justify-content: space-between; font-size: 15px; padding: 6px 0; border-top: 1px solid {LINE};"><span>{H("p.p")}</span><b>{H("p.q")}</b></div></sc-for>'
+                f'<sc-for list="{H("cg_prods")}" as="p" hint-placeholder-count="1"><div style="display: flex; justify-content: space-between; font-size: 15px; padding: 6px 0;"><span>{H("p.p")}</span><b>{H("p.q")}</b></div></sc-for>'
                 f'<div style="font-size: 12.5px; color: {MUTED};">Complete com água até o volume do tanque, na ordem da instrução liberada.</div></div>'
                 f'<span style="display: block; height: 6px; border-radius: 999px; background: {GRAYS}; overflow: hidden;"><span style="{H("bar_st")}"></span></span>'
                 f'<div style="font-size: 12px; color: {MUTED};">{H("feitas_t")}</div>'
