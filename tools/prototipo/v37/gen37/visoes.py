@@ -12,6 +12,14 @@ NOME = {'lista': 'tabela',   # VISOES-2 §2: Lista e Tabela agrupada são uma vi
         'mapa': 'mapa', 'carga': 'carga por recurso', 'matriz': 'matriz', 'arvore': 'árvore', 'galeria': 'galeria'}
 # ícones Lucide 1.45.0 (ISC; LICENSES/lucide-ISC.txt) convertidos para o icon() do engine; só entram os que alguma tela usa
 ICONE = {'lista': 'v_agrupada', 'agrupada': 'v_agrupada', 'kanban': 'v_kanban', 'calendario': 'v_calendario', 'carga': 'v_carga'}
+# Modo de ver a listagem (proprietário, 15/10/2026: "Coloque modos de visão em todas telas... tem que ter opção tabela e 'Cartões'"):
+# Tabela | Cartões no fim da barra de toda grade de listagem do menu (engine.grid, com colunas essenciais ou "Agrupar por") e nas Atividades
+# do plano (PA). Os cartões leem as mesmas linhas da Tabela (busca, filtro rápido, filtros, Agrupar por com descer e trilha, Colunas).
+# Onde a listagem já tem seletor de visões (VISOES-1: O.S.) ou o Kanban da própria tela (BEN, MA › Ordens), o modo não entra (o Kanban
+# já cumpre o papel dos cartões). Preferência por perfil × tela × listagem (safrion.pref.modo:*) e ?view=cartoes na listagem principal.
+MODOS = ['tabela', 'cartoes']
+MODO_NOME = {'tabela': 'Tabela', 'cartoes': 'Cartões'}          # aria-label e dica do botão (só ícone)
+MODO_ICONE = {'tabela': 'v_agrupada', 'cartoes': 'v_cartoes'}  # o mesmo ícone da Tabela no seletor da VISOES-1 (ICONE['lista'])
 # o atributo dominante que cada visão exige (regra do pedido: sem o dado, sem a visão)
 EXIGE = {
     'lista': [],

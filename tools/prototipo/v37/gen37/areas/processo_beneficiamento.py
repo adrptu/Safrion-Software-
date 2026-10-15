@@ -17,7 +17,8 @@ def build():
     fname = 'BEN.dc.html'; E._reset_screen(fname)
     g_ob = grid([dict(k='id', l='Ordem', w=150), dict(k='prod', l='Produto', w=200), dict(k='fase', l='Fase', w=140), dict(k='cond', l='Condição', w=200, multi=True),
                  dict(k='ep', l='Em processo', t='num', a='r', w=130), dict(k='nx', l='Próximo passo', w=230), dict(k='quem', l='Quem resolve', w=200)],
-                [], edit=dict(m='pick'), gid='g_ob', total=False, qf=dict(k='fase', l='Fase', todas='Todas'))
+                [], edit=dict(m='pick'), gid='g_ob', total=False, qf=dict(k='fase', l='Fase', todas='Todas'),
+                cartoes=False)   # Lista | Kanban próprios: o Kanban já cumpre o papel dos cartões (15/10/2026)
     EXTRAJS[0] = _js(BEN_JS)
     vis = (f'<div class="pr-vis" role="group" aria-label="Visão das ordens"><button type="button" aria-pressed="{H("vl_on")}" onClick="{H("vl_go")}">Lista</button>'
            f'<button type="button" aria-pressed="{H("vk_on")}" onClick="{H("vk_go")}">Kanban</button></div>')

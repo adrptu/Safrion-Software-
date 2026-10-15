@@ -1632,7 +1632,7 @@ def build():
                dict(k='real',l='Realizado (ha)',t='num',a='r',d=2,pq='medida',agg='sum'),dict(k='saldo',l='Saldo (ha)',t='num',a='r',d=2,pq='medida',agg='sum'),
                dict(k='disp',l='Dispensado (ha)',t='num',a='r',d=2,zdash=True,pq='medida'),dict(k='prog',l='Progresso (%)',t='num',a='r',d=1,ess=6,pq='medida'),
                dict(k='resp',l='Responsável',pq='quem')],   # sem coluna Lâmina: a O.S. só com água saiu para a Irrigação (01/10), onde a lâmina tem colunas próprias (IR-03); aqui ela ficava sempre vazia
-              [],edit=dict(m='pick'),gid='g_os',total=False,tree=True,vazio=False,
+              [],edit=dict(m='pick'),gid='g_os',total=False,tree=True,vazio=False,cartoes=False,   # visões próprias (VISOES-1): sem o modo Cartões
               # VISOES-2 §3.3: Agrupar por (O quê, Quem, Quando, Onde) com os níveis do descer; a linha traz r.g (osLinhas)
               ag=[dict(pq='oque',l='Atividade',niv=['Operação','Atividade'],um='O.S.',plural='O.S.'),dict(pq='quem',l='Responsável',niv=['Responsável'],um='O.S.',plural='O.S.'),
                   dict(pq='quando',l='Início',niv=['Safra','Mês','Semana'],um='O.S.',plural='O.S.'),dict(pq='onde',l='Talhão',niv=['Fazenda','Talhão'],fc=['','tal'],um='O.S.',plural='O.S.')])   # vazio de filtro: estado comum das visões (VISOES-1 §2.8)
