@@ -55,7 +55,8 @@ for i,r in enumerate(IDX['produtos']):
            cul=set(r[F['culturas']]),comp=comp,org=r[F['organico']],ing=r[F['ingredientes']],tit=IDX['titulares'][r[F['titular']]],
            rot=rotk(ids),codes=codes,gqT=' + '.join(GQ[g] for g in gq))
     x['moa']=(' + '.join(codes)+' · '+' + '.join(GNOME.get(k,k) for k in codes)) if codes else ((x['gqT'] or 'grupo químico não informado')+' · sem código de referência')
-    x['hay']=nz(' '.join([x['reg'],' '.join(r[F['marcas']]),' + '.join(IG[k][0] for k in ids),' + '.join(GQ[g] for g in gq),' + '.join(codes),' + '.join(GNOME.get(k,k) for k in codes),x['tit'],
+    conc=' + '.join(str(i[1]) for i in r[F['ingredientes']] if i[1] is not None)   # a página procura também pela concentração (15/10/2026)
+    x['hay']=nz(' '.join([x['reg'],' '.join(r[F['marcas']]),' + '.join(IG[k][0] for k in ids),conc,' + '.join(GQ[g] for g in gq),' + '.join(codes),' + '.join(GNOME.get(k,k) for k in codes),x['tit'],
                           ', '.join(dict.fromkeys(CL[c][0] for c in cls)),' '.join(comp),'biologico' if bio else '',modo,fo[0],fo[1]]))
     P.append(x)
 REG={x['reg']:x for x in P}
@@ -168,6 +169,7 @@ try:
         carregou and NP==len(P) and SELO in head and f'Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de {DT} · {nf(NP,0)} produtos com registro' in head
         and any(t.startswith('Abrir no AGROFIT oficial') and h==OFICIAL and tg=='_blank' and 'noopener' in (rl or '') for t,h,tg,rl in ln), [head,ln])
     # ---------- 4 · listagem: todos os registros, 7 colunas, render incremental ----------
+    # (cdp.Chrome mostra todas as colunas, como quem escolheu "todas" no painel; o padrão sem Tox · amb, 15/10/2026, está em agrofit_faixa_test.py)
     cols=[nz(x).replace('⇅','').replace('▾','').strip() for x in (J("[...document.querySelectorAll('main [role=columnheader]')].map(h=>h.innerText.replace(/\\s+/g,' '))") or [])]
     n50=len(rows()); clica('main','Mostrar mais'); time.sleep(.4); n150=len(rows())
     chk(f'4 lista: "{nf(NP,0)} de {nf(NP,0)} produtos", 7 colunas (com Alvos, 13/10), 50 linhas e "Mostrar mais" → 150',
@@ -198,7 +200,7 @@ try:
     shot('soja_ferrugem')
     # ---------- 8 · Classe + agrupar por grupo químico ----------
     J("[...document.querySelectorAll('main button')].find(b=>/^Limpar filtros/.test(b.innerText.trim())).click()"); time.sleep(.4)
-    clica('main [role=group][aria-label="Filtrar por classe"]','Herbicida'); c8=cnt()
+    setv('main [role=group][aria-label="Filtros"] select[aria-label="Classe"]','Herbicida'); c8=cnt()   # Classe na faixa "Filtros" (15/10/2026)
     HB=[x for x in P if 'Herbicida' in x['comp']]; GG={}
     for x in HB:
         gs=list(dict.fromkeys(IG[k][1] for k in x['ids'] if IG[k][1] is not None)) or [None]

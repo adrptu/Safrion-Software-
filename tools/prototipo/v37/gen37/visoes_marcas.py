@@ -15,7 +15,8 @@ import re
 
 # Ondas (14/10): 1 · Cadastros e Agrícola; 2 · Manutenção, Suprimentos, Comercial, Configurações e Backoffice. Cada onda com a bateria
 # dos módulos antes de publicar. A AG-07 fica de fora até migrar o modo próprio (por produto × por uso,
-# com 6 e 8 colunas): a pedido-1410 manda tirar essas opções (ESPEC §5, V2-3).
+# com 6 e 8 colunas): a pedido-1410 manda tirar essas opções (ESPEC §5, V2-3). Desde 15/10/2026 a AG-07 traz as
+# próprias marcas (ess e pq em areas/agronomia.py, AGF_COLS_P e AGF_COLS_U: Tox · amb fica no painel "Colunas").
 ABRE = """
 CD-01 g_tal ; Fazenda › talhão ; Área cultivável ; Diferença ; Parcelas na safra 2026/27
 CD-01 g_agua ; Ponto de água ; Vencimento ; Vazão ; Uso
