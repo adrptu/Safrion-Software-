@@ -1028,7 +1028,7 @@ def _pag_plano():
            f'<span style="font-size: 12px; color: {MUTED}; min-width: 18px;">{H("s.pcun")}</span><button type="button" onClick="{H("s.pcadd")}" style="{_MINI}">Incluir peça</button></div>'
          + IF('s.pcHasErr',f'<span role="alert" style="{ERRS}">{H("s.pcerr")}</span>') + '</div></div>')
     svrow=(f'<div class="pm-sv" style="{H("s.rst")}"><div class="pm-sv-linha">'
-           f'<button type="button" class="g2car" aria-label="{H("s.lab")}" title="{H("s.lab")}" aria-expanded="{H("s.open")}" aria-controls="{H("s.did")}" onClick="{H("s.tog")}">{H("s.sym")}</button>'
+           f'<button type="button" class="g2car" aria-label="{H("s.lab")}" aria-expanded="{H("s.open")}" aria-controls="{H("s.did")}" onClick="{H("s.tog")}">{H("s.sym")}</button>'
            f'<span style="display: flex; flex-direction: column; gap: 3px; min-width: 0; align-items: flex-start;"><button type="button" class="pm-nome" onClick="{H("s.edit")}" title="Editar gatilhos, tolerância, tempo e especialidade">{H("s.nome")}</button>'
            + IF('s.hasChg',f'<span style="{H("s.chgst")}">{H("s.chg")}</span>') + '</span>'
            f'<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0;"><b style="font-weight: 700;">{H("s.gat")}</b><span style="font-size: 12px; color: {MUTED};">{H("s.tol")}</span>'

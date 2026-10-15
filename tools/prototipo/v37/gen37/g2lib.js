@@ -1022,6 +1022,7 @@ function g2dicaRegra(o){ if(o.dica!==null&&o.dica!==undefined) return String(o.d
   if(al&&o.comando&&!/[\p{L}\p{N}]/u.test(vis)) return al;   // sem letra nem número visível (×, ‹, ▾, só ícone)
   return ''; }
 function g2dicaTexto(el){ if(!el||el.nodeType!==1||!el.getAttribute) return '';
+  if(el.classList&&el.classList.contains('g2car')) return '';   // 15/10/2026 (proprietário): a seta de abrir/recolher é óbvia, sem dica (o nome fica para o leitor de tela)
   const d=el.getAttribute('data-dica'), de=el.getAttribute('data-dica-de'), t=el.getAttribute('title')||el.__g2tt||'', al=el.getAttribute('aria-label')||'';
   if(d===null&&de===null&&!t&&!al) return '';   // sem fonte de dica: nem mede o texto visível (innerText custa layout)
   return g2dicaRegra({dica:d,de,title:t,vis:(d===null&&de===null)?g2visTxt(el):'',aria:al,

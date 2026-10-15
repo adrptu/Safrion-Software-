@@ -5,7 +5,7 @@ Pedidos do proprietário de 15/10/2026:
 - "esses ícones e setas para fluxo de processos ficou melhor, mais intuitivo, torne mais bonito com nosso design system e substitua o atual fluxo de processos visual".
 - "E no fluxo de processos permita clicar diretamente na etapa do fluxo de processos desejado e ir para a tela."
 
-Vale para toda tela de processo em etapas (hoje: Planejar safra e Compras de insumos), no protótipo e no software real. Revoga a regra de 03/10 de que a faixa "só informa" (UX-ACAO-UNICA-20261003).
+Padrão ETP-02 do catálogo [padroes-1510.md](padroes-1510.md). Vale para toda tela de processo em etapas (hoje: Planejar safra e Compras de insumos), no protótipo e no software real. Revoga a regra de 03/10 de que a faixa "só informa" (UX-ACAO-UNICA-20261003).
 
 ## Regras
 
