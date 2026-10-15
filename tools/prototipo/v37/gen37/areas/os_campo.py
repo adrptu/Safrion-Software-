@@ -89,7 +89,7 @@ function EXTRAVALS(self,v){ cenOuvir(self); const c=cenGet(); const st=self.stat
     :(pend.length?'Entregue por '+d.os.almox+' · confirme o recebimento':'Reservado · retire com '+d.os.almox+' no almoxarifado');
   v.ret_cst='display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;'+(ret?'color:#1E7A4C;background:#E4F3E9;':'color:#8A5A00;background:#FFF4D6;');
   v.cg_t='Carga '+cg.n+' de '+N+(cg.parcial?' · última, parcial':''); v.cg_par=cg.parcial; v.cg_vol=cg.volt; v.cg_area=cg.areat; v.cg_prods=cg.prods;
-  v.cg_st='display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:14px;border:'+(cg.parcial?'2px solid #8A5A00':'1px solid #E4E9E5')+';background:#FFFFFF;';
+  v.cg_st='display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:14px;border:'+(cg.parcial?'2px solid #8A5A00;background:#FFFFFF':'1px solid transparent;background:#F4F6F3')+';';   // SEP-20261015 (d): a carga atual dentro do cartão leva fundo, não moldura
   v.prep=fase!=='ret'; v.feitas_t=feitas+' de '+N+' cargas preparadas'; v.bar_st='display:block;height:100%;border-radius:999px;background:#1E7A4C;width:'+Math.round(100*feitas/N)+'%;';
   v.lista=d.cargas.map((x,i)=>({t:'Carga '+x.n+' · '+x.volt+' · '+x.areat,s:i<feitas?'✓':'',st:'font-size:12.5px;color:'+(i<feitas?'#1E7A4C':(i===feitas&&fase==='prep'?'#15201A':'#8A968E'))+';font-weight:'+(i===feitas&&fase==='prep'?'800':'600')+';'}));
   v.prim_t=fase==='ret'?(pend.length?'Confirmar recebimento':'Retirar no almoxarifado'):(fase==='prep'?('Carga '+cg.n+' preparada'):'Registrar apontamento');

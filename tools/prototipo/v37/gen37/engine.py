@@ -1324,7 +1324,7 @@ _CAB_BLOCO='main section>div:first-child:not(:last-child):has(>h2,>h3,>div>h2,>d
 _BORDA_TOPO=':is([style*="border: 1px"],[style*="border-top: 1px"])'
 # SEP-20261015 (proprietário, 15/10: "retire em todas telas onde tem excesso de linhas separadoras visuais, deixe somente as que geram efetiva
 # organização visual e intuitividade"): a linha do título também sai quando o corpo traz a tabela (com ou sem moldura) ou a barra de modos de
-# visão (O.S., Manutenção), que já separam sozinhas
+# visão (O.S., Manutenção), que já separam sozinhas; a tabela dentro de uma caixa com borda perde a moldura (caixa dentro de caixa)
 _SEM_MOLDURA=(f':not(:has(+*>{_BORDA_TOPO}:first-child))'
               f':not(:has(+*>sc-if:first-child>{_BORDA_TOPO}:first-child))'
               f':not(:has(+*>:first-child>[style*="border-top: 1px"]:first-child))'
@@ -1332,7 +1332,12 @@ _SEM_MOLDURA=(f':not(:has(+*>{_BORDA_TOPO}:first-child))'
               ':not(:has(+*>.g2caixa:first-child,+*>sc-if:first-child>.g2caixa:first-child,+* .g2visoes-w))'
               # cartões (fileira de caixas com borda) e gráfico ou mapa (role=img, svg) logo no topo do corpo
               ':not(:has(+*>:first-child>[style*="border: 1px"]:first-child:not(button,a,label,input,select,span),+*>:is([role=img],svg):first-child))')
+# caixa com borda (seção, cartão, painel, bloco do cadastro, grade): a tabela de dentro fica sem moldura; o cabeçalho com fundo e o espaço separam
+_MOLDURA=':is([style*="border: 1px solid"],.cadx,.g2caixa)'
 SEP_CSS=(
+    f"{_MOLDURA} .g2caixa{{border-color:transparent!important}}"
+    # caixa com fundo próprio dentro de outra caixa (memória de cálculo, indicador, evidência): fica o fundo, sai a borda neutra
+    ":is([style*=\"border: 1px solid\"],.cadx) :is(div,section)[style*=\"border: 1px solid rgb(228, 233, 229)\"][style*=\"background: rgb\"]:not([style*=\"background: rgb(255, 255, 255)\"]){border-color:transparent!important}"
     f"{_CAB_BLOCO}{_SEM_MOLDURA}{{background-image:linear-gradient({DS_SEP['cor']},{DS_SEP['cor']})!important;background-size:calc(100% - 2 * {DS_SEP['recuo']}) 1px!important;"
     "background-position:50% 100%!important;background-repeat:no-repeat!important}"
     f"{_CAB_BLOCO}{_SEM_MOLDURA}+*{{margin-top:{DS_SEP['espaco']}}}"
