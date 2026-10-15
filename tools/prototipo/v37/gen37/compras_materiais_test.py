@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """CMP-MAT (V69) · Compras de materiais, peças e serviços no navegador (CDP), como a pessoa faz. Dados sintéticos.
 Pedido do proprietário (15/10/2026): "cadê as compras de materiais, peças, etc?" — lógica própria: OM, reposição e avulsa, sem safra.
- 1 · Compras tem o seletor "Insumos da safra | Materiais, peças e serviços"; Materiais esconde a safra e as etapas dos insumos, mostra a faixa
-     Filtros (Origem, Situação) e a fila com as três origens; o endereço #tipo=materiais reabre a mesma parte.
+ 1 · Compras tem o seletor "Insumos da safra | Materiais, peças e serviços" no começo da faixa da tela; Materiais esconde a safra e as etapas
+     dos insumos, mostra a faixa Filtros (seletor, Origem, Situação) e a fila com as três origens; o endereço #tipo=materiais reabre a mesma parte.
  2 · Peça de OM: Manutenção gera a OM-0235 (Falta peça) → Solicitar compra → Compras cota, emite o pedido e recebe → a peça entra no saldo
      para a OM-0235, que sai de "Falta peça" e libera na Manutenção (a reserva nasce na liberação, DEC-2609-13). Zé (mecânico) vê "Solicitar cotações" indisponível com o motivo.
  3 · Reposição: a Graxa EP2 abaixo do ponto de pedido aparece sem requisição; Rui abre a reposição; o recebimento entra no estoque.
@@ -38,13 +38,13 @@ def secao(nome, fn):
 def parte1():   # 1 · o seletor e a fila
     cmp('', perfil='Ana', limpa=True); m.sem_erro('CMP · Insumos da safra')
     ins = J("[...document.querySelectorAll('[data-cmtipo]')].map(b=>b.innerText.trim()+':'+b.getAttribute('aria-pressed'))") or []
-    m.ok(ins == ['Insumos da safra:true', 'Materiais, peças e serviços:false'] and vis('.etp') and vis('.mf-tela[aria-label="Trabalhando em"]'),
-         '1a seletor "Insumos da safra | Materiais, peças e serviços" no cabeçalho; Insumos abre por padrão com as etapas e a safra', ins)
+    m.ok(ins == ['Insumos da safra:true', 'Materiais, peças e serviços:false'] and vis('.etp') and vis('.mf-tela[aria-label="Trabalhando em"] [data-cmtipo]'),
+         '1a seletor "Insumos da safra | Materiais, peças e serviços" no começo da faixa da tela; Insumos abre por padrão com as etapas e a safra', ins)
     m.clk('Materiais, peças e serviços'); time.sleep(.4)
-    fx = J("[...document.querySelectorAll('[data-cm-mat] .mf-tela select')].filter(s=>s.getClientRects().length).map(s=>s.getAttribute('aria-label'))") or []
+    fx = J("[...document.querySelectorAll('[data-cm-mat] .mf-tela select, [data-cm-mat] .mf-tela [data-cmtipo=mat]')].filter(s=>s.getClientRects().length).map(s=>s.getAttribute('aria-label')||s.innerText.trim())") or []
     r0 = ids()
-    m.ok(m.hash() == '#tipo=materiais' and not vis('.etp') and not vis('.mf-tela[aria-label="Trabalhando em"]') and fx == ['Filtrar por origem', 'Filtrar por situação'],
-         '1b Materiais: sem as etapas e a safra dos insumos; faixa Filtros com Origem e Situação; endereço #tipo=materiais', [m.hash(), fx])
+    m.ok(m.hash() == '#tipo=materiais' and not vis('.etp') and not vis('.mf-tela[aria-label="Trabalhando em"]') and fx == ['Materiais, peças e serviços', 'Filtrar por origem', 'Filtrar por situação'],
+         '1b Materiais: sem as etapas e a safra dos insumos; faixa Filtros com o seletor, Origem e Situação; endereço #tipo=materiais', [m.hash(), fx])
     m.ok(r0 == ['SC-038', 'SC-040', 'REP:GR-EP2', 'SC-039'],
          '1c a fila mostra as três origens: serviço da OM-0233 (urgente), avulsa da oficina (alta), Graxa EP2 abaixo do ponto de pedido e a reposição SC-039', r0)
     l38 = m.linha('SC-038'); lrep = m.linha('REP:GR-EP2')

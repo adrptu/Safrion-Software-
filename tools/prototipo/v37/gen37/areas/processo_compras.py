@@ -80,11 +80,11 @@ def kline(hole):
 def IFH(cond,html,dflt=False): return f'<sc-if value="{H(cond)}" hint-placeholder-val="{H("true") if dflt else F()}">{html}</sc-if>'
 def FORH(lst,as_,html,n=2): return f'<sc-for list="{H(lst)}" as="{as_}" hint-placeholder-count="{n}">{html}</sc-for>'
 # ---------- V69 · Materiais, peças e serviços: faixa Filtros + fila de requisições + painel de detalhe ----------
-def _mat_corpo(g_mat):
+def _mat_corpo(g_mat,seg=''):
     L_=ui37.MF_LBL.format(MUTED=MUTED); S_=ui37.MF_SEL.format(LINE=LINE,SURF=SURF,INK=INK)
     fsel=lambda rot,val,setfn,lst: (f'<label style="{L_}">{rot}<select aria-label="Filtrar por {rot.lower()}" value="{H(val)}" onChange="{H(setfn)}" style="{S_}">'
                                     + FORH(lst,'o',f'<option value="{H("o.v")}">{H("o.t")}</option>',3) + '</select></label>')
-    faixa=ui37.faixa_filtros(fsel('Origem','cm_fo','cm_setfo','cm_fos')+fsel('Situação','cm_fs','cm_setfs','cm_fss'))
+    faixa=ui37.faixa_filtros(seg+fsel('Origem','cm_fo','cm_setfo','cm_fos')+fsel('Situação','cm_fs','cm_setfs','cm_fss'))
     return f'<div data-cm-mat="1" style="display: flex; flex-direction: column; gap: 14px; min-width: 0;">{faixa}{g_mat}</div>'
 def _mat_painel():
     LB=f'font-size: 12px; font-weight: 600; color: {MUTED};'
@@ -221,18 +221,19 @@ def build():
     s6=kline('k6')+bloco('Pedidos e entregas','Acompanhe recebido, quarentena e saldo a entregar; clique no pedido para reprogramar a entrega.',g_ent,acao=acao_bloco)
     corpo=trail+''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{H("true") if i==1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}</div></sc-if>'
                         for i,s in enumerate([s1,s2,s3,s4,s5,s6],1)) + E.area_acoes('aa','Ações da etapa')
-    # V69 (proprietário, 15/10: "cadê as compras de materiais, peças, etc?"): uma entrada de Compras, dois tipos no seletor do cabeçalho.
+    # V69 (proprietário, 15/10: "cadê as compras de materiais, peças, etc?"): uma entrada de Compras, dois tipos no seletor da faixa.
     # Insumos da safra: o processo de 6 etapas (a safra no "Trabalhando em" e a faixa de etapas). Materiais, peças e serviços: a fila de
     # requisições SC (OM, reposição, avulsa), sem safra, com a faixa Filtros e o detalhe no painel lateral.
-    corpo=IFH('ins_on',corpo,True)+IFH('mat_on',_mat_corpo(g_mat))
-    E.EXTRA.append(_mat_painel())   # painel lateral fora do main (como o formulário da grade): fica preso à direita da janela
-    seg=(f'<div role="group" aria-label="Tipo de compra" style="display: inline-flex; flex-wrap: wrap; align-self: flex-start; padding: 3px; border-radius: 999px; background: {GRAYS}; gap: 2px;">'
+    # o seletor fica no começo da faixa da tela (Trabalhando em, nos insumos; Filtros, nos materiais): sem linha a mais no cabeçalho
+    seg=(f'<div role="group" aria-label="Tipo de compra" style="display: inline-flex; flex-wrap: wrap; padding: 3px; border-radius: 999px; background: {GRAYS}; gap: 2px;">'
          f'<button type="button" data-cmtipo="ins" aria-pressed="{H("cmt_ins")}" onClick="{H("cmt_goIns")}" style="{H("cmt_insSt")}">Insumos da safra</button>'
-         f'<button type="button" data-cmtipo="mat" aria-pressed="{H("cmt_mat")}" onClick="{H("cmt_goMat")}" style="{H("cmt_matSt")}">Materiais, peças e serviços</button></div>')
+         f'<button type="button" data-cmtipo="mat" aria-pressed="{H("cmt_mat")}" onClick="{H("cmt_goMat")}" style="{H("cmt_matSt")}">Materiais, peças e serviços</button></div>')+f'<span aria-hidden="true" style="width: 1px; height: 18px; background: {LINE};"></span>'
+    corpo=IFH('ins_on',corpo,True)+IFH('mat_on',_mat_corpo(g_mat,seg))
+    E.EXTRA.append(_mat_painel())   # painel lateral fora do main (como o formulário da grade): fica preso à direita da janela
     prim=IFH('mat_on',f'<button type="button" data-cm-nova="1" onClick="{H("cm_nova")}" style="{BTN_ST(True)}">Nova requisição</button>')
     HEIGHTS37[fname]=1200
     shell37('CMP','Compras',corpo,fname=fname,subtitle='Da solicitação do planejamento ao pedido entregue: cote, compare, aprove e acompanhe na mesma tela.',
-            steps=IFH('ins_on',steps_state(NOMES),True),primary_html=prim,chipsrow=seg,ctx=(H('ctx_faz'),H('ctx_saf'),None),search=False,mf_if='ins_on')
+            steps=IFH('ins_on',steps_state(NOMES),True),primary_html=prim,ctx=(H('ctx_faz'),H('ctx_saf'),None),search=False,mf_if='ins_on',mf_ini=seg)
 
 JS=r'''
 // ===== Processo · Compra de insumos (6 etapas numa só tela de trabalho) =====

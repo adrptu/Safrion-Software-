@@ -340,7 +340,7 @@ def faixa_cobranca(fid,fname):
             f'<span class="assin-fx-w">{{{{assin_fx_t}}}}</span><span class="assin-fx-m">{{{{assin_fx_m}}}}</span><a href="CF-05.dc.html#pagar" style="color: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: 3px;">Pagar fatura ›</a></div></sc-if>')
 def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=None,crumbs_extra=None,
             ctx=('Fazenda Santa Rita','Safra 2026/27',None),cont=None,chipsrow='',footer=None,
-            fname=None,W=1440,H=880,perfil='Ana · Gestora',search=False,steps=None,primary_html=None,mf_fim='',mf_if=None):
+            fname=None,W=1440,H=880,perfil='Ana · Gestora',search=False,steps=None,primary_html=None,mf_fim='',mf_if=None,mf_ini=''):
     # subtítulo sob o título não aparece mais# 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas"); o parâmetro fica por compatibilidade
     fname=fname or ffile(fid)
     H=_h(fname,H)
@@ -375,7 +375,7 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
             # (texto, funil + texto, só o funil); fica só o funil, com a dica "Filtros" (cada filtro já tem o nome ao lado; no celular sobra largura).
             # O grupo continua com o nome acessível "Filtros". Só contexto (Planejar safra, Compra) segue "Trabalhando em".
             _rot='Filtros' if _filtra else 'Trabalhando em'
-            _fx=faixa_filtros(mf,_rot,mf_fim)
+            _fx=faixa_filtros(mf_ini+mf,_rot,mf_fim)   # mf_ini: seletor da tela no começo da faixa (Compras: o tipo de compra, V69)
             if mf_if: _fx=f'<sc-if value="{{{{{mf_if}}}}}" hint-placeholder-val="{{{{true}}}}">{_fx}</sc-if>'   # V69: a faixa só vale numa parte da tela (Compras: a safra é dos insumos)
             body=_fx + body   # mf_fim: ação da tela que cabe na faixa (Planejar safra: Comparar versões do plano), sem uma linha a mais
         search=False
