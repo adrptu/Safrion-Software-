@@ -630,7 +630,7 @@ function manLiberar(c,id,forcar,pf,d){ const o=c.oms[id]; if(!o) throw new Error
   const ex=manExecSug(o); if(!ex) throw new Error('Falta: executante. Escolha quem executa.'); if(!(Number(o.tempo)>0)) throw new Error('Falta: tempo previsto (h).');
   const f=manFalta(c,o); if(f.length) throw new Error('Não liberada: falta peça · '+f.map(x=>x.nome+' ('+manN(c.itens[x.item].saldo-c.itens[x.item].reservado)+' de '+manN(x.qtd)+' '+x.un+')').join(', ')+(o.sc?'. Aguarda o recebimento da '+o.sc.id+'.':'. Solicite a compra.'));
   const cf=manConflito(c,o); if(cf&&!forcar) return {nada:true,aviso:true,msg:cf.t+' ('+cf.det+'). Mova a janela ou libere mesmo assim.'};
-  (o.pecas||[]).forEach(p=>{ if(!p.item) return; const q=p.qtd-(p.res||0); if(q>0) c.itens[p.item].reservado+=q; p.res=p.qtd; });   /* a peça recebida da SC já chega reservada (V69): libera só o que falta */
+  (o.pecas||[]).forEach(p=>{ if(!p.item) return; const q=p.qtd-(p.res||0); if(q>0) c.itens[p.item].reservado+=q; p.res=p.qtd; });   /* reserva o que ainda não está reservado (com a D5, a peça recebida da SC já chega reservada: V69) */
   o.executante=ex; o.etapa='Liberadas'; if(cf) o.conflitoAceito=true; o.lib={por:manPor(pf),em:c.hoje,conf:cf?cf.t:''}; manToca(o);
   const pr=(o.pecas||[]).filter(p=>p.item).map(p=>p.nome+' '+manN(p.qtd)+' '+p.un);
   return {msg:id+' liberada para a oficina · executante '+ex+(pr.length?' · reservado: '+pr.join(', '):'')+(cf?' · conflito com a '+cf.os.join(' e ')+' aceito e avisado ao PCP':'')+'.'}; }
@@ -641,10 +641,11 @@ function manSolicitar(c,id,pf){ const o=c.oms[id]; if(!o) throw new Error('Ordem
   o.sc={id:sc,data:c.hoje,por:manPor(pf),itens:f.map(p=>{ const it=c.itens[p.item]; return {item:p.item,nome:p.nome,un:p.un,qtd:Math.max(0,p.qtd-Math.max(0,it.saldo-it.reservado))}; })}; manToca(o);
   cmmDaOm(c,o);   /* V69: a SC entra na fila de Compras › Materiais, peças e serviços (dados_compras_mat) */
   return {msg:sc+' enviada a Compras (Materiais, peças e serviços): '+o.sc.itens.map(x=>x.nome+' '+manN(x.qtd,1)+' '+x.un).join(', ')+' · a '+id+' libera quando a peça chegar.'}; }
-/* recebimento da SC da OM, a função única da ponte da Manutenção e de Compras › Materiais (V69): o saldo entra e a peça fica reservada
-   para a OM (o.pecas[].res), que libera sem reservar de novo; a requisição de Compras fica Recebida. Devolve o que ficou reservado. */
+/* recebimento da SC da OM, a função única da ponte da Manutenção e de Compras › Materiais (V69): o saldo entra para a OM, que passa a poder ser
+   liberada; a reserva nasce na liberação (DEC-2609-13). Só com a D5 aprovada pelo proprietário (CMM.resRec, dados_compras_mat) a peça já fica
+   reservada para a OM (o.pecas[].res) e a liberação reserva só o que falta. A requisição de Compras fica Recebida. Devolve o que ficou reservado. */
 function manReceberSc(c,o,quem){ const sc=o.sc; sc.itens.forEach(x=>{ c.itens[x.item].saldo+=x.qtd; }); sc.rec=c.hoje; sc.recPor=quem;
-  const res=[]; (o.pecas||[]).forEach(p=>{ if(!p.item||(p.res||0)>=p.qtd||!sc.itens.some(x=>x.item===p.item)) return; const it=c.itens[p.item]; const q=p.qtd-(p.res||0);
+  const res=[]; if(CMM.resRec) (o.pecas||[]).forEach(p=>{ if(!p.item||(p.res||0)>=p.qtd||!sc.itens.some(x=>x.item===p.item)) return; const it=c.itens[p.item]; const q=p.qtd-(p.res||0);
     if(it.saldo-it.reservado+1e-9<q) return; it.reservado+=q; p.res=p.qtd; res.push(p.nome+' '+manN(p.qtd,1)+' '+p.un); });
   const r=c.cmp&&c.cmp.reqs[sc.id]; if(r&&r.etapa!=='Recebida'){ r.etapa='Recebida'; r.rec={em:c.hoje,por:quem,dest:'om',res}; }
   manToca(o); return res; }

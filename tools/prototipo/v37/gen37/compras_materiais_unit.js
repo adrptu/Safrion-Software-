@@ -15,7 +15,9 @@ caso('semente', () => {
   ok('S2 · nenhuma requisição de material, peça ou serviço tem safra ou cultura', Object.values(q).every(r => !('safra' in r) && !('cultura' in r) && !('saf' in r)), Object.keys(q['SC-040']));
   const c = S(); const p39 = cmmProps(c, c.cmp.reqs['SC-039']);
   ok('S3 · paridade Python × JS: as propostas da semente (SC-039) são as mesmas da regra cmmProps', JSON.stringify(p39.map(p => [p.f, p.valor, p.prazo])) === JSON.stringify(c.cmp.reqs['SC-039'].cot.props.map(p => [p.f, p.valor, p.prazo])), [p39, c.cmp.reqs['SC-039'].cot.props]);
-  ok('S4 · cotação só a homologado do grupo: serviço convida F23 e F21; F25 (não homologado) fica fora', JSON.stringify(c.cmp.reqs['SC-038'].cot.conv) === JSON.stringify(['F21', 'F23']) && cmmForaRegra(c.cmp.reqs['SC-038']).map(f => f.id).join() === 'F25', c.cmp.reqs['SC-038'].cot);
+  ok('S4 · cotação só a homologado do grupo: o serviço convida F08 e F10; F11 (não homologado) fica fora', JSON.stringify(c.cmp.reqs['SC-038'].cot.conv) === JSON.stringify(['F08', 'F10']) && cmmForaRegra(c.cmp.reqs['SC-038']).map(f => f.id).join() === 'F11', c.cmp.reqs['SC-038'].cot);
+  ok('S5 · grupos dos itens: filtro em Peças, graxa e óleos em Lubrificantes (grupos de dados2.GRUPOS e de docs/pcm-suprimentos)', cmmGrupoItem('FIL-MF4292') === 'Peças' && cmmGrupoItem('GR-EP2') === 'Lubrificantes' && c.cmp.reqs['SC-039'].itens[0].grupo === 'Peças', [cmmGrupoItem('FIL-MF4292'), cmmGrupoItem('GR-EP2')]);
+  ok('S6 · pedido da semente na série de manutenção PC-2nn (PC-201) e próximo PC-202', c.cmp.reqs['SC-038'].ped.id === 'PC-201' && c.cmp.seqpc === 202, [c.cmp.reqs['SC-038'].ped, c.cmp.seqpc]);
 });
 
 caso('reposição', () => {
@@ -25,7 +27,7 @@ caso('reposição', () => {
   const a = foto(c); const n = run(c, x => cmmRepor(x, 'GR-EP2', CAIO));
   ok('R2 · NEGATIVO Caio (PCP) não abre reposição: recusa com o motivo e nada muda', /almoxarife/.test(n.erro || '') && foto(c) === a, n);
   const r = run(c, x => cmmRepor(x, 'GR-EP2', RUI)); const q = c.cmp.reqs[r.id];
-  ok('R3 · Rui abre a SC-041 de reposição: 22 kg, Almoxarifado da oficina, A cotar, por Rui (almoxarife); a sugestão some', r.id === 'SC-041' && q.orig === 'rep' && q.itens[0].qtd === 22 && q.cc === 'Almoxarifado da oficina' && q.etapa === 'A cotar' && /Rui \(almoxarife\)/.test(q.por) && !cmmRepos(c).length, [r, q]);
+  ok('R3 · Rui abre a SC-041 de reposição: 22 kg de Lubrificantes, Almoxarifado da oficina, A cotar, por Rui (almoxarife); a sugestão some', r.id === 'SC-041' && q.orig === 'rep' && q.itens[0].qtd === 22 && q.itens[0].grupo === 'Lubrificantes' && q.cc === 'Almoxarifado da oficina' && q.etapa === 'A cotar' && /Rui \(almoxarife\)/.test(q.por) && !cmmRepos(c).length, [r, q]);
   const r2 = run(c, x => cmmRepor(x, 'GR-EP2', RUI));
   ok('R4 · repetir não abre outra requisição', r2.nada && Object.keys(c.cmp.reqs).length === 4, r2);
   run(c, x => cmmCotar(x, 'SC-041', ANA)); const p = cmmSugerida(c, c.cmp.reqs['SC-041']); run(c, x => cmmPedir(x, 'SC-041', p.f, '', ANA));
@@ -43,31 +45,43 @@ caso('peça da OM', () => {
   const a = foto(c); const nc = run(c, x => cmmCotar(x, 'SC-041', ZE));
   ok('O3 · NEGATIVO Zé (mecânico) não cota: recusa com o motivo, nada muda', /quem compra/.test(nc.erro || '') && foto(c) === a, nc);
   const ct = run(c, x => cmmCotar(x, 'SC-041', ANA)); const props = c.cmp.reqs['SC-041'].cot.props;
-  ok('O4 · Ana cota: 3 homologados de Peças e lubrificantes (F21, F22, F23), propostas na hora', !ct.erro && props.map(p => p.f).join() === 'F21,F22,F23' && c.cmp.reqs['SC-041'].etapa === 'Em cotação', [ct, props]);
+  ok('O4 · Ana cota: os 2 homologados de Peças (F08 e F09), propostas na hora', !ct.erro && props.map(p => p.f).join() === 'F08,F09' && c.cmp.reqs['SC-041'].etapa === 'Em cotação', [ct, props]);
   const ref = cmmSugerida(c, c.cmp.reqs['SC-041']);
-  ok('O5 · referência = menor custo que chega a tempo da janela da OM (24/09): Hidráulica Rondon, R$ 160,00, 1 dia (a mais barata chega em 28/09)', ref.f === 'F23' && ref.valor === 160 && ref.chega === '2026-09-24', [ref, props]);
-  const sj = run(c, x => cmmPedir(x, 'SC-041', 'F22', '', ANA));
-  ok('O6 · NEGATIVO escolher outra (Lubrimax, mais barata e atrasada) sem justificativa é recusado', /Justifique/.test(sj.erro || '') && c.cmp.reqs['SC-041'].etapa === 'Em cotação', sj);
-  const pd = run(c, x => cmmPedir(x, 'SC-041', 'F23', '', ANA)); const ped = c.cmp.reqs['SC-041'].ped;
-  ok('O7 · pedido PC-302 (a semente já tem a PC-301) para F23, R$ 160,00, previsão 24/09, por Ana (gestora)', !pd.erro && ped.id === 'PC-302' && ped.f === 'F23' && ped.valor === 160 && ped.prev === '2026-09-24' && /Ana \(gestora\)/.test(ped.por), [pd, ped]);
-  const pd2 = run(c, x => cmmPedir(x, 'SC-041', 'F23', '', ANA));
-  ok('O8 · emitir de novo não cria outro pedido', pd2.nada && c.cmp.seqpc === 303, pd2);
+  ok('O5 · referência = menor custo que chega a tempo da janela da OM (24/09): F08, R$ 160,00, 1 dia (F09 é R$ 4,80 mais barata e chega em 29/09)', ref.f === 'F08' && ref.valor === 160 && ref.chega === '2026-09-24' && props.find(p => p.f === 'F09').valor === 155.2 && props.find(p => p.f === 'F09').chega === '2026-09-29', [ref, props]);
+  const sj = run(c, x => cmmPedir(x, 'SC-041', 'F09', '', ANA));
+  ok('O6 · NEGATIVO escolher a F09 (mais barata e atrasada) sem justificativa é recusado', /Justifique/.test(sj.erro || '') && c.cmp.reqs['SC-041'].etapa === 'Em cotação', sj);
+  const pd = run(c, x => cmmPedir(x, 'SC-041', 'F08', '', ANA)); const ped = c.cmp.reqs['SC-041'].ped;
+  ok('O7 · pedido PC-202 (a semente já tem a PC-201) para F08, R$ 160,00, previsão 24/09, por Ana (gestora)', !pd.erro && ped.id === 'PC-202' && ped.f === 'F08' && ped.valor === 160 && ped.prev === '2026-09-24' && /Ana \(gestora\)/.test(ped.por), [pd, ped]);
+  const pd2 = run(c, x => cmmPedir(x, 'SC-041', 'F08', '', ANA));
+  ok('O8 · emitir de novo não cria outro pedido', pd2.nada && c.cmp.seqpc === 203, pd2);
   const f0 = manClone(c.itens['FIL-MF4292']); const rc = run(c, x => cmmReceber(x, 'SC-041', RUI)); const p0 = c.oms[id].pecas.find(p => p.item === 'FIL-MF4292');
-  ok('O9 · receber a peça da OM: +1 un no saldo e reservada para a OM-0235 (reservado +1, linha da OM reservada), SC Recebida e o.sc.rec',
-    !rc.erro && c.itens['FIL-MF4292'].saldo === f0.saldo + 1 && c.itens['FIL-MF4292'].reservado === f0.reservado + 1 && p0.res === 1 && c.cmp.reqs['SC-041'].etapa === 'Recebida' && c.oms[id].sc.rec === c.hoje && /reservado para a OM-0235/.test(rc.msg), [rc, c.itens['FIL-MF4292'], p0]);
-  ok('O10 · com a peça reservada, a OM-0235 não tem mais Falta peça', !manFalta(c, c.oms[id]).length, manFalta(c, c.oms[id]));
-  const rp = cmmRepos(c);
-  ok('O11 · a peça reservada não conta como livre: o filtro segue coberto pela SC-039 (livre 0 + 4 pedidos ≥ 2)', !rp.some(x => x.k === 'FIL-MF4292'), rp);
+  ok('O9 · receber a peça da OM (DEC-2609-13): +1 un no saldo para a OM-0235, sem reserva antes da liberação; SC Recebida e o.sc.rec',
+    !rc.erro && c.itens['FIL-MF4292'].saldo === f0.saldo + 1 && c.itens['FIL-MF4292'].reservado === f0.reservado && !p0.res && c.cmp.reqs['SC-041'].etapa === 'Recebida' && c.cmp.reqs['SC-041'].rec.dest === 'om'
+    && c.oms[id].sc.rec === c.hoje && /para a OM-0235/.test(rc.msg) && /pronta para liberar/.test(rc.msg), [rc, c.itens['FIL-MF4292'], p0]);
+  ok('O10 · com a peça no saldo, a OM-0235 não tem mais Falta peça', !manFalta(c, c.oms[id]).length, manFalta(c, c.oms[id]));
   const ol0 = c.itens['OL-1540'].reservado; const lb = run(c, x => manLiberar(x, id, false, OT, {}));
-  ok('O12 · liberar a OM-0235 não reserva o filtro de novo (reservado segue +1) e reserva só o óleo (12 L)', !lb.erro && c.oms[id].etapa === 'Liberadas' && c.itens['FIL-MF4292'].reservado === f0.reservado + 1 && c.itens['OL-1540'].reservado === ol0 + 12, [lb, c.itens['FIL-MF4292'], c.itens['OL-1540']]);
+  ok('O11 · liberar a OM-0235 reserva o filtro (+1) e o óleo (12 L) uma vez', !lb.erro && c.oms[id].etapa === 'Liberadas' && c.itens['FIL-MF4292'].reservado === f0.reservado + 1 && c.itens['OL-1540'].reservado === ol0 + 12, [lb, c.itens['FIL-MF4292'], c.itens['OL-1540']]);
+  ok('O12 · o filtro reservado não conta como livre: segue coberto pela SC-039 (livre 0 + 4 pedidos ≥ 2)', !cmmRepos(c).some(x => x.k === 'FIL-MF4292'), cmmRepos(c));
   const mr = run(c, x => manReceber(x, id, OT));
   ok('O13 · a ponte da Manutenção (Registrar recebimento) depois de Compras não soma de novo', mr.nada && c.itens['FIL-MF4292'].saldo === f0.saldo + 1, mr);
+});
+
+caso('D5 · reserva desde o recebimento (chave do proprietário, desligada)', () => {
+  ok('D5a · chave desligada na semente: a reserva segue na liberação (DEC-2609-13)', CMM.resRec === false, CMM.resRec);
+  const salva = CMM.resRec; CMM.resRec = true;
+  try {
+    const c = S(); manGerarTodas(c, null, OT); run(c, x => manSolicitar(x, 'OM-0235', OT)); run(c, x => cmmCotar(x, 'SC-041', ANA)); run(c, x => cmmPedir(x, 'SC-041', 'F08', '', ANA));
+    const f0 = manClone(c.itens['FIL-MF4292']); const rc = run(c, x => cmmReceber(x, 'SC-041', RUI)); const p0 = c.oms['OM-0235'].pecas.find(p => p.item === 'FIL-MF4292');
+    ok('D5b · com a chave ligada o recebimento já reserva para a OM-0235 (reservado +1, linha reservada)', !rc.erro && c.itens['FIL-MF4292'].reservado === f0.reservado + 1 && p0.res === 1 && /reservado para a OM-0235/.test(rc.msg), [rc, c.itens['FIL-MF4292'], p0]);
+    const lb = run(c, x => manLiberar(x, 'OM-0235', false, OT, {}));
+    ok('D5c · e a liberação não reserva o filtro de novo (reservado segue +1)', !lb.erro && c.itens['FIL-MF4292'].reservado === f0.reservado + 1, [lb, c.itens['FIL-MF4292']]);
+  } finally { CMM.resRec = salva; }
 });
 
 caso('ponte da Manutenção primeiro', () => {
   const c = S(); manGerarTodas(c, null, OT); run(c, x => manSolicitar(x, 'OM-0235', OT)); const f0 = manClone(c.itens['FIL-MF4292']);
   const mr = run(c, x => manReceber(x, 'OM-0235', OT));
-  ok('P1 · receber pela ponte da Manutenção reserva para a OM e deixa a SC-041 Recebida em Compras (uma função só)', !mr.erro && c.cmp.reqs['SC-041'].etapa === 'Recebida' && c.itens['FIL-MF4292'].reservado === f0.reservado + 1 && /reservado para a OM-0235/.test(mr.msg), [mr, c.cmp.reqs['SC-041']]);
+  ok('P1 · receber pela ponte da Manutenção deixa a SC-041 Recebida em Compras (uma função só) e o saldo +1', !mr.erro && c.cmp.reqs['SC-041'].etapa === 'Recebida' && c.itens['FIL-MF4292'].saldo === f0.saldo + 1, [mr, c.cmp.reqs['SC-041']]);
   const rc = run(c, x => cmmReceber(x, 'SC-041', RUI));
   ok('P2 · Compras não recebe de novo (recibo)', rc.nada && c.itens['FIL-MF4292'].saldo === f0.saldo + 1, rc);
 });
@@ -79,8 +93,8 @@ caso('serviço', () => {
   const nz = run(c, x => cmmAceitar(x, 'SC-038', ZE));
   ok('V2 · NEGATIVO Zé não aceita o serviço (PCM ou gestora)', /PCM/.test(nz.erro || '') && foto(c) === a, nz);
   const ac = run(c, x => cmmAceitar(x, 'SC-038', OT)); const o = c.oms['OM-0233']; const v = c.cmp.reqs['SC-038'].ped.valor;
-  ok('V3 · Otávio aceita: SC-038 Aceita; o valor do pedido (R$ 1.843,00) vira custo de terceiro da OM-0233 e entra no custo pela função única',
-    !ac.erro && c.cmp.reqs['SC-038'].etapa === 'Aceita' && v === 1843 && o.terc === 1843 && Math.abs(manCusto(c, o, 'est') - (o0 + 1843)) < 1e-9 && o.servs[0].sc === 'SC-038', [ac, o.terc, manCusto(c, o, 'est'), o0]);
+  ok('V3 · Otávio aceita: SC-038 Aceita; o valor do PC-201 (R$ 1.843,00, F10) vira custo de terceiro da OM-0233 e entra no custo pela função única',
+    !ac.erro && c.cmp.reqs['SC-038'].etapa === 'Aceita' && v === 1843 && c.cmp.reqs['SC-038'].ped.f === 'F10' && o.terc === 1843 && Math.abs(manCusto(c, o, 'est') - (o0 + 1843)) < 1e-9 && o.servs[0].sc === 'SC-038', [ac, o.terc, manCusto(c, o, 'est'), o0]);
   ok('V4 · o serviço não mexe em saldo de peça', JSON.stringify(c.itens) === JSON.stringify(MAN0.itens), '');
   const ac2 = run(c, x => cmmAceitar(x, 'SC-038', OT));
   ok('V5 · aceitar de novo não lança o custo duas vezes', ac2.nada && c.oms['OM-0233'].terc === 1843, ac2);

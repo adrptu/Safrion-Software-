@@ -9,29 +9,34 @@ A apropriação é por OM, ativo ou centro de custo, nunca por safra ou cultura;
 custo R$/h), sem rateio na compra.
 
 Estado: c.man.cmp do cenário único (reqs SC-nnn, seqpc), ao lado de c.man.itens (o saldo da oficina) e c.man.oms (a OM que recebe a
-peça reservada ou o custo do serviço). A numeração SC é a mesma do "Solicitar compra" da OM (c.man.seqsc). Fornecedores de peças e
+peça, reservada na liberação pela DEC-2609-13, ou o custo do serviço). A numeração SC é a mesma do "Solicitar compra" da OM (c.man.seqsc). Fornecedores de peças e
 serviços são fictícios e ficam aqui até entrarem no CD-05 (decisão de integração registrada no V69)."""
 import json
 
 HOJE = '2026-09-23'
-PC0 = 301   # pedidos de materiais em PC-3nn (os de insumos ficam em PC-1nn, processo_compras.PC_INI)
-GRUPO_CAT = 'Peças e lubrificantes'      # itens com código no almoxarifado da oficina (dados_manutencao.ITENS)
-GRUPO_MAT = 'Materiais gerais'           # material sem código (avulsa): vai direto ao centro de custo
-GRUPO_SERV = 'Serviços de manutenção'    # serviço de terceiro: sem estoque; o recebimento é o aceite
+PC0 = 201   # pedidos de manutenção em PC-2nn, série única de materiais e serviços (docs/pcm-suprimentos: "Mesma série PC-2xx, com tipo"); insumos em PC-1nn
+G_PECAS = 'Peças'                         # grupos de dados2.GRUPOS / docs/pcm-suprimentos (Peças; Lubrificantes)
+G_LUB = 'Lubrificantes'
+G_MAT = 'Materiais gerais'                # material sem código (avulsa): vai direto ao centro de custo
+G_SERV = 'Serviços de manutenção'         # serviço de terceiro (PRD, grupo "Serviços de manutenção"): sem estoque; o recebimento é o aceite
+GRUPO_ITEM = {'OL-1540': G_LUB, 'OL-HID68': G_LUB, 'GR-EP2': G_LUB}   # os demais itens da oficina são Peças
 CCS = ['Oficina', 'Sede', 'Irrigação', 'Armazém e beneficiamento']   # centros de custo das áreas (requisição avulsa)
 CC_REP = 'Almoxarifado da oficina'
 URG = ['Normal', 'Alta', 'Urgente']
 URG_DIAS = {'Alta': 3, 'Urgente': 1}   # requisição avulsa: "precisa até" pela urgência (Normal fica sem data)
-# fornecedores de peças e serviços (fictícios; homologação e grupos como no CD-05: cotação só vai a homologado do grupo)
+# DEC-2609-13 (decisão registrada do proprietário): a reserva nasce na liberação. A peça comprada para a OM entra no saldo e cobre a OM, que
+# passa a poder ser liberada; prendê-la à OM desde o recebimento é a pergunta D5 ao proprietário (docs/pcm-suprimentos/DECISOES.md §4).
+# Se ele aprovar (DEC registrada), True: o recebimento já reserva para a OM e a liberação só reserva o que falta (manLiberar).
+RESERVA_NO_RECEBIMENTO = False
+# fornecedores de peças e serviços (fictícios, IDs e propostas de docs/pcm-suprimentos: F08 Peças e Lubrificantes, F09 Peças; homologação e
+# grupos como no CD-05: cotação só vai a homologado do grupo). Ficam aqui até entrarem no CD-05 (parceiros 20 → 25).
 FORN = [
-    dict(id='F21', nome='Agro Peças Centro-Oeste', grupos=[GRUPO_CAT, GRUPO_MAT, GRUPO_SERV], homologado=True, fator=0.97, prazo=3, pag='28 dias',
-         fs={GRUPO_SERV: dict(fator=1.06, prazo=3)}),
-    dict(id='F22', nome='Lubrimax Distribuidora', grupos=[GRUPO_CAT], homologado=True, fator=0.94, prazo=5, pag='30 dias'),
-    dict(id='F23', nome='Hidráulica Rondon', grupos=[GRUPO_SERV, GRUPO_CAT], homologado=True, fator=1.00, prazo=1, pag='28 dias',
-         fs={GRUPO_SERV: dict(fator=0.97, prazo=1)}),
-    dict(id='F24', nome='Ferragens São Bento', grupos=[GRUPO_MAT], homologado=True, fator=1.03, prazo=2, pag='à vista'),
-    dict(id='F25', nome='Oficina Volante MT', grupos=[GRUPO_SERV], homologado=False, fator=0.90, prazo=2, pag='à vista',
-         motivo='documentação fiscal pendente'),
+    dict(id='F08', nome='Agro Peças Centro-Oeste', grupos=[G_PECAS, G_LUB, G_MAT, G_SERV], homologado=True, fator=1.00, prazo=1, pag='28 dias',
+         fs={G_LUB: dict(prazo=2), G_MAT: dict(prazo=2), G_SERV: dict(fator=1.06, prazo=3)}),
+    dict(id='F09', nome='Rondon Peças Agrícolas', grupos=[G_PECAS], homologado=True, fator=0.97, prazo=6, pag='30 dias'),
+    dict(id='F10', nome='Hidráulica Rondon', grupos=[G_SERV], homologado=True, fator=0.97, prazo=1, pag='28 dias'),
+    dict(id='F11', nome='Oficina Volante MT', grupos=[G_SERV], homologado=False, fator=0.90, prazo=2, pag='à vista', motivo='documentação fiscal pendente'),
+    dict(id='F12', nome='Ferragens São Bento', grupos=[G_MAT], homologado=True, fator=1.03, prazo=1, pag='à vista'),
 ]
 
 
@@ -61,16 +66,16 @@ def props(itens, hoje=HOJE):
 
 def seed():
     """Três requisições em três etapas (uma por origem) + o que a tela calcula ao vivo (GR-EP2 abaixo do ponto de pedido, sem requisição)."""
-    s38 = [dict(item='', nome='Diagnóstico do circuito hidráulico em bancada', un='serv', qtd=1, preco=1900, grupo=GRUPO_SERV)]
+    s38 = [dict(item='', nome='Diagnóstico do circuito hidráulico em bancada', un='serv', qtd=1, preco=1900, grupo=G_SERV)]
     p38 = props(s38, '2026-09-22'); e38 = min(p38, key=lambda p: p['valor'])
-    s39 = [dict(item='FIL-MF4292', nome='Filtro de óleo MF 4292', un='un', qtd=4, preco=160, grupo=GRUPO_CAT)]
-    s40 = [dict(item='', nome='Eletrodo de solda E6013 2,5 mm', un='kg', qtd=10, preco=38, grupo=GRUPO_MAT)]
+    s39 = [dict(item='FIL-MF4292', nome='Filtro de óleo MF 4292', un='un', qtd=4, preco=160, grupo=G_PECAS)]
+    s40 = [dict(item='', nome='Eletrodo de solda E6013 2,5 mm', un='kg', qtd=10, preco=38, grupo=G_MAT)]
     reqs = {
         'SC-038': dict(id='SC-038', orig='om', tipo='Serviço', om='OM-0233', aid='a01', cc='Oficina', urg='Urgente', data='2026-09-22',
                        por='Otávio (responsável de manutenção)', motivo='Teste de pressão reprovado (120 bar; mínimo 180 bar): diagnóstico do circuito por terceiro',
                        itens=s38, etapa='Pedido emitido',
                        cot=dict(em='2026-09-22', por='Ana (gestora)', conv=[p['f'] for p in p38], props=p38),
-                       ped=dict(id='PC-301', f=e38['f'], valor=e38['valor'], prazo=e38['prazo'], pag=e38['pag'], prev=e38['chega'], em='2026-09-22', por='Ana (gestora)', just='')),
+                       ped=dict(id='PC-201', f=e38['f'], valor=e38['valor'], prazo=e38['prazo'], pag=e38['pag'], prev=e38['chega'], em='2026-09-22', por='Ana (gestora)', just='')),
         'SC-039': dict(id='SC-039', orig='rep', tipo='Material', cc=CC_REP, urg='Normal', data='2026-09-22', por='Rui (almoxarife)',
                        motivo='Saldo livre 0 un abaixo do ponto de pedido (2 un)', itens=s39, etapa='Em cotação',
                        cot=dict(em='2026-09-22', por='Ana (gestora)', conv=[p['f'] for p in props(s39, '2026-09-22')], props=props(s39, '2026-09-22'))),
@@ -82,8 +87,8 @@ def seed():
 
 def js():
     """Regras sobre c.man (o estado da manutenção no cenário único): entram em dados_manutencao.js_regras(), depois das regras da OM."""
-    cfg = dict(forn=FORN, ccs=CCS, ccRep=CC_REP, urg=URG, urgDias=URG_DIAS, gCat=GRUPO_CAT, gMat=GRUPO_MAT, gServ=GRUPO_SERV, pc0=PC0,
-               alcada=__import__('dados2').ALCADA)
+    cfg = dict(forn=FORN, ccs=CCS, ccRep=CC_REP, urg=URG, urgDias=URG_DIAS, gPecas=G_PECAS, gItem=GRUPO_ITEM, gMat=G_MAT, gServ=G_SERV, pc0=PC0,
+               resRec=RESERVA_NO_RECEBIMENTO, alcada=__import__('dados2').ALCADA)
     return 'const CMM = ' + json.dumps(cfg, ensure_ascii=False) + ';\n' + JS
 
 
@@ -97,6 +102,7 @@ function cmmCond(f,g){ return Object.assign({fator:f.fator,prazo:f.prazo},(f.fs|
 function cmmGrupos(r){ return [...new Set((r.itens||[]).map(x=>x.grupo))]; }
 function cmmAberta(r){ return ['Recebida','Aceita'].indexOf(r.etapa)<0; }
 function cmmServ(r){ return r.tipo==='Serviço'; }
+function cmmGrupoItem(k){ return CMM.gItem[k]||CMM.gPecas; }
 /* cotação só para fornecedor homologado em todos os grupos da requisição (a mesma regra da compra de insumos, CD-05) */
 function cmmConvidaveis(r){ const gs=cmmGrupos(r); return CMM.forn.filter(f=>f.homologado&&gs.every(g=>f.grupos.indexOf(g)>=0)); }
 function cmmForaRegra(r){ const gs=cmmGrupos(r); return CMM.forn.filter(f=>!f.homologado&&gs.some(g=>f.grupos.indexOf(g)>=0)); }
@@ -136,13 +142,13 @@ function cmmItensTxt(r){ return (r.itens||[]).map(x=>x.nome+' '+manN(x.qtd,1)+' 
 /* requisição da OM (o "Solicitar compra" da Manutenção): a mesma SC, na fila de Compras */
 function cmmDaOm(c,o){ const s=cmmEst(c); const sc=o.sc;
   s.reqs[sc.id]={id:sc.id,orig:'om',tipo:'Material',om:o.id,aid:o.aid,cc:'Oficina',urg:o.crit==='Alta'?'Alta':'Normal',data:c.hoje,por:sc.por||'',
-    motivo:'Falta peça para liberar a '+o.id+' · '+o.serv,itens:sc.itens.map(x=>({item:x.item,nome:x.nome,un:x.un,qtd:x.qtd,preco:(c.itens[x.item]||{}).preco||0,grupo:CMM.gCat})),etapa:'A cotar'};
+    motivo:'Falta peça para liberar a '+o.id+' · '+o.serv,itens:sc.itens.map(x=>({item:x.item,nome:x.nome,un:x.un,qtd:x.qtd,preco:(c.itens[x.item]||{}).preco||0,grupo:cmmGrupoItem(x.item)})),etapa:'A cotar'};
   return s.reqs[sc.id]; }
 function cmmRepor(c,k,pf){ if(pf!==undefined) cmmExige(pf,'repor'); const x=cmmRepos(c).find(y=>y.k===k);
   if(!x) return {nada:true,msg:((c.itens[k]||{}).nome||k)+' não está abaixo do ponto de pedido (ou a reposição já foi pedida) · nada aberto.'};
   const s=cmmEst(c); const id=cmmNovoId(c);
   s.reqs[id]={id,orig:'rep',tipo:'Material',cc:CMM.ccRep,urg:'Normal',data:c.hoje,por:cmmQuem(pf),motivo:'Saldo livre '+manN(x.livre,1)+' '+x.un+(x.ped?' + '+manN(x.ped,1)+' '+x.un+' pedidos':'')+' abaixo do ponto de pedido ('+manN(x.min,1)+' '+x.un+')',
-    itens:[{item:k,nome:x.nome,un:x.un,qtd:x.qtd,preco:x.preco,grupo:CMM.gCat}],etapa:'A cotar'};
+    itens:[{item:k,nome:x.nome,un:x.un,qtd:x.qtd,preco:x.preco,grupo:cmmGrupoItem(k)}],etapa:'A cotar'};
   return {id,msg:id+' aberta: reposição de '+manN(x.qtd,1)+' '+x.un+' de '+x.nome+' para o '+CMM.ccRep.toLowerCase()+' (repõe até '+manN(x.max,1)+' '+x.un+').'}; }
 /* requisição avulsa: tipo, item do almoxarifado ou descrição, quantidade, destino (ativo ou centro de custo), urgência e motivo. Nunca safra ou cultura. */
 function cmmNova(c,d,pf){ if(pf!==undefined) cmmExige(pf,'nova'); d=d||{}; const err={};
@@ -155,7 +161,7 @@ function cmmNova(c,d,pf){ if(pf!==undefined) cmmExige(pf,'nova'); d=d||{}; const
   if(manVazio(d.motivo)) err.motivo='Diga para que é (o motivo).';
   if(Object.keys(err).length) return {erro:'Corrija os campos destacados; o que você preencheu foi mantido.',err};
   const s=cmmEst(c); const id=cmmNovoId(c); const un=cat?cat.un:(tipo==='Serviço'?'serv':(String(d.un||'').trim()||'un'));
-  const grupo=tipo==='Serviço'?CMM.gServ:(cat?CMM.gCat:CMM.gMat);
+  const grupo=tipo==='Serviço'?CMM.gServ:(cat?cmmGrupoItem(d.item):CMM.gMat);
   s.reqs[id]={id,orig:'avulsa',tipo,aid,cc:cc||'Oficina',urg,ate:CMM.urgDias[urg]?manAdd(c.hoje,CMM.urgDias[urg]):'',data:c.hoje,por:cmmQuem(pf),motivo:String(d.motivo).trim(),
     itens:[{item:cat?d.item:'',nome,un,qtd,preco,grupo}],etapa:'A cotar'};
   return {id,msg:id+' aberta: '+nome+' '+manN(qtd,1)+' '+un+' · '+(aid?c.ativos[aid].nome:'centro de custo '+cc)+' · urgência '+urg.toLowerCase()+'.'}; }
@@ -184,7 +190,8 @@ function cmmReceber(c,id,pf){ if(pf!==undefined) cmmExige(pf,'receber'); const r
   if(r.etapa!=='Pedido emitido') throw new Error('Emita o pedido da '+id+' antes de receber.');
   const quem=cmmQuem(pf);
   if(r.orig==='om'){ const o=c.oms[r.om]; if(!o||!o.sc||o.sc.id!==id) throw new Error('A '+(r.om||'OM')+' não aguarda a '+id+'.');
-    const res=manReceberSc(c,o,quem); return {msg:'Recebimento da '+id+' ('+r.ped.id+'): '+cmmItensTxt(r)+(res.length?' · reservado para a '+o.id+': '+res.join(', '):'')+' · '+o.id+' pronta para liberar.'}; }
+    const res=manReceberSc(c,o,quem); return {msg:'Recebimento da '+id+' ('+r.ped.id+'): '+cmmItensTxt(r)+(res.length?' · reservado para a '+o.id+': '+res.join(', '):' · no saldo da oficina para a '+o.id)
+      +(o.etapa==='A liberar'?' · '+o.id+' pronta para liberar'+(res.length?'':' (a reserva nasce na liberação)'):'')+'.'}; }
   const est=[]; (r.itens||[]).forEach(x=>{ if(x.item&&c.itens[x.item]){ c.itens[x.item].saldo+=x.qtd; est.push(x.nome+' · saldo '+manN(c.itens[x.item].saldo,1)+' '+x.un); } });
   r.etapa='Recebida'; r.rec={em:c.hoje,por:quem,dest:est.length?'estoque':'cc'};
   return {msg:'Recebimento da '+id+' ('+r.ped.id+'): '+cmmItensTxt(r)+(est.length?' · no estoque da oficina: '+est.join(', '):' · entregue a '+(r.aid?c.ativos[r.aid].nome:'centro de custo '+r.cc)+' (consumo direto, sem estoque)')+'.'}; }

@@ -4,7 +4,11 @@
 Safra, solicitação (SOL-2026-07), convites, propostas, aprovação e pedidos ficam vinculados e visíveis em todas as etapas.
 
 Dados: dados2 (SAFRAS, SOL_INICIAL + sol_itens(), demanda() com CAL-01, FORNECEDORES, PROPOSTAS, ALCADA, PEDIDOS, LOTES) + constantes locais abaixo.
-Solicitações enviadas pelo Planejar safra chegam pelo registro compartilhado talhao-os-compras-v1 (localStorage) e pelo endereço #sol=…&saf=…."""
+Solicitações enviadas pelo Planejar safra chegam pelo registro compartilhado talhao-os-compras-v1 (localStorage) e pelo endereço #sol=…&saf=….
+
+V69 (CMP-MAT, docs/integracao/V69/COMPRAS-MATERIAIS.md): a tela vira "Compras" com o seletor "Insumos da safra | Materiais, peças e
+serviços" (#tipo=materiais, &sc=SC-nnn abre o detalhe). Materiais é a fila de requisições SC (OM, reposição abaixo do ponto de pedido,
+avulsa), sem safra, sobre o cenário único (c.man.cmp); regras cmm* em dados_compras_mat.py, embutidas por dados_manutencao.js_regras()."""
 import json, os
 from engine import (grid,esc,MUTED,LINE,BG,SURF,ACC,YEL,YELS,RED,REDS,BTN_ST,EXTRAJS,_MINI,_MINIP,INK,GRAYS,DISP,SEG_ON,SEG_OFF)
 import engine as E
@@ -763,7 +767,8 @@ function cmApro(c,r){ if(r.om){ const o=c.oms[r.om]; const a=o&&c.ativos[o.aid];
   return 'Centro de custo '+r.cc; }
 function cmProx(c,r){ if(r.etapa==='A cotar') return 'solicitar cotações'; if(r.etapa==='Em cotação') return 'escolher a proposta e emitir o pedido';
   if(r.etapa==='Pedido emitido') return (cmServ(r)?'aceitar o serviço':'receber')+' · '+r.ped.id+' previsto '+manBr(r.ped.prev);
-  if(r.etapa==='Recebida') return r.rec&&r.rec.dest==='om'?'reservado para a '+r.om:(r.rec&&r.rec.dest==='cc'?'entregue ao destino':'no estoque da oficina');
+  if(r.etapa==='Recebida'){ if(r.rec&&r.rec.dest==='om'){ const o=c.oms[r.om]; return o&&o.etapa==='A liberar'?'liberar a '+r.om+' (na Manutenção)':'na '+r.om+' · '+(o?o.etapa.toLowerCase():''); }
+    return r.rec&&r.rec.dest==='cc'?'entregue ao destino':'no estoque da oficina'; }
   if(r.etapa==='Aceita') return r.om?'custo de terceiro na '+r.om:'custo no centro de custo '+r.cc; return ''; }
 /* a fila: requisições e itens abaixo do ponto de pedido sem requisição; abertas primeiro, por urgência e pela data de que precisa */
 function cmLista(c){ const L=Object.values(cmmDe(c).reqs).map(r=>({k:'sc',id:r.id,r,orig:r.orig,aberta:cmmAberta(r),urg:r.urg,ate:cmmAte(c,r)}));
@@ -843,7 +848,7 @@ function cmVals(self,v){ const st=self.state; const mat=cmTipo(self)==='mat';
     KV('Pedida por',(r.por||'—')+' em '+manBr(r.data)),KV('Motivo',r.motivo||'—'),KV('Precisa até',ate?manBr(ate)+(o?' (janela da '+o.id+')':' (urgência '+r.urg.toLowerCase()+')'):'sem data')];
   if(r.cot) kv.push(KV('Cotação','enviada em '+manBr(r.cot.em)+' a '+r.cot.conv.map(f=>cmmForn(f).nome).join(', ')+' (simulado)'));
   if(r.ped) kv.push(KV('Pedido',r.ped.id+' · '+cmmForn(r.ped.f).nome+' · '+manRS(r.ped.valor)+' · '+r.ped.pag+' · previsão '+manBr(r.ped.prev)+(r.ped.just?' · justificativa: '+r.ped.just:'')));
-  if(r.rec) kv.push(KV('Recebimento',manBr(r.rec.em)+' por '+(r.rec.por||'—')+' · '+(r.rec.dest==='om'?'reservado para a '+r.om:(r.rec.dest==='cc'?'entregue ao destino (consumo direto)':'no estoque da oficina'))));
+  if(r.rec) kv.push(KV('Recebimento',manBr(r.rec.em)+' por '+(r.rec.por||'—')+' · '+(r.rec.dest==='om'?((r.rec.res||[]).length?'reservado para a '+r.om:'no saldo da oficina para a '+r.om+' (reserva na liberação)'):(r.rec.dest==='cc'?'entregue ao destino (consumo direto)':'no estoque da oficina'))));
   if(r.aceite) kv.push(KV('Aceite',manBr(r.aceite.em)+' por '+(r.aceite.por||'—')+(o?' · custo de terceiro da '+o.id+': '+manRS(o.terc||0):'')));
   v.cm_kv=kv;
   v.cm_itens=(r.itens||[]).map(x=>({t:x.nome+(x.item?' ('+x.item+')':''),s:(cmServ(r)?'':qt(x.qtd,x.un)+' × ')+'ref. '+manRS(x.preco)}));
@@ -859,7 +864,7 @@ function cmVals(self,v){ const st=self.state; const mat=cmTipo(self)==='mat';
       prim('Emitir pedido · '+(p?manRS(p.valor):''),'pedir',()=>cmRun(self,m=>cmmPedir(m,r.id,p.f,F.just||'',pf),()=>self.setState({cmF:{}})),alc); } }
   v.cm_notaOn=true;
   v.cm_nota=cmServ(r)?('Serviço não tem estoque: o aceite lança o valor do pedido como custo de terceiro '+(o?'da '+o.id+' (custo da ordem pela função única da Manutenção).':'do centro de custo '+r.cc+'.'))
-    :(r.orig==='om'?'A peça recebida entra no saldo da oficina já reservada para a '+r.om+', que libera sem nova reserva. ':'')+'O custo fica no ativo ou no centro de custo e chega às culturas pelo uso do ativo (rateio pelo uso do ativo), nunca pela safra na compra.';
+    :(r.orig==='om'?'A peça recebida entra no saldo da oficina para a '+r.om+', que passa a poder ser liberada; a reserva nasce na liberação. ':'')+'O custo fica no ativo ou no centro de custo e chega às culturas pelo uso do ativo (rateio pelo uso do ativo), nunca pela safra na compra.';
   if(o){ v.cm_hasLk=true; v.cm_lkh='MA.dc.html#om='+o.id; v.cm_lkt='Abrir '+o.id; }
   if(r.etapa==='A cotar') prim('Solicitar cotações (simulado)','cotar',()=>cmRun(self,m=>cmmCotar(m,r.id,pf)));
   else if(r.etapa==='Pedido emitido'){ if(cmServ(r)) prim('Registrar aceite do serviço','aceitar',()=>cmRun(self,m=>cmmAceitar(m,r.id,pf)));

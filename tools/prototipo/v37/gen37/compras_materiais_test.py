@@ -3,8 +3,8 @@
 Pedido do proprietário (15/10/2026): "cadê as compras de materiais, peças, etc?" — lógica própria: OM, reposição e avulsa, sem safra.
  1 · Compras tem o seletor "Insumos da safra | Materiais, peças e serviços"; Materiais esconde a safra e as etapas dos insumos, mostra a faixa
      Filtros (Origem, Situação) e a fila com as três origens; o endereço #tipo=materiais reabre a mesma parte.
- 2 · Peça de OM: Manutenção gera a OM-0235 (Falta peça) → Solicitar compra → Compras cota, emite o pedido e recebe → a peça fica reservada
-     para a OM-0235, que libera na Manutenção. Zé (mecânico) vê "Solicitar cotações" indisponível com o motivo.
+ 2 · Peça de OM: Manutenção gera a OM-0235 (Falta peça) → Solicitar compra → Compras cota, emite o pedido e recebe → a peça entra no saldo
+     para a OM-0235, que sai de "Falta peça" e libera na Manutenção (a reserva nasce na liberação, DEC-2609-13). Zé (mecânico) vê "Solicitar cotações" indisponível com o motivo.
  3 · Reposição: a Graxa EP2 abaixo do ponto de pedido aparece sem requisição; Rui abre a reposição; o recebimento entra no estoque.
  4 · Serviço: o aceite da SC-038 lança o valor do pedido como custo de terceiro da OM-0233 (custo da ordem na Manutenção).
  5 · Nova requisição avulsa sem safra nem cultura (nenhum campo pede); celular 390 px sem rolagem lateral.
@@ -72,25 +72,25 @@ def parte2():   # 2 · peça da OM: requisição → cotação → pedido → re
     m.ok('Ordem de manutenção · OM-0235' in p0 and 'Apropriação' in p0 and 'Trator 03' in p0 and 'rateio pelo uso do ativo' in p0 and 'Safra' not in p0.replace('safra', ''),
          '2d detalhe (F5 reabre): origem OM-0235, apropriação no ativo Trator 03, "rateio pelo uso do ativo", nada de safra', p0[:400])
     m.clk('Solicitar cotações (simulado)', PAN); t1 = m.toast(); p1 = pan()
-    m.ok('3 fornecedores homologados' in t1 and 'Hidráulica Rondon' in p1 and 'menor custo a tempo' in p1 and est("c.cmp.reqs['SC-041'].etapa") == 'Em cotação',
-         '2e cotação simulada: 3 homologados; a referência é a de menor custo que chega a tempo da janela da OM', [t1[:120], p1[-500:]])
-    m.clk('Lubrimax Distribuidora', PAN); time.sleep(.3); pj = pan(); m.clk('Emitir pedido', PAN); tj = m.toast()
+    m.ok('2 fornecedores homologados' in t1 and 'Rondon Peças Agrícolas' in p1 and 'menor custo a tempo' in p1 and 'chega depois de 24/09' in p1 and est("c.cmp.reqs['SC-041'].etapa") == 'Em cotação',
+         '2e cotação simulada: os 2 homologados de Peças; a referência é a de menor custo que chega a tempo da janela da OM (24/09)', [t1[:120], p1[-500:]])
+    m.clk('Rondon Peças Agrícolas', PAN); time.sleep(.3); pj = pan(); m.clk('Emitir pedido', PAN); tj = m.toast()
     m.ok('Justificativa da escolha' in pj and 'Justifique' in tj and est("c.cmp.reqs['SC-041'].etapa") == 'Em cotação',
          '2f escolher a mais barata que chega depois da janela pede justificativa (recusa sem pedido)', [tj[:140]])
-    m.clk('Hidráulica Rondon', PAN); time.sleep(.3); pz = prim(); m.clk('Emitir pedido', PAN); t2 = m.toast()
-    m.ok(pz and pz['t'] == 'Emitir pedido · R$ 160,00' and 'PC-302' in t2 and est("c.cmp.reqs['SC-041'].ped.id") == 'PC-302',
-         '2g Ana emite o PC-302 (R$ 160,00, Hidráulica Rondon) vinculado à SC-041 e à OM-0235', [pz, t2[:140]])
+    m.clk('Agro Peças Centro-Oeste', PAN); time.sleep(.3); pz = prim(); m.clk('Emitir pedido', PAN); t2 = m.toast()
+    m.ok(pz and pz['t'] == 'Emitir pedido · R$ 160,00' and 'PC-202' in t2 and est("c.cmp.reqs['SC-041'].ped.id") == 'PC-202',
+         '2g Ana emite o PC-202 (R$ 160,00, Agro Peças Centro-Oeste) vinculado à SC-041 e à OM-0235', [pz, t2[:140]])
     f0 = est("[c.itens['FIL-MF4292'].saldo,c.itens['FIL-MF4292'].reservado]")
     cmp('tipo=materiais&sc=SC-041', perfil='Rui'); m.clk('Registrar recebimento', PAN); t3 = m.toast()
     f1 = est("[c.itens['FIL-MF4292'].saldo,c.itens['FIL-MF4292'].reservado,c.oms['OM-0235'].pecas.find(p=>p.item==='FIL-MF4292').res,c.cmp.reqs['SC-041'].etapa]")
-    m.ok('reservado para a OM-0235' in t3 and f1 == [f0[0] + 1, f0[1] + 1, 1, 'Recebida'],
-         '2h Rui recebe: +1 un no saldo e reservada para a OM-0235 (saldo e reservado +1; linha da OM reservada); SC Recebida', [t3[:160], f0, f1])
+    m.ok('para a OM-0235' in t3 and 'pronta para liberar' in t3 and f1 == [f0[0] + 1, f0[1], 0, 'Recebida'],
+         '2h Rui recebe: +1 un no saldo para a OM-0235, que fica pronta para liberar; a reserva espera a liberação (DEC-2609-13); SC Recebida', [t3[:160], f0, f1])
     m.clk('Registrar recebimento', PAN); m.ok(not prim() and est("c.itens['FIL-MF4292'].saldo") == f0[0] + 1, '2i recebida não oferece receber de novo (nada soma)', prim())
     m.ir('om=OM-0235', perfil='Otávio'); m.bloco('Peças'); po = m.pan()
-    m.ok('Reservado 1 un' in po and 'Liberar serviço' in po and 'Falta peça' not in po, '2j na Manutenção a OM-0235 mostra o filtro "Reservado 1 un" e oferece "Liberar serviço"', po[:300])
+    m.ok('Livre 1 un' in po and 'Liberar serviço' in po and 'Falta peça' not in po, '2j na Manutenção a OM-0235 sai de "Falta peça": o filtro aparece "Livre 1 un" e a primária é "Liberar serviço"', po[:300])
     m.clk('Liberar serviço', '#ma-painel'); t4 = m.toast()
     m.ok('liberada' in t4 and m.man("m.oms['OM-0235'].etapa") == 'Liberadas' and m.man("m.itens['FIL-MF4292'].reservado") == f0[1] + 1,
-         '2k a OM-0235 libera sem reservar o filtro de novo (reservado segue +1)', [t4[:140], m.man("m.itens['FIL-MF4292']")])
+         '2k liberar a OM-0235 reserva o filtro que chegou (reservado +1)', [t4[:140], m.man("m.itens['FIL-MF4292']")])
     m.sem_erro('MA depois do recebimento')
 
 def parte3():   # 3 · reposição abaixo do ponto de pedido
