@@ -60,6 +60,7 @@ try:
     trilhas = lambda: J("(()=>{const t=document.querySelector('main .g2rola [role=table]'); return t?getComputedStyle(t).gridTemplateColumns.split(' ').length:0;})()")
     alinhado = lambda: J("(()=>{const rs=[...document.querySelectorAll('main [role=table] [role=row].g2ed')].slice(0,12); return rs.length>0&&rs.every(r=>{const cs=[...r.querySelectorAll('[role=cell]')]; const l=cs.map(x=>Math.round(x.getBoundingClientRect().left)); return cs.length&&l.every((x,i)=>i===0||x>l[i-1]);});})()")   # célula que quebra de faixa volta à esquerda
     shot = lambda n: c.shot(os.path.join(PROBE, f'praga_alvo_{n}.png'))
+    # cdp.Chrome mostra todas as colunas (como quem escolheu "todas" no painel "Colunas"); o padrão sem Tox · amb (15/10/2026) está em agrofit_faixa_test.py
     COLS_U = ['produto · registro', 'praga-alvo', 'nome cientifico', 'cultura do uso', 'ingrediente ativo · grupo quimico', 'classe · modo de acao', 'tox · amb', 'na fazenda']
     COLS_P = ['produto · registro', 'ingrediente ativo · grupo quimico', 'classe · modo de acao', 'culturas', 'alvos', 'tox · amb', 'na fazenda']   # Alvos: 13/10 (proprietário)
 
@@ -106,13 +107,15 @@ try:
     chk(f'3 filtro da coluna Praga-alvo = "{FN}": "{nf(N_FN)} de {nf(N_SJ)} usos em Soja", só linhas com esse nome comum',
         n3 == f'{nf(N_FN)} de {nf(N_SJ)} usos em Soja' and L3 and all(FN in r[1] for r in L3), [n3, L3[:2]])
     shot('filtro_praga')
-    # 3b · A5 (revisão de 10/10): com o filtro da coluna, os chips contam as linhas filtradas e o número do chip é o que a lista mostra ao clicar
-    chips = lambda: dict((m[0], int(m[1].replace('.', ''))) for m in (J("[...document.querySelectorAll('main button')].map(b=>b.innerText.replace(/\\s+/g,' ').trim()).filter(t=>/^(Todas|Fungicida|Aprovados para orgânicos) [\\d.]+$/.test(t)).map(t=>[t.replace(/ [\\d.]+$/,''),t.match(/[\\d.]+$/)[0]])") or []))
+    # 3b · A5 (revisão de 10/10): com o filtro da coluna, Classe e Orgânicos (listas da faixa "Filtros", 15/10/2026) contam as linhas filtradas e o
+    # número da opção é o que a lista mostra ao escolher
+    FXS = 'main [role=group][aria-label="Filtros"] select'
+    chips = lambda: dict((m[0], int(m[1].replace('.', ''))) for m in (J(f"[...document.querySelectorAll({json.dumps(FXS)})].flatMap(s=>[...s.options].map(o=>o.text.trim())).filter(t=>/^(Todas|Fungicida|Só aprovados) \\([\\d.]+\\)$/.test(t)).map(t=>[t.replace(/ \\([\\d.]+\\)$/,''),t.match(/([\\d.]+)\\)$/)[1]])") or []))
     n_ = lambda: int((cnt().split(' de ')[0] or '0').replace('.', ''))
-    k0 = chips(); clica('main', 'Fungicida'); time.sleep(.8); nF = n_(); k1 = chips(); clica('main', 'Aprovados para orgânicos'); time.sleep(.8); nO = n_()
-    clica('main', 'Aprovados para orgânicos'); time.sleep(.5); clica('main', 'Fungicida'); time.sleep(.5)
-    chk(f'3b A5 · com o filtro "{FN}", os chips contam as linhas filtradas: Todas = {nf(N_FN)}, Fungicida = a lista com o chip, orgânicos (com Fungicida) = a lista com os dois',
-        k0.get('Todas') == N_FN and k0.get('Fungicida') == nF > 0 and k1.get('Aprovados para orgânicos') == nO, [k0, nF, k1, nO])
+    k0 = chips(); setv(FXS + '[aria-label="Classe"]', 'Fungicida'); time.sleep(.5); nF = n_(); k1 = chips(); setv(FXS + '[aria-label="Orgânicos"]', 'S'); time.sleep(.5); nO = n_()
+    setv(FXS + '[aria-label="Orgânicos"]', ''); setv(FXS + '[aria-label="Classe"]', '')
+    chk(f'3b A5 · com o filtro "{FN}", Classe e Orgânicos contam as linhas filtradas: Todas = {nf(N_FN)}, Fungicida = a lista com a classe, Só aprovados (com Fungicida) = a lista com os dois',
+        k0.get('Todas') == N_FN and k0.get('Fungicida') == nF > 0 and k1.get('Só aprovados') == nO, [k0, nF, k1, nO])
     clica('main', 'Limpar filtros'); time.sleep(.6)
     # ---------- 4 · busca por praga-alvo (sem acento, no mesmo uso) ----------
     combo('Cultura', 'soja'); setv('main input[type=search]', 'ferrugem ASIATICA'); n4 = cnt(); L4 = linhas()
