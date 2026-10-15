@@ -4,13 +4,19 @@
 Safra, solicitação (SOL-2026-07), convites, propostas, aprovação e pedidos ficam vinculados e visíveis em todas as etapas.
 
 Dados: dados2 (SAFRAS, SOL_INICIAL + sol_itens(), demanda() com CAL-01, FORNECEDORES, PROPOSTAS, ALCADA, PEDIDOS, LOTES) + constantes locais abaixo.
-Solicitações enviadas pelo Planejar safra chegam pelo registro compartilhado talhao-os-compras-v1 (localStorage) e pelo endereço #sol=…&saf=…."""
+Solicitações enviadas pelo Planejar safra chegam pelo registro compartilhado talhao-os-compras-v1 (localStorage) e pelo endereço #sol=…&saf=….
+
+V69 (CMP-MAT, docs/integracao/V69/COMPRAS-MATERIAIS.md): a tela vira "Compras" com o seletor "Insumos da safra | Materiais, peças e
+serviços" (#tipo=materiais, &sc=SC-nnn abre o detalhe). Materiais é a fila de requisições SC (OM, reposição abaixo do ponto de pedido,
+avulsa), sem safra, sobre o cenário único (c.man.cmp); regras cmm* em dados_compras_mat.py, embutidas por dados_manutencao.js_regras()."""
 import json, os
-from engine import (grid,esc,MUTED,LINE,BG,SURF,ACC,YEL,YELS,RED,REDS,BTN_ST,EXTRAJS,_MINI,_MINIP)
+from engine import (grid,esc,MUTED,LINE,BG,SURF,ACC,YEL,YELS,RED,REDS,BTN_ST,EXTRAJS,_MINI,_MINIP,INK,GRAYS,DISP,SEG_ON,SEG_OFF)
 import engine as E
 from ui37 import shell37, steps_state, HEIGHTS37
+import ui37
 import dados2 as D2
 import cenario
+import dados_manutencao as DM   # V69: Materiais, peças e serviços (c.man.cmp, regras de dados_compras_mat dentro de DM.js_regras)
 
 H=lambda s: '{{'+s+'}}'
 F=lambda: H('false')
@@ -71,6 +77,71 @@ def bloco(titulo,desc,corpo,acao='',tit_hole=False):
             f'<div style="padding: 0 12px 12px;">{corpo}</div></section>')
 def kline(hole):
     return f'<div style="font-size: 13px; line-height: 1.45;"><span style="{H(hole+"st")}">{H(hole)}</span></div>'
+def IFH(cond,html,dflt=False): return f'<sc-if value="{H(cond)}" hint-placeholder-val="{H("true") if dflt else F()}">{html}</sc-if>'
+def FORH(lst,as_,html,n=2): return f'<sc-for list="{H(lst)}" as="{as_}" hint-placeholder-count="{n}">{html}</sc-for>'
+# ---------- V69 · Materiais, peças e serviços: faixa Filtros + fila de requisições + painel de detalhe ----------
+def _mat_corpo(g_mat,seg=''):
+    L_=ui37.MF_LBL.format(MUTED=MUTED); S_=ui37.MF_SEL.format(LINE=LINE,SURF=SURF,INK=INK)
+    fsel=lambda rot,val,setfn,lst: (f'<label style="{L_}">{rot}<select aria-label="Filtrar por {rot.lower()}" value="{H(val)}" onChange="{H(setfn)}" style="{S_}">'
+                                    + FORH(lst,'o',f'<option value="{H("o.v")}">{H("o.t")}</option>',3) + '</select></label>')
+    faixa=ui37.faixa_filtros(seg+fsel('Origem','cm_fo','cm_setfo','cm_fos')+fsel('Situação','cm_fs','cm_setfs','cm_fss'))
+    return f'<div data-cm-mat="1" style="display: flex; flex-direction: column; gap: 14px; min-width: 0;">{faixa}{g_mat}</div>'
+def _mat_painel():
+    LB=f'font-size: 12px; font-weight: 600; color: {MUTED};'
+    INP=f'font-family: inherit; font-size: 13.5px; padding: 7px 9px; border-radius: 8px; border: 1px solid {LINE}; box-sizing: border-box; background: #fff; color: {INK}; min-height: 36px;'
+    SECT=f'font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase;'
+    err=lambda k: IFH(f'cmn_e_{k}',f'<span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H("cmn_e_"+k)}</span>')
+    fld=lambda rot,inner,k: f'<label style="display: flex; flex-direction: column; gap: 4px; {LB} min-width: 0;">{rot}{inner}{err(k)}</label>'
+    segb=lambda lst,rot: (f'<div role="group" aria-label="{rot}" style="display: flex; flex-wrap: wrap; gap: 6px;">'
+                          + FORH(lst,'b',f'<button type="button" aria-pressed="{H("b.on")}" onClick="{H("b.go")}" style="{H("b.st")}">{H("b.t")}</button>',3) + '</div>')
+    qtd_in=(f'<span style="display: flex; align-items: center; gap: 6px;"><input id="cmn-qtd" type="text" inputMode="decimal" value="{H("cmn_qtd")}" onChange="{H("cmn_setqtd")}" style="{INP} width: 100%;">'
+            f'<span style="font-size: 12.5px; color: {MUTED}; white-space: nowrap;">{H("cmn_un")}</span></span>')
+    un_in=(f'<select id="cmn-un" value="{H("cmn_unv")}" onChange="{H("cmn_setun")}" style="{INP}">'+FORH('cmn_uns','o',f'<option value="{H("o")}">{H("o")}</option>',4)+'</select>')
+    preco_in=f'<input id="cmn-preco" type="text" inputMode="decimal" value="{H("cmn_preco")}" onChange="{H("cmn_setpreco")}" style="{INP}">'
+    novo=(f'<div style="display: flex; flex-direction: column; gap: 12px;">'
+          f'<div style="display: flex; flex-direction: column; gap: 4px;"><span style="{LB}">Tipo</span>{segb("cmn_tipos","Tipo")}</div>'
+          + IFH('cmn_cat',fld('Item',f'<select id="cmn-item" value="{H("cmn_item")}" onChange="{H("cmn_setitem")}" style="{INP}">'+FORH('cmn_itens','o',f'<option value="{H("o.v")}">{H("o.t")}</option>',4)+'</select>','item'),True)
+          + IFH('cmn_desc',fld(H('cmn_descRot'),f'<input id="cmn-nome" type="text" value="{H("cmn_nome")}" onChange="{H("cmn_setnome")}" style="{INP}">','nome'))
+          + '<div style="display: flex; gap: 10px; flex-wrap: wrap;">'
+          + '<div style="flex: 1 1 140px; min-width: 0;">' + fld('Quantidade',qtd_in,'qtd') + '</div>'
+          + IFH('cmn_unSel','<div style="flex: 0 1 110px; min-width: 0;">' + fld('Unidade',un_in,'un') + '</div>')
+          + IFH('cmn_est','<div style="flex: 1 1 140px; min-width: 0;">' + fld('Estimativa (R$ por unidade)',preco_in,'preco') + '</div>')
+          + '</div>'
+          + fld('Destino (ativo ou centro de custo)',f'<select id="cmn-dest" value="{H("cmn_dest")}" onChange="{H("cmn_setdest")}" style="{INP}">'+FORH('cmn_dests','o',f'<option value="{H("o.v")}">{H("o.t")}</option>',4)+'</select>','destino')
+          + f'<div style="display: flex; flex-direction: column; gap: 4px;"><span style="{LB}">Urgência</span>{segb("cmn_urgs","Urgência")}{err("urg")}</div>'
+          + fld('Motivo',f'<input id="cmn-motivo" type="text" placeholder="Para que é" value="{H("cmn_motivo")}" onChange="{H("cmn_setmotivo")}" style="{INP}">','motivo')
+          + f'<span style="font-size: 12px; color: {MUTED};">{H("cmn_nota")}</span></div>')
+    kv=FORH('cm_kv','x',f'<div style="display: grid; grid-template-columns: 128px minmax(0,1fr); gap: 10px; padding: 6px 0; border-bottom: 1px solid {LINE}; font-size: 13px;">'
+                        f'<span style="{LB}">{H("x.l")}</span><span style="overflow-wrap: anywhere;">{H("x.v")}'
+                        + IFH('x.hasH',f' <a href="{H("x.h")}" style="color: {ACC}; font-weight: 700; text-decoration: none; white-space: nowrap;">{H("x.ht")} ›</a>') + '</span></div>',5)
+    trilha=(f'<div aria-label="Etapas da compra" style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12.5px;">'
+            + FORH('cm_tr','x',IFH('x.sep',f'<span aria-hidden="true" style="color: {MUTED};">›</span>')+f'<span aria-current="{H("x.cur")}" style="{H("x.st")}">{H("x.t")}</span>',4) + '</div>')
+    props=IFH('cm_hasProps',f'<div style="display: flex; flex-direction: column; gap: 6px;"><div style="{SECT}">{H("cm_propsT")}</div>'
+              f'<div role="group" aria-label="Propostas" style="display: flex; flex-direction: column; gap: 6px;">'
+              + FORH('cm_props','p',f'<button type="button" data-forn="{H("p.f")}" aria-pressed="{H("p.on")}" disabled="{H("p.ro")}" onClick="{H("p.go")}" style="{H("p.st")}">'
+                     f'<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0; text-align: left;"><b>{H("p.t")}</b><span style="font-size: 12px; color: {MUTED};">{H("p.s")}</span></span>'
+                     f'<span style="margin-left: auto; font-weight: 800; white-space: nowrap;">{H("p.v")}</span></button>',3) + '</div>'
+              + IFH('cm_foraOn',f'<span style="font-size: 12px; color: {MUTED};">{H("cm_fora")}</span>')
+              + IFH('cm_justOn',f'<label style="display: flex; flex-direction: column; gap: 4px; {LB}">Justificativa da escolha<textarea id="cm-just" value="{H("cm_just")}" onChange="{H("cm_setjust")}" style="{INP} min-height: 54px; resize: vertical;"></textarea>'
+                    f'<span style="font-size: 12px; color: {MUTED};">{H("cm_justDica")}</span></label>') + '</div>')
+    itens=(f'<div style="display: flex; flex-direction: column; gap: 4px;"><div style="{SECT}">Itens</div>'
+           + FORH('cm_itens','x',f'<div style="display: flex; gap: 10px; justify-content: space-between; font-size: 13px; padding: 4px 0; border-bottom: 1px solid {LINE};"><span>{H("x.t")}</span><span style="color: {MUTED}; white-space: nowrap;">{H("x.s")}</span></div>',2) + '</div>')
+    det=(trilha + kv + itens + props
+         + IFH('cm_notaOn',f'<div role="note" style="font-size: 12.5px; color: {MUTED}; line-height: 1.45;">{H("cm_nota")}</div>'))
+    prim=E.acao_motivo(f'<button type="button" data-cm-prim="1" aria-disabled="{H("cm_pdis")}" data-dica="{H("cm_pwhy")}" title="{H("cm_pwhy")}" onClick="{H("cm_pfn")}" style="{BTN_ST(True,True)}">{H("cm_pt")}</button>',H('cm_pdis'),H('cm_pwhy'))
+    return IFH('cm_pan',f'<div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
+        f'<button type="button" aria-label="Fechar detalhe" tabIndex="-1" onClick="{H("cm_fechar")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button>'
+        f'<aside role="dialog" id="cm-painel" aria-label="{H("cm_titulo")}" tabIndex="-1" onKeyDown="{H("cm_key")}" style="position: relative; width: 480px; max-width: 100%; height: 100%; overflow-y: auto; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;">'
+        f'<div style="display: flex; align-items: flex-start; gap: 10px;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">{H("cm_titulo")}</h2>'
+        f'<button type="button" aria-label="Fechar" title="Fechar" onClick="{H("cm_fechar")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED}; flex-shrink: 0;">×</button></div>'
+        + IFH('cm_hasChips',f'<div style="display: flex; flex-wrap: wrap; gap: 6px;">'+FORH('cm_chips','x',f'<span style="{H("x.st")}">{H("x.t")}</span>',3)+'</div>')
+        + IFH('cm_hasErr',f'<div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">{H("cm_err")}</div>')
+        + IFH('cm_novo',novo) + IFH('cm_det',det,True)
+        + f'<div style="flex-grow: 1;"></div>'
+        f'<div style="display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: flex-start; gap: 8px; padding-top: 10px; border-top: 1px solid {LINE}; position: sticky; bottom: 0; background: {SURF};">'
+        + IFH('cm_hasLk',f'<a href="{H("cm_lkh")}" style="align-self: center; color: {ACC}; font-weight: 700; font-size: 13px; text-decoration: none; margin-right: auto;">{H("cm_lkt")} ›</a>')
+        + f'<button type="button" onClick="{H("cm_fechar")}" style="{BTN_ST(False,True)}">Fechar</button>'
+        + IFH('cm_hasP',prim) + '</div></aside></div>')
 def build():
     fname='CMP.dc.html'; E._reset_screen(fname)
     # ---------- etapa 1 · safras e solicitações ----------
@@ -111,7 +182,11 @@ def build():
                     fields=[dict(k='prev',l='Previsão de entrega',t='date',req=True),dict(k='obs',l='Motivo da reprogramação',t='area',help='Ex.: fornecedor confirmou nova data de embarque.')]),
                tree=True,gid='g_ent',total=True,qf=dict(k='sit',cut=' · '))
     root=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    EXTRAJS[0]=cenario.js_prefixo()+'const CD = '+json.dumps(_cd(),ensure_ascii=False)+';\n'+open(os.path.join(root,'cal01.js'),encoding='utf-8').read()+'\n'+JS
+    g_mat=grid([dict(k='req',l='Requisição',w=250),dict(k='sit',l='Situação · próximo passo',w=240),dict(k='urg',l='Urgência',w=100),dict(k='orig',l='Origem · destino',w=230),
+                dict(k='ate',l='Precisa até',t='date',w=100),dict(k='val',l='Valor (R$)',t='num',a='r',d=2,agg='sum',w=120)],
+               [],edit=dict(m='pick'),gid='g_mat',total=True)
+    EXTRAJS[0]=(cenario.js_prefixo()+DM.js_regras()+'const CD = '+json.dumps(_cd(),ensure_ascii=False)+';\n'+open(os.path.join(root,'cal01.js'),encoding='utf-8').read()+'\n'+JS
+                +CMJS.replace('__SEGON__',json.dumps(SEG_ON())).replace('__SEGOFF__',json.dumps(SEG_OFF())))
     # ---------- corpo ----------
     trail=(f'<sc-if value="{H("tr_on")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12.5px;">'
            f'<span style="font-size: 10.5px; font-weight: 800; letter-spacing: .06em; color: {MUTED};">DOCUMENTOS DA COMPRA</span>'
@@ -146,9 +221,19 @@ def build():
     s6=kline('k6')+bloco('Pedidos e entregas','Acompanhe recebido, quarentena e saldo a entregar; clique no pedido para reprogramar a entrega.',g_ent,acao=acao_bloco)
     corpo=trail+''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{H("true") if i==1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}</div></sc-if>'
                         for i,s in enumerate([s1,s2,s3,s4,s5,s6],1)) + E.area_acoes('aa','Ações da etapa')
+    # V69 (proprietário, 15/10: "cadê as compras de materiais, peças, etc?"): uma entrada de Compras, dois tipos no seletor da faixa.
+    # Insumos da safra: o processo de 6 etapas (a safra no "Trabalhando em" e a faixa de etapas). Materiais, peças e serviços: a fila de
+    # requisições SC (OM, reposição, avulsa), sem safra, com a faixa Filtros e o detalhe no painel lateral.
+    # o seletor fica no começo da faixa da tela (Trabalhando em, nos insumos; Filtros, nos materiais): sem linha a mais no cabeçalho
+    seg=(f'<div role="group" aria-label="Tipo de compra" style="display: inline-flex; flex-wrap: wrap; padding: 3px; border-radius: 999px; background: {GRAYS}; gap: 2px;">'
+         f'<button type="button" data-cmtipo="ins" aria-pressed="{H("cmt_ins")}" onClick="{H("cmt_goIns")}" style="{H("cmt_insSt")}">Insumos da safra</button>'
+         f'<button type="button" data-cmtipo="mat" aria-pressed="{H("cmt_mat")}" onClick="{H("cmt_goMat")}" style="{H("cmt_matSt")}">Materiais, peças e serviços</button></div>')+f'<span aria-hidden="true" style="width: 1px; height: 18px; background: {LINE};"></span>'
+    corpo=IFH('ins_on',corpo,True)+IFH('mat_on',_mat_corpo(g_mat,seg))
+    E.EXTRA.append(_mat_painel())   # painel lateral fora do main (como o formulário da grade): fica preso à direita da janela
+    prim=IFH('mat_on',f'<button type="button" data-cm-nova="1" onClick="{H("cm_nova")}" style="{BTN_ST(True)}">Nova requisição</button>')
     HEIGHTS37[fname]=1200
-    shell37('CMP','Compra de insumos',corpo,fname=fname,subtitle='Da solicitação do planejamento ao pedido entregue: cote, compare, aprove e acompanhe na mesma tela.',
-            steps=steps_state(NOMES),primary_html=None,ctx=(H('ctx_faz'),H('ctx_saf'),None),search=False)
+    shell37('CMP','Compras',corpo,fname=fname,subtitle='Da solicitação do planejamento ao pedido entregue: cote, compare, aprove e acompanhe na mesma tela.',
+            steps=IFH('ins_on',steps_state(NOMES),True),primary_html=prim,ctx=(H('ctx_faz'),H('ctx_saf'),None),search=False,mf_if='ins_on',mf_ini=seg)
 
 JS=r'''
 // ===== Processo · Compra de insumos (6 etapas numa só tela de trabalho) =====
@@ -313,7 +398,7 @@ function sitDem(self,m,d,fa){ const apr=aprOf(self.state);
   if(a&&a.estado==='devolvida') return [CH('Devolvida para ajuste','yellow')];
   if(m.env) return [CH('Em cotação','blue'),MU(it.props.length+(it.props.length===1?' proposta':' propostas'))];
   return [CH('A cotar','gray')]; }
-function PREVALS(self,v){
+function PREVALS(self,v){ cmPre(self);
   const st=self.state; const saf=st.saf||null; sx(self); const m=M(self); self._m=m; const apr=aprOf(st); cenOuvir(self); ACIMA=acimaDe(saf); QUAL=(vivaDe(saf)||{}).qual||{}; ACIMA_PED=!!(apr||(SX&&SX.sol.pedEmit));
   // ---- etapa 1 · safras ----
   GR('g_saf').rows=safras().map(s=>{ const on=(saf===s.id); const r={id:s.id,ro:true,v:{nome:s.nome},s:{nome:s.nome},p:{}};
@@ -502,7 +587,7 @@ function decidir(self){ const st=self.state; const d=st.dec5; const a=st.aprov; 
     g2toast:dev?('Devolução da '+a.quem+' registrada (simulado): '+mot+'. Ajuste na etapa 4 e reenvie.')
                :('Recusa da '+a.quem+' registrada (simulado): '+mot+'. Nada foi contratado; a necessidade da '+SX.sol.id+' continua aberta.')}); }
 function hooks(self){ if(self._hk) return; self._hk=true;
-  self.g2pick=(gid,rid)=>{ if(gid==='g_saf') pick(self,rid); };
+  self.g2pick=(gid,rid)=>{ if(gid==='g_saf') pick(self,rid); else if(gid==='g_mat') cmAbrir(self,rid); };
   self.g2after=(gid,rows,r)=>{ if(!r) return; const st=self.state;
     if(gid==='g_conv'){ const c=Object.assign({},st.conv||{}); c[r.id]={conv:r.v.conv,canal:r.v.canal,prazo:r.v.prazo}; const adic=!!st.env&&r.v.conv==='Convidar';
       keep(self,gid,r.id,{conv:c,g2toast:'Convite atualizado: '+r.v.nome+(r.v.conv==='Convidar'?(' · '+r.v.canal+' · responder até '+r.v.prazo):' · não será convidado')+'.'+(adic?' Envie com Enviar convites adicionais.':'')}); }
@@ -643,6 +728,147 @@ function EXTRAVALS(self,v){ hooks(self);
   }
   g2acoes(v,'aa',A);
   procGravar(self,m);
+  cmVals(self,v);   // V69: seletor do tipo de compra e Materiais, peças e serviços
 }
 const NOMES_=['Escolha a safra','Confira a demanda','Solicite cotações','Compare propostas','Aprove a compra','Acompanhe a entrega'];
+'''
+
+# ===================================================================================================================================
+# V69 · Compras › Materiais, peças e serviços (CMP-MAT): a fila de requisições SC; regras e estado em dados_compras_mat (c.man.cmp)
+CMJS=r'''
+// ===== V69 · Materiais, peças e serviços: requisições SC (OM, reposição, avulsa), sem safra; regras cmm* (dados_compras_mat) =====
+const CM_SEGON=__SEGON__, CM_SEGOFF=__SEGOFF__;
+const CM_ORIG={om:'Ordem de manutenção',rep:'Reposição de estoque',avulsa:'Avulsa'};
+const CM_FO=['Todas','Ordem de manutenção','Reposição de estoque','Avulsa'];
+const CM_FS=['Em aberto','Concluídas','Todas'];
+const CM_ETC={'A cotar':'gray','Em cotação':'blue','Pedido emitido':'blue','Recebida':'green','Aceita':'green'};
+const CM_URC={'Urgente':'red','Alta':'yellow','Normal':'gray'}; const CM_URK={'Urgente':0,'Alta':1,'Normal':2};
+const CM_CH={green:['#1E7A4C','#E4F3E9'],yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],blue:['#1E5F8F','#E3F0FB']};
+const CM_BON='font-family:inherit;font-size:12.5px;font-weight:700;padding:6px 12px;min-height:36px;border-radius:999px;border:1px solid #15201A;background:#15201A;color:#fff;cursor:pointer;';
+const CM_BOFF='font-family:inherit;font-size:12.5px;font-weight:700;padding:6px 12px;min-height:36px;border-radius:999px;border:1px solid #E4E9E5;background:#FFFFFF;color:#15201A;cursor:pointer;';
+const CM_PON='display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;border-radius:10px;border:2px solid #1E7A4C;background:#F2F8F4;font-family:inherit;font-size:13px;color:#15201A;cursor:pointer;';
+const CM_POFF='display:flex;align-items:center;gap:10px;width:100%;padding:10px 13px;border-radius:10px;border:1px solid #E4E9E5;background:#FFFFFF;font-family:inherit;font-size:13px;color:#15201A;cursor:pointer;';
+function cmChipSt(c){ const k=CM_CH[c]||CM_CH.gray; return 'display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;color:'+k[0]+';background:'+k[1]+';'; }
+function cmTipo(self){ return self.state.cmTipo||'ins'; }
+function cmHashLer(){ let h=''; try{ h=decodeURIComponent(location.hash||''); }catch(e){} const t=/[#&]tipo=([^&]+)/.exec(h), s=/[#&]sc=([^&]+)/.exec(h); return {mat:!!(t&&/^mat/i.test(t[1])),sc:s?s[1]:''}; }
+function cmHash(sc){ try{ const h='#tipo=materiais'+(sc?'&sc='+encodeURIComponent(sc):''); if(decodeURIComponent(location.hash||'')!==decodeURIComponent(h)) history.replaceState(null,'',location.pathname+location.search+h); }catch(e){} }
+function cmIr(self,t){ if(t===cmTipo(self)) return; if(t==='mat'){ self.setState({cmTipo:'mat',cmPan:null,cmF:{}}); cmHash(''); return; }
+  self.setState({cmTipo:'ins',cmPan:null,cmF:{}}); try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} if(self.state.saf) hashSync(self.state.saf,solDe(self.state.saf)); }
+function cmServ(r){ return r.tipo==='Serviço'; }
+function cmDesc(r){ const it=r.itens||[]; return it.length===1?it[0].nome:(it.length+' itens'); }
+function cmQtd(r){ return (r.itens||[]).map(x=>qt(x.qtd,x.un)).join(' + '); }
+function cmTipoQtd(r){ return cmServ(r)?'Serviço':'Material · '+cmQtd(r); }
+function cmValor(r){ return r.ped?r.ped.valor:Math.round((r.itens||[]).reduce((s,x)=>s+x.qtd*x.preco,0)*100)/100; }
+function cmDest(c,r){ if(r.om){ const o=c.oms[r.om]; const a=o&&c.ativos[o.aid]; return r.om+(a?' · '+a.nome:''); }
+  if(r.aid&&c.ativos[r.aid]) return c.ativos[r.aid].nome+' · ativo'; if(r.orig==='rep') return CMM.ccRep; return 'Centro de custo '+r.cc; }
+/* onde o custo fica (nunca safra ou cultura na compra) */
+function cmApro(c,r){ if(r.om){ const o=c.oms[r.om]; const a=o&&c.ativos[o.aid]; return 'Ordem '+r.om+' · ativo '+(a?a.nome+' ('+o.aid+')':'—')+' · centro de custo '+r.cc; }
+  if(r.aid&&c.ativos[r.aid]) return 'Ativo '+c.ativos[r.aid].nome+' ('+r.aid+')';
+  if(r.orig==='rep') return 'Estoque do '+CMM.ccRep.toLowerCase()+': o custo vai à ordem que usar o item';
+  return 'Centro de custo '+r.cc; }
+function cmProx(c,r){ if(r.etapa==='A cotar') return 'solicitar cotações'; if(r.etapa==='Em cotação') return 'escolher a proposta e emitir o pedido';
+  if(r.etapa==='Pedido emitido') return (cmServ(r)?'aceitar o serviço':'receber')+' · '+r.ped.id+' previsto '+manBr(r.ped.prev);
+  if(r.etapa==='Recebida'){ if(r.rec&&r.rec.dest==='om'){ const o=c.oms[r.om]; return o&&o.etapa==='A liberar'?'liberar a '+r.om+' (na Manutenção)':'na '+r.om+' · '+(o?o.etapa.toLowerCase():''); }
+    return r.rec&&r.rec.dest==='cc'?'entregue ao destino':'no estoque da oficina'; }
+  if(r.etapa==='Aceita') return r.om?'custo de terceiro na '+r.om:'custo no centro de custo '+r.cc; return ''; }
+/* a fila: requisições e itens abaixo do ponto de pedido sem requisição; abertas primeiro, por urgência e pela data de que precisa */
+function cmLista(c){ const L=Object.values(cmmDe(c).reqs).map(r=>({k:'sc',id:r.id,r,orig:r.orig,aberta:cmmAberta(r),urg:r.urg,ate:cmmAte(c,r)}));
+  cmmRepos(c).forEach(x=>L.push({k:'rep',id:'REP:'+x.k,x,orig:'rep',aberta:true,urg:'Normal',ate:''}));
+  return L.sort((a,b)=>(b.aberta-a.aberta)||(CM_URK[a.urg]-CM_URK[b.urg])||String(a.ate||'9').localeCompare(String(b.ate||'9'))||String(a.id).localeCompare(String(b.id))); }
+function cmPassa(e,fo,fs){ return (fo==='Todas'||CM_ORIG[e.orig]===fo)&&(fs==='Todas'||(fs==='Em aberto'?e.aberta:!e.aberta)); }
+function cmPre(self){ const g=GR('g_mat'); if(!g) return; const c=manGet(); const fo=self.state.cmFo||'Todas', fs=self.state.cmFs||'Em aberto';
+  g.rows=cmLista(c).filter(e=>cmPassa(e,fo,fs)).map(e=>{
+    if(e.k==='rep'){ const x=e.x; return {id:e.id,ro:true,v:{req:x.nome,sit:'Abaixo do ponto de pedido',urg:'Normal',orig:'Reposição de estoque',ate:'',val:Math.round(x.qtd*x.preco*100)/100},
+      s:{req:x.nome,sit:'Abaixo do ponto de pedido',urg:'Normal',orig:'Reposição de estoque'},
+      p:{req:[B(x.nome),BR(),MU('Material · '+qt(x.qtd,x.un)+' a repor')],sit:[CH('Abaixo do ponto de pedido','yellow'),BR(),MU('abrir a requisição de reposição')],
+         urg:[CH('Normal','gray')],orig:[T('Reposição de estoque'),BR(),MU('livre '+qt(x.livre,x.un)+' · ponto de pedido '+qt(x.min,x.un))]}}; }
+    const r=e.r; return {id:r.id,ro:true,v:{req:r.id,sit:r.etapa,urg:r.urg,orig:CM_ORIG[r.orig],ate:e.ate||'',val:cmValor(r)},
+      s:{req:r.id+' '+cmDesc(r),sit:r.etapa,urg:r.urg,orig:CM_ORIG[r.orig]},
+      p:{req:[B(r.id),T(' '+cmDesc(r)),BR(),MU(cmTipoQtd(r))],sit:[CH(r.etapa,CM_ETC[r.etapa]),BR(),MU(cmProx(c,r))],urg:[CH(r.urg,CM_URC[r.urg])],
+         orig:[T(CM_ORIG[r.orig]),BR(),MU(cmDest(c,r))]}}; }); }
+function cmFoco(){ setTimeout(()=>{ const a=document.getElementById('cm-painel'); if(a&&!a.contains(document.activeElement)) a.focus(); },60); }
+function cmAbrir(self,rid){ rid=String(rid); if(rid.indexOf('REP:')===0){ self.setState({cmPan:{k:'rep',id:rid.slice(4)},cmF:{}}); cmHash(''); } else { self.setState({cmPan:{k:'sc',id:rid},cmF:{}}); cmHash(rid); } cmFoco(); }
+function cmFechar(self){ self.setState({cmPan:null,cmF:{}}); cmHash(''); }
+function cmSetF(self,patch){ const F=self.state.cmF||{}; const err=Object.assign({},F.err||{}); Object.keys(patch).forEach(k=>{ delete err[k]; if(k==='item') delete err.nome; }); self.setState({cmF:Object.assign({},F,patch,{err})}); }
+/* comando: a regra grava no cenário único pelo manMudar (atômico: erro não grava nada); o aviso sai no g2toast */
+function cmRun(self,fn,depois){ const r=manMudar(self,(m)=>fn(m))||{}; if(r.err) self.setState({cmF:Object.assign({},self.state.cmF||{},{err:r.err})}); if(!r.erro&&!r.nada&&depois) depois(r); return r; }
+function cmTrilha(r){ const N=['Requisição','Cotação','Pedido',cmServ(r)?'Aceite':'Recebimento']; const cur={'A cotar':1,'Em cotação':2,'Pedido emitido':3,'Recebida':4,'Aceita':4}[r.etapa]||0;
+  return N.map((t,i)=>{ const feita=i<cur, atual=i===cur; return {t:(feita?'✓ ':'')+t,sep:i>0,cur:atual?'step':'false',
+    st:'display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;font-weight:700;'+(feita?'background:#E4F3E9;color:#1E7A4C;':(atual?'background:#E3F0FB;color:#1E5F8F;box-shadow:inset 0 0 0 1px #1E5F8F;':'background:#EEF1EE;color:#5B6660;'))}; }); }
+function cmVals(self,v){ const st=self.state; const mat=cmTipo(self)==='mat';
+  if(!self.__cmIni){ self.__cmIni=1; const ler=()=>{ const h=cmHashLer(); if(!h.mat) return; const ok=h.sc&&cmmDe(manGet()).reqs[h.sc];
+      self.setState({cmTipo:'mat',cmPan:ok?{k:'sc',id:h.sc}:null,cmF:{}}); if(ok) cmFoco(); };
+    setTimeout(ler,0); try{ window.addEventListener('hashchange',ler); }catch(e){} }
+  v.ins_on=!mat; v.mat_on=mat; v.cmt_ins=String(!mat); v.cmt_mat=String(mat); v.cmt_insSt=mat?CM_SEGOFF:CM_SEGON; v.cmt_matSt=mat?CM_SEGON:CM_SEGOFF;
+  v.cmt_goIns=()=>cmIr(self,'ins'); v.cmt_goMat=()=>cmIr(self,'mat');
+  const c=manGet(); const L=cmLista(c); const fo=st.cmFo||'Todas', fs=st.cmFs||'Em aberto';
+  v.cm_fo=fo; v.cm_fos=CM_FO.map(o=>({v:o,t:o+' · '+L.filter(e=>cmPassa(e,o,fs)).length})); v.cm_setfo=(e)=>self.setState({cmFo:e.target.value});
+  v.cm_fs=fs; v.cm_fss=CM_FS.map(o=>({v:o,t:o+' · '+L.filter(e=>cmPassa(e,fo,o)).length})); v.cm_setfs=(e)=>self.setState({cmFs:e.target.value});
+  v.cm_nova=()=>{ self.setState({cmPan:{k:'novo'},cmF:{tipo:'Material'}}); cmHash(''); cmFoco(); };
+  // painel: valores padrão (fechado)
+  Object.assign(v,{cm_pan:false,cm_titulo:'',cm_chips:[],cm_hasChips:false,cm_hasErr:false,cm_err:'',cm_novo:false,cm_det:true,cm_tr:[],cm_kv:[],cm_itens:[],cm_hasProps:false,cm_propsT:'',cm_props:[],
+    cm_foraOn:false,cm_fora:'',cm_justOn:false,cm_just:'',cm_justDica:'',cm_notaOn:false,cm_nota:'',cm_hasLk:false,cm_lkh:'',cm_lkt:'',cm_hasP:false,cm_pt:'',cm_pdis:false,cm_pwhy:'',cm_pfn:()=>{}});
+  v.cm_fechar=()=>cmFechar(self); v.cm_key=(e)=>{ if(e.key==='Escape'){ try{ e.stopPropagation(); }catch(x){} cmFechar(self); } };
+  const pan=mat?st.cmPan:null; if(!pan) return; v.cm_pan=true;
+  const pf=g2perfil(); const F=st.cmF||{}; const KV=(l,val,h,ht)=>({l,v:val,hasH:!!h,h:h||'',ht:ht||''});
+  const prim=(t,cmd,fn,extra)=>{ const why=cmmPode(pf,cmd)||extra||''; v.cm_hasP=true; v.cm_pt=t; v.cm_pdis=!!why; v.cm_pwhy=why; v.cm_pfn=()=>{ if(why) return; fn(); }; };
+  if(pan.k==='novo'){ v.cm_titulo='Nova requisição'; v.cm_novo=true; v.cm_det=false;
+    const tipo=F.tipo||'Material'; const outro=tipo==='Material'&&F.item==='__outro'; const cat=tipo==='Material'&&!outro&&F.item&&c.itens[F.item]?c.itens[F.item]:null; const E=F.err||{};
+    v.cmn_tipos=['Material','Serviço'].map(t=>({t,on:String(tipo===t),st:tipo===t?CM_BON:CM_BOFF,go:()=>cmSetF(self,{tipo:t})}));
+    v.cmn_cat=tipo==='Material'; v.cmn_item=F.item||''; v.cmn_setitem=(e)=>cmSetF(self,{item:e.target.value});
+    v.cmn_itens=[{v:'',t:'Escolha o item'}].concat(Object.keys(c.itens).map(k=>({v:k,t:c.itens[k].nome+' ('+c.itens[k].un+') · livre '+manN(c.itens[k].saldo-c.itens[k].reservado,1)}))).concat([{v:'__outro',t:'Outro material (descrever)'}]);
+    v.cmn_desc=tipo==='Serviço'||outro; v.cmn_descRot=tipo==='Serviço'?'Serviço':'Material'; v.cmn_nome=F.nome||''; v.cmn_setnome=(e)=>cmSetF(self,{nome:e.target.value});
+    v.cmn_qtd=F.qtd||''; v.cmn_setqtd=(e)=>cmSetF(self,{qtd:e.target.value}); v.cmn_un=cat?cat.un:(tipo==='Serviço'?'serviço':''); v.cmn_unSel=outro;
+    v.cmn_uns=['un','kg','m','L','cx','par']; v.cmn_unv=F.un||'un'; v.cmn_setun=(e)=>cmSetF(self,{un:e.target.value});
+    v.cmn_est=!cat; v.cmn_preco=F.preco||''; v.cmn_setpreco=(e)=>cmSetF(self,{preco:e.target.value});
+    v.cmn_dests=[{v:'',t:'Escolha o destino'}].concat(Object.values(c.ativos).map(a=>({v:a.id,t:a.nome+' · ativo'}))).concat(CMM.ccs.map(x=>({v:x,t:x+' · centro de custo'})));
+    v.cmn_dest=F.destino||''; v.cmn_setdest=(e)=>cmSetF(self,{destino:e.target.value});
+    v.cmn_urgs=CMM.urg.map(u=>({t:u,on:String(F.urg===u),st:F.urg===u?CM_BON:CM_BOFF,go:()=>cmSetF(self,{urg:u})}));
+    v.cmn_motivo=F.motivo||''; v.cmn_setmotivo=(e)=>cmSetF(self,{motivo:e.target.value});
+    v.cmn_nota='Sem safra nem cultura: o custo fica no ativo ou no centro de custo e chega às culturas pelo uso do ativo.';
+    ['item','nome','qtd','un','preco','destino','urg','motivo'].forEach(k=>{ v['cmn_e_'+k]=E[k]||''; }); if(E.nome&&!v.cmn_desc){ v.cmn_e_item=E.nome; v.cmn_e_nome=''; }
+    if(Object.keys(E).length){ v.cm_hasErr=true; v.cm_err='Corrija os campos destacados; o que você preencheu foi mantido.'; }
+    prim('Abrir requisição','nova',()=>{ const d={tipo,item:cat?F.item:'',nome:F.nome||'',un:F.un||'un',qtd:F.qtd,preco:F.preco,destino:F.destino,urg:F.urg,motivo:F.motivo};
+      cmRun(self,m=>cmmNova(m,d,pf),(r)=>{ self.setState({cmPan:{k:'sc',id:r.id},cmF:{}}); cmHash(r.id); cmFoco(); }); });
+    return; }
+  if(pan.k==='rep'){ const x=cmmRepos(c).find(y=>y.k===pan.id); const it=c.itens[pan.id]||{nome:pan.id,un:''};
+    v.cm_titulo=it.nome+' · reposição'; v.cm_hasChips=true; v.cm_chips=[{t:'Reposição de estoque',st:cmChipSt('gray')},{t:'Material',st:cmChipSt('gray')},{t:x?'Abaixo do ponto de pedido':'Acima do ponto de pedido',st:cmChipSt(x?'yellow':'green')}];
+    if(!x){ v.cm_kv=[KV('Situação','Saldo livre e reposição pedida já cobrem o ponto de pedido; nada a abrir.')]; return; }
+    v.cm_kv=[KV('Saldo livre',qt(x.livre,x.un)+' (saldo − reservado para ordens)'),KV('Já pedido',x.ped?qt(x.ped,x.un)+' em reposição aberta':'nenhuma reposição aberta'),
+      KV('Ponto de pedido',qt(x.min,x.un)+' · repõe até '+qt(x.max,x.un)),KV('Apropriação','Estoque do '+CMM.ccRep.toLowerCase()+': o custo vai à ordem que usar o item')];
+    v.cm_itens=[{t:x.nome+' ('+x.k+')',s:qt(x.qtd,x.un)+' × ref. '+manRS(x.preco)}];
+    v.cm_notaOn=true; v.cm_nota='Uso geral da oficina, para várias culturas e safras: rateio pelo uso do ativo (horas × custo R$/h), nunca pela safra na compra.';
+    prim('Abrir requisição de reposição','repor',()=>cmRun(self,m=>cmmRepor(m,x.k,pf),(r)=>{ self.setState({cmPan:{k:'sc',id:r.id},cmF:{}}); cmHash(r.id); }));
+    return; }
+  const r=cmmDe(c).reqs[pan.id]; if(!r){ v.cm_titulo=String(pan.id); v.cm_hasErr=true; v.cm_err='Requisição '+pan.id+' não encontrada.'; return; }
+  const o=r.om?c.oms[r.om]:null; const ate=cmmAte(c,r);
+  v.cm_titulo=r.id+' · '+cmDesc(r); v.cm_hasChips=true;
+  v.cm_chips=[{t:CM_ORIG[r.orig],st:cmChipSt('gray')},{t:r.tipo,st:cmChipSt('gray')},{t:'Urgência '+r.urg.toLowerCase(),st:cmChipSt(CM_URC[r.urg])},{t:r.etapa,st:cmChipSt(CM_ETC[r.etapa])}];
+  v.cm_tr=cmTrilha(r);
+  const kv=[KV('Origem',CM_ORIG[r.orig]+(o?' · '+o.id+' · '+o.serv+' ('+o.etapa+')':''),o?'MA.dc.html#om='+o.id:'',o?'Abrir '+o.id:''),KV('Apropriação',cmApro(c,r)),
+    KV('Pedida por',(r.por||'—')+' em '+manBr(r.data)),KV('Motivo',r.motivo||'—'),KV('Precisa até',ate?manBr(ate)+(o?' (janela da '+o.id+')':' (urgência '+r.urg.toLowerCase()+')'):'sem data')];
+  if(r.cot) kv.push(KV('Cotação','enviada em '+manBr(r.cot.em)+' a '+r.cot.conv.map(f=>cmmForn(f).nome).join(', ')+' (simulado)'));
+  if(r.ped) kv.push(KV('Pedido',r.ped.id+' · '+cmmForn(r.ped.f).nome+' · '+manRS(r.ped.valor)+' · '+r.ped.pag+' · previsão '+manBr(r.ped.prev)+(r.ped.just?' · justificativa: '+r.ped.just:'')));
+  if(r.rec) kv.push(KV('Recebimento',manBr(r.rec.em)+' por '+(r.rec.por||'—')+' · '+(r.rec.dest==='om'?((r.rec.res||[]).length?'reservado para a '+r.om:'no saldo da oficina para a '+r.om+' (reserva na liberação)'):(r.rec.dest==='cc'?'entregue ao destino (consumo direto)':'no estoque da oficina'))));
+  if(r.aceite) kv.push(KV('Aceite',manBr(r.aceite.em)+' por '+(r.aceite.por||'—')+(o?' · custo de terceiro da '+o.id+': '+manRS(o.terc||0):'')));
+  v.cm_kv=kv;
+  v.cm_itens=(r.itens||[]).map(x=>({t:x.nome+(x.item?' ('+x.item+')':''),s:(cmServ(r)?'':qt(x.qtd,x.un)+' × ')+'ref. '+manRS(x.preco)}));
+  if(r.cot){ const ref=cmmSugerida(c,r); const ed=r.etapa==='Em cotação'; const sel=r.ped?r.ped.f:(F.f||(ref&&ref.f));
+    v.cm_hasProps=true; v.cm_propsT=ed?'Propostas · escolha uma':'Propostas recebidas';
+    v.cm_props=r.cot.props.map(p=>{ const on=p.f===sel; const late=!!ate&&p.chega>ate;
+      return {f:p.f,t:cmmForn(p.f).nome,v:manRS(p.valor),on:String(on),ro:!ed,go:()=>cmSetF(self,{f:p.f}),st:on?CM_PON:CM_POFF,
+        s:'entrega '+manBr(p.chega)+' ('+p.prazo+(p.prazo>1?' dias':' dia')+') · '+p.pag+(ref&&p.f===ref.f?' · menor custo a tempo':'')+(late?' · chega depois de '+manBr(ate):'')}; });
+    const fora=cmmForaRegra(r); v.cm_foraOn=fora.length>0; v.cm_fora='Não convidado: '+fora.map(f=>f.nome+' (não homologado'+(f.motivo?': '+f.motivo:'')+')').join(', ')+'.';
+    v.cm_justOn=ed&&!!ref&&sel!==ref.f; v.cm_just=F.just||''; v.cm_setjust=(e)=>cmSetF(self,{just:e.target.value});
+    v.cm_justDica=ref?'Obrigatória: a escolhida não é a de menor custo que chega a tempo ('+cmmForn(ref.f).nome+', '+manRS(ref.valor)+').':'';
+    if(ed){ const p=r.cot.props.find(x=>x.f===sel)||ref; const ni=p?cmmNivel(p.valor):0; const alc=p&&cmmAlcIdx(pf)>=0&&cmmAlcIdx(pf)<ni?'Acima da sua alçada: '+manRS(p.valor)+' é decisão de '+CMM.alcada[ni].quem:'';
+      prim('Emitir pedido · '+(p?manRS(p.valor):''),'pedir',()=>cmRun(self,m=>cmmPedir(m,r.id,p.f,F.just||'',pf),()=>self.setState({cmF:{}})),alc); } }
+  v.cm_notaOn=true;
+  v.cm_nota=cmServ(r)?('Serviço não tem estoque: o aceite lança o valor do pedido como custo de terceiro '+(o?'da '+o.id+' (custo da ordem pela função única da Manutenção).':'do centro de custo '+r.cc+'.'))
+    :(r.orig==='om'?'A peça recebida entra no saldo da oficina para a '+r.om+', que passa a poder ser liberada; a reserva nasce na liberação. ':'')+'O custo fica no ativo ou no centro de custo e chega às culturas pelo uso do ativo (rateio pelo uso do ativo), nunca pela safra na compra.';
+  if(o){ v.cm_hasLk=true; v.cm_lkh='MA.dc.html#om='+o.id; v.cm_lkt='Abrir '+o.id; }
+  if(r.etapa==='A cotar') prim('Solicitar cotações (simulado)','cotar',()=>cmRun(self,m=>cmmCotar(m,r.id,pf)));
+  else if(r.etapa==='Pedido emitido'){ if(cmServ(r)) prim('Registrar aceite do serviço','aceitar',()=>cmRun(self,m=>cmmAceitar(m,r.id,pf)));
+    else prim('Registrar recebimento','receber',()=>cmRun(self,m=>cmmReceber(m,r.id,pf))); }
+}
 '''

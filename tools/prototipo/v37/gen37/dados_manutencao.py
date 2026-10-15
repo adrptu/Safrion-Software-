@@ -77,18 +77,19 @@ ATIVOS = _ativos()
 ORDEM_ATIVOS = [a['id'] for a in DC.ATIVOS] + ['cb01']
 
 # ---------- itens de estoque da manutenção (grupo Peças / Lubrificantes) · saldo próprio até o 1b ----------
+# min = ponto de pedido e max = repor até (V69, Compras › Materiais: saldo livre + já pedido abaixo do min sugere a reposição até o max)
 ITENS = {
- 'KIT-MF7719': dict(nome='Kit filtros MF 7719', un='kit', saldo=2, reservado=0, preco=690),
- 'FIL-MF4292': dict(nome='Filtro de óleo MF 4292', un='un', saldo=0, reservado=0, preco=160),
- 'KIT-JD': dict(nome='Kit filtros John Deere', un='kit', saldo=3, reservado=0, preco=740),
- 'KIT-U3030': dict(nome='Kit filtros Uniport 3030', un='kit', saldo=3, reservado=0, preco=520),
- 'KIT-C7250': dict(nome='Kit filtros Case IH 7250', un='kit', saldo=1, reservado=0, preco=1350),
- 'KIT-CB01': dict(nome='Kit filtros caminhão comboio', un='kit', saldo=1, reservado=0, preco=480),
- 'OL-1540': dict(nome='Óleo de motor 15W-40', un='L', saldo=120, reservado=0, preco=28),
- 'OL-HID68': dict(nome='Óleo hidráulico 68', un='L', saldo=200, reservado=0, preco=24),
- 'GR-EP2': dict(nome='Graxa EP2', un='kg', saldo=18, reservado=0, preco=32),
- 'VED-MB': dict(nome='Kit vedação da motobomba', un='kit', saldo=1, reservado=0, preco=380),
- 'DSC-15': dict(nome='Disco de corte 15"', un='un', saldo=24, reservado=0, preco=210),
+ 'KIT-MF7719': dict(nome='Kit filtros MF 7719', un='kit', saldo=2, reservado=0, preco=690, min=1, max=3),
+ 'FIL-MF4292': dict(nome='Filtro de óleo MF 4292', un='un', saldo=0, reservado=0, preco=160, min=2, max=4),
+ 'KIT-JD': dict(nome='Kit filtros John Deere', un='kit', saldo=3, reservado=0, preco=740, min=1, max=3),
+ 'KIT-U3030': dict(nome='Kit filtros Uniport 3030', un='kit', saldo=3, reservado=0, preco=520, min=1, max=3),
+ 'KIT-C7250': dict(nome='Kit filtros Case IH 7250', un='kit', saldo=1, reservado=0, preco=1350, min=1, max=2),
+ 'KIT-CB01': dict(nome='Kit filtros caminhão comboio', un='kit', saldo=1, reservado=0, preco=480, min=1, max=2),
+ 'OL-1540': dict(nome='Óleo de motor 15W-40', un='L', saldo=120, reservado=0, preco=28, min=60, max=200),
+ 'OL-HID68': dict(nome='Óleo hidráulico 68', un='L', saldo=200, reservado=0, preco=24, min=60, max=200),
+ 'GR-EP2': dict(nome='Graxa EP2', un='kg', saldo=18, reservado=0, preco=32, min=20, max=40),
+ 'VED-MB': dict(nome='Kit vedação da motobomba', un='kit', saldo=1, reservado=0, preco=380, min=1, max=2),
+ 'DSC-15': dict(nome='Disco de corte 15"', un='un', saldo=24, reservado=0, preco=210, min=8, max=24),
 }
 ESPECIALIDADES = ['Mecânico', 'Eletricista', 'Lubrificador', 'Terceiro (concessionária)']
 TIPOS_TAREFA = ['Serviço', 'Verificação', 'Medição', 'Teste']
@@ -386,7 +387,8 @@ def seed():
     # v=4 (S2): achados no estado (c.achados substitui c.ach), condição com histórico, tarefas tipadas, leituras, abastecimentos e recibos
     return dict(v=V, rev=0, hoje=HOJE, horiz=HORIZONTE, antiga=LEIT_ANTIGA, custoh=CUSTO_H, maxdia=MAX_DIA, seq=235, seqpm=11, seqsc=41,
                 ativos=ATIVOS, ordem=ORDEM_ATIVOS, itens=ITENS, esp=ESPECIALIDADES, planos=planos, ordemPlanos=[p['id'] for p in PLANOS],
-                vinc=VINCULOS, oms=_oms(), achados=_achados(), leituras=_leituras(), abast=_abast(), recibos={})
+                vinc=VINCULOS, oms=_oms(), achados=_achados(), leituras=_leituras(), abast=_abast(), recibos={},
+                cmp=__import__('dados_compras_mat').seed())   # V69: requisições de materiais, peças e serviços (SC-038..040)
 
 
 def dados_js():
@@ -408,7 +410,8 @@ def js_prefixo():
 
 def js_regras():
     """Regras da manutenção sobre o cenário único (1a): exige cenario.js_prefixo() antes (MAN0 = CEN0.man)."""
-    return 'const MAN0 = CEN0.man;\n' + JS_ACESSO_CEN + dados_js() + JS + '\n'
+    import dados_compras_mat as CM   # V69: Compras de materiais, peças e serviços (c.man.cmp) com as mesmas regras em toda página do estado
+    return 'const MAN0 = CEN0.man;\n' + JS_ACESSO_CEN + dados_js() + JS + '\n' + CM.js() + '\n'
 
 
 JS_ACESSO_CEN = r'''
@@ -627,7 +630,7 @@ function manLiberar(c,id,forcar,pf,d){ const o=c.oms[id]; if(!o) throw new Error
   const ex=manExecSug(o); if(!ex) throw new Error('Falta: executante. Escolha quem executa.'); if(!(Number(o.tempo)>0)) throw new Error('Falta: tempo previsto (h).');
   const f=manFalta(c,o); if(f.length) throw new Error('Não liberada: falta peça · '+f.map(x=>x.nome+' ('+manN(c.itens[x.item].saldo-c.itens[x.item].reservado)+' de '+manN(x.qtd)+' '+x.un+')').join(', ')+(o.sc?'. Aguarda o recebimento da '+o.sc.id+'.':'. Solicite a compra.'));
   const cf=manConflito(c,o); if(cf&&!forcar) return {nada:true,aviso:true,msg:cf.t+' ('+cf.det+'). Mova a janela ou libere mesmo assim.'};
-  (o.pecas||[]).forEach(p=>{ if(!p.item) return; c.itens[p.item].reservado+=p.qtd; p.res=p.qtd; });
+  (o.pecas||[]).forEach(p=>{ if(!p.item) return; const q=p.qtd-(p.res||0); if(q>0) c.itens[p.item].reservado+=q; p.res=p.qtd; });   /* reserva o que ainda não está reservado (com a D5, a peça recebida da SC já chega reservada: V69) */
   o.executante=ex; o.etapa='Liberadas'; if(cf) o.conflitoAceito=true; o.lib={por:manPor(pf),em:c.hoje,conf:cf?cf.t:''}; manToca(o);
   const pr=(o.pecas||[]).filter(p=>p.item).map(p=>p.nome+' '+manN(p.qtd)+' '+p.un);
   return {msg:id+' liberada para a oficina · executante '+ex+(pr.length?' · reservado: '+pr.join(', '):'')+(cf?' · conflito com a '+cf.os.join(' e ')+' aceito e avisado ao PCP':'')+'.'}; }
@@ -636,10 +639,19 @@ function manSolicitar(c,id,pf){ const o=c.oms[id]; if(!o) throw new Error('Ordem
   const f=manFalta(c,o); if(!f.length) return {nada:true,msg:'Nenhuma peça em falta nesta ordem.'};
   const sc='SC-'+String(c.seqsc||41).padStart(3,'0'); c.seqsc=(c.seqsc||41)+1;
   o.sc={id:sc,data:c.hoje,por:manPor(pf),itens:f.map(p=>{ const it=c.itens[p.item]; return {item:p.item,nome:p.nome,un:p.un,qtd:Math.max(0,p.qtd-Math.max(0,it.saldo-it.reservado))}; })}; manToca(o);
-  return {msg:sc+' enviada a Compras (simulado · Compras recebe no 1c): '+o.sc.itens.map(x=>x.nome+' '+manN(x.qtd,1)+' '+x.un).join(', ')+' · a '+id+' libera quando a peça chegar.'}; }
+  cmmDaOm(c,o);   /* V69: a SC entra na fila de Compras › Materiais, peças e serviços (dados_compras_mat) */
+  return {msg:sc+' enviada a Compras (Materiais, peças e serviços): '+o.sc.itens.map(x=>x.nome+' '+manN(x.qtd,1)+' '+x.un).join(', ')+' · a '+id+' libera quando a peça chegar.'}; }
+/* recebimento da SC da OM, a função única da ponte da Manutenção e de Compras › Materiais (V69): o saldo entra para a OM, que passa a poder ser
+   liberada; a reserva nasce na liberação (DEC-2609-13). Só com a D5 aprovada pelo proprietário (CMM.resRec, dados_compras_mat) a peça já fica
+   reservada para a OM (o.pecas[].res) e a liberação reserva só o que falta. A requisição de Compras fica Recebida. Devolve o que ficou reservado. */
+function manReceberSc(c,o,quem){ const sc=o.sc; sc.itens.forEach(x=>{ c.itens[x.item].saldo+=x.qtd; }); sc.rec=c.hoje; sc.recPor=quem;
+  const res=[]; if(CMM.resRec) (o.pecas||[]).forEach(p=>{ if(!p.item||(p.res||0)>=p.qtd||!sc.itens.some(x=>x.item===p.item)) return; const it=c.itens[p.item]; const q=p.qtd-(p.res||0);
+    if(it.saldo-it.reservado+1e-9<q) return; it.reservado+=q; p.res=p.qtd; res.push(p.nome+' '+manN(p.qtd,1)+' '+p.un); });
+  const r=c.cmp&&c.cmp.reqs[sc.id]; if(r&&r.etapa!=='Recebida'){ r.etapa='Recebida'; r.rec={em:c.hoje,por:quem,dest:'om',res}; }
+  manToca(o); return res; }
 function manReceber(c,id,pf){ const o=c.oms[id]; if(!o||!o.sc) throw new Error('Esta ordem não tem compra solicitada.'); if(pf!==undefined) manExige(c,pf,'ponte'); if(o.sc.rec) return {nada:true,msg:'Recebimento da '+o.sc.id+' já registrado.'};
-  o.sc.itens.forEach(x=>{ c.itens[x.item].saldo+=x.qtd; }); o.sc.rec=c.hoje; o.sc.recPor=manPor(pf); manToca(o);
-  return {msg:'Recebimento da '+o.sc.id+' (simulado · papel do Almoxarifado): '+o.sc.itens.map(x=>x.nome+' '+manN(x.qtd,1)+' '+x.un).join(', ')+' · '+id+' pronta para liberar.'}; }
+  const res=manReceberSc(c,o,manPor(pf));
+  return {msg:'Recebimento da '+o.sc.id+' (simulado · papel do Almoxarifado): '+o.sc.itens.map(x=>x.nome+' '+manN(x.qtd,1)+' '+x.un).join(', ')+(res.length?' · reservado para a '+id+': '+res.join(', '):'')+' · '+id+' pronta para liberar.'}; }
 function manIniciar(c,id,pf){ const o=c.oms[id]; if(!o||o.etapa!=='Liberadas') throw new Error(id+' não está em Liberadas.'); if(pf!==undefined) manExige(c,pf,'executar',{o});
   o.etapa='Em execução'; o.ini=c.hoje; o.iniPor=manPor(pf); manToca(o);
   return {msg:id+' Em execução · responda as tarefas e informe a leitura do contador para concluir.'}; }

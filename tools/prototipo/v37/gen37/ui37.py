@@ -52,7 +52,7 @@ MENU2=[('Mapa','map',[('Mapa','IN-04.dc.html')]),
  ('Cadastros','pasta',[('Cadastros','CD.dc.html')]),   # 13/10/2026 (proprietário): sem submenus; a tela CD mostra os 7 cadastros em cartões e cada um volta por "‹ Cadastros"
  ('Agrícola','leaf',[('Painel','PAGR.dc.html'),('Consulta Agrofit','AG-07.dc.html'),('Planos agronômicos','PA.dc.html'),('Análises de solo','AG-02.dc.html'),('Planejar safra','SAF.dc.html'),('Orçamento e previsões','GE-02.dc.html'),('Ordem de Serviço','OS.dc.html'),('Pragas e doenças (MIP/MID)','AG-01.dc.html'),('Irrigação','IR-01.dc.html'),('Previsão e colheita','COLH.dc.html'),('Recebimento','CARGA.dc.html')]+([('Beneficiamento','BEN.dc.html')] if BEN_PUBLICADO else [])+[('Estoque de produto','PROD.dc.html'),('Custos e fechamento','GE-03.dc.html')]),   # 13/10/2026 (proprietário: "coloque orçamento e custos dentro do menu agrícola"; "coloque o submenu colheita dentro de agrícola"; "coloque tudo de produção, dentro de Agrícola"): o ciclo da lavoura até o produto em estoque
  ('Manutenção','wrench',[('Painel','PMAN.dc.html'),('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')]),   # 13/10/2026 (pedido do proprietário: subitens de novo, enxutos): um subitem por visão da tela única, sem tela nova
- ('Suprimentos','cart',[('Painel','PSUP.dc.html'),('Compra de insumos','CMP.dc.html'),('Estoque','EST.dc.html'),('Inteligência de compras','IC.dc.html')]),   # INTEL-01 (13/10)
+ ('Suprimentos','cart',[('Painel','PSUP.dc.html'),('Compras','CMP.dc.html'),('Estoque','EST.dc.html'),('Inteligência de compras','IC.dc.html')]),   # INTEL-01 (13/10)
  ('Comercial','Vendas',[('Painel','PCOM.dc.html'),('Contratos e pedidos','VEN.dc.html'),('Expedição e entregas','EXPED.dc.html'),('Inteligência de vendas','IV.dc.html')]),   # INTEL-01 (13/10): inteligência comercial de vendas
  ('Crédito','cash',[('Solicitações e contratos','GE-08.dc.html#vis=contratos'),('Liberações e garantias','GE-08.dc.html#vis=liberacoes'),('Dossiê e consentimento','GE-08.dc.html#vis=dossie')]),   # 14/10/2026 (proprietário: "crie o menu de crédito"; depois "coloque os submenus de crédito como os demais"): a GE-08 (PRD; DEMO-10) abre pela tela de entrada do Crédito, um cartão por visão (como a Manutenção); sem visão no endereço, a GE-08 mostra tudo (links de outras telas)
  ('Configurações','engrenagem',[('Usuários e alçadas','CF-01.dc.html'),('Auditoria','CF-04.dc.html'),('Integrações','CF-03.dc.html'),('Assinatura e cobrança','CF-05.dc.html')])]   # 06/10/2026 (PLAT-01): grupo por último; CONF-01 (CONF-D01/D02): Usuários e alçadas · Auditoria · Integrações · Assinatura e cobrança, cada item entra no passo que entrega a tela
@@ -353,7 +353,7 @@ def faixa_cobranca(fid,fname):
             f'<span class="assin-fx-w">{{{{assin_fx_t}}}}</span><span class="assin-fx-m">{{{{assin_fx_m}}}}</span><a href="CF-05.dc.html#pagar" style="color: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: 3px;">Pagar fatura ›</a></div></sc-if>')
 def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=None,crumbs_extra=None,
             ctx=('Fazenda Santa Rita','Safra 2026/27',None),cont=None,chipsrow='',footer=None,
-            fname=None,W=1440,H=880,perfil='Ana · Gestora',search=False,steps=None,primary_html=None,mf_fim=''):
+            fname=None,W=1440,H=880,perfil='Ana · Gestora',search=False,steps=None,primary_html=None,mf_fim='',mf_if=None,mf_ini=''):
     # subtítulo sob o título não aparece mais# 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas"); o parâmetro fica por compatibilidade
     fname=fname or ffile(fid)
     H=_h(fname,H)
@@ -388,7 +388,9 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
             # (texto, funil + texto, só o funil); fica só o funil, com a dica "Filtros" (cada filtro já tem o nome ao lado; no celular sobra largura).
             # O grupo continua com o nome acessível "Filtros". Só contexto (Planejar safra, Compra) segue "Trabalhando em".
             _rot='Filtros' if _filtra else 'Trabalhando em'
-            body=faixa_filtros(mf,_rot,mf_fim) + body   # mf_fim: ação da tela que cabe na faixa (Planejar safra: Comparar versões do plano), sem uma linha a mais
+            _fx=faixa_filtros(mf_ini+mf,_rot,mf_fim)   # mf_ini: seletor da tela no começo da faixa (Compras: o tipo de compra, V69)
+            if mf_if: _fx=f'<sc-if value="{{{{{mf_if}}}}}" hint-placeholder-val="{{{{true}}}}">{_fx}</sc-if>'   # V69: a faixa só vale numa parte da tela (Compras: a safra é dos insumos)
+            body=_fx + body   # mf_fim: ação da tela que cabe na faixa (Planejar safra: Comparar versões do plano), sem uma linha a mais
         search=False
     st=chip(status[0],status[1]) if status else ''
     srch=(f'<span style="flex-grow: 1;"></span><span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid {LINE}; border-radius: 999px; background: {SURF}; color: {MUTED}; font-size: 12.5px; min-width: 220px;">'
