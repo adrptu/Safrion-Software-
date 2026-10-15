@@ -818,6 +818,37 @@ function g2acoes(v,pre,c){ c=c||{}; const nada=()=>{};
   const dec=!!c.decide; v[pre+'_hasNotaVis']=dec&&!!(c.nota||lnks.length); v[pre+'_hasNotaSr']=!dec&&!!c.nota; v[pre+'_dica']=(!dec&&c.nota)?c.nota:'';
   v[pre+'_hasMais']=!dec&&(lnks.length>0||!!c.ctx);
   v[pre+'_has']=!!(c.nota||lnks.length||volta||c.troca||sec||prim); }
+// ===== DS-MAIS-20261015 · "⋯ Mais ações" (engine.mais): comportamento único do menu =====
+// botão .g2mais (aria-haspopup=menu, aria-expanded) seguido do menu .g2mais-menu (role=menu, itens role=menuitem). O estado aberto é o
+// aria-expanded do botão (o CSS esconde o menu fechado). Um menu aberto por vez.
+function g2maisMenu(b){ const m=b&&b.nextElementSibling; return m&&m.classList&&m.classList.contains('g2mais-menu')?m:null; }
+function g2maisItens(m){ return m?[...m.querySelectorAll('[role=menuitem]')].filter(x=>x.getClientRects().length&&!x.disabled&&x.getAttribute('aria-disabled')!=='true'):[]; }
+function g2maisFecha(b,foco){ if(!b) return; if(b.getAttribute('aria-expanded')==='true') b.setAttribute('aria-expanded','false'); if(foco&&b.isConnected) b.focus(); }
+function g2maisAbre(b,ult){ document.querySelectorAll('.g2mais[aria-expanded=true]').forEach(x=>{ if(x!==b) g2maisFecha(x); });
+  const m=g2maisMenu(b); if(!m) return; m.removeAttribute('data-cima'); m.removeAttribute('data-esq'); b.setAttribute('aria-expanded','true');
+  const r=b.getBoundingClientRect(), h=m.offsetHeight, w=m.offsetWidth;
+  if(r.bottom+4+h>innerHeight-8&&r.top-4-h>=8) m.setAttribute('data-cima','');   // falta espaço embaixo: sobe
+  if(r.right-w<8) m.setAttribute('data-esq','');                                  // falta espaço à esquerda: abre para a direita
+  const its=g2maisItens(m); if(its.length) (ult?its[its.length-1]:its[0]).focus(); }
+try{ if(!window.__g2maisC){ window.__g2maisC=1;
+  document.addEventListener('click',e=>{ const t=e.target&&e.target.closest?e.target:null; const b=t&&t.closest('button.g2mais');
+    if(b){ if(b.getAttribute('aria-expanded')==='true') g2maisFecha(b); else g2maisAbre(b); return; }
+    const it=t&&t.closest('.g2mais-menu [role=menuitem]');
+    document.querySelectorAll('.g2mais[aria-expanded=true]').forEach(x=>{ const m=g2maisMenu(x); if(!m) return;
+      if(it&&m.contains(it)){ g2maisFecha(x); setTimeout(()=>{ const a=document.activeElement; if((!a||a===document.body||m.contains(a))&&x.isConnected) x.focus(); },0); }
+      else if(!m.contains(t)) g2maisFecha(x); }); },true);
+  document.addEventListener('keydown',e=>{ const a=document.activeElement; const w=a&&a.closest&&a.closest('.g2mais-w'); if(!w) return;
+    const b=w.querySelector('button.g2mais'); const m=g2maisMenu(b); const aberto=!!b&&b.getAttribute('aria-expanded')==='true';
+    if(a===b&&!aberto&&(e.key==='ArrowDown'||e.key==='ArrowUp')){ e.preventDefault(); g2maisAbre(b,e.key==='ArrowUp'); return; }
+    if(!aberto) return;
+    if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); g2maisFecha(b,true); return; }
+    if(e.key==='Tab'){ g2maisFecha(b); return; }
+    const its=g2maisItens(m); if(!its.length) return; const i=its.indexOf(a);
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault(); const n=its.length; its[i<0?(e.key==='ArrowDown'?0:n-1):(i+(e.key==='ArrowDown'?1:n-1))%n].focus(); }
+    else if(e.key==='Home'||e.key==='End'){ e.preventDefault(); its[e.key==='Home'?0:its.length-1].focus(); } },true);
+  // a barra de ações (details.acoes-mais): o ⋯ diz se está aberto (aria-expanded), como o do componente
+  document.addEventListener('toggle',e=>{ const d=e.target; if(d&&d.matches&&d.matches('details.acoes-mais')){ const sm=d.querySelector('summary'); if(sm) sm.setAttribute('aria-expanded',d.open?'true':'false'); } },true);
+} }catch(e){}
 // "⋯ Mais ações" da barra (details.acoes-mais): fecha com Esc (o foco volta ao ⋯), ao clicar fora e depois de escolher um item
 try{ if(!window.__g2mais){ window.__g2mais=1;
   document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; const a=document.activeElement; const d=a&&a.closest&&a.closest('details.acoes-mais[open]'); if(!d) return;

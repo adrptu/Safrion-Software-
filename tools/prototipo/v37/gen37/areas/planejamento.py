@@ -249,10 +249,10 @@ function EXTRAVALS(self,v){
          imsg('Aplicar modelo','Modelo “Soja alta tecnologia v6” aplicado ao rascunho v4 do T2 · 12 operações propostas · exceções locais preservadas · nada publicado.','layers','Aplicar um plano-modelo ao rascunho')],
         g_op)
       + section('Regras do gatilho','Leia o gatilho por extenso; a data prevista nunca vira plantio realizado.',
-        _acoes(ilnk('Ver grade de cultivo','PL-01.dc.html','grid','Abrir a grade de cultivo da safra'),
+        _acoes(E.recolhe_acoes('Regras do gatilho',[ilnk('Ver grade de cultivo','PL-01.dc.html','grid','Abrir a grade de cultivo da safra'),
                imsg('Simular antecipação do plantio',f'Simulação: antecipar o plantio do T1-A para 10/10 move 7 operações dependentes · a {OS_DES["id"]} (DAP −20) já emitida é ajustada pelo agrônomo ao liberar · nada muda até publicar.','calendar','Simular antecipação sem alterar o plano'),
                ilnk('Ver capacidade','SAF.dc.html#saf=S2627&passo=operacoes','trend','Abrir a capacidade por mês da Safra 2026/27 em Planejar safra'),
-               ilnk('Ver compra de insumos','CMP.dc.html','cart','Abrir Compra de insumos (SOL-2026-07)')),
+               ilnk('Ver compra de insumos','CMP.dc.html','cart','Abrir Compra de insumos (SOL-2026-07)')])),
         '',state='gray'))
     EXTRAJS[0]=JS_COMUM+r'''
 function EXTRAVALS(self,v){

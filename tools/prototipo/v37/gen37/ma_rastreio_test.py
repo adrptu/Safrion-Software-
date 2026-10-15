@@ -38,7 +38,7 @@ try:
     cap('om34', 'om=OM-0234'); cap('om33', 'om=OM-0233'); cap('om33ze', 'om=OM-0233', perfil='Zé'); cap('om28', 'om=OM-0228'); cap('om30', 'om=OM-0230')
     cap('ach', 'achado=INSP-104'); cap('venc', 'venc=PM-02|a03|s1')
     cap('cond11', 'ativo=a11', extra=lambda: (m.clk('Mudar condição'), time.sleep(.3)))
-    cap('mais', 'vis=semordem', extra=lambda: m.clk('Mais ações'))
+    cap('mais', 'vis=semordem', extra=lambda: m.clk('Mais ações de Manutenção'))   # ⋯ único (engine.mais, 15/10): o nome diz o contexto
     nlin_pl = len(m.linhas(0)) if m.ir('vis=planos') is None else 0
     row_btn = {}
     for a in ('vis=semordem', 'vis=ordens', 'vis=ativos', 'vis=ativos&modo=abastecimentos', 'vis=planos'):
@@ -80,7 +80,8 @@ try:
     F('F43, F54', 'painel Condição (Bloquear, Restringir, Encerrar restrição, responsável técnico)', tem('cond11', 'Encerrar restrição', 'Trocar responsável técnico', 'Bloquear') and 'Restringir' in MAS and tem('a01', 'RESPONSÁVEL TÉCNICO'))
     F('F45, F46, F57, F82, F102', 'Sai: navegação repetida e selos fixos', not any(x in MAS for x in ('1 bloqueio ativo', '3 de alta criticidade', '1 desvio a investigar', '1 bloqueado · 1 restrito')))
     F('F47, F48', 'Sem ordem › Tipo Inspeção (antes o chip Achados) sem o cartão; bloco Achados do ativo', nao('so', 'ACHADOS CRÍTICOS SEM AÇÃO') and tem('so', 'Inspeção') and tem('a02', 'Achados'))
-    F('F49', '"Registrar achado" (Sem ordem e ativo) com componente; app MB-04', tem('so', 'Registrar achado') and tem('a02', 'Registrar achado') and emsrc('Componente', 'Pode operar?', f='MB-04.dc.html'))
+    # 15/10/2026 (MAIS-01): em Sem ordem a primária é "Gerar N ordens"; "Registrar achado" fica no ⋯ Mais ações de Manutenção ('mais' abre o ⋯ em Sem ordem)
+    F('F49', '"Registrar achado" (Sem ordem, no ⋯, e ativo) com componente; app MB-04', (tem('so', 'Registrar achado') or tem('mais', 'Registrar achado')) and tem('a02', 'Registrar achado') and emsrc('Componente', 'Pode operar?', f='MB-04.dc.html'))
     F('F50, F51, F52', 'painel do achado: Vincular · Gerar com o achado · Criar ordem corretiva · Fechar sem serviço', tem('ach', 'Vincular à OM-0234', 'Criar ordem corretiva', 'Fechar sem serviço') and tem('so', 'Gerar ordem preventiva com NC-0912'))
     F('F53', 'IDs como links #om=', (idlink or 0) > 0 and '#om=' in MAS)
     F('F56', 'Sai: KPI-PCM-07 fixo (Pareto)', 'Pareto' not in MAS)

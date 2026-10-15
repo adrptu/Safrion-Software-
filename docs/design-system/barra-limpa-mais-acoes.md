@@ -21,9 +21,12 @@ Componente único: `engine.area_acoes` com os buracos de `g2lib.g2acoes`. Nenhum
 - Uma ação primária visível por contexto: cabeçalho da tela, cartão ou seção, e linha de tabela. As outras ações daquele contexto vão para o "⋯".
 - O botão "⋯" tem `aria-label` e dica "Mais ações" (ou "Mais ações de <contexto>"). O menu tem `role=menu`, itens com verbo, alvo de toque de pelo menos 40 px e hover verde.
 - Na barra de ações, o menu abre para cima, alinhado à direita (`details.acoes-mais`). Fecha ao clicar de novo, e Esc devolve o foco.
+- **Componente único** (15/10/2026): `engine.mais(contexto, itens)`, promovido do ⋯ da atividade da Biblioteca de planos. Botão com nome e dica "Mais ações de <contexto>", `aria-haspopup=menu` e `aria-expanded`; itens `role=menuitem`. O comportamento é do `g2lib` (`g2mais*`): ↓ ↑ Home End andam entre os itens, Esc fecha e devolve o foco ao ⋯, clicar fora, sair com Tab ou escolher um item fecha. No toque, ⋯ e itens com 44 px.
+- `engine.recolhe_acoes(contexto, ações)` aplica a regra num contexto: a primária e uma secundária ficam à vista, as outras vão para o ⋯. Já passa por ele o cabeçalho de `engine.section` e dos blocos das áreas. A confirmação de um item destrutivo (Restaurar demonstração) aparece fora do menu e fica à vista até a resposta.
 
 ## Verificação
 
 - `solo_mapa_calor_test.py` e `mapa_filtros_test.py` cobrem o Mapa.
 - `acao_unica_test.py`, `saf_tab_test.py` e `ocupacao_test.py` cobrem a barra do Planejar safra: sem nota visível, atalho no "⋯" e dica no botão principal.
 - A auditoria de conformidade do design system (lote "⋯") aplica a regra às demais telas.
+- `ds_padrao_test.py` (partes M e M7) confere o componente e a regra MAIS-01 em 6 telas.

@@ -85,6 +85,7 @@ def _ordens():  # registro canônico dados.ORDENS (fase, selo, saldo, janela); t
 
 # ---------- vocabulário visual local ----------
 def bloco(titulo,desc,corpo,acao='',tone=None):
+    acao=E.recolhe_acoes(titulo,acao)   # MAIS-01 (15/10/2026): uma secundária à vista, as outras no "⋯ Mais ações" do bloco
     desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     dot={'yellow':YEL,'red':RED}.get(tone,ACC)
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; box-shadow: {SH}; display: flex; flex-direction: column; min-width: 0;">'
@@ -202,8 +203,8 @@ def _ca01():
     n_imp=sum(1 for o in ordens if _impedida(o))
     abertas=[o for o in ordens if o['etapa']!='Encerradas' and o.get('area') and o.get('saldo')]
     saldo=sum(o['saldo'] for o in abertas)
-    acoes=(ilink('Conferir apontamentos','CA-02.dc.html','check','Abrir a fila de conferência dos turnos')
-           + ilink('Reprogramar saldo','PL-05.dc.html','calendar','Reprogramar o saldo das ordens no PCP'))
+    acoes=E.recolhe_acoes('Ordens da janela de trabalho',[ilink('Conferir apontamentos','CA-02.dc.html','check','Abrir a fila de conferência dos turnos'),
+           ilink('Reprogramar saldo','PL-05.dc.html','calendar','Reprogramar o saldo das ordens no PCP')])
     n_out=n_lib-n_ag-n_fp
     corpo=(kpis([('A LIBERAR',str(n_lib),f'{n_ag} com produto · {n_fp} só água'+(f' · {n_out} {"outra" if n_out==1 else "outras"}' if n_out else '')),('EM CONFERÊNCIA','1','sobras a receber'),
                  ('SALDO PARADO','70 ha','OS-0420 · Trator T1 (OM-0233)'),('SALDO ABERTO',f'{nf(saldo)} ha',f'{len(abertas)} ordens')])

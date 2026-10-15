@@ -277,8 +277,8 @@ def co02det():
       + dstepper('c2s','c2_hint')
       + sec('Apontamentos por dia','Registre o avanço de cada turno; clique no dia aberto para corrigir.',
         [f'<sc-if value="{H("c2_exec")}" hint-placeholder-val="{T()}">'
-         + sbtn('Finalizar apontamento do turno','c2_fin','clock','Trava os apontamentos do turno; a ordem continua Em execução')
-         + sbtn('Concluir execução','c2_concl','check','Registra o término físico; a ordem entra em Em conferência')+'</sc-if>'],g_ap)
+         + E.recolhe_acoes('Apontamentos por dia',[sbtn('Finalizar apontamento do turno','c2_fin','clock','Trava os apontamentos do turno; a ordem continua Em execução'),
+           sbtn('Concluir execução','c2_concl','check','Registra o término físico; a ordem entra em Em conferência')])+'</sc-if>'],g_ap)
       + sec('Cargas vinculadas','Confira o vínculo de cada carga; dois tickets da mesma carga não duplicam produção.',
         [ilnk('Registrar carga','CO-03.dc.html','truck','Registrar pesagem e romaneio em Registre cargas')],g_cv,state='gray'))
     EXTRAJS[0]=JSBASE+r'''
@@ -453,8 +453,8 @@ def co05det():
       + dstepper('c5s','c5_hint')
       + sec('Balanço de materiais','Confira a entrada contra as saídas por classe e o descarte — embalagem controlada em separado.',
         [f'<sc-if value="{H("c5_exec")}" hint-placeholder-val="{T()}">'
-         + sbtn('Finalizar apontamento do turno','c5_fin','clock','Trava os apontamentos do turno; a ordem continua Em execução')
-         + sbtn('Conferir balanço','c5_confb','scale','Conferir entrada contra saídas (disponível em Em conferência)')+'</sc-if>'],
+         + E.recolhe_acoes('Balanço de materiais',[sbtn('Finalizar apontamento do turno','c5_fin','clock','Trava os apontamentos do turno; a ordem continua Em execução'),
+           sbtn('Conferir balanço','c5_confb','scale','Conferir entrada contra saídas (disponível em Em conferência)')])+'</sc-if>'],
         g_bal+f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 4px 0; font-size: 13px;"><b>{H("c5_bal")}</b>'
               f'<span style="{H("c5_div_st")}"><span style="{H("c5_div_dot")}"></span>{H("c5_div")}</span></div>')
       + sec('Genealogia do lote','Rastreie do cliente ao lote de origem; mistura e divisão preservam a árvore.','',

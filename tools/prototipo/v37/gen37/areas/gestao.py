@@ -52,6 +52,7 @@ def mi(mil): return 'R$ '+nf(mil/1000,2)+' mi'
 
 # ---------- vocabulário visual local (igual ao dos módulos adaptados) ----------
 def bloco(titulo,desc,corpo,acao='',tone=None):
+    acao=E.recolhe_acoes(titulo,acao)   # MAIS-01 (15/10/2026): uma secundária à vista, as outras no "⋯ Mais ações" do bloco
     desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     dot={'yellow':YEL,'red':RED,'gray':'#9AA59E'}.get(tone,ACC)
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; box-shadow: {SH}; display: flex; flex-direction: column; min-width: 0;">'
@@ -204,9 +205,9 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_ver'||!r) r
       + bloco('Cronograma de caixa por versão','Confira o desembolso trimestral de cada versão; o total fecha com o custo total da versão.',g_cx)
       + bloco('Publicação','Submeta a revisão à Direção e publique a previsão para planejamento, programação e compras.',
           '<div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">'
-          + imsg('Submeter orçamento revisado','Submetido à Direção · +R$ 180 mil em defensivos · aparece em Aprovações para decisão.','doc','Enviar a revisão para a Direção decidir')
-          + imsg('Publicar previsão V2','Previsão V2 publicada para planejamento, programação e compras · consumidores passam a ler a nova versão; histórico mantém as anteriores.','check','Publicar a V2 aos consumidores')
-          + imsg('Autorizar versão','Bloqueado · só a alçada Direção autoriza a versão — a submissão já está na caixa de Aprovações.','users','Autorizar a versão (alçada da Direção)')
+          + E.recolhe_acoes('Publicação',[imsg('Submeter orçamento revisado','Submetido à Direção · +R$ 180 mil em defensivos · aparece em Aprovações para decisão.','doc','Enviar a revisão para a Direção decidir')
+          ,imsg('Publicar previsão V2','Previsão V2 publicada para planejamento, programação e compras · consumidores passam a ler a nova versão; histórico mantém as anteriores.','check','Publicar a V2 aos consumidores')
+          ,imsg('Autorizar versão','Bloqueado · só a alçada Direção autoriza a versão — a submissão já está na caixa de Aprovações.','users','Autorizar a versão (alçada da Direção)')])
           + '</div>',tone='gray'))
     shell37('GE-02','Orçamento e previsões',corpo,
       subtitle='Orçado original, revisado e realizado em quantidade, preço e custo — total, por ha e por unidade, com ponte de variações que concilia ao total.',

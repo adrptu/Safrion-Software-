@@ -258,7 +258,6 @@ class Component extends DCLogic {
           v[w.id + '_i' + i] = (i === cur ? w.ion : w.ioff);
         });
       }
-      if (w.type === 'menu') { v[w.id + '_open'] = toggleOpen; v[w.id + '_st'] = w.mst + (st.open === w.id ? '' : 'display: none;'); }
       if (w.type === 'sort') {
         const s = st.sort[w.id] || { c: w.dflt, d: !!w.desc };
         const om = String(st.open || '');
@@ -353,19 +352,10 @@ def navlink(m,act):
 def openlink(href=None):
     href=href or ROW or TABLEHREF.get(CUR) or '#'
     return f'<a href="{href}" aria-label="Abrir" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; color: {MUTED}; text-decoration: none; font-size: 18px;">›</a>'
-def act(text=None,href=None,urgent=False,open=False,menu=False,edit=None):
+def act(text=None,href=None,urgent=False,open=False):
     """Célula de ação de linha: botão pequeno (opcional) e, quando a linha abre um detalhe, a seta › sempre na borda direita."""
     b=''
-    if menu:
-        m=wid('m'); reg(type='menu',id=m,mst=LIST_ST(True))
-        if edit:
-            d=DRAWERS.get((CUR,edit)) or DRAWERS.get(edit)
-            if d and edit not in DRAWN: drawer_button(edit,d)
-            ehole=HL(DRAWN[edit]+'_open') if edit in DRAWN else HL('closeAll')
-        else: ehole=HL('closeAll')
-        items=f'<button type="button" onClick="{ehole}" style="{ITEM_ON()}">Editar</button>'+''.join(f'<button type="button" onClick="{HL("closeAll")}" style="{ITEM_OFF()}{" color: "+RED+";" if t=="Excluir" else ""}">{t}</button>' for t in ('Duplicar','Mover para cima','Mover para baixo','Excluir'))
-        b=f'<span style="position: relative; display: inline-flex;"><button type="button" aria-label="Mais ações" aria-haspopup="menu" onClick="{HL(m+"_open")}" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; color: {MUTED}; border: 0; background: transparent; cursor: pointer; font-size: 18px; letter-spacing: 1px;">⋯</button><div role="menu" style="{HL(m+"_st")}">{items}</div></span>'
-    elif text:
+    if text:
         st=(f"padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; white-space: nowrap; text-decoration: none; display: inline-block; {ALVO_ST}background: {SURF}; "
             + (f"color: {RED}; border: 1px solid {RED};" if urgent else f"color: {INK}; border: 1px solid {LINE};"))
         dest=href or ROW or TABLEHREF.get(CUR) or BTNHREF.get((CUR,text)) or BTNHREF.get(text)
@@ -629,7 +619,7 @@ def section(title,summary,action,body,state='green'):
     dot={'green':ACC,'yellow':YEL,'red':RED,'gray':GRAY}[state]
     vazio=not str(body).strip()   # 14/10/2026: bloco só com ações (a regra foi para a dica ⓘ) não deixa corpo vazio nem linha solta
     return (f'<div style="background: {SURF}; border: 1px solid {LINE}; border-radius: 16px; box-shadow: {SH}; display: flex; flex-direction: column; flex: 1 1 0; min-width: 0;">'
-            f'<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 18px;{"" if vazio else f" border-bottom: 1px solid {LINE};"}"><div style="display: flex; align-items: center; gap: 10px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: {dot}; flex-shrink: 0; box-shadow: 0 0 0 3px {dot}22;"></span><div style="font-size: 15px; font-weight: 700; letter-spacing: -.01em; flex-grow: 1;">{esc(title)}</div>{"".join((a if a.startswith("<") else btn(a,small=True)) for a in ([action] if isinstance(action,str) else action) if a)}</div>' + (f'<div style="font-size: 13px; color: {MUTED}; padding-left: 20px; line-height: 1.35;">{esc(summary)}</div>' if summary else '') + '</div>'
+            f'<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 18px;{"" if vazio else f" border-bottom: 1px solid {LINE};"}"><div style="display: flex; align-items: center; gap: 10px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: {dot}; flex-shrink: 0; box-shadow: 0 0 0 3px {dot}22;"></span><div style="font-size: 15px; font-weight: 700; letter-spacing: -.01em; flex-grow: 1;">{esc(title)}</div>{recolhe_acoes(title,[(a if a.startswith("<") else btn(a,small=True)) for a in ([action] if isinstance(action,str) else action) if a])}</div>' + (f'<div style="font-size: 13px; color: {MUTED}; padding-left: 20px; line-height: 1.35;">{esc(summary)}</div>' if summary else '') + '</div>'
             + ('' if vazio else f'<div style="padding: 14px 18px;">{body}</div>') + '</div>')
 SELECT_KEYS=['se recusar','divisão','cobertura por','risco de roubo','ação do ajuste','atividade','decisão','análise de crédito','indexador','frete','cobrança','garantia','liberação','cultura','variedade','plano','máquina','implemento','operação','talhão','fazenda','insumo','produto','fornecedor','cliente','laborat','depósito','lote','grupo','categoria','marca','modelo','polític','fase','praça','condição','unidade','gatilho','método','tabela','extrator','profundidade','item','peça','operador','mecânico','pessoa','sensor','motivo','avisar por','canal','prioridade','pagamento','retirada','base','tipo','estado','origem','pivô','armazém','cultivar','múltiplo','responsável','alvo','estádio']
 TEXT_HINTS=['(ler qr','r$','kg','(ha','dias','(h)','data','quantidade','preço','valor','litros','umidade','%','horas','km','(m)','l/ha','sc)','rendimento','custo','frete','área','velocidade','largura','eficiência','ciclo','consumo','potência','vida','câmbio','leitura','turno','antecipar','validade','entrega','arquivo','nome','observação','lâmina','horímetro','intervalo','itens','peso','contado','complemento']
@@ -1167,6 +1157,97 @@ ACOES_CSS=(".acoes{position:sticky;bottom:-22px;z-index:6;display:flex;flex-dire
     "@media (hover:hover){.g2xtog:hover{text-decoration:underline;text-underline-offset:3px}}.g2xtog:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:6px}"
     "@media (pointer:coarse){.g2xtog{min-height:44px}}"
     "@media (pointer:coarse){[data-g2agb],[data-g2cvb]{min-height:44px!important}}")   # defeito D: Agrupar por e Colunas com alvo de toque de 44 px
+# =====================================================================================
+# DS-MAIS-20261015 · "⋯ Mais ações" (regras MAIS-01/02). Proprietário, 15/10/2026: "gostei desses 3 pontinhos ... Gerando várias opcoes
+# de ações, deixando a tela mais clean. igual o google faz." Um componente para toda tela, promovido do ⋯ da atividade da Biblioteca de
+# planos (.pa-mais): botão "⋯" com nome e dica "Mais ações de <contexto>", aria-haspopup=menu e aria-expanded; menu role=menu com itens
+# role=menuitem, cada um com o verbo do efeito. O comportamento é um só, no g2lib (g2mais*): abre e fecha pelo ⋯, Esc fecha e devolve o
+# foco ao ⋯, ↓ ↑ Home End andam entre os itens (↓ no ⋯ fechado abre), clicar fora, sair com Tab ou escolher um item fecha. O menu abre
+# para baixo e à direita do ⋯; sobe ou vira para a esquerda quando falta espaço.
+# Regra MAIS-01: em cada contexto (cabeçalho, bloco, cartão, linha) fica à vista a ação primária e no máximo uma secundária; as outras
+# vão para o ⋯ (recolhe_acoes). Na barra de ações do processo o ⋯ é o details.acoes-mais da area_acoes (mesmo desenho de item).
+# =====================================================================================
+MAIS_CSS=(".g2mais-w{position:relative;display:inline-flex;flex-shrink:0;vertical-align:middle}"
+    ".g2mais{display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:34px;padding:0 8px;border:1px solid #E4E9E5;border-radius:10px;"
+    "background:#FFFFFF;color:#15201A;font-family:inherit;font-size:18px;font-weight:800;line-height:1;letter-spacing:1px;cursor:pointer;box-sizing:border-box}"
+    ".g2mais.g2mais-l{border-color:transparent;background:transparent;color:#4B5A51;min-width:32px;min-height:32px;padding:0 4px}"
+    "@media (hover:hover){.g2mais:not(.g2mais-l):hover{border-color:#9DBFAA}}"
+    ".g2mais:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}"
+    "@media (pointer:coarse){.g2mais{min-width:44px;min-height:44px}}"
+    ".g2mais[aria-expanded=false]+.g2mais-menu{display:none}"
+    ".g2mais-menu{position:absolute;right:0;top:calc(100% + 4px);z-index:45;min-width:220px;max-width:min(340px,calc(100vw - 24px));display:flex;flex-direction:column;gap:2px;"
+    "padding:6px;background:#FFFFFF;border:1px solid #E4E9E5;border-radius:12px;box-shadow:0 12px 28px -12px rgba(21,32,26,.35);box-sizing:border-box;text-align:left}"
+    ".g2mais-menu[data-cima]{top:auto;bottom:calc(100% + 4px)}.g2mais-menu[data-esq]{right:auto;left:0}"
+    ".g2mais-menu [role=menuitem]{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:0;background:transparent;font-family:inherit;font-size:13px;"
+    "font-weight:600;line-height:1.3;color:#15201A;padding:9px 12px;min-height:40px;border-radius:8px;cursor:pointer;text-decoration:none;white-space:normal;box-sizing:border-box}"
+    "@media (pointer:coarse){.g2mais-menu [role=menuitem]{min-height:44px}}"
+    ".g2mais-menu [role=menuitem]:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
+    ".g2mais-menu [role=menuitem]:is(:disabled,[aria-disabled=true]){color:#65736A;cursor:not-allowed}"
+    ".g2mais-menu .g2mais-destr{color:#B42318}"
+    "@media (hover:hover){.g2mais-menu .g2mais-destr:hover{background-image:linear-gradient(rgba(180,35,24,.06),rgba(180,35,24,.06))!important}}")
+_ITEM_RE=re.compile(r'^\s*<(button|a)\b([^>]*)>(.*)</(button|a)>\s*$',re.S)
+def _attr_q(t): return str(t).replace('"','&quot;') if '{{' in str(t) else esc(str(t)).replace('"','&quot;')
+def item_menu(html,destr=None):
+    """Converte um botão ou link de ação (HTML do engine: btn, msgbtn, drawer_button, ícone + rótulo) em item do ⋯: sai o estilo inline
+    (o menu dá o desenho), entra role=menuitem. Destrutivo (texto vermelho) continua vermelho. HTML que não é um botão simples volta igual."""
+    m=_ITEM_RE.match(html or '')
+    if not m or m.group(1)!=m.group(4) or ('</'+m.group(1)+'>') in m.group(3) or ('<'+m.group(1)+' ') in m.group(3): return None
+    tag,attrs,inner=m.group(1),m.group(2),m.group(3)
+    st=re.search(r'\sstyle="([^"]*)"',attrs); sts=st.group(1) if st else ''
+    red=destr if destr is not None else bool(re.search(r'(?:^|[;\s])color:\s*'+re.escape(RED),sts))
+    attrs=re.sub(r'\sstyle="[^"]*"','',attrs); attrs=re.sub(r'\srole="[^"]*"','',attrs)
+    cl=re.search(r'\sclass="([^"]*)"',attrs)
+    if red: attrs=(attrs.replace(cl.group(0),f' class="{cl.group(1)} g2mais-destr"') if cl else attrs+' class="g2mais-destr"')
+    inner=re.sub(r'^\s*\+\s*','',inner)   # "+ Incluir" no menu é só "Incluir"
+    return f'<{tag}{attrs} role="menuitem">{inner}</{tag}>'
+def _item_tupla(t):
+    txt,acao=t[0],t[1]; destr=len(t)>2 and t[2]; c=' class="g2mais-destr"' if destr else ''
+    rot=txt if '{{' in txt else esc(txt)
+    if str(acao).startswith('{{'): return f'<button type="button" role="menuitem"{c} onClick="{acao}">{rot}</button>'
+    return f'<a role="menuitem"{c} href="{acao}">{rot}</a>'
+def mais(contexto,itens,linha=False,cls=''):
+    """⋯ Mais ações (DS-MAIS-20261015). contexto: o que as ações afetam ("Mais ações de <contexto>"; vazio = "Mais ações"); pode ser buraco
+    do template. itens: HTML de botão/link do engine (vira item) ou tuplas (texto, onClick "{{buraco}}" ou href[, destrutivo]).
+    linha=True: ⋯ sem borda, para linha de lista e cartão; cls: classe extra no botão (ex.: o desenho próprio da linha da atividade, .pa-mais)."""
+    its=''.join((item_menu(i) or i) if isinstance(i,str) else _item_tupla(i) for i in itens if i)
+    if not its: return ''
+    nome=_attr_q('Mais ações'+(f' de {contexto}' if contexto else ''))
+    return (f'<span class="g2mais-w"><button type="button" class="g2mais{" g2mais-l" if linha else ""}{(" "+cls) if cls else ""}" aria-haspopup="menu" aria-expanded="false" '
+            f'aria-label="{nome}" data-dica="{nome}">⋯</button><span role="menu" class="g2mais-menu" aria-label="{nome}">{its}</span></span>')
+def _verde(html): return bool(re.search(r'background:\s*'+re.escape(ACC),html.split('>',1)[0]))
+_TAG_RE=re.compile(r'<(/?)([a-zA-Z][\w:-]*)\b(?:[^>"]|"[^"]*")*?(/?)>')
+_VAZIOS={'br','img','input','hr','meta','link','source','wbr','path','circle','rect','line','polyline','polygon','ellipse','use','stop'}
+def partes_html(h):
+    """divide HTML em elementos de primeiro nível (texto solto entre eles fica como parte própria); usado para recolher ações já concatenadas"""
+    out=[]; d=0; ini=0; pos=0
+    for m in _TAG_RE.finditer(h or ''):
+        fecha,tag,auto=m.group(1),m.group(2).lower(),m.group(3)
+        if d==0 and not fecha:
+            if h[pos:m.start()].strip(): out.append(h[pos:m.start()])
+            if auto or tag in _VAZIOS: out.append(m.group(0)); pos=m.end(); continue
+            ini=m.start(); d=1; continue
+        if auto or tag in _VAZIOS: continue
+        d+=(-1 if fecha else 1)
+        if d==0: out.append(h[ini:m.end()]); pos=m.end()
+    if d==0 and (h or '')[pos:].strip(): out.append(h[pos:])
+    if d!=0: return [h]   # HTML desequilibrado: não mexe
+    return out
+def recolhe_acoes(contexto,acoes,linha=False,visiveis=1):
+    """Regra MAIS-01 aplicada a uma lista de ações de um contexto (bloco, cartão, cabeçalho): ficam à vista as primárias (verde) e as
+    `visiveis` primeiras secundárias; as outras secundárias que são botão ou link simples vão para o ⋯ "Mais ações de <contexto>".
+    Ação que não é botão simples (condicional, com motivo, composta) fica à vista como veio. Devolve o HTML na ordem: à vista, depois ⋯."""
+    vis=[]; menu=[]; nsec=0
+    if isinstance(acoes,str): acoes=[acoes]
+    acoes=[q for x in acoes if x for q in (partes_html(x) if isinstance(x,str) else [x])]
+    for a in acoes:
+        if not isinstance(a,str): menu.append(a); continue
+        if _verde(a): vis.append(a); continue
+        if nsec<visiveis or item_menu(a) is None: vis.append(a); nsec+=(item_menu(a) is not None); continue
+        menu.append(a)
+    if len(menu)==0: return ''.join(vis)
+    # o verde vai por último (fim da linha, à direita); o ⋯ fica logo antes dele
+    sec=[a for a in vis if not _verde(a)]; prim=[a for a in vis if _verde(a)]
+    return ''.join(sec)+mais(contexto,menu,linha)+''.join(prim)
 # DS-ALVO-20261015: liga o alvo de toque dos componentes (ALVO_ST) só com ponteiro grosso. Um link com cara de botão (inline-block) passa
 # a flex para o texto ficar no meio da altura maior; um link em bloco continua em bloco (flex). A escolha em pílula com estado (chip de
 # filtro rápido, segmento, aria-pressed) também ganha os 44 px, inclusive as cópias do estilo do chip feitas nas telas
@@ -1192,7 +1273,7 @@ def area_acoes(pre='aa',rotulo='Ações da etapa'):
             f'<sc-if value="{h("_hasVolta")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-sec" data-acao="{h("_voltaA")}" onClick="{h("_volta")}">{h("_voltaT")}</button></sc-if>'
             f'<sc-if value="{h("_hasTroca")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-sec" data-acao="trocar" onClick="{h("_troca")}">{h("_trocaT")}</button></sc-if>'
             f'<span class="acoes-esp"></span>'
-            f'<sc-if value="{h("_hasMais")}" hint-placeholder-val="{F_}"><details class="acoes-mais"><summary class="acoes-sec" data-acao="mais" aria-label="Mais ações" title="Mais ações">⋯</summary>'
+            f'<sc-if value="{h("_hasMais")}" hint-placeholder-val="{F_}"><details class="acoes-mais"><summary class="acoes-sec" data-acao="mais" aria-haspopup="menu" aria-expanded="false" aria-label="Mais ações da etapa" data-dica="Mais ações da etapa">⋯</summary>'
             f'<div class="acoes-menu" role="menu" aria-label="Mais ações">'
             f'<sc-if value="{h("_hasCtx")}" hint-placeholder-val="{F_}"><button type="button" role="menuitem" data-acao="corrigir" onClick="{h("_ctxFn")}">{h("_ctxT")}</button></sc-if>'
             f'<sc-for list="{h("_lnks")}" as="am" hint-placeholder-count="0"><button type="button" role="menuitem" data-acao="atalho" onClick="{{{{am.fn}}}}">{{{{am.t}}}}</button></sc-for></div></details></sc-if>'
@@ -1407,7 +1488,7 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         # separador "·" no começo de uma parte da célula: fica num elemento próprio e some (opacidade, sem mudar a largura) quando a parte
         # começa a linha; o texto lido (innerText, leitor de tela sem o ponto) não muda (g2sepIni em g2lib.js)
         ".g2sepd[data-ini]{opacity:0}"
-        + INTERACAO_CSS + ACOES_CSS + ALVO_CSS + SEP_CSS + RETORNO_CSS + DICA_CSS + VISOES_CSS)
+        + INTERACAO_CSS + ACOES_CSS + ALVO_CSS + MAIS_CSS + SEP_CSS + RETORNO_CSS + DICA_CSS + VISOES_CSS)
 _TRASH='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>'
 _MINI=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap; {ALVO_ST}'
 _MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {ACC}; background: {ACC}; color: #fff; cursor: pointer; white-space: nowrap; {ALVO_ST}'

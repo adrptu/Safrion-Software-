@@ -197,9 +197,9 @@ function ma_linhaPl(c,p){ const e=pmEst(p); const nv=pmVincs(c,p.id).length; con
 /* ---------- Ver como (simulação) e menu ⋯ ---------- */
 /* sem a faixa "Ver como" (proprietário, 14/10): o perfil de quem age é o do avatar do menu lateral (g2perfil), lido a cada desenho */
 function ma_verComo(self,v){
-  v.mais_open=!!self.state.mais; v.mais_tog=()=>self.setState({mais:!self.state.mais,rst:false}); v.mais_x=()=>self.setState({mais:false,rst:false});
-  v.rst_no=!self.state.rst; v.rst_ask=!!self.state.rst; v.rst=()=>self.setState({rst:true}); v.rst_cancel=()=>self.setState({rst:false,mais:false});
-  v.rst_ok=()=>{ manReset(self); self.setState({rst:false,mais:false,pan:null,pg:null,rec:null,sv:null,np:null,vk:null}); }; }
+  /* ⋯ Mais ações (engine.mais, componente único): abrir e fechar é do g2lib; restaurar pede confirmação logo abaixo do ⋯ */
+  v.rst_ask=!!self.state.rst; v.rst=()=>self.setState({rst:true}); v.rst_cancel=()=>self.setState({rst:false});
+  v.rst_ok=()=>{ manReset(self); self.setState({rst:false,pan:null,pg:null,rec:null,sv:null,np:null,vk:null}); }; }
 '''
 
 # ---------- visões (listas), detalhe do ativo e painéis: preenchem os buracos da tela ----------
@@ -333,7 +333,7 @@ function ma_hprim(self,v,c,pf,vis,lista,panAberto){ let t='',fn=null,dis='',sec=
   else if(lista&&vis==='planos'){ t='Novo plano'; dis=manPode(c,pf,'plano'); fn=()=>pmNovo(self,manGet(),null); }
   else if(lista&&vis==='ativos'){ sec={t:'Registrar achado',fn:()=>ma_novoAch(self,'')}; }
   v.hp_tem=!!t; v.hp_t=t; v.hp_dis=!!dis; v.hp_why=dis||''; v.hp_fn=fn||(()=>{}); v.hp_st=(panAberto||dis)?MA_SEC:MA_PRIM;
-  v.hs_tem=!!sec; v.hs_t=sec?sec.t:''; v.hs_fn=sec?sec.fn:(()=>{}); }
+  v.hs_vis=!!sec&&!t; v.hs_menu=!!sec&&!!t; v.hs_t=sec?sec.t:''; v.hs_fn=sec?sec.fn:(()=>{}); }   /* MAIS-01: com a primária à vista, a secundária vai para o ⋯ */
 '''
 
 # ---------- detalhe do ativo (página) ----------
@@ -910,19 +910,18 @@ def _btns(lst):
     return FOR(lst,'b',f'<button type="button" disabled="{H("b.dis")}" title="{H("b.why")}" onClick="{H("b.fn")}" style="{H("b.st")}">{H("b.t")}</button>',2)
 
 def _cabecalho():
-    """menu ⋯ (Restaurar demonstração) no fim dos comandos do cabeçalho"""
-    mais=(f'<span style="position: relative; display: inline-flex;"><button type="button" aria-label="Mais ações" title="Mais ações" aria-expanded="{H("mais_open")}" onClick="{H("mais_tog")}" '
-          f'style="border: 1px solid {LINE}; background: {SURF}; border-radius: 9px; width: 34px; height: 30px; cursor: pointer; font-size: 16px; font-weight: 800; color: {INK};">⋯</button>'
-          + IF('mais_open',f'<div role="menu" aria-label="Mais ações" style="position: absolute; right: 0; top: 36px; z-index: 50; width: 300px; background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 8px; display: flex; flex-direction: column; gap: 6px;">'
-               + IF('rst_no',f'<button type="button" role="menuitem" onClick="{H("rst")}" style="{SEC} text-align: left;">Restaurar demonstração</button>'
-                    f'<span style="font-size: 12px; color: {MUTED};">Volta a manutenção (planos, ordens, achados, leituras, abastecimentos) e também O.S., Estoque e App ao início: o estado é um só.</span>',True)
-               + IF('rst_ask',f'<span role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">Restaurar toda a demonstração (manutenção, O.S., Estoque e App)?</span>'
-                    f'<span style="display: flex; gap: 6px;"><button type="button" onClick="{H("rst_ok")}" style="{_MINI} color: {RED}; border-color: {RED};">Restaurar</button><button type="button" onClick="{H("rst_cancel")}" style="{_MINI}">Manter</button></span>')
-               + '</div>') + '</span>')
-    return mais
+    """⋯ Mais ações da manutenção no fim dos comandos do cabeçalho (componente único engine.mais, 15/10/2026): Registrar achado quando a
+    visão também tem a primária (uma secundária à vista no máximo) e Restaurar demonstração. Restaurar apaga o que foi feito na demonstração:
+    pede confirmação logo abaixo do ⋯, fora do menu, e a decisão fica à vista até a resposta."""
+    itens=[IF('hs_menu',f'<button type="button" role="menuitem" onClick="{H("hs_fn")}">{H("hs_t")}</button>'),
+           f'<button type="button" role="menuitem" onClick="{H("rst")}" data-dica="Volta manutenção, O.S., Estoque e App ao início: o estado é um só.">Restaurar demonstração</button>']
+    conf=IF('rst_ask',f'<div role="alertdialog" aria-label="Restaurar demonstração" style="position: absolute; right: 0; top: calc(100% + 6px); z-index: 50; width: 300px; max-width: calc(100vw - 24px); box-sizing: border-box; background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;">'
+            f'<span role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">Restaurar toda a demonstração (manutenção, O.S., Estoque e App)?</span>'
+            f'<span style="display: flex; gap: 6px; justify-content: flex-end;"><button type="button" onClick="{H("rst_cancel")}" style="{_MINI}">Manter</button><button type="button" onClick="{H("rst_ok")}" style="{_MINI} color: {RED}; border-color: {RED};">Restaurar</button></span></div>')
+    return f'<span style="position: relative; display: inline-flex;">{E.mais("Manutenção",itens)}{conf}</span>'
 
 def _prim_cab():
-    return (IF('hs_tem',f'<button type="button" class="ma-hb" onClick="{H("hs_fn")}" style="{SEC}">{H("hs_t")}</button>')
+    return (IF('hs_vis',f'<button type="button" class="ma-hb" onClick="{H("hs_fn")}" style="{SEC}">{H("hs_t")}</button>')
             + IF('hp_tem',f'<button type="button" class="ma-hb" disabled="{H("hp_dis")}" title="{H("hp_why")}" aria-describedby="ma-hp-why" onClick="{H("hp_fn")}" style="{H("hp_st")}">{H("hp_t")}</button>'
                  + IF('hp_dis',f'<span id="ma-hp-why" style="font-size: 12px; font-weight: 700; color: {MUTED}; max-width: 160px;">{H("hp_why")}</span>')))
 
