@@ -42,7 +42,9 @@ try:
         for v in ESPERA:
             vis(v); cartoes[f'{v}@{w}'] = J(CARDS); faixas[f'{v}@{w}'] = J(FAIXA)
     chk('L1 nenhuma visão da Manutenção tem cartão de indicador (1440 e 390 px)', all(n == 0 for n in cartoes.values()), cartoes)
-    chk('L2 faixa Filtros com o funil em cada visão, só com os filtros dela', all(faixas[f'{v}@{w}'] == [ESPERA[v]] for v in ESPERA for w in (1440, 390)), faixas)
+    # 15/10/2026 (DS, FIL-02): Prazo (Sem ordem), Fase e Rotina (Ordens) entraram na faixa; a 1440 px são chips, a 390 px viram seletor
+    E390 = dict(ESPERA, semordem=ESPERA['semordem'] + ['Filtrar por prazo'], ordens=ESPERA['ordens'] + ['Filtrar por fase', 'Filtrar por rotina'])
+    chk('L2 faixa Filtros com o funil em cada visão, só com os filtros dela', all(faixas[f'{v}@1440'] == [ESPERA[v]] and faixas[f'{v}@390'] == [E390[v]] for v in ESPERA), faixas)
     c.aparelho(1440, 900, 1, False)
     # L3 · Sem ordem por tipo (oráculo: achados sem ordem por origem; vencimentos com o prefixo v:)
     vis('semordem')

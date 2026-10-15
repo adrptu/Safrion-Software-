@@ -57,6 +57,7 @@ import quantidade as _QTD   # regra única de quantidade de insumo (SINT-C03)
 from engine import (grid,visoes,esc,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,GRAYS,DISP,BTN_ST,EXTRA,EXTRAJS,_MINI,_MINIP)
 import engine as E
 from ui37 import shell37, HEIGHTS37, tabs
+import ui37
 import dados as D
 import dados2 as D2
 import alocacao as AL
@@ -1652,7 +1653,7 @@ def build():
     # VISOES-1 (proprietário, 10/10/2026): seletor por ícone; Lista e Tabela agrupada na mesma grade (o agrupamento é estado da grade),
     # Kanban e Carga por recurso migram sem mudança de regra. Visões válidas: visoes.py (fonte única; O.S. sem Mapa: DEC-2609-09)
     bar,panes=visoes('g_os','os',{'lista':g_os,'kanban':kb_nota+_kanban_raias(),'calendario':kb_nota+_calendario(),'carga':kb_nota+rc_nota+_recursos_tab()},rotulo='Visão das ordens')
-    colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_chips()}{_notas_tal()}</div>'   # o Talhão subiu para a faixa "Filtros desta tela" (13/10); os avisos dele ficam aqui
+    colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_notas_tal()}</div>'   # o Talhão subiu para a faixa "Filtros desta tela" (13/10); os avisos dele ficam aqui
             f'<div style="flex: 0 0 auto; margin-left: auto;">{bar}</div></div>')
     # recorte vazio (Fazenda/Safra do topo): uma frase e uma ação no lugar das visões
     vazio=(f'<sc-if value="{H("os_vazio")}" hint-placeholder-val="{F()}"><div aria-label="Sem ordens no filtro" style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 36px 16px; border: 1px dashed {LINE}; border-radius: 12px;">'
@@ -1676,7 +1677,7 @@ def build():
     HEIGHTS37[fname]=1000
     shell37('OS','Ordem de Serviço',corpo,fname=fname,
             subtitle='A liberar → Liberadas → Em execução → Em conferência → Encerradas. Pausa, atraso, parcial e impedimento aparecem como selos.',
-            status=(H('os_st'),'red'),primary_html=f'<button type="button" onClick="{H("nv_open")}" style="{BTN_ST(True)}">Criar ordem</button>',search=False,  # BOT-01/03 (15/10/2026): criar é a primária da tela, no cabeçalho, com verbo
+            status=(H('os_st'),'red'),primary_html=f'<button type="button" onClick="{H("nv_open")}" style="{BTN_ST(True)}">Criar ordem</button>',search=False,mf_extra=ui37.faixa_campo('Fase',_chips()),  # BOT-01/03 (15/10/2026): criar é a primária da tela, no cabeçalho, com verbo
             footer='A fase só muda por evento: liberação, início, término físico e encerramento. Finalizar apontamento do turno não encerra a O.S.')
     _status_dinamico(fname)
     return fname

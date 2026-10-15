@@ -296,6 +296,9 @@ SAFRAS_MF = ['2026/27', 'Safrinha 2027', '2025/26']
 # estavam seguindo o padrão que definimos"). MF_SEL e MF_LBL são o seletor e o rótulo; faixa_filtros monta a faixa (shell37 e telas com filtros próprios)
 MF_SEL = ('font-family: inherit; font-size: 12px; font-weight: 700; padding: 4px 26px 4px 10px; min-height: 32px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer;')   # alvo de toque ≥ 32 px
 MF_LBL = 'display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: {MUTED}; font-weight: 700;'
+def faixa_campo(rot, ctl):
+    """filtro da tela na faixa: rótulo (MF_LBL) + controle (seletor ou grupo de chips com aria-pressed), sem quebrar entre os dois"""
+    return f'<span style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;"><span style="{MF_LBL.format(MUTED=MUTED)}">{rot}</span>{ctl}</span>'
 def faixa_filtros(inner, rot='Filtros', fim=''):
     cab = (f'<span class="mf-rot" data-dica="Filtros" style="display: inline-flex; align-items: center; color: {MUTED};">{icon("filtro",18,MUTED)}</span>' if rot == 'Filtros'
            else f'<span class="mf-rot" style="font-size: 11.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: {MUTED};">{rot}</span>')
@@ -346,7 +349,7 @@ def faixa_cobranca(fid,fname):
             f'<span class="assin-fx-w">{{{{assin_fx_t}}}}</span><span class="assin-fx-m">{{{{assin_fx_m}}}}</span><a href="CF-05.dc.html#pagar" style="color: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: 3px;">Pagar fatura ›</a></div></sc-if>')
 def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=None,crumbs_extra=None,
             ctx=('Fazenda Santa Rita','Safra 2026/27',None),cont=None,chipsrow='',footer=None,
-            fname=None,W=1440,H=880,perfil='Ana · Gestora',search=False,steps=None,primary_html=None,mf_fim=''):
+            fname=None,W=1440,H=880,perfil='Ana · Gestora',search=False,steps=None,primary_html=None,mf_fim='',mf_extra=''):
     # subtítulo sob o título não aparece mais# 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas"); o parâmetro fica por compatibilidade
     fname=fname or ffile(fid)
     H=_h(fname,H)
@@ -374,9 +377,9 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
         ctxp+=f'<span style="width: 1px; height: 18px; background: {LINE};"></span>'
     else:
         ctxp=''   # Fazenda e Safra não ficam mais no topo (13/10/2026): vão para a tela, junto dos dados
-        mf=_macro_html(fname,ctx,sep=False)
+        mf=_macro_html(fname,ctx,sep=False)+mf_extra   # FIL-02 (15/10/2026): filtro da tela (chips, seletor) entra na mesma faixa, não numa linha própria
         if mf:
-            _filtra='filtro' in (MACRO.get(fname) or {}).values()   # só contexto (Planejar safra, Compra): a faixa diz onde se trabalha, não "filtros"
+            _filtra=('filtro' in (MACRO.get(fname) or {}).values()) or bool(mf_extra)   # só contexto (Planejar safra, Compra): a faixa diz onde se trabalha, não "filtros"
             # 14/10/2026 (proprietário: "Em vez de filtros desta tela… coloque Filtros: · teste o símbolo de filtro junto ou sozinho"): testadas as três
             # (texto, funil + texto, só o funil); fica só o funil, com a dica "Filtros" (cada filtro já tem o nome ao lado; no celular sobra largura).
             # O grupo continua com o nome acessível "Filtros". Só contexto (Planejar safra, Compra) segue "Trabalhando em".

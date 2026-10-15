@@ -49,7 +49,7 @@ def pan(): return J("PAN()") or ''
 def toast(): return J("TOAST()") or ''
 def cen(expr): return J(f"(()=>{{ const c=CENO(); return ({expr}); }})()")
 def nova(saf, cult, atv, jan):
-    clk('Nova ordem'); a = J(f"OPT('#nv_saf',{json.dumps(saf)})"); time.sleep(.3); b = J(f"OPT('#nv_cult',{json.dumps(cult)})"); time.sleep(.3)
+    clk('Criar ordem'); a = J(f"OPT('#nv_saf',{json.dumps(saf)})"); time.sleep(.3); b = J(f"OPT('#nv_cult',{json.dumps(cult)})"); time.sleep(.3)
     c = J(f"OPT('#nv_atv',{json.dumps(atv)})"); time.sleep(.3); d = J(f"SETV('#nv_jan',{json.dumps(jan)})"); time.sleep(.3); clk('Emitir ordem', True, .9)
     return [a, b, c, d]
 def shot(n): t.c.shot(os.path.join(PR, 'solo_os_' + n + '.png'))

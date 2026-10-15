@@ -671,7 +671,9 @@ function g2toastLugar(){ try{ const t=document.querySelector('.g2toast'); if(!t)
   // salvaguarda: se a âncora ficar acima da área de conteúdo (ex.: área de ações presa mais alta que a tela), volta ao pé da janela
   if(t.getBoundingClientRect().top<topo) t.style.bottom='22px';
   const r0=t.getBoundingClientRect(), h=r0.height, b0=H-r0.bottom;
-  const sob=(b)=>{ const top=H-b-h, bot=H-b; return ctl.filter(c=>c.q.left<r0.right&&c.q.right>r0.left&&c.q.top<bot&&c.q.bottom>top); };
+  // folga de 6 px entre o aviso e o controle (15/10/2026): encostado, meio pixel de diferença (alvo de 44 px, altura fracionária) ou o quadro
+  // da rolagem bastavam para o aviso ficar por cima da borda do botão (UX-BEN35-AVISO-01, roteiro 390 do Beneficiamento)
+  const sob=(b)=>{ const top=H-b-h-6, bot=H-b+6; return ctl.filter(c=>c.q.left<r0.right&&c.q.right>r0.left&&c.q.top<bot&&c.q.bottom>top); };
   if(!sob(b0).length) return;
   for(let b=b0+1;H-b-h>=topo;b++){ if(!sob(b).length){ t.style.bottom=b+'px'; return; } }
   // sem faixa livre: a mais baixa em que tudo o que fica debaixo do aviso é de um mesmo contêiner que rola

@@ -11,6 +11,9 @@ definimos e evoluimos"). Confere no navegador as regras dos componentes comuns, 
   V · um verde por contexto, com verbo (BOT-01/03/08): em 6 telas, no máximo um verde à vista por contexto (cabeçalho, bloco, cartão,
       linha, barra de ações); nenhum verde que só navega ("Abrir/Ver/Voltar/Consultar …" em link) e nenhum rótulo "Novo/Nova …";
       botões do engine (raio 10 px), sem o estilo local de raio 9 px.
+  F · filtros só na faixa padrão (FIL-02): na O.S. e na Manutenção (Sem ordem, Ordens) nenhum grupo de chips de filtro nem seletor fora
+      da faixa .mf-tela (a troca de visão e o filtro rápido da grade não contam); Fase da O.S. e Fase/Rotina/Prazo da Manutenção dentro dela;
+      a 390 px os da Manutenção viram seletor, na mesma faixa.
 Uso (de gen37/, depois de build.py e montar_render.py): python3 ds_padrao_test.py · RENDER_DIR=<dir> serve outro _render."""
 import os, sys, json, time
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -142,12 +145,30 @@ def parte_v():
     h = J("(()=>{const b=[...document.querySelectorAll('header button')].find(b=>b.innerText.trim()==='Criar ordem'); return b?getComputedStyle(b).backgroundColor:'';})()")
     chk('V2 O.S.: "Criar ordem" é a primária do cabeçalho (antes "Nova ordem" com estilo local no bloco)', h == 'rgb(30, 122, 76)', h)
 
-PARTES = set((os.environ.get('DS_PARTES') or 'T,M,V').split(','))
+FORA = r"""JSON.stringify((()=>{const vis=e=>e.getClientRects().length;
+ const g2bar=e=>{ for(let p=e.parentElement,i=0;p&&i<5;p=p.parentElement,i++) if(p.querySelector(':scope > [data-g2q]')) return true; return false; };
+ const grupos=[...document.querySelectorAll('main [role=group]')].filter(g=>vis(g)&&g.querySelector('[aria-pressed]')&&!g.closest('.mf-tela,[role=dialog],aside,[role=table]')&&!g2bar(g)&&!/^vis[aã]o/i.test(g.getAttribute('aria-label')||'')).map(g=>g.getAttribute('aria-label'));
+ const sels=[...document.querySelectorAll('main select')].filter(s=>vis(s)&&!s.closest('.mf-tela,[role=dialog],aside,[role=table]')&&!/^vis[aã]o/i.test(s.getAttribute('aria-label')||'')).map(s=>s.getAttribute('aria-label'));
+ const dentro=[...document.querySelectorAll('.mf-tela [role=group][aria-label^="Filtrar por"], .mf-tela [role=group][aria-label^="Prazo"], .mf-tela [role=group][aria-label=Rotina], .mf-tela select')].filter(vis).map(g=>g.getAttribute('aria-label'));
+ return {grupos,sels,dentro};})())"""
+def parte_f():
+    c.aparelho(1440, 900, 1, False); r = {}
+    for pg in ['OS.dc.html', 'MA.dc.html#vis=ordens', 'MA.dc.html#vis=semordem']:
+        abre(pg, 1.6); r[pg] = json.loads(J(FORA) or '{}')
+    ok = (all(not v['grupos'] and not v['sels'] for v in r.values()) and 'Filtrar por fase' in r['OS.dc.html']['dentro']
+          and {'Filtrar por fase', 'Rotina'} <= set(r['MA.dc.html#vis=ordens']['dentro']) and 'Prazo pelo início da janela' in r['MA.dc.html#vis=semordem']['dentro'])
+    chk('F1 1440 px: nenhum grupo de chips de filtro nem seletor fora da faixa (O.S., Manutenção › Ordens e Sem ordem); Fase, Rotina e Prazo dentro dela', ok, r)
+    c.aparelho(390, 844, 2, True); abre('MA.dc.html#vis=ordens', 1.6); m = json.loads(J(FORA) or '{}')
+    chk('F2 390 px: Manutenção › Ordens com Fase e Rotina como seletores dentro da faixa, nada fora dela',
+        not m['grupos'] and not m['sels'] and {'Filtrar por fase', 'Filtrar por rotina'} <= set(m['dentro']), m)
+
+PARTES = set((os.environ.get('DS_PARTES') or 'T,M,V,F').split(','))
 try:
     c.call('Page.addScriptToEvaluateOnNewDocument', {'source': "window.__err='';addEventListener('error',e=>{window.__err+=(e.message||'erro')+' | ';});"})
     if 'T' in PARTES: parte_t()
     if 'M' in PARTES: parte_m(); parte_r()
     if 'V' in PARTES: parte_v()
+    if 'F' in PARTES: parte_f()
     erros(); chk('Z sem erro de JS nas telas abertas', not ERRS, ERRS[:3])
 finally:
     try: c.close()

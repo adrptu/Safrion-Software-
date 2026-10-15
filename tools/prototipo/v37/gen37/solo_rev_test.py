@@ -59,7 +59,7 @@ def cen(expr): return J(f"(()=>{{ const c=CENO(); return ({expr}); }})()")
 def dem(): return J("__solo.dem()") or {}
 def bruta(d, n): return round((d.get(n) or {}).get('bruta', 0), 2)
 def nova(saf, cult, atv, jan):
-    clk('Nova ordem'); a = J(f"OPT('#nv_saf',{json.dumps(saf)})"); time.sleep(.3); b = J(f"OPT('#nv_cult',{json.dumps(cult)})"); time.sleep(.3)
+    clk('Criar ordem'); a = J(f"OPT('#nv_saf',{json.dumps(saf)})"); time.sleep(.3); b = J(f"OPT('#nv_cult',{json.dumps(cult)})"); time.sleep(.3)
     c = J(f"OPT('#nv_atv',{json.dumps(atv)})"); time.sleep(.3); d = J(f"SETV('#nv_jan',{json.dumps(jan)})"); time.sleep(.3); clk('Emitir ordem', True, .9)
     return [a, b, c, d]
 def top_id(): return J("(()=>{ const a=TOP(); return a?(a.getAttribute('aria-label')||'').split(' · ')[0]:''; })()")
