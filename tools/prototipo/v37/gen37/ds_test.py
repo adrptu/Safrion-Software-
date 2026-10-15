@@ -150,7 +150,7 @@ try:
         for p in cel:
             c.goto(U(p), .3); time.sleep(.25); r390[p] = J(SEP) or {}
         chk('A3 a 390 px (8 telas): separador do cabeçalho e dos blocos, sem linha dupla', all(x.get('cab') and not x.get('fora') and not x.get('duplas') for x in r390.values()), {k: v for k, v in r390.items() if not (v.get('cab') and not v.get('fora') and not v.get('duplas'))})
-        abre('SAF.dc.html'); clk('Nova safra'); time.sleep(.4); pn = J(PAINEL)
+        abre('SAF.dc.html'); clk('Criar safra'); time.sleep(.4); pn = J(PAINEL)
         chk('A4 painel "Nova safra": linha abaixo do título e do × do topo à direita', bool(pn) and pn['t'] == 'Nova safra' and pn['b'], pn)
         abre('CD-03.dc.html'); J("(()=>{const r=document.querySelector('[role=row].g2ed'); (r.querySelector('.g2pw')||r).click(); return 1;})()"); time.sleep(.4); pn = J(PAINEL)
         chk('A5 painel do registro (Cadastros): linha abaixo do título', bool(pn) and pn['b'], pn)
@@ -166,16 +166,16 @@ try:
         # 13/10/2026 (filtros da O.S. na faixa "Filtros desta tela"): o seletor Talhão da barra da O.S. (ost_btn), secundário claro de referência
         # desde a VISOES-1, saiu; a barra da O.S. não tem outro botão secundário, e a referência passa a ser "Nova safra" do Planejar safra
         fora(); abre('SAF.dc.html')
-        sec = "[...document.querySelectorAll('main button')].find(b=>b.getClientRects().length&&b.innerText.trim()==='Nova safra')"
+        sec = "[...document.querySelectorAll('main button')].find(b=>b.getClientRects().length&&b.innerText.trim()==='Criar safra')"
         hover(sec); st = J(f"(()=>{{const s=getComputedStyle({sec}); return [s.backgroundImage,s.borderTopColor,s.boxShadow,s.filter];}})()") or ['', '', '', '']
-        chk('B2 botão secundário (Nova safra): camada verde (rgba(30,122,76,.07)) e borda #9DBFAA; sem a camada cinza nem escurecer', '30, 122, 76, 0.07' in st[0] and st[1] == 'rgb(157, 191, 170)' and '21, 32, 26, 0.05' not in st[2] and st[3] == 'none', st)
+        chk('B2 botão secundário (Criar safra): camada verde (rgba(30,122,76,.07)) e borda #9DBFAA; sem a camada cinza nem escurecer', '30, 122, 76, 0.07' in st[0] and st[1] == 'rgb(157, 191, 170)' and '21, 32, 26, 0.05' not in st[2] and st[3] == 'none', st)
         fora(); abre('OS.dc.html')
         seg = "document.querySelector('[role=toolbar] [data-visao=kanban]')"   # VISOES-1: opção de visão só com ícone
         hover(seg); st = J(f"(()=>{{const s=getComputedStyle({seg}); return [s.backgroundImage,s.boxShadow,s.filter];}})()") or ['', '', '']
         chk('B3 opção de visão (Kanban): camada verde, sem cinza', '30, 122, 76' in st[0] and '21, 32, 26, 0.05' not in st[1] and st[2] == 'none', st)
-        prim = "[...document.querySelectorAll('main button,header button')].find(b=>b.innerText.trim()==='Nova ordem')"
+        prim = "[...document.querySelectorAll('main button,header button')].find(b=>b.innerText.trim()==='Criar ordem')"
         hover(prim); st = J(f"(()=>{{const s=getComputedStyle({prim}); return [s.backgroundImage,s.filter,s.backgroundColor];}})()") or ['', '', '']
-        chk('B4 primária (Nova ordem): só escurece (brightness .92), sem camada clara sobre o texto branco', st[0] == 'none' and 'brightness(0.92)' in st[1] and st[2] == 'rgb(30, 122, 76)', st)
+        chk('B4 primária (Criar ordem): só escurece (brightness .92), sem camada clara sobre o texto branco', st[0] == 'none' and 'brightness(0.92)' in st[1] and st[2] == 'rgb(30, 122, 76)', st)
         fora()
         abre('CD-01.dc.html')
         kid = "[...document.querySelectorAll('[role=table] [role=row].g2ed.g2kid')].find(r=>/T1/.test(r.innerText))"

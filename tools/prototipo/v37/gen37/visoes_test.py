@@ -221,13 +221,13 @@ def modo_comp():
         c.mouse(neutro[0], neutro[1]); time.sleep(.3); res = {}
         for k in ('kanban', 'lista', 'calendario', 'carga'):
             mclique(centro(f"document.querySelector('[role=toolbar] [data-visao={k}]')")); c.mouse(neutro[0], neutro[1]); time.sleep(.7); res[k] = (ativa(), J(DICA)['vis'])
-        nb = J("(()=>{const b=[...document.querySelectorAll('main button,header button')].find(b=>b.innerText.trim()==='Nova ordem'&&b.getClientRects().length); if(!b) return null; const r=b.getBoundingClientRect(); return [r.left+r.width/2, r.bottom-3];})()")
+        nb = J("(()=>{const b=[...document.querySelectorAll('main button,header button')].find(b=>b.innerText.trim()==='Criar ordem'&&b.getClientRects().length); if(!b) return null; const r=b.getBoundingClientRect(); return [r.left+r.width/2, r.bottom-3];})()")
         form = False
         if nb:
             mclique(nb); time.sleep(.4); form = bool(J("!!document.getElementById('nv_jan')&&document.getElementById('nv_jan').getClientRects().length>0"))
             J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); b&&b.click();})()"); time.sleep(.4)
         ultimo_chip(); tecla('Tab'); dt = J(DICA); ft = foco()
-        chk('C4b clique de mouse em cada ícone troca a visão e não deixa #g2-dica aberta com o ponteiro fora; o 1º clique em "Nova ordem" (onde a dica cobria) abre o formulário; Tab até a barra ainda abre a dica',
+        chk('C4b clique de mouse em cada ícone troca a visão e não deixa #g2-dica aberta com o ponteiro fora; o 1º clique em "Criar ordem" (onde a dica cobria) abre o formulário; Tab até a barra ainda abre a dica',
             all(v[0] == k and not v[1] for k, v in res.items()) and form and ft == 'carga' and dt['vis'] and dt['t'] == 'Ver em carga por recurso', [res, nb, form, ft, dt])
     passo('C4b', _c4b)
     def _c5():
@@ -235,8 +235,8 @@ def modo_comp():
         res = {}
         for k in ('lista', 'kanban', 'calendario', 'carga'):
             troca_visao(J, k); n, dd = dup(); res[k] = (J(EST), n, drag(), ativa()); shot('comp_1440_' + k)
-        chk('C5 em cada visão (1440): só "Nova ordem" como primária, 0 duplicata (acoes_duplicadas) e nenhum [draggable=true]',
-            all(v[0] == ['Nova ordem'] and v[1] == 0 and v[2] == 0 and v[3] == k for k, v in res.items()), res)
+        chk('C5 em cada visão (1440): só "Criar ordem" como primária, 0 duplicata (acoes_duplicadas) e nenhum [draggable=true]',
+            all(v[0] == ['Criar ordem'] and v[1] == 0 and v[2] == 0 and v[3] == k for k, v in res.items()), res)
     passo('C5', _c5)
     def _c6():
         # C6 controle negativo
@@ -296,8 +296,8 @@ def modo_celular():
         for k in ('lista', 'agrupada', 'kanban', 'calendario', 'carga'):
             troca_visao(J, k); m = J(MEDE); res[k] = (resumo(m), J(EST), dup()[0], ativa(), ag()); shot('cel_390_' + k)
         esperado = {'lista': ('lista', ''), 'agrupada': ('lista', 'Talhão')}
-        chk('M3 390 px, em cada visão (Tabela, Tabela agrupada por Talhão, Kanban, Calendário, Carga): nada cortado, sem rolagem lateral, título e "Nova ordem" alcançáveis (MEDE/resumo vazio), uma primária e 0 duplicata',
-            all(v[0] == [] and v[1] == ['Nova ordem'] and v[2] == 0 and (v[3], v[4] if k in esperado else None) == esperado.get(k, (k, None)) for k, v in res.items()), res)
+        chk('M3 390 px, em cada visão (Tabela, Tabela agrupada por Talhão, Kanban, Calendário, Carga): nada cortado, sem rolagem lateral, título e "Criar ordem" alcançáveis (MEDE/resumo vazio), uma primária e 0 duplicata',
+            all(v[0] == [] and v[1] == ['Criar ordem'] and v[2] == 0 and (v[3], v[4] if k in esperado else None) == esperado.get(k, (k, None)) for k, v in res.items()), res)
     passo('M3', _m3)
     def _m3b():
         # M3b (VISOES-2, novo): a 390 px com toque, a antiga "Tabela agrupada" (um botão da barra, ≥ 44 px, M1) passou a ser o "Agrupar por" da
@@ -690,7 +690,7 @@ def modo_e2e():
               e.dispatchEvent(new Event('input',{{bubbles:true}})); e.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"""); time.sleep(.5)
         opts = lambda i: J(f"[...document.getElementById({json.dumps(i)}).options].map(o=>o.value).filter(Boolean)") or []
         abre('OS.dc.html')
-        J("[...document.querySelectorAll('button')].find(b=>/^Nova ordem/.test(b.innerText.trim())).click()"); time.sleep(.6)
+        J("[...document.querySelectorAll('button')].find(b=>/^Criar ordem/.test(b.innerText.trim())).click()"); time.sleep(.6)
         setid('nv_saf', 'S27SF'); setid('nv_cult', opts('nv_cult')[0]); setid('nv_atv', opts('nv_atv')[0]); setid('nv_jan', '2027-03-10')
         J("[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Emitir ordem').click()"); time.sleep(.8)
         J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] [role=alert] button')].find(x=>x.getClientRects().length); b&&b.click();})()"); time.sleep(.6)

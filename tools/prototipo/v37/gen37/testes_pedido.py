@@ -38,7 +38,7 @@ def t01(t):
     """Escolher/criar safra e percorrer as quatro etapas (05/10/2026: as antigas 3, 4 e 5 viraram "Dimensione operações e recursos")."""
     t.abrir('SAF.dc.html')
     t.check('Nenhuma safra escolhida automaticamente',t.js("document.body.innerText.indexOf('Nenhuma safra escolhida')>=0"))
-    t.clk('Nova safra'); t.check('Formulário "Nova safra" abriu pela direita',t.form())
+    t.clk('Criar safra'); t.check('Formulário "Nova safra" abriu pela direita',t.form())
     ids=t.js("[...document.querySelectorAll('aside[role=dialog] input,aside[role=dialog] select')].map(i=>i.id)")
     t.setv('#'+ids[0],'Safra 2027/28'); t.setv('#'+ids[1],'set/2027 – ago/2028')
     t.clk('Salvar','aside[role=dialog]'); t.check('Safra criada e aberta na etapa 2',t.js("document.querySelector('[aria-current=step]').innerText.indexOf('Defina cultivos')>=0"),t.aviso())

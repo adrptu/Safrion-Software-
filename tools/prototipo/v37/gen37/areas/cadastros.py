@@ -20,6 +20,7 @@ for _f in ('CD-01.dc.html','CD-01det.dc.html','CD-06.dc.html'): ui37.H_OVR.pop(_
 
 # ---------------- blocos e botões (padrão do exemplar processo_safra) ----------------
 def bloco(titulo,desc,corpo,acao=''):
+    acao=E.recolhe_acoes(titulo,acao)   # MAIS-01 (15/10/2026): uma secundária à vista, as outras no "⋯ Mais ações" do bloco
     desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
             f'<div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px;"><div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">'
@@ -144,17 +145,14 @@ def faixa(key):
         f'<span style="display: flex; align-items: baseline; gap: 8px;"><span style="{H("fx.nst")}">{H("fx.n")}</span><span style="font-size: 13px; font-weight: 600;">{H("fx.rot")}</span></span>'
         f'<span style="display: flex; align-items: baseline; flex-wrap: wrap; column-gap: 8px; row-gap: 2px; font-size: 12.5px; min-width: 0;"><span style="color: {MUTED}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;">{H("fx.reg")}</span>'
         f'<span class="cadx-verbo">{H("fx.verbo")} ›</span></span></button></sc-for></div>')
-PRIM_ST=('padding: 7px 14px; border-radius: 9px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; line-height: 1.25; '
-         f'background: {E.ACC}; color: #fff; border: 1px solid {E.ACC}; box-shadow: 0 1px 2px rgba(30,122,76,.25);')
-SEC_ST=('padding: 7px 12px; border-radius: 9px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; line-height: 1.25; '
-        f'background: {SURF}; color: {INK}; border: 1px solid {LINE};')
+# botões da aba: os do engine (BTN_ST compacto; antes um estilo local com raio 9, auditoria DS 15/10/2026)
 def prim(fn,rotulo,hole=False):
     """primária da aba (uma por aba), dentro do bloco onde age; fica por último na barra."""
     t=H(rotulo) if hole else esc(rotulo)
-    return f'<span class="cadx-prim"><button type="button" onClick="{H(fn)}" style="{PRIM_ST}">{t}</button></span>'
+    return f'<span class="cadx-prim"><button type="button" onClick="{H(fn)}" style="{E.BTN_ST(True,True)}">{t}</button></span>'
 def secbtn(fn,rotulo,dica='',hole=False):
     t=H(rotulo) if hole else esc(rotulo); d=f' title="{esc(dica)}"' if dica else ''
-    return f'<button type="button" onClick="{H(fn)}"{d} style="{SEC_ST}">{t}</button>'
+    return f'<button type="button" onClick="{H(fn)}"{d} style="{E.BTN_ST(False,True)}">{t}</button>'
 def qf_chips(gid):
     """filtro rápido do bloco (Todos · A resolver · ...), à esquerda da barra (buraco gid+'_cqf', ver cadQf)."""
     return (f'<div class="cadx-qf" role="group" aria-label="Filtro rápido"><sc-for list="{H(gid+"_cqf")}" as="qc" hint-placeholder-count="2">'

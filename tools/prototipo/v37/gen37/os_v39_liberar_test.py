@@ -11,7 +11,7 @@ def setv(sel, val):
     J(f"""(()=>{{const i=document.querySelector({json.dumps(sel)}); const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;
       Object.getOwnPropertyDescriptor(P,'value').set.call(i,{json.dumps(val)}); i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"""); time.sleep(.3)
 def nova(cult, atv, jan='2026-10-05'):
-    T.btn('Nova ordem', root='main'); setv('#nv_saf', 'S2627'); setv('#nv_cult', cult); setv('#nv_atv', atv); setv('#nv_jan', jan)
+    T.btn('Criar ordem', root='header'); setv('#nv_saf', 'S2627'); setv('#nv_cult', cult); setv('#nv_atv', atv); setv('#nv_jan', jan)
     T.btn('Emitir ordem', root=NV)
     return (J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.getAttribute('aria-label'):'';})()") or '').split(' · ')[0]
 def pedir_liberar():  # O.S. sem revisão (01/10): o agrônomo libera direto

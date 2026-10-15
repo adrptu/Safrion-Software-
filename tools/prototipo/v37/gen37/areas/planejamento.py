@@ -183,8 +183,8 @@ def build():
            ilnk('Simular parcelas','PL-06.dc.html','layers','Abrir Parcelas e escalonamento')],g_cult)
       + section('Encerramento do período anterior','Destine as pendências antigas antes de encerrar; o pomar e as ocupações não são recriados.',
           [imsg('Encerrar período','Nenhum período apto a encerrar agora: 2026/27 está em planejamento e 2025/26 já foi encerrada em 30/08 com as pendências destinadas.','check','Encerrar o período com as pendências destinadas')],
-          _nota(f'Safra 2025/26 encerrada em 30/08. Pendência destinada: sobra de 14 sc de KCl transferida ao estoque geral (recibo). '
-                f'A adubação pós-colheita do café C1 (NEC-019) segue em <b style="color:{INK};">Decidir pendência</b> no plano operacional.'),state='gray')
+          _nota(f'Safra 2025/26 encerrada em 30/08'   # TXT-02 (15/10/2026): o detalhe vai para a dica ⓘ
+                + E.dica_i('Pendências do período anterior','Pendência destinada: sobra de 14 sc de KCl transferida ao estoque geral (recibo). A adubação pós-colheita do café C1 (NEC-019) segue em Decidir pendência no plano operacional.')),state='gray')
     )
     EXTRAJS[0]=JS_COMUM+r'''
 function EXTRAVALS(self,v){
@@ -249,10 +249,10 @@ function EXTRAVALS(self,v){
          imsg('Aplicar modelo','Modelo “Soja alta tecnologia v6” aplicado ao rascunho v4 do T2 · 12 operações propostas · exceções locais preservadas · nada publicado.','layers','Aplicar um plano-modelo ao rascunho')],
         g_op)
       + section('Regras do gatilho','Leia o gatilho por extenso; a data prevista nunca vira plantio realizado.',
-        _acoes(ilnk('Ver grade de cultivo','PL-01.dc.html','grid','Abrir a grade de cultivo da safra'),
+        _acoes(E.recolhe_acoes('Regras do gatilho',[ilnk('Ver grade de cultivo','PL-01.dc.html','grid','Abrir a grade de cultivo da safra'),
                imsg('Simular antecipação do plantio',f'Simulação: antecipar o plantio do T1-A para 10/10 move 7 operações dependentes · a {OS_DES["id"]} (DAP −20) já emitida é ajustada pelo agrônomo ao liberar · nada muda até publicar.','calendar','Simular antecipação sem alterar o plano'),
                ilnk('Ver capacidade','SAF.dc.html#saf=S2627&passo=operacoes','trend','Abrir a capacidade por mês da Safra 2026/27 em Planejar safra'),
-               ilnk('Ver compra de insumos','CMP.dc.html','cart','Abrir Compra de insumos (SOL-2026-07)')),
+               ilnk('Ver compra de insumos','CMP.dc.html','cart','Abrir Compra de insumos (SOL-2026-07)')])),
         '',state='gray'))
     EXTRAJS[0]=JS_COMUM+r'''
 function EXTRAVALS(self,v){
@@ -301,9 +301,8 @@ function EXTRAVALS(self,v){
       continuity('Plano operacional','Talhão T1-A · Soja 58 W · plantio previsto '+d_pl,'ajuste local em revisão','Publicar ajuste do T1-A')
       + section('Operações deste talhão',f'Confira a data resultante de cada gatilho contra o plantio previsto em {d_pl}; clique na operação para ajustar a dose local com motivo.','',g_tal)
       + section('Ajuste local × padrão','Compare o custo do ajuste antes de publicar; o realizado e as aprovações ficam intactos.','',
-        _nota(f'Herbicida pós-emergente local <b style="color:{INK};">Cletodim 240 0,36 L/ha</b> (padrão 0,45) · motivo: solo arenoso, menor pressão de plantas daninhas · efeito estimado: '
-              f'<b style="color:{INK};">−R$ 0,9 mil</b> no talhão ({T1A["area"]} ha × 0,09 L × R$ 62/L) {tag("hipótese de preço")}. Atualizar o padrão depois <b style="color:{INK};">não sobrescreve</b> esta exceção. '
-              f'A dessecação de manejo de 05/09 permanece intacta; a {OS_DES["id"]} já emitida só muda de dose se o agrônomo ajustar ao liberar.',state='yellow'),state='yellow')
+        _nota(f'Herbicida pós-emergente local <b style="color:{INK};">Cletodim 240 0,36 L/ha</b> (padrão 0,45) · <b style="color:{INK};">−R$ 0,9 mil</b> no talhão {tag("hipótese de preço")}'   # TXT-02: o porquê vai para a dica ⓘ
+              + E.dica_i('Sobre o ajuste local',f'Motivo: solo arenoso, menor pressão de plantas daninhas. Efeito: {T1A["area"]} ha × 0,09 L × R$ 62/L. Atualizar o padrão depois não sobrescreve esta exceção. A dessecação de manejo de 05/09 permanece intacta; a {OS_DES["id"]} já emitida só muda de dose se o agrônomo ajustar ao liberar.'),state='yellow'),state='yellow')
     )
     shell37('PL-02','Plano do talhão T1-A · gatilhos',corpo,fname='PL-02det.dc.html',crumbs_extra=['T1-A · Soja 58 W'],
       subtitle='Plano por talhão com gatilhos antes, no dia e depois do plantio, resolvidos contra a âncora prevista.',

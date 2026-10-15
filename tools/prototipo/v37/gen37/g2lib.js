@@ -1,8 +1,9 @@
 // ===== G2 · grade interativa, formulário lateral e navegação (motor do protótipo v3.7) =====
 const G2C={green:['#1E7A4C','#E4F3E9'],yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],blue:['#1E5F8F','#E3F0FB'],orange:['#9A3F00','#FFE8D6']};
 // a não quebra de linha das ações da célula vem da classe g2cta (engine): numa tabela com a 1ª coluna limitada (celular) elas quebram
-const G2CTA='display:inline-flex;align-items:center;gap:6px;padding:5px 11px;max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:left;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;background:#FFFFFF;color:#15201A;border:1px solid #E4E9E5;cursor:pointer;font-family:inherit;line-height:1.25;';
-const G2CTAU='display:inline-flex;align-items:center;gap:6px;padding:5px 11px;max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:left;border-radius:9px;font-size:12.5px;font-weight:700;text-decoration:none;background:#FFFFFF;color:#B42318;border:1px solid #B42318;cursor:pointer;font-family:inherit;line-height:1.25;';
+// DS-ALVO-20261015: a ação de célula é o _MINI do engine (5px 10px, raio 8, 12 px/700) e ganha 44 px no toque (--g2-alvo, ALVO_CSS)
+const G2CTA='display:inline-flex;align-items:center;gap:6px;padding:5px 10px;max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:left;border-radius:8px;font-size:12px;font-weight:700;min-height:var(--g2-alvo,0px);box-sizing:border-box;text-decoration:none;background:#FFFFFF;color:#15201A;border:1px solid #E4E9E5;cursor:pointer;font-family:inherit;line-height:1.25;';
+const G2CTAU='display:inline-flex;align-items:center;gap:6px;padding:5px 10px;max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;text-align:left;border-radius:8px;font-size:12px;font-weight:700;min-height:var(--g2-alvo,0px);box-sizing:border-box;text-decoration:none;background:#FFFFFF;color:#B42318;border:1px solid #B42318;cursor:pointer;font-family:inherit;line-height:1.25;';
 function g2num(s){ if(typeof s==='number') return s; if(s===null||s===undefined) return NaN; let t=String(s).trim(); if(!t) return NaN; t=t.replace(/[^0-9,.\-]/g,''); if(t.indexOf(',')>=0){ t=t.replace(/\./g,'').replace(',','.'); } else if((t.match(/\./g)||[]).length>1 || /^\-?\d{1,3}(\.\d{3})+$/.test(t)){ t=t.replace(/\./g,''); } return parseFloat(t); }
 function g2fmtn(n,d,dmin){ return Number(n).toLocaleString('pt-BR',{minimumFractionDigits:(dmin!==undefined?dmin:(d||0)),maximumFractionDigits:d||0}); }
 // unidade junto do valor (c.un, decisão de 05/10/2026): "160 ha", "54 %", "R$ 14,49/ha"; só em texto que é um número puro
@@ -79,7 +80,7 @@ function g2qvals(self,sp,v,st,rows0,added){ const id=sp.id, qf=sp.qf; const rows
   const cur=st.qv||''; if(cur&&!(cur in cnt)) cnt[cur]=0;   // escolha sem linhas continua à vista (com 0) para poder ser limpa
   let ks=Object.keys(cnt).sort((a,b)=>(cnt[b]-cnt[a])||a.localeCompare(b,'pt-BR',{numeric:true}));
   if(ks.length<2&&!cur) return; const MAX=10; if(ks.length>MAX){ const top=ks.slice(0,MAX); if(cur&&top.indexOf(cur)<0) top[MAX-1]=cur; ks=top; }
-  const ST='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;';
+  const ST='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;min-height:var(--g2-alvo,0px);box-sizing:border-box;';   /* 44 px no toque (DS-ALVO) */
   const ch=(t,n,on,go,lab)=>({t,n:String(n),on:String(!!on),go,lab,st:ST+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')});
   v[id+'_qf']=[ch(qf.todas||'Todas',rows.length,!cur,()=>g2set(self,id,{qv:''}),'Mostrar todas as linhas')].concat(ks.map(k=>ch(k,cnt[k],cur===k,()=>g2set(self,id,{qv:cur===k?'':k}),cur===k?'Mostrar todas as linhas':('Mostrar só '+k))));
   v[id+'_qfl']='Filtro rápido por '+String(qf.l||c.l).toLowerCase(); v[id+'_hasqf']=true; }
@@ -673,7 +674,9 @@ function g2toastLugar(){ try{ const t=document.querySelector('.g2toast'); if(!t)
   // salvaguarda: se a âncora ficar acima da área de conteúdo (ex.: área de ações presa mais alta que a tela), volta ao pé da janela
   if(t.getBoundingClientRect().top<topo) t.style.bottom='22px';
   const r0=t.getBoundingClientRect(), h=r0.height, b0=H-r0.bottom;
-  const sob=(b)=>{ const top=H-b-h, bot=H-b; return ctl.filter(c=>c.q.left<r0.right&&c.q.right>r0.left&&c.q.top<bot&&c.q.bottom>top); };
+  // folga de 6 px entre o aviso e o controle (15/10/2026): encostado, meio pixel de diferença (alvo de 44 px, altura fracionária) ou o quadro
+  // da rolagem bastavam para o aviso ficar por cima da borda do botão (UX-BEN35-AVISO-01, roteiro 390 do Beneficiamento)
+  const sob=(b)=>{ const top=H-b-h-6, bot=H-b+6; return ctl.filter(c=>c.q.left<r0.right&&c.q.right>r0.left&&c.q.top<bot&&c.q.bottom>top); };
   if(!sob(b0).length) return;
   for(let b=b0+1;H-b-h>=topo;b++){ if(!sob(b).length){ t.style.bottom=b+'px'; return; } }
   // sem faixa livre: a mais baixa em que tudo o que fica debaixo do aviso é de um mesmo contêiner que rola
@@ -824,6 +827,37 @@ function g2acoes(v,pre,c){ c=c||{}; const nada=()=>{};
   const dec=!!c.decide; v[pre+'_hasNotaVis']=dec&&!!(c.nota||lnks.length); v[pre+'_hasNotaSr']=!dec&&!!c.nota; v[pre+'_dica']=(!dec&&c.nota)?c.nota:'';
   v[pre+'_hasMais']=!dec&&(lnks.length>0||!!c.ctx);
   v[pre+'_has']=!!(c.nota||lnks.length||volta||c.troca||sec||prim); }
+// ===== DS-MAIS-20261015 · "⋯ Mais ações" (engine.mais): comportamento único do menu =====
+// botão .g2mais (aria-haspopup=menu, aria-expanded) seguido do menu .g2mais-menu (role=menu, itens role=menuitem). O estado aberto é o
+// aria-expanded do botão (o CSS esconde o menu fechado). Um menu aberto por vez.
+function g2maisMenu(b){ const m=b&&b.nextElementSibling; return m&&m.classList&&m.classList.contains('g2mais-menu')?m:null; }
+function g2maisItens(m){ return m?[...m.querySelectorAll('[role=menuitem]')].filter(x=>x.getClientRects().length&&!x.disabled&&x.getAttribute('aria-disabled')!=='true'):[]; }
+function g2maisFecha(b,foco){ if(!b) return; if(b.getAttribute('aria-expanded')==='true') b.setAttribute('aria-expanded','false'); if(foco&&b.isConnected) b.focus(); }
+function g2maisAbre(b,ult){ document.querySelectorAll('.g2mais[aria-expanded=true]').forEach(x=>{ if(x!==b) g2maisFecha(x); });
+  const m=g2maisMenu(b); if(!m) return; m.removeAttribute('data-cima'); m.removeAttribute('data-esq'); b.setAttribute('aria-expanded','true');
+  const r=b.getBoundingClientRect(), h=m.offsetHeight, w=m.offsetWidth;
+  if(r.bottom+4+h>innerHeight-8&&r.top-4-h>=8) m.setAttribute('data-cima','');   // falta espaço embaixo: sobe
+  if(r.right-w<8) m.setAttribute('data-esq','');                                  // falta espaço à esquerda: abre para a direita
+  const its=g2maisItens(m); if(its.length) (ult?its[its.length-1]:its[0]).focus(); }
+try{ if(!window.__g2maisC){ window.__g2maisC=1;
+  document.addEventListener('click',e=>{ const t=e.target&&e.target.closest?e.target:null; const b=t&&t.closest('button.g2mais');
+    if(b){ if(b.getAttribute('aria-expanded')==='true') g2maisFecha(b); else g2maisAbre(b); return; }
+    const it=t&&t.closest('.g2mais-menu [role=menuitem]');
+    document.querySelectorAll('.g2mais[aria-expanded=true]').forEach(x=>{ const m=g2maisMenu(x); if(!m) return;
+      if(it&&m.contains(it)){ g2maisFecha(x); setTimeout(()=>{ const a=document.activeElement; if((!a||a===document.body||m.contains(a))&&x.isConnected) x.focus(); },0); }
+      else if(!m.contains(t)) g2maisFecha(x); }); },true);
+  document.addEventListener('keydown',e=>{ const a=document.activeElement; const w=a&&a.closest&&a.closest('.g2mais-w'); if(!w) return;
+    const b=w.querySelector('button.g2mais'); const m=g2maisMenu(b); const aberto=!!b&&b.getAttribute('aria-expanded')==='true';
+    if(a===b&&!aberto&&(e.key==='ArrowDown'||e.key==='ArrowUp')){ e.preventDefault(); g2maisAbre(b,e.key==='ArrowUp'); return; }
+    if(!aberto) return;
+    if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); g2maisFecha(b,true); return; }
+    if(e.key==='Tab'){ g2maisFecha(b); return; }
+    const its=g2maisItens(m); if(!its.length) return; const i=its.indexOf(a);
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){ e.preventDefault(); const n=its.length; its[i<0?(e.key==='ArrowDown'?0:n-1):(i+(e.key==='ArrowDown'?1:n-1))%n].focus(); }
+    else if(e.key==='Home'||e.key==='End'){ e.preventDefault(); its[e.key==='Home'?0:its.length-1].focus(); } },true);
+  // a barra de ações (details.acoes-mais): o ⋯ diz se está aberto (aria-expanded), como o do componente
+  document.addEventListener('toggle',e=>{ const d=e.target; if(d&&d.matches&&d.matches('details.acoes-mais')){ const sm=d.querySelector('summary'); if(sm) sm.setAttribute('aria-expanded',d.open?'true':'false'); } },true);
+} }catch(e){}
 // "⋯ Mais ações" da barra (details.acoes-mais): fecha com Esc (o foco volta ao ⋯), ao clicar fora e depois de escolher um item
 try{ if(!window.__g2mais){ window.__g2mais=1;
   document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; const a=document.activeElement; const d=a&&a.closest&&a.closest('details.acoes-mais[open]'); if(!d) return;

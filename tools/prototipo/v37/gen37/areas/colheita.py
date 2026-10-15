@@ -137,7 +137,6 @@ function co_steps(v,pre,cur){{ for(let i=1;i<=5;i++){{ const done=i<cur, now=i==
   v[pre+i+'_tx']='display:flex;align-items:center;gap:8px;font-size:13px;white-space:nowrap;'+(now?'font-weight:800;color:{INK};':(done?'font-weight:600;color:{INK};':'font-weight:600;color:{MUTED};'));
   v[pre+i+'_ln']='flex-grow:1;height:2px;margin:0 10px;min-width:24px;background:'+(done?'{ACC}':'{LINE}')+';'; }} }}
 '''
-PRIM_ST=BTN_ST(True,False)
 def dstepper(pre,hint_hole):
     nomes=['A liberar','Liberadas','Em execução','Em conferência','Encerradas']
     out=''
@@ -153,8 +152,8 @@ def dyn_status(fname,hole):
     s=s.replace(old,f'<span style="{H(hole+"_st")}"><span style="{H(hole+"_dot")}"></span>{H(hole)}</span>',1)
     open(p,'w').write(s)
 def dyn_primary(pre):
-    return (f'<sc-if value="{H(pre+"_isbtn")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H(pre+"_fn")}" style="{PRIM_ST}">{H(pre+"_t")}</button></sc-if>'
-            f'<sc-if value="{H(pre+"_islnk")}" hint-placeholder-val="{F()}"><a href="{H(pre+"_href")}" style="text-decoration: none; display: inline-block; {PRIM_ST}">{H(pre+"_t")}</a></sc-if>')
+    return (f'<sc-if value="{H(pre+"_isbtn")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H(pre+"_fn")}" style="{BTN_ST(True)}">{H(pre+"_t")}</button></sc-if>'
+            f'<sc-if value="{H(pre+"_islnk")}" hint-placeholder-val="{F()}"><a href="{H(pre+"_href")}" style="text-decoration: none; display: inline-block; {BTN_ST(True)}">{H(pre+"_t")}</a></sc-if>')
 
 # =====================================================================================
 def co01():
@@ -277,8 +276,8 @@ def co02det():
       + dstepper('c2s','c2_hint')
       + sec('Apontamentos por dia','Registre o avanço de cada turno; clique no dia aberto para corrigir.',
         [f'<sc-if value="{H("c2_exec")}" hint-placeholder-val="{T()}">'
-         + sbtn('Finalizar apontamento do turno','c2_fin','clock','Trava os apontamentos do turno; a ordem continua Em execução')
-         + sbtn('Concluir execução','c2_concl','check','Registra o término físico; a ordem entra em Em conferência')+'</sc-if>'],g_ap)
+         + E.recolhe_acoes('Apontamentos por dia',[sbtn('Finalizar apontamento do turno','c2_fin','clock','Trava os apontamentos do turno; a ordem continua Em execução'),
+           sbtn('Concluir execução','c2_concl','check','Registra o término físico; a ordem entra em Em conferência')])+'</sc-if>'],g_ap)
       + sec('Cargas vinculadas','Confira o vínculo de cada carga; dois tickets da mesma carga não duplicam produção.',
         [ilnk('Registrar carga','CO-03.dc.html','truck','Registrar pesagem e romaneio em Registre cargas')],g_cv,state='gray'))
     EXTRAJS[0]=JSBASE+r'''
@@ -453,8 +452,8 @@ def co05det():
       + dstepper('c5s','c5_hint')
       + sec('Balanço de materiais','Confira a entrada contra as saídas por classe e o descarte — embalagem controlada em separado.',
         [f'<sc-if value="{H("c5_exec")}" hint-placeholder-val="{T()}">'
-         + sbtn('Finalizar apontamento do turno','c5_fin','clock','Trava os apontamentos do turno; a ordem continua Em execução')
-         + sbtn('Conferir balanço','c5_confb','scale','Conferir entrada contra saídas (disponível em Em conferência)')+'</sc-if>'],
+         + E.recolhe_acoes('Balanço de materiais',[sbtn('Finalizar apontamento do turno','c5_fin','clock','Trava os apontamentos do turno; a ordem continua Em execução'),
+           sbtn('Conferir balanço','c5_confb','scale','Conferir entrada contra saídas (disponível em Em conferência)')])+'</sc-if>'],
         g_bal+f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 4px 0; font-size: 13px;"><b>{H("c5_bal")}</b>'
               f'<span style="{H("c5_div_st")}"><span style="{H("c5_div_dot")}"></span>{H("c5_div")}</span></div>')
       + sec('Genealogia do lote','Rastreie do cliente ao lote de origem; mistura e divisão preservam a árvore.','',

@@ -39,6 +39,7 @@ CSS=('.pr-cards{display:none;flex-direction:column;gap:8px}'
      '.pr-vis button[aria-pressed=true]{background:#FFFFFF;color:#15201A;box-shadow:0 1px 2px rgba(21,32,26,.12)}')
 
 def bloco(titulo,desc,corpo,acao=''):
+    acao=E.recolhe_acoes(titulo,acao)   # MAIS-01 (15/10/2026): uma secundária à vista, as outras no "⋯ Mais ações" do bloco
     desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
             f'<div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px; flex-wrap: wrap;"><div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">'

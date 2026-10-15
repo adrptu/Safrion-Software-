@@ -323,6 +323,11 @@ def ffield(label,fid,val,setfn,err,hint='',big=False,area=False,ph=''):
             + (IF(err+'_has',f'<span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H(err)}</span>') if err else '') + '</div>')
 
 _PRIM_RE=re.compile(r'(<div style="padding: 12px 20px 28px;[^"]*">)<a href="[^"]*" style="([^"]*)">.*?</a>(</div>)',re.S)
+_NAV_APP=re.compile(r'^(Voltar|Ver)\b')
+def _sec_app(st):
+    """BOT-08 (15/10/2026): o rodapé do app que só navega fica secundário (branco, borda neutra); o verde é para o comando"""
+    return (st.replace('background: #1E7A4C; color: #fff; border: 1px solid #1E7A4C;','background: #FFFFFF; color: #15201A; border: 1px solid #E4E9E5;')
+              .replace('box-shadow: 0 1px 2px rgba(30,122,76,.25); ',''))
 def emit(fid,title,sub,status,primary,body,H_=900,fname=None,back='MB-01.dc.html',primary_href=None,js='',dyn_status=False,prim=None,cen=False,dyn_head=None,sem_prim=False,pre_extra='',sub_html=None,dica=''):
     """Gera a tela. dyn_status: selo do cabeçalho vem de v.hdr_* (JS). prim: variantes do botão primário
     [(condição|None,'a'|'b'|'ac',rótulo,href|função|(href,função))] — link navega, botão executa na própria tela, 'ac' = link que também
@@ -335,16 +340,20 @@ def emit(fid,title,sub,status,primary,body,H_=900,fname=None,back='MB-01.dc.html
     st=('§ST§','yellow') if dyn_status else status
     if dyn_head: title,sub='§TT§','§SB§'
     f=mobile37(fid,title,sub,st,primary,body,fname=fname,H=H_,back=back,primary_href=primary_href,dica=dica)   # dica: regras da tela no ⓘ (14/10/2026)
-    if dyn_status or prim or dyn_head or sem_prim:
+    nav_prim=bool(not prim and not sem_prim and primary and _NAV_APP.match(str(primary)))
+    if dyn_status or prim or dyn_head or sem_prim or nav_prim:
         path=os.path.join(E.P,f); s=open(path).read()
+        if nav_prim:
+            m=_PRIM_RE.search(s); s=s[:m.start(2)]+_sec_app(m.group(2))+s[m.end(2):]
         if sem_prim: n0=len(s); s=_PRIM_RE.sub('',s,count=1); assert len(s)<n0, 'rodapé não encontrado'
         if dyn_status: s=s.replace(chip('§ST§','yellow'),dchip('hdr'))
         if dyn_head: s=s.replace('<title>§TT§</title>',f'<title>{esc(dyn_head)}</title>').replace('§TT§',H('hdr_ttl')).replace('§SB§',sub_html if sub_html else H('hdr_sub'))
         if prim:
             m=_PRIM_RE.search(s); pst=m.group(2)+' cursor: pointer;'
+            sst=_sec_app(pst)
             out=''
             for cond,kind,lab,tgt in prim:
-                if kind=='a': el=f'<a href="{tgt}" style="{pst}">{lab}</a>'
+                if kind=='a': el=f'<a href="{tgt}" style="{sst if _NAV_APP.match(lab) else pst}">{lab}</a>'
                 elif kind=='ac': el=f'<a href="{tgt[0]}" onClick="{H(tgt[1])}" style="{pst}">{lab}</a>'
                 else: el=f'<button type="button" onClick="{H(tgt)}" style="{pst}">{lab}</button>'
                 out+=IF(cond,el) if cond else el
@@ -967,7 +976,7 @@ DCH(v,'hdr',k?(k.local+' · planta '+(n+1)):(s.m7ok?'contagem gravada':'escolha 
              say('Retomar','Retomada · pressão normalizada · término previsto recalculado pelo tempo parado.','check','Retomar a volta'),
              say('Registrar avanço',f'Avanço registrado: {br(P["exec_h"])} h · {exec_txt} · balanço hídrico atualizado 1× por aplicação.','drop','Registrar o avanço da volta'))
       + btns(say('Finalizar apontamento do turno','Turno do irrigante finalizado · a ordem segue Em execução — finalizar o turno nunca conclui.','doc','Guardar o turno sem concluir'),
-             say('Próximo setor','Sem outro setor liberado hoje · a OS-0422 (13,5 mm em 2 passadas) libera quando a janela for definida.','pivot','Ver o próximo setor liberado'))
+             say('Ver próximo setor','Sem outro setor liberado hoje · a OS-0422 (13,5 mm em 2 passadas) libera quando a janela for definida.','pivot','Ver o próximo setor liberado'))
       + card('Próximo ciclo',[
           note(f'<b>OS-0422</b> · 13,5 mm em <b>2 passadas de 6,75 mm</b> (máx. {br(POL["lamina_max"])} mm por passada) · janela a definir')],state='gray'))   # 14/10/2026: só o dado; a regra da divisão foi para a dica ⓘ
     emit('MB-08','Irrigação de hoje','',('Em execução · irrigando','green'),

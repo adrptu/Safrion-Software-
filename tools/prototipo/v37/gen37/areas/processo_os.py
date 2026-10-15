@@ -57,6 +57,7 @@ import quantidade as _QTD   # regra única de quantidade de insumo (SINT-C03)
 from engine import (grid,visoes,esc,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,GRAYS,DISP,BTN_ST,EXTRA,EXTRAJS,_MINI,_MINIP)
 import engine as E
 from ui37 import shell37, HEIGHTS37, tabs
+import ui37
 import dados as D
 import dados2 as D2
 import alocacao as AL
@@ -1261,6 +1262,7 @@ function EXTRAVALS(self,v){
 '''
 
 def bloco(titulo,desc,corpo,acao=''):
+    acao=E.recolhe_acoes(titulo,acao)   # MAIS-01 (15/10/2026): uma secundária à vista, as outras no "⋯ Mais ações" do bloco
     desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
             f'<div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px 10px; flex-wrap: wrap;"><div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">'
@@ -1651,7 +1653,7 @@ def build():
     # VISOES-1 (proprietário, 10/10/2026): seletor por ícone; Lista e Tabela agrupada na mesma grade (o agrupamento é estado da grade),
     # Kanban e Carga por recurso migram sem mudança de regra. Visões válidas: visoes.py (fonte única; O.S. sem Mapa: DEC-2609-09)
     bar,panes=visoes('g_os','os',{'lista':g_os,'kanban':kb_nota+_kanban_raias(),'calendario':kb_nota+_calendario(),'carga':kb_nota+rc_nota+_recursos_tab()},rotulo='Visão das ordens')
-    colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_chips()}{_notas_tal()}</div>'   # o Talhão subiu para a faixa "Filtros desta tela" (13/10); os avisos dele ficam aqui
+    colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_notas_tal()}</div>'   # o Talhão subiu para a faixa "Filtros desta tela" (13/10); os avisos dele ficam aqui
             f'<div style="flex: 0 0 auto; margin-left: auto;">{bar}</div></div>')
     # recorte vazio (Fazenda/Safra do topo): uma frase e uma ação no lugar das visões
     vazio=(f'<sc-if value="{H("os_vazio")}" hint-placeholder-val="{F()}"><div aria-label="Sem ordens no filtro" style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 36px 16px; border: 1px dashed {LINE}; border-radius: 12px;">'
@@ -1662,7 +1664,7 @@ def build():
              f'<button type="button" onClick="{H("pn_sair")}" style="{_MINI}">Ver todas as O.S.</button></div></sc-if>')
     corpo=bloco('Ordens por fase','Clique numa ordem para ver atividade, insumos e doses e seguir para a próxima fase.',
                 vazio+tem(f'<div style="display: flex; flex-direction: column; gap: 10px;">{pn_nota}{colbar}{panes}</div>')+_restaurar(),
-                acao=f'<span style="display: inline-flex; align-items: center; gap: 10px;"><button type="button" onClick="{H("nv_open")}" style="padding: 7px 14px; border-radius: 9px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; background: {ACC}; color: #fff; border: 1px solid {ACC}; flex-shrink: 0;">Nova ordem</button></span>')
+                acao='')
     EXTRA.append(_painel()); EXTRA.append(_form())
     # cultura de cada ordem (13/10, filtro Cultura): a do cultivo de cada talhão da ordem na safra dela (D2.SAFRAS e D2.CULTIVOS, fonte do Planejar safra)
     for o in ordens: o['culturas']=_culturas_da(o)
@@ -1675,7 +1677,7 @@ def build():
     HEIGHTS37[fname]=1000
     shell37('OS','Ordem de Serviço',corpo,fname=fname,
             subtitle='A liberar → Liberadas → Em execução → Em conferência → Encerradas. Pausa, atraso, parcial e impedimento aparecem como selos.',
-            status=(H('os_st'),'red'),primary_html=None,search=False,  # "Nova ordem" mora no bloco Ordens por fase
+            status=(H('os_st'),'red'),primary_html=f'<button type="button" onClick="{H("nv_open")}" style="{BTN_ST(True)}">Criar ordem</button>',search=False,mf_extra=ui37.faixa_campo('Fase',_chips()),  # BOT-01/03 (15/10/2026): criar é a primária da tela, no cabeçalho, com verbo
             footer='A fase só muda por evento: liberação, início, término físico e encerramento. Finalizar apontamento do turno não encerra a O.S.')
     _status_dinamico(fname)
     return fname

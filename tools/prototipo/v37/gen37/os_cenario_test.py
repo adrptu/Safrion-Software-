@@ -148,7 +148,7 @@ try:
     T.fechar(); reset()
     NV = 'aside[role=dialog][aria-label="Nova ordem"]'
     def nova(saf, cult, atv):
-        T.btn('Nova ordem', root='main'); setv('#nv_saf', saf); setv('#nv_cult', cult); setv('#nv_atv', atv); setv('#nv_jan', '2026-10-05'); T.btn('Emitir ordem', root=NV)
+        T.btn('Criar ordem', root='header'); setv('#nv_saf', saf); setv('#nv_cult', cult); setv('#nv_atv', atv); setv('#nv_jan', '2026-10-05'); T.btn('Emitir ordem', root=NV)
         return (T.J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.getAttribute('aria-label'):'';})()") or '').split(' · ')[0]
     def setv(sel, val):
         T.J(f"""(()=>{{const i=document.querySelector({json.dumps(sel)}); const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;

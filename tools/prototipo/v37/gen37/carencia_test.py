@@ -103,7 +103,7 @@ def fluxo():
         ok(t.errs() == '', 'mapa sem erro de JavaScript', t.errs())
         # ---------- 5 · O.S.: colheita no Pivô 23 impedida pela carência (comando, não cor) e recuperação ----------
         t.goto('OS.dc.html'); time.sleep(.5)
-        btn('Nova ordem', 'main'); setv('#nv_saf', 'LG2627'); time.sleep(.3); setv('#nv_cult', 'lg23'); time.sleep(.3); setv('#nv_atv', 'q3'); time.sleep(.3); setv('#nv_jan', '2026-09-25'); time.sleep(.3)
+        btn('Criar ordem', 'header'); setv('#nv_saf', 'LG2627'); time.sleep(.3); setv('#nv_cult', 'lg23'); time.sleep(.3); setv('#nv_atv', 'q3'); time.sleep(.3); setv('#nv_jan', '2026-09-25'); time.sleep(.3)
         btn('Emitir ordem', 'aside[role=dialog][aria-label="Nova ordem"]'); time.sleep(.6)
         oid = (J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.getAttribute('aria-label'):'';})()") or '').split(' · ')[0]; p = ospan()
         ok(oid == 'OS-0440' and 'Liberar bloqueado: carência em curso em Pivô 23 até 26/09' in p and 'OS-0508' in p and 'Quem resolve: Ana (agrônoma) reprograma a colheita para 27/09' in p,
