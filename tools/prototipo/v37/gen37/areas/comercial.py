@@ -71,8 +71,7 @@ def R(id,ro=False,o=None,v=None,**cells):
     if o: r['o']=[dict(t=t,h=h) if h else dict(t=t) for t,h in o]
     return r
 def two(a,b): return [Pt.b(a),Pt.br(),Pt.mut(b)]
-PRIM_ST=('padding:11px 20px;border-radius:10px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;'
-         'background:#1E7A4C;color:#fff;border:1px solid #1E7A4C;')
+PRIM_ST=E.BTN_ST(True)   # o primário do engine (antes uma cópia local, sem alvo de toque)
 PRIM=f'<button type="button" onClick="{H("prim_fn")}" title="{H("prim_tip")}" style="{H("prim_st")}">{H("prim_t")}</button>'
 JS_BASE='''
 function GR(id){ return GRIDS.find(g=>g.id===id); }
@@ -278,7 +277,7 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_of'||!r) re
                    ('Finalidade e prazo','cotação de mamão · acesso até 30/09 · documentos: padrão de classificação')],
            confirm='Confirmar destinatários',done='2 destinatários confirmados — parceiro pagante sem convite NÃO recebe')).replace('<button ','<button title="Revisar quem pode receber a oferta" ',1),
          ic(msgbtn('Enviar oferta','Rascunho enviado aos destinatários com convite confirmado pelo portal do cliente (PT-03) · finalidade, prazo e documentos registrados · simulado, nenhuma mensagem real enviada. OF-103 já está com a Frutas Real (RT-0112).'),'users','Enviar a oferta em rascunho aos destinatários confirmados'),
-         f'<button type="button" onClick="{H("g_of_new")}" title="Criar oferta privada" style="{E._MINI} font-size: 13px; padding: 7px 12px;">+ Nova oferta</button>'],
+         f'<button type="button" onClick="{H("g_of_new")}" title="Criar oferta privada" style="{E.BTN_ST(False,True)}">Criar oferta</button>'],
         g_of)
       + section('Comparação de recebimento líquido · OF-101','Compare propostas pelo líquido na fazenda, não pelo preço de face.',
         ic(msgbtn('Comparar propostas','OF-101: Frutas Real v1 rende R$ 2,10/kg líquidos contra R$ 1,99/kg da contraproposta da Rede Hortifrúti BA (frete CIF por conta do produtor) — melhor líquido: Frutas Real (PV-032).'),'scale','Comparar propostas pelo líquido'),

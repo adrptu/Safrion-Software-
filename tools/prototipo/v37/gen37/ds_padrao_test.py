@@ -8,6 +8,9 @@ definimos e evoluimos"). Confere no navegador as regras dos componentes comuns, 
       foco ao ⋯, clicar fora fecha, escolher um item faz a ação e fecha; restaurar a demonstração (Manutenção) pede confirmação fora do
       menu; a 390 px com toque o ⋯ tem 44 × 44 px e o menu cabe na tela; nenhum ⋯ antigo (sem contexto) sobra. MAIS-01: em cada fileira de
       ações (cabeçalho de bloco, barra do bloco) no máximo uma secundária à vista; as outras estão no ⋯ (6 telas recolhidas).
+  V · um verde por contexto, com verbo (BOT-01/03/08): em 6 telas, no máximo um verde à vista por contexto (cabeçalho, bloco, cartão,
+      linha, barra de ações); nenhum verde que só navega ("Abrir/Ver/Voltar/Consultar …" em link) e nenhum rótulo "Novo/Nova …";
+      botões do engine (raio 10 px), sem o estilo local de raio 9 px.
 Uso (de gen37/, depois de build.py e montar_render.py): python3 ds_padrao_test.py · RENDER_DIR=<dir> serve outro _render."""
 import os, sys, json, time
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -118,11 +121,33 @@ def parte_r():
         if f: ruins[pg] = f
     chk('M7 MAIS-01: nenhuma fileira de ações com 2+ secundárias à vista (PL-02, PL-03, GE-02, CA-01, CO-02det, Manutenção › Sem ordem)', not ruins, ruins)
 
-PARTES = set((os.environ.get('DS_PARTES') or 'T,M').split(','))
+VERDES = r"""JSON.stringify((()=>{const vis=e=>e.getClientRects().length; const n=s=>(s||'').replace(/\s+/g,' ').trim();
+ const verde=e=>{const cs=getComputedStyle(e); return cs.backgroundColor==='rgb(30, 122, 76)'&&parseFloat(cs.borderTopLeftRadius)<14&&!e.hasAttribute('aria-pressed');};
+ const ctx=e=>{ for(let p=e.parentElement;p;p=p.parentElement){ if(p.matches('[role=row],tr,.acoes,[data-acoes],section,aside,[role=dialog]')) return p;
+   if(p.matches('header')&&!p.closest('main')) return p; if(p.tagName==='MAIN') return p;
+   const cs=getComputedStyle(p); if(parseFloat(cs.borderTopWidth)>0&&parseFloat(cs.borderTopLeftRadius)>=10&&p.getBoundingClientRect().height>=56) return p; } return document.body; };
+ const els=[...document.querySelectorAll('header button,header a[href],main button,main a[href],.acoes button,.acoes a')].filter(vis).filter(e=>!e.closest('.menu-lat,.g2mais-menu'));
+ const g=new Map(); const nav=[], novo=[], raio9=[];
+ for(const e of els){ const t=n(e.innerText); if(/^\+?\s*Nov[oa]s?\b/.test(t)) novo.push(t); if(getComputedStyle(e).borderTopLeftRadius==='9px'&&parseFloat(getComputedStyle(e).borderTopWidth)>0) raio9.push(t.slice(0,30));
+   if(!verde(e)) continue; if(e.tagName==='A'&&/^(Abrir|Ver|Voltar|Consultar)\b/.test(t)) nav.push(t); const c=ctx(e); if(!g.has(c)) g.set(c,[]); g.get(c).push(t.slice(0,40)); }
+ return {mais:[...g.values()].filter(v=>v.length>1),nav,novo,raio9,n:[...g.values()].reduce((a,v)=>a+v.length,0)};})())"""
+def parte_v():
+    c.aparelho(1440, 900, 1, False); ruins = {}; total = 0
+    for pg in ['OS.dc.html', 'SAF.dc.html', 'PL-03.dc.html', 'VE-03.dc.html', 'CD-01.dc.html', 'PT-04.dc.html']:
+        abre(pg, 1.6); v = json.loads(J(VERDES) or '{}'); total += v.get('n', 0)
+        if v.get('mais') or v.get('nav') or v.get('novo') or v.get('raio9'): ruins[pg] = v
+    chk('V1 um verde por contexto, sem verde que só navega, sem "Novo/Nova" e sem botão local de raio 9 px (O.S., Planejar safra, Capacidade, Ofertas, Cadastro de fazendas, Crédito)',
+        total >= 3 and not ruins, [total, ruins])
+    abre('OS.dc.html', 1.6)
+    h = J("(()=>{const b=[...document.querySelectorAll('header button')].find(b=>b.innerText.trim()==='Criar ordem'); return b?getComputedStyle(b).backgroundColor:'';})()")
+    chk('V2 O.S.: "Criar ordem" é a primária do cabeçalho (antes "Nova ordem" com estilo local no bloco)', h == 'rgb(30, 122, 76)', h)
+
+PARTES = set((os.environ.get('DS_PARTES') or 'T,M,V').split(','))
 try:
     c.call('Page.addScriptToEvaluateOnNewDocument', {'source': "window.__err='';addEventListener('error',e=>{window.__err+=(e.message||'erro')+' | ';});"})
     if 'T' in PARTES: parte_t()
     if 'M' in PARTES: parte_m(); parte_r()
+    if 'V' in PARTES: parte_v()
     erros(); chk('Z sem erro de JS nas telas abertas', not ERRS, ERRS[:3])
 finally:
     try: c.close()

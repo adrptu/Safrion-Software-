@@ -1663,7 +1663,7 @@ def build():
              f'<button type="button" onClick="{H("pn_sair")}" style="{_MINI}">Ver todas as O.S.</button></div></sc-if>')
     corpo=bloco('Ordens por fase','Clique numa ordem para ver atividade, insumos e doses e seguir para a próxima fase.',
                 vazio+tem(f'<div style="display: flex; flex-direction: column; gap: 10px;">{pn_nota}{colbar}{panes}</div>')+_restaurar(),
-                acao=f'<span style="display: inline-flex; align-items: center; gap: 10px;"><button type="button" onClick="{H("nv_open")}" style="padding: 7px 14px; border-radius: 9px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; background: {ACC}; color: #fff; border: 1px solid {ACC}; flex-shrink: 0;">Nova ordem</button></span>')
+                acao='')
     EXTRA.append(_painel()); EXTRA.append(_form())
     # cultura de cada ordem (13/10, filtro Cultura): a do cultivo de cada talhão da ordem na safra dela (D2.SAFRAS e D2.CULTIVOS, fonte do Planejar safra)
     for o in ordens: o['culturas']=_culturas_da(o)
@@ -1676,7 +1676,7 @@ def build():
     HEIGHTS37[fname]=1000
     shell37('OS','Ordem de Serviço',corpo,fname=fname,
             subtitle='A liberar → Liberadas → Em execução → Em conferência → Encerradas. Pausa, atraso, parcial e impedimento aparecem como selos.',
-            status=(H('os_st'),'red'),primary_html=None,search=False,  # "Nova ordem" mora no bloco Ordens por fase
+            status=(H('os_st'),'red'),primary_html=f'<button type="button" onClick="{H("nv_open")}" style="{BTN_ST(True)}">Criar ordem</button>',search=False,  # BOT-01/03 (15/10/2026): criar é a primária da tela, no cabeçalho, com verbo
             footer='A fase só muda por evento: liberação, início, término físico e encerramento. Finalizar apontamento do turno não encerra a O.S.')
     _status_dinamico(fname)
     return fname

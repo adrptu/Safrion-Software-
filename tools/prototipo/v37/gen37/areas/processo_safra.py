@@ -270,7 +270,7 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
     # UX-ACAO-UNICA-20261003: o cabeçalho do bloco só tem comandos do próprio conteúdo (criar, adicionar, modo de visão); avanço,
     # retorno e a primária da etapa ficam na área de ações única ao fim do conteúdo (engine.area_acoes, preenchida em safra.js)
     acoes=lambda extra='': f'<span style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">{extra}</span>'
-    nova_safra=f'<button type="button" onClick="{H("g_saf_new")}" style="{E.BTN_ST(False,True)}">Nova safra</button>'   # criar é secundário: a tarefa da etapa é escolher
+    nova_safra=f'<button type="button" onClick="{H("g_saf_new")}" style="{E.BTN_ST(False,True)}">Criar safra</button>'   # criar é secundário: a tarefa da etapa é escolher
     s1=bloco('Escolha a safra','Clique na safra para continuar de onde parou.',g_saf,acao=nova_safra)
     # SOLO-01 §3.4: "Sugestões pelas análises · N" só com 1 sugestão ou mais (R01, D-29): quem não usa análise não vê nada
     sg_lnk=f'<sc-if value="{H("sg_has")}" hint-placeholder-val="{F()}"><button type="button" id="sg_lnk" class="acoes-lnk" onClick="{H("sg_abrir")}" style="min-height: 28px; white-space: nowrap;">{H("sg_lnk")}</button></sc-if>'

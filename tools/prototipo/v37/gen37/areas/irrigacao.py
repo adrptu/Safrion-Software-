@@ -288,7 +288,7 @@ def ir02():
               + kvfor('pg_kv',2) + checks('pg_ck')
               + f'<sc-if value="{H("pg_tem")}" hint-placeholder-val="{F()}"><div role="status" style="padding: 10px 12px; border-radius: 10px; background: {ACCS}; color: {ACC}; font-size: 13px; font-weight: 700;">{H("pg_temT")}</div></sc-if>')
     pg_rod=(f'<button type="button" onClick="{H("pg_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'
-            f'<sc-if value="{H("pg_tem")}" hint-placeholder-val="{F()}"><a href="{H("pg_href")}" style="{BTN_ST(True,True)} text-decoration: none;">{H("pg_abrirT")}</a></sc-if>'
+            f'<sc-if value="{H("pg_tem")}" hint-placeholder-val="{F()}"><a href="{H("pg_href")}" style="{BTN_ST(False,True)} text-decoration: none; display: inline-block;">{H("pg_abrirT")}</a></sc-if>'
             f'<sc-if value="{H("pg_nova")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("pg_ok")}" style="{BTN_ST(True,True)}">{H("pg_okT")}</button></sc-if>')
     EXTRA.append(painel('pg',pg_corpo,pg_rod))
     EXTRAJS[0]=prefixo()+JS_COMUM+r"""
@@ -409,7 +409,7 @@ function EXTRAVALS(self,v){ irrVista(self,'g_os'); IRG('g_os').rows.forEach(r=>{
     corpo=(vazio('vazio','vazioT','Abrir programação','IR-02.dc.html')
            + f'<sc-if value="{H("tem")}" hint-placeholder-val="{T()}">'+section('Ordens por etapa','','',g_os)+'</sc-if>')
     prim=(f'<span style="{H("hs_st")}">{H("hs_t")}</span><span style="width: 8px;"></span>'
-          f'<sc-if value="{H("hoje_has")}" hint-placeholder-val="{T()}"><a href="{H("hoje_h")}" style="{BTN_ST(True)} text-decoration: none;">{H("hoje_t")}</a></sc-if>')
+          f'<sc-if value="{H("hoje_has")}" hint-placeholder-val="{T()}"><a href="{H("hoje_h")}" style="{BTN_ST(False)} text-decoration: none; display: inline-block;">{H("hoje_t")}</a></sc-if>')
     shell37('IR-03','Ordens de irrigação',corpo,fname=fname,crumbs_extra=['Ordens'],primary_html=prim,steps=faixa(3),search=False)
     ncol_dinamico(fname,['os_ncol'])
 

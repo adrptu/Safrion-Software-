@@ -22,7 +22,7 @@ import dados as D
 import dados2 as D2
 import dados_cad as DC
 from areas.cadastros import H, sel, num, txt, dat, R, js
-from areas.cadastros import (cadx_css, abas, pane, se, faixa, prim, secbtn, qf_chips, seg, barra, cartoes, bloco_cad, estado_cab, estado_html, acoes_form, PRIM_ST, arv)
+from areas.cadastros import (cadx_css, abas, pane, se, faixa, prim, secbtn, qf_chips, seg, barra, cartoes, bloco_cad, estado_cab, estado_html, acoes_form, arv)
 
 F_=H('false'); T_=H('true')
 UFS=['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT','PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO']
@@ -528,7 +528,7 @@ def cd01det():
              dict(k='difp',l='Diferença (%)',t='num',a='r',d=1),dict(k='est',l='Situação',w=220)],
         tr,gid='g_idt',search=False,total=False,headtools=False,frame=False,
         edit=dict(m='form',title='Talhão',newTitle='Cadastrar talhão',sub=SUB_TAL,fields=campos_tal(fazs)))
-    plan=se('det_ativo',f'<span class="cadx-prim"><a href="SAF.dc.html" style="{PRIM_ST} text-decoration: none; display: inline-block;">{H("det_plan")}</a></span>')
+    plan=se('det_ativo',f'<span class="cadx-prim"><a href="SAF.dc.html" style="text-decoration: none; display: inline-block; {E.BTN_ST(True,True)}">{H("det_plan")}</a></span>')
     # árvore safra › parcela: cada linha mostra a sua entidade (safra: área alocada, livre e estado; parcela: tipo, cultura, cultivar, área, plantio
     # e polígono); a área livre é número (negativo = excede), a cor diz se confere
     gp=grid([dict(k='parc',l='Safra › parcela',w=190),dict(k='est',l='Situação',w=180),dict(k='tipo',l='Tipo'),dict(k='cult',l='Cultura'),dict(k='var',l='Cultivar'),
@@ -550,7 +550,7 @@ def cd01det():
     p0=(faixa('det_fx')+se('det_parc_tem',arv(gp),True)
         +se('det_parc_vazio',barra(f'<span style="font-size: 13px; color: {MUTED};">{H("det_parc_msg")}</span>',plan)))
     mapa_lk=(f'<a href="{H("geo_ver")}" style="{link_mini}">Ver no mapa ›</a><a href="IN-04.dc.html#importar" style="{link_mini}">Importar KML ou GeoJSON ›</a>'
-             f'<span class="cadx-prim"><a href="{H("geo_des")}" style="{PRIM_ST} text-decoration: none; display: inline-block;">{H("geo_dest")}</a></span>')
+             f'<span class="cadx-prim"><a href="{H("geo_des")}" style="text-decoration: none; display: inline-block; {E.BTN_ST(True,True)}">{H("geo_dest")}</a></span>')
     p1=(barra(f'<b style="font-size: 13px;">{H("geo_leg")}</b>',se('det_pend',prim('pg_abrir','det_prim',hole=True))+se('det_planok',secbtn('pg_nova','Nova versão do polígono'))+se('geo_mapa',mapa_lk))
         + f'<div class="cadx-rola" style="padding: 16px;">{geo_html}</div>')
     corpo=(se('det_nf',f'<section class="cadx" aria-label="Talhão não encontrado"><div class="cadx-barra"><b style="font-size: 14px;">Talhão não encontrado</b>'

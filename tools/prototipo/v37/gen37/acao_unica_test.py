@@ -86,7 +86,7 @@ try:
         def uma(s): return len(s['prims'])<=1 and s['avancos']<=1 and all(s['prims'].count(x)==1 for x in s['prims'])
         rotulos={k:[a.split(':',1)[1] for a in v['area'] if a.startswith(('avancar:','resolver:','comando:','abrir:'))] for k,v in estados.items()}
         sem_copia=all(sum(1 for x in J(f"[...document.querySelectorAll('header button,header a,main button,main a')].filter(e=>e.getClientRects().length).map(e=>{N}(e.innerText))") if x==t)<=1 for t in rotulos['4'])
-        chk('2 SAF · no máximo uma primária e uma rota de avanço em cada estado (sem safra, falta de plano, etapas 3 e 4), sem cópia do mesmo comando; Nova safra secundária',
+        chk('2 SAF · no máximo uma primária e uma rota de avanço em cada estado (sem safra, falta de plano, etapas 3 e 4), sem cópia do mesmo comando; Criar safra secundária',
             all(uma(s) for s in estados.values()) and estados['1 sem safra']['prims']==[] and estados['2 falta plano']['prims']==['Aplicar plano em 4 cultivos'] and estados['2 falta plano']['avancos']==1
             and estados['3']['prims']==['Conferir demanda de insumos ›'] and estados['4']['prims']==['Abrir Compra de insumos ›'] and sem_copia,
             {k:(v['etapa'],v['prims'],v['area']) for k,v in estados.items()})
@@ -111,7 +111,7 @@ try:
             not any(a.startswith('nota:') for a in e4['area']) and 'resolver:Aplicar plano em 4 cultivos' in e4['area'] and 'avancar:Dimensionar operações ›' in e4['area']
             and e4b['etapa']==3 and len(sp4a)==4 and sp4a==sp4b and l4a==l4b, [e4['area'],e4b['etapa'],sp4a,sp4b])
         # 5 · vazio: safra nova sem cultivos → nenhuma primária e nenhum avanço; a nota diz o que está livre e a conferir e manda planejar na linha
-        abre('SAF'); clk('Nova safra'); time.sleep(.3)
+        abre('SAF'); clk('Criar safra'); time.sleep(.3)
         for k,vl in (('nome','Safra teste ação única'),('ini','2027-01-10'),('fim','2027-08-30')): setv(f'#fx_g_saf_{k}',vl)
         clk('Salvar','aside[role=dialog]'); time.sleep(.6); e5=est(); shot('saf_vazio')
         tal=J(r"""(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); if(!t) return {}; const o={}; [...t.querySelectorAll('[role=row]')].slice(1).filter(r=>!r.classList.contains('g2kid')).forEach(r=>{ const cs=[...r.querySelectorAll('[role=cell]')]; const c0=r.querySelector('.g2c0'); if(!c0) return; const nm=c0.innerText.replace(/^[▾▸] ?/,'').trim().split(/\s+/)[0]; const sr=r.querySelectorAll('.g2sr'); let txt=cs.map(c=>{ let x=c.innerText; c.querySelectorAll('.g2sr').forEach(e=>{ x=x.replace(e.innerText,''); }); return x.replace(/\s+/g,' ').trim(); }); o[nm]={c0:c0.innerText.replace(/\s+/g,' ').trim(),cs:txt}; }); return o; })()""")
@@ -173,8 +173,8 @@ try:
         abre('MA',hash='#vis=planos'); J("localStorage.setItem('safrion.perfilDemo','Otávio')"); c.goto('about:blank',.2); c.goto(f'http://127.0.0.1:{p}/MA.dc.html#vis=planos',.8); m1=est()   # Ver como Otávio (o comando é dele)
         r=J("(()=>{const r=[...document.querySelectorAll('main [role=row][data-rid]')].find(r=>r.getAttribute('data-rid')==='PM-01'); if(!r) return 'sem linha'; (r.querySelector('.g2pw')||r).click(); return 'PM-01';})()"); time.sleep(.6); m2=est(); shot('ma_plano')
         vt=J("[...document.querySelectorAll('main button,main a')].filter(e=>e.getClientRects().length).map(e=>e.innerText.trim()).filter(t=>t.startsWith('‹'))")
-        chk('12 Planos (tela MA) · visão com uma primária "Novo plano"; plano aberto: retorno "‹ Planos", sem etapas e no máximo uma primária',
-            m1['prims']==['Novo plano'] and m1['etapa']==0 and r=='PM-01' and m2['etapa']==0 and '‹ Planos' in vt and len(m2['prims'])<=1, [m1,r,m2,vt])
+        chk('12 Planos (tela MA) · visão com uma primária "Criar plano"; plano aberto: retorno "‹ Planos", sem etapas e no máximo uma primária',
+            m1['prims']==['Criar plano'] and m1['etapa']==0 and r=='PM-01' and m2['etapa']==0 and '‹ Planos' in vt and len(m2['prims'])<=1, [m1,r,m2,vt])
         # 13 · EST: trabalho paralelo → seções (navegação em qualquer ordem), sem número de etapa e sem setas; seção sem trabalho não ganha "ir para a próxima"
         abre('EST'); s0=J(r"""(()=>{const n=document.querySelector('nav[aria-label="Seções do estoque"]'); const bs=n?[...n.querySelectorAll('.etp-itens>button')]:[]; return {n:bs.length, nums:bs.filter(b=>/^\d/.test(b.innerText.trim())).length, cur:(n&&n.querySelector('[aria-current=true]')||{innerText:''}).innerText.trim(), setas:document.querySelectorAll('[aria-label^="Etapa anterior"],[aria-label^="Próxima etapa"]').length, ind:!!document.querySelector('.etp-ind')};})()""")
         clk('Faça contagens','nav[aria-label="Seções do estoque"]'); s5=est(); clk('Confira saldos','nav[aria-label="Seções do estoque"]'); s4=est(); cur4=J("(document.querySelector('nav.etp-sec [aria-current=true]')||{innerText:''}).innerText.trim()"); shot('est_secoes')
@@ -199,8 +199,8 @@ try:
         fase0=J("(()=>{const d=document.querySelector('aside[role=dialog]'); return d?(d.innerText.match(/A liberar|Liberadas|Em execução|Em conferência|Encerradas/)||[''])[0]:'';})()")
         ctl=J("(()=>{const d=document.querySelector('aside[role=dialog]'); if(!d) return -1; return [...d.querySelectorAll('button,a,[role=button]')].filter(b=>/^(A liberar|Liberadas|Em execução|Em conferência|Encerradas)$/.test(b.innerText.trim())).length;})()")
         o1=est()
-        chk('15 O.S. · Lista e Kanban com o mesmo filtro de fase (Liberadas: 2 = 2, antes 2 × 10), Kanban diz o filtro e oferece "Limpar filtros" (volta a 10), Recursos segue o mesmo recorte e diz qual (TABELAS-FOCO); "Nova ordem" a única primária; no painel a fase é texto, não comando',
-            sorted(lis)==sorted(kb) and len(kb)==2 and '2 de 10 ordens no recorte' in nota and 'Limpar filtros' in nota and 'só os blocos das ordens de Santa Rita no recorte' in rc and kb2==10 and o0['prims']==['Nova ordem'] and fase0 and ctl==0 and len(o1['prims'])<=1, [lis,kb,nota,rc,kb2,o0['prims'],fase0,ctl,o1['prims']])
+        chk('15 O.S. · Lista e Kanban com o mesmo filtro de fase (Liberadas: 2 = 2, antes 2 × 10), Kanban diz o filtro e oferece "Limpar filtros" (volta a 10), Recursos segue o mesmo recorte e diz qual (TABELAS-FOCO); "Criar ordem" a única primária; no painel a fase é texto, não comando',
+            sorted(lis)==sorted(kb) and len(kb)==2 and '2 de 10 ordens no recorte' in nota and 'Limpar filtros' in nota and 'só os blocos das ordens de Santa Rita no recorte' in rc and kb2==10 and o0['prims']==['Criar ordem'] and fase0 and ctl==0 and len(o1['prims'])<=1, [lis,kb,nota,rc,kb2,o0['prims'],fase0,ctl,o1['prims']])
         # 15b · O.S. "Ajustar antes de liberar" (360×800, toque): rodapé do formulário preso ao pé do painel, Voltar à esquerda e a
         #       primária à direita, alcançável sem rolar até o fim e sem cobrir o campo focado
         abre('OS',360,800,3,True); aj='sem ordem'

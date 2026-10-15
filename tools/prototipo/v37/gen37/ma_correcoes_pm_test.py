@@ -33,7 +33,7 @@ try:
     m.setv('#vk_leit', '600'); m.clk('Salvar', '#vk-painel'); v1 = m.toast()
     m.ok('Distribuidor 3 t vinculado ao PM-11' in v1 and not J("!!document.querySelector('#vk-painel')"), 'vincular: leitura 600 aceita', v1[:100])
     # 4 · ativo em dois planos com o mesmo serviço: aviso no novo plano e vínculo recusado
-    m.ir('vis=planos', perfil='Otávio', limpa=True); m.clk('Novo plano')
+    m.ir('vis=planos', perfil='Otávio', limpa=True); m.clk('Criar plano')
     m.setv('#np_nome', 'MF 7719 cópia'); m.setv('#np_tipo', 'modelo'); m.setv('#np_modelo', 'MF 7719'); av = J("(document.querySelector('#np-painel')||{}).innerText||''"); m.setv('#np_base', 'PM-01'); m.clk('Salvar', '#np-painel')
     m.clk('Vincular ativo'); m.setv('#vk_data', '2026-09-02'); m.setv('#vk_leit', '2793'); m.clk('Salvar', '#vk-painel'); e = J("(document.querySelector('#vk-painel')||{}).innerText||''")
     m.ok('Trator 02 já está no PM-01' in av and 'já faz Revisão 250 h pelo PM-01' in e, 'dois planos, mesmo serviço: aviso ao criar e vínculo recusado', [av[-120:], e[-160:]])

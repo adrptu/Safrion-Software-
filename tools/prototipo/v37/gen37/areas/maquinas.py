@@ -330,7 +330,7 @@ function ma_hprim(self,v,c,pf,vis,lista,panAberto){ let t='',fn=null,dis='',sec=
     fn=()=>{ const r=ma_cmd(self,c2=>manGerarTodas(c2,ks,g2perfil())); if(r&&r.ids&&r.ids.length){ self.setState({gerados:r.ids,vis:'ordens',fase:'A liberar',rot:''}); ma_abrir(self,'om',r.ids[0]); ma_rec(self,r,r.ids.length>1?{t:'Abrir as '+r.ids.length+' › próxima: '+r.ids[1],k:'om',id:r.ids[1]}:null); } };
     sec={t:'Registrar achado',fn:()=>ma_novoAch(self,'')}; }
   else if(lista&&vis==='ativos'&&self.state.amodo==='abast'){ t='Registrar abastecimento'; dis=manPode(c,pf,'registrar'); fn=()=>ma_novoAb(self,''); }
-  else if(lista&&vis==='planos'){ t='Novo plano'; dis=manPode(c,pf,'plano'); fn=()=>pmNovo(self,manGet(),null); }
+  else if(lista&&vis==='planos'){ t='Criar plano'; dis=manPode(c,pf,'plano'); fn=()=>pmNovo(self,manGet(),null); }
   else if(lista&&vis==='ativos'){ sec={t:'Registrar achado',fn:()=>ma_novoAch(self,'')}; }
   v.hp_tem=!!t; v.hp_t=t; v.hp_dis=!!dis; v.hp_why=dis||''; v.hp_fn=fn||(()=>{}); v.hp_st=(panAberto||dis)?MA_SEC:MA_PRIM;
   v.hs_vis=!!sec&&!t; v.hs_menu=!!sec&&!!t; v.hs_t=sec?sec.t:''; v.hs_fn=sec?sec.fn:(()=>{}); }   /* MAIS-01: com a primária à vista, a secundária vai para o ⋯ */

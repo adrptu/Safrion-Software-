@@ -21,7 +21,7 @@ def build():
     EXTRAJS[0] = _js(BEN_JS)
     vis = (f'<div class="pr-vis" role="group" aria-label="Visão das ordens"><button type="button" aria-pressed="{H("vl_on")}" onClick="{H("vl_go")}">Lista</button>'
            f'<button type="button" aria-pressed="{H("vk_on")}" onClick="{H("vk_go")}">Kanban</button></div>')
-    nova = f'<button type="button" onClick="{H("nova_go")}" style="{_MINI}">+ Nova ordem</button>'
+    nova = f'<button type="button" onClick="{H("nova_go")}" style="{_MINI}">Criar ordem</button>'
     kb = (f'<style>@media (max-width:479px){{.bn-kb>div{{flex-direction:column!important}}.bn-kb>div>div{{width:100%!important}}}}</style>'
           f'<div class="bn-kb" style="overflow-x: auto;">{_kanban()}</div>')
     # o aviso (role=status) segue o posicionamento único do g2lib (g2toastLugar, UX-BEN35-AVISO-01); a regra local da rodada 3 (I-g4), que o

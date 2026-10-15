@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Shell v3.7: menu de 13 áreas do cap. 4.1, contexto do cap. 4.2, faixa de continuidade e rodapé de demonstração."""
-import json, os
+import json, os, re
 from engine import (INK,MUTED,LINE,BG,SURF,ACC,ACCS,SH,SIDE,SIDE_TX,SIDE_MUTED,DISP,FONT,YEL,YELS,RED,REDS,GRAY,GRAYS,
                     icon,esc,chip,btn,act,chev,engine,extra_html,wid,reg,wget,_reset_screen,FIRST_TBL,CHIP_ON,CHIP_OFF,HL)
 import engine as E
@@ -386,7 +386,9 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
     st=chip(status[0],status[1]) if status else ''
     srch=(f'<span style="flex-grow: 1;"></span><span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid {LINE}; border-radius: 999px; background: {SURF}; color: {MUTED}; font-size: 12.5px; min-width: 220px;">'
           f'{icon("lista",13,MUTED)}Buscar ID, talhão, ativo, lote, pessoa…</span>') if search else '<span style="flex-grow: 1;"></span>'
-    prim=primary_html or (btn(primary,True,href=primary_href) if primary else '')
+    # BOT-08 (15/10/2026): verde é comando; o destino que só abre outra tela (Abrir, Ver, Voltar, Consultar, Ir) é link secundário
+    navega=bool(primary and primary_href and re.match(r'^(Abrir|Ver|Voltar|Consultar|Ir|Acessar)\b',str(primary)))
+    prim=primary_html or (btn(primary,not navega,href=primary_href) if primary else '')
     controw=cont if cont else ''
     # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos e os demais soltos pela tela ... somos minimalistas e essencialistas"):
     # a regra que ficava numa faixa no rodapé vira uma dica (ⓘ ao lado do título, com nome acessível; abre no hover, no foco e no toque)

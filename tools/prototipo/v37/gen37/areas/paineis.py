@@ -3,6 +3,7 @@
 Base f6b31f7; autoria Codex, revisão/integração Claude. Menu via patch separado.
 Contagens (não soma de ha, kg, L ou moedas); ausente/incompleto nunca vira zero.
 """
+import re
 import json
 import engine as E
 import cenario
@@ -191,5 +192,5 @@ def build():
           '<p hidden="'+H('!pn_missing')+'" role="status">Há dados incompletos. Consulte a origem pelos acessos abaixo.</p>'+
           chart+pna+
           '<nav class="pn-links" aria-label="Acessos do painel">'+links+'</nav></div>')
-        prim=E.btn(atalhos[0][0],True,href=atalhos[0][1]).replace('<a ', '<a class="pn-link mod-cartao" ')
+        prim=E.btn(atalhos[0][0],not re.match(r'^(Consultar|Abrir|Ver|Voltar)\b',atalhos[0][0]),href=atalhos[0][1]).replace('<a ', '<a class="pn-link mod-cartao" ')   # BOT-08: só navegar não é verde
         shell37(fid,'Painel',body,fname=fname,status=None,primary_html=prim,search=False)

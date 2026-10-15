@@ -1583,6 +1583,10 @@ def _ajuda_auto(cols,calc,campos=()):
 # do cabeçalho da coluna. A regra roda no navegador (g2lib.g2glossCol), sobre as linhas que a grade mostra (as do build e as montadas na tela), com
 # estas entradas do GLOSSARIO (as de "^" valem só para o rótulo): fonte única do texto, aqui.
 _GLOSS_CEL=[(rx,t) for rx,t in GLOSSARIO if not rx.startswith('^')]
+_NOVO_RE=re.compile(r'^\s*\+?\s*Nov[oa]s?\s+',re.I)
+def rotulo_criar(t):
+    """BOT-03 (15/10/2026): o botão de criar diz o verbo do efeito: \"Novo pedido\" vira \"Criar pedido\" (o título do painel continua o nome)"""
+    return _NOVO_RE.sub('Criar ',t) if t else t
 def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None,vazio=True,ag=None,sico=None):
     cols=[_col_un(c) for c in cols]
     # rótulos que ficariam iguais sem a unidade ("Custo (R$/h)" e "Custo (R$/ha)") mantêm a unidade, sem parênteses: "Custo R$/h", "Custo R$/ha"
@@ -1648,7 +1652,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
             + '<span style="flex-grow: 1;"></span>' + tools + cvb
             + (f'<sc-if value="{H("_hassel")}" hint-placeholder-val="{{{{false}}}}"><span role="status" style="font-size: 12px; font-weight: 700; color: {ACC};">{H("_selmsg")}</span>{bulk}<button type="button" onClick="{H("_selclear")}" style="{_MINI}">Limpar seleção</button></sc-if>' if sel else '')
             + (f'<sc-if value="{H("_xhas")}" hint-placeholder-val="{HL("true")}"><button type="button" onClick="{H("_xtog")}" class="g2xtog">{seta_xtog(H("_xup"),H("_xdown"))}{H("_xlab")}</button></sc-if>' if tree else '')   # visão/apresentação: fim da barra, texto discreto (v3)
-            + (f'<sc-if value="{H("_semsel")}" hint-placeholder-val="{{{{true}}}}"><button type="button" onClick="{H("_new")}" style="{_MINI}">+ {esc(add)}</button></sc-if>' if add else '')   # com seleção, a região de ações dá lugar à do lote (DS-40)
+            + (f'<sc-if value="{H("_semsel")}" hint-placeholder-val="{{{{true}}}}"><button type="button" onClick="{H("_new")}" style="{_MINI}">+ {esc(rotulo_criar(add))}</button></sc-if>' if add else '')   # com seleção, a região de ações dá lugar à do lote (DS-40)
             + '</div>')
     # filtro da coluna no padrão Excel/Google Sheets: menu flutuante sob o cabeçalho, ordenar, pesquisar, marcar valores e aplicar no OK
     FM=lambda s: _h(gid+"_fm."+s)

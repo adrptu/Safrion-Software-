@@ -137,7 +137,6 @@ function co_steps(v,pre,cur){{ for(let i=1;i<=5;i++){{ const done=i<cur, now=i==
   v[pre+i+'_tx']='display:flex;align-items:center;gap:8px;font-size:13px;white-space:nowrap;'+(now?'font-weight:800;color:{INK};':(done?'font-weight:600;color:{INK};':'font-weight:600;color:{MUTED};'));
   v[pre+i+'_ln']='flex-grow:1;height:2px;margin:0 10px;min-width:24px;background:'+(done?'{ACC}':'{LINE}')+';'; }} }}
 '''
-PRIM_ST=BTN_ST(True,False)
 def dstepper(pre,hint_hole):
     nomes=['A liberar','Liberadas','Em execução','Em conferência','Encerradas']
     out=''
@@ -153,8 +152,8 @@ def dyn_status(fname,hole):
     s=s.replace(old,f'<span style="{H(hole+"_st")}"><span style="{H(hole+"_dot")}"></span>{H(hole)}</span>',1)
     open(p,'w').write(s)
 def dyn_primary(pre):
-    return (f'<sc-if value="{H(pre+"_isbtn")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H(pre+"_fn")}" style="{PRIM_ST}">{H(pre+"_t")}</button></sc-if>'
-            f'<sc-if value="{H(pre+"_islnk")}" hint-placeholder-val="{F()}"><a href="{H(pre+"_href")}" style="text-decoration: none; display: inline-block; {PRIM_ST}">{H(pre+"_t")}</a></sc-if>')
+    return (f'<sc-if value="{H(pre+"_isbtn")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H(pre+"_fn")}" style="{BTN_ST(True)}">{H(pre+"_t")}</button></sc-if>'
+            f'<sc-if value="{H(pre+"_islnk")}" hint-placeholder-val="{F()}"><a href="{H(pre+"_href")}" style="text-decoration: none; display: inline-block; {BTN_ST(True)}">{H(pre+"_t")}</a></sc-if>')
 
 # =====================================================================================
 def co01():
