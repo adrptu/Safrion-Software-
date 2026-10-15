@@ -43,13 +43,15 @@ try:
     chk('C4 painel agrupado pela pergunta, na ordem; a identidade (O.S.) fica travada', grupos == ['O QUÊ', 'QUEM', 'QUANDO', 'ONDE', 'MEDIDAS', 'SITUAÇÃO', 'OUTRAS'] and dis == ['O.S.'] and botao()[2] == 'true', [grupos, dis])
     marca('Situação'); marca('Quem resolve')
     h1 = head()
-    chk('C5 marcar mostra: Quem resolve e Situação entram depois do padrão, na ordem da grade; o recorte não muda', h1 == PAD + ['SITUAÇÃO', 'QUEM RESOLVE'] and conta() == n0, [h1, conta(), n0])
+    # V2-3: a coluna a mais gruda na vizinha da grade que está no padrão (Situação e Quem resolve logo depois de Fase); o padrão não muda de ordem
+    chk('C5 marcar mostra: Situação e Quem resolve entram juntas, ao lado da vizinha da grade; o padrão mantém a ordem; o recorte não muda',
+        [x for x in h1 if x not in ('SITUAÇÃO', 'QUEM RESOLVE')] == PAD and h1.index('QUEM RESOLVE') == h1.index('SITUAÇÃO') + 1 and conta() == n0, [h1, conta(), n0])
     marca('Prazo')
     chk('C6 desmarcar oculta (Prazo sai) e o botão conta 11 ocultas', 'PRAZO' not in head() and botao()[0] == 'Colunas +11', [head(), botao()])
     J("(()=>{const d=document.querySelector('[data-g2cv=g_os]'); d.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));})()"); time.sleep(.4)
     chk('C7 Esc fecha o painel e o foco volta ao botão Colunas', not painel() and J("document.activeElement&&document.activeElement.getAttribute('data-g2cvb')") == 'g_os')
     abrir('Caio')
-    chk('C8 a escolha volta no próximo acesso', head() == ['O.S.', 'ATIVIDADE', 'TALHÃO', 'FASE', 'PROGRESSO', 'SITUAÇÃO', 'QUEM RESOLVE'], head())
+    chk('C8 a escolha volta no próximo acesso', head() == ['O.S.', 'ATIVIDADE', 'TALHÃO', 'FASE', 'SITUAÇÃO', 'QUEM RESOLVE', 'PROGRESSO'], head())
     abrir('Ana')
     chk('C9 a escolha é por perfil: Ana abre no padrão', head() == PAD, head())
     abrir('Caio'); abre_painel()

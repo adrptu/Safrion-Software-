@@ -105,9 +105,9 @@ try:
         abre('SAF',hash='#saf=S2627&passo=cultivos'); time.sleep(.3)
         e4=est(); k2a=' '.join(a for a in e4['area'] if a.startswith('nota:'))
         acao('avancar'); e4b=est(); etapa(2); k2b=' '.join(a for a in est()['area'] if a.startswith('nota:'))
-        chk('4 SAF · falta de plano: nota com a causa e os talhões, "Aplicar plano em 4 cultivos" é a primária (resolver) e "Dimensionar operações ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (4 sem plano antes e depois, na nota)',
-            any(a.startswith('nota:4 cultivos sem plano agronômico (T4, T3, P1, P2)') for a in e4['area']) and 'resolver:Aplicar plano em 4 cultivos' in e4['area'] and 'avancar:Dimensionar operações ›' in e4['area']
-            and e4b['etapa']==3 and '4 cultivos sem plano' in k2a and '4 cultivos sem plano' in k2b, [e4['area'],e4b['etapa'],k2a,k2b])
+        chk('4 SAF · falta de plano: sem descrição na área de ações (15/10), "Aplicar plano em 4 cultivos" é a primária (resolver) e "Dimensionar operações ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (4 sem plano antes e depois, na nota)',
+            not any(a.startswith('nota:') and 'sem plano' in a for a in e4['area']) and 'resolver:Aplicar plano em 4 cultivos' in e4['area'] and 'avancar:Dimensionar operações ›' in e4['area']
+            and e4b['etapa']==3 and 'sem plano' not in k2a and 'sem plano' not in k2b, [e4['area'],e4b['etapa'],k2a,k2b])
         # 5 · vazio: safra nova sem cultivos → nenhuma primária e nenhum avanço; a nota diz o que está livre e a conferir e manda planejar na linha
         abre('SAF'); clk('Nova safra'); time.sleep(.3)
         for k,vl in (('nome','Safra teste ação única'),('ini','2027-01-10'),('fim','2027-08-30')): setv(f'#fx_g_saf_{k}',vl)

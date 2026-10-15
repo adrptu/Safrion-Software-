@@ -265,6 +265,7 @@ function g2colsVis(self,sp){ if(!g2cvTem(sp)) return sp.cols; const esc=g2cvLer(
     if(base.has(pv)) at=ord.indexOf(pv)+1; else if(base.has(nx)) at=ord.indexOf(nx);
     else { let j=-1; for(let a=i-1;a>=0&&j<0;a--) j=ord.indexOf(gk[a]); at=j+1; }
     ord.splice(at,0,k); });
+  if(gk.every(k=>S.has(k))) ord=gk.slice();   // todas à vista: a tabela completa como foi desenhada (ordem da grade)
   if(!esc&&g2cvCel()) ord=ord.slice(0,3);   // celular: as 3 primeiras do padrão; a escolha explícita vale em qualquer tela
   return ord.map(k=>sp.cols.find(c=>c.k===k)).filter(Boolean); }
 function g2cvGrava(self,sp,ks){ try{ if(ks) localStorage.setItem(g2cvChave(sp),JSON.stringify(ks)); else localStorage.removeItem(g2cvChave(sp)); }catch(e){}

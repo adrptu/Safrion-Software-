@@ -72,7 +72,8 @@ try:
     nota = J("(()=>{const a=document.querySelector('[data-acoes]'); return a?a.innerText.replace(/\\s+/g,' '):''})()") or ''
     tro = J("[...document.querySelectorAll('[data-acoes] button')].filter(b=>b.getClientRects().length).map(b=>b.innerText.replace(/\\s+/g,' ').trim()).filter(t=>/Trocar safra/.test(t))") or []
     chk('T10 "‹ Trocar safra" embaixo, com a seta de voltar (14/10: "faltou setinha pra trás")', tro == ['‹ Trocar safra'], tro)
-    chk('T7 nota curta: sem "sem plano não entram" e sem "CD-02"', '4 cultivos sem plano agronômico (T4, T3, P1, P2).' in nota and 'não entram' not in nota and 'CD-02' not in nota, nota[:300])
+    # 15/10 ("retire essas descrições"): a área de ações não descreve; fica o atalho que resolve e os botões
+    chk('T7 área de ações sem descrição: só "Informar colheita de P1 ›" e os botões ("Aplicar plano em 4 cultivos")', 'sem plano agronômico' not in nota and 'começa em' not in nota and 'CD-02' not in nota and 'Informar colheita de P1 ›' in nota and 'Aplicar plano em 4 cultivos' in nota, nota[:300])
     c.shot(os.path.join(HERE, '_probe_saf_tab_1440.png')) if os.environ.get('SAF_TAB_SHOT') else None
     abre(390)
     h3 = head()

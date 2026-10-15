@@ -1600,8 +1600,10 @@ function safAcoes(self,v,x){ const st=self.state, step=x.step, ro=x.ro, corr=st.
           c={nota:'Todos os talhões estão com perenes da '+(o?o.safnome:'outra safra')+' neste período ('+ocHa(per)+' ha).',lnks:o?[{t:'Planeje por ela ›',fn:()=>abrirCultivo(self,o.saf,'')}]:[]}; }
         else { const ps=[]; if(nl.length) ps.push(nl.length+(nl.length>1?' talhões livres':' talhão livre')+' ('+ocHa(b.livre||0)+' ha)'); if(nc.length) ps.push(nc.length+' a conferir ('+ocHa(b.conf||0)+' ha)'); if(nv) ps.push(nv+(nv>1?' ciclos perenes a vincular':' ciclo perene a vincular'));
           c={nota:'Nenhum cultivo nesta safra'+(ps.length?': '+ps.join(', '):'')+'. Use Planejar ›'+(nv?' ou Vincular ciclo ›':'')+' na linha.'+(fr.t?' '+fr.t:''),lnks:fr.lnks}; } }
-      else if(x.apIds.length) c={nota:semTxt+'.'+(fr.t?' '+fr.t:''),lnks:fr.lnks,prim:aplicar,sec:av(3,'Dimensionar operações')};
-      else c={nota:fr.t||'',lnks:fr.lnks,prim:av(3,'Dimensionar operações')}; } }
+      // sem descrição na área de ações (proprietário, 15/10: "retire essas descrições"): o botão diz quantos cultivos recebem o plano, o que
+      // pede conferência fica no ícone da linha e só o atalho que resolve fica aqui (ex.: "Informar colheita de P1 ›", próximo passo com verbo)
+      else if(x.apIds.length) c={lnks:fr.lnks,prim:aplicar,sec:av(3,'Dimensionar operações')};
+      else c={lnks:fr.lnks,prim:av(3,'Dimensionar operações')}; } }
   else if(!ro&&step===3&&!x.temPlano) c={volta:ir(2),nota:'Nenhum cultivo tem plano agronômico: operações, recursos e demanda dependem dele.',prim:x.apIds.length?aplicar:null};
   // etapa 3: cultivo sem plano vira só o atalho "Aplicar plano em N cultivos" (o veredito já diz o que ficou fora); falta de recurso é aviso,
   // não trava: planejar não reserva, não contrata e não compra (AGENTS §4)

@@ -26,7 +26,7 @@ Classe leva o foco à busca só pelo teclado (no toque e no mouse, não: no celu
 Uso: python3 tabelas_cad_test.py [pasta de capturas]   (~6 min) · python3 tabelas_cad_test.py --ctx [pasta]: só o TABR-CTX-01 e o TABR-CTX-02"""
 import sys, os, re, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir
+from comp_lib import Chrome, servir, cv_todas_sempre
 from tabelas_lib import Grade, limpa, num, un_ok, instante, crescente
 CTX = '--ctx' in sys.argv; ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 OUT = ARGS[0] if ARGS else None
@@ -35,7 +35,7 @@ OK, FAIL = [], []
 def chk(n, cond, info=''):
     (OK if cond else FAIL).append(n); print(('  ok  ' if cond else '  FALHOU ') + n + (' · ' + str(info)[:300] if info != '' else ''), flush=True)
 
-p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js
+p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js; cv_todas_sempre(c)   # V2-3: a tabela completa como foi desenhada (TABELAS-FOCO); o padrão é conferido na VISOES-2
 def shot(n):
     if OUT: c.shot(os.path.join(OUT, n + '.png'))
 ERRS = []

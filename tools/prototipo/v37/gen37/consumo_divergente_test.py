@@ -77,8 +77,8 @@ try:
     shot('q_consumo_6_est_exposicao.png')
     erros += a.erros() or []
     # 3 · O.S.: selo na lista e encerrar bloqueado pelo caso aberto
-    a.abrir('OS'); a.J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith('OS-0421')); r&&r.click();})()"); time.sleep(.5)
-    lo = a.J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith('OS-0421')); return r?r.innerText.replace(/\\s+/g,' '):'';})()") or ''
+    a.abrir('OS'); a.J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/\\bOS-0421\\b/.test(r.innerText)); r&&r.click();})()"); time.sleep(.5)
+    lo = a.J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/\\bOS-0421\\b/.test(r.innerText)); return r?r.innerText.replace(/\\s+/g,' '):'';})()") or ''
     pe = a.J("window.__cen.cenPodeEncerrar(window.__cen.cenGet(),'OS-0421')")
     pa = a.J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText.replace(/\\s+/g,' ')") or ''
     ok('Consumo em conferência' in lo and 'Consumo em conferência' in pa and pe.startswith('Consumo em conferência: Fungicida A 2 L relatados, 1 L em custódia. No Estoque: Rui (almoxarife) confere; Ana (gestora) aceita o excedente'),
