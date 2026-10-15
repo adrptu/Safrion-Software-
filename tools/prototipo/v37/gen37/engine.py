@@ -625,12 +625,28 @@ def colmenu(hd,fil):
             + f'<div style="height: 1px; background: {LINE}; margin: 4px 0;"></div>'
             + item('Agrupar por esta coluna') + item('Limpar filtro desta coluna')
             + '</div>')
+_PRIM_TAG=re.compile(r'(?:\s|<sc-(?:if|for)\b[^>]*>)*<(\w+)((?:"[^"]*"|[^>"])*)>')
+def corpo_estruturado(body):
+    """SEP-20261015 (b): o corpo do bloco começa por conteúdo que já se separa do título sozinho: tabela (.g2caixa, com ou sem moldura),
+    barra de visões, caixa com borda, faixa com fundo próprio ou gráfico/mapa (svg). Desce pelos invólucros sem estilo próprio (até 3 níveis)."""
+    b=str(body)
+    for _ in range(4):
+        m=_PRIM_TAG.match(b)
+        if not m: return False
+        at=m.group(2)
+        if m.group(1)=='svg' or 'g2caixa' in at or 'g2visoes' in at or 'border: 1px' in at or re.search(r'background: (?!#FFFFFF|#fff\b|transparent|\{)', at): return True
+        b=b[m.end():]
+        if not re.match(r'\s*<', b): return False   # o 1º filho é texto: conteúdo solto
+    return False
 def section(title,summary,action,body,state='green'):
     if '{{' not in str(summary): summary=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos e os demais soltos pela tela ... somos minimalistas e essencialistas"): só fica o resumo que mostra estado (buraco dinâmico)
     dot={'green':ACC,'yellow':YEL,'red':RED,'gray':GRAY}[state]
     vazio=not str(body).strip()   # 14/10/2026: bloco só com ações (a regra foi para a dica ⓘ) não deixa corpo vazio nem linha solta
+    # SEP-20261015 (proprietário: "retire ... excesso de linhas separadoras"): a linha do título só fica com conteúdo solto logo abaixo (texto,
+    # formulário, lista sem moldura); tabela, caixa, faixa com fundo e barra de visões já separam sozinhas
+    linha=not vazio and not corpo_estruturado(body)
     return (f'<div style="background: {SURF}; border: 1px solid {LINE}; border-radius: 16px; box-shadow: {SH}; display: flex; flex-direction: column; flex: 1 1 0; min-width: 0;">'
-            f'<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 18px;{"" if vazio else f" border-bottom: 1px solid {LINE};"}"><div style="display: flex; align-items: center; gap: 10px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: {dot}; flex-shrink: 0; box-shadow: 0 0 0 3px {dot}22;"></span><div style="font-size: 15px; font-weight: 700; letter-spacing: -.01em; flex-grow: 1;">{esc(title)}</div>{recolhe_acoes(title,[(a if a.startswith("<") else btn(a,small=True)) for a in ([action] if isinstance(action,str) else action) if a])}</div>' + (f'<div style="font-size: 13px; color: {MUTED}; padding-left: 20px; line-height: 1.35;">{esc(summary)}</div>' if summary else '') + '</div>'
+            f'<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 18px{";" if linha else " 0;"}{f" border-bottom: 1px solid {LINE};" if linha else ""}"><div style="display: flex; align-items: center; gap: 10px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: {dot}; flex-shrink: 0; box-shadow: 0 0 0 3px {dot}22;"></span><div style="font-size: 15px; font-weight: 700; letter-spacing: -.01em; flex-grow: 1;">{esc(title)}</div>{recolhe_acoes(title,[(a if a.startswith("<") else btn(a,small=True)) for a in ([action] if isinstance(action,str) else action) if a])}</div>' + (f'<div style="font-size: 13px; color: {MUTED}; padding-left: 20px; line-height: 1.35;">{esc(summary)}</div>' if summary else '') + '</div>'
             + ('' if vazio else f'<div style="padding: 14px 18px;">{body}</div>') + '</div>')
 SELECT_KEYS=['se recusar','divisão','cobertura por','risco de roubo','ação do ajuste','atividade','decisão','análise de crédito','indexador','frete','cobrança','garantia','liberação','cultura','variedade','plano','máquina','implemento','operação','talhão','fazenda','insumo','produto','fornecedor','cliente','laborat','depósito','lote','grupo','categoria','marca','modelo','polític','fase','praça','condição','unidade','gatilho','método','tabela','extrator','profundidade','item','peça','operador','mecânico','pessoa','sensor','motivo','avisar por','canal','prioridade','pagamento','retirada','base','tipo','estado','origem','pivô','armazém','cultivar','múltiplo','responsável','alvo','estádio']
 TEXT_HINTS=['(ler qr','r$','kg','(ha','dias','(h)','data','quantidade','preço','valor','litros','umidade','%','horas','km','(m)','l/ha','sc)','rendimento','custo','frete','área','velocidade','largura','eficiência','ciclo','consumo','potência','vida','câmbio','leitura','turno','antecipar','validade','entrega','arquivo','nome','observação','lâmina','horímetro','intervalo','itens','peso','contado','complemento']
@@ -1306,10 +1322,16 @@ _CAB_BLOCO='main section>div:first-child:not(:last-child):has(>h2,>h3,>div>h2,>d
 # o conteúdo que já começa por uma borda no topo faz o papel da linha (sem linha dupla): tabela emoldurada (.g2caixa), caixa com borda (aviso,
 # memória de cálculo) e ficha de pares rótulo × valor cuja 1ª célula traz border-top (revisão DS, achado 5: AG-04det, GE-05, GE-06det)
 _BORDA_TOPO=':is([style*="border: 1px"],[style*="border-top: 1px"])'
+# SEP-20261015 (proprietário, 15/10: "retire em todas telas onde tem excesso de linhas separadoras visuais, deixe somente as que geram efetiva
+# organização visual e intuitividade"): a linha do título também sai quando o corpo traz a tabela (com ou sem moldura) ou a barra de modos de
+# visão (O.S., Manutenção), que já separam sozinhas
 _SEM_MOLDURA=(f':not(:has(+*>{_BORDA_TOPO}:first-child))'
               f':not(:has(+*>sc-if:first-child>{_BORDA_TOPO}:first-child))'
               f':not(:has(+*>:first-child>[style*="border-top: 1px"]:first-child))'
-              f':not(:has(+*>sc-if:first-child>:first-child>[style*="border-top: 1px"]:first-child))')
+              f':not(:has(+*>sc-if:first-child>:first-child>[style*="border-top: 1px"]:first-child))'
+              ':not(:has(+*>.g2caixa:first-child,+*>sc-if:first-child>.g2caixa:first-child,+* .g2visoes-w))'
+              # cartões (fileira de caixas com borda) e gráfico ou mapa (role=img, svg) logo no topo do corpo
+              ':not(:has(+*>:first-child>[style*="border: 1px"]:first-child:not(button,a,label,input,select,span),+*>:is([role=img],svg):first-child))')
 SEP_CSS=(
     f"{_CAB_BLOCO}{_SEM_MOLDURA}{{background-image:linear-gradient({DS_SEP['cor']},{DS_SEP['cor']})!important;background-size:calc(100% - 2 * {DS_SEP['recuo']}) 1px!important;"
     "background-position:50% 100%!important;background-repeat:no-repeat!important}"
