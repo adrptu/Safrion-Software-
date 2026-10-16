@@ -1450,7 +1450,7 @@ G2_CSS=(".g2dsel{position:fixed;z-index:90;box-sizing:border-box;overflow-y:auto
     ".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
         # hover dos controles pequenos da grade só onde existe ponteiro com hover (no toque o fundo não fica "grudado")
         "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover,.g2car:hover{background:#E4F3E9}.g2del:hover{background:#FDE8E6;color:#B42318}}"   # DS-HOVER: verde, não cinza
-        ".g2kid{background:#FBFCFA}.g2flash{background:#E4F3E9}.g2tot{cursor:pointer}"
+        ".g2kid{background:#FBFCFA}.g2flash{background:#E4F3E9}.g2tot{cursor:pointer}.g2fgrp{background:#F2F8F4}.g2fgrp .g2c0{background:#F2F8F4!important}.g2fgrp .g2pw{max-width:min(100%,calc(100vw - 172px))!important;flex-wrap:wrap}.g2fgrp .g2pw *{white-space:normal}"   # SAF-FAZ-3: grupo da fazenda com cara de cabeçalho; no celular cabe na parte visível da tabela
         ".g2sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}"   # texto só para leitor de tela (motivo do chip)
         ".g2hb{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;padding:7px 2px 7px 0;text-align:left;white-space:normal;max-width:104px;line-height:1.2}"
         ".g2fb{border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:800;padding:4px 4px;border-radius:6px;display:inline-flex;align-items:center;gap:2px;line-height:1}"   # funil de filtro da coluna (15/10)
@@ -1604,7 +1604,7 @@ def rotulo_criar(t):
     """BOT-03 (15/10/2026): o botão de criar diz o verbo do efeito: \"Novo pedido\" vira \"Criar pedido\" (o título do painel continua o nome)"""
     return _NOVO_RE.sub('Criar ',t) if t else t
 AG_CTRL={}   # gid: (botão Agrupar por com a trilha, menu), para o mesmo controle fora da Tabela (Kanban da O.S.)
-def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None,vazio=True,ag=None,sico=None,sico_so_icone=False,menu_linha=False):
+def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None,vazio=True,ag=None,sico=None,sico_so_icone=False,menu_linha=False,busca_extra=''):
     cols=[_col_un(c) for c in cols]
     # rótulos que ficariam iguais sem a unidade ("Custo (R$/h)" e "Custo (R$/ha)") mantêm a unidade, sem parênteses: "Custo R$/h", "Custo R$/ha"
     # (proprietário, 05/10/2026: "Custo R$/h e R$/ha é melhor e mais intuitivo")
@@ -1661,10 +1661,11 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
          + _icos + f'<span style="display: flex; flex-direction: column; gap: 1px;"><span style="font-weight: 700;">{_h("ao.t")}</span><sc-if value="{_h("ao.temNiv")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11.5px; color: {MUTED};">{_h("ao.niv")}</span></sc-if></span></button></sc-for>'
          f'</div></div></sc-if>') if ag else ''
     if ag: AG_CTRL[gid]=(agb,agm)   # 15/10/2026 (proprietário: "tabela e kanban devem manter o agrupar por"): outra visão da mesma grade reusa o controle
-    if search or add or tree or sel or tools or qf or ess or ag:
+    if search or add or tree or sel or tools or qf or ess or ag or busca_extra:
         tb=(f'<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid {LINE}; flex-wrap: wrap;">'
             + (f'<span data-g2q="{gid}" hidden></span><sc-if value="{H("_qon")}" hint-placeholder-val="{{{{true}}}}"><label style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; background: {BG}; min-width: 160px;">{sicon}<input type="search" aria-label="{H("_qlab")}" placeholder="Buscar…" value="{H("_q")}" onChange="{H("_setq")}" style="font-family: inherit; font-size: 12.5px; border: 0; background: transparent; outline: none; width: 100%;"></label></sc-if>'
                '' if search else '')
+            + busca_extra   # SAF-FAZ-3: filtro rápido da tela (ex.: fazenda) logo depois da busca, antes do filtro rápido da coluna
             + (f'<sc-if value="{H("_hasqf")}" hint-placeholder-val="{{{{false}}}}"><div role="group" aria-label="{H("_qfl")}" style="display: flex; flex-wrap: wrap; gap: 6px;">'
                f'<sc-for list="{H("_qf")}" as="qc" hint-placeholder-count="4"><button type="button" aria-pressed="{_h("qc.on")}" title="{_h("qc.lab")}" onClick="{_h("qc.go")}" style="{_h("qc.st")}">{_h("qc.t")} <span style="opacity: .75;">{_h("qc.n")}</span></button></sc-for></div></sc-if>' if qf else '')
             # 15/10/2026 (proprietário: "tire os números como 8 de 8, no filtro rápido já tem as quantidades"): a contagem só sem filtro rápido
