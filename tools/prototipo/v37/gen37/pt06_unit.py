@@ -33,7 +33,12 @@ const assert=require('node:assert/strict'); let passed=0;
 function check(name,fn){ fn(); passed++; console.log('PASS '+name); }
 const sp=GRIDS.find(g=>g.id==='g_co');
 function setup(resp='Diego Prado'){
- const self={state:{},setState(p){Object.assign(this.state,p)}}; const v={}; EXTRAVALS(self,v); v.pt06_acao();
+ const self={state:{},setState(p){Object.assign(this.state,p)}}; const v={};
+ // Mesma ordem do engine: PREVALS -> montagem g2part da célula -> EXTRAVALS -> clique.
+ if(typeof PREVALS==='function') PREVALS(self,v);
+ const button=g2part(sp.rows.find(r=>r.id==='r2').p.acao[0],v);
+ EXTRAVALS(self,v); button.fn();
+ assert.ok(self.state.g2?.g_co?.fm,'ação montada deve abrir o formulário');
  Object.assign(self.state.g2.g_co.fm.draft,{tema:'Contato na região',resp,prazo:'2026-10-30'});
  return {self,v};
 }
@@ -81,4 +86,4 @@ check('região sem ação segue consulta',()=>{
 console.log(passed+'/'+passed+' cenários do motor; esquema PT06/PT07 validado em Python.');
 """
 script = 'const GRIDS='+json.dumps(grids, ensure_ascii=False)+';\n'+Path(__file__).with_name('g2lib.js').read_text()+'\n'+hooks+'\n'+checks
-subprocess.run([os.environ.get('NODE', 'node'), '-e', script], check=True)
+subprocess.run([os.environ.get('NODE', 'node'), '-'], input=script, text=True, check=True)

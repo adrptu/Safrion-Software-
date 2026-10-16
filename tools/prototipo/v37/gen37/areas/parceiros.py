@@ -66,10 +66,12 @@ function pt06Check(gid,rows,r,d){
     return {resp:'Escolha uma pessoa ativa da Fertisul.'};
   return {};
 }
+function PREVALS(self,v){
+  v.pt06_acao=()=>g2open(self,GRIDS.find(g=>g.id==='g_co'),'r2');
+}
 function EXTRAVALS(self,v){
   self.g2check=pt06Check;
   self.g2formSub=(gid,r)=>gid==='g_co'&&r&&r.id==='r1'?'Cobertura calculada — consulte a origem abaixo.':'';
-  v.pt06_acao=()=>g2open(self,GRIDS.find(g=>g.id==='g_co'),'r2');
   self.g2after=(gid,rows,r)=>{ if(gid!=='g_co'||!r) return;
     r.p.acao=[{k:'act',t:'Revisar ação interna',fn:'pt06_acao'},{k:'br'},
       {k:'txt',t:r.v.tema},{k:'br'},{k:'mut',t:r.v.resp+' · '+r.v.prazo}];
