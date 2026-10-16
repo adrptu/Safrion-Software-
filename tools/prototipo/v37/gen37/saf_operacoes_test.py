@@ -244,9 +244,10 @@ try:
         fechar(); clica_rid('op:Pulverização'); pn = painel(); chk('V11 S2526: rendimento só em consulta', pn and 'Salvar' not in pn, pn[:200]); fechar()
         abre('#saf=LG2627&passo=operacoes'); vlg = veredito()
         chk('V8 LG2627 veredito R2', vlg.startswith('Falta recurso: Operadores e equipe precisam de 127 em nov/26 e você tem 8 (9 meses); Tratores, 10 em out/26 e você tem 4 (4 meses). Inclui 56 ocorrências ainda sem alocação. Fora da conta: 75 ocorrências antes do início da safra (01/09/2026).'), vlg)
-        # o passo V11 deixou a visão "Capacidade por mês" aberta (a tabela de operações fica escondida): a dica é lida nas linhas da tabela, à vista ou não
-        ico = c.js("[...document.querySelectorAll('[data-g2g^=g_op] [role=row]')].map(r=>[...r.querySelectorAll('[data-dica]')].map(e=>e.dataset.dica).filter(d=>/Operadores e equipe 1.584 %|Tratores 234 %/.test(d)).join('|')).filter(Boolean).join('|')") or ''
-        chk('V8 sem atalho fora da tabela; Operadores e equipe 1.584 % e Tratores 234 % ficam na dica do ⚠ das linhas', atalhos() == [] and 'Operadores e equipe 1.584 %' in ico and 'Tratores 234 %' in ico, [atalhos(), ico[:300]])
+        # 15/10 (TAB-06): o alerta fica só na linha. Com a coluna Situação à vista (o teste liga todas as colunas: cv_todas_sempre), ele é o chip
+        # da célula; com ela recolhida, é o ⚠ da 1ª coluna com o texto na dica. Lê os dois, nas linhas da tabela
+        ico = c.js("[...document.querySelectorAll('[data-g2g^=g_op] [role=row]')].map(r=>[r.innerText,...[...r.querySelectorAll('[data-dica]')].map(e=>e.dataset.dica)].filter(d=>/Operadores e equipe 1.584 %|Tratores 234 %/.test(d)).join('|')).filter(Boolean).join('|')") or ''
+        chk('V8 sem atalho fora da tabela; Operadores e equipe 1.584 % e Tratores 234 % ficam nas linhas (chip da Situação ou dica do ⚠)', atalhos() == [] and 'Operadores e equipe 1.584 %' in ico and 'Tratores 234 %' in ico, [atalhos(), ico[:300]])
         chk('V8 qualificador do custo (antes do início e pendentes)', 'inclui ' + rs(919906.51) + ' de antes de 01/09/2026; não inclui as ocorrências pendentes' in custo(), custo())
         txt = c.js("document.body.innerText"); chk('V8 Colheita de frutas: "sem recurso na fazenda · precisa de 10, tem 8"', 'sem recurso na fazenda · precisa de 10, tem 8' in txt, '')
         botao('Capacidade por mês ▾'); op_ = next(r for r in gcap()['rows'] if r['_id'] == 'oper')
