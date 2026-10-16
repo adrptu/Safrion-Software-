@@ -2,7 +2,7 @@
 
 Pedido do proprietário em 16/10/2026: "elimine campos dos formularios de cadastro que não sejam essenciais à gestão. documentos para credito podemos deixar tudo separado em outro lugar para nao perder foco e produtividade."
 
-Padrão: CAD-02 em [`docs/design-system/padroes-1610-cadastros.md`](../../design-system/padroes-1610-cadastros.md).
+Padrão: CAD-02 em [`docs/design-system/padroes-1610.md`](../../design-system/padroes-1610.md), seção Cadastros.
 
 ## Critério
 

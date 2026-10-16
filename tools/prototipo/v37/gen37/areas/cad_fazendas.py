@@ -249,7 +249,7 @@ def cd01():
     # do talhão (sistema, polígono, diferença, parcelas); a área cultivável vale nas duas (na fazenda, a soma dos talhões ativos)
     # a 1440 px as 10 colunas cabem na caixa (TABELAS-FOCO A1): o nome da empresa, a situação com o próximo passo e a posse com a data quebram
     # linha; "Talhões" conta só os ativos (dito na ajuda do cabeçalho)
-    gt=grid([dict(k='t',l='Fazenda › talhão',w=150),dict(k='est',l='Situação',w=150),dict(k='posse',l='Posse',w=100),dict(k='area',l='Área total',t='num',a='r',un='ha',d=0),
+    gt=grid([dict(k='t',l='Fazenda › talhão',w=150),dict(k='est',l='Situação',w=150),dict(k='posse',l='Posse',w=88),dict(k='area',l='Área total',t='num',a='r',un='ha',d=0),
              dict(k='decl',l='Área cultivável',t='num',a='r',un='ha',d=1,ajuda='No talhão, a área cultivável declarada; na fazenda, a soma dos talhões ativos.'),
              dict(k='nt',l='Talhões',t='num',a='r',ajuda='Talhões ativos da fazenda; os inativos não contam.'),dict(k='sis',l='Sistema',w=130),
              dict(k='calc',l='Polígono',t='num',a='r',un='ha',d=1),dict(k='difp',l='Diferença',t='num',a='r',un='%',d=1),
