@@ -282,7 +282,7 @@ function irrChecar(s, o, ps) {
     const liq = ps.filter(p => p.st === 'Programada').reduce((q, p) => q + p.lam, 0) * (o.ef || x.efic) / 100; const d = irrDef(s, o.setor);
     const iU = ini.length ? Math.max.apply(null, ini) : null; const need = iU === null ? null : irrNecAte(s, o, iU);
     if (need !== null && liq > need + Math.max(1, 0.1 * liq)) av.push({ k: 'acima', t: 'Lâmina acima da necessidade · ' + irrMm(liq) + ' mm líquidos para ' + irrN(need, 1) + ' mm' });
-    else if (x.limiar !== null && x.limiar !== undefined && d < x.limiar - 1e-9) av.push({ k: 'limiar', t: 'Abaixo do limiar · déficit ' + irrN(d, 1) + ' de ' + irrN(x.limiar, 1) + ' mm' });
+    if (x.limiar !== null && x.limiar !== undefined && d < x.limiar - 1e-9) av.push({ k: 'limiar', t: 'Abaixo do limiar · déficit ' + irrN(d, 1) + ' de ' + irrN(x.limiar, 1) + ' mm' });
   }
   const uniq = (l) => l.filter((z, i) => l.findIndex(y => y.t === z.t) === i);
   return { bloq: uniq(bloq), av: uniq(av) };
@@ -402,27 +402,46 @@ function irrIniciar(s, id) {
   if (irrPausada(o)) throw new Error('Retome a irrigação antes.');
   const p = irrPassProx(o); if (!p || ['Liberadas', 'Em execução'].indexOf(o.etapa) < 0) throw new Error(id + ' está ' + o.etapa + '.');
   if (p.ini === null) throw new Error('Defina a janela da passada ' + p.n + '.');
-  p.st = 'Em execução'; p.iniReal = Math.max(s.agora, p.ini) + 2; s.agora = p.iniReal; p.cob = 0; o.etapa = 'Em execução'; if (!o.ex) o.ex = irrNovoId(s, 'ex'); if (o.exec.ini === undefined) o.exec.ini = p.iniReal;
+  p.st = 'Em execução'; p.iniReal = Math.max(irrAgora(s, o), p.ini) + 2; p.cob = 0; o.etapa = 'Em execução'; if (!o.ex) o.ex = irrNovoId(s, 'ex'); if (o.exec.ini === undefined) o.exec.ini = p.iniReal;
   irrTr(o, p.iniReal, o.ex, 'Início' + (o.passadas.length > 1 ? ' da passada ' + p.n : '') + ' · telemetria da ' + s.setores[o.setor].bnome + ' ativa', s.faz[o.faz].irrig);
   return { msg: id + ' Em execução · início ' + irrQuando(p.iniReal) + ' (' + o.ex + ') · término previsto ' + irrQuando(irrFimP(o, p)) + '.' };
 }
 function irrUlt(o) { return o.trilha.reduce((q, t) => Math.max(q, t.q), -1e9); }
+// O relógio demonstrativo de uma ordem não desloca as janelas das outras.
+function irrAgora(s, o) { return Math.max(s.agora, irrUlt(o), o.exec.ini === undefined ? -1e9 : o.exec.ini); }
+function irrTerminoInfo(s, o, cob) {
+  const p = irrPassAtual(o); if (!p) return { cedo: false, pendente: false, minutos: 0 };
+  const x = s.setores[o.setor], q = irrAgora(s, o);
+  const minutos = Math.max(0, q - p.iniReal - irrPausaMin(o, p.n));
+  const cedo = q < irrFimP(o, p);
+  // A área informada não é prova do giro. Não atribuir área proporcional ao gotejo.
+  const pendente = minutos <= 0 || (cedo && (cob >= x.ha - 1e-9 || (x.tipo !== 'gotejo' && cob > x.ha * minutos / p.dur + 0.01)));
+  return { cedo, pendente, minutos };
+}
+// Estimativa e tolerância compartilham a mesma precisão em comando e tela.
+function irrMedicao(s, o, med) {
+  const ps = o.passadas.filter(p => p.st === 'Feita' || p.st === 'Parcial');
+  const est = ps.reduce((q, p) => q + p.lam * p.cob * 10, 0);
+  const dv = est ? (med - est) / est * 100 : 0;
+  const temporal = ps.some(p => p.temporalPendente);
+  return { est, dv, temporal, exigeMotivo: temporal || Math.abs(dv) > s.tol + 1e-9 };
+}
 function irrPausar(s, id) {
   const o = irrO(s, id); const p = irrPassAtual(o); if (o.etapa !== 'Em execução' || !p) throw new Error('Só pausa uma passada em execução.');
   if (irrPausada(o)) throw new Error('A irrigação já está pausada.');
-  const q = Math.max(s.agora, irrUlt(o)) + 60; s.agora = q; o.exec.pausas.push({ n: p.n, ini: q, fim: null }); irrTr(o, q, o.ex, 'Pausa · selo Pausada · etapa preservada', s.faz[o.faz].irrig);
+  const q = irrAgora(s, o) + 60; o.exec.pausas.push({ n: p.n, ini: q, fim: null }); irrTr(o, q, o.ex, 'Pausa · selo Pausada · etapa preservada', s.faz[o.faz].irrig);
   return { msg: 'Pausada às ' + irrHm(q) + ' · a etapa continua Em execução.' };
 }
 function irrRetomar(s, id) {
   const o = irrO(s, id); const pz = (o.exec.pausas || []).find(z => z.fim === null || z.fim === undefined); if (!pz) throw new Error('A irrigação não está pausada.');
-  pz.fim = Math.max(s.agora, pz.ini + 8); s.agora = pz.fim; irrTr(o, pz.fim, o.ex, 'Retomada', s.faz[o.faz].irrig); const p = irrPassAtual(o);
+  pz.fim = Math.max(irrAgora(s, o), pz.ini + 8); irrTr(o, pz.fim, o.ex, 'Retomada', s.faz[o.faz].irrig); const p = irrPassAtual(o);
   return { msg: 'Retomada às ' + irrHm(pz.fim) + ' · término previsto ' + irrQuando(irrFimP(o, p)) + '.' };
 }
 function irrAvanco(s, id, cob) {
   const o = irrO(s, id); const p = irrPassAtual(o); const x = s.setores[o.setor]; if (!p) throw new Error('Nenhuma passada em execução.');
   cob = irr2(cob);   // 2 casas, antes de validar (PRE-REV Z4/Y4)
   if (!(cob >= 0) || cob > x.ha) throw new Error('Informe a área coberta entre 0 e ' + irrN(x.ha, 2, 0) + ' ha.');
-  p.cob = cob; const q = Math.max(s.agora, irrUlt(o)) + 30; s.agora = q; const tr = o.trilha.find(t => t.av === p.n);   // 2 casas (PRE-REV Z4)
+  p.cob = cob; const q = irrAgora(s, o) + 30; const tr = o.trilha.find(t => t.av === p.n);   // 2 casas (PRE-REV Z4)
   const ev = 'Avanço da passada ' + p.n + ' · ' + irrN(cob, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha (' + irrN(cob / x.ha * 100, 0) + ' %)';
   if (tr) { tr.ev = ev; tr.q = q; } else { o.trilha.push({ q, rec: o.ex, ev, quem: s.faz[o.faz].irrig, av: p.n }); }   // telemetria e manual do mesmo evento: um registro
   return { msg: ev + ' · mesmo registro da telemetria, sem duplicar.' };
@@ -430,37 +449,40 @@ function irrAvanco(s, id, cob) {
 function irrTele(s, o, p, cob) { if (o.tele && cob >= s.setores[o.setor].ha - 1e-9 && o.passadas.length === 1) return o.tele; return Math.round(p.lam * cob * 10 * 0.985 / 10) * 10; }
 function irrCredito(s, o, p) {
   const x = s.setores[o.setor]; const ap = x.bal.ap; const i = ap.findIndex(a => a.os === o.id && a.n === p.n);
-  if (p.vol === null || p.vol === undefined || !(p.cob > 0)) { if (i >= 0) ap.splice(i, 1); return; }
+  if (p.temporalPendente || p.vol === null || p.vol === undefined || !(p.cob > 0)) { if (i >= 0) ap.splice(i, 1); return; }
   const e = { q: irrFimP(o, p), os: o.id, n: p.n, vol: p.vol, ha: x.ha, ef: o.ef || x.efic, cob: p.cob, txt: p.st === 'Parcial' ? 'passagem parcial' : (x.tipo === 'gotejo' ? 'turno completo' : 'volta completa'), prov: true };
   if (i >= 0) ap[i] = e; else ap.push(e);   // um crédito por passada: telemetria e registro manual não duplicam
 }
-function irrTerminar(s, id, cob, vol, antecipado) {
+function irrTerminar(s, id, cob, vol, antecipado, motivo) {
   const o = irrO(s, id); const p = irrPassAtual(o); const x = s.setores[o.setor];
   if (!p) throw new Error(o.etapa === 'Liberadas' ? 'Nada foi executado ainda: inicie a irrigação.' : 'Nenhuma passada em execução.');
   if (irrPausada(o)) throw new Error('Retome a irrigação antes de confirmar o término.');
   if (o.fert && o.fert.exec) throw new Error('Saldo parado pela v2: aguarde o agrônomo liberar na O.S.');
-  if (s.agora < irrFimP(o, p) && !antecipado) throw new Error('Antes do fim previsto, registre término antecipado com a área real e o volume medido.');
-  if (s.agora < Math.max(p.iniReal, irrUlt(o))) throw new Error('O relógio simulado está antes do último evento registrado. Avance a simulação até esse horário antes de encerrar.');
+  const tempo = irrTerminoInfo(s, o, cob);
+  if (tempo.cedo && !antecipado) throw new Error('Antes do fim previsto, registre término antecipado com a área real e o volume medido.');
   cob = irr2(cob);   // 2 casas, antes de validar (PRE-REV Z4/Y4)
   if (!(cob > 0) || cob > x.ha + 1e-9) throw new Error('Área coberta entre 0 e ' + irrN(x.ha, 2, 0) + ' ha.');
   if (typeof vol !== 'number' || !Number.isFinite(vol) || vol < 0) throw new Error('Informe o volume medido no hidrômetro; a estimativa não é leitura.');
-  const parc = cob < x.ha - 1e-9; p.cob = cob; p.st = parc ? 'Parcial' : 'Feita';   // 2 casas (PRE-REV Z4)
-  p.fimReal = s.agora; p.vol = vol;
+  const mot = String(motivo || '').trim();
+  if (tempo.pendente && !mot) throw new Error('Área e tempo de bombeamento precisam de conferência: informe o motivo. O balanço só será creditado após conferir.');
+  const parc = cob < x.ha - 1e-9; p.temporalPendente = tempo.pendente; p.motivoTempo = tempo.pendente ? mot : ''; p.cob = cob; p.st = parc ? 'Parcial' : 'Feita';   // 2 casas (PRE-REV Z4)
+  p.fimReal = irrAgora(s, o); p.vol = vol;
   irrCredito(s, o, p);
-  irrTr(o, p.fimReal, o.ex, (antecipado ? 'Término antecipado (simulado)' : 'Término (simulado)') + (o.passadas.length > 1 ? ' da passada ' + p.n : '') + ' · ' + irrH(p.fimReal - p.iniReal - irrPausaMin(o, p.n)) + ' de bombeamento · ' + (parc ? 'parou antes: ' + irrN(cob, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha' : (x.tipo === 'gotejo' ? 'turno completo' : 'volta completa') + ' nos ' + irrN(x.ha, 2, 0) + ' ha') + (p.vol === null ? ' · sem leitura do hidrômetro' : ' · hidrômetro ' + irrN(p.vol) + ' m³'), s.faz[o.faz].irrig);
+  irrTr(o, p.fimReal, o.ex, (antecipado ? 'Término antecipado (simulado)' : 'Término (simulado)') + (o.passadas.length > 1 ? ' da passada ' + p.n : '') + ' · ' + irrH(p.fimReal - p.iniReal - irrPausaMin(o, p.n)) + ' de bombeamento · ' + (tempo.pendente ? 'área informada de ' + irrN(cob, 2, 0) + ' ha · tempo incompatível a conferir · motivo: ' + mot : parc ? 'parou antes: ' + irrN(cob, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha' : (x.tipo === 'gotejo' ? 'turno completo' : 'volta completa') + ' nos ' + irrN(x.ha, 2, 0) + ' ha') + (p.vol === null ? ' · sem leitura do hidrômetro' : ' · hidrômetro ' + irrN(p.vol) + ' m³'), s.faz[o.faz].irrig);
   const prox = irrPassProx(o);
-  if (prox) return { msg: 'Passada ' + p.n + ' encerrada · ' + id + ' segue Em execução · próxima passada ' + (prox.ini === null ? 'a definir' : irrQuando(prox.ini)) + '.' };
+  if (prox) return { msg: 'Passada ' + p.n + ' encerrada · ' + id + ' segue Em execução'+(tempo.pendente?' · área e tempo desta passada a conferir, crédito pendente':'')+' · próxima passada ' + (prox.ini === null ? 'a definir' : irrQuando(prox.ini)) + '.' };
   o.etapa = 'Em conferência'; o.exec.fim = p.fimReal;
   return { msg: irrConfAuto(s, o) };
 }
 function irrConfAuto(s, o) {
   const ps = o.passadas.filter(p => p.st === 'Feita' || p.st === 'Parcial'); const x = s.setores[o.setor];
   const med = ps.some(p => p.vol === null || p.vol === undefined) ? null : ps.reduce((q, p) => q + p.vol, 0);
-  const est = ps.reduce((q, p) => q + p.lam * p.cob * 10, 0); const q0 = o.exec.fim + 1;
-  if (med === null) { o.conf = { med: null, est: Math.round(est), st: 'Sem leitura' };
+  const m = irrMedicao(s, o, med); const est = m.est; const q0 = o.exec.fim + 1;
+  if (med === null) { o.conf = { med: null, est, st: 'Sem leitura' };
     irrTr(o, q0, o.ex, 'Em conferência · sem leitura do hidrômetro: nada é creditado no balanço até a leitura', 'sistema');
     return o.id + ' Em conferência · sem leitura do hidrômetro: informe a leitura (o balanço não assume zero nem o previsto).'; }
-  const dv = est ? (med - est) / est * 100 : 0; o.conf = { med, est: Math.round(est), dv, st: Math.abs(dv) <= s.tol + 1e-9 ? 'Automática' : 'Divergência' };
+  const dv = m.dv; o.conf = { med, est, dv, st: m.temporal ? 'Área e tempo a conferir' : (m.exigeMotivo ? 'Divergência' : 'Automática') };
+  if (m.temporal) { irrTr(o, q0, o.ex, 'Área e tempo a conferir · crédito pendente até validação do irrigante/gestor', 'sistema'); return o.id + ' Em conferência · confira área, tempo e medição; sem crédito da passada incompatível no balanço.'; }
   if (o.conf.st === 'Automática') { o.etapa = 'Encerradas'; o.conf.q = q0; x.bal.ap.filter(a => a.os === o.id).forEach(a => { a.prov = false; });
     irrTr(o, q0, o.ex, 'Conferência automática · ' + irrN(med) + ' m³ medidos × ' + irrN(est) + ' m³ estimados (' + irrPct(dv) + ') · encerrada · balanço creditado uma vez', 'sistema');
     return o.id + ' conferida e encerrada · ' + irrN(med) + ' m³ = ' + irrLamTxt(med, irrCobO(o), x.ha) + ' (' + irrPct(dv) + ', tolerância ' + s.tol + ' %) · ' + irrDefTxt(s, o.setor, 'agora ') + '.'; }
@@ -483,20 +505,22 @@ function irrConferir(s, id, vol, motivo) {
   if (informado && (typeof vol !== 'number' || !Number.isFinite(vol) || vol < 0)) throw new Error('Informe o volume medido em m³.');
   const med = informado ? vol : (ps.some(p => p.vol === null || p.vol === undefined) ? null : ps.reduce((q,p) => q+p.vol,0));
   if (med === null) throw new Error('Sem leitura do hidrômetro: informe o volume medido.');
-  const dv = est ? (med-est)/est*100 : 0; const mot = String(motivo || '').trim();
-  if (Math.abs(dv) > s.tol + 1e-9 && !mot) throw new Error('Divergência acima da tolerância: informe o motivo para aceitar.');
+  const m = irrMedicao(s, o, med); const dv = m.dv; const mot = String(motivo || '').trim();
+  if (m.exigeMotivo && !mot) throw new Error(m.temporal ? 'Confira área e tempo e informe o motivo da validação.' : 'Divergência acima da tolerância: informe o motivo para aceitar.');
   // Validar tudo antes de alterar leituras/créditos; a última parcela conserva o total medido.
-  if (informado) { let saldo = med; ps.forEach((p,i) => { p.vol = i === ps.length-1 ? saldo : Math.min(saldo, Math.round(med*vals[i]/(est || 1))); saldo -= p.vol; irrCredito(s,o,p); }); }
-  o.etapa = 'Encerradas'; o.conf = { med, est: Math.round(est), dv, st: 'Hidrômetro prevaleceu', q: s.agora, motivo: mot, quem };
+  ps.forEach(p => { if (p.temporalPendente) { p.temporalPendente = false; p.tempoConferido = { quem, motivo: mot, q: irrAgora(s, o) }; } });
+  if (informado) { let saldo = med; ps.forEach((p,i) => { p.vol = i === ps.length-1 ? saldo : Math.min(saldo, Math.round(med*vals[i]/(est || 1))); saldo -= p.vol; }); }
+  ps.forEach(p => irrCredito(s,o,p));
+  o.etapa = 'Encerradas'; o.conf = { med, est, dv, st: 'Hidrômetro prevaleceu', q: irrAgora(s, o), motivo: mot, quem };
   x.bal.ap.filter(a => a.os === o.id).forEach(a => { a.prov = false; });
-  irrTr(o,s.agora,o.ex,'Conferida (simulado) · hidrômetro '+irrN(med)+' m³ · '+irrPct(dv)+' da estimativa'+(mot?' · motivo: '+mot:'')+' · encerrada',quem);
+  irrTr(o,irrAgora(s, o),o.ex,'Conferida (simulado) · hidrômetro '+irrN(med)+' m³ · '+irrPct(dv)+' da estimativa'+(mot?' · motivo: '+mot:'')+' · encerrada',quem);
   return { msg: id + ' encerrada · hidrômetro prevalece: ' + irrN(med) + ' m³ · balanço usa o medido, sem duplicar · ' + irrDefTxt(s, o.setor) + '.' };
 }
 function irrDevolver(s,id) {
   const quem = irrConferente(); const o = irrO(s,id);
   if (o.etapa !== 'Em conferência') throw new Error(id+' não está Em conferência.');
-  o.conf = Object.assign({},o.conf,{st:'Devolvida',quem,q:s.agora});
-  irrTr(o,s.agora,o.ex,'Devolvida para conferir o hidrômetro · medição e crédito provisório preservados',quem);
+  o.conf = Object.assign({},o.conf,{st:'Devolvida',quem,q:irrAgora(s, o)});
+  irrTr(o,irrAgora(s, o),o.ex,'Devolvida para conferir o hidrômetro · medição e crédito provisório preservados',quem);
   return {msg:id+' devolvida para conferir o hidrômetro · permanece Em conferência.'};
 }
 function irrLimites(s, sid, v) {
@@ -578,7 +602,7 @@ function irrSelos(s, o) {
     return out; }
   if (et === 'A liberar') irrChecar(s, o).bloq.forEach(b => out.push({ t: b.t, c: b.c, h: b.h, dono: b.dono }));
   if (et === 'Em execução') { if (irrPausada(o)) out.push({ t: 'Pausada', c: 'yellow' }); else if (!irrPassAtual(o) && irrPassProx(o)) out.push({ t: 'Entre passadas', c: 'gray' }); }
-  if (et === 'Em conferência' && o.conf) { if (o.conf.st === 'Devolvida') out.push({ t: 'Devolvida · conferir hidrômetro', c: 'yellow' }); else if (o.conf.st === 'Sem leitura') out.push({ t: 'Sem leitura do hidrômetro', c: 'yellow' }); else if (o.conf.st === 'Divergência') out.push({ t: 'Divergência · ' + irrPct(o.conf.dv !== undefined ? o.conf.dv : (o.conf.med - o.conf.est) / o.conf.est * 100), c: 'yellow' }); }
+  if (et === 'Em conferência' && o.conf) { if (o.conf.st === 'Área e tempo a conferir') out.push({ t: 'Área e tempo a conferir · crédito pendente', c: 'yellow' }); else if (o.conf.st === 'Devolvida') out.push({ t: 'Devolvida · conferir hidrômetro', c: 'yellow' }); else if (o.conf.st === 'Sem leitura') out.push({ t: 'Sem leitura do hidrômetro', c: 'yellow' }); else if (o.conf.st === 'Divergência') out.push({ t: 'Divergência · ' + irrPct(o.conf.dv !== undefined ? o.conf.dv : (o.conf.med - o.conf.est) / o.conf.est * 100), c: 'yellow' }); }
   if (et === 'Encerradas' && o.conf) out.push({ t: o.conf.st === 'Automática' ? 'Encerrada automaticamente' : 'Hidrômetro prevaleceu', c: 'gray', mut: true });
   return out;
 }
@@ -595,7 +619,7 @@ function irrProx(s, o) {
     if (red) { if (red.k === 'outorga' || red.k === 'vazao') return { t: 'Ajustar à outorga', h: det + ':conflito', dono: red.dono, r: 1 }; return { t: 'Resolver conflito', h: det + ':conflito', dono: red.dono, r: 1 }; }
     return { t: 'Definir janela', h: det + ':janela', dono: F.irrig, r: 3 }; }
   if (et === 'Liberadas') return { t: 'Iniciar irrigação', h: det, dono: F.irrig, r: 5 };
-  if (et === 'Em execução') { if (irrPausada(o)) return { t: 'Retomar irrigação', h: det, dono: F.irrig, r: 4 }; if (irrPassAtual(o)) return { t: 'Confirmar término', h: det + ':termino', dono: F.irrig, r: 4 };
+  if (et === 'Em execução') { if (irrPausada(o)) return { t: 'Retomar irrigação', h: det, dono: F.irrig, r: 4 }; if (irrPassAtual(o)) return { t: irrTerminoInfo(s, o, 0).cedo ? 'Registrar término antecipado' : 'Confirmar término', h: det + ':termino', dono: F.irrig, r: 4 };
     return { t: 'Iniciar passada ' + irrPassProx(o).n, h: det, dono: F.irrig, r: 5 }; }
   if (et === 'Em conferência') { if (o.conf && o.conf.st === 'Sem leitura') return { t: 'Informar leitura', h: det + ':conferir', dono: F.irrig, r: 2 }; return { t: 'Conferir medição', h: det + ':conferir', dono: F.irrig, r: 2 }; }
   return null;
