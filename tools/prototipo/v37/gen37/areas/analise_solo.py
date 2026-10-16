@@ -24,7 +24,7 @@ CSS=('.so-lado{display:grid;grid-template-columns:minmax(0,.75fr) minmax(0,1.7fr
      '.so-kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 16px}'
      '@media (max-width:899px){.so-lado{grid-template-columns:minmax(0,1fr)}.so-orig-d{display:none}.so-orig-m{display:block}}'
      '@media (max-width:640px){.so-kv{grid-template-columns:repeat(2,minmax(0,1fr))}.so-pan{padding:16px 14px!important}'
-     '.so-pe{margin:0 -14px -16px!important;padding:12px 14px!important}.so-pe button,.so-pe a{min-height:44px}.so-sug button{min-height:44px}}')
+     '.so-pe{margin:0 -14px -16px!important;padding:12px 14px!important}.so-pe button,.so-pe a{min-height:44px!important}.so-sug button{min-height:44px}}')
 
 def bloco(titulo,desc,corpo,acao=''):
     acao=E.recolhe_acoes(titulo,acao)   # MAIS-01 (15/10/2026): uma secundária à vista, as outras no "⋯ Mais ações" do bloco
@@ -340,3 +340,4 @@ function soAgDados(x){ return {faz:x.faz,tal:x.talv,zona:x.zona||'',data:x.datav
     p=os.path.join(E.P,fname); s=open(p,encoding='utf-8').read(); old=ui37.chip(H('st_t'),'yellow')
     assert s.count(old)==1, 'selo do cabeçalho não encontrado em '+fname
     open(p,'w',encoding='utf-8').write(s.replace(old,f'<span style="{H("st_st")}"><span style="{H("st_dot")}"></span>{H("st_t")}</span>'))
+

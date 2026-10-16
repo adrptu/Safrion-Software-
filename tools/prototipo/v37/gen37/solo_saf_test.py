@@ -24,8 +24,10 @@ window.CLK=(t,inPan)=>{ const r=inPan?TOP():document; if(!r) return 'SEM PAINEL'
   const e=els.find(x=>N(x.innerText)===t)||els.find(x=>N(x.innerText).startsWith(t))||els.find(x=>(x.getAttribute('aria-label')||'')===t); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok'; };
 window.EXP=(local)=>{ const g=local.split('-')[0]; const gr=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>N(x.innerText).startsWith('▸ '+g+' ')); if(!gr) return false; const b=[...gr.querySelectorAll('button')].find(b=>N(b.innerText)==='▸'); if(b){ b.click(); return true; } return false; };
 window.INS=(local)=>{ let row=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>N(x.innerText).startsWith(local+' ')); if(!row) return 'sem linha '+local;
-  const b=[...row.querySelectorAll('button')].find(b=>/^(Ajustar|Ver) insumos$/.test(N(b.innerText))); if(!b) return 'sem botão'; b.click(); return 'ok'; };
-window.LINHA=(local)=>{ const row=[...document.querySelectorAll('[role=row].g2ed')].filter(VIS).find(x=>N(x.innerText).startsWith(local+' ')); if(!row) return 'sem linha '+local; (row.querySelector('[role=cell]')||row).click(); return 'ok'; };
+  (row.querySelector('.g2pw')||row).click(); return 'ok'; };
+/* SAF-TAB: a ação de insumos pertence ao detalhe do cultivo, não à célula da listagem. */
+window.INSA=(local)=>{ const a=TOP(); const b=a&&[...a.querySelectorAll('button')].filter(VIS).find(b=>['Ajustar insumos e doses de '+local,'Ver insumos e doses de '+local].includes(N(b.innerText))); if(!b) return 'sem ação de insumos '+local; b.click(); return 'ok'; };
+window.LINHA=(local)=>{ const row=[...document.querySelectorAll('[role=row].g2ed')].filter(VIS).find(x=>N(x.innerText).startsWith(local+' ')); if(!row) return 'sem linha '+local; (row.querySelector('.g2pw')||row).click(); return 'ok'; };
 window.PAN=()=>{ const a=TOP(); return a?N(a.innerText):''; };
 window.TOAST=()=>[...document.querySelectorAll('[role=status]')].map(x=>N(x.innerText)).filter(Boolean).join(' | ');
 window.ALERT=()=>{ const a=TOP(); return a?[...a.querySelectorAll('[role=alert]')].filter(VIS).map(x=>N(x.innerText)).join(' | '):''; };
@@ -44,7 +46,18 @@ def clk(x, pan=False, w=.5): r = J(f"CLK({json.dumps(x)},{'true' if pan else 'fa
 def ins(local, w=.7):
     r = J(f"INS({json.dumps(local)})")
     if str(r).startswith('sem linha') and J(f"EXP({json.dumps(local)})"): time.sleep(.5); r = J(f"INS({json.dumps(local)})")
-    time.sleep(w); return r
+    if r == 'ok':
+        limite = time.monotonic() + 3
+        while time.monotonic() < limite:
+            r = J(f"INSA({json.dumps(local)})")
+            if r == 'ok': break
+            time.sleep(.05)
+    if r != 'ok': raise AssertionError('Abrir insumos de '+local+': '+str(r))
+    limite = time.monotonic() + 3
+    while time.monotonic() < limite:
+        if J("!!(TOP()&&TOP().querySelector('input[aria-label^=\"Dose local de \"]'))"): return r
+        time.sleep(.05)
+    raise AssertionError('Painel de insumos não ficou pronto: '+local)
 def pan(): return J("PAN()") or ''
 def toast(): return J("TOAST()") or ''
 def dem(saf=None): return J(f"__solo.dem({json.dumps(saf) if saf else ''})") or {}
@@ -174,3 +187,4 @@ try:
         t.chk('nenhum erro de JS (celular)', not t.errs(), t.errs())
 finally:
     t.fim()
+

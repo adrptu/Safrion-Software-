@@ -78,10 +78,11 @@ try:
         t.chk('D-01 Agrícola: no fluxo, cartão Análises de solo antes de Planos agronômicos e de Planejar safra; ícone Agrícola marcado, "‹ Agrícola" e o cartão volta ao AG-02 sem erro de JS',
               0 <= i_as < i_pa < i_sf and nv.get('cur') == ['Agrícola'] and nv.get('volta') == ['MOD-AGR.dc.html', '‹ Agrícola'] and h0 and h1 and not e0 and not t.errs(), [menu, nv, h0, h1, e0, t.errs()])
         t.chk('cabeçalho: "1 inconsistente · 1 aguardando validação" e uma só ação primária (Registrar laudo)', '1 inconsistente · 1 aguardando validação' in t.header() and J("PRIMS()") == ['Registrar laudo'], [t.header(), J("PRIMS()")])
-        nb = J("[...document.querySelectorAll('[role=table]')].slice(0,2).map(tb=>{ const g=tb.closest('section')||tb.parentElement; return [!!g.querySelector('input[placeholder^=\"Buscar\"]'), g.querySelectorAll('[role=columnheader]').length, (g.innerText.match(/▾/g)||[]).length]; })")
-        # um campo de busca por tela (proprietário, 13/10/2026): o dos laudos busca também na água no solo (mesmo grupo, data-g2q)
+        nb = J("[...document.querySelectorAll('[role=table]')].filter(VIS).slice(0,2).map(tb=>{ const g=tb.closest('section')||tb.parentElement; const hs=[...tb.querySelectorAll('[role=columnheader]')].filter(h=>N(h.innerText)); return [!!g.querySelector('input[type=search]'), hs.length, hs.every(h=>{const b=h.querySelector('button[aria-label^=\"Ordenar por \"]');return !!b&&!!h.querySelector('button[aria-label=\"Filtrar '+b.getAttribute('aria-label').slice(12)+'\"]');})]; })")
+        # TAB-08 usa botões nomeados e funil SVG; a busca continua única e compartilhada.
         nq = J("document.querySelectorAll('[data-g2q]').length")
-        t.chk('AC-SOLO-18 laudos e água no solo com filtro por coluna e ordenação e um campo de busca só, para as duas', nb and [x[0] for x in nb] == [True, False] and all(x[2] >= 5 for x in nb) and nq >= 2, [nb, nq])
+        buscas = J("[...document.querySelectorAll('main input[type=search]')].filter(VIS).length")
+        t.chk('AC-SOLO-18 laudos e água no solo com filtro por coluna e ordenação e um campo de busca só, para as duas', nb and [x[0] for x in nb] == [True, False] and all(x[1] >= 5 and x[2] for x in nb) and nq >= 2 and buscas == 1, [nb, nq, buscas])
         o1 = J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row].g2ed')].map(r=>N(r.innerText).split(' ')[0])")
         t.chk('lista ordenada pela coleta (mais recente primeiro): LAU-2050 (19/09) antes de LAU-2043 (12/09)', o1 and o1.index('LAU-2050') < o1.index('LAU-2043'), o1)
         t.chk('V "não calculável" no LAU-2050 (sem H+Al) e "difere do laboratório" no LAU-2071', 'não calculável' in rowtxt('LAU-2050') and 'difere do laboratório' in rowtxt('LAU-2071'), [rowtxt('LAU-2050'), rowtxt('LAU-2071')])
@@ -175,7 +176,7 @@ try:
               " const pb=[...a.querySelectorAll('.so-pe a,.so-pe button')].filter(VIS).map(e=>{ const q=e.getBoundingClientRect(); return [N(e.innerText), q.bottom<=innerHeight+1, Math.round(q.height)]; });"
               " return [Math.round(r.width), VIS(d), VIS(m), m?m.open:null, pb, a.scrollWidth<=a.clientWidth+1]; })()")
         t.chk('painel do laudo em tela cheia; original recolhido em "Ver original"; primária presa no rodapé com 44 px; sem estouro lateral',
-              g and g[0] >= 388 and not g[1] and g[2] and g[3] is False and any(x[0] == 'Ver no plano' and x[1] and x[2] >= 44 for x in g[4]) and g[5], g)
+              g and g[0] >= 388 and not g[1] and g[2] and g[3] is False and any(x[0] == 'Ver no plano' and x[1] for x in g[4]) and all(x[2] >= 44 for x in g[4]) and g[5], g)
         shot('celular_laudo')
         clk('Fechar', 'aside[role=dialog]'); clk('Registrar laudo'); clk('Preencher com o laudo de exemplo', 'aside[role=dialog]')
         g = J("(()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].filter(VIS).pop(); return a?[a.scrollWidth<=a.clientWidth+1, Math.round(a.getBoundingClientRect().width)]:null; })()")
@@ -184,3 +185,4 @@ try:
         t.chk('nenhum erro de JS (celular)', not t.errs(), t.errs())
 finally:
     t.fim()
+
