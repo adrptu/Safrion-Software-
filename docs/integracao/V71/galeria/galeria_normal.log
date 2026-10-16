@@ -1,0 +1,37 @@
+família            foto                     largura  situação
+lista do motor     os_tabela                   1440  ok _galeria/os_tabela_1440.png
+agrupada           os_agrupada_talhao          1440  ok _galeria/os_agrupada_talhao_1440.png
+cartões            os_cartoes                  1440  ok _galeria/os_cartoes_1440.png
+kanban             os_kanban                   1440  ok _galeria/os_kanban_1440.png
+formulário         os_form_criar               1440  ok _galeria/os_form_criar_1440.png
+árvore             cd06_produtos_arvore        1440  ok _galeria/cd06_produtos_arvore_1440.png
+cadastro           cd05_parceiros              1440  ok _galeria/cd05_parceiros_1440.png
+cadastro           cd01_fazendas               1440  ok _galeria/cd01_fazendas_1440.png
+tabela própria     pa_tabela                   1440  ok _galeria/pa_tabela_1440.png
+cartões próprios   pa_cartoes                  1440  ok _galeria/pa_cartoes_1440.png
+etapas             saf_etapas                  1440  ok _galeria/saf_etapas_1440.png
+manutenção         ma_ordens                   1440  ok _galeria/ma_ordens_1440.png
+consulta           agrofit                     1440  ok _galeria/agrofit_1440.png
+estoque            est                         1440  ok _galeria/est_1440.png
+mapa               mapa                        1440  ok _galeria/mapa_1440.png
+app de campo       mb01_inicio                 1440  ok _galeria/mb01_inicio_1440.png
+app de campo       mb03_turno                  1440  ok _galeria/mb03_turno_1440.png
+lista do motor     os_tabela                    390  ok _galeria/os_tabela_390.png
+agrupada           os_agrupada_talhao           390  ok _galeria/os_agrupada_talhao_390.png
+cartões            os_cartoes                   390  ok _galeria/os_cartoes_390.png
+kanban             os_kanban                    390  ok _galeria/os_kanban_390.png
+formulário         os_form_criar                390  ok _galeria/os_form_criar_390.png
+árvore             cd06_produtos_arvore         390  ok _galeria/cd06_produtos_arvore_390.png
+cadastro           cd05_parceiros               390  ok _galeria/cd05_parceiros_390.png
+cadastro           cd01_fazendas                390  ok _galeria/cd01_fazendas_390.png
+tabela própria     pa_tabela                    390  ok _galeria/pa_tabela_390.png
+cartões próprios   pa_cartoes                   390  ok _galeria/pa_cartoes_390.png
+etapas             saf_etapas                   390  ok _galeria/saf_etapas_390.png
+manutenção         ma_ordens                    390  ok _galeria/ma_ordens_390.png
+consulta           agrofit                      390  ok _galeria/agrofit_390.png
+estoque            est                          390  ok _galeria/est_390.png
+mapa               mapa                         390  ok _galeria/mapa_390.png
+app de campo       mb01_inicio                  390  ok _galeria/mb01_inicio_390.png
+app de campo       mb03_turno                   390  ok _galeria/mb03_turno_390.png
+RESULTADO: 34/34 fotos em /tmp/claude-0/gal70 (olhe cada uma antes de publicar)
+rc=0

@@ -1,0 +1,7 @@
+OK    C0 há O.S. elegível (sem realizado, A liberar ou Liberadas, com área) 
+OK    C1 antes: rótulo do P1 no Avanço = conta das abertas do cenário (95/190 ha) 
+OK    C2 "Cancelar sem execução" disponível para um perfil com a alçada AL-04 
+OK    C3 OS-0418 cancelada pelo fluxo real (perfil Proprietário) e gravada no cenário 
+OK    C4 depois: rótulo do P1 = conta das abertas sem a cancelada (95/95 ha; a OS-0418 de 95 ha não entra) 
+OK    C5 após recarregar: o mesmo rótulo (lido do cenário gravado, não de estado em memória) 
+RESULTADO: 6/6

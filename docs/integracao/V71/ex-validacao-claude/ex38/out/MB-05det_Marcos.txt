@@ -1,0 +1,24 @@
+Receber devolução
+custódia 10 sc
+i
+REQ-031 · sobras da OS-0417
+VEIO DE
+Almoxarifado · fila
+ESTÁ AQUI
+Devolução REQ-031 · OS-0417
+FALTA
+conferir 10 sc e zerar custódia
+PRÓXIMA AÇÃO
+Confirmar recebimento
+Autorização e conta do material
+O.S./versão: OS-0417 · v1 · adubação de cobertura P1
+Produto: MAP 11-52 · sc 50 kg
+Solicitado/entregue: 100 sc / 100 sc
+Consumo apontado: 70 sc
+Devolvido recebido: 20 sc
+Saldo em custódia: 10 sc
+Responsável pela custódia: Paula (equipe de campo)
+A receber
+Registrar divergência
+Confirmar recebimento de 10 sc
+Tela: Receber devolução · custódia 10 sc

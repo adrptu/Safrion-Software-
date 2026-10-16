@@ -1,0 +1,70 @@
+ok    contraprova troca   os_tabela               1440 (estado de os_kanban)
+ok    contraprova ausente os_tabela               1440
+ok    contraprova troca   os_agrupada_talhao      1440 (estado de os_tabela)
+ok    contraprova ausente os_agrupada_talhao      1440
+ok    contraprova troca   os_cartoes              1440 (estado de os_tabela)
+ok    contraprova ausente os_cartoes              1440
+ok    contraprova troca   os_kanban               1440 (estado de os_tabela)
+ok    contraprova ausente os_kanban               1440
+ok    contraprova troca   os_form_criar           1440 (estado de os_tabela)
+ok    contraprova ausente os_form_criar           1440
+ok    contraprova troca   cd06_produtos_arvore    1440 (estado de cd05_parceiros)
+ok    contraprova ausente cd06_produtos_arvore    1440
+ok    contraprova troca   cd05_parceiros          1440 (estado de cd01_fazendas)
+ok    contraprova ausente cd05_parceiros          1440
+ok    contraprova troca   cd01_fazendas           1440 (estado de cd05_parceiros)
+ok    contraprova ausente cd01_fazendas           1440
+ok    contraprova troca   pa_tabela               1440 (estado de pa_cartoes)
+ok    contraprova ausente pa_tabela               1440
+ok    contraprova troca   pa_cartoes              1440 (estado de pa_tabela)
+ok    contraprova ausente pa_cartoes              1440
+ok    contraprova troca   saf_etapas              1440 (estado de est)
+ok    contraprova ausente saf_etapas              1440
+ok    contraprova troca   ma_ordens               1440 (estado de agrofit)
+ok    contraprova ausente ma_ordens               1440
+ok    contraprova troca   agrofit                 1440 (estado de ma_ordens)
+ok    contraprova ausente agrofit                 1440
+ok    contraprova troca   est                     1440 (estado de saf_etapas)
+ok    contraprova ausente est                     1440
+ok    contraprova troca   mapa                    1440 (estado de est)
+ok    contraprova ausente mapa                    1440
+ok    contraprova troca   mb01_inicio             1440 (estado de mb03_turno)
+ok    contraprova ausente mb01_inicio             1440
+ok    contraprova troca   mb03_turno              1440 (estado de mb01_inicio)
+ok    contraprova ausente mb03_turno              1440
+ok    contraprova troca   os_tabela                390 (estado de os_kanban)
+ok    contraprova ausente os_tabela                390
+ok    contraprova troca   os_agrupada_talhao       390 (estado de os_tabela)
+ok    contraprova ausente os_agrupada_talhao       390
+ok    contraprova troca   os_cartoes               390 (estado de os_tabela)
+ok    contraprova ausente os_cartoes               390
+ok    contraprova troca   os_kanban                390 (estado de os_tabela)
+ok    contraprova ausente os_kanban                390
+ok    contraprova troca   os_form_criar            390 (estado de os_tabela)
+ok    contraprova ausente os_form_criar            390
+ok    contraprova troca   cd06_produtos_arvore     390 (estado de cd05_parceiros)
+ok    contraprova ausente cd06_produtos_arvore     390
+ok    contraprova troca   cd05_parceiros           390 (estado de cd01_fazendas)
+ok    contraprova ausente cd05_parceiros           390
+ok    contraprova troca   cd01_fazendas            390 (estado de cd05_parceiros)
+ok    contraprova ausente cd01_fazendas            390
+ok    contraprova troca   pa_tabela                390 (estado de pa_cartoes)
+ok    contraprova ausente pa_tabela                390
+ok    contraprova troca   pa_cartoes               390 (estado de pa_tabela)
+ok    contraprova ausente pa_cartoes               390
+ok    contraprova troca   saf_etapas               390 (estado de est)
+ok    contraprova ausente saf_etapas               390
+ok    contraprova troca   ma_ordens                390 (estado de agrofit)
+ok    contraprova ausente ma_ordens                390
+ok    contraprova troca   agrofit                  390 (estado de ma_ordens)
+ok    contraprova ausente agrofit                  390
+ok    contraprova troca   est                      390 (estado de saf_etapas)
+ok    contraprova ausente est                      390
+ok    contraprova troca   mapa                     390 (estado de est)
+ok    contraprova ausente mapa                     390
+ok    contraprova troca   mb01_inicio              390 (estado de mb03_turno)
+ok    contraprova ausente mb01_inicio              390
+ok    contraprova troca   mb03_turno               390 (estado de mb01_inicio)
+ok    contraprova ausente mb03_turno               390
+RESULTADO CONTRAPROVA: 68/68 estados errados reprovados
+rc=0

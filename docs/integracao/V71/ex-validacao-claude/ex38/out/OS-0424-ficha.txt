@@ -1,0 +1,47 @@
+Voltar à ficha do app
+Imprimir
+FICHA DE PREPARO E APLICAÇÃO · USO SEM INTERNET
+OS-0424 · Fungicida · T1-B · Soja 62 X
+128 ha · janela 24/09 · 06:00–11:00 · responsável Marcos
+Versão: v1 liberada por Ana (agrônoma) em 23/09 17:40 · Válida até: 24/09 18:00
+Confira a vigência pelo QR antes de preparar
+RETIRADA NO ALMOXARIFADO
+PRODUTO
+Fungicida A
+QUANTIDADE
+65 L · 13 × galão 5 L
+LOTE · VALIDADE
+F26-02 · 03/2028
+REQUISIÇÃO
+REQ-039
+Entregue por (almoxarife)
+Recebido por (caldeiro)
+CALDEIRO · PREPARO POR CARGA
+Tanque útil 3.000 L · vazão 100 L/ha · área por carga 30 ha. Coloque o produto indicado e complete com água até o volume da carga, na ordem da instrução liberada. A última carga é proporcional à área que falta.
+CARGA	CALDA	ÁREA	FUNGICIDA A (0,50 L/HA)	FEITO	HORA
+1	3.000 L	30 ha	15 L		
+2	3.000 L	30 ha	15 L		
+3	3.000 L	30 ha	15 L		
+4	3.000 L	30 ha	15 L		
+5 · parcial	800 L	8 ha	4 L		
+Total	12.800 L	128 ha	64 L		
+OPERADOR · APLICAÇÃO
+VAZÃO
+100 L/ha
+VELOCIDADE
+8 km/h
+BARRA
+36 m
+BICOS · PRESSÃO
+leque 110-015 · 3 bar
+CONJUNTO
+Trator 04 + PJ-3030
+APONTAMENTO (LANCE NO APP QUANDO HOUVER SINAL)
+Data
+Início
+Fim
+Área feita (ha)
+Sobra (L)
+Ocorrência
+Ficha impressa em 24/09 06:10 a partir da versão liberada. Se a versão mudar, esta ficha perde a validade: o app avisa e o QR mostra a versão vigente. Calda preparada não é área aplicada.
+Tela: OS-0424 · Fungicida · T1-B · Soja 62 X · 128 ha · janela 24/09 · 06:00–11:00 · responsável Marcos

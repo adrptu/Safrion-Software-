@@ -261,7 +261,15 @@ function paAddV(self,a){ const ad=self.state.iadd; const on=!!ad&&ad.aid===a.id;
     addTecla:(ev)=>{ if(ev.key==='Enter'){ ev.preventDefault(); paAddOk(self,a); } else if(ev.key==='Escape'){ ev.preventDefault(); ev.stopPropagation(); self.setState({iadd:null}); } },
     addOk:()=>paAddOk(self,a), addNao:()=>self.setState({iadd:null}), addErr:e, addTemErr:!!e,
     addIst:paIst(e&&!!(on&&ad.prod),'84px')+'text-align:right;'}, ac, paOpIco(a.op)); }
-function paS2(self,v,p){ const todas=paWork(p); const ops=paOps(todas); const of=paOpf(self,ops); const atv=of?todas.filter(a=>a.op===of):todas; const pub={};
+// TAB-08 (16/10/2026): a Tabela das atividades ordena e filtra por coluna com a peça do motor (g2cabVals, g2cabAplica); linhas no formato do motor
+function paTbCols(atv){ return [{k:'gat',l:(atv.length&&atv.every(a=>a.g.tipo==='DAP'))?'DAP':'Gatilho',t:'num',a:'r'},{k:'atv',l:'Atividade',t:'txt'},{k:'ins',l:'Insumos',t:'num',a:'r'},{k:'custo',l:'Custo/ha',t:'num',a:'r'}]; }
+function paTbLinha(a){ const np=a.prods.length, ca=np?paCa(a):null, d0=Number(a.g.dias), gat=a.g.tipo==='DAP'?((d0<0?'−':'')+Math.abs(d0)):paGat(a.g).t, o=paOrd(a.g);
+  return {id:a.id, v:{gat:(typeof o==='number'?o:null), atv:a.nome, ins:np, custo:ca}, s:{gat, atv:a.nome, ins:np?(np+(np>1?' insumos':' insumo')):'Só operação', custo:np?paRS(ca)+'/ha':'—'}}; }
+function paS2(self,v,p){ const todas=paWork(p); const ops=paOps(todas); const of=paOpf(self,ops); const atv0=of?todas.filter(a=>a.op===of):todas; const pub={};
+  const tbSp={id:'pa_tb', cols:paTbCols(atv0)}, tbRows=atv0.map(paTbLinha), tbTab=g2mdLer(self,{id:'pa_atv',padrao:'cartoes',url:true})==='tabela';
+  let atv=atv0, ordem=null;
+  if(tbTab){ const ok=g2cabAplica(self,tbSp,tbRows), ids=ok.map(r=>r.id); atv=ids.map(id=>atv0.find(a=>a.id===id)).filter(Boolean); if((g2st(self,'pa_tb').so||{}).k) ordem=ids; }
+  g2cabVals(self,tbSp,v,g2st(self,'pa_tb'),tbRows,tbSp.cols);
   v.pa_opf=paOpChips(self,todas,ops,of); v.tem_opf=ops.length>1; (p.atividades||[]).forEach(a=>{ pub[a.id]=a; });
   const G={}; atv.forEach(a=>{ const g=paGrp(a.g); const k=paGkey(a.g); const m=G[g]||(G[g]={}); (m[k]||(m[k]={g:a.g,atvs:[]})).atvs.push(a); });
   v.grp=['DAP','DATA','COL'].filter(g=>G[g]).map(g=>{ const list=Object.values(G[g]).sort((A,B)=>{ const a=paOrd(A.g), b=paOrd(B.g);
@@ -269,7 +277,8 @@ function paS2(self,v,p){ const todas=paWork(p); const ops=paOps(todas); const of
     const nat=list.reduce((s,t)=>s+t.atvs.length,0), tot=list.reduce((s,t)=>s+t.atvs.reduce((s2,a)=>s2+(a.prods.length?paCa(a):0),0),0);
     /* "8 atividades" e o custo por ha da seção, à direita e alinhado aos custos; gatilhos só quando diferem das atividades */
     return {t:PA_GRP[g].t, d:PA_GRP[g].d, n:nat+(nat>1?' atividades':' atividade')+(list.length!==nat?' · '+list.length+(list.length>1?' gatilhos':' gatilho'):''), tot:paRS(tot)+'/ha',
-      gats:list.map(t=>({atvs:t.atvs.map(a=>paAtvV(self,p,a,pub))}))}; });
+      gats:ordem?[{atvs:list.flatMap(t=>t.atvs).sort((x,y)=>ordem.indexOf(x.id)-ordem.indexOf(y.id)).map(a=>paAtvV(self,p,a,pub))}]   /* ordenada por coluna: uma lista só, na ordem escolhida */
+                 :list.map(t=>({atvs:t.atvs.map(a=>paAtvV(self,p,a,pub))}))}; });
   v.vazio=!todas.length; v.tem_atv=!!todas.length;
   /* modo Tabela | Cartões (15/10/2026): abre em Cartões (a lista própria); preferência por perfil e ?view=tabela no endereço (g2mdVals) */
   { const md=g2mdVals(self,v,{id:'pa_atv',padrao:'cartoes',url:true}); v.pa_md_c=md==='cartoes'; v.pa_md_t=md==='tabela'; v.pa_tb_gat=(atv.length&&atv.every(a=>a.g.tipo==='DAP'))?'DAP':'Gatilho'; }
@@ -657,9 +666,10 @@ def build():
               f'<span style="font-size: 12px; color: {MUTED}; white-space: nowrap; flex-grow: 1;">{H("g.n")}</span><span class="pa-tb-gtot">{H("g.tot")}</span></div></div>'
               + FOR('g.gats', 't', FOR('t.atvs', 'a', tb_lin, 1), 2))
     tabela = (f'<div class="rola"><div role="table" class="pa-tb" aria-label="Atividades do plano">'
-              f'<div role="row" class="pa-tb-cab"><span role="columnheader">{H("pa_tb_gat")}</span><span role="columnheader">Atividade</span>'
-              f'<span role="columnheader" class="pa-tb-ins">Insumos</span><span role="columnheader" class="pa-tb-num">Custo/ha</span><span role="columnheader"><span class="g2sr">Ações</span></span></div>'
-              + FOR('grp', 'g', tb_grp, 1) + '</div></div>')
+              # TAB-08 (16/10/2026, proprietário: "adicionando nessa e nas demais o drill down e os ícones em cada coluna de ordenação e filtro"):
+              # o cabeçalho e o filtro da coluna são a peça do motor (E.cab_colunas_html, E.filtro_coluna_html; g2cabVals no JS)
+              f'<div role="row" class="pa-tb-cab">' + E.cab_colunas_html('pa_tb', 4) + '<span role="columnheader"><span class="g2sr">Ações</span></span></div>'
+              + FOR('grp', 'g', tb_grp, 1) + '</div></div>' + E.filtro_coluna_html('pa_tb'))
     gat = FOR('t.atvs', 'a', atv, 1)
     grp = FOR('grp', 'g', f'<div class="pa-grp" style="display: flex; flex-direction: column; gap: 8px; padding-top: 4px;">'
                           f'<div class="pa-grp-cab" style="display: flex; align-items: baseline; gap: 10px; border-top: 1px solid {LINE}; padding-top: 10px;"><div style="display: flex; align-items: center; gap: 4px; flex-grow: 1; min-width: 0;">'

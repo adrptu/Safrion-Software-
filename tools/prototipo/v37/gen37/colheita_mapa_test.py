@@ -4,7 +4,7 @@ filtro junto ou sozinho" e "veja se tem algum submenu/funcionalidade em agrícol
 e adicione. O mapa é um modo de visão geográfico dos dados de tudo que acontece na fazenda").
 Oráculo: a própria tela Previsão e colheita (COLH), lida no navegador — cada linha de cultivo traz Previsão, Colhido e Situação. No Mapa, o
 talhão mostra o cultivo de situação mais urgente (Em colheita › Programada › Prevista › Colhida › Sem previsão) e "+N" para os outros.
-  C1 barra do mapa: "Colheita" logo depois de "Carência e destino", com o desenho de engine.ICONS['Colheita']
+  C1 barra do mapa: "Colheita e produtividade" logo depois de "Estádio" (DEC-0910-36, 16/10/2026), com o desenho de engine.ICONS['Colheita']
   C2 Lagoa Grande e Santa Rita: o rótulo de cada talhão = situação da COLH (e "+N" com mais cultivos); talhão sem cultivo em produção, "sem colheita"
   C3 faixa de números = contagem por situação dos talhões (oráculo acima); "A receber" = cargas a receber da COLH
   C4 Pivô 19: painel com a Previsão e o Colhido iguais aos da COLH e "1 carga na balança"; o primário leva à Previsão e colheita do cultivo
@@ -34,7 +34,7 @@ def espera(e, s=45):
     return False
 def limpa(): c.goto(U('Main.dc.html'), .3); J("localStorage.clear(); sessionStorage.clear(); 1")
 def camada(nome):
-    J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab][data-dica]')].find(b=>b.getAttribute('data-dica')==={json.dumps(nome)}); if(b) b.click();}})()"); time.sleep(1.6)
+    J(f"(()=>{{const b=[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] [role=tab]')].find(b=>b.innerText.trim()==={json.dumps(nome)}); if(b) b.click();}})()"); time.sleep(1.6)   # 16/10/2026 (proprietário): a barra das funções foi para o alto do mapa, com o nome à vista; acha o botão pelo nome (sem data-dica)
 BLOCO = "(()=>{const n=document.querySelector('nav[aria-label=\"Funcionalidades do mapa\"]'); let s=n; while(s&&s.parentElement&&!(s.innerText||'').match(/Selecionar área/)) s=s.parentElement; return s;})()"
 FAIXA = f"""JSON.stringify((()=>{{const s={BLOCO}; if(!s) return {{}}; const o={{}}; const t=s.innerText.replace(/\\s+/g,' ');
   ['Em colheita','Programada','Prevista','Sem previsão','Colhida','A receber'].forEach(k=>{{ const m=t.match(new RegExp(k+' (\\\\d+)')); if(m) o[k]=+m[1]; }}); return o;}})())"""
@@ -62,10 +62,11 @@ try:
     # Mapa · Lagoa Grande
     limpa(); J("sessionStorage.setItem('mapa-ctx','{\"mf_faz\":\"Lagoa Grande\"}'); 1"); c.goto(U('IN-04.dc.html'), 1.0); pronto = espera("!!(window.__LGI&&window.__LGI.pronto)")
     f_mapa = json.loads(J(FILTROS) or 'null')
-    rail = json.loads(J("JSON.stringify([...document.querySelectorAll('[role=tab][data-dica]')].map(b=>[b.getAttribute('data-dica'),(b.querySelector('svg path')||{getAttribute:()=>''}).getAttribute('d')]))") or '[]')
-    nomes = [x[0] for x in rail]; i = nomes.index('Colheita') if 'Colheita' in nomes else -1
-    chk('C1 barra do mapa: "Colheita" logo depois de "Carência e destino", com o desenho de Colheita', pronto and i > 0 and nomes[i - 1] == 'Carência e destino' and rail[i][1] == E.ICONS['Colheita'], nomes)
-    camada('Colheita')
+    rail = json.loads(J("JSON.stringify([...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] [role=tab]')].map(b=>[b.innerText.trim(),(b.querySelector('svg path')||{getAttribute:()=>''}).getAttribute('d')]))") or '[]')   # 16/10/2026 (proprietário): a barra das funções foi para o alto do mapa, com o nome à vista; acha o botão pelo nome (sem data-dica)
+    # DEC-0910-36 (decisão do proprietário, 16/10/2026): nome da DEC-2609-12, depois de Estádio; Carência e destino virou filtro desta função
+    nomes = [x[0] for x in rail]; i = nomes.index('Colheita e produtividade') if 'Colheita e produtividade' in nomes else -1
+    chk('C1 barra do mapa: "Colheita e produtividade" logo depois de "Estádio", com o desenho de Colheita', pronto and i > 0 and nomes[i - 1] == 'Estádio' and rail[i][1] == E.ICONS['Colheita'], nomes)
+    camada('Colheita e produtividade')
     pivos = {int(re.sub(r'\D', '', pid)): pid for pid in json.loads(J("JSON.stringify(Object.keys(window.__LGI.markers))") or '[]')}
     rot_lg = {pid: J(f"window.__LGI.markers['{pid}'].getElement().innerText.replace(/\\s+/g,' ').trim()") for pid in pivos.values()}
     def esperado(faz, tids):
