@@ -1,0 +1,137 @@
+{
+ "a_pl02_status": [
+  "v4 em rascunho · 1 pendência vencida",
+  "Publicar plano v4",
+  "Tela: Plano operacional · v4 em rascunho · 1 pendência vencida"
+ ],
+ "a_pl02det_topo": [],
+ "a_pl02det_verdes": [
+  "Publicar ajuste do T1-A"
+ ],
+ "a_clique": {
+  "txt": "Publicar ajuste do T1-A",
+  "dis": false,
+  "tag": "BUTTON",
+  "href": null
+ },
+ "a_aviso": "Ajuste do T1-A publicado na v4 · Cletodim 240 a 0,36 L/ha só neste talhão · padrão 0,45 L/ha intacto · dessecação de manejo de 05/09 preservada · a OS-0430 já emitida (A liberar) só muda se o agrônomo ajustar ao liberar. | Tela: Plano do talhão T1-A · gatilhos · Ajuste local em revisão",
+ "a_dlg": [],
+ "a_pl02_depois_status_inicial": [
+  "v4 em rascunho · 1 pendência vencida",
+  "Publicar plano v4",
+  "Tela: Plano operacional · v4 em rascunho · 1 pendência vencida"
+ ],
+ "b_on01det_btn": [
+  {
+   "t": "Validar prévia",
+   "verde": true,
+   "dis": false,
+   "title": "Gravar o que passou na validação"
+  }
+ ],
+ "b_aviso": "Gravados: 9 talhões, 6 máquinas · permanecem na prévia, com erro localizado: 1 talhão com sobreposição a justificar; o estoque inicial (48 linhas) até definir a unidade da coluna “qtde”; 2 duplicidades (T1, T2) aguardando mesclar ou ignorar. | Gravados: 9 talhões, 6 máquinas · permanecem na prévia, com erro localizado: 1 talhão com sobreposição a justificar; o estoque inicial (48 linhas) até definir a unidade da coluna “qtde”; 2 duplicidades (T1, T2) aguardando mesclar ou ignorar.",
+ "c_ve04det_botoes": [
+  "Pedidos de venda",
+  "i",
+  "Enviar revisão v3",
+  "Confira demanda e oferta",
+  "Acompanhe o mercado",
+  "Faça ofertas",
+  "Registre pedidos PV-031 · falta 0,4 t",
+  "Controle contratos",
+  "Trate reclamações RC-12 aguarda Qualidade",
+  "VERSÃO ⇅",
+  "QUANTIDADE ⇅",
+  "PREÇO · MEDIÇÃO ⇅",
+  "JANELA ⇅",
+  "FRETE ⇅",
+  "VENCIMENTO ⇅",
+  "MOTIVO ⇅",
+  "ESTADO ⇅",
+  "Alocar produção/estoque",
+  "⋯",
+  "ORIGEM ⇅",
+  "TIPO DE ALOCAÇÃO ⇅",
+  "QUANTIDADE ⇅",
+  "ESTADO ⇅",
+  "RASTREIO ⇅",
+  "L39-120",
+  "OB-0110",
+  "Emitir solicitação fiscal",
+  "⋯",
+  "EVENTO ⇅",
+  "BASE ⇅",
+  "VALOR PREVISTO ⇅",
+  "VENCIMENTO ⇅",
+  "ESTADO ⇅"
+ ],
+ "c_cand": [
+  "Enviar revisão v3"
+ ],
+ "c_form": {
+  "rot": "Enviar revisão v3",
+  "dlg": [
+   {
+    "titulo": "Revisão v3 do pedido",
+    "n_campos_vis": 4,
+    "n_campos_total": 4,
+    "tipos": {
+     "text": 3,
+     "select-one": 1
+    },
+    "req": 0,
+    "ast": [],
+    "rotulos": [
+     "Quantidade",
+     "Preço",
+     "Janela",
+     "Motivo"
+    ],
+    "verdes": [
+     "Salvar"
+    ],
+    "bts": [
+     "×",
+     "Cancelar",
+     "Salvar"
+    ]
+   }
+  ],
+  "txt": "Revisão v3 do pedido × A revisão preserva a v2 e as aceitações; a v3 só vale com novo aceite do cliente. Salvar envia a revisão (simulado · nenhuma mensagem real enviada). Quantidade t Prometível hoje: 9,6 t classe A (L39-120). Preço R$/kg Janela Motivo Rendimento A de 80% sobre 12,0 t brutas Pedido do cliente Deslocar saldo para outra janela Cancelar Salvar"
+ },
+ "d_CA-02_botoes": [
+  "Conferir 2 apontamentos",
+  "Devolver para esclarecimento",
+  "APONTAMENTO ⇅",
+  "EQUIPE · CONJUNTO ⇅",
+  "REALIZADO · ACUMULADO ⇅",
+  "HORAS ⇅",
+  "CONSUMOS E SOBRAS ⇅",
+  "ORIGEM · SINCRONIZAÇÃO ⇅",
+  "CONFERÊNCIA · AÇÃO ⇅",
+  "OS-0421 · v2",
+  "Conferir",
+  "OS-0420 · v2",
+  "Conferir",
+  "OS-0421 · v2",
+  "Ver histórico ›",
+  "Ver custódia ›",
+  "Reabrir saldo da OS-0417",
+  "Encerrar OS-0417",
+  "Liberar OS-0418"
+ ],
+ "d_CA-03_botoes": [
+  "Registrar ocorrência",
+  "OCORRÊNCIA ⇅",
+  "LOCAL · INSTANTE ⇅",
+  "RELATO ⇅",
+  "GRAVIDADE ⇅",
+  "EVIDÊNCIA ⇅",
+  "DESTINO · RESPONSÁVEL ⇅",
+  "PRÓXIMA AÇÃO ⇅",
+  "Abrir ocorrência ›",
+  "Encaminhar à agronomia ›",
+  "Reprogramar saldo ›",
+  "Ver tratamento ›"
+ ]
+}

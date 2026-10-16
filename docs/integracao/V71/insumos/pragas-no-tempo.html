@@ -1,0 +1,900 @@
+<title>Pragas e doenças no tempo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: mapa da fazenda com a linha do tempo de manejo e clima embaixo; painel do talhão à direita (embaixo no celular). */
+:root {
+  --bg: #F4F6F3; --surface: #FFFFFF; --surface-2: #F2F5F1; --line: #E1E7E2;
+  --ink: #15201A; --ink-2: #3E4A43; --muted: #65736A;
+  --accent: #1E7A4C; --accent-weak: #E4F3E9;
+  --ok: #2E7A4F; --warn: #946210; --bad: #A3261B; --nodata: #66716B; --nocrop: #8A7C5C; --water: #3F6E8C;
+  --field-a: #7C8C55; --field-b: #6E7E4A; --field-line: rgba(255,255,255,.18);
+  --chart-line: #1E7A4C; --chart-fill: rgba(30,122,76,.12); --band: rgba(30,122,76,.10); --global: #65736A; --nc: #A3261B;
+  --def: #1F5F8B; --adub: #7B4FA0; --oper: #5B6660; --rain: #8DB9D8; --irr: #2A9BAE; --fav: #A3261B;
+  --c1: #E4002B; --c2: #FF6A00; --c3: #FFD500; --c4: #B5E61D; --c5: #3FBF2A; --c6: #0B7A1E;
+  --t1: #FCEBCF; --t2: #F8C98B; --t3: #F09E50; --t4: #DA6A2C; --t5: #B33A15;
+  --u1: #E7F1F8; --u2: #BDD9EC; --u3: #8DBBDC; --u4: #5A95C3; --u5: #2D6C9C;
+  --shadow: 0 12px 28px -14px rgba(21,32,26,.35);
+  --font: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1611; --surface: #161F19; --surface-2: #1B261F; --line: #29362E; --ink: #E5ECE6; --ink-2: #C3CEC6; --muted: #93A398;
+    --accent: #4FB383; --accent-weak: #1D3527; --ok: #2F7D52; --warn: #946210; --bad: #B03328; --nodata: #5C6862; --nocrop: #7A6D50; --water: #355E78;
+    --field-a: #4A5734; --field-b: #414D2E; --field-line: rgba(255,255,255,.10);
+    --chart-line: #4FB383; --chart-fill: rgba(79,179,131,.16); --band: rgba(79,179,131,.14); --global: #93A398; --nc: #E07A6E;
+    --def: #6FA8D6; --adub: #B48AD8; --oper: #9AA8A0; --rain: #4E7FA3; --irr: #48B9CB; --fav: #E07A6E;
+    --shadow: 0 12px 28px -14px rgba(0,0,0,.6); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1611; --surface: #161F19; --surface-2: #1B261F; --line: #29362E; --ink: #E5ECE6; --ink-2: #C3CEC6; --muted: #93A398;
+  --accent: #4FB383; --accent-weak: #1D3527; --ok: #2F7D52; --warn: #946210; --bad: #B03328; --nodata: #5C6862; --nocrop: #7A6D50; --water: #355E78;
+  --field-a: #4A5734; --field-b: #414D2E; --field-line: rgba(255,255,255,.10);
+  --chart-line: #4FB383; --chart-fill: rgba(79,179,131,.16); --band: rgba(79,179,131,.14); --global: #93A398; --nc: #E07A6E;
+  --def: #6FA8D6; --adub: #B48AD8; --oper: #9AA8A0; --rain: #4E7FA3; --irr: #48B9CB; --fav: #E07A6E;
+  --shadow: 0 12px 28px -14px rgba(0,0,0,.6); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 14px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 24px; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 16px; margin-bottom: 12px; }
+.crumb { font-size: 12px; color: var(--muted); font-weight: 600; }
+h1 { font-size: 22px; line-height: 1.2; margin: 2px 0 0; font-weight: 800; letter-spacing: -.01em; text-wrap: balance; }
+.ctx { display: flex; flex-wrap: wrap; gap: 6px; }
+.ctx span { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
+.ctx b { color: var(--muted); font-weight: 600; margin-right: 4px; }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 410px); gap: 12px; align-items: start; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.mapcard { overflow: visible; }
+.mapcard .bar { border-radius: 14px 14px 0 0; }
+
+.bar { display: grid; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.barrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.lbl { font-size: 12px; color: var(--muted); font-weight: 600; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; background: var(--surface-2); border-radius: 999px; padding: 3px; }
+.seg button { border: 0; background: transparent; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; min-height: 32px; }
+.seg button[aria-checked="true"], .seg button[aria-pressed="true"] { background: var(--surface); color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.seg.big button { font-size: 13.5px; padding: 7px 14px; }
+.measure { font-size: 12.5px; color: var(--muted); }
+.measure b { color: var(--ink-2); }
+
+.map { position: relative; container-type: inline-size; aspect-ratio: 16 / 7.4; width: 100%;
+  background:
+    linear-gradient(90deg, var(--field-line) 1px, transparent 1px) 0 0 / 16.66% 100%,
+    linear-gradient(0deg, var(--field-line) 1px, transparent 1px) 0 0 / 100% 25%,
+    radial-gradient(circle at 20% 30%, var(--field-a) 0 2px, transparent 3px) 0 0 / 14px 14px,
+    radial-gradient(circle at 70% 60%, var(--field-b) 0 2px, transparent 3px) 0 0 / 11px 11px,
+    var(--field-a); }
+.lake { position: absolute; border-radius: 50%; background: var(--water); opacity: .9; }
+.pv { position: absolute; transform: translate(-50%, -50%); aspect-ratio: 1; border-radius: 50%; border: 2px solid rgba(255,255,255,.85);
+  display: grid; place-content: center; text-align: center; color: #fff; cursor: pointer; padding: 0; line-height: 1.12;
+  text-shadow: 0 1px 2px rgba(0,0,0,.55); transition: background-color .25s ease, box-shadow .2s ease; }
+.pv.dark { color: #15201A; text-shadow: 0 0 3px rgba(255,255,255,.9); }
+.pv .id { font-weight: 800; font-size: clamp(9px, 1.55cqw, 15px); }
+.pv .v { font-weight: 700; font-size: clamp(8px, 1.2cqw, 12.5px); }
+.pv .s { font-weight: 600; font-size: clamp(7px, .95cqw, 11px); opacity: .95; }
+.pv.ok { background: var(--ok); } .pv.warn { background: var(--warn); } .pv.bad { background: var(--bad); }
+.pv.nodata { background: repeating-linear-gradient(135deg, var(--nodata) 0 6px, color-mix(in srgb, var(--nodata) 80%, #fff) 6px 9px); }
+.pv.cloud { background: repeating-linear-gradient(135deg, #9E9E9E 0 6px, #C9C9C9 6px 9px); color: #15201A; text-shadow: 0 0 3px rgba(255,255,255,.9); }
+.pv.nocrop { background: var(--nocrop); cursor: default; }
+.pv[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--ink), 0 0 0 6px rgba(255,255,255,.7); z-index: 2; }
+@media (hover: hover) { .pv:not(.nocrop):hover { box-shadow: 0 0 0 3px rgba(255,255,255,.9); } }
+.badges { position: absolute; top: -5px; right: -6px; display: flex; gap: 2px; }
+.badge { width: clamp(15px, 2.2cqw, 20px); height: clamp(15px, 2.2cqw, 20px); border-radius: 50%; background: var(--surface); display: grid; place-items: center; border: 2px solid; }
+.badge svg { width: 62%; height: 62%; fill: currentColor; }
+.maptip { position: absolute; z-index: 5; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 12.5px; box-shadow: var(--shadow); max-width: 250px; text-shadow: none; }
+.maptip b { display: block; }
+.demo { position: absolute; right: 8px; bottom: 8px; font-size: 11px; color: #fff; background: rgba(0,0,0,.4); padding: 2px 8px; border-radius: 999px; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 14px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex: none; }
+.legend i.hatch { background: repeating-linear-gradient(135deg, #9E9E9E 0 3px, #C9C9C9 3px 5px); }
+
+.time { padding: 12px 14px 14px; border-top: 1px solid var(--line); }
+.timehead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin-bottom: 6px; }
+.now { font-size: 13px; color: var(--ink-2); }
+.now strong { font-size: 15px; color: var(--ink); }
+.ctrls { display: flex; gap: 6px; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 12px; font-weight: 700; font-size: 13px; cursor: pointer; min-height: 34px; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn.primary:hover { filter: brightness(1.06); color: #fff; }
+.btn svg { width: 14px; height: 14px; fill: currentColor; }
+.toggles { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 2px 0 6px; font-size: 12px; color: var(--muted); }
+.tg { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 10px 4px 5px; font-weight: 700; font-size: 12.5px; cursor: pointer; color: var(--ink-2); min-height: 30px; }
+.tg[aria-pressed="false"] { opacity: .5; }
+.tg .ic { width: 19px; height: 19px; border-radius: 50%; display: grid; place-items: center; border: 2px solid; }
+.tg .ic svg { width: 11px; height: 11px; fill: currentColor; }
+
+.chartbox { position: relative; }
+.chartwrap { position: relative; touch-action: none; user-select: none; cursor: ew-resize; border-radius: 10px; }
+.chartwrap:focus-visible { outline-offset: 4px; }
+svg.chart { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { fill: var(--muted); font-family: var(--font); font-size: 11px; }
+.ax { stroke: var(--line); stroke-width: 1; }
+.grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
+.ncl { stroke: var(--nc); stroke-width: 1.5; stroke-dasharray: 5 4; fill: none; }
+.gl { stroke: var(--global); stroke-width: 2; stroke-dasharray: 5 4; fill: none; }
+.ml { stroke: var(--chart-line); stroke-width: 2; fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.mf { fill: var(--chart-fill); stroke: none; }
+.bandf { fill: var(--band); stroke: none; }
+.rainb { fill: var(--rain); } .irrb { fill: var(--irr); } .favb { fill: var(--fav); }
+.evline { stroke-width: 1; stroke-dasharray: 2 3; opacity: .5; }
+.cursor { stroke: var(--ink); stroke-width: 1.5; }
+.knob { fill: var(--ink); }
+.knobtxt { fill: var(--surface); font-weight: 800; font-size: 11px; }
+.hoverline { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; }
+.pt { fill: var(--surface); stroke: var(--chart-line); stroke-width: 2; }
+.pt.bad { stroke: var(--nc); }
+.pt.cloud { fill: var(--surface); stroke: #9E9E9E; stroke-dasharray: 2 2; }
+.scn { stroke: var(--muted); stroke-width: 1; }
+.evt { position: absolute; transform: translate(-50%, -50%); width: 22px; height: 22px; border-radius: 50%; border: 2px solid; background: var(--surface); display: grid; place-items: center; padding: 0; cursor: pointer; z-index: 3; }
+.evt svg { width: 12px; height: 12px; fill: currentColor; }
+.evt .n { position: absolute; top: -8px; right: -9px; min-width: 15px; height: 15px; border-radius: 8px; background: var(--ink); color: var(--surface); font-size: 9.5px; font-weight: 800; display: grid; place-items: center; padding: 0 3px; }
+.evt[aria-expanded="true"] { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px currentColor; }
+.evt.def { border-color: var(--def); color: var(--def); } .evt.adub { border-color: var(--adub); color: var(--adub); }
+.lanelab { position: absolute; left: 0; font-size: 10.5px; color: var(--muted); transform: translateY(-50%); pointer-events: none; }
+.tip { position: absolute; z-index: 6; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 12.5px; box-shadow: var(--shadow); min-width: 180px; max-width: 270px; }
+.tip b { display: block; margin-bottom: 2px; }
+.tip .row, .pop .row { display: flex; justify-content: space-between; gap: 12px; color: var(--ink-2); }
+.pop { position: absolute; z-index: 8; width: min(340px, calc(100% - 8px)); max-height: 420px; overflow: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 10px 12px 12px; font-size: 12.5px; display: grid; gap: 8px; cursor: default; }
+.pop h4 { margin: 0; font-size: 13.5px; font-weight: 800; padding-right: 26px; }
+.pop .x { position: absolute; top: 6px; right: 6px; border: 0; background: transparent; width: 28px; height: 28px; border-radius: 8px; cursor: pointer; font-size: 18px; line-height: 1; color: var(--muted); }
+.pop .x:hover { background: var(--surface-2); }
+.pop .ev { display: grid; gap: 4px; border-top: 1px solid var(--line); padding-top: 8px; }
+.pop h4 + .ev { border-top: 0; padding-top: 0; }
+.pop .k { color: var(--muted); }
+.pop .k.warn { color: var(--warn); font-weight: 600; }
+.pop table { width: 100%; border-collapse: collapse; }
+.pop td { padding: 2px 0; vertical-align: top; }
+.pop td.r { text-align: right; white-space: nowrap; padding-left: 8px; }
+.pop .eff { background: var(--surface-2); border-radius: 8px; padding: 6px 8px; color: var(--ink-2); }
+.pop .eff b { color: var(--ink); }
+.pop .go { justify-self: start; border: 0; background: transparent; color: var(--accent); font-weight: 700; padding: 2px 0; cursor: pointer; }
+.keys { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--ink-2); margin-top: 6px; }
+.keys span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 18px; height: 0; border-top: 2px solid; display: inline-block; }
+.sw.d { border-top-style: dashed; }
+.sq { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.ramp { display: inline-flex; } .ramp i { width: 8px; height: 10px; display: inline-block; }
+
+.panel { position: sticky; top: max(12px, env(safe-area-inset-top, 0px)); }
+.panel .ph { padding: 14px 14px 10px; border-bottom: 1px solid var(--line); display: grid; gap: 6px; }
+.panel h3 { margin: 0; font-size: 16px; font-weight: 800; }
+.panel .sub { font-size: 12.5px; color: var(--muted); }
+.panel .pb { padding: 12px 14px 14px; display: grid; gap: 12px; }
+.back { justify-self: start; border: 0; background: transparent; color: var(--accent); font-weight: 700; padding: 4px 0; cursor: pointer; font-size: 13px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); }
+.chip i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.state { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.insights { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.insights li { background: var(--surface-2); border-radius: 10px; padding: 9px 11px; font-size: 13px; color: var(--ink-2); }
+.insights li strong { color: var(--ink); }
+.note { font-size: 12px; color: var(--muted); }
+.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.tblwrap { overflow-x: auto; }
+.tbl th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 700; padding: 6px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.tbl th button { border: 0; background: transparent; padding: 0; font: inherit; color: inherit; cursor: pointer; text-transform: inherit; letter-spacing: inherit; }
+.tbl td { padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tbl td.r, .tbl th.r { text-align: right; }
+.apps { display: grid; gap: 8px; }
+.app { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; align-items: start; text-align: left; width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 9px 10px; cursor: pointer; }
+.app:hover { border-color: var(--accent); }
+.app .d { font-weight: 800; font-size: 13px; }
+.app .p { font-weight: 700; font-size: 13px; }
+.app .m { grid-column: 2 / 4; font-size: 12px; color: var(--muted); }
+.app .e { font-weight: 800; font-size: 13px; text-align: right; }
+.app .e.good { color: var(--ok); } .app .e.weak { color: var(--warn); }
+.app .ctl { grid-column: 2 / 4; font-size: 12px; color: var(--ink-2); }
+.decide { display: grid; gap: 6px; background: var(--surface-2); border-radius: 10px; padding: 10px 11px; }
+.empty { color: var(--muted); font-size: 13px; }
+h5 { margin: 0; font-size: 13px; font-weight: 800; }
+
+@media (max-width: 980px) { .layout { grid-template-columns: minmax(0, 1fr); } .panel { position: static; } }
+@media (max-width: 560px) { .map { aspect-ratio: 4 / 3.3; } .pv .s { display: none; } h1 { font-size: 19px; } }
+@media (prefers-reduced-motion: reduce) { .pv { transition: none; } }
+</style>
+
+<div class="top">
+  <div>
+    <div class="crumb">Mapa › <span id="crumbLayer">Pragas e doenças</span></div>
+    <h1>Mapa da fazenda</h1>
+  </div>
+  <div class="ctx" aria-label="Contexto">
+    <span><b>Fazenda</b>Lagoa Grande</span><span><b>Safra</b>2026/27</span><span><b>Cultura</b>Mamão</span>
+  </div>
+</div>
+
+<div class="layout">
+  <section class="card mapcard" aria-label="Mapa com a evolução da lavoura, o manejo e o clima">
+    <div class="bar">
+      <div class="barrow"><div class="seg big" role="radiogroup" aria-label="Camada" id="layers"></div></div>
+      <div class="barrow">
+        <span class="lbl" id="subsLbl">Alvo</span><div class="seg" role="radiogroup" aria-label="Alvo ou índice" id="subs"></div>
+        <span class="lbl" id="scaleLbl">Contraste</span><div class="seg" role="radiogroup" aria-label="Contraste" id="scale"></div>
+        <div class="measure" id="measure"></div>
+      </div>
+    </div>
+    <div class="map" id="map"></div>
+    <div class="legend" id="legend" aria-label="Legenda do mapa"></div>
+    <div class="time">
+      <div class="timehead">
+        <div class="now" id="now" aria-live="polite"></div>
+        <div class="ctrls">
+          <button class="btn" id="play" type="button" aria-label="Reproduzir a evolução"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg><span>Reproduzir</span></button>
+          <button class="btn" id="today" type="button">Hoje</button>
+        </div>
+      </div>
+      <div class="toggles" id="toggles" role="group" aria-label="O que mostrar na linha do tempo"></div>
+      <div class="chartbox" id="tlbox">
+        <div class="chartwrap" id="tl" tabindex="0" role="slider" aria-label="Data. Setas mudam um dia; Shift muda uma semana."></div>
+      </div>
+      <div class="keys" id="tlkeys" aria-hidden="true"></div>
+    </div>
+  </section>
+  <aside class="card panel" id="panel" aria-live="polite"></aside>
+</div>
+
+<script>
+(() => {
+'use strict';
+// ================= base sintética · Lagoa Grande · mamão =================
+const START = new Date(2026, 6, 1);   // 01/07/2026
+const DAYS = 86;                      // 25/09/2026, data da última cena de satélite
+const RAINMM = { 18: 22, 19: 9, 37: 14, 38: 31, 39: 6, 52: 18, 66: 11, 67: 25, 79: 16 };
+const nf0 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
+const nf1 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
+const nf2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const dDate = d => { const x = new Date(START); x.setDate(x.getDate() + d); return x; };
+const fmtD = d => { const x = dDate(d); return String(x.getDate()).padStart(2, '0') + '/' + String(x.getMonth() + 1).padStart(2, '0'); };
+const median = arr => { if (!arr.length) return null; const s = [...arr].sort((a, b) => a - b); const m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const signed2 = v => (Math.abs(v) < .005 ? '' : v > 0 ? '+' : '−') + nf2.format(Math.abs(v));
+const pct = v => (v >= 0 ? '+' : '−') + nf0.format(Math.abs(v * 100)) + ' %';
+const dose = (v) => nf2.format(v).replace(/,00$/, '');
+function rngFor(s) { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } let a = h >>> 0;
+  return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+// ---- clima diário da estação da fazenda (sintético) ----
+const CLIMA = [];
+(() => { const r = rngFor('clima');
+  for (let d = 0; d <= DAYS; d++) {
+    const t = d / DAYS, rain = RAINMM[d] || 0, rainPrev = RAINMM[d - 1] || 0;
+    const wave = d >= 44 && d <= 50 ? 3.6 : d >= 74 && d <= 80 ? 3.1 : 0;
+    const tmax = 29.2 + 4.4 * t + wave + (r() - .5) * 1.8 - (rain ? 3.5 : 0) - (rainPrev ? 1.2 : 0);
+    const tmin = tmax - 11.5 + (r() - .5) * 2 + (rain ? 2.5 : 0);
+    const ur = Math.max(24, Math.min(96, 60 - 16 * t - wave * 2.6 + (rain ? 26 : 0) + (rainPrev ? 12 : 0) + (r() - .5) * 8));
+    const molh = rain ? 9 + r() * 5 : rainPrev ? 5 + r() * 4 : ur > 62 ? 2 + r() * 3 : r() * 1.5;
+    const tmed = (tmax + tmin) / 2, es = 0.6108 * Math.exp(17.27 * tmed / (tmed + 237.3));
+    CLIMA.push({ tmax, tmin, ur, molh, dpv: es * (1 - ur / 100), quenteSeco: tmax >= 32 && ur < 50, calor: tmax >= 35, molhado: molh >= 8 && tmed >= 18 && tmed <= 30 });
+  } })();
+
+// ---- pivôs: áreas e NDVI das cenas de 10/09 e 25/09 do protótipo oficial (lagoa_s2.json, sintético) ----
+const PIVO_DATA = [
+  ['P1', 29.92, .58, .56], ['P2', 37.75, .78, .80], ['P3', 70.18, .55, .55], ['P4', 73.18, .77, .78], ['P5', 71.11, .26, .39], ['P6', 62.79, .78, .78],
+  ['P7', 61.39, .38, .38], ['P8', 50.63, .39, .39], ['P9', 74.98, .80, .78], ['P10', 30.15, .58, .55], ['P11', 50.0, .15, .17], ['P12', 48.47, .64, .14],
+  ['P13', 49.31, .15, .16], ['P14', 63.16, .55, .58], ['P15', 36.17, .38, .36], null, ['P17', 33.36, .80, .78], ['P18', 48.93, .80, .80],
+  ['P19', 75.11, .79, .78], ['P20', 77.39, .78, .79], ['P21', 80.82, .55, .58], ['P22', 62.07, .77, .77], ['P23', 63.99, .78, .78], ['P24', 34.37, .78, .80]];
+const STAGE = { P1: 'media', P3: 'media', P10: 'media', P14: 'media', P21: 'media', P5: 'jovem', P7: 'jovem', P8: 'jovem', P15: 'jovem', P11: 'solo', P13: 'solo', P12: 'velha' };
+const STAGE_TXT = { adulta: 'em produção', media: 'em formação', jovem: 'plantio novo', solo: 'sem lavoura', velha: 'lavoura velha erradicada' };
+const PIVOS = PIVO_DATA.map((p, i) => { if (!p) return null; const col = i % 6, row = Math.floor(i / 6);
+  return { id: p[0], ha: p[1], a71: p[2], a86: p[3], stage: STAGE[p[0]] || 'adulta', x: 8.5 + col * 16.6, y: 12.8 + row * 24.8 }; }).filter(Boolean);
+PIVOS.forEach(p => { p.pestOff = ['solo', 'velha'].includes(p.stage); });
+const P = id => PIVOS.find(p => p.id === id);
+
+// ---- pragas e doenças (resposta ligada ao clima) ----
+const ALVOS = [
+  { id: 'acaro', nome: 'Ácaro-rajado', med: 'folhas com ácaro', un: '%', curto: '%', nc: 15, cap: 70, x0: [.5, 2.2], wk: [1.3, 1.8], imm: .05,
+    clima: c => 1 + (c.quenteSeco ? .03 : 0) - (c.molhado ? .025 : 0), fav: c => c.quenteSeco, favTxt: 'dia quente e seco (≥ 32 °C e UR < 50 %)', favCurto: 'quente e seco',
+    prods: [ { n: 'Espirodiclofeno 240 SC', c: 'Espirodiclofeno', g: 'IRAC 23', base: .86, res: 18, dose: .3, du: 'L' },
+             { n: 'Abamectina 18 EC', c: 'Abamectina', g: 'IRAC 6', base: .80, res: 10, dose: .5, du: 'L' },
+             { n: 'Fenpiroximato 50 SC', c: 'Fenpiroximato', g: 'IRAC 21A', base: .80, res: 13, dose: 1, du: 'L' },
+             { n: 'Óleo mineral', c: 'Óleo mineral', g: 'ação física', base: .38, res: 3, dose: 1.5, du: 'L' } ] },
+  { id: 'mosca', nome: 'Mosca-branca', med: 'adultos por folha', un: '', curto: '/folha', nc: 5, cap: 40, x0: [.3, 1.2], wk: [1.25, 1.6], imm: .025,
+    clima: c => 1 + (c.quenteSeco ? .022 : 0) - (c.molhado ? .02 : 0), fav: c => c.quenteSeco, favTxt: 'dia quente e seco (≥ 32 °C e UR < 50 %)', favCurto: 'quente e seco',
+    prods: [ { n: 'Espiromesifeno 240 SC', c: 'Espiromesifeno', g: 'IRAC 23', base: .80, res: 16, dose: .5, du: 'L' },
+             { n: 'Acetamiprido 200 SP', c: 'Acetamiprido', g: 'IRAC 4A', base: .74, res: 10, dose: .25, du: 'kg' },
+             { n: 'Piriproxifem 100 EC', c: 'Piriproxifem', g: 'IRAC 7C', base: .62, res: 20, dose: .5, du: 'L' } ] },
+  { id: 'antrac', nome: 'Antracnose', med: 'frutos com lesão', un: '%', curto: '%', nc: 5, cap: 45, x0: [.3, 1.1], wk: [1.0, 1.0], imm: .01,
+    clima: c => c.molhado ? 1.085 : (c.ur > 65 ? 1.012 : .993), fav: c => c.molhado, favTxt: 'dia com 8 h ou mais de folha molhada (UR ≥ 90 %) entre 18 e 30 °C', favCurto: 'molhamento ≥ 8 h',
+    prods: [ { n: 'Azoxistrobina 250 SC', c: 'Azoxistrobina', g: 'FRAC 11', base: .70, res: 14, dose: .4, du: 'L' },
+             { n: 'Tebuconazol 200 EC', c: 'Tebuconazol', g: 'FRAC 3', base: .66, res: 12, dose: 1, du: 'L' },
+             { n: 'Mancozebe 800 WP', c: 'Mancozebe', g: 'FRAC M3', base: .45, res: 7, dose: 3, du: 'kg' } ] },
+  { id: 'cochon', nome: 'Cochonilha', med: 'plantas com colônia', un: '%', curto: '%', nc: 10, cap: 50, x0: [.8, 2.5], wk: [1.15, 1.32], imm: .03,
+    clima: c => 1 + (c.quenteSeco ? .015 : 0), fav: c => c.quenteSeco, favTxt: 'dia quente e seco (≥ 32 °C e UR < 50 %)', favCurto: 'quente e seco',
+    prods: [ { n: 'Buprofezina 250 SC', c: 'Buprofezina', g: 'IRAC 16', base: .74, res: 20, dose: 1, du: 'L' },
+             { n: 'Acetamiprido 200 SP', c: 'Acetamiprido', g: 'IRAC 4A', base: .70, res: 12, dose: .25, du: 'kg' },
+             { n: 'Óleo mineral', c: 'Óleo mineral', g: 'ação física', base: .45, res: 4, dose: 1.5, du: 'L' } ] } ];
+const EQ = { a600: { n: 'Atomizador · 600 L/ha', c: 'Atomizador 600 L/ha', cov: 1.0, lha: 600 }, a400: { n: 'Atomizador · 400 L/ha', c: 'Atomizador 400 L/ha', cov: .9, lha: 400 }, b100: { n: 'Barra · 100 L/ha', c: 'Barra 100 L/ha', cov: .6, lha: 100 } };
+const PROF = {};
+PIVOS.forEach(p => { const r = rngFor('prof' + p.id); const late = ['P4', 'P9', 'P21', 'P20'].includes(p.id);
+  PROF[p.id] = { press: 0.75 + r() * 0.7, eq: ['P4', 'P6', 'P20'].includes(p.id) ? 'b100' : (['P3', 'P9', 'P14', 'P22'].includes(p.id) ? 'a400' : 'a600'),
+    repete: ['P6', 'P17', 'P21'].includes(p.id), oleo1: ['P2', 'P9', 'P24'].includes(p.id), delay: late ? 6 + Math.floor(r() * 2) : 2 + Math.floor(r() * 3),
+    gatilho: late ? 1.15 : 0.9, off: Math.floor(r() * 3), falha: p.id === 'P17' ? [71, 78] : [] }; });
+const HOT = { acaro: ['P4', 'P6', 'P17', 'P9', 'P21'], mosca: ['P1', 'P2', 'P8'], antrac: ['P19', 'P23', 'P5'], cochon: ['P18', 'P14'] };
+
+function simulatePest(p, a) {
+  const r = rngFor(p.id + a.id), pf = PROF[p.id], hot = HOT[a.id].includes(p.id) ? 1.55 : 1;
+  let x = (a.x0[0] + r() * (a.x0[1] - a.x0[0])) * pf.press * hot * (p.stage === 'jovem' ? .7 : 1);
+  const obs = [], apps = []; let resid = 0, last = -99, pending = null, lastGroup = null, n = 0, consec = 0; const groupCount = {};
+  for (let d = 0; d <= DAYS; d++) {
+    if (pending && pending.day === d) {
+      let prod;
+      if (pf.oleo1 && n === 0 && a.prods.some(q => q.c === 'Óleo mineral')) prod = a.prods.find(q => q.c === 'Óleo mineral');
+      else if (pf.repete) prod = a.prods.find(q => q.c !== 'Óleo mineral') || a.prods[0];
+      else { const cand = a.prods.filter(q => q.c !== 'Óleo mineral' && q.g !== lastGroup); prod = cand[(n + p.id.length) % cand.length] || a.prods[0]; }
+      const rep = groupCount[prod.g] || 0; consec = prod.g === lastGroup ? consec + 1 : 0;
+      const eq = EQ[pf.eq], resist = consec > 0 ? Math.pow(.7, consec) : Math.pow(.93, rep);
+      const eff = Math.min(.95, prod.base * eq.cov * resist * (0.9 + r() * 0.18));
+      x = x * (1 - eff); resid = Math.round(prod.res * (0.7 + 0.3 * eq.cov));
+      groupCount[prod.g] = rep + 1; lastGroup = prod.g; n++; last = d;
+      apps.push({ day: d, prod, eq: pf.eq, entrada: n, rep: rep + 1, consec, alvo: a.id }); pending = null;
+    }
+    const wk = a.wk[0] + (a.wk[1] - a.wk[0]) * d / DAYS;
+    let g = Math.pow(wk, 1 / 7) * a.clima(CLIMA[d]); if (resid > 0) { g = 1 + (g - 1) * 0.2; resid--; }
+    x = Math.max(.05, Math.min(a.cap, x * g + a.imm * pf.press * hot * (resid > 0 ? 0.3 : 1)));
+    if ((d - 1 - pf.off) % 7 === 0 && d >= 1 + pf.off && !pf.falha.includes(d)) {
+      const v = Math.max(0, x * (0.88 + r() * 0.24)); obs.push({ day: d, v });
+      if (v >= a.nc * pf.gatilho && d - last > 9 && !pending) pending = { day: Math.min(DAYS, d + pf.delay) };
+    }
+  }
+  apps.forEach(ap => { const before = [...obs].reverse().find(o => o.day <= ap.day && ap.day - o.day <= 10); const after = obs.find(o => o.day >= ap.day + 5 && o.day <= ap.day + 14);
+    ap.before = before || null; ap.after = after || null; ap.red = before && after && before.v > 0 ? (before.v - after.v) / before.v : null;
+    const back = obs.find(o => o.day > ap.day && o.v >= a.nc); ap.backDay = back ? back.day : null; });
+  return { obs, apps };
+}
+const PEST = {}; ALVOS.forEach(a => { PEST[a.id] = {}; PIVOS.forEach(p => { if (!p.pestOff) PEST[a.id][p.id] = simulatePest(p, a); }); });
+
+// ---- água e adubação ----
+const NEED = { adulta: 5.2, media: 4.6, jovem: 3.0, solo: 0, velha: 4.0 };        // mm/dia (ETc de exemplo, ajustada pelo DPV)
+const SUFF = { P3: .68, P14: .7, P21: .7, P20: .9 };                              // fração da necessidade atendida pela irrigação
+const FERT = {
+  std: { every: 14, items: [['Nitrato de amônio', 20, { N: .32 }], ['Sulfato de potássio', 45, { K2O: .5, S: .17 }]], via: 'Fertirrigação', nome: 'Nitrato de amônio + sulfato de potássio · a cada 14 dias' },
+  ureia: { every: 14, items: [['Ureia', 12, { N: .45 }], ['Cloreto de potássio', 30, { K2O: .6 }]], via: 'Fertirrigação', nome: 'Ureia + cloreto de potássio' },
+  irreg: { every: 31, items: [['Nitrato de amônio', 20, { N: .32 }], ['Sulfato de potássio', 45, { K2O: .5, S: .17 }]], via: 'Fertirrigação', nome: 'Nitrato de amônio + sulfato de potássio · intervalo > 21 dias' },
+  arranque: { every: 10, items: [['Nitrato de amônio', 25, { N: .32 }], ['Ácido bórico', 1, { B: .17 }]], via: 'Fertirrigação de arranque', nome: 'Arranque: nitrato de amônio + ácido bórico' } };
+const PLAN = { P9: 'ureia', P23: 'ureia', P20: 'irreg', P24: 'irreg', P1: 'irreg', P10: 'irreg' };
+const EVENTS = [], WATER = {}, SAT = {}; let evSeq = 0;
+const addEvent = e => { e.id = 'e' + (++evSeq); EVENTS.push(e); return e; };
+const needOn = (p, d) => NEED[p.stage] * Math.max(.75, Math.min(1.35, 1 + .14 * (CLIMA[d].dpv - 1.9)));
+PIVOS.forEach(p => {
+  const r = rngFor('w' + p.id); const suff = SUFF[p.id] || (p.stage === 'jovem' ? 1 : .98);
+  const irr = new Array(DAYS + 1).fill(0); const off = Math.floor(r() * 3);
+  if (NEED[p.stage] > 0) for (let d = off; d <= DAYS; d += 3) {
+    if ((RAINMM[d] || 0) + (RAINMM[d - 1] || 0) >= 10) continue;
+    const rain3 = [0, 1, 2].reduce((s, k) => s + (RAINMM[d - k] || 0), 0); const need3 = [0, 1, 2].reduce((s, k) => s + needOn(p, Math.min(DAYS, d + k)), 0);
+    irr[d] = Math.max(0, Math.round((need3 - rain3) * suff * 2) / 2);
+  }
+  WATER[p.id] = { irr, suff };
+  if (['adulta', 'media', 'jovem'].includes(p.stage)) {
+    const prog = p.stage === 'jovem' ? 'arranque' : (PLAN[p.id] || 'std'); const pr = FERT[prog]; let d = 3 + Math.floor(r() * 6);
+    while (d <= DAYS) {
+      const items = pr.items.map(([n, ds, nut]) => ({ n, dose: ds, du: 'kg', total: ds * p.ha, nut: Object.fromEntries(Object.entries(nut).map(([k, f]) => [k, ds * f])) }));
+      addEvent({ kind: 'adub', day: d, pid: p.id, via: pr.via, prog, progNome: pr.nome, items });
+      d += pr.every + (prog === 'irreg' ? Math.floor(r() * 6) : Math.floor(r() * 2));
+    }
+  }
+});
+addEvent({ kind: 'oper', day: 73, pid: 'P12', via: 'Erradicação da lavoura velha', items: [{ n: 'Glifosato 480', dose: 3, du: 'L', total: 3 * P('P12').ha }], os: 'OS-0509', calda: 'Barra · 100 L/ha' });
+ALVOS.forEach(a => PIVOS.forEach(p => { const s = PEST[a.id][p.id]; if (!s) return; s.apps.forEach(ap => {
+  ap.ev = addEvent({ kind: 'def', day: ap.day, pid: p.id, alvo: a.id, ap, items: [{ n: ap.prod.n, dose: ap.prod.dose, du: ap.prod.du, total: ap.prod.dose * p.ha }], calda: EQ[ap.eq].n, caldaL: EQ[ap.eq].lha * p.ha }); }); }));
+EVENTS.sort((x, y) => x.day - y.day);
+
+// ---- vigor por satélite: cenas a cada 5 dias; NDVI ancorado em 10/09 e 25/09; calor e falta de água pesam ----
+const SCENES = []; for (let d = 1; d <= DAYS; d += 5) SCENES.push(d);
+const SCENE_CLOUD = { 16: 62, 36: 88, 51: 34, 66: 74 };
+const IDX = { NDVI: { cuts: [.30, .45, .60, .72, .82] }, NDRE: { cuts: [.10, .18, .25, .30, .35] } };
+PIVOS.forEach(p => {
+  const r = rngFor('s' + p.id), W = WATER[p.id];
+  const base = d => p.stage === 'adulta' ? .79 : p.stage === 'media' ? .61 : p.stage === 'jovem' ? (p.id === 'P5' ? .14 + .25 * Math.pow(d / DAYS, 1.6) : .27 + .11 * d / DAYS)
+    : p.stage === 'solo' ? .15 : (d < 72 ? .66 : d > 75 ? .14 : .66 - (.52 * (d - 72) / 3));
+  let sw = 40, wEff = 0, pool = 1.1, nEff = 0; const ndvi = [], nut = [];
+  const fertN = {}; EVENTS.forEach(e => { if (e.kind === 'adub' && e.pid === p.id) fertN[e.day] = e.items.reduce((s, it) => s + (it.nut.N || 0), 0); });
+  for (let d = 0; d <= DAYS; d++) {
+    const need = NEED[p.stage] ? needOn(p, d) : 0;
+    sw = Math.max(0, Math.min(60, sw + (RAINMM[d] || 0) + W.irr[d] - need));
+    const stress = need > 0 ? Math.max(0, 1 - sw / 22) : 0;
+    const heat = need > 0 && CLIMA[d].calor ? .018 * (1.15 - W.suff) * 3 : 0;
+    wEff += (-0.11 * stress - heat - wEff) * 0.12;
+    pool = pool * 0.962 + (fertN[d] || 0) * 0.085;
+    const target = need > 0 && p.stage !== 'velha' ? 0.085 * Math.tanh(pool - 0.9) : 0; nEff += (target - nEff) * 0.14;
+    ndvi.push(base(d) + (p.stage === 'solo' || (p.stage === 'velha' && d > 75) ? 0 : wEff + nEff) + (r() - .5) * .006); nut.push(p.stage === 'solo' ? 0 : nEff);
+  }
+  const c71 = p.a71 - ndvi[71], c86 = p.a86 - ndvi[86]; const corr = d => d <= 71 ? c71 : c71 + (c86 - c71) * (d - 71) / 15;
+  const ndviC = ndvi.map((v, d) => Math.max(.05, Math.min(.95, v + corr(d))));
+  const spread = p.stage === 'adulta' ? .045 : p.stage === 'solo' ? .03 : .065;
+  SAT[p.id] = { scenes: SCENES.map(d => {
+    const cloud = d === 71 ? (p.id === 'P24' ? 44.4 : 0) : d === 86 ? 0 : Math.max(0, Math.min(100, (SCENE_CLOUD[d] || 2) + (r() - .5) * 30));
+    const v = ndviC[d] + (r() - .5) * .006, ndre = .508 * v - .036 + 1.1 * nut[d] + (r() - .5) * .004;
+    return { day: d, cloud: Math.round(cloud * 10) / 10, ok: cloud <= 20, NDVI: { med: v, p10: v - spread, p90: v + spread * .8 }, NDRE: { med: ndre, p10: ndre - spread / 2, p90: ndre + spread * .4 } }; }) };
+});
+const sceneAt = (pid, day, idx) => { const s = SAT[pid].scenes.find(q => q.day === day); return s && s.ok ? s[idx].med : null; };
+function vigorEffect(e, idx) {
+  const sc = SAT[e.pid].scenes; const before = [...sc].reverse().find(s => s.ok && s.day <= e.day && e.day - s.day <= 10); const after = sc.find(s => s.ok && s.day >= e.day + 10 && s.day <= e.day + 25);
+  if (!before || !after) return null; const d = after[idx].med - before[idx].med, st = P(e.pid).stage;
+  const peers = PIVOS.filter(q => q.stage === st && q.id !== e.pid).map(q => { const b = sceneAt(q.id, before.day, idx), a = sceneAt(q.id, after.day, idx); return b != null && a != null ? a - b : null; }).filter(v => v != null);
+  const dc = median(peers); return { before, after, d, dc, rel: dc != null ? d - dc : null };
+}
+const climaBetween = (a, b) => { let qs = 0, cal = 0, mol = 0, n = 0, tx = 0, ur = 0; for (let d = a + 1; d <= b; d++) { const c = CLIMA[d]; n++; tx += c.tmax; ur += c.ur; if (c.quenteSeco) qs++; if (c.calor) cal++; if (c.molhado) mol++; } return { qs, cal, mol, tmax: n ? tx / n : null, ur: n ? ur / n : null }; };
+
+// ================= estado =================
+const S = { layer: 'pragas', alvo: 'acaro', idx: 'NDVI', scale: 'abs', day: DAYS, sel: null, group: 'prod', sort: { k: 'red', dir: -1 }, playing: null,
+  show: { def: true, adub: true, agua: true, clima: true }, pop: null };
+try { const g = JSON.parse(localStorage.getItem('pdt.v3') || '{}'); ['layer', 'alvo', 'idx'].forEach(k => { if (g[k]) S[k] = g[k]; }); } catch (e) {}
+const save = () => { try { localStorage.setItem('pdt.v3', JSON.stringify({ layer: S.layer, alvo: S.alvo, idx: S.idx })); } catch (e) {} };
+const A = () => ALVOS.find(a => a.id === S.alvo);
+const isPest = () => S.layer === 'pragas';
+
+function pestAt(pid, day) {
+  const sim = PEST[S.alvo][pid]; if (!sim) return null; let o = null; for (const q of sim.obs) { if (q.day <= day) o = q; else break; }
+  if (!o) return { state: 'nodata', age: null }; const age = day - o.day; if (age > 14) return { state: 'nodata', age, v: o.v, day: o.day };
+  const ratio = o.v / A().nc; return { v: o.v, day: o.day, age, ratio, state: ratio >= 1 ? 'bad' : ratio >= .5 ? 'warn' : 'ok' };
+}
+function satAt(pid, day) {
+  const sc = SAT[pid].scenes.filter(s => s.day <= day); if (!sc.length) return { state: 'noimg' };
+  const last = sc[sc.length - 1], valid = [...sc].reverse().find(s => s.ok);
+  if (!last.ok && (!valid || day - valid.day > 15)) return { state: 'cloud', cloud: last.cloud, day: last.day };
+  if (!valid || day - valid.day > 15) return { state: 'noimg' };
+  return { state: 'ok', v: valid[S.idx].med, day: valid.day, age: day - valid.day, cloudLast: last.ok ? null : last };
+}
+function pestGlobal(day) { let sw = 0, sv = 0, acima = 0, sem = 0, n = 0;
+  PIVOS.forEach(p => { if (p.pestOff) return; n++; const q = pestAt(p.id, day); if (!q || q.state === 'nodata') { sem++; return; } sw += p.ha; sv += p.ha * q.v; if (q.state === 'bad') acima++; });
+  return { v: sw ? sv / sw : null, acima, sem, n }; }
+function satGlobal(day, stage) { const vals = []; let sw = 0, sv = 0, sem = 0, n = 0;
+  PIVOS.forEach(p => { if (p.stage === 'solo' || (p.stage === 'velha' && day > 75)) return; if (stage && p.stage !== stage) return; n++; const q = satAt(p.id, day); if (q.state !== 'ok') { sem++; return; } sw += p.ha; sv += p.ha * q.v; vals.push(q.v); });
+  vals.sort((a, b) => a - b); const qt = f => vals.length ? vals[Math.min(vals.length - 1, Math.floor(f * (vals.length - 1)))] : null;
+  return { v: sw ? sv / sw : null, q25: qt(.25), q75: qt(.75), sem, n }; }
+function waterOn(day, pid) { if (pid) return { rain: RAINMM[day] || 0, irr: WATER[pid].irr[day] }; let sw = 0, si = 0;
+  PIVOS.forEach(p => { if (NEED[p.stage] > 0) { sw += p.ha; si += p.ha * WATER[p.id].irr[day]; } }); return { rain: RAINMM[day] || 0, irr: sw ? si / sw : 0 }; }
+
+const fmtV = (v, a) => (a.un === '%' ? nf0.format(v) + ' %' : nf1.format(v) + a.curto);
+const fmtVlong = (v, a) => (a.un === '%' ? nf0.format(v) + ' % de ' + a.med : nf1.format(v) + ' ' + a.med);
+const stateTxt = { bad: 'acima do NC', warn: 'perto do NC', ok: 'abaixo do NC', nodata: 'sem vistoria recente' };
+const stateVar = { bad: 'var(--bad)', warn: 'var(--warn)', ok: 'var(--ok)', nodata: 'var(--nodata)' };
+const fmtRed = r => r >= 0 ? nf0.format(r * 100) + ' %' : 'subiu ' + nf0.format(-r * 100) + ' %';
+const fmtQ = (q, du) => (q >= 100 ? nf0.format(q) : nf1.format(q)) + ' ' + du;
+const CLS_TXT = ['Falha', 'Fraco', 'Atenção', 'Médio', 'Bom', 'Vigor alto'];
+const climaTxt = c => nf0.format(c.tmax) + ' °C máx · ' + nf0.format(c.tmin) + ' °C mín · UR ' + nf0.format(c.ur) + ' % · folha molhada ' + nf0.format(c.molh) + ' h';
+function satClass(v) {
+  let cuts = IDX[S.idx].cuts;
+  if (S.scale === 'rel') { const vals = PIVOS.map(p => { const q = satAt(p.id, S.day); return q.state === 'ok' && p.stage !== 'solo' && !(p.stage === 'velha' && S.day > 75) ? q.v : null; }).filter(x => x != null).sort((a, b) => a - b);
+    if (vals.length > 3) { const lo = vals[Math.floor(.02 * (vals.length - 1))], hi = vals[Math.ceil(.98 * (vals.length - 1))]; cuts = [1, 2, 3, 4, 5].map(i => lo + (hi - lo) * i / 6); } }
+  let c = 0; while (c < 5 && v >= cuts[c]) c++; return { c, cuts };
+}
+const tBin = t => t < 28 ? 1 : t < 31 ? 2 : t < 33 ? 3 : t < 35 ? 4 : 5;
+const uBin = u => u < 40 ? 1 : u < 50 ? 2 : u < 65 ? 3 : u < 80 ? 4 : 5;
+
+// ================= ícones =================
+const ICON = {
+  def: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5C6 4.6 3.5 7.2 3.5 9.9a4.5 4.5 0 0 0 9 0C12.5 7.2 10 4.6 8 1.5z"/></svg>',
+  adub: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 2.5C7 2.6 3.2 5.6 3.2 10.1c0 .9.2 1.8.6 2.6L2.5 14l.9.9 1.4-1.4c.7.4 1.5.5 2.3.5 4.4 0 6.6-4 6.4-11.5zM5.6 12.1c1.2-2.6 3.1-4.6 5.6-6.1-2.1 1.8-3.7 3.8-4.6 6.5z"/></svg>',
+  oper: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3h10v2H3zm1 3h8l-1 8H5z"/></svg>',
+  agua: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 6.5c1.5 0 1.5-1 3-1s1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 3-1v2c-1.5 0-1.5 1-3 1s-1.5-1-3-1-1.5 1-3 1-1.5-1-3-1-1.5 1-3 1zm0 4c1.5 0 1.5-1 3-1s1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 3-1v2c-1.5 0-1.5 1-3 1s-1.5-1-3-1-1.5 1-3 1-1.5-1-3-1-1.5 1-3 1z"/></svg>',
+  clima: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 1.5a2 2 0 0 1 2 2v6.3a3.3 3.3 0 1 1-4 0V3.5a2 2 0 0 1 2-2zm0 9.2a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2zM11 3h3v1.5h-3zm0 3h3v1.5h-3z"/></svg>' };
+const KIND_TXT = { def: 'Defensivo', adub: 'Adubação', oper: 'Operação' };
+
+// ================= barra de camadas =================
+function seg(el, items, current, onPick) {
+  el.innerHTML = '';
+  items.forEach(([id, label]) => { const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.id = el.id + '-' + id; b.textContent = label;
+    b.setAttribute('aria-checked', String(id === current)); b.tabIndex = id === current ? 0 : -1; b.addEventListener('click', () => onPick(id));
+    b.addEventListener('keydown', e => { if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return; e.preventDefault(); const i = items.findIndex(q => q[0] === current);
+      const j = (i + (e.key === 'ArrowRight' ? 1 : items.length - 1)) % items.length; onPick(items[j][0]); const nb = document.getElementById(el.id + '-' + items[j][0]); if (nb) nb.focus(); });
+    el.appendChild(b); });
+}
+function renderBar() {
+  seg(document.getElementById('layers'), [['pragas', 'Pragas e doenças'], ['sat', 'Satélite']], S.layer, id => { S.layer = id; closePop(); save(); renderAll(); });
+  document.getElementById('crumbLayer').textContent = isPest() ? 'Pragas e doenças' : 'Satélite';
+  const subs = document.getElementById('subs'), scale = document.getElementById('scale');
+  document.getElementById('subsLbl').textContent = isPest() ? 'Alvo' : 'Índice';
+  document.getElementById('scaleLbl').hidden = scale.hidden = isPest();
+  if (isPest()) seg(subs, ALVOS.map(a => [a.id, a.nome]), S.alvo, id => { S.alvo = id; closePop(); save(); renderAll(); });
+  else { seg(subs, [['NDVI', 'NDVI'], ['NDRE', 'NDRE']], S.idx, id => { S.idx = id; closePop(); save(); renderAll(); });
+    seg(scale, [['abs', 'Absoluto'], ['rel', 'Fazenda']], S.scale, id => { S.scale = id; renderBar(); renderMap(); renderLegend(); }); }
+  renderMeasure();
+}
+function renderMeasure() {
+  const el = document.getElementById('measure');
+  if (isPest()) { const a = A(); el.innerHTML = 'Medida: <b>' + (a.un === '%' ? '% de ' : '') + a.med + '</b> · NC <b>' + fmtV(a.nc, a) + '</b> <span title="Valor de exemplo; no Safrion vem do protocolo publicado">(protocolo)</span>'; }
+  else { const last = SCENES.filter(d => d <= S.day).pop(); el.innerHTML = 'Sentinel-2 · 10 m · cena de <b>' + (last != null ? fmtD(last) : '—') + '</b> · mediana do pivô, só pixels sem nuvem <span title="Série sintética ancorada nas cenas de 10/09 e 25/09 do protótipo">(sintético)</span>'; }
+}
+function renderToggles() {
+  const el = document.getElementById('toggles'); el.innerHTML = '<span>Na linha do tempo:</span>';
+  [['def', 'Defensivos', 'var(--def)', ICON.def], ['adub', 'Adubação', 'var(--adub)', ICON.adub], ['agua', 'Chuva e irrigação', 'var(--irr)', ICON.agua], ['clima', 'Temperatura e umidade', 'var(--t4)', ICON.clima]].forEach(([k, t, c, ic]) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'tg'; b.setAttribute('aria-pressed', String(S.show[k]));
+    b.innerHTML = '<span class="ic" style="color:' + c + ';border-color:' + c + '">' + ic + '</span>' + t;
+    b.addEventListener('click', () => { S.show[k] = !S.show[k]; closePop(); renderToggles(); renderTimeline(); renderPanel(); });
+    el.appendChild(b); });
+}
+
+// ================= mapa =================
+const mapEl = document.getElementById('map'); let mapTip = null;
+function renderMap() {
+  mapEl.innerHTML = ''; const a = A();
+  const lake = document.createElement('div'); lake.className = 'lake'; lake.setAttribute('aria-hidden', 'true'); Object.assign(lake.style, { left: '54%', top: '57%', width: '9.5%', height: '13%' }); mapEl.appendChild(lake);
+  PIVOS.forEach(p => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'pv';
+    const dd = 5.6 + Math.sqrt(p.ha) * 0.8; b.style.left = p.x + '%'; b.style.top = p.y + '%'; b.style.width = dd + '%';
+    let lab = '<span class="id">' + p.id + '</span>', desc = p.id + ', ' + nf1.format(p.ha) + ' ha, ' + STAGE_TXT[p.stage], tip = '<b>' + p.id + ' · ' + nf1.format(p.ha) + ' ha · ' + STAGE_TXT[p.stage] + '</b>';
+    if (isPest()) {
+      if (p.pestOff) { b.classList.add('nocrop'); b.disabled = true; b.innerHTML = lab + '<span class="s">' + STAGE_TXT[p.stage] + '</span>'; b.setAttribute('aria-label', desc); mapEl.appendChild(b); return; }
+      const q = pestAt(p.id, S.day); b.classList.add(q.state);
+      if (q.state !== 'nodata') lab += '<span class="v num">' + fmtV(q.v, a) + '</span><span class="s">' + stateTxt[q.state] + '</span>'; else lab += '<span class="s">' + (q.day != null ? 'vistoria há ' + q.age + ' d' : 'sem vistoria') + '</span>';
+      const txt = q.state === 'nodata' ? 'sem vistoria nos últimos 14 dias' : fmtVlong(q.v, a) + ', ' + stateTxt[q.state] + ', vistoria em ' + fmtD(q.day);
+      desc += ', ' + txt; tip += txt[0].toUpperCase() + txt.slice(1);
+    } else {
+      const q = satAt(p.id, S.day);
+      if (p.stage === 'solo' || (p.stage === 'velha' && S.day > 75)) { b.classList.add('nocrop'); lab += '<span class="s">sem lavoura</span>'; desc += ', sem lavoura'; tip += 'Sem lavoura · índice de solo exposto'; }
+      else if (q.state === 'cloud') { b.classList.add('cloud'); lab += '<span class="s">nuvem ' + nf0.format(q.cloud) + ' %</span>'; desc += ', nuvem em ' + fmtD(q.day); tip += 'Cena de ' + fmtD(q.day) + ' com ' + nf0.format(q.cloud) + ' % de nuvem: sem valor'; }
+      else if (q.state === 'noimg') { b.classList.add('nodata'); lab += '<span class="s">sem imagem</span>'; desc += ', sem imagem válida em 15 dias'; tip += 'Sem imagem válida nos últimos 15 dias'; }
+      else { const { c } = satClass(q.v); b.style.background = 'var(--c' + (c + 1) + ')'; if (c === 2 || c === 3) b.classList.add('dark');
+        lab += '<span class="v num">' + S.idx + ' ' + nf2.format(q.v) + '</span><span class="s">' + CLS_TXT[c].toLowerCase() + '</span>';
+        desc += ', ' + S.idx + ' ' + nf2.format(q.v) + ', ' + CLS_TXT[c].toLowerCase() + ', cena de ' + fmtD(q.day);
+        tip += S.idx + ' ' + nf2.format(q.v) + ' (' + CLS_TXT[c].toLowerCase() + ') · cena de ' + fmtD(q.day) + (q.cloudLast ? '<br>Cena de ' + fmtD(q.cloudLast.day) + ' com nuvem: mantida a anterior' : '') +
+          (WATER[p.id].suff < .8 ? '<br>Irrigação cobre ' + nf0.format(WATER[p.id].suff * 100) + ' % da necessidade' : ''); }
+    }
+    const recent = EVENTS.filter(e => e.pid === p.id && e.day <= S.day && S.day - e.day <= 10 && (isPest() ? (e.kind === 'def' && e.alvo === S.alvo) : e.kind !== 'def'));
+    if (recent.length) { const kinds = [...new Set(recent.map(e => e.kind))];
+      lab += '<span class="badges" aria-hidden="true">' + kinds.map(k => '<span class="badge" style="border-color:var(--' + k + ');color:var(--' + k + ')">' + ICON[k] + '</span>').join('') + '</span>';
+      const last = recent[recent.length - 1]; desc += ', ' + KIND_TXT[last.kind].toLowerCase() + ' em ' + fmtD(last.day); tip += '<br>' + KIND_TXT[last.kind] + ' em ' + fmtD(last.day) + ': ' + last.items.map(i => i.n).join(' + '); }
+    b._tip = tip + '<br><span style="color:var(--muted)">Clique para ver a evolução</span>';
+    b.innerHTML = lab; b.setAttribute('aria-label', desc); b.setAttribute('aria-pressed', String(S.sel === p.id));
+    b.addEventListener('click', () => select(S.sel === p.id ? null : p.id));
+    b.addEventListener('mouseenter', () => showMapTip(b)); b.addEventListener('mouseleave', hideMapTip); b.addEventListener('focus', () => showMapTip(b)); b.addEventListener('blur', hideMapTip);
+    mapEl.appendChild(b);
+  });
+  const demo = document.createElement('div'); demo.className = 'demo'; demo.textContent = 'Demonstração sintética'; mapEl.appendChild(demo);
+}
+function showMapTip(el) { hideMapTip(); mapTip = document.createElement('div'); mapTip.className = 'maptip'; mapTip.innerHTML = el._tip || ''; mapEl.appendChild(mapTip);
+  const mr = mapEl.getBoundingClientRect(), er = el.getBoundingClientRect(); let left = er.left - mr.left + er.width / 2 - mapTip.offsetWidth / 2, top = er.top - mr.top - mapTip.offsetHeight - 8; if (top < 4) top = er.bottom - mr.top + 8;
+  mapTip.style.left = Math.max(4, Math.min(mr.width - mapTip.offsetWidth - 4, left)) + 'px'; mapTip.style.top = top + 'px'; }
+function hideMapTip() { if (mapTip) { mapTip.remove(); mapTip = null; } }
+function renderLegend() {
+  const el = document.getElementById('legend');
+  if (isPest()) { el.innerHTML = '<span><i style="background:var(--bad)"></i>acima do NC</span><span><i style="background:var(--warn)"></i>perto do NC (50 a 99 %)</span><span><i style="background:var(--ok)"></i>abaixo do NC</span><span><i style="background:var(--nodata)"></i>sem vistoria em 14 dias</span><span><i style="background:var(--nocrop)"></i>sem lavoura</span><span><i style="background:var(--surface);border:2px solid var(--def)"></i>defensivo nos últimos 10 dias</span>'; return; }
+  const { cuts } = satClass(.5); const f = v => nf2.format(v);
+  const ranges = [0, 1, 2, 3, 4, 5].map(i => i === 0 ? '< ' + f(cuts[0]) : i === 5 ? '≥ ' + f(cuts[4]) : f(cuts[i - 1]) + ' a ' + f(cuts[i]));
+  el.innerHTML = ranges.map((r, i) => '<span><i style="background:var(--c' + (i + 1) + ')"></i>' + CLS_TXT[i] + ' ' + r + '</span>').join('') +
+    '<span><i class="hatch"></i>nuvem ou sem imagem</span><span><i style="background:var(--nocrop)"></i>sem lavoura</span><span><i style="background:var(--surface);border:2px solid var(--adub)"></i>adubação nos últimos 10 dias</span>' +
+    '<span class="note">' + (S.scale === 'rel' ? 'Contraste da fazenda: compara os pivôs nesta data; não mede gravidade.' : 'Limites absolutos de exemplo; no Safrion são configurados por cultura e estádio.') + '</span>';
+}
+
+// ================= gráfico (fazenda ou talhão) com manejo e clima =================
+function svgEl(tag, attrs, parent) { const e = document.createElementNS('http://www.w3.org/2000/svg', tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function niceMax(v) { const p = Math.pow(10, Math.floor(Math.log10(v))); const n = v / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * p; }
+function chartEvents(pid, kinds, bin) {
+  const list = EVENTS.filter(e => (pid ? e.pid === pid : true) && ((e.kind === 'def' && kinds.includes('def') && (!isPest() || e.alvo === S.alvo)) || ((e.kind === 'adub' || e.kind === 'oper') && kinds.includes('adub'))));
+  const groups = {}; list.forEach(e => { const kind = e.kind === 'def' ? 'def' : 'adub', b = Math.floor(e.day / bin), k = kind + '@' + b; (groups[k] = groups[k] || { bin: b, kind, list: [] }).list.push(e); });
+  return Object.values(groups).map(g => { g.days = [...new Set(g.list.map(e => e.day))].sort((a, b) => a - b); g.day = g.days.length === 1 ? g.days[0] : Math.min(DAYS, g.bin * bin + (bin - 1) / 2);
+    g.icon = g.list.every(e => e.kind === 'oper') ? 'oper' : g.kind; return g; });
+}
+const rangeTxt = days => days.length > 1 ? fmtD(days[0]) + ' a ' + fmtD(days[days.length - 1]) : fmtD(days[0]);
+function buildChart(opts) {
+  const host = opts.host, layer = opts.layer || host; host.innerHTML = ''; if (layer !== host) layer.querySelectorAll(':scope > .evt, :scope > .lanelab, :scope > .pop').forEach(x => x.remove());
+  const W = Math.max(280, host.clientWidth || 600), narrow = W < 520, pid = opts.pid;
+  const laneKinds = []; if (S.show.def) laneKinds.push('def'); if (S.show.adub) laneKinds.push('adub');
+  const plotH = opts.compact ? 120 : (narrow ? 110 : 120);
+  const m = { l: 38, r: opts.compact || narrow ? 12 : 56, t: opts.compact ? 12 : 26 };
+  const waterH = S.show.agua ? 24 : 0, climaH = S.show.clima ? 26 : 0, laneH = 24 * laneKinds.length;
+  const plotB = m.t + plotH, waterT = plotB + 8, climaT = waterT + waterH + (waterH ? 6 : 0), laneT = climaT + climaH + (climaH ? 6 : 0), axisT = laneT + laneH + 4;
+  const H = axisT + 16, pw = W - m.l - m.r, X = d => m.l + (d / DAYS) * pw;
+  let series, yMax, yMin = 0, ref = null, fmtY;
+  if (isPest()) { const a = A(); fmtY = v => a.un === '%' ? nf0.format(v) : nf1.format(v);
+    const g = []; for (let d = 0; d <= DAYS; d++) g.push(pestGlobal(d).v); const own = pid ? PEST[S.alvo][pid].obs : null;
+    yMax = niceMax(Math.max(a.nc * 1.5, ...g.map(v => v || 0), ...(own || []).map(o => o.v)) * 1.08); ref = a.nc; series = { g, own }; }
+  else { fmtY = v => nf2.format(v); const g = [], q25 = [], q75 = [], stage = pid ? P(pid).stage : null;
+    for (let d = 0; d <= DAYS; d++) { const s = satGlobal(d, stage && !['solo', 'velha'].includes(stage) ? stage : null); g.push(s.v); q25.push(s.q25); q75.push(s.q75); }
+    const own = pid ? SAT[pid].scenes : null;
+    const vals = [...g, ...q25, ...q75].filter(v => v != null).concat(own ? own.flatMap(s => [s[S.idx].p10, s[S.idx].p90]) : []);
+    yMin = Math.max(0, Math.floor((Math.min(...vals) - .03) * 20) / 20); yMax = Math.min(1, Math.ceil((Math.max(...vals) + .03) * 20) / 20); series = { g, q25, q75, own }; }
+  const Y = v => m.t + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+  const svg = svgEl('svg', { class: 'chart', viewBox: `0 0 ${W} ${H}`, 'aria-hidden': 'true' });
+  for (let i = 0; i <= 2; i++) { const v = yMin + (yMax - yMin) * i / 2, y = Y(v); svgEl('line', { class: i ? 'grid' : 'ax', x1: m.l, x2: W - m.r, y1: y, y2: y }, svg);
+    const t = svgEl('text', { x: m.l - 6, y: y + 4, 'text-anchor': 'end' }, svg); t.textContent = fmtY(v); }
+  if (ref != null) { svgEl('line', { class: 'ncl', x1: m.l, x2: W - m.r, y1: Y(ref), y2: Y(ref) }, svg);
+    if (!(opts.compact || narrow)) { const t = svgEl('text', { x: W - m.r + 6, y: Y(ref) + 4 }, svg); t.textContent = 'NC ' + fmtV(ref, A()); t.style.fill = 'var(--nc)'; t.style.fontWeight = '700'; } }
+  const bin = Math.max(1, Math.ceil(25 / (pw / DAYS)));
+  const evs = chartEvents(pid, laneKinds, bin);
+  if (pid) evs.forEach(g => svgEl('line', { class: 'evline', x1: X(g.day), x2: X(g.day), y1: m.t, y2: laneT + laneKinds.indexOf(g.kind) * 24 + 12, stroke: 'var(--' + g.kind + ')' }, svg));
+  const pathOf = (arr, gx, gy) => { let s = ''; arr.forEach((v, i) => { const y = gy(v, i); if (y == null) return; s += (s ? 'L' : 'M') + X(gx(v, i)).toFixed(1) + ' ' + Y(y).toFixed(1); }); return s; };
+  if (isPest()) {
+    const dg = pathOf(series.g, (v, i) => i, v => v);
+    if (!pid) { const f = series.g.findIndex(v => v != null); if (f >= 0) svgEl('path', { class: 'mf', d: dg + `L${X(DAYS)} ${Y(0)}L${X(f)} ${Y(0)}Z` }, svg); }
+    svgEl('path', { class: pid ? 'gl' : 'ml', d: dg }, svg);
+    if (pid) { svgEl('path', { class: 'ml', d: pathOf(series.own, o => o.day, o => o.v) }, svg);
+      series.own.forEach(o => { const c = svgEl('circle', { cx: X(o.day), cy: Y(o.v), r: 4, class: 'pt' + (o.v >= ref ? ' bad' : '') }, svg); c.style.opacity = o.day <= S.day ? 1 : .35; }); }
+  } else {
+    let up = '', dn = '';
+    if (pid) { const ok = series.own.filter(s => s.ok); ok.forEach(s => { up += (up ? 'L' : 'M') + X(s.day).toFixed(1) + ' ' + Y(s[S.idx].p90).toFixed(1); }); [...ok].reverse().forEach(s => { dn += 'L' + X(s.day).toFixed(1) + ' ' + Y(s[S.idx].p10).toFixed(1); }); }
+    else { series.q75.forEach((v, d) => { if (v == null) return; up += (up ? 'L' : 'M') + X(d).toFixed(1) + ' ' + Y(v).toFixed(1); }); for (let d = DAYS; d >= 0; d--) { const v = series.q25[d]; if (v != null) dn += 'L' + X(d).toFixed(1) + ' ' + Y(v).toFixed(1); } }
+    if (up) svgEl('path', { class: 'bandf', d: up + dn + 'Z' }, svg);
+    svgEl('path', { class: pid ? 'gl' : 'ml', d: pathOf(series.g, (v, i) => i, v => v) }, svg);
+    if (pid) { const ok = series.own.filter(s => s.ok); svgEl('path', { class: 'ml', d: pathOf(ok, s => s.day, s => s[S.idx].med) }, svg);
+      series.own.forEach(s => { if (s.ok) { const c = svgEl('circle', { cx: X(s.day), cy: Y(s[S.idx].med), r: 3.5, class: 'pt' }, svg); c.style.opacity = s.day <= S.day ? 1 : .35; }
+        else svgEl('circle', { cx: X(s.day), cy: plotB - 5, r: 3.5, class: 'pt cloud' }, svg); }); }
+    SCENES.forEach(d => svgEl('line', { class: 'scn', x1: X(d), x2: X(d), y1: plotB, y2: plotB + 4 }, svg));
+  }
+  svgEl('line', { class: 'ax', x1: m.l, x2: W - m.r, y1: plotB, y2: plotB }, svg);
+  // água (mm): chuva + irrigação empilhadas
+  if (waterH) { const vals = []; for (let d = 0; d <= DAYS; d++) vals.push(waterOn(d, pid)); const maxMm = Math.max(10, ...vals.map(v => v.rain + v.irr));
+    const lab = svgEl('text', { x: m.l - 6, y: waterT + waterH - 3, 'text-anchor': 'end' }, svg); lab.textContent = 'mm';
+    vals.forEach((v, d) => { const hi = v.irr / maxMm * waterH, hr = v.rain / maxMm * waterH; if (hi > 0) svgEl('rect', { class: 'irrb', x: X(d) - 1.5, y: waterT + waterH - hi, width: 3, height: hi, rx: 1 }, svg);
+      if (hr > 0) svgEl('rect', { class: 'rainb', x: X(d) - 1.5, y: waterT + waterH - hi - hr, width: 3, height: hr, rx: 1 }, svg); }); }
+  // clima: Tmáx e UR em faixas de cor; marca de condição favorável ao alvo (pragas) ou calor ≥ 35 °C (satélite)
+  if (climaH) { const cw = Math.max(1.5, pw / DAYS + .4);
+    const l1 = svgEl('text', { x: m.l - 6, y: climaT + 8, 'text-anchor': 'end' }, svg); l1.textContent = '°C';
+    const l2 = svgEl('text', { x: m.l - 6, y: climaT + 18, 'text-anchor': 'end' }, svg); l2.textContent = 'UR';
+    CLIMA.forEach((c, d) => { svgEl('rect', { x: X(d) - cw / 2, y: climaT, width: cw, height: 8, fill: 'var(--t' + tBin(c.tmax) + ')' }, svg);
+      svgEl('rect', { x: X(d) - cw / 2, y: climaT + 10, width: cw, height: 8, fill: 'var(--u' + uBin(c.ur) + ')' }, svg);
+      const fav = isPest() ? A().fav(c) : c.calor; if (fav) svgEl('rect', { class: 'favb', x: X(d) - cw / 2, y: climaT + 21, width: cw, height: 4, rx: 1 }, svg); });
+  }
+  const stepD = opts.compact || narrow ? 14 : 7;
+  for (let d = 1; d <= DAYS; d += stepD) { const t = svgEl('text', { x: X(d), y: axisT + 11, 'text-anchor': 'middle' }, svg); t.textContent = fmtD(d); }
+  const cur = svgEl('g', {}, svg); const hov = svgEl('line', { class: 'hoverline', y1: m.t, y2: axisT, x1: -10, x2: -10, visibility: 'hidden' }, svg);
+  if (pid) svgEl('line', { class: 'cursor', x1: X(S.day), x2: X(S.day), y1: m.t - 4, y2: axisT }, svg);
+  host.appendChild(svg);
+  laneKinds.forEach((k, i) => { const l = document.createElement('div'); l.className = 'lanelab'; l.style.top = (laneT + i * 24 + 12) + 'px'; l.textContent = k === 'def' ? 'Def.' : 'Adub.'; l.setAttribute('aria-hidden', 'true'); layer.appendChild(l); });
+  evs.forEach(g => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'evt ' + g.kind; b.style.left = X(g.day) + 'px'; b.style.top = (laneT + laneKinds.indexOf(g.kind) * 24 + 12) + 'px';
+    b.innerHTML = ICON[g.icon] + (g.list.length > 1 ? '<span class="n">' + g.list.length + '</span>' : ''); if (g.days[0] > S.day) b.style.opacity = .35;
+    const what = g.list.length > 1 ? g.list.length + (g.kind === 'def' ? ' aplicações de defensivo' : ' adubações e operações') : g.list[0].items.map(i => i.n).join(' + ') + (pid ? '' : ' em ' + g.list[0].pid);
+    b.dataset.days = g.days.join(','); b.setAttribute('aria-label', rangeTxt(g.days) + ': ' + what + '. Ver insumos, doses e efeito.'); b.setAttribute('aria-haspopup', 'dialog'); b.setAttribute('aria-expanded', 'false');
+    b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); openPop(layer, b, g, X(g.day), pid); });
+    layer.appendChild(b);
+  });
+  return { W, H, m, X, Y, cur, hov, top0: m.t, axisT, series };
+}
+
+// ================= janela de insumos, doses e efeito =================
+function eventHTML(e, pid, multi) {
+  const p = P(e.pid), c = CLIMA[e.day]; let h = '<div class="ev">';
+  h += '<div><b>' + (multi ? fmtD(e.day) + ' · ' : '') + (pid ? '' : e.pid + ' · ') + (e.kind === 'def' ? 'Defensivo · ' + ALVOS.find(a => a.id === e.alvo).nome : e.via) + '</b> <span class="k">· ' + nf1.format(p.ha) + ' ha</span></div>';
+  h += '<table>' + e.items.map(it => '<tr><td>' + it.n + '</td><td class="r num">' + dose(it.dose) + ' ' + it.du + '/ha</td><td class="r num">' + fmtQ(it.total, it.du) + '</td></tr>').join('') + '</table>';
+  if (e.kind === 'adub') { const nut = {}; e.items.forEach(it => Object.entries(it.nut).forEach(([k, v]) => nut[k] = (nut[k] || 0) + v)); h += '<div class="k">Nutrientes: ' + Object.entries(nut).map(([k, v]) => k + ' ' + nf1.format(v) + ' kg/ha').join(' · ') + '</div>'; }
+  if (e.kind === 'def') { const ap = e.ap; h += '<div class="k">' + ap.prod.g + ' · ' + ap.entrada + 'ª entrada' + (ap.consec > 0 ? ' · ' + (ap.consec + 1) + 'ª seguida do grupo' : '') + '</div><div class="k">Calda: ' + e.calda + ' · ' + nf0.format(e.caldaL) + ' L no talhão</div>'; }
+  if (e.kind === 'oper') h += '<div class="k">' + e.os + ' · Calda: ' + e.calda + '</div>';
+  h += '<div class="k">Clima no dia: ' + climaTxt(c) + '</div>';
+  if (e.kind === 'def' && (c.ur < 50 || c.tmax > 32)) h += '<div class="k warn">Dia quente e seco: confira se a aplicação foi feita nas horas frescas, com vento e umidade dentro da faixa.</div>';
+  if (e.kind === 'def') { const ap = e.ap, a = ALVOS.find(x => x.id === e.alvo); const known = ap.after && ap.after.day <= S.day && ap.red != null;
+    if (known) { const cl = climaBetween(ap.day, ap.after.day);
+      h += '<div class="eff">Efeito no alvo: <b>' + fmtV(ap.before.v, a) + ' → ' + fmtV(ap.after.v, a) + '</b> (' + (ap.red >= 0 ? '−' + nf0.format(ap.red * 100) + ' %' : 'subiu ' + nf0.format(-ap.red * 100) + ' %') + ') · vistorias ' + fmtD(ap.before.day) + ' e ' + fmtD(ap.after.day) +
+        '<br>Até a vistoria: ' + (a.id === 'antrac' ? cl.mol + ' dia(s) com molhamento ≥ 8 h' : cl.qs + ' dia(s) quentes e secos') + '</div><button type="button" class="go" data-go="' + ap.after.day + '" data-pid="' + e.pid + '" data-layer="pragas">Ir para a vistoria de ' + fmtD(ap.after.day) + ' ›</button>'; }
+    else h += '<div class="eff">Efeito: aguarda a vistoria de 5 a 14 dias depois.</div>'; }
+  if (e.kind === 'adub') { const ef = vigorEffect(e, S.idx); const known = ef && ef.after.day <= S.day;
+    if (known) { const cl = climaBetween(e.day, ef.after.day);
+      h += '<div class="eff">Vigor (' + S.idx + '): <b>' + nf2.format(ef.before[S.idx].med) + ' → ' + nf2.format(ef.after[S.idx].med) + '</b> (' + signed2(ef.d) + ')' + (ef.rel != null ? ' · em relação aos pivôs ' + STAGE_TXT[p.stage] + ': <b>' + signed2(ef.rel) + '</b>' : '') + ' · cenas ' + fmtD(ef.before.day) + ' e ' + fmtD(ef.after.day) +
+        '<br>No período: ' + cl.cal + ' dia(s) ≥ 35 °C · irrigação cobre ' + nf0.format(WATER[e.pid].suff * 100) + ' % da necessidade</div><button type="button" class="go" data-go="' + ef.after.day + '" data-pid="' + e.pid + '" data-layer="sat">Ir para a cena de ' + fmtD(ef.after.day) + ' ›</button>'; }
+    else h += '<div class="eff">Efeito no vigor: aguarda cena sem nuvem de 10 a 25 dias depois.</div>'; }
+  return h + '</div>';
+}
+function openPop(layer, btn, g, x, pid) {
+  closePop(); const pop = document.createElement('div'); pop.className = 'pop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Manejo de ' + rangeTxt(g.days));
+  const max = 6, list = g.list.slice(0, max);
+  const multi = g.days.length > 1;
+  pop.innerHTML = '<button type="button" class="x" aria-label="Fechar">×</button><h4>' + (multi ? rangeTxt(g.days) : dDate(g.day).toLocaleDateString('pt-BR')) + ' · ' + (g.kind === 'def' ? 'Defensivos' : 'Adubação e operações') + ' · ' + g.list.length + '</h4>' +
+    list.map(e => eventHTML(e, pid, multi)).join('') + (g.list.length > max ? '<div class="note">E mais ' + (g.list.length - max) + ' neste intervalo. Clique num talhão do mapa para ver os dele.</div>' : '');
+  layer.appendChild(pop);
+  const hw = layer.clientWidth; let left = Math.max(4, Math.min(hw - pop.offsetWidth - 4, x - pop.offsetWidth / 2));
+  const bt = parseFloat(btn.style.top), br = btn.getBoundingClientRect(); const above = br.top - pop.offsetHeight - 16 > 8;
+  pop.style.left = left + 'px'; pop.style.top = (above ? bt - pop.offsetHeight - 16 : bt + 16) + 'px';
+  btn.setAttribute('aria-expanded', 'true'); S.pop = { el: pop, btn };
+  pop.addEventListener('pointerdown', e => e.stopPropagation());
+  pop.querySelector('.x').addEventListener('click', () => { closePop(); btn.focus(); });
+  pop.querySelectorAll('.go').forEach(b => b.addEventListener('click', () => { const d = +b.dataset.go; closePop(); stop(); S.layer = b.dataset.layer; S.sel = b.dataset.pid; S.day = d; save(); renderAll(); }));
+  pop.querySelector('.x').focus();
+}
+function closePop() { if (S.pop) { S.pop.btn.setAttribute('aria-expanded', 'false'); S.pop.el.remove(); S.pop = null; } }
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (S.pop) { const b = S.pop.btn; closePop(); b.focus(); } else if (S.sel) select(null); });
+document.addEventListener('pointerdown', e => { if (S.pop && !S.pop.el.contains(e.target) && !S.pop.btn.contains(e.target)) closePop(); });
+
+// ================= linha do tempo da fazenda =================
+const tlEl = document.getElementById('tl'), tlBox = document.getElementById('tlbox'); let TL = null;
+function renderTimeline() {
+  TL = buildChart({ host: tlEl, layer: tlBox, pid: null }); drawCursor();
+  let k = isPest() ? '<span><i class="sw" style="border-color:var(--chart-line)"></i>Média da fazenda (ponderada por área)</span><span><i class="sw d" style="border-color:var(--nc)"></i>Nível de controle (NC)</span>'
+    : '<span><i class="sw" style="border-color:var(--chart-line)"></i>' + S.idx + ' médio da fazenda</span><span><i class="sq" style="background:var(--band)"></i>Metade central dos pivôs</span>';
+  if (S.show.agua) k += '<span><i class="sq" style="background:var(--rain)"></i>Chuva</span><span><i class="sq" style="background:var(--irr)"></i>Irrigação (média)</span>';
+  if (S.show.clima) k += '<span><span class="ramp">' + [1, 2, 3, 4, 5].map(i => '<i style="background:var(--t' + i + ')"></i>').join('') + '</span>Temperatura máxima (&lt; 28 a ≥ 35 °C)</span><span><span class="ramp">' + [1, 2, 3, 4, 5].map(i => '<i style="background:var(--u' + i + ')"></i>').join('') + '</span>Umidade do ar (&lt; 40 a ≥ 80 %)</span><span><i class="sq" style="background:var(--fav);height:4px"></i>' + (isPest() ? 'Favorável a ' + A().nome.toLowerCase() + ': ' + A().favCurto : 'Calor ≥ 35 °C') + '</span>';
+  document.getElementById('tlkeys').innerHTML = k;
+}
+function drawCursor() {
+  if (!TL) return; const { X, Y, m, cur, top0, axisT, series } = TL; cur.innerHTML = '';
+  const x = X(S.day); svgEl('line', { class: 'cursor', x1: x, x2: x, y1: top0 - 6, y2: axisT }, cur);
+  const v = series.g[S.day]; if (v != null) svgEl('circle', { cx: x, cy: Y(v), r: 5, class: 'pt' + (isPest() && v >= A().nc ? ' bad' : '') }, cur);
+  const w = 46, kx = Math.max(m.l, Math.min(TL.W - m.r - w, x - w / 2));
+  svgEl('rect', { class: 'knob', x: kx, y: 2, width: w, height: 18, rx: 9 }, cur); const t = svgEl('text', { class: 'knobtxt', x: kx + w / 2, y: 15, 'text-anchor': 'middle' }, cur); t.textContent = fmtD(S.day);
+  tlEl.setAttribute('aria-valuemin', '0'); tlEl.setAttribute('aria-valuemax', String(DAYS)); tlEl.setAttribute('aria-valuenow', String(S.day)); tlEl.setAttribute('aria-valuetext', dDate(S.day).toLocaleDateString('pt-BR'));
+}
+function dayFromEvent(e) { const r = tlEl.getBoundingClientRect(); const { m, W } = TL; const sx = (e.clientX - r.left) * (W / r.width); return Math.round(Math.max(0, Math.min(DAYS, (sx - m.l) / (W - m.l - m.r) * DAYS))); }
+let dragging = false, tipEl = null;
+tlEl.addEventListener('pointerdown', e => { if (!TL) return; dragging = true; tlEl.setPointerCapture(e.pointerId); stop(); closePop(); setDay(dayFromEvent(e)); });
+tlEl.addEventListener('pointermove', e => { if (!TL) return; const d = dayFromEvent(e); if (dragging) setDay(d); showTlTip(d, e); });
+tlEl.addEventListener('pointerup', e => { dragging = false; try { tlEl.releasePointerCapture(e.pointerId); } catch (x) {} });
+tlEl.addEventListener('pointerleave', hideTlTip);
+tlEl.addEventListener('keydown', e => { const step = e.shiftKey ? 7 : 1; let d = S.day;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowUp') d += step; else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') d -= step; else if (e.key === 'Home') d = 0; else if (e.key === 'End') d = DAYS; else return;
+  e.preventDefault(); stop(); setDay(Math.max(0, Math.min(DAYS, d))); });
+function showTlTip(d, e) {
+  const { X, hov } = TL; hov.setAttribute('x1', X(d)); hov.setAttribute('x2', X(d)); hov.setAttribute('visibility', 'visible');
+  if (!tipEl) { tipEl = document.createElement('div'); tipEl.className = 'tip'; tlEl.appendChild(tipEl); }
+  const w = waterOn(d), c = CLIMA[d]; let h = '<b>' + dDate(d).toLocaleDateString('pt-BR') + '</b>';
+  if (isPest()) { const s = pestGlobal(d), a = A(); h += '<div class="row"><span>Média da fazenda</span><span class="num">' + (s.v != null ? fmtV(s.v, a) : '—') + '</span></div><div class="row"><span>Acima do NC</span><span class="num">' + s.acima + ' de ' + s.n + '</span></div>'; }
+  else { const s = satGlobal(d); h += '<div class="row"><span>' + S.idx + ' médio</span><span class="num">' + (s.v != null ? nf2.format(s.v) : '—') + '</span></div>' + (SCENES.includes(d) ? '<div class="row"><span>Cena de satélite</span><span>' + ((SCENE_CLOUD[d] || 0) > 20 ? 'com nuvem' : 'sem nuvem') + '</span></div>' : ''); }
+  h += '<div class="row"><span>Temperatura</span><span class="num">' + nf0.format(c.tmax) + ' / ' + nf0.format(c.tmin) + ' °C</span></div><div class="row"><span>Umidade do ar</span><span class="num">' + nf0.format(c.ur) + ' %</span></div>' +
+    '<div class="row"><span>Folha molhada</span><span class="num">' + nf0.format(c.molh) + ' h</span></div><div class="row"><span>Chuva · irrigação</span><span class="num">' + nf0.format(w.rain) + ' · ' + nf1.format(w.irr) + ' mm</span></div>';
+  tipEl.innerHTML = h; const r = tlEl.getBoundingClientRect(); let left = e.clientX - r.left + 12; if (left + 210 > r.width) left = e.clientX - r.left - 222; tipEl.style.left = Math.max(0, left) + 'px'; tipEl.style.top = '0px';
+}
+function hideTlTip() { if (tipEl) { tipEl.remove(); tipEl = null; } if (TL) TL.hov.setAttribute('visibility', 'hidden'); }
+function renderNow() {
+  const el = document.getElementById('now'), c = CLIMA[S.day]; const dt = '<strong>' + dDate(S.day).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' }) + '</strong>';
+  const cl = ' · ' + nf0.format(c.tmax) + ' °C · UR ' + nf0.format(c.ur) + ' %';
+  if (isPest()) { const a = A(), s = pestGlobal(S.day); el.innerHTML = dt + cl + ' · média da fazenda ' + (s.v != null ? '<strong class="num">' + fmtV(s.v, a) + '</strong> (' + nf1.format(s.v / a.nc) + '× NC)' : '—') + ' · <span class="num">' + s.acima + '</span> de ' + s.n + ' talhões acima do NC'; }
+  else { const s = satGlobal(S.day); el.innerHTML = dt + cl + ' · ' + S.idx + ' médio ' + (s.v != null ? '<strong class="num">' + nf2.format(s.v) + '</strong>' : '—') + ' · ' + (s.n - s.sem) + ' de ' + s.n + ' pivôs com imagem válida'; }
+}
+function setDay(d) { if (d === S.day) return; S.day = d; closePop(); renderMeasure(); renderMap(); renderLegend(); renderTimeline(); renderNow(); renderPanel(); }
+function stop() { if (S.playing) { clearInterval(S.playing); S.playing = null; setPlayBtn(); } }
+function setPlayBtn() { const b = document.getElementById('play'); b.querySelector('span').textContent = S.playing ? 'Pausar' : 'Reproduzir'; b.setAttribute('aria-label', S.playing ? 'Pausar a evolução' : 'Reproduzir a evolução');
+  b.querySelector('svg').innerHTML = S.playing ? '<path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/>' : '<path d="M4 2.5v11l9-5.5z"/>'; }
+document.getElementById('play').addEventListener('click', () => { if (S.playing) { stop(); return; } if (S.day >= DAYS) setDay(0);
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  S.playing = setInterval(() => { if (S.day >= DAYS) { stop(); return; } setDay(Math.min(DAYS, S.day + (reduce ? 7 : 1))); }, reduce ? 600 : 150); setPlayBtn(); });
+document.getElementById('today').addEventListener('click', () => { stop(); setDay(DAYS); });
+
+// ================= painel =================
+const panelEl = document.getElementById('panel');
+function select(pid) { S.sel = pid; closePop(); renderMap(); renderPanel(); }
+function panelHead(html) { panelEl.innerHTML = ''; const h = document.createElement('div'); h.className = 'ph'; h.innerHTML = html; panelEl.appendChild(h);
+  const b = h.querySelector('.back'); if (b) b.addEventListener('click', () => select(null)); const body = document.createElement('div'); body.className = 'pb'; panelEl.appendChild(body); return body; }
+function renderPanel() {
+  if (S.sel) { const p = P(S.sel); if (isPest() && p.pestOff) S.sel = null; else return isPest() ? renderPestPivot(p) : renderSatPivot(p); }
+  return isPest() ? renderPestRanking() : renderVigorRanking();
+}
+function chartIn(body, pid, keys) { const box = document.createElement('div'); box.className = 'chartbox'; body.appendChild(box); buildChart({ host: box, pid, compact: true });
+  const k = document.createElement('div'); k.className = 'keys'; k.innerHTML = keys + '<span>Clique num ícone para ver insumos, doses e efeito</span>'; body.appendChild(k); return box; }
+function openIcon(box, kind, day) { const b = [...box.querySelectorAll('.evt.' + kind)].find(x => x.dataset.days.split(',').map(Number).includes(day)); if (b) b.click(); }
+function renderPestPivot(p) {
+  const a = A(), sim = PEST[S.alvo][p.id], q = pestAt(p.id, S.day), pf = PROF[p.id];
+  const body = panelHead('<button class="back" type="button">‹ Todos os talhões</button><h3>' + p.id + ' · ' + a.nome + '</h3><div class="sub">' + nf1.format(p.ha) + ' ha · Mamão Formosa ' + STAGE_TXT[p.stage] + ' · ' + EQ[pf.eq].n + '</div>' +
+    '<div class="state"><span class="chip"><i style="background:' + stateVar[q.state] + '"></i>' + (q.state === 'nodata' ? 'Sem vistoria nos últimos 14 dias' : stateTxt[q.state][0].toUpperCase() + stateTxt[q.state].slice(1) + ' · ' + fmtV(q.v, a) + ' em ' + fmtD(q.day)) + '</span></div>');
+  if (q.state === 'bad' && S.day === DAYS) { const dec = document.createElement('div'); dec.className = 'decide';
+    dec.innerHTML = '<div><strong>Próxima ação:</strong> decidir o controle deste talhão.</div><button class="btn primary" type="button">Decidir controle</button><div class="note" hidden>No Safrion, abre o painel de decisão da vistoria, com os produtos registrados e o receituário.</div>';
+    body.appendChild(dec); dec.querySelector('button').addEventListener('click', () => { dec.querySelector('.note').hidden = false; }); }
+  const box = chartIn(body, p.id, '<span><i class="sw" style="border-color:var(--chart-line)"></i>' + p.id + ' (vistorias)</span><span><i class="sw d" style="border-color:var(--global)"></i>Média da fazenda</span><span><i class="sw d" style="border-color:var(--nc)"></i>NC</span>');
+  const apps = sim.apps.filter(ap => ap.day <= S.day);
+  const h = document.createElement('h5'); h.innerHTML = 'Aplicações e efeito <span class="note">· vistoria antes → 5 a 14 dias depois</span>'; body.appendChild(h);
+  if (!apps.length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = 'Nenhuma aplicação para ' + a.nome.toLowerCase() + ' até ' + fmtD(S.day) + '.'; body.appendChild(e); }
+  const list = document.createElement('div'); list.className = 'apps'; body.appendChild(list);
+  [...apps].reverse().forEach(ap => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'app';
+    const known = ap.after && ap.after.day <= S.day && ap.red != null, effTxt = known ? (ap.red >= 0 ? '−' + nf0.format(ap.red * 100) + ' %' : 'subiu ' + nf0.format(-ap.red * 100) + ' %') : 'aguarda vistoria';
+    const ctl = ap.backDay != null && ap.backDay <= S.day ? ap.backDay - ap.day : null;
+    b.innerHTML = '<span class="d num">' + fmtD(ap.day) + '</span><span class="p">' + ap.prod.c + ' <span class="note">· ' + dose(ap.prod.dose) + ' ' + ap.prod.du + '/ha</span></span><span class="e num ' + (known ? (ap.red >= .6 ? 'good' : 'weak') : '') + '">' + effTxt + '</span>' +
+      '<span class="m">' + ap.prod.g + ' · ' + ap.entrada + 'ª entrada' + (ap.consec > 0 ? ' · ' + (ap.consec + 1) + 'ª seguida do grupo' : '') + ' · ' + EQ[ap.eq].c + '</span>' +
+      (known ? '<span class="ctl num">' + fmtV(ap.before.v, a) + ' → ' + fmtV(ap.after.v, a) + ' · ' + (ctl != null ? 'voltou ao NC em ' + ctl + ' dias' : 'segue abaixo do NC') + '</span>' : '');
+    b.setAttribute('aria-label', fmtD(ap.day) + ', ' + ap.prod.n + ', ' + dose(ap.prod.dose) + ' ' + ap.prod.du + ' por hectare, efeito ' + effTxt + '. Abrir insumos, doses e efeito.');
+    b.addEventListener('click', () => openIcon(box, 'def', ap.day)); list.appendChild(b);
+  });
+}
+function renderSatPivot(p) {
+  const q = satAt(p.id, S.day), W = WATER[p.id];
+  let chip; if (p.stage === 'solo' || (p.stage === 'velha' && S.day > 75)) chip = '<span class="chip"><i style="background:var(--nocrop)"></i>Sem lavoura</span>';
+  else if (q.state === 'ok') { const { c } = satClass(q.v); chip = '<span class="chip"><i style="background:var(--c' + (c + 1) + ')"></i>' + S.idx + ' ' + nf2.format(q.v) + ' · ' + CLS_TXT[c].toLowerCase() + ' · cena de ' + fmtD(q.day) + '</span>'; }
+  else chip = '<span class="chip"><i style="background:#9E9E9E"></i>' + (q.state === 'cloud' ? 'Nuvem na cena de ' + fmtD(q.day) : 'Sem imagem válida em 15 dias') + '</span>';
+  const body = panelHead('<button class="back" type="button">‹ Todos os talhões</button><h3>' + p.id + ' · vigor e manejo</h3><div class="sub">' + nf1.format(p.ha) + ' ha · Mamão Formosa ' + STAGE_TXT[p.stage] + (NEED[p.stage] ? ' · irrigação cobre ' + nf0.format(W.suff * 100) + ' % da necessidade' : '') + '</div><div class="state">' + chip + '</div>');
+  const box = chartIn(body, p.id, '<span><i class="sw" style="border-color:var(--chart-line)"></i>' + p.id + ' (mediana da cena)</span><span><i class="sq" style="background:var(--band)"></i>P10 a P90 do pivô</span><span><i class="sw d" style="border-color:var(--global)"></i>Pivôs ' + STAGE_TXT[p.stage] + '</span><span>○ cena com nuvem</span>');
+  const evs = EVENTS.filter(e => e.pid === p.id && e.kind !== 'def' && e.day <= S.day);
+  const h = document.createElement('h5'); h.innerHTML = 'Adubações e resposta do vigor <span class="note">· cena antes → 10 a 25 dias depois</span>'; body.appendChild(h);
+  if (!evs.length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = 'Nenhuma adubação até ' + fmtD(S.day) + '.'; body.appendChild(e); }
+  const list = document.createElement('div'); list.className = 'apps'; body.appendChild(list);
+  [...evs].reverse().forEach(e => {
+    const ef = e.kind === 'adub' ? vigorEffect(e, S.idx) : null, known = ef && ef.after.day <= S.day; const nN = e.kind === 'adub' ? e.items.reduce((s, it) => s + (it.nut.N || 0), 0) : 0;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'app';
+    b.innerHTML = '<span class="d num">' + fmtD(e.day) + '</span><span class="p">' + e.items.map(i => i.n).join(' + ') + '</span><span class="e num ' + (known && ef.rel != null ? (ef.rel > .005 ? 'good' : 'weak') : '') + '">' + (known ? signed2(ef.rel != null ? ef.rel : ef.d) : (e.kind === 'oper' ? '' : 'aguarda cena')) + '</span>' +
+      '<span class="m">' + e.via + (nN ? ' · N ' + nf1.format(nN) + ' kg/ha' : '') + ' · ' + e.items.map(i => dose(i.dose) + ' ' + i.du + '/ha').join(' + ') + '</span>' +
+      (known ? '<span class="ctl num">' + S.idx + ' ' + nf2.format(ef.before[S.idx].med) + ' → ' + nf2.format(ef.after[S.idx].med) + (ef.rel != null ? ' · ' + signed2(ef.rel) + ' em relação aos pivôs ' + STAGE_TXT[p.stage] : '') + '</span>' : '');
+    b.setAttribute('aria-label', fmtD(e.day) + ', ' + e.items.map(i => i.n).join(' e ') + '. Abrir insumos, doses e efeito.');
+    b.addEventListener('click', () => openIcon(box, 'adub', e.day)); list.appendChild(b);
+  });
+}
+// ---- rankings: o que funcionou ----
+function pestAppsUntil(day) { const out = []; PIVOS.forEach(p => { const s = PEST[S.alvo][p.id]; if (!s) return; s.apps.forEach(ap => { if (ap.after && ap.after.day <= day && ap.red != null) out.push(Object.assign({ pid: p.id }, ap)); }); }); return out; }
+function pestClimate(day) {
+  // crescimento semanal entre vistorias sem aplicação (nem resíduo de 10 dias), separado pelo clima do intervalo
+  const a = A(), rows = { fav: [], nfav: [] };
+  PIVOS.forEach(p => { const s = PEST[S.alvo][p.id]; if (!s) return; for (let i = 1; i < s.obs.length; i++) { const o1 = s.obs[i - 1], o2 = s.obs[i]; if (o2.day > day || o1.v < (a.un === '%' ? .8 : .3)) continue;
+    if (s.apps.some(ap => ap.day > o1.day - 10 && ap.day <= o2.day)) continue;
+    const g = Math.pow(o2.v / o1.v, 7 / (o2.day - o1.day)) - 1; const cl = climaBetween(o1.day, o2.day); const n = a.id === 'antrac' ? cl.mol : cl.qs;
+    (n >= (a.id === 'antrac' ? 1 : 3) ? rows.fav : rows.nfav).push(g); } });
+  return rows;
+}
+function renderPestRanking() {
+  const a = A();
+  const body = panelHead('<h3>O que reduziu ' + a.nome.toLowerCase() + '</h3><div class="sub">Aplicações com vistoria antes e depois e efeito do clima, até ' + fmtD(S.day) + '. Clique num talhão para ver a evolução com os ícones de cada aplicação.</div>');
+  const apps = pestAppsUntil(S.day), ins = [];
+  if (apps.length) {
+    const byProd = {}; apps.forEach(ap => (byProd[ap.prod.c] = byProd[ap.prod.c] || []).push(ap));
+    const best = Object.entries(byProd).filter(([, v]) => v.length >= 2).map(([k, v]) => ({ k, n: v.length, red: median(v.map(x => x.red)), g: v[0].prod.g })).sort((x, y) => y.red - x.red)[0];
+    if (best) ins.push('<strong>' + best.k + '</strong> (' + best.g + ') teve a maior redução mediana: <strong class="num">' + fmtRed(best.red) + '</strong> em ' + best.n + ' aplicações.');
+    for (const [k, v] of Object.entries(byProd)) { const b = v.filter(x => x.eq === 'b100'), at = v.filter(x => x.eq !== 'b100'); const rb = median(b.map(x => x.red)), ra = median(at.map(x => x.red));
+      if (b.length && at.length && ra - rb > .1) { ins.push('Com <strong>' + k + '</strong>, a barra a 100 L/ha teve redução mediana de <strong class="num">' + fmtRed(rb) + '</strong>; o atomizador, <strong class="num">' + fmtRed(ra) + '</strong>. A calda e o equipamento contam.'); break; } }
+    for (const [k, v] of Object.entries(byProd)) { const first = v.filter(x => x.consec === 0 && x.rep === 1), sq = v.filter(x => x.consec >= 2); const rf = median(first.map(x => x.red)), rs = median(sq.map(x => x.red));
+      if (first.length && sq.length && rf - rs > .15) { ins.push('<strong>' + k + '</strong> repetido em sequência caiu de <strong class="num">' + fmtRed(rf) + '</strong> na 1ª entrada para <strong class="num">' + fmtRed(rs) + '</strong> da 3ª seguida em diante. Sinal de resistência: rotacione o mecanismo de ação.'); break; } }
+  }
+  const pc = pestClimate(S.day), gf = median(pc.fav), gn = median(pc.nfav);
+  if (pc.fav.length >= 3 && pc.nfav.length >= 3 && Math.abs(gf - gn) > .05) ins.push('Clima: em intervalos com ' + (a.id === 'antrac' ? '1 ou mais dias de folha molhada por 8 h ou mais' : '3 ou mais dias quentes e secos (≥ 32 °C e UR < 50 %)') + ', ' + a.nome.toLowerCase() + ' variou <strong class="num">' + pct(gf) + '</strong> por semana sem controle; nos demais, <strong class="num">' + pct(gn) + '</strong> (' + pc.fav.length + ' e ' + pc.nfav.length + ' intervalos sem aplicação).');
+  insightsList(body, ins);
+  groupSeg(body, [['prod', 'Produto'], ['calda', 'Produto e calda'], ['entrada', 'Sequência'], ['clima', 'Clima da semana']]);
+  const groups = {};
+  apps.forEach(ap => { let k; if (S.group === 'prod') k = ap.prod.c; else if (S.group === 'calda') k = ap.prod.c + ' · ' + EQ[ap.eq].c; else if (S.group === 'entrada') k = ap.prod.c + ' · ' + (ap.consec >= 2 ? '3ª seguida ou mais' : ap.consec === 1 ? '2ª seguida' : 'em rotação');
+    else { const cl = climaBetween(ap.day, ap.after.day); k = a.id === 'antrac' ? (cl.mol ? 'Com molhamento até a vistoria' : 'Sem molhamento até a vistoria') : (cl.qs >= 3 ? 'Semana quente e seca depois' : 'Semana amena depois'); }
+    const G = groups[k] = groups[k] || { k, sub: S.group === 'clima' ? 'todas as aplicações do alvo' : ap.prod.g + ' · ' + dose(ap.prod.dose) + ' ' + ap.prod.du + '/ha', red: [], ctl: [], open: 0 };
+    G.red.push(ap.red); if (ap.backDay != null && ap.backDay <= S.day) G.ctl.push(ap.backDay - ap.day); else G.open++; });
+  const rows = Object.values(groups).map(G => ({ k: G.k, sub: G.sub, n: G.red.length, red: median(G.red), ctl: median(G.ctl), open: G.open }));
+  rankTable(body, rows, [['k', 'Aplicado', ''], ['n', 'Nº', 'r'], ['red', 'Redução', 'r'], ['ctl', 'Volta ao NC', 'r']],
+    r => '<td><strong>' + r.k + '</strong><br><span class="note">' + r.sub + (r.n < 3 ? ' · pouca evidência' : '') + '</span></td><td class="r num">' + r.n + '</td><td class="r num">' + fmtRed(r.red) + '</td><td class="r num">' + (r.ctl != null ? 'em ' + nf0.format(r.ctl) + ' d' : '—') + (r.open ? '<br><span class="note">' + r.open + ' segue' + (r.open > 1 ? 'm' : '') + ' abaixo</span>' : '') + '</td>',
+    'Ainda não há aplicações com vistoria depois para medir o efeito. Arraste a barra de tempo para frente.');
+  foot(body, 'Associação observada nas vistorias, não prova de causa: dose, clima, fase da praga e cobertura também mudam o resultado. Condição favorável de exemplo: ' + a.favTxt + '. Doses de exemplo. A decisão é do agrônomo.');
+}
+function satClimate(day) {
+  // variação do índice entre cenas válidas consecutivas, por calor no intervalo e irrigação
+  const out = { calorBaixa: [], calorOk: [], semCalor: [] };
+  PIVOS.forEach(p => { if (!['adulta', 'media'].includes(p.stage)) return; const sc = SAT[p.id].scenes.filter(s => s.ok && s.day <= day);
+    for (let i = 1; i < sc.length; i++) { const d = sc[i][S.idx].med - sc[i - 1][S.idx].med, cl = climaBetween(sc[i - 1].day, sc[i].day);
+      if (cl.cal >= 2) (WATER[p.id].suff < .8 ? out.calorBaixa : out.calorOk).push(d); else out.semCalor.push(d); } });
+  return out;
+}
+function renderVigorRanking() {
+  const body = panelHead('<h3>O que melhorou o vigor (' + S.idx + ')</h3><div class="sub">Resposta de cada adubação (cena antes → 10 a 25 dias depois, menos a variação dos pivôs do mesmo estádio) e efeito do clima e da água, até ' + fmtD(S.day) + '.</div>');
+  const evs = EVENTS.filter(e => e.kind === 'adub').map(e => ({ e, ef: vigorEffect(e, S.idx) })).filter(x => x.ef && x.ef.rel != null && x.ef.after.day <= S.day); const ins = [];
+  const byProg = {}; evs.forEach(x => (byProg[x.e.progNome] = byProg[x.e.progNome] || []).push(x));
+  const best = Object.entries(byProg).filter(([, v]) => v.length >= 2).map(([k, v]) => ({ k, n: v.length, rel: median(v.map(x => x.ef.rel)) })).sort((a, b) => b.rel - a.rel)[0];
+  if (best && best.rel >= .01) ins.push('<strong>' + best.k + '</strong> teve a melhor resposta mediana: <strong class="num">' + signed2(best.rel) + '</strong> de ' + S.idx + ' em ' + best.n + ' adubações, comparado aos pivôs do mesmo estádio.');
+  const adultas = PIVOS.filter(p => p.stage === 'adulta'), now = p => { const q = satAt(p.id, S.day); return q.state === 'ok' ? q.v : null; };
+  const reg = adultas.filter(p => PLAN[p.id] !== 'irreg').map(now).filter(v => v != null), irr = adultas.filter(p => PLAN[p.id] === 'irreg').map(now).filter(v => v != null);
+  if (reg.length && irr.length && median(reg) - median(irr) > .008) ins.push('Pivôs em produção adubados a cada 14 dias estão com ' + S.idx + ' mediano <strong class="num">' + nf2.format(median(reg)) + '</strong>; os com intervalo maior que 21 dias (' + adultas.filter(p => PLAN[p.id] === 'irreg').map(p => p.id).join(', ') + '), <strong class="num">' + nf2.format(median(irr)) + '</strong>.');
+  const sc = satClimate(S.day), mb = median(sc.calorBaixa), mo = median(sc.calorOk), ms = median(sc.semCalor);
+  if (sc.calorBaixa.length >= 2 && sc.calorOk.length >= 2 && mo - mb > .005) ins.push('Clima: entre cenas com 2 ou mais dias acima de 35 °C, pivôs com irrigação abaixo de 80 % variaram <strong class="num">' + signed2(mb) + '</strong> de ' + S.idx + '; os com irrigação completa, <strong class="num">' + signed2(mo) + '</strong>. Sem calor, a variação mediana foi <strong class="num">' + signed2(ms) + '</strong>.');
+  insightsList(body, ins);
+  groupSeg(body, [['prod', 'Programa'], ['calda', 'Dose de N'], ['entrada', 'Estádio'], ['clima', 'Calor e água']]);
+  const groups = {};
+  if (S.group === 'clima') { [['Calor ≥ 35 °C · irrigação abaixo de 80 %', sc.calorBaixa], ['Calor ≥ 35 °C · irrigação completa', sc.calorOk], ['Sem calor', sc.semCalor]].forEach(([k, arr]) => { if (arr.length) groups[k] = { k, sub: 'variação entre cenas consecutivas', rel: arr, d: arr }; }); }
+  else evs.forEach(({ e, ef }) => { const nN = e.items.reduce((s, it) => s + (it.nut.N || 0), 0);
+    const k = S.group === 'prod' ? e.progNome : S.group === 'calda' ? 'N ' + nf1.format(nN) + ' kg/ha por aplicação' : 'Pivôs ' + STAGE_TXT[P(e.pid).stage];
+    const G = groups[k] = groups[k] || { k, sub: e.via, rel: [], d: [], pids: new Set() }; G.rel.push(ef.rel); G.d.push(ef.d); G.pids.add(e.pid); });
+  const levelVsStage = pids => { const vals = [...pids].map(id => { const p = P(id), q = satAt(id, S.day); if (q.state !== 'ok') return null; const st = median(PIVOS.filter(x => x.stage === p.stage).map(x => satAt(x.id, S.day)).filter(z => z.state === 'ok').map(z => z.v)); return st != null ? q.v - st : null; }).filter(v => v != null); return median(vals); };
+  const rows = Object.values(groups).map(G => ({ k: G.k, sub: G.sub, n: G.rel.length, red: median(G.rel), ctl: S.group === 'clima' ? median(G.d) : levelVsStage(G.pids || []) }));
+  rankTable(body, rows, [['k', 'Manejo ou condição', ''], ['n', 'Nº', 'r'], ['red', S.group === 'clima' ? 'Variação' : 'Resposta', 'r'], ['ctl', S.group === 'clima' ? 'Bruta' : 'Nível hoje', 'r']],
+    r => '<td><strong>' + r.k + '</strong><br><span class="note">' + r.sub + (r.n < 3 ? ' · pouca evidência' : '') + '</span></td><td class="r num">' + r.n + '</td><td class="r num">' + signed2(r.red) + '</td><td class="r num">' + (r.ctl != null ? signed2(r.ctl) : '—') + '</td>',
+    'Ainda não há adubações com cena sem nuvem depois. Arraste a barra de tempo para frente.');
+  foot(body, 'Resposta = variação do pivô depois da adubação menos a dos pivôs do mesmo estádio no mesmo período, para separar o efeito do clima. Nível hoje = índice dos pivôs do grupo menos a mediana do estádio na data. Use NDRE para nutrição de nitrogênio. Associação, não prova de causa; nuvem, estádio, água e calor também mudam o índice. Doses de exemplo. A decisão é do agrônomo.');
+}
+function insightsList(body, ins) { if (!ins.length) return; const ul = document.createElement('ul'); ul.className = 'insights'; ins.forEach(t => { const li = document.createElement('li'); li.innerHTML = t; ul.appendChild(li); }); body.appendChild(ul); }
+function groupSeg(body, items) { if (!items.some(i => i[0] === S.group)) S.group = items[0][0];
+  const grp = document.createElement('div'); grp.style.cssText = 'display:flex;flex-wrap:wrap;align-items:center;gap:8px'; grp.innerHTML = '<span class="note">Agrupar por</span>';
+  const sg = document.createElement('div'); sg.className = 'seg'; sg.setAttribute('role', 'group'); sg.setAttribute('aria-label', 'Agrupar por');
+  items.forEach(([k, t]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; b.setAttribute('aria-pressed', String(S.group === k)); b.addEventListener('click', () => { S.group = k; renderPanel(); }); sg.appendChild(b); });
+  grp.appendChild(sg); body.appendChild(grp); }
+function rankTable(body, rows, cols, rowHtml, emptyTxt) {
+  if (!rows.length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = emptyTxt; body.appendChild(e); return; }
+  const k = cols.some(c => c[0] === S.sort.k) ? S.sort.k : 'red', dir = S.sort.dir;
+  rows.sort((x, y) => { const vx = x[k] == null ? -Infinity : x[k], vy = y[k] == null ? -Infinity : y[k]; return typeof vx === 'string' ? dir * vx.localeCompare(vy, 'pt-BR') : dir * (vx - vy); });
+  const wrap = document.createElement('div'); wrap.className = 'tblwrap';
+  wrap.innerHTML = '<table class="tbl"><thead><tr>' + cols.map(([ck, ct, cl]) => '<th class="' + cl + '" aria-sort="' + (k === ck ? (dir > 0 ? 'ascending' : 'descending') : 'none') + '"><button type="button" data-k="' + ck + '">' + ct + (k === ck ? (dir > 0 ? ' ▲' : ' ▼') : ' ⇅') + '</button></th>').join('') + '</tr></thead><tbody>' + rows.map(r => '<tr>' + rowHtml(r) + '</tr>').join('') + '</tbody></table>';
+  body.appendChild(wrap);
+  wrap.querySelectorAll('th button').forEach(b => b.addEventListener('click', () => { const ck = b.dataset.k; S.sort = { k: ck, dir: S.sort.k === ck ? -S.sort.dir : (ck === 'k' ? 1 : -1) }; renderPanel(); }));
+}
+function foot(body, t) { const n = document.createElement('div'); n.className = 'note'; n.textContent = t; body.appendChild(n); }
+
+function renderAll() { renderBar(); renderToggles(); renderMap(); renderLegend(); renderTimeline(); renderNow(); renderPanel(); }
+let rT = null; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => { closePop(); renderTimeline(); renderPanel(); }, 120); });
+renderAll();
+})();
+</script>

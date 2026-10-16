@@ -28,7 +28,7 @@ observacoes (dados locais coerentes com dados.py / dados2.py / comercial.py / su
   filtrado pelo caso (VE-06 deve passar esse parâmetro no link "Emitir solicitação de crédito").
 - Novo caso de ação recebe AC-104 em diante; proposta de parâmetro PP-014.
 """
-import json
+import json, os
 from engine import (grid,Pt,kpis,chip,tag,icon,esc,msgbtn,drawer_button,stepper,BTN_ST,EXTRA,EXTRAJS,_MINI,
                     INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,GRAYS,SH,DISP)
 import engine as E
@@ -612,26 +612,73 @@ def _ge08():
         doss,edit=dict(m='form',title='Bloco do dossiê',sub='Ajuste quem acessa e até quando. O credor só vê o bloco com consentimento confirmado; mudar o acesso registra novo consentimento.',
             fields=[F('cont','Conteúdo',ro=True),F('aut','Autorizado para',t='multi',opts=['Banco Terra','Coop Crédito','Fundo Agro Invest'],req=True),F('prz','Prazo de acesso',t='date',req=True)]),
         search=False,gid='g_dos',total=False)
+    # ---- Documentos para crédito (proprietário, 16/10/2026: "documentos para credito podemos deixar tudo separado em outro lugar para nao
+    # perder foco e produtividade"): CAR, matrícula, módulos fiscais, contrato de arrendamento e a pendência dos documentos saíram do cadastro
+    # da fazenda (CD-01) e vivem aqui, uma linha por documento e fazenda (ou parceiro), na grade do motor com Tabela | Cartões. Fonte: os mesmos
+    # dados sintéticos de dados_cad.FAZENDAS (nada se perde) e a condição documental do CRE-0102 (certidão exigida pelo Banco Terra).
+    # Outorga de água e restrição ambiental ficam no CD-01 (a Irrigação usa a outorga: CTL-5)
+    import dados_cad as DC
+    TIPOS_DOC=['CAR','Matrícula','Certidão de matrícula atualizada','Contrato de arrendamento','CCIR','ITR','Outro']
+    def _fz(f): return f['nome']
+    # revisão do Codex 6220145128 (S2): o documento da fazenda leva o id estável dela (fid); no navegador, credito_docs.js migra o cadastro salvo
+    # antes da mudança, segue o nome, a posse e as fazendas do cadastro atual e grava as edições do Crédito (as linhas abaixo são o seed)
+    docs=[]
+    for f in DC.FAZENDAS:
+        docs.append(dict(id='dc_car_'+f['id'],tipo='CAR',fid=f['id'],tit=_fz(f),num=f.get('car',''),val='',exig='',mf=f.get('mf',''),pend=''))
+        docs.append(dict(id='dc_mat_'+f['id'],tipo='Matrícula',fid=f['id'],tit=_fz(f),num=f.get('matr',''),val='',exig='',pend=''))
+        if f.get('posse') and f['posse']!='Própria':
+            docs.append(dict(id='dc_arr_'+f['id'],tipo='Contrato de arrendamento',fid=f['id'],tit=_fz(f),num=f.get('arrend',''),val=f.get('fim',''),exig='',
+                             custo=f.get('custo',''),pend=f.get('pend','')))
+    docs.append(dict(id='dc_cert_SR',tipo='Certidão de matrícula atualizada',fid='SR',tit='Santa Rita',num='',val='',exig=f'Banco Terra · {c["id"]}',pend='Condição da aprovação: validade de 90 dias'))
+    CRED_SEED_FAZ=[dict(id=f['id'],nome=f['nome'],posse=f.get('posse',''),fim=f.get('fim',''),sit=f.get('sit','')) for f in DC.FAZENDAS]
+    CRED_JS=(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'credito_docs.js'),encoding='utf-8').read()
+             +'\nconst CRED_SEED_FAZ='+json.dumps(CRED_SEED_FAZ,ensure_ascii=False)+', CRED_SEED_DOCS='+json.dumps(docs,ensure_ascii=False)+';\n')
+    g_doc=grid([C('tipo','Documento',w=230),C('est','Situação',w=200),C('tit','Fazenda ou parceiro'),C('num','Número ou registro',w=260),C('val','Validade',t='date'),C('exig','Exigido por',w=170)],
+        [R(d['id'],v=d) for d in docs],gid='g_doc',total=False,cartoes=True,qf=dict(k='est',todas='Todos'),
+        edit=dict(m='form',title='Documento',newTitle='Incluir documento',sub='Documento que o credor pede para analisar ou liberar o crédito. Não bloqueia o planejamento.',
+            fields=[F('tipo','Documento',t='sel',opts=TIPOS_DOC,req=True),F('tit','Fazenda ou parceiro',t='sel',opts=[_fz(f) for f in DC.FAZENDAS],dyn=True,req=True),
+                    F('num','Número ou registro',t='txt',req=False,help='Em branco, o documento fica pendente.'),
+                    F('mf','Módulos fiscais',t='num',req=False,min=0,cond=dict(k='tipo',eq='CAR'),help='Do recibo do CAR.'),
+                    F('custo','Valor do arrendamento',t='num',req=False,min=0,u='sc/ha/ano',cond=dict(k='tipo',eq='Contrato de arrendamento')),
+                    F('val','Validade ou fim',t='date',req=False),
+                    F('pend','Pendência',t='txt',req=False,help='O que falta no documento (ex.: contrato sem registro em cartório).')]))
     doc=idrawer('Anexar documento condicionante',dict(title='Documento exigido pelo credor',sub='condição da aprovação',
             fields=[('Solicitação',c['id']),('Documento','Certidão de matrícula atualizada'),('Validade','90 dias'),('Arquivo','matricula_1874.pdf')],
             confirm='Enviar ao credor',done='Em conferência pelo credor'),'doc','Anexar a certidão exigida pelo Banco Terra')
     DDID=E.DRAWN['Anexar documento condicionante']
-    EXTRAJS[0]=JS_BASE+'''
-const DDID='''+json.dumps(DDID)+''', LIB='''+json.dumps(c['liberado'])+''', VAL='''+json.dumps(c['valor'])+r''';
+    EXTRAJS[0]=JS_BASE+CRED_JS+'''
+const DDID='''+json.dumps(DDID)+''', LIB='''+json.dumps(c['liberado'])+''', VAL='''+json.dumps(c['valor'])+r''', HOJE_DOC='2026-09-23';
+// documentos para crédito: pendente sem número ou com pendência; vencido depois da validade; a certidão do CRE-0102 enviada fica em conferência
+function docSit(self,V){ const sent=!!((self.state.added||{})[DDID]);
+  if(V.id==='dc_cert_SR'&&sent) return ['Em conferência pelo credor','yellow'];
+  if(!String(V.num||'').trim()) return ['Pendente','yellow']; if(V.pend) return ['Pendente','yellow'];
+  if(V.val&&V.val<HOJE_DOC) return ['Vencido','red']; return [V.tipo==='Contrato de arrendamento'?'Vigente':'Registrado','green']; }
+function PREVALS(self,v){ const sp=GRIDS.find(g=>g.id==='g_doc'); if(!sp) return;
+  // 1ª montagem: migra o cadastro salvo antes da mudança e monta as linhas pelo cadastro atual (fazendas pelo id estável) e pelo que o
+  // Crédito gravou (credito_docs.js); as fazendas ficam em self._credFz para o seletor e para gravar a edição
+  if(!self._credIni){ self._credIni=1; credMigrar(); self._credFz=credFazendas(CRED_SEED_FAZ); sp.rows=credDocs(self._credFz,CRED_SEED_DOCS).map(r=>({id:r.id,v:r.v,s:{},p:{}})); }
+  g2rows(self,sp).forEach(r=>{ const V=r.v; V.id=r.id; const S=docSit(self,V); r.p=r.p||{}; r.s=r.s||{}; r.s.tit=V.tit||''; r.s.val=V.val||'';
+    r.p.tipo=[{k:'b',t:V.tipo}]; r.s.tipo=V.tipo; r.p.est=[{k:'chip',t:S[0],c:S[1]}].concat(V.pend?[{k:'mut',t:V.pend}]:[]); r.s.est=S[0];
+    const det=[V.num||'',V.mf?String(V.mf).replace('.',',')+' módulos fiscais':'',V.custo?String(V.custo).replace('.',',')+' sc/ha/ano':''].filter(Boolean).join(' · ');
+    r.p.num=[det?{k:'txt',t:det}:{k:'mut',t:'a informar'}]; r.s.num=det; r.p.exig=[V.exig?{k:'txt',t:V.exig}:{k:'mut',t:'—'}]; r.s.exig=V.exig||''; }); }
 function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
-  const hv=(String(location.hash).match(/vis=([a-z]+)/)||[])[1]||'', VIS=['contratos','liberacoes','dossie'], vis=VIS.indexOf(hv)>=0?hv:'';
+  const hv=(String(location.hash).match(/vis=([a-z]+)/)||[])[1]||'', VIS=['contratos','liberacoes','dossie','documentos'], vis=VIS.indexOf(hv)>=0?hv:'';
   VIS.forEach(k=>{ v['cv_'+k]=!vis||vis===k; });
   if(!self.__creHash){ self.__creHash=true; addEventListener('hashchange',()=>self.setState({}),false); }
   v.cre_hint=sent?('liberado '+LIB+' de '+VAL+' · certidão em conferência pelo credor (responsável: Banco Terra) — a 2ª parcela libera quando o Banco Terra aceitar o documento')
                  :('liberado '+LIB+' de '+VAL+' · próximas parcelas só liberam com a certidão do imóvel atualizada — anexe o documento para destravar');
   v.lib2=()=>self.setState({g2toast:sent?('Bloqueado · certidão em conferência pelo credor (responsável: Banco Terra) — a 2ª parcela aguarda a conferência do credor; liberado até agora '+LIB+' de '+VAL+'.')
                                          :('Bloqueado · condição documental pendente — liberado até agora: '+LIB+' de '+VAL+'; a 1ª parcela já é título real em Contas a pagar. Anexe a certidão para liberar.')});
+  // seletor "Fazenda ou parceiro" (opções dinâmicas do motor): as fazendas ativas do cadastro atual, inclusive as criadas no CD-01, pelo nome de hoje
+  self.g2opts=(gid,k,d)=>{ if(gid!=='g_doc'||k!=='tit') return null; const ns=(self._credFz||[]).filter(f=>f.sit!=='Inativa'&&f.nome).map(f=>f.nome);
+    if(d&&d.tit&&ns.indexOf(d.tit)<0) ns.push(d.tit); return [{v:'',t:'Escolha…'}].concat(ns.map(n=>({v:n,t:n}))); };
   const add=v[DDID+'_add']; v[DDID+'_add']=()=>{ add(); self.setState({g2toast:'Certidão enviada ao Banco Terra · em conferência pelo credor · nenhuma parcela liberada por isso.'}); };
   v.autorizar=()=>{ if(self.state.aut){ self.setState({g2toast:'Bloco já autorizado · consentimento registrado uma vez.'}); return; }
     gsetRow(self,'g_dos','d3',r=>{ r.p.st=[{k:'chip',t:'Autorizado pela Direção',c:'green'}]; r.s.st='Autorizado'; });
     self.setState({aut:true,g2toast:'Autorizado pela Direção · Banco Terra acessa “Compromissos e garantias” até 31/12/2026, só para análise do '+'''+json.dumps(c['id'])+r'''+'.'}); };
   self.g2after=(gid,rows,r)=>{ if(!r) return; if(gid==='g_dos'){ undate(r,['prz']); self.setState({g2toast:'Acesso do bloco '+r.v.blk+' atualizado · novo consentimento registrado; o credor vê após confirmar.'}); }
-    if(gid==='g_cre'){ self.setState({g2toast:'Rascunho '+r.id+' salvo · nada é enviado ao credor sem convite confirmado.'}); } }; }'''
+    if(gid==='g_cre'){ self.setState({g2toast:'Rascunho '+r.id+' salvo · nada é enviado ao credor sem convite confirmado.'}); }
+    if(gid==='g_doc'){ undate(r,['val']); credSalvarDoc(r,self._credFz||[]); self.setState({g2toast:'Salvo: '+r.v.tipo+' · '+r.v.tit+' · '+docSit(self,Object.assign({id:r.id},r.v))[0].toLowerCase()+'.'}); } }; }'''
     # 14/10/2026 (proprietário: "coloque os submenus de crédito como os demais"): a tela de entrada do Crédito abre uma visão por cartão
     # (GE-08.dc.html#vis=contratos|liberacoes|dossie), como a Manutenção; os indicadores ficam em todas; sem visão no endereço, tudo
     CV=lambda k: f'<sc-if value="{H("cv_"+k)}" hint-placeholder-val="{H("true")}">'
@@ -645,7 +692,9 @@ function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
                 acao=imsg('Comparar propostas',f'Comparadas 2 propostas do {c["id"]} por CET/CETCR e valor presente com premissas declaradas · Banco Terra 14,2% a.a. vs. Coop Crédito 13,8% a.a. + tarifa.','scale','Comparar propostas por CET/CETCR e valor presente'))
         + '</sc-if>' + CV('liberacoes') + bloco(f'Acompanhamento do {c["id"]}','Cumpra a condição documental para liberar as próximas parcelas; o pedido não aparece pago nem liberado antes do fato financeiro.',acomp,
                 acao=doc+ibtn('Registrar liberação da 2ª parcela','lib2','cash','Registrar a 2ª liberação (exige a condição documental aceita)'),tone='yellow')
-        + '</sc-if>' + CV('dossie') + bloco('Dossiê e consentimento','Autorize cada bloco com finalidade e prazo; clique num bloco para ajustar quem acessa.',g_dos,tone='gray') + '</sc-if>')
+        + '</sc-if>' + CV('dossie') + bloco('Dossiê e consentimento','Autorize cada bloco com finalidade e prazo; clique num bloco para ajustar quem acessa.',g_dos,tone='gray') + '</sc-if>'
+        + CV('documentos') + bloco('Documentos para crédito','CAR, matrícula, contrato de arrendamento e certidões que o credor pede, por fazenda.',g_doc,
+                acao=f'<button type="button" onClick="{H("g_doc_new")}" style="{BTN_ST(False,True)} display: inline-flex; align-items: center; gap: 6px;">{__import__("areas.processo_planos",fromlist=["MAIS"]).MAIS(14)}Incluir documento</button>',tone='gray') + '</sc-if>')
     shell37('GE-08','Crédito e garantias',corpo,
       subtitle='Solicitações, dossiês autorizados, propostas, decisões, contratos, liberações e serviço da dívida.',
       status=(f'{c["id"]} · condição documental pendente','yellow'),

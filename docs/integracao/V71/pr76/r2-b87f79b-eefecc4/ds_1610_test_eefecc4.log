@@ -1,0 +1,15 @@
+OK    S1 TAB-08 toda tabela do motor (247) tem o cabeçalho com ordenar e filtrar
+OK    S2 TAB-08 a moldura da tabela vale em toda página com tabela do motor
+OK    S3 AGR-02 nenhuma página com a trilha do agrupamento (155 páginas)
+OK    S4 TAB-08 Atividades do plano em Tabela usa a peça do motor (cabeçalho e filtro pa_tb)
+OK    B1 TAB-08 toda tabela à vista tem moldura de 12 px (201 tabelas)
+OK    B1b TAB-08 toda coluna com ordenar tem ⇅ e funil
+OK    B2 TAB-04 toda linha que abre o detalhe mostra a seta na 1ª célula
+OK    B3 TAB-08 sem linha vertical na 1ª coluna
+OK    C1 VIS-06 OS.dc.html?view=cartoes: um cartão por linha (10), colunas alinhadas e rótulos uma vez no alto
+OK    C1 VIS-06 SAF.dc.html?view=cartoes: um cartão por linha (4), colunas alinhadas e rótulos uma vez no alto
+OK    C1 VIS-06 CD-05.dc.html?view=cartoes: um cartão por linha (20), colunas alinhadas e rótulos uma vez no alto
+OK    C1 VIS-06 CD-06.dc.html?view=cartoes: um cartão por linha (12), colunas alinhadas e rótulos uma vez no alto
+OK    C2 TAB-08 Atividades em Tabela: ⇅ do Custo/ha ordena do menor para o maior; o funil de Insumos tira "2 insumos"
+OK    D sem erro de JavaScript
+RESULTADO: 14 ok · 0 falhas

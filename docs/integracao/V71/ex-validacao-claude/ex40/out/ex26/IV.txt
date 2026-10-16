@@ -1,0 +1,167 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Comercial › Inteligência de vendas
+‹
+Comercial
+Inteligência de vendas
+i
+vender agora: Soja · nenhuma venda abaixo da referência · 1 produto(s) com venda sem oferta que cubra
+PRODUTOS EM ALTA
+1
+Soja +3,8%
+VENDER AGORA
+1
+Soja
+MÊS DE MELHOR PREÇO
+Soja set · Milho fev · Mamão jul
+mês de melhor preço no histórico de 5 anos
+Preço e melhor mês para vender
+Todos 4
+Esperar 1
+Sem série de preço 1
+Vender agora 1
+Vender na colheita 1
+Agrupar por
+▾
+Colunas
++3
+PRODUTO
+⇅
+O QUE FAZER
+⇅
+PREÇO AGORA
+⇅
+AGORA VS NORMAL DO MÊS
+⇅
+MELHOR MÊS PARA VENDER
+⇅
+Soja em grão
+Vender agora
+este é o melhor mês dos próximos 12
+R$ 129,40/sc
++4,8%
+normal R$ 123,47/sc
+set
+pior: mar
+Milho em grão
+Esperar
+até dez: +7,2% na época, 3,6% depois do custo do dinheiro
+R$ 61,80/sc
+−5,7%
+normal R$ 65,54/sc
+fev
+pior: jul
+Mamão Formosa · fruta de campo
+Vender na colheita
+perecível: planeje a colheita para jul
+R$ 3,10/kg
+−5,4%
+normal R$ 3,28/kg
+jul
+pior: fev
+Feijão em grão
+Sem série de preço
+sem fonte de preço: ausente ≠ zero
+sem cotação
+—
+—
+VENDAS ABAIXO DA REFERÊNCIA
+0
+nenhuma venda 5% abaixo da referência
+VENDA SEM OFERTA QUE CUBRA
+1
+Mamão: vendido sem previsão
+MELHOR RECEBIMENTO LÍQUIDO
+R$ 2,88/kg
+melhor líquido: PV-038 · Frutas Real
+Preço × mercado
+Todos 2
+Até 5% abaixo 1
+Saca a conferir 1
+PRODUTO
+⇅
+PREÇO MÉDIO CONTRATADO
+⇅
+REFERÊNCIA DE MERCADO
+⇅
+DIFERENÇA
+⇅
+SINAL
+⇅
+Mamão Formosa · fruta de campo
+R$ 3,05/kg
+R$ 3,10/kg
+CEAGESP · São Paulo · 22/09 (sintético, ex-VE-02)
+−1,6%
+Até 5% abaixo
+Soja em grão
+—
+2 venda(s) de saca a conferir fora da média
+R$ 129,40/sc
+CEPEA/Esalq · Paraná · 22/09 (sintético, ex-VE-02)
+—
+Saca a conferir
+Safra comercializada
+2 de 2
+Colunas
++2
+PRODUTO
+⇅
+OFERTA DA SAFRA
+⇅
+COMERCIALIZADO
+⇅
+LIVRE PARA VENDER
+⇅
+Sem previsão
+Mamão Formosa · fruta de campo
+0 kg
+há período com venda e sem previsão publicada
+—
+déficit 40.000 kg
+Soja em grão
+106.600 sc
+—
+suspenso: 4 venda(s) de saca a conferir
+Recebimento líquido por venda
+4 de 4
+Agrupar por
+▾
+Colunas
++4
+VENDA
+⇅
+CLIENTE
+⇅
+PREÇO
+⇅
+LÍQUIDO
+⇅
+PV-038
+Frutas Real
+R$ 3,10/kg
+R$ 2,88/kg
+PV-036
+Frutas Real
+R$ 3,05/kg
+R$ 2,83/kg
+PV-031
+Frutas Real
+R$ 3,05/kg
+R$ 2,83/kg
+PV-037
+Frutas Real
+R$ 3,00/kg
+R$ 2,78/kg
+Restaurar demonstração
+Tela: Inteligência de vendas · vender agora: Soja · nenhuma venda abaixo da referência · 1 produto(s) com venda sem oferta que cubra

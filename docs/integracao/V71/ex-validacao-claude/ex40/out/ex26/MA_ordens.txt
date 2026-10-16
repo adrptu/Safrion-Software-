@@ -1,0 +1,185 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+‹
+Manutenção
+Manutenção
+1 ativo bloqueado · 1 conflito
+⋯
+Sem ordem
+6
+Ordens
+0
+Ativos
+1
+Planos
+0
+Tipo
+Todos os tipos
+Preventiva
+Corretiva
+Criticidade
+Toda criticidade
+Alta
+Média
+Baixa
+Grupo
+Todos os grupos
+Tratores
+Pulverizadores
+Plantadeiras
+Implementos
+Colhedoras
+Beneficiamento
+Irrigação
+Armazenagem
+Veículos
+Todas 16
+A liberar 1
+Liberadas 1
+Em execução 1
+Em conferência 1
+Encerradas 12
+Aguardam você · 0
+Esta semana
+Com conflito · 1
+Espera por peça · 0
+16 de 16
+Agrupar por
+▾
+Colunas
++3
+ORDEM · ATIVO
+⇅
+SERVIÇO · TIPO
+⇅
+JANELA
+⇅
+EXECUTANTE
+⇅
+FASE
+⇅
+OM-0230
+Pulverizador PJ-3030
+Revisão 500 h
+Preventiva · PM-04 v2
+20/09
+Zé
+Em conferência
+OM-0228
+Bomba do Pivô 2
+Inspeção corretiva · pressão baixa
+Corretiva · Alta
+23/09 14:00
+João
+Liberadas
+Ativo bloqueado · Zé
+OM-0233
+Trator T1
+Corretiva · pressão hidráulica
+Corretiva · Alta
+23/09
+Zé
+Em execução
+Conflito · OS-0420 28/09 · Otávio · 28/09
+OM-0234
+Trator 02
+Revisão 250 h
+Preventiva · PM-01 v3
+28/09
+Zé (sugerido)
+A liberar
+OM-0229
+Bomba do Pivô 1
+Preventiva mensal
+Preventiva · PM-07 v3
+15/09
+João
+Encerradas
+OM-0221
+Colhedora Axial-Flow 7250
+Corretiva · rolamento do elevador
+Corretiva · Média
+12/09
+Concessionária Case IH
+Encerradas
+OM-0231
+Trator T1
+Revisão 250 h
+Preventiva · PM-03 v4
+12/09
+Zé
+Encerradas
+OM-0225
+Packing linha 1
+Preventiva mensal
+Preventiva · PM-08 v1
+08/09
+Zé
+Encerradas
+OM-0219
+Trator 02
+Revisão 500 h
+Preventiva · PM-01 v3
+02/09
+Zé
+Encerradas
+OM-0222
+Bomba do Pivô 2
+Preventiva mensal
+Preventiva · PM-07 v3
+01/09
+João
+Encerradas
+OM-0212
+Trator 03
+Revisão 250 h
+Preventiva · PM-02 v2
+08/08
+Zé
+Encerradas
+OM-0207
+Silo 01
+Inspeção trimestral
+Preventiva · PM-09 v1
+12/07
+João
+Encerradas
+OM-0205
+Trator 04
+Revisão 250 h
+Preventiva · PM-03 v4
+02/06
+Zé
+Encerradas
+OM-0181
+Comboio CB-01
+Revisão 10.000 km
+Preventiva · PM-10 v1
+15/05
+Zé
+Encerradas
+OM-0102
+Colhedora Axial-Flow 7250
+Revisão 500 h
+Preventiva · PM-06 v2
+15/10
+Zé
+Encerradas
+OM-0118
+Plantadeira 24 linhas
+Revisão pré-plantio
+Preventiva · PM-05 v1
+20/09
+Zé
+Encerradas
+Tela: Manutenção · 1 ativo bloqueado · 1 conflito

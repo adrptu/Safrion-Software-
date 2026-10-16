@@ -1,0 +1,8 @@
+paginas_scan_9434f72 rc=0 RESULTADO: 5 ok · 0 falhas (148 páginas) 
+paginas_scan_RENDER_DIR_bf7d8b6 rc=1 RESULTADO: 4 ok · 1 falhas (148 páginas) 
+cadastros_padrao_test_9434f72 rc=0 RESULTADO: 44/44 
+cadastros_padrao_test_RENDER_DIR_bf7d8b6 rc=0 RESULTADO: 44/44 
+cadf_fix_lista_test_9434f72 rc=0 RESULTADO: OK 11/11 
+ds_test_9434f72 rc=1 RESULTADO: FALHOU 69/72 
+ds_test_DS_RENDER_bf7d8b6 rc=1 RESULTADO: FALHOU 69/72 
+fim

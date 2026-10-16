@@ -1,0 +1,126 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Comercial › Ofertas e propostas
+Ofertas e propostas
+i
+OF-101 aceita · 2 pedidos a confirmar
+Abrir pedidos da OF-101
+Confira demanda e oferta
+Acompanhe o mercado
+Faça ofertas
+Registre pedidos
+PV-031 · falta 0,4 t
+Controle contratos
+Trate reclamações
+RC-12 aguarda Qualidade
+Negociações em andamento
+Revisar destinatários
+⋯
+5 de 5
+OFERTA
+⇅
+VOLUME
+⇅
+JANELA
+⇅
+DESTINO · CLIENTES
+⇅
+PREÇO · CONDIÇÃO
+⇅
+ESTADO · VALIDADE
+⇅
+AÇÃO
+⇅
+OF-103 · enviada
+Mamão Formosa A
+2.000 kg
+05/10–11/10
+CIF região Sudeste
+Frutas Real
+R$ 3,05/kg · 28 d
+Enviada · reservada pela RT-0112
+válida até 30/09
+Ver reserva
+OF-101 · v1
+Mamão Formosa B
+1,8 t
+28/09–04/10
+FOB fazenda
+Frutas Real · Rede Hortifrúti BA
+R$ 2,10/kg · 21 d
+Aceita · PV-032 e PV-033
+válida até 26/09
+Confirmar no pedido
+OF-102 · v2
+Mamão Formosa A
+10,0 t
+28/09–04/10
+CIF Vitória/ES
+Frutas Real
+R$ 3,05/kg · 28 d
+Virou PV-031 · a confirmar
+válida até 24/09
+Ver pedido
+OF-100 · v1
+Café beneficiado
+500 sc
+out/26
+FOB armazém
+Torrefação Serra
+R$ 2.480,00/sc · FOB
+Virou PV-028 · L27-013 bloqueado
+sem validade
+Ver pedido
+OF-099 · v1
+Soja padrão 26/27
+5.000 sc
+fev/27
+CIF Paranaguá
+Coop Grão Sul
+R$ 131,00/sc · à vista
+Expirada · RT-0109 liberada
+válida até 20/09
+—
+Comparação de recebimento líquido · OF-101
+Comparar propostas
+PROPOSTA
+⇅
+CLIENTE
+⇅
+PREÇO
+⇅
+FRETE POR CONTA
+⇅
+PRAZO
+⇅
+LÍQUIDO/KG
+⇅
+DIFERENÇA
+⇅
+v1 · aceita (PV-032)
+Frutas Real
+R$ 2,10/kg
+cliente (FOB)
+21 d
+R$ 2,10
+Melhor líquido
+v2 · contraproposta (PV-033)
+Rede Hortifrúti BA
+R$ 2,25/kg
+produtor (CIF, R$ 0,26/kg)
+35 d
+R$ 1,99
+−R$ 0,11/kg
+Tela: Ofertas e propostas · OF-101 aceita · 2 pedidos a confirmar

@@ -16,7 +16,7 @@ import dados2 as D2
 import dados_cad as DC
 from areas.cadastros import (sel, num, txt, dat, cond, R, js,
                              CULTIVARES, MODO, FONTE, REND_CAMPOS, REND_JS, _uso_cultivar)
-from areas.cadastros import (cadx_css, abas, pane, faixa, prim, secbtn, qf_chips, bloco_cad, estado_cab, acoes_form, arv)
+from areas.cadastros import (secbtn, prim_cab, QF_CAD, bloco_cad, estado_cab, acoes_form)
 
 H=lambda s: '{{'+s+'}}'
 ui37.H_OVR.pop('CD-02.dc.html',None)   # layout novo: a altura vem de HEIGHTS37
@@ -82,8 +82,7 @@ def cd02():
     # revisão TABR (A1, 09/10): a Situação logo depois da identificação, à vista sem rolar
     cv=grid([dict(k='nome',l='Cultura › cultivar',w=200),dict(k='est',l='Situação',w=230),dict(k='tipo',l='Tipo de ciclo'),dict(k='unid',l='Unidade de produtividade',w=170),
              dict(k='dias',l='Ciclo',t='num',a='r',un='dias'),dict(k='sem',l='Item de semente',w=220),dict(k='uso',l='Cultivos',t='num',a='r')],
-        tree,gid='g_cv',tree=True,dele=False,total=False,frame=False,x0={r['id']:True for r in tree},
-        tools=qf_chips('g_cv')+prim('g_cv_new','Cadastrar cultivar'),
+        tree,gid='g_cv',tree=True,dele=False,total=False,x0={r['id']:True for r in tree},qf=QF_CAD,
         edit=dict(m='form',title='Cultivar',newTitle='Cadastrar cultivar',sub='Registro no RNC é referência, não prova de adaptação local; cultivar em uso não se exclui, inative.',
             fields=[txt('nome','Cultivar ou híbrido'),
                     sel('cult','Cultura',[n for n,*_ in DC.CULTURAS]+[OUTRA_C],**{'def':'Soja'}),
@@ -104,8 +103,9 @@ def cd02():
                      sel('unid','Unidade de produtividade',DC.UNID_PROD,help='Padrão da cultura na meta e no custo por unidade do Planejar safra; o seletor "Unidade de produtividade" das tabelas também mostra kg/ha, t/ha e sc 60 kg/ha.')]))
     # ---- corpo: um bloco só (13/10/2026, proprietário: "tire cadastro de operações de culturas e cultivares, e coloque no lugar mais correto";
     # Operações e rendimentos virou o CD-08, ao lado deste no grupo Propriedade e produção da tela Cadastros) ----
-    acoes_form('g_cv'); cadx_css()
-    corpo=bloco_cad('',faixa('c2_fx0')+arv(cv),'Culturas e cultivares')
+    # padrão comum (16/10/2026): bloco e grade do motor; "Criar cultivar" no cabeçalho (BOT-01/03/05); sem faixa de atenção (TAB-06/07)
+    acoes_form('g_cv')
+    corpo=bloco_cad('',cv,'Culturas e cultivares',titulo='Cultivares por cultura')
     dados=json.dumps(dict(unid=DC.UNID_PROD,sem=SEMENTES_BASE,son=SEG_ON(),soff=SEG_OFF(),
                       defc=next(r['id'] for r in cul_rows if r['v']['nome']=='Soja')),ensure_ascii=False)
     js({},CADC_JS+f"\nconst C2={dados}; const OUTRA_C={json.dumps(OUTRA_C)}, CRIAR={json.dumps(CRIAR,ensure_ascii=False)};\n"+r'''
@@ -158,8 +158,6 @@ function EXTRAVALS(self,v){ simv(self,v); self.g2persist=()=>c2grava(self); c2gr
   v.c2e=semF?semF+(semF>1?' cultivares':' cultivar')+' sem semente':'Sem pendências';
   cadEstado(v,'c2e',v.c2e,semF?'yellow':'green');
   cadQfPos(self,v,'g_cv','c2qf0'); cadConta(self,v,'g_cv');
-  cadFaixa(v,'c2_fx0',[semF?{n:semF,rot:semF>1?'cultivares anuais sem item de semente':'cultivar anual sem item de semente',reg:semL.map(r=>r.v.cult+' '+r.v.nome).join(', '),verbo:'Vincular semente',
-    go:semF===1?()=>cadcAbrir(self,'g_cv',semL[0].id):()=>self.setState({c2qf0:'res'})}:null]);
   // linha da cultura / da operação abre o formulário próprio
   c2pais(self,'g_cv').forEach(p=>{ v['c2oc_'+p.id]=()=>g2open(self,GR('g_cult'),p.id,null); (p.kids||[]).forEach(r=>{ v['c2ab_'+r.id]=()=>cadcAbrir(self,'g_cv',r.id); }); });
  // exclusão sai da linha: fica no painel da cultivar (Excluir cultivar, com a causa quando está em uso)
@@ -198,7 +196,7 @@ function EXTRAVALS(self,v){ simv(self,v); self.g2persist=()=>c2grava(self); c2gr
   }; }
 ''')
     HEIGHTS37[fname]=1000   # sem rolagem de página: só a tabela rola
-    shell37('CD-02','Culturas e cultivares',corpo,fname=fname,status=None,primary_html=None,search=False)
+    shell37('CD-02','Culturas e cultivares',corpo,fname=fname,status=None,primary_html=prim_cab('Criar cultivar','g_cv_new'),search=False)
     estado_cab(fname,'Culturas e cultivares','c2e')
 
 
@@ -228,8 +226,8 @@ def cd08():
     # 09/10): a fonte do dado (a premissa a validar é a pendência, com o verbo) logo depois do conjunto; modo, largura, velocidade e eficiência,
     # que formam o rendimento, ficam no painel (o mesmo formulário do Planejar safra), e a grade cabe sem rolar a 1440 px
     rend=grid([dict(k='nome',l='Operação › conjunto',w=300),dict(k='fonte',l='Fonte',w=200),dict(k='proc',l='Processo',w=140),dict(k='cult',l='Cultura'),
-               dict(k='rend',l='Rendimento',t='num',a='r',un='ha/h',d=2),dict(k='custo_h',l='R$/h',t='num',a='r',d=2),dict(k='custo_ha',l='R$/ha',t='num',a='r',d=2)],rtree,gid='g_rend',tree=True,dele=False,total=False,frame=False,x0={r['id']:True for r in rtree},
-        tools=qf_chips('g_rend')+secbtn('sim_cmp','Comparar com o realizado','Compara o padrão com os apontamentos de campo')+prim('g_rend_new','Cadastrar rendimento'),
+               dict(k='rend',l='Rendimento',t='num',a='r',un='ha/h',d=2),dict(k='custo_h',l='R$/h',t='num',a='r',d=2),dict(k='custo_ha',l='R$/ha',t='num',a='r',d=2)],rtree,gid='g_rend',tree=True,dele=False,total=False,x0={r['id']:True for r in rtree},qf=QF_CAD,
+        tools=secbtn('sim_cmp','Comparar com o realizado','Compara o padrão com os apontamentos de campo'),
         edit=dict(m='form',title='Rendimento',newTitle='Cadastrar rendimento',
             sub='Informe como o conjunto trabalha e quanto custa por hora; rendimento e custo por hectare são recalculados. Planejar safra parte deste padrão.',
             fields=[sel('op','Operação',ops+[OUTRA_O],**{'def':ops[0]}),
@@ -246,8 +244,7 @@ def cd08():
              fields=[txt('nome','Nome da operação'),
                      sel('proc','Processo',PROC_NOMES,help='Etapa de custo: o custo da O.S. e do orçamento desta operação vai para este processo.'),
                      dict(k='atvs',l='Atividades usuais',t='area',req=False,help='Separe por ponto e vírgula; no plano, a operação vem primeiro e filtra estas atividades.')]))
-    cadx_css()
-    corpo=bloco_cad('',faixa('c2_fx1')+arv(rend),'Operações e rendimentos')
+    corpo=bloco_cad('',rend,'Operações e rendimentos',titulo='Rendimentos por operação')
     dados=json.dumps(dict(cul=[dict(id=f'CU{i}',nome=n) for i,(n,*_) in enumerate(DC.CULTURAS,1)],defo='OP1'),ensure_ascii=False)   # mesmos ids do CD-02
     js(dict(cmp='Pulverização: padrão 21,6 ha/h × realizado 19,8 ha/h (OS-0421, 4 dias) · revisão sugerida, nada alterado.'),REND_JS
        +CADC_JS+f"\nconst C8={dados}; const OUTRA_O={json.dumps(OUTRA_O)};\n"+r'''
@@ -287,8 +284,6 @@ function EXTRAVALS(self,v){ simv(self,v); const c8grava=()=>cadLsGrava(self,{cd0
   v.c8e=prem?prem+(prem>1?' premissas':' premissa')+' a validar':'Sem pendências';
   cadEstado(v,'c8e',v.c8e,prem?'yellow':'green');
   cadQfPos(self,v,'g_rend','c2qf1'); cadConta(self,v,'g_rend');
-  cadFaixa(v,'c2_fx1',[prem?{n:prem,rot:prem>1?'rendimentos como premissa':'rendimento como premissa',reg:premL.map(r=>r.v.op+' · '+r.v.conj).join(', '),verbo:'Validar rendimento',
-    go:prem===1?()=>g2open(self,GR('g_rend'),premL[0].id,null):()=>self.setState({c2qf1:'res'})}:null]);
   // linha da operação abre o formulário próprio
   c2pais(self,'g_rend').forEach(p=>{ v['c2oo_'+p.id]=()=>g2open(self,GR('g_op'),p.id,null); });
   valida(self,v,'g_rend',(d,fm)=>{ const e={}; const nova=d.op===OUTRA_O; const on=nova?String(d.nop||'').trim():d.op;
@@ -317,5 +312,5 @@ function EXTRAVALS(self,v){ simv(self,v); const c8grava=()=>cadLsGrava(self,{cd0
       self.setState({g2toast:pre+'Salvo: '+V.op+' rende '+nf(V.rend,2)+' ha/h a R$ '+nf(V.custo_h,2)+'/h e R$ '+nf(V.custo_ha,2)+'/ha. Novos planejamentos usam este padrão.'}); } }; }
 ''')
     HEIGHTS37[fname]=1000
-    shell37('CD-08','Operações e rendimentos',corpo,fname=fname,status=None,primary_html=None,search=False)
+    shell37('CD-08','Operações e rendimentos',corpo,fname=fname,status=None,primary_html=prim_cab('Criar rendimento','g_rend_new'),search=False)
     estado_cab(fname,'Operações e rendimentos','c8e')

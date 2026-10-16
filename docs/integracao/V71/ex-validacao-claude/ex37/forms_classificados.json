@@ -1,0 +1,1965 @@
+[
+ {
+  "tela": "AG-01",
+  "titulo": "Programar vistoria",
+  "trig": "Programar vistoria",
+  "tipo": "criação/ação (botão)",
+  "prim": "Programar vistoria",
+  "n": 4,
+  "ned": 4,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Talhão Pivô 1 · Mamão formação · pré-flo=select",
+   "Alvo Ácaro-rajado · praga Mosca-branca ·=select",
+   "Data=date",
+   "Responsável Lúcia Wesley=select"
+  ]
+ },
+ {
+  "tela": "AG-01",
+  "titulo": "VIS-055 · Mancha-anelar (PRSV) · Pivô 22",
+  "trig": "Confirmar foco",
+  "tipo": "criação/ação (botão)",
+  "prim": "Gerar O.S. de erradicação",
+  "n": 2,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Área do foco (ha)=text",
+   "A partir de=date"
+  ]
+ },
+ {
+  "tela": "AG-02",
+  "titulo": "Registrar laudo de solo",
+  "trig": "Registrar laudo",
+  "tipo": "criação/ação (botão)",
+  "prim": "Registrar laudo",
+  "n": 17,
+  "ned": 17,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Fazenda=select",
+   "Talhão=select",
+   "Coleta=date",
+   "Laboratório=select",
+   "Arquivo do laudo (PDF)=text",
+   "Valor de Ca=text",
+   "Unidade de Ca=select",
+   "Valor de Mg=text",
+   "Unidade de Mg=select",
+   "Valor de K=text",
+   "Unidade de K=select",
+   "Valor de H+Al=text",
+   "Unidade de H+Al=select",
+   "Valor de Al=text",
+   "Unidade de Al=select",
+   "Valor de Argila=text",
+   "Unidade de Argila=select"
+  ]
+ },
+ {
+  "tela": "AG-02",
+  "titulo": "Registrar medição de água no solo",
+  "trig": "+ Registrar medição",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 13,
+  "ned": 12,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Fazenda=select",
+   "Talhão=select",
+   "Zona (opcional)=text",
+   "Data da medição=date",
+   "Profundidade amostrada=select",
+   "Profundidade efetiva das raízes=text",
+   "Método=select",
+   "Unidade=select",
+   "Capacidade de campo (CC)=text",
+   "Ponto de murcha permanente (PMP)=text",
+   "Fonte ou laboratório=select",
+   "Responsável=select",
+   "Água disponível (CAD)=text"
+  ]
+ },
+ {
+  "tela": "AG-03",
+  "titulo": "Criar diagnóstico",
+  "trig": "+ Criar diagnóstico",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 7,
+  "ned": 7,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Talhão · cultura=select",
+   "Evidências (vistoria · laudo)=text",
+   "Hipótese · causa=textarea",
+   "Meta=text",
+   "Risco=select",
+   "Ação proposta=textarea",
+   "Responsável=select"
+  ]
+ },
+ {
+  "tela": "AG-05",
+  "titulo": "Criar versão",
+  "trig": "+ Criar versão",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 6,
+  "ned": 6,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Tipo=select",
+   "Escopo (cultura · região · fase)=text",
+   "Referência=text",
+   "Unidade · gatilhos=text",
+   "Validade · revisão=text",
+   "Aprovador técnico=select"
+  ]
+ },
+ {
+  "tela": "AG-06",
+  "titulo": "Avaliação de eficácia · EF-021",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 4,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Método pré/pós=text",
+   "Datas=text",
+   "Confiança=select",
+   "Parecer técnico=textarea"
+  ]
+ },
+ {
+  "tela": "AG-07",
+  "titulo": "1,4 Sight",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Usar na O.S.",
+  "n": 3,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Cultura Escolha a cultura (1) Batata=select",
+   "Praga-alvo Escolha o alvo (1) (alvo não =select",
+   "Ordem A liberar Nenhuma ordem de pulveri=select"
+  ]
+ },
+ {
+  "tela": "CA-01",
+  "titulo": "Ordem · OS-0418 v2",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 5,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "O.S.=text",
+   "Atividade · local=text",
+   "Fase=text",
+   "Janela=text",
+   "Equipe · conjunto=select"
+  ]
+ },
+ {
+  "tela": "CA-01det",
+  "titulo": "Turno · 20/09",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 5,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Turno=text",
+   "Tipo de registro=text",
+   "Conferência=text",
+   "Área do dia=text",
+   "Motivo da correção=textarea"
+  ]
+ },
+ {
+  "tela": "CA-02",
+  "titulo": "Corrigir apontamento · OS-0421 · v2 Dia 4 · 23/09 · T1",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 5,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Apontamento=text",
+   "Conferência=text",
+   "Realizado do dia=text",
+   "Horas de máquina=text",
+   "Motivo da correção=textarea"
+  ]
+ },
+ {
+  "tela": "CA-03",
+  "titulo": "Ocorrência · OC-114 Quebra de máquina",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 7,
+  "ned": 7,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Tipo=select",
+   "Local=text",
+   "Instante=text",
+   "Relato=textarea",
+   "Gravidade=select",
+   "Evidência=select",
+   "Destino · responsável=select"
+  ]
+ },
+ {
+  "tela": "CA-03",
+  "titulo": "Registrar ocorrência",
+  "trig": "Registrar ocorrência",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 7,
+  "ned": 7,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Tipo=select",
+   "Local=text",
+   "Instante=text",
+   "Relato=textarea",
+   "Gravidade=select",
+   "Evidência=select",
+   "Destino · responsável=select"
+  ]
+ },
+ {
+  "tela": "CARGA",
+  "titulo": "Registrar pesagem",
+  "trig": "Registrar pesagem",
+  "tipo": "criação/ação (botão)",
+  "prim": "Registrar pesagem",
+  "n": 4,
+  "ned": 4,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Dia da colheita=text",
+   "Ticket da balança=text",
+   "Peso bruto=text",
+   "Tara=text"
+  ]
+ },
+ {
+  "tela": "CD-01",
+  "titulo": "Cadastrar talhão",
+  "trig": "Cadastrar talhão",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 4,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Identificação do talhão=text",
+   "Fazenda=select",
+   "Sistema=select",
+   "Área cultivável=text"
+  ]
+ },
+ {
+  "tela": "CD-01",
+  "titulo": "Talhão · T1",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 6,
+  "ned": 5,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Identificação do talhão=text",
+   "Fazenda=select",
+   "Sistema=select",
+   "Área cultivável=text",
+   "Área do polígono=text",
+   "Situação=select"
+  ]
+ },
+ {
+  "tela": "CD-01det",
+  "titulo": "Talhão · T1",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 6,
+  "ned": 5,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Identificação do talhão=text",
+   "Fazenda=select",
+   "Sistema=select",
+   "Área cultivável=text",
+   "Área do polígono=text",
+   "Situação=select"
+  ]
+ },
+ {
+  "tela": "CD-02",
+  "titulo": "Cadastrar cultivar",
+  "trig": "Cadastrar cultivar",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 6,
+  "ned": 6,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Cultivar ou híbrido=text",
+   "Cultura=select",
+   "Ciclo até a colheita=text",
+   "Item de semente=select",
+   "Registro=select",
+   "Situação=select"
+  ]
+ },
+ {
+  "tela": "CD-02",
+  "titulo": "Cultura · Soja",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 3,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nome da cultura=text",
+   "Tipo de ciclo=select",
+   "Unidade de produtividade=select"
+  ]
+ },
+ {
+  "tela": "CD-03",
+  "titulo": "Cadastrar máquina ou instalação",
+  "trig": "Cadastrar máquina ou instalação",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 12,
+  "ned": 9,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Classe=select",
+   "Nome=text",
+   "Modelo=text",
+   "Condição técnica=textarea",
+   "Responsável técnico=text",
+   "Potência=text",
+   "Custo R$/h da máquina=text",
+   "Fonte do custo=select",
+   "Leitura do horímetro=text",
+   "Exige calibração ou aferição?=select",
+   "Local=select",
+   "Situação=select"
+  ]
+ },
+ {
+  "tela": "CD-03",
+  "titulo": "Máquina · Trator T1",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 12,
+  "ned": 8,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Classe=select",
+   "Nome=text",
+   "Modelo=text",
+   "Condição técnica=textarea",
+   "Responsável técnico=text",
+   "Potência=text",
+   "Custo R$/h da máquina=text",
+   "Fonte do custo=select",
+   "Leitura do horímetro=text",
+   "Exige calibração ou aferição?=select",
+   "Local=select",
+   "Situação=select"
+  ]
+ },
+ {
+  "tela": "CD-04",
+  "titulo": "Cadastrar pessoa",
+  "trig": "Cadastrar pessoa",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 23,
+  "ned": 23,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nome=text",
+   "Equipe=select",
+   "Operar trator=checkbox",
+   "Operar pulverizador=checkbox",
+   "Operar plantadeira=checkbox",
+   "Operar colhedora=checkbox",
+   "Preparar calda (caldeiro)=checkbox",
+   "Irrigar=checkbox",
+   "Almoxarifado=checkbox",
+   "Liberar O.S. (agrônomo)=checkbox",
+   "Conferir=checkbox",
+   "Manutenção de máquinas=checkbox",
+   "Testar reparo=checkbox",
+   "Aprovar O.S. de manutenção=checkbox",
+   "Liberar ativo=checkbox",
+   "Autorizar rota e liberar ordem de proces=checkbox",
+   "Liberar lote (qualidade)=checkbox",
+   "Vínculo=select",
+   "Admissão=date",
+   "Disponível até=date",
+   "Calendário de trabalho=select",
+   "Custo-hora com encargos=text",
+   "Situação=select"
+  ]
+ },
+ {
+  "tela": "CD-04",
+  "titulo": "Pessoa · Ana",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 24,
+  "ned": 24,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nome=text",
+   "Equipe=select",
+   "Operar trator=checkbox",
+   "Operar pulverizador=checkbox",
+   "Operar plantadeira=checkbox",
+   "Operar colhedora=checkbox",
+   "Preparar calda (caldeiro)=checkbox",
+   "Irrigar=checkbox",
+   "Almoxarifado=checkbox",
+   "Liberar O.S. (agrônomo)=checkbox",
+   "Conferir=checkbox",
+   "Manutenção de máquinas=checkbox",
+   "Testar reparo=checkbox",
+   "Aprovar O.S. de manutenção=checkbox",
+   "Liberar ativo=checkbox",
+   "Autorizar rota e liberar ordem de proces=checkbox",
+   "Liberar lote (qualidade)=checkbox",
+   "Validade do registro no CREA=date",
+   "Vínculo=select",
+   "Admissão=date",
+   "Disponível até=date",
+   "Calendário de trabalho=select",
+   "Custo-hora com encargos=text",
+   "Situação=select"
+  ]
+ },
+ {
+  "tela": "CD-05",
+  "titulo": "Cadastrar parceiro",
+  "trig": "Cadastrar parceiro",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 12,
+  "ned": 12,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "CPF ou CNPJ=text",
+   "Nome ou razão social=text",
+   "Fornecedor=checkbox",
+   "Cliente=checkbox",
+   "Parceiro de crédito=checkbox",
+   "Transportador=checkbox",
+   "Prestador=checkbox",
+   "Nome do contato=text",
+   "E-mail=email",
+   "WhatsApp=tel",
+   "E-mail=checkbox",
+   "WhatsApp=checkbox"
+  ]
+ },
+ {
+  "tela": "CD-05",
+  "titulo": "Parceiro · Fertisul",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 22,
+  "ned": 21,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "CPF ou CNPJ=text",
+   "Nome ou razão social=text",
+   "Fornecedor=checkbox",
+   "Cliente=checkbox",
+   "Parceiro de crédito=checkbox",
+   "Transportador=checkbox",
+   "Prestador=checkbox",
+   "Nome do contato=text",
+   "E-mail=email",
+   "WhatsApp=tel",
+   "E-mail=checkbox",
+   "WhatsApp=checkbox",
+   "Sementes=checkbox",
+   "Fertilizantes=checkbox",
+   "Herbicidas=checkbox",
+   "Fungicidas=checkbox",
+   "Inseticidas=checkbox",
+   "Adjuvantes=checkbox",
+   "Inoculantes=checkbox",
+   "Combustível=checkbox",
+   "Peças=checkbox",
+   "Homologado=select"
+  ]
+ },
+ {
+  "tela": "CD-06",
+  "titulo": "Cadastrar item",
+  "trig": "Cadastrar item",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 11,
+  "ned": 11,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nome do item=text",
+   "Grupo=select",
+   "Unidade-base=select",
+   "Embalagem de entrega=select",
+   "Conteúdo da embalagem=text",
+   "Controle=select",
+   "Preço de referência=text",
+   "Data do preço=date",
+   "Garantia ou densidade=text",
+   "Local padrão=select",
+   "Situação=select"
+  ]
+ },
+ {
+  "tela": "CD-06",
+  "titulo": "Grupo · Adjuvantes",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 2,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nome do grupo=text",
+   "Natureza de custo=select"
+  ]
+ },
+ {
+  "tela": "CD-07",
+  "titulo": "Cadastrar código",
+  "trig": "Cadastrar código",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 10,
+  "ned": 9,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Código=text",
+   "Nome=text",
+   "Dimensão=select",
+   "Código superior=text",
+   "Grupos de insumo=text",
+   "Início da vigência=date",
+   "Fim da vigência=date",
+   "Tradução no ERP=select",
+   "Conta ou centro no ERP=text",
+   "Tipo de operação (TOP) no ERP=text"
+  ]
+ },
+ {
+  "tela": "CD-07",
+  "titulo": "Código · 01",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 10,
+  "ned": 9,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Código=text",
+   "Nome=text",
+   "Dimensão=select",
+   "Origem=text",
+   "Código superior=text",
+   "Início da vigência=date",
+   "Fim da vigência=date",
+   "Tradução no ERP=select",
+   "Conta ou centro no ERP=text",
+   "Tipo de operação (TOP) no ERP=text"
+  ]
+ },
+ {
+  "tela": "CD-08",
+  "titulo": "Cadastrar rendimento",
+  "trig": "Cadastrar rendimento",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 15,
+  "ned": 13,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Operação=select",
+   "Conjunto ou equipe=text",
+   "Cultura=select",
+   "Como obter o rendimento=select",
+   "Largura de trabalho=text",
+   "Velocidade de trabalho=text",
+   "Eficiência de campo=text",
+   "Rendimento efetivo=text",
+   "Máquina=text",
+   "Implemento=text",
+   "Pessoas na equipe=text",
+   "Custo por pessoa=text",
+   "Custo por hora=text",
+   "Fonte do dado=select",
+   "Vigente até=date"
+  ]
+ },
+ {
+  "tela": "CD-08",
+  "titulo": "Operação · Pulverização",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 3,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nome da operação=text",
+   "Processo=select",
+   "Atividades usuais=textarea"
+  ]
+ },
+ {
+  "tela": "CO-01",
+  "titulo": "Revisar previsão · T7 Mamão Formosa · 42 ha",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 7,
+  "ned": 7,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Ciclo / estádio=text",
+   "Plantas vivas=text",
+   "Peso médio · curva=text",
+   "Rendimento comercial=text",
+   "Perdas previstas=text",
+   "Faixa prevista=text",
+   "Justificativa da revisão=textarea"
+  ]
+ },
+ {
+  "tela": "CO-02",
+  "titulo": "Ordem de colheita · OC-0510 T7 · Mamão Formosa",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Origem=text",
+   "Janela=text",
+   "Equipe e máquinas=select",
+   "Previsto=text"
+  ]
+ },
+ {
+  "tela": "CO-02det",
+  "titulo": "Registrar avanço do turno · OC-0510",
+  "trig": "Registrar avanço",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 4,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Dia=text",
+   "Quantidade colhida=text",
+   "Horas de equipe=text",
+   "Observação=textarea"
+  ]
+ },
+ {
+  "tela": "CO-03",
+  "titulo": "Carga · CG-1207 09:40 · Carreta 03",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 7,
+  "ned": 6,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Ordem · origem=select",
+   "Veículo=select",
+   "Peso bruto=text",
+   "Tara=text",
+   "Líquido=text",
+   "Qualidade inicial=text",
+   "Destino=select"
+  ]
+ },
+ {
+  "tela": "CO-03",
+  "titulo": "Registrar carga",
+  "trig": "Registrar carga",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 7,
+  "ned": 6,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Ordem · origem=select",
+   "Veículo=select",
+   "Peso bruto=text",
+   "Tara=text",
+   "Líquido=text",
+   "Qualidade inicial=text",
+   "Destino=select"
+  ]
+ },
+ {
+  "tela": "CO-04",
+  "titulo": "Recebimento · RC-13 retorno PV-030 · a caminho",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 6,
+  "ned": 5,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Peso recebido=text",
+   "Local=select",
+   "Condição=select",
+   "Amostra=text",
+   "Divergência=text",
+   "Lote criado=text"
+  ]
+ },
+ {
+  "tela": "CO-05",
+  "titulo": "Criar ordem de processo",
+  "trig": "Criar ordem de processo",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 5,
+  "ned": 4,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Rota=select",
+   "Produto=select",
+   "Janela=text",
+   "Lotes de entrada · origem=text",
+   "Saídas por classe=text"
+  ]
+ },
+ {
+  "tela": "CO-05",
+  "titulo": "Ordem de processo · OB-0110 Mamão Formosa · Packing frutas · v3",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 5,
+  "ned": 4,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Rota=select",
+   "Produto=select",
+   "Janela=text",
+   "Lotes de entrada · origem=text",
+   "Saídas por classe=text"
+  ]
+ },
+ {
+  "tela": "CO-06",
+  "titulo": "Inspeção · INSP-88 L27-013",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Produto=text",
+   "Padrão · amostra=text",
+   "Responsável=select",
+   "Decisão=text"
+  ]
+ },
+ {
+  "tela": "GE-02",
+  "titulo": "Criar cenário",
+  "trig": "Criar cenário",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 5,
+  "ned": 5,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nome do cenário=text",
+   "Premissa alterada=textarea",
+   "Volume soja=text",
+   "Preço médio soja=text",
+   "Custo total=text"
+  ]
+ },
+ {
+  "tela": "GE-04",
+  "titulo": "Título · Agro Norte NF 8790 · 2/3",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 6,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Credor=text",
+   "Principal=text",
+   "Vencimento=date",
+   "Pagamento programado=date",
+   "Conta de saída=select",
+   "Observação=textarea"
+  ]
+ },
+ {
+  "tela": "GE-05",
+  "titulo": "Título · FAT-2090",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 5,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Título=text",
+   "Valor=text",
+   "Próxima cobrança=date",
+   "Canal autorizado=select",
+   "Registro da cobrança=textarea"
+  ]
+ },
+ {
+  "tela": "GE-07",
+  "titulo": "Criar ação",
+  "trig": "Criar ação",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 7,
+  "ned": 7,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Título do caso=text",
+   "Origem · indicador=select",
+   "Hipótese de causa=textarea",
+   "Ação definida=textarea",
+   "Dono=select",
+   "Prazo=date",
+   "Evidência esperada=textarea"
+  ]
+ },
+ {
+  "tela": "IN-01",
+  "titulo": "Tarefa · OS-0420 · plantio Santa Rita · T4",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 3,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Tarefa=text",
+   "Responsável=select",
+   "Prazo=select"
+  ]
+ },
+ {
+  "tela": "IN-03",
+  "titulo": "Compromisso · 23/09/2026",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 4,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Compromisso=text",
+   "Data=date",
+   "Responsável=select",
+   "Prioridade=select"
+  ]
+ },
+ {
+  "tela": "IN-03",
+  "titulo": "Nova tarefa vinculada",
+  "trig": "Criar tarefa vinculada",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 4,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Compromisso=text",
+   "Data=date",
+   "Responsável=select",
+   "Prioridade=select"
+  ]
+ },
+ {
+  "tela": "IR-01",
+  "titulo": "Setor · Gotejo T7",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 10,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Déficit hoje=text",
+   "Necessidade=text",
+   "Ordem que cobre=text",
+   "Responsável pelo próximo passo=text",
+   "Cultura e estádio=text",
+   "Equipamento=text",
+   "Água disponível no solo (referência)=text",
+   "Lâmina máxima por passada=text",
+   "Intervalo mínimo entre inícios=text",
+   "Eficiência do sistema=text"
+  ]
+ },
+ {
+  "tela": "IR-03det",
+  "titulo": "Adicionar produtos · OS-0419",
+  "trig": "Adicionar produtos",
+  "tipo": "criação/ação (botão)",
+  "prim": "Criar versão v2",
+  "n": 3,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Produto=select",
+   "Dose (kg/ha)=text",
+   "Motivo agronômico=textarea"
+  ]
+ },
+ {
+  "tela": "IR-04",
+  "titulo": "Cadastrar sensor",
+  "trig": "+ Cadastrar sensor",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 4,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nome=text",
+   "Grandeza=select",
+   "Cobertura=select",
+   "Próxima calibração=date"
+  ]
+ },
+ {
+  "tela": "IR-04",
+  "titulo": "Fonte · Estação meteorológica Santa Rita",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nome=text",
+   "Grandeza=select",
+   "Cobertura=select",
+   "Próxima calibração=date"
+  ]
+ },
+ {
+  "tela": "LO-01",
+  "titulo": "Reprogramar janela · T1 · 1ª de 3 Retirada · cliente",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 2,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nova janela=text",
+   "Motivo da reprogramação=select"
+  ]
+ },
+ {
+  "tela": "LO-01",
+  "titulo": "Reservar slot de doca",
+  "trig": "+ Reservar slot",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 4,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Horário (início–fim)=text",
+   "Doca=select",
+   "Carga=text",
+   "Duração estimada=text"
+  ]
+ },
+ {
+  "tela": "LO-02",
+  "titulo": "Registrar chegada na portaria · T1",
+  "trig": "Registrar chegada",
+  "tipo": "criação/ação (botão)",
+  "prim": "Confirmar chegada do T1",
+  "n": 3,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Data da chegada=date",
+   "Hora da chegada=time",
+   "Identificação=select"
+  ]
+ },
+ {
+  "tela": "LO-02",
+  "titulo": "Separar lotes da carga",
+  "trig": "Separar lotes",
+  "tipo": "criação/ação (botão)",
+  "prim": "Confirmar separação",
+  "n": 3,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Pedido · carga=select",
+   "Lote apto e reservado=select",
+   "Quantidade a separar=number"
+  ]
+ },
+ {
+  "tela": "LO-02det",
+  "titulo": "Registrar lacre · Lacre aplicado",
+  "trig": "Registrar lacre",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nº do lacre=text",
+   "Aplicado por=text",
+   "Conferido por=select",
+   "Evidência=select"
+  ]
+ },
+ {
+  "tela": "LO-04",
+  "titulo": "Pedir cotação",
+  "trig": "+ Pedir cotação",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 4,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Prestador=select",
+   "Carga=select",
+   "Unidade de cobrança=select",
+   "Resposta até=text"
+  ]
+ },
+ {
+  "tela": "MA",
+  "titulo": "Registrar achado",
+  "trig": "Registrar achado",
+  "tipo": "criação/ação (botão)",
+  "prim": "Registrar achado",
+  "n": 2,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Ativo Escolha o ativo Trator T1 · JD 6M =select",
+   "Sintoma=textarea"
+  ]
+ },
+ {
+  "tela": "MA-01",
+  "titulo": "Registrar achado",
+  "trig": "Registrar achado",
+  "tipo": "criação/ação (botão)",
+  "prim": "Registrar achado",
+  "n": 2,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Ativo Escolha o ativo Trator T1 · JD 6M =select",
+   "Sintoma=textarea"
+  ]
+ },
+ {
+  "tela": "MA-02",
+  "titulo": "Registrar achado",
+  "trig": "Registrar achado",
+  "tipo": "criação/ação (botão)",
+  "prim": "Registrar achado",
+  "n": 2,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Ativo Escolha o ativo Trator T1 · JD 6M =select",
+   "Sintoma=textarea"
+  ]
+ },
+ {
+  "tela": "MA-03",
+  "titulo": "Registrar achado",
+  "trig": "Registrar achado",
+  "tipo": "criação/ação (botão)",
+  "prim": "Registrar achado",
+  "n": 2,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Ativo Escolha o ativo Trator T1 · JD 6M =select",
+   "Sintoma=textarea"
+  ]
+ },
+ {
+  "tela": "MA-05",
+  "titulo": "Registrar abastecimento",
+  "trig": "Registrar abastecimento",
+  "tipo": "criação/ação (botão)",
+  "prim": "Registrar abastecimento",
+  "n": 4,
+  "ned": 4,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Ativo Escolha o ativo Trator T1 · JD 6M =select",
+   "ou=date",
+   "Volume · L=text",
+   "Tanque cheio (método do consumo L/h)=checkbox"
+  ]
+ },
+ {
+  "tela": "ON-01det",
+  "titulo": "Objeto da importação · Talhões (shapefile)",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Objeto=text",
+   "Mapeamento de colunas=text",
+   "Sistema de coordenadas=select",
+   "Justificativa da sobreposição (T2 × T3, =textarea"
+  ]
+ },
+ {
+  "tela": "OS",
+  "titulo": "Nova ordem",
+  "trig": "Criar ordem",
+  "tipo": "criação/ação (botão)",
+  "prim": "Emitir ordem",
+  "n": 4,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Safra=select",
+   "Cultivo=select",
+   "Atividade=select",
+   "Início da janela=date"
+  ]
+ },
+ {
+  "tela": "PA",
+  "titulo": "Novo plano",
+  "trig": "Criar plano",
+  "tipo": "criação/ação (botão)",
+  "prim": "Criar plano",
+  "n": 2,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nome do plano=text",
+   "Cultura=select"
+  ]
+ },
+ {
+  "tela": "PL-01",
+  "titulo": "Nova safra",
+  "trig": "+ Criar safra",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nome da safra=text",
+   "Período=text",
+   "Fazenda=select",
+   "Cultivos · área=text"
+  ]
+ },
+ {
+  "tela": "PL-01",
+  "titulo": "Safra · Safra 2026/27",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nome da safra=text",
+   "Período=text",
+   "Fazenda=select",
+   "Cultivos · área=text"
+  ]
+ },
+ {
+  "tela": "PL-02",
+  "titulo": "Operação · C1 Café Catuaí 144",
+  "trig": "Decidir pendência",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 8,
+  "ned": 4,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Parcela=text",
+   "Atividade=text",
+   "Área=text",
+   "Dose/quantidade=text",
+   "Gatilho por extenso=text",
+   "Janela=text",
+   "Pendência=text",
+   "Decisão da pendência=select"
+  ]
+ },
+ {
+  "tela": "PL-02",
+  "titulo": "Operação · T4 Soja 58 W",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 6,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Parcela=text",
+   "Atividade=text",
+   "Área=text",
+   "Dose/quantidade=text",
+   "Gatilho por extenso=text",
+   "Janela=text"
+  ]
+ },
+ {
+  "tela": "PL-04",
+  "titulo": "Programar · OS-0421 fungicida T1+T2",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 6,
+  "ned": 4,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Ordem=text",
+   "Janela=text",
+   "Recurso/conjunto=select",
+   "Operador=select",
+   "Duração=text",
+   "Etapa=text"
+  ]
+ },
+ {
+  "tela": "PL-05",
+  "titulo": "Impedimento · Ativo bloqueado Trator T1 · OM-0233 pressão hidráulica baixa",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 5,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Causa=text",
+   "Responsável=select",
+   "Prazo=select",
+   "Alternativa=text",
+   "Aprovação=text"
+  ]
+ },
+ {
+  "tela": "PL-06",
+  "titulo": "Parcela · T1-A polígono norte",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 6,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Parcela=text",
+   "Área=text",
+   "Variedade=select",
+   "Plantio próprio=date",
+   "Janela de colheita=text",
+   "Preparo/limpeza=text"
+  ]
+ },
+ {
+  "tela": "PM",
+  "titulo": "Novo plano de manutenção",
+  "trig": "Distribuidor 3 t · Criar plano",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 19,
+  "ned": 19,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nome do plano=text",
+   "Aplica-se a=select",
+   "Trator T1 · JD 6M 155=checkbox",
+   "Trator 02 · MF 7719=checkbox",
+   "Trator 03 · MF 4292=checkbox",
+   "Trator 04 · JD 5078E=checkbox",
+   "Pulverizador PJ-3030=checkbox",
+   "Plantadeira 24 linhas=checkbox",
+   "Distribuidor 3 t=checkbox",
+   "Colhedora Axial-Flow 7250=checkbox",
+   "Máquina TSI=checkbox",
+   "Esqueletadeira=checkbox",
+   "Bomba do Pivô 1=checkbox",
+   "Bomba do Pivô 2=checkbox",
+   "Gotejo T7=checkbox",
+   "Packing linha 1=checkbox",
+   "Silo 01=checkbox",
+   "Comboio CB-01=checkbox",
+   "Começar de=select"
+  ]
+ },
+ {
+  "tela": "PT-02det",
+  "titulo": "Esclarecimento · O frete CIF até o Galpão 2 vale para os 5 itens?",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 2,
+  "ned": 1,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Pergunta=textarea",
+   "Sua resposta=textarea"
+  ]
+ },
+ {
+  "tela": "PT-07",
+  "titulo": "Convidar usuário",
+  "trig": "+ Convidar usuário",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 3,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nome=text",
+   "E-mail=email",
+   "Papel=select"
+  ]
+ },
+ {
+  "tela": "PT-07",
+  "titulo": "Credenciamento · Fertisul Fertilizantes Ltda 12.345.678/0001-95",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 16,
+  "ned": 15,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "CNPJ=text",
+   "Fertilizantes e corretivos=checkbox",
+   "Sementes=checkbox",
+   "Defensivos=checkbox",
+   "Combustível=checkbox",
+   "Sudoeste GO=checkbox",
+   "Triângulo MG=checkbox",
+   "Oeste BA=checkbox",
+   "Médio-Norte MT=checkbox",
+   "Soja=checkbox",
+   "Milho=checkbox",
+   "Café=checkbox",
+   "Algodão=checkbox",
+   "Feijão=checkbox",
+   "E-mail de cotação=email",
+   "WhatsApp=tel"
+  ]
+ },
+ {
+  "tela": "SAF",
+  "titulo": "Nova safra",
+  "trig": "Criar safra",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 7,
+  "ned": 7,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nome da safra=text",
+   "Início=date",
+   "Fim=date",
+   "Santa Rita=checkbox",
+   "Boa Vista=checkbox",
+   "Lagoa Grande=checkbox",
+   "Estado=select"
+  ]
+ },
+ {
+  "tela": "SAF",
+  "titulo": "Safra · Safra 2026/27",
+  "trig": "Editar",
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 7,
+  "ned": 7,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Nome da safra=text",
+   "Início=date",
+   "Fim=date",
+   "Santa Rita=checkbox",
+   "Boa Vista=checkbox",
+   "Lagoa Grande=checkbox",
+   "Estado=select"
+  ]
+ },
+ {
+  "tela": "SU-01",
+  "titulo": "Reprogramar proposta de reposição",
+  "trig": "Reprogramar proposta",
+  "tipo": "criação/ação (botão)",
+  "prim": "Reprogramar",
+  "n": 3,
+  "ned": 3,
+  "ast": 3,
+  "req": 0,
+  "campos": [
+   "Item *=select",
+   "Nova data necessária *=date",
+   "Motivo *=text"
+  ]
+ },
+ {
+  "tela": "SU-02",
+  "titulo": "Política · Fertilizantes Galpão 2",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 10,
+  "ned": 10,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Lote/múltiplo de compra=text",
+   "Depósito=select",
+   "Classe ABC (valor)=select",
+   "Criticidade=select",
+   "Método de reposição=select",
+   "Segurança=text",
+   "Prazo de reposição=text",
+   "Validade / regra de saída=text",
+   "Limite econômico=text",
+   "Justificativa da proposta=textarea"
+  ]
+ },
+ {
+  "tela": "SU-02",
+  "titulo": "Submeter exceção versionada",
+  "trig": "Submeter exceção",
+  "tipo": "criação/ação (botão)",
+  "prim": "Submeter exceção",
+  "n": 5,
+  "ned": 5,
+  "ast": 5,
+  "req": 0,
+  "campos": [
+   "Item/grupo *=select",
+   "Alteração *=text",
+   "Início *=date",
+   "Fim *=date",
+   "Justificativa *=textarea"
+  ]
+ },
+ {
+  "tela": "SU-03",
+  "titulo": "Reservar saldo para ordem",
+  "trig": "Reservar para ordem",
+  "tipo": "criação/ação (botão)",
+  "prim": "Reservar",
+  "n": 3,
+  "ned": 3,
+  "ast": 3,
+  "req": 0,
+  "campos": [
+   "Ordem de destino *=select",
+   "Lote *=select",
+   "Quantidade *=text"
+  ]
+ },
+ {
+  "tela": "SU-05",
+  "titulo": "Contrato · Fertisul · CT-2026-11",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 3,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Responsável=select",
+   "Condição de pagamento=select",
+   "Fim da vigência=date",
+   "Tolerância=text"
+  ]
+ },
+ {
+  "tela": "SU-05",
+  "titulo": "Formalizar contrato",
+  "trig": "Formalizar contrato",
+  "tipo": "criação/ação (botão)",
+  "prim": "Formalizar contrato",
+  "n": 6,
+  "ned": 6,
+  "ast": 6,
+  "req": 0,
+  "campos": [
+   "Contraparte *=select",
+   "Itens *=text",
+   "Volume líquido preliminar *=text",
+   "Tolerância inferior/superior *=select",
+   "Condição de pagamento *=select",
+   "Fim da vigência *=date"
+  ]
+ },
+ {
+  "tela": "SU-06",
+  "titulo": "Recebimento · NF 4533 PC-090 Coop. Vale",
+  "trig": "Ler documento/QR",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 6,
+  "ned": 6,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Quantidade conferida=text",
+   "Lote=text",
+   "Validade=text",
+   "Inspeção=select",
+   "Depósito=select",
+   "Divergência=select"
+  ]
+ },
+ {
+  "tela": "SU-06",
+  "titulo": "Resolver diferença · NF 8812",
+  "trig": "Resolver diferença",
+  "tipo": "criação/ação (botão)",
+  "prim": "Registrar decisão",
+  "n": 3,
+  "ned": 3,
+  "ast": 2,
+  "req": 0,
+  "campos": [
+   "Decisão *=select",
+   "Responsável *=select",
+   "Observação=textarea"
+  ]
+ },
+ {
+  "tela": "SU-06",
+  "titulo": "Segregar lote",
+  "trig": "Segregar lote",
+  "tipo": "criação/ação (botão)",
+  "prim": "Segregar",
+  "n": 3,
+  "ned": 3,
+  "ast": 3,
+  "req": 0,
+  "campos": [
+   "Lote *=select",
+   "Quantidade *=text",
+   "Motivo *=text"
+  ]
+ },
+ {
+  "tela": "SU-07",
+  "titulo": "Solicitar requisição",
+  "trig": "Solicitar",
+  "tipo": "criação/ação (botão)",
+  "prim": "Criar requisição",
+  "n": 4,
+  "ned": 4,
+  "ast": 4,
+  "req": 0,
+  "campos": [
+   "O.S. · item autorizado *=select",
+   "Quantidade *=text",
+   "Local de entrega *=text",
+   "Recebedor *=select"
+  ]
+ },
+ {
+  "tela": "SU-07det",
+  "titulo": "Destinar saldo em custódia",
+  "trig": "Destinar saldo",
+  "tipo": "criação/ação (botão)",
+  "prim": "Submeter destinação",
+  "n": 4,
+  "ned": 4,
+  "ast": 4,
+  "req": 0,
+  "campos": [
+   "Quantidade *=text",
+   "Destinação *=select",
+   "Evidência *=text",
+   "Aprovador *=select"
+  ]
+ },
+ {
+  "tela": "SU-07det",
+  "titulo": "Receber devolução · REQ-031",
+  "trig": "Receber devolução",
+  "tipo": "criação/ação (botão)",
+  "prim": "Confirmar recebimento",
+  "n": 3,
+  "ned": 3,
+  "ast": 3,
+  "req": 0,
+  "campos": [
+   "Quantidade medida *=text",
+   "Condição *=select",
+   "Recebedor *=select"
+  ]
+ },
+ {
+  "tela": "SU-08",
+  "titulo": "Estornar com vínculo",
+  "trig": "Estornar com vínculo",
+  "tipo": "criação/ação (botão)",
+  "prim": "Estornar com vínculo",
+  "n": 2,
+  "ned": 2,
+  "ast": 2,
+  "req": 0,
+  "campos": [
+   "Movimento original *=select",
+   "Motivo *=text"
+  ]
+ },
+ {
+  "tela": "SU-08",
+  "titulo": "Registrar perda em alçada",
+  "trig": "Registrar perda",
+  "tipo": "criação/ação (botão)",
+  "prim": "Submeter perda",
+  "n": 5,
+  "ned": 5,
+  "ast": 5,
+  "req": 0,
+  "campos": [
+   "Item · lote *=select",
+   "Quantidade *=text",
+   "Causa *=text",
+   "Evidência *=text",
+   "Aprovador *=select"
+  ]
+ },
+ {
+  "tela": "SU-08",
+  "titulo": "Transferir entre locais",
+  "trig": "Transferir entre locais",
+  "tipo": "criação/ação (botão)",
+  "prim": "Iniciar transferência",
+  "n": 5,
+  "ned": 5,
+  "ast": 5,
+  "req": 0,
+  "campos": [
+   "Item · lote *=select",
+   "Quantidade *=text",
+   "Origem *=select",
+   "Destino *=select",
+   "Motivo *=text"
+  ]
+ },
+ {
+  "tela": "SU-09",
+  "titulo": "Planejar contagem",
+  "trig": "Planejar contagem",
+  "tipo": "criação/ação (botão)",
+  "prim": "Planejar contagem",
+  "n": 4,
+  "ned": 4,
+  "ast": 4,
+  "req": 0,
+  "campos": [
+   "Escopo *=select",
+   "Data de corte *=date",
+   "Contador *=select",
+   "Recontagem *=select"
+  ]
+ },
+ {
+  "tela": "VE-02",
+  "titulo": "Novo alerta de preço",
+  "trig": "+ Criar alerta",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 6,
+  "ned": 6,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Instrumento=select",
+   "Condição=select",
+   "Limite=text",
+   "Avisar por=select",
+   "Validade=date",
+   "Estado=select"
+  ]
+ },
+ {
+  "tela": "VE-03",
+  "titulo": "Nova oferta privada",
+  "trig": "Criar oferta",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 7,
+  "ned": 7,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Produto · classe=select",
+   "Volume=text",
+   "Janela=text",
+   "Destino · frete=select",
+   "Preço=text",
+   "Prazo de pagamento=select",
+   "Validade=text"
+  ]
+ },
+ {
+  "tela": "VE-04",
+  "titulo": "Novo pedido de venda",
+  "trig": "+ Criar pedido",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 7,
+  "ned": 7,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Cliente=select",
+   "Itens · classe=select",
+   "Quantidade=text",
+   "Unidade=select",
+   "Preço por unidade=text",
+   "Janela=text",
+   "Condição=select"
+  ]
+ },
+ {
+  "tela": "VE-04",
+  "titulo": "Pedido · PV-033",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 7,
+  "ned": 7,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Cliente=select",
+   "Itens · classe=select",
+   "Quantidade=text",
+   "Unidade=select",
+   "Preço por unidade=text",
+   "Janela=text",
+   "Condição=select"
+  ]
+ },
+ {
+  "tela": "VE-04det",
+  "titulo": "Revisão v3 do pedido",
+  "trig": "Enviar revisão v3",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 4,
+  "ned": 4,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Quantidade=text",
+   "Preço=text",
+   "Janela=text",
+   "Motivo=select"
+  ]
+ },
+ {
+  "tela": "VE-05",
+  "titulo": "Novo compromisso",
+  "trig": "Formalizar compromisso",
+  "tipo": "criação/ação (botão)",
+  "prim": "Salvar",
+  "n": 5,
+  "ned": 5,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Contraparte=select",
+   "Produto · base=select",
+   "Volume=text",
+   "Janela=text",
+   "Condições=text"
+  ]
+ },
+ {
+  "tela": "VE-06",
+  "titulo": "Caso · RC-15",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Salvar",
+  "n": 6,
+  "ned": 6,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Pedido · entrega=text",
+   "Motivo=select",
+   "Lote=text",
+   "Quantidade=text",
+   "Evidências=text",
+   "Tratamento financeiro=select"
+  ]
+ },
+ {
+  "tela": "VEN",
+  "titulo": "BT-090 · Fertisul",
+  "trig": null,
+  "tipo": "edição (linha)",
+  "prim": "Registrar a saca",
+  "n": 1,
+  "ned": 1,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Fonte=text"
+  ]
+ },
+ {
+  "tela": "VEN",
+  "titulo": "Registrar venda",
+  "trig": "Registrar venda",
+  "tipo": "criação/ação (botão)",
+  "prim": "Registrar venda",
+  "n": 2,
+  "ned": 2,
+  "ast": 0,
+  "req": 0,
+  "campos": [
+   "Quantidade=text",
+   "Preço=text"
+  ]
+ }
+]

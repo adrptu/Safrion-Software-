@@ -1,0 +1,13 @@
+FALHOU largura abaixo do mínimo barrada
+FALHOU rendimento ao vivo acompanha o digitado
+OK  salvou e fechou
+FALHOU aviso de salvo com o novo rendimento
+RESULTADO: FALHOU 1/4
+Traceback (most recent call last):
+  File "/home/user/sp-cad/tools/prototipo/v37/gen37/cadc_cd0102_b.py", line 19, in <module>
+    t.chk('linha recalculada (27,00 ha/h · R$ 333,00 · R$ 12,33) e o painel com 36 m · 10 km/h · 75 %', all(x in r for x in ['27,00 ha/h','R$ 333,00','R$ 12,33']) and lve==['36','10','75'], [r,lve])
+                                                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-cad/tools/prototipo/v37/gen37/cadc_cd0102_b.py", line 19, in <genexpr>
+    t.chk('linha recalculada (27,00 ha/h · R$ 333,00 · R$ 12,33) e o painel com 36 m · 10 km/h · 75 %', all(x in r for x in ['27,00 ha/h','R$ 333,00','R$ 12,33']) and lve==['36','10','75'], [r,lve])
+                                                                                                            ^^^^^^
+TypeError: argument of type 'NoneType' is not iterable

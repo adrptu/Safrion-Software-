@@ -1,0 +1,118 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Comercial › Contratos e pedidos
+‹
+Comercial
+Contratos e pedidos
+i
+2 vendas sem cobertura · 4 com a saca a conferir
+Registrar venda
+Vendas
+Todas 8
+Saca a conferir 4
+Sem reserva 2
+Entregue 1
+Futura: compromete a previsão 1
+Agrupar por
+▾
+Colunas
++3
+VENDA · CLIENTE
+⇅
+SITUAÇÃO · PRÓXIMO PASSO
+⇅
+FALTA
+⇅
+PRODUTO
+⇅
+QUANTIDADE
+⇅
+PREÇO
+⇅
+BT-090
+· Fertisul
+Barter · liquidação em produto
+Saca a conferir
+Registrar a saca · Comercial
+suspensa
+Soja em grão
+Padrão 2026/27
+1.000 sc
+saca de 50 ou 60 kg?
+R$ 131,00/sc (saca a conferir)
+CRE-0095
+· Agroquímica Delta
+CPR · liquidação em produto
+Saca a conferir
+Registrar a saca · Comercial
+suspensa
+Soja em grão
+Padrão 2026/27
+6.900 sc
+saca de 50 ou 60 kg?
+R$ 118,84/sc (saca a conferir)
+CT-203
+· Coop Grão Sul
+Saca a conferir
+Registrar a saca · Comercial
+suspensa
+Soja em grão
+Padrão 2026/27
+12.000 sc
+saca de 50 ou 60 kg?
+R$ 132,00/sc (saca a conferir)
+PV-030
+· Coop Grão Sul
+Saca a conferir
+Registrar a saca · Comercial
+suspensa
+Soja em grão
+Padrão 2025/26
+4.000 sc
+saca de 50 ou 60 kg?
+R$ 128,00/sc (saca a conferir)
+PV-031
+· Frutas Real
+Sem reserva
+sem lote apto · aguardar colheita ou liberação
+10.000 kg
+Mamão Formosa · fruta embalada
+A
+10.000 kg
+R$ 3,05/kg
+PV-036
+· Frutas Real
+Sem reserva
+sem lote apto · aguardar colheita ou liberação
+10.000 kg
+Mamão Formosa · fruta de campo
+10.000 kg
+R$ 3,05/kg
+PV-037
+· Frutas Real
+Entregue
+entregue · R$ 91.470,00 a receber até 15/10
+0 kg
+Mamão Formosa · fruta de campo
+30.490 kg
+R$ 3,00/kg
+PV-038
+· Frutas Real
+Futura: compromete a previsão
+compromete a previsão · reservar na colheita
+30.000 kg
+Mamão Formosa · fruta de campo
+30.000 kg
+R$ 3,10/kg
+Restaurar demonstração
+Tela: Contratos e pedidos · 2 vendas sem cobertura · 4 com a saca a conferir

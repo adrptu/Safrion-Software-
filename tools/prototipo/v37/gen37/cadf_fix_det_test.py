@@ -54,11 +54,12 @@ try:
     J(f"({CLK})('Reativar B1','main button')"); time.sleep(.45)
     foco=J("(document.activeElement||{}).id||''")
     chk('6 "Reativar B1" abre o formulário do B1 com Situação em Ativo e o foco nela', aberto() and fv('sit')=='Ativo' and foco.endswith('_sit'), [fv('sit'),foco])
-    save(); aba('Geometria'); hb=mbtns(); aba('Parcelas')
-    chk('7 salvar reativa: toast, estado e a aba Geometria voltam a nomear o próximo passo', 'B1 reativado: volta ao Planejar safra e ao Mapa.' in toast() and 'Inativo' not in head()
-        and 'Definir polígono do B1' in hb and 'Reativar B1' not in hb, [toast(),hb])
+    # 16/10/2026 (BOT-01): o próximo passo do talhão ("Definir polígono do B1") é a primária do cabeçalho do detalhe
+    save(); aba('Geometria'); hb=mbtns(); hh=hbtns(); aba('Parcelas')
+    chk('7 salvar reativa: toast, estado e o cabeçalho voltam a nomear o próximo passo', 'B1 reativado: volta ao Planejar safra e ao Mapa.' in toast() and 'Inativo' not in head()
+        and 'Definir polígono do B1' in hh and 'Reativar B1' not in hb, [toast(),hb,hh])
     # ---------- versões do polígono não ficam cortadas ----------
-    tal('T1'); aba('Geometria'); J(f"({CLK})('Definir polígono da T1-B','main button')"); time.sleep(.3); J(f"({BTN})('Gerar prévia')"); time.sleep(.25); J(f"({BTN})('Salvar polígono')"); time.sleep(.4)
+    tal('T1'); aba('Geometria'); J(f"({CLK})('Definir polígono da T1-B','header button')"); time.sleep(.3); J(f"({BTN})('Gerar prévia')"); time.sleep(.25); J(f"({BTN})('Salvar polígono')"); time.sleep(.4)
     for _ in range(2):
         J(f"({CLK})('Nova versão do polígono')"); time.sleep(.3); J(f"({BTN})('Gerar prévia')"); time.sleep(.25); J(f"({BTN})('Salvar polígono')"); time.sleep(.4)
     J(f"({CLK})('Expandir tudo')"); time.sleep(.3)

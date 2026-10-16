@@ -1,0 +1,17 @@
+OK  C1 1440: o Crédito na barra abre a tela de entrada com um cartão por visão da GE-08
+OK  C2 1440 Contratos: só a parte do cartão (Solicitações e contratos), com os indicadores e "‹ Crédito"
+OK  C2 1440 Liberações: só a parte do cartão (Acompanhamento do CRE-0102), com os indicadores e "‹ Crédito"
+OK  C2 1440 Dossiê: só a parte do cartão (Dossiê e consentimento), com os indicadores e "‹ Crédito"
+OK  C2 1440 Documentos: só a parte do cartão (Documentos para crédito), com os indicadores e "‹ Crédito"
+OK  C3 1440: trocar a visão pelo endereço troca a parte sem recarregar
+OK  C4 1440: GE-08 sem visão no endereço (links de outras telas) mostra as quatro partes
+OK  C5 1440: sem rolagem lateral e sem erro de JS
+OK  C1 390: o Crédito na barra abre a tela de entrada com um cartão por visão da GE-08
+OK  C2 390 Contratos: só a parte do cartão (Solicitações e contratos), com os indicadores e "‹ Crédito"
+OK  C2 390 Liberações: só a parte do cartão (Acompanhamento do CRE-0102), com os indicadores e "‹ Crédito"
+OK  C2 390 Dossiê: só a parte do cartão (Dossiê e consentimento), com os indicadores e "‹ Crédito"
+OK  C2 390 Documentos: só a parte do cartão (Documentos para crédito), com os indicadores e "‹ Crédito"
+OK  C3 390: trocar a visão pelo endereço troca a parte sem recarregar
+OK  C4 390: GE-08 sem visão no endereço (links de outras telas) mostra as quatro partes
+OK  C5 390: sem rolagem lateral e sem erro de JS
+RESULTADO: 16/16

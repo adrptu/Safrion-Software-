@@ -1,0 +1,96 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Planos agronômicos
+‹
+Agrícola
+Planos agronômicos
+Criar plano
+Biblioteca de planos por cultura
+Todas 8
+Soja 2
+Milho 1
+Feijão 1
+Café 1
+Mamão Formosa 3
+SOJA · 2 planos
+Soja alta tecnologia
+Abrir plano
+→
+Publicado · v6
+8 atividades
+R$ 2.099,90 insumos/ha
+Gatilhos
+DAP
+Soja padrão
+Abrir plano
+→
+Publicado · v3
+4 atividades
+R$ 1.383,50 insumos/ha
+Gatilhos
+DAP
+MILHO · 1 plano
+Milho safrinha
+Abrir plano
+→
+Publicado · v4
+5 atividades
+R$ 2.027,50 insumos/ha
+Gatilhos
+DAP
+FEIJÃO · 1 plano
+Feijão pivô
+Abrir plano
+→
+Publicado · v3
+4 atividades
+R$ 1.788,50 insumos/ha
+Gatilhos
+DAP
+Antes da colheita
+CAFÉ · 1 plano
+Café arábica produção
+Abrir plano
+→
+Publicado · v2
+6 atividades
+R$ 2.496,00 insumos/ha
+Gatilhos
+Data
+Após a colheita
+MAMÃO FORMOSA · 3 planos
+Mamão Formosa produção
+Abrir plano
+→
+Publicado · v3
+3 atividades
+R$ 489,50 insumos/ha
+Gatilhos
+Data
+Mamão Formosa · implantação irrigada
+Abrir plano
+→
+Publicado · v1
+12 atividades
+R$ 3.994,00 insumos/ha
+Gatilhos
+DAP
+Mamão Formosa · produção irrigada
+Abrir plano
+→
+Publicado · v1
+12 atividades
+R$ 1.768,50 insumos/ha
+Gatilhos
+Data
+Tela: Planos agronômicos

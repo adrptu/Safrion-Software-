@@ -1,0 +1,115 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Irrigação › Clima e sensores
+Clima e sensores
+1 suspeita · 1 sem dado
+Confira a necessidade
+1 a programar
+Programe a irrigação
+1 conflito · 1 janela a definir
+Execute e confira
+1 a conferir
+Acompanhe clima e sensores
+1 suspeita · 1 sem dado
+Fazenda
+Todas
+Lagoa Grande
+Santa Rita
+Boa Vista
+Fontes e sensores
+Agrupar por
+▾
+Colunas
++5
++ Cadastrar sensor
+FONTE
+⇅
+GRANDEZA
+⇅
+ATUALIZAÇÃO
+⇅
+EFEITO NO BALANÇO
+⇅
+Estação meteorológica Santa Rita
+ET₀, Chuva, Vento
+hoje 06:00
+ETc dos setores
+Hidrômetro · Pivô 2
+Volume
+hoje 06:00
+crédito das irrigações
+Sonda de umidade · P2 (20 cm)
+Umidade do solo
+hoje 05:40
+Pivô 2 medido
+Suspeita
+Sonda de umidade · P1 (20 cm)
+Umidade do solo
+hoje 05:40
+Pivô 1 por estimativa de ET (≈)
+Sonda de umidade · T7
+Umidade do solo
+20/09 06:00
+Gotejo T7 por estimativa de ET (≈)
+Previsão meteorológica (modelo externo)
+Chuva prevista 48 h
+hoje 06:00
+não entra como chuva
+Captações e outorgas
+Agrupar por
+▾
+Colunas
++5
+CAPTAÇÃO
+⇅
+VAZÃO OUTORGADA
+⇅
+USO DO DIA
+⇅
+VENCIMENTO
+⇅
+Rio · captação da sede
+400 L/s
+8 %
+30/06/2028
+Reservatório da sede
+250 L/s
+0 %
+30/06/2028
+Desempenho por setor · 09–22/09
+Agrupar por
+▾
+Colunas
++3
+SETOR
+⇅
+LÂMINA APLICADA
+⇅
+EFICIÊNCIA
+⇅
+VARIAÇÃO DA EFICIÊNCIA
+⇅
+Pivô 2
+40,6 mm
+1,39 m³/kWh
++4 %
+Pivô 1
+36,4 mm
+1,35 m³/kWh
+0 %
+Gotejo T7
+24,0 mm
+1,75 m³/kWh
+—
+Total
+Tela: Clima e sensores

@@ -1,0 +1,53 @@
+OK    P1a liberar OS-0430 grava 2 registros: CMD-42 por Ana (agrônoma) e CMD-06 por Ana (gestora), versão v1
+OK    P1b aprovação com escopo: 160 ha · Glifosato 480 2 L/ha, 2,4-D 806 1 L/ha, Óleo mineral 0,5 L/ha
+OK    P1c liberação cita a requisição: "v1 liberada por Ana (gestora) às hh:mm · REQ-041 reservada no Estoque (CMD-06)"
+OK    P1d aviso: texto antigo preservado + aprovação; sem segundo "Próximo passo" (o do painel é o único)
+OK    P1e efeito no Estoque igual ao de hoje: G26-14 reserva 320 L, D26-01 160 L, O26-05 80 L
+OK    P1f a Origem da tela mostra as 2 linhas depois das de origem (4 registros)
+OK    N1 repetir a confirmação: recusada pelo estado, sem 3º registro e sem gravar
+OK    P2 sem insumos: 2 registros, CMD-06 sem requisição, nenhuma reserva
+OK    P3 ajustar e liberar: aprova a v2 (Glifosato 480 2,5 L/ha), REQ-042 reserva 123,28 L; linha do ajuste antes da aprovação
+OK    N2 OS-0418 sem lote de Ureia 45%: recusa com o motivo do Estoque e nenhum registro de aprovação
+OK    P4 OS-0418 fertirrigação v2: CMD-42 por Ana com 95 ha · Ureia 45% 12 kg/ha; REQ-038 reserva 1.140 kg
+OK    N3 saldo insuficiente (Glifosato 100 L para 320 L): recusa e nenhum registro
+OK    N4 água sem produto: Liberadas pela prontidão, sem registro de agrônomo (só o CMD-06, com autor)
+OK    N4b sinal água na OS-0430 (herbicidas): recusa "exige aprovação agronômica", segue A liberar, sem CMD-42 e sem reserva
+OK    N4c água na OS-W já liberada: recusa "não está em A liberar"
+OK    N5 ajustar sem liberar: v2 gravada, etapa A liberar, nenhum CMD-42/CMD-06
+OK    N6 osLibErro (prévia na cópia) = "" e o cenário gravado continua sem registro
+OK    N7 colheita no T1-A com carência em curso: recusa e nenhum registro
+OK    V osVn: "REC-014 v2 · v1" → v1 (OS-0431); "plano CAFE-AR · v1" → v1 (OS-0425); "v1" → v1
+OK    P5 ordem nova: CMD-42 "160 ha · Fungicida TS 0,1 L/ha, Inoculante líquido 0,2 L/ha" e aviso sem "—"
+OK    N8 OS-0418 sem a Ureia: CMD-42 da v3 "95 ha · sem insumos" e CMD-06 sem "reservada"
+OK    V2 osVn: "v3 no saldo de 70 ha (KCl −12 %) · 30 ha na v2" → v2 (o último, como osc_ajustar); "" → v1
+OK    D dose 1,125 L/ha sem arredondar na trilha (ajuste e CMD-42) e 180 L reservados
+OK    N9 recusa legal (Glifosato 7,5 L/ha, bula 1,5–3) no ajuste e na liberação: nenhum CMD-42/CMD-06, versão v1 e nada reservado
+OK    A1 NEGATIVO Caio (PCP) libera a OS-0430: recusado ("decisão de Ana (agrônoma)"), sem CMD-42/CMD-06, sem reserva e sem requisição (antes: liberava e gravava "aprovada por Ana (agrônoma)")
+OK    A1 NEGATIVO Rui (almoxarife) libera a OS-0430: recusado ("decisão de Ana (agrônoma)"), sem CMD-42/CMD-06, sem reserva e sem requisição (antes: liberava e gravava "aprovada por Ana (agrônoma)")
+OK    A1 NEGATIVO Paula (almoxarife e conferência) libera a OS-0430: recusado ("decisão de Ana (agrônoma)"), sem CMD-42/CMD-06, sem reserva e sem requisição (antes: liberava e gravava "aprovada por Ana (agrônoma)")
+OK    A1 NEGATIVO sem perfil libera a OS-0430: recusado ("decisão de Ana (agrônoma)"), sem CMD-42/CMD-06, sem reserva e sem requisição (antes: liberava e gravava "aprovada por Ana (agrônoma)")
+OK    A1 NEGATIVO Caio forjado com os papéis libera a OS-0430: recusado ("decisão de Ana (agrônoma)"), sem CMD-42/CMD-06, sem reserva e sem requisição (antes: liberava e gravava "aprovada por Ana (agrônoma)")
+OK    A2 Ana (agrônoma e gestora) libera: dois registros, cada um com o papel que decidiu
+OK    A3 NEGATIVO Caio ajusta dose e área (Salvar e liberar): recusado; versão v1, sem linha de ajuste nem registro (antes: gravava "ajustada por Ana (agrônoma)")
+OK    A3b NEGATIVO Rui grava só a versão (Salvar ajuste): recusado, versão v1
+OK    A3c Ana grava a v2: a linha do ajuste nomeia quem ajustou (Ana (agrônoma))
+OK    A4 NEGATIVO sinal "só água" numa ordem sem produto que não é de irrigação (OS-0511, sexagem e desbaste): recusado e segue A liberar (antes: liberava sem CMD-42 e sem papel)
+OK    A5 osProx com o perfil Caio: no lugar do botão, "Liberar para execução: decisão de Ana (agrônoma e gestora)." (pendência amarela)
+OK    A5b com o perfil Ana (ou sem perfil, a prévia): sem pendência de papel e o botão Liberar para execução
+OK    A5c confirmação nomeia os dois registros: "Ana (agrônoma) aprova esta versão e Ana (gestora) libera"
+OK    A5d revisão do CTL-3, achado 1: com o perfil Caio (sem os papéis) a confirmação nomeia quem decide, nunca "Caio (PCP) aprova" (antes: "Caio (PCP) aprova esta versão e Caio (PCP) libera")
+OK    A6 a prévia do impedimento (osLibErro) não depende do perfil: OS-0418 segue "Sem lote de Ureia 45% no Estoque."
+OK    A7 papéis do cadastro: OS_LIB() = gestor; g2quem(agrônomo) = OS_AGRO(); g2quem(gestor) = Ana (gestora)
+OK    A8 NEGATIVO Beto (só agrônomo) libera a OS-0430: recusado no CMD-06 ("decisão de Ana (gestora) ou Gil (gestor)"), sem CMD-42/CMD-06 e sem reserva
+OK    A8b NEGATIVO Gil (só gestor) libera antes da aprovação: recusado ("Aprovação agronômica da v1 da OS-0430 pendente: decisão de Ana (agrônoma) ou Beto (agrônomo)"), nada gravado (antes: recusado no CMD-42; CONF-01 R13)
+OK    A8c a tela não oferece "Liberar para execução" a quem tem só um dos papéis: Beto vê "Aprovar v1"; Gil vê a aprovação pendente (antes: os dois só viam a pendência de papel)
+OK    A8d confirmação com Beto: "Beto (agrônomo) aprova esta versão e Ana (gestora) ou Gil (gestor) libera"
+OK    A8e Beto aprova: só o CMD-42 (v1, Beto (agrônomo)); segue A liberar, sem reserva, com o selo "Aprovada v1 · aguarda liberação"
+OK    A8f NEGATIVO aprovar de novo a mesma versão: recusado sem gravar
+OK    A8g depois da aprovação, Gil vê "Liberar para execução" e Beto vê a pendência "aguarda liberação"
+OK    A8h Gil libera: só o CMD-06 (Gil (gestor)); Liberadas; REQ-041 reservada; o aviso diz quem aprovou antes
+OK    A8i "Salvar e aprovar v2": CMD-42 da v2; a aprovação da v1 não libera a v2 (Gil libera a v2 aprovada)
+OK    A8j NEGATIVO v1 aprovada e v2 salva sem aprovar: Gil é recusado (a aprovação de uma versão nunca libera outra)
+OK    A8k cadastro restaurado (10 perfis)
+TOTAL 51 · falhas 0
+RESULTADO passou · TOTAL 51 · falhas 0

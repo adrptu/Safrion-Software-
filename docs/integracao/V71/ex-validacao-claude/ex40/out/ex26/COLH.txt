@@ -1,0 +1,290 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Previsão e colheita
+‹
+Agrícola
+Previsão e colheita
+i
+Pivô 19 em colheita · 1 carga a receber
+Publicar previsão do Pivô 19
+Fazenda
+Todas
+Lagoa Grande
+Santa Rita
+Boa Vista
+Safra
+Todas
+2026/27
+Safrinha 2027
+2025/26
+Cultura
+Todas
+Café
+Feijão
+Mamão Formosa
+Milho
+Soja
+Talhão
+Todos
+C1
+P1
+P2
+Pivô 2
+Pivô 4
+Pivô 6
+Pivô 9
+Pivô 17
+Pivô 18
+Pivô 19
+Pivô 20
+Pivô 22
+Pivô 23
+Pivô 24
+T1-A
+T1-B
+T2
+T3
+T4
+T7
+Previsão e resultado por talhão
+Por talhão
+Por semana
+Todas 5
+Sem previsão 4
+Colhida 1
+Em colheita 1
+Prevista 1
+Unidade de produtividade · Mamão Formosa
+Padrão da cultura · t/ha
+kg/ha
+sc 60 kg/ha (equivalência)
+cx 10 kg/ha (equivalência)
+Recolher tudo
+Colunas
++3
+TALHÃO · VARIEDADE
+⇅
+SITUAÇÃO · PRÓXIMO PASSO
+⇅
+PREVISÃO
+⇅
+COLHIDO
+⇅
+REFERÊNCIA · DESVIO
+⇅
+▾
+Mamão Formosa
+1 em colheita · 1 colhida · 10 sem previsão
+96,74 t
+Pivô 19
+Tainung 1
+Em colheita
+Publicar S40 e S41 · Ana (agrônoma) · 1 carga a receber
+72,9 t · S39 (v1)
+36,42 t
+meta 50 t/ha/ano
+ciclo aberto
+Pivô 6
+Tainung 1
+Colhida
+Contar os frutos de 20 plantas · equipe de colheita (app)
+62 t · S38 (v1)
+60,32 t
+meta 50 t/ha/ano
+ciclo aberto
+Pivô 2
+UENF/Caliman 01
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+sem previsão publicada
+—
+meta 50 t/ha/ano
+—
+Pivô 4
+Tainung 1
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+sem previsão publicada
+—
+meta 50 t/ha/ano
+—
+Pivô 9
+UENF/Caliman 01
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+sem previsão publicada
+—
+meta 50 t/ha/ano
+—
+Pivô 17
+Tainung 1
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+sem previsão publicada
+—
+meta 50 t/ha/ano
+—
+Pivô 18
+Tainung 1
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+sem previsão publicada
+—
+meta 50 t/ha/ano
+—
+Pivô 20
+UENF/Caliman 01
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+sem previsão publicada
+—
+meta 50 t/ha/ano
+—
+Pivô 22
+Tainung 1
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+sem previsão publicada
+—
+meta 50 t/ha/ano
+—
+Pivô 23
+Tainung 1
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+sem previsão publicada
+—
+meta 50 t/ha/ano
+—
+Pivô 24
+Tainung 1
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+sem previsão publicada
+—
+meta 50 t/ha/ano
+—
+T7
+Formosa
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+sem previsão publicada
+—
+meta 45 t/ha/ano
+—
+▾
+Soja
+7 prevista
+0 sc
+P1
+58 W
+Prevista (v1)
+colheita a partir de 10/03/27 · nada a fazer agora
+6.270 sc · safra (v1)
+—
+meta 66 sc/ha
+—
+P2
+62 X
+Prevista (v1)
+colheita a partir de 25/03/27 · nada a fazer agora
+5.280 sc · safra (v1)
+—
+meta 66 sc/ha
+—
+T1-A
+58 W
+Prevista (v1)
+colheita a partir de 12/02/27 · nada a fazer agora
+10.240 sc · safra (v1)
+—
+meta 64 sc/ha
+—
+T1-B
+62 X
+Prevista (v1)
+colheita a partir de 22/02/27 · nada a fazer agora
+9.424 sc · safra (v1)
+—
+meta 62 sc/ha
+—
+T2
+58 W
+Prevista (v1)
+colheita a partir de 15/02/27 · nada a fazer agora
+18.774 sc · safra (v1)
+—
+meta 63 sc/ha
+—
+T3
+62 X
+Prevista (v1)
+colheita a partir de 19/02/27 · nada a fazer agora
+5.952 sc · safra (v1)
+—
+meta 62 sc/ha
+—
+T4
+58 W
+Prevista (v1)
+colheita a partir de 17/02/27 · nada a fazer agora
+12.240 sc · safra (v1)
+—
+meta 60 sc/ha
+—
+▾
+Café
+1 sem previsão
+0 sc
+C1
+Catuaí 144
+Sem previsão
+Publicar a previsão da safra pela meta · Ana (agrônoma)
+sem previsão publicada
+—
+meta 38 sc/ha
+—
+▾
+Feijão
+1 sem previsão
+0 sc
+P1
+Pérola
+Sem previsão
+Publicar a previsão da safra pela meta · Ana (agrônoma)
+sem previsão publicada
+—
+meta 50 sc/ha
+—
+▾
+Milho
+2 sem previsão
+0 sc
+T1-A
+Híbrido AG 8700
+Sem previsão
+Publicar a previsão da safra pela meta · Ana (agrônoma)
+sem previsão publicada
+—
+meta 180 sc/ha
+—
+T2
+Híbrido AG 8700
+Sem previsão
+Publicar a previsão da safra pela meta · Ana (agrônoma)
+sem previsão publicada
+—
+meta 175 sc/ha
+—
+Restaurar demonstração
+Tela: Previsão e colheita · Pivô 19 em colheita · 1 carga a receber

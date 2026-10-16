@@ -1,0 +1,4 @@
+ma_unica_test.py rc=0 182s :: RESULTADO: 23/23 ok
+config_test.py rc=0 886s :: RESULTADO: OK 88/88
+saf_operacoes_test.py rc=0 209s :: RESULTADO: 87 ok · 0 falhas (tudo)
+FIM

@@ -1,0 +1,104 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Cargas e recebimento
+‹
+Agrícola
+Cargas e recebimento
+i
+1 carga a pesar · 7 recebidas
+Registrar pesagem
+Fazenda
+Todas
+Lagoa Grande
+Santa Rita
+Boa Vista
+Safra
+Todas
+2026/27
+Safrinha 2027
+2025/26
+Cultura
+Todas
+Café
+Feijão
+Mamão Formosa
+Milho
+Soja
+Cargas
+Todas 8
+Recebida 7
+A pesar 1
+Ordenado por Colheita · recebimento ▼
+×
+Agrupar por
+▾
+Colunas
++4
+CARGA · TICKET
+⇅
+SITUAÇÃO · PRÓXIMO PASSO
+⇅
+LÍQUIDO
+⇅
+ORIGEM
+⇅
+CG-2107
+· TK-4502
+Recebida
+Abrir ordem de beneficiamento · Igor (responsável de produção)
+12.300 kg
+Pivô 19 · OS-0505
+CG-2108
+· do app
+A pesar
+Pesar · Lúcia
+—
+Pivô 19 · OS-0505
+CG-2105
+· TK-4490
+Recebida
+Abrir ordem de beneficiamento · Igor (responsável de produção)
+12.180 kg
+Pivô 19 · OS-0505
+CG-2106
+· TK-4491
+Recebida
+Abrir ordem de beneficiamento · Igor (responsável de produção)
+11.940 kg
+Pivô 19 · OS-0505
+CG-2103
+· TK-4478
+Recebida
+Abrir ordem de beneficiamento · Igor (responsável de produção)
+14.960 kg
+Pivô 6 · OS-0510
+CG-2104
+· TK-4479
+Recebida
+Abrir ordem de beneficiamento · Igor (responsável de produção)
+14.870 kg
+Pivô 6 · OS-0510
+CG-2101
+· TK-4471
+Recebida
+no estoque de produto
+15.280 kg
+Pivô 6 · OS-0510
+CG-2102
+· TK-4472
+Recebida
+no estoque de produto
+15.210 kg
+Pivô 6 · OS-0510
+Restaurar demonstração
+Tela: Cargas e recebimento · 1 carga a pesar · 7 recebidas

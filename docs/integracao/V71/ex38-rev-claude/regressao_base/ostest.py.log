@@ -1,0 +1,43 @@
+OK  sem erro JS 
+OK  abre na Lista 
+OK  10 ordens agrícolas na lista (registro canônico, igual ao chip Todas) (['OS-0415', 'OS-0417', 'OS-0418', 'OS-0420', 'OS-0421', 'OS-0424', 'OS-0425', 'OS-0430', 'OS-0431', 'OB-0104'], ['Todas 10'])
+OK  ordens só de água fora da página O.S. (lista e texto) []
+OK  página sem rolagem horizontal e filtro Talhão visível (a tabela rola dentro da caixa) [1440, 1440, True]
+OK  chip Em execução filtra ['OS-0420', 'OS-0421']
+OK  chip marcado 
+OK  chip A liberar = 3 (fertirrigação OS-0418 fica; água OS-0422/OS-0423 não) ['OS-0418', 'OS-0430', 'OS-0431']
+OK  filtro aparece na grade 
+OK  Todas volta a 10 
+OK  painel abre OS-0421 · Pulverização · Fungicida 1ª aplicação
+Abrir ordem completa ›
+×
+Em exec
+OK  painel fase Em execução 
+   apontamentos: ['20/09 Dia 1 50 ha 50 / 350 ha Conferido', '21/09 Dia 2 50 ha 100 / 350 ha Conferido', '22/09 Dia 3 50 ha 150 / 350 ha Conferido', '23/09 Dia 4 40 ha 190 / 350 ha Provisório', '24/09 Dia 5 prev. 50 ha — Previsto', '25/09 Dia 6 prev. 50 ha — Previsto', '26/09 Dia 7 prev. 60 ha — Previsto']
+OK  apontamentos 50,50,50,40 → 190/350 ['20/09 Dia 1 50 ha 50 / 350 ha Conferido', '21/09 Dia 2 50 ha 100 / 350 ha Conferido', '22/09 Dia 3 50 ha 150 / 350 ha Conferido', '23/09 Dia 4 40 ha 190 / 350 ha Provisório']
+OK  saldo 160 
+OK  frase do turno 
+OK  origem 
+OK  Abrir ordem → CA-01det CA-01det.dc.html
+OK  Esc fecha painel 
+OK  Kanban 5 colunas fixas ['A LIBERAR 3', 'LIBERADAS 2', 'EM EXECUÇÃO 2', 'EM CONFERÊNCIA 1', 'ENCERRADAS 2']
+OK  Kanban 10 cartões, sem ordens de água {'OS-0418': 'A liberar', 'OS-0430': 'A liberar', 'OS-0431': 'A liberar', 'OS-0424': 'Liberadas', 'OS-0425': 'Liberadas', 'OS-0420': 'Em execução', 'OS-0421': 'Em execução', 'OS-0417': 'Em conferência', 'OS-0415': 'Encerradas', 'OB-0104': 'Encerradas'}
+OK  cartão abre painel OS-0420 com link da ordem completa OS-0420 · Plantio · Soja 58 W
+Abrir ordem completa ›
+×
+Em ex
+OK  Lista = Kanban {}
+FALHA form Nova ordem 
+FALHA valida vazios Apontamento pausado: Trator T1 bloqueado (OM-0233).
+Quem resolve: O Trator 02 assume a partir de 24/09.
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr77base/tools/prototipo/v37/gen37/ostest.py", line 88, in <module>
+    setv('#nv_saf','S2627'); setv('#nv_cult','c4'); check('cultivo sem plano avisa', 'não tem plano aplicado' in pan())
+    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr77base/tools/prototipo/v37/gen37/ostest.py", line 19, in setv
+    def setv(sel,val): J(f"({SETV})({json.dumps(sel)},{json.dumps(val)})"); time.sleep(.3)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr77base/tools/prototipo/v37/gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

@@ -1,0 +1,73 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Pragas e doenças (MIP/MID) › Recomendações
+Recomendações
+1 uso sem registro (REC-014)
+Recomendações e receituários
+Ver demanda gerada
+4 de 4
+RECOMENDAÇÃO
+⇅
+ORIGEM
+⇅
+OPERAÇÃO · TALHÃO
+⇅
+PRODUTO · DOSE · JANELA
+⇅
+SITUAÇÃO
+⇅
+PRÓXIMO PASSO
+⇅
+REC-014
+v2 · v3 no saldo
+DIA-007
+VIS-011
+Plantio · nematoide + K
+T4 · Soja 58 W
+KCl 60 % por zona + TS nematicida
+janela: 20/09–05/10
+TS sem registro p/ cisto
+saldo de 70 ha travado até a v4
+Abrir REC-014
+REC-015
+rascunho
+DIA-009
+VIS-013
+Pulverização · mosca-branca
+P1 · Feijão
+a definir na decisão
+janela: —
+Rascunho
+aguarda a decisão do DIA-009
+Decidir controle
+REC-016
+v1
+Protocolo Soja alta tecnologia v6
+Pulverização · ferrugem asiática
+T1+T2 · Soja
+Fungicida A 0,4 L/ha
+janela: em execução
+Aprovada
+OS-0421 · 190/350 ha
+Abrir OS-0421
+REC-017
+v2
+OS-0418 reclassificada (água → fertirrigação)
+Fertirrigação · ureia
+P1 · Feijão
+Ureia 45 % 12 kg/ha
+janela: esta semana
+Submetida
+liberação na OS-0418
+Liberar OS-0418
+Tela: Recomendações · 1 uso sem registro (REC-014)
