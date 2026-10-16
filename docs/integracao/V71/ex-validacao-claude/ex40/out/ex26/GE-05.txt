@@ -1,0 +1,130 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Gestão e resultados › Contas a receber
+Contas a receber
+i
+R$ 244.000 vencidos · 1 crédito a emitir
+Emitir crédito do RC-12
+Carteira em aberto
+R$ 289.900 4 títulos
+Vencidos
+R$ 244.000 PV-029 · 4 d
+Créditos solicitados
+1 RC-12 · R$ 885
+Recebido no mês
+R$ 1,02 mi conciliado
+Crédito solicitado pelo caso RC-12
+Caso
+RC-12 · maturação avançada · 4 fotos + laudo do cliente · abrir caso ›
+Pedido · título
+PV-027 · Rede Hortifrúti BA · entrega 2/2 · FAT-2096 (R$ 8.850)
+Crédito solicitado
+R$ 885 = 300 kg × R$ 2,95/kg · retorno do lote L26-118 recebido bloqueado (não volta ao vendável)
+Carteira por cliente e título
+Registrar cobrança autorizada
+⋯
+4 de 4
+Recolher tudo
+CLIENTE · TÍTULO
+⇅
+PEDIDO · ENTREGA
+⇅
+VENCIMENTO
+⇅
+VALOR
+⇅
+SALDO
+⇅
+DIVERGÊNCIA · CASO
+⇅
+PRÓXIMA COBRANÇA
+⇅
+▾
+Atacado Bom Preço
+1 título(s)
+R$ 244.000
+R$ 244.000
+FAT-2090
+PV-029
+milho 4.000 sc × R$ 61
+atrasada
+4 d
+R$ 244.000
+R$ 244.000
+Aguarda evidências
+RC-14
+· 150 sc ardidos
+24/09/2026
+▾
+Rede Hortifrúti BA
+2 título(s)
+R$ 17.700
+R$ 17.700
+FAT-2088
+PV-027
+entrega 1/2 · mamão A 3,0 t
+no prazo
+05/10
+R$ 8.850
+R$ 8.850
+—
+—
+FAT-2096
+PV-027
+entrega 2/2 · mamão A 3,0 t
+no prazo
+11/10
+R$ 8.850
+R$ 8.850
+Crédito solicitado
+RC-12
+· 300 kg · R$ 885
+—
+▾
+Frutas Real
+1 título(s)
+R$ 28.200
+R$ 28.200
+FAT-2112
+PV-026
+VG-117 · mamão A 9,4 t
+no prazo
+20/10
+R$ 28.200
+R$ 28.200
+Recusa 0,4 t · a definir
+RC-15
+· R$ 1.200
+—
+▾
+Coop Grão Sul
+1 título(s)
+R$ 1.024.000
+—
+FAT-2079
+PV-030
+soja 8.000 sc × R$ 128 · contra entrega
+recebido
+15/09 · conciliado
+R$ 1.024.000
+—
+Retorno a caminho
+RC-13
+· 900 sc · umidade
+—
+Total
+R$ 1.313.900
+R$ 289.900
+Tela: Contas a receber · R$ 244.000 vencidos · 1 crédito a emitir

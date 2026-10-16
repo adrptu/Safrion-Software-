@@ -1,0 +1,115 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+‹
+Manutenção
+Manutenção
+1 ativo bloqueado · 1 conflito
+Gerar 3 ordens preventivas
+Ação do Otávio (responsável de manutenção)
+⋯
+Sem ordem
+6
+Ordens
+0
+Ativos
+1
+Planos
+0
+Tipo
+Todos os tipos
+Preventiva
+Corretiva
+Inspeção
+Criticidade
+Toda criticidade
+Alta
+Média
+Baixa
+Grupo
+Todos os grupos
+Tratores
+Pulverizadores
+Plantadeiras
+Implementos
+Colhedoras
+Beneficiamento
+Irrigação
+Armazenagem
+Veículos
+Vencidas
+Até 10 d
+Até 30 d
+6 de 6
+Agrupar por
+▾
+Colunas
++1
+ITEM
+⇅
+ATIVO · LEITURA
+⇅
+O QUE
+⇅
+PRAZO
+⇅
+PRÓXIMO PASSO
+⇅
+PM-02 v2
+· vencimento
+Trator 03
+· 5.120 h · 22/09
+Revisão 250 h
+a cada 250 h ou 180 dias
+Vencida · 30 h além
+Gerar ordem preventiva
+PM-05 v1
+· vencimento
+Plantadeira 24 linhas
+· 886 h · 20/09
+Revisão pré-plantio
+a cada 365 dias
+Vencida desde 20/09
+Gerar ordem preventiva
+PM-07 v3
+· vencimento
+Bomba do Pivô 2
+· 8.914 h · 23/09
+Preventiva mensal
+a cada 1.000 h ou 30 dias
+Em breve · janela abre em 5 d
+Gerar ordem preventiva
+NC-0912
+· inspeção
+Nova
+Plantadeira 24 linhas
+· 886 h · 20/09
+Órgão de trabalho · Disco de corte com desgaste
+Média · desde 20/09
+Gerar ordem preventiva com NC-0912
+SM-0150
+· relato
+Nova
+Colhedora Axial-Flow 7250
+· 2.150 h · 22/09
+Órgão de trabalho · Ruído intermitente no elevador
+Baixa · desde 21/09
+Criar ordem corretiva
+INSP-104
+· inspeção
+Nova
+Trator 02
+· 2.988 h · 23/09
+Hidráulico · Vazamento leve em mangueira
+Média · desde 23/09
+Vincular à OM-0234
+Tela: Manutenção · 1 ativo bloqueado · 1 conflito

@@ -1,0 +1,199 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Planejamento › Capacidade e recursos
+Capacidade e recursos
+i
+Déficit 270 h em tratores
+Carga out/26
+2.410 h demanda do plano
+Capacidade líquida
+2.640 h após manutenção
+Déficit
+270 h tratores 150+ cv
+Ociosidade out/26
+180 h colhedoras
+Carga × capacidade por recurso/classe
+Ver rendimentos
+RECURSO/CLASSE
+⇅
+OPERAÇÃO DOMINANTE
+⇅
+CARGA OUT/26
+▼
+CAPACIDADE LÍQUIDA
+⇅
+OCUPADO
+⇅
+LIVRE
+⇅
+SEM ALOCAÇÃO
+⇅
+INDISPONÍVEL
+⇅
+DÉFICIT
+⇅
+Tratores 150+ cv
+Plantio soja 910 ha
+1.180 h
+910 h
+620 h
+120 h
+60 h
+110 h (OM-0233)
+270 h
+Pulverizadores
+Dessecação + fungicida
+520 h
+610 h
+380 h
+180 h
+50 h
+—
+0 h
+Plantadeiras
+Plantio escalonado
+430 h
+460 h
+410 h
+50 h
+—
+—
+0 h
+Equipes de campo
+Todas
+280 h
+300 h
+240 h
+40 h
+20 h
+—
+0 h
+Colhedoras
+Milho P2 (nov)
+0 h
+360 h
+0 h
+180 h
+180 h
+—
+Ociosa · realocar
+Cenários para o déficit de 270 h
+Simular turnos e conjuntos
+⋯
+Publicar cenário 2º turno + aluguel
+CENÁRIO
+⇅
+COBRE
+⇅
+CUSTO ESTIMADO (HIPÓTESE)
+⇅
+RESTRIÇÃO
+⇅
+COMPARAÇÃO
+⇅
+Remanejar colhedora ociosa + operador
+60 h
+R$ 4 mil
+deslocamento 1 dia
+reaproveitamento entre setores
+2º turno tratores (out)
+190 h
+R$ 26 mil
+contratar 1 operador
+Recomendado
+Aluguel trator 180 cv · 30 d
+80 h
+R$ 38 mil
+disponível a partir de 05/10
+cobre o restante com o 2º turno
+Terceirizar plantio (prestador)
+100 h
+R$ 42 mil
+contrato ativo exigido · a partir de 26/09
+—
+Aquisição trator novo
+270 h
+R$ 620 mil
+prazo de entrega 90 d · fora da janela
+Não atende esta safra
+Máquinas agora e na programação
+Livres e aptas 1
+Operando 1
+Reservadas 2
+Com restrição 1
+Indisponíveis 1
+A confirmar 1
+Trator 02 · MF 7719
+Apta
+Proposto · OS-0420 saldo 70 ha · aguarda PCP
+livre hoje · 25/09 reservado (OS-0430)
+elegível só após confirmação do PCP · preventiva 28/09
+Trator 03 · JD 6M
+Apta
+Operando · OS-0421 dia 4 de 7
+fim previsto 26/09 (dia 7)
+reserva futura: dessecação T1-B 05/10
+Trator T1 · JD 6M 155
+Indisponível · bloqueado pelo PCM
+Parado · oficina (OM-0233)
+retorno previsto 14h — aguardando teste
+Pulverizador 01
+Apta com restrição · bico seção 3
+Reservado · OS-0430 25/09
+elegível sob condição validada
+restrição registrada pelo PCM
+Plantadeira 24 linhas (implemento)
+Apta
+Reservada · OS-0431 24/09 · T1-A 15/10
+revisão pré-plantio 25/09
+Colhedora Axial-Flow 7250
+A confirmar
+Sem telemetria · checklist de 14/09
+informação vencida pela política
+Última atualização 07:42
+Manutenções e impacto na produção
+Simular janela
+⋯
+MANUTENÇÃO
+⇅
+JANELA
+⇅
+PRODUÇÃO AFETADA
+⇅
+SITUAÇÃO
+⇅
+ABRIR
+⇅
+Corretiva OM-0233
+Trator T1 · retorno previsto 14h · não confirmado
+até teste aprovado
+OS-0420 saldo 70 ha
+OS-0431 · plantio T2 · 102 ha
+Proposto · OS-0420 saldo 70 ha · aguarda PCP
+OS-0431: sem substituto confirmado
+Ver ordem
+Preventiva 250 h · OM-0234
+Trator 02 · MF 7719
+28/09
+OS-0420 saldo · substituto até 27/09
+Conflito · OS-0420
+Ver conflito
+Revisão pré-plantio
+Plantadeira 24 linhas
+25/09
+nenhuma ordem na janela
+Sem conflito
+Ver agenda
+Tela: Capacidade e recursos · Déficit 270 h em tratores

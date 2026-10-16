@@ -1,0 +1,160 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Logística › Fretes e transportadores
+Fretes e transportadores
+i
+1 cotação a decidir · até 10:30
+Contratar Rota Sul · R$ 1.824
+Programe o transporte
+Expeça as cargas
+Doca 1 ocupada · Carga 07 sem NF
+Acompanhe viagens
+VG-117 · recusa em RC-15
+Controle fretes
+Prestadores elegíveis
+1 + frota própria · TransGrão inelegível
+Cotação aberta
+1 Carga 07 · até 10:30
+A pagar
+R$ 1.882 VG-117 · medição aceita
+Otif médio 30 d
+92% vs. janela original
+Comparar cotações · Carga 07
+Mesma base: 9,6 t · 512 km · refrigerado
++ Pedir cotação
+PRESTADOR
+⇅
+BASE
+⇅
+CUSTO TOTAL
+⇅
+PRAZO
+⇅
+CONSERVAÇÃO
+⇅
+ITENS INCLUÍDOS
+⇅
+SITUAÇÃO
+⇅
+Rota Sul Transportes
+9,6 t × R$ 190/t
+R$ 1.824
+chegada até 18:00
+baú refrigerado OK
+pedágio incluído
+Melhor custo total comparável
+Frota própria
+512 km × R$ 4,10
+R$ 2.099
+até 19:00
+sem baú refrigerado
+—
+Incompatível · conservação
+TransGrão Ltda
+R$ 2.400/viagem
+R$ 2.496
+até 17:00
+refrigerado OK
+pedágio à parte (+R$ 96)
+Documento vencido · não elegível
+Prestadores e frota
+PRESTADOR · ROTA
+⇅
+PREÇO
+⇅
+CONDIÇÃO
+⇅
+DOCUMENTOS
+⇅
+DESEMPENHO 90 D
+⇅
+AÇÃO
+⇅
+Rota Sul Transportes
+Sede → Vitória/ES
+R$ 190/t
+28 dd após aceite da medição
+RNTRC + RCTR-C válidos
+12 viagens
+OTIF 92% · avaria 0,3%
+contrato vigente
+TransGrão Ltda
+Sede → Porto de Vitória
+R$ 2.400/viagem
+21 dd
+Seguro vencido 15/09 · não elegível
+4 viagens
+OTIF 75% · 1 avaria
+Solicitar documento
+Frota própria · 2 caminhões
+rotas internas · Boa Vista
+R$ 4,10/km
+custo interno
+Licenças em dia
+22 viagens
+ocupação 61%
+Ver programação
+Conferência e pagamento do serviço
+Ver contas a pagar
+VIAGEM
+⇅
+PRESTADOR
+⇅
+MEDIÇÃO
+⇅
+RATEIO APLICADO
+⇅
+VALOR DO SERVIÇO
+⇅
+ESTADO
+⇅
+AÇÃO
+⇅
+VG-112
+Frota própria
+8 mil L · romaneio conferido
+—
+—
+Apropriado à transferência
+custo interno
+VG-117
+Rota Sul Transportes
+9,4 t entregues · medição aceita hoje 08:50
+Rateio v2 · peso líquido
+R$ 1.882
+A encaminhar ao financeiro
+Encaminhar pagamento
+Padrão de rateio da instalação
+DIRECIONADOR
+⇅
+VERSÃO
+⇅
+QUANDO USAR
+⇅
+SALVAGUARDAS
+⇅
+Peso líquido (t)
+v2 · vigente desde 01/08
+padrão inicial
+custos exclusivos de um pedido atribuídos antes de ratear o saldo comum
+Peso × distância
+opcional
+viagens com trechos distintos
+cada trecho só para os itens transportados nele; base zero gera pendência, não rateio silencioso
+Posições de pallet
+opcional
+quando volume/pallet é a restrição
+bases não comparáveis não se somam
+Tela: Fretes e transportadores · 1 cotação a decidir · até 10:30

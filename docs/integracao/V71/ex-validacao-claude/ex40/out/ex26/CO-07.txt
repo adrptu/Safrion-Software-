@@ -1,0 +1,126 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Colheita e pós-colheita › Estoque de produção
+Estoque de produção
+i
+2 lotes bloqueados · 2 em inspeção
+Alocar pedido
+Preveja a colheita
+Programe as ordens
+OC-0514 impedida
+Registre cargas
+Receba a produção
+Beneficie
+Confira a qualidade
+L27-013 bloqueado
+Controle o estoque de produção
+Grãos · físico
+47.032 sc 50 kg
+Café bloqueado
+3.690 sc 60 kg
+Mamão indisponível
+11,7 t 9,6 A + 1,8 B em inspeção · 0,3 retorno
+Grãos · disponível
+41.157 sc 50 kg
+Saldo por lote, classe, local e proprietário
+Tudo
+Livres
+Comprometidos
+Bloqueados
+Transferir
+⋯
+7 de 7
+LOTE · LOCAL · PROPRIETÁRIO
+⇅
+PRODUTO · CLASSE · VALIDADE
+⇅
+FÍSICO
+⇅
+QUALIDADE
+⇅
+RESERVADO
+⇅
+DISPONÍVEL
+⇅
+ORIGEM
+⇅
+AÇÃO
+⇅
+L27-013
+Armazém Sede · Santa Rita
+Café beneficiado · tipo em revisão
+3.690 sc 60 kg
+Bloqueado · INSP-88
+0
+0 · bloqueado
+OB-0104
+Abrir lote
+L26-118
+Packing Sede (bloqueio) · Santa Rita
+Mamão A · retorno RC-12 · validade 3 d
+300 kg
+Bloqueado · aguarda qualidade
+0
+0 · bloqueado
+RC-12 · PV-027
+Abrir inspeção
+Silo 1 · Soja 25/26
+Santa Rita
+Soja em grão · padrão
+38.420 sc 50 kg
+Apto
+3.875 sc (contrato barter)
+34.545 sc
+safra 25/26
+Alocar pedido
+Silo 2
+Santa Rita
+Milho seco · base 14%
+8.612 sc 50 kg
+Apto · INSP-85
+2.000 sc
+6.612 sc
+OC-0501 · OB-0106
+Alocar pedido
+L39-120
+Packing Sede · Santa Rita
+Mamão · classe A cal. 8–10 · validade 7 d
+9,6 t
+Em inspeção · INSP-92
+9,6 t provisória (PV-031)
+0 t até liberar
+OB-0110
+Abrir inspeção
+L39-121
+Packing Sede · Santa Rita
+Mamão · classe B · validade 7 d
+1,8 t
+Em inspeção · INSP-92
+0
+0 t até liberar
+OB-0110
+Abrir inspeção
+L38-118
+Packing Sede · Santa Rita
+Mamão de campo · consumido na OB-0110
+0 kg
+Liberado · INSP-91
+—
+0
+OC-0507 · S38
+—
+Reserva não conta duas vezes
+Soja: físico apto 38.420 sc − reserva 3.875 sc = disponível 34.545 sc.
+Tela: Estoque de produção · 2 lotes bloqueados · 2 em inspeção

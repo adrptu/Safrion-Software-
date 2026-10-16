@@ -1,0 +1,60 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Mapa
+Mapa da fazenda
+OS-0507 impedida · 3 a liberar
+Fazenda
+Todas
+Lagoa Grande
+Santa Rita
+Boa Vista
+Safra
+2026/27
+Cultura
+Todas
+Mamão
+Integrado
+Satélite
+Solo
+Pragas e doenças
+Ordens de serviço
+Irrigação
+Estádio
+Colheita e produtividade
+Custos
+Irrigação
+i
+Mostrar
+Hoje
+Balanço hídrico
+Programadas 7
+Pendentes 0
+Impedidas 1
+Estimados 1
+Abrir irrigação ›
+Mapa real indisponível: {"requestedAttributes":{"antialias":false,"preserveDrawingBuffer":false,"powerPreference":"high-performance","failIfMajorPerformanceCaveat":false,"desynchronized":false,"alpha":true,"depth":true,"stencil":true,"premultipliedAlpha":true},"statusMessage":"Could not create a WebGL context, VENDOR = 0xffff, DEVICE = 0xffff, Sandboxed = no, Optimus = no, AMD switchable = no, Reset notification strategy = 0x0000, ErrorMessage = BindToCurrentSequence failed: .","type":"webglcontextcreationerror","message":"Failed to initialize WebGL"}. Recarregue a página.
+Selecionar área
+Medir
+Desenhar
+Importar
++
+−
+irrigando
+programada
+pendente: janela, conferência ou liberação
+impedida ou conflito
+sem necessidade hoje
+sem necessidade · ≈ estimado
+sequeiro ou preparo
+Demonstração sintética
+Tela: Mapa da fazenda

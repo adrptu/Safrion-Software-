@@ -52,7 +52,8 @@ try:
     ls = sum(float(re.search(r'([\d.,]+) m³/h', r).group(1).replace('.', '').replace(',', '.')) for r in rio) / 3.6
     p2 = next((r for r in rows if r.startswith('Ponto de água 2 ')), '')
     # integração V56 (TABR, CD-01 Água: uma variável por coluna): a linha tem Documento "Outorga", Vazão e Vencimento em colunas e a Situação
-    # "Vence em 90 dias"; o número do documento fica no painel e na faixa "precisa de atenção" (aguaDoc: "Outorga SINT-002/0000 · 20/11/2026")
+    # "Vence em 90 dias"; o número do documento fica no painel e na dica do selo da linha (aguaDoc: "Outorga SINT-002/0000 · 20/11/2026"; antes na
+    # faixa "precisa de atenção", que saiu em 16/10/2026: TAB-06, alerta só dentro da tabela; o texto da dica também vai para o leitor de tela)
     fx2 = J("(document.querySelector('main')||document.body).innerText.replace(/\\s+/g,' ')") or ''
     chk(f'E3.1 CD-01 › Água (a fonte): {len(rows)} pontos; "Outorga SINT-002/0000" 150 m³/h, vence 20/11/2026; captação superficial vigente do Rio A soma {ls:.2f} L/s',
         len(rows) == 16 and ' Outorga ' in p2 and '150 m³/h' in p2 and '20/11/2026' in p2 and 'Vence em 90 dias' in p2 and 'Outorga SINT-002/0000 · 20/11/2026' in fx2

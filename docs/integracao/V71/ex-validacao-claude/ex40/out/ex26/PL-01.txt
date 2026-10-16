@@ -1,0 +1,164 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Planejamento › Safras, ciclos e metas
+Safras, ciclos e metas
+i
+2026/27 em planejamento
+Autorizar execução 2026/27
+Safras abertas
+2 2026/27 · Safrinha 2027
+Área planejada
+1.165 ha Safra 2026/27 · 9 cultivos
+Cultivos sem plano
+4 T4 · T3 · P1 · P2
+Orçamento 2026/27
+Pendente aguarda Direção
+Safras e períodos
++ Criar safra
+SAFRA
+⇅
+PERÍODO
+⇅
+FAZENDA
+⇅
+CULTIVOS · ÁREA
+⇅
+SITUAÇÃO
+⇅
+ABRIR
+⇅
+Safra 2026/27
+set/2026 – ago/2027
+Santa Rita
+9 cultivos · 1.165 ha
+Em planejamento · orçamento aguarda Direção
+Abrir plano
+Safrinha 2027
+fev – jul/2027
+Santa Rita
+3 cultivos · 553 ha
+Rascunho
+Abrir no Planejar safra
+Safra 2025/26
+set/2025 – ago/2026
+Santa Rita
+5 cultivos · 881 ha
+Encerrada
+Abrir fechamento
+Safra Mamão 2026/27
+set/2026 – ago/2027
+Lagoa Grande
+23 cultivos · 1.285 ha
+Em planejamento
+Abrir no Planejar safra
+Grade de cultivo · Safra 2026/27
+Vincular ciclo
+⋯
+9 de 9
+TALHÃO/PARCELA
+⇅
+CULTURA
+⇅
+VARIEDADE
+⇅
+ÁREA
+⇅
+PLANTIO PREVISTO
+⇅
+META (HIPÓTESE)
+⇅
+PLANO
+⇅
+T1-A
+Parcela
+Soja
+58 W
+160 ha
+15/10/2026
+64 sc/ha
+Soja alta tecnologia v6
+T1-B
+Parcela
+Soja
+62 X
+152 ha
+25/10/2026
+62 sc/ha
+Soja alta tecnologia v6
+T2
+Talhão inteiro
+Soja
+58 W
+298 ha
+18/10/2026
+63 sc/ha
+Soja alta tecnologia v6
+T4
+Talhão inteiro
+Soja
+58 W
+204 ha
+20/10/2026
+1ª onda 100 ha em curso · OS-0420
+60 sc/ha
+Sem plano
+T3
+Talhão inteiro
+Soja
+62 X
+96 ha
+22/10/2026
+62 sc/ha
+Sem plano
+P1
+Talhão inteiro
+Soja
+58 W
+95 ha
+10/11/2026
+66 sc/ha
+Sem plano
+P2
+Talhão inteiro
+Soja
+62 X
+80 ha
+25/11/2026
+66 sc/ha
+Sem plano
+T7
+Talhão inteiro
+Mamão Formosa
+Formosa
+42 ha
+10/03/2025
+ciclo vinculado · pomar existente
+45 t/ha/ano
+Mamão Formosa produção v3
+C1
+Talhão inteiro
+Café
+Catuaí 144
+38 ha
+15/01/2019
+ciclo vinculado · pomar existente
+38 sc/ha
+Café arábica produção v2
+Total
+1.165 ha
+Encerramento do período anterior
+Encerrar período
+Safra 2025/26 encerrada em 30/08ⓘ
+Tela: Safras, ciclos e metas · 2026/27 em planejamento

@@ -20,7 +20,7 @@ ok=[]
 def chk(nome,cond,extra=''):
     ok.append(bool(cond)); print(('OK  ' if cond else 'FALHOU ')+nome+(' · '+str(extra) if extra else ''))
 def novo(nome,doc,papel='Cliente',canais=()):
-    J("[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Cadastrar parceiro').click()"); time.sleep(.4)
+    J("[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Criar parceiro').click()"); time.sleep(.4)
     J(f"({SETV})('#{FID('nome')}',{json.dumps(nome)})"); J(f"({SETV})('#{FID('cnpj')}',{json.dumps(doc)})"); time.sleep(.2)
     J(f"{CAN(papel)}.click()"); time.sleep(.2)
     # cliente exige ao menos um produto de interesse (regra do Comercial, posterior a este teste): marca o primeiro, se o grupo existir

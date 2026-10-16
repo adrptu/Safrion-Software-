@@ -16,10 +16,10 @@ REND = [('conj', 'Trator 05 + Grade niveladora'), ('larg', '4'), ('vel', '7'), (
 try:
     t.goto('Main.dc.html'); J("localStorage.clear(); sessionStorage.clear(); 1")
     t.goto('CD-02.dc.html')
-    t.clk('Cadastrar cultivar'); t.fset('cult', 'Outra cultura…')
+    t.clk('Criar cultivar'); t.fset('cult', 'Outra cultura…')
     t.fset('nome', 'BRS 373'); t.fset('ncult', 'Sorgo'); t.fset('tipo', 'Anual'); t.fset('unid', 'sc de 60 kg/ha'); t.fset('dias', '120'); t.btn('Salvar'); time.sleep(.3)
     s0 = t.rowtxt(0, 'Sorgo') or ''
-    t.goto('CD-08.dc.html'); t.clk('Cadastrar rendimento'); op1 = t.fopts('cult') or []
+    t.goto('CD-08.dc.html'); t.clk('Criar rendimento'); op1 = t.fopts('cult') or []
     t.chk('V1 cultura criada no CD-02 (Sorgo) aparece na lista Cultura do rendimento no CD-08', 'Sorgo 1 cultivar' in s0 and 'Sorgo' in op1 and 'Todas' in op1, [s0, op1])
     t.fset('op', 'Gradagem') if 'Gradagem' in (t.fopts('op') or []) else t.fset('op', (t.fopts('op') or ['', ''])[1])
     opn = t.fv('op')
@@ -35,7 +35,7 @@ try:
     t.goto('CD-02.dc.html'); t.openrow(0, 'Sorgo 1 cultivar'); t.fset('nome', 'Sorgo granífero'); t.btn('Salvar'); time.sleep(.3)
     s3 = t.rowtxt(0, 'Sorgo granífero') or ''
     t.goto('CD-08.dc.html'); r3 = t.rowtxt(0, 'Trator 05 + Grade niveladora') or ''
-    t.clk('Cadastrar rendimento'); op3 = t.fopts('cult') or []
+    t.clk('Criar rendimento'); op3 = t.fopts('cult') or []
     t.chk('V3 renomear Sorgo → Sorgo granífero no CD-02: o CD-08 mostra o nome atual no rendimento e na lista, sem o antigo, com os mesmos custos',
           'Sorgo granífero' in s3 and 'Sorgo granífero' in r3 and r3.replace('Sorgo granífero', 'Sorgo') == r1 and 'Sorgo granífero' in op3 and 'Sorgo' not in op3, [s3, r3, op3])
     # V4 · duplicidade

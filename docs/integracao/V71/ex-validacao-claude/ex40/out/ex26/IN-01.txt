@@ -1,0 +1,87 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Início › Meu dia
+Meu dia
+4 vencem hoje
+Registrar ocorrência
+Fila do dia
+7 de 7
+OBJETO · LOCAL
+⇅
+TAREFA
+⇅
+PRAZO
+⇅
+RESPONSÁVEL
+⇅
+IMPEDIMENTO
+⇅
+PRÓXIMA AÇÃO
+⇅
+OS-0420 · plantio
+Santa Rita · T4
+Substituir Trator T1 bloqueado
+vence hoje
+Carlos
+Ativo bloqueado · OM-0233
+Reprogramar saldo
+OS-0418 · fertirrigação
+Santa Rita · P1
+Liberar a fertirrigação (pode ajustar)
+vence hoje
+Ana
+Falta insumo · Ureia 45%
+Liberar
+OS-0430 · dessecação
+Santa Rita · T1-A
+Liberar a dessecação (pode ajustar)
+até 3 dias
+Ana
+—
+Liberar
+OS-0417 · cobertura
+Santa Rita · P1
+Receber devolução de sobras (10 sc)
+vence hoje
+Rui
+—
+Receber devolução
+Fila de expedição
+Sede · doca 1
+Chamar o próximo apto da fila (T2)
+vence hoje
+Equipe expedição
+T1 atrasado · prev. 09:10
+Abrir fila
+OS-0421 · fungicida
+Santa Rita · T1+T2
+Conferir o apontamento do dia 4 (40 ha)
+até 3 dias
+Paula
+—
+Conferir apontamentos
+INSP-88 · qualidade
+Armazém Sede
+Decidir o lote L27-013
+até 3 dias
+Equipe qualidade
+Lote bloqueado
+Abrir inspeção
+Alertas agrupados
+Abrir OM-0233
+Ver app de João
+Pressão hidráulica baixa no Trator T1 · ×3 esta noite → caso único OM-0233
+Sincronização pendente do celular de João · ×2 → registros guardados no aparelho, sem conflito
+Tela: Meu dia

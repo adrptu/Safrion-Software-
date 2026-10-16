@@ -21,7 +21,7 @@ from ui37 import shell37, HEIGHTS37
 import dados2 as D2
 import dados_cad as DC
 from areas.cadastros import H, sel, num, txt, dat, cond, R, js
-from areas.cadastros import (cadx_css, abas, pane, faixa, prim, bloco_cad, estado_cab)
+from areas.cadastros import (abas, pane, prim_cab, QF_CAD, bloco_cad, estado_cab)
 
 F_=H('false')
 # ================= CD-05 · Parceiros e fornecedores =================
@@ -114,18 +114,13 @@ CAMPOS=[txt('cnpj','CPF ou CNPJ',newOnly=True,help='CPF com 11 dígitos ou CNPJ 
         # Fornecedor
         multi('grupos','Grupos homologados',D2.GRUPOS,req=False,cond=_pc('Fornecedor'),help='Grupos de insumo em que pode receber cotação.'),
         sel('homol','Homologado',['Sim','Não'],cond=_pc('Fornecedor'),**{'def':'Não'},help='Fornecedor não homologado não recebe cotação, mesmo com grupo marcado.'),
-        # Cliente
-        multi('prod','Produtos de interesse',DC.PRODUTOS_VENDA,cond=_pc('Cliente')),
-        txt('entrega','Local e horário de entrega',req=False,cond=_pc('Cliente'),help='Onde recebe ou retira e em que horário.'),
-        sel('pag','Condição de pagamento',COND_PAG,cond=_pc('Cliente'),**{'def':PAG_DEF},help='O vencimento conta a partir do evento.'),
+        # Cliente (16/10/2026, só o essencial à gestão: produtos de interesse, local de entrega e condição de pagamento saíram, nenhuma tela os lê;
+        # o pedido de venda tem os seus; tabela em docs/integracao/V71/cadastros-campos.md)
         num('lim','Limite de crédito comercial','R$',req=False,min=0,cond=_pc('Cliente')),
         dat('limv','Validade da análise de crédito',req=False,cond=_pc('Cliente'),help='Depois desta data, novos pedidos ficam retidos até nova análise.'),
-        # Parceiro de crédito
+        # Parceiro de crédito (16/10/2026: garantias aceitas e gerente saíram; a garantia é de cada contrato, no Crédito, e o contato do parceiro
+        # já é o nome, o e-mail e o WhatsApp acima)
         multi('linhas','Linhas de crédito',DC.LINHAS_CRED,cond=_pc('Parceiro de crédito')),
-        multi('gar','Garantias aceitas',DC.GARANTIAS,req=False,cond=_pc('Parceiro de crédito')),
-        txt('ger','Gerente do crédito',cond=_pc('Parceiro de crédito')),
-        dict(k='ger_email',l='E-mail do gerente',t='email',req=False,cond=_pc('Parceiro de crédito')),
-        dict(k='ger_tel',l='Telefone do gerente',t='tel',req=False,cond=_pc('Parceiro de crédito')),
         # Transportador
         txt('rntrc','RNTRC',cond=_pc('Transportador'),help='8 dígitos do registro na ANTT.'),
         multi('veic','Veículos e capacidade',VEICULOS,cond=_pc('Transportador')),
@@ -135,12 +130,12 @@ CAMPOS=[txt('cnpj','CPF ou CNPJ',newOnly=True,help='CPF com 11 dígitos ou CNPJ 
         txt('motivo','Motivo da suspensão',cond=cond('sit','Suspenso'),help='Aparece na listagem enquanto durar a suspensão.'),
         # escondidos: situação e papéis marcados (condição das seções)
         dict(k='sit',l='Situação',t='txt',req=False,cond=NUNCA,**{'def':'Ativo'})]+[dict(k=k,l=k,t='txt',req=False,cond=NUNCA) for k in RP.values()]
-SECOES={'grupos':'FORNECEDOR','prod':'CLIENTE','linhas':'PARCEIRO DE CRÉDITO','rntrc':'TRANSPORTADOR','ops':'PRESTADOR','motivo':'SUSPENSÃO'}
+SECOES={'grupos':'FORNECEDOR','lim':'CLIENTE','linhas':'PARCEIRO DE CRÉDITO','rntrc':'TRANSPORTADOR','ops':'PRESTADOR','motivo':'SUSPENSÃO'}
 # uma variável por coluna (TABELAS-FOCO, 04/10/2026): parceiro e CPF/CNPJ; contato, WhatsApp, e-mail e canais autorizados; a situação de cada papel
 # em chip (multivalorada: filtra por estado). No filtro de um papel entram as colunas desse papel (grupos, limite e validade, linhas e garantias,
 # RNTRC e veículos, operações); em Todos elas ficam no painel do parceiro. Listas (papéis, canais, grupos…) filtram por item. Com parceiro
 # suspenso, a coluna "Motivo da suspensão" entra depois da situação (a listagem mostra o motivo enquanto durar a suspensão).
-_ID=[dict(k='nome',l='Parceiro',w=180),dict(k='cnpj',l='CPF/CNPJ',w=150)]
+_ID=[dict(k='nome',l='Parceiro',w=260),dict(k='cnpj',l='CPF/CNPJ',w=150)]
 _CT=[dict(k='cont',l='Contato',w=140),dict(k='whats',l='WhatsApp',w=130),dict(k='email',l='E-mail',w=220),dict(k='canais',l='Canais autorizados',multi=True,w=150)]
 _SIT=dict(k='papel',l='Situação do papel',multi=True,w=220)
 _PAP=dict(k='papeis',l='Papéis',multi=True,w=170)
@@ -150,7 +145,7 @@ _P,_C=_ID[0],_ID[1]
 COLS_T=[_P,_SIT,_C,_PAP]+_CT
 COLS_P={'Fornecedor':[_P,dict(k='homol',l='Homologado',w=130),_C,dict(k='grupos',l='Grupos homologados',multi=True,w=260)]+_CT,
         'Cliente':[_P,_SIT,_C,_PAP,dict(k='lim',l='Limite de crédito',t='num',a='r',un='R$',d=0),dict(k='limv',l='Validade da análise de crédito',t='date')]+_CT,
-        'Parceiro de crédito':[_P,_SIT,_C,_PAP,dict(k='linhas',l='Linhas de crédito',multi=True,w=220),dict(k='gar',l='Garantias aceitas',multi=True,w=240)]+_CT,
+        'Parceiro de crédito':[_P,_SIT,_C,_PAP,dict(k='linhas',l='Linhas de crédito',multi=True,w=220)]+_CT,
         'Transportador':[_P,_SIT,_C,_PAP,dict(k='rntrc',l='RNTRC'),dict(k='veic',l='Veículos',multi=True,w=260)]+_CT,
         'Prestador':[_P,_SIT,_C,_PAP,dict(k='ops',l='Operações que presta',multi=True,w=220)]+_CT}
 COL_MOT=dict(k='motivo',l='Motivo da suspensão',w=220)
@@ -171,23 +166,19 @@ def _form_extra(form):
          '<span style="flex-grow: 1;"></span>')
     for k in (a,b,c): assert form.count(k)==1, k
     return form.replace(a,sec+a,1).replace(b,b+dup,1).replace(c,c+rod,1)
-def _filtros():
-    # filtro por papel dentro do bloco, à esquerda da barra da grade (também troca as colunas: Fornecedores mostra grupos e homologação)
-    return (f'<div role="group" aria-label="Filtrar por papel" class="cadx-qf">'
-            f'<sc-for list="{H("cd5_fil")}" as="x" hint-placeholder-count="{len(FILTROS)}"><button type="button" aria-pressed="{H("x.cur")}" onClick="{H("x.go")}" style="{H("x.st")}">'
-            f'{H("x.t")}<span style="{H("x.nst")}">{H("x.n")}</span></button></sc-for></div>')
 def cd05():
     fname='CD-05.dc.html'; E._reset_screen(fname)
     rows=[R(f['id'],_v(f)) for f in _parceiros()]
-    g=grid(COLS_T,rows,gid='g_forn',total=False,frame=False,tools=_filtros()+prim('g_forn_new','Cadastrar parceiro'),
+    # filtro por papel no filtro rápido do motor, logo depois da busca (TAB-01); ele também troca as colunas (Fornecedores: grupos e homologação)
+    g=grid(COLS_T,rows,gid='g_forn',total=False,qf=QF_CAD,
         edit=dict(m='form',title='Parceiro',newTitle='Cadastrar parceiro',
                   sub='Um cadastro por CPF ou CNPJ: marque os papéis e preencha só as seções deles.',fields=CAMPOS))
     assert 'g_forn_F.open' in E.EXTRA[-1]; E.EXTRA[-1]=_form_extra(E.EXTRA[-1])
-    cob=grid([dict(k='g',l='Grupo de insumo',w=260),dict(k='n',l='Fornecedores que recebem cotação',t='num',a='r'),dict(k='sit',l='Situação',w=430)],[],gid='g_cob',total=False,search=True,frame=False,
+    cob=grid([dict(k='g',l='Grupo de insumo',w=260),dict(k='n',l='Fornecedores que recebem cotação',t='num',a='r'),dict(k='sit',l='Situação',w=430)],[],gid='g_cob',total=False,search=True,
         edit=dict(m='origin',title='Grupo',fields=[dict(k='g',l='Grupo',t='txt',ro=True),dict(k='n',l='Fornecedores que recebem cotação',t='num',ro=True)]))
-    # um bloco com abas: Parceiros (filtro por papel e a primária) | Cobertura de cotação (grupos de insumo); cada aba com a sua faixa de atenção
-    cadx_css()
-    corpo=bloco_cad(abas('c5t',['Parceiros','Cobertura de cotação'],'Cadastros de parceiros'),pane('c5t',0,faixa('cd5_fx0')+g)+pane('c5t',1,faixa('cd5_fx1')+cob),
+    # um bloco com abas: Parceiros (filtro por papel) | Cobertura de cotação (grupos de insumo). Padrão comum (16/10/2026): "Criar parceiro" no
+    # cabeçalho só na aba Parceiros (a Cobertura não cria); limite vencido e grupo sem fornecedor ficam na linha e no estado do cabeçalho
+    corpo=bloco_cad(abas('c5t',['Parceiros','Cobertura de cotação'],'Cadastros de parceiros'),pane('c5t',0,g)+pane('c5t',1,cob),
                     'Parceiros e fornecedores')
     js({},'const GRUPOS_='+json.dumps(D2.GRUPOS,ensure_ascii=False)+', COLS_T='+json.dumps(COLS_T,ensure_ascii=False)+', COLS_P='+json.dumps(COLS_P,ensure_ascii=False)+', COL_MOT='+json.dumps(COL_MOT,ensure_ascii=False)
        +', FILTROS='+json.dumps(FILTROS,ensure_ascii=False)+', RP='+json.dumps(RP,ensure_ascii=False)+', SECOES='+json.dumps(SECOES,ensure_ascii=False)
@@ -246,24 +237,16 @@ function PREVALS(self,v){ const rows=RW(self,'g_forn'); const fp=self.state.cd5_
     return {id:'c_'+g,v:{g:g,n:n},s:{sit:st[0]},
       p:{g:[{k:'b',t:g}],sit:st[1]},
       o:n?fs.map(r=>({t:r.v.nome+' · '+(r.v.contato?r.v.contato+' · ':'')+r.v.email})):[{t:'Nenhum fornecedor homologado com e-mail autorizado neste grupo. Marque o grupo num fornecedor e homologue.'}]}; });
-  // filtros rápidos por papel, com contagem
-  v.cd5_fil=FILTROS.map(([k,t])=>{ const n=k?rows.filter(r=>ml(r.v.papeis).indexOf(k)>=0).length:rows.length; const on=(k===fp);
-    return {t:t,n:n,cur:on?'true':'false',go:()=>trocaPapel(self,k),
-      st:'display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:999px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;'+(on?'background:'+ACC_+';color:#fff;border:1px solid '+ACC_+';':'background:#FFFFFF;color:'+INK_+';border:1px solid '+LINE_+';'),
-      nst:'font-weight:600;'+(on?'color:#fff;opacity:.8;':'color:'+MUTED_+';')}; });
+  // filtros rápidos por papel, com contagem, no desenho do filtro rápido do motor (cadChip; entram na barra no EXTRAVALS)
+  v.cd5_fil=FILTROS.map(([k,t])=>{ const n=k?rows.filter(r=>ml(r.v.papeis).indexOf(k)>=0).length:rows.length; return cadChip(t,n,k===fp,()=>trocaPapel(self,k),!k); });
   // estado do cabeçalho calculado: grupos sem fornecedor que receba cotação e limites de cliente vencidos
   const semG=GR('g_cob').rows.filter(x=>x.v.n===0).length;
   const venc=rows.filter(r=>r.v.sit!=='Suspenso'&&ml(r.v.papeis).indexOf('Cliente')>=0&&Number(r.v.lim)&&r.v.limv&&r.v.limv<HOJE).length;
   const pend=[semG?semG+(semG>1?' grupos':' grupo')+' sem fornecedor':'',venc?venc+(venc>1?' limites vencidos':' limite vencido'):''].filter(Boolean);
   cadEstado(v,'cd5e',pend.join(' · ')||'Cadastro em dia',pend.length?'yellow':'green');
   // abas e faixa "precisa de atenção": limite de cliente vencido (aba Parceiros) e grupo sem fornecedor que receba cotação (aba Cobertura)
-  cadAbas(self,v,'c5t','c5aba',[{slug:'parceiros',n:rows.length,cor:venc?'yellow':''},{slug:'cobertura',n:GR('g_cob').rows.length,cor:semG?'yellow':''}]);
-  const vencL=rows.filter(r=>r.v.sit!=='Suspenso'&&ml(r.v.papeis).indexOf('Cliente')>=0&&Number(r.v.lim)&&r.v.limv&&r.v.limv<HOJE);
-  cadFaixa(v,'cd5_fx0',[venc?{n:venc,rot:venc>1?'limites de crédito vencidos':'limite de crédito vencido',reg:vencL.map(r=>r.v.nome).join(', '),verbo:'Renovar limite',cor:'yellow',
-    go:venc===1?()=>g2open(self,GR('g_forn'),vencL[0].id,null):()=>trocaPapel(self,'Cliente')}:null]);
-  const semL=GR('g_cob').rows.filter(x=>x.v.n===0);
-  cadFaixa(v,'cd5_fx1',[semG?{n:semG,rot:semG>1?'grupos sem fornecedor que receba cotação':'grupo sem fornecedor que receba cotação',reg:semL.map(x=>x.v.g).join(', '),verbo:'Homologar fornecedor',cor:'yellow',
-    go:()=>{ cadHash('parceiros'); trocaPapel(self,'Fornecedor',{c5aba:0}); }}:null]); }
+  // abas; o que pede atenção fica na linha (Limite vencido; Sem fornecedor · Homologar fornecedor ›) e no estado do cabeçalho (TAB-06)
+  self._c5aba=cadAbas(self,v,'c5t','c5aba',[{slug:'parceiros',n:rows.length,cor:venc?'yellow':''},{slug:'cobertura',n:GR('g_cob').rows.length,cor:semG?'yellow':''}]); }
 // "Abrir e ativar papel": abre o parceiro já cadastrado com os papéis marcados no cadastro novo (nada é duplicado)
 function abrirAtivar(self,id){ const sp=GR('g_forn'); const cur=g2st(self,'g_forn').fm; const r=g2find(RW(self,'g_forn'),id); if(!r) return;
   const draft={}; sp.edit.fields.forEach(f=>{ const x=r.v[f.k]; draft[f.k]=(x!==undefined&&x!==null&&x!=='')?(f.t==='num'?String(x).replace('.',','):String(x)):''; });
@@ -288,6 +271,8 @@ function regras(self,d,fm){ const e={}; const dg=dig(d.cnpj); const cc=ml(d.cana
   if(tem('Transportador')&&String(d.rntrc||'').trim()&&dig(d.rntrc).length!==8) e.rntrc='O RNTRC tem 8 dígitos.';
   return e; }
 function EXTRAVALS(self,v){ const sp=GR('g_forn'); const F=v.g_forn_F; v.cd5_susp=false; v.cd5_reat=false;
+  cadQfMotor(v,'g_forn',v.cd5_fil,'Filtrar por papel');   // papéis no lugar do filtro rápido do motor (TAB-01)
+  cadPrim(v,self._c5aba===1?'':'Criar parceiro',v.g_forn_new);   // a Cobertura de cotação não cria registro: sem verde
   // menu do filtro de coluna: o g2lib conta todas as linhas; aqui ficam só os valores e as contagens das linhas do filtro de papel
   const fc=sp.cols.find(c=>c.k===g2st(self,'g_forn').fmc), FM=v.g_forn_fm;
   // (colunas multivaloradas contam cada item da lista, como o g2lib; valor sem linha no filtro de papel não aparece, mesmo marcado por padrão)
@@ -325,7 +310,7 @@ function EXTRAVALS(self,v){ const sp=GR('g_forn'); const F=v.g_forn_F; v.cd5_sus
     const st={g2toast:msg}; if(self.state.cd5_p&&pp.indexOf(self.state.cd5_p)<0) trocaPapel(self,'',st); else self.setState(st); }; }
 ''')
     HEIGHTS37[fname]=1000   # sem rolagem de página: só a tabela da aba rola
-    shell37('CD-05','Parceiros e fornecedores',corpo,fname=fname,status=None,primary_html=None,search=False)
+    shell37('CD-05','Parceiros e fornecedores',corpo,fname=fname,status=None,primary_html=prim_cab(),search=False)
     estado_cab(fname,'Parceiros e fornecedores','cd5e')
     from areas.cadastros import ncol_dinamico
     ncol_dinamico(fname,['cd5_ncol'])   # as colunas do papel e o motivo da suspensão mudam a quantidade de colunas

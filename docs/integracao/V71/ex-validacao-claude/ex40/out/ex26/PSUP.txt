@@ -1,0 +1,38 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Suprimentos › Painel
+‹
+Suprimentos
+Painel
+Conferir estoque
+Lotes com saldo físico
+ⓘ
+28
+Lotes com reserva
+ⓘ
+4
+Lotes em quarentena
+ⓘ
+1
+Requisições a entregar
+ⓘ
+5
+Lotes com saldo físico
+Com quarentena
+1
+Com reserva, sem quarentena
+4
+Sem reserva nem quarentena
+23
+Acompanhar compras
+Tela: Painel

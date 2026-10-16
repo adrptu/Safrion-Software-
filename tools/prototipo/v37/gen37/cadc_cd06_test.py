@@ -10,7 +10,7 @@ try:
     t.goto('CD-06.dc.html'); body=J("document.body.innerText")
     # SOLO-01 (D-10): o Calcário dolomítico ganhou preço de referência (R$ 180,00/t) e data; o selo abre sem pendência de preço
     t.chk('abre sem pendência de preço no cabeçalho e sem fatos do Estoque (quarentena, pedido)',
-          'sem preço' not in t.header() and 'Cadastrar item' in t.bloco() and 'quarentena' not in body and 'PC-088' not in body and not t.errs(), t.header())
+          'sem preço' not in t.header() and 'Criar item' in t.header() and 'quarentena' not in body and 'PC-088' not in body and not t.errs(), t.header())
     r=t.rowtxt(0,'KCl 60%'); t.openrow(0,'KCl 60%'); dk=t.dlg(); ck=t.fv('ctrl'); t.cancel()
     # revisão TABR (09/10/2026, A1): o controle (lote e validade) sai da grade para o painel do item; a Situação fica à vista sem rolar
     t.chk('item mostra unidade + embalagem e preço com data; controle e saldo no painel com "Ver saldo no Estoque"',
@@ -37,14 +37,14 @@ try:
     t.chk('inativar item em plano: chip Inativo e aviso de que sai dos planos e das cotações',
           'Inativo' in (t.rowtxt(0,'Fungicida C') or '') and 'sai dos planos e das cotações' in t.toast(), [t.rowtxt(0,'Fungicida C'),t.toast()])
     # Outro grupo…: cria o grupo no próprio formulário do item
-    t.clk('Cadastrar item'); t.fset('grupo','Outro grupo…'); L=t.labels()
+    t.clk('Criar item'); t.fset('grupo','Outro grupo…'); L=t.labels()
     for k,v in [('item','Trichoderma WP'),('ngrupo','Biológicos'),('nnat','3.1.02 · Defensivos'),('un','kg'),('emb','Saco'),('cont','1'),('ctrl','Lote e validade'),
                 ('preco','85'),('pdata','2026-09-20'),('local','Câmara fria')]: t.fset(k,v)
     t.btn('Salvar'); time.sleep(.2)
     t.chk('"Outro grupo…" cria Biológicos (natureza 3.1.02) com o item Trichoderma WP',
           'Nome do novo grupo' in L and 'Natureza de custo' in L and 'Biológicos 1 item 3.1.02 · Defensivos' in (t.rowtxt(0,'Biológicos') or '')
           and 'kg saco de 1 kg' in (t.rowtxt(0,'Trichoderma') or ''), [L,t.rowtxt(0,'Biológicos'),t.rowtxt(0,'Trichoderma'),t.alerts()])
-    t.clk('Cadastrar item'); t.fset('item','MAP 11-52'); t.fset('cont','50'); t.btn('Salvar')
+    t.clk('Criar item'); t.fset('item','MAP 11-52'); t.fset('cont','50'); t.btn('Salvar')
     t.chk('item repetido é barrado', 'Já existe o item MAP 11-52 em Fertilizantes.' in t.alerts(), t.alerts())
     t.cancel()
     t.aba('Locais')   # 01/10: locais numa aba própria do mesmo bloco (tabela 0 da aba); cabeçalho em caixa normal
@@ -55,7 +55,7 @@ try:
     t.chk('locais: fazenda na tabela, sem coluna Controle; capacidade só no tanque e no silo (do ativo), com o filtro do tipo',
           any('FAZENDA' in h for h in hd) and not any('CONTROLE' in h for h in hd) and not any('CAPACIDADE' in h for h in hd) and '15.000 L' in (tq or '') and '60.000 sc de 60 kg' in (si or ''),
           [hd,tq,si])
-    t.chk('"Cadastrar local" é a ação da aba Locais (sem "+ Novo local")', J("document.body.innerText.indexOf('Novo local')<0") and t.clk('Cadastrar local')=='ok' and t.title()=='Cadastrar local', t.title())
+    t.chk('"Cadastrar local" é a ação da aba Locais (sem "+ Novo local")', J("document.body.innerText.indexOf('Novo local')<0") and t.clk('Criar local')=='ok' and t.title()=='Cadastrar local', t.title())
     t.fset('nome','Galpão BV 2'); t.fset('faz','Boa Vista'); t.fset('tipo','Galpão'); t.btn('Salvar'); time.sleep(.2)
     t.chk('local novo na Boa Vista', 'Boa Vista' in (t.rowtxt(0,'Galpão BV 2') or '') and not t.errs(), [t.rowtxt(0,'Galpão BV 2'),t.errs()])
     t.shot('cadc_cd06.png')

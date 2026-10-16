@@ -1,0 +1,90 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Irrigação › Ordens
+Ordens de irrigação
+1 em conferência · 3 a liberar
+Abrir ordem de hoje · OS-0419
+Confira a necessidade
+1 a programar
+Programe a irrigação
+1 conflito · 1 janela a definir
+Execute e confira
+1 a conferir
+Acompanhe clima e sensores
+1 suspeita · 1 sem dado
+Fazenda
+Todas
+Lagoa Grande
+Santa Rita
+Boa Vista
+Ordens por etapa
+Todas 6
+A liberar 3
+Em conferência 1
+Encerradas 1
+Liberadas 1
+Agrupar por
+▾
+Colunas
++4
+ORDEM
+⇅
+SETOR
+⇅
+PRÓXIMO PASSO
+⇅
+INÍCIO
+⇅
+LÂMINA
+⇅
+ETAPA
+⇅
+Conflito
+OS-0423
+Gotejo T7
+Resolver conflito
+hoje 14:00
+4,0 mm
+A liberar
+Falta insumo
+OS-0418
+Pivô 1
+Receber o insumo no Estoque
+amanhã 21:00
+8,1 mm
+A liberar
+OS-0422
+Pivô 2
+Definir janela
+a definir
+13,5 mm
+A liberar
+OS-0394
+Pivô 2
+Conferir medição
+ontem 20:00
+10,81 mm
+Em conferência
+OS-0419
+Pivô 2
+Iniciar irrigação
+hoje 20:00
+10,81 mm
+Liberadas
+OS-0392
+Gotejo T7
+—
+19/09 14:00
+4,0 mm
+Encerradas
+Tela: Ordens de irrigação

@@ -1,0 +1,62 @@
+# EX-40.1 · telas de entrada dos módulos (render b87f79b, Ana, 1440 × 1000)
+
+## Agrícola (MOD-AGR.dc.html) · h1 'Agrícola' · 14 cartões · blocos ['Planejamento', 'Execução', 'Resultados']
+  - 'Agrofit' → AG-07.dc.html · tem número no cartão: False
+  - 'Análises de solo' → AG-02.dc.html · tem número no cartão: False
+  - 'Planos agronômicos' → PA.dc.html · tem número no cartão: False
+  - 'Planejar safra' → SAF.dc.html · tem número no cartão: False
+  - 'Orçamento' → GE-02.dc.html · tem número no cartão: False
+  - 'Pragas e doenças' → AG-01.dc.html · tem número no cartão: False
+  - 'Ordens de serviço' → OS.dc.html · tem número no cartão: False
+  - 'Irrigação' → IR-01.dc.html · tem número no cartão: False
+  - 'Colheita' → COLH.dc.html · tem número no cartão: False
+  - 'Recebimento' → CARGA.dc.html · tem número no cartão: False
+  - 'Beneficiamento' → BEN.dc.html · tem número no cartão: False
+  - 'Estoque de produto' → PROD.dc.html · tem número no cartão: False
+  - 'Custos' → GE-03.dc.html · tem número no cartão: False
+  - 'Painel' → PAGR.dc.html · tem número no cartão: False
+
+## Comercial (MOD-COM.dc.html) · h1 'Comercial' · 4 cartões · blocos []
+  - 'Painel' → PCOM.dc.html · tem número no cartão: False
+  - 'Contratos e pedidos' → VEN.dc.html · tem número no cartão: False
+  - 'Expedição' → EXPED.dc.html · tem número no cartão: False
+  - 'Inteligência' → IV.dc.html · tem número no cartão: False
+
+## Suprimentos (MOD-SUP.dc.html) · h1 'Suprimentos' · 4 cartões · blocos []
+  - 'Painel' → PSUP.dc.html · tem número no cartão: False
+  - 'Compras' → CMP.dc.html · tem número no cartão: False
+  - 'Estoque' → EST.dc.html · tem número no cartão: False
+  - 'Inteligência' → IC.dc.html · tem número no cartão: False
+
+## Configurações (MOD-CFG.dc.html) · h1 'Configurações' · 4 cartões · blocos []
+  - 'Usuários e alçadas' → CF-01.dc.html · tem número no cartão: False
+  - 'Auditoria' → CF-04.dc.html · tem número no cartão: False
+  - 'Integrações' → CF-03.dc.html · tem número no cartão: False
+  - 'Assinatura' → CF-05.dc.html · tem número no cartão: False
+
+## Manutenção (MOD-MAN.dc.html) · h1 'Manutenção' · 5 cartões · blocos []
+  - 'Painel' → PMAN.dc.html · tem número no cartão: False
+  - 'Sem ordem' → MA.dc.html#vis=semordem · tem número no cartão: False
+  - 'Ordens' → MA.dc.html#vis=ordens · tem número no cartão: False
+  - 'Ativos' → MA.dc.html#vis=ativos · tem número no cartão: False
+  - 'Planos' → MA.dc.html#vis=planos · tem número no cartão: False
+
+## Crédito (MOD-CRE.dc.html) · h1 'Crédito' · 3 cartões · blocos []
+  - 'Contratos' → GE-08.dc.html#vis=contratos · tem número no cartão: False
+  - 'Liberações' → GE-08.dc.html#vis=liberacoes · tem número no cartão: False
+  - 'Dossiê' → GE-08.dc.html#vis=dossie · tem número no cartão: False
+
+## Outros acessos (MOD-OUT.dc.html) · h1 'Outros acessos' · 4 cartões · blocos []
+  - 'App de campo' → MB-01.dc.html · tem número no cartão: False
+  - 'Portal do parceiro' → PT-01.dc.html · tem número no cartão: False
+  - 'Onboarding' → ON-01.dc.html · tem número no cartão: False
+  - 'Backoffice' → BO-02.dc.html · tem número no cartão: False
+
+## Caminho Mapa → Agrícola → Ordens de serviço: ok/ok · telas MOD-AGR.dc.html → OS.dc.html · cliques 2
+   filtros rápidos com contagem na O.S.: ['Todas 10', 'A liberar 3', 'Liberadas 2', 'Em execução 2', 'Em conferência 1', 'Encerradas 2', 'Canceladas 0']
+   volta ao módulo: ['‹\nAgrícola → MOD-AGR.dc.html']
+   Manutenção: ícone → MOD-MAN.dc.html → cartão 'Painel' → PMAN.dc.html · cliques 2
+   Suprimentos: ícone → MOD-SUP.dc.html → cartão 'Estoque' → EST.dc.html · cliques 2
+   Comercial: ícone → MOD-COM.dc.html → cartão 'Contratos e pedidos' → VEN.dc.html · cliques 2
+
+erros JS: []

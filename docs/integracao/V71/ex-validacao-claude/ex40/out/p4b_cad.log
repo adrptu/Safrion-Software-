@@ -1,0 +1,11 @@
+campos do painel do setor P2 (rótulo, valor):
+   ['fx_g_set_defT', '11,2 mm · estação Santa Rita + sonda · hoje 06:00']
+   ['fx_g_set_necT', 'líquida 11,2 mm · bruta 12,44 mm · 2 passadas necessárias de 6,22 mm']
+   ['fx_g_set_ordT', 'OS-0419 · cobre 87 % · resta 1,5 mm']
+   ['fx_g_set_donoT', 'João']
+   ['fx_g_set_cultT', 'Milho · V10']
+   ['fx_g_set_eqT', 'Pivô · 80 ha · 166 L/s · Bomba do Pivô 2 · Rio · captação da sede']
+   ['fx_g_set_cadT', 'CAD 45 mm em 0–30 cm (raízes até 30 cm) · AGS-003 · zona Z1 (baixada) · curva de retenção (laboratório) · 02/09/2026']
+   ['fx_g_set_lmax', '12']
+   ['fx_g_set_imin', '18']
+   ['fx_g_set_efic', '90']

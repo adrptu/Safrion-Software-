@@ -1,0 +1,83 @@
+# P0 · inventário (executado, render b87f79b, perfil Ana)
+páginas: 156 · no menu (não ocultas): 69 · ocultas: 87
+sem caminho por link a partir do menu: GE-01.dc.html, IN-03.dc.html, MB-05det.dc.html, MB-08.dc.html, MB-08x-recibo.dc.html, MB-09det.dc.html, PL-03.dc.html, PM.dc.html, PT-06.dc.html, SU-03.dc.html, SU-03det.dc.html
+
+## "Restaurar demonstração" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  AG-01.dc.html: [1, 1] · saltos=0 · oculta=False
+  BEN.dc.html: [1, 1] · saltos=0 · oculta=False
+  CARGA.dc.html: [1, 1] · saltos=0 · oculta=False
+  COLH.dc.html: [1, 1] · saltos=0 · oculta=False
+  EST.dc.html: [1, 1] · saltos=0 · oculta=False
+  EXPED.dc.html: [1, 1] · saltos=0 · oculta=False
+  IC.dc.html: [1, 1] · saltos=0 · oculta=False
+  IV.dc.html: [1, 1] · saltos=0 · oculta=False
+  MA-01.dc.html: [0, 1] · saltos=0 · oculta=False
+  MA-02.dc.html: [0, 1] · saltos=0 · oculta=False
+  MA-03.dc.html: [0, 1] · saltos=0 · oculta=False
+  MA-04.dc.html: [0, 1] · saltos=0 · oculta=False
+  MA-04det.dc.html: [0, 1] · saltos=0 · oculta=False
+  MA-05.dc.html: [0, 1] · saltos=0 · oculta=False
+  MA.dc.html: [0, 1] · saltos=0 · oculta=False
+  MB-01.dc.html: [1, 1] · saltos=0 · oculta=False
+  OS.dc.html: [1, 1] · saltos=0 · oculta=False
+  PCOM.dc.html: [1, 1] · saltos=0 · oculta=False
+  PM.dc.html: [0, 1] · saltos=None · oculta=True
+  PROD.dc.html: [1, 1] · saltos=0 · oculta=False
+  VEN.dc.html: [1, 1] · saltos=0 · oculta=False
+
+## "Encerrar saldo" (visível, presente no DOM) · página (saltos do menu; oculta?)
+
+## "Cancelar reserva" (visível, presente no DOM) · página (saltos do menu; oculta?)
+
+## "Cancelar sem execução" (visível, presente no DOM) · página (saltos do menu; oculta?)
+
+## "Notificar responsáveis" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  PL-05.dc.html: [1, 1] · saltos=1 · oculta=True
+
+## "Água no solo" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  AG-02.dc.html: [1, 1] · saltos=0 · oculta=False
+
+## "Manutenções e impacto na produção" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  PL-03.dc.html: [1, 1] · saltos=None · oculta=True
+  PL-04.dc.html: [1, 1] · saltos=2 · oculta=True
+
+## "Concluir com" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  MB-06.dc.html: [1, 1] · saltos=1 · oculta=True
+
+## "Propor melhoria" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  AG-06.dc.html: [1, 1] · saltos=1 · oculta=True
+
+## "Propor revisão" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  AG-06.dc.html: [1, 1] · saltos=1 · oculta=True
+
+## "Formalizar contrato" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  SU-05.dc.html: [1, 1] · saltos=2 · oculta=True
+
+## "Aprovar e emitir" (visível, presente no DOM) · página (saltos do menu; oculta?)
+
+## "Emitir pedido" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  SU-05.dc.html: [1, 1] · saltos=2 · oculta=True
+
+## "Aprovar compra" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  CF-01.dc.html: [1, 1] · saltos=0 · oculta=False
+
+## "Validar" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  AG-05.dc.html: [1, 1] · saltos=2 · oculta=True
+  CD-08.dc.html: [1, 1] · saltos=0 · oculta=False
+  ON-01det.dc.html: [2, 2] · saltos=1 · oculta=True
+
+## "Publicar" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  AG-05.dc.html: [1, 1] · saltos=2 · oculta=True
+  CD-07.dc.html: [1, 1] · saltos=0 · oculta=False
+  CF-01.dc.html: [2, 2] · saltos=0 · oculta=False
+  CO-01.dc.html: [0, 1] · saltos=3 · oculta=True
+  COLH.dc.html: [6, 11] · saltos=0 · oculta=False
+  GE-02.dc.html: [0, 1] · saltos=0 · oculta=False
+  PAGR.dc.html: [4, 4] · saltos=0 · oculta=False
+  PL-02.dc.html: [1, 1] · saltos=1 · oculta=True
+  PL-02det.dc.html: [2, 2] · saltos=2 · oculta=True
+  PL-03.dc.html: [1, 1] · saltos=None · oculta=True
+  PL-06.dc.html: [1, 1] · saltos=3 · oculta=True
+  SU-02.dc.html: [1, 1] · saltos=3 · oculta=True
+
+## erros de JavaScript
