@@ -1,0 +1,163 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+‹
+Manutenção
+Manutenção
+1 ativo bloqueado · 1 conflito
+Registrar achado
+⋯
+Sem ordem
+6
+Ordens
+0
+Ativos
+1
+Planos
+0
+Grupo
+Todos os grupos
+Tratores
+Pulverizadores
+Plantadeiras
+Implementos
+Colhedoras
+Beneficiamento
+Irrigação
+Armazenagem
+Veículos
+Pendência
+Toda pendência
+Leitura a confirmar
+Sem plano
+Achado sem ordem
+Desvio de consumo
+Vence em 30 d
+Restrição vencida
+Ativos
+Abastecimentos
+Todas 16
+Apto 14
+Bloqueado 1
+Restrito 1
+Agrupar por
+▾
+Colunas
++3
+ATIVO · LOCAL
+⇅
+EM ABERTO
+⇅
+PRÓXIMA MANUTENÇÃO
+⇅
+LEITURA
+⇅
+Bloqueado · desde 22/09
+Trator T1
+· JD 6M 155 · Oficina Sede
+OM-0233 · Em execução
+Em dia
+Revisão 250 h · 4.450 h ≈ 08/10
+4.312 h · 23/09
+Bomba do Pivô 2
+· pivô central fixo · 8 torres · motobomba + hidrômetro novo · Pivô 2
+OM-0228 · Liberadas
+Vence em breve
+Preventiva mensal · 01/10
+8.914 h · 23/09
+Trator 03
+· MF 4292 · Galpão 1
+—
+Vencida
+Revisão 250 h · 5.090 h · passou ≈ 19/09
+5.120 h · 22/09
+Plantadeira 24 linhas
+· PD-12 · Galpão 1
+NC-0912 sem ordem
+Vencida
+Revisão pré-plantio · 20/09
+886 h · 20/09
+Trator 02
+· MF 7719 · Santa Rita · T4
+OM-0234 · A liberar
+INSP-104 sem ordem
+Vence em breve
+Revisão 250 h · 3.043 h ≈ 28/09
++1
+2.988 h · 23/09
+Packing linha 1
+· esteira + balança · Armazém Sede
+—
+Em dia
+Preventiva mensal · 08/10
+12.301 h · 22/09
+Silo 01
+· aeração + termometria · Armazém Sede
+—
+Em dia
+Inspeção trimestral · 10/10
+sem contador
+Colhedora Axial-Flow 7250
+· Case IH 7250 · Galpão 1
+SM-0150 sem ordem
+Em dia
+Revisão 500 h · 15/10
+2.150 h · 22/09
+Bomba do Pivô 1
+· motobomba 125 cv · Pivô 1
+—
+Em dia
+Preventiva mensal · 15/10
+7.650 h · 23/09
+Comboio CB-01
+· caminhão comboio 6 m³ · Sede
+—
+Em dia
+Revisão 10.000 km · 50.000 km ≈ 15/10
+48.200 km · 23/09
+Trator 04
+· JD 5078E · Galpão 1
+—
+Em dia
+Revisão 250 h · 3.550 h ≈ 17/10
+3.410 h · 12/09
+de 12/09
+Pulverizador PJ-3030
+· Uniport 3030 · Santa Rita · T1
+OM-0230 · Em conferência
+Em dia
+Revisão 250 h · 1.790 h ≈ 20/10
++1
+1.542 h · 23/09
+Distribuidor 3 t
+· Lancer 3000 · Galpão 1
+—
+Sem plano
+640 h · 18/09
+Máquina TSI
+· tratamento de sementes na sede · Oficina Sede
+—
+Sem plano
+720 h · 19/09
+Esqueletadeira
+· café · 1 linha · Galpão 1
+—
+Sem plano
+310 h · 15/09
+de 15/09
+Gotejo T7
+· cabeçal + injetora de fertilizante · Talhão T7
+—
+Sem plano
+5.210 h · 23/09
+Total
+Tela: Manutenção · 1 ativo bloqueado · 1 conflito

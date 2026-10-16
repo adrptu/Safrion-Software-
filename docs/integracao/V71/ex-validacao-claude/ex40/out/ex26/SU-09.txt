@@ -1,0 +1,81 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Suprimentos › Inventários e ajustes
+Inventários e ajustes
+i
+1 ajuste aguardando gestor · 1 diferença a submeter
+Aprovar ajuste INV-2609
+AJUSTES AGUARDANDO GESTOR
+1
+INV-2609 · R$ 2.340
+DIFERENÇAS A SUBMETER
+1
+INV-2612
+CONTAGENS PLANEJADAS
+1
+INV-2611 · 25/09
+Contagens cegas por local, item e lote
+Planejar contagem
+Contar no app ›
+4 de 4
+INVENTÁRIO · ESCOPO
+⇅
+CORTE · CONTADOR
+⇅
+OBSERVADO × SISTEMA · RECONTAGEM
+⇅
+DIFERENÇA · CAUSA
+⇅
+ESTADO · AÇÃO
+⇅
+INV-2609
+Galpão 2 · MAP 11-52 · M26-07
+20/09
+Rui (conferente)
+89.400 kg × 90.000 kg
+recontagem: confirmou 89.400 kg (Paula)
+-600 kg
+Sacaria rasgada na pilha 3
+Aguarda gestor · ajuste
+Ana (gestora)
+Aprovar ajuste
+INV-2612
+Almox. oficina · Filtro de óleo RE504836
+22/09
+Marta (conferente)
+5 un × 6 un
+-1 un
+causa a informar
+Diferença · a submeter
+Submeter ajuste
+Recontar
+INV-2610
+Almox. defensivos · Fungicida A · F26-02
+21/09
+Paula (almoxarife)
+545 L × 545 L
+0
+Encerrado · sem diferença
+Ver efeito no extrato
+INV-2611
+Almox. defensivos · Glifosato 480 · G26-14
+25/09
+Paula (almoxarife)
+saldo oculto ao contador
+recontagem: automática se diferença > 0,5 %
+—
+Planejada · corte 25/09
+Contar no app
+Tela: Inventários e ajustes · 1 ajuste aguardando gestor · 1 diferença a submeter

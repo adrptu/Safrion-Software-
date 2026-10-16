@@ -1,0 +1,82 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Gestão e resultados › Planos de ação
+Planos de ação
+i
+3 casos em curso · 1 em verificação
+Criar ação
+Casos de melhoria e desvios
+5 de 5
+CASO
+⇅
+ORIGEM · INDICADOR
+⇅
+HIPÓTESE · AÇÃO DEFINIDA
+⇅
+DONO
+⇅
+PRAZO
+▲
+ESTADO
+⇅
+AÇÃO
+⇅
+AC-090
+atraso de liberação de O.S.
+aderência 86%
+prontidão conferida tarde
+ação: checagem de prontidão na véspera
+Marcos
+15/09/2026
+Encerrado
+Reabrir com motivo
+AC-102
+leitura suspeita sonda P1
+sensores · salto de 18 p.p.
+sensor descalibrado
+ação: inspecionar e recalibrar; excluir do balanço até lá
+Equipe irrigação
+26/09/2026
+Em curso
+Verificar resultado
+AC-101
+custo de pulverização
+R$ 48,40/ha · feijão P1
+consumo +10% e compra fora do contrato
+ação: validar calda com agrônomo · negociar contrato de fungicida
+Ana
+30/09/2026
+Em curso
+Propor mudança
+AC-097
+perda no beneficiamento
+descarte 5%
+regulagem da classificadora
+ação: regulagem feita · medir por 2 semanas
+Rui
+04/10/2026
+Em verificação
+Verificar resultado
+Encerrar com evidência
+AC-103
+recorrência hidráulica T1
+OM-0233
+mangueira fora de especificação
+ação: trocar especificação da peça e revisar preventiva
+PCP
+10/10/2026
+Aguardando peça
+Ver OM-0233
+Tela: Planos de ação · 3 casos em curso · 1 em verificação

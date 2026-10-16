@@ -1,0 +1,88 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+‹
+Manutenção
+Manutenção
+1 ativo bloqueado · 1 conflito
+⋯
+‹ Ativos
+Trator T1
+JD 6M 155 · Oficina Sede · Tratores · responsável técnico: Zé
+Bloqueado · desde 22/09
+Leitura 4.312 h · 23/09
+Registrar achado
+Registrar leitura
+Registrar abastecimento
+Abrir no CD-03 ›
+Ver agenda em O.S. › Recursos ›
+▾
+Situação
+· Bloqueado · desde 22/09 · tratada pela OM-0233
+CONDIÇÃO
+Bloqueado · desde 22/09 · Pressão hidráulica baixa · SM-0147 e INSP-105
+DESDE · QUEM
+22/09 · Zé (mecânico)
+EVIDÊNCIA
+checklist + manômetro
+PRAZO · LIMITES
+—
+TRATADA PELA
+OM-0233 · Em execução
+RESPONSÁVEL TÉCNICO
+Zé
+LEITURA
+4.312 h · 23/09 · Inspeção INSP-105
+RETORNO PREVISTO
+24/09 12:00
+Mudar condição ›
+Ação do Otávio ou do responsável técnico (Zé)
+AGENDA DA SEMANA (O.S. › RECURSOS)
+23/09 OM-0233 06:00–18:00 · manutenção
+24/09 OM-0233 06:00–18:00 · manutenção
+24/09 OS-0431 06:00–16:00 · condicional
+HISTÓRICO DA CONDIÇÃO
+22/09 · Bloqueado · Pressão hidráulica baixa · SM-0147 e INSP-105 · Zé (mecânico)
+▸
+O que vence
+· 0 devido(s) de 1
+▸
+Achados
+· nenhum sem ordem
+▸
+Ordens
+· 1 abertas · 1 encerradas
+▸
+Leituras e abastecimentos
+· 4.312 h · 23/09
+▾
+Custo e desempenho
+· R$ 2.844,00 · set/2026
+PEÇAS (3.1.05)
+R$ 740,00
+LUBRIFICANTES (3.1.04)
+R$ 504,00
+OFICINA (CUSTO R$/H DA OFICINA 320)
+R$ 1.600,00
+TERCEIROS
+R$ 0,00
+CUSTO POR HORA OPERADA
+não calculável (KPI-PCM-10)
+CONSUMO
+— sem método
+DISPONIBILIDADE 30 D
+não calculável
+MTBF · MTTR
+não estimável
+CUMPRIMENTO DE PREVENTIVA
+não calculável
+Tela: Manutenção · 1 ativo bloqueado · 1 conflito

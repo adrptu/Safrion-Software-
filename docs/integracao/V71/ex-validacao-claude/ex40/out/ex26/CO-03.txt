@@ -1,0 +1,100 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Colheita e pós-colheita › Cargas, pesagens e romaneios
+Cargas, pesagens e romaneios
+i
+1 chegada a confirmar · 1 pesagem pendente
+Preveja a colheita
+Programe as ordens
+OC-0514 impedida
+Registre cargas
+Receba a produção
+Beneficie
+Confira a qualidade
+L27-013 bloqueado
+Controle o estoque de produção
+Cargas do período
+Registrar carga
+Registrar no celular
+5 de 5
+CARGA · HORA · VEÍCULO
+▼
+ORDEM · ORIGEM
+⇅
+BRUTO − TARA (KG)
+⇅
+LÍQUIDO
+⇅
+QUALIDADE INICIAL
+⇅
+DESTINO
+⇅
+SITUAÇÃO · ROMANEIO
+⇅
+AÇÃO
+⇅
+CG-1207
+09:40 · Carreta 03
+OC-0510 · T7 (mamão)
+4.310 − 1.180
+3.130 kg
+Classe A · calibre 9
+Packing Sede
+Chegada a confirmar
+ROM-0791
+Confirmar chegada
+CG-1206
+07:55 · Carreta 02
+OC-0510 · T7 (mamão)
+4.390 − 1.180
+3.210 kg
+Classe A/B · calibre 8–10
+Packing Sede
+Recebida
+ROM-0790
+Emitir romaneio
+CG-1205
+06:30 · Carreta 02
+OC-0510 · T7 Q1+Q2 (mamão)
+4.140 − 1.180
+2.960 kg
+Mistura Q1+Q2 · 60/40 estimada
+Packing Sede
+Recebida
+ROM-0789
+Emitir romaneio
+CG-1103
+16:10 · Caminhão 07
+OC-0508 · C1 (café)
+9.140 − 5.020
+4.120 kg
+Bica corrida · rend. 52%
+Terreiro/armazém
+Pesagem pendente
+ROM-0762
+Vincular pesagem
+CG-0988
+11:20 · Caminhão 05
+OC-0501 · T3 (milho)
+15.980 − 6.140
+9.840 kg
+Umidade 17,2% · impureza 1,1%
+Silo 2 (secador)
+Recebida
+ROM-0701
+Emitir romaneio
+Qualidade inicial por cultura
+CG-0988 (milho) carrega umidade 17,2% e impureza 1,1%; CG-1206/1207 (mamão) carregam classe e calibre; CG-1103 (café) carrega bica corrida e rendimento 52%. A mistura Q1+Q2 da CG-1205 mantém rastreio com participação estimada 60/40.
+Tela: Cargas, pesagens e romaneios · 1 chegada a confirmar · 1 pesagem pendente

@@ -1,0 +1,16 @@
+# EX-40.3 · AG-05 (oculta) · Validar e Publicar
+[Ana] botões visíveis ['Publicar', 'Validar'] · Validar ok: 'Checagem: fonte ok, escopo ok, unidades ok · v3 apta a publicar; a publicação não reescreve os planos em execução. | Tela: Biblioteca e planos técnicos · 1 em validação · 1 inativo'
+   Publicar ok: 'Nada a publicar ainda: o Feijão pivô v3 está em validação. Depois de validado, publicar envia as diferenças às 4 adoções ativas, preserva ajustes locais e não muda planos em execução. | Tela: Biblioteca e planos técnicos · 1 em validação · 1 inativo'
+   linha depois dos dois cliques: '' · cliques 2
+[Caio] botões visíveis ['Publicar', 'Validar'] · Validar ok: 'Checagem: fonte ok, escopo ok, unidades ok · v3 apta a publicar; a publicação não reescreve os planos em execução. | Tela: Biblioteca e planos técnicos · 1 em validação · 1 inativo'
+   Publicar ok: 'Nada a publicar ainda: o Feijão pivô v3 está em validação. Depois de validado, publicar envia as diferenças às 4 adoções ativas, preserva ajustes locais e não muda planos em execução. | Tela: Biblioteca e planos técnicos · 1 em validação · 1 inativo'
+   linha depois dos dois cliques: '' · cliques 2
+
+# Fluxo vigente: Planos agronômicos (PA, no menu) · mudar a dose de Fungicida A e "Salvar alterações"
+[Caio] dose 0,6: aviso 'Dose de Fungicida A: 0,5 → 0,6 L/ha. Rascunho v7 criado; a v6 publicada e os 5 cultivos que usam o plano não mudam. | Dose de Fungicida A: 0,5 → 0,6 L/ha. Rascunho v7 criado; a v6 publicada e os 5 cultivos que usam o plano não mudam.' · primárias ['Salvar alterações'] · Salvar ok: 'Plano salvo · v7 · cultivos seguem na versão deles | Plano salvo · v7 · cultivos seguem na versão deles' · cliques 3
+[Rui] dose 0,7: aviso 'Dose de Fungicida A: 0,5 → 0,7 L/ha. Rascunho v7 criado; a v6 publicada e os 5 cultivos que usam o plano não mudam. | Dose de Fungicida A: 0,5 → 0,7 L/ha. Rascunho v7 criado; a v6 publicada e os 5 cultivos que usam o plano não mudam.' · primárias ['Salvar alterações'] · Salvar ok: 'Plano salvo · v7 · cultivos seguem na versão deles | Plano salvo · v7 · cultivos seguem na versão deles' · cliques 3
+
+# EX-40.4 · AG-06 (oculta) · Propor melhoria × Propor revisão
+Propor melhoria: href GE-07.dc.html · contexto 'bloco: Abrir aplicações Propor melhoria' → abre GE-07.dc.html · Planos de ação
+Propor revisão: href AG-05.dc.html · contexto 'bloco: Propor revisão' → abre AG-05.dc.html · Biblioteca e planos técnicos
+erros JS: []

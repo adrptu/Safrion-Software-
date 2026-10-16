@@ -1,0 +1,109 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Suprimentos › Políticas de estoque
+Políticas de estoque
+i
+1 proposta aguardando gestor
+Submeter exceção
+Políticas por item e depósito
+Simular cobertura
+Ver efeito em Necessidades ›
+6 de 6
+ITEM/GRUPO · DEPÓSITO
+⇅
+ABC · CRITICIDADE
+⇅
+MÉTODO
+⇅
+SEGURANÇA · PRAZO
+⇅
+LOTE/MÚLTIPLO
+⇅
+VALIDADE
+⇅
+LIMITE ECONÔMICO
+⇅
+VERSÃO · ESTADO
+⇅
+Fertilizantes
+Galpão 2
+A ·
+Alta
+Necessidade datada
+7 d · 12 d
+carreta 36 t
+—
+R$ 400.000
+Vigente
+v4
+Defensivos
+Almox. defensivos
+A ·
+Alta
+Datada + proteção
+5 d · 8 d
+caixa 12 un
+18 meses · FEFO
+R$ 250.000
+Vigente
+v2
+Sementes
+Câmara fria
+A ·
+Alta
+Necessidade datada
+5 d · 10 d
+big bag 1 t
+12 meses
+R$ 180.000
+Vigente
+v3
+Diesel S10
+Tanque Sede
+B ·
+Alta
+Mínimo/máximo
+2 d · 2 d
+15 mil L
+—
+R$ 90.000
+Aguarda gestor
+v5
+Peças de manutenção
+Almox. oficina
+C ·
+Alta
+Mínimo/máximo
+0 d · 15 d
+un
+—
+R$ 60.000
+Com exceção
+v3.1
+EPIs
+Almox. oficina
+C ·
+Média
+Mínimo/máximo
+0 d · 7 d
+par/un
+24 meses
+R$ 12.000
+Vigente
+v1
+Publicação de vigência
+Publicar vigência
+Propostas e exceções aguardando: Diesel S10 v5 (gestor, vence em 5 dias).
+Tela: Políticas de estoque · 1 proposta aguardando gestor

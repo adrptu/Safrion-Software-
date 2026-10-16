@@ -1,0 +1,88 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Orçamento e previsões
+‹
+Agrícola
+Orçamento e previsões
+i
+V2 publicada · 1 cenário em rascunho
+Comparar base × previsão × real
+Versões em paralelo
+Criar cenário
+⋯
+3 de 3
+Agrupar por
+▾
+Colunas
++3
+VERSÃO
+⇅
+CUSTO TOTAL
+⇅
+PICO DE CAIXA
+⇅
+ESTADO · APROVAÇÃO
+⇅
+V1 · base aprovada
+R$ 14,25 mi
+R$ 6,1 mi · fev/27
+Aprovada · preservada
+Direção · 12/08
+V2 · previsão corrente
+R$ 14,68 mi
+R$ 6,4 mi · fev/27
+Publicada ao planejamento
+Controladoria · 20/09
+C1 · seca out/nov
+R$ 14,91 mi
+R$ 7,0 mi · mar/27
+Cenário · rascunho
+Cronograma de caixa por versão
+TRIMESTRE
+⇅
+DESEMBOLSO V1
+⇅
+DESEMBOLSO V2
+⇅
+DIFERENÇA
+⇅
+MAIOR COMPONENTE
+⇅
+out–dez/26
+R$ 5,90 mi
+R$ 6,20 mi
+R$ 0,30 mi
+insumos de plantio
+jan–mar/27
+R$ 4,80 mi
+R$ 4,90 mi
+R$ 0,10 mi
+defensivos e colheita da soja
+abr–jun/27
+R$ 2,10 mi
+R$ 2,10 mi
+—
+beneficiamento e frete
+jul–set/27
+R$ 1,45 mi
+R$ 1,48 mi
+R$ 0,03 mi
+colheita do café e armazenagem
+Total
+R$ 14,25 mi
+R$ 14,68 mi
+R$ 0,43 mi
+Publicação
+Submeter orçamento revisado
+⋯
+Tela: Orçamento e previsões · V2 publicada · 1 cenário em rascunho

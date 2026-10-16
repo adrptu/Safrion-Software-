@@ -1,0 +1,238 @@
+{
+ "Agrícola": {
+  "h1": "Agrícola",
+  "blocos": [
+   "Planejamento",
+   "Execução",
+   "Resultados"
+  ],
+  "cartoes": [
+   {
+    "t": "Agrofit",
+    "h": "AG-07.dc.html",
+    "num": false
+   },
+   {
+    "t": "Análises de solo",
+    "h": "AG-02.dc.html",
+    "num": false
+   },
+   {
+    "t": "Planos agronômicos",
+    "h": "PA.dc.html",
+    "num": false
+   },
+   {
+    "t": "Planejar safra",
+    "h": "SAF.dc.html",
+    "num": false
+   },
+   {
+    "t": "Orçamento",
+    "h": "GE-02.dc.html",
+    "num": false
+   },
+   {
+    "t": "Pragas e doenças",
+    "h": "AG-01.dc.html",
+    "num": false
+   },
+   {
+    "t": "Ordens de serviço",
+    "h": "OS.dc.html",
+    "num": false
+   },
+   {
+    "t": "Irrigação",
+    "h": "IR-01.dc.html",
+    "num": false
+   },
+   {
+    "t": "Colheita",
+    "h": "COLH.dc.html",
+    "num": false
+   },
+   {
+    "t": "Recebimento",
+    "h": "CARGA.dc.html",
+    "num": false
+   },
+   {
+    "t": "Beneficiamento",
+    "h": "BEN.dc.html",
+    "num": false
+   },
+   {
+    "t": "Estoque de produto",
+    "h": "PROD.dc.html",
+    "num": false
+   },
+   {
+    "t": "Custos",
+    "h": "GE-03.dc.html",
+    "num": false
+   },
+   {
+    "t": "Painel",
+    "h": "PAGR.dc.html",
+    "num": false
+   }
+  ]
+ },
+ "Comercial": {
+  "h1": "Comercial",
+  "blocos": [],
+  "cartoes": [
+   {
+    "t": "Painel",
+    "h": "PCOM.dc.html",
+    "num": false
+   },
+   {
+    "t": "Contratos e pedidos",
+    "h": "VEN.dc.html",
+    "num": false
+   },
+   {
+    "t": "Expedição",
+    "h": "EXPED.dc.html",
+    "num": false
+   },
+   {
+    "t": "Inteligência",
+    "h": "IV.dc.html",
+    "num": false
+   }
+  ]
+ },
+ "Suprimentos": {
+  "h1": "Suprimentos",
+  "blocos": [],
+  "cartoes": [
+   {
+    "t": "Painel",
+    "h": "PSUP.dc.html",
+    "num": false
+   },
+   {
+    "t": "Compras",
+    "h": "CMP.dc.html",
+    "num": false
+   },
+   {
+    "t": "Estoque",
+    "h": "EST.dc.html",
+    "num": false
+   },
+   {
+    "t": "Inteligência",
+    "h": "IC.dc.html",
+    "num": false
+   }
+  ]
+ },
+ "Configurações": {
+  "h1": "Configurações",
+  "blocos": [],
+  "cartoes": [
+   {
+    "t": "Usuários e alçadas",
+    "h": "CF-01.dc.html",
+    "num": false
+   },
+   {
+    "t": "Auditoria",
+    "h": "CF-04.dc.html",
+    "num": false
+   },
+   {
+    "t": "Integrações",
+    "h": "CF-03.dc.html",
+    "num": false
+   },
+   {
+    "t": "Assinatura",
+    "h": "CF-05.dc.html",
+    "num": false
+   }
+  ]
+ },
+ "Manutenção": {
+  "h1": "Manutenção",
+  "blocos": [],
+  "cartoes": [
+   {
+    "t": "Painel",
+    "h": "PMAN.dc.html",
+    "num": false
+   },
+   {
+    "t": "Sem ordem",
+    "h": "MA.dc.html#vis=semordem",
+    "num": false
+   },
+   {
+    "t": "Ordens",
+    "h": "MA.dc.html#vis=ordens",
+    "num": false
+   },
+   {
+    "t": "Ativos",
+    "h": "MA.dc.html#vis=ativos",
+    "num": false
+   },
+   {
+    "t": "Planos",
+    "h": "MA.dc.html#vis=planos",
+    "num": false
+   }
+  ]
+ },
+ "Crédito": {
+  "h1": "Crédito",
+  "blocos": [],
+  "cartoes": [
+   {
+    "t": "Contratos",
+    "h": "GE-08.dc.html#vis=contratos",
+    "num": false
+   },
+   {
+    "t": "Liberações",
+    "h": "GE-08.dc.html#vis=liberacoes",
+    "num": false
+   },
+   {
+    "t": "Dossiê",
+    "h": "GE-08.dc.html#vis=dossie",
+    "num": false
+   }
+  ]
+ },
+ "Outros acessos": {
+  "h1": "Outros acessos",
+  "blocos": [],
+  "cartoes": [
+   {
+    "t": "App de campo",
+    "h": "MB-01.dc.html",
+    "num": false
+   },
+   {
+    "t": "Portal do parceiro",
+    "h": "PT-01.dc.html",
+    "num": false
+   },
+   {
+    "t": "Onboarding",
+    "h": "ON-01.dc.html",
+    "num": false
+   },
+   {
+    "t": "Backoffice",
+    "h": "BO-02.dc.html",
+    "num": false
+   }
+  ]
+ }
+}
