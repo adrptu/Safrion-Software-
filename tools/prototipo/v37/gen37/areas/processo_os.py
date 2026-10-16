@@ -241,7 +241,7 @@ function osReqVis(co,r){ if(!r) return r;
   return Object.assign({},r,{itens:r.itens.map(it=>{ const q=Math.min(osPendCons(co,it.prod),it.consumido||0);
     return q>1e-9?Object.assign({},it,{consumido:it.consumido-q,custodia:it.custodia+q,semSinal:q}):it; })}); }
 // área apontada no aparelho e ainda não enviada: não entra no realizado, mas conta para o máximo do apontamento pela web
-function osApPend(o){ return (o.ap||[]).filter(a=>a.sinc===false).reduce((s,a)=>s+(a.ha||0),0); }
+function osApPend(o){ return cenApPend(o); }
 function osMerge(b,co,c){ if(!co) return b;
   const x=co.osc||{}; const r=co.req?osReqVis(co,c.reqs[co.req]||null):null; const mine=(x.cond!==undefined&&x.fase===co.etapa);
   const o=Object.assign({},b,{etapa:co.etapa,ap:co.ap||[],req:co.req||null,reservado:!!co.reservado,selos:co.selos||b.selos||[],versao:co.versao||b.versao,r});
@@ -766,11 +766,11 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   kv.push(['Padrão · versão',[a.orig||'—'].concat(vp).join(' · ')]);  // sem repetir a recomendação
   v.pan_atv=kv.map(x=>({l:x[0],v:x[1]}));
   // insumos: usado = consumido pelos apontamentos (cenário); situação e trilha do almoxarifado ao app, por item da requisição
-  const consumoProj=cenInsumosOrdem(cenGet(),o);
+  const consumoProj=cenInsumosOrdem(cenGet(),o,o.r);
   v.pan_ins=(o.ins||[]).map(x=>{ const it=(o.r&&o.etapa!=='Canceladas')?(o.r.itens.find(i=>i.prod===x.p)||null):null;
     const ip=consumoProj.find(i=>i.p===x.p), usado=ip.consumido; const tr=osTrilha(o,it);
     const og=osOrigem(o,x);
-    return {p:x.p,g:(x.g||'')+(og?((x.g?' · ':'')+og):''),dose:nd(x.dose)+' '+x.un+'/ha',tot:nd(x.tot)+' '+x.un,usado:(usado!==null?nd(usado)+' '+x.un:'Sem registro'),sit:(o.etapa==='Canceladas'?osInsSit(o,x,it):((ip.temReq?osInsSit(o,x,it)+' · ':'')+cenInsumoSaldoTxt(ip))),tr,hasTr:tr.length>0}; });
+    return {p:x.p,g:(x.g||'')+(og?((x.g?' · ':'')+og):''),dose:nd(x.dose)+' '+x.un+'/ha',tot:nd(x.tot)+' '+x.un,usado:(usado!==null?nd(usado)+' '+x.un:'Sem registro'),sit:(['Liberadas','Em execução'].indexOf(o.etapa)<0?osInsSit(o,x,it):((ip.temReq?osInsSit(o,x,it)+' · ':'')+cenInsumoSaldoTxt(ip))),tr,hasTr:tr.length>0}; });
   /* 14/10 (proprietário: "faltando edição de ... recursos (pessoas e máquinas)"): recursos da alocação vigente (alocacao.py: semana do PCP + trocas
      do cenário) e troca por outro da mesma função antes da execução; quem troca é o PCP ou quem libera (AL-01). Sem o papel, "Trocar" fica
      indisponível com o motivo. Substituto ocupado, em manutenção ou bloqueado aparece com o motivo e não é escolhível (o comando recusa igual). */

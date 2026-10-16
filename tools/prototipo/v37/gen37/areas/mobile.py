@@ -180,7 +180,7 @@ function mbJan(o){ return (MBJAN[o.id] || {}).j || 'a definir'; }
 function mbMinhas(c){ return Object.values(c.ordens).filter(o => o.resp === c.app.operador && !/^Colheita/.test(String(o.tipo || ''))).sort((a, b) => mbK(a) - mbK(b) || a.id.localeCompare(b.id)); }
 function mbFila(c){ return mbMinhas(c).filter(o => o.etapa === 'Liberadas' || o.etapa === 'Em execução'); }
 function mbReq(c, o){ return (o && o.req && c.reqs[o.req]) || null; }
-function mbProv(o){ return (o.ap || []).filter(a => a.sinc === false).reduce((s, a) => s + (a.ha || 0), 0); }
+function mbProv(o){ return cenApPend(o); }
 function mbTurno(c){ const t = c.app.turno; return t && !t.fim ? t : null; }
 function mbPausado(t){ const p = t && t.pausas[t.pausas.length - 1]; return !!(p && !p.fim); }
 function mbRealTxt(o){ const p = mbProv(o); return 'Realizado ' + cenNum(o.realizado, 1) + ' de ' + cenNum(o.area, 1) + ' ha · saldo ' + cenNum(o.saldo, 1) + ' ha' + (p ? ' · +' + cenNum(p, 1) + ' ha no aparelho, aguardando sinal' : ''); }
@@ -219,15 +219,19 @@ function mbPasso(c, o){
 }
 // Insumos da ordem: a retirar, entregues a confirmar, com o operador (custódia) ou já consumidos.
 function mbIns(c, o){
-  return cenInsumosOrdem(c,o).map(x => {
-    const k=mbConf(c,o.id,x.p), lotes=x.itens.map(i=>i.lote).filter(Boolean).join(', ');
-    let st='gray', sit=x.temReq?'Com você '+(x.custodia===null?'não informado':cenNum(x.custodia)+' '+x.un):'Consumo sem registro';
-    if(k){ st='yellow'; sit='Em conferência · relatado '+cenNum(k.relatado)+' '+k.un; }
-    else if(x.confirmar){ st='yellow'; sit+=' · confirmar retirada'; }
-    else if(x.custodia>0) st='green';
-    if(x.falta>0) st='yellow';
-    return {t:x.p+(lotes?' · lote '+lotes:''), s:sit+' · '+cenInsumoSaldoTxt(x), st:mbTx(st)};
-  }); }
+  const proj=cenInsumosOrdem(c,o), r=mbReq(c,o), rows=[];
+  ((r&&r.itens)||[]).forEach(i=>{
+    const x=proj.find(x=>x.p===i.prod),k=mbConf(c,o.id,i.prod);
+    const L=i.prod+' · lote '+i.lote+(i.emb?' · '+i.emb:'');
+    let st='gray',sit='consumido '+cenNum(i.consumido)+' '+i.un;
+    if(k){st='yellow';sit='em conferência · relatado '+cenNum(k.relatado)+' '+k.un+' · com você '+cenNum(i.custodia)+' '+i.un;}
+    else if(i.custodia>0){st=i.confirmado?'green':'yellow';sit=i.confirmado?'com você '+cenNum(i.custodia)+' '+i.un:'entregue '+cenNum(i.custodia)+' '+i.un+' · a confirmar';}
+    else {const sal=cenSaldoEntregar(i);if(sal>0&&(!x||x.falta>0))sit='retirar '+cenNum(sal)+' '+i.un+' ('+mbEmb(i,sal)+')';}
+    rows.push({t:L,s:sit+(x?' · '+cenInsumoSaldoTxt(x):''),st:mbTx(st)});
+  });
+  proj.filter(x=>!x.temReq).forEach(x=>rows.push({t:x.p,s:'Consumo sem registro · '+cenInsumoSaldoTxt(x),st:mbTx('yellow')}));
+  return rows;
+}
 
 function mbCard(self, c, o){ const p = mbPasso(c, o); const ec = MB_ETAPA_COR[o.etapa] || 'gray'; const ins = mbIns(c, o);
   return { id: o.id, tipo: o.tipo, loc: o.talhao + ' · ' + cenNum(o.area, 1) + ' ha · janela ' + mbJan(o), real: mbRealTxt(o),
@@ -309,12 +313,13 @@ def qcards(lst,a='q',count=2,abrir=True):
             f'<div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;"><span style="{H(a+".e_st")}"><span style="{H(a+".e_dot")}"></span>{H(a+".e_t")}</span>'
             f'<span style="{H(a+".p_st")}"><span style="{H(a+".p_dot")}"></span>{H(a+".p_t")}</span></div>'
             f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{H(a+".real")}</div>'
-            + IF(a+'.hasIns',f'<div style="display: flex; flex-direction: column; gap: 3px; padding: 7px 10px; border-radius: 10px; background: {BG};"><sc-for list="{H(a+".ins")}" as="i" hint-placeholder-count="1">'
-                 f'<div style="font-size: 12.5px; line-height: 1.4; color: {INK};">{H("i.t")} <span style="{H("i.st")}">· {H("i.s")}</span></div></sc-for></div>')
             + f'<div style="display: flex; flex-wrap: wrap; gap: 8px;">'
             + IF(a+'.nx_isA',f'<a href="{H(a+".nx_href")}" onClick="{H(a+".sel")}" title="{H(a+".nx_tt")}" style="{_NXST} text-decoration: none;">{H(a+".nx_t")}</a>')
             + IF(a+'.nx_isB',f'<button type="button" onClick="{H(a+".nx_fn")}" title="{H(a+".nx_tt")}" style="{_NXST}">{H(a+".nx_t")}</button>')
-            + ab + '</div></div></sc-for>')
+            + ab + '</div>'
+            + IF(a+'.hasIns',f'<div style="display: flex; flex-direction: column; gap: 3px; padding: 7px 10px; border-radius: 10px; background: {BG};"><sc-for list="{H(a+".ins")}" as="i" hint-placeholder-count="1">'
+                 f'<div style="font-size: 12.5px; line-height: 1.4; color: {INK};">{H("i.t")} <span style="{H("i.st")}">· {H("i.s")}</span></div></sc-for></div>')
+            + '</div></sc-for>')
 INP=f'font-family: inherit; font-size: 16px; font-weight: 500; color: {INK}; padding: 12px 14px; border: 1px solid {LINE}; border-radius: 14px; background: {SURF}; width: 100%; box-sizing: border-box;'
 def ffield(label,fid,val,setfn,err,hint='',big=False,area=False,ph=''):
     """Campo do formulário móvel com dica e erro junto ao campo."""

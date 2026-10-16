@@ -22,11 +22,13 @@ def main():
         js=screens['MB-02det.dc.html']; a=js.index('const dProj='); b=js.index('const aps=',a)
         detail='function detail(c,o){const v={},r=mbReq(c,o);'+js[a:b]+'return v.d_ins;}\n'
         source=(ROOT/'areas/processo_os.py').read_text(); a=source.index('  const consumoProj='); b=source.index('  /* 14/10',a)
-        panel='function panel(c,o){CEN_MEM=c;const v={};o=Object.assign({},o,{r:c.reqs[o.req]});'+source[a:b]+'return v.pan_ins;}\n'
+        panel='function panel(c,o){CEN_MEM=c;const v={};o=Object.assign({},o,{r:osReqVis(o,c.reqs[o.req])});'+source[a:b]+'return v.pan_ins;}\n'
         a=source.index("  const EQ={'Adubação");b=source.index('  v.pan_fichas=',a)
         prep='function panelPrep(c,o){const rcC=c,a={op:"Pulverização"},v={};'+source[a:b]+'return v.pan_prep;}\n'
         mb=(ROOT/'areas/mobile.py').read_text(); a=mb.index('function mbIns(');b=mb.index('function mbCard',a)
-        payload=cenario.js_prefixo()+'\n'+('const OSC='+json.dumps(dict(os=F.OS,retirada='fixture'))+';\n'+F.APP_JS.replace('function EXTRAVALS(self,v)','function appVals(self,v)'))+'\n'+mb[a:b]+detail+panel+prep
+        reqvis=source[source.index('function osPendCons'):source.index('function osMerge')]
+        emb=mb[mb.index('function mbEmb'):mb.index('// Área que ainda cabe')]
+        payload=cenario.perfis_js()+cenario.js_prefixo()+'\n'+reqvis+emb+'\n'+('const OSC='+json.dumps(dict(os=F.OS,retirada='fixture'))+';\n'+F.APP_JS.replace('function EXTRAVALS(self,v)','function appVals(self,v)'))+'\n'+mb[a:b]+detail+panel+prep
         payload+='\n'+(ROOT/'ex38_test.js').read_text()
         run=subprocess.run([node],input=payload,text=True,capture_output=True)
         print(run.stdout,end='');print(run.stderr,end='',file=sys.stderr)

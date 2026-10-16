@@ -73,13 +73,13 @@ function oscPreparo(c,v){ const o=c.ordens['OS-0424'], p=cenPreparoOrdem(c,o);
   v.preparo=cenPreparoTxt(p); v.preparoOk=p.ok&&p.n>0; v.preparoBloq=!v.preparoOk;
   v.versao=o?o.versao:'Ordem indisponível';
   v.validade=o&&CEN0.ordens[o.id]&&o.versao===CEN0.ordens[o.id].versao?FICHA0424.valida:'Conferir validade da nova instrução';
-  v.totalArea=p.ok?cenNum(p.area,3)+' ha':'—'; v.totalVol=p.ok?cenNum(p.area*p.vazao,3)+' L':'—';
-  v.totalProds=p.ok?o.ins.map(x=>x.p+' '+cenNum(x.dose*p.area,3)+' '+x.un).join(' · '):'—';
+  v.totalArea=p.ok?cenNum(p.area,3)+' ha':'—'; v.totalVol=p.ok?cenNum(cenQtd(p.vazao,p.area))+' L':'—';
+  v.totalProds=p.ok?o.ins.map(x=>x.p+' '+cenNum(cenQtd(x.dose,p.area))+' '+x.un).join(' · '):'—';
   v.vazao=p.ok?cenNum(p.vazao)+' L/ha':'Não informada';
   v.hacarga=p.ok?cenNum(p.haCarga,3)+' ha':'Não calculável';
   v.conjunto=p.ok?p.conjunto:p.motivo;
   v.doses=o?(o.ins||[]).map(x=>x.p+' '+cenNum(x.dose,3)+' '+x.un+'/ha').join(' · '):'';
-  v.cargas=p.cargas.map(x=>({n:x.n,parcial:x.parcial,volt:cenNum(x.vol,3)+' L de calda',areat:cenNum(x.area,3)+' ha',
+  v.cargas=p.cargas.map(x=>({n:x.n,rotulo:x.n+(x.parcial?' · parcial':''),parcial:x.parcial,volt:cenNum(x.vol,3)+' L de calda',areat:cenNum(x.area,3)+' ha',
     prods:x.prods.map(y=>({p:y.p,q:cenNum(y.q,3)+' '+y.un})),produtos:x.prods.map(y=>y.p+' '+cenNum(y.q,3)+' '+y.un).join(' · ')}));
   v.saldoIns=o?cenInsumosOrdem(c,o).map(cenInsumoSaldoTxt).join(' · '):'';
   return p;
@@ -94,17 +94,17 @@ function EXTRAVALS(self,v){ cenOuvir(self); const c=cenGet(); const st=self.stat
   const r=c.reqs[d.os.req]; const its=r?r.itens:[]; const pend=its.filter(i=>i.custodia>0&&!i.confirmado);
   const ret=its.length>0&&its.every(i=>(i.custodia>0&&i.confirmado)||i.consumido>0);
   const semSinal=(c.movs||[]).some(m=>m.tipo==='recebimento'&&m.req===d.os.req&&m.sinc===false);
-  const fase=!ret?'ret':(feitas<N?'prep':'apl'); const cg=cargas[Math.min(feitas,N-1)]||{n:0,parcial:false,volt:'—',areat:'—',prods:[]};
+  const fase=!ret?'ret':(!v.preparoOk||feitas<N?'prep':'apl'); const cg=cargas[Math.min(feitas,N-1)]||{n:0,parcial:false,volt:'—',areat:'—',prods:[]};
   v.ret=ret; v.naoRet=!ret;
   v.ret_st=ret?'Recebido · '+its.map(i=>cenNum(i.custodia)+' '+i.un).join(' + ')+' com '+c.app.operador+(semSinal?' · aguardando sinal':' · conferido com '+d.os.almox)
     :(pend.length?'Entregue por '+d.os.almox+' · confirme o recebimento':'Reservado · retire com '+d.os.almox+' no almoxarifado');
   v.ret_cst='display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;'+(ret?'color:#1E7A4C;background:#E4F3E9;':'color:#8A5A00;background:#FFF4D6;');
-  v.cg_t='Carga '+cg.n+' de '+N+(cg.parcial?' · última, parcial':''); v.cg_par=cg.parcial; v.cg_vol=cg.volt; v.cg_area=cg.areat; v.cg_prods=cg.prods;
+  v.cg_t=N?'Carga '+cg.n+' de '+N+(cg.parcial?' · última, parcial':''):'Preparo indisponível'; v.cg_par=cg.parcial; v.cg_vol=cg.volt; v.cg_area=cg.areat; v.cg_prods=cg.prods;
   v.cg_st='display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:14px;border:'+(cg.parcial?'2px solid #8A5A00;background:#FFFFFF':'1px solid transparent;background:#F4F6F3')+';';   // SEP-20261015 (d): a carga atual dentro do cartão leva fundo, não moldura
   v.prep=fase!=='ret'; v.feitas_t=feitas+' de '+N+' cargas preparadas'; v.bar_st='display:block;height:100%;border-radius:999px;background:#1E7A4C;width:'+(N?Math.round(100*feitas/N):0)+'%;';
   v.lista=cargas.map((x,i)=>({t:'Carga '+x.n+' · '+x.volt+' · '+x.areat,s:i<feitas?'✓':'',st:'font-size:12.5px;color:'+(i<feitas?'#1E7A4C':(i===feitas&&fase==='prep'?'#15201A':'#8A968E'))+';font-weight:'+(i===feitas&&fase==='prep'?'800':'600')+';'}));
   v.prim_t=fase==='ret'?(pend.length?'Confirmar recebimento':'Retirar no almoxarifado'):(fase==='prep'?('Carga '+cg.n+' preparada'):'Registrar apontamento');
-  v.primDis=!v.preparoOk; if(v.primDis) v.prim_t='Conferir preparo na O.S.';
+  v.primDis=fase==='prep'&&!v.preparoOk; if(v.primDis) v.prim_t='Conferir preparo na O.S.';
   v.prim=()=>{ if(v.primDis){self.setState({g2toast:v.preparo});return;} if(fase==='ret'){ if(pend.length){ cenMudar(self,c=>cenConfirmarRecebimento(c,d.os.req)); return; }
       self.setState({g2toast:'Nada entregue ainda: retire com '+d.os.almox+' no almoxarifado ('+d.os.req+' · '+d.retirada+'). Quando ele entregar, confirme o recebimento aqui.'}); return; }
     if(fase==='prep'){ self.setState({preparoChave:chave,feitas:feitas+1,g2toast:'Carga '+cg.n+' preparada ('+cg.volt+'). Marcada nesta tela; ainda não é aplicação.'}); return; }
@@ -141,7 +141,7 @@ def app():
             f'<div role="status" style="display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: {ACCS}; color: {ACC}; font-size: 12px; font-weight: 700;">● Disponível sem internet · {H("versao")}</div></header>'
             f'<main style="flex-grow: 1; min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px;">{ret}{prep}{opr}'
             f'<a href="OS-0424-ficha.dc.html" style="{_MINI} text-decoration: none; text-align: center;">Abrir ficha para imprimir</a></main>'
-            f'<div style="padding: 12px 16px 26px; background: {SURF}; box-shadow: 0 -6px 12px -10px rgba(21,32,26,.25);"><button type="button" onClick="{H("prim")}" disabled="{H("primDis")}" style="display: block; width: 100%; padding: 17px; border: 0; border-radius: 16px; background: {ACC}; color: #fff; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer;">{H("prim_t")}</button></div></div>')
+            f'<div style="padding: 12px 16px 26px; background: {SURF}; box-shadow: 0 -6px 12px -10px rgba(21,32,26,.25);"><button type="button" onClick="{H("prim")}" aria-disabled="{H("primDis")}" style="display: block; width: 100%; padding: 17px; border: 0; border-radius: 16px; background: {ACC}; color: #fff; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer;">{H("prim_t")}</button></div></div>')
     HEIGHTS37[fname] = 1030
     return _page(fname, "OS-0424 · ficha de campo", 390, 1030, body, movel=True)
 
@@ -168,11 +168,11 @@ def ficha():
     th = f'text-align: left; font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase; color: {MUTED}; padding: 6px 8px; border-bottom: 1.5px solid {INK};'
     td = f'padding: 9px 8px; border-bottom: 1px solid {LINE}; font-size: 13.5px;'
     box = '<span style="display: inline-block; width: 16px; height: 16px; border: 1.5px solid #15201A; border-radius: 3px;"></span>'
-    rowst='display:grid;grid-template-columns:44px 96px 78px minmax(0,1fr) 40px 50px;'
-    rows = (f'<sc-for list="{H("cargas")}" as="c"><div role="row" style="{rowst}"><div role="cell" style="{td}">{H("c.n")}</div><div role="cell" style="{td}">{H("c.volt")}</div>'
+    rowst='display:grid;grid-template-columns:82px 110px 70px minmax(0,1fr) 40px 44px;'
+    rows = (f'<sc-for list="{H("cargas")}" as="c"><div role="row" style="{rowst}"><div role="cell" style="{td}">{H("c.rotulo")}</div><div role="cell" style="{td}">{H("c.volt")}</div>'
             f'<div role="cell" style="{td}">{H("c.areat")}</div><div role="cell" style="{td}">{H("c.produtos")}</div><div role="cell" style="{td}">{box}</div><div role="cell" style="{td}"></div></div></sc-for>')
     headers=''.join(f'<div role="columnheader" style="{th}">{t}</div>' for t in ['Carga','Calda','Área','Produtos · dose: '+H('doses'),'Feito','Hora'])
-    totals=''.join(f'<div role="cell" style="{td}">{t}</div>' for t in ['Total',H('totalVol'),H('totalArea'),H('totalProds'),'',''])
+    totals=''.join(f'<div role="cell" style="{td}">{t}</div>' for t in ['Saldo',H('totalVol'),H('totalArea'),H('totalProds'),'',''])
     kv = lambda l, v: f'<div><div style="font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase; color: {MUTED};">{l}</div><div style="font-size: 15px; font-weight: 800;">{v}</div></div>'
     linha = lambda l: f'<div style="display: flex; gap: 8px; align-items: flex-end; font-size: 13px;"><span style="white-space: nowrap;">{l}</span><span style="flex-grow: 1; border-bottom: 1px solid #15201A; height: 18px;"></span></div>'
     sec = lambda t: f'<div style="font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; margin-top: 14px;">{t}</div>'
@@ -181,13 +181,14 @@ def ficha():
             f'<header class="g2-cab" style="display: flex; gap: 18px; align-items: flex-start;"><div style="flex-grow: 1;">'
             f'<div style="font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: {MUTED};">Ficha de preparo e aplicação · uso sem internet</div>'
             f'<h1 style="margin: 4px 0 2px; font-family: {DISP}; font-size: 24px;">{OS["id"]} · {OS["ativ"]} · {OS["local"]}</h1>'
-            f'<div style="font-size: 13px;">{nf(OS["area"])} ha · janela {OS["janela"]} · responsável {OS["resp"]}</div>'
+            f'<div style="font-size: 13px;">{nf(OS["area"])} ha na ordem · preparo abaixo somente do saldo · janela {OS["janela"]} · responsável {OS["resp"]}</div>'
             f'<div style="font-size: 13px; margin-top: 4px;"><b>Versão:</b> {H("versao")} · <b>Válida até:</b> {H("validade")}</div></div>'
             f'<div style="text-align: center; font-size: 10.5px; color: {MUTED}; width: 120px;">{_qr()}<div>Confira a versão na O.S. antes de preparar</div></div></header>'
             + sec('Retirada no almoxarifado')
             + f'<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">' + ''.join(kv('Produto', x['p']) + kv('Quantidade', f"{nf(x['reserv'])} {x['un']} · {nf(math.ceil(x['reserv']/5))} × {x['emb']}") + kv('Lote · validade', f"{x['lote']} · {x['val']}") + kv('Requisição', OS['req']) for x in PRODS) + '</div>'
             + f'<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 4px;">{linha("Entregue por (almoxarife)")}{linha("Recebido por (caldeiro)")}</div>'
-            + sec('Caldeiro · preparo por carga')
+            + sec('Caldeiro · preparo por carga do saldo')
+            + '<div style="font-size:12.5px;">Coloque o produto indicado e complete com água até o volume da carga, na ordem da instrução liberada. A última carga é proporcional à área que falta.</div>'
             + f'<div role="status" style="font-size: 12.5px;">{H("preparo")}</div><div>{H("saldoIns")}</div>'
             + f'<div role="table" aria-label="Cargas de preparo"><div role="row" style="{rowst}">{headers}</div><div role="rowgroup">{rows}</div><div role="row" style="{rowst}">{totals}</div></div>'
             + sec('Operador · aplicação')
