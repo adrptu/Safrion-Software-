@@ -9,9 +9,11 @@ t=T(); J=t.J
 try:
     t.goto('CD-07.dc.html'); body=J("document.body.innerText")
     def pv(txt,k): t.openrow(0,txt); v=t.fv(k) or ''; t.cancel(); return v   # campo do painel do código (origem e vínculos, revisão TABR)
-    t.chk('cabeçalho com versão em vigor, rascunho e pendência; primária "Cadastrar código"; secundárias Importar e Publicar',
-          'v5 em vigor · rascunho v6 com 3 alterações · 1 tradução pendente' in t.header() and 'Cadastrar código' in t.bloco()
-          and 'Importar do ERP' in body and 'Publicar estrutura' in body and 'Publicar estrutura v6' not in body and not t.errs(), t.header())
+    # 16/10/2026 (padrão comum): "Criar código" no cabeçalho (BOT-01/03); "Publicar versão v6" (o verbo da BOT-03, antes "Publicar estrutura"
+    # na faixa de atenção) no cabeçalho como secundária, só com rascunho; Importar do ERP é ferramenta da barra da grade
+    t.chk('cabeçalho com versão em vigor, rascunho e pendência; primária "Criar código"; secundárias Importar (na barra) e "Publicar versão v6" (no cabeçalho)',
+          'v5 em vigor · rascunho v6 com 3 alterações · 1 tradução pendente' in t.header() and 'Criar código' in t.header()
+          and 'Importar do ERP' in body and 'Publicar versão v6' in t.header() and not t.errs(), t.header())
     t.chk('Cultura vem do CD-02 (5 culturas, com milho) e Processo é etapa (TRAT), sem PULV nem CR-SOJA',
           # TABELAS-FOCO (06/10/2026); revisão TABR (09/10/2026, A1): a origem e os vínculos ficam no painel do código
           'Cultura 5 códigos' in (t.anyrow(0,'Cultura 5') or '') and pv('MILHO','origT')=='Culturas e cultivares' and 'operações Pulverização' in pv('TRAT','vincT')
@@ -36,7 +38,7 @@ try:
     t.fset('sup','9.9'); t.btn('Salvar')
     t.chk('código superior inexistente é barrado junto ao campo', 'Não existe o código 9.9 em Natureza.' in t.alerts(), t.alerts())
     t.cancel()
-    t.clk('Cadastrar código'); ops=t.fopts('dim'); t.fset('dim','Centro de responsabilidade'); L=t.labels()
+    t.clk('Criar código'); ops=t.fopts('dim'); t.fset('dim','Centro de responsabilidade'); L=t.labels()
     for k,v in [('cod','CC-MAQ'),('nome','Máquinas · apoio'),('rat','Horas de máquina'),('ini','2026-10-01'),('conta','centro 313')]: t.fset(k,v)
     t.btn('Salvar'); time.sleep(.2)
     t.chk('novo centro: dimensão sem Cultura/Processo, pede o rateio e entra no rascunho',
@@ -52,11 +54,11 @@ try:
           [t.header(),t.toast()])
     t.clk('Importar do ERP')
     t.chk('segunda importação não repete as mudanças', 'não tem mudanças novas' in t.toast(), t.toast())
-    t.aviso('Publicar estrutura'); time.sleep(.2); ts=t.toast()
+    t.clk('Publicar versão'); time.sleep(.2); ts=t.toast()
     t.chk('publicar: v6 em vigor, v5 preservada, código sem conta fica fora',
           'estrutura v6 publicada' in ts and 'v5 preservada' in ts and 'PRJ-PIVO3' in ts and 'v6 em vigor · 1 tradução pendente' in t.header() and 'rascunho' not in t.header(), [ts,t.header()])
-    sem=J("![...document.querySelectorAll('main button')].some(b=>b.innerText.indexOf('Publicar estrutura')>=0)")
-    t.chk('sem alterações no rascunho não aparece "Publicar estrutura"; sem erros de JS', sem and not t.errs(), [sem,t.errs()])
+    sem=J("![...document.querySelectorAll('header button,main button')].some(b=>b.innerText.indexOf('Publicar')>=0)")
+    t.chk('sem alterações no rascunho não aparece "Publicar versão"; sem erros de JS', sem and not t.errs(), [sem,t.errs()])
     t.shot('cadc_cd07.png')
 finally:
     t.fim()

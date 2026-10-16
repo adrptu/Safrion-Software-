@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """Teste CDP do CD-01 (Fazendas, áreas e talhões): cadastrar fazenda nova com validação, cadastrar talhão na nova fazenda,
 "Cadastrar fazenda…" a partir do talhão sem perder o preenchido, subtotal por fazenda, inativar e abrir o detalhe de outro talhão.
+16/10/2026 (proprietário: "fazendas e talhoes na mesma tela, conectados e intuitivos"; padrão comum dos cadastros): uma árvore só, com a
+fazenda na linha-pai (abre o painel dela); "Criar fazenda" no cabeçalho (BOT-01/03); o talhão se inclui de dentro da fazenda ("Incluir
+talhão"); a fazenda só com o essencial (fuso calculado da UF; CAR, matrícula e arrendamento no Crédito). Oráculos ajustados a isso.
 Uso: python3 cadf_test.py  (serve _render/; ≤ 15 verificações; cada passo espera ≤ 0,5 s)."""
 import sys, os, time, subprocess, json
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
@@ -16,6 +19,8 @@ def ROW(ti,txt): return f"[...document.querySelectorAll('[role=table]')[{ti}].qu
 def openrow(ti,txt): J(f"(()=>{{const r={ROW(ti,txt)}; (r.querySelector('[role=cell] span')||r).click();}})()"); time.sleep(.35)
 # revisão TABR (09/10/2026, A1): a Situação vem logo depois do talhão ("T1 Em dia Sequeiro …"); a linha é achada pelo código na 1ª célula
 def openrow1(ti,cod): J(f"""(()=>{{const r=[...document.querySelectorAll('[role=table]')[{ti}].querySelectorAll('[role=row]')].find(r=>{{const c=r.querySelector('[role=cell]'); return c&&c.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim()==={json.dumps(cod)};}}); (r.querySelector('[role=cell] span')||r).click();}})()"""); time.sleep(.35)
+# linha da fazenda (linha-pai da árvore, 16/10/2026): o 1º span da célula é o ▾ da seta; o clique vai no texto (.g2pw) e abre o painel da fazenda
+def openpai(ti,txt): J(f"(()=>{{const r={ROW(ti,txt)}; (r.querySelector('.g2pw')||r).click();}})()"); time.sleep(.35)
 def rowtxt(ti,txt): return J(f"(()=>{{const r={ROW(ti,txt)}; return r?r.innerText.replace(/\\s+/g,' '):null;}})()")
 def fv(k): return J(f"(()=>{{const i=document.querySelector('aside[role=dialog] [id$=\"_{k}\"]'); return i?i.value:null;}})()")
 def fset(k,val): J(f"({SETV})('aside[role=dialog] [id$=\"_{k}\"]',{json.dumps(val)})"); time.sleep(.2)
@@ -33,45 +38,46 @@ def chk(nome,cond,extra=''):
     ok.append(bool(cond)); print(('OK  ' if cond else 'FALHOU ')+nome+(' · '+str(extra)[:300] if extra else ''))
 try:
     c.size(1440,1100); c.goto(f'http://127.0.0.1:{p}/CD-01.dc.html',wait=1.2)
-    sr=rowtxt(0,'Santa Rita 8 talhões'); bv=rowtxt(0,'Boa Vista 1 talhão')
+    sr=rowtxt(0,'Santa Rita Santa Rita Agro'); bv=rowtxt(0,'Boa Vista Boa Vista Ltda')
     chk('1 CD-01 sem erro, subtotal por fazenda e nenhum total somando fazendas',
         erro_js()=='' and '1.165,0 ha' in (sr or '') and '120,0 ha' in (bv or '') and J("document.querySelectorAll('.g2tot').length")==0, [erro_js(),sr,bv])
     # ---------- cadastrar fazenda nova com validação ----------
-    aba('Fazendas'); J(f"({CLK})('Cadastrar fazenda','main button')"); time.sleep(.35); save()
+    J(f"({CLK})('Criar fazenda','header button')"); time.sleep(.35); save()
     al=alerts(); chk('2 fazenda vazia: erros junto aos campos', 'Informe nome da fazenda.' in al and 'Informe município.' in al and 'Informe área total do imóvel.' in al, al)
     fset('nome','Nova Esperança'); fset('mun','Lucas do Rio Verde'); fset('uf','MT')
-    chk('3 fuso sugerido pela UF (MT → Cuiabá)', fv('fuso')=='América/Cuiabá (UTC−4)', fv('fuso'))
+    chk('3 o fuso não é campo (calculado da UF ao salvar, 16/10)', 'Fuso horário' not in labels(), labels())
     fset('area','600'); fset('posse','Arrendada'); L=labels(); save(); al=alerts()
-    chk('4 arrendada pede arrendador, fim do contrato e custo da terra', all(x in L for x in ['Arrendador ou parceiro','Fim do contrato','Custo da terra'])
-        and 'Informe o arrendador ou parceiro.' in al and 'Informe o fim do contrato.' in al and fv('nome')=='Nova Esperança', [L,al])
-    fset('arrend','José Prado'); fset('fim','2030-06-30'); fset('custo','9'); save()
-    cnv=cardtxt('Nova Esperança'); aba('Talhões')
-    chk('5 fazenda salva: cartão novo e grupo vazio com "Cadastrar talhão"', not aberto() and 'Nova Esperança' in (cnv or '')
-        and 'Cadastrar talhão' in (rowtxt(0,'Nova Esperança') or ''), [toast(),cnv,rowtxt(0,'Nova Esperança')])
+    # 16/10/2026: arrendador e custo da terra saíram (nenhuma tela lia; o contrato de arrendamento é documento para crédito, no Crédito)
+    chk('4 arrendada pede o fim do contrato (sem arrendador nem custo da terra)', 'Fim do contrato' in L and 'Arrendador ou parceiro' not in L and 'Custo da terra' not in L
+        and 'Informe o fim do contrato.' in al and fv('nome')=='Nova Esperança', [L,al])
+    fset('fim','2030-06-30'); save()
+    fuso=J("(()=>{try{const s=JSON.parse(localStorage.getItem('talhao-os-cd01-v1')); const f=s.faz.find(x=>x.v.nome==='Nova Esperança'); return f?f.v.fuso:null;}catch(e){return 'erro';}})()")
+    chk('5 fazenda salva: linha-pai nova com "Incluir talhão" e o fuso calculado da UF (MT → Cuiabá)', not aberto() and 'Incluir talhão' in (rowtxt(0,'Nova Esperança') or '')
+        and fuso=='América/Cuiabá (UTC−4)', [toast(),rowtxt(0,'Nova Esperança'),fuso])
     # ---------- cadastrar talhão na nova fazenda ----------
-    J(f"({CLK})('Cadastrar talhão','[role=row] button')"); time.sleep(.35)
+    J(f"({CLK})('Incluir talhão','[role=row] button')"); time.sleep(.35)
     chk('6 talhão nasce na fazenda do grupo', fv('faz')=='Nova Esperança', fv('faz'))
     fset('t','N1'); fset('sis','Pivô central'); fset('setor','Bomba do Pivô 1'); fset('decl','700'); save(); al=alerts()
     chk('7 regras do talhão: pivô já usado e área acima da fazenda', 'Bomba do Pivô 1 já irriga o P1' in al and 'somariam 700 ha; a fazenda tem 600 ha' in al, al)
     fset('sis','Sequeiro'); fset('decl','250'); save()
-    ne=rowtxt(0,'Nova Esperança 1 talhão')
-    chk('8 talhão salvo na nova fazenda com subtotal próprio (Santa Rita não muda)', not aberto() and '250,0 ha' in (ne or '') and '1.165,0 ha' in (rowtxt(0,'Santa Rita 8 talhões') or ''), [ne,toast()])
-    # ---------- "Cadastrar fazenda…" a partir do talhão, sem perder o preenchido ----------
-    J(f"({CLK})('Cadastrar talhão','main button')"); time.sleep(.35); fset('t','X9'); fset('decl','50'); fset('faz','Cadastrar fazenda…'); time.sleep(.2)
+    ne=rowtxt(0,'Nova Esperança')
+    chk('8 talhão salvo na nova fazenda com subtotal próprio (Santa Rita não muda)', not aberto() and '250,0 ha' in (ne or '') and '1.165,0 ha' in (rowtxt(0,'Santa Rita Santa Rita Agro') or ''), [ne,toast()])
+    # ---------- "Cadastrar fazenda…" a partir do talhão, sem perder o preenchido (o talhão se inclui de dentro da fazenda) ----------
+    openpai(0,'Santa Rita Santa Rita Agro'); J(f"({BTN})('Incluir talhão')"); time.sleep(.35); fset('t','X9'); fset('decl','50'); fset('faz','Cadastrar fazenda…'); time.sleep(.2)
     sub=J("document.querySelector('aside[role=dialog]').innerText")
     fset('nome','Serra Azul'); fset('mun','Jataí'); fset('area','100'); save()
     chk('9 volta ao talhão com a fazenda nova escolhida e o preenchido mantido', 'Ao salvar, você volta ao talhão X9' in sub and fv('t')=='X9' and fv('decl')=='50' and fv('faz')=='Serra Azul', [fv('t'),fv('decl'),fv('faz')])
-    save(); chk('10 talhão X9 salvo na Serra Azul', '50,0 ha' in (rowtxt(0,'Serra Azul 1 talhão') or ''), rowtxt(0,'Serra Azul'))
+    save(); chk('10 talhão X9 salvo na Serra Azul', '50,0 ha' in (rowtxt(0,'Serra Azul') or ''), rowtxt(0,'Serra Azul'))
     # ---------- inativar sem excluir ----------
     openrow1(0,'T1'); fset('sit','Inativo'); save(); al=alerts()
     chk('11 T1 com parcelas na safra não inativa', 'T1 tem parcelas na Safra 2026/27 e na Safrinha 2027' in al, al)
     J(f"({BTN})('Cancelar')"); time.sleep(.2); J(f"({BTN})('Descartar alterações')"); time.sleep(.2)
     openrow1(0,'B1'); fset('sit','Inativo'); save()
     b1=rowtxt(0,'B1'); bv=rowtxt(0,'Boa Vista')
-    chk('12 B1 inativo: continua na lista com chip e sai do subtotal', not aberto() and 'Inativo' in (b1 or '') and '0,0 ha' in (bv or '') and 'sem talhão ativo' in (bv or ''), [b1,bv])
-    aba('Fazendas'); opencard('Boa Vista'); fset('sit','Inativa'); save()
-    chk('13 fazenda sem talhão ativo inativa sem excluir', not aberto() and 'Inativa' in (cardtxt('Boa Vista') or ''), cardtxt('Boa Vista'))
-    aba('Talhões')
+    # a Situação fica oculta por padrão (VISOES-2: vira ícone só quando pede atenção); o B1 inativo segue na lista com a área apagada
+    chk('12 B1 inativo: continua na lista e sai do subtotal (0 talhão ativo na Boa Vista)', not aberto() and '120,0 ha' in (b1 or '') and ' 0,0 ha 0 ' in ' '+(bv or '')+' ', [b1,bv])
+    openpai(0,'Boa Vista Boa Vista Ltda'); fset('sit','Inativa'); save()
+    chk('13 fazenda sem talhão ativo inativa sem excluir (chip "Inativa" na linha da fazenda)', not aberto() and 'Boa Vista Inativa' in (rowtxt(0,'Boa Vista Ltda') or ''), rowtxt(0,'Boa Vista Ltda'))
     # ---------- abrir o detalhe de outro talhão ----------
     openrow1(0,'T2'); J(f"({BTN})('Abrir talhão ›')"); time.sleep(2.2)
     for _ in range(8):

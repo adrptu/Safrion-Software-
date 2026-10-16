@@ -7,29 +7,32 @@ import time, json
 t=T(); J=t.J
 MULTI="""((t)=>{const l=[...document.querySelectorAll('aside[role=dialog] label')].find(x=>x.innerText.trim()===t); if(!l) return false; l.querySelector('input').click(); return true;})"""
 def marca(txt): r=J(f"({MULTI})({json.dumps(txt)})"); time.sleep(.2); return r
-def conta(): return J("(document.body.innerText.match(/(\\d+) de 15/)||[])[1]||''")
+# TAB-02 (16/10/2026, padrão comum): com filtro rápido a barra não mostra "x de 15"; conta as linhas de máquina à vista na tabela
+def conta(): return str(J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row]')].filter(r=>r.querySelector('[role=cell]')).length"))
 try:
     t.goto('CD-03.dc.html')
-    t.chk('cabeçalho: estado calculado "1 máquina bloqueada · 2 calibrações a resolver" (condição única, PCM S3) e primária "Cadastrar máquina ou instalação"',
-          '1 máquina bloqueada · 2 calibrações a resolver' in t.header() and 'Cadastrar máquina ou instalação' in t.bloco() and not t.errs(), t.header()+' '+t.errs())
+    t.chk('cabeçalho: estado calculado "1 máquina bloqueada · 2 calibrações a resolver" (condição única, PCM S3) e primária "Criar máquina ou instalação" no cabeçalho (BOT-01/03, 16/10)',
+          '1 máquina bloqueada · 2 calibrações a resolver' in t.header() and 'Criar máquina ou instalação' in t.header() and not t.errs(), t.header()+' '+t.errs())
     r=t.rowtxt(0,'Trator T1') or ''; href=J(f"(()=>{{const r={t.ROW(0,'Trator T1')}; const a=r&&[...r.querySelectorAll('a')].find(a=>a.innerText.indexOf('Ver ordens afetadas')>=0); return a?a.getAttribute('href'):null;}})()")
-    fx=J("(document.querySelector('.cadx-faixa')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
-    t.chk('Trator T1: linha "Bloqueado" (condição única da Manutenção) com "Ver ordens afetadas" → OS.dc.html; faixa de atenção com "OM-0233 · retorno previsto 24/09"',
+    # 16/10/2026 (padrão comum, TAB-06): sem faixa de atenção; o motivo e o retorno previsto ficam na dica do selo da linha
+    fx=J(f"(()=>{{const r={t.ROW(0,'Trator T1')}; const c=r&&[...r.querySelectorAll('[data-dica]')].find(x=>x.innerText.indexOf('Bloqueado')>=0); return c?c.getAttribute('data-dica'):'';}})()") or ''
+    t.chk('Trator T1: linha "Bloqueado" (condição única da Manutenção) com "Ver ordens afetadas" → OS.dc.html; o selo diz "OM-0233 · … retorno previsto 24/09" na dica',
           'Bloqueado' in r and 'OM-0233' in fx and 'retorno previsto 24/09' in fx and href=='OS.dc.html', [r,fx,href])
     t.clk('A resolver'); time.sleep(.2); n1=conta(); vis=[x for x in ('Trator T1','Máquina TSI','Bomba do Pivô 2','Trator 02') if t.rowtxt(0,x)]
     t.clk('Limpar filtros'); n2=conta()
     t.chk('filtro rápido "A resolver" (no bloco) filtra as exceções (T1, TSI vencida, bomba a aferir) e "Limpar filtros" volta às 15',
           n1=='3' and vis==['Trator T1','Máquina TSI','Bomba do Pivô 2'] and n2=='15', [n1,vis,n2])
     t.openrow(0,'Trator T1'); L=t.labels(); orig=J("[...document.querySelectorAll('aside[role=dialog] a')].map(a=>a.innerText.trim()+'|'+a.getAttribute('href'))")
-    t.chk('formulário do T1: condição técnica e responsável técnico (Zé) só leitura, vindos da Manutenção (OM-0233), classe fixa, origem "Ver ordens afetadas" e sem "Valor do ativo"',
-          t.fdis('cond_t') and 'Bloqueado · OM-0233' in (t.fv('cond_t') or '') and t.fdis('rt') and t.fv('rt')=='Zé' and t.fdis('classe') and 'Valor do ativo' not in L
+    # 16/10/2026 (formulário só com o essencial): "Responsável técnico" (só leitura, da Manutenção) saiu do cadastro; segue na Manutenção
+    t.chk('formulário do T1: condição técnica só leitura, vinda da Manutenção (OM-0233), classe fixa, origem "Ver ordens afetadas", sem "Valor do ativo" e sem "Responsável técnico"',
+          t.fdis('cond_t') and 'Bloqueado · OM-0233' in (t.fv('cond_t') or '') and 'Responsável técnico' not in L and t.fdis('classe') and 'Valor do ativo' not in L
           and any(o.startswith('Ver ordens afetadas · OS-0420 e OS-0431') and o.endswith('|OS.dc.html') for o in orig), [t.fv('cond_t'),L,orig])
     t.cancel()
     t.openrow(0,'Trator 02'); hv=t.fv('cont_tr'); hd=t.fdis('cont_tr')
     t.chk('leitura do horímetro só leitura no CD-03, lida da Manutenção (2988 h); a decisão de leitura e troca de contador é lá (PCM S3, AC-PCM-15)', hd and hv in ('2988','2.988'), [hv,hd])
     t.cancel()
     # cadastro novo: classe primeiro, capacidade condicional
-    t.clk('Cadastrar máquina ou instalação'); L0=t.labels()
+    t.clk('Criar máquina ou instalação'); L0=t.labels()
     t.chk('novo cadastro: a classe é o primeiro campo e Trator abre só a potência',
           L0[0]=='Classe' and 'Potência' in L0 and 'Largura da barra' not in L0 and 'Linhas' not in L0 and 'Custo R$/h da máquina' in L0, L0)
     t.fset('classe','Plantadeira'); t.fset('linhas_pl','20'); t.fset('esp_pl','0,45'); lv=t.fv('larg_pl')
@@ -51,12 +54,14 @@ try:
     t.aba('Conjuntos'); k2=t.card('Trator T1 + Plantadeira 24 linhas') or ''
     t.chk('conjunto do T1 fica Indisponível pela manutenção e sugere o substituto Trator 02 (190 cv)',
           'Indisponível' in k2 and 'Trator T1 bloqueado' in k2 and 'substituto: Trator 02 (190 cv)' in k2 and 'Carlos' in k2, k2)
-    t.clk('Montar conjunto'); t.fset('maq','Trator 03'); t.fset('impl','Plantadeira 24 linhas'); marca('Plantio'); pc=t.fv('pot_c'); t.btn('Salvar'); a=t.alerts()
-    t.chk('Montar conjunto: Trator 03 (110 cv) com a plantadeira (exige 140 cv) dá erro no campo da máquina',
+    t.clk('Criar conjunto'); t.fset('maq','Trator 03'); t.fset('impl','Plantadeira 24 linhas'); marca('Plantio'); pc=t.fv('pot_c'); t.btn('Salvar'); a=t.alerts()
+    t.chk('Criar conjunto (BOT-03, antes "Montar conjunto"): Trator 03 (110 cv) com a plantadeira (exige 140 cv) dá erro no campo da máquina',
           'Trator 03 tem 110 cv; Plantadeira 24 linhas exige 140 cv' in a and 'abaixo dos 140 cv' in (pc or ''), [a,pc])
     t.fset('maq','Trator 02'); t.btn('Salvar'); time.sleep(.2); r=t.card('Trator 02 + Plantadeira 24 linhas') or ''
-    t.chk('com o Trator 02 o conjunto é montado: largura 12 m herdada, Disponível, Carlos alocável e sem rendimento',
-          not t.isopen() and '12 m' in r and 'Disponível' in r and 'Carlos' in r and 'sem rendimento' in r.lower() and 'Conjunto montado' in t.toast(), [r,t.toast(),t.alerts()])
+    # 16/10/2026: o conjunto é linha da grade do motor; a Situação tem um estado (Sem rendimento, com o próximo passo), e não mais "Disponível" no
+    # rodapé do cartão ao lado do selo
+    t.chk('com o Trator 02 o conjunto é montado: largura 12 m herdada, máquinas disponíveis, Carlos alocável e sem rendimento',
+          not t.isopen() and '12 m' in r and 'Indisponível' not in r and 'Carlos' in r and 'sem rendimento' in r.lower() and 'Conjunto montado' in t.toast(), [r,t.toast(),t.alerts()])
     t.shot('cada_cd03.png')
     t.chk('nenhum erro de JS na jornada', not t.errs(), t.errs())
 finally:

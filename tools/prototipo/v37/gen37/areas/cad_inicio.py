@@ -18,8 +18,9 @@ H = lambda s: '{{' + s + '}}'
 # (código, nome, ícone, para que serve, o que tem dentro, termos de busca)
 GRUPOS = [
     ('Propriedade e produção', [
-        ('CD-01', 'Fazendas, áreas e talhões', 'map', 'Onde a fazenda produz: talhões com área e mapa, documentos da fazenda, áreas ambientais e outorgas de água.',
-         'Talhões · Fazendas · Ambiental · Água', 'fazenda área talhão parcela gleba mapa geometria matrícula car ambiental reserva app água outorga poço'),
+        # 16/10/2026: fazendas e talhões numa lista só; os documentos para crédito (CAR, matrícula) foram para o Crédito
+        ('CD-01', 'Fazendas, áreas e talhões', 'map', 'Onde a fazenda produz: fazendas e talhões com área e mapa, áreas ambientais e outorgas de água.',
+         'Fazendas e talhões · Ambiental · Água', 'fazenda área talhão parcela gleba mapa geometria posse ambiental reserva app água outorga poço'),
         ('CD-02', 'Culturas e cultivares', 'leaf', 'O que se planta: culturas e cultivares, com ciclo, unidade de produtividade e semente.',
          'Culturas · Cultivares', 'cultura cultivar variedade híbrido soja milho café mamão feijão ciclo semente produtividade'),
         # 13/10/2026 (proprietário): Operações saiu de Culturas e cultivares para o lugar próprio, ao lado (como fazem os sistemas do setor)

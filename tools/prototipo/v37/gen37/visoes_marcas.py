@@ -18,7 +18,7 @@ import re
 # com 6 e 8 colunas): a pedido-1410 manda tirar essas opções (ESPEC §5, V2-3). Desde 15/10/2026 a AG-07 traz as
 # próprias marcas (ess e pq em areas/agronomia.py, AGF_COLS_P e AGF_COLS_U: Tox · amb fica no painel "Colunas").
 ABRE = """
-CD-01 g_tal ; Fazenda › talhão ; Área cultivável ; Diferença ; Parcelas na safra 2026/27
+CD-01 g_tal ; Fazenda › talhão ; Área total ; Área cultivável ; Talhões ; Diferença ; Parcelas na safra 2026/27
 CD-01 g_agua ; Ponto de água ; Vencimento ; Vazão ; Uso
 CD-01det g_parc ; Safra › parcela ; Cultura ; Área ; Plantio
 CD-02 g_cv ; Cultura › cultivar ; Ciclo ; Cultivos

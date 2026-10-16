@@ -91,7 +91,7 @@ try:
     J(f"({BTN})('Cancelar')"); time.sleep(.2); J(f"({BTN})('Descartar alterações')"); time.sleep(.2)
     # novo parceiro pessoa física: 12 dígitos barra, 11 dígitos salva, CPF repetido barra
     FIL('Todos')
-    J("[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Cadastrar parceiro').click()"); time.sleep(.4)
+    J("[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Criar parceiro').click()"); time.sleep(.4)
     J(f"({SETV})('#{FID('nome')}','Joana Prado')"); J(f"({SETV})('#{FID('cnpj')}','987.654.321-001')"); time.sleep(.2)
     J(f"{CAN('Prestador')}.click()"); time.sleep(.2); J(f"({BTN})('Salvar')"); time.sleep(.4)
     al=AL(); chk('12 dígitos barrado', 'Informe CPF (11 dígitos) ou CNPJ (14 dígitos).' in al, al)
