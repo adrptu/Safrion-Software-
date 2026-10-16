@@ -97,8 +97,24 @@ A tabela própria das Atividades do plano usa a mesma peça; não há cópia de 
 
 **CAD-03:** Fazendas e talhões numa lista só, em árvore: a fazenda com os talhões dentro.
 
-## Mapa (frente MAPA-9)
+## Mapa (frente MAPA-9, juntada em f27811b)
 
-> "no mapa em analise de solo, coloque icone para importar novo laudo"
+> "no mapa em analise de solo, coloque icone para importar novo laudo. (no topo do mapa, a direita na parte branca onde ja ficam demais botoes acima do mapa)"; "a barra de icones do mapa por estar do lado da barra lateral de icones dos modulos, nao fica legal, melhore esses icones do mapa de lugar"
 
-**MAP-02:** com a camada Análises de solo, o ícone "Importar laudo" fica na faixa branca acima do mapa, à direita, junto dos outros botões.
+**MAP-02 · Importar laudo no mapa:**
+- Com a função Solo, o ícone "Importar laudo de análise de solo" é o último das ferramentas no topo do mapa, à direita.
+- Tem 32 px no mouse e 44 px no toque, com dica e `aria-label`.
+- Abre o mesmo "Registrar laudo" do AG-02, com a fazenda e o talhão do mapa já escolhidos (`#registrar=<fazenda>`).
+
+**MAP-03 · Funções do mapa numa barra horizontal com nome (VISOES-ROT):**
+- As 9 funções (DEC-1610-09) ficam no alto do bloco do mapa, com ícone e nome; a coluna ao lado do menu de módulos saiu.
+- Usa o seletor de visões da DS na variante com nome (`engine.VISOES_CSS`), em abas com `aria-selected`.
+- A 390 px a barra rola dentro dela, com a função ativa à vista.
+- O bloco do mapa ocupa a altura que sobra da janela: a fazenda inteira cabe em 1440 × 900.
+- Inventário: o IN-04 era a única tela com coluna de ícones ao lado do menu.
+
+**Teste:** `mapa9_test.py` (13/13; a base reprova 8 e para no ícone que não existe).
+
+**Dano evitado:**
+- duas colunas de ícones lado a lado, que se confundem;
+- importar laudo exigir sair do mapa e achar o talhão de novo.
