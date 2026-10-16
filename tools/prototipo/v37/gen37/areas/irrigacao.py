@@ -74,7 +74,7 @@ def painel(pre,corpo,rodape,w=480):
             f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{H(pre+"_sub")}</div>{corpo}<div style="flex-grow: 1;"></div>'
             f'<sc-if value="{H(pre+"_warn")}" hint-placeholder-val="{F()}"><div role="alert" class="saida" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.'
             f'<div style="display: flex; gap: 8px;"><button type="button" onClick="{H(pre+"_discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{H(pre+"_keep")}" style="{_MINIP}">Continuar editando</button></div></div></sc-if>'
-            f'<div class="pe-form" style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">{rodape}</div></aside></div></sc-if>')
+            f'<div class="pe-form" style="display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};">{rodape}</div></aside></div></sc-if>')
 def campo(lbl,fid,inner,err_pre):
     return (f'<div style="display: flex; flex-direction: column; gap: 4px;"><label for="{fid}" style="font-size: 12px; font-weight: 600; color: {MUTED};">{lbl}</label>{inner}'
             f'<sc-if value="{H(err_pre+"_has")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H(err_pre)}</span></sc-if></div>')
@@ -224,13 +224,13 @@ function PREVALS(self,v){ irrOuvir(self); fpvVals(self,v); const s=irrGet(); con
     const so=irrSonda(s,x); o2.push({t:'Fontes: '+(F.demo?'ETo de referência (demonstrativa)':'Estação Santa Rita')+(so?' · '+so.nome+' '+so.st.toLowerCase()+(so.motivo?' ('+so.motivo+')':''):''),h:'IR-04.dc.html'});
     const eq=(x.tipo==='gotejo'?'Gotejo':'Pivô')+' · '+irrN(x.ha)+' ha · '+irrN(x.vazao)+' L/s · '+x.bnome+' · '+((s.capt[x.capt]||{}).nome||'');
     const r={id:k,rk:RK[si.sit]||9,ro:!b,ac:si.acao,acId:(o?o.id:(top&&top.fert&&!/^Programar/.test((si.acao||[''])[0])?top.fert:x.nome)),fe:!!(top&&top.fert),o:o2.map(z=>typeof z==='string'?{t:z}:z),
-      v:{def:temD?si.d:'',nec:temN?n.br:'',cob:cobN,lmax:x.lmax,imin:x.imin,efic:x.efic,defT:si.d===null?'—':((si.est?'≈':'')+irrN(si.d,1)+' mm · '+(si.fon||fon)),
-         necT:temN?('líquida '+irrN(n.liq,1)+' mm · bruta '+irrMm(n.br)+' mm · '+n.np+(n.np>1?' passadas necessárias de ':' passada necessária de ')+irrMm(n.por)+' mm'):'sem lâmina hoje',
+      v:{def:temD?si.d:'',nec:temN?n.demandaBr:'',cob:cobN,lmax:x.lmax,imin:x.imin,efic:x.efic,defT:si.d===null?'—':((si.est?'≈':'')+irrN(si.d,1)+' mm · '+(si.fon||fon)),
+         necT:temN?('líquida '+irrN(n.liq,1)+' mm · bruta '+irrMm(n.demandaBr)+' mm · programação '+irrMm(n.br)+' mm · '+n.np+(n.np>1?' passadas necessárias de ':' passada necessária de ')+irrMm(n.por)+' mm'):'sem lâmina hoje',
          ordT:ordId?(ordId+(cobN!==''?' · cobre '+cobN+' %'+(restaN>0?' · resta '+irrN(restaN,1)+' mm':''):(cb&&cb.prox?' · próximo ciclo':''))):'sem ordem',
          donoT:si.acao?(si.dono||'—'):'—',cultT:CE.c+(CE.e?' · '+CE.e:''),eqT:eq,cadT:irrCadTxt(F,k,x)},
       s:{},p:{def}};
     irrTxt(r,'setor',x.nome,true); irrTxt(r,'faz',F.nome); r.s.def=temD?(si.est?'≈':'')+irrN(si.d,1)+' mm':'';
-    r.p.nec=[temN?{k:'txt',t:irrMm(n.br)}:{k:'mut',t:'—'}]; r.s.nec=temN?irrMm(n.br):''; irrTxt(r,'ord',ordId);
+    r.p.nec=[temN?{k:'txt',t:irrMm(n.demandaBr)}:{k:'mut',t:'—'}]; r.s.nec=temN?irrMm(n.demandaBr):''; irrTxt(r,'ord',ordId);
     // cobertura da ordem sobre o déficit de hoje; ordem do próximo ciclo não cobre o de hoje (a célula diz isso)
     r.p.cob=[cobN!==''?{k:'txt',t:String(cobN)}:(cb&&cb.prox?{k:'mut',t:'próximo ciclo'}:{k:'mut',t:'—'})]; r.s.cob=cobN!==''?String(cobN):(cb&&cb.prox?'próximo ciclo':'');
     r.p.sit=[{k:'chip',t:si.sit,c:SITC[si.c]||'gray'}]; r.s.sit=si.sit;
@@ -348,6 +348,7 @@ function EXTRAVALS(self,v){ const s=irrGet(); const fz=irrFazK(self);
                {l:'Passadas',t:n.np+(n.np>1?' de ':' de ')+irrMm(n.por)+' mm · limite '+irrMm(x.lmax)+' mm'},{l:'Volume e duração',t:irrN(n.vol)+' m³ · '+irrH(n.dur)+(n.np>1?' por passada':'')}];
       if(ab.length||fe.length){ const id=ab.length?ab[0].id:fe[0]; v.pg_tem=true; v.pg_nova=false; v.pg_href=ab.length?'IR-03det.dc.html#'+id:'OS.dc.html#'+id; v.pg_abrirT='Abrir '+id;
         v.pg_temT='Tarefa única '+id+' já existe'+(ab.length?' · '+irrEtapa(s,ab[0])+' · '+irrJanO(ab[0]):' · fertirrigação na O.S.')+' · nenhuma ordem nova.'; }
+      else if(n.erro){ v.pg_nova=false; v.pg_err=n.erro; v.pg_err_has=true; v.pg_kv.push({l:'Próximo passo',t:'Confira a ficha do pivô e o limite por passada antes de programar.'}); }
       else if(n.liq<0.05){ v.pg_kv.push({l:'Situação',t:'sem déficit hoje'}); v.pg_nova=false; }
       else { if(fp) v.pg_okT='Programar só água'; const durs=Array.from({length:n.np},()=>n.dur); const inis=irrSugerir(s,sid,durs,s.agora,'novo');
         v.pg_kv.push({l:'Janela sugerida',t:inis.every(q=>q!==null)?inis.map((q,i)=>irrJan(q,q+durs[i])).join(' · '):'sem janela livre em 5 dias'});
@@ -442,18 +443,18 @@ def ir03det():
               + f'<div><button type="button" onClick="{H("cf_outra")}" style="{BTN_ST(False,True)}">Definir outra janela</button></div>')
     cf_rod=(f'<button type="button" onClick="{H("cf_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'
             f'<button type="button" onClick="{H("cf_ok")}" style="{BTN_ST(True,True)}">Aplicar janela</button>')
-    tm_corpo=(f'<div role="radiogroup" aria-label="Área coberta" style="display: flex; flex-direction: column; gap: 6px;">'
-              f'<label style="display: flex; gap: 8px; align-items: center; font-size: 13.5px; cursor: pointer;"><input type="radio" name="tm_t" checked="{H("tm_full")}" onChange="{H("tm_setfull")}" style="accent-color: {ACC};">{H("tm_fullT")}</label>'
-              f'<label style="display: flex; gap: 8px; align-items: center; font-size: 13.5px; cursor: pointer;"><input type="radio" name="tm_t" checked="{H("tm_parc")}" onChange="{H("tm_setparc")}" style="accent-color: {ACC};">Parou antes · informar a área coberta</label></div>'
-              + f'<sc-if value="{H("tm_parc")}" hint-placeholder-val="{F()}">'+campo('Área coberta (ha)','tm_cob',f'<input id="tm_cob" inputMode="decimal" value="{H("tm_cob")}" onChange="{H("tm_setcob")}" style="{INP}">','tm_ecob')+'</sc-if>'
-              + campo('Leitura do hidrômetro (m³)','tm_vol',f'<input id="tm_vol" inputMode="decimal" value="{H("tm_vol")}" onChange="{H("tm_setvol")}" placeholder="vazio = sem leitura" style="{INP}">','tm_evol')
+    tm_corpo=(campo('Área real coberta (ha)','tm_cob',f'<input id="tm_cob" inputMode="decimal" value="{H("tm_cob")}" onChange="{H("tm_setcob")}" style="{INP}">','tm_ecob')
+              + campo('Volume medido no hidrômetro (m³)','tm_vol',f'<input id="tm_vol" inputMode="decimal" value="{H("tm_vol")}" onChange="{H("tm_setvol")}" style="{INP}">','tm_evol')
+              + f'<sc-if value="{H("tm_mot_show")}" hint-placeholder-val="{F()}">'+campo('Motivo para conferir área e tempo','tm_mot',f'<input id="tm_mot" value="{H("tm_mot")}" onChange="{H("tm_setmot")}" style="{INP}">','tm_emot')+'</sc-if>'
               + f'<div style="font-size: 12.5px; color: {MUTED};">{H("tm_hint")}</div>')
     tm_rod=(f'<button type="button" onClick="{H("tm_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'
-            f'<button type="button" onClick="{H("tm_ok")}" style="{BTN_ST(True,True)}">Confirmar término</button>')
+            f'<button type="button" onClick="{H("tm_ok")}" style="{BTN_ST(True,True)}">{H("tm_okT")}</button>')
     cm_corpo=(kvfor('cm_kv',2)
-              + campo('Leitura do hidrômetro (m³)','cm_vol',f'<input id="cm_vol" inputMode="decimal" value="{H("cm_vol")}" onChange="{H("cm_setvol")}" style="{INP}">','cm_evol'))
+              + campo('Leitura do hidrômetro (m³)','cm_vol',f'<input id="cm_vol" inputMode="decimal" value="{H("cm_vol")}" onChange="{H("cm_setvol")}" style="{INP}">','cm_evol')
+              + f'<sc-if value="{H("cm_mot_show")}" hint-placeholder-val="{F()}">'+campo('Motivo para aceitar a divergência','cm_mot',f'<input id="cm_mot" value="{H("cm_mot")}" onChange="{H("cm_setmot")}" style="{INP}">','cm_emot')+'</sc-if>')
     cm_rod=(f'<button type="button" onClick="{H("cm_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'
-            f'<button type="button" onClick="{H("cm_ok")}" style="{BTN_ST(True,True)}">Validar e encerrar</button>')
+            f'<button type="button" onClick="{H("cm_devolver")}" style="{BTN_ST(False,True)} white-space: normal;">Devolver para conferir o hidrômetro</button>'
+            f'<button type="button" onClick="{H("cm_ok")}" style="{BTN_ST(True,True)}">{H("cm_okT")}</button>')
     av_corpo=campo('Área coberta até agora (ha)','av_cob',f'<input id="av_cob" inputMode="decimal" value="{H("av_cob")}" onChange="{H("av_setcob")}" style="{INP}">','av_ecob')
     av_rod=(f'<button type="button" onClick="{H("av_cancel")}" style="{BTN_ST(False,True)}">Cancelar</button>'
             f'<button type="button" onClick="{H("av_ok")}" style="{BTN_ST(True,True)}">Salvar avanço</button>')
@@ -478,8 +479,8 @@ function abrirAcao(self,ac){ const s=irrGet(); const o=s.ordens[detId(self)]; if
   if(ac==='janela'){ const ps=o.passadas.filter(p=>p.st==='Programada'); const sug=irrSugerir(s,o.setor,ps.map(p=>p.dur),s.agora,o.id);
     self.setState({jn:{ps:ps.map((p,i)=>{ const q=p.ini!==null?p.ini:sug[i]; return {n:p.n,d:q===null?'':irrIso(irrDiaN(q)),h:q===null?'':irrHm(q)}; })}}); }
   else if(ac==='conflito') self.setState({cf:{i:0}});
-  else if(ac==='termino'){ const p=irrPassAtual(o); if(!p) return; self.setState({tm:{full:true,cob:'',vol:String(irrTele(s,o,p,x.ha))}}); }
-  else if(ac==='conferir') self.setState({cm:{vol:o.conf&&o.conf.med?String(o.conf.med):''}}); }
+  else if(ac==='termino'){ const p=irrPassAtual(o); if(!p) return; self.setState({tm:{cob:'',vol:'',mot:''}}); }
+  else if(ac==='conferir'){ const vol=o.conf&&o.conf.med!==null&&o.conf.med!==undefined?String(o.conf.med):''; self.setState({cm:{vol,original:vol,mot:''}}); } }
 function PREVALS(self,v){ irrOuvir(self);
   irrHashOuvir(self,(h)=>{ const id=h.split(':')[0]||'OS-0419'; self.setState({det:h||'OS-0419',jn:null,cf:null,tm:null,cm:null,av:null,rc:null}); const ac=h.split(':')[1]; if(ac) setTimeout(()=>abrirAcao(self,ac),0); });
   const s=irrGet(); const id=detId(self); const o=s.ordens[id]; v.achou=!!o; v.nao=!o; v.det_id=id; v.naoT='Ordem '+id+' não encontrada na irrigação.';
@@ -496,7 +497,7 @@ function PREVALS(self,v){ irrOuvir(self);
   v.avs=av.map(a=>({t:a.t,st:tagSt()}));
   // passadas (sub-detalhe)
   IRG('g_pas').rows=o.passadas.map(p=>{ const temI=p.ini!==null&&p.ini!==undefined; const i0=temI?((p.iniReal!==undefined&&p.iniReal!==null)?p.iniReal:p.ini):null;
-    const sv=(o.fert&&p.st==='Programada')?['Na O.S. · v2','yellow']:(p.st==='Parcial'&&o.fert&&o.fert.exec&&o.fert.v1===p.cob?['Parcial · v1','yellow']:[p.st,{'Programada':'gray','Em execução':'green','Feita':'gray','Parcial':'yellow'}[p.st]||'gray']);
+    const sv=p.temporalPendente?['Área e tempo a conferir','yellow']:(o.fert&&p.st==='Programada')?['Na O.S. · v2','yellow']:(p.st==='Parcial'&&o.fert&&o.fert.exec&&o.fert.v1===p.cob?['Parcial · v1','yellow']:[p.st,{'Programada':'gray','Em execução':'green','Feita':'gray','Parcial':'yellow'}[p.st]||'gray']);
     const tc=p.cob!==null&&p.cob!==undefined, tv=p.vol!==null&&p.vol!==undefined;
     const dm=irrDurP(o,p);   /* Início, Fim e Duração da mesma janela */
     const r={id:'p'+p.n,v:{n:p.n,lam:p.lam,dur:Math.round(dm/6)/10,cob:tc?p.cob:'',vol:tv?p.vol:''},s:{n:p.n+'ª',st:sv[0]},p:{n:[{k:'txt',t:p.n+'ª'}],st:[{k:'chip',t:sv[0],c:sv[1]}]}};
@@ -509,8 +510,8 @@ function PREVALS(self,v){ irrOuvir(self);
   const ex=[{l:'Início',t:o.exec.ini!==undefined?irrQuando(o.exec.ini):'—'},{l:'Pausas',t:pz.length?pz.length+' · '+irrN(pzm)+' min'+(irrPausada(o)?' · pausada agora':''):'nenhuma'}];
   if(pa) ex.push({l:'Avanço',t:(pa.cob?irrN(pa.cob,2,1)+' de '+irrN(x.ha,2,0)+' ha ('+irrN(pa.cob/x.ha*100,0)+' %)':'sem leitura de área')+' · término previsto '+irrQuando(irrFimP(o,pa))});
   else ex.push({l:'Término',t:o.exec.fim!==undefined?irrQuando(o.exec.fim):(o.passadas.some(p=>p.ini!==null)?'previsto '+irrQuando(Math.max.apply(null,o.passadas.filter(p=>p.ini!==null).map(p=>irrFimP(o,p)))):'—')});
-  const cf=o.conf; ex.push({l:'Hidrômetro',t:cf&&cf.med?irrN(cf.med)+' m³ medidos':(cf&&cf.st==='Sem leitura'?'sem leitura':'telemetria ao terminar')},
-    {l:'Conferência',t:cf?(cf.med?irrN(cf.med)+' × '+irrN(cf.est)+' m³ estimados na área coberta · '+irrPct(cf.dv!==undefined?cf.dv:(cf.med-cf.est)/cf.est*100)+' (tolerância '+s.tol+' %)':'aguardando a leitura'):'automática até '+s.tol+' % de desvio'});
+  const cf=o.conf; ex.push({l:'Hidrômetro',t:cf&&cf.med!==null&&cf.med!==undefined?irrN(cf.med)+' m³ medidos':(cf&&cf.st==='Sem leitura'?'sem leitura':'telemetria ao terminar')},
+    {l:'Conferência',t:cf?(cf.med!==null&&cf.med!==undefined?irrN(cf.med)+' × '+irrN(cf.est)+' m³ estimados na área coberta · '+irrPct(cf.dv!==undefined?cf.dv:(cf.med-cf.est)/cf.est*100)+' (tolerância '+s.tol+' %)':'aguardando a leitura'):'automática até '+s.tol+' % de desvio'});
   const aps=x.bal?irrApsSetor(s,o.setor).filter(a=>a.os===id):[];
   ex.push({l:'Crédito no balanço',t:aps.length?aps.map(a=>irrMm(irrApNet(a))+' mm líquidos '+(irrApParc(a,x.ha)?'na faixa de '+irrN(irrApCob(a),2,1)+' ha':'no '+x.nome)+(a.osc?' (O.S.)':'')).join(' + ')+(aps.some(a=>a.prov)?' · provisório':' · definitivo'):(o.fert?'quando a O.S. apontar a área':'só com leitura do hidrômetro')});
   // saldo da passagem parcial que foi para a v2 (antes ficava na célula da área coberta das passadas)
@@ -521,8 +522,8 @@ function PREVALS(self,v){ irrOuvir(self);
 }
 function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.ordens[id];
   const run=(fn,after)=>{ const r=irrMudar(self,fn); if(!r.erro&&after) after(r); return r; };
-  ['jn','cf','tm','cm','av','rc'].forEach(k=>{ v[k+'_open']=false; v[k+'_warn']=false; v[k+'_cancel']=()=>fechar(self,k); v[k+'_key']=(e)=>{ if(e&&e.key==='Escape') fechar(self,k); }; v[k+'_discard']=()=>fechar(self,k); v[k+'_keep']=()=>{}; });
-  irrPaineis(self,['jn','cf','tm','cm','av','rc'].map(k=>[k,!!self.state[k],()=>(k==='rc'?v.rc_cancel():fechar(self,k))]));
+  ['jn','cf','tm','cm','av','rc'].forEach(k=>{ v[k+'_open']=false; v[k+'_warn']=false; v[k+'_cancel']=()=>fechar(self,k); v[k+'_key']=(e)=>{ if(e&&e.key==='Escape') v[k+'_cancel'](); }; v[k+'_discard']=()=>fechar(self,k); v[k+'_keep']=()=>{}; });
+  irrPaineis(self,['jn','cf','tm','cm','av','rc'].map(k=>[k,!!self.state[k],()=>v[k+'_cancel']()]));
   if(!o){ v.hs_t='Ordem não encontrada'; v.hs_st=chipSt('gray'); v.prim_btn=false; v.prim_link=true; v.prim_href='IR-03.dc.html'; v.prim_lt='Voltar às ordens'; v.pz_show=false; v.av_show=false; v.rc_show=false; return; }
   const x=s.setores[o.setor]; const et=irrEtapa(s,o); const sel=irrSelos(s,o); const p=irrProx(s,o);
   v.hs_t=[et].concat(sel.filter(z=>!z.mut).map(z=>z.t)).join(' · '); v.hs_st=chipSt(sel.some(z=>z.c==='red')?'red':(sel.some(z=>z.c==='yellow')?'yellow':IRR_COR[et]||'gray'));
@@ -559,32 +560,45 @@ function EXTRAVALS(self,v){ const s=irrGet(); const id=detId(self); const o=s.or
     v.cf_outra=()=>{ self.setState({cf:null}); abrirAcao(self,'janela'); };
     v.cf_ok=()=>{ const z=ops[(self.state.cf||{}).i||0]; if(!z) return; run(s0=>irrDefinirJanela(s0,id,z.inis),()=>fechar(self,'cf')); }; }
   else { v.cf_ck=[]; v.cf_opts=[]; v.cf_semop=false; v.cf_semopT=''; v.cf_outra=()=>{}; v.cf_ok=()=>{}; v.cf_titulo=''; v.cf_sub=''; }
-  // ---- painel: confirmar término (área coberta + hidrômetro preenchido pela telemetria) ----
+  // IRR-ONDA0: fato informado, sem área/volume estimados como padrão.
   const tm=self.state.tm;
-  if(tm){ const pa=irrPassAtual(o); v.tm_open=true; v.tm_titulo='Confirmar término · '+id; v.tm_sub=x.nome+' · '+(pa?'passada '+pa.n+' · início '+irrQuando(pa.iniReal):'');
-    v.tm_full=!!tm.full; v.tm_parc=!tm.full; v.tm_fullT=(x.tipo==='gotejo'?'Turno completo':'Volta completa')+' · '+irrN(x.ha,2,0)+' ha';
+  if(tm){ const pa=irrPassAtual(o); const tempo=irrTerminoInfo(s,o,irr2(g2num(tm.cob))); const cedo=tempo.cedo;
+    v.tm_open=true; v.tm_okT=cedo?'Registrar término antecipado':'Confirmar término'; v.tm_titulo=v.tm_okT+' · '+id;
+    v.tm_sub=x.nome+' · simulado · '+(pa?'passada '+pa.n+' · início '+irrQuando(pa.iniReal):'');
     v.tm_cob=tm.cob; v.tm_vol=tm.vol; const er=tm.err||{}; v.tm_ecob=er.cob||''; v.tm_ecob_has=!!er.cob; v.tm_evol=er.vol||''; v.tm_evol_has=!!er.vol;
-    v.tm_hint='Leitura da telemetria da '+x.bnome+' · vazio = sem leitura, nada é creditado';
-    const set=(k,val)=>(e)=>{ const cur=self.state.tm; const d=Object.assign({},cur,{[k]:val===undefined?e.target.value:val,err:{}});
-      if(k==='full'&&pa){ const cob=val?x.ha:(g2num(cur.cob)||0); d.vol=val?String(irrTele(s,o,pa,x.ha)):(cob?String(irrTele(s,o,pa,cob)):''); }
-      if(k==='cob'&&pa){ const c2=g2num(e.target.value); if(c2>0) d.vol=String(irrTele(s,o,pa,c2)); }
-      self.setState({tm:d}); };
-    v.tm_setfull=set('full',true); v.tm_setparc=set('full',false); v.tm_setcob=set('cob'); v.tm_setvol=set('vol');
-    v.tm_ok=()=>{ const cur=self.state.tm; const er={}; const cob=cur.full?x.ha:irr2(g2num(cur.cob)); const vs=String(cur.vol||'').trim(); const vol=vs?g2num(vs):null;
-      if(!cur.full&&!(cob>0&&cob<=x.ha)) er.cob='Área entre 0 e '+irrN(x.ha,2,0)+' ha (ex.: 11,6).'; if(vs&&!(vol>0)) er.vol='Use um número em m³ (ex.: 8.480) ou deixe vazio.';
+    v.tm_hint=(cedo?'Antes do fim previsto: informe o término antecipado e a área real. ':'')+'Simulado: informe o volume medido; estimativa não é leitura. O balanço usa somente o medido.';
+    const set=k=>e=>self.setState({tm:Object.assign({},self.state.tm,{[k]:e.target.value,err:{}})});
+    v.tm_setcob=set('cob'); v.tm_setvol=set('vol'); v.tm_setmot=set('mot'); v.tm_mot=tm.mot||''; v.tm_mot_show=tempo.pendente; v.tm_emot=er.mot||''; v.tm_emot_has=!!er.mot;
+    if(tempo.pendente) v.tm_hint+=' Área e tempo precisam de conferência: informe o motivo; o balanço aguarda validação do irrigante ou gestor.';
+    v.tm_warn=!!tm.warn; v.tm_cancel=()=>{ const t=self.state.tm; if(t&&(t.cob||t.vol||t.mot)) self.setState({tm:Object.assign({},t,{warn:true})}); else fechar(self,'tm'); };
+    v.tm_keep=()=>self.setState({tm:Object.assign({},self.state.tm,{warn:false})});
+    v.tm_ok=()=>{ const cur=self.state.tm; const er={}; const cob=irr2(g2num(cur.cob)); const vs=String(cur.vol||'').trim(); const vol=vs?g2num(vs):null;
+      if(!(cob>0&&cob<=x.ha)) er.cob='Informe a área real entre 0 e '+irrN(x.ha,2,0)+' ha.';
+      if(!vs||!Number.isFinite(vol)||vol<0) er.vol='Informe o volume medido em m³; zero medido é diferente de ausência.';
+      if(tempo.pendente&&!String(cur.mot||'').trim()) er.mot='Informe o motivo; área e tempo serão conferidos antes do crédito.';
       if(Object.keys(er).length){ self.setState({tm:Object.assign({},cur,{err:er})}); return; }
-      run(s0=>irrTerminar(s0,id,cob,vol),()=>fechar(self,'tm')); }; }
-  else { v.tm_full=true; v.tm_parc=false; v.tm_cob=''; v.tm_vol=''; v.tm_ecob=''; v.tm_ecob_has=false; v.tm_evol=''; v.tm_evol_has=false; v.tm_hint=''; v.tm_fullT=''; v.tm_setfull=()=>{}; v.tm_setparc=()=>{}; v.tm_setcob=()=>{}; v.tm_setvol=()=>{}; v.tm_ok=()=>{}; v.tm_titulo=''; v.tm_sub=''; }
+      run(s0=>irrTerminar(s0,id,cob,vol,cedo,cur.mot),()=>fechar(self,'tm')); }; }
+  else { v.tm_mot=''; v.tm_mot_show=false; v.tm_emot=''; v.tm_emot_has=false; v.tm_setmot=()=>{}; v.tm_cob=''; v.tm_vol=''; v.tm_ecob=''; v.tm_ecob_has=false; v.tm_evol=''; v.tm_evol_has=false; v.tm_hint=''; v.tm_setcob=()=>{}; v.tm_setvol=()=>{}; v.tm_ok=()=>{}; v.tm_titulo=''; v.tm_sub=''; v.tm_okT='Confirmar término'; }
   // ---- painel: conferir medição / informar leitura (hidrômetro validado prevalece) ----
   const cm=self.state.cm;
-  if(cm){ const c=o.conf||{}; v.cm_open=true; v.cm_titulo=(c.st==='Sem leitura'?'Informar leitura · ':'Conferir medição · ')+id; v.cm_sub=x.nome+' · hidrômetro × estimativa na área coberta · tolerância '+s.tol+' %';
+  if(cm){ const c=o.conf||{}; v.cm_open=true; v.cm_titulo=(c.st==='Sem leitura'?'Informar leitura · ':'Conferir medição · ')+id; v.cm_sub=x.nome+' · hidrômetro × estimativa na área coberta · tolerância '+s.tol+' %'+(irrMedicao(s,o,c.med).temporal?' · área e tempo a conferir; crédito pendente':'');
     const ps=o.passadas.filter(p=>p.st==='Feita'||p.st==='Parcial'); const cob=ps.reduce((a,p)=>Math.max(a,p.cob||0),0);
-    v.cm_kv=[{l:'Estimado',t:irrN(c.est||0)+' m³ · '+irrMm(o.passadas[0].lam)+' mm em '+irrN(cob,2,1)+' ha'},{l:'Medido',t:c.med?irrN(c.med)+' m³ · '+irrPct((c.med-c.est)/c.est*100):'sem leitura'},
+    v.cm_kv=[{l:'Estimado',t:irrN(c.est||0)+' m³ · '+irrMm(o.passadas[0].lam)+' mm em '+irrN(cob,2,1)+' ha'},{l:'Medido',t:c.med!==null&&c.med!==undefined?irrN(c.med)+' m³ · '+irrPct((c.med-c.est)/c.est*100):'sem leitura'},
              {l:'Crédito',t:'volume medido ÷ área coberta × '+(o.ef||x.efic)+' %'+(cob<x.ha-1e-9?' · só na faixa coberta':'')},{l:'Área coberta',t:irrN(cob,2,1)+' de '+irrN(x.ha,2,0)+' ha'}];
-    v.cm_vol=cm.vol; v.cm_evol=(cm.err||''); v.cm_evol_has=!!cm.err; v.cm_setvol=(e)=>self.setState({cm:{vol:e.target.value,err:''}});
-    v.cm_ok=()=>{ const vs=String(self.state.cm.vol||'').trim(); const vol=g2num(vs); if(!(vol>0)){ self.setState({cm:{vol:vs,err:'Informe a leitura em m³ (ex.: 1.206).'}}); return; }
-      run(s0=>irrConferir(s0,id,vol),()=>fechar(self,'cm')); }; }
-  else { v.cm_kv=[]; v.cm_vol=''; v.cm_evol=''; v.cm_evol_has=false; v.cm_setvol=()=>{}; v.cm_ok=()=>{}; v.cm_titulo=''; v.cm_sub=''; }
+    const num=g2num(cm.vol), medicao=irrMedicao(s,o,num);
+    v.cm_mot_show=medicao.exigeMotivo; v.cm_okT=v.cm_mot_show?'Aceitar com motivo':'Validar e encerrar';
+    v.cm_vol=cm.vol; v.cm_mot=cm.mot||''; v.cm_evol=cm.err||''; v.cm_evol_has=!!cm.err;
+    v.cm_emot=cm.emot||''; v.cm_emot_has=!!cm.emot;
+    const set=k=>e=>self.setState({cm:Object.assign({},self.state.cm,{[k]:e.target.value,err:'',emot:''})});
+    v.cm_setvol=set('vol'); v.cm_setmot=set('mot');
+    v.cm_warn=!!cm.warn; v.cm_cancel=()=>{ const c=self.state.cm; if(c&&(c.vol!==c.original||c.mot)) self.setState({cm:Object.assign({},c,{warn:true})}); else fechar(self,'cm'); };
+    v.cm_keep=()=>self.setState({cm:Object.assign({},self.state.cm,{warn:false})});
+    v.cm_devolver=()=>run(s0=>irrDevolver(s0,id),()=>fechar(self,'cm'));
+    v.cm_ok=()=>{ const cur=self.state.cm, vs=String(cur.vol||'').trim(),vol=vs?g2num(vs):null;
+      if(vol===null||!Number.isFinite(vol)||vol<0){ self.setState({cm:Object.assign({},cur,{err:'Informe o volume medido em m³.'})}); return; }
+      if(v.cm_mot_show&&!String(cur.mot||'').trim()){self.setState({cm:Object.assign({},cur,{emot:'Informe o motivo para aceitar a divergência.'})});return;}
+      run(s0=>irrConferir(s0,id,vol,cur.mot),()=>fechar(self,'cm')); }; }
+  else { v.cm_kv=[]; v.cm_vol=''; v.cm_mot=''; v.cm_mot_show=false; v.cm_emot=''; v.cm_emot_has=false; v.cm_evol=''; v.cm_evol_has=false; v.cm_setvol=()=>{}; v.cm_setmot=()=>{}; v.cm_devolver=()=>{}; v.cm_ok=()=>{}; v.cm_titulo=''; v.cm_sub=''; v.cm_okT='Validar e encerrar'; }
   // ---- painel: registrar avanço (telemetria e manual do mesmo evento = um registro) ----
   const avs=self.state.av;
   if(avs){ v.av_open=true; v.av_titulo='Registrar avanço · '+id; v.av_sub=x.nome+' · passada '+((irrPassAtual(o)||{}).n||'')+' em execução · área pelo ângulo do pivô ou app de campo';
