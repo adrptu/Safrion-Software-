@@ -1,0 +1,9 @@
+OK  R1 botão que filtra na mesma tela pulsa ao ser acionado (anel verde)
+OK  R1b o pulso some sozinho
+OK  R2 abrir o plano realça o bloco de destino (o detalhe) e anuncia o novo contexto
+OK  R3 o cartão que muda de tela liga a barra de carga no clique e a tela nova chega com o título realçado
+OK  R4 cancelar o formulário sem mudar nada confirma "Edição cancelada" (sem prometer desfazer o que já foi gravado)
+OK  R5 mudar e descartar confirma "Alterações descartadas"
+OK  R6 com "menos movimento" o acionado fica com anel parado, sem animação
+OK  R7 sem erro de JS
+RESULTADO: 8/8

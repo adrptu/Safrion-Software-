@@ -1,0 +1,36 @@
+OK    1 IR-03det#OS-0423:conflito abre "Resolver conflito" com a parada da B3 e as opções 15:00–17:00 e 21:00–23:00 
+OK    2 aplicar a janela libera pela prontidão (LIB-2292), sem aprovação 
+OK    3 recarregar: a OS-0423 continua Liberadas (estado gravado) com janela 15:00–17:00 
+OK    4 IR-03 lê o mesmo estado: OS-0423 Liberadas, sem conflito 
+OK    5 Mapa Integrado: T7 sem "irrigação em conflito" (amarelo pela mancha do satélite) 
+OK    6 Mapa camada Irrigação: T7 "programada · hoje 15:00" e P2 "conferir medição · OS-0394" 
+OK    7 IR-03det#OS-0394:conferir abre a conferência com 1.206 m³ medidos × 1.254 m³ estimados 
+FALHA 8 OS-0394 encerrada · hidrômetro prevalece, sem novo crédito (P2 segue 11,2 mm) ['', 'Agrícola › Irrigação › Ordens › OS-0394 OS-0394 · Irrigação · Pivô 2 Em conferência · Divergência · −3,8 % Conferir medição']
+OK    9 OS-0419 Iniciar → Em execução (início hoje 20:02, EX-5120) 
+OK    10 recarregar: segue Em execução e o primário é Confirmar término (Pausar só agora) 
+FALHA 11 Confirmar término: volta completa e hidrômetro preenchido pela telemetria (8480 m³) ['Registrar término antecipado · OS-0419 × Pivô 2 · simulado · passada 1 · início hoje 20:02 Área real coberta (ha) Volume medido no hidrômetro (m³) Antes do fim previsto: informe o término antecipado e a área real. Simulado: informe o volume medido; estimativa não é leitura. O balanço usa somente o m', '']
+FALHA 12 término → conferência automática (−1,9 %) → Encerradas; P2 agora 1,7 mm ['Antes do fim previsto: informe o término antecipado e a área real. Simulado: informe o volume medido; estimativa não é leitura. O balanço usa somente o medido. | OS-0419 Em execução · início hoje 20:02 (EX-5120) · término previsto amanhã 10:33.', 'Agrícola › Irrigação › Ordens › OS-0419 OS-0419 · Irrigação · Pivô 2 Em execução Confirmar término']
+FALHA 13 trilha com início, término (amanhã 10:33) e conferência automática QUANDO ⇅ RECIBO ⇅ EVENTO ⇅ QUEM ⇅ hoje 06:12 AU-3098 Necessidade calculada pelo balanço · déficit 11,2 mm → 10,81 mm brutos em 1 passada sistema hoje 06:12 LIB-2287 Liberada pela prontidão · janela, Bomba do Pivô 2, energia e outorga conferidas sistema hoje 20:02 EX-5120 Início · telemetria da Bomba do Pivô 2 ativa João
+FALHA 14 IR-01: Pivô 2 com 1,7 mm e próximo passo da OS-0422 (Definir janela) Pivô 2 A conferir Divergência na OS-0394 : −3,8 % Conferir medição 11,2 mm 13,4 mm OS-0419 87 % —
+FALHA 15 painel do setor: aplicação da OS-0419 creditada uma vez (8.480 m³ = 10,6 mm × 90 % = 9,54 mm líquidos) Setor · Pivô 2 × Os limites valem para a próxima programação; ordens liberadas não mudam. Déficit hoje Necessidade Ordem que cobre Responsável pelo próximo passo Cultura e estádio Equipamento Água disponível no solo (referência) Propriedade do solo medida em Agrícola › Análises de solo. Não é a capacidade do equipamento nem a lâmina recomendada: a lâmina segue a política de água e o responsável técnico. Lâmina máxima por passada mm Intervalo mínimo entre inícios h Eficiência do sistema % Conferi
+FALHA 16 Mapa (Balanço hídrico): P2 com déficit 1,7 mm (verde) ['P2: déficit 11,2 mm → 2× 6,7 mm a 100 %', '#D98A4E']
+OK    17 IR-02#programar=PV02: fazenda Lagoa Grande e "Tarefa única OS-0601 já existe" (Abrir OS-0601, sem Programar) 
+OK    18 PV02 continua com uma só ordem 
+OK    19 IR-01 na Lagoa Grande: 23 pivôs; Pivô 2 programado (OS-0601 hoje 21:00), balanço demonstrativo (no painel do setor) 
+OK    22 IR-01 Santa Rita: o primário é o passo mais urgente (Resolver conflito · OS-0423 → IR-03det#OS-0423:conflito) 
+OK    23 painel Definir janela: foco entra no painel, aria-modal e Esc fecha (foco volta à tela) 
+OK    24 link direto inválido (OS-0392 Encerradas:janela) não abre o painel e explica o motivo 
+OK    25 Adicionar produtos na OS-0423 (conflito com a parada da B3) é recusado: a v2 não fura o bloqueio 
+OK    26 Agenda (IN-03) lê o estado: OS-0423 resolvida vira Iniciar irrigação · João, prioridade Normal, sem selo de conflito 
+OK    27 IR-01 Pivô 1: falta insumo · OS-0418 (como na O.S.) e próximo passo Programar só água · João (responsável no painel do setor) 
+OK    28 IR-02#programar=P1: Programar só água cria e libera a ordem de água; OS-0418 segue parada 
+OK    29 v2 em execução: Revisão de saldo pendente; depois da liberação na O.S. a ordem segue a etapa da O.S. (Liberadas · Iniciar execução na O.S.) e a v1 fica creditada só na faixa de 30 ha 
+OK    30 Restaurar demonstração (Estoque) volta a irrigação à semente: OS-0419 Liberadas sem v2 órfã 
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr79/tools/prototipo/v37/gen37/irr_fluxo_test.py", line 146, in <module>
+    J("[...document.querySelectorAll('aside[role=dialog] input[type=radio]')][1].click()"); time.sleep(.3); setv('#tm_cob', '40'); setv('#tm_vol', ''); clk('Confirmar término', 'aside[role=dialog]')
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr79/tools/prototipo/v37/gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

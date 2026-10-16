@@ -1,0 +1,228 @@
+{
+  "scope": "oraculo de especificacao; nao produto, UI ou banco",
+  "cases": [
+    {
+      "id": "A3-total",
+      "result": "50",
+      "expected": "50",
+      "meaning": "25ha a2L/ha; nao somar doses"
+    },
+    {
+      "id": "A3-cargas",
+      "result": [
+        {
+          "volume": "2000",
+          "product": "40",
+          "destinations": [
+            [
+              "A",
+              "10"
+            ],
+            [
+              "B",
+              "10"
+            ]
+          ]
+        },
+        {
+          "volume": "500",
+          "product": "10",
+          "destinations": [
+            [
+              "B",
+              "5"
+            ]
+          ]
+        }
+      ],
+      "expected": [
+        {
+          "volume": "2000",
+          "product": "40",
+          "destinations": [
+            [
+              "A",
+              "10"
+            ],
+            [
+              "B",
+              "10"
+            ]
+          ]
+        },
+        {
+          "volume": "500",
+          "product": "10",
+          "destinations": [
+            [
+              "B",
+              "5"
+            ]
+          ]
+        }
+      ],
+      "meaning": "Carga compartilhada e ultima parcial; volume final nao e agua a adicionar"
+    },
+    {
+      "id": "A3-horas",
+      "result": "6.75",
+      "expected": "6.75",
+      "meaning": "6h trabalho +0.5deslocamento +0.25setup"
+    },
+    {
+      "id": "A3-ausencia",
+      "result": null,
+      "expected": null,
+      "meaning": "Ausente nao e zero"
+    },
+    {
+      "id": "A4-demanda",
+      "result": "50",
+      "expected": "50",
+      "meaning": "Grupo coordena origens; nao tem demanda adicional"
+    },
+    {
+      "id": "A4-contraprova",
+      "result": false,
+      "expected": false,
+      "meaning": "Somar origens e grupo reprova:100L"
+    },
+    {
+      "id": "A4-reserva",
+      "result": "0",
+      "expected": "0",
+      "meaning": "Antes CMD06 nao criar reserva"
+    },
+    {
+      "id": "A6-parcial",
+      "result": {
+        "area": "15",
+        "consumo": "30",
+        "saldo_area": "10",
+        "saldo_teorico": "20"
+      },
+      "expected": {
+        "area": "15",
+        "consumo": "30",
+        "saldo_area": "10",
+        "saldo_teorico": "20"
+      },
+      "meaning": "Saldo teorico nao comprova estoque livre/calda; nao encerra ordem"
+    },
+    {
+      "id": "B3-delta",
+      "result": "-15.0",
+      "expected": "-15",
+      "meaning": "60L para45L"
+    },
+    {
+      "id": "B3-custo",
+      "result": {
+        "antes": "1200",
+        "depois": "900",
+        "delta": "-300",
+        "ha_antes": "40",
+        "ha_depois": "30"
+      },
+      "expected": {
+        "antes": "1200",
+        "depois": "900",
+        "delta": "-300",
+        "ha_antes": "40",
+        "ha_depois": "30"
+      },
+      "meaning": "Preco sintetico20R$/L; estimativa nao custo realizado"
+    },
+    {
+      "id": "B5-cancelar",
+      "result": "50",
+      "expected": "50",
+      "meaning": "Retirar so demanda5ha; sem devolucao ficticia"
+    },
+    {
+      "id": "B1-calendario",
+      "result": "2026-11-06",
+      "expected": "2026-11-06",
+      "meaning": "Dias civis atravessam mes; horarios/fuso no contrato real"
+    },
+    {
+      "id": "N1-unidades",
+      "result": true,
+      "expected": true,
+      "meaning": "Conversao exata equivalente"
+    },
+    {
+      "id": "N2-base",
+      "result": false,
+      "expected": false,
+      "meaning": "Base diferente"
+    },
+    {
+      "id": "N3-dimensao",
+      "result": false,
+      "expected": false,
+      "meaning": "Massa nao e volume"
+    },
+    {
+      "id": "N4-precisao",
+      "result": false,
+      "expected": false,
+      "meaning": "Tela arredondada nao decide equivalencia"
+    },
+    {
+      "id": "N5-janela-global",
+      "result": false,
+      "expected": false,
+      "meaning": "A cruzaB eB cruzaC; grupo sem intersecao"
+    },
+    {
+      "id": "N6-duracao",
+      "result": false,
+      "expected": false,
+      "meaning": "6.75h nao cabem nas5h comuns"
+    },
+    {
+      "id": "N7-choque",
+      "result": true,
+      "expected": true,
+      "meaning": "Conflito mesmo recurso, interno ou externo ao lote"
+    },
+    {
+      "id": "N8-limite",
+      "result": false,
+      "expected": false,
+      "meaning": "Intervalos sem sobreposicao; deslocamento e setup devem estar incluidos"
+    },
+    {
+      "id": "N9-embalagem",
+      "result": "0.66",
+      "expected": "0.66",
+      "meaning": "Nao arredondar para frasco1L"
+    },
+    {
+      "id": "N10-dose-0",
+      "result": true,
+      "expected": true,
+      "meaning": "Recusa aritmetica; insumo ausente nao vira dosezero"
+    },
+    {
+      "id": "N10-dose--1",
+      "result": true,
+      "expected": true,
+      "meaning": "Recusa aritmetica; insumo ausente nao vira dosezero"
+    },
+    {
+      "id": "N10-dose-NaN",
+      "result": true,
+      "expected": true,
+      "meaning": "Recusa aritmetica; insumo ausente nao vira dosezero"
+    },
+    {
+      "id": "N10-dose-Infinity",
+      "result": true,
+      "expected": true,
+      "meaning": "Recusa aritmetica; insumo ausente nao vira dosezero"
+    }
+  ],
+  "passed": 25
+}

@@ -1,0 +1,1145 @@
+{
+ "AG-01.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Pragas e doenças",
+  "desvios": {
+   "TAB-05": "8 botões: Confirmar foco, Seguir monitorando, Programar vistoria"
+  }
+ },
+ "AG-01det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Rota e evidências",
+  "desvios": {
+   "TAB-07": "4 cartões acima da lista: PONTOS VÁLIDOS 13 de 14 1 em recoleta | MÉDIA VÁLIDA 13 cistos/200 cm³ · NC 15 | PONTOS ≥ NC 3 2 de reboleira "
+  }
+ },
+ "AG-02.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Análises de solo",
+  "desvios": {}
+ },
+ "AG-03.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Diagnósticos",
+  "desvios": {}
+ },
+ "AG-03det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Diagnóstico · DIA-007 nematoide T4",
+  "desvios": {}
+ },
+ "AG-04.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Recomendações",
+  "desvios": {}
+ },
+ "AG-04det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Recomendação · REC-014 plantio T4",
+  "desvios": {}
+ },
+ "AG-05.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Biblioteca e planos técnicos",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-05": "2 botões: Comparar, Validar"
+  }
+ },
+ "AG-06.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Eficácia e histórico",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-05": "1 botões: Registrar parecer"
+  }
+ },
+ "AG-07.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Consulta Agrofit",
+  "desvios": {}
+ },
+ "BEN.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Beneficiamento",
+  "desvios": {}
+ },
+ "BO-01.dc.html": {
+  "modulo": "Onboarding e backoffice",
+  "menu": false,
+  "h1": "Planos e preços",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho"
+  }
+ },
+ "BO-02.dc.html": {
+  "modulo": "Onboarding e backoffice",
+  "menu": true,
+  "h1": "Assinaturas e cobrança",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: MENSALIDADES VIGENTES R$ 6.278,46 4 orga | ORGANIZAÇÕES 6 Ativa 3 · Inadimplente 1  | FATURAS ABERTAS 2 · R$ 9"
+  }
+ },
+ "CA-01.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Ordens de campo",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: A liberar 5 3 com produto · 2 só água | Em conferência 1 sobras a receber | Saldo parado 70 ha OS-0420 · Trato"
+  }
+ },
+ "CA-01det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "OS-0421 · Fungicida 1ª aplicação",
+  "desvios": {
+   "TAB-07": "4 cartões acima da lista: Autorizado 350 ha v2 | Realizado 190 ha 150 conf. + 40 prov. | Saldo 160 ha 3 turnos | Hoje Dia 4 de 7 40 ha ·"
+  }
+ },
+ "CA-01x-os0420.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "OS-0420 · Plantio Soja 58 W",
+  "desvios": {
+   "TAB-07": "4 cartões acima da lista: Autorizado 100 ha v2 no realizado · v3 n | Realizado 30 ha 18 conf. + 12 prov. | Saldo 70 ha parado · Trator T"
+  }
+ },
+ "CA-02.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Apontamentos e conferência",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "TAB-07": "3 cartões acima da lista: Provisórios 52 ha aguardam conferência | Fora da tolerância 1 horas · OS-0420 | Sobras a receber 10 sc OS-0417",
+   "TAB-05": "2 botões: Conferir"
+  }
+ },
+ "CA-03.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Ocorrências",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "CA-03det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "OC-114 · Quebra do Trator T1",
+  "desvios": {
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "CA-04.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Minhas requisições",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-05": "1 botões: Confirmar recebimento"
+  }
+ },
+ "CARGA.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Cargas e recebimento",
+  "desvios": {}
+ },
+ "CD-01.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Fazendas, áreas e talhões",
+  "desvios": {}
+ },
+ "CD-01det.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Talhão",
+  "desvios": {
+   "FIL-01": "Talhão"
+  }
+ },
+ "CD-02.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Culturas e cultivares",
+  "desvios": {}
+ },
+ "CD-03.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Máquinas, instalações e setores",
+  "desvios": {}
+ },
+ "CD-04.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Pessoas e equipes",
+  "desvios": {}
+ },
+ "CD-05.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Parceiros e fornecedores",
+  "desvios": {}
+ },
+ "CD-06.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Produtos, unidades e locais",
+  "desvios": {}
+ },
+ "CD-07.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Estrutura gerencial",
+  "desvios": {}
+ },
+ "CD-08.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Operações e rendimentos",
+  "desvios": {}
+ },
+ "CD.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Cadastros",
+  "desvios": {}
+ },
+ "CF-01.dc.html": {
+  "modulo": "Configurações",
+  "menu": true,
+  "h1": "Usuários e alçadas",
+  "desvios": {}
+ },
+ "CF-03.dc.html": {
+  "modulo": "Configurações",
+  "menu": true,
+  "h1": "Integrações",
+  "desvios": {}
+ },
+ "CF-04.dc.html": {
+  "modulo": "Configurações",
+  "menu": true,
+  "h1": "Auditoria",
+  "desvios": {}
+ },
+ "CF-05.dc.html": {
+  "modulo": "Configurações",
+  "menu": true,
+  "h1": "Assinatura e cobrança",
+  "desvios": {
+   "TAB-07": "3 cartões acima da lista: ÁREA MEDIDA 2.570,23 ha de 2.600 ha cont | PRÉVIA DO PERÍODO R$ 5.140,46 set/2026 f | PRÓXIMA COBRANÇA 01/10/2"
+  }
+ },
+ "CMP.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": true,
+  "h1": "Compras",
+  "desvios": {
+   "TAB-05": "2 botões: Abrir compra, Consultar pedidos"
+  }
+ },
+ "CO-01.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Previsão e maturação",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: Oferta S39 (bruta) 12,0 t mamão · T7 | Rendimento classe a 80% curva de packing | Falta no PV-031 0,4 t renego"
+  }
+ },
+ "CO-02.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Programação e ordens de colheita",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: Janela S39 22–27/09 | Em execução 1 +1 em conferência | Saldo da semana 2,7 t + 15 sc café | Recebimento 14 t/",
+   "TAB-05": "3 botões: Iniciar ordem, Conferir cargas, Liberar ordem"
+  }
+ },
+ "CO-02det.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "OC-0510 · Colheita de mamão T7",
+  "desvios": {
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "CO-03.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Cargas, pesagens e romaneios",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-05": "4 botões: Emitir romaneio, Vincular pesagem"
+  }
+ },
+ "CO-04.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Recebimento da produção",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-05": "3 botões: Receber bloqueado, Segregar carga, Conferir carga"
+  }
+ },
+ "CO-05.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Beneficiamento",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-05": "2 botões: Registrar avanço, Liberar ordem"
+  }
+ },
+ "CO-05det.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "OB-0110 · Packing do mamão",
+  "desvios": {
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "CO-06.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Qualidade e rastreabilidade",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-05": "2 botões: Decidir lote, Registrar resultado"
+  }
+ },
+ "CO-06det.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "INSP-88 · Lote L27-013 bloqueado",
+  "desvios": {
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "CO-07.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Estoque de produção",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: Grãos · físico 47.032 sc 50 kg | Café bloqueado 3.690 sc 60 kg | Mamão indisponível 11,7 t 9,6 A + 1,8 B  | Gr"
+  }
+ },
+ "COLH.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Previsão e colheita",
+  "desvios": {}
+ },
+ "EST.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": true,
+  "h1": "Estoque",
+  "desvios": {}
+ },
+ "EXPED.dc.html": {
+  "modulo": "Comercial",
+  "menu": true,
+  "h1": "Expedição e entregas",
+  "desvios": {}
+ },
+ "GE-01.dc.html": {
+  "modulo": "Gestão",
+  "menu": false,
+  "h1": "Visão gerencial",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: Receita prevista 26/27 R$ 18,35 mi 5 cul | Margem projetada R$ 3,67 mi 20,0% | Roic consolidado 4,2% com terra"
+  }
+ },
+ "GE-02.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Orçamento e previsões",
+  "desvios": {}
+ },
+ "GE-02det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Comparar · V1 × V2 × real",
+  "desvios": {}
+ },
+ "GE-03.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Custos e fechamento",
+  "desvios": {
+   "TAB-07": "4 cartões acima da lista: Competência 09/2026 fecha 05/10 | Lançamentos 1.412 98% com doc. | Provisórios R$ 22.736 4 lançamentos | Conci"
+  }
+ },
+ "GE-04.dc.html": {
+  "modulo": "Gestão",
+  "menu": false,
+  "h1": "Contas a pagar e caixa",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: Caixa hoje R$ 1,84 mi 2 contas | Vence hoje R$ 158 mil 2 títulos | Aguardando banco R$ 62 mil 1 remessa | Sald",
+   "TAB-05": "2 botões: Importar retorno, Propor pagamento"
+  }
+ },
+ "GE-05.dc.html": {
+  "modulo": "Gestão",
+  "menu": false,
+  "h1": "Contas a receber",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: Carteira em aberto R$ 289.900 4 títulos | Vencidos R$ 244.000 PV-029 · 4 d | Créditos solicitados 1 RC-12 · R$"
+  }
+ },
+ "GE-06.dc.html": {
+  "modulo": "Gestão",
+  "menu": false,
+  "h1": "Indicadores operacionais",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "GE-06det.dc.html": {
+  "modulo": "Gestão",
+  "menu": false,
+  "h1": "Detalhar · custo de pulverização",
+  "desvios": {
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "GE-07.dc.html": {
+  "modulo": "Gestão",
+  "menu": false,
+  "h1": "Planos de ação",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-05": "4 botões: Reabrir com motivo, Verificar resultado, Encerrar com evidência"
+  }
+ },
+ "GE-08.dc.html": {
+  "modulo": "Crédito",
+  "menu": true,
+  "h1": "Crédito e garantias",
+  "desvios": {
+   "TAB-07": "4 cartões acima da lista: Dívida ativa · 3 contratos R$ 1,90 mi | Serviço da dívida 26/27 R$ 610 mil pico  | Capacidade livre no período",
+   "TAB-05": "1 botões: Autorizar bloco"
+  }
+ },
+ "IC.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": true,
+  "h1": "Inteligência de compras",
+  "desvios": {
+   "TAB-07": "3 cartões acima da lista: INSUMOS EM ALTA 6 KCl 60% · MAP 11-52 ·  | COMPRAR AGORA 4 necessidade próxima: Óle | ECONOMIA ESPERANDO O MÊS"
+  }
+ },
+ "IN-01.dc.html": {
+  "modulo": "Mapa e Início",
+  "menu": false,
+  "h1": "Meu dia",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "IN-02.dc.html": {
+  "modulo": "Mapa e Início",
+  "menu": false,
+  "h1": "Aprovações",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "IN-03.dc.html": {
+  "modulo": "Mapa e Início",
+  "menu": false,
+  "h1": "Agenda e pendências",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "IN-04.dc.html": {
+  "modulo": "Mapa",
+  "menu": true,
+  "h1": "Mapa da fazenda",
+  "desvios": {}
+ },
+ "IR-01.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Irrigação",
+  "desvios": {}
+ },
+ "IR-02.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Programação",
+  "desvios": {}
+ },
+ "IR-03.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Ordens de irrigação",
+  "desvios": {}
+ },
+ "IR-03det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "OS-0419 · Irrigação · Pivô 2",
+  "desvios": {}
+ },
+ "IR-04.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Clima e sensores",
+  "desvios": {}
+ },
+ "IV.dc.html": {
+  "modulo": "Comercial",
+  "menu": true,
+  "h1": "Inteligência de vendas",
+  "desvios": {
+   "TAB-07": "2 cartões acima da lista: PRODUTOS EM ALTA 1 Soja +3,8% | VENDER AGORA 1 Soja"
+  }
+ },
+ "LO-01.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Programação de transporte",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: Cargas hoje 5 3 retiradas · 1 entrega ·  | Atrasadas 1 T1 · prev. 09:10 | Ocupação das docas 64% doca 1 crític"
+  }
+ },
+ "LO-02.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Expedições e cargas",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: No pátio 3 T2 em doca · T3 pronto · T4 a | Atrasados 1 T1 · janela 08:00 | Impedidas 1 Carga 07 · NF pendente ",
+   "TAB-05": "5 botões: Avaliar encaixe, Registrar chegada, Reprocessar NF, Cobrar NF"
+  }
+ },
+ "LO-02det.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Conferir carga · T2 · VD-2101",
+  "desvios": {
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "LO-03.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Viagens e entregas",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: Aguardando saída 2 VG-118 lacre · VG-119 | Divergências abertas 1 VG-117 · caso RC- | Concluídas 7 d 2 VG-117 "
+  }
+ },
+ "LO-04.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Fretes e transportadores",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: Prestadores elegíveis 1 + frota própria  | Cotação aberta 1 Carga 07 · até 10:30 | A pagar R$ 1.882 VG-117 · m",
+   "TAB-05": "2 botões: Solicitar documento, Encaminhar pagamento"
+  }
+ },
+ "MA.dc.html": {
+  "modulo": "Manutenção",
+  "menu": true,
+  "h1": "Manutenção",
+  "desvios": {}
+ },
+ "MB-01.dc.html": {
+  "modulo": "App de campo",
+  "menu": true,
+  "h1": "Hoje no campo",
+  "desvios": {}
+ },
+ "MB-02.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Minhas ordens",
+  "desvios": {}
+ },
+ "MB-02det.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "OS-0421 · Pulverização",
+  "desvios": {}
+ },
+ "MB-03.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Apontamento do turno",
+  "desvios": {}
+ },
+ "MB-03x-recibo.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Envios e recibos",
+  "desvios": {}
+ },
+ "MB-04.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Registrar ocorrência",
+  "desvios": {}
+ },
+ "MB-05.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Almoxarifado móvel",
+  "desvios": {}
+ },
+ "MB-05det.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Receber devolução",
+  "desvios": {}
+ },
+ "MB-06.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Vistoria VIS-014",
+  "desvios": {}
+ },
+ "MB-07.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Contagem de frutos",
+  "desvios": {}
+ },
+ "MB-08.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Irrigação de hoje",
+  "desvios": {}
+ },
+ "MB-08x-recibo.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Irrigação · recibo do término",
+  "desvios": {}
+ },
+ "MB-09.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Máquina",
+  "desvios": {}
+ },
+ "MB-09det.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "OM-0233 · Trator T1",
+  "desvios": {}
+ },
+ "MB-10.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Cargas e entregas",
+  "desvios": {}
+ },
+ "MOD-AGR.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Agrícola",
+  "desvios": {}
+ },
+ "MOD-CFG.dc.html": {
+  "modulo": "Configurações",
+  "menu": true,
+  "h1": "Configurações",
+  "desvios": {}
+ },
+ "MOD-COM.dc.html": {
+  "modulo": "Comercial",
+  "menu": true,
+  "h1": "Comercial",
+  "desvios": {}
+ },
+ "MOD-CRE.dc.html": {
+  "modulo": "Crédito",
+  "menu": true,
+  "h1": "Crédito",
+  "desvios": {}
+ },
+ "MOD-MAN.dc.html": {
+  "modulo": "Manutenção",
+  "menu": true,
+  "h1": "Manutenção",
+  "desvios": {}
+ },
+ "MOD-OUT.dc.html": {
+  "modulo": "Onboarding e backoffice",
+  "menu": true,
+  "h1": "Outros acessos",
+  "desvios": {}
+ },
+ "MOD-SUP.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": true,
+  "h1": "Suprimentos",
+  "desvios": {}
+ },
+ "ON-01.dc.html": {
+  "modulo": "Onboarding e backoffice",
+  "menu": true,
+  "h1": "Entrada e implantação guiada",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "TAB-07": "3 cartões acima da lista: Trial dia 5 de 30 até 18/10 | Área declarada 480 ha limite do trial | Pendências 3 polígono · CAR · prévia",
+   "TAB-05": "5 botões: Rever dados, Desenhar áreas, Anexar CAR, Continuar cultura e cicl"
+  }
+ },
+ "ON-01det.dc.html": {
+  "modulo": "Onboarding e backoffice",
+  "menu": false,
+  "h1": "Importação · prévia e erros",
+  "desvios": {}
+ },
+ "OS-0424-app.dc.html": {
+  "modulo": "App de campo",
+  "menu": true,
+  "h1": "OS-0424 · Fungicida",
+  "desvios": {}
+ },
+ "OS-0424-ficha.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "OS-0424 · Fungicida · T1-B · Soja 62 X",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "TAB-08": "tabela"
+  }
+ },
+ "OS.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Ordem de Serviço",
+  "desvios": {}
+ },
+ "PA.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Planos agronômicos",
+  "desvios": {}
+ },
+ "PAGR.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Painel",
+  "desvios": {}
+ },
+ "PCOM.dc.html": {
+  "modulo": "Comercial",
+  "menu": true,
+  "h1": "Painel comercial",
+  "desvios": {}
+ },
+ "PL-01.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Safras, ciclos e metas",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "3 cartões acima da lista: Safras abertas 2 2026/27 · Safrinha 2027 | Área planejada 1.165 ha Safra 2026/27 ·  | Cultivos sem plano 4 T4 "
+  }
+ },
+ "PL-02.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Plano operacional",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-05": "1 botões: Decidir pendência"
+  }
+ },
+ "PL-02det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Plano do talhão T1-A · gatilhos",
+  "desvios": {
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "PL-03.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Capacidade e recursos",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: Carga out/26 2.410 h demanda do plano | Capacidade líquida 2.640 h após manutenç | Déficit 270 h tratores 150+"
+  }
+ },
+ "PL-04.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Programação integrada",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: Já emitidas 8 7 O.S. + 1 O.M. | Novas elegíveis 5 prévia de emissão | Aguardando dados 2 sem previsão confirma"
+  }
+ },
+ "PL-05.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Impedimentos e reprogramação",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: Impedimentos abertos 5 fila única | Ordens afetadas 3 + 2 itens do plano · 1 | Vencem hoje 1 com dono nomeado "
+  }
+ },
+ "PL-05det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Impedimento · OS-0431 ativo bloqueado",
+  "desvios": {
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "PL-06.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Parcelas e escalonamento",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "PMAN.dc.html": {
+  "modulo": "Manutenção",
+  "menu": true,
+  "h1": "Painel",
+  "desvios": {}
+ },
+ "PROD.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Estoque de produto",
+  "desvios": {}
+ },
+ "PSUP.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": true,
+  "h1": "Painel",
+  "desvios": {}
+ },
+ "PT-01.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": true,
+  "h1": "Portal do parceiro",
+  "desvios": {}
+ },
+ "PT-02.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Cotações concedidas",
+  "desvios": {
+   "TAB-05": "1 botões: Baixar comprovante"
+  }
+ },
+ "PT-02det.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Proposta · SOL-2026-07 · Fertilizantes",
+  "desvios": {}
+ },
+ "PT-03.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Ofertas",
+  "desvios": {
+   "TAB-05": "1 botões: Acompanhar negociação"
+  }
+ },
+ "PT-04.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Crédito",
+  "desvios": {
+   "TAB-05": "1 botões: Ver decisão registrada"
+  }
+ },
+ "PT-04det.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Dossiê · CRE-0102 custeio",
+  "desvios": {}
+ },
+ "PT-05.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Negócios e documentos",
+  "desvios": {
+   "TAB-05": "1 botões: Ver motivo"
+  }
+ },
+ "PT-05det.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Negócio · CT-2026-11 KCl 60%",
+  "desvios": {}
+ },
+ "PT-06.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Indicadores",
+  "desvios": {
+   "TAB-07": "4 cartões acima da lista: Taxa de resposta 86% 12 de 14 convites | Conversão 27% 3 de 11 decididas | Entregas no prazo 92% 12 de 13 carg",
+   "TAB-05": "1 botões: Criar ação interna"
+  }
+ },
+ "PT-07.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Perfil e assinatura",
+  "desvios": {
+   "TAB-05": "2 botões: Revogar acesso, Reenviar convite"
+  }
+ },
+ "SAF.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Planejar safra",
+  "desvios": {
+   "TAB-05": "7 botões: Editar, Continuar: aplicar plano, Continuar: enviar demand, Consultar safra"
+  }
+ },
+ "SU-01.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Necessidades e cobertura",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: ITENS COM FALTA FIRME 18 SOL-2026-07 em  | PEDIDO ATRASADO 5 o “pedir até” já passo | CONDICIONADO À QUALIDADE"
+  }
+ },
+ "SU-02.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Políticas de estoque",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "SU-03.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Saldos e lotes de materiais",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: CONFLITO DE RESERVA 0 F26-02 · uso da sa | LOTES RETIDOS 3 K26-11 · M26-05 · L27-01 | CUSTÓDIA EM CAMPO 3 orde"
+  }
+ },
+ "SU-03det.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Lote F26-02 · reservas",
+  "desvios": {
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "SU-04.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Solicitações e cotações",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "SU-05.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Contratos, pedidos e entregas",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: CONFLITOS 1 carga 4 · CT-2026-11 | A RECEBER ATÉ 26/09 3 NF 4533 · PC-093 · | LIBERADO A ENTREGAR R$ 180,8 mil"
+  }
+ },
+ "SU-05det.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "CT-2026-11 · Fertisul · KCl 60%",
+  "desvios": {
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "SU-06.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Recebimentos e divergências",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: DIVERGÊNCIAS ABERTAS 1 preço da NF 8812  | EM QUARENTENA 10 t K26-11 · laudo até 27 | A RECEBER 3 NF 4533 · NF",
+   "TAB-05": "1 botões: Liberar qualidade"
+  }
+ },
+ "SU-07.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Requisições e entregas",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: EM CUSTÓDIA 3 ordens OS-0417 · OS-0421 · | FILA DE SEPARAÇÃO 2 REQ-039 · REQ-040 | IMPEDIDAS 2 OM-0233 · aprov",
+   "TAB-05": "4 botões: Confirmar entrega, Separar FEFO, Entregar 8.000 kg"
+  }
+ },
+ "SU-07det.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "REQ-031 · OS-0417 · MAP 11-52",
+  "desvios": {
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "SU-08.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Transferências e movimentos",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "3 cartões acima da lista: EM TRÂNSITO 1 TR-0452 | PERDAS AGUARDANDO GESTOR 1 PE-012 | ESTORNOS LANÇADOS 1 ES-0071",
+   "TAB-05": "2 botões: Confirmar recebimento, Aprovar perda"
+  }
+ },
+ "SU-09.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Inventários e ajustes",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "3 cartões acima da lista: AJUSTES AGUARDANDO GESTOR 1 INV-2609 · R | DIFERENÇAS A SUBMETER 1 INV-2612 | CONTAGENS PLANEJADAS 1 INV-2611 ",
+   "TAB-05": "3 botões: Aprovar ajuste, Submeter ajuste, Recontar"
+  }
+ },
+ "VE-01.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Demanda e oferta",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "VE-02.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Mercado e preços",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "VE-03.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Ofertas e propostas",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "VE-04.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Pedidos de venda",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-07": "4 cartões acima da lista: A confirmar 3 PV-031 · PV-032 · PV-033 | Disputa de saldo 3,0 t × 1,8 t Mamão B · | Sem alocação 2 PV-031 falt",
+   "TAB-05": "2 botões: Confirmar pedido"
+  }
+ },
+ "VE-04det.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Pedido PV-031 · Mamão Formosa A",
+  "desvios": {
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "VE-05.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Contratos e compromissos",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho"
+  }
+ },
+ "VE-06.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Reclamações e devoluções",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "CAB-2": "Fazenda/Safra em texto no cabeçalho",
+   "TAB-05": "2 botões: Autorizar retorno, Cobrar evidências"
+  }
+ },
+ "VEN.dc.html": {
+  "modulo": "Comercial",
+  "menu": true,
+  "h1": "Contratos e pedidos",
+  "desvios": {}
+ }
+}

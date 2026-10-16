@@ -1,0 +1,14 @@
+OK  aviso "Salvo: Ana · alocável em O.S." sem ponto duplo · Salvo: Ana · alocável em O.S.
+OK  ajuda de Habilidades: "Exige NR-10, NR-31 e CREA com validade." · rar lote (qualidade)
+Exige NR-10, NR-31 e CREA com validade.
+OK  inativar o Lucas grava e nomeia o próximo passo: escolher outro líder para Campo 2 · Salvo: Lucas · inativa · escolha outro líder para Campo 2.
+OK  linha da Campo 2 mostra o líder Lucas inativa e a situação "Líder inativa" · Campo 2 Líder inativa Escolher líder ativo › Lucas inativa 1 9 h/dia seg–sáb · 06–15h
+OK  formulário da Campo 2 mostra o líder gravado "Lucas · inativa" (não Ana) com aviso · [['Lucas', 'Lucas · inativa'], 'Líder\nLucas · inativa\nAna\nCaio\nMarcos\nCarlos\nPaula\nNilton\nJoão\nRui\nZé\nOtávio\nBeto\nIgor\nMarta\nDora\nLucas está inativa; escolha um líder ativo.']
+OK  mudar só o calendário e salvar pede um líder ativo no campo Líder · Corrija os campos destacados; o que você preencheu foi mantido. | Lucas está inativa; escolha um líder ativo.
+OK  escolher Carlos grava: Campo 2 com líder Carlos e calendário seg–sex · ['Campo 2 Em dia Carlos 1 10 h/dia seg–sex · 07–17h', '']
+OK  renomear Marcos avisa que o líder da Campo 1 foi atualizado · Salvo: Marcos Silva · alocável em O.S. · líder de Campo 1 atualizado.
+OK  Campo 1: linha e formulário mostram o líder "Marcos Silva" · ['Campo 1 1 não alocável Marcos Silva 4 9 h/dia seg–sáb · 06–15h', 'Marcos Silva', 'Marcos Silva']
+OK  Cadastrar equipe: Líder começa em "Escolha…" e salvar sem ele pede o líder no campo · [['', 'Escolha…'], 'Corrija os campos destacados; o que você preencheu foi mantido. | Informe líder.']
+OK  com a Paula a equipe Campo 3 é criada · ['Campo 3 Em dia Paula 0 9 h/dia seg–sáb · 06–15h', '']
+OK  nenhum erro de JS
+RESULTADO: OK 12/12

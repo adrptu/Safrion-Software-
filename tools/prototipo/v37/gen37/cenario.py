@@ -55,6 +55,10 @@ def seed():
                                resp=o['resp'], ins=ins, req=REQ_DA_OS.get(o['id']), selos=o.get('selos', []),
                                ap=[dict(d=a['d'], dia=a['dia'], ha=a['ha'], st=a['st'], sinc=True, origem='web') for a in o.get('ap', [])],
                                reservado=o['id'] in REQ_DA_OS and o['etapa'] != 'A liberar')
+    # EX-38: instrução sintética validada no contrato 6218879317; não é recomendação agronômica.
+    for oid in ('OS-0421', 'OS-0424'):
+        if oid in ordens:
+            ordens[oid]['instrucao'] = dict(vazao=100, origem='instrução da O.S. vigente (demonstração)', versao=ordens[oid]['versao'])
     # reservas vigentes (liberadas e ainda não entregues): REQ-039 da OS-0424 e REQ-040 da OS-0425
     for oid, rid in (('OS-0424', 'REQ-039'), ('OS-0425', 'REQ-040')):
         o = ordens.get(oid)
@@ -114,11 +118,13 @@ function cenLoteVencido(l, hoje) {
 
 
 def js_prefixo():
+    import dados_cad as _DC
+    capacidades = {a['id']: dict(tanque=a.get('tanque'), nome=a['nome']) for a in _DC.ATIVOS if a.get('classe') == 'Pulverizador'}
     import dados_producao   # regras da produção (producao.js) em toda página do estado (D-22): O.S., Mapa, Estoque e app têm prPodeEncerrar
     import alocacao as _AL  # 14/10: troca de recurso na O.S. vale no painel, na Carga do PCP, na Manutenção e no app
     import dados_ben        # regras do beneficiamento (ben.js) depois: a qualidade do lote de produção e as decisões valem em toda página do estado
     # análise de solo (SOLO-01): só as funções de solo.js (regras e comandos sobre c.solo); os dados (SOLO0) entram só no AG-02 e no Planejar safra
-    return ('const CEN0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + VALIDADE_JS + open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read() + '\n'
+    return ('const CEN_PREP_ATIVOS = ' + json.dumps(capacidades, ensure_ascii=False) + ';\n' + 'const CEN0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n' + VALIDADE_JS + open(os.path.join(HERE, 'cenario.js'), encoding='utf-8').read() + '\n'
             + dados_producao.js_regras() + dados_ben.js_regras() + open(os.path.join(HERE, 'solo.js'), encoding='utf-8').read() + '\n'
             + _AL.js())   # alocação vigente (semana do PCP + trocas de recurso das O.S.) em toda página do estado
 

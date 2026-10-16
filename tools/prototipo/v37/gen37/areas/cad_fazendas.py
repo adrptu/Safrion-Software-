@@ -110,6 +110,9 @@ CAMPOS_FAZ=[txt('nome','Nome da fazenda'),
             sel('sit','Situação',['Ativa','Inativa'],**{'def':'Ativa'})]
 
 # ---------------- JS comum às duas telas (regras do talhão, campos condicionais, cenário salvo) ----------------
+# credito_docs.js (revisão do Codex 6220145128, S2): as duas telas migram o cadastro salvo antes da mudança de 16/10 (CAR, matrícula,
+# módulos fiscais e contrato vão para o Crédito pelo id estável da fazenda) antes de ler o cadastro
+CREDJS=open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'credito_docs.js'),encoding='utf-8').read()+'\n'
 TALJS=r'''
 const TOL=0.01, NOVA_FAZ=__NOVA__, CKEY='talhao-os-cd01-v1';
 function r1(n){ return Math.round(Number(n)*10)/10; }
@@ -286,14 +289,14 @@ def cd01():
     corpo=bloco_cad(abas('cdt',['Fazendas e talhões','Ambiental','Água'],'Cadastros da fazenda'),
                     pane('cdt',0,p0)+pane('cdt',1,ga)+pane('cdt',2,gw),'Fazendas, áreas e talhões')
     js({},
-       TALJS+'const FUSO_UF='+json.dumps(DC.FUSO_UF,ensure_ascii=False)+', FUSO_PAD='+json.dumps(DC.FUSOS[0],ensure_ascii=False)
+       CREDJS+TALJS+'const FUSO_UF='+json.dumps(DC.FUSO_UF,ensure_ascii=False)+', FUSO_PAD='+json.dumps(DC.FUSOS[0],ensure_ascii=False)
        +', ALOC='+json.dumps(_aloc(),ensure_ascii=False)+', NPARC='+json.dumps(_nparc())+', MAPA='+json.dumps([g[0] for g in GEO_MAPA])
        +', MAPA_FID='+json.dumps(MAPA_FID)+', MAPA_LG='+json.dumps([p[0] for p in DC.LG_PIVOS])+', LG_SINT='+json.dumps(__import__('dados_lagoa_fonte').ROTULO,ensure_ascii=False)+';\n'+r'''
 function tals(rows){ const o=[]; rows.forEach(g=>{ if(g.kids) g.kids.forEach(k=>o.push(k)); else o.push(g); }); return o; }
 function arvore(fz,ts){ const gs=fz.map(f=>({id:'F_'+f.id,ro:true,v:{t:f.v.nome,fid:f.id},s:{},p:{},kids:[]}));
   ts.forEach(t=>{ let g=gs.find(x=>x.v.t===t.v.faz); if(!g){ g={id:'F_'+t.v.faz,ro:true,v:{t:t.v.faz,fid:''},s:{},p:{},kids:[]}; gs.push(g); } g.kids.push(t); }); return gs; }
 // fazendas e talhões salvos (nesta ou na tela do detalhe) voltam ao abrir a tela
-function cadIni(self){ if(self._ini) return; self._ini=1; const st=cadLer(); if(!st||!st.faz||!st.tal) return;
+function cadIni(self){ if(self._ini) return; self._ini=1; credMigrar(); const st=cadLer(); if(!st||!st.faz||!st.tal) return;
   const fz=st.faz.map(x=>({id:x.id,v:Object.assign({},x.v),s:{},p:{}})); const tl=st.tal.map(x=>({id:x.id,v:Object.assign({},x.v),s:{},p:{}}));
   // registro novo do cadastro (ex.: Lagoa Grande, do KML) entra mesmo quando o navegador guardou um estado de antes dele
   GR('g_faz').rows.forEach(r=>{ if(!fz.some(x=>x.id===r.id)) fz.push({id:r.id,v:Object.assign({},r.v),s:{},p:{}}); });
@@ -366,8 +369,11 @@ function PREVALS(self,v){ cadIni(self); cadActsIni(self); const fz=RW(self,'g_fa
       const n=ina?0:(NPARC[r.id]||0); V.parc=n; r.p.parc=[{k:(n?'txt':'mut'),t:String(n)}]; r.s.parc=String(n);
       vazio(r,['posse','area','nt']);
       const S=talSit(r); r.p.est=S.p; r.s.est=S.t; }); });
-  // filtro rápido da lista (talhões): Todos · A resolver · Inativos
-  cadQf(self,v,'g_tal','cd_qf',[{k:'res',t:'A resolver',f:r=>!!talSit(r).res},{k:'inat',t:'Inativos',f:r=>r.v.sit==='Inativo',oz:true}]);
+  // filtro rápido da árvore: Todos · A resolver · Inativos. A fazenda (linha-pai) é registro: entra pela própria situação (fp), conta junto
+  // com os talhões e, sem talhão a resolver, aparece recolhida (revisão do Codex 6220145128, S3: fazenda incompleta sem talhões sumia)
+  const fzDe=g=>fz.find(x=>x.id===g.v.fid)||null;
+  cadQf(self,v,'g_tal','cd_qf',[{k:'res',t:'A resolver',f:r=>!!talSit(r).res,fp:g=>{ const f=fzDe(g); return !!f&&fazPend(f.v); }},
+    {k:'inat',t:'Inativos',f:r=>r.v.sit==='Inativo',fp:g=>{ const f=fzDe(g); return !!f&&f.v.sit==='Inativa'; },oz:true}],{pais:true});
   // mapa: cor pela situação do polígono; talhão que não é da fazenda do mapa não aparece nele
   const fm0=fz.find(f=>f.id===MAPA_FID); const nm=fm0?fm0.v.nome:''; v.cd_mapa_faz=nm;
   MAPA.forEach(id=>{ const r0=g2find(tr,id); const r=r0&&r0.v.faz===nm?r0:null; const V=r?r.v:null; const tem=V&&isnum(V.calc); const ina=V&&V.sit==='Inativo'; const di=V&&difInfo(V);
@@ -391,7 +397,7 @@ function PREVALS(self,v){ cadIni(self); cadActsIni(self); const fz=RW(self,'g_fa
   if(mot.length) ps.push(mot.length+(mot.length>1?' diferenças sem motivo':' diferença sem motivo'));
   if(nAg) ps.push(nAg+(nAg>1?' outorgas a renovar':' outorga a renovar'));
   cadEstado(v,'cd',ps.length?ps.join(' · '):'Cadastro em dia',agV.length?'red':(ps.length?'yellow':'green'));
-  const aba=cadAbas(self,v,'cdt','cd_aba',[{slug:'talhoes',n:ts.length,cor:(sem.length||mot.length||docs.length)?'yellow':''},
+  const aba=cadAbas(self,v,'cdt','cd_aba',[{slug:'talhoes',n:ts.length+tr.filter(g=>Array.isArray(g.kids)).length,cor:(sem.length||mot.length||docs.length)?'yellow':''},
     {slug:'ambiental',n:am.length,cor:''},{slug:'agua',n:ag.length,cor:agV.length?'red':((agA.length||agR.length)?'yellow':'')}]);
   self._cdaba=aba;
   // mapa: Santa Rita (desenho) ou Lagoa Grande (pivôs do KML)
@@ -559,12 +565,12 @@ def cd01det():
     fazjs=[dict(id=r['id'],v=r['v']) for r in fr]
     vers={t:[list(x) for x in DC.geo_vers(t)] for t in DC.CALC}
     safo=[dict(sid=s['id'],nome=s['nome'],estado=s['estado'],faz=s['fazenda']) for s in SAF_ABERTAS]
-    js({},TALJS+'const FAZ0='+json.dumps(fazjs,ensure_ascii=False)+', VERS0='+json.dumps(vers,ensure_ascii=False)+', SAFOPEN='+json.dumps(safo,ensure_ascii=False)
+    js({},CREDJS+TALJS+'const FAZ0='+json.dumps(fazjs,ensure_ascii=False)+', VERS0='+json.dumps(vers,ensure_ascii=False)+', SAFOPEN='+json.dumps(safo,ensure_ascii=False)
        +', MOTIVOS='+json.dumps(DC.MOTIVOS_DIF,ensure_ascii=False)
        # área cultivável da época de cada safra encerrada (registro fechado não é recalculado com a área atual)
        +', CULT_EP='+json.dumps({s['id']:{t:float(ha) for t,ha,*_ in D.TALHOES} for s in D2.SAFRAS if s['ro']})+';\nlet FAZL=FAZ0;\n'+r'''
 const HATCH='repeating-linear-gradient(45deg,#C9CFCB 0 7px,#EEF1EE 7px 14px)';
-function detIni(self){ if(self._ini) return; self._ini=1; const st=cadLer();
+function detIni(self){ if(self._ini) return; self._ini=1; credMigrar(); const st=cadLer();
   if(st&&st.faz){ const f0=FAZ0; FAZL=st.faz.map(x=>({id:x.id,v:Object.assign({},x.v)})); f0.forEach(f=>{ if(!FAZL.some(x=>x.id===f.id)) FAZL.push({id:f.id,v:Object.assign({},f.v)}); }); }
   if(st&&st.tal){ const t0=GR('g_idt').rows; const tl=st.tal.map(x=>({id:x.id,v:Object.assign({},x.v),s:{},p:{}}));
     t0.forEach(r=>{ if(!tl.some(x=>x.id===r.id)) tl.push({id:r.id,v:Object.assign({},r.v),s:{},p:{}}); }); GR('g_idt').rows=tl; }

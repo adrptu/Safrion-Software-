@@ -143,6 +143,13 @@ Todos **ficam**:
   - grade do motor com Tabela | Cartões e filtro rápido pela Situação;
   - uma linha por documento e fazenda (ou parceiro).
 - **Fonte:** os mesmos dados sintéticos de `dados_cad.FAZENDAS` e a condição documental do CRE-0102 (certidão exigida pelo Banco Terra). Nada se perdeu.
+- **Vínculo com o cadastro** (`credito_docs.js`, revisão do Codex 6220145128):
+  - cada documento de fazenda leva o id estável dela (`dc_car_SR`, `dc_mat_SR`, `dc_arr_BV`…), e o titular mostrado é o nome atual;
+  - CAR e matrícula de cada fazenda ativa, e o contrato de quem não tem posse própria, seguem o cadastro atual (inclusive a fazenda criada);
+  - o cadastro salvo no navegador antes da mudança (com `car`, `matr`, `mf`, `arrend`, `custo` e `pend`) migra uma vez para o Crédito, ao abrir o CD-01, o CD-01det ou o Crédito. A migração não sobrescreve o que já foi editado no Crédito, e os campos saem do cadastro;
+  - a edição no Crédito fica gravada por id do documento (`safrion-credito-docs-v1`);
+  - documento automático tem tipo e fazenda fixos (só leitura no formulário e recusados no comando). Para outro documento, "Incluir documento";
+  - só vale como salvo o que o navegador gravou: se falha, o formulário volta com o rascunho e o motivo (revisão do Codex 6221423767).
 
 | Documento | Fazenda | Dado |
 |---|---|---|
@@ -162,7 +169,7 @@ Todos **ficam**:
 
 ## Verificação
 
-`cadastros_padrao_test.py`, partes P6a a P6e:
+`cadastros_padrao_test.py`, partes P6a a P6e, e `cadastros_rev1_test.py`, R1a a R1f (cadastro antigo migrado, fazenda renomeada e criada, edição gravada sem reverter nem duplicar):
 - formulários sem os campos que saíram;
 - Crédito com os documentos e os mesmos números de `dados_cad`.
 

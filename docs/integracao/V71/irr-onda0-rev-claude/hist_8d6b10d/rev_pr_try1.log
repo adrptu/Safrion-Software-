@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr79/docs/integracao/V71/irr-onda0-rev-claude/irr_onda0_rev_test.py", line 68, in <module>
+    reset(); abrir('IR-03det.dc.html#OS-0419'); d0 = P2def()
+                                                     ^^^^^^^
+  File "/tmp/claude-0/pr79/docs/integracao/V71/irr-onda0-rev-claude/irr_onda0_rev_test.py", line 51, in P2def
+    def P2def(): return estado("Math.round(irrDef(s,'P2')*10)/10")
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr79/docs/integracao/V71/irr-onda0-rev-claude/irr_onda0_rev_test.py", line 50, in estado
+    def estado(expr): return J(f"(()=>{{const s=irrGet(); return ({expr});}})()")
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr79/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: ReferenceError: irrGet is not defined
+    at <anonymous>:1:15
+    at <anonymous>:1:69

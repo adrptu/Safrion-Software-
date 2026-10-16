@@ -1,0 +1,13 @@
+ds_1610_test.py rc=0 259s :: RESULTADO: 14 ok · 0 falhas
+cartoes_test.py rc=0 538s :: RESULTADO: 70/70
+visoes_v23_codex_test.py rc=1 20s :: RESULTADO: 22/23
+visoes_v23_test.py rc=0 758s :: RESULTADO: 370/370
+visoes_perfil_test.py rc=0 30s :: RESULTADO: 13/13
+getest.py rc=0 42s :: 
+botoes_retorno_test.py rc=1 17s :: 
+retorno_acao_test.py rc=0 31s :: RESULTADO: 8/8
+textos_soltos_test.py rc=0 119s :: OK    T PL-02: fora da vista · ““20 dias antes do plantio · DAP −20 · previsto para 25/09” — o produto” 
+links_ocultos_test.py rc=0 4s :: OK    E4 nenhuma mensagem de produto aponta "Produção › Cargas e recebimento" (o caminho é "Agrícola › Recebimento", 13/10) 
+popover_390_test.py rc=0 60s :: RESULTADO: 9/9
+componentes_test.py rc=0 269s :: RESULTADO: 3 ok · 0 falhas (matriz)
+FIM

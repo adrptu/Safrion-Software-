@@ -1,0 +1,15 @@
+== /tmp/claude-0/pr79
+1 término: OS-0419 Em conferência · confira área, tempo e medição; sem crédito da passada incompatível no balanço. · etapa Em conferência · conf Área e tempo a conferir · crédito []
+2 IR-01 Pivô 2: Pivô 2 11,2 mm Conferir medição a definir
+3 IR-02 painel P2: DÉFICIT HOJE 11,2 mm LÂMINA BRUTA 13,4 mm (eficiência 90 %) PASSADAS 2 de 6,7 mm · limite 12,0 mm VOLUME E DURAÇÃO 10.720 m³ · 9,0 h por passada Tarefa única OS-0422 já existe · A liberar · a definir · nenhuma ordem nova. Cancelar Abrir OS-0422
+RESULTADO Q5: programar não oferecido · aviso de água não validada: False
+== /tmp/claude-0/pr79ec65
+1 término: OS-0419 conferida e encerrada · 8.480 m³ = 10,6 mm no setor (−1,9 %, tolerância 3 %) · déficit do Pivô 2 agora 1,7 mm. · etapa Encerradas · conf Automática · crédito [{'q': 1202, 'os': 'OS-0419', 'n': 1, 'vol': 8480, 'ha': 80, 'ef': 90, 'cob': 80, 'txt': 'volta completa', 'prov': False}]
+2 IR-01 Pivô 2: Pivô 2 1,7 mm Conferir medição a definir
+3 IR-02 painel P2: DÉFICIT HOJE 1,7 mm LÂMINA BRUTA 6,7 mm (eficiência 90 %) PASSADAS 1 de 6,7 mm · limite 12,0 mm VOLUME E DURAÇÃO 5.360 m³ · 9,0 h Tarefa única OS-0422 já existe · A liberar · a definir · nenhuma ordem nova. Cancelar Abrir OS-0422
+RESULTADO Q5: programar não oferecido · aviso de água não validada: False
+== /tmp/claude-0/pr79base
+1 término: OS-0419 conferida e encerrada · 8.480 m³ = 10,6 mm no setor (−1,9 %, tolerância 3 %) · déficit do Pivô 2 agora 1,7 mm. · etapa Encerradas · conf Automática · crédito [{'q': 2073, 'os': 'OS-0419', 'n': 1, 'vol': 8480, 'ha': 80, 'ef': 90, 'cob': 80, 'txt': 'volta completa', 'prov': False}]
+2 IR-01 Pivô 2: Pivô 2 1,7 mm Conferir medição a definir
+3 IR-02 painel P2: DÉFICIT HOJE 1,7 mm LÂMINA BRUTA 1,84 mm (eficiência 90 %) PASSADAS 1 de 1,84 mm · limite 12,0 mm VOLUME E DURAÇÃO 1.476 m³ · 2,5 h Tarefa única OS-0422 já existe · A liberar · a definir · nenhuma ordem nova. Cancelar Abrir OS-0422
+RESULTADO Q5: programar não oferecido · aviso de água não validada: False

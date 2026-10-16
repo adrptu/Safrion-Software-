@@ -1,0 +1,18 @@
+OK    1 IR-03det#OS-0423:conflito abre "Resolver conflito" com a parada da B3 e as opções 15:00–17:00 e 21:00–23:00 
+OK    2 aplicar a janela libera pela prontidão (LIB-2292), sem aprovação 
+OK    3 recarregar: a OS-0423 continua Liberadas (estado gravado) com janela 15:00–17:00 
+OK    4 IR-03 lê o mesmo estado: OS-0423 Liberadas, sem conflito 
+OK    5 Mapa Integrado: T7 sem "irrigação em conflito" (amarelo pela mancha do satélite) 
+OK    6 Mapa camada Irrigação: T7 "programada · hoje 15:00" e P2 "conferir medição · OS-0394" 
+OK    7 IR-03det#OS-0394:conferir abre a conferência com 1.206 m³ medidos × 1.254 m³ estimados 
+FALHA 8 OS-0394 encerrada · hidrômetro prevalece, sem novo crédito (P2 segue 11,2 mm) ['', 'Agrícola › Irrigação › Ordens › OS-0394 OS-0394 · Irrigação · Pivô 2 Em conferência · Divergência · −3,8 % Conferir medição']
+OK    9 OS-0419 Iniciar → Em execução (início hoje 20:02, EX-5120) 
+FALHA 10 recarregar: segue Em execução e o primário é Registrar término antecipado (Pausar só agora) Agrícola › Irrigação › Ordens › OS-0419 OS-0419 · Irrigação · Pivô 2 Em execução Confirmar término
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr79base/tools/prototipo/v37/gen37/_rev_claude_irr_fluxo_localstorage.py", line 76, in <module>
+    chk('11 término não inventa área/telemetria: campos vazios e motivo temporal necessário', J("document.querySelector('#tm_cob').value") == '' and J("document.querySelector('#tm_vol').value") == '' and 'Simulado' in d, d[:300])
+                                                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr79base/tools/prototipo/v37/gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

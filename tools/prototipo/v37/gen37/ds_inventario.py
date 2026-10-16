@@ -14,6 +14,10 @@ BASE = os.path.join(HERE, 'ds_inventario_base.json')
 EXCECOES = {
     'mapa.py': 'mapa e camadas: peça própria do Mapa (PLA-01), sem tabela do motor',
 }
+# exceção contada (só aquelas ocorrências, o resto do arquivo segue na catraca): arquivo → (regra, quantas, motivo)
+EXC_CONTA = {
+    'os_campo.py': ('tabela', 1, 'ficha impressa da OS-0424: documento de papel, sem ordenar nem filtrar (exceção TAB-08 aceita pelo Codex, 6223504783)'),
+}
 RE_CSS = re.compile(r'([^{}"\'\n]*\.g2[\w-]*[^{}"\'\n]*)\{')
 RE_TAB = re.compile(r'role=\\?"table\\?"|role="table"')
 RE_CARD = re.compile(r'class=\\?"[^"]*\b(?:[a-z0-9]+-)?(?:card|cartao|cartoes)\b')
@@ -27,6 +31,7 @@ def varre():
         css = [s for s in css if not re.search(r'self\.|const |\|\||;|=>', s)]   # JS (self.state.g2…), não CSS
         css = [s for s in css if re.search(r'\.[a-z][\w-]*\s*[^,]*\.g2', s) or s.startswith('.g2')]
         tab = len(RE_TAB.findall(txt)); card = len(RE_CARD.findall(txt))
+        if nome in EXC_CONTA and EXC_CONTA[nome][0] == 'tabela': tab = max(0, tab - EXC_CONTA[nome][1])
         if css or tab or card:
             out[nome] = dict(css=len(css), tabela=tab, cartao=card, exemplos=css[:6], excecao=EXCECOES.get(nome, ''))
     return out

@@ -1,0 +1,87 @@
+     painel OS-0421 · Adjuvante: ['Adjuvante espalhante\nAdjuvantes · padrão do plano v6', '0,25 L/ha', '87,5 L', 'Sem registro', 'Sem requisição · previsto para o saldo 40 L · falta para terminar 40 L']
+OK    A6a painel OS-0421: USADO do Adjuvante = "Sem registro" (nem 47,5 L nem 0 L)
+OK    A2-0 painel OS-0421: falta para terminar Fungicida A = 15 L (0,5 × 160 − 65) e Adjuvante = 40 L (0,25 × 160 − 0)
+OK    P2 painel OS-0421: preparo 3.000 L · 100 L/ha · 30 ha por carga · 6 cargas · última 10 ha · Fungicida A 15 L · Adjuvante 7,5 L (oráculo 160 ÷ 30)
+OK    A6b MB-01 OS-0421: Adjuvante "Consumo sem registro", sem 47,5 L; falta 15 L e 40 L como no painel
+OK    A6c MB-02det OS-0421: Adjuvante sem número de consumo inventado (sem "consumido 0" e sem 47,5 L); falta igual ao painel
+OK    P2 MB-02det OS-0421: o mesmo preparo do painel (6 cargas · última 10 ha · 15 L · 7,5 L)
+OK    A1a ficha OS-0424: 5 cargas = 4 × (3.000 L, 30 ha, 15 L) + (800 L, 8 ha, 4 L); total 12.800 L · 128 ha · 64 L
+OK    A1e ficha: a última carga continua marcada como parcial (base: "5 · parcial")
+OK    A1f ficha: mantém a instrução do caldeiro "complete com água até o volume da carga… última carga é proporcional" (base)
+OK    A1c impressão (media print): ações ocultas e tabela inteira visível (5 cargas + total, todas as linhas com altura e dentro de 794 px)
+     PDF: /tmp/claude-0/pr77/docs/integracao/V71/ex38-rev-claude/r2/pdf/ex38_ficha_0424_pr.pdf · 2857 caracteres · [' 1                3.000 L de           30 ha         Fungicida A 15 L', ' 2                3.000 L de           30 ha         Fungicida A 15 L', ' 3                3.000 L de           30 ha         Fungicida A 15 L', ' 4                3.000 L de           30 ha         Fungicida A 15 L', ' 5 · parcial      800 L de calda       8 ha          Fungicida A 4 L', ' Saldo            12.800 L             128 ha        Fungicida A 64 L']
+OK    A1d PDF impresso (printToPDF + pdftotext): 5 linhas de carga e o total 12.800 L · 128 ha · 64 L
+OK    A1b instrução 120 L/ha → ficha com 6 cargas: 5 × (3.000 L, 25 ha, 12,5 L) + (360 L, 3 ha, 1,5 L); total 15.360 L · 128 ha · 64 L
+OK    A1b2 a mesma mudança chega ao app e ao painel da OS-0424 (25 ha por carga · 6 cargas · última 3 ha · 12,5 L)
+OK    A1g tanque do PJ-3030 = 2.500 L no cadastro (montagem mutante) → ficha com 6 cargas: 5 × (2.500 L, 25 ha, 12,5 L) + (300 L, 3 ha, 1,5 L)
+OK    A1h tanque 2.500 L: OS-0421 com 7 cargas (160 ÷ 25 = 6,4) · Fungicida A 12,5 L · Adjuvante 6,25 L, igual no painel e no MB-02det
+     Estoque (outra tela) entrega a REQ-039: 65 L de Fungicida A entregues a Marcos (OS-0424). Aguarda confirmação no app.
+OK    A8a teclado: Tab até "Confirmar recebimento" e "Carga 1 preparada"; Espaço e Enter acionam; foco visível em todos os alvos
+OK    A5a marcar 2 cargas não grava aplicação nem consumo: cenário idêntico (rev, apontamentos, realizado 0, saldo 128, custódia 65, consumido 0, movimentos)
+OK    A5b o retorno diz que a marcação é só desta tela e não é aplicação (sem "Salvo no aparelho")
+OK    A5c painel OS-0424 depois das marcações: USADO 0 L, nenhum apontamento, Liberadas
+OK    A5d recarregar a tela: a marcação não persiste (0 de 5 cargas preparadas)
+OK    A5e preparo diferente (instrução 120 L/ha gravada por outra tela) não reaproveita as 2 marcações: 0 de 6
+OK    A5f versão diferente (v2 sem instrução própria): preparo bloqueado com motivo, sem cargas e sem "100 L/ha"/"120 L/ha"
+OK    A3a OS-0430 liberada pela tela (v1 sem instrução de vazão): "Vazão não informada · conferir instrução", sem cargas nem 100 L/ha inventados
+OK    A3b OS-0424 em v2 sem instrução própria: painel, MB-02det e ficha avisam "Vazão não informada", ficha sem cargas e Imprimir indisponível
+     OS-0504 recursos: L
+OK    A4a OS-0504 (Lagoa, pulverização sem pulverizador alocado): "Sem conjunto · alocar pulverizador", sem tanque/cargas padrão
+OK    A4b OS-0424 sem pulverizador (PJ trocado por distribuidor): "Sem conjunto" no painel, MB-02det, app e ficha; nenhum 3.000 L/100 L/ha inventado
+     após o apontamento (saldo, custódia, consumido, turnos): [140, 57, 103, 5] · Apontamento do dia 5: 20 ha (provisório) · usado: Fungicida A 8 L. Saldo 140 ha; a ordem continua em execução. Divergência de consumo/dose: Fungicida A planejado 10 L × informado 8 L; Adjuvante espalh
+OK    A8b teclado: Tab até a linha, Enter abre; Tab/Enter até Salvar apontamento; foco visível em cada alvo
+     falta para terminar · painel {'Fungicida A': Decimal('13'), 'Adjuvante espalhante': Decimal('35')} · MB-01 {'Fungicida A': Decimal('13'), 'Adjuvante espalhante': Decimal('35')} · MB-02det {'Fungicida A': Decimal('13'), 'Adjuvante espalhante': Decimal('35')}
+     USADO do Adjuvante depois de informar 0 L no apontamento (o 0 fora da requisição não é gravado em cons): ['Adjuvante espalhante\nAdjuvantes · padrão do plano v6', '0,25 L/ha', '87,5 L', 'Sem registro', 'Sem requisição · previsto para o saldo 35 L · falta para terminar 35 L']
+OK    A2a apontamento de 20 ha com 8 L informados: falta Fungicida A = 0,5 × 140 − 57 = 13 L e Adjuvante = 0,25 × 140 = 35 L, iguais no painel, MB-01 e MB-02det
+OK    A2b preparo do saldo novo igual no painel e no MB-02det: 140 ha → 5 cargas · última 20 ha
+     app sem sinal: Turno fechado: 20 ha em 3 h · salvo no aparelho, envia quando houver sinal. A ordem continua em execução. Divergência de consumo/dose: Adjuvante espalhante plan
+     sem sinal (saldo, custódia, pendente ha): [160, 55, [20]] · falta painel {'Fungicida A': Decimal('15'), 'Adjuvante espalhante': Decimal('35')} · MB-01 {'Fungicida A': Decimal('15'), 'Adjuvante espalhante': Decimal('35')} · MB-02det {'Fungicida A': Decimal('15'), 'Adjuvante espalhante': Decimal('35')}
+     sem sinal · painel Fungicida A (colunas): ['Fungicida A\nFungicidas · padrão do plano v6', '0,5 L/ha', '175 L', '95 L', 'Em custódia · Marcos · consumo no aparelho, aguardando sinal · previsto para o saldo 70 L · falta para terminar 15 L · consumo no aparelho pendente de sincronização'] · trilha: Reservado 175 L · lote F26-02 | › Entregue 160 L (32 × galão 5 L) a Marcos | › Confirmado no app | › Consumido 95 L | › Em custódia 65 L | › Devolvido | Adjuvante espalhante | Adjuvantes · padrão do plano v6 | 0,25 L/ha | 87,5 L | Sem regis
+OK    A2g sem sinal, a linha do painel é coerente: USADO e "falta" usam a mesma custódia da trilha (osReqVis: a baixa do aparelho volta até o envio)
+OK    A2c sem sinal, as três telas mostram a mesma falta (consistência)
+OK    A2d sem sinal, a falta não cresce pelo consumo já baixado no aparelho: 0,5 × (160 − 20) − 55 = 15 L (não 0,5 × 160 − 55 = 25 L)
+     MB-01 sem sinal: OS-0421 · Pulverização · Fungicida 1ª aplicação | T1+T2 · 350 ha · janela 20–26/09 | Em execução | Pronta para o próximo turno | Realizado 190 de 350 ha · saldo 160 ha · +20 ha no aparelho, aguardando sinal | Iniciar turno | Abrir ordem | Fungicida A · lote F26-02 · galão 5 L · com você 55 L · previsto para o saldo 70 L · falta para terminar 15 L · consumo no aparelho pendente de sincronização | A
+OK    A2f sem sinal, o preparo do MB-02det é do que falta aplicar (160 − 20 = 140 ha → 5 cargas · última 20 ha), não dos 160 ha do servidor
+     sinal volta: 1 registro enviado ao voltar o sinal.
+OK    A2e com sinal: saldo 140 ha, custódia 55 L → falta 15 L no painel e no MB-01
+     salvo pela base: Ocorrência OC-501 registrada. · v 7 · rev 1 · instrucao na OS-0424: False
+OK    A7a versão nova lê o cenário salvo pela base sem perder nada (mesma v e rev, REQ-039 com 65 L confirmados, ocorrência registrada)
+OK    A7b sem instrução gravada no cenário antigo, a mesma versão usa a instrução da semente: app com 5 cargas de 30 ha e "Recebido · 65 L"
+OK    A7c MB-01 OS-0424 com o cenário antigo: 65 L com você → falta para terminar 0 L (0,5 × 128 = 64 ≤ 65)
+     X1 saldo após 0,2 + 39,8 ha: 120.00000000000001 · Apontamento do dia 5: 0,2 ha (provisório) · usado: Fungicida · Apontamento do dia 6: 39,8 ha (provisório) · usado: Fungicid
+OK    X1 saldo 160 − 0,2 − 39,8 = 120 ha: preparo "4 cargas · última 30 ha" no painel e no MB-02det (sem 5ª carga de 0 ha)
+     X2 Apontamento do dia 5: 140 ha (provisório) · usado: Fungicida A 65 L. Saldo 20 ha · RETIRADA E FICHAS DE EXECUÇÃO | 3.000 L · 100 L/ha · 30 ha por carga · 1 carga · última 20 ha · Fungicida A 15 L por carga cheia · Adjuvante espalhante 7,5 L por 
+OK    X2 saldo de 20 ha: o texto diz "1 carga" (não "1 cargas")
+     X3 app: ['Confirmar recebimento', False] · CALDEIRO · PREPARO | Vazão não informada · conferir instrução da versão vigente | previsto para o saldo 64 L · falta para terminar 0 L | Preparo indisponível | Tanque: — | Área: — | Complete com água até o volume do tanque, na ordem da instrução liberada. | 0 de 0 cargas pr
+OK    X3 app OS-0424 entregue e versão sem instrução: "Confirmar recebimento" continua disponível (a trava do preparo não bloqueia a custódia)
+     X4 OB-0112 insumo: [] · tot [[0, 881]]
+     X4 (informativo): OB-0112 não abre painel na O.S. (beneficiamento); a divergência com cenOsSup (total fixo da versão) fica latente, sem tela afetada nesta fatia
+     X5 OS-0430 (A liberar) Glifosato: ['Glifosato 480\nHerbicidas · padrão do plano v6', '2 L/ha', '320 L', 'Sem registro', 'Reserva ao liberar']
+     X6 OS-0415 (Encerradas) Glifosato: ['Glifosato 480\nHerbicidas', '2 L/ha', '192 L', 'Sem registro', 'Consumo conferido']
+OK    X5 OS-0430 A liberar: situação "Reserva ao liberar" (sem "Sem requisição · falta…")
+OK    X6 OS-0415 Encerradas: situação "Consumo conferido" (sem "previsto 0 L · falta 0 L")
+     X7 ficha após 30 ha: cabeçalho OS-0424 · Fungicida · T1-B · Soja 62 X | 128 ha na ordem · preparo abaixo somente do saldo · janela 24/09 · 06:00–11:00 · responsável Marcos | V · total (Decimal('9800'), Decimal('98'), Decimal('49')) · cargas 4
+OK    X7 ficha depois de 30 ha: cabeçalho diz que o preparo é do saldo e a tabela traz 3 × (3.000 L, 30 ha, 15 L) + (800 L, 8 ha, 4 L); saldo 9.800 L · 98 ha · 49 L
+OK    N5 ficha: conjunto com trator e pulverizador ("Trator 04 + Pulverizador PJ-3030 36 m")
+     X8 (saldo, custódia, ha no aparelho): [140, 0, 140] · MB-01: OS-0421 · Pulverização · Fungicida 1ª aplicação | T1+T2 · 350 ha · janela 20–26/09 | Em execução | Área feita · aguardando sinal | Realizado 210 de 350 ha · saldo 140 ha · +140 ha no aparelho, aguardando sinal | Ver envios | Abrir ordem | Fungicida A · lote F26-02 · galão 5 L · consumido 160 L · previsto para o saldo 0 L · falta para terminar 0 L · consumo no aparelho pendente de sincronização | Adjuvante espalhante 
+OK    X8 área toda feita no aparelho (140 de 140 ha) e custódia 0: MB-01 não pede mais produto (falta 0 L), não 70 L
+OK    N1 MB-01 OS-0424 reservada: "retirar 65 L (13 × galão 5 L)"
+     N2: Turno fechado: 2 ha em 1 h. A ordem continua em execução. Divergência de consumo/dose: Fungicida A planejado 1 L × infor
+OK    N2 MB-01 OS-0421 em conferência: "em conferência · relatado 70 L · com você 65 L"
+OK    N3 app em v2: "Conferir preparo na O.S." com aria-disabled="true", alcançado por Tab com foco visível; Enter mostra o motivo e não grava nada
+     Y1: [128, 50, [30]] Turno fechado: 30 ha em 2 h · salvo no aparelho, envia quando houver sinal. A ordem contin
+OK    Y1 duas abas sem sinal: 2 de 5 marcadas; a outra aba fecha 30 ha (15 L) → esta aba passa a 0 de 4 (98 ha: 30, 30, 30, 8) e falta 0 L (0,5 × 98 = 49 ≤ 50 com você)
+     Y1 sinal: 2 registros enviados ao voltar o sinal.
+OK    Y1b sinal volta: saldo 98 ha, custódia 50 L, falta 0 L no MB-01
+     Y2 ficha 70 L/ha: [(1, Decimal('3000'), Decimal('42.857'), Decimal('21.429')), (2, Decimal('3000'), Decimal('42.857'), Decimal('21.429')), (3, Decimal('2960'), Decimal('42.286'), Decimal('21.143'))] (Decimal('8960'), Decimal('128'), Decimal('64'))
+OK    Y2 vazão 70 L/ha: 3 cargas (128 ÷ 42,857); soma das cargas = saldo ±0,01 (64 L, 128 ha) e total 8.960 L
+     Y3 área toda no aparelho · painel falta {'Fungicida A': Decimal('0'), 'Adjuvante espalhante': Decimal('0')} · demanda do servidor (cenOsSup, Node no mesmo estado): {"bruto":70,"cust":55,"need":15,"sobra":0,"res":[]}
+     Y4 saldo residual: 1.4210854715202004e-14 · painel: RETIRADA E FICHAS DE EXECUÇÃO | 3.000 L · 100 L/ha · 30 ha por carga · 1 carga · última 0 ha · Fungicida A 15 L por carga cheia · Adjuvante espalhante 7,5 L por carga cheia · instrução da O.S. vigente ( · MB-02det: Preparo da versão vigente: 3.000 L · 100 L/ha · 30 ha por carga · 1 carga · última 0 ha · Fungicida A 15 L por carga cheia · Adjuvante espalhante 7,5 L por carg
+FALHA Y4 área toda apontada (saldo residual 1.4210854715202004e-14 ha): sem carga fantasma ("1 carga · última 0 ha") no painel nem no MB-02det  · observado: (1.4210854715202004e-14, 'RETIRADA E FICHAS DE EXECUÇÃO\n3.000 L · 100 L/ha · 30 ha por carga · 1 carga · última 0 ha · Fungicida A 15 L por carga cheia · Adjuvante espalhante 7,5 L por carga cheia · instrução da O.S. vigente (', 'Preparo da versão vigente: 3.000 L · 100 L/ha · 30 ha por carga · 1 carga · última 0 ha · Fungicida A 15 L por carga cheia · Adjuvante espalhante 7,5 L por carg')
+     390: {'OS-0424-app.dc.html': ({'doc': 390, 'body': 390, 'w': 390, 'fora': []}, []), 'MB-02det.dc.htmlOS-0421': ({'doc': 390, 'body': 390, 'w': 390, 'fora': []}, []), 'MB-02det.dc.htmlOS-0424': ({'doc': 390, 'body': 390, 'w': 390, 'fora': []}, [])}
+OK    A9a 390 px: app OS-0424 e MB-02det (OS-0421, OS-0424) sem rolagem horizontal e sem item cortado
+OK    A9b toque em "Carga 1 preparada" marca 1 de 5; alvo ≥ 44 × 44 px
+OK    A9c MB-02det OS-0424: toque em "Abrir ficha do caldeiro" (≥ 44 px) abre o app da OS-0424; ação do rodapé ≥ 44 px
+OK    A10 sem erro de JavaScript nas telas visitadas
+     foco: [('linha OS-0421 (45 Tab)', True), ('Registrar apontamento', True), ('Área feita', True), ('Usado de Fungicida A', True), ('Usado de Adjuvante', True), ('Salvar apontamento', True)]
+RESULTADO: 55/56 · FALHAS: Y4

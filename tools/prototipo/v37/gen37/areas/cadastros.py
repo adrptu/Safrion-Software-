@@ -194,18 +194,30 @@ function cadChip(t,n,on,go,todos){ return {t:t,n:String(n),on:on?'true':'false',
   st:CAD_QF_ST+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')}; }
 // filtro rápido da lista: Todos · A resolver · (Inativos só com N>0). Chama no PREVALS (esconde pelo r.sh) e cadQfPos no EXTRAVALS.
 // opc.extra: outro filtro da lista (ex.: Função) que vale junto; as contagens dos chips respeitam ele
+// opc.pais (CAD-03; revisão do Codex 6220145128, S3): a linha-pai também é registro (a fazenda na árvore Fazendas e talhões). Ela conta em
+// "Todos" e passa no filtro pela própria situação (def.fp), sem somar área nem inventar filho. O pai que passa sem nenhum filho passar
+// fica visível e recolhido (os filhos em dia não entram na lista filtrada; a seta os mostra); com filho passando, ele é o contexto do filho.
+// Voltar a "Todos" devolve a abertura de antes
 function cadQf(self,v,gid,key,defs,opc){ const q=self.state[key]||''; const rows=RW(self,gid); const regs=cadRegs(rows); const d=defs.find(x=>x.k===q); const SH='cadqf_'+gid;
-  const ex=(opc&&opc.extra)||null; const passa=r=>(!d||d.f(r))&&(!ex||ex(r));
+  const ex=(opc&&opc.extra)||null; const passa=r=>(!d||d.f(r))&&(!ex||ex(r)); const pais=!!(opc&&opc.pais);
   regs.forEach(r=>{ if(r.sh===SH) delete r.sh; if(!passa(r)&&!r.sh) r.sh=SH; });
-  const grp=l=>l.forEach(r=>{ if(Array.isArray(r.kids)){ if(r.sh===SH) delete r.sh; if((d||ex)&&!r.sh) r.sh=SH; grp(r.kids); } }); grp(rows);
-  const vis=regs.filter(r=>(!r.sh||r.sh===SH)&&(!ex||ex(r)));
-  const ch=[{k:'',t:defs.todos||'Todos',n:vis.length}].concat(defs.map(x=>({k:x.k,t:x.t,n:vis.filter(x.f).length,oz:x.oz}))).filter(c=>!(c.oz&&!c.n&&q!==c.k));
-  v[gid+'_cqf']=ch.map(c=>{ const on=q===c.k; return cadChip(c.t,c.n,on,()=>self.setState({[key]:(on&&c.k)?'':c.k}),!c.k); });
+  const gs=[]; const grp=l=>l.forEach(r=>{ if(Array.isArray(r.kids)){ gs.push(r); grp(r.kids); } }); grp(rows);
+  gs.forEach(g=>{ if(g.sh===SH) delete g.sh; const so=pais&&d&&d.fp&&d.fp(g)&&!cadRegs(g.kids).some(k=>!k.sh); if((d||ex)&&!g.sh&&!so) g.sh=SH; });
+  const vis=regs.filter(r=>(!r.sh||r.sh===SH)&&(!ex||ex(r))); const gv=pais?gs.filter(g=>!g.sh||g.sh===SH):[];
+  const ch=[{k:'',t:defs.todos||'Todos',n:vis.length+gv.length}].concat(defs.map(x=>({k:x.k,t:x.t,n:vis.filter(x.f).length+(x.fp?gv.filter(x.fp).length:0),oz:x.oz})))
+    .filter(c=>!(c.oz&&!c.n&&q!==c.k));
+  v[gid+'_cqf']=ch.map(c=>{ const on=q===c.k; return cadChip(c.t,c.n,on,()=>{ const nk=(on&&c.k)?'':c.k; if(pais) cadQfX(self,gid,defs.find(x=>x.k===nk)); self.setState({[key]:nk}); },!c.k); });
   return q; }
+// abertura da árvore ao trocar o filtro rápido (opc.pais): abre o pai com filho que passa e recolhe o que passa sozinho; sem filtro, volta a de antes
+function cadQfX(self,gid,d){ const st=g2st(self,gid); const SK='_cadqfx_'+gid;
+  if(!d){ if(self[SK]){ g2set(self,gid,{x:self[SK]}); self[SK]=null; } return; }
+  if(!self[SK]) self[SK]=Object.assign({},st.x||GR(gid).x0||{}); const x=Object.assign({},self[SK]);
+  const w=l=>l.forEach(g=>{ if(!Array.isArray(g.kids)) return; if(cadRegs(g.kids).some(d.f)) x[g.id]=true; else if(d.fp&&d.fp(g)) x[g.id]=false; w(g.kids); }); w(RW(self,gid));
+  g2set(self,gid,{x:x}); }
 // os chips entram no lugar do filtro rápido do motor (TAB-01: logo depois da busca; TAB-02: sem "x de y" com filtro rápido)
 function cadQfMotor(v,gid,ch,rot){ if(!ch||!ch.length) return; v[gid+'_qf']=ch; v[gid+'_hasqf']=true; v[gid+'_qfl']=rot||'Filtro rápido'; }
 function cadQfPos(self,v,gid,key){ cadQfMotor(v,gid,v[gid+'_cqf']); if(!(self.state[key]||'')) return;
-  v[gid+'_filtered']=true; v[gid+'_clear']=()=>{ g2set(self,gid,{q:'',f:{}}); self.setState({[key]:''}); }; }
+  v[gid+'_filtered']=true; v[gid+'_clear']=()=>{ g2set(self,gid,{q:'',f:{}}); if(self['_cadqfx_'+gid]) cadQfX(self,gid,null); self.setState({[key]:''}); }; }
 // "X de Y" da árvore conta registros (folhas) que passam na busca e nos filtros, não grupos
 function cadConta(self,v,gid){ const sp=GR(gid), st=g2st(self,gid), ad=self.state.added||{}; const regs=cadRegs(RW(self,gid));
   v[gid+'_all']=regs.filter(r=>!r.sh||String(r.sh).indexOf('cadqf_')===0).length; v[gid+'_count']=regs.filter(r=>g2match(r,sp,st,null,ad)).length; }

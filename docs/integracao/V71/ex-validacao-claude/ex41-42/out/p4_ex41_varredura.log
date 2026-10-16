@@ -1,0 +1,158 @@
+  1 AG-01.dc.html                 1.5s prim=['Programar vistoria'] destr=0 dis=0 cab=5/5/5 notas=0
+  2 AG-01det.dc.html              1.0s prim=['Abrir OS-0420'] destr=0 dis=0 cab=4/4/4 notas=0
+  3 AG-02.dc.html                 3.0s prim=['Registrar laudo'] destr=0 dis=0 cab=12/12/12 notas=0
+  4 AG-03.dc.html                 1.0s prim=[] destr=0 dis=0 cab=7/7/7 notas=0
+  5 AG-03det.dc.html              0.8s prim=['Abrir recomendação REC-014'] destr=0 dis=0 cab=5/5/5 notas=0
+  6 AG-04.dc.html                 1.1s prim=[] destr=0 dis=0 cab=6/6/6 notas=0
+  7 AG-04det.dc.html              1.9s prim=['Criar v4 com TS registrado'] destr=0 dis=0 cab=23/23/23 notas=0
+  8 AG-05.dc.html                 1.6s prim=[] destr=0 dis=0 cab=8/8/8 notas=0
+  9 AG-06.dc.html                 1.2s prim=[] destr=0 dis=0 cab=12/12/12 notas=1
+ 10 AG-07.dc.html                 4.1s prim=[] destr=0 dis=0 cab=6/6/6 notas=0
+ 11 BEN.dc.html                   1.8s prim=[] destr=0 dis=0 cab=5/5/5 notas=0
+ 12 BO-01.dc.html                 1.8s prim=['Simular área'] destr=0 dis=0 cab=12/12/12 notas=0
+ 13 BO-02.dc.html                 2.0s prim=['Conciliar pagamentos'] destr=0 dis=0 cab=9/9/9 notas=0
+ 14 CA-01.dc.html                 1.2s prim=['Preparar e emitir período'] destr=0 dis=0 cab=8/7/7 notas=0
+ 15 CA-01det.dc.html              1.0s prim=['Registrar avanço'] destr=0 dis=0 cab=13/13/13 notas=0
+ 16 CA-01x-os0420.dc.html         2.0s prim=['Acompanhar OM-0233'] destr=0 dis=0 cab=18/18/18 notas=0
+ 17 CA-02.dc.html                 2.2s prim=['Conferir 2 apontamentos'] destr=0 dis=0 cab=11/7/7 notas=0
+ 18 CA-03.dc.html                 1.7s prim=['Registrar ocorrência'] destr=0 dis=0 cab=8/7/7 notas=0
+ 19 CA-03det.dc.html              0.9s prim=['Acompanhar OM-0233'] destr=0 dis=0 cab=8/8/8 notas=0
+ 20 CA-04.dc.html                 1.3s prim=['Solicitar material da ordem'] destr=0 dis=0 cab=8/8/8 notas=0
+ 21 CARGA.dc.html                 1.9s prim=['Registrar pesagem'] destr=0 dis=0 cab=4/4/4 notas=0
+ 22 CD-01.dc.html                 1.9s prim=['Criar fazenda'] destr=0 dis=0 cab=6/6/6 notas=0
+ 23 CD-01det.dc.html              1.5s prim=['Definir polígono da T1-B'] destr=0 dis=0 cab=13/4/4 notas=0
+ 24 CD-02.dc.html                 0.9s prim=['Criar cultivar'] destr=0 dis=0 cab=3/3/3 notas=0
+ 25 CD-03.dc.html                 1.7s prim=['Criar máquina ou instalação'] destr=0 dis=0 cab=3/3/3 notas=0
+ 26 CD-04.dc.html                 1.3s prim=['Criar pessoa'] destr=0 dis=0 cab=4/4/4 notas=0
+ 27 CD-05.dc.html                 0.9s prim=['Criar parceiro'] destr=0 dis=0 cab=3/3/3 notas=0
+ 28 CD-06.dc.html                 1.4s prim=['Criar item'] destr=0 dis=0 cab=3/3/3 notas=0
+ 29 CD-07.dc.html                 1.6s prim=['Criar código'] destr=0 dis=0 cab=3/3/3 notas=0
+ 30 CD-08.dc.html                 1.5s prim=['Criar rendimento'] destr=0 dis=0 cab=4/4/4 notas=0
+ 31 CD.dc.html                    1.3s prim=[] destr=0 dis=0 cab=0/0/0 notas=0
+ 32 CF-01.dc.html                 1.4s prim=['Convidar pessoa'] destr=0 dis=0 cab=9/9/9 notas=9
+ 33 CF-03.dc.html                 1.4s prim=['Sincronizar agora (simulado)'] destr=0 dis=0 cab=3/3/3 notas=0
+ 34 CF-04.dc.html                 1.1s prim=['Baixar trilha (CSV)'] destr=0 dis=0 cab=5/5/5 notas=0
+ 35 CF-05.dc.html                 1.9s prim=['Alterar plano ou área'] destr=0 dis=1 cab=12/12/12 notas=0
+ 36 CMP.dc.html                   2.1s prim=[] destr=0 dis=5 cab=5/5/5 notas=0
+ 37 CO-01.dc.html                 3.5s prim=['Programar colheita'] destr=0 dis=0 cab=21/21/21 notas=0
+ 38 CO-02.dc.html                 2.8s prim=['Preparar ordens do período'] destr=0 dis=0 cab=8/8/8 notas=0
+ 39 CO-02det.dc.html              1.4s prim=['Registrar avanço'] destr=0 dis=0 cab=10/10/10 notas=0
+ 40 CO-03.dc.html                 0.9s prim=['Registrar carga'] destr=0 dis=0 cab=8/8/8 notas=0
+ 41 CO-04.dc.html                 0.9s prim=[] destr=0 dis=0 cab=8/8/8 notas=0
+ 42 CO-05.dc.html                 0.9s prim=['Criar ordem de processo'] destr=0 dis=0 cab=6/6/6 notas=0
+ 43 CO-05det.dc.html              1.2s prim=['Concluir execução'] destr=0 dis=0 cab=5/5/5 notas=0
+ 44 CO-06.dc.html                 1.4s prim=['Inspecionar lote'] destr=0 dis=0 cab=7/7/7 notas=0
+ 45 CO-06det.dc.html              1.1s prim=['Liberar para destinação compatível'] destr=0 dis=0 cab=13/13/13 notas=0
+ 46 CO-07.dc.html                 1.9s prim=['Alocar pedido'] destr=0 dis=0 cab=8/8/8 notas=0
+ 47 COLH.dc.html                  1.4s prim=['Publicar previsão do Pivô 19'] destr=0 dis=0 cab=5/5/5 notas=0
+ 48 EST.dc.html                   2.2s prim=['Conferir NF 4533'] destr=0 dis=0 cab=6/6/6 notas=0
+ 49 EXPED.dc.html                 1.1s prim=[] destr=0 dis=0 cab=5/5/5 notas=0
+ 50 GE-01.dc.html                 1.8s prim=[] destr=0 dis=0 cab=13/13/13 notas=0
+ 51 GE-02.dc.html                 1.1s prim=['Comparar base × previsão × real'] destr=0 dis=0 cab=9/9/9 notas=0
+ 52 GE-02det.dc.html              1.6s prim=['Criar ação do desvio'] destr=0 dis=0 cab=6/6/6 notas=0
+ 53 GE-03.dc.html                 1.3s prim=['Fechar competência 09/2026'] destr=0 dis=0 cab=4/4/4 notas=0
+ 54 GE-04.dc.html                 1.1s prim=['Enviar remessa ao banco'] destr=0 dis=0 cab=6/6/6 notas=0
+ 55 GE-05.dc.html                 1.9s prim=['Emitir crédito do RC-12'] destr=0 dis=0 cab=7/7/7 notas=0
+ 56 GE-06.dc.html                 1.6s prim=[] destr=0 dis=0 cab=13/13/13 notas=0
+ 57 GE-06det.dc.html              0.9s prim=[] destr=0 dis=0 cab=8/8/8 notas=0
+ 58 GE-07.dc.html                 1.1s prim=['Criar ação'] destr=0 dis=0 cab=7/7/7 notas=0
+ 59 GE-08.dc.html                 1.7s prim=['Solicitar proposta a credores'] destr=0 dis=0 cab=19/19/19 notas=0
+ 60 IC.dc.html                    2.4s prim=[] destr=0 dis=0 cab=18/18/18 notas=0
+ 61 IN-01.dc.html                 1.7s prim=['Registrar ocorrência'] destr=0 dis=0 cab=6/6/6 notas=0
+ 62 IN-02.dc.html                 2.7s prim=[] destr=0 dis=0 cab=7/6/6 notas=0
+ 63 IN-03.dc.html                 1.4s prim=['Criar tarefa vinculada'] destr=0 dis=0 cab=7/7/7 notas=0
+ 64 IN-04.dc.html                 2.5s prim=[] destr=0 dis=0 cab=0/0/0 notas=0
+ 65 IR-01.dc.html                 1.7s prim=['Resolver conflito · OS-0423'] destr=0 dis=0 cab=4/4/4 notas=0
+ 66 IR-02.dc.html                 1.8s prim=['Programar irrigação'] destr=0 dis=0 cab=6/6/6 notas=0
+ 67 IR-03.dc.html                 1.9s prim=[] destr=0 dis=0 cab=6/6/6 notas=0
+ 68 IR-03det.dc.html              1.1s prim=['Iniciar irrigação'] destr=0 dis=0 cab=12/12/12 notas=0
+ 69 IR-04.dc.html                 2.6s prim=[] destr=0 dis=0 cab=12/12/12 notas=0
+ 70 IV.dc.html                    3.7s prim=[] destr=0 dis=0 cab=18/18/18 notas=0
+ 71 LO-01.dc.html                 1.7s prim=['Expedir cargas'] destr=0 dis=0 cab=17/17/17 notas=0
+ 72 LO-02.dc.html                 1.1s prim=['Conferir carga do T2'] destr=0 dis=0 cab=18/18/18 notas=0
+ 73 LO-02det.dc.html              1.0s prim=['Registrar lacre'] destr=0 dis=0 cab=19/19/19 notas=0
+ 74 LO-03.dc.html                 2.5s prim=['Conciliar frete da VG-117'] destr=0 dis=0 cab=14/14/14 notas=0
+ 75 LO-04.dc.html                 1.5s prim=['Contratar Rota Sul · R$ 1.824'] destr=0 dis=0 cab=24/24/24 notas=0
+ 76 MA-01.dc.html                 3.2s prim=[] destr=0 dis=0 cab=4/4/4 notas=0
+ 77 MA-02.dc.html                 3.0s prim=[] destr=0 dis=1 cab=5/5/5 notas=0
+ 78 MA-03.dc.html                 3.9s prim=[] destr=0 dis=1 cab=5/5/5 notas=0
+ 79 MA-04.dc.html                 3.5s prim=[] destr=0 dis=0 cab=5/5/5 notas=0
+ 80 MA-04det.dc.html              1.8s prim=[] destr=0 dis=1 cab=5/5/5 notas=0
+ 81 MA-05.dc.html                 1.8s prim=['Registrar abastecimento'] destr=0 dis=0 cab=5/5/5 notas=0
+ 82 MA.dc.html                    2.2s prim=[] destr=0 dis=0 cab=4/4/4 notas=0
+ 83 MB-01.dc.html                 1.2s prim=['Iniciar turno · OS-0421'] destr=0 dis=0 cab=0/0/0 notas=0
+ 84 MB-02.dc.html                 0.9s prim=[] destr=0 dis=0 cab=0/0/0 notas=0
+ 85 MB-02det.dc.html              1.1s prim=['Iniciar turno · OS-0421'] destr=0 dis=0 cab=0/0/0 notas=0
+ 86 MB-03.dc.html                 1.1s prim=['Iniciar turno · OS-0421'] destr=0 dis=0 cab=0/0/0 notas=0
+ 87 MB-03x-recibo.dc.html         1.5s prim=[] destr=0 dis=0 cab=0/0/0 notas=0
+ 88 MB-04.dc.html                 1.7s prim=['Registrar ocorrência'] destr=0 dis=0 cab=0/0/0 notas=0
+ 89 MB-05.dc.html                 1.2s prim=[] destr=0 dis=0 cab=0/0/0 notas=0
+ 90 MB-05det.dc.html              0.8s prim=['Confirmar recebimento de 10 sc'] destr=0 dis=0 cab=0/0/0 notas=0
+ 91 MB-06.dc.html                 1.0s prim=['Registrar e ir ao ponto 11'] destr=0 dis=5 cab=0/0/0 notas=0
+ 92 MB-07.dc.html                 2.0s prim=[] destr=0 dis=0 cab=0/0/0 notas=0
+ 93 MB-08.dc.html                 1.0s prim=['Confirmar término da irrigação'] destr=0 dis=0 cab=0/0/0 notas=0
+ 94 MB-08x-recibo.dc.html         0.8s prim=[] destr=0 dis=0 cab=0/0/0 notas=0
+ 95 MB-09.dc.html                 0.9s prim=['Registrar abastecimento'] destr=0 dis=0 cab=0/0/0 notas=0
+ 96 MB-09det.dc.html              1.3s prim=[] destr=0 dis=0 cab=0/0/0 notas=0
+ 97 MB-10.dc.html                 1.0s prim=['Registrar carga · OS-0505'] destr=1 dis=0 cab=0/0/0 notas=0
+ 98 MOD-AGR.dc.html               0.8s prim=[] destr=0 dis=0 cab=0/0/0 notas=0
+ 99 MOD-CFG.dc.html               1.2s prim=[] destr=0 dis=0 cab=0/0/0 notas=0
+100 MOD-COM.dc.html               0.8s prim=[] destr=0 dis=0 cab=0/0/0 notas=0
+101 MOD-CRE.dc.html               0.8s prim=[] destr=0 dis=0 cab=0/0/0 notas=0
+102 MOD-MAN.dc.html               1.0s prim=[] destr=0 dis=0 cab=0/0/0 notas=0
+103 MOD-OUT.dc.html               0.8s prim=[] destr=0 dis=0 cab=0/0/0 notas=0
+104 MOD-SUP.dc.html               1.0s prim=[] destr=0 dis=0 cab=0/0/0 notas=0
+105 Main.dc.html                 14.5s prim=[] destr=0 dis=0 cab=0/0/0 notas=0
+106 ON-01.dc.html                 1.1s prim=['Criar primeiro planejamento'] destr=0 dis=0 cab=9/9/9 notas=0
+107 ON-01det.dc.html              1.1s prim=['Validar prévia'] destr=0 dis=0 cab=6/6/6 notas=0
+108 OS-0424-app.dc.html           0.9s prim=['Retirar no almoxarifado'] destr=0 dis=0 cab=0/0/0 notas=0
+109 OS-0424-ficha.dc.html         0.9s prim=['Imprimir'] destr=0 dis=0 cab=6/0/0 notas=0
+110 OS.dc.html                    1.3s prim=['Criar ordem'] destr=0 dis=0 cab=6/6/6 notas=0
+111 PA.dc.html                    1.6s prim=['Criar plano'] destr=0 dis=0 cab=0/0/0 notas=0
+112 PAGR.dc.html                  1.4s prim=[] destr=0 dis=0 cab=5/5/5 notas=0
+113 PCOM.dc.html                  1.4s prim=['Registrar a saca do PV-030'] destr=0 dis=0 cab=10/10/10 notas=0
+114 PL-01.dc.html                 1.3s prim=['Autorizar execução 2026/27'] destr=0 dis=0 cab=13/13/13 notas=0
+115 PL-02.dc.html                 2.1s prim=['Publicar plano v4'] destr=0 dis=0 cab=6/6/6 notas=0
+116 PL-02det.dc.html              2.1s prim=['Publicar ajuste do T1-A'] destr=0 dis=0 cab=6/6/6 notas=0
+117 PL-03.dc.html                 1.7s prim=['Publicar cenário 2º turno + aluguel'] destr=0 dis=0 cab=19/19/19 notas=0
+118 PL-04.dc.html                 1.4s prim=['Liberar prontas'] destr=0 dis=0 cab=20/20/20 notas=0
+119 PL-05.dc.html                 2.3s prim=[] destr=0 dis=0 cab=6/6/6 notas=0
+120 PL-05det.dc.html              1.2s prim=['Confirmar substituição pelo Trator 02'] destr=0 dis=0 cab=0/0/0 notas=0
+121 PL-06.dc.html                 1.9s prim=['Publicar parcelamento e plano'] destr=0 dis=0 cab=13/13/13 notas=0
+122 PM.dc.html                    2.6s prim=[] destr=0 dis=1 cab=4/4/4 notas=0
+123 PMAN.dc.html                  1.1s prim=['Tratar pendências'] destr=0 dis=0 cab=0/0/0 notas=0
+124 PROD.dc.html                  1.5s prim=[] destr=0 dis=0 cab=5/5/5 notas=0
+125 PSUP.dc.html                  1.6s prim=['Conferir estoque'] destr=0 dis=0 cab=0/0/0 notas=0
+126 PT-01.dc.html                 1.0s prim=['Responder esclarecimento'] destr=0 dis=0 cab=8/8/8 notas=0
+127 PT-02.dc.html                 1.2s prim=[] destr=0 dis=0 cab=5/5/5 notas=0
+128 PT-02det.dc.html              1.9s prim=['Submeter proposta v2'] destr=0 dis=0 cab=16/16/16 notas=1
+129 PT-03.dc.html                 1.3s prim=['Enviar proposta'] destr=0 dis=0 cab=18/18/18 notas=0
+130 PT-04.dc.html                 1.3s prim=[] destr=0 dis=0 cab=9/9/9 notas=0
+131 PT-04det.dc.html              0.9s prim=['Conferir documento'] destr=1 dis=0 cab=7/7/7 notas=0
+132 PT-05.dc.html                 1.2s prim=[] destr=0 dis=0 cab=9/9/9 notas=0
+133 PT-05det.dc.html              1.8s prim=['Enviar documento da carga 3'] destr=0 dis=0 cab=12/12/12 notas=0
+134 PT-06.dc.html                 1.1s prim=[] destr=0 dis=0 cab=14/14/14 notas=0
+135 PT-07.dc.html                 1.3s prim=[] destr=0 dis=0 cab=18/18/18 notas=0
+136 SAF.dc.html                   2.7s prim=[] destr=0 dis=3 cab=4/4/4 notas=0
+137 SU-01.dc.html                 1.3s prim=['Abrir cotação da SOL-2026-07'] destr=0 dis=0 cab=7/7/7 notas=0
+138 SU-02.dc.html                 1.8s prim=['Submeter exceção'] destr=0 dis=0 cab=8/8/8 notas=1
+139 SU-03.dc.html                 2.2s prim=['Reservar para ordem'] destr=0 dis=0 cab=9/9/9 notas=0
+140 SU-03det.dc.html              2.1s prim=['Ver a demanda no Planejar safra'] destr=0 dis=0 cab=3/3/3 notas=0
+141 SU-04.dc.html                 1.2s prim=['Selecionar Fertisul'] destr=0 dis=0 cab=13/13/13 notas=0
+142 SU-05.dc.html                 1.3s prim=['Resolver conflito da carga 4'] destr=0 dis=0 cab=24/24/24 notas=0
+143 SU-05det.dc.html              1.7s prim=['Reprogramar carga 4'] destr=0 dis=0 cab=9/9/9 notas=0
+144 SU-06.dc.html                 1.8s prim=['Conferir NF 4533'] destr=0 dis=0 cab=6/6/6 notas=0
+145 SU-07.dc.html                 1.0s prim=['Receber devolução da REQ-031'] destr=0 dis=0 cab=7/7/7 notas=0
+146 SU-07det.dc.html              0.9s prim=['Receber devolução'] destr=0 dis=0 cab=3/3/3 notas=0
+147 SU-08.dc.html                 1.3s prim=['Transferir entre locais'] destr=1 dis=0 cab=6/6/6 notas=0
+148 SU-09.dc.html                 0.9s prim=['Aprovar ajuste INV-2609'] destr=0 dis=0 cab=5/5/5 notas=0
+149 VE-01.dc.html                 1.3s prim=['Criar oferta'] destr=0 dis=0 cab=12/12/12 notas=0
+150 VE-02.dc.html                 1.3s prim=['Preparar oferta'] destr=0 dis=0 cab=14/14/14 notas=0
+151 VE-03.dc.html                 1.5s prim=[] destr=0 dis=0 cab=14/14/14 notas=0
+152 VE-04.dc.html                 1.5s prim=['Resolver alocação do PV-031'] destr=0 dis=0 cab=14/14/14 notas=0
+153 VE-04det.dc.html              1.1s prim=['Enviar revisão v3'] destr=0 dis=0 cab=18/18/18 notas=0
+154 VE-05.dc.html                 1.6s prim=['Formalizar compromisso'] destr=0 dis=0 cab=10/10/10 notas=0
+155 VE-06.dc.html                 2.1s prim=['Abrir caso'] destr=0 dis=0 cab=6/6/6 notas=0
+156 VEN.dc.html                   2.7s prim=['Registrar venda'] destr=0 dis=0 cab=6/6/6 notas=0
+RESUMO {"paginas": 156, "falhas": [], "prim_total": 106, "prim_paginas_com_mais_de_1": [], "prim_uma_palavra": [["OS-0424-ficha.dc.html", "Imprimir"]], "destr_a_vista": [["MB-10.dc.html", ["Descartar carga a pesar"]], ["PT-04det.dc.html", ["Recusar crédito"]], ["SU-08.dc.html", ["Estornar com vínculo"]]], "dis_total": 18, "dis_com_motivo_visivel": 0, "dis_so_dica": 16, "dis_sem_nada": [["CF-05.dc.html", "23/09/2026 · atual"], ["MA-04det.dc.html", "Concluir serviço"]], "cab_total": 1139, "cab_ordenar": 1117, "cab_funil": 1117, "tabelas": 211, "tabelas_sem_ordenar_filtrar": [["CA-02.dc.html", ["QUANDO|EVENTO|EFEITO"]], ["CD-01det.dc.html", ["FAZENDA|SISTEMA|SETOR DE IRRIGAÇÃO"]], ["OS-0424-ficha.dc.html", ["CARGA|CALDA|ÁREA"]]], "paginas_com_tabela": 126, "com_agrupar": 32, "com_colunas": 43, "caixas_em_tabela": [["CA-01.dc.html", 12, false], ["CA-03.dc.html", 4, false], ["IN-02.dc.html", 4, false]], "etapas": ["CMP.dc.html", "SAF.dc.html"], "notas": [["AG-06.dc.html", 1, ["de 5 AVALIAÇÃO ⇅ RECOMENDAÇÃO → EXECUÇÃO ⇅ MÉTODO PRÉ/PÓS ⇅ DATAS ⇅ RESULTADO ⇅ CONFIANÇA"]], ["CF-01.dc.html", 9, ["ÃO ⇅ MUDANÇA ⇅ AL-01 · Liberar O.S. agrícola CMD-06 gestor · Ana fora: irrigação só com ág", "06 gestor · Ana fora: irrigação só com água (DEC-2609-10) Vigente v1 desde 01/07/2026 Edit", "a versão da O.S. e ajustar antes de liberar CMD-42 agrônomo · Ana — Vigente v1 desde 01/0"]], ["PT-02det.dc.html", 1, ["· só esta cotação consentimento do produtor (RN-039)"]], ["SU-02.dc.html", 1, ["TEM/GRUPO · DEPÓSITO ⇅ ABC · CRITICIDADE ⇅ MÉTODO ⇅ SEGURANÇA · PRAZO ⇅ LOTE/MÚLTIPLO ⇅ VA"]]], "erros_js": [], "formas_hist": {"4": 3, "1": 37, "3": 32, "2": 53, "0": 1}}
+FIM

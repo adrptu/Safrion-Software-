@@ -1,0 +1,15 @@
+irr_estado_test.py | rc=0 | sem RESULTADO: 38 ok · 0 falhas []
+irr_fluxo_test.py | rc=1 | sem RESULTADO: RuntimeError: Uncaught
+tabelas_irr_test.py | rc=1 | RESULTADO: 98/106 ok · FALHAS: TABR-CTX-02 1440 clique IR-01 topo = Lagoa Grande: a coluna Fazenda sai com o filtro dela (sem chip "faz: Santa Rita"); a Situação e a busca ficam e a lista é da Lagoa Grande; TABR-CTX-02 1440 clique IR-01 topo = Todas: a coluna Fazenda volta sem o filtro antigo (antes voltava "Fazenda: Santa Rita" e escondia a Lagoa Grande); Situação e busca ficam; TABR-CTX-02 1440 teclado IR-01 topo = Lagoa Grande: a coluna Fazenda sai com o filtro dela (sem chip "faz: Santa Rita"); a Situação e a busca ficam e a lista é da Lagoa Grande; o foco fica no seletor; TABR-CTX-02 1440 teclado IR-01 topo = Todas: a coluna Fazenda volta sem o filtro antigo (antes voltava "Fazenda: Santa Rita" e escondia a Lagoa Grande); Situação e busca ficam; TABR-CTX-02 390 px clique IR-01 topo = Lagoa Grande: a coluna Fazenda sai com o filtro dela (sem chip "faz: Santa Rita"); a Situação e a busca ficam e a lista é da Lagoa Grande; TABR-CTX-02 390 px clique IR-01 topo = Todas: a coluna Fazenda volta sem o filtro antigo (antes voltava "Fazenda: Santa Rita" e escondia a Lagoa Grande); Situação e busca ficam; TABR-CTX-02 390 px teclado IR-01 topo = Lagoa Grande: a coluna Fazenda sai com o filtro dela (sem chip "faz: Santa Rita"); a Situação e a busca ficam e a lista é da Lagoa Grande; o foco fica no seletor; TABR-CTX-02 390 px teclado IR-01 topo = Todas: a coluna Fazenda volta sem o filtro antigo (antes voltava "Fazenda: Santa Rita" e escondia a Lagoa Grande); Situação e busca ficam
+irr_onda0_test.py | rc=0 | sem RESULTADO: {"ok":28,"fail":0,"navegador":false}
+ctl5_test.py | rc=0 | RESULTADO 30/30 []
+ficha_pivo_test.py | rc=0 | RESULTADO: OK 21/21
+ficha_pivo_unit_test.py | rc=0 | RESULTADO 23/23
+outorga_unit_test.py | rc=0 | RESULTADO 27/27
+map_decisoes_test.py | rc=0 | sem RESULTADO: 18 ok · 0 falhas []
+map_irrig_filtro_test.py | rc=0 | sem RESULTADO: 14 ok · 1 falhas ['15 contagens sem água: camada Ordens de serviço "Ordens" = ordens OS da tela O.S. e "Ordens abertas" do Integrado = abertas da tela O.S.; 
+os_irrig_filtro_test.py | rc=0 | RESULTADO: 15 ok · 0 falhas
+os_v39_selo_agua_test.py | rc=0 | RESULTADO: 13/13 ok
+mapa9_test.py | rc=0 | RESULTADO: 13 ok · 0 falhas
+paginas_scan_test.py | rc=0 | RESULTADO: 4 ok · 0 falhas (148 páginas)
+FIM

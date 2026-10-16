@@ -1,0 +1,1342 @@
+{
+ "paginas": 156,
+ "falhas": [],
+ "prim_total": 106,
+ "prim_paginas_com_mais_de_1": [],
+ "prim_uma_palavra": [
+  [
+   "OS-0424-ficha.dc.html",
+   "Imprimir"
+  ]
+ ],
+ "prim_rotulos": [
+  "Abrir OS-0420",
+  "Abrir caso",
+  "Abrir cotação da SOL-2026-07",
+  "Abrir recomendação REC-014",
+  "Acompanhar OM-0233",
+  "Alocar pedido",
+  "Alterar plano ou área",
+  "Aprovar ajuste INV-2609",
+  "Autorizar execução 2026/27",
+  "Baixar trilha (CSV)",
+  "Comparar base × previsão × real",
+  "Conciliar frete da VG-117",
+  "Conciliar pagamentos",
+  "Concluir execução",
+  "Conferir 2 apontamentos",
+  "Conferir NF 4533",
+  "Conferir carga do T2",
+  "Conferir documento",
+  "Conferir estoque",
+  "Confirmar recebimento de 10 sc",
+  "Confirmar substituição pelo Trator 02",
+  "Confirmar término da irrigação",
+  "Contratar Rota Sul · R$ 1.824",
+  "Convidar pessoa",
+  "Criar ação",
+  "Criar ação do desvio",
+  "Criar cultivar",
+  "Criar código",
+  "Criar fazenda",
+  "Criar item",
+  "Criar máquina ou instalação",
+  "Criar oferta",
+  "Criar ordem",
+  "Criar ordem de processo",
+  "Criar parceiro",
+  "Criar pessoa",
+  "Criar plano",
+  "Criar primeiro planejamento",
+  "Criar rendimento",
+  "Criar tarefa vinculada",
+  "Criar v4 com TS registrado",
+  "Definir polígono da T1-B",
+  "Emitir crédito do RC-12",
+  "Enviar documento da carga 3",
+  "Enviar proposta",
+  "Enviar remessa ao banco",
+  "Enviar revisão v3",
+  "Expedir cargas",
+  "Fechar competência 09/2026",
+  "Formalizar compromisso",
+  "Imprimir",
+  "Iniciar irrigação",
+  "Iniciar turno · OS-0421",
+  "Inspecionar lote",
+  "Liberar para destinação compatível",
+  "Liberar prontas",
+  "Preparar e emitir período",
+  "Preparar oferta",
+  "Preparar ordens do período",
+  "Programar colheita",
+  "Programar irrigação",
+  "Programar vistoria",
+  "Publicar ajuste do T1-A",
+  "Publicar cenário 2º turno + aluguel",
+  "Publicar parcelamento e plano",
+  "Publicar plano v4",
+  "Publicar previsão do Pivô 19",
+  "Receber devolução",
+  "Receber devolução da REQ-031",
+  "Registrar a saca do PV-030",
+  "Registrar abastecimento",
+  "Registrar avanço",
+  "Registrar carga",
+  "Registrar carga · OS-0505",
+  "Registrar e ir ao ponto 11",
+  "Registrar lacre",
+  "Registrar laudo",
+  "Registrar ocorrência",
+  "Registrar pesagem",
+  "Registrar venda",
+  "Reprogramar carga 4",
+  "Reservar para ordem",
+  "Resolver alocação do PV-031",
+  "Resolver conflito da carga 4",
+  "Resolver conflito · OS-0423",
+  "Responder esclarecimento",
+  "Retirar no almoxarifado",
+  "Selecionar Fertisul",
+  "Simular área",
+  "Sincronizar agora (simulado)",
+  "Solicitar material da ordem",
+  "Solicitar proposta a credores",
+  "Submeter exceção",
+  "Submeter proposta v2",
+  "Transferir entre locais",
+  "Tratar pendências",
+  "Validar prévia",
+  "Ver a demanda no Planejar safra"
+ ],
+ "destr_a_vista": [
+  [
+   "MB-10.dc.html",
+   [
+    "Descartar carga a pesar"
+   ]
+  ],
+  [
+   "PT-04det.dc.html",
+   [
+    "Recusar crédito"
+   ]
+  ],
+  [
+   "SU-08.dc.html",
+   [
+    "Estornar com vínculo"
+   ]
+  ]
+ ],
+ "dis_total": 18,
+ "dis_com_motivo_visivel": 0,
+ "dis_so_dica": 16,
+ "dis_sem_nada": [
+  [
+   "CF-05.dc.html",
+   "23/09/2026 · atual"
+  ],
+  [
+   "MA-04det.dc.html",
+   "Concluir serviço"
+  ]
+ ],
+ "dis_exemplos": [
+  [
+   "CF-05.dc.html",
+   {
+    "t": "23/09/2026 · atual",
+    "mot": "",
+    "dica": ""
+   }
+  ],
+  [
+   "CMP.dc.html",
+   {
+    "t": "2 Confira a demanda · travada: Escolha a safra a fazer",
+    "mot": "",
+    "dica": "Escolha a safra"
+   }
+  ],
+  [
+   "CMP.dc.html",
+   {
+    "t": "3 Solicite cotações · travada: Escolha a safra a fazer",
+    "mot": "",
+    "dica": "Escolha a safra"
+   }
+  ],
+  [
+   "CMP.dc.html",
+   {
+    "t": "4 Compare propostas · travada: Escolha a safra a fazer",
+    "mot": "",
+    "dica": "Escolha a safra"
+   }
+  ],
+  [
+   "CMP.dc.html",
+   {
+    "t": "5 Aprove a compra · travada: Escolha a safra a fazer",
+    "mot": "",
+    "dica": "Escolha a safra"
+   }
+  ],
+  [
+   "CMP.dc.html",
+   {
+    "t": "6 Acompanhe a entrega · travada: Escolha a safra a fazer",
+    "mot": "",
+    "dica": "Escolha a safra"
+   }
+  ],
+  [
+   "MA-02.dc.html",
+   {
+    "t": "Gerar 3 ordens preventivas",
+    "mot": "",
+    "dica": "Ação do Otávio (responsável de manutenção)"
+   }
+  ],
+  [
+   "MA-03.dc.html",
+   {
+    "t": "Gerar 3 ordens preventivas",
+    "mot": "",
+    "dica": "Ação do Otávio (responsável de manutenção)"
+   }
+  ],
+  [
+   "MA-04det.dc.html",
+   {
+    "t": "Concluir serviço",
+    "mot": "",
+    "dica": ""
+   }
+  ],
+  [
+   "MB-06.dc.html",
+   {
+    "t": "10",
+    "mot": "",
+    "dica": "Ponto 10: não coletado"
+   }
+  ],
+  [
+   "MB-06.dc.html",
+   {
+    "t": "11",
+    "mot": "",
+    "dica": "Ponto 11: não coletado"
+   }
+  ],
+  [
+   "MB-06.dc.html",
+   {
+    "t": "12",
+    "mot": "",
+    "dica": "Ponto 12: não coletado"
+   }
+  ],
+  [
+   "MB-06.dc.html",
+   {
+    "t": "13",
+    "mot": "",
+    "dica": "Ponto 13: não coletado"
+   }
+  ],
+  [
+   "MB-06.dc.html",
+   {
+    "t": "14",
+    "mot": "",
+    "dica": "Ponto 14: não coletado"
+   }
+  ],
+  [
+   "PM.dc.html",
+   {
+    "t": "Criar plano",
+    "mot": "",
+    "dica": "Ação do Otávio (responsável de manutenção)"
+   }
+  ],
+  [
+   "SAF.dc.html",
+   {
+    "t": "2 Defina cultivos e planos · travada: Escolha a safra a fazer",
+    "mot": "",
+    "dica": "Escolha a safra"
+   }
+  ],
+  [
+   "SAF.dc.html",
+   {
+    "t": "3 Dimensione operações e recursos · travada: Escolha a safra a fazer",
+    "mot": "",
+    "dica": "Escolha a safra"
+   }
+  ],
+  [
+   "SAF.dc.html",
+   {
+    "t": "4 Confira a demanda de insumos · travada: Escolha a safra a fazer",
+    "mot": "",
+    "dica": "Escolha a safra"
+   }
+  ]
+ ],
+ "cab_total": 1139,
+ "cab_ordenar": 1117,
+ "cab_funil": 1117,
+ "tabelas": 211,
+ "tabelas_sem_ordenar_filtrar": [
+  [
+   "CA-02.dc.html",
+   [
+    "QUANDO|EVENTO|EFEITO"
+   ]
+  ],
+  [
+   "CD-01det.dc.html",
+   [
+    "FAZENDA|SISTEMA|SETOR DE IRRIGAÇÃO"
+   ]
+  ],
+  [
+   "OS-0424-ficha.dc.html",
+   [
+    "CARGA|CALDA|ÁREA"
+   ]
+  ]
+ ],
+ "paginas_com_tabela": 126,
+ "com_agrupar": 32,
+ "com_colunas": 43,
+ "caixas_em_tabela": [
+  [
+   "CA-01.dc.html",
+   12,
+   false
+  ],
+  [
+   "CA-03.dc.html",
+   4,
+   false
+  ],
+  [
+   "IN-02.dc.html",
+   4,
+   false
+  ]
+ ],
+ "etapas": [
+  "CMP.dc.html",
+  "SAF.dc.html"
+ ],
+ "formas_filtrar": {
+  "AG-01.dc.html": {
+   "busca": 1,
+   "barra": [
+    "Agrupar vistorias por"
+   ],
+   "rapido": [
+    "Filtrar por situação"
+   ],
+   "funil": 5,
+   "n": 4
+  },
+  "AG-01det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 4,
+   "n": 1
+  },
+  "AG-02.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por situação"
+   ],
+   "funil": 12,
+   "n": 3
+  },
+  "AG-03.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 7,
+   "n": 2
+  },
+  "AG-03det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 5,
+   "n": 1
+  },
+  "AG-04.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 6,
+   "n": 2
+  },
+  "AG-04det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 23,
+   "n": 1
+  },
+  "AG-05.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 8,
+   "n": 2
+  },
+  "AG-06.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 12,
+   "n": 2
+  },
+  "AG-07.dc.html": {
+   "busca": 1,
+   "barra": [
+    "Agrupar por"
+   ],
+   "rapido": [],
+   "funil": 6,
+   "n": 3
+  },
+  "BEN.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por fase"
+   ],
+   "funil": 5,
+   "n": 3
+  },
+  "BO-01.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 12,
+   "n": 2
+  },
+  "BO-02.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por estado"
+   ],
+   "funil": 9,
+   "n": 3
+  },
+  "CA-01.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 7,
+   "n": 2
+  },
+  "CA-01det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 13,
+   "n": 1
+  },
+  "CA-01x-os0420.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 18,
+   "n": 1
+  },
+  "CA-02.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 7,
+   "n": 2
+  },
+  "CA-03.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 7,
+   "n": 2
+  },
+  "CA-03det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 8,
+   "n": 1
+  },
+  "CA-04.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 8,
+   "n": 2
+  },
+  "CARGA.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por situação"
+   ],
+   "funil": 4,
+   "n": 3
+  },
+  "CD-01.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido"
+   ],
+   "funil": 6,
+   "n": 3
+  },
+  "CD-01det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 4,
+   "n": 1
+  },
+  "CD-02.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido"
+   ],
+   "funil": 3,
+   "n": 3
+  },
+  "CD-03.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido"
+   ],
+   "funil": 3,
+   "n": 3
+  },
+  "CD-04.dc.html": {
+   "busca": 1,
+   "barra": [
+    "Função"
+   ],
+   "rapido": [
+    "Filtro rápido"
+   ],
+   "funil": 4,
+   "n": 4
+  },
+  "CD-05.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtrar por papel"
+   ],
+   "funil": 3,
+   "n": 3
+  },
+  "CD-06.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido"
+   ],
+   "funil": 3,
+   "n": 3
+  },
+  "CD-07.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido"
+   ],
+   "funil": 3,
+   "n": 3
+  },
+  "CD-08.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido"
+   ],
+   "funil": 4,
+   "n": 3
+  },
+  "CF-01.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por acesso",
+    "Filtro rápido por mudança"
+   ],
+   "funil": 9,
+   "n": 3
+  },
+  "CF-03.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 3,
+   "n": 2
+  },
+  "CF-04.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por mês"
+   ],
+   "funil": 5,
+   "n": 3
+  },
+  "CF-05.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por fazenda",
+    "Filtro rápido por estado"
+   ],
+   "funil": 12,
+   "n": 3
+  },
+  "CMP.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 5,
+   "n": 1
+  },
+  "CO-01.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 21,
+   "n": 2
+  },
+  "CO-02.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 8,
+   "n": 2
+  },
+  "CO-02det.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 10,
+   "n": 2
+  },
+  "CO-03.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 8,
+   "n": 2
+  },
+  "CO-04.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 8,
+   "n": 2
+  },
+  "CO-05.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 6,
+   "n": 2
+  },
+  "CO-05det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 5,
+   "n": 1
+  },
+  "CO-06.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 7,
+   "n": 2
+  },
+  "CO-06det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 13,
+   "n": 1
+  },
+  "CO-07.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 8,
+   "n": 2
+  },
+  "COLH.dc.html": {
+   "busca": 1,
+   "barra": [
+    "Unidade de produtividade · Mamão Formosa"
+   ],
+   "rapido": [
+    "Filtro rápido por situação"
+   ],
+   "funil": 5,
+   "n": 4
+  },
+  "EST.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por situação"
+   ],
+   "funil": 6,
+   "n": 3
+  },
+  "EXPED.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 5,
+   "n": 2
+  },
+  "GE-01.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 13,
+   "n": 2
+  },
+  "GE-02.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 9,
+   "n": 2
+  },
+  "GE-02det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 6,
+   "n": 1
+  },
+  "GE-03.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 4,
+   "n": 2
+  },
+  "GE-04.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 6,
+   "n": 2
+  },
+  "GE-05.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 7,
+   "n": 2
+  },
+  "GE-06.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 13,
+   "n": 2
+  },
+  "GE-06det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 8,
+   "n": 1
+  },
+  "GE-07.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 7,
+   "n": 2
+  },
+  "GE-08.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por situação"
+   ],
+   "funil": 19,
+   "n": 3
+  },
+  "IC.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por o que fazer"
+   ],
+   "funil": 18,
+   "n": 3
+  },
+  "IN-01.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 6,
+   "n": 2
+  },
+  "IN-02.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 6,
+   "n": 2
+  },
+  "IN-03.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 7,
+   "n": 2
+  },
+  "IR-01.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por situação"
+   ],
+   "funil": 4,
+   "n": 3
+  },
+  "IR-02.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 6,
+   "n": 1
+  },
+  "IR-03.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por etapa"
+   ],
+   "funil": 6,
+   "n": 3
+  },
+  "IR-03det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 12,
+   "n": 1
+  },
+  "IR-04.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 12,
+   "n": 1
+  },
+  "IV.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por o que fazer",
+    "Filtro rápido por sinal"
+   ],
+   "funil": 18,
+   "n": 3
+  },
+  "LO-01.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 17,
+   "n": 2
+  },
+  "LO-02.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 18,
+   "n": 1
+  },
+  "LO-02det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 19,
+   "n": 1
+  },
+  "LO-03.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 14,
+   "n": 2
+  },
+  "LO-04.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 24,
+   "n": 1
+  },
+  "MA-01.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por condição"
+   ],
+   "funil": 4,
+   "n": 3
+  },
+  "MA-02.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 5,
+   "n": 2
+  },
+  "MA-03.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 5,
+   "n": 2
+  },
+  "MA-04.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtrar por fase"
+   ],
+   "funil": 5,
+   "n": 3
+  },
+  "MA-04det.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtrar por fase"
+   ],
+   "funil": 5,
+   "n": 3
+  },
+  "MA-05.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por qualidade"
+   ],
+   "funil": 5,
+   "n": 3
+  },
+  "MA.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por condição"
+   ],
+   "funil": 4,
+   "n": 3
+  },
+  "ON-01.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 9,
+   "n": 1
+  },
+  "ON-01det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 6,
+   "n": 1
+  },
+  "OS-0424-ficha.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 0,
+   "n": 0
+  },
+  "OS.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtrar por fase"
+   ],
+   "funil": 6,
+   "n": 3
+  },
+  "PAGR.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 5,
+   "n": 2
+  },
+  "PCOM.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por situação"
+   ],
+   "funil": 10,
+   "n": 3
+  },
+  "PL-01.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 13,
+   "n": 2
+  },
+  "PL-02.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 6,
+   "n": 2
+  },
+  "PL-02det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 6,
+   "n": 1
+  },
+  "PL-03.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 19,
+   "n": 1
+  },
+  "PL-04.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 20,
+   "n": 2
+  },
+  "PL-05.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 6,
+   "n": 2
+  },
+  "PL-06.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 13,
+   "n": 1
+  },
+  "PM.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 4,
+   "n": 2
+  },
+  "PROD.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por qualidade"
+   ],
+   "funil": 5,
+   "n": 3
+  },
+  "PT-01.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 8,
+   "n": 1
+  },
+  "PT-02.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 5,
+   "n": 1
+  },
+  "PT-02det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 16,
+   "n": 1
+  },
+  "PT-03.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 18,
+   "n": 1
+  },
+  "PT-04.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 9,
+   "n": 1
+  },
+  "PT-04det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 7,
+   "n": 1
+  },
+  "PT-05.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 9,
+   "n": 1
+  },
+  "PT-05det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 12,
+   "n": 1
+  },
+  "PT-06.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 14,
+   "n": 1
+  },
+  "PT-07.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 18,
+   "n": 1
+  },
+  "SAF.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por fazenda"
+   ],
+   "funil": 4,
+   "n": 3
+  },
+  "SU-01.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 7,
+   "n": 2
+  },
+  "SU-02.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 8,
+   "n": 2
+  },
+  "SU-03.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 9,
+   "n": 2
+  },
+  "SU-03det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 3,
+   "n": 1
+  },
+  "SU-04.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 13,
+   "n": 2
+  },
+  "SU-05.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 24,
+   "n": 2
+  },
+  "SU-05det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 9,
+   "n": 1
+  },
+  "SU-06.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 6,
+   "n": 2
+  },
+  "SU-07.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 7,
+   "n": 2
+  },
+  "SU-07det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 3,
+   "n": 1
+  },
+  "SU-08.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 6,
+   "n": 2
+  },
+  "SU-09.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 5,
+   "n": 2
+  },
+  "VE-01.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 12,
+   "n": 2
+  },
+  "VE-02.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 14,
+   "n": 2
+  },
+  "VE-03.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 14,
+   "n": 2
+  },
+  "VE-04.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por situação"
+   ],
+   "funil": 14,
+   "n": 3
+  },
+  "VE-04det.dc.html": {
+   "busca": 0,
+   "barra": [],
+   "rapido": [],
+   "funil": 18,
+   "n": 1
+  },
+  "VE-05.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 10,
+   "n": 2
+  },
+  "VE-06.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [],
+   "funil": 6,
+   "n": 2
+  },
+  "VEN.dc.html": {
+   "busca": 1,
+   "barra": [],
+   "rapido": [
+    "Filtro rápido por situação"
+   ],
+   "funil": 6,
+   "n": 3
+  }
+ },
+ "notas": [
+  [
+   "AG-06.dc.html",
+   1,
+   [
+    "de 5 AVALIAÇÃO ⇅ RECOMENDAÇÃO → EXECUÇÃO ⇅ MÉTODO PRÉ/PÓS ⇅ DATAS ⇅ RESULTADO ⇅ CONFIANÇA"
+   ]
+  ],
+  [
+   "CF-01.dc.html",
+   9,
+   [
+    "ÃO ⇅ MUDANÇA ⇅ AL-01 · Liberar O.S. agrícola CMD-06 gestor · Ana fora: irrigação só com ág",
+    "06 gestor · Ana fora: irrigação só com água (DEC-2609-10) Vigente v1 desde 01/07/2026 Edit",
+    "a versão da O.S. e ajustar antes de liberar CMD-42 agrônomo · Ana — Vigente v1 desde 01/0"
+   ]
+  ],
+  [
+   "PT-02det.dc.html",
+   1,
+   [
+    "· só esta cotação consentimento do produtor (RN-039)"
+   ]
+  ],
+  [
+   "SU-02.dc.html",
+   1,
+   [
+    "TEM/GRUPO · DEPÓSITO ⇅ ABC · CRITICIDADE ⇅ MÉTODO ⇅ SEGURANÇA · PRAZO ⇅ LOTE/MÚLTIPLO ⇅ VA"
+   ]
+  ]
+ ],
+ "erros_js": [],
+ "formas_hist": {
+  "4": 3,
+  "1": 37,
+  "3": 32,
+  "2": 53,
+  "0": 1
+ }
+}

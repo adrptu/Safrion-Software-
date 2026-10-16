@@ -1082,7 +1082,7 @@ def _agf_cref(lst):
           f'<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px;"><b style="font-size: 13.5px;">{H("c.t")}</b><span style="{MUT}">{H("c.sub")}</span>'
           f'<sc-for list="{H("c.chips")}" as="k" hint-placeholder-count="1">{chp("k.t","k.st","k.dot")}</sc-for></div>'
           f'<div style="font-size: 12.8px;"><b>{H("c.g")}</b> <span style="color: {MUTED};">{H("c.gn")}</span></div>'
-          f'<div role="table" aria-label="Usos conferidos" style="display: flex; flex-direction: column;"><div role="row" style="display: grid; grid-template-columns: {UT}; gap: 10px; padding: 4px 0; {TH}">'
+          f'<div role="table" aria-label="Usos conferidos" style="display: flex; flex-direction: column;"><div role="row" class="g2thr" style="display: grid; grid-template-columns: {UT}; gap: 10px; padding: 4px 0; {TH}">'
           f'<span role="columnheader">Cultura</span><span role="columnheader">Alvo</span><span role="columnheader">Dose</span><span role="columnheader">Carência</span><span role="columnheader" style="text-align: right;">Máx.</span><span role="columnheader">Intervalo</span></div>'
           f'<sc-for list="{H("c.usos")}" as="u" hint-placeholder-count="2"><div role="row" style="display: grid; grid-template-columns: {UT}; gap: 10px; align-items: start; padding: 6px 0; border-top: 1px solid {LINE}; font-size: 12.5px; line-height: 1.4;">'
           f'<span role="cell"><b>{H("u.c")}</b></span><span role="cell">{H("u.a")}<sc-if value="{H("u.nc")}" hint-placeholder-val="{F_()}"> <span style="padding: 0 6px; border-radius: 999px; font-size: 11px; font-weight: 700; color: {YEL}; background: {YELS};">não conferido</span></sc-if></span>'
@@ -1106,7 +1106,7 @@ def _agf_painel(link):
     def tabela(rot,tpl,cab,lst,var,celulas,n=2):
         head=''.join(f'<span role="columnheader" style="{"text-align: right;" if r else ""}">{c}</span>' for c,r in cab)
         return (f'<div role="table" aria-label="{rot}" style="display: flex; flex-direction: column;">'
-                f'<div role="row" style="display: grid; grid-template-columns: {tpl}; gap: 10px; padding: 4px 0; {TH}">{head}</div>'
+                f'<div role="row" class="g2thr" style="display: grid; grid-template-columns: {tpl}; gap: 10px; padding: 4px 0; {TH}">{head}</div>'   # TAB-10: 40 px
                 f'<sc-for list="{H(lst)}" as="{var}" hint-placeholder-count="{n}"><div role="row" style="display: grid; grid-template-columns: {tpl}; gap: 10px; '
                 f'align-items: start; padding: 7px 0; border-top: 1px solid {LINE}; font-size: 12.8px; line-height: 1.4; font-variant-numeric: tabular-nums;">{celulas}</div></sc-for></div>')
     cel=lambda x,r=False,b=False: (f'<span role="cell" style="min-width: 0;{" text-align: right;" if r else ""}">' + (f'<b>{x}</b>' if b else x) + '</span>')
@@ -1131,7 +1131,7 @@ def _agf_painel(link):
           f'style="font-family: inherit; font-size: 13px; padding: 7px 10px; border: 1px solid {LINE}; border-radius: 9px; max-width: 340px;">'
           + se('af_usosLoad',f'<div role="status" style="{MUT}">Carregando os usos registrados…</div>')
           + f'<div role="table" aria-label="{H("af_usosL")}" style="display: flex; flex-direction: column;">'
-          f'<div role="row" style="display: grid; grid-template-columns: {H("af_usosTpl")}; gap: 10px; padding: 4px 8px; {TH}">'
+          f'<div role="row" class="g2thr" style="display: grid; grid-template-columns: {H("af_usosTpl")}; gap: 10px; padding: 4px 8px; {TH}">'
           f'<sc-for list="{H("af_usosCab")}" as="h" hint-placeholder-count="3"><span role="columnheader" aria-sort="{H("h.sort")}" style="min-width: 0;">'
           f'<button type="button" onClick="{H("h.go")}" title="{H("h.tt")}" style="border: 0; background: transparent; padding: 0; font: inherit; color: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; text-align: left;">{H("h.l")} <span aria-hidden="true" style="{H("h.ast")}">{H("h.seta")}</span></button></span></sc-for>'
           f'<span role="columnheader" aria-label="Ação"></span></div>'

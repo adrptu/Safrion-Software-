@@ -46,7 +46,7 @@ def recurso_un(rid, gid, un):
     r = L.c.js(f"""(()=>{{const r=document.querySelector('[role=row][data-rid={json.dumps(rid)}]'); if(!r) return 'sem linha'; const x=[...r.querySelectorAll('[role=cell]')].find(z=>!z.querySelector('input,button')&&z.innerText.trim()&&!z.classList.contains('g2nr'))||r; x.click(); return 'ok';}})()""")
     time.sleep(.6); f = fset(gid, 'un', str(un)); s = salvar(); time.sleep(.9); return r, f, s, toast()
 def abre_cap():
-    if L.c.js("[...document.querySelectorAll('button')].some(b=>b.offsetParent&&b.innerText.trim()==='Capacidade por mês ▾')"): botao('Capacidade por mês ▾'); time.sleep(.4)
+    if L.c.js("[...document.querySelectorAll('button')].some(b=>b.offsetParent&&b.innerText.trim()==='▸ Capacidade por mês')"): botao('▸ Capacidade por mês'); time.sleep(.4)
 def vista(nome):
     """lê a etapa 3 aberta: veredito, células de jul/27 (Tratores e Operadores), filtro de cada uma e custo"""
     abre_cap(); o = dict(ver=veredito(), custo=custo(), meses=meses_cap())

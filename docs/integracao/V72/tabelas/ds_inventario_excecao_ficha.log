@@ -1,0 +1,8 @@
+# ds_inventario --catraca na árvore da DS-TAB com a composição 55baa3f (4a16b30 + exceção contada)
+$ python3 -B ds_inventario.py --catraca
+RESULTADO: catraca ok
+exit=0
+# contraprova: cópia com um 2º role="table" no os_campo.py
+RESULTADO: SUBIU: os_campo.py tabela 0→1
+exit=1
+# antes da exceção (bateria q27, render 8bdc1a1): RESULTADO: SUBIU: os_campo.py tabela 0→1 (grade da ficha impressa trazida pelo PR #77)
