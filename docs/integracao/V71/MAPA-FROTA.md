@@ -67,7 +67,7 @@ Estado / impedimento / próximo passo: especificado, sem código; R2 trata o 622
 | Codex (crítica antecipada) | não se aplica: foi sobre o desenho inicial, antes deste arquivo | 16/10/2026 | Comentário 6223268675. Sete pontos, aceites propostos, pedido de matriz estado × fonte × ação e da lista de arquivos da F1. Tratamento abaixo |
 | Codex (revisão R1 deste arquivo) | `62b29d4a56e903002150772fe57d817a2e48973c0c999d29e8a332ce161a65c8` (87cb077, 698 linhas) | 16/10/2026 | Comentário 6224128496 no PR #86 (HEAD 87cb077): dois S2, dois S3 e a fronteira de arquivos aceita no 6224071197. Tratamento abaixo, na R2 |
 | Codex (revisão R2) | pendente | — | pendente |
-| Gemini (parecer repassado no 6224128496) | conforme o registro do Codex | 16/10/2026 | Propôs trocar a pausa por movimento em saltos. **Recusado** (item 3 abaixo). As três contraprovas seguem pendentes; nenhuma consulta paga nova nesta R2 |
+| Gemini: parecer textual sobre um pacote mínimo, sem execução (repassado no 6224128496) | conforme o registro do Codex | 16/10/2026 | Recebido e tratado nesta R2: concorda com os itens 1, 2 e 4 e com os alertas de foco e deduplicação; propôs trocar a pausa por movimento em saltos, **recusado** (item 3a). Não é contraprova do produto: as três contraprovas no navegador (localização presumida, transição de sinal, foco × movimento) ficam para as fatias F1 e F2 (N9). Nenhuma consulta paga nova |
 
 **Tratamento da crítica antecipada (6223268675):**
 
@@ -351,7 +351,7 @@ Estar no mercado não prova regra de domínio; o aceite se mede pelos K e M abai
 | 5 | Desligada | Em execução | Desligada às 12:03 (telemetria) | Da hora em que desligou | Sólido, sem seta, selo ⏻ | "Desligada às 12:03" | Abrir O.S. |
 | 6 | Sem sinal | Em execução | Último conhecido: "Trabalhando às 10:12" | Sem sinal há 18 min | Vazado cinza, imóvel, sem seta; o rastro termina | "Sem sinal há 18 min · última: Trabalhando 10:12" | Abrir O.S. |
 | 7 | Integração desconectada (`conectada` = falso) | Em execução | Desconhecido desde 10:40 | "Sem fonte: telemetria desconectada às 10:40 · última há N min", nunca atual, nem com leitura recente (P9) | Igual ao sem sinal, com a hora da última | "Sem fonte de posição" | Abrir O.S.; (gestor) Ver integração |
-| 8 | Nunca houve posição | Em execução | Pela O.S. ou pelo app | Posição indisponível (motivo) | Nenhum | "Posição indisponível · sem fonte vinculada" | Abrir O.S. |
+| 8 | Nunca houve posição | Em execução | Pela fonte da máquina; sem fonte, Desconhecido (decisão 3, P12) | Posição indisponível (motivo) | Nenhum | "Posição indisponível · sem fonte vinculada" | Abrir O.S. |
 | 9 | Sem conjunto | Em execução | Desconhecido | Indisponível | Nenhum | "Sem conjunto alocado hoje" | Abrir O.S. |
 | 10 | Conflito de ativo | Em execução em duas O.S. | Do ativo | Do ativo | Um marcador por conjunto, selo "Conflito" | Duas linhas "Conflito · também na OS-xxxx" | Abrir cada O.S. |
 | 11 | Leitura atrasada, futura, inválida ou suspeita | — | Não muda | Não muda; contador no detalhe da fonte | O marcador não volta | — | — |
