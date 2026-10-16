@@ -14,7 +14,8 @@ e confere as regras puras que a tela usa (docs/navegacao/ESPECIFICACAO.md):
   U12 resumo das alterações na nota (até 2 e "e mais N"; plano novo)
   U13 dose na tabela: 0, vazio, "−2" e "-2" recusados sem rascunho; a saída do campo marca a hora da gravação (R1)
   U14 "Publicar" recusa o clique que começou com o botão desabilitado ou logo depois de a saída do campo gravar a dose (R1); com a
-     dose em edição não publica (R2); depois, publica
+     dose em edição não publica (R2); depois, publica (aviso curto "Plano salvo · v7 …", 15/10: "caixa pequena, pouco texto"; o oráculo
+     antigo esperava o resumo das doses, que saiu do aviso)
   U15 sair do detalhe com a dose ou a inclusão digitadas avisa e não troca de plano (R8); vazio sai direto
   U16 o painel da atividade só grava no plano e na atividade em que foi aberto (R4); U17 salvar sem mudança não cria rascunho (R3)
 Uso (de gen37/): python3 pa_regras_test.py   (sai 1 se algum caso falhar)
@@ -124,7 +125,7 @@ caso('U14 Publicar: recusa o clique que começou com o botão desabilitado e o q
   const c=tela({pid:'SOJA-AT',pl}); c.__paSaiT=Date.now()-PA_SAI_MS-5; paPub(c); const c1=v(c);
   const d=tela({pid:'SOJA-AT',pl,ied:{aid:fungId(),prod:'Fungicida A',val:'0',err:''}}); paPub(d); const d1=[v(d),d.state.g2toast];
   ok('U14 Publicar: recusa o clique que começou com o botão desabilitado e o que vem logo depois de a saída do campo gravar a dose (R1); com a dose em edição não publica (R2); depois publica a v7',
-     a1[0]===6&&a1[1]==='O rascunho mudou neste clique: confira e clique em Salvar alterações de novo.'&&a2[0]===7&&/^Alterações salvas na v7\. 1 alteração na v7: .*Os cultivos continuam como estavam/.test(a2[1])
+     a1[0]===6&&a1[1]==='O rascunho mudou neste clique: confira e clique em Salvar alterações de novo.'&&a2[0]===7&&/^Plano salvo · v7( · cultivos seguem na versão deles)?$/.test(a2[1])
      &&b1[0]===6&&b1[1]==='A dose de Glifosato 480: 2 → 6 L/ha entrou no rascunho agora: confira e clique em Salvar alterações de novo.'&&c1===7&&d1[0]===6&&!d1[1], [a1,a2,b1,c1,d1]); });
 caso('U15 sair do detalhe com a dose ou a inclusão de insumo digitadas avisa e não sai (R8); inclusão em branco e dose fechada saem direto',['paPend','paSair','paSaiNao'],()=>{
   const pend=[paPend({iadd:{aid:'a',prod:'Inseticida B',dose:'',err:''}}),paPend({iadd:{aid:'a',prod:'',dose:'0,3',err:''}}),paPend({iadd:{aid:'a',prod:'',dose:' ',err:''}}),paPend({ied:{aid:'a',prod:'Fungicida A',val:'0',err:'x'}}),paPend({})];

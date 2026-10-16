@@ -262,7 +262,7 @@ function paAddV(self,a){ const ad=self.state.iadd; const on=!!ad&&ad.aid===a.id;
     addOk:()=>paAddOk(self,a), addNao:()=>self.setState({iadd:null}), addErr:e, addTemErr:!!e,
     addIst:paIst(e&&!!(on&&ad.prod),'84px')+'text-align:right;'}, ac, paOpIco(a.op)); }
 // TAB-08 (16/10/2026): a Tabela das atividades ordena e filtra por coluna com a peça do motor (g2cabVals, g2cabAplica); linhas no formato do motor
-function paTbCols(atv){ return [{k:'gat',l:(atv.length&&atv.every(a=>a.g.tipo==='DAP'))?'DAP':'Gatilho',t:'num',a:'r'},{k:'atv',l:'Atividade',t:'txt'},{k:'ins',l:'Insumos',t:'num',a:'r'},{k:'custo',l:'Custo/ha',t:'num',a:'r'}]; }
+function paTbCols(atv){ return [{k:'gat',l:(atv.length&&atv.every(a=>a.g.tipo==='DAP'))?'DAP':'Gatilho',t:'num',a:'r'},{k:'atv',l:'Atividade',t:'txt'},{k:'ins',l:'Insumos',t:'num',a:'r',hcls:'pa-tb-ins'},{k:'custo',l:'Custo/ha',t:'num',a:'r',hcls:'pa-tb-num'}]; }   /* hcls: no celular o cabeçalho some com a coluna (TAB-10) */
 function paTbLinha(a){ const np=a.prods.length, ca=np?paCa(a):null, d0=Number(a.g.dias), gat=a.g.tipo==='DAP'?((d0<0?'−':'')+Math.abs(d0)):paGat(a.g).t, o=paOrd(a.g);
   return {id:a.id, v:{gat:(typeof o==='number'?o:null), atv:a.nome, ins:np, custo:ca}, s:{gat, atv:a.nome, ins:np?(np+(np>1?' insumos':' insumo')):'Só operação', custo:np?paRS(ca)+'/ha':'—'}}; }
 function paS2(self,v,p){ const todas=paWork(p); const ops=paOps(todas); const of=paOpf(self,ops); const atv0=of?todas.filter(a=>a.op===of):todas; const pub={};
@@ -544,20 +544,20 @@ ERR = f'font-size: 12px; font-weight: 700; color: {RED};'
 def err(hole_has, hole_msg): return IF(hole_has, f'<span role="alert" style="{ERR}">{H(hole_msg)}</span>')
 
 
-PA_TB_CSS = ('.pa-tb{display:grid;grid-template-columns:72px minmax(0,1fr) 110px 120px 48px;border:1px solid #E4E9E5;border-radius:12px;background:#fff;font-size:13px}'
+PA_TB_CSS = ('.pa-tb{display:grid;grid-template-columns:88px minmax(0,1fr) 110px 120px 48px;border:1px solid #E4E9E5;border-radius:12px;background:#fff;font-size:13px}'
              '.pa-tb [role=row]{display:grid;grid-column:1/-1;grid-template-columns:subgrid;align-items:center;border-top:1px solid #E4E9E5}'
              '.pa-tb [role=row]>[role=cell],.pa-tb [role=row]>[role=columnheader]{padding:6px 10px;min-width:0}'
              '.pa-tb-cab{border-top:0!important;background:#F4F6F3;border-radius:12px 12px 0 0;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A}'
              '.pa-tb-l{cursor:pointer}@media (hover:hover){.pa-tb-l:hover{background:#F2F8F4}.pa-tb-l:hover .pa-mais{opacity:1}}.pa-tb-l:focus-within .pa-mais,.pa-tb-l .pa-mais[aria-expanded=true]{opacity:1}'
-             '.pa-tb-gat{text-align:right;font-variant-numeric:tabular-nums}.pa-tb-gat b{font-size:13px}'
+             '.pa-tb-gat{display:flex;align-items:center;gap:4px;font-variant-numeric:tabular-nums}.pa-tb-gat b{font-size:13px;margin-left:auto}'
              '.pa-tb-atv{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.pa-tb-car{margin-left:-4px}@media (pointer:coarse){.pa-tb-car{width:36px;height:36px}}.pa-tb-atv .pa-titulo{min-width:0;flex:0 1 auto;overflow-wrap:break-word}'
              '.pa-tb-ins{text-align:right;font-size:12px;color:#65736A}.pa-tb-num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}'
              '.pa-tb .pa-mais-w{padding:0!important}.pa-tb-det{border-top:0!important;background:#FBFCFA}.pa-tb-det:empty{display:none}.pa-tb-detc{grid-column:1/-1;padding:0!important}'
-             '.pa-tb-detc .pa-insumos{border-radius:0;padding-left:92px}'
+             '.pa-tb-detc .pa-insumos{border-radius:0;padding-left:98px}'
              '.pa-tb-grpc{grid-column:1/-1;display:flex;align-items:center;gap:6px;padding:8px 10px 4px 12px!important}.pa-tb-gtot{width:120px;padding-right:48px;text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;box-sizing:content-box}'
              '.pa-tb .pa-titulo:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:4px}'
              # celular: DAP, Atividade (com o Custo/ha logo abaixo do nome) e ⋯; Insumos fica na linha aberta e no cartão; o título da seção ganha a linha
-             '@media (max-width:640px){.pa-tb{grid-template-columns:44px minmax(0,1fr) 44px}.pa-tb .pa-tb-ins,.pa-tb-cab .pa-tb-num{display:none}'
+             '@media (max-width:640px){.pa-tb{grid-template-columns:76px minmax(0,1fr) 44px}.pa-tb .pa-tb-ins,.pa-tb-cab .pa-tb-num{display:none!important}'
              '.pa-tb [role=row]>[role=cell],.pa-tb [role=row]>[role=columnheader]{padding:6px}.pa-tb-l{grid-template-rows:auto auto;row-gap:0}'
              '.pa-tb-l>.pa-tb-gat{grid-column:1;grid-row:1/3}.pa-tb-l>.pa-tb-atv{grid-column:2;grid-row:1;padding-bottom:0!important;flex-wrap:nowrap;align-items:flex-start}.pa-tb-atv .pa-op-ico{padding-top:7px}'
              '.pa-tb-l>.pa-tb-num{grid-column:2;grid-row:2;text-align:left;padding-top:0!important;font-size:12.5px}.pa-tb-l>.pa-mais-w{grid-column:3;grid-row:1/3}'
@@ -652,9 +652,11 @@ def build():
     # o modo Cartões (abre nele, VISOES-2 §4); a Tabela tem DAP (ou Gatilho), Atividade com o ícone da operação, Insumos, Custo/ha e o ⋯, com
     # o mesmo filtro por operação, o mesmo "Expandir tudo" e o mesmo clique: a linha (ou o nome) abre os insumos logo abaixo, editáveis
     tb_lin = (f'<div role="row" class="pa-tb-l" data-atv="{H("a.aid")}" onClick="{H("a.rowtog")}" style="{H("a.rst")}">'
-              f'<span role="cell" class="pa-tb-gat" title="{H("a.gatlab")}"><b aria-hidden="true">{H("a.gatilho")}</b><span class="g2sr">{H("a.gatlab")}</span></span>'
-              # 16/10/2026 (proprietário: "na tabela tá sem símbolo drill down"): a mesma seta ▸/▾ do modo Cartões, sem dica (TAB-04)
-              f'<span role="cell" class="pa-tb-atv"><button type="button" class="g2car pa-tb-car" aria-label="{H("a.lab")}" aria-expanded="{H("a.open")}" aria-controls="{H("a.detalhesId")}" onClick="{H("a.tog")}">{H("a.sym")}</button>'
+              # 16/10/2026 (proprietário: "na tabela tá sem símbolo drill down"): a mesma seta ▸/▾ do modo Cartões, sem dica (TAB-04);
+              # TAB-09 (16/10/2026, "colone os icones de drill down sempre na esquerda"): a seta abre a 1ª coluna, antes do DAP
+              f'<span role="cell" class="pa-tb-gat" title="{H("a.gatlab")}"><button type="button" class="g2car pa-tb-car" aria-label="{H("a.lab")}" aria-expanded="{H("a.open")}" aria-controls="{H("a.detalhesId")}" onClick="{H("a.tog")}">{H("a.sym")}</button>'
+              f'<b aria-hidden="true">{H("a.gatilho")}</b><span class="g2sr">{H("a.gatlab")}</span></span>'
+              f'<span role="cell" class="pa-tb-atv">'
               f'<span class="pa-op-ico" role="img" aria-label="{H("a.op")}" title="{H("a.op")}">' + _opico('a') + '</span>'
               f'<button type="button" class="pa-titulo" aria-label="{H("a.lab")}" aria-expanded="{H("a.open")}" aria-controls="{H("a.detalhesId")}" onClick="{H("a.tog")}">{H("a.nome")}</button>'
               + IF('a.hasChg', f'<span style="{H("a.chgst")} padding: 0 8px; font-size: 11px; line-height: 16px;">{H("a.chg")}</span>') + '</span>'
@@ -668,7 +670,7 @@ def build():
     tabela = (f'<div class="rola"><div role="table" class="pa-tb" aria-label="Atividades do plano">'
               # TAB-08 (16/10/2026, proprietário: "adicionando nessa e nas demais o drill down e os ícones em cada coluna de ordenação e filtro"):
               # o cabeçalho e o filtro da coluna são a peça do motor (E.cab_colunas_html, E.filtro_coluna_html; g2cabVals no JS)
-              f'<div role="row" class="pa-tb-cab">' + E.cab_colunas_html('pa_tb', 4) + '<span role="columnheader"><span class="g2sr">Ações</span></span></div>'
+              f'<div role="row" class="pa-tb-cab">' + E.cab_colunas_html('pa_tb', 4) + '<span role="columnheader" class="g2th"><span class="g2sr">Ações</span></span></div>'
               + FOR('grp', 'g', tb_grp, 1) + '</div></div>' + E.filtro_coluna_html('pa_tb'))
     gat = FOR('t.atvs', 'a', atv, 1)
     grp = FOR('grp', 'g', f'<div class="pa-grp" style="display: flex; flex-direction: column; gap: 8px; padding-top: 4px;">'

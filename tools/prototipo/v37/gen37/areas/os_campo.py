@@ -190,7 +190,7 @@ def ficha():
             + sec('Caldeiro · preparo por carga do saldo')
             + '<div style="font-size:12.5px;">Coloque o produto indicado e complete com água até o volume da carga, na ordem da instrução liberada. A última carga é proporcional à área que falta.</div>'
             + f'<div role="status" style="font-size: 12.5px;">{H("preparo")}</div><div>{H("saldoIns")}</div>'
-            + f'<div role="table" aria-label="Cargas de preparo"><div role="row" style="{rowst}">{headers}</div><div role="rowgroup">{rows}</div><div role="row" style="{rowst}">{totals}</div></div>'
+            + f'<div role="table" aria-label="Cargas de preparo"><div role="row" class="g2thr" style="{rowst}">{headers}</div><div role="rowgroup">{rows}</div><div role="row" style="{rowst}">{totals}</div></div>'
             + sec('Operador · aplicação')
             + f'<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">{kv("Vazão", H("vazao"))}{kv("Velocidade", nf(EQ["vel"])+" km/h")}{kv("Barra", nf(EQ["barra"])+" m")}{kv("Bicos · pressão", EQ["bicos"])}{kv("Conjunto", H("conjunto"))}</div>'
             + sec('Apontamento (lance no app quando houver sinal)')
