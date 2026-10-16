@@ -103,7 +103,7 @@ def seed():
                man=DM.seed(), producao=dados_producao.seed())
     est = dados_ben.semear(est)   # integração V56: o BEN semeia o packing (lotes, PV-031) e o Comercial completa as vendas depois, inclusive o PV-031
     est['producao'] = dados_comercial.completar(est['producao'])
-    return est
+    return seed_agrupamento(est)
 
 
 # Validade mensal é inclusiva até o último dia; ausência aplicável (—) conserva o comportamento do cadastro.
@@ -137,8 +137,41 @@ def perfis_js():
     return s[i:j] + '\n'
 
 
+
+def seed_agrupamento(est):
+    """Quatro origens sintéticas, sem assinatura/reserva. Não altera ordens salvas nem aplica migração."""
+    import copy
+    for i, (area, dose) in enumerate(((10, 2), (15, 2), (5, 2), (5, 3))):
+        oid='OS-%04d' % (590+i)
+        if oid in est['ordens']: raise ValueError('ID da demonstração de agrupamento já ocupado: '+oid)
+        parcela='LG-DEMO-%s' % chr(65+i)
+        ins=[dict(p='Sulfato de magnésio',g='Fertilizante',dose=dose,un='kg',tot=_QTD.qtd(dose,area),emb='saco 25 kg')]
+        origem='Demonstração de agrupamento · parcelas sintéticas sem sobreposição no contexto Lagoa Grande / Mamão Formosa. Não é recomendação agronômica.'
+        no=dict(id=oid,novo=True,tipo='Pulverização · demonstração de agrupamento',talhao='Parcela demonstrativa '+chr(65+i),
+                talhoes=[dict(id=parcela,nome='Parcela demonstrativa '+chr(65+i))],faz=DL.FAZ,saf='2026/27',cult='LG-DEMO',
+                cultura='Mamão Formosa',culturas=['Mamão Formosa'],area=area,etapa='A liberar',selos=[dict(t='Demonstração',c='gray')],
+                versao='v1',realizado=0,saldo=area,ap=[],ins=ins,req=None,reservado=False,resp='A programar',
+                jan='2026-09-29',ini='2026-09-29',fim='2026-09-29',janela='29/09 · 08:00–18:00 UTC−3',
+                atv=dict(op='Pulverização',nome='Demonstração de agrupamento',orig=origem,conj='',rend=5),
+                keys=[parcela+'|DEMO-AGRUPAR'],cond='Revisar a versão de cada origem; agrupar não aprova nem libera.',
+                dono='Agrônomo',prazo='Revisar versão',orig=[origem],obs=origem,nota='',agua=False,local='',semins='',bloq=None,aviso='',link='')
+        est['ordens'][oid]=dict(id=oid,tipo=no['tipo'],talhao=no['talhao'],area=area,etapa='A liberar',versao='v1',realizado=0,saldo=area,
+                resp=no['resp'],ins=copy.deepcopy(ins),req=None,selos=no['selos'],ap=[],reservado=False,osc=dict(novo=no),
+                instrucao=dict(vazao=100,versao='v1',origem=origem),
+                loteFicha=dict(versaoOS='v1',organizacao='DEMO-LG',fazenda=DL.FAZ,safra='LG2627',cultura='Mamão Formosa',
+                    operacao='Pulverização',metodo='barra',receita='DEMO-AGRUPAR',receitaVersao='v1',perfil='barra',regulagem='DEMO-100L',
+                    ocorrencia='DEMO-AGRUPAR-'+chr(65+i),parcela=parcela,tipo='liquido',base='ha',
+                    janela=['2026-09-29T08:00:00-03:00','2026-09-29T18:00:00-03:00'],volumeHa=100,
+                    capacidadeHaH=5,deslocamentoH=0.5 if i==0 else 0,setupH=0.25 if i==0 else 0,tanqueUtil=3000,
+                    recursos=dict(maquina='Trator',implemento='Pulverizador'),
+                    insumos=[dict(p='Sulfato de magnésio',id='DEMO-SULFMG',formulacao='Solúvel · demonstração',concentracao='Demonstração, sem recomendação',base='ha')]))
+    return est
+
+
 if __name__ == '__main__':
     import sys; sys.path.insert(0, HERE)
     s = seed()
     for k, o in s['ordens'].items(): print(k, o['etapa'], o['versao'], o['req'], o['realizado'], '/', o['area'], [i['p'] for i in o['ins']])
     for k, r in s['reqs'].items(): print(k, r['os'], r['estado'], [(i['prod'], i['lote'], i['solicitado'], i['entregue'], i['custodia']) for i in r['itens']])
+
+
