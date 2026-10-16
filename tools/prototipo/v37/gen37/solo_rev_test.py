@@ -22,7 +22,8 @@ window.VIS=e=>{ if(!e) return false; const r=e.getBoundingClientRect(); const cs
 window.TOP=()=>[...document.querySelectorAll('aside[role=dialog]')].filter(VIS).pop()||null;
 window.CLK=(t,inPan)=>{ const r=inPan?TOP():document; if(!r) return 'SEM PAINEL'; const els=[...r.querySelectorAll('button,a,summary')].filter(VIS);
   const e=els.find(x=>N(x.innerText)===t)||els.find(x=>N(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok'; };
-window.EXP=(local)=>{ const g=local.split('-')[0]; const gr=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>N(x.innerText).startsWith('▸ '+g+' ')); if(!gr) return false; const b=[...gr.querySelectorAll('button')].find(b=>N(b.innerText)==='▸'); if(b){ b.click(); return true; } return false; };
+window.EXP=(local)=>{ const g=local.split('-')[0]; const F='button.g2car[aria-expanded=false]';   /* TAB-11: o grupo fechado é o da seta com aria-expanded=false (antes o texto "▸ T1 …") */
+  const gr=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>x.querySelector(F)&&N(x.innerText).startsWith(g+' ')); if(!gr) return false; const b=gr.querySelector(F); if(b){ b.click(); return true; } return false; };
 window.INS=(local)=>{ const row=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>N(x.innerText).startsWith(local+' ')); if(!row) return 'sem linha '+local;
   (row.querySelector('.g2pw')||row).click(); return 'ok'; };
 /* SAF-TAB: a ação de insumos pertence ao detalhe do cultivo, não à célula da listagem. */

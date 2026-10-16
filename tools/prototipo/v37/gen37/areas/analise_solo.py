@@ -231,7 +231,7 @@ def _painel_laudo(g_ext,g_uso):
            + kv
            + f'<div class="so-lado"><div class="so-orig-d">{orig}</div><div style="min-width: 0; display: flex; flex-direction: column; gap: 6px;">{LAB("Extraído · valores e índices")}'
              f'<div style="font-size: 12.5px; color: {MUTED};">Clique na linha para corrigir valor ou unidade; os índices calculados mostram a fórmula e as entradas.</div>{g_ext}</div>'
-             f'<details class="so-orig-m" style="border: 1px solid {LINE}; border-radius: 12px; padding: 8px 12px;"><summary style="cursor: pointer; font-weight: 700; font-size: 13px; min-height: 32px;">Ver original</summary>{orig}</details></div>'
+             f'<details class="so-orig-m" style="border: 1px solid {LINE}; border-radius: 12px; padding: 8px 12px;"><summary class="g2seta-nome" style="cursor: pointer; font-weight: 700; font-size: 13px; min-height: 32px;">{E.seta()}Ver original</summary>{orig}</details></div>'
            + f'<sc-if value="{H("ld_hasUso")}" hint-placeholder-val="{F()}"><section aria-label="Uso no plano" style="display: flex; flex-direction: column; gap: 6px;">{LAB("Uso no plano")}'
              f'<div style="font-size: 12.5px; color: {MUTED};">Clique na linha para ver o porquê. Usar a sugestão é no Planejar safra.</div>{g_uso}</section></sc-if>'
            + f'<sc-if value="{H("ld_semUso")}" hint-placeholder-val="{F()}"><div style="font-size: 12.5px; color: {MUTED};">{H("ld_semUsoT")}</div></sc-if>'

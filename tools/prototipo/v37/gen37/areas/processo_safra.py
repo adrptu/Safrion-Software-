@@ -286,7 +286,7 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
            f'<span>Custo de operação <b style="color: {INK};">{H("v3_cop")}</b> · {H("v3_copq")}</span>'
            f'<button type="button" class="acoes-lnk" data-acao="resumo" onClick="{H("rs_abrir")}" style="min-height: 24px;">Resumo da safra</button></span>')
     linha_cap=(f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 0 4px 8px;">'
-               f'<span style="flex-grow: 1;"></span><button type="button" class="acoes-lnk" aria-expanded="{H("v3_capexp")}" onClick="{H("v3_captog")}">{H("v3_capt")}</button></div>')
+               f'<span style="flex-grow: 1;"></span><button type="button" class="acoes-lnk g2seta-nome" aria-expanded="{H("v3_capexp")}" onClick="{H("v3_captog")}">{E.seta()}Capacidade por mês</button></div>')
     filtro=(f'<sc-if value="{H("v3_fil")}" hint-placeholder-val="{F()}"><div role="status" tabIndex="-1" id="saf-cap-filtro" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 0 4px 8px; font-size: 12.8px;">'
             f'<span>Mostrando <b>{H("v3_filn")}</b>: {H("v3_filt")}</span><button type="button" onClick="{H("v3_filx")}" style="{_MINI}">Ver todas</button></div></sc-if>')
     # 15/10/2026 (proprietário: "esses avisos e alertas deixe apenas dentro da tabela de forma visual, não fora dela"): o veredito fica para o
@@ -380,9 +380,9 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
       f'<sc-if value="{H("lp_nerr")}" hint-placeholder-val="{F()}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">Corrija os campos destacados; o que você digitou foi mantido.</div></sc-if>'
       f'<sc-for list="{H("lp_grupos")}" as="g" hint-placeholder-count="1"><div style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase; padding-top: 4px;">{H("g.t")}</div>'
       f'<sc-for list="{H("g.gats")}" as="t" hint-placeholder-count="2"><div style="border: 1px solid {LINE}; border-radius: 12px; overflow: hidden;">'
-      f'<div style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: {BG};"><button type="button" class="g2car" aria-label="{H("t.lab")}" onClick="{H("t.tog")}">{H("t.sym")}</button><b style="font-size: 13.5px;">{H("t.t")}</b><span style="font-size: 12px; color: {MUTED};">· {H("t.dt")}</span></div>'
+      f'<div style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: {BG};">{E.seta_abrir(H("t.exp"),H("t.lab"),H("t.tog"))}<b style="font-size: 13.5px;">{H("t.t")}</b><span style="font-size: 12px; color: {MUTED};">· {H("t.dt")}</span></div>'
       f'<sc-if value="{H("t.open")}" hint-placeholder-val="{H("true")}"><div style="padding: 4px 12px 10px;"><sc-for list="{H("t.atvs")}" as="a" hint-placeholder-count="1"><div style="padding: 6px 0;">'
-      f'<div style="display: flex; align-items: center; gap: 8px;"><button type="button" class="g2car" aria-label="{H("a.lab")}" onClick="{H("a.tog")}">{H("a.sym")}</button><span style="font-size: 13px; font-weight: 700;">{H("a.t")}</span><span style="font-size: 12px; color: {MUTED};">· {H("a.op")}</span></div>'
+      f'<div style="display: flex; align-items: center; gap: 8px;">{E.seta_abrir(H("a.exp"),H("a.lab"),H("a.tog"))}<span style="font-size: 13px; font-weight: 700;">{H("a.t")}</span><span style="font-size: 12px; color: {MUTED};">· {H("a.op")}</span></div>'
       f'<sc-if value="{H("a.open")}" hint-placeholder-val="{H("true")}"><div style="padding-left: 30px;"><sc-if value="{H("a.semProd")}" hint-placeholder-val="{F()}"><div style="font-size: 12px; color: {MUTED}; padding: 4px 0;">Sem insumos · só operação</div></sc-if>'
       f'<sc-for list="{H("a.prods")}" as="p" hint-placeholder-count="1">{prod_row}</sc-for>'
       f'<sc-if value="{H("a.podeIncl")}" hint-placeholder-val="{F()}"><div style="padding-top: 6px;"><button type="button" onClick="{H("a.incl")}" style="{_MINI} font-size: 12px;">+ Incluir insumo nesta atividade</button></div></sc-if>'

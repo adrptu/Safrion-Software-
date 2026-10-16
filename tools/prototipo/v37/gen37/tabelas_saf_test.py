@@ -48,7 +48,7 @@ try:
     chk('unidade por nível: operação em ha-op (área e custo); horas com "h"; rendimento "ha/h" ou "varia"; custo total em R$',
         all(r[5].endswith(' ha-op') and (r[7] == '' or r[7].endswith('/ha-op')) and r[6].endswith(' h') and (r[4] in ('', 'varia') or r[4].endswith(' ha/h')) and (r[8] == '' or r[8].startswith('R$ ')) for r in n0), [(r[0], r[4], r[5], r[6], r[7], r[8]) for r in n0])
     for _ in range(4):
-        if not J(f"(()=>{{const b=[...({TB}).querySelectorAll('button[aria-label^=\"Expandir\"]')].filter(b=>b.offsetParent); b.forEach(x=>x.click()); return b.length;}})()"): break
+        if not J(f"(()=>{{const b=[...({TB}).querySelectorAll('button.g2car[aria-expanded=false]')].filter(b=>b.offsetParent); b.forEach(x=>x.click()); return b.length;}})()"): break
         time.sleep(.35)
     rs = linhas(); fi = [r for r in rs if len(r) == 9 and r[0] != 'Total' and r not in n0 and ' · ' not in r[0] and r[5]]
     chk('atividades em "ha" (uma passada por cultivo) e talhões em "ha"', fi and all(r[5].endswith(' ha') or r[5].endswith(' ha-op') for r in fi) and any(r[5].endswith(' ha') for r in fi), [(r[0], r[5]) for r in fi][:4])
@@ -82,7 +82,7 @@ try:
         hs = [x.upper() for x in heads()]; return [dict(zip(hs, [t.replace('▾', '').replace('▸', '').strip() for t in r])) for r in linhas()]
     def expande():
         for _ in range(4):
-            if not J(f"(()=>{{const b=[...({TB}).querySelectorAll('button[aria-label^=\"Expandir\"]')].filter(b=>b.offsetParent); b.forEach(x=>x.click()); return b.length;}})()"): break
+            if not J(f"(()=>{{const b=[...({TB}).querySelectorAll('button.g2car[aria-expanded=false]')].filter(b=>b.offsetParent); b.forEach(x=>x.click()); return b.length;}})()"): break
             time.sleep(.35)
     # etapa 2: cultivos
     c.goto(URL.replace('passo=operacoes', 'passo=cultivos'), 1.6); TB = TBF('TIPO'); h2 = [x.upper() for x in heads()]; d2 = dicts(); shot('saf2-1440')

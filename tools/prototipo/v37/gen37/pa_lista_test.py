@@ -117,7 +117,7 @@ def digita(txt):
     c.call('Input.insertText', {'text': txt}); time.sleep(.15)
 def mudar_dose(val, toque=False, abrir=True):
     """Fungicida 1ª aplicação · Fungicida A: abre a atividade (se fechada), toca a dose, digita e confirma com Enter"""
-    if abrir and J(f"!!{lab('Mostrar insumos de Fungicida 1ª aplicação')}"): clique(lab('Mostrar insumos de Fungicida 1ª aplicação'), toque)
+    if abrir and J(f"!!{lab('Abrir insumos de Fungicida 1ª aplicação')}"): clique(lab('Abrir insumos de Fungicida 1ª aplicação'), toque)
     clique(lab('Alterar a dose de Fungicida A'), toque, .3)
     J("document.activeElement&&document.activeElement.select&&document.activeElement.select()"); digita(val); c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.45)
 def publicar_ate(toque=False):
@@ -186,7 +186,7 @@ try:
     # ---------------- L7 · erro e recusa ----------------
     with secao('L7'):
         abre('PA.dc.html#plano=SOJA-AT')
-        clique(lab('Mostrar insumos de Fungicida 1ª aplicação')); clique(lab('Alterar a dose de Fungicida A'), w=.3)
+        clique(lab('Abrir insumos de Fungicida 1ª aplicação')); clique(lab('Alterar a dose de Fungicida A'), w=.3)
         J("document.activeElement.select()"); digita('0'); c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.4)
         e0 = J("[...document.querySelectorAll('main [role=alert]')].map(a=>a.innerText.trim()).join(' | ')"); r0 = est()
         c.tecla('Escape', 'Escape', 27); time.sleep(.3); r0b = est()
@@ -258,7 +258,7 @@ try:
     # ---------------- L14 · R1/R2: dose sem Enter e "Publicar" ----------------
     with secao('L14'):
         abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,6')
-        clique(lab('Mostrar insumos de Dessecação pré-plantio'), w=.3); clique(lab('Alterar a dose de Glifosato 480'), w=.3)
+        clique(lab('Abrir insumos de Dessecação pré-plantio'), w=.3); clique(lab('Alterar a dose de Glifosato 480'), w=.3)
         J("document.activeElement.select&&document.activeElement.select()"); digita('6'); aberta = J(NOTA)
         clique(PUB, w=.1); espera("[...document.querySelectorAll('[role=status]')].some(x=>/entrou no rascunho agora|salvas na v7/.test(x.innerText))", 4)
         t14 = toast(); n14 = J(NOTA); e14 = est(); v14 = J("document.querySelector('main').innerText.replace(/\\s+/g,' ')")   # Versões saiu do detalhe (14/10): o cabeçalho diz a versão em vigor
@@ -268,7 +268,7 @@ try:
             and not n14['txt'] and not n14['dis'] and 'Alterada' in v14
             and 'Rascunho v7 · v6 em vigor' in v14 and 'Publicado · v7' not in v14, [aberta, t14, n14, v14[:400]])
         clique(PUB, w=.1); espera("[...document.querySelectorAll('[role=status]')].some(x=>/Plano salvo · v7/.test(x.innerText))", 4); t14b = toast()
-        clique(lab('Mostrar insumos de Dessecação pré-plantio'), w=.3) if J(f"!!{lab('Mostrar insumos de Dessecação pré-plantio')}") else None
+        clique(lab('Abrir insumos de Dessecação pré-plantio'), w=.3) if J(f"!!{lab('Abrir insumos de Dessecação pré-plantio')}") else None
         g14 = J(f"(()=>{{const b={lab('Alterar a dose de Glifosato 480')}; return b?b.innerText.trim():'';}})()")
         chk('L14b R1: o clique seguinte publica a v7 com as duas doses que estavam no resumo (Glifosato 480 em 6 L/ha)', 'Plano salvo · v7' in t14b and g14 == '6 L/ha', [t14b, g14])
         abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,6'); clique(lab('Alterar a dose de Fungicida A'), w=.3)
@@ -326,7 +326,7 @@ try:
             and 'Plano do endereço não encontrado' in t18 and h18.replace('#plano=', '') not in t18 and 'NP' not in t18, [h18, t18, e18['hash']])
     # ---------------- L19 · R8: sair com a inclusão de insumo digitada ----------------
     with secao('L19'):
-        abre('PA.dc.html#plano=SOJA-AT'); clique(lab('Mostrar insumos de Fungicida 1ª aplicação'), w=.3); clique(lab('Incluir insumo em Fungicida 1ª aplicação'), w=.4)
+        abre('PA.dc.html#plano=SOJA-AT'); clique(lab('Abrir insumos de Fungicida 1ª aplicação'), w=.3); clique(lab('Incluir insumo em Fungicida 1ª aplicação'), w=.4)
         digita('Inset'); time.sleep(.4); c.tecla('ArrowDown', 'ArrowDown', 40); c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.4); digita('0,3')
         clique("document.querySelector('[data-acoes] [data-acao=voltar]')", w=.5); w1 = est(); nt1 = J(NOTA)
         clique(btn('Continuar editando', "document.querySelector('[data-acoes]')"), w=.4); w2 = est(); dv = J("(()=>{const i=document.querySelector('[id^=pa-add-dose-]'); return i?{v:i.value, foco:document.activeElement===i}:null;})()")
