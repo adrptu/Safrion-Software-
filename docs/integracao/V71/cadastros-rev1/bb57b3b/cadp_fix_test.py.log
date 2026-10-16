@@ -1,0 +1,16 @@
+OK  1 sem erro JS
+OK  2 clientes com pedido (VE-04), contrato de venda (VE-05) e título (GE-05) existem no CD-05 como Cliente · faltam [] · VE-04 ['Atacado Bom Preço', 'CD Horti', 'Coop Grão Sul', 'Frutas Real', 'Rede Hortifrúti BA', 'Torrefação Serra'] · GE-05 ['Atacado Bom Preço', 'Coop Grão Sul', 'Frutas Real', 'Rede Hortifrúti BA'] · VE-05 ['Coop Grão Sul', 'Torrefação Serra']
+OK  3 contraparte de barter (VE-05) cadastrada como Fornecedor; Coopergrão, sem uso em outra tela, saiu · ['Agroquímica Delta', 'Fertisul'] · ['Agro Norte', 'Agroquímica Delta', 'Casa do Adubo', 'Coop. Vale', 'Fertisul', 'Química Centro-Oeste', 'Santa Rita Insumos', 'Sementes Vale']
+OK  4 suspenso com motivo na linha · Casa do Adubo Suspenso Entrega fora do prazo 22.456.789/0001-22 Fornecedor Juliana Prado 65 99822-3344 não autorizado vendas@casadoadubo.com.br E-mail
+OK  5 reativado: linha volta a Homologado, sem o motivo · Casa do Adubo Homologado 22.456.789/0001-22 Fornecedor Juliana Prado 65 99822-3344 não autorizado vendas@casadoadubo.com.br E-mail
+OK  6 nova suspensão começa com motivo vazio e a ajuda não promete histórico · '' · SUSPENSÃO Motivo da suspensão Aparece na listagem enquanto durar a suspensão.
+OK  7 salvar sem motivo novo é barrado junto ao campo · Informe motivo da suspensão.
+OK  8 Clientes · Situação do papel: sem "—" dos não clientes, contagens somam 7 · ['Limite vencido 1', 'Limite vigente 6']
+OK  9 Clientes · Papéis: só valores das 7 linhas de cliente (Coop. Vale também é Fornecedor), sem valor zerado · ['Cliente 7', 'Fornecedor 1']
+OK  10 Papéis: Cliente em Todos; em Fornecedores o filtro da coluna que sai é limpo (sem chip "papeis:") · Todos 20 Fornecedores 8 Clientes 7 Parceiros de crédito 3 Transportadores 2 Prestadores 1 Papéis: Cliente × Limpar filtros Agrupar por ▾ Colunas (7) → Todos 20 Fornecedores 8 Clientes 7 Parceiros de crédito 3 Transportadores 2 Prestadores 1 Agrupar por ▾ Colunas (8)
+OK  11 de volta a Todos o filtro limpo não reaparece · Todos 20 Fornecedores 8 Clientes 7 Parceiros de crédito 3 Transportadores 2 Prestadores 1 Agrupar por ▾ Colunas (20)
+OK  12 filtro de coluna comum às duas grades continua valendo em Fornecedores · Todos 20 Fornecedores 8 Clientes 7 Parceiros de crédito 3 Transportadores 2 Prestadores 1 Parceiro: Fertisul × Limpar filtros Agrupar por ▾ Colunas · ['Fertisul']
+OK  13 filtro de Situação do papel (texto muda com o papel) é limpo ao trocar de papel · Todos 20 Fornecedores 8 Clientes 7 Parceiros de crédito 3 Transportadores 2 Prestadores 1 Situação do papel: Limite vencido × Limpar filtros Agrupar por ▾ Colunas (1) → Todos 20 Fornecedores 8 Clientes 7 Parceiros de crédito 3 Transportadores 2 Prestadores 1 Agrupar por ▾ Colunas (20)
+OK  14 conteúdo cabe na prancheta em Todos e em Fornecedores · Todos 689 · Fornecedores 689 · prancheta 1000
+OK  15 sem erro JS ao fim
+RESULTADO: OK 15/15
