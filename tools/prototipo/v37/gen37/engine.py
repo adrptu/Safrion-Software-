@@ -64,6 +64,7 @@ ICONS.update({'Indicadores':ICONS['Controle'],'PCE':ICONS['PCP'],'Estoque':ICONS
  'prancheta':'M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1zM16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M12 11h4M12 16h4M8 11h.01M8 16h.01',
  'prancheta_ok':'M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1zM16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M9 14l2 2 4-4',
  'frasco':'M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2M8.5 2h7M7 16h10',
+ 'arquivo_up':'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M12 18v-6M9 15l3-3 3 3',   # arquivo com seta (Lucide file-up, ISC): importar laudo no Mapa (16/10/2026)
  'tomada':'M12 22v-5M9 8V2M15 8V2M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z',
  'armazem':'M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35ZM6 18h12M6 14h12M6 10h12v12h-12z',
  'historico':'M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5M12 7v5l4 2',
@@ -1425,6 +1426,10 @@ VISOES_CSS=(
     ".g2visoes>.g2vmais{display:none}"
     "@media (max-width:640px){.g2visoes>button[data-i]:not([data-i=\"0\"]):not([data-i=\"1\"]):not([data-i=\"2\"]){display:none}.g2visoes>.g2vmais{display:inline-flex}}"
     f"@media (pointer:coarse),(max-width:640px){{.g2visoes>button{{width:{DS_VISOES['alvo_toque']};height:{DS_VISOES['alvo_toque']}}}.g2visoes>button svg{{width:20px;height:20px}}}}"
+    # VISOES-ROT (16/10/2026, proprietário: barra do Mapa "do lado da barra lateral de ícones dos módulos não fica legal"): o mesmo seletor com o
+    # nome visível ao lado do ícone, para escolhas que o ícone sozinho não explica (funções do Mapa). Mesmo trilho, ativo tonal e alvos; a largura
+    # acompanha o nome; sem esconder opções no estreito (quem usa rola o trilho na horizontal)
+    ".g2visoes.g2visoes-rot>button{width:auto;gap:6px;padding:0 12px;font-size:12.5px;font-weight:700;white-space:nowrap}"
     ".g2vmenu{position:absolute;top:calc(100% + 6px);right:0;z-index:60;min-width:220px;max-width:calc(100vw - 32px);box-sizing:border-box;background:#FFFFFF;"
     "border:1px solid #E4E9E5;border-radius:12px;box-shadow:0 14px 34px -14px rgba(21,32,26,.4);padding:6px;display:flex;flex-direction:column;gap:2px}"
     ".g2vmenu>button{display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 12px;border:0;border-radius:8px;background:transparent;color:#15201A;"

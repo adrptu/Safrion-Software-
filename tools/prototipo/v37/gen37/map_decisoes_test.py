@@ -50,9 +50,9 @@ try:
     sem_os=(J("document.querySelectorAll('aside[aria-label^=\"T1\"] [role=radio], aside[aria-label^=\"T1\"] [aria-label=\"Próximo passo\"], aside [aria-expanded], aside details').length")==0
             and 'Nova O.S. neste talhão' not in t1 and 'Liberar para execução' not in t1)
     r=ver('T1','Ver ordens'); a=ativa(); tsel=json.loads(J("sessionStorage.getItem('mapa-ctx')") or '{}').get('tsel'); t1=pan('T1')
-    # camadas novas: Análises de solo (afb2f46) e Colheita (0346e66, pedido do proprietário de 14/10 = DEC-0910-36); a ordem é a da barra
-    chk('3 Integrado T1: "NESTE TALHÃO" com Satélite, Lavoura, Análises de solo, Pragas e doenças, Carência e destino, Colheita, Irrigação, Ordens de serviço, Insumos e Custos (um "Ver …" cada), sem O.S. nem recolher · "Ver ordens" troca para Ordens de serviço com o T1 aberto',
-        [n for n,_ in lin]==['Satélite','Lavoura','Análises de solo','Pragas e doenças','Carência e destino','Colheita','Irrigação','Ordens de serviço','Insumos','Custos'] and all(len(b)==1 and b[0].startswith('Ver ') for _,b in lin)
+    # DEC-0910-36 (decisão do proprietário, 16/10/2026): a ordem é a da barra de nove nomes; Insumos e Carência e destino (filtros) logo abaixo da função que os contém
+    chk('3 Integrado T1: "NESTE TALHÃO" com Satélite, Solo, Pragas e doenças, Ordens de serviço, Insumos, Irrigação, Estádio, Colheita e produtividade, Carência e destino e Custos (um "Ver …" cada), sem O.S. nem recolher · "Ver ordens" troca para Ordens de serviço com o T1 aberto',
+        [n for n,_ in lin]==['Satélite','Solo','Pragas e doenças','Ordens de serviço','Insumos','Irrigação','Estádio','Colheita e produtividade','Carência e destino','Custos'] and all(len(b)==1 and b[0].startswith('Ver ') for _,b in lin)
         and sem_os and r=='ok' and a==['Ordens de serviço'] and tsel==['T1'] and 'ORDENS DE SERVIÇO' in t1 and 'NESTE TALHÃO' not in t1, [lin,sem_os,r,a,tsel,t1[:200]])
     # 4-7 · camada Ordens de serviço: primário = próximo passo da ordem mais urgente, sem outro botão para o mesmo destino
     lk=links('T1')

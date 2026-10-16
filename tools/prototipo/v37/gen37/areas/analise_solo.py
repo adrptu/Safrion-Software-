@@ -321,9 +321,10 @@ function EXTRAVALS(self,v){ try{ window.__soloSelf=self; window.__solo={get:()=>
     catch(e){ const m=String(e.message||e); const f=/capacidade de campo/.test(m)?'ccv':(/ponto de murcha|Ponto de murcha/.test(m)?'pmpv':(/profundidade efetiva/.test(m)?'z':(/data|depois de hoje/i.test(m)?'datav':(/já está registrada/.test(m)?'datav':'talv')))); const o={}; o[f]=m.replace(' Nada foi gravado.',''); return o; } };
   self.g2opts=(gid,k,d)=>{ if(gid==='g_agua'&&k==='talv') return [{v:'',t:'Escolha o talhão'}].concat((SOLO_TAL[d.faz||'Santa Rita']||[]).map(x=>({v:x[0],t:x[0]+' · '+cenNum(x[1])+' ha'}))); return null; };
   self.g2live=(gid,k,d)=>{ if(gid==='g_agua'&&k==='cadT'){ const cad=soloCAD({cc:d.ccv,pmp:d.pmpv,z:d.z,un:d.un}); return cad.v===null?'não calculável: '+cad.nc:cad.e; } return null; };
-  /* abrir pelo endereço: AG-02.dc.html#LAU-2061 (laudo) · AG-02.dc.html#registrar=Santa Rita/T3 (Registrar laudo com fazenda e talhão, vindo do Mapa) */
+  /* abrir pelo endereço: AG-02.dc.html#LAU-2061 (laudo) · AG-02.dc.html#registrar=Santa Rita/T3 (Registrar laudo com fazenda e talhão, vindo do Mapa) ·
+     AG-02.dc.html#registrar=Lagoa Grande (ícone Importar laudo do Mapa › Solo sem talhão escolhido: só a fazenda vem preenchida) */
   if(!self.__hashIni){ self.__hashIni=1; const ab=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||'').replace('#',''); }catch(e){} if(/^LAU-\d+$/.test(h)) setTimeout(()=>self.setState({lau:h,mf_faz:'Todas'}),0);
-      const m=/^registrar=([^/]+)\/(.+)$/.exec(h); if(m) setTimeout(()=>{ self.setState({lau:null,mf_faz:'Todas'}); soRlNovo(self,m[1],m[2]); },0); }; ab(); try{ window.addEventListener('hashchange',ab); }catch(e){} } }
+      const m=/^registrar=([^/]+)(?:\/(.+))?$/.exec(h); if(m) setTimeout(()=>{ self.setState({lau:null,mf_faz:'Todas'}); soRlNovo(self,m[1],m[2]||''); },0); }; ab(); try{ window.addEventListener('hashchange',ab); }catch(e){} } }
 function soAgDados(x){ return {faz:x.faz,tal:x.talv,zona:x.zona||'',data:x.datav,prof:x.profv,z:x.z,met:x.metv,un:x.un,cc:x.ccv,pmp:x.pmpv,fonte:x.fontev,resp:x.resp}; }
 ''')
     EXTRA.append('<style>'+CSS+'</style>')

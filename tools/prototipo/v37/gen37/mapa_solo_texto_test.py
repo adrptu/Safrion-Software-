@@ -2,11 +2,11 @@
 """Mapa: camada Análises de solo e menos texto (proprietário, 13/10/2026: "coloque analises de solo como uma das opcoes do menu do mapa" e
 "diminua essa quantidade de textos e descrições no mapa. somos minimalistas e essencialistas"). Oráculo pelos laudos de dados_solo.py
 (a mesma base do AG-02), com V = 100 × SB ÷ T calculado aqui em Decimal (SB = Ca + Mg + K ÷ 391; T = SB + H+Al) e meta V₂ da regra.
-  S1 a barra do mapa tem "Análises de solo" entre Lavoura e Pragas e doenças; ao tocar, o nome da camada é "Análises de solo"
-  S2 Lagoa Grande: números da faixa e rótulos dos pivôs pelo oráculo (só o Pivô 12 tem laudo 0–20; V 50 % abaixo da meta 70 %; 22 sem análise)
+  S1 a barra do mapa tem "Solo" entre Satélite e Pragas e doenças (DEC-0910-36, 16/10/2026); ao tocar, o nome da camada é "Solo"
+  S2 Lagoa Grande: números da faixa e rótulos dos pivôs pelo oráculo (só o Pivô 12 tem laudo 0–20; V 50 % abaixo da meta 70 %; os outros "Sem laudo")
   S3 tocar o Pivô 12 abre o painel com o laudo LAU-2071 0–20 cm, CTC 8,10 e V 50 %, e o atalho para o laudo no AG-02
   S4 Santa Rita: com análise = talhões com laudo de solo 0–20 (T1, T2, T4 e C1), a validar = C1, sem análise = os demais
-  S5 talhão sem análise (T3): "Registrar laudo" abre o AG-02 com a fazenda e o talhão no formulário
+  S5 talhão sem laudo (T3): "Sem laudo" e "Registrar laudo" abre o AG-02 com a fazenda e o talhão no formulário
   T1 em cada camada, a fonte técnica sai da tela e fica na dica ⓘ ao lado do nome; nenhuma linha solta acima de 60 caracteres no bloco do mapa
   T2 o selo "Demonstração sintética" continua à vista na legenda de toda camada da Lagoa Grande (dado sintético sempre rotulado)
   T3 o ⓘ abre a dica com a fonte (mouse sobre o ⓘ); sem a etiqueta "clique no talhão"
@@ -52,9 +52,9 @@ def espera(e, s=45):
         if J(e): return True
         time.sleep(.4)
     return False
-RAIL = "JSON.stringify([...document.querySelectorAll('[role=tab][data-dica]')].filter(b=>b.getClientRects().length).map(b=>b.getAttribute('data-dica')))"
+RAIL = "JSON.stringify([...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] [role=tab]')].filter(b=>b.getClientRects().length).map(b=>b.innerText.trim()))"   # 16/10/2026 (proprietário): a barra das funções foi para o alto do mapa, com o nome à vista; acha o botão pelo nome (sem data-dica)
 def camada(nome, w=1.6):
-    J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab][data-dica]')].find(b=>b.getAttribute('data-dica')==={json.dumps(nome)}); if(b) b.click(); return !!b;}})()"); time.sleep(w)
+    J(f"(()=>{{const b=[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] [role=tab]')].find(b=>b.innerText.trim()==={json.dumps(nome)}); if(b) b.click(); return !!b;}})()"); time.sleep(w)
 INFO = "(()=>{const b=document.querySelector('main button.g2-info[aria-label=\"Fonte e regra da camada\"]'); return b?b.getAttribute('data-dica'):null;})()"
 # bloco do mapa: a seção que contém a barra de camadas; nome da camada = primeiro <b> do cabeçalho
 BLOCO = "(()=>{const n=document.querySelector('nav[aria-label=\"Funcionalidades do mapa\"]'); let s=n; while(s&&s.parentElement&&!(s.innerText||'').match(/Selecionar área/)) s=s.parentElement; return s;})()"
@@ -75,19 +75,20 @@ try:
     c.aparelho(1440, 900, 1, False); c.goto(U('Main.dc.html'), .3); J("localStorage.clear(); sessionStorage.clear(); sessionStorage.setItem('mapa-ctx','{\"mf_faz\":\"Lagoa Grande\"}'); 1")
     c.goto(U('IN-04.dc.html'), 1.0); pronto = espera("!!(window.__LGI&&window.__LGI.pronto)")
     rail = json.loads(J(RAIL) or '[]')
-    camada('Análises de solo'); nome = J(NOME)
-    i = rail.index('Análises de solo') if 'Análises de solo' in rail else -1
-    chk('S1 barra do mapa: "Análises de solo" entre Lavoura e Pragas e doenças; tocar mostra a camada "Análises de solo"',
-        pronto and i > 0 and rail[i - 1] == 'Lavoura' and rail[i + 1] == 'Pragas e doenças' and nome == 'Análises de solo', [pronto, rail, nome])
+    # DEC-0910-36 (decisão do proprietário, 16/10/2026): a função se chama Solo, entre Satélite e Pragas e doenças
+    camada('Solo'); nome = J(NOME)
+    i = rail.index('Solo') if 'Solo' in rail else -1
+    chk('S1 barra do mapa: "Solo" entre Satélite e Pragas e doenças; tocar mostra a camada "Solo"',
+        pronto and i > 0 and rail[i - 1] == 'Satélite' and rail[i + 1] == 'Pragas e doenças' and nome == 'Solo', [pronto, rail, nome])
     # 15/10/2026 (mapa de calor do solo): a faixa conta laudos e pontos da camada; o rótulo é o indicador escolhido (padrão: V %)
     fxt = (J("(document.querySelector('[role=group][aria-label^=Indicadores]')||{}).innerText||''") or '').replace('\n', ' ')
     ids = [q[0] for q in F.LG_PIVOS]; rots = {q: mk(q) for q in ids}
     p12k = next(q for q in ids if q.endswith('12'))
     esp12 = f'P12 V % {fmt(V12.quantize(Dc("1"), rounding=ROUND_HALF_UP))} %'
-    sem = [q for q in ids if (rots[q] or '').endswith('sem análise')]
+    sem = [q for q in ids if (rots[q] or '').endswith('Sem laudo')]   # DEC-0910-36: talhão sem laudo = "Sem laudo", em cinza
     import re as _re
     nl = int((_re.search(r'Laudos (\d+)', fxt) or [0, -1])[1]); npt = int((_re.search(r'Pontos (\d+)', fxt) or [0, -1])[1])
-    chk(f'S2 Lagoa Grande: faixa com {len(LG020)} laudos 0–20 e {sum(len(l["pts"]) for l in LG020.values())} pontos pelo oráculo; Pivô 12 "{esp12}"; os {NPIV - len(LG020)} pivôs sem laudo "sem análise"',
+    chk(f'S2 Lagoa Grande: faixa com {len(LG020)} laudos 0–20 e {sum(len(l["pts"]) for l in LG020.values())} pontos pelo oráculo; Pivô 12 "{esp12}"; os {NPIV - len(LG020)} pivôs sem laudo "Sem laudo"',
         nl == len(LG020) and npt == sum(len(l['pts']) for l in LG020.values()) and rots[p12k] == esp12 and len(sem) == NPIV - len(LG020), [fxt, rots[p12k], len(sem)])
     toca_piv(p12k); time.sleep(1.4)
     pan = J("(()=>{const a=[...document.querySelectorAll('main aside')].find(x=>x.getClientRects().length); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
@@ -103,7 +104,7 @@ try:
         if lg or (inf and len(inf) > 60 and inf in (J("document.body.innerText") or '')): ruins[nm] = lg or ['fonte à vista']
         if 'Demonstração sintética' not in nota: sem_selo.append([nm, nota[-80:]])
     chk(f'T1 {len(rail)} camadas: a fonte técnica fica na dica ⓘ ao lado do nome; nenhuma linha solta acima de 60 caracteres no bloco do mapa',
-        len(rail) >= 10 and not ruins and not sem_info, [ruins, sem_info])
+        len(rail) == 9 and not ruins and not sem_info, [ruins, sem_info])   # nove funções (DEC-0910-36)
     chk('T2 o selo "Demonstração sintética" segue à vista na legenda de toda camada da Lagoa Grande', not sem_selo, sem_selo)
     camada('Satélite')
     pi = json.loads(J("JSON.stringify((()=>{const b=document.querySelector('main button.g2-info[aria-label=\"Fonte e regra da camada\"]'); const r=b?b.getBoundingClientRect():{left:-9,top:-9,width:0,height:0}; return {x:r.left+r.width/2,y:r.top+r.height/2};})())"))
@@ -114,7 +115,7 @@ try:
         'imagem e índices fictícios' in dica and 'aquisição' in dica and 'clique no talhão' not in corpo, [dica[:200], 'clique no talhão' in corpo])
     # S4 · Santa Rita
     c.goto(U('Main.dc.html'), .3); J("sessionStorage.setItem('mapa-ctx','{\"mf_faz\":\"Santa Rita\"}'); 1"); c.goto(U('IN-04.dc.html'), 1.6)
-    camada('Análises de solo'); fxs = (J("(document.querySelector('[role=group][aria-label^=Indicadores]')||{}).innerText||''") or '').replace('\n', ' ')
+    camada('Solo'); fxs = (J("(document.querySelector('[role=group][aria-label^=Indicadores]')||{}).innerText||''") or '').replace('\n', ' ')
     c1 = J("(()=>{const e=[...document.querySelectorAll('svg [aria-label]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('C1:')); return e?e.getAttribute('aria-label'):'';})()") or ''
     chk(f'S4 Santa Rita: {ESP_SR["Com análise"]} laudos 0–20 (T1, T2, T4 e C1) pelo oráculo; C1 aguardando validação e sem H+Al: V não calculável',
         f'Laudos {ESP_SR["Com análise"]}' in fxs and 'não calculável' in c1, [fxs, c1])
@@ -126,10 +127,10 @@ try:
     if h5:
         c.goto(U(h5), 2.0); espera("!!document.querySelector('[role=dialog]')", 10)
         f5 = json.loads(J("JSON.stringify((()=>{const d=[...document.querySelectorAll('[role=dialog]')].find(x=>x.getClientRects().length&&/Registrar laudo/.test(x.innerText)); return d?[...d.querySelectorAll('select')].map(s=>s.options[s.selectedIndex]?s.options[s.selectedIndex].text:''):[];})())") or '[]')
-    chk('S5 Santa Rita T3 (sem análise): painel "sem análise" com "Registrar laudo"; o AG-02 abre o formulário com Santa Rita e T3 já escolhidos',
-        'sem análise' in p5 and h5.startswith('AG-02.dc.html#registrar=') and 'Santa Rita' in f5 and any(x.split(' · ')[0] == 'T3' for x in f5), [p5[:200], h5, f5])
+    chk('S5 Santa Rita T3 (sem laudo): painel "Sem laudo" com "Registrar laudo"; o AG-02 abre o formulário com Santa Rita e T3 já escolhidos',
+        'Sem laudo' in p5 and h5.startswith('AG-02.dc.html#registrar=') and 'Santa Rita' in f5 and any(x.split(' · ')[0] == 'T3' for x in f5), [p5[:200], h5, f5])
     errs = J("window.__err") or ''
-    c.aparelho(390, 844, 2, True); c.goto(U('IN-04.dc.html'), 1.6); camada('Análises de solo')
+    c.aparelho(390, 844, 2, True); c.goto(U('IN-04.dc.html'), 1.6); camada('Solo')
     sw = J("document.documentElement.scrollWidth<=window.innerWidth+1")
     chk('T4 celular 390 px sem rolagem horizontal; sem erro de JS', sw and not errs and not (J("window.__err") or ''), [sw, errs, J("window.__err")])
 finally:
