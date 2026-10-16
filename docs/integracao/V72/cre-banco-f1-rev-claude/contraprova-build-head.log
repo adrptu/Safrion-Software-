@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/headchk/prototipo/v37/gen37/credito_ficha_build.py", line 16, in <module>
+    assert '>{{cre_ficha_salvar_rotulo}}</button>' in painel and '>Salvar</button>' not in painel
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

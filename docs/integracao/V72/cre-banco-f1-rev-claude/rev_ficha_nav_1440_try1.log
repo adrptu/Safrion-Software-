@@ -1,0 +1,34 @@
+INFO  R1440 cabeçalho do bloco Documentos (à vista | no ⋯) · {'vis': ['Bens e avaliações', '⋯'], 'menu': ['Incluir documento']}
+FALHA R1 1440 Documentos: "Incluir documento" continua à vista no bloco (como na base) · {'vis': ['Bens e avaliações', '⋯'], 'menu': ['Incluir documento']}
+FALHA R2 1440 cabeçalho da GE-08 mantém o estado "CRE-0102 · condição documental pendente" (estado sempre visível) · Crédito › Crédito e garantias ‹ Crédito Crédito e garantias i
+INFO  R3 1440 verdes fora de painel em #vis=contratos · []
+INFO  R3 1440 verdes fora de painel em #vis=documentos · []
+INFO  R3 1440 verdes fora de painel em #vis=dossie · []
+INFO  R3 1440 verdes fora de painel em #vis=liberacoes · []
+INFO  R4 1440 links do detalhe do CRE-0102 · [['Liberado R$ 300 mil de R$ 850 mil · 1ª parcela é título em Contas a pagar ›', 'GE-04.dc.html'], ['Dossiê de crédito ›', 'GE-08.dc.html#vis=dossie']]
+INFO  R4 1440 destino do "Dossiê de crédito" · ['/GE-08.dc.html#vis=dossie', ['Dossiê e consentimento'], True]
+OK    R4 1440 "Dossiê de crédito" do contrato abre a visão interna Dossiê e consentimento (sem ir ao portal)
+OK    R5 1440 sem erro de JS nas visões da GE-08
+OK    F1 1440 Documentos › "Bens e avaliações" abre a ficha (#vis=ficha)
+INFO  F1 1440 onde fica o atalho · {'vis': True, 'menu': False}
+OK    F2 1440 a ficha mostra só o bloco dela, sem KPIs de contrato
+OK    F3 1440 BOT-01: uma só primária fora de painel, "Incluir bem"
+INFO  F4 1440 estado vazio (texto do bloco) · Ficha do grupo · Bens e avaliações Ver documentos Ficha do grupo · valores declarados · referência da demonstração: 16/10/2026. 0 de 0 BEM ⇅ SITUAÇÃO ⇅ VALOR DECLARADO ⇅ ORIGEM ⇅ ÚLTIMA CONFIRMAÇÃO ⇅ Nenhuma linha corresponde aos filtros · Limpar filtros
+FALHA F4 1440 estado vazio diz que não há bem e aponta "Incluir bem" (sem falar em filtro inexistente) · ncia da demonstração: 16/10/2026. 0 de 0 BEM ⇅ SITUAÇÃO ⇅ VALOR DECLARADO ⇅ ORIGEM ⇅ ÚLTIMA CONFIRMAÇÃO ⇅ Nenhuma linha corresponde aos filtros · Limpar filtros
+OK    F5 1440 sem rolagem lateral
+INFO  K1 1440 sequência do Tab no painel [tag,id,texto,no painel,:focus-visible,contorno] · [['A', '', 'Ver documentos', False, True, 'solid 2px none'], ['INPUT', '', 'Buscar nesta tabela', False, True, 'none 0px none'], ['BUTTON', '', 'Tabela', False, True, 'solid 2px rgb(30, 122, 76) 0px -2px 0px 0px inset'], ['BUTTON', '', 'Cartões', False, True, 'solid 2px none'], ['BUTTON', '', 'BEM\n⇅', False, True, 'solid 2px none'], ['BUTTON', '', 'Filtrar Bem', False, True, 'solid 2px none'], ['BUTTON', '', 'SITUAÇÃO\n⇅', False, True, 'solid 2px none'], ['BUTTON', '', 'Filtrar Situação', False, True, 'solid 2px none'], ['BUTTON', '', 'VALOR DECLARADO\n⇅', False, True, 'solid 2px none'], ['BUTTON', '', 'Filtrar Valor declarado', False, True, 'solid 2px none'], ['BUTTON', '', 'ORIGEM\n⇅', False, True, 'solid 2px none'], ['BUTTON', '', 'Filtrar Origem', False, True, 'solid 2px none'], ['BUTTON', '', 'ÚLTIMA CONFIRMAÇÃO\n⇅', False, True, 'solid 2px none'], ['BUTTON', '', 'Filtrar Última co
+FALHA K1 1440 Enter em "Incluir bem" abre o painel e o Tab percorre só o painel, com foco visível · [False, None, [['A', '', 'Ver documentos', False, True, 'solid 2px none'], ['INPUT', '', 'Buscar nesta tabela', False, True, 'none 0px none'], ['BUTTON', '', 'Tabela', False, True, 'solid 2px rgb(30, 122, 76) 0px -2px 0px 0px inset']]]
+INFO  K2 1440 valores digitados pelo teclado · {'nome': None, 'tipo': None, 'valor': None, 'data': None, 'responsavel': None, 'fonte': None}
+INFO  K2 1440 data pelo teclado não ficou ISO; usado setter · None
+FALHA ficha 1440 (exceção) · RuntimeError("TypeError: Cannot read properties of undefined (reading 'querySelectorAll')\n    at <anonymous>:1:120\n    at <anonymous>:1:217")
+OK    S1 1440 Ana: motivo à vista e "Incluir bem" indisponível
+FALHA sem papel 1440 Ana (exceção) · RuntimeError("TypeError: Cannot read properties of undefined (reading 'querySelectorAll')\n    at <anonymous>:1:119\n    at <anonymous>:1:239")
+OK    S1 1440 Rui: motivo à vista e "Incluir bem" indisponível
+FALHA sem papel 1440 Rui (exceção) · RuntimeError("TypeError: Cannot read properties of undefined (reading 'querySelectorAll')\n    at <anonymous>:1:119\n    at <anonymous>:1:239")
+OK    L1 1440 armazenamento ilegível: alerta com motivo e "Tentar novamente"; dado preservado
+OK    L2 1440 incluir com leitura quebrada não apaga o armazenamento
+FALHA L3 1440 restaurado o armazenamento, "Tentar novamente" volta a lista sem recarregar · [0, 'Não foi possível ler a ficha. Os dados foram preservados; tente novamente quando o armazenamento estiver disponível.']
+FALHA A1 1440 duas abas: a edição da outra aba é detectada; rascunho preservado e a versão mais nova fica · [None, '', None, None]
+FALHA A2 1440 reabrir na aba A lê a versão da aba B (777,00) · None
+FALHA duas abas 1440 (exceção) · TypeError("'NoneType' object is not subscriptable")
+RESULTADO: 10 ok · 11 falhas · R1 1440 Documentos: "Incluir documento" continua à vista no bloco (como na base); R2 1440 cabeçalho da GE-08 mantém o estado "CRE-0102 · condição documental pendente" (estado sempre visível); F4 1440 estado vazio diz que não há bem e aponta "Incluir bem" (sem falar em filtro inexistente); K1 1440 Enter em "Incluir bem" abre o painel e o Tab percorre só o painel, com foco visível; ficha 1440 (exceção); sem papel 1440 Ana (exceção); sem papel 1440 Rui (exceção); L3 1440 restaurado o armazenamento, "Tentar novamente" volta a lista sem recarregar; A1 1440 duas abas: a edição da outra aba é detectada; rascunho preservado e a versão mais nova fica; A2 1440 reabrir na aba A lê a versão da aba B (777,00); duas abas 1440 (exceção)

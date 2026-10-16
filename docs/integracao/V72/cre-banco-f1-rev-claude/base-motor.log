@@ -1,0 +1,138 @@
+FALHA entrada mostra somente ficha e oculta KPIs de contrato: AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ undefined
+- true
+
+    at /tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:12:99
+    at test (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:8:24)
+    at Object.<anonymous> (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:12:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+FALHA novo bem salvo pelo formulário volta com centavos e origem: TypeError: c.app.renderVals(...).cre_ficha_novo is not a function
+    at novo (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:10:45)
+    at /tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:13:71
+    at test (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:8:24)
+    at Object.<anonymous> (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:13:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+FALHA quota reabre formulário com rascunho e não cria item: TypeError: c.app.renderVals(...).cre_ficha_novo is not a function
+    at novo (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:10:45)
+    at /tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:14:90
+    at test (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:8:24)
+    at Object.<anonymous> (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:14:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+FALHA confirmar pela grade preserva data/fonte e grava perfil vigente: TypeError: c.app.renderVals(...).cre_ficha_novo is not a function
+    at novo (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:10:45)
+    at /tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:15:76
+    at test (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:8:24)
+    at Object.<anonymous> (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:15:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+FALHA perfil sem direção consulta e não inclui nem confirma: TypeError: c.app.renderVals(...).cre_ficha_novo is not a function
+    at novo (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:10:45)
+    at /tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:16:66
+    at test (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:8:24)
+    at Object.<anonymous> (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:16:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+FALHA retirar papel com formulário aberto impede gravação: TypeError: c.app.renderVals(...).cre_ficha_novo is not a function
+    at /tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:17:83
+    at test (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:8:24)
+    at Object.<anonymous> (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:17:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+FALHA conflito conserva rascunho; reabrir lê última versão: TypeError: c.app.renderVals(...).cre_ficha_novo is not a function
+    at novo (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:10:45)
+    at /tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:18:65
+    at test (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:8:24)
+    at Object.<anonymous> (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:18:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+FALHA recorte de documentos conserva ficha e filtro na troca de visão: TypeError: c.app.renderVals(...).cre_ficha_novo is not a function
+    at novo (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:10:45)
+    at /tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:19:76
+    at test (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:8:24)
+    at Object.<anonymous> (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:19:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+FALHA valores ordenam numericamente sem perder centavos: TypeError: c.app.renderVals(...).cre_ficha_novo is not a function
+    at novo (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:10:45)
+    at /tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:20:62
+    at test (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:8:24)
+    at Object.<anonymous> (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:20:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+FALHA confirmar nomeia a ação e oculta campos de alteração: TypeError: c.app.renderVals(...).cre_ficha_novo is not a function
+    at novo (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:10:45)
+    at /tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:21:65
+    at test (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:8:24)
+    at Object.<anonymous> (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:21:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+FALHA documentos automáticos continuam protegidos e graváveis na mesma transação: TypeError: c.credFichaLer is not a function
+    at /tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:22:469
+    at test (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:8:24)
+    at Object.<anonymous> (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:22:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+FALHA histórico disponível no detalhe e idade não zera ao confirmar: TypeError: c.app.renderVals(...).cre_ficha_novo is not a function
+    at novo (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:10:45)
+    at /tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:23:74
+    at test (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:8:24)
+    at Object.<anonymous> (/tmp/claude-0/pr90/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js:23:1)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+RESULTADO 0/12

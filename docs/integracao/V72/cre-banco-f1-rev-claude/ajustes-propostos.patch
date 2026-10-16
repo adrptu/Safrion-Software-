@@ -1,0 +1,102 @@
+diff -ru a/tools/prototipo/v37/gen37/areas/gestao.py b/tools/prototipo/v37/gen37/areas/gestao.py
+--- a/tools/prototipo/v37/gen37/areas/gestao.py	2026-10-16 21:37:48.858626735 +0000
++++ b/tools/prototipo/v37/gen37/areas/gestao.py	2026-10-16 21:38:29.079237993 +0000
+@@ -658,7 +658,10 @@
+                     F('data','Data original da declaração',t='date',cond=dc),F('responsavel','Responsável pela declaração original',t='txt',cond=dc),
+                     F('fonte','Fonte do valor',t='txt',cond=dc,help='Ex.: laudo de avaliação ou declaração do produtor.'),
+                     F('hist','Versões anteriores',t='area',ro=True)]))
+-    g_ficha=g_ficha.replace('>Salvar</button>','>'+H('cre_ficha_salvar_rotulo')+'</button>')
++    # o painel do motor vai para EXTRA (engine._g2form), fora do HTML da grade: o rótulo "Salvar declaração | Confirmar vigência" entra lá
++    i_fm=next(i for i,x in enumerate(EXTRA) if '{{g_ficha_F.save}}' in x)
++    assert EXTRA[i_fm].count('>Salvar</button>')==1
++    EXTRA[i_fm]=EXTRA[i_fm].replace('>Salvar</button>','>'+H('cre_ficha_salvar_rotulo')+'</button>')
+     EXTRAJS[0]=JS_BASE+CRED_JS+'''
+ const DDID='''+json.dumps(DDID)+''', LIB='''+json.dumps(c['liberado'])+''', VAL='''+json.dumps(c['valor'])+r''', HOJE_DOC='2026-09-23', HOJE_FICHA='2026-10-16';
+ // documentos para crédito: pendente sem número ou com pendência; vencido depois da validade; a certidão do CRE-0102 enviada fica em conferência
+@@ -686,6 +689,7 @@
+   v.cv_ficha=vis==='ficha'; v.cv_ficha_nao=!v.cv_ficha; // entrada pela área de Documentos; não altera o conjunto legado sem recorte
+   v.cre_ficha_sem_papel=!g2umPapel(g2perfil(),['direcao','financeiro']);
+   v.cre_ficha_erro=!!self._fichaErr;v.cre_ficha_motivo=self._fichaErr||'';
++  v.cre_ficha_vazia=!self._fichaErr&&!(g2rows(self,GRIDS.find(g=>g.id==='g_ficha'))||[]).length; if(v.cre_ficha_vazia) v.g_ficha_empty=false;
+   v.cre_ficha_novo=()=>{if(v.cre_ficha_sem_papel){self.setState({g2toast:'Somente a direção pode alterar a ficha nesta demonstração.'});return;}g2new(self,GRIDS.find(g=>g.id==='g_ficha'));};
+   v.cre_ficha_reler=()=>self.setState({});
+   const fmF=g2st(self,'g_ficha').fm, FF=v.g_ficha_F;
+@@ -714,7 +718,7 @@
+   // documento automático: tipo e fazenda fixos no formulário (só leitura, com o motivo) e recusados ao salvar
+   self.g2check=(gid,cur,row,d,isNovo)=>{
+     if(gid==='g_ficha'){
+-      if(!g2umPapel(g2perfil(),['direcao','financeiro']))return {oper:'Somente a direção pode alterar a ficha nesta demonstração.'};
++      if(!g2umPapel(g2perfil(),['direcao','financeiro']))return {[isNovo?'nome':'oper']:'Somente a direção pode alterar a ficha nesta demonstração.'};
+       const e=credFichaErros(d,row&&row.v?Object.assign({},row.v,{valor:row.v.valor===''?null:row.v.valor}):null,HOJE_FICHA);
+       if(!Object.keys(e).length)self._fichaCmd={id:row&&row.id,d:Object.assign({},d),rev:Number(d._fichaRev)||0};return e;
+     }
+@@ -745,7 +749,8 @@
+     ficha=(f'<p style="color:{MUTED}; margin:0;">Ficha do grupo · valores declarados · referência da demonstração: 16/10/2026.</p>'
+         + f'<sc-if value="{H("cre_ficha_sem_papel")}"><p role="note">Consulta: somente a direção pode alterar ou confirmar valores. O papel financeiro ainda não está disponível nesta demonstração.</p></sc-if>'
+         + f'<sc-if value="{H("cre_ficha_erro")}"><p role="alert">{H("cre_ficha_motivo")}</p>'
+-        + ibtn('Tentar novamente','cre_ficha_reler','doc')+'</sc-if>'+g_ficha)
++        + ibtn('Tentar novamente','cre_ficha_reler','doc')+'</sc-if>'+g_ficha
++        + f'<sc-if value="{H("cre_ficha_vazia")}"><p role="status" style="color:{MUTED}; margin:0; font-size: 13px;">Nenhum bem na ficha ainda. Use “Incluir bem” para declarar o primeiro.</p></sc-if>')
+     corpo=(CV('ficha')+bloco('Ficha do grupo · Bens e avaliações','',ficha,
+               acao=ilink('Ver documentos','GE-08.dc.html#vis=documentos','doc'))+'</sc-if>'
+         + f'<sc-if value="{H("cv_ficha_nao")}">'
+@@ -758,9 +763,10 @@
+                 acao=doc+ibtn('Registrar liberação da 2ª parcela','lib2','cash','Registrar a 2ª liberação (exige a condição documental aceita)'),tone='yellow')
+         + '</sc-if>' + CV('dossie') + bloco('Dossiê e consentimento','Autorize cada bloco com finalidade e prazo; clique num bloco para ajustar quem acessa.',g_dos,tone='gray') + '</sc-if>'
+         + CV('documentos') + bloco('Documentos para crédito','CAR, matrícula, contrato de arrendamento e certidões que o credor pede, por fazenda.',g_doc,
+-                acao=ilink('Bens e avaliações','GE-08.dc.html#vis=ficha','doc')+f'<button type="button" onClick="{H("g_doc_new")}" style="{BTN_ST(False,True)} display: inline-flex; align-items: center; gap: 6px;">{__import__("areas.processo_planos",fromlist=["MAIS"]).MAIS(14)}Incluir documento</button>',tone='gray') + '</sc-if>')
++                acao=f'<button type="button" onClick="{H("g_doc_new")}" style="{BTN_ST(False,True)} display: inline-flex; align-items: center; gap: 6px;">{__import__("areas.processo_planos",fromlist=["MAIS"]).MAIS(14)}Incluir documento</button>'+ilink('Bens e avaliações','GE-08.dc.html#vis=ficha','doc'),tone='gray') + '</sc-if>')
+     shell37('GE-08','Crédito e garantias',corpo,
+       subtitle='Solicitações, dossiês autorizados, propostas, decisões, contratos, liberações e serviço da dívida.',
++      status=(f'{c["id"]} · condição documental pendente','yellow'),
+       primary_html=CV('ficha')+f'<button type="button" disabled="{H("cre_ficha_sem_papel")}" onClick="{H("cre_ficha_novo")}" style="{BTN_ST(True,True)}">Incluir bem</button></sc-if>',
+       footer='Capacidade usa caixa disponível ao serviço da dívida por período; CET/CETCR sempre com método e premissas declarados. '
+              'O mesmo saco nunca garante dois contratos.')
+diff -ru a/tools/prototipo/v37/gen37/credito_ficha_build.py b/tools/prototipo/v37/gen37/credito_ficha_build.py
+--- a/tools/prototipo/v37/gen37/credito_ficha_build.py	2026-10-16 21:37:48.862671070 +0000
++++ b/tools/prototipo/v37/gen37/credito_ficha_build.py	2026-10-16 21:38:29.079747932 +0000
+@@ -7,7 +7,16 @@
+ 
+ gestao._ge08()
+ page = pathlib.Path(engine.P) / 'GE-08.dc.html'
+-scripts = re.findall(r'<script[^>]*data-dc-script[^>]*>([\s\S]*?)</script>', page.read_text())
++html = page.read_text()
++scripts = re.findall(r'<script[^>]*data-dc-script[^>]*>([\s\S]*?)</script>', html)
++# proteção de regressão (revisão Claude do PR #90): o rótulo do botão de gravar está no painel da ficha, e o bloco Documentos mantém
++# "Incluir documento" à vista com "Bens e avaliações" no ⋯
++painel = html[html.index('aria-label="{{g_ficha_F.title}}"'):]
++painel = painel[:painel.index('</aside>')]
++assert '>{{cre_ficha_salvar_rotulo}}</button>' in painel and '>Salvar</button>' not in painel
++docs = html[html.index('Documentos para crédito</h3>'):]
++docs = docs[:docs.index('role="table"')]
++assert docs.index('Incluir documento') < docs.index('role="menu"') < docs.index('Bens e avaliações')
+ assert len(scripts) == 1 and "g_ficha" in scripts[0]
+ out = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(engine.ROOT) / 'credito_ficha_generated.js'
+ out.write_text(scripts[0])
+diff -ru a/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js b/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js
+--- a/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js	2026-10-16 22:00:15.739570126 +0000
++++ b/tools/prototipo/v37/gen37/credito_ficha_motor_unit.js	2026-10-16 22:00:15.758426460 +0000
+@@ -14,7 +14,7 @@
+ test('quota reabre formulário com rascunho e não cria item',c=>{c.localStorage.fail=true;novo(c);assert.equal(c.credFichaLer().items.length,0);let fm=c.g2st(c.app,'g_ficha').fm;assert.equal(fm.draft.valor,'850000,50');assert.match(fm.errG,/gravar/);assert.match(c.app.state.g2toast,/Não salvo/);});
+ test('confirmar pela grade preserva data/fonte e grava perfil vigente',c=>{novo(c);let id=c.credFichaLer().items[0].id;abrir(c,id);c.g2st(c.app,'g_ficha').fm.draft.oper='Confirmar vigência';c.app.renderVals().g_ficha_F.save();let r=c.credFichaLer().items[0];assert.equal(r.data,'2026-03-10');assert.equal(r.confirmacoes[0].quem,'Proprietário');assert.equal(r.confirmacoes[0].quando,'2026-10-16');});
+ test('perfil sem direção consulta e não inclui nem confirma',c=>{novo(c);c.localStorage.data['safrion.perfilDemo']='Rui';let v=c.app.renderVals();assert.equal(v.cre_ficha_sem_papel,true);v.cre_ficha_novo();assert.equal(c.g2st(c.app,'g_ficha').fm,null);let id=c.credFichaLer().items[0].id;abrir(c,id);assert.equal(c.g2st(c.app,'g_ficha').fm.ro,true);});
+-test('retirar papel com formulário aberto impede gravação',c=>{c.app.renderVals().cre_ficha_novo();Object.assign(c.g2st(c.app,'g_ficha').fm.draft,draft);c.localStorage.data['safrion.perfilDemo']='Rui';c.app.renderVals().g_ficha_F.save();assert.equal(c.credFichaLer().items.length,0);assert.match(c.g2st(c.app,'g_ficha').fm.errs.oper,/direção/);});
++test('retirar papel com formulário aberto impede gravação',c=>{c.app.renderVals().cre_ficha_novo();Object.assign(c.g2st(c.app,'g_ficha').fm.draft,draft);c.localStorage.data['safrion.perfilDemo']='Rui';c.app.renderVals().g_ficha_F.save();assert.equal(c.credFichaLer().items.length,0);assert.match(c.g2st(c.app,'g_ficha').fm.errs.nome,/direção/);});   // na inclusão o "O que fazer" não aparece: o motivo vai para um campo à vista (revisão Claude PR #90)
+ test('conflito conserva rascunho; reabrir lê última versão',c=>{novo(c);let id=c.credFichaLer().items[0].id;abrir(c,id);Object.assign(c.g2st(c.app,'g_ficha').fm.draft,{valor:'1'});c.credFichaSalvar(id,{...draft,valor:'900000'},1,'Proprietário','2026-10-16');c.app.renderVals().g_ficha_F.save();assert.equal(c.g2st(c.app,'g_ficha').fm.draft.valor,'1');assert.match(c.g2st(c.app,'g_ficha').fm.errG,/Outra edição/);abrir(c,id);assert.equal(c.g2st(c.app,'g_ficha').fm.draft.valor,'900000,00');});
+ test('recorte de documentos conserva ficha e filtro na troca de visão',c=>{novo(c);c.g2set(c.app,'g_ficha',{q:'Trator'});c.location.hash='#vis=documentos';let v=c.app.renderVals();assert.equal(v.cv_documentos,true);assert.equal(v.cv_ficha,false);c.location.hash='#vis=ficha';c.app.renderVals();assert.equal(c.g2st(c.app,'g_ficha').q,'Trator');assert.equal(c.credFichaLer().items.length,1);});
+ test('valores ordenam numericamente sem perder centavos',c=>{novo(c);novo(c,{...draft,nome:'Segundo bem',valor:'12.500.000,00'});let rows=c.g2sort(c.g2rows(c.app,c.ficha),c.ficha,{so:{k:'valor',d:false}});assert.equal(rows[0].v.nome,'Trator sintético');assert.equal(rows[1].v.nome,'Segundo bem');abrir(c,rows[1].id);assert.equal(c.g2st(c.app,'g_ficha').fm.draft.valor,'12500000,00');});
+diff -ru a/tools/prototipo/v37/gen37/links_ocultos_test.py b/tools/prototipo/v37/gen37/links_ocultos_test.py
+--- a/tools/prototipo/v37/gen37/links_ocultos_test.py	2026-10-16 21:48:46.427096911 +0000
++++ b/tools/prototipo/v37/gen37/links_ocultos_test.py	2026-10-16 21:48:46.440496458 +0000
+@@ -117,8 +117,9 @@
+  ('PAGR.dc.html','MB-06.dc.html'):'o painel agrícola carrega mip.js inteiro para ler a situação (mipSit); o elo do app de campo está só em '
+       'mipProx, que o painel não desenha: "Conferir vistoria" leva ao AG-01 (PAINEL-02 MIP, 14/10/2026)',
+  **{x:'Crédito entrou no menu (proprietário, 14/10/2026: "crie o menu de crédito"): a GE-08 abre a origem de cada compromisso (conta a pagar GE-04, '
+-      'proposta do portal PT-04, venda VE-05), telas de Finanças e Vendas ainda fora do menu; ficam para a frente de navegação (VISOES-2 ESPEC §6)'
+-    for x in p('GE-08','GE-04','PT-04','VE-05')},
++      'venda VE-05), telas de Finanças e Vendas ainda fora do menu; ficam para a frente de navegação (VISOES-2 ESPEC §6). CRE-BANCO F1 (PR #90): '
++      'o dossiê do contrato abre a visão interna GE-08#vis=dossie e a primária que levava ao portal PT-04 saiu'
++    for x in p('GE-08','GE-04','VE-05')},
+  **{x:'cadeia MIP → diagnóstico e recomendação (frente própria)' for x in p('AG-01','AG-03','AG-03det','AG-04det')|p('AG-02','AG-03det')|p('AG-01det','AG-03det','AG-04det','AG-06','PL-02')|p('AG-07','AG-04det')|p('IN-04','AG-06')},
+  **{x:'detalhe fixo na página visível (frente própria)' for x in p('CA-01det','AG-04','CA-02','CA-04','PL-05','SU-07')|p('CA-01x-os0420','AG-04det','CA-02','CA-03det','PL-05','SU-07')}}
+ fora=sorted(pares-set(RESIDUAL))

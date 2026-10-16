@@ -1,0 +1,8 @@
+rev_ficha_nav rc=1 108s · RESULTADO: 105 ok · 2 falhas · P8 1440 reabrir 12.500.000,00 devolve o mesmo texto digitado; P8 390 reabrir 12.500.000,00 devolve o mesmo texto digitado
+credito_menu_test rc=0 25s · RESULTADO: 16/16
+cadastros_padrao_test rc=0 302s · RESULTADO: 44/44
+cadastros_rev1_test rc=0 151s · RESULTADO: 19/19
+cad_gravacao_falha_test rc=0 54s · RESULTADO: 7/7 ok
+ds_modulos rc=0 234s · RESULTADO: catraca ok
+paginas_scan_test rc=0 409s · RESULTADO: 5 ok · 0 falhas (148 páginas)
+FIM

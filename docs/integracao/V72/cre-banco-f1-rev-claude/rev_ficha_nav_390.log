@@ -1,0 +1,69 @@
+INFO  R390 cabeçalho do bloco Documentos (à vista | no ⋯) · {'vis': ['Bens e avaliações', '⋯'], 'menu': ['Incluir documento']}
+FALHA R1 390 Documentos: "Incluir documento" continua à vista no bloco (como na base) · {'vis': ['Bens e avaliações', '⋯'], 'menu': ['Incluir documento']}
+FALHA R2 390 cabeçalho da GE-08 mantém o estado "CRE-0102 · condição documental pendente" (estado sempre visível) · Crédito › Crédito e garantias ‹ Crédito Crédito e garantias i
+INFO  R3 390 verdes fora de painel em #vis=contratos · []
+INFO  R3 390 verdes fora de painel em #vis=documentos · []
+INFO  R3 390 verdes fora de painel em #vis=dossie · []
+INFO  R3 390 verdes fora de painel em #vis=liberacoes · []
+INFO  R4 390 links do detalhe do CRE-0102 · [['Liberado R$ 300 mil de R$ 850 mil · 1ª parcela é título em Contas a pagar ›', 'GE-04.dc.html'], ['Dossiê de crédito ›', 'GE-08.dc.html#vis=dossie']]
+INFO  R4 390 destino do "Dossiê de crédito" · ['/GE-08.dc.html#vis=dossie', ['Dossiê e consentimento'], True]
+OK    R4 390 "Dossiê de crédito" do contrato abre a visão interna Dossiê e consentimento (sem ir ao portal)
+OK    R5 390 sem erro de JS nas visões da GE-08
+OK    F1 390 Documentos › "Bens e avaliações" abre a ficha (#vis=ficha)
+INFO  F1 390 onde fica o atalho · {'vis': True, 'menu': False}
+OK    F2 390 a ficha mostra só o bloco dela, sem KPIs de contrato
+OK    F3 390 BOT-01: uma só primária fora de painel, "Incluir bem"
+INFO  F4 390 estado vazio (texto do bloco) · Ficha do grupo · Bens e avaliações Ver documentos Ficha do grupo · valores declarados · referência da demonstração: 16/10/2026. 0 de 0 BEM ⇅ SITUAÇÃO ⇅ VALOR DECLARADO ⇅ ORIGEM ⇅ ÚLTIMA CONFIRMAÇÃO ⇅ Nenhuma linha corresponde aos filtros · Limpar filtros
+FALHA F4 390 estado vazio diz que não há bem e aponta "Incluir bem" (sem falar em filtro inexistente) · ncia da demonstração: 16/10/2026. 0 de 0 BEM ⇅ SITUAÇÃO ⇅ VALOR DECLARADO ⇅ ORIGEM ⇅ ÚLTIMA CONFIRMAÇÃO ⇅ Nenhuma linha corresponde aos filtros · Limpar filtros
+OK    F5 390 sem rolagem lateral
+INFO  K1 390 sequência do Tab no painel [tag,id,texto,no painel,:focus-visible,contorno] · [['BUTTON', '', '×', True, True, 'solid 2px none'], ['INPUT', 'fx_g_ficha_nome', '', True, True, 'solid 2px none'], ['SELECT', 'fx_g_ficha_tipo', 'Avaliação de mercado\nValor con', True, True, 'solid 2px none'], ['INPUT', 'fx_g_ficha_valor', '', True, True, 'solid 2px none'], ['INPUT', 'fx_g_ficha_data', '', True, True, 'solid 2px none'], ['INPUT', 'fx_g_ficha_data', '', True, False, 'none 0px none'], ['INPUT', 'fx_g_ficha_responsavel', '', True, True, 'solid 2px none'], ['INPUT', 'fx_g_ficha_fonte', '', True, True, 'solid 2px none'], ['BUTTON', '', 'Cancelar', True, True, 'solid 2px none'], ['BUTTON', '', 'Salvar', True, True, 'solid 2px rgba(30, 122, 76, 0.25) 0px 1px 2px 0px']]
+OK    K1 390 Enter em "Incluir bem" abre o painel e o Tab percorre só o painel, com foco visível
+INFO  K2 390 valores digitados pelo teclado · {'nome': 'Trator sintético A', 'tipo': 'Avaliação de mercado', 'valor': '850000,50', 'data': '2026-03-10', 'responsavel': 'Ana', 'fonte': 'Laudo sintético 01'}
+FALHA N1 390 o botão de gravar da inclusão diz "Salvar declaração" (como o PR declara) · Salvar
+OK    K2 390 Espaço em "Salvar declaração" grava pelo teclado; painel fecha
+OK    K3 390 ao fechar o painel o foco volta para quem abriu ("Incluir bem")
+INFO  K2 390 aviso · Ficha salva neste navegador · nada enviado ao credor. | Ficha salva neste navegador · nada enviado ao credor.
+OK    P1 390 850000,50 grava como texto decimal "850000.50" (sem float), com data, responsável e fonte
+OK    P2 390 documentos CAD-02 intocados pela ficha (chave própria; safrion-credito-docs-v1 ausente)
+INFO  P3 390 linhas da lista · [['Trator sintético A', 'Declarado', 'R$ 850.000,50', 'Avaliação de mercado · R$ 850.000,50 · 10/03/2026 · Ana · Laudo sintético 01 · Registrado por Proprietário em 16/10/2026 · 220 dias desde a declaração', 'Sem revalidação'], ['Imóvel sintético B', 'Declarado', 'R$ 12.500.000,00', 'Valor contábil · R$ 12.500.000,00 · 15/01/2026 · Carlos · Balanço sintético 2025 · Registrado por Proprietário em 16/10/2026 · 274 dias desde a declaração', 'Sem revalidação'], ['Silo sintético C', 'Declarado', 'R$ 0,00', 'Declaração do produtor · R$ 0,00 · 01/10/2026 · Ana · Declaração sintética · Registrado por Proprietário em 16/10/2026 · 15 dias desde a declaração', 'Sem revalidação'], ['Galpão sintético D', 'Pendente', 'A informar', 'Declaração do produtor · A informar · Data a informar · Responsável a informar · Fonte a informar · Registrado por Proprietário em 16/10/2026', 'Sem revalidação']]
+OK    P3 390 lista mostra R$ 850.000,50, R$ 12.500.000,00, R$ 0,00 (Declarado) e "A informar" (Pendente)
+OK    P4 390 armazenado: 12500000.00, zero "0.00" ≠ ausente null
+OK    P5 390 origem com tipo, data, responsável, fonte e idade (220 dias)
+OK    P6 390 recarregar a página preserva os 4 bens com os mesmos valores
+INFO  P7 390 reabrir: valor no campo · ['850000,50', '12500000,00', 'Sem versão anterior']
+OK    P7 390 reabrir 850000,50 devolve "850000,50" no campo
+FALHA P8 390 reabrir 12.500.000,00 devolve o mesmo texto digitado · 12500000,00
+INFO  C1 390 botões e campos ao confirmar · [['×', 'Cancelar', 'Salvar'], ['fx_g_ficha_oper', 'fx_g_ficha_resumo', 'fx_g_ficha_confirmacao', 'fx_g_ficha_hist'], ['Salvar']]
+OK    C1 390 confirmar oculta os campos da declaração e tem um só verde no painel
+FALHA C1b 390 o verde do painel nomeia a ação: "Confirmar vigência" · ['Salvar']
+OK    C2 390 confirmação registra quem/quando à parte e preserva valor, data, fonte, responsável e quem registrou
+OK    C3 390 linha mostra "Confirmado por Proprietário em 16/10/2026" e a idade continua 220 dias
+OK    C4 390 confirmar de novo no mesmo dia não duplica nem muda a revisão
+INFO  C4 390 aviso da 2ª confirmação · Vigência confirmada · declaração original preservada. | Vigência confirmada · declaração original preservada.
+OK    C5 390 pendente não aceita confirmação; motivo à vista no painel
+OK    H1 390 alteração guarda a versão anterior com as confirmações; a nova começa sem confirmação
+OK    H2 390 detalhe mostra "Versões anteriores" com R$ 850.000,50 e a confirmação
+OK    V1 390 "850000.50" (ponto decimal ambíguo) é recusado com motivo no campo; nada gravado
+OK    V2 390 valor sem fonte é recusado
+OK    Q1 390 cota cheia: painel continua aberto com o motivo e o rascunho "13.000.000,00"; armazenamento e lista sem mudança
+OK    Q2 390 liberado o armazenamento, "Salvar declaração" de novo grava a edição preservada (13000000.00, histórico 1)
+OK    Q3 390 cota cheia em inclusão: nada criado; painel reabre com o rascunho
+OK    Q4 390 recuperação da inclusão grava uma só vez
+INFO  M1 390 cartões · ['Trator sintético A Situação Declarado Valor declarado R$ 900.000,00 Origem Avaliação de mercado · R$ 900.000,00 · 16/10/2026 · Ana · Laudo sintético 01 · Registrado por Proprietário em 16/10/2026 · 0 dias desde a declaração Última confirmação Sem revalidação', 'Imóvel sintético B Situação Declarado Valor declarado R$ 13.000.000,00 Origem Valor contábil · R$ 13.000.000,00 · 15/01/2026 · Carlos · Balanço sintético 2025 · Registrado por Proprietário em 16/10/2026 · 274 dias desde a declaração Última confirmação Sem revalidação', 'Silo sintético C Situação Declarado Valor declarado R$ 0,00 Origem Declaração do produtor · R$ 0,00 · 01/10/2026 · Ana · Declaração sintética · Registrado por Proprietário em 16/10/2026 · 15 dias desde a declaração Última confirmação Sem revalidação', 'Galpão sintético D Situação Pendente Valor declarado A informar Origem Declaração do produtor · A informar · Dat
+OK    M1 390 modo Cartões mostra os bens com valor e situação
+OK    M2 390 cartão abre o detalhe (zero volta "0,00")
+OK    M3 390 filtro rápido "Pendente" mostra só o pendente
+INFO  M4 390 ordem por valor · ['R$ 0,00', 'R$ 1,00', 'R$ 900.000,00', 'R$ 13.000.000,00', 'A informar']
+OK    M4 390 ordenar por valor é numérico (0 < 1 < 900 mil < 13 mi; pendente no fim)
+OK    D1 390 TAB-09 seta de abrir na 1ª coluna da ficha
+OK    D2 390 TAB-10 cabeçalho da ficha com 40 px
+INFO  D3 390 alvos < 44 px na ficha · [['Buscar nesta tabela', 19], ['BEM\n⇅', 18], ['Filtrar Bem', 21], ['SITUAÇÃO\n⇅', 18], ['Filtrar Situação', 21], ['VALOR DECLARADO\n▲', 32], ['Filtrar Valor declarado', 21], ['ORIGEM\n⇅', 18], ['Filtrar Origem', 21], ['ÚLTIMA CONFIRMAÇÃO\n⇅', 32], ['Filtrar Última confirmaç', 21]]
+OK    D4 390 formulário longo: painel dentro da tela e o botão de gravar alcançável (44 px)
+OK    K4 390 Enter na linha abre o detalhe; Tab + Esc fecha e devolve o foco à linha
+OK    K5 390 sem erro de JS na ficha
+OK    S1 390 Ana: motivo à vista e "Incluir bem" indisponível
+OK    S2 390 Ana: detalhe só consulta (motivo, nenhum campo editável, sem botão de gravar)
+OK    S3 390 Ana: papel retirado com o painel aberto: não grava e o motivo aparece no painel (item existente)
+INFO  S4 390 Ana painel de inclusão após perder o papel · Incluir bem × Ficha do grupo · dados de demonstração. Salvar não envia dados a um credor. Corrija os campos destacados; o que você preencheu foi mantido. Bem Tipo do valor Avaliação de mercado Valor contábil Declaração do produtor Valor declarado (R$) Ex.: 850.000,50. Em branco, fica pendente; zero é um valor declarado. Data original da declaração Responsável pela declaração original Fonte do valo
+FALHA S4 390 Ana: papel retirado na inclusão: não grava e o motivo aparece no painel · Incluir bem × Ficha do grupo · dados de demonstração. Salvar não envia dados a um credor. Corrija os campos destacados; o que você preencheu foi mantido. Bem Tipo do valor Avaliação de mercado Valor contábil Declaração do produtor Valor declarado (R$) Ex.: 850.000,50. Em branco, fica pendente; zero 
+RESULTADO: 41 ok · 7 falhas · R1 390 Documentos: "Incluir documento" continua à vista no bloco (como na base); R2 390 cabeçalho da GE-08 mantém o estado "CRE-0102 · condição documental pendente" (estado sempre visível); F4 390 estado vazio diz que não há bem e aponta "Incluir bem" (sem falar em filtro inexistente); N1 390 o botão de gravar da inclusão diz "Salvar declaração" (como o PR declara); P8 390 reabrir 12.500.000,00 devolve o mesmo texto digitado; C1b 390 o verde do painel nomeia a ação: "Confirmar vigência"; S4 390 Ana: papel retirado na inclusão: não grava e o motivo aparece no painel

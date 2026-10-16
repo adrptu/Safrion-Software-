@@ -1,0 +1,21 @@
+INFO  R1440 cabeçalho do bloco Documentos (à vista | no ⋯) · {'vis': ['Incluir documento'], 'menu': []}
+OK    R1 1440 Documentos: "Incluir documento" continua à vista no bloco (como na base)
+OK    R2 1440 cabeçalho da GE-08 mantém o estado "CRE-0102 · condição documental pendente" (estado sempre visível)
+INFO  R3 1440 verdes fora de painel em #vis=contratos · ['Solicitar proposta a credores']
+INFO  R3 1440 verdes fora de painel em #vis=documentos · ['Solicitar proposta a credores']
+INFO  R3 1440 verdes fora de painel em #vis=dossie · ['Solicitar proposta a credores']
+INFO  R3 1440 verdes fora de painel em #vis=liberacoes · ['Solicitar proposta a credores']
+INFO  R4 1440 links do detalhe do CRE-0102 · [['Liberado R$ 300 mil de R$ 850 mil · 1ª parcela é título em Contas a pagar ›', 'GE-04.dc.html'], ['Dossiê de crédito ›', 'PT-04.dc.html']]
+INFO  R4 1440 destino do "Dossiê de crédito" · ['/PT-04.dc.html', [], False]
+OK    R5 1440 sem erro de JS nas visões da GE-08
+INFO  R390 cabeçalho do bloco Documentos (à vista | no ⋯) · {'vis': ['Incluir documento'], 'menu': []}
+OK    R1 390 Documentos: "Incluir documento" continua à vista no bloco (como na base)
+OK    R2 390 cabeçalho da GE-08 mantém o estado "CRE-0102 · condição documental pendente" (estado sempre visível)
+INFO  R3 390 verdes fora de painel em #vis=contratos · ['Solicitar proposta a credores']
+INFO  R3 390 verdes fora de painel em #vis=documentos · ['Solicitar proposta a credores']
+INFO  R3 390 verdes fora de painel em #vis=dossie · ['Solicitar proposta a credores']
+INFO  R3 390 verdes fora de painel em #vis=liberacoes · ['Solicitar proposta a credores']
+INFO  R4 390 links do detalhe do CRE-0102 · [['Liberado R$ 300 mil de R$ 850 mil · 1ª parcela é título em Contas a pagar ›', 'GE-04.dc.html'], ['Dossiê de crédito ›', 'PT-04.dc.html']]
+INFO  R4 390 destino do "Dossiê de crédito" · ['/PT-04.dc.html', [], False]
+OK    R5 390 sem erro de JS nas visões da GE-08
+RESULTADO: 6 ok · 0 falhas
