@@ -1,0 +1,89 @@
+OK Agrícola: quatro estados; não conta cancelada, encerrada nem BEN
+OK Suprimentos: lote sobreposto conta nos indicadores pertinentes; requisição por registro, item coberto e cancelada excluídos
+OK Gráfico de estoque: cada lote físico conta uma só vez
+OK Painéis não alteram cenário
+OK Manutenção: serviço vencido sem ordem; quatro abertas, uma executando e um ativo bloqueado
+OK Gráfico manutenção: fases abertas
+OK Plano inativo não cria pendência
+OK Próxima revisão fora da janela não cria pendência
+OK PAGR ausente nunca vira zero
+OK PMAN ausente nunca vira zero
+OK PSUP ausente nunca vira zero
+OK Sem ordem com o seed: a mesma conta da visão (manSemOrdem)
+OK Sem ordem com achados vazios (coleção válida): só os vencimentos
+OK Sem ordem sem a coleção de achados: Sem dados, e os demais indicadores seguem
+OK Achado sem estado: Sem dados
+OK Coleções vazias válidas: zero agrícola
+OK Coleções vazias válidas: zero suprimentos
+OK Saldo físico ausente não produz total parcial
+OK Custódia ausente não vira demanda falsa
+OK Estado ausente impede contagem parcial de O.S.
+OK agrPainelRef: não muda o estado (JSON igual antes e depois)
+OK agrPainelRef: seed = OS-0418 e OS-0502 (falta insumo no Estoque), OS-0420 (ativo bloqueado), OS-0431 (falta máquina), OS-0507 (bomba)
+OK agrPainelRef: mesma lista e mesmo motivo que a projeção da tela O.S. (osProjecao + OS_IMP_RE)
+OK agrPainelRef: origem na O.S. e n confere
+OK agrPainelRef: causa estruturada pela projeção (não pelo texto do selo)
+OK agrPainelRef: cada impedida traz fazenda e safra do registro
+OK agrPainelRef: hoje 23/09 (D2.HOJE_ISO) = nenhuma atrasada, nenhuma sem prazo; custos null; desde null
+OK agrPainelRef: hoje 25/09 → atrasadas = abertas com fim antes de hoje (Em conferência fora)
+OK agrPainelRef: atrasadas com recorte Lagoa Grande
+OK agrPainelRef: enviada para conferência deixa de ser atrasada
+OK agrPainelRef: ordem emitida sem fim não é julgada: conta em sem_prazo
+OK agrPainelRef: referência devolvida para a apresentação (não "hoje")
+OK agrPainelRef: data impossível (2026-99-99) = atrasadas Sem dados, impedidas mantidas
+OK agrPainelRef: fim inexistente (2026-02-30) não é julgado: vai para sem_prazo
+OK agrPainelRef: ano bissexto (2028-02-29) é data válida: 1 dia de atraso
+OK agrPainelRef: hoje fora do formato ISO = atrasadas Sem dados, impedidas mantidas
+OK agrPainelRef: Trator T1 apto → OS-0420 e OS-0431 saem; falta de insumo e bomba ficam
+OK agrPainelRef: apto = a mesma projeção da tela O.S. (sem selo de impedimento na OS-0420)
+OK agrPainelRef: recorte Lagoa Grande = OS-0502 e OS-0507
+OK agrPainelRef: recorte Santa Rita = OS-0418, OS-0420 e OS-0431
+OK agrPainelRef: recorte safra 2025/26 = nenhuma
+OK agrPainelRef: recorte Santa Rita · 2026/27 = OS-0418, OS-0420 e OS-0431
+OK agrPainelRef: ordem aberta sem fazenda com recorte pedido = Sem dados
+OK agrPainelRef: sem recorte, a mesma ordem conta
+OK agrPainelRef: encerrada sai da lista
+OK agrPainelRef: cancelada sai da lista
+OK agrPainelRef: ordens ausentes = Sem dados
+OK agrPainelRef: ordens vazias = lista vazia e 0
+OK agrPainelRef: ordem fora do estado não volta (a01 apto, OS-0420 apagada)
+OK agrPainelRef: OS-0420 apagada com a01 bloqueado também não volta
+OK agrPainelRef: ordem do estado sem registro nem emissão = Sem dados
+OK agrPainelRef: chave diferente do id = Sem dados
+OK agrPainelRef: ordem sem etapa = Sem dados
+OK agrPainelRef: beneficiamento fora do registro não invalida o estado
+OK agrPainelRef: ordem emitida na tela (osc.novo) entra pela base dela
+OK agrCustoRef: não muda o estado
+OK agrCustoRef: seed = 4 culturas (fazenda · cultura)
+OK agrCustoRef: Soja com talhões sem plano = R$/ha orçado null, sem_orc listado e parcial
+OK agrCustoRef: realizado total = soma de cusTalhao por talhão (mesma conta do Mapa)
+OK agrCustoRef: O.S. de vários talhões (OS-0421, T1 + T2) fica em sem_rateio
+OK agrCustoRef: recorte Lagoa Grande = só a cultura da Lagoa
+OK agrCustoRef: preço removido não vira zero: alguma cultura fica parcial com o item em pend
+OK agrCustoRef: estado vazio = custos zerados (válido), não null
+OK agrCustoRef: 10 ha, duas passadas de 10 ha (100 + 100) = R$ 20/ha plantado; execução em 20 ha à parte
+OK agrCustoRef: provisório 100 + conferido 100 = total 200 (sem soma dupla)
+OK agrCustoRef: conferir move provisório para conferido sem mudar o total
+OK agrCustoRef: consumo sem preço = parcial, item em pend e desvio de execução indisponível
+OK agrCustoRef: ordem emitida sem vínculo de talhão fica em fora (com o realizado) e torna parcial, não some calada
+OK agrCustoRef: fora com consumo sem preço = pend preservada, executada, cobertura incerta, grupo parcial e desvio indisponível
+OK agrCustoRef: fora com estados (provisório 100 + conferido 100)
+OK agrCustoRef: O.S. em T e U sem apontamento por talhão = sem_rateio R$ 200, grupo parcial com o motivo e desvio indisponível (sem rateio automático)
+OK agrCustoRef: com a ordem vinculada a um talhão só, nada de cobertura incerta nem sem_rateio
+OK agrCustoRef: estado inválido = Sem dados
+OK agrPainelRef: estado não objeto = Sem dados
+OK execucao: não muda o estado
+OK execucao: seed = O.S. Em execução e Em conferência, com área prevista e realizada (ha) da projeção
+OK execucao: totais em ha e contagens
+OK execucao: pendência = o texto do domínio que segura o encerramento (OS-0417, sobra em custódia), com dono
+OK execucao: recorte Lagoa Grande
+OK execucao: área no aparelho sem envio fica em sinal_ha, fora do realizado
+OK execucao: estado inválido = Sem dados (null), como os
+OK mip: decidir = acima do NC ou foco, pela regra do AG-01 (mipSit), dono = RT
+OK mip: atrasadas (prevista vencida, dias até a referência) e coleta no aparelho
+OK mip: contagens, referência e origem
+OK mip: recorte Lagoa Grande; com recorte de safra = Sem dados (a vistoria não tem safra)
+OK mip: O.S. de controle cancelada devolve a decisão ao RT (sit cancelada em decidir)
+OK mip: vistoria com talhão ou protocolo fora do MIP = Sem dados
+RESULTADO 87/87
+

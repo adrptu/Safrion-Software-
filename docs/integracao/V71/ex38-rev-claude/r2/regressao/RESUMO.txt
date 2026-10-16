@@ -1,0 +1,40 @@
+app_entrega_parcial_test.py | rc=0 | 23s | 7/7 ok · FALHAS: 0 
+app_mb03_turno_test.py | rc=0 | 14s | 11/11 ok · FALHAS: 0 
+consumo_divergente_test.py | rc=0 | 47s | 21/21 ok · FALHAS: 0 
+mbtest.py | rc=0 | 92s | FALHAS: 0 
+app_os0424_test.py | rc=0 | 11s | 9/9 ok · FALHAS: 0 
+app_mb02det_test.py | rc=0 | 10s | 8/8 ok · FALHAS: 0 
+app_cenario_test.py | rc=0 | 23s | 15/15 ok · FALHAS: 0 
+app_mb03x_test.py | rc=0 | 13s | 7/7 ok · FALHAS: 0 
+app_mb04_test.py | rc=0 | 13s | 6/6 ok · FALHAS: 0 
+app_restaurar_test.py | rc=0 | 8s | 4/4 ok · FALHAS: 0 
+app_saldo_zero_test.py | rc=0 | 22s | 12/12 ok · FALHAS: 0 
+os_cenario_test.py | rc=0 | 76s |    OS-0430 Dessecação pré-plantio T1-A — 160,00 ha 25/09/2026 25/09/2026 A liberar — — Ana (agrônoma) — antes de 25/09 0,00 ha 160,00 ha — 0,0 % Marcos | PRÓXIMO PASSO O agrônomo confere atividade, área, produtos e doses abaixo e libera; se precisar, ajusta antes de liberar. Os insu
+os_ator_test.py | rc=0 | 38s | RESULTADO: 15/15 ok 
+os_recurso_test.py | rc=0 | 38s | RESULTADO: 16/16 
+os_v39_bloq_test.py | rc=0 | 32s | RESULTADO: 13/13 ok 
+os_v39_liberar_test.py | rc=0 | 27s | RESULTADO: 20/20 ok 
+os_v39_selo_agua_test.py | rc=0 | 21s | RESULTADO: 13/13 ok 
+os_irrig_filtro_test.py | rc=0 | 51s |   ok  5 IR-03: a linha da OS-0418 (Liberar na O.S.) abre a OS-0418 na O.S.: Ana (agrônoma) libera, requisição ao liberar; sem lote de Ureia, liberar fica bloqueado · ('http://127.0.0.1:41445/OS.dc.html#OS-0418', 'OS-0418 · Fertirrigação · reclassificada × A liberar Falta insumo · Ureia 45%
+os_aprov_lib_test.py | rc=0 | 1s | TOTAL 51 · falhas 0 RESULTADO passou · TOTAL 51 · falhas 0 
+tabelas_os_test.py | rc=0 | 86s | RESULTADO: 40/40 ok 
+map_decisoes_test.py | rc=0 | 92s | 18 ok · 0 falhas [] 
+mapa9_test.py | rc=0 | 209s | RESULTADO: 13 ok · 0 falhas 
+pt06_unit.py | rc=0 | 1s | PASS fechar rascunho solicita confirmação PASS região sem ação segue consulta 
+painel_agricola_test.py | rc=0 | 0s | RESULTADO 81/81 
+painel_modulos_test.py | rc=0 | 1s | RESULTADO 87/87 
+usar_os_unit_test.py | rc=0 | 1s | RESULTADO 24/24 
+cen_grava_test.py | rc=0 | 0s | RESULTADO_JS OK RESULTADO 10/10 
+etapas_celular_test.py | rc=0 | 61s | RESULTADO: 14 ok · 0 falhas (celular) 
+popover_390_test.py | rc=0 | 61s | RESULTADO: 9/9 
+est_cenario_test.py | rc=0 | 38s | RESULTADO: 15/15 ok 
+carencia_test.py | rc=0 | 148s | RESULTADO: 90/90 verificações 
+rend_multiconjuntos_test.py | rc=0 | 91s | RESULTADO: 18/18 OK 
+d5_reserva_test.py | rc=0 | 76s | RESULTADO: 13/13 ok 
+reserva_duplo_clique_test.py | rc=0 | 21s | RESULTADO: OK 2/2 
+dose_divergente_test.py | rc=1 | 41s |     FALHAS += dose_divergente_nav.rodar() AssertionError: Dia não oferece conferência 
+ap_unico_test.py | rc=1 | 0s |     if 'unit' in MODOS: FALHAS += unit() AttributeError: 'NoneType' object has no attribute 'group' 
+solo_os_test.py | rc=1 | 24s |     if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js')) RuntimeError: Uncaught 
+ostest.py | rc=1 | 20s |     if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js')) RuntimeError: Uncaught 
+paginas_scan_test.py | rc=0 | 518s | RESULTADO: 4 ok · 0 falhas (148 páginas) 
+FIM

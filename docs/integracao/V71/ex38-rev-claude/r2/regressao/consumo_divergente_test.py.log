@@ -1,0 +1,27 @@
+  OK  MB-03: sugestão 2 L não editada acima de 1 L → pede o número real, turno aberto, nenhum caso aberto: [True, 0, 5, 1] · Informe quanto usou: a sugestão de 2 L passa do que está com você (1 L).
+  OK  MB-03: sugestão 1 L (dose × área); o real 2 L informado avisa a conferência, sem erro:  L/ha × hectares · com você 1 L / Acima do que está com você (1 L): fecha em conferência com Rui (almoxarife).
+  OK  fato gravado: 1 apontamento a mais, relatado 2 L em ap.conf (não trocado pela dose), custódia segue 1 L e consumido sem baixa: [1, 159, 6, '{}', '{"Fungicida A":2}']
+  OK  caso CC-301 Em conferência com relatado × custódia, dono Rui (almoxarife) e selo na O.S.; nenhum erro no app: ['CC-301', 2, 1, 'Em conferência', 'Rui (almoxarife)', 'Parcial · dia 4 de 7,Consumo em conferência,Divergência de consumo/dose · Adjuvante espalhante, Fungicida A']
+  OK  recibo do turno no app: selo Consumo em conferência, nada baixado, quem confere e quem aceita o excedente (revisão do CTL-3, achado 7)
+  OK  MB-01: cartão da OS-0421 mostra o consumo em conferência e não pede devolução do 1 L
+  OK  EST etapa 3: resumo e linha da REQ-035 com o caso, Aceitar/Recusar; ação da etapa = "Receber devolução da REQ-031"
+  OK  EST etapa 4: disponível do Fungicida A (480 L) com a exposição na coluna Em conferência (1 L) e a OS-0421: {'disp': '480 L', 'conf': '1 L', 'os': 'OS-0421'}
+  OK  O.S.: selo na lista e no painel; encerrar bloqueado pelo caso (Consumo em conferência: Fungicida A 2 L relatados, 1 L em custódia. No Estoque: )
+  OK  perfil Rui: "aceite: Ana (gestora)" no lugar de Aceitar consumo; comando direto recusado, lote intacto: Aceitar 1 L acima da custódia (CC-301): decisão de Ana (gestora). Nada foi alterado. ·  160 L 159 L 0 L 1 L Marcos Consumo em conferência CC-301 · Fungicida A 2 L relatados, 1 L em custódia · Rui (almoxarife) aceite: Ana (gestora) Recusar relato —
+  OK  Aceitar mostra antes de confirmar de onde sai cada litro; nada muda até confirmar: [545, 'Em conferência', 1] ·  A 2 L relatados, 1 L em custódia · Rui (almoxarife) Baixa 2 L na OS-0421: 1 L da custódia de Marcos · 1 L sai do lote F26-02 (livre). Confirmar aceite Voltar —
+  OK  confirmar: custódia 0, consumido +2, entregue +1, lote −1 L do livre (reserva da REQ-039 intacta), caso Aceito e selo fora: [0, 161, 161, 544, 'Aceito'] · CC-301 aceito: Fungicida A 2 L baixados na OS-0421 · 1 L regularizado do lote F26-02.
+  OK  aceitar de novo é recusado e não baixa outra vez: [161, 544] · Este consumo não está em conferência.
+  OK  custódia 0: o app recusa iniciar com o texto da web e o dono, sem abrir turno: Iniciar bloqueado: REQ-035 sem entrega · Fungicida A 14 L a entregar. Rui (almoxarife) entrega no Estoque; Marcos confirma o recebimento no app.
+  OK  Adjuvante fora da REQ-035: aviso e caso CC-302 (custódia 0), sem recusa no app: ['CC-301 Fungicida A 2 1 Aceito Consumo acima da custódia', 'CC-302 Adjuvante espalhante 0.5 0 Em conferência Consumo sem material em custódia']
+  OK  EST: linha própria do relato fora da requisição (singular, "nada em custódia"); recusar deixa sem efeito e preserva o relatado: ['Recusado', 'registro sem fato físico', 'Parcial · dia 4 de 7,Divergência de consumo/dose · Adjuvante espalhante, Fungicida A', 0.5]
+  OK  sem sinal: caso só no aparelho; ao voltar o sinal (2 envios) aparece uma vez, com selo: [0, False, 'Parcial · dia 4 de 7,Divergência de consumo/dose · Adjuvante espalhante, Fungicida A'] → [1, 3, 'Parcial · dia 4 de 7,Divergência de consumo/dose · Adjuvante espalhante, Fungicida A,Consumo em conferência']
+  OK  prévia da OS-0424: 5 L da reserva da própria REQ-039; Voltar desfaz só a prévia: [524, 45, 20, 'CC-304', 'Em conferência'] · Rui (almoxarife) Baixa 25 L na OS-0424: 20 L da custódia de Marcos · 5 L saem do lote F26-02 (reserva da REQ-039). Confirmar aceite Voltar —
+  OK  aceite: físico −5, reserva 45 → 40 = saldo a entregar 40 (nenhum litro preso além da necessidade): [519, 40, 0, 25, 25, 40] · CC-304 aceito: Fungicida A 25 L baixados na OS-0424 · 5 L regularizados do lote F26-02 (reserva da REQ-039).
+  OK  recibo do app com caso resolvido: "Turno fechado · OS-0424 · dia 2 · 2 ha em 1 h
+Enviado · a ordem continua aberta
+Conferência resolvida
+Divergência de consumo/dose
+Consumo: nada baixado neste turno
+Recusado por Rui (almoxarife) · Fungicida A 3 L relatado"
+  OK  sem erros JS em MB-03, MB-01, EST e O.S. []
+21/21 ok · FALHAS: 0
