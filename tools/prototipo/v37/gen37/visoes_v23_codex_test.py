@@ -138,7 +138,7 @@ try:
     group(gid,'Sem agrupar')
     # CD05 substitui sp.cols ao selecionar papel.
     for role in ['Clientes','Fornecedores','Todos']:
-        click("[...document.querySelectorAll('button')].find(e=>e.innerText.trim().split('\\n')[0]==="+json.dumps(role)+")")
+        click("[...document.querySelectorAll('button')].find(e=>e.innerText.trim().replace(/\\s+\\d+$/,'')==="+json.dumps(role)+")")
         h=heads(gid)
         expected_role=['parceiro','contato'] if role=='Fornecedores' else [x.lower() for x in QUADRO[('CD-05.dc.html',gid)]]
         check('CD05 papel '+role+' preserva marcas essenciais disponíveis',h==expected_role,h)

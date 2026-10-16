@@ -1,0 +1,14 @@
+PASS grava membro ativo: Marta Nunes
+PASS grava membro ativo: Diego Prado
+PASS recusa sem perder rascunho: Ana Lima
+PASS recusa sem perder rascunho: Marcos Silva
+PASS recusa sem perder rascunho: Rui Santos
+PASS recusa sem perder rascunho: Paula Costa
+PASS recusa sem perder rascunho: Sônia Reis
+PASS recusa sem perder rascunho: Pessoa inexistente
+PASS organização divergente é recusada
+PASS inelegibilidade após abertura é revalidada
+PASS campos obrigatórios e correção preservam contexto
+PASS fechar rascunho solicita confirmação
+PASS região sem ação segue consulta
+13/13 cenários do motor; esquema PT06/PT07 validado em Python.
