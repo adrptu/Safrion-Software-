@@ -8,6 +8,7 @@
 Varre todas as páginas do _render (fora Main e as páginas de redirecionamento) a 1440 × 900 e 390 × 844 (toque), em cada estado:
   inicial · "Expandir tudo" (árvore e grupos) · o outro modo do seletor Tabela | Cartões · e estados extras que só abrem por endereço
   (Atividades do plano, ficha do Agrofit).
+C: nenhum erro de JavaScript em nenhuma tela e estado (a troca para Cartões vale em toda lista do motor desde 16/10).
 Contraprova: RENDER_DIR=<render da 519ed7b> reprova (Atividades com o DAP antes da seta, seleção antes da seta, seta de seção no fim;
 cabeçalhos de 26,6 a 64,4 px).
 Uso (de gen37/): CHROME_BIN=… CDP_GL=1 SAFRION_DADOS=sintetico python3 -B tab_drill_cab_test.py   · TDC_LARG=1440 ou 390 (padrão: as duas)
@@ -24,6 +25,7 @@ FORA = set(REDIRECIONA) | {'Main.dc.html'}
 PAGS = sorted(os.path.basename(f) for f in glob.glob(os.path.join(R, '*.dc.html')) if os.path.basename(f) not in FORA)
 EXTRAS = ['PA.dc.html#plano=SOJA-AT', 'PA.dc.html?view=tabela#plano=SOJA-AT', 'AG-07.dc.html#pasteuria-nishizawae-fs', 'SAF.dc.html#saf=S2627&passo=operacoes']
 OK, FAIL = [], []
+erros = []   # erro de JavaScript em qualquer tela ou estado (inclusive ao trocar para Cartões)
 def chk(n, c, info=''):
     (OK if c else FAIL).append(n); print(('OK    ' if c else 'FALHA ') + n + ('' if c else ' · ' + str(info)[:1500]), flush=True)
 
@@ -72,6 +74,7 @@ ESTADOS = r"""((k)=>{ const vis=e=>!!e&&e.getClientRects().length>0;
 
 def varre(c, J, BASE, w):
     setas, cabs, n_setas, n_cab, telas_seta, telas_cab, cortes = [], [], 0, 0, set(), set(), set()
+    del erros[:]
     alturas = {}
     for pg in PAGS + EXTRAS:
         c.goto(BASE + pg, 1.0)
@@ -86,6 +89,7 @@ def varre(c, J, BASE, w):
                 n_cab += 1; alturas.setdefault(x['h'], set()).add(pg)
                 for t in x.get('cortado') or []: cortes.add((pg, t))
                 if abs(x['h'] - CAB_PX) > 1: cabs.append((w, pg, est, x['g'], x['h'], x['lab'])); telas_cab.add(pg)
+        for e in (J("window.__errs||[]") or [])[:2]: erros.append((w, pg, str(e)[:160]))
         J("localStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana')")
     return setas, cabs, n_setas, n_cab, telas_seta, telas_cab, alturas, cortes
 
@@ -103,8 +107,7 @@ try:
         for x in dedup(cabs)[:40]: print('  cab ', x, flush=True)
         chk(f'A{w} TAB-09 seta de abrir na 1ª coluna, antes de qualquer outra coluna ({n_setas} setas; telas com desvio: {len(ts)})', n_setas > 500 and not setas, sorted(ts))
         chk(f'B{w} TAB-10 cabeçalho de tabela com {CAB_PX} px ±1 ({n_cab} cabeçalhos; alturas distintas: {len(alt)}; telas com desvio: {len(tc)})', n_cab > 100 and not cabs, sorted(tc))
-    errs = J("window.__errs||[]") or []
-    chk('C sem erro de JavaScript na última tela', not errs, errs[:4])
+        chk(f'C{w} sem erro de JavaScript em nenhuma tela e estado (inicial, Expandir tudo, outro modo)', not erros, erros[:6])
 finally:
     c.close(); srv.terminate()
 print(f'RESULTADO: {len(OK)} ok · {len(FAIL)} falhas' + (' · ' + '; '.join(FAIL) if FAIL else ''))

@@ -517,8 +517,11 @@ function g2modosFim(self,v){ if(typeof GRIDS==='undefined') return;
 // TAB-08 (16/10/2026): cabeçalho com ordenar (⇅) e filtrar (funil) e o menu de filtro por valores, para o E.grid e para as tabelas próprias
 // (Atividades do plano): sp = {id, cols:[{k,l,t,a}]}, rows = linhas no formato do motor (id, v, s, ordk). Grava em g2st(self,sp.id): so, f, fmc…
 function g2cabVals(self,sp,v,st,rows,cols){ const id=sp.id, so=st.so||sp.so||{};
-  // TAB-10: célula de cabeçalho com 40 px (.g2th); rótulo longo (mais de 26 letras) ganha largura para caber em 2 linhas (--g2hbw, até 180 px)
-  const hbw=(l)=>{ const n=String(l||'').length; return n>26?'--g2hbw:'+Math.min(180,Math.ceil(n*3.9+14))+'px;':''; };
+  // TAB-10: célula de cabeçalho com 40 px (.g2th); o rótulo que não cabe em 2 linhas de 104 px ganha a largura da melhor quebra em 2 linhas
+  // (--g2hbw, até 200 px; 7,4 px por letra maiúscula de 10,5 px e 22 px do ⇅); o que nem assim couber termina em reticências
+  const hbw=(l)=>{ const w=String(l||'').split(/\s+/).filter(Boolean); if(w.length<2) return ''; let m=1e9;
+    for(let i=1;i<w.length;i++) m=Math.min(m,Math.max(w.slice(0,i).join(' ').length,w.slice(i).join(' ').length));
+    const px=Math.ceil(m*7.4+22); return px>104?'--g2hbw:'+Math.min(200,px)+'px;':''; };
   v[id+'_head']=cols.map((c,ci)=>({l:c.l, tt:c.ajuda||g2glossCol(sp,c,rows), un:c.un||'', cls:(ci===0?'g2th g2c0':'g2th')+(c.hcls?' '+c.hcls:''), st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+hbw(c.l)+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;':''),
      arrow:(so.k===c.k?(so.d?'▼':'▲'):'⇅'), astyle:(so.k===c.k?'color:#1E7A4C;':'color:#8A968E;'), sortLabel:'Ordenar por '+c.l,
      sort:()=>{ const cur=g2st(self,id).so||sp.so||{}; let nx; if(cur.k!==c.k) nx={k:c.k,d:false}; else if(!cur.d) nx={k:c.k,d:true}; else nx={}; g2set(self,id,{so:nx}); },

@@ -1536,7 +1536,10 @@ CARTOES_CSS=(
     ".g2cd-fv{min-width:0;max-width:100%;overflow:hidden}"
     ".g2cd-fv .g2pw{display:block;min-width:0;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}"   # bloco: as reticências só valem fora do flex
     ".g2cd-fv .g2pw>[style*=\"flex-basis: 100%\"],.g2cd-fv .g2pw>[style*=\"flex-basis: 100%\"]~*{display:none}"
-    ".g2cd-fv .g2pw>[style*=\"color: #65736A; font-size: 12px\"]:not(:first-child){display:none}"
+    # texto de apoio apagado da célula fica na Tabela (VIS-05): o desenho põe a cor em rgb no atributo, então valem as duas grafias; as demais
+    # partes do valor ganham o espaço que o flex da Tabela dava (16/10: "Fungicida AF26-02" colava as partes nos cartões)
+    ".g2cd-fv .g2pw>:is([style*=\"color: #65736A; font-size: 12px\"],[style*=\"color: rgb(101, 115, 106); font-size: 12px\"]):not(:first-child){display:none}"
+    ".g2cd-fv .g2pw>*+*{margin-left:6px}"
     ".g2cd-hd{min-height:24px;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;border:1px solid transparent}"
     ".g2cd-hd .g2cd-tit,.g2cd-hd .g2cd-f{padding-top:0;padding-bottom:0;display:block;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
     ".g2cd-tot{min-height:40px;border-radius:10px;background:#F4F6F3;border:1px solid transparent;font-variant-numeric:tabular-nums}"
@@ -1765,9 +1768,12 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     # essenciais, Agrupar por ou o quadro visoes.MODO_LISTAS) ganha o seletor no fim da barra, depois de Colunas. cartoes='externo': a tela
     # já tem seletor de visões próprio (O.S. pela VISOES-1; MA › Ordens e BEN com Kanban) e o Cartões entra nele; a grade desenha os cartões
     # e não põe seletor (g2lib.g2modosFim). cartoes=False tira. Os cartões são as mesmas linhas da Tabela (g2cdVals)
+    # 16/10/2026 (proprietário: "os demais módulos estão com design system diferente do nosso padrão de excelencia do módulo agrícola"):
+    # toda lista do motor com cabeçalho de ordenar e filtrar ganha Tabela | Cartões, em todos os módulos (antes só as do quadro
+    # MODO_LISTAS e as com colunas essenciais ou Agrupar por). Matriz sem ordenar (headtools=False, ex.: capacidade por mês) fica só em Tabela
     import visoes as _V
     if cartoes is None and (CUR,gid) in _V.MODO_LISTAS: cartoes=True
-    modo=cartoes in (True,'externo') or (cartoes is not False and (ess or bool(ag)))
+    modo=cartoes in (True,'externo') or (cartoes is not False and (ess or bool(ag) or headtools))
     if modo: spec['modo']='externo' if cartoes=='externo' else True
     mdb=f'<sc-if value="{H("_mdhas")}" hint-placeholder-val="{{{{false}}}}">{modos_html(gid)}</sc-if>' if (modo and cartoes!='externo') else ''
     # VISOES-2 §3.3: "Agrupar por" (ícone da pergunta + nome da coluna) e a trilha do descer, na barra da grade
