@@ -541,7 +541,7 @@ function g2cabVals(self,sp,v,st,rows,cols){ const id=sp.id, so=st.so||sp.so||{};
     const fechar=()=>g2set(self,id,{fmc:null,fmd:null,fmq:''});
     const aplicar=()=>{ const s=(g2st(self,id).fmd)||sel; if(!s.length) return; const f=Object.assign({},g2st(self,id).f||{}); if(s.length>=todos.length) delete f[fmc]; else f[fmc]=s.slice(); g2set(self,id,{f,fmc:null,fmd:null,fmq:''}); };
     const tipo=fcol.t==='num'?'num':(fcol.t==='date'?'data':'txt');
-    v[id+'_fm']={open:true, l:fcol.l, titulo:'Filtrar '+fcol.l, pos:'top:'+Math.max(8,y)+'px;left:'+x+'px;', qid:'g2fq_'+id, q,
+    v[id+'_fm']={open:true, l:fcol.l, titulo:'Filtrar '+fcol.l, pos:'top:'+Math.max(8,y)+'px;left:'+x+'px;max-height:'+(vh-Math.max(8,y)-8)+'px;overflow-y:auto;',   /* cabe na janela no celular (popover_390_test) */ qid:'g2fq_'+id, q,
       setq:(e)=>g2set(self,id,{fmq:e.target.value,fmd:sel}),
       vals:vis.map(k=>({t:L(k),n:cnt[k],on:sel.indexOf(k)>=0, tog:()=>{ const s=sel.slice(); const i=s.indexOf(k); if(i>=0) s.splice(i,1); else s.push(k); setd(s); }})),
       semRes:!vis.length, semMarca:!sel.length, okSt:sel.length?'':'opacity:.5;cursor:not-allowed;', conta:sel.length+' de '+todos.length+' marcados',
