@@ -88,7 +88,7 @@ function ma_condTxt(c,a){ const i=a.condInfo||{}; if(a.cond==='Bloqueado') retur
 function ma_hashLer(){ const o={}; String(decodeURIComponent((location.hash||'').slice(1))).split('&').forEach(p=>{ const i=p.indexOf('='); if(i>0) o[p.slice(0,i)]=p.slice(i+1); }); return o; }
 function ma_hashDe(st){ const p=[]; const pg=st.pg, pan=st.pan;
   if(!pg&&st.vis) p.push('vis='+st.vis); if(!pg&&st.vis==='semordem'&&st.tipo) p.push('tipo='+st.tipo);
-  if(!pg&&st.vis==='ativos'&&st.amodo==='abast') p.push('modo=abastecimentos'); if(!pg&&st.vis==='ordens'&&(st.omodo==='kanban'||st.omodo==='cartoes')) p.push('modo='+st.omodo);
+  if(!pg&&st.vis==='ativos'&&st.amodo==='abast') p.push('modo=abastecimentos'); if(!pg&&st.vis==='ativos'&&st.amodo!=='abast'&&st.fpend==='Sem plano') p.push('pend=semplano'); if(!pg&&st.vis==='ordens'&&(st.omodo==='kanban'||st.omodo==='cartoes')) p.push('modo='+st.omodo);
   if(pg) p.push(pg.k+'='+pg.id); if(pan&&['om','achado','venc','leitura'].indexOf(pan.k)>=0&&pan.id) p.push(pan.k+'='+pan.id);
   if(st.np&&st.np.novoDe) p.push('novo=plano:'+st.np.novoDe); return p.join('&'); }
 function ma_hashSync(st){ try{ const h=ma_hashDe(st); if(decodeURIComponent((location.hash||'').slice(1))!==h) history.replaceState(null,'',location.pathname+location.search+(h?'#'+h:'')); }catch(e){} }
@@ -100,11 +100,13 @@ function ma_abertura(c,pf){ const pa=manPapelDe(pf);
   return {vis:'ordens',rot:''}; }
 function ma_aplicaHash(self,h){ const c=manGet(); const s={pan:null,pg:null,rec:null};
   const ab=ma_abertura(c,g2perfil()); s.vis=h.vis||((h.om)?'ordens':(h.achado||h.venc?'semordem':ab.vis)); s.rot=(!h.vis&&!h.om&&s.vis==='ordens')?ab.rot:'';
-  if(h.tipo) s.tipo=h.tipo==='achados'?'achados':(h.tipo==='vencimentos'?'venc':''); if(h.modo==='abastecimentos'){ s.vis='ativos'; s.amodo='abast'; } if(h.modo==='kanban'||h.modo==='cartoes') s.omodo=h.modo;
+  if(h.tipo) s.tipo=h.tipo==='achados'?'achados':(h.tipo==='vencimentos'?'venc':''); if(h.modo==='abastecimentos'){ s.vis='ativos'; s.amodo='abast'; }
+  if(h.pend==='semplano'){ s.vis='ativos'; s.amodo='ativos'; s.fpend='Sem plano'; }   /* MA-VINCULO: "N ativos sem plano" da entrada do módulo e do CD-03 */ if(h.modo==='kanban'||h.modo==='cartoes') s.omodo=h.modo;
   if(h.ativo&&c.ativos[h.ativo]) s.pg={k:'ativo',id:h.ativo}; if(h.plano&&c.planos[h.plano]) s.pg={k:'plano',id:h.plano};
   if(h.om&&c.oms[h.om]) s.pan={k:'om',id:h.om,modal:true}; else if(h.achado&&c.achados[h.achado]) s.pan={k:'achado',id:h.achado,modal:true};
   else if(h.venc) s.pan={k:'venc',id:h.venc,modal:true}; else if(h.leitura) s.pan={k:'leitura',id:h.leitura,modal:true};
   self.setState(s); if(h.novo&&h.novo.indexOf('plano:')===0&&c.ativos[h.novo.slice(6)]) setTimeout(()=>pmNovo(self,manGet(),h.novo.slice(6)),0);
+  if(h.vincular&&c.ativos[h.vincular]) setTimeout(()=>vlAbrir(self,{aids:[h.vincular]}),0);   /* "Vincular ao PM-xx ›" da linha do ativo: o painel já com a sugestão */
   if(!s.pan&&!s.pg&&s.vis==='ordens') setTimeout(()=>ma_autoAbre(self),0); }
 /* a ≥1024 px a visão Ordens abre, sem modal, o painel da 1ª OM que espera o papel (abrir não executa) */
 function ma_espera(c,o,pf){ const k=manPf(pf).k, pa=manPapelDe(pf); if(!manAberta(o)) return false;
@@ -176,14 +178,23 @@ function ma_linhaAtv(c,a,per){ const px=ma_prox(c,a); const abertas=Object.value
   const cp=manCustoPeriodo(c,per,a.id); const cons=ma_consumo(c,a); const i=a.condInfo||{};
   const ab=abertas.map(o=>({k:'link',t:o.id+' · '+o.etapa,h:'#om='+o.id})).concat(achs.map(q=>({k:'link',t:q.id+' sem ordem',h:'#achado='+q.id})));
   const abp=[]; ab.forEach((x,j)=>{ if(j) abp.push({k:'br',t:''}); abp.push(x); });
-  const pend=[]; if(a.suspeita) pend.push('Leitura a confirmar'); if(!manLinhas(c).some(l=>l.aid===a.id)) pend.push('Sem plano'); if(achs.length) pend.push('Achado sem ordem');
+  const pl=ma_plCel(c,a);
+  const pend=[]; if(a.suspeita) pend.push('Leitura a confirmar'); if(pl.semp) pend.push('Sem plano'); if(achs.length) pend.push('Achado sem ordem');
   if(cons&&cons.desvio!==null&&Math.abs(cons.desvio)>=15) pend.push('Desvio de consumo'); if(px&&px.l.x.prev&&manDias(c.hoje,px.l.x.prev)<=30) pend.push('Vence em 30 d'); if(manRestricaoVencida(c,a)) pend.push('Restrição vencida');
-  return {id:a.id,pend,v:{custo:cp.enc,cond:{'Bloqueado':0,'Restrito':1,'Apto':2}[a.cond],prox:px?(px.l.x.prev?manT(px.l.x.prev)/864e5:9e9):9e9,leit:a.leit?a.leit.val:null},
-    s:{ativo:a.nome+' '+a.modelo+' '+a.local+' '+a.grupo,cond:a.cond,leit:a.leit?manLeitTxt(a):'sem contador',prox:px?(px.l.s.nome+' '+px.l.x.sit):'Sem plano',ab:abertas.map(o=>o.id).join(' ')+' '+achs.map(q=>q.id).join(' '),cons:cons?cons.t:'— sem método',grupo:a.grupo},
-    p:{ativo:[{k:'link',t:a.nome,h:'#ativo='+a.id},{k:'mut',t:'· '+a.modelo+' · '+a.local}],cond:[ma_ch(a.cond+(a.cond==='Bloqueado'&&i.desde?' · desde '+manBr(i.desde):'')+(a.cond==='Restrito'&&i.ate?' · até '+manBr(i.ate):''),ma_cond(a))].concat(manRestricaoVencida(c,a)?[ma_ch('Restrição vencida','yellow')]:[]),
+  return {id:a.id,pend,semp:pl.semp,v:{custo:cp.enc,cond:{'Bloqueado':0,'Restrito':1,'Apto':2}[a.cond],prox:px?(px.l.x.prev?manT(px.l.x.prev)/864e5:9e9):9e9,leit:a.leit?a.leit.val:null},
+    s:{ativo:a.nome+' '+a.modelo+' '+a.local+' '+a.grupo,plano:pl.s,cond:a.cond,leit:a.leit?manLeitTxt(a):'sem contador',prox:px?(px.l.s.nome+' '+px.l.x.sit):'—',ab:abertas.map(o=>o.id).join(' ')+' '+achs.map(q=>q.id).join(' '),cons:cons?cons.t:'— sem método',grupo:a.grupo},
+    p:{ativo:[{k:'link',t:a.nome,h:'#ativo='+a.id},{k:'mut',t:'· '+a.modelo+' · '+a.local}],plano:pl.p,cond:[ma_ch(a.cond+(a.cond==='Bloqueado'&&i.desde?' · desde '+manBr(i.desde):'')+(a.cond==='Restrito'&&i.ate?' · até '+manBr(i.ate):''),ma_cond(a))].concat(manRestricaoVencida(c,a)?[ma_ch('Restrição vencida','yellow')]:[]),
        leit:a.leit?[{k:'txt',t:manLeitTxt(a)}].concat(a.suspeita?[ma_ch('a confirmar','yellow')]:(manAntiga(c,a)?[ma_ch('de '+manBr(a.leit.data),'yellow')]:[])):[{k:'mut',t:'sem contador'}],
-       prox:px?[ma_ch(px.l.x.sit,MAN_SITC[px.l.x.sit]||'gray'),{k:'txt',t:px.l.s.nome+' · '+manProxTxt(c,px.l.x)}].concat(px.n?[{k:'mut',t:'+'+px.n}]:[]):[{k:'mut',t:'Sem plano'}],
+       prox:px?[ma_ch(px.l.x.sit,MAN_SITC[px.l.x.sit]||'gray'),{k:'txt',t:px.l.s.nome+' · '+manProxTxt(c,px.l.x)}].concat(px.n?[{k:'mut',t:'+'+px.n}]:[]):[{k:'mut',t:'—'}],   /* "Sem plano" fica na coluna Plano (MA-VINCULO) */
        ab:abp.length?abp:[{k:'mut',t:'—'}],cons:cons?[{k:'txt',t:cons.t}].concat(cons.desvio!==null&&Math.abs(cons.desvio)>=15?[ma_ch((cons.desvio>0?'+':'')+manN(cons.desvio)+' %','yellow')]:[]):[{k:'mut',t:'— sem método'}]}}; }
+/* MA-VINCULO (16/10): coluna Plano da visão Ativos. Cada plano do ativo (nada colapsado) com a situação; sem plano, a sugestão explícita
+   ("Vincular ao PM-xx ›" abre o painel com ela escolhida) ou "Criar plano ›". Links, não botões: a linha identifica, o painel resolve. */
+function ma_plCel(c,a){ const pls=manPlanosDe(c,a.id); const semp=manAtvAtivo(a)&&!pls.some(manPlVale); const pp=[]; const st=[];
+  if(!manAtvAtivo(a)) return {semp:false,s:'Ativo '+String(a.sit||'inativo').toLowerCase(),p:[{k:'mut',t:'Ativo '+String(a.sit||'inativo').toLowerCase()}]};
+  pls.forEach((p,j)=>{ const si=manPlSit(c,p,a); if(j) pp.push({k:'br',t:''}); pp.push({k:'link',t:p.id,h:'#plano='+p.id}); pp.push(Object.assign(ma_ch(si.t,si.c),si.dica?{dica:si.dica}:{})); st.push(p.id+' · '+si.t); });
+  if(semp){ const sg=manVincSug(c,a)[0]; if(pp.length) pp.push({k:'br',t:''}); pp.push(ma_ch('Sem plano','yellow')); pp.push({k:'br',t:''});
+    pp.push(sg?{k:'link',t:'Vincular ao '+sg.p.id+' ›',h:'#vis=ativos&vincular='+a.id}:{k:'link',t:'Criar plano ›',h:'#vis=ativos&novo=plano:'+a.id}); st.unshift('Sem plano'); }
+  return {semp,s:st.join('; '),p:pp}; }
 /* consumo pelo último lançamento com método (tanque cheio a tanque cheio; PRD CAL-07); sem método, "—" */
 function ma_consumo(c,a){ const bs=(c.abast||[]).filter(b=>b.aid===a.id&&!b.tipo&&b.qual!=='Estornado').sort((x,y)=>(y.data+(y.hora||'')).localeCompare(x.data+(x.hora||'')));
   for(const b of bs){ const lh=manLh(c,b); if(lh&&lh.lh!==null){ const dv=(a.lh&&lh.un==='L/h')?Math.round((lh.lh/a.lh-1)*100):null; return {t:manConsTxt(lh)+' · tanque cheio',lh:lh.lh,un:lh.un,desvio:dv,b:b.id}; } } return null; }
@@ -201,7 +212,7 @@ function ma_linhaPl(c,p){ const e=pmEst(p); const nv=pmVincs(c,p.id).length; con
 function ma_verComo(self,v){
   /* ⋯ Mais ações (engine.mais, componente único): abrir e fechar é do g2lib; restaurar pede confirmação logo abaixo do ⋯ */
   v.rst_ask=!!self.state.rst; v.rst=()=>self.setState({rst:true}); v.rst_cancel=()=>self.setState({rst:false});
-  v.rst_ok=()=>{ manReset(self); self.setState({rst:false,pan:null,pg:null,rec:null,sv:null,np:null,vk:null}); }; }
+  v.rst_ok=()=>{ manReset(self); self.setState({rst:false,pan:null,pg:null,rec:null,sv:null,np:null,vl:null,dv:null}); }; }
 '''
 
 # ---------- visões (listas), detalhe do ativo e painéis: preenchem os buracos da tela ----------
@@ -230,7 +241,7 @@ function PREVALS(self,v){ manOuvir(self); const c=manGet(); const st=self.state;
   /* Ativos e abastecimentos */
   const at=c.ordem.map(id=>c.ativos[id]).filter(a=>a&&(!st.fgrupo||a.grupo===st.fgrupo)).map(a=>ma_linhaAtv(c,a,per)).filter(r=>!st.fpend||r.pend.indexOf(st.fpend)>=0)
     .sort((a,b)=>(a.v.cond-b.v.cond)||(a.v.prox-b.v.prox));
-  ma_G('g_at').rows=at; ma_G('g_ab').rows=(c.abast||[]).filter(b=>!st.fgrupo||(c.ativos[b.aid]||{}).grupo===st.fgrupo).sort((x,y)=>(y.data+(y.hora||'')).localeCompare(x.data+(x.hora||''))).map(b=>ma_linhaAb(c,b));   /* o Grupo vale também para os lançamentos, pelo ativo de cada um (MAN-LIMPA-GRUPO-01) */
+  ma_G('g_at').rows=at; self.__at=at; ma_G('g_ab').rows=(c.abast||[]).filter(b=>!st.fgrupo||(c.ativos[b.aid]||{}).grupo===st.fgrupo).sort((x,y)=>(y.data+(y.hora||'')).localeCompare(x.data+(x.hora||''))).map(b=>ma_linhaAb(c,b));   /* o Grupo vale também para os lançamentos, pelo ativo de cada um (MAN-LIMPA-GRUPO-01) */
   /* Planos */
   ma_G('g_pl').rows=pmPlans(c).filter(p=>!st.fgrupo||p.grupo===st.fgrupo).map(p=>ma_linhaPl(c,p));
   /* detalhe do ativo */
@@ -251,10 +262,12 @@ function PREVALS(self,v){ manOuvir(self); const c=manGet(); const st=self.state;
   else { ['d_venc','d_ach','d_om','d_lei'].forEach(g=>{ ma_G(g).rows=[]; }); }
   const Pp=pg&&pg.k==='plano'?c.planos[pg.id]:null;
   ma_G('d_vinc').rows=Pp?pmVincs(c,Pp.id).map(k=>{ const aid=k.split('|')[1]; const a=c.ativos[aid]; const vv=c.vinc[k]; const ls=manLinhas(c,Pp.id).filter(l=>l.aid===aid&&l.s);
-    const l=ls.sort((x,y)=>manIniJanela(x.x)-manIniJanela(y.x))[0]; const om=ls.map(x=>x.om).find(Boolean);
-    return {id:k,v:{},s:{ativo:a.nome,marco:manBr(vv.marco.data),prox:l?manProxTxt(c,l.x):'—',sit:l?l.x.sit:'Aguarda publicar',om:om?om.id:''},
-      p:{ativo:[{k:'link',t:a.nome,h:'#ativo='+aid}],marco:[{k:'txt',t:manBr(vv.marco.data)+(vv.marco.leit!==null&&vv.marco.leit!==undefined&&a.un?' · '+manQ(vv.marco.leit,a.un):'')}].concat(vv.marco.est?[ma_ch('estimado','yellow')]:[]).concat(vv.marco.de?[{k:'mut',t:'da '+vv.marco.de}]:[]),
-         prox:[{k:'txt',t:l?(l.s.nome+' · '+manProxTxt(c,l.x)):'—'}],sit:[ma_ch(l?l.x.sit:'Aguarda publicar',l?(MAN_SITC[l.x.sit]||'gray'):'gray')],om:om?[{k:'link',t:om.id+' · '+om.etapa,h:'#om='+om.id}]:[{k:'mut',t:'—'}]}}; }):[]; }
+    const om=ls.map(x=>x.om).find(Boolean)||Object.values(c.oms).find(o=>o.pid===Pp.id&&o.aid===aid&&manAberta(o))||null; const si=manPlSit(c,Pp,a);
+    const px=[]; ls.forEach((l,j)=>{ if(j) px.push({k:'br',t:''}); px.push({k:'txt',t:l.s.nome+' · '+manProxTxt(c,l.x)}); });
+    return {id:k,ro:true,v:{},s:{ativo:a.nome,base:manVincDeTxt(a,vv.marco),prox:ls.map(l=>l.s.nome+' · '+manProxTxt(c,l.x)).join(' · ')||'—',sit:si.t,om:om?om.id:''},
+      p:{ativo:[{k:'link',t:a.nome,h:'#ativo='+aid},{k:'mut',t:'· '+a.modelo}],base:[{k:'txt',t:manVincDeTxt(a,vv.marco)}].concat(vv.marco.est?[ma_ch('estimado','yellow')]:[]).concat(vv.marco.de?[{k:'mut',t:'da '+vv.marco.de}]:[]),
+         prox:px.length?px:[{k:'mut',t:Pp.versao?'—':'vence quando o plano for publicado'}],sit:[Object.assign(ma_ch(si.t,si.c),si.dica?{dica:si.dica}:{})],
+         om:(om?[{k:'link',t:om.id+' · '+om.etapa,h:'#om='+om.id}]:[{k:'mut',t:'—'}]).concat([{k:'act',t:'Desvincular',fn:'pl_desv:'+k}])}}; }):[]; }
 '''
 
 MA_JS+=r'''
@@ -318,15 +331,21 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2pe
   /* (o período ficou só no cálculo do custo do mês da coluna) */
   v.at_ativos=(st.amodo||'ativos')==='ativos'; v.at_abast=st.amodo==='abast';
   v.at_modos=[['ativos','Ativos'],['abast','Abastecimentos']].map(([k,t])=>({t,on:String((st.amodo||'ativos')===k),st:ma_pill((st.amodo||'ativos')===k),go:()=>self.setState({amodo:k})}));
+  /* MA-VINCULO: filtro rápido "Sem plano" na barra da grade (TAB-01; o mesmo estado da Pendência da faixa Filtros) */
+  { const nsp=manSemPlano(c).filter(a=>!st.fgrupo||a.grupo===st.fgrupo).length; const onS=st.fpend==='Sem plano';
+    v.at_semp_tem=nsp>0||onS; v.at_semp_n=String(nsp); v.at_semp_on=String(onS); v.at_semp_lab=onS?'Mostrar todos os ativos':'Mostrar só os ativos sem plano';
+    v.at_semp_st='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;min-height:var(--g2-alvo,0px);box-sizing:border-box;'+(onS?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;');
+    v.at_semp_go=()=>self.setState({fpend:onS?'':'Sem plano'}); }
+  v.pl_desv=(k)=>dvAbrir(self,k);
   v.f_pends=[{v:'',t:'Toda pendência'}].concat(['Leitura a confirmar','Sem plano','Achado sem ordem','Desvio de consumo','Vence em 30 d','Restrição vencida'].map(x=>({v:x,t:x}))); v.f_pend=st.fpend||''; v.f_setpend=(e)=>self.setState({fpend:e.target.value});
   /* Planos: linha calculada dos ativos sem plano */
   const sp=pmSemPlano(c); v.tem_sem=sp.length>0; v.sem_n=sp.length+(sp.length>1?' ativos sem plano':' ativo sem plano'); v.sem=sp.map(a=>({t:a.nome,lab:'Criar plano para '+a.nome,go:()=>pmNovo(self,manGet(),a.id)}));
   /* primária da visão (cabeçalho): com painel aberto, só a do painel é primária */
-  const panAberto=!!(st.pan||st.sv||st.np||st.vk); ma_hprim(self,v,c,pf,vis,lista,panAberto);
+  const panAberto=!!(st.pan||st.sv||st.np||st.vl||st.dv); ma_hprim(self,v,c,pf,vis,lista,panAberto);
   /* páginas e painéis */
   if(v.pg_ativo) ma_ativoV(self,v,c,c.ativos[st.pg.id],pf); else ma_ativoV0(v);
   if(v.pg_plano) pmPlanoV(self,v,c,c.planos[st.pg.id],pf); else pmPlanoV0(v);
-  ma_panV(self,v,c,pf); pmSvP(self,v,c); pmNpP(self,v,c); pmVkP(self,v,c); }
+  ma_panV(self,v,c,pf); pmSvP(self,v,c); pmNpP(self,v,c); vlP(self,v,c,pf); dvP(self,v,c,pf); }
 function ma_hprim(self,v,c,pf,vis,lista,panAberto){ let t='',fn=null,dis='',sec=null;
   if(lista&&vis==='semordem'){ const spS=ma_G('g_so'), stS=g2st(self,'g_so'); const ks=(self.__so||[]).filter(r=>r.k==='venc'&&r.devida&&g2match(r,spS,stS)).map(r=>r.key); const n=ks.length;   /* A6: o que a grade mostra */
     t=n?('Gerar '+n+(n>1?' ordens preventivas':' ordem preventiva')):'Gerar ordens preventivas'; dis=n?manPode(c,pf,'gerar'):'Nada a gerar neste filtro';
@@ -334,7 +353,10 @@ function ma_hprim(self,v,c,pf,vis,lista,panAberto){ let t='',fn=null,dis='',sec=
     sec={t:'Registrar achado',fn:()=>ma_novoAch(self,'')}; }
   else if(lista&&vis==='ativos'&&self.state.amodo==='abast'){ t='Registrar abastecimento'; dis=manPode(c,pf,'registrar'); fn=()=>ma_novoAb(self,''); }
   else if(lista&&vis==='planos'){ t='Criar plano'; dis=manPode(c,pf,'plano'); fn=()=>pmNovo(self,manGet(),null); }
-  else if(lista&&vis==='ativos'){ sec={t:'Registrar achado',fn:()=>ma_novoAch(self,'')}; }
+  else if(lista&&vis==='ativos'){ const spA=ma_G('g_at'), stA=g2st(self,'g_at'); const qc=spA.qf?spA.cols.find(x=>x.k===spA.qf.k):null;
+    const ids=(self.__at||[]).filter(r=>r.semp&&g2match(r,spA,stA)&&(!stA.qv||!qc||g2qhas(r,qc,spA.qf,stA.qv))).map(r=>r.id);   /* MA-VINCULO: o que a grade mostra */
+    if(ids.length){ t='Vincular a plano'; dis=manPode(c,pf,'plano'); fn=()=>vlAbrir(self,{aids:ids}); }
+    sec={t:'Registrar achado',fn:()=>ma_novoAch(self,'')}; }
   v.hp_tem=!!t; v.hp_t=t; v.hp_dis=!!dis; v.hp_why=dis||''; v.hp_fn=fn||(()=>{}); v.hp_st=(panAberto||dis)?MA_SEC:MA_PRIM;
   v.hs_vis=!!sec&&!t; v.hs_menu=!!sec&&!!t; v.hs_t=sec?sec.t:''; v.hs_fn=sec?sec.fn:(()=>{}); }   /* MAIS-01: com a primária à vista, a secundária vai para o ⋯ */
 '''
@@ -377,14 +399,16 @@ function ma_ativoV(self,v,c,a,pf){ const st=self.state; const i=a.condInfo||{}; 
   else if(semTrata) P={t:'Criar ordem corretiva',fn:()=>ma_cmd(self,c2=>manCorretivaAtivo(c2,a.id,g2perfil(),self.state.pchave),(r)=>{ if(r.id) ma_abrir(self,'om',r.id); ma_rec(self,r); }),dis:manPode(c,pf,'decidir')};
   else if(ma_motor(a)&&a.un) P={t:'Registrar abastecimento',fn:()=>ma_novoAb(self,a.id),dis:manPode(c,pf,'registrar')};
   else if(a.un) P={t:'Registrar leitura',fn:()=>ma_novaLeit(self,a.id),dis:manPode(c,pf,'registrar')};
-  const panAberto=!!(st.pan||st.sv||st.np||st.vk);
+  const panAberto=!!(st.pan||st.sv||st.np||st.vl||st.dv);
   v.at_prim=!!P; v.at_pt=P?P.t:''; v.at_pfn=P?P.fn:(()=>{}); v.at_pdis=!!(P&&P.dis); v.at_pwhy=(P&&P.dis)||''; v.at_pst=(panAberto||(P&&P.dis))?MA_SEC:MA_PRIM;
   v.at_secs=[{t:'Registrar achado',fn:()=>ma_novoAch(self,a.id),dis:manPode(c,pf,'registrar')}].concat(a.un&&(!P||P.t!=='Registrar leitura')?[{t:'Registrar leitura',fn:()=>ma_novaLeit(self,a.id),dis:manPode(c,pf,'registrar')}]:[])
     .map(x=>({t:x.t,fn:x.fn,dis:!!x.dis,why:x.dis||'',st:MA_SEC}));
   v.at_cd03='CD-03.dc.html'; v.at_rec='OS.dc.html';
-  const plc=!ls.length?pmPlans(c).find(p=>p.estado!=='Inativo'&&manCabe(c,p,a)):null; const temV=manLinhas(c).some(l=>l.aid===a.id);
-  v.at_semPl=!temV; v.at_semPlt=plc?('Sem vínculo · Vincular ao '+plc.id+' ›'):'Sem plano · Criar plano ›';
-  v.at_semPlGo=()=>{ if(plc){ ma_pg(self,'plano',plc.id); setTimeout(()=>pmVkOpen(self,manGet(),manGet().planos[plc.id],a.id),0); } else pmNovo(self,manGet(),a.id); }; }
+  /* MA-VINCULO: os planos do ativo à vista no cabeçalho; sem plano, "Vincular ao PM-xx ›" (sugestão explícita: abre o painel) ou "Criar plano ›" */
+  const pls=manPlanosDe(c,a.id); const semp=manAtvAtivo(a)&&!pls.some(manPlVale); const sg=semp?manVincSug(c,a)[0]:null;
+  v.at_pls=pls.map(p=>{ const si=manPlSit(c,p,a); return {t:p.id,h:'#plano='+p.id,s:si.t,st:ma_chipSt(si.c),dot:ma_dotSt(si.c)}; }); v.at_temPls=pls.length>0;
+  v.at_semPl=semp; v.at_semPlt=sg?((sg.cp.nivel==='escopo'?'Sem vínculo':'Sem plano')+' · Vincular ao '+sg.p.id+' ›'):'Sem plano · Criar plano ›';
+  v.at_semPlGo=()=>{ if(sg) vlAbrir(self,{aids:[a.id]}); else pmNovo(self,manGet(),a.id); }; }
 '''
 
 # ---------- painéis (um por registro; uma primária no rodapé) ----------
@@ -685,13 +709,13 @@ const PM_IN='font-family:inherit;font-size:13.5px;padding:8px 10px;border-radius
 const PM_BASE={exec:'Data e leitura da execução',prog:'Vencimento programado'};
 function pmPlans(c){ return c.ordemPlanos.map(id=>c.planos[id]).filter(Boolean); }
 function pmEst(p){ if(p.estado==='Inativo') return ['Inativo','gray']; if(!p.versao) return ['Rascunho v1','yellow']; if(p.rasc) return ['Publicado v'+p.versao+' · Rascunho v'+p.rasc.v+' em edição','yellow']; return ['Publicado v'+p.versao,'green']; }
-function pmVincs(c,pid){ return Object.keys(c.vinc).filter(k=>k.split('|')[0]===pid); }
-function pmSemPlano(c){ return c.ordem.map(id=>c.ativos[id]).filter(a=>a&&!Object.keys(c.vinc).some(k=>k.split('|')[1]===a.id)&&!pmPlans(c).some(p=>p.estado!=='Inativo'&&manCabe(c,p,a))); }
-function pmCands(c,p){ return c.ordem.map(id=>c.ativos[id]).filter(a=>a&&manCabe(c,p,a)&&!c.vinc[p.id+'|'+a.id]); }
-function pmUnits(c,p){ const u={n:0}; c.ordem.forEach(id=>{ const a=c.ativos[id]; if(a&&(manCabe(c,p,a)||c.vinc[p.id+'|'+a.id])){ u.n++; if(a.un) u[a.un]=1; } }); return u; }
+function pmVincs(c,pid){ return Object.keys(c.vinc).filter(k=>k.split('|')[0]===pid&&manVincVale(c.vinc[k])); }
+function pmSemPlano(c){ return c.ordem.map(id=>c.ativos[id]).filter(a=>manAtvAtivo(a)&&!Object.keys(c.vinc).some(k=>k.split('|')[1]===a.id&&manVincVale(c.vinc[k]))&&!pmPlans(c).some(p=>p.estado!=='Inativo'&&manCabe(c,p,a))); }
+function pmCands(c,p){ return c.ordem.map(id=>c.ativos[id]).filter(a=>manAtvAtivo(a)&&manCabe(c,p,a)&&!manVincVale(c.vinc[p.id+'|'+a.id])); }
+function pmUnits(c,p){ const u={n:0}; c.ordem.forEach(id=>{ const a=c.ativos[id]; if(a&&(manCabe(c,p,a)||manVincVale(c.vinc[p.id+'|'+a.id]))){ u.n++; if(a.un) u[a.un]=1; } }); return u; }
 function pmNum(x){ const t=String(x===undefined||x===null?'':x).trim(); if(!t) return null; const n=Number(t.replace(/\./g,'').replace(',','.')); return isNaN(n)?NaN:n; }
 function pmFoco(id,alt){ setTimeout(()=>{ const e=document.getElementById(id)||(alt&&document.getElementById(alt)); if(e) e.focus(); },0); }
-function pmRet(self){ const r=document.activeElement; if(!self.state.sv&&!self.state.np&&!self.state.vk) self.__pmRet=(r&&r!==document.body&&!(r.closest&&r.closest('aside')))?r:null; }
+function pmRet(self){ const r=document.activeElement; if(!self.state.sv&&!self.state.np&&!self.state.vl&&!self.state.dv) self.__pmRet=(r&&r!==document.body&&!(r.closest&&r.closest('aside')))?r:null; }
 function pmBack(self){ setTimeout(()=>{ const r=self.__pmRet; self.__pmRet=null; if(r&&document.contains(r)) r.focus(); },0); }
 function pmSit(c,p){ if(p.estado==='Inativo') return {t:'Inativo · não gera vencimentos',c:'gray'}; if(!p.versao) return {t:'Publique para gerar vencimentos',c:'gray'};
   const ls=manLinhas(c,p.id).filter(l=>l.s); if(!ls.length) return {t:'Sem ativos vinculados',c:'gray'};
@@ -729,7 +753,7 @@ function pmFld(self,v,pre,k,isChk){ const st=self.state[pre]; const e=(st.errs||
 function pmPanel(self,v,pre,o){ const st=self.state[pre]; v[pre+'_open']=!!st; if(!st){ v[pre+'_titulo']=''; v[pre+'_sub']=''; return false; }
   const fim=()=>{ self.setState({[pre]:null}); pmBack(self); };
   const close=()=>{ const cur=self.state[pre]; if(cur&&JSON.stringify(cur.d)!==cur.orig&&!cur.warn){ self.setState({[pre]:Object.assign({},cur,{warn:true})}); return; } fim(); };
-  self['__pmClose_'+pre]=close; ma_modalDoc(self,()=>{ const q=['sv','np','vk'].find(x=>self.state[x]); return q?{root:document.getElementById(q+'-painel'),close:()=>self['__pmClose_'+q]()}:null; });
+  self['__pmClose_'+pre]=close; ma_modalDoc(self,()=>{ const q=['sv','np','vl','dv'].find(x=>self.state[x]); return q?{root:document.getElementById(q+'-painel'),close:()=>self['__pmClose_'+q]()}:null; });
   v[pre+'_titulo']=o.titulo; v[pre+'_sub']=o.sub; v[pre+'_close']=close;
   v[pre+'_key']=(e)=>{ if(!e) return; if(e.key==='Escape'){ e.preventDefault(); close(); } else ma_trap(e,document.getElementById(pre+'-painel')); };
   v[pre+'_save']=o.save; v[pre+'_warn']=!!st.warn; v[pre+'_discard']=fim; v[pre+'_keep']=()=>self.setState({[pre]:Object.assign({},self.state[pre],{warn:false})});
@@ -738,7 +762,7 @@ function pmPanel(self,v,pre,o){ const st=self.state[pre]; v[pre+'_open']=!!st; i
 function pmSvOpen(self,c,p,sid){ pmRet(self); const s=sid?manWork(p).find(x=>x.id===sid):null; const g=s?s.gat:{}, t=s?(s.tol||{}):{};
   const f=(n)=>(n===undefined||n===null||n==='')?'':String(n).replace('.',',');
   const d={nome:s?s.nome:'',h:f(g.h),km:f(g.km),d:f(g.d),th:f(t.h),tkm:f(t.km),td:f(t.d),base:s?(s.base||'exec'):'exec',cumpre:s?(s.cumpre||[]).slice():[],tempo:s?f(s.tempo):'',esp:s?s.esp:''};
-  self.setState({sv:{pid:p.id,sid:sid||null,d,orig:JSON.stringify(d),errs:{},warn:false},np:null,vk:null,pan:null}); pmFoco('sv_nome'); }
+  self.setState({sv:{pid:p.id,sid:sid||null,d,orig:JSON.stringify(d),errs:{},warn:false},np:null,vl:null,dv:null,pan:null}); pmFoco('sv_nome'); }
 function pmSvSave(self){ const st=self.state.sv; const d=st.d; const errs={}; const c=manGet(); const p=c.planos[st.pid]; const U=pmUnits(c,p);
   if(!String(d.nome).trim()) errs.nome='Informe o nome do serviço.'; else if(manWork(p).some(x=>x.id!==st.sid&&x.nome.toLowerCase()===String(d.nome).trim().toLowerCase())) errs.nome='Já existe um serviço com este nome no plano.';
   else { const dup=pmVincs(c,p.id).map(k=>{ const aid=k.split('|')[1]; const x=manDupServ(c,p.id,aid,[String(d.nome).trim()]); return x?(manNome(c.ativos[aid])+' já faz '+x.s+' pelo '+x.pid+'.'):''; }).find(Boolean); if(dup) errs.nome=dup; }
@@ -760,37 +784,23 @@ function pmSvSave(self){ const st=self.state.sv; const d=st.d; const errs={}; co
 function pmNovo(self,c,aid,pid){ pmRet(self); const a=aid?c.ativos[aid]:null; const p=pid?c.planos[pid]:null;
   const d=p?{nome:p.nome,tipo:p.aplica.t,modelo:p.aplica.t==='modelo'?p.aplica.v[0]:'',ativos:p.aplica.t==='ativos'?p.aplica.v.slice():[],base:''}
            :{nome:a?(a.nome+' · preventiva'):'',tipo:a?'ativos':'modelo',modelo:'',ativos:a?[a.id]:[],base:''};
-  self.setState({np:{pid:pid||null,novoDe:aid||'',d,orig:JSON.stringify(d),errs:{},warn:false},sv:null,vk:null,pan:null}); pmFoco('np_nome'); }
+  self.setState({np:{pid:pid||null,novoDe:aid||'',d,orig:JSON.stringify(d),errs:{},warn:false},sv:null,vl:null,dv:null,pan:null}); pmFoco('np_nome'); }
 function pmCobertos(c,d,pid){ const as=d.tipo==='modelo'?c.ordem.map(x=>c.ativos[x]).filter(a=>a&&a.modelo===d.modelo):(d.ativos||[]).map(x=>c.ativos[x]).filter(Boolean); const out=[];
   as.forEach(a=>{ pmPlans(c).forEach(p=>{ if(p.id===pid||p.estado==='Inativo') return; if(manCabe(c,p,a)||c.vinc[p.id+'|'+a.id]){ const t=a.nome+' já está no '+p.id; if(out.indexOf(t)<0) out.push(t); } }); });
   return out; }
 function pmNpSave(self){ const st=self.state.np, d=st.d, errs={}; const c=manGet();
   if(!String(d.nome).trim()) errs.nome='Informe o nome do plano.'; else if(pmPlans(c).some(x=>x.id!==st.pid&&x.nome.toLowerCase()===String(d.nome).trim().toLowerCase())) errs.nome='Já existe um plano com este nome.';
-  if(d.tipo==='modelo'&&!d.modelo) errs.modelo='Escolha o modelo.'; if(d.tipo==='ativos'&&!d.ativos.length) errs.ativos='Marque ao menos um ativo.';
+  if(d.tipo==='modelo'&&!d.modelo) errs.modelo='Escolha o modelo.'; if(d.tipo==='ativos'&&!d.ativos.length&&!(st.pid&&pmVincs(c,st.pid).length)) errs.ativos='Marque ao menos um ativo.';
+  if(!errs.modelo&&!errs.ativos){ const na=manAplicaNova(c,st.pid?c.planos[st.pid]:{id:'',aplica:{t:'ativos',v:[]},grupo:''},d); if(na.erro) errs[d.tipo==='modelo'?'modelo':'ativos']=na.erro; }
   if(Object.keys(errs).length){ self.setState({np:Object.assign({},st,{errs,warn:false})}); return; }
-  if(st.pid){ manMudar(self,c2=>{ manExige(c2,g2perfil(),'plano'); const p=c2.planos[st.pid]; if(!p) throw new Error('Plano não encontrado.'); p.nome=String(d.nome).trim(); p.aplica={t:d.tipo,v:d.tipo==='modelo'?[d.modelo]:d.ativos.slice()};
-      const as=d.tipo==='modelo'?c2.ordem.map(x=>c2.ativos[x]).filter(a=>a.modelo===d.modelo):d.ativos.map(x=>c2.ativos[x]); if(as[0]) p.grupo=as[0].grupo;
+  if(st.pid){ manMudar(self,c2=>{ manExige(c2,g2perfil(),'plano'); const p=c2.planos[st.pid]; if(!p) throw new Error('Plano não encontrado.'); p.nome=String(d.nome).trim();
+      const na=manAplicaNova(c2,p,d); if(na.erro) throw new Error(na.erro); p.aplica=na.aplica; p.grupo=na.grupo;   /* MA-VINCULO: trocar "Aplica a" não perde vínculo */
       const nv=pmCands(c2,p).length; return {msg:p.id+' salvo · '+manAplTxt(c2,p)+(nv?' · '+nv+(nv>1?' ativos a vincular':' ativo a vincular'):'')+'.',st:{np:null}}; }); pmBack(self); return; }
   manMudar(self,c2=>{ manExige(c2,g2perfil(),'plano'); const id='PM-'+String(c2.seqpm).padStart(2,'0'); c2.seqpm++; const base=d.base?c2.planos[d.base]:null;
     const as=d.tipo==='modelo'?c2.ordem.map(x=>c2.ativos[x]).filter(a=>a.modelo===d.modelo):d.ativos.map(x=>c2.ativos[x]);
     c2.planos[id]={id,nome:String(d.nome).trim(),grupo:(as[0]||{}).grupo||'Implementos',aplica:{t:d.tipo,v:d.tipo==='modelo'?[d.modelo]:d.ativos.slice()},estado:'Ativo',versao:0,
       servicos:base?manClone(manWork(base)):[],rasc:null,hist:[]}; c2.ordemPlanos.push(id);
     return {msg:'Plano '+id+' criado em rascunho v1'+(base?' com os serviços de '+base.id:'')+' · inclua os serviços, vincule os ativos e publique.',st:{np:null,pg:{k:'plano',id},pan:null,xs:{}},id}; }); }
-/* ---------- vincular ativo (D-41): marco pré-preenchido da última OM encerrada do mesmo serviço (ou de um que o "cumpre também"), corrigível com motivo ---------- */
-function pmVkSug(c,p,aid){ const m=manMarcoSug(c,p,aid); return m; }
-function pmVkOpen(self,c,p,aid){ pmRet(self); const cs=pmCands(c,p); if(!cs.length){ self.setState({g2toast:'Todos os ativos deste plano já estão vinculados.'}); return; } const a0=aid||((cs[0]||{}).id)||'';
-  const sg=pmVkSug(c,p,a0); const d={aid:a0,data:sg?sg.data:'',leit:sg&&sg.leit!==null&&sg.leit!==undefined?String(sg.leit):'',sem:false,mot:''};
-  self.setState({vk:{pid:p.id,d,sug:sg,orig:JSON.stringify(d),errs:{},warn:false},sv:null,np:null,pan:null}); pmFoco('vk_data','vk-painel'); }
-function pmVkSave(self){ const st=self.state.vk, d=st.d, errs={}; const c=manGet(); const a=c.ativos[d.aid]; const sg=pmVkSug(c,c.planos[st.pid],d.aid);
-  if(!a) errs.aid='Escolha o ativo.';
-  if(a&&!d.sem){ if(!d.data) errs.data='Informe a data ou marque sem histórico.'; else if(d.data>c.hoje) errs.data='A data não pode ser futura.';
-    if(a.un){ const n=pmNum(d.leit); if(n===null||isNaN(n)) errs.leit='Informe a leitura na última execução.'; else if(n<0) errs.leit='Zero ou mais.'; else if(a.leit&&n>a.leit.val) errs.leit='Maior que a leitura atual ('+manLeitTxt(a)+').'; } }
-  const mudou=sg&&!d.sem&&(d.data!==sg.data||(a&&a.un&&pmNum(d.leit)!==sg.leit)); if(mudou&&!String(d.mot||'').trim()) errs.mot='Informe o motivo da correção do marco ('+sg.om+').';
-  if(a&&!errs.aid){ const p=c.planos[st.pid]; const dup=manDupServ(c,st.pid,a.id,manWork(p).concat(manPub(p)).map(s=>s.nome)); if(dup) errs.aid=manNome(a)+' já faz '+dup.s+' pelo '+dup.pid+'; um serviço por ativo evita ordem em dobro.'; }
-  if(Object.keys(errs).length){ self.setState({vk:Object.assign({},st,{errs,warn:false})}); return; }
-  manMudar(self,c2=>{ manExige(c2,g2perfil(),'plano'); const a2=c2.ativos[d.aid]; const m=d.sem?{data:c2.hoje,leit:(a2.leit?a2.leit.val:null),om:null,est:true}:{data:d.data,leit:a2.un?pmNum(d.leit):null,om:null,est:false,de:(sg&&!mudou)?sg.om:'',mot:mudou?String(d.mot).trim():''};
-    c2.vinc[st.pid+'|'+d.aid]={marco:m,ult:{}}; const ls=manLinhas(c2,st.pid).filter(l=>l.aid===d.aid&&l.s);
-    return {msg:manNome(a2)+' vinculado ao '+st.pid+(m.est?' com marco estimado (hoje)':(m.de?' com o marco da '+m.de:''))+(ls.length?' · '+ls.map(l=>l.s.nome+': '+l.x.sit.toLowerCase()).join(' · '):' · os vencimentos começam quando o plano for publicado')+'.',st:{vk:null}}; }); }
 /* ---------- publicar (painel com diferenças, impacto e "ordens abertas seguem a vN") ---------- */
 function pmPub(self,pid){ return manMudar(self,c=>{ manExige(c,g2perfil(),'plano'); const p=c.planos[pid]; if(!p) throw new Error('Plano não encontrado.'); if(p.versao&&!p.rasc) return {nada:true,msg:'Nada a publicar: edite um serviço para criar o rascunho.'};
   const w=manWork(p); if(!w.length) throw new Error('Inclua ao menos um serviço antes de publicar.');
@@ -868,9 +878,13 @@ function pmPlanoV(self,v,c,p,pf){ const st=self.state; const e=pmEst(p); v.p_nom
   if(v.ban_i) P={t:'Reativar',fn:reat,dis:pp};
   else if(nvv){ const sk=w.find(s=>!s.tarefas.length), sg=w.find(s=>!Object.keys(s.gat||{}).length); const why=pp||(!w.length?'Inclua ao menos um serviço':(sg?'“'+sg.nome+'” está sem gatilho':(sk?'“'+sk.nome+'” está sem tarefas':'')));
     P={t:'Publicar v'+nvv,fn:()=>ma_abrir(self,'pub',p.id),dis:why}; }
-  const panAberto=!!(st.pan||st.sv||st.np||st.vk);
+  const panAberto=!!(st.pan||st.sv||st.np||st.vl||st.dv);
   v.p_prim=!!P; v.p_pt=P?P.t:''; v.p_pfn=P&&!P.dis?P.fn:(()=>{}); v.p_pdis=!!(P&&P.dis); v.p_pwhy=(P&&P.dis)||''; v.p_pst=(panAberto||(P&&P.dis))?MA_SEC:MA_PRIM;
-  v.p_secs=[{t:'Incluir serviço',fn:()=>pmSvOpen(self,manGet(),p,null)},{t:'Vincular ativo',fn:()=>pmVkOpen(self,manGet(),p,null),hide:!(pmCands(c,p).length>0&&p.estado!=='Inativo')},{t:'Editar plano',fn:()=>pmNovo(self,manGet(),null,p.id)}]
+  /* MA-VINCULO: "Ativos deste plano" com "Vincular ativos" na própria seção (candidatos compatíveis primeiro, busca, vários de uma vez) */
+  const ncv=c.ordem.map(id=>c.ativos[id]).filter(a=>a&&!manVincVale(c.vinc[p.id+'|'+a.id])&&!manVincCompat(c,p,a).erro).length; const nvn=pmVincs(c,p.id).length;
+  v.p_nvinc=String(nvn); v.p_apl='Aplica a: '+manAplTxt(c,p); v.p_semVinc=!nvn; v.p_temVl=p.estado!=='Inativo'&&(ncv>0||pmCands(c,p).length>0); v.p_vlt='Vincular ativos'; v.p_vlNc=ncv?(ncv+(ncv>1?' compatíveis':' compatível')):'nenhum compatível';   /* com candidato do "Aplica a" que não serve, o painel mostra o motivo */
+  v.p_vldis=!!pp; v.p_vlwhy=pp||''; v.p_vl=()=>{ if(!pp) vlAbrir(self,{pid:p.id}); };
+  v.p_secs=[{t:'Incluir serviço',fn:()=>pmSvOpen(self,manGet(),p,null)},{t:'Editar plano',fn:()=>pmNovo(self,manGet(),null,p.id)}]
     .filter(x=>!x.hide).map(x=>({t:x.t,fn:pp?(()=>{}):x.fn,dis:!!pp,why:pp||'',st:MA_SEC})); }
 function pmSvP(self,v,c){ const st=self.state.sv; const p=st?c.planos[st.pid]:null;
   if(!pmPanel(self,v,'sv',{titulo:st&&st.sid?'Editar serviço':'Incluir serviço',sub:p?(p.id+' · '+(p.versao?'grava no rascunho v'+(p.rasc?p.rasc.v:p.versao+1)+'; a v'+p.versao+' e as ordens abertas não mudam.':'grava na v1 em rascunho.')):'',save:()=>pmSvSave(self)})){ v.sv_bases=[]; v.sv_esps=[]; v.sv_cum=[]; return; }
@@ -883,8 +897,10 @@ function pmSvP(self,v,c){ const st=self.state.sv; const p=st?c.planos[st.pid]:nu
 function pmNpP(self,v,c){ const st=self.state.np; const ed=!!(st&&st.pid);
   if(!pmPanel(self,v,'np',{titulo:ed?'Editar plano':'Novo plano de manutenção',sub:ed?st.pid:'Nasce em rascunho v1.',save:()=>pmNpSave(self)})){ v.np_tipos=[]; v.np_mods=[]; v.np_atvs=[]; v.np_bases=[]; v.np_avs=[]; return; }
   v.np_novo=!ed; const cob=pmCobertos(c,st.d,st.pid); v.np_avs=cob.map(t=>({t})); v.np_temAv=cob.length>0;
+  const p0=ed?c.planos[st.pid]:null; const muda=!!p0&&JSON.stringify({t:st.d.tipo,v:st.d.tipo==='modelo'?[st.d.modelo]:st.d.ativos})!==JSON.stringify({t:p0.aplica.t,v:p0.aplica.v});
+  const na=muda?manAplicaNova(c,p0,st.d):null; v.np_ef=na?na.efeito.map(t=>({t})):[]; v.np_temEf=!!na&&!na.erro&&na.efeito.length>0; v.np_apl=p0?('Hoje: '+manAplTxt(c,p0)):'';
   ['nome','tipo','modelo','base'].forEach(k=>pmFld(self,v,'np',k));
-  v.np_tipos=[{v:'modelo',t:'Modelo (todos os ativos do modelo)'},{v:'ativos',t:'Ativos específicos'}];
+  v.np_tipos=[{v:'modelo',t:'Todos os ativos de um modelo'},{v:'ativos',t:'Ativos escolhidos'}];
   const mods=[]; c.ordem.forEach(id=>{ const m=c.ativos[id].modelo; if(mods.indexOf(m)<0) mods.push(m); });
   v.np_mods=[{v:'',t:'Escolha o modelo'}].concat(mods.map(m=>({v:m,t:m+' · '+c.ordem.map(id=>c.ativos[id]).filter(a=>a.modelo===m).map(a=>a.nome).join(', ')})));
   v.np_isMod=st.d.tipo==='modelo'; v.np_isAtv=st.d.tipo==='ativos';
@@ -892,15 +908,109 @@ function pmNpP(self,v,c){ const st=self.state.np; const ed=!!(st&&st.pid);
     tog:()=>{ const cur=self.state.np; const l=cur.d.ativos.slice(); const i=l.indexOf(a.id); if(i>=0) l.splice(i,1); else l.push(a.id); const er=Object.assign({},cur.errs||{}); delete er.ativos; self.setState({np:Object.assign({},cur,{d:Object.assign({},cur.d,{ativos:l}),errs:er,warn:false})}); }}));
   const e=(st.errs||{}).ativos||''; v.np_eativos=e; v.np_heativos=!!e;
   v.np_bases=[{v:'',t:'Plano em branco'}].concat(pmPlans(c).map(x=>({v:x.id,t:'Copiar serviços de '+x.id+' · '+x.nome}))); }
-function pmVkP(self,v,c){ const st=self.state.vk; const p=st?c.planos[st.pid]:null;
-  if(!pmPanel(self,v,'vk',{titulo:'Vincular ativo',sub:p?(p.id+' · '+p.nome+' · o marco é a última execução do serviço.'):'',save:()=>pmVkSave(self)})){ v.vk_ativos=[]; return; }
-  ['aid','data','leit','mot'].forEach(k=>pmFld(self,v,'vk',k)); pmFld(self,v,'vk','sem',true);
-  const cs=pmCands(c,p); v.vk_temCand=cs.length>0; v.vk_semCand=!cs.length;
-  v.vk_ativos=cs.map(a=>({v:a.id,t:manNome(a)})); const a=c.ativos[st.d.aid]; const sg=a?pmVkSug(c,p,a.id):null;
-  v.vk_setaid=(e)=>{ const aid=e.target.value; const g=pmVkSug(manGet(),p,aid); const cur=self.state.vk; self.setState({vk:Object.assign({},cur,{d:Object.assign({},cur.d,{aid,data:g?g.data:'',leit:g&&g.leit!==null&&g.leit!==undefined?String(g.leit):'',mot:''}),errs:{},warn:false})}); };
-  v.vk_hasCont=!!(a&&a.un)&&!st.d.sem; v.vk_un=a&&a.un?a.un:''; v.vk_isData=!st.d.sem;
-  v.vk_orig=sg?('Marco da '+sg.om+' · '+manBr(sg.data)+(sg.leit!==null&&sg.leit!==undefined&&a&&a.un?' · '+manQ(sg.leit,a.un):'')+' (última OM encerrada do mesmo serviço) · corrigível com motivo'):(a?'Sem OM encerrada do mesmo serviço: informe data e leitura ou marque sem histórico.':'');
-  v.vk_ult=a?(a.leit?('Leitura atual: '+manLeitTxt(a)+' · '+a.leit.origem):'Ativo sem contador: só gatilhos por dias.'):''; v.vk_temSug=!!sg&&!st.d.sem; }
+/* ---------- Vincular a plano (MA-VINCULO, 16/10/2026): um painel para 1 ou vários ativos, aberto pelo ativo, pela visão Ativos ou pelo plano ----------
+   SEL-04: a ação em lote é no painel lateral (lista já marcada, campos comuns uma vez, uma primária "Vincular N …"; tudo ou nada; repetir não duplica).
+   Base de contagem: a do vínculo encerrado volta como estava; a da última OM encerrada do mesmo serviço vem proposta (corrigir pede motivo); sem
+   execução registrada a pessoa escolhe "Contar de agora" ou "Informar a última execução" (nada é inferido). Prévia pela mesma conta do vencimento. */
+function vlChipSt(on){ return 'font-family:inherit;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;min-height:var(--g2-alvo,36px);box-sizing:border-box;text-align:left;'+(on?'border:1px solid #1E7A4C;background:#E4F3E9;color:#1E6B47;box-shadow:inset 0 0 0 1px #1E7A4C;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;'); }
+function vlB(st,aid){ const b=(st.d.b||{})[aid]||{}; return {modo:st.d.bmodo||'',corr:!!b.corr,data:b.data||'',leit:b.leit===undefined?'':b.leit,mot:b.mot||''}; }
+function vlOps(c,pre){ const out=[]; c.ordemPlanos.map(id=>c.planos[id]).forEach(p=>{ if(!p||p.estado==='Inativo') return; let n=0, best=9;
+    pre.forEach(aid=>{ const a=c.ativos[aid]; if(!a||manVincVale(c.vinc[p.id+'|'+aid])) return; const cp=manVincCompat(c,p,a); if(cp.erro) return; n++; best=Math.min(best,MAN_NIV[cp.nivel]); });
+    if(n) out.push({p,n,best}); });
+  return out.sort((x,y)=>(y.n-x.n)||(x.best-y.best)||((y.p.versao?1:0)-(x.p.versao?1:0))||x.p.id.localeCompare(y.p.id)); }
+function vlLista(c,st){ const p=c.planos[st.d.pid]; const rows=[], seen={};
+  if(!p) return st.pre.map(aid=>c.ativos[aid]).filter(Boolean).map(a=>({a,cp:{erro:'',avisos:[],nivel:''},ja:false,pre:true,semPl:true}));
+  const add=(a,pre)=>{ if(!a||seen[a.id]) return; seen[a.id]=1; const ja=manVincVale(c.vinc[p.id+'|'+a.id]); rows.push({a,cp:ja?{erro:'',avisos:[],nivel:''}:manVincCompat(c,p,a),ja,pre}); };
+  st.pre.forEach(aid=>add(c.ativos[aid],true));
+  const cs=c.ordem.map(id=>c.ativos[id]).filter(a=>a&&!manVincVale(c.vinc[p.id+'|'+a.id])).map(a=>({a,cp:manVincCompat(c,p,a)}));
+  cs.filter(x=>!x.cp.erro).sort((x,y)=>MAN_NIV[x.cp.nivel]-MAN_NIV[y.cp.nivel]).forEach(x=>add(x.a,false));
+  const q=g2norm(st.q||'').trim(); if(!q) return rows;
+  cs.filter(x=>x.cp.erro).forEach(x=>add(x.a,false));   /* na busca, o que não serve aparece com o motivo */
+  return rows.filter(r=>r.pre||g2norm(r.a.nome+' '+r.a.modelo+' '+r.a.local+' '+r.a.classe).indexOf(q)>=0); }
+function vlMarcaIni(c,st){ const on={}; vlLista(c,st).forEach(r=>{ if(r.ja||r.cp.erro) return; if(r.pre||(st.fixo&&r.cp.nivel==='escopo')) on[r.a.id]=true; }); return on; }
+function vlAbrir(self,o){ pmRet(self); const c=manGet(); o=o||{}; const pre=(o.aids||[]).filter(id=>c.ativos[id]);
+  const pid=o.pid||((vlOps(c,pre)[0]||{}).p||{}).id||'';
+  const st={fixo:!!o.pid,pre,q:'',d:{pid,on:{},bmodo:'',b:{}},errs:{},chave:manChave(),falha:'',warn:false};
+  st.d.on=vlMarcaIni(c,st); st.orig=JSON.stringify(st.d);
+  self.setState({vl:st,sv:null,np:null,dv:null,pan:null}); pmFoco('vl-painel'); }
+function vlSet(self,patch,dpatch){ const cur=self.state.vl; if(!cur) return; self.setState({vl:Object.assign({},cur,patch||{},dpatch?{d:Object.assign({},cur.d,dpatch)}:{},{warn:false,falha:''})}); }
+function vlSetB(self,aid,patch){ const cur=self.state.vl; if(!cur) return; const b=Object.assign({},cur.d.b||{}); b[aid]=Object.assign({},b[aid]||{},patch); const er=Object.assign({},cur.errs||{});
+  Object.keys(patch).forEach(k=>{ delete er[aid+'.'+k]; }); self.setState({vl:Object.assign({},cur,{d:Object.assign({},cur.d,{b}),errs:er,warn:false,falha:''})}); }
+function vlSalvar(self){ const st=self.state.vl; if(!st) return; const c=manGet(); const p=c.planos[st.d.pid]; if(!p) return;
+  const on=st.d.on||{}; const L=vlLista(c,st).filter(r=>on[r.a.id]&&!r.ja&&!r.cp.erro); const errs={};
+  L.forEach(r=>{ if(manVincBase(c,p,r.a).modo==='hist') return; const x=manVincRef(c,p,r.a,vlB(st,r.a.id)); Object.keys(x.errs).forEach(k=>{ errs[k==='modo'?'_modo':(r.a.id+'.'+k)]=x.errs[k]; }); });
+  if(Object.keys(errs).length){ self.setState({vl:Object.assign({},st,{errs,falha:''})}); return; }
+  const ids=L.map(r=>r.a.id); const itens=L.map(r=>({aid:r.a.id,base:vlB(st,r.a.id)}));
+  const r=manMudar(self,c2=>manVincular(c2,st.d.pid,itens,g2perfil(),st.chave),{estrito:true});
+  if(r.erro){ self.setState({vl:Object.assign({},self.state.vl||st,{falha:r.erro})}); return; }   /* nada gravado: o painel fica com tudo o que foi escolhido */
+  self.setState({vl:null}); vlVolta(self,ids); }
+/* foco de volta: quem abriu; se a linha mudou (o link sumiu), a linha do ativo vinculado; senão o título */
+function vlVolta(self,ids){ setTimeout(()=>{ const r=self.__pmRet; self.__pmRet=null; if(r&&document.contains(r)&&r.getClientRects().length){ r.focus(); return; }
+  const row=[...document.querySelectorAll('main [role=row][data-rid]')].find(x=>x.getClientRects().length&&ids.some(id=>x.getAttribute('data-rid')===id||x.getAttribute('data-rid').endsWith('|'+id)));
+  const r0=row||[...document.querySelectorAll('main [role=row][data-rid]')].find(x=>x.getClientRects().length);   /* o ativo saiu do filtro: a 1ª linha da mesma lista */
+  if(r0){ r0.focus(); return; } const h=document.querySelector('main h2'); if(h){ h.setAttribute('tabindex','-1'); h.focus(); } },80); }
+function vlP(self,v,c,pf){ const st=self.state.vl; const p=st?c.planos[st.d.pid]:null;
+  if(!pmPanel(self,v,'vl',{titulo:st&&st.fixo&&p?('Vincular ativos ao '+p.id):'Vincular a plano',sub:'A base de contagem é a última execução de cada ativo (o marco é a última execução do serviço). Vincular não registra manutenção como feita.',save:()=>vlSalvar(self)})){ v.vl_ops=[]; v.vl_ls=[]; return; }
+  v.vl_fixo=!!st.fixo&&!!p; v.vl_pnome=p?(p.id+' · '+p.nome):''; v.vl_papl=p?(manAplTxt(c,p)+' · '+(p.versao?('v'+p.versao+' em vigor'):'rascunho: vence só depois de publicar')):'';
+  const ops=st.fixo?[]:vlOps(c,st.pre);
+  v.vl_ops=ops.map(o=>{ const on=o.p.id===st.d.pid; return {id:o.p.id,nome:o.p.nome,n:o.n+(o.n>1?' ativos':' ativo')+(o.p.versao?'':' · rascunho'),on:String(on),st:vlChipSt(on),
+    go:()=>{ const cur=self.state.vl; if(!cur||cur.d.pid===o.p.id) return; const n=Object.assign({},cur,{d:Object.assign({},cur.d,{pid:o.p.id}),errs:{},falha:'',warn:false}); n.d.on=vlMarcaIni(manGet(),n); self.setState({vl:n}); }}; });
+  v.vl_temOps=!st.fixo&&ops.length>0; v.vl_temOpAv=v.vl_temOps&&st.pre.length>1&&ops.some(o=>o.n<st.pre.length);
+  v.vl_opAv='Um plano por vez: quem não serve ao plano escolhido fica de fora, com o motivo.';
+  const grs=[...new Set(st.pre.map(id=>(c.ativos[id]||{}).grupo).filter(Boolean))];
+  v.vl_semOps=!st.fixo&&!ops.length; v.vl_semOpsT=v.vl_semOps?('Nenhum plano de '+grs.join(' ou ')+' serve '+(st.pre.length>1?'a estes ativos.':'a este ativo.')):'';
+  v.vl_criar=()=>{ const aid=st.pre[0]; self.setState({vl:null}); pmNovo(self,manGet(),aid); };
+  v.vl_q=st.q||''; v.vl_setq=(e)=>vlSet(self,{q:e.target.value}); v.vl_busca=!!st.fixo||!!st.q||vlLista(c,Object.assign({},st,{q:''})).length>6;   /* busca onde a lista é longa (o plano e suas candidatas) */
+  const L=vlLista(c,st); const on=st.d.on||{}; const ers=st.errs||{};
+  const marc=L.filter(r=>on[r.a.id]&&!r.ja&&!r.cp.erro); const semH=p?marc.filter(r=>manVincBase(c,p,r.a).modo===''):[];
+  v.vl_temSem=semH.length>0; v.vl_semT='Sem execução registrada ('+semH.map(r=>r.a.nome).join(', ')+'): como contar?';
+  v.vl_semAj=st.d.bmodo==='agora'?'Conta de hoje e da leitura atual de cada ativo (marco estimado, fica marcado). Se houve revisão, informe-a.':(st.d.bmodo==='ult'?'Informe a data e a leitura da última execução de cada um.':'Escolha uma das duas: nada é inferido.');
+  v.vl_agoraOn=String(st.d.bmodo==='agora'); v.vl_ultOn=String(st.d.bmodo==='ult'); v.vl_agoraSt=vlChipSt(st.d.bmodo==='agora'); v.vl_ultSt=vlChipSt(st.d.bmodo==='ult');
+  v.vl_agora=()=>{ const cur=self.state.vl; const er=Object.assign({},cur.errs||{}); delete er._modo; self.setState({vl:Object.assign({},cur,{d:Object.assign({},cur.d,{bmodo:'agora'}),errs:er,warn:false,falha:''})}); };
+  v.vl_ult=()=>{ const cur=self.state.vl; const er=Object.assign({},cur.errs||{}); delete er._modo; self.setState({vl:Object.assign({},cur,{d:Object.assign({},cur.d,{bmodo:'ult'}),errs:er,warn:false,falha:''})}); };
+  v.vl_eModo=ers._modo||''; v.vl_temEModo=!!ers._modo; v.vl_hoje=c.hoje;
+  const IN='font-family:inherit;font-size:13.5px;padding:7px 9px;border-radius:8px;box-sizing:border-box;background:#fff;color:#15201A;min-height:var(--g2-alvo,36px);';
+  v.vl_ls=L.map(r=>{ const a=r.a, id=a.id; const ok=!r.ja&&!r.cp.erro; const isOn=!!on[id]&&ok; const b0=p&&ok?manVincBase(c,p,a):{modo:''}; const bb=vlB(st,id);
+    const x=isOn&&b0.modo!=='hist'?manVincRef(c,p,a,bb):null; const ref=x&&x.ref; let orig='', inp=false, temCorr=false, corrT='';
+    if(b0.modo==='hist'){ const f=b0.v.fim; orig='Retoma a contagem de antes (desvinculado em '+manBr(f.em)+' · '+f.mot+'): base '+manVincDeTxt(a,b0.v.marco)+(Object.keys(b0.v.ult||{}).length?' e as últimas execuções guardadas.':'.'); }
+    else if(b0.modo==='om'){ const t0=b0.om+' · '+manBr(b0.data)+(a.un&&b0.leit!==null&&b0.leit!==undefined?' · '+manQ(b0.leit,a.un):''); orig=bb.corr?('Corrigindo a base da '+t0+':'):('Última execução registrada: '+t0+'.'); temCorr=true; corrT=bb.corr?('Usar a da '+b0.om):'Corrigir'; inp=bb.corr; }
+    else if(st.d.bmodo==='agora') orig=ref?('Sem execução registrada · contando de agora: '+manVincDeTxt(a,ref)+' (marco estimado).'):'Sem execução registrada · contar de agora:';
+    else if(st.d.bmodo==='ult'){ orig='Última execução (sem registro no sistema):'; inp=true; }
+    else orig='Sem execução registrada · escolha acima como contar.';
+    const vv=b0.modo==='hist'?b0.v:(ref?{marco:ref,ult:{}}:null);
+    const prev=isOn&&p&&vv?manVincPrev(c,p,a,vv).map(z=>({nome:z.nome,txt:z.txt,st:'font-size:12.5px;color:'+({'Vencida':'#B42318','Vence em breve':'#8A5A00'}[z.sit]||'#15201A')+';'})):[];
+    const ed=ers[id+'.data']||'', el=ers[id+'.leit']||(x&&st.d.bmodo==='agora'&&x.errs.leit)||'', em=ers[id+'.mot']||'';
+    const brd=(er)=>IN+'border:1px solid '+(er?'#B42318':'#E4E9E5')+';';
+    return {id,idx:'vl-x-'+id,nome:a.nome,sub:a.modelo+' · '+a.local+(a.leit&&a.un?' · '+manLeitTxt(a):(a.un?'':' · sem contador')),on:isOn,dis:!ok,
+      tog:()=>{ const cur=self.state.vl; const o2=Object.assign({},cur.d.on||{}); o2[id]=!o2[id]; vlSet(self,null,{on:o2}); },
+      temErro:!!(r.cp.erro||r.ja),erro:r.ja?('Já vinculado ao '+(p?p.id:'')+'.'):(r.cp.erro?'Não serve: '+r.cp.erro:''),avs:ok?r.cp.avisos.map(t=>({t})):[],
+      mostra:isOn,orig,temCorr,corrT,corr:()=>vlSetB(self,id,bb.corr?{corr:false}:{corr:true,data:b0.data||'',leit:(b0.leit===null||b0.leit===undefined)?'':String(b0.leit)}),
+      inp,cont:!!a.un,un:a.un||'',idd:'vl_data_'+id,idl:'vl_leit_'+id,idm:'vl_mot_'+id,data:bb.data,leit:String(bb.leit),mot:bb.mot,pedeMot:inp&&b0.modo==='om',
+      setd:(ev)=>vlSetB(self,id,{data:ev.target.value}),setl:(ev)=>vlSetB(self,id,{leit:ev.target.value}),setm:(ev)=>vlSetB(self,id,{mot:ev.target.value}),
+      hoje:()=>vlSetB(self,id,{data:c.hoje}),temAtual:!!(a.leit&&a.un),atualT:a.leit&&a.un?('Atual · '+manQ(a.leit.val,a.un)):'',atual:()=>vlSetB(self,id,{leit:a.leit?String(a.leit.val):''}),
+      std:brd(ed),stl:brd(el)+'width:110px;text-align:right;',stm:brd(em)+'flex:1 1 180px;min-width:0;',temEd:!!ed,ed,temEl:!!el,el,temEm:!!em,em,prev,temPrev:prev.length>0}; });
+  v.vl_vazio=!L.length; v.vl_vazioT=st.q?'Nenhum ativo com “'+st.q+'”.':'Nenhum ativo para vincular.';
+  const n=marc.length; const pp=manPode(c,pf,'plano');
+  const why=pp||(!p?'Escolha o plano':(!n?'Marque ao menos um ativo':((semH.length&&!st.d.bmodo)?'Escolha como contar os ativos sem execução registrada':'')));
+  v.vl_rot=p?('Vincular '+(n>1?n+' ativos ':'')+'ao '+p.id):'Vincular'; v.vl_sdis=!!why; v.vl_swhy=why; v.vl_temWhy=!!why; v.vl_sst=why?MA_SEC:MA_PRIM;
+  v.vl_temFalha=!!st.falha; v.vl_falha=st.falha?(st.falha+' Suas escolhas continuam aqui.'):''; }
+/* ---------- Desvincular (com motivo; histórico guardado; a OM aberta continua) ---------- */
+function dvAbrir(self,k){ pmRet(self); const q=String(k).split('|'); const d={mot:''};
+  self.setState({dv:{pid:q[0],aid:q[1],d,orig:JSON.stringify(d),errs:{},warn:false,chave:manChave(),falha:''},sv:null,np:null,vl:null,pan:null}); pmFoco('dv_mot','dv-painel'); }
+function dvSalvar(self){ const st=self.state.dv; if(!st) return; if(manVazio(st.d.mot)){ self.setState({dv:Object.assign({},st,{errs:{mot:'Informe o motivo.'}})}); return; }
+  const r=manMudar(self,c2=>manDesvincular(c2,st.pid,st.aid,st.d.mot,g2perfil(),st.chave),{estrito:true});
+  if(r.erro){ self.setState({dv:Object.assign({},self.state.dv||st,{falha:r.erro})}); return; } self.setState({dv:null}); vlVolta(self,[]); }
+function dvP(self,v,c,pf){ const st=self.state.dv; const p=st?c.planos[st.pid]:null, a=st?c.ativos[st.aid]:null;
+  if(!pmPanel(self,v,'dv',{titulo:'Desvincular '+(a?a.nome:''),sub:p?(p.id+' · '+p.nome):'',save:()=>dvSalvar(self)})){ v.dv_ms=[]; v.dv_oms=[]; return; }
+  pmFld(self,v,'dv','mot');
+  v.dv_ms=['Ativo vendido ou baixado','Vínculo feito por engano','Passou para outro plano'].map(t=>({t,on:String(st.d.mot===t),st:vlChipSt(st.d.mot===t),go:()=>{ const cur=self.state.dv; self.setState({dv:Object.assign({},cur,{d:Object.assign({},cur.d,{mot:t}),errs:{},warn:false,falha:''})}); }}));
+  const ab=Object.values(c.oms).filter(o=>o.pid===st.pid&&o.aid===st.aid&&manAberta(o));
+  v.dv_oms=ab.map(o=>({t:o.id+' · '+o.serv+' · '+o.etapa,h:'#om='+o.id})); v.dv_temOm=ab.length>0;
+  v.dv_omT=ab.length>1?'Estas ordens continuam abertas (desvincular não apaga ordem; se não for fazer, cancele na própria ordem):':'Esta ordem continua aberta (desvincular não apaga ordem; se não for fazer, cancele na própria ordem):';
+  v.dv_ef=a&&p?(a.nome+' deixa de gerar vencimentos do '+p.id+'. A base de contagem e as últimas execuções ficam guardadas: vincular de novo retoma a mesma contagem.'):'';
+  const pp=manPode(c,pf,'plano'); const why=pp||(manVazio(st.d.mot)?'Informe o motivo':'');
+  v.dv_rot='Desvincular'; v.dv_sdis=!!why; v.dv_swhy=why; v.dv_temWhy=!!why; v.dv_sst=MA_SEC+'color:#B42318;border-color:#B42318;';
+  v.dv_temFalha=!!st.falha; v.dv_falha=st.falha?(st.falha+' O motivo continua aqui.'):''; }
 '''
 
 # =====================================================================================
@@ -947,9 +1057,10 @@ def _visoes():
             dict(k='pecas',l='Peças',w=120),dict(k='prox',l='Próximo passo',w=140)],'g_so')
     g_om=G([dict(k='om',l='Ordem · ativo',w=120),dict(k='serv',l='Serviço · tipo',w=140),dict(k='jan',l='Janela',t='date',w=75),dict(k='fase',l='Fase',w=100),
             dict(k='pend',l='Pendência',w=145),dict(k='exe',l='Executante',w=90),dict(k='tempo',l='Tempo',t='num',w=80),dict(k='custo',l='Custo',t='num',w=100)],'g_om',cartoes='externo')   # DS VIS-05: Cartões entra no seletor Lista | Cartões | Kanban da tela
-    g_at=G([dict(k='ativo',l='Ativo · local',w=150),dict(k='cond',l='Condição',w=120),dict(k='leit',l='Leitura',t='num',w=95),dict(k='prox',l='Próxima manutenção',t='num',w=145),
+    semp=IF('at_semp_tem',f'<button type="button" aria-pressed="{H("at_semp_on")}" title="{H("at_semp_lab")}" onClick="{H("at_semp_go")}" style="{H("at_semp_st")}">Sem plano <span style="opacity: .75;">{H("at_semp_n")}</span></button>')
+    g_at=G([dict(k='ativo',l='Ativo · local',w=150),dict(k='plano',l='Plano',w=150),dict(k='cond',l='Condição',w=120),dict(k='leit',l='Leitura',t='num',w=95),dict(k='prox',l='Próxima manutenção',t='num',w=145),
             dict(k='ab',l='Em aberto',w=120),dict(k='custo',l='Custo no mês',t='num',a='r',d=2,pre='R$ ',agg='sum',w=110),dict(k='cons',l='Consumo',w=95)],'g_at',total=True,
-           qf=dict(k='cond',l='condição'))
+           qf=dict(k='cond',l='condição'),busca_extra=semp)
     g_ab=G([dict(k='id',l='Lançamento · operador',w=130),dict(k='ativo',l='Ativo',w=120),dict(k='tq',l='Tanque/lote',w=105),dict(k='vol',l='Volume (L)',t='num',a='r',w=75),
             dict(k='data',l='Data · leitura',w=100),dict(k='met',l='Método',w=110),dict(k='lh',l='Consumo',t='num',a='r',w=80),dict(k='qual',l='Qualidade',w=105)],'g_ab',qf=dict(k='qual',l='qualidade'))
     g_pl=G([dict(k='nome',l='Plano',w=150),dict(k='grupo',l='Grupo de máquina',w=130),dict(k='est',l='Estado',w=140),dict(k='apl',l='Aplica-se a',w=140),dict(k='svs',l='Serviços',w=140),dict(k='atv',l='Ativos',w=110),dict(k='sit',l='Situação',w=165)],'g_pl')
@@ -1001,7 +1112,10 @@ def _pag_ativo():
     cab=(f'<div style="display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap;"><div style="display: flex; flex-direction: column; gap: 6px; flex: 1 1 320px; min-width: 0;">'
          f'<button type="button" onClick="{H("voltar")}" style="{LNK} align-self: flex-start;">‹ Ativos</button>'
          f'<h2 style="margin: 0; font-family: {DISP}; font-size: 21px; letter-spacing: -.02em;">{H("at_t")}</h2><span style="font-size: 13px; color: {MUTED};">{H("at_sub")}</span>'
-         f'<span style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">{_chiph("at_cond","at_cst","at_cdot")}<span style="font-size: 12.5px; font-weight: 600;">{H("at_leit")}</span></span></div>'
+         f'<span style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">{_chiph("at_cond","at_cst","at_cdot")}<span style="font-size: 12.5px; font-weight: 600;">{H("at_leit")}</span></span>'
+         + f'<span class="ma-atpl" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 13px;"><span style="{LBL}">Plano</span>'
+         + FOR('at_pls','x',f'<a href="{H("x.h")}" style="color: {ACC}; font-weight: 800; text-decoration: none;">{H("x.t")} ›</a>{_chiph("x.s","x.st","x.dot")}',1)
+         + IF('at_semPl',f'<button type="button" onClick="{H("at_semPlGo")}" style="{LNK}">{H("at_semPlt")}</button>') + '</span></div>'
          f'<div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">{_btns("at_secs")}'
          + IF('at_prim',f'<button type="button" disabled="{H("at_pdis")}" title="{H("at_pwhy")}" onClick="{H("at_pfn")}" style="{H("at_pst")}">{H("at_pt")}</button>')
          + f'</div></div>'
@@ -1018,8 +1132,8 @@ def _pag_ativo():
     return IF('pg_ativo',f'<div style="display: flex; flex-direction: column; gap: 10px;">{corpo}</div>')
 
 def _pag_plano():
-    d_vinc=grid([dict(k='ativo',l='Ativo',w=190),dict(k='marco',l='Marco',w=210),dict(k='prox',l='Próximo vencimento',w=230),dict(k='sit',l='Situação',w=150),dict(k='om',l='Ordem',w=170)],[],
-                edit=dict(m='pick'),gid='d_vinc',total=False,search=False)
+    d_vinc=grid([dict(k='ativo',l='Ativo',w=180),dict(k='base',l='Base de contagem',w=170),dict(k='prox',l='Próximo vencimento',w=240),dict(k='sit',l='Situação',w=130),dict(k='om',l='Ordem',w=150)],[],
+                edit=dict(m='pick'),gid='d_vinc',total=False,search=False,dele=True,menu_linha=True)   # MA-VINCULO: ⋯ da linha com "Desvincular" (TAB-05)
     tk=(f'<li style="display: flex; align-items: center; gap: 8px; padding: 5px 0; border-top: 1px solid {LINE}; font-size: 13px;">'
         f'<span style="font-size: 12px; font-weight: 800; color: {MUTED}; width: 18px; flex-shrink: 0;">{H("t.n")}</span><span style="flex-grow: 1; min-width: 0;">{H("t.t")}</span>'
         f'<span style="font-size: 11.5px; font-weight: 700; color: {MUTED}; border: 1px solid {LINE}; border-radius: 999px; padding: 0 7px;">{H("t.tipo")}</span>'
@@ -1079,11 +1193,21 @@ def _pag_plano():
                 f'<b>{H("h.t")}</b><span style="color: {MUTED};">{H("h.at")}</span><span><span style="{H("h.stst")}">{H("h.st")}</span></span></div>',2)+'</div>') + '</section>')
     inat=IF('p_podeInat',f'<div><button type="button" onClick="{H("p_inat")}" title="Para de gerar vencimentos; nada é apagado" style="{LNK} color: #4B5A51;">⋯ Inativar plano</button></div>')
     corpo=(cab + ban + f'<section aria-label="Serviços" style="display: flex; flex-direction: column; gap: 8px;">{_lab("Serviços")}{svs}</section>'
-           + f'<section aria-label="Ativos vinculados" style="display: flex; flex-direction: column; gap: 8px;">{_lab("Ativos vinculados · só leitura")}{d_vinc}</section>' + hist + inat)
+           + f'<section aria-labelledby="pm-atv-t" style="display: flex; flex-direction: column; gap: 8px;"><div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">'
+             f'<h3 id="pm-atv-t" style="{SECT} margin: 0;">Ativos deste plano · {H("p_nvinc")}</h3><span style="font-size: 12.5px; color: {MUTED};">{H("p_apl")}</span><span style="flex-grow: 1;"></span>'
+             + IF('p_temVl',f'<span style="font-size: 12px; color: {MUTED};">{H("p_vlNc")}</span><button type="button" class="ma-hb" disabled="{H("p_vldis")}" title="{H("p_vlwhy")}" onClick="{H("p_vl")}" style="{SEC}">{H("p_vlt")}</button>'
+                  + IF('p_vldis',f'<span style="font-size: 12px; font-weight: 700; color: {MUTED};">{H("p_vlwhy")}</span>'))
+             + '</div>' + IF('p_semVinc',f'<div style="padding: 10px 12px; background: {BG}; border-radius: 12px; font-size: 13px;">Nenhum ativo vinculado: o plano não gera vencimentos.</div>')
+             + IF('!p_semVinc',d_vinc,True) + '</section>' + hist + inat)
     return IF('pg_plano',f'<div style="display: flex; flex-direction: column; gap: 12px;">{corpo}</div>')
 
 PM_CSS=('.pm-sv{border:1px solid #E4E9E5;border-radius:12px;background:#fff}'
         '.pm-sv-linha{display:grid;grid-template-columns:30px minmax(0,1.1fr) minmax(0,1.6fr) 130px 160px 34px;gap:10px;align-items:center;padding:8px 10px;font-size:13px}'
+        '.vl-lista{display:flex;flex-direction:column}.vl-l{display:grid;grid-template-columns:minmax(0,230px) minmax(0,1fr);gap:6px 14px;align-items:start;padding:10px 0;border-top:1px solid #E4E9E5}'
+        '.vl-ck{display:flex;gap:10px;align-items:flex-start;min-height:40px;cursor:pointer}.vl-ck input{width:20px;height:20px;margin:1px 0 0;accent-color:#1E7A4C;flex-shrink:0}'
+        '.vl-ck:has(input:disabled){cursor:default;opacity:.85}.vl-d{display:flex;flex-direction:column;gap:6px;min-width:0}.vl-in{display:flex;gap:6px 8px;flex-wrap:wrap;align-items:center}'
+        '.vl-prev{display:flex;flex-direction:column;gap:2px;padding:6px 10px;border-radius:8px;background:#F4F7F5}'
+        '@media (max-width:640px){.vl-l{grid-template-columns:minmax(0,1fr)}.vl-ck{min-height:44px}.vl-in input,.vl-at{min-height:44px}.ma-atpl a{display:inline-flex;align-items:center;min-height:44px}}'
         '.pm-sv-det{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;padding:10px 14px 14px 50px;border-top:1px solid #E4E9E5}'
         '@media (max-width:640px){.pm-sv-linha{grid-template-columns:30px minmax(0,1fr) 34px}.pm-sv-linha>:nth-child(3),.pm-sv-linha>:nth-child(4),.pm-sv-linha>:nth-child(5){display:none}.pm-sv-det{grid-template-columns:1fr;padding-left:14px}}'
         '.pm-nome{border:0;background:transparent;padding:0;font-family:inherit;font-size:13.5px;font-weight:800;color:#15201A;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:#C9D3CC;text-underline-offset:3px}'
@@ -1231,7 +1355,16 @@ def ma_chip_st(c):
     return f'display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; color: {k[0]}; background: {k[1]};'
 
 # ---------- painéis do plano (formulários com Salvar/Cancelar e aviso de alterações não salvas) ----------
-def _aside(pre,corpo,w=520):
+def _aside(pre,corpo,w=520,dyn=False):
+    """dyn=True (MA-VINCULO): a primária leva o verbo e a contagem (pre_rot), fica desligada com o motivo à vista (pre_sdis, pre_swhy) e o rodapé
+    gruda no fim do painel (alcançável a 390 px com a lista longa). Sem dyn, o rodapé Cancelar | Salvar de sempre."""
+    if dyn:
+        rod=(f'<div class="pe-form ma-rod" style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 24px 14px; border-top: 1px solid {LINE}; position: sticky; bottom: -22px; margin: 0 -24px -22px; background: {SURF}; z-index: 2;">'
+             + IF(f'{pre}_temWhy',f'<span id="{pre}-why" style="font-size: 12px; font-weight: 700; color: {MUTED}; flex: 1 1 160px; min-width: 0;">{H(pre+"_swhy")}</span>')
+             + f'<button type="button" onClick="{H(pre+"_close")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" disabled="{H(pre+"_sdis")}" aria-describedby="{pre}-why" onClick="{H(pre+"_save")}" style="{H(pre+"_sst")}">{H(pre+"_rot")}</button></div>')
+    else:
+        rod=(f'<div class="pe-form" style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 8px; border-top: 1px solid {LINE};">'
+             f'<button type="button" onClick="{H(pre+"_close")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{H(pre+"_save")}" style="{BTN_ST(True,True)}">Salvar</button></div>')
     return IF(f'{pre}_open',
         f'<div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
         f'<button type="button" aria-label="Fechar" tabIndex="-1" onClick="{H(pre+"_close")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button>'
@@ -1243,9 +1376,7 @@ def _aside(pre,corpo,w=520):
         + corpo + '<div style="flex-grow: 1;"></div>'
         + IF(f'{pre}_warn',f'<div role="alert" class="saida" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.'
              f'<div style="display: flex; gap: 8px;"><button type="button" onClick="{H(pre+"_discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{H(pre+"_keep")}" style="{_MINIP}">Continuar editando</button></div></div>')
-        + f'<div class="pe-form" style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 8px; border-top: 1px solid {LINE};">'
-          f'<button type="button" onClick="{H(pre+"_close")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{H(pre+"_save")}" style="{BTN_ST(True,True)}">Salvar</button></div>'
-        f'</aside></div>')
+        + rod + f'</aside></div>')
 def _err(pre,k): return IF(f'{pre}_he{k}',f'<span role="alert" style="{ERRS}">{H(pre+"_e"+k)}</span>')
 def _inp(pre,k,rot,typ='text',num=False,w=None,suf=''):
     inp=(f'<input id="{pre}_{k}" type="{typ}" value="{H(pre+"_"+k)}" onChange="{H(pre+"_set"+k)}"'+(' inputMode="decimal"' if num else '')
@@ -1272,19 +1403,63 @@ def _paineis_plano():
     np_body=(_inp('np','nome','Nome do plano') + _selp('np','tipo','Aplica-se a','np_tipos') + IF('np_isMod',_selp('np','modelo','Modelo','np_mods'))
              + IF('np_isAtv',f'<div style="display: flex; flex-direction: column; gap: 6px;"><span style="{LBL}">Ativos</span>'+_checks('np_atvs','Ativos do plano')+_err('np','ativos')+'</div>')
              + IF('np_temAv',f'<div style="padding: 8px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">' + FOR('np_avs','a',f'<div>{H("a.t")}</div>',1) + '</div>')
+             + IF('!np_novo',f'<span style="font-size: 12px; color: {MUTED}; margin-top: -6px;">{H("np_apl")}</span>')
+             + IF('np_temEf',f'<div role="status" aria-label="Efeito da mudança" style="display: flex; flex-direction: column; gap: 4px; padding: 8px 12px; border-radius: 10px; background: {ACCS}; color: #1E6B47; font-size: 12.5px; font-weight: 700;">'
+                  f'<span style="{SECT} color: #1E6B47;">Ao salvar</span>' + FOR('np_ef','e',f'<div>{H("e.t")}</div>',2) + '</div>')
              + IF('np_novo',_selp('np','base','Começar de','np_bases'),True))
-    vk_body=(IF('vk_temCand',_selp('vk','aid','Ativo','vk_ativos','vk_setaid') + f'<span style="font-size: 12px; color: {MUTED}; margin-top: -6px;">{H("vk_ult")}</span>'
-                + IF('vk_temSug',f'<div style="padding: 8px 10px; border-radius: 8px; background: {ACCS}; font-size: 12.5px; font-weight: 700; color: #1E6B47;">{H("vk_orig")}</div>')
-                + IF('!vk_temSug',f'<div style="font-size: 12.5px; color: {MUTED};">{H("vk_orig")}</div>')
-                + IF('vk_isData',_inp('vk','data','Data da última execução',typ='date'),True)
-                + IF('vk_hasCont',_inp('vk','leit','Leitura na última execução',num=True,w='160px',suf=H('vk_un')))
-                + IF('vk_temSug',_inp('vk','mot','Motivo, se corrigir o marco'))
-                + f'<label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600;"><input type="checkbox" checked="{H("vk_sem")}" onChange="{H("vk_setsem")}" style="width: 16px; height: 16px; accent-color: {ACC}; margin: 0;">'
-                  f'Sem histórico: usar hoje e a leitura atual (marco estimado)</label>')
-             + IF('vk_semCand',f'<div style="font-size: 13px; color: {MUTED};">Todos os ativos deste plano já estão vinculados.</div>'))
-    return _aside('sv',sv_body,w=560)+_aside('np',np_body,w=520)+_aside('vk',vk_body,w=480)
+    # MA-VINCULO: Vincular a plano (1 ou vários; SEL-04) e Desvincular
+    inp=(f'<div class="vl-in"><label for="{H("r.idd")}" style="{LBL}">Data</label><input id="{H("r.idd")}" type="date" max="{H("vl_hoje")}" value="{H("r.data")}" onChange="{H("r.setd")}" style="{H("r.std")}">'
+         f'<button type="button" class="vl-at" onClick="{H("r.hoje")}" style="{_MINI}">Hoje</button>'
+         + IF('r.cont',f'<label for="{H("r.idl")}" style="{LBL}">Leitura</label><span style="display: inline-flex; align-items: center; gap: 6px;"><input id="{H("r.idl")}" inputMode="numeric" value="{H("r.leit")}" onChange="{H("r.setl")}" style="{H("r.stl")}"><span style="font-size: 12.5px; color: {MUTED};">{H("r.un")}</span></span>'
+              + IF('r.temAtual',f'<button type="button" class="vl-at" onClick="{H("r.atual")}" style="{_MINI}">{H("r.atualT")}</button>'))
+         + '</div>' + IF('r.temEd',f'<span role="alert" style="{ERRS}">{H("r.ed")}</span>')
+         + IF('r.pedeMot',f'<div class="vl-in"><label for="{H("r.idm")}" style="{LBL}">Motivo da correção</label><input id="{H("r.idm")}" value="{H("r.mot")}" onChange="{H("r.setm")}" style="{H("r.stm")}"></div>'
+              + IF('r.temEm',f'<span role="alert" style="{ERRS}">{H("r.em")}</span>')))
+    linha=(f'<div class="vl-l" data-aid="{H("r.id")}"><label class="vl-ck"><input type="checkbox" checked="{H("r.on")}" disabled="{H("r.dis")}" onChange="{H("r.tog")}" aria-describedby="{H("r.idx")}">'
+           f'<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0;"><b style="font-size: 13.5px;">{H("r.nome")}</b><span style="font-size: 12px; color: {MUTED};">{H("r.sub")}</span></span></label>'
+           f'<div id="{H("r.idx")}" class="vl-d">'
+           + IF('r.temErro',f'<span style="font-size: 12.5px; font-weight: 700; color: {RED};">{H("r.erro")}</span>')
+           + FOR('r.avs','x',f'<span style="font-size: 12.5px; font-weight: 700; color: {YEL};">⚠ {H("x.t")}</span>',1)
+           + IF('r.mostra',f'<span style="font-size: 12.5px;">{H("r.orig")}</span>'
+                + IF('r.temCorr',f'<button type="button" onClick="{H("r.corr")}" style="{LNK} align-self: flex-start;">{H("r.corrT")}</button>')
+                + IF('r.inp',inp) + IF('r.temEl',f'<span role="alert" style="{ERRS}">{H("r.el")}</span>')
+                + IF('r.temPrev',f'<div class="vl-prev" aria-label="Prévia do vencimento">' + FOR('r.prev','x',f'<span style="{H("x.st")}"><b>{H("x.nome")}</b> {H("x.txt")}</span>',1) + '</div>'))
+           + '</div></div>')
+    vl_body=(IF('vl_temFalha',f'<div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">{H("vl_falha")}</div>')
+             + IF('vl_fixo',f'<div style="font-size: 13px;"><b>{H("vl_pnome")}</b><br><span style="color: {MUTED};">{H("vl_papl")}</span></div>')
+             + IF('vl_temOps',f'<div style="display: flex; flex-direction: column; gap: 6px;"><span id="vl-pl-t" style="{LBL}">Plano</span><div role="radiogroup" aria-labelledby="vl-pl-t" style="display: flex; flex-wrap: wrap; gap: 6px;">'
+                  + FOR('vl_ops','o',f'<button type="button" role="radio" aria-checked="{H("o.on")}" onClick="{H("o.go")}" style="{H("o.st")}"><b>{H("o.id")}</b> · {H("o.nome")} <span style="font-weight: 600; opacity: .75;">· {H("o.n")}</span></button>',2)
+                  + '</div>' + IF('vl_temOpAv',f'<span style="font-size: 12px; color: {MUTED};">{H("vl_opAv")}</span>') + '</div>')
+             + IF('vl_semOps',f'<div role="note" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 13px; font-weight: 700;">{H("vl_semOpsT")}'
+                  f'<button type="button" onClick="{H("vl_criar")}" style="{LNK}">Criar plano ›</button></div>')
+             + IF('vl_temSem',f'<div role="group" aria-labelledby="vl-sem-t" style="display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 10px; background: {BG};">'
+                  f'<span id="vl-sem-t" style="font-size: 13px; font-weight: 700;">{H("vl_semT")}</span><span style="display: flex; gap: 6px; flex-wrap: wrap;">'
+                  f'<button type="button" aria-pressed="{H("vl_agoraOn")}" onClick="{H("vl_agora")}" style="{H("vl_agoraSt")}">Contar de agora</button>'
+                  f'<button type="button" aria-pressed="{H("vl_ultOn")}" onClick="{H("vl_ult")}" style="{H("vl_ultSt")}">Informar a última execução</button></span>'
+                  f'<span style="font-size: 12px; color: {MUTED};">{H("vl_semAj")}</span>' + IF('vl_temEModo',f'<span role="alert" style="{ERRS}">{H("vl_eModo")}</span>') + '</div>')
+             + IF('vl_busca',f'<label style="display: flex; align-items: center; gap: 6px; padding: 4px 10px; border: 1px solid {LINE}; border-radius: 999px; background: {BG};">'
+               f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="{MUTED}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>'
+               f'<input id="vl_q" type="search" aria-label="Buscar ativo" placeholder="Buscar ativo, modelo ou local" value="{H("vl_q")}" onChange="{H("vl_setq")}" style="font-family: inherit; font-size: 13px; border: 0; background: transparent; outline: none; flex: 1 1 auto; min-width: 0; min-height: 32px;"></label>')
+             + f'<div class="vl-lista" role="group" aria-label="Ativos">' + FOR('vl_ls','r',linha,3) + IF('vl_vazio',f'<div style="font-size: 13px; color: {MUTED}; padding: 8px 0;">{H("vl_vazioT")}</div>') + '</div>')
+    dv_body=(IF('dv_temFalha',f'<div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">{H("dv_falha")}</div>')
+             + f'<div style="font-size: 13px; line-height: 1.45;">{H("dv_ef")}</div>'
+             + IF('dv_temOm',f'<div role="note" style="display: flex; flex-direction: column; gap: 4px; padding: 8px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">{H("dv_omT")}'
+                  + FOR('dv_oms','o',f'<a href="{H("o.h")}" style="color: {YEL};">{H("o.t")} ›</a>',1) + '</div>')
+             + f'<div style="display: flex; flex-direction: column; gap: 6px;"><span id="dv-m-t" style="{LBL}">Motivo</span><div role="group" aria-labelledby="dv-m-t" style="display: flex; flex-wrap: wrap; gap: 6px;">'
+               + FOR('dv_ms','m',f'<button type="button" aria-pressed="{H("m.on")}" onClick="{H("m.go")}" style="{H("m.st")}">{H("m.t")}</button>',3) + '</div></div>'
+             + _inp('dv','mot','Motivo (escreva ou escolha acima)'))
+    return _aside('sv',sv_body,w=560)+_aside('np',np_body,w=520)+_aside('vl',vl_body,w=720,dyn=True)+_aside('dv',dv_body,w=480,dyn=True)
 
 # =====================================================================================
+def hub_aviso():
+    """Entrada do módulo (MOD-MAN): "N ativos sem plano de manutenção · Vincular ›" pela regra comum (DM.JS_VINC_BASE) sobre o cenário gravado."""
+    js=DM.hub_semplano_js()+('function modExtra(self,v){ let n=0; try{ n=manSemPlano(manHubEstado()).length; }catch(e){ n=0; } v.man_semp=n>0; '
+                            "v.man_semp_t=n+(n>1?' ativos sem plano de manutenção':' ativo sem plano de manutenção'); }\n")
+    topo=IF('man_semp',f'<a class="mod-aviso" href="MA.dc.html#vis=ativos&pend=semplano" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; box-sizing: border-box; '
+                       f'padding: 8px 14px; border-radius: 12px; background: {YELS}; color: {YEL}; font-size: 14px; font-weight: 800; text-decoration: none;">'
+                       f'<span aria-hidden="true">⚠</span><span>{H("man_semp_t")}</span><span style="text-decoration: underline; text-underline-offset: 3px;">Vincular ›</span></a>')
+    return dict(topo=topo,js=js)
+
 def _redirect(fname,destino):
     """página antiga = só redirecionamento (fora do canvas e do Índice): leva a âncora antiga (#OM-0234, #PM-01, #novo:a14) ao endereço novo"""
     js=("(function(){var h=decodeURIComponent((location.hash||'').slice(1)),d='"+destino+"';"
