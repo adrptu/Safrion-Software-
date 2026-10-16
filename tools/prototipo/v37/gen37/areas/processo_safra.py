@@ -83,6 +83,9 @@ def build():
                 grp[t]['kids'].append(r)
             else: out.append(r)
         return out
+    # SAF-FAZ-3 (B): com várias fazendas, filtro rápido por fazenda logo depois da busca (segmentado, para não confundir com o da Situação)
+    FFZ=(f'<sc-if value="{H("ffz_tem")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Fazenda" class="ffz">'
+         f'<sc-for list="{H("ffz_l")}" as="fq" hint-placeholder-count="3"><button type="button" aria-pressed="{H("fq.on")}" title="{H("fq.al")}" onClick="{H("fq.go")}">{H("fq.t")}</button></sc-for></div></sc-if>')
     cult_html=''
     for k in ['S2627','S27SF','S2526','LG2627','NOVA']:
         rows=cult_rows(k)
@@ -90,7 +93,7 @@ def build():
         # sem caixas de seleção (proprietário, 13/10/2026): o plano entra pela primária "Aplicar plano em N cultivos" (os sem plano) ou pelo
         # "Aplicar plano" / "Reaplicar" da linha; trocar o plano de um cultivo é pelo formulário da linha
         g=grid(CULT_COLS,rows,edit=dict(m='form',title='Cultivo',newTitle='Novo cultivo',sub='Altere o cultivo e o plano agronômico e salve.',fields=CULT_FIELDS),
-               sel=False,dele=not ro,add=None,gid=f'g_cult_{k}',qf=dict(k='sit',l='situação',nivel0=True),total=True,tree=True,x0={},menu_linha=True,
+               sel=False,dele=not ro,add=None,gid=f'g_cult_{k}',qf=dict(k='sit',l='situação',nivel0=True),total=True,tree=True,x0={},menu_linha=True,busca_extra=FFZ,
                sico=dict(k='sit',cores=['red','yellow']),
                tools=f'<sc-if value="{H("us_"+k+"_vis")}" hint-placeholder-val="{F()}">'+UNP.sel_html('us_'+k)+'</sc-if>')   # UNID-PROD: um seletor por tabela (D-U01), só com a Meta à vista (SAF-TAB)
         cult_html+=f'<sc-if value="{H("cult_"+k)}" hint-placeholder-val="{F()}">{g}</sc-if>'
@@ -274,7 +277,8 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
     s1=bloco('Escolha a safra','Clique na safra para continuar de onde parou.',g_saf,acao=nova_safra)
     # SOLO-01 §3.4: "Sugestões pelas análises · N" só com 1 sugestão ou mais (R01, D-29): quem não usa análise não vê nada
     sg_lnk=f'<sc-if value="{H("sg_has")}" hint-placeholder-val="{F()}"><button type="button" id="sg_lnk" class="acoes-lnk" onClick="{H("sg_abrir")}" style="min-height: 28px; white-space: nowrap;">{H("sg_lnk")}</button></sc-if>'
-    s2=bloco('Talhões e cultivos',H('k2'),cult_html,desc_hole=True,acao=sg_lnk)   # sem botão: planeja-se pela linha do talhão (Planejar ›, Dividir, Vincular ciclo ›)
+    plt_lnk=f'<sc-if value="{H("plt_tem")}" hint-placeholder-val="{F()}"><button type="button" id="plt-abrir" class="acoes-lnk" aria-haspopup="dialog" onClick="{H("plt_abrir")}" style="min-height: 28px; white-space: nowrap;">Planejar talhões livres…</button></sc-if>'   # SAF-FAZ-3 (C)
+    s2=bloco('Talhões e cultivos',H('k2'),cult_html,desc_hole=True,acao=plt_lnk+sg_lnk)   # sem botão: planeja-se pela linha do talhão (Planejar ›, Dividir, Vincular ciclo ›)
     # etapa 3: título com o custo de operação e o link "Resumo da safra"; veredito (role=status) e, fora dele, a linha de capacidade;
     # g_cap recolhida; linha de filtro (só com recurso × mês escolhido); g_op por último (estica e só a área de dados rola)
     custo=(f'<span style="display: inline-flex; align-items: baseline; gap: 6px; flex-wrap: wrap; justify-content: flex-end; font-size: 12.8px; color: {MUTED};">'
@@ -437,8 +441,64 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
     EXTRA.append(_overlay('sg_',1080,corpo_sg))
     EXTRA.append(porque_html())
     EXTRA.append('<style>@media (max-width:640px){.so-sug button{min-height:44px!important}.so-pan{padding:16px 14px!important}.so-pe{margin:0 -14px -16px!important;padding:12px 14px!important}.so-pe button{min-height:44px}}</style>')
+    # SAF-FAZ-3 (A): na faixa "Trabalhando em", as fazendas da safra em chips ✓ e "+ Fazenda" (etapas 1 e 2 com safra escolhida); sem safra, e nas
+    # etapas 3 e 4 (por fazenda), a fazenda em texto, como antes. A lista abre no lugar (popover do DS), com área e talhões de cada fazenda
+    lab=f'display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: {GRAYS}; font-weight: 700; font-size: 11.5px;'
+    sfz=(f'<sc-if value="{H("sfz_txt_on")}" hint-placeholder-val="{H("true")}"><span title="Fazenda da safra aberta" style="{lab}">{H("ctx_faz")}</span></sc-if>'
+         f'<sc-if value="{H("sfz_chips_on")}" hint-placeholder-val="{F()}"><span role="group" aria-label="Fazendas da safra" id="saf-fz" style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;">'
+         f'<sc-for list="{H("sfz_chips")}" as="fc" hint-placeholder-count="2"><button type="button" class="sfz-chip" aria-haspopup="dialog" aria-label="{H("fc.al")}" onClick="{H("fc.go")}" disabled="{H("fc.dis")}">{H("fc.t")}</button></sc-for>'
+         f'<sc-if value="{H("sfz_add")}" hint-placeholder-val="{F()}"><button type="button" id="sfz-add" class="sfz-add" aria-haspopup="dialog" aria-expanded="{H("sfz_exp")}" onClick="{H("sfz_abrir")}">+ Fazenda</button></sc-if></span></sc-if>')
+    EXTRA.append('<style>.sfz-chip,.sfz-add{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;min-height:var(--g2-alvo,30px);box-sizing:border-box;border-radius:999px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}'
+                 '.sfz-chip{border:1px solid #1E7A4C;background:#E4F3E9;color:#14532D}.sfz-chip:disabled{cursor:default}.sfz-add{border:1px dashed #8A968E;background:#FFFFFF;color:#1E7A4C}'
+                 '.sfz-chip:not(:disabled):hover,.sfz-add:hover{border-color:#1E7A4C;background:#D7EEDF}'
+                 '.ffz{display:inline-flex;border:1px solid #E4E9E5;border-radius:999px;overflow:hidden;background:#FFFFFF}'
+                 '.ffz button{border:0;background:transparent;padding:4px 11px;min-height:var(--g2-alvo,0px);font-family:inherit;font-size:12px;font-weight:700;color:#15201A;cursor:pointer;white-space:nowrap}'
+                 '.ffz button+button{border-left:1px solid #E4E9E5}.ffz button[aria-pressed="true"]{background:#1E7A4C;color:#FFFFFF}.ffz button[aria-pressed="false"]:hover{background:#E4F3E9}</style>')
+    EXTRA.append(
+      f'<sc-if value="{H("sfz_pop")}" hint-placeholder-val="{F()}"><div style="position: fixed; inset: 0; z-index: 70;">'
+      f'<button type="button" aria-label="Fechar a lista de fazendas" tabIndex="-1" onClick="{H("sfz_fechar")}" style="position: absolute; inset: 0; border: 0; background: transparent; cursor: default;"></button>'
+      f'<div role="dialog" id="sfz-pop" aria-label="Fazendas da safra" onKeyDown="{H("sfz_key")}" style="{H("sfz_pos")} position: fixed; max-height: 70vh; overflow-y: auto; box-sizing: border-box; background: #FFFFFF; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 12px 28px -12px rgba(21,32,26,.35); padding: 6px; display: flex; flex-direction: column; gap: 2px; z-index: 71;">'
+      f'<div style="padding: 6px 8px 4px; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; color: {MUTED}; text-transform: uppercase;">Fazendas da safra</div>'
+      f'<sc-for list="{H("sfz_ops")}" as="o" hint-placeholder-count="3"><label class="sfz-op" style="display: flex; align-items: flex-start; gap: 10px; min-height: 44px; box-sizing: border-box; padding: 7px 8px; border-radius: 8px; cursor: pointer;">'
+      f'<input type="checkbox" id="{H("o.id")}" checked="{H("o.on")}" onChange="{H("o.tog")}" style="width: 16px; height: 16px; accent-color: {ACC}; margin: 2px 0 0; flex-shrink: 0;">'
+      f'<span style="display: flex; flex-direction: column; gap: 1px; min-width: 0;"><b style="font-size: 13.5px; color: {INK};">{H("o.t")}</b><span style="font-size: 12px; color: {MUTED};">{H("o.sub")}</span>'
+      f'<sc-if value="{H("o.hasErr")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; color: {RED}; font-weight: 700; line-height: 1.4;">{H("o.err")}</span></sc-if></span></label></sc-for>'
+      f'<div style="display: flex; justify-content: flex-end; padding: 6px 4px 2px; border-top: 1px solid {LINE};"><button type="button" onClick="{H("sfz_fechar")}" style="{_MINI}">Fechar</button></div>'
+      f'</div></div></sc-if>')
+    EXTRA.append('<style>.sfz-op:hover{background:#F2F8F4}</style>')
+    # SAF-FAZ-3 (C): painel "Planejar talhões livres" — a escolha múltipla mora aqui (sem caixas na tabela, decisão de 13/10); cultura, plano e
+    # data uma vez para todos; um cultivo por talhão, pela regra do cultivo único
+    fld=lambda lab_,campo,k,ajuda='': (f'<div style="display: flex; flex-direction: column; gap: 4px;"><label for="plt_{k}" style="font-size: 12px; font-weight: 600; color: {MUTED};">{lab_}</label>{campo}'
+        + (f'<span style="font-size: 11.5px; color: {MUTED};">{ajuda}</span>' if ajuda else '')
+        + f'<sc-if value="{H("plt_he_"+k)}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H("plt_e_"+k)}</span></sc-if></div>')
+    inp=f'font-family: inherit; font-size: 14px; padding: 9px 11px; border-radius: 10px; border: 1px solid {LINE}; background: #FFFFFF; color: {INK}; min-width: 0;'
+    EXTRA.append(
+      f'<sc-if value="{H("plt_open")}" hint-placeholder-val="{F()}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
+      f'<button type="button" aria-label="Fechar" onClick="{H("plt_fechar")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button>'
+      f'<aside role="dialog" aria-label="{H("plt_titulo")}" id="plt-painel" onKeyDown="{H("plt_key")}" style="position: relative; width: 560px; max-width: 100%; height: 100vh; overflow-y: auto; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;">'
+      f'<div style="display: flex; gap: 10px; align-items: flex-start;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px; flex-grow: 1;">{H("plt_titulo")}</h2><button type="button" aria-label="Fechar" onClick="{H("plt_fechar")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED};">×</button></div>'
+      f'<div style="font-size: 13px; color: {MUTED};">{H("plt_sub")}</div>'
+      f'<sc-if value="{H("plt_hasg")}" hint-placeholder-val="{F()}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">{H("plt_gerr")}</div></sc-if>'
+      f'<div style="display: flex; align-items: center; gap: 12px;"><span style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase; flex-grow: 1;">Talhões livres</span>'
+      f'<button type="button" class="acoes-lnk" onClick="{H("plt_todos")}" style="min-height: 28px;">Marcar todos</button><button type="button" class="acoes-lnk" onClick="{H("plt_nenhum")}" style="min-height: 28px;">Desmarcar</button></div>'
+      f'<sc-for list="{H("plt_grupos")}" as="g" hint-placeholder-count="2"><div role="group" aria-label="{H("g.cab")}" style="display: flex; flex-direction: column; gap: 6px;">'
+      f'<sc-if value="{H("g.multi")}" hint-placeholder-val="{F()}"><div style="font-size: 12.5px; font-weight: 800; color: {INK}; padding-top: 2px;">{H("g.cab")}</div></sc-if>'
+      f'<sc-for list="{H("g.itens")}" as="it" hint-placeholder-count="2"><label style="display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; min-height: 44px; box-sizing: border-box; border: 1px solid {LINE}; border-radius: 10px; cursor: pointer;">'
+      f'<input type="checkbox" id="{H("it.id")}" checked="{H("it.on")}" onChange="{H("it.tog")}" style="width: 16px; height: 16px; accent-color: {ACC}; margin: 2px 0 0; flex-shrink: 0;">'
+      f'<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0;"><b style="font-size: 13.5px;">{H("it.t")}</b><span style="font-size: 12.5px; color: {MUTED};">{H("it.txt")}</span>'
+      f'<sc-if value="{H("it.hasErr")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; color: {RED}; font-weight: 700; line-height: 1.4;">{H("it.err")}</span></sc-if></span></label></sc-for></div></sc-for>'
+      f'<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding-top: 6px; border-top: 1px solid {LINE};">'
+      + fld('Cultura',f'<select id="plt_cult" value="{H("plt_cult")}" onChange="{H("plt_setCult")}" style="{inp}"><sc-for list="{H("plt_cults")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select>','cult')
+      + fld('Variedade',f'<input id="plt_var" value="{H("plt_var")}" onChange="{H("plt_setVar")}" autoComplete="off" style="{inp}">','var')
+      + fld('Plano agronômico',f'<select id="plt_plano" value="{H("plt_plano")}" onChange="{H("plt_setPlano")}" style="{inp}"><sc-for list="{H("plt_planos")}" as="o" hint-placeholder-count="2"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select>','plano')
+      + fld('Plantio',f'<input type="date" id="plt_plantio" value="{H("plt_plantio")}" onChange="{H("plt_setPlantio")}" style="{inp}">','plantio',H('plt_pminT'))
+      + fld('Meta de produtividade',f'<span style="display: flex; align-items: center; gap: 6px;"><input id="plt_meta" inputMode="decimal" value="{H("plt_meta")}" onChange="{H("plt_setMeta")}" autoComplete="off" style="{inp} flex: 1 1 auto; width: 100%;"><span style="font-size: 12.5px; color: {MUTED}; white-space: nowrap;">{H("plt_un")}</span></span>','meta')
+      + f'</div><div style="flex-grow: 1;"></div>'
+      f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};"><button type="button" onClick="{H("plt_fechar")}" style="{BTN_ST(False,True)}">Cancelar</button>'
+      f'<button type="button" id="plt-gravar" onClick="{H("plt_salvar")}" style="{BTN_ST(True,True)} {H("plt_btnSt")}">{H("plt_btn")}</button></div>'
+      f'</aside></div></sc-if>')
     HEIGHTS37[fname]=1500
     shell37('SAF','Planejar safra',corpo,fname=fname,subtitle='',
             steps=steps_state(NOMES),primary_html=None,  # cartão da faixa leva à etapa (15/10); avanço/retorno/primária também na área de ações
-            ctx=(H('ctx_faz'),H('ctx_saf'),None),search=False,
+            ctx=(H('ctx_faz'),H('ctx_saf'),None),search=False,mf_ini=sfz,
             mf_fim='')   # 14/10/2026 (proprietário: "tire comparar versões do plano"): a entrada saiu da faixa; o painel (CONTROLE-02) segue no código   # na faixa "Trabalhando em": devolve ao Total a altura que a faixa nova tomou (L1 a 1440 × 1040; diagnóstico 13/10)

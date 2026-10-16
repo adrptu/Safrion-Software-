@@ -3,7 +3,10 @@
 os talhoes de cada fazenda?"; contraprovas do Codex 6173977617). Dados sintéticos.
 F1 criar com duas fazendas · F2 trocar de fazenda na mesma etapa (talhões da fazenda) · F3 "2 fazendas" na escolha · F4 acrescentar fazenda
 sem herdar estado · F5 tirar fazenda com vínculo é recusado no campo, nada muda · F6 tirar fazenda vazia · F7 enviar as fazendas: falha numa,
-nova tentativa só da que falhou, sem solicitação duplicada · F8 teclado · F9 sem erro de JS. Uso: python3 saf_fazendas_test.py"""
+nova tentativa só da que falhou, sem solicitação duplicada · F8 teclado · F9 sem erro de JS. Uso: python3 saf_fazendas_test.py
+SAF-FAZ-3 (15/10/2026, pedido do proprietário: "selecionar fazendas e talhões de mais de 1 fazenda por vez"): na etapa 2 as fazendas ficam
+juntas numa tabela só (um grupo por fazenda) e os chips ✓ vão para a faixa "Trabalhando em"; a troca de fazenda com a faixa "Fazendas" fica
+nas etapas 3 e 4 (por fazenda). F1, F2 e F8 mudaram o oráculo por isso; a regra de sub-safra por fazenda continua a mesma."""
 import sys, os, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from comp_lib import Chrome, servir
@@ -25,6 +28,8 @@ def marcadas(): return J("[...document.querySelectorAll('aside[role=dialog] labe
 def marca(faz): return J("(()=>{const l=[...document.querySelectorAll('aside[role=dialog] label')].find(l=>l.innerText.trim()===%s&&l.querySelector('input[type=checkbox]')); if(!l) return false; l.querySelector('input').click(); return true;})()" % json.dumps(faz))
 def linhas(): return J("window.__safRef.linhas().map(r=>({id:r.id,nome:r.nome,faz:r.faz,mae:r.mae||null,estado:r.estado||''}))") or []
 def toast(): return J("(()=>{const t=document.querySelector('.g2toast'); return t&&getComputedStyle(t).display!=='none'?t.innerText.trim():'';})()") or ''
+def chips_tr(): return J("[...document.querySelectorAll('#saf-fz .sfz-chip')].map(b=>b.innerText.trim())") or []   # SAF-FAZ-3: fazendas na faixa "Trabalhando em"
+def grupos(): return J("[...document.querySelectorAll('[role=table] [role=row].g2fgrp')].filter(r=>r.offsetParent).map(r=>r.querySelector('b').innerText.trim())") or []
 def faixa(): return J("(()=>{const g=document.getElementById('saf-fazendas'); if(!g||!g.offsetParent) return null; return {chips:[...g.querySelectorAll('button[aria-pressed]')].map(b=>[b.innerText.trim(),b.getAttribute('aria-pressed')]),txt:g.innerText.replace(/\\s+/g,' ')};})()")
 def editar(pred):   # pred: expressão JS sobre a linha r
     return J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>%s); const a=r&&[...r.querySelectorAll('button,a,[role=button]')].find(b=>b.innerText.trim()==='Editar'); if(a) a.click(); return !!a;})()" % pred) and (time.sleep(.6) or True)
@@ -45,17 +50,17 @@ try:
         nome = f'Safra 2027/28 · {w}'
         preenche('nome', nome); preenche('ini', '2027-09-01'); preenche('fim', '2028-08-31'); time.sleep(.2); salvar()
         ls = [x for x in linhas() if x['nome'] == nome]; t1 = toast(); fx = faixa()
-        chk(f'F1 {w}: "Nova safra" com Santa Rita e Lagoa Grande cria uma sub-safra por fazenda, ligadas, em rascunho; abre a primeira com a faixa das fazendas',
+        time.sleep(.6); ct = chips_tr(); gs = grupos()
+        chk(f'F1 {w}: "Nova safra" com Santa Rita e Lagoa Grande cria uma sub-safra por fazenda, ligadas, em rascunho; abre a primeira com as duas fazendas na faixa (✓) e na tabela (um grupo cada)',
             m0 == ['Santa Rita'] and [x['faz'] for x in ls] == ['Santa Rita', 'Lagoa Grande'] and ls[0]['mae'] and ls[0]['mae'] == ls[1]['mae']
-            and all(x['estado'] == 'Rascunho' for x in ls) and '2 fazendas' in t1 and fx and fx['chips'] == [['Santa Rita', 'true'], ['Lagoa Grande', 'false']], [m0, ls, t1, fx])
-        time.sleep(.6); tal_sr = J("(()=>{const t=document.querySelector('main').innerText; return t.indexOf('T7')>=0&&t.indexOf('Pivô')<0;})()")
-        if not tal_sr: print('   (diag) main SR:', (J("document.querySelector('main').innerText") or '')[:600].replace('\n',' | '))
-        # F2 · troca de fazenda na mesma etapa
-        clica("document.querySelector('#saf-fazendas button[aria-pressed=false]')"); time.sleep(1.0)
-        fx2 = faixa(); st = J("[window.__safSelf.state.saf,window.__safSelf.state.step]"); txt = J("document.querySelector('main').innerText")
-        chk(f'F2 {w}: tocar em Lagoa Grande abre a sub-safra dela na mesma etapa (2), com os talhões da Lagoa Grande e não os da Santa Rita',
-            fx2 and fx2['chips'] == [['Santa Rita', 'false'], ['Lagoa Grande', 'true']] and st and st[0] == ls[1]['id'] and st[1] == 2 and tal_sr and 'Pivô' in txt and 'T7' not in txt
-            and 'Fazenda Lagoa Grande' in J("document.body.innerText"), [fx2, st, tal_sr])
+            and all(x['estado'] == 'Rascunho' for x in ls) and '2 fazendas' in t1 and fx is None and ct == ['✓ Santa Rita', '✓ Lagoa Grande'] and gs == ['Santa Rita', 'Lagoa Grande'], [m0, ls, t1, fx, ct, gs])
+        # F2 · na etapa 2 as fazendas ficam juntas; a ação numa linha da Lagoa Grande vale na sub-safra dela, na mesma etapa
+        txt = J("document.querySelector('main').innerText"); st0 = J("window.__safSelf.state.saf")
+        clica("[...document.querySelectorAll('[role=table] [role=row][data-rid]')].filter(r=>r.offsetParent).map(r=>[...r.querySelectorAll('button')].find(b=>/^Vincular ciclo/.test(b.innerText.trim())&&/Pivô/.test(r.innerText))).find(Boolean)"); time.sleep(1.0)
+        st = J("[window.__safSelf.state.saf,window.__safSelf.state.step]"); pn = J("(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); return a?a.innerText:'';})()") or ''
+        chk(f'F2 {w}: na etapa 2 os talhões das duas fazendas ficam juntos (T7 e os pivôs); a ação num pivô abre a sub-safra da Lagoa Grande na mesma etapa (2), com o contexto dela',
+            'T7' in txt and 'Pivô' in txt and st0 == ls[0]['id'] and st and st[0] == ls[1]['id'] and st[1] == 2 and 'Lagoa Grande' in pn and len(grupos()) == 2, [st0, st, pn[:200]])
+        clica("[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.offsetParent&&b.innerText.trim()==='Cancelar')"); time.sleep(.5)
         # F3 · na escolha da safra, "2 fazendas"
         trocar_safra()
         n2 = J("[...document.querySelectorAll('[role=row].g2ed')].filter(r=>r.innerText.indexOf(%s)>=0).map(r=>/2 fazendas/.test(r.innerText))" % json.dumps(nome))
@@ -99,13 +104,13 @@ try:
     clica("document.getElementById('sg-env')"); time.sleep(.8); t7c = toast()
     sols2 = J("(()=>{ try{ return Object.values((JSON.parse(localStorage.getItem('talhao-os-compras-v1'))||{}).sols||{}).filter(x=>x.safra==='S27SF').map(x=>[x.id,x.comp||0]); }catch(e){ return 'x'; } })()")
     chk('F7c enviar de novo sem mudança na demanda não duplica nem complementa', sols2 == [['SOL-2027-02', 0]], [t7c, sols2])
-    # F8 · teclado a 390: Tab até a fazenda e Enter troca
+    # F8 · teclado a 390: Tab até a fazenda e Enter troca (etapas 3 e 4, por fazenda; SAF-FAZ-3)
     c.aparelho(390, 844, 2, True)
-    c.goto(U('SAF.dc.html#saf=S27SF&passo=cultivos'), 2.0)
+    c.goto(U('SAF.dc.html#saf=S27SF&passo=operacoes'), 2.0)
     J("(()=>{const b=document.querySelector('#saf-fazendas button[aria-pressed=false]'); b.focus();})()")
     c.tecla('Enter', 'Enter', 13, '\r'); time.sleep(1.0); fx8 = faixa()
-    chk('F8 390 · teclado: foco na fazenda e Enter abre a Lagoa Grande na mesma etapa; a faixa cabe sem rolagem lateral',
-        fx8 and fx8['chips'][1] == ['Lagoa Grande', 'true'] and J("window.__safSelf.state.step") == 2 and J("document.documentElement.scrollWidth<=innerWidth"), [fx8, J("window.__safSelf.state.step")])
+    chk('F8 390 · teclado: foco na fazenda e Enter abre a Lagoa Grande na mesma etapa (3); a faixa cabe sem rolagem lateral',
+        fx8 and fx8['chips'][1] == ['Lagoa Grande', 'true'] and J("window.__safSelf.state.step") == 3 and J("document.documentElement.scrollWidth<=innerWidth"), [fx8, J("window.__safSelf.state.step")])
     chk('F9 sem erro de JS', not J("(window.__e||[]).length"), J("window.__e"))
 finally:
     c.close() if hasattr(c, 'close') else None

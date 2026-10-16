@@ -290,7 +290,7 @@ def perfil_pill(perfil):
 MACRO = {
     'IN-04.dc.html': dict(faz='filtro', saf='lista', cult='filtro'),   # 15/10/2026 (proprietário): Safra e Cultura no Mapa; as safras vêm da fazenda (mf_saf_opts)
     'OS.dc.html': dict(faz='filtro', saf='filtro', cult='filtro', tal='filtro'),   # 13/10 (proprietário): Cultura e Talhão no filtro principal da O.S.
-    'SAF.dc.html': dict(faz='contexto', saf='contexto', trocar=False),   # 14/10/2026 (proprietário): "Trocar safra" fica embaixo, nos botões do fluxo
+    'SAF.dc.html': dict(faz='tela', saf='contexto', trocar=False),   # 14/10/2026 (proprietário): "Trocar safra" fica embaixo, nos botões do fluxo; SAF-FAZ-3 (15/10): as fazendas da safra a tela desenha (chips ✓ e "+ Fazenda", mf_ini)
     'CMP.dc.html': dict(faz='contexto', saf='contexto'),
     'EST.dc.html': dict(faz='filtro'),
     'COLH.dc.html': dict(faz='filtro', saf='filtro', cult='filtro', tal='filtro'),   # 13/10: Cultura e Talhão onde ajudam (colheita é por cultura e talhão)
