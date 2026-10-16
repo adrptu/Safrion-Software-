@@ -1,0 +1,7 @@
+{
+  "print_partial_binding": true,
+  "print_instruction": true,
+  "print_scope_saldo": true,
+  "primary_keyboard_explanation": true,
+  "card_action_before_insumos": true
+}
