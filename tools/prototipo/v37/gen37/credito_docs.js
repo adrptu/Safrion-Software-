@@ -80,3 +80,71 @@ function credSalvarDoc(r, fzs, seedDocs) {
   if (o.tipo === 'CAR') o.mf = (V.mf === undefined || V.mf === null) ? '' : V.mf;
   if (o.tipo === 'Contrato de arrendamento') o.custo = (V.custo === undefined || V.custo === null) ? '' : V.custo;
   const ds = credLer(); ds.ed[r.id] = o; return credGravar(ds); }
+// CRE-BANCO F1 / C19: ficha comum do grupo de demonstração. Não é cadastro de cliente real
+// nem consentimento: nenhum dado deste armazenamento é enviado a um credor.
+const CRED_FICHA_KEY='safrion-credito-ficha-demo-grupo-v1';
+const CRED_FICHA_TIPOS=['Avaliação de mercado','Valor contábil','Declaração do produtor'];
+function credFichaLer(){
+  try { const raw=localStorage.getItem(CRED_FICHA_KEY); if(raw===null)return {v:1,items:[]};
+    const x=JSON.parse(raw), ids=new Set();
+    if(!x||x.v!==1||!Array.isArray(x.items))throw Error('formato');
+    x.items.forEach(r=>{if(!r||typeof r.id!=='string'||!r.id||ids.has(r.id)||!Number.isSafeInteger(r.rev)||r.rev<1||!Array.isArray(r.historico)||!Array.isArray(r.confirmacoes)||typeof r.nome!=='string'||!(r.valor===null||typeof r.valor==='string'&&/^\d+\.\d{2}$/.test(r.valor)))throw Error('registro');ids.add(r.id);});
+    return x;
+  } catch(e){throw Error('Não foi possível ler a ficha. Os dados foram preservados; tente novamente quando o armazenamento estiver disponível.');}
+}
+function credFichaValor(s){
+  s=String(s==null?'':s).trim(); if(!s)return null;
+  if(!/^(?:\d+|\d{1,3}(?:\.\d{3})+)(?:,\d{1,2})?$/.test(s))throw Error('Informe o valor em R$, como 850.000,00, com até duas casas decimais.');
+  const p=s.replace(/\./g,'').split(','), i=p[0].replace(/^0+(?=\d)/,''), d=(p[1]||'').padEnd(2,'0');
+  if(BigInt(i+d)>BigInt(Number.MAX_SAFE_INTEGER))throw Error('O valor excede a precisão suportada.');
+  return i+'.'+d;
+}
+function credFichaData(s){
+  s=String(s||'').trim(); if(/^\d{2}\/\d{2}\/\d{4}$/.test(s))s=s.split('/').reverse().join('-');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return '';
+  const d=new Date(s+'T12:00:00Z');return !isNaN(d)&&d.toISOString().slice(0,10)===s?s:'';
+}
+function credFichaErros(d,old,hoje){const e={};
+  if(d.oper==='Confirmar vigência'){if(!old||old.valor===null)e.oper='Valor pendente: complete a declaração antes de confirmar.';return e;}
+  if(d.oper!=='Atualizar declaração')e.oper='Escolha a operação.';
+  if(!String(d.nome||'').trim())e.nome='Informe o bem.';
+  if(!CRED_FICHA_TIPOS.includes(d.tipo))e.tipo='Escolha o tipo da declaração.';
+  let val;try{val=credFichaValor(d.valor);}catch(x){e.valor=x.message;}
+  const data=credFichaData(d.data);
+  if((d.data&&!data)||(data&&data>hoje))e.data='Informe uma data válida, até a data de hoje.';
+  if(val!==null&&val!==undefined){if(!data)e.data='Informe a data original da declaração.';
+    if(!String(d.fonte||'').trim())e.fonte='Informe a fonte do valor.';
+    if(!String(d.responsavel||'').trim())e.responsavel='Informe o responsável pela declaração original.';}
+  return e;
+}
+function credFichaSalvar(id,d,rev,ator,hoje){
+  const pf=typeof g2pf==='function'?g2pf(ator):null;
+  if(!pf||!(pf.papeis.direcao||pf.papeis.financeiro))throw Error('Este perfil não pode alterar a ficha. Solicite à direção; o papel financeiro ainda não está disponível nesta demonstração.');
+  if(!credFichaData(hoje)||typeof id!=='string'||!id)throw Error('Data ou identificação inválida. Nada foi salvo.');
+  const db=credFichaLer(), n=db.items.findIndex(r=>r.id===id), old=n<0?null:db.items[n];
+  if((old?old.rev:0)!==rev)throw Error('Outra edição foi salva. Seu rascunho foi preservado; feche e reabra o item para conferir a versão atual.');
+  const errs=credFichaErros(d,old,hoje);if(Object.keys(errs).length)throw Error(Object.values(errs)[0]);
+  let r;
+  if(d.oper==='Confirmar vigência'){
+    if(old.confirmacoes.some(c=>c.quem===pf.k&&c.quando===hoje))return old;
+    r=Object.assign({},old,{rev:old.rev+1,confirmacoes:old.confirmacoes.concat({quem:pf.k,quando:hoje})});
+  }else{
+    const fields={nome:String(d.nome).trim(),tipo:d.tipo,valor:credFichaValor(d.valor),data:credFichaData(d.data),fonte:String(d.fonte||'').trim(),responsavel:String(d.responsavel||'').trim()};
+    if(old&&Object.keys(fields).every(k=>fields[k]===old[k]))return old;
+    const hist=old?old.historico.concat({nome:old.nome,tipo:old.tipo,valor:old.valor,data:old.data,fonte:old.fonte,responsavel:old.responsavel,registradoPor:old.registradoPor,registradoEm:old.registradoEm,confirmacoes:old.confirmacoes}):[];
+    r=Object.assign({id,rev:rev+1,historico:hist,confirmacoes:[],registradoPor:pf.k,registradoEm:hoje},fields);
+  }
+  if(n<0)db.items.push(r);else db.items[n]=r;
+  try{localStorage.setItem(CRED_FICHA_KEY,JSON.stringify(db));}catch(e){throw Error('Não foi possível gravar a ficha. Libere espaço ou permita o armazenamento e tente salvar novamente; o rascunho foi preservado.');}
+  return r;
+}
+function credFichaDinheiro(v){if(v===null)return 'A informar';const p=v.split('.');return 'R$ '+p[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.')+','+p[1];}
+function credFichaResumo(r){return [r.tipo,credFichaDinheiro(r.valor),r.data?g2fmt(r.data,{t:'date'}):'Data a informar',r.responsavel||'Responsável a informar',r.fonte||'Fonte a informar',r.registradoPor?'Registrado por '+r.registradoPor+' em '+g2fmt(r.registradoEm,{t:'date'}):''].filter(Boolean).join(' · ');}
+function credFichaLinha(r,hoje){
+  const idade=r.data?Math.floor((Date.parse(hoje+'T12:00:00Z')-Date.parse(r.data+'T12:00:00Z'))/86400000):null;
+  const ultima=r.confirmacoes.slice(-1)[0], situacao=r.valor===null?'Pendente':'Declarado';
+  const origem=credFichaResumo(r)+(idade===null?'':' · '+idade+' dias desde a declaração');
+  const confirmacao=ultima?'Confirmado por '+ultima.quem+' em '+g2fmt(ultima.quando,{t:'date'}):'Sem revalidação';
+  const hist=r.historico.map((h,i)=>'Versão '+(i+1)+': '+credFichaResumo(h)+(h.confirmacoes.length?' · confirmações: '+h.confirmacoes.map(c=>c.quem+' em '+g2fmt(c.quando,{t:'date'})).join('; '):'')).join('\n');
+  return {id:r.id,v:Object.assign({},r,{valor:r.valor===null?'':r.valor,oper:'Atualizar declaração',resumo:origem,confirmacao:r.confirmacoes.length?r.confirmacoes.map(c=>'Confirmado por '+c.quem+' em '+g2fmt(c.quando,{t:'date'})).join('\n'):confirmacao,hist:hist||'Sem versão anterior'}),s:{nome:r.nome,situacao,origem,confirmacao},p:{situacao:[{k:'chip',t:situacao,c:r.valor===null?'yellow':'gray'}],valor:[{k:'txt',t:credFichaDinheiro(r.valor)}],origem:[{k:'txt',t:origem}],confirmacao:[{k:'txt',t:confirmacao}]}};
+}

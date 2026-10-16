@@ -1,0 +1,26 @@
+{
+  "parent": "7860b8191cbf23af6be43440eefdb992b9e79dca",
+  "files": {
+    "areas/gestao.py": {
+      "base_blob": "f1bd6db29f04f50d2a3f6caea55d3145bdf9bfb4",
+      "candidate_blob": "fb103fae5ac6f271acbbf030ff0cf25b66d5607c",
+      "sha256": "3bd2ca4a3a31e2071bf5d78de7190c87816c6ff675f2ba80e57821bf270030ec"
+    },
+    "credito_ficha_build.py": {
+      "base_blob": "7181ed5e9816e6f4ad8125cad0ab11b2fa36d6a7",
+      "candidate_blob": "aaf42a6748cc580ab8d336258d36aafd62f44a4a",
+      "sha256": "d5b2dca4328c2f38c2cef2cc29ddcc4ba188f86397a5a53344ebff8de5644cc5"
+    },
+    "credito_ficha_motor_unit.js": {
+      "base_blob": "ca72373750fb2bd44e33d0d6fb3f35e7767ffb65",
+      "candidate_blob": "9d843ab15eac6f84f810b7e11318745b12317336",
+      "sha256": "256c52fa5dd16bc834f21ecaa3d01532fd1b3e168ed343812ba2d98025ba3a5c"
+    },
+    "links_ocultos_test.py": {
+      "base_blob": "6dafbcfd06033c3ea7284bd09e54c4e89b36a50e",
+      "candidate_blob": "ee85bfddf6117f1006856bb609882545a65f1366",
+      "sha256": "193beb7dd64bc57f36e3530f1a4e8bc769e94f22ebaea5e8586a6405e21e903e"
+    }
+  },
+  "html_sha256": "c29cd1f761d42686fc82f9aef422a4f7ae42d880ba466cbe8daf47f926b33c15"
+}
