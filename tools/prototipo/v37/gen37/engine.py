@@ -1491,6 +1491,9 @@ TABELA_CSS=(
     "[data-g2g] [role=cell]{min-height:44px;box-sizing:border-box}"
     "[data-g2g] [role=columnheader]{min-height:36px;box-sizing:border-box}"
     ".g2so{font-size:11px;line-height:1}"
+    # celular (até 480 px): "Agrupar por" e "Colunas" só com o ícone e o valor (o nome fica no aria-label), para a barra caber numa linha com
+    # Tabela | Cartões e sobrar altura para as linhas (AC-PCM-22: ≥ 5 linhas acima da dobra a 390 px)
+    "@media (max-width:480px){.g2rot{display:none}}"
     ".g2drill{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;flex-shrink:0;color:#9AA59E}"
     "@media (hover:hover){[data-g2g] .g2ed:hover .g2drill{color:#1E7A4C}}"
 )
@@ -1745,7 +1748,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     # (3 primeiras) ele aparece também nas de até 5, para recuperar as ocultas (Codex 6168779649, residual)
     ess=any(c.get('ess') for c in cols)
     cvb=(f'<sc-if value="{H("_cvhas")}" hint-placeholder-val="{{{{false}}}}"><button type="button" data-g2cvb="{gid}" aria-haspopup="dialog" aria-expanded="{H("_cvexp")}" aria-label="{H("_cvlab")}" title="{H("_cvlab")}" onClick="{H("_cvtog")}" '
-         f'style="{_MINI} display: inline-flex; align-items: center; gap: 6px; min-height: 32px;">{_ICO_COLUNAS}Colunas<span style="color: {MUTED};">{H("_cvn")}</span></button></sc-if>') if ess else ''
+         f'style="{_MINI} display: inline-flex; align-items: center; gap: 6px; min-height: 32px;">{_ICO_COLUNAS}<span class="g2rot">Colunas</span><span style="color: {MUTED};">{H("_cvn")}</span></button></sc-if>') if ess else ''
     # modo Tabela | Cartões (proprietário, 15/10/2026; DS VIS-05 "toda lista tem Tabela e Cartões"): toda listagem do menu (colunas
     # essenciais, Agrupar por ou o quadro visoes.MODO_LISTAS) ganha o seletor no fim da barra, depois de Colunas. cartoes='externo': a tela
     # já tem seletor de visões próprio (O.S. pela VISOES-1; MA › Ordens e BEN com Kanban) e o Cartões entra nele; a grade desenha os cartões
@@ -1761,9 +1764,9 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     agb=''
     if ag:
         agb=(f'<sc-if value="{H("_aghas")}" hint-placeholder-val="{{{{false}}}}"><span style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0;">'
-             f'<button type="button" data-g2agb="{gid}" aria-haspopup="menu" aria-expanded="{H("_agexp")}" onClick="{H("_agtog")}" style="{_MINI} display: inline-flex; align-items: center; gap: 6px; min-height: 32px;">'
+             f'<button type="button" data-g2agb="{gid}" aria-haspopup="menu" aria-expanded="{H("_agexp")}" aria-label="Agrupar por {H("_agl")}" onClick="{H("_agtog")}" style="{_MINI} display: inline-flex; align-items: center; gap: 6px; min-height: 32px;">'
              + ''.join(f'<sc-if value="{H("_agi_"+k)}" hint-placeholder-val="{{{{false}}}}">{_IPQ[k]}</sc-if>' for k in ['0','oque','quem','quando','onde'])
-             + f'<span style="color: {MUTED}; font-weight: 600;">Agrupar por</span> {H("_agl")} <span aria-hidden="true" style="font-size: 9px;">▾</span></button>'
+             + f'<span class="g2rot" style="color: {MUTED}; font-weight: 600;">Agrupar por</span> {H("_agl")} <span aria-hidden="true" style="font-size: 9px;">▾</span></button>'
              '</span></sc-if>')   # AGR-02 (16/10/2026): sem a trilha do descer
     agm=(f'<sc-if value="{H("_agmenu")}" hint-placeholder-val="{{{{false}}}}"><div style="position: fixed; inset: 0; z-index: 70;">'
          f'<button type="button" aria-label="Fechar Agrupar por" tabIndex="-1" onClick="{H("_agfecha")}" style="position: absolute; inset: 0; border: 0; background: transparent; cursor: default;"></button>'

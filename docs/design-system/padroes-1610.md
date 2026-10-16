@@ -32,6 +32,8 @@ Pedidos do proprietário em 16/10, transformados em padrão pelo método da skil
   - **▸/▾** abre os itens ali mesmo;
   - **›** abre o detalhe.
 
+**Celular (até 480 px):** "Agrupar por" e "Colunas" aparecem só com o ícone e o valor; o nome fica no `aria-label`. Assim a barra cabe numa linha com Tabela | Cartões, e a lista mostra pelo menos 5 linhas acima da dobra (AC-PCM-22).
+
 **Peça única:**
 - `E.cab_colunas_html` e `E.filtro_coluna_html`;
 - `g2cabVals` e `g2cabAplica` no `g2lib`.
