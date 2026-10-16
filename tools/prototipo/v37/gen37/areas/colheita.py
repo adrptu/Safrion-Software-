@@ -741,4 +741,4 @@ def _car_sec():
     corpo=(f'<div style="display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 12.5px; color: {MUTED}; line-height: 1.5;">{H("car_fonte")}</div>'
            f'<div style="font-size: 13px; font-weight: 700;">{H("car_n")}</div>{lista}{det}</div>')
     return sec('Carência e destino dos lotes de mamão','Avalie cada lote para o destino: origem, aplicações até a colheita, pós-colheita, limite do mercado e evidência. Carência cumprida não é conformidade.',
-               [ilnk('Ver carência no mapa','IN-04.dc.html#car','clock','Abrir a camada Carência e destino do mapa')],corpo,state='yellow')
+               [ilnk('Ver carência no mapa','IN-04.dc.html#car','clock','Abrir no mapa: Colheita e produtividade › Carência e destino')],corpo,state='yellow')

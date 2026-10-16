@@ -30,7 +30,7 @@ def escolhe(rotulo, val):
     J(f"""(()=>{{const s=document.querySelector('.mf-tela select[aria-label={json.dumps(rotulo)}]'); Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(s,{json.dumps(val)});
       s.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"""); time.sleep(1.0)
 def camada(nome):
-    J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab][data-dica]')].find(b=>b.getAttribute('data-dica')==={json.dumps(nome)}); if(b) b.click();}})()"); time.sleep(1.2)
+    J(f"(()=>{{const b=[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] [role=tab]')].find(b=>b.innerText.trim()==={json.dumps(nome)}); if(b) b.click();}})()"); time.sleep(1.2)   # 16/10/2026 (proprietário): a barra das funções foi para o alto do mapa, com o nome à vista; acha o botão pelo nome (sem data-dica)
 try:
     c.call('Page.addScriptToEvaluateOnNewDocument', {'source': "window.__err='';addEventListener('error',e=>{window.__err+=(e.message||'erro')+' | ';});"})
     c.aparelho(1440, 900, 1, False)
