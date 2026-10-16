@@ -21,3 +21,4 @@ with tempfile.TemporaryDirectory(prefix='est_onda0_') as td:
     result=subprocess.run([os.environ.get('NODE','node'),str(p)],capture_output=True,text=True,timeout=120)
 print(result.stdout,end=''); print(result.stderr,end='',file=sys.stderr)
 raise SystemExit(result.returncode)
+

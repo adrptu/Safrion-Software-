@@ -45,7 +45,7 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T; o cenário come
   conferencia rodada 3 (S2-1; conferencia390 = a 390 com toque real): a OB-0113 conferida estorna a S-01 na conferência; a OB-0112 não aponta
            as 1.000 caixas dela, o Estoque não oferece devolvê-las (formulário vazio), e a OB-0113 reabre, relança e fecha com diferença 0.
   sobra    rodada 3 (S2-2 e NAV-CLAREZA; sobra390 = a 390): sobra parcial (139 de 869): o atalho da OB-0112 abre o Estoque em Receba
-           devoluções com o formulário da REQ-041 e 139; a mudança da sobra em outra aba é recusada sem gravar (a saída de Produto, que não muda
+           devoluções com o formulário vazio da REQ-041 e a ajuda de sobra139; a mudança da sobra em outra aba é recusada sem gravar (a saída de Produto, que não muda
            a sobra, não); depois de salvar, "Voltar à OB-0112"; nenhuma tela diz "dispensado".
   multilote rodada 3 (S2-3; multilote390 = a 390): NF 7731 com 1.100 aptas e 100 em quarentena e 600 no CX26-01: a OB-0113 libera em duas
            linhas (REQ-041 1.100 do CX26-02, REQ-042 69 do CX26-01), o Rui entrega as duas sem "O.S. pede" nem chip do app, e a ordem fecha
@@ -57,7 +57,7 @@ Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 be
 Capturas em _probe/ben_*.png. Dados sintéticos (SAFRION_DADOS=sintetico)."""
 import sys, os, time, json
 os.environ.setdefault('SAFRION_DADOS', 'sintetico')
-HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
+HERE = os.environ.get('GEN') or os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cadc_lib import T
 import ui37; PUB = ui37.BEN_PUBLICADO   # v55: com o BEN fora da navegação o Estoque não aponta a tela oculta (sem "Voltar à OB-…")
 TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'lotes', 'duplo', 'criada', 'teclado', 'cancelar', 'faixa390', 'cadeia', 'cadeia390',
@@ -289,9 +289,9 @@ try:
         # devolução no Estoque (Rui, almoxarife)
         ir('EST.dc.html'); perfil('Rui'); est_secao(3)
         r = J("(()=>{ const rw=[...document.querySelectorAll('[role=row]')].find(x=>N(x.innerText).indexOf('REQ-030')>=0); if(!rw) return 'sem linha'; window.__cl++; (rw.querySelector('[role=cell] span')||rw).click(); return 'ok'; })()"); time.sleep(.5)
-        q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value"); clk('Salvar', 'aside[role=dialog]'); time.sleep(.3)
+        q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value"); setv('#fx_g_dev_qtd', '60'); setv('#fx_g_dev_cond', 'Apta · volta ao disponível'); clk('Salvar', 'aside[role=dialog]'); time.sleep(.3)
         st = cen("[c.reqs['REQ-030'].itens[0].custodia, c.lotes['Caixa de mamão Formosa 10 kg|CX26-01'].fisico]")
-        t.chk('(3) Estoque › Receba devoluções: REQ-030 sugere 60 un; devolução apta: custódia 0 e CX26-01 540 → 600 un', r == 'ok' and q == '60' and st == [0, 600], [r, q, st, toast()])
+        t.chk('(3) Estoque › Receba devoluções: REQ-030 abre vazia; Rui confere 60 un aptas: custódia 0 e CX26-01 540 → 600 un', r == 'ok' and q == '' and st == [0, 600], [r, q, st, toast()])
         ir('BEN.dc.html#OB-0110'); perfil('Igor'); time.sleep(.3); clk('Fechar processo', 'aside'); p = toast()
         st = cen("[c.ordens['OB-0110'].etapa, c.producao.lotes['L39-120']&&c.producao.lotes['L39-120'].q0, c.producao.lotes['L39-121']&&c.producao.lotes['L39-121'].q0, c.producao.ben.insp['INSP-92'].prazo]")
         t.chk('(3) Fechar: OB-0110 Encerradas; L39-120 e L39-121 Em inspeção (INSP-92, Marta, prazo 28/09); "Fechar não libera"', st == ['Encerradas', 'Em inspeção', 'Em inspeção', '2026-09-28'] and 'Fechar não libera' in p, [st, p])
@@ -600,7 +600,7 @@ try:
         t.chk('L2 · estorno da S-01 pela tela (Pesagem refeita): o estorno-consumo volta ao CX26-01 e à REQ-041, o mesmo lote do consumo; a REQ-042 fica intacta', st == ['CX26-01', 'REQ-041', 'CX26-01', 540, 0], [st, tc])
         perfil('Rui'); ir('EST.dc.html'); est_secao(3); rw = J("ROWTXT('REQ-041')") or ''
         r = J("(()=>{ const rw=[...document.querySelectorAll('[role=row]')].find(x=>N(x.innerText).indexOf('REQ-041')>=0); if(!rw) return 'sem linha'; window.__cl++; (rw.querySelector('[role=cell] span')||rw).click(); return 'ok'; })()"); time.sleep(.5)
-        q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value"); setv('#fx_g_dev_qtd', '540'); clk('Salvar', 'aside[role=dialog]'); tc = toast(); st = cen(LT + ".concat([c.lotes['Caixa de mamão Formosa 10 kg|CX26-01'].reservado])")
+        q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value"); setv('#fx_g_dev_qtd', '540'); setv('#fx_g_dev_cond', 'Apta · volta ao disponível'); clk('Salvar', 'aside[role=dialog]'); tc = toast(); st = cen(LT + ".concat([c.lotes['Caixa de mamão Formosa 10 kg|CX26-01'].reservado])")
         t.chk('L3 · Estoque › Receba devoluções: a REQ-041 (CX26-01) está em uso (12.300 kg a embalar, sobra 0): o formulário vem vazio; o Rui recebe 540, o CX26-01 volta a 540 com elas reservadas à OB-0113 (rodada 3), e o QA-CX-02 continua com 1.000 e a reserva 100 da REQ-042',
               r == 'ok' and 'CX26-01' in rw and q == '' and st == [540, 1000, 100, 540] and '540 un voltam reservadas à OB-0113' in tc, [rw, q, st, tc])
         est_secao(2); rw = J("ROWTXT('REQ-042')") or ''
@@ -804,9 +804,9 @@ try:
               a == 'ok' and b == 'ok' and 'S-02 registrada' in tc and 'Receber a devolução da OB-0113 no Estoque' in imp and 'Faltam 250 un. A OB-0113 tem sobra de 69 un em custódia (Receba devoluções). Ainda faltam 181 un' in imp, [a, b, tc, imp])
         perfil('Rui'); r0 = rev(); r = tocar('Receber a devolução da OB-0113 no Estoque', 'aside', nav=True); time.sleep(.6); loc = J("location.pathname.split('/').pop()")
         sec = J(SECAO); q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value"); rw = pan(); r2 = 'ok' if rev() == r0 else 'gravou ao navegar'
-        r3 = tocar('Salvar', 'aside[role=dialog]'); tc = toast(); st = cen(CXS)
-        t.chk(T_ + ' 5 · Rui segue o atalho (navega sem gravar): o Estoque abre em Receba devoluções com o formulário da REQ-041 e a sobra (69 un); recebida no CX26-02 (rodada 3: sem procurar seção nem linha)',
-              r == 'ok' and loc == 'EST.dc.html' and sec == ['Receba devoluções'] and r2 == 'ok' and q == '69' and r3 == 'ok' and '69 un de Caixa de mamão Formosa 10 kg devolvidos ao disponível' in tc and st == ['Em execução', 0, 600, 100], [r, loc, sec, rw[:300], r2, q, r3, tc, st])
+        setv('#fx_g_dev_qtd', '69'); setv('#fx_g_dev_cond', 'Apta · volta ao disponível'); r3 = tocar('Salvar', 'aside[role=dialog]'); tc = toast(); st = cen(CXS)
+        t.chk(T_ + ' 5 · Rui segue o atalho (navega sem gravar): o Estoque abre em Receba devoluções com o formulário da REQ-041 vazio; Rui confere 69 un aptas, recebidas no CX26-02 (rodada 3: sem procurar seção nem linha)',
+              r == 'ok' and loc == 'EST.dc.html' and sec == ['Receba devoluções'] and r2 == 'ok' and q == '' and r3 == 'ok' and '69 un de Caixa de mamão Formosa 10 kg devolvidos ao disponível' in tc and st == ['Em execução', 0, 600, 100], [r, loc, sec, rw[:300], r2, q, r3, tc, st])
         perfil('Igor'); abre('OB-0113'); r = tocar(CONC, 'aside'); tc = toast(); perfil('Paula'); r2 = tocar('Conferir balanço', 'aside'); perfil('Igor'); r3 = tocar('Fechar processo', 'aside'); tc2 = toast()
         st = cen("(()=>{ const o=c.ordens['OB-0113']; return [o.etapa, (o.ben.just||[]).length, o.ben.sai.filter(s=>s.fluxo==='Perda identificada').length, c.reqs['REQ-041'].itens[0].custodia, c.reqs['REQ-041'].itens[0].consumido]; })()")
         t.chk(T_ + ' 6 · a OB-0113 fecha os 12.300 kg (A 11.000 + descarte 1.300) com diferença 0, sem justificativa nem perda; as 1.100 caixas usadas, custódia 0',
@@ -870,9 +870,9 @@ try:
         carrega(fx6, W, H); perfil('Rui'); ir('EST.dc.html', w=W, h=H)
         if W < 500: tocar('Confira recebimentos', 'nav[aria-label="Seções do estoque"]')
         tocar('Receba devoluções', 'nav[aria-label="Seções do estoque"]'); r = tocar('REQ-041'); q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value"); pf = pan()
-        r2 = tocar('Salvar', 'aside[role=dialog]'); tc = toast()
-        t.chk(T_ + ' 5 · revisão A7: ordem conferida com perda justificada: o formulário traz as 69 e diz "conferida … até o Fechar"; ao salvar, as 69 ficam reservadas até o Fechar, sem "com tudo registrado" nem "caixas em uso"',
-              r == 'ok' and q == '69' and 'com tudo registrado' not in pf and 'até o Fechar' in pf and r2 == 'ok' and 'caixas em uso' not in tc and 'até o Fechar' in tc, [r, q, pf[:500], r2, tc[:300]])
+        setv('#fx_g_dev_qtd', '69'); setv('#fx_g_dev_cond', 'Apta · volta ao disponível'); r2 = tocar('Salvar', 'aside[role=dialog]'); tc = toast()
+        t.chk(T_ + ' 5 · revisão A7: ordem conferida com perda justificada: o formulário abre vazio, Rui confere 69 aptas e diz "conferida … até o Fechar"; ao salvar, as 69 ficam reservadas até o Fechar, sem "com tudo registrado" nem "caixas em uso"',
+              r == 'ok' and q == '' and 'com tudo registrado' not in pf and 'até o Fechar' in pf and r2 == 'ok' and 'caixas em uso' not in tc and 'até o Fechar' in tc, [r, q, pf[:500], r2, tc[:300]])
         shot('conferencia_' + str(W)); t.chk(T_ + ' conferencia sem erro de JS', not t.errs(), t.errs()); tamanho(1440, 1000)
     if 'conferencia' in MODOS: conferencia(1440)
     if 'conferencia390' in MODOS: conferencia(390)
@@ -886,13 +886,15 @@ try:
               'Receber a devolução da OB-0113 no Estoque' in imp and 'Faltam 250 un. A OB-0113 tem sobra de 139 un em custódia (Receba devoluções). Ainda faltam 111 un' in imp and 'dispensad' not in p.lower(), imp)
         perfil('Rui'); r0 = rev(); r = tocar('Receber a devolução da OB-0113 no Estoque', 'aside', nav=True); time.sleep(.6)
         sec = J(SECAO); q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value"); pf = pan(); pr = J("[...document.querySelectorAll('main button')].filter(VIS).map(b=>N(b.innerText)).filter(x=>/^Receber devolução/.test(x))")
-        t.chk(T_ + ' 2 · o atalho (sem gravar) abre o Estoque em Receba devoluções com o formulário da REQ-041 e 139 (nunca 869); o texto diz a origem, a conta da sobra, a OB-0112, o lote e o que volta reservado',
-              r == 'ok' and rev() == r0 and sec == ['Receba devoluções'] and q == '139' and 'Sobra da OB-0113 para a OB-0112: 139 un = 869 un em custódia − 730 un que a OB-0113 ainda embala (7.300 kg' in pf
+        t.chk(T_ + ' 2 · o atalho (sem gravar) abre o Estoque em Receba devoluções com o formulário da REQ-041 vazio e a ajuda de sobra139 (custódia869); o texto diz a origem, a conta da sobra, a OB-0112, o lote e o que volta reservado',
+              r == 'ok' and rev() == r0 and sec == ['Receba devoluções'] and q == '' and 'Sobra da OB-0113 para a OB-0112: 139 un = 869 un em custódia − 730 un que a OB-0113 ainda embala (7.300 kg' in pf
               and 'CX26-02' in pf and 'volta reservado à OB-0113' in pf and 'dispensad' not in pf.lower(), [r, rev(), r0, sec, q, pf[:700], pr])
+        setv('#fx_g_dev_qtd', '139'); setv('#fx_g_dev_cond', 'Apta · volta ao disponível')   # EST-ONDA0 (E1): quem confere informa
         J("__cen.cenMudar(null, c => __ben.benSaida(c, 'OB-0113', { fluxo: 'Descarte', destino: 'Compostagem', kg: 100 }, 'Igor'))"); r1 = rev()
         r = tocar('Salvar', 'aside[role=dialog]'); pf = pan(); q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value"); st = cen("c.reqs['REQ-041'].itens[0].custodia")
-        t.chk(T_ + ' 3 · outra aba registra um descarte de 100 kg na OB-0113 (a sobra passa a 149): o Salvar é recusado sem gravar, com o que mudou, e o formulário traz a sobra nova',
-              r == 'ok' and rev() == r1 and st == 869 and 'mudou depois que você abriu (sobra 139 → 149 un)' in pf and q == '149', [r, rev(), r1, st, q, pf[:600]])
+        t.chk(T_ + ' 3 · outra aba registra um descarte de 100 kg na OB-0113 (a sobra passa a 149): o Salvar é recusado sem gravar, com o que mudou, quantidade e condição voltam vazias; a ajuda mostra a sobra nova',
+              r == 'ok' and rev() == r1 and st == 869 and 'mudou depois que você abriu (sobra 139 → 149 un)' in pf and q == '' and 'Sobra da OB-0113 para a OB-0112: 149 un' in pf, [r, rev(), r1, st, q, pf[:600]])
+        setv('#fx_g_dev_qtd', '149'); setv('#fx_g_dev_cond', 'Apta · volta ao disponível')   # EST-ONDA0 (E1)
         J("__cen.cenMudar(null, c => __ben.benSaida(c, 'OB-0113', { fluxo: 'Produto', classe: 'A', cx: 10, bruto: 106 }, 'Igor'))"); r1 = rev()
         r = tocar('Salvar', 'aside[role=dialog]'); tc = toast(); st = cen("(()=>{ const it=c.reqs['REQ-041'].itens[0]; return [it.custodia, Math.max(0,it.solicitado-(it.dispensado||0)-it.consumido-it.custodia), c.lotes['Caixa de mamão Formosa 10 kg|CX26-02'].reservado]; })()")
         vt = J("(()=>{ const a=[...document.querySelectorAll('main a')].filter(VIS).find(x=>N(x.innerText)==='Voltar à OB-0112'); return a?a.getAttribute('href'):null; })()")
@@ -910,16 +912,17 @@ try:
         else:
             nb = J("[...document.querySelectorAll('a[href*=\"BEN.dc.html\"],[onclick*=\"BEN.dc.html\"]')].length")
             t.chk(T_ + ' 5 · BEN fora da navegação: o Estoque não tem elo para BEN.dc.html depois da devolução guiada', nb == 0, nb)
-        # revisão A8 (S2): o formulário aberto pela lista (o caminho da primária, sem #dev) com 139; a outra aba já recebeu as 139: o Salvar
+        # revisão A8 (S2): o formulário aberto pela lista (o caminho da primária, sem #dev) vazio e preenchido com139 aptas; a outra aba já recebeu as 139: o Salvar
         # desta aba não grava de novo (antes: movimentos [139, 139] e custódia 869 → 730 → 591)
         carrega(fx, W, H); perfil('Rui'); ir('EST.dc.html', w=W, h=H)
         if W < 500: tocar('Confira recebimentos', 'nav[aria-label="Seções do estoque"]')
         tocar('Receba devoluções', 'nav[aria-label="Seções do estoque"]'); rr = tocar('REQ-041'); q6 = J("(document.querySelector('#fx_g_dev_qtd')||{}).value")
+        setv('#fx_g_dev_qtd', '139'); setv('#fx_g_dev_cond', 'Apta · volta ao disponível')   # EST-ONDA0 (E1)
         J("__cen.cenMudar(null, c => __cen.cenDevolver(c, 'REQ-041', 'Caixa de mamão Formosa 10 kg', 139, true, 'Rui'))"); r1 = rev()
         r = tocar('Salvar', 'aside[role=dialog]'); pf = pan(); q7 = J("(document.querySelector('#fx_g_dev_qtd')||{}).value")
         st = cen("[c.reqs['REQ-041'].itens[0].custodia, c.movs.filter(m=>m.req==='REQ-041'&&m.tipo==='devolucao').map(m=>m.qtd)]")
-        t.chk(T_ + ' 6 · revisão A8: aberto pela lista com 139; a outra aba já recebeu as 139: o Salvar é recusado sem gravar, diz o que mudou e o formulário vem sem sobra',
-              rr == 'ok' and q6 == '139' and r == 'ok' and rev() == r1 and st == [730, [139]] and 'mudou depois que você abriu' in pf and q7 in ('', None), [rr, q6, r, rev(), r1, st, q7, pf[:500]])
+        t.chk(T_ + ' 6 · revisão A8: aberto pela lista vazio; Rui informa139 aptas; a outra aba já recebeu as 139: o Salvar é recusado sem gravar, diz o que mudou e o formulário vem sem sobra',
+              rr == 'ok' and q6 == '' and r == 'ok' and rev() == r1 and st == [730, [139]] and 'mudou depois que você abriu' in pf and q7 in ('', None), [rr, q6, r, rev(), r1, st, q7, pf[:500]])
         shot('sobra_' + str(W)); t.chk(T_ + ' sobra sem erro de JS', not t.errs(), t.errs()); tamanho(1440, 1000)
     if 'sobra' in MODOS: sobra(1440)
     if 'sobra390' in MODOS: sobra(390)
@@ -974,3 +977,4 @@ try:
 finally:
     t.fim()
 sys.exit(0 if all(t.ok) else 1)   # juízo pela linha RESULTADO e pelo código de saída
+
