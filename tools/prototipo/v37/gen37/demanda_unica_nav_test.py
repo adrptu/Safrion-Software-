@@ -67,8 +67,8 @@ try:
     nums=lambda: (J("(document.querySelector('[role=group][aria-label^=\"Indicadores de\"]')||{innerText:''}).innerText") or '').replace('\n',' ')
     cen=lambda e: J(f"(()=>{{const c=window.__cen.cenGet(); return ({e});}})()")   # só na tela O.S. (expõe window.__cen)
     def os_painel(oid):
-        ir('OS.dc.html',w=1.6)
-        J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith({json.dumps(oid)})); r&&r.click();}})()"); time.sleep(.6)
+        ir('OS.dc.html',w=1.6)   # a linha pode começar pelo selo de alerta ("Falta insumo"): acha pela célula com o código
+        J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.split('\\n').some(l=>l.trim()==={json.dumps(oid)})); r&&r.click();}})()"); time.sleep(.6)
     def motivo(txt):
         J(f"(()=>{{const i=document.querySelector('textarea[aria-label=\"Motivo do cancelamento\"]'); if(!i) return; const P=HTMLTextAreaElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,{json.dumps(txt)}); i.dispatchEvent(new Event('input',{{bubbles:true}})); i.dispatchEvent(new Event('change',{{bubbles:true}}));}})()"); time.sleep(.3)
     c.size(1440,1000); ir('SAF.dc.html'); J("localStorage.clear(); sessionStorage.clear()")
