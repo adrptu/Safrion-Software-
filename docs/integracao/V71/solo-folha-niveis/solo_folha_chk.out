@@ -1,0 +1,104 @@
+OK    cópia LAU-2061 Ca → 3.10
+OK    cópia LAU-2061 Mg → 1.25
+OK    cópia LAU-2061 K → 58.65
+OK    cópia LAU-2061 H+Al → 3.00
+OK    cópia LAU-2061 Al → 0
+OK    cópia LAU-2061 P → 18.5
+OK    cópia LAU-2061 MO → 30
+OK    cópia LAU-2061 Fe → 35
+OK    cópia LAU-2061 B → 0.38
+OK    cópia LAU-2061 Argila → 40
+OK    cópia LAU-2063 Ca → 1.25
+OK    cópia LAU-2063 Mg → 0.44
+OK    cópia LAU-2063 K → 136.85
+OK    cópia LAU-2063 H+Al → 3.06
+OK    cópia LAU-2063 Al → 0.30
+OK    cópia LAU-2063 P → 7.5
+OK    cópia LAU-2063 Argila → 36
+OK    cópia LAU-2043 Ca → 3.90
+OK    cópia LAU-2043 Mg → 1.40
+OK    cópia LAU-2043 K → 31.28
+OK    cópia LAU-2043 H+Al → 3.82
+OK    cópia LAU-2043 P → 14.0
+OK    cópia LAU-2043 S → 9.0
+OK    cópia LAU-2043 Argila → 38
+OK    cópia LAU-2044 Ca → 1.10
+OK    cópia LAU-2044 Mg → 0.50
+OK    cópia LAU-2044 K → 23.46
+OK    cópia LAU-2044 H+Al → 3.00
+OK    cópia LAU-2044 Al → 0.10
+OK    cópia LAU-2044 S → 14.0
+OK    cópia LAU-2071 Ca → 2.90
+OK    cópia LAU-2071 Mg → 0.95
+OK    cópia LAU-2071 K → 78.20
+OK    cópia LAU-2071 H+Al → 4.05
+OK    cópia LAU-2071 P → 11.0
+OK    cópia LAU-2071 B → 0.27
+OK    cópia LAU-2071 Argila → 28
+OK    cópia LAU-2072 Ca → 0.30
+OK    cópia LAU-2072 Mg → 0.20
+OK    cópia LAU-2072 K → 31.28
+OK    cópia LAU-2072 Al → 0.60
+OK    cópia LAU-2055 Ca → 3.60
+OK    cópia LAU-2055 Mg → 1.30
+OK    cópia LAU-2055 K → 110.00
+OK    cópia LAU-2055 H+Al → 2.00
+OK    cópia LAU-2055 Argila → 30
+OK    cópia LAU-2050 P → 22
+OK    cópia LAU-2050 extrator → Resina
+OK    cópia LAU-2061 MO unidade → g/dm³
+OK    cópia LAU-2048 K sem unidade → 
+OK    cópia LAU-2071 V do laboratório → 49
+OK    data do cenário → 2026-09-23
+
+== SOLO (F1: CER04) ==
+OK    O1 LAU-2063 P 7,5 Mehlich-1 · argila 36 % → faixa 36–60 → classe → ('36-60', 'médio', 'amarelo')
+OK    O1b marcador do P 7,5: 3º segmento a 82,76 % dele; 56,55 % da barra → (Decimal('82.76'), Decimal('56.55'))
+OK    O1c contraprova: a classe demonstrativa de hoje para o P 7,5 do T2 é "baixo" (cortes 6/12/18/30, sem argila nem cultura) → baixo
+OK    O2 LAU-2063 SB, T, V → (Decimal('2.04'), Decimal('5.10'), Decimal('40.0'))
+OK    O2b V 40,0 → classe da Tab. 9 e alvo V₂ 50 % (sequeiro): abaixo do alvo; NC = (50 − 40) × 5,10 ÷ 100 t/ha → ('adequado', Decimal('0.510'))
+OK    O2c contraprova com o V₂ de demonstração (60 %): NC → 1.020
+OK    O3 LAU-2063 K 136,85 mg/dm³ · T 5,10 ≥ 4 → classe → ('alto', 'azul')
+OK    O4 LAU-2061 K 58,65 · T 7,50 → fonte "adequado" (verde); demonstração de hoje "médio" → (Decimal('7.50'), 'adequado', 'verde', 'médio')
+OK    O5 LAU-2061 P 18,5 · argila 40 → CER04 "alto" · SOJ20 "muito alto" · demonstração "adequado" → ('36-60', 'alto', 'muito alto', 'adequado')
+OK    O6 LAU-2061 SB 4,50 · V 60,0 → na faixa ideal 50–60 (limite superior incluso) → (Decimal('4.50'), Decimal('60.0'), True)
+OK    O7 LAU-2061 MO 30 g/dm³ × fonte em % (Tab. 1) → sem classe → unidade diferente
+OK    O8 LAU-2061 Fe 35 mg/dm³ → sem referência (Anexo 6 não classifica Fe) → False
+OK    O9 T4 S (9,0 + 14,0) ÷ 2 = 11,5 → "alto" (Tab. 11; sem ideal na fonte) → (Decimal('11.5'), ('alto', None))
+OK    O10 LAU-2044 (20–40) m = 100 × 0,10 ÷ 1,76 = 5,68 % → "baixa" · Ca 1,10 → Tab. 4 "adequado" → (Decimal('1.76'), Decimal('5.68'), 'baixa', 'adequado')
+OK    O10b LAU-2072 (Pivô 12, 20–40, mamão) m 50,85 % > 20 (limite do mamão, p. 354) · Ca 0,30 < 0,5 → (Decimal('1.18'), Decimal('50.85'), True, True)
+OK    O11 LAU-2071 V = 4,05 ÷ 8,10 = 50,0 % → no alvo (NC 0); laboratório 49: difere (|1,0| > 0,5); demonstração 70 %: NC 1,620 t/ha → (Decimal('50.0'), Decimal('0'), True, Decimal('1.620'))
+OK    O12 LAU-2071 K 78,20 · T 8,10 · argila 28 → condição "alta" → "médio" (amarelo) → ('alta', 'médio')
+OK    O13 LAU-2055 K 110 · T 7,18 · argila 30 → "adequado" → (Decimal('7.18'), 'alta', 'adequado')
+OK    O13b condição ambígua: T 3,50 com argila 30 % (uma regra diz baixa, a outra alta) → condição ambígua
+OK    O14 LAU-2071 P 11,0 · argila 28 → perenes 16–35 → "médio" → ('16-35', 'médio')
+OK    O15 K 25,5 mg/dm³ com T ≥ 4 (Tab. 12: "≤ 25" e "26 a 50") → entre classes → entre classes
+OK    O16 B 0,27 → CER04 entre classes · SOJ20 baixo → ('entre classes', 'baixo')
+OK    O17 LAU-2021 (T3) coleta 10/08/2024 → validade 10/08/2026 < 23/09/2026 → vencido → ('2026-08-10', True)
+OK    O17b coleta 23/09/2024 → validade 23/09/2026 = hoje → ainda vale (vence só depois) → False
+OK    O18 LAU-2050 (C1 café) P 22 resina × Tab. 3 de perenes (Mehlich-1) → método diferente → método diferente
+OK    O18b fixture: P 22 resina, anual, sequeiro (Tab. 8) → "alto" → alto
+OK    O19 Santa Rita · P · fora do ideal: T1 (alto) + T2 (médio) = 610 ha; T4 fica "laudo de zona (Z2)" → (['T1', 'T2'], Decimal('610'), True)
+OK    O20 exemplo novo do T7: SB 2,41 · T 5,91 · V 40,78 % · NC (50 − V) × T ÷ 100 = 0,545 t/ha → (Decimal('2.41'), Decimal('5.91'), Decimal('40.78'), Decimal('0.545'))
+OK    O20b exemplo de hoje (V 66 %) com alvo 50 %: sem calagem (contraprova da jornada D-23) → (Decimal('66.0'), True)
+OK    O21 LAU-2043 sat. K = 100 × 0,08 ÷ 9,20 = 0,87 % → "baixa" (adequada 2 a 3 %) → (Decimal('9.20'), Decimal('0.87'), 'baixa')
+OK    O22 LAU-2063 Ca:Mg = 1,25 ÷ 0,44 = 2,84 → "adequada", mas Mg 0,44 < 0,5 (mínimo da mesma observação) → (Decimal('2.84'), True, True)
+OK    O23 P (argila 36–60): 12,0 → "adequado"; 12,05 → "alto"; 8,05 → entre classes (8,0 e 8,1) → ('adequado', 'alto', 'entre classes')
+OK    O23b V 60,5 → Tab. 9 entre classes (60 e 61) e acima do ideal 50–60 (p. 84) → ('entre classes', True)
+OK    O24 P 15,0 · argila 30: sequeiro "médio" × irrigado "baixo"; V₂ 50 % × 60 % (p. 84) → ('médio', 'baixo')
+
+== FOLHA (F2: SOJ20 Tab. 7 e CER04 cap. 10) ==
+OK    F1 LAU-2023 soja · 3º trifólio sem pecíolo · R2 · K 15,0 g/kg × 18,0–25,0 → "baixo" (laranja) → ('baixo', 'laranja')
+OK    F1b fora da faixa primeiro: P, K, Mg, B, Mn e Zn baixos; N, Ca, S, Cu e Fe adequados → ['B', 'K', 'Mg', 'Mn', 'P', 'Zn']
+OK    F1c K em % (1,50 dag/kg) × 10 = 15,0 g/kg → mesma classe → baixo
+OK    F2 o mesmo K com pecíolo: Tab. 7 não vale (órgão); CER04 Tab. 2 (3ª folha com pecíolo, florescimento) → abaixo da faixa 17–25 → abaixo da faixa
+OK    F3 estádios: R2 com crescimento não cadastrado → na época; R1 sem tipo → fora; V6 → fora → ('na época', 'fora da época de referência', 'fora da época de referência')
+OK    F4 LAU-2022 café · 3º/4º par · 12/01/2026 (época dez–jan) → abaixo: P, K, Mg, B, Zn → ['B', 'K', 'Mg', 'P', 'Zn']
+OK    F4b café coletado em 05/03/2026 → fora da época (dez–jan) → fora da época de referência
+OK    F5 LAU-2025 mamão Pivô 2 · pecíolo → abaixo: P e K; micronutrientes: sem referência na fonte → ['K', 'P']
+OK    F5b leitura cruzada Pivô 2: K do solo (LAU-2055) adequado × K da folha abaixo — só leitura → ('adequado', 'abaixo da faixa')
+OK    F6 Pivô 6: solo K 20 mg/dm³ (T 6,55; argila 30) → "baixo"; folha K 28 g/kg → abaixo de 35–50 → (Decimal('6.55'), 'baixo', 'abaixo da faixa')
+OK    F7 LAU-2023 coletado em 18/12/2025 é da safra 2025/26 (encerrada): leitura histórica, não vale para 2026/27 → True
+OK    F8 LAU-2048 K 17,4 sem unidade → inconsistente, sem classe → True
+
+Resumo: 98 OK · 0 falhas
