@@ -1,0 +1,17 @@
+EXPECTED FAIL P2 tanque/vazão iguais no painel e mobile: The expression evaluated to a falsy value:
+
+  assert.ok(v.pan_prep.includes(mobileCalda.litros+' L')&&v.pan_prep.includes(mobileCalda.vazao))
+
+EXPECTED FAIL P4 adjuvante sem consumo registrado: Expected values to be strictly equal:
++ actual - expected
+
++ '47,5 L'
+- 'Sem registro'
+
+EXPECTED FAIL P5 app mostra falta para terminar15L: The input did not match the regular expression /falta para terminar 15 L/. Input:
+
+'com você 65 L'
+
+3/3 regressões reproduzidas na base; blocos reais/Node, não navegador
+
+

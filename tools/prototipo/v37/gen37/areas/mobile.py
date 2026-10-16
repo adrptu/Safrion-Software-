@@ -70,7 +70,6 @@ F02=next(l for l in D2.LOTES if l['lote']=='F26-02')
 F02_LIVRE=F02['fisico']-F02['quarentena']-F02['reservado']                            # 480 L
 
 EQ421='Marcos · Pulverizador PJ-3030 + Trator 03'
-CALDA=dict(litros='2.000', vazao='120 L/ha', dose='0,5 L/ha de Fungicida A', cobre='16,7 ha', por_tanque='8,3 L')
 P,POL=D.PIVO,D.POLITICA_AGUA
 AREA_PIVO=80; AREA_COB=round(AREA_PIVO*P['cobertura_pct']/100,1); AREA_RESTO=round(AREA_PIVO-AREA_COB,1)   # ≈11,6 · ≈68,4 ha
 IRR=dict(janela='20:00–amanhã 10:31', ini='20:02', fim='amanhã 10:33', fim_d='24/09 10:33', dur='14,5 h', au='AU-3098', lib='LIB-2287', ex='EX-5120', medido='10,6', dif='−1,9%')
@@ -219,13 +218,17 @@ function mbPasso(c, o){
            fn: (self) => cenMudar(self, c => mbIniciar(c, o.id)), tt: 'Iniciar turno na ' + o.id };
 }
 // Insumos da ordem: a retirar, entregues a confirmar, com o operador (custódia) ou já consumidos.
-function mbIns(c, o){ const r = mbReq(c, o); if (!r) return [];
-  return r.itens.map(i => { const L = i.prod + ' · lote ' + i.lote + (i.emb ? ' · ' + i.emb : ''); const k = mbConf(c, o.id, i.prod);
-    if (k) return { t: L, s: 'em conferência · relatado ' + cenNum(k.relatado) + ' ' + k.un + ' · com você ' + cenNum(i.custodia) + ' ' + i.un, st: mbTx('yellow') };
-    if (i.custodia > 0 && !i.confirmado) return { t: L, s: 'entregue ' + cenNum(i.custodia) + ' ' + i.un + ' · a confirmar', st: mbTx('yellow') };
-    if (i.custodia > 0) return { t: L, s: 'com você ' + cenNum(i.custodia) + ' ' + i.un, st: mbTx('green') };
-    const sal = cenSaldoEntregar(i); if (sal > 0) return { t: L, s: 'retirar ' + cenNum(sal) + ' ' + i.un, st: mbTx('gray') };
-    return { t: L, s: 'consumido ' + cenNum(i.consumido) + ' ' + i.un, st: mbTx('gray') }; }); }
+function mbIns(c, o){
+  return cenInsumosOrdem(c,o).map(x => {
+    const k=mbConf(c,o.id,x.p), lotes=x.itens.map(i=>i.lote).filter(Boolean).join(', ');
+    let st='gray', sit=x.temReq?'Com você '+(x.custodia===null?'não informado':cenNum(x.custodia)+' '+x.un):'Consumo sem registro';
+    if(k){ st='yellow'; sit='Em conferência · relatado '+cenNum(k.relatado)+' '+k.un; }
+    else if(x.confirmar){ st='yellow'; sit+=' · confirmar retirada'; }
+    else if(x.custodia>0) st='green';
+    if(x.falta>0) st='yellow';
+    return {t:x.p+(lotes?' · lote '+lotes:''), s:sit+' · '+cenInsumoSaldoTxt(x), st:mbTx(st)};
+  }); }
+
 function mbCard(self, c, o){ const p = mbPasso(c, o); const ec = MB_ETAPA_COR[o.etapa] || 'gray'; const ins = mbIns(c, o);
   return { id: o.id, tipo: o.tipo, loc: o.talhao + ' · ' + cenNum(o.area, 1) + ' ha · janela ' + mbJan(o), real: mbRealTxt(o),
     e_t: o.etapa, e_st: mbChs(ec), e_dot: mbDot(ec), p_t: p.chip[0], p_st: mbChs(p.chip[1]), p_dot: mbDot(p.chip[1]),
@@ -444,7 +447,6 @@ v.ack=()=>{ if(self.state.ack) return; self.setState({ack:true,g2toast:'Ciência
               'Fechar o turno não encerra a ordem: encerrar é no escritório, com apontamentos enviados e nada em custódia.')
 
     # ---- MB-02det · detalhe da ordem escolhida (cenário) ----
-    PREP421=f"{CALDA['litros']} L de calda · {CALDA['vazao']} · cobre {CALDA['cobre']} · {CALDA['por_tanque']} de Fungicida A ({CALDA['dose']})"
     corpo=(
       sigbar()
       + mcont('Minhas ordens',H('d_aqui'),H('d_falta'),H('d_prox'))
@@ -481,16 +483,17 @@ v.d_falta=({{fechar:'hectares, horas e consumo do turno',confirmar:'confirmar o 
   outro:'fechar o turno da '+(tt?tt.os:'')+' · saldo de '+cenNum(rs,1)+' ha',devolver:'devolver a sobra '+cenAoAlmox()+': '+mbSobraTxt(mbSobra(c,o)),
   enviar:cenNum(mbProv(o),1)+' ha no aparelho, aguardando sinal',rever:'decisão de '+g2alcQuem('AL-02')+' sobre a área restante',none:p.feita?'encerramento no escritório':'liberação no escritório'}})[p.k];
 const kv=[{{l:'Versão',t:o.versao}},{{l:'Janela',t:mbJan(o)}},{{l:'Local',t:o.talhao+' · '+cenNum(o.area,1)+' ha'}},{{l:'Andamento',t:mbRealTxt(o)}}];
-if(o.id==='OS-0421'){{ kv.push({{l:'Equipe/conjunto',t:{json.dumps(EQ421)}}}); kv.push({{l:'Preparo por tanque',t:{json.dumps(PREP421)}}}); }}
+if(o.id==='OS-0421'||o.id==='OS-0424'){{ const prep=cenPreparoOrdem(c,o); kv.push({{l:'Preparo da versão vigente',t:cenPreparoTxt(prep)}}); }}
 v.d_kv=kv; v.d_424=o.id==='OS-0424';
 v.d_req=r?r.id:'sem requisição'; v.d_hasins=(o.ins||[]).length>0;
-v.d_ins=(o.ins||[]).map(x=>{{ const it=r&&r.itens.find(i=>i.prod===x.p);
+const dProj=cenInsumosOrdem(c,o);
+v.d_ins=(o.ins||[]).map(x=>{{ const it=r&&r.itens.find(i=>i.prod===x.p), ip=dProj.find(i=>i.p===x.p);
   let cst='gray', ct=r?'Peça ao escritório antes de usar':'Reserva ao liberar a ordem';
   const kc=mbConf(c,o.id,x.p); if(kc){{cst='yellow'; ct='Em conferência · '+cenConfTxt(kc,c)+' · '+cenConcQuem(c,[kc]);}}
   else if(it){{ if(it.custodia>0&&!it.confirmado){{cst='yellow'; ct='Entregue '+cenNum(it.custodia)+' '+it.un+' · confirme a retirada';}} else if(it.custodia>0){{cst='green'; ct='Com você '+cenNum(it.custodia)+' '+it.un;}} else if(cenSaldoEntregar(it)>0){{cst='gray'; ct='Retirar '+cenNum(cenSaldoEntregar(it))+' '+it.un+' com '+(cenAlmoxNome()||'o almoxarife');}} else {{cst='gray'; ct='Nada em custódia';}} }}
   return {{t:x.p+' · '+cenNum(x.dose,2)+' '+x.un+'/ha × '+cenNum(o.area,2)+' ha = '+cenNum(x.tot)+' '+x.un,
           s:it?('lote '+it.lote+(it.emb?' · '+it.emb:'')+' · entregue '+cenNum(it.entregue)+' '+it.un+' · consumido '+cenNum(it.consumido)+' '+it.un):(r?'fora da '+r.id+' · nada com você':'sem requisição'),
-          c:ct, st:mbTx(cst)}}; }});
+          c:ct+' · '+cenInsumoSaldoTxt(ip), st:mbTx(ip.falta>0?'yellow':cst)}}; }});
 const aps=(o.ap||[]); v.d_semap=!aps.length; const apx=Math.max(0,aps.length-4); v.d_apmais=apx>0; v.d_apmais_t=apx?apx+(apx>1?' turnos anteriores':' turno anterior'):'';
 v.d_aps=aps.slice(-4).map(a=>{{ const ofl=a.sinc===false; const cc=ofl?'yellow':(a.st==='Conferido'?'green':((a.st==='Previsto'||a.st===CEN_AP_DESC)?'gray':'yellow'));
   return {{t:'Dia '+a.dia+' · '+a.d+' · '+cenNum(a.ha,1)+' ha'+(a.h?' em '+cenNum(a.h,1)+' h':''), c:ofl?'No aparelho · aguardando sinal':a.st, st:mbChs(cc), dot:mbDot(cc)}}; }});
@@ -1405,3 +1408,4 @@ function mbAtvCurtos(c, m, u){ const hoje = m.hoje; const t = mbTurno(c); let os
 function mbPillD(on, dis){ return mbPill(on) + (dis ? ' opacity: .55; cursor: not-allowed;' : ''); }
 try { window.__mbman = { mbUsuario, mbOmsDe, mbAtvCurtos, mbManView, mbCond }; } catch (e) {}
 '''
+

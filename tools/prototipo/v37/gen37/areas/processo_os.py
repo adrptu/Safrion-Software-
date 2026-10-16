@@ -766,10 +766,11 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   kv.push(['Padrão · versão',[a.orig||'—'].concat(vp).join(' · ')]);  // sem repetir a recomendação
   v.pan_atv=kv.map(x=>({l:x[0],v:x[1]}));
   // insumos: usado = consumido pelos apontamentos (cenário); situação e trilha do almoxarifado ao app, por item da requisição
+  const consumoProj=cenInsumosOrdem(cenGet(),o);
   v.pan_ins=(o.ins||[]).map(x=>{ const it=(o.r&&o.etapa!=='Canceladas')?(o.r.itens.find(i=>i.prod===x.p)||null):null;
-    const usado=it?it.consumido:((o.id==='OS-0417')?x.tot:(o.area?cenQtd(x.dose,o.realizado||0):0)); const tr=osTrilha(o,it);
+    const ip=consumoProj.find(i=>i.p===x.p), usado=ip.consumido; const tr=osTrilha(o,it);
     const og=osOrigem(o,x);
-    return {p:x.p,g:(x.g||'')+(og?((x.g?' · ':'')+og):''),dose:nd(x.dose)+' '+x.un+'/ha',tot:nd(x.tot)+' '+x.un,usado:(usado?nd(usado)+' '+x.un:'—'),sit:osInsSit(o,x,it),tr,hasTr:tr.length>0}; });
+    return {p:x.p,g:(x.g||'')+(og?((x.g?' · ':'')+og):''),dose:nd(x.dose)+' '+x.un+'/ha',tot:nd(x.tot)+' '+x.un,usado:(usado!==null?nd(usado)+' '+x.un:'Sem registro'),sit:(o.etapa==='Canceladas'?osInsSit(o,x,it):((ip.temReq?osInsSit(o,x,it)+' · ':'')+cenInsumoSaldoTxt(ip))),tr,hasTr:tr.length>0}; });
   /* 14/10 (proprietário: "faltando edição de ... recursos (pessoas e máquinas)"): recursos da alocação vigente (alocacao.py: semana do PCP + trocas
      do cenário) e troca por outro da mesma função antes da execução; quem troca é o PCP ou quem libera (AL-01). Sem o papel, "Trocar" fica
      indisponível com o motivo. Substituto ocupado, em manutenção ou bloqueado aparece com o motivo e não é escolhível (o comando recusa igual). */
@@ -786,11 +787,12 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
       ok:()=>{ const R=cenMudar(self,c=>alTrocar(c,o.id,r.r,rt.para,PF)); if(R&&!R.erro) self.setState({rt:null,g2toast:R.msg||'Recurso trocado.'}); },
       cancel:()=>self.setState({rt:null})}; });
   v.pan_hasRec=v.pan_rec.length>0;
-  const EQ={'Pulverização':{cap:3000,un:'L',vaz:100,nome:'tanque útil 3.000 L · 100 L/ha'},'Adubação a lanço':{cap:3000,un:'kg',nome:'distribuidor 3.000 kg'}}[a.op];
+  const EQ={'Adubação a lanço':{cap:3000,un:'kg',nome:'distribuidor 3.000 kg'}}[a.op];
   const areaP=(o.etapa==='Em execução')?(o.saldo||0):(o.area||0);
   let prep=''; if(EQ&&areaP>0&&(o.ins||[]).length){ const ac=EQ.vaz?EQ.cap/EQ.vaz:EQ.cap/(o.ins.reduce((t,x)=>t+x.dose,0)||1); const n=Math.ceil(areaP/ac-1e-9); const ult=areaP-ac*(n-1);
     prep=n+(n>1?' cargas':' carga')+' ('+EQ.nome+'): '+nd(ac,1)+' ha por carga'+(ult<ac-1e-9?'; última '+nd(ult,1)+' ha':'')+' · '+(o.ins||[]).map(x=>x.p+' '+nd(x.dose*ac,1)+' '+x.un+' por carga').join(', ')+(o.etapa==='Em execução'?' (saldo de '+nf(o.saldo)+' ha)':''); }
   v.pan_prep=prep; v.pan_hasPrep=!!prep&&['Liberadas','Em execução'].indexOf(o.etapa)>=0;
+  if(a.op==='Pulverização'){ const p=cenPreparoOrdem(rcC,o); v.pan_prep=cenPreparoTxt(p); v.pan_hasPrep=['Liberadas','Em execução'].indexOf(o.etapa)>=0; }
   v.pan_fichas=o.id==='OS-0424';
   // retirada: o link ao almoxarifado só enquanto houver saldo a entregar; entregue e confirmado, ficam só as fichas de carga
   const exe=(o.ins||[]).length>0&&['Liberadas','Em execução'].indexOf(o.etapa)>=0;
@@ -1778,3 +1780,4 @@ def _car_rev_html():
             f'<label style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 700;">Carência na bula (dias)<input type="text" inputmode="numeric" value="{H("car_bula_d")}" onChange="{H("car_bula_set")}" style="{inp} width: 9em;"></label>'
             f'<button type="button" onClick="{H("car_bula_go")}" style="{H("car_bula_st")}">Registrar carência conferida</button></div>'
             f'<sc-if value="{H("car_bula_hasErr")}" hint-placeholder-val="{F()}"><div role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">{H("car_bula_err")}</div></sc-if></div></sc-if>')
+
