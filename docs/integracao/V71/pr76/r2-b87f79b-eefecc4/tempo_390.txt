@@ -1,0 +1,18 @@
+_render_base CA-01x-os0420 +0.0s {"main": [629, 2019], "cartoes": [], "rolas": [[267, 267], [131, 131], [99, 99]]}
+_render_base CA-01x-os0420 +1.5s {"main": [629, 2036], "cartoes": [], "rolas": [[284, 284], [131, 131], [99, 99]]}
+_render_base CA-01x-os0420 +3.0s {"main": [629, 2036], "cartoes": [], "rolas": [[284, 284], [131, 131], [99, 99]]}
+_render_base CA-03det +0.0s {"main": [601, 1429], "cartoes": [], "rolas": [[352, 352], [366, 366]]}
+_render_base CA-03det +1.5s {"main": [601, 1369], "cartoes": [], "rolas": [[352, 352], [306, 306]]}
+_render_base CA-03det +3.0s {"main": [601, 1369], "cartoes": [], "rolas": [[352, 352], [306, 306]]}
+_render_base PL-03 +0.0s {"main": [689, 3022], "cartoes": [457, 628, 935, 579], "rolas": [[283, 283], [387, 387], [405, 405]]}
+_render_base PL-03 +1.5s {"main": [689, 3022], "cartoes": [457, 628, 935, 579], "rolas": [[283, 283], [387, 387], [405, 405]]}
+_render_base PL-03 +3.0s {"main": [689, 3022], "cartoes": [457, 628, 935, 579], "rolas": [[283, 283], [387, 387], [405, 405]]}
+_render_comp CA-01x-os0420 +0.0s {"main": [629, 2019], "cartoes": [], "rolas": [[267, 267], [131, 131], [99, 99]]}
+_render_comp CA-01x-os0420 +1.5s {"main": [629, 2036], "cartoes": [], "rolas": [[284, 284], [131, 131], [99, 99]]}
+_render_comp CA-01x-os0420 +3.0s {"main": [629, 2036], "cartoes": [], "rolas": [[284, 284], [131, 131], [99, 99]]}
+_render_comp CA-03det +0.0s {"main": [601, 1429], "cartoes": [], "rolas": [[352, 352], [366, 366]]}
+_render_comp CA-03det +1.5s {"main": [601, 1369], "cartoes": [], "rolas": [[352, 352], [306, 306]]}
+_render_comp CA-03det +3.0s {"main": [601, 1369], "cartoes": [], "rolas": [[352, 352], [306, 306]]}
+_render_comp PL-03 +0.0s {"main": [689, 3022], "cartoes": [457, 628, 935, 579], "rolas": [[283, 283], [387, 387], [405, 405]]}
+_render_comp PL-03 +1.5s {"main": [689, 3022], "cartoes": [457, 628, 935, 579], "rolas": [[283, 283], [387, 387], [405, 405]]}
+_render_comp PL-03 +3.0s {"main": [689, 3022], "cartoes": [457, 628, 935, 579], "rolas": [[283, 283], [387, 387], [405, 405]]}
