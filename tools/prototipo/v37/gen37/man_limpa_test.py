@@ -81,7 +81,8 @@ try:
     tb = J("(()=>{const t=[...document.querySelectorAll('[role=toolbar][aria-label=\"Visão das ordens\"]')].find(t=>t.getClientRects().length); if(!t) return null; return [...t.querySelectorAll('button')].map(b=>[b.getAttribute('aria-label'),b.innerText.trim(),!!b.querySelector('svg'),b.getAttribute('aria-pressed')]);})()")
     J("(()=>{const b=[...document.querySelectorAll('[role=toolbar][aria-label=\"Visão das ordens\"] button')].find(b=>b.getAttribute('aria-label')==='Kanban'); if(b) b.click();})()"); time.sleep(.6)
     kb = J("!!document.querySelector('[aria-label=\"Kanban das ordens\"]')&&document.querySelector('[aria-label=\"Kanban das ordens\"]').getClientRects().length>0")
-    chk('L6 Lista e Kanban em ícones com nome; o ícone Kanban abre o quadro', tb == [['Lista', '', True, 'true'], ['Kanban', '', True, 'false']] and kb, [tb, kb])
+    # DS VIS-05 (padroes-1510, 15/10/2026: "toda lista tem Tabela e Cartões"): Cartões entra entre a Lista e o Kanban
+    chk('L6 Lista, Cartões e Kanban em ícones com nome; o ícone Kanban abre o quadro', tb == [['Lista', '', True, 'true'], ['Cartões', '', True, 'false'], ['Kanban', '', True, 'false']] and kb, [tb, kb])
     # L8 · Abastecimentos (oráculo: c.abast cujo ativo é do grupo; o grupo com mais lançamentos, que não seja o total)
     vis('ativos&modo=abastecimentos'); setf('grupo', ''); b0 = J(RIDS) or []
     ga = J("(()=>{ const c=window.__man.manGet(); const g={}; (c.abast||[]).forEach(b=>{ const k=(c.ativos[b.aid]||{}).grupo; if(k) (g[k]=g[k]||[]).push(b.id); });"

@@ -86,7 +86,7 @@ function ma_condTxt(c,a){ const i=a.condInfo||{}; if(a.cond==='Bloqueado') retur
 function ma_hashLer(){ const o={}; String(decodeURIComponent((location.hash||'').slice(1))).split('&').forEach(p=>{ const i=p.indexOf('='); if(i>0) o[p.slice(0,i)]=p.slice(i+1); }); return o; }
 function ma_hashDe(st){ const p=[]; const pg=st.pg, pan=st.pan;
   if(!pg&&st.vis) p.push('vis='+st.vis); if(!pg&&st.vis==='semordem'&&st.tipo) p.push('tipo='+st.tipo);
-  if(!pg&&st.vis==='ativos'&&st.amodo==='abast') p.push('modo=abastecimentos'); if(!pg&&st.vis==='ordens'&&st.omodo==='kanban') p.push('modo=kanban');
+  if(!pg&&st.vis==='ativos'&&st.amodo==='abast') p.push('modo=abastecimentos'); if(!pg&&st.vis==='ordens'&&(st.omodo==='kanban'||st.omodo==='cartoes')) p.push('modo='+st.omodo);
   if(pg) p.push(pg.k+'='+pg.id); if(pan&&['om','achado','venc','leitura'].indexOf(pan.k)>=0&&pan.id) p.push(pan.k+'='+pan.id);
   if(st.np&&st.np.novoDe) p.push('novo=plano:'+st.np.novoDe); return p.join('&'); }
 function ma_hashSync(st){ try{ const h=ma_hashDe(st); if(decodeURIComponent((location.hash||'').slice(1))!==h) history.replaceState(null,'',location.pathname+location.search+(h?'#'+h:'')); }catch(e){} }
@@ -98,7 +98,7 @@ function ma_abertura(c,pf){ const pa=manPapelDe(pf);
   return {vis:'ordens',rot:''}; }
 function ma_aplicaHash(self,h){ const c=manGet(); const s={pan:null,pg:null,rec:null};
   const ab=ma_abertura(c,g2perfil()); s.vis=h.vis||((h.om)?'ordens':(h.achado||h.venc?'semordem':ab.vis)); s.rot=(!h.vis&&!h.om&&s.vis==='ordens')?ab.rot:'';
-  if(h.tipo) s.tipo=h.tipo==='achados'?'achados':(h.tipo==='vencimentos'?'venc':''); if(h.modo==='abastecimentos'){ s.vis='ativos'; s.amodo='abast'; } if(h.modo==='kanban') s.omodo='kanban';
+  if(h.tipo) s.tipo=h.tipo==='achados'?'achados':(h.tipo==='vencimentos'?'venc':''); if(h.modo==='abastecimentos'){ s.vis='ativos'; s.amodo='abast'; } if(h.modo==='kanban'||h.modo==='cartoes') s.omodo=h.modo;
   if(h.ativo&&c.ativos[h.ativo]) s.pg={k:'ativo',id:h.ativo}; if(h.plano&&c.planos[h.plano]) s.pg={k:'plano',id:h.plano};
   if(h.om&&c.oms[h.om]) s.pan={k:'om',id:h.om,modal:true}; else if(h.achado&&c.achados[h.achado]) s.pan={k:'achado',id:h.achado,modal:true};
   else if(h.venc) s.pan={k:'venc',id:h.venc,modal:true}; else if(h.leitura) s.pan={k:'leitura',id:h.leitura,modal:true};
@@ -300,8 +300,9 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2pe
   v.rotinas=[{t:'Aguardam você · '+nVoce,on:String(st.rot==='voce'),st:ma_pill(st.rot==='voce'),go:()=>self.setState({rot:st.rot==='voce'?'':'voce'})},{t:'Esta semana',on:String(st.rot==='semana'),st:ma_pill(st.rot==='semana'),go:()=>self.setState({rot:st.rot==='semana'?'':'semana'})},
     {t:'Com conflito · '+os.filter(o=>ma_temConf(c,o)).length,on:String(st.rot==='conf'),st:ma_pill(st.rot==='conf'),go:()=>self.setState({rot:st.rot==='conf'?'':'conf'})},
     {t:'Espera por peça · '+ab.filter(o=>manFalta(c,o).length).length,on:String(st.rot==='peca'),st:ma_pill(st.rot==='peca'),go:()=>self.setState({rot:st.rot==='peca'?'':'peca'})}];
-  v.om_lista=(st.omodo||'lista')==='lista'; v.om_kanban=st.omodo==='kanban';
-  v.om_modos=[['lista','Lista','v_lista'],['kanban','Kanban','v_kanban']].map(([k,t],i)=>({k,t,i:String(i),li:k==='lista',ka:k==='kanban',on:String((st.omodo||'lista')===k),go:()=>self.setState({omodo:k})}));
+  /* DS VIS-05 (15/10/2026: "toda lista tem Tabela e Cartões"): Lista | Cartões | Kanban; Cartões é a mesma grade g_om em cartões (g2lib.g2modosFim) */
+  v.om_lista=['lista','cartoes'].indexOf(st.omodo||'lista')>=0; v.om_kanban=st.omodo==='kanban'; self.g2modoExterno=(gid)=>(gid==='g_om'&&self.state.omodo==='cartoes')?'cartoes':'tabela';
+  v.om_modos=[['lista','Lista','v_lista'],['cartoes','Cartões','v_cartoes'],['kanban','Kanban','v_kanban']].map(([k,t],i)=>({k,t,i:String(i),li:k==='lista',ca:k==='cartoes',ka:k==='kanban',on:String((st.omodo||'lista')===k),go:()=>self.setState({omodo:k})}));
   v.semana=st.rot==='semana'; const dias={}; os.filter(o=>manAberta(o)&&o.janIso&&o.janIso<=dom).forEach(o=>{ const d=o.janIso<c.hoje?'vencidas':o.janIso; (dias[d]=dias[d]||[]).push(o); });
   v.sem_dias=Object.keys(dias).sort().map(d=>{ const esp={}; dias[d].forEach(o=>{ esp[o.esp]=(esp[o.esp]||0)+(Number(o.tempo)||0); });
     return {t:d==='vencidas'?'Atrasadas':(manSem(d)+' '+manBr(d)),oms:dias[d].map(o=>o.id).join(', '),hh:Object.keys(esp).map(k=>k+' '+manN(esp[k],1)+' HH').join(' · ')}; });
@@ -930,7 +931,7 @@ def _visoes():
     g_so=G([dict(k='item',l='Item',w=120),dict(k='ativo',l='Ativo · leitura',w=160),dict(k='oque',l='O que',w=170),dict(k='prazo',l='Prazo',t='num',w=130),
             dict(k='pecas',l='Peças',w=120),dict(k='prox',l='Próximo passo',w=140)],'g_so')
     g_om=G([dict(k='om',l='Ordem · ativo',w=120),dict(k='serv',l='Serviço · tipo',w=140),dict(k='jan',l='Janela',t='date',w=75),dict(k='fase',l='Fase',w=100),
-            dict(k='pend',l='Pendência',w=145),dict(k='exe',l='Executante',w=90),dict(k='tempo',l='Tempo',t='num',w=80),dict(k='custo',l='Custo',t='num',w=100)],'g_om',cartoes=False)   # Lista | Kanban próprios: o Kanban já cumpre o papel dos cartões (15/10/2026)
+            dict(k='pend',l='Pendência',w=145),dict(k='exe',l='Executante',w=90),dict(k='tempo',l='Tempo',t='num',w=80),dict(k='custo',l='Custo',t='num',w=100)],'g_om',cartoes='externo')   # DS VIS-05: Cartões entra no seletor Lista | Cartões | Kanban da tela
     g_at=G([dict(k='ativo',l='Ativo · local',w=150),dict(k='cond',l='Condição',w=120),dict(k='leit',l='Leitura',t='num',w=95),dict(k='prox',l='Próxima manutenção',t='num',w=145),
             dict(k='ab',l='Em aberto',w=120),dict(k='custo',l='Custo no mês',t='num',a='r',d=2,pre='R$ ',agg='sum',w=110),dict(k='cons',l='Consumo',w=95)],'g_at',total=True,
            qf=dict(k='cond',l='condição'))
@@ -945,7 +946,7 @@ def _visoes():
     from areas.processo_os import _kanban
     modos=(f'<div class="g2visoes-w"><div class="g2visoes" role="toolbar" aria-label="Visão das ordens">'
            + FOR('om_modos','x',f'<button type="button" data-i="{H("x.i")}" aria-label="{H("x.t")}" data-dica="{H("x.t")}" aria-pressed="{H("x.on")}" onClick="{H("x.go")}">'
-                 + IF('x.li',icon('v_lista',16),True) + IF('x.ka',icon('v_kanban',16)) + '</button>',2) + '</div></div>')
+                 + IF('x.li',icon('v_lista',16),True) + IF('x.ca',icon('v_cartoes',16)) + IF('x.ka',icon('v_kanban',16)) + '</button>',3) + '</div></div>')
     ordens=(flt(f'<div role="group" aria-label="Filtrar por fase" style="display: flex; flex-wrap: wrap; gap: 6px;">'
                   + FOR('fchips','fc',f'<button type="button" aria-pressed="{H("fc.on")}" onClick="{H("fc.go")}" style="{H("fc.st")}">{H("fc.t")} <span style="opacity: .75;">{H("fc.n")}</span></button>',6) + '</div>',
                   _chips('rotinas','Rotina'),'<span style="flex-grow: 1;"></span>',modos)

@@ -10,14 +10,16 @@ tabela e 'Cartões'"), no Chrome headless, como a pessoa usa (clique e toque de 
   M5  390 px (toque): cartões numa coluna, sem rolagem lateral; botões do seletor com 44 px
   M6  Planos agronômicos › Atividades do plano: abre em Cartões (a lista própria); a Tabela tem DAP, Atividade, Insumos, Custo/ha e ⋯,
       as mesmas atividades com o filtro por operação; clicar na linha abre os insumos como o cartão; a escolha fica e vai ao endereço
-  M7  telas com visões próprias (O.S.) ou Kanban próprio (MA › Ordens, BEN) não ganham o seletor
+  M7  DS VIS-05 ("toda lista tem Tabela e Cartões"): O.S. (seletor de visões da VISOES-1), MA › Ordens e BEN (Lista | Kanban próprios) ganham
+      Cartões no próprio seletor, sem um 2º seletor na barra da grade; os mesmos itens da Tabela (e com Agrupar por, na O.S.)
   M8  sem erro de JavaScript
 Telas: Planejar safra › etapa 1 (g_saf), Atividades do plano (PA), Cadastros › Parceiros (CD-05 g_forn), Manutenção › Ativos (MA g_at),
-Estoque › Recebimento (EST g_rec) e Cadastros › Produtos (CD-06 g_itm, árvore). Dados sintéticos; render em RENDER_DIR ou _render.
+Estoque › Recebimento (EST g_rec), Configurações › Usuários (CF-01 g_pes, lista sem colunas essenciais: visoes.MODO_LISTAS) e Cadastros ›
+Produtos (CD-06 g_itm, árvore). Dados sintéticos; render em RENDER_DIR ou _render.
 Uso (de gen37/): CHROME_BIN=… SAFRION_DADOS=sintetico python3 -B cartoes_test.py   (sai 1 se falhar). Emulação; não é aparelho físico."""
 import sys, os, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir, agrupar_por
+from comp_lib import Chrome, servir, agrupar_por, troca_visao
 
 R = os.environ.get('RENDER_DIR') or os.path.join(HERE, '_render')
 ok_n = 0; falhas = []
@@ -88,6 +90,7 @@ CASOS = [
     ('CD-05 Parceiros', 'CD-05.dc.html', 'g_forn'),
     ('MA Ativos', 'MA.dc.html#vis=ativos', 'g_at'),
     ('EST Recebimento', 'EST.dc.html', 'g_rec'),
+    ('CF-01 Pessoas', 'CF-01.dc.html', 'g_pes'),
 ]
 try:
     c.aparelho(1440, 900, 1, False)
@@ -109,7 +112,7 @@ try:
         chk(f'M2b {nome}: cartões em lista com rótulo (role=list/listitem)', lst and all(x[0] and x[1] > 0 for x in lst), lst)
         # busca (pelo título do 1º item) nos dois modos
         # o termo é a palavra mais longa do título do 1º cartão, sem o texto de links e botões da célula (o "Editar" da safra)
-        termo = J(f"(()=>{{const t=document.querySelector('[data-g2cd=\"{gid}\"] .g2cd-tit'); if(!t) return ''; const k=t.cloneNode(true); k.querySelectorAll('a,button,[role=img]').forEach(x=>x.remove()); return k.textContent.replace(/[^A-Za-zÀ-ÿ0-9 ]/g,' ').trim().split(/\\s+/).sort((a,b)=>b.length-a.length)[0]||''}})()")
+        termo = J(f"(()=>{{const t=document.querySelector('[data-g2cd=\"{gid}\"] .g2cd-tit'); if(!t) return ''; let x=t.innerText; t.querySelectorAll('a,button,[role=img]').forEach(e=>{{ x=x.replace(e.innerText,' '); }}); return x.replace(/[^A-Za-zÀ-ÿ0-9 ]/g,' ').trim().split(/\\s+/).sort((a,b)=>b.length-a.length)[0]||''}})()")
         busca(gid, termo); c1 = ids_car(gid); modo(gid, 'tabela'); t1 = ids_tab(gid)
         chk(f'M2c {nome}: com a busca "{termo}" os dois modos mostram os mesmos itens', termo and t1 and c1 == t1 and len(t1) <= len(t0), [termo, t1, c1])
         busca(gid, '')
@@ -220,11 +223,18 @@ try:
     modo('pa_atv', 'cartoes')
     chk('M6f PA: voltar a Cartões tira o view= e mostra a lista própria', 'view=' not in J("location.search") and J("!!document.querySelector('.pa-atividade')"), J("location.href"))
 
-    # M7 · onde o modo não entra
-    sem = {}
-    for pg2, g2 in [('OS.dc.html', 'g_os'), ('MA.dc.html#vis=ordens', 'g_om'), ('BEN.dc.html', 'g_ob')]:
-        abrir(pg2, espera=1.4); sem[g2] = J(f"!!document.querySelector('[data-g2md=\"{g2}\"]')")
-    chk('M7 O.S. (visões próprias), MA › Ordens e BEN (Kanban próprio) ficam sem o seletor de modo', not any(sem.values()), sem)
+    # M7 · O.S., MA › Ordens e BEN: Cartões no seletor da própria tela (DS VIS-05)
+    abrir('OS.dc.html', perfil='Ana', limpa=True); espera("!!document.querySelector('[data-g2g=\"g_os\"]')")
+    t7 = ids_tab('g_os'); r7 = troca_visao(J, 'cartoes', '[aria-label="Visão das ordens"]'); c7 = ids_car('g_os'); u7 = J("location.search")
+    agrupar_por(J, 'Talhão', 'g_os'); c8 = ids_car('g_os'); troca_visao(J, 'lista', '[aria-label="Visão das ordens"]'); t8 = ids_tab('g_os'); agrupar_por(J, 'Sem agrupar', 'g_os')
+    chk('M7a O.S.: "Ver em cartões" no seletor de visões (?view=cartoes) mostra as mesmas ordens da Tabela, também agrupadas por Talhão; sem 2º seletor na barra da grade',
+        r7 == 'ok' and t7 and c7 == t7 and 'view=cartoes' in u7 and t8 and c8 == t8 and any(x.startswith('grp@') for x in t8) and not J("!!document.querySelector('[data-g2md=\"g_os\"]')"), [r7, t7, c7, u7, t8, c8])
+    for nome, pg2, g2, alvo in [('MA › Ordens', 'MA.dc.html#vis=ordens', 'g_om', "[...document.querySelectorAll('[aria-label=\"Visão das ordens\"] button')].find(b=>b.getAttribute('aria-label')==='Cartões')"),
+                                ('BEN', 'BEN.dc.html', 'g_ob', "[...document.querySelectorAll('[aria-label=\"Visão das ordens\"] button')].find(b=>b.innerText.trim()==='Cartões')")]:
+        abrir(pg2, perfil='Ana', limpa=True); espera(f"!!document.querySelector('[data-g2g=\"{g2}\"]')")
+        ta = ids_tab(g2); clique_el(alvo); time.sleep(.4); ca = ids_car(g2); pr = J(f"(()=>{{const b={alvo}; return b?b.getAttribute('aria-pressed'):null}})()")
+        chk(f'M7b {nome}: "Cartões" no seletor da tela (Lista | Cartões | Kanban) mostra as mesmas ordens da Lista; sem 2º seletor na barra da grade',
+            ta and ca == ta and pr == 'true' and not J(f"!!document.querySelector('[data-g2md=\"{g2}\"]')"), [ta, ca, pr, J("location.hash")])
 
     # M5 · 390 px (toque): uma coluna, sem rolagem lateral, alvos de 44 px
     c.aparelho(390, 844, 2, True)

@@ -46,7 +46,8 @@ temV, temE = not isinstance(V, Exception), not isinstance(E, Exception) and hasa
 def p1():
     if not temV: return ['visoes.py ausente']
     f = []
-    if V.validas('os') != ['lista', 'kanban', 'calendario', 'carga']: f.append(('validas', V.validas('os')))
+    # DS VIS-05 (padroes-1510, 15/10/2026: "toda lista tem Tabela e Cartões"): Cartões entra logo depois da Tabela
+    if V.validas('os') != ['lista', 'cartoes', 'kanban', 'calendario', 'carga']: f.append(('validas', V.validas('os')))
     if 'Fundida na Tabela' not in V.REGISTRO['os']['cortes'].get('agrupada', ''): f.append('agrupada sem o motivo da fusão (VISOES-2)')
     for k, at in V.REGISTRO['os']['ativas'].items():
         if not all(str(at.get(a) or '').strip() for a in V.EXIGE[k]): f.append(('sem fonte', k))
@@ -55,7 +56,7 @@ def p1():
     if 'DEC-2609-09' not in V.REGISTRO['os']['cortes'].get('mapa', ''): f.append('O.S. sem Mapa: DEC-2609-09 mantida')
     if V.ORDEM[0] != 'lista': f.append('Lista não é a primeira')
     return f
-f1 = p1(); chk('P1 validas(os) = lista (Tabela), kanban, calendario, carga; a Tabela agrupada foi fundida na Tabela (VISOES-2), com motivo; cada visão com os atributos que EXIGE pede, com fonte; cortes com motivo (Mapa: DEC-2609-09)', not f1, f1)
+f1 = p1(); chk('P1 validas(os) = lista (Tabela), cartoes (DS VIS-05), kanban, calendario, carga; a Tabela agrupada foi fundida na Tabela (VISOES-2), com motivo; cada visão com os atributos que EXIGE pede, com fonte; cortes com motivo (Mapa: DEC-2609-09)', not f1, f1)
 def p2():
     if not temV: return ['visoes.py ausente']
     s = V.sustenta; f = []
@@ -92,7 +93,7 @@ f3 = p3(); chk('P3 painel para visão não sustentada, painel faltando ou apelid
 
 # 3 · componente
 def barra_os():
-    E.VISOES_SPEC.pop('g_c', None); b, c = E.visoes('g_c', 'os', {'lista': '<i>L</i>', 'kanban': '<i>K</i>', 'calendario': '<i>Cal</i>', 'carga': '<i>C</i>'}, 'Visão das ordens'); E.VISOES_SPEC.pop('g_c', None); return b, c
+    E.VISOES_SPEC.pop('g_c', None); b, c = E.visoes('g_c', 'os', {'lista': '<i>L</i>', 'cartoes': 'lista', 'kanban': '<i>K</i>', 'calendario': '<i>Cal</i>', 'carga': '<i>C</i>'}, 'Visão das ordens'); E.VISOES_SPEC.pop('g_c', None); return b, c
 def checa_barra(b, val):
     f = []
     if 'role="toolbar"' not in b or 'aria-label="Visão das ordens"' not in b: f.append('toolbar com rótulo')
@@ -111,7 +112,7 @@ def checa_barra(b, val):
 if temV and temE:
     b, corpo = barra_os(); fb = checa_barra(b, V.validas('os'))
     chk('C0 barra: role=toolbar "Visão das ordens", 5 botões data-visao na ordem fixa, aria-label "Ver em …", aria-pressed e tabIndex do estado, só ícone aria-hidden, sem title, "mais" (5 visões), sem verde cheio', not fb, fb)
-    chk('C0b corpo: estado da visão (role=status) e um painel por grupo (Lista e Tabela agrupada no mesmo painel), sem invólucro em volta do painel',
+    chk('C0b corpo: estado da visão (role=status) e um painel por grupo (Tabela e Cartões no mesmo painel), sem invólucro em volta do painel',
         'role="status" data-visoes-estado="g_c"' in corpo and corpo.count('<i>L</i>') == 1 and corpo.count('{{g_c_vp_') == 4 and '{{g_c_vp_agrupada}}' not in corpo and 'display: contents' not in corpo, corpo[:300])
     css = E.VISOES_CSS
     chk('C0c CSS: 32 px no computador; 44 px e ícone 20 px com ponteiro grosso OU até 640 px; até 640 px só as 3 primeiras e o "mais"; no G2_CSS de toda tela',
@@ -173,7 +174,7 @@ if os.path.isdir(P):
     pags = {f: open(os.path.join(P, f), encoding='utf-8').read() for f in os.listdir(P) if f.endswith('.dc.html')}
     com = sorted(f for f, s in pags.items() if 'data-visoes=' in s)
     s = pags.get('OS.dc.html', '')
-    chk('B1 só a O.S. tem o seletor nesta fatia, com as 4 visões (Tabela, Kanban, Calendário, Carga; VISOES-2 fundiu a agrupada); G2_VISOES vai na página', com == ['OS.dc.html'] and 'data-visoes="lista kanban calendario carga"' in s and 'const G2_VISOES = {"g_os"' in s, com)
+    chk('B1 só a O.S. tem o seletor nesta fatia, com as 5 visões (Tabela, Cartões pela DS VIS-05, Kanban, Calendário, Carga; VISOES-2 fundiu a agrupada); G2_VISOES vai na página', com == ['OS.dc.html'] and 'data-visoes="lista cartoes kanban calendario carga"' in s and 'const G2_VISOES = {"g_os"' in s, com)
     chk('B1b o nível Talhão do "Agrupar por" da O.S. declara a coluna de filtro (fc = tal): o filtro de Talhão limita os grupos', '"niv": ["Fazenda", "Talhão"], "fc": ["", "tal"]' in s)
     chk('B2 um caminho só: o botão "Agrupar por talhão" (os_agrgo) e as abas de texto Lista | Kanban | Recursos saíram', 'os_agrgo' not in s and '>Recursos</button>' not in s and '>Kanban</button>' not in s, '')
     chk('B3 nenhum arrastar (Kanban e Carga sem draggable)', 'draggable' not in s)

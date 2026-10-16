@@ -414,7 +414,11 @@ function g2agMenuVals(self,sp,v,R){ const id=sp.id; if(!g2agTem(sp)){ v[id+'_agh
 // Os cartões leem as MESMAS linhas que a Tabela desenha (v[gid_rows], depois do EXTRAVALS da tela): busca, filtro rápido, filtros de
 // coluna, Agrupar por com descer e trilha, Colunas e o ⋯ da linha.
 const G2_MODO_PREF='safrion.pref.modo:'; const G2_MODO_MEM={};
-function g2mdTem(sp){ return !!(sp&&sp.modo)&&!g2visaoSpec(sp.id); }
+function g2mdTem(sp){ return !!(sp&&sp.modo)&&sp.modo!=='externo'&&!g2visaoSpec(sp.id); }
+// modo de fora (engine.grid cartoes='externo', DS VIS-05): a tela já tem seletor de visões e o Cartões é uma opção dele; a visão 'cartoes'
+// da VISOES-1 (O.S.) ou o gancho da tela self.g2modoExterno(gid) (MA › Ordens, BEN) diz o modo; a grade não põe seletor próprio
+function g2mdExterno(self,sp){ if(g2visaoSpec(sp.id)) return g2visao(self,sp.id)==='cartoes'?'cartoes':'tabela';
+  const f=self.g2modoExterno; return (typeof f==='function'&&f(sp.id)==='cartoes')?'cartoes':'tabela'; }
 function g2mdChave(id,pf,arq){ return G2_MODO_PREF+String(pf||'')+':'+String(arq||'')+':'+String(id||''); }
 function g2mdPrefLer(chave){ let x=null; try{ x=localStorage.getItem(chave); }catch(e){ x=null; } return (x!==null&&x!==undefined)?x:(G2_MODO_MEM[chave]||null); }
 function g2mdPrefGrava(chave,m){ G2_MODO_MEM[chave]=m; try{ localStorage.setItem(chave,m); }catch(e){} }
@@ -451,8 +455,8 @@ function g2cdVals(self,sp,v){ const id=sp.id, rows=v[id+'_rows']||[], cols=v[id+
     const notas=P.tr.filter(c=>c&&c.isData&&!g2cdVazio(c));
     return {P, t0, id:rw.id, ed, fl, tab:rw.tab, open:rw.open, key:rw.key, sels:P.sels, tparts:t0.parts||[], acts:P.tr.filter(c=>c&&c.isDel), nota:notas.length?notas[0].parts:[], temNota:notas.length>0}; };
   // árvore: o cartão do 1º nível diz "n itens" e abre os filhos dentro dele (a mesma expansão da seta da Tabela, st.x); se o título já diz
-  // a contagem ("Adjuvantes 2 itens"), o botão só diz Mostrar/Ocultar itens
-  const card=(rw)=>{ const b=base(rw), L=ls(b.P,G2_CD_MAX), t0=b.t0, abre=!!(rw.has&&t0.caretExp==='true'), nk=rw.nk||0, nome=g2cdNome(t0), ja=/\b\d+\s+ite(m|ns)\b/.test(nome);
+  // a contagem ("Adjuvantes 2 itens", "Pulverização 6 atividades"), o botão só diz Mostrar/Ocultar itens
+  const card=(rw)=>{ const b=base(rw), L=ls(b.P,G2_CD_MAX), t0=b.t0, abre=!!(rw.has&&t0.caretExp==='true'), nk=rw.nk||0, nome=g2cdNome(t0), ja=new RegExp('(^|\\s)'+nk+'\\s+[A-Za-zÀ-ÿ]').test(nome);
     return Object.assign(b,{cls:'g2cd'+(b.ed?' g2ed':'')+(b.fl?' g2flash':''), ls:L, temLs:L.length>0, temKids:!!rw.has, kopen:abre, kexp:String(abre), ksym:abre?'▾':'▸',
       kn:ja?(abre?'Ocultar itens':'Mostrar itens'):(nk+(nk===1?' item':' itens')), ktog:t0.toggle||(()=>{}), klab:'Itens de '+nome, kids:[]}); };
   const kid=(rw,d)=>{ const b=base(rw), t0=b.t0, L=ls(b.P,2);
@@ -475,10 +479,10 @@ function g2cdNome(t0){ return ((t0&&t0.parts)||[]).filter(p=>p&&!p.isIco&&!p.isB
 // depois do EXTRAVALS (engine.ENGINE_JS2): modo de cada grade com seletor e, em Cartões, os cartões das linhas que a Tabela desenharia
 function g2modosFim(self,v){ if(typeof GRIDS==='undefined') return;
   if(!self.__g2mdChegou&&GRIDS.some(g2mdTem)){ self.__g2mdChegou=1; setTimeout(()=>{ try{ g2mdChegada(self); }catch(e){} },60); }
-  for(const sp of GRIDS){ if(!sp.modo) continue; const id=sp.id;
-    if(!g2mdTem(sp)){ v[id+'_mdhas']=false; v[id+'_mdt']=true; v[id+'_mdc']=false; v[id+'_cdg']=[]; v[id+'_cdtot']=[]; v[id+'_cdtotHas']=false; continue; }
-    const m=g2mdVals(self,v,{id,padrao:'tabela',url:'vista'}), car=m==='cartoes';
-    v[id+'_mdhas']=true; v[id+'_mdt']=!car; v[id+'_mdc']=car;
+  for(const sp of GRIDS){ if(!sp.modo) continue; const id=sp.id, ext=sp.modo==='externo';
+    if(!ext&&!g2mdTem(sp)){ v[id+'_mdhas']=false; v[id+'_mdt']=true; v[id+'_mdc']=false; v[id+'_cdg']=[]; v[id+'_cdtot']=[]; v[id+'_cdtotHas']=false; continue; }
+    const m=ext?g2mdExterno(self,sp):g2mdVals(self,v,{id,padrao:'tabela',url:'vista'}), car=m==='cartoes';
+    v[id+'_mdhas']=!ext; v[id+'_mdt']=!car; v[id+'_mdc']=car;
     if(car) g2cdVals(self,sp,v); else { v[id+'_cdg']=[]; v[id+'_cdtot']=[]; v[id+'_cdtotHas']=false; } } }
 function g2vals(self,sp,v,mask){
   const id=sp.id, rows0=g2disp(self,sp), added=self.state.added||{};
@@ -566,7 +570,9 @@ function g2vals(self,sp,v,mask){
         delLabel:'Excluir '+g2text(r,sp.cols[0]), ask:()=>g2set(self,id,{cf:r.id}), no:()=>g2set(self,id,{cf:null}),
         yes:()=>{ const g2_0=self.state.g2; const rs=g2clone(g2rows(self,sp)); const rm=(list)=>{ const i=list.findIndex(x=>x.id===r.id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&rm(x.kids)); }; rm(rs); g2set(self,id,{rows:rs,cf:null}); self.setState({g2toast:'Excluído: '+g2text(r,sp.cols[0])}); if(self.g2after) self.g2after(id,rs,null); g2persiste(self,id,g2_0,{cf:null},'Não excluído'); }}); }
     const canOpen=editable && !(ed.leafOnly && has) && !r.fora && !(r.nosel && !r.dr);
-    return {id:r.id, lvl, has, nk:(r.kids||[]).length, grp:!!r.grp, gk:r.grp?String(r.grp.k):'',   // lvl…gk: para o modo Cartões (g2cdVals)
+    // lvl…gk: para o modo Cartões (g2cdVals); grp é só o grupo do Agrupar por (r.grp = {k, lv}); o grp:true das linhas-pai da tela (talhão
+    // dividido no Planejar safra) é árvore comum: vira cartão com os filhos dentro
+    return {id:r.id, lvl, has, nk:(r.kids||[]).length, grp:!!(r.grp&&typeof r.grp==='object'), gk:(r.grp&&typeof r.grp==='object')?String(r.grp.k):'',
       cls:'g2r'+(canOpen?' g2ed':'')+(st.fl===r.id?' g2flash':'')+(lvl>0?' g2kid':''), tab:(canOpen&&!r.drDup)?'0':'-1',
       open:(e)=>{ if(canOpen) g2open(self,sp,r.id,e); }, key:(e)=>{ if(!canOpen || !e || (e.key!=='Enter'&&e.key!==' ')) return; const t=e.target; if(t&&t.closest&&t.closest('a,button,input,select,textarea,label,[data-noedit],.g2nr')) return; e.preventDefault(); g2open(self,sp,r.id,null); }, cells}; });
   v[id+'_count']=flat.filter(x=>x.lvl===0).length; v[id+'_all']=rows.length;

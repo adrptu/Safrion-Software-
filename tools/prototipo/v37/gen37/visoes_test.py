@@ -174,9 +174,10 @@ def modo_comp():
         chips = J("(()=>{const g=document.querySelector('[aria-label=\"Filtrar por fase\"]'); return g?Math.round(g.getBoundingClientRect().right):0;})()")
         # VISOES-2 F2a (13/10): o Calendário entra entre o Kanban e a Carga (ordem do registro, visoes.ORDEM)
         # VISOES-2 (14/10): Lista e Tabela agrupada viraram a Tabela (agrupar é o "Agrupar por" da grade)
-        chk('C1 barra role=toolbar "Visão das ordens" à direita dos filtros: 4 botões data-visao (lista = Tabela, kanban, calendario, carga), aria-label "Ver em …", sem texto visível nem title, svg aria-hidden',
-            bool(b) and b['role'] == 'toolbar' and b['lab'] == 'Visão das ordens' and b['vs'] == 'lista kanban calendario carga' and ks == ['lista', 'kanban', 'calendario', 'carga']
-            and labs == ['Ver em tabela', 'Ver em kanban', 'Ver em calendário', 'Ver em carga por recurso'] and all(x['txt'] == '' and not x['tit'] and x['svg'] for x in b['bs'])
+        # DS VIS-05 (padroes-1510, 15/10/2026: "toda lista tem Tabela e Cartões"): Cartões entra logo depois da Tabela (5 visões)
+        chk('C1 barra role=toolbar "Visão das ordens" à direita dos filtros: 5 botões data-visao (lista = Tabela, cartoes, kanban, calendario, carga), aria-label "Ver em …", sem texto visível nem title, svg aria-hidden',
+            bool(b) and b['role'] == 'toolbar' and b['lab'] == 'Visão das ordens' and b['vs'] == 'lista cartoes kanban calendario carga' and ks == ['lista', 'cartoes', 'kanban', 'calendario', 'carga']
+            and labs == ['Ver em tabela', 'Ver em cartões', 'Ver em kanban', 'Ver em calendário', 'Ver em carga por recurso'] and all(x['txt'] == '' and not x['tit'] and x['svg'] for x in b['bs'])
             and b['esq'] >= chips - 1, b)
         # C2
         f = J(CHK_C); at = [x for x in b['bs'] if x['p'] == 'true'] if b else []
@@ -197,10 +198,11 @@ def modo_comp():
         tecla('ArrowRight'); tecla(' '); time.sleep(.4); e2 = (ativa(), foco(), busca())
         tecla('Tab'); fora_ = foco(); c.tab(1, True); time.sleep(.25); volta = foco()
         chk('C3 Tab para uma vez na barra (entra na ativa e sai com o próximo Tab); ← → com volta, Home/End, ↑ ↓ não movem; seta não ativa (Lista segue ativa, sem ?view); Enter e Espaço ativam e o foco fica no botão; Shift+Tab volta à mesma parada',
-            f1 == 'lista' and f2 not in ('lista', 'kanban', 'calendario', 'carga', 'mais') and f3 == 'lista'
-            and seq == ['kanban', 'calendario', 'carga', 'lista', 'carga', 'lista', 'carga', 'carga', 'carga'] and sem_ativar
-            and e1[0] == 'kanban' and e1[1] == 'kanban' and 'view=kanban' in e1[2] and e2[0] == 'calendario' and e2[1] == 'calendario' and 'view=calendario' in e2[2]
-            and fora_ not in ('lista', 'kanban', 'calendario', 'carga') and volta == 'calendario', [f1, f2, f3, seq, sem_ativar, e1, e2, fora_, volta])
+            # DS VIS-05: com o Cartões depois da Tabela, Home + → leva ao Cartões e o → seguinte ao Kanban (5 botões)
+            f1 == 'lista' and f2 not in ('lista', 'cartoes', 'kanban', 'calendario', 'carga', 'mais') and f3 == 'lista'
+            and seq == ['cartoes', 'kanban', 'calendario', 'carga', 'calendario', 'lista', 'carga', 'carga', 'carga'] and sem_ativar
+            and e1[0] == 'cartoes' and e1[1] == 'cartoes' and 'view=cartoes' in e1[2] and e2[0] == 'kanban' and e2[1] == 'kanban' and 'view=kanban' in e2[2]
+            and fora_ not in ('lista', 'cartoes', 'kanban', 'calendario', 'carga') and volta == 'kanban', [f1, f2, f3, seq, sem_ativar, e1, e2, fora_, volta])
     passo('C3', _c3)
     def _c4():
         # C4 dica (g2dica da DS): no foco de teclado na hora; Esc fecha sem tirar o foco; sem aria-describedby repetindo o nome; hover de 300 ms
@@ -211,8 +213,9 @@ def modo_comp():
         if not J("document.querySelector('[role=toolbar] [data-visao=carga]').matches(':hover')"):
             J("document.querySelector('[role=toolbar] [data-visao=carga]').dispatchEvent(new PointerEvent('pointerover',{bubbles:true,composed:true,pointerType:'mouse'}))")
         time.sleep(.6); d3 = J(DICA); c.mouse(1430, 890); time.sleep(.3)
-        chk('C4 foco de teclado em "kanban" abre #g2-dica (role=tooltip) "Ver em kanban", sem aria-describedby repetido; Esc fecha e o foco fica; hover abre "Ver em carga por recurso"',
-            d['vis'] and d['t'] == 'Ver em kanban' and d['role'] == 'tooltip' and 'g2-dica' not in db and not d2['vis'] and fo == 'kanban' and d3['vis'] and d3['t'] == 'Ver em carga por recurso', [d, db, d2, fo, d3])
+        # DS VIS-05: a C3 termina no Kanban (5 visões); o ← leva ao Cartões
+        chk('C4 foco de teclado em "cartoes" (← a partir do Kanban) abre #g2-dica (role=tooltip) "Ver em cartões", sem aria-describedby repetido; Esc fecha e o foco fica; hover abre "Ver em carga por recurso"',
+            d['vis'] and d['t'] == 'Ver em cartões' and d['role'] == 'tooltip' and 'g2-dica' not in db and not d2['vis'] and fo == 'cartoes' and d3['vis'] and d3['t'] == 'Ver em carga por recurso', [d, db, d2, fo, d3])
     passo('C4', _c4)
     def _c4b():
         # C4b (revisão, achado B1): o clique do mouse não deixa a dica aberta (ela cobria "Nova ordem" e engolia o 1º clique); o teclado continua
@@ -277,14 +280,16 @@ def modo_celular():
         menu = J("(()=>{const m=document.querySelector('[role=menu][data-visoes-menu]'); return m&&m.getClientRects().length?[...m.querySelectorAll('[role=menuitemradio]')].map(i=>[i.getAttribute('data-visao-menu'),i.innerText.trim(),i.getAttribute('aria-checked')]):null;})()")
         fm = foco(); tecla('Escape'); time.sleep(.3)
         fechado = not J("!!document.querySelector('[role=menu][data-visoes-menu]')"); fe = foco()
-        tecla('ArrowDown'); time.sleep(.4); fd = foco(); tecla('Enter'); time.sleep(.6)
+        tecla('ArrowDown'); time.sleep(.4); fd = foco(); tecla('ArrowDown'); time.sleep(.25); fd2 = foco(); tecla('Enter'); time.sleep(.6)
         b3 = bar(); mais = next((x for x in b3['bs'] if x['k'] == 'mais'), {}); pressed_vis = [x['k'] for x in b3['bs'] if x['vis'] and x['p'] == 'true']
         shot('cel_390_carga')
-        # VISOES-2 (14/10): com 4 visões (Tabela, Kanban, Calendário, Carga) a barra mostra as 3 primeiras e o "mais" fica com a Carga
-        chk('M2 390 px: Tabela, Kanban e Calendário na barra + "mais"; o menu mostra "Carga por recurso" em texto; Esc fecha e devolve o foco ao "mais"; ↓ no "mais" abre o menu; com a Carga escolhida o "mais" leva a marca e diz o nome',
-            vis == ['lista', 'kanban', 'calendario', 'mais'] and menu == [['carga', 'Carga por recurso', 'false']] and fm == 'menu:carga' and fechado and fe == 'mais' and fd == 'menu:carga'
+        # VISOES-2 (14/10) e DS VIS-05 (15/10): com 5 visões (Tabela, Cartões, Kanban, Calendário, Carga) a barra mostra as 3 primeiras e o "mais"
+        # fica com o Calendário e a Carga; ↓ no "mais" abre o menu no 1º item e o ↓ seguinte chega à Carga
+        chk('M2 390 px: Tabela, Cartões e Kanban na barra + "mais"; o menu mostra "Calendário" e "Carga por recurso" em texto; Esc fecha e devolve o foco ao "mais"; ↓ no "mais" abre o menu; com a Carga escolhida o "mais" leva a marca e diz o nome',
+            vis == ['lista', 'cartoes', 'kanban', 'mais'] and menu == [['calendario', 'Calendário', 'false'], ['carga', 'Carga por recurso', 'false']] and fm == 'menu:calendario' and fechado and fe == 'mais'
+            and fd == 'menu:calendario' and fd2 == 'menu:carga'
             and ativa() == 'carga' and carga_on() and mais.get('ativo') == 'true' and mais.get('lab') == 'Mais visões (atual: carga por recurso)' and mais.get('bg') == 'rgb(228, 243, 233)'
-            and not pressed_vis and 'view=carga' in busca(), [vis, menu, fm, fechado, fe, fd, ativa(), mais, pressed_vis, busca()])
+            and not pressed_vis and 'view=carga' in busca(), [vis, menu, fm, fechado, fe, fd, fd2, ativa(), mais, pressed_vis, busca()])
     passo('M2', _m2)
     def _m3():
         # M3 nada cortado em cada visão; primária única alcançável; 0 duplicata. VISOES-2: a Tabela sem agrupar e a Tabela agrupada por Talhão
@@ -293,10 +298,10 @@ def modo_celular():
         # "Ver em kanban" (o Kanban agora é o 2º botão) caía sobre "Nova ordem"; a medida aqui é a do layout de cada visão, não a da dica
         abre('OS.dc.html', 390, 844, True, 2)
         res = {}
-        for k in ('lista', 'agrupada', 'kanban', 'calendario', 'carga'):
+        for k in ('lista', 'agrupada', 'cartoes', 'kanban', 'calendario', 'carga'):   # Cartões (DS VIS-05) também medido
             troca_visao(J, k); m = J(MEDE); res[k] = (resumo(m), J(EST), dup()[0], ativa(), ag()); shot('cel_390_' + k)
         esperado = {'lista': ('lista', ''), 'agrupada': ('lista', 'Talhão')}
-        chk('M3 390 px, em cada visão (Tabela, Tabela agrupada por Talhão, Kanban, Calendário, Carga): nada cortado, sem rolagem lateral, título e "Criar ordem" alcançáveis (MEDE/resumo vazio), uma primária e 0 duplicata',
+        chk('M3 390 px, em cada visão (Tabela, Tabela agrupada por Talhão, Cartões, Kanban, Calendário, Carga): nada cortado, sem rolagem lateral, título e "Criar ordem" alcançáveis (MEDE/resumo vazio), uma primária e 0 duplicata',
             all(v[0] == [] and v[1] == ['Criar ordem'] and v[2] == 0 and (v[3], v[4] if k in esperado else None) == esperado.get(k, (k, None)) for k, v in res.items()), res)
     passo('M3', _m3)
     def _m3b():

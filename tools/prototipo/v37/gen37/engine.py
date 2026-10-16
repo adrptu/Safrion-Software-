@@ -1669,12 +1669,15 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     ess=any(c.get('ess') for c in cols)
     cvb=(f'<sc-if value="{H("_cvhas")}" hint-placeholder-val="{{{{false}}}}"><button type="button" data-g2cvb="{gid}" aria-haspopup="dialog" aria-expanded="{H("_cvexp")}" aria-label="{H("_cvlab")}" title="{H("_cvlab")}" onClick="{H("_cvtog")}" '
          f'style="{_MINI} display: inline-flex; align-items: center; gap: 6px; min-height: 32px;">{_ICO_COLUNAS}Colunas<span style="color: {MUTED};">{H("_cvn")}</span></button></sc-if>') if ess else ''
-    # modo Tabela | Cartões (proprietário, 15/10/2026): toda listagem do menu (colunas essenciais ou Agrupar por) ganha o seletor no fim da
-    # barra; cartoes=False tira (tela com Kanban próprio, que já cumpre o papel dos cartões: BEN, MA › Ordens). A O.S. (seletor de visões
-    # da VISOES-1) fica sem ele também pelo g2lib (g2mdTem). Os cartões são as mesmas linhas da Tabela (g2cdVals)
-    modo=(cartoes is not False) and (ess or bool(ag))
-    if modo: spec['modo']=True
-    mdb=f'<sc-if value="{H("_mdhas")}" hint-placeholder-val="{{{{false}}}}">{modos_html(gid)}</sc-if>' if modo else ''
+    # modo Tabela | Cartões (proprietário, 15/10/2026; DS VIS-05 "toda lista tem Tabela e Cartões"): toda listagem do menu (colunas
+    # essenciais, Agrupar por ou o quadro visoes.MODO_LISTAS) ganha o seletor no fim da barra, depois de Colunas. cartoes='externo': a tela
+    # já tem seletor de visões próprio (O.S. pela VISOES-1; MA › Ordens e BEN com Kanban) e o Cartões entra nele; a grade desenha os cartões
+    # e não põe seletor (g2lib.g2modosFim). cartoes=False tira. Os cartões são as mesmas linhas da Tabela (g2cdVals)
+    import visoes as _V
+    if cartoes is None and (CUR,gid) in _V.MODO_LISTAS: cartoes=True
+    modo=cartoes in (True,'externo') or (cartoes is not False and (ess or bool(ag)))
+    if modo: spec['modo']='externo' if cartoes=='externo' else True
+    mdb=f'<sc-if value="{H("_mdhas")}" hint-placeholder-val="{{{{false}}}}">{modos_html(gid)}</sc-if>' if (modo and cartoes!='externo') else ''
     # VISOES-2 §3.3: "Agrupar por" (ícone da pergunta + nome da coluna) e a trilha do descer, na barra da grade
     _ip=lambda d: f'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{d}</svg>'
     _IPQ={'oque':_ip('<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>'),   # lucide layers
@@ -1699,7 +1702,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
          + _icos + f'<span style="display: flex; flex-direction: column; gap: 1px;"><span style="font-weight: 700;">{_h("ao.t")}</span><sc-if value="{_h("ao.temNiv")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11.5px; color: {MUTED};">{_h("ao.niv")}</span></sc-if></span></button></sc-for>'
          f'</div></div></sc-if>') if ag else ''
     if ag: AG_CTRL[gid]=(agb,agm)   # 15/10/2026 (proprietário: "tabela e kanban devem manter o agrupar por"): outra visão da mesma grade reusa o controle
-    if search or add or tree or sel or tools or qf or ess or ag:
+    if search or add or tree or sel or tools or qf or ess or ag or mdb:
         tb=(f'<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid {LINE}; flex-wrap: wrap;">'
             + (f'<span data-g2q="{gid}" hidden></span><sc-if value="{H("_qon")}" hint-placeholder-val="{{{{true}}}}"><label style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; background: {BG}; min-width: 160px;">{sicon}<input type="search" aria-label="{H("_qlab")}" placeholder="Buscar…" value="{H("_q")}" onChange="{H("_setq")}" style="font-family: inherit; font-size: 12.5px; border: 0; background: transparent; outline: none; width: 100%;"></label></sc-if>'
                '' if search else '')
