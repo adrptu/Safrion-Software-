@@ -45,3 +45,19 @@ sha256 do `OS.dc.html`:
 | `ds_1610_test.py` | 14 ok · 0 falhas (0) | `ds_1610_test_5e5e62d.log` |
 | `visoes_test.py` (dica dos ícones de visão) | 9 ok · 0 falhas (0) | `visoes_test_5e5e62d.log` |
 | `regras_toque_test.py` (dica no toque) | 5 ok · 0 falhas (0) | `regras_toque_test_5e5e62d.log` |
+
+## Composição com a ponta nova da base (VEL §3.6)
+
+A base andou de `1639ab3` para `b87f79b`: 10 commits, nenhum em `g2lib.js`, `ds_test.py`, `engine.py` ou `processo_os.py`. O merge gerou `f8d0d40`. Repeti no render de árvore limpa desse commit:
+
+| Execução | Resultado (rc) | Bruto |
+|---|---|---|
+| `ds_test.py` | OK 72/72 (0) | `normal_f8d0d40.log` |
+| `m_d15`, parte D | FALHOU 17/18, só o D15 (1) | `mutante_d15_D_f8d0d40.log` |
+| `m_e2`, parte E | FALHOU 4/5, só o E2 (1) | `mutante_e2_E_f8d0d40.log` |
+| `ds_unit_test.py` | OK 44/44 e 31/31 (0) | `ds_unit_f8d0d40.log` |
+
+sha256 do `OS.dc.html` no `f8d0d40`:
+- normal: `6425bb3c5d939169fc48a6881bd0852df84f053b7911370657227b10ebd66a57`
+- `m_d15`: `fafa346be11f8d3cbf87650df4619b818926a18853bbea3e22022cf2afcec839`
+- `m_e2`: `8fa8ef43c8ccf6420333234a08e2ce66052f17a5429b7c95564fcd8df15cb969`
