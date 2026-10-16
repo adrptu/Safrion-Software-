@@ -101,8 +101,8 @@ A tabela própria das Atividades do plano usa a mesma peça; não há cópia de 
 - Atividades do plano: a seta na célula do gatilho (`pa-tb-gat`).
 
 **Inventário na base (519ed7b):**
-- a varredura achou 6 telas ou estados fora: Ordens de campo (CA-01), Ocorrências (CA-03) e Aprovações (IN-02), com a caixa antes da seta; Qualidade (CO-06), com a seta no fim do lote; Atividades do plano em Tabela, com o DAP antes;
-- pelo código, mais 2: raia do Kanban da O.S. com Agrupar por e "Capacidade por mês" no Planejar safra, ambas com a seta no fim.
+- a varredura achou 7 telas ou estados fora: Ordens de campo (CA-01), Ocorrências (CA-03) e Aprovações (IN-02), com a caixa antes da seta; Qualidade (CO-06), com a seta no fim do lote; Atividades do plano em Tabela (2 estados), com o DAP antes; Planejar safra › operações, com "Capacidade por mês ▾";
+- pelo código, mais 1: a raia do Kanban da O.S. com Agrupar por, com a seta no fim.
 
 **Dano evitado:** a pessoa procura a seta num lugar diferente em cada tela, e a linha que abre fica sem o sinal no lugar de sempre.
 
@@ -118,7 +118,7 @@ A tabela própria das Atividades do plano usa a mesma peça; não há cópia de 
 - Toda linha de cabeçalho de tabela tem 40 px: motor, tabelas próprias (Atividades do plano, Agrofit) e a ficha impressa da O.S.
 - 40 px é a altura de duas linhas de rótulo no cabeçalho do motor, a mais comum na base (39,2 px em 86 telas a 1440 px).
 - O rótulo ocupa até 2 linhas.
-- Rótulo com mais de 26 letras ganha largura, até 180 px, para caber em 2 linhas.
+- Rótulo cuja melhor quebra em 2 linhas não cabe em 104 px ganha a largura dessa quebra, medida no texto como desenhado, até 200 px.
 - Se ainda assim não couber (coluna estreita no celular), termina em reticências. O nome inteiro continua no nome acessível ("Ordenar por …").
 
 **Peça única** (`engine.TABELA_CSS`):
@@ -128,8 +128,8 @@ A tabela própria das Atividades do plano usa a mesma peça; não há cópia de 
 - `--g2hbw` vem do `g2cabVals`.
 
 **Inventário na base (519ed7b):**
-- 1440 px: 7 alturas diferentes (de 22 a 64,4 px), com 69 telas fora de 40 px;
-- 390 px: 9 alturas diferentes, com 65 telas fora.
+- 1440 px: 7 alturas diferentes (de 22 a 64,4 px), com 70 telas fora de 40 px;
+- 390 px: 9 alturas diferentes, com 68 telas fora.
 
 Causas:
 - rótulo quebrando em 3 ou 4 linhas (largura máxima de 104 px);
@@ -141,7 +141,7 @@ No celular, o cabeçalho das Atividades agora esconde Insumos e Custo/ha junto c
 
 **Dano evitado:** a tabela muda de cara de uma tela para outra, e o rótulo em 3 ou 4 linhas empurra os dados para baixo.
 
-**Teste:** `tab_drill_cab_test.py` parte B, que também conta os rótulos que terminam em reticências. O render da 519ed7b reprova.
+**Teste:** `tab_drill_cab_test.py` parte B, que também conta os rótulos que terminam em reticências: nenhum a 1440 px e 30 a 390 px, em coluna estreita. O render da 519ed7b reprova.
 
 ## PAR-01 · Paridade dos módulos com o Agrícola
 
@@ -152,7 +152,7 @@ No celular, o cabeçalho das Atividades agora esconde Insumos e Custo/ha junto c
 - O módulo não ganha estilo próprio.
 
 **Aplicado em 16/10 na peça comum:**
-- **VIS-05 em toda lista do motor:** a lista com ordenar e filtrar ganha Tabela | Cartões. Antes eram só as do quadro `MODO_LISTAS` e as com colunas essenciais ou Agrupar por; agora são 237 das 247 grades. A matriz sem ordenar (capacidade por mês) fica só em Tabela.
+- **VIS-05 em toda lista do motor:** a lista com ordenar e filtrar ganha Tabela | Cartões. Antes eram só as do quadro `MODO_LISTAS` e as com colunas essenciais ou Agrupar por (82 de 247 grades); agora são 240 de 250. A matriz sem ordenar (capacidade por mês) fica só em Tabela.
 - **VIS-06 nos cartões:**
   - o texto de apoio apagado da célula fica só na Tabela (a regra existia, mas não pegava, porque o desenho grava a cor em rgb);
   - as partes do valor ganham espaço entre si.

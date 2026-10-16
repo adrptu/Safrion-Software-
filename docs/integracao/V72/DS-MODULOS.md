@@ -42,9 +42,15 @@ Estado / impedimento / próximo passo: executado na branch claude/v44-v72-ds-tab
 
 | Medida | Base 519ed7b | Candidata |
 |---|---|---|
-| Telas ou estados com a seta fora da 1ª coluna (1440 / 390) | 6 / 6 | 0 / 0 |
+| Setas conferidas (1440 / 390) | 1.539 / 1.395 | 1.580 / 1.436 |
+| Telas ou estados com a seta fora da 1ª coluna (1440 / 390) | 7 / 7 | 0 / 0 |
+| Cabeçalhos medidos (1440 / 390) | 214 / 198 | 215 / 199 |
 | Alturas distintas de cabeçalho (1440 / 390) | 7 / 9 | 1 / 1 (40 px) |
-| Telas com cabeçalho fora de 40 px (1440 / 390) | 69 / 65 | 0 / 0 |
+| Telas com cabeçalho fora de 40 px (1440 / 390) | 70 / 68 | 0 / 0 |
+| Rótulos com reticências (1440 / 390) | 0 / 0 | 0 / 30 (coluna estreita no celular; nome inteiro no aria-label) |
+| Erro de JavaScript em alguma tela ou estado | 0 | 0 |
+
+As 7 telas ou estados da base: CA-01, CA-03 e IN-02 (caixa antes da seta), CO-06 (seta no fim do lote), Atividades do plano em Tabela (2 estados, DAP antes da seta) e Planejar safra › etapa de operações ("Capacidade por mês ▾").
 
 Brutos em `tabelas/` (ver "Provas").
 
@@ -70,7 +76,7 @@ Brutos em `tabelas/` (ver "Provas").
 | Mapa e Início, fora do menu | não | 3 | 9 | 6 | CAB-1/CAB-2 (3/3) |
 | Onboarding e backoffice, fora do menu | não | 2 | 3 | 1 | CAB-1 (1) |
 | App de campo, fora do menu | não | 14 | 0 | 0 | — |
-| **Total** | | **148** | **253** | **176** | |
+| **Total** | | **148** | **252** | **175** | |
 
 Leitura:
 - As telas do menu de Manutenção, Suprimentos, Comercial, Configurações e Portal já seguem a tabela do motor. O que falta nelas também falta no próprio Agrícola: ação na célula (TAB-05) e cartões de resumo (TAB-07).
@@ -80,9 +86,9 @@ Leitura:
 
 | ID | Mudança | Onde | Alcance |
 |---|---|---|---|
-| TAB-09 | Seta de abrir na 1ª coluna, antes da seleção; nos cartões, a coluna da seta antes da seleção; Atividades do plano com a seta antes do DAP; seta de seção antes do nome | `engine.grid`, `g2lib` (`carT`, `_selArw`, `_cdgtc`), `processo_planos.py`, `colheita.py`, `processo_os.py`, `safra.js` | 1.572 setas a 1440 e 1.378 a 390 conferidas |
-| TAB-10 | Cabeçalho de 40 px (`.g2th`, `.g2thr`), rótulo em até 2 linhas (`.g2hl`), largura pela melhor quebra (`--g2hbw`) | `engine.TABELA_CSS`, `g2cabVals`, `agronomia.py` (Agrofit), `os_campo.py` (ficha), `processo_planos.py` | 214 cabeçalhos a 1440 e 197 a 390 |
-| VIS-05 | Toda lista do motor com ordenar e filtrar ganha Tabela \| Cartões (antes só o quadro `MODO_LISTAS` e as listas com colunas essenciais ou Agrupar por). Matriz sem ordenar (capacidade por mês) fica só em Tabela | `engine.grid` | de 83 para 237 das 247 grades; VIS-05 de 77 telas para 0 |
+| TAB-09 | Seta de abrir na 1ª coluna, antes da seleção; nos cartões, a coluna da seta antes da seleção; Atividades do plano com a seta antes do DAP; seta de seção antes do nome | `engine.grid`, `g2lib` (`carT`, `_selArw`, `_cdgtc`), `processo_planos.py`, `colheita.py`, `processo_os.py`, `safra.js` | 1.580 setas a 1440 e 1.436 a 390 conferidas |
+| TAB-10 | Cabeçalho de 40 px (`.g2th`, `.g2thr`), rótulo em até 2 linhas (`.g2hl`), largura medida da melhor quebra (`--g2hbw`, canvas) | `engine.TABELA_CSS`, `g2cabVals`, `agronomia.py` (Agrofit), `os_campo.py` (ficha), `processo_planos.py` | 215 cabeçalhos a 1440 e 199 a 390 |
+| VIS-05 | Toda lista do motor com ordenar e filtrar ganha Tabela \| Cartões (antes só o quadro `MODO_LISTAS` e as listas com colunas essenciais ou Agrupar por). Matriz sem ordenar (capacidade por mês) fica só em Tabela | `engine.grid` | seletor próprio em 240 das 250 grades (base: 82 de 247); VIS-05 de 77 telas para 0 |
 | VIS-06 | Nos cartões, o texto de apoio apagado da célula fica só na Tabela (a regra existia, mas não pegava: o desenho grava a cor em rgb) e as demais partes do valor ganham espaço ("Fungicida AF26-02" colava) | `engine.CARTOES_CSS` | toda lista em Cartões |
 
 ## O que fica, por regra (tela, evidência e mudança exata)
@@ -96,7 +102,7 @@ Leitura:
   2. depois liga `menu_linha=True` por padrão.
 - **Por que não neste lote:** os botões mudam de lugar em ~15 testes que clicam neles pelo texto (mip_fluxo, mip_correcoes, irr_estado, irr_fluxo, tabelas_irr, os_irrig_filtro, ben_fluxo, links_ocultos, saf_operacoes, acao_unica, componentes, ds_test, etapas_celular, saf_cmp_continuidade). É uma frente própria com os oráculos revistos um a um.
 
-### TAB-07 · cartões de resumo acima da lista (31 telas)
+### TAB-07 · cartões de resumo acima da lista (35 telas)
 
 - **No menu:**
   - Agrícola: AG-01det, CA-01det, CA-01x-os0420, CA-02, GE-03;
@@ -139,9 +145,61 @@ Ver "Mudanças pendentes em arquivos proibidos".
 | `areas/gestao.py` | GE-08 (Crédito) | TAB-07, TAB-05 | Tirar os 4 `kpis` do topo (dívida, serviço da dívida, capacidade, a liberar): somas na linha de total da `g_cre`; "A liberar" como filtro rápido. "Autorizar bloco" para o ⋯ (`menu_linha=True`, depois do motor) |
 | `areas/gestao.py` | GE-01, GE-03, GE-04, GE-05 | TAB-07 | Mesma regra do TAB-07 acima, tela a tela |
 | `areas/gestao.py` | GE-04, GE-07 | TAB-05 | "Importar retorno", "Propor pagamento", "Reabrir com motivo", "Verificar resultado", "Encerrar com evidência" para o ⋯ |
-| `areas/cadastros.py` (`CADX_CSS`) | CD-01 a CD-08 | TAB-08, TAB-10 | Tirar `.cadx .g2hb{text-transform:none;letter-spacing:0;font-size:12px;white-space:nowrap;max-width:none;…;padding:10px 2px 10px 0}` e `.cadx .g2rola [role=row]{font-size:13.5px!important}`. Hoje o cabeçalho dos Cadastros sai em caixa normal e 12 px, e só tem 40 px porque o motor vence o padding (CAD-01 já prevê tirar o CADX_CSS) |
 | `areas/cad_fazendas.py` | CD-01det (Talhão) | FIL-01 | O seletor "Talhão" fora da faixa vai para `ui37.faixa_filtros` |
 
-## Provas (executado nesta branch)
+## Provas (executado)
 
-Comandos executados de `tools/prototipo/v37/gen37/`, com `CHROME_BIN=/tmp/cloudchrome/chrome CDP_GL=1 SAFRION_DADOS=sintetico`. Os resultados e as contagens estão no relatório da entrega e nos logs de `tabelas/`.
+Comandos rodados de `tools/prototipo/v37/gen37/` com `CHROME_BIN=/tmp/cloudchrome/chrome CDP_GL=1 SAFRION_DADOS=sintetico`.
+
+**Candidata.** Render limpo de f46e2d6 (merge com a composição 6b59bd8 e PR #76).
+
+| Comando | Resultado |
+|---|---|
+| `tab_drill_cab_test.py` (`TDC_LARG=1440` e `390`) | 3/3 e 3/3 (`tabelas/tab_drill_cab_candidata_f46e2d6_*.log`) |
+| `ds_modulos.py --grava` | 175 desvios em 80 de 148 telas (`ds-modulos.json`, `tabelas/ds_modulos_candidata_f46e2d6.log`) |
+| `paginas_scan_test.py` | 5 ok · 0 falhas (148 páginas) |
+| `ds_1610_test.py` | 14 ok · 0 falhas |
+| `ds_1510_test.py` | 17 ok · 0 falhas |
+| `tabelas_cad_test.py` | 206/206 |
+| `agrofit_faixa_test.py` | 17/17 |
+| `acao_unica_test.py` | 10 ok · 0 falhas |
+| `galeria.py` | 34/34 fotos (`tabelas/galeria_candidata_f46e2d6.log`), conferidas uma a uma |
+| `ds_inventario.py --catraca` | catraca ok (css 6 · tabela 5 · cartão 5) |
+
+Os testes abaixo rodaram no render de fd5167a. Entre fd5167a e f46e2d6 só muda a medida da largura do rótulo do cabeçalho (`g2hbLarg`), e a parte afetada (A1 do `tabelas_cad`, `paginas_scan`, `agrofit_faixa`, TAB-10) foi refeita acima:
+
+| Teste | Resultado |
+|---|---|
+| `tabelas_os_test.py` | 40/40 |
+| `cadastros_padrao_test.py` | 44/44 |
+| `cadastros_rev1_test.py` | 14/14 |
+| `cartoes_test.py` | 70/70 |
+| `pa_lista_test.py` | 24/24 |
+| `pa_regras_test.py` | 18/18 |
+| `tabelas_saf_test.py` | 24/24 |
+| `tabelas_est_test.py` | 34/34 |
+| `tabelas_ben_test.py` | 12/12 |
+| `saf_tab_test.py` | 14/14 |
+| `visoes_test.py` | 9/9 |
+| `visoes_unit_test.py` | 25/25 |
+| `popover_390_test.py` | 9/9 |
+| `ma_unica_test.py` | 23/23 |
+| `saf_operacoes_test.py` | 87/87 |
+| `rend_multiconjuntos_test.py` | 18/18 |
+| `saf_capacidade_simetrica_test.py` | 38/38 |
+
+**Contraprova (base 519ed7b, render limpo).**
+- `tab_drill_cab_test.py` reprova A e B nas duas larguras (`tabelas/tab_drill_cab_contraprova_519ed7b_*.log`).
+- `ds_modulos.py`: 252 desvios em 90 telas (`ds-modulos-base.json`, `tabelas/ds_modulos_contraprova_519ed7b.log`).
+
+**Vermelhos que já eram vermelhos na base:**
+
+| Teste | Na base | Na candidata | Classificação |
+|---|---|---|---|
+| `tabelas_irr_test.py` | 98/106 | 98/106 | **Teste obsoleto.** TABR-CTX-02 espera o contador "N de 23", que a TAB-02 (15/10) tirou quando há filtro rápido. Mesmas 8 falhas nas duas. |
+| `visoes2_formas_test.py` | F2–F4 falham e o teste para em exceção | igual | **Produto e teste obsoleto.** A raia do Kanban ainda "desce" para uma trilha que a AGR-02 desligou (ver "AGR-02 no Kanban da O.S."). |
+| `pa_regras_test.py` U14 | 17/18 | 18/18 | **Teste obsoleto, corrigido.** O oráculo esperava o resumo das doses no aviso, que saiu em 15/10 ("caixa pequena, pouco texto"). A contraprova continua: sem publicar, a versão fica 6 e o caso reprova. |
+
+**Oráculos mudados por padrão novo:**
+- `ds_1610_test.py` B2 procura a seta na 1ª célula da linha (TAB-09).
+- `saf_operacoes_test.py`, `rend_multiconjuntos_test.py` e `saf_capacidade_simetrica_test.py` clicam em "▸ Capacidade por mês" (TAB-09: seta antes do nome).
