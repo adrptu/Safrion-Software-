@@ -130,12 +130,16 @@ A tabela própria das Atividades do plano usa a mesma peça; não há cópia de 
 - **Campo calculável é calculado** (ex.: o fuso vem da UF).
 - **Documentos para crédito vivem no Crédito** › Documentos para crédito: CAR, matrícula, módulos fiscais, contrato de arrendamento, certidões e o que o credor pedir. No cadastro sobra, no máximo, o vínculo "Documentos para crédito ›".
 - **Documento que trava operação agrícola fica onde a regra o usa:** a outorga de água, no CD-01 › Água, que a Irrigação lê.
+- **O documento movido segue a entidade pelo id estável dela, nunca pelo nome** (revisão do Codex 6220145128). Fonte única: `credito_docs.js`.
+  - O Crédito mostra o nome, a posse e as fazendas do cadastro atual: fazenda criada no CD-01 já tem CAR e matrícula a informar e entra no seletor.
+  - O que foi preenchido no formulário antigo migra uma vez, sem sobrescrever o que já foi editado no Crédito, e sai do cadastro.
+  - A edição no Crédito é gravada por id do documento: recarregar não reverte nem duplica.
 
 **Prova:** tabela campo a campo em `docs/integracao/V71/cadastros-campos.md`.
 
 **Dano evitado:** formulário longo, com campos que nenhuma tela usa, custa tempo e tira o foco de quem cadastra. Documento de banco misturado ao cadastro operacional aparece como pendência onde não trava nada.
 
-**Teste:** `cadastros_padrao_test.py`, P6a a P6e.
+**Teste:** `cadastros_padrao_test.py`, P6a a P6e; `cadastros_rev1_test.py`, R1a a R1f.
 
 ### CAD-03 · Mãe e filhas numa lista só (fazendas e talhões)
 
@@ -153,6 +157,11 @@ A tabela própria das Atividades do plano usa a mesma peça; não há cópia de 
 - **A primária do cabeçalho cria a mãe** ("Criar fazenda").
 - **A filha se inclui de dentro da mãe:** "Incluir talhão" no painel da fazenda, ou na própria linha quando a fazenda está vazia (BOT-03).
 - **As outras entidades da tela continuam em abas** (Ambiental, Água).
+- **A mãe também é registro no filtro rápido** (revisão do Codex 6220145128):
+  - "A resolver" e "Inativos" alcançam a mãe pela situação dela, sem somar área e sem inventar filha;
+  - a mãe que passa sozinha aparece recolhida, e as filhas em dia ficam fora da lista filtrada;
+  - a filha que passa traz a mãe como contexto;
+  - "Todos", a contagem e a aba contam mães e filhas; voltar a "Todos" devolve a abertura de antes.
 
 **Dano evitado:** com a fazenda numa aba de cartões e os talhões em outra, a pessoa perdia a ligação entre a área da fazenda e a soma dos talhões e cadastrava talhão sem ver a fazenda.
 
@@ -160,6 +169,8 @@ A tabela própria das Atividades do plano usa a mesma peça; não há cópia de 
 - a árvore abre e fecha;
 - a área cultivável da fazenda é a soma dos talhões;
 - Criar fazenda e Incluir talhão funcionam.
+
+E `cadastros_rev1_test.py`, R2a a R2e: "A resolver" com fazenda incompleta sem e com talhões, o contexto do talhão pendente, "Todos", teclado e 390 px.
 
 ### Fica para o motor (não é desta frente)
 
