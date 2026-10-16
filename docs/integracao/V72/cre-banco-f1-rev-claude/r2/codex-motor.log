@@ -1,0 +1,18 @@
+OK entrada mostra somente ficha e oculta KPIs de contrato
+OK novo bem salvo pelo formulário volta com centavos e origem
+OK quota reabre formulário com rascunho e não cria item
+OK confirmar pela grade preserva data/fonte e grava perfil vigente
+OK perfil sem direção consulta e não inclui nem confirma
+OK retirar papel com formulário aberto impede gravação
+OK conflito conserva rascunho; reabrir lê última versão
+OK recorte de documentos conserva ficha e filtro na troca de visão
+OK valores ordenam numericamente sem perder centavos
+OK confirmar nomeia a ação e oculta campos de alteração
+OK documentos automáticos continuam protegidos e graváveis na mesma transação
+OK histórico disponível no detalhe e idade não zera ao confirmar
+OK ficha vazia orienta inclusão sem alegar filtro
+OK consulta vazia aponta quem pode incluir
+OK filtro sem resultado preserva mensagem do motor
+OK armazenamento ilegível mostra recuperação sem falso vazio
+OK zero e pendente reabrem sem perder distinção
+RESULTADO 17/17

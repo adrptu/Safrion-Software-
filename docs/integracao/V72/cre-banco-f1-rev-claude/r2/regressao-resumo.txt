@@ -1,0 +1,8 @@
+rev_ficha_nav_r2 rc=0 125s · RESULTADO: 111 ok · 0 falhas
+credito_menu_test rc=0 25s · RESULTADO: 16/16
+cadastros_rev1_test rc=0 152s · RESULTADO: 19/19
+cad_gravacao_falha_test rc=0 55s · RESULTADO: 7/7 ok
+cadastros_padrao_test rc=0 302s · RESULTADO: 44/44
+ds_modulos rc=0 258s · RESULTADO: catraca ok
+paginas_scan_test rc=0 403s · RESULTADO: 5 ok · 0 falhas (148 páginas)
+FIM
