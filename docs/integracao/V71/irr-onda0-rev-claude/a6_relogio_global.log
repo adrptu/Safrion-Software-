@@ -1,0 +1,10 @@
+== /tmp/claude-0/pr79
+1 OS-0423: OS-0423 Liberadas · LIB-2292 · 4,0 mm · hoje 15:00–17:00 · liberar não liga o equipamento. · janela [(900, 120)] · agora 372
+2 OS-0419: OS-0419 Em execução · início hoje 20:02 (EX-5120) · término previsto amanhã 10:33. · agora 1202
+3 OS-0423: OS-0423 Em execução · início hoje 20:04 (EX-5122) · término previsto hoje 22:04. · janela liberada 900 → 1020 · início real 1204 · agora 1204
+RESULTADO A6: início fora da janela liberada
+== /tmp/claude-0/pr79base
+1 OS-0423: OS-0423 Liberadas · LIB-2292 · 4,0 mm · hoje 15:00–17:00 · liberar não liga o equipamento. · janela [(900, 120)] · agora 372
+2 OS-0419: OS-0419 Em execução · início hoje 20:02 (EX-5120) · término previsto amanhã 10:33. · agora 372
+3 OS-0423: OS-0423 Em execução · início hoje 15:02 (EX-5122) · término previsto hoje 17:02. · janela liberada 900 → 1020 · início real 902 · agora 372
+RESULTADO A6: início dentro da janela
