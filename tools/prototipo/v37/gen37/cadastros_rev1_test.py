@@ -187,7 +187,7 @@ try:
     aberto = J("!!document.querySelector('aside[role=dialog] #fx_g_doc_num')"); rasc = J("(document.querySelector('aside[role=dialog] #fx_g_doc_num')||{}).value||''")
     dlg = J("(document.querySelector('aside[role=dialog]')||{}).innerText||''") or ''; hist = J("window.__t") or []
     avisos = J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
-    ed0 = (ler(DKEY) or {}).get('ed', {})
+    ed0 = (ler(DKEY) or {}).get('ed', {}); foto('r3_nao_salvo_1440')
     chk('R3a navegador recusando os documentos: o valor antigo do cadastro (CAR-LEGADO) aparece no Crédito com o nome novo; Salvar não confirma, o formulário fica com o rascunho e o motivo, nada gravado',
         len(leg) == 1 and 'CAR-LEGADO' in leg[0].get('Número ou registro', '') and abriu and aberto and rasc == 'CAR-NOVO-1' and 'não gravou' in dlg
         and 'Não salvo' in avisos and not any('Salvo: CAR' in x for x in hist + [avisos]) and (ed0.get('dc_car_SR') or {}).get('num') != 'CAR-NOVO-1', [leg, abriu, aberto, rasc, 'não gravou' in dlg, avisos[:300], hist[-3:], ed0])
@@ -203,6 +203,7 @@ try:
     J("(()=>{const t=document.querySelector('[data-g2g=g_doc]'); const r=[...t.querySelectorAll('[role=row][data-rid]')].find(x=>x.dataset.rid==='dc_car_SR'); r&&(r.querySelector('[role=cell] .g2pw')||r).click();})()"); time.sleep(.5)
     ro = J("(()=>{const q=s=>document.querySelector('aside[role=dialog] '+s); const a=q('#fx_g_doc_tipo'), b=q('#fx_g_doc_tit'); const d=(document.querySelector('aside[role=dialog]')||{}).innerText||'';"
            " return {tipo:!!a&&a.disabled, tit:!!b&&b.disabled, motivo:/tipo e a fazenda não mudam/.test(d)};})()") or {}
+    foto('r4_automatico_so_leitura_1440')
     J(f"({SETV})('aside[role=dialog] #fx_g_doc_tit','Fazenda Teste')"); J(f"({SETV})('aside[role=dialog] #fx_g_doc_num','FORCADO-1')"); time.sleep(.2); btn('Salvar'); time.sleep(.3)
     ainda = J("!!document.querySelector('aside[role=dialog] #fx_g_doc_num')"); btn('Cancelar'); btn('Descartar alterações')
     ed2 = (ler(DKEY) or {}).get('ed', {}); ir(DOCS); ncar = (len(doc('CAR', 'Santa Rita')), len(doc('CAR', 'Fazenda Teste')))

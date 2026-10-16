@@ -677,7 +677,7 @@ function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
     if(String(d.tipo||'')!==String(row.v.tipo||'')) e.tipo=CRED_FIXO; if(String(d.tit||'')!==String(row.v.tit||'')) e.tit=CRED_FIXO; return e; };
   const FD=v.g_doc_F, fmD=g2st(self,'g_doc').fm;
   if(FD&&FD.open&&fmD&&fmD.rid&&credAuto(fmD.rid)) (FD.fields||[]).forEach(f=>{ if(f.fid==='fx_g_doc_tipo'||f.fid==='fx_g_doc_tit'){ f.dis=true; f.ist=String(f.ist||'').replace('background:#FFFFFF','background:#F4F6F3');
-    if(!f.err){ f.help='Documento automático da fazenda: o tipo e a fazenda não mudam aqui. Para outro documento, use "Incluir documento".'; f.hasHelp=true; } } });
+    if(!f.err&&f.fid==='fx_g_doc_tit'){ f.help='Documento automático da fazenda: o tipo e a fazenda não mudam aqui. Para outro documento, use "Incluir documento".'; f.hasHelp=true; } } });   // o motivo uma vez, sob os dois campos fixos
   // seletor "Fazenda ou parceiro" (opções dinâmicas do motor): as fazendas ativas do cadastro atual, inclusive as criadas no CD-01, pelo nome de hoje
   self.g2opts=(gid,k,d)=>{ if(gid!=='g_doc'||k!=='tit') return null; const ns=(self._credFz||[]).filter(f=>f.sit!=='Inativa'&&f.nome).map(f=>f.nome);
     if(d&&d.tit&&ns.indexOf(d.tit)<0) ns.push(d.tit); return [{v:'',t:'Escolha…'}].concat(ns.map(n=>({v:n,t:n}))); };
