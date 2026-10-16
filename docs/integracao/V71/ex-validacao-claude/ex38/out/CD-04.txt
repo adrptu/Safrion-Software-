@@ -1,0 +1,115 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Cadastros › Pessoas e equipes
+‹
+Cadastros
+Pessoas e equipes
+2 não alocáveis · 1 a renovar em 30 dias
+Pessoas
+15
+Equipes
+8
+2
+não alocáveis em O.S.
+Lucas, Beto
+Regularizar habilitação ›
+1
+habilitação vence em 30 dias
+Marcos
+Renovar ›
+15 de 15
+Todas 15
+A resolver 3
+Função
+Todas
+Operadores (4)
+Caldeiros (2)
+Irrigantes (1)
+Almoxarifes (1)
+Agrônomos (1)
+Cadastrar pessoa
+Agrupar por
+▾
+Colunas
++5
+Pessoa
+⇅
+Equipe
+⇅
+Validade da habilitação
+⇅
+Habilidades
+⇅
+Ana
+Agronomia
+31/12/2027
+Liberar O.S. (agrônomo)
+Caio
+Agronomia
+—
+Conferir
+Marcos
+Campo 1
+30/09/2026
+Operar trator, Operar pulverizador
+Carlos
+Campo 1
+31/08/2027
+Operar trator, Operar plantadeira
+Paula
+Campo 1
+30/04/2027
+Preparar calda (caldeiro), Conferir
+Nilton
+Campo 2
+30/04/2027
+Preparar calda (caldeiro)
+Não alocável em O.S.
+Lucas
+Campo 2
+15/08/2026
+Operar trator, Operar colhedora
+João
+Irrigação
+31/03/2027
+Irrigar
+Rui
+Suprimentos
+—
+Almoxarifado, Conferir
+Zé
+Oficina
+31/05/2027
+Manutenção de máquinas, Testar reparo
+Otávio
+Oficina
+—
+Aprovar O.S. de manutenção, Liberar ativo
+Não alocável em O.S.
+Beto
+Campo 1
+pendente
+Operar trator
+Igor
+Beneficiamento e qualidade
+—
+Autorizar rota e liberar ordem de processo
+Marta
+Beneficiamento e qualidade
+—
+Liberar lote (qualidade)
+Dora
+Comercial
+—
+—
+Tela: Pessoas e equipes · 2 não alocáveis · 1 a renovar em 30 dias

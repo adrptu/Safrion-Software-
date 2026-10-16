@@ -1,0 +1,33 @@
+OS-0424 · Pulverização
+Liberadas
+i
+Pulverização · Fungicida A · T1-B · 128 ha
+Com sinal
+Sem sinal
+Nada aguardando sinal
+Ver envios
+VEIO DE
+Minhas ordens
+ESTÁ AQUI
+OS-0424 · Liberadas
+FALTA
+retirar os insumos com Rui
+PRÓXIMA AÇÃO
+Retirar no almoxarifado
+Instrução liberada
+Reservado · REQ-039
+Versão: v1
+Janela: 24/09
+Local: T1-B · 128 ha
+Andamento: Realizado 0 de 128 ha · saldo 128 ha
+Abrir ficha do caldeiro
+Insumos · REQ-039
+Fungicida A · 0,5 L/ha × 128 ha = 64 L
+lote F26-02 · galão 5 L · entregue 0 L · consumido 0 L
+Retirar 65 L com Rui
+Apontamentos
+Nenhum turno fechado nesta ordem.
+Registrar ocorrência
+Ver retirada
+Retirar no almoxarifado
+Tela: OS-0424 · Pulverização · Liberadas

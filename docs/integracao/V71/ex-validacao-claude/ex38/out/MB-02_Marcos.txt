@@ -1,0 +1,55 @@
+Minhas ordens
+1 impedida · 1 revogada
+i
+Com sinal
+Sem sinal
+Nada aguardando sinal
+Ver envios
+Suas ordens · Marcos
+OS-0421 · Pulverização · Fungicida 1ª aplicação
+T1+T2 · 350 ha · janela 20–26/09
+Em execução
+Pronta para o próximo turno
+Realizado 190 de 350 ha · saldo 160 ha
+Fungicida A · lote F26-02 · galão 5 L · com você 65 L
+Iniciar turno
+Abrir ordem
+OS-0424 · Pulverização · Fungicida A
+T1-B · 128 ha · janela 24/09
+Liberadas
+Reservado · REQ-039
+Realizado 0 de 128 ha · saldo 128 ha
+Fungicida A · lote F26-02 · galão 5 L · retirar 65 L
+Retirar no almoxarifado
+Abrir ordem
+OS-0430 · Dessecação pré-plantio
+T1-A · 160 ha · janela 25/09 (DAP −20)
+A liberar
+Aguarda liberação no escritório
+Realizado 0 de 160 ha · saldo 160 ha
+Abrir ordem
+Da equipe · outros responsáveis
+OS-0420 · Plantio · Soja 58 W
+Contexto: T4 · Santa Rita · resp. Carlos · Realizado: 30/100 ha (18 conferidos + 12 provisórios) · saldo 70 ha parado
+Em execução
+Impedida · ativo bloqueado
+v2 no realizado · v3 no saldo
+Aviso: Fichas do saldo revogadas pelo ajuste da v3 (KCl −12 % só nos 70 ha, por Ana) · 23/09 08:05
+Ciência pendente do operador
+Impedimento: OM-0233 · Trator T1 bloqueado · substituto Trator 02 · MF 7719 a partir de 24/09 06:00
+Reconhecer
+Iniciar · bloqueado
+Registrar ocorrência
+OS-0418 · Fertirrigação · Pivô 1
+Contexto: P1 · 95 ha · resp. João · Motivo: água reclassificada para fertirrigação · v2 a liberar por Ana (agrônoma)
+A liberar
+Revogada no servidor · 23/09 07:15
+Relato no aparelho: 23/09 07:40 · “pivô 1 ligado 20 min para teste de pressão”
+Relato fora da autorização atual · aguarda decisão
+Iniciar · bloqueado (revogada 07:15)
+OS-0419 · Irrigação · água
+Contexto: Pivô 2 · Santa Rita · janela hoje 20:00–amanhã 10:31 · resp. João
+Liberadas
+necessidade do balanço
+Ler QR
+Tela: Minhas ordens · 1 impedida · 1 revogada

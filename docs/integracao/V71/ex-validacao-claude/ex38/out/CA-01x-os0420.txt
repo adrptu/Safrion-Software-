@@ -1,0 +1,128 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Ordem de Serviço › OS-0420
+OS-0420 · Plantio Soja 58 W
+i
+Em execução · Impedida
+Acompanhar OM-0233
+VEIO DE
+REC-014 v2 · necessidade NEC-028
+→
+ESTÁ AQUI
+Em execução · Impedida · 30/100 ha
+→
+FALTA
+reparo da OM-0233 ou substituto (Trator 02 a partir de 24/09)
+→
+PRÓXIMA AÇÃO
+Acompanhar OM-0233
+Impedida · ativo bloqueado  Saldo de 70 ha parado pelo Trator T1 (OM-0233) · substituto Trator 02 a partir de 24/09. O saldo segue na v3 (KCl −12 %), ajustada por Ana (agrônoma) em 23/09; os 30 ha realizados ficam preservados na v2.
+A liberar
+Liberadas
+Em execução
+Em conferência
+Encerradas
+Autorizado
+100 ha v2 no realizado · v3 no saldo
+Realizado
+30 ha 18 conf. + 12 prov.
+Saldo
+70 ha parado · Trator T1
+Impedimento
+OM-0233 Trator T1 bloqueado
+Instrução herdada da REC-014 v2
+Ver recomendação
+PRODUTO
+⇅
+DOSE DA V2
+⇅
+QUANTIDADE PARA 100 HA
+⇅
+SALDO DE 70 HA NA V3
+⇅
+FONTE
+⇅
+Semente de soja 58 W (resistente)
+52 kg/ha
+5.200 kg
+sem mudança
+plano Soja alta tecnologia · decisão do DIA-007
+KCl 60 %
+120 kg/ha · zonas 140 / 120 / 95
+12.000 kg
+−12 % · 105,6 kg/ha
+ajustada por Ana (agrônoma) em 23/09
+REC-014 v2 · IAC Boletim 100 · prescrição por zona
+TS nematicida (abamectina)
+100 mL/100 kg de semente
+5,2 L
+sem mudança
+REC-014 v2 · bula AGROFIT
+Janela da recomendação 20/09 a 05/10 · janela da ordem 22–28/09 · T4, 1ª onda de 100 ha dos 204 ha da necessidade NEC-028.
+Apontamentos
+Conferir apontamentos
+DATA
+⇅
+TURNO
+⇅
+ÁREA DO DIA
+⇅
+ACUMULADO
+⇅
+CONFERÊNCIA
+⇅
+ORIGEM · SINCRONIZAÇÃO
+⇅
+21/09
+Dia 1
+18 ha
+18 / 100 ha
+Conferido
+app · sincronizado
+22/09
+Dia 2
+12 ha
+30 / 100 ha
+Provisório
+offline · sincronizado 12:10 · turno interrompido 06:40 pela quebra do Trator T1
+Impedimento e substituto
+Ver ocorrência
+⋯
+OC-114 · pressão hidráulica baixa no Trator T1 em 22/09 06:40 → OM-0233 em execução (Zé · mecânico). Substituto proposto: Trator 02 · MF 7719, apto e livre a partir de 24/09 06:00 — elegível só após confirmação do PCP.
+Ajuste do saldo · v3
+Ver fichas
+v3 · KCl −12 % no saldo de 70 ha (105,6 kg/ha)ⓘ
+Materiais e custo
+REQUISIÇÃO
+⇅
+ITEM
+⇅
+SOLICITADO
+⇅
+ENTREGUE
+⇅
+CONSUMIDO
+⇅
+EM CUSTÓDIA
+⇅
+CUSTO APONTADO
+⇅
+REQ-036
+Semente de soja 58 W
+5.200 kg
+1.560 kg
+1.560 kg
+0 kg
+R$ 14.820
+R$ 494/ha realizado
+Tela: OS-0420 · Plantio Soja 58 W · Em execução · Impedida

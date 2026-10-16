@@ -1,0 +1,59 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Suprimentos › Requisições e entregas › REQ-031
+REQ-031 · OS-0417 · MAP 11-52
+i
+Custódia aberta · 10 sc
+Receber devolução
+VEIO DE
+Término físico · consumo 70 sc
+→
+ESTÁ AQUI
+OS-0417 em conferência
+→
+FALTA
+Receber 10 sc ou destinar
+→
+PRÓXIMA AÇÃO
+Receber devolução
+Balanço da requisição
+Destinar saldo
+Conciliar custódia
+MEDIDA
+⇅
+QUANTIDADE
+⇅
+SITUAÇÃO
+⇅
+Entregue à ordem
+100 sc
+lote M26-07 · separado FEFO em 18/09
+Consumo apontado
+70 sc
+apontamentos do campo · 95 ha a 36,8 kg/ha
+Devolução declarada
+20 sc
+declaração não transfere custódia
+Devolução recebida e conferida
+20 sc
+voltou ao M26-05 · quarentena
+Saldo em custódia
+10 sc
+Impede encerrar a ordem · prazo 24/09
+Linha do tempo
+18/09 · 100 sc entregues à custódia de Paula (MV-8760, lote M26-07)
+22/09 · término físico · consumo apontado 70 sc em 95 ha
+22/09 · devolução declarada 20 sc · 23/09 09:41 20 sc recebidas e conferidas por Rui
+Tela: REQ-031 · OS-0417 · MAP 11-52 · Custódia aberta · 10 sc
