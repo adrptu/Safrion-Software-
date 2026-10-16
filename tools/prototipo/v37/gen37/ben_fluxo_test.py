@@ -289,7 +289,7 @@ try:
         # devolução no Estoque (Rui, almoxarife)
         ir('EST.dc.html'); perfil('Rui'); est_secao(3)
         r = J("(()=>{ const rw=[...document.querySelectorAll('[role=row]')].find(x=>N(x.innerText).indexOf('REQ-030')>=0); if(!rw) return 'sem linha'; window.__cl++; (rw.querySelector('[role=cell] span')||rw).click(); return 'ok'; })()"); time.sleep(.5)
-        q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value"); setv('#fx_g_dev_qtd', '60'); setv('#fx_g_dev_cond', 'Apta · volta ao disponível'); clk('Salvar', 'aside[role=dialog]'); time.sleep(.3)
+        q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value"); setv('#fx_g_dev_qtd', '60'); setv('#fx_g_dev_cond', 'Apta · volta ao disponível', False); J('window.__cl++'); clk('Salvar', 'aside[role=dialog]'); time.sleep(.3)   # condição: escolha por toque (§9), não campo digitado
         st = cen("[c.reqs['REQ-030'].itens[0].custodia, c.lotes['Caixa de mamão Formosa 10 kg|CX26-01'].fisico]")
         t.chk('(3) Estoque › Receba devoluções: REQ-030 abre vazia; Rui confere 60 un aptas: custódia 0 e CX26-01 540 → 600 un', r == 'ok' and q == '' and st == [0, 600], [r, q, st, toast()])
         ir('BEN.dc.html#OB-0110'); perfil('Igor'); time.sleep(.3); clk('Fechar processo', 'aside'); p = toast()
@@ -325,7 +325,7 @@ try:
         ir('EST.dc.html'); est_secao(2); t.chk('(5) a REQ-041 da OB-0112 aparece em Entregue por O.S.', 'OB-0112' in (J("ROWTXT('REQ-041')") or ''), J("ROWTXT('REQ-041')"))
         cl, tx = J("[window.__cl, window.__tx]")
         print(f'MEDIDA tarefa do proprietário (§11.7): {cl} cliques/toques e {tx} campos digitados (linha de base, AC-36)')
-        t.chk('(medida) tarefa do proprietário, desde o cartão Beneficiamento em Agrícola, em até 30 toques e sem campo digitado (só toques: a quantidade e as caixas vêm sugeridas)', cl <= 30 and tx == 0, [cl, tx])
+        t.chk('(medida) tarefa do proprietário, desde o cartão Beneficiamento em Agrícola, em até 30 toques e 1 campo digitado: a quantidade conferida da devolução (ESPECIFICACAO §9, Devolver caixas: 1; EST-ONDA0); as caixas vêm sugeridas e a condição é um toque', cl <= 30 and tx == 1, [cl, tx])
         # integração com a Colheita: o L39-131 (recebido em processo, pós-colheita do CAR0) abre uma ordem pelo atalho do Estoque de produto
         ir('PROD.dc.html#L39-131'); time.sleep(.4); p = pan()
         if PUB:
