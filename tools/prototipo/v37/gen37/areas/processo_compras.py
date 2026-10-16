@@ -126,7 +126,14 @@ def _mat_painel():
                     f'<span style="font-size: 12px; color: {MUTED};">{H("cm_justDica")}</span></label>') + '</div>')
     itens=(f'<div style="display: flex; flex-direction: column; gap: 4px;"><div style="{SECT}">Itens</div>'
            + FORH('cm_itens','x',f'<div style="display: flex; gap: 10px; justify-content: space-between; font-size: 13px; padding: 4px 0; border-bottom: 1px solid {LINE};"><span>{H("x.t")}</span><span style="color: {MUTED}; white-space: nowrap;">{H("x.s")}</span></div>',2) + '</div>')
-    det=(trilha + kv + itens + props
+    # D5 (16/10/2026): quantidade recebida explícita por linha ("Tudo · 1 un" ou o número); recebimento parcial reserva só o que chegou
+    rec=IFH('cm_recOn',f'<div style="display: flex; flex-direction: column; gap: 6px;"><div style="{SECT}">Recebimento</div>'
+            + FORH('cm_recIt','x',f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px;"><span style="flex: 1 1 150px; min-width: 0;">{H("x.t")}</span>'
+                   f'<span style="display: inline-flex; align-items: center; gap: 6px;"><input data-cmrec="{H("x.k")}" aria-label="{H("x.lab")}" type="text" inputMode="decimal" placeholder="{H("x.ph")}" value="{H("x.v")}" onChange="{H("x.set")}" style="{INP} width: 96px; text-align: right;">'
+                   f'<span style="font-size: 12.5px; color: {MUTED};">{H("x.un")}</span></span>'
+                   f'<button type="button" data-cmtudo="{H("x.k")}" onClick="{H("x.tudo")}" style="{_MINI}">{H("x.tudoT")}</button></div>',2)
+            + f'<span style="font-size: 12px; color: {MUTED};">{H("cm_recDica")}</span></div>')
+    det=(trilha + kv + itens + props + rec
          + IFH('cm_notaOn',f'<div role="note" style="font-size: 12.5px; color: {MUTED}; line-height: 1.45;">{H("cm_nota")}</div>'))
     prim=E.acao_motivo(f'<button type="button" data-cm-prim="1" aria-disabled="{H("cm_pdis")}" data-dica="{H("cm_pwhy")}" title="{H("cm_pwhy")}" onClick="{H("cm_pfn")}" style="{BTN_ST(True,True)}">{H("cm_pt")}</button>',H('cm_pdis'),H('cm_pwhy'))
     return IFH('cm_pan',f'<div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
@@ -766,9 +773,15 @@ function cmApro(c,r){ if(r.om){ const o=c.oms[r.om]; const a=o&&c.ativos[o.aid];
   if(r.aid&&c.ativos[r.aid]) return 'Ativo '+c.ativos[r.aid].nome+' ('+r.aid+')';
   if(r.orig==='rep') return 'Estoque do '+CMM.ccRep.toLowerCase()+': o custo vai à ordem que usar o item';
   return 'Centro de custo '+r.cc; }
+/* D5 (proprietário, 16/10/2026): quanto do que chegou ficou reservado para a OM (some quando a OM é cancelada: a reserva volta ao livre) */
+function cmResN(c,r){ const o=r.om?c.oms[r.om]:null; if(!o||o.etapa==='Canceladas') return 0; return (r.recs||[]).reduce((s,x)=>s+(x.res||[]).reduce((a,y)=>a+y.qtd,0),0); }
 function cmProx(c,r){ if(r.etapa==='A cotar') return 'solicitar cotações'; if(r.etapa==='Em cotação') return 'escolher a proposta e emitir o pedido';
-  if(r.etapa==='Pedido emitido') return (cmServ(r)?'aceitar o serviço':'receber')+' · '+r.ped.id+' previsto '+manBr(r.ped.prev);
-  if(r.etapa==='Recebida'){ if(r.rec&&r.rec.dest==='om'){ const o=c.oms[r.om]; return o&&o.etapa==='A liberar'?'liberar a '+r.om+' (na Manutenção)':'na '+r.om+' · '+(o?o.etapa.toLowerCase():''); }
+  if(r.etapa==='Pedido emitido'){ if(cmServ(r)) return 'aceitar o serviço · '+r.ped.id+' previsto '+manBr(r.ped.prev);
+    const f=(r.itens||[]).filter(x=>cmmFalta(x)>1e-9); const rs=cmResN(c,r)>0?'Reservado para '+r.om+' · ':'';
+    return rs+((r.recs||[]).length?'receber o restante ('+f.map(x=>qt(cmmFalta(x),x.un)).join(' + ')+')':'receber')+' · '+r.ped.id+' previsto '+manBr(r.ped.prev); }
+  if(r.etapa==='Recebida'){ if(r.rec&&r.rec.dest==='om'){ const o=c.oms[r.om]; const rs=cmResN(c,r)>0?'Reservado para '+r.om+' · ':'';
+      if(o&&o.etapa==='Canceladas') return 'no estoque livre ('+r.om+' cancelada)';
+      return rs+(o&&o.etapa==='A liberar'?'liberar a '+r.om+' (na Manutenção)':'na '+r.om+' · '+(o?o.etapa.toLowerCase():'')); }
     return r.rec&&r.rec.dest==='cc'?'entregue ao destino':'no estoque da oficina'; }
   if(r.etapa==='Aceita') return r.om?'custo de terceiro na '+r.om:'custo no centro de custo '+r.cc; return ''; }
 /* a fila: requisições e itens abaixo do ponto de pedido sem requisição; abertas primeiro, por urgência e pela data de que precisa */
@@ -789,6 +802,7 @@ function cmPre(self){ const g=GR('g_mat'); if(!g) return; const c=manGet(); cons
 function cmFoco(){ setTimeout(()=>{ const a=document.getElementById('cm-painel'); if(a&&!a.contains(document.activeElement)) a.focus(); },60); }
 function cmAbrir(self,rid){ rid=String(rid); if(rid.indexOf('REP:')===0){ self.setState({cmPan:{k:'rep',id:rid.slice(4)},cmF:{}}); cmHash(''); } else { self.setState({cmPan:{k:'sc',id:rid},cmF:{}}); cmHash(rid); } cmFoco(); }
 function cmFechar(self){ self.setState({cmPan:null,cmF:{}}); cmHash(''); }
+function cmSetRec(self,i,val){ const p={}; p['rq'+i]=val; p.chave=manChave(); cmSetF(self,p); }
 function cmSetF(self,patch){ const F=self.state.cmF||{}; const err=Object.assign({},F.err||{}); Object.keys(patch).forEach(k=>{ delete err[k]; if(k==='item') delete err.nome; }); self.setState({cmF:Object.assign({},F,patch,{err})}); }
 /* comando: a regra grava no cenário único pelo manMudar (atômico: erro não grava nada); o aviso sai no g2toast */
 function cmRun(self,fn,depois){ const r=manMudar(self,(m)=>fn(m))||{}; if(r.err) self.setState({cmF:Object.assign({},self.state.cmF||{},{err:r.err})}); if(!r.erro&&!r.nada&&depois) depois(r); return r; }
@@ -807,7 +821,7 @@ function cmVals(self,v){ const st=self.state; const mat=cmTipo(self)==='mat';
   v.cm_nova=()=>{ self.setState({cmPan:{k:'novo'},cmF:{tipo:'Material'}}); cmHash(''); cmFoco(); };
   // painel: valores padrão (fechado)
   Object.assign(v,{cm_pan:false,cm_titulo:'',cm_chips:[],cm_hasChips:false,cm_hasErr:false,cm_err:'',cm_novo:false,cm_det:true,cm_tr:[],cm_kv:[],cm_itens:[],cm_hasProps:false,cm_propsT:'',cm_props:[],
-    cm_foraOn:false,cm_fora:'',cm_justOn:false,cm_just:'',cm_justDica:'',cm_notaOn:false,cm_nota:'',cm_hasLk:false,cm_lkh:'',cm_lkt:'',cm_hasP:false,cm_pt:'',cm_pdis:false,cm_pwhy:'',cm_pfn:()=>{}});
+    cm_foraOn:false,cm_fora:'',cm_justOn:false,cm_just:'',cm_justDica:'',cm_notaOn:false,cm_nota:'',cm_hasLk:false,cm_lkh:'',cm_lkt:'',cm_recOn:false,cm_recIt:[],cm_recDica:'',cm_hasP:false,cm_pt:'',cm_pdis:false,cm_pwhy:'',cm_pfn:()=>{}});
   v.cm_fechar=()=>cmFechar(self); v.cm_key=(e)=>{ if(e.key==='Escape'){ try{ e.stopPropagation(); }catch(x){} cmFechar(self); } };
   const pan=mat?st.cmPan:null; if(!pan) return; v.cm_pan=true;
   const pf=g2perfil(); const F=st.cmF||{}; const KV=(l,val,h,ht)=>({l,v:val,hasH:!!h,h:h||'',ht:ht||''});
@@ -844,15 +858,23 @@ function cmVals(self,v){ const st=self.state; const mat=cmTipo(self)==='mat';
   const o=r.om?c.oms[r.om]:null; const ate=cmmAte(c,r);
   v.cm_titulo=r.id+' · '+cmDesc(r); v.cm_hasChips=true;
   v.cm_chips=[{t:CM_ORIG[r.orig],st:cmChipSt('gray')},{t:r.tipo,st:cmChipSt('gray')},{t:'Urgência '+r.urg.toLowerCase(),st:cmChipSt(CM_URC[r.urg])},{t:r.etapa,st:cmChipSt(CM_ETC[r.etapa])}];
+  const recs=r.recs||[]; const canc=o&&o.etapa==='Canceladas'?o.canc||{}:null;
+  if(recs.length&&r.etapa==='Pedido emitido') v.cm_chips.push({t:'Recebido em parte',st:cmChipSt('yellow')});
+  if(cmResN(c,r)>0) v.cm_chips.push({t:'Reservado para '+r.om,st:cmChipSt('green')});
+  else if(canc&&recs.some(x=>(x.res||[]).length)) v.cm_chips.push({t:'Reserva devolvida ao livre ('+r.om+' cancelada)',st:cmChipSt('gray')});
   v.cm_tr=cmTrilha(r);
   const kv=[KV('Origem',CM_ORIG[r.orig]+(o?' · '+o.id+' · '+o.serv+' ('+o.etapa+')':''),o?'MA.dc.html#om='+o.id:'',o?'Abrir '+o.id:''),KV('Apropriação',cmApro(c,r)),
     KV('Pedida por',(r.por||'—')+' em '+manBr(r.data)),KV('Motivo',r.motivo||'—'),KV('Precisa até',ate?manBr(ate)+(o?' (janela da '+o.id+')':' (urgência '+r.urg.toLowerCase()+')'):'sem data')];
   if(r.cot) kv.push(KV('Cotação','enviada em '+manBr(r.cot.em)+' a '+r.cot.conv.map(f=>cmmForn(f).nome).join(', ')+' (simulado)'));
   if(r.ped) kv.push(KV('Pedido',r.ped.id+' · '+cmmForn(r.ped.f).nome+' · '+manRS(r.ped.valor)+' · '+r.ped.pag+' · previsão '+manBr(r.ped.prev)+(r.ped.just?' · justificativa: '+r.ped.just:'')));
-  if(r.rec) kv.push(KV('Recebimento',manBr(r.rec.em)+' por '+(r.rec.por||'—')+' · '+(r.rec.dest==='om'?((r.rec.res||[]).length?'reservado para a '+r.om:'no saldo da oficina para a '+r.om+' (reserva na liberação)'):(r.rec.dest==='cc'?'entregue ao destino (consumo direto)':'no estoque da oficina'))));
+  const LQ=xs=>(xs||[]).map(y=>y.nome+' '+qt(y.qtd,y.un)).join(', ');
+  recs.forEach((x,i)=>kv.push(KV('Recebimento'+(recs.length>1?' '+(i+1):''),x.id+' · '+manBr(x.em)+' por '+(x.por||'—')+' · '+LQ(x.ent)
+    +((x.res||[]).length?' · Reservado para '+x.om+': '+LQ(x.res)+(canc?' · devolvido ao livre em '+manBr(canc.em)+' ('+r.om+' cancelada: '+(canc.motivo||'')+')':''):'')
+    +((x.livre||[]).length?(r.orig==='om'?' · no estoque livre: ':' · no estoque da oficina: ')+LQ(x.livre):'')+((x.cc||[]).length?' · entregue ao destino (consumo direto)':''))));
+  if(r.rec&&!recs.length) kv.push(KV('Recebimento',manBr(r.rec.em)+' por '+(r.rec.por||'—')+' · '+(r.rec.dest==='om'?'no saldo da oficina para a '+r.om:(r.rec.dest==='cc'?'entregue ao destino (consumo direto)':'no estoque da oficina'))));
   if(r.aceite) kv.push(KV('Aceite',manBr(r.aceite.em)+' por '+(r.aceite.por||'—')+(o?' · custo de terceiro da '+o.id+': '+manRS(o.terc||0):'')));
   v.cm_kv=kv;
-  v.cm_itens=(r.itens||[]).map(x=>({t:x.nome+(x.item?' ('+x.item+')':''),s:(cmServ(r)?'':qt(x.qtd,x.un)+' × ')+'ref. '+manRS(x.preco)}));
+  v.cm_itens=(r.itens||[]).map(x=>({t:x.nome+(x.item?' ('+x.item+')':''),s:(cmServ(r)?'':qt(x.qtd,x.un)+' × ')+'ref. '+manRS(x.preco)+(x.rec>0&&x.rec<x.qtd-1e-9?' · recebido '+qt(x.rec,x.un):'')}));
   if(r.cot){ const ref=cmmSugerida(c,r); const ed=r.etapa==='Em cotação'; const sel=r.ped?r.ped.f:(F.f||(ref&&ref.f));
     v.cm_hasProps=true; v.cm_propsT=ed?'Propostas · escolha uma':'Propostas recebidas';
     v.cm_props=r.cot.props.map(p=>{ const on=p.f===sel; const late=!!ate&&p.chega>ate;
@@ -865,10 +887,17 @@ function cmVals(self,v){ const st=self.state; const mat=cmTipo(self)==='mat';
       prim('Emitir pedido · '+(p?manRS(p.valor):''),'pedir',()=>cmRun(self,m=>cmmPedir(m,r.id,p.f,F.just||'',pf),()=>self.setState({cmF:{}})),alc); } }
   v.cm_notaOn=true;
   v.cm_nota=cmServ(r)?('Serviço não tem estoque: o aceite lança o valor do pedido como custo de terceiro '+(o?'da '+o.id+' (custo da ordem pela função única da Manutenção).':'do centro de custo '+r.cc+'.'))
-    :(r.orig==='om'?'A peça recebida entra no saldo da oficina para a '+r.om+', que passa a poder ser liberada; a reserva nasce na liberação. ':'')+'O custo fica no ativo ou no centro de custo e chega às culturas pelo uso do ativo (rateio pelo uso do ativo), nunca pela safra na compra.';
+    :(r.orig==='om'?'A peça que chega fica reservada para a '+r.om+' (decisão do proprietário, 16/10): não entra no estoque livre e nenhuma outra ordem a usa; recebimento parcial reserva só o que chegou; se a ordem for cancelada, a reserva volta ao livre. ':'')+'O custo fica no ativo ou no centro de custo e chega às culturas pelo uso do ativo (rateio pelo uso do ativo), nunca pela safra na compra.';
   if(o){ v.cm_hasLk=true; v.cm_lkh='MA.dc.html#om='+o.id; v.cm_lkt='Abrir '+o.id; }
   if(r.etapa==='A cotar') prim('Solicitar cotações (simulado)','cotar',()=>cmRun(self,m=>cmmCotar(m,r.id,pf)));
   else if(r.etapa==='Pedido emitido'){ if(cmServ(r)) prim('Registrar aceite do serviço','aceitar',()=>cmRun(self,m=>cmmAceitar(m,r.id,pf)));
-    else prim('Registrar recebimento','receber',()=>cmRun(self,m=>cmmReceber(m,r.id,pf))); }
+    else { const pend=(r.itens||[]).map((x,i)=>({x,i,f:cmmFalta(x)})).filter(y=>y.f>1e-9); const qs=(r.itens||[]).map((x,i)=>F['rq'+i]||'');
+      const dig=pend.filter(y=>!manVazio(qs[y.i])); const pode=!cmmPode(pf,'receber');
+      v.cm_recOn=pode&&pend.length>0; v.cm_recIt=pend.map(y=>({k:String(y.i),t:y.x.nome,un:y.x.un,ph:'falta '+manN(y.f,1),v:qs[y.i],lab:'Recebido agora · '+y.x.nome+' ('+y.x.un+')',
+        set:(e)=>cmSetRec(self,y.i,e.target.value),tudo:()=>cmSetRec(self,y.i,String(y.f).replace('.',',')),tudoT:'Tudo · '+qt(y.f,y.x.un)}));
+      v.cm_recDica=r.orig==='om'?(o&&manAberta(o)?'Chegou menos? Informe só o que chegou: só isso fica reservado para a '+r.om+'.':'A '+r.om+' não está aberta ('+(o?o.etapa.toLowerCase():'não encontrada')+'): o que chegar entra no estoque livre.')
+        :(r.orig==='rep'?'Entra no estoque livre da oficina. Chegou menos? Informe só o que chegou.':'Sem código no almoxarifado: vai direto ao destino (consumo).');
+      const tx=dig.length===1&&pend.length===1?' · '+qt(manNum(qs[dig[0].i]),dig[0].x.un):(dig.length?' · '+dig.length+(dig.length>1?' itens':' item'):'');
+      prim('Registrar recebimento'+tx,'receber',()=>cmRun(self,m=>cmmReceber(m,r.id,pf,qs,F.chave),()=>self.setState({cmF:{}})),dig.length?'':'Informe a quantidade recebida'); } }
 }
 '''

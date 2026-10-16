@@ -9,7 +9,9 @@ A apropriação é por OM, ativo ou centro de custo, nunca por safra ou cultura;
 custo R$/h), sem rateio na compra.
 
 Estado: c.man.cmp do cenário único (reqs SC-nnn, seqpc), ao lado de c.man.itens (o saldo da oficina) e c.man.oms (a OM que recebe a
-peça, reservada na liberação pela DEC-2609-13, ou o custo do serviço). A numeração SC é a mesma do "Solicitar compra" da OM (c.man.seqsc). Fornecedores de peças e
+peça ou o custo do serviço). D5 (proprietário, 16/10/2026, docs/integracao/V69/decisoes-proprietario-1610.md): a peça comprada para uma OM
+fica reservada para ela desde o recebimento (não entra no livre; outra ordem não a usa); a reposição continua indo ao estoque livre.
+A numeração SC é a mesma do "Solicitar compra" da OM (c.man.seqsc). Fornecedores de peças e
 serviços são fictícios e ficam aqui até entrarem no CD-05 (decisão de integração registrada no V69)."""
 import json
 
@@ -24,10 +26,6 @@ CCS = ['Oficina', 'Sede', 'Irrigação', 'Armazém e beneficiamento']   # centro
 CC_REP = 'Almoxarifado da oficina'
 URG = ['Normal', 'Alta', 'Urgente']
 URG_DIAS = {'Alta': 3, 'Urgente': 1}   # requisição avulsa: "precisa até" pela urgência (Normal fica sem data)
-# DEC-2609-13 (decisão registrada do proprietário): a reserva nasce na liberação. A peça comprada para a OM entra no saldo e cobre a OM, que
-# passa a poder ser liberada; prendê-la à OM desde o recebimento é a pergunta D5 ao proprietário (docs/pcm-suprimentos/DECISOES.md §4).
-# Se ele aprovar (DEC registrada), True: o recebimento já reserva para a OM e a liberação só reserva o que falta (manLiberar).
-RESERVA_NO_RECEBIMENTO = False
 # fornecedores de peças e serviços (fictícios, IDs e propostas de docs/pcm-suprimentos: F08 Peças e Lubrificantes, F09 Peças; homologação e
 # grupos como no CD-05: cotação só vai a homologado do grupo). Ficam aqui até entrarem no CD-05 (parceiros 20 → 25).
 FORN = [
@@ -88,7 +86,7 @@ def seed():
 def js():
     """Regras sobre c.man (o estado da manutenção no cenário único): entram em dados_manutencao.js_regras(), depois das regras da OM."""
     cfg = dict(forn=FORN, ccs=CCS, ccRep=CC_REP, urg=URG, urgDias=URG_DIAS, gPecas=G_PECAS, gItem=GRUPO_ITEM, gMat=G_MAT, gServ=G_SERV, pc0=PC0,
-               resRec=RESERVA_NO_RECEBIMENTO, alcada=__import__('dados2').ALCADA)
+               alcada=__import__('dados2').ALCADA)
     return 'const CMM = ' + json.dumps(cfg, ensure_ascii=False) + ';\n' + JS
 
 
@@ -132,8 +130,9 @@ function cmmQuem(pf){ const q=manPf(pf); const ks=Object.keys(q.papeis||{}); if(
 /* reposição: item com ponto de pedido cujo saldo livre (saldo − reservado) + o já pedido em reposição aberta fica abaixo do ponto;
    a sugestão repõe até o máximo do item. O estado salvo sem min/max lê a política da semente. */
 function cmmPol(c,k){ const it=c.itens[k]||{}, b=(MAN0.itens||{})[k]||{}; return {min:Number(it.min!==undefined?it.min:b.min)||0,max:Number(it.max!==undefined?it.max:b.max)||0}; }
-function cmmLivre(c,k){ const it=c.itens[k]; return it?it.saldo-it.reservado:0; }
-function cmmPedido(c,k){ return Object.values(cmmDe(c).reqs).filter(r=>r.orig==='rep'&&cmmAberta(r)).reduce((s,r)=>s+(r.itens||[]).filter(x=>x.item===k).reduce((a,x)=>a+x.qtd,0),0); }
+function cmmLivre(c,k){ return manLivreIt(c,k); }   /* livre = saldo − reservado: a regra única da manutenção (dados_manutencao.manLivreIt) */
+/* já pedido em reposição aberta: só o que ainda não chegou (o recebido em parte já está no saldo) */
+function cmmPedido(c,k){ return Object.values(cmmDe(c).reqs).filter(r=>r.orig==='rep'&&cmmAberta(r)).reduce((s,r)=>s+(r.itens||[]).filter(x=>x.item===k).reduce((a,x)=>a+x.qtd-(x.rec||0),0),0); }
 function cmmRepos(c){ return Object.keys(c.itens).map(k=>{ const p=cmmPol(c,k); if(!(p.min>0)) return null; const it=c.itens[k]; const livre=cmmLivre(c,k), ped=cmmPedido(c,k);
   if(livre+ped>=p.min-1e-9) return null; const qtd=Math.max(p.max,p.min)-(livre+ped);
   return {k,nome:it.nome,un:it.un,livre,ped,min:p.min,max:p.max,qtd,preco:it.preco}; }).filter(Boolean); }
@@ -182,19 +181,40 @@ function cmmPedir(c,id,fid,just,pf){ if(pf!==undefined) cmmExige(pf,'pedir'); co
   const s=cmmEst(c); const pc='PC-'+(s.seqpc||CMM.pc0); s.seqpc=(s.seqpc||CMM.pc0)+1;
   r.ped={id:pc,f:p.f,valor:p.valor,prazo:p.prazo,pag:p.pag,prev:p.chega,em:c.hoje,por:cmmQuem(pf),just:ref&&p.f!==ref.f?String(just).trim():''}; r.etapa='Pedido emitido';
   return {msg:pc+' emitido para '+cmmForn(p.f).nome+' · '+manRS(p.valor)+' · previsão '+manBr(p.chega)+' · vinculado à '+id+(r.om?' e à '+r.om:'')+'.'}; }
-/* recebimento do material: peça da OM entra no saldo e fica reservada para a OM (manReceberSc, a mesma função da ponte da Manutenção);
-   reposição entra no estoque da oficina; material sem código vai direto ao centro de custo (consumo, sem saldo) */
-function cmmReceber(c,id,pf){ if(pf!==undefined) cmmExige(pf,'receber'); const r=cmmPega(c,id);
+/* quanto chegou agora, por linha da requisição (qtds[i], digitado ou o "Tudo" da tela: quantidade sempre explícita); sem qtds, tudo o que
+   falta receber (a ponte simulada da Manutenção). Recusa negativo, acima do que falta receber e recebimento vazio: nada é gravado. */
+function cmmFalta(x){ return Math.max(0,x.qtd-(x.rec||0)); }
+function cmmQtdRec(r,qtds){ const out=(r.itens||[]).map((x,i)=>{ const falta=cmmFalta(x);
+    if(qtds===undefined||qtds===null) return falta;
+    const t=qtds[i]; if(manVazio(t)) return 0; const q=manNum(t);
+    if(isNaN(q)||q<0) throw new Error('Quantidade recebida inválida: '+x.nome+'. Nada foi gravado.');
+    if(q>falta+1e-9) throw new Error('Acima do pedido: chegou '+manN(q,1)+' '+x.un+' de '+x.nome+' e falta receber '+manN(falta,1)+' '+x.un+'. Nada foi gravado.');
+    return q; });
+  if(!out.some(q=>q>1e-9)) throw new Error('Informe a quantidade recebida. Nada foi gravado.'); return out; }
+/* recebimento do material (chave de idempotência de quem confere: a mesma chave não soma nem reserva de novo, D-30).
+   Peça da OM: manReceberSc, a função única com a ponte da Manutenção: D5 (proprietário, 16/10/2026) reserva para a OM o que chegou.
+   Reposição entra no estoque livre da oficina; material sem código vai direto ao centro de custo (consumo, sem saldo).
+   Recebimento parcial: só o que chegou entra; a requisição segue "Pedido emitido" até chegar tudo. */
+function cmmReceber(c,id,pf,qtds,chave){ const r0=manCmd(c,chave,'receber',()=>cmmReceber0(c,id,pf,qtds));
+  if(r0.repetido) return {nada:true,repetido:true,msg:'Recebimento já registrado com esta chave · nada somado nem reservado de novo ('+String(r0.msg||'').replace(/\.$/,'')+').'}; return r0; }
+function cmmReceber0(c,id,pf,qtds){ if(pf!==undefined) cmmExige(pf,'receber'); const r=cmmPega(c,id);
   if(cmmServ(r)) throw new Error('Serviço não tem recebimento de estoque: registre o aceite do serviço.');
   if(r.etapa==='Recebida') return {nada:true,msg:'Recebimento da '+id+' já registrado em '+manBr(r.rec.em)+' · nada somado de novo.'};
   if(r.etapa!=='Pedido emitido') throw new Error('Emita o pedido da '+id+' antes de receber.');
-  const quem=cmmQuem(pf);
+  const quem=cmmQuem(pf); const q=cmmQtdRec(r,qtds);
   if(r.orig==='om'){ const o=c.oms[r.om]; if(!o||!o.sc||o.sc.id!==id) throw new Error('A '+(r.om||'OM')+' não aguarda a '+id+'.');
-    const res=manReceberSc(c,o,quem); return {msg:'Recebimento da '+id+' ('+r.ped.id+'): '+cmmItensTxt(r)+(res.length?' · reservado para a '+o.id+': '+res.join(', '):' · no saldo da oficina para a '+o.id)
-      +(o.etapa==='A liberar'?' · '+o.id+' pronta para liberar'+(res.length?'':' (a reserva nasce na liberação)'):'')+'.'}; }
-  const est=[]; (r.itens||[]).forEach(x=>{ if(x.item&&c.itens[x.item]){ c.itens[x.item].saldo+=x.qtd; est.push(x.nome+' · saldo '+manN(c.itens[x.item].saldo,1)+' '+x.un); } });
-  r.etapa='Recebida'; r.rec={em:c.hoje,por:quem,dest:est.length?'estoque':'cc'};
-  return {msg:'Recebimento da '+id+' ('+r.ped.id+'): '+cmmItensTxt(r)+(est.length?' · no estoque da oficina: '+est.join(', '):' · entregue a '+(r.aid?c.ativos[r.aid].nome:'centro de custo '+r.cc)+' (consumo direto, sem estoque)')+'.'}; }
+    const porItem={}; (r.itens||[]).forEach((x,i)=>{ if(q[i]>0) porItem[x.item]=(porItem[x.item]||0)+q[i]; });
+    const e=manReceberSc(c,o,quem,porItem); return {id,msg:manRecTxt(c,o,e)}; }
+  const hist=r.recs=r.recs||[]; const rid=r.ped.id+'/'+(hist.length+1); const est=[], cc=[];
+  (r.itens||[]).forEach((x,i)=>{ if(!(q[i]>0)) return; x.rec=(x.rec||0)+q[i]; const it=x.item&&c.itens[x.item];
+    if(it){ it.saldo+=q[i]; est.push({item:x.item,nome:x.nome,un:x.un,qtd:q[i],saldo:it.saldo}); } else cc.push({item:'',nome:x.nome,un:x.un,qtd:q[i]}); });
+  const completo=(r.itens||[]).every(x=>cmmFalta(x)<=1e-9); hist.push({id:rid,em:c.hoje,por:quem,ent:est.concat(cc),livre:est,cc});
+  if(completo){ r.etapa='Recebida'; r.rec={em:c.hoje,por:quem,dest:(r.itens||[]).some(x=>x.item&&c.itens[x.item])?'estoque':'cc'}; }
+  const falta=(r.itens||[]).filter(x=>cmmFalta(x)>1e-9).map(x=>x.nome+' '+manN(cmmFalta(x),1)+' '+x.un);
+  return {id,msg:'Recebimento '+rid+' da '+id+': '+est.concat(cc).map(x=>x.nome+' '+manN(x.qtd,1)+' '+x.un).join(', ')
+    +(est.length?' · no estoque da oficina: '+est.map(x=>x.nome+' · saldo '+manN(x.saldo,1)+' '+x.un).join(', '):'')
+    +(cc.length?' · entregue a '+(r.aid&&c.ativos[r.aid]?c.ativos[r.aid].nome:'centro de custo '+r.cc)+' (consumo direto, sem estoque)':'')
+    +(falta.length?' · recebimento parcial: falta receber '+falta.join(', '):'')+'.'}; }
 /* aceite do serviço: sem estoque; o valor do pedido vira custo de terceiro da OM (manCusto: peças + horas × custo-hora + terceiro) */
 function cmmAceitar(c,id,pf){ if(pf!==undefined) cmmExige(pf,'aceitar'); const r=cmmPega(c,id);
   if(!cmmServ(r)) throw new Error('Material se recebe: registre o recebimento.');
@@ -204,5 +224,5 @@ function cmmAceitar(c,id,pf){ if(pf!==undefined) cmmExige(pf,'aceitar'); const r
   if(o){ o.terc=Math.round(((Number(o.terc)||0)+r.ped.valor)*100)/100; o.servs=(o.servs||[]).concat([{sc:id,pc:r.ped.id,valor:r.ped.valor,em:c.hoje,por:cmmQuem(pf)}]); manToca(o); }
   r.etapa='Aceita'; r.aceite={em:c.hoje,por:cmmQuem(pf)};
   return {msg:'Serviço da '+id+' aceito ('+r.ped.id+' · '+manRS(r.ped.valor)+')'+(o?' · custo de terceiro da '+o.id+': '+manRS(o.terc)+' (custo estimado da ordem '+manRS(manCusto(c,o,'est'))+')':' · custo no centro de custo '+r.cc)+'.'}; }
-try { window.__cmm = { cmmDe, cmmRepos, cmmProps, cmmSugerida, cmmPode, manGet }; } catch (e) {}
+try { window.__cmm = { cmmDe, cmmRepos, cmmProps, cmmSugerida, cmmPode, cmmReceber, cmmLivre, manGet }; } catch (e) {}
 '''

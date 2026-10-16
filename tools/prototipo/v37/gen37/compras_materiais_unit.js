@@ -55,27 +55,15 @@ caso('peça da OM', () => {
   const pd2 = run(c, x => cmmPedir(x, 'SC-041', 'F08', '', ANA));
   ok('O8 · emitir de novo não cria outro pedido', pd2.nada && c.cmp.seqpc === 203, pd2);
   const f0 = manClone(c.itens['FIL-MF4292']); const rc = run(c, x => cmmReceber(x, 'SC-041', RUI)); const p0 = c.oms[id].pecas.find(p => p.item === 'FIL-MF4292');
-  ok('O9 · receber a peça da OM (DEC-2609-13): +1 un no saldo para a OM-0235, sem reserva antes da liberação; SC Recebida e o.sc.rec',
-    !rc.erro && c.itens['FIL-MF4292'].saldo === f0.saldo + 1 && c.itens['FIL-MF4292'].reservado === f0.reservado && !p0.res && c.cmp.reqs['SC-041'].etapa === 'Recebida' && c.cmp.reqs['SC-041'].rec.dest === 'om'
-    && c.oms[id].sc.rec === c.hoje && /para a OM-0235/.test(rc.msg) && /pronta para liberar/.test(rc.msg), [rc, c.itens['FIL-MF4292'], p0]);
+  ok('O9 · receber a peça da OM (D5, proprietário 16/10): +1 un no saldo e reservado +1 para a OM-0235 (o livre não cresce); SC Recebida e o.sc.rec',
+    !rc.erro && c.itens['FIL-MF4292'].saldo === f0.saldo + 1 && c.itens['FIL-MF4292'].reservado === f0.reservado + 1 && p0.res === 1 && c.cmp.reqs['SC-041'].etapa === 'Recebida' && c.cmp.reqs['SC-041'].rec.dest === 'om'
+    && c.oms[id].sc.rec === c.hoje && /Reservado para OM-0235/.test(rc.msg) && /pronta para liberar/.test(rc.msg), [rc, c.itens['FIL-MF4292'], p0]);
   ok('O10 · com a peça no saldo, a OM-0235 não tem mais Falta peça', !manFalta(c, c.oms[id]).length, manFalta(c, c.oms[id]));
   const ol0 = c.itens['OL-1540'].reservado; const lb = run(c, x => manLiberar(x, id, false, OT, {}));
-  ok('O11 · liberar a OM-0235 reserva o filtro (+1) e o óleo (12 L) uma vez', !lb.erro && c.oms[id].etapa === 'Liberadas' && c.itens['FIL-MF4292'].reservado === f0.reservado + 1 && c.itens['OL-1540'].reservado === ol0 + 12, [lb, c.itens['FIL-MF4292'], c.itens['OL-1540']]);
+  ok('O11 · liberar a OM-0235 não reserva o filtro de novo (segue +1, do recebimento) e reserva o óleo (12 L) uma vez', !lb.erro && c.oms[id].etapa === 'Liberadas' && c.itens['FIL-MF4292'].reservado === f0.reservado + 1 && c.itens['OL-1540'].reservado === ol0 + 12, [lb, c.itens['FIL-MF4292'], c.itens['OL-1540']]);
   ok('O12 · o filtro reservado não conta como livre: segue coberto pela SC-039 (livre 0 + 4 pedidos ≥ 2)', !cmmRepos(c).some(x => x.k === 'FIL-MF4292'), cmmRepos(c));
   const mr = run(c, x => manReceber(x, id, OT));
   ok('O13 · a ponte da Manutenção (Registrar recebimento) depois de Compras não soma de novo', mr.nada && c.itens['FIL-MF4292'].saldo === f0.saldo + 1, mr);
-});
-
-caso('D5 · reserva desde o recebimento (chave do proprietário, desligada)', () => {
-  ok('D5a · chave desligada na semente: a reserva segue na liberação (DEC-2609-13)', CMM.resRec === false, CMM.resRec);
-  const salva = CMM.resRec; CMM.resRec = true;
-  try {
-    const c = S(); manGerarTodas(c, null, OT); run(c, x => manSolicitar(x, 'OM-0235', OT)); run(c, x => cmmCotar(x, 'SC-041', ANA)); run(c, x => cmmPedir(x, 'SC-041', 'F08', '', ANA));
-    const f0 = manClone(c.itens['FIL-MF4292']); const rc = run(c, x => cmmReceber(x, 'SC-041', RUI)); const p0 = c.oms['OM-0235'].pecas.find(p => p.item === 'FIL-MF4292');
-    ok('D5b · com a chave ligada o recebimento já reserva para a OM-0235 (reservado +1, linha reservada)', !rc.erro && c.itens['FIL-MF4292'].reservado === f0.reservado + 1 && p0.res === 1 && /reservado para a OM-0235/.test(rc.msg), [rc, c.itens['FIL-MF4292'], p0]);
-    const lb = run(c, x => manLiberar(x, 'OM-0235', false, OT, {}));
-    ok('D5c · e a liberação não reserva o filtro de novo (reservado segue +1)', !lb.erro && c.itens['FIL-MF4292'].reservado === f0.reservado + 1, [lb, c.itens['FIL-MF4292']]);
-  } finally { CMM.resRec = salva; }
 });
 
 caso('ponte da Manutenção primeiro', () => {

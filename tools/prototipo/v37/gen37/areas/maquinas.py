@@ -54,7 +54,9 @@ CSS=('.ma-vis-m{display:none}'
      # título de cada filtro para o usuário não se perder"), para a lista começar acima da dobra (AC-PCM-22)
      '.ma-fx .mf-tela{flex-wrap:nowrap!important;overflow-x:auto;padding:6px 10px!important;gap:8px!important}.ma-fx .mf-tela>label{flex:0 0 auto}'
      '.ma-vc-l{display:none}.ma-vc-s{display:inline}.ma-hb{padding:7px 12px!important;font-size:13px!important}'
-     '.ma-pan{width:100%!important;max-width:100%!important;left:0!important}.ma-hide-m{display:none!important}.ma-flt{flex-wrap:wrap}}'
+     '.ma-pan{width:100%!important;max-width:100%!important;left:0!important}.ma-hide-m{display:none!important}.ma-flt{flex-wrap:wrap}'
+     # peças da OM no celular: a situação (chip) desce para a linha de baixo, inteira; sem chip por cima da coluna Aplicado
+     '.ma-pcs{grid-template-columns:minmax(0,1fr) 64px 76px!important}.ma-pcs-h>:nth-child(3){display:none}.ma-pcs-l>:nth-child(3){grid-column:1 / -1;grid-row:2;justify-self:start}}'
      '.ma-pan{position:fixed;top:0;right:0;bottom:0;z-index:60;width:620px;max-width:100%;background:#fff;box-shadow:-12px 0 40px -12px rgba(21,32,26,.35);'
      'display:flex;flex-direction:column;box-sizing:border-box;outline:none}'
      '.ma-pan-c{flex:1 1 0!important;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:12px;min-height:0!important}'   # a primária do rodapé fica à vista (AC-PCM-22)
@@ -417,7 +419,12 @@ function ma_panV(self,v,c,pf){ const st=self.state; const pan=st.pan;
   const hideP=!!av; v.pan_hasP=!!P&&!hideP; v.pan_pt=P?P.t:''; v.pan_pfn=P?P.fn:(()=>{}); v.pan_pdis=!!(P&&P.dis); v.pan_pst=P?P.st:MA_SEC; v.pan_pwhy=P?P.why:''; v.pan_hasWhy=!!(P&&P.why&&!hideP);
   v.pan_secs=hideP?[]:S; }
 /* ---------- painel da OM: o único detalhe da ordem (web e app) ---------- */
-function ma_omPrim(self,c,o,pf,f){ const a=c.ativos[o.aid]; const P={}; const S=[];
+/* cancelar sem execução (D5): secundária em A liberar e Liberadas, com motivo; a reserva volta ao livre, com registro (manCancelar) */
+function ma_omPrim(self,c,o,pf,f){ const r=ma_omPrim0(self,c,o,pf,f); if(o.etapa!=='A liberar'&&o.etapa!=='Liberadas') return r;
+  const canc=()=>self.setState({paviso:{t:'Cancelar a '+o.id+': informe o motivo. A reserva da ordem volta ao estoque livre, com registro.',campo:'canc',lab:'Motivo do cancelamento',
+    ok:{t:'Cancelar a '+o.id,fn:()=>{ const mt=(self.state.pf||{}).canc; ma_cmd(self,c2=>manCancelar(c2,o.id,mt,g2perfil(),self.state.pchave),(x)=>ma_rec(self,x)); }},no:'Voltar'}});
+  return {P:r.P,S:r.S.concat([ma_btn('Cancelar ordem · motivo',canc,manPode(c,pf,'cancelar'),false)])}; }
+function ma_omPrim0(self,c,o,pf,f){ const a=c.ativos[o.aid]; const P={}; const S=[];
   const run=(fn,prox)=>ma_cmd(self,fn,(r)=>ma_rec(self,r,prox===undefined?ma_proxOm(manGet(),g2perfil(),o.id,self.state.gerados):prox));
   if(o.etapa==='A liberar'){ const fl=manFalta(c,o); const cf=manConflito(c,o);
     if(fl.length){ if(!o.sc) return {P:ma_btn('Solicitar compra (simulado · Compras recebe no 1c)',()=>run(c2=>manSolicitar(c2,o.id,g2perfil()),null),manPode(c,pf,'ponte'),true),S};
@@ -458,7 +465,7 @@ function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const 
     bst:'height:5px;border-radius:999px;background:'+(i<cur?'#9CCBB0':(i===cur?'#1E7A4C':'#E4E9E5'))+';'}));
   const pr=ma_omPrim(self,c,o,pf,f); const sl=manSelos(c,o); const p0=sl[0];
   v.om_veio=o.de?('Pendência da '+o.de):(o.pid?(o.pid+' v'+o.ver+' · '+o.serv):(o.origAch?o.origAch+' · achado':String(o.origem||'').split(' · ')[0]));
-  v.om_aqui=o.etapa; v.om_falta=p0?(p0.t+(p0.dono?' · '+p0.dono:'')+(p0.prazo?' · '+p0.prazo:'')+(sl.length>1?' · +'+(sl.length-1):'')):'nada'; v.om_prox=pr.P?pr.P.t:(o.etapa==='Encerradas'?'—':'—');
+  v.om_aqui=o.etapa==='Canceladas'&&o.canc?('Cancelada em '+manBr(o.canc.em)+' por '+o.canc.por+' · '+o.canc.motivo):o.etapa; v.om_falta=p0?(p0.t+(p0.dono?' · '+p0.dono:'')+(p0.prazo?' · '+p0.prazo:'')+(sl.length>1?' · +'+(sl.length-1):'')):'nada'; v.om_prox=pr.P?pr.P.t:(o.etapa==='Encerradas'?'—':'—');
   const ab=o.etapa==='A liberar'||o.etapa==='Liberadas'?'jan':(o.etapa==='Em execução'?'tk':(o.etapa==='Em conferência'?(o.trata&&!o.aptidao?'tk':'pc'):'cus')); const bo=st.oblk||{};
   const B=(k,t,sum)=>{ const open=bo[o.id+k]===undefined?(k===ab||(k==='con'&&o.etapa==='Em execução')):!!bo[o.id+k]; const tog=()=>self.setState({oblk:Object.assign({},self.state.oblk||{},{[o.id+k]:!open})});
     v['ob_'+k]=open; v['obk_'+k+'_t']=t; v['obk_'+k+'_s']=sum; v['obk_'+k+'_y']=open?'▾':'▸'; v['obk_'+k+'_o']=String(open); v['obk_'+k+'_g']=tog; return {k,t,sum,open:String(open),sym:open?'▾':'▸',tog}; };
@@ -517,11 +524,19 @@ function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const 
   v.om_inc=()=>{ const ff=self.state.pf||{}; ma_cmd(self,c2=>manIncluir(c2,o.id,ff.itipo||'Serviço',ff.itxt,g2perfil()),(r)=>{ const f2=Object.assign({},self.state.pf||{}); delete f2.itxt; self.setState({pf:f2}); ma_rec(self,r); }); };
   v.om_tkn=nr+' de '+o.chk.length+' respondidas';
   /* peças: Item · Planejado · Situação · Aplicado; retiradas com destino e responsável */
-  v.om_pcs=(o.pecas||[]).map((p,i)=>{ const it=p.item?c.itens[p.item]:null; const disp=it?it.saldo-it.reservado:null; let s,cc;
-    if(p.sob>0){ s='Sobra '+manN(p.sob,1)+' '+p.un+' a devolver'; cc='yellow'; } else if(p.dev){ s='Aplicado '+manN(p.apl,1)+' · devolvido '+manN(p.dev,1)+' '+p.un; cc='green'; }
-    else if(p.apl&&o.exec){ s='Aplicado '+manN(p.apl,1)+' '+p.un; cc='green'; } else if(p.res){ s='Reservado '+manN(p.res,1)+' '+p.un; cc='green'; }
-    else if(it&&disp<p.qtd){ s='Falta '+manN(p.qtd-Math.max(0,disp),1)+' '+p.un+(o.sc?' · '+o.sc.id:''); cc='red'; } else if(it){ s='Livre '+manN(disp,1)+' '+p.un; cc='gray'; } else { s='Sem código no catálogo (1b)'; cc='gray'; }
-    return {nome:p.nome,q:manN(p.qtd,1)+' '+p.un,s,st:ma_chipSt(cc),dot:ma_dotSt(cc),ed:exe&&!pE,ro:!(exe&&!pE),av:f['ap'+i]===undefined?'':f['ap'+i],aph:'vazio = '+manN(p.qtd,1),alab:'Aplicado · '+p.nome+' ('+p.un+')',un:p.un,
+  v.om_pcs=(o.pecas||[]).map((p,i)=>{ const it=p.item?c.itens[p.item]:null; const disp=it?it.saldo-it.reservado:null; let s,cc; const nec=manNec(p);
+    const rr=(p.rsv||[]).reduce((a,x)=>a+x.qtd,0); const dv=o.etapa==='Canceladas'?((o.canc||{}).dev||[]).find(x=>x.item===p.item&&p.item):null;
+    /* D5: o chip curto diz a situação; a linha de baixo, a origem (pedido › recebimento › reserva › ordem) ou o motivo */
+    let orig=(p.rsv||[]).map(x=>(x.pc?x.pc+' › ':'')+'recebimento '+x.rec+' ('+manBr(x.em)+') › reserva '+manN(x.qtd,1)+' '+p.un+' › '+o.id).join(' · ');
+    if(dv){ s='Devolvida ao livre'; cc='gray'; orig='Reserva de '+manN(dv.qtd,1)+' '+p.un+' devolvida ao livre em '+manBr(o.canc.em)+' (cancelada: '+o.canc.motivo+')'+(dv.orig?' · recebimento '+dv.orig:''); }
+    else if(o.etapa==='Canceladas'){ s='Sem reserva (cancelada)'; cc='gray'; }
+    else if(p.sob>0){ s='Sobra '+manN(p.sob,1)+' '+p.un+' a devolver'; cc='yellow'; } else if(p.dev){ s='Aplicado '+manN(p.apl,1)+' · devolvido '+manN(p.dev,1)+' '+p.un; cc='green'; }
+    else if(p.apl&&o.exec){ s='Aplicado '+manN(p.apl,1)+' '+p.un; cc='green'; }
+    else if(p.res&&rr>0){ const fl=nec>1e-9&&disp<nec; s='Peça chegou · reservada'; cc=fl?'yellow':'green';
+      if(nec>1e-9) orig='Reservada '+manN(p.res,1)+' de '+manN(p.qtd,1)+' '+p.un+(fl?' · falta '+manN(nec-Math.max(0,disp),1)+' '+p.un+(o.sc?' ('+o.sc.id+')':''):'')+' · '+orig; }
+    else if(p.res){ s='Reservado '+manN(p.res,1)+' '+p.un; cc='green'; }
+    else if(it&&disp<p.qtd){ const rt=manResTxt(c,p.item,o.id); s='Falta '+manN(p.qtd-Math.max(0,disp),1)+' '+p.un+(o.sc?' · '+o.sc.id:''); cc='red'; if(rt) orig=rt+': ninguém a usa em outra ordem'; } else if(it){ s='Livre '+manN(disp,1)+' '+p.un; cc='gray'; } else { s='Sem código no catálogo (1b)'; cc='gray'; }
+    return {nome:p.nome,orig,hasOrig:!!orig,q:manN(p.qtd,1)+' '+p.un,s,st:ma_chipSt(cc),dot:ma_dotSt(cc),ed:exe&&!pE,ro:!(exe&&!pE),av:f['ap'+i]===undefined?'':f['ap'+i],aph:'vazio = '+manN(p.qtd,1),alab:'Aplicado · '+p.nome+' ('+p.un+')',un:p.un,
       apl:o.exec?manN(p.apl,1)+' '+p.un:'—',aset:(e)=>maF(self,'ap'+i,e.target.value)}; });
   v.om_temPc=v.om_pcs.length>0; v.om_semPc=!v.om_temPc;
   const pR=(manPode(c,pf,'executar',{o})&&manPode(c,pf,'ponte'))||'';
@@ -1130,11 +1145,12 @@ def _painel():
          + IF('om_incEd',f'<div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; padding-top: 6px;">{_sel("om_inct","om_setinct","om_inc_tipos","Tipo da tarefa")}'
               f'<input aria-label="Nova tarefa" placeholder="Nova tarefa" value="{H("om_incx")}" onChange="{H("om_setincx")}" style="{INP} flex: 1 1 180px;"><button type="button" onClick="{H("om_inc")}" style="{_MINI}">Incluir tarefa</button></div>')
          + IF('om_incWhy',f'<div style="{sb}">Incluir tarefa: {H("om_incWhy")}</div>'))
-    pcs=(IF('om_temPc',f'<div style="display: grid; grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr) 110px; gap: 8px; font-size: 11px; font-weight: 800; color: {MUTED}; text-transform: uppercase;"><span>Item</span><span>Planejado</span><span>Situação</span><span>Aplicado</span></div>'
-             + FOR('om_pcs','p',f'<div style="display: grid; grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr) 110px; gap: 8px; align-items: center; padding: 5px 0; border-top: 1px solid {LINE}; font-size: 12.8px;">'
+    pcs=(IF('om_temPc',f'<div class="ma-pcs ma-pcs-h" style="display: grid; grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr) 110px; gap: 8px; font-size: 11px; font-weight: 800; color: {MUTED}; text-transform: uppercase;"><span>Item</span><span>Planejado</span><span>Situação</span><span>Aplicado</span></div>'
+             + FOR('om_pcs','p',f'<div class="ma-pcs ma-pcs-l" style="display: grid; grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr) 110px; gap: 8px; align-items: center; padding: 5px 0; border-top: 1px solid {LINE}; font-size: 12.8px;">'
                    f'<b style="font-weight: 600;">{H("p.nome")}</b><span style="font-variant-numeric: tabular-nums;">{H("p.q")}</span>{_chiph("p.s","p.st","p.dot")}'
                    + IF('p.ed',f'<label style="display: inline-flex; align-items: center; gap: 4px;"><input aria-label="{H("p.alab")}" inputMode="decimal" placeholder="{H("p.aph")}" value="{H("p.av")}" onChange="{H("p.aset")}" style="{INP} width: 70px; text-align: right; font-size: 12.5px;">{H("p.un")}</label>')
-                   + IF('p.ro',f'<span>{H("p.apl")}</span>') + '</div>',3))
+                   + IF('p.ro',f'<span>{H("p.apl")}</span>')
+                   + IF('p.hasOrig',f'<span style="grid-column: 1 / -1; margin-top: -2px; font-size: 11.5px; color: {MUTED};">{H("p.orig")}</span>') + '</div>',3))
          + IF('om_semPc',f'<div style="{sb}">Sem peças nesta ordem (corretiva nasce sem peças até “Incluir peça”, PCMS Bloco 2).</div>')
          + IF('om_temRet',_lab('Peças retiradas · nunca voltam ao estoque livre')
               + FOR('om_rets','r',f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 5px 0; border-top: 1px solid {LINE}; font-size: 12.8px;">'
