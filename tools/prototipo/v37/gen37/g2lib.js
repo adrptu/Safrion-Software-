@@ -516,12 +516,16 @@ function g2modosFim(self,v){ if(typeof GRIDS==='undefined') return;
     if(car) g2cdVals(self,sp,v); else { v[id+'_cdg']=[]; v[id+'_cdtot']=[]; v[id+'_cdtotHas']=false; v[id+'_cdtotx']=[]; v[id+'_cdhd']=[]; v[id+'_cdhdHas']=false; v[id+'_cdgtc']=''; v[id+'_cdcar']=''; } } }
 // TAB-08 (16/10/2026): cabeçalho com ordenar (⇅) e filtrar (funil) e o menu de filtro por valores, para o E.grid e para as tabelas próprias
 // (Atividades do plano): sp = {id, cols:[{k,l,t,a}]}, rows = linhas no formato do motor (id, v, s, ordk). Grava em g2st(self,sp.id): so, f, fmc…
+// largura (px) do rótulo do cabeçalho como desenhado (.g2hb: 10,5 px, 700, maiúsculas, espaçamento .03em); sem canvas (node), estimativa
+let G2_HB_CTX=null;
+function g2hbLarg(t){ t=String(t||'').toUpperCase(); try{ if(!G2_HB_CTX){ const cv=document.createElement('canvas'); G2_HB_CTX=cv.getContext('2d');
+    G2_HB_CTX.font='700 10.5px '+getComputedStyle(document.body).fontFamily; } return G2_HB_CTX.measureText(t).width+t.length*0.315; }catch(e){ return t.length*7.0; } }
 function g2cabVals(self,sp,v,st,rows,cols){ const id=sp.id, so=st.so||sp.so||{};
-  // TAB-10: célula de cabeçalho com 40 px (.g2th); o rótulo que não cabe em 2 linhas de 104 px ganha a largura da melhor quebra em 2 linhas
-  // (--g2hbw, até 200 px; 7,4 px por letra maiúscula de 10,5 px e 22 px do ⇅); o que nem assim couber termina em reticências
+  // TAB-10: célula de cabeçalho com 40 px (.g2th); o rótulo que não cabe em 2 linhas de 104 px ganha a largura exata da melhor quebra em
+  // 2 linhas (--g2hbw, até 200 px; medida do texto como desenhado + 16 px do ⇅); o que nem assim couber termina em reticências
   const hbw=(l)=>{ const w=String(l||'').split(/\s+/).filter(Boolean); if(w.length<2) return ''; let m=1e9;
-    for(let i=1;i<w.length;i++) m=Math.min(m,Math.max(w.slice(0,i).join(' ').length,w.slice(i).join(' ').length));
-    const px=Math.ceil(m*7.4+22); return px>104?'--g2hbw:'+Math.min(200,px)+'px;':''; };
+    for(let i=1;i<w.length;i++) m=Math.min(m,Math.max(g2hbLarg(w.slice(0,i).join(' ')),g2hbLarg(w.slice(i).join(' '))));
+    const px=Math.ceil(m+18); return px>104?'--g2hbw:'+Math.min(200,px)+'px;':''; };
   v[id+'_head']=cols.map((c,ci)=>({l:c.l, tt:c.ajuda||g2glossCol(sp,c,rows), un:c.un||'', cls:(ci===0?'g2th g2c0':'g2th')+(c.hcls?' '+c.hcls:''), st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+hbw(c.l)+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;':''),
      arrow:(so.k===c.k?(so.d?'▼':'▲'):'⇅'), astyle:(so.k===c.k?'color:#1E7A4C;':'color:#8A968E;'), sortLabel:'Ordenar por '+c.l,
      sort:()=>{ const cur=g2st(self,id).so||sp.so||{}; let nx; if(cur.k!==c.k) nx={k:c.k,d:false}; else if(!cur.d) nx={k:c.k,d:true}; else nx={}; g2set(self,id,{so:nx}); },
