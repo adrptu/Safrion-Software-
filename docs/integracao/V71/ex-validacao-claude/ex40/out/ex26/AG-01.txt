@@ -1,0 +1,157 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Pragas e doenças
+‹
+Agrícola
+Pragas e doenças
+2 focos a confirmar
+Programar vistoria
+Fazenda
+Todas
+Lagoa Grande
+Santa Rita
+Boa Vista
+Cultura
+Todas
+Mamão
+Talhão
+Todos
+Pivô 1
+Pivô 2
+Pivô 4
+Pivô 6
+Pivô 9
+Pivô 17
+Pivô 18
+Pivô 19
+Pivô 22
+Pivô 23
+Vistorias
+Todas 10
+Foco 2
+Perto do NC 1
+Em controle 2
+Vistoria atrasada 1
+Abaixo do NC 1
+Encerrada 3
+10 de 10
+Agrupar
+Nenhum
+Talhão
+Alvo
+Situação
+Fazenda
+Colunas
++2
+VISTORIA
+⇅
+ALVO
+⇅
+CONTAGEM × NC
+⇅
+TALHÃO · CULTURA
+⇅
+PRÓXIMO PASSO
+⇅
+VIS-055
+Mancha-anelar (PRSV)
+Virose
+1 de 20 com sintoma
+presença
+20/20 pontos
+Pivô 22
+Mamão produção · Lagoa Grande
+Confirmar foco
+VIS-053
+Meleira (virose)
+Virose
+3 de 20 com sintoma
+presença
+20/20 pontos
+Pivô 9
+Mamão produção · Lagoa Grande
+Confirmar foco
+VIS-054
+Mosca-branca
+Praga
+8,4 / 10
+adultos/folha
+20/20 pontos
+Pivô 2
+Mamão produção · Lagoa Grande
+Seguir monitorando
+VIS-051
+Ácaro-rajado
+Praga
+18 / 15
+% folhas com ácaro
+20/20 pontos
+Pivô 6
+Mamão produção · Lagoa Grande
+Abrir OS-0504
+VIS-052
+Antracnose
+Doença
+9 / 5
+% frutos com lesão
+20/20 pontos
+Pivô 23
+Mamão produção · Lagoa Grande
+Abrir OS-0508
+VIS-060
+Ácaro-rajado
+Praga
+3 / 15
+% folhas com ácaro
+20/20 pontos
+Pivô 17
+Mamão produção · Lagoa Grande
+Programar vistoria
+VIS-057
+Ácaro-rajado
+Praga
+4 / 15
+% folhas com ácaro
+20/20 pontos
+Pivô 4
+Mamão produção · Lagoa Grande
+Seguir monitorando
+VIS-059
+Antracnose
+Doença
+1 / 5
+% frutos com lesão
+20/20 pontos
+Pivô 19
+Mamão produção · Lagoa Grande
+Programar vistoria
+VIS-056
+Cochonilha
+Praga
+5 / 10
+% plantas com colônia
+20/20 pontos
+Pivô 18
+Mamão produção · Lagoa Grande
+Programar vistoria
+VIS-058
+Mosca-branca
+Praga
+2,1 / 10
+adultos/folha
+20/20 pontos
+Pivô 1
+Mamão formação · pré-florada · Lagoa Grande
+Programar vistoria
+Restaurar demonstração
+Tela: Pragas e doenças · 2 focos a confirmar

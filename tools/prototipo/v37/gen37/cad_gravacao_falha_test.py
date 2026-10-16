@@ -37,7 +37,7 @@ def rends(): return [r for o in ((J(GRAV) or {}).get('cd08') or {}).get('rend', 
 try:
     t.goto('Main.dc.html'); J("localStorage.clear(); sessionStorage.clear(); 1")
     t.goto('CD-02.dc.html'); J(FALHA)
-    t.clk('Cadastrar cultivar'); t.fset('cult', 'Outra cultura…')
+    t.clk('Criar cultivar'); t.fset('cult', 'Outra cultura…')
     t.fset('nome', 'BRS 373'); t.fset('ncult', 'Sorgo'); t.fset('tipo', 'Anual'); t.fset('unid', 'sc de 60 kg/ha'); t.fset('dias', '120'); t.btn('Salvar'); time.sleep(.3)
     a1, aberto1, n1, c1, s1, g1 = t.alerts(), t.isopen(), t.fv('nome'), t.fv('ncult'), t.rowtxt(0, 'Sorgo'), culturas()
     t.chk('G1 CD-02 com a gravação falhando: formulário aberto com BRS 373/Sorgo, alerta "Não salvo", Sorgo fora da lista e nada gravado',
@@ -48,7 +48,7 @@ try:
     t.chk('G2 gravação de volta: o mesmo Salvar fecha e grava Sorgo e a cultivar BRS 373 uma vez', not t.isopen() and 'Sorgo 1 cultivar' in s2
           and g2.count('Sorgo') == 1 and cv2.count('BRS 373') == 1, [s2, g2, cv2])
     t.goto('CD-02.dc.html'); s3 = t.rowtxt(0, 'Sorgo') or ''
-    t.goto('CD-08.dc.html'); t.clk('Cadastrar rendimento'); op3 = t.fopts('cult') or []
+    t.goto('CD-08.dc.html'); t.clk('Criar rendimento'); op3 = t.fopts('cult') or []
     t.chk('G3 recarregar o CD-02 mantém Sorgo; o CD-08 oferece Sorgo na Cultura do rendimento', 'Sorgo 1 cultivar' in s3 and 'Sorgo' in op3, [s3, op3])
     # G4 · CD-08
     J(FALHA)
@@ -73,7 +73,7 @@ try:
           [d5, ab5, a5, to5, r5, g5, d5b, r5b, r5c, g5c])
     # G7 · residual de atomicidade (Codex 6159509677): a semente nova vai na mesma gravação das culturas e cultivares
     def cad7():
-        t.clk('Cadastrar cultivar'); t.fset('cult', 'Outra cultura…'); t.fset('nome', 'BRS 1501'); t.fset('ncult', 'Milheto'); t.fset('tipo', 'Anual')
+        t.clk('Criar cultivar'); t.fset('cult', 'Outra cultura…'); t.fset('nome', 'BRS 1501'); t.fset('ncult', 'Milheto'); t.fset('tipo', 'Anual')
         t.fset('unid', 'sc de 60 kg/ha'); t.fset('dias', '90'); t.btn('Salvar'); time.sleep(.4)
     t.goto('CD-02.dc.html'); J(PARCIAL); cad7()
     a7, ab7, n7, c7, cul7, cv7, sm7 = t.alerts(), t.isopen(), t.fv('nome'), t.fv('ncult'), culturas(), cvs(), sementes()

@@ -16,7 +16,8 @@ def chk(nome, cond, det=''):
 p, srv = servir(R); c = Chrome(); J = c.js
 c.call('Page.addScriptToEvaluateOnNewDocument', {'source': "window.__e=[];addEventListener('error',e=>window.__e.push(String(e.message)))"})
 U = lambda x: f'http://127.0.0.1:{p}/{x}'
-BLOCOS = ['Solicitações e contratos', 'Acompanhamento do CRE-0102', 'Dossiê e consentimento']
+# 16/10/2026 (proprietário: "documentos para credito podemos deixar tudo separado em outro lugar"): 4ª visão, Documentos para crédito
+BLOCOS = ['Solicitações e contratos', 'Acompanhamento do CRE-0102', 'Dossiê e consentimento', 'Documentos para crédito']
 def espera(cond, lim=8.0):
     # espera a condição observável (AGENTS §3.6), com limite explícito: sob carga, 1,2 s fixos não bastavam para a tela renderizar
     t0 = time.time()
@@ -33,7 +34,7 @@ try:
         J("(()=>{const a=[...document.querySelectorAll('nav[aria-label=Menu] a')].find(a=>(a.getAttribute('aria-label')||a.title||a.innerText).trim().startsWith('Crédito')); a.click();})()"); espera("location.pathname.endsWith('MOD-CRE.dc.html')&&[...document.querySelectorAll('main a.mod-cartao')].filter(a=>a.offsetParent).length>=3")
         cards = J("[...document.querySelectorAll('main a.mod-cartao')].filter(a=>a.offsetParent).map(a=>[a.innerText.trim(),a.getAttribute('href')])") or []
         chk(f'C1 {w}: o Crédito na barra abre a tela de entrada com um cartão por visão da GE-08',
-            J("location.pathname").endswith('MOD-CRE.dc.html') and cards == [['Contratos', 'GE-08.dc.html#vis=contratos'], ['Liberações', 'GE-08.dc.html#vis=liberacoes'], ['Dossiê', 'GE-08.dc.html#vis=dossie']], [J("location.pathname"), cards])
+            J("location.pathname").endswith('MOD-CRE.dc.html') and cards == [['Contratos', 'GE-08.dc.html#vis=contratos'], ['Liberações', 'GE-08.dc.html#vis=liberacoes'], ['Dossiê', 'GE-08.dc.html#vis=dossie'], ['Documentos', 'GE-08.dc.html#vis=documentos']], [J("location.pathname"), cards])
         for i, (nome, href) in enumerate(cards):
             c.goto(U('MOD-CRE.dc.html'), 1.0); J("[...document.querySelectorAll('main a.mod-cartao')].filter(a=>a.offsetParent)[%d].click()" % i); time.sleep(1.2)
             vol = J("[...document.querySelectorAll('a')].some(a=>a.offsetParent&&/Crédito/.test(a.innerText)&&/MOD-CRE/.test(a.getAttribute('href')||''))")
@@ -41,7 +42,7 @@ try:
         J("location.hash='vis=dossie'"); espera("[...document.querySelectorAll('main h2,main h3')].filter(h=>h.offsetParent).length===1")
         chk(f'C3 {w}: trocar a visão pelo endereço troca a parte sem recarregar', blocos() == [BLOCOS[2]], blocos())
         c.goto(U('GE-08.dc.html'), 1.2)
-        chk(f'C4 {w}: GE-08 sem visão no endereço (links de outras telas) mostra as três partes', blocos() == BLOCOS, blocos())
+        chk(f'C4 {w}: GE-08 sem visão no endereço (links de outras telas) mostra as quatro partes', blocos() == BLOCOS, blocos())
         chk(f'C5 {w}: sem rolagem lateral e sem erro de JS', J("document.documentElement.scrollWidth<=innerWidth") and not J("(window.__e||[]).length"), [J("[document.documentElement.scrollWidth,innerWidth]"), J("window.__e")])
 finally:
     c.close() if hasattr(c, 'close') else None

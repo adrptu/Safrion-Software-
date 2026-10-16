@@ -1,0 +1,94 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Campo › Minhas requisições
+Minhas requisições
+i
+10 sc e 65 L em custódia
+Solicitar material da ordem
+Requisições e custódia da equipe
+Ver em Suprimentos
+4 de 4
+REQUISIÇÃO · ORDEM
+⇅
+ITEM · LOTE
+⇅
+SOLICITADO
+⇅
+ENTREGUE
+⇅
+CONSUMIDO
+⇅
+DEVOLVIDO DECL. · RECEB.
+⇅
+EM CUSTÓDIA
+⇅
+PRÓXIMA AÇÃO
+⇅
+REQ-031
+·
+OS-0417
+Em conferência
+MAP 11-52
+lote M26-07
+100 sc
+100 sc
+70 sc
+20 · 20 sc
+10 sc
+com Paula
+Devolver saldo
+REQ-035
+·
+OS-0421
+Em execução
+Fungicida A
+lote F26-02
+175 L
+160 L
+95 L
+—
+65 L
+com Marcos
+Apontar uso ›
+REQ-036
+·
+OS-0420
+Impedida · ativo bloqueado
+Semente de soja 58 W
+lote S58-0801
+5.200 kg
+1.560 kg
+1.560 kg
+—
+0 kg
+sem saldo
+Ver impedimento ›
+REQ-038
+·
+OS-0418
+Aguardando liberação da O.S.
+Ureia 45%
+—
+1.140 kg
+0 kg
+0 kg
+—
+0 kg
+aguardando entrega
+Confirmar recebimento
+Encerramento bloqueado pela custódia
+Encerrar OS-0417
+Balanço da REQ-031: 100 sc entregues − 70 consumidos − 20 recebidos = 10 sc com Paula (equipe de campo), prazo 24/09; Rui recebe no almoxarifado.
+Tela: Minhas requisições · 10 sc e 65 L em custódia

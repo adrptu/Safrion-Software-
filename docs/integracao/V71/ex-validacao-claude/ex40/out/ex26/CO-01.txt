@@ -1,0 +1,150 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Colheita e pós-colheita › Previsão e maturação
+Previsão e maturação
+i
+S39 publicada · falta 0,4 t no PV-031
+Programar colheita
+Preveja a colheita
+Programe as ordens
+OC-0514 impedida
+Registre cargas
+Receba a produção
+Beneficie
+Confira a qualidade
+L27-013 bloqueado
+Controle o estoque de produção
+Oferta S39 (bruta)
+12,0 t mamão · T7
+Rendimento classe a
+80% curva de packing
+Falta no PV-031
+0,4 t renegociar ou outra origem
+Futuras em classe a
+9,6 t contra pedido de 10,0 t
+Oferta semanal por parcela
+Coletar contagem
+⋯
+4 de 4
+PARCELA · CULTURA · ÁREA
+⇅
+CICLO / ESTÁDIO
+⇅
+PLANTAS VIVAS
+⇅
+PESO · CURVA
+⇅
+REND. COMERCIAL · PERDAS
+⇅
+FAIXA PREVISTA
+⇅
+DESTINO
+⇅
+AÇÃO
+⇅
+T7
+Mamão Formosa · 42 ha
+produção · sem. 39
+11.980 (98,2%)
+1,45 kg/fruto · +2%
+80% classe A
+perdas 5% campo
+11,2 – 12,6 t (média 12,0) · S39
+PV-031 · classe A
+Comparar pedidos
+C1
+Café · 38 ha
+granação · safra 26/27
+—
+—
+52% bica → beneficiado
+perdas —
+1.050 – 1.200 sc 60 kg · mai–jul/27
+estoque
+Coletar contagem
+P1
+Feijão · 95 ha
+R5
+—
+enchimento de grão
+—
+perdas —
+2.660 – 2.950 sc 50 kg · S40
+a definir
+Programar colheita
+T3
+Milho · 96 ha
+colhido
+—
+—
+realizado 8.612 sc
+perdas 0,3%
+Realizado · fora da oferta
+Silo 2
+—
+Pedido PV-031 × oferta de classe A
+Renegociar saldo do pedido
+PEDIDO
+⇅
+CLIENTE PEDE
+⇅
+FUTURAS EM CLASSE A
+⇅
+FALTA
+⇅
+SEMANA
+⇅
+SITUAÇÃO
+⇅
+PV-031
+10,0 t classe A
+9,6 t
+12,0 t × 80%
+falta 0,4 t
+S39
+Não prometer integralmente
+Qualidade da previsão
+Revisar amostragem
+CICLO
+⇅
+VERSÃO CONGELADA
+⇅
+ANTECEDÊNCIA
+⇅
+WAPE
+⇅
+VIÉS
+⇅
+AMOSTRA
+⇅
+META
+⇅
+Mamão · semanal
+v S39-02 · 21/09
+7 d
+9,4%
++3,1%
+18 pontos
+WAPE ≤ 8%
+Hipótese · meta proposta
+Milho · safra
+v ago-26 · 01/08
+35 d
+4,2%
+−0,8%
+12 pontos
+WAPE ≤ 6%
+Hipótese · meta proposta
+Tela: Previsão e maturação · S39 publicada · falta 0,4 t no PV-031

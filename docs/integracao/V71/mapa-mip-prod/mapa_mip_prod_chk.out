@@ -1,0 +1,64 @@
+== PARTE 1 · linha do tempo do MIP (Lagoa Grande, Ácaro-rajado, protocolo mamao-acaro, NC 15 % folhas com ácaro, 20 pontos)
+   VIS-061 PV06 2026-08-25 média 22 → acima · 4 pontos ≥ 2×NC
+   VIS-062 PV06 2026-09-04 média 9 → abaixo
+   VIS-051 PV06 2026-09-19 média 18 → acima · 3 pontos ≥ 2×NC
+   VIS-063 PV04 2026-08-27 média 20 → acima
+   VIS-064 PV04 2026-09-10 média 6 → abaixo
+   VIS-057 PV04 2026-09-22 média 4 → abaixo
+   VIS-065 PV17 2026-08-26 média 16 → acima
+   VIS-066 PV17 2026-09-03 média 8 → abaixo
+   VIS-060 PV17 2026-09-10 média 3 → abaixo
+   VIS-067 PV09 2026-08-28 média 18 → acima
+   VIS-068 PV09 2026-09-08 média 7.5 → abaixo
+   VIS-071 PV09 2026-09-20 média 5 → abaixo
+   VIS-069 PV02 2026-09-01 média 12 → perto
+   VIS-070 PV02 2026-09-09 média 10 → abaixo
+   VIS-072 PV02 2026-09-18 média 6 → abaixo
+OK    nenhuma leitura nova abaixo do NC tem reboleira (≥ 2 pontos ≥ 30): a classe é a da média
+   estado em 2026-09-04 {'PV02': ('atual', 'VIS-069', 3), 'PV04': ('sem leitura recente', 'VIS-063', 8), 'PV06': ('atual', 'VIS-062', 0), 'PV09': ('atual', 'VIS-067', 7), 'PV17': ('atual', 'VIS-066', 1)}
+   estado em 2026-09-23 {'PV02': ('atual', 'VIS-072', 5), 'PV04': ('atual', 'VIS-057', 1), 'PV06': ('atual', 'VIS-051', 4), 'PV09': ('atual', 'VIS-071', 3), 'PV17': ('sem leitura recente', 'VIS-060', 13)}
+   04/09: média ponderada 12.61312715434699348908464189965530448104 · área com leitura atual 208.88 ha · 4 pivôs
+OK    T1 média global 04/09 = Σ(média×área)/Σ área dos pivôs com leitura atual = 2.634,63/208,88 = 12,6131… · 12.613127
+OK    T1 PV04 em 04/09: última 27/08 com 8 dias > 7 → "sem leitura recente" (fora da média, nunca zero)
+OK    T1 PV09 em 04/09: leitura de 28/08 com 7 dias = validade → atual
+   mutantes 04/09: leitura velha na média 14.5296 · velha como zero 9.3407 · média simples 11.75
+OK    T1 mutantes distintos do oráculo (velha 14,5296 · zero 9,3407 · simples 11,75) · (Decimal('14.5296'), Decimal('9.3407'), Decimal('11.75'))
+   23/09: média ponderada 8.139686369119420989143546441495778045838 · área 248.70 · 4 pivôs
+OK    T2 média global 23/09 (PV06 18, PV04 4, PV09 5, PV02 6; PV17 de 10/09 fora) = 2.024,34/248,70 = 8,1397… · 8.139686
+OK    T2 classes em 04/09: PV06 9 abaixo · PV17 8 abaixo · PV09 18 acima · PV02 12 perto (12 = 0,8 × 15)
+   área com o protocolo: 04/09 1137.45 ha em 20 pivôs · 23/09 1137.45 ha em 20
+OK    T3 cobertura 04/09 = 208,88 de 1.137,45 ha (18,36 %; 20 pivôs com mamão) · 23/09 = 248,70 de 1.137,45 ha (21,86 %) · (Decimal('1137.45'), Decimal('18.36'), Decimal('21.86'))
+== PARTE 1 · pares antes × depois (antes: até 7 dias antes do 1º apontamento; depois: 3 a 14 dias após o último; dia da aplicação não entra)
+   histórico sem O.S. PV06 Abamectina 18 EC: antes VIS-061 (22) · depois VIS-062 (9) · redução 59.0909 % · PARCIAL: sem O.S.: dose e área não registradas
+   OS-0521 PV04 Acaricida D: antes VIS-063 (20) · depois VIS-064 (6) · redução 70.0000 %
+   OS-0522 PV17 Acaricida D: antes VIS-065 (16) · depois VIS-066 (8) · redução 50.0000 %
+   OS-0523 PV09 Acaricida D: antes VIS-067 (18) · depois VIS-068 (7.5) · redução 58.3333 %
+   OS-0524 PV02 Fenpiroximato 50 SC + Óleo mineral: antes VIS-069 (12) · depois VIS-070 (10) · redução 16.6667 % · PARCIAL: área 20 de 37.75 ha
+OK    T4 OS-0521 PV04: (20 − 6) ÷ 20 = 70 %
+OK    T4 OS-0522 PV17: (16 − 8) ÷ 16 = 50 %
+OK    T4 OS-0523 PV09: (18 − 7,5) ÷ 18 = 58,333… %
+OK    T4 PV06 histórico: 59,0909… % e parcial (sem O.S.)
+OK    T4 OS-0524 PV02: 16,666… % e parcial (área 20 de 37,75 ha = 52,98 %)
+   Acaricida D: pares completos ['50.0000', '58.3333', '70.0000'] · mediana 58.3333 % · mín–máx 50.0 – 70.0 % · média (mutante) 59.4444
+OK    T5 ranking Acaricida D: 3 pares completos (= n mínimo 3) · mediana 58,3333 % · 50,0 a 70,0 %
+OK    T5 mutante "média em vez de mediana" dá 59,4444 % (≠ 58,3333 %)
+OK    T5 Abamectina e Fenpiroximato + óleo: 0 pares completos → "poucos casos", sem número de comparação
+OK    T6 OS-0521: Acaricida D 0,6 L/ha × 73,18 ha = 43,908 L; calda 1.000 L/ha × 73,18 ha = 73.180 L
+OK    T6 OS-0524: Fenpiroximato 100 mL/100 L com calda 1.000 L/ha = 1,0 L/ha; 20 ha → 20 L
+OK    T6 carência OS-0521: 7 dias do último apontamento (30/08) → colheita liberada em 06/09
+   pressão PV04 27/08–23/09: 40 (% folhas)·dia · 10 dias sem leitura atual
+OK    T7 pressão PV04 de 27/08 a 23/09 = 5 × 8 dias (27/08 a 03/09) = 40 (% folhas)·dia, com 10 dias sem leitura atual (04 a 09/09 e 18 a 21/09) · (Decimal('40'), 10)
+OK    T7 mutante trapézio (reta entre leituras) dá 12,5 ≠ 40
+== PARTE 2 · mapa de colheita: conversões, limpeza e médias (Soja, sc de 60 kg, umidade de referência 14 %: dados_cad.CULTURA_UN)
+   ponto: área 0.0072 ha · úmida 4E+3 kg/ha · a 14 % 3860.465116 kg/ha · 64.341085 sc/ha
+OK    P1 ponto 9 m × 8 m, 28,8 kg a 17 %: 4.000 kg/ha úmida → 3.860,465116 kg/ha a 14 % (CAL-16) → 64,341085 sc/ha
+   mutantes P1: sem correção 66.666667 · corrigir duas vezes 62.096629 · saca de 50 kg 77.209302
+OK    P1 mutantes: sem correção 66,666667 · corrigir duas vezes 62,096629 · saca de 50 kg 77,209302 · (Decimal('66.666667'), Decimal('62.096629'), Decimal('77.209302'))
+OK    P2 média ponderada pela área dos pontos = 612.000/180 = 3.400 kg/ha (a média simples 3.166,67 é o mutante; PRD 62.3)
+   outlier: mediana 60 · MAD 2 · limite ± 8.8956 · excluídos [Decimal('0'), Decimal('180')]
+OK    P3 outlier pela mediana ± 3 × 1,4826 × MAD (mediana 60, MAD 2, ±8,8956): exclui 0 e 180, mantém 57 a 64
+OK    P4 IDW potência 2 com pontos a 3, 4 e 5 m (60, 50, 70) = 12,591667 ÷ 0,213611 = 58,946684 · 58.946684
+OK    P5 diferença mapa × apurada = (62,40 − 60,50) ÷ 60,50 = +3,1405 %
+OK    P6 idempotência: mesmos bytes → mesmo SHA-256 (mesma importação); 1 byte diferente → outro SHA-256 (nova versão) · fc00eab0c4e2b770
+
+RESUMO: 28 de 28 conferências passaram

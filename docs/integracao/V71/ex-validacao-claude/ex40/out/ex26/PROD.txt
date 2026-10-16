@@ -1,0 +1,164 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Estoque de produto
+‹
+Agrícola
+Estoque de produto
+i
+10 em processo · 1 bloqueado
+Fazenda
+Todas
+Lagoa Grande
+Santa Rita
+Boa Vista
+Safra
+Todas
+2026/27
+Safrinha 2027
+2025/26
+Cultura
+Todas
+Café
+Feijão
+Mamão Formosa
+Milho
+Soja
+Lotes de produto
+Todos 3
+Bloqueado 1
+Em processo 1
+Liberado 1
+Só com saldo
+Recolher tudo
+Colunas
++5
+LOTE · PRODUTO
+⇅
+DISPONÍVEL
+⇅
+QUALIDADE · PRÓXIMO PASSO
+⇅
+FÍSICO
+⇅
+LOCAL · VALIDADE
+⇅
+▾
+Mamão Formosa · fruta de campo
+0 kg
+87.520 kg
+L38-115
+· 2026/27
+0 kg
+Em processo
+em processo na OB-0110 · Igor (responsável de produção)
+3.010 kg
+Packing
+vence 27/09
+L38-116
+· 2026/27
+0 kg
+Em processo
+em processo na OB-0110 · Igor (responsável de produção)
+2.980 kg
+Packing
+vence 27/09
+L38-117
+· 2026/27
+0 kg
+Em processo
+em processo na OB-0110 · Igor (responsável de produção)
+2.990 kg
+Packing
+vence 27/09
+L38-118
+· 2026/27
+0 kg
+Em processo
+em processo na OB-0110 · Igor (responsável de produção)
+3.020 kg
+Packing
+vence 27/09
+L38-132
+· 2026/27
+0 kg
+Em processo
+Abrir ordem de beneficiamento · Igor (responsável de produção)
+29.830 kg
+Galpão de frutas Lagoa Grande
+vence 25/09 · vencido
+L39-117
+· 2026/27
+0 kg
+Em processo
+na OB-0112 (A liberar) · Igor (responsável de produção)
+2.960 kg
+Packing
+vence 02/10
+L39-118
+· 2026/27
+0 kg
+Em processo
+na OB-0112 (A liberar) · Igor (responsável de produção)
+3.180 kg
+Packing
+vence 02/10
+L39-119
+· 2026/27
+0 kg
+Em processo
+Registrar resultado · Marta (qualidade) · INSP-94 até 27/09
+3.130 kg
+Packing
+vence 02/10
+L39-131
+· 2026/27
+0 kg
+Em processo
+Abrir ordem de beneficiamento · Igor (responsável de produção)
+24.120 kg
+Galpão de frutas Lagoa Grande
+vence 28/09
+L39-132
+· 2026/27
+0 kg
+Em processo
+Abrir ordem de beneficiamento · Igor (responsável de produção)
+12.300 kg
+Galpão de frutas Lagoa Grande
+vence 29/09
+▾
+Mamão Formosa · fruta embalada
+0 kg
+300 kg
+L26-118
+· classe A · 30 cx 2026/27
+0 kg
+Bloqueado
+Registrar decisão · Marta (qualidade) · INSP-93 vence hoje
+300 kg
+Packing
+vence 01/10
+▾
+Soja em grão
+34.545 sc
+38.420 sc
+L10-031
+· classe Padrão 2025/26
+34.545 sc
+Liberado
+Registrar a saca do PV-030 em Contratos e pedidos · Comercial
+38.420 sc
+Silo 01
+—
+Restaurar demonstração
+Tela: Estoque de produto · 10 em processo · 1 bloqueado

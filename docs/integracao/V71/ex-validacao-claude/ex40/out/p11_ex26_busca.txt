@@ -1,0 +1,221 @@
+
+## AGR % aplicações acima do NC e na janela   /acima do NC|aplicar até|% do NC/
+  [oculta] AG-03: Mosca-branca acima do NC no R5
+  [menu] IN-04_3_Pragas_e_doenças: acima do NC
+  [menu] PAGR: 5,1 / 4 · adultos/folíolo · 128% do NC
+
+## AGR eficácia produto × alvo   /efic[áa]cia|redução observada|Controle \d+ ?%|Redução \d+ ?%/
+  [oculta] AG-06: Controle 96 % ‖ Redução 62 %
+
+## AGR custo de controle R$/ha   /R\$ ?[\d.,]+ ?/ ?ha|custo de controle|R\$/ha/
+  [oculta] AG-06: R$ 96/ha ‖ R$ 328/ha ‖ R$ 82/ha ‖ R$ 54/ha ‖ (+1)
+  [oculta] GE-06: R$ 40,00/ha ‖ R$ 48,40/ha ↑
+  [oculta] GE-06det: R$/ha · 120 ha·operação (95 ha do P1 + 25 ha reaplicados) ‖ R$ 40,00/ha (base V1 aprovada) · Ana (gestora)
+  [oculta] GE-07: R$ 48,40/ha · feijão P1
+  [menu] IC: R$ 1.277,84/ha ‖ R$ 814,97/ha ‖ R$ 288,34/ha ‖ R$ 78,91/ha ‖ (+4)
+  [menu] IN-04_8_Custos: Previsto R$/ha
+  [menu] PAGR: Orçamento da safra × realizado acumulado · R$/ha plantado · Fonte: Custos do Mapa ‖ Realizado: Subtotal conhecido: 62,18 R$/ha ‖ Orçado: 515,39 R$/ha ‖ Realizado: 0,00 R$/ha ‖ (+3)
+
+## AGR % recomendações com registro válido   /sem registro|registro (válido|vencido)|registrado para|não registrado/
+  [oculta] AG-04: 1 uso sem registro (REC-014) ‖ TS sem registro p/ cisto ‖ Tela: Recomendações · 1 uso sem registro (REC-014)
+
+## AGR % vistorias no prazo   /[Vv]istoria atrasada|atrasad[ao]s?\b.*vistori|vistorias? (no prazo|atrasad)/
+  [menu] AG-01: Vistoria atrasada 1
+  [menu] IN-04_3_Pragas_e_doenças: vistoria atrasada ou sem vistoria no período
+  [menu] PAGR: Vistoria atrasada
+
+## PCP % área na janela   /(fora|dentro) da janela|na janela|janela (vencida|perdida)/
+  [oculta] PL-03: prazo de entrega 90 d · fora da janela ‖ nenhuma ordem na janela
+  [oculta] PL-04: nenhuma ordem na janela
+
+## PCP aderência plano × executado   /[Pp]lanejado ?[×x] ?realizado|[Pp]revisto ?[×x] ?realizado|aderência|[Pp]lano ?[×x] ?(executado|real)/
+  [oculta] GE-07: aderência 86%
+
+## PCP déficit de capacidade antecipado   /[Dd]éficit [\d.,]+ ?h|capacidade líquida|[Oo]ciosidade/
+  [oculta] PL-03: Déficit 270 h em tratores ‖ Ociosidade out/26 ‖ Tela: Capacidade e recursos · Déficit 270 h em tratores
+
+## PCP tempo impedimento → liberação   /impedid[ao]s? h[áa]|desde \d|dias impedid|tempo (até|de) libera/
+  [oculta] LO-04: v2 · vigente desde 01/08
+  [menu] MA_ativo_a01: Bloqueado · desde 22/09 ‖ · Bloqueado · desde 22/09 · tratada pela OM-0233 ‖ Bloqueado · desde 22/09 · Pressão hidráulica baixa · SM-0147 e INSP-105
+  [menu] MA_ativos: Bloqueado · desde 22/09
+  [menu] MA_semordem: Vencida desde 20/09 ‖ Média · desde 20/09 ‖ Baixa · desde 21/09 ‖ Média · desde 23/09
+  [menu] PCOM: saídas de venda desde 27/08
+
+## EXE ha/h real × padrão   /ha/h/
+
+## EXE horas paradas por causa   /[Hh]oras? parad|parada[s]? por|[Pp]aradas?\b.*(causa|motivo)/
+
+## EXE custo por ha da operação   /[Cc]usto (R\$/ha|por ha|/ha)|R\$ ?[\d.,]+/ha/
+  [oculta] AG-06: R$ 96/ha ‖ R$ 328/ha ‖ R$ 82/ha ‖ R$ 54/ha ‖ (+1)
+  [oculta] GE-06: R$ 40,00/ha ‖ R$ 48,40/ha ↑
+  [oculta] GE-06det: R$ 40,00/ha (base V1 aprovada) · Ana (gestora)
+  [oculta] GE-07: R$ 48,40/ha · feijão P1
+  [menu] IC: R$ 1.277,84/ha ‖ R$ 814,97/ha ‖ R$ 288,34/ha ‖ R$ 78,91/ha ‖ (+4)
+
+## EXE % área dentro das condições   /Delta ?T|condições de aplicação|vento|inversão/
+
+## IRR lâmina aplicada × necessidade   /[Ll]âmina|[Nn]ecessidade (bruta|líquida)|mm líquidos/
+  [menu] CA-02: Em execução: a lâmina já aplicada é descontada, sem duplicar apontamentos
+  [oculta] SU-01: Necessidade líquida por data
+
+## IRR horas em ponta   /[Pp]onta/
+  [oculta] CA-01: Conferir apontamentos
+  [menu] CA-02: Apontamentos e conferência ‖ Conferir 2 apontamentos ‖ fica no balanço hídrico; não é reapontada na fertirrigação ‖ Em execução: a lâmina já aplicada é descontada, sem duplicar apontamentos ‖ (+3)
+  [oculta] CA-04: Apontar uso ›
+  [oculta] GE-01: apontamentos + preço de compra
+  [menu] GE-03: Apontamento · OS-0421 ‖ Apontamento · OS-0420 ‖ rateio por apontamento ‖ Coleta e apontamentos
+  [oculta] GE-06: R$ ÷ ha tratado (apontado) ‖ apontamentos · 100%
+  [oculta] GE-06det: 100% dos apontamentos sincronizados · 0 conflitos ‖ Apontamentos da O.S. ‖ Abrir apontamentos
+  [oculta] IN-01: Conferir o apontamento do dia 4 (40 ha) ‖ Conferir apontamentos
+  [menu] PAGR: OS-0421 · vários talhões (T1, T2) sem apontamento por talhão: R$ 17.573,10 fora do total
+
+## IRR % da outorga usada   /[Oo]utorga/
+  [menu] IR-04: Captações e outorgas
+
+## SUP % demanda coberta antes da janela   /[Ff]alta a partir|coberto|[Cc]obertura|chega depois da falta/
+  [oculta] AG-06: % cobertura verde
+  [oculta] CA-01: Adubação de cobertura
+  [oculta] GE-06det: Cobertura
+  [oculta] IN-01: OS-0417 · cobertura
+  [menu] OS: Adubação de cobertura
+  [menu] PAGR: Santa Rita · Safra 2026/27 · Adubação de cobertura ‖ Parcial · conferir cobertura · 1.085,00 ha plantados
+  [oculta] PL-04: · cobertura P1
+  [oculta] SU-01: Suprimentos › Necessidades e cobertura ‖ Necessidades e cobertura ‖ 10.000 kg coberto se o laudo aprovar ‖ Tela: Necessidades e cobertura · 18 itens com falta firme · 5 atrasados
+  [oculta] SU-02: Simular cobertura
+  [oculta] SU-05: plantio T4 e cobertura ‖ cobertura nov · T4, T3, P1 e P2
+  [menu] VEN: 2 vendas sem cobertura · 4 com a saca a conferir ‖ Tela: Contratos e pedidos · 2 vendas sem cobertura · 4 com a saca a conferir
+
+## SUP ruptura que parou O.S.   /[Rr]uptura|aguarda a compra|[Ii]nsumo no [Ee]stoque|falta de insumo|saldo insuficiente/
+  [menu] IR-02: Receber o insumo no Estoque
+  [menu] IR-03: Receber o insumo no Estoque
+  [menu] PAGR: Insumo no Estoque
+
+## SUP economia realizada   /[Ee]conomia/
+  [oculta] AG-06: Economia adiada × efetivamente evitada
+
+## SUP capital parado   /[Cc]apital (parado|sem demanda|empatado)|sem demanda/
+
+## SUP perda por validade   /[Vv]encid[oa]|[Vv]alidade|[Vv]encendo/
+  [oculta] CO-07: Mamão A · retorno RC-12 · validade 3 d ‖ Mamão · classe A cal. 8–10 · validade 7 d ‖ Mamão · classe B · validade 7 d
+  [oculta] GE-05: R$ 244.000 vencidos · 1 crédito a emitir ‖ Vencidos ‖ Tela: Contas a receber · R$ 244.000 vencidos · 1 crédito a emitir
+  [oculta] LO-01: Vencido · vaga ao próximo elegível
+  [oculta] LO-04: Documento vencido · não elegível ‖ Seguro vencido 15/09 · não elegível
+  [menu] MA_ativos: Restrição vencida ‖ Vencida
+  [menu] MA_semordem: Vencidas ‖ Vencida · 30 h além ‖ Vencida desde 20/09
+  [menu] PCOM: nada vencido
+  [oculta] PL-02: v4 em rascunho · 1 pendência vencida ‖ Vencida · decidir pendência ‖ Tela: Plano operacional · v4 em rascunho · 1 pendência vencida
+  [oculta] PL-03: informação vencida pela política
+  [menu] PROD: vence 25/09 · vencido
+  [oculta] VE-03: sem validade
+
+## SUP acuracidade de inventário   /[Aa]curacidade|[Ii]nventário|[Cc]ontagem|[Aa]juste de inventário/
+  [oculta] AG-06: 2 aplicações dispensadas por contagem abaixo do NC confirmada no ciclo (P2 e T3) ‖ 1 aplicação no C1 aguardando nova contagem de bicho-mineiro em 02/10
+  [oculta] CO-01: Coletar contagem
+  [oculta] IN-02: Ajuste de inventário Galpão 2 ‖ Ajuste de inventário ‖ −12 sc MAP · contagem cega · folha de contagem
+  [oculta] SU-09: Suprimentos › Inventários e ajustes ‖ Inventários e ajustes ‖ Planejar contagem ‖ recontagem: confirmou 89.400 kg (Paula) ‖ (+2)
+
+## MAN disponibilidade da frota   /[Dd]isponibilidade/
+  [oculta] VE-01: Disponibilidade da semana 05/10 · Mamão A
+
+## MAN MTBF/MTTR   /MTBF|MTTR/
+  [oculta] GE-06: MTBF ‖ MTTR
+  [menu] MA_ativo_a01: MTBF · MTTR
+
+## MAN % preventiva   /[Cc]umprimento de preventiva|% (de )?preventiva|[Pp]reventiva/
+  [oculta] GE-07: ação: trocar especificação da peça e revisar preventiva
+  [menu] MA_ativos: Preventiva mensal · 01/10 ‖ Preventiva mensal · 08/10 ‖ Preventiva mensal · 15/10
+  [menu] MA_ordens: Preventiva ‖ Preventiva · PM-04 v2 ‖ Preventiva · PM-01 v3 ‖ Preventiva mensal ‖ (+8)
+  [menu] MA_planos: · Motobombas de pivô · preventiva mensal ‖ Preventiva mensal ‖ · Packing linha 1 · preventiva mensal
+  [menu] MA_semordem: Gerar 3 ordens preventivas ‖ Preventiva ‖ Gerar ordem preventiva ‖ Preventiva mensal ‖ (+1)
+  [oculta] PL-03: elegível só após confirmação do PCP · preventiva 28/09 ‖ Preventiva 250 h · OM-0234
+  [oculta] PL-04: livre hoje · 25/09 OS-0430 · 28/09 preventiva OM-0234 ‖ Preventiva 250 h · OM-0234
+  [oculta] SU-01: Peças · colhedora, preventiva
+  [oculta] SU-05: OM-0234 · preventiva
+
+## MAN backlog em horas   /[Bb]acklog|horas? de backlog|carga da oficina/
+
+## MAN custo por hora   /[Cc]usto (por hora|R\$/h|/h)|R\$ ?[\d.,]+/h/
+  [oculta] AG-06: R$ 96/ha ‖ R$ 328/ha ‖ R$ 82/ha ‖ R$ 54/ha ‖ (+1)
+  [oculta] GE-06: R$ 40,00/ha ‖ R$ 48,40/ha ↑ ‖ R$ 158/h ‖ R$ 141/h ‖ (+2)
+  [oculta] GE-06det: R$ 40,00/ha (base V1 aprovada) · Ana (gestora)
+  [oculta] GE-07: R$ 48,40/ha · feijão P1
+  [menu] IC: R$ 1.277,84/ha ‖ R$ 814,97/ha ‖ R$ 288,34/ha ‖ R$ 78,91/ha ‖ (+4)
+
+## COL perda na colheita   /[Pp]erda (na colheita|de colheita)|[Pp]erdas?/
+  [oculta] CO-01: perdas 5% campo ‖ perdas — ‖ perdas 0,3%
+  [oculta] CO-05: 3.690 sc 60 kg (L27-013) · perdas 4,1% ‖ OB-0104 fechou com balanço conciliado e perdas de 4,1%, e foi Encerrada. O lote L27-013 (3.690 sc 60 kg) segue Bloqueado pela inspeção INSP-88 — indis
+  [oculta] GE-06: Perda no beneficiamento
+  [oculta] GE-07: perda no beneficiamento
+  [oculta] SU-08: 1 em trânsito · 1 perda em alçada ‖ Registrar perda ‖ Perda em alçada ‖ Galpão 2 → perda ‖ (+2)
+
+## COL erro da previsão (WAPE)   /WAPE|[Ee]rro da previsão|[Vv]iés/
+  [oculta] CO-01: WAPE ‖ WAPE ≤ 8% ‖ WAPE ≤ 6%
+
+## COL % classe A   /[Cc]lasse A|[Tt]ipo (1|7|6)|[Cc]lassifica/
+  [oculta] AG-04: OS-0418 reclassificada (água → fertirrigação)
+  [oculta] CA-01: Fertirrigação · reclassificada
+  [menu] CA-02: Água aplicada antes da reclassificação · 6,7 mm no Pivô 1
+  [oculta] CO-01: 80% classe A ‖ PV-031 · classe A ‖ Pedido PV-031 × oferta de classe A ‖ 10,0 t classe A
+  [oculta] CO-03: Classe A · calibre 9 ‖ Classe A/B · calibre 8–10
+  [oculta] CO-06: Defeitos acima do tipo 6 ‖ Mamão classe A e B ‖ mistura · Pivô 6 (Lagoa Grande) · 18/09 + Pivô 19 (Lagoa Grande) · 21/09 · mistura no packing · classe A ‖ divisão · Pivô 19 (Lagoa Grande) · 22/09 · classe A
+  [oculta] CO-07: Mamão · classe A cal. 8–10 · validade 7 d
+  [oculta] GE-06: classificação classe B alta
+  [oculta] GE-07: regulagem da classificadora
+  [oculta] LO-01: Mamão Formosa classe A · 9,6 t
+  [oculta] LO-03: Mamão classe A · 9,4 t · PV-026 · L38-110 ‖ Mamão Formosa classe A · 9,6 t (Carga 07 · PV-031)
+  [menu] OS: Fertirrigação · reclassificada
+  [menu] PROD: · classe A · 30 cx 2026/27
+
+## COL % lotes aprovados   /[Ll]otes? (aprovad|liberad|bloquead|reprovad)|[Aa]pto/
+  [oculta] CA-01: Ana (agrônoma) · liberar (pode ajustar a dose antes) · Ureia 45 % sem saldo apto
+  [oculta] CO-05: 1 lote bloqueado após encerramento ‖ Tela: Beneficiamento · 1 lote bloqueado após encerramento
+  [oculta] CO-06: 1 lote bloqueado · decisão até 25/09 · 1 retorno a destinar ‖ Tela: Qualidade e rastreabilidade · 1 lote bloqueado · decisão até 25/09 · 1 retorno a destinar
+  [oculta] CO-07: 2 lotes bloqueados · 2 em inspeção ‖ Apto ‖ Apto · INSP-85 ‖ Soja: físico apto 38.420 sc − reserva 3.875 sc = disponível 34.545 sc. ‖ (+1)
+  [oculta] IN-01: Chamar o próximo apto da fila (T2) ‖ Lote bloqueado
+  [menu] MA_ativos: Apto 14
+  [menu] OS: Lote bloqueado
+  [menu] PCOM: 0 kg apto ‖ 38.420 sc apto
+  [oculta] VE-01: estoque apto 2.400 kg + produção 9.100 kg
+  [menu] VEN: sem lote apto · aguardar colheita ou liberação
+
+## COL quebra   /[Qq]uebra/
+  [menu] CA-02: turno parado pela quebra do Trator T1
+  [oculta] CO-05: 39,1 t secas (base 14%) · em processo 7,1 t · quebra 1,8 t
+  [oculta] SU-08: quebra de embalagem
+
+## COM % vendido × custo coberto   /[Vv]endido|[Ll]ivre para vender|custo coberto/
+  [menu] IV: Mamão: vendido sem previsão
+
+## COM preço contra referência   /[Rr]eferência de mercado|[Pp]reço médio/
+
+## COM basis   /[Bb]asis/
+
+## COM OTIF   /OTIF/
+  [oculta] LO-04: OTIF 92% · avaria 0,3% ‖ OTIF 75% · 1 avaria
+
+## COM frete por tonelada   /[Ff]rete|R\$ ?[\d.,]+/t\b/
+  [menu] GE-02: beneficiamento e frete
+  [menu] GE-03: Romaneio de frete ‖ Frete de insumos ‖ Fechar está bloqueado: frete sem versão de rateio e diesel sem conciliação de tanque.
+  [oculta] LO-01: Controle fretes ‖ Frete previsto ‖ Cotar frete ‖ frete do cliente ‖ (+1)
+  [oculta] LO-03: Conciliar frete da VG-117 ‖ Controle fretes ‖ Ver frete ‖ frete base R$ 1.786 (direto) · pedágio R$ 96 (comum, rateado)
+  [oculta] LO-04: Logística › Fretes e transportadores ‖ Fretes e transportadores ‖ Controle fretes ‖ 9,6 t × R$ 190/t ‖ (+2)
+  [oculta] SU-05: R$ 2.330/t
+
+## GES custo por saca e margem/ha por talhão   /R\$ ?[\d.,]+ ?/ ?sc|[Cc]usto (por saca|unitário|/sc)|[Mm]argem/
+  [oculta] GE-01: Margem projetada ‖ R$ 113,98/sc ‖ R$ 1.762,47/sc ‖ R$ 43,11/sc ‖ (+1)
+  [menu] IV: R$ 129,40/sc ‖ normal R$ 123,47/sc ‖ R$ 61,80/sc ‖ normal R$ 65,54/sc
+  [menu] PCOM: R$ 129,40/sc
+  [oculta] VE-03: R$ 2.480,00/sc · FOB ‖ R$ 131,00/sc · à vista
+  [menu] VEN: R$ 131,00/sc (saca a conferir) ‖ R$ 118,84/sc (saca a conferir) ‖ R$ 132,00/sc (saca a conferir) ‖ R$ 128,00/sc (saca a conferir)
+
+## GES desvio decomposto   /[Dd]esvio|[Vv]ariação (de preço|de consumo)|preço ?[×x] ?quantidade/
+  [oculta] GE-01: Abrir origem do desvio
+  [oculta] GE-07: Casos de melhoria e desvios
+  [menu] MA_ativos: Desvio de consumo
+
+## GES caixa de 13 semanas   /13 semanas|[Ff]luxo de caixa|[Cc]aixa/
+  [menu] EST: Caixa de mamão Formosa 10 kg
+  [menu] GE-02: Cronograma de caixa por versão
+  [oculta] GE-04: Gestão e resultados › Contas a pagar e caixa ‖ Contas a pagar e caixa ‖ Caixa hoje ‖ Tela: Contas a pagar e caixa · R$ 158 mil vencem hoje · 1 aguarda alçada
+  [oculta] IN-02: Caixa única de decisões
+  [oculta] SU-02: caixa 12 un

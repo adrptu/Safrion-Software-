@@ -1,0 +1,64 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Início › Aprovações
+Aprovações
+4 pendentes · 1 vence hoje
+Caixa única de decisões
+4 de 4
+OBJETO E DECISÃO
+⇅
+SOLICITANTE · ALÇADA
+⇅
+VENCIMENTO
+⇅
+EFEITO · VALOR
+⇅
+CONFLITO
+⇅
+SITUAÇÃO
+⇅
+Ajuste de inventário Galpão 2
+Ajuste de inventário
+Rui · almoxarifado
+alçada: Gestor
+vence hoje
+−12 sc MAP · contagem cega · folha de contagem
+—
+Decidir
+Política de estoque · Diesel S10
+Política de estoque
+Rui · almoxarifado
+alçada: Gestor
+até 5 dias
+mínimo do tanque 40 %
+—
+Decidir
+Orçamento revisado · safra 26/27
+Orçamento
+Controladoria
+alçada: Direção
+até 7 dias
++R$ 180 mil defensivos · 2 anexos
+—
+Decidir
+Acesso · novo operador (Beto)
+Acesso e alçada
+Paula · coordenação
+alçada: Gestor
+até 2 dias
+perfil Operador · Santa Rita · termo assinado
+—
+Decidir
+Tela: Aprovações

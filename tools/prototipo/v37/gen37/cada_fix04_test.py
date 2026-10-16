@@ -18,7 +18,8 @@ try:
     t.openrow(0,'Lucas'); t.fset('sit','Inativa'); t.btn('Salvar'); time.sleep(.2); ts=t.toast()
     t.chk('inativar o Lucas grava e nomeia o próximo passo: escolher outro líder para Campo 2', 'Salvo: Lucas · inativa · escolha outro líder para Campo 2.' in ts, ts)
     t.aba('Equipes'); e=t.card('Campo 2') or ''
-    t.chk('cartão da Campo 2 mostra o líder Lucas com "Inativa"', 'Lucas · Inativa' in e, e)
+    # 16/10/2026: Equipes na grade do motor (antes cartões): a Situação diz "Líder inativa" e a coluna Líder mostra "Lucas inativa"
+    t.chk('linha da Campo 2 mostra o líder Lucas inativa e a situação "Líder inativa"', 'Lucas inativa' in e and 'Líder inativa' in e, e)
     t.opencard('Campo 2'); lv=[t.fv('lider'),seltxt('lider')]; hl=help_('Líder')
     t.chk('formulário da Campo 2 mostra o líder gravado "Lucas · inativa" (não Ana) com aviso', lv==['Lucas','Lucas · inativa'] and 'Lucas está inativa; escolha um líder ativo.' in hl, [lv,hl])
     t.fset('cal','seg–sex · 07–17h'); t.btn('Salvar'); a=t.alerts()
@@ -29,7 +30,7 @@ try:
     t.chk('renomear Marcos avisa que o líder da Campo 1 foi atualizado', 'líder de Campo 1 atualizado' in ts and 'O.S..' not in ts, ts)
     t.aba('Equipes'); e=t.card('Campo 1') or ''; t.opencard('Campo 1'); lv=t.fv('lider'); st=seltxt('lider'); t.cancel()
     t.chk('Campo 1: linha e formulário mostram o líder "Marcos Silva"', 'Marcos Silva' in e and lv=='Marcos Silva' and st=='Marcos Silva', [e,lv,st])
-    t.clk('Cadastrar equipe'); nt=[t.fv('lider'),seltxt('lider')]; t.fset('nome','Campo 3'); t.btn('Salvar'); a=t.alerts()
+    t.clk('Criar equipe'); nt=[t.fv('lider'),seltxt('lider')]; t.fset('nome','Campo 3'); t.btn('Salvar'); a=t.alerts()
     t.chk('Cadastrar equipe: Líder começa em "Escolha…" e salvar sem ele pede o líder no campo', nt==['','Escolha…'] and 'Informe líder' in a, [nt,a])
     t.fset('lider','Paula'); t.btn('Salvar'); time.sleep(.2); e=t.card('Campo 3') or ''
     t.chk('com a Paula a equipe Campo 3 é criada', not t.isopen() and 'Paula' in e, [e,t.alerts()])

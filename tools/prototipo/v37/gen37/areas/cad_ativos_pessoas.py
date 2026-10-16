@@ -20,7 +20,7 @@ from ui37 import shell37, HEIGHTS37
 import dados2 as D2
 import dados_cad as DC
 from areas.cadastros import sel, num, txt, dat, cond, R, js, LOC_ATV
-from areas.cadastros import (cadx_css, abas, pane, faixa, prim, qf_chips, filtro_sel, barra, cartoes, bloco_cad, estado_cab, acoes_form)
+from areas.cadastros import (abas, pane, prim_cab, QF_CAD, filtro_sel, bloco_cad, estado_cab, acoes_form)
 
 H=lambda s: '{{'+s+'}}'
 for _f in ('CD-03.dc.html','CD-04.dc.html'): ui37.H_OVR.pop(_f,None)   # layout novo: a altura vem de HEIGHTS37
@@ -141,8 +141,8 @@ def _campos_ativo():
             cont.append(dict(k=f'cont_{cd}',l='Leitura do horímetro',t='num',u='h',ro=True,cond=cond('classe',cl),help='Só leitura: vem da Manutenção (abastecimento, conclusão da OM, leitura avulsa); troca de contador se decide lá (PCM S3).'))
     return ([sel('classe','Classe',[c for c,_ in CLS],newOnly=True,help='Abre só a capacidade desta classe; fica fixa depois do cadastro.',**{'def':'Trator'}),
              txt('nome','Nome',help='Ex.: Trator 05. Não pode repetir.'),txt('modelo','Modelo',req=False),
-             dict(k='cond_t',l='Condição técnica',t='area',ro=True,help='Vem da Manutenção (condição única); não se altera no cadastro.',**{'def':'Apto'}),
-             dict(k='rt',l='Responsável técnico',ro=True,help='Vem da Manutenção (painel Condição); só leitura no cadastro.')]
+             dict(k='cond_t',l='Condição técnica',t='area',ro=True,help='Vem da Manutenção (condição única); não se altera no cadastro.',**{'def':'Apto'})]
+            # 16/10/2026: "Responsável técnico" (só leitura, da Manutenção) saiu do cadastro: não muda decisão aqui; segue na Manutenção
             + cap
             + [num('custo_h','Custo R$/h da máquina','R$/h',min=0,req=False,help='Combustível, manutenção e depreciação; o operador entra em Pessoas. O rendimento usa este valor (≠ Custo R$/h da oficina, na OM).'),
                sel('custo_f','Fonte do custo',CFONTES,req=False,**{'def':'Premissa a validar'})]
@@ -171,27 +171,27 @@ def cd03():
     # Revisão TABR (09/10): a Situação logo depois da máquina (A1); modelo, largura de trabalho, espaçamento e plataforma no painel. A capacidade
     # principal muda de grandeza com a classe (potência em cv, tanque em L, vazão em m³/h…), então não fica numa coluna só (A4: ordenava cv
     # com L): a coluna entra quando o filtro de Classe deixa uma só grandeza, com o rótulo e a unidade dela, e ordena pelo número
-    g=grid([dict(k='nome',l='Máquina ou instalação',w=190),dict(k='est',l='Situação',w=230),dict(k='classe',l='Classe',w=150),
+    g=grid([dict(k='nome',l='Máquina ou instalação',w=260),dict(k='est',l='Situação',w=230),dict(k='classe',l='Classe',w=150),
             dict(k='custo_h',l='R$/h',t='num',a='r',d=2),dict(k='ncj',l='Conjuntos',t='num',a='r'),dict(k='calv',l='Próxima calibração',t='date')],
-        _linhas_ativo(),gid='g_atv',total=False,frame=False,
-        tools=qf_chips('g_atv')+prim('g_atv_new','Cadastrar máquina ou instalação'),
+        _linhas_ativo(),gid='g_atv',total=False,qf=QF_CAD,
         edit=dict(m='form',title='Máquina',newTitle='Cadastrar máquina ou instalação',
             sub=SUB_EDIT,fields=_campos_ativo()))
     rend={c['id']:c['rend'] for c in D2.CONJ}
     maqs=[a['nome'] for a in DC.ATIVOS if a['classe'] not in IMPL]; imps=[a['nome'] for a in DC.ATIVOS if a['classe'] in IMPL]
-    cj=grid([dict(k='nome',l='Conjunto',w=210),dict(k='ops',l='Operações',w=130),dict(k='larg',l='Largura',t='num',a='r',u='m'),
-             dict(k='cond',l='Condição',w=210),dict(k='oper',l='Operadores alocáveis',w=180),dict(k='rend',l='Rendimento',t='num',a='r')],
+    # Conjuntos (16/10/2026): eram só cartões próprios; agora a grade do motor com Tabela | Cartões (VIS-05), com o que o cartão mostrava em
+    # colunas (situação com o próximo passo, operações, largura, rendimento, potência e operadores alocáveis)
+    cj=grid([dict(k='nome',l='Conjunto',w=330),dict(k='est',l='Situação',w=200),dict(k='ops',l='Operações',w=180),dict(k='larg',l='Largura',t='num',a='r',un='m'),
+             dict(k='rend',l='Rendimento',t='num',a='r',un='ha/h',d=2),dict(k='pot',l='Potência',t='num',a='r',un='cv'),dict(k='oper',l='Operadores alocáveis',w=180)],
         [R(k,dict(maq=m,impl=i or SEM_IMPL,ops=op,rend=rend.get(rid,''))) for k,m,i,op,rid in DC.CONJUNTOS],
-        gid='g_cj',dele=False,total=False,search=False,
+        gid='g_cj',dele=False,total=False,qf=QF_CAD,cartoes=True,
         edit=dict(m='form',title='Conjunto',newTitle='Montar conjunto',sub='Escolha a máquina, o implemento e as operações; a largura vem do implemento.',
             fields=[sel('maq','Máquina',maqs),sel('impl','Implemento',[SEM_IMPL]+imps,**{'def':SEM_IMPL}),
                     dict(k='ops',l='Operações',t='multi',opts=OPS,req=True),
                     dict(k='larg_c',l='Largura de trabalho',ro=True,live=True,u='m',help='Herdada do implemento (ou da plataforma da colhedora).'),
                     dict(k='pot_c',l='Potência',ro=True,live=True,help='O trator precisa ter ao menos a potência que o implemento exige.')]))
-    # um bloco com abas: Máquinas e instalações (tabela) | Conjuntos (cartões); a ação de cada entidade fica na sua aba
-    acoes_form('g_atv'); acoes_form('g_cj'); cadx_css()
-    p1=(barra(f'<span style="font-size: 12px; font-weight: 600; color: {MUTED};">{H("c3_ncj")}</span>',prim('g_cj_new','Montar conjunto'))+cartoes('c3_cjs','Conjuntos'))
-    corpo=bloco_cad(abas('c3t',['Máquinas e instalações','Conjuntos'],'Cadastros de máquinas'),pane('c3t',0,faixa('c3_fx0')+g)+pane('c3t',1,p1),'Máquinas, instalações e setores')
+    # um bloco com abas: Máquinas e instalações | Conjuntos, as duas na grade do motor; a primária do cabeçalho segue a aba (BOT-01/03)
+    acoes_form('g_atv'); acoes_form('g_cj')
+    corpo=bloco_cad(abas('c3t',['Máquinas e instalações','Conjuntos'],'Cadastros de máquinas'),pane('c3t',0,g)+pane('c3t',1,cj),'Máquinas, instalações e setores')
     dados=dict(cod=COD,impl=IMPL,calib=CALIB_CLS,sem=SEM_IMPL,ophab=OPHAB,subnew=SUB_NEW,capcol=CAPCOL,
                cond={k:dict(t=c['t'],m=c['om']+' · '+c['det'],ordens=c['ordens'],om=c['om']) for k,c in DC.CONDICAO.items()},
                pes=[dict(v,id=pid) for pid,v in pessoas()])
@@ -249,7 +249,8 @@ function c3conj(self,V){ const atv=RW(self,'g_atv'); const M=atv.find(r=>r.v.nom
 // situação da máquina: um só cálculo para a linha, o filtro "A resolver", a faixa, o ponto da aba e o estado do cabeçalho
 function c3sit(r){ const V=r.v; const C=c3cond(r), K=c3calib(V);
   if(V.sit==='Inativo') return {t:'Inativa',p:[chipc('Inativa','gray')]};
-  if(C.t==='Bloqueado') return {t:'Bloqueado',p:sitX('Bloqueado','red','Ver ordens afetadas','OS.dc.html'),res:'man'};
+  // o motivo e o retorno previsto (antes na faixa de atenção, 16/10/2026) ficam na dica do selo, na própria linha (TAB-06)
+  if(C.t==='Bloqueado') return {t:'Bloqueado',p:[Object.assign(chipc('Bloqueado','red'),{dica:C.m||''})].concat(sitX('Bloqueado','red','Ver ordens afetadas','OS.dc.html').slice(1)),res:'man'};
   if(K.s==='Vencida') return {t:'Calibração vencida',p:sitX('Calibração vencida','red','Registrar calibração'),res:'cal'};
   if(K.s==='Aferir') return {t:'Sem aferição',p:sitX('Sem aferição','yellow','Registrar aferição'),res:'cal'};
   // calibração que vence em 15 dias: o chip diz isso (a cor da data não é o único sinal, revisão TABR A10); continua apta, fora do "A resolver"
@@ -296,30 +297,31 @@ function PREVALS(self,v){ cadActsIni(self); fpvVals(self,v);
   cadQf(self,v,'g_atv','c3qf',[{k:'res',t:'A resolver',f:r=>!!c3sit(r).res},{k:'inat',t:'Inativas',f:r=>r.v.sit==='Inativo',oz:true}]);
   c3opts('g_cj','maq',atv.filter(r=>C3.impl.indexOf(r.v.classe)<0).map(r=>r.v.nome));
   c3opts('g_cj','impl',[C3.sem].concat(atv.filter(r=>C3.impl.indexOf(r.v.classe)>=0).map(r=>r.v.nome)));
-  // conjuntos em cartões: máquina + implemento, operações, largura, rendimento e potência; operadores no rodapé; exceção no chip
-  const cjs=RW(self,'g_cj'); v.c3_ncj=cjs.length+(cjs.length===1?' conjunto':' conjuntos');
-  cjs.forEach(r=>{ const V=r.v; const X=c3conj(self,V); r.s.nome=(V.maq||'')+(X.I?' + '+V.impl:''); const lg=X.I?c3larg(X.I.v):(X.M?c3larg(X.M.v):null); V.larg=lg===null?'':lg;
-    r.nd=c3temR(V)?'tem rendimento':''; });
-  cadCartoes(self,v,'c3_cjs','g_cj',cjs.map(r=>{ const V=r.v; const X=c3conj(self,V); const O=c3oper(V.ops); const temR=c3temR(V);
-    const pot=X.M&&X.M.v.classe==='Trator'?c3n(X.M.v,'pot'):null; let chip=null, verbo='', det='';
-    if(X.bad.length){ chip={t:'Indisponível',c:'red'}; det=X.bad.map(y=>y.x.v.nome+' '+y.c.curto).join(' · ')+(X.sub?' · substituto: '+X.sub.v.nome+' ('+nfa(c3n(X.sub.v,'pot'))+' cv)':''); verbo=X.sub?'Trocar pelo '+X.sub.v.nome:'Trocar máquina'; }
-    else if(X.cal.length){ chip={t:'Calibrar antes de usar',c:'yellow'}; det=X.cal.map(x=>x.v.nome+' · '+c3calib(x.v).s.toLowerCase()).join(' · '); verbo='Registrar calibração'; }
-    else if(!temR) chip={t:'Sem rendimento',c:'yellow'};
-    return {id:r.id,nome:r.s.nome,chip:chip,sub:ml(V.ops).join(' · ')+(det?' · '+det:''),
-      nums:[{v:V.larg===''?'—':nfa(V.larg),u:V.larg===''?'':'m',l:'Largura'},{v:temR?nf(V.rend,2):'—',u:temR?'ha/h':'',l:'Rendimento'}].concat(pot!==null?[{v:nfa(pot),u:'cv',l:'Potência'}]:[]),
-      rod:'Operadores: '+O.p.map(x=>x.t).join(' · '),verbo:verbo,sitT:'Disponível'}; })); }
+  // conjuntos na grade do motor (antes cartões próprios): máquina + implemento, situação com o próximo passo (o motivo na dica), operações,
+  // largura, rendimento, potência e operadores alocáveis
+  RW(self,'g_cj').forEach(r=>{ const V=r.v; const X=c3conj(self,V); const nome=(V.maq||'')+(X.I?' + '+V.impl:''); r.p.nome=[{k:'b',t:nome}]; r.s.nome=nome;
+    const lg=X.I?c3larg(X.I.v):(X.M?c3larg(X.M.v):null); V.larg=lg===null?'':lg; r.p.larg=[lg===null?{k:'mut',t:'—'}:{k:'txt',t:nfa(lg)}]; r.s.larg=lg===null?'':nfa(lg);
+    const temR=c3temR(V); r.nd=temR?'tem rendimento':''; r.p.rend=[temR?{k:'txt',t:nf(V.rend,2)}:{k:'mut',t:'—'}]; r.s.rend=temR?nf(V.rend,2):'';
+    const pot=X.M&&X.M.v.classe==='Trator'?c3n(X.M.v,'pot'):null; V.pot=pot===null?'':pot; r.p.pot=[pot===null?{k:'mut',t:'—'}:{k:'txt',t:nfa(pot)}]; r.s.pot=pot===null?'':nfa(pot);
+    const ops=ml(V.ops); r.m=Object.assign({},r.m||{},{ops:ops.map(o=>({id:o,l:o}))}); r.p.ops=[ops.length?{k:'txt',t:ops.join(', ')}:{k:'mut',t:'—'}]; r.s.ops=ops.join(', ');
+    const O=c3oper(V.ops); r.p.oper=O.p; r.s.oper=O.s; const S=c3cjSit(self,V); r.p.est=S.p; r.s.est=S.t; });
+  cadQf(self,v,'g_cj','c3qfc',[{k:'res',t:'A resolver',f:r=>!!c3cjSit(self,r.v).res}]); }
+// situação do conjunto: um só cálculo para a linha e o filtro "A resolver"; o motivo (máquina bloqueada, calibração, substituto) vai na dica
+function c3cjSit(self,V){ const X=c3conj(self,V);
+  if(X.bad.length){ const det=X.bad.map(y=>y.x.v.nome+' '+y.c.curto).join(' · ')+(X.sub?' · substituto: '+X.sub.v.nome+' ('+nfa(c3n(X.sub.v,'pot'))+' cv)':'');
+    return {t:'Indisponível',p:[Object.assign(chipc('Indisponível','red'),{dica:det}),{k:'b',t:(X.sub?'Trocar pelo '+X.sub.v.nome:'Trocar máquina')+' ›'}],res:true}; }
+  if(X.cal.length){ const det=X.cal.map(x=>x.v.nome+' · '+c3calib(x.v).s.toLowerCase()).join(' · ');
+    return {t:'Calibrar antes de usar',p:[Object.assign(chipc('Calibrar antes de usar','yellow'),{dica:det}),{k:'b',t:'Registrar calibração ›'}],res:true}; }
+  if(!c3temR(V)) return {t:'Sem rendimento',p:sitX('Sem rendimento','yellow','Cadastrar rendimento','CD-08.dc.html'),res:true};
+  return {t:'Disponível',p:sitOk('Disponível')}; }
 function EXTRAVALS(self,v){
   const atv=RW(self,'g_atv'); const manL=atv.filter(r=>c3sit(r).res==='man'), calL=atv.filter(r=>c3sit(r).res==='cal'); const man=manL.length, cal=calL.length;
   cadEstado(v,'c3e',[man?man+(man>1?' máquinas bloqueadas':' máquina bloqueada'):'',cal?cal+(cal>1?' calibrações a resolver':' calibração a resolver'):''].filter(Boolean).join(' · ')||'Máquinas aptas e calibradas',
             man?'red':(cal?'yellow':'green'));
   const cjs=RW(self,'g_cj'); const cjBad=cjs.filter(r=>c3conj(self,r.v).bad.length).length, cjAv=cjs.filter(r=>{ const X=c3conj(self,r.v); return !X.bad.length&&(X.cal.length||!c3temR(r.v)); }).length;
-  cadAbas(self,v,'c3t','c3aba',[{slug:'maquinas',n:atv.length,cor:man?'red':(cal?'yellow':'')},{slug:'conjuntos',n:cjs.length,cor:cjBad?'red':(cjAv?'yellow':'')}]);
-  cadQfPos(self,v,'g_atv','c3qf');
-  const res=()=>self.setState({c3qf:'res'}); const venc=calL.some(r=>c3calib(r.v).s==='Vencida');
-  cadFaixa(v,'c3_fx0',[man?{n:man,rot:man>1?'máquinas bloqueadas':'máquina bloqueada',reg:manL.map(r=>{ const x=c3cond(r); return r.v.nome+(x.m?' · '+x.m:''); }).join(', '),verbo:'Ver ordens afetadas',cor:'red',
-                            go:()=>{ location.href='OS.dc.html'; }}:null,
-                        cal?{n:cal,rot:cal>1?'calibrações a resolver':'calibração a resolver',reg:calL.map(r=>r.v.nome).join(', '),verbo:'Registrar calibração',cor:venc?'red':'yellow',
-                            go:cal===1?()=>g2open(self,GR('g_atv'),calL[0].id,null):res}:null],res);
+  const aba=cadAbas(self,v,'c3t','c3aba',[{slug:'maquinas',n:atv.length,cor:man?'red':(cal?'yellow':'')},{slug:'conjuntos',n:cjs.length,cor:cjBad?'red':(cjAv?'yellow':'')}]);
+  cadPrim(v,aba===1?'Criar conjunto':'Criar máquina ou instalação',aba===1?v.g_cj_new:v.g_atv_new);   // BOT-03: registro novo e independente é Criar
+  cadQfPos(self,v,'g_atv','c3qf'); cadQfPos(self,v,'g_cj','c3qfc');
   // classe escolhida no cadastro novo já marca se exige calibração (continua editável)
   const F=v.g_atv_F; if(F&&F.open&&F.fields){ const f=F.fields.find(x=>x.fid==='fx_g_atv_classe');
     if(f&&!f.dis) f.set=(e)=>{ const cur=g2st(self,'g_atv').fm; if(!cur) return; const val=e.target.value; const d=Object.assign({},cur.draft,{classe:val});
@@ -360,7 +362,7 @@ function EXTRAVALS(self,v){
 ''')
     HEIGHTS37[fname]=1000   # sem rolagem de página: só a tabela ou os cartões da aba rolam
     E.EXTRA.append(EXTRA_FP)
-    shell37('CD-03','Máquinas, instalações e setores',corpo,fname=fname,status=None,primary_html=None,search=False)
+    shell37('CD-03','Máquinas, instalações e setores',corpo,fname=fname,status=None,primary_html=prim_cab(),search=False)
     estado_cab(fname,'Máquinas, instalações e setores','c3e')
     from areas.cadastros import ncol_dinamico
     ncol_dinamico(fname,['c3_ncol'])   # a coluna da capacidade entra e sai com o filtro de Classe
@@ -375,7 +377,7 @@ def cd04():
             + [dat(k,l,req=False) for _,k,l in HABIL]
             + [sel('vinc','Vínculo',['CLT','Safrista','Diarista','Terceiro'],**{'def':'CLT'}),dat('adm','Admissão'),
                dat('ate','Disponível até',req=False,help='Fim do contrato de safrista ou diarista.'),
-               sel('cal','Calendário de trabalho',['Da equipe']+CALS,**{'def':'Da equipe'},help='Mude só se a pessoa foge do calendário da equipe.'),
+               # 16/10/2026: "Calendário de trabalho" saiu (nenhuma tela lia o da pessoa; vale o calendário da equipe)
                num('custo','Custo-hora com encargos','R$/h',min=0,help='Salário e encargos por hora trabalhada; visível só para quem tem permissão de custos.'),
                sel('sit','Situação',['Ativa','Inativa'],**{'def':'Ativa'})])
     # pessoa numa linha, uma variável por coluna (TABELAS-FOCO, 04/10/2026): equipe, habilidades (filtro por habilidade), vínculo, disponível até,
@@ -385,21 +387,21 @@ def cd04():
     # ao app no painel da pessoa (campos do formulário)
     # integração V56: com as equipes e pessoas do Beneficiamento e da Manutenção (Igor, Marta: "Beneficiamento e qualidade", "Autorizar rota e
     # liberar ordem de processo") a grade passava 37 px da caixa a 1440 px; Equipe e Habilidades quebram linha um pouco antes e a grade cabe (A1)
-    gp=grid([dict(k='nome',l='Pessoa',w=140),dict(k='est',l='Situação',w=185),dict(k='equipe',l='Equipe',w=104),dict(k='habs',l='Habilidades',multi=True,w=136),
+    gp=grid([dict(k='nome',l='Pessoa',w=200),dict(k='est',l='Situação',w=185),dict(k='equipe',l='Equipe',w=104),dict(k='habs',l='Habilidades',multi=True,w=136),
              dict(k='vinc',l='Vínculo',w=100),dict(k='ate',l='Disponível até',t='date'),dict(k='custo',l='R$/h',t='num',a='r',d=2),dict(k='habx',l='Habilitação',multi=True),
              dict(k='habv',l='Validade da habilitação',t='date')],
-        [R(pid,v) for pid,v in pes],gid='g_pes',total=False,frame=False,
-        tools=qf_chips('g_pes')+filtro_sel('c4fun','Função')+prim('g_pes_new','Cadastrar pessoa'),
+        [R(pid,v) for pid,v in pes],gid='g_pes',total=False,qf=QF_CAD,busca_extra=filtro_sel('c4fun','Função'),   # TAB-01: filtros à esquerda
         edit=dict(m='form',title='Pessoa',newTitle='Cadastrar pessoa',
             sub='Marque o que a pessoa faz; a habilitação exigida aparece abaixo. Cadastrar não cria login. Inative em vez de excluir.',fields=campos))
-    ge=grid([dict(k='nome',l='Equipe'),dict(k='lider',l='Líder'),dict(k='membros',l='Pessoas ativas',t='num',a='r'),dict(k='cal',l='Calendário',w=220)],
-        [R(i,dict(nome=n,lider=l,cal=c)) for i,n,l,c in EQUIPES],gid='g_eq',dele=False,total=False,search=False,
+    # Equipes (16/10/2026): eram só cartões próprios; agora a grade do motor com Tabela | Cartões (VIS-05), com o que o cartão mostrava em colunas
+    ge=grid([dict(k='nome',l='Equipe'),dict(k='est',l='Situação',w=200),dict(k='lider',l='Líder'),dict(k='membros',l='Pessoas ativas',t='num',a='r'),
+             dict(k='jorn',l='Jornada',t='num',a='r',un='h/dia'),dict(k='cal',l='Calendário',w=220)],
+        [R(i,dict(nome=n,lider=l,cal=c)) for i,n,l,c in EQUIPES],gid='g_eq',dele=False,total=False,qf=QF_CAD,cartoes=True,
         edit=dict(m='form',title='Equipe',newTitle='Cadastrar equipe',sub='Altere nome, líder e calendário; quem segue a equipe herda o calendário.',
             fields=[txt('nome','Nome da equipe'),sel('lider','Líder',[v['nome'] for _,v in pes]),sel('cal','Calendário',CALS,**{'def':'seg–sáb · 06–15h'})]))
-    # um bloco com abas: Pessoas (tabela) | Equipes (cartões); cada aba com a sua ação
-    acoes_form('g_eq'); cadx_css()
-    p1=(barra(f'<span style="font-size: 12px; font-weight: 600; color: {MUTED};">{H("c4_neq")}</span>',prim('g_eq_new','Cadastrar equipe'))+cartoes('c4_eqs','Equipes'))
-    corpo=bloco_cad(abas('c4t',['Pessoas','Equipes'],'Cadastros de pessoas'),pane('c4t',0,faixa('c4_fx0')+gp)+pane('c4t',1,p1),'Pessoas e equipes')
+    # um bloco com abas: Pessoas | Equipes, as duas na grade do motor; a primária do cabeçalho segue a aba (BOT-01/03)
+    acoes_form('g_eq')
+    corpo=bloco_cad(abas('c4t',['Pessoas','Equipes'],'Cadastros de pessoas'),pane('c4t',0,gp)+pane('c4t',1,ge),'Pessoas e equipes')
     dados=dict(qf=QF,habil=[[a,k] for a,k,_ in HABIL],calda=CALDA,agro=AGRO)
     js({},ALOC_JS+'const C4='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
 function c4hdia(c){ const m=/(\d{2})–(\d{2})h/.exec(c||''); if(m) return (Number(m[2])-Number(m[1]))+' h/dia'; const n=/(\d+)h$/.exec(c||''); return n?n[1]+' h/dia':''; }
@@ -444,29 +446,31 @@ function PREVALS(self,v){ cadActsIni(self); const ps=RW(self,'g_pes'); const eqc
         {extra:fun?(r=>c4qf(fun,r.v,alocavel(r.v))):null});
   const eqs=RW(self,'g_eq');
   eqs.forEach(r=>{ self._c4eq[r.id]=r.v.nome; const n=ps.filter(p=>p.v.equipe===r.v.nome&&p.v.sit!=='Inativa').length; r.v.membros=n; r.nd=n?'tem pessoas':''; r.s.nome=r.v.nome||''; });
-  // equipes em cartões: líder, pessoas ativas e jornada; calendário no rodapé; exceção (líder inativa, gente não alocável) no chip
-  v.c4_neq=eqs.length+(eqs.length===1?' equipe':' equipes');
-  cadCartoes(self,v,'c4_eqs','g_eq',eqs.map(r=>{ const V=r.v; const mem=ps.filter(p=>p.v.equipe===V.nome&&p.v.sit!=='Inativa'); const nao=mem.filter(p=>!alocavel(p.v).ok).length;
-    const L=ps.find(p=>p.v.nome===V.lider); const linat=!!V.lider&&(!L||L.v.sit==='Inativa'); const hd=c4hdia(V.cal);
-    return {id:r.id,nome:V.nome||'',chip:linat?{t:'Líder inativa',c:'yellow'}:(nao?{t:nao+(nao>1?' não alocáveis':' não alocável'),c:'red'}:null),
-      sub:'Líder '+(V.lider||'—')+(linat?' · Inativa':''),
-      nums:[{v:String(mem.length),u:'',l:mem.length===1?'Pessoa ativa':'Pessoas ativas'},{v:hd?hd.replace(' h/dia',''):'—',u:hd?'h/dia':'',l:'Jornada'}],
-      rod:V.cal||'',verbo:linat?'Escolher líder ativo':'',sitT:'Em dia'}; }));
+  // equipes na grade do motor (antes cartões próprios): situação (líder inativa, gente não alocável), líder, pessoas ativas, jornada e calendário
+  eqs.forEach(r=>{ const V=r.v; const S=c4eqSit(ps,V); r.p.est=S.p; r.s.est=S.t; r.p.nome=[{k:'b',t:V.nome||''}];
+    const L=ps.find(p=>p.v.nome===V.lider); const linat=!!V.lider&&(!L||L.v.sit==='Inativa');
+    r.p.lider=[V.lider?{k:'txt',t:V.lider}:{k:'mut',t:'—'}].concat(linat?[{k:'mut',t:'inativa'}]:[]); r.s.lider=V.lider||'';
+    r.p.membros=[{k:(V.membros?'txt':'mut'),t:String(V.membros||0)}]; r.s.membros=String(V.membros||0);
+    const hd=c4hdia(V.cal); const hn=hd?Number(hd.replace(' h/dia','')):''; V.jorn=hn; r.p.jorn=[hd?{k:'txt',t:String(hn)}:{k:'mut',t:'—'}]; r.s.jorn=hd?String(hn):'';
+    r.p.cal=[V.cal?{k:'txt',t:V.cal}:{k:'mut',t:'—'}]; r.s.cal=V.cal||''; });
+  cadQf(self,v,'g_eq','c4qfe',Object.assign([{k:'res',t:'A resolver',f:r=>!!c4eqSit(ps,r.v).res}],{todos:'Todas'}));
   const fe=(GR('g_eq').edit.fields||[]).find(x=>x.k==='lider'); if(fe) fe.opts=ps.filter(p=>p.v.sit!=='Inativa').map(p=>p.v.nome);
   const fq=(GR('g_pes').edit.fields||[]).find(x=>x.k==='equipe'); if(fq) fq.opts=eqs.map(e=>e.v.nome); }
+// situação da equipe: líder inativa (escolher outro) ou gente não alocável em O.S.; um só cálculo para a linha e o filtro "A resolver"
+function c4eqSit(ps,V){ const mem=ps.filter(p=>p.v.equipe===V.nome&&p.v.sit!=='Inativa'); const nao=mem.filter(p=>!alocavel(p.v).ok).length;
+  const L=ps.find(p=>p.v.nome===V.lider); const linat=!!V.lider&&(!L||L.v.sit==='Inativa');
+  if(linat) return {t:'Líder inativa',p:sitX('Líder inativa','yellow','Escolher líder ativo'),res:true};
+  if(nao) { const t=nao+(nao>1?' não alocáveis':' não alocável'); return {t:t,p:[chipc(t,'red')],res:true}; }
+  return {t:'Em dia',p:sitOk('Em dia')}; }
 function EXTRAVALS(self,v){ const ps=RW(self,'g_pes'); const eqc=c4eqcal(self);
   const naoL=ps.filter(r=>c4sit(r.v).res==='nao'), venL=ps.filter(r=>c4sit(r.v).res==='ven'); const nao=naoL.length, ven=venL.length;
   cadEstado(v,'c4e',[nao?nao+(nao>1?' não alocáveis':' não alocável'):'',ven?ven+' a renovar em 30 dias':''].filter(Boolean).join(' · ')||'Todos alocáveis',nao?'red':(ven?'yellow':'green'));
   const eqs=RW(self,'g_eq'); const eqLid=eqs.filter(e=>{ const L=ps.find(p=>p.v.nome===e.v.lider); return !!e.v.lider&&(!L||L.v.sit==='Inativa'); }).length;
   const eqNao=eqs.filter(e=>ps.some(p=>p.v.equipe===e.v.nome&&p.v.sit!=='Inativa'&&!alocavel(p.v).ok)).length;
-  cadAbas(self,v,'c4t','c4aba',[{slug:'pessoas',n:ps.length,cor:nao?'red':(ven?'yellow':'')},{slug:'equipes',n:eqs.length,cor:eqNao?'red':(eqLid?'yellow':'')}]);
-  cadQfPos(self,v,'g_pes','c4qf'); cadConta(self,v,'g_pes');
+  const aba=cadAbas(self,v,'c4t','c4aba',[{slug:'pessoas',n:ps.length,cor:nao?'red':(ven?'yellow':'')},{slug:'equipes',n:eqs.length,cor:eqNao?'red':(eqLid?'yellow':'')}]);
+  cadPrim(v,aba===1?'Criar equipe':'Criar pessoa',aba===1?v.g_eq_new:v.g_pes_new);   // BOT-03: registro novo e independente é Criar
+  cadQfPos(self,v,'g_pes','c4qf'); cadConta(self,v,'g_pes'); cadQfPos(self,v,'g_eq','c4qfe');
   if(self.state.c4fun){ v.g_pes_filtered=true; v.g_pes_clear=()=>{ g2set(self,'g_pes',{q:'',f:{}}); self.setState({c4qf:'',c4fun:''}); }; }
-  const res=()=>self.setState({c4qf:'res',c4fun:''});
-  cadFaixa(v,'c4_fx0',[nao?{n:nao,rot:nao>1?'não alocáveis em O.S.':'não alocável em O.S.',reg:naoL.map(r=>r.v.nome).join(', '),verbo:'Regularizar habilitação',cor:'red',
-                            go:nao===1?()=>g2open(self,GR('g_pes'),naoL[0].id,null):res}:null,
-                        ven?{n:ven,rot:ven>1?'habilitações vencem em 30 dias':'habilitação vence em 30 dias',reg:venL.map(r=>r.v.nome).join(', '),verbo:'Renovar',cor:'yellow',
-                            go:ven===1?()=>g2open(self,GR('g_pes'),venL[0].id,null):res}:null],res);
   // formulário: validade só das habilitações exigidas; ajuda com a habilitação e o calendário; acesso ao app simulado
   const F=v.g_pes_F; if(F&&F.open&&F.fields){ const fm=g2st(self,'g_pes').fm||{}; const d=fm.draft||{}; const ex=habExig(d.hab);
     F.fields=F.fields.filter(f=>{ const h=C4.habil.find(y=>f.fid==='fx_g_pes_'+y[1]); return !h||ex.indexOf(h[0])>=0; });
@@ -499,5 +503,5 @@ function EXTRAVALS(self,v){ const ps=RW(self,'g_pes'); const eqc=c4eqcal(self);
       self.setState({g2toast:(isNew?'Equipe criada: ':'Salvo: ')+r.v.nome+' · '+r.v.cal+' · '+c4hdia(r.v.cal)+(n?' · '+n+(n>1?' pessoas seguem':' pessoa segue')+' a equipe':'')+'.'}); } }; }
 ''')
     HEIGHTS37[fname]=1000   # sem rolagem de página: só a tabela ou os cartões da aba rolam
-    shell37('CD-04','Pessoas e equipes',corpo,fname=fname,status=None,primary_html=None,search=False)
+    shell37('CD-04','Pessoas e equipes',corpo,fname=fname,status=None,primary_html=prim_cab(),search=False)
     estado_cab(fname,'Pessoas e equipes','c4e')

@@ -1,0 +1,122 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Logística › Viagens e entregas
+Viagens e entregas
+i
+1 divergência aberta
+Conciliar frete da VG-117
+Programe o transporte
+Expeça as cargas
+Doca 1 ocupada · Carga 07 sem NF
+Acompanhe viagens
+VG-117 · recusa em RC-15
+Controle fretes
+Aguardando saída
+2 VG-118 lacre · VG-119 NF
+Divergências abertas
+1 VG-117 · caso RC-15
+Concluídas 7 d
+2 VG-117 parcial · VG-112
+Otif 30 d
+92% contra a janela original
+Viagens
+Ver financeiro
+4 de 4
+VIAGEM
+▲
+CARGA → DESTINATÁRIO
+⇅
+EVENTOS · EVIDÊNCIA
+⇅
+RECEBIDO · OCORRÊNCIA
+⇅
+ESTADO
+⇅
+AÇÃO
+⇅
+VG-112
+Diesel S10 · 8 mil L (transferência 19/09)
+→ Boa Vista
+entrega 19/09 16:20
+romaneio assinado
+8 mil L aceitos · sem ocorrência
+Concluída no prazo
+Ver frete
+VG-117
+Mamão classe A · 9,4 t · PV-026 · L38-110
+→ Frutas Real · Vitória/ES
+saída 22/09 14:10 · chegada 18:40 (janela até 18:00)
+comprovante assinado + 4 fotos
+9,0 t
+aceitas ·
+0,4 t
+recusadas
+OC-77 · avaria em 2 pallets
+Caso RC-15 aberto
+Entregue · aceite parcial
+Abrir caso RC-15
+VG-118
+Milho a granel · 37,00 t (retirada · T2)
+→ Cooperativa Central
+carregada 09:22 · saída pendente
+TK-5531 + NF 45.812
+—
+lacre pendente
+Aguardando saída
+Conferir carga
+VG-119
+Mamão Formosa classe A · 9,6 t (Carga 07 · PV-031)
+→ Frutas Real · Vitória/ES
+programada · saída prevista 11:00
+Rota Sul Transportes
+—
+NF pendente · Sandra até 10:00
+Programada · impedida
+Resolver na expedição
+Entrega tardia · VG-117
+REGISTRO
+⇅
+VALOR
+⇅
+Janela original (compromisso)
+22/09 até 18:00 · congelada para o indicador
+Causa observada
+chuva forte na BR-101 · informada pelo transportador 16:05
+Reprogramação aceita
+chegada 18:40–19:00 · aceite do cliente 16:20 · muda a expectativa, não o compromisso
+Chegada real
+22/09 18:40
+Pontualidade
+Atrasada 40 min vs. compromisso original
+Rateio aplicado à viagem
+VIAGEM
+⇅
+DIRECIONADOR · VERSÃO
+⇅
+BASE
+⇅
+COMPONENTES
+⇅
+TOTAL
+⇅
+RECONCILIAÇÃO
+⇅
+VG-117
+Rateio v2 · peso líquido
+9,4 t
+frete base R$ 1.786 (direto) · pedágio R$ 96 (comum, rateado)
+R$ 1.882
+Confere · 100% do custo da viagem
+Tela: Viagens e entregas · 1 divergência aberta

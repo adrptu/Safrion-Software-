@@ -78,122 +78,59 @@ def js(sims,code):
     EXTRAJS[0]='const SIMS = '+json.dumps(sims,ensure_ascii=False)+';\n'+CDJS+CADXJS+code
 
 # =====================================================================================
-# Padrão visual dos cadastros (redesenho de 01/10/2026, pedido do Adrianus: "mais moderno, organizado, bonito e intuitivo").
-# Um bloco por tela (section.cadx): abas por entidade na 1ª linha; em cada aba, a faixa "precisa de atenção" (cartões com
-# verbo), a barra da grade (busca, contagem, filtro rápido Todos · A resolver, ações da aba com a primária por último) e os
-# dados. Só a área de dados rola (cabeçalho da tabela fixo); título, abas, filtros e ações ficam parados.
-# Estado do cabeçalho em uma linha (ponto + texto na cor do estado), sem botão de ação de entidade no cabeçalho da página.
-CADX_CSS=(
-    "main:has(>.cadx){gap:0}"
-    ".cadx{flex:1 1 0;min-height:0;display:flex;flex-direction:column;min-width:0;background:#FFFFFF;border:1px solid #E4E9E5;border-radius:14px;overflow:hidden}"
-    ".cadx-topo{display:flex;align-items:center;gap:12px;padding:12px 16px 0;flex-wrap:wrap}"
-    ".cadx-abas{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:#EEF1EE;max-width:100%;overflow-x:auto}"
-    ".cadx-dados{flex:1 1 0;min-height:0;display:flex;flex-direction:column}.cadx-ident{border-bottom:1px solid #E4E9E5}"
-    ".cadx-dados .g2caixa{flex:1 1 0;min-height:0}.cadx-dados .g2rola{flex:1 1 0;min-height:0;overflow:auto}"
-    ".cadx-rola{flex:1 1 0;min-height:0;overflow:auto}"
-    # barra da grade: busca e contagem, filtro rápido, filtros ativos ... ações da aba, expandir/recolher, primária por último
-    # SEP-20261015 (c): sem linha entre a barra e o que vem abaixo (cabeçalho da tabela com fundo, cartões, mapa)
-    ".cadx .g2caixa>div:first-child:has(>span),.cadx-barra{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px}"
-    ".cadx .g2caixa>div:first-child>label:has(input[type=search]),.cadx .g2caixa>div:first-child>label:has(input[type=search])+span{order:-2}"
-    ".cadx-qf{order:-1;display:flex;flex-wrap:wrap;gap:6px}.cadx-prim{order:1;display:inline-flex;margin-left:auto}"
-    ".cadx-seg{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:#EEF1EE}"
-    # cabeçalho da coluna em caixa normal, numa linha; ordenação sempre visível
-    ".cadx .g2hb{text-transform:none;letter-spacing:0;font-size:12px;white-space:nowrap;max-width:none;line-height:1.2;padding:10px 2px 10px 0}"
-    # linhas de uma altura (44 px), texto 13,5 px; links e ações da célula em tinta, não em verde
-    ".cadx .g2rola [role=row]{font-size:13.5px!important}.cadx [role=cell]{min-height:44px;box-sizing:border-box}"
-    ".cadx .g2pw{flex-wrap:nowrap;white-space:nowrap;overflow:hidden}"
-    # texto que não cabe na largura da coluna termina em reticências (o complemento apagado encolhe primeiro; nome, chip e verbo não;
-    # o motor envolve cada texto num span.sc-interp, por isso o chip é o span com outro span dentro)
-    ".cadx .g2pw span{min-width:0;overflow:hidden;text-overflow:ellipsis}.cadx .g2pw b,.cadx .g2pw span:has(>span:not(.sc-interp)),.cadx .g2pw a,.cadx .g2pw button{flex-shrink:0}"
-    ".cadx .g2pw a,.cadx .g2pw button{color:#15201A!important;font-weight:700}@media (hover:hover){.cadx .g2pw a:hover,.cadx .g2pw button:hover{text-decoration:underline!important}}"
-    ".cadx .g2kid{background:#FFFFFF}@media (hover:hover){.cadx .g2ed:hover{background:#F2F8F4}}"   # DS-HOVER-20261009: verde do sistema, não cinza
-    # árvore: a linha do grupo ganha faixa clara (hierarquia sem precisar de caixa)
-    ".cadx-arv .g2r:not(.g2kid) [role=cell]{background:#F7F9F6!important}@media (hover:hover){.cadx-arv .g2r.g2ed:not(.g2kid):hover [role=cell]{background:#E8F3EC!important}}"
-    # faixa "precisa de atenção": cartões brancos com borda esquerda na cor do estado
-    ".cadx-faixa{display:flex;gap:12px;flex-wrap:wrap;padding:12px 16px 2px}"
-    ".cadx-aviso{flex:0 1 330px;min-width:240px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:#FFFFFF;"
-    "border:1px solid #E4E9E5;border-radius:12px;padding:10px 14px;cursor:pointer;font-family:inherit;color:#15201A}"
-    "@media (hover:hover){.cadx-aviso:hover{background:#F2F8F4;border-color:#9DBFAA}.cadx-aviso:hover .cadx-verbo{text-decoration:underline}}.cadx-aviso:focus-visible,.cadx-cartao:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}"
-    ".cadx-verbo{font-weight:700;color:#15201A;white-space:nowrap}"
-    # cartões de entidade contêiner (fazendas, equipes, conjuntos)
-    ".cadx-cartoes{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;padding:16px;align-content:start}"
-    ".cadx-cartao{display:flex;flex-direction:column;align-items:stretch;gap:10px;text-align:left;background:#FFFFFF;border:1px solid #E4E9E5;border-radius:14px;"
-    "padding:16px;cursor:pointer;font-family:inherit;color:#15201A;min-width:0}"
-    "@media (hover:hover){.cadx-cartao:hover{border-color:#1E7A4C}.cadx-cartao:hover .cadx-verbo{text-decoration:underline}}"
-    ".cc-num{font-family:'Sora','Manrope',sans-serif;font-size:20px;font-weight:800;letter-spacing:-.01em}"
-    "@media (max-width:767px){.cadx-faixa,.cadx-cartoes{grid-template-columns:1fr}.cadx-aviso{flex:1 1 100%}}"
-)
-TAB_ON=E.SEG_ON().replace('font-size: 12.5px','font-size: 13px')
-TAB_OFF=E.SEG_OFF().replace('font-size: 12.5px','font-size: 13px')
-def cadx_css():
-    """estilo do padrão dos cadastros (vale só dentro de .cadx e da faixa; demais telas não mudam)."""
-    E.EXTRA.append('<style>'+CADX_CSS+'</style>')
+# Padrão comum dos cadastros (16/10/2026, proprietário: "todas telas de cadastro estao fora do nosso padrão"; skill padrao-safrion).
+# O redesenho de 01/10 (anterior ao design system de 09/10) punha uma camada de estilo da área (CADX_CSS) sobre o componente comum: cabeçalho
+# da tabela em caixa normal, tabela sem moldura e encostada no bloco, linhas e hover próprios, barra da grade montada à mão e o "Cadastrar"
+# verde na barra. Toda melhoria do motor ficava anulada aqui. Agora cada cadastro usa só o componente comum, como a O.S. e o Estoque:
+# - o bloco do motor: abas por entidade na 1ª linha (ou o título do bloco) e a grade (engine.grid) com a barra na ordem da TAB-01 (busca e
+#   filtros rápidos à esquerda; ferramentas da tela, Expandir tudo, Agrupar por, Colunas e Tabela | Cartões à direita, nesta ordem);
+# - a primária no cabeçalho da tela, à direita do título (BOT-01), com o verbo Criar e o "+" (BOT-03 e BOT-05); com abas, o rótulo segue
+#   a aba ativa e a aba sem criação fica sem verde;
+# - o que pede atenção fica na linha (TAB-06) e no filtro rápido "A resolver", com a contagem; sem faixa de cartões sobre a lista (TAB-07);
+# - Equipes e Conjuntos, que eram só cartões próprios, passam à grade do motor com Tabela | Cartões (VIS-05).
+# Não há mais CSS da área: nenhuma regra mira classe do motor (ds_inventario.py). As classes cadx-* que sobraram são só ganchos de teste.
+from areas.processo_planos import MAIS, ICO   # o "+" de Criar e Incluir (BOT-05), o mesmo do "Criar plano"
+SEG_TRILHO=f'display: inline-flex; flex-wrap: wrap; padding: 3px; border-radius: 999px; background: {E.GRAYS}; gap: 2px; max-width: 100%;'   # trilho do engine.seg
+QF_CAD=dict(k='_cadqf')   # abre na barra da grade o espaço do filtro rápido do motor; os chips vêm da tela (cadQf → cadQfPos)
 def abas(pre,nomes,rotulo='Cadastros desta tela'):
-    """abas por entidade: rótulo + contagem + ponto de pendência (buracos pre+i+'_st|_go|_sel|_n|_dot', ver cadAbas)."""
+    """abas por entidade no seletor segmentado do motor (engine.seg, SEG_ON/SEG_OFF): rótulo + contagem + ponto de pendência
+    (buracos pre+i+'_st|_go|_sel|_n|_dot', ver cadAbas)."""
     bs=''.join(f'<button type="button" role="tab" aria-selected="{H(pre+str(i)+"_sel")}" onClick="{H(pre+str(i)+"_go")}" style="{H(pre+str(i)+"_st")}">{esc(n)}'
                f'<span style="font-size: 12px; font-weight: 600; color: {MUTED};">{H(pre+str(i)+"_n")}</span>'
                f'<span aria-hidden="true" style="{H(pre+str(i)+"_dot")}"></span></button>' for i,n in enumerate(nomes))
-    return f'<div role="tablist" aria-label="{esc(rotulo)}" class="cadx-abas">{bs}</div>'
+    # as abas não quebram linha (o trilho arredondado em duas linhas vira um bloco): no estreito, a fileira rola de lado, como antes
+    return f'<div role="tablist" aria-label="{esc(rotulo)}" class="cadx-abas" style="{SEG_TRILHO.replace("flex-wrap: wrap;","flex-wrap: nowrap; overflow-x: auto;")}">{bs}</div>'
 def pane(pre,i,html,ativo=0):
     return f'<sc-if value="{H(pre+str(i)+"_on")}" hint-placeholder-val="{H("true" if i==ativo else "false")}">{html}</sc-if>'
 def se(hole,html,dflt=False):
     return f'<sc-if value="{H(hole)}" hint-placeholder-val="{H("true" if dflt else "false")}">{html}</sc-if>'
-def faixa(key):
-    """faixa "precisa de atenção" da aba: cartões com número, o que falta, o registro e o verbo (buracos de cadFaixa)."""
-    return se(key+'_tem',
-        f'<div class="cadx-faixa" role="group" aria-label="Precisa de atenção"><sc-for list="{H(key)}" as="fx" hint-placeholder-count="1">'
-        f'<button type="button" class="cadx-aviso" onClick="{H("fx.go")}" style="{H("fx.st")}">'
-        f'<span style="display: flex; align-items: baseline; gap: 8px;"><span style="{H("fx.nst")}">{H("fx.n")}</span><span style="font-size: 13px; font-weight: 600;">{H("fx.rot")}</span></span>'
-        f'<span style="display: flex; align-items: baseline; flex-wrap: wrap; column-gap: 8px; row-gap: 2px; font-size: 12.5px; min-width: 0;"><span style="color: {MUTED}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;">{H("fx.reg")}</span>'
-        f'<span class="cadx-verbo">{H("fx.verbo")} ›</span></span></button></sc-for></div>')
-# botões da aba: os do engine (BTN_ST compacto; antes um estilo local com raio 9, auditoria DS 15/10/2026)
-def prim(fn,rotulo,hole=False):
-    """primária da aba (uma por aba), dentro do bloco onde age; fica por último na barra."""
-    t=H(rotulo) if hole else esc(rotulo)
-    return f'<span class="cadx-prim"><button type="button" onClick="{H(fn)}" style="{E.BTN_ST(True,True)}">{t}</button></span>'
+def prim_cab(rotulo=None,fn=None):
+    """primária da tela no cabeçalho, à direita do título (BOT-01): verbo Criar com o "+" (BOT-03 e BOT-05), o mesmo desenho do "Criar plano".
+    Com rótulo fixo, chama o buraco fn (ex.: 'g_cv_new'). Sem rótulo, segue a aba ativa: buracos cadp_t, cadp_go e cadp_tem (cadPrim)."""
+    if rotulo: return f'<button type="button" data-acao="criar" onClick="{H(fn)}" style="{E.BTN_ST(True)} {ICO}">{MAIS(15)}{esc(rotulo)}</button>'
+    return se('cadp_tem',f'<button type="button" data-acao="criar" onClick="{H("cadp_go")}" style="{E.BTN_ST(True)} {ICO}">{MAIS(15)}{H("cadp_t")}</button>',True)
 def secbtn(fn,rotulo,dica='',hole=False):
     t=H(rotulo) if hole else esc(rotulo); d=f' title="{esc(dica)}"' if dica else ''
     return f'<button type="button" onClick="{H(fn)}"{d} style="{E.BTN_ST(False,True)}">{t}</button>'
-def qf_chips(gid):
-    """filtro rápido do bloco (Todos · A resolver · ...), à esquerda da barra (buraco gid+'_cqf', ver cadQf)."""
-    return (f'<div class="cadx-qf" role="group" aria-label="Filtro rápido"><sc-for list="{H(gid+"_cqf")}" as="qc" hint-placeholder-count="2">'
-            f'<button type="button" aria-pressed="{H("qc.on")}" onClick="{H("qc.go")}" style="{H("qc.st")}">{H("qc.t")} <span style="opacity: .75;">{H("qc.n")}</span></button></sc-for></div>')
 def filtro_sel(key,rotulo):
-    """filtro de classificação do bloco (lista com contagem), ao lado do filtro rápido de estado; buracos key, key_set, key_opts."""
-    return (f'<label class="cadx-qf" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: {MUTED};">{esc(rotulo)}'
+    """filtro de classificação da lista (lista com contagem), logo depois da busca (TAB-01); buracos key, key_set, key_opts."""
+    return (f'<label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: {MUTED};">{esc(rotulo)}'
             f'<select aria-label="{esc(rotulo)}" value="{H(key)}" onChange="{H(key+"_set")}" style="{H(key+"_st")}">'
             f'<sc-for list="{H(key+"_opts")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label>')
 def seg(pre,opcoes,rotulo):
-    """alternância de visão dentro da aba (ex.: Lista | Mapa); buracos pre+i+'_st' e pre+i+'_go'."""
+    """alternância de visão da tela (ex.: Lista | Mapa) no seletor segmentado do motor; buracos pre+i+'_st' e pre+i+'_go'."""
     bs=''.join(f'<button type="button" aria-pressed="{H(pre+str(i)+"_on")}" onClick="{H(pre+str(i)+"_go")}" style="{H(pre+str(i)+"_st")}">{esc(o)}</button>' for i,o in enumerate(opcoes))
-    return f'<div role="group" aria-label="{esc(rotulo)}" class="cadx-seg">{bs}</div>'
+    return f'<div role="group" aria-label="{esc(rotulo)}" style="{SEG_TRILHO}">{bs}</div>'
 def barra(esq,dir=''):
-    """barra de uma aba sem grade (cartões, mapa): mesmo desenho da barra da grade."""
-    return f'<div class="cadx-barra">{esq}<span style="flex-grow: 1;"></span>{dir}</div>'
-def cartoes(key,rotulo):
-    """cartões de entidade contêiner: nome, chip só com exceção, identificação, 2-3 números e rodapé com a situação (buracos de cadCartoes)."""
-    num=(f'<sc-for list="{H("c.nums")}" as="n" hint-placeholder-count="3"><span style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">'
-         f'<span style="white-space: nowrap;"><span class="cc-num">{H("n.v")}</span> <span style="font-size: 12px; color: {MUTED};">{H("n.u")}</span></span>'
-         f'<span style="font-size: 11.5px; font-weight: 600; color: {MUTED};">{H("n.l")}</span></span></sc-for>')
-    return (f'<div class="cadx-rola"><div class="cadx-cartoes" role="list" aria-label="{esc(rotulo)}"><sc-for list="{H(key)}" as="c" hint-placeholder-count="2">'
-            f'<button type="button" role="listitem" class="cadx-cartao" aria-label="{H("c.lab")}" onClick="{H("c.open")}">'
-            f'<span style="display: flex; align-items: flex-start; gap: 8px;"><b style="font-size: 15px; font-weight: 800; flex-grow: 1; min-width: 0; line-height: 1.3;">{H("c.nome")}</b>'
-            + se('c.temChip',f'<span style="{H("c.chSt")}"><span style="{H("c.chDot")}"></span>{H("c.chT")}</span>') + '</span>'
-            f'<span style="font-size: 12.5px; color: {MUTED}; margin-top: -6px;">{H("c.sub")}</span>'
-            f'<span style="display: flex; gap: 24px; flex-wrap: wrap;">{num}</span>'
-            f'<span style="display: flex; align-items: center; gap: 8px; border-top: 1px solid {LINE}; padding-top: 10px; font-size: 12.5px;">'
-            f'<span style="color: {MUTED}; flex-grow: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{H("c.rod")}</span>'
-            + se('c.ok',f'<span style="display: inline-flex; align-items: center; gap: 6px; color: {MUTED};"><span style="width: 8px; height: 8px; border-radius: 999px; background: {E.ACC};"></span>{H("c.sitT")}</span>')
-            + se('c.neutro',f'<span style="color: {MUTED};">{H("c.sitT")}</span>')
-            + se('c.exc',f'<span class="cadx-verbo">{H("c.verbo")} ›</span>')
-            + '</span></button></sc-for></div></div>')
-def arv(html):
-    """marca uma grade em árvore (linhas de grupo com faixa clara) sem criar caixa nova."""
-    return f'<div class="cadx-arv" style="display: contents;">{html}</div>'
-def bloco_cad(topo,dados,rotulo):
-    """o único bloco da tela: 1ª linha (abas) e a área de dados que estica até o fim da janela."""
-    return (f'<section class="cadx" aria-label="{esc(rotulo)}">' + (f'<div class="cadx-topo">{topo}</div>' if topo else '')
-            + f'<div class="cadx-dados">{dados}</div></section>')
+    """barra de um painel sem grade (mapa, geometria): o mesmo desenho e a mesma ordem da barra da grade do motor (engine.grid)."""
+    return f'<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; flex-wrap: wrap;">{esq}<span style="flex-grow: 1;"></span>{dir}</div>'
+def bloco_cad(topo,dados,rotulo,titulo=None):
+    """bloco do motor (o mesmo da O.S. e do Estoque): 1ª linha com as abas (ou o título do bloco) e o corpo; sendo o único bloco da tela, a
+    tabela estica até o fim da janela e só ela rola, com o cabeçalho fixo (regras do engine.G2_CSS para main section:only-of-type)."""
+    cab=topo or f'<h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">{esc(titulo or rotulo)}</h3>'
+    return (f'<section aria-label="{esc(rotulo)}" style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
+            f'<div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px 10px; flex-wrap: wrap;">{cab}</div>'
+            f'<div style="padding: 0 12px 12px; display: flex; flex-direction: column; gap: 10px;">{dados}</div></section>')
 def estado_cab(fname,titulo,key):
     """estado da tela ao lado do título, em uma linha (ponto + texto na cor do estado; buracos key, key_stst, key_stdot via cadEstado)."""
     import os
@@ -223,9 +160,9 @@ def acoes_form(gid):
     raise AssertionError('formulário sem bloco de ações: '+gid)
 
 CADXJS=r'''
-// ===== padrão visual dos cadastros =====
+// ===== padrão comum dos cadastros (16/10/2026) =====
 const CADT={yellow:['#8A5A00','#FFF3D6'],red:['#B42318','#FDE8E6'],gray:['#5B6660','#EEF1EE'],green:['#1E7A4C','#E4F3E9']};
-const CAD_TAB=[__TABOFF__,__TABON__];
+const CAD_TAB=[__SEGOFF__,__SEGON__];   // engine.SEG_OFF e engine.SEG_ON: abas e alternâncias no seletor segmentado do motor
 // situação da linha como chip (TABELAS-FOCO, proprietário 04/10/2026): verde quando ok, cinza quando neutro; exceção em chip com o próximo passo
 function sitOk(t){ return [chipc(t,'green')]; }
 function sitInfo(t){ return [chipc(t,'gray')]; }   // estado neutro (nem ok nem pendência)
@@ -234,6 +171,8 @@ function sitX(t,c,verbo,h){ return [chipc(t,c)].concat(verbo?[h?{k:'link',t:verb
 function cadEstado(v,key,t,cor){ const c=(CADT[cor]||CADT.gray)[0]; v[key]=t;
   v[key+'_stst']='display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;white-space:nowrap;color:'+c+';';
   v[key+'_stdot']='width:8px;height:8px;border-radius:999px;flex-shrink:0;background:'+c+';'; }
+// primária da tela no cabeçalho (BOT-01): com abas, o rótulo e a ação seguem a aba ativa; sem rótulo, a aba não cria (sem verde)
+function cadPrim(v,t,go){ v.cadp_t=t||''; v.cadp_go=go||(()=>{}); v.cadp_tem=!!t; }
 // abas: a ativa fica no estado (self.state[key]) e no endereço (#aba=slug), para voltar do detalhe na mesma aba
 function cadAbas(self,v,pre,key,info){ let a=self.state[key];
   if(a===undefined){ a=0; try{ const m=/[#&]aba=([^&]+)/.exec(location.hash||''); if(m){ const i=info.findIndex(x=>x.slug===decodeURIComponent(m[1])); if(i>=0) a=i; } }catch(e){} }
@@ -245,39 +184,33 @@ function cadAbas(self,v,pre,key,info){ let a=self.state[key];
 // guarda a aba no endereço sem perder os outros parâmetros (ex.: #talhao=T1&aba=geometria)
 function cadHash(slug){ try{ const h=String(location.hash||'').replace(/^#/,''); const ps=h?h.split('&').filter(x=>x&&x.indexOf('aba=')!==0):[]; ps.push('aba='+slug); history.replaceState(null,'','#'+ps.join('&')); }catch(e){} }
 function cadIrAba(self,key,i,slug,extra){ cadHash(slug); self.setState(Object.assign({[key]:i},extra||{})); }
-// alternância de visão (Lista | Mapa)
-function cadSeg(v,pre,n,cur,go){ for(let i=0;i<n;i++){ const on=i===cur; v[pre+i+'_on']=on?'true':'false'; v[pre+i+'_go']=()=>go(i);
-  v[pre+i+'_st']='font-family:inherit;font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:999px;border:0;cursor:pointer;'+(on?'background:#FFFFFF;color:#15201A;box-shadow:0 1px 2px rgba(21,32,26,.12);':'background:transparent;color:#65736A;'); } }
+// alternância de visão da tela (Lista | Mapa) no seletor segmentado do motor
+function cadSeg(v,pre,n,cur,go){ for(let i=0;i<n;i++){ const on=i===cur; v[pre+i+'_on']=on?'true':'false'; v[pre+i+'_go']=()=>go(i); v[pre+i+'_st']=CAD_TAB[on?1:0]; } }
 // registros de uma grade (em árvore, só as folhas; o grupo tem kids)
 function cadRegs(rows){ const o=[]; const w=l=>l.forEach(r=>{ if(Array.isArray(r.kids)) w(r.kids); else o.push(r); }); w(rows); return o; }
-// filtro rápido do bloco: Todos · A resolver · (Inativos só com N>0). Chama no PREVALS (esconde pelo r.sh) e cadQfPos no EXTRAVALS.
-// opc.extra: outro filtro do bloco (ex.: Função) que vale junto; as contagens dos chips respeitam ele
+// chip do filtro rápido no desenho do motor (g2lib.g2qvals): o cadastro só calcula a contagem e o que passa; o motor desenha na barra
+const CAD_QF_ST='font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;min-height:var(--g2-alvo,0px);box-sizing:border-box;';
+function cadChip(t,n,on,go,todos){ return {t:t,n:String(n),on:on?'true':'false',go:go,lab:(on||todos)?'Mostrar todas as linhas':'Mostrar só '+t,
+  st:CAD_QF_ST+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')}; }
+// filtro rápido da lista: Todos · A resolver · (Inativos só com N>0). Chama no PREVALS (esconde pelo r.sh) e cadQfPos no EXTRAVALS.
+// opc.extra: outro filtro da lista (ex.: Função) que vale junto; as contagens dos chips respeitam ele
 function cadQf(self,v,gid,key,defs,opc){ const q=self.state[key]||''; const rows=RW(self,gid); const regs=cadRegs(rows); const d=defs.find(x=>x.k===q); const SH='cadqf_'+gid;
   const ex=(opc&&opc.extra)||null; const passa=r=>(!d||d.f(r))&&(!ex||ex(r));
   regs.forEach(r=>{ if(r.sh===SH) delete r.sh; if(!passa(r)&&!r.sh) r.sh=SH; });
   const grp=l=>l.forEach(r=>{ if(Array.isArray(r.kids)){ if(r.sh===SH) delete r.sh; if((d||ex)&&!r.sh) r.sh=SH; grp(r.kids); } }); grp(rows);
   const vis=regs.filter(r=>(!r.sh||r.sh===SH)&&(!ex||ex(r)));
   const ch=[{k:'',t:defs.todos||'Todos',n:vis.length}].concat(defs.map(x=>({k:x.k,t:x.t,n:vis.filter(x.f).length,oz:x.oz}))).filter(c=>!(c.oz&&!c.n&&q!==c.k));
-  v[gid+'_cqf']=ch.map(c=>{ const on=q===c.k; return {t:c.t,n:String(c.n),on:on?'true':'false',go:()=>self.setState({[key]:(on&&c.k)?'':c.k}),
-    st:'font-family:inherit;font-size:12px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;'+(on?'border:1px solid #1E7A4C;background:#1E7A4C;color:#fff;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;')}; });
+  v[gid+'_cqf']=ch.map(c=>{ const on=q===c.k; return cadChip(c.t,c.n,on,()=>self.setState({[key]:(on&&c.k)?'':c.k}),!c.k); });
   return q; }
+// os chips entram no lugar do filtro rápido do motor (TAB-01: logo depois da busca; TAB-02: sem "x de y" com filtro rápido)
+function cadQfMotor(v,gid,ch,rot){ if(!ch||!ch.length) return; v[gid+'_qf']=ch; v[gid+'_hasqf']=true; v[gid+'_qfl']=rot||'Filtro rápido'; }
+function cadQfPos(self,v,gid,key){ cadQfMotor(v,gid,v[gid+'_cqf']); if(!(self.state[key]||'')) return;
+  v[gid+'_filtered']=true; v[gid+'_clear']=()=>{ g2set(self,gid,{q:'',f:{}}); self.setState({[key]:''}); }; }
 // "X de Y" da árvore conta registros (folhas) que passam na busca e nos filtros, não grupos
 function cadConta(self,v,gid){ const sp=GR(gid), st=g2st(self,gid), ad=self.state.added||{}; const regs=cadRegs(RW(self,gid));
   v[gid+'_all']=regs.filter(r=>!r.sh||String(r.sh).indexOf('cadqf_')===0).length; v[gid+'_count']=regs.filter(r=>g2match(r,sp,st,null,ad)).length; }
 function cadSel(self,v,key,opts){ const cur=self.state[key]||''; v[key]=cur; v[key+'_opts']=opts; v[key+'_set']=(e)=>self.setState({[key]:e.target.value});
   v[key+'_st']='font-family:inherit;font-size:12.5px;font-weight:700;padding:4px 8px;border-radius:999px;cursor:pointer;color:#15201A;'+(cur?'border:1px solid #1E7A4C;background:#E4F3E9;':'border:1px solid #E4E9E5;background:#FFFFFF;'); return cur; }
-function cadQfPos(self,v,gid,key){ if(!(self.state[key]||'')) return; v[gid+'_filtered']=true; v[gid+'_clear']=()=>{ g2set(self,gid,{q:'',f:{}}); self.setState({[key]:''}); }; }
-// faixa "precisa de atenção": até 3 cartões; com mais, o 3º vira "Mais N pendências"
-function cadFaixa(v,key,itens,mais){ let it=(itens||[]).filter(Boolean);
-  if(it.length>3){ const resto=it.slice(2).reduce((s,x)=>s+(Number(x.n)||1),0); it=it.slice(0,2).concat([{n:resto,rot:resto>1?'outras pendências':'outra pendência',reg:'',verbo:'Ver todas',cor:'yellow',go:mais}]); }
-  v[key]=it.map(x=>{ const c=(CADT[x.cor]||CADT.yellow)[0]; return {n:String(x.n),rot:x.rot,reg:x.reg||'',verbo:x.verbo,go:x.go||(()=>{}),
-    st:'border-left:3px solid '+c+';', nst:"font-family:'Sora','Manrope',sans-serif;font-size:20px;font-weight:800;line-height:1;color:"+c+';'}; });
-  v[key+'_tem']=it.length>0; }
-// cartões de entidade contêiner; clicar (ou Enter) abre o mesmo painel da grade
-function cadCartoes(self,v,key,gid,itens){ v[key]=itens.map(x=>{ const c=x.chip?(CADT[x.chip.c]||CADT.gray):null;
-  return {nome:x.nome,sub:x.sub||'',lab:'Abrir '+x.nome,nums:x.nums||[],rod:x.rod||'',ok:!x.verbo&&!x.neutro,neutro:!x.verbo&&!!x.neutro,exc:!!x.verbo,sitT:x.sitT||'Em dia',verbo:x.verbo||'',
-    temChip:!!c,chT:x.chip?x.chip.t:'',chSt:c?'display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;color:'+c[0]+';background:'+c[1]+';':'',
-    chDot:c?'width:6px;height:6px;border-radius:999px;background:'+c[0]+';':'',open:()=>g2open(self,GR(gid),x.id,null)}; }); }
 // ações do painel lateral (Excluir com confirmação; bloqueada mostra a causa)
 const CAD_ACTS={};
 const CAD_BTN='padding:7px 14px;border-radius:10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;line-height:1.25;white-space:nowrap;';
@@ -296,7 +229,8 @@ function cadExcluir(self,gid,r,ent,motivo,fazer){
   if(motivo) return {t:'Excluir '+ent,h:'Não dá para excluir: '+motivo+'.',st:CAD_BTN_OFF,go:()=>self.setState({g2toast:'Não dá para excluir: '+motivo+'.'})};
   if(g2st(self,gid).cfp!==r.id) return {t:'Excluir '+ent,h:'Pede confirmação antes de tirar do cadastro.',st:CAD_BTN_DEL,go:()=>g2set(self,gid,{cfp:r.id})};
   return {t:'Confirmar exclusão',h:'Não dá para desfazer.',st:CAD_BTN_DEL2,go:()=>{ if(fazer){ g2set(self,gid,{fm:null,cfp:null}); fazer(); } else cadApaga(self,gid,r.id); }}; }
-'''.replace('__TABOFF__',json.dumps(TAB_OFF)).replace('__TABON__',json.dumps(TAB_ON))
+'''.replace('__SEGOFF__',json.dumps(E.SEG_OFF())).replace('__SEGON__',json.dumps(E.SEG_ON()))
+
 
 # =====================================================================================
 # Cada tela pode ser reescrita num módulo próprio (areas/cad_*.py, que importa os auxiliares daqui); se ele existir, é o que vale.

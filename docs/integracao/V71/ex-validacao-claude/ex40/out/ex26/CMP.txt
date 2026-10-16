@@ -1,0 +1,88 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Suprimentos › Compras
+‹
+Suprimentos
+Compras
+1
+Escolha a safra
+· etapa atual
+em andamento
+2
+Confira a demanda
+· travada: Escolha a safra
+a fazer
+3
+Solicite cotações
+· travada: Escolha a safra
+a fazer
+4
+Compare propostas
+· travada: Escolha a safra
+a fazer
+5
+Aprove a compra
+· travada: Escolha a safra
+a fazer
+6
+Acompanhe a entrega
+· travada: Escolha a safra
+a fazer
+TRABALHANDO EM
+Insumos da safra
+Materiais, peças e serviços
+Fazenda Santa Rita
+Nenhuma safra escolhida
+Trocar safra
+Safras e solicitações
+SAFRA
+⇅
+SOLICITAÇÃO DE COMPRA
+⇅
+ORIGEM
+⇅
+COMPRA
+⇅
+AÇÃO
+⇅
+Safra 2026/27
+set/2026 – ago/2027
+SOL-2026-07
+14 insumos · R$ 428.305,00
+enviada 23/09/2026 10:40 por Ana (gestora)
+Planejar safra · demanda de insumos
+Ver origem
+A cotar
+Abrir compra
+Safrinha 2027
+fev – jul/2027
+Sem solicitação
+Solicitação ainda não enviada pelo planejamento
+Abrir Planejar safra
+—
+—
+Safra 2025/26
+set/2025 – ago/2026
+SOL-2025-06
+concluída
+Planejar safra · 2025/26
+Encerrada · 3 pedidos entregues
+Consultar pedidos
+Safra Mamão 2026/27
+set/2026 – ago/2027
+Sem solicitação
+Solicitação ainda não enviada pelo planejamento
+Abrir Planejar safra
+—
+—
+Tela: Compras

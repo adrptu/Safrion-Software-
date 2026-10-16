@@ -1,0 +1,144 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Suprimentos › Solicitações e cotações
+Solicitações e cotações
+i
+5 prontas para comparar · 1 rascunho
+Selecionar Fertisul
+Cotações em andamento
+Enviar COT-113
+8 de 8
+COTAÇÃO · ORIGEM
+⇅
+ITENS
+⇅
+FORNECEDORES
+⇅
+RESPOSTAS
+⇅
+MELHOR CUSTO EQUALIZADO
+⇅
+ESTADO
+⇅
+SOL-2026-07 · Adjuvantes
+Planejar safra · demanda de insumos
+1 item
+Óleo mineral
+2 homologados
+2/2
+R$ 3.667
+Santa Rita Insumos
+Pronta
+SOL-2026-07 · Fertilizantes
+Planejar safra · demanda de insumos
+5 itens
+MAP 11-52, Nitrato de cálcio…
+3 homologados
+3/3
+R$ 360.905
+Fertisul
+Pronta
+SOL-2026-07 · Fungicidas
+Planejar safra · demanda de insumos
+2 itens
+Fungicida TS, Fungicida C
+3 homologados
+2/3
+R$ 12.013
+Agro Norte
+Falta 1 resposta
+SOL-2026-07 · Herbicidas
+Planejar safra · demanda de insumos
+3 itens
+Glifosato 480, 2,4-D 806…
+3 homologados
+3/3
+R$ 21.637
+Santa Rita Insumos
+Pronta
+SOL-2026-07 · Inoculantes
+Planejar safra · demanda de insumos
+1 item
+Inoculante líquido
+2 homologados
+2/2
+R$ 3.240
+Casa do Adubo
+Pronta
+SOL-2026-07 · Inseticidas
+Planejar safra · demanda de insumos
+2 itens
+Inseticida B, Acaricida D
+2 homologados
+2/2
+R$ 13.700
+Santa Rita Insumos
+Pronta
+COT-113 · Rolamento 6310 2RS
+Necessidades · falta firme 3 un
+1 item
+3 un
+3 sugeridos
+—
+—
+Rascunho
+COT-110 · Kit filtros + óleo 15W40
+Manutenção · OM-0234
+1 item
+1 kit
+3 convidados
+1/3
+—
+Até 24/09
+Comparação equalizada · SOL-2026-07 · Fertilizantes
+Aprovar contratação ›
+FORNECEDOR
+⇅
+MERCADORIA
+⇅
+FRETE
+⇅
+PRAZO DE ENTREGA
+⇅
+CONDIÇÃO
+⇅
+CUSTO COMPARÁVEL
+⇅
+SITUAÇÃO
+⇅
+Fertisul
+R$ 360.905
+CIF · incluso
+12 dias
+CIF · 28 dias
+R$ 360.905
+Melhor equalizado
+Coop. Vale
+R$ 368.346
+R$ 5.819
+FOB · estimado
+15 dias
+FOB · à vista
+R$ 374.166
++R$ 13.261
+Casa do Adubo
+R$ 375.788
+CIF · incluso
+8 dias
+CIF · 30 dias
+R$ 375.788
++R$ 14.883
+Itens: MAP 11-52 79.500 kg, Nitrato de cálcio 680 kg, Nitrato de potássio 870 kg, NPK 20-05-20 14.800 kg, Ureia 45% 1.140 kg. Alçada pelo valor: Direção (até R$ 300 mil).
+Tela: Solicitações e cotações · 5 prontas para comparar · 1 rascunho

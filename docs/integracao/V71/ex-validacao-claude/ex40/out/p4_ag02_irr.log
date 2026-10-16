@@ -1,0 +1,19 @@
+# EX-40.6 · AG-02 "Água no solo" (render b87f79b, Ana)
+Água no solo 4 de 4 Agrupar por ▾ Colunas +5 + Registrar medição MEDIÇÃO ⇅ TALHÃO · ZONA ⇅ DATA ▼ CAD ⇅ AGS-004 Pivô 12 16/09/2026 não calculável sem ponto de murcha permanente medido AGS-003 P2 Z1 (baixada) 02/09/2026 45 mm AGS-002 P1 28/08/2026 39 mm AGS-001 T7 20/08/2026 56 mm
+
+# IR-01 · painel do setor Pivô 2 (#P2)
+Setor · Pivô 2 × Os limites valem para a próxima programação; ordens liberadas não mudam. Déficit hoje Necessidade Ordem que cobre Responsável pelo próximo passo Cultura e estádio Equipamento Água disponível no solo (referência) Propriedade do solo medida em Agrícola › Análises de solo. Não é a capacidade do equipamento nem a lâmina recomendada: a lâmina segue a política de água e o responsável técnico. Lâmina máxima por passada mm Intervalo mínimo entre inícios h Eficiência do sistema % Conferir medição OS-0394 · Divergência · −3,8 % · Em conferência · ontem 20:00–22:06 · conferir medição: João Ficha do pivô Capacidade do equipamento: vazão, pressão, tempo de volta e lâmina pelo percentímetro (ficha do fabricante). ORIGEM Memória: déficit em 15/09 5,0 + ETc 7 dias 35,1 − chuva efetiva 12,0 − irrigação líquida 16,9 = 11,2 mm Chuva efetiva: 20/09 · 20 mm × 60 % · ETc = ET₀ Penman-Monteith (Estação Santa Rita) × Kc do estádio Déficit no fim do dia: 16/09 10,0 · 17/09 5,3 · 18/09 10,3 · 19/09 8,1 · 20/09 1,2 · 21/09 6,2 · 22/09 11,2 · hoje 11,2 Passagem parcial · faixa de 11,6 ha (OS-0394): 1,8 mm · resto do pivô: 11,2 mm Aplicado · 22/09 · OS-0394 · passagem parcial · 1.206 m³ em 11,6 ha = 10,4 mm brutos na faixa × 90 % = 9,36 mm líquidos · fora do déficit do pivô · provisório Aplicado · 19/09 · OS-0391 · volta completa · 6.400 m³ em 80 ha = 8,0 mm brutos × 90 % = 7,2 mm líquidos Aplicado · 17/09 · OS-0388 · volta completa · 8.640 m³ em 80 ha = 10,8 mm brutos × 90 % = 9,72 mm líquidos OS-0394 · Em conferência · ontem 20:00–22:06 › OS-0419 · Liberadas · hoje 20:00–amanhã 10:31 › OS-0422 · A liberar · a definir › Fontes: Estação Santa Rita · Sonda de umidade · P2 (20 cm) ativa › Cancelar Salvar
+
+campo "Água disponível no solo (referência)": 'Água disponível no solo (referência)'
+links da Irrigação para AG-02: []
+erros JS: []
+
+# leitura do código (grep soloCAD/soloAguaDo)
+/tmp/claude-0/ex40/tools/prototipo/v37/gen37/areas/irrigacao.py:196:function irrCadTxt(F,k,x){ const tal=x.faz==='SR'?k:x.nome; const m=soloAguaDo({agua:SOLO_AGUA0},cenGet(),F.nome,tal); if(!m) return 'sem medição de água no solo neste talhão';
+/tmp/claude-0/ex40/tools/prototipo/v37/gen37/areas/irrigacao.py:197:  const cad=soloCAD(m); return (cad.v===null?'CAD não calculável ('+cad.nc+')':'CAD '+prFmtT(cad.v,1)+' mm em '+m.prof+' cm (raízes até '+prFmtT(m.z,1)+' cm)')+' · '+m.id+(m.zona?' · zona '+m.zona:'')+' · '+m.met.toLowerCase()+' · '+soloBr(m.data); }
+/tmp/claude-0/ex40/tools/prototipo/v37/gen37/areas/analise_solo.py:133:  GR('g_agua').rows=ms.map(m=>{ const cad=soloCAD(m); const r={id:m.id,ro:true,v:{},s:{},p:{}};
+/tmp/claude-0/ex40/tools/prototipo/v37/gen37/areas/analise_solo.py:323:  self.g2live=(gid,k,d)=>{ if(gid==='g_agua'&&k==='cadT'){ const cad=soloCAD({cc:d.ccv,pmp:d.pmpv,z:d.z,un:d.un}); return cad.v===null?'não calculável: '+cad.nc:cad.e; } return null; };
+/tmp/claude-0/ex40/tools/prototipo/v37/gen37/solo.js:96:function soloCAD(m) {
+/tmp/claude-0/ex40/tools/prototipo/v37/gen37/solo.js:106:function soloAguaDo(S0, c, faz, tal) {   /* medição de água mais recente do talhão (talhão inteiro antes de zona) */
+/tmp/claude-0/ex40/tools/prototipo/v37/gen37/solo.js:411:    const cad = soloCAD(S.agua[id]);
+

@@ -1,0 +1,78 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Irrigação › Programação
+Programação
+1 conflito · 1 janela a definir
+Programar irrigação
+Confira a necessidade
+1 a programar
+Programe a irrigação
+1 conflito · 1 janela a definir
+Execute e confira
+1 a conferir
+Acompanhe clima e sensores
+1 suspeita · 1 sem dado
+Fazenda
+Todas
+Lagoa Grande
+Santa Rita
+Boa Vista
+Agenda por captação
+Recolher tudo
+Colunas
++3
+CAPTAÇÃO › ORDEM
+⇅
+INÍCIO
+⇅
+LÂMINA
+⇅
+SETOR
+⇅
+FIM
+⇅
+PRÓXIMO PASSO
+⇅
+▾
+Rio · captação da sede
+3 ordens
+OS-0419
+hoje 20:00
+10,81 mm
+Pivô 2
+amanhã 10:31
+Iniciar irrigação
+OS-0422
+a definir
+13,5 mm
+Pivô 2
+a definir
+Definir janela
+Falta insumo
+OS-0418
+amanhã 21:00
+8,1 mm
+Pivô 1
+25/09 11:15
+Receber o insumo no Estoque
+▾
+Reservatório da sede
+1 ordem
+Conflito
+OS-0423
+hoje 14:00
+4,0 mm
+Gotejo T7
+hoje 16:00
+Resolver conflito
+Tela: Programação

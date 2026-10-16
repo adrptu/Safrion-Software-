@@ -1,0 +1,125 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Gestão e resultados › Visão gerencial
+Visão gerencial
+i
+Abrir composição do resultado
+Receita prevista 26/27
+R$ 18,35 mi 5 culturas · V2
+Margem projetada
+R$ 3,67 mi 20,0%
+Roic consolidado
+4,2% com terra
+Qualidade dos dados
+96% até 22/09
+Resultado por cultura · grupo consolidado
+Comparar cenário
+5 de 5
+CULTURA
+⇅
+ÁREA
+⇅
+RECEITA
+▼
+MARGEM
+⇅
+CUSTO UNITÁRIO
+⇅
+CAPITAL COM TERRA
+⇅
+ROIC
+⇅
+CAUSA PRIORITÁRIA
+⇅
+Soja
+51.280 sc · previsão V2
+814 ha
+R$ 6,20 mi
+R$ 0,36 mi
+R$ 113,98/sc
+R$ 36,6 mi
+0,6 %
+Plantio T4 impedido · OM-0233
+Mamão Formosa
+1.890 t · previsão V2
+42 ha
+R$ 4,91 mi
+R$ 1,22 mi
+R$ 1,95/kg
+R$ 4,1 mi
+19,7 %
+—
+Café
+1.444 sc · previsão V2
+38 ha
+R$ 3,58 mi
+R$ 1,04 mi
+R$ 1.762,47/sc
+R$ 3,9 mi
+17,5 %
+Lote L27-013 bloqueado
+Milho
+29.920 sc · previsão V2
+176 ha
+R$ 1,83 mi
+R$ 0,54 mi
+R$ 43,11/sc
+R$ 7,9 mi
+4,5 %
+—
+Feijão (pivô)
+4.750 sc · previsão V2
+95 ha
+R$ 1,83 mi
+R$ 0,52 mi
+R$ 275,79/sc
+R$ 5,2 mi
+6,6 %
+Pulverização +R$ 1.808
+Total
+1.165 ha
+R$ 18,35 mi
+R$ 3,68 mi
+R$ 57,7 mi
+Causas prioritárias do período
+DESVIO
+⇅
+ONDE
+⇅
+EFEITO
+⇅
+ORIGEM DO DADO
+⇅
+PRÓXIMA AÇÃO
+⇅
+Custo de pulverização acima do orçado
+Feijão · P1
+OS-0409
++R$ 1.808 vs. base V1
+apontamentos + preço de compra
+Abrir origem do desvio
+Plantio parado por ativo bloqueado
+Soja · T4
+OS-0420 · 30 de 100 ha
+70 ha de saldo com janela em risco
+OM-0233 · Trator T1
+Criar ação
+Lote de café bloqueado para venda
+Armazém Sede
+L27-013
+3.690 sc retidas até a inspeção
+INSP-88
+Abrir lote
+Tela: Visão gerencial

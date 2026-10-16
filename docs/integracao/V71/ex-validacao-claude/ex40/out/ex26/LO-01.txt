@@ -1,0 +1,181 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Logística › Programação de transporte
+Programação de transporte
+i
+1 carga atrasada · T1
+Expedir cargas
+Programe o transporte
+Expeça as cargas
+Doca 1 ocupada · Carga 07 sem NF
+Acompanhe viagens
+VG-117 · recusa em RC-15
+Controle fretes
+Cargas hoje
+5 3 retiradas · 1 entrega · 1 transf.
+Atrasadas
+1 T1 · prev. 09:10
+Ocupação das docas
+64% doca 1 crítica até 10:45
+Frete previsto
+R$ 1,8 mil só entrega do agricultor
+Agenda de cargas do dia
+Cotar frete
+5 de 5
+CARGA · TIPO
+⇅
+PRODUTO · ROTA
+⇅
+JANELA
+▲
+VEÍCULO · COMPATIBILIDADE
+⇅
+FRETE
+⇅
+AÇÃO
+⇅
+T1
+· 1ª de 3
+Retirada · cliente
+Milho a granel · 37,00 t
+Silo Sede → Cooperativa Central
+08:00–09:00
+Atrasado · prev. 09:10
+Cliente · Rota Norte
+ocupação 37/37 t
+Compatível · granel
+frete do cliente
+Ver fila
+T2
+· 2ª de 3
+Retirada · cliente
+Milho a granel · 37,00 t
+Silo Sede → Cooperativa Central
+08:30–09:30
+em doca 1 · lacre pendente
+Cliente · Rota Norte
+ocupação 37/37 t
+Compatível · granel
+frete do cliente
+Conferir carga
+T3
+· 3ª de 3
+Retirada · cliente
+Milho a granel · 37,00 t
+Silo Sede → Cooperativa Central
+09:00–10:00
+presente · aguarda doca 1
+Cliente · Rota Norte
+ocupação 37/37 t
+Compatível · granel
+frete do cliente
+Ver na fila
+TR-0459
+Transferência
+KCl 60 % · 10.000 kg (200 sc)
+Galpão 2 → Boa Vista
+11:00–11:45
+T4 · frota própria
+ocupação 10/12 t
+Compatível · ensacado
+custo interno
+apropriado uma vez
+Separar lotes
+Carga 07
+· PV-031
+Entrega · agricultor
+Mamão Formosa classe A · 9,6 t
+Packing Sede → Frutas Real · Vitória/ES
+11:00–12:00
+Impedida · NF pendente
+Rota Sul · baú refrigerado
+ocupação 9,6/12 t
+Compatível · refrigerado
+R$ 1.824
+cotado · a contratar
+Contratar frete
+Agrupar entregas compatíveis
+Agrupar entregas
+CANDIDATA A AGRUPAR COM A CARGA 07
+⇅
+PRODUTO · CONSERVAÇÃO
+⇅
+ROTA
+⇅
+JANELA
+⇅
+COMPATIBILIDADE
+⇅
+Remessa SU · Fungicida A · 12 cx
+Defensivo químico
+Vitória/ES
+flexível
+Incompatível · defensivo × alimento
+TR-0459 · KCl 60 % · 10.000 kg
+Fertilizante ensacado
+Boa Vista
+11:00–11:45
+Rota diferente · não agrupa
+Docas e slots
+Ver viagens
++ Reservar slot
+SLOT
+▲
+DOCA
+⇅
+CARGA · TRANSPORTADOR
+⇅
+DURAÇÃO
+⇅
+RESPONSABILIDADE
+⇅
+ESTADO
+⇅
+08:00–09:00
+Doca 1 · granel
+T1
+· janela original preservada
+45 min
+—
+Vencido · vaga ao próximo elegível
+08:35–09:40
+Doca 1 · granel
+T2
+· cliente (Rota Norte)
+45 min + setup 10 min + pesagem
+Expedição: carga e balança · Cliente: veículo e motorista
+Em uso · excede o slot 12 min (lacre)
+09:50–10:45
+Doca 1 · granel
+T3
+· cliente (Rota Norte)
+45 min + setup 10 min
+Expedição: carga e balança · Cliente: veículo e motorista
+Reservado · doca 1 ainda com o T2
+11:00–11:55
+Doca 3 · ensacados
+TR-0459
+· T4 frota própria
+45 min + setup 10 min
+Expedição: separação e carga · Frota: veículo
+Reservado
+11:00–12:00
+Doca 2 · paletizados
+Carga 07
+· Rota Sul Transportes
+60 min + inspeção refrigerado
+Expedição: carga · Transportador: baú e temperatura
+Impedida · NF pendente
+Tela: Programação de transporte · 1 carga atrasada · T1

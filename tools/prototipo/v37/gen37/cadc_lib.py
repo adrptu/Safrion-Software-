@@ -44,8 +44,10 @@ class T:
     def bloco(s): return s.J("document.querySelector('main').innerText.replace(/\\s+/g,' ')")
     def aba(s,t): r=s.J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab]')].find(b=>b.innerText.replace(/\\s+/g,' ').trim().startsWith({json.dumps(t)})); if(!b) return false; b.click(); return true;}})()"); time.sleep(.35); return r
     # layout de 01/10 (um bloco por tela, abas por entidade, ações no bloco, cartões para fazendas, equipes e conjuntos)
-    def card(s,t): return s.J(f"(()=>{{const c=[...document.querySelectorAll('.cadx-cartao')].find(c=>c.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); return c?c.innerText.replace(/\\s+/g,' '):null;}})()")
-    def opencard(s,t): r=s.J(f"(()=>{{const c=[...document.querySelectorAll('.cadx-cartao')].find(c=>c.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); if(!c) return false; c.click(); return true;}})()"); time.sleep(.35); return r
+    # 16/10/2026 (padrão comum dos cadastros): Equipes, Conjuntos e Fazendas deixaram de ser cartões próprios (.cadx-cartao) e são linhas da
+    # grade do motor (Tabela | Cartões); card() devolve o texto da linha e opencard() abre a linha, como o clique no cartão fazia
+    def card(s,t): return s.J(f"(()=>{{const c=[...document.querySelectorAll('[role=table] [role=row]')].filter(r=>r.offsetParent&&r.querySelector('[role=cell]')).find(c=>c.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); return c?c.innerText.replace(/\\s+/g,' '):null;}})()")
+    def opencard(s,t): r=s.J(f"(()=>{{const c=[...document.querySelectorAll('[role=table] [role=row]')].filter(r=>r.offsetParent&&r.querySelector('[role=cell]')).find(c=>c.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); if(!c) return false; (c.querySelector('.g2pw')||c).click(); return true;}})()"); time.sleep(.35); return r
     def mainsel(s,val): r=s.J(f"({SETV})('main select',{json.dumps(val)})"); time.sleep(.35); return r
     def cancel(s):
         s.btn('Cancelar'); s.btn('Descartar alterações'); s.btn('Fechar')

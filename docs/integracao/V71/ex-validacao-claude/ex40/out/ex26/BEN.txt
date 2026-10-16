@@ -1,0 +1,53 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Beneficiamento
+‹
+Agrícola
+Beneficiamento
+i
+1 a liberar · 1 em execução · 3 lotes a beneficiar
+Ordens de beneficiamento
+Lista
+Cartões
+Kanban
+Criar ordem
+Todas 2
+A liberar 1
+Em execução 1
+Agrupar por
+▾
+Colunas
++2
+ORDEM
+⇅
+PRODUTO
+⇅
+PRÓXIMO PASSO
+⇅
+FASE
+⇅
+EM PROCESSO
+⇅
+Impedida
+OB-0112
+Mamão Formosa
+Resolver 2 impedimentos e autorizar a rota
+A liberar
+0 kg
+OB-0110
+Mamão Formosa
+Enviar para conferência
+Em execução
+0 kg
+Restaurar demonstração
+Tela: Beneficiamento · 1 a liberar · 1 em execução · 3 lotes a beneficiar

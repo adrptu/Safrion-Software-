@@ -1,0 +1,438 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Suprimentos › Inteligência de compras
+‹
+Suprimentos
+Inteligência de compras
+i
+4 insumo(s) para comprar agora · cotações dentro da referência
+INSUMOS EM ALTA
+6
+KCl 60% · MAP 11-52 · NPK 20-05-20 · Nitrato de cálcio · Nitrato de potássio · Ureia 45%
+COMPRAR AGORA
+4
+necessidade próxima: Óleo mineral · Nitrato de cálcio · 2,4-D 806 · Glifosato 480
+ECONOMIA ESPERANDO O MÊS CERTO
+R$ 23.103,65
+9 insumo(s) mais baratos
+Preço e melhor mês para comprar
+Todos 19
+Esperar 9
+Comprar até a necessidade 6
+Comprar agora 4
+Agrupar por
+▾
+Colunas
++3
+INSUMO
+⇅
+O QUE FAZER
+⇅
+ECONOMIA ESTIMADA
+⇅
+PREÇO AGORA
+⇅
+MÊS MAIS BARATO
+⇅
+Óleo mineral
+Adjuvantes
+Comprar agora
+para receber até 28/09 (entrega em 5 dias), peça agora
+—
+R$ 18,00/L
+mar
+mais caro: set
+2,4-D 806
+Herbicidas
+Comprar agora
+para receber até 28/09 (entrega em 5 dias), peça agora
+—
+R$ 32,00/L
+mar
+mais caro: set
+Glifosato 480
+Herbicidas
+Comprar agora
+para receber até 28/09 (entrega em 5 dias), peça agora
+—
+R$ 28,00/L
+mar
+mais caro: set
+Nitrato de cálcio
+Fertilizantes
+Comprar agora
+para receber até 01/10 (entrega em 8 dias), peça agora
+—
+R$ 4,20/kg
+fev
+mais caro: ago
+Inoculante líquido
+Inoculantes
+Esperar
+até out (pedir até 10/10): 3,2% mais barato na época
+R$ 173,31
+R$ 45,00/L
+mar
+mais caro: set
+Acaricida D
+Inseticidas
+Esperar
+até out (pedir até 10/10): 4,4% mais barato na época
+R$ 200,13
+R$ 180,00/L
+mar
+mais caro: set
+Semente de soja 58 W
+Sementes
+Esperar
+até out (pedir até 05/10): 5,2% mais barato na época
+R$ 13.554,66
+R$ 9,50/kg
+abr
+mais caro: set
+Semente de soja 62 X
+Sementes
+Esperar
+até out (pedir até 15/10): 4,8% mais barato na época
+R$ 3.609,10
+R$ 9,50/kg
+abr
+mais caro: set
+Adjuvante espalhante
+Adjuvantes
+Esperar
+até nov (pedir até 24/11): 3,1% mais barato na época
+R$ 71,47
+R$ 22,00/L
+mar
+mais caro: set
+Fungicida A
+Fungicidas
+Esperar
+até nov (pedir até 24/11): 4,7% mais barato na época
+R$ 3.552,13
+R$ 145,00/L
+mar
+mais caro: set
+Inseticida B
+Inseticidas
+Esperar
+até dez (pedir até 09/12): 7,0% mais barato na época
+R$ 1.212,40
+R$ 95,00/L
+mar
+mais caro: set
+Fungicida C
+Fungicidas
+Esperar
+até jan (pedir até 15/01): 7,6% mais barato na época
+R$ 278,11
+R$ 120,00/L
+mar
+mais caro: set
+Ureia 45%
+Fertilizantes
+Esperar
+até fev (pedir até 09/03): 12,8% mais barato na época
+R$ 452,34
+R$ 3,10/kg
+fev
+mais caro: ago
+Fungicida TS
+Fungicidas
+Comprar até a necessidade
+até 09/10 a época barateia só 2,6%
+—
+R$ 210,00/L
+mar
+mais caro: set
+MAP 11-52
+Fertilizantes
+Comprar até a necessidade
+até 07/10 a época barateia só 2,0%
+—
+R$ 3,90/kg
+fev
+mais caro: ago
+NPK 20-05-20
+Fertilizantes
+Comprar até a necessidade
+até 07/10 a época barateia só 2,4%
+—
+R$ 3,40/kg
+fev
+mais caro: ago
+Nitrato de potássio
+Fertilizantes
+Comprar até a necessidade
+até 24/10 a época barateia só 2,3%
+—
+R$ 6,10/kg
+fev
+mais caro: ago
+KCl 60%
+Fertilizantes
+Comprar até a necessidade
+até 27/10 a época barateia só 2,0%
+—
+R$ 2,40/kg
+fev
+mais caro: ago
+Cletodim 240
+Herbicidas
+Comprar até a necessidade
+até 04/11 a época barateia só 2,8%
+—
+R$ 62,00/L
+mar
+mais caro: set
+COTAÇÕES ACIMA DA REFERÊNCIA
+0
+nenhuma cotação 5% acima da referência
+ECONOMIA PELA MELHOR COTAÇÃO
+R$ 41.363
+contra a referência da safra
+INSUMOS POR HECTARE
+R$ 1.277,84/ha
+insumos orçados ÷ 1.165 ha da safra S2627
+Preço por insumo
+19 de 19
+Agrupar por
+▾
+Colunas
++3
+INSUMO
+⇅
+ÚLTIMO PAGO
+⇅
+MELHOR COTAÇÃO
+⇅
+VS ÚLTIMO
+⇅
+SINAL
+⇅
+Inoculante líquido
+R$ 44,10/L
+01/09 · Sementes Vale · sintético
+R$ 45,00/L
+Casa do Adubo · 6 d · CIF
++2,0%
+Dentro da referência
+Fungicida A
+R$ 141,00/L
+20/11 · Agro Norte
+R$ 142,10/L
+Agro Norte · 5 d · CIF
++0,8%
+Dentro da referência
+Fungicida C
+sem compra registrada
+R$ 117,60/L
+Agro Norte · 5 d · CIF
+—
+Dentro da referência
+Fungicida TS
+R$ 218,40/L
+20/08 · Química Centro-Oeste · sintético
+R$ 205,80/L
+Agro Norte · 5 d · CIF
+−5,8%
+Dentro da referência
+Semente de soja 58 W
+R$ 9,30/kg
+05/10 · Coop. Vale
+R$ 9,31/kg
+Coop. Vale · 14 d · FOB
++0,1%
+Dentro da referência
+Semente de soja 62 X
+R$ 9,55/kg
+08/10 · Sementes Vale
+R$ 9,31/kg
+Coop. Vale · 14 d · FOB
+−2,5%
+Dentro da referência
+Adjuvante espalhante
+sem compra registrada
+R$ 21,34/L
+Santa Rita Insumos · 7 d · CIF
+—
+Dentro da referência
+Óleo mineral
+R$ 17,10/L
+15/09 · Santa Rita Insumos · sintético
+R$ 17,46/L
+Santa Rita Insumos · 7 d · CIF
++2,1%
+Dentro da referência
+KCl 60%
+R$ 2,33/kg
+02/10 · Fertisul
+R$ 2,33/kg
+Fertisul · 12 d · CIF
+−0,1%
+Dentro da referência
+MAP 11-52
+R$ 3,72/kg
+18/09 · Fertisul
+R$ 3,78/kg
+Fertisul · 12 d · CIF
++1,7%
+Dentro da referência
+NPK 20-05-20
+sem compra registrada
+R$ 3,30/kg
+Fertisul · 12 d · CIF
+—
+Dentro da referência
+Nitrato de cálcio
+sem compra registrada
+R$ 4,07/kg
+Fertisul · 12 d · CIF
+—
+Dentro da referência
+Nitrato de potássio
+sem compra registrada
+R$ 5,92/kg
+Fertisul · 12 d · CIF
+—
+Dentro da referência
+Ureia 45%
+sem compra registrada
+R$ 3,01/kg
+Fertisul · 12 d · CIF
+—
+Dentro da referência
+2,4-D 806
+R$ 32,64/L
+02/10 · Agro Norte · sintético
+R$ 30,72/L
+Santa Rita Insumos · 7 d · CIF
+−5,9%
+Dentro da referência
+Cletodim 240
+sem compra registrada
+R$ 59,52/L
+Santa Rita Insumos · 7 d · CIF
+—
+Dentro da referência
+Glifosato 480
+R$ 27,16/L
+02/10 · Agro Norte · sintético
+R$ 26,88/L
+Santa Rita Insumos · 7 d · CIF
+−1,0%
+Dentro da referência
+Acaricida D
+sem compra registrada
+R$ 171,00/L
+Santa Rita Insumos · 9 d · CIF
+—
+Dentro da referência
+Inseticida B
+sem compra registrada
+R$ 90,25/L
+Santa Rita Insumos · 9 d · CIF
+—
+Dentro da referência
+Fornecedores
+7 de 7
+FORNECEDOR
+⇅
+COTAÇÕES
+⇅
+PREÇO VS REFERÊNCIA
+⇅
+PRAZO DE ENTREGA
+⇅
+PONTUALIDADE
+⇅
+Química Centro-Oeste
+última: Fungicida TS · 20/08
+0
+—
+—
+0%
+1 de 1 com atraso
+Fertisul
+última: KCl 60% · 02/10
+6
+−3,0%
+12 dias
+100%
+0 de 2 com atraso
+Santa Rita Insumos
+última: Óleo mineral · 15/09
+11
+−1,4%
+6,8 dias
+100%
+0 de 3 com atraso
+Coop. Vale
+última: Semente de soja 58 W · 05/10
+11
+−0,9%
+13,5 dias
+sem entrega
+Agro Norte
+última: Fungicida A · 20/11
+10
+0,0%
+5 dias
+50%
+2 de 4 com atraso
+Sementes Vale
+última: Semente de soja 62 X · 08/10
+2
+0,0%
+10 dias
+67%
+1 de 3 com atraso
+Casa do Adubo
+última: MAP 11-52 · 12/03
+7
++0,9%
+7,7 dias
+0%
+1 de 1 com atraso
+Custo de insumos por hectare
+7 de 7
+GRUPO
+⇅
+TOTAL ORÇADO
+⇅
+CUSTO R$/HA
+⇅
+Fertilizantes
+R$ 949.437
+R$ 814,97/ha
+Sementes
+R$ 335.920
+R$ 288,34/ha
+Fungicidas
+R$ 91.928
+R$ 78,91/ha
+Herbicidas
+R$ 70.699
+R$ 60,69/ha
+Inseticidas
+R$ 21.921
+R$ 18,82/ha
+Adjuvantes
+R$ 13.290
+R$ 11,41/ha
+Inoculantes
+R$ 5.490
+R$ 4,71/ha
+Restaurar demonstração
+Tela: Inteligência de compras · 4 insumo(s) para comprar agora · cotações dentro da referência

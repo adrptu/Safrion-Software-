@@ -1,0 +1,42 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Manutenção › Painel
+‹
+Manutenção
+Painel
+Tratar pendências
+Pendências sem ordem
+ⓘ
+6
+Ordens abertas
+ⓘ
+4
+Em execução
+ⓘ
+1
+Ativos bloqueados
+ⓘ
+1
+Ordens por estado
+A liberar
+1
+Liberadas
+1
+Em execução
+1
+Em conferência
+1
+Consultar ordens
+Consultar ativos
+Consultar planos
+Tela: Painel

@@ -1,0 +1,91 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Comercial › Reclamações e devoluções
+Reclamações e devoluções
+i
+RC-12 aguarda destinação · RC-15 aberto hoje
+Abrir caso
+Confira demanda e oferta
+Acompanhe o mercado
+Faça ofertas
+Registre pedidos
+PV-031 · falta 0,4 t
+Controle contratos
+Trate reclamações
+RC-12 aguarda Qualidade
+Casos por entrega e lote
+Emitir solicitação de crédito
+⋯
+5 de 5
+CASO
+⇅
+PEDIDO · ENTREGA
+⇅
+MOTIVO · EVIDÊNCIAS
+⇅
+LOTE · QUANTIDADE
+⇅
+DECISÃO · FINANCEIRO
+⇅
+AÇÃO
+⇅
+RC-15
+PV-026 · VG-117
+entrega 22/09 · recusa em LO-03
+Avaria no transporte
+OC-77 · canhoto + 4 fotos
+L38-110 · 0,4 t
+Recusa registrada
+financeiro: a definir
+Autorizar retorno
+RC-14
+PV-029 · 1/1
+milho · Atacado Bom Preço
+Grãos ardidos
+—
+L26-140 · 150 sc
+Aguardando evidências
+financeiro: a definir
+Cobrar evidências
+RC-13
+PV-030 · 2/3
+soja 25/26 · Coop Grão Sul
+Umidade acima do padrão
+laudo de umidade · 2 fotos
+L27-020 · 900 sc
+Retorno a caminho
+financeiro: a definir
+Receber bloqueado
+RC-12
+PV-027 · 2/2
+mamão A · Rede Hortifrúti BA
+Maturação avançada
+4 fotos · laudo do cliente
+L26-118 · 300 kg
+Bloqueado · aguarda Qualidade
+financeiro: Crédito solicitado
+Decidir destinação
+RC-11
+PV-025 · 1/1
+mamão A · Frutas Real
+Avaria no transporte
+fotos + canhoto
+L26-101 · 120 kg
+Encerrado · descarte
+financeiro: Crédito emitido
+—
+Efeito no estoque · retorno do RC-12
+300 kg retornaram e foram recebidos como bloqueados: o estoque vendável não aumentou e o lote L26-118 segue indisponível para reserva e expedição.
+Tela: Reclamações e devoluções · RC-12 aguarda destinação · RC-15 aberto hoje

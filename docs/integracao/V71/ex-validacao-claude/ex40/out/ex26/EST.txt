@@ -1,0 +1,70 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Suprimentos › Estoque
+‹
+Suprimentos
+Estoque
+Confira recebimentos
+Entregue por O.S.
+Receba devoluções
+Confira saldos
+Faça contagens
+Acompanhe movimentos
+Fazenda
+Todas
+Lagoa Grande
+Santa Rita
+Boa Vista
+2 notas a conferir · em quarentena: KCl 60% 10.000 kg · pedidos com saldo a entregar: PC-088 40.000 kg, PC-090 20.000 kg, PC-091 8.000 kg, PC-096 1.200 un
+Recebimentos
+Conferir NF 4533
+Todas 3
+A conferir 1
+Aguarda laudo 1
+Prevista 1
+Agrupar por
+▾
+Colunas
++8
+NOTA FISCAL
+⇅
+ITEM
+⇅
+DIVERGÊNCIA
+⇅
+FORNECEDOR
+⇅
+NA NOTA
+⇅
+CONFERIDA
+⇅
+NF 4501
+KCl 60%
+—
+Fertisul
+60.000 kg
+60.000 kg
+NF 4533
+Semente de soja 58 W
+—
+Coop. Vale
+20.000 kg
+—
+NF 7731
+Caixa de mamão Formosa 10 kg
+—
+Embalagens Açu
+1.200 un
+—
+Restaurar demonstração
+Tela: Estoque
