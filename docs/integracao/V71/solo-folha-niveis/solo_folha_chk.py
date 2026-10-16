@@ -139,8 +139,11 @@ MAMAO_PEC = dict(N=faixa_ad('10', '25'), P=faixa_ad('2.2', '4.0'), K=faixa_ad('3
 SOJA_COMPEC = dict(K=faixa_ad('17', '25'))
 
 def mais_meses(iso, n):
+    """validade = coleta + n meses; dia que não existe no mês de chegada vira o último dia válido dele (R2 do Codex, achado 4):
+    29/02/2024 + 24 meses = 28/02/2026 (vale até 28/02; vencido em 01/03)."""
+    import calendar
     y, m, d = map(int, iso.split('-')); m += n; y += (m - 1) // 12; m = (m - 1) % 12 + 1
-    return datetime.date(y, m, d).isoformat()
+    return datetime.date(y, m, min(d, calendar.monthrange(y, m)[1])).isoformat()
 
 HOJE = DS.HOJE
 chk('data do cenário', HOJE, '2026-09-23')
@@ -247,9 +250,10 @@ chk('F1 LAU-2023 soja · 3º trifólio sem pecíolo · R2 · K 15,0 g/kg × 18,0
 chk('F1b fora da faixa primeiro: P, K, Mg, B, Mn e Zn baixos; N, Ca, S, Cu e Fe adequados', sorted(a for a, c in res.items() if c != 'adequado'), sorted(['P', 'K', 'Mg', 'B', 'Mn', 'Zn']))
 chk('F1c K em % (1,50 dag/kg) × 10 = 15,0 g/kg → mesma classe', classifica(SOJA_T7['K'], D('1.50') * 10)[0], 'baixo')
 chk('F2 o mesmo K com pecíolo: Tab. 7 não vale (órgão); CER04 Tab. 2 (3ª folha com pecíolo, florescimento) → abaixo da faixa 17–25', classifica(SOJA_COMPEC['K'], D('15.0'))[0], 'abaixo da faixa')
-def epoca_soja(est, crescimento):   # SOJ20 p. 149
+def epoca_soja(est, crescimento, veg=None):   # SOJ20 p. 148 (texto da amostragem); Tab. 7 na p. 149
     if est == 'R2': return 'na época'
     if est == 'R1' and crescimento == 'determinado': return 'na época'
+    if est == 'R3 inicial' and crescimento == 'indeterminado' and veg in ('V8', 'V9', 'V10'): return 'na época'   # "podendo-se estender até o início do estádio R3, desde que as plantas estejam no estádio vegetativo V8/V10"
     return 'fora da época de referência'
 chk('F3 estádios: R2 com crescimento não cadastrado → na época; R1 sem tipo → fora; V6 → fora', (epoca_soja('R2', None), epoca_soja('R1', None), epoca_soja('V6', None)), ('na época', 'fora da época de referência', 'fora da época de referência'))
 FOLHA_CAFE = dict(N='28.4', P='1.1', K='16.0', Ca='12.0', Mg='3.2', S='1.7', B='45', Cu='12', Fe='110', Mn='80', Zn='8')   # LAU-2022 (sintético)
@@ -267,6 +271,48 @@ chk('F6 Pivô 6: solo K 20 mg/dm³ (T 6,55; argila 30) → "baixo"; folha K 28 g
 chk('F7 LAU-2023 coletado em 18/12/2025 é da safra 2025/26 (encerrada): leitura histórica, não vale para 2026/27', '2025-10-12' <= '2025-12-18' < '2026-09-23', True)
 # F8 · LAU-2048 (feijão, P1): K sem unidade e estádio R5 × época "florescimento"
 chk('F8 LAU-2048 K 17,4 sem unidade → inconsistente, sem classe', an('LAU-2048', 'K')[1] == '', True)
+
+print('\n== R2 (revisão do Codex, comentário 6221505413) ==')
+# R2-4 · validade com 29/02: último dia válido do mês de chegada
+chk('V1 coleta 29/02/2024 + 24 meses → validade 28/02/2026 (último dia válido)', mais_meses('2024-02-29', 24), '2026-02-28')
+chk('V1b em 28/02/2026 ainda vale; em 01/03/2026 vencido (vencido = validade < hoje)', ('2026-02-28' < '2026-02-28', '2026-02-28' < '2026-03-01'), (False, True))
+js = datetime.date(2026, 2, 1) + datetime.timedelta(days=29 - 1)   # Date.setUTCMonth do solo.js:25 transborda o dia 29 para março
+chk('V1c contraprova: a conta de hoje (solo.js:25) dá 01/03/2026, um dia a mais (executada também no node)', js.isoformat(), '2026-03-01')
+
+# R2-1 · regime hídrico explícito do cultivo (e da zona), nunca deduzido do setor da Irrigação
+P_SEQ_16_35 = P_SEQ['16-35']
+def diag_regime(regime, p, v, T, k):
+    """regime: 'sequeiro' | 'irrigado' | 'não declarado' | 'dois regimes' (laudo composto sobre zonas de regimes diferentes).
+    Só o P (Tab. 6 × Tab. 7) e o alvo V₂ (p. 84: 50 × 60 %) dependem do regime; o K (Tab. 12) não."""
+    kcls = classifica(K_ANU['>=4' if T >= 4 else '<4'], k)[0]
+    if regime == 'sequeiro':
+        return (classifica(P_SEQ_16_35, p)[0], q(max(D(0), (D(50) - v) * T / 100), 3), kcls)
+    if regime == 'irrigado':
+        return (classifica(P_IRR_16_35, p)[0], q(max(D(0), (D(60) - v) * T / 100), 3), kcls)
+    motivo = 'regime não declarado' if regime == 'não declarado' else 'laudo composto cobre dois regimes'
+    return (motivo, motivo, kcls)
+Pf, Vf, Tf, Kf = D('15.0'), D('45'), D('6.00'), D('60')   # fixture: argila 30 %, V 45 %, T 6,00, K 60 mg/dm³
+chk('G1 sequeiro declarado: P "médio" (Tab. 6) · NC (50 − 45) × 6,00 ÷ 100 = 0,300 · K "adequado"', diag_regime('sequeiro', Pf, Vf, Tf, Kf), ('médio', D('0.300'), 'adequado'))
+chk('G2 irrigado declarado: P "baixo" (Tab. 7) · NC (60 − 45) × 6,00 ÷ 100 = 0,900 · K igual', diag_regime('irrigado', Pf, Vf, Tf, Kf), ('baixo', D('0.900'), 'adequado'))
+chk('G3 regime não declarado (com ou sem setor): P e alvo suspensos; K continua classificado', diag_regime('não declarado', Pf, Vf, Tf, Kf), ('regime não declarado', 'regime não declarado', 'adequado'))
+chk('G4 importado sem setor, irrigado declarado → vale o declarado (o aviso do setor não muda a conta)', diag_regime('irrigado', Pf, Vf, Tf, Kf)[:2], ('baixo', D('0.900')))
+chk('G5 infraestrutura sem uso: setor de pivô cadastrado, sequeiro declarado nesta safra → tabelas de sequeiro', diag_regime('sequeiro', Pf, Vf, Tf, Kf)[:2], ('médio', D('0.300')))
+chk('G6 cobertura parcial: laudo composto sobre 60 ha irrigados + 40 ha de sequeiro → P e alvo suspensos; laudo da zona irrigada → "baixo"',
+    (diag_regime('dois regimes', Pf, Vf, Tf, Kf)[:2], diag_regime('irrigado', Pf, Vf, Tf, Kf)[0]), (('laudo composto cobre dois regimes', 'laudo composto cobre dois regimes'), 'baixo'))
+chk('G7 safra alterada, o mesmo laudo: P1 soja 2026/27 sequeiro → (médio, 0,300); P1 feijão safrinha 2027 irrigado → (baixo, 0,900)',
+    (diag_regime('sequeiro', Pf, Vf, Tf, Kf)[:2], diag_regime('irrigado', Pf, Vf, Tf, Kf)[:2]), (('médio', D('0.300')), ('baixo', D('0.900'))))
+
+# R2-2 · café sem linha conferida: nada de alvo novo pela demonstração
+ALVO_CONFERIDO = {'Soja': D(50), 'Milho': D(50), 'Feijão': D(50), 'Mamão Formosa': D(50)}   # sequeiro: CER04 p. 84; mamão: p. 353
+def alvo_v2(cultura):
+    return ALVO_CONFERIDO.get(cultura, 'sem referência adotada')
+chk('C1 café: alvo de V sem linha conferida → "sem referência adotada", sem NC; contraprova: a demonstração (60 %) daria 0,900 t/ha',
+    (alvo_v2('Café'), q((D(60) - Vf) * Tf / 100, 3)), ('sem referência adotada', D('0.900')))
+
+# R2-5 · época da soja de crescimento indeterminado (SOJ20 p. 148)
+chk('E1 indeterminado: R3 inicial com V8/V10 → na época; R3 inicial sem V8/V10 → fora; determinado em R3 inicial → fora; determinado em R1 → na época',
+    (epoca_soja('R3 inicial', 'indeterminado', 'V9'), epoca_soja('R3 inicial', 'indeterminado', 'V6'), epoca_soja('R3 inicial', 'determinado', 'V9'), epoca_soja('R1', 'determinado')),
+    ('na época', 'fora da época de referência', 'fora da época de referência', 'na época'))
 
 print('\nResumo:', len(OK), 'OK ·', len(FAIL), 'falhas')
 sys.exit(1 if FAIL else 0)

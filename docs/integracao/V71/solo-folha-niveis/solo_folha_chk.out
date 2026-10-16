@@ -101,4 +101,18 @@ OK    F6 Pivô 6: solo K 20 mg/dm³ (T 6,55; argila 30) → "baixo"; folha K 28 
 OK    F7 LAU-2023 coletado em 18/12/2025 é da safra 2025/26 (encerrada): leitura histórica, não vale para 2026/27 → True
 OK    F8 LAU-2048 K 17,4 sem unidade → inconsistente, sem classe → True
 
-Resumo: 98 OK · 0 falhas
+== R2 (revisão do Codex, comentário 6221505413) ==
+OK    V1 coleta 29/02/2024 + 24 meses → validade 28/02/2026 (último dia válido) → 2026-02-28
+OK    V1b em 28/02/2026 ainda vale; em 01/03/2026 vencido (vencido = validade < hoje) → (False, True)
+OK    V1c contraprova: a conta de hoje (solo.js:25) dá 01/03/2026, um dia a mais (executada também no node) → 2026-03-01
+OK    G1 sequeiro declarado: P "médio" (Tab. 6) · NC (50 − 45) × 6,00 ÷ 100 = 0,300 · K "adequado" → ('médio', Decimal('0.300'), 'adequado')
+OK    G2 irrigado declarado: P "baixo" (Tab. 7) · NC (60 − 45) × 6,00 ÷ 100 = 0,900 · K igual → ('baixo', Decimal('0.900'), 'adequado')
+OK    G3 regime não declarado (com ou sem setor): P e alvo suspensos; K continua classificado → ('regime não declarado', 'regime não declarado', 'adequado')
+OK    G4 importado sem setor, irrigado declarado → vale o declarado (o aviso do setor não muda a conta) → ('baixo', Decimal('0.900'))
+OK    G5 infraestrutura sem uso: setor de pivô cadastrado, sequeiro declarado nesta safra → tabelas de sequeiro → ('médio', Decimal('0.300'))
+OK    G6 cobertura parcial: laudo composto sobre 60 ha irrigados + 40 ha de sequeiro → P e alvo suspensos; laudo da zona irrigada → "baixo" → (('laudo composto cobre dois regimes', 'laudo composto cobre dois regimes'), 'baixo')
+OK    G7 safra alterada, o mesmo laudo: P1 soja 2026/27 sequeiro → (médio, 0,300); P1 feijão safrinha 2027 irrigado → (baixo, 0,900) → (('médio', Decimal('0.300')), ('baixo', Decimal('0.900')))
+OK    C1 café: alvo de V sem linha conferida → "sem referência adotada", sem NC; contraprova: a demonstração (60 %) daria 0,900 t/ha → ('sem referência adotada', Decimal('0.900'))
+OK    E1 indeterminado: R3 inicial com V8/V10 → na época; R3 inicial sem V8/V10 → fora; determinado em R3 inicial → fora; determinado em R1 → na época → ('na época', 'fora da época de referência', 'fora da época de referência', 'na época')
+
+Resumo: 110 OK · 0 falhas
