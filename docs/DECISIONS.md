@@ -96,7 +96,7 @@ Ficam em `docs/adr/`, uma por arquivo, no modelo `0000-modelo.md`. As escolhas j
 
 ## Decisões do proprietário de 16/10/2026
 
-Respondidas por Adrianus no canal do Claude, em lista de escolha, e pedidos dele feitos no mesmo dia. Valem como decisão dele (AGENTS §2). O detalhe está no protótipo, em `docs/integracao/V69/decisoes-proprietario-1610.md` e `docs/design-system/padroes-1610.md` (branch `claude/v44-v69-mapa`).
+Respondidas por Adrianus no canal do Claude, em lista de escolha, e pedidos dele feitos no mesmo dia. Valem como decisão dele (AGENTS §2). O detalhe está no protótipo, em `docs/integracao/V69/decisoes-proprietario-1610.md` e `docs/design-system/padroes-1610.md` (branch `claude/v44-v69-mapa`, commit 6b726d6).
 
 | ID | Decisão | Fonte |
 |---|---|---|

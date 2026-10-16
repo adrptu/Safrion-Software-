@@ -10,7 +10,7 @@ Pedido do proprietário em 16/10/2026: "crie uma skill e metodologia de trabalho
 Esta skill é o **método**. As regras ficam numa fonte única, que não se copia para cá:
 - `AGENTS.md` §4;
 - PRD cap. 74;
-- `docs/design-system/` (na branch do protótipo: `padroes-1510.md`, `padroes-1610.md`, `diretrizes-ux.md` e os demais).
+- `docs/design-system/` (na branch do protótipo `claude/v44-v69-mapa`, a partir de 6b726d6: `padroes-1510.md`, `padroes-1610.md`, `diretrizes-ux.md` e os demais; os scripts `ds_inventario.py`, `galeria.py` e `ds_1610_test.py` ficam em `tools/prototipo/v37/gen37/` no mesmo commit).
 
 ## Por que o proprietário precisava corrigir (causas medidas em 16/10)
 
@@ -84,7 +84,7 @@ Pedido do proprietário sobre uma tela vale para **todas as telas do mesmo tipo*
 | Tabela | Planos agronômicos › Atividades do plano, modo Tabela, com seta de abrir e ícones de ordenar e filtrar em cada coluna | 16/10 |
 | Cartões | Atividades do plano, modo Cartões: um cartão por linha, com seta, colunas alinhadas e ⋯ | 16/10 |
 | Cabeçalho de tela | Ordem de Serviço: título, estado e a primária verde à direita (BOT-01) | 09/10 |
-| Barra da tabela | Ordem da TAB-01: busca, filtros rápidos, Agrupar por, Colunas, Expandir, Tabela \| Cartões na ponta | 15/10 |
+| Barra da tabela | TAB-01 em `docs/design-system/padroes-1510.md`: a ordem vale como está lá e não se copia aqui | 15/10 |
 
 ## O que nunca fazer
 
