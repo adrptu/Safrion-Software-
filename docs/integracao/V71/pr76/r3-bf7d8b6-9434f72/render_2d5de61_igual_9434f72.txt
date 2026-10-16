@@ -1,0 +1,2 @@
+$ (build sintético de 2d5de61) && diff -rq _render <_render de 9434f72>
+rc=0 · 181 arquivos em cada _render · sem saída = idênticos byte a byte

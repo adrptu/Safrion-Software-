@@ -36,6 +36,8 @@ Medidas, de `docs/integracao/V71/pr76/scripts/` (o `_base.py` acha o `gen37` pel
 
 Esta rodada repete só as provas afetadas. As demais continuam valendo pela rodada 2.
 
+**HEAD 2d5de61** junta também a ponta dee9dbe1, sem rebase. De bf7d8b6 a dee9dbe1 só mudaram `docs/integracao/V71` e `visoes_v23_codex_test.py`. O build sintético da 2d5de61 é idêntico, byte a byte, ao da 9434f72 (`render_2d5de61_igual_9434f72.txt`: `diff -rq` sem saída, 181 arquivos). Por isso, as provas desta rodada valem para a 2d5de61.
+
 ### Inventário e retrato do layout
 | Medida | Resultado | Arquivo |
 |---|---|---|
