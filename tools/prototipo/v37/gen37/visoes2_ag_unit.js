@@ -1,6 +1,6 @@
 // VISOES-2 · "Agrupar por" no g2lib, sem navegador: node visoes2_ag_unit.js (dados sintéticos)
 // A1–A3: a trilha sobrevive ao endereço com "/", "%", "&", "+" e acento (Codex 6168779649, achado 1).
-// A4–A7: o filtro de Talhão limita os grupos do nível Talhão aos escolhidos, sem perder a O.S. de dois talhões (achado 2).
+// A4–A7: o filtro de Talhão limita os grupos do nível Talhão aos escolhidos, sem perder a O.S. de dois talhões (achado 2); A7 segue a AGR-02.
 // VISOES_G2LIB=<arquivo> roda contra outro g2lib (o anterior, para ver o vermelho).
 const fs = require('fs'), path = require('path');
 const arq = process.env.VISOES_G2LIB || path.join(__dirname, 'g2lib.js');
@@ -34,9 +34,14 @@ const grupos = (f) => { const self = { state: { g2: { g_t: { ag: { d: 'onde', t:
 chk('A4 filtro Talhão = T1: só o grupo T1 (OS-1, área 10); T2 não reaparece', () => JSON.stringify(grupos({ tal: ['T1'] })) === JSON.stringify([['T1', 10, 'OS-1']]), () => grupos({ tal: ['T1'] }));
 chk('A5 filtro T1 + T2: grupos T1 (OS-1) e T2 (OS-1, OS-2), sem T3', () => JSON.stringify(grupos({ tal: ['T1', 'T2'] })) === JSON.stringify([['T1', 10, 'OS-1'], ['T2', 15, 'OS-1,OS-2']]), () => grupos({ tal: ['T1', 'T2'] }));
 chk('A6 sem filtro: T1, T2 e T3 com a O.S. de dois talhões nos dois', () => JSON.stringify(grupos({})) === JSON.stringify([['T1', 10, 'OS-1'], ['T2', 15, 'OS-1,OS-2'], ['T3', 7, 'OS-3']]), () => grupos({}));
-chk('A7 descer em T1 sob o filtro T1: a linha da O.S. continua inteira (os dois talhões no detalhe)', () => {
-  const self = { state: { g2: {} } }, st = { ag: { d: 'onde', t: ['Lagoa', 'T1'] }, f: { tal: ['T1'] } }; self.state.g2.g_t = st;
-  const R = F('g2agRows')(self, SP, st, ROWS); return R.rows.length === 1 && R.rows[0].id === 'OS-1' && R.rows[0].m.tal.length === 2; });
+// A7 (AGR-02, 16/10/2026: o grupo não desce e não há trilha): trilha antiga salva no estado (Lagoa › T1) é ignorada — os grupos são os
+// mesmos de sem trilha — e a O.S. de dois talhões continua inteira (os dois talhões) dentro do grupo T1.
+chk('A7 AGR-02: trilha antiga (Lagoa › T1) ignorada sob o filtro T1 (mesmos grupos de sem trilha) e a O.S. de dois talhões inteira no grupo T1', () => {
+  const st = { ag: { d: 'onde', t: ['Lagoa', 'T1'] }, f: { tal: ['T1'] } }; const self = { state: { g2: { g_t: st } } };
+  const R = F('g2agRows')(self, SP, st, ROWS); const k = R.rows.length === 1 && R.rows[0].kids.find(x => x.id.split('@')[0] === 'OS-1');
+  return JSON.stringify(R.rows.map(r => [r.grp.k, r.v.area, r.kids.map(x => x.id.split('@')[0]).join(',')])) === JSON.stringify(grupos({ tal: ['T1'] }))
+    && !!k && (k.m.tal || []).length === 2; }, () => { const st = { ag: { d: 'onde', t: ['Lagoa', 'T1'] }, f: { tal: ['T1'] } };
+  const R = F('g2agRows')({ state: { g2: { g_t: st } } }, SP, st, ROWS); return R.rows.map(r => [r.grp.k, r.kids.map(x => [x.id, (x.m || {}).tal])]); });
 chk('A8 O.S. sem talhão (lista vazia) entra no grupo "Sem talhão"; Σ das O.S. distintas dos grupos = total', () => {
   const rows = ROWS.concat([{ id: 'OB-9', v: { id: 'OB-9', area: 0 }, s: { id: 'OB-9', tal: '' }, m: { tal: [] }, g: { onde: ['Lagoa', []] } }]);
   const self = { state: { g2: { g_t: { ag: { d: 'onde', t: [] } } } } }; const R = F('g2agRows')(self, SP, { ag: { d: 'onde', t: [] }, agx: 'x' }, rows);
