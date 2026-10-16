@@ -1,0 +1,8 @@
+OK  REV6 prévia no painel da própria Ana sem nenhum papel: "Você sem nenhum papel" com o porquê
+OK  REV6 NEGATIVO Salvar: recusado "Ninguém retira todos os próprios papéis", nada gravado; o Ver como segue Ana
+OK  REV5 outra aba entrega no Estoque (19 registros): o detalhe aberto segue o de Lucas (01/08/2026), o mesmo registro
+OK  REV1 NEGATIVO Ver como Zé (mecânico) estorna a CG-2109 (Santa Rita) pela tela: recusado "decisão de Rui (almoxarife)", a carga segue Recebida, nada gravado
+OK  REV1 Ver como Rui estorna: a carga grava "Rui (almoxarife)" e o CF-04 mostra Rui (almoxarife) · Estornar carga
+OK  REV4 Ver como Zé encerra a OS-0508: o aviso diz por quem; o CF-04 passa a 19 registros · 4 autores com "Encerrar O.S. · CMD-10" por Zé (mecânico)
+OK  REV sem erro de JS
+RESULTADO: OK 7/7

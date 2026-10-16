@@ -1,0 +1,64 @@
+V1 abriu: {'qtd': '', 'cond': '[object Object]', 'condTxt': '[object Object]', 'condOpts': ['[object Object]', 'Apta · volta ao disponível', 'Bloqueada para inspeção · vai para quarentena']} | cenário salvo: vazio (CEN0)
+OK    V1 a abertura não presume quantidade (vazia) 
+OK    V1 a abertura não presume condição (nenhuma condição válida escolhida) 
+OK    V1 a custódia aparece só na dica (500 kg com Paula) 
+FALHA V1 o seletor de condição mostra um texto legível ao abrir (sem "[object Object]") · ['[object Object]', ['[object Object]', 'Apta · volta ao disponível', 'Bloqueada para inspeção · vai para quarentena']]
+V1 salvar sem mexer: Corrija os campos destacados; o que você preencheu foi mantido. | Informe quantidade conferida. | Informe condição. | MV devolução: [] | REQ-031: None
+OK    V1 salvar sem mexer é recusado e o formulário continua aberto 
+OK    V1 a recusa diz o que corrigir (quantidade e condição) 
+OK    V1 cenário salvo inalterado após a recusa (sem MV, custódia 500) 
+V1 480 Apta (duplo clique): fechou | MV: [('MV-1001', 480, True)] | REQ-031: {'custodia': 20, 'devolvido': 1480, 'entregue': 5000} | M26-07: {'fisico': 90480, 'quarentena': 0}
+OK    V1 480 + Apta grava um MV de devolução de 480 apto 
+OK    V1 custódia 500 → 20 kg 
+OK    V1 duplo clique no Salvar não duplica (um MV, um movimento novo) 
+V1 repetir 480: Corrija os campos destacados; o que você preencheu foi mantido. | Acima da custódia: só 20 kg estão com Paula.
+OK    V1 reenviar 480 com custódia 20 é recusado, com a correção, sem mudar o cenário 
+OK    V1 sem erro de script 
+V2 abriu NF 4533: {'ped': 'PC-090 · Semente de soja 58 W · Coop. Vale', 'pedDis': True, 'nfRO': True}
+OK    V2 NF 4533 abre presa ao PC-090 (pedido só leitura) 
+OK    V2 número da NF de origem só leitura 
+V2 troca para PC-096 (forçada no DOM): Corrija os campos destacados; o que você preencheu foi mantido. | Item diferente do pedido: item Semente de soja 58 W ≠ Caixa de mamão Formosa 10 kg; unidade kg ≠ un; fornecedor Coop. Vale ≠ Embalagens Açu. Confira a nota e o pedido de origem; nada foi gravado. | Item diferente do pedido: item Semente de soja 58 W ≠ Caixa de mamão Formosa 10 kg; unidade kg ≠ un; fornecedor Coop. Vale ≠ Embalagens Açu. Confira a nota e o pedido de origem; nada foi gravado. | movimentos de recebimento: []
+OK    V2 trocar para PC-096 e salvar é recusado com "Item diferente do pedido" 
+OK    V2 a recusa diz o que diverge (item, unidade e fornecedor) 
+OK    V2 cenário salvo inalterado (nenhum MV de recebimento) 
+     nota: V2: estReceber não está no escopo global da página; comando direto coberto pelo teste Node do Codex
+OK    V2 sem erro de script 
+V3 NF 4533 coerente: fechou | MV: [('MV-1001', 20000, 'kg', 'Semente de soja 58 W', 'S58-0926')] | S58-0926: {'fisico': 20000, 'quarentena': 0}
+OK    V3 NF 4533 coerente (PC-090, 20.000 kg) grava um recebimento de 20.000 kg no S58-0926 
+V3 primária depois: ['Conferir NF 7731']
+V3 devoluções: [(480, True), (20, False)] | REQ-031: {'custodia': 0, 'devolvido': 1500, 'entregue': 5000} | M26-07: {'fisico': 90500, 'quarentena': 20} | obs exigida: Corrija os campos destacados; o que você preencheu foi mantido. | Descreva a condição (ex.: embalagem aberta).
+OK    V3 devolução normal: 480 apta + 20 bloqueada (com observação) → custódia 0 
+OK    V3 bloqueada sem observação é recusada e a de 20 kg vai para a quarentena do M26-07 
+OK    V3 sem erro de script 
+V4 Tab até a seção: 14 {'tag': 'BUTTON', 'id': '', 'txt': 'Receba devoluções', 'vis': True, 'noDlg': False, 'outline': 'solid 2px', 'sombra': 'none'}
+V4 Tab até o gatilho: 1 {'tag': 'BUTTON', 'id': '', 'txt': 'Receber devolução da REQ-031', 'vis': True, 'noDlg': False, 'outline': 'solid 2px', 'sombra': 'none'}
+OK    V4 gatilho "Receber devolução da REQ-031" alcançável por Tab, com foco visível 
+V4 Enter abriu: True | foco: {'tag': 'BUTTON', 'id': '', 'txt': 'Receber devolução da REQ-031', 'vis': True, 'noDlg': False, 'outline': 'solid 2px', 'sombra': 'none'}
+FALHA V4 Enter abre o diálogo e o foco entra nele · {'tag': 'BUTTON', 'id': '', 'txt': 'Receber devolução da REQ-031', 'vis': True, 'noDlg': False, 'outline': 'solid 2px', 'sombra': 'none'}
+V4 Esc: False {'tag': 'BUTTON', 'id': '', 'txt': 'Receber devolução da REQ-031', 'vis': True, 'noDlg': False, 'outline': 'solid 2px', 'sombra': 'none'}
+FALHA V4 Esc fecha sem mudança e o foco volta ao gatilho · {'tag': 'BUTTON', 'id': '', 'txt': 'Receber devolução da REQ-031', 'vis': True, 'noDlg': False, 'outline': 'solid 2px', 'sombra': 'none'}
+V4 Enter no Salvar vazio: 6 Corrija os campos destacados; o que você preencheu foi mantido. | Informe quantidade conferida. | Informe condição. | foco: {'tag': 'BUTTON', 'id': '', 'txt': 'Salvar', 'vis': True, 'noDlg': True, 'outline': 'solid 2px', 'sombra': 'rgba(30, 122, 76, 0.25) 0px 1px 2px 0px'}
+OK    V4 Salvar vazio pelo teclado é recusado, o foco fica no diálogo e o cenário não muda 
+V4 campos: {'qtd': [2, '480', True], 'cond': [1, 'Apta · volta ao disponível', True], 'salvar': [3, True]}
+V4 Espaço no Salvar: fechou | MV: [(480, True)] | REQ-031: {'custodia': 20, 'devolvido': 1480, 'entregue': 5000} | foco depois: {'tag': 'BUTTON', 'id': '', 'txt': 'Receber devolução da REQ-031', 'vis': True, 'noDlg': False, 'outline': 'solid 2px', 'sombra': 'none'}
+OK    V4 só teclado: 480 digitado, Apta pela seta, Espaço no Salvar → MV 480 e custódia 20 
+OK    V4 foco visível nos campos e no Salvar 
+OK    V4 depois de salvar o foco volta ao gatilho (ou à linha da REQ-031) 
+OK    V4 sem erro de script 
+V5 largura: {'doc': 390, 'body': 390, 'w': 390}
+OK    V5 EST a 390 px sem rolagem horizontal da página 
+V5 alvos (L×A): {'faixa': [302, 44], 'secao': [372, 44], 'gatilho': [224, 34], 'qtd': [320, 39], 'cond': [342, 41], 'salvar': [69, 44], 'cancelar': [86, 44], 'fechar': [32, 32]} | diálogo: [0, 390, 390]
+OK    V5 toque abre o diálogo dentro da janela 
+FALHA V5 alvos tocados do diálogo ≥ 44 px: quantidade, condição, Salvar · {'qtd': [320, 39], 'cond': [342, 41], 'salvar': [69, 44], 'cancelar': [86, 44], 'fechar': [32, 32]}
+FALHA V5 alvos tocados da tela ≥ 44 px: faixa de seções, seção, gatilho · {'faixa': [302, 44], 'secao': [372, 44], 'gatilho': [224, 34]}
+V5 toque 480 Apta: fechou | MV: [(480, True)] | REQ-031: {'custodia': 20, 'devolvido': 1480, 'entregue': 5000} | largura com diálogo: {'doc': 390, 'w': 390}
+OK    V5 toque: 480 + Apta grava MV 480 e custódia 20; sem rolagem lateral com o diálogo aberto 
+V5 NF 4533 a 390: ['PC-090 · Semente de soja 58 W · Coop. Vale', True, 0, 390, 390]
+OK    V5 NF 4533 a 390 px: pedido só leitura e diálogo dentro da janela 
+OK    V5 sem erro de script 
+V6 base gravou: 2 movimentos · [('MV-1001', 'devolucao', 480, 'MAP 11-52'), ('MV-1002', 'recebimento-nf', 1000, 'Caixa de mamão Formosa 10 kg')] | REQ-031: {'custodia': 20, 'devolvido': 1480, 'entregue': 5000}
+V6 PR abriu o cenário da base: 2 movimentos | igual ao salvo: True True | seções: [585, 1256, 1160, 3315, 466, 393] | erros: []
+OK    V6 cenário salvo pela base abre no PR sem perda (movimentos, requisições e lotes iguais) e sem erro 
+V6 continua no PR: REQ-031 OS-0417 MAP 11-52 20 kg Paula | após 20 apta: {'custodia': 0, 'devolvido': 1500, 'entregue': 5000} 3 | aberto: None
+OK    V6 no PR, a devolução dos 20 kg restantes do cenário da base grava sobre ele (prefixo preservado, custódia 0) 
+RESULTADO: 34/39 · FALHAS: V1 o seletor de condição mostra um texto legível ao abrir (sem "[object Object]") ; V4 Enter abre o diálogo e o foco entra nele ; V4 Esc fecha sem mudança e o foco volta ao gatilho ; V5 alvos tocados do diálogo ≥ 44 px: quantidade, condição, Salvar ; V5 alvos tocados da tela ≥ 44 px: faixa de seções, seção, gatilho

@@ -1,0 +1,14 @@
+OK    · sem erro JS
+
+OK 1 · FALHAS: nenhuma
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr81base/tools/prototipo/v37/gen37/verif_ce_est.py", line 15, in <module>
+    v.chk('novo: PC-088 (fertilizante) → Sem validade travado', J("document.querySelector('#fx_g_rec_val').value")=='Sem validade' and J("document.querySelector('#fx_g_rec_val').readOnly||document.querySelector('#fx_g_rec_val').disabled"))
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr81base/tools/prototipo/v37/gen37/verif_ce_lib.py", line 20, in J
+    def J(s,x): return s.c.js(x)
+                       ^^^^^^^^^
+  File "/tmp/claude-0/pr81base/tools/prototipo/v37/gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

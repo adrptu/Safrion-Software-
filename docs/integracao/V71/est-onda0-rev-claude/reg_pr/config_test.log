@@ -1,0 +1,83 @@
+OK  A15 navegação: Configurações é o último módulo da barra (antes de Outros acessos), marcado no CF-01; a tela de entrada ("‹ Configurações") tem no máximo 4 cartões na ordem Usuários e alçadas · Auditoria · Integrações · Assinatura, e o cartão abre o CF-01
+OK  CF-01 seed: "14 com acesso · 1 sem acesso" (Igor e Marta do BEN-1; Otávio e Dora da v56 entram) e a primária "Convidar pessoa"; sem erro de JS
+OK  A14 as duas grades têm filtro rápido e ordenação/filtro por coluna e um campo de busca só, para as duas; "%" na célula da AL-05
+OK  AL-01 alinhada ao comando (CONF-D10): gestor · Ana, editável; nenhum "Caio (PCP)" como liberador
+OK  painel da AL-01: definição, ordens afetadas (6 em A liberar) e versões; com o painel aberto, nenhuma primária fora dele
+OK  prévia: muda gestor → PCP, Caio ganha, Ana perde, vale na hora; primária do painel "Salvar alçada" (uma só)
+OK  AL-01 v2 vigente: PCP · Caio; 1 evento; painel fechado
+OK  F13 a linha da AL-01 gravada fica realçada (g2flash)
+OK  O.S. com AL-01 = PCP: Ana vê "Aprovar v1" (não "Liberar para execução")
+OK  Ana aprova: selo "Aprovada v1 · aguarda liberação" e a ordem segue em A liberar
+OK  Ver como Caio (PCP): libera a v1 aprovada; só o CMD-06 (aviso cita a aprovação anterior)
+OK  F1 trilha (mais recente primeiro): CMD-06, CMD-42 e a mudança da AL-01 na ordem em que foram gravados, mesmo no mesmo minuto
+OK  F1 coluna Quando em ordem crescente: mudança da AL-01, CMD-42, CMD-06 (ordena pela ordem da trilha, não só pela data)
+OK  AL-05 20 → 25 % por Ana: prévia "aguarda 2º aprovador" (amplia o seu poder); OS-0421 70 → 87,5 ha; primária "Enviar para confirmação"
+OK  AL-05 "Aguarda 2º aprovador"; o cabeçalho diz "AL-05 aguarda confirmação"; Ana não confirma (primária segue "Convidar pessoa")
+OK  Ana concede gestor a Caio pelo painel da pessoa
+OK  F13 a linha de Caio fica realçada depois de "Salvar papéis"
+OK  F12 Ver como Rui na AL-05 pendente: "Confirma ou recusa: Caio (gestor)", sem mandar à própria proponente (Ana)
+OK  Ver como Caio: a primária vira "Confirmar AL-05"
+OK  F7 painel da AL-05 para Caio: "Recusar mudança" como secundária e uma só primária "Confirmar mudança"
+OK  Caio confirma: AL-05 v2 vigente com 25 %
+OK  F11 Ver como Caio (gestor): o painel dele não oferece "Desativar acesso"
+OK  ERRO R3: Ana concede direção a si mesma → recusa com o motivo no painel; nada gravado
+OK  ERRO R5: Ana retira o próprio gestor (última gestora) → recusa; nada gravado
+OK  R4 no painel: "agrônomo" desabilitado para Caio, com o motivo (exige CREA válido no CD-04)
+OK  REPETIÇÃO: duplo clique em "Salvar papéis" = 1 evento (chave de quem inicia)
+OK  A8 desativar Paula: cabeçalho vermelho "AL-12 sem titular" e primária "Resolver AL-12"; Paula fora do Ver como
+OK  A8 O.S.: ninguém diz "Paula (conferência) decide"
+OK  Resolver AL-12: lista curta com quem tem a habilidade "Conferir" primeiro (Caio, Rui)
+OK  um toque escolhe: primária "Conceder conferência a Rui"
+OK  AL-12 volta a ter titular (Rui); cabeçalho sem pendência
+OK  F9 Ana retira o próprio agrônomo: a prévia avisa AL-02 sem titular e a primária vira "Resolver AL-02"
+OK  F9 painel da AL-02 sem candidato: diz por quê e o caminho (R3: outra pessoa com gestor; conceda gestor antes; CREA no CD-04); botão com o motivo
+OK  Convidar pessoa → Beto (lista curta) → painel com "Convidar (simulado)" como única primária
+OK  A9 Beto com acesso Ativo, só app de campo; cabeçalho "15 com acesso · 0 sem acesso"; primária desabilitada "Todas as pessoas do cadastro têm acesso"
+OK  CD-04 lê o acesso de Configurações: Beto sem "Sem acesso ao app"; no formulário, origem "Acesso ao app: Ativo desde 26/09/2026" com link; sem campo de acesso
+OK  perfil Rui (sem gestor): primária desabilitada com "decisão de Ana (gestora)"
+OK  perfil Rui: papéis só leitura e o motivo no painel
+OK  CF-01 sem erro de JS na jornada
+OK  CF-04 seed: "18 registros · 3 autores · lidos dos comandos gravados; nada é digitado aqui"; uma primária "Baixar trilha (CSV)"
+OK  filtro rápido por mês: Todos 18 · jul/2026 12 · ago/2026 3 · jun/2026 2 · set/2026 1
+OK  A11 CSV = as 12 linhas de jul/2026 (+ cabeçalho), sem segredo; a exportação vira registro
+OK  a própria exportação aparece na trilha: 19 registros
+OK  F13 a linha da exportação fica realçada (g2flash)
+OK  F16 duplo clique em "Baixar trilha": 1 registro e 1 arquivo
+OK  filtro por pessoa (Quem): Provedor → 2 registros de 20 (faturas pagas pelo provedor simulado; a 2ª exportação, do F16, entra na conta)
+OK  detalhe só leitura: de onde vem a data (simulada da cobrança), registro de origem e "A trilha não se edita"
+OK  filtro sem resultado: "Nenhuma linha corresponde aos filtros" e a primária desabilitada "Nenhum registro para baixar"
+OK  ato do CF-01 entra na trilha na hora: "Alterar alçada · AL-05" por Ana (gestora), 26/09/2026 hh:mm, web
+OK  A12 nenhum texto com cara de segredo no CF-04
+OK  CF-04 sem erro de JS
+OK  CF-03 seed: selo "Demonstração · nenhuma conexão real", 5 conexões, fila do ERP 0, uma primária "Sincronizar agora (simulado)"
+OK  fila do ERP 1 (a entrega; as 3 reservas ficam fora)
+OK  painel do ERP: quem escreve cada objeto, ambiente de demonstração, credencial "Não configurada" mascarada, pendência com o movimento da entrega
+OK  sincronizar envia 1; de novo, nada é reenviado; cada sincronização é um registro
+OK  REPETIÇÃO: duplo clique em "Sincronizar" = 1 registro (chave do desenho)
+OK  F13 a linha do ERP fica realçada depois de sincronizar
+OK  F15 app de campo: "pelo sinal do aparelho (simulado)", sem "tempo real"
+OK  app de campo: "Com sinal (simulado)", nunca "online" ou "ao vivo"
+OK  A12 nenhum texto com cara de segredo no CF-03
+OK  CF-03 sem erro de JS
+OK  A9 CF-05 conta as pessoas com acesso do estado de Configurações (14 no seed, com Igor, Marta, Otávio e Dora)
+OK  A18 Ver como Rui: pagar a fatura é recusado "decisão de Ana (gestora)" e nada é pago
+OK  A18 com Ana: paga e o evento grava "por Ana (gestora)"
+OK  A18 backoffice com o Ver como em Rui: conciliar segue com "Admin plataforma" (sem AL-15)
+OK  o pagamento entra na trilha com Ana (gestora) e a data simulada da cobrança
+OK  CF-05 sem erro de JS
+OK  REV6 prévia no painel da própria Ana sem nenhum papel: "Você sem nenhum papel" com o porquê
+OK  REV6 NEGATIVO Salvar: recusado "Ninguém retira todos os próprios papéis", nada gravado; o Ver como segue Ana
+OK  REV5 outra aba entrega no Estoque (19 registros): o detalhe aberto segue o de Lucas (01/08/2026), o mesmo registro
+OK  REV1 NEGATIVO Ver como Zé (mecânico) estorna a CG-2109 (Santa Rita) pela tela: recusado "decisão de Rui (almoxarife)", a carga segue Recebida, nada gravado
+OK  REV1 Ver como Rui estorna: a carga grava "Rui (almoxarife)" e o CF-04 mostra Rui (almoxarife) · Estornar carga
+OK  REV4 Ver como Zé encerra a OS-0508: o aviso diz por quem; o CF-04 passa a 19 registros · 4 autores com "Encerrar O.S. · CMD-10" por Zé (mecânico)
+OK  REV sem erro de JS
+OK  REV12a duplo clique real (120 ms) em "Baixar trilha": 1 exportação e 1 arquivo
+OK  REV12b referência: um novo clique depois do duplo clique é outra exportação (+1)
+OK  REV12c F13: outra aba entrega no Estoque e o realce segue na linha da exportação gravada (não pula de linha)
+OK  REV12d duplo clique real em "Sincronizar agora (simulado)": 1 registro
+OK  REV13a CF-04 a 390 px, rolado até o fim à direita: a 1ª coluna (presa) mostra Quando e Quem ("Ana (gestora)")
+OK  REV13b Ver como Rui a 390 px: a primária desabilitada diz no rótulo "decisão de Ana (gestora)"
+OK  REV13c painel da Paula a 390 px: "Salvar papéis" à vista (rodapé preso no fim do painel)
+OK  REV14a abrir o painel da Paula põe o foco dentro dele, e Esc fecha sem um Tab antes
+OK  REV14b Resolver AL-12: um só ponto de Tab no grupo; seta para baixo marca e foca o 2º candidato

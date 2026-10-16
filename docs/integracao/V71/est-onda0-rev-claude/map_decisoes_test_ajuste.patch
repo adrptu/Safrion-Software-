@@ -1,0 +1,20 @@
+--- a/tools/prototipo/v37/gen37/map_decisoes_test.py
++++ b/tools/prototipo/v37/gen37/map_decisoes_test.py
+@@ -8,7 +8,7 @@
+ da máquina (CTL-1: primário "Acompanhar OM-0233" → MA-04, não a PL-05 fixa); os painéis não repetem destino; "Receber sobras" leva ao Estoque do menu; a devolução recebida pela tela EST e a liberação
+ feita pela tela O.S. (cenário compartilhado) chegam ao mapa. Uso: python3 map_decisoes_test.py (≈ 30 s)."""
+ import sys, os, time, subprocess, json
+-HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
++HERE=os.environ.get('GEN') or os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
+ from cdp import Chrome
+ from journeys import free
+ R=os.path.join(HERE,'_render'); p=free()
+@@ -80,7 +80,7 @@
+         l7=='T7: sem ordem' and 'OS-0423' not in t7 and r=='ok' and pr==['Resolver conflito',H7] and [h for _,h in lk].count(H7)==1, [l7,t7[:160],r,pr,lk])
+     tap('T7')
+     # 8-9 · a devolução recebida pela tela Estoque tira custódia, selo e atalho da OS-0417 no mapa
+-    c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/EST.dc.html',wait=1.2); clk('Receba devoluções'); clk('Receber devolução da REQ-031'); clk('Salvar','aside[role=dialog]'); t=T()
++    c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/EST.dc.html',wait=1.2); clk('Receba devoluções'); clk('Receber devolução da REQ-031'); J("(()=>{const s=(q,v)=>{const i=document.querySelector(q); const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,v); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));}; s('#fx_g_dev_qtd','500'); s('#fx_g_dev_cond','Apta · volta ao disponível'); return 1;})()"); time.sleep(.4); clk('Salvar','aside[role=dialog]'); t=T()   # EST-ONDA0 (E1): quem confere informa quantidade e condição
+     chk('8 Estoque: devolução da REQ-031 recebida (500 kg → 0 kg)', '500 kg → 0 kg' in t, t)
+     mapa('O.S./prazos'); tap('P1'); t1=pan('P1'); i=t1.find('OS-0417'); o17=t1[i:i+260]
+     chk('9 mapa (Ordens de serviço) após a devolução: OS-0417 sem "Sobras a receber", sem custódia e sem "Receber sobras"',

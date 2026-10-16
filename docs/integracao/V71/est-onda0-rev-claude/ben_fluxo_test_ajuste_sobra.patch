@@ -1,0 +1,42 @@
+--- a/tools/prototipo/v37/gen37/ben_fluxo_test.py
++++ b/tools/prototipo/v37/gen37/ben_fluxo_test.py
+@@ -57,7 +57,7 @@
+ Capturas em _probe/ben_*.png. Dados sintéticos (SAFRION_DADOS=sintetico)."""
+ import sys, os, time, json
+ os.environ.setdefault('SAFRION_DADOS', 'sintetico')
+-HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
++HERE = os.environ.get('GEN') or os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
+ from cadc_lib import T
+ import ui37; PUB = ui37.BEN_PUBLICADO   # v55: com o BEN fora da navegação o Estoque não aponta a tela oculta (sem "Voltar à OB-…")
+ TODOS = ('fluxo', 'erros', 'celular', 'revisao', 'roteiro', 'roteiro390', 'complemento', 'lotes', 'duplo', 'criada', 'teclado', 'cancelar', 'faixa390', 'cadeia', 'cadeia390',
+@@ -887,12 +887,14 @@
+         perfil('Rui'); r0 = rev(); r = tocar('Receber a devolução da OB-0113 no Estoque', 'aside', nav=True); time.sleep(.6)
+         sec = J(SECAO); q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value"); pf = pan(); pr = J("[...document.querySelectorAll('main button')].filter(VIS).map(b=>N(b.innerText)).filter(x=>/^Receber devolução/.test(x))")
+         t.chk(T_ + ' 2 · o atalho (sem gravar) abre o Estoque em Receba devoluções com o formulário da REQ-041 e 139 (nunca 869); o texto diz a origem, a conta da sobra, a OB-0112, o lote e o que volta reservado',
+-              r == 'ok' and rev() == r0 and sec == ['Receba devoluções'] and q == '139' and 'Sobra da OB-0113 para a OB-0112: 139 un = 869 un em custódia − 730 un que a OB-0113 ainda embala (7.300 kg' in pf
++              r == 'ok' and rev() == r0 and sec == ['Receba devoluções'] and q == '' and 'Sobra da OB-0113 para a OB-0112: 139 un = 869 un em custódia − 730 un que a OB-0113 ainda embala (7.300 kg' in pf
+               and 'CX26-02' in pf and 'volta reservado à OB-0113' in pf and 'dispensad' not in pf.lower(), [r, rev(), r0, sec, q, pf[:700], pr])
++        setv('#fx_g_dev_qtd', '139'); setv('#fx_g_dev_cond', 'Apta · volta ao disponível')   # EST-ONDA0 (E1): quem confere informa
+         J("__cen.cenMudar(null, c => __ben.benSaida(c, 'OB-0113', { fluxo: 'Descarte', destino: 'Compostagem', kg: 100 }, 'Igor'))"); r1 = rev()
+         r = tocar('Salvar', 'aside[role=dialog]'); pf = pan(); q = J("(document.querySelector('#fx_g_dev_qtd')||{}).value"); st = cen("c.reqs['REQ-041'].itens[0].custodia")
+         t.chk(T_ + ' 3 · outra aba registra um descarte de 100 kg na OB-0113 (a sobra passa a 149): o Salvar é recusado sem gravar, com o que mudou, e o formulário traz a sobra nova',
+-              r == 'ok' and rev() == r1 and st == 869 and 'mudou depois que você abriu (sobra 139 → 149 un)' in pf and q == '149', [r, rev(), r1, st, q, pf[:600]])
++              r == 'ok' and rev() == r1 and st == 869 and 'mudou depois que você abriu (sobra 139 → 149 un)' in pf and q == '' and 'Sobra da OB-0113 para a OB-0112: 149 un' in pf, [r, rev(), r1, st, q, pf[:600]])
++        setv('#fx_g_dev_qtd', '149'); setv('#fx_g_dev_cond', 'Apta · volta ao disponível')   # EST-ONDA0 (E1)
+         J("__cen.cenMudar(null, c => __ben.benSaida(c, 'OB-0113', { fluxo: 'Produto', classe: 'A', cx: 10, bruto: 106 }, 'Igor'))"); r1 = rev()
+         r = tocar('Salvar', 'aside[role=dialog]'); tc = toast(); st = cen("(()=>{ const it=c.reqs['REQ-041'].itens[0]; return [it.custodia, Math.max(0,it.solicitado-(it.dispensado||0)-it.consumido-it.custodia), c.lotes['Caixa de mamão Formosa 10 kg|CX26-02'].reservado]; })()")
+         vt = J("(()=>{ const a=[...document.querySelectorAll('main a')].filter(VIS).find(x=>N(x.innerText)==='Voltar à OB-0112'); return a?a.getAttribute('href'):null; })()")
+@@ -915,11 +917,12 @@
+         carrega(fx, W, H); perfil('Rui'); ir('EST.dc.html', w=W, h=H)
+         if W < 500: tocar('Confira recebimentos', 'nav[aria-label="Seções do estoque"]')
+         tocar('Receba devoluções', 'nav[aria-label="Seções do estoque"]'); rr = tocar('REQ-041'); q6 = J("(document.querySelector('#fx_g_dev_qtd')||{}).value")
++        setv('#fx_g_dev_qtd', '139'); setv('#fx_g_dev_cond', 'Apta · volta ao disponível')   # EST-ONDA0 (E1)
+         J("__cen.cenMudar(null, c => __cen.cenDevolver(c, 'REQ-041', 'Caixa de mamão Formosa 10 kg', 139, true, 'Rui'))"); r1 = rev()
+         r = tocar('Salvar', 'aside[role=dialog]'); pf = pan(); q7 = J("(document.querySelector('#fx_g_dev_qtd')||{}).value")
+         st = cen("[c.reqs['REQ-041'].itens[0].custodia, c.movs.filter(m=>m.req==='REQ-041'&&m.tipo==='devolucao').map(m=>m.qtd)]")
+         t.chk(T_ + ' 6 · revisão A8: aberto pela lista com 139; a outra aba já recebeu as 139: o Salvar é recusado sem gravar, diz o que mudou e o formulário vem sem sobra',
+-              rr == 'ok' and q6 == '139' and r == 'ok' and rev() == r1 and st == [730, [139]] and 'mudou depois que você abriu' in pf and q7 in ('', None), [rr, q6, r, rev(), r1, st, q7, pf[:500]])
++              rr == 'ok' and q6 == '' and r == 'ok' and rev() == r1 and st == [730, [139]] and 'mudou depois que você abriu' in pf and q7 in ('', None), [rr, q6, r, rev(), r1, st, q7, pf[:500]])
+         shot('sobra_' + str(W)); t.chk(T_ + ' sobra sem erro de JS', not t.errs(), t.errs()); tamanho(1440, 1000)
+     if 'sobra' in MODOS: sobra(1440)
+     if 'sobra390' in MODOS: sobra(390)

@@ -1,0 +1,9 @@
+pr_map_decisoes_ajuste | rc=0 | 66s | (sem RESULTADO) 18 ok · 0 falhas []
+base_map_decisoes_ajuste | rc=0 | 72s | (sem RESULTADO) 18 ok · 0 falhas []
+base_ben_sobra | rc=0 | 65s | RESULTADO: OK 9/9
+base_ben_conferencia | rc=0 | 137s | RESULTADO: OK 8/8
+base_ben_cadeia390 | rc=0 | 148s | RESULTADO: OK 9/9
+base_ben_sobra390 | rc=0 | 65s | RESULTADO: OK 9/9
+base_ben_conferencia390 | rc=0 | 137s | RESULTADO: OK 8/8
+pr_ben_unit | rc=0 | 3s | RESULTADO: OK 206/206
+FIM

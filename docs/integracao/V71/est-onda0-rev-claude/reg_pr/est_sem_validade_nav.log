@@ -1,0 +1,9 @@
+  OK  1440: data anterior fica oculta pelo campo sem validade
+  FALHA 1440: troca de pedido permite recebimento válido · Corrija os campos destacados; o que você preencheu foi mantido. | Item diferente do pedido: item Semente de soja 58 W ≠ KCl 60%; fornecedor Coop. Vale ≠ Fertisul. Confira a nota e o pedido de origem; nada foi gravado. | Item diferente do pedido: item Semente de soja 58 W ≠ KCl 60%; fornecedor Coop. 
+  FALHA 1440: soma5 preservando ausência de validade
+  OK  1440: sem erro JS
+  OK  390: data anterior fica oculta pelo campo sem validade
+  FALHA 390: troca de pedido permite recebimento válido · Corrija os campos destacados; o que você preencheu foi mantido. | Item diferente do pedido: item Semente de soja 58 W ≠ KCl 60%; fornecedor Coop. Vale ≠ Fertisul. Confira a nota e o pedido de origem; nada foi gravado. | Item diferente do pedido: item Semente de soja 58 W ≠ KCl 60%; fornecedor Coop. 
+  FALHA 390: soma5 preservando ausência de validade
+  OK  390: sem erro JS
+RESULTADO: 4/8 ok · FALHAS: 1440: troca de pedido permite recebimento válido; 1440: soma5 preservando ausência de validade; 390: troca de pedido permite recebimento válido; 390: soma5 preservando ausência de validade

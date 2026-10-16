@@ -1,0 +1,12 @@
+OK  REV12a duplo clique real (120 ms) em "Baixar trilha": 1 exportação e 1 arquivo
+OK  REV12b referência: um novo clique depois do duplo clique é outra exportação (+1)
+OK  REV12c F13: outra aba entrega no Estoque e o realce segue na linha da exportação gravada (não pula de linha)
+OK  REV12d duplo clique real em "Sincronizar agora (simulado)": 1 registro
+OK  REV13a CF-04 a 390 px, rolado até o fim à direita: a 1ª coluna (presa) mostra Quando e Quem ("Ana (gestora)")
+OK  REV13b Ver como Rui a 390 px: a primária desabilitada diz no rótulo "decisão de Ana (gestora)"
+OK  REV13c painel da Paula a 390 px: "Salvar papéis" à vista (rodapé preso no fim do painel)
+OK  REV14a abrir o painel da Paula põe o foco dentro dele, e Esc fecha sem um Tab antes
+OK  REV14b Resolver AL-12: um só ponto de Tab no grupo; seta para baixo marca e foca o 2º candidato
+OK  REV14c "Confirmar dispensa" grava 1 CMD-47 com a chave gerada ao abrir o painel (W-DSP-OS-0421-…)
+OK  REV2 sem erro de JS
+RESULTADO: OK 11/11

@@ -1,0 +1,12 @@
+OK    1 cabeçalho e indicador: 2 a liberar (OS-0418 e OS-0430), sem "decisões" 
+OK    2 Integrado: T1 amarelo "OS-0430 a liberar" (mesma contagem do cabeçalho) 
+OK    3 Integrado T1: "NESTE TALHÃO" com Satélite, Solo, Pragas e doenças, Ordens de serviço, Insumos, Irrigação, Estádio, Colheita e produtividade, Carência e destino e Custos (um "Ver …" cada), sem O.S. nem recolher · "Ver ordens" troca para Ordens de serviço com o T1 aberto 
+OK    4 T1 (Ordens de serviço): OS-0430 A liberar · primário "Liberar para execução" · "Ajustar antes de liberar" → O.S. da OS-0430 · rodapé "Nova O.S. neste talhão" · sem revisão · nenhum destino repetido 
+OK    5 P1: OS-0418 com Liberar bloqueado pelo Estoque · primário "Ajustar antes de liberar" → O.S. da OS-0418 · OS-0417: "Receber devolução no Estoque" (EST) · sem IN-02det · nenhum destino repetido 
+OK    6 T4: OS-0420 parada só pela máquina · primário "Acompanhar OM-0233" → MA#om=OM-0233 · ordem completa → CA-01x-os0420 · sem IN-02x-os0420 · sem PL-05 · nenhum destino repetido 
+OK    7 T7: sem ordem na camada Ordens de serviço · na camada Irrigação, um só botão "Resolver conflito" (primário) → IR-03det#OS-0423:conflito 
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr81/docs/integracao/V71/est-onda0-rev-claude/map_decisoes_test_ajuste.py", line 83, in <module>
+    c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/EST.dc.html',wait=1.2); clk('Receba devoluções'); clk('Receber devolução da REQ-031'); setv('#fx_g_dev_qtd','500'); setv('#fx_g_dev_cond','Apta · volta ao disponível'); clk('Salvar','aside[role=dialog]'); t=T()   # EST-ONDA0 (E1): quem confere informa quantidade e condição
+                                                                                                                                            ^^^^
+NameError: name 'setv' is not defined. Did you mean: 'set'?

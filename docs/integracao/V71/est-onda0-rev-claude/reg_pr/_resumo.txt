@@ -1,0 +1,32 @@
+est_cenario_test.py | rc=1 | 40s | RESULTADO: 10/15 ok · FALHAS: devolução apta de 20 L: custódia 320 → 300 L, lote G26-14 880 → 900 L sem bloqueio; contagem cega (saldo oculto) de 870 L no G26-14: ajuste −30 L aguardando o gestor; físico continua 900 L; movimentos: 3 reservas, 3 entregas, confirmação no app, 2 devoluções, liberação e ajuste, com origem Web/App; consumo do app sem sinal: movimento "Aguardando sinal"; Glifosato segue consumido 0 L e custódia 300 L até o envio; OS-0430 no cenário: consumido/devolvido/custódia por item e encerramento ainda bloqueado
+est_a4_test.py | rc=0 | 2s | RESULTADO 53/53
+est_a4_nav_test.py | rc=0 | 64s | RESULTADO: 15/15 ok
+est_item_divergente_test.py | rc=0 | 1s | RESULTADO 6/6
+est_item_divergente_nav.py | rc=0 | 19s | RESULTADO: 12/12 ok
+est_validade_entrada_test.py | rc=0 | 2s | RESULTADO 15/15
+est_validade_entrada_nav.py | rc=0 | 21s | RESULTADO: 12/12 ok
+est_validade_test.py | rc=0 | 1s | RESULTADO 11/11
+est_validade_data_test.py | rc=0 | 0s | RESULTADO 3/3
+est_validade_nav.py | rc=0 | 16s | RESULTADO: 10/10 ok
+est_validade_conc_nav_test.py | rc=0 | 17s | RESULTADO: 12/12 ok
+est_validade_conflito_nav.py | rc=0 | 19s | RESULTADO: 12/12 ok
+est_validade_memoria_nav.py | rc=0 | 16s | RESULTADO: 8/8 ok
+est_validade_quar_dem_test.py | rc=0 | 1s | RESULTADO total 3/3
+est_sem_validade_nav.py | rc=1 | 19s | RESULTADO: 4/8 ok · FALHAS: 1440: troca de pedido permite recebimento válido; 1440: soma5 preservando ausência de validade; 390: troca de pedido permite recebimento válido; 390: soma5 preservando ausência de validade
+est_laudo_lote_nav_test.py | rc=0 | 379s | RESULTADO: 7 ok · 0 falhas
+est_fix1_test.py | rc=1 | 17s | RESULTADO: 12/13 ok · FALHAS: Restaurar demonstração volta o filtro para "Todos os locais"
+est_fix2_test.py | rc=0 | 30s | RESULTADO: 11/11 ok
+esttest.py | rc=1 | 95s | RESULTADO: FALHAS: parte 2: custódia 500 → 0, devolvido 1.500 kg, encerramento liberado; parte 2: após devolução de 30 L: 45 L a entregar; parte 2: ajuda da quantidade mostra a conta; parte 2: 46 L acima do saldo: erro; parte 2: reentrega legítima de 45 L aceita; parte 2: MAP físico 90.000 + 500 kg devolvidos; parte 2: Fungicida A: 545 + 30 devolvidos − 45 reentregues = 530 L; reserva da OS-0424 (65 L) preservada
+verif_ce_est.py | rc=1 | 8s | (sem RESULTADO) RuntimeError: Uncaught
+consumo_divergente_test.py | rc=0 | 51s | (sem RESULTADO) 21/21 ok · FALHAS: 0
+ben_fluxo_test.py | rc=124 | 900s | (sem RESULTADO) == cadeia 390 · a falta de uma ordem não tira as caixas de outra ordem liberada ou em execução
+demanda_estado_nav_test.py | rc=124 | 900s | (sem RESULTADO) OK    · F1 reserva entre fazendas (achado 3, S3): liberar a OS-0501 (Lagoa Grande) com lotes do Almox. defensivos da Santa Rita move a compra entre as fazendas sem contar duas vezes (Glifosato SR 20,
+map_aprov_test.py | rc=0 | 18s | (sem RESULTADO) 4 ok · 1 falhas ['2 O.S.: OS-0418 A liberar com "Liberar bloqueado: sem lote de Ureia 45%", sem "Aguardando agrônomo", "Aprovada pelo agrônomo", AP-2201 nem "Revisar versão"']
+map_decisoes_test.py | rc=0 | 77s | (sem RESULTADO) 16 ok · 2 falhas ['8 Estoque: devolução da REQ-031 recebida (500 kg → 0 kg)', '9 mapa (Ordens de serviço) após a devolução: OS-0417 sem "Sobras a receber", sem custódia e sem "Receber sobras
+os_cenario_test.py | rc=0 | 74s | RESULTADO: 22/22 ok
+sutest.py | rc=0 | 45s | RESULTADO: OK
+visoes_marcas.py | rc=0 | 0s | (sem RESULTADO) 
+config_test.py | rc=124 | 901s | (sem RESULTADO) OK  REV14b Resolver AL-12: um só ponto de Tab no grupo; seta para baixo marca e foca o 2º candidato
+cmptest.py | rc=0 | 162s | (sem RESULTADO) FALHAS: nenhuma
+paginas_scan_test.py | rc=0 | 497s | RESULTADO: 4 ok · 0 falhas (148 páginas)
+FIM

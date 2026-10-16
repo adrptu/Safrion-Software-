@@ -1,0 +1,11 @@
+OK  CF-03 seed: selo "Demonstração · nenhuma conexão real", 5 conexões, fila do ERP 0, uma primária "Sincronizar agora (simulado)"
+OK  fila do ERP 1 (a entrega; as 3 reservas ficam fora)
+OK  painel do ERP: quem escreve cada objeto, ambiente de demonstração, credencial "Não configurada" mascarada, pendência com o movimento da entrega
+OK  sincronizar envia 1; de novo, nada é reenviado; cada sincronização é um registro
+OK  REPETIÇÃO: duplo clique em "Sincronizar" = 1 registro (chave do desenho)
+OK  F13 a linha do ERP fica realçada depois de sincronizar
+OK  F15 app de campo: "pelo sinal do aparelho (simulado)", sem "tempo real"
+OK  app de campo: "Com sinal (simulado)", nunca "online" ou "ao vivo"
+OK  A12 nenhum texto com cara de segredo no CF-03
+OK  CF-03 sem erro de JS
+RESULTADO: OK 10/10

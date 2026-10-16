@@ -1,0 +1,6 @@
+pr_ben_sobra_ajuste | rc=0 | 65s | RESULTADO: OK 9/9
+pr_ben_sobra390_ajuste | rc=0 | 66s | RESULTADO: OK 9/9
+base_ben_fluxo | rc=0 | 92s | RESULTADO: OK 34/34
+base_ben_lotes | rc=0 | 34s | RESULTADO: OK 8/8
+base_ben_cadeia | rc=0 | 146s | RESULTADO: OK 9/9
+FIM

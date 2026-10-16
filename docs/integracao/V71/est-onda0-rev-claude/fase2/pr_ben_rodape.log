@@ -1,0 +1,9 @@
+== rodape · rótulos do rodapé e aviso fora dos botões
+OK  R1 · cancelar a OB-0112: o rodapé é "Voltar | Confirmar cancelamento da OB-0112" (sem um "Cancelar" ao lado do Voltar) · ['Voltar', 'Confirmar cancelamento da OB-0112']
+OK  R2 · OB-0110 conferida: o rodapé não tem "Fechar" ao lado de "Fechar processo" · ['Reabrir execução', 'Voltar à lista', 'Fechar processo']
+OK  R3 · Fechar recusado (custódia 60): "Não gravado" com a causa, e o rodapé diz "Voltar à lista" (não "Fechar") · [['Reabrir execução', 'Voltar à lista', 'Fechar processo'], 'OB-0110 · Mamão Formosa · PACK-FRU v3 Em conferência Packing · Santa Rita · janela 26/09–27/09 · Igor (responsável de produção) × PRÓXIMO PASSO Fechar processo · Igor (responsável de produção). Sobra em custódia: Caixa de mamão Formosa 10 
+OK  R4 1440 · logo depois de "Retirar L39-119" o aviso está à vista e cada botão do rodapé recebe o toque no centro (elementFromPoint): Cancelar a ordem: livre, Voltar à lista: livre, Autorizar rota e liberar: livre · ['OB-0112 v2: L39-119 sai da ordem: 6.140 kg · 584 un de caixa (sugestão 584).', ['Cancelar a ordem: livre', 'Voltar à lista: livre', 'Autorizar rota e liberar: livre']]
+OK  R4 390 · logo depois de "Retirar L39-119" o aviso está à vista e cada botão do rodapé recebe o toque no centro (elementFromPoint): Cancelar a ordem: livre, Voltar à lista: livre, Autorizar rota e liberar: livre · ['OB-0112 v2: L39-119 sai da ordem: 6.140 kg · 584 un de caixa (sugestão 584).', ['Cancelar a ordem: livre', 'Voltar à lista: livre', 'Autorizar rota e liberar: livre']]
+OK  rodape sem erro de JS
+OK  AV · UX-BEN35-AVISO-01: nenhum toque esperou o aviso sair; o aviso nunca ficou sobre o alvo, sobre outro controle visível (navegação, cabeçalho ou conteúdo) nem fora da tela; na faixa reservada o toque não aciona controle escondido · [[], 'reserva em: ']
+RESULTADO: OK 7/7

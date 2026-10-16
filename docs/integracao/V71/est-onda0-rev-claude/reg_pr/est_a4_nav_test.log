@@ -1,0 +1,22 @@
+
+== largura 1440×1000
+  OK  T1 1440: contagem cega 1.100 L; a reserva de 320 L da OS-0430 depois dela não a invalida (aguardando aprovação, com "Aprovar ajuste")
+  OK  T2 1440: entrega de 320 L depois da contagem → linha "Desatualizada", motivo e só "Recontar"; faixa conta 1 a recontar; sem rolagem horizontal
+  OK  T3 1440: devolução de 20 L por outra tela; "Aprovar ajuste" é recusado com o motivo e o caminho "Recontar"
+  OK  T3c 1440: o selo "Desatualizada" e o botão "Recontar" aparecem inteiros na caixa da grade (à vista, pelo foco ou rolando a grade)
+  OK  T3b 1440: recusa atômica (físico 900 L, ajuste pendente, sem movimento de ajuste) e a linha passa a "Desatualizada" com "Recontar"; sem rolagem horizontal
+  OK  T4 1440: "Recontar" abre a contagem cega; 895 L e "Aprovar ajuste" aplicam 900 → 895 L, um movimento
+
+== largura 390×844
+  OK  T1 390: contagem cega 1.100 L; a reserva de 320 L da OS-0430 depois dela não a invalida (aguardando aprovação, com "Aprovar ajuste")
+  OK  T2 390: entrega de 320 L depois da contagem → linha "Desatualizada", motivo e só "Recontar"; faixa conta 1 a recontar; sem rolagem horizontal
+  OK  T3 390: devolução de 20 L por outra tela; "Aprovar ajuste" é recusado com o motivo e o caminho "Recontar"
+  OK  T3c 390: o selo "Desatualizada" e o botão "Recontar" aparecem inteiros na caixa da grade (à vista, pelo foco ou rolando a grade)
+  OK  T3b 390: recusa atômica (físico 900 L, ajuste pendente, sem movimento de ajuste) e a linha passa a "Desatualizada" com "Recontar"; sem rolagem horizontal
+  OK  T4 390: "Recontar" abre a contagem cega; 895 L e "Aprovar ajuste" aplicam 900 → 895 L, um movimento
+
+== T5 · contagem abaixo da reserva (1440×1000)
+  OK  T5 contagem 300 L com 320 L reservados: registrada com aviso, aprovada (físico 300 L, reserva 320 L preservada) e o alerta com a requisição e o dono
+  OK  T5b o lote G26-14 mostra "Reserva sem físico · 20 L" com quem confere; a entrega de 320 L é recusada
+  OK  sem erro de script na tela
+RESULTADO: 15/15 ok

@@ -1,0 +1,13 @@
+  OK  1440: motivo e recuperação junto ao formulário
+  OK  1440: preenchimento preservado
+  OK  1440: nenhum saldo/movimento/recibo gravado
+  OK  1440: página sem excesso horizontal
+  OK  1440: item conferido corretamente recupera fluxo
+  OK  1440: sem erro JS
+  OK  390: motivo e recuperação junto ao formulário
+  OK  390: preenchimento preservado
+  OK  390: nenhum saldo/movimento/recibo gravado
+  OK  390: página sem excesso horizontal
+  OK  390: item conferido corretamente recupera fluxo
+  OK  390: sem erro JS
+RESULTADO: 12/12 ok

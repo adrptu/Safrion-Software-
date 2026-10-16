@@ -1,0 +1,13 @@
+OK  CF-04 seed: "18 registros · 3 autores · lidos dos comandos gravados; nada é digitado aqui"; uma primária "Baixar trilha (CSV)"
+OK  filtro rápido por mês: Todos 18 · jul/2026 12 · ago/2026 3 · jun/2026 2 · set/2026 1
+OK  A11 CSV = as 12 linhas de jul/2026 (+ cabeçalho), sem segredo; a exportação vira registro
+OK  a própria exportação aparece na trilha: 19 registros
+OK  F13 a linha da exportação fica realçada (g2flash)
+OK  F16 duplo clique em "Baixar trilha": 1 registro e 1 arquivo
+OK  filtro por pessoa (Quem): Provedor → 2 registros de 20 (faturas pagas pelo provedor simulado; a 2ª exportação, do F16, entra na conta)
+OK  detalhe só leitura: de onde vem a data (simulada da cobrança), registro de origem e "A trilha não se edita"
+OK  filtro sem resultado: "Nenhuma linha corresponde aos filtros" e a primária desabilitada "Nenhum registro para baixar"
+OK  ato do CF-01 entra na trilha na hora: "Alterar alçada · AL-05" por Ana (gestora), 26/09/2026 hh:mm, web
+OK  A12 nenhum texto com cara de segredo no CF-04
+OK  CF-04 sem erro de JS
+RESULTADO: OK 12/12

@@ -1,0 +1,7 @@
+OK  A9 CF-05 conta as pessoas com acesso do estado de Configurações (14 no seed, com Igor, Marta, Otávio e Dora)
+OK  A18 Ver como Rui: pagar a fatura é recusado "decisão de Ana (gestora)" e nada é pago
+OK  A18 com Ana: paga e o evento grava "por Ana (gestora)"
+OK  A18 backoffice com o Ver como em Rui: conciliar segue com "Admin plataforma" (sem AL-15)
+OK  o pagamento entra na trilha com Ana (gestora) e a data simulada da cobrança
+OK  CF-05 sem erro de JS
+RESULTADO: OK 6/6

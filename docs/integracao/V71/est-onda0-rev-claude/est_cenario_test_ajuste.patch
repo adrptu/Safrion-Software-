@@ -1,0 +1,20 @@
+--- a/tools/prototipo/v37/gen37/est_cenario_test.py
++++ b/tools/prototipo/v37/gen37/est_cenario_test.py
+@@ -4,7 +4,7 @@
+ recusar entrega acima do saldo, receber devolução apta e bloqueada, liberar a quarentena, contar lote com divergência e aprovar
+ o ajuste; o app confirma e aponta sem sinal. A O.S. e o estoque são conferidos lendo cenGet() na própria página."""
+ import sys, os, time
+-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
++sys.path.insert(0, os.environ.get('GEN') or os.path.dirname(os.path.abspath(__file__)))
+ from est_lib import Est
+ 
+ E = Est()
+@@ -44,7 +44,7 @@
+          'confirmação no app (aviso de outra tela) retira "Aguardando confirmação no app" sem recarregar')
+     # 6 · devolução apta volta ao disponível
+     E.etapa(3); print('k3:', E.k()); E.row(RQ, 'Glifosato 480'); print('padrão devolução:', E.val('fx_g_dev_qtd'))
+-    E.setv('fx_g_dev_qtd', '20'); E.salvar(); print('toast:', E.toast())
++    E.setv('fx_g_dev_qtd', '20'); E.setv('fx_g_dev_cond', 'Apta · volta ao disponível'); E.salvar(); print('toast:', E.toast())   # EST-ONDA0 (E1): a condição não tem mais padrão; quem confere escolhe
+     st = E.cen(f"(()=>{{const i=c.reqs['{RQ}'].itens[0]; const l=c.lotes['Glifosato 480|G26-14']; return [i.custodia,i.devolvido,l.fisico,l.quarentena];}})()"); print(' ', st, E.rowtxt(RQ, 'Glifosato 480'))
+     E.ok(st == [300, 20, 900, 0], 'devolução apta de 20 L: custódia 320 → 300 L, lote G26-14 880 → 900 L sem bloqueio')
+     # 7 · devolução bloqueada vai para quarentena (observação obrigatória)
