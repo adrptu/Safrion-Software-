@@ -110,14 +110,14 @@ function soloAguaDo(S0, c, faz, tal) {   /* medição de água mais recente do t
 /* ---------- laudos: semente + estado, situação (R02, R03) ---------- */
 function cenSolo(c) { const s = c.solo || (c.solo = {}); ['laudos', 'corr', 'st', 'aceites', 'agua', 'recibos'].forEach(k => { if (!s[k]) s[k] = {}; }); return s; }   /* D-05: sem subir a versão */
 function soloLaudos(c, S0) {
-  const S = (c && c.solo) || {}; const R = S0.regra; const hoje = S0.hoje || soloHoje(); const irr = S0.irrigados || [];
+  const S = (c && c.solo) || {}; const R = S0.regra; const hoje = S0.hoje || soloHoje();
   const ls = (S0.laudos || []).concat(Object.values(S.laudos || {})).map(l0 => {
     const l = cenClone(l0); const cr = (S.corr || {})[l.id] || {};
     l.an = (l.an || []).map(x => cr[x.a] ? Object.assign({}, x, { v: cr[x.a].v, un: cr[x.a].un, corrigido: cr[x.a] }) : x);
     const st = (S.st || {})[l.id]; if (st) { l.sit = st.sit; l.por = st.por || ''; l.em = st.em || ''; }
     const semUn = l.an.filter(x => !x.un).map(x => x.a);
     if (semUn.length) { l.sit = 'Inconsistente'; l.motivo = semUn.join(', ') + ' sem unidade'; }
-    l.val = soloMaisMeses(l.coleta, irr.indexOf(l.tal) >= 0 ? R.validade.irrigado : R.validade.meses);
+    l.val = soloMaisMeses(l.coleta, R.validade.meses);   // DEC-1610-04: 24 meses para todo talhão, irrigado ou não
     if (l.sit === 'Validado' && l.val < hoje) { l.sit = 'Vencido'; l.motivo = 'validade até ' + soloBr(l.val); }
     if (l.tipo === 'solo') l.idx = soloIdx(l, R.tol);
     return l; });
@@ -340,8 +340,8 @@ function soloValidar(c, id, chave, ator) {   /* só o agrônomo valida (R03); an
     S.st[id] = { sit: 'Validado', por: quem, em: soloAgora() };
     return { msg: id + ' validado por ' + quem + '.', id }; }); }
 /* laudos como o comando os vê (o SOLO0 da tela + c.solo); sem SOLO0 (tela sem a análise), null: o comando de uso recusa em vez de confiar no item */
-function soloS0(ok) { if (typeof SOLO0 === 'undefined') return ok ? { laudos: [], regra: { validade: { meses: 24, irrigado: 12 } }, irrigados: [], hoje: soloHoje() } : null;
-  return { laudos: SOLO0.laudos || [], regra: SOLO0.regra || { validade: { meses: 24, irrigado: 12 } }, irrigados: SOLO0.irrigados || [], hoje: soloHoje() }; }
+function soloS0(ok) { if (typeof SOLO0 === 'undefined') return ok ? { laudos: [], regra: { validade: { meses: 24 } }, hoje: soloHoje() } : null;
+  return { laudos: SOLO0.laudos || [], regra: SOLO0.regra || { validade: { meses: 24 } }, hoje: soloHoje() }; }
 /* o comando reconfere o item que a tela mandou (revisão A2: o servidor é a autoridade): R11 na chave e na correção incluída do cultivo, e o laudo
    do item tem de ser o vigente do talhão e da profundidade (R02). Devolve '' ou o motivo. Dano evitado: gravar dose de laudo substituído ou não
    validado, ou duas calagens vivas, a partir de um painel aberto antes da mudança. */
