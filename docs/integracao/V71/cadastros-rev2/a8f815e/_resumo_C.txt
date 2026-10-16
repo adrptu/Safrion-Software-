@@ -1,0 +1,2 @@
+credito_menu_test.py rc=0 35s :: RESULTADO: 16/16
+FIM

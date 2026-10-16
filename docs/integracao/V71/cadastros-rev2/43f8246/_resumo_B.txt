@@ -1,0 +1,10 @@
+cadastros_padrao_test.py rc=0 370s :: RESULTADO: 44/44
+credito_menu_test.py rc=1 54s :: RESULTADO: 14/16 · FALHAS: C2 1440 Documentos: só a parte do cartão (Documentos para crédito), com os indicadores e "‹ Crédito"; C2 390 Contratos: só a parte do cartão (Solicitações e contr
+cad_gravacao_falha_test.py rc=0 67s :: RESULTADO: 7/7 ok
+cad_inicio_test.py rc=0 61s :: RESULTADO: 16 ok · 0 falhas
+getest.py rc=0 48s :: 
+cadf_test.py rc=0 40s :: RESULTADO: OK 15/15
+cadf_fix_lista_test.py rc=0 38s :: RESULTADO: OK 11/11
+cadf_det_test.py rc=0 20s :: RESULTADO: OK 13/13
+assinatura_test.py rc=0 225s :: RESULTADO: 45 ok · 0 falhas
+FIM
