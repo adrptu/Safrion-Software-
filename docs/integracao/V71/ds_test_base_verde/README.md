@@ -61,3 +61,14 @@ sha256 do `OS.dc.html` no `f8d0d40`:
 - normal: `6425bb3c5d939169fc48a6881bd0852df84f053b7911370657227b10ebd66a57`
 - `m_d15`: `fafa346be11f8d3cbf87650df4619b818926a18853bbea3e22022cf2afcec839`
 - `m_e2`: `8fa8ef43c8ccf6420333234a08e2ce66052f17a5429b7c95564fcd8df15cb969`
+
+## Composição com a base em `052b9bf`
+
+A base andou de `b87f79b` para `052b9bf`: 10 commits, entre eles a frente CADASTROS-PADRÃO. No `ds_test.py`, ela mexeu só no B6. O merge gerou `d0eb3a8`, sem conflito. O `OS.dc.html` tem o mesmo sha256 do `f8d0d40`. Repeti no render de árvore limpa:
+
+| Execução | Resultado (rc) | Bruto |
+|---|---|---|
+| `ds_test.py` | OK 72/72 (0) | `normal_d0eb3a8.log` |
+| `m_d15`, parte D | FALHOU 17/18, só o D15 (1) | `mutante_d15_D_d0eb3a8.log` |
+| `m_e2`, parte E | FALHOU 4/5, só o E2 (1) | `mutante_e2_E_d0eb3a8.log` |
+| `ds_unit_test.py` | OK 44/44 e 31/31 (0) | `ds_unit_d0eb3a8.log` |
