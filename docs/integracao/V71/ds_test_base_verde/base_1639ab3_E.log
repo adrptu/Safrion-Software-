@@ -1,0 +1,7 @@
+OK  E1 390 px · Planejar safra: etapa 2 realçada e anunciada
+OK  E2 390 px · liberar a OS-0430 pela lista: a ordem passa a Liberadas (painel; chips de fase A liberar −1, Liberadas +1), o que mudou é realçado e o aviso é anunciado
+OK  E3 390 px · toque: conciliar; toque longo no botão indisponível mostra a dica sem acionar o comando
+OK  E4 390 px · tocar fora fecha a dica
+OK  E5 390 px · sem erro de execução e a dica cabe na tela
+RESULTADO: OK 5/5
+rc=0
