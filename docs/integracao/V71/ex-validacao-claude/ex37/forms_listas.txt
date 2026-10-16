@@ -1,0 +1,13 @@
+diálogos/painéis com campo (únicos): 183
+Motivo/justificativa {'texto livre': 13, 'lista': 10}
+    texto livre ['CA-01det:Motivo da correção', 'CA-02:Motivo da correção', 'CO-01:Justificativa da revis', 'ON-01det:Justificativa da sobre', 'SU-01:Motivo *', 'SU-08:Motivo *', 'SU-08:Motivo *', 'IR-03det:Motivo agronômico', 'SU-02:Justificativa *', 'SU-02:Justificativa da propo', 'SU-06:Motivo *', 'CO-06det:Justificativa', 'GE-02det:Justificativa']
+    lista ['LO-01:Motivo da reprogramaçã', 'VE-04det:Motivo', 'VE-06:Motivo', 'GE-03:Motivo', 'PL-05:Motivo', 'PL-05det:Motivo', 'CA-01det:Motivo', 'CA-02:Motivo', 'PT-03:Motivo', 'GE-07:Motivo']
+Causa/hipótese {'texto livre': 3}
+    texto livre ['SU-08:Causa *', 'AG-03:Hipótese · causa', 'GE-07:Hipótese de causa']
+Local {'lista': 4, 'texto livre': 3}
+    lista ['CD-06:Local padrão', 'CO-04:Local', 'CD-03:Local', 'CD-03:Local']
+    texto livre ['SU-07:Local de entrega *', 'CA-03:Local', 'CA-03:Local']
+Evidência {'lista': 3, 'texto livre': 6}
+    lista ['LO-02det:Evidência', 'CA-03:Evidência', 'CA-03:Evidência']
+    texto livre ['SU-08:Evidência *', 'VE-06:Evidências', 'AG-03:Evidências (vistoria ·', 'GE-07:Evidência esperada', 'SU-07det:Evidência *', 'GE-07:Evidência']
+TOTAL formulários (campo editável + verde): 134 | Salvar: 73 | criação/ação: 92 com Salvar: 33 | edição: 42 | com marca de obrigatório: 13

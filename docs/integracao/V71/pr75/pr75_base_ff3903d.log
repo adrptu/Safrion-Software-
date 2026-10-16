@@ -1,0 +1,16 @@
+FALHA A1 clique de mouse abre o formulário None
+FALHA A1b Responsável só com Marta e Diego None
+FALHA A2 salvar sem tema não grava e fica aberto None
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/pr75r2/pt06_rev.py", line 36, in <module>
+    preencher('tema','Rever condição comercial (sintético)'); preencher('prazo','2026-10-30'); adulterar('Ana')
+                                                                                               ^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/pr75r2/pt06_rev.py", line 25, in adulterar
+    return J(f"""(()=>{{const s={DLG}.querySelector('select'); const o=document.createElement('option'); o.value=o.text={json.dumps(nome)}; s.appendChild(o);
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/v69d/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of undefined (reading 'querySelector')
+    at <anonymous>:1:110
+    at <anonymous>:2:217

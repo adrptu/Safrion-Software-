@@ -5,6 +5,7 @@ import json, os
 from engine import (grid,section,esc,icon,chip,btn,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,GRAYS,SH,DISP,BTN_ST,EXTRA,EXTRAJS,_MINI,_MINIP)
 import engine as E
 from ui37 import shell37, steps_state, HEIGHTS37
+import ui37 as UI
 import dados2 as D2
 import dados as D
 import ocupacao_cen as OCEN
@@ -296,13 +297,14 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
     s4=bloco('Demanda de insumos por grupo',H('k6'),g_dem,desc_hole=True,
                 acao=f'<span style="display: inline-flex; align-items: center; gap: 8px;"><sc-if value="{H("sol_link")}" hint-placeholder-val="{F()}"><a href="{H("sol_href")}" style="{_MINI} text-decoration: none;">Abrir em Compra de insumos ›</a></sc-if></span>')
     # SAF-FAZ-2: safra de várias fazendas mostra as fazendas dela; um toque troca de fazenda na mesma etapa (cada uma com a própria sub-safra)
-    sg_faixa=(f'<sc-if value="{H("sg_tem")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Fazendas desta safra" id="saf-fazendas" '
-              f'style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 12px; border: 1px solid {LINE}; border-radius: 12px; background: {SURF};">'
-              f'<span style="font-size: 12.5px; font-weight: 700; color: {MUTED};">Fazendas</span>'
-              f'<sc-for list="{H("sg_fz")}" as="fz" hint-placeholder-count="2"><button type="button" aria-pressed="{H("fz.on")}" aria-label="{H("fz.al")}" onClick="{H("fz.go")}" style="{_MINI} min-height: 36px;">{H("fz.t")}</button></sc-for>'
-              f'<span style="font-size: 12.5px; color: {MUTED}; flex: 1 1 220px;">{H("sg_res")}</span>'
-              f'<sc-if value="{H("sg_env")}" hint-placeholder-val="{F()}"><button type="button" id="sg-env" onClick="{H("sg_envGo")}" style="{E.BTN_ST(False,True)}">{H("sg_envT")}</button></sc-if>'
-              f'</div></sc-if>')
+    # 16/10/2026 (proprietário: "abaixo de trabalhando em… em fazendas… não falta o símbolo do filtro que é nosso padrão?"): a faixa das fazendas
+    # usa a peça comum dos filtros (ui37.faixa_filtros: funil, rótulo e chips), não um desenho próprio; id e nome acessível continuam os mesmos
+    sg_chips=(f'<sc-for list="{H("sg_fz")}" as="fz" hint-placeholder-count="2"><button type="button" aria-pressed="{H("fz.on")}" aria-label="{H("fz.al")}" onClick="{H("fz.go")}" style="{_MINI} min-height: 36px;">{H("fz.t")}</button></sc-for>')
+    sg_faixa=(f'<sc-if value="{H("sg_tem")}" hint-placeholder-val="{F()}">'
+              + UI.faixa_filtros(UI.faixa_campo('Fazendas',sg_chips) + f'<span style="font-size: 12.5px; color: {MUTED}; flex: 1 1 220px;">{H("sg_res")}</span>',
+                                 fim=f'<sc-if value="{H("sg_env")}" hint-placeholder-val="{F()}"><button type="button" id="sg-env" onClick="{H("sg_envGo")}" style="{E.BTN_ST(False,True)}">{H("sg_envT")}</button></sc-if>')
+                .replace('<div class="mf-tela" role="group" aria-label="Filtros"','<div class="mf-tela" id="saf-fazendas" role="group" aria-label="Fazendas desta safra"',1)
+              + '</sc-if>')
     EXTRA.append('<style>#saf-fazendas button[aria-pressed="true"]{background:#E4F3E9!important;border-color:#1E7A4C!important;color:#14532D!important;box-shadow:inset 0 0 0 1px #1E7A4C}</style>')   # a fazenda aberta, como o chip escolhido
     corpo=sg_faixa+''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{H("true") if i==1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}</div></sc-if>'
                   for i,s in enumerate([s1,s2,s3,s4],1)) + E.area_acoes('aa','Ações da etapa')

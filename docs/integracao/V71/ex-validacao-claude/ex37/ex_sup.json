@@ -1,0 +1,211 @@
+{
+ "1_ag02_Lagoa Grande": {
+  "aplica": "ok Lagoa Grande",
+  "filtros": [
+   "Filtrar por fazenda=Lagoa Grande"
+  ],
+  "campos": [
+   [
+    "Fazenda",
+    "Lagoa Grande"
+   ],
+   [
+    "Talhão",
+    ""
+   ],
+   [
+    "Coleta",
+    ""
+   ]
+  ]
+ },
+ "1_ag02_Boa Vista": {
+  "aplica": "ok Boa Vista",
+  "filtros": [
+   "Filtrar por fazenda=Boa Vista"
+  ],
+  "campos": [
+   [
+    "Fazenda",
+    "Boa Vista"
+   ],
+   [
+    "Talhão",
+    ""
+   ],
+   [
+    "Coleta",
+    ""
+   ]
+  ]
+ },
+ "2_os_filtros": [
+  "Filtrar por fazenda=Santa Rita",
+  "Filtrar por safra=Todas",
+  "Filtrar por cultura=Todas",
+  "Filtrar por talhão=Todos"
+ ],
+ "2_os_topo": "A\nProprietário · todos os papéis (teste)\nAna · Gestora e RT\nCaio · PCP\nRui · Almoxarife e expedição\nPaula · Conferência\nZé · Mecânico\nOtávio · Manutenção (PCM)\nJoão · Irrigante (eletricista NR-10)\nIgor · Produção\nDora · Comercial\nMarta · Qualidade\nAgrícola › Ordem de Serviço\n‹\nAgrícola\nOrdem de Serviço\ni\n2 em execução · 3 impedidas\nCriar ordem\nFazenda\nTodas\nLagoa Grande\nSanta Rita\nBoa Vista\nSafra\nTodas\n2026/27\nSafrinha 2027\n2025/26\nCultura\nTodas\nCafé\nMilho\nSoja\nTalhão\nTodos\nC1\nP1\nSem talhão\nT1\nT1-A\nT1-B\nT2\nT3\nT4\nOrdens por fase\nTodas\n10\nA liberar\n3\nLiberadas\n2\nEm execução\n2\nEm conferência\n1\nEncerradas\n2\nCanceladas\n0\n10 de 10\nAgrupar por\n▾\nColunas\n+12\nO.S.\n⇅\nATIVIDADE\n⇅\nTALHÃO\n⇅\nPRAZO\n⇅\nFASE\n⇅\nPROGRESSO\n⇅\nOS-0415\nDessecação pós-colheita\nT3\n—\nEncerradas\n100,0 %\nOS-0417\nAdubação de cobertura\nP1\n24/09\nEm conferência\n100,0 %\nFalta insumo\nOS-0418\nFertirrigação · reclassificada\nP1\n—\nA liberar\n0",
+ "2_os_form": [
+  [
+   "Safra",
+   "",
+   "select-one"
+  ],
+  [
+   "Cultivo",
+   "",
+   "select-one"
+  ],
+  [
+   "Atividade",
+   "",
+   "select-one"
+  ],
+  [
+   "Início da janela",
+   "",
+   "date"
+  ]
+ ],
+ "2_os_safra_opcoes": [
+  "Selecione a safra",
+  "Safra 2026/27",
+  "Safrinha 2027",
+  "Safra Mamão 2026/27"
+ ],
+ "3_ca02_clique": {
+  "txt": "Reabrir saldo da OS-0417",
+  "dis": false,
+  "tag": "BUTTON",
+  "href": null
+ },
+ "3_ca02_dlg": [],
+ "3_ca02_painel_qualquer": [
+  {
+   "tag": "ASIDE",
+   "role": null,
+   "txt": "Reabrir saldo para execução × Volta a Em execução preservando o término anterior e a trilha; a instrução do saldo é revalidada pelo responsável competente. Ordem Motivo Falha de aplicação em 5 ha detectada na conferência Máquina diferente do padrão Ajuste da fazenda Sonda deslocada Chuva Quebra Falta de insumo Praga acima do NC ────────── Buscar no cadastro… + Novo (abre o cadastro) Saldo a reabrir Programação Responsável PCP · Ana Ana Marcos Rui Paula ────────── Buscar no cadastro… + Novo (abre",
+   "inputs": 5
+  }
+ ],
+ "3_ca02_inputs_tela": [
+  "",
+  "",
+  "Motivo · lista do cadastro",
+  "",
+  "",
+  "Responsável · lista do cadastro"
+ ],
+ "4_co06det_botoes": [
+  {
+   "t": "PENDÊNCIA ⇅",
+   "verde": false,
+   "dis": false,
+   "title": ""
+  },
+  {
+   "t": "LOTE ⇅",
+   "verde": false,
+   "dis": false,
+   "title": ""
+  },
+  {
+   "t": "QUANTIDADE ⇅",
+   "verde": false,
+   "dis": false,
+   "title": ""
+  },
+  {
+   "t": "RESPONSÁVEL ⇅",
+   "verde": false,
+   "dis": false,
+   "title": ""
+  },
+  {
+   "t": "PRAZO ⇅",
+   "verde": false,
+   "dis": false,
+   "title": ""
+  },
+  {
+   "t": "CONDIÇÃO DE RESOLUÇÃO ⇅",
+   "verde": false,
+   "dis": false,
+   "title": ""
+  },
+  {
+   "t": "CRITÉRIO ⇅",
+   "verde": false,
+   "dis": false,
+   "title": ""
+  },
+  {
+   "t": "PADRÃO DO TIPO 6 ⇅",
+   "verde": false,
+   "dis": false,
+   "title": ""
+  },
+  {
+   "t": "MEDIDO ⇅",
+   "verde": false,
+   "dis": false,
+   "title": ""
+  },
+  {
+   "t": "SITUAÇÃO ⇅",
+   "verde": false,
+   "dis": false,
+   "title": ""
+  },
+  {
+   "t": "TENTATIVA ⇅",
+   "verde": false,
+   "dis": false,
+   "title": ""
+  },
+  {
+   "t": "ORIGEM ⇅",
+   "verde": false,
+   "dis": false,
+   "title": ""
+  },
+  {
+   "t": "RESULTADO ⇅",
+   "verde": false,
+   "dis": false,
+   "title": ""
+  },
+  {
+   "t": "Comercial (VE-04)",
+   "verde": false,
+   "dis": false,
+   "title": ""
+  },
+  {
+   "t": "Logística (LO-02)",
+   "verde": false,
+   "dis": false,
+   "title": ""
+  },
+  {
+   "t": "Liberar para destinação compatível",
+   "verde": true,
+   "dis": false,
+   "title": "Liberar o lote só para destinações compatíveis com o tipo 7"
+  },
+  {
+   "t": "Definir destinação",
+   "verde": false,
+   "dis": false,
+   "title": "Definir destinação física (reprocesso exige ordem vinculada)"
+  },
+  {
+   "t": "Manter bloqueio",
+   "verde": false,
+   "dis": false,
+   "title": "Manter o lote bloqueado com a pendência aberta"
+  }
+ ],
+ "4_co06det_topo": "INSP-88\nINSP-88 · Lote L27-013 bloqueado\ni\nBloqueado · decisão até 25/09\nPreveja a colheita\nPrograme as ordens\nOC-0514 impedida\nRegistre cargas\nReceba a produção\nBeneficie\nConfira a qualidade\nL27-013 bloqueado\nControle o estoque de produção\nVEIO DE\nCO-05 · OB-0104 encerrada\n→\nESTÁ AQUI\nLote L27-013 · Bloqueado\n→\nFALTA\ndecisão da qualidade · destinação\n→\nPRÓXIMA AÇÃO\nRegistrar decisão do lote\nPendência formal de qualidade\nPENDÊNCIA\n⇅\nLOTE\n⇅\nQUANTIDADE\n⇅\nRESPONSÁVEL\n⇅\nPRAZO\n⇅\nCONDIÇÃO DE RESOLUÇÃO\n⇅\nINSP-88\nL27-013\nCafé beneficiado\n3.690 sc 60 kg\nQualidade · Marta\naté 3 dias · 25/09\nlaudo COB revisado + decisão Liberar/Destinar\nResultado da amostra\nCRITÉRIO\n⇅\nPADRÃO DO TIPO 6\n⇅\nMEDIDO\n⇅\nSITUAÇ"
+}
