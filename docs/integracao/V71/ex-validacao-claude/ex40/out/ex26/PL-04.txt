@@ -1,0 +1,215 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Planejamento › Programação integrada
+Programação integrada
+i
+1 pronta · 4 com impedimento
+Período de trabalho
+Hoje
+Próximos 7 dias
+Próximos 14 dias
+23/09 → 29/09 · fuso da fazenda
+Já emitidas
+8 7 O.S. + 1 O.M.
+Novas elegíveis
+5 prévia de emissão
+Aguardando dados
+2 sem previsão confirmada
+Fora do período
+1 não entra na fila
+Ordens do período 23–29/09
+Preparar O.S. do período
+⋯
+Liberar prontas
+8 de 8
+ORDEM
+⇅
+JANELA · DURAÇÃO
+⇅
+CONJUNTO · OPERADOR
+⇅
+IMPEDIMENTO · SELO
+⇅
+ETAPA · MATERIAL
+⇅
+ABRIR
+⇅
+OS-0421
+fungicida T1+T2
+24–26/09
+dias 5–7 · saldo 160 ha
+3 turnos
+Pulv. 02 + Trator 03
+Marcos
+Parcial · dia 4 de 7
+Em execução
+em custódia ✓
+Abrir O.S.
+OS-0430
+dessecação T1-A
+25/09
+DAP −20
+2 turnos
+Pulv. 01 + Trator 02
+Beto
+—
+A liberar
+separado ✓
+Abrir O.S.
+OS-0431
+plantio T2
+24/09 06:00
+2 turnos
+Trator T1 + Plantadeira 24 linhas
+Carlos
+Impedida · ativo bloqueado
+A liberar
+sementes previstas
+Resolver impedimento
+OS-0419
+água Pivô 2
+hoje 20:00–amanhã 10:31
+14,5 h (1 volta a 62 %)
+Pivô 2
+João
+—
+Liberadas
+sem insumo · sem requisição
+Abrir na Irrigação
+OS-0418
+fertirrigação P1
+24/09 21:00–25/09 11:15
+14,3 h
+Pivô 1
+João
+Falta insumo · Ureia 45%
+A liberar
+requisição na liberação
+Abrir O.S.
+OS-0422
+água Pivô 2 · próximo ciclo
+a definir
+2 passadas · 18,1 h
+Pivô 2
+João
+Janela a definir
+A liberar
+sem insumo
+Abrir na Irrigação
+OS-0423
+água gotejo T7
+hoje 14:00–16:00
+2 h
+Gotejo T7
+João
+Conflito
+parada da B3 14:00–15:00
+A liberar
+sem insumo
+Abrir na Irrigação
+OM-0233
+reparo Trator T1
+hoje
+oficina
+8 h
+Oficina Sede
+Nilton
+—
+Em execução
+peça entregue ✓
+Abrir O.M.
+Máquinas na programação
+Ver capacidade
+MÁQUINA
+⇅
+CONDIÇÃO
+⇅
+OCUPAÇÃO NO PERÍODO
+⇅
+ELEGIBILIDADE
+⇅
+Trator 02 · MF 7719
+Apta
+livre hoje · 25/09 OS-0430 · 28/09 preventiva OM-0234
+Proposto · OS-0420 saldo 70 ha · aguarda PCP
+Trator 03 · JD 6M
+Apta
+operando OS-0421 até 26/09
+—
+Trator T1 · JD 6M 155
+Indisponível · bloqueado pelo PCM
+oficina OM-0233 · retorno previsto 14h, não confirmado
+não ofertado
+Pulverizador 01
+Apta com restrição
+reservado OS-0430 25/09
+elegível sob condição validada
+Pendências de outros períodos
+ORDEM
+⇅
+ETAPA
+⇅
+SELO
+⇅
+PENDÊNCIA
+⇅
+AÇÃO
+⇅
+OS-0417
+· cobertura P1
+Em conferência
+Sobras a receber
+10 sc 50 kg de MAP 11-52 sob custódia de Paula · REQ-031
+Receber devolução
+OS-0420
+· plantio T4
+Em execução
+Impedida · ativo bloqueado
+saldo 70 ha · substituto Trator 02 proposto · aguarda PCP
+Ver impedimento
+Manutenções e impacto na produção
+Simular janela
+⋯
+MANUTENÇÃO
+⇅
+JANELA
+⇅
+PRODUÇÃO AFETADA
+⇅
+SITUAÇÃO
+⇅
+ABRIR
+⇅
+Corretiva OM-0233
+Trator T1 · retorno previsto 14h · não confirmado
+até teste aprovado
+OS-0420 saldo 70 ha
+OS-0431 · plantio T2 · 102 ha
+Proposto · OS-0420 saldo 70 ha · aguarda PCP
+OS-0431: sem substituto confirmado
+Ver ordem
+Preventiva 250 h · OM-0234
+Trator 02 · MF 7719
+28/09
+OS-0420 saldo · substituto até 27/09
+Conflito · OS-0420
+Ver conflito
+Revisão pré-plantio
+Plantadeira 24 linhas
+25/09
+nenhuma ordem na janela
+Sem conflito
+Ver agenda
+Tela: Programação integrada · 1 pronta · 4 com impedimento

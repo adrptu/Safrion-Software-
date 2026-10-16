@@ -1,0 +1,11 @@
+# EX-40.7 · PCOM (render b87f79b, Ana, 1440)
+{"ctl": ["Colunas +2", "Tabela", "Cartões", "Agrupar por ▾", "Colunas +2", "Tabela", "Cartões"], "grupos": [], "linhas": [["g_of", 0], ["g_pr", 0]], "blocos": []}
+   'Colunas' visíveis: 2 · botões de visão visíveis: []
+   barras com 'Colunas' visíveis por tela (estado inicial): {'PCOM.dc.html': 2, 'VEN.dc.html': 1, 'EXPED.dc.html': 1, 'PROD.dc.html': 1, 'EST.dc.html': 1, 'CMP.dc.html': 0, 'COLH.dc.html': 1, 'CARGA.dc.html': 1, 'IR-01.dc.html': 1, 'AG-02.dc.html': 2, 'GE-03.dc.html': 1, 'IC.dc.html': 2, 'IV.dc.html': 3, 'OS.dc.html': 1, 'AG-01.dc.html': 1, 'GE-02.dc.html': 1, 'PSUP.dc.html': 0, 'PAGR.dc.html': 0, 'PMAN.dc.html': 0}
+
+# EX-40.8 · CD-04 Pessoas e equipes (aba Pessoas)
+{"chips": ["Todas 15", "A resolver 3"], "funcao": [["Todas", "Operadores (4)", "Caldeiros (2)", "Irrigantes (1)", "Almoxarifes (1)", "Agrônomos (1)"]], "agrupar": ["g_pes: Agrupar por ▾"], "funis": ["Filtrar Pessoa", "Filtrar Equipe", "Filtrar Validade da habilitação", "Filtrar Habilidades"], "busca": 1}
+   Agrupar por (g_pes): aberto · itens ['Sem agrupar', 'Habilidades', 'Equipe', 'Disponível até']
+   chip 'Caldeiros': 0 clique(s) · linhas visíveis 0
+   lista 'Função' tem caldeiro? valor 'cal'
+erros JS: []

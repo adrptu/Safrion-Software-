@@ -1,0 +1,113 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Planejamento › Plano operacional
+Plano operacional
+i
+v4 em rascunho · 1 pendência vencida
+Publicar plano v4
+Operações previstas · Safra 2026/27
+Adicionar operação
+⋯
+7 de 7
+PARCELA · CULTIVO
+⇅
+ATIVIDADE · NECESSIDADE
+⇅
+DOSE/QUANTIDADE
+⇅
+GATILHO POR EXTENSO → DATA
+⇅
+SITUAÇÃO
+⇅
+ABRIR
+⇅
+T4
+Soja 58 W · 100 ha
+Plantio · 1ª onda
+NEC-028 · REC-014 v2 · 100 de 204 ha
+Semente 52 kg/ha + KCl 60% 120 kg/ha
+no dia do plantio · 1ª onda 22–28/09
+janela 22–28/09
+Convertida · OS-0420
+30 de 100 ha feitos · saldo 70 ha impedido
+Abrir O.S.
+Ver recomendação
+T1-A
+Soja 58 W · 160 ha
+Dessecação pré-plantio
+NEC-031
+Glifosato 480 2,0 L/ha + 2,4-D 1,0 L/ha
+20 dias antes do plantio · DAP −20
+previsto 15/10 →
+25/09
+janela ±5 d
+O.S. emitida · OS-0430
+Ver plano do talhão
+T1-A
+Soja 58 W · 160 ha
+Plantio e adubação de base
+NEC-032
+Semente 52 kg/ha + MAP 250 kg/ha
+no dia do plantio · DAP 0 →
+15/10
+janela 10–20/10
+Prevista
+Ver plano do talhão
+T1-A
+Soja 58 W · 160 ha
+Herbicida pós-emergente
+NEC-033
+Cletodim 240 0,45 L/ha
+ajuste local 0,36 em revisão
+25 dias após o plantio · DAP +25 →
+09/11
+janela ±3 d
+Aguarda plantio real
+Ver plano do talhão
+T1-B
+Soja 62 X · 152 ha
+Plantio escalonado
+NEC-034
+Semente 52 kg/ha + MAP 250 kg/ha
+no dia do plantio · DAP 0 →
+25/10
+janela 20–30/10
+Prevista
+—
+P1
+Feijão Pérola · 95 ha
+Fungicida R5
+NEC-026
+Fungicida A 0,50 L/ha
+21 dias antes da colheita · colheita prevista 20/10 →
+29/09
+janela ±2 d
+Prevista
+—
+C1
+Café Catuaí 144 · 38 ha
+Adubação pós-colheita
+NEC-019 · ciclo 2025/26
+KCl 60% 150 kg/ha
+30 dias após a colheita · colheita real 12/08 →
+11/09
+janela ±10 d
+Vencida · decidir pendência
+sem compra até a decisão
+Decidir pendência
+Regras do gatilho
+Ver grade de cultivo
+⋯
+Tela: Plano operacional · v4 em rascunho · 1 pendência vencida

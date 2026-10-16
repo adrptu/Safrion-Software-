@@ -1,0 +1,15 @@
+OK    R1a valores editados antes da mudança seguem no Crédito com o nome novo (CAR, módulos fiscais, matrícula e contrato); o nome antigo some
+OK    R1a fazenda criada no CD-01 aparece no Crédito com CAR e matrícula a informar (pendentes)
+OK    R1a seletor "Fazenda ou parceiro" segue o cadastro atual: Santa Rita do Sul, Boa Vista, Lagoa Grande e Fazenda Teste; sem o nome antigo
+OK    R1b os campos movidos saem do cadastro salvo e ficam no Crédito pelo id estável da fazenda (dc_car_SR, dc_mat_SR, dc_arr_BV)
+OK    R1c editar no Crédito, recarregar, salvar a fazenda no CD-01 e voltar: o CAR editado fica, nenhum documento duplica ou volta ao antigo
+OK    R1d a edição do Crédito vence o valor antigo do cadastro, que sai do cadastro sem duplicar o documento
+OK    R2a "A resolver" mostra a fazenda incompleta sem talhões (Fazenda Teste) e a incompleta com talhões em dia (Lagoa Grande); conta 3 (B1 + 2 fazendas)
+OK    R2b B1 (sem polígono) aparece com a Boa Vista como contexto; talhões em dia (T1, PV01) ficam fora; nenhuma área somada ou talhão inventado
+OK    R2c "Todos" recupera tudo (mesmas linhas e abertura de antes) e conta fazendas + talhões (4 + 32 = 36)
+OK    R2d teclado: Enter no chip "A resolver" filtra; Enter na linha da Fazenda Teste abre o painel dela
+OK    R2e 390 px: "A resolver" mostra Fazenda Teste, Lagoa Grande e B1 sem rolagem lateral da página
+OK    R1e 390 px: documentos com o nome atual (Santa Rita do Sul) e o painel do documento abre pelo toque na linha
+OK    R1f CD-01det com cadastro antigo: migra para o Crédito antes de ler (o CAR editado fica no Crédito, sai do cadastro) e abre sem erro
+OK    R0 sem erro de JS
+RESULTADO: 14/14

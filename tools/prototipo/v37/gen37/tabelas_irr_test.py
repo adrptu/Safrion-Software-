@@ -154,7 +154,7 @@ try:
     pn = J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText.replace(/\\s+/g,' ')") or ''
     fv = lambda k: J(f"(document.querySelector('#fx_g_set_{k}')||{{}}).value") or ''
     chk('IR-01 painel (A1, A7): Pivô 2 com fonte do déficit, 2 passadas necessárias, OS-0419 cobre 87 % · resta 1,5 mm, responsável João e Milho · V10',
-        'estação Santa Rita' in fv('defT') and '2 passadas necessárias' in fv('necT') and fv('ordT') == 'OS-0419 · cobre 87 % · resta 1,5 mm' and fv('donoT') == 'João' and fv('cultT') == 'Milho · V10', [fv(k) for k in ('defT', 'necT', 'ordT', 'donoT', 'cultT')])
+        'estação Santa Rita' in fv('defT') and '2 passadas necessárias' in fv('necT') and 'programação 13,4 mm' in fv('necT') and 'bruta 12,44 mm' in fv('necT') and fv('ordT') == 'OS-0419 · cobre 87 % · resta 1,5 mm' and fv('donoT') == 'João' and fv('cultT') == 'Milho · V10', [fv(k) for k in ('defT', 'necT', 'ordT', 'donoT', 'cultT')])
     J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); b&&b.click();})()"); time.sleep(.3)
     fazenda('Todas'); g = Grade(J, 0); hs = g.labels(); d = g.dicts()
     pv2 = sorted(r.get('Fazenda') for r in d if r.get('Setor') == 'Pivô 2')
@@ -320,3 +320,4 @@ finally:
     c.close(); srv.terminate()
 print(f'RESULTADO: {len(OK)}/{len(OK) + len(FAIL)} ok' + (' · FALHAS: ' + '; '.join(FAIL) if FAIL else ''))
 sys.exit(1 if FAIL else 0)
+

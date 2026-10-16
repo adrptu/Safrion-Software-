@@ -1,0 +1,77 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Planejar safra
+‹
+Agrícola
+Planejar safra
+1
+Escolha a safra
+· etapa atual
+em andamento
+4
+2
+Defina cultivos e planos
+· travada: Escolha a safra
+a fazer
+3
+Dimensione operações e recursos
+· travada: Escolha a safra
+a fazer
+4
+Confira a demanda de insumos
+· travada: Escolha a safra
+a fazer
+TRABALHANDO EM
+Todas as fazendas
+Nenhuma safra escolhida
+Escolha a safra
+Criar safra
+Todas 4
+Santa Rita 3
+Lagoa Grande 1
+Agrupar por
+▾
+Colunas
++2
+SAFRA
+⇅
+FAZENDA
+⇅
+PRÓXIMO PASSO
+⇅
+ÁREA
+⇅
+Safra 2026/27
+set/2026 – ago/2027
+Editar
+Santa Rita
+Continuar: aplicar plano em 4 cultivos
+1.165 ha
+Safrinha 2027
+fev – jul/2027
+Editar
+Santa Rita
+Continuar: enviar demanda para cotação
+553 ha
+Safra 2025/26
+set/2025 – ago/2026
+Santa Rita
+Consultar safra
+881 ha
+Safra Mamão 2026/27
+set/2026 – ago/2027
+Editar
+Lagoa Grande
+Continuar: enviar demanda para cotação
+1.285 ha
+Tela: Planejar safra

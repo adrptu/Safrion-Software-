@@ -215,13 +215,15 @@ try:
         kid = "[...document.querySelectorAll('[role=table] [role=row].g2ed.g2kid')].find(r=>/T1/.test(r.innerText))"
         hover(kid); bg = J(f"getComputedStyle({kid}).backgroundColor")
         chk('B5 linha da grade dos Cadastros (T1): hover verde #F2F8F4, não o cinza #F4F6F3', bg == 'rgb(242, 248, 244)', bg)
-        grp = "document.querySelector('.cadx-arv [role=row].g2ed:not(.g2kid)')"
+        # 16/10/2026 (padrão comum dos cadastros): a faixa e o hover próprios da linha de grupo (.cadx-arv, #E8F3EC) saíram com o CADX_CSS; a
+        # linha de grupo que abre detalhe tem o hover verde do motor (.g2ed, #F2F8F4), igual às árvores das outras telas
+        grp = "[...document.querySelectorAll('[role=table] [role=row].g2ed:not(.g2kid)')].find(r=>r.querySelector('.g2car'))"
         for pg in ('CD-01.dc.html', 'CD-02.dc.html', 'CD-06.dc.html', 'CD-07.dc.html'):
             abre(pg)
             if J(f"!!{grp}"): break
         if J(f"!!{grp}"):
-            hover(grp); bg = J(f"getComputedStyle({grp}.querySelector('[role=cell]')).backgroundColor")
-            chk('B6 linha de grupo da árvore dos Cadastros: hover verde (#E8F3EC), não cinza', bg == 'rgb(232, 243, 236)', bg)
+            hover(grp); bg = J(f"getComputedStyle({grp}).backgroundColor")
+            chk('B6 linha de grupo da árvore dos Cadastros: hover verde do motor (#F2F8F4), não cinza', bg == 'rgb(242, 248, 244)', bg)
         else: print('(B6 pulado: nenhuma linha de grupo que abre detalhe nas árvores dos Cadastros)')
         fora(); chk('B7 sem erro de execução', not errs(), errs())
 

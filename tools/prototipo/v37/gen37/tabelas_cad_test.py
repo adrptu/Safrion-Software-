@@ -285,8 +285,10 @@ try:
     c.aparelho(1440, 900, 1, False)
     abre('Main.dc.html', .3); J("localStorage.clear(); sessionStorage.clear()")
     # ================= CD-01 Talhões =================
-    abre('CD-01.dc.html'); aba('Talhões'); g = Grade(J, 0)
-    d = tf03('CD-01 Talhões', g, ['Fazenda › talhão', 'Situação', 'Sistema', 'Área cultivável', 'Polígono', 'Diferença', 'Parcelas na safra 2026/27'])
+    # 16/10/2026 (proprietário: "fazendas e talhoes na mesma tela, conectados e intuitivos"): uma árvore só, com a fazenda na linha-pai; as
+    # colunas da fazenda (posse, área total, talhões ativos) entram ao lado das do talhão
+    abre('CD-01.dc.html'); aba('Fazendas e talhões'); g = Grade(J, 0)
+    d = tf03('CD-01 Fazendas e talhões', g, ['Fazenda › talhão', 'Situação', 'Posse', 'Área total', 'Área cultivável', 'Talhões', 'Sistema', 'Polígono', 'Diferença', 'Parcelas na safra 2026/27'])
     t1 = next((r for r in d if r.get('Fazenda › talhão') == 'T1'), {}); p1 = next((r for r in d if r.get('Fazenda › talhão') == 'P1'), {})
     pv = next((r for r in d if r.get('Fazenda › talhão', '').startswith('PV')), {})
     chk('CD-01: T1 Sequeiro | 312,0 ha | 312,4 ha | +0,1 % | 2 parcelas (número) | Em dia; P1 Pivô central',
@@ -304,8 +306,11 @@ try:
     chk('CD-01 Água (defeito): a outorga do ponto 1 aparece como Outorga (antes "Certidão"); o ponto 6 é Certidão', a1.get('Documento') == 'Outorga' and a6.get('Documento') == 'Certidão', (a1, a6))
     chk('CD-01 Água: ponto 1 = Captação superficial | Rio A | 180 m³/h | 30/04/2031 | Vigente',
         [a1.get(k) for k in ('Uso', 'Curso d’água', 'Vazão', 'Vencimento', 'Situação')] == ['Captação superficial', 'Rio A (demonstração)', '180 m³/h', '30/04/2031', 'Vigente'], a1)
-    fx = J("[...document.querySelectorAll('.cadx-faixa')].filter(x=>x.offsetParent).map(x=>x.innerText.replace(/\\s+/g,' ')).join(' | ')") or ''
-    chk('CD-01 Água (defeito): a faixa "precisa de atenção" diz Outorga SINT-003/0000 (antes "Certidão SINT-003/0000")', 'Outorga SINT-003/0000' in fx and 'Certidão SINT-003' not in fx, fx[:200])
+    # 16/10/2026 (padrão comum, TAB-06/07): a faixa "precisa de atenção" saiu; o documento a renovar fica na linha (Documento e Situação)
+    # a Situação traz, depois de " : ", a dica do selo (texto do leitor de tela) com o número e o vencimento do documento a renovar
+    fx = J("document.querySelectorAll('.cadx-faixa,.cadx-aviso').length"); ren = [r for r in d if r.get('Situação', '').split(' : ')[0] in ('Vencida', 'Vence em 90 dias', 'Em renovação')]
+    chk('CD-01 Água: sem faixa fora da tabela; as outorgas a renovar aparecem na linha com o documento e a situação', fx == 0 and ren and all(r.get('Documento') in ('Outorga', 'Certidão')
+        and (' : ' + r.get('Documento') + ' SINT-') in r.get('Situação', '') for r in ren), (fx, ren[:2]))
     g.ordena('Vazão'); vz = [x for x in g.col('Vazão') if x != '—']; m3 = [num(x) * (3.6 if x.endswith('L/s') else 1) for x in vz]
     chk('CD-01 Água: ordenar Vazão pelo valor em m³/h (L/s × 3,6), com a unidade do documento na célula', crescente(m3) and any(x.endswith('L/s') for x in vz), vz)
     g.ordena('Vencimento'); vc = [instante(x) for x in g.col('Vencimento') if x != '—']
@@ -421,8 +426,10 @@ try:
            J("(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or '']
     J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); b&&b.click();})()"); time.sleep(.3)
     # acesso ao app: só leitura no painel, gerido em Configurações (CONF-D05, v57); antes da CONF era um campo do formulário
-    chk('CD-04 (A1): calendário e acesso ao app no painel da pessoa (saíram da grade); o acesso só se lê aqui e se gerencia em Configurações',
-        cal[0] == 'Da equipe' and cal[1] is False and 'Acesso ao app: ' in cal[2] and 'gerenciar em Configurações › Usuários e alçadas' in cal[2], [cal[0], cal[1], cal[2][-300:]])
+    # 16/10/2026 (proprietário: "elimine campos dos formularios de cadastro que não sejam essenciais", CAD-02): o calendário da pessoa saiu do
+    # formulário (nenhuma tela o lia; jornada e capacidade usam o da equipe)
+    chk('CD-04 (A1): calendário fora da grade e do painel da pessoa (vale o da equipe); acesso ao app no painel; o acesso só se lê aqui e se gerencia em Configurações',
+        cal[0] is None and cal[1] is False and 'Acesso ao app: ' in cal[2] and 'gerenciar em Configurações › Usuários e alçadas' in cal[2], [cal[0], cal[1], cal[2][-300:]])
     rr = g.rotulos('Habilidades')
     chk('CD-04: o filtro de Habilidades oferece cada habilidade (não a lista inteira da célula)', rr and 'Operar trator' in rr and not any(',' in x for x in rr), rr)
     g.filtra('Habilidades', ['Operar trator']); fl = sorted(r.get('Pessoa') for r in g.dicts())
@@ -500,7 +507,7 @@ try:
     chk('CD-07: filtro Situação = Dimensão própria → culturas e processos (9)', fl == {'Dimensão própria'} and len(g.dicts(True)) == 9, len(g.dicts(True)))
     limpa(J); shot('cd07-1440')
     # A8: depois de publicar, "No rascunho" sai (não fica uma coluna vazia em todas as linhas); com rascunho novo, volta
-    J("(()=>{const c=[...document.querySelectorAll('.cadx-aviso')].find(c=>c.innerText.indexOf('Publicar estrutura')>=0); c&&c.click();})()"); time.sleep(.6)
+    J("(()=>{const c=[...document.querySelectorAll('header button')].find(c=>c.innerText.indexOf('Publicar versão')>=0); c&&c.click();})()"); time.sleep(.6)   # 16/10: no cabeçalho (antes na faixa)
     h_pub = g.labels(); al7 = g.desalinhadas()
     chk('CD-07 (A8): depois de "Publicar estrutura", a coluna "No rascunho" sai e as células seguem sob os cabeçalhos', h_pub == CD7[:-1] and al7 == 0, (h_pub, al7))
     # A1: a Situação à vista sem rolar a grade a 1440 e 1280 px; a 1440 px as grades cabem na caixa (o CD-05 rola só os contatos, no fim)
@@ -509,7 +516,7 @@ try:
     larg = []
     for w in (1440, 1280):
         c.aparelho(w, 900, 1, False)
-        for pg, tabs in (('CD-01.dc.html', ['Talhões', 'Água']), ('CD-01det.dc.html#talhao=T1', ['']), ('CD-02.dc.html', ['Culturas', 'Operações']), ('CD-03.dc.html', ['']),
+        for pg, tabs in (('CD-01.dc.html', ['Fazendas e talhões', 'Água']), ('CD-01det.dc.html#talhao=T1', ['']), ('CD-02.dc.html', ['Culturas', 'Operações']), ('CD-03.dc.html', ['']),
                          ('CD-04.dc.html', ['Pessoas']), ('CD-05.dc.html', ['Parceiros']), ('CD-06.dc.html', ['Itens', 'Locais']), ('CD-07.dc.html', [''])):
             abre(pg)
             for tb in tabs:
@@ -522,7 +529,7 @@ try:
     ERRS.extend(J("window.__errs") or []); chk('sem erro de script (1440)', not ERRS, ERRS[:3])
     # ================= 390 px =================
     c.aparelho(390, 844, 2, True); r390 = []
-    for pg, tabs in (('CD-01.dc.html', ['Talhões', 'Água']), ('CD-01det.dc.html#talhao=T1', ['']), ('CD-02.dc.html', ['Culturas', 'Operações']), ('CD-03.dc.html', ['']),
+    for pg, tabs in (('CD-01.dc.html', ['Fazendas e talhões', 'Água']), ('CD-01det.dc.html#talhao=T1', ['']), ('CD-02.dc.html', ['Culturas', 'Operações']), ('CD-03.dc.html', ['']),
                      ('CD-04.dc.html', ['Pessoas']), ('CD-05.dc.html', ['Parceiros', 'Cobertura']), ('CD-06.dc.html', ['Itens', 'Locais']), ('CD-07.dc.html', [''])):
         abre(pg)
         for tb in tabs:

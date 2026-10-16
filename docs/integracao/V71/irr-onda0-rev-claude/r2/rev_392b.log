@@ -1,0 +1,77 @@
+OK    V1a OS-0419 inicia (Em execução); déficit do P2 antes = 11,2 mm; cabeçalho "Registrar término antecipado" 
+OK    V1b painel abre sem área e sem leitura pré-preenchidas (nenhuma "Volta completa" marcada) 
+OK    V1c antes do fim previsto: "Término antecipado" e rótulo "simulado" 
+OK    V1d confirmar logo depois, sem área e sem leitura: recusado junto dos campos, nada gravado 
+OK    V1e só a área (sem leitura): recusado; a leitura nunca vem da estimativa 
+OK    F1a 10 ha a 0 min de bombeamento: campo de motivo visível e gravar sem motivo é recusado, nada gravado 
+OK    V1f término antecipado grava só o informado (Parcial, 10 ha, 1.000 m³) e o motivo 
+OK    V1g trilha "Término antecipado (simulado) · … tempo incompatível a conferir · motivo"; Em conferência com selo "Área e tempo a conferir" 
+OK    V1h/F1b nada creditado antes da validação: sem aplicação da OS-0419 e déficit do P2 segue 11,2 mm 
+OK    F1c conferência: pede motivo mesmo dentro da tolerância (−7,5 %) e avisa "área e tempo a conferir" 
+OK    F1d validar sem motivo é recusado 
+OK    F1e validado com motivo: encerra e credita só a faixa (1.000 m³ em 10 ha); quem e motivo gravados 
+OK    F1f 80 ha e 8.480 m³ a 0 h: motivo pedido na tela e gravar sem ele é recusado (nada gravado) 
+OK    F1g com motivo: Em conferência, sem crédito; P2 segue 11,2 mm (não 1,7) 
+OK    F1h após 60 min bombeando, 5 ha (≤ 80 × 60/871 = 5,51 ha) e 540 m³: sem motivo, grava e credita a faixa 
+     F1h: OS-0419 conferida e encerrada · 540 m³ = 10,8 mm na faixa de 5 ha (−0,1 %, tolerância 3 %) · déficit do Pivô 2 agora 11,2 mm (faixa de 5,0 ha: 1,5 mm).
+OK    V2a início hoje 20:02 (1202 min) e o relógio global não muda (06:12 = 372) 
+OK    V2b Pausar: selo Pausada, etapa Em execução, primária Retomar irrigação 
+OK    V2c pausada: o link direto de término não abre o painel 
+OK    V2d Retomar: sem selo Pausada, primária de término, pausa fechada; relógio global segue 372 
+OK    V2e nada creditado entre início, pausa e retomada 
+     V2 horários: início 1202 · pausa 1262 → 1270 · término 1270 · trilha [(1262, 'Pausa · selo Pausada · etapa preservada'), (1270, 'Retomada'), (1270, 'Término antecipado (simulado) · 1,0 h de bombeamento · área informada '), (1271, 'Área e tempo a conferir · crédito pendente até validação do irrigante/')]
+OK    V2f término depois da retomada (início ≤ pausa ≤ retomada ≤ término) e "1,0 h de bombeamento" (pausa descontada) 
+OK    V2g 30 ha em 60 min pede motivo; com ele, sem crédito até conferir 
+OK    F2a depois de iniciar a OS-0419 (20:02), a OS-0423 inicia às 15:02, dentro da janela 15:00–17:00; relógio global 372 
+OK    V3a Santa Rita · Pivô 2: passadas de 6,7 mm (ficha a 100 %) e 9,0 h 
+     P2: DÉFICIT HOJE 11,2 mm LÂMINA BRUTA 13,4 mm (eficiência 90 %) PASSADAS 2 de 6,7 mm · limite 12,0 mm VOLUME E DURAÇÃO 10.720 m³ · 9,0 h por passada Tarefa única OS-0419 já existe · Liberadas · hoje 20:00–amanhã 10:31 · nenhuma ordem nova. Cancelar Abrir OS-0419
+OK    V3b Lagoa Grande · PV19: 1 passada de 7,21 mm (ficha demonstrativa) e 16,0 h 
+     PV19: DÉFICIT HOJE 2,4 mm LÂMINA BRUTA 7,21 mm (eficiência 85 %) PASSADAS 1 de 7,21 mm · limite 8,0 mm VOLUME E DURAÇÃO 5.415 m³ · 16,0 h JANELA SUGERIDA sem janela livre em 5 dias Bloqueia · Janela a definir · Joaquim Aviso · Abaixo do limiar · déficit 2,4 de 9,0 mm Cancelar Programar
+OK    V3c ordem do PV19 nasce com a lâmina e a duração da ficha (7,21 mm · 960 min) 
+OK    V3d limite 5 mm < 7,21 mm da ficha: bloqueio com motivo e sem "Programar" 
+OK    S4a IR-01 Pivô 2: necessidade bruta 12,44 mm e programação 13,4 mm explicada no detalhe 
+OK    V4a −3,8 %: primária "Aceitar com motivo" e secundária "Devolver para conferir o hidrômetro" 
+OK    V4b Ana sem motivo: recusada junto do campo, leitura 1206 preservada, nada gravado 
+OK    V4c Rui (almoxarife) com motivo: recusado, nada gravado 
+OK    V4d Rui também não devolve 
+OK    V4e Ana com motivo: encerra; motivo e quem na conferência e na trilha 
+OK    V4f João (irrigante) devolve: segue Em conferência, medição e crédito provisório preservados, selo Devolvida 
+OK    V4g devolvida: a conferência reabre com "Aceitar com motivo" (a devolução não fecha nada) 
+OK    F3a 1.291,6 m³ (+3,0017 % sobre 1.253,96): a tela pede motivo e o comando recusa sem ele 
+OK    F3b com motivo encerra com 1.291,6 m³ gravado com precisão 
+OK    F3c 1.253 m³ (−0,08 %): sem campo de motivo, "Validar e encerrar" encerra 
+OK    S4b zero medido aparece como medido: "0 m³ medidos" e "0 × … m³ estimados" 
+OK    V5a só água: liberada pela prontidão, sem agrônomo, e o irrigante inicia 
+OK    V5b com produto (v2): volta a exigir a agrônoma na O.S.; "Iniciar irrigação" sai da tela 
+OK    V6a Tab chega a "Iniciar irrigação" com foco visível 
+OK    V6b Enter inicia 
+OK    V6c Enter no término do cabeçalho abre o painel com o foco dentro (na área real) 
+OK    V6d Esc sem alteração fecha e o foco volta ao gatilho 
+OK    V6d2 Tab da leitura leva ao motivo (campo do F1 na ordem do teclado) 
+OK    V6e Esc com rascunho pede confirmação e preserva o digitado (área, leitura e motivo) 
+OK    V6f Tab até a primária do painel com foco visível 
+OK    V6g Espaço registra o término antecipado (12 ha, 1.200 m³, com motivo) e o painel fecha 
+     foco após gravar: {'t': 'Conferir medição', 'id': '', 'vis': True, 'ol': 'solid 2px', 'bs': 'rgba(30, 122, 76, 0.25) 0px 1px 2px 0px', 'dlg': False}
+OK    V6h Enter em "Conferir medição" abre o painel com o foco na leitura 
+OK    V6i Tab leva ao motivo 
+OK    V6j Espaço em "Aceitar com motivo" (foco visível) encerra com o motivo digitado 
+OK    V7a 390 px sem rolagem horizontal da página: IR-01, IR-02 (painel), IR-03det (página e painel de término) 
+OK    V7b toque inicia e abre o término; Iniciar, término, Registrar e Cancelar com alvo ≥ 44 px dentro da tela 
+OK    V7c toque registra o término antecipado (5 ha, 500 m³, motivo); campo de motivo dentro da tela 
+OK    V7d 390 px: painel de conferência sem rolagem lateral; Devolver e Aceitar ≥ 44 px dentro da tela 
+OK    V7e toque em "Aceitar com motivo" encerra 
+OK    P1 recarregar com o painel de término preenchido: nada gravado pela metade; segue Em execução, painel fechado 
+OK    P1b o link #termino reabre o painel vazio (rascunho não vira fato) 
+OK    P2 recarregar pausada: segue Pausada com "Retomar irrigação" 
+OK    P3 recarregar e voltar à lista: pendência "Área e tempo a conferir" persiste, sem crédito 
+ACHADO Q1 o irrigante que registrou a volta incompatível não deveria validar sozinho a própria conferência {'etapa': 'Encerradas', 'credito': [{'vol': 8480, 'cob': 80}], 'conf': {'med': 8480, 'est': 8648, 'dv': -1.942645698427382, 'st': 'Hidrômetro prevaleceu', 'q': 1203, 'motivo': 'Eu mesmo conferi (sintético)', 'quem': 'João'}, 'tempoConferido': {'quem': 'João', 'motivo': 'Eu mesmo conferi (sintético)', 'q': 1203}}
+     Q2 Rui iniciou: OS-0419 Em execução · início hoje 20:02 (EX-5120) · término previsto amanhã 10:33. · término: OS-0419 Em conferência · confira área, tempo e medição; sem crédito da passada incompatível no balanço. · etapa Em conferência
+OK    Q3 avanço de 80 ha a +30 min não dispensa o motivo do término incompatível 
+     Q4 gotejo T7 42 ha após 60 min de 120: motivo pedido = True · Retomada às 16:10 · término previsto hoje 17:10.
+OK    V8a estado salvo na base abre igual (OS-0394 encerrada, OS-0423 liberada, OS-0419 em execução com a pausa) 
+OK    V8b sem erro de JavaScript ao abrir o cenário salvo 
+OK    F2b a OS-0419 em execução do cenário salvo termina (20 ha, 2.000 m³; motivo se pedido), sem "Avance a simulação" 
+OK    F2c no cenário salvo, a OS-0423 inicia na sua janela (15:02) 
+OK    V9 sem erro de JavaScript nas páginas percorridas 
+ACHADOS (contraexemplos do revisor): 0 ok · 1 achados ['Q1 o irrigante que registrou a volta incompatível não deveria validar sozinho a própria conferência']
+RESULTADO: 67/67

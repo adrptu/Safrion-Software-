@@ -1,0 +1,19 @@
+rc=0 659s tab_drill_cab_test.py :: RESULTADO: 6 ok · 0 falhas
+rc=0 235s ds_modulos.py --catraca :: RESULTADO: catraca ok
+rc=1 1s ds_inventario.py --catraca :: RESULTADO: SUBIU: os_campo.py tabela 0→1
+rc=0 256s ds_1610_test.py :: RESULTADO: 14 ok · 0 falhas
+rc=0 69s tabelas_os_test.py :: RESULTADO: 40/40 ok
+rc=0 1s ex38_test.py :: 17/17 cenários Node; P3: 400 combinações
+rc=0 53s os_cenario_test.py :: RESULTADO: 22/22 ok
+rc=0 145s irr_fluxo_test.py :: 34 ok · 0 falhas []
+rc=0 14s irr_estado_test.py :: 38 ok · 0 falhas []
+rc=1 216s tabelas_irr_test.py :: RESULTADO: 98/106 ok · FALHAS: TABR-CTX-02 1440 clique IR-01 topo = Lagoa Grande: a coluna Fazenda sai com o filtro dela (sem chip "faz: Santa Rita"); a Situação e a busca ficam e a lista é da Lagoa Grande; TABR-CTX-02 1440 clique IR-01 topo = Todas: a coluna Fazenda volta sem o filtro antigo (antes voltava "Fazenda: Santa Rita" e escondia a Lagoa Grande); Situação e busca ficam; TABR-CTX-02 1440 teclado IR-01 topo = Lagoa Grande: a coluna Fazenda sai com o filtro dela (sem chip "faz: Santa Rita"); a Situação e a busca ficam e a lista é da Lagoa Grande; o foco fica no seletor; TABR-CTX-02 1440 teclado IR-01 topo = Todas: a coluna Fazenda volta sem o filtro antigo (antes voltava "Fazenda: Santa Rita" e escondia a Lagoa Grande); Situação e busca ficam; TABR-CTX-02 390 px clique IR-01 topo = Lagoa Grande: a coluna Fazenda sai com o filtro dela (sem chip "faz: Santa Rita"); a Situação e a busca ficam e a lista é da Lagoa Grande; TABR-CTX-02 390 px clique IR-01 topo = Todas: a coluna Fazenda volta sem o filtro antigo (antes voltava "Fazenda: Santa Rita" e escondia a Lagoa Grande); Situação e busca ficam; TABR-CTX-02 390 px teclado IR-01 topo = Lagoa Grande: a coluna Fazenda sai com o filtro dela (sem chip "faz: Santa Rita"); a Situação e a busca ficam e a lista é da Lagoa Grande; o foco fica no seletor; TABR-CTX-02 390 px teclado IR-01 topo = Todas: a coluna Fazenda volta sem o filtro antigo (antes voltava "Fazenda: Santa Rita" e escondia a Lagoa Grande); Situação e busca ficam
+rc=0 150s cadastros_rev1_test.py :: RESULTADO: 19/19
+rc=0 25s credito_menu_test.py :: RESULTADO: 16/16
+rc=0 195s solo_saf_test.py :: RESULTADO: OK 36/36
+rc=0 529s cartoes_test.py :: RESULTADO: 70/70
+rc=0 0s pa_regras_test.py :: RESULTADO 18/18
+rc=0 185s saf_operacoes_test.py :: RESULTADO: 87 ok · 0 falhas (tudo)
+rc=0 571s tabelas_cad_test.py :: RESULTADO: 206/206 ok
+rc=0 400s paginas_scan_test.py :: RESULTADO: 5 ok · 0 falhas (148 páginas)
+FIM

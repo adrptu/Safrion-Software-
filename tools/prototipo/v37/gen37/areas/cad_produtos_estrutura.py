@@ -18,7 +18,7 @@ import dados_cad as DC
 from areas.cadastros import (sel, num, txt, dat, cond, R, js, _itens, CULTIVARES)
 from areas.cad_culturas import CADC_JS
 from areas.cad_ativos_pessoas import CAPCOL_JS   # TABR-CTX-01: capacidade que muda de grandeza (a mesma do CD-03)
-from areas.cadastros import (cadx_css, abas, pane, faixa, prim, secbtn, qf_chips, bloco_cad, estado_cab, acoes_form, arv)
+from areas.cadastros import (abas, pane, se, secbtn, prim_cab, QF_CAD, bloco_cad, estado_cab, acoes_form)
 
 H=lambda s: '{{'+s+'}}'
 for _f in ('CD-06.dc.html','CD-07.dc.html'): ui37.H_OVR.pop(_f,None)   # layout novo: a altura vem de HEIGHTS37
@@ -80,8 +80,7 @@ def cd06():
     # revisão TABR (A1, 09/10): a Situação logo depois do item, à vista sem rolar; o controle (lote e validade) no painel do item
     gi=grid([dict(k='item',l='Grupo › item',w=220),dict(k='est',l='Situação',w=200),dict(k='nat',l='Natureza de custo',w=170),dict(k='un',l='Unidade'),dict(k='embt',l='Embalagem',w=130),
              dict(k='preco',l='Preço de referência',t='num',a='r',w=140),dict(k='pdata',l='Data do preço',t='date')],
-        tree,gid='g_itm',tree=True,dele=False,total=False,frame=False,x0={r['id']:True for r in tree},
-        tools=qf_chips('g_itm')+prim('g_itm_new','Cadastrar item'),
+        tree,gid='g_itm',tree=True,dele=False,total=False,x0={r['id']:True for r in tree},qf=QF_CAD,
         edit=dict(m='form',title='Item',newTitle='Cadastrar item',
             sub='Altere o item. O saldo não se edita aqui: nasce de recebimentos e movimentos no Estoque.',
             fields=[txt('item','Nome do item'),
@@ -112,15 +111,16 @@ def cd06():
     # capacidade como número (ordena) com a unidade na célula: tanque em L, silo em sc de 60 kg (o ativo de origem fica no painel do local).
     # Revisão TABR (A4, 09/10): L e sc são grandezas diferentes; a coluna entra quando o filtro de Tipo escolhe Tanque ou Silo
     gl=grid([dict(k='nome',l='Local'),dict(k='faz',l='Fazenda'),dict(k='tipo',l='Tipo'),dict(k='itens',l='Itens com este local padrão',t='num',a='r')],
-        lrows,gid='g_loc',qf=dict(k='tipo',todas='Todos'),dele=False,total=False,search=True,frame=False,tools=prim('g_loc_new','Cadastrar local'),
+        lrows,gid='g_loc',qf=dict(k='tipo',todas='Todos'),dele=False,total=False,search=True,
         edit=dict(m='form',title='Local',newTitle='Cadastrar local',sub='Altere o local de estoque. Local com itens não pode ser excluído.',
             fields=[txt('nome','Nome do local'),sel('faz','Fazenda',[f['nome'] for f in DC.FAZENDAS],**{'def':'Santa Rita'}),
                     sel('tipo','Tipo',['Galpão','Almoxarifado','Câmara fria','Tanque','Silo','Armazém'],**{'def':'Galpão'}),
                     num('cap','Capacidade do tanque','L',min=1,cond=cond('tipo','Tanque')),
                     dict(k='capa',l='Capacidade do silo',ro=True,cond=cond('tipo','Silo'),help='Vem do ativo em Máquinas, instalações e setores.')]))
     # um bloco com abas: Itens (árvore grupo › item) | Locais de estoque; exclusão e saldo no painel de cada registro
-    acoes_form('g_itm'); acoes_form('g_loc'); cadx_css()
-    corpo=bloco_cad(abas('c6t',['Itens','Locais de estoque'],'Cadastros de produtos'),pane('c6t',0,faixa('c6_fx0')+arv(gi))+pane('c6t',1,gl),'Produtos, unidades e locais')
+    # padrão comum (16/10/2026): a primária no cabeçalho segue a aba (Criar item | Criar local); o que falta fica na linha e no "A resolver"
+    acoes_form('g_itm'); acoes_form('g_loc')
+    corpo=bloco_cad(abas('c6t',['Itens','Locais de estoque'],'Cadastros de produtos'),pane('c6t',0,gi)+pane('c6t',1,gl),'Produtos, unidades e locais')
     dados=json.dumps(dict(receita=RECEITA,defg=next(r['id'] for r in g_rows if r['v']['nome']=='Fertilizantes'),
                           defl=next(l[0] for l in DC.LOCAIS if l[1]=='Galpão 2')),ensure_ascii=False)
     js({},CADC_JS+CAPCOL_JS+f"const C6={dados}; const OUTRO_G={json.dumps(OUTRO_G,ensure_ascii=False)};\n"+r'''
@@ -172,13 +172,9 @@ function EXTRAVALS(self,v){
   const its=leaves(RW(self,'g_itm')).filter(r=>!/^GR/.test(r.id));
   const semP=its.filter(r=>r.v.sit!=='Inativo'&&r.v.custo&&!isnum(r.v.preco)).length, semE=its.filter(r=>r.v.sit!=='Inativo'&&!c6emb(r.v)).length;
   cadEstado(v,'c6e',[semP?semP+(semP>1?' itens':' item')+' sem preço':'',semE?semE+(semE>1?' itens':' item')+' sem embalagem':''].filter(Boolean).join(' · ')||'Cadastro completo',(semP||semE)?'yellow':'green');
-  cadAbas(self,v,'c6t','c6aba',[{slug:'itens',n:its.length,cor:(semP||semE)?'yellow':''},{slug:'locais',n:RW(self,'g_loc').length,cor:''}]);
+  const aba=cadAbas(self,v,'c6t','c6aba',[{slug:'itens',n:its.length,cor:(semP||semE)?'yellow':''},{slug:'locais',n:RW(self,'g_loc').length,cor:''}]);
+  cadPrim(v,aba===1?'Criar local':'Criar item',aba===1?v.g_loc_new:v.g_itm_new);
   cadQfPos(self,v,'g_itm','c6qf'); cadConta(self,v,'g_itm');
-  const pL=its.filter(r=>r.v.sit!=='Inativo'&&r.v.custo&&!isnum(r.v.preco)), eL=its.filter(r=>r.v.sit!=='Inativo'&&!c6emb(r.v)), res=()=>self.setState({c6qf:'res'});
-  cadFaixa(v,'c6_fx0',[pL.length?{n:pL.length,rot:pL.length>1?'itens sem preço de referência':'item sem preço de referência',reg:pL.map(r=>r.v.item).join(', '),verbo:'Informar preço',
-                         go:pL.length===1?()=>cadcAbrir(self,'g_itm',pL[0].id):res}:null,
-                       eL.length?{n:eL.length,rot:eL.length>1?'itens sem embalagem':'item sem embalagem',reg:eL.map(r=>r.v.item).join(', '),verbo:'Informar embalagem',
-                         go:eL.length===1?()=>cadcAbrir(self,'g_itm',eL[0].id):res}:null],res);
   c6pais(self).forEach(p=>{ v['c6g_'+p.id]=()=>g2open(self,GR('g_grp'),p.id,null); });
   // linha do item abre só com os valores gravados: item sem preço abre o campo vazio ('Sem preço' fica no chip da tabela)
   its.forEach(r=>{ v['c6i_'+r.id]=()=>cadcAbrir(self,'g_itm',r.id); });
@@ -222,7 +218,7 @@ function EXTRAVALS(self,v){
     self.setState({g2toast:'Salvo: '+r.v.item+' · '+msg.join(' · ')+'.'}); }; }
 ''')
     HEIGHTS37[fname]=1000   # sem rolagem de página: só a tabela da aba rola
-    shell37('CD-06','Produtos, unidades e locais',corpo,fname=fname,status=None,primary_html=None,search=False)
+    shell37('CD-06','Produtos, unidades e locais',corpo,fname=fname,status=None,primary_html=prim_cab(),search=False)
     estado_cab(fname,'Produtos, unidades e locais','c6e')
     from areas.cadastros import ncol_dinamico
     ncol_dinamico(fname,[None,'c6l_ncol'])   # a capacidade dos locais entra com o filtro Tanque ou Silo
@@ -268,8 +264,8 @@ def cd07():
     # rascunho (A8: depois de publicar ela ficava vazia em todas as linhas)
     g=grid([dict(k='cod',l='Dimensão › código',w=170),dict(k='est',l='Situação',w=170),dict(k='nome',l='Nome',w=170),dict(k='ini',l='Início da vigência',t='date'),
             dict(k='fim',l='Fim da vigência',t='date'),dict(k='conta',l='Conta no ERP (Sankhya)',w=150),dict(k='rasc',l='No rascunho',w=110)],
-        tree,gid='g_dim',tree=True,dele=False,total=False,frame=False,x0={r['id']:True for r in tree},
-        tools=qf_chips('g_dim')+secbtn('c7imp','Importar do ERP','Simulação: mostra a prévia antes de trazer qualquer código')+prim('g_dim_new','Cadastrar código'),
+        tree,gid='g_dim',tree=True,dele=False,total=False,x0={r['id']:True for r in tree},qf=QF_CAD,
+        tools=secbtn('c7imp','Importar do ERP','Simulação: mostra a prévia antes de trazer qualquer código'),
         edit=dict(m='form',title='Código',newTitle='Cadastrar código',leafOnly=True,
             sub='Altere o código e a tradução. A mudança entra no rascunho e vale para novos lançamentos depois de publicada; fatos já gravados mantêm as dimensões da época.',
             fields=[txt('cod','Código'),txt('nome','Nome'),sel('dim','Dimensão',DIMS_MANUAIS,**{'def':'Natureza'},help='Cada código em uma dimensão: nunca combine fazenda, cultura e processo num único centro.'),
@@ -283,9 +279,11 @@ def cd07():
                     sel('trad','Tradução no ERP',TRAD,**{'def':'Conta do ERP'},help='Dimensão própria segue no lançamento e é traduzida pela integração, sem conta fixa.'),
                     txt('conta','Conta ou centro no ERP',req=False,cond=cond('trad','Conta do ERP'),help='Em branco, o código fica fora da publicação até ser mapeado. Exemplo: pulverização na soja do T1 = empresa 01 + natureza 3.1.02 + CR-SR + cultura SOJA + processo TRAT + talhão T1 → conta 4.1.1.02 · TOP 1201.'),
                     txt('top','Tipo de operação (TOP) no ERP',req=False,cond=cond('trad','Conta do ERP'))]))
-    # um bloco (sem abas: a dimensão é o 1º nível da árvore). Na faixa: publicar o rascunho e traduzir o que falta; Importar do ERP na barra
-    acoes_form('g_dim'); cadx_css()
-    corpo=bloco_cad('',faixa('c7_fx')+f'<div style="padding: 0 16px;">{_imp_html()}</div>'+arv(g),'Estrutura gerencial')
+    # um bloco (sem abas: a dimensão é o 1º nível da árvore); Importar do ERP é ferramenta da tela, na barra da grade (TAB-01).
+    # Padrão comum (16/10/2026): "Criar código" no cabeçalho (BOT-01); "Publicar versão vN" (o próximo passo do rascunho, antes na faixa de
+    # atenção) fica no cabeçalho como secundária, só com rascunho aberto (BOT-06); a tradução que falta fica na linha e no "A resolver"
+    acoes_form('g_dim')
+    corpo=bloco_cad('',_imp_html()+g,'Estrutura gerencial',titulo='Códigos por dimensão')
     dados=json.dumps(dict(ver=VERSAO,mud=V6_MUD,imp=IMP,dims=DC.DIMS),ensure_ascii=False)
     js({},CADC_JS+f"const C7={dados};\n"+r'''
 function c7rm(list,id){ const i=list.findIndex(x=>x.id===id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&c7rm(x.kids,id)); }
@@ -347,11 +345,8 @@ function PREVALS(self,v){ cadActsIni(self); const mud=c7mud(self); const cods=c7
 function EXTRAVALS(self,v){ const ver=c7ver(self), mud=c7mud(self), n=Object.keys(mud).length, pend=c7pend(self).length;
   cadEstado(v,'c7e','v'+ver+' em vigor'+(n?' · rascunho v'+(ver+1)+' com '+n+(n===1?' alteração':' alterações'):'')+(pend?' · '+pend+(pend===1?' tradução pendente':' traduções pendentes'):''),(n||pend)?'yellow':'green');
   cadQfPos(self,v,'g_dim','c7qf'); cadConta(self,v,'g_dim');
-  // faixa: o próximo passo do rascunho (publicar) e a tradução que falta; a exclusão vai para o painel do código (entra no rascunho)
-  const pl=c7pend(self);
-  cadFaixa(v,'c7_fx',[n?{n:n,rot:(n===1?'alteração':'alterações')+' no rascunho v'+(ver+1),reg:'v'+ver+' segue em vigor até publicar',verbo:'Publicar estrutura',cor:'yellow',go:()=>v.c7pub()}:null,
-                      pend?{n:pend,rot:pend===1?'tradução pendente':'traduções pendentes',reg:pl.map(r=>r.v.cod+' · '+r.v.nome).join(', '),verbo:'Traduzir no ERP',cor:'yellow',
-                            go:pend===1?()=>g2open(self,GR('g_dim'),pl[0].id,null):()=>self.setState({c7qf:'res'})}:null]);
+  // o próximo passo do rascunho (publicar) no cabeçalho, como secundária, só com rascunho aberto; a exclusão fica no painel do código
+  v.c7pub_tem=n>0; v.c7pub_t='Publicar versão v'+(ver+1); v.c7pub_go=()=>v.c7pub();
   // código vindo do CD-02 (Cultura, Processo): só a tradução é editável
   const F=v.g_dim_F; const fm=g2st(self,'g_dim').fm;
   if(F&&F.open&&fm&&fm.rid&&mud[fm.rid]==='excluído') F.sub='Excluído no rascunho v'+(ver+1)+': o código sai da estrutura quando a versão for publicada; até lá, só consulta.';
@@ -393,7 +388,8 @@ function EXTRAVALS(self,v){ const ver=c7ver(self), mud=c7mud(self), n=Object.key
       +(exc.length?' · '+exc.length+(exc.length>1?' códigos excluídos':' código excluído'):'')+' · v'+ver+' preservada'+(pend.length?' · fora até ter conta: '+pend.map(r=>r.v.cod).join(', '):'')+'.'}); }; }
 ''')
     HEIGHTS37[fname]=1000   # sem rolagem de página: só a árvore rola
-    shell37('CD-07','Estrutura gerencial',corpo,fname=fname,status=None,primary_html=None,search=False)
+    pub=se('c7pub_tem',f'<button type="button" data-acao="publicar" onClick="{H("c7pub_go")}" style="{E.BTN_ST(False)}">{H("c7pub_t")}</button>')
+    shell37('CD-07','Estrutura gerencial',corpo,fname=fname,status=None,primary_html=pub+prim_cab('Criar código','g_dim_new'),search=False)
     estado_cab(fname,'Estrutura gerencial','c7e')
     from areas.cadastros import ncol_dinamico
     ncol_dinamico(fname,['c7_ncol'])   # "No rascunho" entra e sai com o rascunho

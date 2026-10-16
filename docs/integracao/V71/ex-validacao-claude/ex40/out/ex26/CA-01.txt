@@ -1,0 +1,200 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Fazenda Santa Rita
+Safra 2026/27
+Campo › Ordens de campo
+Ordens de campo
+i
+2 em execução · 2 impedidas
+Preparar e emitir período
+A liberar
+5 3 com produto · 2 só água
+Em conferência
+1 sobras a receber
+Saldo parado
+70 ha OS-0420 · Trator T1 (OM-0233)
+Saldo aberto
+955 ha 10 ordens
+Ordens da janela de trabalho
+Lista
+Kanban
+Mapa
+Conferir apontamentos
+⋯
+12 de 12
+O.S.
+⇅
+ATIVIDADE · LOCAL
+⇅
+JANELA
+⇅
+FASE
+⇅
+CONDIÇÃO · PRÓXIMA AÇÃO
+⇅
+REALIZADO · SALDO
+⇅
+EQUIPE · CONJUNTO
+⇅
+OS-0418
+v2
+Fertirrigação · reclassificada
+P1 · 95 ha
+24/09 21:00–25/09 11:15
+até 3 dias
+A liberar
+Sem pendência
+Ana (agrônoma) · liberar (pode ajustar a dose antes) · Ureia 45 % sem saldo apto
+Liberar ›
+0 / 95 ha
+saldo 95 ha
+João
+Pivô 1
+OS-0422
+v1 · só água · libera pela prontidão
+Irrigação · água
+P2 · 80 ha · 13,5 mm em 2 passadas de 6,75 mm
+a definir
+A liberar
+Janela a definir
+João (irrigante) define a janela das 2 passadas
+Definir janela ›
+0 / 80 ha
+saldo 80 ha
+João
+Pivô 2
+OS-0423
+v1 · só água · libera pela prontidão
+Irrigação · água por gotejo
+T7 · 42 ha · 4,0 mm
+hoje 14:00–16:00
+vence hoje
+A liberar
+Conflito · parada da B3
+Caio (PCP) resolve a parada da B3 (14:00–15:00) · estimativa por ET · sonda sem dado
+Resolver conflito ›
+0 / 42 ha
+saldo 42 ha
+João
+Gotejo T7
+OS-0430
+v1
+Dessecação pré-plantio
+T1-A · 160 ha
+25/09 (DAP −20)
+A liberar
+Sem pendência
+0 / 160 ha
+saldo 160 ha
+Marcos
+Pulverizador PJ-3030 + Trator 03
+OS-0431
+REC-014 v2 · v1
+Plantio · Soja 58 W
+T2 · 102 ha
+amanhã (24/09) 06:00
+A liberar
+Falta máquina · Trator T1 bloqueado
+0 / 102 ha
+saldo 102 ha
+Carlos
+Plantadeira PD-12 + Trator T1 (bloqueado)
+OS-0419
+v1 · liberada pela prontidão operacional
+Irrigação · água
+P2 · 80 ha · 10,81 mm em 1 passada
+hoje 20:00–amanhã 10:31
+vence hoje
+Liberadas
+Sem pendência
+Pronta para iniciar hoje às 20:00 · João
+Abrir em Irrigação ›
+0 / 80 ha
+saldo 80 ha
+João
+Pivô 2
+OS-0424
+v1
+Pulverização · Fungicida A
+T1-B · 128 ha
+24/09
+Liberadas
+Sem pendência
+0 / 128 ha
+saldo 128 ha
+Marcos
+Pulverizador PJ-3030 + Trator 03
+OS-0425
+plano CAFE-AR · v1
+Adubação 1ª parcela · café
+C1 · 38 ha
+15/10
+Liberadas
+Entrega sem saldo suficiente
+0 / 38 ha
+saldo 38 ha
+Paula
+Distribuidor DA-08
+OS-0420
+v2 · v3 no saldo
+Plantio · Soja 58 W
+T4 · 100 ha
+22–28/09
+no prazo
+Em execução
+Impedida · ativo bloqueado
+OM-0233 · Manutenção · substituto a partir de 24/09 · saldo de 70 ha parado (já na v3)
+Ver OM-0233 ›
+30 / 100 ha
+18 conf. + 12 prov. · saldo 70 ha parado
+Carlos
+Plantadeira PD-12 + Trator T1 (bloqueado)
+OS-0421
+v2
+Pulverização · Fungicida 1ª aplicação
+T1+T2 · 350 ha
+20–26/09
+no prazo
+Em execução
+Parcial · dia 4 de 7
+Turno do dia 4 aguardando conferência · Paula
+Conferir dia 4 ›
+190 / 350 ha
+150 conf. + 40 prov. · saldo 160 ha
+Marcos
+Pulverizador PJ-3030 + Trator 03
+OS-0417
+v1
+Adubação de cobertura
+P1 · 95 ha
+19–21/09
+Em conferência
+Sobras a receber
+Paula (equipe de campo) devolve 10 sc até 24/09 · Rui recebe no almoxarifado
+Ver custódia ›
+95 / 95 ha
+saldo 0 ha
+Paula
+Distribuidor DA-08
+OS-0415
+v1
+Dessecação pós-colheita
+T3 · 96 ha
+10–12/09
+Encerradas
+Sem pendência
+96 / 96 ha
+saldo 0 ha
+Marcos
+Pulverizador PJ-3030 + Trator 03
+Tela: Ordens de campo · 2 em execução · 2 impedidas

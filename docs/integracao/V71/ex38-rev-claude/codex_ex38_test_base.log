@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr77base/tools/prototipo/v37/gen37/ex38_test.py", line 36, in <module>
+    if __name__=='__main__': main()
+                             ^^^^^^
+  File "/tmp/claude-0/pr77base/tools/prototipo/v37/gen37/ex38_test.py", line 22, in main
+    js=screens['MB-02det.dc.html']; a=js.index('const dProj='); b=js.index('const aps=',a)
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: substring not found
+exit=1

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Retorno visual dos botões (proprietário, 14/10/2026: "botões como salvar, cancelar e outros estão com feedback visual ao usuário?").
-Mede no navegador, no formulário "Cadastrar cultivar" (CD-02) e na Manutenção, o que a pessoa vê (DS-HOVER-20261009, VIS-01 a VIS-04):
+Mede no navegador, no formulário "Cadastrar cultivar" (CD-02, aberto por "Criar cultivar" no cabeçalho desde 16/10, CAD-01) e na Manutenção, o que a pessoa vê (DS-HOVER-20261009, VIS-01 a VIS-04):
   B1 passar o mouse: Salvar (cheio) escurece; Cancelar (claro) ganha a camada verde. O Chrome sem janela não declara mouse com hover (a emulação
      não muda o (hover:hover)); por isso B1 confere a REGRA de hover que vale para cada botão (seletor que casa com ele e o efeito declarado),
      não o pixel. B2 (pressionar) mede o pixel
@@ -37,7 +37,7 @@ try:
     c.call('Emulation.setEmulatedMedia', {'features': [{'name': 'hover', 'value': 'hover'}, {'name': 'pointer', 'value': 'fine'}]})
     c.goto(U('Main.dc.html'), .3); J("localStorage.clear(); sessionStorage.clear(); 1")
     c.goto(U('CD-02.dc.html'), 1.4)
-    J("(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Cadastrar cultivar'); if(b) b.click();})()"); time.sleep(.6)
+    J("(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Criar cultivar'); if(b) b.click();})()"); time.sleep(.6)
     s0, c0 = estilo('Salvar'), estilo('Cancelar')
     ps, pc = ponto('Salvar'), ponto('Cancelar')
     REGRA = (f"(t=>{{ const b={BT}(t); const out=[]; for(const ss of document.styleSheets){{ let rs; try{{ rs=ss.cssRules; }}catch(e){{ continue; }}"

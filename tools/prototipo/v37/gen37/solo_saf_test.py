@@ -24,8 +24,10 @@ window.CLK=(t,inPan)=>{ const r=inPan?TOP():document; if(!r) return 'SEM PAINEL'
   const e=els.find(x=>N(x.innerText)===t)||els.find(x=>N(x.innerText).startsWith(t))||els.find(x=>(x.getAttribute('aria-label')||'')===t); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok'; };
 window.EXP=(local)=>{ const g=local.split('-')[0]; const gr=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>N(x.innerText).startsWith('▸ '+g+' ')); if(!gr) return false; const b=[...gr.querySelectorAll('button')].find(b=>N(b.innerText)==='▸'); if(b){ b.click(); return true; } return false; };
 window.INS=(local)=>{ let row=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>N(x.innerText).startsWith(local+' ')); if(!row) return 'sem linha '+local;
-  const b=[...row.querySelectorAll('button')].find(b=>/^(Ajustar|Ver) insumos$/.test(N(b.innerText))); if(!b) return 'sem botão'; b.click(); return 'ok'; };
-window.LINHA=(local)=>{ const row=[...document.querySelectorAll('[role=row].g2ed')].filter(VIS).find(x=>N(x.innerText).startsWith(local+' ')); if(!row) return 'sem linha '+local; (row.querySelector('[role=cell]')||row).click(); return 'ok'; };
+  (row.querySelector('.g2pw')||row).click(); return 'ok'; };
+/* SAF-TAB: a ação de insumos pertence ao detalhe do cultivo, não à célula da listagem. */
+window.INSA=(local)=>{ const a=TOP(); const b=a&&[...a.querySelectorAll('button')].filter(VIS).find(b=>['Ajustar insumos e doses de '+local,'Ver insumos e doses de '+local].includes(N(b.innerText))); if(!b) return 'sem ação de insumos '+local; b.click(); return 'ok'; };
+window.LINHA=(local)=>{ const row=[...document.querySelectorAll('[role=row].g2ed')].filter(VIS).find(x=>N(x.innerText).startsWith(local+' ')); if(!row) return 'sem linha '+local; (row.querySelector('.g2pw')||row).click(); return 'ok'; };
 window.PAN=()=>{ const a=TOP(); return a?N(a.innerText):''; };
 window.TOAST=()=>[...document.querySelectorAll('[role=status]')].map(x=>N(x.innerText)).filter(Boolean).join(' | ');
 window.ALERT=()=>{ const a=TOP(); return a?[...a.querySelectorAll('[role=alert]')].filter(VIS).map(x=>N(x.innerText)).join(' | '):''; };
@@ -44,7 +46,18 @@ def clk(x, pan=False, w=.5): r = J(f"CLK({json.dumps(x)},{'true' if pan else 'fa
 def ins(local, w=.7):
     r = J(f"INS({json.dumps(local)})")
     if str(r).startswith('sem linha') and J(f"EXP({json.dumps(local)})"): time.sleep(.5); r = J(f"INS({json.dumps(local)})")
-    time.sleep(w); return r
+    if r == 'ok':
+        limite = time.monotonic() + 3
+        while time.monotonic() < limite:
+            r = J(f"INSA({json.dumps(local)})")
+            if r == 'ok': break
+            time.sleep(.05)
+    if r != 'ok': raise AssertionError('Abrir insumos de '+local+': '+str(r))
+    limite = time.monotonic() + 3
+    while time.monotonic() < limite:
+        if J("!!(TOP()&&TOP().querySelector('input[aria-label^=\"Dose local de \"]'))"): return r
+        time.sleep(.05)
+    raise AssertionError('Painel de insumos não ficou pronto: '+local)
 def pan(): return J("PAN()") or ''
 def toast(): return J("TOAST()") or ''
 def dem(saf=None): return J(f"__solo.dem({json.dumps(saf) if saf else ''})") or {}
@@ -122,7 +135,7 @@ try:
         sel0 = J("(()=>{ const a=TOP(); return [...a.querySelectorAll('input[type=checkbox]')].filter(i=>i.checked).length; })()")
         pd = J("(()=>{ const a=TOP(); const b=[...a.querySelectorAll('button')].find(b=>/^Usar \\d+ sugest/.test(N(b.innerText))); return b?[N(b.innerText),b.getAttribute('aria-disabled')]:null; })()")
         t.chk('AC-SOLO-10 lote: nenhuma linha vem marcada e "Usar 0 sugestões" fica desabilitado', sel0 == 0 and pd and pd[0] == 'Usar 0 sugestões' and pd[1] == 'true', [sel0, pd])
-        t.chk('AC-SOLO-18 lote com busca, filtro rápido por tipo e ordenação', J("(()=>{ const a=TOP(); return !!a.querySelector('input[placeholder^=\"Buscar\"]') && /Outra dose/.test(a.innerText) && /Retirar/.test(a.innerText) && (a.innerText.match(/▾/g)||[]).length>=5; })()"))
+        t.chk('AC-SOLO-18 lote com busca, filtro rápido por tipo e controles de coluna acessíveis', J("(()=>{ const a=TOP(); if(!a) return false; const hs=[...a.querySelectorAll('[role=columnheader]')].filter(h=>N(h.innerText)); const qs=[...a.querySelectorAll('button')].filter(b=>b.getClientRects().length).map(b=>N(b.innerText).replace(/\\s+\\d+$/,'')); return !!a.querySelector('input[placeholder^=\"Buscar\"]') && ['Outra dose','Incluir','Retirar'].every(t=>qs.includes(t)) && hs.length>=5 && hs.every(h=>{const b=h.querySelector('button[aria-label^=\"Ordenar por \"]'); return !!b&&!!h.querySelector('button[aria-label=\"Filtrar '+b.getAttribute('aria-label').slice(12)+'\"]');}); })()"))
         t.chk('rodapé "Os demais talhões seguem a dose do plano."', 'Os demais talhões seguem a dose do plano.' in p)
         J("(()=>{ const a=TOP(); [...a.querySelectorAll('input[type=checkbox]')].filter(i=>/^Selecionar (?!as )/.test(i.getAttribute('aria-label')||'')&&!i.checked).forEach(i=>i.click()); })()"); time.sleep(.5)
         clk('Usar 4 sugestões', True, 1.0); d2 = dem()
@@ -174,3 +187,4 @@ try:
         t.chk('nenhum erro de JS (celular)', not t.errs(), t.errs())
 finally:
     t.fim()
+

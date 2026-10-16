@@ -1,0 +1,10 @@
+OK  CD-02 sem erro JS
+OK  rendimentos sem rolagem lateral a 1440 px · [1280, 1280]
+OK  no máximo 7 colunas
+FALHOU colunas com uma variável cada · ['Cultura › cultivar', 'Situação', 'Tipo de ciclo', 'Unidade de produtividade', 'Ciclo', 'Item de semente', 'Cultivos']
+RESULTADO: FALHOU 3/4
+Traceback (most recent call last):
+  File "/home/user/sp-cad/tools/prototipo/v37/gen37/cadc_cd0102_a.py", line 18, in <module>
+    r=t.rowtxt(0,'PJ-3030'); t.chk('linha mostra custo por hora e por hectare', 'R$ 313,00' in r and 'R$ 14,49' in r, r)
+                                                                                ^^^^^^^^^^^^^^^^
+TypeError: argument of type 'NoneType' is not iterable

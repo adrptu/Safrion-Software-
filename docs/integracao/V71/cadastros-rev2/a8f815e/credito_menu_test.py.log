@@ -1,0 +1,22 @@
+OK  C1 1440: o Crédito na barra abre a tela de entrada com um cartão por visão da GE-08
+OK  C2 1440 Contratos: só a parte do cartão (Solicitações e contratos), com os indicadores e "‹ Crédito"
+OK  C2 1440 Liberações: só a parte do cartão (Acompanhamento do CRE-0102), com os indicadores e "‹ Crédito"
+OK  C2 1440 Dossiê: só a parte do cartão (Dossiê e consentimento), com os indicadores e "‹ Crédito"
+OK  C2 1440 Documentos: só a parte do cartão (Documentos para crédito), com os indicadores e "‹ Crédito"
+OK  C3 1440: trocar a visão pelo endereço troca a parte sem recarregar
+OK  C4 1440: GE-08 sem visão no endereço (links de outras telas) mostra as quatro partes
+OK  C5 1440: sem rolagem lateral e sem erro de JS
+Traceback (most recent call last):
+  File "/home/user/sp-cad/tools/prototipo/v37/gen37/credito_menu_test.py", line 34, in <module>
+    J("(()=>{const a=[...document.querySelectorAll('nav[aria-label=Menu] a')].find(a=>(a.getAttribute('aria-label')||a.title||a.innerText).trim().startsWith('Crédito')); a.click();})()"); espera("location.pathname.endsWith('MOD-CRE.dc.html')&&[...document.querySelectorAll('main a.mod-cartao')].filter(a=>a.offsetParent).length>=3")
+                                                                                                                                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-cad/tools/prototipo/v37/gen37/credito_menu_test.py", line 25, in espera
+    if J("(()=>{try{return !!(%s)}catch(e){return false}})()" % cond): return True
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-cad/tools/prototipo/v37/gen37/comp_lib.py", line 50, in js
+    r=self.call('Runtime.evaluate',{'expression':expr,'awaitPromise':True,'returnByValue':True})
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/sp-cad/tools/prototipo/v37/gen37/comp_lib.py", line 47, in call
+    if 'error' in m: raise RuntimeError(f"{method}: {m['error']}")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Runtime.evaluate: {'code': -32000, 'message': 'Inspected target navigated or closed'}

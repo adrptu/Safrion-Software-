@@ -1,0 +1,239 @@
+AG-01.dc.html Pragas e doenças 10 {'Restaurar demonstração': [1, 1]} []
+AG-01det.dc.html Rota e evidências 16 {} []
+AG-02.dc.html Análises de solo 9 {'Água no solo': [1, 1]} []
+AG-03.dc.html Diagnósticos 12 {} []
+AG-03det.dc.html Diagnóstico · DIA-007 nematoide T4 16 {} []
+AG-04.dc.html Recomendações 14 {} []
+AG-04det.dc.html Recomendação · REC-014 plantio T4 19 {} []
+AG-05.dc.html Biblioteca e planos técnicos 11 {'Validar': [1, 1], 'Publicar': [1, 1]} []
+AG-06.dc.html Eficácia e histórico 17 {'Propor melhoria': [1, 1], 'Propor revisão': [1, 1]} []
+AG-07.dc.html Consulta Agrofit 9 {} []
+BEN.dc.html Beneficiamento 9 {'Restaurar demonstração': [1, 1]} []
+BO-01.dc.html Planos e preços 11 {} []
+BO-02.dc.html Assinaturas e cobrança 11 {} []
+CA-01.dc.html Ordens de campo 18 {} []
+CA-01det.dc.html OS-0421 · Fungicida 1ª aplicação 15 {} []
+CA-01x-os0420.dc.html OS-0420 · Plantio Soja 58 W 15 {} []
+CA-02.dc.html Apontamentos e conferência 13 {} []
+CA-03.dc.html Ocorrências 13 {} []
+CA-03det.dc.html OC-114 · Quebra do Trator T1 13 {} []
+CA-04.dc.html Minhas requisições 14 {} []
+CARGA.dc.html Cargas e recebimento 10 {'Restaurar demonstração': [1, 1]} []
+CD-01.dc.html Fazendas, áreas e talhões 9 {} []
+CD-01det.dc.html Talhão 11 {} []
+CD-02.dc.html Culturas e cultivares 9 {} []
+CD-03.dc.html Máquinas, instalações e setores 9 {} []
+CD-04.dc.html Pessoas e equipes 9 {} []
+CD-05.dc.html Parceiros e fornecedores 9 {} []
+CD-06.dc.html Produtos, unidades e locais 9 {} []
+CD-07.dc.html Estrutura gerencial 9 {'Publicar': [1, 1]} []
+CD-08.dc.html Operações e rendimentos 9 {'Validar': [1, 1]} []
+CD.dc.html Cadastros 17 {} []
+CF-01.dc.html Usuários e alçadas 9 {'Aprovar compra': [1, 1], 'Publicar': [2, 2]} []
+CF-03.dc.html Integrações 9 {} []
+CF-04.dc.html Auditoria 11 {} []
+CF-05.dc.html Assinatura e cobrança 9 {} []
+CMP.dc.html Compras 10 {} []
+CO-01.dc.html Previsão e maturação 18 {'Publicar': [0, 1]} []
+CO-02.dc.html Programação e ordens de colheita 17 {} []
+CO-02det.dc.html OC-0510 · Colheita de mamão T7 16 {} []
+CO-03.dc.html Cargas, pesagens e romaneios 17 {} []
+CO-04.dc.html Recebimento da produção 16 {} []
+CO-05.dc.html Beneficiamento 18 {} []
+CO-05det.dc.html OB-0110 · Packing do mamão 16 {} []
+CO-06.dc.html Qualidade e rastreabilidade 19 {} []
+CO-06det.dc.html INSP-88 · Lote L27-013 bloqueado 18 {} []
+CO-07.dc.html Estoque de produção 20 {} []
+COLH.dc.html Previsão e colheita 9 {'Restaurar demonstração': [1, 1], 'Publicar': [6, 11]} []
+EST.dc.html Estoque 9 {'Restaurar demonstração': [1, 1]} []
+EXPED.dc.html Expedição e entregas 10 {'Restaurar demonstração': [1, 1]} []
+GE-01.dc.html Visão gerencial 14 {} []
+GE-02.dc.html Orçamento e previsões 10 {'Publicar': [0, 1]} []
+GE-02det.dc.html Comparar · V1 × V2 × real 13 {} []
+GE-03.dc.html Custos e fechamento 14 {} []
+GE-04.dc.html Contas a pagar e caixa 13 {} []
+GE-05.dc.html Contas a receber 11 {} []
+GE-06.dc.html Indicadores operacionais 18 {} []
+GE-06det.dc.html Detalhar · custo de pulverização 15 {} []
+GE-07.dc.html Planos de ação 11 {} []
+GE-08.dc.html Crédito e garantias 12 {} []
+IC.dc.html Inteligência de compras 9 {'Restaurar demonstração': [1, 1]} []
+IN-01.dc.html Meu dia 18 {} []
+IN-02.dc.html Aprovações 13 {} []
+IN-03.dc.html Agenda e pendências 14 {} []
+IN-04.dc.html Mapa da fazenda 10 {} []
+IR-01.dc.html Irrigação 15 {} []
+IR-02.dc.html Programação 13 {} []
+IR-03.dc.html Ordens de irrigação 14 {} []
+IR-03det.dc.html OS-0419 · Irrigação · Pivô 2 13 {} []
+IR-04.dc.html Clima e sensores 13 {} []
+IV.dc.html Inteligência de vendas 9 {'Restaurar demonstração': [1, 1]} []
+LO-01.dc.html Programação de transporte 14 {} []
+LO-02.dc.html Expedições e cargas 15 {} []
+LO-02det.dc.html Conferir carga · T2 · VD-2101 13 {} []
+LO-03.dc.html Viagens e entregas 16 {} []
+LO-04.dc.html Fretes e transportadores 14 {} []
+MA-01.dc.html Manutenção 9 {'Restaurar demonstração': [0, 1]} []
+MA-02.dc.html Manutenção 9 {'Restaurar demonstração': [0, 1]} []
+MA-03.dc.html Manutenção 9 {'Restaurar demonstração': [0, 1]} []
+MA-04.dc.html Manutenção 9 {'Restaurar demonstração': [0, 1]} []
+MA-04det.dc.html Manutenção 9 {'Restaurar demonstração': [0, 1]} []
+MA-05.dc.html Manutenção 9 {'Restaurar demonstração': [0, 1]} []
+MA.dc.html Manutenção 9 {'Restaurar demonstração': [0, 1]} []
+MB-01.dc.html Hoje no campo 11 {'Restaurar demonstração': [1, 1]} []
+MB-02.dc.html Minhas ordens 5 {} []
+MB-02det.dc.html OS-0421 · Pulverização 4 {} []
+MB-03.dc.html Apontamento do turno 4 {} []
+MB-03x-recibo.dc.html Envios e recibos 2 {} []
+MB-04.dc.html Registrar ocorrência 2 {} []
+MB-05.dc.html Almoxarifado móvel 2 {} []
+MB-05det.dc.html Receber devolução 1 {} []
+MB-06.dc.html Vistoria VIS-014 2 {'Concluir com': [1, 1]} []
+MB-07.dc.html Contagem de frutos 2 {} []
+MB-08.dc.html Irrigação de hoje 2 {} []
+MB-08x-recibo.dc.html Irrigação · recibo do término 2 {} []
+MB-09.dc.html Máquina 3 {} []
+MB-09det.dc.html OM-0233 · Trator T1 3 {} []
+MB-10.dc.html Cargas e entregas 2 {} []
+MOD-AGR.dc.html Agrícola 23 {} []
+MOD-CFG.dc.html Configurações 13 {} []
+MOD-COM.dc.html Comercial 13 {} []
+MOD-CRE.dc.html Crédito 10 {} []
+MOD-MAN.dc.html Manutenção 11 {} []
+MOD-OUT.dc.html Outros acessos 13 {} []
+MOD-SUP.dc.html Suprimentos 13 {} []
+Main.dc.html  1 {} []
+ON-01.dc.html Entrada e implantação guiada 11 {} []
+ON-01det.dc.html Importação · prévia e erros 10 {'Validar': [2, 2]} []
+OS-0424-app.dc.html OS-0424 · Fungicida 2 {} []
+OS-0424-ficha.dc.html OS-0424 · Fungicida · T1-B · Soja 62 X 1 {} []
+OS.dc.html Ordem de Serviço 9 {'Restaurar demonstração': [1, 1]} []
+PA.dc.html Planos agronômicos 9 {} []
+PAGR.dc.html Painel 14 {'Publicar': [4, 4]} []
+PCOM.dc.html Painel comercial 10 {'Restaurar demonstração': [1, 1]} []
+PL-01.dc.html Safras, ciclos e metas 13 {} []
+PL-02.dc.html Plano operacional 16 {'Publicar': [1, 1]} []
+PL-02det.dc.html Plano do talhão T1-A · gatilhos 10 {'Publicar': [2, 2]} []
+PL-03.dc.html Capacidade e recursos 14 {'Manutenções e impacto na produção': [1, 1], 'Publicar': [1, 1]} []
+PL-04.dc.html Programação integrada 18 {'Manutenções e impacto na produção': [1, 1]} []
+PL-05.dc.html Impedimentos e reprogramação 14 {'Notificar responsáveis': [1, 1]} []
+PL-05det.dc.html Impedimento · OS-0431 ativo bloqueado 10 {} []
+PL-06.dc.html Parcelas e escalonamento 9 {'Publicar': [1, 1]} []
+PM.dc.html Manutenção 9 {'Restaurar demonstração': [0, 1]} []
+PMAN.dc.html Painel 10 {} []
+PROD.dc.html Estoque de produto 9 {'Restaurar demonstração': [1, 1]} []
+PSUP.dc.html Painel 11 {} []
+PT-01.dc.html Portal do parceiro 15 {} []
+PT-02.dc.html Cotações concedidas 11 {} []
+PT-02det.dc.html Proposta · SOL-2026-07 · Fertilizantes 10 {} []
+PT-03.dc.html Ofertas 9 {} []
+PT-04.dc.html Crédito 10 {} []
+PT-04det.dc.html Dossiê · CRE-0102 custeio 10 {} []
+PT-05.dc.html Negócios e documentos 11 {} []
+PT-05det.dc.html Negócio · CT-2026-11 KCl 60% 10 {} []
+PT-06.dc.html Indicadores 9 {} []
+PT-07.dc.html Perfil e assinatura 9 {} []
+SAF.dc.html Planejar safra 9 {} []
+SU-01.dc.html Necessidades e cobertura 13 {} []
+SU-02.dc.html Políticas de estoque 10 {'Publicar': [1, 1]} []
+SU-03.dc.html Saldos e lotes de materiais 11 {} []
+SU-03det.dc.html Lote F26-02 · reservas 11 {} []
+SU-04.dc.html Solicitações e cotações 10 {} []
+SU-05.dc.html Contratos, pedidos e entregas 11 {'Formalizar contrato': [1, 1], 'Emitir pedido': [1, 1]} []
+SU-05det.dc.html CT-2026-11 · Fertisul · KCl 60% 11 {} []
+SU-06.dc.html Recebimentos e divergências 9 {} []
+SU-07.dc.html Requisições e entregas 13 {} []
+SU-07det.dc.html REQ-031 · OS-0417 · MAP 11-52 10 {} []
+SU-08.dc.html Transferências e movimentos 10 {} []
+SU-09.dc.html Inventários e ajustes 11 {} []
+VE-01.dc.html Demanda e oferta 22 {} []
+VE-02.dc.html Mercado e preços 16 {} []
+VE-03.dc.html Ofertas e propostas 16 {} []
+VE-04.dc.html Pedidos de venda 19 {} []
+VE-04det.dc.html Pedido PV-031 · Mamão Formosa A 19 {} []
+VE-05.dc.html Contratos e compromissos 19 {} []
+VE-06.dc.html Reclamações e devoluções 18 {} []
+VEN.dc.html Contratos e pedidos 9 {'Restaurar demonstração': [1, 1]} []
+# P0 · inventário (executado, render b87f79b, perfil Ana)
+páginas: 156 · no menu (não ocultas): 69 · ocultas: 87
+sem caminho por link a partir do menu: GE-01.dc.html, IN-03.dc.html, MB-05det.dc.html, MB-08.dc.html, MB-08x-recibo.dc.html, MB-09det.dc.html, PL-03.dc.html, PM.dc.html, PT-06.dc.html, SU-03.dc.html, SU-03det.dc.html
+
+## "Restaurar demonstração" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  AG-01.dc.html: [1, 1] · saltos=0 · oculta=False
+  BEN.dc.html: [1, 1] · saltos=0 · oculta=False
+  CARGA.dc.html: [1, 1] · saltos=0 · oculta=False
+  COLH.dc.html: [1, 1] · saltos=0 · oculta=False
+  EST.dc.html: [1, 1] · saltos=0 · oculta=False
+  EXPED.dc.html: [1, 1] · saltos=0 · oculta=False
+  IC.dc.html: [1, 1] · saltos=0 · oculta=False
+  IV.dc.html: [1, 1] · saltos=0 · oculta=False
+  MA-01.dc.html: [0, 1] · saltos=0 · oculta=False
+  MA-02.dc.html: [0, 1] · saltos=0 · oculta=False
+  MA-03.dc.html: [0, 1] · saltos=0 · oculta=False
+  MA-04.dc.html: [0, 1] · saltos=0 · oculta=False
+  MA-04det.dc.html: [0, 1] · saltos=0 · oculta=False
+  MA-05.dc.html: [0, 1] · saltos=0 · oculta=False
+  MA.dc.html: [0, 1] · saltos=0 · oculta=False
+  MB-01.dc.html: [1, 1] · saltos=0 · oculta=False
+  OS.dc.html: [1, 1] · saltos=0 · oculta=False
+  PCOM.dc.html: [1, 1] · saltos=0 · oculta=False
+  PM.dc.html: [0, 1] · saltos=None · oculta=True
+  PROD.dc.html: [1, 1] · saltos=0 · oculta=False
+  VEN.dc.html: [1, 1] · saltos=0 · oculta=False
+
+## "Encerrar saldo" (visível, presente no DOM) · página (saltos do menu; oculta?)
+
+## "Cancelar reserva" (visível, presente no DOM) · página (saltos do menu; oculta?)
+
+## "Cancelar sem execução" (visível, presente no DOM) · página (saltos do menu; oculta?)
+
+## "Notificar responsáveis" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  PL-05.dc.html: [1, 1] · saltos=1 · oculta=True
+
+## "Água no solo" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  AG-02.dc.html: [1, 1] · saltos=0 · oculta=False
+
+## "Manutenções e impacto na produção" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  PL-03.dc.html: [1, 1] · saltos=None · oculta=True
+  PL-04.dc.html: [1, 1] · saltos=2 · oculta=True
+
+## "Concluir com" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  MB-06.dc.html: [1, 1] · saltos=1 · oculta=True
+
+## "Propor melhoria" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  AG-06.dc.html: [1, 1] · saltos=1 · oculta=True
+
+## "Propor revisão" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  AG-06.dc.html: [1, 1] · saltos=1 · oculta=True
+
+## "Formalizar contrato" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  SU-05.dc.html: [1, 1] · saltos=2 · oculta=True
+
+## "Aprovar e emitir" (visível, presente no DOM) · página (saltos do menu; oculta?)
+
+## "Emitir pedido" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  SU-05.dc.html: [1, 1] · saltos=2 · oculta=True
+
+## "Aprovar compra" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  CF-01.dc.html: [1, 1] · saltos=0 · oculta=False
+
+## "Validar" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  AG-05.dc.html: [1, 1] · saltos=2 · oculta=True
+  CD-08.dc.html: [1, 1] · saltos=0 · oculta=False
+  ON-01det.dc.html: [2, 2] · saltos=1 · oculta=True
+
+## "Publicar" (visível, presente no DOM) · página (saltos do menu; oculta?)
+  AG-05.dc.html: [1, 1] · saltos=2 · oculta=True
+  CD-07.dc.html: [1, 1] · saltos=0 · oculta=False
+  CF-01.dc.html: [2, 2] · saltos=0 · oculta=False
+  CO-01.dc.html: [0, 1] · saltos=3 · oculta=True
+  COLH.dc.html: [6, 11] · saltos=0 · oculta=False
+  GE-02.dc.html: [0, 1] · saltos=0 · oculta=False
+  PAGR.dc.html: [4, 4] · saltos=0 · oculta=False
+  PL-02.dc.html: [1, 1] · saltos=1 · oculta=True
+  PL-02det.dc.html: [2, 2] · saltos=2 · oculta=True
+  PL-03.dc.html: [1, 1] · saltos=None · oculta=True
+  PL-06.dc.html: [1, 1] · saltos=3 · oculta=True
+  SU-02.dc.html: [1, 1] · saltos=3 · oculta=True
+
+## erros de JavaScript

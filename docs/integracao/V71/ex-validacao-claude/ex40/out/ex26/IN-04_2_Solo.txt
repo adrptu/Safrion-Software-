@@ -1,0 +1,87 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Mapa
+Mapa da fazenda
+OS-0507 impedida · 3 a liberar
+Fazenda
+Todas
+Lagoa Grande
+Santa Rita
+Boa Vista
+Safra
+2026/27
+Cultura
+Todas
+Mamão
+Integrado
+Satélite
+Solo
+Pragas e doenças
+Ordens de serviço
+Irrigação
+Estádio
+Colheita e produtividade
+Custos
+Solo
+i
+Laudo
+Mais recente
+LAU-2055 · Pivô 2 · 16/09/2026
+LAU-2056 · Pivô 5 · 16/09/2026
+LAU-2057 · Pivô 9 · 16/09/2026
+LAU-2071 · Pivô 12 · 15/09/2026
+LAU-2058 · Pivô 19 · 16/09/2026
+Camada
+0–20 cm
+20–40 cm
+Indicador
+V %
+pH
+P
+K
+Ca
+Mg
+MO
+CTC
+SB
+m %
+Al
+H+Al
+S
+B
+Cu
+Fe
+Mn
+Zn
+Argila
+Contraste
+Talhão
+Fazenda
+Absoluto
+Laudos 5
+Pontos 77
+V % 69 %
+Manchas ruins 0 ha · 0 %
+Mapa real indisponível: {"requestedAttributes":{"antialias":false,"preserveDrawingBuffer":false,"powerPreference":"high-performance","failIfMajorPerformanceCaveat":false,"desynchronized":false,"alpha":true,"depth":true,"stencil":true,"premultipliedAlpha":true},"statusMessage":"Could not create a WebGL context, VENDOR = 0xffff, DEVICE = 0xffff, Sandboxed = no, Optimus = no, AMD switchable = no, Reset notification strategy = 0x0000, ErrorMessage = BindToCurrentSequence failed: .","type":"webglcontextcreationerror","message":"Failed to initialize WebGL"}. Recarregue a página.
+Selecionar área
+Medir
+Desenhar
+Importar
++
+−
+menor (pior)
+maior (melhor)
+sextos de cada talhão · V % %
+sem laudo ou não calculável
+Demonstração sintética
+Tela: Mapa da fazenda

@@ -1,0 +1,363 @@
+{
+ "PAGR": {
+  "oculta": false,
+  "chars": 7905,
+  "h1": "Painel"
+ },
+ "PMAN": {
+  "oculta": false,
+  "chars": 524,
+  "h1": "Painel"
+ },
+ "PSUP": {
+  "oculta": false,
+  "chars": 539,
+  "h1": "Painel"
+ },
+ "PCOM": {
+  "oculta": false,
+  "chars": 1784,
+  "h1": "Painel comercial"
+ },
+ "GE-02": {
+  "oculta": false,
+  "chars": 1295,
+  "h1": "Orçamento e previsões"
+ },
+ "GE-03": {
+  "oculta": false,
+  "chars": 1696,
+  "h1": "Custos e fechamento"
+ },
+ "OS": {
+  "oculta": false,
+  "chars": 1459,
+  "h1": "Ordem de Serviço"
+ },
+ "AG-01": {
+  "oculta": false,
+  "chars": 2033,
+  "h1": "Pragas e doenças"
+ },
+ "AG-02": {
+  "oculta": false,
+  "chars": 1994,
+  "h1": "Análises de solo"
+ },
+ "PA": {
+  "oculta": false,
+  "chars": 1358,
+  "h1": "Planos agronômicos"
+ },
+ "SAF": {
+  "oculta": false,
+  "chars": 1120,
+  "h1": "Planejar safra"
+ },
+ "IR-01": {
+  "oculta": false,
+  "chars": 876,
+  "h1": "Irrigação"
+ },
+ "COLH": {
+  "oculta": false,
+  "chars": 4190,
+  "h1": "Previsão e colheita"
+ },
+ "CARGA": {
+  "oculta": false,
+  "chars": 1547,
+  "h1": "Cargas e recebimento"
+ },
+ "BEN": {
+  "oculta": false,
+  "chars": 773,
+  "h1": "Beneficiamento"
+ },
+ "PROD": {
+  "oculta": false,
+  "chars": 2445,
+  "h1": "Estoque de produto"
+ },
+ "VEN": {
+  "oculta": false,
+  "chars": 1977,
+  "h1": "Contratos e pedidos"
+ },
+ "EXPED": {
+  "oculta": false,
+  "chars": 724,
+  "h1": "Expedição e entregas"
+ },
+ "IV": {
+  "oculta": false,
+  "chars": 2559,
+  "h1": "Inteligência de vendas"
+ },
+ "IC": {
+  "oculta": false,
+  "chars": 6687,
+  "h1": "Inteligência de compras"
+ },
+ "EST": {
+  "oculta": false,
+  "chars": 978,
+  "h1": "Estoque"
+ },
+ "CMP": {
+  "oculta": false,
+  "chars": 1382,
+  "h1": "Compras"
+ },
+ "GE-01": {
+  "oculta": true,
+  "chars": 1745,
+  "h1": "Visão gerencial"
+ },
+ "GE-04": {
+  "oculta": true,
+  "chars": 2060,
+  "h1": "Contas a pagar e caixa"
+ },
+ "GE-05": {
+  "oculta": true,
+  "chars": 1934,
+  "h1": "Contas a receber"
+ },
+ "GE-06": {
+  "oculta": true,
+  "chars": 1683,
+  "h1": "Indicadores operacionais"
+ },
+ "GE-06det": {
+  "oculta": true,
+  "chars": 1641,
+  "h1": "Detalhar · custo de pulverização"
+ },
+ "GE-07": {
+  "oculta": true,
+  "chars": 1475,
+  "h1": "Planos de ação"
+ },
+ "AG-03": {
+  "oculta": true,
+  "chars": 1118,
+  "h1": "Diagnósticos"
+ },
+ "AG-04": {
+  "oculta": true,
+  "chars": 1265,
+  "h1": "Recomendações"
+ },
+ "AG-06": {
+  "oculta": true,
+  "chars": 1590,
+  "h1": "Eficácia e histórico"
+ },
+ "IR-02": {
+  "oculta": false,
+  "chars": 1046,
+  "h1": "Programação"
+ },
+ "IR-03": {
+  "oculta": false,
+  "chars": 1163,
+  "h1": "Ordens de irrigação"
+ },
+ "IR-04": {
+  "oculta": false,
+  "chars": 1583,
+  "h1": "Clima e sensores"
+ },
+ "CO-01": {
+  "oculta": true,
+  "chars": 2048,
+  "h1": "Previsão e maturação"
+ },
+ "CO-02": {
+  "oculta": true,
+  "chars": 1644,
+  "h1": "Programação e ordens de colheita"
+ },
+ "CO-03": {
+  "oculta": true,
+  "chars": 1874,
+  "h1": "Cargas, pesagens e romaneios"
+ },
+ "CO-04": {
+  "oculta": true,
+  "chars": 1567,
+  "h1": "Recebimento da produção"
+ },
+ "CO-05": {
+  "oculta": true,
+  "chars": 1752,
+  "h1": "Beneficiamento"
+ },
+ "CO-06": {
+  "oculta": true,
+  "chars": 2763,
+  "h1": "Qualidade e rastreabilidade"
+ },
+ "CO-07": {
+  "oculta": true,
+  "chars": 2097,
+  "h1": "Estoque de produção"
+ },
+ "LO-01": {
+  "oculta": true,
+  "chars": 3195,
+  "h1": "Programação de transporte"
+ },
+ "LO-03": {
+  "oculta": true,
+  "chars": 2306,
+  "h1": "Viagens e entregas"
+ },
+ "LO-04": {
+  "oculta": true,
+  "chars": 2688,
+  "h1": "Fretes e transportadores"
+ },
+ "SU-01": {
+  "oculta": true,
+  "chars": 3137,
+  "h1": "Necessidades e cobertura"
+ },
+ "SU-02": {
+  "oculta": true,
+  "chars": 1383,
+  "h1": "Políticas de estoque"
+ },
+ "SU-04": {
+  "oculta": true,
+  "chars": 2262,
+  "h1": "Solicitações e cotações"
+ },
+ "SU-05": {
+  "oculta": true,
+  "chars": 2858,
+  "h1": "Contratos, pedidos e entregas"
+ },
+ "SU-08": {
+  "oculta": true,
+  "chars": 2089,
+  "h1": "Transferências e movimentos"
+ },
+ "SU-09": {
+  "oculta": true,
+  "chars": 1506,
+  "h1": "Inventários e ajustes"
+ },
+ "PL-01": {
+  "oculta": true,
+  "chars": 2157,
+  "h1": "Safras, ciclos e metas"
+ },
+ "PL-02": {
+  "oculta": true,
+  "chars": 2033,
+  "h1": "Plano operacional"
+ },
+ "PL-03": {
+  "oculta": true,
+  "chars": 3207,
+  "h1": "Capacidade e recursos"
+ },
+ "PL-04": {
+  "oculta": true,
+  "chars": 3283,
+  "h1": "Programação integrada"
+ },
+ "IN-01": {
+  "oculta": true,
+  "chars": 1495,
+  "h1": "Meu dia"
+ },
+ "IN-02": {
+  "oculta": true,
+  "chars": 1039,
+  "h1": "Aprovações"
+ },
+ "CA-01": {
+  "oculta": true,
+  "chars": 3403,
+  "h1": "Ordens de campo"
+ },
+ "CA-02": {
+  "oculta": false,
+  "chars": 2734,
+  "h1": "Apontamentos e conferência"
+ },
+ "CA-04": {
+  "oculta": true,
+  "chars": 1307,
+  "h1": "Minhas requisições"
+ },
+ "VE-01": {
+  "oculta": true,
+  "chars": 2588,
+  "h1": "Demanda e oferta"
+ },
+ "VE-03": {
+  "oculta": true,
+  "chars": 1885,
+  "h1": "Ofertas e propostas"
+ },
+ "VE-06": {
+  "oculta": true,
+  "chars": 1805,
+  "h1": "Reclamações e devoluções"
+ },
+ "MA_semordem": {
+  "oculta": false
+ },
+ "MA_ordens": {
+  "oculta": false
+ },
+ "MA_ativos": {
+  "oculta": false
+ },
+ "MA_planos": {
+  "oculta": false
+ },
+ "MA_ativo_a01": {
+  "oculta": false
+ },
+ "IN-04_0": {
+  "oculta": false,
+  "funcao": "Integrado"
+ },
+ "IN-04_1": {
+  "oculta": false,
+  "funcao": "Satélite"
+ },
+ "IN-04_2": {
+  "oculta": false,
+  "funcao": "Solo"
+ },
+ "IN-04_3": {
+  "oculta": false,
+  "funcao": "Pragas e doenças"
+ },
+ "IN-04_4": {
+  "oculta": false,
+  "funcao": "Ordens de serviço"
+ },
+ "IN-04_5": {
+  "oculta": false,
+  "funcao": "Irrigação"
+ },
+ "IN-04_6": {
+  "oculta": false,
+  "funcao": "Estádio"
+ },
+ "IN-04_7": {
+  "oculta": false,
+  "funcao": "Colheita e produtividade"
+ },
+ "IN-04_8": {
+  "oculta": false,
+  "funcao": "Custos"
+ }
+}

@@ -123,7 +123,7 @@ DRAWERS={'Editar atividade por idade':dict(title='Editar atividade do plano pere
  'Criar alerta de preço':dict(title='Novo alerta de preço',fields=[('Item','Soja · CEPEA'),('Condição','acima de'),('Preço (R$/sc)','135'),('Avisar por','WhatsApp')],confirm='Criar alerta',done='✓ Alerta criado'),
  'Importar nota fiscal (XML)':dict(title='Importar nota fiscal',sub='itens, lotes e validade entram no estoque sozinhos',fields=[('Arquivo XML','NFe_12877.xml'),('Depósito','Galpão 1')],confirm='Importar',done='✓ NF 12.877 · 3 itens'),
  'Ver dossiê':dict(title='Dossiê para aprovação',content='<div style="font-size: 13px; display: flex; flex-direction: column; gap: 6px;">'+''.join(f'<div>✓ {x}</div>' for x in ['Safra 2026/27: 1.240 ha, cultura e variedade por talhão','Orçamento COE/COT e PMV por talhão','Produtividade real das 3 últimas safras','Estoque de produto e contratos de venda','Matrícula, CAR e CCIR dos imóveis','Fluxo de caixa da safra com vencimentos','Histórico de crédito e pagamentos','Consentimento LGPD assinado em 12/08'])+'</div>',confirm='Baixar PDF',done='✓ PDF gerado'),
- 'Ver tabela da cultura':dict(title='Tabela de adubação · soja (Cerrado)',sub='Embrapa Cerrado, Sousa & Lobato (2004) · Mehlich-1',content='<table style="width: 100%; border-collapse: collapse; font-size: 12.5px;"><tr><th style="text-align:left; padding: 6px;">Classe de P</th><th style="text-align:left; padding: 6px;">P₂O₅ kg/ha</th><th style="text-align:left; padding: 6px;">K₂O kg/ha (K médio)</th></tr><tr><td style="padding: 6px;">muito baixo</td><td style="padding: 6px;">120 + corr.</td><td style="padding: 6px;">120</td></tr><tr><td style="padding: 6px;">baixo</td><td style="padding: 6px;">100</td><td style="padding: 6px;">100</td></tr><tr><td style="padding: 6px;">médio</td><td style="padding: 6px;">80</td><td style="padding: 6px;">80</td></tr><tr><td style="padding: 6px;">adequado</td><td style="padding: 6px;">60 (manutenção 20 kg/t)</td><td style="padding: 6px;">60</td></tr><tr><td style="padding: 6px;">alto</td><td style="padding: 6px;">40</td><td style="padding: 6px;">40</td></tr></table>',confirm='Usar esta tabela',done='✓ Tabela aplicada'),
+ 'Ver tabela da cultura':dict(title='Tabela de adubação · soja (Cerrado)',sub='Embrapa Cerrado, Sousa & Lobato (2004) · Mehlich-1',content='<table style="width: 100%; border-collapse: collapse; font-size: 12.5px;"><tr class="g2thr"><th style="text-align:left; padding: 6px;">Classe de P</th><th style="text-align:left; padding: 6px;">P₂O₅ kg/ha</th><th style="text-align:left; padding: 6px;">K₂O kg/ha (K médio)</th></tr><tr><td style="padding: 6px;">muito baixo</td><td style="padding: 6px;">120 + corr.</td><td style="padding: 6px;">120</td></tr><tr><td style="padding: 6px;">baixo</td><td style="padding: 6px;">100</td><td style="padding: 6px;">100</td></tr><tr><td style="padding: 6px;">médio</td><td style="padding: 6px;">80</td><td style="padding: 6px;">80</td></tr><tr><td style="padding: 6px;">adequado</td><td style="padding: 6px;">60 (manutenção 20 kg/t)</td><td style="padding: 6px;">60</td></tr><tr><td style="padding: 6px;">alto</td><td style="padding: 6px;">40</td><td style="padding: 6px;">40</td></tr></table>',confirm='Usar esta tabela',done='✓ Tabela aplicada'),
  'Ligar pivôs da noite':dict(title='Ligar pivôs da noite',sub='O.S. 0418 e 0419 · janela 21h30–23h40 · 100 % noturno',fields=[('Lâmina e horário · Pivô 1','8 mm · 1,0 h · 21h30'),('Lâmina e horário · Pivô 2','14 mm · 2,1 h · 21h30')],confirm='Ligar às 21h30',done='✓ Programados'),
 }
 # ---- ações que só mostram resultado na própria tela ----
@@ -649,7 +649,10 @@ def section(title,summary,action,body,state='green'):
     # SEP-20261015 (proprietário: "retire ... excesso de linhas separadoras"): a linha do título só fica com conteúdo solto logo abaixo (texto,
     # formulário, lista sem moldura); tabela, caixa, faixa com fundo e barra de visões já separam sozinhas
     linha=not vazio and not corpo_estruturado(body)
-    return (f'<div style="background: {SURF}; border: 1px solid {LINE}; border-radius: 16px; box-shadow: {SH}; display: flex; flex-direction: column; flex: 1 1 0; min-width: 0;">'
+    # 16/10: flex-basis 0 com o min-height:0 que o G2_CSS dá ao último bloco do main (e ao bloco antes da área de ações) zerava o cartão
+    # numa tela longa (CO-07, PL-01, VE-01, VE-02 em 1440 × 900: 2 px, texto fora da borda); o flex-shrink:0 do ui37 não cobre base 0.
+    # O cartão nunca fica menor que o conteúdo: o corpo dele não rola, então a altura menor só jogava o texto para fora da moldura
+    return (f'<div style="background: {SURF}; border: 1px solid {LINE}; border-radius: 16px; box-shadow: {SH}; display: flex; flex-direction: column; flex: 1 1 0; min-width: 0; min-height: auto;">'
             f'<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 18px{";" if linha else " 0;"}{f" border-bottom: 1px solid {LINE};" if linha else ""}"><div style="display: flex; align-items: center; gap: 10px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: {dot}; flex-shrink: 0; box-shadow: 0 0 0 3px {dot}22;"></span><div style="font-size: 15px; font-weight: 700; letter-spacing: -.01em; flex-grow: 1;">{esc(title)}</div>{recolhe_acoes(title,[(a if a.startswith("<") else btn(a,small=True)) for a in ([action] if isinstance(action,str) else action) if a])}</div>' + (f'<div style="font-size: 13px; color: {MUTED}; padding-left: 20px; line-height: 1.35;">{esc(summary)}</div>' if summary else '') + '</div>'
             + ('' if vazio else f'<div style="padding: 14px 18px;">{body}</div>') + '</div>')
 SELECT_KEYS=['se recusar','divisão','cobertura por','risco de roubo','ação do ajuste','atividade','decisão','análise de crédito','indexador','frete','cobrança','garantia','liberação','cultura','variedade','plano','máquina','implemento','operação','talhão','fazenda','insumo','produto','fornecedor','cliente','laborat','depósito','lote','grupo','categoria','marca','modelo','polític','fase','praça','condição','unidade','gatilho','método','tabela','extrator','profundidade','item','peça','operador','mecânico','pessoa','sensor','motivo','avisar por','canal','prioridade','pagamento','retirada','base','tipo','estado','origem','pivô','armazém','cultivar','múltiplo','responsável','alvo','estádio']
@@ -1494,7 +1497,14 @@ _SETA_DRILL='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke=
 TABELA_CSS=(
     ".g2rola:has(>[role=table][data-g2g]){border:1px solid #E4E9E5;border-radius:12px;background:#FFFFFF;margin:0 0 12px;flex:0 1 auto!important}"   # a moldura acaba na última linha; rola só quando passa da altura; sem margem lateral: a largura é dos dados (Agrofit a 1280 px sem rolagem lateral) e a borda alinha ao título do bloco
     "[data-g2g] [role=cell]{min-height:44px;box-sizing:border-box}"
-    "[data-g2g] [role=columnheader]{min-height:36px;box-sizing:border-box}"
+    # TAB-10 (16/10/2026, proprietário: "padronize a altura das colunas cabeçalho das tabelas, em diferentes telas temos diferentes alturas"):
+    # todo cabeçalho de tabela tem 40 px, a altura de duas linhas de rótulo do cabeçalho do motor. .g2th na célula (cab_colunas_html, seleção,
+    # ação) e .g2thr na linha das tabelas próprias (grade ou table). Rótulo em até 2 linhas (.g2hl); o longo ganha largura (g2cabVals --g2hbw)
+    # e, se ainda não couber, reticências: o nome inteiro fica no aria-label ("Ordenar por …") e na dica
+    ".g2th{height:40px;box-sizing:border-box;overflow:hidden}"
+    ".g2thr{height:40px;box-sizing:border-box;align-items:center;overflow:hidden}"
+    "[role=columnheader].g2th .g2hb{padding-top:2px;padding-bottom:2px}"
+    ".g2hl{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-width:0;line-height:1.35}"   # 1,35: o til da 3ª linha (Ã) não aparece sob a 2ª
     ".g2so{font-size:11px;line-height:1}"
     # celular (até 480 px): "Agrupar por" e "Colunas" só com o ícone e o valor (o nome fica no aria-label), para a barra caber numa linha com
     # Tabela | Cartões e sobrar altura para as linhas (AC-PCM-22: ≥ 5 linhas acima da dobra a 390 px)
@@ -1529,7 +1539,10 @@ CARTOES_CSS=(
     ".g2cd-fv{min-width:0;max-width:100%;overflow:hidden}"
     ".g2cd-fv .g2pw{display:block;min-width:0;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}"   # bloco: as reticências só valem fora do flex
     ".g2cd-fv .g2pw>[style*=\"flex-basis: 100%\"],.g2cd-fv .g2pw>[style*=\"flex-basis: 100%\"]~*{display:none}"
-    ".g2cd-fv .g2pw>[style*=\"color: #65736A; font-size: 12px\"]:not(:first-child){display:none}"
+    # texto de apoio apagado da célula fica na Tabela (VIS-05): o desenho põe a cor em rgb no atributo, então valem as duas grafias; as demais
+    # partes do valor ganham o espaço que o flex da Tabela dava (16/10: "Fungicida AF26-02" colava as partes nos cartões)
+    ".g2cd-fv .g2pw>:is([style*=\"color: #65736A; font-size: 12px\"],[style*=\"color: rgb(101, 115, 106); font-size: 12px\"]):not(:first-child){display:none}"
+    ".g2cd-fv .g2pw>*+*{margin-left:6px}"
     ".g2cd-hd{min-height:24px;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;border:1px solid transparent}"
     ".g2cd-hd .g2cd-tit,.g2cd-hd .g2cd-f{padding-top:0;padding-bottom:0;display:block;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
     ".g2cd-tot{min-height:40px;border-radius:10px;background:#F4F6F3;border:1px solid transparent;font-variant-numeric:tabular-nums}"
@@ -1543,11 +1556,11 @@ CARTOES_CSS=(
     "@media (pointer:coarse){.g2cd-c .g2car{height:44px}.g2cd-k{min-height:48px}}"
     # estreito (contêiner até 640 px): título e ⋯ na 1ª linha; os campos descem, em duas colunas, com o rótulo
     "@container (max-width:640px){"
-    ".g2cd-g{grid-template-columns:auto 0px minmax(0,1fr) auto!important}"
-    ".g2cartoes[data-car=\"1\"] .g2cd-g{grid-template-columns:auto 36px minmax(0,1fr) auto!important}"
+    ".g2cd-g{grid-template-columns:0px auto minmax(0,1fr) auto!important}"
+    ".g2cartoes[data-car=\"1\"] .g2cd-g{grid-template-columns:36px auto minmax(0,1fr) auto!important}"
     ".g2cd-hd{display:none}"
     ".g2cd-fs{display:grid;grid-column:3/4;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;padding:0 8px 10px}"
-    ".g2cd-s{grid-column:1;grid-row:1}.g2cd-c{grid-column:2;grid-row:1}.g2cd-tit{grid-column:3;grid-row:1}.g2cd-a{grid-column:4;grid-row:1}"
+    ".g2cd-c{grid-column:1;grid-row:1}.g2cd-s{grid-column:2;grid-row:1}.g2cd-tit{grid-column:3;grid-row:1}.g2cd-a{grid-column:4;grid-row:1}"
     ".g2cd-f{padding:0}.g2cd-f.g2cd-num{align-items:flex-start;text-align:left}"
     ".g2cd-fl{position:static;width:auto;height:auto;clip:auto;font-size:11.5px;color:#65736A;white-space:normal}"
     ".g2cd-gcab .g2cd-fs:not(:has(.g2pw>*)),.g2cd-f:not(:has(.g2cd-fv .g2pw>*)):not(:has(.g2cd-fv>b)){display:none}"   # campo vazio não ocupa lugar
@@ -1562,7 +1575,7 @@ G2_CSS=(".g2dsel{position:fixed;z-index:90;box-sizing:border-box;overflow-y:auto
         "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover,.g2car:hover{background:#E4F3E9}.g2del:hover{background:#FDE8E6;color:#B42318}}"   # DS-HOVER: verde, não cinza
         ".g2kid{background:#FBFCFA}.g2flash{background:#E4F3E9}.g2tot{cursor:pointer}.g2fgrp{background:#F2F8F4}.g2fgrp .g2c0{background:#F2F8F4!important}.g2fgrp .g2pw{max-width:min(100%,calc(100vw - 172px))!important;flex-wrap:wrap}.g2fgrp .g2pw *{white-space:normal}"   # SAF-FAZ-3: grupo da fazenda com cara de cabeçalho; no celular cabe na parte visível da tabela
         ".g2sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}"   # texto só para leitor de tela (motivo do chip)
-        ".g2hb{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;padding:7px 2px 7px 0;text-align:left;white-space:normal;max-width:104px;line-height:1.2}"
+        ".g2hb{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;padding:7px 2px 7px 0;text-align:left;white-space:normal;max-width:var(--g2hbw,104px);line-height:1.2}"
         ".g2fb{border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:800;padding:4px 4px;border-radius:6px;display:inline-flex;align-items:center;gap:2px;line-height:1}"   # funil de filtro da coluna (15/10)
         ".g2fb .g2fi-ico{flex-shrink:0;display:block}"
         ".g2car{width:22px;height:22px;border:0;border-radius:6px;background:transparent;cursor:pointer;font-size:13px;color:#15201A;flex-shrink:0;padding:0}"
@@ -1758,9 +1771,12 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     # essenciais, Agrupar por ou o quadro visoes.MODO_LISTAS) ganha o seletor no fim da barra, depois de Colunas. cartoes='externo': a tela
     # já tem seletor de visões próprio (O.S. pela VISOES-1; MA › Ordens e BEN com Kanban) e o Cartões entra nele; a grade desenha os cartões
     # e não põe seletor (g2lib.g2modosFim). cartoes=False tira. Os cartões são as mesmas linhas da Tabela (g2cdVals)
+    # 16/10/2026 (proprietário: "os demais módulos estão com design system diferente do nosso padrão de excelencia do módulo agrícola"):
+    # toda lista do motor com cabeçalho de ordenar e filtrar ganha Tabela | Cartões, em todos os módulos (antes só as do quadro
+    # MODO_LISTAS e as com colunas essenciais ou Agrupar por). Matriz sem ordenar (headtools=False, ex.: capacidade por mês) fica só em Tabela
     import visoes as _V
     if cartoes is None and (CUR,gid) in _V.MODO_LISTAS: cartoes=True
-    modo=cartoes in (True,'externo') or (cartoes is not False and (ess or bool(ag)))
+    modo=cartoes in (True,'externo') or (cartoes is not False and (ess or bool(ag) or headtools))
     if modo: spec['modo']='externo' if cartoes=='externo' else True
     mdb=f'<sc-if value="{H("_mdhas")}" hint-placeholder-val="{{{{false}}}}">{modos_html(gid)}</sc-if>' if (modo and cartoes!='externo') else ''
     # VISOES-2 §3.3: "Agrupar por" (ícone da pergunta + nome da coluna) e a trilha do descer, na barra da grade
@@ -1802,8 +1818,8 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
             + '</div>')
     fpanel=filtro_coluna_html(gid)
     lk=f'border: 0; background: transparent; padding: 0; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;'
-    hsel=f'<div role="columnheader" style="padding: 6px 4px 6px 12px; display: flex; align-items: center;"><button type="button" aria-label="{H("_selallLab")}" title="{H("_selallLab")}" onClick="{H("_selall")}" style="border: 1px solid {LINE}; background: {SURF}; width: 16px; height: 16px; border-radius: 4px; cursor: pointer; padding: 0;"></button></div>' if sel else ''
-    hdel=f'<div role="columnheader"></div>' if dele else ''
+    hsel=f'<div role="columnheader" class="g2th" style="padding: 6px 4px 6px 12px; display: flex; align-items: center; gap: 6px;"><sc-if value="{H("_selArw")}" hint-placeholder-val="{{{{false}}}}"><span style="width: 22px; flex-shrink: 0;"></span></sc-if><button type="button" aria-label="{H("_selallLab")}" title="{H("_selallLab")}" onClick="{H("_selall")}" style="border: 1px solid {LINE}; background: {SURF}; width: 16px; height: 16px; border-radius: 4px; cursor: pointer; padding: 0;"></button></div>' if sel else ''
+    hdel=f'<div role="columnheader" class="g2th"></div>' if dele else ''
     head=(f'<div role="row" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; background: {BG}; border-radius: 0;">{hsel}'
           + cab_colunas_html(gid,len(cols),headtools) + f'{hdel}</div>')
     # célula de seleção e de ação (⋯ ou lixeira, com a confirmação): as mesmas na linha da Tabela e no cartão (modo Cartões, 15/10/2026)
@@ -1815,9 +1831,11 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
               f'<sc-if value="{_h("c.asking")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 12px; font-weight: 700; color: {RED};">Excluir?</span><button type="button" onClick="{_h("c.yes")}" style="{_MINI} color: {RED}; border-color: {RED};">Excluir</button><button type="button" onClick="{_h("c.no")}" style="{_MINI}">Manter</button></sc-if></sc-if>')
     body=(f'<sc-for list="{H("_rows")}" as="r" hint-placeholder-count="3"><div role="row" data-rid="{_h("r.id")}" class="{_h("r.cls")}" tabIndex="{_h("r.tab")}" onClick="{_h("r.open")}" onKeyDown="{_h("r.key")}" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 1px solid {LINE}; align-items: center; font-size: 13px;">'
           f'<sc-for list="{_h("r.cells")}" as="c" hint-placeholder-count="{n}"><div role="cell" class="{_h("c.cls")}" style="display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; min-width: 0; {_h("c.st")}">'
-          + _cel_sel +
-          f'<sc-if value="{_h("c.hasCaret")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.caretOk")}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="g2car" aria-label="{_h("c.caretLabel")}" aria-expanded="{_h("c.caretExp")}" onClick="{_h("c.toggle")}">{_h("c.caretSym")}</button></sc-if><sc-if value="{_h("c.caretNo")}" hint-placeholder-val="{{{{false}}}}"><span style="width: 22px; flex-shrink: 0;"></span></sc-if>'
+          # TAB-09 (16/10/2026, proprietário: "colone os icones de drill down sempre na esquerda"): a seta vem antes de tudo na linha, inclusive
+          # da caixa de seleção (g2lib põe a seta na 1ª célula, c.carT); o recuo da árvore fica na célula do nome, depois da seta
+          f'<sc-if value="{_h("c.carT")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.caretOk")}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="g2car" aria-label="{_h("c.caretLabel")}" aria-expanded="{_h("c.caretExp")}" onClick="{_h("c.toggle")}">{_h("c.caretSym")}</button></sc-if><sc-if value="{_h("c.caretNo")}" hint-placeholder-val="{{{{false}}}}"><span style="width: 22px; flex-shrink: 0;"></span></sc-if>'
           f'<sc-if value="{_h("c.drill")}" hint-placeholder-val="{{{{false}}}}"><span class="g2drill" aria-hidden="true">{_SETA_DRILL}</span></sc-if></sc-if>'
+          + _cel_sel +
           f'<sc-if value="{_h("c.isData")}" hint-placeholder-val="{{{{true}}}}"><span class="g2pw" style="{_h("c.pw")}"><sc-for list="{_h("c.parts")}" as="p" hint-placeholder-count="1">{_PARTS}</sc-for></span></sc-if>'
           + _cel_del +
           f'</div></sc-for></div></sc-for>')
@@ -1884,13 +1902,13 @@ def cab_colunas_html(gid,ncols,headtools=True):
     g2lib.g2cabVals; a mesma peça no E.grid e nas tabelas próprias."""
     H=lambda x: _h(gid+x); cols=range(ncols)
     return (f'<sc-for list="{H("_head")}" as="h" hint-placeholder-count="{ncols}"><div role="columnheader" class="{_h("h.cls")}" data-un="{_h("h.un")}" data-dica="{_h("h.tt")}" style="{_h("h.st")} padding: 0 4px 0 8px;">'
-          + (f'<button type="button" class="g2hb" onClick="{_h("h.sort")}" aria-label="{_h("h.sortLabel")}">{_h("h.l")} <span aria-hidden="true" class="g2so" style="{_h("h.astyle")}">{_h("h.arrow")}</span></button>'
+          + (f'<button type="button" class="g2hb" onClick="{_h("h.sort")}" aria-label="{_h("h.sortLabel")}"><span class="g2hl">{_h("h.l")}</span> <span aria-hidden="true" class="g2so" style="{_h("h.astyle")}">{_h("h.arrow")}</span></button>'
              f'<button type="button" class="g2fb" onClick="{_h("h.fmenu")}" aria-label="{_h("h.flabel")}" title="{_h("h.ftit")}" style="color: {_h("h.fcolor")};"><svg class="g2fi-ico" width="13" height="13" viewBox="0 0 24 24" fill="{_h("h.ffill")}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+ICONS['filtro']+'"/></svg></button>' if headtools else
-             f'<span class="g2hb" style="cursor: default;">{_h("h.l")}</span>')
+             f'<span class="g2hb" style="cursor: default;"><span class="g2hl">{_h("h.l")}</span></span>')
           + '</div></sc-for>')
 def _cartoes_html(gid,cel_sel,cel_del):
     """Modo Cartões da grade, VIS-06 (16/10/2026, proprietário: "deixe o modo de visão do cartão igual de planos agronômicos"): um cartão por
-    linha, como as Atividades do plano. Grade de cada linha (g2lib.g2cdVals, _cdgtc): seleção · seta · título · até G2_CD_MAX colunas alinhadas
+    linha, como as Atividades do plano. Grade de cada linha (g2lib.g2cdVals, _cdgtc): seta · seleção · título (TAB-09) · até G2_CD_MAX colunas alinhadas
     em todos os cartões · ⋯. Rótulos das colunas uma vez, no alto (_cdhd); no estreito (contêiner até 640 px) os campos descem para baixo do
     título, com o rótulo. Árvore: a seta abre os filhos dentro do cartão, nas mesmas colunas. Agrupar por: título do grupo com as somas
     alinhadas. Total numa linha acima, alinhado. Clique ou Enter abre o mesmo detalhe da linha da Tabela; listas com rótulo (role=list)."""
@@ -1899,21 +1917,21 @@ def _cartoes_html(gid,cel_sel,cel_del):
     acao=lambda lst: f'<span class="g2cd-a" data-noedit="1"><sc-for list="{_h(lst)}" as="c" hint-placeholder-count="0">{cel_del}</sc-for></span>'
     campos=lambda lst: (f'<div class="g2cd-fs"><sc-for list="{_h(lst)}" as="f" hint-placeholder-count="3"><div class="{_h("f.cls")}">'
                         f'<span class="g2cd-fl">{_h("f.l")}</span><span class="g2cd-fv"><span class="g2pw">{pt("f.parts")}</span></span></div></sc-for></div>')
-    vazio='<span class="g2cd-s"></span><span class="g2cd-c"></span>'
+    vazio='<span class="g2cd-c"></span><span class="g2cd-s"></span>'   # TAB-09: a coluna da seta vem antes da seleção
     kid=(f'<div role="listitem" data-rid="{_h("k.id")}" class="{_h("k.cls")}" {G} tabIndex="{_h("k.tab")}" onClick="{_h("k.open")}" onKeyDown="{_h("k.key")}">' + vazio
          + f'<div class="g2cd-tit" style="{_h("k.tst")}"><span class="g2cd-tl">'
          f'<sc-if value="{_h("k.caretOk")}" hint-placeholder-val="{F_}"><button type="button" class="g2car" aria-label="{_h("k.caretLabel")}" aria-expanded="{_h("k.caretExp")}" onClick="{_h("k.toggle")}">{_h("k.caretSym")}</button></sc-if>'
          f'<span class="g2pw">{pt("k.tparts")}</span></span></div>' + campos('k.fs') + acao('k.acts') + '</div>')
     card=(f'<div role="listitem" data-rid="{_h("cd.id")}" class="{_h("cd.cls")}" tabIndex="{_h("cd.tab")}" onClick="{_h("cd.open")}" onKeyDown="{_h("cd.key")}">'
-          f'<div class="g2cd-g g2cd-lin" {G}><span class="g2cd-s" data-noedit="1"><sc-for list="{_h("cd.sels")}" as="c" hint-placeholder-count="0">{cel_sel}</sc-for></span>'
-          f'<span class="g2cd-c"><sc-if value="{_h("cd.temKids")}" hint-placeholder-val="{F_}"><button type="button" class="g2car g2cd-nk" aria-label="{_h("cd.kal")}" aria-expanded="{_h("cd.kexp")}" onClick="{_h("cd.ktog")}">{_h("cd.ksym")}</button></sc-if></span>'
+          f'<div class="g2cd-g g2cd-lin" {G}><span class="g2cd-c"><sc-if value="{_h("cd.temKids")}" hint-placeholder-val="{F_}"><button type="button" class="g2car g2cd-nk" aria-label="{_h("cd.kal")}" aria-expanded="{_h("cd.kexp")}" onClick="{_h("cd.ktog")}">{_h("cd.ksym")}</button></sc-if></span>'
+          f'<span class="g2cd-s" data-noedit="1"><sc-for list="{_h("cd.sels")}" as="c" hint-placeholder-count="0">{cel_sel}</sc-for></span>'
           f'<div class="g2cd-tit"><span class="g2cd-tl"><span class="g2pw">{pt("cd.tparts")}</span><sc-if value="{_h("cd.temKn")}" hint-placeholder-val="{F_}"><span class="g2cd-kn">{_h("cd.kn")}</span></sc-if></span>'
           f'<sc-if value="{_h("cd.temNota")}" hint-placeholder-val="{F_}"><span class="g2cd-nota"><span class="g2pw">{pt("cd.nota")}</span></span></sc-if></div>'
           + campos('cd.fs') + acao('cd.acts') + '</div>'
           f'<sc-if value="{_h("cd.kopen")}" hint-placeholder-val="{F_}"><div role="list" aria-label="{_h("cd.klab")}" class="g2cd-kids">'
           f'<sc-for list="{_h("cd.kids")}" as="k" hint-placeholder-count="1">{kid}</sc-for></div></sc-if></div>')
-    cab=(f'<sc-if value="{_h("gr.temCab")}" hint-placeholder-val="{F_}"><div class="g2cd-gcab g2cd-g" {G} data-rid="{_h("gr.id")}"><span class="g2cd-s"></span><span class="g2cd-c">'
-         f'<sc-if value="{_h("gr.caretOk")}" hint-placeholder-val="{F_}"><button type="button" class="g2car" aria-label="{_h("gr.caretLabel")}" aria-expanded="{_h("gr.caretExp")}" onClick="{_h("gr.toggle")}">{_h("gr.caretSym")}</button></sc-if></span>'
+    cab=(f'<sc-if value="{_h("gr.temCab")}" hint-placeholder-val="{F_}"><div class="g2cd-gcab g2cd-g" {G} data-rid="{_h("gr.id")}"><span class="g2cd-c">'
+         f'<sc-if value="{_h("gr.caretOk")}" hint-placeholder-val="{F_}"><button type="button" class="g2car" aria-label="{_h("gr.caretLabel")}" aria-expanded="{_h("gr.caretExp")}" onClick="{_h("gr.toggle")}">{_h("gr.caretSym")}</button></sc-if></span><span class="g2cd-s"></span>'
          f'<div class="g2cd-tit"><span class="g2cd-tl"><span class="g2pw g2cd-gnome">{pt("gr.tparts")}</span>'
          f'<sc-for list="{_h("gr.ext")}" as="l" hint-placeholder-count="1"><span class="g2cd-gx"><sc-if value="{_h("l.temL")}" hint-placeholder-val="{F_}"><span class="g2cd-kr">{_h("l.l")}:</span> </sc-if>'
          f'<span class="g2pw">{pt("l.parts")}</span></span></sc-for></span></div>' + campos('gr.fs') + '<span class="g2cd-a"></span></div></sc-if>')

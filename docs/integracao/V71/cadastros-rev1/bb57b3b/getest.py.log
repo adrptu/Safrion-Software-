@@ -1,0 +1,7 @@
+GE-03 {'os0420': True, 'abre_form_frete': True, 'frete_versionado': True, 'definitivo_consulta': True, 'fechar_bloqueado': True, 'diesel_idempotente': True, 'fechou': True}
+GE-04 {'pc088_unico': False, 'aviso_nao_salvo': True, 'salvou': True, 'remessa_idempotente': True, 'retorno_na_linha': True}
+GE-05 {'filtrado_rc12': True, 'linhas': ['▾', 'FAT-2096', 'Total'], 'pv028_ausente': True, 'credito': True, 'cobranca_salva': True}
+GE-02det {'aviso_pp': True, 'estado_pp': True}
+GE-08 {'v2_51280': True, 'bloqueio_conferencia': False, 'autorizar_na_linha': True}
+GE-07 {'criou_ac104': True}
+FALHAS: [('GE-04', 'pc088_unico'), ('GE-08', 'bloqueio_conferencia')]

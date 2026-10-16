@@ -1,0 +1,6 @@
+OK    V1a OS-0419 inicia (Em execução); déficit do P2 antes = 11,2 mm 
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr79/docs/integracao/V71/irr-onda0-rev-claude/irr_onda0_rev_test.py", line 85, in <module>
+    chk('V1b painel abre sem área e sem leitura pré-preenchidas (nenhuma "Volta completa" marcada)', bool(d) and d['cob'] == '' and d['vol'] == '' and d['radios'] == 0 and 'Volta completa' not in d['txt'], d)
+                                                                                                                 ~^^^^^^^
+KeyError: 'cob'

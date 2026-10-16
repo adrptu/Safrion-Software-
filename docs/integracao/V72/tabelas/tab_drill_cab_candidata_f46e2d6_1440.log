@@ -1,0 +1,7 @@
+# 1440 px · 148 telas + 4 estados por endereço · 1580 setas e 215 cabeçalhos medidos
+# 1440 px · alturas de cabeçalho: 40 px em 123 telas
+# 1440 px · rótulos de cabeçalho com reticências (3ª linha; nome inteiro no aria-label): 0 · 
+OK    A1440 TAB-09 seta de abrir na 1ª coluna, antes de qualquer outra coluna (1580 setas; telas com desvio: 0)
+OK    B1440 TAB-10 cabeçalho de tabela com 40 px ±1 (215 cabeçalhos; alturas distintas: 1; telas com desvio: 0)
+OK    C1440 sem erro de JavaScript em nenhuma tela e estado (inicial, Expandir tudo, outro modo)
+RESULTADO: 3 ok · 0 falhas

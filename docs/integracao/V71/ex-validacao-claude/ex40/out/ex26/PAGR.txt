@@ -1,0 +1,451 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Painel
+‹
+Agrícola
+Painel
+Consultar O.S.
+A liberar
+ⓘ
+6
+Liberadas
+ⓘ
+4
+Em execução
+ⓘ
+5
+Em conferência
+ⓘ
+2
+O.S. · onde agir primeiro
+
+5 O.S. precisam de ação ⓘ
+
+Prazos até 23/09/2026
+
+Por causa
+Máquina ou equipamento
+3 O.S.
+Insumo no Estoque
+2 O.S.
+Por quem resolve
+Manutenção
+2 O.S.
+Suprimentos
+2 O.S.
+PCP
+1 O.S.
+Execução · prevista e enviada ⓘ
+OS-0417 · P1
+
+Santa Rita · Safra 2026/27 · Adubação de cobertura
+
+Em conferência
+
+Enviada: 95,00 ha de 95,00 ha previstos
+
+100% da área prevista enviada
+
+Sobra em custódia: MAP 11-52 500 kg. Receba a devolução no Estoque.
+
+Rui (almoxarife) · 24/09
+
+Conferir O.S.
+OS-0420 · T4
+
+Santa Rita · Safra 2026/27 · Plantio · Soja 58 W
+
+Em execução
+
+Enviada: 30,00 ha de 100,00 ha previstos
+
+30% da área prevista enviada
+
+Manutenção · OM-0233 até 24/09
+
+Acompanhar O.S.
+OS-0421 · T1+T2
+
+Santa Rita · Safra 2026/27 · Pulverização · Fungicida 1ª aplicação
+
+Em execução
+
+Enviada: 190,00 ha de 350,00 ha previstos
+
+54% da área prevista enviada
+
+Paula · conferir o dia 4 hoje
+
+Acompanhar O.S.
+OS-0505 · Pivô 19
+
+Lagoa Grande · Safra 2026/27 · Colheita · semana 39
+
+Em execução
+
+Enviada: 50,00 ha de 75,11 ha previstos
+
+67% da área prevista enviada
+
+Lúcia · conferir o dia 2
+
+Acompanhar O.S.
+OS-0506 · Pivô 4
+
+Lagoa Grande · Safra 2026/27 · Fertirrigação NK
+
+Em execução
+
+Enviada: 36,00 ha de 73,18 ha previstos
+
+49% da área prevista enviada
+
+Responsável não informado · Prazo não informado
+
+Acompanhar O.S.
+OS-0507 · Pivô 5
+
+Lagoa Grande · Safra 2026/27 · Fertirrigação de arranque
+
+Em execução
+
+Enviada: 25,40 ha de 71,11 ha previstos
+
+36% da área prevista enviada
+
+Manutenção · bomba até 25/09
+
+Acompanhar O.S.
+OS-0508 · Pivô 23
+
+Lagoa Grande · Safra 2026/27 · Fungicida para antracnose
+
+Em conferência
+
+Enviada: 63,99 ha de 63,99 ha previstos
+
+100% da área prevista enviada
+
+Wesley · conferir e encerrar
+
+Conferir O.S.
+MIP · onde agir ⓘ
+
+Referência 23/09/2026
+
+Decisão do responsável técnico
+VIS-013 · P1
+
+Santa Rita · Feijão · Mosca-branca
+
+Acima do NC
+
+5,1 / 4 · adultos/folíolo · 128% do NC
+
+Vistoria 18/09/2026 · 5 dias até a referência
+
+Ana
+
+Conferir vistoria
+VIS-053 · Pivô 9
+
+Lagoa Grande · Mamão · Meleira (virose)
+
+Foco
+
+3 de 20 com sintoma · plantas com sintoma
+
+Vistoria 21/09/2026 · 2 dias até a referência
+
+virose · erradicar
+
+Ana
+
+Conferir vistoria
+VIS-055 · Pivô 22
+
+Lagoa Grande · Mamão · Mancha-anelar (PRSV)
+
+Foco
+
+1 de 20 com sintoma · plantas com sintoma
+
+Vistoria 21/09/2026 · 2 dias até a referência
+
+virose · erradicar
+
+Ana
+
+Conferir vistoria
+Vistorias atrasadas
+VIS-006 · P1
+
+Santa Rita · Feijão · Percevejo
+
+Vistoria atrasada
+
+Prevista 11/09/2026 · 12 dias de atraso
+
+Marcos
+
+Conferir vistoria
+VIS-060 · Pivô 17
+
+Lagoa Grande · Mamão · Ácaro-rajado
+
+Vistoria atrasada
+
+Prevista 17/09/2026 · 6 dias de atraso
+
+Lúcia
+
+Conferir vistoria
+Coleta a resolver
+VIS-016 · C1
+
+Santa Rita · Café · Mancha-de-phoma
+
+Sincronizar
+
+0/12 pontos · 6 no aparelho
+
+João
+
+Conferir vistoria
+Custos · orçado e realizado ⓘ
+
+Orçamento da safra × realizado acumulado · R$/ha plantado · Fonte: Custos do Mapa
+
+Soja · Santa Rita · Safra 2026/27
+
+Parcial · conferir cobertura · 1.085,00 ha plantados
+
+Orçado: Orçamento por hectare indisponível
+
+Realizado: Subtotal conhecido: 62,18 R$/ha
+
+Conferido: 49.135,88 R$ · Provisório: 18.326,88 R$
+
+Sem orçamento de plano: T4, T3, P1, P2
+OS-0421 · vários talhões (T1, T2) sem apontamento por talhão: R$ 17.573,10 fora do total
+Mamão Formosa · Santa Rita · Safra 2026/27
+
+Acumulado da safra · 42,00 ha plantados
+
+Orçado: 515,39 R$/ha
+
+Realizado: 0,00 R$/ha
+
+Conferido: 0,00 R$ · Provisório: 0,00 R$
+
+Café · Santa Rita · Safra 2026/27
+
+Acumulado da safra · 38,00 ha plantados
+
+Orçado: 3.377,50 R$/ha
+
+Realizado: 0,00 R$/ha
+
+Conferido: 0,00 R$ · Provisório: 0,00 R$
+
+Mamão Formosa · Lagoa Grande · Safra 2026/27
+
+Acumulado da safra · 1.285,23 ha plantados
+
+Orçado: 6.825,50 R$/ha
+
+Realizado: 114,45 R$/ha
+
+Conferido: 109.023,79 R$ · Provisório: 38.073,20 R$
+
+O.S. fora dos totais por cultura
+OS-0421 · Sem rateio por talhão · 17.573,10 R$ conhecidos
+Conferido: 13.873,50 R$ · Provisório: 3.699,60 R$
+
+Conferir composição dos custos
+Colheita · previsto e recebido ⓘ
+23 de 23
+CULTIVO · FAZENDA
+⇅
+PERÍODO
+⇅
+PREVISÃO PUBLICADA
+⇅
+RECEBIDO
+⇅
+SITUAÇÃO · PRÓXIMO PASSO
+⇅
+T1-A · Soja 58 W
+Santa Rita
+Safra 2026/27
+10.240 sc
+—
+Prevista
+colheita a partir de 12/02/27 · nada a fazer agora
+T1-B · Soja 62 X
+Santa Rita
+Safra 2026/27
+9.424 sc
+—
+Prevista
+colheita a partir de 22/02/27 · nada a fazer agora
+T2 · Soja 58 W
+Santa Rita
+Safra 2026/27
+18.774 sc
+—
+Prevista
+colheita a partir de 15/02/27 · nada a fazer agora
+T4 · Soja 58 W
+Santa Rita
+Safra 2026/27
+12.240 sc
+—
+Prevista
+colheita a partir de 17/02/27 · nada a fazer agora
+T3 · Soja 62 X
+Santa Rita
+Safra 2026/27
+5.952 sc
+—
+Prevista
+colheita a partir de 19/02/27 · nada a fazer agora
+P1 · Soja 58 W
+Santa Rita
+Safra 2026/27
+6.270 sc
+—
+Prevista
+colheita a partir de 10/03/27 · nada a fazer agora
+P2 · Soja 62 X
+Santa Rita
+Safra 2026/27
+5.280 sc
+—
+Prevista
+colheita a partir de 25/03/27 · nada a fazer agora
+T7 · Mamão Formosa Formosa
+Santa Rita
+S39 · 21/09–27/09 (em curso)
+Sem previsão publicada
+—
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+C1 · Café Catuaí 144
+Santa Rita
+Safra 2026/27
+Sem previsão publicada
+—
+Sem previsão
+Publicar a previsão da safra pela meta · Ana (agrônoma)
+T1-A · Milho Híbrido AG 8700
+Santa Rita
+Safrinha 2027
+Sem previsão publicada
+—
+Sem previsão
+Publicar a previsão da safra pela meta · Ana (agrônoma)
+T2 · Milho Híbrido AG 8700
+Santa Rita
+Safrinha 2027
+Sem previsão publicada
+—
+Sem previsão
+Publicar a previsão da safra pela meta · Ana (agrônoma)
+P1 · Feijão Pérola
+Santa Rita
+Safrinha 2027
+Sem previsão publicada
+—
+Sem previsão
+Publicar a previsão da safra pela meta · Ana (agrônoma)
+Pivô 2 · Mamão Formosa UENF/Caliman 01
+Lagoa Grande
+S39 · 21/09–27/09 (em curso)
+Sem previsão publicada
+—
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+Pivô 4 · Mamão Formosa Tainung 1
+Lagoa Grande
+S39 · 21/09–27/09 (em curso)
+Sem previsão publicada
+—
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+Pivô 6 · Mamão Formosa Tainung 1
+Lagoa Grande
+S39 · 21/09–27/09 (em curso)
+Sem previsão publicada
+—
+Colhida
+Contar os frutos de 20 plantas · equipe de colheita (app)
+Pivô 9 · Mamão Formosa UENF/Caliman 01
+Lagoa Grande
+S39 · 21/09–27/09 (em curso)
+Sem previsão publicada
+—
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+Pivô 17 · Mamão Formosa Tainung 1
+Lagoa Grande
+S39 · 21/09–27/09 (em curso)
+Sem previsão publicada
+—
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+Pivô 18 · Mamão Formosa Tainung 1
+Lagoa Grande
+S39 · 21/09–27/09 (em curso)
+Sem previsão publicada
+—
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+Pivô 19 · Mamão Formosa Tainung 1
+Lagoa Grande
+S39 · 21/09–27/09 (em curso)
+72,9 t
+36,42 t
+Em colheita
+1 carga(s) a receber
+Pivô 20 · Mamão Formosa UENF/Caliman 01
+Lagoa Grande
+S39 · 21/09–27/09 (em curso)
+Sem previsão publicada
+—
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+Pivô 22 · Mamão Formosa Tainung 1
+Lagoa Grande
+S39 · 21/09–27/09 (em curso)
+Sem previsão publicada
+—
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+Pivô 23 · Mamão Formosa Tainung 1
+Lagoa Grande
+S39 · 21/09–27/09 (em curso)
+Sem previsão publicada
+—
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+Pivô 24 · Mamão Formosa Tainung 1
+Lagoa Grande
+S39 · 21/09–27/09 (em curso)
+Sem previsão publicada
+—
+Sem previsão
+Contar os frutos de 20 plantas · equipe de colheita (app)
+Planejar safra
+Consultar colheita
+Tela: Painel

@@ -1,0 +1,67 @@
+P1: 134 células do desenho · lado 84.6 m · 0.7090 ha por célula (área do cadastro ÷ células)
+centro do P1: -15.54727 · -54.29720 · raio pela área do cadastro 549.9 m
+arquivo sintético: 13077 pontos · 0.80 MB · SHA-256 cb849c20b98b336d45108614ea9c5865ef72e7ddd340d356ffc855d4682ca101
+prévia · entrou 11851 de 13077 · {'fora do talhão': 420, 'umidade inválida (fora de 8 a 40 %)': 62, 'velocidade fora de 3 a 10 km/h': 126, 'início ou fim de passada (2 pontos)': 483, 'borda (a menos de 9 m do contorno)': 69, 'fora da mediana ± 3 × 1,4826 × MAD': 66}
+média ponderada 58.9688 sc/ha · média simples 58.9733 · área coberta 88.90 ha (93.58 %) · apurada 57.2 · diferença +3.09 %
+OK    C1 prévia: soma dos motivos + válidos = total de pontos
+OK    C1 cada defeito plantado cai num motivo (todos os motivos com contagem > 0) · {'fora do talhão': 420, 'umidade inválida (fora de 8 a 40 %)': 62, 'velocidade fora de 3 a 10 km/h': 126, 'início ou fim de passada (2 pontos)': 483, 'borda (a menos de 9 m do contorno)': 69, 'fora da mediana ± 3 × 1,4826 × MAD': 66}
+OK    C2 média ponderada pela área ≠ média simples (pontos com área diferente) · 58.9688 × 58.9733
+OK    C3 mutante sem limpeza muda a média (mais de 0,5 sc/ha) · 59.68 × 58.97
+OK    C4 diferença mapa × apurada visível e calculada sobre a apurada (5.434 sc ÷ 95 ha = 57,20 sc/ha) · +3.09 %
+células com valor 134 de 134 · raio 59.8 m · correlação célula IDW × verdade 0.924
+OK    C5 toda célula do pivô tem ponto no raio (sem registro = 0 aqui; célula vazia ficaria "sem registro", nunca zero) · 0
+OK    E0 n de células com valor ≥ n mínimo 30 · 134
+
+Spearman (n = 134 células) · n efetivo por par (CRH 1989, correlograma de Moran até 7 células) · IC 95 % por Fisher z com EP = √(1,06/(n_ef−3)) · q = BH sobre 8
+   K (mg/dm³)                       ρ = +0.670 [+0.147; +0.901] · n_ef = 12.2 · p = 0.0157 · q = 0.1255 · (sem n_ef: p = 0.0000, q = 0.0000) · controlável (adubação)
+   Déficit hídrico acumulado (mm)   ρ = -0.585 [-0.868; -0.015] · n_ef = 12.5 · p = 0.0404 · q = 0.1614 · (sem n_ef: p = 0.0000, q = 0.0000) · controlável (irrigação)
+   Argila (%)                       ρ = +0.257 [-0.305; +0.686] · n_ef = 15.2 · p = 0.3506 · q = 0.5569 · (sem n_ef: p = 0.0027, q = 0.0054) · condição
+   CTC (cmolc/dm³)                  ρ = +0.262 [-0.275; +0.675] · n_ef = 16.4 · p = 0.3189 · q = 0.5569 · (sem n_ef: p = 0.0022, q = 0.0054) · condição
+   MO (%)                           ρ = +0.120 [-0.382; +0.566] · n_ef = 17.9 · p = 0.6369 · q = 0.7279 · (sem n_ef: p = 0.1685, q = 0.1926) · condição
+   P (mg/dm³)                       ρ = -0.076 [-0.497; +0.374] · n_ef = 21.5 · p = 0.7404 · q = 0.7404 · (sem n_ef: p = 0.3833, q = 0.3833) · controlável (adubação)
+   pH (CaCl₂)                       ρ = +0.229 [-0.342; +0.676] · n_ef = 14.7 · p = 0.4176 · q = 0.5569 · (sem n_ef: p = 0.0079, q = 0.0120) · controlável (calagem)
+   V (%)                            ρ = +0.225 [-0.335; +0.667] · n_ef = 15.2 · p = 0.4162 · q = 0.5569 · (sem n_ef: p = 0.0090, q = 0.0120) · controlável (calagem)
+   NDVI 15/01 (indicador, fora do modelo)  ρ = +0.692 · p = 2.1e-20
+   grupos confundidos (|ρ| ≥ 0,7): [('ARG', 'CTC'), ('PH', 'V')]
+
+Regressão (n = 134, 8 variáveis) · R² = 0.627 · Σ LMG = 0.627
+   K (mg/dm³)                       β = +0.2410 [+0.1783; +0.3037] (plantado +0.20) · LMG 0.305 (48.7 % do R²)
+   Déficit hídrico acumulado (mm)   β = -0.0783 [-0.1132; -0.0433] (plantado -0.10) · LMG 0.209 (33.4 % do R²)
+   Argila (%)                       β = -0.0280 [-0.3295; +0.2735] (plantado +0.15) · LMG 0.027 (4.3 % do R²)
+   CTC (cmolc/dm³)                  β = +0.8117 [-0.5991; +2.2226] (plantado +0.00) · LMG 0.028 (4.5 % do R²)
+   MO (%)                           β = -1.1779 [-2.8725; +0.5167] (plantado +0.00) · LMG 0.006 (0.9 % do R²)
+   P (mg/dm³)                       β = -0.0219 [-0.1456; +0.1019] (plantado +0.00) · LMG 0.001 (0.2 % do R²)
+   pH (CaCl₂)                       β = -4.0892 [-15.1782; +6.9998] (plantado +0.00) · LMG 0.027 (4.3 % do R²)
+   V (%)                            β = +0.0011 [-0.2632; +0.2654] (plantado +0.00) · LMG 0.023 (3.7 % do R²)
+OK    E1 Σ LMG = R² do modelo completo
+OK    E2 efeito plantado de K (+0,20) dentro do IC 95 % de β · [0.1783; 0.3037]
+OK    E2 efeito plantado do déficit (−0,10) dentro do IC 95 % de β · [-0.1132; -0.0433]
+OK    E4a associação simples (Spearman com n efetivo e FDR): nenhuma nula acusada · {'MO': np.float64(0.7279), 'P': np.float64(0.7404), 'PH': np.float64(0.5569), 'V': np.float64(0.5569)}
+OK    E4b contraprova: tratando as 134 células como independentes (sem n efetivo), pH e V% passariam mesmo com FDR · {'PH': np.float64(0.012), 'V': np.float64(0.012)}
+   grupo ARG+CTC: F = 4.90 · p = 0.008898 · LMG do grupo 0.055
+   grupo PH+V: F = 2.07 · p = 0.1301 · LMG do grupo 0.050
+   modelo · p e q (BH, 6 hipóteses): {'K': ('5.85e-12', '3.51e-11'), 'DEF': ('2.03e-05', '6.09e-05'), 'MO': ('0.171', '0.206'), 'P': ('0.727', '0.727'), 'ARG+CTC': ('0.0089', '0.0178'), 'PH+V': ('0.13', '0.195')}
+OK    E3 no modelo: K, déficit e o grupo argila+CTC com q < 0,05
+OK    E4 no modelo: MO, P e o grupo pH+V% com q ≥ 0,05 e IC de β de MO e P com o zero
+OK    E5b grupo argila+CTC (efeito plantado na argila) significativo em conjunto; grupo pH+V% (nulo) não · (np.float64(0.0089), np.float64(0.1301))
+OK    E5c o efeito plantado da argila (+0,15) está no IC de β, mas β sozinho não separa argila de CTC (IC com o zero) · (np.float64(-0.33), np.float64(0.274))
+OK    E5 argila e CTC aparecem como grupo; pH e V% também · [('ARG', 'CTC'), ('PH', 'V')]
+OK    E9 BH em Decimal: p = 0,001 · 0,008 · 0,039 · 0,041 · 0,042 · 0,06 → q = 0,006 · 0,024 · 0,0504 · 0,0504 · 0,0504 · 0,06 (2 passam; sem correção, 5) · ['0.006', '0.024', '0.0504', '0.0504', '0.0504', '0.06']
+OK    E6 mutante NDVI no modelo: β de K encolhe 15 % ou mais (o indicador esconde a alavanca) · 0.1929 × 0.2410 (20.0 %)
+
+Moran I (vizinhos por aresta): resíduos -0.030 (p perm. = 0.645) · K +0.888 · pH +0.796 · produtividade +0.558
+OK    E7 resíduos sem dependência espacial restante (p ≥ 0,05), enquanto K e produtividade são autocorrelacionados (I > 0,3) · (np.float64(-0.03), np.float64(0.645), np.float64(0.888), np.float64(0.558))
+
+   K (mg/dm³): faixa ruim 34 células (24.10 ha) · Δ medianas 31.00 · ganho 7.47 sc/ha [5.53; 9.41] · plantado 6.20 · R$ 966.6180/ha · R$ 23295 na faixa ruim
+OK    E8 ganho plantado de K (6.20 sc/ha) dentro do intervalo do ganho
+   Déficit hídrico acumulado (mm): faixa ruim 35 células (24.81 ha) · Δ medianas 44.00 · ganho 3.44 sc/ha [1.91; 4.98] · plantado 4.40 · R$ 445.1360/ha · R$ 11044 na faixa ruim
+OK    E8 ganho plantado de DEF (4.40 sc/ha) dentro do intervalo do ganho
+
+teste em faixas (semente 20261017): diferenças [0.66 2.33 1.79 2.83 2.13 4.32] · média 2.34 sc/ha · IC 95 % [1.07; 3.61] (t com 5 gl = 2.5706)
+OK    F1 efeito plantado (+3,0) dentro do IC e IC sem o zero → "efeito confirmado" · (np.float64(1.07), np.float64(3.61))
+   4.000 ensaios simulados: cobertura do IC 95 % = 95.1 % · IC sem o zero em 93.0 %
+OK    F1b cobertura do IC entre 94 % e 96 % (o método, não só uma semente) · 0.9508
+OK    F2 mutante sem pareamento: limite inferior menor (a variação entre blocos alarga o intervalo) · (np.float64(-2.45), np.float64(1.07))
+   valor: 2.34 sc/ha × R$ 129.40 = R$ 302.7960/ha; menos o custo do tratamento R$ 240.00/ha = R$ 62.7960/ha
+
+RESUMO: 25 de 25 conferências passaram · semente 20261016

@@ -49,7 +49,8 @@ def parte_b(c, J, BASE):
             const box=t.parentElement, cs=getComputedStyle(box), hs=[...t.querySelectorAll('[role=columnheader]')].filter(h=>h.querySelector('.g2hb'));
             const ferr=hs.some(h=>h.querySelector('button.g2hb'))?hs.filter(h=>!h.querySelector('.g2so')||!h.querySelector('.g2fb')).length:0;
             const rows=[...t.querySelectorAll('[role=row].g2ed')].filter(r=>r.getClientRects().length).slice(0,12);
-            const semSeta=rows.filter(r=>{ const c0=r.querySelector('[role=cell].g2c0'); return !c0||!c0.querySelector('.g2drill,.g2car'); }).map(r=>r.getAttribute('data-rid'));
+            // TAB-09 (16/10/2026): a seta fica na 1ª célula da linha (com seleção, antes da caixa), não necessariamente na do nome (.g2c0)
+            const semSeta=rows.filter(r=>{ const c0=r.querySelector('[role=cell]'); return !c0||!c0.querySelector('.g2drill,.g2car'); }).map(r=>r.getAttribute('data-rid'));
             const c0=t.querySelector('[role=cell].g2c0'), h0=t.querySelector('[role=columnheader].g2c0');
             const vert=[c0,h0].filter(Boolean).some(e=>{ const sh=getComputedStyle(e).boxShadow; return sh&&sh!=='none'; });
             out.push({g:t.getAttribute('data-g2g'), moldura:cs.borderTopWidth==='1px'&&cs.borderTopLeftRadius==='12px', ferr, semSeta, vert}); }); return out; })()""") or []

@@ -1,0 +1,12 @@
+OK    V1a OS-0419 inicia (Em execução); déficit do P2 antes = 11,2 mm 
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr79/docs/integracao/V71/irr-onda0-rev-claude/irr_onda0_rev_test.py", line 84, in <module>
+    clicar('Confirmar término'); d = dlg()
+                                     ^^^^^
+  File "/tmp/claude-0/pr79/docs/integracao/V71/irr-onda0-rev-claude/irr_onda0_rev_test.py", line 23, in dlg
+    return J(f"(()=>{{const d={DLG}; if(!d) return null; const n={N}; return {{lab:d.getAttribute('aria-label')||'',txt:n(d.innerText),foco:d.contains(document.activeElement),"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr79/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: SyntaxError: Unexpected token ';'

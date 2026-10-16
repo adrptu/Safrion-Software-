@@ -59,6 +59,78 @@ function cenQtd(dose, area) {
   let c;   // centésimos, meio para cima
   if (e <= 2) c = n * (10n ** BigInt(2 - e)); else { const d = 10n ** BigInt(e - 2); c = (n * 2n + d) / (2n * d); }
   const t = c.toString().padStart(3, '0'); return (neg ? -1 : 1) * Number(t.slice(0, -2) + '.' + t.slice(-2)); }   // decimal exato → número mais próximo (= float(Decimal))
+// Área registrada no aparelho: ainda não entrou no saldo do servidor.
+function cenApPend(o){ return (o.ap||[]).filter(a=>a.sinc===false).reduce((s,a)=>s+(a.ha||0),0); }
+// EX-38: necessidade restante usa área e custódia locais juntas, via cenOsSup.
+// rVis (osReqVis) controla apenas o consumo reconhecido no escritório; a previsão sinaliza a pendência.
+function cenInsumosOrdem(c, ordem, rVis) {
+  const o = c && c.ordens && ordem && c.ordens[ordem.id] || ordem;
+  if(!o) return [];
+  const r = c && c.reqs && c.reqs[o.req];
+  const valido = n => typeof n === 'number' && Number.isFinite(n) && n >= 0;
+  const pend = o ? cenApPend(o) : 0;
+  const area = o && valido(o.saldo) ? Math.max(0,o.saldo-pend) : null;
+  // Custódia já baixada no aparelho: não recompor a baixa sobre a área local.
+  const co = Object.assign({},o,{saldo:area,realizado:(o.realizado||0)+pend,ap:(o.ap||[]).filter(a=>a.sinc!==false),ins:(o.ins||[]).filter(x=>area!==null&&valido(x.dose))});
+  const rCalc=r?Object.assign({},r,{itens:(r.itens||[]).filter(i=>valido(i.custodia)&&valido(i.consumido))}):r;
+  const supr = cenOsSup(c,co,rCalc);
+  return ((o && o.ins) || []).map(x => {
+    const itens = r ? (r.itens || []).filter(i => i.prod === x.p) : [];
+    const mesmaUn = itens.every(i => i.un === x.un);
+    const soma = (k,lista=itens) => lista.length && lista.every(i=>i.un===x.un&&valido(i[k]))
+      ? cenQtd(lista.reduce((n,i)=>n+i[k],0),1) : null;
+    const su=supr[x.p];
+    const previsto=area!==null&&valido(x.dose)&&su?su.bruto:null;
+    const custodia=itens.length?(mesmaUn&&soma('custodia')!==null?su.cust:null):0;
+    const falta=previsto!==null&&custodia!==null?su.need:null;
+    return {p:x.p, un:x.un, dose:x.dose, area, previsto, custodia, falta,
+      consumido:soma('consumido',rVis?(rVis.itens||[]).filter(i=>i.prod===x.p):itens), temReq:itens.length > 0, itens,
+      confirmar:itens.some(i => i.custodia > 0 && !i.confirmado),
+      pendente:itens.some(i => i.semSinal) || pend>0};
+  });
+}
+// Uma projeção por ordem para painel, app e impressão. Não grava preparo nem aplica produtos.
+function cenPreparoOrdem(c, ordem) {
+  const o = c && c.ordens && ordem && c.ordens[ordem.id] || ordem;
+  const fail = motivo => ({ok:false, motivo, cargas:[]});
+  if (!o) return fail('Ordem indisponível · voltar às ordens');
+  const rec = typeof alDaOrdem === 'function' ? alDaOrdem(c,o.id).filter(r=>r.classe==='Pulverizador') : [];
+  if (rec.length !== 1) return fail(rec.length ? 'Mais de um pulverizador · conferir conjunto' : 'Sem conjunto · alocar pulverizador na O.S.');
+  const aid = typeof AL0 !== 'undefined' && AL0.ativo[rec[0].r];
+  const ativo = typeof CEN_PREP_ATIVOS !== 'undefined' && CEN_PREP_ATIVOS[aid];
+  const tanque = ativo && ativo.tanque;
+  if (!(typeof tanque==='number' && Number.isFinite(tanque) && tanque>0)) return fail('Tanque não informado · conferir implemento');
+  // Cenário salvo antes deste acréscimo: usar a semente apenas se a versão ainda for a mesma.
+  const base = typeof CEN0 !== 'undefined' && CEN0.ordens[o.id];
+  const instr = Object.prototype.hasOwnProperty.call(o,'instrucao') ? o.instrucao : (base && base.versao===o.versao ? base.instrucao : null);
+  if (!instr || instr.versao !== o.versao || !(typeof instr.vazao==='number' && Number.isFinite(instr.vazao) && instr.vazao>0))
+    return fail('Vazão não informada · conferir instrução da versão vigente');
+  const vazao=instr.vazao, saldo=o.saldo;
+  const area=typeof saldo==='number'&&Number.isFinite(saldo)&&saldo>=0?Math.max(0,saldo-cenApPend(o)):saldo;
+  if (!(typeof area==='number' && Number.isFinite(area) && area>=0)) return fail('Área restante inválida · conferir a O.S.');
+  if (!(o.ins||[]).length || o.ins.some(x=>typeof x.dose!=='number'||!Number.isFinite(x.dose)||x.dose<0||!Number.isFinite(x.dose*area)||!Number.isFinite(x.dose*(tanque/vazao)))) return fail('Dose não informada · conferir instrução');
+  const haCarga=tanque/vazao, n=area>0?Math.max(1,Math.ceil(area/haCarga-1e-9)):0;
+  if (!Number.isFinite(haCarga)||haCarga<=0||!Number.isSafeInteger(n)||n<0||n>10000) return fail('Preparo fora da faixa · conferir tanque, vazão e área');
+  const cargas=Array.from({length:n},(_,i)=>{ const ha=Math.min(haCarga, Math.max(0,area-i*haCarga));
+    return {n:i+1, area:ha, vol:ha*vazao, parcial:ha<haCarga-1e-9,
+      prods:o.ins.map(x=>({p:x.p,un:x.un,dose:x.dose,q:x.dose*ha}))}; });
+  return {ok:true,tanque,vazao,haCarga,n,area,ultima:n?cargas[n-1].area:0,cargas,
+    produtos:o.ins.map(x=>({p:x.p,un:x.un,dose:x.dose,q:x.dose*haCarga})),
+    origem:instr.origem,versao:o.versao,conjunto:alDaOrdem(c,o.id).filter(r=>r.classe==='Trator'||r.classe==='Pulverizador').map(r=>r.nome).join(' + ')};
+}
+function cenPreparoTxt(p) {
+  if(!p.ok) return p.motivo;
+  if(!p.n) return 'Sem área restante para preparar';
+  return cenNum(p.tanque)+' L · '+cenNum(p.vazao)+' L/ha · '+cenNum(p.haCarga,3)+' ha por carga · '+p.n+(p.n===1?' carga':' cargas')
+    +' · última '+cenNum(p.ultima,3)+' ha · '+p.produtos.map(x=>x.p+' '+cenNum(x.q,3)+' '+x.un+' por carga cheia').join(' · ')
+    +' · '+p.origem;
+}
+function cenInsumoSaldoTxt(x) {
+  if (x.previsto === null || x.falta === null) return 'Saldo não calculável · conferir área, dose e unidade';
+  return (x.temReq ? '' : 'Sem requisição · ') + 'previsto para o saldo ' + cenNum(x.previsto) + ' ' + x.un
+    + ' · falta para terminar ' + cenNum(x.falta) + ' ' + x.un
+    + (x.pendente ? ' · consumo no aparelho pendente de sincronização' : '');
+}
 function cenQtdTrecho(dose, antes, ha) {
   const a0 = Number((antes || 0).toFixed(6)), a1 = Number(((antes || 0) + ha).toFixed(6));
   return Math.round((cenQtd(dose, a1) - cenQtd(dose, a0)) * 100) / 100; }
@@ -752,3 +824,4 @@ function cenPodeEncerrar(c, id) { const o = c.ordens[id]; const r = o.req && c.r
   const dv = cenDivAbertas(o); if (dv.length) return CEN_DIV + ' em revisão técnica: ' + dv.map(a => 'dia ' + a.dia + ' · ' + a.div.map(cenDivTxt).join('; ')).join(' | ') + '. ' + g2quem('agronomo') + ' aceita com motivo ou registra a correção na linha do apontamento.';   // B-R8
   if (typeof prPodeEncerrar === 'function') { const pm = prPodeEncerrar(c, id); if (pm) return pm; }   // colheita: nenhuma carga a pesar ou sem sinal (R-18)
   return ''; }
+

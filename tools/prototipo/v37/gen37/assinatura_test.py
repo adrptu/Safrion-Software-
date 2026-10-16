@@ -5,7 +5,7 @@ Fluxo principal em desktop (1440 × 900) e no celular (390 × 844, toque): norma
 repetidos sem segundo efeito). Faixa de cobrança nas telas da organização (OS, EST, CD-01) e em nenhuma outra (MB-01, CF-05, BO-02, ON-01).
 Revisão PLAT (06/10): medida do período = maior entre abertura e fechamento (A7b, A4d, A18c), uma contestação por fatura e quem age nos
 eventos (A17c, A6), proposta empresarial acima de 5.000 ha (A20), faixa curta no celular (A15e), nenhuma faixa no PT (A8c).
-Trava (R12): Cadastrar talhão e Desenhar recusam antes de abrir; Reativar recusa ao salvar; importação recusa a linha "Talhão novo" e importa o
+Trava (R12): Incluir talhão (de dentro da fazenda, CAD-03) e Desenhar recusam antes de abrir; Reativar recusa ao salvar; importação recusa a linha "Talhão novo" e importa o
 contorno novo de talhão existente; editar a área de talhão existente salva; liberar O.S. segue. Contestação congela a régua; crédito vai para o
 período seguinte. Uso (de gen37/, depois de build.py e montar_render.py): python3 assinatura_test.py   (CDP_GL=1 para o mapa real)"""
 import sys, os, time, json, tempfile
@@ -57,6 +57,8 @@ def linha(i, txt): return J(f"(()=>{{const t=document.querySelectorAll('main [ro
 def abre_linha(i, txt):
     r = J(f"(()=>{{const t=document.querySelectorAll('main [role=table]')[{i}]; const r=t&&[...t.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.indexOf({json.dumps(txt)})>=0); if(!r) return 'sem linha'; (r.querySelector('[role=cell]')||r).click(); return 'ok';}})()")
     time.sleep(.5); return r
+def incluir_talhao():   # 16/10/2026 (CAD-03): o talhão se inclui de dentro da fazenda (painel da Santa Rita › Incluir talhão)
+    abre_linha(0, 'Santa Rita'); return clk('Incluir talhão', 'aside[role=dialog]')
 def faixa(): return J("(()=>{const f=document.querySelector('header [aria-label=Cobrança]'); if(!f) return null; const a=f.querySelector('a'); return {t:f.innerText.replace(/\\s+/g,' '),href:a&&a.getAttribute('href'),bg:getComputedStyle(f).backgroundColor,link:a?getComputedStyle(a).backgroundColor:''};})()")
 def data(d): return clk(d)
 def selo(): return J("(()=>{const h=document.querySelector('header h1'); const s=h&&h.nextElementSibling; return s?s.innerText.trim():'';})()") or ''
@@ -108,7 +110,7 @@ try:
     chk('A4c desfazer antes de 01/10 volta ao contrato v2 (com recibo DES-0001: desfazer também registra quem agiu, revisão PLAT achado 4)', 'Mudança desfeita (DES-0001): segue Completo' in t and 'Seu plano' in linha(2, 'Completo'), t)
     clk('Fechar', 'aside[role=dialog]')
     # talhão novo de 50 ha pelo formulário do CD-01 (A10)
-    go('CD-01.dc.html'); clk('Cadastrar talhão')
+    go('CD-01.dc.html'); incluir_talhao()
     setv('#fx_g_tal_t', 'T9'); setv('#fx_g_tal_faz', 'Santa Rita'); setv('#fx_g_tal_sis', 'Sequeiro'); setv('#fx_g_tal_decl', '50'); clk('Salvar', 'aside[role=dialog]'); t = toast()
     go('CF-05.dc.html'); b = body()
     chk('A10a talhão de 50 ha no CD-01: CF-05 mede 2.620,23 ha, avisa 20,23 ha acima do contratado (sem cobrança-surpresa: prévia R$ 5.200,00) e a primária vira Ampliar área contratada',
@@ -150,8 +152,8 @@ try:
     chk('A8d faixa vermelha na O.S.: suspenso ampliar a área, nada apagado, trabalho de campo segue', f and f['bg'] == 'rgb(253, 232, 230)' and 'suspenso' in f['t'] and 'nada foi apagado' in f['t'], f)
     lib = J("(()=>{ const C=window.__cen; if(!C) return 'sem window.__cen'; const r=C.cenMudar(null,k=>C.osc_liberar(k,'OS-0430',false,'',{k:'Ana'})); return r.erro||r.msg||''; })()")
     chk('A9a inadimplente: liberar a OS-0430 (mesmo comando da tela, osc_liberar) segue', 'liberada' in (lib or ''), lib)
-    go('CD-01.dc.html'); clk('Cadastrar talhão'); t = toast()
-    chk('A9b Cadastrar talhão recusa antes de abrir, com motivo e caminho', 'suspenso até o pagamento' in t and 'Configurações › Assinatura e cobrança' in t and dlg() == '', [t, dlg()[:200]])
+    go('CD-01.dc.html'); incluir_talhao(); t = toast()
+    chk('A9b Incluir talhão recusa antes de abrir, com motivo e caminho', 'suspenso até o pagamento' in t and 'Configurações › Assinatura e cobrança' in t and dlg() == '', [t, dlg()[:200]])
     abre_linha(0, 'T4'); setv('#fx_g_tal_decl', '205'); clk('Salvar', 'aside[role=dialog]'); t = toast()
     chk('A9c editar a área cultivável de um talhão existente salva (corrigir o fato não é ampliar o contrato)', 'Salvo: T4' in t and dlg() == '', [t, dlg()[:300]])
     abre_linha(0, 'B1'); setv('#fx_g_tal_sit', 'Ativo'); clk('Salvar', 'aside[role=dialog]'); a = J(ALERTA) or dlg()
@@ -200,8 +202,8 @@ try:
     chk('A18c Baixar fatura (CSV): números da cópia (2.570,23 ha · R$ 5.140,46; fechamento 2.450,23 ha; mesmo depois de editar o T4) e cobrança simulada',
         '"Área medida (ha)";"2.570,23"' in csv and '"Medida no fechamento (ha)";"2.450,23"' in csv and '5.140,46' in csv and 'simulada' in csv, csv[:500])
     clk('Fechar', 'aside[role=dialog]')
-    go('CD-01.dc.html'); clk('Cadastrar talhão')
-    chk('A9h depois de pagar, Cadastrar talhão volta a abrir o formulário; faixa some', 'Cadastrar talhão' in dlg() and faixa() is None, dlg()[:120])
+    go('CD-01.dc.html'); incluir_talhao()
+    chk('A9h depois de pagar, Incluir talhão volta a abrir o formulário (Cadastrar talhão); faixa some', 'Cadastrar talhão' in dlg() and faixa() is None, dlg()[:120])
     # ============ cenário C · contestação congela a régua e resolver com crédito vai para o período seguinte (A17) ============
     go('CF-05.dc.html', limpa=True); data('01/10/2026'); abre_linha(1, 'set/2026'); clk('Contestar fatura', 'aside[role=dialog]')
     setv('#cf_motivo', 'Área da Lagoa Grande contada antes do aceite'); clk('Registrar contestação', 'aside[role=dialog]'); t = toast(); clk('Fechar', 'aside[role=dialog]')

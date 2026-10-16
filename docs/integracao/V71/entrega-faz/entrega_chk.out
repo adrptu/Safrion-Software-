@@ -1,0 +1,41 @@
+S1 SR
+   13/10 - 20/10 {'Oleo': ('220', 11), 'Glif': ('20', 1)}
+S1 LG
+   30/09 - 20/10 {'Glif': ('300', 15), 'Oleo': ('400', 20)}
+   21/10 - 15/11 {'Oleo': ('240', 12)}
+idempotente (mesma entrada, mesma saída): True
+E4  LG só Óleo, cap 500, físico 0
+   entrega 30/09 - 25/10 [('Oleo', '400')]
+   entrega 31/10 - 15/11 [('Oleo', '240')]
+   estoque final em 21/11 = 10 (<= 500 : True )
+E4  LG só Óleo, cap 300
+   CONFLITO [('Oleo', '400')] 30/09-25/10 pico 400 > 300
+   entrega 31/10 - 15/11 [('Oleo', '240')]
+   estoque final em 21/11 = 10 (<= 300 : True )
+E4  LG só Óleo, cap 500, 150 L em quarentena no local
+   CONFLITO [('Oleo', '400')] 30/09-25/10 pico 550 > 500
+   entrega 31/10 - 15/11 [('Oleo', '240')]
+   estoque final em 21/11 = 160 (<= 500 : True )
+E4b S1 LG (Glifosato 300 + Óleo 400), cap 500
+   entrega 30/09 - 20/10 [('Glif', '300')]
+   CONFLITO [('Oleo', '400')] 30/09-25/10 pico 700 > 500
+   entrega 31/10 - 15/11 [('Oleo', '240')]
+   estoque final em 21/11 = 16.66 (<= 500 : True )
+E4c contraprova do Codex: cap 20, Óleo 11 L em 20/10 e 20 L em 20/11, galão 20 L, físico 0
+   entrega 30/09 - 15/10 [('Oleo', '20')]
+   CONFLITO [('Oleo', '20')] 21/10-15/11 pico 29 > 20
+   estoque final em 21/11 = 9 (<= 20 : True )
+E5b armário NR-31: 60 L + 50 kg = 110 > 100 ? True
+E12 SR Óleo saldo 220 (nada recebido), usos 12/10·120 e 12/11·90: ([('12/10', '120'), ('12/11', '100')], '0')
+E18 Glifosato LG: aberto 100, nec 25/10 = 93.34 -> ([('25/10', '100')], '0')
+E18 plano reduz uso LG a 150 L (nec 0): -> ([], '100') (saldo continua aberto, não some)
+E18 repetir sem mudança: True
+E11 LG Glifosato: programado 200 recebido 200 saldo 0 | pedido total 220 saldo total 20
+E11 falta recalculada LG 25/10 = 93.34 (não 100)
+30/09 qua · 06/10 ter · 07/10 qua · 13/10 ter · 20/10 ter · 21/10 qua · 25/10 dom · 15/11 dom · 
+E8b SR (E12 com recebimento seg e sex, piso = hoje 23/09)
+   25/09 - 05/10 {'Oleo': ('120', 6)}
+   16/10 - 30/10 {'Glif': ('20', 1), 'Oleo': ('100', 5)}
+   janelas vazias: []
+dias: [('23/09', 'qua'), ('25/09', 'sex'), ('28/09', 'seg'), ('03/10', 'sáb'), ('05/10', 'seg'), ('09/10', 'sex'), ('16/10', 'sex'), ('30/10', 'sex'), ('06/11', 'sex')]
+E8b Nitrato SR: entregar até 26/09 · chegada viável 30/09 · janela 30/09 - 26/09 · vazia = True
