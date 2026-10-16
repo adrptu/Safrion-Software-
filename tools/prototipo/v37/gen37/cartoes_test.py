@@ -130,11 +130,12 @@ try:
             chk(f'M2e {nome}: Agrupar por "{ags[0]}": os mesmos grupos e itens nos dois modos ({ng} grupos)', r == 'ok' and t3 and c3 == t3 and ng >= 1, [r, t3, c3])
             modo(gid, 'cartoes')
             ngc = J(f"document.querySelectorAll('[data-g2cd=\"{gid}\"] .g2cd-gcab').length")
-            desce = J(f"(()=>{{const b=document.querySelector('[data-g2cd=\"{gid}\"] .g2cd-gcab button[aria-label^=\"Descer\"]'); if(!b) return ''; const t=b.innerText.trim(); b.click(); return t;}})()"); time.sleep(.5)
-            trilha = J(f"(()=>{{const n=document.querySelector('[data-g2agtr=\"{gid}\"]'); return n?n.innerText.replace(/\\s+/g,' ').trim():''}})()")
+            # AGR-02 (16/10/2026): o nome do grupo não desce e não há trilha; a seta do grupo recolhe
+            desce = J(f"document.querySelectorAll('[data-g2cd=\"{gid}\"] .g2cd-gcab button[aria-label^=\"Descer\"]').length")
+            trilha = J(f"!!document.querySelector('nav[data-g2agtr=\"{gid}\"]')")
             c4 = ids_car(gid); modo(gid, 'tabela'); t4 = ids_tab(gid)
-            chk(f'M2f {nome}: no Cartões, um título por grupo ({ngc}); o nome do grupo desce (trilha "{trilha}") e os dois modos seguem iguais',
-                ngc == ng and desce and desce.rstrip(' ›') in trilha and t4 and c4 == t4, [ngc, ng, desce, trilha, t4, c4])
+            chk(f'M2f {nome}: no Cartões, um título por grupo ({ngc}), sem descer pelo nome nem trilha (AGR-02); os dois modos seguem iguais',
+                ngc == ng and desce == 0 and not trilha and t4 and c4 == t4, [ngc, ng, desce, trilha, t4, c4])
             agrupar_por(J, 'Sem agrupar', gid)
         # total da tabela → linha de resumo acima dos cartões
         tot_t = J(f"(()=>{{const r=document.querySelector('[data-g2g=\"{gid}\"] .g2tot'); return r?r.innerText.replace(/\\s+/g,' ').trim():''}})()")
@@ -200,7 +201,7 @@ try:
     pa_tab = J("[...document.querySelectorAll('.pa-tb-l[data-atv]')].map(x=>x.getAttribute('data-atv'))") or []
     lin = J("(()=>{const l=document.querySelector('.pa-tb-l'); return l?{ico:!!l.querySelector('.pa-op-ico svg'), mais:!!l.querySelector('.g2mais'), cells:[...l.querySelectorAll('[role=cell]')].map(x=>x.innerText.replace(/\\s+/g,' ').trim())}:null})()")
     chk('M6b PA Tabela: colunas DAP, Atividade (com o ícone), Insumos, Custo/ha e ⋯; as mesmas atividades, na mesma ordem; ?view=tabela no endereço',
-        [x.upper() for x in cab[:4]] == ['DAP', 'ATIVIDADE', 'INSUMOS', 'CUSTO/HA'] and pa_tab == pa_card and lin and lin['ico'] and lin['mais'] and 'view=tabela' in J("location.search"), [cab, pa_tab, lin])
+        [x.split('\n')[0].strip().upper() for x in cab[:4]] == ['DAP', 'ATIVIDADE', 'INSUMOS', 'CUSTO/HA']   # TAB-08 (16/10): rótulo + ⇅ + funil and pa_tab == pa_card and lin and lin['ico'] and lin['mais'] and 'view=tabela' in J("location.search"), [cab, pa_tab, lin])
     # filtro por operação: o 2º chip
     J("(()=>{const xs=[...document.querySelectorAll('.pa-opf')]; if(xs[1]) xs[1].click();})()"); time.sleep(.45)
     f_tab = J("[...document.querySelectorAll('.pa-tb-l[data-atv]')].map(x=>x.getAttribute('data-atv'))") or []
