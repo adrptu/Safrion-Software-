@@ -2,7 +2,7 @@
 
 **Correção (bf19d26):** `min-height: auto` no cartão do `engine.section()`. O teste S4 entrou no `paginas_scan_test.py`.
 
-**Composição para revisão (eefecc4):** merge da ponta b87f79b da `claude/v44-v69-mapa`, sem rebase. Pedido do Codex no comentário 6219215674 do PR #47.
+**Composição para revisão (9434f72, a candidata atual):** merge da ponta bf7d8b6 da `claude/v44-v69-mapa`, sem rebase, pedido no comentário 6220286112 do PR #47. A composição anterior era eefecc4, com b87f79b, pedida no comentário 6219215674.
 
 Tudo aqui foi **executado** em Chrome headless (`comp_lib.Chrome`, emulação, não é aparelho físico), com render sintético (`SAFRION_DADOS=sintetico`, 156 páginas) e só dados sintéticos.
 
@@ -29,6 +29,30 @@ Medidas, de `docs/integracao/V71/pr76/scripts/` (o `_base.py` acha o `gen37` pel
 | `compara.py <antes.json> <depois.json>` | Lista as diferenças entre dois retratos. |
 | `fotos.py <_render> <rótulo> <dir> TELAS…` | Tira as fotos roladas até o fim, em 1440 × 900 e 390 × 844. |
 | `tempo_co06det.py` e `tempo_390.py` | Repetem a medida 0 s, 1,5 s e 3 s depois de carregar, para separar instabilidade de efeito. |
+
+## Rodada 3: base bf7d8b6 × composição 9434f72 (pasta `r3-bf7d8b6-9434f72/`)
+
+**Candidata atual: 9434f72.** É o merge da ponta bf7d8b6, sem rebase, pedido no comentário 6220286112 do PR #47. A bf7d8b6 traz a frente CADASTROS-PADRAO (eabc4a3), com código executável: `ui37.py` (item de menu do Crédito), `areas/cad_*`, `areas/gestao.py` e testes, inclusive `ds_test.py` e `cadf_fix_lista_test.py`.
+
+Esta rodada repete só as provas afetadas. As demais continuam valendo pela rodada 2.
+
+### Inventário e retrato do layout
+| Medida | Resultado | Arquivo |
+|---|---|---|
+| Inventário | 29 telas na base bf7d8b6, 0 na composição | `inventario_bf7d8b6.txt`, `inventario_9434f72.txt` |
+| Retrato | 29 diferenças em 312 | `compara_bf7d8b6_9434f72.txt` |
+
+As 29 diferenças são exatamente as 29 telas em 1440 px. Não há diferença em 390 px nem em nenhuma tela de Cadastros (CD-*).
+
+### Testes
+Saídas em `resumo_testes.txt` e um `.log` por teste.
+
+| Teste | Composição 9434f72 | Base bf7d8b6 |
+|---|---|---|
+| `paginas_scan_test.py` | 5 ok · 0 falhas; S4 com 470 cartões | S4 **reprova** (contraprova atual) |
+| `cadastros_padrao_test.py` | 44/44 | 44/44 |
+| `cadf_fix_lista_test.py` | 11/11 | não rodado |
+| `ds_test.py` | 69/72 (D13, D15, E2) | 69/72 (D13, D15, E2) |
 
 ## Rodada 2: base b87f79b × composição eefecc4 (pasta `r2-b87f79b-eefecc4/`)
 
