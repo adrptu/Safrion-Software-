@@ -107,6 +107,7 @@ try:
     chk('V1', 'a abertura não presume quantidade (vazia)', bool(d) and d['qtd'] == '', d and d['qtd'])
     chk('V1', 'a abertura não presume condição (nenhuma condição válida escolhida)', bool(d) and d['cond'] not in CONDS, d and d['cond'])
     chk('V1', 'a custódia aparece só na dica (500 kg com Paula)', bool(d) and 'Em custódia: 500 kg' in d['txt'], d and d['txt'][:200])
+    chk('V1', 'A1: a condição abre em "Escolha a condição", com as duas condições como opções', bool(d) and d['condTxt'] == 'Escolha a condição' and d['condOpts'] == ['Escolha a condição'] + CONDS, d and [d['condTxt'], d['condOpts']])
     chk('V1', 'o seletor de condição mostra um texto legível ao abrir (sem "[object Object]")', bool(d) and d['condTxt'] and 'object' not in d['condTxt'] and all('object' not in o for o in d['condOpts']), d and [d['condTxt'], d['condOpts']])
     antes = ls(); salvar(); d = dlg(); depois = ls(); c1 = cen()
     print('V1 salvar sem mexer:', d and d['alertas'], '| MV devolução:', [(m.get('id'), m.get('qtd'), m.get('apto')) for m in mv_dev(c1)], '| REQ-031:', it31(c1))
@@ -145,6 +146,7 @@ try:
     print('V2 troca para PC-096 (' + ('forçada no DOM' if forcado else 'pela tela') + '):', d and d['alertas'], '| movimentos de recebimento:', [(m.get('id'), m.get('qtd'), m.get('un'), m.get('prod'), m.get('lote')) for m in rec])
     al = (d or {}).get('alertas', '')
     chk('V2', 'trocar para PC-096 e salvar é recusado com "Item diferente do pedido"', bool(d) and 'Item diferente do pedido' in al, al or 'formulário fechou (gravou)')
+    chk('V2', 'A4: a mensagem "Item diferente do pedido" aparece uma vez só', al.count('Item diferente do pedido') == 1, al)
     chk('V2', 'a recusa diz o que diverge (item, unidade e fornecedor)', all(x in al for x in ('Semente de soja 58 W', 'Caixa de mamão', 'kg', 'un', 'Coop. Vale', 'Embalagens Açu')), al)
     chk('V2', 'cenário salvo inalterado (nenhum MV de recebimento)', ls() == antes and not rec, [(m.get('id'), m.get('qtd'), m.get('prod')) for m in rec])
     # comando direto (outra tela/aba que não passe pelo formulário): o comando também confere
@@ -235,6 +237,26 @@ try:
     chk('V5', 'NF 4533 a 390 px: pedido só leitura e diálogo dentro da janela', bool(d) and d['pedDis'] is True and d['R'] <= d['W'] + .5, d and [d['pedDis'], d['R'], d['W']])
     e = errs(); chk('V5', 'sem erro de script', not e, e)
     c.aparelho(1440, 900)
+
+    # ======================= V7 · linha do BEN: ajuda com a sobra (A3) e recusa da aba velha (A5) =======================
+    limpar(); abrir()
+    fx = J("""(()=>{ const r=window.__cen.cenMudar(null,c=>{ const o=c.ordens['OB-0110'], it=c.reqs['REQ-030'].itens[0]; o.etapa='Em execução'; o.ben.ent=[{kg:7300}]; o.ben.sai=[];
+      it.entregue=869; it.consumido=0; it.devolvido=0; it.custodia=869; return {msg:'fixture'}; }); return r.erro||'ok'; })()""")
+    abrir(); secao(3); r7 = clique("[...document.querySelectorAll('[role=row]')].find(x=>/REQ-030/.test(x.innerText))")
+    d = dlg(); ajuda = J(f"(({DLG})||document).querySelector('#fx_g_dev_qtd').closest('div').parentElement.innerText.replace(/\\s+/g,' ')") if d else ''
+    print('V7 BEN abriu:', fx, d and {k: d[k] for k in ('qtd', 'cond')}, '| ajuda:', ajuda[:400])
+    chk('V7', 'A3: linha do BEN abre com quantidade e condição vazias', bool(d) and d['qtd'] == '' and d['cond'] not in CONDS, d and [d['qtd'], d['cond']])
+    chk('V7', 'A3: a ajuda do campo mostra a sobra calculada (139 = 869 − 730) e a parcela desta linha (139 un), sem presumir o recebido', '139 un = 869 un em custódia − 730 un' in ajuda and 'Sobra desta linha: 139 un' in ajuda and 'Informe a quantidade e a condição' in ajuda, ajuda[:400])
+    if d:
+        digitar('fx_g_dev_qtd', '139'); setv('fx_g_dev_cond', CONDS[0])
+        J("window.__cen.cenMudar(null,c=>{ c.ordens['OB-0110'].ben.ent=[{kg:7200}]; return {msg:'outra aba'}; })"); a7 = ls()   # outra aba: a sobra passa a 149
+        salvar(); d2 = dlg(); c7 = cen(); dv = mv_dev(c7, 'Caixa de mamão Formosa 10 kg')
+        print('V7 aba velha:', d2 and d2['alertas'], '| campos:', d2 and [d2['qtd'], d2['cond']], '| MV:', [(m.get('qtd'), m.get('apto')) for m in dv])
+        chk('V7', 'A5: a recusa da aba velha diz o que mudou e pede de novo quantidade e condição; campos limpos; nada gravado', bool(d2) and 'sobra 139 → 149 un' in d2['alertas'] and 'quantidade e a condição' in d2['alertas'] and d2['qtd'] == '' and d2['cond'] not in CONDS and not dv and ls() == a7, [d2 and d2['alertas'], d2 and [d2['qtd'], d2['cond']], dv])
+        digitar('fx_g_dev_qtd', '149'); setv('fx_g_dev_cond', CONDS[0]); salvar(); d3 = dlg(); c8 = cen(); dv = mv_dev(c8, 'Caixa de mamão Formosa 10 kg')
+        print('V7 149 aptas:', 'aberto: ' + d3['alertas'] if d3 else 'fechou', '| MV:', [(m.get('qtd'), m.get('apto')) for m in dv], '| custódia:', c8['reqs']['REQ-030']['itens'][0]['custodia'])
+        chk('V7', 'conferindo 149 aptas, grava um MV de 149 e a custódia cai 869 → 720', d3 is None and [(m.get('qtd'), m.get('apto')) for m in dv] == [(149, True)] and c8['reqs']['REQ-030']['itens'][0]['custodia'] == 720, [d3 and d3['alertas'], dv])
+    e = errs(); chk('V7', 'sem erro de script', not e, e)
 
     # ======================= V6 · cenário salvo pela base abre sem perda =======================
     if LEG:

@@ -1,0 +1,29 @@
+início 20:50:39 (q27 com FIM)
+cand_rev | rc=1 | 189s | RESULTADO: 42/46 · FALHAS: V4 Enter abre o diálogo e o foco entra nele ; V4 Esc fecha sem mudança e o foco volta ao gatilho ; V5 alvos tocados do diálogo ≥ 44 px: quantidade, condição, Salvar ; V5 alvos tocados da tela ≥ 44 px: faixa de seções, seção, gatilho
+base_rev | rc=1 | 141s | RESULTADO: 16/38 · FALHAS: V1 a abertura não presume quantidade (vazia) ; V1 a abertura não presume condição (nenhuma condição válida escolhida) ; V1 A1: a condição abre em "Escolha a condição", com as duas condições como opções ; V1 salvar sem mexer é recusado e o formulário continua aberto ; V1 a recusa diz o que corrigir (quantidade e condição) ; V1 cenário salvo inalterado após a recusa (sem MV, custódia 500) ; V2 NF 4533 abre presa ao PC-090 (pedido só leitura) ; V2 número da NF de origem só leitura ; V2 trocar para PC-096 e salvar é recusado com "Item diferente do pedido" ; V2 A4: a mensagem "Item diferente do pedido" aparece uma vez só ; V2 a recusa diz o que diverge (item, unidade e fornecedor) ; V2 cenário salvo inalterado (nenhum MV de recebimento) ; V4 Enter abre o diálogo e o foco entra nele ; V4 Esc fecha sem mudança e o foco volta ao gatilho ; V4 Salvar vazio pelo teclado é recusado, o foco fica no diálogo e o cenário não muda ; V4 só teclado: 480 digitado, Apta pela seta, Espaço no Salvar → MV 480 e custódia 20 ; V5 alvos tocados do diálogo ≥ 44 px: quantidade, condição, Salvar ; V5 alvos tocados da tela ≥ 44 px: faixa de seções, seção, gatilho ; V5 NF 4533 a 390 px: pedido só leitura e diálogo dentro da janela ; V7 A3: linha do BEN abre com quantidade e condição vazias ; V7 A3: a ajuda do campo mostra a sobra calculada (139 = 869 − 730) e a parcela desta linha (139 un), sem presumir o recebido ; V7 A5: a recusa da aba velha diz o que mudou e pede de novo quantidade e condição; campos limpos; nada gravado
+cand_est_cenario_test | rc=0 | 27s | RESULTADO: 15/15 ok
+cand_esttest | rc=0 | 69s | RESULTADO: OK
+cand_est_sem_validade_nav | rc=0 | 15s | RESULTADO: 8/8 ok
+cand_map_decisoes_test | rc=0 | 58s | (sem RESULTADO) 18 ok · 0 falhas []
+cand_demanda_estado_nav_test | rc=0 | 819s | RESULTADO: 14 ok · 0 falhas
+cand_ben_fluxo | rc=1 | 92s | RESULTADO: FALHOU 33/34
+cand_ben_lotes | rc=0 | 34s | RESULTADO: OK 8/8
+cand_ben_cadeia | rc=0 | 148s | RESULTADO: OK 9/9
+cand_ben_cadeia390 | rc=0 | 146s | RESULTADO: OK 9/9
+cand_ben_conferencia | rc=0 | 134s | RESULTADO: OK 8/8
+cand_ben_conferencia390 | rc=0 | 134s | RESULTADO: OK 8/8
+cand_ben_sobra | rc=0 | 64s | RESULTADO: OK 9/9
+cand_ben_sobra390 | rc=0 | 66s | RESULTADO: OK 9/9
+cand_est_a4_test | rc=0 | 1s | RESULTADO 53/53
+cand_consumo_divergente_test | rc=0 | 42s | (sem RESULTADO) 21/21 ok · FALHAS: 0
+cand_os_cenario_test | rc=0 | 50s | RESULTADO: 22/22 ok
+cand_paginas_scan_test | rc=0 | 396s | RESULTADO: 4 ok · 0 falhas (148 páginas)
+FIM
+cand_ben_fluxo_com_patch_medida | rc=0 | 92s | RESULTADO: OK 34/34
+ant7762_rev | rc=1 | 151s | RESULTADO: 35/44 · FALHAS: V1 A1: a condição abre em "Escolha a condição", com as duas condições como opções ; V1 o seletor de condição mostra um texto legível ao abrir (sem "[object Object]") ; V2 A4: a mensagem "Item diferente do pedido" aparece uma vez só ; V4 Enter abre o diálogo e o foco entra nele ; V4 Esc fecha sem mudança e o foco volta ao gatilho ; V5 alvos tocados do diálogo ≥ 44 px: quantidade, condição, Salvar ; V5 alvos tocados da tela ≥ 44 px: faixa de seções, seção, gatilho ; V7 A3: a ajuda do campo mostra a sobra calculada (139 = 869 − 730) e a parce
+--- sem navegador (executado antes da bateria de navegador) ---
+node est_onda0_unit.js (50af2ae) | rc=0 | RESULTADO 24/24
+est_onda0_test.py (50af2ae) | rc=0 | RESULTADO 24/24
+est_onda0_test.py GEN=7762fd3 (testes novos contra a versão anterior) | rc=1 | RESULTADO 19/24 (falham A1, A3 ×2, A4, A5)
+est_onda0_test.py GEN=bf7d8b6 (base) | rc=1 | RESULTADO 3/24
+montagem 50af2ae: build=0, montar_render=0, 156 páginas

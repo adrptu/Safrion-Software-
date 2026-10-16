@@ -1,0 +1,62 @@
+V1 abriu: {'qtd': '500', 'cond': 'Apta · volta ao disponível', 'condTxt': 'Apta · volta ao disponível', 'condOpts': ['Apta · volta ao disponível', 'Bloqueada para inspeção · vai para quarentena']} | cenário salvo: vazio (CEN0)
+FALHA V1 a abertura não presume quantidade (vazia) · 500
+FALHA V1 a abertura não presume condição (nenhuma condição válida escolhida) · Apta · volta ao disponível
+OK    V1 a custódia aparece só na dica (500 kg com Paula) 
+FALHA V1 A1: a condição abre em "Escolha a condição", com as duas condições como opções · ['Apta · volta ao disponível', ['Apta · volta ao disponível', 'Bloqueada para inspeção · vai para quarentena']]
+OK    V1 o seletor de condição mostra um texto legível ao abrir (sem "[object Object]") 
+V1 salvar sem mexer: None | MV devolução: [('MV-1001', 500, True)] | REQ-031: {'custodia': 0, 'devolvido': 1500, 'entregue': 5000}
+FALHA V1 salvar sem mexer é recusado e o formulário continua aberto · formulário fechou
+FALHA V1 a recusa diz o que corrigir (quantidade e condição) · None
+FALHA V1 cenário salvo inalterado após a recusa (sem MV, custódia 500) · [{'custodia': 0, 'devolvido': 1500, 'entregue': 5000}, [(500, True)]]
+     nota: V1: o formulário fechou ao salvar sem mexer (gravou); passos 480/duplo clique não aplicáveis
+OK    V1 sem erro de script 
+V2 abriu NF 4533: {'ped': 'PC-090 · Semente de soja 58 W · Coop. Vale', 'pedDis': False, 'nfRO': False}
+FALHA V2 NF 4533 abre presa ao PC-090 (pedido só leitura) · ['PC-090 · Semente de soja 58 W · Coop. Vale', False]
+FALHA V2 número da NF de origem só leitura · False
+V2 troca para PC-096 (pela tela): None | movimentos de recebimento: [('MV-1001', 1000, 'un', 'Caixa de mamão Formosa 10 kg', 'S58-0926')]
+FALHA V2 trocar para PC-096 e salvar é recusado com "Item diferente do pedido" · formulário fechou (gravou)
+FALHA V2 A4: a mensagem "Item diferente do pedido" aparece uma vez só · 
+FALHA V2 a recusa diz o que diverge (item, unidade e fornecedor) · 
+FALHA V2 cenário salvo inalterado (nenhum MV de recebimento) · [('MV-1001', 1000, 'Caixa de mamão Formosa 10 kg')]
+     nota: V2: estReceber não está no escopo global da página; comando direto coberto pelo teste Node do Codex
+OK    V2 sem erro de script 
+V3 NF 4533 coerente: fechou | MV: [('MV-1001', 20000, 'kg', 'Semente de soja 58 W', 'S58-0926')] | S58-0926: {'fisico': 20000, 'quarentena': 0}
+OK    V3 NF 4533 coerente (PC-090, 20.000 kg) grava um recebimento de 20.000 kg no S58-0926 
+V3 primária depois: ['Conferir NF 7731']
+V3 devoluções: [(480, True), (20, False)] | REQ-031: {'custodia': 0, 'devolvido': 1500, 'entregue': 5000} | M26-07: {'fisico': 90500, 'quarentena': 20} | obs exigida: Corrija os campos destacados; o que você preencheu foi mantido. | Descreva a condição (ex.: embalagem aberta).
+OK    V3 devolução normal: 480 apta + 20 bloqueada (com observação) → custódia 0 
+OK    V3 bloqueada sem observação é recusada e a de 20 kg vai para a quarentena do M26-07 
+OK    V3 sem erro de script 
+V4 Tab até a seção: 14 {'tag': 'BUTTON', 'id': '', 'txt': 'Receba devoluções', 'vis': True, 'noDlg': False, 'outline': 'solid 2px', 'sombra': 'none'}
+V4 Tab até o gatilho: 1 {'tag': 'BUTTON', 'id': '', 'txt': 'Receber devolução da REQ-031', 'vis': True, 'noDlg': False, 'outline': 'solid 2px', 'sombra': 'none'}
+OK    V4 gatilho "Receber devolução da REQ-031" alcançável por Tab, com foco visível 
+V4 Enter abriu: True | foco: {'tag': 'BUTTON', 'id': '', 'txt': 'Receber devolução da REQ-031', 'vis': True, 'noDlg': False, 'outline': 'solid 2px', 'sombra': 'none'}
+FALHA V4 Enter abre o diálogo e o foco entra nele · {'tag': 'BUTTON', 'id': '', 'txt': 'Receber devolução da REQ-031', 'vis': True, 'noDlg': False, 'outline': 'solid 2px', 'sombra': 'none'}
+V4 Esc: False {'tag': 'BUTTON', 'id': '', 'txt': 'Receber devolução da REQ-031', 'vis': True, 'noDlg': False, 'outline': 'solid 2px', 'sombra': 'none'}
+FALHA V4 Esc fecha sem mudança e o foco volta ao gatilho · {'tag': 'BUTTON', 'id': '', 'txt': 'Receber devolução da REQ-031', 'vis': True, 'noDlg': False, 'outline': 'solid 2px', 'sombra': 'none'}
+V4 Enter no Salvar vazio: 6 None | foco: {'tag': 'BUTTON', 'id': '', 'txt': 'Receber devolução da REQ-022', 'vis': True, 'noDlg': False, 'outline': 'solid 2px', 'sombra': 'none'}
+FALHA V4 Salvar vazio pelo teclado é recusado, o foco fica no diálogo e o cenário não muda · [None, {'tag': 'BUTTON', 'id': '', 'txt': 'Receber devolução da REQ-022', 'vis': True, 'noDlg': False, 'outline': 'solid 2px', 'sombra': 'none'}]
+V4 Salvar vazio fechou o formulário: REQ-031 {'custodia': 0, 'devolvido': 1500, 'entregue': 5000} | MV: [(500, True)]
+FALHA V4 só teclado: 480 digitado, Apta pela seta, Espaço no Salvar → MV 480 e custódia 20 · não aplicável: o Salvar vazio já gravou [(500, True)]
+OK    V4 sem erro de script 
+V5 largura: {'doc': 390, 'body': 390, 'w': 390}
+OK    V5 EST a 390 px sem rolagem horizontal da página 
+V5 alvos (L×A): {'faixa': [302, 44], 'secao': [372, 44], 'gatilho': [224, 34], 'qtd': [320, 39], 'cond': [342, 41], 'salvar': [69, 44], 'cancelar': [86, 44], 'fechar': [32, 32]} | diálogo: [0, 390, 390]
+OK    V5 toque abre o diálogo dentro da janela 
+FALHA V5 alvos tocados do diálogo ≥ 44 px: quantidade, condição, Salvar · {'qtd': [320, 39], 'cond': [342, 41], 'salvar': [69, 44], 'cancelar': [86, 44], 'fechar': [32, 32]}
+FALHA V5 alvos tocados da tela ≥ 44 px: faixa de seções, seção, gatilho · {'faixa': [302, 44], 'secao': [372, 44], 'gatilho': [224, 34]}
+V5 toque 480 Apta: fechou | MV: [(480, True)] | REQ-031: {'custodia': 20, 'devolvido': 1480, 'entregue': 5000} | largura com diálogo: {'doc': 390, 'w': 390}
+OK    V5 toque: 480 + Apta grava MV 480 e custódia 20; sem rolagem lateral com o diálogo aberto 
+V5 NF 4533 a 390: ['PC-090 · Semente de soja 58 W · Coop. Vale', False, 0, 390, 390]
+FALHA V5 NF 4533 a 390 px: pedido só leitura e diálogo dentro da janela · [False, 390, 390]
+OK    V5 sem erro de script 
+V7 BEN abriu: ok {'qtd': '139', 'cond': 'Apta · volta ao disponível'} | ajuda: Quantidade conferida un Em custódia: 869 un com Igor.
+FALHA V7 A3: linha do BEN abre com quantidade e condição vazias · ['139', 'Apta · volta ao disponível']
+FALHA V7 A3: a ajuda do campo mostra a sobra calculada (139 = 869 − 730) e a parcela desta linha (139 un), sem presumir o recebido · Quantidade conferida un Em custódia: 869 un com Igor.
+V7 aba velha: Corrija os campos destacados; o que você preencheu foi mantido. | A OB-0110 mudou depois que você abriu (sobra 139 → 149 un): nada foi gravado. A quantidade foi atualizada; confira e salve de novo. | campos: ['149', 'Apta · volta ao disponível'] | MV: []
+FALHA V7 A5: a recusa da aba velha diz o que mudou e pede de novo quantidade e condição; campos limpos; nada gravado · ['Corrija os campos destacados; o que você preencheu foi mantido. | A OB-0110 mudou depois que você abriu (sobra 139 → 149 un): nada foi gravado. A quantidade foi atualizada; confira e salve de novo.', ['149', 'Apta · volta ao disponível'], []]
+V7 149 aptas: fechou | MV: [(149, True)] | custódia: 720
+OK    V7 conferindo 149 aptas, grava um MV de 149 e a custódia cai 869 → 720 
+OK    V7 sem erro de script 
+     nota: V6 sem LEGADO_DIR: não aplicável nesta execução
+RESULTADO: 16/38 · FALHAS: V1 a abertura não presume quantidade (vazia) ; V1 a abertura não presume condição (nenhuma condição válida escolhida) ; V1 A1: a condição abre em "Escolha a condição", com as duas condições como opções ; V1 salvar sem mexer é recusado e o formulário continua aberto ; V1 a recusa diz o que corrigir (quantidade e condição) ; V1 cenário salvo inalterado após a recusa (sem MV, custódia 500) ; V2 NF 4533 abre presa ao PC-090 (pedido só leitura) ; V2 número da NF de origem só leitura ; V2 trocar para PC-096 e salvar é recusado com "Item diferente do pedido" ; V2 A4: a mensagem "Item diferente do pedido" aparece uma vez só ; V2 a recusa diz o que diverge (item, unidade e fornecedor) ; V2 cenário salvo inalterado (nenhum MV de recebimento) ; V4 Enter abre o diálogo e o foco entra nele ; V4 Esc fecha sem mudança e o foco volta ao gatilho ; V4 Salvar vazio pelo teclado é recusado, o foco fica no diálogo e o cenário não muda ; V4 só teclado: 480 digitado, Apta pela seta, Espaço no Salvar → MV 480 e custódia 20 ; V5 alvos tocados do diálogo ≥ 44 px: quantidade, condição, Salvar ; V5 alvos tocados da tela ≥ 44 px: faixa de seções, seção, gatilho ; V5 NF 4533 a 390 px: pedido só leitura e diálogo dentro da janela ; V7 A3: linha do BEN abre com quantidade e condição vazias ; V7 A3: a ajuda do campo mostra a sobra calculada (139 = 869 − 730) e a parcela desta linha (139 un), sem presumir o recebido ; V7 A5: a recusa da aba velha diz o que mudou e pede de novo quantidade e condição; campos limpos; nada gravado
