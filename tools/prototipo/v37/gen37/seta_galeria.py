@@ -12,6 +12,8 @@ OUT = os.environ.get('SETA_GAL_DIR') or os.path.normpath(os.path.join(HERE, '..'
 os.makedirs(OUT, exist_ok=True)
 # abre a 1ª seta fechada (botão com aria-expanded=false) que casa o seletor, para a foto ter as duas posições
 ABRE = "((sel)=>{ const b=[...document.querySelectorAll(sel)].find(b=>b.getClientRects().length&&b.getAttribute('aria-expanded')==='false'); if(!b) return 'sem seta fechada'; b.scrollIntoView({block:'center'}); b.click(); return 'ok'; })"
+# fecha a 1ª seta aberta (lista que abre toda aberta: a foto mostra as duas posições)
+FECHA = "((sel)=>{ const b=[...document.querySelectorAll(sel)].find(b=>b.getClientRects().length&&b.getAttribute('aria-expanded')==='true'); if(!b) return 'sem seta aberta'; b.click(); return 'ok'; })"
 CLICA_TXT = "((t)=>{ const b=[...document.querySelectorAll('button')].find(b=>b.getClientRects().length&&b.innerText.replace(/\\s+/g,' ').trim().replace(/^[▸▾]\\s*/,'').replace(/\\s*▾$/,'')===t); if(!b) return 'sem '+t; b.click(); return 'ok'; })"
 TELAS = [   # (nome, endereço, ações [(js, espera)])
     ('cd01_arvore', 'CD-01.dc.html', []),                                            # a captura do proprietário: grupo e talhões
@@ -22,7 +24,7 @@ TELAS = [   # (nome, endereço, ações [(js, espera)])
     ('ma_ativo_blocos', 'MA.dc.html#ativo=a01', []),
     ('ma_plano_servicos', 'MA.dc.html#plano=PM-01', [(f"{ABRE}('.pm-sv .g2car')", .6)]),
     ('colh_colheita', 'COLH.dc.html', []),
-    ('cd06_cartoes', 'CD-06.dc.html?view=cartoes', [(f"{ABRE}('[data-g2cd] .g2cd-nk')", .6)]),
+    ('cd06_cartoes', 'CD-06.dc.html?view=cartoes', [(f"{FECHA}('[data-g2cd] .g2cd-nk')", .6)]),
     ('os_painel_secoes', 'OS.dc.html#OS-0420', []),
 ]
 p, srv = servir(R); c = Chrome(); J = c.js; B = f'http://127.0.0.1:{p}/'; fotos = []

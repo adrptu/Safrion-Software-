@@ -1526,6 +1526,9 @@ SETA_CSS=(
     "background:transparent;cursor:pointer;flex-shrink:0;padding:0;margin:0;color:#65736A;font:inherit;line-height:0}"
     ".g2seta.g2drill,.g2seta-vazio{width:var(--g2seta-alvo);height:16px;flex-shrink:0;display:inline-flex}"
     ".g2car:focus-visible{outline:2px solid #1E7A4C;outline-offset:1px}"   # anel inteiro: o botão fica na borda da célula
+    # no toque, na 1ª célula da tabela, o alvo de 44 px ocupa o recuo da célula (8 px) e o espaço até o nome (6 px): o nome perde 8 px em vez
+    # de 22 (a 390 px a 1ª coluna é estreita); a seta de ir e a linha sem seta acompanham, para os nomes seguirem alinhados
+    "@media (pointer:coarse){[data-g2g] :is([role=cell].g2c0,[role=cell].g2csel,[role=columnheader].g2th) :is(.g2car,.g2seta.g2drill,.g2seta-vazio){margin-left:-8px;margin-right:-6px}}"
     ".g2seta-nome{display:inline-flex;align-items:center;gap:6px}"   # botão com o nome à vista e a seta antes dele
     "@media (pointer:coarse){[aria-expanded]:has(>.g2seta),summary:has(>.g2seta){min-height:44px;box-sizing:border-box}}"   # seção, lote, "Capacidade por mês": 44 px no toque
     "summary:has(>.g2seta){list-style:none}summary:has(>.g2seta)::-webkit-details-marker{display:none}summary:has(>.g2seta)::marker{content:''}"
