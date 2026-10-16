@@ -1,0 +1,13 @@
+os_lote_test fix exit=0 RESULTADO 32/32
+ui_rev 1440 fix exit=0 RESULTADO 21/21
+ui_rev 390 fix exit=0 RESULTADO 21/21
+os_v39_liberar_test.py fix exit=0 secs=24 | RESULTADO: 20/20 ok
+carencia_test.py fix exit=0 secs=113 | RESULTADO: 90/90 verificações
+mip_fluxo_test.py fix exit=0 secs=55 | RESULTADO 15/15
+mip_correcoes_test.py fix exit=0 secs=83 | RESULTADO 14/14
+os_recurso_test.py fix exit=0 secs=36 | RESULTADO: 16/16
+tabelas_os_test.py fix exit=0 secs=71 | RESULTADO: 40/40 ok
+os_cenario_test.py fix exit=0 secs=56 | RESULTADO: 22/22 ok
+ctl5_test.py fix exit=0 secs=81 | RESULTADO 30/30 []
+paginas_scan_test.py fix exit=0 secs=396 | RESULTADO: 5 ok · 0 falhas (148 páginas)
+FIM

@@ -1,0 +1,14 @@
+OK    1 Fazenda: AG-01 sem contexto = Lagoa Grande (igual ao Mapa) · Santa Rita escolhida no AG-01 persiste ao recarregar e abre o Mapa na Santa Rita · #VIS-051 leva AG-01 e Mapa para a Lagoa Grande 
+OK    2 AG-01 (Lagoa Grande): VIS-060 "Vistoria atrasada · prevista para 17/09 · 6 dias" com "Programar vistoria", que abre o formulário no Pivô 17 × ácaro-rajado 
+OK    3 AG-01 (Santa Rita): VIS-006 (P1 percevejo, prevista 11/09) atrasada mesmo com a VIS-014 aberta em outro alvo do P1 
+OK    4 1280 × 800: AG-01, AG-03 e AG-04 sem rolagem lateral (Próximo passo à vista) 
+OK    5 Mapa T7 (7 dias) = AG-01: "Ácaro-rajado · perto do NC" com o botão "Seguir monitorando" · sem texto de bastidor na fonte 
+OK    6 VIS-017 concluída com 2 de 16 → AG-01 "Coleta incompleta" com "Completar coleta" (MB-06#VIS-017) → o app abre o ponto 3 e reabre a coleta 
+OK    7 App: 500 em "% folíolos com ácaro" recusado (passa de 100) · tocar no ponto 01 abre "Corrigir o ponto 1" e grava 5 → 6 
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr88/tools/prototipo/v37/gen37/mip_correcoes_test.py", line 86, in <module>
+    J("(()=>{const c=JSON.parse(localStorage.getItem('talhao-os-cenario-v1')); c.ordens['OS-0440'].etapa='Canceladas'; localStorage.setItem('talhao-os-cenario-v1',JSON.stringify(c));})()")
+  File "/tmp/claude-0/pr88/tools/prototipo/v37/gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

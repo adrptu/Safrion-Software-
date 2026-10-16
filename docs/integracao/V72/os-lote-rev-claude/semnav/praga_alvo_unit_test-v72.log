@@ -1,0 +1,24 @@
+OK    U0 o JS da página roda no node com os arquivos reais (sem erro)
+OK    U1 a página tem a lista por uso: agModoUso, agVisUso, agUsoLeaf e agUsoTot
+OK    U2 colunas por uso: Produto · registro | Praga-alvo | Nome científico | Cultura do uso | Ingrediente | Classe | Tox · amb | Na fazenda (Praga-alvo multivalorada; até 7 úteis + identificador)
+OK    U3 modo: sem cultura = por produto; com cultura e usos carregados = por uso; usos ainda carregando = por produto
+OK    U4 Soja: uma linha por uso (produto × praga-alvo) em Soja + "Todas as culturas" = 25092 linhas, nenhuma repetida, total "25092 usos em Soja"
+OK    U5 as linhas de cada produto ficam juntas (ordem dos produtos da lista)
+OK    U6 "Ver só os de Soja" = 22040 usos (= nUsos de Soja no índice, 22040)
+OK    U7 Praga-alvo (caixa de escolha) = Phakopsora pachyrhizi em Soja: 332 linhas, só desse alvo
+OK    U8 busca "FERRUGEM asiatica" em Soja = 332 usos (palavras no produto ou na praga-alvo do mesmo uso; sem acento e sem caixa)
+OK    U9 Mamão + Classe Fungicida + busca "antracnose" = 150 usos
+OK    U10 REPETIÇÃO: a mesma consulta e a volta à cultura dão as mesmas linhas
+OK    U11 linha Phakopsora: Praga-alvo = "Ferrugem da soja, ferrugem "asiática"" · Nome científico = "Phakopsora pachyrhizi" · Cultura do uso = Soja (ou "Todas as culturas"); filtro pelos nomes comuns
+OK    U12 praga-alvo sem nome comum no AGROFIT: Praga-alvo vazia ("—", filtro "(vazio)") e o nome científico na sua coluna
+OK    U13 alvo não informado no AGROFIT: as duas colunas vazias, a de Praga-alvo diz "não informado"
+OK    U14 uso registrado em "Todas as culturas" aparece com Cultura do uso = "Todas as culturas"
+OK    U15 ORDENAÇÃO da grade pela Praga-alvo (A → Z, sem nome comum no fim) e pelo Nome científico (Z → A)
+OK    U16 FILTRO da coluna Praga-alvo = "Ferrugem da soja": 332 linhas (pertinência do nome, não texto parcial)
+OK    U17 FILTRO "(vazio)" na Praga-alvo = os 437 usos sem nome comum
+OK    U18 cada linha de uso abre a ficha do registro com a cultura e o alvo do uso (id = registro@cultura@alvo; dr = agf_op_<id>)
+OK    U19 com a lista por uso, os chips contam usos (Soja): Fungicida = a lista com o chip, "Todas" = a lista sem chip (25092), orgânicos = a lista com "Aprovados para orgânicos"
+    u20: {'fn': True, 'todas': [332, 332], 'fung': [329, 329], 'org': [0, 0], 'fungOrg': [0, 0], 'semFiltro': True, 'org2': ['Cigarrinha-das-pastagens', 228, 228, 238, 238, 238, 238], 'prod': ['Herbicida · —', 640, 640, 640, 640, 0, 0]}
+OK    U20 A5 · com o filtro da coluna Praga-alvo = "Ferrugem da soja" (Soja), os chips contam as linhas filtradas: Todas = a lista sem chip, Fungicida = a lista com o chip, orgânicos = a lista com os dois; sem filtro de coluna valem as contagens de sempre; o mesmo na lista por produto
+
+RESULTADO 21/21

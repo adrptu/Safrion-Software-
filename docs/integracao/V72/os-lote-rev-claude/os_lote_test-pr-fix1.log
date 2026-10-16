@@ -1,0 +1,16 @@
+OK 1440px · contexto Lagoa Grande disponível
+OK 1440px · quatro origens da seed aparecem
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/os_lote_test_fix.py", line 47, in <module>
+    verificar(prefix+'abre por teclado',aguardar(c,dialog))
+                                        ^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/os_lote_test_fix.py", line 24, in aguardar
+    if c.js(expr):return True
+       ^^^^^^^^^^
+  File "/tmp/claude-0/pr88/tools/prototipo/v37/gen37/comp_lib.py", line 50, in js
+    r=self.call('Runtime.evaluate',{'expression':expr,'awaitPromise':True,'returnByValue':True})
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr88/tools/prototipo/v37/gen37/comp_lib.py", line 47, in call
+    if 'error' in m: raise RuntimeError(f"{method}: {m['error']}")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Runtime.evaluate: {'code': -32000, 'message': 'Object reference chain is too long'}

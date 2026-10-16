@@ -1,0 +1,15 @@
+  FALHA nova ordem de colheita nasce sem insumos · ('OS-0444', 'OS-0444 · Colheita de café · Colheita × A liberar C1 · 38 ha · janela a partir de 05/10/2026 · — A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO O agrônomo confere atividade e ')
+  OK  confirmação diz que não há insumo a reservar
+  OK  CTL-1/CTL-3: confirmação diz que confirmar é aprovar esta versão (agrônoma) e liberar (gestora)
+RESULTADO: 2/3 ok · FALHAS: nova ordem de colheita nasce sem insumos
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr88/tools/prototipo/v37/gen37/os_v39_liberar_test.py", line 31, in <module>
+    ev = T.cen("((c.ordens['OS-0440'].osc||{}).ev||[]).map(e=>e.cmd+'|'+e.t)") or []
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr88/tools/prototipo/v37/gen37/os_lib.py", line 58, in cen
+    return self.J(f"(()=>{{const X=window.__cen; const c=X.cenGet(); return ({expr});}})()")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr88/tools/prototipo/v37/gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

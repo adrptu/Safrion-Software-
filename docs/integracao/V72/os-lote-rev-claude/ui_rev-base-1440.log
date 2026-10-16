@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr88/docs/integracao/V72/os-lote-rev-claude/ui_rev_test.py", line 53, in <module>
+    c.js(bt('Agrupar operações compatíveis', False) + '.focus()'); c.tecla('Enter', 'Enter', 13, text='\r'); esperar('!!' + D)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr88/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of undefined (reading 'focus')
+    at <anonymous>:1:134

@@ -1,0 +1,37 @@
+[
+ {
+  "n": "base: comando real gravou o cenário (OS-0430 liberada)",
+  "ok": true,
+  "info": "OS-0430 liberada. REQ-041 reservou no Estoque: Glifosato 480 320 L, 2,4-D 806 160 L, Óleo mineral 80 L. v1 aprovada por Ana (agrônoma) e liberada por Ana (gestora)."
+ },
+ {
+  "n": "base: cenário salvo não tem as origens de demonstração",
+  "ok": true,
+  "info": ""
+ },
+ {
+  "n": "candidata: abrir a tela não reescreve nem descarta o salvo da base",
+  "ok": true,
+  "info": "['b1619a0314a49fc8', 85891, 85891]"
+ },
+ {
+  "n": "candidata: lê a mudança da base (OS-0430 Liberadas pela cenGet)",
+  "ok": true,
+  "info": ""
+ },
+ {
+  "n": "candidata: sem exceção ao abrir com o salvo antigo",
+  "ok": true,
+  "info": "[]"
+ },
+ {
+  "n": "candidata: painel de agrupamento abre com salvo antigo (sem origens de demonstração) e sem exceção",
+  "ok": true,
+  "info": "(sem painel: perfil sem papel)"
+ },
+ {
+  "n": "candidata: novo comando grava preservando a mudança da base",
+  "ok": true,
+  "info": "['OS-0431 liberada. REQ-042 reservou no Estoque: Semente de soja 58 W 5.304 kg, MAP 11-52 25.500 kg. v1 aprovada por Ana (agrônoma) e liberada por Ana (gestora).', 2]"
+ }
+]

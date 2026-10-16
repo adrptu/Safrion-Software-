@@ -1,0 +1,5 @@
+ma_menu_test.py pr2 exit=0 secs=59 | RESULTADO: 10/10 ok
+ma_atrito_test.py pr2 exit=0 secs=105 | RESULTADO: 13/13 ok
+inteligencia_nav_test.py pr2 exit=0 secs=18 | RESULTADO: 27/27 ok
+est_validade_conc_nav_test.py pr2 exit=0 secs=14 | RESULTADO: 12/12 ok
+FIM

@@ -1,0 +1,6 @@
+visoes2_formas_test.py base exit=1 secs=11 |     at <anonymous>:1:190
+os_v39_liberar_test.py base exit=0 secs=22 | RESULTADO: 20/20 ok
+carencia_test.py base exit=0 secs=112 | RESULTADO: 90/90 verificações
+mip_fluxo_test.py base exit=0 secs=56 | RESULTADO 15/15
+mip_correcoes_test.py base exit=0 secs=82 | RESULTADO 14/14
+FIM

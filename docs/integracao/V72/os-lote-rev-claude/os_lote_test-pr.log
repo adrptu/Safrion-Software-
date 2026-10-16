@@ -1,0 +1,12 @@
+OK 1440px · contexto Lagoa Grande disponível
+OK 1440px · quatro origens da seed aparecem
+FALHA 1440px · abre por teclado
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr88/tools/prototipo/v37/gen37/os_lote_test.py", line 48, in <module>
+    verificar(prefix+'seleção começa vazia',c.js(f"{dialog}.querySelectorAll('input[type=checkbox]:checked').length===0"))
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr88/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of null (reading 'querySelectorAll')
+    at <anonymous>:1:71

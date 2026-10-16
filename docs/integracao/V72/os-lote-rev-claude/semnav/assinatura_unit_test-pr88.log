@@ -1,0 +1,82 @@
+OK    S0 com a Lagoa sintética os números batem com a especificação §6 (2.570,23 ha · 5.140,46 · 3.855,35 · 5.200,00 · 5.240,46 · 6.278,46 · 6.338,00 · 2.945,23 ha)
+--- (A) com cenario.js
+OK    A1a medida = soma decimal da área cultivável dos talhões ativos (base): 2570.23 ha em 32 talhões
+OK    A1b soma em ponto flutuante seria 2570.2300000000005 (por isso centésimos inteiros); a medida é exata
+OK    A1c mesma regra de mescla do tmBase (salvo primeiro, base nos ids que faltam): inativo, fazenda inativa e talhão novo do Mapa (tmSalvar TN01)
+OK    A1d situação por linha: T3 "Inativo · fora", B1 "Inativo · fora"; o novo conta
+OK    A1e fazenda inativa tira os talhões dela mesmo com o talhão Ativo
+OK    A2a assinMensalidade: 16 casos (inclui 5140.46, 3855.35, 224,25 e a simulação do BO-01)
+OK    A2b ponto flutuante daria 2570.23*1.5 = 3855.3450000000003; a regra decimal dá 3855.35
+OK    A2c mínimo é o maior, não se soma: Completo 100 ha = R$ 299,00 (não R$ 499,00); Essencial 149,5 ha = R$ 224,25 (passou do mínimo)
+OK    A2d crédito nunca deixa o valor negativo e sai em centavos
+OK    A2e cada fatura do seed confere com assinMensalidade dos seus dados
+OK    A7a 23/09: Ativa, sem fatura aberta, set/2026 em medição com 5140.46
+OK    A7b primária 23/09: Alterar plano ou área
+OK    A7c 01/10: set/2026 fecha com 2570.23 ha → 5140.46, A vencer, vence 01/10; assinatura Ativa; primária Pagar fatura
+OK    A7d data só avança
+OK    A7e 06/10: Em atraso há 5 dias; nada restrito
+OK    A11 faixa 06/10: amarela, "vencida há 5 dias (data simulada da cobrança: 06/10)"; no celular só "Fatura de set/2026 vencida há 5 dias"
+OK    A7f 16/10: Inadimplente há 15 dias; trava de ampliar área com motivo e caminho
+OK    A11b faixa 16/10: vermelha, cita o que está suspenso e que nada foi apagado; no celular "… vencida há 15 dias · talhão novo suspenso"
+OK    A3 fatura fechada não muda depois de criar e editar talhão (cópia da medição)
+OK    A6a mesma chave de pagamento: um efeito, mesmo recibo
+OK    A6b fatura paga não paga de novo com outra chave
+OK    A7g pagar volta a Ativa e tira a trava
+OK    A6c forma fora da lista é recusada (nenhum campo de cartão)
+OK    A4a aceite agenda o Essencial para 01/10 (contrato v3); set fecha no Completo
+OK    A6d mesma chave de aceite: um contrato só
+OK    A4b prévia de set segue 5140.46; a de out (Essencial) dá 3855.35
+OK    A4c desfazer antes de 01/10 volta ao contrato v2
+OK    A4d em 01/10 set/2026 fecha no Completo (5140.46) e out/2026 já está no Essencial
+OK    A5 área abaixo da medida e acima de 5.000 ha recusadas com o motivo, sem gravar
+OK    A5b nada muda: mesmo plano e área é recusado
+OK    A10a 50 ha a mais: medida 2620.23, cobrada 2600 (sem cobrança-surpresa) → 5200.00; primária Ampliar área contratada
+OK    A10b BO-02 mede ao vivo: Santa Rita 2620.23 ha e mensalidades vigentes 6338.00
+OK    A12a BO-02 em 23/09: vigentes 6278.46 · Ativa 3 · Em avaliação 1 · Inadimplente 1 · Cancelada 1 · 2 faturas abertas R$ 939,00 · cobrada 2945.23 · medida 2958.23
+OK    A12b conciliar: Bela Vista paga (evt_1JKT5), recusa da Aurora registrada, Aurora segue Vencida; 1 fatura aberta R$ 299,00
+OK    A12c conciliar de novo: mesma chave devolve o recibo; outra chave não acha evento novo; nada duplica
+OK    A17a motivo curto recusado
+OK    A17b contestada: em 16/10 a assinatura segue Ativa (régua congelada) e nada é restrito
+OK    A17c pagar fatura em contestação é recusado
+OK    A17d crédito maior que a fatura é recusado
+OK    A17e resolver com crédito: set volta a A vencer (vence 21/10), valor não reescrito; out/2026 mostra o crédito de R$ 100,00
+OK    A18 CSV da fatura traz os números da cópia (medida, cobrada, valor) e diz que a cobrança é simulada
+OK    R1a fatura resolvida não é contestada de novo: a recusa cita o RES- que resolveu; um crédito só; contestou Ana · Gestora, resolveu Admin plataforma
+OK    R1b teto do crédito pelo total já creditado da fatura: R$ 5.000,00 + R$ 200,00 > 5140.46 é recusado
+OK    R1c manter o valor e contestar de novo: recusado; em 16/10 a régua corre do novo vencimento (11/10): Em atraso há 5 dias
+OK    R2a crédito de 5140.46 numa prévia de 3855.35: aplica 3855.35, prévia R$ 0,00 e mostra saldo de 1285.11 para nov/2026
+OK    R2b out/2026 fecha com o crédito de 3855.35 e lança o saldo de 1285.11 em nov/2026: crédito usado + saldo = crédito dado (nada some)
+OK    R2c fatura de R$ 0,00 nasce quitada pelo crédito: estado Paga, não pede pagamento (a aberta é a de set/2026), não conta atraso
+OK    R2d prévia de nov/2026 desconta o saldo: 3855.35 − 1285.11
+OK    R2e CSV de out/2026 traz o saldo de crédito para nov/2026
+OK    R3a 23/09 com B1 (120 ha) inativo: medida hoje 2450.23 ha, mas a prévia de set/2026 usa a abertura (2570.23 ha): inativar não reduz o mês em curso
+OK    R3b 01/10: set/2026 fecha com a abertura (2570.23 ha → 5140.46); a cópia guarda abertura e fechamento; out/2026 abre com 2450.23 ha
+OK    R3c B1 reativado em 01/10: out/2026 fecha com 2570.23 ha (vale o fechamento; a abertura era 2450.23)
+OK    R4a ato sem quem age é recusado sem gravar (aceite e conciliação)
+OK    R4b quem age fica no contrato, no recibo, na fatura e no evento: aceite e pagamento por Ana · Gestora, conciliação por Admin plataforma; a fatura copia quem aceitou o contrato
+OK    R5a régua no limite: 10 dias Em atraso; 11 dias Inadimplente
+OK    R5b R7 no limite: contratada igual à medida aceita; 5.000 ha aceita; 5.000,01 ha recusada
+OK    R5c primária com ampliação agendada que cobre a medida (2.620,23 ≤ 2.700): Alterar plano ou área; sem a agendada, Ampliar
+OK    R5d fatura paga não é contestada
+OK    R5e estado da fatura: pendente = "Pendente" e não conta atraso; contestada = "Em contestação"
+OK    R5f defesa do tmSalvar: talhão novo com a assinatura inadimplente é recusado mesmo sem passar pelo botão (nada gravado)
+OK    R6a voltar ao contrato de hoje pelo aceite, clique duplo: o 1º desfaz (DES-0001), o 2º devolve o mesmo recibo sem erro; o contrato desfeito fica guardado com quem desfez
+OK    R6b contestar ou resolver sem chave é recusado e não grava recibo "undefined"
+OK    R7a estado salvo com outra versão da assinatura (v=0, contrato v2 de 1.234 ha): vale o seed; a próxima gravação recomeça do seed
+OK    R7b ASSIN0.v = versão + resumo do seed ("2-9670ad1a")
+OK    R8 trial da Boa Esperança: 23/09 dia 5 de 30; 16/10 dia 28 de 30
+OK    R10a medida acima de 5.000 ha (5170.23): primária Pedir proposta empresarial; a sugestão de área fica no teto
+OK    R10b pedido de proposta: registrado uma vez (PRO-0001, por Ana · Gestora); a mesma chave devolve o recibo; outra chave é recusada
+OK    R10c abaixo do teto o pedido é recusado (use Alterar plano ou área)
+TOTAL 68 · falhas 0
+--- (B) sem cenario.js
+OK    B1 sem cenario.js e sem nada salvo: assinLer() devolve o seed, sem ReferenceError
+OK    B2 cenário salvo com a versão vigente: lê a assinatura (16/10, inadimplente) e trava ampliar a área
+OK    B3 faixa vermelha também na tela sem cenario.js
+OK    B4 cenário salvo com outra versão: vale o seed (mesma regra do cenGet)
+OK    B5 cenário ilegível: vale o seed, sem erro
+OK    B6 assinatura salva com outra versão do seed (outro build, outro cadastro): vale o seed
+OK    B7 tela sem medição: o cadastro não redesenha; gravação que não muda estado, dias nem data não redesenha; pagar redesenha
+OK    B7b tela que mede a área (CF-05, BO-01, BO-02) redesenha quando o cadastro muda
+TOTAL 8 · falhas 0
+RESULTADO passou · 76 verificações JS · falhas 0

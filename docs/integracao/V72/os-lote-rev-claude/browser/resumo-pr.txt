@@ -1,0 +1,15 @@
+os_recurso_test.py pr exit=0 secs=36 | RESULTADO: 16/16
+tabelas_os_test.py pr exit=0 secs=73 | RESULTADO: 40/40 ok
+os_cenario_test.py pr exit=0 secs=57 | RESULTADO: 22/22 ok
+ex38_test.py pr exit=0 secs=2 | Geração: mobile.build + OS0424 app/ficha OK; sem navegador
+ctl5_test.py pr exit=0 secs=81 | RESULTADO 30/30 []
+visoes2_formas_test.py pr exit=1 secs=11 |     at <anonymous>:1:190
+os_v39_liberar_test.py pr exit=1 secs=11 | RuntimeError: Uncaught
+os_v39_bloq_test.py pr exit=0 secs=28 | RESULTADO: 13/13 ok
+os_v39_selo_agua_test.py pr exit=0 secs=21 | RESULTADO: 13/13 ok
+carencia_test.py pr exit=1 secs=41 | RuntimeError: Uncaught
+mip_fluxo_test.py pr exit=1 secs=36 | RuntimeError: Uncaught
+mip_correcoes_test.py pr exit=1 secs=60 | RuntimeError: Uncaught
+visoes_unit_test.py pr exit=0 secs=1 | RESULTADO: OK 25/25
+paginas_scan_test.py pr exit=0 secs=400 | RESULTADO: 5 ok · 0 falhas (148 páginas)
+FIM

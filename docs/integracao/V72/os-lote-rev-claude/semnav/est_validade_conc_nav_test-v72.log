@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/v72/tools/prototipo/v37/gen37/est_validade_conc_nav_test.py", line 4, in <module>
+    from est_lib import Est
+  File "/tmp/claude-0/v72/tools/prototipo/v37/gen37/est_lib.py", line 6, in <module>
+    from cdp import Chrome
+  File "/tmp/claude-0/v72/tools/prototipo/v37/gen37/cdp.py", line 10, in <module>
+    CH=_chrome()
+       ^^^^^^^^^
+  File "/tmp/claude-0/v72/tools/prototipo/v37/gen37/cdp.py", line 9, in _chrome
+    raise RuntimeError('Chrome não encontrado: defina CHROME_BIN')
+RuntimeError: Chrome não encontrado: defina CHROME_BIN

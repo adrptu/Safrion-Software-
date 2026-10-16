@@ -1,0 +1,8 @@
+OK    base: comando real gravou o cenário (OS-0430 liberada)
+OK    base: cenário salvo não tem as origens de demonstração
+OK    candidata: abrir a tela não reescreve nem descarta o salvo da base
+OK    candidata: lê a mudança da base (OS-0430 Liberadas pela cenGet)
+OK    candidata: sem exceção ao abrir com o salvo antigo
+OK    candidata: painel de agrupamento abre com salvo antigo (sem origens de demonstração) e sem exceção
+OK    candidata: novo comando grava preservando a mudança da base
+RESULTADO 7/7

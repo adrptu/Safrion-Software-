@@ -1,0 +1,36 @@
+OK    motor JS (node) executou sem erro
+OK    F1 diferença à referência: (2,90 − 3,10) ÷ 3,10 = −6,45% e vira alerta (pior que −5%)
+OK    F2 ausente ≠ zero: sem referência a diferença é null, sem alerta e "—" na tela
+OK    F3 posição: 25 ÷ 100 = 25%; oferta zero ou ausente não vira 0% (null)
+OK    F4 líquido = preço − frete − preço × 1,2% × dias ÷ 30: 3,00 − 0,19 − 0,036 = 2,774 (30 d); à vista 2,81
+OK    F5 frete por unidade = R$ 190/t × kg da unidade ÷ 1000: caixa de 20 kg R$ 3,80; kg R$ 0,19
+OK    F6 pontualidade = no prazo ÷ entregas: 2 de 3 = 66,7%; sem entrega é null (não 0% nem 100%)
+OK    F7 R$/ha = Σ(qtd × preço) ÷ área: (100 × 2,5 + 10 × 30) ÷ 50 = 11; área zero é null
+OK    F8 limites de 5%: exatamente +5% ou −5% não alerta; +5,01% e −5,01% alertam
+OK    V1 soja com 4 contratos de saca a conferir (A-17): posição "Suspenso", livre e % null (nunca 0%); no preço médio ficam fora as 2 vendas (PV-030, CT-203), pois CPR e troca comprometem a oferta mas não são venda
+OK    V2 mamão vendido (40.000 kg) sem previsão publicada: "Sem previsão", risco de oferta e 1 alerta no total (o preço, −1,6%, não alerta)
+OK    V3 com a massa da saca conferida (60 kg), a soja sai do "Suspenso": % = vendido ÷ oferta e o preço médio volta com a diferença à referência
+OK    V4 recebimento líquido de cada venda = preço − frete − custo do prazo (retirada: frete zero); só venda com preço
+OK    C1 melhor cotação válida de cada insumo = menor preço entre as válidas (oráculo Python, 19 insumos)
+OK    C2 diferença da melhor cotação à referência = (cotação − referência) ÷ referência, igual ao oráculo
+OK    C3 economia = Σ qtd × (referência − melhor) só onde a melhor é menor, igual ao oráculo (R$ 41362.772)
+OK    C4 R$/ha da safra = Σ qtd × referência ÷ área, igual ao oráculo
+OK    C5 pontualidade de cada fornecedor = entregas no prazo ÷ entregas (a entregar não conta), igual ao oráculo
+OK    C6 em 13/10/2026 todas as cotações (válidas até 02/10) venceram: nenhuma vira "melhor preço", economia zero e o insumo pede nova cotação
+OK    C7 insumo sem cotação: melhor, diferença e economia null (ausente ≠ zero) e não conta como vencida
+OK    C8 cotação 6% acima da referência alerta; exatamente 5% acima não
+OK    C9 a conta não altera os dados de entrada (INTC sem campo novo depois de duas chamadas)
+OK    P1 índice sazonal de cada mês = média, nas janelas de 12 meses, de preço ÷ média da janela (oráculo, 22 séries)
+OK    P2 melhor mês: venda = o de maior índice; compra = o de menor (empate: o mais cedo), igual ao oráculo
+OK    P3 tendência sem a época (3 meses contra os 3 anteriores, preço ÷ índice) = oráculo; a semente mostra Alta, Queda e Estável
+OK    P4 normal do mês = média dos últimos 12 meses × índice do mês; agora vs normal = oráculo
+OK    P5 o que fazer e a economia de cada linha = oráculo; economia total R$ 23103.58
+OK    P6 ausente ≠ zero: Feijão sem fonte de preço fica "sem série" (sem preço, sem melhor mês, sem recomendação inventada)
+OK    P7 contraprova da tendência: série só com a época sai "Estável" sem a época; a conta crua (jul–set contra abr–jun) diria +10,5% (Alta)
+OK    P8 contraprova do prazo: necessidade (menos a entrega) neste mês → "Comprar agora"; até jan → "Esperar" até jan, 9,5% mais barato
+OK    P9 perecível não espera: a mesma série que manda esperar o produto armazenável manda o perecível "Vender na colheita"
+OK    P11 o mês que paga a espera vence o de maior preço bruto: Esperar até outubro (+8,8 % líquido), não "Sem ganho em esperar" por agosto
+OK    P12 sem ganho líquido em nenhum mês (outubro +0,8 %, agosto −1,2 %): continua "Sem ganho em esperar"
+OK    P13 empate de ganho líquido (novembro 2 meses +7,6 %, dezembro 3 meses +7,6 %): o mais cedo (novembro); perecível segue "Vender na colheita"
+OK    P10 a conta não altera a série de entrada (INTP igual depois de duas chamadas)
+RESULTADO: OK 35/35

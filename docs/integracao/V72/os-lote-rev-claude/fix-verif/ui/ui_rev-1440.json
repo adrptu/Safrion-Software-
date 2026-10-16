@@ -1,0 +1,187 @@
+[
+ {
+  "n": "1440px · OBS foco logo após abrir pelo teclado",
+  "ok": null,
+  "info": "DENTRO BUTTON:×"
+ },
+ {
+  "n": "1440px · Esc logo após abrir (sem Tab) fecha o painel",
+  "ok": true,
+  "info": "aberto=False foco=DENTRO BUTTON:×"
+ },
+ {
+  "n": "1440px · OBS linhas no painel (recorte LG)",
+  "ok": null,
+  "info": "15"
+ },
+ {
+  "n": "1440px · três origens marcadas por ponteiro",
+  "ok": true,
+  "info": ""
+ },
+ {
+  "n": "1440px · OS-0593 (dose 3) bloqueada com motivo em texto",
+  "ok": true,
+  "info": "[True, 'OS-0593 · Parcela demonstrativa D · 5 ha Receita ou parâmetros incompatíveis com a seleção Abrir origem']"
+ },
+ {
+  "n": "1440px · campos de programação aparecem",
+  "ok": true,
+  "info": ""
+ },
+ {
+  "n": "1440px · OBS fuso inicia vazio (precisa escolher, apesar da janela da origem trazer -03:00)",
+  "ok": null,
+  "info": "False"
+ },
+ {
+  "n": "1440px · OBS selects",
+  "ok": null,
+  "info": "['Fuso da fazenda', 'Máquina', 'Implemento', 'Operador', 'Caldeiro']"
+ },
+ {
+  "n": "1440px · OBS prévia (texto)",
+  "ok": null,
+  "info": "Agrupar operações × Lagoa Grande · Todas · Todas · recorte da abertura 3 selecionadas 30 ha · receita DEMO-AGRUPAR v1 · 6,75 h Janela comum: 29/09 08:00 (UTC-03:00) a 29/09 18:00 (UTC-03:00) Sulfato de magnésio · 60 kg (2 kg/ha) Carga 1 · 3.000 L · OS-0590: 10 ha / OS-0591: 15 ha / OS-0592: 5 ha OS-0590 · Trator 03 · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Pulverizador PJ-3030 36 m · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Marcos · operador · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Paula · caldeiro · 29/09 08:00–10:45 (UTC-03:00) OS-0591 · Trator 03 · 29/09 10:45–13:45 (UTC-03:00) OS-0591 · Pulverizador PJ-3030 36 m · 29/09 10:45–13:45 (UTC-03:00) OS-0591 · Marcos · operador · 29/09 10:45–13:45 (UTC-03:00) OS-0591 · Paula · caldeiro · 29/09 10:45–13:45 (UTC-03:00) OS-0592 · Trator 03 · 29/09 13:45–14:45 (UTC-03:00) OS-0592 · Pulverizador PJ-3030 36 m · 29/09 13:45–14:45 (UTC-03:00) OS-05"
+ },
+ {
+  "n": "1440px · prévia: 30 ha, 60 kg, 6,75 h",
+  "ok": true,
+  "info": "Agrupar operações × Lagoa Grande · Todas · Todas · recorte da abertura 3 selecionadas 30 ha · receita DEMO-AGRUPAR v1 · 6,75 h Janela comum: 29/09 08:00 (UTC-03:00) a 29/09 18:00 (UTC-03:00) Sulfato de magnésio · 60 kg (2 kg/ha) Carga 1 · 3.000 L · OS-0590: 10 ha / OS-0591: 15 ha / OS-0592: 5 ha OS-"
+ },
+ {
+  "n": "1440px · OBS janela comum exibida",
+  "ok": null,
+  "info": "Janela comum: 29/09 08:00 (UTC-03:00) a 29/09 18:00 (UTC-03:00)"
+ },
+ {
+  "n": "1440px · OBS blocos programados exibidos",
+  "ok": null,
+  "info": "['OS-0590 · Trator 03 · 29/09 08:00–10:45 (UTC-03:00)', 'OS-0590 · Pulverizador PJ-3030 36 m · 29/09 08:00–10:45 (UTC-03:00)', 'OS-0590 · Marcos · operador · 29/09 08:00–10:45 (UTC-03:00)', 'OS-0590 · Paula · caldeiro · 29/09 08:00–10:45 (UTC-03:00)', 'OS-0591 · Trator 03 · 29/09 10:45–13:45 (UTC-03:00)', 'OS-0591 · Pulverizador PJ-3030 36 m · 29/09 10:45–13:45 (UTC-03:00)', 'OS-0591 · Marcos · operador · 29/09 10:45–13:45 (UTC-03:00)', 'OS-0591 · Paula · caldeiro · 29/09 10:45–13:45 (UTC-03:00)', 'OS-0592 · Trator 03 · 29/09 13:45–14:45 (UTC-03:00)', 'OS-0592 · Pulverizador PJ-3030 36 m · 29/09 13:45–14:45 (UTC-03:00)', 'OS-0592 · Marcos · operador · 29/09 13:45–14:45 (UTC-03:00)', 'OS-0592 · Paula · caldeiro · 29/09 13:45–14:45 (UTC-03:00)']"
+ },
+ {
+  "n": "1440px · janela na mesma hora local dos blocos (08:00, fuso da fazenda)",
+  "ok": true,
+  "info": "['Janela comum: 29/09 08:00 (UTC-03:00) a 29/09 18:00 (UTC-03:00)', ['OS-0590 · Trator 03 · 29/09 08:00–10:45 (UTC-03:00)']]"
+ },
+ {
+  "n": "1440px · primária única no rodapé, ≥44 px, dentro da tela",
+  "ok": true,
+  "info": ""
+ },
+ {
+  "n": "1440px · sem rolagem horizontal da página",
+  "ok": true,
+  "info": ""
+ },
+ {
+  "n": "1440px · duplo acionamento cria um só grupo e mostra recibo",
+  "ok": true,
+  "info": "[['GRP-1'], 'GRP-1 · versão 1 × Lagoa Grande · Todas · Todas · recorte da abertura 0 selecionadas GRP-1 confirmado · origens preservadas; aprovação e liberação continuam por O.S. OS-0590 · Vinculada OS-0591 · Vinc']"
+ },
+ {
+  "n": "1440px · agrupar não aprova, não libera, não reserva; programação gravada",
+  "ok": true,
+  "info": ""
+ },
+ {
+  "n": "1440px · \"Agrupar operações compatíveis\" após um grupo abre nova composição",
+  "ok": true,
+  "info": "Agrupar operações"
+ },
+ {
+  "n": "1440px · OBS detalhe do grupo (Caio)",
+  "ok": null,
+  "info": "GRP-1 · versão 1 × Lagoa Grande · Todas · recorte da abertura 0 selecionadas Programar grupo Escolha explicitamente as origens deste recorte. OS-0590 · Trator 03 · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Pulverizador PJ-3030 36 m · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Marcos · operador · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Paula · caldeiro · 29/09 08:00–10:45 (UTC-03:00) OS-0591 · Trator 03 · 29/09 10:45–13:45 (UTC-03:00) OS-0591 · Pulverizador PJ-3030 36 m · 29/09 10:45–13:45 (UTC-03:00) OS-0591 · Marcos · operador · 29/09 10:45–13:45 (UTC-03:00) OS-0591 · Paula · caldeiro · 29/09 10:45–13:45 (UTC-03:00) OS-0592 · Trator 03 · 29/09 13:45–14:45 (UTC-03:00) OS-0592 · Pulverizador PJ-30"
+ },
+ {
+  "n": "1440px · detalhe mostra aprovação pendente por origem",
+  "ok": true,
+  "info": "GRP-1 · versão 1 × Lagoa Grande · Todas · recorte da abertura 0 selecionadas Programar grupo Escolha explicitamente as origens deste recorte. OS-0590 · Trator 03 · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Pulverizador PJ-3030 36 m · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Marcos · operador · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Paula · caldeiro · 29/09 08:00–10:45 (UTC-03:00) OS-0591 · Trator 03"
+ },
+ {
+  "n": "1440px · OBS detalhe OS-0590 menciona o grupo?",
+  "ok": null,
+  "info": "False"
+ },
+ {
+  "n": "1440px · detalhe da O.S. mostra recursos programados (Marcos, T03)",
+  "ok": true,
+  "info": "OS-0590 · Pulverização · demonstração de agrupamento × A liberar Demonstração Parcela demonstrativa A · 10 ha · janela 29/09 · 08:00–18:00 UTC−3 · Marcos A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO O agrônomo confere atividade, área, produtos e doses abaixo e libera; se p"
+ },
+ {
+  "n": "1440px · OBS botões do detalhe OS-0590 (Ana, AL-01 padrão)",
+  "ok": null,
+  "info": "['×', 'Liberar para execução', 'Ajustar antes de liberar', 'Cancelar sem execução']"
+ },
+ {
+  "n": "1440px · CF-01: AL-01 passa a PCP · Caio (configuração do cenário, pela tela)",
+  "ok": true,
+  "info": "AL-01 · Liberar O.S. agrícola CMD-06 PCP · Caio fora: irrigação só com água (DEC-2609-10) Vigente v2 desde 26/09/2026 Editável: papel"
+ },
+ {
+  "n": "1440px · OBS botões do detalhe OS-0590 (Ana, AL-01=PCP)",
+  "ok": null,
+  "info": "['×', 'Aprovar v1', 'Ajustar antes de aprovar', 'Cancelar sem execução']"
+ },
+ {
+  "n": "1440px · OBS botões do detalhe OS-0591 (Ana, AL-01=PCP)",
+  "ok": null,
+  "info": "['×', 'Aprovar v1', 'Ajustar antes de aprovar', 'Cancelar sem execução']"
+ },
+ {
+  "n": "1440px · OBS eventos após aprovar",
+  "ok": null,
+  "info": "['CMD-42 v1', 'CMD-42 v1', '']"
+ },
+ {
+  "n": "1440px · aprovar pela O.S. grava só CMD-42 (sem CMD-06) e mantém A liberar",
+  "ok": true,
+  "info": "['CMD-42 v1', 'CMD-42 v1', '']"
+ },
+ {
+  "n": "1440px · no grupo, só as aprovadas e prontas ficam selecionáveis",
+  "ok": true,
+  "info": "[False, False, True]"
+ },
+ {
+  "n": "1440px · OBS confirmação de liberação",
+  "ok": null,
+  "info": "GRP-1 · versão 1 × Lagoa Grande · Todas · recorte da abertura 2 selecionadas Programar grupo Liberar OS-0590, OS-0591. Cada origem terá seu resultado; nenhuma aprovação será criada. OS-0590 · Trator 03 · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Pulverizador PJ-3030 36 m · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Marcos · operador · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Paula · caldeiro · 29/09 08:"
+ },
+ {
+  "n": "1440px · recarregar antes de confirmar não libera nada",
+  "ok": true,
+  "info": ""
+ },
+ {
+  "n": "1440px · OBS recibo da liberação",
+  "ok": null,
+  "info": "GRP-1 · versão 1 × Lagoa Grande · Todas · recorte da abertura 0 selecionadas 2 liberadas · 0 pendentes; consulte cada origem. OS-0590 · Liberada OS-0591 · Liberada Selecione as origens que deseja liberar. Programar grupo Escolha explicitamente as origens deste recorte. OS-0590 · Trator 03 · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Pulverizador PJ-3030 36 m · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Marcos · operador · 29/09 08:00–10:45 (UTC-03:00) OS-0590 · Paula · caldeiro · 29/09 08:00–10:45 (UT"
+ },
+ {
+  "n": "1440px · OBS estado após liberar",
+  "ok": null,
+  "info": "['Liberadas|CMD-42 v1,CMD-06 v1', 'Liberadas|CMD-42 v1,CMD-06 v1', 'A liberar|']"
+ },
+ {
+  "n": "1440px · liberação por origem: 2 Liberadas só com CMD-06 novo; 3ª segue A liberar sem eventos",
+  "ok": true,
+  "info": "['Liberadas|CMD-42 v1,CMD-06 v1', 'Liberadas|CMD-42 v1,CMD-06 v1', 'A liberar|']"
+ },
+ {
+  "n": "1440px · duplo acionamento não duplica movimento/reserva",
+  "ok": true,
+  "info": "[['OS-0590 reserva', 'OS-0591 reserva'], ['os-grupo-1792184561691-bo5p3vxtz9a', 'os-grupo-1792184597039-23okn47vn8p|OS-0590', 'os-grupo-1792184597039-23okn47vn8p|OS-0591', 'os-grupo-1792184597039-23okn47vn8p']]"
+ },
+ {
+  "n": "1440px · aba velha: confirmação recusada com motivo, sem segundo grupo",
+  "ok": true,
+  "info": "Agrupar operações × Lagoa Grande · Todas · Todas · recorte da abertura 2 selecionadas OS-0590: vinculada a GRP-1 25 ha · receita DEMO-AGRUPAR v1 · 5,75 h Janela comum: 29/09 08:00 (UTC-03:00) a 29/09 18:00 (UTC-03:00) Sulfato de magnésio · 50 kg (2 kg/ha) Carga 1 · 2.500 L · OS-0590: 10 ha / OS-0591"
+ },
+ {
+  "n": "1440px · sem exceções JavaScript",
+  "ok": true,
+  "info": "[]"
+ }
+]

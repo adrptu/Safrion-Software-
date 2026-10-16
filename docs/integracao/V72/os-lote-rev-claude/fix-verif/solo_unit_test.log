@@ -1,0 +1,130 @@
+OK    motor JS (node) executou sem erro
+OK    AC-SOLO-01 V 40 → 60, T 5, PRNT 80: NC100 1,00 t/ha e dose 1,25 t/ha (PRNT uma vez)
+OK    AC-SOLO-01b V acima de V₂: NC = 0 (nunca negativa)
+OK    AC-SOLO-02 LAU-2043 SB/T/t/V/m = 5,38 / 9,20 / 5,48 / 58,48 / 1,82
+OK    AC-SOLO-02 LAU-2044 SB/T/t/V/m = 1,66 / 4,66 / 1,76 / 35,62 / 5,68
+OK    AC-SOLO-02 LAU-2061 SB/T/t/V/m = 4,50 / 7,50 / 4,50 / 60,00 / 0,00
+OK    AC-SOLO-02 LAU-2063 SB/T/t/V/m = 2,04 / 5,10 / 2,34 / 40,00 / 12,82
+OK    AC-SOLO-02 LAU-2071 SB/T/t/V/m = 4,05 / 8,10 / 4,25 / 50,00 / 4,71
+OK    AC-SOLO-02 LAU-2072 SB/T/t/V/m = 0,58 / 4,58 / 1,18 / 12,66 / 50,85
+OK    AC-SOLO-02 LAU-2050 sem H+Al: T e V "não calculável" (nunca 0); SB 4,75, t 4,75, m 0
+OK    AC-SOLO-02 Al "< 0,1" (abaixo do limite): t e m "não calculável", nunca metade do limite; V calculado
+OK    AC-SOLO-02 Na não analisado fica fora da soma e a fórmula diz
+OK    AC-SOLO-02 Na analisado entra na soma
+OK    AC-SOLO-02 unidade incompatível (Ca em mg/kg) → "não calculável"
+OK    AC-SOLO-02 mmolc/dm³ ÷ 10 e mg/dm³ (Ca ÷ 200,4; Mg ÷ 121,6)
+OK    D-17 LAU-2071: V 50 % recalculado × 49 % do laboratório → "difere", a regra usa o recalculado
+OK    AC-SOLO-03 classes de K: 39,99 baixo · 40 médio · 79,99 médio · 80 adequado · 119,99 adequado · 120 alto
+OK    AC-SOLO-03 meta 2.399 e 4.801 kg/ha: fora da faixa, nada e "meta fora da faixa da regra"
+OK    AC-SOLO-03 meta 2.400 e 3.600 → linha até 3.600 (72); 3.601 e 4.800 → linha até 4.800 (90)
+OK    AC-SOLO-03 V = V₂ → NC 0
+OK    AC-SOLO-03 gesso com Ca 0,5 e m 20 % exatos → não indicado; Ca 0,49 → indicado
+OK    R08 NG = k × argila: perene 75 × 20 = 1.500 kg/ha; anual 50 × 32 = 1.600
+OK    §6 T1-A: KCl 120 → 150 kg/ha · +4.800 kg · +R$ 11.520,00 · LAU-2061 · regra rotulada
+OK    §6 T1-A: conta passo a passo (médio · 3.840 kg/ha · 90 ÷ 0,6 = 150)
+OK    §6 T1-A: sem calagem (V 60 = V₂) e só 1 sugestão
+OK    §6 T1-B: KCl 150 kg/ha · +4.560 kg (meta 62 sc/ha = 3.720 kg/ha)
+OK    §6 T2: KCl retirar (K alto) · −35.760 kg · −R$ 85.824,00 · único insumo da a4
+OK    §6 T2: incluir Calagem · Calcário dolomítico 1,20 t/ha em 30/09/2026 · +357,6 t · +R$ 64.368,00
+OK    §6 T2: a data diz que o DAP −60 (19/08) já passou e vale a chegada viável
+OK    §6 Pivô 12: calagem 2.000 → 1.800 kg/ha (filler PRNT 90; V 50 → 70; T 8,10) · −9.694 kg · −R$ 1.744,92 · OS-0502 em A liberar
+OK    §6 Pivô 12: gessagem 1.000 → 1.500 kg/ha (Ca 0,30 < 0,5; perene 75 × 20) · +24.235 kg · +R$ 5.331,70
+OK    §6 sem sugestão: C1 (laudo aguardando validação) e T4 (laudo por zona e sem plano)
+OK    §6 R17: a Safrinha 2027 (T2) não recebe a calagem do LAU-2063; diz que foi para a Safra 2026/27
+OK    §6 MAP 11-52: sem regra de P (nenhuma sugestão de MAP)
+OK    AC-SOLO-04 regra desligada → 0 sugestões; os laudos continuam visíveis
+OK    AC-SOLO-06 registrar o laudo do T7 → LAU-2073 em Aguardando validação
+OK    R13 mesma chave e mesmo conteúdo: "já registrado", nada muda (1 laudo novo)
+OK    R13 mesma chave e outro conteúdo: conflito, nada gravado
+OK    AC-SOLO-06 registrar de novo a mesma amostra (outra chave) → recusado: "já registrada como LAU-2073"
+OK    AC-SOLO-06 antes de validar, o T7 não tem sugestão
+OK    AC-SOLO-06 Caio não valida ("decisão de Ana (agrônoma)"); nada muda
+OK    AC-SOLO-06 Ana valida; só então o T7 mostra "incluir Calagem 0,40 t/ha" (+16,8 t, +R$ 3.024,00)
+OK    AC-SOLO-07 LAU-2048 (K sem unidade): Inconsistente, validar recusado
+OK    AC-SOLO-07 corrigir K para g/kg → Aguardando validação; o original continua no laudo
+OK    §3.1 corrigir um laudo Validado o devolve a Aguardando validação (e ele deixa de sugerir)
+OK    AC-SOLO-10 base: 4 sugestões na Safra 2026/27 (T1-A, T1-B, T2 KCl, T2 calagem)
+OK    AC-SOLO-10 lote: KCl −26.400 kg e Calcário dolomítico +357,6 t no aviso
+OK    AC-SOLO-09 a mesma chave duas vezes: "já registrado" e nenhum aceite a mais
+OK    AC-SOLO-09 mesma chave e outra dose: conflito, nada gravado
+OK    AC-SOLO-09 depois do lote, T1-A não sugere mais (aceite = sugestão)
+OK    AC-SOLO-09/15 lote com uma linha negada pela R11 (OS-0502 já liberada): a gessagem grava, a calagem diz o motivo
+OK    AC-SOLO-15 com a OS-0502 liberada a sugestão de calagem vem negada (o plano esconde a linha; o AG-02 diz por quê)
+OK    AC-SOLO-15 data passada: comando recusa
+OK    R14 sem ajuste da sessão: vale o aceite (150, pela análise)
+OK    R14 ajuste manual da sessão (140) vence o aceite
+OK    AC-SOLO-12 desfazer (como de outra aba) → vale o padrão 120; nada ficou copiado na sessão
+OK    AC-SOLO-12 a linha "Análise sugere 150" volta
+OK    AC-SOLO-13 plano v7 com KCl padrão 110: aceite 150 mantido e padrão 110 como referência
+OK    AC-SOLO-13 KCl fora do v7 → aceite órfão visível e o KCl não volta sozinho
+OK    AC-SOLO-13 v7 com Calagem própria e a calagem incluída pela análise → uma só calagem no T2 (vale a incluída; a do padrão é referência)
+OK    R07 retirada pela análise do único insumo: a Adubação de cobertura (a4) sai do T2; a calagem incluída entra
+OK    AC-SOLO-13 aceite do SOJA-AT com o cultivo em SOJA-PD → não vale e não é apagado
+OK    AC-SOLO-17 laudo do T1 com V 50 % (T 7,50): 0,88 t/ha ao T1-A e ao T1-B na Safra 2026/27
+OK    AC-SOLO-17 e nada à parcela do T1 na Safrinha 2027
+OK    AC-SOLO-21 vale o de coleta mais recente (LAU-2073); o LAU-2063 fica Substituído e não sugere
+OK    R18 Calcário sem preço de referência: nada incluído e o motivo aparece
+OK    AC-SOLO-11 meta 60 sc/ha (3.600 kg/ha) → 72 ÷ 0,6 = 120 = padrão: a sugestão some
+OK    AC-SOLO-11 com o aceite de 150 feito, "Análise sugere 120" reaparece (−4.560 kg)
+OK    CAD % volume: (32 − 18) ÷ 100 × 40 cm × 10 = 56 mm (T7)
+OK    CAD % volume: (28 − 15) ÷ 100 × 30 cm × 10 = 39 mm (P1)
+OK    CAD mm/cm: (3,1 − 1,6) × 30 cm = 45 mm (P2, zona)
+OK    CAD só com a capacidade de campo (Pivô 12): "não calculável", sem lâmina inventada
+OK    CAD com unidade sem conversão (g/g) e PMP ≥ CC: não calculável
+OK    medição nova AGS-005: CAD 56 mm no aviso; a mais recente do talhão passa a valer
+OK    medição repetida (mesmo talhão, data, profundidade e método) é recusada
+OK    medição sem capacidade de campo é recusada junto ao campo
+OK    A10 solo.js não define massa de saca nem aritmética decimal própria
+OK    A1 laudo novo do T2 com a calagem do LAU-2063 já liberada (OS-0441): a sugestão de outra calagem vem negada pela R11, com o motivo
+OK    A1 o comando recusa a troca mesmo se a tela mandar (nada gravado; a calagem do LAU-2063 continua a única ativa)
+OK    A1 o lote também recusa a linha (falha sozinha com o motivo)
+OK    A1 com a O.S. da calagem antiga ainda em A liberar: o laudo novo troca a dose (1,32 t/ha) e a O.S. antiga lê a substituta (selo "Plano mudou pela análise")
+OK    A1 soloKCorr reconhece a correção do cultivo por tipo (c3 × c30; cal × ges)
+OK    A2 rascunho velho (calagem do LAU-2063, já Substituído) salvo depois: recusado com "a análise mudou … Reabra o painel" e só a calagem do LAU-2073 fica ativa
+OK    A2 KCl 150 do LAU-2061 depois de o laudo voltar a Aguardando validação: recusado; o T1-A segue com 120
+OK    A2 no lote, a linha do laudo não validado falha sozinha com o motivo
+OK    A2 (e mutante MX) nova calagem sem "substitui" na tela: o comando desfaz a anterior do mesmo tipo; uma só calagem no plano (393,36 t, não 750,96 t)
+OK    A3 laudo novo do T2 (V 69,91 %, K 30 mg/dm³): o lote mostra "retirar a Calagem incluída" (−357,6 t) e KCl 180 kg/ha na cobertura retirada (+53.640 kg)
+OK    A3 o "Uso no plano" do laudo novo mostra as duas como disponíveis
+OK    A3 usar as duas: a calagem sai (uso "retirada pelo LAU-2073"), a Adubação de cobertura volta com KCl 180 pela análise · aviso Calcário −357,6 t e KCl +53.640 kg
+OK    A3 a O.S. em A liberar da calagem retirada pela análise lê "retirar" (selo "Plano mudou pela análise")
+OK    A3 gessagem incluída (1.500 kg/ha) e laudo 20–40 cm novo sem gatilho (Ca 1,20; m 0 %): "retirar a Gessagem incluída"
+OK    A3 KCl 150 pelo LAU-2061 e laudo novo do T1 com extrator Resina (sem regra): sugere voltar ao padrão 120 kg/ha (−4.800 kg)
+OK    A3 usar: o uso volta ao padrão ("voltou ao padrão pelo …"), o plano fica com 120 e a O.S. em A liberar leria 120
+OK    A4 KCl 60 + 60 kg/ha (plantio + cobertura): 75 + 75 = 150 kg/ha de KCl = 90 kg/ha de K₂O (a regra), com o parcelamento na conta
+OK    A4 KCl 30 + 60 kg/ha: 50 + 100 = 150 kg/ha (proporção do padrão)
+OK    A5 aceite de 150 com a OS-0440 em execução: Restaurar, ajuste manual e desfazer de outra aba são recusados ("não aplicável, OS-0440 em execução"); o plano segue com 150
+OK    A5 "Desfazer inclusão" da calagem com a O.S. liberada: recusado
+OK    A9 diferença 4,35 kg × R$ 0,50 = R$ 2,18 (decimal, meio para cima; o ponto flutuante dava 2,17)
+OK    MA R13 novo uso na mesma chave substitui (120), nunca soma (270), com o 150 no histórico
+OK    MB R24 empate na data: vale o talhão inteiro antes da zona (P2, 02/09)
+OK    MD medição com data futura recusada
+OK    MC laudo com coleta futura recusado
+OK    MO laudo sem laboratório recusado
+OK    MU correção sem unidade recusada
+OK    ME laudo por zona não é o vigente (T4, 0–20 e 20–40)
+OK    MF o vigente confere a fazenda (T1 da Lagoa Grande não usa o LAU-2061 da Santa Rita)
+OK    MH talhão irrigado também vale 24 meses (DEC-1610-04): em 01/10/2027 o LAU-2071 (Pivô 12, coleta 15/09/2026) e o LAU-2061 (T1, sequeiro) seguem Validado
+OK    MH2 irrigado passa de 24 meses: em 01/10/2028 o LAU-2071 está Vencido
+OK    MG em 01/10/2028 o LAU-2061 passou de 24 meses: Vencido e sem sugestão
+OK    MI regra de K só para Soja: Milho com KCl no plano não recebe dose e o painel diz "sem regra de demonstração para Milho"
+OK    MJ regra de K só com Mehlich-1: Resina não recebe dose e o painel diz "extrator Resina sem regra"
+OK    MN desfazer grava o histórico (quem e quando)
+OK    MW inclusão em plano por DAP com plantio 10/01/2027: data DAP −60 = 11/11/2026 (não a chegada viável)
+OK    D-11 garantia estruturada: KCl 60% → 60 % K₂O; Calcário dolomítico → PRNT 85 % (o mesmo texto do CD-06)
+OK    D-10 preço de referência do Calcário dolomítico: R$ 180,00/t (fonte única do CD-06 e da regra)
+OK    A4 o Calcário dolomítico entra no registro legal como corretivo (fora da trava de agrotóxico)
+OK    nomes de solo.js não colidem com safra.js
+OK    nomes de solo.js não colidem com cal01.js
+OK    nomes de solo.js não colidem com ocupacao.js
+OK    nomes de solo.js não colidem com cenario.js
+OK    nomes de solo.js não colidem com producao.js
+OK    nomes de solo.js não colidem com ben.js
+OK    nomes de solo.js não colidem com g2lib.js
+OK    nomes de solo.js não colidem com irrigacao_estado.js
+OK    nomes de solo.js não colidem com mip.js
+OK    prefixo do cenário (com solo.js) sem "política de água", "PA-07", "exceção" e "revisão individual" (a O.S. carrega o prefixo)
+OK    memória da demanda no Python com a origem do ajuste do talhão, como o Planejar safra (T1-B 0,60 L/ha "(ajustado pelo usuário)" na parte sem O.S.; os demais sem rótulo)
+OK    demFazenda (Planejar safra, Compra e Mapa) escreve a origem da dose: "pela análise · LAU-2061", "ajustado pelo usuário" e o padrão sem rótulo; a SOL guarda orig e laudo
+OK    dem_fazenda (Python) escreve a mesma memória que o demFazenda
+RESULTADO: OK 129/129

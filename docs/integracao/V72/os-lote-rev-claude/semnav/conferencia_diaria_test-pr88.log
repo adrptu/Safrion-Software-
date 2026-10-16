@@ -1,0 +1,2 @@
+usage: conferencia_diaria_test.py [-h] [--node NODE] --output OUTPUT
+conferencia_diaria_test.py: error: the following arguments are required: --output

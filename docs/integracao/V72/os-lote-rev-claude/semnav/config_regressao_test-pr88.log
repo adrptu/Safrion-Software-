@@ -1,0 +1,8 @@
+OK    R1 duas dispensas na mesma O.S. ficam registradas, cada uma com quem decidiu (10 ha e 5 ha)
+OK    R2 pedir recontagem grava quem recusou o ajuste (Rui (almoxarife)) e a hora
+OK    R3 caso de consumo fechado pela decisão de duplicidade leva via CMD-09 (não é um CMD-50)
+OK    R4 aceite do consumo grava a hora da decisão (em)
+TOTAL JS · falhas 0
+OK    R5 todo perfil que decide (G2_PERFIS) é uma pessoa do CD-04 (Caio incluído)
+OK    R6 a tela de alçadas não afirma um liberador diferente do que o comando usa (AL-01 = gestor)
+RESULTADO 6/6

@@ -1,0 +1,17 @@
+OK  F1 Kanban com Agrupar por Talhão: uma raia por talhão; OS-0421 nas raias T1 e T2; as O.S. distintas das raias = as da Tabela
+FALHA F2 o nome da raia desce: trilha no endereço, um quadro só com as O.S. de T2 e a faixa "Talhão: … › T2 ×" acima do quadro · ['?view=kanban&ag=onde&trilha=Santa%20Rita/T2', ['OB-0104', 'OS-0415', 'OS-0417', 'OS-0418', 'OS-0420', 'OS-0421', 'OS-0421', 'OS-0424', 'OS-0425', 'OS-0430', 'OS-0431'], '']
+FALHA F3 Calendário lê o mesmo recorte da trilha (só O.S. de T2) e mostra a mesma faixa · [['OS-0417', 'OS-0418', 'OS-0420', 'OS-0421', 'OS-0424', 'OS-0430', 'OS-0431'], '']
+FALHA F4 Carga mostra a mesma faixa do recorte · 
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr88/tools/prototipo/v37/gen37/visoes2_formas_test.py", line 40, in <module>
+    visao('kanban'); tira('Tirar a trilha')
+                     ^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr88/tools/prototipo/v37/gen37/visoes2_formas_test.py", line 23, in tira
+    def tira(rx): J("(()=>{const b=[...document.querySelectorAll('[data-os-recorte] button')].filter(x=>x.offsetParent).find(x=>new RegExp(%s).test(x.getAttribute('aria-label')||'')); b.click();})()" % json.dumps(rx)); time.sleep(.6)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr88/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of undefined (reading 'click')
+    at <anonymous>:1:180
+    at <anonymous>:1:190

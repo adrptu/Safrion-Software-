@@ -1,0 +1,34 @@
+S1 sem aprovação: estados => ["OS-0590:Não liberada:Aprovação exata pendente · revisar versão na O.S.","OS-0591:Não liberada:Aprovação exata pendente · revisar versão na O.S.","OS-0592:Não liberada:Aprovação exata pendente · revisar versão na O.S."]
+S1 CMD-42 criados => [0,0,0]
+S1 etapas => ["A liberar","A liberar","A liberar"]
+S1b aprovação v1 com ordem v2 => [{"os":"OS-0590","estado":"Não liberada","motivo":"Aprovação exata pendente · revisar versão na O.S."}]
+S1b etapa => A liberar
+S1c Caio libera => {"erro":"Liberar selecionadas do grupo: decisão de Ana (gestora). Nada foi alterado."}
+S1d Marcos compõe => {"erro":"Agrupar operações: decisão de Ana (agrônoma) ou Caio (PCP). Nada foi alterado."}
+S1e itens => [{"os":"OS-0590","estado":"Liberada","cmd":"CMD-06","versao":"v1","repetido":false}]
+S1e eventos => ["CMD-42 v1","CMD-06 v1"]
+S2 ajuste aceito em origem agrupada => versão v2
+S2 liberar pelo grupo => [{"os":"OS-0591","estado":"Não liberada","motivo":"OS-0591: definir parâmetros da versão vigente"}]
+S2 separar a origem alterada => {"erro":"OS-0591: definir parâmetros da versão vigente"}
+S2 separar outra origem => {"erro":"OS-0591: definir parâmetros da versão vigente"}
+S2 reprogramar grupo => OS-0591: definir parâmetros da versão vigente
+S2 liberar pela O.S. (fluxo existente) => {"ok":"OS-0591 liberada. REQ-041 reservou no Estoque: Sulfato de magnésio 37,5 kg. v2 liberada por Ana (gestora); aprovada antes por Ana (agrônoma) às 20:36."}
+S3 cancelar => Cancelar a OS-0592 sem execução (CMD-46): decisão de Ana (gestora). Nada foi alterado.
+S3 separar cancelada => {"ok":{"msg":"OS-0592 separada de GRP-1 · origem, aprovação e demanda preservadas.","grupo":"GRP-1","versao":2,"itens":[{"os":"OS-0592","estado":"Separada"}]}}
+S3 separar outra => {"erro":"Composição mudou: releia o grupo."}
+S3 programar grupo => ok
+S4 cargas 10.1,15.3,4.7 => ["2000L:90=10.1/91=9.9","1010L:91=5.4/92=4.699999999999999"]
+S4 quantidade 10.1,15.3,4.7 => ["60.199999999999996 kg vs cenQtd 60.2"]
+S4 cargas 0.1,0.2,0.3 => ["60.00000000000001L:90=0.1/91=0.2/92=0.3"]
+S4 quantidade 0.1,0.2,0.3 => ["1.2000000000000002 kg vs cenQtd 1.2"]
+S4 cargas 7.3,8.9,12.35 => ["2000L:90=7.3/91=8.9/92=3.799999999999999","854.9999999999995L:92=8.549999999999995"]
+S4 quantidade 7.3,8.9,12.35 => ["57.099999999999994 kg vs cenQtd 57.1"]
+S5 cabe exatamente => ok horas=10 pend=
+S6 cruza meia-noite => OS-0591: sequência cruza meia-noite; reveja a janela operacional.
+S6 fuso −4 na janela −3 => ["2026-09-29 8-10.75 -04:00","2026-09-29 10.75-13.75 -04:00","2026-09-29 13.75-14.75 -04:00"]
+S7 Carlos => OS-0590: Carlos · operador · habilidade da operação ausente · OS-0591: Carlos · operador · habilidade da operação ausente · OS-0592: Carlos · operador · habilidade da operação ausente
+S7 Marcos como caldeiro => OS-0590: Habilidades da operação pendentes · OS-0590: Carlos · operador · habilidade da operação ausente · OS-0591: Habilidades da operação pendentes · OS-0591: Carlos · operador · habilidade da operação ausente · OS-0592: Habilidades da operação pendentes · OS-0592: Carlos · operador · habilidade da operação ausente
+S7 mapa de pessoas => {"MAR":"Marcos|Operar trator; Operar pulverizador|v31=2026-09-30","CAR":"Carlos|Operar trator; Operar plantadeira|v31=2027-08-31","PAU":"Paula|Preparar calda (caldeiro); Conferir|v31=2027-04-30","JOA":"João|Irrigar|v31="}
+S8 T04+PJ => OS-0590: Potência do conjunto insuficiente ou não informada · OS-0591: Potência do conjunto insuficiente ou não informada · OS-0592: Potência do conjunto insuficiente ou não informada
+S8 potências => {"T1":155,"T02":190,"T03":110,"T04":78}
+S9 blocos vigentes desses recursos => ["T03 OS-0421 2026-09-22 6-11 firme","PJ OS-0421 2026-09-22 6-11 firme","MAR OS-0421 2026-09-22 6-11 firme","PAU OS-0421 2026-09-22 6-11 firme","T03 OS-0421 2026-09-23 6-11 firme","PJ OS-0421 2026-09-23 6-11 firme","MAR OS-0421 2026-09-23 6-11 firme","PAU OS-0421 2026-09-23 6-11 firme","T03 OS-0421 2026-09-24 6-11 firme","PJ OS-0421 2026-09-24 6-11 firme","MAR OS-0421 2026-09-24 6-11 firme","PAU OS-0421 2026-09-24 6-11 firme","T03 OS-0421 2026-09-25 6-11 firme","PJ OS-0421 2026-09-25 6-11 firme","MAR OS-0421 2026-09-25 6-11 firme","PAU OS-0421 2026-09-25 6-11 firme","T03 OS-0421 2026-09-26 6-12 firme","PJ OS-0421 2026-09-26 6-12 firme","MAR OS-0421 2026-09-26 6-12 firme","PAU OS-0421 2026-09-26 6-12 firme","PJ OS-0424 2026-09-24 6-11 firme","MAR OS-0424 2026-09-24 6-11 firme","PAU OS-0424 2026-09-24 6-11 firme","T03 OS-0430 2026-09-25 13-20.4 condicional","PJ OS-0430 2026-09-25 13-20.4 condicional","MAR OS-0430 2026-09-25 13-20.4 condicional","PAU OS-0430 2026-09-25 13-20.4 condicional"]

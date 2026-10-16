@@ -1,0 +1,18 @@
+/tmp/tmpezvoazxl.js:4691
+  if (tempo.cedo && !antecipado) throw new Error('Antes do fim previsto, registre término antecipado com a área real e o volume medido.');
+                                 ^
+
+Error: Antes do fim previsto, registre término antecipado com a área real e o volume medido.
+    at irrTerminar (/tmp/tmpezvoazxl.js:4691:40)
+    at /tmp/tmpezvoazxl.js:5245:91
+    at Object.<anonymous> (/tmp/tmpezvoazxl.js:5253:3)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+
+Node.js v22.22.0
+
