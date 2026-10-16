@@ -1,6 +1,7 @@
 """As exceções do .gitleaks.toml continuam estreitas: HML-SECRET-03 (um literal exato em 25 arquivos exatos do protótipo)
 e HML-SECRET-04 (cinco nomes exatos de chave de localStorage, só no protótipo e em dois arquivos de especificação).
-O .gitleaksignore tem só o achado exato da HML-SECRET-05 (commit, arquivo, regra e linha), sem curinga."""
+O .gitleaksignore tem só os achados exatos da HML-SECRET-05 e da HML-SECRET-06 (DEC-1610-15: 31 nomes de chave de
+localStorage em commits antigos de branches de frente), cada um com commit, arquivo, regra e linha, sem curinga."""
 from pathlib import Path
 import re
 import json
@@ -85,11 +86,50 @@ class ExcecaoDasChavesDoPrototipo(unittest.TestCase):
 HML_SECRET_05 = ['7d38e5d50083a96b03d5a1247c31cd7518803b09:docs/integracao/PCM/diff-cdc185f-ba03515.patch:generic-api-key:3922']
 
 
+HML_SECRET_06 = [
+    '207f3623cdfb9059b46774f64245bc4ef735993f:work/prototipo-fase1/gen37/painel_modulos_test.py:generic-api-key:91',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/CD-03.dc.html:generic-api-key:3724',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IN-03.dc.html:generic-api-key:3591',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IN-03.dc.html:generic-api-key:3648',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IN-04.dc.html:generic-api-key:3591',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IN-04.dc.html:generic-api-key:3648',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-01.dc.html:generic-api-key:3591',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-01.dc.html:generic-api-key:3648',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-02.dc.html:generic-api-key:3591',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-02.dc.html:generic-api-key:3648',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-03.dc.html:generic-api-key:3591',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-03.dc.html:generic-api-key:3648',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-03det.dc.html:generic-api-key:3591',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-03det.dc.html:generic-api-key:3648',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-04.dc.html:generic-api-key:3591',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-04.dc.html:generic-api-key:3648',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/CD-03.dc.html:generic-api-key:3724',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IN-03.dc.html:generic-api-key:3591',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IN-03.dc.html:generic-api-key:3648',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IN-04.dc.html:generic-api-key:3591',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IN-04.dc.html:generic-api-key:3648',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-01.dc.html:generic-api-key:3591',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-01.dc.html:generic-api-key:3648',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-02.dc.html:generic-api-key:3591',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-02.dc.html:generic-api-key:3648',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-03.dc.html:generic-api-key:3591',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-03.dc.html:generic-api-key:3648',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-03det.dc.html:generic-api-key:3591',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-03det.dc.html:generic-api-key:3648',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-04.dc.html:generic-api-key:3591',
+    'f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-04.dc.html:generic-api-key:3648',
+]
+# Só os dois commits antigos listados no PR #73 (comentário 6217016316); nenhum é ponta de branch ativa.
+COMMITS_06 = {'f6d7486eb732c259bdf89cfbaaf26ef269299b8d', '207f3623cdfb9059b46774f64245bc4ef735993f'}
+
+
 class IgnoreSoComAchadoExato(unittest.TestCase):
-    def test_gitleaksignore_so_com_o_fingerprint_da_hml_secret_05(self):
+    def test_gitleaksignore_so_com_os_achados_exatos_da_hml_secret_05_e_06(self):
         linhas = [l.strip() for l in (RAIZ / '.gitleaksignore').read_text(encoding='utf-8').splitlines()]
         efetivas = [l for l in linhas if l and not l.startswith('#')]
-        self.assertEqual(efetivas, HML_SECRET_05)
+        self.assertEqual(efetivas, HML_SECRET_05 + HML_SECRET_06)
+        self.assertEqual(len(set(efetivas)), len(efetivas))
+        self.assertEqual({l.split(':')[0] for l in HML_SECRET_06}, COMMITS_06)
         for l in efetivas:
             with self.subTest(l=l):
                 # commit de 40 hex, caminho exato, regra e linha: sem curinga nem fingerprint de arquivo inteiro
