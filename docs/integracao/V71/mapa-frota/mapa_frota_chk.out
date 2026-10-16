@@ -1,0 +1,64 @@
+# R · rendimento = largura (m) × velocidade (km/h) × eficiência (%) ÷ 1000 → ha/h
+OK    R-r1 · Pulverização · Trator 02 MF 7719 + Pulverizador PJ-3030 36 m · 21,600 ha/h calculado × 21,6 ha/h no catálogo
+OK    R-r2 · Plantio · Trator T1 JD 6M 155 + Plantadeira 24 linhas · 6,804 ha/h calculado × 6,8 ha/h no catálogo
+OK    R-r3 · Adubação a lanço · Trator 03 + Distribuidor 3 t · 18,000 ha/h calculado × 18,0 ha/h no catálogo
+OK    R-r5 · Colheita de grãos · Colhedora Axial-Flow 7250 + trator com graneleiro · 5,000 ha/h calculado × 5,0 ha/h no catálogo
+OK    R5 · Plantadeira 24 linhas × 0,5 m = largura do rendimento r2 · 24 × 0.5 m = 12 m
+OK    R6 · Pulverizador PJ-3030: barra = largura do r1 · 36 m
+OK    R7 · Distribuidor 3 t: largura = r3 · 24 m
+OK    R8 · Colhedora: plataforma = r5 · 10 m
+# C · O.S. Em execução (registro) e conjunto pela alocação no dia operacional 2026-09-26
+OK    C1 · O.S. Em execução no registro inicial (Santa Rita + Lagoa Grande) · OS-0420, OS-0421, OS-0505, OS-0506, OS-0507
+OK    C2 · OS-0421 em 2026-09-26: Trator 03 + Pulverizador PJ-3030 (firme) · Pulverizador PJ-3030 36 m + Trator 03
+OK    C3 · OS-0420 em 2026-09-26: Trator 02 + Plantadeira (alocação condicional; a O.S. segue "Impedida · ativo bloqueado") · Plantadeira 24 linhas + Trator 02 MF 7719 · condicional
+OK    C3b · selo da OS-0420 no registro · Impedida · ativo bloqueado
+OK    C4 · conflito latente em 24/09 06:00–11:00: PJ, MAR e PAU na OS-0421 e na OS-0424 · MAR OS-0421×OS-0424, PAU OS-0421×OS-0424, PJ OS-0421×OS-0424
+OK    C5 · nenhuma O.S. da Lagoa Grande tem recurso na alocação (a F1 precisa da fixture de conjunto) · 0 blocos
+OK    C6 · CD-03: conjunto padrão de pulverização é Trator 02 + PJ-3030, a OS-0421 está alocada com o Trator 03 (fonte do mapa = alocação) · ('k1', 'Trator 02', 'Pulverizador PJ-3030', 'Pulverização')
+# E · projeção de preparo (EX-38) e tempo restante no rendimento de referência (rotulados como projeção, não fato)
+OK    E1 · OS-0421: tanque 3.000 L ÷ vazão 100 L/ha = 30 ha por carga · 30 ha
+OK    E2 · saldo 160 ha → 6 cargas, a última com 10 ha (projeção, não carga real) · 6 cargas · última 10 ha
+OK    E3 · saldo 160 ha ÷ 21,6 ha/h ≈ 7,4 h (estimativa no rendimento de referência) · 7,407 h
+# G · percurso sintético dentro da geometria demonstrativa (passadas de 36 m, recuo de 18 m nas cabeceiras)
+OK    G1 · T2 é convexo (o trecho entre passadas fica dentro)
+OK    G2 · escala do desenho da Santa Rita: 298 ha ÷ área do polígono · 6,825 m por unidade do SVG
+OK    G3 · T2: todos os vértices do percurso dentro do polígono · 48 passadas · 84,4 km
+OK    G4 · tempo do percurso a 8 km/h × área ÷ (36 m × 8 km/h): plausível (0,85–1,05), não é medida de área · 10,55 h × 10,35 h · razão 1,020
+OK    G4b · 8 km/h no desenho da Santa Rita (1 unidade ≈ 1 px a 1440 px): movimento lento, legível só com rumo e rastro · 0,33 unidade/s
+OK    G5 · Pivô 19: raio pela área (tgRaioDeHa) = raio da geometria · 488,96 m × 488.96 m (Demonstração sintética)
+OK    G6 · Pivô 19: passadas de 36 m com recuo de 18 m ficam dentro do círculo (percurso em metros relativos ao centro, sem coordenada real gravada) · 27 passadas · 19,9 km
+# L · leituras de uma fonte: ordem pelo instante observado; limite de idade declarado pela fonte (fixture: 60 s)
+OK    L1 · sequência normal: atual = última observada; idade 5 s ≤ 60 s
+OK    L2 · duplicata (mesmo id) ignorada, sem mexer no rastro
+OK    L3 · atrasada (observada antes da atual): entra no rastro marcada, o marcador não volta
+OK    L4 · futura (observada > recebida + 120 s): recusada, não vira atual
+OK    L5 · inválida (latitude 95° ou 0,0): recusada
+OK    L6 · fronteira do limite: idade 60 s = Atual; 61 s = Sem sinal há 1 min
+OK    L6b · texto da idade: 1.145 s → há 19 min; 3.900 s → há 1 h 05 min
+OK    L7 · nenhuma leitura: Posição indisponível (nunca o centro do talhão)
+OK    L8 · salto impossível confirmado pela leitura seguinte coerente: suspeita vira posição, a seguinte é a atual
+OK    L9 · salto isolado (a seguinte volta para perto): a suspeita é descartada
+OK    L10 · mesmo instante observado com outro id na mesma fonte: o segundo não troca a posição
+# P · telemetria > app de campo > última posição; pausa informada não é "sem sinal"
+OK    P1 · telemetria e app atuais: vale a telemetria
+OK    P2 · telemetria velha (300 s) e app atual: vale o app (troca marcada no rastro)
+OK    P3 · as duas velhas: a mais recente, como Sem sinal
+OK    P4 · telemetria desconectada e sem app: "Sem fonte" com a última posição (visual de sem sinal)
+OK    P5 · app em pausa informada (aparelho com sinal): "Parada · pausa", não "Sem sinal"
+OK    P6 · app em pausa mas sem sinal do aparelho: volta a ser Sem sinal
+OK    P7 · nenhuma fonte com leitura: Posição indisponível
+# V · equipamento do fornecedor × ativo do cadastro (série normalizada; nome nunca vincula)
+OK    V1 · série igual (caixa diferente), mesmo fabricante e modelo: vinculado sozinho
+OK    V2 · série com espaços no lugar dos hífens: mesma série normalizada
+OK    V3 · série igual e modelo diferente: confirmar vínculo
+OK    V4 · série desconhecida: sem ativo no cadastro (criar ou ignorar)
+OK    V5 · mesmo nome "Trator T1", série diferente: nunca vincula por nome
+OK    V6 · série repetida no cadastro: confirmar, nunca escolher sozinho
+OK    V7 · fornecedor sem nº de série: confirmar
+OK    V8 · série igual de outro fabricante: confirmar
+# K · um ativo em duas O.S. Em execução incompatíveis = conflito (sem escolher uma); mesmo agrupador não é conflito
+OK    K1 · PJ na OS-0421 e na OS-0424, as duas Em execução: conflito com as duas origens
+OK    K2 · as mesmas O.S. no mesmo agrupador (OS-LOTE): sem conflito
+OK    K3 · O.S. A liberar não ocupa o ativo no mapa
+
+54 OK · 0 falhas
