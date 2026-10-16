@@ -410,19 +410,19 @@ function irrUlt(o) { return o.trilha.reduce((q, t) => Math.max(q, t.q), -1e9); }
 function irrPausar(s, id) {
   const o = irrO(s, id); const p = irrPassAtual(o); if (o.etapa !== 'Em execução' || !p) throw new Error('Só pausa uma passada em execução.');
   if (irrPausada(o)) throw new Error('A irrigação já está pausada.');
-  const q = irrUlt(o) + 60; o.exec.pausas.push({ n: p.n, ini: q, fim: null }); irrTr(o, q, o.ex, 'Pausa · selo Pausada · etapa preservada', s.faz[o.faz].irrig);
+  const q = Math.max(s.agora, irrUlt(o)) + 60; s.agora = q; o.exec.pausas.push({ n: p.n, ini: q, fim: null }); irrTr(o, q, o.ex, 'Pausa · selo Pausada · etapa preservada', s.faz[o.faz].irrig);
   return { msg: 'Pausada às ' + irrHm(q) + ' · a etapa continua Em execução.' };
 }
 function irrRetomar(s, id) {
   const o = irrO(s, id); const pz = (o.exec.pausas || []).find(z => z.fim === null || z.fim === undefined); if (!pz) throw new Error('A irrigação não está pausada.');
-  pz.fim = pz.ini + 8; irrTr(o, pz.fim, o.ex, 'Retomada', s.faz[o.faz].irrig); const p = irrPassAtual(o);
+  pz.fim = Math.max(s.agora, pz.ini + 8); s.agora = pz.fim; irrTr(o, pz.fim, o.ex, 'Retomada', s.faz[o.faz].irrig); const p = irrPassAtual(o);
   return { msg: 'Retomada às ' + irrHm(pz.fim) + ' · término previsto ' + irrQuando(irrFimP(o, p)) + '.' };
 }
 function irrAvanco(s, id, cob) {
   const o = irrO(s, id); const p = irrPassAtual(o); const x = s.setores[o.setor]; if (!p) throw new Error('Nenhuma passada em execução.');
   cob = irr2(cob);   // 2 casas, antes de validar (PRE-REV Z4/Y4)
   if (!(cob >= 0) || cob > x.ha) throw new Error('Informe a área coberta entre 0 e ' + irrN(x.ha, 2, 0) + ' ha.');
-  p.cob = cob; const q = irrUlt(o) + 30; const tr = o.trilha.find(t => t.av === p.n);   // 2 casas (PRE-REV Z4)
+  p.cob = cob; const q = Math.max(s.agora, irrUlt(o)) + 30; s.agora = q; const tr = o.trilha.find(t => t.av === p.n);   // 2 casas (PRE-REV Z4)
   const ev = 'Avanço da passada ' + p.n + ' · ' + irrN(cob, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha (' + irrN(cob / x.ha * 100, 0) + ' %)';
   if (tr) { tr.ev = ev; tr.q = q; } else { o.trilha.push({ q, rec: o.ex, ev, quem: s.faz[o.faz].irrig, av: p.n }); }   // telemetria e manual do mesmo evento: um registro
   return { msg: ev + ' · mesmo registro da telemetria, sem duplicar.' };
@@ -440,14 +440,14 @@ function irrTerminar(s, id, cob, vol, antecipado) {
   if (irrPausada(o)) throw new Error('Retome a irrigação antes de confirmar o término.');
   if (o.fert && o.fert.exec) throw new Error('Saldo parado pela v2: aguarde o agrônomo liberar na O.S.');
   if (s.agora < irrFimP(o, p) && !antecipado) throw new Error('Antes do fim previsto, registre término antecipado com a área real e o volume medido.');
-  if (s.agora < p.iniReal) throw new Error('O relógio simulado está antes do início registrado. Confira o horário antes de encerrar.');
+  if (s.agora < Math.max(p.iniReal, irrUlt(o))) throw new Error('O relógio simulado está antes do último evento registrado. Avance a simulação até esse horário antes de encerrar.');
   cob = irr2(cob);   // 2 casas, antes de validar (PRE-REV Z4/Y4)
   if (!(cob > 0) || cob > x.ha + 1e-9) throw new Error('Área coberta entre 0 e ' + irrN(x.ha, 2, 0) + ' ha.');
   if (typeof vol !== 'number' || !Number.isFinite(vol) || vol < 0) throw new Error('Informe o volume medido no hidrômetro; a estimativa não é leitura.');
   const parc = cob < x.ha - 1e-9; p.cob = cob; p.st = parc ? 'Parcial' : 'Feita';   // 2 casas (PRE-REV Z4)
   p.fimReal = s.agora; p.vol = vol;
   irrCredito(s, o, p);
-  irrTr(o, p.fimReal, o.ex, (antecipado ? 'Término antecipado (simulado)' : 'Término (simulado)') + (o.passadas.length > 1 ? ' da passada ' + p.n : '') + ' · ' + irrH(p.fimReal - p.iniReal) + ' de bombeamento · ' + (parc ? 'parou antes: ' + irrN(cob, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha' : (x.tipo === 'gotejo' ? 'turno completo' : 'volta completa') + ' nos ' + irrN(x.ha, 2, 0) + ' ha') + (p.vol === null ? ' · sem leitura do hidrômetro' : ' · hidrômetro ' + irrN(p.vol) + ' m³'), s.faz[o.faz].irrig);
+  irrTr(o, p.fimReal, o.ex, (antecipado ? 'Término antecipado (simulado)' : 'Término (simulado)') + (o.passadas.length > 1 ? ' da passada ' + p.n : '') + ' · ' + irrH(p.fimReal - p.iniReal - irrPausaMin(o, p.n)) + ' de bombeamento · ' + (parc ? 'parou antes: ' + irrN(cob, 2, 0) + ' de ' + irrN(x.ha, 2, 0) + ' ha' : (x.tipo === 'gotejo' ? 'turno completo' : 'volta completa') + ' nos ' + irrN(x.ha, 2, 0) + ' ha') + (p.vol === null ? ' · sem leitura do hidrômetro' : ' · hidrômetro ' + irrN(p.vol) + ' m³'), s.faz[o.faz].irrig);
   const prox = irrPassProx(o);
   if (prox) return { msg: 'Passada ' + p.n + ' encerrada · ' + id + ' segue Em execução · próxima passada ' + (prox.ini === null ? 'a definir' : irrQuando(prox.ini)) + '.' };
   o.etapa = 'Em conferência'; o.exec.fim = p.fimReal;
