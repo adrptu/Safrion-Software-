@@ -1,0 +1,22 @@
+OK Pivô19: 72.9t publicadas e 36.42t recebidas na S39
+OK Perene identifica semana em curso
+OK Recebido conserva unidade de produção
+OK Cultivo abre a origem exata
+OK Anual lê a previsão da safra
+OK Safra tem nome sem prefixo repetido
+OK Ausência de previsão não é zero
+OK Leitura não altera cenário
+OK Fonte ausente fica indisponível
+OK Previsão de outra semana não contamina S39
+OK Recebido futuro não vira acumulado da semana
+OK Café a apurar permanece explícito
+OK Café a apurar não ordena como zero medido
+OK Anual sem previsão publicada preserva nulo
+OK G2 anual ausente por último direção 0
+OK G2 último é o objeto sem previsão direção 0
+OK G2 café a apurar não usa 1200 do rótulo direção 0
+OK G2 anual ausente por último direção 1
+OK G2 último é o objeto sem previsão direção 1
+OK G2 café a apurar não usa 1200 do rótulo direção 1
+RESULTADO 20/20
+

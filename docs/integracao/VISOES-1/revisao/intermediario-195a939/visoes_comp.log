@@ -1,0 +1,10 @@
+OK   C1 barra role=toolbar "Visão das ordens" à direita dos filtros: 4 botões data-visao (lista, agrupada, kanban, carga), aria-label "Ver em …", sem texto visível nem title, svg aria-hidden
+OK   C2 exatamente um aria-pressed="true" (Lista ao entrar); o ativo é tonal (fundo #E4F3E9, barra interna de 2 px), nunca rgb(30, 122, 76); 32 × 32 px no computador
+OK   C3 Tab para uma vez na barra (entra na ativa e sai com o próximo Tab); ← → com volta, Home/End, ↑ ↓ não movem; seta não ativa (Lista segue ativa, sem ?view); Enter e Espaço ativam e o foco fica no botão; Shift+Tab volta à mesma parada
+OK   C4 foco de teclado em "tabela agrupada" abre #g2-dica (role=tooltip) "Ver em tabela agrupada", sem aria-describedby repetido; Esc fecha e o foco fica; hover abre "Ver em carga por recurso"
+OK   C4b clique de mouse em cada ícone troca a visão e não deixa #g2-dica aberta com o ponteiro fora; o 1º clique em "Nova ordem" (onde a dica cobria) abre o formulário; Tab até a barra ainda abre a dica
+OK   C5 em cada visão (1440): só "Nova ordem" como primária, 0 duplicata (acoes_duplicadas) e nenhum [draggable=true]
+OK   C6 controle negativo: a verificação acusa um 2º aria-pressed=true injetado e um aria-label tirado (e passa limpa)
+OK   C7 cores forçadas (forced-colors: active): o ativo tem fundo e cor do sistema (Highlight), diferentes do fundo da página e dos inativos
+OK   sem erro de script nas páginas
+RESULTADO: 9 ok · 0 falhas (comp)

@@ -10,6 +10,7 @@ import sys, os, time, json, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from os_lib import Os
 from conferencia_diaria_nav_helpers import conferir_dias
+from comp_lib import troca_visao   # VISOES-1: troca de visão pelo seletor (data-visao), não pelo texto
 
 T = Os(); OS = 'OS-0430'
 def setin(lab, val):  # campo do painel pelo rótulo acessível (input + change, como a digitação)
@@ -20,9 +21,10 @@ try:
     # 1 · A liberar sem etapa de revisão: próximo passo Liberar para execução (Ana pode ajustar antes); ajuste inválido não libera
     T.ordem(OS); p = T.pan(); st = T.cen(f"[c.ordens['{OS}'].etapa, 'aprov' in c.ordens['{OS}'], c.v]")
     T.btn('Ajustar antes de liberar'); setin('Área da ordem (ha)', '0'); T.btn('Salvar e liberar'); pa = T.pan(); T.btn('Voltar'); print('  ', st)
-    T.ok(st == ['A liberar', False, 2] and T.temb('Liberar para execução') and T.temb('Ajustar antes de liberar') and not T.temb('Revisar versão') and not T.temb('Aprovar versão')
+    # v>=2: formato sem revisão (01/10); o seed segue subindo de versão (v=7 em 10/10), então o oráculo não fixa o número
+    T.ok(st[:2] == ['A liberar', False] and st[2] >= 2 and T.temb('Liberar para execução') and T.temb('Ajustar antes de liberar') and not T.temb('Revisar versão') and not T.temb('Aprovar versão')
          and 'Aguardando agrônomo' not in p and 'Aprovada pelo agrônomo' not in p and 'APV-' not in p and 'Informe a área maior que 0 ha.' in pa and T.cen(f"c.ordens['{OS}'].etapa") == 'A liberar',
-         'A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov', (st, p[p.find('PRÓXIMO'):][:300], pa[-300:]))
+         'A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário (v≥2) sem aprov', (st, p[p.find('PRÓXIMO'):][:300], pa[-300:]))
     # 2 · liberar: a requisição nova reserva por lote (Glifosato 320 L, 2,4-D 160 L, Óleo 80 L)
     T.btn('Liberar para execução'); ct = T.pan(); T.btn('Confirmar liberação'); tt = T.toast()
     RQ = T.cen(f"c.ordens['{OS}'].req"); st = T.cen(f"[c.ordens['{OS}'].etapa, c.reqs['{RQ}'].itens.map(i=>i.prod+' '+i.solicitado+' '+i.lote).join(' | '), c.lotes['Glifosato 480|G26-14'].reservado]")
@@ -137,7 +139,7 @@ try:
          (pa[-500:], st, pb[-400:], st2, st3, tt))
     T.fechar(); reset()
     T.mudar(f"c.ordens['{OS}'].ins[0].dose=7.5; c.ordens['{OS}'].ins[0].tot=1200; return {{msg:''}};"); T.ordem(OS); p = T.pan()
-    T.fechar(); aba = lambda n: (T.J(f"(()=>{{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==={json.dumps(n)}); b&&b.click();}})()"), time.sleep(.4))
+    T.fechar(); aba = lambda n: troca_visao(T.J, {'Lista': 'lista', 'Kanban': 'kanban'}[n])   # VISOES-1: pelo seletor (data-visao)
     aba('Kanban'); kb = T.J("(()=>{const k=[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].find(x=>x.innerText.indexOf('OS-0430')===0); return k?k.innerText:'';})()") or ''
     aba('Lista'); T.ordem(OS)
     T.ok('Fora do registro · Glifosato 480' in T.linha(OS) and 'Fora do registro · Glifosato 480' in kb and 'Liberar bloqueado: Glifosato 480 7,5 L/ha em T1 (T1-A): dose fora da bula: 1,5–3 L/ha.' in p
@@ -146,7 +148,7 @@ try:
     T.fechar(); reset()
     NV = 'aside[role=dialog][aria-label="Nova ordem"]'
     def nova(saf, cult, atv):
-        T.btn('Nova ordem', root='main'); setv('#nv_saf', saf); setv('#nv_cult', cult); setv('#nv_atv', atv); setv('#nv_jan', '2026-10-05'); T.btn('Emitir ordem', root=NV)
+        T.btn('Criar ordem', root='header'); setv('#nv_saf', saf); setv('#nv_cult', cult); setv('#nv_atv', atv); setv('#nv_jan', '2026-10-05'); T.btn('Emitir ordem', root=NV)
         return (T.J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.getAttribute('aria-label'):'';})()") or '').split(' · ')[0]
     def setv(sel, val):
         T.J(f"""(()=>{{const i=document.querySelector({json.dumps(sel)}); const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;

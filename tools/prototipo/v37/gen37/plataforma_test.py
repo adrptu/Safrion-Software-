@@ -9,7 +9,7 @@ navegador, simular acima de 5.000 ha recusado (erro). Desktop 1440 × 900 e celu
 Uso (de gen37/, depois de build.py e montar_render.py): python3 plataforma_test.py"""
 import sys, os, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir, MEDE
+from comp_lib import Chrome, servir, MEDE, cv_todas_sempre
 PROBE = os.path.join(HERE, '_probe'); os.makedirs(PROBE, exist_ok=True)
 OK = []; FA = []
 def cad_mais(t):
@@ -47,7 +47,7 @@ def abre_linha(i, txt):
 def selo(): return J("(()=>{const h=document.querySelector('header h1'); const s=h&&h.nextElementSibling; return s?s.innerText.trim():'';})()") or ''
 GRADES = """(()=>[...document.querySelectorAll('main .g2caixa')].map(x=>({busca:!!x.querySelector('input[type=search]'),ord:x.querySelectorAll('.g2hb').length,fil:x.querySelectorAll('.g2fb').length})))()"""
 try:
-    c = Chrome(); c.aparelho(1440, 900)
+    c = Chrome(); c.aparelho(1440, 900); cv_todas_sempre(c)   # V2-3: o teste lê colunas fora do "Abre com"
     # ============ BO-02 ============
     go('BO-02.dc.html', limpa=True); b = body()
     chk('A12a BO-02 em 23/09: mensalidades vigentes R$ 6.278,46 · 2 faturas abertas R$ 939,00 · área cobrada 2.945,23 ha (medida 2.958,23 ha)',
@@ -55,7 +55,7 @@ try:
     chk('A12b organizações por estado: Ativa 3 · Inadimplente 1 · Em avaliação 1 · Cancelada 1; selo "2 eventos a conciliar"',
         'Ativa 3 · Inadimplente 1 · Em avaliação 1 · Cancelada 1' in b and selo() == '2 eventos a conciliar', [selo(), b[:500]])
     chk('A11a BO-02: uma primária (Conciliar pagamentos)', J(PRIMS) == ['Conciliar pagamentos'], J(PRIMS))
-    g = J(GRADES); chk('A14a BO-02: as 2 grades têm busca, ordenação e filtro por coluna; R$ e ha na célula', len(g) == 2 and all(x['busca'] and x['ord'] >= 5 and x['fil'] >= 5 for x in g)
+    g = J(GRADES); chk('A14a BO-02: as 2 grades têm ordenação e filtro por coluna e um campo de busca só, para as duas (13/10/2026); R$ e ha na célula', len(g) == 2 and [x['busca'] for x in g] == [True, False] and all(x['ord'] >= 5 and x['fil'] >= 5 for x in g)
         and 'R$ 5.140,46' in linha(0, 'Grupo Santa Rita') and '2.570,23 ha' in linha(0, 'Grupo Santa Rita') and '2.600 ha' in linha(0, 'Grupo Santa Rita'), [g, linha(0, 'Grupo Santa Rita')])
     chk('A12c linhas do seed: Aurora inadimplente (ago/2026 vencida, 3 tentativas), Bela Vista com evento a conciliar, Boa Esperança em avaliação (dia 5 de 30), Dois Rios cancelada',
         'Inadimplente' in linha(0, 'Fazenda Aurora') and '3 tentativas recusadas' in linha(0, 'Fazenda Aurora') and 'evento do provedor a conciliar' in linha(0, 'Agro Bela Vista')
@@ -103,7 +103,7 @@ try:
     chk('A14c simulação calculada no navegador: 20 ha 199/299 (mínimo) · 149,5 ha 224,25 · 500 ha 750/1.000 · 1.000 ha 1.500/2.000 · 5.000 ha 7.500/10.000',
         'R$ 199,00' in sim['20 ha'] and 'R$ 299,00' in sim['20 ha'] and 'R$ 224,25' in sim['149,5 ha'] and 'R$ 750,00' in sim['500 ha'] and 'R$ 1.000,00' in sim['500 ha']
         and 'R$ 1.500,00' in sim['1.000 ha'] and 'R$ 2.000,00' in sim['1.000 ha'] and 'R$ 7.500,00' in sim['5.000 ha'] and 'R$ 10.000,00' in sim['5.000 ha'], sim)
-    g = J(GRADES); chk('A14d BO-01: as 2 grades têm busca, ordenação e filtro', len(g) == 2 and all(x['busca'] and x['ord'] >= 3 for x in g), g)
+    g = J(GRADES); chk('A14d BO-01: as 2 grades têm ordenação e filtro e um campo de busca só, para as duas (13/10/2026)', len(g) == 2 and [x['busca'] for x in g] == [True, False] and all(x['ord'] >= 3 for x in g), g)
     clk('Simular área'); d = dlg(); sha = J("document.querySelector('#bo_sha').value")
     chk('A12g Simular área começa na área medida (2.570,23 ha): Essencial R$ 3.855,35 e Completo R$ 5.140,46 por mês', sha == '2.570,23' and 'R$ 3.855,35/mês' in d and 'R$ 5.140,46/mês' in d, [sha, d[:400]])
     clk('Fechar', 'aside[role=dialog]')

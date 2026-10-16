@@ -134,6 +134,10 @@ def _lg():
         pl = plantio.get(pid); dias = (HOJE - dt.date(*map(int, pl.split('-')))).days if pl else -1
         x = dict(faz='LG', nome=f'Pivô {n}', cult='Mamão', ha=ha, tipo='pivô', vazao=round(1.25 * ha), bomba='B-' + pid, bnome=f'Bomba do Pivô {n}',
                  capt='LG-PAR', lmax=8.0, imin=18, efic=85, sonda=('SO-PV10' if pid == 'PV10' else None), bal=None, limiar=None, fase='preparo de área')
+        # ficha DEMONSTRATIVA do pivô (sintética, 15/10/2026): sem a ficha do fabricante, a da Lagoa Grande sai do raio do KML, da vazão demonstrativa
+        # e de 3,2 m/min na última torre a 100 %; lâmina a 100 % = vazão × tempo de volta ÷ área (1 mm em 1 ha = 10 m³). Só a recomendação usa.
+        _r = math.sqrt(ha * 1e4 / math.pi); _v = 2 * math.pi * _r / (3.2 * 60)
+        x['ficha'] = dict(lamina_100_mm=round(x['vazao'] * 3.6 * _v / (ha * 10), 2), volta_100_h=round(_v, 1), pct_min=10, fonte='ficha demonstrativa (sintética)')
         if pid in DEF_LG and dias >= 0:
             fase, kc, lim, _ = next(f for f in FASE if dias < f[3])
             d = DEF_LG[pid]; etcd = ETO * kc; ndias = max(1, round(d / etcd))

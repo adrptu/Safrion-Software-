@@ -8,6 +8,7 @@
 
 /* ---------- utilitários ---------- */
 const SOLO_PROFS = ['0–20', '20–40'];
+const SOLO_SITC = { 'Validado': 'green', 'Aguardando validação': 'yellow', 'Inconsistente': 'red', 'Vencido': 'gray', 'Substituído': 'gray' };   /* cor da situação do laudo (AG-02, Planejar safra e Mapa) */
 const SOLO_FASE = { 'Liberadas': 'já liberada', 'Em execução': 'em execução', 'Em conferência': 'em conferência', 'Encerradas': 'encerrada' };
 function soloR2(x) { return prN(prRd(prM(x), 10000n) * 10000n); }   /* 2 casas, meio para cima, em decimal (R09) */
 function soloNum(x) {   /* texto pt-BR ou ponto → texto decimal; vazio → null; inválido → NaN */
@@ -35,6 +36,19 @@ function soloCmolc(x) {
   if (x.un === 'mmolc/dm³') return { v: prDiv(x.v, 10) };
   if (x.un === 'mg/dm³' && SOLO_MG[x.a]) return { v: prDiv(x.v, SOLO_MG[x.a]) };
   return { v: null, nc: 'unidade incompatível (' + x.un + ')' }; }
+// indicadores do laudo (15/10/2026): valor do indicador (analito do laudo ou índice do soloIdx: V, T, SB, m) no laudo e num ponto da
+// amostragem em grade (dados_solo.pontos). Fonte única do AG-02 (colunas) e do Mapa (mapa de calor). K sempre em mg/dm³ (soloKmg).
+function soloIndVal(l, ind) {
+  if (ind.idx) { const r = (l.idx || {})[ind.k]; return r && r.v !== null && r.v !== undefined ? Number(r.v) : null; }
+  const x = soloAn(l, ind.k); if (!x || x.v === null || x.v === undefined) return null;
+  if (ind.k === 'K') { const km = soloKmg(x); return km.v === null ? null : Number(km.v); } return Number(x.v);
+}
+function soloIndPt(l, ind, p) {
+  if (ind.idx) { const pl = Object.assign({}, l, { an: l.an.map(x => (p.an[x.a] !== undefined) ? Object.assign({}, x, { v: p.an[x.a] }) : x) }); const r = soloIdx(pl, SOLO0.regra.tol)[ind.k];
+    return r && r.v !== null && r.v !== undefined ? Number(r.v) : null; }
+  if (p.an[ind.k] === undefined) return null;
+  if (ind.k === 'K') { const km = soloKmg(Object.assign({}, soloAn(l, 'K'), { v: p.an.K })); return km.v === null ? null : Number(km.v); } return Number(p.an[ind.k]);
+}
 function soloKmg(x) {   /* K em mg/dm³ para a classe de teor (R07) */
   if (!x) return { v: null, nc: 'K não analisado' }; if (x.q === '<') return { v: null, nc: 'K abaixo do limite de detecção' }; if (!x.un) return { v: null, nc: 'K sem unidade' };
   if (x.un === 'mg/dm³') return { v: prN(prM(x.v)) }; if (x.un === 'cmolc/dm³') return { v: prMul(x.v, SOLO_MG.K) }; if (x.un === 'mmolc/dm³') return { v: prMulDiv(x.v, SOLO_MG.K, 10) };
@@ -66,6 +80,7 @@ function soloIdx(l, tol) {
 function soloCalagem(T, V1, V2, prnt) {   /* CAL-10 (AC-27): NC100 = max(0, (V2 − V1)·T/100) t/ha; dose = NC100·100/PRNT, com o PRNT uma vez */
   const d = prSub(V2, V1); const nc = prCmp(d, 0) > 0 ? prMulDiv(d, T, 100) : 0;
   return { nc, dose: prMulDiv(nc, 100, prnt) }; }
+function soloV2(R, cultura) { const k = prCult(cultura); return R.v2[k] !== undefined ? R.v2[k] : R.v2[cultura]; }   /* V₂ da cultura (R06, demonstração) */
 function soloClasseK(kmg, R) { const c = R.k.cortes; for (let i = 0; i < c.length; i++) if (prCmp(kmg, c[i]) < 0) return R.k.classes[i]; return R.k.classes[c.length]; }
 function soloK2O(kmg, metaKg, R) {   /* K₂O (kg/ha) pela classe de K e pela meta; fora da faixa da regra, nada (AGR-012: sem extrapolação silenciosa) */
   const f = R.k.faixa; if (prCmp(metaKg, f[0]) < 0 || prCmp(metaKg, f[1]) > 0) return { nc: 'meta fora da faixa da regra (' + cenNum(Number(f[0])) + ' a ' + cenNum(Number(f[1])) + ' kg/ha)' };
@@ -95,14 +110,14 @@ function soloAguaDo(S0, c, faz, tal) {   /* medição de água mais recente do t
 /* ---------- laudos: semente + estado, situação (R02, R03) ---------- */
 function cenSolo(c) { const s = c.solo || (c.solo = {}); ['laudos', 'corr', 'st', 'aceites', 'agua', 'recibos'].forEach(k => { if (!s[k]) s[k] = {}; }); return s; }   /* D-05: sem subir a versão */
 function soloLaudos(c, S0) {
-  const S = (c && c.solo) || {}; const R = S0.regra; const hoje = S0.hoje || soloHoje(); const irr = S0.irrigados || [];
+  const S = (c && c.solo) || {}; const R = S0.regra; const hoje = S0.hoje || soloHoje();
   const ls = (S0.laudos || []).concat(Object.values(S.laudos || {})).map(l0 => {
     const l = cenClone(l0); const cr = (S.corr || {})[l.id] || {};
     l.an = (l.an || []).map(x => cr[x.a] ? Object.assign({}, x, { v: cr[x.a].v, un: cr[x.a].un, corrigido: cr[x.a] }) : x);
     const st = (S.st || {})[l.id]; if (st) { l.sit = st.sit; l.por = st.por || ''; l.em = st.em || ''; }
     const semUn = l.an.filter(x => !x.un).map(x => x.a);
     if (semUn.length) { l.sit = 'Inconsistente'; l.motivo = semUn.join(', ') + ' sem unidade'; }
-    l.val = soloMaisMeses(l.coleta, irr.indexOf(l.tal) >= 0 ? R.validade.irrigado : R.validade.meses);
+    l.val = soloMaisMeses(l.coleta, R.validade.meses);   // DEC-1610-04: 24 meses para todo talhão, irrigado ou não
     if (l.sit === 'Validado' && l.val < hoje) { l.sit = 'Vencido'; l.motivo = 'validade até ' + soloBr(l.val); }
     if (l.tipo === 'solo') l.idx = soloIdx(l, R.tol);
     return l; });
@@ -169,7 +184,7 @@ function soloSugestoes(ctx, cu) {
   /* ---- calagem (R06), só com o 0–20 cm e T em cmolc/dm³ ---- */
   let fezL1 = false;
   if (L1) {
-    const ix = L1.idx, V2 = R.v2[prCult(cu.cultura)] !== undefined ? R.v2[prCult(cu.cultura)] : R.v2[cu.cultura];
+    const ix = L1.idx, V2 = soloV2(R, cu.cultura);
     if (V2 !== undefined && ix.T.v !== null && ix.V.v !== null) {
       const ents = (prod, prnt) => ['V ' + prFmtT(ix.V.v, 2) + ' % (' + ix.V.e + ')' + (ix.V.difere ? ' · laboratório ' + prFmtT(ix.V.lab, 2) + ' %: difere, vale o recalculado' : ''),
         'T ' + prFmt(ix.T.v, 2) + ' cmolc/dm³ (' + ix.T.e + ')', 'V₂ ' + V2 + ' % para ' + cu.cultura + ' (demonstração)', 'PRNT ' + prnt + ' % do ' + prod + ' (cadastro de produtos)'];
@@ -325,8 +340,8 @@ function soloValidar(c, id, chave, ator) {   /* só o agrônomo valida (R03); an
     S.st[id] = { sit: 'Validado', por: quem, em: soloAgora() };
     return { msg: id + ' validado por ' + quem + '.', id }; }); }
 /* laudos como o comando os vê (o SOLO0 da tela + c.solo); sem SOLO0 (tela sem a análise), null: o comando de uso recusa em vez de confiar no item */
-function soloS0(ok) { if (typeof SOLO0 === 'undefined') return ok ? { laudos: [], regra: { validade: { meses: 24, irrigado: 12 } }, irrigados: [], hoje: soloHoje() } : null;
-  return { laudos: SOLO0.laudos || [], regra: SOLO0.regra || { validade: { meses: 24, irrigado: 12 } }, irrigados: SOLO0.irrigados || [], hoje: soloHoje() }; }
+function soloS0(ok) { if (typeof SOLO0 === 'undefined') return ok ? { laudos: [], regra: { validade: { meses: 24 } }, hoje: soloHoje() } : null;
+  return { laudos: SOLO0.laudos || [], regra: SOLO0.regra || { validade: { meses: 24 } }, hoje: soloHoje() }; }
 /* o comando reconfere o item que a tela mandou (revisão A2: o servidor é a autoridade): R11 na chave e na correção incluída do cultivo, e o laudo
    do item tem de ser o vigente do talhão e da profundidade (R02). Devolve '' ou o motivo. Dano evitado: gravar dose de laudo substituído ou não
    validado, ou duas calagens vivas, a partir de um painel aberto antes da mudança. */
@@ -411,8 +426,10 @@ function soloDataAtv(x, a, pl) { const g = a.g || {}; if (g.tipo === 'DAP') retu
 function soloCultivoBase(S0, x) { const pl = (S0.planos || {})[x.plano]; if (!pl || pl.cultura !== x.cultura) return null;
   return Object.assign({}, x, { plano: pl, dt: a => soloDataAtv(x, a, pl) }); }
 /* R17 (D-19): a correção de um laudo vai para os cultivos do talhão na primeira safra aberta que o tem, pela data de plantio */
-function soloAlvo(cults, safras) { return (faz, tal) => { const cs = cults.filter(x => x.faz === faz && x.tal === tal && !((safras || {})[x.saf] || {}).ro).sort((a, b) => a.plantio < b.plantio ? -1 : (a.plantio > b.plantio ? 1 : 0));
-  const x = cs[0]; return x ? { saf: x.saf, nome: ((safras || {})[x.saf] || {}).nome || x.saf } : null; }; }
+/* o cultivo do talhão na primeira safra aberta, pela data de plantio (R17; também a cultura do V₂ no Mapa) */
+function soloCultivoAlvo(cults, safras, faz, tal) { return (cults || []).filter(x => x.faz === faz && x.tal === tal && !((safras || {})[x.saf] || {}).ro).sort((a, b) => a.plantio < b.plantio ? -1 : (a.plantio > b.plantio ? 1 : 0))[0] || null; }
+function soloAlvo(cults, safras) { return (faz, tal) => { const x = soloCultivoAlvo(cults, safras, faz, tal);
+  return x ? { saf: x.saf, nome: ((safras || {})[x.saf] || {}).nome || x.saf } : null; }; }
 function soloCtxBase(c, S0) { return { S0, ls: soloLaudos(c, S0), aceites: ((c && c.solo) || {}).aceites || {}, c, adj: {}, alvo: soloAlvo(S0.cult || [], S0.safras) }; }
 /* "Uso no plano" de um laudo (AG-02): uma linha por sugestão dos cultivos do talhão, com o estado (em uso, disponível, não aplicável, sem regra) */
 function soloUsoNoPlano(c, S0, l) { const ctx = soloCtxBase(c, S0); const out = []; const A = ctx.aceites;
@@ -424,3 +441,28 @@ function soloUsoNoPlano(c, S0, l) { const ctx = soloCtxBase(c, S0); const out = 
         st: 'em uso desde ' + soloDdMm(a.em) + ' por ' + String(a.por).split(' ')[0] }); });
     if (l.sit === 'Validado' && !R.sug.some(s => s.laudo.id === l.id)) R.info.filter(t => t.indexOf(l.id) >= 0).forEach(t => out.push({ s: null, cu, st: 'sem regra', info: t })); });
   return out; }
+/* "No plano" do laudo (AG-02 e Mapa): sugestões disponíveis e em uso (a recomendação pendente é a disponível que ainda não está em uso) */
+function soloUsoCont(u) { const n = u.filter(x => x.s && !/^não aplicável/.test(x.st)).length, e = u.filter(x => x.ac).length; return { n, e }; }
+function soloNoPlano(l, u) { if (l.tipo !== 'solo' || l.sit !== 'Validado') return { t: '—', c: '' }; const k = soloUsoCont(u);
+  if (!k.n && !k.e) return { t: 'sem sugestão', c: '' }; return { t: k.n + (k.n > 1 ? ' sugestões' : ' sugestão') + (k.e ? ' · ' + k.e + ' em uso' : ''), c: k.e ? 'green' : 'blue' }; }
+
+/* ---------- Mapa (IN-04, camada Análises de solo · pedido do proprietário de 13/10/2026): a leitura essencial do talhão ----------
+   Laudo do talhão: o de solo de 0–20 cm de coleta mais recente que não foi substituído (sem ele, o de 20–40 cm); o da outra profundidade
+   vem junto (sub) e os demais (foliar, substituídos) só na lista. Sem laudo de solo: 'sem' (ausente não é zero; vale a dose do plano).
+   k: 'corrigir' = validado, 0–20 cm e V abaixo do V₂ da cultura do próximo cultivo (a mesma conta da calagem, CAL-10: NC > 0);
+   'dia' = validado (sem cultivo, sem V₂ ou sem V calculável não vira 'corrigir'); 'validar' = aguardando validação ou inconsistente;
+   'vencida' = vencido. A cor e o texto da camada saem daqui; nenhuma regra nova. */
+function soloLeituraTal(ls, S0, faz, tal) {
+  const R = S0.regra; const doTal = ls.filter(l => l.faz === faz && l.tal === tal);
+  const so = doTal.filter(l => l.tipo === 'solo' && l.sit !== 'Substituído');
+  const rec = p => so.filter(l => l.prof === p).sort((a, b) => a.coleta < b.coleta ? 1 : (a.coleta > b.coleta ? -1 : 0))[0] || null;
+  const l = rec('0–20') || rec('20–40'); const sub = l ? rec(l.prof === '0–20' ? '20–40' : '0–20') : null;
+  const outros = doTal.filter(x => x !== l && x !== sub).sort((a, b) => a.coleta < b.coleta ? 1 : -1);
+  const cu = soloCultivoAlvo(S0.cult, S0.safras, faz, tal); const V2 = cu ? soloV2(R, cu.cultura) : undefined;
+  if (!l) return { k: 'sem', l: null, sub: null, outros, cu, V: null, V2, abaixo: null };
+  const ix = l.idx || {}; const V = ix.V && ix.V.v !== null && ix.V.v !== undefined ? ix.V.v : null;
+  /* abaixo: V do 0–20 cm abaixo do V₂ (NC da calagem > 0), em qualquer situação do laudo; null = não se compara (sem V, sem V₂ ou 20–40 cm) */
+  const abaixo = (l.prof === '0–20' && V !== null && V2 !== undefined && ix.T && ix.T.v !== null) ? prCmp(soloCalagem(ix.T.v, V, V2, 100).nc, 0) > 0 : null;
+  let k = l.sit === 'Validado' ? 'dia' : (l.sit === 'Vencido' ? 'vencida' : 'validar');
+  if (k === 'dia' && abaixo) k = 'corrigir';
+  return { k, l, sub, outros, cu, V, V2, abaixo }; }

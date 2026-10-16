@@ -1,0 +1,2 @@
+varredura.py rc=0 681s carga=13.49 :: RESULTADO: 152/152 páginas sem erro
+FIM

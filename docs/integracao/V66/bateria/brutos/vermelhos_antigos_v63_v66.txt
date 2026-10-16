@@ -1,0 +1,52 @@
+## cotest  (v63: cotest.py.log · v66: cotest.py.log)
+v63 resumo: 40/53 verificações OK
+v66 resumo: 40/53 verificações OK
+linhas de falha: iguais (0)
+
+## os_cenario_test  (v63: os_cenario_test.py.log · v66: os_cenario_test.py.log)
+v63 resumo: RESULTADO: 21/22 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov
+v66 resumo: RESULTADO: 21/22 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov
+linhas de falha: iguais (2)
+
+## ostest  (v63: ostest.py.log · v66: ostest.py.log)
+v63 resumo: 32 ok · 1 falhas ['painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo']
+v66 resumo: 32 ok · 1 falhas ['painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo']
+linhas de falha: iguais (1)
+
+## intest  (v63: intest.py.log · v66: intest.py.log)
+v63 resumo: RuntimeError: Uncaught
+v66 resumo: RuntimeError: Uncaught
+linhas de falha: iguais (6)
+
+## psfix38  (v63: psfix38test.py.log · v66: psfix38test.py.log)
+v63 resumo: IndexError: list index out of range
+v66 resumo: IndexError: list index out of range
+linhas de falha: iguais (0)
+
+## saf38  (v63: saf38test.py.log · v66: saf38test.py.log)
+v63 resumo: RuntimeError: Uncaught
+v66 resumo: RuntimeError: Uncaught
+linhas de falha: iguais (0)
+
+## saftest  (v63: saftest.py.log · v66: saftest.py.log)
+v63 resumo: RuntimeError: Uncaught
+v66 resumo: RuntimeError: Uncaught
+linhas de falha: iguais (0)
+
+## getest  (v63: getest.py.log · v66: getest.py.log)
+v63 resumo: FALHAS: [('GE-04', 'pc088_unico')]
+v66 resumo: FALHAS: [('GE-04', 'pc088_unico')]
+linhas de falha: iguais (1)
+
+## vetest  (v63: vetest.py.log · v66: vetest.py.log)
+v63 resumo: RESULTADO: 1 FALHA(S)
+v66 resumo: RESULTADO: 1 FALHA(S)
+linhas de falha: iguais (2)
+
+## Diferença do registro inteiro (sem tempos, portas e caminhos)
+cotest.py.log: 4 linha(s) diferentes
+psfix38test.py.log: 0 linha(s) diferentes
+saf38test.py.log: 0 linha(s) diferentes
+saftest.py.log: 0 linha(s) diferentes
+intest.py.log: 0 linha(s) diferentes
+cotest: as 4 linhas diferentes são o texto da dica (ⓘ) que passou a aparecer junto da âncora em CO-05 (OK nas duas) e CO-04 (FALHOU nas duas); mesmo resultado, 40/53.

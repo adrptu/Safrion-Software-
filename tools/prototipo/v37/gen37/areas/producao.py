@@ -16,6 +16,7 @@ from ui37 import shell37, HEIGHTS37
 import ui37
 import cenario
 import dados_carencia as DCAR
+import unidprod_ui as UNP
 
 H=lambda s: '{{'+s+'}}'
 T=lambda: H('true'); F=lambda: H('false')
@@ -38,6 +39,8 @@ CSS=('.pr-cards{display:none;flex-direction:column;gap:8px}'
      '.pr-vis button[aria-pressed=true]{background:#FFFFFF;color:#15201A;box-shadow:0 1px 2px rgba(21,32,26,.12)}')
 
 def bloco(titulo,desc,corpo,acao=''):
+    acao=E.recolhe_acoes(titulo,acao)   # MAIS-01 (15/10/2026): uma secundária à vista, as outras no "⋯ Mais ações" do bloco
+    desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
             f'<div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px; flex-wrap: wrap;"><div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">'
             f'<h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">{esc(titulo)}</h3><div style="font-size: 12.8px; color: {MUTED};">{esc(desc)}</div></div>{acao}</div>'
@@ -85,7 +88,7 @@ def painel():
           f'<sc-if value="{H("pp_hasErr")}" hint-placeholder-val="{F()}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700; line-height: 1.4;">{H("pp_err")}</div></sc-if></div></sc-if>')
     pe=(f'<div style="position: sticky; bottom: -20px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 -22px -20px; padding: 12px 22px; background: {SURF}; border-top: 1px solid {LINE};">'
         f'<sc-for list="{H("pp_sec")}" as="b" hint-placeholder-count="0"><button type="button" onClick="{H("b.go")}" style="{BTN_ST(False,True)}">{H("b.t")}</button></sc-for>'
-        f'<span style="flex-grow: 1;"></span><button type="button" onClick="{H("pp_close")}" style="{BTN_ST(False,True)}">{H("pp_closeT")}</button>'
+        f'<span style="flex-grow: 1;"></span><sc-if value="{H("pp_closeOn")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("pp_close")}" style="{BTN_ST(False,True)}">{H("pp_closeT")}</button></sc-if>'
         f'<sc-if value="{H("pp_hasPB")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("pp_pgo")}" style="{BTN_ST(True,True)}">{H("pp_pt")}</button></sc-if>'
         f'<sc-if value="{H("pp_hasPA")}" hint-placeholder-val="{F()}"><a href="{H("pp_ph")}" style="{BTN_ST(True,True)} text-decoration: none;">{H("pp_pt")}</a></sc-if></div>')
     return (f'<sc-if value="{H("pp_open")}" hint-placeholder-val="{F()}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
@@ -118,15 +121,10 @@ def _shell(fid,title,sub,corpo,fname,altura,foot,steps=None):
     shell37(fid,title,corpo,fname=fname,subtitle=sub,status=(H('st_t'),'yellow'),primary_html=prim_html(),search=False,footer=foot,steps=steps)
     _status(fname)
 
-# Recebimento e beneficiamento (BEN-D14, 09/10): o grupo Produção fica com 3 itens (colheita D-01); Cargas e Beneficiamento são telas
-# irmãs do mesmo item, ligadas pela faixa de telas (o mesmo componente da Irrigação: navegação, sem número de etapa, pendência escrita)
-# v55: com o Beneficiamento fora da navegação até a rodada 3 (ui37.BEN_PUBLICADO=False), Cargas vira tela única, sem faixa de uma opção
-# só; a tela do BEN (oculta) segue com a faixa e o link de volta a Cargas
-REC_TELAS=[('Cargas e recebimento','CARGA.dc.html'),('Beneficiamento','BEN.dc.html')]
-def faixa_rec(cur):
-    if cur==1 and not ui37.BEN_PUBLICADO: return None
-    itens=''.join(ui37.secao_item(t,i==cur,href=h,why_hole=f'rs{i}') for i,(t,h) in enumerate(REC_TELAS,1))
-    return ui37.secoes_nav(itens,len(REC_TELAS),cur,REC_TELAS[cur-1][0],'Telas de recebimento e beneficiamento')
+# Recebimento e Beneficiamento (BEN-D39, 13/10/2026, proprietário: "coloque beneficiamento dentro de menu produção" e "coloque tudo de
+# produção, dentro de Agrícola"): cada um é cartão próprio de Agrícola e volta por "‹ Agrícola". A faixa de telas Cargas | Beneficiamento
+# (BEN-D14) saiu: seria um 2º caminho para o mesmo cartão. Cargas aponta o Beneficiamento só onde faz sentido: o lote em processo diz a
+# ordem ("na OB-0110") ou o atalho "Abrir ordem de beneficiamento" (prBenProx, PR_BEN_H)
 
 def _js(tela):
     return cenario.js_prefixo()+DCAR.js_nucleo()+PR_UI_JS+tela
@@ -145,7 +143,20 @@ function prPill(on){ return 'font-family:inherit;font-size:13px;font-weight:700;
 function prInSt(err){ return 'font-family:inherit;font-size:15px;padding:9px 11px;border-radius:10px;box-sizing:border-box;width:100%;max-width:240px;background:#FFFFFF;color:#15201A;border:1px solid '+(err?'#B42318':'#E4E9E5')+';'; }
 function prCel(t,k){ return {t:String(t==null?'':t), st:k==='b'?'font-weight:800;color:#15201A;':(k==='mut'?'color:#65736A;':(k==='red'?'color:#B42318;font-weight:700;':(k==='ok'?'color:#1E7A4C;font-weight:700;':'color:#15201A;')))}; }
 /* filtros do topo (DEC-2609-11): nestas telas a fazenda começa em Todas (a colheita em curso é da Lagoa Grande e o estoque de grão da Santa Rita) */
-function prTopo(self,v){ if(self.state.mf_faz===undefined){ self.state.mf_faz='Todas'; } v.mf_faz=self.state.mf_faz; v.mf_saf=self.state.mf_saf||'Todas'; }
+function prTopo(self,v){ g2keep(self,'pr_topo',{topo:true,v});   /* PROD-C961-CONTEXTO-01 (Codex, 13/10): Fazenda, Safra, Cultura e Talhão voltam ao sair e voltar ou recarregar */
+  if(self.state.mf_faz===undefined){ self.state.mf_faz='Todas'; } v.mf_faz=self.state.mf_faz; v.mf_saf=self.state.mf_saf||'Todas';
+  /* Cultura e Talhão (proprietário, 13/10/2026: "nas demais telas que isso for bastante essencial e ajudar o usuário"): as opções são as dos cultivos
+     com produção no recorte de Fazenda e Safra; o Talhão segue a Cultura escolhida. Colheita usa os dois; Cargas e Estoque de produto, a Cultura. */
+  const cu=self.state.mf_cult||'Todas', cs=[], ts=[];
+  Object.values(PRDC.cult).forEach(k=>{ if(!k.prod||!prFazOk(self,k.faz)||!prSafOk(self,(PRDC.safras[k.saf]||{}).mf)) return; if(cs.indexOf(k.cultura)<0) cs.push(k.cultura);
+    if((cu==='Todas'||k.cultura===cu)&&ts.indexOf(k.local)<0) ts.push(k.local); });
+  cs.sort((a,b)=>a.localeCompare(b,'pt-BR')); ts.sort((a,b)=>a.localeCompare(b,'pt-BR',{numeric:true})); if(cu!=='Todas'&&cs.indexOf(cu)<0) cs.push(cu);
+  v.mf_cult=cu; v.mf_cult_opts=[{v:'Todas',t:'Todas'}].concat(cs.map(c=>({v:c,t:c})));
+  v.mf_setcult=(e)=>self.setState({mf_cult:e.target.value,mf_tal:'',g2toast:'Cultura: '+e.target.value});
+  const tl=self.state.mf_tal||''; if(tl&&ts.indexOf(tl)<0) ts.push(tl); v.mf_tal=tl; v.mf_tal_opts=[{v:'',t:'Todos'}].concat(ts.map(t=>({v:t,t})));
+  v.mf_settal=(e)=>self.setState({mf_tal:e.target.value,g2toast:'Talhão: '+(e.target.value||'Todos')}); }
+function prCultOk(self,cu){ const f=self.state.mf_cult||'Todas'; return f==='Todas'||!cu||cu===f; }
+function prTalOk(self,t){ const f=self.state.mf_tal||''; return !f||!t||t===f; }
 function prFazOk(self,faz){ const f=self.state.mf_faz||'Todas'; return f==='Todas'||!faz||faz===f; }
 function prSafOk(self,saf){ const s=self.state.mf_saf||'Todas'; return s==='Todas'||!saf||saf===s; }
 /* formulário do painel: valores em self.state.pr_form; o padrão (o.v) só para o que é herdado ou calculado, nunca último valor */
@@ -167,6 +178,7 @@ function prPainel(self,v,P){ v.pp_open=!!P; P=P||{chip:['','gray']};
   v.pp_hasErr=!!P.err; v.pp_err=P.err||''; v.pp_sec=(P.sec||[]).map(b=>Object.assign({},b,{go:prGuarda(self,b.go)}));
   v.pp_hasPB=!!(P.prim&&P.prim.go); v.pp_hasPA=!!(P.prim&&P.prim.h&&!P.prim.go); v.pp_pt=P.prim?P.prim.t:''; v.pp_ph=(P.prim&&P.prim.h)||'#'; v.pp_pgo=prGuarda(self,(P.prim&&P.prim.go)||(()=>{}));
   v.pp_close=()=>self.setState({pr_pan:null,pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null}); v.pp_closeT=P.form&&!P.form.aviso?'Cancelar':'Fechar';   /* form.aviso: recusa mostrada no lugar do formulário (nada a cancelar) */
+  v.pp_closeOn=!P.closeHide;   /* closeHide (opcional, só o BEN usa): o formulário já tem "Voltar"; o fechar do rodapé repetiria a saída (rodada 3, S4) */
   v.pp_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); v.pp_close(); } }; }
 /* executa um comando no estado (atômico) e mostra o resultado; erro fica no painel, junto da ação */
 function prRun(self,fn,ok){ const r=cenMudar(null,fn); if(r.erro){ self.setState({pr_err:r.erro,g2toast:''}); return r; }
@@ -187,8 +199,6 @@ function prCards(self,v,gid,mk){ const ids=(v[gid+'_rows']||[]).map(r=>r.id); co
 function prCard(o){ return {grp:!!o.grp,reg:!o.grp,t1:o.t1||'',num:o.num||'',t2:o.t2||'',ct:(o.chip||['',''])[0],cst:prChs((o.chip||['','gray'])[1]),cdot:prDot((o.chip||['','gray'])[1]),nx:o.nx||'',go:o.go||(()=>{}),cur:'false'}; }
 /* números com unidade na célula (decisão de 05/10/2026): valor tipado em v (base kg) para ordenar, texto em p */
 function prTx(t){ return [{k:'txt',t}]; }
-/* faixa de Recebimento e beneficiamento (CARGA | BEN, BEN-D14): a pendência de cada tela, lida do mesmo estado e do filtro de fazenda */
-function prFaixaRec(self,v,c){ const W=benPendRec(c,f=>prFazOk(self,f)); v.rs1_why=W.carga; v.rs1_has=!!W.carga; v.rs2_why=W.ben; v.rs2_has=!!W.ben; }
 '''
 # v55: Beneficiamento fora da navegação até a rodada 3 (ui37.BEN_PUBLICADO). Cargas e Estoque de produto só tiram o endereço da tela do BEN
 # desta constante: vazia, o próximo passo do lote em processo fica em texto (ex.: "na OB-0110 (Em execução) · Igor"), sem link e sem ação
@@ -286,7 +296,7 @@ const _g2rows0=g2rows; g2rows=function(self,sp){ return PR_GRIDS[sp.id]?sp.rows:
 function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c; const P=prP(c);
   self.g2pick=(gid,rid)=>{ if(String(rid).indexOf('grp:')===0) return; self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null,pr_cx:null,pr_ch:prChave('W-RS')}); };
   const so=self.state.pr_saldo!==false; v.sl_on=String(so); v.sl_st=prPill(so); v.sl_tog=()=>self.setState({pr_saldo:!so});
-  const lots=Object.values(P.lotes).filter(L=>prFazOk(self,L.faz)&&prSafOk(self,L.saf)); const prods={};
+  const lots=Object.values(P.lotes).filter(L=>prFazOk(self,L.faz)&&prSafOk(self,L.saf)&&prCultOk(self,L.cultura)); const prods={};
   lots.forEach(L=>{ const S=prSaldos(c,L); if(so&&S.esgotado) return; (prods[L.prod]=prods[L.prod]||[]).push({L,S}); });
   const rows=Object.keys(prods).sort().map(pr=>{ const ls=prods[pr]; const U=x=>prLoteTxt(ls[0].L,x); const sm=k=>prSoma(ls.map(x=>x.S[k]));
     return {id:'grp:'+pr,ro:true,v:{nome:pr,prod:pr,fis:sm('fis'),blq:sm('blq'),proc:sm('proc'),apto:sm('apto'),res:sm('res'),disp:sm('disp')},
@@ -389,7 +399,7 @@ def carga():
     corpo=bloco('Cargas','O que chegou de cada talhão, quanto pesou e em que lote está. Clique numa carga a pesar para pesar; numa recebida, para ver descontos, lote e trilha.',
                 g_cg+cartoes('cards_cg'))
     _shell('CARGA','Cargas e recebimento','Pese e receba a carga do campo: o talhão vem da O.S., o lote nasce na hora e a produção do talhão muda só com a carga recebida.',corpo,fname,1000,
-           'Produção só nasce de carga recebida; caixas ou kg estimados no campo nunca somam. Ticket repetido não duplica (R-03, R-07).',steps=faixa_rec(1))
+           'Produção só nasce de carga recebida; caixas ou kg estimados no campo nunca somam. Ticket repetido não duplica (R-03, R-07).')
 
 CARGA_JS=r'''
 const PR_GRIDS={g_cg:1};
@@ -416,10 +426,10 @@ function prCgRow(c,g){ const P=prP(c); const s=prCgSit(c,g); const L=P.lotes[g.l
        sit:[{k:'chip',t:s.t,c:s.c},{k:'br'},s.h?{k:'link',t:s.nx,h:s.h}:{k:'mut',t:s.nx}]}}; }
 function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c; const P=prP(c);
   self.g2pick=(gid,rid)=>self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null,pr_ch:null});
-  const gs=prCargas(c,g=>g.sinc!==false&&prFazOk(self,g.faz)&&prSafOk(self,((PRDC.safras[(PRDC.cult[(g.origem[0]||{}).cult]||{}).saf]||{}).mf)||''));
+  const gs=prCargas(c,g=>g.sinc!==false&&prFazOk(self,g.faz)&&prSafOk(self,((PRDC.safras[(PRDC.cult[(g.origem[0]||{}).cult]||{}).saf]||{}).mf)||'')&&prCultOk(self,(PRDC.cult[(g.origem[0]||{}).cult]||{}).cultura||''));
   GR('g_cg').rows=gs.map(g=>prCgRow(c,g)); self._gs=gs; }
 /* origens possíveis da carga (R-06): O.S. de colheita Liberadas, Em execução ou Em conferência, nas fazendas do filtro */
-function prOrigens(self,c){ return Object.values(c.ordens||{}).filter(o=>prEhColheita(o)&&PR_FASES_COLH.indexOf(o.etapa)>=0&&prFazOk(self,prFazDaOS(c,o))).sort((a,b)=>a.id.localeCompare(b.id)); }
+function prOrigens(self,c){ return Object.values(c.ordens||{}).filter(o=>prEhColheita(o)&&PR_FASES_COLH.indexOf(o.etapa)>=0&&prFazOk(self,prFazDaOS(c,o))&&prCultOk(self,(PRDC.cult[prCultDaOS(c,o)]||{}).cultura||'')).sort((a,b)=>a.id.localeCompare(b.id)); }
 function prFormPesar(self,c,g){ const P=prP(c); const nova=!g; const ords=prOrigens(self,c);
   const os1=g?g.os:prFval(self,'os',ords.length===1?ords[0].id:''); const o=c.ordens[os1]; const cu=g?g.cultura:(o?(PRDC.cult[prCultDaOS(c,o)]||{}).cultura:''); const u=cu?prUn(cu):{};
   const mix=!g&&prFval(self,'mix','')==='sim'; const os2=prFval(self,'os2','');
@@ -485,7 +495,7 @@ function prPanCarga(self,c,g){ const P=prP(c); const s=prCgSit(c,g); const cu=g.
       if(ob) PPx.next=s.nx+'. Sem estorno enquanto a '+ob.id+' não fecha: erro de pesagem entra no balanço da ordem e se justifica na conferência (alçada).';
       else PPx.sec=[{t:'Estornar',go:()=>self.setState({pr_modo:'estorno',pr_form:null,pr_err:''})}]; } }
   return PPx; }
-function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=prP(c); const st=self.state; prFaixaRec(self,v,c);
+function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const P=prP(c); const st=self.state;
   v.cards_cg=prCards(self,v,'g_cg',id=>{ const g=P.cargas[id]; if(!g) return null; const s=prCgSit(c,g);
     return prCard({t1:g.id+(g.ticket?' · '+g.ticket:''),num:g.st==='Descartada'?'descartada':(g.liq===null?'a pesar':prFmtT(g.liq,2)+' kg'),t2:prCgOrig(g).join(' + ')+' · colhida '+prBr(g.dcol)+(g.lote?' · '+g.lote:''),chip:[s.t,s.c],nx:s.nx,go:()=>self.g2pick('g_cg',id)}); });
   const sel=st.pr_sel; const gs=sel&&P.cargas[sel.id]; let prim;
@@ -515,13 +525,14 @@ def colh():
     g_tal=grid([dict(k='tal',l='Talhão · variedade',w=170),dict(k='cult',l='Cultura',w=110),dict(k='area',l='Área',t='num',a='r',d=2,un='ha'),dict(k='prev',l='Previsão',w=140),
                 dict(k='colh',l='Colhido',t='num',a='r',w=90),dict(k='prtv',l='Produtividade',w=150),dict(k='ref',l='Referência · desvio',w=140),
                 dict(k='sit',l='Situação · próximo passo',w=230)],
-               [],edit=dict(m='pick'),tree=True,gid='g_tal',total=False,qf=dict(k='sit',cut=' · ',l='Situação',todas='Todas'))
+               [],edit=dict(m='pick'),tree=True,gid='g_tal',total=False,qf=dict(k='sit',cut=' · ',l='Situação',todas='Todas'),
+               tools=UNP.sel_html('up'))   # UNID-PROD: um seletor por tabela, na barra (D-U01)
     # Comercial P7 (D-C14, CE-05): "Vendas futuras" e "Oferta livre" saíram para o Painel comercial (a semana em curso entra lá pelo estoque, PRD 49.2)
     g_sem=grid([dict(k='sem',l='Semana',w=150),dict(k='prod',l='Produto',w=200),dict(k='pub',l='Previsão publicada',t='num',a='r',w=150),dict(k='colh',l='Colhido',t='num',a='r'),
                 dict(k='desv',l='Desvio',w=150)],
                [],edit=dict(m='pick'),gid='g_sem',total=False,qf=dict(k='prod',l='Produto',todas='Todos'),
                tools=f'<span role="group" aria-label="Horizonte" style="display: inline-flex; gap: 6px;"><button type="button" aria-pressed="{H("hz4_on")}" onClick="{H("hz4")}" style="{H("hz4_st")}">4 semanas</button><button type="button" aria-pressed="{H("hzs_on")}" onClick="{H("hzs")}" style="{H("hzs_st")}">Safra</button></span>')
-    EXTRAJS[0]=_js(COLH_JS)
+    EXTRAJS[0]=_js(UNP.JS+COLH_JS); EXTRA.append('<style>'+UNP.CSS+'</style>')
     vis=(f'<div class="pr-vis" role="group" aria-label="Visão"><button type="button" aria-pressed="{H("vt_on")}" onClick="{H("vt_go")}">Por talhão</button>'
          f'<button type="button" aria-pressed="{H("vs_on")}" onClick="{H("vs_go")}">Por semana</button></div>')
     corpo=(IF('vt',bloco('Previsão e resultado por talhão','Cultura › talhão: previsão publicada, colhido, produtividade contra a meta e a previsão. Clique num talhão para contagens, versões, passes, cargas e resultado.',
@@ -534,56 +545,36 @@ def colh():
 COLH_JS=r'''
 const PR_GRIDS={g_tal:1,g_sem:1};
 const _g2rows0=g2rows; g2rows=function(self,sp){ return PR_GRIDS[sp.id]?sp.rows:_g2rows0(self,sp); };
-const PR_SITORD={'Em colheita':0,'Programada':1,'Prevista':2,'Colhida':3,'Sem previsão':4};
-const PR_SITCOR={'Em colheita':'green','Programada':'blue','Prevista':'gray','Colhida':'gray','Sem previsão':'yellow'};
-/* janela de colheita do cultivo anual: a data do cultivo ou plantio + 120 dias */
-function prJanAnual(k){ return k.colheita||(k.plantio?prDiaMais(k.plantio,120):''); }
-/* situação, próximo passo e ação do talhão (spec §3.1): perene manda a próxima semana ainda sem ordem; anual, a safra */
-function prTal(c,cid){ const k=PRDC.cult[cid]; const R=prResultado(c,cid); const oss=prOsCult(c,cid); const vs=prP(c).previsoes[cid]||[]; const ult=vs[vs.length-1]||null;
-  const abertas=oss.filter(o=>o.etapa!=='Encerradas'); const exec=abertas.find(o=>o.etapa==='Em execução'||o.etapa==='Em conferência'); const prog=abertas.find(o=>o.etapa==='A liberar'||o.etapa==='Liberadas');
-  let sit; if(exec) sit='Em colheita'; else if(prog) sit='Programada'; else if(R.passes.some(p=>p.final)&&!(ult&&Object.keys(ult.sem||{}).some(w=>!prSemComecou(w)))) sit='Colhida'; else if(ult) sit='Prevista'; else sit='Sem previsão';
-  const cnt=k.semanal?prContagem(c,cid):null; const pub=prPublicavel(c,cid); const ag=prQuem('ag'); const agO=g2alcQuem('AL-02')||ag; let ac=null;   /* publicar: AL-17; emitir a O.S. e acompanhar: o agrônomo da O.S. (AL-02) */
-  if(k.semanal){ let w=prSemMais(prSem(prHoje()),1); while(oss.some(o=>prSemDaOS(o)===w)) w=prSemMais(w,1);
-    const atv=(PRDC.colhAtv||{})[k.plano];
-    if(!cnt) ac={k:'contar',t:'Coletar contagem',h:'MB-07.dc.html#'+cid,q:'equipe de colheita (app)',x:'contar os frutos de 20 plantas'};
-    else if(pub) ac={k:'publicar',t:'Publicar previsão',q:ag,x:'publicar '+Object.keys(pub.sem).map(prSemTxt).join(' e ')};
-    else if(atv&&prVersaoSem(c,cid,w)) ac={k:'programar',t:'Programar colheita '+prSemTxt(w),h:'OS.dc.html#nova:'+cid+':'+atv+':'+prSemIni(w),q:agO,x:'emitir a O.S. da '+prSemTxt(w)};
-    else if(exec||prog) ac={k:'abrir',t:'Abrir '+(exec||prog).id,h:'OS.dc.html#'+(exec||prog).id,q:(exec||prog).resp||agO,x:(exec?'acompanhar a '+exec.id:'liberar a '+prog.id)}; }
-  else { const jan=prJanAnual(k); const perto=jan&&jan<=prDiaMais(prHoje(),30); const atv=(PRDC.colhAtv||{})[k.plano];
-    if(pub&&!(R.comecou)) ac={k:'publicar',t:'Publicar previsão',q:ag,x:'publicar a previsão da safra pela meta'};
-    else if(exec||prog) ac={k:'abrir',t:'Abrir '+(exec||prog).id,h:'OS.dc.html#'+(exec||prog).id,q:(exec||prog).resp||agO,x:'acompanhar a '+(exec||prog).id};
-    else if(perto&&atv) ac={k:'programar',t:'Programar colheita',h:'OS.dc.html#nova:'+cid+':'+atv+':'+jan,q:agO,x:'emitir a O.S. de colheita'}; }
-  const nx=ac?(ac.x.charAt(0).toUpperCase()+ac.x.slice(1)+' · '+ac.q):(k.semanal?'acompanhar':(prJanAnual(k)?'colheita a partir de '+prBr(prJanAnual(k))+'/'+prJanAnual(k).slice(2,4)+' · nada a fazer agora':'sem janela de colheita'));
-  return {k,R,sit,ac,nx,ult,cnt,pub,exec,prog,oss}; }
-/* previsão vigente na linha: semana em curso ou a próxima publicada; anual, a safra */
-function prPrevTxt(c,X){ const k=X.k; const vs=prP(c).previsoes[k.id]||[];
-  if(!k.semanal){ const v=vs.filter(x=>x.safra!==undefined).slice(-1)[0]; return v?{t:prUnTxt(k.cultura,v.safra,0)+' · safra (v'+v.v+')',v:v.safra}:{t:'sem previsão publicada',v:null}; }
-  const s0=prSem(prHoje()); const ws=[...new Set([].concat(...vs.map(v=>Object.keys(v.sem||{}))))].sort(); const w=ws.find(x=>x>=s0)||ws[ws.length-1];
-  if(!w) return {t:X.cnt?'rascunho pela contagem':'sem previsão publicada',v:null}; const v=prVersaoSem(c,k.id,w); return {t:prUnTxt(k.cultura,v.sem[w],1)+' · '+prSemTxt(w)+' (v'+v.v+')',v:v.sem[w]}; }
+/* PR_SITORD, PR_SITCOR, prJanAnual, prTal e prPrevTxt estão em producao.js (14/10/2026): o Mapa (camada Colheita) usa os mesmos */
+/* UNID-PROD: indicador e meta na unidade escolhida para a cultura (preferência do perfil, D-U01); a chave de ordenação e de filtro é a
+   base por ha, igual em qualquer unidade (R-U11); estados ordenam no fim */
+function prIndTxt(ind,suf){ return ind.st==='medido'?prUnpTxt(Object.assign({},ind,{estim:false}))+(suf||'')+(ind.estim?' · estimativa':''):prUnpTxt(ind); }
+function prOrdK(ind){ if(ind.st==='medido') return ind.kgHa; if(ind.st==='apurar') return 'apurar'+(ind.campo?':'+(ind.campo.st==='pend'?'pend':ind.campo.lHa):''); return ind.st; }
 function prTalRow(c,X){ const k=X.k, R=X.R; const pv=prPrevTxt(c,X); const colhT=prProdTxt(k.cultura,R);   /* café sem rendimento medido: "L · sc a apurar" (COLH-C01) */
-  const prtvT=R.apurar?prPrtvResTxt(k.cultura,R):(R.prtv!==null&&R.area>0?prPrtvTxt(k.cultura,R.kg,R.area)+(k.semanal?' · ciclo':' · safra')+(R.parcial?' parcial':' final'):'—');
-  const refT=k.meta?('meta '+prFmtT(k.meta,1)+' '+(k.un_meta||PRDC.un[prCult(k.cultura)].prtv)):'sem meta'; const dsT=R.desv!==null?prFmt(R.desv,1)+' %':(R.apurar?'a apurar':(R.comecou?(k.semanal?'ciclo aberto':(R.parcial?'safra parcial':'—')):'—'));
+  const op=g2unidPref(k.cultura); const ind=prUnpInd(k.cultura,R,op); const prtvT=prIndTxt(ind,(k.semanal?' · ciclo':' · safra')+(R.parcial?' parcial':' final'));
+  const mt=k.meta?prUnpMeta(k.cultura,k.meta,k.un_meta,op):null; const refT=mt?'meta '+mt.txt:'sem meta'; const dsT=R.desv!==null?prFmt(R.desv,1)+' %':(R.apurar?'a apurar':(R.comecou?(k.semanal?'ciclo aberto':(R.parcial?'safra parcial':'—')):'—'));
   const pes=R.aPesar.length; const nx=X.nx+(pes?' · '+pes+(pes>1?' cargas a receber':' carga a receber'):'');
-  return {id:k.id,ro:true,v:{tal:k.local,cult:k.cultura,area:k.area,colh:R.apurar&&!(prCmp(R.kg,0)>0)?null:R.kg,sit:X.sit},   /* parte medida ordena pelo medido; só a apurar fica vazio (COLH-C01, revisão DOM achado 7) */
+  return {id:k.id,ro:true,ordk:{prtv:prOrdK(ind)},v:{tal:k.local,cult:k.cultura,area:k.area,colh:R.apurar&&!(prCmp(R.kg,0)>0)?null:R.kg,sit:X.sit},   /* parte medida ordena pelo medido; só a apurar fica vazio (COLH-C01, revisão DOM achado 7) */
     s:{tal:k.local+' '+k.cultura,cult:k.cultura,prev:pv.t,colh:colhT,prtv:prtvT,ref:refT+' '+dsT,sit:X.sit+' · '+nx},
     p:{tal:[{k:'b',t:k.local}].concat(k.var?[{k:'br'},{k:'mut',t:k.var}]:[]),cult:[{k:'txt',t:k.cultura}],prev:[{k:pv.v===null?'mut':'txt',t:pv.t}],colh:[{k:R.comecou?'b':'mut',t:colhT}],
-       prtv:[{k:R.prtv!==null?'txt':'mut',t:prtvT}],ref:[{k:'txt',t:refT},{k:'br'},{k:R.desv!==null&&R.desv<0?'cn':'mut',c:'red',t:dsT}],
+       prtv:[{k:ind.st==='medido'?'txt':'mut',t:prtvT}],ref:[{k:'txt',t:refT},{k:'br'},{k:R.desv!==null&&R.desv<0?'cn':'mut',c:'red',t:dsT}],
        sit:[{k:'chip',t:X.sit+(X.ult&&X.sit==='Prevista'?' (v'+X.ult.v+')':''),c:PR_SITCOR[X.sit]},{k:'br'},{k:'mut',t:nx}]}}; }
 /* cartão do grupo (cultura) a 390 px: o mesmo texto da linha do grupo no desktop, ponderada só sobre o medido e o que ficou a apurar (COLH-C01) */
-function prGrpNum(cu,rs){ const pd=prPonderada(rs); const nap=rs.filter(r=>r&&r.apurar).length; const n=rs.length+(rs.length>1?' talhões':' talhão');
-  if(pd) return prPrtvTxt(cu,pd.kg,pd.area)+' ponderada sobre '+prFmtT(pd.area,2)+' ha'+(nap?' · '+nap+(nap>1?' talhões':' talhão')+' a apurar fora da conta':'');
-  return nap?prPrtvResTxt(cu,{apurar:true})+' · '+n:n; }
+function prGrpNum(cu,rs){ const pd=prPonderada(rs); const nap=rs.filter(r=>r&&r.apurar).length; const n=rs.length+(rs.length>1?' talhões':' talhão'); const op=g2unidPref(cu);
+  if(pd) return prIndTxt(prUnpInd(cu,pd,op))+' ponderada sobre '+prFmtT(pd.area,2)+' ha'+(nap?' · '+nap+(nap>1?' talhões':' talhão')+' a apurar fora da conta':'');
+  return nap?prPrtvResTxt(cu,{apurar:true},op)+' · '+n:n; }
 function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self._c=c;
   self.g2pick=(gid,rid)=>{ if(String(rid).indexOf('grp:')===0) return; self.setState({pr_sel:{g:gid,id:rid},pr_pan:{g:gid,id:rid},pr_form:null,pr_err:'',pr_ferr:null,pr_modo:null}); };
-  const cids=Object.keys(PRDC.cult).filter(id=>{ const k=PRDC.cult[id]; return k.prod&&prFazOk(self,k.faz)&&prSafOk(self,(PRDC.safras[k.saf]||{}).mf); });
+  const cids=Object.keys(PRDC.cult).filter(id=>{ const k=PRDC.cult[id]; return k.prod&&prFazOk(self,k.faz)&&prSafOk(self,(PRDC.safras[k.saf]||{}).mf)&&prCultOk(self,k.cultura)&&prTalOk(self,k.local); });
   const X=cids.map(id=>prTal(c,id)); self._X=X; const por={};
   X.forEach(x=>{ (por[x.k.cultura]=por[x.k.cultura]||[]).push(x); });
   const grupos=Object.keys(por).map(cu=>{ const xs=por[cu].sort((a,b)=>(PR_SITORD[a.sit]-PR_SITORD[b.sit])||String(a.k.local).localeCompare(String(b.k.local),'pt-BR',{numeric:true}));
     const pd=prPonderada(xs.map(x=>x.R)); const kg=prSoma(xs.map(x=>x.R.kg)); const ha=prSoma(xs.map(x=>x.k.area)); const ord=Math.min.apply(null,xs.map(x=>PR_SITORD[x.sit]));
     const cnt={}; xs.forEach(x=>{ cnt[x.sit]=(cnt[x.sit]||0)+1; }); const sitT=Object.keys(cnt).sort((a,b)=>PR_SITORD[a]-PR_SITORD[b]).map(k=>cnt[k]+' '+k.toLowerCase()).join(' · ');
     const nap=xs.filter(x=>x.R.apurar).length; const GX={kg,apurar:nap>0,cafe:prSoma(xs.map(x=>x.R.cafe||0))}; const colG=prProdTxt(cu,GX);   /* café a apurar fora da soma e da ponderada (COLH-C01) */
-    const pdT=pd?prPrtvTxt(cu,pd.kg,pd.area)+' ponderada':(nap?prPrtvResTxt(cu,GX):'—'); const pdA=pd?'sobre '+prFmtT(pd.area,2)+' ha colhidos'+(nap?' · '+nap+(nap>1?' talhões':' talhão')+' a apurar fora da conta':''):'';   /* a área da conta, não a da linha (revisão A-15) */
-    return {ord,cu,row:{id:'grp:'+cu,ro:true,v:{tal:cu,cult:cu,area:ha,colh:nap&&!(kg>0)?null:kg},s:{tal:cu,cult:cu,colh:colG,prtv:pd||nap?pdT+' '+pdA:'',sit:''},
+    const op=g2unidPref(cu); const pind=pd?prUnpInd(cu,pd,op):null;   /* UNID-PROD: a ponderada na unidade escolhida, só do estágio-base (D-U16) */
+    const pdT=pd?prIndTxt(pind)+' ponderada':(nap?prPrtvResTxt(cu,{apurar:true},op):'—'); const pdA=pd?'sobre '+prFmtT(pd.area,2)+' ha colhidos'+(nap?' · '+nap+(nap>1?' talhões':' talhão')+' a apurar fora da conta':''):'';   /* a área da conta, não a da linha (revisão A-15) */
+    return {ord,cu,row:{id:'grp:'+cu,ro:true,ordk:{prtv:pind?pind.kgHa:null},v:{tal:cu,cult:cu,area:ha,colh:nap&&!(kg>0)?null:kg},s:{tal:cu,cult:cu,colh:colG,prtv:pd||nap?pdT+' '+pdA:'',sit:''},
       p:{tal:[{k:'b',t:cu}],cult:[{k:'mut',t:xs.length+(xs.length>1?' talhões':' talhão')}],prev:[{k:'mut',t:''}],colh:[{k:'b',t:colG}],
          prtv:pd?[{k:'b',t:pdT},{k:'br'},{k:'mut',t:pdA}]:[{k:'mut',t:pdT}],ref:[{k:'mut',t:''}],sit:[{k:'mut',t:sitT}]},
       kids:xs.map(x=>prTalRow(c,x))}}; }).sort((a,b)=>a.ord-b.ord||a.cu.localeCompare(b.cu));
@@ -612,24 +603,27 @@ function PREVALS(self,v){ cenOuvir(self); prTopo(self,v); const c=cenGet(); self
   GR('g_sem').rows=rows; self._wrows=rows;
   v.hz4_on=String(hz==='4'); v.hzs_on=String(hz==='s'); v.hz4_st=prPill(hz==='4'); v.hzs_st=prPill(hz==='s'); v.hz4=()=>self.setState({pr_hz:'4'}); v.hzs=()=>self.setState({pr_hz:'s'}); }
 function prPanTal(self,c,X){ const k=X.k, R=X.R; const P=prP(c); const U=x=>prUnTxt(k.cultura,x); const kg=x=>prFmtT(x,2)+' kg'; const r0=prRascunho(c,k.id);
+  const op=g2unidPref(k.cultura); const ind=prUnpInd(k.cultura,R,op); const mt=k.meta?prUnpMeta(k.cultura,k.meta,k.un_meta,op):null;   /* UNID-PROD: a mesma unidade da linha */
+  const ops=prUnpOpcoes(k.cultura,'base'); const unT=ind.op==='padrao'?ind.un+' · Padrão da cultura':ind.un+' · Padrão da cultura: '+ops[0].rot.replace('Padrão da cultura · ','');
+  const prtvP=prIndTxt(ind,R.parcial?' parcial':' final');
   const cnts=(P.contagens||[]).filter(x=>x.cult===k.id).slice().reverse().map(x=>({c:[[x.id,'b'],prBr(x.d)+' '+(x.at||''),x.quem,x.plantas+' plantas','Pintado '+x.pintado,'De vez '+x.devez,'Verde desenvolvido '+x.verde,'peso médio '+prFmtT(x.peso,2)+' kg',x.sinc===false?['no aparelho','red']:''].filter(Boolean)}));
   const s0=prSem(prHoje());
-  const ras=r0?(r0.safra!==undefined?[{c:[['Safra','b'],U(r0.safra),'pela meta ('+prFmtT(k.meta,1)+' '+k.un_meta+' × '+prFmtT(k.area,2)+' ha)']}]
-    :Object.keys(r0.sem).sort().map(w=>({c:[[prSemTxt(w),'b'],U(r0.sem[w]),w===s0?['em curso: orienta a '+((X.oss.find(o=>prSemDaOS(o)===w)||{}).id||'O.S. aberta')+', não publica','mut']:(prSemComecou(w)?['já começou','mut']:''),r0.base==='meta'?['pela meta','mut']:['pela '+r0.cnt.id+' · '+r0.par.plantas_ha+' plantas/ha · perda '+prFmtT(prMul(r0.par.perda,100),1)+' %','mut']].filter(Boolean)}))):[];
+  const ras=r0?(r0.safra!==undefined?[{c:[['Safra','b'],U(r0.safra),'pela meta ('+(mt?mt.txt:'')+' × '+prFmtT(k.area,2)+' ha)']}]
+    :Object.keys(r0.sem).sort().map(w=>({c:[[prSemTxt(w),'b'],U(r0.sem[w]),w===s0?['em curso: orienta a '+((X.oss.find(o=>prSemDaOS(o)===w)||{}).id||'O.S. aberta')+', não publica','mut']:(prSemComecou(w)?['já começou','mut']:''),r0.base==='meta'?['pela meta'+(mt?' ('+mt.txt+')':''),'mut']:['pela '+r0.cnt.id+' · '+r0.par.plantas_ha+' plantas/ha · perda '+prFmtT(prMul(r0.par.perda,100),1)+' %','mut']].filter(Boolean)}))):[];
   const vers=(P.previsoes[k.id]||[]).slice().reverse().map(v=>({c:[['v'+v.v,'b'],prBr(v.d)+' '+(v.at||''),v.por,v.safra!==undefined?'safra '+U(v.safra):Object.keys(v.sem).sort().map(w=>prSemTxt(w)+' '+U(v.sem[w])).join(' · '),v.base==='meta'?'pela meta':'pela contagem']}));
-  const pas=R.passes.map(p=>({c:[[p.os,'b'],prSemTxt(p.sem),p.fase,prFmtT(p.area,2)+' ha',prProdTxt(k.cultura,p),p.apurar?prPrtvResTxt(k.cultura,p):(p.area>0?prPrtvTxt(k.cultura,p.kg,p.area)+(p.final?' final':' parcial'):'sem área apontada'),p.refKg?'previsão '+U(p.refKg)+' (v'+p.ref.v+')':'sem previsão antes da semana',p.desv!==null?[prFmt(p.desv,2)+' %',p.desv<0?'red':'ok']:(p.final?'':'sem desvio (parcial)'),p.aPesar.length?[p.aPesar.length+' a pesar: '+p.aPesar.map(g=>g.id).join(', '),'red']:''].filter(Boolean),l:{t:'Abrir '+p.os,h:'OS.dc.html#'+p.os}}));
+  const pas=R.passes.map(p=>({c:[[p.os,'b'],prSemTxt(p.sem),p.fase,prFmtT(p.area,2)+' ha',prProdTxt(k.cultura,p),(!p.apurar&&!(p.area>0))?'sem área colhida apontada':prIndTxt(prUnpInd(k.cultura,p,op),p.final?' final':' parcial'),p.refKg?'previsão '+U(p.refKg)+' (v'+p.ref.v+')':'sem previsão antes da semana',p.desv!==null?[prFmt(p.desv,2)+' %',p.desv<0?'red':'ok']:(p.final?'':'sem desvio (parcial)'),p.aPesar.length?[p.aPesar.length+' a pesar: '+p.aPesar.map(g=>g.id).join(', '),'red']:''].filter(Boolean),l:{t:'Abrir '+p.os,h:'OS.dc.html#'+p.os}}));
   const cgs=prCargas(c,g=>g.sinc!==false&&(g.origem||[]).some(x=>x.cult===k.id)).sort((a,b)=>(a.dcol<b.dcol?-1:1)).map(g=>{ const x=g.origem.find(y=>y.cult===k.id);
     return {c:[[g.id,'b'],'colhida '+prBr(g.dcol),g.st,(g.st==='A pesar'||g.st==='Descartada')?(g.est_cx?'~'+g.est_cx+' caixas (não soma)':'—'):kg(x.kg)+(g.origem.length>1?' ('+prFmtT(x.pct,2)+' %)':''),g.lote||''].filter(Boolean),l:{t:'Ver carga',h:'CARGA.dc.html#'+g.id}}; });
   const liq=prSoma([].concat(...R.passes.map(p=>[p.liq]))), com=prSoma([].concat(...R.passes.map(p=>[p.com])));
   const res=[{c:[['Bruto de campo (líquido pesado)','b'],kg(liq)]},{c:[['Descontos','b'],kg(prSub(liq,com))]},{c:[['Comercial','b'],kg(com)+(R.u.grao?' · '+U(com):'')]},
     {c:[['Área colhida','b'],k.semanal?(R.area>0?prFmtT(R.area,2)+' ha (área do cultivo, desde o 1º passe)':'nenhum passe'):prFmtT(R.area,2)+' ha (apontada)']},
-    {c:[['Produtividade','b'],R.apurar?prPrtvResTxt(k.cultura,R)+' (rendimento do beneficiamento)':(R.prtv!==null&&R.area>0?prPrtvTxt(k.cultura,R.kg,R.area)+(R.parcial?' parcial':' final'):'—')]},
+    {c:[['Produtividade','b'],R.apurar?prUnpTxt(ind)+' (rendimento do beneficiamento)':prtvP]},
     {c:[['Contra a meta','b'],R.desv!==null?prFmt(R.desv,1)+' %':(R.apurar?'a apurar: compara quando o beneficiamento medir o rendimento':(k.semanal?'ciclo aberto: compara com a meta anual ao encerrar a safra':'safra parcial'))]},
     {c:[['Custo','b'],['sem custo realizado · Controle','mut']]}];
-  const PPx={title:k.local+' · '+k.cultura+(k.var?' '+k.var:''),chip:[X.sit,PR_SITCOR[X.sit]],sub:k.faz+' · '+((PRDC.safras[k.saf]||{}).nome||'')+' · '+prFmtT(k.area,2)+' ha'+(k.meta?' · meta '+prFmtT(k.meta,1)+' '+k.un_meta:''),
+  const PPx={title:k.local+' · '+k.cultura+(k.var?' '+k.var:''),chip:[X.sit,PR_SITCOR[X.sit]],sub:k.faz+' · '+((PRDC.safras[k.saf]||{}).nome||'')+' · '+prFmtT(k.area,2)+' ha'+(mt?' · meta '+mt.txt:''),
     next:X.nx+'.',kv:[{l:'Previsão vigente',v:prPrevTxt(c,X).t},{l:k.semanal?'Colhido no ciclo':'Colhido na safra',v:prProdTxt(k.cultura,R)},
-      {l:'Produtividade',v:R.apurar?prPrtvResTxt(k.cultura,R):(R.prtv!==null&&R.area>0?prPrtvTxt(k.cultura,R.kg,R.area)+(R.parcial?' parcial':' final'):'—')},{l:'Cargas a receber',v:String(R.aPesar.length)},
-      {l:'Custo R$/'+R.u.un,v:'sem custo realizado · Controle'},{l:'Unidade (DEC-0510-03)',v:R.u.prtv}],
+      {l:'Produtividade',v:prtvP},{l:'Cargas a receber',v:String(R.aPesar.length)},
+      {l:'Custo R$/'+R.u.un,v:'sem custo realizado · Controle'},{l:'Unidade de produtividade',v:unT}],
     secs:(k.semanal?[{t:'Contagens de frutos',rows:cnts,vazio:'Nenhuma contagem: colete no app (MB-07).'}]:[]).concat([{t:'Rascunho (não publicado)',rows:ras,vazio:'Sem rascunho.'},{t:'Versões publicadas',rows:vers,vazio:'Nenhuma versão publicada.'},
       {t:k.semanal?'Passes (O.S. de colheita por semana)':'Ordens de colheita',rows:pas,vazio:'Nenhuma O.S. de colheita.'},{t:'Cargas do talhão',rows:cgs,vazio:'Nenhuma carga.'},{t:'Resultado',rows:res}]),err:self.state.pr_err};
   const ac=X.ac; if(ac){ if(ac.h) PPx.prim={t:ac.t,h:ac.h};
@@ -651,9 +645,15 @@ function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=s
   v.cards_tal=prCards(self,v,'g_tal',id=>{ if(String(id).indexOf('grp:')===0){ const cu=id.slice(4); const xs=XS.filter(x=>x.k.cultura===cu);
       return prCard({grp:true,t1:cu,num:prGrpNum(cu,xs.map(x=>x.R))}); }
     const X=byId[id]; if(!X) return null; const R=X.R;
-    return prCard({t1:X.k.local+' · '+X.k.cultura,num:R.apurar?prProdTxt(X.k.cultura,R):(R.prtv!==null&&R.area>0?prPrtvTxt(X.k.cultura,R.kg,R.area):prProdTxt(X.k.cultura,R)),t2:'Previsão '+prPrevTxt(c,X).t+' · colhido '+prProdTxt(X.k.cultura,R),chip:[X.sit,PR_SITCOR[X.sit]],nx:X.nx,go:()=>self.g2pick('g_tal',id)}); });
+    const ind=prUnpInd(X.k.cultura,R,g2unidPref(X.k.cultura));   /* UNID-PROD: o mesmo número da linha, na mesma unidade */
+    return prCard({t1:X.k.local+' · '+X.k.cultura,num:R.apurar?prProdTxt(X.k.cultura,R):(ind.st==='medido'?prIndTxt(ind):prProdTxt(X.k.cultura,R)),t2:'Previsão '+prPrevTxt(c,X).t+' · colhido '+prProdTxt(X.k.cultura,R),chip:[X.sit,PR_SITCOR[X.sit]],nx:X.nx,go:()=>self.g2pick('g_tal',id)}); });
   v.cards_sem=prCards(self,v,'g_sem',id=>{ const r=(self._wrows||[]).find(x=>x.id===id); if(!r) return null;
     return prCard({t1:r.s.sem+' · '+r.s.prod,num:r.s.pub,t2:'Colhido '+r.s.colh+(r.s.desv?' · desvio '+r.s.desv:''),chip:['Previsão','gray'],nx:'',go:()=>{}}); });
+  /* UNID-PROD · seletor da tabela: contexto = cultura do talhão com o painel aberto; sem painel, a 1ª cultura visível (D-U01). A nota diz
+     quando um estágio mostrado (café da roça só em L) fica no Padrão dele por falta de peso (R-U05) */
+  { const pn=st.pr_pan; const xp=pn&&pn.g==='g_tal'?byId[pn.id]:null; const cu=xp?xp.k.cultura:unpCultVis(self,'g_tal',r=>r.v&&r.v.cult);
+    const nota=cu?[...new Set(XS.filter(x=>x.k.cultura===cu).map(x=>prUnpInd(cu,x.R,g2unidPref(cu)).motivo).filter(Boolean))].join(' · '):'';
+    unpVals(self,v,'up',cu,nota); }
   /* ação primária: do talhão selecionado; sem seleção, a do 1º talhão da lista em que a regra dá passo */
   const sel=st.pr_sel; let X=sel&&sel.g==='g_tal'?byId[sel.id]:null; let suf='';
   if(!X){ const ord=[].concat(...(GR('g_tal').rows||[]).map(r=>r.kids||[])).map(r=>byId[r.id]).filter(Boolean); X=ord.find(x=>x.ac)||null; if(X) suf=' do '+X.k.local; }

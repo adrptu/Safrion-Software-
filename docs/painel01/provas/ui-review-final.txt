@@ -1,0 +1,62 @@
+OK PAGR primeiro cartão 1440
+OK PAGR quatro indicadores renderizados 1440
+OK PAGR sem JS/overflow 1440
+OK PAGR destinos existentes 1440
+OK PAGR fonte completa no seed 1440
+OK PAGR ação primária alcançável ao rolar 1440
+OK PAGR fórmula por teclado 1440
+OK PAGR Escape fecha dica 1440
+OK PAGR volta devolve foco ao cartão 1440
+OK PMAN primeiro cartão 1440
+OK PMAN quatro indicadores renderizados 1440
+OK PMAN sem JS/overflow 1440
+OK PMAN destinos existentes 1440
+OK PMAN fonte completa no seed 1440
+OK PMAN ação primária alcançável ao rolar 1440
+OK PMAN fórmula por teclado 1440
+OK PMAN Escape fecha dica 1440
+OK PMAN volta devolve foco ao cartão 1440
+OK PSUP primeiro cartão 1440
+OK PSUP quatro indicadores renderizados 1440
+OK PSUP sem JS/overflow 1440
+OK PSUP destinos existentes 1440
+OK PSUP fonte completa no seed 1440
+OK PSUP ação primária alcançável ao rolar 1440
+OK PSUP fórmula por teclado 1440
+OK PSUP Escape fecha dica 1440
+OK PSUP volta devolve foco ao cartão 1440
+OK PAGR primeiro cartão 390
+OK PAGR quatro indicadores renderizados 390
+OK PAGR sem JS/overflow 390
+OK PAGR destinos existentes 390
+OK PAGR fonte completa no seed 390
+OK PAGR ação primária alcançável ao rolar 390
+OK PAGR fórmula por teclado 390
+OK PAGR Escape fecha dica 390
+OK PAGR toque abre fórmula e alvo44
+OK PAGR volta devolve foco ao cartão 390
+OK PMAN primeiro cartão 390
+OK PMAN quatro indicadores renderizados 390
+OK PMAN sem JS/overflow 390
+OK PMAN destinos existentes 390
+OK PMAN fonte completa no seed 390
+OK PMAN ação primária alcançável ao rolar 390
+OK PMAN fórmula por teclado 390
+OK PMAN Escape fecha dica 390
+OK PMAN toque abre fórmula e alvo44
+OK PMAN volta devolve foco ao cartão 390
+OK PSUP primeiro cartão 390
+OK PSUP quatro indicadores renderizados 390
+OK PSUP sem JS/overflow 390
+OK PSUP destinos existentes 390
+OK PSUP fonte completa no seed 390
+OK PSUP ação primária alcançável ao rolar 390
+OK PSUP fórmula por teclado 390
+OK PSUP Escape fecha dica 390
+OK PSUP toque abre fórmula e alvo44
+OK PSUP volta devolve foco ao cartão 390
+OK Vazio é zero com mensagem explícita
+OK Mudança do cenário atualiza painel sem recarregar
+OK Fonte ausente: sem dados e caminho de recuperação
+OK Comercial reutiliza PCOM como primeiro cartão
+RESULTADO 61/61

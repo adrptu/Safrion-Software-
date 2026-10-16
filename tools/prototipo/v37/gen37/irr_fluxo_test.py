@@ -149,8 +149,9 @@ try:
     chk('31 parada em 40 de 80 ha (3.800 m³): o Pivô 2 segue 11,2 mm e a faixa coberta (40 ha) é mostrada à parte', 'faixa de 40,0 ha' in tt and '11,2 mm' in r2, [tt, r2])
     # contexto: fazenda do Mapa ↔ Irrigação
     goto('IR-01.dc.html'); setv('select[aria-label="Filtrar por fazenda"]', 'Lagoa Grande'); time.sleep(.4); setv('select[aria-label="Filtrar por fazenda"]', 'Santa Rita'); time.sleep(.4)
-    goto('IN-04.dc.html', 2.4); mf = J("(document.querySelector('header select')||{}).value")
-    setv('header select', 'Lagoa Grande'); time.sleep(1.2); goto('IR-01.dc.html'); irf = J("document.querySelector('select[aria-label=\"Filtrar por fazenda\"]').value")
+    # 13/10/2026: o filtro de fazenda do Mapa saiu do topo e fica na faixa "Filtros desta tela" (.mf-tela)
+    goto('IN-04.dc.html', 2.4); mf = J("(document.querySelector('.mf-tela select')||{}).value")
+    setv('.mf-tela select', 'Lagoa Grande'); time.sleep(1.2); goto('IR-01.dc.html'); irf = J("document.querySelector('select[aria-label=\"Filtrar por fazenda\"]').value")
     chk('32 fazenda acompanha: escolhida na Irrigação abre o Mapa nela; trocada no Mapa, a Irrigação abre na do Mapa', mf == 'Santa Rita' and irf == 'Lagoa Grande', [mf, irf])
     # filtro rápido preservado ao voltar
     J("sessionStorage.setItem('irr-faz','Santa Rita')"); goto('IR-03.dc.html'); clk('A liberar'); n1 = J("document.querySelectorAll('[role=row].g2ed').length")

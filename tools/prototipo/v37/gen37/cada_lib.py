@@ -10,10 +10,12 @@ BTN="""((t)=>{const b=[...document.querySelectorAll('aside[role=dialog] button')
 CLK="""((t)=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...document.querySelectorAll('button,a')]; const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
 ERRS="window.__errs=[];window.addEventListener('error',e=>window.__errs.push(String(e.message)));const __ce=console.error;console.error=function(){window.__errs.push([...arguments].map(String).join(' ').slice(0,300));__ce.apply(console,arguments);};"
 class T:
-    def __init__(s):
+    def __init__(s,colunas='todas'):
         s.p=free(); s.srv=subprocess.Popen(['python3','-m','http.server',str(s.p),'--bind','127.0.0.1','--directory',os.path.join(HERE,'_render')],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
         time.sleep(0.6); s.c=Chrome(port=free()); s.J=s.c.js; s.ok=[]
         s.c.call('Page.addScriptToEvaluateOnNewDocument',{'source':ERRS}); s.c.size(1440,1100)
+        # V2-3: os testes de cadastro são de domínio e leem colunas fora do "Abre com"; o padrão é conferido nos testes da VISOES-2
+        if colunas=='todas': s.c.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__g2cvTodasSempre=true'})
     def goto(s,f): s.c.goto(f'http://127.0.0.1:{s.p}/{f}',wait=1.2); time.sleep(.3)
     # erro conhecido do motor (engine.py, fora desta frente): o runtime chama componentDidUpdate(prevProps) sem o 2º argumento e
     # ENGINE_JS2 lê ps.g2toast → TypeError a cada aviso (o aviso aparece, só não some sozinho). Fica fora da contagem.

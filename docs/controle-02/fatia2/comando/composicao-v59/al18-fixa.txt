@@ -1,0 +1,6 @@
+OK adaptador real permite avisos e publica R1 pela alçada real
+OK sobreposição real recusa antes de gravar recibo ou referência
+OK cultura incompatível real recusa e preserva rascunho
+OK Rui sem AL18 recusa comando real
+OK AL18 fixa recusa alteração sem gravar e mantém regra gestor
+RESULTADO 5/5

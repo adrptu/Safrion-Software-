@@ -69,12 +69,12 @@ def fluxo():
         t.goto('Main.dc.html'); J("localStorage.removeItem('talhao-os-cenario-v1'); sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:'Lagoa Grande',lay:'Integrado',tsel:[]}))")
         t.goto('IN-04.dc.html#car:PV23'); ok(pronto(), 'mapa real da Lagoa Grande pronto'); time.sleep(.8)
         rail = J("[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')].map(b=>b.innerText.trim())") or []
-        ico = J("(()=>{const b=[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')].find(b=>b.innerText.trim()==='Carência e destino'); const p=b&&b.querySelector('svg path'); return p?p.getAttribute('d'):'';})()") or ''
-        ok('Carência e destino' in rail and rail.index('Carência e destino') == rail.index('Pragas e doenças') + 1, 'barra do mapa com a camada Carência e destino depois de Pragas e doenças', rail)
-        ok(ico.startswith('M12 12m-9 0a9 9') and 'M10.3 3.9' not in ico, 'ícone da camada = relógio do catálogo (o triângulo fica para alerta real)', ico)
-        sel = J("(()=>{const b=[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')].find(b=>b.innerText.trim()==='Carência e destino'); return b?b.getAttribute('aria-selected'):'';})()")
+        # DEC-0910-36 (decisão do proprietário, 16/10/2026): Carência e destino deixa a barra e vira filtro de Colheita e produtividade
+        filtro = J("(()=>{const b=[...document.querySelectorAll('main [role=group][aria-label=Mostrar] button')].find(b=>b.innerText.trim()==='Carência e destino'); return b?b.getAttribute('aria-pressed'):'';})()")
+        ok('Carência e destino' not in rail and 'Colheita e produtividade' in rail and filtro == 'true', 'Carência e destino é filtro (Mostrar) de Colheita e produtividade, fora da barra', [rail, filtro])
+        sel = J("(()=>{const b=[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')].find(b=>b.innerText.trim()==='Colheita e produtividade'); return b?b.getAttribute('aria-selected'):'';})()")
         p = pan(); a = acts()
-        ok(sel == 'true' and 'Pivô 23' in p and 'carência até 26/09' in rot('PV23'), 'link #car:PV23 abre a camada com o Pivô 23 selecionado; rótulo do pivô "carência até 26/09" = último dia em carência (texto, não só cor)', [sel, rot('PV23'), p[:160]])
+        ok(sel == 'true' and 'Pivô 23' in p and 'carência até 26/09' in rot('PV23'), 'link #car:PV23 abre Colheita e produtividade › Carência e destino com o Pivô 23 selecionado; rótulo do pivô "carência até 26/09" = último dia em carência (texto, não só cor)', [sel, rot('PV23'), p[:160]])
         ok('Colheita impedida até 26/09 · Tebuconazol 200 EC (OS-0508)' in p and 'determina o prazo' in p and 'faixa não registrada: vale o talhão todo' in p and 'Consultado em 23/09/2026 (hoje)' in p and 'Atualização' in p,
            'painel: prazo determinante, faixa não identificada vale para o pivô, data consultada e atualização', p[:600])
         ok(a == [['Ver restrição', 'OS.dc.html#OS-0508']], 'uma ação primária no estado: Ver restrição → OS-0508', a)
@@ -103,7 +103,7 @@ def fluxo():
         ok(t.errs() == '', 'mapa sem erro de JavaScript', t.errs())
         # ---------- 5 · O.S.: colheita no Pivô 23 impedida pela carência (comando, não cor) e recuperação ----------
         t.goto('OS.dc.html'); time.sleep(.5)
-        btn('Nova ordem', 'main'); setv('#nv_saf', 'LG2627'); time.sleep(.3); setv('#nv_cult', 'lg23'); time.sleep(.3); setv('#nv_atv', 'q3'); time.sleep(.3); setv('#nv_jan', '2026-09-25'); time.sleep(.3)
+        btn('Criar ordem', 'header'); setv('#nv_saf', 'LG2627'); time.sleep(.3); setv('#nv_cult', 'lg23'); time.sleep(.3); setv('#nv_atv', 'q3'); time.sleep(.3); setv('#nv_jan', '2026-09-25'); time.sleep(.3)
         btn('Emitir ordem', 'aside[role=dialog][aria-label="Nova ordem"]'); time.sleep(.6)
         oid = (J("(()=>{const a=document.querySelector('aside[role=dialog]'); return a?a.getAttribute('aria-label'):'';})()") or '').split(' · ')[0]; p = ospan()
         ok(oid == 'OS-0440' and 'Liberar bloqueado: carência em curso em Pivô 23 até 26/09' in p and 'OS-0508' in p and 'Quem resolve: Ana (agrônoma) reprograma a colheita para 27/09' in p,
@@ -192,8 +192,8 @@ def fluxo():
         # ---------- 8b · link "Ver carência no mapa" (#car, sem talhão) não troca fazenda nem seleção ----------
         t.goto('Main.dc.html'); J("sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:'Santa Rita',lay:'Lavoura',tsel:['T7'],flt:{}}))")
         t.goto('IN-04.dc.html#car'); time.sleep(1.2); ctx = J("sessionStorage.getItem('mapa-ctx')") or ''
-        ok('"mf_faz":"Santa Rita"' in ctx and '"tsel":["T7"]' in ctx and '"lay":"Carência e destino"' in ctx and J("location.hash") == '',
-           'link #car vindo da CO-06 abre a camada na fazenda e com o talhão que já estavam (Santa Rita, T7)', ctx)
+        ok('"mf_faz":"Santa Rita"' in ctx and '"tsel":["T7"]' in ctx and '"lay":"Colheita"' in ctx and '"ver":"Carência e destino"' in ctx and J("location.hash") == '',
+           'link #car vindo da CO-06 abre Colheita e produtividade › Carência e destino na fazenda e com o talhão que já estavam (Santa Rita, T7)', ctx)
         ok(t.errs() == '', 'link #car sem erro de JavaScript', t.errs())
         # ---------- 9 · celular (390 × 844): camada e lotes alcançáveis, sem erro ----------
         t.c.size(390, 844); t.goto('IN-04.dc.html#car:PV23'); pronto(); time.sleep(1.0)

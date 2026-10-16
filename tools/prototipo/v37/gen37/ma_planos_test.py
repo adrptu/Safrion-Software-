@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Teste CDP dos Planos de manutenção girando as preventivas (pedido de 02/10/2026), na tela única MA (PCM simplificado S1–S2):
-menu (1 item) · visão Planos (10 planos, 4 ativos sem plano) · vencimentos calculados (paridade JS × Python) · gerar sem duplicar ·
+navegação (ícone Manutenção → MA; visões no seletor da tela) · visão Planos (10 planos, 4 ativos sem plano) · vencimentos calculados (paridade JS × Python) · gerar sem duplicar ·
 falta de peça trava a liberação · jornada da OM-0234 (conflito → Liberar mesmo assim → iniciar → tarefas + leitura → concluir fecha o ciclo) ·
 publicar v+1 sem mudar a ordem aberta · leitura do abastecimento muda a situação · leitura menor vira troca de contador a confirmar.
 Uso: python3 ma_planos_test.py   (lê _render; o cenário é zerado no início)"""
@@ -12,11 +12,14 @@ from ui37 import MENU2
 m = MA(1440, 1100); J = m.J
 try:
     m.ir('vis=planos', perfil='Otávio', limpa=True); m.sem_erro('MA · Planos')
-    # 1 · menu (13/10/2026, pedido do proprietário): Manutenção com 4 subitens enxutos, um por visão da mesma tela MA; Planos é o último
+    # 1 · navegação (13/10/2026, proprietário: barra lateral só com ícones, sem submenus): um ícone Manutenção → tela única MA, destacado e sem
+    #     subitens; as 4 visões ficam no seletor da própria tela, Planos por último; #vis=planos abre a visão Planos (antes, v57: 4 subitens no menu)
     g = [x for x in MENU2 if x[0] == 'Manutenção'][0]
-    mn = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>a.innerText.trim()+'|'+a.getAttribute('href')).filter(x=>/MA\\.dc\\.html/.test(x))")
-    m.ok(g[2] == [('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')] and mn == ['Pendências sem ordem|MA.dc.html#vis=semordem','Ordens de manutenção|MA.dc.html#vis=ordens','Ativos e disponibilidade|MA.dc.html#vis=ativos','Planos preventivos|MA.dc.html#vis=planos'],
-         'menu: Manutenção com 4 subitens (uma visão cada) → MA.dc.html; "Planos preventivos" abre a visão Planos', mn)
+    mn = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].filter(a=>/^(MA|MOD-MAN)/.test(a.getAttribute('href')||'')).map(a=>[a.getAttribute('aria-label'),a.getAttribute('href'),a.getAttribute('aria-current'),a.innerText.trim()])")
+    vs = J("[...document.querySelectorAll('main .ma-vis button')].map(b=>[b.innerText.replace(/\\s*\\d+\\s*$/,'').trim(),b.getAttribute('aria-pressed')])")
+    m.ok(g[2][0] == ('Painel', 'PMAN.dc.html') and all(h.split('#')[0] == 'MA.dc.html' for _, h in g[2][1:]) and mn == [['Manutenção', 'MOD-MAN.dc.html', 'page', '']]   # v60: o ícone abre a tela de entrada; v65: o Painel (PMAN) é o 1º atalho
+         and vs == [['Sem ordem', 'false'], ['Ordens', 'false'], ['Ativos', 'false'], ['Planos', 'true']] and m.hash() == '#vis=planos',
+         'navegação: um ícone Manutenção → tela de entrada MOD-MAN (destacado, sem subitens); o seletor da tela traz Sem ordem · Ordens · Ativos · Planos e #vis=planos abre a visão Planos', [mn, vs, m.hash()])
     # 2 · visão Planos: 10 planos, 4 ativos sem plano, PM-02 com 1 vencida
     sem = J("[...document.querySelectorAll('main button[aria-label^=\"Criar plano para\"]')].map(b=>b.innerText)") or []
     pl = m.linhas(0)
@@ -27,7 +30,7 @@ try:
     m.ok(sorted(js) == py, f'vencimento: manVenc (JS) = vencimento() (Python) nos {len(py)} ativo × serviço')
     # 4 · Sem ordem: 2 vencidas, primária pelo estado
     m.ir('vis=semordem'); b = m.body()
-    m.ok('VENCIDAS SEM ORDEM\n2' in b and 'Gerar 3 ordens preventivas' in m.hdr(), 'Sem ordem: 2 vencidas · primária "Gerar 3 ordens preventivas"', m.hdr())
+    m.ok(m.man("window.__man.manSemOrdem(m).venc.filter(l=>l.x.sit==='Vencida').length") == 2 and 'GERAR ORDEM PREVENTIVA' in b.upper() and 'Gerar 3 ordens preventivas' in m.hdr(), 'Sem ordem: 2 vencidas · primária "Gerar 3 ordens preventivas"', m.hdr())
     # 5 · gerar sem duplicar
     n0 = m.man("Object.keys(m.oms).length"); m.clk('Gerar 3 ordens preventivas'); tt = m.toast()
     n1 = m.man("Object.keys(m.oms).length"); r = J("(()=>{ const M=window.__man; const c=M.manClone(M.manGet()); const x=M.manGerarTodas(c); return x.msg||''; })()")

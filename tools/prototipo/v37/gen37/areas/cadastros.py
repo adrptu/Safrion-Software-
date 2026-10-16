@@ -20,6 +20,8 @@ for _f in ('CD-01.dc.html','CD-01det.dc.html','CD-06.dc.html'): ui37.H_OVR.pop(_
 
 # ---------------- blocos e botões (padrão do exemplar processo_safra) ----------------
 def bloco(titulo,desc,corpo,acao=''):
+    acao=E.recolhe_acoes(titulo,acao)   # MAIS-01 (15/10/2026): uma secundária à vista, as outras no "⋯ Mais ações" do bloco
+    desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
             f'<div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px;"><div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">'
             f'<h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">{esc(titulo)}</h3><div style="font-size: 12.8px; color: {MUTED};">{esc(desc)}</div></div>'
@@ -90,7 +92,8 @@ CADX_CSS=(
     ".cadx-dados .g2caixa{flex:1 1 0;min-height:0}.cadx-dados .g2rola{flex:1 1 0;min-height:0;overflow:auto}"
     ".cadx-rola{flex:1 1 0;min-height:0;overflow:auto}"
     # barra da grade: busca e contagem, filtro rápido, filtros ativos ... ações da aba, expandir/recolher, primária por último
-    ".cadx .g2caixa>div:first-child:has(>span),.cadx-barra{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid #E4E9E5}"
+    # SEP-20261015 (c): sem linha entre a barra e o que vem abaixo (cabeçalho da tabela com fundo, cartões, mapa)
+    ".cadx .g2caixa>div:first-child:has(>span),.cadx-barra{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px}"
     ".cadx .g2caixa>div:first-child>label:has(input[type=search]),.cadx .g2caixa>div:first-child>label:has(input[type=search])+span{order:-2}"
     ".cadx-qf{order:-1;display:flex;flex-wrap:wrap;gap:6px}.cadx-prim{order:1;display:inline-flex;margin-left:auto}"
     ".cadx-seg{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:#EEF1EE}"
@@ -143,17 +146,14 @@ def faixa(key):
         f'<span style="display: flex; align-items: baseline; gap: 8px;"><span style="{H("fx.nst")}">{H("fx.n")}</span><span style="font-size: 13px; font-weight: 600;">{H("fx.rot")}</span></span>'
         f'<span style="display: flex; align-items: baseline; flex-wrap: wrap; column-gap: 8px; row-gap: 2px; font-size: 12.5px; min-width: 0;"><span style="color: {MUTED}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;">{H("fx.reg")}</span>'
         f'<span class="cadx-verbo">{H("fx.verbo")} ›</span></span></button></sc-for></div>')
-PRIM_ST=('padding: 7px 14px; border-radius: 9px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; line-height: 1.25; '
-         f'background: {E.ACC}; color: #fff; border: 1px solid {E.ACC}; box-shadow: 0 1px 2px rgba(30,122,76,.25);')
-SEC_ST=('padding: 7px 12px; border-radius: 9px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; line-height: 1.25; '
-        f'background: {SURF}; color: {INK}; border: 1px solid {LINE};')
+# botões da aba: os do engine (BTN_ST compacto; antes um estilo local com raio 9, auditoria DS 15/10/2026)
 def prim(fn,rotulo,hole=False):
     """primária da aba (uma por aba), dentro do bloco onde age; fica por último na barra."""
     t=H(rotulo) if hole else esc(rotulo)
-    return f'<span class="cadx-prim"><button type="button" onClick="{H(fn)}" style="{PRIM_ST}">{t}</button></span>'
+    return f'<span class="cadx-prim"><button type="button" onClick="{H(fn)}" style="{E.BTN_ST(True,True)}">{t}</button></span>'
 def secbtn(fn,rotulo,dica='',hole=False):
     t=H(rotulo) if hole else esc(rotulo); d=f' title="{esc(dica)}"' if dica else ''
-    return f'<button type="button" onClick="{H(fn)}"{d} style="{SEC_ST}">{t}</button>'
+    return f'<button type="button" onClick="{H(fn)}"{d} style="{E.BTN_ST(False,True)}">{t}</button>'
 def qf_chips(gid):
     """filtro rápido do bloco (Todos · A resolver · ...), à esquerda da barra (buraco gid+'_cqf', ver cadQf)."""
     return (f'<div class="cadx-qf" role="group" aria-label="Filtro rápido"><sc-for list="{H(gid+"_cqf")}" as="qc" hint-placeholder-count="2">'
@@ -208,7 +208,9 @@ def ncol_dinamico(fname,holes):
     partes=s.split(alvo); assert len(partes)-1>=len(holes), (fname,len(partes)-1,holes)
     for i,h in enumerate(holes):
         if h is None: continue
-        q=partes[i+1]; j=q.index(','); assert q[:j].isdigit(), (fname,q[:20]); partes[i+1]='{{'+h+'}}'+q[j:]
+        q=partes[i+1]; j=q.index(',')
+        if q.startswith('{{') and q[:j].endswith('_ncols}}'): continue   # VISOES-2 V2-3: grade com colunas essenciais já segue as colunas visíveis (g2lib)
+        assert q[:j].isdigit(), (fname,q[:20]); partes[i+1]='{{'+h+'}}'+q[j:]
     open(p,'w',encoding='utf-8').write(alvo.join(partes))
 def estado_html(key):
     return f'<span class="cadx-estado" style="{H(key+"_stst")}"><span style="{H(key+"_stdot")}"></span>{H(key)}</span>'
@@ -285,8 +287,10 @@ const CAD_BTN_DEL2=CAD_BTN+'background:#B42318;color:#FFFFFF;border:1px solid #B
 const CAD_BTN_OFF=CAD_BTN+'background:#F4F6F3;color:#8A968E;border:1px solid #E4E9E5;cursor:not-allowed;';
 function cadActsIni(self){ self.g2formActs=(gid,r,fm)=>{ const f=CAD_ACTS[gid]; return f?(f(self,r,fm)||[]).filter(Boolean).map(a=>Object.assign({st:CAD_BTN_SEC,h:''},a)):[]; }; }
 function cadApaga(self,gid,id){ const sp=GR(gid); const r0=g2find(RW(self,gid),id); const nome=r0?g2text(r0,sp.cols[0]):''; const rs=g2clone(RW(self,gid));
+  const g2_0=self.state.g2, fm0=g2st(self,gid).fm;   // gravação falhou (CD08-GRAVA-01): a linha volta e o registro reabre com o motivo
   const rm=(l)=>{ const i=l.findIndex(x=>x.id===id); if(i>=0){ l.splice(i,1); return true; } return l.some(x=>x.kids&&rm(x.kids)); }; rm(rs);
-  g2set(self,gid,{rows:rs,fm:null,cfp:null}); self.setState({g2toast:'Excluído: '+nome}); if(self.g2after) self.g2after(gid,rs,null); }
+  g2set(self,gid,{rows:rs,fm:null,cfp:null}); self.setState({g2toast:'Excluído: '+nome}); if(self.g2after) self.g2after(gid,rs,null);
+  g2persiste(self,gid,g2_0,fm0?{fm:Object.assign({},fm0,{errs:{},warn:false}),cfp:null}:{cfp:null},'Não excluído'); }
 // ent: 'cultivar'; motivo: por que não pode (vazio = pode); fazer: exclusão própria da tela (ex.: rascunho da estrutura)
 function cadExcluir(self,gid,r,ent,motivo,fazer){
   if(motivo) return {t:'Excluir '+ent,h:'Não dá para excluir: '+motivo+'.',st:CAD_BTN_OFF,go:()=>self.setState({g2toast:'Não dá para excluir: '+motivo+'.'})};
@@ -296,7 +300,7 @@ function cadExcluir(self,gid,r,ent,motivo,fazer){
 
 # =====================================================================================
 # Cada tela pode ser reescrita num módulo próprio (areas/cad_*.py, que importa os auxiliares daqui); se ele existir, é o que vale.
-CAD_MODS=(('areas.cad_fazendas',('cd01','cd01det')),('areas.cad_culturas',('cd02',)),('areas.cad_ativos_pessoas',('cd03','cd04')),
+CAD_MODS=(('areas.cad_fazendas',('cd01','cd01det')),('areas.cad_culturas',('cd02','cd08')),('areas.cad_ativos_pessoas',('cd03','cd04')),
           ('areas.cad_parceiros',('cd05',)),('areas.cad_produtos_estrutura',('cd06','cd07')))
 def build():
     import importlib, importlib.util

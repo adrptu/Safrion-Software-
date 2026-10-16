@@ -23,7 +23,9 @@ class Conta:
     def menu(s, item):
         """menu Manutenção com subitens (pedido do proprietário, 13/10/2026): abre o grupo e toca a visão (2 cliques; antes 1, o item
         único "Manutenção"). A página nova não conta como troca: é o destino da tarefa. As metas abaixo sobem 1 clique só por isso."""
-        m.clk('Manutenção', 'nav[aria-label=Menu]', w=.6); m.clk(item, 'nav[aria-label=Menu]', w=1.4); s.c += 2; s.marca()
+        # v60 (13/10/2026): os subitens viraram cartões da tela de entrada da Manutenção (Sem ordem, Ordens, Ativos, Planos); continuam 2 toques
+        m.clk('Manutenção', 'nav[aria-label=Menu]', w=.9); m.clk(CARTAO[item], 'main', w=1.4); s.c += 2; s.marca()
+CARTAO = {'Pendências sem ordem': 'Sem ordem', 'Ordens de manutenção': 'Ordens', 'Ativos e disponibilidade': 'Ativos', 'Planos preventivos': 'Planos'}
 RES = []
 def tarefa(nome, c, esperado, ok_estado, info=''):
     tot = (c.c, c.k, c.t); RES.append((nome, tot, esperado))
@@ -58,7 +60,7 @@ try:
     om = m.man("Object.values(m.oms).find(o=>(o.achados||[]).indexOf('NC-0912')>=0)||{}") or {}
     tarefa('(b) NC-0912 → preventiva liberada', c, (6, 0, 0), om.get('etapa') == 'Liberadas', om.get('id'))
     # (c) ver o que vence · programar · liberar as 3
-    c = inicio('Otávio'); c.menu('Pendências sem ordem'); ver = 'VENCIDAS SEM ORDEM' in m.body().upper()
+    c = inicio('Otávio'); c.menu('Pendências sem ordem'); ver = 'GERAR ORDEM PREVENTIVA' in m.body().upper()   # MAN-LIMPA-01: sem o cartão; a lista mostra os vencimentos com a ação
     tarefa('(c) ver o que vence', c, (2, 0, 0), ver and 'vis=semordem' in m.hash())
     c.clk('Gerar 3 ordens preventivas'); tarefa('(c) programar', c, (3, 0, 0), m.man("['OM-0235','OM-0236','OM-0237'].every(id=>!!m.oms[id])"))
     c.clk('Solicitar compra', '#ma-painel'); c.clk('Registrar recebimento', '#ma-painel'); c.clk('Liberar serviço', '#ma-painel')
@@ -66,9 +68,10 @@ try:
     tarefa('(c) liberar as 3 (acumulado)', c, (12, 0, 0), m.man("['OM-0235','OM-0236','OM-0237'].every(id=>m.oms[id].etapa==='Liberadas')"), [m.man("['OM-0235','OM-0236','OM-0237'].map(id=>m.oms[id].etapa)")])
     # (d) aptos agora · custo do mês · custo de uma OM · custo por ativo
     c = inicio('Ana'); c.menu('Ativos e disponibilidade'); b = m.body().upper()
-    tarefa('(d) aptos agora', c, (2, 0, 0), 'APTOS AGORA' in b and 'vis=ativos' in m.hash())
-    tarefa('(d) custo do mês', c, (2, 0, 0), 'CUSTO DE MANUTENÇÃO · SET/2026' in b)
-    tarefa('(d) custo por ativo', c, (2, 0, 0), 'CUSTO NO PERÍODO' in b)
+    tarefa('(d) aptos agora', c, (2, 0, 0), 'APTO' in b and 'CONDIÇÃO' in b and   # MAN-LIMPA-01: a coluna Condição responde (o indicador foi ao Painel)
+          'vis=ativos' in m.hash())
+    tarefa('(d) custo do mês', c, (2, 0, 0), 'CUSTO NO MÊS' in b)   # coluna Custo no mês da lista de ativos
+    tarefa('(d) custo por ativo', c, (2, 0, 0), 'CUSTO NO MÊS' in b)
     c = inicio('Ana'); c.menu('Ativos e disponibilidade'); c.abre('a02'); m.bloco('Ordens'); b = m.body()
     tarefa('(d) custo de uma OM (Manutenção · ativo › Ordens)', c, (3, 0, 0), 'OM-0219' in b and 'R$ 4.658,00' in b)
     # (e) abastecimento, web (operador herdado da alocação: 8)

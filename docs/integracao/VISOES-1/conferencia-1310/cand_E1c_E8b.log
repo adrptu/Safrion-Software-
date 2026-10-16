@@ -1,0 +1,4 @@
+OK   E1c busca "0431" (sem fase) → Agrupada: só o grupo T2, com a OS-0431, e o subtotal = Total (102 ha); a soma dos grupos = Total
+OK   E8b Carga com Safra 2025/26: nenhum bloco (as ordens dela não têm alocação) e o estado "Nenhuma ordem de … safra 2025/26 tem alocação…"; com a 2026/27 os blocos aparecem (OS-0419 e OS-0421)
+OK   sem erro de script nas páginas
+RESULTADO: 3 ok · 0 falhas (e2e)

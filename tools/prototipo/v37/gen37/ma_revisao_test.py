@@ -54,11 +54,11 @@ try:
     novas = m.man("Object.keys(m.oms).length") - n0; nova_a = m.man("Object.values(m.oms).filter(o=>o.etapa==='A liberar'&&o.tipo==='Preventiva'&&!['OM-0234'].includes(o.id)).map(o=>o.aid)")
     m.ok(len(vis) == 1 and hb == 'Gerar 1 ordem preventiva' and novas == 1 and nova_a == ['a03'], 'A6 (S3) · com a busca "Trator 03", a primária é "Gerar 1 ordem preventiva" e gera só a do Trator 03', [vis, hb, novas, nova_a])
     # ---------- A8 · João executa a OM-0228 e declara a Bomba do Pivô 2 apta ----------
-    m.ir('om=OM-0228', perfil='João', limpa=True); vc = J("[...document.querySelectorAll('header button,main button')].filter(b=>/^João$/.test(b.innerText.trim())).length")
+    m.ir('om=OM-0228', perfil='João', limpa=True); vc = J("(document.querySelector('select[aria-label=\"Trocar perfil de demonstração\"]')||{}).value")   # 14/10: o perfil é o do avatar (sem a faixa Ver como)
     pr = J(PRIMS_PAN); m.clk('Iniciar serviço', '#ma-painel'); m.bloco('Tarefas'); n = m.responder('Conforme')
     m.setv('#ma-painel input[aria-label^="Valor · Medir pressão"]', '3,4'); m.setv('#om-leitura', '8930'); m.clk('Previsto (3 h)', '#ma-painel'); m.clk('Concluir serviço', '#ma-painel')
     p3 = J(PRIMS_PAN); m.clk(p3[0] if p3 else 'Declarar', '#ma-painel')
-    m.ok(vc >= 1 and pr == ['Iniciar serviço'] and n == 3 and m.man("m.oms['OM-0228'].etapa") == 'Em conferência' and (p3 or [''])[0].startswith('Declarar ') and m.man("m.ativos.a11.cond") == 'Apto' and 'João' in (m.man("m.oms['OM-0228'].aptidao.por") or ''),
+    m.ok(vc == 'João' and pr == ['Iniciar serviço'] and n == 3 and m.man("m.oms['OM-0228'].etapa") == 'Em conferência' and (p3 or [''])[0].startswith('Declarar ') and m.man("m.ativos.a11.cond") == 'Apto' and 'João' in (m.man("m.oms['OM-0228'].aptidao.por") or ''),
          'A8 (S3) · Ver como João: inicia a OM-0228, mede conforme, conclui e declara a bomba apta (responsável técnico)', [vc, pr, n, m.man("m.oms['OM-0228'].etapa"), p3, m.man("m.ativos.a11.cond")])
     m.sem_erro('A8')
     # ---------- A10 · comboio em km/L na célula ----------

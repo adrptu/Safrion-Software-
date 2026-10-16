@@ -6,7 +6,7 @@ Aceite do docs/navegacao/CONSOLIDADO.md §3.1 e do design system de 09/10 (BOT-0
   L3  cartão → detalhe com #plano=SOJA-AT; sem rascunho, nenhuma primária; "‹ Biblioteca de planos" no Próximo passo; Atividades,
       Cultivos e Versões visíveis; "Incluir atividade" branco e compacto no cabeçalho do bloco Atividades, com "+"
   L4  F5 reabre o mesmo plano; #plano=XYZ abre a lista, sem erro; trocar o endereço para #plano=MILHO-SF abre o Milho
-  L5  mudar uma dose na tabela: UMA primária "Publicar versão v7"; o resumo das alterações na nota, ao lado dela e NA TELA
+  L5  mudar uma dose na tabela: UMA primária "Salvar alterações"; o resumo das alterações na nota, ao lado dela e NA TELA
       (1440 × 900 aqui; 390 × 844 em L11); "Ver alterações" leva ao bloco completo, o último antes do Próximo passo
   L6  repetição: 2ª mudança no mesmo rascunho v7; publicar: v7 em vigor, sem primária, cultivos "Na v6 · v7 publicada" com o link
       ao cultivo no Planejar safra (#saf=S2627&passo=cultivos&cult=c1)
@@ -25,7 +25,8 @@ Aceite do docs/navegacao/CONSOLIDADO.md §3.1 e do design system de 09/10 (BOT-0
       sem Enter não publica e o erro continua no campo
   L15 R3: rascunho que volta a ficar igual à v6 desabilita "Publicar" com o motivo
   L16 R4: trocar o endereço com o painel da atividade aberto não troca de plano (endereço volta) nem grava em outro plano
-  L17 R6: Esc com o filtro de coluna aberto fecha só o filtro; a 390 px, Esc com o menu sobreposto fecha só o menu
+  L17 R6: Esc com o menu ⋯ da atividade aberto fecha só o menu, a 1440 e a 390 px (toque); a 390 px a barra lateral fica recolhida
+      (68 px, sem expandir: proprietário, 13/10/2026; antes: Esc com o menu sobreposto fechava só o menu)
   L18 R7: plano novo e F5: o aviso não mostra o id interno
   L19 R8: voltar ou trocar de plano com a inclusão de insumo digitada avisa ("Descartar e …" ou "Continuar editando")
   L13 sem erro de JavaScript
@@ -120,11 +121,11 @@ def mudar_dose(val, toque=False, abrir=True):
     clique(lab('Alterar a dose de Fungicida A'), toque, .3)
     J("document.activeElement&&document.activeElement.select&&document.activeElement.select()"); digita(val); c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.45)
 def publicar_ate(toque=False):
-    """anda pelo caminho que a tela oferece até 'Publicar versão v7' (na base passa por 'Revisar e publicar ›') e publica"""
+    """anda pelo caminho que a tela oferece até 'Salvar alterações' (na base passa por 'Revisar e publicar ›') e publica"""
     for _ in range(3):
-        if J(f"!!{btnc('Publicar versão v7')}"): break
+        if J(f"!!{btnc('Salvar alterações')}"): break
         if clique("document.querySelector('[data-acoes] [data-acao=avancar]')", toque, .6) != 'ok': break
-    return clique(btnc('Publicar versão v7'), toque, .6)
+    return clique(btnc('Salvar alterações'), toque, .6)
 def cenario_cliques(porta, toque=False, w=1440, h=900):
     """mudar uma dose (Fungicida A 0,5 → 0,6 L/ha) e publicar a v7, do índice do menu (lista) até a versão publicada"""
     abre('PA.dc.html', w, h, 3 if toque else 1, toque, porta=porta); CLIQUES[0] = 0
@@ -143,9 +144,9 @@ try:
         clique(CARD('Soja alta tecnologia'), w=.7); d = est(); shot('1440_detalhe')
         inc = J(f"(()=>{{const b={btn('Incluir atividade')}; if(!b) return null; const s=b.closest('section'); const h=s&&s.querySelector('h3'); const cs=getComputedStyle(b); return {{bg:cs.backgroundColor, fs:cs.fontSize, mais:!!b.querySelector('svg'), bloco:h?h.innerText.trim():'', topo:Math.abs(b.getBoundingClientRect().top-h.getBoundingClientRect().top)<30}};}})()")
         chk('L1b detalhe sem faixa de etapas e sem "impedida"', not d['faixa'] and not d['impedida'], d)
-        chk('L3 cartão → detalhe #plano=SOJA-AT; sem rascunho nenhuma primária; Próximo passo só com "‹ Biblioteca de planos"; Atividades, Cultivos e Versões visíveis; "Incluir atividade" branco, compacto, com "+", no cabeçalho do bloco Atividades',
+        chk('L3 cartão → detalhe #plano=SOJA-AT; sem rascunho nenhuma primária; Próximo passo só com "‹ Biblioteca de planos"; só o bloco Atividades (Cultivos e Versões saíram em 14/10); "Incluir atividade" branco, compacto, com "+", no cabeçalho do bloco Atividades',
             d['hash'] == '#plano=SOJA-AT' and d['h2'] == 'Soja alta tecnologia' and d['prims'] == [] and d['area'] == ['voltar:‹ Biblioteca de planos'] and d['rot'] == 'Próximo passo'
-            and 'Atividades do plano' in d['tit'] and 'Cultivos que usam este plano' in d['tit'] and any(t.endswith('Versões') for t in d['tit'])
+            and 'Atividades do plano' in d['tit'] and not any('Cultivos que usam' in t for t in d['tit']) and not any(t.endswith('Versões') for t in d['tit'])
             and inc and inc['bg'] == 'rgb(255, 255, 255)' and inc['fs'] == '13px' and inc['mais'] and inc['bloco'] == 'Atividades do plano' and inc['topo'], [d, inc])
     # ---------------- L4 · endereço ----------------
     with secao('L4'):
@@ -160,32 +161,27 @@ try:
         abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,6'); t1 = toast(); m = est(); shot('1440_rascunho')
         ordem = J(r"""(()=>{const a=document.querySelector('[data-acoes]'); const ss=[...document.querySelectorAll('main section')].filter(s=>s.getClientRects().length); const u=ss[ss.length-1]; if(!a||!u) return {ultimo:'',depois:false,texto:''};
           return {ultimo:(u.querySelector('h3')||{innerText:''}).innerText.trim(), depois:!!(u.compareDocumentPosition(a)&Node.DOCUMENT_POSITION_FOLLOWING), texto:u.innerText.replace(/\s+/g,' ')};})()""")
-        nt = J(NOTA); clique(btn('Ver alterações', "document.querySelector('[data-acoes]')"), w=.4)
-        alt = J("(()=>{const h=document.getElementById('pa-alt-tit'); if(!h) return null; const r=h.getBoundingClientRect(); return {naTela:r.top>=0&&r.bottom<=innerHeight, foco:document.activeElement===h};})()")
-        chk('L5 mudar a dose na tabela: rascunho v7; UMA primária "Publicar versão v7"; o resumo "1 alteração na v7: Fungicida 1ª aplicação (Fungicida A: 0,5 → 0,6 L/ha)." na nota, ao lado dela e na tela a 1440 × 900 (descrição do botão); "Ver alterações" leva ao bloco "Alterações do rascunho v7 em relação à v6" (dose, custo, impacto), o último antes do Próximo passo; cultivos "Continua na v6 ao publicar"',
-            'Rascunho v7 criado' in t1 and [x['t'] for x in m['prims']] == ['Publicar versão v7'] and not m['prims'][0]['dis'] and 'comando:Publicar versão v7' in m['area']
-            and nt['txt'].startswith('1 alteração na v7: Fungicida 1ª aplicação (Fungicida A: 0,5 → 0,6 L/ha).') and nt['naTela'] and nt['pubNaTela'] and nt['desc'] == 'aa-nota'
-            and alt and alt['naTela'] and alt['foco']
-            and ordem['ultimo'] == 'Alterações do rascunho v7 em relação à v6' and ordem['depois'] and 'Fungicida A: 0,5 → 0,6 L/ha' in ordem['texto'] and 'Custo de insumos' in ordem['texto'] and 'não serão alterados' in ordem['texto']
-            and J("document.querySelector('main').innerText.includes('Continua na v6 ao publicar')"), [t1, m, nt, alt, ordem])
+        nt = J(NOTA); alt = J("!!document.getElementById('pa-alt-tit')")
+        sel = J("[...document.querySelectorAll('main .pa-atividade')].filter(a=>/Alterada/.test(a.innerText)).map(a=>(a.querySelector('.pa-titulo')||{innerText:''}).innerText.trim())") or []
+        # 14/10/2026 (proprietário: "tire essa parte de alterações de rascunho. lá embaixo deixe o botão salvar"): sem bloco e sem nota; a
+        # atividade mudada fica marcada na lista e o aviso ao salvar diz o que mudou (L6)
+        chk('L5 mudar a dose na tabela: rascunho v7; UMA primária "Salvar alterações", sem nota ao lado e sem o bloco de alterações; a atividade mudada fica marcada "Alterada"',
+            'Rascunho v7 criado' in t1 and [x['t'] for x in m['prims']] == ['Salvar alterações'] and not m['prims'][0]['dis'] and 'comando:Salvar alterações' in m['area']
+            and not nt['txt'] and not alt and 'Fungicida 1ª aplicação' in sel, [t1, m, nt, alt, sel, ordem])
         mudar_dose('0,7', abrir=False); t2 = toast(); m2 = est()
-        clique(btn('Publicar versão v7'), w=.7); t3 = toast(); m3 = est(); shot('1440_publicado'); foco = J("(document.activeElement&&document.activeElement.id)||''")
-        lk = J("[...document.querySelectorAll('main a')].filter(a=>a.getClientRects().length&&a.innerText.trim()==='Abrir cultivo no Planejar safra ›').map(a=>a.getAttribute('href'))")
+        clique(btn('Salvar alterações'), w=.7); t3 = toast(); m3 = est(); shot('1440_publicado'); foco = J("(document.activeElement&&document.activeElement.id)||''")
         corpo = J("document.querySelector('main').innerText")
-        clique(lab('Mostrar as versões'), w=.4); vs = J("(document.getElementById('pa-versoes')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
-        chk('L6 repetição: a 2ª mudança fica no rascunho v7 (uma primária); publicar: v7 em vigor e v6 substituída, sem primária nem bloco de alterações; o foco vai aos cultivos; c1, c2, c3 "Na v6 · v7 publicada" com o link ao cultivo no Planejar safra; o aviso e o impacto dizem que a troca de versão ainda não existe no protótipo (R5), sem prometer a adoção',
-            'Gravado no rascunho v7' in t2 and [x['t'] for x in m2['prims']] == ['Publicar versão v7'] and 'Versão v7 publicada' in t3 and m3['prims'] == [] and m3['area'] == ['voltar:‹ Biblioteca de planos']
-            and not any(t.startswith('Alterações do rascunho') for t in m3['tit']) and corpo.count('Na v6 · v7 publicada') == 3
-            and lk == ['SAF.dc.html#saf=S2627&passo=cultivos&cult=c1', 'SAF.dc.html#saf=S2627&passo=cultivos&cult=c2', 'SAF.dc.html#saf=S2627&passo=cultivos&cult=c3']
-            and 'v7 publicada em' in vs and 'Em vigor' in vs and 'Substituída' in vs and 'Safra encerrada · fica na v5' in corpo and foco == 'pa-cv-tit'
-            and 'No protótipo, a versão publicada aqui ainda não chega ao Planejar safra.' in t3 and 'decida a adoção' not in t3 + corpo and 'no protótipo, ela ainda não existe' in corpo,
-            [t2, m2['prims'], t3, m3, lk, vs, corpo.count('Na v6 · v7 publicada'), foco])
+        chk('L6 repetição: a 2ª mudança fica no rascunho v7 (uma primária); salvar: aviso curto "Plano salvo · v7 · cultivos seguem na versão deles" (15/10, proprietário: pouco texto); "Publicado · v7", sem primária nem bloco de alterações; o foco vai ao nome do plano',
+            'Gravado no rascunho v7' in t2 and [x['t'] for x in m2['prims']] == ['Salvar alterações'] and t3.startswith('Plano salvo · v7') and 'cultivos seguem na versão deles' in t3 and m3['prims'] == [] and m3['area'] == ['voltar:‹ Biblioteca de planos']
+            and not any(t.startswith('Alterações do rascunho') for t in m3['tit']) and 'Publicado · v7' in corpo and foco == 'pa-det-tit' and len(t3) <= 60 and 'decida a adoção' not in t3 + corpo,
+            [t2, m2['prims'], t3, m3, foco])
     # ---------------- L8 · link ao Planejar safra ----------------
     with secao('L8'):
-        clique("[...document.querySelectorAll('main a')].find(a=>a.innerText.trim()==='Abrir cultivo no Planejar safra ›')", w=.2)
+        # o link "Abrir cultivo no Planejar safra ›" saiu com o bloco Cultivos (14/10); o endereço direto do cultivo continua valendo
+        c.goto(f'http://127.0.0.1:{p}/SAF.dc.html#saf=S2627&passo=cultivos&cult=c1', .2)
         espera("location.pathname.endsWith('SAF.dc.html')&&!![...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length&&/T1-A/.test(x.innerText))", 8)
         sf = J("(()=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const cur=document.querySelector('.etp-ind [aria-current=step]'); const d=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); return {url:location.pathname.split('/').pop()+location.hash, etapa:cur?n(cur.innerText):'', painel:d?n(d.innerText).slice(0,160):''};})()"); shot('1440_saf_cultivo')
-        chk('L8 o link abre o Planejar safra na etapa 2 (Cultivos) da 2026/27 com o painel do cultivo c1 (T1-A)',
+        chk('L8 o endereço do cultivo abre o Planejar safra na etapa 2 (Cultivos) da 2026/27 com o painel do cultivo c1 (T1-A)',
             sf['url'] == 'SAF.dc.html#saf=S2627&passo=cultivos&cult=c1' and sf['etapa'].startswith('2') and 'T1-A' in sf['painel'], sf)
     # ---------------- L7 · erro e recusa ----------------
     with secao('L7'):
@@ -199,9 +195,10 @@ try:
         clique(lab('Incluir insumo em Fungicida 1ª aplicação'), w=.1); espera(f"!!{PUB}&&{PUB}.disabled&&!!document.querySelector('[id^=pa-add-dose-]')")
         ia = est(); nota = J("(document.querySelector('[data-acoes] .acoes-nota')||{innerText:''}).innerText.trim()")
         clique(btn('Cancelar', "document.querySelector('main')"), w=.1); espera(f"!document.querySelector('[id^=pa-add-dose-]')&&!!{PUB}&&!{PUB}.disabled"); ib = est()
-        chk('L7a dose 0 recusada junto ao campo sem criar rascunho; Esc cancela e o detalhe continua sem primária; com a inclusão de insumo aberta, "Publicar versão v7" desabilitado com o motivo (nota e dica); Cancelar devolve',
+        chk('L7a dose 0 recusada junto ao campo sem criar rascunho; Esc cancela e o detalhe continua sem primária; com a inclusão de insumo aberta, "Incluir" verde na linha e "Salvar alterações" desabilitado com o motivo (nota e dica); Cancelar devolve',
             'Informe a dose por hectare, maior que zero.' in e0 and r0['prims'] == [] and r0b['prims'] == [] and r0b['h2'] == 'Soja alta tecnologia'
-            and len(ia['prims']) == 1 and ia['prims'][0]['dis'] and ia['prims'][0]['why'] == 'Conclua ou cancele a inclusão do insumo para publicar a v7.' and nota == ia['prims'][0]['why']
+            and [p['t'] for p in ia['prims']] == ['Incluir', 'Salvar alterações'] and not ia['prims'][0]['dis']   # 15/10 (proprietário): "Incluir" é a primária verde da linha de inclusão
+            and ia['prims'][1]['dis'] and ia['prims'][1]['why'] == 'Conclua ou cancele a inclusão do insumo para salvar.' and nota == ia['prims'][1]['why']
             and len(ib['prims']) == 1 and not ib['prims'][0]['dis'], [e0, r0, r0b, ia, nota, ib])
         clique("document.querySelector('[data-acoes] [data-acao=voltar]')", w=.6)
         clique(btn('Criar plano'), w=.5)
@@ -211,9 +208,9 @@ try:
         clique(btn('Criar plano', "document.querySelector('aside[role=dialog]')"), w=.4); dup = J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText")
         J("(()=>{const i=document.querySelector('#np_nome'); const P=HTMLInputElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(i,'Soja teste'); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})()"); time.sleep(.3)
         clique(btn('Criar plano', "document.querySelector('aside[role=dialog]')"), w=.8); nv = est(); nota2 = J("(document.querySelector('[data-acoes] .acoes-nota')||{innerText:''}).innerText.trim()")
-        chk('L7b plano novo: rodapé "Cancelar · Criar plano"; nome repetido na cultura recusado; em branco abre o detalhe #plano= com "Publicar versão v1" desabilitado e o motivo; o bloco Atividades mantém "Incluir atividade"',
+        chk('L7b plano novo: rodapé "Cancelar · Criar plano"; nome repetido na cultura recusado; em branco abre o detalhe #plano= com "Salvar alterações" desabilitado e o motivo; o bloco Atividades mantém "Incluir atividade"',
             rodape == ['Cancelar', 'Criar plano'] and 'Já existe um plano com este nome nesta cultura.' in dup and nv['h2'] == 'Soja teste' and nv['hash'].startswith('#plano=NP')
-            and len(nv['prims']) == 1 and nv['prims'][0]['t'] == 'Publicar versão v1' and nv['prims'][0]['dis'] and nota2 == 'Inclua ao menos uma atividade para publicar a v1.'
+            and len(nv['prims']) == 1 and nv['prims'][0]['t'] == 'Salvar alterações' and nv['prims'][0]['dis'] and nota2 == 'Inclua ao menos uma atividade para salvar.'
             and J(f"!!{btn('Incluir atividade')}") and 'Nenhuma atividade ainda' in J("document.querySelector('main').innerText"), [rodape, dup[-200:], nv, nota2])
         clique(btn('Descartar rascunho'), w=.3); clique(btn('Descartar rascunho', "document.querySelector('main [role=alert]')"), w=.6); dsc = est()
         chk('L7c descartar o plano novo volta à lista (sem endereço) e ele sai da biblioteca', dsc['cards'] == len(D2.PLANOS) and dsc['hash'] == '' and 'Plano novo descartado' in toast(), dsc)
@@ -231,11 +228,13 @@ try:
     # ---------------- L10 · posição ----------------
     with secao('L10'):
         abre('PA.dc.html', 1440, 700); ult = J("[...document.querySelectorAll('main .g2card')].pop().getAttribute('aria-label')")
-        clique("[...document.querySelectorAll('main .g2card')].pop()", w=.7)
         ROL = "[...document.querySelectorAll('main[data-scroll],.ml-tog+div')].map(e=>Math.round(e.scrollTop))"
+        # 14/10 (cartão sem o rodapé dos cultivos): a biblioteca ficou mais curta; a prova é voltar à mesma rolagem de antes de abrir, não um valor fixo
+        centro("[...document.querySelectorAll('main .g2card')].pop()"); time.sleep(.3); antes = J(ROL)   # a mesma rolagem do clique (o clique centraliza o cartão)
+        clique("[...document.querySelectorAll('main .g2card')].pop()", w=.7)
         clique("document.querySelector('[data-acoes] [data-acao=voltar]')", w=.7); dep = J(ROL); fcs = J("(document.activeElement&&document.activeElement.getAttribute('aria-label'))||''")
         cur = J("(document.querySelector('main .g2card[aria-current=true]')||{getAttribute:()=>''}).getAttribute('aria-label')")
-        chk('L10 "‹ Biblioteca de planos" volta à posição de rolagem da biblioteca, com o foco e a marca no último cartão aberto', max(dep) > 100 and fcs == ult and cur == ult, [dep, fcs, ult, cur])
+        chk('L10 "‹ Biblioteca de planos" volta à posição de rolagem da biblioteca, com o foco e a marca no último cartão aberto', max(antes) > 0 and dep == antes and fcs == ult and cur == ult, [antes, dep, fcs, ult, cur])
     # ---------------- L11 · 390 px (toque) ----------------
     with secao('L11'):
         abre('PA.dc.html', 390, 844, 3, True); a = J(r"""(()=>{const b=[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Criar plano'); const r=b?b.getBoundingClientRect():null;
@@ -244,13 +243,13 @@ try:
         b = J(r"""(()=>{const e=document.querySelector('[data-acoes] [data-acao=comando]'); const r=e?e.getBoundingClientRect():null; const t=r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2):null;
           return {lado:document.documentElement.scrollWidth>innerWidth+1, prim:e?e.innerText.trim():'', naTela:!!r&&r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth&&!!t&&e.contains(t)};})()"""); shot('390_rascunho')
         clique("document.querySelector('[data-acoes] [data-acao=comando]')", True, .7); t390 = toast()
-        chk('L11 390 px (toque): sem rolagem lateral; "Criar plano" na tela; depois de mudar a dose, "Publicar versão v7" na tela, sem nada por cima, com o resumo das alterações na tela ao lado; publicar pelo toque',
-            not a['lado'] and a['criar'] and not b['lado'] and b['prim'] == 'Publicar versão v7' and b['naTela'] and n390['naTela'] and 'Fungicida A: 0,5 → 0,6 L/ha' in n390['txt']
-            and 'Versão v7 publicada' in t390, [a, b, n390, t390])
+        chk('L11 390 px (toque): sem rolagem lateral; "Criar plano" na tela; depois de mudar a dose, "Salvar alterações" na tela, sem nada por cima e sem nota; salvar pelo toque e o aviso curto diz a versão salva',
+            not a['lado'] and a['criar'] and not b['lado'] and b['prim'] == 'Salvar alterações' and b['naTela'] and not n390['txt']
+            and t390.startswith('Plano salvo · v7'), [a, b, n390, t390])
     # ---------------- L12 · cliques medidos (mesmo cenário) ----------------
     with secao('L12'):
         n1, tec1, r1, tt1 = cenario_cliques(p)
-        res = {'depois': (n1, tec1, 'Versão v7 publicada' in tt1)}
+        res = {'depois': (n1, tec1, 'Plano salvo · v7' in tt1)}
         if ANTES:
             n0, tec0, r0_, tt0 = cenario_cliques(p0); res['antes cdc185f'] = (n0, tec0, 'Versão v7 publicada' in tt0)
         info('cliques e teclas para mudar uma dose e publicar (cliques, teclas, publicou)', res)
@@ -261,30 +260,31 @@ try:
         abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,6')
         clique(lab('Mostrar insumos de Dessecação pré-plantio'), w=.3); clique(lab('Alterar a dose de Glifosato 480'), w=.3)
         J("document.activeElement.select&&document.activeElement.select()"); digita('6'); aberta = J(NOTA)
-        clique(PUB, w=.1); espera("[...document.querySelectorAll('[role=status]')].some(x=>/entrou no rascunho agora|publicada/.test(x.innerText))", 4)
-        t14 = toast(); n14 = J(NOTA); e14 = est(); clique(lab('Mostrar as versões'), w=.3); v14 = J("(document.getElementById('pa-versoes')||{innerText:''}).innerText.replace(/\\s+/g,' ')")
-        chk('L14a R1: dose do Glifosato 480 digitada (6) sem Enter: "Publicar" desabilitado com o motivo; o clique de verdade nele não publica: a dose entra no rascunho v7 e no resumo ao lado do botão, o aviso pede para conferir e clicar de novo; a v6 segue em vigor',
-            aberta['dis'] and aberta['txt'] == 'Confirme (Enter) ou cancele (Esc) a dose de Glifosato 480 para publicar a v7.'
-            and 'Versão v7 publicada' not in t14 and 'A dose de Glifosato 480: 2 → 6 L/ha entrou no rascunho agora' in t14
-            and n14['txt'].startswith('2 alterações na v7:') and 'Glifosato 480: 2 → 6 L/ha' in n14['txt'] and 'Fungicida A: 0,5 → 0,6 L/ha' in n14['txt'] and not n14['dis'] and n14['naTela']
-            and 'v7 publicada' not in v14 and 'rascunho em edição' in v14, [aberta, t14, n14, v14])
-        clique(PUB, w=.1); espera("[...document.querySelectorAll('[role=status]')].some(x=>/Versão v7 publicada/.test(x.innerText))", 4); t14b = toast()
+        clique(PUB, w=.1); espera("[...document.querySelectorAll('[role=status]')].some(x=>/entrou no rascunho agora|salvas na v7/.test(x.innerText))", 4)
+        t14 = toast(); n14 = J(NOTA); e14 = est(); v14 = J("document.querySelector('main').innerText.replace(/\\s+/g,' ')")   # Versões saiu do detalhe (14/10): o cabeçalho diz a versão em vigor
+        chk('L14a R1: dose do Glifosato 480 digitada (6) sem Enter: "Salvar alterações" desabilitado com o motivo; o clique de verdade nele não salva: a dose entra no rascunho v7 (a atividade fica marcada), o aviso pede para conferir e clicar de novo; a v6 segue em vigor',
+            aberta['dis'] and aberta['txt'] == 'Confirme (Enter) ou cancele (Esc) a dose de Glifosato 480 para salvar.'
+            and 'salvas na v7' not in t14 and 'A dose de Glifosato 480: 2 → 6 L/ha entrou no rascunho agora: confira e clique em Salvar alterações de novo.' in t14
+            and not n14['txt'] and not n14['dis'] and 'Alterada' in v14
+            and 'Rascunho v7 · v6 em vigor' in v14 and 'Publicado · v7' not in v14, [aberta, t14, n14, v14[:400]])
+        clique(PUB, w=.1); espera("[...document.querySelectorAll('[role=status]')].some(x=>/Plano salvo · v7/.test(x.innerText))", 4); t14b = toast()
         clique(lab('Mostrar insumos de Dessecação pré-plantio'), w=.3) if J(f"!!{lab('Mostrar insumos de Dessecação pré-plantio')}") else None
         g14 = J(f"(()=>{{const b={lab('Alterar a dose de Glifosato 480')}; return b?b.innerText.trim():'';}})()")
-        chk('L14b R1: o clique seguinte publica a v7 com as duas doses que estavam no resumo (Glifosato 480 em 6 L/ha)', 'Versão v7 publicada' in t14b and g14 == '6 L/ha', [t14b, g14])
+        chk('L14b R1: o clique seguinte publica a v7 com as duas doses que estavam no resumo (Glifosato 480 em 6 L/ha)', 'Plano salvo · v7' in t14b and g14 == '6 L/ha', [t14b, g14])
         abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,6'); clique(lab('Alterar a dose de Fungicida A'), w=.3)
         J("document.activeElement.select&&document.activeElement.select()"); digita('0'); clique(PUB, w=.6)
         t2 = toast(); a2 = J("[...document.querySelectorAll('main [role=alert]')].map(a=>a.innerText.trim()).join(' | ')"); n2 = J(NOTA); campo = J("(document.querySelector('input[id^=pa-dose-]')||{value:null}).value")
         chk('L14c R2: dose 0 digitada sem Enter e clique em "Publicar": não publica; o erro continua junto ao campo aberto e o botão segue desabilitado com o motivo',
-            'Versão v7 publicada' not in t2 and 'Informe a dose por hectare, maior que zero.' in a2 and campo == '0' and n2['dis'] and n2['txt'].startswith('Confirme (Enter) ou cancele (Esc) a dose de Fungicida A'), [t2, a2, n2, campo])
+            'salvas na v7' not in t2 and 'Informe a dose por hectare, maior que zero.' in a2 and campo == '0' and n2['dis'] and n2['txt'].startswith('Confirme (Enter) ou cancele (Esc) a dose de Fungicida A'), [t2, a2, n2, campo])
     # ---------------- L15 · R3: rascunho igual à versão publicada ----------------
     with secao('L15'):
         abre('PA.dc.html#plano=SOJA-AT'); mudar_dose('0,6'); mudar_dose('0,5', abrir=False); n15 = J(NOTA); e15 = est()
-        chk('L15 R3: 0,5 → 0,6 → 0,5 deixa o rascunho v7 igual à v6: "Publicar versão v7" desabilitado com o motivo (sem v7 vazia, sem cultivo marcado)',
+        chk('L15 R3: 0,5 → 0,6 → 0,5 deixa o rascunho v7 igual à v6: "Salvar alterações" desabilitado com o motivo (sem v7 vazia, sem cultivo marcado)',
             len(e15['prims']) == 1 and e15['prims'][0]['dis'] and n15['txt'] == 'O rascunho v7 está igual à v6: altere algo ou descarte o rascunho.' and e15['prims'][0]['why'] == n15['txt'], [n15, e15])
     # ---------------- L16 · R4: endereço trocado com o painel aberto ----------------
     with secao('L16'):
-        abre('PA.dc.html#plano=SOJA-AT'); clique("[...document.querySelectorAll('main .pa-editar')].find(b=>b.getClientRects().length)", w=.5)
+        abre('PA.dc.html#plano=SOJA-AT'); clique("[...document.querySelectorAll('main .pa-mais')].find(b=>b.getClientRects().length)", w=.3)   # VISOES-2: editar está no menu ⋯
+        clique("[...document.querySelectorAll('main [role=menu] button')].find(b=>b.innerText.trim()==='Editar atividade')", w=.5)
         p0 = J("(document.querySelector('aside[role=dialog] h2')||{innerText:''}).innerText")
         J("location.hash='#plano=MILHO-SF'"); espera("location.hash==='#plano=SOJA-AT'", 3); time.sleep(.3)
         p1 = J("(document.querySelector('aside[role=dialog] h2')||{innerText:''}).innerText"); h16 = J("location.hash"); t16 = toast()
@@ -295,16 +295,26 @@ try:
             p0 == 'Atividade · Dessecação pré-plantio' and p1 == p0 and h16 == '#plano=SOJA-AT' and 'Feche o painel antes de trocar de plano.' in t16 and rod == ['Cancelar', 'Salvar']
             and e16['h2'] == 'Soja alta tecnologia' and 'Publicado · v4' in mi and 'Rascunho v5' not in mi and 'Dessecação pré-plantio' not in mi, [p0, p1, h16, t16, rod, e16['h2'], mi[:300]])
     # ---------------- L17 · R6: Esc fecha só a camada de cima ----------------
+    # 13/10/2026 (proprietário: "deixe a barra lateral dos menus somente recolhido com os ícones e tooltip sem opção de expandir"): a 390 px
+    # não há mais menu sobreposto para o Esc fechar. A parte de 390 px passa a ser a do filtro de coluna (por toque) e a barra recolhida
+    # 14/10/2026: o filtro de coluna saiu com o bloco Cultivos; a camada de cima do detalhe passa a ser o menu ⋯ da atividade
+    FILTRO = "[...document.querySelectorAll('main .pa-mais')].find(b=>b.getClientRects().length)"
+    FOCA = "(()=>{const m=[...document.querySelectorAll('main [role=menu]')].find(x=>x.getClientRects().length); return !!m&&m.contains(document.activeElement);})()"
+    ABERTO = "!![...document.querySelectorAll('main [role=menu]')].find(x=>x.getClientRects().length)"
+    VOLTA = "!!(document.activeElement&&document.activeElement.classList.contains('pa-mais'))"
+    BARRA = r"""(()=>{const m=document.querySelector('nav[aria-label=Menu]'); const vis=e=>!!e&&e.getClientRects().length>0;
+      const exp=[...document.querySelectorAll('button,[role=button],a,label')].filter(vis).filter(e=>/\b(expandir|recolher|abrir|fechar)\b.{0,12}\bmenu\b/i.test((e.getAttribute('aria-label')||'')+' '+(e.getAttribute('title')||'')+' '+e.innerText)).length;
+      return [Math.round(m.getBoundingClientRect().width), exp, getComputedStyle(m).position==='absolute'||vis(document.querySelector('.ml-fundo'))];})()"""
     with secao('L17'):
         abre('PA.dc.html#plano=SOJA-AT')
-        clique("[...document.querySelectorAll('main button')].find(b=>b.getClientRects().length&&/^Filtrar /.test(b.getAttribute('aria-label')||''))", w=.5)
-        f0 = J("(()=>{const d=[...document.querySelectorAll('div[role=dialog]')].find(x=>x.getClientRects().length); if(!d) return false; const b=[...d.querySelectorAll('button')].find(x=>x.getClientRects().length); b&&b.focus(); return document.activeElement===b;})()")
-        c.tecla('Escape', 'Escape', 27); time.sleep(.5); f1 = est(); fa = J("!![...document.querySelectorAll('div[role=dialog]')].find(x=>x.getClientRects().length)")
-        abre('PA.dc.html#plano=SOJA-AT', 390, 844, 3, True); clique("document.querySelector('.ml-tog')", True, .5)
-        m0 = J("!!document.querySelector('.menu-lat:not(.rec)')"); J("(()=>{const a=[...document.querySelectorAll('.menu-lat a,.menu-lat button')].find(x=>x.getClientRects().length); a&&a.focus();})()")
-        c.tecla('Escape', 'Escape', 27); time.sleep(.5); m1 = J("!!document.querySelector('.menu-lat:not(.rec)')"); g1 = est()
-        chk('L17 R6: Esc com o filtro de coluna dos cultivos aberto fecha só o filtro (o plano continua aberto); a 390 px, Esc com o menu sobreposto aberto fecha só o menu',
-            f0 and not fa and f1['h2'] == 'Soja alta tecnologia' and f1['hash'] == '#plano=SOJA-AT' and m0 and not m1 and g1['h2'] == 'Soja alta tecnologia' and g1['hash'] == '#plano=SOJA-AT', [f0, fa, f1['h2'], f1['hash'], m0, m1, g1['h2']])
+        clique(FILTRO, w=.5); f0 = J(FOCA)
+        c.tecla('Escape', 'Escape', 27); time.sleep(.5); f1 = est(); fa = J(ABERTO); fv = J(VOLTA)
+        abre('PA.dc.html#plano=SOJA-AT', 390, 844, 3, True); b0 = J(BARRA)
+        clique(FILTRO, True, .5); g0 = J(FOCA); shot('L17_390_filtro')
+        c.tecla('Escape', 'Escape', 27); time.sleep(.5); g1 = est(); ga = J(ABERTO); b1 = J(BARRA); gv = J(VOLTA)
+        chk('L17 R6: Esc com o menu ⋯ da atividade aberto (foco no 1º item) fecha só o menu e devolve o foco ao ⋯ (o plano continua aberto), a 1440 px e a 390 px (toque); a 390 px a barra lateral fica recolhida (68 px), sem botão de expandir nem menu sobreposto',
+            f0 and not fa and fv and gv and f1['h2'] == 'Soja alta tecnologia' and f1['hash'] == '#plano=SOJA-AT' and b0 == [68, 0, False]
+            and g0 and not ga and g1['h2'] == 'Soja alta tecnologia' and g1['hash'] == '#plano=SOJA-AT' and b1 == [68, 0, False], [f0, fa, fv, f1['h2'], f1['hash'], b0, g0, ga, gv, g1['h2'], g1['hash'], b1])
     # ---------------- L18 · R7: aviso sem o id interno ----------------
     with secao('L18'):
         abre('PA.dc.html'); clique(btn('Criar plano'), w=.5)

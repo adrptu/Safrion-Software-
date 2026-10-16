@@ -93,6 +93,9 @@ def js_prefixo():
         import ui37   # v57: com o Beneficiamento fora da navegação (BEN_PUBLICADO=False), a trilha não liga para BEN.dc.html (decisão da v55)
         _CACHE['js'] = ('const CONF0 = ' + json.dumps(seed(), ensure_ascii=False).replace('</', '<\\/') + ';\n'
                         + 'const CONF_BEN_H = ' + json.dumps('BEN.dc.html#' if ui37.BEN_PUBLICADO else '') + ';\n'
+                        # CF04 × CONTROLE-02 F2: o adaptador da trilha do Codex (PlanoReferencia.trilha) em escopo próprio, para a CF-04 ler os
+                        # recibos da referência técnica em qualquer tela sem redeclarar o PlanoReferencia do Planejar safra
+                        + 'const CONF_PLANO_REF = (() => {\n' + open(os.path.join(HERE, 'plano_referencia.js'), encoding='utf-8').read() + '\nreturn PlanoReferencia; })();\n'
                         + open(os.path.join(HERE, 'configuracoes.js'), encoding='utf-8').read() + '\n')
     return _CACHE['js']
 

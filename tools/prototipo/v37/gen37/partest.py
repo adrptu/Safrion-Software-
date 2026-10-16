@@ -3,10 +3,11 @@ import sys, os, time, subprocess, json
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
 from journeys import free
+from comp_lib import cv_todas_sempre
 HERE=os.path.dirname(os.path.abspath(__file__))
 R=sys.argv[1] if len(sys.argv)>1 else os.path.join(HERE,'_render')
 p=free(); srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(0.8)
-c=Chrome(port=free()); J=c.js
+c=Chrome(port=free()); J=c.js; cv_todas_sempre(c)   # VISOES-2 §3.6 / SAF-TAB: o teste lê colunas fora do padrão
 OK=[]; FAIL=[]
 def chk(nome,cond,det=''):
     (OK if cond else FAIL).append(nome); print(('  ok  ' if cond else '  FALHOU ')+nome+(' · '+str(det) if det else ''))
@@ -30,6 +31,10 @@ LEGT="""(r=>{ const t=r.closest('[role=table]'); const hs=t?[...t.querySelectorA
 FORA="""(r=>{ const t=r.closest('[role=table]'); const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim().toUpperCase()); const i=hs.indexOf('SAFRA'); const cs=[...r.querySelectorAll('[role=cell]')]; return r.classList.contains('g2kid')&&i>=0&&cs[i]&&/›$/.test(cs[i].innerText.trim()); })"""
 ROWS=f"""(()=>[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row]')].slice(1)).filter(r=>!({FORA})(r)).map(r=>({LEGT})(r)))()"""
 def rows(): return J(ROWS) or []
+def expande():
+    # SAF-TAB (14/10): talhão de um cultivo abre recolhido; conta as folhas com tudo aberto, como a pessoa faria
+    J("(()=>{const b=[...document.querySelectorAll('button.g2xtog')].find(b=>b.offsetParent&&/Expandir tudo/.test(b.innerText)); if(b) b.click();})()"); time.sleep(.4)
+def nfolhas(): expande(); return J(NFOLHAS)
 def rowbtn(prefix,label):
     return J(f"""(()=>{{const rs=[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row]')]);
       const r=rs.find(x=>({LEGT})(x).startsWith({json.dumps(prefix)})); if(!r) return 'SEM LINHA';
@@ -53,7 +58,7 @@ try:
     # etapa 2 nova: a faixa diz os hectares desta safra; a contagem é das linhas desta safra (sem a linha do talhão nem as de fora)
     NFOLHAS=f"""(()=>[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row]')]).filter(r=>r.querySelector('button.g2del')&&!({FORA})(r)).length)()"""
     k2a=k(r"/Nesta safra [^\n]+/"); print('   faixa:',k2a)
-    chk('faixa "Nesta safra 1.165" e 9 cultivos (folhas)', k2a.startswith('Nesta safra 1.165') and J(NFOLHAS)==9, (k2a,J(NFOLHAS)))
+    chk('faixa "Nesta safra 1.165" e 9 cultivos (folhas)', k2a.startswith('Nesta safra 1.165') and nfolhas()==9, (k2a,nfolhas()))
     # etapa única (05/10/2026): o k4 saiu; horas e custo de operação ficam na etapa 3 (Total da g_op e linha do título); a demanda na 4
     etapa(3); k4a=k3(); etapa(4); k6a=k(r"/Valor da necessidade[^\n]+/"); etapa(2)
     print('   etapa 3:',k4a); print('   k6:',k6a)
@@ -78,7 +83,7 @@ try:
     chk('T4 em 5 × 40,8', pvals()==['T4-A','40,8','T4-B','40,8','T4-C','40,8','T4-D','40,8','T4-E','40,8'], pvals())
     clk('Salvar divisão','aside[role=dialog]'); t=toast(); chk('salvou T4 em 5', 'T4 dividido em 5 parcelas' in t, t)
     rs=rows(); chk('5 sublinhas de T4', sum(1 for r in rs if r.startswith('T4-'))==5 and any(r.startswith('T4 5 parcelas') for r in rs))
-    k2b=k(r"/Nesta safra [^\n]+/"); chk('faixa e folhas (15 cultivos, mesma área)', k2b.startswith('Nesta safra 1.165') and J(NFOLHAS)==15, (k2b,J(NFOLHAS)))
+    k2b=k(r"/Nesta safra [^\n]+/"); chk('faixa e folhas (15 cultivos, mesma área)', k2b.startswith('Nesta safra 1.165') and nfolhas()==15, (k2b,nfolhas()))
     tot=J("(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const r=[...t.querySelectorAll('[role=row]')].pop(); return r.innerText.replace(/\\s+/g,' ');})()")
     chk('total da tabela 1.165 ha (unidade na célula, cabeçalho "Área": decisão de 05/10/2026)', 'Total 1.165 ha' in (tot or '') and bool(J("[...document.querySelectorAll('[role=columnheader]')].some(h=>/^Área\\b/i.test(h.innerText.trim())&&!/livre|\\(/i.test(h.innerText))")), tot)
     # --- 27 parcelas: nomes após Z viram AA
@@ -98,11 +103,16 @@ try:
     LPABRE="""(pref=>{ const rs=[...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row]')]);
       const r=rs.find(x=>({LEGT})(x).startsWith(pref)); if(!r) return 'SEM LINHA'; const t=r.closest('[role=table]');
       const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim().toUpperCase()); const i=hs.indexOf('PLANO AGRONÔMICO');
-      const cel=[...r.querySelectorAll('[role=cell]')][i]; const b=cel&&cel.querySelector('button'); if(!b) return 'SEM PLANO'; b.click(); return 'ok'; })""".replace('{LEGT}',LEGT)
+      const cel=[...r.querySelectorAll('[role=cell]')][i]; if(!cel||/sem plano|Aplicar plano/i.test(cel.innerText)) return 'SEM PLANO'; cel.click(); return 'ok'; })""".replace('{LEGT}',LEGT)
+    # SAF-TAB (14/10): "Ajustar insumos" saiu da célula do plano; o clique na linha abre o cultivo e a ação do painel abre os insumos
+    LPACAO="""(()=>{ const d=document.querySelector('aside[role=dialog]'); const b=d&&[...d.querySelectorAll('button')].find(b=>/^(Ajustar|Ver) insumos e doses de /.test(b.innerText.trim())); if(!b) return 'SEM AÇÃO'; b.click(); return 'ok'; })()"""
     LPLE="""(()=>{ const d=document.querySelector('aside[role=dialog]'); const i=d&&d.querySelector('#lp_a6_0'); if(!i) return null; let r=i.parentElement;
       while(r&&r!==d&&!/R\\$/.test(r.innerText)) r=r.parentElement;
       return {tit:(d.querySelector('h2')||{innerText:''}).innerText.replace(/\\s+/g,' ').trim(), dose:i.value, linha:(r||i.parentElement).innerText.replace(/\\s+/g,' ').trim()}; })()"""
-    def lp(pref): r=J(f"({LPABRE})({json.dumps(pref)})"); time.sleep(.5); return [r,J(LPLE)]
+    def lp(pref):
+        r=J(f"({LPABRE})({json.dumps(pref)})"); time.sleep(.5)
+        if r=='ok': r=J(LPACAO); time.sleep(.5)
+        return [r,J(LPLE)]
     def lpfecha():
         J("(()=>{const d=document.querySelector('aside[role=dialog]'); const b=d&&(d.querySelector('[aria-label=Fechar]')||[...d.querySelectorAll('button')].find(b=>b.innerText.trim()==='Cancelar')); b&&b.click();})()"); time.sleep(.35)
         if panel(): clk('Descartar alterações','aside[role=dialog]')

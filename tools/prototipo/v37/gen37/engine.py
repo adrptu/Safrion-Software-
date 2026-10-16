@@ -52,10 +52,40 @@ ICONS.update({'Indicadores':ICONS['Controle'],'PCE':ICONS['PCP'],'Estoque':ICONS
  'leaf':'M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 20 3c1 2 2 4.5 2 8.5S16.8 21 12.5 21zM2 21c0-3 1.85-5.36 5.08-6',
  'calendar':'M3 5h18v16H3zM16 3v4M8 3v4M3 10h18',
  'layers':'M12 2l9 5-9 5-9-5 9-5zM3 12l9 5 9-5M3 17l9 5 9-5',
- # MAPA-ICONES-20261003: satélite com corpo, dois painéis solares lisos (sem divisões: legível em 20 px, escala 1) e antena (camada Satélite); lupa sobre folha = vistoria/monitoramento
- # (camada Pragas e doenças), distinto da folha da Lavoura. O triângulo 'alert' continua só para alerta/impedimento real.
+ # MAPA-ICONES-20261003: satélite com corpo, dois painéis solares lisos (sem divisões: legível em 20 px, escala 1) e antena (camada Satélite).
+ # Pragas e doenças: inseto (Lucide bug, ISC; aviso em LICENSES/lucide-ISC.txt), pedido do proprietário de 13/10/2026 ("mude ícone para um inseto
+ # intuitivo"); substitui a lupa sobre folha. Distinto da folha da Lavoura; o triângulo 'alert' continua só para alerta/impedimento real.
  'satelite':'M7.69 11.51L11.51 7.69L15.61 11.79L11.79 15.61zM1.89 17.44L5.92 13.41L10.59 18.08L6.56 22.11zM13.41 5.92L17.44 1.89L22.11 6.56L18.08 10.59zM8.25 15.75L10.09 13.91M13.91 10.09L15.75 8.25M13.7 13.7L14.97 14.97M13.98 17.66A3.4 3.4 0 0 0 17.66 13.98',
- 'monitoramento':'M3.5 20.5C3.5 14.2 6.8 10.8 12.6 10.6C12.6 16.6 9.4 20.5 3.5 20.5zM3.5 20.5L9.2 14.8M20.2 9.2a5.2 5.2 0 1 1-10.4 0a5.2 5.2 0 0 1 10.4 0zM18.8 12.9L22 16.1',
+ 'busca':'M21 21L16.66 16.66M3 11a8 8 0 1 0 16 0a8 8 0 1 0 -16 0',   # lupa (Lucide search, ISC): campo de busca da tela Cadastros
+ # navegação sem submenus (13/10/2026): ícones Lucide (ISC; aviso em LICENSES/lucide-ISC.txt) das telas de entrada e da barra lateral
+ 'engrenagem':'M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2zM9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0',
+ 'pasta':'M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z',
+ 'livro':'M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z',
+ 'prancheta':'M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1zM16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M12 11h4M12 16h4M8 11h.01M8 16h.01',
+ 'prancheta_ok':'M9 2h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1zM16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M9 14l2 2 4-4',
+ 'frasco':'M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2M8.5 2h7M7 16h10',
+ 'arquivo_up':'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M12 18v-6M9 15l3-3 3 3',   # arquivo com seta (Lucide file-up, ISC): importar laudo no Mapa (16/10/2026)
+ 'tomada':'M12 22v-5M9 8V2M15 8V2M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z',
+ 'armazem':'M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35ZM6 18h12M6 14h12M6 10h12v12h-12z',
+ 'historico':'M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5M12 7v5l4 2',
+ 'escudo':'M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1zM9 12l2 2 4-4',
+ 'grafico':'M3 3v18h18M18 17V9M13 17V5M8 17v-3',
+ 'celular':'M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h-10a2 2 0 0 1-2-2v-16a2 2 0 0 1 2-2zM12 18h.01',
+ # Beneficiamento (13/10/2026, proprietário: "Packing house, industria, etc"): fábrica (Lucide factory, ISC), distinta da caixa do Estoque
+ 'filtro':'M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z',   # funil (Lucide funnel, ISC): faixa de filtros da tela
+ 'fabrica':'M3 19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5a.5.5 0 0 0-.769-.422l-4.462 2.844A.5.5 0 0 1 15 10.5v-2a.5.5 0 0 0-.769-.422L9.77 10.922A.5.5 0 0 1 9 10.5V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2zM8 16h.01M12 16h.01M16 16h.01',
+ 'inseto':'M8 2L9.88 3.88M14.12 3.88L16 2M9 7.13v-1a3.003 3.003 0 1 1 6 0v1M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6M12 20v-9M6.53 9C4.6 8.8 3 7.1 3 5M6 13H2M3 21c0-2.1 1.7-3.9 3.8-4M20.97 5c0 2.1-1.6 3.8-3.5 4M22 13h-4M17.2 17c2.1.1 3.8 1.9 3.8 4',
+})
+# VISOES-1 (10/10/2026): ícones do seletor de visões, Lucide 1.45.0 (ISC; aviso em LICENSES/lucide-ISC.txt, que também traz o MIT do Feather,
+# origem dos ícones acima). rect/circle convertidos para o caminho único de icon(); só entram os que alguma tela usa.
+ICONS.update({
+ 'v_lista':'M3 5h.01M3 12h.01M3 19h.01M8 5h13M8 12h13M8 19h13',   # lucide list
+ 'v_agrupada':'M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2zM21 9H3M21 15H3',   # lucide rows-3
+ 'v_kanban':'M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2zM8 7v7M12 7v4M16 7v9',   # lucide square-kanban
+ 'v_calendario':'M8 2v4M16 2v4M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2zM3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01',   # lucide calendar-days (VISOES-2)
+ 'v_carga':'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3.128a4 4 0 0 1 0 7.744M22 21v-2a4 4 0 0 0-3-3.87M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0',   # lucide users
+ 'v_mais':'M11 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0M18 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0M4 12a1 1 0 1 0 2 0a1 1 0 1 0 -2 0',   # lucide ellipsis
+ 'v_cartoes':'M4 3h5a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-5a1 1 0 0 1 -1 -1v-5a1 1 0 0 1 1 -1zM15 3h5a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-5a1 1 0 0 1 -1 -1v-5a1 1 0 0 1 1 -1zM15 14h5a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-5a1 1 0 0 1 -1 -1v-5a1 1 0 0 1 1 -1zM4 14h5a1 1 0 0 1 1 1v5a1 1 0 0 1 -1 1h-5a1 1 0 0 1 -1 -1v-5a1 1 0 0 1 1 -1z',   # lucide layout-grid (modo Cartões, 15/10/2026)
 })
 def icon(name,size=16,color='currentColor'):
     if name=='Mapa': name='map' if 'map' in ICONS else 'Início'
@@ -136,13 +166,18 @@ ITEM_OFF=lambda: f'display: block; width: 100%; text-align: left; padding: 8px 1
 LIST_ST=lambda right=False: f'position: absolute; top: calc(100% + 6px); {"right: 0;" if right else "left: 0;"} z-index: 25; min-width: 200px; background: {SURF}; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 12px 32px -8px rgba(21,32,26,.28); padding: 6px; flex-direction: column; gap: 2px; display: flex;'
 CMENU_ST=lambda: f'position: absolute; top: 102px; left: 14px; z-index: 25; width: 270px; background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; box-shadow: 0 12px 32px -8px rgba(21,32,26,.28); padding: 8px; flex-direction: column; gap: 2px; display: flex;'
 GCHIP_ST=lambda: f'display: inline-flex; align-items: center; gap: 6px; padding: 3px 4px 3px 10px; border-radius: 999px; background: {INK}; color: #fff; font-size: 12px; font-weight: 700;'
-CHIP_ON=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 1px solid {ACC}; background: {ACCS}; color: {ACC}; cursor: pointer;'   # escolha tonal (DS-36): não imita o primário
-CHIP_OFF=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer;'
+CHIP_ON=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 1px solid {ACC}; background: {ACCS}; color: {ACC}; cursor: pointer; {ALVO_ST}'   # escolha tonal (DS-36): não imita o primário
+CHIP_OFF=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; {ALVO_ST}'
 SEG_ON=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 0; cursor: pointer; background: {SURF}; color: {INK}; box-shadow: 0 1px 2px rgba(21,32,26,.12); white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;'
 SEG_OFF=lambda: f'font-family: inherit; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 999px; border: 0; cursor: pointer; background: transparent; color: {MUTED}; box-shadow: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;'
 TOAST_ST=lambda: f'position: absolute; left: max(16px, min(248px, calc(100% - 536px))); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); z-index: 40; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); max-width: min(520px, calc(100% - 32px)); box-sizing: border-box;'
 DRAWER_ST=lambda: 'position: absolute; inset: 0; z-index: 30; display: flex; justify-content: flex-end;'
-BTN_ST=lambda primary=False,small=False: (f"padding: {'7px 14px' if small else '11px 20px'}; border-radius: 10px; font-size: {'13px' if small else '14px'}; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; "
+# DS-ALVO-20261015 (proprietário, 15/10/2026: "padronize tudo de melhor que definimos"): alvo de toque de 44 px no componente, não tela a
+# tela. O estilo inline lê a variável --g2-alvo, que o CSS comum (ALVO_CSS, dentro do G2_CSS) liga só com ponteiro grosso; no ponteiro fino
+# vale 0 e nada muda de tamanho. Vale para BTN_ST/btn, _MINI/_MINIP, a ação de célula da grade (G2CTA, g2lib) e os chips de filtro.
+DS_ALVO=dict(toque='44px')
+ALVO_ST='min-height: var(--g2-alvo, 0px); box-sizing: border-box; '
+BTN_ST=lambda primary=False,small=False: (f"padding: {'7px 14px' if small else '11px 20px'}; border-radius: 10px; font-size: {'13px' if small else '14px'}; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; {ALVO_ST}"
         + (f"background: {ACC}; color: #fff; border: 1px solid {ACC}; box-shadow: 0 1px 2px rgba(30,122,76,.25);" if primary else f"background: {SURF}; color: {INK}; border: 1px solid {LINE};"))
 def msgbtn(text,message,primary=False,small=True):
     """botão que age na própria tela: mostra o resultado numa mensagem (toast)."""
@@ -225,7 +260,6 @@ class Component extends DCLogic {
           v[w.id + '_i' + i] = (i === cur ? w.ion : w.ioff);
         });
       }
-      if (w.type === 'menu') { v[w.id + '_open'] = toggleOpen; v[w.id + '_st'] = w.mst + (st.open === w.id ? '' : 'display: none;'); }
       if (w.type === 'sort') {
         const s = st.sort[w.id] || { c: w.dflt, d: !!w.desc };
         const om = String(st.open || '');
@@ -320,20 +354,11 @@ def navlink(m,act):
 def openlink(href=None):
     href=href or ROW or TABLEHREF.get(CUR) or '#'
     return f'<a href="{href}" aria-label="Abrir" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; color: {MUTED}; text-decoration: none; font-size: 18px;">›</a>'
-def act(text=None,href=None,urgent=False,open=False,menu=False,edit=None):
+def act(text=None,href=None,urgent=False,open=False):
     """Célula de ação de linha: botão pequeno (opcional) e, quando a linha abre um detalhe, a seta › sempre na borda direita."""
     b=''
-    if menu:
-        m=wid('m'); reg(type='menu',id=m,mst=LIST_ST(True))
-        if edit:
-            d=DRAWERS.get((CUR,edit)) or DRAWERS.get(edit)
-            if d and edit not in DRAWN: drawer_button(edit,d)
-            ehole=HL(DRAWN[edit]+'_open') if edit in DRAWN else HL('closeAll')
-        else: ehole=HL('closeAll')
-        items=f'<button type="button" onClick="{ehole}" style="{ITEM_ON()}">Editar</button>'+''.join(f'<button type="button" onClick="{HL("closeAll")}" style="{ITEM_OFF()}{" color: "+RED+";" if t=="Excluir" else ""}">{t}</button>' for t in ('Duplicar','Mover para cima','Mover para baixo','Excluir'))
-        b=f'<span style="position: relative; display: inline-flex;"><button type="button" aria-label="Mais ações" aria-haspopup="menu" onClick="{HL(m+"_open")}" style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; color: {MUTED}; border: 0; background: transparent; cursor: pointer; font-size: 18px; letter-spacing: 1px;">⋯</button><div role="menu" style="{HL(m+"_st")}">{items}</div></span>'
-    elif text:
-        st=(f"padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; white-space: nowrap; text-decoration: none; display: inline-block; background: {SURF}; "
+    if text:
+        st=(f"padding: 7px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; white-space: nowrap; text-decoration: none; display: inline-block; {ALVO_ST}background: {SURF}; "
             + (f"color: {RED}; border: 1px solid {RED};" if urgent else f"color: {INK}; border: 1px solid {LINE};"))
         dest=href or ROW or TABLEHREF.get(CUR) or BTNHREF.get((CUR,text)) or BTNHREF.get(text)
         if dest: b=f'<a href="{dest}" style="{st}">{esc(text)}</a>'
@@ -386,9 +411,7 @@ def btn(text,primary=False,small=False,href=None):
         if d: return drawer_button(text,d,primary,small)
         m=MSGS.get((CUR,text)) or MSGS.get(text)
         if m: return msgbtn(text,m,primary,small)
-    pad='7px 14px' if small else '11px 20px'; fs='13px' if small else '14px'
-    st=(f"padding: {pad}; border-radius: 10px; font-size: {fs}; font-weight: 700; font-family: inherit; cursor: pointer; line-height: 1.25; letter-spacing: -.005em; white-space: nowrap; "
-        + (f"background: {ACC}; color: #fff; border: 1px solid {ACC}; box-shadow: 0 1px 2px rgba(30,122,76,.25);" if primary else f"background: {SURF}; color: {INK}; border: 1px solid {LINE};"))
+    st=BTN_ST(primary,small)   # o mesmo componente (antes era uma cópia do estilo)
     if href: return f'<a href="{href}" style="text-decoration: none; display: inline-block; {st}">{esc(text)}</a>'
     return f'<button type="button" style="{st}">{esc(text)}</button>'
 def integ(items,out=None):
@@ -505,8 +528,19 @@ def ctxbar(items):
 def cards_widget(items):
     k=wid('k'); reg(type='cards',id=k,opts=[t for t,_,_,_ in items],dflt=next((i for i,x in enumerate(items) if x[3]),0),on=f'background: {SURF}; border: 2px solid {ACC}; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px;',off=f'background: {SURF}; border: 2px solid {LINE}; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px;')
     return ''.join(f'<div style="{HL(k+"_s"+str(i))}"><div style="font-size: 15px; font-weight: 600;">{esc(t)}</div><div style="font-size: 22px; font-weight: 600; color: {ACC};">{esc(v)}</div><div style="font-size: 13px; color: {MUTED};">{esc(d)}</div><div style="flex-grow: 1;"></div><div style="display: flex; justify-content: flex-end;"><span style="{HL(k+"_c"+str(i))}">{chip("Escolhido","green")}</span><span style="{HL(k+"_b"+str(i))}"><button type="button" onClick="{HL(k+"_p"+str(i))}" style="{BTN_ST(False,True)}">Escolher</button></span></div></div>' for i,(t,v,d,sel) in enumerate(items))
+# TXT-04 (15/10/2026, menos texto e menos grito): o rótulo do indicador em caixa normal; o que veio em CAIXA ALTA vira frase, as siglas ficam
+_SIGLAS={'O.S.','OS','NF','NF-E','NC','OM','PCM','DAP','R$','ERP','CAR','CPR','CRE','MIP','TSI','EPI','NDVI','PRNT','CFTV','PCP','EPP','S39','S38'}
+def rotulo_normal(t):
+    t=str(t)
+    if not t or t!=t.upper() or not re.search(r'[A-ZÀ-Ý]{2}',t): return t
+    ps=[(w if (w.strip('()·,:') in _SIGLAS or re.fullmatch(r'\(?[A-Z]{1,3}-?\d+\)?',w)) else w.lower()) for w in t.split(' ')]   # sigla e código (S39, T1) ficam
+    s=' '.join(ps); return s[:1].upper()+s[1:]
+def dica_i(rotulo,texto):
+    """ⓘ com a explicação (g2dica): abre no ponteiro, no foco e no toque; o texto sai da tela e fica a um toque (DS VIS-04)"""
+    q=lambda x: esc(str(x)).replace(chr(34),'&quot;')
+    return '<button type="button" class="g2dica-i" aria-label="'+q(rotulo)+'" data-dica="'+q(texto)+'">ⓘ</button>'
 def kpis(items):
-    cells=''.join(f'<div style="flex-grow: 1; padding: 16px 18px; background: {SURF}; border: 1px solid {LINE}; border-radius: 16px; box-shadow: {SH}; display: flex; flex-direction: column; gap: 8px;"><div style="font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: {MUTED}; font-weight: 700;">{esc(l)}</div><div style="font-family: {DISP}; font-size: 30px; font-weight: 700; letter-spacing: -.02em; color: {ACC if i==len(items)-1 else INK}; font-variant-numeric: tabular-nums; line-height: 1.1;">{esc(v)} <span style="font-size: 12px; color: {MUTED}; font-weight: 400; letter-spacing: 0;">{esc(u)}</span></div></div>' for i,(l,v,u) in enumerate(items))
+    cells=''.join(f'<div style="flex-grow: 1; padding: 16px 18px; background: {SURF}; border: 1px solid {LINE}; border-radius: 16px; box-shadow: {SH}; display: flex; flex-direction: column; gap: 8px;"><div style="font-size: 12.5px; color: {MUTED}; font-weight: 600;">{esc(rotulo_normal(l))}</div><div style="font-family: {DISP}; font-size: 30px; font-weight: 700; letter-spacing: -.02em; color: {ACC if i==len(items)-1 else INK}; font-variant-numeric: tabular-nums; line-height: 1.1;">{esc(v)} <span style="font-size: 12px; color: {MUTED}; font-weight: 400; letter-spacing: 0;">{esc(u)}</span></div></div>' for i,(l,v,u) in enumerate(items))
     return f'<div style="display: flex; gap: 14px;">{cells}</div>'
 TABLEHREF={'PlanosManutencao.dc.html':'PlanoManutencao.dc.html','PlanoManutencao.dc.html':None,'Indicadores.dc.html':None,'Politicas.dc.html':'Insumo.dc.html','Cobertura.dc.html':'Insumo.dc.html','Inventario.dc.html':'Insumo.dc.html','Recebimento.dc.html':'Insumo.dc.html','Monitoramento.dc.html':'Vistoria.dc.html','Vistoria.dc.html':None,'Prescricao.dc.html':None,'Analises.dc.html':'Solo.dc.html','Operacoes.dc.html':'Operacao.dc.html','Operacao.dc.html':None,'Talhoes.dc.html':'Talhao.dc.html','Maquinas.dc.html':'Maquina.dc.html','Insumos.dc.html':'Insumo.dc.html','Planos.dc.html':'Plano.dc.html','Diagnostico.dc.html':'Talhao.dc.html','Safra.dc.html':'Talhao.dc.html','Solo.dc.html':'Talhao.dc.html','Calculo.dc.html':'Insumo.dc.html','Carga.dc.html':'Frota.dc.html','Frota.dc.html':'Carga.dc.html','Orcamento.dc.html':'Talhao.dc.html','PCM.dc.html':'Maquina.dc.html','OSManutencao.dc.html':'Insumo.dc.html','CompraLiquida.dc.html':'Cotacoes.dc.html','Cotacoes.dc.html':'LinkFornecedor.dc.html','Almoxarifado.dc.html':'Insumo.dc.html','OSCampoLista.dc.html':'OSCampo.dc.html','OSCampo.dc.html':'Insumo.dc.html','Balanco.dc.html':'Pivos.dc.html','Pivos.dc.html':'Balanco.dc.html','OSOficina.dc.html':'Insumo.dc.html','Beneficiamento.dc.html':'Expedicao.dc.html','Oferta.dc.html':'LinkCliente.dc.html','Expedicao.dc.html':'Oferta.dc.html','Realizado.dc.html':'Talhao.dc.html','MapaFazenda.dc.html':'Talhao.dc.html','Maquina.dc.html':'OSManutencao.dc.html','Talhao.dc.html':'OSCampo.dc.html','Insumo.dc.html':'OSCampo.dc.html','Mercado.dc.html':'Mercado.dc.html','Plano.dc.html':None}
 def table(headers,rows,widths=None,sort=0,desc=False,filters=None,total=None,group=None,search=True,popover=None,dense=False,rowhref=None,extra_rows=None):
@@ -526,7 +560,7 @@ def table(headers,rows,widths=None,sort=0,desc=False,filters=None,total=None,gro
     gchip=f'<span style="{HL(gp+"_cst")}">Agrupado por {HL(gp+"_label")}<button type="button" aria-label="Remover agrupamento" onClick="{HL(gp+"_clear")}" style="border: 0; background: transparent; color: #fff; cursor: pointer; font-size: 13px; padding: 0 4px;">×</button></span>'
     fchips=''.join(f'<span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 4px 3px 10px; border-radius: 999px; background: {ACCS}; color: {ACC}; font-size: 12px; font-weight: 700;">{esc(headers[i])}: {esc(v)} <button type="button" aria-label="Limpar filtro" onClick="{HL(tbl+"_clear")}" style="border: 0; background: transparent; color: {ACC}; cursor: pointer; font-size: 13px; padding: 0 4px;">×</button></span>' for i,v in filters.items())
     sicon=f'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{MUTED}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>'
-    tb=(f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid {LINE};">'
+    tb=(f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px;">'   # SEP-20261015 (c): sem linha sobre o cabeçalho da tabela, que já tem fundo
         f'<label style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid {LINE}; border-radius: 999px; background: {BG}; font-size: 13px; color: {MUTED}; min-width: 170px;">{sicon}<input type="search" aria-label="Buscar na tabela" placeholder="Buscar nesta tabela…" style="font-family: inherit; font-size: 13px; border: 0; background: transparent; outline: none; width: 100%;"></label>'
         f'<span style="font-size: 12.5px; color: {MUTED}; font-weight: 600;">{HL(tbl+"_count")} de {tot} linhas</span>{fchips}{gchip}'
         f'<span style="flex-grow: 1;"></span>'
@@ -593,11 +627,31 @@ def colmenu(hd,fil):
             + f'<div style="height: 1px; background: {LINE}; margin: 4px 0;"></div>'
             + item('Agrupar por esta coluna') + item('Limpar filtro desta coluna')
             + '</div>')
+_PRIM_TAG=re.compile(r'(?:\s|<sc-(?:if|for)\b[^>]*>)*<(\w+)((?:"[^"]*"|[^>"])*)>')
+def corpo_estruturado(body):
+    """SEP-20261015 (b): o corpo do bloco começa por conteúdo que já se separa do título sozinho: tabela (.g2caixa, com ou sem moldura),
+    barra de visões, caixa com borda, faixa com fundo próprio ou gráfico/mapa (svg). Desce pelos invólucros sem estilo próprio (até 3 níveis)."""
+    b=str(body)
+    for _ in range(4):
+        m=_PRIM_TAG.match(b)
+        if not m: return False
+        at=m.group(2)
+        if m.group(1)=='svg' or 'g2caixa' in at or 'g2visoes' in at or 'border: 1px' in at or re.search(r'background: (?!#FFFFFF|#fff\b|transparent|\{)', at): return True
+        # TAB-01 (padroes-1510.md): fileira de filtro rápido em chips (grupo com aria-pressed) é a barra da visão, que já separa sozinha
+        if 'role="group"' in at and 'aria-pressed' in b[m.end():m.end()+900]: return True
+        b=b[m.end():]
+        if not re.match(r'\s*<', b): return False   # o 1º filho é texto: conteúdo solto
+    return False
 def section(title,summary,action,body,state='green'):
+    if '{{' not in str(summary): summary=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos e os demais soltos pela tela ... somos minimalistas e essencialistas"): só fica o resumo que mostra estado (buraco dinâmico)
     dot={'green':ACC,'yellow':YEL,'red':RED,'gray':GRAY}[state]
+    vazio=not str(body).strip()   # 14/10/2026: bloco só com ações (a regra foi para a dica ⓘ) não deixa corpo vazio nem linha solta
+    # SEP-20261015 (proprietário: "retire ... excesso de linhas separadoras"): a linha do título só fica com conteúdo solto logo abaixo (texto,
+    # formulário, lista sem moldura); tabela, caixa, faixa com fundo e barra de visões já separam sozinhas
+    linha=not vazio and not corpo_estruturado(body)
     return (f'<div style="background: {SURF}; border: 1px solid {LINE}; border-radius: 16px; box-shadow: {SH}; display: flex; flex-direction: column; flex: 1 1 0; min-width: 0;">'
-            f'<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 18px; border-bottom: 1px solid {LINE};"><div style="display: flex; align-items: center; gap: 10px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: {dot}; flex-shrink: 0; box-shadow: 0 0 0 3px {dot}22;"></span><div style="font-size: 15px; font-weight: 700; letter-spacing: -.01em; flex-grow: 1;">{esc(title)}</div>{"".join((a if a.startswith("<") else btn(a,small=True)) for a in ([action] if isinstance(action,str) else action) if a)}</div>' + (f'<div style="font-size: 13px; color: {MUTED}; padding-left: 20px; line-height: 1.35;">{esc(summary)}</div>' if summary else '') + '</div>'
-            f'<div style="padding: 14px 18px;">{body}</div></div>')
+            f'<div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 18px{";" if linha else " 0;"}{f" border-bottom: 1px solid {LINE};" if linha else ""}"><div style="display: flex; align-items: center; gap: 10px;"><span style="width: 10px; height: 10px; border-radius: 999px; background: {dot}; flex-shrink: 0; box-shadow: 0 0 0 3px {dot}22;"></span><div style="font-size: 15px; font-weight: 700; letter-spacing: -.01em; flex-grow: 1;">{esc(title)}</div>{recolhe_acoes(title,[(a if a.startswith("<") else btn(a,small=True)) for a in ([action] if isinstance(action,str) else action) if a])}</div>' + (f'<div style="font-size: 13px; color: {MUTED}; padding-left: 20px; line-height: 1.35;">{esc(summary)}</div>' if summary else '') + '</div>'
+            + ('' if vazio else f'<div style="padding: 14px 18px;">{body}</div>') + '</div>')
 SELECT_KEYS=['se recusar','divisão','cobertura por','risco de roubo','ação do ajuste','atividade','decisão','análise de crédito','indexador','frete','cobrança','garantia','liberação','cultura','variedade','plano','máquina','implemento','operação','talhão','fazenda','insumo','produto','fornecedor','cliente','laborat','depósito','lote','grupo','categoria','marca','modelo','polític','fase','praça','condição','unidade','gatilho','método','tabela','extrator','profundidade','item','peça','operador','mecânico','pessoa','sensor','motivo','avisar por','canal','prioridade','pagamento','retirada','base','tipo','estado','origem','pivô','armazém','cultivar','múltiplo','responsável','alvo','estádio']
 TEXT_HINTS=['(ler qr','r$','kg','(ha','dias','(h)','data','quantidade','preço','valor','litros','umidade','%','horas','km','(m)','l/ha','sc)','rendimento','custo','frete','área','velocidade','largura','eficiência','ciclo','consumo','potência','vida','câmbio','leitura','turno','antecipar','validade','entrega','arquivo','nome','observação','lâmina','horímetro','intervalo','itens','peso','contado','complemento']
 OPTIONS={
@@ -706,7 +760,8 @@ def stepper(steps,hint):
         color=INK if st!='todo' else MUTED
         line=f'<span style="flex-grow: 1; height: 2px; background: {ACC if st=="done" else LINE}; margin: 0 10px; min-width: 24px;"></span>' if i<n-1 else ''
         parts+=f'<div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: {color}; font-weight: {700 if st=="now" else 600}; white-space: nowrap;">{dot}{esc(name)}</div>{line}'
-    return f'<div style="display: flex; flex-direction: column; gap: 8px;"><div style="display: flex; align-items: center;">{parts}</div><div style="font-size: 13.5px; color: {MUTED};">{esc(hint)}</div></div>'
+    hint_=f'<div style="font-size: 13.5px; color: {MUTED};">{esc(hint)}</div>' if hint else ''   # 14/10/2026: sem legenda vazia (a regra vai para a dica ⓘ)
+    return f'<div style="display: flex; flex-direction: column; gap: 8px;"><div style="display: flex; align-items: center;">{parts}</div>{hint_}</div>'
 def linechart(vals,w=760,h=240,fut=None,ymin=None,ymax=None,labels=None,color=ACC,unit=''):
     n=len(vals); lo=ymin if ymin is not None else min(vals+(fut or []))*0.96; hi=ymax if ymax is not None else max(vals+(fut or []))*1.04
     L,R,T,B=44,16,14,30; iw=w-L-R; ih=h-T-B
@@ -876,7 +931,7 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 </helmet>
 <div style="position: relative; width: {W}px; height: {H}px; box-sizing: border-box; display: flex; background: {BG}; font-family: {FONT}; color: {INK}; overflow: hidden;">
 <nav aria-label="Módulos" style="width: 224px; flex-shrink: 0; background: {SIDE}; display: flex; flex-direction: column; padding: 16px 12px 12px; gap: 1px; box-sizing: border-box; overflow: hidden;">
-<div style="display: flex; align-items: center; gap: 10px; padding: 2px 12px 8px; font-family: {DISP}; font-weight: 700; font-size: 15px; letter-spacing: -.01em; color: #fff;"><span style="width: 28px; height: 28px; border-radius: 9px; background: {ACC}; display: inline-flex; align-items: center; justify-content: center;">{icon("Agronomia",16,"#fff")}</span>Talhão à O.S.</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 2px 12px 8px; font-family: {DISP}; font-weight: 700; font-size: 15px; letter-spacing: -.01em; color: #fff;"><span style="width: 28px; height: 28px; border-radius: 9px; background: {ACC}; display: inline-flex; align-items: center; justify-content: center;">{icon("Agronomia",16,"#fff")}</span>Safrion</div>
 {nav}
 <div style="flex-grow: 1;"></div>
 <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 12.5px; color: {SIDE_TX}; border-top: 1px solid rgba(255,255,255,.08);"><span style="width: 26px; height: 26px; border-radius: 999px; background: {ACC}; color: #fff; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: center;">A</span><span style="display: flex; flex-direction: column; line-height: 1.2;"><span style="font-weight: 700; color: #fff;">Ana</span><span style="color: {SIDE_MUTED}; font-size: 11.5px;">Fazenda Santa Rita</span></span></div>
@@ -910,7 +965,13 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 '''
     open(os.path.join(P,fname),'w').write(html)
 
-def mobile(fname,title,sub,status,primary,body,W=390,H=844,module=None):
+def mobile(fname,title,sub,status,primary,body,W=390,H=844,module=None,dica=''):
+    # 14/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos titulos e os demais soltos pela tela"): sem subtítulo vazio;
+    # a regra da tela vai para a dica ⓘ (o mesmo .g2-info do shell37), depois do selo, com alvo de toque de 44 px
+    info=(f'<button type="button" class="g2-info" aria-label="Regras desta tela" data-dica="{esc(dica)}" style="flex-shrink: 0; width: 44px; height: 44px; margin: -8px -10px -8px -6px; '
+          f'border: 0; background: transparent; padding: 0; cursor: help; display: inline-flex; align-items: center; justify-content: center; font-family: inherit;">'
+          f'<span aria-hidden="true" style="width: 26px; height: 26px; border-radius: 999px; border: 1px solid {LINE}; background: {SURF}; color: {MUTED}; font-size: 14px; font-weight: 700; '
+          f'display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;">i</span></button>') if dica else ''
     _mn=re.search(r'<!--MNAV-->.*?<!--/MNAV-->',body,flags=re.S)
     _nav=_mn.group(0) if _mn else ''
     body=body.replace(_nav,'') if _nav else body
@@ -937,13 +998,13 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 </helmet>
 <div data-mroot="1" style="position: relative; width: 100%; height: {H}px; --mw: {W}px; box-sizing: border-box; display: flex; flex-direction: column; background: {BG}; font-family: {FONT}; color: {INK}; overflow: clip;">
 <header style="padding-right: 20px; padding-bottom: 14px; padding-left: 20px; background: {SURF}; border-bottom: 1px solid {LINE}; display: flex; flex-direction: column; gap: 6px;">
-<div style="display: flex; align-items: center; gap: 10px;"><a href="{back}" aria-label="Voltar" style="text-decoration: none; display: inline-flex; align-items: center;">{chev()}</a><h1 style="margin: 0; font-family: {DISP}; font-size: 20px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">{esc(title)}</h1>{chip(status[0],status[1]) if status else ''}</div>
-<div style="font-size: 13px; color: {MUTED};">{esc(sub)}</div>
+<div style="display: flex; align-items: center; gap: 10px;"><a href="{back}" aria-label="Voltar" style="text-decoration: none; display: inline-flex; align-items: center;">{chev()}</a><h1 style="margin: 0; font-family: {DISP}; font-size: 20px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1;">{esc(title)}</h1>{chip(status[0],status[1]) if status else ''}{info}</div>
+{f'<div style="font-size: 13px; color: {MUTED};">{esc(sub)}</div>' if sub else ''}
 </header>
 <main style="flex-grow: 1; min-height: 0; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; box-sizing: border-box;">
 {body}
 </main>
-<div style="padding: 12px 20px 28px; background: {SURF}; border-top: 1px solid {LINE};"><a href="{PHREF.get(fname,'#')}" style="display: block; text-align: center; text-decoration: none; box-sizing: border-box; width: 100%; padding: 18px; border-radius: 16px; box-shadow: 0 1px 2px rgba(30,122,76,.25); font-size: 17px; font-weight: 800; letter-spacing: -.01em; font-family: inherit; background: {ACC}; color: #fff; border: 1px solid {ACC};">{esc(primary)}</a></div>
+<div style="padding: 12px 20px 28px; background: {SURF}; box-shadow: 0 -6px 12px -10px rgba(21,32,26,.25);"><a href="{PHREF.get(fname,'#')}" style="display: block; text-align: center; text-decoration: none; box-sizing: border-box; width: 100%; padding: 18px; border-radius: 16px; box-shadow: 0 1px 2px rgba(30,122,76,.25); font-size: 17px; font-weight: 800; letter-spacing: -.01em; font-family: inherit; background: {ACC}; color: #fff; border: 1px solid {ACC};">{esc(primary)}</a></div>
 {_nav}
 {extra_html().replace('left: max(16px, min(248px, calc(100% - 536px)));','left: 16px; right: 16px;')}
 {G2_TOAST}
@@ -978,11 +1039,11 @@ def add(f,t,W,H,r):
 # exclusão confirmada e edição pela linha em formulário lateral) — substitui table()
 # =====================================================================================
 from html.parser import HTMLParser as _HP
-GRIDS=[]; NAVSPEC=[]
+GRIDS=[]; NAVSPEC=[]; VISOES_SPEC={}
 G2LIB=open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'g2lib.js')).read()
 _old_reset=_reset_screen
 def _reset_screen(f):
-    _old_reset(f); GRIDS.clear(); NAVSPEC.clear()
+    _old_reset(f); GRIDS.clear(); NAVSPEC.clear(); VISOES_SPEC.clear()
     try: EXTRAJS[0]=''
     except NameError: pass
 # =====================================================================================
@@ -1035,11 +1096,17 @@ INTERACAO_CSS=(
     ".menu-lat :focus-visible{outline-color:#8FD6AE}"
     "[role=row]:focus-visible{outline-offset:-2px}"
     "label:has(>input[type=search]):focus-within{outline:2px solid #1E7A4C;outline-offset:1px}"
+    # campo de busca em pílula (13/10, proprietário: "tire esse retângulo estranho de todos campos de busca ao passar o mouse"): o input de
+    # dentro não desenha caixa no hover nem no foco; o retorno fica só no contorno arredondado da pílula (hover acima e focus-within)
+    "label:has(>input[type=search])>input{outline:none!important;box-shadow:none!important}"
     "aside[role=dialog]>div[style*=\"justify-content: flex-end; gap: 8px; padding-top: 6px; border-top\"]{position:sticky;bottom:0;z-index:2;background:#FFFFFF;padding-bottom:2px}"
     "svg [role=button]:focus-visible{outline:none;stroke:#15201A;stroke-width:4px;stroke-dasharray:7 4}"
     # indisponível: aparência diferente e cursor de proibido; o motivo fica no texto/rótulo do próprio componente
-    "button:disabled{opacity:.55;cursor:not-allowed;filter:none;box-shadow:none}"
-    "[aria-disabled=true]{cursor:not-allowed}"
+    # (14/10: o estilo do próprio botão trazia cursor:pointer e vencia a regra; !important garante o cursor de proibido em todo indisponível)
+    "button:disabled{opacity:.55;cursor:not-allowed!important;filter:none;box-shadow:none}"
+    "[aria-disabled=true]{cursor:not-allowed!important}"
+    # menu de etapas aberto (folha do celular): o aviso fica atrás do fundo dele, sem cobrir as etapas (UX-BEN35-AVISO-01)
+    "body:has(.etp-chk:checked) .g2toast{z-index:25!important}"
     # cartão navegável (variante .g2card, ex.: planos agronômicos): pista permanente "Abrir … →" no próprio botão
     ".g2card{background:#FFFFFF;border:1px solid #E4E9E5;position:relative}"
     ".g2card-cta{display:inline-flex;align-items:center;gap:4px;color:#1E7A4C;font-weight:700;font-size:12.5px;white-space:nowrap}"
@@ -1069,10 +1136,18 @@ MOBILE_CSS=("[data-mroot]{max-width:var(--mw);max-height:100vh;max-height:100dvh
 # aviso temporário sobe acima dela. No estreito, empilha mantendo a ordem: nota, retorno, avanço/primária.
 # =====================================================================================
 AVISO_PE='22px'   # distância do aviso temporário (G2_TOAST) ao pé da janela, sem a área de ações presa; a reserva da área em fluxo usa a mesma
-ACOES_CSS=(".acoes{position:sticky;bottom:0;z-index:6;display:flex;flex-direction:column;gap:6px;margin-top:2px;padding:10px 0 2px;"
+# 14/10 (proprietário: "Biblioteca de planos ainda com bug visual"): o main tem 22 px de respiro no pé (18 px no estreito); com bottom:0 a área
+# ficava presa 22 px acima do pé e o conteúdo rolava visível nessa faixa, embaixo dela. A área desce sobre o respiro (bottom negativo) e o
+# repõe por dentro: encosta no pé da janela em toda tela com área de ações.
+ACOES_CSS=(".acoes{position:sticky;bottom:-22px;z-index:6;display:flex;flex-direction:column;gap:6px;margin-top:2px;margin-bottom:-22px;padding:10px 0 24px;"   # margem negativa: no fim da rolagem a área também cobre o respiro
     "background:#F4F6F3;border-top:1px solid #E4E9E5;box-shadow:0 -8px 12px -12px rgba(21,32,26,.35)}"
     ".acoes-nota{margin:0;font-size:12.8px;line-height:1.4;color:#5B4300;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}"
     ".acoes-nota b{color:#15201A}"
+    ".acoes-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}"
+    ".acoes-mais{position:relative}.acoes-mais:not([open])>.acoes-menu{display:none}.acoes-mais>summary{list-style:none;min-width:44px;justify-content:center;font-size:18px;line-height:1;letter-spacing:1px}.acoes-mais>summary::-webkit-details-marker{display:none}"
+    ".acoes-menu{position:absolute;right:0;bottom:calc(100% + 6px);z-index:30;min-width:240px;display:flex;flex-direction:column;gap:2px;padding:6px;background:#FFFFFF;border:1px solid #E4E9E5;border-radius:12px;box-shadow:0 8px 24px rgba(21,32,26,.18)}"
+    ".acoes-menu>button{display:block;width:100%;text-align:left;border:0;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:#15201A;padding:9px 12px;min-height:40px;border-radius:8px;cursor:pointer}"
+    "@media (hover:hover){.acoes-menu>button:hover{background:#E4F3E9}}.acoes-menu>button:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
     ".acoes-linha{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.acoes-esp{flex:1 1 auto}"
     ".acoes :is(.acoes-sec,.acoes-prim){font-family:inherit;font-size:13.5px;font-weight:700;line-height:1.25;padding:9px 16px;border-radius:10px;cursor:pointer;white-space:nowrap;min-height:40px;box-sizing:border-box;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}"
     ".acoes-sec{background:#FFFFFF;color:#15201A;border:1px solid #E4E9E5}"
@@ -1083,6 +1158,7 @@ ACOES_CSS=(".acoes{position:sticky;bottom:0;z-index:6;display:flex;flex-directio
     "main>div.acoes:last-child{flex:0 0 auto;min-height:auto}main>div:has(+div.acoes:last-child){flex:1 1 auto;min-height:0;display:flex;flex-direction:column}"
     "@media (max-width:640px),(max-height:560px){main[data-scroll]>div.acoes:last-child{flex:0 0 auto!important}main[data-scroll]>div:has(+div.acoes:last-child){flex:1 0 auto!important}}"
     "@media (pointer:coarse){.acoes :is(.acoes-sec,.acoes-prim){min-height:44px}}"
+    "@media (max-width:640px){.acoes{bottom:-18px;margin-bottom:-18px;padding-bottom:20px}}"   # respiro do main no estreito (ui37: 18 px)
     # estreito: botões na largura disponível, sem comprimir a barra; ordem visual = ordem de leitura/Tab (retorno, avanço, primária)
     "@media (max-width:640px){.acoes-linha{flex-wrap:wrap}.acoes-esp{display:none}.acoes :is(.acoes-sec,.acoes-prim){flex:1 1 140px;white-space:normal;text-align:center}}"
     # altura curta: a casca rola inteira (ui37) e a área volta ao fluxo, no fim do conteúdo. V55-RESP-01: em fluxo, o aviso temporário
@@ -1110,7 +1186,106 @@ ACOES_CSS=(".acoes{position:sticky;bottom:0;z-index:6;display:flex;flex-directio
     # expandir/recolher global (v3 · tabela 1): controle discreto de texto na barra da coleção, com menos ênfase que qualquer botão
     ".g2xtog{border:0;background:transparent;color:#1E7A4C;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:4px 2px;white-space:nowrap}"
     "@media (hover:hover){.g2xtog:hover{text-decoration:underline;text-underline-offset:3px}}.g2xtog:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:6px}"
-    "@media (pointer:coarse){.g2xtog{min-height:44px}}")
+    "@media (pointer:coarse){.g2xtog{min-height:44px}}"
+    "@media (pointer:coarse){[data-g2agb],[data-g2cvb]{min-height:44px!important}}")   # defeito D: Agrupar por e Colunas com alvo de toque de 44 px
+# =====================================================================================
+# DS-MAIS-20261015 · "⋯ Mais ações" (regras MAIS-01/02). Proprietário, 15/10/2026: "gostei desses 3 pontinhos ... Gerando várias opcoes
+# de ações, deixando a tela mais clean. igual o google faz." Um componente para toda tela, promovido do ⋯ da atividade da Biblioteca de
+# planos (.pa-mais): botão "⋯" com nome e dica "Mais ações de <contexto>", aria-haspopup=menu e aria-expanded; menu role=menu com itens
+# role=menuitem, cada um com o verbo do efeito. O comportamento é um só, no g2lib (g2mais*): abre e fecha pelo ⋯, Esc fecha e devolve o
+# foco ao ⋯, ↓ ↑ Home End andam entre os itens (↓ no ⋯ fechado abre), clicar fora, sair com Tab ou escolher um item fecha. O menu abre
+# para baixo e à direita do ⋯; sobe ou vira para a esquerda quando falta espaço.
+# Regra MAIS-01: em cada contexto (cabeçalho, bloco, cartão, linha) fica à vista a ação primária e no máximo uma secundária; as outras
+# vão para o ⋯ (recolhe_acoes). Na barra de ações do processo o ⋯ é o details.acoes-mais da area_acoes (mesmo desenho de item).
+# =====================================================================================
+MAIS_CSS=(".g2mais-w{position:relative;display:inline-flex;flex-shrink:0;vertical-align:middle}"
+    ".g2mais{display:inline-flex;align-items:center;justify-content:center;min-width:36px;min-height:34px;padding:0 8px;border:1px solid #E4E9E5;border-radius:10px;"
+    "background:#FFFFFF;color:#15201A;font-family:inherit;font-size:18px;font-weight:800;line-height:1;letter-spacing:1px;cursor:pointer;box-sizing:border-box}"
+    ".g2mais.g2mais-l{border-color:transparent;background:transparent;color:#4B5A51;min-width:32px;min-height:32px;padding:0 4px}"
+    "@media (hover:hover){.g2mais:not(.g2mais-l):hover{border-color:#9DBFAA}}"
+    ".g2mais:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}"
+    "@media (pointer:coarse){.g2mais{min-width:44px;min-height:44px}}"
+    ".g2mais[aria-expanded=false]+.g2mais-menu{display:none}"
+    ".g2mais-menu{position:absolute;right:0;top:calc(100% + 4px);z-index:45;min-width:220px;max-width:min(340px,calc(100vw - 24px));display:flex;flex-direction:column;gap:2px;"
+    "padding:6px;background:#FFFFFF;border:1px solid #E4E9E5;border-radius:12px;box-shadow:0 12px 28px -12px rgba(21,32,26,.35);box-sizing:border-box;text-align:left}"
+    ".g2mais-menu[data-cima]{top:auto;bottom:calc(100% + 4px)}.g2mais-menu[data-esq]{right:auto;left:0}"
+    ".g2mais-menu [role=menuitem]{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:0;background:transparent;font-family:inherit;font-size:13px;"
+    "font-weight:600;line-height:1.3;color:#15201A;padding:9px 12px;min-height:40px;border-radius:8px;cursor:pointer;text-decoration:none;white-space:normal;box-sizing:border-box}"
+    "@media (pointer:coarse){.g2mais-menu [role=menuitem]{min-height:44px}}"
+    ".g2mais-menu [role=menuitem]:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
+    ".g2mais-menu [role=menuitem]:is(:disabled,[aria-disabled=true]){color:#65736A;cursor:not-allowed}"
+    ".g2mais-menu .g2mais-destr{color:#B42318}"
+    "@media (hover:hover){.g2mais-menu .g2mais-destr:hover{background-image:linear-gradient(rgba(180,35,24,.06),rgba(180,35,24,.06))!important}}")
+_ITEM_RE=re.compile(r'^\s*<(button|a)\b([^>]*)>(.*)</(button|a)>\s*$',re.S)
+def _attr_q(t): return str(t).replace('"','&quot;') if '{{' in str(t) else esc(str(t)).replace('"','&quot;')
+def item_menu(html,destr=None):
+    """Converte um botão ou link de ação (HTML do engine: btn, msgbtn, drawer_button, ícone + rótulo) em item do ⋯: sai o estilo inline
+    (o menu dá o desenho), entra role=menuitem. Destrutivo (texto vermelho) continua vermelho. HTML que não é um botão simples volta igual."""
+    m=_ITEM_RE.match(html or '')
+    if not m or m.group(1)!=m.group(4) or ('</'+m.group(1)+'>') in m.group(3) or ('<'+m.group(1)+' ') in m.group(3): return None
+    tag,attrs,inner=m.group(1),m.group(2),m.group(3)
+    st=re.search(r'\sstyle="([^"]*)"',attrs); sts=st.group(1) if st else ''
+    red=destr if destr is not None else bool(re.search(r'(?:^|[;\s])color:\s*'+re.escape(RED),sts))
+    attrs=re.sub(r'\sstyle="[^"]*"','',attrs); attrs=re.sub(r'\srole="[^"]*"','',attrs)
+    cl=re.search(r'\sclass="([^"]*)"',attrs)
+    if red: attrs=(attrs.replace(cl.group(0),f' class="{cl.group(1)} g2mais-destr"') if cl else attrs+' class="g2mais-destr"')
+    inner=re.sub(r'^\s*\+\s*','',inner)   # "+ Incluir" no menu é só "Incluir"
+    return f'<{tag}{attrs} role="menuitem">{inner}</{tag}>'
+def _item_tupla(t):
+    txt,acao=t[0],t[1]; destr=len(t)>2 and t[2]; c=' class="g2mais-destr"' if destr else ''
+    rot=txt if '{{' in txt else esc(txt)
+    if str(acao).startswith('{{'): return f'<button type="button" role="menuitem"{c} onClick="{acao}">{rot}</button>'
+    return f'<a role="menuitem"{c} href="{acao}">{rot}</a>'
+def mais(contexto,itens,linha=False,cls=''):
+    """⋯ Mais ações (DS-MAIS-20261015). contexto: o que as ações afetam ("Mais ações de <contexto>"; vazio = "Mais ações"); pode ser buraco
+    do template. itens: HTML de botão/link do engine (vira item) ou tuplas (texto, onClick "{{buraco}}" ou href[, destrutivo]).
+    linha=True: ⋯ sem borda, para linha de lista e cartão; cls: classe extra no botão (ex.: o desenho próprio da linha da atividade, .pa-mais)."""
+    its=''.join((item_menu(i) or i) if isinstance(i,str) else _item_tupla(i) for i in itens if i)
+    if not its: return ''
+    nome=_attr_q('Mais ações'+(f' de {contexto}' if contexto else ''))
+    return (f'<span class="g2mais-w"><button type="button" class="g2mais{" g2mais-l" if linha else ""}{(" "+cls) if cls else ""}" aria-haspopup="menu" aria-expanded="false" '
+            f'aria-label="{nome}" data-dica="{nome}">⋯</button><span role="menu" class="g2mais-menu" aria-label="{nome}">{its}</span></span>')
+def _verde(html): return bool(re.search(r'background:\s*'+re.escape(ACC),html.split('>',1)[0]))
+_TAG_RE=re.compile(r'<(/?)([a-zA-Z][\w:-]*)\b(?:[^>"]|"[^"]*")*?(/?)>')
+_VAZIOS={'br','img','input','hr','meta','link','source','wbr','path','circle','rect','line','polyline','polygon','ellipse','use','stop'}
+def partes_html(h):
+    """divide HTML em elementos de primeiro nível (texto solto entre eles fica como parte própria); usado para recolher ações já concatenadas"""
+    out=[]; d=0; ini=0; pos=0
+    for m in _TAG_RE.finditer(h or ''):
+        fecha,tag,auto=m.group(1),m.group(2).lower(),m.group(3)
+        if d==0 and not fecha:
+            if h[pos:m.start()].strip(): out.append(h[pos:m.start()])
+            if auto or tag in _VAZIOS: out.append(m.group(0)); pos=m.end(); continue
+            ini=m.start(); d=1; continue
+        if auto or tag in _VAZIOS: continue
+        d+=(-1 if fecha else 1)
+        if d==0: out.append(h[ini:m.end()]); pos=m.end()
+    if d==0 and (h or '')[pos:].strip(): out.append(h[pos:])
+    if d!=0: return [h]   # HTML desequilibrado: não mexe
+    return out
+def recolhe_acoes(contexto,acoes,linha=False,visiveis=1):
+    """Regra MAIS-01 aplicada a uma lista de ações de um contexto (bloco, cartão, cabeçalho): ficam à vista as primárias (verde) e as
+    `visiveis` primeiras secundárias; as outras secundárias que são botão ou link simples vão para o ⋯ "Mais ações de <contexto>".
+    Ação que não é botão simples (condicional, com motivo, composta) fica à vista como veio. Devolve o HTML na ordem: à vista, depois ⋯."""
+    vis=[]; menu=[]; nsec=0
+    if isinstance(acoes,str): acoes=[acoes]
+    acoes=[q for x in acoes if x for q in (partes_html(x) if isinstance(x,str) else [x])]
+    for a in acoes:
+        if not isinstance(a,str): menu.append(a); continue
+        if _verde(a): vis.append(a); continue
+        if nsec<visiveis or item_menu(a) is None: vis.append(a); nsec+=(item_menu(a) is not None); continue
+        menu.append(a)
+    if len(menu)==0: return ''.join(vis)
+    # o verde vai por último (fim da linha, à direita); o ⋯ fica logo antes dele
+    sec=[a for a in vis if not _verde(a)]; prim=[a for a in vis if _verde(a)]
+    return ''.join(sec)+mais(contexto,menu,linha)+''.join(prim)
+# DS-ALVO-20261015: liga o alvo de toque dos componentes (ALVO_ST) só com ponteiro grosso. Um link com cara de botão (inline-block) passa
+# a flex para o texto ficar no meio da altura maior; um link em bloco continua em bloco (flex). A escolha em pílula com estado (chip de
+# filtro rápido, segmento, aria-pressed) também ganha os 44 px, inclusive as cópias do estilo do chip feitas nas telas
+ALVO_CSS=("@media (pointer:coarse){:root{--g2-alvo:"+DS_ALVO['toque']+"}"
+          "main :is(button,a)[aria-pressed][style*='border-radius: 999px']{min-height:"+DS_ALVO['toque']+";box-sizing:border-box}"
+          "a[style*='--g2-alvo'][style*='display: inline-block']{display:inline-flex!important;align-items:center;justify-content:center}"
+          "a[style*='--g2-alvo'][style*='display: block']{display:flex!important;align-items:center;justify-content:center}}")
 def area_acoes(pre='aa',rotulo='Ações da etapa'):
     """Área de ações única do processo guiado (DS-33/DS-61). Buracos vêm de g2acoes(v,pre,cfg) em g2lib.js.
     Nota opcional (causa da pendência + atalho contextual), retorno secundário à esquerda, avanço secundário quando a primária
@@ -1118,14 +1293,23 @@ def area_acoes(pre='aa',rotulo='Ações da etapa'):
     h=lambda s: '{{'+pre+s+'}}'
     F_='{{false}}'
     return (f'<sc-if value="{h("_has")}" hint-placeholder-val="{F_}"><div class="acoes" role="group" aria-label="{rotulo}" data-acoes="{pre}">'
-            f'<sc-if value="{h("_hasNota")}" hint-placeholder-val="{F_}"><p class="acoes-nota" id="{pre}-nota"><span>{h("_nota")}</span>'
+            # barra limpa (proprietário, 15/10/2026: "tire todos esses avisos chatos da barra de ações que fica embaixo na tela. deixar tudo clean e
+            # minimalista"): a nota só aparece quando é a decisão do momento (c.decide, ex.: sair sem salvar); fora disso vira a dica do botão
+            # principal (e a descrição dele para o leitor de tela) e os atalhos vão para o "⋯ Mais ações"
+            f'<sc-if value="{h("_hasNotaSr")}" hint-placeholder-val="{F_}"><span class="acoes-sr" id="{pre}-nota">{h("_nota")}</span></sc-if>'
+            f'<sc-if value="{h("_hasNotaVis")}" hint-placeholder-val="{F_}"><p class="acoes-nota" id="{pre}-nota"><span>{h("_nota")}</span>'
             f'<sc-if value="{h("_hasCtx")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-lnk" data-acao="corrigir" onClick="{h("_ctxFn")}">{h("_ctxT")}</button></sc-if>'
             f'<sc-for list="{h("_lnks")}" as="al" hint-placeholder-count="0"><button type="button" class="acoes-lnk" data-acao="atalho" onClick="{{{{al.fn}}}}">{{{{al.t}}}}</button></sc-for></p></sc-if>'
             f'<div class="acoes-linha">'
             f'<sc-if value="{h("_hasVolta")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-sec" data-acao="{h("_voltaA")}" onClick="{h("_volta")}">{h("_voltaT")}</button></sc-if>'
+            f'<sc-if value="{h("_hasTroca")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-sec" data-acao="trocar" onClick="{h("_troca")}">{h("_trocaT")}</button></sc-if>'
             f'<span class="acoes-esp"></span>'
+            f'<sc-if value="{h("_hasMais")}" hint-placeholder-val="{F_}"><details class="acoes-mais"><summary class="acoes-sec" data-acao="mais" aria-haspopup="menu" aria-expanded="false" aria-label="Mais ações da etapa" data-dica="Mais ações da etapa">⋯</summary>'
+            f'<div class="acoes-menu" role="menu" aria-label="Mais ações">'
+            f'<sc-if value="{h("_hasCtx")}" hint-placeholder-val="{F_}"><button type="button" role="menuitem" data-acao="corrigir" onClick="{h("_ctxFn")}">{h("_ctxT")}</button></sc-if>'
+            f'<sc-for list="{h("_lnks")}" as="am" hint-placeholder-count="0"><button type="button" role="menuitem" data-acao="atalho" onClick="{{{{am.fn}}}}">{{{{am.t}}}}</button></sc-for></div></details></sc-if>'
             f'<sc-if value="{h("_hasSec")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-sec" data-acao="{h("_secA")}" onClick="{h("_secFn")}">{h("_secT")}</button></sc-if>'
-            f'<sc-if value="{h("_hasPrim")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-prim" data-acao="{h("_primA")}" aria-describedby="{h("_desc")}" onClick="{h("_primFn")}">{h("_primT")}</button></sc-if>'
+            f'<sc-if value="{h("_hasPrim")}" hint-placeholder-val="{F_}"><button type="button" class="acoes-prim" data-acao="{h("_primA")}" aria-describedby="{h("_desc")}" data-dica="{h("_dica")}" onClick="{h("_primFn")}">{h("_primT")}</button></sc-if>'
             f'<sc-if value="{h("_hasLink")}" hint-placeholder-val="{F_}"><a class="acoes-prim" data-acao="abrir" href="{h("_href")}">{h("_primT")}</a></sc-if>'
             f'</div></div></sc-if>')
 # =====================================================================================
@@ -1142,11 +1326,30 @@ _CAB_BLOCO='main section>div:first-child:not(:last-child):has(>h2,>h3,>div>h2,>d
 # o conteúdo que já começa por uma borda no topo faz o papel da linha (sem linha dupla): tabela emoldurada (.g2caixa), caixa com borda (aviso,
 # memória de cálculo) e ficha de pares rótulo × valor cuja 1ª célula traz border-top (revisão DS, achado 5: AG-04det, GE-05, GE-06det)
 _BORDA_TOPO=':is([style*="border: 1px"],[style*="border-top: 1px"])'
+# SEP-20261015 (proprietário, 15/10: "retire em todas telas onde tem excesso de linhas separadoras visuais, deixe somente as que geram efetiva
+# organização visual e intuitividade"): a linha do título também sai quando o corpo traz a tabela (com ou sem moldura) ou a barra de modos de
+# visão (O.S., Manutenção), que já separam sozinhas; a tabela dentro de uma caixa com borda perde a moldura (caixa dentro de caixa)
 _SEM_MOLDURA=(f':not(:has(+*>{_BORDA_TOPO}:first-child))'
               f':not(:has(+*>sc-if:first-child>{_BORDA_TOPO}:first-child))'
               f':not(:has(+*>:first-child>[style*="border-top: 1px"]:first-child))'
-              f':not(:has(+*>sc-if:first-child>:first-child>[style*="border-top: 1px"]:first-child))')
+              f':not(:has(+*>sc-if:first-child>:first-child>[style*="border-top: 1px"]:first-child))'
+              ':not(:has(+*>.g2caixa:first-child,+*>sc-if:first-child>.g2caixa:first-child,+* .g2visoes-w))'
+              # TAB-01 (padroes-1510.md): filtro rápido em chips (grupo com aria-pressed) no topo do corpo é a barra da visão
+              ':not(:has(+*>[role=group]:first-child [aria-pressed],+*>:first-child>[role=group]:first-child [aria-pressed],+*>:first-child>:first-child>[role=group]:first-child [aria-pressed]))'
+              # cartões (fileira de caixas com borda) e gráfico ou mapa (role=img, svg) logo no topo do corpo
+              ':not(:has(+*>:first-child>[style*="border: 1px"]:first-child:not(button,a,label,input,select,span),+*>:is([role=img],svg):first-child))')
+# caixa com borda (seção, cartão, painel, bloco do cadastro, grade): a tabela de dentro fica sem moldura; o cabeçalho com fundo e o espaço separam
+_MOLDURA=':is([style*="border: 1px solid"],.cadx,.g2caixa)'
+_BT='[style*="border-top: 1px solid"]'
 SEP_CSS=(
+    f"{_MOLDURA} .g2caixa{{border-color:transparent!important}}"
+    # caixa com fundo próprio dentro de outra caixa (memória de cálculo, indicador, evidência): fica o fundo, sai a borda neutra
+    ":is([style*=\"border: 1px solid\"],.cadx) :is(div,section)[style*=\"border: 1px solid rgb(228, 233, 229)\"][style*=\"background: rgb\"]:not([style*=\"background: rgb(255, 255, 255)\"]){border-color:transparent!important}"
+    # 1ª linha de uma lista que abre a caixa com borda: a borda da caixa já está ali, a poucos px (linha dupla)
+    f"[style*=\"border: 1px solid\"]>:first-child{_BT}{{border-top-color:transparent!important}}"
+    # lista curta (2 ou 3 itens com linha no topo, contados na hora: a lista cresce e a linha volta): itens separados pelo espaço, sem linha;
+    # o sc-for não fica no DOM (os itens são filhos diretos do contêiner); linha de tabela (role=row) fica
+    f":has(>{_BT}~{_BT}):not(:has(>{_BT}~{_BT}~{_BT}~{_BT}))>:is(div,li){_BT}:not([role=row]){{border-top-color:transparent!important}}"
     f"{_CAB_BLOCO}{_SEM_MOLDURA}{{background-image:linear-gradient({DS_SEP['cor']},{DS_SEP['cor']})!important;background-size:calc(100% - 2 * {DS_SEP['recuo']}) 1px!important;"
     "background-position:50% 100%!important;background-repeat:no-repeat!important}"
     f"{_CAB_BLOCO}{_SEM_MOLDURA}+*{{margin-top:{DS_SEP['espaco']}}}"
@@ -1170,6 +1373,15 @@ RETORNO_CSS=(
     "#g2-carga.ini{opacity:1;width:82%;transition:width 1.4s cubic-bezier(.08,.6,.2,1)}#g2-carga.chega{opacity:1;width:82%}"
     "#g2-carga.fim{opacity:0;width:100%;transition:width .22s ease-out,opacity .28s ease .22s}"
     "@media (prefers-reduced-motion:reduce){#g2-carga.ini,#g2-carga.chega{width:100%;transition:none}#g2-carga.fim{transition:none}}"
+    # 14/10 (proprietário: feedback em todas as telas e botões): o controle acionado pulsa um anel verde de 320 ms (g2lib, clique/toque/Enter);
+    # com "menos movimento", o anel fica parado o mesmo tempo
+    # contorno (outline) e não sombra: chips e botões com sombra própria (!important) não escondem o retorno
+    "@keyframes g2acionado{0%{outline:2px solid rgba(30,122,76,.75);outline-offset:0}100%{outline:2px solid rgba(30,122,76,0);outline-offset:5px}}"
+    ".g2-acionado{animation:g2acionado .32s ease-out}"
+    ".g2card.g2-acionado,a.mod-cartao.g2-acionado{background:#E4F3E9!important;border-color:#1E7A4C!important}"
+    "@media (prefers-reduced-motion:reduce){.g2-acionado{animation:none!important;transition:none!important;outline:2px solid #1E7A4C!important;outline-offset:2px}}"
+    # chegada na tela: o conteúdo entra em 180 ms (só opacidade: sem transform, a barra de ações fixa não pula); sem animação com "menos movimento"
+    "@keyframes g2entra{from{opacity:.25}to{opacity:1}}@media (prefers-reduced-motion:no-preference){main{animation:g2entra .18s ease-out}}"
 )
 # =====================================================================================
 # DS-DICA-20261009 (g2lib: g2dica, G2_DICAS): dica acessível (role=tooltip), ícone ⓘ, termo com dica e indisponível com motivo.
@@ -1196,18 +1408,163 @@ DICA_CSS=(
     ".g2motivo{display:block;font-size:12.5px;font-weight:600;line-height:1.35;color:#65736A;text-align:right;white-space:normal;overflow-wrap:anywhere;border-radius:6px}"
     "@media (max-width:640px){.g2ind{align-items:flex-start;max-width:100%}.g2motivo{text-align:left}}"
 )
+# =====================================================================================
+# VISOES-1 (proprietário, 10/10/2026): seletor de visões por ícone no cabeçalho da listagem (visoes()). Trilho e raio da DS-36; 32 × 32 px
+# no computador e 44 × 44 com ponteiro grosso ou até 640 px; inativo em cor.texto.secundario corrigido (#5B6660, PRD 74.2: #65736A dá 4,38:1 no trilho); ativo tonal (fundo #E4F3E9, ícone #1E6B47, borda e
+# barra interna de 2 px como a etapa atual) com aria-pressed, nunca o verde cheio da primária (BOT-01); hover verde da DS (VIS-02) vem do
+# INTERACAO_CSS; dica no foco e no hover pelo g2dica (aria-label, sem texto visível). Até 640 px: as 3 primeiras e "mais" (menu com nome).
+# =====================================================================================
+DS_VISOES=dict(trilho='#EEF1EE',inativo='#5B6660',ativo_fundo='#E4F3E9',ativo_icone='#1E6B47',ativo_barra='#1E7A4C',alvo='32px',alvo_toque='44px')
+VISOES_CSS=(
+    ".g2visoes-w{position:relative;display:inline-flex;max-width:100%}"
+    f".g2visoes{{display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;background:{DS_VISOES['trilho']}}}"
+    f".g2visoes>button{{display:inline-flex;align-items:center;justify-content:center;width:{DS_VISOES['alvo']};height:{DS_VISOES['alvo']};padding:0;margin:0;"
+    f"border:1px solid transparent;border-radius:999px;background:transparent;color:{DS_VISOES['inativo']};cursor:pointer;box-sizing:border-box;font-family:inherit;flex-shrink:0}}"
+    ".g2visoes>button svg{width:16px;height:16px}"
+    f".g2visoes>button[aria-pressed=true],.g2visoes>button[data-ativo=true]{{background:{DS_VISOES['ativo_fundo']};color:{DS_VISOES['ativo_icone']};"
+    f"border-color:{DS_VISOES['ativo_barra']};box-shadow:inset 0 -2px 0 {DS_VISOES['ativo_barra']}}}"
+    ".g2visoes>.g2vmais{display:none}"
+    "@media (max-width:640px){.g2visoes>button[data-i]:not([data-i=\"0\"]):not([data-i=\"1\"]):not([data-i=\"2\"]){display:none}.g2visoes>.g2vmais{display:inline-flex}}"
+    f"@media (pointer:coarse),(max-width:640px){{.g2visoes>button{{width:{DS_VISOES['alvo_toque']};height:{DS_VISOES['alvo_toque']}}}.g2visoes>button svg{{width:20px;height:20px}}}}"
+    # VISOES-ROT (16/10/2026, proprietário: barra do Mapa "do lado da barra lateral de ícones dos módulos não fica legal"): o mesmo seletor com o
+    # nome visível ao lado do ícone, para escolhas que o ícone sozinho não explica (funções do Mapa). Mesmo trilho, ativo tonal e alvos; a largura
+    # acompanha o nome; sem esconder opções no estreito (quem usa rola o trilho na horizontal)
+    ".g2visoes.g2visoes-rot>button{width:auto;gap:6px;padding:0 12px;font-size:12.5px;font-weight:700;white-space:nowrap}"
+    ".g2vmenu{position:absolute;top:calc(100% + 6px);right:0;z-index:60;min-width:220px;max-width:calc(100vw - 32px);box-sizing:border-box;background:#FFFFFF;"
+    "border:1px solid #E4E9E5;border-radius:12px;box-shadow:0 14px 34px -14px rgba(21,32,26,.4);padding:6px;display:flex;flex-direction:column;gap:2px}"
+    ".g2vmenu>button{display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 12px;border:0;border-radius:8px;background:transparent;color:#15201A;"
+    "font-family:inherit;font-size:14px;font-weight:600;text-align:left;cursor:pointer;white-space:nowrap}"
+    f".g2vmenu>button[aria-checked=true]{{background:{DS_VISOES['ativo_fundo']};color:{DS_VISOES['ativo_icone']};box-shadow:inset 0 -2px 0 {DS_VISOES['ativo_barra']}}}"
+    # revisão VISOES-1, achado B5: o menu do "mais" só existe no estreito; aberto a 390 px e alargada a janela, ele não fica solto sem o botão
+    "@media (min-width:641px){.g2vmenu{display:none}}"
+    # revisão VISOES-1, achado B3: em cores forçadas (alto contraste) o fundo tonal e a barra (box-shadow) somem; o ativo usa as cores do sistema
+    "@media (forced-colors:active){.g2visoes>button[aria-pressed=true],.g2visoes>button[data-ativo=true],.g2vmenu>button[aria-checked=true]"
+    "{forced-color-adjust:none;background:Highlight;color:HighlightText;border-color:Highlight}}"
+    # estado em toda visão (§2.8): uma frase e a ação nomeada, no topo do painel
+    ".g2vest{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding:10px 12px;border:1px solid transparent;border-radius:10px;background:#F4F6F3;"
+    "font-size:13px;font-weight:600;line-height:1.4;color:#15201A}"
+    ".g2vest[data-tipo=erro],.g2vest[data-tipo=cenario]{border-style:solid;border-color:#F4C7C1;background:#FDE8E6;color:#8F1C13}"
+    ".g2vest[data-tipo=regra]{border-style:solid;border-color:#EAD6A8;background:#FFF3D6;color:#5B4300}"
+)
+def visoes(gid, ent, paineis, rotulo):
+    """Seletor de visões (VISOES-1): devolve (barra, corpo). paineis: {visão: html | nome de outra visão (mesmo painel; ex.: a Tabela agrupada
+    usa a grade da Lista, o agrupamento é estado da grade)}. As visões vêm de visoes.validas(ent) (fonte única): chaves diferentes das válidas,
+    visão sem atributo com fonte ou painel que aponta para visão sem painel fazem o build falhar. Com uma visão só: ('', painel), sem seletor.
+    Corpo = estado da visão (§2.8, role=status) + um painel por grupo (sc-if pelo estado da grade: g2visoesFim no g2lib)."""
+    import visoes as V
+    val = V.validas(ent)
+    if sorted(paineis) != sorted(val):
+        raise ValueError(f'visoes({gid}): painéis {sorted(paineis)} ≠ visões válidas de {ent} {sorted(val)} (visoes.py)')
+    alias = {k: p for k, p in paineis.items() if isinstance(p, str) and p in V.ORDEM}
+    for k, p in alias.items():
+        if p not in paineis or p in alias: raise ValueError(f'visoes({gid}): {k} aponta para {p}, que não tem painel próprio')
+    grupos = [[k] + [a for a in val if alias.get(a) == k] for k in val if k not in alias]
+    if len(val) == 1: return '', paineis[val[0]]
+    for k in val:
+        if k not in V.ICONE: raise ValueError(f'visoes({gid}): visão {k} sem ícone (visoes.ICONE)')
+    VISOES_SPEC[gid] = dict(ent=ent, validas=val, nomes={k: V.menu_nome(k) for k in val}, paineis=grupos, rotulo=rotulo)
+    h = lambda s: _h(gid + s); F_ = '{{false}}'
+    bts = ''.join(f'<button type="button" data-visao="{k}" data-i="{i}" aria-label="{esc(V.rotulo(k))}" aria-pressed="{h("_vb_"+k+"_p")}" '
+                  f'tabIndex="{h("_vb_"+k+"_t")}" onClick="{h("_vb_"+k+"_go")}">{icon(V.ICONE[k],16)}</button>' for i, k in enumerate(val))
+    mais = menu = ''
+    if len(val) > 3:
+        mais = (f'<button type="button" class="g2vmais" data-visao-mais="1" aria-haspopup="menu" aria-expanded="{h("_vm_x")}" aria-label="{h("_vm_lab")}" '
+                f'data-ativo="{h("_vm_on")}" tabIndex="{h("_vm_t")}" onClick="{h("_vm_go")}">{icon("v_mais",16)}</button>')
+        menu = (f'<sc-if value="{h("_vm_open")}" hint-placeholder-val="{F_}"><div role="menu" class="g2vmenu" aria-label="Mais visões" data-visoes-menu="{gid}" onKeyDown="{h("_vmk")}">'
+                + ''.join(f'<button type="button" role="menuitemradio" tabIndex="-1" data-visao-menu="{k}" aria-checked="{h("_vmi_"+k+"_c")}" onClick="{h("_vmi_"+k+"_go")}">'
+                          f'{icon(V.ICONE[k],20)}<span>{esc(V.menu_nome(k))}</span></button>' for k in val[3:]) + '</div></sc-if>')
+    barra = (f'<div class="g2visoes-w"><div class="g2visoes" role="toolbar" aria-label="{esc(rotulo)}" data-visoes="{" ".join(val)}" data-visoes-gid="{gid}" '
+             f'onKeyDown="{h("_vk")}">{bts}{mais}</div>{menu}</div>')
+    est = (f'<sc-if value="{h("_vest_on")}" hint-placeholder-val="{F_}"><div class="g2vest" role="status" data-visoes-estado="{gid}" data-tipo="{h("_vest_tipo")}">'
+           f'<span>{h("_vest_t")}</span><sc-if value="{h("_vest_tema")}" hint-placeholder-val="{F_}"><button type="button" onClick="{h("_vest_go")}" style="{_MINI}">{h("_vest_a")}</button></sc-if></div></sc-if>')
+    # sem invólucro em volta do painel: o sc-if não vira elemento, e as regras "a tabela estica até o fim" (G2_CSS, div>.g2caixa) continuam valendo
+    corpo = est + ''.join(f'<sc-if value="{h("_vp_"+g[0])}" hint-placeholder-val="{{{{{"true" if i == 0 else "false"}}}}}">{paineis[g[0]]}</sc-if>'
+                         for i, g in enumerate(grupos))
+    return barra, corpo
 def acao_motivo(botao, dis, motivo):
     """Botão que pode ficar indisponível com motivo (PRD DS-06 e 74.5.0, VIS-04): o botão (com aria-disabled="{dis}" e data-dica="{motivo}") e,
     só enquanto indisponível, o motivo em texto visível logo abaixo, na cor do texto secundário. A dica no ponteiro, no foco e no toque longo
     complementa; não substitui o texto. Ativar o botão indisponível realça este motivo e anuncia a recusa (g2lib)."""
     return f'<span class="g2ind">{botao}<sc-if value="{dis}" hint-placeholder-val="{{{{false}}}}"><span class="g2motivo">{motivo}</span></sc-if></span>'
-G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
+# TAB-08 · Tabela padrão (16/10/2026, proprietário: "padronize o visual desse modo de visão tabela em todos, mas adicionando nessa e nas demais o
+# drill down e os ícones em cada coluna de ordenação e filtro"; referência: Planos agronômicos › Atividades do plano). A tabela numa moldura própria
+# (borda e raio de 12 px, alinhada à barra), cabeçalho em maiúsculas pequenas sobre o fundo da DS, sem linha vertical, linhas de 44 px, ⇅ e funil
+# em toda coluna (cab_colunas_html, também nas tabelas próprias) e, na 1ª célula, a seta de quem abre: ▸/▾ abre os itens ali mesmo; › abre o detalhe (TAB-04)
+_SETA_DRILL='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>'
+TABELA_CSS=(
+    ".g2rola:has(>[role=table][data-g2g]){border:1px solid #E4E9E5;border-radius:12px;background:#FFFFFF;margin:0 0 12px;flex:0 1 auto!important}"   # a moldura acaba na última linha; rola só quando passa da altura; sem margem lateral: a largura é dos dados (Agrofit a 1280 px sem rolagem lateral) e a borda alinha ao título do bloco
+    "[data-g2g] [role=cell]{min-height:44px;box-sizing:border-box}"
+    "[data-g2g] [role=columnheader]{min-height:36px;box-sizing:border-box}"
+    ".g2so{font-size:11px;line-height:1}"
+    # celular (até 480 px): "Agrupar por" e "Colunas" só com o ícone e o valor (o nome fica no aria-label), para a barra caber numa linha com
+    # Tabela | Cartões e sobrar altura para as linhas (AC-PCM-22: ≥ 5 linhas acima da dobra a 390 px)
+    "@media (max-width:480px){.g2rot{display:none}}"
+    ".g2drill{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;flex-shrink:0;color:#9AA59E}"
+    "@media (hover:hover){[data-g2g] .g2ed:hover .g2drill{color:#1E7A4C}}"
+)
+# VIS-06 · cartões em linha (16/10/2026, _cartoes_html; referência: Atividades do plano › Cartões): um cartão por linha com borda e raio de
+# 12 px, colunas alinhadas entre os cartões (grade em cada linha, g2cdVals._cdgtc), rótulos uma vez no alto, seta à esquerda que abre os
+# itens dentro do cartão, ⋯ no fim; hover verde (VIS-02), foco de 2 px, 44 px no toque; no estreito os campos descem, com o rótulo
+CARTOES_CSS=(
+    ".g2cartoes{display:flex;flex-direction:column;gap:8px;padding:0 0 12px;box-sizing:border-box;container-type:inline-size}"
+    ".g2cd-grade{display:flex;flex-direction:column;gap:8px}"
+    ".g2cd{min-width:0;border:1px solid #E4E9E5;border-radius:12px;background:#FFFFFF;box-sizing:border-box;font-size:13px}"
+    ".g2cd.g2ed{cursor:pointer}.g2cd:focus-visible,.g2cd-k:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}"
+    "@media (hover:hover){.g2cd.g2ed:hover{border-color:#9DBFAA}}"
+    ".g2cd-g{display:grid;align-items:center;min-width:0;box-sizing:border-box;padding:0 4px 0 6px}"
+    ".g2cd-lin{min-height:52px}.g2cd-fs{display:contents}"
+    ".g2cd-s,.g2cd-c,.g2cd-a{display:flex;align-items:center;justify-content:center;min-width:0}"
+    ".g2cd-c .g2car{width:30px;height:36px}"
+    ".g2cd-tit{min-width:0;padding:6px 8px;display:flex;flex-direction:column;gap:2px}"
+    ".g2cd-tl{display:flex;align-items:center;gap:8px;min-width:0}"
+    ".g2cd-tl>.g2pw{flex:0 1 auto;flex-wrap:nowrap;min-width:0;overflow:hidden;font-size:13.5px;font-weight:700;line-height:1.3}"
+    ".g2cd-tl>.g2pw>*{white-space:nowrap}"
+    ".g2cd-tl>.g2pw>[style*=\"flex-basis: 100%\"],.g2cd-tl>.g2pw>[style*=\"flex-basis: 100%\"]~*{display:none}"   # 2ª linha da célula: fica na Tabela e no detalhe
+    ".g2cd-tl>.g2pw>:not(:first-child):not(b):not([data-dica]){font-weight:500;color:#65736A;font-size:12.5px}"
+    ".g2cd-kn{flex-shrink:0;font-size:12px;color:#65736A;white-space:nowrap}"
+    ".g2cd-nota{font-size:12px;color:#65736A;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}"
+    ".g2cd-f{min-width:0;padding:6px 8px;display:flex;flex-direction:column;gap:2px;font-size:13px}"
+    ".g2cd-f.g2cd-num{align-items:flex-end;text-align:right;font-variant-numeric:tabular-nums}"
+    ".g2cd-fl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}"   # no largo o rótulo vem do alto; fica para o leitor
+    ".g2cd-fv{min-width:0;max-width:100%;overflow:hidden}"
+    ".g2cd-fv .g2pw{display:block;min-width:0;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}"   # bloco: as reticências só valem fora do flex
+    ".g2cd-fv .g2pw>[style*=\"flex-basis: 100%\"],.g2cd-fv .g2pw>[style*=\"flex-basis: 100%\"]~*{display:none}"
+    ".g2cd-fv .g2pw>[style*=\"color: #65736A; font-size: 12px\"]:not(:first-child){display:none}"
+    ".g2cd-hd{min-height:24px;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;border:1px solid transparent}"
+    ".g2cd-hd .g2cd-tit,.g2cd-hd .g2cd-f{padding-top:0;padding-bottom:0;display:block;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
+    ".g2cd-tot{min-height:40px;border-radius:10px;background:#F4F6F3;border:1px solid transparent;font-variant-numeric:tabular-nums}"
+    ".g2cd-gcab{min-height:40px;padding-top:6px;border:1px solid transparent}.g2cd-gcab .g2cd-gnome{font-weight:800}"
+    ".g2cd-gx{display:inline-flex;align-items:baseline;gap:4px;font-size:12.5px;color:#65736A;white-space:nowrap;font-variant-numeric:tabular-nums}"
+    ".g2cd-kr{color:#65736A}"
+    ".g2cd-kids{display:flex;flex-direction:column;border-top:1px solid #E4E9E5;background:#FBFCFA;border-radius:0 0 12px 12px}"
+    ".g2cd-k{min-height:44px;border-top:1px solid #F0F2EF}.g2cd-k:first-child{border-top:0}.g2cd-k:last-child{border-radius:0 0 12px 12px}.g2cd-k.g2ed{cursor:pointer}"
+    ".g2cd-k .g2cd-tl>.g2pw{font-size:13px;font-weight:600}"
+    "@media (hover:hover){.g2cd-k.g2ed:hover{background:#F2F8F4}}"
+    "@media (pointer:coarse){.g2cd-c .g2car{height:44px}.g2cd-k{min-height:48px}}"
+    # estreito (contêiner até 640 px): título e ⋯ na 1ª linha; os campos descem, em duas colunas, com o rótulo
+    "@container (max-width:640px){"
+    ".g2cd-g{grid-template-columns:auto 0px minmax(0,1fr) auto!important}"
+    ".g2cartoes[data-car=\"1\"] .g2cd-g{grid-template-columns:auto 36px minmax(0,1fr) auto!important}"
+    ".g2cd-hd{display:none}"
+    ".g2cd-fs{display:grid;grid-column:3/4;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;padding:0 8px 10px}"
+    ".g2cd-s{grid-column:1;grid-row:1}.g2cd-c{grid-column:2;grid-row:1}.g2cd-tit{grid-column:3;grid-row:1}.g2cd-a{grid-column:4;grid-row:1}"
+    ".g2cd-f{padding:0}.g2cd-f.g2cd-num{align-items:flex-start;text-align:left}"
+    ".g2cd-fl{position:static;width:auto;height:auto;clip:auto;font-size:11.5px;color:#65736A;white-space:normal}"
+    ".g2cd-gcab .g2cd-fs:not(:has(.g2pw>*)),.g2cd-f:not(:has(.g2cd-fv .g2pw>*)):not(:has(.g2cd-fv>b)){display:none}"   # campo vazio não ocupa lugar
+    "}"
+)
+G2_CSS=(".g2dsel{position:fixed;z-index:90;box-sizing:border-box;overflow-y:auto;max-width:min(420px,calc(100vw - 16px));padding:6px;background:#FFFFFF;border:1px solid #E4E9E5;border-radius:12px;box-shadow:0 12px 28px -12px rgba(21,32,26,.35);font-family:inherit;outline:none}"   # lista suspensa do DS (15/10)
+    ".g2dsel [role=option]{display:flex;align-items:center;gap:6px;min-height:36px;padding:7px 12px 7px 8px;border-radius:8px;font-size:13.5px;font-weight:600;color:#15201A;cursor:pointer;white-space:nowrap}"
+    ".g2dsel .g2dsel-ck{width:16px;flex-shrink:0;color:#1E7A4C;font-weight:800}.g2dsel [aria-selected=true]{color:#1E7A4C;font-weight:800}"
+    ".g2dsel .g2dsel-at{background:#F2F8F4}.g2dsel [aria-disabled=true]{color:#8A968E;cursor:not-allowed}"
+    ".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outline:2px solid #1E7A4C;outline-offset:-2px}"
         # hover dos controles pequenos da grade só onde existe ponteiro com hover (no toque o fundo não fica "grudado")
         "@media (hover:hover){.g2fi:hover{background:#F2F8F4}.g2fb:hover,.g2car:hover{background:#E4F3E9}.g2del:hover{background:#FDE8E6;color:#B42318}}"   # DS-HOVER: verde, não cinza
-        ".g2kid{background:#FBFCFA}.g2flash{background:#E4F3E9}.g2tot{cursor:pointer}"
+        ".g2kid{background:#FBFCFA}.g2flash{background:#E4F3E9}.g2tot{cursor:pointer}.g2fgrp{background:#F2F8F4}.g2fgrp .g2c0{background:#F2F8F4!important}.g2fgrp .g2pw{max-width:min(100%,calc(100vw - 172px))!important;flex-wrap:wrap}.g2fgrp .g2pw *{white-space:normal}"   # SAF-FAZ-3: grupo da fazenda com cara de cabeçalho; no celular cabe na parte visível da tabela
         ".g2sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}"   # texto só para leitor de tela (motivo do chip)
         ".g2hb{display:inline-flex;align-items:center;gap:4px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;padding:7px 2px 7px 0;text-align:left;white-space:normal;max-width:104px;line-height:1.2}"
-        ".g2fb{border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10px;font-weight:700;padding:4px 3px;border-radius:6px}"
+        ".g2fb{border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:10.5px;font-weight:800;padding:4px 4px;border-radius:6px;display:inline-flex;align-items:center;gap:2px;line-height:1}"   # funil de filtro da coluna (15/10)
+        ".g2fb .g2fi-ico{flex-shrink:0;display:block}"
         ".g2car{width:22px;height:22px;border:0;border-radius:6px;background:transparent;cursor:pointer;font-size:13px;color:#15201A;flex-shrink:0;padding:0}"
         ".g2del{width:28px;height:28px;border:0;border-radius:8px;background:transparent;cursor:pointer;color:#8A968E;display:inline-flex;align-items:center;justify-content:center}"
         ".g2pw{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;flex:0 1 auto;justify-content:inherit;text-align:inherit}"
@@ -1216,6 +1573,8 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         # tela sem rolagem de página (pedido do Adrianus, 01/10/2026): título, filtros rápidos e expandir/recolher ficam parados;
         # o último bloco com dados estica até o fim da janela e só a área de dados rola, com o cabeçalho da tabela fixo
         "main>div:last-child{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}"
+        # rodapé sem dados depois do bloco com a tabela ("Restaurar demonstração" na Carga) não estica: o espaço é da tabela (proprietário, 13/10/2026)
+        "main>section:has(.g2caixa,.rola)~div:last-child:not(:has(.g2caixa,.rola)){flex:0 0 auto}"
         # só estica quando é o único bloco da tela (vários blocos empilhados: a área rola, sem rolagem dupla)
         # e só a tabela/lista que está direto no corpo do bloco (aninhada mais fundo fica na altura natural)
         "main section:only-of-type:has(.g2caixa,.rola){flex:1 1 0;min-height:240px;display:flex;flex-direction:column}"
@@ -1226,24 +1585,47 @@ G2_CSS=(".g2r{background:#FFFFFF}.g2ed{cursor:pointer}.g2ed:focus-visible{outlin
         ".g2rola{--g2cols:initial;scroll-padding:calc(var(--g2hh,0px) + 6px) 6px 6px calc(var(--g2c0w,0px) + 6px)}"
         ".g2rola [role=columnheader] button:focus-visible{outline-offset:-2px}"   # cabeçalho rente à borda da caixa: o anel fica por dentro, inteiro
         ".g2cta{white-space:nowrap}"
+        # SAF-TAB (proprietário, 14/10: "mais minimalistas"): ação secundária repetida em toda linha (Dividir) aparece ao passar o mouse ou
+        # com o foco na linha; no toque fica sempre visível. Ocupa o mesmo lugar (opacidade), sem pular a linha
+        "@media (hover:hover){[role=row] .g2sec{opacity:0;transition:opacity .12s}[role=row]:hover .g2sec,[role=row]:focus-within .g2sec{opacity:1}}"
+        # no celular (até 640 px) a ação secundária sai da linha: o toque na linha abre o painel, que oferece a mesma ação (print do proprietário, 14/10)
+        "@media (max-width:640px){[role=row] .g2sec{display:none}}"
+        # coluna de número (a='r', célula sem quebra): o número curto fica numa linha; o texto que passa da largura da coluna (linha de apoio
+        # "01/09 · Sementes Vale", "R$ 131,00/sc (saca a conferir)") quebra dentro dela em vez de invadir a vizinha (proprietário, 13/10/2026).
+        # Os cadastros (CADX) mantêm uma linha com reticências, de propósito.
+        ".g2celn .g2pw{white-space:normal}.cadx .g2celn .g2pw{white-space:nowrap}"
         # tabela com a 1ª coluna limitada (g2lib, data-c0): textos, cabeçalhos e ações quebram linha dentro da largura visível
         # (vale também onde a área trunca com reticências), para cada célula caber inteira ao rolar
         ".g2rola[data-c0] :is(.g2pw,.g2hb,.g2cta){white-space:normal}.g2rola[data-c0] .g2pw{flex-wrap:wrap}.g2rola[data-c0] .g2pw :is(b,a,button,span){flex-shrink:1}.g2rola[data-c0] [role=cell]{align-self:stretch}"   # linha mais alta: a célula acompanha (fundo inteiro)
-        "main section:only-of-type>div:last-child>.g2caixa:last-of-type{flex:1 1 0}main section:only-of-type>div:last-child>.g2caixa:last-of-type>.g2rola{flex:1 1 0}"
+        "main section:only-of-type>div:last-child>.g2caixa:not(:has(~ .g2caixa)){flex:1 1 0}main section:only-of-type>div:last-child>.g2caixa:not(:has(~ .g2caixa))>.g2rola{flex:1 1 0}"
         "main section:only-of-type>div:last-child>.rola{flex:1 1 0;min-height:0;overflow:auto}"
         # tabela um nível abaixo, junto com chips ou legenda (ex.: Ordem de Serviço): o contêiner direto também estica
         "main section:only-of-type>div:last-child>div:has(>.g2caixa,>.rola){flex:1 1 0;min-height:0;display:flex;flex-direction:column}"
-        "main section:only-of-type>div:last-child>div>.g2caixa:last-of-type{flex:1 1 0}main section:only-of-type>div:last-child>div>.g2caixa:last-of-type>.g2rola{flex:1 1 0}"
+        "main section:only-of-type>div:last-child>div>.g2caixa:not(:has(~ .g2caixa)){flex:1 1 0}main section:only-of-type>div:last-child>div>.g2caixa:not(:has(~ .g2caixa))>.g2rola{flex:1 1 0}"
         "main section:only-of-type>div:last-child>div>.rola{flex:1 1 0;min-height:0;overflow:auto}"
         ".g2rola [role=table]>[role=row]:first-child{position:sticky;top:0;z-index:3}"
-        + INTERACAO_CSS + ACOES_CSS + SEP_CSS + RETORNO_CSS + DICA_CSS)
+        # a tabela cabe na largura visível quebrando o texto das colunas e só rola de lado quando nem assim cabe (o menor conteúdo passa
+        # da largura); no celular segue a rolagem com a 1ª coluna presa (proprietário, 13/10/2026: "rolagem desnecessária")
+        # a célula nunca fica mais estreita que o seu menor conteúdo (a linha da célula traz min-width:0): o que não quebra (nome no CADX,
+        # número) segura a coluna e, se preciso, a tabela rola de lado em vez de um texto invadir a coluna vizinha
+        # 13/10 (correção da v59): ocupar ao menos a largura útil (tabela estreita estica), sem obrigar a caber; com width:100% a tabela larga
+        # da O.S. espremia as colunas e os selos quebravam letra a letra ("En cer rad as"). A larga volta à largura natural e rola de lado.
+        "@media (min-width:700px){.g2rola [role=table]{min-width:100%!important}.g2rola [role=table] [role=cell]{min-width:min-content!important}}"
+        # separador "·" no começo de uma parte da célula: fica num elemento próprio e some (opacidade, sem mudar a largura) quando a parte
+        # começa a linha; o texto lido (innerText, leitor de tela sem o ponto) não muda (g2sepIni em g2lib.js)
+        ".g2sepd[data-ini]{opacity:0}"
+        + INTERACAO_CSS + ACOES_CSS + ALVO_CSS + MAIS_CSS + SEP_CSS + RETORNO_CSS + DICA_CSS + VISOES_CSS + TABELA_CSS + CARTOES_CSS)
 _TRASH='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>'
-_MINI=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap;'
-_MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {ACC}; background: {ACC}; color: #fff; cursor: pointer; white-space: nowrap;'
-_PARTS=(f'<sc-if value="{{{{p.isTxt}}}}" hint-placeholder-val="{{{{false}}}}"><span>{{{{p.t}}}}</span></sc-if>'
+_MINI=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {LINE}; background: {SURF}; color: {INK}; cursor: pointer; white-space: nowrap; {ALVO_ST}'
+_MINIP=f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid {ACC}; background: {ACC}; color: #fff; cursor: pointer; white-space: nowrap; {ALVO_ST}'
+_SEPD=f'<sc-if value="{{{{p.sepL}}}}" hint-placeholder-val="{{{{false}}}}"><span class="g2sepd" aria-hidden="true">· </span></sc-if>'
+_ICO_ALERTA='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>'   # lucide triangle-alert (ISC)
+_ICO_COLUNAS='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>'   # lucide columns-3 (ISC)
+_PARTS=(f'<sc-if value="{{{{p.isIco}}}}" hint-placeholder-val="{{{{false}}}}"><span role="img" aria-label="{{{{p.dica}}}}" data-dica="{{{{p.dica}}}}" style="{{{{p.st}}}}">{_ICO_ALERTA}<sc-if value="{{{{p.icoTem}}}}" hint-placeholder-val="{{{{false}}}}"><span aria-hidden="true" style="white-space: normal; min-width: 0;">{{{{p.icoTxt}}}}</span></sc-if></span></sc-if>'
+        f'<sc-if value="{{{{p.isTxt}}}}" hint-placeholder-val="{{{{false}}}}"><span>{_SEPD}{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isCn}}}}" hint-placeholder-val="{{{{false}}}}"><span style="{{{{p.st}}}}">{{{{p.t}}}}</span></sc-if>'
-        f'<sc-if value="{{{{p.isB}}}}" hint-placeholder-val="{{{{false}}}}"><b>{{{{p.t}}}}</b></sc-if>'
-        f'<sc-if value="{{{{p.isMut}}}}" hint-placeholder-val="{{{{false}}}}"><span style="color: {MUTED}; font-size: 12px;">{{{{p.t}}}}</span></sc-if>'
+        f'<sc-if value="{{{{p.isB}}}}" hint-placeholder-val="{{{{false}}}}"><b>{_SEPD}{{{{p.t}}}}</b></sc-if>'
+        f'<sc-if value="{{{{p.isMut}}}}" hint-placeholder-val="{{{{false}}}}"><span style="color: {MUTED}; font-size: 12px;">{_SEPD}{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isChip}}}}" hint-placeholder-val="{{{{false}}}}"><span data-dica="{{{{p.dica}}}}" style="{{{{p.st}}}}"><span style="{{{{p.dot}}}}"></span>{{{{p.t}}}}<sc-if value="{{{{p.hasDica}}}}" hint-placeholder-val="{{{{false}}}}"><span class="g2sr">: {{{{p.dica}}}}</span></sc-if></span></sc-if>'
         f'<sc-if value="{{{{p.isTag}}}}" hint-placeholder-val="{{{{false}}}}"><span style="display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; color: {MUTED}; border: 1px solid {LINE}; white-space: nowrap;">{{{{p.t}}}}</span></sc-if>'
         f'<sc-if value="{{{{p.isLink}}}}" hint-placeholder-val="{{{{false}}}}"><a href="{{{{p.href}}}}" style="color: {ACC}; font-weight: 700; text-decoration: none;">{{{{p.t}}}}</a></sc-if>'
@@ -1327,7 +1709,19 @@ def _ajuda_auto(cols,calc,campos=()):
 # do cabeçalho da coluna. A regra roda no navegador (g2lib.g2glossCol), sobre as linhas que a grade mostra (as do build e as montadas na tela), com
 # estas entradas do GLOSSARIO (as de "^" valem só para o rótulo): fonte única do texto, aqui.
 _GLOSS_CEL=[(rx,t) for rx,t in GLOSSARIO if not rx.startswith('^')]
-def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None):
+_NOVO_RE=re.compile(r'^\s*\+?\s*Nov[oa]s?\s+',re.I)
+def rotulo_criar(t):
+    """BOT-03 (15/10/2026): o botão de criar diz o verbo do efeito: \"Novo pedido\" vira \"Criar pedido\" (o título do painel continua o nome)"""
+    return _NOVO_RE.sub('Criar ',t) if t else t
+# ícones do "Agrupar por" (VISOES-2 §3.3): o mesmo desenho na grade e em toda barra com agrupamento próprio (Agrofit, 16/10/2026)
+_ip_ag=lambda d: f'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{d}</svg>'
+AG_ICONES={'oque':_ip_ag('<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>'),   # lucide layers
+            'quem':_ip_ag('<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'),   # lucide user
+            'quando':_ip_ag('<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>'),   # lucide calendar
+            'onde':_ip_ag('<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>'),   # lucide map-pin
+            '0':_ip_ag('<path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h18"/>')}   # lucide menu (sem agrupar)
+AG_CTRL={}   # gid: (botão Agrupar por com a trilha, menu), para o mesmo controle fora da Tabela (Kanban da O.S.)
+def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None,vazio=True,ag=None,sico=None,sico_so_icone=False,menu_linha=False,busca_extra='',cartoes=None):
     cols=[_col_un(c) for c in cols]
     # rótulos que ficariam iguais sem a unidade ("Custo (R$/h)" e "Custo (R$/ha)") mantêm a unidade, sem parênteses: "Custo R$/h", "Custo R$/ha"
     # (proprietário, 05/10/2026: "Custo R$/h e R$/ha é melhor e mais intuitivo")
@@ -1335,6 +1729,9 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     cols=[(dict(c,l=c['l']+' '+c['un']) if (c.get('un') and _ls.count(c.get('l'))>1) else c) for c in cols]
     _ed=edit if isinstance(edit,dict) else {}
     cols=_ajuda_auto(cols,_ed.get('calc'),_ed.get('fields') or ())   # DS-DICA: sigla, unidade e fórmula no cabeçalho
+    import visoes_marcas as _VM   # VISOES-2 V2-3: ess, pq, sico e Agrupar por das listagens do menu, num quadro só
+    cols,ag,sico=_VM.marcar(CUR,gid,cols,ag,tree,sico); ag_gen=bool(ag) and bool(ag[0].get('ck'))
+    if sico and sico_so_icone: sico=dict(sico,so=True)   # 15/10 (proprietário: "avisos só dentro da tabela, de forma visual"): só o ícone, texto na dica
     """Grade interativa. cols: [dict(k,l,t='txt'|'num',a='r',u,d,agg='sum'|'avg',chips={valor:cor},w,pre)];
     rows: [dict(id,v={},s={},p={k:[partes]},ro=False,kids=[...],o=[dict(t,h)],dr='d3_open',sh='d2')];
     edit: dict(m='form'|'ro'|'origin'|'none', title, sub, fields=[dict(k,l,t='txt'|'num'|'sel'|'date'|'area',opts,req,min,max,u,cond=dict(k,eq),help,def,ro)], calc, newTitle, leafOnly)."""
@@ -1343,32 +1740,132 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     n=len(cols)+(1 if sel else 0)+(1 if dele else 0)
     # qf: filtro rápido por uma coluna, k (chave), cut (fica o texto antes do separador), sep (vários valores na célula), todas ('Todas'|'Todos')
     qf=(dict(k=qf) if isinstance(qf,str) else qf) or None
-    spec=dict(id=gid,cols=cols,rows=rows,edit=edit,sel=sel,del_=dele,tree=tree,so=so or {},total=total,x0=x0 or {},qf=qf)
+    spec=dict(id=gid,cols=cols,rows=rows,edit=edit,sel=sel,del_=dele,tree=(tree or (bool(ag) and not ag_gen)),so=so or {},total=total,x0=x0 or {},qf=qf)
+    if any(c.get('ess') for c in cols): spec['marcas']={c['k']:dict(ess=c.get('ess'),pq=c.get('pq')) for c in cols if c.get('ess') or c.get('pq')}   # V2-3: g2marca
+    if menu_linha: spec['rmenu']=True   # 15/10/2026: ações da linha no ⋯ (com ícone), Excluir por último
+    if sico: spec['sico']=sico   # VISOES-2 §3.6: a coluna de situação (k) oculta vira ícone antes da identidade, só nas cores que pedem atenção (cores)
+    if ag: spec['ag']=ag   # VISOES-2 §3.3: [dict(pq, l, niv=[...], fc=[coluna de filtro por nível], um, plural)]; as linhas trazem r.g[pq]
     spec['del']=spec.pop('del_'); GRIDS.append(spec)
     H=lambda s: _h(gid+s)
     sicon=f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="{MUTED}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>'
     tb=''
-    if search or add or tree or sel or tools or qf:
-        tb=(f'<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid {LINE}; flex-wrap: wrap;">'
-            + (f'<label style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; background: {BG}; min-width: 160px;">{sicon}<input type="search" aria-label="Buscar nesta tabela" placeholder="Buscar…" value="{H("_q")}" onChange="{H("_setq")}" style="font-family: inherit; font-size: 12.5px; border: 0; background: transparent; outline: none; width: 100%;"></label>'
-               f'<span style="font-size: 12px; color: {MUTED}; font-weight: 600; white-space: nowrap;">{H("_count")} de {H("_all")}</span>' if search else '')
+    # VISOES-2 §8 C1: o botão nasce em toda grade com ess; no computador, até 5 colunas ficam inteiras e g2cvVals o esconde; no celular
+    # (3 primeiras) ele aparece também nas de até 5, para recuperar as ocultas (Codex 6168779649, residual)
+    ess=any(c.get('ess') for c in cols)
+    cvb=(f'<sc-if value="{H("_cvhas")}" hint-placeholder-val="{{{{false}}}}"><button type="button" data-g2cvb="{gid}" aria-haspopup="dialog" aria-expanded="{H("_cvexp")}" aria-label="{H("_cvlab")}" title="{H("_cvlab")}" onClick="{H("_cvtog")}" '
+         f'style="{_MINI} display: inline-flex; align-items: center; gap: 6px; min-height: 32px;">{_ICO_COLUNAS}<span class="g2rot">Colunas</span><span style="color: {MUTED};">{H("_cvn")}</span></button></sc-if>') if ess else ''
+    # modo Tabela | Cartões (proprietário, 15/10/2026; DS VIS-05 "toda lista tem Tabela e Cartões"): toda listagem do menu (colunas
+    # essenciais, Agrupar por ou o quadro visoes.MODO_LISTAS) ganha o seletor no fim da barra, depois de Colunas. cartoes='externo': a tela
+    # já tem seletor de visões próprio (O.S. pela VISOES-1; MA › Ordens e BEN com Kanban) e o Cartões entra nele; a grade desenha os cartões
+    # e não põe seletor (g2lib.g2modosFim). cartoes=False tira. Os cartões são as mesmas linhas da Tabela (g2cdVals)
+    import visoes as _V
+    if cartoes is None and (CUR,gid) in _V.MODO_LISTAS: cartoes=True
+    modo=cartoes in (True,'externo') or (cartoes is not False and (ess or bool(ag)))
+    if modo: spec['modo']='externo' if cartoes=='externo' else True
+    mdb=f'<sc-if value="{H("_mdhas")}" hint-placeholder-val="{{{{false}}}}">{modos_html(gid)}</sc-if>' if (modo and cartoes!='externo') else ''
+    # VISOES-2 §3.3: "Agrupar por" (ícone da pergunta + nome da coluna) e a trilha do descer, na barra da grade
+    _IPQ=AG_ICONES
+    _icos=''.join(f'<sc-if value="{{{{ao.{k}}}}}" hint-placeholder-val="{{{{false}}}}">{_IPQ[k2]}</sc-if>' for k,k2 in [('i0','0'),('iOque','oque'),('iQuem','quem'),('iQuando','quando'),('iOnde','onde')])
+    agb=''
+    if ag:
+        agb=(f'<sc-if value="{H("_aghas")}" hint-placeholder-val="{{{{false}}}}"><span style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0;">'
+             f'<button type="button" data-g2agb="{gid}" aria-haspopup="menu" aria-expanded="{H("_agexp")}" aria-label="Agrupar por {H("_agl")}" onClick="{H("_agtog")}" style="{_MINI} display: inline-flex; align-items: center; gap: 6px; min-height: 32px;">'
+             + ''.join(f'<sc-if value="{H("_agi_"+k)}" hint-placeholder-val="{{{{false}}}}">{_IPQ[k]}</sc-if>' for k in ['0','oque','quem','quando','onde'])
+             + f'<span class="g2rot" style="color: {MUTED}; font-weight: 600;">Agrupar por</span> {H("_agl")} <span aria-hidden="true" style="font-size: 9px;">▾</span></button>'
+             '</span></sc-if>')   # AGR-02 (16/10/2026): sem a trilha do descer
+    agm=(f'<sc-if value="{H("_agmenu")}" hint-placeholder-val="{{{{false}}}}"><div style="position: fixed; inset: 0; z-index: 70;">'
+         f'<button type="button" aria-label="Fechar Agrupar por" tabIndex="-1" onClick="{H("_agfecha")}" style="position: absolute; inset: 0; border: 0; background: transparent; cursor: default;"></button>'
+         f'<div role="menu" aria-label="Agrupar por" data-g2agm="{gid}" onKeyDown="{H("_agkey")}" style="{H("_agpos")} box-sizing: border-box; position: fixed; width: 260px; background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 6px; display: flex; flex-direction: column; gap: 2px; z-index: 71;">'
+         f'<sc-for list="{H("_agops")}" as="ao" hint-placeholder-count="5"><button type="button" role="menuitemradio" aria-checked="{_h("ao.on")}" onClick="{_h("ao.go")}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 4px 10px; border: 0; border-radius: 8px; background: transparent; font-family: inherit; font-size: 13px; color: {INK}; text-align: left; cursor: pointer;">'
+         + _icos + f'<span style="display: flex; flex-direction: column; gap: 1px;"><span style="font-weight: 700;">{_h("ao.t")}</span><sc-if value="{_h("ao.temNiv")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 11.5px; color: {MUTED};">{_h("ao.niv")}</span></sc-if></span></button></sc-for>'
+         f'</div></div></sc-if>') if ag else ''
+    if ag: AG_CTRL[gid]=(agb,agm)   # 15/10/2026 (proprietário: "tabela e kanban devem manter o agrupar por"): outra visão da mesma grade reusa o controle
+    if search or add or tree or sel or tools or qf or ess or ag or busca_extra or mdb:
+        tb=(f'<div style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; flex-wrap: wrap;">'   # SEP-20261015 (c): sem linha entre a barra e o cabeçalho da tabela, que já tem fundo
+            + (f'<span data-g2q="{gid}" hidden></span><sc-if value="{H("_qon")}" hint-placeholder-val="{{{{true}}}}"><label style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid {LINE}; border-radius: 999px; background: {BG}; min-width: 160px;">{sicon}<input type="search" aria-label="{H("_qlab")}" placeholder="Buscar…" value="{H("_q")}" onChange="{H("_setq")}" style="font-family: inherit; font-size: 12.5px; border: 0; background: transparent; outline: none; width: 100%;"></label></sc-if>'
+               '' if search else '')
+            + busca_extra   # SAF-FAZ-3: filtro rápido da tela (ex.: fazenda) logo depois da busca, antes do filtro rápido da coluna
             + (f'<sc-if value="{H("_hasqf")}" hint-placeholder-val="{{{{false}}}}"><div role="group" aria-label="{H("_qfl")}" style="display: flex; flex-wrap: wrap; gap: 6px;">'
                f'<sc-for list="{H("_qf")}" as="qc" hint-placeholder-count="4"><button type="button" aria-pressed="{_h("qc.on")}" title="{_h("qc.lab")}" onClick="{_h("qc.go")}" style="{_h("qc.st")}">{_h("qc.t")} <span style="opacity: .75;">{_h("qc.n")}</span></button></sc-for></div></sc-if>' if qf else '')
+            # 15/10/2026 (proprietário: "tire os números como 8 de 8, no filtro rápido já tem as quantidades"): a contagem só sem filtro rápido
+            + (f'<sc-if value="{{{{{gid}_hasqf !== true}}}}" hint-placeholder-val="{{{{false}}}}"><span data-g2cnt="{gid}" style="font-size: 12px; color: {MUTED}; font-weight: 600; white-space: nowrap;">{H("_count")} de {H("_all")}</span></sc-if>' if search else '')
             + f'<sc-for list="{H("_fchips")}" as="fc" hint-placeholder-count="0"><span style="display: inline-flex; align-items: center; gap: 2px; padding: 2px 4px 2px 9px; border-radius: 999px; background: {ACCS}; color: {ACC}; font-size: 11.5px; font-weight: 700;">{_h("fc.t")}<button type="button" aria-label="Remover filtro" onClick="{_h("fc.rm")}" style="border: 0; background: transparent; color: {ACC}; cursor: pointer; font-size: 13px; padding: 0 4px;">×</button></span></sc-for>'
             + f'<sc-if value="{H("_filtered")}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{H("_clear")}" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;">Limpar filtros</button></sc-if>'
+            # 16/10/2026 (proprietário: "padronize expandir e recolher na melhor posição"): à direita, nesta ordem: ferramentas da tela, Expandir
+            # tudo, Agrupar por, Colunas e Tabela | Cartões (o modo de visão fica sempre na ponta). Filtros rápidos ao lado da busca (15/10)
             + '<span style="flex-grow: 1;"></span>' + tools
+            + (f'<sc-if value="{H("_xhas")}" hint-placeholder-val="{HL("true")}"><button type="button" onClick="{H("_xtog")}" class="g2xtog">{seta_xtog(H("_xup"),H("_xdown"))}{H("_xlab")}</button></sc-if>' if tree else '')
+            + agb + cvb
+            + mdb   # modo Tabela | Cartões (15/10/2026): no fim dos controles de visão, depois de Colunas
             + (f'<sc-if value="{H("_hassel")}" hint-placeholder-val="{{{{false}}}}"><span role="status" style="font-size: 12px; font-weight: 700; color: {ACC};">{H("_selmsg")}</span>{bulk}<button type="button" onClick="{H("_selclear")}" style="{_MINI}">Limpar seleção</button></sc-if>' if sel else '')
-            + (f'<sc-if value="{H("_xhas")}" hint-placeholder-val="{HL("true")}"><button type="button" onClick="{H("_xtog")}" class="g2xtog">{seta_xtog(H("_xup"),H("_xdown"))}{H("_xlab")}</button></sc-if>' if tree else '')   # visão/apresentação: fim da barra, texto discreto (v3)
-            + (f'<sc-if value="{H("_semsel")}" hint-placeholder-val="{{{{true}}}}"><button type="button" onClick="{H("_new")}" style="{_MINI}">+ {esc(add)}</button></sc-if>' if add else '')   # com seleção, a região de ações dá lugar à do lote (DS-40)
+            + (f'<sc-if value="{H("_semsel")}" hint-placeholder-val="{{{{true}}}}"><button type="button" onClick="{H("_new")}" style="{_MINI}">+ {esc(rotulo_criar(add))}</button></sc-if>' if add else '')   # com seleção, a região de ações dá lugar à do lote (DS-40)
             + '</div>')
-    # filtro da coluna no padrão Excel/Google Sheets: menu flutuante sob o cabeçalho, ordenar, pesquisar, marcar valores e aplicar no OK
+    fpanel=filtro_coluna_html(gid)
+    lk=f'border: 0; background: transparent; padding: 0; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;'
+    hsel=f'<div role="columnheader" style="padding: 6px 4px 6px 12px; display: flex; align-items: center;"><button type="button" aria-label="{H("_selallLab")}" title="{H("_selallLab")}" onClick="{H("_selall")}" style="border: 1px solid {LINE}; background: {SURF}; width: 16px; height: 16px; border-radius: 4px; cursor: pointer; padding: 0;"></button></div>' if sel else ''
+    hdel=f'<div role="columnheader"></div>' if dele else ''
+    head=(f'<div role="row" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; background: {BG}; border-radius: 0;">{hsel}'
+          + cab_colunas_html(gid,len(cols),headtools) + f'{hdel}</div>')
+    # célula de seleção e de ação (⋯ ou lixeira, com a confirmação): as mesmas na linha da Tabela e no cartão (modo Cartões, 15/10/2026)
+    _cel_sel=(f'<sc-if value="{_h("c.isSel")}" hint-placeholder-val="{{{{false}}}}"><input type="checkbox" aria-label="{_h("c.selLabel")}" checked="{_h("c.on")}" onChange="{_h("c.tog")}" style="width: 16px; height: 16px; accent-color: {ACC}; margin: 0;"></sc-if>')
+    _cel_del=(f'<sc-if value="{_h("c.isDel")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.notAsking")}" hint-placeholder-val="{{{{true}}}}"><sc-if value="{_h("c.trash")}" hint-placeholder-val="{{{{true}}}}"><button type="button" class="g2del" aria-label="{_h("c.delLabel")}" title="Excluir" onClick="{_h("c.ask")}">{_TRASH}</button></sc-if>'
+              f'<sc-if value="{_h("c.rm")}" hint-placeholder-val="{{{{false}}}}"><span class="g2mais-w"><button type="button" class="g2mais g2mais-l" aria-haspopup="menu" aria-expanded="false" aria-label="{_h("c.rmLabel")}" data-dica="{_h("c.rmLabel")}">⋯</button>'
+              f'<span role="menu" class="g2mais-menu" aria-label="{_h("c.rmLabel")}"><sc-for list="{_h("c.rmItems")}" as="it" hint-placeholder-count="2"><button type="button" role="menuitem" class="{_h("it.cls")}" onClick="{_h("it.fn")}">'
+              f'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="{_h("it.ico")}"/></svg>{_h("it.t")}</button></sc-for></span></span></sc-if></sc-if>'
+              f'<sc-if value="{_h("c.asking")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 12px; font-weight: 700; color: {RED};">Excluir?</span><button type="button" onClick="{_h("c.yes")}" style="{_MINI} color: {RED}; border-color: {RED};">Excluir</button><button type="button" onClick="{_h("c.no")}" style="{_MINI}">Manter</button></sc-if></sc-if>')
+    body=(f'<sc-for list="{H("_rows")}" as="r" hint-placeholder-count="3"><div role="row" data-rid="{_h("r.id")}" class="{_h("r.cls")}" tabIndex="{_h("r.tab")}" onClick="{_h("r.open")}" onKeyDown="{_h("r.key")}" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 1px solid {LINE}; align-items: center; font-size: 13px;">'
+          f'<sc-for list="{_h("r.cells")}" as="c" hint-placeholder-count="{n}"><div role="cell" class="{_h("c.cls")}" style="display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; min-width: 0; {_h("c.st")}">'
+          + _cel_sel +
+          f'<sc-if value="{_h("c.hasCaret")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.caretOk")}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="g2car" aria-label="{_h("c.caretLabel")}" aria-expanded="{_h("c.caretExp")}" onClick="{_h("c.toggle")}">{_h("c.caretSym")}</button></sc-if><sc-if value="{_h("c.caretNo")}" hint-placeholder-val="{{{{false}}}}"><span style="width: 22px; flex-shrink: 0;"></span></sc-if>'
+          f'<sc-if value="{_h("c.drill")}" hint-placeholder-val="{{{{false}}}}"><span class="g2drill" aria-hidden="true">{_SETA_DRILL}</span></sc-if></sc-if>'
+          f'<sc-if value="{_h("c.isData")}" hint-placeholder-val="{{{{true}}}}"><span class="g2pw" style="{_h("c.pw")}"><sc-for list="{_h("c.parts")}" as="p" hint-placeholder-count="1">{_PARTS}</sc-for></span></sc-if>'
+          + _cel_del +
+          f'</div></sc-for></div></sc-for>')
+    tot=''
+    if total and any(c.get('agg') for c in cols):
+        tot=(f'<div role="row" class="g2tot" tabIndex="0" onClick="{H("_totopen")}" title="Ver a composição do total" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 2px solid {INK}; background: {BG}; font-size: 13px;">'
+             + ('<div role="cell"></div>' if sel else '') + f'<sc-for list="{H("_tot")}" as="t" hint-placeholder-count="{len(cols)}"><div role="cell" class="{_h("t.cls")}" style="{_h("t.st")}">{_h("t.t")}</div></sc-for>' + ('<div role="cell"></div>' if dele else '') + '</div>')
+    empty='' if not vazio else f'<sc-if value="{H("_empty")}" hint-placeholder-val="{{{{false}}}}"><div style="padding: 16px; font-size: 13px; color: {MUTED};">Nenhuma linha corresponde aos filtros · <button type="button" onClick="{H("_clear")}" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-weight: 700; cursor: pointer;">Limpar filtros</button></div></sc-if>'
+    ntr=H('_ncols') if ess else n   # VISOES-2 §3.6: com colunas essenciais, as trilhas seguem as colunas visíveis
+    tbl=(f'<div class="g2rola"><div role="table" data-g2g="{gid}" style="display: grid; grid-template-columns: var(--g2cols, repeat({ntr}, auto)); min-width: 100%; width: max-content;">{head}{body}{tot}</div></div>')
+    if modo: tbl=(f'<sc-if value="{H("_mdt")}" hint-placeholder-val="{{{{true}}}}">{tbl}</sc-if>'
+                  f'<sc-if value="{H("_mdc")}" hint-placeholder-val="{{{{false}}}}">{_cartoes_html(gid,_cel_sel,_cel_del)}</sc-if>')
+    tbl+=empty
+    EXTRA.append(_g2form(gid))
+    # TAB-08 (16/10/2026): a moldura é da tabela (TABELA_CSS), como nas Atividades do plano; a caixa só organiza barra e dados
+    box='min-width: 0;'
+    # VISOES-2 §3.6: painel de colunas (fixo, como o filtro: a caixa da grade corta o que transborda); grupos pela pergunta, marcar mostra,
+    # desmarcar oculta, a identidade fica travada; "Restaurar padrão" volta às colunas de "Abre com"
+    cvp=(f'<sc-if value="{H("_cvopen")}" hint-placeholder-val="{{{{false}}}}"><div style="position: fixed; inset: 0; z-index: 70;">'
+         f'<button type="button" aria-label="Fechar colunas" tabIndex="-1" onClick="{H("_cvfecha")}" style="position: absolute; inset: 0; border: 0; background: transparent; cursor: default;"></button>'
+         f'<div role="dialog" aria-label="Colunas desta tabela" data-g2cv="{gid}" onKeyDown="{H("_cvkey")}" style="{H("_cvpos")} box-sizing: border-box; position: fixed; width: 290px; overflow-y: auto; background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 8px; display: flex; flex-direction: column; gap: 2px; z-index: 71;">'
+         f'<sc-for list="{H("_cvg")}" as="cg" hint-placeholder-count="3"><div role="group" aria-label="{_h("cg.t")}" style="display: flex; flex-direction: column;">'
+         f'<div style="padding: 8px 8px 2px; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; color: {MUTED}; text-transform: uppercase;">{_h("cg.t")}</div>'
+         f'<sc-for list="{_h("cg.cols")}" as="cc" hint-placeholder-count="2"><label style="display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 0 8px; border-radius: 8px; font-size: 13px; cursor: pointer;">'
+         f'<input type="checkbox" checked="{_h("cc.on")}" disabled="{_h("cc.dis")}" onChange="{_h("cc.tog")}" style="width: 16px; height: 16px; accent-color: {ACC}; margin: 0;"><span>{_h("cc.l")}</span></label></sc-for></div></sc-for>'
+         f'<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px solid {LINE}; margin-top: 6px; padding: 8px 4px 2px;">'
+         f'<sc-if value="{H("_cvmudou")}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{H("_cvrest")}" style="{lk}">Restaurar padrão</button></sc-if><span style="flex-grow: 1;"></span>'
+         f'<button type="button" onClick="{H("_cvfecha")}" style="{_MINI}">Fechar</button></div></div></div></sc-if>') if ess else ''
+    return f'<div class="g2caixa" style="{box}">{tb}{fpanel}{cvp}{agm}{tbl}</div>'
+def modos_html(pre,rotulo='Visão da lista: tabela ou cartões'):
+    """Seletor Tabela | Cartões (proprietário, 15/10/2026; fonte: visoes.MODOS): o desenho do seletor de visões da VISOES-1 (.g2visoes: trilho,
+    ícone, ativo tonal com aria-pressed, 32 px no mouse e 44 px no toque), um botão por modo, só ícone, com o nome no aria-label (a dica vem dele).
+    Buracos: {pre}_md_<modo>_p (aria-pressed) e {pre}_md_<modo>_go (g2lib.g2mdVals). O rótulo começa com "Visão" (padrão dos seletores de visão)."""
+    import visoes as V
+    bts=''.join(f'<button type="button" data-modo="{k}" aria-label="{V.MODO_NOME[k]}" aria-pressed="{_h(pre+"_md_"+k+"_p")}" onClick="{_h(pre+"_md_"+k+"_go")}">'
+                f'{icon(V.MODO_ICONE[k],16)}</button>' for k in V.MODOS)
+    return f'<div class="g2visoes g2modos" role="group" aria-label="{esc(rotulo)}" data-g2md="{pre}">{bts}</div>'
+def filtro_coluna_html(gid):
+    """Menu do filtro da coluna (padrão Excel/Google Sheets): ordenar, pesquisar, marcar valores e aplicar no OK. Buracos {gid}_fm.* de
+    g2lib.g2cabVals; o mesmo no E.grid e nas tabelas próprias (TAB-08)."""
     FM=lambda s: _h(gid+"_fm."+s)
     lk=f'border: 0; background: transparent; padding: 0; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;'
     it=f'display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 8px; border: 0; border-radius: 8px; background: transparent; font-family: inherit; font-size: 13px; color: {INK}; text-align: left; cursor: pointer;'
     fpanel=(f'<sc-if value="{FM("open")}" hint-placeholder-val="{{{{false}}}}"><div style="position: fixed; inset: 0; z-index: 70;">'
             f'<button type="button" aria-label="Fechar filtro" tabIndex="-1" onClick="{FM("cancel")}" style="position: absolute; inset: 0; border: 0; background: transparent; cursor: default;"></button>'
-            f'<div role="dialog" aria-label="{FM("titulo")}" onKeyDown="{FM("key")}" style="{FM("pos")} position: fixed; width: 280px; background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 8px; display: flex; flex-direction: column; gap: 6px; z-index: 71;">'
+            f'<div role="dialog" aria-label="{FM("titulo")}" onKeyDown="{FM("key")}" style="{FM("pos")} box-sizing: border-box; position: fixed; width: 280px; background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 8px; display: flex; flex-direction: column; gap: 6px; z-index: 71;">'
             f'<button type="button" class="g2fi" onClick="{FM("asc")}" style="{it}">{FM("ascT")}</button><button type="button" class="g2fi" onClick="{FM("desc")}" style="{it}">{FM("descT")}</button>'
+            f'<sc-if value="{FM("podeOcultar")}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="g2fi" onClick="{FM("ocultar")}" style="{it}">Ocultar coluna</button></sc-if>'   # VISOES-2 §3.6 (falso em grade sem colunas essenciais)
             f'<div style="height: 1px; background: {LINE}; margin: 2px 0;"></div>'
             f'<div style="padding: 2px 8px 0; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; color: {MUTED}; text-transform: uppercase;">Filtrar por valores</div>'
             f'<div style="display: flex; align-items: center; gap: 12px; padding: 0 8px;"><button type="button" onClick="{FM("todos")}" style="{lk}">Selecionar tudo</button><button type="button" onClick="{FM("nenhum")}" style="{lk}">Limpar</button>'
@@ -1381,31 +1878,54 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
             f'<sc-if value="{FM("semMarca")}" hint-placeholder-val="{{{{false}}}}"><div role="alert" style="padding: 0 8px; font-size: 12px; font-weight: 700; color: {RED};">Marque pelo menos um valor.</div></sc-if>'
             f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 2px;"><button type="button" onClick="{FM("cancel")}" style="{_MINI}">Cancelar</button>'
             f'<button type="button" onClick="{FM("ok")}" disabled="{FM("semMarca")}" style="{_MINIP} {FM("okSt")}">OK</button></div></div></div></sc-if>')
-    hsel=f'<div role="columnheader" style="padding: 6px 4px 6px 12px; display: flex; align-items: center;"><button type="button" aria-label="{H("_selallLab")}" title="{H("_selallLab")}" onClick="{H("_selall")}" style="border: 1px solid {LINE}; background: {SURF}; width: 16px; height: 16px; border-radius: 4px; cursor: pointer; padding: 0;"></button></div>' if sel else ''
-    hdel=f'<div role="columnheader"></div>' if dele else ''
-    head=(f'<div role="row" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; background: {BG}; border-radius: 0;">{hsel}'
-          f'<sc-for list="{H("_head")}" as="h" hint-placeholder-count="{len(cols)}"><div role="columnheader" class="{_h("h.cls")}" data-un="{_h("h.un")}" data-dica="{_h("h.tt")}" style="{_h("h.st")} padding: 0 4px 0 8px;">'
-          + (f'<button type="button" class="g2hb" onClick="{_h("h.sort")}" aria-label="{_h("h.sortLabel")}">{_h("h.l")} <span aria-hidden="true" style="{_h("h.astyle")} font-size: 9px;">{_h("h.arrow")}</span></button>'
-             f'<button type="button" class="g2fb" onClick="{_h("h.fmenu")}" aria-label="{_h("h.flabel")}" title="{_h("h.flabel")}" style="color: {_h("h.fcolor")};">▾{_h("h.fil")}</button>' if headtools else
+    return fpanel
+def cab_colunas_html(gid,ncols,headtools=True):
+    """Células do cabeçalho da tabela (TAB-08): rótulo que ordena (⇅ ▲ ▼) e funil que abre o filtro da coluna. Buracos {gid}_head de
+    g2lib.g2cabVals; a mesma peça no E.grid e nas tabelas próprias."""
+    H=lambda x: _h(gid+x); cols=range(ncols)
+    return (f'<sc-for list="{H("_head")}" as="h" hint-placeholder-count="{ncols}"><div role="columnheader" class="{_h("h.cls")}" data-un="{_h("h.un")}" data-dica="{_h("h.tt")}" style="{_h("h.st")} padding: 0 4px 0 8px;">'
+          + (f'<button type="button" class="g2hb" onClick="{_h("h.sort")}" aria-label="{_h("h.sortLabel")}">{_h("h.l")} <span aria-hidden="true" class="g2so" style="{_h("h.astyle")}">{_h("h.arrow")}</span></button>'
+             f'<button type="button" class="g2fb" onClick="{_h("h.fmenu")}" aria-label="{_h("h.flabel")}" title="{_h("h.ftit")}" style="color: {_h("h.fcolor")};"><svg class="g2fi-ico" width="13" height="13" viewBox="0 0 24 24" fill="{_h("h.ffill")}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+ICONS['filtro']+'"/></svg></button>' if headtools else
              f'<span class="g2hb" style="cursor: default;">{_h("h.l")}</span>')
-          + f'</div></sc-for>{hdel}</div>')
-    body=(f'<sc-for list="{H("_rows")}" as="r" hint-placeholder-count="3"><div role="row" data-rid="{_h("r.id")}" class="{_h("r.cls")}" tabIndex="{_h("r.tab")}" onClick="{_h("r.open")}" onKeyDown="{_h("r.key")}" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 1px solid {LINE}; align-items: center; font-size: 13px;">'
-          f'<sc-for list="{_h("r.cells")}" as="c" hint-placeholder-count="{n}"><div role="cell" class="{_h("c.cls")}" style="display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; min-width: 0; {_h("c.st")}">'
-          f'<sc-if value="{_h("c.isSel")}" hint-placeholder-val="{{{{false}}}}"><input type="checkbox" aria-label="{_h("c.selLabel")}" checked="{_h("c.on")}" onChange="{_h("c.tog")}" style="width: 16px; height: 16px; accent-color: {ACC}; margin: 0;"></sc-if>'
-          f'<sc-if value="{_h("c.hasCaret")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.caretOk")}" hint-placeholder-val="{{{{false}}}}"><button type="button" class="g2car" aria-label="{_h("c.caretLabel")}" aria-expanded="{_h("c.caretExp")}" title="{_h("c.caretLabel")}" onClick="{_h("c.toggle")}">{_h("c.caretSym")}</button></sc-if><sc-if value="{_h("c.caretNo")}" hint-placeholder-val="{{{{false}}}}"><span style="width: 22px; flex-shrink: 0;"></span></sc-if></sc-if>'
-          f'<sc-if value="{_h("c.isData")}" hint-placeholder-val="{{{{true}}}}"><span class="g2pw" style="{_h("c.pw")}"><sc-for list="{_h("c.parts")}" as="p" hint-placeholder-count="1">{_PARTS}</sc-for></span></sc-if>'
-          f'<sc-if value="{_h("c.isDel")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.notAsking")}" hint-placeholder-val="{{{{true}}}}"><button type="button" class="g2del" aria-label="{_h("c.delLabel")}" title="Excluir" onClick="{_h("c.ask")}">{_TRASH}</button></sc-if>'
-          f'<sc-if value="{_h("c.asking")}" hint-placeholder-val="{{{{false}}}}"><span style="font-size: 12px; font-weight: 700; color: {RED};">Excluir?</span><button type="button" onClick="{_h("c.yes")}" style="{_MINI} color: {RED}; border-color: {RED};">Excluir</button><button type="button" onClick="{_h("c.no")}" style="{_MINI}">Manter</button></sc-if></sc-if>'
-          f'</div></sc-for></div></sc-for>')
-    tot=''
-    if total and any(c.get('agg') for c in cols):
-        tot=(f'<div role="row" class="g2tot" tabIndex="0" onClick="{H("_totopen")}" title="Ver a composição do total" style="display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; border-top: 2px solid {INK}; background: {BG}; font-size: 13px;">'
-             + ('<div role="cell"></div>' if sel else '') + f'<sc-for list="{H("_tot")}" as="t" hint-placeholder-count="{len(cols)}"><div role="cell" class="{_h("t.cls")}" style="{_h("t.st")}">{_h("t.t")}</div></sc-for>' + ('<div role="cell"></div>' if dele else '') + '</div>')
-    empty=f'<sc-if value="{H("_empty")}" hint-placeholder-val="{{{{false}}}}"><div style="padding: 16px; font-size: 13px; color: {MUTED};">Nenhuma linha corresponde aos filtros · <button type="button" onClick="{H("_clear")}" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-weight: 700; cursor: pointer;">Limpar filtros</button></div></sc-if>'
-    tbl=(f'<div class="g2rola"><div role="table" data-g2g="{gid}" style="display: grid; grid-template-columns: var(--g2cols, repeat({n}, auto)); min-width: 100%; width: max-content;">{head}{body}{tot}</div></div>{empty}')
-    EXTRA.append(_g2form(gid))
-    box=f'background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; min-width: 0; overflow: hidden;' if frame else 'min-width: 0;'
-    return f'<div class="g2caixa" style="{box}">{tb}{fpanel}{tbl}</div>'
+          + '</div></sc-for>')
+def _cartoes_html(gid,cel_sel,cel_del):
+    """Modo Cartões da grade, VIS-06 (16/10/2026, proprietário: "deixe o modo de visão do cartão igual de planos agronômicos"): um cartão por
+    linha, como as Atividades do plano. Grade de cada linha (g2lib.g2cdVals, _cdgtc): seleção · seta · título · até G2_CD_MAX colunas alinhadas
+    em todos os cartões · ⋯. Rótulos das colunas uma vez, no alto (_cdhd); no estreito (contêiner até 640 px) os campos descem para baixo do
+    título, com o rótulo. Árvore: a seta abre os filhos dentro do cartão, nas mesmas colunas. Agrupar por: título do grupo com as somas
+    alinhadas. Total numa linha acima, alinhado. Clique ou Enter abre o mesmo detalhe da linha da Tabela; listas com rótulo (role=list)."""
+    H=lambda s:_h(gid+s); F_='{{false}}'; T_='{{true}}'; G=f'style="{H("_cdgtc")}"'
+    pt=lambda lst: f'<sc-for list="{_h(lst)}" as="p" hint-placeholder-count="1">{_PARTS}</sc-for>'
+    acao=lambda lst: f'<span class="g2cd-a" data-noedit="1"><sc-for list="{_h(lst)}" as="c" hint-placeholder-count="0">{cel_del}</sc-for></span>'
+    campos=lambda lst: (f'<div class="g2cd-fs"><sc-for list="{_h(lst)}" as="f" hint-placeholder-count="3"><div class="{_h("f.cls")}">'
+                        f'<span class="g2cd-fl">{_h("f.l")}</span><span class="g2cd-fv"><span class="g2pw">{pt("f.parts")}</span></span></div></sc-for></div>')
+    vazio='<span class="g2cd-s"></span><span class="g2cd-c"></span>'
+    kid=(f'<div role="listitem" data-rid="{_h("k.id")}" class="{_h("k.cls")}" {G} tabIndex="{_h("k.tab")}" onClick="{_h("k.open")}" onKeyDown="{_h("k.key")}">' + vazio
+         + f'<div class="g2cd-tit" style="{_h("k.tst")}"><span class="g2cd-tl">'
+         f'<sc-if value="{_h("k.caretOk")}" hint-placeholder-val="{F_}"><button type="button" class="g2car" aria-label="{_h("k.caretLabel")}" aria-expanded="{_h("k.caretExp")}" onClick="{_h("k.toggle")}">{_h("k.caretSym")}</button></sc-if>'
+         f'<span class="g2pw">{pt("k.tparts")}</span></span></div>' + campos('k.fs') + acao('k.acts') + '</div>')
+    card=(f'<div role="listitem" data-rid="{_h("cd.id")}" class="{_h("cd.cls")}" tabIndex="{_h("cd.tab")}" onClick="{_h("cd.open")}" onKeyDown="{_h("cd.key")}">'
+          f'<div class="g2cd-g g2cd-lin" {G}><span class="g2cd-s" data-noedit="1"><sc-for list="{_h("cd.sels")}" as="c" hint-placeholder-count="0">{cel_sel}</sc-for></span>'
+          f'<span class="g2cd-c"><sc-if value="{_h("cd.temKids")}" hint-placeholder-val="{F_}"><button type="button" class="g2car g2cd-nk" aria-label="{_h("cd.kal")}" aria-expanded="{_h("cd.kexp")}" onClick="{_h("cd.ktog")}">{_h("cd.ksym")}</button></sc-if></span>'
+          f'<div class="g2cd-tit"><span class="g2cd-tl"><span class="g2pw">{pt("cd.tparts")}</span><sc-if value="{_h("cd.temKn")}" hint-placeholder-val="{F_}"><span class="g2cd-kn">{_h("cd.kn")}</span></sc-if></span>'
+          f'<sc-if value="{_h("cd.temNota")}" hint-placeholder-val="{F_}"><span class="g2cd-nota"><span class="g2pw">{pt("cd.nota")}</span></span></sc-if></div>'
+          + campos('cd.fs') + acao('cd.acts') + '</div>'
+          f'<sc-if value="{_h("cd.kopen")}" hint-placeholder-val="{F_}"><div role="list" aria-label="{_h("cd.klab")}" class="g2cd-kids">'
+          f'<sc-for list="{_h("cd.kids")}" as="k" hint-placeholder-count="1">{kid}</sc-for></div></sc-if></div>')
+    cab=(f'<sc-if value="{_h("gr.temCab")}" hint-placeholder-val="{F_}"><div class="g2cd-gcab g2cd-g" {G} data-rid="{_h("gr.id")}"><span class="g2cd-s"></span><span class="g2cd-c">'
+         f'<sc-if value="{_h("gr.caretOk")}" hint-placeholder-val="{F_}"><button type="button" class="g2car" aria-label="{_h("gr.caretLabel")}" aria-expanded="{_h("gr.caretExp")}" onClick="{_h("gr.toggle")}">{_h("gr.caretSym")}</button></sc-if></span>'
+         f'<div class="g2cd-tit"><span class="g2cd-tl"><span class="g2pw g2cd-gnome">{pt("gr.tparts")}</span>'
+         f'<sc-for list="{_h("gr.ext")}" as="l" hint-placeholder-count="1"><span class="g2cd-gx"><sc-if value="{_h("l.temL")}" hint-placeholder-val="{F_}"><span class="g2cd-kr">{_h("l.l")}:</span> </sc-if>'
+         f'<span class="g2pw">{pt("l.parts")}</span></span></sc-for></span></div>' + campos('gr.fs') + '<span class="g2cd-a"></span></div></sc-if>')
+    sec=(cab + f'<sc-if value="{_h("gr.temCards")}" hint-placeholder-val="{T_}"><div role="list" aria-label="{_h("gr.lab")}" class="g2cd-grade">'
+         f'<sc-for list="{_h("gr.cards")}" as="cd" hint-placeholder-count="3">{card}</sc-for></div></sc-if>')
+    hd=(f'<sc-if value="{H("_cdhdHas")}" hint-placeholder-val="{T_}"><div class="g2cd-hd g2cd-g" {G} aria-hidden="true">' + vazio
+        + f'<div class="g2cd-tit">{H("_cdhdT")}</div><div class="g2cd-fs"><sc-for list="{H("_cdhd")}" as="h" hint-placeholder-count="3"><div class="{_h("h.cls")}">{_h("h.l")}</div></sc-for></div><span class="g2cd-a"></span></div></sc-if>')
+    tot=(f'<sc-if value="{H("_cdtotHas")}" hint-placeholder-val="{F_}"><div class="g2cd-tot g2cd-g" {G}>' + vazio
+         + f'<div class="g2cd-tit"><span class="g2cd-tl"><b>Total</b><sc-for list="{H("_cdtotx")}" as="t" hint-placeholder-count="0"><span class="g2cd-gx"><span class="g2cd-kr">{_h("t.l")}:</span> <b>{_h("t.t")}</b></span></sc-for></span></div>'
+         f'<div class="g2cd-fs"><sc-for list="{H("_cdtot")}" as="t" hint-placeholder-count="1"><div class="{_h("t.cls")}"><span class="g2cd-fl">{_h("t.l")}</span><span class="g2cd-fv"><b>{_h("t.t")}</b></span></div></sc-for></div>'
+         '<span class="g2cd-a"></span></div></sc-if>')
+    return f'<div class="g2rola g2cartoes" data-g2cd="{gid}" data-car="{H("_cdcar")}">{hd}{tot}<sc-for list="{H("_cdg")}" as="gr" hint-placeholder-count="1">{sec}</sc-for></div>'
 def seta_xtog(sobe,desce):
     """Seta à esquerda de "Expandir tudo"/"Recolher tudo": ícone SVG (não entra no texto nem é lido); sobe/desce = buracos booleanos."""
     ic=lambda d: f'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="{d}"/></svg>'
@@ -1431,6 +1951,7 @@ def _g2form(gid):
             f'<button type="button" aria-label="Fechar" title="Fechar" onClick="{F("close")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED}; flex-shrink: 0;">×</button></div>'
             f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{F("sub")}</div>'
             f'<sc-if value="{F("hasErr")}" hint-placeholder-val="{{{{false}}}}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">Corrija os campos destacados; o que você preencheu foi mantido.</div></sc-if>'
+            f'<sc-if value="{F("hasErrG")}" hint-placeholder-val="{{{{false}}}}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">{F("errP")}: {F("errG")} Nada foi perdido; tente de novo.</div></sc-if>'
             f'<sc-for list="{F("fields")}" as="f" hint-placeholder-count="3"><div style="display: flex; flex-direction: column; gap: 4px;">'
             f'<label for="{_h("f.fid")}" style="font-size: 12px; font-weight: 600; color: {MUTED};">{_h("f.l")}</label><div style="display: flex; align-items: center; gap: 8px;">'
             f'<sc-if value="{_h("f.isSel")}" hint-placeholder-val="{{{{false}}}}"><select id="{_h("f.fid")}" value="{_h("f.v")}" onChange="{_h("f.set")}" disabled="{_h("f.dis")}" style="{_h("f.ist")}"><sc-for list="{_h("f.opts")}" as="o" hint-placeholder-count="2"><option value="{_h("o.v")}">{_h("o.t")}</option></sc-for></select></sc-if>'
@@ -1591,7 +2112,8 @@ def table(headers,rows,widths=None,sort=0,desc=False,filters=None,total=None,gro
 ENGINE_JS2=ENGINE_JS.replace("this.state = { sel: {}, open: null, sort: {}, msg: {}, added: {} };",
                              "this.state = { sel: {}, open: null, sort: {}, msg: {}, added: {}, g2: {}, nav: {}, g2toast: '' };")
 ENGINE_JS2=ENGINE_JS2.replace("    return v;\n  }\n}","""    v.g2toast = this.state.g2toast || ''; v.g2toastst = this.state.g2toast ? '' : 'display: none;';
-    v.mf_faz = this.state.mf_faz || 'Santa Rita'; v.mf_saf = this.state.mf_saf || 'Todas';
+    { const T = G2_TOAST_TOM(v.g2toast); v.g2toastcx = T.cx; v.g2toastico = T.d; v.g2toastic = T.ic; }   // 15/10/2026 (proprietário): aviso pequeno, cor pelo tom e ícone
+    v.mf_faz = this.state.mf_faz || 'Santa Rita'; v.mf_saf = this.state.mf_saf || 'Todas'; v.mf_susp = false;   // mf_susp: filtros do topo suspensos (recorte do Painel na O.S.)
     v.mf_setfaz = (e) => this.setState({ mf_faz: e.target.value, g2toast: 'Fazenda: ' + e.target.value });
     v.mf_setsaf = (e) => this.setState({ mf_saf: e.target.value, g2toast: 'Safra: ' + e.target.value });
     if (!v.mf_trocar) v.mf_trocar = () => this.setState({ step: 1, g2toast: 'Escolha a safra na etapa 1.' });
@@ -1599,6 +2121,8 @@ ENGINE_JS2=ENGINE_JS2.replace("    return v;\n  }\n}","""    v.g2toast = this.st
     if (typeof PREVALS === 'function') PREVALS(this, v);
     for (const sp of GRIDS) g2vals(this, sp, v, vis[sp.id]);
     if (typeof EXTRAVALS === 'function') EXTRAVALS(this, v);
+    if (typeof g2modosFim === 'function') g2modosFim(this, v);   /* modo Tabela | Cartões (15/10/2026): os cartões das linhas que a Tabela desenharia */
+    if (typeof g2visoesFim === 'function') g2visoesFim(this, v);   /* VISOES-1: seletor, painéis e estado da visão */
     if (typeof assinAvisoVals === 'function') assinAvisoVals(this, v);   // faixa de cobrança (PLAT-01, R11): só as telas da organização têm o buraco
     return v;
   }
@@ -1630,8 +2154,17 @@ def engine():
     grids=json.dumps(GRIDS,ensure_ascii=False).replace('</','<\\/')
     nav=json.dumps(NAVSPEC,ensure_ascii=False)
     gloss=json.dumps(_GLOSS_CEL,ensure_ascii=False)   # glossário da célula (revisão DS, achado 8): g2glossCol no g2lib
-    return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\nconst G2_GLOSS = '+gloss+';\n'+G2LIB+'\n'+_assin_prefixo()+_conf_prefixo()+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
+    vis=json.dumps(VISOES_SPEC,ensure_ascii=False)
+    return 'const SPEC = '+spec+';\nconst GRIDS = '+grids+';\nconst NAV = '+nav+';\nconst G2_GLOSS = '+gloss+';\nconst G2_VISOES = '+vis+';\n'+G2LIB+'\n'+G2_TOAST_JS+'\n'+_assin_prefixo()+_conf_prefixo()+(EXTRAJS[0] or '')+'\n'+ENGINE_JS2
 # o aviso é visto aqui e anunciado uma vez pela região viva do g2lib (g2vivo, DS-RETORNO-20261009): aria-live=off evita a leitura em dobro
 # aviso temporário: largura do texto até min(560 px, janela − 32); sem o width, o left:50% limitava a caixa a meia janela (180 px a 360 px)
 # e o aviso quebrava em 3 a 17 linhas (medido: 47 e 345 caracteres), cobrindo o pé da tela (V55-RESP-01)
-G2_TOAST=f'<div role="status" aria-live="off" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: calc({AVISO_PE} + var(--acoes-h, 0px) + env(safe-area-inset-bottom, 0px)); z-index: 70; background: {INK}; color: #fff; padding: 11px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 32px -8px rgba(21,32,26,.4); width: max-content; max-width: min(560px, calc(100vw - 32px)); box-sizing: border-box; {{{{g2toastst}}}}">{{{{g2toast}}}}</div>'
+G2_TOAST=f'<div role="status" aria-live="off" class="g2toast" style="pointer-events: none; position: fixed; left: 50%; transform: translateX(-50%); bottom: calc({AVISO_PE} + var(--acoes-h, 0px) + env(safe-area-inset-bottom, 0px)); z-index: 70; display: flex; align-items: center; gap: 8px; padding: 8px 14px 8px 10px; border-radius: 10px; font-size: 13px; font-weight: 600; line-height: 1.35; box-shadow: 0 6px 18px -8px rgba(21,32,26,.28); width: max-content; max-width: min(420px, calc(100vw - 32px)); box-sizing: border-box; {{{{g2toastcx}}}} {{{{g2toastst}}}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{{{g2toastic}}}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="{{{{g2toastico}}}}"/></svg><span>{{{{g2toast}}}}</span></div>'
+# 15/10/2026 (proprietário: "o feedback é em preto com letras brancas, e cheio de texto; deveria ser uma caixa pequena, pouco texto, verdinho leve e um ícone"):
+# o tom sai do próprio texto: feito (verde-claro, ✓), impedido ou a corrigir (âmbar, !), o resto informa (branco, i). Uma regra, todas as telas.
+G2_TOAST_JS=r'''function G2_TOAST_TOM(t){ t=String(t||'');
+  const av=/^(N[ãa]o |Nada |Sem |Erro|Recus|Impedid|Indispon|Bloque|Falta|Corrija|Escolha|Salve ou|Informe|Conclua|Preencha|Selecione|Feche|Ainda |Aten[çc][ãa]o|Fora |Somente|S[óo] )|n[ãa]o foi |n[ãa]o pode|nada foi gravado|impedid|recusad|bloquead|indispon[íi]vel|somente consulta/i;
+  const ok=/(salv[oa]s?\b|gravad|registrad|inclu[íi]d|criad|emitid|liberad|publicad|enviad|aplicad|removid|retirad|exclu[íi]d|atualizad|confirmad|recebid|conclu[íi]d|gerad|aprovad|descartad|restaurad|copiad|importad|vinculad|reservad|devolvid|ajustad|voltou|pronto|feito)/i;
+  if(av.test(t)) return {cx:'background: #FFF7E8; border: 1px solid #F0D7A6; color: #6B4200;', ic:'#B7791F', d:'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4M12 17h.01'};
+  if(ok.test(t)) return {cx:'background: #EAF6EE; border: 1px solid #B9DEC7; color: #14532D;', ic:'#1E7A4C', d:'M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4 12 14.01l-3-3'};
+  return {cx:'background: #FFFFFF; border: 1px solid #DDE3DE; color: #15201A;', ic:'#4B5A51', d:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-4M12 8h.01'}; }'''

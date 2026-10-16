@@ -55,7 +55,8 @@ for i,r in enumerate(IDX['produtos']):
            cul=set(r[F['culturas']]),comp=comp,org=r[F['organico']],ing=r[F['ingredientes']],tit=IDX['titulares'][r[F['titular']]],
            rot=rotk(ids),codes=codes,gqT=' + '.join(GQ[g] for g in gq))
     x['moa']=(' + '.join(codes)+' · '+' + '.join(GNOME.get(k,k) for k in codes)) if codes else ((x['gqT'] or 'grupo químico não informado')+' · sem código de referência')
-    x['hay']=nz(' '.join([x['reg'],' '.join(r[F['marcas']]),' + '.join(IG[k][0] for k in ids),' + '.join(GQ[g] for g in gq),' + '.join(codes),' + '.join(GNOME.get(k,k) for k in codes),x['tit'],
+    conc=' + '.join(str(i[1]) for i in r[F['ingredientes']] if i[1] is not None)   # a página procura também pela concentração (15/10/2026)
+    x['hay']=nz(' '.join([x['reg'],' '.join(r[F['marcas']]),' + '.join(IG[k][0] for k in ids),conc,' + '.join(GQ[g] for g in gq),' + '.join(codes),' + '.join(GNOME.get(k,k) for k in codes),x['tit'],
                           ', '.join(dict.fromkeys(CL[c][0] for c in cls)),' '.join(comp),'biologico' if bio else '',modo,fo[0],fo[1]]))
     P.append(x)
 REG={x['reg']:x for x in P}
@@ -107,25 +108,42 @@ try:
             if cnt() and J("document.body.innerText.indexOf('Carregando culturas e alvos')<0"): J(J0); return True
             time.sleep(.25)
         J(J0); return False
-    def combo(rot,txt):
-        J(f"document.querySelector('input[aria-label={json.dumps(rot)}]').focus()"); time.sleep(.2); setv(f'input[aria-label={json.dumps(rot)}]',txt)
-        J(f"document.querySelector('input[aria-label={json.dumps(rot)}]').dispatchEvent(new KeyboardEvent('keydown',{{key:'Enter',bubbles:true}}))"); time.sleep(.4)
+    def combo(rot, txt):   # Cultura e Praga-alvo são listas de escolha (13/10: um campo de busca por tela): a 1ª opção que começa com o texto (ou o contém)
+        r = J(f"""(()=>{{const s=document.querySelector('select[aria-label={json.dumps(rot)}]'); if(!s) return 'sem lista';
+          const n=x=>String(x||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().trim(); const q=n({json.dumps(txt)}); const os=[...s.options];
+          const o=q===''?os.find(o=>o.value===''):(os.find(o=>o.value!==''&&n(o.text).startsWith(q))||os.find(o=>o.value!==''&&n(o.text).indexOf(q)>=0));
+          if(!o) return 'sem opção'; s.value=o.value; s.dispatchEvent(new Event('change',{{bubbles:true}})); return 'ok';}})()"""); time.sleep(.4)
+        return r
     shot=lambda n: c.shot(os.path.join(PROBE,f'agrofit_real_{n}.png'))
-    menu=lambda: J("[...document.querySelectorAll('.ml-sub a')].filter(a=>a.offsetParent).map(a=>[a.innerText.trim(),a.getAttribute('href'),a.style.backgroundColor])") or []
-    agri=lambda m: [x[:2] for x in m if x[1] in ('AG-07.dc.html','PA.dc.html','SAF.dc.html','OS.dc.html','AG-01.dc.html','IR-01.dc.html')]
+    # navegação sem submenus (13/10/2026, ui37.MENU2/HUB37/CURTO37/VOLTA37): módulo marcado, "‹ Módulo" e os cartões da tela de entrada
+    NAV="JSON.stringify((()=>{const n=document.querySelector('nav[aria-label=Menu]'); const v=document.querySelector('a.volta37'); return {cur:n?[...n.querySelectorAll('a[aria-current=page]')].map(a=>a.getAttribute('aria-label')):[], volta:v?[v.getAttribute('href'),v.innerText.replace(/\\s+/g,' ').trim()]:null};})())"
+    CARDS="JSON.stringify([...document.querySelectorAll('a.mod-cartao')].filter(a=>a.getClientRects().length).map(a=>[a.getAttribute('href'),a.innerText.replace(/\\s+/g,' ').trim()]))"
+    def espera(js,ate=20.0):   # condição observável (página nova pronta), não tempo fixo; no limite devolve False e a verificação falha
+        t1=time.time()
+        while time.time()-t1<ate:
+            try:
+                if J(js): return True
+            except Exception: pass
+            time.sleep(.1)
+        return False
 
     # ---------- 1 · O.S.: menu e atalho "Agrofit ›" (links antigos #<id da ficha da fazenda>) ----------
     c.goto(U_('Main.dc.html'),wait=.8); J("localStorage.removeItem('talhao-os-cenario-v1')")
     c.goto(U_('OS.dc.html#OS-0430'),wait=1.5)
     cen=J("(()=>{const c=window.__cen.cenGet(); return {lotes:Object.values(c.lotes), ins430:c.ordens['OS-0430'].ins.map(x=>x.p)};})()")
-    m=agri(menu())
+    nv=json.loads(J(NAV) or '{}')
     J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(x=>x.innerText.trim()==='Ajustar antes de liberar'); if(b) b.click();})()"); time.sleep(.5)
     lk=J("(()=>{const g=document.querySelector('[role=group][aria-label=\"Ajustar antes de liberar\"]'); return g?[...g.querySelectorAll('a')].filter(a=>a.innerText.trim()==='Agrofit ›').map(a=>[a.getAttribute('href'),a.target,a.rel]):[];})()") or []
     esp=sorted('AG-07.dc.html#'+r['id'] for n in cen['ins430'] for r in AGF['ref'] if n in r['nomes_fazenda'])
-    chk('1 O.S.: Agrícola começa por Consulta Agrofit (antes de Planos agronômicos); OS-0430 › Ajustar: "Agrofit ›" → AG-07.dc.html#<ficha>, nova aba',
-        m[:2]==[['Consulta Agrofit','AG-07.dc.html'],['Planos agronômicos','PA.dc.html']] and esp and sorted(h for h,_,_ in lk)==esp
-        and all(t=='_blank' and 'noopener' in (r or '') for _,t,r in lk), [m[:2],esp,lk])
     J("window.__cen.cenMudar(null,c=>({msg:''}))"); junta('OS')
+    # Agrícola começa pela Consulta Agrofit: "‹ Agrícola" da O.S. → tela de entrada (antes: subitens do menu lateral). Desde 14/10/2026 a tela de
+    # entrada é o fluxo do processo (ui37.FLUXO37, mod_fluxo_test.py): o Agrofit abre o 1º bloco, antes de Planos agronômicos; o Painel fecha o último
+    J("(document.querySelector('a.volta37')||{click:()=>0}).click()"); hub=espera("location.pathname.endsWith('/MOD-AGR.dc.html') && document.readyState==='complete' && document.querySelectorAll('a.mod-cartao').length>0")
+    m=json.loads(J(CARDS) or '[]'); junta('MOD-AGR')
+    ix=lambda h: [x[0] for x in m].index(h) if h in [x[0] for x in m] else -1
+    chk('1 O.S.: o fluxo do Agrícola começa pelo Agrofit, antes de Planos agronômicos (tela de entrada, aberta por "‹ Agrícola"); OS-0430 › Ajustar: "Agrofit ›" → AG-07.dc.html#<ficha>, nova aba',
+        hub and nv.get('cur')==['Agrícola'] and nv.get('volta')==['MOD-AGR.dc.html','‹ Agrícola'] and m[:1]==[['AG-07.dc.html','Agrofit']] and 0<ix('PA.dc.html') and ix('PAGR.dc.html')==len(m)-1
+        and esp and sorted(h for h,_,_ in lk)==esp and all(t=='_blank' and 'noopener' in (r or '') for _,t,r in lk), [nv,hub,m[:3],esp,lk])
 
     # ---------- 2 · o link antigo da O.S. abre a lista filtrada pelo mesmo ingrediente ----------
     alvo=esp[0]; r0=REF[alvo.split('#')[1]]; k0=gk(r0); L0=[x for x in P if x['key']==k0]; n0=len(L0)
@@ -143,15 +161,20 @@ try:
     head=J("document.querySelector('header').innerText.replace(/\\n/g,' | ')") or ''
     ln=J("[...document.querySelectorAll('header a')].map(a=>[a.innerText.trim(),a.getAttribute('href'),a.target,a.rel])") or []
     NP=META['contagens']['registros']
-    chk(f'3 cabeçalho: "Base atualizada · {DT}" e "Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de {DT} · {nf(NP,0)} produtos com registro" + AGROFIT oficial (nova aba)',
-        carregou and NP==len(P) and f'Base atualizada · {DT}' in head and f'Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de {DT} · {nf(NP,0)} produtos com registro' in head
+    # o selo depende da idade do arquivo no relógio real (agDiasArq: mais de 7 dias = desatualizada); o oráculo calcula a idade aqui
+    import email.utils, datetime as _dt
+    IDADE=(_dt.datetime.now(_dt.timezone.utc)-email.utils.parsedate_to_datetime(META['fontes']['formulados']['last_modified'])).days
+    SELO=f'Base de {DT} · desatualizada' if IDADE>7 else f'Base atualizada · {DT}'
+    chk(f'3 cabeçalho: "{SELO}" (arquivo com {IDADE} dias) e "Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de {DT} · {nf(NP,0)} produtos com registro" + AGROFIT oficial (nova aba)',
+        carregou and NP==len(P) and SELO in head and f'Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de {DT} · {nf(NP,0)} produtos com registro' in head
         and any(t.startswith('Abrir no AGROFIT oficial') and h==OFICIAL and tg=='_blank' and 'noopener' in (rl or '') for t,h,tg,rl in ln), [head,ln])
-    # ---------- 4 · listagem: todos os registros, 6 colunas, render incremental ----------
+    # ---------- 4 · listagem: todos os registros, 7 colunas, render incremental ----------
+    # (cdp.Chrome mostra todas as colunas, como quem escolheu "todas" no painel; o padrão sem Tox · amb, 15/10/2026, está em agrofit_faixa_test.py)
     cols=[nz(x).replace('⇅','').replace('▾','').strip() for x in (J("[...document.querySelectorAll('main [role=columnheader]')].map(h=>h.innerText.replace(/\\s+/g,' '))") or [])]
     n50=len(rows()); clica('main','Mostrar mais'); time.sleep(.4); n150=len(rows())
-    chk(f'4 lista: "{nf(NP,0)} de {nf(NP,0)} produtos", 6 colunas do desenho, 50 linhas e "Mostrar mais" → 150',
+    chk(f'4 lista: "{nf(NP,0)} de {nf(NP,0)} produtos", 7 colunas (com Alvos, 13/10), 50 linhas e "Mostrar mais" → 150',
         cnt()==f'{nf(NP,0)} de {nf(NP,0)} produtos' and n50==50 and n150==150
-        and cols==['produto · registro','ingrediente ativo · grupo quimico','classe · modo de acao','culturas','tox · amb','na fazenda'], [cnt(),cols,n50,n150])
+        and cols==['produto · registro','ingrediente ativo · grupo quimico','classe · modo de acao','culturas','alvos','tox · amb','na fazenda'], [cnt(),cols,n50,n150])
     shot('lista')
     # ---------- 5 · busca sem acento, cultura e alvo no MESMO uso ----------
     E5=busca('feijão percevejo'); setv('main input[type=search]','feijão percevejo'); a1=cnt(); setv('main input[type=search]','FEIJAO percevejo'); a2=cnt()
@@ -177,7 +200,7 @@ try:
     shot('soja_ferrugem')
     # ---------- 8 · Classe + agrupar por grupo químico ----------
     J("[...document.querySelectorAll('main button')].find(b=>/^Limpar filtros/.test(b.innerText.trim())).click()"); time.sleep(.4)
-    clica('main [role=group][aria-label="Filtrar por classe"]','Herbicida'); c8=cnt()
+    setv('main [role=group][aria-label="Filtros"] select[aria-label="Classe"]','Herbicida'); c8=cnt()   # Classe na faixa "Filtros" (15/10/2026)
     HB=[x for x in P if 'Herbicida' in x['comp']]; GG={}
     for x in HB:
         gs=list(dict.fromkeys(IG[k][1] for k in x['ids'] if IG[k][1] is not None)) or [None]

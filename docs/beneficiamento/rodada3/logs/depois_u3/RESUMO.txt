@@ -1,0 +1,4 @@
+rev_u3.py_13cd6735cdc_scratchpad_fr_ben_v37_gen37 rc=0 118s carga=17.95 :: RESULTADO: OK 5/5
+FIM
+rev_tela.py_atchpad_fr_ben_v37_gen37_U1_U2_U4_U5_U6 rc=0 394s carga=15.38 :: RESULTADO: FALHOU 18/20
+FIM

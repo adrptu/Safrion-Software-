@@ -140,7 +140,7 @@ function ocTabela(ctx,safra,occ0,talhoes,safras){ const sid=safra.id, a=ocDia(sa
   return [linhas,band]; }
 function ocChips(linhas){ const c={}; linhas.forEach(v=>{ c[v.sit]=(c[v.sit]||0)+1; }); return c; }
 function ocSucessoes(linhas){ return linhas.filter(v=>v.sit==='A conferir'&&v.conf<=0.005).length; }
-function ocFaixaTxt(band,linhas,tot){ const p=['Nesta safra '+ocHa(band.nesta)].concat([['Livre','livre'],['A conferir','conf'],['Perene','perene'],['Ocupado','ocup']].filter(([r,k])=>band[k]>0.005).map(([r,k])=>r+' '+ocHa(band[k])));
+function ocFaixaTxt(band,linhas,tot){ const p=['Nesta safra '+ocHa(band.nesta)].concat([['Livre','livre'],['A conferir','conf'],['Sem plantio','semp'],['Perene','perene'],['Ocupado','ocup']].filter(([r,k])=>band[k]>0.005).map(([r,k])=>r+' '+ocHa(band[k])));   // Sem plantio (SAF-FAZ-3): livre que a pessoa decidiu não plantar
   const s=ocSucessoes(linhas); const ex=ocR2(linhas.reduce((q,v)=>q+(v.exc||0),0));
   return p.join(' · ')+' · de '+ocHa(tot)+' ha'+(ex>0.005?' · '+ocHa(ex)+' ha em sobreposição':'')+(s===1?' · 1 sucessão a conferir':(s?' · '+s+' sucessões a conferir':'')); }
 // ---------- salvar: trava, pendência nova e aviso (R-14, R-15) ----------

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """Comercial e logística · teste de navegador do fluxo principal (docs/comercial/ESPECIFICACAO.md §8; AC-01, AC-11, AC-12, AC-14..AC-17).
 Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T):
-  menu     AC-01: grupo Comercial logo depois de Produção, 3 itens, cada um abre sem erro de JS; nenhum elo para tela oculta
+  menu     AC-01 (navegação sem submenus, 13/10/2026): ícone Comercial logo depois de Suprimentos na barra; a tela de entrada do Comercial
+           com os cartões Contratos e pedidos · Expedição · Painel (+ Inteligência, INTEL-01); cada cartão abre sem erro de JS e volta
+           por "‹ Comercial"; nenhum elo para tela oculta
   tarefa   AC-14: tarefa do proprietário (§8.1, perfil Ana) de ponta a ponta no desktop, com cliques e campos medidos (≤ 16 e ≤ 3);
            "Confirmar saída" recebe dois cliques seguidos sem espera e grava um só MP de expedição; Painel com R$ 128,00/sc e R$ 170.318
   erros    recusa e repetição: venda sem campos, tara ≥ bruto, crédito da Frutas Real (KC09) recusado para Rui e aprovado por Ana,
@@ -48,6 +50,23 @@ def ir(pg, limpa=False, w=1440, h=1000, perfil=None):
     if perfil is not None:
         t.c.goto(f'http://127.0.0.1:{t.p}/Main.dc.html', wait=.3); J(f"localStorage.setItem('safrion.perfilDemo',{json.dumps(perfil)})")
     t.goto(pg); time.sleep(.5); lib()
+def espera(js, ate=20.0):
+    """espera a condição observável (página nova pronta), não um tempo fixo; no limite devolve False e o chk seguinte falha"""
+    t0 = time.time()
+    while time.time() - t0 < ate:
+        try:
+            if J(js): return True
+        except Exception: pass
+        time.sleep(.1)
+    return False
+def pronta(pg, extra='true'): return f"location.pathname.endsWith('/{pg}') && document.readyState==='complete' && !!document.body && ({extra})"
+# navegação sem submenus (13/10/2026, ui37.MENU2/HUB37/CURTO37/VOLTA37): ícones da barra (aria-label), módulo marcado, "‹ Módulo" e cartões
+NAV = "JSON.stringify((()=>{const n=document.querySelector('nav[aria-label=Menu]'); const v=document.querySelector('a.volta37'); return {mods:n?[...n.querySelectorAll('a[aria-label]')].map(a=>a.getAttribute('aria-label')):[], cur:n?[...n.querySelectorAll('a[aria-current=page]')].map(a=>a.getAttribute('aria-label')):[], volta:v?[v.getAttribute('href'),v.innerText.replace(/\\s+/g,' ').trim()]:null};})())"
+CARDS = "JSON.stringify([...document.querySelectorAll('a.mod-cartao')].filter(a=>a.getClientRects().length).map(a=>[a.getAttribute('href'),a.innerText.replace(/\\s+/g,' ').trim()]))"
+HUB = "document.querySelectorAll('a.mod-cartao').length>0"
+def volta_com():
+    """"‹ Comercial" (o clique conta como os outros) → tela de entrada do Comercial pronta"""
+    r = clk('Voltar para Comercial', w=0); ok = espera(pronta('MOD-COM.dc.html', HUB)); lib(); return r == 'ok' and ok
 def clk(x, root=None, w=.45): r = J(f"CLK({json.dumps(x)},{json.dumps(root)})"); time.sleep(w); return r
 def setv(sel, val, conta=True): r = J(f"SETV({json.dumps(sel)},{json.dumps(val)},{'true' if conta else 'false'})"); time.sleep(.25); return r
 def row(x): r = J(f"ROW({json.dumps(x)})"); time.sleep(.45); return r
@@ -67,16 +86,22 @@ try:
     if 'menu' in MODOS:
         print('== menu · AC-01')
         ir('VEN.dc.html', limpa=True)
-        m = J("N(document.querySelector('nav[aria-label=Menu]').innerText)") or ''
-        i_pr, i_co, i_ma = m.find('Produção'), m.find('Comercial'), m.find('Manutenção')
-        t.chk('AC-01 grupo Comercial logo depois de Produção (antes de Manutenção)', 0 <= i_pr < i_co < i_ma, m[:400])
-        itens = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>[N(a.innerText),a.getAttribute('href')]).filter(x=>['VEN.dc.html','EXPED.dc.html','PCOM.dc.html'].indexOf(x[1])>=0)") or []
-        t.chk('AC-01 Comercial com 3 itens: Contratos e pedidos, Expedição e entregas, Painel comercial', [x[0] for x in itens] == ['Contratos e pedidos', 'Expedição e entregas', 'Painel comercial'], itens)
-        for pg in ('VEN', 'EXPED', 'PCOM'):
-            ir(pg + '.dc.html'); t.chk(f'AC-01 {pg} abre sem erro de JS e com dados do estado', not t.errs() and len(J("N(document.querySelector('main').innerText)") or '') > 200, t.errs())
+        nv = json.loads(J(NAV) or '{}'); mods = nv.get('mods') or []
+        # 13/10/2026 (proprietário): a Produção entrou em Agrícola; ordem Agrícola · Manutenção · Suprimentos · Comercial · Configurações
+        i_pr, i_co, i_ma = [mods.index(x) if x in mods else -1 for x in ('Suprimentos', 'Comercial', 'Configurações')]
+        t.chk('AC-01 ícone Comercial logo depois de Suprimentos (antes de Configurações) na barra; na VEN o Comercial marcado e "‹ Comercial"',
+              0 <= i_pr and i_co == i_pr + 1 and i_co < i_ma and nv.get('cur') == ['Comercial'] and nv.get('volta') == ['MOD-COM.dc.html', '‹ Comercial'], nv)
+        vt = volta_com(); cs = json.loads(J(CARDS) or '[]'); e0 = t.errs(); shot('menu')
+        ESP = [['PCOM.dc.html', 'Painel'], ['VEN.dc.html', 'Contratos e pedidos'], ['EXPED.dc.html', 'Expedição'], ['IV.dc.html', 'Inteligência']]   # PAINEL-01 (v65): o Painel é o 1º cartão de cada módulo
+        t.chk('AC-01 "‹ Comercial" abre a tela de entrada com os cartões Painel · Contratos e pedidos · Expedição (+ Inteligência, INTEL-01), na ordem do menu, sem erro de JS',
+              vt and cs == ESP and not e0, [vt, cs, e0])
+        for h, nome in ESP:
+            pg = h.replace('.dc.html', '')
+            if not J(pronta('MOD-COM.dc.html', HUB)): volta_com()
+            r = clk(nome, '.mod-grade', w=0); ok = espera(pronta(h, "!!document.querySelector('main') && document.querySelector('main').innerText.replace(/\\s+/g,' ').trim().length>200")); time.sleep(.3); lib()
+            t.chk(f'AC-01 cartão "{nome}" abre {pg} sem erro de JS e com dados do estado', r == 'ok' and ok and not t.errs(), [r, ok, J("location.pathname"), t.errs()])
             oc = J("[...document.querySelectorAll('a[href]')].map(a=>a.getAttribute('href')).filter(h=>/^(VE|LO|CO)-\\d/.test(h))") or []
             t.chk(f'AC-01 {pg} sem elo para tela oculta (VE-*, LO-*, CO-*)', not oc, oc)
-        shot('menu')
     if 'tarefa' in MODOS:
         print('== tarefa · AC-14 tarefa do proprietário (§8.1), perfil Ana, cliques e campos medidos')
         ir('VEN.dc.html', limpa=True)
@@ -111,7 +136,8 @@ try:
               r2 == 'ok' and n == 1 and liq == 36960 and S and S[2] == 2065200 and ('616 sc' in p or 'já confirmada' in p), [r2, n, liq, S, p])
         rw = J("ROWTXT('RM-0002')") or ''
         t.chk('(3) cliente retira: a RM-0002 fica Entregue, R$ 78.848,00 a receber até 26/09', 'Entregue' in rw and 'R$ 78.848,00 a receber até 26/09' in rw, [rw, p])
-        clk('Painel comercial')
+        # navegação sem submenus (13/10/2026): "‹ Comercial" → cartão "Painel" (antes: o subitem "Painel comercial" do menu)
+        volta_com(); clk('Painel', '.mod-grade')
         for _ in range(150):   # espera a condição (Painel comercial com os indicadores), não um tempo fixo: sob carga 0,9 s não bastava (§3.6)
             if J("/PCOM\\.dc\\.html/.test(location.pathname) && !!document.querySelector('[aria-label=Indicadores]')"): break
             time.sleep(.1)

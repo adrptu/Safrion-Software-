@@ -1,0 +1,17 @@
+OK    E1 em todo o código de produto, só a O.S. e o Mapa chamam osc_liberar 
+OK    E1b só osc_liberar (processo_os) chama cenLiberar: nenhum atalho libera sem gravar CMD-42/CMD-06 (o Beneficiamento libera pelo benAutorizarLiberar, E1d) 
+OK    E1d em ben.js o nome cenLiberar não aparece e a única passagem para Liberadas fica dentro de benAutorizarLiberar (perfil de produção, benO, CMD-42 e CMD-06); a tela e a semente do BEN não citam cenLiberar 
+OK    E1e o E1d derruba os atalhos de liberação no ben.js (5 mutantes: cenLiberar colado, com outra variável e por apelido; Liberadas por atribuição e por objeto) 
+OK    E1c o efeito sem o registro de quem decide (osc_libEfeito) só é chamado por osc_liberar e pela prévia osLibErro (cópia) 
+OK    E4 nenhuma mensagem de produto aponta "Produção › Cargas e recebimento" (o caminho é "Agrícola › Recebimento", 13/10) 
+OK    E2 nenhuma ordem de manutenção em A liberar no cenário; a de beneficiamento em A liberar só com fam BEN e fora da lista da O.S. (OB-0104 Encerradas) 
+OK    E3 "Nova ordem" só emite atividade agrícola do plano 
+OK    L0 navegação nova: 7 telas de entrada na barra lateral, 31 telas com cartão na entrada e "‹ Módulo" de volta, 4 em Outros acessos; 83 telas seguem ocultas 
+OK    L1 nenhum elo do escopo (PL-04/PL-05/PL-05det, CA-02, CO-06det, GE-07, MB-05det, MB-07..MB-10, SU-03det a partir de telas visíveis) 
+OK    L2 todo o resto da varredura está na lista residual, por par e com motivo 
+OK    L2b a lista residual só tem pares que a varredura ainda acha (par que sumiu sai da lista, para não liberar de antemão um elo futuro) 
+OK    L4a BEN.dc.html publicado: no menu (não oculto), no canvas na página "menu", fora da conta de ocultos e com cartão próprio em Agrícola logo depois de Recebimento 
+OK    L4b BEN.dc.html publicado: volta por "‹ Agrícola"; Cargas aponta o Beneficiamento pelo lote em processo (PR_BEN_H ligado) e o Estoque pela devolução guiada (EST_BEN_H) 
+OK    L4c Cargas e recebimento sem a faixa "Telas de recebimento e beneficiamento"; o Beneficiamento também 
+OK    L3 Mapa · OS-0420: o passo vai para a OM-0233 viva (tela MA, visível e com âncora no registro: MA#om=), não para PL-05 
+TOTAL 16 · falhas 0

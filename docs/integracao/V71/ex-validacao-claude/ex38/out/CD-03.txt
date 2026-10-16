@@ -1,0 +1,91 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Cadastros › Máquinas, instalações e setores
+‹
+Cadastros
+Máquinas, instalações e setores
+1 máquina bloqueada · 2 calibrações a resolver
+Máquinas e instalações
+15
+Conjuntos
+7
+1
+máquina bloqueada
+Trator T1 · OM-0233 · Pressão hidráulica baixa · SM-0147 e INSP-105 · retorno previsto 24/09 12:00
+Ver ordens afetadas ›
+2
+calibrações a resolver
+Máquina TSI, Bomba do Pivô 2
+Registrar calibração ›
+15 de 15
+Todos 15
+A resolver 3
+Cadastrar máquina ou instalação
+Agrupar por
+▾
+Colunas
++3
+Máquina ou instalação
+⇅
+Custo R$/h
+⇅
+Próxima calibração
+⇅
+Bloqueado
+Trator T1
+R$ 180,00/h
+—
+Trator 02
+R$ 180,00/h
+—
+Trator 03
+R$ 150,00/h
+—
+Trator 04
+R$ 150,00/h
+—
+Pulverizador PJ-3030
+R$ 95,00/h
+14/12/2026
+Plantadeira 24 linhas
+R$ 140,00/h
+09/03/2027
+Distribuidor 3 t
+R$ 45,00/h
+30/10/2026
+Colhedora Axial-Flow 7250
+R$ 950,00/h
+—
+Calibração vencida
+Máquina TSI
+R$ 60,00/h
+18/09/2026
+Esqueletadeira
+R$ 60,00/h
+—
+Bomba do Pivô 1
+R$ 85,00/h
+12/10/2026
+Bomba do Pivô 2
+R$ 85,00/h
+—
+Gotejo T7
+R$ 25,00/h
+04/11/2026
+Packing linha 1
+R$ 120,00/h
+01/10/2026
+Silo 01
+—
+17/12/2026
+Tela: Máquinas, instalações e setores · 1 máquina bloqueada · 2 calibrações a resolver

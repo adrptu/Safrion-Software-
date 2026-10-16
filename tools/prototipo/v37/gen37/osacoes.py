@@ -29,8 +29,8 @@ def setv(sel,val):
 def marca(lab): J(f"document.querySelector('aside[role=dialog] input[aria-label={json.dumps(lab)}]').click()"); time.sleep(.25)
 def chip_fase(t): J(f"(()=>{{const b=[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] button')].find(b=>b.innerText.replace(/\\s+/g,' ').trim().startsWith({json.dumps(t)})); b.click();}})()"); time.sleep(.4)
 def chips(): return J("[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] button')].map(b=>b.innerText.replace(/\\s+/g,' ').trim())") or []
-def kanban(): J("(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Kanban'); b&&b.click();})()"); time.sleep(.4)
-def lista(): J("(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.innerText.trim()==='Lista'); b&&b.click();})()"); time.sleep(.4)
+def kanban(): J("document.querySelector('[data-visao=kanban]').click()"); time.sleep(.4)   # VISOES-1: pelo seletor (data-visao)
+def lista(): J("document.querySelector('[data-visao=lista]').click()"); time.sleep(.4)
 def cartao(id_): return J(f"(()=>{{const k=[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].find(x=>x.innerText.indexOf({json.dumps(id_)})===0); return k?k.innerText.replace(/\\s+/g,' '):'';}})()") or ''
 try:
     c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/OS.dc.html',wait=1.3)

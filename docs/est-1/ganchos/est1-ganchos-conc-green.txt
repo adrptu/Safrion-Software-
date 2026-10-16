@@ -1,0 +1,6 @@
+{"falta":2,"reserva":2,"livre":0,"erroPrevia":"Lote G26-14 vencido em 01/2000: não pode fornecer a retirada complementar. Revise a origem física ou recuse o relato; a custódia já entregue permanece preservada.","erroComando":"Lote G26-14 vencido em 01/2000: não pode fornecer a retirada complementar. Revise a origem física ou recuse o relato; a custódia já entregue permanece preservada.","fisicoAntes":1199,"fisicoDepois":1199,"estado":"Em conferência"}
+OK conciliação não retira lote vencido por reserva antiga
+OK custódia entregue antes do vencimento ainda pode ser conciliada sem nova retirada
+OK recusar relato mantém físico e reserva vencidos sem retirada
+RESULTADO 3/3
+RESULTADO 3/3

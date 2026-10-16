@@ -1,0 +1,118 @@
+AG-07            mantida     97  Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · arquivo de 02/10/2026 · 4.409 produtos com r
+BO-01            cortada    243  PRECO-01: R$ 2,00/ha·mês = R$ 24,00/ha·ano. Mínimo: cobra-se o maior entre o mínimo e preç
+BO-02            cortada     36  medida 2.958,23 ha · cobrada = mín(medida; contratada)
+BO-02            cortada     47  a vencer, vencidas, pendentes ou em contestação
+BO-02            cortada    141  Isolamento: a plataforma vê área e cobrança por organização (e por fazenda na consulta con
+CA-01            cortada     45  3 com produto (o agrônomo libera) · 2 só água
+CA-01det         cortada     81  Recomendação de origem: fungicida 1ª aplicação · protocolo do plano técnico · v2 aprovada.
+CA-01det         cortada    124  término físico do escopo (ou dispensa autorizada do saldo) entra automaticamente em Em con
+CA-01x-os0420    cortada     71  impedimento é selo: a ordem segue Em execução e nenhum botão pula etapa
+CA-02            cortada     88  Concluir execução não encerra a ordem com custódia, divergência ou conferência pendente.
+CA-02            cortada    204  Se a liberação não estiver mais vigente, o saldo reaberto recebe o selo Pausada até renova
+CA-04            cortada    167  Balanço da REQ-031: 100 sc entregues − 70 consumidos − 20 recebidos = 10 sc com Paula (equ
+CF-01            cortada    129  Os comandos da O.S., do Estoque e do app leem esta tabela. Mudança vale para o próximo com
+CF-01            cortada    180  Origem: Cadastros › Pessoas e equipes (nome, função, habilidade e CREA). Aqui não se cadas
+CF-03            cortada    210  Sincronizar envia ao ERP cada movimento uma vez por conteúdo: repetir não reenvia; um cons
+CF-05            cortada     40  Preço, mínimo, franquias e cancelamento: exemplo · a decidir pelo proprietário (DEC-01, DE
+CF-05            cortada     69  só demonstração · avança a data da cobrança, não a dos outros módulos
+CF-05            cortada    106  Pessoas com acesso: 14 (Configurações › Usuários e alçadas) · usuários sem limite · não en
+CF-05            cortada    116  Data simulada da cobrança: 23/09/2026. O período fecha no último dia do mês e a fatura ven
+CF-05            cortada    148  Origem: Cadastros › Fazendas, áreas e talhões · conta a área cultivável dos talhões ativos
+CO-02            cortada    255  Hectares concluídos não geram quilogramas de estoque, e pesagens não duplicam a produção d
+CO-02det         cortada    105  Término físico entra automaticamente em Em conferência; encerrar exige cargas e apontament
+CO-04            cortada    295  A entrada NÃO equivale a liberação comercial: produto em processo continua identificado (C
+CO-05            cortada     95  OB-0104 fechou com balanço conciliado e perdas de 4,1%, e foi Encerrada — fechar processo 
+CO-05det         cortada     81  Concluir execução leva a Em conferência; fechar processo exige balanço conferido.
+CO-05det         mantida     94  L39-120/121 seguem Aguardando inspeção até a decisão em CO-06, mesmo com o processo encerr
+CO-06            cortada    235  Bloqueio invalida a elegibilidade das reservas afetadas e avisa o Comercial automaticament
+CO-06            cortada    300  Lotes de campo vêm dos apontamentos das O.S. de colheita (parcela + data). Pós-colheita, m
+CO-07            cortada    216  Soja: físico apto 38.420 sc − reserva 3.875 sc = disponível 34.545 sc; o contrato barter q
+GE-02            cortada     57  Autorizar versão: só a Direção, pela caixa de Aprovações.
+GE-02det         cortada    149  Orçamento flexível para os 120 ha·op ao padrão original = R$ 4.800; desvio contra essa bas
+GE-04            cortada    197  Fonte oficial: ERP designado — aqui se propõe, aprova e concilia; a liquidação vem confirm
+GE-06det         cortada     62  custo total da operação ÷ ha efetivamente tratados (apontados)
+GE-06det         cortada     65  lançamentos de custo documento a documento + apontamentos da O.S.
+GE-08            cortada     44  Garantias sob controle: penhor de 30% da soja (15.384 sc) + CPR de 6.900 sc (barter CRE-00
+IC               cortada     31  comprando pela melhor cotação, contra a referência da safra
+IC               cortada     46  9 insumo(s) mais baratos esperando o mês certo, antes da necessidade
+LO-02            cortada    152  A preparar → Em separação → Conferência → Pronta p/ carregar → Carregada → Saída confirmad
+LO-02            cortada    173  Política v4: elegibilidade (presença, prontidão, doca livre, documentos) › janela em risco
+LO-02det         cortada     51  Frete: retirada pelo cliente — custo e transportador do cliente; o rateio da instalação nã
+LO-04            cortada     38  Mesma base: 9,6 t · 512 km · refrigerado. Sugestão não despacha transportador.
+MA               cortada     62  das OMs encerradas no sistema · em andamento R$ 12.572,00 est.
+MB-01            cortada     52  Siga a ordem da janela; o botão diz o próximo passo.
+MB-01            cortada     58  Escolha o trabalho para abrir o formulário do seu domínio.
+MB-02            cortada     48  Consulte; quem executa é o responsável indicado.
+MB-02            cortada     53  suas (Marcos) e da equipe · mesma ordem do escritório
+MB-02            cortada     56  Abra a ordem para ver instrução, insumos e apontamentos.
+MB-02            cortada     69  Água simplificada: abre em Irrigação, sem materiais e sem requisição.
+MB-02            cortada    107  Fechar o turno não encerra a ordem. Encerrar é no escritório, com apontamentos enviados e 
+MB-02det         cortada     49  Siga dose, janela e preparo da versão autorizada.
+MB-02det         cortada     57  Confira o que já foi enviado e o que está só no aparelho.
+MB-02det         cortada     59  Use só o material autorizado; a sobra volta pela devolução.
+MB-03            cortada     45  Inicie o turno na ordem em que vai trabalhar.
+MB-03            cortada     52  iniciar, pausar e fechar · hectares, horas e consumo
+MB-03x-recibo    cortada     46  fila do aparelho · cada registro entra uma vez
+MB-03x-recibo    cortada     67  Reenvios devolvem o mesmo recibo; a conferência decide o realizado.
+MB-03x-recibo    cortada    145  Conflito com outro aparelho abre reconciliação sem somar em dobro. Pacote revogado ou venc
+MB-04            cortada     56  tipo e texto · foto e voz simuladas · funciona sem sinal
+MB-05            cortada     46  Leve a O.S.; Rui entrega por lote e embalagem.
+MB-05            cortada     50  Use na ordem; a sobra volta pela devolução ao Rui.
+MB-05            cortada     68  retiradas do operador e tarefas do almoxarife · por lote e embalagem
+MB-05            cortada     96  Confirmar o recebimento põe o material sob sua custódia; o apontamento do turno baixa o co
+MB-05det         cortada     31  REQ-031 · sobras da OS-0417 · conferência física contra QR
+MB-05det         cortada     48  Confira as sacas contra o QR antes de confirmar.
+MB-05det         cortada     99  Material preparado não retorna como produto original disponível; só sobra íntegra volta ao
+MB-05det         cortada    170  Ao confirmar: custódia zera, a conta 100 = 70 + 30 fecha e a OS-0417 segue para o fechamen
+MB-07            cortada     49  previsão de colheita · conta por planta e estádio
+MB-07            cortada     52  Toque no talhão de fruta em produção que vai contar.
+MB-08            cortada     46  Acompanhe a volta e confirme o término no fim.
+MB-08            cortada     46  Registre pausas e avanço sem encerrar a ordem.
+MB-08            cortada     78  Água sem produto: sem materiais, sem requisição, sem custódia e sem devolução.
+MB-08            cortada     91  Só a fertirrigação (OS-0418) é liberada pelo agrônomo, com materiais e requisição próprios
+MB-08            cortada    147  Área/volume insuficientes? Registra-se o tempo e a estimativa fica pendente — a lâmina não
+MB-08            cortada    153  13,5 mm (OS-0422) passam do máximo de 12,0 mm por passada: o sistema divide em 2 passadas 
+MB-08x-recibo    cortada     34  Balanço hídrico atualizado uma vez por aplicação · 10,6 mm creditados nos 80 ha do pivô.
+MB-08x-recibo    cortada     45  mapa, lista, quadro e app leem o mesmo evento
+MB-08x-recibo    cortada     47  Confira os recibos e a área realmente atendida.
+MB-08x-recibo    cortada     83  Fatos consistentes → conferência e encerramento automáticos, com recibos separados.
+MB-08x-recibo    cortada    152  Horímetro divergente da lâmina calculada → a ordem fica Em conferência com o motivo exibid
+MB-09            cortada     27  Herdada do turno da OS-0421 (alocação de hoje) · toque noutra para trocar
+MB-09            cortada     54  condição, leitura e abastecimento · funciona sem sinal
+MB-09            cortada     55  Herdada do seu turno; toque noutra ou busque pelo nome.
+MB-09            cortada     58  Tanque, volume e leitura; a foto do tíquete é a evidência.
+MB-09det         cortada     53  Nunca voltam ao estoque livre: destino e responsável.
+MB-10            cortada     53  colheita: área e cargas do talhão · motorista: viagem
+MB-10            cortada     81  Área não gera produção: a produção do talhão nasce só da carga pesada e recebida.
+MB-10            cortada     88  Aponte a área do turno e registre cada carga que sai do talhão; a balança pesa e recebe.
+ON-01det         cortada    188  Estoque, análise ou plantio nunca são completados com dados inventados. Área importada mai
+OS-0424-app      mantida     73  Complete com água até o volume do tanque, na ordem da instrução liberada.
+OS-0424-ficha    mantida    187  Ficha impressa em 24/09 06:10 a partir da versão liberada. Se a versão mudar, esta ficha p
+OS-0424-ficha    mantida    210  Tanque útil 3.000 L · vazão 100 L/ha · área por carga 30 ha. Coloque o produto indicado e 
+PL-02            cortada    295  “20 dias antes do plantio · DAP −20 · previsto para 25/09” — o produtor não digita sinal n
+PL-03            cortada     63  retorno previsto 14h — aguardando teste não ofertado como livre
+PL-03            cortada     68  informação vencida pela política não fica verde por falta de notícia
+PL-03            cortada     78  trator livre + implemento reservado ≠ conjunto livre revisão pré-plantio 25/09
+PL-03            cortada    107  Contadores são recortes que se sobrepõem — não somam o total da frota. Última atualização 
+PL-05            cortada    345  Resolver compra ou manutenção revalida prontidão; não inicia máquina nem muda a agenda aut
+PL-05det         cortada    149  A parada do Trator T1 reduz a capacidade da janela uma única vez (já refletida em Capacida
+PL-06            cortada    101  Proposta · não divide a área vigente Parcelas não duplicam hectares de cobrança (312 ha); 
+PT-02            cortada    114  Cada versão submetida fica preservada — revisar antes do prazo cria nova versão; motivo de
+PT-05det         cortada     71  Entregue dentro da janela com NF-e e laudo por carga — recusa no recebimento abre divergên
+SU-01            cortada    145  KCl 60%: falta firme 140 − 50 − 40 = 50 t; as 10 t em quarentena não entram e ficam como c
+SU-02            cortada    182  Classe ABC financeira não substitui criticidade: Diesel é B em valor e Alta em criticidade
+SU-03            cortada    179  Físico ≠ utilizável ≠ disponível. Custódia em campo fica fora do físico do depósito e não 
+SU-04            cortada    155  O fornecedor responde pelo portal externo com convite próprio, nunca por esta lista. A SOL
+SU-05            cortada     94  Recebimento parcial mantém o saldo do pedido aberto; o aceite físico acontece em Recebimen
+SU-05            cortada     98  O recebido já está dentro das liberações acumuladas e não é subtraído de novo do saldo con
+SU-06            cortada    189  Aceite físico não aprova o título: o título segue para Contas a pagar à parte. O retido em
+SU-07            cortada    160  Material entregue sai do disponível e passa à custódia da ordem; o consumo apontado no cam
+SU-07det         cortada    157  É o mesmo balanço que a conferência da ordem usa. Declarar a devolução não aumenta o utili
+SU-08            cortada    187  Correção não apaga a operação original: o estorno cria movimento novo com vínculo. Movimen
+SU-09            cortada    203  O contador não vê o saldo do sistema e os movimentos do escopo ficam suspensos entre o cor
+VE-01            cortada    144  Saldo final é o máximo factível sob capacidade e prazo — folga de outra classe ou dia não 
+VE-02            cortada    114  1 sc soja = 50 kg · 1 bushel soja = 27,216 kg (≈ 0,5443 sc) · 1 lb = 0,4536 kg. Câmbio da 
+VE-03            cortada    190  Aceite registrado pelas duas partes, por versão. Confirmação automática só sob política pr
+VE-06            cortada    170  300 kg retornaram e foram recebidos como bloqueados: o estoque vendável não aumentou e o l
+
+explicação antes: 12680 car. · ainda à vista: 661 car. · cortada: 12019 car. (94.8%)

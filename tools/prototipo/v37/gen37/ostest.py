@@ -8,6 +8,7 @@ import sys, os, time, subprocess, json, re, shutil
 sys.path.insert(0,os.path.dirname(os.path.abspath(__file__)))
 from cdp import Chrome
 from journeys import free
+from comp_lib import troca_visao   # VISOES-1: troca de visão pelo seletor (data-visao), não pelo texto
 HERE=os.path.dirname(os.path.abspath(__file__)); R=os.path.join(HERE,'_render')
 for n in ('OS.dc.html',): shutil.copy(os.path.join(HERE,'project',n),os.path.join(R,n))  # IN-04 e MB-02 são de outras frentes: usa a cópia já em _render
 p=free(); srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(0.8)
@@ -17,7 +18,8 @@ SETV="""((sel,val)=>{const i=document.querySelector(sel); const P=i.tagName==='S
 def clk(t,root=None): r=J(f"({CLK})({json.dumps(t)},{json.dumps(root)})"); time.sleep(.4); return r
 def setv(sel,val): J(f"({SETV})({json.dumps(sel)},{json.dumps(val)})"); time.sleep(.3)
 toast=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')")
-rows=lambda: J("[...document.querySelectorAll('[role=table] [role=row].g2ed')].map(r=>r.innerText.split('\\n')[0].trim())")
+# VISOES-2 (C2): o estado vermelho curto ("Falta insumo") vem antes do código na célula; a O.S. da linha é o código visível (OS-/OB-)
+rows=lambda: J("[...document.querySelectorAll('[role=table] [role=row].g2ed')].map(r=>{const t=r.innerText; const m=t.match(/\\bO[SB]-\\d+/); return m?m[0]:t.split('\\n')[0].trim();})")
 def pan():   # 01/10: abre as seções recolhidas do painel antes de ler
     if J('(()=>{const bs=[...document.querySelectorAll(\'aside[role=dialog] section[aria-label] > button[aria-expanded="false"]\')]; bs.forEach(b=>b.click()); return bs.length;})()'): time.sleep(.3)
     return J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText")
@@ -40,7 +42,8 @@ try:
     corpo=J("document.body.innerText")
     check('ordens só de água fora da página O.S. (lista e texto)', not any(x in r0 or x in corpo for x in AGUA), [x for x in AGUA if x in corpo])
     # TABELAS-FOCO (5983172395 item 6): uma variável por coluna; a rolagem horizontal fica dentro da caixa da tabela e não esconde o filtro Talhão
-    ov=J("(()=>{const b=document.getElementById('ost_btn').getBoundingClientRect(); return [document.documentElement.scrollWidth,innerWidth,b.left>=0&&b.right<=innerWidth&&b.width>0];})()"); check('página sem rolagem horizontal e filtro Talhão visível (a tabela rola dentro da caixa)', ov[0]<=ov[1]+1 and ov[2], ov)
+    # 13/10/2026: o seletor de talhão da barra (ost_btn) virou o filtro Talhão da faixa "Filtros desta tela" (Cultura e Talhão no filtro principal)
+    ov=J("(()=>{const b=document.querySelector('select[aria-label=\"Filtrar por talhão\"]').getBoundingClientRect(); return [document.documentElement.scrollWidth,innerWidth,b.left>=0&&b.right<=innerWidth&&b.width>0];})()"); check('página sem rolagem horizontal e filtro Talhão visível (a tabela rola dentro da caixa)', ov[0]<=ov[1]+1 and ov[2], ov)
     # chips de fase
     clk('Em execução'); r=rows(); check('chip Em execução filtra', r==['OS-0421','OS-0420'] or sorted(r)==['OS-0420','OS-0421'], r)
     check('chip marcado', J("[...document.querySelectorAll('[aria-label=\"Filtrar por fase\"] button')].filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>b.innerText.replace(/\\s+/g,' '))")==['Em execução 2'])
@@ -62,7 +65,7 @@ try:
     J("document.querySelector('aside[role=dialog]').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}))"); time.sleep(.3)
     check('Esc fecha painel', pan()=='')
     # Kanban
-    clk('Kanban'); time.sleep(.3)
+    troca_visao(J,'kanban'); time.sleep(.3)
     cols=J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] > div')].map(d=>d.innerText.split('\\n').slice(0,2).join(' '))")
     check('Kanban 5 colunas fixas', len(cols)==5 and all(cols[i].upper().startswith(FASES[i].upper()) for i in range(5)), cols)
     kb={}
@@ -75,9 +78,9 @@ try:
     t=pan(); check('cartão abre painel OS-0420 com link da ordem completa', 'OS-0420' in t and J("(document.querySelector('aside[role=dialog] a')||{}).getAttribute('href')")=='CA-01x-os0420.dc.html' and 'v3 no saldo de 70 ha' in t and 'em revisão' not in t, t[:60])
     clk('Fechar','aside[role=dialog]')
     # lista × Kanban
-    clk('Lista'); lista={}
+    troca_visao(J,'lista'); lista={}
     for r_ in J("[...document.querySelectorAll('[role=row].g2ed')].map(r=>r.innerText.replace(/\\n/g,' | '))"):
-        lista[r_.split(' | ')[0].strip()]=fase_de(r_)
+        _m=re.search(r'\bO[SB]-\d+',r_); lista[_m.group(0) if _m else r_.split(' | ')[0].strip()]=fase_de(r_)   # VISOES-2 (C2): o código visível, não a 1ª linha
     check('Lista = Kanban', lista==kb, {k:(lista.get(k),kb.get(k)) for k in kb if lista.get(k)!=kb.get(k)})
     # Nova ordem
     clk('Nova ordem'); check('form Nova ordem', 'Nova ordem' in pan())
@@ -87,7 +90,9 @@ try:
     clk('Cancelar','aside[role=dialog]'); check('aviso não salvo', 'Há alterações não salvas' in pan())
     clk('Continuar editando','aside[role=dialog]'); clk('Emitir ordem','aside[role=dialog]')
     tt=toast(); check('emite em A liberar', 'OS-0440' in tt and 'A liberar' in tt and 'Não foi liberada' in tt, tt)
-    t=pan(); check('painel da nova ordem A liberar: Liberar para execução e Ajustar antes de liberar, sem selo de agrônomo', 'OS-0440' in t and 'Liberar para execução' in t and 'Ajustar antes de liberar' in t and 'Aguardando agrônomo' not in t and 'Revisar versão' not in t, t[:120])
+    # a atividade a7 traz o Inseticida B em L/ha e a bula em kg/ha: a trava legal única (CTL-1) troca "Liberar para execução" por "Liberar bloqueado"
+    # com o motivo e quem resolve; o que este caso protege é a ausência de etapa de revisão do agrônomo (O.S. sem revisão, 01/10)
+    t=pan(); check('painel da nova ordem A liberar: Liberar (ou a trava legal com o motivo) e Ajustar antes de liberar, sem selo de agrônomo', 'OS-0440' in t and ('Liberar para execução' in t or ('Liberar bloqueado' in t and 'Quem resolve' in t)) and 'Ajustar antes de liberar' in t and 'Aguardando agrônomo' not in t and 'Revisar versão' not in t, t[:400])
     J("document.querySelector('aside[role=dialog] button[aria-label=Fechar]').click()"); time.sleep(.3); check(f'{N+1} ordens', len(rows())==N+1)
     cs=chips(); check('contador A liberar 4 e Todas sobe junto', cs[1]=='A liberar 4' and cs[0]==f'Todas {N+1}', cs)
     clk('Nova ordem'); setv('#nv_saf','S2627'); setv('#nv_cult','c1'); setv('#nv_atv','a7'); setv('#nv_jan','2026-12-02'); clk('Emitir ordem','aside[role=dialog]')

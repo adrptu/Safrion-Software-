@@ -1,0 +1,26 @@
+build rc=0
+montar_render rc=0 :: _render montado: 152 páginas + 20 arquivos do site · dados da Lagoa Grande: sintéticos 5/5
+ben_unit_test.py rc=0 2s carga=18.80 :: RESULTADO: OK 168/168
+producao_unit_test.py rc=0 2s carga=18.80 :: RESULTADO: OK 160/160
+comercial_unit_test.py rc=0 2s carga=18.80 :: RESULTADO: OK 114/114
+est_cenario_test.py rc=0 28s carga=18.57 :: RESULTADO: 15/15 ok
+os_cenario_test.py rc=1 49s carga=18.35 :: RESULTADO: 21/22 ok · FALHAS: A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário v2 sem aprov
+cen_grava_test.py rc=0 0s carga=18.18 :: RESULTADO 10/10
+est_a4_test.py rc=0 1s carga=18.18 :: RESULTADO 53/53
+solo_unit_test.py rc=0 2s carga=18.18 :: RESULTADO: OK 128/128
+cada_cd04_test.py rc=0 18s carga=17.85 :: RESULTADO: OK 15/15
+links_ocultos_test.py rc=0 3s carga=18.56 :: TOTAL 16 · falhas 0
+nav_modulos_test.py rc=0 88s carga=17.16 :: RESULTADO: 15 ok · 0 falhas
+producao_fluxo_test.py rc=0 587s carga=14.53 :: RESULTADO: OK 91/91
+busca_unica_test.py rc=0 354s carga=12.56 :: RESULTADO: 6 ok · 0 falhas
+paginas_scan_test.py rc=0 411s carga=13.67 :: RESULTADO: 4 ok · 0 falhas (143 páginas)
+tabelas_ben_test.py rc=0 32s carga=14.94 :: RESULTADO: OK 12/12
+tabelas_est_test.py rc=0 50s carga=13.51 :: RESULTADO: 34/34 ok
+cafe_apurar_test.py rc=0 42s carga=13.36 :: RESULTADO: OK 10/10
+comercial_fluxo_test.py rc=0 317s carga=17.98 :: RESULTADO: OK 74/74
+comercial_revisao_test.py rc=0 355s carga=14.51 :: RESULTADO: OK 33/33
+config_test.py rc=1 871s carga=12.07 :: RESULTADO: FALHOU 87/88
+os_irrig_filtro_test.py rc=0 54s carga=13.17 :: RESULTADO: 15 ok · 0 falhas
+tabelas_os_test.py rc=0 63s carga=15.33 :: RESULTADO: 40/40 ok
+ben_fluxo_test.py rc=1 21s carga=12.15 :: RESULTADO: FALHOU 1/13
+FIM

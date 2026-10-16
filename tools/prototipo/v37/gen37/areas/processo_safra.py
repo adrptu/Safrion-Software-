@@ -5,15 +5,20 @@ import json, os
 from engine import (grid,section,esc,icon,chip,btn,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,GRAYS,SH,DISP,BTN_ST,EXTRA,EXTRAJS,_MINI,_MINIP)
 import engine as E
 from ui37 import shell37, steps_state, HEIGHTS37
+import ui37 as UI
 import dados2 as D2
 import dados as D
 import ocupacao_cen as OCEN
+import cenario
+import unidprod_ui as UNP
 HERE=os.path.dirname(os.path.abspath(__file__)); ROOT=os.path.dirname(HERE)
 H=lambda s: '{{'+s+'}}'
 F=lambda: H('false')
 NOMES=['Escolha a safra','Defina cultivos e planos','Dimensione operações e recursos','Confira a demanda de insumos']
 def bloco(titulo,desc,corpo,acao='',tit_hole=False,desc_hole=False):
+    if not desc_hole: desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     t=titulo if tit_hole else esc(titulo); desc=desc if desc_hole else esc(desc)
+    acao=E.recolhe_acoes(titulo,acao)   # MAIS-01 (15/10/2026): uma secundária à vista, as outras no "⋯ Mais ações" do bloco
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
             f'<div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px;"><div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">'
             f'<h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">{t}</h3><div style="font-size: 12.8px; color: {MUTED};">{desc}</div></div>{acao}</div>'
@@ -26,10 +31,10 @@ def build():
     # ---------- etapa 1 · safras ----------
     g_saf=grid([dict(k='nome',l='Safra'),dict(k='faz',l='Fazenda'),dict(k='n',l='Cultivos',t='num',a='r'),dict(k='area',l='Área',t='num',a='r',u='ha'),dict(k='estado',l='Estado'),dict(k='acao',l='Próximo passo',w=290)],
        [dict(id=s['id'],ro=s['ro'],v=dict(nome=s['nome'],ini=s['ini'],fim=s['fim'],periodo=s['periodo'],faz=s['fazenda'],estado=s['estado']),s={},p={}) for s in D2.SAFRAS],
-       edit=dict(m='form',title='Safra',newTitle='Nova safra',sub='Altere nome, início, fim e fazenda. Cultivos e planos ficam nas etapas seguintes.',
+       edit=dict(m='form',title='Safra',newTitle='Nova safra',sub='Altere nome, início, fim e fazendas. Cultivos e planos ficam nas etapas seguintes, por fazenda.',
                  fields=[dict(k='nome',l='Nome da safra',t='txt',req=True,def_='' ),dict(k='ini',l='Início',t='date',req=True),dict(k='fim',l='Fim',t='date',req=True,help='O fim precisa ser depois do início.'),
-                         dict(k='faz',l='Fazenda',t='sel',opts=OCEN.fazendas(),req=True,**{'def':'Santa Rita'}),dict(k='estado',l='Estado',t='sel',opts=['Rascunho','Em planejamento'],**{'def':'Rascunho'})]),
-       add=None,gid='g_saf',total=False)
+                         dict(k='fazs',l='Fazendas',t='multi',opts=OCEN.fazendas(),req=True,**{'def':'Santa Rita'}),dict(k='estado',l='Estado',t='sel',opts=['Rascunho','Em planejamento'],**{'def':'Rascunho'})]),
+       add=None,gid='g_saf',total=False,qf=dict(k='faz',l='fazenda',todas='Todas'))   # 14/10 (proprietário: "não dá para escolher ou mudar de fazenda"): chips por fazenda na escolha da safra
     # ---------- etapa 2 · talhões e cultivos (ESPECIFICACAO etapa-2-talhoes) ----------
     # todos os talhões Ativos do CD-01 da fazenda da safra (com o B1 da Boa Vista e os pivôs da Lagoa Grande); a ocupação no tempo sai do
     # serviço único ocupacao.js (ENG-011). Linhas de talhão e de outras safras são só de exibição (safra.js · syncTalhoes); o estado guarda
@@ -39,14 +44,18 @@ def build():
     TALFAZ={t:f for f,lst in TAL_FAZ.items() for t,_ in lst}
     # TABELAS-FOCO (5983172395): uma variável por coluna; as cinco primeiras respondem onde, quanto e quando; Cultura, Ocupa até, Fim por e
     # Safra logo depois respondem o que ocupa e até quando (§3.1)
-    CULT_COLS=[dict(k='local',l='Talhão ou parcela',w=130),dict(k='sit',l='Situação',w=150,niv0=True),dict(k='livre',l='Área livre (ha)',t='num',a='r',d=2,dmin=0,niv0=True),
-               dict(k='desde',l='Livre a partir de',t='num',w=130,niv0=True),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum',d=2,dmin=0),dict(k='cult',l='Cultura'),
-               dict(k='ate',l='Ocupa até',t='num'),dict(k='fimpor',l='Fim por',w=150,ajuda='Pelo plano e Colheita informada são previsões. Estimado: ciclo da cultivar ou plano mais longo da cultura (CD-02), sem plano no cultivo. Observado: colheita registrada.'),
-               dict(k='saf',l='Safra',w=150),dict(k='var',l='Variedade'),dict(k='plano',l='Plano agronômico',w=190),dict(k='ver',l='Versão'),dict(k='dt_plantio',l='Plantio',t='num'),
-               dict(k='meta',l='Meta',t='num',a='r'),dict(k='aj',l='Ajustes locais',t='num',a='r'),dict(k='tipo',l='Tipo',w=120)]
+    # SAF-TAB (proprietário, 14/10: "muitas colunas, confuso… mais minimalistas"): abre com o que decide a etapa (ess = posição: talhão,
+    # cultura, plano, área, plantio); as outras 11 ficam em "Colunas +11" (VISOES-2 §3.6). A Situação sai do padrão e vira ícone antes do
+    # talhão só quando pede atenção (sico: Sobreposição, A conferir); Planejado, Livre e Perene não ganham ícone. No celular, as 3 primeiras.
+    CULT_COLS=[dict(k='local',l='Talhão ou parcela',w=130,ess=1,pq='onde'),dict(k='sit',l='Situação',w=150,niv0=True,pq='situacao'),dict(k='livre',l='Área livre (ha)',t='num',a='r',d=2,dmin=0,niv0=True,pq='medida'),
+               dict(k='desde',l='Livre a partir de',t='num',w=130,niv0=True,pq='quando'),dict(k='area',l='Área (ha)',t='num',a='r',agg='sum',d=2,dmin=0,ess=4,pq='medida'),dict(k='cult',l='Cultura',ess=2,pq='oque'),
+               dict(k='ate',l='Ocupa até',t='num',pq='quando'),dict(k='fimpor',l='Fim por',w=150,pq='quando',ajuda='Pelo plano e Colheita informada são previsões. Estimado: ciclo da cultivar ou plano mais longo da cultura (CD-02), sem plano no cultivo. Observado: colheita registrada.'),
+               dict(k='saf',l='Safra',w=150,pq='quando'),dict(k='var',l='Variedade',pq='oque'),dict(k='plano',l='Plano agronômico',w=190,ess=3,pq='oque'),dict(k='ver',l='Versão',pq='oque'),dict(k='dt_plantio',l='Plantio',t='num',ess=5,pq='quando'),
+               dict(k='meta',l='Meta',t='num',a='r',pq='medida'),dict(k='aj',l='Ajustes locais',t='num',a='r',pq='medida'),dict(k='tipo',l='Tipo',w=120,pq='oque')]
     NUNCA_C=dict(k='modo',eq='__nunca'); PLAN=dict(k='modo',ne='vinc'); VINC=dict(k='modo',eq='vinc')
     # painel "Planejar T1" (§2): contexto herdado no subtítulo; Plano antes do Plantio; Plantio = PlantioMin; Colheita prevista editável só sem
-    # plano; meta na unidade de mercado da cultura (DEC-0510-03). "Vincular ciclo C1" (R-24) mostra o ciclo travado e pede plano e meta.
+    # plano; meta na unidade escolhida no seletor da tabela (UNID-PROD), Padrão = unidade de mercado da cultura (DEC-0510-03).
+    # "Vincular ciclo C1" (R-24) mostra o ciclo travado e pede plano e meta.
     CULT_FIELDS=[dict(k='modo',l='',t='txt',cond=NUNCA_C),dict(k='talhao',l='',t='txt',cond=NUNCA_C),
                  dict(k='cult',l='Cultura',t='sel',dyn=True,opts=[],req=True,cond=PLAN),dict(k='cult',l='Cultura',ro=True,cond=VINC),
                  dict(k='var',l='Variedade',t='txt',req=True,cond=PLAN),dict(k='var',l='Variedade',ro=True,cond=VINC),
@@ -58,7 +67,7 @@ def build():
                  dict(k='area',l='Área',t='num',req=True,min=0.01,max=5000,u='ha',cond=PLAN),dict(k='area',l='Área do ciclo',ro=True,u='ha',cond=VINC),
                  dict(k='colheita',l='Colheita prevista',t='date',cond=[dict(k='plano',eq=''),PLAN],help='Sem plano: a data que a fazenda prevê. Vazia, o sistema estima pelo ciclo da cultivar (CD-02).'),
                  dict(k='colh_txt',l='Colheita prevista',ro=True,live=True,cond=dict(k='plano',ne='')),
-                 dict(k='meta',l='Meta de produtividade',t='num',req=True,min=0),dict(k='unm_txt',l='Unidade da meta',ro=True,live=True,help='Unidade de mercado da cultura (CD-02, DEC-0510-03).'),
+                 dict(k='meta',l='Meta de produtividade',t='num',req=True,min=0),dict(k='unm_txt',l='Unidade da meta',ro=True,live=True,help='A do seletor "Unidade de produtividade" da tabela ao abrir este painel; o Padrão da cultura vem do CD-02 (DEC-0510-03).'),
                  dict(k='ocup_txt',l='Ocupação prevista',ro=True,live=True,cond=PLAN)]
     def talhao_de(c):
         return c['local'] if c['tipo']!='Parcela' else c['local'].rsplit('-',1)[0]
@@ -75,6 +84,9 @@ def build():
                 grp[t]['kids'].append(r)
             else: out.append(r)
         return out
+    # SAF-FAZ-3 (B): com várias fazendas, filtro rápido por fazenda logo depois da busca (segmentado, para não confundir com o da Situação)
+    FFZ=(f'<sc-if value="{H("ffz_tem")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Fazenda" class="ffz">'
+         f'<sc-for list="{H("ffz_l")}" as="fq" hint-placeholder-count="3"><button type="button" aria-pressed="{H("fq.on")}" title="{H("fq.al")}" onClick="{H("fq.go")}">{H("fq.t")}</button></sc-for></div></sc-if>')
     cult_html=''
     for k in ['S2627','S27SF','S2526','LG2627','NOVA']:
         rows=cult_rows(k)
@@ -82,7 +94,9 @@ def build():
         # sem caixas de seleção (proprietário, 13/10/2026): o plano entra pela primária "Aplicar plano em N cultivos" (os sem plano) ou pelo
         # "Aplicar plano" / "Reaplicar" da linha; trocar o plano de um cultivo é pelo formulário da linha
         g=grid(CULT_COLS,rows,edit=dict(m='form',title='Cultivo',newTitle='Novo cultivo',sub='Altere o cultivo e o plano agronômico e salve.',fields=CULT_FIELDS),
-               sel=False,dele=not ro,add=None,gid=f'g_cult_{k}',qf=dict(k='sit',l='situação',nivel0=True),total=True,tree=True,x0={})
+               sel=False,dele=not ro,add=None,gid=f'g_cult_{k}',qf=dict(k='sit',l='situação',nivel0=True),total=True,tree=True,x0={},menu_linha=True,busca_extra=FFZ,
+               sico=dict(k='sit',cores=['red','yellow']),
+               tools=f'<sc-if value="{H("us_"+k+"_vis")}" hint-placeholder-val="{F()}">'+UNP.sel_html('us_'+k)+'</sc-if>')   # UNID-PROD: um seletor por tabela (D-U01), só com a Meta à vista (SAF-TAB)
         cult_html+=f'<sc-if value="{H("cult_"+k)}" hint-placeholder-val="{F()}">{g}</sc-if>'
     # ---------- etapa 3 · rendimentos (uma grade por safra: a edição vale só para a safra aberta; safra encerrada abre só em consulta) ----------
     ops={}
@@ -184,7 +198,7 @@ def build():
                dict(k='horas',l='Horas-conjunto (h)',t='num',a='r',d=1,agg='sum'),
                dict(k='rha',l='Custo R$/ha',t='num',a='r',agg='fn',ajuda='Na linha: custo ÷ área trabalhada. No Total: custo ÷ hectares dos talhões (cada talhão conta uma vez, como no Resumo da safra)'),
                dict(k='custo',l='Custo total',t='num',a='r',agg='sum',ajuda='Máquinas e pessoas, sem insumos. O Total é o Custo de operação do topo')],
-       [],edit=dict(m='pick',leafOnly=False),tree=True,gid='g_op',total=True,qf=dict(k='sit',l='situação',nivel0=True))
+       [],edit=dict(m='pick',leafOnly=False),tree=True,gid='g_op',total=True,qf=dict(k='sit',l='situação',nivel0=True),sico_so_icone=True)
     # g_cap: capacidade por mês (recurso × mês, ocupação), uma por safra; recolhida por padrão.
     # Recurso, Maior uso e Mês abrem o formulário do recurso; as células de mês (nr) só filtram (toque na célula com demanda desta safra)
     def cap_cols(mis):
@@ -235,20 +249,24 @@ def build():
     from areas.analise_solo import SOLO_UI_JS, porque_html
     # análise de solo (SOLO-01): o estado compartilhado (cenario.js + solo.js) e os laudos (SOLO0) entram no Planejar safra; 0 colisões de nome (solo_unit_test)
     # CTL-4: o mesmo cenário compartilhado (O.S., requisições, lotes) entra na demanda (cenDemEntradas/cenOsDem): emitir, liberar, apontar, cancelar ou devolver muda a conta
-    EXTRAJS[0]=cenario.js_prefixo()+DSO.js_prefixo()+SOLO_UI_JS+'\nconst D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
-function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' && r && String(r.id).indexOf('n')===0 && !self.state.saf){ if(!r.v.estado) r.v.estado='Rascunho'; self.setState({saf:r.id,step:2,g2toast:'Safra criada: '+r.v.nome+'. Planeje os talhões livres na tabela.'}); }
+    # UNID-PROD (D-U14): o conversor único (producao.js) com o prefixo do estado, o mesmo das telas do estado; a tela não chama cenGet nem cenSave
+    EXTRA.append('<style>'+UNP.CSS+'</style>')
+    EXTRAJS[0]=cenario.js_prefixo()+DSO.js_prefixo()+SOLO_UI_JS+UNP.JS+'\nconst D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra_grupo.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
+function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' && r){ const msg=sgAplicar(self,rows,r,isNew);   /* SAF-FAZ-2: uma sub-safra por fazenda */
+      if(isNew && !self.state.saf){ if(!r.v.estado) r.v.estado='Rascunho'; self.setState({saf:r.id,step:2,g2toast:msg||('Safra criada: '+r.v.nome+'. Planeje os talhões livres na tabela.')}); } else if(msg) self.setState({g2toast:msg}); }
     if(String(gid).indexOf('g_cult_')===0) cultAfter(self,gid,rows,r,isNew);
     if(String(gid).indexOf('g_rend_')===0&&r) rendAfter(self,gid,rows,r,isNew);
     if(String(gid).indexOf('g_recp_')===0&&r) recAfter(self,gid,rows,r); };
   self.g2live=(gid,k,d)=>(String(gid).indexOf('g_rend_')===0?rendLive(k,d,self):(String(gid).indexOf('g_cult_')===0?cultLive(self,gid,k,d):(String(gid).indexOf('g_recp_')===0?recLive(self,gid,k,d):null)));
   self.g2draft=(gid,k,d,fm)=>(String(gid).indexOf('g_cult_')===0?cultDraft(self,gid,k,d,fm):null);
+  self.g2openDraft=(gid,r,d)=>safOpenDraft(self,gid,r,d); self.g2newDraft=(gid)=>safNovaDraft(self,gid);
   self.g2formSub=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultSub(self,gid,r,fm):(String(gid).indexOf('g_recp_')===0?recSub(self):null));
   self.g2opts=(gid,k,d,rid)=>(String(gid).indexOf('g_cult_')===0&&k==='plano'?planOpts(d):(String(gid).indexOf('g_cult_')===0&&k==='cult'?cultOpts(d):(String(gid).indexOf('g_rend_')===0&&k==='conj_id'?conjOpts(rid||d.base):null)));
   self.g2formActs=(gid,r,fm)=>(String(gid).indexOf('g_cult_')===0?cultActs(self,gid,r):(String(gid).indexOf('g_rend_')===0?rendActs(self,gid,r):null));
-  self.g2check=(gid,rows,r,d,isNew)=>(String(gid).indexOf('g_cult_')===0?cultCheck(self,gid,rows,r,d,isNew):(String(gid).indexOf('g_rend_')===0?(self._conjAntes=(r?String(r.v.conj_id||''):null),opAntes(self,r),rendCheck(self,rows,r,d,isNew)):(String(gid).indexOf('g_recp_')===0?(opAntes(self,r),null):(gid==='g_saf'?safCheck(d):null))));
+  self.g2check=(gid,rows,r,d,isNew)=>(String(gid).indexOf('g_cult_')===0?cultCheck(self,gid,rows,r,d,isNew):(String(gid).indexOf('g_rend_')===0?(self._conjAntes=(r?String(r.v.conj_id||''):null),opAntes(self,r),rendCheck(self,rows,r,d,isNew)):(String(gid).indexOf('g_recp_')===0?(opAntes(self,r),null):(gid==='g_saf'?Object.assign({},sgChecar(self,rows,r,d,isNew),safCheck(d)):null))));
   self.g2pick=(gid,rid,r)=>{ if(gid==='g_op') abrirRend(self,rid); if(String(gid).indexOf('g_cap_')===0) abrirRec(self,rid); }; }
 const _EV=EXTRAVALS; EXTRAVALS=function(self,v){ _safhooks(self); cenOuvir(self); _EV(self,v); };
-const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)=>rendNova(self,rid); resumoVals(self,v); };   // + Outra configuração e Resumo da safra (etapa 3)'''
+const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)=>rendNova(self,rid); resumoVals(self,v); safUnidVals(self,v); };   // + Outra configuração e Resumo da safra (etapa 3)'''
     import plano_referencia as PR
     EXTRAJS[0] += PR.js()
     EXTRA.append(PR.painel())
@@ -256,27 +274,39 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
     # UX-ACAO-UNICA-20261003: o cabeçalho do bloco só tem comandos do próprio conteúdo (criar, adicionar, modo de visão); avanço,
     # retorno e a primária da etapa ficam na área de ações única ao fim do conteúdo (engine.area_acoes, preenchida em safra.js)
     acoes=lambda extra='': f'<span style="display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">{extra}</span>'
-    nova_safra=f'<button type="button" onClick="{H("g_saf_new")}" style="{E.BTN_ST(False,True)}">Nova safra</button>'   # criar é secundário: a tarefa da etapa é escolher
+    nova_safra=f'<button type="button" onClick="{H("g_saf_new")}" style="{E.BTN_ST(False,True)}">Criar safra</button>'   # criar é secundário: a tarefa da etapa é escolher
     s1=bloco('Escolha a safra','Clique na safra para continuar de onde parou.',g_saf,acao=nova_safra)
     # SOLO-01 §3.4: "Sugestões pelas análises · N" só com 1 sugestão ou mais (R01, D-29): quem não usa análise não vê nada
     sg_lnk=f'<sc-if value="{H("sg_has")}" hint-placeholder-val="{F()}"><button type="button" id="sg_lnk" class="acoes-lnk" onClick="{H("sg_abrir")}" style="min-height: 28px; white-space: nowrap;">{H("sg_lnk")}</button></sc-if>'
-    s2=bloco('Talhões e cultivos',H('k2'),cult_html,desc_hole=True,acao=sg_lnk)   # sem botão: planeja-se pela linha do talhão (Planejar ›, Dividir, Vincular ciclo ›)
+    plt_lnk=f'<sc-if value="{H("plt_tem")}" hint-placeholder-val="{F()}"><button type="button" id="plt-abrir" class="acoes-lnk" aria-haspopup="dialog" onClick="{H("plt_abrir")}" style="min-height: 28px; white-space: nowrap;">Planejar talhões livres…</button></sc-if>'   # SAF-FAZ-3 (C)
+    s2=bloco('Talhões e cultivos',H('k2'),cult_html,desc_hole=True,acao=plt_lnk+sg_lnk)   # sem botão: planeja-se pela linha do talhão (Planejar ›, Dividir, Vincular ciclo ›)
     # etapa 3: título com o custo de operação e o link "Resumo da safra"; veredito (role=status) e, fora dele, a linha de capacidade;
     # g_cap recolhida; linha de filtro (só com recurso × mês escolhido); g_op por último (estica e só a área de dados rola)
     custo=(f'<span style="display: inline-flex; align-items: baseline; gap: 6px; flex-wrap: wrap; justify-content: flex-end; font-size: 12.8px; color: {MUTED};">'
            f'<span>Custo de operação <b style="color: {INK};">{H("v3_cop")}</b> · {H("v3_copq")}</span>'
            f'<button type="button" class="acoes-lnk" data-acao="resumo" onClick="{H("rs_abrir")}" style="min-height: 24px;">Resumo da safra</button></span>')
     linha_cap=(f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 0 4px 8px;">'
-               f'<sc-for list="{H("v3_atalhos")}" as="at" hint-placeholder-count="1"><button type="button" class="acoes-lnk" data-acao="atalho" aria-label="{H("at.al")}" onClick="{H("at.go")}" style="{H("at.st")}">{H("at.t")}</button></sc-for>'
                f'<span style="flex-grow: 1;"></span><button type="button" class="acoes-lnk" aria-expanded="{H("v3_capexp")}" onClick="{H("v3_captog")}">{H("v3_capt")}</button></div>')
     filtro=(f'<sc-if value="{H("v3_fil")}" hint-placeholder-val="{F()}"><div role="status" tabIndex="-1" id="saf-cap-filtro" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 0 4px 8px; font-size: 12.8px;">'
             f'<span>Mostrando <b>{H("v3_filn")}</b>: {H("v3_filt")}</span><button type="button" onClick="{H("v3_filx")}" style="{_MINI}">Ver todas</button></div></sc-if>')
-    corpo3=(f'<p id="saf-v3-ver" style="margin: 0 4px 8px; font-size: 13.4px; line-height: 1.45;"><span role="status" style="{H("v3_vst")}">{H("v3_ver")}</span></p>'
+    # 15/10/2026 (proprietário: "esses avisos e alertas deixe apenas dentro da tabela de forma visual, não fora dela"): o veredito fica para o
+    # leitor de tela (role=status, sem ocupar a tela) e os atalhos de recurso saíram; o recurso em falta aparece só como ⚠ na linha (dica com o mês)
+    corpo3=(f'<p id="saf-v3-ver" class="acoes-sr" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0;"><span role="status" style="{H("v3_vst")}">{H("v3_ver")}</span></p>'
             + linha_cap + f'<sc-if value="{H("v3_capab")}" hint-placeholder-val="{F()}"><div id="saf-cap" style="padding-bottom: 10px;">{cap_html}</div></sc-if>' + filtro + g_op)
     s3=bloco('Operações e recursos','',corpo3,acao=custo)
     s4=bloco('Demanda de insumos por grupo',H('k6'),g_dem,desc_hole=True,
                 acao=f'<span style="display: inline-flex; align-items: center; gap: 8px;"><sc-if value="{H("sol_link")}" hint-placeholder-val="{F()}"><a href="{H("sol_href")}" style="{_MINI} text-decoration: none;">Abrir em Compra de insumos ›</a></sc-if></span>')
-    corpo=PR.entrada()+''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{H("true") if i==1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}</div></sc-if>'
+    # SAF-FAZ-2: safra de várias fazendas mostra as fazendas dela; um toque troca de fazenda na mesma etapa (cada uma com a própria sub-safra)
+    # 16/10/2026 (proprietário: "abaixo de trabalhando em… em fazendas… não falta o símbolo do filtro que é nosso padrão?"): a faixa das fazendas
+    # usa a peça comum dos filtros (ui37.faixa_filtros: funil, rótulo e chips), não um desenho próprio; id e nome acessível continuam os mesmos
+    sg_chips=(f'<sc-for list="{H("sg_fz")}" as="fz" hint-placeholder-count="2"><button type="button" aria-pressed="{H("fz.on")}" aria-label="{H("fz.al")}" onClick="{H("fz.go")}" style="{_MINI} min-height: 36px;">{H("fz.t")}</button></sc-for>')
+    sg_faixa=(f'<sc-if value="{H("sg_tem")}" hint-placeholder-val="{F()}">'
+              + UI.faixa_filtros(UI.faixa_campo('Fazendas',sg_chips) + f'<span style="font-size: 12.5px; color: {MUTED}; flex: 1 1 220px;">{H("sg_res")}</span>',
+                                 fim=f'<sc-if value="{H("sg_env")}" hint-placeholder-val="{F()}"><button type="button" id="sg-env" onClick="{H("sg_envGo")}" style="{E.BTN_ST(False,True)}">{H("sg_envT")}</button></sc-if>')
+                .replace('<div class="mf-tela" role="group" aria-label="Filtros"','<div class="mf-tela" id="saf-fazendas" role="group" aria-label="Fazendas desta safra"',1)
+              + '</sc-if>')
+    EXTRA.append('<style>#saf-fazendas button[aria-pressed="true"]{background:#E4F3E9!important;border-color:#1E7A4C!important;color:#14532D!important;box-shadow:inset 0 0 0 1px #1E7A4C}</style>')   # a fazenda aberta, como o chip escolhido
+    corpo=sg_faixa+''.join(f'<sc-if value="{H("s"+str(i))}" hint-placeholder-val="{H("true") if i==1 else F()}"><div style="display: flex; flex-direction: column; gap: 14px;">{s}</div></sc-if>'
                   for i,s in enumerate([s1,s2,s3,s4],1)) + E.area_acoes('aa','Ações da etapa')
     # ---------- painel: Resumo da safra (§4.3) ----------
     rs_lin=(f'<div style="display: grid; grid-template-columns: minmax(0,1.2fr) 90px minmax(0,1fr) minmax(0,1fr) minmax(0,1.1fr); gap: 8px; padding: 7px 0; border-top: 1px solid {LINE}; font-size: 12.8px; align-items: baseline;">'
@@ -339,7 +369,7 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
       f'<div style="display: flex; gap: 10px; align-items: flex-start;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px; flex-grow: 1;">{H("lp_titulo")}</h2><button type="button" aria-label="Fechar" onClick="{H("lp_close")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED};">×</button></div>'
       f'<div style="font-size: 13px; color: {MUTED};">{H("lp_sub")}</div>'
       f'<sc-if value="{H("lp_hasInfo")}" hint-placeholder-val="{F()}"><sc-for list="{H("lp_info")}" as="q" hint-placeholder-count="1"><div style="font-size: 12.5px; color: {MUTED};">{H("q.t")} <a href="{H("q.h")}" style="color: {ACC}; font-weight: 700; text-decoration: none;">Ver laudo ›</a></div></sc-for></sc-if>'
-      f'<sc-if value="{H("lp_hasIncSug")}" hint-placeholder-val="{F()}"><sc-for list="{H("lp_incSug")}" as="q" hint-placeholder-count="1"><div class="so-sug" role="note" style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; padding: 8px 10px; border: 1px dashed {LINE}; border-radius: 10px; font-size: 12.5px; color: {MUTED}; line-height: 1.5;">'
+      f'<sc-if value="{H("lp_hasIncSug")}" hint-placeholder-val="{F()}"><sc-for list="{H("lp_incSug")}" as="q" hint-placeholder-count="1"><div class="so-sug" role="note" style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; padding: 8px 10px; background: {BG}; border-radius: 10px; font-size: 12.5px; color: {MUTED}; line-height: 1.5;">'
       f'<span>Análise sugere <b style="color: {INK};">{H("q.d")}</b> · {H("q.q")} ·</span><button type="button" id="{H("q.pqId")}" onClick="{H("q.pq")}" style="border: 0; background: transparent; padding: 0 2px; color: {ACC}; font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; min-height: 28px;">Por quê</button><span aria-hidden="true">·</span>'
       f'<button type="button" onClick="{H("q.go")}" style="border: 0; background: transparent; padding: 0 2px; color: {ACC}; font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; min-height: 28px;">{H("q.u")}</button></div></sc-for></sc-if>'
       f'<sc-if value="{H("lp_hasIncl")}" hint-placeholder-val="{F()}"><div style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase;">Incluída pela análise</div><sc-for list="{H("lp_incl")}" as="q" hint-placeholder-count="1">'
@@ -413,7 +443,64 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
     EXTRA.append(_overlay('sg_',1080,corpo_sg))
     EXTRA.append(porque_html())
     EXTRA.append('<style>@media (max-width:640px){.so-sug button{min-height:44px!important}.so-pan{padding:16px 14px!important}.so-pe{margin:0 -14px -16px!important;padding:12px 14px!important}.so-pe button{min-height:44px}}</style>')
+    # SAF-FAZ-3 (A): na faixa "Trabalhando em", as fazendas da safra em chips ✓ e "+ Fazenda" (etapas 1 e 2 com safra escolhida); sem safra, e nas
+    # etapas 3 e 4 (por fazenda), a fazenda em texto, como antes. A lista abre no lugar (popover do DS), com área e talhões de cada fazenda
+    lab=f'display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: {GRAYS}; font-weight: 700; font-size: 11.5px;'
+    sfz=(f'<sc-if value="{H("sfz_txt_on")}" hint-placeholder-val="{H("true")}"><span title="Fazenda da safra aberta" style="{lab}">{H("ctx_faz")}</span></sc-if>'
+         f'<sc-if value="{H("sfz_chips_on")}" hint-placeholder-val="{F()}"><span role="group" aria-label="Fazendas da safra" id="saf-fz" style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;">'
+         f'<sc-for list="{H("sfz_chips")}" as="fc" hint-placeholder-count="2"><button type="button" class="sfz-chip" aria-haspopup="dialog" aria-label="{H("fc.al")}" onClick="{H("fc.go")}" disabled="{H("fc.dis")}">{H("fc.t")}</button></sc-for>'
+         f'<sc-if value="{H("sfz_add")}" hint-placeholder-val="{F()}"><button type="button" id="sfz-add" class="sfz-add" aria-haspopup="dialog" aria-expanded="{H("sfz_exp")}" onClick="{H("sfz_abrir")}">+ Fazenda</button></sc-if></span></sc-if>')
+    EXTRA.append('<style>.sfz-chip,.sfz-add{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;min-height:var(--g2-alvo,30px);box-sizing:border-box;border-radius:999px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}'
+                 '.sfz-chip{border:1px solid #1E7A4C;background:#E4F3E9;color:#14532D}.sfz-chip:disabled{cursor:default}.sfz-add{border:1px dashed #8A968E;background:#FFFFFF;color:#1E7A4C}'
+                 '.sfz-chip:not(:disabled):hover,.sfz-add:hover{border-color:#1E7A4C;background:#D7EEDF}'
+                 '.ffz{display:inline-flex;border:1px solid #E4E9E5;border-radius:999px;overflow:hidden;background:#FFFFFF}'
+                 '.ffz button{border:0;background:transparent;padding:4px 11px;min-height:var(--g2-alvo,0px);font-family:inherit;font-size:12px;font-weight:700;color:#15201A;cursor:pointer;white-space:nowrap}'
+                 '.ffz button+button{border-left:1px solid #E4E9E5}.ffz button[aria-pressed="true"]{background:#1E7A4C;color:#FFFFFF}.ffz button[aria-pressed="false"]:hover{background:#E4F3E9}</style>')
+    EXTRA.append(
+      f'<sc-if value="{H("sfz_pop")}" hint-placeholder-val="{F()}"><div style="position: fixed; inset: 0; z-index: 70;">'
+      f'<button type="button" aria-label="Fechar a lista de fazendas" tabIndex="-1" onClick="{H("sfz_fechar")}" style="position: absolute; inset: 0; border: 0; background: transparent; cursor: default;"></button>'
+      f'<div role="dialog" id="sfz-pop" aria-label="Fazendas da safra" onKeyDown="{H("sfz_key")}" style="{H("sfz_pos")} position: fixed; max-height: 70vh; overflow-y: auto; box-sizing: border-box; background: #FFFFFF; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 12px 28px -12px rgba(21,32,26,.35); padding: 6px; display: flex; flex-direction: column; gap: 2px; z-index: 71;">'
+      f'<div style="padding: 6px 8px 4px; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; color: {MUTED}; text-transform: uppercase;">Fazendas da safra</div>'
+      f'<sc-for list="{H("sfz_ops")}" as="o" hint-placeholder-count="3"><label class="sfz-op" style="display: flex; align-items: flex-start; gap: 10px; min-height: 44px; box-sizing: border-box; padding: 7px 8px; border-radius: 8px; cursor: pointer;">'
+      f'<input type="checkbox" id="{H("o.id")}" checked="{H("o.on")}" onChange="{H("o.tog")}" style="width: 16px; height: 16px; accent-color: {ACC}; margin: 2px 0 0; flex-shrink: 0;">'
+      f'<span style="display: flex; flex-direction: column; gap: 1px; min-width: 0;"><b style="font-size: 13.5px; color: {INK};">{H("o.t")}</b><span style="font-size: 12px; color: {MUTED};">{H("o.sub")}</span>'
+      f'<sc-if value="{H("o.hasErr")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; color: {RED}; font-weight: 700; line-height: 1.4;">{H("o.err")}</span></sc-if></span></label></sc-for>'
+      f'<div style="display: flex; justify-content: flex-end; padding: 6px 4px 2px; border-top: 1px solid {LINE};"><button type="button" onClick="{H("sfz_fechar")}" style="{_MINI}">Fechar</button></div>'
+      f'</div></div></sc-if>')
+    EXTRA.append('<style>.sfz-op:hover{background:#F2F8F4}</style>')
+    # SAF-FAZ-3 (C): painel "Planejar talhões livres" — a escolha múltipla mora aqui (sem caixas na tabela, decisão de 13/10); cultura, plano e
+    # data uma vez para todos; um cultivo por talhão, pela regra do cultivo único
+    fld=lambda lab_,campo,k,ajuda='': (f'<div style="display: flex; flex-direction: column; gap: 4px;"><label for="plt_{k}" style="font-size: 12px; font-weight: 600; color: {MUTED};">{lab_}</label>{campo}'
+        + (f'<span style="font-size: 11.5px; color: {MUTED};">{ajuda}</span>' if ajuda else '')
+        + f'<sc-if value="{H("plt_he_"+k)}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; font-weight: 700; color: {RED};">{H("plt_e_"+k)}</span></sc-if></div>')
+    inp=f'font-family: inherit; font-size: 14px; padding: 9px 11px; border-radius: 10px; border: 1px solid {LINE}; background: #FFFFFF; color: {INK}; min-width: 0;'
+    EXTRA.append(
+      f'<sc-if value="{H("plt_open")}" hint-placeholder-val="{F()}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
+      f'<button type="button" aria-label="Fechar" onClick="{H("plt_fechar")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button>'
+      f'<aside role="dialog" aria-label="{H("plt_titulo")}" id="plt-painel" onKeyDown="{H("plt_key")}" style="position: relative; width: 560px; max-width: 100%; height: 100vh; overflow-y: auto; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;">'
+      f'<div style="display: flex; gap: 10px; align-items: flex-start;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px; flex-grow: 1;">{H("plt_titulo")}</h2><button type="button" aria-label="Fechar" onClick="{H("plt_fechar")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED};">×</button></div>'
+      f'<div style="font-size: 13px; color: {MUTED};">{H("plt_sub")}</div>'
+      f'<sc-if value="{H("plt_hasg")}" hint-placeholder-val="{F()}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">{H("plt_gerr")}</div></sc-if>'
+      f'<div style="display: flex; align-items: center; gap: 12px;"><span style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase; flex-grow: 1;">Talhões livres</span>'
+      f'<button type="button" class="acoes-lnk" onClick="{H("plt_todos")}" style="min-height: 28px;">Marcar todos</button><button type="button" class="acoes-lnk" onClick="{H("plt_nenhum")}" style="min-height: 28px;">Desmarcar</button></div>'
+      f'<sc-for list="{H("plt_grupos")}" as="g" hint-placeholder-count="2"><div role="group" aria-label="{H("g.cab")}" style="display: flex; flex-direction: column; gap: 6px;">'
+      f'<sc-if value="{H("g.multi")}" hint-placeholder-val="{F()}"><div style="font-size: 12.5px; font-weight: 800; color: {INK}; padding-top: 2px;">{H("g.cab")}</div></sc-if>'
+      f'<sc-for list="{H("g.itens")}" as="it" hint-placeholder-count="2"><label style="display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; min-height: 44px; box-sizing: border-box; border: 1px solid {LINE}; border-radius: 10px; cursor: pointer;">'
+      f'<input type="checkbox" id="{H("it.id")}" checked="{H("it.on")}" onChange="{H("it.tog")}" style="width: 16px; height: 16px; accent-color: {ACC}; margin: 2px 0 0; flex-shrink: 0;">'
+      f'<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0;"><b style="font-size: 13.5px;">{H("it.t")}</b><span style="font-size: 12.5px; color: {MUTED};">{H("it.txt")}</span>'
+      f'<sc-if value="{H("it.hasErr")}" hint-placeholder-val="{F()}"><span role="alert" style="font-size: 12px; color: {RED}; font-weight: 700; line-height: 1.4;">{H("it.err")}</span></sc-if></span></label></sc-for></div></sc-for>'
+      f'<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding-top: 6px; border-top: 1px solid {LINE};">'
+      + fld('Cultura',f'<select id="plt_cult" value="{H("plt_cult")}" onChange="{H("plt_setCult")}" style="{inp}"><sc-for list="{H("plt_cults")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select>','cult')
+      + fld('Variedade',f'<input id="plt_var" value="{H("plt_var")}" onChange="{H("plt_setVar")}" autoComplete="off" style="{inp}">','var')
+      + fld('Plano agronômico',f'<select id="plt_plano" value="{H("plt_plano")}" onChange="{H("plt_setPlano")}" style="{inp}"><sc-for list="{H("plt_planos")}" as="o" hint-placeholder-count="2"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select>','plano')
+      + fld('Plantio',f'<input type="date" id="plt_plantio" value="{H("plt_plantio")}" onChange="{H("plt_setPlantio")}" style="{inp}">','plantio',H('plt_pminT'))
+      + fld('Meta de produtividade',f'<span style="display: flex; align-items: center; gap: 6px;"><input id="plt_meta" inputMode="decimal" value="{H("plt_meta")}" onChange="{H("plt_setMeta")}" autoComplete="off" style="{inp} flex: 1 1 auto; width: 100%;"><span style="font-size: 12.5px; color: {MUTED}; white-space: nowrap;">{H("plt_un")}</span></span>','meta')
+      + f'</div><div style="flex-grow: 1;"></div>'
+      f'<div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};"><button type="button" onClick="{H("plt_fechar")}" style="{BTN_ST(False,True)}">Cancelar</button>'
+      f'<button type="button" id="plt-gravar" onClick="{H("plt_salvar")}" style="{BTN_ST(True,True)} {H("plt_btnSt")}">{H("plt_btn")}</button></div>'
+      f'</aside></div></sc-if>')
     HEIGHTS37[fname]=1500
     shell37('SAF','Planejar safra',corpo,fname=fname,subtitle='',
-            steps=steps_state(NOMES),primary_html=None,  # faixa só informa; avanço/retorno/primária na área de ações (UX-ACAO-UNICA-20261003)
-            ctx=(H('ctx_faz'),H('ctx_saf'),None),search=False)
+            steps=steps_state(NOMES),primary_html=None,  # cartão da faixa leva à etapa (15/10); avanço/retorno/primária também na área de ações
+            ctx=(H('ctx_faz'),H('ctx_saf'),None),search=False,mf_ini=sfz,
+            mf_fim='')   # 14/10/2026 (proprietário: "tire comparar versões do plano"): a entrada saiu da faixa; o painel (CONTROLE-02) segue no código   # na faixa "Trabalhando em": devolve ao Total a altura que a faixa nova tomou (L1 a 1440 × 1040; diagnóstico 13/10)

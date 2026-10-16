@@ -46,6 +46,41 @@ def rs(v,d=2): return 'R$ '+nf(v,d)
 
 # ---- Fertisul = F01 de dados2 ----
 FERT=next(f for f in D2.FORNECEDORES if f['id']=='F01')
+# Semente do portal: PT-06 e PT-07 compartilham organização, identidade e elegibilidade.
+FERT_USUARIOS={
+    'u1':dict(org='F01',nome='Marta Nunes',mail='marta@fertisul.com.br',papel='Administradora',ativo=True),
+    'u2':dict(org='F01',nome='Diego Prado',mail='diego@fertisul.com.br',papel='Comercial',ativo=True),
+    'u3':dict(org='F01',nome='Sônia Reis',mail='sonia@fertisul.com.br',papel='Financeiro',ativo=False),
+}
+def fert_usuario_valores(uid):
+    return {k:FERT_USUARIOS[uid][k] for k in ('nome','mail','papel')}
+
+def pt06_responsaveis():
+    return [u['nome'] for u in FERT_USUARIOS.values() if u['org']==FERT['id'] and u['ativo']]
+
+PT06_JS=r"""
+function pt06Check(gid,rows,r,d){
+  if(gid!=='g_co') return {};
+  if(!r || r.id!=='r2' || r.v.org!==PT06_ORG) return {resp:'A ação deve pertencer à Fertisul. Reabra pela região de origem.'};
+  if(!PT06_USUARIOS.some(u=>u.org===PT06_ORG&&u.ativo&&u.nome===d.resp))
+    return {resp:'Escolha uma pessoa ativa da Fertisul.'};
+  return {};
+}
+function PREVALS(self,v){
+  v.pt06_acao=()=>g2open(self,GRIDS.find(g=>g.id==='g_co'),'r2');
+}
+function EXTRAVALS(self,v){
+  self.g2check=pt06Check;
+  self.g2formSub=(gid,r)=>gid==='g_co'&&r&&r.id==='r1'?'Cobertura calculada — consulte a origem abaixo.':'';
+  self.g2after=(gid,rows,r)=>{ if(gid!=='g_co'||!r) return;
+    r.p.acao=[{k:'act',t:'Revisar ação interna',fn:'pt06_acao'},{k:'br'},
+      {k:'txt',t:r.v.tema},{k:'br'},{k:'mut',t:r.v.resp+' · '+r.v.prazo}];
+    g2set(self,gid,{rows});
+    self.setState({g2toast:'Ação interna registrada nesta demonstração · '+r.v.resp+' · sem envio externo.'});
+  };
+}
+"""
+
 PROP=next(p for p in D2.PROPOSTAS['Fertilizantes'] if p['f']=='F01')
 SOL=D2.SOL_INICIAL
 SOL_IT=[(n,o) for n,o in D2.sol_itens().items() if o['grupo']=='Fertilizantes']
@@ -172,12 +207,13 @@ def pt02():
           acao=[Pt.act('Baixar comprovante','Comprovante da v2 (PDF) · motivo agregado da não seleção: condição comercial — sem proposta concorrente nem dado reservado.')]),
       ],edit=dict(m='ro',title='Cotação'),search=False,total=False,gid='g_cot')
     corpo=section('Minhas cotações','Abra a cotação para revisar sua proposta; outros fornecedores nunca aparecem aqui.','',
-        g+nota('Cada versão submetida fica preservada — revisar antes do prazo cria nova versão; motivo de não seleção é agregado.'))
+        g)
     shell37('PT-02','Cotações concedidas',corpo,ctx=CTX_F,perfil=PERFIL_F,
       subtitle='Você responde pelo convite recebido — o dossiê mostra só o que foi concedido, com finalidade e prazo de acesso.',
       status=('1 aberta · revisa até '+COT['revisa'],'yellow'),
       primary='Abrir proposta '+COT['sol'],primary_href='PT-02det.dc.html',
-      footer=f"Convite nasce da correspondência categoria/cultura/região do seu perfil (57.4.2); acesso ao dossiê da {COT['sol']} expira em {COT['acesso']}.")
+      footer=f"Convite nasce da correspondência categoria/cultura/região do seu perfil (57.4.2); acesso ao dossiê da {COT['sol']} expira em {COT['acesso']}. "
+             "Cada versão submetida fica preservada: revisar antes do prazo cria nova versão; motivo de não seleção é agregado.")
 
 # ---- PT-02det · dossiê + proposta da SOL-2026-07 · Fertilizantes ----
 def pt02det():
@@ -395,13 +431,13 @@ def pt05det():
     corpo=(continuity('Negócios e documentos',f"PC-088 · {CT['recebido']} t recebidas",f"NF-e da carga 3 ({CT['prev3']}) · laudo até {CT['laudo']}",'Enviar documento da carga 3')
       +section('Entregas','Clique na carga liberada para atualizar data prevista e placa.','',
         stepper([('Cotação respondida','done'),('Proposta selecionada','done'),('Pedido confirmado','done'),('Entrega e documentos','now'),('Recebimento','todo'),('Pagamento','todo')],
-                'Entregue dentro da janela com NF-e e laudo por carga — recusa no recebimento abre divergência, não devolve ao estoque apto.')
+                'Entregue dentro da janela com NF-e e laudo por carga')
         +'<div style="height: 12px;"></div>'+cg,state='yellow')
       +section('Documentos','Envie NF-e e laudo de cada carga; o comprador confere no recebimento.',[div],dc)
       +section('Condição aceita','Confira a condição acordada; mudar exige novo aceite do comprador.','',cond,state='gray'))
     shell37('PT-05',f"Negócio · {CT['id']} KCl 60%",corpo,fname=fname,ctx=CTX_F,perfil=PERFIL_F,
       crumbs_extra=['PC-088'],status=('Carga 3 a entregar · NF-e pendente','yellow'),primary_html=env,
-      footer='Revisão de pedido preserva versões e exige novo aceite; recusa no recebimento não recoloca produto em estoque apto (FO-35).')
+      footer='Revisão de pedido preserva versões e exige novo aceite; recusa no recebimento abre divergência e não recoloca produto em estoque apto (FO-35).')
 
 # ============ PT-06 · Indicadores do parceiro (Fertisul) ============
 def pt06():
@@ -417,13 +453,16 @@ def pt06():
         R('f4',v=dict(e='Negócios concluídos',q=FUNIL['concl'],val=FUNIL['concl_valor']),conv=[Pt.txt(pct(FUNIL['concl'],FUNIL['ganhos'])+' · 1 em execução')],
           o=[('Abrir negócios próprios','PT-05.dc.html')]),
       ],edit=dict(m='origin',title='Etapa do funil',fields=[F('e','Etapa',ro=True),F('q','Quantidade','num',ro=True)]),search=False,total=False,gid='g_fu')
-    acao=drawer_part('Criar ação interna',dict(title='Ação interna da Fertisul',sub='fica só na sua organização — não chega ao produtor',
-            fields=[('Tema','revisar condição comercial no Triângulo MG'),('Responsável','Diego Prado'),('Prazo','15/10/2026')],confirm='Criar ação',done='Ação interna criada · visível só para a Fertisul'))
+    acao={'k':'act','t':'Criar ação interna','fn':'pt06_acao'}
     co=grid([C('reg','Categoria · região',w=300),C('conv','Convites',t='num',a='r'),C('gan','Ganhos',t='num',a='r'),C('rec','Receita própria',t='num',a='r',pre='R$ ',zdash=True),C('cob','Cobertura'),C('acao','Ação')],[
-        R('r1',v=dict(reg='Fertilizantes e corretivos · Sudoeste GO',conv=11,gan=FUNIL['ganhos'],rec=FUNIL['concl_valor']),cob=ch('Região principal','green'),acao=[Pt.mut('—')],
+        R('r1',ro=True,v=dict(reg='Fertilizantes e corretivos · Sudoeste GO',conv=11,gan=FUNIL['ganhos'],rec=FUNIL['concl_valor']),cob=ch('Região principal','green'),acao=[Pt.mut('—')],
           o=[(f"Receita própria = negócios concluídos; o {CT['id']} entra quando concluir",None)]),
-        R('r2',v=dict(reg='Fertilizantes e corretivos · Triângulo MG',conv=3,gan=0,rec=0),cob=ch('Sem ganho no período','gray'),acao=[acao]),
-      ],edit=dict(m='origin',title='Cobertura',fields=[F('reg','Categoria · região',ro=True)]),search=False,total=False,gid='g_co')
+        R('r2',v=dict(reg='Fertilizantes e corretivos · Triângulo MG',conv=3,gan=0,rec=0,org=FERT['id'],tema='',resp='',prazo=''),cob=ch('Sem ganho no período','gray'),acao=[acao]),
+      ],edit=dict(m='form',title='Ação interna da Fertisul',sub='Registre a ação para esta região. Demonstração local; nada é enviado ao produtor.',
+        fields=[F('reg','Categoria · região',ro=True),
+                F('tema','Tema',req=True,cond=dict(k='reg',eq='Fertilizantes e corretivos · Triângulo MG')),
+                F('resp','Responsável','sel',req=True,opts=pt06_responsaveis(),cond=dict(k='reg',eq='Fertilizantes e corretivos · Triângulo MG')),
+                F('prazo','Prazo','date',req=True,cond=dict(k='reg',eq='Fertilizantes e corretivos · Triângulo MG'))]),search=False,total=False,gid='g_co')
     ag=grid([C('i','Indicador agregado',w=380),C('p','Sua posição'),C('n','Amostra'),C('s','Situação')],[
         R('a1',i='Preço mediano de fertilizantes NPK · Sudoeste GO',p='−2% vs. mediana',n='n = 17',s=ch('Publicado','green'),o=[('Mediana de 17 propostas de 9 fornecedores, com consentimento',None)]),
         R('a2',i='Prazo médio de entrega · Triângulo MG',p='—',n='n < 10',s=ch('Suprimido · amostra pequena','gray'),o=[('Amostra menor que 10: suprimido para não identificar fazenda',None)]),
@@ -436,6 +475,7 @@ def pt06():
       +section('Funil próprio','Clique na etapa para ver de onde vem cada número.',[exp],fu)
       +section('Origem e cobertura','Compare regiões e crie ações internas onde não há ganho.','',co)
       +section('Agregados protegidos','Consulte o benchmark publicado; amostra pequena fica suprimida.','',ag,state='gray'))
+    EXTRAJS[0]='const PT06_ORG='+json.dumps(FERT['id'])+';\nconst PT06_USUARIOS='+json.dumps(list(FERT_USUARIOS.values()),ensure_ascii=False)+';\n'+PT06_JS
     shell37('PT-06','Indicadores',corpo,ctx=CTX_F,perfil=PERFIL_F,
       subtitle='Últimos 12 meses · indicadores próprios e, quando contratado, agregados com proteção contra reidentificação.',
       footer='Filtros de amostras pequenas não permitem inferir fazenda individual; benchmark entre clientes exige governança e consentimentos aplicáveis.')
@@ -460,11 +500,11 @@ def pt07():
                   fields=[F('tipo','Aviso',ro=True),F('canal','Canal','sel',req=True,opts=['Portal','Portal + e-mail','Portal + WhatsApp','Portal + e-mail + WhatsApp'])]),
         search=False,total=False,gid='g_pref')
     us=grid([C('nome','Usuário',w=180),C('mail','E-mail',w=220),C('papel','Papel'),C('sit','Situação'),C('acao','Ação')],[
-        R('u1',ro=True,v=dict(nome='Marta Nunes',mail='marta@fertisul.com.br',papel='Administradora'),sit=ch('Ativa','green'),acao=[Pt.mut('você')],
+        R('u1',ro=True,v=fert_usuario_valores('u1'),sit=ch('Ativa','green'),acao=[Pt.mut('você')],
           o=[('A administradora gere usuários; o próprio papel muda só com outra administradora',None)]),
-        R('u2',v=dict(nome='Diego Prado',mail='diego@fertisul.com.br',papel='Comercial'),sit=ch('Ativo','green'),
+        R('u2',v=fert_usuario_valores('u2'),sit=ch('Ativo','green'),
           acao=[Pt.act('Revogar acesso','Acesso de Diego revogado imediatamente · sessões encerradas · registro no histórico do parceiro.',u=True)]),
-        R('u3',v=dict(nome='Sônia Reis',mail='sonia@fertisul.com.br',papel='Financeiro'),sit=ch('Convite pendente','yellow'),
+        R('u3',v=fert_usuario_valores('u3'),sit=ch('Convite pendente','yellow'),
           acao=[Pt.act('Reenviar convite','Convite reenviado a Sônia · expira em 7 dias'+SIM+'.')]),
       ],edit=dict(m='form',title='Usuário',newTitle='Convidar usuário',sub='O papel limita o que a pessoa vê e faz no portal; o convite expira em 7 dias.',
                   fields=[F('nome','Nome',req=True),F('mail','E-mail','email',req=True),F('papel','Papel','sel',req=True,opts=['Administradora','Comercial','Financeiro','Logística'],default='Comercial')]),

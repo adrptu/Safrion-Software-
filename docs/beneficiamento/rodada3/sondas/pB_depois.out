@@ -1,0 +1,426 @@
+{
+ "passos": [
+  {
+   "n": "(1) após estorno",
+   "est": {
+    "etapa": "Em execução",
+    "kgAberto": "2300",
+    "usoMax": 230,
+    "sobra": 0,
+    "falta": 139,
+    "livreTot": 1710,
+    "selos": [
+     "Faltam 139 caixas"
+    ],
+    "prox": "Enviar para conferência",
+    "nota": "O que não foi registrado (2.300 kg) vira diferença na conferência. Faltam 139 caixas para os 2.300 kg em processo (30 un em custódia, 0 un a entregar): Pedir mais caixas."
+   },
+   "A": [
+    {
+     "rid": "REQ-041",
+     "lote": "CX26-02",
+     "sol": 1169,
+     "ent": 1169,
+     "cust": 30,
+     "cons": 1000,
+     "dev": 139,
+     "disp": 139,
+     "pend": 0
+    }
+   ],
+   "V": []
+  },
+  {
+   "n": "(1) após pedir 9",
+   "est": {
+    "etapa": "Em execução",
+    "kgAberto": "2300",
+    "usoMax": 230,
+    "sobra": 0,
+    "falta": 130,
+    "livreTot": 1701,
+    "selos": [
+     "Faltam 130 caixas"
+    ],
+    "prox": "Enviar para conferência",
+    "nota": "O que não foi registrado (2.300 kg) vira diferença na conferência. Faltam 130 caixas para os 2.300 kg em processo (30 un em custódia, 9 un a entregar): Pedir mais caixas."
+   },
+   "A": [
+    {
+     "rid": "REQ-041",
+     "lote": "CX26-02",
+     "sol": 1178,
+     "ent": 1169,
+     "cust": 30,
+     "cons": 1000,
+     "dev": 139,
+     "disp": 139,
+     "pend": 9
+    }
+   ],
+   "V": []
+  },
+  {
+   "n": "(1) após pedir 9+130 = 139",
+   "est": {
+    "etapa": "Em execução",
+    "kgAberto": "2300",
+    "usoMax": 230,
+    "sobra": 0,
+    "falta": 0,
+    "livreTot": 1571,
+    "selos": [],
+    "prox": "Enviar para conferência",
+    "nota": "O que não foi registrado (2.300 kg) vira diferença na conferência."
+   },
+   "A": [
+    {
+     "rid": "REQ-041",
+     "lote": "CX26-02",
+     "sol": 1308,
+     "ent": 1169,
+     "cust": 30,
+     "cons": 1000,
+     "dev": 139,
+     "disp": 139,
+     "pend": 139
+    }
+   ],
+   "V": []
+  },
+  {
+   "n": "(1) após pedir a nova sugestão",
+   "est": {
+    "etapa": "Em execução",
+    "kgAberto": "2300",
+    "usoMax": 230,
+    "sobra": 0,
+    "falta": 0,
+    "livreTot": 1571,
+    "selos": [],
+    "prox": "Enviar para conferência",
+    "nota": "O que não foi registrado (2.300 kg) vira diferença na conferência."
+   },
+   "A": [
+    {
+     "rid": "REQ-041",
+     "lote": "CX26-02",
+     "sol": 1308,
+     "ent": 1169,
+     "cust": 30,
+     "cons": 1000,
+     "dev": 139,
+     "disp": 139,
+     "pend": 139
+    }
+   ],
+   "V": []
+  },
+  {
+   "n": "(2) após avaria",
+   "est": {
+    "etapa": "Em execução",
+    "kgAberto": "7300",
+    "usoMax": 730,
+    "sobra": 0,
+    "falta": 50,
+    "livreTot": 1571,
+    "selos": [
+     "Faltam 50 caixas"
+    ],
+    "prox": "Enviar para conferência",
+    "nota": "O que não foi registrado (7.300 kg) vira diferença na conferência. Faltam 50 caixas para os 7.300 kg em processo (619 un em custódia, 0 un a entregar): Pedir mais caixas."
+   },
+   "A": [
+    {
+     "rid": "REQ-041",
+     "lote": "CX26-02",
+     "sol": 1169,
+     "ent": 1169,
+     "cust": 619,
+     "cons": 500,
+     "dev": 50,
+     "disp": 50,
+     "pend": 0
+    }
+   ],
+   "cx02": [
+    81,
+    50,
+    0,
+    0
+   ],
+   "V": []
+  },
+  {
+   "n": "(2) após pedir 50",
+   "est": {
+    "etapa": "Em execução",
+    "kgAberto": "7300",
+    "usoMax": 730,
+    "sobra": 0,
+    "falta": 0,
+    "livreTot": 1521,
+    "selos": [],
+    "prox": "Enviar para conferência",
+    "nota": "O que não foi registrado (7.300 kg) vira diferença na conferência."
+   },
+   "A": [
+    {
+     "rid": "REQ-041",
+     "lote": "CX26-02",
+     "sol": 1169,
+     "ent": 1169,
+     "cust": 619,
+     "cons": 500,
+     "dev": 50,
+     "disp": 50,
+     "pend": 0
+    },
+    {
+     "rid": "REQ-042",
+     "lote": "CX26-01",
+     "sol": 50,
+     "ent": 0,
+     "cust": 0,
+     "cons": 0,
+     "dev": 0,
+     "disp": 0,
+     "pend": 50
+    }
+   ],
+   "V": []
+  },
+  {
+   "n": "(2) após entregar as 50",
+   "est": {
+    "etapa": "Em execução",
+    "kgAberto": "7300",
+    "usoMax": 730,
+    "sobra": 0,
+    "falta": 0,
+    "livreTot": 1521,
+    "selos": [],
+    "prox": "Enviar para conferência",
+    "nota": "O que não foi registrado (7.300 kg) vira diferença na conferência."
+   },
+   "A": [
+    {
+     "rid": "REQ-041",
+     "lote": "CX26-02",
+     "sol": 1169,
+     "ent": 1169,
+     "cust": 619,
+     "cons": 500,
+     "dev": 50,
+     "disp": 50,
+     "pend": 0
+    },
+    {
+     "rid": "REQ-042",
+     "lote": "CX26-01",
+     "sol": 50,
+     "ent": 50,
+     "cust": 50,
+     "cons": 0,
+     "dev": 0,
+     "disp": 0,
+     "pend": 0
+    }
+   ],
+   "V": []
+  },
+  {
+   "n": "(2) após usar as 669",
+   "est": {
+    "etapa": "Em execução",
+    "kgAberto": "610",
+    "usoMax": 61,
+    "sobra": 0,
+    "falta": 0,
+    "livreTot": 1521,
+    "selos": [],
+    "prox": "Enviar para conferência",
+    "nota": "O que não foi registrado (610 kg) vira diferença na conferência."
+   },
+   "A": [
+    {
+     "rid": "REQ-041",
+     "lote": "CX26-02",
+     "sol": 1169,
+     "ent": 1169,
+     "cust": 0,
+     "cons": 1119,
+     "dev": 50,
+     "disp": 50,
+     "pend": 0
+    },
+    {
+     "rid": "REQ-042",
+     "lote": "CX26-01",
+     "sol": 50,
+     "ent": 50,
+     "cust": 0,
+     "cons": 50,
+     "dev": 0,
+     "disp": 0,
+     "pend": 0
+    }
+   ],
+   "V": []
+  },
+  {
+   "n": "(3) lote após reprovar",
+   "cx02": [
+    81,
+    50,
+    0,
+    50
+   ],
+   "quar": [],
+   "V": []
+  },
+  {
+   "n": "(3) recomendação da OB-0112",
+   "V": []
+  },
+  {
+   "n": "(3) seguir",
+   "r": "O lote CX26-02 só tem material reprovado (laudo LAUDO-REP-1 50 un): ele fica segregado para a devolução ao fornecedor, não volta ao disponível.",
+   "V": []
+  }
+ ],
+ "log": [
+  {
+   "nome": "NF 7731 1200",
+   "ok": true,
+   "msg": "1.200 un de Caixa de mamão Formosa 10 kg recebidos no lote CX26-02 (Packing)."
+  },
+  {
+   "nome": "nova L39-132",
+   "ok": true,
+   "msg": "OB-0113 criada (A liberar): PACK-FRU v3 · L39-132 · 12.300 kg · 1.169 un de caixa (sugestão confirmada) · fruta da Lagoa Grande processada na Packing linha 1 · Packing (Santa Rita). Próximo passo: Autorizar rota e liberar."
+  },
+  {
+   "nome": "liberar A",
+   "ok": true,
+   "msg": "OB-0113 v1 autorizada (CMD-42) e liberada (CMD-06) por Igor (responsável de produção): REQ-041 reservou 1.169 un de Caixa de mamão Formosa 10 kg; entradas reservadas à ordem. O Estoque entrega as caixas no balcão."
+  },
+  {
+   "nome": "entregar A",
+   "ok": true,
+   "msg": "1.169 un de Caixa de mamão Formosa 10 kg entregues a Igor (OB-0113). Recebidas no balcão (o beneficiamento não confirma no app)."
+  },
+  {
+   "nome": "iniciar A",
+   "ok": true,
+   "msg": "OB-0113 em execução: registre as saídas pesadas (produto com caixas e bruto, descarte, outro destino e perda identificada)."
+  },
+  {
+   "nome": "NF-Y 1000 CX26-01",
+   "ok": true,
+   "msg": "1.000 un de Caixa de mamão Formosa 10 kg recebidos no lote CX26-01 (Packing)."
+  },
+  {
+   "nome": "A: Produto 1000",
+   "ok": true,
+   "msg": "S-01 registrada na OB-0113: Produto A · 1000 cx · bruto 10.600 kg − tara 600 kg = 10.000 kg → L39-133."
+  },
+  {
+   "nome": "A: descarte 2000",
+   "ok": true,
+   "msg": "S-02 registrada na OB-0113: Descarte · Compostagem · 2.000 kg."
+  },
+  {
+   "nome": "A: devolver sobra 139",
+   "ok": true,
+   "msg": "139 un de Caixa de mamão Formosa 10 kg devolvidos ao disponível."
+  },
+  {
+   "nome": "A: estornar descarte",
+   "ok": true,
+   "msg": "S-02 estornado: Pesagem refeita · diferença 300 kg (2,44 %) → 2.300 kg (18,70 %)."
+  },
+  {
+   "nome": "A: pedir 9",
+   "ok": true,
+   "msg": "9 un de Caixa de mamão Formosa 10 kg pedidas para a OB-0113: REQ-041 com 1.178 un. Rui (almoxarife) ou Paula (almoxarife) entrega no balcão (Estoque › Entregue por O.S.)."
+  },
+  {
+   "nome": "A: pedir 130",
+   "ok": true,
+   "msg": "130 un de Caixa de mamão Formosa 10 kg pedidas para a OB-0113: REQ-041 com 1.308 un. Rui (almoxarife) ou Paula (almoxarife) entrega no balcão (Estoque › Entregue por O.S.)."
+  },
+  {
+   "nome": "A: pedir a sugestão 0",
+   "ok": false,
+   "msg": "Caixas: número inteiro de unidades (ao menos 1)."
+  },
+  {
+   "nome": "NF 7731 1200",
+   "ok": true,
+   "msg": "1.200 un de Caixa de mamão Formosa 10 kg recebidos no lote CX26-02 (Packing)."
+  },
+  {
+   "nome": "nova L39-132",
+   "ok": true,
+   "msg": "OB-0113 criada (A liberar): PACK-FRU v3 · L39-132 · 12.300 kg · 1.169 un de caixa (sugestão confirmada) · fruta da Lagoa Grande processada na Packing linha 1 · Packing (Santa Rita). Próximo passo: Autorizar rota e liberar."
+  },
+  {
+   "nome": "liberar A",
+   "ok": true,
+   "msg": "OB-0113 v1 autorizada (CMD-42) e liberada (CMD-06) por Igor (responsável de produção): REQ-041 reservou 1.169 un de Caixa de mamão Formosa 10 kg; entradas reservadas à ordem. O Estoque entrega as caixas no balcão."
+  },
+  {
+   "nome": "entregar A",
+   "ok": true,
+   "msg": "1.169 un de Caixa de mamão Formosa 10 kg entregues a Igor (OB-0113). Recebidas no balcão (o beneficiamento não confirma no app)."
+  },
+  {
+   "nome": "iniciar A",
+   "ok": true,
+   "msg": "OB-0113 em execução: registre as saídas pesadas (produto com caixas e bruto, descarte, outro destino e perda identificada)."
+  },
+  {
+   "nome": "NF-Y 1000 CX26-01",
+   "ok": true,
+   "msg": "1.000 un de Caixa de mamão Formosa 10 kg recebidos no lote CX26-01 (Packing)."
+  },
+  {
+   "nome": "A: Produto 500",
+   "ok": true,
+   "msg": "S-01 registrada na OB-0113: Produto A · 500 cx · bruto 5.300 kg − tara 300 kg = 5.000 kg → L39-133."
+  },
+  {
+   "nome": "A: devolver 50 avariadas",
+   "ok": true,
+   "msg": "50 un de Caixa de mamão Formosa 10 kg devolvidos e bloqueados para inspeção: 50 un estavam em uso e continuam da OB-0113 (se o laudo aprovar, voltam reservadas a ela)."
+  },
+  {
+   "nome": "A: pedir 50",
+   "ok": true,
+   "msg": "50 un de Caixa de mamão Formosa 10 kg pedidas para a OB-0113 no CX26-01 (o CX26-02 da REQ-041 tinha 31 un livres: requisição própria, a devolução volta a cada lote): REQ-042 com 50 un. Rui (almoxarife) ou Paula (almoxarife) entrega no balcão (Estoque › Entregue por O.S.)."
+  },
+  {
+   "nome": "entregar REQ-042 50",
+   "ok": true,
+   "msg": "50 un de Caixa de mamão Formosa 10 kg entregues a Igor (OB-0113). Recebidas no balcão (o beneficiamento não confirma no app)."
+  },
+  {
+   "nome": "A: Produto 669",
+   "ok": true,
+   "msg": "S-02 registrada na OB-0113: Produto B · 669 cx · bruto 7.091,4 kg − tara 401,4 kg = 6.690 kg → L39-134 · caixas 619 un do CX26-02 (REQ-041) + 50 un do CX26-01 (REQ-042)."
+  },
+  {
+   "nome": "Ana reprova a quarentena do CX26-02",
+   "ok": true,
+   "msg": "50 un do lote CX26-02 reprovados com o laudo LAUDO-REP-1 por Ana (gestora) (caixas quebradas): ficam segregados para a devolução ao fornecedor e a falta deixa de ser condicionada."
+  },
+  {
+   "nome": "seguir a fonte quarentena (laudo que libera)",
+   "ok": false,
+   "msg": "O lote CX26-02 só tem material reprovado (laudo LAUDO-REP-1 50 un): ele fica segregado para a devolução ao fornecedor, não volta ao disponível."
+  }
+ ],
+ "violacoes": []
+}

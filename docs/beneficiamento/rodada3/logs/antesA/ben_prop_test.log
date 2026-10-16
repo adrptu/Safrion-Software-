@@ -1,0 +1,18 @@
+OK    U53a I-d2 · devolução guiada da sobra sem "a entregar" fantasma
+OK    U53b I-a3 · a devolução guiada não tira caixa em uso
+OK    U53c I-b1 · livre total de dois lotes
+OK    U53d I-a4 · Encerradas sem custódia, a entregar nem reserva
+OK    U53e I-e4 · reserva do lote = reserva própria das linhas abertas (Fechar baixa)
+OK    U53f I-b3 · Pedir mais caixas aceito com o livre total
+OK    U53g I-a1 · sobra em conferência pelo kg aberto
+FALHA U53h I-f5 · pedir a falta sugerida a baixa (revisão A1) · [{"passo": 9, "inv": "I-a3", "info": [{"k": "devolver", "rid": "REQ-041", "q": 639, "apto": false}, "bloqueada: perdeu caixa em uso"]}, {"passo": 10, "inv": "I-f5", "info": [{"k": "pedir", "o": "OB-0114", "n": "falta"}, 639, 639, 149]}]
+FALHA U53i I-a3 · caixa em uso devolvida bloqueada continua da ordem (revisão A2) · [{"passo": 3, "inv": "I-a3", "info": [{"k": "devolver", "rid": "REQ-030", "q": 7, "apto": false}, "bloqueada: perdeu caixa em uso"]}]
+FALHA U53j I-f6 · quarentena reprovada não é fonte (revisão A3) · [{"passo": 2, "inv": "I-f6", "info": ["OB-0113", {"tipo": "quarentena", "lote": "CX26-01", "key": "Caixa de mamão Formosa 10 kg|CX26-01", "qtd": 22, "quem": "Ana (gestora)"}, 0]}]
+FALHA I-f6 semente 20261010004 passo 14 ["OB-0116", {"tipo": "quarentena", "lote": "CX26-01", "key": "Caixa de mamão Formosa 10 kg|CX26-01", "qtd": 22, "quem": "Ana (gestora)"}, 0] 
+  trilha mínima: [{"k": "devolver", "rid": "REQ-030", "q": 22, "apto": false}, {"k": "reprovar", "key": "Caixa de mamão Formosa 10 kg|CX26-01"}, {"k": "criar", "lote": "L38-132"}]
+FALHA I-a3 semente 20261010018 passo 26 [{"k": "devolver", "rid": "REQ-030", "q": 7, "apto": false}, "bloqueada: perdeu caixa em uso"] 
+  trilha mínima: [{"k": "criar", "lote": "L38-132"}, {"k": "seguirRec", "o": "OB-0113"}, {"k": "estornar", "o": "OB-0110", "i": 4}, {"k": "devolver", "rid": "REQ-030", "q": 7, "apto": false}]
+FALHA I-f1 semente 20261010116 passo 20 [{"k": "seguirRec", "o": "OB-0116"}, "cobre e não libera"] 
+  trilha mínima: [{"k": "cancelar", "o": "OB-0112"}, {"k": "criar", "lote": "L39-132"}, {"k": "criar", "lote": "L39-117", "cx": 2264}, {"k": "criar", "lote": "L39-118", "cx": 2026}, {"k": "criar", "lote": "L38-132"}, {"k": "nf", "lote": "QA-CX-03", "doc": "NF-P53", "apto": 116, "quar": 173}, {"k": "reprovar", "key": "Caixa de mamão Formosa 10 kg|QA-CX-03"}, {"k": "nf", "lote": "QA-CX-03", "doc": "NF-P3", "apto": 828, "quar": 0}, {"k": "seguirRec", "o": "OB-0116"}]
+COBERTURA dos seis do aceite: faltou I-a1, I-d2, I-e4, I-b1, I-a4 · ['I-f6', 'I-a3', 'I-f1']
+RESULTADO: FALHOU 360 sequências × 35 passos; 10 casos fixos · invariantes violados: I-f6, I-a3, I-f1

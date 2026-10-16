@@ -263,7 +263,8 @@ const OS_COM = (c, id, etapa, keys) => { c.ordens[id] = { id, etapa, ins: [], os
   const ls = soloLaudos(c, SOLO0); ok('ME laudo por zona não é o vigente (T4, 0–20 e 20–40)', !soloVigente(ls, 'Santa Rita', 'T4', '0–20') && !soloVigente(ls, 'Santa Rita', 'T4', '20–40'));
   ok('MF o vigente confere a fazenda (T1 da Lagoa Grande não usa o LAU-2061 da Santa Rita)', !soloVigente(ls, 'Lagoa Grande', 'T1', '0–20') && (soloVigente(ls, 'Santa Rita', 'T1', '0–20') || {}).id === 'LAU-2061'); }
 { const S2 = Object.assign(cenClone(SOLO0), { hoje: '2027-10-01' }); const ls = soloLaudos(NOVO(), S2); const st = id => ls.find(l => l.id === id).sit;
-  ok('MH talhão irrigado vale 12 meses: em 01/10/2027 o LAU-2071 (Pivô 12) está Vencido e o LAU-2061 (T1, sequeiro) segue Validado', st('LAU-2071') === 'Vencido' && st('LAU-2061') === 'Validado', [st('LAU-2071'), st('LAU-2061')]);
+  ok('MH talhão irrigado também vale 24 meses (DEC-1610-04): em 01/10/2027 o LAU-2071 (Pivô 12, coleta 15/09/2026) e o LAU-2061 (T1, sequeiro) seguem Validado', st('LAU-2071') === 'Validado' && st('LAU-2061') === 'Validado', [st('LAU-2071'), st('LAU-2061')]);
+  const S4 = Object.assign(cenClone(SOLO0), { hoje: '2028-10-01' }); ok('MH2 irrigado passa de 24 meses: em 01/10/2028 o LAU-2071 está Vencido', soloLaudos(NOVO(), S4).find(l => l.id === 'LAU-2071').sit === 'Vencido');
   const S3 = Object.assign(cenClone(SOLO0), { hoje: '2028-10-01' }); ok('MG em 01/10/2028 o LAU-2061 passou de 24 meses: Vencido e sem sugestão', soloLaudos(NOVO(), S3).find(l => l.id === 'LAU-2061').sit === 'Vencido'
     && soloSugestoes(soloCtxBase(NOVO(), S3), soloCultivoBase(S3, S3.cult.find(x => x.id === 'c1'))).sug.length === 0); }
 { const S1 = cenClone(SOLO0); S1.planos['SOJA-AT'].cultura = 'Milho'; S1.cult.find(x => x.id === 'c1').cultura = 'Milho';

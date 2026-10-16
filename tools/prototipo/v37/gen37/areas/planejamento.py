@@ -68,8 +68,9 @@ def _nota(txt,state=None):
     bd=f'border-left: 3px solid {YEL}; padding-left: 12px;' if state=='yellow' else ''
     return f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.6; {bd}">{txt}</div>'
 def _ficha(pares):   # ficha de leitura (pares rótulo → valor): não é lista de registros, por isso não é grade
-    return ''.join(f'<div style="display: grid; grid-template-columns: 220px 1fr; gap: 12px; padding: 9px 2px; border-top: {"0" if i==0 else "1px solid "+LINE}; font-size: 13px; line-height: 1.5;">'
-                   f'<div style="color: {MUTED}; font-weight: 600;">{esc(k)}</div><div>{v}</div></div>' for i,(k,v) in enumerate(pares))
+    # SEP-20261015 (e): pares separados pelo espaço, sem linha entre eles
+    return ''.join(f'<div style="display: grid; grid-template-columns: 220px 1fr; gap: 12px; padding: 5px 2px; font-size: 13px; line-height: 1.5;">'
+                   f'<div style="color: {MUTED}; font-weight: 600;">{esc(k)}</div><div>{v}</div></div>' for k,v in pares)
 def _acoes(*xs): return f'<div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">{"".join(xs)}</div>'
 def _pill(tx): return f'<span style="display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 12px; font-weight: 600; color: {MUTED}; border: 1px solid {LINE}; line-height: 1.4;">{esc(tx)}</span>'
 def R(id,v,p=None,s=None,**kw):
@@ -183,8 +184,8 @@ def build():
            ilnk('Simular parcelas','PL-06.dc.html','layers','Abrir Parcelas e escalonamento')],g_cult)
       + section('Encerramento do período anterior','Destine as pendências antigas antes de encerrar; o pomar e as ocupações não são recriados.',
           [imsg('Encerrar período','Nenhum período apto a encerrar agora: 2026/27 está em planejamento e 2025/26 já foi encerrada em 30/08 com as pendências destinadas.','check','Encerrar o período com as pendências destinadas')],
-          _nota(f'Safra 2025/26 encerrada em 30/08. Pendência destinada: sobra de 14 sc de KCl transferida ao estoque geral (recibo). '
-                f'A adubação pós-colheita do café C1 (NEC-019) segue em <b style="color:{INK};">Decidir pendência</b> no plano operacional.'),state='gray')
+          _nota(f'Safra 2025/26 encerrada em 30/08'   # TXT-02 (15/10/2026): o detalhe vai para a dica ⓘ
+                + E.dica_i('Pendências do período anterior','Pendência destinada: sobra de 14 sc de KCl transferida ao estoque geral (recibo). A adubação pós-colheita do café C1 (NEC-019) segue em Decidir pendência no plano operacional.')),state='gray')
     )
     EXTRAJS[0]=JS_COMUM+r'''
 function EXTRAVALS(self,v){
@@ -249,13 +250,11 @@ function EXTRAVALS(self,v){
          imsg('Aplicar modelo','Modelo “Soja alta tecnologia v6” aplicado ao rascunho v4 do T2 · 12 operações propostas · exceções locais preservadas · nada publicado.','layers','Aplicar um plano-modelo ao rascunho')],
         g_op)
       + section('Regras do gatilho','Leia o gatilho por extenso; a data prevista nunca vira plantio realizado.',
-        _acoes(ilnk('Ver grade de cultivo','PL-01.dc.html','grid','Abrir a grade de cultivo da safra'),
+        _acoes(E.recolhe_acoes('Regras do gatilho',[ilnk('Ver grade de cultivo','PL-01.dc.html','grid','Abrir a grade de cultivo da safra'),
                imsg('Simular antecipação do plantio',f'Simulação: antecipar o plantio do T1-A para 10/10 move 7 operações dependentes · a {OS_DES["id"]} (DAP −20) já emitida é ajustada pelo agrônomo ao liberar · nada muda até publicar.','calendar','Simular antecipação sem alterar o plano'),
                ilnk('Ver capacidade','SAF.dc.html#saf=S2627&passo=operacoes','trend','Abrir a capacidade por mês da Safra 2026/27 em Planejar safra'),
-               ilnk('Ver compra de insumos','CMP.dc.html','cart','Abrir Compra de insumos (SOL-2026-07)')),
-        _nota(f'“20 dias antes do plantio · DAP −20 · previsto para {d_des}” — o produtor não digita sinal negativo. '
-              f'“Dias antes da colheita” e “dias após a colheita” são opções distintas, com a colheita escolhida. '
-              f'Operação vencida exige consulta ao realizado e decisão sobre a pendência, não descarte automático.'),state='gray'))
+               ilnk('Ver compra de insumos','CMP.dc.html','cart','Abrir Compra de insumos (SOL-2026-07)')])),
+        '',state='gray'))
     EXTRAJS[0]=JS_COMUM+r'''
 function EXTRAVALS(self,v){
   v.pl_dec=(rid)=>{ const sp=pl_G('g_op'); g2open(self,sp,rid); const st=g2st(self,'g_op'); };
@@ -273,7 +272,9 @@ function EXTRAVALS(self,v){
     shell37('PL-02','Plano operacional',corpo,
       subtitle='Operações por parcela e data com memória de quantidades — planejar não emite O.S.',
       status=('v4 em rascunho · 1 pendência vencida','yellow'),primary='Publicar plano v4',
-      footer='Publicação cria necessidades únicas; a O.S. nasce depois, na janela de emissão (8.6), consumindo o saldo da mesma necessidade (JANELA-07).')
+      footer='Publicação cria necessidades únicas; a O.S. nasce depois, na janela de emissão (8.6), consumindo o saldo da mesma necessidade (JANELA-07). '
+             f'Gatilho por extenso: “20 dias antes do plantio · DAP −20 · previsto para {d_des}”; o produtor não digita sinal negativo. '
+             '“Dias antes da colheita” e “dias após a colheita” são opções distintas, com a colheita escolhida. Operação vencida exige consulta ao realizado e decisão sobre a pendência, não descarte automático.')
 
     # ---- PL-02det · plano do talhão T1-A com gatilhos (detalhe âncora, cap. 40) ----
     HEIGHTS37['PL-02det.dc.html']=1000; PARENT37['PL-02det.dc.html']='PL-02.dc.html'
@@ -301,9 +302,8 @@ function EXTRAVALS(self,v){
       continuity('Plano operacional','Talhão T1-A · Soja 58 W · plantio previsto '+d_pl,'ajuste local em revisão','Publicar ajuste do T1-A')
       + section('Operações deste talhão',f'Confira a data resultante de cada gatilho contra o plantio previsto em {d_pl}; clique na operação para ajustar a dose local com motivo.','',g_tal)
       + section('Ajuste local × padrão','Compare o custo do ajuste antes de publicar; o realizado e as aprovações ficam intactos.','',
-        _nota(f'Herbicida pós-emergente local <b style="color:{INK};">Cletodim 240 0,36 L/ha</b> (padrão 0,45) · motivo: solo arenoso, menor pressão de plantas daninhas · efeito estimado: '
-              f'<b style="color:{INK};">−R$ 0,9 mil</b> no talhão ({T1A["area"]} ha × 0,09 L × R$ 62/L) {tag("hipótese de preço")}. Atualizar o padrão depois <b style="color:{INK};">não sobrescreve</b> esta exceção. '
-              f'A dessecação de manejo de 05/09 permanece intacta; a {OS_DES["id"]} já emitida só muda de dose se o agrônomo ajustar ao liberar.',state='yellow'),state='yellow')
+        _nota(f'Herbicida pós-emergente local <b style="color:{INK};">Cletodim 240 0,36 L/ha</b> (padrão 0,45) · <b style="color:{INK};">−R$ 0,9 mil</b> no talhão {tag("hipótese de preço")}'   # TXT-02: o porquê vai para a dica ⓘ
+              + E.dica_i('Sobre o ajuste local',f'Motivo: solo arenoso, menor pressão de plantas daninhas. Efeito: {T1A["area"]} ha × 0,09 L × R$ 62/L. Atualizar o padrão depois não sobrescreve esta exceção. A dessecação de manejo de 05/09 permanece intacta; a {OS_DES["id"]} já emitida só muda de dose se o agrônomo ajustar ao liberar.'),state='yellow'),state='yellow')
     )
     shell37('PL-02','Plano do talhão T1-A · gatilhos',corpo,fname='PL-02det.dc.html',crumbs_extra=['T1-A · Soja 58 W'],
       subtitle='Plano por talhão com gatilhos antes, no dia e depois do plantio, resolvidos contra a âncora prevista.',
@@ -315,10 +315,10 @@ function EXTRAVALS(self,v){
     maq_cards=[
       ('Trator 02 · MF 7719','Apta','green',SUBST,f'livre hoje · 25/09 reservado ({OS_DES["id"]})','elegível só após confirmação do PCP · preventiva 28/09'),
       ('Trator 03 · JD 6M','Apta','green','Operando · OS-0421 dia 4 de 7','fim previsto 26/09 (dia 7)','reserva futura: dessecação T1-B 05/10'),
-      ('Trator T1 · JD 6M 155','Indisponível · bloqueado pelo PCM','red','Parado · oficina (OM-0233)','retorno previsto 14h — aguardando teste','não ofertado como livre'),
+      ('Trator T1 · JD 6M 155','Indisponível · bloqueado pelo PCM','red','Parado · oficina (OM-0233)','retorno previsto 14h — aguardando teste',''),
       ('Pulverizador 01','Apta com restrição · bico seção 3','yellow',f'Reservado · {OS_DES["id"]} 25/09','elegível sob condição validada','restrição registrada pelo PCM'),
-      ('Plantadeira 24 linhas (implemento)','Apta','green',f'Reservada · {OS_DEMO17["id"]} 24/09 · T1-A 15/10','trator livre + implemento reservado ≠ conjunto livre','revisão pré-plantio 25/09'),
-      ('Colhedora Axial-Flow 7250','A confirmar','gray','Sem telemetria · checklist de 14/09','informação vencida pela política','não fica verde por falta de notícia'),
+      ('Plantadeira 24 linhas (implemento)','Apta','green',f'Reservada · {OS_DEMO17["id"]} 24/09 · T1-A 15/10','revisão pré-plantio 25/09',''),
+      ('Colhedora Axial-Flow 7250','A confirmar','gray','Sem telemetria · checklist de 14/09','informação vencida pela política',''),
     ]
     cards=''.join(
       f'<div style="min-width: 0; background: {SURF}; border: 1px solid {LINE}; border-radius: 12px; padding: 10px 12px;">'
@@ -332,8 +332,8 @@ function EXTRAVALS(self,v){
          ('equi','Equipes de campo','Todas',280,300,240,40,20,'—',0),
          ('colh','Colhedoras','Milho P2 (nov)',0,360,0,180,180,'—',None)]
     ORIGC={'trat':[dict(t='Plano operacional: plantio T1-A, T1-B, T2, T4 (1ª onda) e T3 · 910 ha',h='PL-02.dc.html'),dict(t='Capacidade: 4 tratores × 22 dias úteis × 10 h, menos manutenção'),dict(t='Indisponível: Trator T1 parado pela OM-0233',h='MA.dc.html#om=OM-0233')],
-           'pulv':[dict(t='Plano operacional: dessecações e fungicidas de outubro',h='PL-02.dc.html'),dict(t='Rendimento 21,6 ha/h · Trator 02 + Pulverizador PJ-3030',h='CD-02.dc.html')],
-           'plan':[dict(t='Plano operacional: plantio escalonado T1-A/T1-B e T2',h='PL-02.dc.html'),dict(t='Rendimento 6,8 ha/h · Plantadeira 24 linhas',h='CD-02.dc.html')],
+           'pulv':[dict(t='Plano operacional: dessecações e fungicidas de outubro',h='PL-02.dc.html'),dict(t='Rendimento 21,6 ha/h · Trator 02 + Pulverizador PJ-3030',h='CD-08.dc.html')],
+           'plan':[dict(t='Plano operacional: plantio escalonado T1-A/T1-B e T2',h='PL-02.dc.html'),dict(t='Rendimento 6,8 ha/h · Plantadeira 24 linhas',h='CD-08.dc.html')],
            'equi':[dict(t='Soma das horas de pessoas de todas as operações do mês')],
            'colh':[dict(t='Colheita do milho P2 só em novembro · capacidade ociosa em outubro')]}
     g_cap=grid([dict(k='cls',l='Recurso/classe',w=170),dict(k='op',l='Operação dominante',w=190),dict(k='carga',l='Carga out/26',t='num',a='r',u='h'),dict(k='cap',l='Capacidade líquida',t='num',a='r',u='h'),
@@ -360,7 +360,7 @@ function EXTRAVALS(self,v){
       kpis([('CARGA OUT/26','2.410 h','demanda do plano'),('CAPACIDADE LÍQUIDA','2.640 h','após manutenção'),
             ('DÉFICIT','270 h','tratores 150+ cv'),('OCIOSIDADE OUT/26','180 h','colhedoras')])
       + section('Carga × capacidade por recurso/classe','Compare a carga herdada do plano com a capacidade líquida; clique na classe para ver a origem dos números.',
-        [ilnk('Ver rendimentos','CD-02.dc.html','calc','Abrir a tabela de rendimentos das operações')],g_cap,state='red')
+        [ilnk('Ver rendimentos','CD-08.dc.html','calc','Abrir a tabela de rendimentos das operações')],g_cap,state='red')
       + section('Cenários para o déficit de 270 h','Compare custo e restrição de cada cenário; publicar não contrata nem compra automaticamente.',
         [imsg('Simular turnos e conjuntos','Simulação: 2º turno nos tratores (out) cobre 190 h · custo estimado +R$ 26 mil · restrição: contratar 1 operador habilitado. Nada é alterado.','calc','Simular turnos, equipes e conjuntos'),
          ilnk('Propor cotação','SU-04.dc.html','cart','Abrir a cotação de aluguel ou prestador'),
@@ -370,13 +370,15 @@ function EXTRAVALS(self,v){
         f'<div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;">{tag("Livres e aptas 1")}{tag("Operando 1")}{tag("Reservadas 2")}{tag("Com restrição 1")}{tag("Indisponíveis 1")}{tag("A confirmar 1")}</div>'
         f'<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;">{cards}</div>'
         + '<div style="height: 8px;"></div>'
-        + _nota('Contadores são recortes que se sobrepõem — não somam o total da frota. Última atualização 07:42 · fonte: PCM + eventos da operação.'),state='gray')
+        + _nota('Última atualização 07:42'),state='gray')
       + _painel_manut('g_mi3')
     )
     shell37('PL-03','Capacidade e recursos',corpo,
       subtitle='Carga herdada do plano contra capacidade líquida; déficits com plano de atendimento e quadro compartilhado de máquinas.',
       status=('Déficit 270 h em tratores','red'),
-      footer='Uma máquina não ocupa duas frentes no mesmo horário; manutenção não é descontada duas vezes (RECURSO-01 a 10).')
+      footer='Uma máquina não ocupa duas frentes no mesmo horário; manutenção não é descontada duas vezes (RECURSO-01 a 10). '
+             'Condição, ocupação e elegibilidade são separadas: apto não é livre, livre não é elegível; trator livre + implemento reservado ≠ conjunto livre; máquina bloqueada não é ofertada como livre; '
+             'informação vencida pela política não fica verde por falta de notícia. Contadores são recortes que se sobrepõem e não somam o total da frota (fonte: PCM + eventos da operação).')
 
     # ================= PL-04 · Programação integrada (janela 8.6) =================
     HEIGHTS37['PL-04.dc.html']=2050
@@ -499,9 +501,7 @@ function EXTRAVALS(self,v){
             fields=[('Ordem','OS-0420 · plantio T4'),('Saldo','70 ha'),('Data','26/09/2026'),('Máquina','Trator 02 · MF 7719'),('Motivo','Substituição do ativo bloqueado')],
             confirm='Reprogramar saldo',done='Saldo reprogramado · aguarda nova liberação'),'calendar','Reprogramar o saldo da OS-0420'),
          imsg('Aprovar proposta','Proposta de substituição aprovada · a alocação é confirmada na tela do impedimento; nada inicia automaticamente.','check','Aprovar a proposta de substituição')],
-        _nota(f'Resolver compra ou manutenção revalida prontidão; não inicia máquina nem muda a agenda automaticamente. '
-              f'A liberação técnica do ativo após teste válido não reassume a agenda antiga — o PCP reconfirma o saldo necessário. '
-              f'A adubação pós-colheita do C1 (NEC-019) não entra nesta fila: aguarda a decisão da pendência no plano operacional, sem compra.',state='yellow'),state='yellow')
+        '',state='yellow')
     )
     EXTRAJS[0]=JS_COMUM+r'''
 function EXTRAVALS(self,v){
@@ -512,7 +512,8 @@ function EXTRAVALS(self,v){
     shell37('PL-05','Impedimentos e reprogramação',corpo,
       subtitle='Fila única de faltas, chuva, ativo, técnica, pessoas, qualidade e integração — propostas lado a lado.',
       status=('1 vence hoje','red'),
-      footer='Impedimento tem dono e prazo; o selo fica na ordem (nunca vira etapa do Kanban).')
+      footer='Impedimento tem dono e prazo; o selo fica na ordem (nunca vira etapa do Kanban). '
+             'Resolver compra ou manutenção revalida prontidão; não inicia máquina nem muda a agenda automaticamente. A liberação técnica do ativo após teste válido não reassume a agenda antiga: o PCP reconfirma o saldo necessário. A adubação pós-colheita do C1 (NEC-019) não entra nesta fila: aguarda a decisão da pendência no plano operacional, sem compra.')
 
     # ---- PL-05det · impedimento com substituição (DEMO-17) ----
     HEIGHTS37['PL-05det.dc.html']=1260; PARENT37['PL-05det.dc.html']='PL-05.dc.html'
@@ -547,12 +548,12 @@ function EXTRAVALS(self,v){
                idrw('Terceirizar',dict(title='Reprogramar com prestador',sub='apenas a agenda; versão executada permanece intacta',
                    fields=[('Ordem',OS_DEMO17['id']),('Data','26/09/2026'),('Responsável','Prestador · plantio terceirizado'),('Motivo','Ativo bloqueado sem substituto interno')],
                    confirm='Reprogramar',done='Reprogramada · responsáveis notificados (simulado)'),'truck','Reprogramar a ordem com prestador terceirizado'))
-        + '<div style="height: 12px;"></div>'
-        + _nota('A parada do Trator T1 reduz a capacidade da janela <b>uma única vez</b> (já refletida em Capacidade e recursos); o PCP não remove o bloqueio técnico do PCM.',state='yellow')))
+        ))
     shell37('PL-05',f'Impedimento · {OS_DEMO17["id"]} ativo bloqueado',corpo,fname='PL-05det.dc.html',crumbs_extra=[OS_DEMO17['id']],
       subtitle='Bloqueio do PCM antes do início — substituição avaliada com condição, ocupação e elegibilidade separadas.',
       status=('Decidir hoje','red'),
-      footer='DEMO-17 · Apto ≠ livre ≠ elegível (44.11.1). Teste reprovado mantém o bloqueio; CMD-19 libera tecnicamente sem reassumir agenda; CMD-34 confirma a alocação.')
+      footer='DEMO-17 · Apto ≠ livre ≠ elegível (44.11.1). Teste reprovado mantém o bloqueio; CMD-19 libera tecnicamente sem reassumir agenda; CMD-34 confirma a alocação. '
+             'A parada do Trator T1 reduz a capacidade da janela uma única vez (já refletida em Capacidade e recursos); o PCP não remove o bloqueio técnico do PCM.')
 
     # ================= PL-06 · Parcelas e escalonamento (cap. 43) =================
     HEIGHTS37['PL-06.dc.html']=1500
@@ -564,7 +565,7 @@ function EXTRAVALS(self,v){
       f'T1-A · {T1A["area"]} ha · Soja {T1A["variedade"]} · plantio {_br(T1A["plantio"])[:5]}<br>T1-B · {T1B["area"]} ha · Soja {T1B["variedade"]} · plantio {_br(T1B["plantio"])[:5]}<br>'
       f'<div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px;">{chip("Soma 312 ha = talhão ✓","green")}{chip("Sem sobreposição ✓","green")}</div></div>'
       f'<div style="background: {SURF}; border: 1px solid {LINE}; border-radius: 12px; padding: 10px 12px; font-size: 12.5px; line-height: 1.6;">'
-      f'{chip("Proposta · não divide a área vigente","yellow")}<br>Parcelas não duplicam hectares de cobrança (312 ha); operações e materiais seguem a parcela correta.</div></div></div>')
+      f'{chip("Proposta · não divide a área vigente","yellow")}</div></div></div>')
     par=[
       R('pA',dict(par='T1-A',geo='polígono norte',area=T1A['area'],ciclo='Safra 2026/27 · soja',var=T1A['variedade'],plant=T1A['plantio'],col=JAN(COL_A),prep=f'dessecação 25/09 ({OS_DES["id"]})'),
         p=dict(par=[B('T1-A')],sit=[CH('Proposta v2','yellow')])),
@@ -618,4 +619,5 @@ function EXTRAVALS(self,v){
     shell37('PL-06','Parcelas e escalonamento',corpo,
       subtitle='Parcelas com variedade e data próprias escalonam a colheita para caber na demanda e na capacidade.',
       status=('Proposta v2 aguardando aprovação','yellow'),primary='Publicar parcelamento e plano',
-      footer='Dividir área valida soma, sobreposição e histórico; replantio respeita a liberação física da parcela (cap. 43, PARC).')
+      footer='Dividir área valida soma, sobreposição e histórico; replantio respeita a liberação física da parcela (cap. 43, PARC). '
+             'Parcelas não duplicam hectares de cobrança (312 ha); operações e materiais seguem a parcela correta.')

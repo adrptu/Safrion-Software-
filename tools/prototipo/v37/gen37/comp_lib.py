@@ -13,7 +13,7 @@ from cadc_lib import ERRS
 IR_ETAPA=r"""(async (n)=>{ const num=()=>{ const c=document.querySelector('.etp-ind [aria-current=step]'); return c?Number((c.innerText.match(/\d+/)||[0])[0]):0; };
   for(let k=0;k<10;k++){ const i=num(); if(i===n) return i;
     let b=document.querySelector(i<n?'[data-acoes] [data-acao=avancar]':'[data-acoes] [data-acao=voltar]');
-    if(!b&&i>n&&n===1) b=[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Trocar safra');
+    if(!b&&i>n&&n===1) b=[...document.querySelectorAll('[data-acoes] button, .mf-tela button, header button')].find(x=>x.innerText.trim()==='Trocar safra');
     if(!b) return 'sem caminho de '+i+' para '+n; b.click(); await new Promise(r=>setTimeout(r,450)); }
   return 'não chegou: '+num(); })"""
 
@@ -35,6 +35,8 @@ class Chrome:
         t=json.load(urllib.request.urlopen(urllib.request.Request(f'http://127.0.0.1:{self.port}/json/new?about:blank',method='PUT'),timeout=30)); self.alvo=t['id']
         self.ws=WS(t['webSocketDebuggerUrl']); self.i=0
         self.call('Page.enable'); self.call('Runtime.enable'); self.call('Page.addScriptToEvaluateOnNewDocument',{'source':ERRS})
+        # só diagnóstico (classificar vermelho da V2-3): G2CV_TODAS=1 mostra todas as colunas; a correção permanente é cv_todas_sempre no teste
+        if os.environ.get('G2CV_TODAS')=='1': self.call('Page.addScriptToEvaluateOnNewDocument',{'source':'window.__g2cvTodasSempre=true'})
         try: self.call('Emulation.setFocusEmulationEnabled',{'enabled':True})   # página com foco, como a janela ativa de quem usa
         except Exception: pass
     def call(self,method,params=None,timeout=60):
@@ -107,7 +109,7 @@ MEDE=r"""(()=>{
  const nav=document.querySelector('.etp'); if(nav&&vis(nav)){ const at=nav.querySelector('.etp-atual'); const comp=!!(at&&vis(at)); const cur=nav.querySelector('.etp-itens [aria-current=step],.etp-itens [aria-current=page],.etp-itens [aria-current=true]');
    out.etapa=comp?n(at.innerText):(cur?n(cur.innerText):''); out.etapaOk=comp?topo(at):(!!cur&&topo(cur)); out.etapaCompacta=comp;
    const its=[...nav.querySelectorAll('.etp-itens>*')].filter(vis); let sob=0; for(let i=0;i<its.length;i++) for(let j=i+1;j<its.length;j++){ const a=its[i].getBoundingClientRect(), b=its[j].getBoundingClientRect(); if(Math.min(a.right,b.right)-Math.max(a.left,b.left)>1&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>1) sob++; } out.etapaSob=sob; }
- const tog=document.querySelector('.ml-tog'); if(tog) out.menuBtnOk=topo(tog);
+ const tog=document.querySelector('.ml-tog'); if(tog&&vis(tog)) out.menuBtnOk=topo(tog);   // 13/10: a barra é sempre recolhida e a .ml-tog fica oculta (marcador)
  const menu=document.querySelector('.menu-lat'); const m=document.querySelector('main');
  if(menu&&m){ const a=menu.getBoundingClientRect(), b=m.getBoundingClientRect(); out.menu=[Math.round(a.width),getComputedStyle(menu).position]; out.menuCobre=a.right>b.left+1; }
  if(m){ const r=m.getBoundingClientRect(); out.mainW=Math.round(Math.min(r.right,vw)-Math.max(r.left,0)); out.util=Math.round(Math.min(r.bottom,vh)-Math.max(r.top,0));
@@ -140,3 +142,70 @@ def resumo(m):
         if not m.get('painelPrimOk'): p.append('ação do painel inalcançável')
     if m.get('escalaGlobal'): p.append('escala global')
     return p
+
+# ---------- VISOES-1: troca de visão pelo seletor de ícones ----------
+# Auxiliar único dos testes (o botão não tem texto visível: o alvo é o atributo data-visao, nunca o texto ou o rótulo). No estreito (até 640 px),
+# a visão fora da barra fica no "mais": o primeiro passo abre o menu e devolve 'mais'; troca_visao() escolhe o item no menu (data-visao-menu).
+VISAO = r"""((k,raiz)=>{ const R=raiz?document.querySelector(raiz):document; if(!R) return 'SEM RAIZ '+raiz; const vis=e=>!!e&&e.getClientRects().length>0;
+  const b=[...R.querySelectorAll('[data-visao="'+k+'"]')].find(vis); if(b){ b.click(); return 'ok'; }
+  const m=[...R.querySelectorAll('[data-visao-mais]')].find(vis)||[...document.querySelectorAll('[data-visao-mais]')].find(vis); if(!m) return 'NÃO ACHEI visão '+k;
+  if(m.getAttribute('aria-expanded')!=='true') m.click(); return 'mais'; })"""
+VISAO_MENU = r"""((k)=>{ const i=[...document.querySelectorAll('[data-visao-menu="'+k+'"]')].find(e=>e.getClientRects().length>0); if(!i) return 'NÃO ACHEI visão '+k+' no mais'; i.click(); return 'ok'; })"""
+def visao(k, raiz=None):
+    """Expressão JS que aciona a visão k pelo seletor (data-visao), opcionalmente dentro de raiz (ex.: '[aria-label="Visão das ordens"]')."""
+    return f"({VISAO})({json.dumps(k)},{json.dumps(raiz)})"
+def cv_todas_sempre(c):
+    """VISOES-2 §3.6: em toda página aberta por este navegador, todas as grades com colunas essenciais mostram todas as colunas (a pessoa
+    escolheria "todas" no seletor). Só para testes de domínio que leem colunas fora do padrão; vale depois de localStorage.clear() e recarga."""
+    r = c.call('Page.addScriptToEvaluateOnNewDocument', {'source': 'window.__g2cvTodasSempre=true'})
+    i = (r or {}).get('identifier') if isinstance(r, dict) else None
+    c._cv_todas_ids = list(getattr(c, '_cv_todas_ids', []) or []) + ([i] if i else [])
+def cv_padrao(c):
+    """Desfaz cv_todas_sempre (e o padrão "todas" do cdp.Chrome) para as próximas páginas: o trecho do teste que confere a tela como a pessoa a vê."""
+    for i in list(getattr(c, '_cv_todas_ids', []) or []):
+        c.call('Page.removeScriptToEvaluateOnNewDocument', {'identifier': i})
+    c._cv_todas_ids = []
+def cv_todas_js(gid='g_os'):
+    """VISOES-2 §3.6: a pessoa escolhe ver todas as colunas da grade (a escolha do seletor "Colunas", gravada para todos os perfis da tela).
+    Para testes de domínio que leem colunas fora do padrão "Abre com"; o padrão em si é conferido no teste da VISOES-2."""
+    import json as _j
+    return "(window.__g2cvTodas?window.__g2cvTodas(%s):false)" % _j.dumps(gid)
+
+
+# ---------- VISOES-2 §3.3: "Agrupar por" da Tabela ----------
+# O botão button[data-g2agb=<gid>] abre o menu [data-g2agm=<gid>] com os itens role=menuitemradio ("Sem agrupar" e as perguntas da grade, pelo
+# nome: na O.S., Atividade, Responsável, Início e Talhão). O alvo é o texto do item (a 1ª linha; a 2ª são os níveis, ex.: "Fazenda › Talhão").
+AGRUPAR = r"""((gid)=>{ const vis=e=>!!e&&e.getClientRects().length>0; const b=[...document.querySelectorAll('[data-g2agb="'+gid+'"]')].find(vis);
+  if(!b) return 'NÃO ACHEI "Agrupar por" da grade '+gid; if(b.getAttribute('aria-expanded')!=='true') b.click(); return 'menu'; })"""
+AGRUPAR_ITEM = r"""((rot,gid)=>{ const m=[...document.querySelectorAll('[data-g2agm="'+gid+'"]')].find(e=>e.getClientRects().length>0); if(!m) return 'menu "Agrupar por" fechado';
+  const i=[...m.querySelectorAll('[role=menuitemradio]')].find(x=>(x.innerText||'').trim().split('\n')[0].trim()===rot); if(!i) return 'NÃO ACHEI "'+rot+'" no "Agrupar por"'; i.click(); return 'ok'; })"""
+# item da pergunta Onde no "Agrupar por" de cada grade com visões (o antigo "agrupada" da VISOES-1); na O.S., "Talhão" (Fazenda › Talhão),
+# como em areas/processo_os.py (g_os, ag=[… dict(pq='onde', l='Talhão', …)]). O GRIDS da página não fica no escopo global: o nome vem daqui.
+AGRUPADA_ROT = {'g_os': 'Talhão'}
+def agrupar_por(J, rotulo, gid='g_os', espera=.45):
+    """VISOES-2 §3.3: escolhe rotulo ("Sem agrupar", "Talhão"…) no "Agrupar por" da grade gid, como a pessoa (abre o menu e clica no item).
+    Devolve 'ok' ou o motivo."""
+    r = J(f"({AGRUPAR})({json.dumps(gid)})"); time.sleep(.3)
+    if r != 'menu': return r
+    r = J(f"({AGRUPAR_ITEM})({json.dumps(rotulo)},{json.dumps(gid)})"); time.sleep(espera); return r
+def agrupado_por(J, gid='g_os'):
+    """Nome do agrupamento escolhido na grade gid, como o botão "Agrupar por" mostra ('' = Sem agrupar; None = sem o botão à vista)."""
+    return J("(()=>{const b=[...document.querySelectorAll('[data-g2agb=\"%s\"]')].find(e=>e.getClientRects().length>0); if(!b) return null;"
+             " return (b.innerText||'').replace(/\\s+/g,' ').replace(/^\\s*Agrupar por\\s*/,'').replace(/\\s*▾\\s*$/,'').trim();})()" % gid)
+
+def troca_visao(J, k, raiz=None, espera=.45):
+    """Aciona a visão k e espera o redesenho; no estreito escolhe pelo menu "mais" quando o botão não está na barra. Devolve 'ok' ou o motivo.
+    VISOES-2 §2 (14/10): a "Tabela agrupada" saiu do seletor (a Tabela é data-visao=lista; agrupar é o "Agrupar por" da grade). k='agrupada'
+    continua aceito como atalho do mesmo resultado, pelo caminho da pessoa: clica na Tabela e escolhe, no "Agrupar por" da grade da barra
+    (data-visoes-gid), a pergunta Onde (na O.S., "Talhão": Fazenda › Talhão). k='lista' só clica na Tabela e mantém o agrupamento escolhido
+    (ele é estado da grade, guardado por perfil); para desagrupar, agrupar_por(J, 'Sem agrupar')."""
+    if k == 'agrupada':
+        gid = J("(()=>{const R=%s; const t=R&&[...R.querySelectorAll('[role=toolbar][data-visoes-gid]')].find(e=>e.getClientRects().length>0); return t?t.getAttribute('data-visoes-gid'):'g_os';})()"
+                % (f"document.querySelector({json.dumps(raiz)})" if raiz else 'document'))
+        r = troca_visao(J, 'lista', raiz, espera)
+        if r != 'ok': return r
+        rot = AGRUPADA_ROT.get(gid)
+        return agrupar_por(J, rot, gid, espera) if rot else f'a grade {gid} não tem o "agrupada" (Onde) em AGRUPADA_ROT'
+    r = J(visao(k, raiz)); time.sleep(.3)
+    if r == 'mais': r = J(f"({VISAO_MENU})({json.dumps(k)})")
+    time.sleep(espera); return r

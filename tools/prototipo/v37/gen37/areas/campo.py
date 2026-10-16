@@ -85,6 +85,8 @@ def _ordens():  # registro canônico dados.ORDENS (fase, selo, saldo, janela); t
 
 # ---------- vocabulário visual local ----------
 def bloco(titulo,desc,corpo,acao='',tone=None):
+    acao=E.recolhe_acoes(titulo,acao)   # MAIS-01 (15/10/2026): uma secundária à vista, as outras no "⋯ Mais ações" do bloco
+    desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     dot={'yellow':YEL,'red':RED}.get(tone,ACC)
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; box-shadow: {SH}; display: flex; flex-direction: column; min-width: 0;">'
             f'<div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px 10px; flex-wrap: wrap;">'
@@ -93,7 +95,7 @@ def bloco(titulo,desc,corpo,acao='',tone=None):
             f'<h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">{esc(titulo)}</h3>'
             f'<div style="font-size: 12.8px; color: {MUTED};">{esc(desc)}</div></div>'
             f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">{acao}</div></div>'
-            f'<div style="padding: 0 12px 12px; display: flex; flex-direction: column; gap: 10px;">{corpo}</div></section>')
+            + (f'<div style="padding: 0 12px 12px; display: flex; flex-direction: column; gap: 10px;">{corpo}</div>' if str(corpo).strip() else '') + '</section>')   # 14/10/2026: sem corpo vazio
 def _iconize(html_,text,ic,title):
     html_=html_.replace('style="','style="display: inline-flex; align-items: center; gap: 6px; ',1)
     html_=html_.replace('<button type="button" ',f'<button type="button" title="{esc(title or text)}" ',1)
@@ -201,10 +203,10 @@ def _ca01():
     n_imp=sum(1 for o in ordens if _impedida(o))
     abertas=[o for o in ordens if o['etapa']!='Encerradas' and o.get('area') and o.get('saldo')]
     saldo=sum(o['saldo'] for o in abertas)
-    acoes=(ilink('Conferir apontamentos','CA-02.dc.html','check','Abrir a fila de conferência dos turnos')
-           + ilink('Reprogramar saldo','PL-05.dc.html','calendar','Reprogramar o saldo das ordens no PCP'))
+    acoes=E.recolhe_acoes('Ordens da janela de trabalho',[ilink('Conferir apontamentos','CA-02.dc.html','check','Abrir a fila de conferência dos turnos'),
+           ilink('Reprogramar saldo','PL-05.dc.html','calendar','Reprogramar o saldo das ordens no PCP')])
     n_out=n_lib-n_ag-n_fp
-    corpo=(kpis([('A LIBERAR',str(n_lib),f'{n_ag} com produto (o agrônomo libera) · {n_fp} só água'+(f' · {n_out} {"outra" if n_out==1 else "outras"}' if n_out else '')),('EM CONFERÊNCIA','1','sobras a receber'),
+    corpo=(kpis([('A LIBERAR',str(n_lib),f'{n_ag} com produto · {n_fp} só água'+(f' · {n_out} {"outra" if n_out==1 else "outras"}' if n_out else '')),('EM CONFERÊNCIA','1','sobras a receber'),
                  ('SALDO PARADO','70 ha','OS-0420 · Trator T1 (OM-0233)'),('SALDO ABERTO',f'{nf(saldo)} ha',f'{len(abertas)} ordens')])
            + bloco('Ordens da janela de trabalho','Clique numa ordem para ajustar janela e equipe; use o link da condição para resolver a pendência.',
                    f'<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">{bar}<span style="flex-grow: 1;"></span>{acoes}</div>{panes}'))
@@ -282,8 +284,7 @@ def _ca01det():
     corpo=(
       continuity('Plano de safra · janela 20–26/09','Em execução · 190/350 ha','160 ha em 3 turnos','Registrar avanço')
       + banner
-      + stepper([('A liberar','done'),('Liberadas','done'),('Em execução','now'),('Em conferência','todo'),('Encerradas','todo')],
-          'término físico do escopo (ou dispensa autorizada do saldo) entra automaticamente em Em conferência — nenhum botão pula etapa')
+      + stepper([('A liberar','done'),('Liberadas','done'),('Em execução','now'),('Em conferência','todo'),('Encerradas','todo')],'')
       + kpis([('AUTORIZADO','350 ha','v2'),('REALIZADO','190 ha','150 conf. + 40 prov.'),('SALDO','160 ha','3 turnos'),('HOJE','Dia 4 de 7','40 ha · chuva')])
       + bloco('Apontamentos de turno','Confira um apontamento por dia na mesma ordem; clique no turno para corrigir com motivo ou redistribuir os previstos.',g_ap,
           imsg('Pausar execução','Pausada por chuva · a ordem ganha o selo Pausada e continua Em execução; "Retomar execução" devolve o saldo de 160 ha sem nova emissão.','clock','Pausar a execução sem mudar a fase')
@@ -292,8 +293,7 @@ def _ca01det():
       + bloco('Materiais em custódia da equipe','Confira o que foi entregue, consumido e está com a equipe; clique na linha para ver a origem do saldo.',g_mat,
           ilink('Requisitar material','SU-07.dc.html','box','Abrir requisições e entregas em Suprimentos') + ilink('Ver consumo e devoluções','CA-04.dc.html','layers','Abrir as requisições da equipe'))
       + bloco('Plano, versão e fichas','Ajuste produtos e doses só no saldo; as fichas do caldeiro, do operador e do almoxarife derivam da versão vigente.',
-          nota(f'Recomendação de origem: <b style="color:{INK};">fungicida 1ª aplicação · protocolo do plano técnico · v2 aprovada</b>. '
-               f'O agrônomo ajusta e libera a v3 só para o saldo; as fichas do saldo passam à v3.'),
+          nota(f'Recomendação de origem: <b style="color:{INK};">fungicida 1ª aplicação · protocolo do plano técnico · v2 aprovada</b>.'),
           ajuste + fichas + ilink('Ver recomendação','AG-04.dc.html','leaf','Abrir a recomendação de origem') + ilink('Reprogramar saldo','PL-05.dc.html','calendar','Reprogramar o saldo no PCP')))
     EXTRAJS[0]=(f'const AREA={area}; const DID={json.dumps(DID)}; const FICHAS_V2={json.dumps(FV2,ensure_ascii=False)}; const FICHAS_REV={json.dumps(FREV,ensure_ascii=False)};\n'+APJS)
     prim=f'<a href="MB-03.dc.html" style="{BTN_ST(True)} text-decoration: none; display: inline-flex; align-items: center;">Registrar avanço</a>'
@@ -301,7 +301,8 @@ def _ca01det():
     shell37('CA-01','OS-0421 · Fungicida 1ª aplicação',corpo,fname=fname,crumbs_extra=['OS-0421'],primary_html=prim,
       status=('Em execução · Parcial · dia 4 de 7','yellow'),
       subtitle='350 ha em T1+T2 · 7 turnos (50, 50, 50, 40, 50, 50 e 60 ha) · os mesmos acumulados aparecem na conferência, no app e no Kanban.',
-      footer='Finalizar o turno não encerra a ordem; conferir um dia não muda a fase. Ajuste de dose só alcança o saldo.')
+      footer='Finalizar o turno não encerra a ordem; conferir um dia não muda a fase. Ajuste de dose só alcança o saldo: o agrônomo ajusta e libera a v3 só para o saldo, e as fichas do saldo passam à v3. '
+             'Término físico do escopo (ou dispensa autorizada do saldo) entra automaticamente em Em conferência; nenhum botão pula etapa.')
 
 # ---------------- CA-01x-os0420 · OS-0420 (DEMO-01 / DEMO-14) ----------------
 def _ca01x_0420():
@@ -341,8 +342,7 @@ def _ca01x_0420():
       continuity('REC-014 v2 · necessidade NEC-028','Em execução · Impedida · 30/100 ha','reparo da OM-0233 ou substituto (Trator 02 a partir de 24/09)','Acompanhar OM-0233')
       + alerta(f'{chip("Impedida · ativo bloqueado","red")} &nbsp;Saldo de {saldo} ha parado pelo Trator T1 (OM-0233) · substituto Trator 02 a partir de 24/09. '
                f'O saldo segue na v3 (KCl −12 %), ajustada por Ana (agrônoma) em 23/09; os {real} ha realizados ficam preservados na v2.',tone='red')
-      + stepper([('A liberar','done'),('Liberadas','done'),('Em execução','now'),('Em conferência','todo'),('Encerradas','todo')],
-          'impedimento é selo: a ordem segue Em execução e nenhum botão pula etapa')
+      + stepper([('A liberar','done'),('Liberadas','done'),('Em execução','now'),('Em conferência','todo'),('Encerradas','todo')],'')
       + kpis([('AUTORIZADO',f'{area} ha','v2 no realizado · v3 no saldo'),('REALIZADO',f'{real} ha','18 conf. + 12 prov.'),('SALDO',f'{saldo} ha','parado · Trator T1'),('IMPEDIMENTO','OM-0233','Trator T1 bloqueado')])
       + bloco('Instrução herdada da REC-014 v2','Confira produto, dose e janela que a ordem herdou da recomendação; clique no produto para ver a origem.',
           g_ins+nota(f'Janela da recomendação 20/09 a 05/10 · janela da ordem 22–28/09 · T4, 1ª onda de {area} ha dos 204 ha da necessidade NEC-028.'),
@@ -354,7 +354,8 @@ def _ca01x_0420():
                f'Substituto proposto: <b style="color:{INK};">{D.OM["substituto"]}</b>, apto e livre a partir de 24/09 06:00 — elegível só após confirmação do PCP.'),
           ilink('Ver ocorrência','CA-03det.dc.html','alert','Abrir a ocorrência OC-114') + ilink('Reprogramar saldo','PL-05.dc.html','calendar','Confirmar substituto e reprogramar o saldo no PCP'),tone='red')
       + bloco('Ajuste do saldo · v3','Confira o ajuste que Ana (agrônoma) fez no saldo; o realizado continua na v2.',
-          nota(f'v3 em vigor desde 23/09, ajustada por Ana (agrônoma): KCl −12 % só no saldo de {saldo} ha (105,6 kg/ha). A v2 continua valendo apenas para os {real} ha já realizados.'),
+          nota(f'<b style="color:{INK};">v3 · KCl −12 %</b> no saldo de {saldo} ha (105,6 kg/ha)'   # TXT-02: o resto vai para a dica ⓘ
+               + E.dica_i('Sobre a v3',f'v3 em vigor desde 23/09, ajustada por Ana (agrônoma). A v2 continua valendo apenas para os {real} ha já realizados.')),
           imsg('Ver fichas',f'Fichas do saldo de {saldo} ha na v3 (KCl 105,6 kg/ha) · as fichas dos {real} ha realizados permanecem no histórico da v2.','doc','Consultar as fichas do caldeiro, do operador e do almoxarife'))
       + bloco('Materiais e custo','Confira a requisição da ordem e o custo dos hectares realizados; clique na linha para ver a origem.',g_req))
     HEIGHTS37[fname]=1900; PARENT37[fname]='OS.dc.html'  # "Voltar" leva à tela de O.S. do menu, não ao CA-01 oculto
@@ -362,7 +363,7 @@ def _ca01x_0420():
       primary='Acompanhar OM-0233',primary_href='MA.dc.html#om=OM-0233',
       status=('Em execução · Impedida','red'),
       subtitle=f'{area} ha no T4 · {real} ha realizados · saldo de {saldo} ha parado até o ativo ser liberado ou substituído.',
-      footer='Instrução, versão e realizado vêm da mesma recomendação; o ajuste alcança só o saldo e nunca reescreve o realizado.')
+      footer='Instrução, versão e realizado vêm da mesma recomendação; o ajuste alcança só o saldo e nunca reescreve o realizado. Impedimento é selo: a ordem segue Em execução e nenhum botão pula etapa.')
 
 # ---------------- CA-02 · Apontamentos e conferência ----------------
 FILAJS=r'''
@@ -421,10 +422,9 @@ def _ca02():
       + bloco('Fila de conferência diária','Confira previsto contra observado por turno; clique no apontamento para corrigir com histórico.',g_fila,
           imsg('Devolver para esclarecimento','Apontamento do dia 2 da OS-0420 devolvido a Carlos com a pergunta registrada — o fato permanece registrado, nada é apagado.','alert','Devolver o apontamento ao executor com uma pergunta'))
       + bloco('Reabrir saldo para execução','Reabra o saldo quando a conferência encontrar trabalho físico adicional (conferente ou PCP com permissão).',
-          nota(f'Se a liberação não estiver mais vigente, o saldo reaberto recebe o selo <b style="color:{INK};">Pausada</b> até renovar as condições. '
-               f'Correção só documental <b style="color:{INK};">permanece Em conferência</b> — não reabre período contábil nem reescreve fatos.'),reabrir,tone='yellow')
+          '',reabrir,tone='yellow')
       + bloco('Encerramento','Encerre a ordem só com término físico e todas as condições satisfeitas.',
-          nota('Concluir execução não encerra a ordem com custódia, divergência ou conferência pendente.'),
+          '',
           imsg('Encerrar OS-0417','Indisponível: 10 sc de MAP 11-52 sob custódia de Paula (equipe de campo) · prazo 24/09. Rui recebe a devolução no almoxarifado; ou documente a destinação competente para encerrar.','check','Encerrar a ordem (exige custódia zero e conferência concluída)'))
       + bloco('Roteiro da OS-0418 após a liberação','Confira como a fertirrigação será liberada, entregue, apontada e conciliada; cenário projetado, a ordem atual segue A liberar.',g_proj,
           ilink('Liberar OS-0418','OS.dc.html#OS-0418','check','Abrir a OS-0418 para o agrônomo liberar (pode ajustar)'),tone='yellow'))
@@ -435,7 +435,9 @@ def _ca02():
     shell37('CA-02','Apontamentos e conferência',corpo,primary_html=prim,
       status=('2 a conferir · 1 divergência','yellow'),
       subtitle='Conferência diária confirma provisórios sem mudar a fase da ordem; consumo recebe um único evento de efeito.',
-      footer='Fato permanece registrável fora da tolerância. Conferir um dia não conclui a ordem de vários dias; conferência posterior não repete baixa.')
+      footer='Fato permanece registrável fora da tolerância. Conferir um dia não conclui a ordem de vários dias; conferência posterior não repete baixa. '
+             'Reabrir saldo: se a liberação não estiver mais vigente, o saldo reaberto recebe o selo Pausada até renovar as condições; correção só documental permanece Em conferência, sem reabrir período contábil nem reescrever fatos. '
+             'Concluir execução não encerra a ordem com custódia, divergência ou conferência pendente.')
 
 # ---------------- CA-03 · Ocorrências ----------------
 OCJS=r'''
@@ -559,8 +561,7 @@ def _ca04():
       bloco('Requisições e custódia da equipe','Confira entregue, consumido e em custódia por ordem; clique na linha para ver a origem do saldo.',g_req,
           ilink('Ver em Suprimentos','SU-07.dc.html','box','Abrir o mesmo registro em Requisições e entregas'))
       + bloco('Encerramento bloqueado pela custódia','Devolva as sobras da OS-0417 para liberar o encerramento.',
-          nota(f'Balanço da REQ-031: {R["entregue"]} sc entregues − {R["consumido"]} consumidos − {R["dev_recebida"]} recebidos = <b style="color:{INK};">{R["custodia"]} sc com Paula (equipe de campo)</b>, prazo 24/09; Rui recebe no almoxarifado. '
-               f'Declarar o retorno <b style="color:{INK};">não</b> aumenta o estoque utilizável: só a quantidade medida e recebida entra no local e na condição registrados. Sem ajuste automático pela diferença.'),
+          nota(f'Balanço da REQ-031: {R["entregue"]} sc entregues − {R["consumido"]} consumidos − {R["dev_recebida"]} recebidos = <b style="color:{INK};">{R["custodia"]} sc com Paula (equipe de campo)</b>, prazo 24/09; Rui recebe no almoxarifado.'),   # é o dado da trava: fica à vista (TEXTO-2, textos_soltos F)
           imsg('Encerrar OS-0417',f'Indisponível: {R["custodia"]} sc de MAP 11-52 sob custódia de Paula (equipe de campo) · prazo 24/09. Declarar devolução não aumenta o utilizável — Rui recebe as {R["custodia"]} sc no almoxarifado, ou documente a destinação competente para liberar o encerramento.',
                'check','Encerrar a ordem (exige custódia zero)'),tone='yellow'))
     prim=idrawer('Solicitar material da ordem',dict(title='Solicitar material da ordem',sub='A requisição nasce da ordem liberada; itens e doses vêm da versão vigente.',
@@ -570,7 +571,8 @@ def _ca04():
     shell37('CA-04','Minhas requisições',corpo,primary_html=prim,
       status=('10 sc e 65 L em custódia','yellow'),
       subtitle='Visão filtrada de Requisições e entregas (Suprimentos) com a custódia da equipe e o saldo por ordem.',
-      footer='É o mesmo registro de Suprimentos e do Estoque: consumo é apontado na conferência e devolução é recebida no almoxarifado.')
+      footer='É o mesmo registro de Suprimentos e do Estoque: consumo é apontado na conferência e devolução é recebida no almoxarifado. '
+             'Declarar o retorno não aumenta o estoque utilizável: só a quantidade medida e recebida entra no local e na condição registrados. Sem ajuste automático pela diferença.')
 
 def build():
     _ca01(); _ca01det(); _ca01x_0420(); _ca02(); _ca03(); _ca03det(); _ca04()

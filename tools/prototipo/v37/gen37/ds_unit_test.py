@@ -35,6 +35,19 @@ chk('2.3 nenhuma regra de hover com fundo cinza no gerador (engine, ui37, areas)
 # no topo (caixa com borda, ficha cuja 1ª célula tem border-top), que já faz o papel da linha (AG-04det, GE-05, GE-06det tinham duas linhas)
 chk('2.4 separador: linha abaixo do título do bloco (sem linha dupla sobre conteúdo que começa com borda no topo), do painel lateral e .g2-cab', bool(SEP) and SEP in css
     and 'aside[role=dialog]>div:first-child:has(>h2)' in SEP and ':is([style*="border: 1px"],[style*="border-top: 1px"])' in SEP and '>:first-child>[style*="border-top: 1px"]:first-child' in SEP)
+# SEP-20261015 (proprietário, 15/10: "retire em todas telas onde tem excesso de linhas separadoras visuais, deixe somente as que geram efetiva
+# organização visual e intuitividade"): (b) sem linha do título antes de tabela, caixa, faixa ou barra de visões; (c) sem linha entre a barra da
+# tabela e o cabeçalho com fundo; (d) tabela dentro de caixa sem moldura própria; (e) lista curta e pares rótulo × valor sem linha
+_sec_tab = E.section('Tabela', '', '', '<div class="g2caixa" style="border: 1px solid #E4E9E5;">x</div>') if hasattr(E, 'corpo_estruturado') else ''
+_sec_txt = E.section('Texto', '', '', '<div style="font-size: 13px;">Texto solto</div>') if hasattr(E, 'corpo_estruturado') else ''
+_cab = lambda h: h.split('<div style="display: flex; align-items: center; gap: 10px;">', 1)[0]
+chk('2.4b SEP-20261015: tabela dentro de caixa sem moldura, título sem linha antes da tabela e da barra de visões, lista curta sem linha; '
+    'engine.section só traça a linha do título com conteúdo solto abaixo',
+    bool(SEP) and '.g2caixa{border-color:transparent!important}' in SEP and '.g2visoes-w' in SEP and ':not(:has(>[style*="border-top: 1px solid"]~[style*="border-top: 1px solid"]~[style*="border-top: 1px solid"]~[style*="border-top: 1px solid"]))' in SEP
+    and 'border-bottom' not in _cab(_sec_tab) and 'border-bottom: 1px solid' in _cab(_sec_txt), [_cab(_sec_tab)[-160:], _cab(_sec_txt)[-160:]])
+_g = E.grid([dict(k='a', l='A')], [dict(id='r1', v=dict(a='1'))], gid='g_sep_unit') if hasattr(E, 'grid') else ''
+_tb = _g.split('<div class="g2rola">', 1)[0]
+chk('2.4c barra da tabela (busca, Agrupar por, Colunas) sem borda inferior: o cabeçalho da tabela já tem fundo', bool(_g) and 'padding: 8px 12px;' in _tb and 'padding: 8px 12px; border-bottom' not in _tb, _tb[:300])
 chk('2.5 realce: animação de 0,52 s e, com menos movimento, realce estático sem animação', '@keyframes g2realce' in css and '.g2-realce{animation:g2realce 0.52s' in css and re.search(r'prefers-reduced-motion:reduce\)\{\.g2-realce\{animation:none!important', css))
 chk('2.6 barra de carga no topo e dica (role=tooltip criada pelo g2lib) com estilo comum', '#g2-carga{' in css and '.g2dica{' in css and '.g2dica-i{' in css)
 chk('2.7 indisponível com motivo (aria-disabled) com a aparência do desabilitado', ':is(button,a)[aria-disabled=true]{opacity:.55' in css)
@@ -91,7 +104,8 @@ chk('5.1 o teste de contraste mede os tokens do engine (realce, linha, camada do
 # integração V56 (DS × PCM simplificado): PM e MA-01..05/MA-04det são só redirecionamento para a tela MA (areas/maquinas.REDIRECIONA, fora do
 # canvas e do Índice): não desenham tela, então ficam fora da conta; a sonda 6r confere que continuam sendo só redirecionamento
 from areas.maquinas import REDIRECIONA
-pags = sorted(p for p in glob.glob(os.path.join(E.P, '*.dc.html')) if os.path.basename(p) not in REDIRECIONA)
+# 13/10/2026: o índice saiu; Main.dc.html é página técnica mínima (areas/indice.py, sem cabeçalho nem tela de uso), fora desta conta
+pags = sorted(p for p in glob.glob(os.path.join(E.P, '*.dc.html')) if os.path.basename(p) not in REDIRECIONA and os.path.basename(p) != 'Main.dc.html')
 red = sorted(p for p in glob.glob(os.path.join(E.P, '*.dc.html')) if os.path.basename(p) in REDIRECIONA)
 if pags:
     sem = [os.path.basename(p) for p in pags if '@keyframes g2realce' not in open(p, encoding='utf-8').read() or '.g2-cab{' not in open(p, encoding='utf-8').read()]

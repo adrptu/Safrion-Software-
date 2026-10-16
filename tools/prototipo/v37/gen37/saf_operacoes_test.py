@@ -7,7 +7,7 @@ mudar). Emulação no Chrome headless: não é aparelho físico.
 Uso: python3 saf_operacoes_test.py [desktop|celular|tudo]   (padrão: tudo)"""
 import sys, os, time, json, re, subprocess, copy
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir
+from comp_lib import Chrome, servir, cv_todas_sempre
 import dados2 as D2
 MODO = sys.argv[1] if len(sys.argv) > 1 else 'tudo'
 PROBE = os.path.join(HERE, '_probe'); os.makedirs(PROBE, exist_ok=True)
@@ -39,7 +39,8 @@ def veredito(): return c.js(f"(()=>{{const e=document.querySelector('#saf-v3-ver
 def atalhos(): return c.js(f"[...document.querySelectorAll('[data-acao=atalho]')].filter(b=>b.offsetParent&&!b.closest('[data-acoes]')).map(b=>{N}(b.innerText))") or []
 def filtro(): return c.js(f"(()=>{{const e=document.getElementById('saf-cap-filtro'); return e&&e.offsetParent?{N}(e.innerText):'';}})()") or ''
 def custo(): return c.js(f"(()=>{{const b=document.querySelector('[data-acao=resumo]'); const s=b&&b.parentElement; return s?{N}(s.innerText):'';}})()") or ''
-def acoes(): return c.js(f"(()=>{{const a=document.querySelector('[data-acoes]'); return a?[...a.querySelectorAll('button,a')].filter(b=>b.offsetParent).map(b=>{N}(b.innerText)):[];}})()") or []
+# barra limpa (15/10/2026): os atalhos ficam no "⋯ Mais ações" (fechado); a leitura junta os botões à vista e os itens do menu
+def acoes(): return c.js(f"(()=>{{const a=document.querySelector('[data-acoes]'); return a?[...a.querySelectorAll('button,a')].filter(b=>b.offsetParent||b.closest('.acoes-menu')).map(b=>{N}(b.textContent)):[];}})()") or []
 def painel(): return c.js(f"(()=>{{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.offsetParent); return a?{N}(a.innerText):'';}})()") or ''
 def erros(): return c.js("(window.__errs||[]).join(' | ')") or ''
 def faixa_atual(): return c.js(f"(()=>{{const e=document.querySelector('.etp-ind [aria-current=step]'); return e?{N}(e.innerText):'';}})()") or ''
@@ -87,6 +88,7 @@ VER = {'S2627': 'Na estimativa mensal, cabe nos 690 ha com plano. Fora da conta:
        'S2526': 'Capacidade não calculada: as 21 ocorrências desta safra ficam fora do calendário do protótipo (set/26 – ago/27).'}
 try:
     c = Chrome()
+    cv_todas_sempre(c)   # VISOES-2 §3.6 / SAF-TAB: o teste lê colunas fora do padrão
     if MODO in ('desktop', 'tudo'):
         # ---------- N1–N4a, N6, N7: endereços, faixa e retomada ----------
         abre('#saf=S27SF&etapa=6'); chk('N1 etapa=6 abre a 4 "Confira a demanda de insumos"', etapa_n() == 4 and 'Confira a demanda de insumos' in faixa_atual(), faixa_atual())
@@ -111,7 +113,7 @@ try:
         # ---------- V1, O1, O2, O4: S2627 no topo e na g_op ----------
         abre('#saf=S2627&passo=operacoes', 1440, 1040)
         chk('V1 veredito S2627 (R4, âmbar)', veredito() == VER['S2627'], veredito())
-        chk('V1 atalho "Maior uso: Colhedoras 81 % · fev/27"', atalhos() == ['Maior uso: Colhedoras 81 % · fev/27'], atalhos())
+        chk('V1 sem atalho fora da tabela (15/10, proprietário: avisos só dentro da tabela)', atalhos() == [], atalhos())
         pc = D2.plano_op('S2627'); chk('V1 custo de operação = espelho, "máquinas e pessoas, sem insumos"', custo().startswith('Custo de operação ' + rs(pc['cop']) + ' · máquinas e pessoas, sem insumos'), custo())
         G = gop()
         chk('O1 g_op: 9 colunas na ordem do §3.4 (Custo total no fim: proprietário, 13/10/2026)', G['hs'] == ['OPERAÇÃO › ATIVIDADE › TALHÃO', 'SITUAÇÃO', 'DATA', 'CONJUNTO', 'RENDIMENTO', 'ÁREA TRABALHADA', 'HORAS-CONJUNTO', 'CUSTO R$/HA', 'CUSTO TOTAL'], G['hs'])
@@ -125,7 +127,7 @@ try:
         chk('O4 S2627: 8 operações "Janela não informada", nenhum "Cabe na janela"; sem chips do filtro rápido', all(r['SITUAÇÃO'] == 'Janela não informada' for r in n0) and 'Cabe na janela' not in c.js("document.body.innerText") and not c.js("[...document.querySelectorAll('[role=group][aria-label^=\"Filtro rápido\"]')].some(g=>g.offsetParent)"), [r['SITUAÇÃO'] for r in n0])
         chk('Total da g_op só em horas-conjunto = espelho (561,8 h)', total_h() == fmt(pc['hconj'], 1) + ' h', total_h())
         chk('O18 negativo: "/ha da safra" não aparece', '/ha da safra' not in c.js("document.body.innerText"))
-        ac = acoes(); chk('§5.2 área de ações: Aplicar plano em 4 cultivos, ‹ Cultivos e planos, Conferir demanda de insumos ›', ac == ['Aplicar plano em 4 cultivos', '‹ Cultivos e planos', 'Conferir demanda de insumos ›'] or sorted(ac) == sorted(['Aplicar plano em 4 cultivos', '‹ Cultivos e planos', 'Conferir demanda de insumos ›']), ac)
+        ac = acoes(); chk('§5.2 área de ações: Aplicar plano em 4 cultivos, ‹ Cultivos e planos, ‹ Trocar safra (14/10: embaixo, no fluxo, com a seta de voltar), Conferir demanda de insumos ›', sorted(ac) == sorted(['Aplicar plano em 4 cultivos', '‹ Cultivos e planos', '‹ Trocar safra', 'Conferir demanda de insumos ›']), ac)
         # L1: as operações aparecem acima da área de ações (a página não rola)
         vis = c.js("""(()=>{ const a=document.querySelector('[data-acoes]'); const lim=a?a.getBoundingClientRect().top:innerHeight; const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent&&/^OPERA/i.test(t.querySelector('[role=columnheader]').innerText));
           return [...t.querySelectorAll('[role=row]')].slice(1).filter(r=>{ const b=r.getBoundingClientRect(); return b.top>=0&&b.bottom<=lim+1; }).length; })()""")
@@ -234,7 +236,7 @@ try:
         c.tecla('Escape', 'Escape', 27); time.sleep(.5); foco = c.js("document.activeElement&&document.activeElement.getAttribute('data-acao')")
         chk('P4 Esc fecha o Resumo e o foco volta ao link', painel() == '' and foco == 'resumo', (painel()[:80], foco))
         # ---------- V12, V11, V8 ----------
-        abre('#saf=S27SF&passo=operacoes'); chk('V12 S27SF veredito R5 (verde) e atalho Colhedoras 56 % · jul/27', veredito() == VER['S27SF'] and atalhos() == ['Maior uso: Colhedoras 56 % · jul/27'], (veredito(), atalhos()))
+        abre('#saf=S27SF&passo=operacoes'); chk('V12 S27SF veredito R5 (verde, para o leitor de tela) e nenhum atalho fora da tabela', veredito() == VER['S27SF'] and atalhos() == [], (veredito(), atalhos()))
         abre('#saf=S2526&passo=operacoes'); ac = acoes()
         chk('V11 S2526: veredito R1; sem atalho; primária "Ver demanda de insumos ›"', veredito() == VER['S2526'] and atalhos() == [] and 'Ver demanda de insumos ›' in ac, (veredito(), atalhos(), ac))
         botao('Capacidade por mês ▾'); K = gcap(); clica_rid('trator'); pn = painel()
@@ -242,7 +244,10 @@ try:
         fechar(); clica_rid('op:Pulverização'); pn = painel(); chk('V11 S2526: rendimento só em consulta', pn and 'Salvar' not in pn, pn[:200]); fechar()
         abre('#saf=LG2627&passo=operacoes'); vlg = veredito()
         chk('V8 LG2627 veredito R2', vlg.startswith('Falta recurso: Operadores e equipe precisam de 127 em nov/26 e você tem 8 (9 meses); Tratores, 10 em out/26 e você tem 4 (4 meses). Inclui 56 ocorrências ainda sem alocação. Fora da conta: 75 ocorrências antes do início da safra (01/09/2026).'), vlg)
-        chk('V8 atalhos "Operadores e equipe 1.584 % · nov/26" e "Tratores 234 % · out/26"', atalhos() == ['Operadores e equipe 1.584 % · nov/26', 'Tratores 234 % · out/26'], atalhos())
+        # 15/10 (TAB-06): o alerta fica só na linha. Com a coluna Situação à vista (o teste liga todas as colunas: cv_todas_sempre), ele é o chip
+        # da célula; com ela recolhida, é o ⚠ da 1ª coluna com o texto na dica. Lê os dois, nas linhas da tabela
+        ico = c.js("[...document.querySelectorAll('[data-g2g^=g_op] [role=row]')].map(r=>[r.innerText,...[...r.querySelectorAll('[data-dica]')].map(e=>e.dataset.dica)].filter(d=>/Operadores e equipe 1.584 %|Tratores 234 %/.test(d)).join('|')).filter(Boolean).join('|')") or ''
+        chk('V8 sem atalho fora da tabela; Operadores e equipe 1.584 % e Tratores 234 % ficam nas linhas (chip da Situação ou dica do ⚠)', atalhos() == [] and 'Operadores e equipe 1.584 %' in ico and 'Tratores 234 %' in ico, [atalhos(), ico[:300]])
         chk('V8 qualificador do custo (antes do início e pendentes)', 'inclui ' + rs(919906.51) + ' de antes de 01/09/2026; não inclui as ocorrências pendentes' in custo(), custo())
         txt = c.js("document.body.innerText"); chk('V8 Colheita de frutas: "sem recurso na fazenda · precisa de 10, tem 8"', 'sem recurso na fazenda · precisa de 10, tem 8' in txt, '')
         botao('Capacidade por mês ▾'); op_ = next(r for r in gcap()['rows'] if r['_id'] == 'oper')

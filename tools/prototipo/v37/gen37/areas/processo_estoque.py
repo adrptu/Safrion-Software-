@@ -8,6 +8,7 @@ import json
 from engine import (grid,esc,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,DISP,BTN_ST,EXTRA,EXTRAJS,_MINI,_MINIP)
 import engine as E
 from ui37 import shell37, secoes_state, HEIGHTS37
+import ui37
 import dados2 as D2
 import cenario
 
@@ -42,6 +43,7 @@ def _notas():
 def _ped_label(p): return f"{p['id']} · {p['item']} · {_forn(p['f'])}"
 
 def bloco(titulo,desc,corpo,acao=''):
+    desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
             f'<div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px;"><div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">'
             f'<h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">{esc(titulo)}</h3><div style="font-size: 12.8px; color: {MUTED};">{esc(desc)}</div></div>{acao}</div>'
@@ -69,7 +71,7 @@ def _dados_js():
     chave={l['lote']:l['item']+'|'+l['lote'] for l in D2.LOTES}
     conts=[dict(id=c['id'],key=chave[c['lote']],sis=(c['sistema'] if c['contado'] is not None else None),cont=c['contado'],
                 contador=CONTADOR_BASE.get(c['id'],''),causa=CAUSA_BASE.get(c['id'],''),aj=None,hist=[]) for c in D2.CONTAGENS]
-    return dict(hoje=D2.HOJE,pedidos=peds,recs=recs,contagens=conts,conds=CONDS,sem_validade=SEM_VALIDADE,imped=IMPED,locais=LOCAIS)
+    return dict(hoje='/'.join(reversed(cenario.DIA_OP.split('-'))),pedidos=peds,recs=recs,contagens=conts,conds=CONDS,sem_validade=SEM_VALIDADE,imped=IMPED,locais=LOCAIS)
 
 def build():
     fname='EST.dc.html'; E._reset_screen(fname)
@@ -132,12 +134,15 @@ def build():
         [],edit=dict(m='origin',title='Movimento',fields=[dict(k='tipo',l='Movimento',t='txt',ro=True),dict(k='quem',l='Quem',t='txt',ro=True)]),
         gid='g_mov',total=False,qf=dict(k='tipo',cut=' · ',todas='Todos'))
     # ---------- JS: cenário compartilhado + processo ----------
-    EXTRAJS[0]=cenario.js_prefixo()+'const E2 = '+json.dumps(_dados_js(),ensure_ascii=False).replace('</','<\\/')+';\n'+JS
+    # v55: com o Beneficiamento fora da navegação (ui37.BEN_PUBLICADO=False) o Estoque não aponta a tela oculta: o retorno da devolução guiada
+    # ("Voltar à OB-…", rodada 3) só existe com a tela publicada; o endereço vem desta constante, como o PR_BEN_H de Cargas e Estoque de produto
+    EXTRAJS[0]=cenario.js_prefixo()+'const E2 = '+json.dumps(_dados_js(),ensure_ascii=False).replace('</','<\\/')+';\n'+'const EST_BEN_H='+json.dumps('BEN.dc.html' if ui37.BEN_PUBLICADO else '')+';\n'+JS
     # ---------- corpo ----------
     acao_bloco=f'<button type="button" onClick="{H("prim_fn")}" style="{H("prim_st")}">{H("prim_t")}</button>'   # ação da etapa no bloco onde age
     s1=kline('k1')+bloco('Recebimentos','Confira a nota contra o pedido e o material; clique na linha para conferir.',g_rec,acao=acao_bloco)
     s2=kline('k2')+bloco('Entregas por O.S.','Entregue por item, do lote reservado, só para O.S. liberada ou em execução.',g_ent,acao=acao_bloco)
-    s3=kline('k3')+bloco('Custódia e devoluções','Confira a sobra e receba: apta volta ao disponível, bloqueada vai para quarentena.',g_dev,acao=acao_bloco)
+    volta=(f'<sc-if value="{H("dev_volta_on")}" hint-placeholder-val="{F()}"><a href="{H("dev_volta_h")}" style="align-self: flex-start; color: {ACC}; font-weight: 700; text-decoration: none; font-size: 13px;">{H("dev_volta_t")}</a></sc-if>')   # retorno à ordem pedinte (BEN, rodada 3)
+    s3=kline('k3')+volta+bloco('Custódia e devoluções','Confira a sobra e receba: apta volta ao disponível, bloqueada vai para quarentena.',g_dev,acao=acao_bloco)
     # liberar quarentena: o pedido nasce na linha do lote (gestor); o nº do laudo é digitado aqui, junto da confirmação
     libq=(f'<sc-if value="{H("lib_on")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Liberar quarentena com laudo" style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; padding: 10px 12px; border-radius: 10px; background: {YELS}; border: 1px solid {LINE};">'
           f'<span style="font-size: 13px; font-weight: 600; flex: 1 1 280px;">{H("lib_t")}</span>'
@@ -179,7 +184,6 @@ function eiso(s){ const t=String(s||'').replace(/^previsto /,'').replace(/ \(pre
 function edmy(iso){ const a=String(iso||'').split('-'); return a.length===3?a[2]+'/'+a[1]+'/'+a[0]:'—'; }
 function eym(s){ const m=/^(\d{2})\/(\d{4})$/.exec(String(s||'')); return m?m[2]+'-'+m[1]:''; }
 function eval_(s){ const m=/^(\d{2})\/(\d{4})$/.exec(String(s||'')); return m?Number(m[2])*100+Number(m[1]):999999; }
-function ehojeYM(){ const a=String(E2.hoje).split('/'); return Number(a[2])*100+Number(a[1]); }
 function ereqN(id){ return Number(String(id||'').replace(/\D/g,''))||0; }
 const EOK=['Liberadas','Em execução'];
 const FCOR={'A liberar':'gray','Liberadas':'green','Em execução':'green','Em conferência':'yellow','Encerradas':'gray'};
@@ -200,14 +204,24 @@ function eitem(c,r,it0){ const o=c.ordens[r.os]||{}; const sq=Math.min(epCons(o,
   const it=sq>1e-9?Object.assign({},it0,{consumido:it0.consumido-sq,custodia:it0.custodia+sq}):it0;
   const l=c.lotes[it.prod+'|'+it.lote]||null; const pend=cenSaldoEntregar(it);
   const imp=(o.selos||[]).find(s=>/impedida/i.test(s.t||'')); const im=E2.imped[r.os]||null;
-  const bloq=imp?(im?im.txt:(r.os+' '+String(imp.t).toLowerCase())):''; const selo=imp?(im?im.selo:'O.S. impedida'):'';
+  const bloq=(imp?(im?im.txt:(r.os+' '+String(imp.t).toLowerCase())):'')||estValidadeErro(l); const selo=imp?(im?im.selo:'O.S. impedida'):'';
   const pode=!bloq&&EOK.indexOf(o.etapa)>=0;
   let motivo=bloq;
   if(!motivo&&!pode) motivo=(o.etapa==='A liberar')?(r.os+' aguarda a liberação na O.S. (agrônomo)'):(r.os+' '+(EFASE[o.etapa]||String(o.etapa||'').toLowerCase())+': sem nova entrega');
   const resP=l?Math.max(0,Math.min(l.reservado,eresTot(c,r.id,it.prod)-it.entregue)):0;
   const sinal=(o.ap||[]).some(a=>a.sinc===false);  // apontamento no aparelho: a sobra só é conferida depois do envio
   const cf=cenConfAbertas(c,r.os).find(k=>k.req===r.id&&k.prod===it.prod)||null;
-  return {id:r.id+'|'+it.prod, rid:r.id, os:r.os, o, it, l, un:it.un, pend, pode, bloq, selo, motivo, resP, livre:l?cenDisp(l)+resP:0, quem:it.quem||o.resp||'', sinal, cf}; }
+  /* linha de caixa de ordem do beneficiamento (rodada 3, BEN-D33): o pré-preenchido da devolução é a sobra da linha (benDevPadrao), nunca a
+     custódia de ordem aberta; a O.S. continua com a custódia */
+  const ben=typeof benEh==='function'&&benEh(o); const dp=ben&&it0.custodia>1e-9?benDevPadrao(c,o,it0,r.id):0;
+  return {id:r.id+'|'+it.prod, rid:r.id, os:r.os, o, it, l, un:it.un, pend, pode, bloq, selo, motivo, resP, livre:l?cenDisp(l)+resP:0, quem:it.quem||o.resp||'', sinal, cf, ben, dp, dpart:edispPartes(c,r.id,it)}; }
+// o que saiu do "a entregar" sem reposição (campo interno dispensado; a palavra não aparece na tela: a O.S. já usa "dispensar" para a área):
+// a sobra devolvida (movimento de devolução apta com a parte livre), a avaria (devolução bloqueada) e a reserva baixada no Fechar
+function edispPartes(c,rid,it){ if(!((it.dispensado||0)>1e-9)) return []; const mv=(c.movs||[]).filter(m=>m.req===rid&&m.prod===it.prod); const S=f=>mv.filter(f).reduce((a,m)=>a+(m.sobra!==undefined?m.sobra:m.qtd),0);
+  return [[S(m=>m.tipo==='devolucao'&&m.apto&&m.sobra>0),'devolvido como sobra'],[S(m=>m.tipo==='devolucao'&&!m.apto),'avariado'],[S(m=>m.tipo==='reserva-baixa'),'baixado no Fechar']].filter(x=>x[0]>1e-9); }
+// sobra de caixas da ordem do beneficiamento, com a conta (texto da linha e do formulário de Receba devoluções; rodada 3, I-c3)
+function esobTxt(c,o){ const T=benCxTot(c,o), um=benCxUsoMax(o), kg=benKgAberto(o), s=benCxSobra(c,o);
+  return 'Sobra da '+o.id+': '+eq(s,'un')+' = '+eq(T.cust,'un')+' em custódia − '+eq(um,'un')+' que a '+o.id+' ainda embala ('+benKg(kg)+' ÷ '+prFmtT(BENC.cx.massa,0)+' kg por caixa)'; }
 // consumo em conferência (CONC-07): relatado × custódia, quem concilia e as duas decisões do almoxarife (CMD-50)
 function ecfCel(k,c,ask,PF){ const h=[{k:'chip',t:'Consumo em conferência',c:'yellow'},{k:'mut',t:k.id+' · '+cenConfTxt(k,c)+' · '+k.resp}];
   const exc=k.relatado-cenConfCust(c,k)>1e-9;   /* o excedente da custódia sai do lote: aceite do gestor (padrão 2) */
@@ -217,7 +231,7 @@ function ecfCel(k,c,ask,PF){ const h=[{k:'chip',t:'Consumo em conferência',c:'y
   if(p.erro) return h.concat([{k:'mut',t:p.erro},{k:'act',t:'Recusar relato',fn:'cfr:'+k.id},{k:'act',t:'Voltar',fn:'cfno:x'}]);
   return h.concat([{k:'txt',t:p.txt},{k:'act',t:'Confirmar aceite',fn:'cfok:'+k.id},{k:'act',t:'Voltar',fn:'cfno:x'}]); }
 function eitens(c){ const out=[]; Object.keys(c.reqs||{}).sort((a,b)=>ereqN(a)-ereqN(b)).forEach(k=>{ const r=c.reqs[k]; (r.itens||[]).forEach(it=>out.push(eitem(c,r,it))); }); return out; }
-function econta(x){ return eq(x.it.solicitado,x.un)+' solicitado − '+eq(x.it.consumido,x.un)+' consumido − '+eq(x.it.custodia,x.un)+' em custódia'; }
+function econta(x){ return eq(x.it.solicitado,x.un)+' solicitado'+(x.dpart||[]).map(p=>' − '+eq(p[0],x.un)+' '+p[1]).join('')+' − '+eq(x.it.consumido,x.un)+' consumido − '+eq(x.it.custodia,x.un)+' em custódia'; }
 function elotes(c){ return Object.keys(c.lotes).map(k=>Object.assign({key:k},c.lotes[k])); }
 function eitemDisp(c,prod){ return Object.values(c.lotes).filter(l=>l.prod===prod).reduce((a,l)=>a+cenDisp(l),0); }
 function elotLbl(l){ return l.lote+' · '+l.prod+' · '+l.local; }
@@ -236,12 +250,13 @@ function eput(c,rec){ c.estInv=c.estInv||{}; c.estInv[rec.id]=rec; }
 function eajuste(c,rec){ return rec&&rec.aj?((c.ajustes||[]).find(a=>a.id===rec.aj)||null):null; }
 function econtou(rec){ return !!rec&&rec.cont!==null&&rec.cont!==undefined&&rec.cont!==''; }
 function enovoInv(c){ let n=2612; const ids=einvs(c).map(x=>x.id); while(ids.indexOf('INV-'+n)>=0) n++; return 'INV-'+n; }
-const MTIPO={'reserva':'Reserva','entrega':'Entrega','recebimento':'Recebimento confirmado no app','consumo':'Consumo apontado no app','devolucao':'Devolução',
+const MTIPO={'reserva':'Reserva','reserva-baixa':'Reserva baixada no Fechar','entrega':'Entrega','recebimento':'Recebimento confirmado no app','consumo':'Consumo apontado no app','devolucao':'Devolução',
   'recebimento-nf':'Recebimento de nota','inspecao':'Quarentena liberada','inspecao-reprovada':'Qualidade reprovada','contagem':'Contagem sem diferença','ajuste':'Ajuste de inventário'};
 function emovQtd(m){ const u=m.un||''; switch(m.tipo){ case 'entrega': return '−'+eq(m.qtd,u); case 'devolucao': case 'recebimento-nf': return '+'+eq(m.qtd,u);
-  case 'ajuste': return esig(m.qtd,u); case 'reserva': return eq(m.qtd,u)+' reservados'; case 'inspecao': return eq(m.qtd,u)+' liberados'; default: return ''; } }
+  case 'ajuste': return esig(m.qtd,u); case 'reserva': return eq(m.qtd,u)+' reservados'; case 'reserva-baixa': return eq(m.qtd,u)+' baixados da reserva'; case 'inspecao': return eq(m.qtd,u)+' liberados'; default: return ''; } }
 function emovTxt(m){ const u=m.un||'';
-  if(m.tipo==='reserva') return 'reserva '+m.req+' → '+m.os+': '+eq(m.qtd,u)+' reservados';
+  if(m.tipo==='reserva') return 'reserva '+m.req+' → '+m.os+': '+eq(m.qtd,u)+' reservados'+(m.det?' ('+m.det+')':'');
+  if(m.tipo==='reserva-baixa') return 'reserva baixada '+m.req+' → '+m.os+': '+eq(m.qtd,u)+' não entregues (Fechar)';
   if(m.tipo==='entrega') return 'entrega '+m.req+' → '+m.os+': −'+eq(m.qtd,u)+' ('+m.quem+')';
   if(m.tipo==='devolucao') return 'devolução '+m.req+' ('+m.os+'): +'+eq(m.qtd,u)+(m.apto?' apta':' bloqueada para inspeção');
   if(m.tipo==='recebimento-nf') return 'recebimento '+m.doc+': +'+eq(m.qtd,u)+(m.apto?' apto':' em quarentena')+(m.val&&m.val!=='—'?' · validade '+m.val:'');
@@ -253,7 +268,12 @@ function emovTxt(m){ const u=m.un||'';
 // consumo: o canal do apontamento (app ou web) ou o aceite do almoxarife (conf = o caso conciliado)
 function emovTipo(m){ if(m.tipo==='consumo'&&m.origem!=='app') return typeof m.conf==='string'?'Consumo aceito na conferência':'Consumo apontado na web'; return MTIPO[m.tipo]||m.tipo; }
 // lote vencido: validade (mês/ano) anterior ao mês de hoje; entra todo em quarentena e não volta ao disponível
-function evenc(l){ return !!l&&!!l.validade&&l.validade!=='—'&&eval_(l.validade)<ehojeYM(); }
+function evenc(l){ return cenLoteVencido(l,eiso(E2.hoje)); }
+function estValidadeEntradaErro(l){ return evenc(l)?'Lote '+l.lote+' vencido em '+l.validade+': receba em quarentena, sem quantidade apta para uso.':''; }
+// Um mesmo lote não pode misturar entradas com validades diferentes, nem pela quarentena.
+function estValidadeConflito(l,val){ if(!l) return ''; const normal=v=>String(v||'').trim().replace(/^—$/,'');
+  const atual=normal(l.validade), recebida=normal(val); return atual===recebida?'':'A validade informada difere da registrada no lote '+l.lote+' ('+(atual||'sem validade')+'). Confira o lote e a validade no documento antes de receber; o estoque foi preservado.'; }
+function estValidadeErro(l){ return evenc(l)?'Lote '+l.lote+' vencido em '+l.validade+': não pode ser entregue. Revise a reserva com o responsável pela O.S.; o físico permanece no estoque.':''; }
 // consumo apontado no app: "Glifosato 480 10, 2,4-D 806 5" (cenFecharTurno) → itens com a unidade da requisição ou da O.S.
 function econsDet(c,m){ const r=m.req&&c.reqs[m.req]; const o=c.ordens[m.os]||{};
   return String(m.det||'').split(', ').map(s=>{ const x=/^(.*)\s(-?[\d.]+(?:,\d+)?)$/.exec(s.trim()); if(!x) return null; const prod=x[1];
@@ -284,20 +304,30 @@ function emovDoc(c,m,usados){ if(m.doc||m.tipo!=='ajuste') return m.doc?{doc:m.d
 // ---------- mudanças no cenário (sempre dentro de cenMudar) ----------
 // Recebimento: a parte apta e a parte em quarentena entram no mesmo lote (cenReceber); os dados da conferência ficam no movimento.
 // chave: do formulário de quem confere (ENG-021); o mesmo formulário enviado 2× não recebe de novo (cenIdem; revisão CONF 13/10)
-function estReceber(c,d,ator,chave){ return cenIdem(c,chave,JSON.stringify(['estReceber',d,(g2pf(ator)||{}).k||'']),'Recebimento '+(d.nf||''),()=>estReceber0(c,d,ator)); }
+const EST_ITEM_DIFERENTE='Item diferente do pedido: não confirme como o produto comprado. Confira o item com o fornecedor e corrija o pedido antes de receber. Nada entrou no estoque.';
+function estReceber(c,d,ator,chave){
+  // Quarentena também guarda a identidade do produto: não pode mascarar um item diferente.
+  if(d.div==='Item diferente do pedido') throw new Error(EST_ITEM_DIFERENTE);
+  return cenIdem(c,chave,JSON.stringify(['estReceber',d,(g2pf(ator)||{}).k||'']),'Recebimento '+(d.nf||''),()=>estReceber0(c,d,ator)); }
 function estReceber0(c,d,ator){   /* ator: quem confere (perfil); o movimento grava quem agiu (revisão do CTL-3, achado 4) */ const n0=c.movs.length; const antes=eitemDisp(c,d.item);
+  const validadeErro=estValidadeEntradaErro({lote:d.lote,validade:d.val})||estValidadeEntradaErro(c.lotes[d.item+'|'+d.lote]);
+  if(d.apto>0&&validadeErro) throw new Error(validadeErro);
+  const conflito=estValidadeConflito(c.lotes[d.item+'|'+d.lote],d.val); if(conflito) throw new Error(conflito);
   if(d.apto>0) cenReceber(c,d.item,d.lote,d.apto,d.un,d.local,d.val,d.nf,true,ator);
   if(d.quar>0) cenReceber(c,d.item,d.lote,d.quar,d.un,d.local,d.val,d.nf,false,ator);
   if(c.movs.length===n0) throw new Error('Nada conferido para entrar no estoque.');
   c.movs.slice(n0).forEach(m=>{ m.val=d.val; }); c.movs[n0].estRec=d;
   return {msg:'Recebimento '+d.nf+' conferido: '+eq(d.conf,d.un)+' de '+d.item+' no lote '+d.lote+(d.val&&d.val!=='—'?' (validade '+d.val+')':'')+'. Disponível '+eq(antes,d.un)+' → '+eq(eitemDisp(c,d.item),d.un)+(d.quar?'; '+eq(d.quar,d.un)+' em quarentena ficam fora do disponível.':'.')}; }
-// Entrega: só a reserva desta requisição é baixada (a de outras O.S. fica); a nova entrega aguarda a confirmação no app.
+// Entrega: só a reserva desta requisição é baixada (regra única no cenEntregar, rodada 3); a nova entrega aguarda a confirmação no app.
 function estEntregar(c,rid,prod,qtd,quem,ator,chave){ return cenIdem(c,chave,JSON.stringify(['estEntregar',rid,prod,Number(qtd),quem||'',(g2pf(ator)||{}).k||'']),'Entrega',()=>estEntregar0(c,rid,prod,qtd,quem,ator)); }
 function estEntregar0(c,rid,prod,qtd,quem,ator){ const r0=c.reqs[rid]; const it0=r0&&r0.itens.find(i=>i.prod===prod); const l=it0&&c.lotes[prod+'|'+it0.lote];
-  const res0=l?l.reservado:0; const own=it0&&l?Math.max(0,Math.min(res0,eresTot(c,rid,prod)-it0.entregue)):0;
-  const r=cenEntregar(c,rid,prod,qtd,quem,ator);
-  if(l) l.reservado=Math.max(0,res0-Math.min(qtd,own)); it0.confirmado=false; return r; }
-function estDevolver(c,rid,prod,qtd,apto,obs,ator){ const r=cenDevolver(c,rid,prod,qtd,apto,ator); if(obs) c.movs[c.movs.length-1].obs=obs;
+  const validadeErro=estValidadeErro(l); if(validadeErro) throw new Error(validadeErro);   // EST-1 (Codex): lote vencido não sai
+  const r=cenEntregar(c,rid,prod,qtd,quem,ator); it0.confirmado=false; return r; }   // a reserva própria é baixada no cenEntregar0 (BEN rodada 3, I-d3)
+function estDevolver(c,rid,prod,qtd,apto,obs,ator){
+  const req0=c.reqs[rid],it0=req0&&req0.itens.find(i=>i.prod===prod);
+  const validadeErro=estValidadeEntradaErro(it0&&c.lotes[prod+'|'+it0.lote]);
+  if(apto&&validadeErro) throw new Error(validadeErro);
+  const r=cenDevolver(c,rid,prod,qtd,apto,ator); if(obs) c.movs[c.movs.length-1].obs=obs;
   const req=c.reqs[rid]; const o=c.ordens[req.os]||{}; const it=req.itens.find(i=>i.prod===prod); const pe=cenPodeEncerrar(c,req.os);
   return {msg:r.msg+' Custódia de '+prod+' na '+req.os+': '+eq(it.custodia+qtd,it.un)+' → '+eq(it.custodia,it.un)+(o.etapa==='Em conferência'&&!pe?' · encerramento liberado.':'.')}; }
 // contador do inventário (revisão CONF F6): pessoas com acesso Ativo e o papel almoxarife em Configurações, em ordem alfabética; nunca uma lista
@@ -340,6 +370,7 @@ function evelha(c,rec){ if(!econtou(rec)||Math.abs(rec.cont-rec.sis)<1e-9) retur
 const ESTV={};
 ESTV.g_rec=(self,fm)=>{ const C=cenGet(); const e={}, d=fm.draft; const n=(k)=>g2num(d[k]); const conf=n('conf'), apto=n('apto'), quar=eblank(d.quar)?0:n('quar'), qnf=n('qtd_nf');
   const p=epeds(C).find(x=>x.id===elotId(d.ped)); const u=(p&&p.un)||'kg';
+  if(d.div==='Item diferente do pedido') e.div=EST_ITEM_DIFERENTE;
   if(!isNaN(conf)&&!isNaN(apto)&&!isNaN(quar)&&Math.abs(apto+quar-conf)>1e-6) e.apto='Apta + quarentena deve somar a conferida ('+eq(conf,u)+').';
   if(!isNaN(conf)&&!isNaN(qnf)&&Math.abs(conf-qnf)>1e-6&&d.div==='Sem divergência') e.div='A conferida difere da nota em '+eq(Math.abs(conf-qnf),u)+': indique a divergência.';
   if(p&&!isNaN(conf)&&conf>p.a_entregar+1e-6&&d.div!=='Sobra') e.conf='Acima do saldo do pedido '+p.id+' ('+eq(p.a_entregar,u)+' a entregar): registre como sobra.';
@@ -349,8 +380,9 @@ ESTV.g_rec=(self,fm)=>{ const C=cenGet(); const e={}, d=fm.draft; const n=(k)=>g
   if(!efert(d.ped)){ const vv=String(d.val||'').trim();
     if(!vv) e.val='Informe a validade do lote (mês/ano, ex.: 06/2027).';
     else if(!/^(0[1-9]|1[0-2])\/\d{4}$/.test(vv)) e.val='Use mês/ano com 4 dígitos no ano (ex.: 06/2027).';
-    else if(eval_(vv)<ehojeYM()){ if(!isNaN(apto)&&apto>1e-9) e.apto='Lote vencido em '+vv+': registre toda a quantidade em quarentena (Apta para uso = 0).';
+    else if(evenc({validade:vv})){ if(!isNaN(apto)&&apto>1e-9) e.apto=estValidadeEntradaErro({lote:lt,validade:vv});
       if(!String(d.obs||'').trim()) e.obs='Informe o motivo (lote vencido em '+vv+').'; } }
+  const conflito=p&&estValidadeConflito(C.lotes[p.item+'|'+lt],efert(d.ped)?'—':d.val); if(conflito&&!e.val) e.val=conflito;
   return e; };
 ESTV.g_ent=(self,fm)=>{ const e={}; const x=eitens(cenGet()).find(y=>y.id===fm.rid); if(!x) return e; const n=g2num(fm.draft.qtd); if(isNaN(n)) return e;
   if(n>x.pend+1e-9) e.qtd='Acima do saldo a entregar: '+eq(x.pend,x.un)+' ('+econta(x)+').';
@@ -360,6 +392,7 @@ ESTV.g_dev=(self,fm)=>{ const e={}; const x=eitens(cenGet()).find(y=>y.id===fm.r
   if(x.sinal){ e.qtd='Apontamento de '+x.os+' no aparelho, aguardando sinal: receba a sobra depois do envio.'; return e; }
   if(x.cf){ e.qtd='Consumo em conferência ('+x.cf.id+'): aceite ou recuse o relato antes de receber devolução.'; return e; }
   if(!isNaN(n)&&n>x.it.custodia+1e-9) e.qtd='Acima da custódia: só '+eq(x.it.custodia,x.un)+' estão com '+x.quem+'.';
+  if(fm.draft.cond===E2.conds[0]&&evenc(x.l)) e.cond=estValidadeEntradaErro(x.l);
   if(fm.draft.cond!==E2.conds[0]&&!String(fm.draft.obs||'').trim()) e.obs='Descreva a condição (ex.: embalagem aberta).';
   return e; };
 ESTV.g_cnt=(self,fm)=>{ const e={}; const C=cenGet(); if(!elotKey(C,fm.draft.lote)){ e.lote='Escolha o lote contado.'; return e; }
@@ -377,8 +410,20 @@ ESAVE.g_rec=(self,fm)=>{ const d=fm.draft; const p=epedBase(d.ped); const n=k=>e
   const r=cenMudar(null,c=>estReceber(c,rec,g2perfil(),eChave(fm,'REC'))); r.fl=id; return r; };
 ESAVE.g_ent=(self,fm)=>{ const x=eitens(cenGet()).find(y=>y.id===fm.rid); if(!x) return {erro:'Requisição não encontrada.'};
   return cenMudar(null,c=>estEntregar(c,x.rid,x.it.prod,g2num(fm.draft.qtd),fm.draft.quem,g2perfil(),eChave(fm,'ENT'))); };
-ESAVE.g_dev=(self,fm)=>{ const x=eitens(cenGet()).find(y=>y.id===fm.rid); if(!x) return {erro:'Requisição não encontrada.'};
-  return cenMudar(null,c=>estDevolver(c,x.rid,x.it.prod,g2num(fm.draft.qtd),fm.draft.cond===E2.conds[0],String(fm.draft.obs||'').trim(),g2perfil())); };
+ESAVE.g_dev=(self,fm)=>{ const C=cenGet(); const x=eitens(C).find(y=>y.id===fm.rid); if(!x) return {erro:'Requisição não encontrada.'};
+  /* atalho guiado (EST.dc.html#dev=…, rodada 3, I-c5): se a sobra ou a fase da ordem mudou depois que o formulário abriu (outra aba), recusa sem
+     escrita, diz o que mudou e atualiza a quantidade. A versão vai no endereço só como contexto: uma saída de Produto sobe a versão sem mudar a
+     sobra (−caixas e −kg). Dano evitado: devolver caixas que a ordem voltou a precisar */
+  /* revisão A8 (S2): a revalidação vale para todo caminho de abertura (lista, primária e #dev): o que a pessoa viu ao abrir (self._estDevVi:
+     sobra, fase e entregue − devolvido da linha) é conferido no Salvar. entregue − devolvido muda com outra devolução ou entrega gravada, não
+     com a saída de Produto. Dano evitado: a aba velha aberta pela lista gravava de novo a sobra já recebida (custódia 869 → 730 → 591) */
+  const D=self._estDev; const V=self._estDevVi&&self._estDevVi.id===x.id?self._estDevVi:null; if(V&&x.ben){ const sob=benCxSobra(C,x.o), et=x.o.etapa, mv=x.it.entregue-x.it.devolvido;
+    if(sob!==V.sob||et!==V.etapa||Math.abs(mv-V.mov)>1e-9){ const t='A '+x.os+' mudou depois que você abriu ('+[sob!==V.sob?'sobra '+eq(V.sob)+' → '+eq(sob,'un'):'',et!==V.etapa?V.etapa+' → '+et:'',
+        Math.abs(mv-V.mov)>1e-9?'outra devolução ou entrega gravada na '+x.rid+': custódia '+eq(x.it.custodia,x.un):''].filter(Boolean).join('; ')+'): nada foi gravado. A quantidade foi atualizada; confira e salve de novo.';
+      V.sob=sob; V.etapa=et; V.mov=mv; if(D&&D.rid===x.rid){ D.sob=sob; D.etapa=et; } return {erro:t,draft:{qtd:x.dp>0?String(x.dp):''}}; } }
+  const r=cenMudar(null,c=>estDevolver(c,x.rid,x.it.prod,g2num(fm.draft.qtd),fm.draft.cond===E2.conds[0],String(fm.draft.obs||'').trim(),g2perfil()));
+  if(!r.erro&&D&&D.rid===x.rid){ self._estDev=null; if(D.para) self.setState({est_volta:D.para}); try{ history.replaceState(null,'',location.pathname); }catch(e){} }
+  return r; };
 ESAVE.g_cnt=(self,fm)=>{ const d=fm.draft; const C=cenGet(); const rec=fm.rid?einvRec(C,fm.rid):null; const causa=String(d.causa||'').trim();
   if(econtou(rec)) return cenMudar(null,c=>estCausa(c,rec.id,causa));
   const key=elotKey(C,d.lote); const inv=rec?rec.id:enovoInv(C); const r=cenMudar(null,c=>estContar(c,inv,key,g2num(d.cont),d.contador,causa,g2perfil())); r.fl=inv; return r; };
@@ -390,7 +435,7 @@ g2save=function(self,sp){ const fm=g2st(self,sp.id).fm; if(!fm||fm.ro||!ESAVE[sp
   const e=Object.assign({},ESTV[sp.id]?(ESTV[sp.id](self,fm)||{}):{},efields(sp,fm));
   if(Object.keys(e).length){ g2set(self,sp.id,{fm:Object.assign({},fm,{errs:e,warn:false})}); return; }
   const r=ESAVE[sp.id](self,fm)||{};
-  if(r.erro){ g2set(self,sp.id,{fm:Object.assign({},fm,{errs:{[ECAMPO[sp.id]]:r.erro},warn:false})}); return; }
+  if(r.erro){ g2set(self,sp.id,{fm:Object.assign({},fm,{errs:{[ECAMPO[sp.id]]:r.erro},warn:false},r.draft?{draft:Object.assign({},fm.draft,r.draft)}:{})}); return; }
   g2set(self,sp.id,{fm:null,fl:r.fl||fm.rid}); self.setState({cenrev:Date.now(),g2toast:r.msg||'Salvo.'}); };
 // as grades desta tela são sempre recalculadas do cenário (nada fica preso no estado local da grade)
 const ECEN={g_rec:1,g_ent:1,g_dev:1,g_lot:1,g_cnt:1,g_mov:1};
@@ -441,7 +486,7 @@ function PREVALS(self,v){
   // ---- etapa 2: entregas por O.S. ----
   let nent=0,nag=0,ncons=0,nimp=0;
   const eord=x=>(x.pode&&x.l&&x.pend>1e-9)?0:(x.pode?1:2);
-  GR('g_ent').rows=IT.slice().sort((a,b)=>(eord(a)-eord(b))||(ereqN(a.rid)-ereqN(b.rid))).map(x=>{ const u=x.un, it=x.it, o=x.o; const ag=it.custodia>1e-9&&!it.confirmado;
+  GR('g_ent').rows=IT.slice().sort((a,b)=>(eord(a)-eord(b))||(ereqN(a.rid)-ereqN(b.rid))).map(x=>{ const u=x.un, it=x.it, o=x.o; const ag=it.custodia>1e-9&&!it.confirmado&&!x.ben;
     if(eord(x)===0) nent++; if(ag) nag++; if(x.bloq) nimp++; else if(!x.pode) ncons++;
     const r={id:x.id,ro:eord(x)!==0,v:{req:x.rid,os:x.os,un:u,emb:it.emb||'',fase:o.etapa||'',item:it.prod,sol:it.solicitado,ent:it.entregue,pend:x.pend,
       lote:x.l?(x.l.lote+' · '+x.l.local+(x.l.validade&&x.l.validade!=='—'?' · validade '+x.l.validade:'')):'Sem lote no estoque',qtd:x.pend>1e-9?x.pend:'',quem:x.quem},s:{},p:{}};
@@ -459,7 +504,7 @@ function PREVALS(self,v){
     else if(x.pend<=1e-9) sit={k:'chip',t:'Entrega completa',c:'green'};
     else if(it.entregue>0) sit={k:'chip',t:'Parcial',c:'yellow'}; else sit={k:'chip',t:'A entregar',c:'gray'};
     if(x.pode&&x.l&&x.pend>1e-9) sub=(x.livre<x.pend-1e-9?'lote cobre só '+eq(x.livre,u)+' dos '+eq(x.pend,u):(it.entregue>0?'faltam '+eq(x.pend,u):''));
-    const tot=((o.ins||[]).find(i=>i.p===it.prod)||{}).tot; if(x.pode&&tot&&tot>it.solicitado+1e-9) sub=(sub?sub+' · ':'')+'O.S. pede '+eq(tot,u)+', reservado '+eq(it.solicitado,u);
+    const tot=((o.ins||[]).find(i=>i.p===it.prod)||{}).tot; const solO=IT.filter(y=>y.os===x.os&&y.it.prod===it.prod).reduce((a,y)=>a+y.it.solicitado,0); if(x.pode&&tot&&tot>solO+1e-9) sub=(sub?sub+' · ':'')+'O.S. pede '+eq(tot,u)+', reservado '+eq(it.solicitado,u);
     // situação (chips do estado) e detalhe (o porquê, com quantidades) em colunas próprias
     r.p.sit=[sit].concat(ag?[{k:'chip',t:'Aguardando confirmação no app',c:'yellow'}]:[]).concat(x.selo?[{k:'chip',t:x.selo,c:'yellow'}]:[]);
     r.s.sit=sit.t+(ag?' · Aguardando confirmação no app':''); r.v.det=sub; r.s.det=sub; r.p.det=sub?[{k:'txt',t:sub}]:[{k:'mut',t:'—'}]; return r; });
@@ -469,7 +514,7 @@ function PREVALS(self,v){
   const custs=[];
   GR('g_dev').rows=IT.filter(x=>x.it.entregue>1e-9||x.it.custodia>1e-9).sort((a,b)=>((b.it.custodia>1e-9)-(a.it.custodia>1e-9))||(ereqN(a.rid)-ereqN(b.rid))).map(x=>{
     const u=x.un, it=x.it, o=x.o; const cu=it.custodia>1e-9; if(cu) custs.push(x);
-    const r={id:x.id,ro:!cu||x.sinal||!!x.cf,v:{req:x.rid,os:x.os,item:it.prod,lote:it.lote,un:u,com:cu?x.quem:'',ent:it.entregue,cons:it.consumido,dev:it.devolvido,cust:it.custodia,qtd:cu?it.custodia:'',cond:E2.conds[0],obs:''},s:{},p:{}};
+    const r={id:x.id,ro:!cu||x.sinal||!!x.cf,v:{req:x.rid,os:x.os,item:it.prod,lote:it.lote,un:u,com:cu?x.quem:'',ent:it.entregue,cons:it.consumido,dev:it.devolvido,cust:it.custodia,qtd:cu?(x.ben?(x.dp>0?x.dp:''):it.custodia):'',cond:E2.conds[0],obs:''},s:{},p:{}};
     r.p.req=[{k:'b',t:x.rid}]; r.s.req=x.rid; r.p.os=[{k:'link',t:x.os,h:'OS.dc.html'}]; r.s.os=x.os;
     r.p.item=[{k:'txt',t:it.prod}]; r.s.item=it.prod; r.s.lote=it.lote;
     r.p.ent=[{k:'txt',t:eq(it.entregue,u)}]; r.p.cons=[{k:'txt',t:eq(it.consumido,u)}]; r.p.dev=[{k:'txt',t:eq(it.devolvido,u)}];
@@ -480,6 +525,7 @@ function PREVALS(self,v){
     if(x.cf){ r.p.enc=ecfCel(x.cf,C,self.state.est_cfask,PF); r.s.enc='Consumo em conferência '+x.cf.id; r.p.det=[{k:'mut',t:'—'}]; r.s.det=''; return r; }
     if(o.etapa==='Em conferência'){ if(pe){ enc={k:'chip',t:'Bloqueado',c:'red'}; es=cOS?cOS+' em custódia':pe; } else { enc={k:'chip',t:'Pode encerrar',c:'green'}; es='custódia zero'; } }
     else if(cu&&x.sinal){ enc={k:'chip',t:'Aguardando sinal do app',c:'yellow'}; es='consumo no aparelho · receba a sobra depois do envio'; }
+    else if(cu&&x.ben){ enc=x.dp>0?{k:'chip',t:'Sobra a receber',c:'yellow'}:{k:'chip',t:'Em uso na ordem',c:'gray'}; es=x.dp>0?esobTxt(C,o):('a '+x.os+' ainda embala '+benKg(benKgAberto(o))+' (até '+eq(benCxUsoMax(o),u)+')'); }
     else if(cu){ enc={k:'chip',t:'Em uso na O.S.',c:'gray'}; es='O.S. '+(EFASE[o.etapa]||String(o.etapa||'').toLowerCase()); }
     else enc={k:'chip',t:'Sem custódia',c:'gray'};
     r.p.enc=[enc]; r.s.enc=enc.t; r.v.det=es; r.s.det=es; r.p.det=es?[{k:'txt',t:es}]:[{k:'mut',t:'—'}]; return r; });
@@ -497,7 +543,7 @@ function PREVALS(self,v){
     const fis=S(l=>l.fisico), blq=S(l=>l.quarentena), res=S(l=>l.reservado), dp=S(cenDisp); if(blq>1e-9) quarTxt.push(pr+' '+eq(blq,un));
     const bv=S(l=>evenc(l)?l.quarentena:0); if(blq-bv>1e-9) inspTxt.push(pr+' '+eq(blq-bv,un)); if(bv>1e-9) vencTxt.push(pr+' '+eq(bv,un));
     const id='I|'+pr; x0[id]=true; const locs=[...new Set(ls.map(l=>l.local))].join(', '); const ex=eexp(pr);
-    const o=[{t:'Disponível = físico − reservado − bloqueado = '+eq(fis,un)+' − '+eq(res,un)+' − '+eq(blq,un)+' = '+eq(dp,un)}]
+    const o=[{t:'Disponível: '+eq(dp,un)+'. Soma do saldo livre dos lotes não vencidos. Em cada lote: físico − reservado − bloqueado, com mínimo de zero.'}]
       .concat(cr.map(x=>({t:'Em custódia (fora do depósito, não soma no físico): '+x.rid+' · '+x.os+' · '+eq(x.it.custodia,un)+' com '+x.quem,h:'OS.dc.html'})))
       .concat(ex.q>1e-9?[{t:'Em conferência (exposição, fora do saldo até a decisão): '+ex.ids.join(', ')+' · '+eq(ex.q,un)+' além da custódia'}]:[]);
     const cos=cr.map(x=>x.os).join(', ');
@@ -574,8 +620,16 @@ function PREVALS(self,v){
   v.k5=nacontar+(nacontar===1?' contagem a fazer':' contagens a fazer')+' · '+naprov+(naprov===1?' ajuste aguardando aprovação':' ajustes aguardando aprovação')+(nvelha?' · '+nvelha+(nvelha===1?' contagem desatualizada a recontar':' contagens desatualizadas a recontar'):'');
   v.k6=(C.movs||[]).length+((C.movs||[]).length===1?' movimento':' movimentos')+' desde o início da demonstração · '+nsin+' aguardando sinal do app';
 }
-function EXTRAVALS(self,v){
+/* atalho da devolução guiada (rodada 3, I-c1): EST.dc.html#dev=<REQ>&para=<OB pedinte>&ver=<versão>&sob=<sobra> abre Receba devoluções com o
+   formulário da linha aberto; a sobra e a fase de quando abriu ficam para a revalidação no Salvar (BEN-D13 superada só para #dev) */
+function estDevHash(self){ if(self.__estDevH) return; self.__estDevH=1; const ab=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||'').slice(1); }catch(e){} if(!/^dev=/.test(h)) return;
+    const q={}; h.split('&').forEach(kv=>{ const i=kv.indexOf('='); if(i>0) q[kv.slice(0,i)]=kv.slice(i+1); }); const C=cenGet(); const r=C.reqs[q.dev]; const it=r&&r.itens.find(i=>i.prod===BENC.cx.item); const o=r&&C.ordens[r.os];
+    if(!it||!o) return; self._estDev={rid:q.dev,para:q.para||'',ver:q.ver||'',sob:q.sob!==undefined&&q.sob!==''&&isFinite(Number(q.sob))?Number(q.sob):benCxSobra(C,o),etapa:o.etapa};
+    setTimeout(()=>{ g2etapa(self,{step:3,est_volta:null}); setTimeout(()=>g2open(self,GR('g_dev'),q.dev+'|'+it.prod,null),60); },0); };
+  ab(); try{ window.addEventListener('hashchange',ab); }catch(e){} }
+function EXTRAVALS(self,v){ estDevHash(self);
   self.g2perfilFecha={est_cfask:null,libask:null,lib_laudo:'',lib_mot:'',lib_err:''};   /* trocar o perfil fecha o aceite do consumo e o laudo da quarentena (com o motivo) */
+  v.dev_volta_on=!!self.state.est_volta&&!!EST_BEN_H; v.dev_volta_h=EST_BEN_H?EST_BEN_H+'#'+(self.state.est_volta||''):'#'; v.dev_volta_t='Voltar à '+(self.state.est_volta||'');
   const st=self.state; const step=st.step||1; const N=6; const C=self._cen||cenGet();
   self.g2live=(gid,k,d)=>{ if(gid==='g_rec'&&k==='val'&&efert(d.ped)) return 'Sem validade'; return undefined; };
   for(let i=1;i<=N;i++) v['s'+i]=(step===i);
@@ -586,7 +640,7 @@ function EXTRAVALS(self,v){
   if(v.est_vazio) prim=['Ver Santa Rita',v.est_versr];
   else if(step===1){ const r=GR('g_rec').rows.find(x=>!x.ro); prim=r?['Conferir '+r.v.nf,()=>g2open(self,GR('g_rec'),r.id,null)]:['Registrar recebimento',()=>v.g_rec_new&&v.g_rec_new()]; }
   else if(step===2){ const r=GR('g_ent').rows.find(x=>!x.ro); prim=r?['Entregar '+r.v.req+' · '+r.v.item,()=>g2open(self,GR('g_ent'),r.id,null)]:null; }
-  else if(step===3){ const xs=IT.filter(y=>y.it.custodia>1e-9&&!y.sinal&&!y.cf).sort((a,b)=>((a.o.etapa==='Em conferência'?0:1)-(b.o.etapa==='Em conferência'?0:1))||(ereqN(a.rid)-ereqN(b.rid))); const x=xs[0];
+  else if(step===3){ const D=self._estDev; const xs=IT.filter(y=>y.it.custodia>1e-9&&!y.sinal&&!y.cf&&!(y.ben&&!(y.dp>0))).sort((a,b)=>((D&&a.rid===D.rid?0:1)-(D&&b.rid===D.rid?0:1))||((a.o.etapa==='Em conferência'?0:1)-(b.o.etapa==='Em conferência'?0:1))||(ereqN(a.rid)-ereqN(b.rid))); const x=xs[0];
     prim=x?['Receber devolução da '+x.rid,()=>g2open(self,GR('g_dev'),x.id,null)]:null; }
   else if(step===4) prim=null;   // saldos: consulta (sem primária)
   else if(step===5){ const r=GR('g_cnt').rows.find(x=>eblank(x.v.cont)); prim=r?['Contar '+r.v.inv,()=>g2open(self,GR('g_cnt'),r.id,null)]:['Nova contagem',()=>v.g_cnt_new&&v.g_cnt_new()]; v.cnt_add=!!r; }
@@ -637,8 +691,19 @@ function EXTRAVALS(self,v){
       else if(!x.l) Fe.sub='Sem lote de '+x.it.prod+' no estoque: receba a nota antes de entregar.';
       else if(x.pend<=1e-9) Fe.sub='Entrega completa: '+econta(x)+' = 0. Sobras e custódia ficam em Receba devoluções.';
       else Fe.sub='Entregue '+x.it.prod+' à '+x.os+' ('+(x.o.tipo||'')+'), do lote '+x.l.lote+(x.it.emb?' em '+x.it.emb:'')+'. O material fica com quem recebe e aguarda a confirmação no app.'; } }
-  const Fd=v.g_dev_F; const fmD=g2st(self,'g_dev').fm; if(Fd&&Fd.open&&fmD){ const x=IT.find(y=>y.id===fmD.rid); if(x){
-      Fd.sub=x.it.custodia<=1e-9?'Sem material em custódia neste item.':x.sinal?('Em custódia: '+eq(x.it.custodia,x.un)+' de '+x.it.prod+' com '+x.quem+' ('+x.os+'). O apontamento do turno está no aparelho, aguardando sinal: receba a sobra depois do envio.'):('Em custódia: '+eq(x.it.custodia,x.un)+' de '+x.it.prod+' com '+x.quem+' ('+x.os+'). Confira e receba: só o conferido volta ao lote '+x.it.lote+'.'); } }
+  const Fd=v.g_dev_F; const fmD=g2st(self,'g_dev').fm;
+  /* revisão A8: o que a pessoa viu ao abrir o formulário de devolução de uma linha do BEN, por qualquer caminho (no #dev, a sobra e a fase do endereço) */
+  if(!fmD) self._estDevVi=null; else { const xv=IT.find(y=>y.id===fmD.rid); if(xv&&xv.ben&&!(self._estDevVi&&self._estDevVi.id===fmD.rid)){ const D0=self._estDev&&self._estDev.rid===xv.rid?self._estDev:null;
+    self._estDevVi={id:fmD.rid,sob:D0?D0.sob:benCxSobra(C,xv.o),etapa:D0?D0.etapa:xv.o.etapa,mov:xv.it.entregue-xv.it.devolvido}; } }
+  if(Fd&&Fd.open&&fmD){ const x=IT.find(y=>y.id===fmD.rid); if(x){
+      const D=self._estDev&&self._estDev.rid===x.rid?self._estDev:null; const sb=x.ben&&x.it.custodia>1e-9?benCxSobra(C,x.o):0;
+      /* revisão A7: o texto segue a fase (conferida: a custódia volta ao lote e o que passar da sobra fica reservado só até o Fechar; não é "tudo registrado" nem "caixas em uso") */
+      const cfx=x.ben&&x.o.etapa==='Em conferência'&&!!(x.o.ben&&x.o.ben.conf);
+      const bt=!x.ben||x.it.custodia<=1e-9?'':(x.dp>0&&x.dp>=x.it.custodia-1e-9&&x.o.etapa==='Em conferência'&&sb<x.dp?(cfx?' '+x.os+' conferida: a custódia inteira volta ao lote '+x.it.lote+(sb>0?'; '+eq(sb,x.un)+' ficam livres (sobra) e o resto fica reservado':' e fica reservada')+' à '+x.os+' até o Fechar.'
+          :' '+x.os+' com tudo registrado (conferência): a custódia inteira volta ao lote '+x.it.lote+'; o que passar da sobra ('+eq(sb,x.un)+') fica reservado à '+x.os+' até o Fechar.')
+        :(sb>0?' '+esobTxt(C,x.o).replace('Sobra da '+x.os+':','Sobra da '+x.os+(D&&D.para?' para a '+D.para:'')+':')+'. Apta, volta livre ao lote '+x.it.lote+'; o que passar de '+eq(sb,x.un)+' volta reservado à '+x.os+(cfx?' até o Fechar.':' (caixas em uso).')
+        :' A '+x.os+' ainda embala '+benKg(benKgAberto(x.o))+' (até '+eq(benCxUsoMax(x.o),x.un)+') e não tem sobra: o que for devolvido volta reservado à '+x.os+' (caixas em uso) no lote '+x.it.lote+'.'));
+      Fd.sub=(x.it.custodia<=1e-9?'Sem material em custódia neste item.':x.sinal?('Em custódia: '+eq(x.it.custodia,x.un)+' de '+x.it.prod+' com '+x.quem+' ('+x.os+'). O apontamento do turno está no aparelho, aguardando sinal: receba a sobra depois do envio.'):('Em custódia: '+eq(x.it.custodia,x.un)+' de '+x.it.prod+' com '+x.quem+' ('+x.os+'). Confira e receba: só o conferido volta ao lote '+x.it.lote+'.'))+bt; } }
   const Fc=v.g_cnt_F; const fmC=g2st(self,'g_cnt').fm; if(Fc&&Fc.open&&fmC){ const rc=fmC.rid?GR('g_cnt').rows.find(x=>x.id===fmC.rid):null;
     Fc.sub=fmC.ro?'Contagem encerrada: consulta.':((rc&&!eblank(rc.v.cont))?'Contagem registrada: quantidade e contador ficam travados. Informe a causa da diferença; para conferir de novo, use Recontar na linha.'
       :'Contagem cega: informe só o que contou. A diferença para o sistema aparece depois de salvar e vira ajuste para aprovação.'); }

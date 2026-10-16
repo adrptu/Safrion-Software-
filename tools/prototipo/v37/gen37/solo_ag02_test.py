@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Análises de solo (AG-02 · SOLO-01) · teste de navegador do fluxo principal (docs/analise-solo/ESPECIFICACAO.md §8).
 Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T):
-  desktop  1440 × 1000: menu (D-01); AC-SOLO-06 registrar o laudo de exemplo (LAU-2073), repetir (recusa), chave repetida (já registrado),
+  desktop  1440 × 1000: navegação (D-01; sem submenus, 13/10/2026: cartão na tela de entrada do Agrícola); AC-SOLO-06 registrar
+           o laudo de exemplo (LAU-2073), repetir (recusa), chave repetida (já registrado),
            Caio não valida, Ana valida e só então o T7 tem sugestão; AC-SOLO-07 LAU-2048 inconsistente sem "Validar" e correção do K;
            AC-SOLO-15 OS-0502 liberada → "não aplicável"; Por quê com a regra rotulada; água no solo (CAD, repetida recusada, sem CC
            recusada) e a CAD como referência no IR-01 (outra CAD não muda lâmina nem necessidade, R24); AC-SOLO-18 tabelas com busca, filtro e ordenação; uma ação primária.
@@ -40,6 +41,19 @@ def ir(pg, w=1440, h=1000, limpa=False, perfil=None):
         if limpa: J("localStorage.clear(); sessionStorage.clear()")
         if perfil: J(f"localStorage.setItem('safrion.perfilDemo',{json.dumps(perfil)})")
     t.goto(pg); time.sleep(.6); lib()
+def espera(js, ate=20.0):
+    """espera a condição observável (página nova pronta), não um tempo fixo; no limite devolve False e o chk seguinte falha"""
+    t0 = time.time()
+    while time.time() - t0 < ate:
+        try:
+            if J(js): return True
+        except Exception: pass
+        time.sleep(.1)
+    return False
+def pronta(pg, extra='true'): return f"location.pathname.endsWith('/{pg}') && document.readyState==='complete' && !!document.body && ({extra})"
+# navegação sem submenus (13/10/2026, ui37.MENU2/HUB37/CURTO37/VOLTA37): módulo marcado, "‹ Módulo" e cartões da tela de entrada
+NAV = "JSON.stringify((()=>{const n=document.querySelector('nav[aria-label=Menu]'); const v=document.querySelector('a.volta37'); return {cur:n?[...n.querySelectorAll('a[aria-current=page]')].map(a=>a.getAttribute('aria-label')):[], volta:v?[v.getAttribute('href'),v.innerText.replace(/\\s+/g,' ').trim()]:null};})())"
+CARDS = "JSON.stringify([...document.querySelectorAll('a.mod-cartao')].filter(a=>a.getClientRects().length).map(a=>[a.getAttribute('href'),a.innerText.replace(/\\s+/g,' ').trim()]))"
 def clk(x, root=None, w=.45): r = J(f"CLK({json.dumps(x)},{json.dumps(root)})"); time.sleep(w); return r
 def row(x, root=None, w=.5): r = J(f"ROW({json.dumps(x)},{json.dumps(root)})"); time.sleep(w); return r
 def rowtxt(x, root=None): return J(f"ROWTXT({json.dumps(x)},{json.dumps(root)})") or ''
@@ -54,12 +68,20 @@ try:
     if 'desktop' in MODOS:
         print('== desktop · AG-02 Análises de solo')
         ir('AG-02.dc.html', limpa=True, perfil='Ana')
-        menu = J("[...document.querySelectorAll('nav a, aside a, .ml-sub a')].map(a=>N(a.innerText)).filter(Boolean)") or []
+        # D-01 como o usuário navega agora: "‹ Agrícola" → tela de entrada → cartão "Análises de solo" de volta ao AG-02. Desde 14/10/2026 a tela de
+        # entrada é o fluxo do processo (ui37.FLUXO37, mod_fluxo_test.py): Agrofit → Análises de solo → Planos agronômicos → Planejar safra (o laudo
+        # vem antes do plano, cujas doses ele sugere); a ordem do menu (MENU2) não muda
+        nv = json.loads(J(NAV) or '{}'); clk('Voltar para Agrícola', w=0); h0 = espera(pronta('MOD-AGR.dc.html', "document.querySelectorAll('a.mod-cartao').length>0"))
+        menu = [x[1] for x in json.loads(J(CARDS) or '[]')]; e0 = t.errs(); lib(); clk('Análises de solo', '.mod-grade', w=0)
+        h1 = espera(pronta('AG-02.dc.html', "document.querySelectorAll('[role=table] [role=row]').length>1")); time.sleep(.3); lib()
         i_pa, i_as, i_sf = [menu.index(x) if x in menu else -1 for x in ('Planos agronômicos', 'Análises de solo', 'Planejar safra')]
-        t.chk('D-01 menu Agrícola: Análises de solo entre Planos agronômicos e Planejar safra', 0 <= i_pa < i_as < i_sf, menu[:14])
+        t.chk('D-01 Agrícola: no fluxo, cartão Análises de solo antes de Planos agronômicos e de Planejar safra; ícone Agrícola marcado, "‹ Agrícola" e o cartão volta ao AG-02 sem erro de JS',
+              0 <= i_as < i_pa < i_sf and nv.get('cur') == ['Agrícola'] and nv.get('volta') == ['MOD-AGR.dc.html', '‹ Agrícola'] and h0 and h1 and not e0 and not t.errs(), [menu, nv, h0, h1, e0, t.errs()])
         t.chk('cabeçalho: "1 inconsistente · 1 aguardando validação" e uma só ação primária (Registrar laudo)', '1 inconsistente · 1 aguardando validação' in t.header() and J("PRIMS()") == ['Registrar laudo'], [t.header(), J("PRIMS()")])
         nb = J("[...document.querySelectorAll('[role=table]')].slice(0,2).map(tb=>{ const g=tb.closest('section')||tb.parentElement; return [!!g.querySelector('input[placeholder^=\"Buscar\"]'), g.querySelectorAll('[role=columnheader]').length, (g.innerText.match(/▾/g)||[]).length]; })")
-        t.chk('AC-SOLO-18 laudos e água no solo com busca, filtro por coluna e ordenação', nb and all(x[0] and x[2] >= 5 for x in nb), nb)
+        # um campo de busca por tela (proprietário, 13/10/2026): o dos laudos busca também na água no solo (mesmo grupo, data-g2q)
+        nq = J("document.querySelectorAll('[data-g2q]').length")
+        t.chk('AC-SOLO-18 laudos e água no solo com filtro por coluna e ordenação e um campo de busca só, para as duas', nb and [x[0] for x in nb] == [True, False] and all(x[2] >= 5 for x in nb) and nq >= 2, [nb, nq])
         o1 = J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row].g2ed')].map(r=>N(r.innerText).split(' ')[0])")
         t.chk('lista ordenada pela coleta (mais recente primeiro): LAU-2050 (19/09) antes de LAU-2043 (12/09)', o1 and o1.index('LAU-2050') < o1.index('LAU-2043'), o1)
         t.chk('V "não calculável" no LAU-2050 (sem H+Al) e "difere do laboratório" no LAU-2071', 'não calculável' in rowtxt('LAU-2050') and 'difere do laboratório' in rowtxt('LAU-2071'), [rowtxt('LAU-2050'), rowtxt('LAU-2071')])

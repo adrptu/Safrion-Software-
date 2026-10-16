@@ -87,7 +87,12 @@ const CASOS = {
   /* AL-15 (P7): conferida no CF-05 dentro do cenMudar (cfPor da tela), antes do comando da assinatura; o backoffice não passa por ela */
   'AL-15': [() => M(c => assinAvancar(c, '2026-10-01', { ha: 2570.23, n: 30 })), ator => M(c => { const f = assinAberta(assinGarante(c).orgs.sr); return assinPagar(c, f.id, 'Pix', confChave('pag'), cenExigeAlc(ator, 'AL-15', 'Pagar a fatura')); }), 'Ana', 'Rui'],
   /* AL-17 (integração com a Colheita): publicar previsão lê a alçada com o perfil de quem age */
-  'AL-17': [() => {}, ator => M(c => prPublicar(c, 'lg19', ator)), 'Ana', 'Rui'] };
+  'AL-17': [() => {}, ator => M(c => prPublicar(c, 'lg19', ator)), 'Ana', 'Rui'],
+  /* AL-18 (CONTROLE-02 F2): o comando real (PlanoReferenciaComando.publicar, PR #58) precisa da tela do Planejar safra; ele lê a alçada por
+     cenExigeAlc(ator, 'AL-18', …) dentro do cenMudar, e este caso lê pelo mesmo ponto */
+  'AL-18': [() => {}, ator => M(c => { cenExigeAlc(ator, 'AL-18', 'Publicar referência técnica'); c.__al18 = ator; return { msg: 'ok' }; }), 'Ana', 'Rui'] };
+caso('A4 AL-18 fixa', () => { ini(); const rv = G().rev; const r = M(c => confAlcMudar(c, 'AL-18', { papel: 'agronomo' }, 'teste', confChave('t'), 'Ana'));
+  ok('A4 AL-18 é fixa (contrato da F2, 6147460986): trocar o papel para agrônomo é recusado sem gravar; segue gestor', !!r.erro && G().rev === rv && g2alc('AL-18').papeis.join() === 'gestor' && g2alc('AL-18').edita === '', [r.erro || r.msg, g2alc('AL-18').papeis]); });
 G2_ALCADAS.forEach(a => caso('A4 ' + a.id, () => { const X = CASOS[a.id]; if (!X) { ok('A4 ' + a.id + ' tem caso de teste', false); return; }
   ini(); X[0](); const rv = G().rev; const rn = X[1](X[3]);
   ok('A4 ' + a.id + ' NEGATIVO sem o papel (' + X[3] + '): recusado "decisão de …", nada gravado', !!rn.erro && /decisão de|exige Direção|Aprovação agronômica/.test(rn.erro) && G().rev === rv, rn.erro || rn.msg);

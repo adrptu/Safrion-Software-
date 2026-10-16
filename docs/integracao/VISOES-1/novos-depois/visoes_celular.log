@@ -1,0 +1,6 @@
+OK   M1 alvos ≥ 44 × 44 px a 390 px com toque (pointer:coarse) e sem toque (janela de 390 px com mouse)
+OK   M2 390 px: Lista, Tabela agrupada e Kanban na barra + "mais"; o menu mostra "Carga por recurso" em texto; Esc fecha e devolve o foco ao "mais"; ↓ no "mais" abre o menu; com a Carga escolhida o "mais" leva a marca e diz o nome
+OK   M3 390 px, em cada visão: nada cortado, sem rolagem lateral, título e "Nova ordem" alcançáveis (MEDE/resumo vazio), uma primária e 0 duplicata
+OK   M4 toque longo (650 ms) no Kanban mostra a dica "Ver em kanban" e não troca a visão
+OK   sem erro de script nas páginas
+RESULTADO: 5 ok · 0 falhas (celular)

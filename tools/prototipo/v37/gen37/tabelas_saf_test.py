@@ -7,14 +7,14 @@ cobertura (só esta atividade) recalcula rendimento e R$/ha na mesma linha; a bu
 sem rolagem da página. Uso: python3 tabelas_saf_test.py [pasta de capturas]   (< 90 s)"""
 import sys, os, time, json, re
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir
+from comp_lib import Chrome, servir, cv_todas_sempre
 OUT = sys.argv[1] if len(sys.argv) > 1 else None
 if OUT: os.makedirs(OUT, exist_ok=True)
 OK, FAIL = [], []
 def chk(n, cond, info=''):
     (OK if cond else FAIL).append(n); print(('  ok  ' if cond else '  FALHOU ') + n + (' · ' + str(info)[:300] if info != '' else ''))
 
-p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js
+p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js; cv_todas_sempre(c)   # VISOES-2 §3.6 / SAF-TAB
 URL = f'http://127.0.0.1:{p}/SAF.dc.html#saf=S2627&passo=operacoes'
 # etapa única (§3.4): 9 colunas (Custo total desde 13/10/2026); a unidade fixa vai na célula ("21,60 ha/h", "2.520 ha-op", "116,7 h", "R$ 14,49/ha-op")
 COLS = ['Operação › atividade › talhão', 'Situação', 'Data', 'Conjunto', 'Rendimento', 'Área trabalhada', 'Horas-conjunto', 'Custo R$/ha', 'Custo total']
@@ -101,6 +101,8 @@ try:
         and all(r.get('TIPO', '') == 'Parcela' or re.match(r'^\d+ parcelas?$', r.get('TIPO', '')) for r in d)
         and len(d) < len([r for r in d2 if r.get('CULTURA') and not r.get('SAFRA', '').endswith('›')]), [(r.get('TALHÃO OU PARCELA', ''), r.get('TIPO', '')) for r in d])
     limpa()
+    # SAF-TAB (14/10): talhão de um cultivo abre recolhido; abre tudo, como a pessoa faria, para editar o cultivo do T2
+    J("(()=>{const b=[...document.querySelectorAll('button.g2xtog')].find(b=>b.offsetParent&&/Expandir tudo/.test(b.innerText)); if(b) b.click();})()"); time.sleep(.4)
     # meta decimal: a célula e o filtro mostram o valor exato com a unidade ("62,5 sc/ha"), sem arredondar
     J(f"(()=>{{const r=[...({TB}).querySelectorAll('[role=row].g2ed')].filter(x=>x.offsetParent).find(x=>/^T2\\b/.test(x.innerText.trim())); r.querySelector('[role=cell]:nth-child(2)').click();}})()"); time.sleep(.5)
     J("""(()=>{const i=document.querySelector('aside [id$="_meta"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'62,5'); i.dispatchEvent(new Event('input',{bubbles:true}));})()"""); time.sleep(.2)

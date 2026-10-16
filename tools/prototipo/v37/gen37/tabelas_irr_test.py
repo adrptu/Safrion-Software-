@@ -19,7 +19,7 @@ por clique (toque) e pelo teclado (setas no seletor de fazenda; o foco fica nele
 Uso: python3 tabelas_irr_test.py [pasta de capturas]   (< 3 min)"""
 import sys, os, re, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir
+from comp_lib import Chrome, servir, cv_todas_sempre
 from tabelas_lib import Grade, limpa, num, un_ok, instante, crescente
 OUT = sys.argv[1] if len(sys.argv) > 1 else None
 if OUT: os.makedirs(OUT, exist_ok=True)
@@ -27,7 +27,7 @@ OK, FAIL = [], []
 def chk(n, cond, info=''):
     (OK if cond else FAIL).append(n); print(('  ok  ' if cond else '  FALHOU ') + n + (' · ' + str(info)[:300] if info != '' else ''), flush=True)
 
-p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js
+p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js; cv_todas_sempre(c)   # V2-3: a tabela completa como foi desenhada (TABELAS-FOCO); o padrão é conferido na VISOES-2
 ERRS = []
 def shot(n):
     if OUT: c.shot(os.path.join(OUT, n + '.png'))

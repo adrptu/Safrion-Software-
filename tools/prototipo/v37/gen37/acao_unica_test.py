@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Teste CDP · UX-ACAO-UNICA-20261003 v2 (padrão de comandos, patch c691c431 · cap. 74 DS-02/26/29/31/33/40/54/61/63, DS-AC-08/17).
 Pedido do Adrianus: no Planejar safra, clicar nas etapas, usar as setas e clicar em "Definir rendimentos" mudavam a etapa por três
-caminhos; "com tantas opções o usuário fica perdido". Uma tarefa ativa = uma primária e uma rota de avanço; a faixa só informa.
+caminhos; "com tantas opções o usuário fica perdido". Uma tarefa ativa = uma primária e uma rota de avanço; a faixa leva à etapa (15/10).
 Modos (cada um < 90 s; capturas em _probe/acao_*.png):
   python3 acao_unica_test.py saf          1-9   Planejar safra: faixa informativa, uma primária por estado, Planejar › na linha do talhão, falta de
                                                 plano, vazio, filtro sem resultado, Corrigir cultivos → revisão, avançar não envia
@@ -17,7 +17,7 @@ Modos (cada um < 90 s; capturas em _probe/acao_*.png):
 Emulação no Chrome headless (largura × altura em px CSS, escala, toque, sem hover): não é aparelho físico."""
 import sys, os, time, json
 HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
-from comp_lib import Chrome, servir, IR_ETAPA
+from comp_lib import Chrome, servir, IR_ETAPA, troca_visao
 MODO=sys.argv[1] if len(sys.argv)>1 else 'saf'
 PROBE=os.path.join(HERE,'_probe'); os.makedirs(PROBE,exist_ok=True)
 OK=[]; FAIL=[]
@@ -31,7 +31,7 @@ EST=r"""(()=>{const n=s=>(s||'').replace(/\s+/g,' ').trim(); const vis=e=>{ if(!
  const dlg=[...document.querySelectorAll('aside[role=dialog]')].find(vis);
  const verde=e=>getComputedStyle(e).backgroundColor==='rgb(30, 122, 76)';
  const prims=[...document.querySelectorAll('header button,header a,main button,main a')].filter(e=>vis(e)&&verde(e)&&!e.closest('.menu-lat')).map(e=>n(e.innerText).slice(0,48));
- const a=document.querySelector('[data-acoes]'); const area=a&&vis(a)?[...a.querySelectorAll('button,a,.acoes-nota')].filter(vis).map(e=>(e.dataset.acao||'nota')+':'+n(e.innerText).slice(0,90)):[];
+ const a=document.querySelector('[data-acoes]'); const area=a&&vis(a)?[...a.querySelectorAll('button,a,.acoes-nota,.acoes-sr')].filter(e=>vis(e)||e.closest('.acoes-menu')||e.classList.contains('acoes-sr')).map(e=>(e.dataset.acao||'nota')+':'+n(e.textContent).slice(0,90)):[];
  const cur=document.querySelector('.etp-ind [aria-current=step]'); const k=cur?Number((n(cur.innerText).match(/\d+/)||[0])[0]):0;
  return {etapa:k, prims, area, avancos:area.filter(x=>x.startsWith('avancar:')).length, dialogo:!!dlg};})()"""
 def errs(): return [e for e in (c.js("window.__errs||[]") or []) if "reading 'g2toast'" not in e]
@@ -55,21 +55,29 @@ def rolagem():   # posição de leitura: a soma das rolagens da casca, do conte�
     return J("(()=>{const col=document.querySelector('.ml-tog+div'); const m=document.querySelector('main[data-scroll]'); return Math.round((col?col.scrollTop:0)+(m?m.scrollTop:0)+[...document.querySelectorAll('main .g2rola,main .rola')].reduce((a,x)=>a+x.scrollTop,0));})()")
 try:
     c=Chrome()
+    if MODO=='saf':   # SAF-TAB: o 5 lê Situação, Área livre e Livre a partir de, fora do padrão das colunas
+        from comp_lib import cv_todas_sempre; cv_todas_sempre(c)
     if MODO=='saf':
-        # 1 · faixa só informa: lista ordenada sem botão, link, handler ou parada de Tab; palavra do estado; clicar não navega; sem setas
+        # 1 · faixa leva à etapa (15/10/2026, proprietário: "permita clicar diretamente na etapa do fluxo de processos desejado e ir para a tela";
+        #     revoga o "só informa" de 03/10): lista ordenada, um botão por cartão, palavra do estado; clicar na etapa 1 vai a ela e na 2 volta;
+        #     etapa travada não navega e diz o motivo; o Tab passa pela faixa; sem setas ‹ › soltas
         abre('SAF',hash='#saf=S2627&etapa=2'); time.sleep(.3)
         fx=J(r"""(()=>{const f=document.querySelector('.etp-ind'); const ol=f&&f.querySelector('ol[aria-label="Etapas do processo"]'); const lis=ol?[...ol.children]:[];
-          return {tag:f?f.tagName:'', ol:!!ol, n:lis.length, li:lis.every(x=>x.tagName==='LI'), ctl:f?f.querySelectorAll('button,a,[tabindex],[onclick],[role=button]').length:-1,
+          return {tag:f?f.tagName:'', ol:!!ol, n:lis.length, li:lis.every(x=>x.tagName==='LI'), btn:lis.map(x=>x.querySelectorAll(':scope>button.etp-ir').length).join(''), lnk:f?f.querySelectorAll('a').length:-1,
             atual:(ol&&ol.querySelector('[aria-current=step]')||{innerText:''}).innerText.replace(/\s+/g,' ').trim(), sr:[...(f?f.querySelectorAll('.etp-sr'):[])].map(x=>x.textContent.trim()),
-            setas:document.querySelectorAll('[aria-label^="Etapa anterior"],[aria-label^="Próxima etapa"]').length, cursor:lis[2]?getComputedStyle(lis[2]).cursor:''};})()""")
-        J("document.querySelectorAll('.etp-ind ol>li')[2].click()"); time.sleep(.4); e1=est()
-        J("document.activeElement&&document.activeElement.blur()"); paradas=[]
-        for _ in range(45):
-            c.tab(); paradas.append(J("(()=>{const a=document.activeElement; return a?(a.closest('.etp-ind')?'FAIXA':(a.closest('[data-acoes]')?'AREA':'')):'';})()"))
+            setas:document.querySelectorAll('[aria-label^="Etapa anterior"],[aria-label^="Próxima etapa"]').length, cursor:lis[0]?getComputedStyle(lis[0].querySelector('button')||lis[0]).cursor:''};})()""")
+        J("document.querySelectorAll('.etp-ind ol>li')[0].querySelector('button').click()"); time.sleep(.5); e1=est()
+        J("document.querySelectorAll('.etp-ind ol>li')[1].querySelector('button').click()"); time.sleep(.5); e2=est()
+        foco=J("[...document.querySelectorAll('.etp-ind .etp-ir')].map(b=>{ b.focus(); return document.activeElement===b&&b.tabIndex===0; }).every(Boolean)"); J("document.activeElement&&document.activeElement.blur()")
         shot('saf_faixa_1440')
-        chk('1 SAF · faixa só informa: lista ordenada de 4 etapas sem botão/link/handler/Tab (0 controles), palavra do estado (concluída/etapa atual/pendente), cursor comum, clicar na etapa 3 não navega, nenhuma seta ‹ › e 45 Tabs nunca param na faixa',
-            fx['tag']=='DIV' and fx['ol'] and fx['n']==4 and fx['li'] and fx['ctl']==0 and fx['atual'].startswith('2 ') and 'concluída' in ' '.join(fx['sr']) and 'etapa atual' in ' '.join(fx['sr']) and 'pendente' in ' '.join(fx['sr'])
-            and fx['cursor']!='pointer' and fx['setas']==0 and e1['etapa']==2 and 'FAIXA' not in paradas, [fx,e1,paradas])
+        abre('SAF',hash='#etapa=1'); time.sleep(.3)
+        tr=J(r"""(()=>{const b=document.querySelectorAll('.etp-ind ol>li')[2].querySelector('button'); const r={dis:b.getAttribute('aria-disabled'), dica:b.dataset.dica||''}; b.click(); return r;})()"""); time.sleep(.5)
+        trv=dict(tr or {}, etapa=est()['etapa'], dica=J("(()=>{const d=document.querySelector('[data-modo=recusa]:not([hidden])'); return d?d.textContent.replace(/\\s+/g,' ').trim():'';})()"))
+        chk('1 SAF · faixa leva à etapa: 4 cartões-botão, palavra do estado (concluída/etapa atual/pendente), cursor de ação; clicar na etapa 1 vai a ela e na 2 volta; '
+            'etapa 3 travada sem safra não navega e diz o motivo na dica (recusa do DS); os cartões recebem foco pelo Tab; nenhuma seta ‹ › solta',
+            fx['tag']=='DIV' and fx['ol'] and fx['n']==4 and fx['li'] and fx['btn']=='1111' and fx['lnk']==0 and fx['atual'].startswith('2 ') and 'concluída' in ' '.join(fx['sr']) and 'etapa atual' in ' '.join(fx['sr']) and 'pendente' in ' '.join(fx['sr'])
+            and fx['cursor']=='pointer' and fx['setas']==0 and e1['etapa']==1 and e2['etapa']==2 and foco
+            and trv.get('dis')=='true' and trv.get('dica')=='Escolha a safra' and trv.get('etapa')==1 and 'Escolha a safra' in trv.get('dica',''), [fx,e1['etapa'],e2['etapa'],foco,trv])
         # 2 · uma primária e uma rota de avanço por estado, sem cópia do mesmo comando (cabeçalho, bloco, faixa, área)
         estados={}
         abre('SAF'); estados['1 sem safra']=est()
@@ -84,7 +92,7 @@ try:
         def uma(s): return len(s['prims'])<=1 and s['avancos']<=1 and all(s['prims'].count(x)==1 for x in s['prims'])
         rotulos={k:[a.split(':',1)[1] for a in v['area'] if a.startswith(('avancar:','resolver:','comando:','abrir:'))] for k,v in estados.items()}
         sem_copia=all(sum(1 for x in J(f"[...document.querySelectorAll('header button,header a,main button,main a')].filter(e=>e.getClientRects().length).map(e=>{N}(e.innerText))") if x==t)<=1 for t in rotulos['4'])
-        chk('2 SAF · no máximo uma primária e uma rota de avanço em cada estado (sem safra, falta de plano, etapas 3 e 4), sem cópia do mesmo comando; Nova safra secundária',
+        chk('2 SAF · no máximo uma primária e uma rota de avanço em cada estado (sem safra, falta de plano, etapas 3 e 4), sem cópia do mesmo comando; Criar safra secundária',
             all(uma(s) for s in estados.values()) and estados['1 sem safra']['prims']==[] and estados['2 falta plano']['prims']==['Aplicar plano em 4 cultivos'] and estados['2 falta plano']['avancos']==1
             and estados['3']['prims']==['Conferir demanda de insumos ›'] and estados['4']['prims']==['Abrir Compra de insumos ›'] and sem_copia,
             {k:(v['etapa'],v['prims'],v['area']) for k,v in estados.items()})
@@ -101,13 +109,15 @@ try:
             nadd==0 and b and b[0]=='Planejar ›' and b[1]=='Talhões e cultivos' and bool(campo) and aviso and val=='Teste ação única' and e3['etapa']==2, [nadd,b,campo,aviso,val,e3['etapa']])
         # 4 · falta de plano: causa escrita + passo que resolve; avançar não aplica plano em silêncio
         abre('SAF',hash='#saf=S2627&passo=cultivos'); time.sleep(.3)
-        e4=est(); k2a=' '.join(a for a in e4['area'] if a.startswith('nota:'))
-        acao('avancar'); e4b=est(); etapa(2); k2b=' '.join(a for a in est()['area'] if a.startswith('nota:'))
-        chk('4 SAF · falta de plano: nota com a causa e os talhões, "Aplicar plano em 4 cultivos" é a primária (resolver) e "Dimensionar operações ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (4 sem plano antes e depois, na nota)',
-            any(a.startswith('nota:4 cultivos sem plano agronômico (T4, T3, P1, P2)') for a in e4['area']) and 'resolver:Aplicar plano em 4 cultivos' in e4['area'] and 'avancar:Dimensionar operações ›' in e4['area']
-            and e4b['etapa']==3 and '4 cultivos sem plano' in k2a and '4 cultivos sem plano' in k2b, [e4['area'],e4b['etapa'],k2a,k2b])
+        # oráculo direto (revisão Codex 6181957223): as linhas dos cultivos (plano de cada um) antes do avanço e depois do retorno à etapa 2
+        LIN="JSON.stringify([...document.querySelectorAll('[role=table]')].filter(t=>t.offsetParent).flatMap(t=>[...t.querySelectorAll('[role=row][data-rid]')].map(r=>r.innerText.replace(/\\s+/g,' ').trim())))"
+        e4=est(); l4a=json.loads(J(LIN) or '[]'); sp4a=[x for x in l4a if 'Aplicar plano' in x]   # cultivo sem plano: a linha oferece "Aplicar plano"
+        acao('avancar'); e4b=est(); etapa(2); time.sleep(.4); l4b=json.loads(J(LIN) or '[]'); sp4b=[x for x in l4b if 'Aplicar plano' in x]; e4c=est()
+        chk('4 SAF · falta de plano: sem descrição visível na área de ações (15/10), "Aplicar plano em 4 cultivos" é a primária (resolver) e "Dimensionar operações ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (as linhas dos cultivos iguais antes e depois e ainda "Aplicar plano em 4 cultivos" na volta)',
+            not any(a.startswith('nota:') for a in e4['area']) and 'resolver:Aplicar plano em 4 cultivos' in e4['area'] and 'avancar:Dimensionar operações ›' in e4['area']
+            and e4b['etapa']==3 and l4a==l4b and len(l4a)>=8 and 'resolver:Aplicar plano em 4 cultivos' in e4c['area'], [e4['area'],e4b['etapa'],len(l4a),l4a==l4b,e4c['area']])
         # 5 · vazio: safra nova sem cultivos → nenhuma primária e nenhum avanço; a nota diz o que está livre e a conferir e manda planejar na linha
-        abre('SAF'); clk('Nova safra'); time.sleep(.3)
+        abre('SAF'); clk('Criar safra'); time.sleep(.3)
         for k,vl in (('nome','Safra teste ação única'),('ini','2027-01-10'),('fim','2027-08-30')): setv(f'#fx_g_saf_{k}',vl)
         clk('Salvar','aside[role=dialog]'); time.sleep(.6); e5=est(); shot('saf_vazio')
         tal=J(r"""(()=>{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); if(!t) return {}; const o={}; [...t.querySelectorAll('[role=row]')].slice(1).filter(r=>!r.classList.contains('g2kid')).forEach(r=>{ const cs=[...r.querySelectorAll('[role=cell]')]; const c0=r.querySelector('.g2c0'); if(!c0) return; const nm=c0.innerText.replace(/^[▾▸] ?/,'').trim().split(/\s+/)[0]; const sr=r.querySelectorAll('.g2sr'); let txt=cs.map(c=>{ let x=c.innerText; c.querySelectorAll('.g2sr').forEach(e=>{ x=x.replace(e.innerText,''); }); return x.replace(/\s+/g,' ').trim(); }); o[nm]={c0:c0.innerText.replace(/\s+/g,' ').trim(),cs:txt}; }); return o; })()""")
@@ -127,7 +137,7 @@ try:
         setv('main input[type=search]','o'); time.sleep(.4)
         J("(()=>{const m=document.querySelector('main[data-scroll]'); const rs=[m,...m.querySelectorAll('.g2rola,.rola')].filter(x=>x.scrollHeight>x.clientHeight+20); rs.forEach(x=>{ x.scrollTop=Math.min(240,x.scrollHeight-x.clientHeight); });})()"); time.sleep(.3)
         y0=rolagem(); nota0=[a for a in est()['area'] if a.startswith('nota:')]
-        r=J("(()=>{const b=document.querySelector('[data-acoes] [data-acao=corrigir]'); if(!b) return 'sem Corrigir'; b.click(); return b.innerText.trim();})()"); time.sleep(.7)
+        r=J("(()=>{const b=document.querySelector('[data-acoes] [data-acao=corrigir]'); if(!b) return 'sem Corrigir'; b.click(); return b.textContent.trim();})()"); time.sleep(.7)   # no ⋯ (15/10)
         e7=est(); foco=J("(()=>{const a=document.activeElement; const r=a&&a.closest('[role=row]'); return r?(r.innerText.match(/\\b(T4|T3|P1|P2)\\b/)||[''])[0]:(a?a.tagName:'');})()"); shot('saf_corrigir_trecho')
         acao('resolver'); time.sleep(.3)
         ok_sel=J("(()=>{const s=document.querySelector('#ap_sel'); if(!s) return 'sem plano'; const o=[...s.options].find(x=>x.value); if(!o) return 'sem opção'; const P=HTMLSelectElement.prototype; Object.getOwnPropertyDescriptor(P,'value').set.call(s,o.value); s.dispatchEvent(new Event('change',{bubbles:true})); return o.textContent;})()"); time.sleep(.3)
@@ -153,24 +163,24 @@ try:
             a2['prims']==['Solicitar cotações ›'] and a2['avancos']==1 and a3['prims']==['Enviar convites (simulado)'] and a3['avancos']==0 and a5['prims']==['Enviar à Direção'] and a5['avancos']==1 and a6['etapa']==6 and 'Compra aprovada' not in b and 'PC-101' not in b,
             [a2,a3,a5,a6['etapa']])
         # 11 · PA (NAV-1: lista → detalhe, sem etapas; design system 09/10, BOT-01/02/03/06): lista com o único verde "Criar plano" no
-        #      cabeçalho; detalhe sem rascunho sem primária ("Incluir atividade" secundário no bloco); com rascunho, "Publicar versão v7"
+        #      cabeçalho; detalhe sem rascunho sem primária ("Incluir atividade" secundário no bloco); com rascunho, "Salvar alterações"
         #      a única primária, no Próximo passo; nenhum avanço que só navega ("Revisar e publicar", "Ver versões e cultivos")
         abre('PA'); p1=est(); novo=J(f"(()=>{{const b=[...document.querySelectorAll('header button')].find(b=>{N}(b.innerText)==='Criar plano'); return b?getComputedStyle(b).backgroundColor:null;}})()")
         J("document.querySelector('main .g2card').click()"); time.sleep(.5); p2=est(); inc=J(f"[...document.querySelectorAll('main button')].filter(b=>b.getClientRects().length&&{N}(b.innerText)==='Incluir atividade').map(b=>getComputedStyle(b).backgroundColor)")
         rp=J(f"[...document.querySelectorAll('main button,[data-acoes] button')].filter(b=>b.getClientRects().length&&/Revisar e publicar|Ver versões e cultivos/.test(b.innerText)).length")
         J("(()=>{const b=[...document.querySelectorAll('main button')].find(b=>(b.getAttribute('aria-label')||'').startsWith('Mostrar insumos de Fungicida 1ª aplicação')); b.click();})()"); time.sleep(.3)
         J("[...document.querySelectorAll('main button.pa-dose')][0].click()"); time.sleep(.3); c.call('Input.insertText',{'text':'0,6'}); c.tecla('Enter','Enter',13,text='\r'); time.sleep(.5); p3=est(); shot('pa_detalhe_rascunho')
-        chk('11 PA · lista: "Criar plano" o único verde, no cabeçalho; detalhe sem rascunho: sem primária, "Incluir atividade" secundário e só "‹ Biblioteca de planos" na área; com rascunho: "Publicar versão v7" a única primária, como comando; nenhum avanço que só navega',
+        chk('11 PA · lista: "Criar plano" o único verde, no cabeçalho; detalhe sem rascunho: sem primária, "Incluir atividade" secundário e só "‹ Biblioteca de planos" na área; com rascunho: "Salvar alterações" a única primária, como comando; nenhum avanço que só navega',
             p1['prims']==['Criar plano'] and novo=='rgb(30, 122, 76)' and p1['etapa']==0 and p2['etapa']==0 and inc==['rgb(255, 255, 255)'] and rp==0 and p2['prims']==[] and p2['avancos']==0 and p2['area']==['voltar:‹ Biblioteca de planos']
-            and p3['prims']==['Publicar versão v7'] and p3['avancos']==0 and 'comando:Publicar versão v7' in p3['area'],
+            and p3['prims']==['Salvar alterações'] and p3['avancos']==0 and 'comando:Salvar alterações' in p3['area'],   # PA-SALVAR (14/10): "lá embaixo deixe o botão salvar"
             [p1,novo,p2,inc,rp,p3])
         # 12 · Planos (PCM simplificado S1: PM.dc.html virou a visão Planos da tela MA, ESPECIFICACAO §3.5 "primária: Novo plano"): uma primária na visão;
         #      plano aberto: retorno "‹ Planos", sem etapas e no máximo uma primária ("Publicar vN" só com rascunho)
         abre('MA',hash='#vis=planos'); J("localStorage.setItem('safrion.perfilDemo','Otávio')"); c.goto('about:blank',.2); c.goto(f'http://127.0.0.1:{p}/MA.dc.html#vis=planos',.8); m1=est()   # Ver como Otávio (o comando é dele)
         r=J("(()=>{const r=[...document.querySelectorAll('main [role=row][data-rid]')].find(r=>r.getAttribute('data-rid')==='PM-01'); if(!r) return 'sem linha'; (r.querySelector('.g2pw')||r).click(); return 'PM-01';})()"); time.sleep(.6); m2=est(); shot('ma_plano')
         vt=J("[...document.querySelectorAll('main button,main a')].filter(e=>e.getClientRects().length).map(e=>e.innerText.trim()).filter(t=>t.startsWith('‹'))")
-        chk('12 Planos (tela MA) · visão com uma primária "Novo plano"; plano aberto: retorno "‹ Planos", sem etapas e no máximo uma primária',
-            m1['prims']==['Novo plano'] and m1['etapa']==0 and r=='PM-01' and m2['etapa']==0 and '‹ Planos' in vt and len(m2['prims'])<=1, [m1,r,m2,vt])
+        chk('12 Planos (tela MA) · visão com uma primária "Criar plano"; plano aberto: retorno "‹ Planos", sem etapas e no máximo uma primária',
+            m1['prims']==['Criar plano'] and m1['etapa']==0 and r=='PM-01' and m2['etapa']==0 and '‹ Planos' in vt and len(m2['prims'])<=1, [m1,r,m2,vt])
         # 13 · EST: trabalho paralelo → seções (navegação em qualquer ordem), sem número de etapa e sem setas; seção sem trabalho não ganha "ir para a próxima"
         abre('EST'); s0=J(r"""(()=>{const n=document.querySelector('nav[aria-label="Seções do estoque"]'); const bs=n?[...n.querySelectorAll('.etp-itens>button')]:[]; return {n:bs.length, nums:bs.filter(b=>/^\d/.test(b.innerText.trim())).length, cur:(n&&n.querySelector('[aria-current=true]')||{innerText:''}).innerText.trim(), setas:document.querySelectorAll('[aria-label^="Etapa anterior"],[aria-label^="Próxima etapa"]').length, ind:!!document.querySelector('.etp-ind')};})()""")
         clk('Faça contagens','nav[aria-label="Seções do estoque"]'); s5=est(); clk('Confira saldos','nav[aria-label="Seções do estoque"]'); s4=est(); cur4=J("(document.querySelector('nav.etp-sec [aria-current=true]')||{innerText:''}).innerText.trim()"); shot('est_secoes')
@@ -186,16 +196,17 @@ try:
             and tel['MA'][0]==0, tel)
         # 15 · O.S.: Lista e Kanban com o mesmo filtro (reproduzido antes: 2 × 10); Recursos explica a granularidade; fase não muda por clique
         abre('OS'); o0=est(); clk('Liberadas','[aria-label="Filtrar por fase"]'); lis=J("[...document.querySelectorAll('main [role=row].g2ed')].filter(e=>e.getClientRects().length).map(r=>r.innerText.split('\\n')[0].trim())")
-        clk('Kanban','[aria-label="Visão das ordens"]'); kb=J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].filter(e=>e.getClientRects().length).map(b=>b.getAttribute('aria-label').split(' ')[1])")
-        nota=J("(()=>{const n=[...document.querySelectorAll('main [role=note]')].find(e=>e.getClientRects().length); return n?n.innerText.replace(/\\s+/g,' ').trim():'';})()"); shot('os_kanban_filtro')
-        clk('Recursos','[aria-label="Visão das ordens"]'); rc=J("(()=>{const n=[...document.querySelectorAll('main [role=note]')].find(e=>e.getClientRects().length); return n?n.innerText.replace(/\\s+/g,' ').trim():'';})()")
-        clk('Kanban','[aria-label="Visão das ordens"]'); clk('Limpar filtros'); kb2=J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].filter(e=>e.getClientRects().length).length")
-        clk('Lista','[aria-label="Visão das ordens"]'); J("(()=>{const r=document.querySelector('[role=row].g2ed'); (r.querySelector('[role=cell] b')||r).click();})()"); time.sleep(.5)
+        troca_visao(J,'kanban','[aria-label="Visão das ordens"]'); kb=J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].filter(e=>e.getClientRects().length).map(b=>b.getAttribute('aria-label').split(' ')[1])")
+        # VISOES-2 §8 ponto 3: o recorte vira a faixa [data-os-recorte] (contagem, chips removíveis e "Limpar filtros"); a fase fica nos chips de fase
+        nota=J("(()=>{const n=[...document.querySelectorAll('main [data-os-recorte]')].find(e=>e.getClientRects().length); return n?n.innerText.replace(/\\s+/g,' ').trim():'';})()"); shot('os_kanban_filtro')
+        troca_visao(J,'carga','[aria-label="Visão das ordens"]'); rc=J("(()=>{const n=[...document.querySelectorAll('main [role=note]')].find(e=>e.getClientRects().length); return n?n.innerText.replace(/\\s+/g,' ').trim():'';})()")
+        troca_visao(J,'kanban','[aria-label="Visão das ordens"]'); clk('Limpar filtros'); kb2=J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"] [role=button]')].filter(e=>e.getClientRects().length).length")
+        troca_visao(J,'lista','[aria-label="Visão das ordens"]'); J("(()=>{const r=document.querySelector('[role=row].g2ed'); (r.querySelector('[role=cell] b')||r).click();})()"); time.sleep(.5)
         fase0=J("(()=>{const d=document.querySelector('aside[role=dialog]'); return d?(d.innerText.match(/A liberar|Liberadas|Em execução|Em conferência|Encerradas/)||[''])[0]:'';})()")
         ctl=J("(()=>{const d=document.querySelector('aside[role=dialog]'); if(!d) return -1; return [...d.querySelectorAll('button,a,[role=button]')].filter(b=>/^(A liberar|Liberadas|Em execução|Em conferência|Encerradas)$/.test(b.innerText.trim())).length;})()")
         o1=est()
-        chk('15 O.S. · Lista e Kanban com o mesmo filtro de fase (Liberadas: 2 = 2, antes 2 × 10), Kanban diz o filtro e oferece "Limpar filtros" (volta a 10), Recursos segue o mesmo recorte e diz qual (TABELAS-FOCO); "Nova ordem" a única primária; no painel a fase é texto, não comando',
-            sorted(lis)==sorted(kb) and len(kb)==2 and 'Filtro da lista aplicado: fase Liberadas' in nota and 'só os blocos das ordens no filtro da lista (fase Liberadas)' in rc and kb2==10 and o0['prims']==['Nova ordem'] and fase0 and ctl==0 and len(o1['prims'])<=1, [lis,kb,nota,rc,kb2,o0['prims'],fase0,ctl,o1['prims']])
+        chk('15 O.S. · Lista e Kanban com o mesmo filtro de fase (Liberadas: 2 = 2, antes 2 × 10), Kanban diz o filtro e oferece "Limpar filtros" (volta a 10), Recursos segue o mesmo recorte e diz qual (TABELAS-FOCO); "Criar ordem" a única primária; no painel a fase é texto, não comando',
+            sorted(lis)==sorted(kb) and len(kb)==2 and '2 de 10 ordens no recorte' in nota and 'Limpar filtros' in nota and 'só os blocos das ordens de Santa Rita no recorte' in rc and kb2==10 and o0['prims']==['Criar ordem'] and fase0 and ctl==0 and len(o1['prims'])<=1, [lis,kb,nota,rc,kb2,o0['prims'],fase0,ctl,o1['prims']])
         # 15b · O.S. "Ajustar antes de liberar" (360×800, toque): rodapé do formulário preso ao pé do painel, Voltar à esquerda e a
         #       primária à direita, alcançável sem rolar até o fim e sem cobrir o campo focado
         abre('OS',360,800,3,True); aj='sem ordem'
@@ -317,7 +328,9 @@ try:
                 bool(fim['aviso']) and (av!='longo' or fim['aviso'][0]>300) and fim['controles'] and not any(x[4] for x in fim['controles']) and livres and all(fim['alcancaveis']) and fim['noPonto'] and fim['avisoNoToque'] and e0==2 and e1==3, [prep,fim,e0,e1])
         # 19 · inserção repetitiva com o teclado aberto (contraprova Gemini): 16ª parcela no "Dividir" do T4; uma instância de "+ Adicionar parcela",
         #      foco no nome da parcela nova, à vista e fora do rodapé do painel; contexto (talhão) mantido
-        abre('SAF',360,420,3,True,hash='#saf=S2627&etapa=2'); r=J("(()=>{const b=[...document.querySelectorAll('main button')].filter(b=>b.getClientRects().length&&b.innerText.trim()==='Dividir')[0]; if(!b) return 'sem Dividir'; b.click(); return 'ok';})()"); time.sleep(.6)
+        # no celular o "Dividir" sai da linha (print do proprietário, 14/10): o toque na linha do T4 abre o painel com "Dividir T4 em parcelas"
+        abre('SAF',360,420,3,True,hash='#saf=S2627&etapa=2'); r=J("(()=>{const rw=[...document.querySelectorAll('main [role=row].g2ed')].find(x=>{const c=x.querySelector('.g2c0'); return c&&c.innerText.trim().split(/\\s+/)[0]==='T4';}); const z=rw&&[...rw.querySelectorAll('[role=cell]')].find(q=>!q.querySelector('button,input')&&q.innerText.trim()&&!q.classList.contains('g2c0')); if(!z) return 'sem T4'; z.click(); return 'ok';})()"); time.sleep(.6)
+        r=J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Dividir T4 em parcelas'); if(!b) return 'sem Dividir'; b.click(); return 'ok';})()") if r=='ok' else r; time.sleep(.6)
         tit=J("(document.querySelector('aside[role=dialog] h2')||{innerText:''}).innerText.trim()"); ruins=[]
         n0=J("document.querySelectorAll('aside[role=dialog] input[aria-label^=\"Nome da parcela\"]').length")
         for k in range(max(0,16-n0)):
@@ -445,7 +458,7 @@ try:
         abre('SAF',hash='#saf=S2627&etapa=2'); time.sleep(.3)
         xt=J("(()=>{const b=[...document.querySelectorAll('main button')].find(b=>b.getClientRects().length&&/^(Expandir|Recolher) tudo$/.test(b.innerText.trim())); if(!b) return null; const cs=getComputedStyle(b); return [b.innerText.trim(), cs.backgroundColor, cs.borderTopWidth];})()")
         qf=J("(()=>{const b=[...document.querySelectorAll('main [aria-pressed=true]')].find(b=>b.getClientRects().length); return b?[b.innerText.replace(/\\s+/g,' ').trim(), getComputedStyle(b).backgroundColor]:null;})()")
-        abre('OS',limpa=False); vs=J("(()=>{const b=[...document.querySelectorAll('main [aria-label=\"Visão das ordens\"] [aria-pressed=true]')].find(b=>b.getClientRects().length); return b?[b.innerText.trim(), getComputedStyle(b).backgroundColor]:null;})()")
+        abre('OS',limpa=False); vs=J("(()=>{const b=[...document.querySelectorAll('main [aria-label=\"Visão das ordens\"] [aria-pressed=true]')].find(b=>b.getClientRects().length); return b?[b.innerText.trim()||b.getAttribute('aria-label'), getComputedStyle(b).backgroundColor]:null;})()")
         och=J("(()=>{const b=[...document.querySelectorAll('main [aria-label=\"Filtrar por fase\"] [aria-pressed=true]')].find(b=>b.getClientRects().length); return b?[b.innerText.replace(/\\s+/g,' ').trim(), getComputedStyle(b).backgroundColor]:null;})()")
         G='rgb(30, 122, 76)'
         chk('29 tipo por função: "Expandir/Recolher tudo" sem fundo e sem borda; filtro rápido escolhido (SAF), visão atual (O.S. Lista) e chip de fase escolhido sem o verde cheio da primária',

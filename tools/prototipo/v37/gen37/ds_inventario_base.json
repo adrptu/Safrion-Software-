@@ -1,0 +1,49 @@
+{
+ "tot": {
+  "css": 21,
+  "tabela": 5,
+  "cartao": 7
+ },
+ "arquivos": {
+  "agronomia.py": {
+   "css": 0,
+   "tabela": 3,
+   "cartao": 0
+  },
+  "cadastros.py": {
+   "css": 15,
+   "tabela": 0,
+   "cartao": 2
+  },
+  "maquinas.py": {
+   "css": 4,
+   "tabela": 0,
+   "cartao": 0
+  },
+  "modulos.py": {
+   "css": 0,
+   "tabela": 0,
+   "cartao": 1
+  },
+  "paineis.py": {
+   "css": 0,
+   "tabela": 0,
+   "cartao": 3
+  },
+  "processo_os.py": {
+   "css": 0,
+   "tabela": 1,
+   "cartao": 0
+  },
+  "processo_planos.py": {
+   "css": 1,
+   "tabela": 1,
+   "cartao": 0
+  },
+  "producao.py": {
+   "css": 1,
+   "tabela": 0,
+   "cartao": 1
+  }
+ }
+}

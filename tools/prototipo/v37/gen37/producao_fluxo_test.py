@@ -5,7 +5,8 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T):
            Lagoa Grande · 2026/27); a mesma semana não duplica; "Aprovar e liberar" da S40 do Pivô 6 recusado por carência
            sem dados (dono Wesley). Roda também na base (a parte A-05 falha lá: é o defeito reproduzido).
   fluxo    AC-17: tarefa do proprietário (§8.1) de ponta a ponta no desktop, com cliques e campos digitados medidos
-           (limite 30 cliques e 5 campos); AC-01 menu; AC-04; AC-15 (encerrar com carga a pesar recusado no OS.dc.html).
+           (limite 30 cliques e 5 campos); AC-01 navegação (sem submenus, 13/10/2026: a Produção dentro de Agrícola; tela de
+           entrada com 3 cartões, cada um abre sem erro de JS); AC-04; AC-15 (encerrar com carga a pesar recusado no OS.dc.html).
   erros    recusas e repetição: pesagem sem condição, ticket repetido com outro conteúdo, reserva acima da falta, mesma
            pesagem repetida não duplica, carga sem sinal do app só entra ao voltar o sinal (AC-16).
   celular  AC-19: 390 × 844, cartões, sem rolagem horizontal, ação primária visível e presa ao rodapé nas três telas.
@@ -14,15 +15,20 @@ Modos (um por vez, cada um abre o Chrome headless do cadc_lib.T):
            A-06 descartar carga a pesar (CARGA e MB-10), A-09 toque duplo no MB-07, A-11 carga sem sinal na O.S., A-13 sem "Liberar"
            quando a pendência é de outro, A-14 MB-10 na carência, A-15 ponderada com a área da conta, A-16 perda inválida,
            A-17 PV-030 como saldo do CT-201, A-18 coluna Em processo.
-Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 producao_fluxo_test.py [os|fluxo|erros|celular]
+  unid     UNID-PROD (docs/unidades-produtividade/ESPECIFICACAO.md §7): seletor "Unidade de produtividade" por teclado e a 390 px;
+           20 trocas sem mudar o estado (localStorage igual byte a byte depois de um comando real) com filtro rápido, filtro por valor,
+           ordem, rascunho e foco preservados; preferência por perfil × cultura restaurada ao voltar; a mesma unidade na linha, no
+           painel e no cartão; café da roça sem peso (massa indisponível, com o motivo); Mapa PENDENTE da DEC-0910-36 (não conta OK).
+Uso: env CHROME_BIN=… flock /tmp/cdpB.lock env CDP_GL=1 timeout 900 python3 producao_fluxo_test.py [os|fluxo|erros|celular|revisao|unid]
 Capturas em _probe/producao_*.png. Dados sintéticos (SAFRION_DADOS=sintetico)."""
 import sys, os, time, json
 os.environ.setdefault('SAFRION_DADOS', 'sintetico')
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from cadc_lib import T
-MODOS = [a for a in sys.argv[1:] if a in ('os', 'fluxo', 'erros', 'celular', 'revisao')] or ['os', 'fluxo', 'erros', 'celular', 'revisao']
+MODOS = [a for a in sys.argv[1:] if a in ('os', 'fluxo', 'erros', 'celular', 'revisao', 'unid')] or ['os', 'fluxo', 'erros', 'celular', 'revisao', 'unid']
 PR = os.path.join(HERE, '_probe'); os.makedirs(PR, exist_ok=True)
 t = T(); J = t.J
+from comp_lib import cv_todas_sempre; cv_todas_sempre(t.c)   # VISOES-2 §3.6 / SAF-TAB: lê colunas fora do padrão (Meta, unidade)
 LIB = r"""
 window.N=s=>(s||'').replace(/\s+/g,' ').trim();
 window.VIS=e=>{ if(!e) return false; const r=e.getBoundingClientRect(); const cs=getComputedStyle(e); return r.width>1&&r.height>1&&cs.visibility!=='hidden'&&cs.display!=='none'; };
@@ -45,6 +51,23 @@ def ir(pg, limpa=False, w=1440, h=1000):
         t.c.goto(f'http://127.0.0.1:{t.p}/Main.dc.html', wait=.4); J("localStorage.clear(); sessionStorage.clear()")
     cl, tx = (J("[window.__cl||0, window.__tx||0]") or [0, 0]) if not limpa else (0, 0)
     t.goto(pg); time.sleep(.5); lib(); J(f"window.__cl={cl}; window.__tx={tx};")
+def espera(js, ate=20.0):
+    """espera a condição observável (página nova pronta), não um tempo fixo; no limite devolve False e o chk seguinte falha"""
+    t0 = time.time()
+    while time.time() - t0 < ate:
+        try:
+            if J(js): return True
+        except Exception: pass
+        time.sleep(.1)
+    return False
+def pronta(pg, extra='true'): return f"location.pathname.endsWith('/{pg}') && document.readyState==='complete' && !!document.body && ({extra})"
+# navegação sem submenus (13/10/2026, ui37.MENU2/HUB37/CURTO37/VOLTA37): ícones da barra (aria-label), módulo marcado, "‹ Módulo" e cartões
+NAV = "JSON.stringify((()=>{const n=document.querySelector('nav[aria-label=Menu]'); const v=document.querySelector('a.volta37'); return {mods:n?[...n.querySelectorAll('a[aria-label]')].map(a=>a.getAttribute('aria-label')):[], cur:n?[...n.querySelectorAll('a[aria-current=page]')].map(a=>a.getAttribute('aria-label')):[], volta:v?[v.getAttribute('href'),v.innerText.replace(/\\s+/g,' ').trim()]:null};})())"
+CARDS = "JSON.stringify([...document.querySelectorAll('a.mod-cartao')].filter(a=>a.getClientRects().length).map(a=>[a.getAttribute('href'),a.innerText.replace(/\\s+/g,' ').trim()]))"
+HUB = "document.querySelectorAll('a.mod-cartao').length>0"
+def volta_pro():
+    """"‹ Agrícola" → tela de entrada de Agrícola pronta (13/10/2026, proprietário: "coloque tudo de produção, dentro de Agrícola")"""
+    r = clk('Voltar para Agrícola', w=0); ok = espera(pronta('MOD-AGR.dc.html', HUB)); lib(); return r == 'ok' and ok
 def clk(x, root=None, w=.45): r = J(f"CLK({json.dumps(x)},{json.dumps(root)})"); time.sleep(w); return r
 def setv(sel, val, conta=True): r = J(f"SETV({json.dumps(sel)},{json.dumps(val)},{'true' if conta else 'false'})"); time.sleep(.25); return r
 def row(x): r = J(f"ROW({json.dumps(x)})"); time.sleep(.45); return r
@@ -62,18 +85,18 @@ try:
     if 'os' in MODOS:
         print('== os · A-05 / AC-22: ordem nova de colheita na fazenda e safra do cultivo; uma por semana; carência no liberar')
         ir('OS.dc.html', limpa=True)
-        clk('Nova ordem'); r = nova_ordem('Safra Mamão 2026/27', 'Pivô 19', 'Colheita', '2026-09-28'); clk('Emitir ordem', 'aside')
+        clk('Criar ordem'); r = nova_ordem('Safra Mamão 2026/27', 'Pivô 19', 'Colheita', '2026-09-28'); clk('Emitir ordem', 'aside')
         c = cen("(()=>{ const k=Object.keys(c.ordens).filter(k=>c.ordens[k].osc&&c.ordens[k].osc.novo); const o=c.ordens[k[k.length-1]]; return o?[o.id,o.tipo,o.osc.novo.faz,o.osc.novo.saf,o.etapa]:null; })()")
         t.chk('A-05 ordem nova do Pivô 19 (Safra Mamão 2026/27) nasce na Lagoa Grande e na safra 2026/27, A liberar', c and c[2] == 'Lagoa Grande' and c[3] == '2026/27' and c[4] == 'A liberar', [r, c])
         nid = c[0] if c else ''
         J("SETV('select[aria-label=\"Filtrar por fazenda\"]','Lagoa Grande')"); time.sleep(.4); J("SETV('select[aria-label=\"Filtrar por safra\"]','2026/27')"); time.sleep(.5)
         t.chk('A-05 com o filtro Lagoa Grande · 2026/27 a ordem nova aparece na lista', bool(nid) and nid in (J("ROWTXT(" + json.dumps(nid) + ")") or ''), nid)
         t.chk('AC-22 perene: a ordem se chama "Colheita · semana 40"', c and c[1] == 'Colheita · semana 40', c)
-        clk('Nova ordem'); nova_ordem('Safra Mamão 2026/27', 'Pivô 19', 'Colheita', '2026-09-29'); clk('Emitir ordem', 'aside')
+        clk('Criar ordem'); nova_ordem('Safra Mamão 2026/27', 'Pivô 19', 'Colheita', '2026-09-29'); clk('Emitir ordem', 'aside')
         e = pan()
         t.chk('AC-22 segunda ordem de colheita da mesma semana (S40) no Pivô 19 é recusada e aponta a existente', ('Já existe ' + nid) in e and 'semana 40' in e, e[:400])
         clk('Cancelar', 'aside'); clk('Descartar alterações', 'aside')
-        clk('Nova ordem'); nova_ordem('Safra Mamão 2026/27', 'Pivô 19', 'Colheita', '2026-09-22'); clk('Emitir ordem', 'aside')
+        clk('Criar ordem'); nova_ordem('Safra Mamão 2026/27', 'Pivô 19', 'Colheita', '2026-09-22'); clk('Emitir ordem', 'aside')
         e = pan()
         t.chk('AC-22 colheita na semana 39 do Pivô 19 é recusada: a OS-0505 (Colheita · semana 39) já existe', 'Já existe OS-0505' in e, e[:400])
         clk('Cancelar', 'aside'); clk('Descartar alterações', 'aside')
@@ -92,14 +115,25 @@ try:
     if 'fluxo' in MODOS:
         print('== fluxo · AC-01 menu e AC-17 tarefa do proprietário (§8.1), cliques e campos medidos')
         ir('PROD.dc.html', limpa=True)
-        m = J("(()=>{ const nav=document.querySelector('nav[aria-label=Menu]'); const t=N(nav.innerText); return t; })()") or ''
-        i_ag, i_pr, i_ma = m.find('Agrícola'), m.find('Produção'), m.find('Manutenção')
-        t.chk('AC-01 grupo Produção logo depois de Agrícola (antes de Manutenção)', 0 <= i_ag < i_pr < i_ma, m[:300])
-        # BEN-D14 (09/10): o grupo continua com 3 itens (D-01); o Beneficiamento é tela irmã de Cargas, dentro de "Recebimento e beneficiamento"
-        itens = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>[N(a.innerText),a.getAttribute('href')]).filter(x=>['COLH.dc.html','CARGA.dc.html','BEN.dc.html','PROD.dc.html'].indexOf(x[1])>=0)") or []
-        t.chk('AC-01 Produção com 3 itens: Previsão e colheita, Recebimento e beneficiamento, Estoque de produto', [x[0] for x in itens] == ['Previsão e colheita', 'Recebimento e beneficiamento', 'Estoque de produto'], itens)
-        for pg in ('COLH', 'CARGA', 'PROD'):
-            ir(pg + '.dc.html'); t.chk(f'AC-01 {pg} abre sem erro de JS', not t.errs(), t.errs())
+        nv = json.loads(J(NAV) or '{}'); mods = nv.get('mods') or []
+        # 13/10/2026 (proprietário: "coloque o submenu colheita dentro de agrícola"; "coloque tudo de produção, dentro de Agrícola"): sem o ícone
+        # Produção; Colheita, Recebimento e Estoque de produto são os 3 últimos cartões de Agrícola, e cada tela volta por "‹ Agrícola"
+        t.chk('AC-01 sem o ícone Produção na barra; no Estoque de produto o ícone Agrícola marcado e "‹ Agrícola"',
+              'Produção' not in mods and 'Agrícola' in mods and nv.get('cur') == ['Agrícola'] and nv.get('volta') == ['MOD-AGR.dc.html', '‹ Agrícola'], nv)
+        vt = volta_pro(); cs = json.loads(J(CARDS) or '[]'); e0 = t.errs()
+        # BEN-D39 (13/10/2026, proprietário: "coloque beneficiamento dentro de menu produção"): publicado (ui37.BEN_PUBLICADO), o Beneficiamento é
+        # cartão próprio logo depois de Recebimento; oculto (v55), não aparece. A conferência é a mesma nos dois estados
+        import ui37
+        ESP = [['COLH.dc.html', 'Colheita'], ['CARGA.dc.html', 'Recebimento']] + ([['BEN.dc.html', 'Beneficiamento']] if ui37.BEN_PUBLICADO else []) + [['PROD.dc.html', 'Estoque de produto']]
+        t.chk('AC-01 "‹ Agrícola" abre a tela de entrada com ' + ' · '.join(x[1] for x in ESP) + f' em sequência ({len(ESP)} cartões)'
+              + ('' if ui37.BEN_PUBLICADO else ' (sem Beneficiamento)') + ', sem erro de JS',
+              vt and any(cs[i:i + len(ESP)] == ESP for i in range(len(cs))) and cs.count(['BEN.dc.html', 'Beneficiamento']) == (1 if ui37.BEN_PUBLICADO else 0) and not any(x[0] == 'BEN.dc.html' and x[1] != 'Beneficiamento' for x in cs) and not e0, [vt, cs, e0])
+        for h, nome in ESP:
+            pg = h.replace('.dc.html', '')
+            if not J(pronta('MOD-AGR.dc.html', HUB)): volta_pro()
+            r = clk(nome, '.mod-grade', w=0); ok = espera(pronta(h, "!!document.querySelector('main') && document.querySelector('main').innerText.trim().length>50")); time.sleep(.3); lib()
+            vv = (json.loads(J(NAV) or '{}') or {}).get('volta')
+            t.chk(f'AC-01 cartão "{nome}" abre {pg} com "‹ Agrícola", sem erro de JS', r == 'ok' and ok and vv == ['MOD-AGR.dc.html', '‹ Agrícola'] and not t.errs(), [r, ok, J("location.pathname"), vv, t.errs()])
         ir('COLH.dc.html', limpa=True)
         t.chk('§8.1 sem seleção, a ação primária é "Publicar previsão" do Pivô 19', J("PRIM()") == ['Publicar previsão do Pivô 19'], J("PRIM()"))
         r = row('Pivô 19'); p = pan()
@@ -283,6 +317,162 @@ try:
         t.chk('A-04 ' + nid + ' Liberadas: "Cancelar sem execução" some depois da carga recebida (colheita com carga é execução)', 'Cancelar sem execução' in a0 and 'Cancelar sem execução' not in a1 and cen(f"c.ordens[{json.dumps(nid)}].etapa") == 'Liberadas', [nid, a0, a1])
         t.chk('revisão: nenhuma página com erro de JS', not t.errs(), t.errs())
         shot('revisao')
+    if 'unid' in MODOS:
+        print('== unid · UNID-PROD: unidade de produtividade selecionável (docs/unidades-produtividade §7; AC-c, AC-g, AC-h)')
+        _KC = {'Tab': ('Tab', 9, ''), 'Enter': ('Enter', 13, '\r'), 'ArrowDown': ('ArrowDown', 40, ''), 'ArrowUp': ('ArrowUp', 38, '')}
+        def tecla(k):
+            code, vk, txt = _KC[k]
+            t.c.call('Input.dispatchKeyEvent', dict({'type': 'keyDown', 'key': k, 'code': code, 'windowsVirtualKeyCode': vk}, **({'text': txt} if txt else {})))
+            t.c.call('Input.dispatchKeyEvent', {'type': 'keyUp', 'key': k, 'code': code, 'windowsVirtualKeyCode': vk}); time.sleep(.15)
+        UL = r"""
+window.USEL=()=>[...document.querySelectorAll('[data-unp] select')].find(VIS)||null;
+window.UINF=()=>{ const s=USEL(); if(!s) return null; const w=s.closest('[data-unp]'); const r=s.getBoundingClientRect(); const n=w.querySelector('.unp-nota');
+  return {v:s.value, lab:N(w.querySelector('label').innerText), opts:[...s.options].map(o=>o.value), dis:[...s.options].filter(o=>o.disabled).map(o=>o.value),
+          w:Math.round(r.width), h:Math.round(r.height), fs:getComputedStyle(s).fontSize, nota:n?N(n.innerText):'', foco:document.activeElement===s}; };
+window.TBL=()=>[...document.querySelectorAll('[role=table]')].find(VIS)||null;
+window.HIDX=(col)=>{ const hs=[...TBL().querySelectorAll('[role=columnheader]')]; return hs.findIndex(h=>N(h.innerText).toUpperCase().startsWith(col.toUpperCase())); };
+window.ROWEL=(tal)=>[...TBL().querySelectorAll('[role=row]')].find(x=>[...x.querySelectorAll('[role=cell]')].slice(0,2).some(c=>{ const t=N(c.innerText).replace(/^[▾▸▴▶▼►]\s*/,''); return t===tal||t.startsWith(tal+' '); }))||null;
+window.ROWCLK=(tal)=>{ const r=ROWEL(tal); if(!r) return 'sem linha '+tal; const c=[...r.querySelectorAll('[role=cell]')].find(z=>N(z.innerText)&&!z.querySelector('input[type=checkbox]')); (c||r).click(); return 'ok'; };
+window.SAFM=(k)=>{ const S=window.__safSelf; return (S&&S.__cultivos)?JSON.stringify(S.__cultivos(k)):null; };
+window.SAFR=(k,loc)=>{ const S=window.__safSelf; const c=(S&&S.__cultivos)?S.__cultivos(k).find(c=>c[1]===loc):null; return c?[c[2],c[3]]:null; };
+window.CEL=(tal,col)=>{ const r=ROWEL(tal); const i=HIDX(col); if(!r||i<0) return null; const cs=r.querySelectorAll('[role=cell]'); return cs[i]?N(cs[i].innerText):null; };
+window.UST=()=>{ const tb=TBL(); return {rows:[...tb.querySelectorAll('[role=row]')].map(r=>r.querySelector('[role=cell]')).filter(Boolean).map(c=>N(c.innerText)),
+  q:[...document.querySelectorAll('button[aria-pressed=true]')].filter(VIS).map(b=>N(b.innerText)), fch:[...document.querySelectorAll('button[aria-label="Remover filtro"]')].filter(VIS).length,
+  pe:(document.querySelector('#pf_pe')||{}).value, pan:N((document.querySelector('aside[role=dialog] h2')||{}).innerText||''), so:N(((TBL().querySelectorAll('[role=columnheader]')[HIDX('Produtividade')]||{}).innerText)||'')}; };
+window.LS=()=>JSON.stringify(Object.keys(localStorage).filter(k=>k.indexOf('safrion.pref.unidprod:')!==0).sort().map(k=>[k,localStorage.getItem(k)]));
+window.CARDS=()=>[...document.querySelectorAll('.pr-card, .pr-grp')].filter(VIS).map(c=>N(c.innerText));
+'ok'"""
+        def ul(): lib(); J(UL)
+        def ui(): return J("UINF()") or {}
+        def cel(tal, col='Produtividade'): return J(f"CEL({json.dumps(tal)},{json.dumps(col)})") or ''
+        def usel(val): r = J(f"(()=>{{ const s=USEL(); if(!s) return 'sem seletor'; return SETV('[data-unp] select',{json.dumps(val)}); }})()"); time.sleep(.4); return r
+        # 1 · teclado a 1440 px: da busca da tabela, Tab chega ao seletor sem sair da barra; seta escolhe kg/ha; Enter não age
+        ir('COLH.dc.html', limpa=True); ul(); u0 = ui()
+        foi = J("(()=>{ const q=[...document.querySelectorAll('input[aria-label=\"Buscar nesta tabela\"]')].find(VIS); if(!q) return false; q.focus(); return document.activeElement===q; })()")
+        cam = []
+        for i in range(25):
+            tecla('Tab'); f = J("(()=>{ const e=document.activeElement; const tb=[...document.querySelectorAll('input[aria-label=\"Buscar nesta tabela\"]')].find(VIS).closest('div'); return [e.tagName, N(e.innerText||e.getAttribute('aria-label')||'').slice(0,40), tb.contains(e), e===USEL()]; })()") or ['', '', False, False]
+            cam.append(f)
+            if f[3] or not f[2]: break
+        t.chk('AC-g seletor "Unidade de produtividade · Mamão Formosa" na barra da tabela, no Padrão, com kg/ha, sc 60 e cx 10 (sem t/ha repetido)',
+              u0.get('lab') == 'Unidade de produtividade · Mamão Formosa' and u0.get('v') == 'padrao' and u0.get('opts') == ['padrao', 'kg', 'sc60', 'cx10'], u0)
+        t.chk(f'AC-g Tab a partir da busca chega ao seletor sem sair da barra ({len(cam)} Tabs)', foi and cam and cam[-1][3] and all(x[2] for x in cam), cam)
+        c0 = J("localStorage.getItem('talhao-os-cenario-v1')"); st0 = J("UST()")
+        tecla('ArrowDown'); time.sleep(.3); u1 = ui(); m19 = cel('Pivô 19'); gm = cel('Mamão Formosa')
+        t.chk('AC-g seta para baixo escolhe kg/ha: Pivô 19 "484,89 kg/ha · ciclo parcial" e o total "701,52 kg/ha ponderada"; foco continua no seletor',
+              u1.get('v') == 'kg' and m19.startswith('484,89 kg/ha · ciclo parcial') and gm.startswith('701,52 kg/ha ponderada') and u1.get('foco'), [u1, m19, gm])
+        tecla('Enter'); time.sleep(.3); u2 = ui(); st2 = J("UST()")
+        t.chk('AC-g Enter não dispara ação: nada gravado no cenário, nenhum painel aberto, filtros e linhas iguais, kg/ha mantido',
+              u2.get('v') == 'kg' and J("localStorage.getItem('talhao-os-cenario-v1')") == c0 and not pan() and st2 == st0 and u2.get('foco'), [u2, st0, st2, pan()[:80]])
+        shot('unid_1440')
+        # 2 · 390 px: alvo de 44 px, fonte de 16 px, sem rolagem horizontal; cartões na unidade escolhida
+        ir('COLH.dc.html', w=390, h=844); ul(); u3 = ui(); cds = J("CARDS()") or []; sw = J("[document.documentElement.scrollWidth, innerWidth]")
+        t.chk('AC-g 390 px: seletor com alvo ≥ 44 × 44 px e fonte de 16 px, sem rolagem horizontal; cartões do Pivô 19 e do Mamão em kg/ha',
+              u3.get('h', 0) >= 44 and u3.get('w', 0) >= 44 and u3.get('fs') == '16px' and sw and sw[0] <= sw[1] and u3.get('v') == 'kg'
+              and any('Pivô 19' in c and '484,89 kg/ha' in c for c in cds) and any('701,52 kg/ha ponderada' in c.lower() for c in cds), [u3, sw, cds[:2]])
+        shot('unid_390')
+        # 3 · AC-c: um comando real grava o cenário; 20 trocas pelo teclado não mudam o estado nem o que está aberto
+        ir('CARGA.dc.html', limpa=True); row('CG-2108'); setv('#pf_tk', 'TK-4520'); setv('#pf_bruto', '19250'); setv('#pf_tara', '7200'); clk('Íntegra', 'aside'); clk('Pesar a CG-2108', 'aside')
+        g = cen("c.producao.cargas['CG-2108'].st")
+        ir('COLH.dc.html'); ul(); S0 = J("LS()")
+        row('Pivô 19'); setv('#pf_pe', '7', False)   # rascunho do "Publicar previsão" (não publica)
+        clk('Em colheita'); time.sleep(.3)
+        v19 = cel('Pivô 19')
+        J("(()=>{ const h=TBL().querySelectorAll('[role=columnheader]')[HIDX('Produtividade')]; h.querySelector('.g2fb').click(); })()"); time.sleep(.5)
+        clk('Limpar', '[role=dialog][aria-label^="Filtrar"]')
+        mk = J(f"(()=>{{ const d=document.querySelector('[role=dialog][aria-label^=\"Filtrar\"]'); const l=[...d.querySelectorAll('label')].find(x=>N(x.innerText).indexOf({json.dumps(v19)})===0); if(!l) return 'sem valor '+{json.dumps(v19)}; l.querySelector('input').click(); return 'ok'; }})()"); time.sleep(.3)
+        clk('OK', '[role=dialog][aria-label^="Filtrar"]'); time.sleep(.3)
+        J("(()=>{ const h=TBL().querySelectorAll('[role=columnheader]')[HIDX('Produtividade')]; h.querySelector('.g2hb').click(); })()"); time.sleep(.4)
+        J("USEL().focus()"); A = J("UST()"); ua = ui()
+        meio = []   # no meio de cada troca (kg/ha na tela), o filtro por valor aplicado em t/ha continua achando o Pivô 19 (chave estável, RC-04)
+        for i in range(10):
+            tecla('ArrowDown'); time.sleep(.1); mm = J("UST()") or {}; meio.append([ui().get('v'), any(x.startswith('Pivô 19') for x in mm.get('rows', [])), mm.get('fch')]); tecla('ArrowUp')
+        time.sleep(.3); B = J("UST()"); ub = ui(); S1 = J("LS()")
+        print('     estado antes/depois das 20 trocas:', json.dumps(A, ensure_ascii=False)[:300])
+        t.chk('AC-c a pesagem da CG-2108 (comando real) gravou o cenário antes da medição', g == 'Recebida' and 'talhao-os-cenario-v1' in (S0 or ''), g)
+        t.chk('AC-c 20 trocas pelo teclado (10 × seta para baixo e para cima): localStorage, menos a preferência, igual byte a byte',
+              S0 == S1 and len(S0 or '') > 100, [len(S0 or ''), len(S1 or '')])
+        t.chk('AC-c R-U11 filtro rápido "Em colheita", filtro por valor (Pivô 19 na lista), ordem, rascunho (perda 7) e foco no seletor iguais depois das trocas',
+              mk == 'ok' and A == B and A.get('fch') == 1 and any(x.startswith('Pivô 19') for x in A.get('rows', [])) and A.get('pe') == '7' and A.get('pan', '').startswith('Pivô 19')
+              and any(x.startswith('Em colheita') for x in A.get('q', [])) and ua.get('foco') and ub.get('foco') and ua.get('lab', '').endswith('Mamão Formosa')
+              and len(meio) == 10 and all(x == ['kg', True, 1] for x in meio), [mk, meio[:2], A, B, ua, ub])
+        # 4 · ir a outra tela e voltar: a preferência volta
+        usel('kg'); ir('PROD.dc.html'); ir('COLH.dc.html'); ul(); u4 = ui(); m4 = cel('Pivô 19')
+        t.chk('AC-g ir ao Estoque de produto e voltar: o seletor e as células continuam em kg/ha', u4.get('v') == 'kg' and ' kg/ha · ciclo parcial' in m4, [u4, m4])
+        # 5 · por perfil: Caio vê o Padrão; Ana volta a ver kg/ha
+        J("localStorage.setItem('safrion.perfilDemo','Caio')"); ir('COLH.dc.html'); ul(); uc = ui(); mc = cel('Pivô 19')
+        J("localStorage.setItem('safrion.perfilDemo','Ana')"); ir('COLH.dc.html'); ul(); ua2 = ui(); ma = cel('Pivô 19')
+        t.chk('AC-g preferência por perfil × cultura: Caio vê o Padrão (t/ha); voltando à Ana, kg/ha', uc.get('v') == 'padrao' and ' t/ha · ciclo parcial' in mc and ua2.get('v') == 'kg' and ' kg/ha · ciclo parcial' in ma, [uc.get('v'), mc, ua2.get('v'), ma])
+        # 6 · AC-h: a mesma unidade e o mesmo número na linha, no painel (kv e passes) e no cartão
+        row('Pivô 19'); p = pan().lower(); n19 = m4.split(' · ')[0]
+        ir('COLH.dc.html', w=390, h=844); ul(); cd19 = next((c for c in (J("CARDS()") or []) if 'Pivô 19' in c), '')
+        t.chk('AC-h Pivô 19: o mesmo número em kg/ha na linha, no kv Produtividade, nos passes e no cartão; kv "Unidade de produtividade kg/ha · Padrão da cultura: t/ha"',
+              bool(n19) and p.count('produtividade ' + n19 + ' parcial') == 2 and 'unidade de produtividade kg/ha · padrão da cultura: t/ha' in p and ' kg/ha parcial previsão' in p and n19 in cd19 and 'meta 50.000 kg/ha/ano' in p,
+              [n19, p[:420], cd19])
+        # 7 · AC-h soja: escolhido kg/ha no contexto da Soja (painel do T1-A aberto), a Referência mostra a meta em kg/ha
+        ir('COLH.dc.html'); ul(); row('T1-A'); us = ui(); usel('kg'); rs = cel('T1-A', 'Referência'); us2 = ui(); mamao = cel('Pivô 19')
+        t.chk('AC-h contexto = cultura do painel aberto: "Unidade de produtividade · Soja"; com kg/ha, a Referência do T1-A mostra "meta 3.840 kg/ha"; o Mamão fica na escolha dele',
+              us.get('lab') == 'Unidade de produtividade · Soja' and us.get('opts') == ['padrao', 'kg', 't'] and us2.get('v') == 'kg' and rs.startswith('meta 3.840 kg/ha') and ' kg/ha · ciclo parcial' in mamao, [us, rs, us2.get('v'), mamao])
+        # 7b/8 · SAF (P3): a mesma escolha da Soja aparece na Meta; trocar a unidade não muda meta nem unidade gravadas; salvar sem mexer não regrava
+        def rowc(tal): r = J(f"ROWCLK({json.dumps(tal)})"); time.sleep(.5); return r
+        def fv(k): return J(f"(()=>{{ const i=document.querySelector('aside[role=dialog] [id$=\"_{k}\"]'); return i?i.value:null; }})()")
+        def fset(k, val): r = J(f"SETV('aside[role=dialog] [id$=\"_{k}\"]',{json.dumps(val)})"); time.sleep(.3); return r
+        ir('SAF.dc.html'); clk('Continuar'); time.sleep(.6); ul(); u7 = ui(); m7 = cel('T1-A', 'Meta'); L0 = J("LS()")
+        t.chk('AC-h entre telas: a Soja em kg/ha escolhida no COLH aparece em kg/ha no Planejar safra ("3.840 kg/ha" na Meta do T1-A; seletor "Unidade de produtividade · Soja")',
+              u7.get('lab') == 'Unidade de produtividade · Soja' and u7.get('v') == 'kg' and m7 == '3.840 kg/ha', [u7, m7])
+        M0 = J("SAFM('S2627')"); J("USEL().focus()")
+        for i in range(10): tecla('ArrowDown'); tecla('ArrowUp')
+        time.sleep(.3); M1 = J("SAFM('S2627')"); L1 = J("LS()"); u8 = ui()
+        t.chk('AC-c SAF: 20 trocas pelo teclado não mudam meta nem unidade gravadas de nenhum cultivo, nem o localStorage (menos a preferência); foco no seletor',
+              M0 and M0 == M1 and L0 == L1 and u8.get('foco') and '"T1-A",64,"sc/ha"]' in M0, [M0[:200] if M0 else M0, u8])
+        usel('t'); rowc('T1-A'); f1 = [fv('meta'), fv('unm_txt')]; clk('Salvar', 'aside[role=dialog]'); a1 = J("SAFR('S2627','T1-A')")
+        t.chk('R-U06 com t/ha escolhido, o painel do T1-A abre "3,84" e "t/ha · Padrão da cultura: sc/ha (60 kg)"; salvar sem mexer mantém {64, sc/ha}',
+              f1 == ['3,84', 't/ha · Padrão da cultura: sc/ha (60 kg)'] and a1 == [64, 'sc/ha'], [f1, a1])
+        J("(()=>{ const r=ROWEL('T1'); const b=r&&[...r.querySelectorAll('button')].find(x=>N(x.innerText)==='Dividir'); if(b) b.click(); })()"); time.sleep(.6); dm = J("[...document.querySelectorAll('input[aria-label^=\"Meta de \"]')].filter(VIS).map(i=>i.value)") or []
+        du = J("[...document.querySelectorAll('[data-un=meta]')].filter(VIS).map(x=>N(x.innerText))") or []
+        clk('Salvar divisão'); time.sleep(.4); d1 = [J("SAFR('S2627','T1-A')"), J("SAFR('S2627','T1-B')")]
+        t.chk('R-U06 Dividir do T1 em t/ha: cada parcela abre na unidade da preferência (3,84 e 3,72 t/ha); salvar sem mexer mantém {64, sc/ha} e {62, sc/ha}, linha a linha',
+              dm[:2] == ['3,84', '3,72'] and du[:2] == ['t/ha', 't/ha'] and d1 == [[64, 'sc/ha'], [62, 'sc/ha']], [dm, du, d1])
+        rowc('T1-A'); fset('meta', 'abc'); clk('Salvar', 'aside[role=dialog]'); e8 = J("[...document.querySelectorAll('aside [role=alert]')].filter(VIS).map(x=>N(x.innerText)).join(' | ')") or ''; a8 = J("SAFR('S2627','T1-A')")
+        t.chk('recusa: meta "abc" não é número; nada gravado ({64, sc/ha})', 'número' in e8 and a8 == [64, 'sc/ha'], [e8, a8])
+        fset('meta', '3,9'); usel('kg'); f2 = [fv('meta'), fv('unm_txt')]; clk('Salvar', 'aside[role=dialog]'); a2 = J("SAFR('S2627','T1-A')"); m2 = cel('T1-A', 'Meta')
+        t.chk('D-U20 com o painel aberto e 3,9 digitado em t/ha, trocar o seletor para kg/ha não muda o campo (3,9 · t/ha); salvar grava {3,9, t/ha}; a tabela mostra "3.900 kg/ha"',
+              f2 == ['3,9', 't/ha · Padrão da cultura: sc/ha (60 kg)'] and a2 == [3.9, 't/ha'] and m2 == '3.900 kg/ha', [f2, a2, m2])
+        usel('t'); rowc('T1-A'); fset('meta', '3,85'); clk('Salvar', 'aside[role=dialog]'); a3 = J("SAFR('S2627','T1-A')"); usel('padrao'); m3 = cel('T1-A', 'Meta')
+        for i in range(20): usel(['t', 'kg', 'padrao'][i % 3])
+        usel('padrao'); a4 = J("SAFR('S2627','T1-A')"); m4b = cel('T1-A', 'Meta')
+        t.chk('R-U06 digitar 3,85 com t/ha grava {3,85, t/ha}; no Padrão a tabela mostra "64,17 sc/ha"; 20 trocas depois, o mesmo texto e o mesmo {3,85, t/ha} (sem deriva)',
+              a3 == [3.85, 't/ha'] and m3 == '64,17 sc/ha' and a4 == [3.85, 't/ha'] and m4b == '64,17 sc/ha', [a3, m3, a4, m4b])
+        # revisão v57 (S2): com kg/ha escolhido, trocar a cultura mantém kg/ha (no mamão, kg/ha/ano); antes virava 3.720 t/ha/ano, mil vezes a meta
+        usel('kg'); rowc('T1-B'); f5 = [fv('meta'), fv('unm_txt')]; fset('cult', 'Mamão Formosa'); f6 = [fv('meta'), fv('unm_txt')]
+        clk('Salvar', 'aside[role=dialog]'); a5 = J("SAFR('S2627','T1-B')"); m5 = cel('T1-B', 'Meta')
+        t.chk('R-U06 T1-B (62 sc/ha) aberto em kg/ha mostra "3720"; trocar a cultura para Mamão mantém "3720" com "kg/ha/ano"; salvar grava {3720, kg/ha/ano} (não t/ha/ano)',
+              f5 == ['3720', 'kg/ha · Padrão da cultura: sc/ha (60 kg)'] and f6 == ['3720', 'kg/ha/ano · Padrão da cultura: t/ha/ano'] and a5 == [3720, 'kg/ha/ano'] and m5 in ('3.720 kg/ha/ano', '3,72 t/ha/ano'),
+              [f5, f6, a5, m5])
+        ir('SAF.dc.html', w=390, h=844); clk('Continuar'); time.sleep(.6); ul(); u9 = ui(); sw9 = J("[document.documentElement.scrollWidth, innerWidth]")
+        t.chk('AC-g SAF a 390 px: seletor com alvo ≥ 44 px e sem rolagem horizontal', u9.get('h', 0) >= 44 and sw9 and sw9[0] <= sw9[1], [u9, sw9])
+        shot('unid_saf')
+        # recusa (R-U05): café da roça só em L não vira massa; com o peso do fruto, kg/ha de Café da roça (nunca café beneficiado)
+        ir('CARGA.dc.html')
+        J("window.__car.cenMudar(null,c=>{ c.ordens['OS-0930']={id:'OS-0930',tipo:'Colheita de café',talhao:'C1',area:0,etapa:'Em execução',versao:'v1',realizado:5,saldo:0,resp:'Sérgio',ins:[],req:null,selos:[],"
+          "ap:[{d:'25/09',dia:1,ha:5,st:'Conferido',sinc:true,origem:'web'}],reservado:false,osc:{}}; return {msg:''}; })")
+        J("localStorage.setItem('safrion.perfilDemo','Rui')")   # desde a CONF (v57) pesar e receber é do almoxarife: a pesagem age como Rui
+        ir('CARGA.dc.html'); J("SETV('select[aria-label=\"Filtrar por fazenda\"]','Santa Rita')"); time.sleep(.4)
+        clk('Registrar pesagem'); clk('OS-0930 · C1', 'aside'); setv('#pf_dcol', '25/09'); setv('#pf_tk', 'TK-CF1'); setv('#pf_bruto', '9200'); setv('#pf_tara', '3200'); setv('#pf_lit', '12000'); clk('Íntegra', 'aside'); clk('Registrar pesagem', 'aside')
+        J("localStorage.removeItem('safrion.perfilDemo')")
+        ir('COLH.dc.html'); ul(); row('C1 Catuaí'); uf = ui(); usel('kg'); cf = cel('C1 Catuaí'); uf2 = ui()
+        J("window.__car.cenMudar(null,c=>{ Object.values(c.producao.cargas).filter(g=>g.cultura==='Café').forEach(g=>(g.origem||[]).forEach(x=>{ x.kg=0; })); return {msg:''}; })")
+        ir('COLH.dc.html'); ul(); row('C1 Catuaí'); cs0 = cel('C1 Catuaí'); us0 = ui()
+        t.chk('R-U05 café da roça pesado (12.000 L, 6.000 kg, 5 ha): com kg/ha, "kg/ha a apurar · 1.200,00 kg/ha de Café da roça" (o beneficiado continua a apurar)',
+              uf.get('lab') == 'Unidade de produtividade · Café' and uf2.get('v') == 'kg' and cf.startswith('kg/ha a apurar · 1.200,00 kg/ha de Café da roça'), [uf, cf])
+        t.chk('R-U05 recusa: sem o peso do fruto, a célula mostra só "2.400 L/ha de Café da roça" e a nota diz "kg/ha indisponível para Café da roça: falta peso ou conversão medida"',
+              cs0.startswith('kg/ha a apurar · 2.400 L/ha de Café da roça') and 'kg/ha indisponível para Café da roça: falta peso ou conversão medida' in us0.get('nota', '') and us0.get('v') == 'kg', [cs0, us0])
+        shot('unid_cafe')
+        # 9 · Mapa: a camada Colheita e produtividade é da DEC-0910-36 (D-U02); sem ela na barra, PENDENTE (não conta como OK)
+        ir('IN-04.dc.html'); tem = J("[...document.querySelectorAll('button,[role=tab]')].filter(VIS).some(b=>/Colheita\\/produtividade|Colheita e produtividade/.test(N(b.innerText)))")
+        if tem: t.chk('AC-h Mapa: a camada Colheita e produtividade mostra a mesma unidade', False, 'camada na barra: falta ligar ao conversor (P5)')
+        else: print('PENDENTE (DEC-0910-36) AC-h Mapa: a camada Colheita e produtividade não está na barra; não conta como OK')
+        t.chk('unid: nenhuma página com erro de JS', not t.errs(), t.errs())
 finally:
     t.fim()
 sys.exit(0 if all(t.ok) else 1)   # FALHOU com saída 0 escondia a falha (09/10, achado ao endurecer o AC-01)

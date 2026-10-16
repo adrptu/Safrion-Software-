@@ -1,0 +1,31 @@
+== U1 1440 · falta depois de pedir a sugestão
+OK  U1 1440 · antes: "Faltam 139 caixas" e o Pedir mais caixas vem com 139 · ['OB-0113 · Mamão Formosa · PACK-FRU v3 Em execução Packing (Santa Rita) · fruta da Lagoa Grande · janela 26/09–27/09 · Igor (responsável de produção) × PRÓXIMO PASSO Enviar para conferência · Igor (responsável de produção). O que não foi registrado (2.300 kg) vira diferença na conferência. Faltam 1
+OK  U1 1440 · DEFEITO esperado: depois de pedir as 139 sugeridas o painel NÃO deveria mostrar falta (mostra "Faltam 61 caixas" e sugere 61) · ['ok', '139 un de Caixa de mamão Formosa 10 kg pedidas para a OB-0113: REQ-041 com 1.308 un. Rui (almoxarife) ou Paula (almoxarife) entrega no balcão (Estoque › Entregue por O.S.).', 'OB-0113 · Mamão Formosa · PACK-FRU v3 Em execução Packing (Santa Rita) · fruta da Lagoa Grande · janela 26/09–27/09 
+OK  U1 1440 · sem rolagem horizontal · {'doc': 0, 'painel': [0]}
+OK  U1 1440 · sem erro de JS
+== U2 1440 · duplo no Salvar da devolução guiada
+OK  U2 1440 · duplo no Salvar grava UMA devolução de 139 (custódia 869 → 730) · ['ok', '139', 'ok', [139], [730, 170, 0], '139 un de Caixa de mamão Formosa 10 kg devolvidos ao disponível. Custódia de Caixa de mamão Formosa 10 kg na OB-0113: 869 un → 730 un.']
+OK  U2 1440 · sem erro de JS
+== U4 1440 · quarentena reprovada como fonte
+OK  U4 1440 · DEFEITO esperado: com 700 un REPROVADAS no CX26-02, a recomendação não deveria citar a quarentena como fonte nem levar a "Ver a quarentena" · IMPEDIMENTOS DA LIBERAÇÃO Caixa de mamão Formosa 10 kg: 1.040 un disponíveis para 1.169 un · Estoque resolve: Rui (almoxarife) ou Paula (almoxarife) Faltam 129 un. A OB-0110 tem sobra de 60 un em custódia (Receba devoluções). Ainda faltam 69 un: a compra de caixas entra no BEN-2. Sem caixa, Cancelar
+FALHOU U4 1440 · a gestora vê o CX26-02 como reprovado (não como a liberar) · FILTROS DESTA TELA Fazenda Todas Lagoa Grande Santa Rita Boa Vista 1 nota a conferir · em quarentena: KCl 60% 10.000 kg, Caixa de mamão Formosa 10 kg 700 un · pedidos com saldo a entregar: PC-088 40.000 kg, PC-090 20.000 kg, PC-091 8.000 kg Recebimentos Confira a nota contra o pedido e o material; c
+== U5 1440 · Enter segurado no Salvar do Estoque
+OK  U5 1440 · Enter segurado no Salvar grava uma devolução só · [{'tag': 'H3', 'id': '', 't': 'Custódia e devoluções', 'anel': False, 'painel': False}, {'tag': 'BUTTON', 'id': '', 't': 'Salvar', 'anel': True, 'painel': True}, [139], {'tag': 'H3', 'id': '', 't': 'Custódia e devoluções', 'anel': False, 'painel': False}, '139 un de Caixa de mamão Formosa 10 kg devo
+== U6 1440 · textos do Estoque para ordem conferida com perda justificada
+OK  U6 1440 · ordem conferida com 1.200 kg de perda justificada: o formulário não diz "com tudo registrado" e a mensagem não chama de "caixas em uso" · ['ok', '69', 'Receber devolução · REQ-041 × Em custódia: 69 un de Caixa de mamão Formosa 10 kg com Igor (OB-0113). Confira e receba: só o conferido volta ao lote CX26-02. OB-0113 conferida: a custódia inteira volta ao lote CX26-02 e fica reservada à OB-0113 até o Fechar. Quantidade conferida un Em c
+== U1 390 · falta depois de pedir a sugestão
+OK  U1 390 · antes: "Faltam 139 caixas" e o Pedir mais caixas vem com 139 · ['OB-0113 · Mamão Formosa · PACK-FRU v3 Em execução Packing (Santa Rita) · fruta da Lagoa Grande · janela 26/09–27/09 · Igor (responsável de produção) × PRÓXIMO PASSO Enviar para conferência · Igor (responsável de produção). O que não foi registrado (2.300 kg) vira diferença na conferência. Faltam 1
+OK  U1 390 · DEFEITO esperado: depois de pedir as 139 sugeridas o painel NÃO deveria mostrar falta (mostra "Faltam 61 caixas" e sugere 61) · ['ok', '139 un de Caixa de mamão Formosa 10 kg pedidas para a OB-0113: REQ-041 com 1.308 un. Rui (almoxarife) ou Paula (almoxarife) entrega no balcão (Estoque › Entregue por O.S.).', 'OB-0113 · Mamão Formosa · PACK-FRU v3 Em execução Packing (Santa Rita) · fruta da Lagoa Grande · janela 26/09–27/09 
+OK  U1 390 · sem rolagem horizontal · {'doc': 0, 'painel': [0]}
+OK  U1 390 · sem erro de JS
+== U2 390 · duplo no Salvar da devolução guiada
+OK  U2 390 · duplo no Salvar grava UMA devolução de 139 (custódia 869 → 730) · ['ok', '139', 'ok', [139], [730, 170, 0], '139 un de Caixa de mamão Formosa 10 kg devolvidos ao disponível. Custódia de Caixa de mamão Formosa 10 kg na OB-0113: 869 un → 730 un.']
+OK  U2 390 · sem erro de JS
+== U4 390 · quarentena reprovada como fonte
+OK  U4 390 · DEFEITO esperado: com 700 un REPROVADAS no CX26-02, a recomendação não deveria citar a quarentena como fonte nem levar a "Ver a quarentena" · IMPEDIMENTOS DA LIBERAÇÃO Caixa de mamão Formosa 10 kg: 1.040 un disponíveis para 1.169 un · Estoque resolve: Rui (almoxarife) ou Paula (almoxarife) Faltam 129 un. A OB-0110 tem sobra de 60 un em custódia (Receba devoluções). Ainda faltam 69 un: a compra de caixas entra no BEN-2. Sem caixa, Cancelar
+FALHOU U4 390 · a gestora vê o CX26-02 como reprovado (não como a liberar) · FILTROS DESTA TELA Fazenda Todas Lagoa Grande Santa Rita Boa Vista 1 nota a conferir · em quarentena: KCl 60% 10.000 kg, Caixa de mamão Formosa 10 kg 700 un · pedidos com saldo a entregar: PC-088 40.000 kg, PC-090 20.000 kg, PC-091 8.000 kg Recebimentos Confira a nota contra o pedido e o material; c
+== U5 390 · Enter segurado no Salvar do Estoque
+OK  U5 390 · Enter segurado no Salvar grava uma devolução só · [{'tag': 'H3', 'id': '', 't': 'Custódia e devoluções', 'anel': False, 'painel': False}, {'tag': 'BUTTON', 'id': '', 't': 'Salvar', 'anel': True, 'painel': True}, [139], {'tag': 'H3', 'id': '', 't': 'Custódia e devoluções', 'anel': False, 'painel': False}, '139 un de Caixa de mamão Formosa 10 kg devo
+== U6 390 · textos do Estoque para ordem conferida com perda justificada
+OK  U6 390 · ordem conferida com 1.200 kg de perda justificada: o formulário não diz "com tudo registrado" e a mensagem não chama de "caixas em uso" · ['ok', '69', 'Receber devolução · REQ-041 × Em custódia: 69 un de Caixa de mamão Formosa 10 kg com Igor (OB-0113). Confira e receba: só o conferido volta ao lote CX26-02. OB-0113 conferida: a custódia inteira volta ao lote CX26-02 e fica reservada à OB-0113 até o Fechar. Quantidade conferida un Em c
+RESULTADO: FALHOU 18/20

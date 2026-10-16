@@ -50,8 +50,13 @@ CSS=('.ma-vis-m{display:none}'
      '.ma-gat [role=row][data-rid]>[role=cell] .g2pw>*+*{display:none}.ma-gat [role=row][data-rid]>[role=cell]{min-height:46px;box-sizing:border-box}'   # no celular a linha do ativo mostra o essencial de cada coluna; o resto fica no detalhe
      '.ma-cards .ma-card>span:last-child{display:none}.ma-cards .ma-card>span:nth-child(2){font-size:18px!important}'
      '.ma-flt{flex-wrap:nowrap!important;overflow-x:auto;padding-bottom:2px}.ma-flt>*{flex:0 0 auto}'
+     # faixa Filtros (MAN-LIMPA-01) no celular: uma linha que rola de lado, com o título de cada filtro (proprietário, 14/10: "precisa manter o
+     # título de cada filtro para o usuário não se perder"), para a lista começar acima da dobra (AC-PCM-22)
+     '.ma-fx .mf-tela{flex-wrap:nowrap!important;overflow-x:auto;padding:6px 10px!important;gap:8px!important}.ma-fx .mf-tela>label{flex:0 0 auto}'
      '.ma-vc-l{display:none}.ma-vc-s{display:inline}.ma-hb{padding:7px 12px!important;font-size:13px!important}'
-     '.ma-pan{width:100%!important;max-width:100%!important;left:0!important}.ma-hide-m{display:none!important}.ma-flt{flex-wrap:wrap}}'
+     '.ma-pan{width:100%!important;max-width:100%!important;left:0!important}.ma-hide-m{display:none!important}.ma-flt{flex-wrap:wrap}'
+     # peças da OM no celular: a situação (chip) desce para a linha de baixo, inteira; sem chip por cima da coluna Aplicado
+     '.ma-pcs{grid-template-columns:minmax(0,1fr) 64px 76px!important}.ma-pcs-h>:nth-child(3){display:none}.ma-pcs-l>:nth-child(3){grid-column:1 / -1;grid-row:2;justify-self:start}}'
      '.ma-pan{position:fixed;top:0;right:0;bottom:0;z-index:60;width:620px;max-width:100%;background:#fff;box-shadow:-12px 0 40px -12px rgba(21,32,26,.35);'
      'display:flex;flex-direction:column;box-sizing:border-box;outline:none}'
      '.ma-pan-c{flex:1 1 0!important;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:12px;min-height:0!important}'   # a primária do rodapé fica à vista (AC-PCM-22)
@@ -83,7 +88,7 @@ function ma_condTxt(c,a){ const i=a.condInfo||{}; if(a.cond==='Bloqueado') retur
 function ma_hashLer(){ const o={}; String(decodeURIComponent((location.hash||'').slice(1))).split('&').forEach(p=>{ const i=p.indexOf('='); if(i>0) o[p.slice(0,i)]=p.slice(i+1); }); return o; }
 function ma_hashDe(st){ const p=[]; const pg=st.pg, pan=st.pan;
   if(!pg&&st.vis) p.push('vis='+st.vis); if(!pg&&st.vis==='semordem'&&st.tipo) p.push('tipo='+st.tipo);
-  if(!pg&&st.vis==='ativos'&&st.amodo==='abast') p.push('modo=abastecimentos'); if(!pg&&st.vis==='ordens'&&st.omodo==='kanban') p.push('modo=kanban');
+  if(!pg&&st.vis==='ativos'&&st.amodo==='abast') p.push('modo=abastecimentos'); if(!pg&&st.vis==='ordens'&&(st.omodo==='kanban'||st.omodo==='cartoes')) p.push('modo='+st.omodo);
   if(pg) p.push(pg.k+'='+pg.id); if(pan&&['om','achado','venc','leitura'].indexOf(pan.k)>=0&&pan.id) p.push(pan.k+'='+pan.id);
   if(st.np&&st.np.novoDe) p.push('novo=plano:'+st.np.novoDe); return p.join('&'); }
 function ma_hashSync(st){ try{ const h=ma_hashDe(st); if(decodeURIComponent((location.hash||'').slice(1))!==h) history.replaceState(null,'',location.pathname+location.search+(h?'#'+h:'')); }catch(e){} }
@@ -95,7 +100,7 @@ function ma_abertura(c,pf){ const pa=manPapelDe(pf);
   return {vis:'ordens',rot:''}; }
 function ma_aplicaHash(self,h){ const c=manGet(); const s={pan:null,pg:null,rec:null};
   const ab=ma_abertura(c,g2perfil()); s.vis=h.vis||((h.om)?'ordens':(h.achado||h.venc?'semordem':ab.vis)); s.rot=(!h.vis&&!h.om&&s.vis==='ordens')?ab.rot:'';
-  if(h.tipo) s.tipo=h.tipo==='achados'?'achados':(h.tipo==='vencimentos'?'venc':''); if(h.modo==='abastecimentos'){ s.vis='ativos'; s.amodo='abast'; } if(h.modo==='kanban') s.omodo='kanban';
+  if(h.tipo) s.tipo=h.tipo==='achados'?'achados':(h.tipo==='vencimentos'?'venc':''); if(h.modo==='abastecimentos'){ s.vis='ativos'; s.amodo='abast'; } if(h.modo==='kanban'||h.modo==='cartoes') s.omodo=h.modo;
   if(h.ativo&&c.ativos[h.ativo]) s.pg={k:'ativo',id:h.ativo}; if(h.plano&&c.planos[h.plano]) s.pg={k:'plano',id:h.plano};
   if(h.om&&c.oms[h.om]) s.pan={k:'om',id:h.om,modal:true}; else if(h.achado&&c.achados[h.achado]) s.pan={k:'achado',id:h.achado,modal:true};
   else if(h.venc) s.pan={k:'venc',id:h.venc,modal:true}; else if(h.leitura) s.pan={k:'leitura',id:h.leitura,modal:true};
@@ -109,7 +114,7 @@ function ma_espera(c,o,pf){ const k=manPf(pf).k, pa=manPapelDe(pf); if(!manAbert
 function ma_ordFila(c){ return Object.values(c.oms).filter(o=>manAberta(o)).sort((a,b)=>(a.janIso||'9').localeCompare(b.janIso||'9')||({'Alta':0,'Média':1,'Baixa':2}[a.crit]-{'Alta':0,'Média':1,'Baixa':2}[b.crit])||a.id.localeCompare(b.id)); }
 function ma_autoAbre(self){ try{ if(!window.matchMedia('(min-width: 1024px)').matches) return; }catch(e){ return; } const st=self.state; if(st.pan||st.pg||st.vis!=='ordens') return;
   const c=manGet(); const o=ma_ordFila(c).find(x=>ma_espera(c,x,g2perfil())); if(o) self.setState({pan:{k:'om',id:o.id,modal:false},rec:null,anun:'Painel da '+o.id+' aberto ao lado.'}); }
-function ma_vis(self,k){ self.setState({vis:k,pg:null,pan:null,rec:null,card:'',fase:'',rot:'',anun:''}); if(k==='ordens') setTimeout(()=>ma_autoAbre(self),0); }
+function ma_vis(self,k){ self.setState({vis:k,pg:null,pan:null,rec:null,card:'',fase:'',rot:'',anun:'',ftipo:(k==='ordens'&&self.state.ftipo==='Inspeção')?'':self.state.ftipo}); if(k==='ordens') setTimeout(()=>ma_autoAbre(self),0); }
 function ma_abrir(self,k,id,extra){ const r=document.activeElement; if(!self.state.pan) self.__panRet=(r&&r!==document.body&&!(r.closest&&r.closest('#ma-painel')))?r:null;
   self.setState(Object.assign({pan:{k,id,modal:true},rec:null,pf:{},pchave:manChave(),paviso:null},extra||{})); setTimeout(()=>{ const e=document.getElementById('ma-painel'); if(e) e.focus(); },0); }
 function ma_fechar(self){ self.setState({pan:null,rec:null,paviso:null,pf:{},anun:''}); setTimeout(()=>{ const r=self.__panRet; self.__panRet=null; if(r&&document.contains(r)) r.focus(); },0); }
@@ -134,24 +139,26 @@ function ma_selosAtv(c,a){ const s=[]; if(a.cond==='Bloqueado') s.push(ma_ch('At
 function ma_pecasTxt(c,s){ const fs=(s.pecas||[]).filter(x=>{ const it=c.itens[x.item]; return it&&(it.saldo-it.reservado)<x.qtd; });
   if(!(s.pecas||[]).length) return {t:'—',c:''}; if(!fs.length) return {t:'Com saldo',c:''}; const x=fs[0], it=c.itens[x.item]; return {t:'Falta '+manN(x.qtd-Math.max(0,it.saldo-it.reservado),1)+' '+it.un+' · '+it.nome,c:'red'}; }
 function ma_linhasSemOrdem(self,c,st){ const rows=[]; const hz=st.prazo==='venc'?-1e9:(st.prazo==='30'?30:c.horiz);
-  if(st.tipo!=='achados') manLinhas(c).filter(l=>l.s&&!l.om&&!l.dup&&l.p.estado!=='Inativo').forEach(l=>{ const ini=manIniJanela(l.x); const venc=l.x.sit==='Vencida';
-    if(!(venc||(st.prazo!=='venc'&&ini<=hz))) return;
+  const SO=manSemOrdem(c,st.prazo==='venc'?-1e9:hz);   /* a mesma lista do Painel de Manutenção (fonte única) */
+  if(st.tipo!=='achados') SO.venc.forEach(l=>{ const ini=manIniJanela(l.x); const venc=l.x.sit==='Vencida';
     if(st.fgrupo&&l.a.grupo!==st.fgrupo) return; if(st.fplano&&l.pid!==st.fplano) return; if(st.fcrit) return;
     const pc=ma_pecasTxt(c,l.s); const prz=venc?manSitTxt(c,l.x):(l.x.sit==='Vence em breve'?'Em breve · janela abre '+(ini<=0?'hoje':'em '+Math.ceil(ini)+' d'):'Em dia · janela abre em '+Math.ceil(ini)+' d');
     const a=l.a; const k=l.vk+'#'+l.sid; const vid=l.pid+'|'+l.aid+'|'+l.sid;
-    rows.push({id:'v:'+vid,k:'venc',key:k,venc:venc,devida:manDevida(l),v:{prazo:(venc?1000:2000)+ini,item:l.pid},s:{item:l.pid+' v'+l.p.versao+' vencimento',ativo:a.nome,oque:l.s.nome,prazo:prz,pecas:pc.t,prox:manDevida(l)?'Gerar ordem preventiva':'Aguardar a janela'},
+    rows.push({id:'v:'+vid,k:'venc',tp:'Preventiva',key:k,venc:venc,devida:manDevida(l),v:{prazo:(venc?1000:2000)+ini,item:l.pid},s:{item:l.pid+' v'+l.p.versao+' vencimento',ativo:a.nome,oque:l.s.nome,prazo:prz,pecas:pc.t,prox:manDevida(l)?'Gerar ordem preventiva':'Aguardar a janela'},
       p:{item:[{k:'link',t:l.pid+' v'+l.p.versao,h:'#venc='+vid},{k:'mut',t:'· vencimento'}],ativo:[{k:'b',t:a.nome},{k:'mut',t:'· '+manLeitTxt(a)}].concat(ma_selosAtv(c,a)).concat(l.est?[ma_ch('Marco estimado','yellow')]:[]),
          oque:[{k:'txt',t:l.s.nome},{k:'br',t:''},{k:'mut',t:manGatTxt(l.s)}],prazo:[ma_ch(prz,venc?'red':(l.x.sit==='Vence em breve'?'yellow':'gray'))],pecas:pc.c?[ma_ch(pc.t,'red')]:[{k:'mut',t:pc.t}],
          prox:[{k:'txt',t:manDevida(l)?'Gerar ordem preventiva':'Aguardar a janela'}]}}); });
-  if(st.tipo!=='venc') Object.values(c.achados).filter(q=>q.estado==='Sem ordem').forEach(q=>{ const a=c.ativos[q.aid]; if(!a) return;
+  if(st.tipo!=='venc') SO.ach.forEach(q=>{ const a=c.ativos[q.aid];
     if(st.fgrupo&&a.grupo!==st.fgrupo) return; if(st.fplano) return; if(st.fcrit&&q.crit!==st.fcrit) return;
     const op=manAchOpcoes(c,q.id); const grave=q.crit==='Alta'||q.sug==='Bloqueado'; const prz=q.voltou?('Voltou da '+q.voltou):(q.crit+' · desde '+manBr(q.oc[0]||q.em));
-    rows.push({id:'a:'+q.id,k:'achado',crit:grave,v:{prazo:(grave?0:3000)+manDias(q.em,c.hoje)*-1,item:q.id},s:{item:q.id+' '+q.origem,ativo:a.nome,oque:q.comp+' '+q.sint,prazo:prz,pecas:'—',prox:op.prim?op.prim.t:''},
+    rows.push({id:'a:'+q.id,k:'achado',tp:q.origem==='Inspeção'?'Inspeção':'Corretiva',crit:grave,v:{prazo:(grave?0:3000)+manDias(q.em,c.hoje)*-1,item:q.id},s:{item:q.id+' '+q.origem,ativo:a.nome,oque:q.comp+' '+q.sint,prazo:prz,pecas:'—',prox:op.prim?op.prim.t:''},
       p:{item:[{k:'link',t:q.id,h:'#achado='+q.id},{k:'mut',t:'· '+q.origem.toLowerCase()}].concat(q.nova?[ma_ch('Nova','yellow')]:[]),ativo:[{k:'b',t:a.nome},{k:'mut',t:'· '+manLeitTxt(a)}].concat(ma_selosAtv(c,a)),
          oque:[{k:'txt',t:q.comp+' · '+q.sint}].concat(q.oc.length>1?[{k:'mut',t:'· '+q.oc.length+' ocorrências'}]:[]),prazo:[ma_ch(prz,q.voltou?'yellow':(grave?'red':(q.crit==='Média'?'yellow':'gray')))],pecas:[{k:'mut',t:'—'}],
          prox:[{k:'txt',t:op.prim?op.prim.t:'—'}].concat(q.sug!=='Apto'?[{k:'br',t:''},ma_ch('Sugere '+q.sug,q.sug==='Bloqueado'?'red':'yellow')]:[])}}); });
   rows.sort((x,y)=>x.v.prazo-y.v.prazo); return rows; }
 function ma_pendTxt(c,o){ const s=manSelos(c,o); if(!s.length) return null; const p=s[0]; return {t:p.t+(p.dono?' · '+p.dono:'')+(p.prazo?' · '+p.prazo:''),c:p.c,n:s.length-1}; }
+/* MAN-LIMPA-01: Tipo, Criticidade e Grupo da faixa Filtros nas ordens (as contagens dos chips de fase usam o mesmo recorte) */
+function ma_omFiltro(c,os,st){ return os.filter(o=>(!st.ftipo||o.tipo===st.ftipo)&&(!st.fcrit||o.crit===st.fcrit)&&(!st.fgrupo||(c.ativos[o.aid]||{}).grupo===st.fgrupo)); }
 /* filtro "Com conflito" em Ordens (F25/F26): conflito com a produção calculado sobre AL e registro do app a resolver */
 function ma_temConf(c,o){ return !!(((o.etapa==='A liberar'||o.etapa==='Liberadas')&&manConflito(c,o)&&!o.conflitoAceito)||o.conflitoApp); }
 function ma_linhaOm(c,o){ const a=c.ativos[o.aid]; const p=ma_pendTxt(c,o); const fin=o.etapa==='Encerradas'; const custo=fin?manCustoFinal(c,o):manCusto(c,o,'est');
@@ -187,17 +194,14 @@ function ma_linhaAb(c,b){ const a=c.ativos[b.aid]||{nome:b.aid}; const lh=manLh(
        lh:lh?[{k:'txt',t:manConsTxt(lh)}]:[{k:'mut',t:'—'}],qual:[ma_ch(b.qual,qc)].concat(b.estorno?[{k:'mut',t:'· '+b.estorno}]:[])}}; }
 function ma_linhaPl(c,p){ const e=pmEst(p); const nv=pmVincs(c,p.id).length; const cand=pmCands(c,p).length; const si=pmSit(c,p); const sem=manLinhas(c,p.id).filter(l=>l.s&&manDevida(l)&&!l.om&&!l.dup).length;
   return {id:p.id,v:{},s:{nome:p.id+' '+p.nome,est:e[0],apl:manAplTxt(c,p),svs:manWork(p).map(s=>s.nome).join(', '),atv:nv+' vinculados de '+(nv+cand),sit:si.t+(sem?' · '+sem+' sem ordem':''),grupo:p.grupo},
-    p:{nome:[{k:'link',t:p.id,h:'#plano='+p.id},{k:'mut',t:'· '+p.nome}],est:[ma_ch(e[0],e[1])],apl:[{k:'txt',t:manAplTxt(c,p)}],svs:[{k:'txt',t:manWork(p).map(s=>s.nome).join(' · ')||'—'}],
+    p:{nome:[{k:'link',t:p.id,h:'#plano='+p.id},{k:'mut',t:'· '+p.nome}],grupo:[{k:'txt',t:p.grupo||'—'}],est:[ma_ch(e[0],e[1])],apl:[{k:'txt',t:manAplTxt(c,p)}],svs:[{k:'txt',t:manWork(p).map(s=>s.nome).join(' · ')||'—'}],
        atv:[{k:'txt',t:nv+(nv===1?' vinculado de ':' vinculados de ')+(nv+cand)}],sit:[ma_ch(si.t,si.c)].concat(sem?[{k:'link',t:sem+' sem ordem',h:'#vis=semordem&plano='+p.id}]:[])}}; }
 /* ---------- Ver como (simulação) e menu ⋯ ---------- */
-function ma_verComo(self,v){ const pf=g2perfil();
-  v.vc=MA_PERFIS.map(k=>{ const q=g2pf(k)||{k,t:k}; const on=pf.k===k; return {t:k,on:String(on),tit:'Ver como '+q.t+' (simulação; não é segurança de acesso)',st:ma_pill(on),
-    go:()=>{ try{ localStorage.setItem(G2_PERFIL_KEY,k); }catch(e){} G2_PERFIL_MEM=k; const ab=ma_abertura(manGet(),g2pf(k));
-      self.setState({perfil:k,vis:ab.vis,rot:ab.rot,pg:null,pan:null,rec:null,card:'',fase:'',g2toast:'Ver como '+q.t+' (simulação): o estado da demonstração não muda.'}); if(ab.vis==='ordens') setTimeout(()=>ma_autoAbre(self),0); }}; });
-  v.vc_fora=MA_PERFIS.indexOf(pf.k)<0; v.vc_fora_t=pf.t+' · sem papel na manutenção';
-  v.mais_open=!!self.state.mais; v.mais_tog=()=>self.setState({mais:!self.state.mais,rst:false}); v.mais_x=()=>self.setState({mais:false,rst:false});
-  v.rst_no=!self.state.rst; v.rst_ask=!!self.state.rst; v.rst=()=>self.setState({rst:true}); v.rst_cancel=()=>self.setState({rst:false,mais:false});
-  v.rst_ok=()=>{ manReset(self); self.setState({rst:false,mais:false,pan:null,pg:null,rec:null,sv:null,np:null,vk:null}); }; }
+/* sem a faixa "Ver como" (proprietário, 14/10): o perfil de quem age é o do avatar do menu lateral (g2perfil), lido a cada desenho */
+function ma_verComo(self,v){
+  /* ⋯ Mais ações (engine.mais, componente único): abrir e fechar é do g2lib; restaurar pede confirmação logo abaixo do ⋯ */
+  v.rst_ask=!!self.state.rst; v.rst=()=>self.setState({rst:true}); v.rst_cancel=()=>self.setState({rst:false});
+  v.rst_ok=()=>{ manReset(self); self.setState({rst:false,pan:null,pg:null,rec:null,sv:null,np:null,vk:null}); }; }
 '''
 
 # ---------- visões (listas), detalhe do ativo e painéis: preenchem os buracos da tela ----------
@@ -212,23 +216,23 @@ function PREVALS(self,v){ manOuvir(self); const c=manGet(); const st=self.state;
       history.pushState(null,'',location.pathname+location.search+'#'+a.getAttribute('href').split('#')[1]); ma_aplicaHash(self,ma_hashLer()); }); }catch(e){} }
   const vis=st.vis||'semordem'; const per=st.per||'mes';
   /* Sem ordem */
-  const so=ma_linhasSemOrdem(self,c,Object.assign({prazo:'10'},st,{tipo:st.tipo||''}));
-  let soF=so; if(st.card==='vencidas') soF=so.filter(r=>r.k==='venc'&&r.venc); else if(st.card==='breve') soF=so.filter(r=>r.k==='venc'&&!r.venc&&r.devida); else if(st.card==='criticos') soF=so.filter(r=>r.k==='achado'&&r.crit);
+  const so=ma_linhasSemOrdem(self,c,Object.assign({prazo:'10'},st,{tipo:''}));
+  const soF=st.ftipo?so.filter(r=>r.tp===st.ftipo):so;
   ma_G('g_so').rows=soF; self.__so=soF;
   /* Ordens */
   const os=Object.values(c.oms).filter(o=>o.etapa!=='Canceladas');
   const fim=(o)=>o.etapa==='Encerradas'; const dom=manAdd(c.hoje,7-new Date(manT(c.hoje)).getUTCDay());
-  let oF=os; if(st.fase) oF=oF.filter(o=>o.etapa===st.fase);
+  const osB=ma_omFiltro(c,os,st); let oF=osB; if(st.fase) oF=oF.filter(o=>o.etapa===st.fase);
   if(st.rot==='voce') oF=oF.filter(o=>ma_espera(c,o,pf)); else if(st.rot==='semana') oF=oF.filter(o=>!fim(o)&&o.janIso&&o.janIso<=dom); else if(st.rot==='conf') oF=oF.filter(o=>ma_temConf(c,o));
-  if(st.card==='criticas') oF=oF.filter(o=>!fim(o)&&o.crit==='Alta'); else if(st.card==='sobras') oF=oF.filter(o=>(o.pecas||[]).some(p=>p.sob>0)); else if(st.card==='peca') oF=oF.filter(o=>manFalta(c,o).length);
+  else if(st.rot==='peca') oF=oF.filter(o=>!fim(o)&&manFalta(c,o).length);
   const oR=oF.map(o=>ma_linhaOm(c,o)).sort((a,b)=>String(a.v.ord).localeCompare(String(b.v.ord)));
   ma_G('g_om').rows=oR; self.__om=oR;
   /* Ativos e abastecimentos */
-  const at=c.ordem.map(id=>c.ativos[id]).filter(Boolean).map(a=>ma_linhaAtv(c,a,per)).filter(r=>(!st.fpend||r.pend.indexOf(st.fpend)>=0)&&(st.card!=='naoaptos'||r.s.cond!=='Apto'))
+  const at=c.ordem.map(id=>c.ativos[id]).filter(a=>a&&(!st.fgrupo||a.grupo===st.fgrupo)).map(a=>ma_linhaAtv(c,a,per)).filter(r=>!st.fpend||r.pend.indexOf(st.fpend)>=0)
     .sort((a,b)=>(a.v.cond-b.v.cond)||(a.v.prox-b.v.prox));
-  ma_G('g_at').rows=at; ma_G('g_ab').rows=(c.abast||[]).slice().sort((x,y)=>(y.data+(y.hora||'')).localeCompare(x.data+(x.hora||''))).map(b=>ma_linhaAb(c,b));
+  ma_G('g_at').rows=at; ma_G('g_ab').rows=(c.abast||[]).filter(b=>!st.fgrupo||(c.ativos[b.aid]||{}).grupo===st.fgrupo).sort((x,y)=>(y.data+(y.hora||'')).localeCompare(x.data+(x.hora||''))).map(b=>ma_linhaAb(c,b));   /* o Grupo vale também para os lançamentos, pelo ativo de cada um (MAN-LIMPA-GRUPO-01) */
   /* Planos */
-  ma_G('g_pl').rows=pmPlans(c).map(p=>ma_linhaPl(c,p));
+  ma_G('g_pl').rows=pmPlans(c).filter(p=>!st.fgrupo||p.grupo===st.fgrupo).map(p=>ma_linhaPl(c,p));
   /* detalhe do ativo */
   const pg=st.pg; const A=pg&&pg.k==='ativo'?c.ativos[pg.id]:null;
   if(A){ const ls=manLinhas(c).filter(l=>l.aid===A.id);
@@ -281,28 +285,26 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2pe
   const capp=manAppConfAbertos(c).length;   /* registros do app a resolver (S4) */
   const sl=[]; if(bloq) sl.push(bloq+(bloq>1?' ativos bloqueados':' ativo bloqueado')); if(conf) sl.push(conf+(conf>1?' conflitos':' conflito')); if(capp) sl.push(capp+(capp>1?' registros do app a resolver':' registro do app a resolver'));
   v.st_ma=sl.join(' · ')||'Sem impedimentos'; v.st_ma_st=ma_chipSt(sl.length?'red':'green').replace('padding:2px 9px;','padding:3px 10px;'); v.st_ma_dot=ma_dotSt(sl.length?'red':'green');
-  const card=(k,t,n,sub,on)=>({k,t,n:String(n),sub:sub||'',btn:!!k,on:String(!!on),go:()=>self.setState({card:st.card===k?'':k}),lab:t+' · '+n+(k?(on?' · mostrando só estes; toque para ver todos':' · toque para filtrar'):'')});
-  /* Sem ordem: 3 cartões-filtro (a mesma base de prazo: início da janela, 10 d) */
-  const vencidas=so.filter(r=>r.k==='venc'&&r.venc).length, breve=so.filter(r=>r.k==='venc'&&!r.venc&&r.devida).length, crit=so.filter(r=>r.k==='achado'&&r.crit).length;
-  v.c_so=[card('vencidas','Vencidas sem ordem',vencidas,'base do KPI-PCM-05',st.card==='vencidas'),card('breve','Em breve sem ordem',breve,'janela em até '+c.horiz+' d',st.card==='breve'),card('criticos','Achados críticos sem ação',crit,'KPI-PCM-11',st.card==='criticos')];
+  /* MAN-LIMPA-01 (proprietário, 14/10/2026: "elimine os cards de manutenção, vamos focar os cards na área de gráficos e relatórios"): a tela de
+     trabalho não tem cartões; os indicadores ficam no Painel de Manutenção. Os filtros seguem a faixa Filtros (funil), como na O.S. */
   const chs=(lst,cur,set)=>lst.map(([k,t])=>({t,on:String(cur===k),st:ma_pill(cur===k),go:()=>set(k)}));
-  v.so_tipo=chs([['','Todos'],['venc','Vencimentos'],['achados','Achados']],st.tipo||'',k=>self.setState({tipo:k}));
   v.so_prazo=chs([['venc','Vencidas'],['10','Até 10 d'],['30','Até 30 d']],st.prazo||'10',k=>self.setState({prazo:k}));
   const grupos=[]; c.ordem.forEach(id=>{ const g=(c.ativos[id]||{}).grupo; if(g&&grupos.indexOf(g)<0) grupos.push(g); });
   v.f_grupos=[{v:'',t:'Todos os grupos'}].concat(grupos.map(g=>({v:g,t:g}))); v.f_grupo=st.fgrupo||''; v.f_setgrupo=(e)=>self.setState({fgrupo:e.target.value});
-  v.f_planos=[{v:'',t:'Todos os planos'}].concat(pmPlans(c).map(p=>({v:p.id,t:p.id+' · '+p.nome}))); v.f_plano=st.fplano||''; v.f_setplano=(e)=>self.setState({fplano:e.target.value});
+  const TIPOS={semordem:['Preventiva','Corretiva','Inspeção'],ordens:['Preventiva','Corretiva']}; const vv=st.vis||'semordem';
+  v.f_tipos=[{v:'',t:'Todos os tipos'}].concat((TIPOS[vv]||[]).map(x=>({v:x,t:x}))); v.f_tipo=st.ftipo||''; v.f_settipo=(e)=>self.setState({ftipo:e.target.value});
+  v.flt_tipo=!!TIPOS[vv]; v.flt_crit=!!TIPOS[vv]; v.flt_pend=vv==='ativos'&&(st.amodo||'ativos')==='ativos';   /* cada visão mostra só os filtros que valem para ela */
   v.f_crits=[{v:'',t:'Toda criticidade'},{v:'Alta',t:'Alta'},{v:'Média',t:'Média'},{v:'Baixa',t:'Baixa'}]; v.f_crit=st.fcrit||''; v.f_setcrit=(e)=>self.setState({fcrit:e.target.value});
-  /* Ordens: 4 cartões; chips Todas + 5 fases (a única contagem de fase); rotina; Lista | Kanban */
-  const os=Object.values(c.oms).filter(o=>o.etapa!=='Canceladas'); const ab=os.filter(o=>manAberta(o));
-  const hh=ab.filter(o=>MAN_ABERTAS.indexOf(o.etapa)>=0).reduce((s,o)=>s+(Number(o.tempo)||0),0);
-  v.c_om=[card('criticas','Ordens críticas abertas',ab.filter(o=>o.crit==='Alta').length,'PRD 55.2 · oficina',st.card==='criticas'),card('','Backlog',manN(hh,1)+' HH','semanas: não calculável (sem capacidade P10)'),
-    card('sobras','Sobras a receber',os.filter(o=>(o.pecas||[]).some(p=>p.sob>0)).length,'KPI-SUP-06 · ponte até o 1b',st.card==='sobras'),card('peca','Espera por peça',ab.filter(o=>manFalta(c,o).length).length,'tempo médio: não calculável até o 1c',st.card==='peca')];
-  v.fchips=[{t:'Todas',n:String(os.length),on:String(!st.fase),go:()=>self.setState({fase:''}),st:ma_pill(!st.fase)}].concat(MAN_FASES.map(f=>({t:f,n:String(os.filter(o=>o.etapa===f).length),on:String(st.fase===f),st:ma_pill(st.fase===f),go:()=>self.setState({fase:st.fase===f?'':f})})));
+  /* Ordens: chips Todas + 5 fases (a única contagem de fase, no recorte da faixa Filtros); rotina; Lista | Kanban em ícones */
+  const os=Object.values(c.oms).filter(o=>o.etapa!=='Canceladas'); const ab=os.filter(o=>manAberta(o)); const osB=ma_omFiltro(c,os,st);
+  v.fchips=[{t:'Todas',n:String(osB.length),on:String(!st.fase),go:()=>self.setState({fase:''}),st:ma_pill(!st.fase)}].concat(MAN_FASES.map(f=>({t:f,n:String(osB.filter(o=>o.etapa===f).length),on:String(st.fase===f),st:ma_pill(st.fase===f),go:()=>self.setState({fase:st.fase===f?'':f})})));
   const nVoce=os.filter(o=>ma_espera(c,o,pf)).length; const dom=manAdd(c.hoje,7-new Date(manT(c.hoje)).getUTCDay());
   v.rotinas=[{t:'Aguardam você · '+nVoce,on:String(st.rot==='voce'),st:ma_pill(st.rot==='voce'),go:()=>self.setState({rot:st.rot==='voce'?'':'voce'})},{t:'Esta semana',on:String(st.rot==='semana'),st:ma_pill(st.rot==='semana'),go:()=>self.setState({rot:st.rot==='semana'?'':'semana'})},
-    {t:'Com conflito · '+os.filter(o=>ma_temConf(c,o)).length,on:String(st.rot==='conf'),st:ma_pill(st.rot==='conf'),go:()=>self.setState({rot:st.rot==='conf'?'':'conf'})}];
-  v.om_lista=(st.omodo||'lista')==='lista'; v.om_kanban=st.omodo==='kanban';
-  v.om_modos=[['lista','Lista'],['kanban','Kanban']].map(([k,t])=>({t,on:String((st.omodo||'lista')===k),st:ma_pill((st.omodo||'lista')===k),go:()=>self.setState({omodo:k})}));
+    {t:'Com conflito · '+os.filter(o=>ma_temConf(c,o)).length,on:String(st.rot==='conf'),st:ma_pill(st.rot==='conf'),go:()=>self.setState({rot:st.rot==='conf'?'':'conf'})},
+    {t:'Espera por peça · '+ab.filter(o=>manFalta(c,o).length).length,on:String(st.rot==='peca'),st:ma_pill(st.rot==='peca'),go:()=>self.setState({rot:st.rot==='peca'?'':'peca'})}];
+  /* DS VIS-05 (15/10/2026: "toda lista tem Tabela e Cartões"): Lista | Cartões | Kanban; Cartões é a mesma grade g_om em cartões (g2lib.g2modosFim) */
+  v.om_lista=['lista','cartoes'].indexOf(st.omodo||'lista')>=0; v.om_kanban=st.omodo==='kanban'; self.g2modoExterno=(gid)=>(gid==='g_om'&&self.state.omodo==='cartoes')?'cartoes':'tabela';
+  v.om_modos=[['lista','Lista','v_lista'],['cartoes','Cartões','v_cartoes'],['kanban','Kanban','v_kanban']].map(([k,t],i)=>({k,t,i:String(i),li:k==='lista',ca:k==='cartoes',ka:k==='kanban',on:String((st.omodo||'lista')===k),go:()=>self.setState({omodo:k})}));
   v.semana=st.rot==='semana'; const dias={}; os.filter(o=>manAberta(o)&&o.janIso&&o.janIso<=dom).forEach(o=>{ const d=o.janIso<c.hoje?'vencidas':o.janIso; (dias[d]=dias[d]||[]).push(o); });
   v.sem_dias=Object.keys(dias).sort().map(d=>{ const esp={}; dias[d].forEach(o=>{ esp[o.esp]=(esp[o.esp]||0)+(Number(o.tempo)||0); });
     return {t:d==='vencidas'?'Atrasadas':(manSem(d)+' '+manBr(d)),oms:dias[d].map(o=>o.id).join(', '),hh:Object.keys(esp).map(k=>k+' '+manN(esp[k],1)+' HH').join(' · ')}; });
@@ -312,12 +314,8 @@ function EXTRAVALS(self,v){ const c=manGet(); const st=self.state; const pf=g2pe
     cards:cs.map(o=>{ const a=c.ativos[o.aid]; const sl=manSelos(c,o); return {id:o.id,lab:'Abrir '+o.id+' · '+(a?a.nome:''),open:()=>ma_abrir(self,'om',o.id),key:(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); ma_abrir(self,'om',o.id); } },
       st:'display:flex;flex-direction:column;gap:5px;padding:10px;border-radius:10px;background:#fff;border:1px solid #E4E9E5;cursor:pointer;text-align:left;',tipo:o.serv,local:(a?a.nome:'')+' · '+(o.jan||'—'),hasBar:false,bar:'',hasReal:false,real:'',
       selos:sl.slice(0,2).map(z=>({t:z.t,st:ma_chipSt(z.c),dot:ma_dotSt(z.c)})),hasObs:false,obs:'',hasDp:!!o.executante,dp:o.executante?('Executante: '+o.executante):'',meta:o.tipo+' · '+o.crit}; })}; });
-  /* Ativos: período, 4 cartões, Ativos | Abastecimentos */
-  const per=st.per||'mes'; const P=manPeriodo(c,per); v.per_v=per; v.per_set=(e)=>self.setState({per:e.target.value});
-  const aptos=c.ordem.filter(id=>(c.ativos[id]||{}).cond==='Apto').length; const cp=manCustoPeriodo(c,per); const cu=manCumprimento(c,per);
-  v.c_at=[card('naoaptos','Aptos agora',aptos+' de '+c.ordem.length,'condição, não disponibilidade · toque: os não aptos',st.card==='naoaptos'),
-    card('','Cumprimento de preventiva',cu?(cu.pct+' %'):'não calculável',cu?(cu.ok+' de '+cu.n+' no prazo · '+P.t):'sem encerradas com vencimento registrado · '+P.t),
-    card('','Custo de manutenção · '+P.t,manRS(cp.enc),'das OMs encerradas no sistema · em andamento '+manRS(cp.and)+' est.'),card('','MTBF · MTTR','não estimável','sem histórico de falhas (KPI-PCM-02)')];
+  /* Ativos: Ativos | Abastecimentos; custo da coluna no mês corrente (o período e os indicadores ficam no Painel) */
+  /* (o período ficou só no cálculo do custo do mês da coluna) */
   v.at_ativos=(st.amodo||'ativos')==='ativos'; v.at_abast=st.amodo==='abast';
   v.at_modos=[['ativos','Ativos'],['abast','Abastecimentos']].map(([k,t])=>({t,on:String((st.amodo||'ativos')===k),st:ma_pill((st.amodo||'ativos')===k),go:()=>self.setState({amodo:k})}));
   v.f_pends=[{v:'',t:'Toda pendência'}].concat(['Leitura a confirmar','Sem plano','Achado sem ordem','Desvio de consumo','Vence em 30 d','Restrição vencida'].map(x=>({v:x,t:x}))); v.f_pend=st.fpend||''; v.f_setpend=(e)=>self.setState({fpend:e.target.value});
@@ -335,16 +333,16 @@ function ma_hprim(self,v,c,pf,vis,lista,panAberto){ let t='',fn=null,dis='',sec=
     fn=()=>{ const r=ma_cmd(self,c2=>manGerarTodas(c2,ks,g2perfil())); if(r&&r.ids&&r.ids.length){ self.setState({gerados:r.ids,vis:'ordens',fase:'A liberar',rot:''}); ma_abrir(self,'om',r.ids[0]); ma_rec(self,r,r.ids.length>1?{t:'Abrir as '+r.ids.length+' › próxima: '+r.ids[1],k:'om',id:r.ids[1]}:null); } };
     sec={t:'Registrar achado',fn:()=>ma_novoAch(self,'')}; }
   else if(lista&&vis==='ativos'&&self.state.amodo==='abast'){ t='Registrar abastecimento'; dis=manPode(c,pf,'registrar'); fn=()=>ma_novoAb(self,''); }
-  else if(lista&&vis==='planos'){ t='Novo plano'; dis=manPode(c,pf,'plano'); fn=()=>pmNovo(self,manGet(),null); }
+  else if(lista&&vis==='planos'){ t='Criar plano'; dis=manPode(c,pf,'plano'); fn=()=>pmNovo(self,manGet(),null); }
   else if(lista&&vis==='ativos'){ sec={t:'Registrar achado',fn:()=>ma_novoAch(self,'')}; }
   v.hp_tem=!!t; v.hp_t=t; v.hp_dis=!!dis; v.hp_why=dis||''; v.hp_fn=fn||(()=>{}); v.hp_st=(panAberto||dis)?MA_SEC:MA_PRIM;
-  v.hs_tem=!!sec; v.hs_t=sec?sec.t:''; v.hs_fn=sec?sec.fn:(()=>{}); }
+  v.hs_vis=!!sec&&!t; v.hs_menu=!!sec&&!!t; v.hs_t=sec?sec.t:''; v.hs_fn=sec?sec.fn:(()=>{}); }   /* MAIS-01: com a primária à vista, a secundária vai para o ⋯ */
 '''
 
 # ---------- detalhe do ativo (página) ----------
 MA_JS+=r'''
 function ma_motor(a){ return ['Trator','Colhedora','Pulverizador','Veículo'].indexOf(a.classe)>=0; }
-function ma_agenda(c,aid){ const r=MAN_AL.rec[aid]; if(!r) return []; return MAN_AL.aloc.filter(x=>x.r===r&&x.dia>=c.hoje).map(x=>manBr(x.dia)+' '+x.os+' '+String(Math.floor(x.ini)).padStart(2,'0')+':'+String(Math.round((x.ini%1)*60)).padStart(2,'0')+'–'+String(Math.floor(x.fim)).padStart(2,'0')+':'+String(Math.round((x.fim%1)*60)).padStart(2,'0')+(x.sit==='firme'?'':' · '+x.sit)); }
+function ma_agenda(c,aid){ const r=MAN_AL.rec[aid]; if(!r) return []; return manAloc().filter(x=>x.r===r&&x.dia>=c.hoje).map(x=>manBr(x.dia)+' '+x.os+' '+String(Math.floor(x.ini)).padStart(2,'0')+':'+String(Math.round((x.ini%1)*60)).padStart(2,'0')+'–'+String(Math.floor(x.fim)).padStart(2,'0')+':'+String(Math.round((x.fim%1)*60)).padStart(2,'0')+(x.sit==='firme'?'':' · '+x.sit)); }
 function ma_custoNat(c,aid,per){ const P=manPeriodo(c,per); const n={pecas:0,lub:0,ofi:0,terc:0};
   Object.values(c.oms).filter(o=>o.aid===aid&&o.etapa==='Encerradas'&&o.exec&&o.exec.data>=P.de&&o.exec.data<=P.ate).forEach(o=>{ (o.pecas||[]).forEach(p=>{ const v=(p.apl||0)*(p.preco||0); if(/^(OL|GR)-/.test(p.item||'')) n.lub+=v; else n.pecas+=v; });
     n.ofi+=((o.exec&&o.exec.horas)||0)*c.custoh; n.terc+=Number(o.terc)||0; }); return n; }
@@ -421,7 +419,12 @@ function ma_panV(self,v,c,pf){ const st=self.state; const pan=st.pan;
   const hideP=!!av; v.pan_hasP=!!P&&!hideP; v.pan_pt=P?P.t:''; v.pan_pfn=P?P.fn:(()=>{}); v.pan_pdis=!!(P&&P.dis); v.pan_pst=P?P.st:MA_SEC; v.pan_pwhy=P?P.why:''; v.pan_hasWhy=!!(P&&P.why&&!hideP);
   v.pan_secs=hideP?[]:S; }
 /* ---------- painel da OM: o único detalhe da ordem (web e app) ---------- */
-function ma_omPrim(self,c,o,pf,f){ const a=c.ativos[o.aid]; const P={}; const S=[];
+/* cancelar sem execução (D5): secundária em A liberar e Liberadas, com motivo; a reserva volta ao livre, com registro (manCancelar) */
+function ma_omPrim(self,c,o,pf,f){ const r=ma_omPrim0(self,c,o,pf,f); if(o.etapa!=='A liberar'&&o.etapa!=='Liberadas') return r;
+  const canc=()=>self.setState({paviso:{t:'Cancelar a '+o.id+': informe o motivo. A reserva da ordem volta ao estoque livre, com registro.',campo:'canc',lab:'Motivo do cancelamento',
+    ok:{t:'Cancelar a '+o.id,fn:()=>{ const mt=(self.state.pf||{}).canc; ma_cmd(self,c2=>manCancelar(c2,o.id,mt,g2perfil(),self.state.pchave),(x)=>ma_rec(self,x)); }},no:'Voltar'}});
+  return {P:r.P,S:r.S.concat([ma_btn('Cancelar ordem · motivo',canc,manPode(c,pf,'cancelar'),false)])}; }
+function ma_omPrim0(self,c,o,pf,f){ const a=c.ativos[o.aid]; const P={}; const S=[];
   const run=(fn,prox)=>ma_cmd(self,fn,(r)=>ma_rec(self,r,prox===undefined?ma_proxOm(manGet(),g2perfil(),o.id,self.state.gerados):prox));
   if(o.etapa==='A liberar'){ const fl=manFalta(c,o); const cf=manConflito(c,o);
     if(fl.length){ if(!o.sc) return {P:ma_btn('Solicitar compra (simulado · Compras recebe no 1c)',()=>run(c2=>manSolicitar(c2,o.id,g2perfil()),null),manPode(c,pf,'ponte'),true),S};
@@ -462,7 +465,7 @@ function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const 
     bst:'height:5px;border-radius:999px;background:'+(i<cur?'#9CCBB0':(i===cur?'#1E7A4C':'#E4E9E5'))+';'}));
   const pr=ma_omPrim(self,c,o,pf,f); const sl=manSelos(c,o); const p0=sl[0];
   v.om_veio=o.de?('Pendência da '+o.de):(o.pid?(o.pid+' v'+o.ver+' · '+o.serv):(o.origAch?o.origAch+' · achado':String(o.origem||'').split(' · ')[0]));
-  v.om_aqui=o.etapa; v.om_falta=p0?(p0.t+(p0.dono?' · '+p0.dono:'')+(p0.prazo?' · '+p0.prazo:'')+(sl.length>1?' · +'+(sl.length-1):'')):'nada'; v.om_prox=pr.P?pr.P.t:(o.etapa==='Encerradas'?'—':'—');
+  v.om_aqui=o.etapa==='Canceladas'&&o.canc?('Cancelada em '+manBr(o.canc.em)+' por '+o.canc.por+' · '+o.canc.motivo):o.etapa; v.om_falta=p0?(p0.t+(p0.dono?' · '+p0.dono:'')+(p0.prazo?' · '+p0.prazo:'')+(sl.length>1?' · +'+(sl.length-1):'')):'nada'; v.om_prox=pr.P?pr.P.t:(o.etapa==='Encerradas'?'—':'—');
   const ab=o.etapa==='A liberar'||o.etapa==='Liberadas'?'jan':(o.etapa==='Em execução'?'tk':(o.etapa==='Em conferência'?(o.trata&&!o.aptidao?'tk':'pc'):'cus')); const bo=st.oblk||{};
   const B=(k,t,sum)=>{ const open=bo[o.id+k]===undefined?(k===ab||(k==='con'&&o.etapa==='Em execução')):!!bo[o.id+k]; const tog=()=>self.setState({oblk:Object.assign({},self.state.oblk||{},{[o.id+k]:!open})});
     v['ob_'+k]=open; v['obk_'+k+'_t']=t; v['obk_'+k+'_s']=sum; v['obk_'+k+'_y']=open?'▾':'▸'; v['obk_'+k+'_o']=String(open); v['obk_'+k+'_g']=tog; return {k,t,sum,open:String(open),sym:open?'▾':'▸',tog}; };
@@ -478,7 +481,7 @@ function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const 
   /* janela e equipe */
   const podeJ=(o.etapa==='A liberar'||o.etapa==='Liberadas'); const pm=manPode(c,pf,'mover'); v.om_janEd=podeJ&&!pm; v.om_janRo=!v.om_janEd;
   v.om_jan=(o.jan||'—')+(o.vencOrig&&o.vencOrig!==o.janIso?' · vencimento original '+manBr(o.vencOrig):''); v.om_conf=!!cf; v.om_conft=cf?(cf.t+' · '+cf.det):'';
-  const usa=MAN_AL.rec[o.aid]?MAN_AL.aloc.filter(x=>x.r===MAN_AL.rec[o.aid]&&x.dia>=c.hoje&&x.sit!=='manutenção').map(x=>x.os):[];
+  const usa=MAN_AL.rec[o.aid]?manAloc().filter(x=>x.r===MAN_AL.rec[o.aid]&&x.dia>=c.hoje&&x.sit!=='manutenção').map(x=>x.os):[];
   /* substituto proposto (ponte até o 1b): o PCP decide em O.S. › Recursos */
   const pp=(c.prop||{})[o.id]; const ps=pp?c.ativos[pp.sub]:null; const pa=(a&&a.cond==='Bloqueado'&&manAberta(o))?manPropAfeta(c,o):[];
   v.om_prop=pp?('Substituto proposto: '+(ps?manNome(ps):pp.sub)+' para '+pp.os.join(' e ')+' · por '+pp.por+' · aguarda PCP (simulado)'):''; v.om_hasProp=!!pp;
@@ -521,11 +524,19 @@ function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const 
   v.om_inc=()=>{ const ff=self.state.pf||{}; ma_cmd(self,c2=>manIncluir(c2,o.id,ff.itipo||'Serviço',ff.itxt,g2perfil()),(r)=>{ const f2=Object.assign({},self.state.pf||{}); delete f2.itxt; self.setState({pf:f2}); ma_rec(self,r); }); };
   v.om_tkn=nr+' de '+o.chk.length+' respondidas';
   /* peças: Item · Planejado · Situação · Aplicado; retiradas com destino e responsável */
-  v.om_pcs=(o.pecas||[]).map((p,i)=>{ const it=p.item?c.itens[p.item]:null; const disp=it?it.saldo-it.reservado:null; let s,cc;
-    if(p.sob>0){ s='Sobra '+manN(p.sob,1)+' '+p.un+' a devolver'; cc='yellow'; } else if(p.dev){ s='Aplicado '+manN(p.apl,1)+' · devolvido '+manN(p.dev,1)+' '+p.un; cc='green'; }
-    else if(p.apl&&o.exec){ s='Aplicado '+manN(p.apl,1)+' '+p.un; cc='green'; } else if(p.res){ s='Reservado '+manN(p.res,1)+' '+p.un; cc='green'; }
-    else if(it&&disp<p.qtd){ s='Falta '+manN(p.qtd-Math.max(0,disp),1)+' '+p.un+(o.sc?' · '+o.sc.id:''); cc='red'; } else if(it){ s='Livre '+manN(disp,1)+' '+p.un; cc='gray'; } else { s='Sem código no catálogo (1b)'; cc='gray'; }
-    return {nome:p.nome,q:manN(p.qtd,1)+' '+p.un,s,st:ma_chipSt(cc),dot:ma_dotSt(cc),ed:exe&&!pE,ro:!(exe&&!pE),av:f['ap'+i]===undefined?'':f['ap'+i],aph:'vazio = '+manN(p.qtd,1),alab:'Aplicado · '+p.nome+' ('+p.un+')',un:p.un,
+  v.om_pcs=(o.pecas||[]).map((p,i)=>{ const it=p.item?c.itens[p.item]:null; const disp=it?it.saldo-it.reservado:null; let s,cc; const nec=manNec(p);
+    const rr=(p.rsv||[]).reduce((a,x)=>a+x.qtd,0); const dv=o.etapa==='Canceladas'?((o.canc||{}).dev||[]).find(x=>x.item===p.item&&p.item):null;
+    /* D5: o chip curto diz a situação; a linha de baixo, a origem (pedido › recebimento › reserva › ordem) ou o motivo */
+    let orig=(p.rsv||[]).map(x=>(x.pc?x.pc+' › ':'')+'recebimento '+x.rec+' ('+manBr(x.em)+') › reserva '+manN(x.qtd,1)+' '+p.un+' › '+o.id).join(' · ');
+    if(dv){ s='Devolvida ao livre'; cc='gray'; orig='Reserva de '+manN(dv.qtd,1)+' '+p.un+' devolvida ao livre em '+manBr(o.canc.em)+' (cancelada: '+o.canc.motivo+')'+(dv.orig?' · recebimento '+dv.orig:''); }
+    else if(o.etapa==='Canceladas'){ s='Sem reserva (cancelada)'; cc='gray'; }
+    else if(p.sob>0){ s='Sobra '+manN(p.sob,1)+' '+p.un+' a devolver'; cc='yellow'; } else if(p.dev){ s='Aplicado '+manN(p.apl,1)+' · devolvido '+manN(p.dev,1)+' '+p.un; cc='green'; }
+    else if(p.apl&&o.exec){ s='Aplicado '+manN(p.apl,1)+' '+p.un; cc='green'; }
+    else if(p.res&&rr>0){ const fl=nec>1e-9&&disp<nec; s='Peça chegou · reservada'; cc=fl?'yellow':'green';
+      if(nec>1e-9) orig='Reservada '+manN(p.res,1)+' de '+manN(p.qtd,1)+' '+p.un+(fl?' · falta '+manN(nec-Math.max(0,disp),1)+' '+p.un+(o.sc?' ('+o.sc.id+')':''):'')+' · '+orig; }
+    else if(p.res){ s='Reservado '+manN(p.res,1)+' '+p.un; cc='green'; }
+    else if(it&&disp<p.qtd){ const rt=manResTxt(c,p.item,o.id); s='Falta '+manN(p.qtd-Math.max(0,disp),1)+' '+p.un+(o.sc?' · '+o.sc.id:''); cc='red'; if(rt) orig=rt+': ninguém a usa em outra ordem'; } else if(it){ s='Livre '+manN(disp,1)+' '+p.un; cc='gray'; } else { s='Sem código no catálogo (1b)'; cc='gray'; }
+    return {nome:p.nome,orig,hasOrig:!!orig,q:manN(p.qtd,1)+' '+p.un,s,st:ma_chipSt(cc),dot:ma_dotSt(cc),ed:exe&&!pE,ro:!(exe&&!pE),av:f['ap'+i]===undefined?'':f['ap'+i],aph:'vazio = '+manN(p.qtd,1),alab:'Aplicado · '+p.nome+' ('+p.un+')',un:p.un,
       apl:o.exec?manN(p.apl,1)+' '+p.un:'—',aset:(e)=>maF(self,'ap'+i,e.target.value)}; });
   v.om_temPc=v.om_pcs.length>0; v.om_semPc=!v.om_temPc;
   const pR=(manPode(c,pf,'executar',{o})&&manPode(c,pf,'ponte'))||'';
@@ -911,33 +922,22 @@ def _blk(pre,k,corpo):
     return (f'<section class="ma-bl" aria-label="{H(pre+k+"_t")}"><button type="button" class="ma-blh" aria-expanded="{H(pre+k+"_o")}" onClick="{H(pre+k+"_g")}">'
             f'<span aria-hidden="true" style="width: 14px;">{H(pre+k+"_y")}</span><span>{H(pre+k+"_t")}</span><span style="font-weight: 600; color: {MUTED}; font-size: 12.5px; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">· {H(pre+k+"_s")}</span></button>'
             + IF(pre.replace('_','')+'_'+k if False else ('ob_'+k if pre=='obk_' else 'ab_'+k),f'<div class="ma-bl-c">{corpo}</div>') + '</section>')
-def _card_html(lst):
-    inner=(IF('k.btn',f'<button type="button" class="ma-card" aria-pressed="{H("k.on")}" aria-label="{H("k.lab")}" onClick="{H("k.go")}">'
-              f'<span style="font-size: 11px; font-weight: 800; letter-spacing: .05em; color: {MUTED}; text-transform: uppercase;">{H("k.t")}</span>'
-              f'<span style="font-family: {DISP}; font-size: 22px; font-weight: 700;">{H("k.n")}</span><span style="font-size: 11.5px; color: {MUTED};">{H("k.sub")}</span></button>')
-           + IF('!k.btn',f'<div class="ma-card"><span style="font-size: 11px; font-weight: 800; letter-spacing: .05em; color: {MUTED}; text-transform: uppercase;">{H("k.t")}</span>'
-              f'<span style="font-family: {DISP}; font-size: 22px; font-weight: 700;">{H("k.n")}</span><span style="font-size: 11.5px; color: {MUTED};">{H("k.sub")}</span></div>'))
-    return f'<div class="ma-cards" style="display: flex; gap: 10px;">' + FOR(lst,'k',inner,4) + '</div>'
 def _btns(lst):
     return FOR(lst,'b',f'<button type="button" disabled="{H("b.dis")}" title="{H("b.why")}" onClick="{H("b.fn")}" style="{H("b.st")}">{H("b.t")}</button>',2)
 
 def _cabecalho():
-    vc=(f'<span role="group" aria-label="Ver como (simulação)" style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;">'
-        f'<span class="ma-vc-l" style="font-size: 12px; font-weight: 700; color: {MUTED};">Ver como (simulação)</span><span class="ma-vc-s" style="font-size: 12px; font-weight: 700; color: {MUTED};">Ver como</span>'
-        + FOR('vc','p',f'<button type="button" aria-pressed="{H("p.on")}" title="{H("p.tit")}" onClick="{H("p.go")}" style="{H("p.st")}">{H("p.t")}</button>',3)
-        + IF('vc_fora',f'<span style="font-size: 12px; color: {MUTED};">{H("vc_fora_t")}</span>') + '</span>')
-    mais=(f'<span style="position: relative; display: inline-flex;"><button type="button" aria-label="Mais ações" title="Mais ações" aria-expanded="{H("mais_open")}" onClick="{H("mais_tog")}" '
-          f'style="border: 1px solid {LINE}; background: {SURF}; border-radius: 9px; width: 34px; height: 30px; cursor: pointer; font-size: 16px; font-weight: 800; color: {INK};">⋯</button>'
-          + IF('mais_open',f'<div role="menu" aria-label="Mais ações" style="position: absolute; right: 0; top: 36px; z-index: 50; width: 300px; background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 8px; display: flex; flex-direction: column; gap: 6px;">'
-               + IF('rst_no',f'<button type="button" role="menuitem" onClick="{H("rst")}" style="{SEC} text-align: left;">Restaurar demonstração</button>'
-                    f'<span style="font-size: 12px; color: {MUTED};">Volta a manutenção (planos, ordens, achados, leituras, abastecimentos) e também O.S., Estoque e App ao início: o estado é um só.</span>',True)
-               + IF('rst_ask',f'<span role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">Restaurar toda a demonstração (manutenção, O.S., Estoque e App)?</span>'
-                    f'<span style="display: flex; gap: 6px;"><button type="button" onClick="{H("rst_ok")}" style="{_MINI} color: {RED}; border-color: {RED};">Restaurar</button><button type="button" onClick="{H("rst_cancel")}" style="{_MINI}">Manter</button></span>')
-               + '</div>') + '</span>')
-    return f'<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">{vc}<span style="flex-grow: 1;"></span>{mais}</div>'
+    """⋯ Mais ações da manutenção no fim dos comandos do cabeçalho (componente único engine.mais, 15/10/2026): Registrar achado quando a
+    visão também tem a primária (uma secundária à vista no máximo) e Restaurar demonstração. Restaurar apaga o que foi feito na demonstração:
+    pede confirmação logo abaixo do ⋯, fora do menu, e a decisão fica à vista até a resposta."""
+    itens=[IF('hs_menu',f'<button type="button" role="menuitem" onClick="{H("hs_fn")}">{H("hs_t")}</button>'),
+           f'<button type="button" role="menuitem" onClick="{H("rst")}" data-dica="Volta manutenção, O.S., Estoque e App ao início: o estado é um só.">Restaurar demonstração</button>']
+    conf=IF('rst_ask',f'<div role="alertdialog" aria-label="Restaurar demonstração" style="position: absolute; right: 0; top: calc(100% + 6px); z-index: 50; width: 300px; max-width: calc(100vw - 24px); box-sizing: border-box; background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;">'
+            f'<span role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">Restaurar toda a demonstração (manutenção, O.S., Estoque e App)?</span>'
+            f'<span style="display: flex; gap: 6px; justify-content: flex-end;"><button type="button" onClick="{H("rst_cancel")}" style="{_MINI}">Manter</button><button type="button" onClick="{H("rst_ok")}" style="{_MINI} color: {RED}; border-color: {RED};">Restaurar</button></span></div>')
+    return f'<span style="position: relative; display: inline-flex;">{E.mais("Manutenção",itens)}{conf}</span>'
 
 def _prim_cab():
-    return (IF('hs_tem',f'<button type="button" class="ma-hb" onClick="{H("hs_fn")}" style="{SEC}">{H("hs_t")}</button>')
+    return (IF('hs_vis',f'<button type="button" class="ma-hb" onClick="{H("hs_fn")}" style="{SEC}">{H("hs_t")}</button>')
             + IF('hp_tem',f'<button type="button" class="ma-hb" disabled="{H("hp_dis")}" title="{H("hp_why")}" aria-describedby="ma-hp-why" onClick="{H("hp_fn")}" style="{H("hp_st")}">{H("hp_t")}</button>'
                  + IF('hp_dis',f'<span id="ma-hp-why" style="font-size: 12px; font-weight: 700; color: {MUTED}; max-width: 160px;">{H("hp_why")}</span>')))
 
@@ -946,40 +946,43 @@ def _visoes():
     g_so=G([dict(k='item',l='Item',w=120),dict(k='ativo',l='Ativo · leitura',w=160),dict(k='oque',l='O que',w=170),dict(k='prazo',l='Prazo',t='num',w=130),
             dict(k='pecas',l='Peças',w=120),dict(k='prox',l='Próximo passo',w=140)],'g_so')
     g_om=G([dict(k='om',l='Ordem · ativo',w=120),dict(k='serv',l='Serviço · tipo',w=140),dict(k='jan',l='Janela',t='date',w=75),dict(k='fase',l='Fase',w=100),
-            dict(k='pend',l='Pendência',w=145),dict(k='exe',l='Executante',w=90),dict(k='tempo',l='Tempo',t='num',w=80),dict(k='custo',l='Custo',t='num',w=100)],'g_om')
+            dict(k='pend',l='Pendência',w=145),dict(k='exe',l='Executante',w=90),dict(k='tempo',l='Tempo',t='num',w=80),dict(k='custo',l='Custo',t='num',w=100)],'g_om',cartoes='externo')   # DS VIS-05: Cartões entra no seletor Lista | Cartões | Kanban da tela
     g_at=G([dict(k='ativo',l='Ativo · local',w=150),dict(k='cond',l='Condição',w=120),dict(k='leit',l='Leitura',t='num',w=95),dict(k='prox',l='Próxima manutenção',t='num',w=145),
-            dict(k='ab',l='Em aberto',w=120),dict(k='custo',l='Custo no período',t='num',a='r',d=2,pre='R$ ',agg='sum',w=110),dict(k='cons',l='Consumo',w=95)],'g_at',total=True,
+            dict(k='ab',l='Em aberto',w=120),dict(k='custo',l='Custo no mês',t='num',a='r',d=2,pre='R$ ',agg='sum',w=110),dict(k='cons',l='Consumo',w=95)],'g_at',total=True,
            qf=dict(k='cond',l='condição'))
     g_ab=G([dict(k='id',l='Lançamento · operador',w=130),dict(k='ativo',l='Ativo',w=120),dict(k='tq',l='Tanque/lote',w=105),dict(k='vol',l='Volume (L)',t='num',a='r',w=75),
             dict(k='data',l='Data · leitura',w=100),dict(k='met',l='Método',w=110),dict(k='lh',l='Consumo',t='num',a='r',w=80),dict(k='qual',l='Qualidade',w=105)],'g_ab',qf=dict(k='qual',l='qualidade'))
-    g_pl=G([dict(k='nome',l='Plano',w=150),dict(k='est',l='Estado',w=140),dict(k='apl',l='Aplica-se a',w=140),dict(k='svs',l='Serviços',w=140),dict(k='atv',l='Ativos',w=110),dict(k='sit',l='Situação',w=165)],'g_pl')
+    g_pl=G([dict(k='nome',l='Plano',w=150),dict(k='grupo',l='Grupo de máquina',w=130),dict(k='est',l='Estado',w=140),dict(k='apl',l='Aplica-se a',w=140),dict(k='svs',l='Serviços',w=140),dict(k='atv',l='Ativos',w=110),dict(k='sit',l='Situação',w=165)],'g_pl')
     flt=lambda *xs: '<div class="ma-flt" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">'+''.join(xs)+'</div>'
-    semordem=(_card_html('c_so') + flt(_chips('so_tipo','Tipo'),_chips('so_prazo','Prazo pelo início da janela'),_sel('f_crit','f_setcrit','f_crits','Criticidade'),_sel('f_grupo','f_setgrupo','f_grupos','Grupo'),_sel('f_plano','f_setplano','f_planos','Plano'))
-              + g_so)
+    semordem=(flt(_chips('so_prazo','Prazo pelo início da janela')) + g_so)
     semana=IF('semana',f'<div role="note" aria-label="Esta semana" style="display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border: 1px solid {LINE}; border-radius: 12px; background: {SURF};">'
               f'<div style="{SECT}">Esta semana · por dia · capacidade da oficina não calculável (sem P10)</div>'
               + FOR('sem_dias','d',f'<div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 12.8px;"><b style="min-width: 90px;">{H("d.t")}</b><span>{H("d.oms")}</span><span style="color: {MUTED};">{H("d.hh")}</span></div>',3) + '</div>')
     from areas.processo_os import _kanban
-    ordens=(_card_html('c_om')
-            + flt(f'<div role="group" aria-label="Filtrar por fase" style="display: flex; flex-wrap: wrap; gap: 6px;">'
+    modos=(f'<div class="g2visoes-w"><div class="g2visoes" role="toolbar" aria-label="Visão das ordens">'
+           + FOR('om_modos','x',f'<button type="button" data-i="{H("x.i")}" aria-label="{H("x.t")}" data-dica="{H("x.t")}" aria-pressed="{H("x.on")}" onClick="{H("x.go")}">'
+                 + IF('x.li',icon('v_lista',16),True) + IF('x.ca',icon('v_cartoes',16)) + IF('x.ka',icon('v_kanban',16)) + '</button>',3) + '</div></div>')
+    ordens=(flt(f'<div role="group" aria-label="Filtrar por fase" style="display: flex; flex-wrap: wrap; gap: 6px;">'
                   + FOR('fchips','fc',f'<button type="button" aria-pressed="{H("fc.on")}" onClick="{H("fc.go")}" style="{H("fc.st")}">{H("fc.t")} <span style="opacity: .75;">{H("fc.n")}</span></button>',6) + '</div>',
-                  _chips('rotinas','Rotina'),'<span style="flex-grow: 1;"></span>',_chips('om_modos','Visão das ordens'))
+                  _chips('rotinas','Rotina'),'<span style="flex-grow: 1;"></span>',modos)
             + semana + IF('om_lista',g_om,True) + IF('om_kanban',_kanban()))
-    ativos=(f'<div class="ma-top" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;"><label class="ma-lbl" style="display: inline-flex; align-items: center; gap: 6px; {LBL}">Período'
-            f'<select aria-label="Período" value="{H("per_v")}" onChange="{H("per_set")}" style="{INP}"><option value="mes">Mês atual</option><option value="30d">30 d</option><option value="12m">12 m</option></select></label>'
-            f'<span style="flex-grow: 1;"></span>{_chips("at_modos","Modo")}</div>'
-            + _card_html('c_at')
-            + IF('at_ativos',flt(_sel('f_grupo','f_setgrupo','f_grupos','Grupo'),_sel('f_pend','f_setpend','f_pends','Pendência'))+f'<div class="ma-gat">{g_at}</div>',True) + IF('at_abast',g_ab))
-    planos=(IF('tem_sem',f'<div class="ma-sem" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; border: 1px dashed {LINE}; border-radius: 12px;">'
+    ativos=(f'<div class="ma-top" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">{_chips("at_modos","Modo")}</div>'
+            + IF('at_ativos',f'<div class="ma-gat">{g_at}</div>',True) + IF('at_abast',g_ab))
+    planos=(IF('tem_sem',f'<div class="ma-sem" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; background: {BG}; border-radius: 12px;">'
                f'<span style="font-size: 12.5px; font-weight: 800;">{H("sem_n")}</span>'
                + FOR('sem','a',f'<button type="button" onClick="{H("a.go")}" aria-label="{H("a.lab")}" title="{H("a.lab")}" style="{_MINI}">{H("a.t")} · Criar plano</button>',4) + '</div>')
-            + flt(_sel('f_grupo','f_setgrupo','f_grupos','Grupo')) + g_pl)
+            + g_pl)
     sel=(f'<div class="ma-vis" role="group" aria-label="Visão" style="display: flex; flex-wrap: wrap; gap: 6px;">'
          + FOR('vis','x',f'<button type="button" aria-pressed="{H("x.on")}" onClick="{H("x.go")}" style="{H("x.st")}">{H("x.t")}<span style="{H("x.nst")}">{H("x.n")}</span></button>',4) + '</div>'
          f'<label class="ma-vis-m" style="align-items: center; gap: 8px; {LBL}">Visão<select aria-label="Visão" value="{H("vis_k")}" onChange="{H("vis_set")}" style="{INP} font-weight: 700;">'
          + FOR('vis','x',f'<option value="{H("x.k")}">{H("x.t")} · {H("x.n")}</option>',4) + '</select></label>')
+    L_=ui37.MF_LBL.format(MUTED=MUTED); S_=ui37.MF_SEL.format(LINE=LINE,SURF=SURF,INK=INK)
+    fsel=lambda rot,val,setfn,lst: (f'<label style="{L_}">{rot}<select aria-label="Filtrar por {rot.lower()}" value="{H(val)}" onChange="{H(setfn)}" style="{S_}">'
+                                    + FOR(lst,'o',f'<option value="{H("o.v")}">{H("o.t")}</option>',3) + '</select></label>')
+    faixa=ui37.faixa_filtros(IF('flt_tipo',fsel('Tipo','f_tipo','f_settipo','f_tipos'),True) + IF('flt_crit',fsel('Criticidade','f_crit','f_setcrit','f_crits'),True)
+                             + fsel('Grupo','f_grupo','f_setgrupo','f_grupos') + IF('flt_pend',fsel('Pendência','f_pend','f_setpend','f_pends')))
     col=lambda x: f'<div style="display: flex; flex-direction: column; gap: 10px; min-width: 0;">{x}</div>'
-    return (IF('lista',col(sel + IF('v_semordem',col(semordem),True) + IF('v_ordens',col(ordens)) + IF('v_ativos',col(ativos)) + IF('v_planos',col(planos))),True))
+    return (IF('lista',col(sel + f'<div class="ma-fx">{faixa}</div>' + IF('v_semordem',col(semordem),True) + IF('v_ordens',col(ordens)) + IF('v_ativos',col(ativos)) + IF('v_planos',col(planos))),True))
 
 def _cas(lst):
     """Conflitos do app (S4): o registro feito sem sinal que encontrou a ordem mudada; Otávio aplica ou descarta com motivo."""
@@ -1041,7 +1044,7 @@ def _pag_plano():
            f'<span style="font-size: 12px; color: {MUTED}; min-width: 18px;">{H("s.pcun")}</span><button type="button" onClick="{H("s.pcadd")}" style="{_MINI}">Incluir peça</button></div>'
          + IF('s.pcHasErr',f'<span role="alert" style="{ERRS}">{H("s.pcerr")}</span>') + '</div></div>')
     svrow=(f'<div class="pm-sv" style="{H("s.rst")}"><div class="pm-sv-linha">'
-           f'<button type="button" class="g2car" aria-label="{H("s.lab")}" title="{H("s.lab")}" aria-expanded="{H("s.open")}" aria-controls="{H("s.did")}" onClick="{H("s.tog")}">{H("s.sym")}</button>'
+           f'<button type="button" class="g2car" aria-label="{H("s.lab")}" aria-expanded="{H("s.open")}" aria-controls="{H("s.did")}" onClick="{H("s.tog")}">{H("s.sym")}</button>'
            f'<span style="display: flex; flex-direction: column; gap: 3px; min-width: 0; align-items: flex-start;"><button type="button" class="pm-nome" onClick="{H("s.edit")}" title="Editar gatilhos, tolerância, tempo e especialidade">{H("s.nome")}</button>'
            + IF('s.hasChg',f'<span style="{H("s.chgst")}">{H("s.chg")}</span>') + '</span>'
            f'<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0;"><b style="font-weight: 700;">{H("s.gat")}</b><span style="font-size: 12px; color: {MUTED};">{H("s.tol")}</span>'
@@ -1070,7 +1073,7 @@ def _pag_plano():
          + IF('ban_n',f'<div style="padding: 8px 14px; border-radius: 12px; background: {YELS}; color: {YEL}; font-size: 13px; font-weight: 700;">Rascunho v1 · publique para o plano gerar vencimentos.</div>')
          + IF('ban_i',f'<div style="padding: 8px 14px; border-radius: 12px; background: {GRAYS}; color: {INK}; font-size: 13px; font-weight: 700;">Inativo · não gera vencimentos; as ordens abertas seguem.</div>'))
     svs=(IF('sv_tem',f'<div style="display: flex; flex-direction: column; gap: 8px;">' + FOR('svs','s',svrow,2) + '</div>')
-         + IF('sv_vazio',f'<div style="padding: 14px; border: 1px dashed {LINE}; border-radius: 12px; font-size: 13px;">Nenhum serviço ainda · use “Incluir serviço”.</div>'))
+         + IF('sv_vazio',f'<div style="padding: 14px; background: {BG}; border-radius: 12px; font-size: 13px;">Nenhum serviço ainda · use “Incluir serviço”.</div>'))
     hist=(f'<section class="ma-bl"><button type="button" class="ma-blh" aria-expanded="{H("hist_open")}" onClick="{H("hist_tog")}"><span aria-hidden="true" style="width: 14px;">{H("hist_sym")}</span>Versões</button>'
           + IF('hist_open','<div class="ma-bl-c">'+FOR('hist','h',f'<div style="display: grid; grid-template-columns: 48px 200px 110px; gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid {LINE}; font-size: 13px;">'
                 f'<b>{H("h.t")}</b><span style="color: {MUTED};">{H("h.at")}</span><span><span style="{H("h.stst")}">{H("h.st")}</span></span></div>',2)+'</div>') + '</section>')
@@ -1142,11 +1145,12 @@ def _painel():
          + IF('om_incEd',f'<div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; padding-top: 6px;">{_sel("om_inct","om_setinct","om_inc_tipos","Tipo da tarefa")}'
               f'<input aria-label="Nova tarefa" placeholder="Nova tarefa" value="{H("om_incx")}" onChange="{H("om_setincx")}" style="{INP} flex: 1 1 180px;"><button type="button" onClick="{H("om_inc")}" style="{_MINI}">Incluir tarefa</button></div>')
          + IF('om_incWhy',f'<div style="{sb}">Incluir tarefa: {H("om_incWhy")}</div>'))
-    pcs=(IF('om_temPc',f'<div style="display: grid; grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr) 110px; gap: 8px; font-size: 11px; font-weight: 800; color: {MUTED}; text-transform: uppercase;"><span>Item</span><span>Planejado</span><span>Situação</span><span>Aplicado</span></div>'
-             + FOR('om_pcs','p',f'<div style="display: grid; grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr) 110px; gap: 8px; align-items: center; padding: 5px 0; border-top: 1px solid {LINE}; font-size: 12.8px;">'
+    pcs=(IF('om_temPc',f'<div class="ma-pcs ma-pcs-h" style="display: grid; grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr) 110px; gap: 8px; font-size: 11px; font-weight: 800; color: {MUTED}; text-transform: uppercase;"><span>Item</span><span>Planejado</span><span>Situação</span><span>Aplicado</span></div>'
+             + FOR('om_pcs','p',f'<div class="ma-pcs ma-pcs-l" style="display: grid; grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr) 110px; gap: 8px; align-items: center; padding: 5px 0; border-top: 1px solid {LINE}; font-size: 12.8px;">'
                    f'<b style="font-weight: 600;">{H("p.nome")}</b><span style="font-variant-numeric: tabular-nums;">{H("p.q")}</span>{_chiph("p.s","p.st","p.dot")}'
                    + IF('p.ed',f'<label style="display: inline-flex; align-items: center; gap: 4px;"><input aria-label="{H("p.alab")}" inputMode="decimal" placeholder="{H("p.aph")}" value="{H("p.av")}" onChange="{H("p.aset")}" style="{INP} width: 70px; text-align: right; font-size: 12.5px;">{H("p.un")}</label>')
-                   + IF('p.ro',f'<span>{H("p.apl")}</span>') + '</div>',3))
+                   + IF('p.ro',f'<span>{H("p.apl")}</span>')
+                   + IF('p.hasOrig',f'<span style="grid-column: 1 / -1; margin-top: -2px; font-size: 11.5px; color: {MUTED};">{H("p.orig")}</span>') + '</div>',3))
          + IF('om_semPc',f'<div style="{sb}">Sem peças nesta ordem (corretiva nasce sem peças até “Incluir peça”, PCMS Bloco 2).</div>')
          + IF('om_temRet',_lab('Peças retiradas · nunca voltam ao estoque livre')
               + FOR('om_rets','r',f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 5px 0; border-top: 1px solid {LINE}; font-size: 12.8px;">'
@@ -1304,7 +1308,9 @@ def ma():
     EXTRA.append(_painel()); EXTRA.append(_paineis_plano())
     EXTRAJS[0]=(DM.js_prefixo()+MA_JS.replace('__NAVST__',json.dumps([ui37.subnav_st(False),ui37.subnav_st(True)],ensure_ascii=False)).replace('__PRIM__',json.dumps(PRIM)).replace('__SEC__',json.dumps(SEC))+PM_JS)
     HEIGHTS37[FNAME]=1000
-    shell37('MA','Manutenção',corpo,fname=FNAME,status=(H('st_ma'),'red'),primary_html=_prim_cab(),chipsrow=_cabecalho(),search=False)
+    # 14/10/2026 (proprietário: "tire das telas ver como simulação"): sem a faixa "Ver como"; quem age é o perfil do avatar do menu lateral (a
+    # mesma fonte, g2perfil). O menu ⋯ (Restaurar demonstração) vai para o fim dos comandos do cabeçalho, sem uma linha só para ele.
+    shell37('MA','Manutenção',corpo,fname=FNAME,status=(H('st_ma'),'red'),primary_html=_prim_cab()+_cabecalho(),search=False)
     _status_dyn(FNAME,'st_ma')
     for f,d in REDIRECIONA.items(): _redirect(f,d)
     return FNAME

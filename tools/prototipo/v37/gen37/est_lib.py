@@ -20,13 +20,15 @@ LEGE = r"""(r=>{ const t=r.closest('[role=table]'); const raw=r.innerText.replac
 
 
 class Est:
-    def __init__(self, copiar=True):
+    def __init__(self, copiar=True, colunas='todas'):
         if copiar:
             open(os.path.join(R, 'EST.dc.html'), 'w', encoding='utf-8').write(open(os.path.join(HERE, 'project', 'EST.dc.html'), encoding='utf-8').read())
         self.p = free()
         self.srv = subprocess.Popen(['python3', '-m', 'http.server', str(self.p), '--bind', '127.0.0.1', '--directory', R], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         time.sleep(0.6)
         self.c = Chrome(port=free()); self.c.size(1440, 1000); self.J = self.c.js; self.FAIL = []; self.n = 0
+        # V2-3: os testes do Estoque são de domínio e leem colunas fora do "Abre com"; o padrão é conferido nos testes da VISOES-2
+        if colunas == 'todas': self.c.call('Page.addScriptToEvaluateOnNewDocument', {'source': 'window.__g2cvTodasSempre=true'})
 
     def abrir(self, wait=1.0):
         self.c.goto(f'http://127.0.0.1:{self.p}/EST.dc.html', wait=wait)
@@ -53,7 +55,8 @@ class Est:
 
     def cel(self, linha, col):
         """Valor de uma coluna (pelo cabeçalho) na linha que contém o texto linha (TABELAS-FOCO: uma variável por coluna)."""
-        return self.J(f"""(()=>{{const r=({FIND})({json.dumps([linha])}); if(!r) return 'sem linha'; const t=r.closest('[role=table]');
+        ts = list(linha) if isinstance(linha, (list, tuple)) else [linha]
+        return self.J(f"""(()=>{{const r=({FIND})({json.dumps(ts)}); if(!r) return 'sem linha'; const t=r.closest('[role=table]');
           const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\\s+/g,' ').trim().replace(/ · \\d+$/,'').toUpperCase());
           const i=hs.indexOf({json.dumps(col.upper())}); const c=[...r.querySelectorAll('[role=cell]')][i]; return c?c.innerText.replace(/\\s+/g,' ').trim():'sem coluna';}})()""")
 

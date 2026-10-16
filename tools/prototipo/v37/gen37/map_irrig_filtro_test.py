@@ -49,7 +49,9 @@ try:
     chk('2 cabeçalho: OS-0420 e OS-0431 impedidas · 2 a liberar (OS-0418 e OS-0430), sem "decisões"', 'OS-0420 e OS-0431 impedidas · 2 a liberar' in head() and 'decis' not in head(), head())
     # 3-6 · barra de 01/10 (Irrigação de volta, Pragas e doenças); as ordens de água vivem na camada Irrigação
     rail=J(f"{RAIL}.map(b=>b.innerText.trim())") or []
-    chk('3 barra: Integrado, Satélite, Lavoura, Pragas e doenças, Carência e destino (MAPA-CARENCIA-LMR-20261003), Irrigação, Ordens de serviço, Insumos, Custos', rail==['Integrado','Satélite','Lavoura','Pragas e doenças','Carência e destino','Irrigação','Ordens de serviço','Insumos','Custos'], rail)
+    # DEC-0910-36 (decisão do proprietário, 16/10/2026): os nove nomes da DEC-2609-12; Carência e destino e Insumos viraram filtros (mapa9_test.py)
+    chk('3 barra: Integrado, Satélite, Solo, Pragas e doenças, Ordens de serviço, Irrigação, Estádio, Colheita e produtividade, Custos',
+        rail==['Integrado','Satélite','Solo','Pragas e doenças','Ordens de serviço','Irrigação','Estádio','Colheita e produtividade','Custos'], rail)
     l7,f7=lab('T7'); l2,f2=lab('P2')
     # 01/10: o Integrado fala da irrigação sem citar a ordem de água como O.S. (ela é do módulo Irrigação); 02/10: a cor vem do estado da irrigação
     chk('4 Integrado: T7 vermelho (irrigação em conflito); P2 amarelo (irrigação · conferir medição da passagem parcial), sem número de ordem de água', 'irrigação em conflito' in (l7 or '') and 'OS-0423' not in (l7 or '') and f7=='#C8553D' and 'conferir medição' in (l2 or '') and 'OS-0394' not in (l2 or '') and f2=='#D4B25A', [l7,f7,l2,f2])

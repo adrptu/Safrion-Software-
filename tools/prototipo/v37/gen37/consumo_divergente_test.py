@@ -69,13 +69,16 @@ try:
          and 'Consumo em conferência' in ln and 'CC-301' in ln and 'Aceitar consumo' in ln and 'Recusar relato' in ln and prim() == 'Receber devolução da REQ-031',
          f'EST etapa 3: resumo e linha da REQ-035 com o caso, Aceitar/Recusar; ação da etapa = "{prim()}"', ln[:200])
     shot('q_consumo_3_est_conferencia.png')
-    etapa(3); l4 = linha(P, 'em conferência (CC-301)')
-    ok('480 L' in l4 and '1 L em conferência (CC-301)' in l4, f'EST etapa 4: disponível do Fungicida A mostra a exposição de 1 L em conferência: {l4[:160]}')
+    # a exposição fica na coluna "Em conferência", ao lado do Disponível (tabelas por coluna; antes era a frase "1 L em conferência (CC-301)")
+    etapa(3); l4 = a.J("(()=>{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf('Fungicida A')>=0&&r.innerText.indexOf('1 lote')>=0); const g=r&&r.closest('[role=table],[role=grid],[role=treegrid]'); if(!g) return null;"
+                       " const hs=[...g.querySelector('[role=row]').querySelectorAll('[role=columnheader]')].map(x=>x.innerText.split('\\n')[0].trim()); const cs=[...r.querySelectorAll('[role=cell],[role=gridcell],[role=rowheader]')].map(x=>x.innerText.trim());"
+                       " const v=k=>cs[hs.indexOf(k)]; return {disp:v('DISPONÍVEL'),conf:v('EM CONFERÊNCIA'),os:v('O.S. COM CUSTÓDIA')};})()") or {}
+    ok(l4.get('disp') == '480 L' and l4.get('conf') == '1 L' and l4.get('os') == OS, f'EST etapa 4: disponível do Fungicida A (480 L) com a exposição na coluna Em conferência (1 L) e a {OS}: {l4}')
     shot('q_consumo_6_est_exposicao.png')
     erros += a.erros() or []
     # 3 · O.S.: selo na lista e encerrar bloqueado pelo caso aberto
-    a.abrir('OS'); a.J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith('OS-0421')); r&&r.click();})()"); time.sleep(.5)
-    lo = a.J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>r.innerText.trim().startsWith('OS-0421')); return r?r.innerText.replace(/\\s+/g,' '):'';})()") or ''
+    a.abrir('OS'); a.J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/\\bOS-0421\\b/.test(r.innerText)); r&&r.click();})()"); time.sleep(.5)
+    lo = a.J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/\\bOS-0421\\b/.test(r.innerText)); return r?r.innerText.replace(/\\s+/g,' '):'';})()") or ''
     pe = a.J("window.__cen.cenPodeEncerrar(window.__cen.cenGet(),'OS-0421')")
     pa = a.J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText.replace(/\\s+/g,' ')") or ''
     ok('Consumo em conferência' in lo and 'Consumo em conferência' in pa and pe.startswith('Consumo em conferência: Fungicida A 2 L relatados, 1 L em custódia. No Estoque: Rui (almoxarife) confere; Ana (gestora) aceita o excedente'),

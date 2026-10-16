@@ -6,8 +6,8 @@ catalogo(): BENC, o que as regras de ben.js leem e não mudam: versões de rota 
 com massa declarada e tara (fonte única: dados_cad.EMB_PACK, DEC-0510-03), ativo do packing (CD-03) e condição da Manutenção na
 semente (dados_manutencao; a tela lê o estado da Manutenção quando existe). A rota é por cultura, produto e estágio: grão (SEC-GRA) e
 café (CAF-BEN) já são dados com o bloco em que entram, mas só a PACK-FRU v3 está aprovada no BEN-1.
-semear(est): grava no estado do cenário (cenario.seed) as ordens OB-0110 e OB-0112 (c.ordens, fam 'BEN': reaproveitam cenLiberar,
-cenEntregar, cenDevolver e cenPodeEncerrar), a REQ-030 das caixas, o lote de caixas CX26-01 (c.lotes) e, no estado da Produção
+semear(est): grava no estado do cenário (cenario.seed) as ordens OB-0110 e OB-0112 (c.ordens, fam 'BEN': reaproveitam cenEntregar,
+cenDevolver e cenPodeEncerrar; a liberação reserva pelo benReservaCx do ben.js, BEN-D34), a REQ-030 das caixas, o lote de caixas CX26-01 (c.lotes) e, no estado da Produção
 (c.producao, o mesmo modelo de lote, movimento MP-, pedido e reserva da Colheita), os lotes do packing, o PV-031 e as inspeções.
 Dados sintéticos (ENG-017): pessoas, clientes e números fictícios."""
 import json, os
@@ -18,6 +18,10 @@ CX = DC.CX_MAMAO
 CXD = DC.EMB_PACK[CX]
 EMB_CX = 'pallet de entrega de 60 caixas vazias'
 LOCAL = 'l8'   # Packing (Santa Rita), tipo Packing (colheita D-24)
+# tipo da unidade de beneficiamento (BEN-D40, 13/10/2026, proprietário: "Packing house, industria, etc"): vem do tipo do local de processo
+# (dados_cad.LOCAIS; colheita R-10) e aparece curto no painel da ordem. Hoje só o Packing (l8) tem linha e rota no BEN-1; secador/terreiro
+# (grãos e café, BEN-3/BEN-4) e agroindústria (tipo de local a criar no CD-06) entram com a rota própria
+TIPO_UNID = {'Packing': 'Packing house', 'Secador': 'Grãos e café', 'Terreiro': 'Grãos e café', 'Agroindústria': 'Agroindústria'}
 QUEM_PROD = 'Igor (responsável de produção)'
 QUEM_QUAL = 'Marta (qualidade)'
 MANGO = 'Mamão Formosa · fruta de campo'
@@ -65,7 +69,7 @@ def catalogo():
     at = {a['id']: dict(nome=a['nome'], kgh=a.get('kgh'), custo_h=a.get('custo_h')) for a in DC.ATIVOS if a['id'] in ('a13',)}
     return dict(rotas=ROTAS, cx=dict(item=CX, massa=CXD['massa'], tara=CXD['tara'], un=CXD['un'], emb=EMB_CX, fonte=CXD['fonte'], preco=DC.PRECO_EXTRA.get(CX)),
                 ativos=at, cond0={k: v['cond'] for k, v in DM.ATIVOS.items() if k in at},   # condição ao vivo: c.man do cenário único (PCM 1a)
-                quem=dict(prod=QUEM_PROD, qual=QUEM_QUAL), local=LOCAL, emb=EMBAL,
+                quem=dict(prod=QUEM_PROD, qual=QUEM_QUAL), local=LOCAL, emb=EMBAL, tipoUnid=TIPO_UNID,
                 # onde cada linha roda (BEN-D18): a ordem fica no local da linha; a Packing linha 1 é a do Packing da Santa Rita (l8). O CD-03
                 # guarda o local da máquina em texto livre ("Armazém Sede", também Santa Rita); linha nova por fazenda entra pelo CD-03
                 linhas={'a13': LOCAL},

@@ -14,7 +14,7 @@ saldo) abre a etapa 3 da Safra 2026/27 e nenhuma página leva mais ao PL-03.
 1440 × 900 e 390 × 844 (toque). Emulação no Chrome headless: não é aparelho físico. Uso: python3 saf_capacidade_simetrica_test.py"""
 import sys, os, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, IR_ETAPA
+from comp_lib import Chrome, IR_ETAPA, cv_todas_sempre
 import dados2 as D2
 import saf_nav_lib as L
 from saf_nav_lib import chk, OK, FAIL, abre, botao, fset, salvar, toast, painel, erros, PROBE
@@ -68,6 +68,7 @@ ESP = {k: GA[k]['cells'][JUL] for k in ('trator', 'oper')}
 assert all(abs(GA[k]['cells'][JUL]['d'] - GB[k]['cells'][JUL]['d']) < 1e-9 for k in ESP), 'espelho assimétrico'
 try:
     c = L.c = Chrome()
+    cv_todas_sempre(c)   # VISOES-2 §3.6 / SAF-TAB: o teste lê colunas fora do padrão
     for w, hh, toque in ((1440, 900, False), (390, 844, True)):
         tg = f'{w}px'
         abre('#saf=S2627&passo=safra', w, hh, toque)
@@ -75,7 +76,7 @@ try:
             r1 = na_saf(sid, 'Editar'); fset('g_saf', 'ini', INI); fset('g_saf', 'fim', FIM); r2 = salvar(); time.sleep(.5); t = toast()
             chk(f'{tg} preparo: Editar {sid} e gravar o período 01/09/2026 a 12/07/2027 pela tela', r1 == 'ok' and r2 == 'ok' and 'Salvo' in t and 'set/2026 – jul/2027' in linha_saf(sid), (r1, r2, t, linha_saf(sid), painel()[:300]))
         na_saf('S2627', 'Continuar'); botao('Dimensionar operações ›'); time.sleep(.6); e1 = estado(); A = vista(f'S2627_{w}')
-        botao('Trocar safra'); time.sleep(.5); na_saf('S27SF', 'Continuar'); botao('‹ Operações e recursos'); time.sleep(.6); e2 = estado(); B = vista(f'S27SF_{w}')
+        botao('‹ Trocar safra'); time.sleep(.5); na_saf('S27SF', 'Continuar'); botao('‹ Operações e recursos'); time.sleep(.6); e2 = estado(); B = vista(f'S27SF_{w}')
         chk(f'{tg} navegação: S2627 e depois S27SF abertas na etapa 3 pela tela', (e1, e2) == ('S2627 3', 'S27SF 3'), (e1, e2))
         for rid, nome in (('trator', 'Tratores'), ('oper', 'Operadores e equipe')):
             x = ESP[rid]; tot = f"{h1(x['d'])} h de {h1(x['cap'])} h ({D2.fmt_ocup(x['ocup'])})"
@@ -104,13 +105,15 @@ try:
             rt[:3] == ('ok', 'ok', 'ok') and 'Tratores: 1 unidade, jornada de ' in rt[3] and ro_[:3] == ('ok', 'ok', 'ok') and 'Operadores e equipe: 1 pessoa, jornada de ' in ro_[3]
             and '1 unidades' not in rt[3] + ro_[3] and '1 pessoas' not in ro_[3], (rt, ro_))
         # R1 pela tela: a Safrinha passa para ago/27 e todo o plano dela (fev–jul/27) fica antes do início; o motivo não é "fora do calendário"
-        botao('Trocar safra'); time.sleep(.5); r1 = na_saf('S27SF', 'Editar'); fset('g_saf', 'ini', '2027-08-01'); fset('g_saf', 'fim', '2027-08-31'); r2 = salvar(); time.sleep(.5)
+        botao('‹ Trocar safra'); time.sleep(.5); r1 = na_saf('S27SF', 'Editar'); fset('g_saf', 'ini', '2027-08-01'); fset('g_saf', 'fim', '2027-08-31'); r2 = salvar(); time.sleep(.5)
         na_saf('S27SF', 'Continuar'); L.c.js(f"({IR_ETAPA})(3)"); time.sleep(.8); e3 = estado(); v1 = veredito()
         chk(f'{tg} R1 pela tela (Safrinha em ago/27): "nenhuma ocorrência desta safra cai no período dela (01/08/2027 a 31/08/2027)" com as {NR1} ocorrências antes do início; nunca "fora do calendário"',
             (r1, r2, e3) == ('ok', 'ok', 'S27SF 3') and v1 == R1TXT, (r1, r2, e3, v1))
         chk(f'{tg} sem erro de JS', erros() == '', erros())
     # PL-03 (verificação SAF-C02, S3): a capacidade tem uma fonte só (capCalc). Os links das telas de Planejamento levam à etapa 3 da S2627
     def ver_capacidade():
+        L.c.js("""(()=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const v=[...document.querySelectorAll('a,button')].some(b=>b.offsetParent&&n(b.innerText)==='Ver capacidade'); if(v) return;
+          const b=[...document.querySelectorAll('button.g2mais')].find(b=>{const m=b.nextElementSibling; return m&&[...m.querySelectorAll('[role=menuitem]')].some(i=>n(i.textContent)==='Ver capacidade');}); if(b) b.click();})()"""); time.sleep(.3)   # DS-PADRAO L3: no ⋯ do bloco
         r = L.c.js("""(()=>{const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const a=[...document.querySelectorAll('a,button')].filter(b=>b.offsetParent&&n(b.innerText)==='Ver capacidade');
           if(!a.length) return 'sem link'; const h=a[0].getAttribute('href')||''; a[0].click(); return 'ok '+h;})()"""); time.sleep(1.6)
         return r, L.c.js("location.pathname.split('/').pop()+location.hash"), estado(), veredito(), erros()

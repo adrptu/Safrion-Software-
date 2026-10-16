@@ -1,0 +1,73 @@
+C1 |AG-07.dc.html|390px| acetamida + alquilenobis(ditiocarbamato
+C1 |CD-03.dc.html|1024px| Registrar aferição › 
+C1 |CD-03.dc.html|1024px| Registrar calibração › 
+C1 |CD-04.dc.html|1024px| Registrar NR-31 › 
+C1 |CD-04.dc.html|1024px| Renovar NR-31 › 
+C1 |CD-04.dc.html|1024px| Renovar › 
+C1 |CD-04.dc.html|1440px| Registrar NR-31 › 
+C1 |CD-04.dc.html|1440px| Renovar NR-31 › 
+C1 |CD-04.dc.html|390px| Registrar NR-31 › 
+C1 |CD-04.dc.html|390px| Renovar NR-31 › 
+C1 |CD-04.dc.html|390px| Renovar › 
+C1 |CD-07.dc.html|1024px| Centro de responsabilidade 
+C1 |CD-07.dc.html|1024px| Traduzir › 
+C1 |CD-07.dc.html|1440px| Traduzir › 
+C1 |CD-07.dc.html|390px| Dimensão própria 
+C1 |CD-07.dc.html|390px| Tradução pendente 
+C1 |CD-08.dc.html|1024px| Colhedora Axial-Flow 7250 + trator com 
+C1 |CD-08.dc.html|1024px| Equipe de colheita (10 pessoas) + trato
+C1 |CD-08.dc.html|1440px| Equipe de colheita (10 pessoas) + trato
+C1 |CD-08.dc.html|390px| Premissa a validar 
+C1 |CO-03.dc.html|1024px| Terreiro/armazém 
+C1 |CO-03.dc.html|390px| Terreiro/armazém 
+C1 |GE-01.dc.html|390px| apontamentos + preço de compra 
+C1 |GE-02det.dc.html|390px| lançamento de custo 
+C1 |GE-02det.dc.html|390px| recebimento NF 8842 
+C1 |GE-07.dc.html|390px| R$ 48,40/ha · feijão P1 
+C1 |GE-07.dc.html|390px| sensores · salto de 18 p.p. 
+C1 |PCOM.dc.html|1024px| fora da média: PV-030, CT-203 (saca a 
+C1 |PCOM.dc.html|1440px| fora da média: PV-030, CT-203 (saca a 
+C1 |PL-03.dc.html|390px| reaproveitamento entre setores 
+C1 |PT-04det.dc.html|390px| Exclusivo para esta finalidade · proib
+C1 |PT-07.dc.html|390px| cotacoes@fertisul.com.br 
+C1 |SAF.dc.html#saf=S2627&passo=cultivos|1024px| Sucessão a conferir: soja sem fim conf
+C1 |SAF.dc.html#saf=S2627&passo=cultivos|1440px| Sucessão a conferir: soja sem fim conf
+C1 |SAF.dc.html#saf=S2627&passo=cultivos|390px| A conferir: Sucessão a conferir: soja 
+C1 |VE-04det.dc.html|390px| Conversão na confirmação 
+C1 |VE-04det.dc.html|390px| Reserva provisória RT-0107 
+C4 |CA-04.dc.html|1024px| · 
+C4 |CA-04.dc.html|1440px| · 
+C4 |CA-04.dc.html|390px| · 
+C4 |CARGA.dc.html|1024px| · 
+C4 |CARGA.dc.html|1440px| · 
+C4 |EXPED.dc.html|1024px| · 
+C4 |EXPED.dc.html|1440px| · 
+C4 |GE-05.dc.html|1024px| · 
+C4 |GE-05.dc.html|1440px| · 
+C4 |GE-05.dc.html|390px| · 
+C4 |LO-01.dc.html|1024px| · 
+C4 |LO-01.dc.html|1440px| · 
+C4 |LO-01.dc.html|390px| · 
+C4 |LO-02det.dc.html|1024px| · 
+C4 |LO-02det.dc.html|1440px| · 
+C4 |MA-02.dc.html|1024px| · 
+C4 |MA-02.dc.html|1440px| · 
+C4 |MA-02.dc.html|390px| · 
+C4 |MA-03.dc.html|1024px| · 
+C4 |MA-03.dc.html|1440px| · 
+C4 |MA-03.dc.html|390px| · 
+C4 |MA-04det.dc.html|1024px| · 
+C4 |MA-04det.dc.html|1440px| · 
+C4 |MA-04det.dc.html|390px| · 
+C4 |PL-04.dc.html|1024px| · 
+C4 |PL-04.dc.html|1440px| · 
+C4 |PROD.dc.html|1024px| · 
+C4 |PROD.dc.html|1440px| · 
+C4 |VE-04.dc.html|1024px| · 
+C4 |VE-04.dc.html|1440px| · 
+C4 |VE-04.dc.html|390px| · 
+C4 |VE-04det.dc.html|1024px| · 
+C4 |VE-04det.dc.html|1440px| · 
+C4 |VE-04det.dc.html|390px| · 
+C4 |VEN.dc.html|1024px| · 
+C4 |VEN.dc.html|1440px| · 

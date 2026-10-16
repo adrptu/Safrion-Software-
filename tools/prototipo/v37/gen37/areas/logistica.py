@@ -60,6 +60,8 @@ def ibtn(label,hole,ic,title,primary=False):
 def ilink(label,href,ic,title):
     return (f'<a href="{href}" title="{esc(title)}" style="{BTN_ST(False,True)} text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">{icon(ic,14)}{esc(label)}</a>')
 def bloco(titulo,desc,corpo,acao='',state='green'):
+    acao=E.recolhe_acoes(titulo,acao)   # MAIS-01 (15/10/2026): uma secundária à vista, as outras no "⋯ Mais ações" do bloco
+    desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     dot={'green':ACC,'yellow':YEL,'red':RED,'gray':'#8A968E'}[state]
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
             f'<div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px 10px; flex-wrap: wrap;">'
@@ -356,18 +358,19 @@ function EXTRAVALS(self,v){ const s=self.state;
       kpis([('NO PÁTIO',H('k_patio'),H('k_patio_u')),('ATRASADOS','1','T1 · janela 08:00'),
             ('IMPEDIDAS','1','Carga 07 · NF pendente'),('DOCA OCIOSA EVITÁVEL','0 min','fila reordenada com motivo')])
       + bloco('Fila ao vivo','Chame o próximo elegível; clique na linha para reordenar com motivo.',
-              nota(f'Política v4: elegibilidade (presença, prontidão, doca livre, documentos) › janela em risco › perecibilidade › pontualidade › espera acumulada. Tolerância de chegada: {TOLERANCIA}.')
-              + g_fi + enc,
+              g_fi + enc,
               ibtn('Chamar próximo elegível','chamar','truck','Chamar o próximo caminhão elegível para a doca livre'),state='yellow')
       + bloco('Expedições em preparação','Separe os lotes aptos e acompanhe cada carga até a saída.',
-              nota('A preparar → Em separação → Conferência → Pronta p/ carregar → Carregada → Saída confirmada. Qualidade, financeiro e documentos são dimensões separadas.')+g_ex,
+              g_ex,
               ibtn('Separar lotes','sep_open','box','Separar lotes aptos e reservados para um pedido'))
       + bloco('Pontualidade e espera','Confira pontualidade e espera contra a janela original.',g_po,state='gray')
     )
     shell37('LO-02','Expedições e cargas',corpo,
       subtitle='Fila de presentes aptos, bloqueados e atrasados sobre as cargas da agenda; chamar exige doca livre e carga pronta.',
       status=('Doca 1 ocupada · Carga 07 impedida','red'),primary='Conferir carga do T2',primary_href='LO-02det.dc.html',steps=faixa(2),
-      footer='Sem conectividade a fila local tem escritor único (portaria) e reconciliação idempotente — nunca duas filas autoritativas (FILA-07). DEMO-19/20.')
+      footer='Sem conectividade a fila local tem escritor único (portaria) e reconciliação idempotente — nunca duas filas autoritativas (FILA-07). DEMO-19/20. '
+             f'Política v4 da fila: elegibilidade (presença, prontidão, doca livre, documentos) › janela em risco › perecibilidade › pontualidade › espera acumulada; tolerância de chegada: {TOLERANCIA}. '
+             'Expedição: A preparar → Em separação → Conferência → Pronta p/ carregar → Carregada → Saída confirmada; qualidade, financeiro e documentos são dimensões separadas.')
 
     # =====================================================================
     # LO-02det · Conferir carga T2 (saída física única)
@@ -434,14 +437,14 @@ function EXTRAVALS(self,v){ const s=self.state; const lac=s.lacre, aut=s.aut, sa
       + bloco('Conferência por pedido e lote','Confira pedido, separado e carregado por lote.',g_cf)
       + bloco('Pesagem e base comercial','Confira tara, bruto e líquido na base comercial; tara não é vendida como produto.',g_ps,state='gray')
       + bloco('Checklist e documentos','Registre o lacre pela linha; a saída exige todos os itens verdes.',
-              g_ck+nota('Frete: retirada pelo cliente — custo e transportador do cliente; o rateio da instalação não se aplica a esta carga.'),state='yellow')
+              g_ck+nota('Frete: retirada pelo cliente — custo e transportador do cliente.'),state='yellow')
       + bloco('Saída','Confirme a saída uma única vez; o estoque baixa nesse evento.',g_sa,
               ilink('Acompanhar viagem','LO-03.dc.html','map','Abrir a viagem VG-118 em Acompanhe viagens'))
     )
     shell37('LO-02','Conferir carga · T2 · VD-2101',corpo,fname='LO-02det.dc.html',crumbs_extra=['T2 · VD-2101 · 2ª de 3'],
       subtitle='Retirada pelo cliente: conferência, pesagem, documentos e saída física única no ponto contratado.',
       status=(H('st_t'),'yellow'),primary_html=PRIM,steps=faixa(2),
-      footer='Confirmar saída comprova retirada no ponto contratado; não prova chegada ao destino (48.2). CMD-26 acontece uma única vez, aqui.')
+      footer='Confirmar saída comprova retirada no ponto contratado; não prova chegada ao destino (48.2). CMD-26 acontece uma única vez, aqui. Retirada pelo cliente: o rateio da instalação não se aplica à carga.')
 
     # =====================================================================
     # LO-03 · Acompanhe viagens
@@ -569,7 +572,7 @@ function EXTRAVALS(self,v){ const s=self.state;
       kpis([('PRESTADORES ELEGÍVEIS','1','+ frota própria · TransGrão inelegível'),('COTAÇÃO ABERTA','1','Carga 07 · até 10:30'),
             ('A PAGAR','R$ 1.882','VG-117 · medição aceita'),('OTIF MÉDIO 30 D','92%','vs. janela original')])
       + bloco('Comparar cotações · Carga 07','Compare o custo total na mesma base e contrate a melhor opção elegível.',
-              nota('Mesma base: 9,6 t · 512 km · refrigerado. Sugestão não despacha transportador.')+g_ct,state='yellow')
+              nota('Mesma base: 9,6 t · 512 km · refrigerado')+g_ct,state='yellow')
       + bloco('Prestadores e frota','Mantenha preço e condição de cada prestador; clique na linha para ajustar.',g_pr)
       + bloco('Conferência e pagamento do serviço','Encaminhe ao pagamento só o serviço medido e aceito.',g_sv,
               ilink('Ver contas a pagar','GE-04.dc.html','cash','Abrir contas a pagar (GE-04)'))

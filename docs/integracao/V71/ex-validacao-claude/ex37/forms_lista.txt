@@ -1,0 +1,151 @@
+AG-01 | Programar vistoria | Programar vistoria | ed=4 tot=4 ast=0 req=0 | verde=['Programar vistoria'] | modal=True
+AG-01 | Confirmar foco | VIS-055 · Mancha-anelar (PRSV) · Pivô 22 | ed=2 tot=2 ast=0 req=0 | verde=['Erradicar plantas', 'Gerar O.S. de erradicação'] | modal=True
+AG-02 | Registrar laudo | Registrar laudo de solo | ed=17 tot=17 ast=0 req=0 | verde=['Registrar laudo'] | modal=True
+AG-02 | + Registrar medição | Registrar medição de água no solo | ed=12 tot=13 ast=0 req=0 | verde=['Salvar'] | modal=True
+AG-03 | + Criar diagnóstico | Criar diagnóstico | ed=7 tot=7 ast=0 req=0 | verde=['Salvar'] | modal=True
+AG-03det | None | Evidência · VIS-011 | ed=0 tot=5 ast=0 req=0 | verde=[] | modal=True
+AG-04det | None | Item da recomendação · KCl 60 % | ed=0 tot=2 ast=0 req=0 | verde=[] | modal=True
+AG-05 | + Criar versão | Criar versão | ed=6 tot=6 ast=0 req=0 | verde=['Salvar'] | modal=True
+AG-05 | None | Item da biblioteca · Soja alta tecnologia v6  | ed=0 tot=6 ast=0 req=0 | verde=[] | modal=True
+AG-06 | None | Avaliação de eficácia · EF-021 | ed=4 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+AG-07 | None | 1,4 Sight | ed=2 tot=3 ast=0 req=0 | verde=[] dis=['Usar na O.S.'] | modal=True
+BO-01 | None | Plano · Avaliação | ed=0 tot=9 ast=0 req=0 | verde=[] | modal=True
+BO-01 | Simular área | Simular área | ed=1 tot=1 ast=0 req=0 | verde=[] | modal=True
+CA-01 | None | Ordem · OS-0418 v2 | ed=2 tot=5 ast=0 req=0 | verde=['Salvar'] | modal=True
+CA-01det | None | Turno · 20/09 | ed=2 tot=5 ast=0 req=0 | verde=['Salvar'] | modal=True
+CA-01x-os0420 | None | Instrução · Semente de soja 58 W (resistente) | ed=0 tot=3 ast=0 req=0 | verde=[] | modal=True
+CA-02 | None | Corrigir apontamento · OS-0421 · v2 Dia 4 · 2 | ed=3 tot=5 ast=0 req=0 | verde=['Salvar'] | modal=True
+CA-03 | None | Ocorrência · OC-114 Quebra de máquina | ed=7 tot=7 ast=0 req=0 | verde=['Salvar'] | modal=True
+CA-03 | Registrar ocorrência | Registrar ocorrência | ed=7 tot=7 ast=0 req=0 | verde=['Salvar'] | modal=True
+CA-03det | None | Vínculo · OS-0420 · Plantio Soja 58 W | ed=0 tot=4 ast=0 req=0 | verde=[] | modal=True
+CA-04 | None | Saldo da requisição · REQ-031 OS-0417 Adubaçã | ed=0 tot=4 ast=0 req=0 | verde=[] | modal=True
+CARGA | Registrar pesagem | Registrar pesagem | ed=4 tot=4 ast=0 req=0 | verde=['Registrar pesagem'] | modal=True
+CD-01 | Cadastrar talhão | Cadastrar talhão | ed=4 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+CD-01 | None | Talhão · T1 | ed=5 tot=6 ast=0 req=0 | verde=['Salvar'] | modal=True
+CD-01det | None | Talhão · T1 | ed=5 tot=6 ast=0 req=0 | verde=['Salvar'] | modal=True
+CD-02 | Cadastrar cultivar | Cadastrar cultivar | ed=6 tot=6 ast=0 req=0 | verde=['Salvar'] | modal=True
+CD-02 | None | Cultura · Soja | ed=2 tot=3 ast=0 req=0 | verde=['Salvar'] | modal=True
+CD-03 | Cadastrar máquina ou instalação | Cadastrar máquina ou instalação | ed=9 tot=12 ast=0 req=0 | verde=['Salvar'] | modal=True
+CD-03 | None | Máquina · Trator T1 | ed=8 tot=12 ast=0 req=0 | verde=['Salvar'] | modal=True
+CD-04 | Cadastrar pessoa | Cadastrar pessoa | ed=23 tot=23 ast=0 req=0 | verde=['Salvar'] | modal=True
+CD-04 | None | Pessoa · Ana | ed=24 tot=24 ast=0 req=0 | verde=['Salvar'] | modal=True
+CD-05 | Cadastrar parceiro | Cadastrar parceiro | ed=12 tot=12 ast=0 req=0 | verde=['Salvar'] | modal=True
+CD-05 | None | Parceiro · Fertisul | ed=21 tot=22 ast=0 req=0 | verde=['Salvar'] | modal=True
+CD-06 | Cadastrar item | Cadastrar item | ed=11 tot=11 ast=0 req=0 | verde=['Salvar'] | modal=True
+CD-06 | None | Grupo · Adjuvantes | ed=2 tot=2 ast=0 req=0 | verde=['Salvar'] | modal=True
+CD-07 | Cadastrar código | Cadastrar código | ed=9 tot=10 ast=0 req=0 | verde=['Salvar'] | modal=True
+CD-07 | None | Código · 01 | ed=9 tot=10 ast=0 req=0 | verde=['Salvar'] | modal=True
+CD-08 | Cadastrar rendimento | Cadastrar rendimento | ed=13 tot=15 ast=0 req=0 | verde=['Salvar'] | modal=True
+CD-08 | None | Operação · Pulverização | ed=3 tot=3 ast=0 req=0 | verde=['Salvar'] | modal=True
+CF-05 | Alterar plano ou área | Alterar plano ou área | ed=1 tot=1 ast=0 req=0 | verde=[] | modal=True
+CF-05 | None | Talhão T1 · Santa Rita | ed=0 tot=4 ast=0 req=0 | verde=[] | modal=True
+CO-01 | None | Revisar previsão · T7 Mamão Formosa · 42 ha | ed=7 tot=7 ast=0 req=0 | verde=['Salvar'] | modal=True
+CO-02 | None | Ordem de colheita · OC-0510 T7 · Mamão Formos | ed=2 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+CO-02det | None | Avanço do turno · OC-0510 · 22/09 | ed=0 tot=4 ast=0 req=0 | verde=[] | modal=True
+CO-02det | Registrar avanço | Registrar avanço do turno · OC-0510 | ed=4 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+CO-03 | None | Carga · CG-1207 09:40 · Carreta 03 | ed=6 tot=7 ast=0 req=0 | verde=['Salvar'] | modal=True
+CO-03 | Registrar carga | Registrar carga | ed=6 tot=7 ast=0 req=0 | verde=['Salvar'] | modal=True
+CO-04 | None | Recebimento · RC-13 retorno PV-030 · a caminh | ed=5 tot=6 ast=0 req=0 | verde=['Salvar'] | modal=True
+CO-05 | Criar ordem de processo | Criar ordem de processo | ed=4 tot=5 ast=0 req=0 | verde=['Salvar'] | modal=True
+CO-05 | None | Ordem de processo · OB-0110 Mamão Formosa · P | ed=4 tot=5 ast=0 req=0 | verde=['Salvar'] | modal=True
+CO-05det | None | Saída do packing · OB-0110 · Entrada | ed=0 tot=4 ast=0 req=0 | verde=[] | modal=True
+CO-06 | None | Inspeção · INSP-88 L27-013 | ed=2 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+CO-06det | None | Pendência de qualidade · INSP-88 | ed=0 tot=3 ast=0 req=0 | verde=[] | modal=True
+CO-07 | None | Movimentos do lote · L27-013 Armazém Sede · S | ed=0 tot=3 ast=0 req=0 | verde=[] | modal=True
+EST | None | Recebimento · NF 4501 | ed=0 tot=11 ast=0 req=0 | verde=[] | modal=True
+GE-01 | None | Resultado · Soja 51.280 sc · previsão V2 | ed=0 tot=4 ast=0 req=0 | verde=[] | modal=True
+GE-02 | Criar cenário | Criar cenário | ed=5 tot=5 ast=0 req=0 | verde=['Salvar'] | modal=True
+GE-02 | None | Versão · V1 · base aprovada | ed=0 tot=5 ast=0 req=0 | verde=[] | modal=True
+GE-02det | None | Grandeza · Área tratada | ed=0 tot=3 ast=0 req=0 | verde=[] | modal=True
+GE-03 | None | Lançamento · NF 8842 · recebimento | ed=0 tot=5 ast=0 req=0 | verde=[] | modal=True
+GE-04 | None | Título · Agro Norte NF 8790 · 2/3 | ed=3 tot=6 ast=0 req=0 | verde=['Salvar'] | modal=True
+GE-05 | None | Título · FAT-2090 | ed=3 tot=5 ast=0 req=0 | verde=['Salvar'] | modal=True
+GE-06 | None | Indicador · Custo de pulverização | ed=0 tot=3 ast=0 req=0 | verde=[] | modal=True
+GE-06det | None | Causa · Área tratada acima do plano | ed=0 tot=2 ast=0 req=0 | verde=[] | modal=True
+GE-07 | None | Caso · AC-090 atraso de liberação de O.S. | ed=0 tot=7 ast=0 req=0 | verde=[] | modal=True
+GE-07 | Criar ação | Criar ação | ed=7 tot=7 ast=0 req=0 | verde=['Salvar'] | modal=True
+GE-08 | None | Solicitação · CRE-0102 | ed=0 tot=4 ast=0 req=0 | verde=[] | modal=True
+IN-01 | None | Tarefa · OS-0420 · plantio Santa Rita · T4 | ed=2 tot=3 ast=0 req=0 | verde=['Salvar'] | modal=True
+IN-02 | None | Decisão · Ajuste de inventário Galpão 2 Ajust | ed=0 tot=3 ast=0 req=0 | verde=[] | modal=True
+IN-03 | None | Compromisso · 23/09/2026 | ed=4 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+IN-03 | Criar tarefa vinculada | Nova tarefa vinculada | ed=4 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+IR-01 | None | Setor · Gotejo T7 | ed=3 tot=10 ast=0 req=0 | verde=['Salvar'] | modal=True
+IR-02 | Programar irrigação | Programar irrigação | ed=1 tot=1 ast=0 req=0 | verde=[] | modal=True
+IR-03det | Adicionar produtos | Adicionar produtos · OS-0419 | ed=3 tot=3 ast=0 req=0 | verde=['Criar versão v2'] | modal=True
+IR-03det | None | Evento · hoje 06:12 | ed=0 tot=4 ast=0 req=0 | verde=[] | modal=True
+IR-04 | + Cadastrar sensor | Cadastrar sensor | ed=4 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+IR-04 | None | Fonte · Estação meteorológica Santa Rita | ed=2 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+LO-01 | None | Reprogramar janela · T1 · 1ª de 3 Retirada ·  | ed=2 tot=2 ast=0 req=0 | verde=['Salvar'] | modal=True
+LO-01 | + Reservar slot | Reservar slot de doca | ed=4 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+LO-02 | None | Posição na fila · T2 | ed=0 tot=2 ast=0 req=0 | verde=[] | modal=True
+LO-02 | Registrar chegada | Registrar chegada na portaria · T1 | ed=3 tot=3 ast=0 req=0 | verde=['Confirmar chegada do T1'] | modal=True
+LO-02 | Separar lotes | Separar lotes da carga | ed=3 tot=3 ast=0 req=0 | verde=['Confirmar separação'] | modal=True
+LO-02det | Registrar lacre | Registrar lacre · Lacre aplicado | ed=3 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+LO-03 | None | Viagem programada · VG-112 | ed=0 tot=2 ast=0 req=0 | verde=[] | modal=True
+LO-04 | None | Cotação recebida · Rota Sul Transportes | ed=0 tot=4 ast=0 req=0 | verde=[] | modal=True
+LO-04 | + Pedir cotação | Pedir cotação | ed=4 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+MA | Registrar achado | Registrar achado | ed=2 tot=2 ast=0 req=0 | verde=['Registrar achado'] | modal=True
+MA-01 | Registrar achado | Registrar achado | ed=2 tot=2 ast=0 req=0 | verde=['Registrar achado'] | modal=True
+MA-02 | ⋯/Registrar achado | Registrar achado | ed=2 tot=2 ast=0 req=0 | verde=['Registrar achado'] | modal=True
+MA-03 | ⋯/Registrar achado | Registrar achado | ed=2 tot=2 ast=0 req=0 | verde=['Registrar achado'] | modal=True
+MA-05 | Registrar abastecimento | Registrar abastecimento | ed=4 tot=4 ast=0 req=0 | verde=['Registrar abastecimento'] | modal=True
+ON-01 | None | Passo · 1 · Organização | ed=0 tot=3 ast=0 req=0 | verde=[] | modal=True
+ON-01det | None | Objeto da importação · Talhões (shapefile) | ed=3 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+OS | Criar ordem | Nova ordem | ed=2 tot=4 ast=0 req=0 | verde=['Emitir ordem'] | modal=True
+PA | Criar plano | Novo plano | ed=2 tot=2 ast=0 req=0 | verde=['Criar plano'] | modal=True
+PL-01 | + Criar safra | Nova safra | ed=3 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+PL-01 | None | Safra · Safra 2026/27 | ed=3 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+PL-02 | Decidir pendência | Operação · C1 Café Catuaí 144 | ed=4 tot=8 ast=0 req=0 | verde=['Salvar'] | modal=True
+PL-02 | None | Operação · T4 Soja 58 W | ed=3 tot=6 ast=0 req=0 | verde=['Salvar'] | modal=True
+PL-02det | None | Ajuste local · Dessecação de manejo | ed=0 tot=5 ast=0 req=0 | verde=[] | modal=True
+PL-03 | None | Carga × capacidade · Tratores 150+ cv | ed=0 tot=4 ast=0 req=0 | verde=[] | modal=True
+PL-04 | None | Programar · OS-0421 fungicida T1+T2 | ed=4 tot=6 ast=0 req=0 | verde=['Salvar'] | modal=True
+PL-05 | None | Impedimento · Ativo bloqueado Trator T1 · OM- | ed=3 tot=5 ast=0 req=0 | verde=['Salvar'] | modal=True
+PL-06 | None | Parcela · T1-A polígono norte | ed=3 tot=6 ast=0 req=0 | verde=['Salvar'] | modal=True
+PM | Distribuidor 3 t · Criar plano | Novo plano de manutenção | ed=19 tot=19 ast=0 req=0 | verde=['Salvar'] | modal=True
+PT-02det | None | Esclarecimento · O frete CIF até o Galpão 2 v | ed=1 tot=2 ast=0 req=0 | verde=['Salvar'] | modal=True
+PT-05det | None | Previsão da carga · Cargas 1–2 | ed=0 tot=3 ast=0 req=0 | verde=[] | modal=True
+PT-06 | None | Etapa do funil · Convites recebidos | ed=0 tot=2 ast=0 req=0 | verde=[] | modal=True
+PT-07 | + Convidar usuário | Convidar usuário | ed=3 tot=3 ast=0 req=0 | verde=['Salvar'] | modal=True
+PT-07 | None | Credenciamento · Fertisul Fertilizantes Ltda  | ed=15 tot=16 ast=0 req=0 | verde=['Salvar'] | modal=True
+SAF | Criar safra | Nova safra | ed=7 tot=7 ast=0 req=0 | verde=['Salvar'] | modal=True
+SAF | Editar | Safra · Safra 2026/27 | ed=7 tot=7 ast=0 req=0 | verde=['Salvar'] | modal=True
+SU-01 | None | Necessidade · Semente de soja 58 W | ed=0 tot=2 ast=0 req=0 | verde=[] | modal=True
+SU-01 | Reprogramar proposta | Reprogramar proposta de reposição | ed=3 tot=3 ast=3 req=0 | verde=['Reprogramar'] | modal=True
+SU-02 | None | Política · Fertilizantes Galpão 2 | ed=10 tot=10 ast=0 req=0 | verde=['Salvar'] | modal=True
+SU-02 | Submeter exceção | Submeter exceção versionada | ed=5 tot=5 ast=5 req=0 | verde=['Submeter exceção'] | modal=True
+SU-03 | Reservar para ordem | Reservar saldo para ordem | ed=3 tot=3 ast=3 req=0 | verde=['Reservar'] | modal=True
+SU-03 | None | Saldo · KCl 60% · K26-11 | ed=0 tot=2 ast=0 req=0 | verde=[] | modal=True
+SU-03det | None | Saldo do lote · Físico no lote | ed=0 tot=1 ast=0 req=0 | verde=[] | modal=True
+SU-04 | None | Cotação · SOL-2026-07 · Adjuvantes | ed=0 tot=1 ast=0 req=0 | verde=[] | modal=True
+SU-05 | None | Contrato · Fertisul · CT-2026-11 | ed=3 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+SU-05 | Formalizar contrato | Formalizar contrato | ed=6 tot=6 ast=6 req=0 | verde=['Formalizar contrato'] | modal=True
+SU-05det | None | Saldo do contrato · Contratado | ed=0 tot=2 ast=0 req=0 | verde=[] | modal=True
+SU-06 | None | Recebimento · NF 4501 PC-088 Fertisul | ed=0 tot=6 ast=0 req=0 | verde=[] | modal=True
+SU-06 | Ler documento/QR | Recebimento · NF 4533 PC-090 Coop. Vale | ed=6 tot=6 ast=0 req=0 | verde=['Salvar'] | modal=True
+SU-06 | Resolver diferença | Resolver diferença · NF 8812 | ed=3 tot=3 ast=2 req=0 | verde=['Registrar decisão'] | modal=True
+SU-06 | Segregar lote | Segregar lote | ed=3 tot=3 ast=3 req=0 | verde=['Segregar'] | modal=True
+SU-07 | None | Requisição · REQ-031 OS-0417 Adubação de cobe | ed=0 tot=3 ast=0 req=0 | verde=[] | modal=True
+SU-07 | Solicitar | Solicitar requisição | ed=4 tot=4 ast=4 req=0 | verde=['Criar requisição'] | modal=True
+SU-07det | None | Balanço · Entregue à ordem | ed=0 tot=1 ast=0 req=0 | verde=[] | modal=True
+SU-07det | Destinar saldo | Destinar saldo em custódia | ed=4 tot=4 ast=4 req=0 | verde=['Submeter destinação'] | modal=True
+SU-07det | Receber devolução | Receber devolução · REQ-031 | ed=3 tot=3 ast=3 req=0 | verde=['Confirmar recebimento'] | modal=True
+SU-08 | Estornar com vínculo | Estornar com vínculo | ed=2 tot=2 ast=2 req=0 | verde=['Estornar com vínculo'] | modal=True
+SU-08 | None | Movimento · TR-0452 23/09 10:12 | ed=0 tot=5 ast=0 req=0 | verde=[] | modal=True
+SU-08 | Registrar perda | Registrar perda em alçada | ed=5 tot=5 ast=5 req=0 | verde=['Submeter perda'] | modal=True
+SU-08 | Transferir entre locais | Transferir entre locais | ed=5 tot=5 ast=5 req=0 | verde=['Iniciar transferência'] | modal=True
+SU-09 | None | Inventário · INV-2609 Galpão 2 · MAP 11-52 ·  | ed=0 tot=1 ast=0 req=0 | verde=[] | modal=True
+SU-09 | Planejar contagem | Planejar contagem | ed=4 tot=4 ast=4 req=0 | verde=['Planejar contagem'] | modal=True
+VE-02 | None | Cotação · Soja futuro SFH27 | ed=0 tot=4 ast=0 req=0 | verde=[] | modal=True
+VE-02 | + Criar alerta | Novo alerta de preço | ed=6 tot=6 ast=0 req=0 | verde=['Salvar'] | modal=True
+VE-03 | ⋯/Criar oferta | Nova oferta privada | ed=7 tot=7 ast=0 req=0 | verde=['Salvar'] | modal=True
+VE-03 | None | Oferta · OF-103 · enviada Mamão Formosa A | ed=0 tot=7 ast=0 req=0 | verde=[] | modal=True
+VE-04 | + Criar pedido | Novo pedido de venda | ed=7 tot=7 ast=0 req=0 | verde=['Salvar'] | modal=True
+VE-04 | None | Pedido · PV-033 | ed=7 tot=7 ast=0 req=0 | verde=['Salvar'] | modal=True
+VE-04det | Enviar revisão v3 | Revisão v3 do pedido | ed=4 tot=4 ast=0 req=0 | verde=['Salvar'] | modal=True
+VE-04det | None | Versão · v2 | ed=0 tot=4 ast=0 req=0 | verde=[] | modal=True
+VE-05 | Formalizar compromisso | Novo compromisso | ed=5 tot=5 ast=0 req=0 | verde=['Salvar'] | modal=True
+VE-05 | None | Obrigação · CT-201 · venda Coop Grão Sul | ed=0 tot=5 ast=0 req=0 | verde=[] | modal=True
+VE-06 | None | Caso · RC-15 | ed=6 tot=6 ast=0 req=0 | verde=['Salvar'] | modal=True
+VEN | None | BT-090 · Fertisul | ed=1 tot=1 ast=0 req=0 | verde=['Registrar a saca'] | modal=True
+VEN | Registrar venda | Registrar venda | ed=2 tot=2 ast=0 req=0 | verde=['Registrar venda'] | modal=True

@@ -20,6 +20,9 @@ from engine import (grid,table,section,kpis,chip,btn,tag,icon,esc,msgbtn,drawer_
 import engine as E
 from ui37 import shell37, steps_bar, continuity, HEIGHTS37, PARENT37
 import dados as D
+def _lmr_ext():   # data da extração do LMR (ANVISA) para a dica ⓘ do CO-06, a mesma que a tela mostrava (dd/mm/aaaa)
+    import dados_carencia as _DC
+    a=str(_DC._lmr().get('extraido','')).split('-'); return '/'.join(reversed(a)) if len(a)==3 else '—'
 
 H=lambda s: '{{'+s+'}}'
 F=lambda: H('false')
@@ -134,7 +137,6 @@ function co_steps(v,pre,cur){{ for(let i=1;i<=5;i++){{ const done=i<cur, now=i==
   v[pre+i+'_tx']='display:flex;align-items:center;gap:8px;font-size:13px;white-space:nowrap;'+(now?'font-weight:800;color:{INK};':(done?'font-weight:600;color:{INK};':'font-weight:600;color:{MUTED};'));
   v[pre+i+'_ln']='flex-grow:1;height:2px;margin:0 10px;min-width:24px;background:'+(done?'{ACC}':'{LINE}')+';'; }} }}
 '''
-PRIM_ST=BTN_ST(True,False)
 def dstepper(pre,hint_hole):
     nomes=['A liberar','Liberadas','Em execução','Em conferência','Encerradas']
     out=''
@@ -150,8 +152,8 @@ def dyn_status(fname,hole):
     s=s.replace(old,f'<span style="{H(hole+"_st")}"><span style="{H(hole+"_dot")}"></span>{H(hole)}</span>',1)
     open(p,'w').write(s)
 def dyn_primary(pre):
-    return (f'<sc-if value="{H(pre+"_isbtn")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H(pre+"_fn")}" style="{PRIM_ST}">{H(pre+"_t")}</button></sc-if>'
-            f'<sc-if value="{H(pre+"_islnk")}" hint-placeholder-val="{F()}"><a href="{H(pre+"_href")}" style="text-decoration: none; display: inline-block; {PRIM_ST}">{H(pre+"_t")}</a></sc-if>')
+    return (f'<sc-if value="{H(pre+"_isbtn")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H(pre+"_fn")}" style="{BTN_ST(True)}">{H(pre+"_t")}</button></sc-if>'
+            f'<sc-if value="{H(pre+"_islnk")}" hint-placeholder-val="{F()}"><a href="{H(pre+"_href")}" style="text-decoration: none; display: inline-block; {BTN_ST(True)}">{H(pre+"_t")}</a></sc-if>')
 
 # =====================================================================================
 def co01():
@@ -242,14 +244,13 @@ def co02():
                    ('Capacidade de recebimento','14 t/dia · packing Sede')],
            confirm='Emitir ordens em A liberar',done='2 ordens emitidas em A liberar · liberação é ação separada'),'calendar','Derivar as ordens da semana 40 da previsão publicada',primary=True),
          imsg('Liberar ordens prontas','0 de 1 liberada · OC-0514: recebimento excede 14 t/d em 01/10 — mova para 02/10 ou reduza a frente. Resultado por item.',
-              'check','Liberar as ordens em A liberar que têm recursos e capacidade')],g_oc)
-      + sec('Avanço × carga','Registre área e horas no avanço e o peso na carga — as unidades não se misturam.','',
-        nota(f'Hectares concluídos {B("não geram quilogramas")} de estoque, e pesagens não duplicam a produção da mesma carga. '
-             f'Ex.: avanço de 30 ha numa ordem de 100 ha fica como 30 ha realizados e 70 ha de saldo; a pesagem é conciliada depois, sem impedir o registro do turno.'),state='gray'))
+              'check','Liberar as ordens em A liberar que têm recursos e capacidade')],g_oc))
     shell37('CO-02','Programação e ordens de colheita',corpo,
       subtitle='Recorte da agenda integrada com maturação, pedido, equipe, embalagem, packing e transporte — capacidade em unidades compatíveis.',
       status=('1 impedida · 1 em conferência','yellow'),steps=faixa(2),
-      footer='Ciclo canônico: A liberar → Liberadas → Em execução → Em conferência → Encerradas. Finalizar turno mantém Em execução; término físico entra em Em conferência.')
+      footer='Ciclo canônico: A liberar → Liberadas → Em execução → Em conferência → Encerradas. Finalizar turno mantém Em execução; término físico entra em Em conferência. '
+             'Avanço × carga: área e horas vão no avanço e o peso na carga, sem misturar unidades. Hectares concluídos não geram quilogramas de estoque, e pesagens não duplicam a produção da mesma carga '
+             '(ex.: avanço de 30 ha numa ordem de 100 ha fica como 30 ha realizados e 70 ha de saldo; a pesagem é conciliada depois, sem impedir o registro do turno).')
 
 # =====================================================================================
 def co02det():
@@ -275,8 +276,8 @@ def co02det():
       + dstepper('c2s','c2_hint')
       + sec('Apontamentos por dia','Registre o avanço de cada turno; clique no dia aberto para corrigir.',
         [f'<sc-if value="{H("c2_exec")}" hint-placeholder-val="{T()}">'
-         + sbtn('Finalizar apontamento do turno','c2_fin','clock','Trava os apontamentos do turno; a ordem continua Em execução')
-         + sbtn('Concluir execução','c2_concl','check','Registra o término físico; a ordem entra em Em conferência')+'</sc-if>'],g_ap)
+         + E.recolhe_acoes('Apontamentos por dia',[sbtn('Finalizar apontamento do turno','c2_fin','clock','Trava os apontamentos do turno; a ordem continua Em execução'),
+           sbtn('Concluir execução','c2_concl','check','Registra o término físico; a ordem entra em Em conferência')])+'</sc-if>'],g_ap)
       + sec('Cargas vinculadas','Confira o vínculo de cada carga; dois tickets da mesma carga não duplicam produção.',
         [ilnk('Registrar carga','CO-03.dc.html','truck','Registrar pesagem e romaneio em Registre cargas')],g_cv,state='gray'))
     EXTRAJS[0]=JSBASE+r'''
@@ -289,7 +290,7 @@ function EXTRAVALS(self,v){ const st=self.state; const f=st.c2f||'exec';
   const sel = f==='exec'? ['Em execução · parcial dia 2 de 5','yellow'] : (st.c2c? ['Em conferência · CG-1207 a conciliar','yellow'] : ['Em conferência · cargas a conferir','yellow']);
   v.c2_selo=sel[0]; v.c2_selo_st=co_chipst(sel[1]); v.c2_selo_dot=co_dotst(sel[1]);
   co_steps(v,'c2s',f==='exec'?3:4);
-  v.c2_hint = f==='exec'? 'Término físico entra automaticamente em Em conferência; encerrar exige cargas e apontamentos conciliados.' : 'Em conferência: concilie as cargas com os apontamentos antes de encerrar.';
+  v.c2_hint = f==='exec'? '' : 'Em conferência: concilie as cargas com os apontamentos antes de encerrar.';   /* 14/10/2026: a regra da execução foi para a dica ⓘ */
   if(f==='exec'){ v.c2p_t='Registrar avanço'; v.c2p_fn=v.g_ap_new; v.c2p_isbtn=true; v.c2p_islnk=false; v.c2_prox='Registrar avanço do turno'; }
   else if(!st.c2c){ v.c2p_t='Conferir cargas'; v.c2p_isbtn=true; v.c2p_islnk=false; v.c2_prox='Conferir cargas';
     v.c2p_fn=()=>self.setState({c2c:true,g2toast:'Conferência: 2 de 3 cargas conciliadas (CG-1205, CG-1206) · CG-1207 aguarda recebimento — encerrar só após conciliação.'}); }
@@ -302,7 +303,8 @@ function EXTRAVALS(self,v){ const st=self.state; const f=st.c2f||'exec';
     shell37('CO-02','OC-0510 · Colheita de mamão T7',corpo,fname=fn,crumbs_extra=['OC-0510'],
       subtitle='Área executada não gera massa fictícia; pesagem não confirma área — os dois fatos convivem na mesma ordem e são conciliados.',
       status=(H('c2_selo'),'green'),primary_html=dyn_primary('c2p'),steps=faixa(2),
-      footer='Qualidade do lote permanece separada da execução: classe/calibre definitivos saem do packing (CO-05) e da inspeção (CO-06).')
+      footer='Qualidade do lote permanece separada da execução: classe/calibre definitivos saem do packing (CO-05) e da inspeção (CO-06). '
+             'Término físico entra automaticamente em Em conferência; encerrar exige cargas e apontamentos conciliados.')
     dyn_status(fn,'c2_selo')
 
 # =====================================================================================
@@ -379,13 +381,13 @@ def co04():
       gid='g_rc',total=False)
     corpo=(
       sec('Cargas e retornos recebidos','Confira cada entrada, trate a divergência na linha e segregue o que não pode seguir.','',g_rc)
-      + sec('Regra do recebimento','Substitua a estimativa pela quantidade recebida, sem somar as duas.','',
-        nota(f'A entrada NÃO equivale a liberação comercial: produto em processo continua identificado (CG-0988 segue no secador como OB-0106) e '
-             f'retorno de cliente entra {B("bloqueado")} até a decisão da qualidade (CO-06). A quantidade {B("recebida substitui a estimativa")} conforme a regra de medição — nunca soma com ela.'),state='gray'))
+      )
     shell37('CO-04','Recebimento da produção',corpo,
       subtitle='Confira cargas e retornos — entrada NÃO equivale a liberação comercial; divergência é tratada na origem e o destino provisório fica rastreável.',
       status=('1 carga a segregar · 1 retorno a receber bloqueado','yellow'),steps=faixa(4),
-      footer='Encaminhar processo abre o beneficiamento (CO-05); solicitar inspeção abre a qualidade (CO-06) — sempre preservando a carga de origem.')
+      footer='Encaminhar processo abre o beneficiamento (CO-05); solicitar inspeção abre a qualidade (CO-06) — sempre preservando a carga de origem. '
+             'A entrada não equivale a liberação comercial: produto em processo continua identificado (CG-0988 segue no secador como OB-0106) e retorno de cliente entra bloqueado até a decisão da qualidade (CO-06). '
+             'A quantidade recebida substitui a estimativa conforme a regra de medição, nunca soma com ela.')
 
 # =====================================================================================
 def co05():
@@ -416,9 +418,8 @@ def co05():
       sec('Ordens de processo','Acompanhe cada ordem pela rota da cultura; clique na linha para ajustar rota e janela.',
         [sbtn('Criar ordem de processo','g_ob_new','layers','Criar ordem de processo em A liberar (deriva do PCP)',primary=True)],g_ob)
       + sec('Encerrada ≠ liberada','Encerre o processo pelo balanço; libere o lote só pela qualidade.','',
-        nota(f'{B("OB-0104")} fechou com balanço conciliado e perdas de 4,1%, e foi Encerrada — fechar processo não libera lote. '
-             f'O lote {B("L27-013 (3.690 sc 60 kg)")} segue <b style="color:{RED};">Bloqueado</b> pela inspeção INSP-88 — indisponível para reserva e expedição em CO-07 até a decisão da qualidade; '
-             f'decisão posterior de qualidade não reabre a ordem encerrada.'),state='yellow'))
+        nota(f'{B("OB-0104")} fechou com balanço conciliado e perdas de 4,1%, e foi Encerrada. '
+             f'O lote {B("L27-013 (3.690 sc 60 kg)")} segue <b style="color:{RED};">Bloqueado</b> pela inspeção INSP-88 — indisponível para reserva e expedição em CO-07 até a decisão da qualidade.'),state='yellow'))
     EXTRAJS[0]=JSBASE+'const CO5_ACT='+json.dumps([lib],ensure_ascii=False)+';\n'+r'''
 function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_ob'||!r) return;
   const sub={k:'mut',t:r.v.prod+' · '+r.v.rota};
@@ -430,7 +431,7 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_ob'||!r) re
     shell37('CO-05','Beneficiamento',corpo,
       subtitle='Ordens de processo e lotes com múltiplas entradas/saídas; genealogia permanece após mistura e divisão.',
       status=('1 lote bloqueado após encerramento','yellow'),steps=faixa(5),
-      footer='Ciclo canônico das ordens de processo; sem liberação automática de lote por balanço fechado — qualidade decide em CO-06 (DEMO-19).')
+      footer='Ciclo canônico das ordens de processo; sem liberação automática de lote por balanço fechado — qualidade decide em CO-06 (DEMO-19). Fechar processo não libera lote; decisão posterior de qualidade não reabre a ordem encerrada.')
 
 # =====================================================================================
 def co05det():
@@ -451,8 +452,8 @@ def co05det():
       + dstepper('c5s','c5_hint')
       + sec('Balanço de materiais','Confira a entrada contra as saídas por classe e o descarte — embalagem controlada em separado.',
         [f'<sc-if value="{H("c5_exec")}" hint-placeholder-val="{T()}">'
-         + sbtn('Finalizar apontamento do turno','c5_fin','clock','Trava os apontamentos do turno; a ordem continua Em execução')
-         + sbtn('Conferir balanço','c5_confb','scale','Conferir entrada contra saídas (disponível em Em conferência)')+'</sc-if>'],
+         + E.recolhe_acoes('Balanço de materiais',[sbtn('Finalizar apontamento do turno','c5_fin','clock','Trava os apontamentos do turno; a ordem continua Em execução'),
+           sbtn('Conferir balanço','c5_confb','scale','Conferir entrada contra saídas (disponível em Em conferência)')])+'</sc-if>'],
         g_bal+f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 4px 0; font-size: 13px;"><b>{H("c5_bal")}</b>'
               f'<span style="{H("c5_div_st")}"><span style="{H("c5_div_dot")}"></span>{H("c5_div")}</span></div>')
       + sec('Genealogia do lote','Rastreie do cliente ao lote de origem; mistura e divisão preservam a árvore.','',
@@ -479,7 +480,7 @@ function EXTRAVALS(self,v){ const st=self.state; const f=st.c5f||'exec'; const b
   co_steps(v,'c5s', f==='exec'?3:(f==='conf'?4:6));
   v.c5_aqui= f==='exec'? 'Em execução · packing' : (f==='conf'? 'Em conferência' : 'Encerrada');
   v.c5_falta= f==='enc'? 'inspeção dos lotes L39-120/121' : (f==='conf'&&cf? 'fechar processo · inspeção dos lotes' : 'conferir balanço · inspeção dos lotes');
-  v.c5_hint= f==='exec'? 'Concluir execução leva a Em conferência; fechar processo exige balanço conferido.' :
+  v.c5_hint= f==='exec'? '' :   /* 14/10/2026: a regra da execução foi para a dica ⓘ */
              (f==='conf'? 'Confira o balanço; conferido e sem divergência, a ordem fica elegível a Fechar processo.' : 'Processo encerrado com balanço conciliado; a liberação dos lotes é decisão da qualidade (CO-06).');
   const toast=t=>self.setState({g2toast:t});
   v.c5_fin=()=>toast('Turno finalizado · ordem PERMANECE Em execução · apontamentos do turno travados para conferência.');
@@ -501,7 +502,7 @@ function EXTRAVALS(self,v){ const st=self.state; const f=st.c5f||'exec'; const b
     shell37('CO-05','OB-0110 · Packing do mamão',corpo,fname=fn,crumbs_extra=['OB-0110'],
       subtitle='Entradas e saídas por estado físico, classes, embalagens, perdas e genealogia.',
       status=(H('c5_selo'),'green'),primary_html=dyn_primary('c5p'),steps=faixa(5),
-      footer='Balanço conferido torna o processo elegível a fechar; a liberação comercial dos lotes é decisão de qualidade (CO-06 · DEMO-07).')
+      footer='Concluir execução leva a Em conferência; fechar processo exige balanço conferido. Balanço conferido torna o processo elegível a fechar; a liberação comercial dos lotes é decisão de qualidade (CO-06 · DEMO-07).')
     dyn_status(fn,'c5_selo')
 
 # =====================================================================================
@@ -540,8 +541,7 @@ def co06():
       + sec('Árvore de lotes e recolhimento','Rastreie para trás e para frente, mesmo sem saldo no lote.',
         [imsg('Rastrear clientes','Rastreio do L27-013: nenhum cliente atendido — lote nunca saiu para venda; para trás: OB-0104 ← bica L27-018/019 ← colheita C1 de jul/26.','layers','Rastrear clientes e origem do lote L27-013'),
          ilnk('Abrir recolhimento','VE-06.dc.html','alert','Abrir o caso de recolhimento no Comercial'),ilnk('Ver viagens afetadas','LO-03.dc.html','truck','Ver viagens que levaram lotes afetados')],
-        nota(f'Bloqueio {B("invalida a elegibilidade das reservas afetadas")} e avisa o Comercial automaticamente — '
-             f'tentativas de reservar ou expedir o lote falham com motivo (ver CO-07). A simulação de recolhimento usa a mesma árvore, mesmo com saldo zero.'),state='gray'))
+        '',state='gray'))
     # + carência e destino dos lotes (MAPA-CARENCIA-LMR-20261003): cenário, motor e CARVALS
     EXTRAJS[0]=JSBASE+_car_js()+r'''
 function EXTRAVALS(self,v){ CARVALS(self,v); self.g2after=(gid,rows,r)=>{ if(gid==='g_in'&&r&&r.p.przo){ r.p.przo=[{k:'txt',t:r.v.resp}].concat(r.p.przo.slice(1)); r.s.przo=r.v.resp; } }; }
@@ -549,7 +549,11 @@ function EXTRAVALS(self,v){ CARVALS(self,v); self.g2after=(gid,rows,r)=>{ if(gid
     shell37('CO-06','Qualidade e rastreabilidade',corpo,
       subtitle='Inspeções, bloqueios e árvore de lotes; liberar e bloquear são decisões da qualidade, independentes do encerramento da produção.',
       status=('1 lote bloqueado · decisão até 25/09 · 1 retorno a destinar','red'),steps=faixa(6),
-      footer='Padrões variam por cultura: grãos por umidade/impureza; frutas por classe/calibre; café por defeitos e rendimento bica → beneficiado.')
+      footer='Padrões variam por cultura: grãos por umidade/impureza; frutas por classe/calibre; café por defeitos e rendimento bica → beneficiado. '
+             'Bloqueio invalida a elegibilidade das reservas afetadas e avisa o Comercial automaticamente; tentativas de reservar ou expedir o lote falham com motivo (ver CO-07). '
+             'A simulação de recolhimento usa a mesma árvore, mesmo com saldo zero. '
+             'Carência e destino: lotes de campo vêm dos apontamentos das O.S. de colheita (parcela + data); pós-colheita, mistura, divisão, laudo e destinos iniciais são registros demonstrativos. '
+             f'LMR Brasil: ANVISA (monografias, extração {_lmr_ext()}). Regras de exportação não carregadas; o "Mercado sintético" usa valores sintéticos.')
 
 # =====================================================================================
 def co06det():
@@ -631,9 +635,7 @@ def co07():
       + sec('Saldo por lote, classe, local e proprietário','Escolha a visão e clique no lote para ver os movimentos que formam o saldo.',
         [segh,ilnk('Transferir','SU-08.dc.html','truck','Transferir saldo entre locais'),ilnk('Inventariar','SU-09.dc.html','lista','Abrir contagem de inventário')],g_es)
       + sec('Reserva não conta duas vezes','Desconte a reserva uma única vez do físico apto.','',
-        nota(f'Soja: físico apto {B("38.420 sc")} − reserva {B("3.875 sc")} = disponível {B("34.545 sc")}; '
-             f'o contrato barter que originou a reserva {B("não é subtraído de novo")}. A oferta futura (previsão em CO-01) {B("não soma")} como estoque; '
-             f'café em sc 60 kg não soma com grãos em sc 50 kg; retorno bloqueado não aumenta o vendável.'),state='gray'))
+        nota(f'Soja: físico apto {B("38.420 sc")} − reserva {B("3.875 sc")} = disponível {B("34.545 sc")}.'),state='gray'))
     SEG_ON=E.SEG_ON(); SEG_OFF=E.SEG_OFF()
     EXTRAJS[0]=JSBASE+'const C7VIS='+json.dumps([k for _,k in VIS])+';\nconst C7_ON='+json.dumps(SEG_ON)+';\nconst C7_OFF='+json.dumps(SEG_OFF)+';\n'+r'''
 function PREVALS(self,v){ const sp=co_G('g_es'); if(!sp._all) sp._all=sp.rows; const k=C7VIS[self.state.c7||0];
@@ -644,7 +646,9 @@ function EXTRAVALS(self,v){ C7VIS.forEach((k,i)=>{ v['c7v'+i]=()=>self.setState(
       subtitle='Saldo físico, bloqueado, apto, reservado e disponível por lote, classe, local e proprietário — única tela canônica de produto acabado.',
       status=('2 lotes bloqueados · 2 em inspeção','yellow'),
       primary='Alocar pedido',primary_href='VE-04.dc.html',steps=faixa(7),
-      footer='Tentar alocar ou expedir o L27-013 falha com motivo (bloqueio INSP-88); liberação posterior habilita apenas destinações compatíveis (AC-50).')
+      footer='Tentar alocar ou expedir o L27-013 falha com motivo (bloqueio INSP-88); liberação posterior habilita apenas destinações compatíveis (AC-50). '
+             'A reserva conta uma vez: o contrato barter que originou a reserva não é subtraído de novo. A oferta futura (previsão em CO-01) não soma como estoque; '
+             'café em sc 60 kg não soma com grãos em sc 50 kg; retorno bloqueado não aumenta o vendável.')
 
 def build():
     co01(); co02(); co02det(); co03(); co04(); co05(); co05det(); co06(); co06det(); co07()
@@ -666,8 +670,8 @@ function CARVALS(self,v){ cenOuvir(self); const c=cenGet(); const L=carLotes(c);
   const sel=(self.state.carsel&&L[self.state.carsel])?self.state.carsel:'';
   const orig=(l)=>carAncestrais(L,l.id).filter(x=>x.tipo==='campo').map(x=>carNome(x.tal)+' ('+((CARD.tal[x.tal]||{}).faz||'')+') · '+carBr(x.d)).join(' + ');
   const nomeD=(d)=>d?((CARD.dest[d]||{}).nome||d):'sem destino';
-  v.car_fonte='Lotes de campo vêm dos apontamentos das O.S. de colheita (parcela + data). Pós-colheita, mistura, divisão, laudo e destinos iniciais são registros demonstrativos. '
-    +'LMR Brasil: ANVISA (monografias, extração '+carBr(CARD.lmrf.extraido)+'/'+CARD.lmrf.extraido.slice(0,4)+'). Regras de exportação não carregadas; o "Mercado sintético" usa valores sintéticos.';
+  /* 14/10/2026 (proprietário: "reduza ou elimine ... os demais soltos pela tela"): a origem dos lotes e a fonte do LMR foram para a dica ⓘ; à vista só o rótulo de demonstração */
+  v.car_fonte='Demonstração · pós-colheita, laudos e destinos sintéticos';
   const Nn=(st,u,p)=>{ const n=ids.filter(k=>av[k].st===st).length; return n+' '+(n===1?u:p); };
   v.car_n=ids.length+' lotes · '+Nn('nao_conforme','não conforme','não conformes')+' · '+Nn('pendente','pendente','pendentes')+' · '+Nn('nao_avaliado','sem destino','sem destino')+' · '+Nn('conforme','conforme no escopo','conformes no escopo');
   v.car_lotes=ids.map(k=>{ const l=L[k], a=av[k]; const on=k===sel;
@@ -737,4 +741,4 @@ def _car_sec():
     corpo=(f'<div style="display: flex; flex-direction: column; gap: 12px;"><div style="font-size: 12.5px; color: {MUTED}; line-height: 1.5;">{H("car_fonte")}</div>'
            f'<div style="font-size: 13px; font-weight: 700;">{H("car_n")}</div>{lista}{det}</div>')
     return sec('Carência e destino dos lotes de mamão','Avalie cada lote para o destino: origem, aplicações até a colheita, pós-colheita, limite do mercado e evidência. Carência cumprida não é conformidade.',
-               [ilnk('Ver carência no mapa','IN-04.dc.html#car','clock','Abrir a camada Carência e destino do mapa')],corpo,state='yellow')
+               [ilnk('Ver carência no mapa','IN-04.dc.html#car','clock','Abrir no mapa: Colheita e produtividade › Carência e destino')],corpo,state='yellow')

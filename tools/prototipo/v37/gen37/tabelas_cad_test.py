@@ -26,7 +26,7 @@ Classe leva o foco à busca só pelo teclado (no toque e no mouse, não: no celu
 Uso: python3 tabelas_cad_test.py [pasta de capturas]   (~6 min) · python3 tabelas_cad_test.py --ctx [pasta]: só o TABR-CTX-01 e o TABR-CTX-02"""
 import sys, os, re, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir
+from comp_lib import Chrome, servir, cv_todas_sempre
 from tabelas_lib import Grade, limpa, num, un_ok, instante, crescente
 CTX = '--ctx' in sys.argv; ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 OUT = ARGS[0] if ARGS else None
@@ -35,7 +35,7 @@ OK, FAIL = [], []
 def chk(n, cond, info=''):
     (OK if cond else FAIL).append(n); print(('  ok  ' if cond else '  FALHOU ') + n + (' · ' + str(info)[:300] if info != '' else ''), flush=True)
 
-p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js
+p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js; cv_todas_sempre(c)   # V2-3: a tabela completa como foi desenhada (TABELAS-FOCO); o padrão é conferido na VISOES-2
 def shot(n):
     if OUT: c.shot(os.path.join(OUT, n + '.png'))
 ERRS = []
@@ -123,8 +123,12 @@ def menu_tecla(col, busca, valor):
     lab = J("(()=>{const l=document.activeElement&&document.activeElement.closest('label'); return l?l.innerText.replace(/\\s+\\d+$/,'').trim():'';})()")
     ESPACO(); time.sleep(.2); c.tab(1, True); ENTER(); time.sleep(.5); return lab == valor
 def ordena_tecla(col):
-    """↓ maior para menor pelo teclado: Enter no ▾, Shift+Tab 3× até "↓ Classificar…" e Espaço (Enter no menu é o OK do filtro)."""
-    foca(f'button[aria-label="Filtrar {col}"]'); ENTER(); time.sleep(.45); c.tab(3, True)
+    """↓ maior para menor pelo teclado: Enter no ▾, Shift+Tab até "↓ Classificar…" (no máximo 6; a V2-3 pôs "Ocultar coluna" no caminho) e Espaço
+    (Enter no menu é o OK do filtro)."""
+    foca(f'button[aria-label="Filtrar {col}"]'); ENTER(); time.sleep(.45)
+    for _ in range(6):
+        c.tab(1, True)
+        if (J("document.activeElement.innerText") or '').startswith('↓'): break
     ok = (J("document.activeElement.innerText") or '').startswith('↓'); ESPACO(); time.sleep(.5); return ok
 def tira_chip(pref, tec):
     """o × do chip do filtro (Classe): pelo teclado, Tab a partir da busca até ele e Enter; por clique, o clique nele."""
@@ -341,19 +345,20 @@ try:
     chk('CD-02: filtro Unidade de produtividade = t/ha/ano vale na cultivar (Mamão Formosa › Formosa)', len(fl) == 2 and fl[0].startswith('Mamão Formosa') and fl[1] == 'Formosa', fl)
     limpa(J); g.ordena('Ciclo', desc=True); bl = por_grupo(g, 'Ciclo')
     chk('CD-02: ordenar Ciclo (dias) pelo número dentro da cultura', bl and all(crescente([num(x) for x in b], True) for b in bl), bl[:2])
-    aba('Operações'); g = Grade(J, 0)
-    d = tf03('CD-02 Rendimentos', g, ['Operação › conjunto', 'Fonte', 'Processo', 'Cultura', 'Rendimento', 'Custo R$/h', 'Custo R$/ha'])
+    # 13/10/2026 (proprietário: "tire cadastro de operações de culturas e cultivares"): os rendimentos estão no CD-08, não numa aba do CD-02
+    abre('CD-08.dc.html'); g = Grade(J, 0)
+    d = tf03('CD-08 Rendimentos', g, ['Operação › conjunto', 'Fonte', 'Processo', 'Cultura', 'Rendimento', 'Custo R$/h', 'Custo R$/ha'])
     pz = next((r for r in d if r.get('Operação › conjunto', '').startswith('Trator 02')), {})
-    chk('CD-02: pulverização Medição local | Tratos culturais | 21,60 ha/h | R$ 313,00/h | R$ 14,49/ha',
+    chk('CD-08: pulverização Medição local | Tratos culturais | 21,60 ha/h | R$ 313,00/h | R$ 14,49/ha',
         [pz.get(k) for k in ('Fonte', 'Processo', 'Rendimento', 'Custo R$/h', 'Custo R$/ha')] == ['Medição local', 'Tratos culturais', '21,60 ha/h', 'R$ 313,00/h', 'R$ 14,49/ha'], pz)
     fch = [(r.get('Operação › conjunto'), c) for r, c in zip(g.dicts(), g.chips('Fonte')) if c]
-    chk('CD-02 (A11): a Fonte é texto; só a premissa a validar é chip (pendência com "Validar ›")', [x for x, _ in fch] == ['Derriçadeiras portáteis · equipe de 6'], fch)
+    chk('CD-08 (A11): a Fonte é texto; só a premissa a validar é chip (pendência com "Validar ›")', [x for x, _ in fch] == ['Derriçadeiras portáteis · equipe de 6'], fch)
     J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(x=>x.innerText.indexOf('Trator 02')===0); r&&r.querySelector('[role=cell] span').click();})()"); time.sleep(.5)
     fv = lambda k: J(f"(document.querySelector('#fx_g_rend_{k}')||{{}}).value") or ''
-    chk('CD-02 (A1): largura 36 m, velocidade 8 km/h e eficiência 75 % no painel do rendimento (saíram da grade)', [fv('larg'), fv('vel'), fv('efic')] == ['36', '8', '75'], [fv('larg'), fv('vel'), fv('efic')])
+    chk('CD-08 (A1): largura 36 m, velocidade 8 km/h e eficiência 75 % no painel do rendimento (saíram da grade)', [fv('larg'), fv('vel'), fv('efic')] == ['36', '8', '75'], [fv('larg'), fv('vel'), fv('efic')])
     J("(()=>{const b=[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Cancelar'); b&&b.click();})()"); time.sleep(.3)
     g.filtra('Processo', ['Colheita']); fl = {r.get('Processo') for r in g.dicts(True)}
-    chk('CD-02: filtro Processo = Colheita vale no conjunto', fl == {'Colheita'} and len(g.dicts(True)) == 2, [r.get('Operação › conjunto') for r in g.dicts(True)])
+    chk('CD-08: filtro Processo = Colheita vale no conjunto', fl == {'Colheita'} and len(g.dicts(True)) == 2, [r.get('Operação › conjunto') for r in g.dicts(True)])
     limpa(J)
     # ================= CD-03 =================
     abre('CD-03.dc.html'); g = Grade(J, 0)

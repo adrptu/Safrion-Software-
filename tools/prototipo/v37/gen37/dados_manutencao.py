@@ -77,18 +77,19 @@ ATIVOS = _ativos()
 ORDEM_ATIVOS = [a['id'] for a in DC.ATIVOS] + ['cb01']
 
 # ---------- itens de estoque da manutenção (grupo Peças / Lubrificantes) · saldo próprio até o 1b ----------
+# min = ponto de pedido e max = repor até (V69, Compras › Materiais: saldo livre + já pedido abaixo do min sugere a reposição até o max)
 ITENS = {
- 'KIT-MF7719': dict(nome='Kit filtros MF 7719', un='kit', saldo=2, reservado=0, preco=690),
- 'FIL-MF4292': dict(nome='Filtro de óleo MF 4292', un='un', saldo=0, reservado=0, preco=160),
- 'KIT-JD': dict(nome='Kit filtros John Deere', un='kit', saldo=3, reservado=0, preco=740),
- 'KIT-U3030': dict(nome='Kit filtros Uniport 3030', un='kit', saldo=3, reservado=0, preco=520),
- 'KIT-C7250': dict(nome='Kit filtros Case IH 7250', un='kit', saldo=1, reservado=0, preco=1350),
- 'KIT-CB01': dict(nome='Kit filtros caminhão comboio', un='kit', saldo=1, reservado=0, preco=480),
- 'OL-1540': dict(nome='Óleo de motor 15W-40', un='L', saldo=120, reservado=0, preco=28),
- 'OL-HID68': dict(nome='Óleo hidráulico 68', un='L', saldo=200, reservado=0, preco=24),
- 'GR-EP2': dict(nome='Graxa EP2', un='kg', saldo=18, reservado=0, preco=32),
- 'VED-MB': dict(nome='Kit vedação da motobomba', un='kit', saldo=1, reservado=0, preco=380),
- 'DSC-15': dict(nome='Disco de corte 15"', un='un', saldo=24, reservado=0, preco=210),
+ 'KIT-MF7719': dict(nome='Kit filtros MF 7719', un='kit', saldo=2, reservado=0, preco=690, min=1, max=3),
+ 'FIL-MF4292': dict(nome='Filtro de óleo MF 4292', un='un', saldo=0, reservado=0, preco=160, min=2, max=4),
+ 'KIT-JD': dict(nome='Kit filtros John Deere', un='kit', saldo=3, reservado=0, preco=740, min=1, max=3),
+ 'KIT-U3030': dict(nome='Kit filtros Uniport 3030', un='kit', saldo=3, reservado=0, preco=520, min=1, max=3),
+ 'KIT-C7250': dict(nome='Kit filtros Case IH 7250', un='kit', saldo=1, reservado=0, preco=1350, min=1, max=2),
+ 'KIT-CB01': dict(nome='Kit filtros caminhão comboio', un='kit', saldo=1, reservado=0, preco=480, min=1, max=2),
+ 'OL-1540': dict(nome='Óleo de motor 15W-40', un='L', saldo=120, reservado=0, preco=28, min=60, max=200),
+ 'OL-HID68': dict(nome='Óleo hidráulico 68', un='L', saldo=200, reservado=0, preco=24, min=60, max=200),
+ 'GR-EP2': dict(nome='Graxa EP2', un='kg', saldo=18, reservado=0, preco=32, min=20, max=40),
+ 'VED-MB': dict(nome='Kit vedação da motobomba', un='kit', saldo=1, reservado=0, preco=380, min=1, max=2),
+ 'DSC-15': dict(nome='Disco de corte 15"', un='un', saldo=24, reservado=0, preco=210, min=8, max=24),
 }
 ESPECIALIDADES = ['Mecânico', 'Eletricista', 'Lubrificador', 'Terceiro (concessionária)']
 TIPOS_TAREFA = ['Serviço', 'Verificação', 'Medição', 'Teste']
@@ -328,7 +329,7 @@ def _leituras():
 
 
 # ---------- conflito com a produção (D-38): a alocação da semana (alocacao.py), a mesma fonte de O.S. › Recursos ----------
-REC_DO_ATIVO = {'a01': 'T1', 'a02': 'T02', 'a03': 'T03', 'a04': 'T04', 'a08': 'COL', 'a15': 'PV1', 'a11': 'PV2', 'a05': 'PJ', 'a06': 'PL', 'a07': 'DI', 'a10': 'ES'}
+REC_DO_ATIVO = AL.REC_DO_ATIVO   # fonte: alocacao.py (o mesmo mapa da troca de recurso na O.S.)
 
 
 def al_js():
@@ -386,7 +387,8 @@ def seed():
     # v=4 (S2): achados no estado (c.achados substitui c.ach), condição com histórico, tarefas tipadas, leituras, abastecimentos e recibos
     return dict(v=V, rev=0, hoje=HOJE, horiz=HORIZONTE, antiga=LEIT_ANTIGA, custoh=CUSTO_H, maxdia=MAX_DIA, seq=235, seqpm=11, seqsc=41,
                 ativos=ATIVOS, ordem=ORDEM_ATIVOS, itens=ITENS, esp=ESPECIALIDADES, planos=planos, ordemPlanos=[p['id'] for p in PLANOS],
-                vinc=VINCULOS, oms=_oms(), achados=_achados(), leituras=_leituras(), abast=_abast(), recibos={})
+                vinc=VINCULOS, oms=_oms(), achados=_achados(), leituras=_leituras(), abast=_abast(), recibos={},
+                cmp=__import__('dados_compras_mat').seed())   # V69: requisições de materiais, peças e serviços (SC-038..040)
 
 
 def dados_js():
@@ -408,7 +410,8 @@ def js_prefixo():
 
 def js_regras():
     """Regras da manutenção sobre o cenário único (1a): exige cenario.js_prefixo() antes (MAN0 = CEN0.man)."""
-    return 'const MAN0 = CEN0.man;\n' + JS_ACESSO_CEN + dados_js() + JS + '\n'
+    import dados_compras_mat as CM   # V69: Compras de materiais, peças e serviços (c.man.cmp) com as mesmas regras em toda página do estado
+    return 'const MAN0 = CEN0.man;\n' + JS_ACESSO_CEN + dados_js() + JS + '\n' + CM.js() + '\n'
 
 
 JS_ACESSO_CEN = r'''
@@ -463,7 +466,7 @@ function manRtTxt(a){ return a?(a.rt||'Otávio'):'—'; }
 function manPode(c,pf,cmd,x){ x=x||{}; const q=manPf(pf); const pa=manPapelDe(q); const k=q.k;
   const PCM='Ação do Otávio (responsável de manutenção)';
   if(cmd==='registrar') return (pa||MAN_OPS.indexOf(k)>=0)?'':'Ação de Otávio, Zé, Ana ou do operador da máquina';   /* operador do app (Marcos, S4) registra achado, leitura e abastecimento */
-  if(['decidir','gerar','mover','liberar','encerrar','leituraDecidir','estorno','plano','ponte'].indexOf(cmd)>=0) return pa==='pcm'?'':PCM;
+  if(['decidir','gerar','mover','liberar','encerrar','cancelar','leituraDecidir','estorno','plano','ponte'].indexOf(cmd)>=0) return pa==='pcm'?'':PCM;
   if(cmd==='condicao'){ const a=x.aid?c.ativos[x.aid]:null; if(pa==='pcm') return ''; if(pa==='mecanico'&&a&&a.rt===k) return ''; return 'Ação do Otávio ou do responsável técnico ('+manRtTxt(a)+')'; }
   const o=x.o;
   if(cmd==='incluir'){ if(!o) return 'Ordem não encontrada.'; if(pa==='pcm'&&(o.etapa==='A liberar'||o.etapa==='Liberadas')) return ''; if(o.etapa==='Em execução'&&o.executante&&o.executante===k) return '';
@@ -516,8 +519,14 @@ function manLeitTxt(a){ if(!a||!a.leit) return 'sem contador'; return manQ(a.lei
 function manAntiga(c,a){ return !!(a&&a.leit&&manDias(a.leit.data,c.hoje)>c.antiga); }
 /* ---------- ordens ---------- */
 function manAberta(o){ return o.etapa!=='Encerradas'&&o.etapa!=='Canceladas'; }
-function manOmCiclo(c,pid,aid,sid,ciclo){ return Object.values(c.oms).find(o=>o.pid===pid&&o.aid===aid&&(o.cobre||[]).indexOf(sid)>=0&&(o.ciclos||{})[sid]===ciclo)||null; }
-function manFalta(c,o){ return (o.pecas||[]).filter(p=>p.item&&!p.res&&o.etapa==='A liberar'&&((c.itens[p.item].saldo-c.itens[p.item].reservado)<p.qtd)); }
+function manOmCiclo(c,pid,aid,sid,ciclo){ return Object.values(c.oms).find(o=>o.etapa!=='Canceladas'&&o.pid===pid&&o.aid===aid&&(o.cobre||[]).indexOf(sid)>=0&&(o.ciclos||{})[sid]===ciclo)||null; }
+/* falta peça: o que a OM ainda precisa além do já reservado para ela (D5: a peça que chegou da compra já vem reservada) e o livre não cobre */
+function manNec(p){ return Math.max(0,(p.qtd||0)-(p.res||0)); }
+function manLivreIt(c,k){ const it=c.itens[k]; return it?it.saldo-it.reservado:0; }
+function manFalta(c,o){ return (o.pecas||[]).filter(p=>p.item&&o.etapa==='A liberar'&&manNec(p)>1e-9&&manLivreIt(c,p.item)<manNec(p)-1e-9); }
+/* quem segura a reserva do item (outras OMs abertas): o motivo de "falta" quando há saldo físico, mas preso a outra ordem (D5) */
+function manResDe(c,k,exceto){ const out=[]; Object.values(c.oms).forEach(o=>{ if(o.id===exceto||!manAberta(o)) return; const q=(o.pecas||[]).filter(p=>p.item===k).reduce((s,p)=>s+(p.res||0),0); if(q>1e-9) out.push({om:o.id,qtd:q}); }); return out; }
+function manResTxt(c,k,exceto){ const it=c.itens[k]||{}; const rs=manResDe(c,k,exceto); return rs.length?rs.map(x=>manN(x.qtd,1)+' '+(it.un||'')+' reservada'+(x.qtd>1?'s':'')+' para a '+x.om).join(', '):''; }
 /* todas as linhas plano × ativo × serviço (publicado), com cálculo, ordem do ciclo e selos */
 function manLinhas(c,pid){ const out=[];
   Object.keys(c.vinc).forEach(vk=>{ const v=c.vinc[vk]; const k=vk.split('|'); if(pid&&k[0]!==pid) return; const p=c.planos[k[0]], a=c.ativos[k[1]]; if(!p||!a) return;
@@ -529,6 +538,12 @@ function manLinhas(c,pid){ const out=[];
   return out; }
 function manDevida(l){ return l.x.sit==='Vencida'||l.x.sit==='Vence em breve'; }
 function manSemOm(c){ return manLinhas(c).filter(l=>manDevida(l)&&!l.om&&!l.dup); }
+// a lista "Sem ordem" do PCM (fonte única da visão Sem ordem e do Painel de Manutenção): vencimentos de plano ativo sem ordem que já venceram
+// ou cuja janela abre até o horizonte (c.horiz dias, ou hz), e achados (inspeção, relato, alerta) ainda sem ordem de um ativo cadastrado
+function manSemOrdem(c,hz){ const h=hz===undefined?c.horiz:hz;
+  const venc=manLinhas(c).filter(l=>l.s&&!l.om&&!l.dup&&l.p.estado!=='Inativo'&&(l.x.sit==='Vencida'||manIniJanela(l.x)<=h));
+  const ach=Object.values(c.achados||{}).filter(q=>q.estado==='Sem ordem'&&c.ativos[q.aid]);
+  return {venc,ach,n:venc.length+ach.length}; }
 function manLinhaOm(c,o){ if(!o||!o.pid) return null; return manLinhas(c,o.pid).find(x=>x.aid===o.aid&&x.sid===o.sid&&x.om&&x.om.id===o.id)||null; }
 function manDupServ(c,pid,aid,nomes){ const ns=nomes.map(x=>String(x).toLowerCase());
   for(const k of Object.keys(c.vinc)){ const q=k.split('|'); if(q[1]!==aid||q[0]===pid) continue; const o=c.planos[q[0]]; if(!o||o.estado==='Inativo') continue;
@@ -537,16 +552,18 @@ function manDupServ(c,pid,aid,nomes){ const ns=nomes.map(x=>String(x).toLowerCas
 function manSelosLinha(c,l){ const s=[]; if(l.a.cond==='Bloqueado'){ s.push({t:'Ativo bloqueado',c:'red'}); }
   if(manAntiga(c,l.a)) s.push({t:'Leitura de '+manBr(l.a.leit.data),c:'yellow'}); if(l.a.suspeita) s.push({t:'Leitura a confirmar',c:'yellow'}); if(l.est) s.push({t:'Marco estimado',c:'yellow'}); return s; }
 /* ---------- conflito com a produção (D-38): horas livres do recurso no dia (jornada − O.S. firme ou condicional) < tempo previsto ---------- */
+// alocação vigente (alocacao.py: semana do PCP + trocas de recurso das O.S. no cenário); sem o cenário (motor isolado), a semana fixa
+function manAloc(){ try{ if(typeof alVigente==='function'&&typeof cenGet==='function') return alVigente(cenGet()); }catch(e){} return MAN_AL.aloc; }
 function manLivre(c,aid,iso){ const r=MAN_AL.rec[aid]; if(!r) return null; const jor=(MAN_AL.jorRec||{})[r]||MAN_AL.jor;
-  const its=MAN_AL.aloc.filter(a=>a.r===r&&a.dia===iso&&a.sit!=='manutenção'); const h=its.reduce((s,a)=>s+a.h,0); const os=[];
+  const its=manAloc().filter(a=>a.r===r&&a.dia===iso&&a.sit!=='manutenção'); const h=its.reduce((s,a)=>s+a.h,0); const os=[];
   its.forEach(a=>{ if(os.indexOf(a.os)<0) os.push(a.os); }); return {r,jor,h,livre:Math.round((jor-h)*100)/100,os}; }
 function manConflito(c,o,iso){ if(!o) return null; iso=iso||o.janIso; if(!iso) return null; const L=manLivre(c,o.aid,iso); if(!L||!L.os.length) return null;
   const t=Number(o.tempo)>0?Number(o.tempo):1; if(L.livre+1e-9>=t) return null;
   return {os:L.os,dia:iso,livre:Math.max(0,L.livre),t:'Conflito · '+L.os.join(' e ')+' '+manBr(iso),det:manN(Math.max(0,L.livre),1)+' h livres de '+manN(L.jor,1)+' h para '+manN(t,1)+' h previstas'}; }
 function manProxLivre(c,o){ for(let i=1;i<=7;i++){ const d=manAdd(c.hoje,i); if(!manConflito(c,o,d)) return d; } return null; }
 /* operador da alocação do ativo no dia (AL): pessoa da mesma O.S. no mesmo dia; sem alocação, nenhum (D-19) */
-function manOperadorDia(c,aid,iso){ const r=MAN_AL.rec[aid]; if(!r) return ''; const oss=MAN_AL.aloc.filter(a=>a.r===r&&a.dia===iso&&a.sit!=='manutenção').map(a=>a.os);
-  const ps=MAN_AL.aloc.filter(a=>a.dia===iso&&oss.indexOf(a.os)>=0&&MAN_AL.tipo[a.r]==='Pessoa').map(a=>MAN_AL.nome[a.r]);
+function manOperadorDia(c,aid,iso){ const r=MAN_AL.rec[aid]; if(!r) return ''; const oss=manAloc().filter(a=>a.r===r&&a.dia===iso&&a.sit!=='manutenção').map(a=>a.os);
+  const ps=manAloc().filter(a=>a.dia===iso&&oss.indexOf(a.os)>=0&&MAN_AL.tipo[a.r]==='Pessoa').map(a=>MAN_AL.nome[a.r]);
   const op=ps.find(n=>/operador|irrigante/.test(n))||''; return op?op.split(' · ')[0]:''; }
 function manTanques(c,aid){ const a=c.ativos[aid]; const campo=!!a&&/^(Santa Rita|Pivô|Talhão)/.test(a.local||''); return MAN_TQ.filter(t=>campo?t.onde==='campo':true).map(t=>t.id); }
 /* limite da tolerância de uma preventiva aberta (data) e se já venceu */
@@ -617,9 +634,9 @@ function manLiberar(c,id,forcar,pf,d){ const o=c.oms[id]; if(!o) throw new Error
   if(d.executante!==undefined&&d.executante!==null&&d.executante!=='') o.executante=d.executante;
   if(d.tempo!==undefined&&!manVazio(d.tempo)){ const t=manNum(d.tempo); if(isNaN(t)||t<=0||t>200) throw new Error('Tempo previsto inválido.'); o.tempo=t; }
   const ex=manExecSug(o); if(!ex) throw new Error('Falta: executante. Escolha quem executa.'); if(!(Number(o.tempo)>0)) throw new Error('Falta: tempo previsto (h).');
-  const f=manFalta(c,o); if(f.length) throw new Error('Não liberada: falta peça · '+f.map(x=>x.nome+' ('+manN(c.itens[x.item].saldo-c.itens[x.item].reservado)+' de '+manN(x.qtd)+' '+x.un+')').join(', ')+(o.sc?'. Aguarda o recebimento da '+o.sc.id+'.':'. Solicite a compra.'));
+  const f=manFalta(c,o); if(f.length) throw new Error('Não liberada: falta peça · '+f.map(x=>{ const rt=manResTxt(c,x.item,o.id); return x.nome+' (livre '+manN(Math.max(0,manLivreIt(c,x.item)),1)+' de '+manN(manNec(x),1)+' '+x.un+(rt?' · '+rt+', que ninguém usa em outra ordem':'')+')'; }).join(', ')+(o.sc?'. Aguarda o recebimento da '+o.sc.id+'.':'. Solicite a compra.'));
   const cf=manConflito(c,o); if(cf&&!forcar) return {nada:true,aviso:true,msg:cf.t+' ('+cf.det+'). Mova a janela ou libere mesmo assim.'};
-  (o.pecas||[]).forEach(p=>{ if(!p.item) return; c.itens[p.item].reservado+=p.qtd; p.res=p.qtd; });
+  (o.pecas||[]).forEach(p=>{ if(!p.item) return; const q=manNec(p); if(q>0) c.itens[p.item].reservado+=q; p.res=p.qtd; });   /* reserva o que ainda não está reservado (D5: a peça recebida da SC já chega reservada) */
   o.executante=ex; o.etapa='Liberadas'; if(cf) o.conflitoAceito=true; o.lib={por:manPor(pf),em:c.hoje,conf:cf?cf.t:''}; manToca(o);
   const pr=(o.pecas||[]).filter(p=>p.item).map(p=>p.nome+' '+manN(p.qtd)+' '+p.un);
   return {msg:id+' liberada para a oficina · executante '+ex+(pr.length?' · reservado: '+pr.join(', '):'')+(cf?' · conflito com a '+cf.os.join(' e ')+' aceito e avisado ao PCP':'')+'.'}; }
@@ -627,11 +644,50 @@ function manLiberar(c,id,forcar,pf,d){ const o=c.oms[id]; if(!o) throw new Error
 function manSolicitar(c,id,pf){ const o=c.oms[id]; if(!o) throw new Error('Ordem não encontrada.'); if(pf!==undefined) manExige(c,pf,'ponte'); if(o.sc) return {nada:true,msg:'A '+o.sc.id+' já foi enviada a Compras (simulado).'};
   const f=manFalta(c,o); if(!f.length) return {nada:true,msg:'Nenhuma peça em falta nesta ordem.'};
   const sc='SC-'+String(c.seqsc||41).padStart(3,'0'); c.seqsc=(c.seqsc||41)+1;
-  o.sc={id:sc,data:c.hoje,por:manPor(pf),itens:f.map(p=>{ const it=c.itens[p.item]; return {item:p.item,nome:p.nome,un:p.un,qtd:Math.max(0,p.qtd-Math.max(0,it.saldo-it.reservado))}; })}; manToca(o);
-  return {msg:sc+' enviada a Compras (simulado · Compras recebe no 1c): '+o.sc.itens.map(x=>x.nome+' '+manN(x.qtd,1)+' '+x.un).join(', ')+' · a '+id+' libera quando a peça chegar.'}; }
+  o.sc={id:sc,data:c.hoje,por:manPor(pf),itens:f.map(p=>({item:p.item,nome:p.nome,un:p.un,qtd:Math.max(0,manNec(p)-Math.max(0,manLivreIt(c,p.item)))}))}; manToca(o);
+  cmmDaOm(c,o);   /* V69: a SC entra na fila de Compras › Materiais, peças e serviços (dados_compras_mat) */
+  return {msg:sc+' enviada a Compras (Materiais, peças e serviços): '+o.sc.itens.map(x=>x.nome+' '+manN(x.qtd,1)+' '+x.un).join(', ')+' · a '+id+' libera quando a peça chegar.'}; }
+/* recebimento da SC da OM, a função única da ponte da Manutenção e de Compras › Materiais (V69). porItem = {código: quantidade que chegou agora}
+   (sem ele, tudo o que falta receber: a ponte simulada). D5 (proprietário, 16/10/2026): o que chega para uma OM aberta fica reservado para ela,
+   até a necessidade da ordem (o.pecas[].res), com a origem em o.pecas[].rsv (pedido → recebimento → reserva → ordem). Não entra no livre e
+   nenhuma outra ordem o usa (manFalta e manLiberar contam só o livre). Passou da necessidade, ou a OM foi cancelada ou encerrada: vai ao livre.
+   A peça que já estava no livre continua reservada na liberação (DEC-2609-13). A requisição de Compras fica Recebida quando chega tudo. */
+function manReceberSc(c,o,quem,porItem){ const sc=o.sc; const r=c.cmp&&c.cmp.reqs[sc.id];
+  const pend={}; sc.itens.forEach(x=>{ const f=Math.max(0,x.qtd-(x.rec||0)); if(f>1e-9) pend[x.item]=(pend[x.item]||0)+f; });
+  const rq={}; Object.keys(pend).forEach(k=>{ const q=porItem?Number(porItem[k]||0):pend[k];
+    if(q>pend[k]+1e-9) throw new Error('Acima do pedido: chegou '+manN(q,1)+' de '+((c.itens[k]||{}).nome||k)+' e falta receber '+manN(pend[k],1)+'. Nada foi gravado.'); if(q>1e-9) rq[k]=q; });
+  if(!Object.keys(rq).length) throw new Error('Informe a quantidade recebida. Nada foi gravado.');
+  const hist=r?(r.recs=r.recs||[]):(sc.recs=sc.recs||[]); const pc=r&&r.ped?r.ped.id:''; const rid=(pc||sc.id)+'/'+(hist.length+1);
+  const aberta=MAN_ABERTAS.indexOf(o.etapa)>=0; const ent=[], res=[], livre=[];
+  const marca=(its,k,q)=>{ (its||[]).forEach(x=>{ if(x.item!==k||q<=1e-9) return; const d=Math.min(q,Math.max(0,x.qtd-(x.rec||0))); x.rec=(x.rec||0)+d; q-=d; }); };
+  Object.keys(rq).forEach(k=>{ const it=c.itens[k]; let q=rq[k]; it.saldo+=q; marca(sc.itens,k,q); if(r) marca(r.itens,k,q); ent.push({item:k,nome:it.nome,un:it.un,qtd:q});
+    if(aberta) (o.pecas||[]).forEach(p=>{ if(p.item!==k||q<=1e-9) return; const d=Math.min(q,manNec(p),Math.max(0,manLivreIt(c,k))); if(!(d>1e-9)) return;
+      it.reservado+=d; p.res=(p.res||0)+d; p.rsv=(p.rsv||[]).concat([{pc,rec:rid,sc:sc.id,qtd:d,em:c.hoje,por:quem}]); res.push({item:k,nome:p.nome,un:p.un,qtd:d}); q-=d; });
+    if(q>1e-9) livre.push({item:k,nome:it.nome,un:it.un,qtd:q}); });
+  const completo=sc.itens.every(x=>(x.rec||0)>=x.qtd-1e-9); hist.push({id:rid,em:c.hoje,por:quem,om:o.id,ent,res,livre});
+  if(completo){ sc.rec=c.hoje; sc.recPor=quem; if(r&&r.etapa!=='Recebida'){ r.etapa='Recebida'; r.rec={em:c.hoje,por:quem,dest:'om',res:res.map(x=>x.nome+' '+manN(x.qtd,1)+' '+x.un)}; } }
+  manToca(o); return {rid,ent,res,livre,completo,falta:sc.itens.filter(x=>(x.rec||0)<x.qtd-1e-9).map(x=>x.nome+' '+manN(x.qtd-(x.rec||0),1)+' '+x.un)}; }
+/* o texto do recebimento da OM (Compras e a ponte): o que chegou, o que ficou reservado para a OM, o que foi ao livre e o próximo passo */
+function manRecTxt(c,o,e,pre){ const L=xs=>xs.map(x=>x.nome+' '+manN(x.qtd,1)+' '+x.un).join(', ');
+  return (pre||('Recebimento '+e.rid+' da '+o.sc.id))+': '+L(e.ent)+(e.res.length?' · Reservado para '+o.id+': '+L(e.res)+' (fora do estoque livre)':'')
+    +(e.livre.length?' · no estoque livre: '+L(e.livre)+(manAberta(o)?'':' ('+o.id+' '+({'Canceladas':'cancelada','Encerradas':'encerrada'}[o.etapa]||o.etapa.toLowerCase())+')'):'')
+    +(e.falta.length?' · recebimento parcial: falta receber '+e.falta.join(', '):'')
+    +(o.etapa==='A liberar'&&!manFalta(c,o).length?' · '+o.id+' pronta para liberar':'')+'.'; }
 function manReceber(c,id,pf){ const o=c.oms[id]; if(!o||!o.sc) throw new Error('Esta ordem não tem compra solicitada.'); if(pf!==undefined) manExige(c,pf,'ponte'); if(o.sc.rec) return {nada:true,msg:'Recebimento da '+o.sc.id+' já registrado.'};
-  o.sc.itens.forEach(x=>{ c.itens[x.item].saldo+=x.qtd; }); o.sc.rec=c.hoje; o.sc.recPor=manPor(pf); manToca(o);
-  return {msg:'Recebimento da '+o.sc.id+' (simulado · papel do Almoxarifado): '+o.sc.itens.map(x=>x.nome+' '+manN(x.qtd,1)+' '+x.un).join(', ')+' · '+id+' pronta para liberar.'}; }
+  const e=manReceberSc(c,o,manPor(pf)); return {msg:manRecTxt(c,o,e,'Recebimento da '+o.sc.id+' (simulado · papel do Almoxarifado)')}; }
+/* cancelar sem execução (PCMS-M19, só a parte da reserva; D5): em A liberar ou Liberadas, pelo PCM, com motivo. A reserva da ordem (a da
+   liberação e a da peça que chegou pela compra) volta ao estoque livre, com registro na ordem (o.canc.dev, com a origem do recebimento);
+   o achado volta a Sem ordem e o ciclo do plano pode gerar outra ordem. Peça ainda não recebida chega livre. Repetir não devolve de novo. */
+function manCancelar(c,id,motivo,pf,chave){ return manCmd(c,chave,'cancelar',()=>{ const o=c.oms[id]; if(!o) throw new Error('Ordem não encontrada.'); if(pf!==undefined) manExige(c,pf,'cancelar');
+    if(o.etapa==='Canceladas') return {nada:true,msg:id+' já cancelada em '+manBr((o.canc||{}).em)+' · nada devolvido de novo.'};
+    if(['A liberar','Liberadas'].indexOf(o.etapa)<0) throw new Error(id+' está '+o.etapa+': trabalho iniciado não se cancela; conclua e encerre.');
+    if(manVazio(motivo)) throw new Error('Informe o motivo do cancelamento.');
+    const por=manPor(pf), dev=[];
+    (o.pecas||[]).forEach(p=>{ const q=p.res||0; if(!p.item||!(q>1e-9)) return; const it=c.itens[p.item]; it.reservado=Math.max(0,it.reservado-q); p.res=0;
+      dev.push({item:p.item,nome:p.nome,un:p.un,qtd:q,orig:(p.rsv||[]).map(x=>x.rec).join(', ')}); });
+    const de=o.etapa; o.etapa='Canceladas'; o.canc={por,em:c.hoje,motivo:String(motivo).trim(),de,dev}; const volta=manVolta(c,o); manToca(o);
+    return {msg:id+' cancelada por '+por+' · motivo: '+String(motivo).trim()+(dev.length?' · reserva devolvida ao estoque livre: '+dev.map(x=>x.nome+' '+manN(x.qtd,1)+' '+x.un+(x.orig?' (recebimento '+x.orig+')':'')).join(', '):' · nada estava reservado')
+      +(o.sc&&!o.sc.rec?' · a '+o.sc.id+' segue em Compras; o que chegar entra no estoque livre':'')+(volta.length?' · '+volta.join(', ')+' voltou a Sem ordem':'')+'.'}; }); }
 function manIniciar(c,id,pf){ const o=c.oms[id]; if(!o||o.etapa!=='Liberadas') throw new Error(id+' não está em Liberadas.'); if(pf!==undefined) manExige(c,pf,'executar',{o});
   o.etapa='Em execução'; o.ini=c.hoje; o.iniPor=manPor(pf); manToca(o);
   return {msg:id+' Em execução · responda as tarefas e informe a leitura do contador para concluir.'}; }
@@ -668,7 +724,7 @@ function manMotCond(a){ const ms=manMots(a); if(!ms.length) return 'Apto'; retur
 /* novo motivo: o bloqueio passa à frente de uma restrição; num ativo já bloqueado, acrescenta (o principal segue o primeiro) */
 function manMotAdd(a,m){ const ms=manMots(a); if(!ms.length||a.cond==='Apto'){ manMotSet(a,[m]); return; } if(a.cond==='Restrito'&&m.cond==='Bloqueado') manMotSet(a,[m].concat(ms)); else manMotSet(a,ms.concat([m])); }
 /* O.S. com o recurso do ativo alocado de hoje em diante (alocação do PCP, O.S. › Recursos): aviso, nunca promessa de impedimento (A9) */
-function manOsAloc(c,aid){ const r=MAN_AL.rec[aid]; if(!r) return []; return [...new Set(MAN_AL.aloc.filter(x=>x.r===r&&x.sit!=='manutenção'&&x.dia>=c.hoje).map(x=>x.os))]; }
+function manOsAloc(c,aid){ const r=MAN_AL.rec[aid]; if(!r) return []; return [...new Set(manAloc().filter(x=>x.r===r&&x.sit!=='manutenção'&&x.dia>=c.hoje).map(x=>x.os))]; }
 /* a OM que trata a condição (D-34): trata um motivo (o do achado; senão um sem achado e sem ordem); Teste do reparo entra sozinho se ainda não há Teste (no Restrito, Medição também vale) */
 function manTratar(c,o,ach,mot){ const a=c.ativos[o.aid]; if(!a||a.cond==='Apto') return false; const ms=manMots(a);
   const m=mot||ms.find(x=>ach&&x.achado===ach&&!manMotOm(c,x))||ms.find(x=>!x.achado&&!manMotOm(c,x)); if(!m) return false;
@@ -972,7 +1028,7 @@ function manCumprimento(c,k){ const P=manPeriodo(c,k); const os=Object.values(c.
 /* ---------- "Propor substituto" (ponte até o 1b, ESPECIFICACAO §0.1: sai com a PCMS-M09b): o ativo parado afeta O.S. na alocação;
    Otávio registra a proposta de um substituto apto da mesma classe e o PCP decide em O.S. › Recursos (simulado) ---------- */
 function manPropAfeta(c,o){ const a=c.ativos[o.aid]; const r=MAN_AL.rec[o.aid]; if(!a||!r) return []; const de=(a.condInfo&&a.condInfo.desde)||c.hoje;
-  return [...new Set(MAN_AL.aloc.filter(x=>x.r===r&&x.sit!=='manutenção'&&x.dia>=de).map(x=>x.os))]; }
+  return [...new Set(manAloc().filter(x=>x.r===r&&x.sit!=='manutenção'&&x.dia>=de).map(x=>x.os))]; }
 function manPropSub(c,o){ const a=c.ativos[o.aid]; if(!a) return null; return Object.values(c.ativos).filter(x=>x.id!==a.id&&x.classe===a.classe&&x.cond==='Apto').sort((x,y)=>x.id.localeCompare(y.id))[0]||null; }
 function manPropor(c,id,pf){ const o=c.oms[id]; if(!o) throw new Error('Ordem não encontrada.'); if(pf!==undefined) manExige(c,pf,'ponte');
   const a=c.ativos[o.aid]; if(!a||a.cond!=='Bloqueado'||!manAberta(o)) throw new Error('Só para ativo bloqueado com ordem aberta.');
@@ -1041,7 +1097,7 @@ function manAppConfDescartar(c,id,motivo,pf){ manExige(c,pf,'decidir'); const x=
   if(manVazio(motivo)) throw new Error('Informe o motivo para descartar.'); x.estado='Descartado'; x.dec={por:manPor(pf),em:c.hoje,motivo:String(motivo).trim()}; manAppConfBaixa(c,x);
   return {msg:'Registro do app descartado: '+x.desc+' ('+String(motivo).trim()+') · fica no histórico da ordem.'}; }
 /* acesso para os testes de navegador (mesmo padrão do window.__cen da O.S.) */
-try { window.__man = { manPropor, manAppCmd, manAppSinal, manAppProj, manAppConfAplicar, manAppConfDescartar, manMudar, manRetirada, manIncluir, manGet, manClone, manLinhas, manVenc, manGerar, manGerarTodas, manLiberar, manConcluir, manReset, manLeitura, manLeituraOk, manLeituraDescartar, manSolicitar, manReceber, manPlaus, manNum,
+try { window.__man = { manPropor, manAppCmd, manAppSinal, manAppProj, manAppConfAplicar, manAppConfDescartar, manMudar, manRetirada, manIncluir, manGet, manClone, manLinhas, manSemOrdem, manVenc, manGerar, manGerarTodas, manLiberar, manConcluir, manReset, manLeitura, manLeituraOk, manLeituraDescartar, manSolicitar, manReceber, manCancelar, manFalta, manPlaus, manNum,
   manConflito, manProxLivre, manMover, manPode, manAchOpcoes, manCusto, manCustoFinal, manTesteValido, manFaltaEncerrar, manFaltaConcluir, manMarcoSug,
   manTentativa, manDeclararApto, manAchRegistrar, manAchCorretiva, manAbastecer, manCondicao, manMots, manAptoRot }; } catch (e) {}
 '''

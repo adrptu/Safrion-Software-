@@ -32,7 +32,7 @@ try:
     # 3 · Mapa na abertura: nenhuma decisão pendente; OS-0418 e OS-0430 a liberar pelo agrônomo; o T4 só com a máquina
     ir('IN-04.dc.html',900); lb=J("(()=>{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('T4:')); return e?e.getAttribute('aria-label'):'';})()")
     nm=(J("(document.querySelector('[role=group][aria-label^=\"Indicadores de\"]')||{innerText:''}).innerText") or '').replace('\n',' ')
-    chk('3 Mapa: sem "Decisões pendentes", "A liberar (agrônomo) 2", cabeçalho sem "decis" e T4 "OS-0420 impedida"', 'Decisões pendentes' not in nm and 'A liberar (agrônomo) 2' in nm and 'decis' not in head() and lb=='T4: OS-0420 impedida', [nm,head(),lb])
+    chk('3 Mapa: sem "Decisões pendentes", "A liberar 2", cabeçalho sem "decis" e T4 "OS-0420 impedida"', 'Decisões pendentes' not in nm and 'A liberar 2' in nm and 'decis' not in head() and lb=='T4: OS-0420 impedida', [nm,head(),lb])
     # 4-5 · devolução de sobras vai ao Estoque do menu (nunca ao módulo oculto SU-07)
     ir('IN-01.dc.html'); a1=J("[...document.querySelectorAll('a')].filter(a=>a.innerText.trim()==='Receber devolução').map(a=>a.getAttribute('href'))")
     chk('4 Meu dia: "Receber devolução" → EST.dc.html', a1==['EST.dc.html'] and J("document.querySelectorAll('a[href=\"SU-07.dc.html\"]').length")==0, a1)

@@ -1,0 +1,122 @@
+{
+ "colh_pivo19": {
+  "tha": [
+   "PRODUTIVIDADE\n0,48 t/ha parcial",
+   "36,42 t\n0,73 t/ha parcial",
+   "Produtividade\n0,48 t/ha parcial"
+  ],
+  "area": [
+   "Área colhida\n75,11 ha (área do cultivo, desde o 1º passe)"
+  ],
+  "passe": [
+   "OS-0505\nS39\nEm execução\n50 ha\n36,42 t\n0,73 t/ha parcial"
+  ]
+ },
+ "os0420_painel": {
+  "insumos": [
+   "Semente de soja 58 W\nSementes\n52 kg/ha",
+   "MAP 11-52\nFertilizantes\n250 kg/ha"
+  ],
+  "quem": [
+   "Quem resolve: O Trator 02 assume a partir de 24/09."
+  ]
+ },
+ "os0420_completa": {
+  "url": "http://127.0.0.1:38511/CA-01x-os0420.dc.html",
+  "kcl": [
+   "KCl 60 %\n120 kg/ha · zonas 140 / 120 / 95\n12.000 kg\n−12 % · 105,6 kg/ha"
+  ],
+  "map": false,
+  "subst": [
+   "Substituto proposto: Trator 02 · MF 7719, apto e livre a partir de 24/09 06:00 — elegível só após confirmação do PCP."
+  ]
+ },
+ "os0418_painel": {
+  "maquina": [
+   "Máquina · Pivô 1"
+  ],
+  "atividade": [
+   "ATIVIDADE\nFertirrigação · Fertirrigação de nitrogênio · Sistema de gotejo T7 · 1 irrigante"
+  ]
+ },
+ "su05_contrato": [
+  [
+   "Contraparte *",
+   "Fertisul"
+  ],
+  [
+   "Itens *",
+   "MAP 11-52, NPK 20-05-20 e nitratos (SOL-"
+  ],
+  [
+   "Volume líquido preliminar *",
+   "78,85"
+  ],
+  [
+   "Tolerância inferior/superior *",
+   "−5% / +5%"
+  ],
+  [
+   "Condição de pagamento *",
+   "28 dias"
+  ],
+  [
+   "Fim da vigência *",
+   "2027-01-31"
+  ]
+ ],
+ "su04_fertisul": [
+  "SOL-2026-07 · Fertilizantes\nPlanejar safra · demanda de insumos\n5 itens\nMAP 11-52, Nitrato de cálcio…\n3 homologados\n3/3\nR$ 360.905\n"
+ ],
+ "cmp_fert": {
+  "itens": [
+   [
+    "KCl 60%",
+    "0"
+   ],
+   [
+    "MAP 11-52",
+    "79.500"
+   ],
+   [
+    "Nitrato de cálcio",
+    "680"
+   ],
+   [
+    "Nitrato de potássio",
+    "870"
+   ],
+   [
+    "NPK 20-05-20",
+    "14.800"
+   ],
+   [
+    "Ureia 45%",
+    "1.140"
+   ]
+  ],
+  "soma_kg": 96990
+ },
+ "cd06_inseticida_b": [
+  "Inseticida B\nL\nR$ 95,00/L"
+ ],
+ "vis013_inseticida_b": {
+  "opcao": [
+   "Inseticida B\nIRAC 1B · 1,0 kg/ha · carência 14 dias · máx. 2 por ciclo"
+  ],
+  "dose": [
+   "Dose (kg/ha)"
+  ],
+  "estoque": [
+   "Estoque: 60 de 95 kg · a liberação na O.S. aguarda a compra."
+  ]
+ },
+ "vis013_verdes": [
+  "Controlar o talhão",
+  "Emitir receituário e gerar O.S."
+ ],
+ "pl02_status": [
+  "v4 em rascunho · 1 pendência vencida"
+ ],
+ "pl02det_aviso": "Ajuste do T1-A publicado na v4 · Cletodim 240 a 0,36 L/ha só neste talhão · padrão 0,45 L/ha intacto · dessecação de manejo de 05/09 preservada · a OS-0430 já emitida (A liberar) só muda se o agrônomo ajustar ao liberar. | Tela: Plano do talhão T1-A · gatilhos · Ajuste local em revisão"
+}

@@ -74,7 +74,8 @@ try:
          'ajuste aprovado pelo gestor: G26-14 900 → 870 L, um movimento de ajuste, sem botão para aprovar de novo')
     # 11 · movimentos: trilha da reserva ao ajuste, com origem web/app
     E.etapa(6); m = E.main(); print('k6:', E.k())
-    tipos = E.J("[...document.querySelectorAll('[role=row].g2ed')].map(r=>r.innerText.split('\\n').slice(2,3).join(''))")
+    # V2-3: a coluna Movimento lida pelo cabeçalho (a ordem segue o "Abre com")
+    tipos = E.J("(()=>{const rs=[...document.querySelectorAll('[role=row].g2ed')]; if(!rs.length) return []; const t=rs[0].closest('[role=table]'); const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\\s+/g,' ').trim().toUpperCase()); const i=hs.indexOf('MOVIMENTO'); return rs.map(r=>([...r.querySelectorAll('[role=cell]')][i]||{innerText:''}).innerText.replace(/\\s+/g,' ').trim());})()")
     print('  tipos:', tipos)
     E.ok(tipos.count('Reserva') == 3 and tipos.count('Entrega') == 3 and tipos.count('Devolução') == 2 and 'Recebimento confirmado no app' in tipos
          and 'Quarentena liberada' in tipos and 'Ajuste de inventário' in tipos and 'App' in m and 'Web' in m,
@@ -82,8 +83,8 @@ try:
     # 12 · apontamento do app sem sinal: movimento "Aguardando sinal"; o Estoque só vê consumo e baixa de custódia quando o app envia
     print('app sem sinal:', E.mudar("cenSinal(c,false); cenIniciarTurno(c,'OS-0430'); return cenFecharTurno(c,10,1.5);"))
     E.abrir(); E.etapa(6); t = E.rowtxt('Consumo apontado no app'); print(' ', t, '| k6:', E.k())
-    E.etapa(3); g = E.rowtxt(RQ, 'Glifosato 480'); print(' ', g)
-    E.ok('Aguardando sinal' in t and 'App' in t and '320 L 0 L 20 L 300 L' in g and 'Aguardando sinal do app' in g,
+    E.etapa(3); g = E.rowtxt(RQ, 'Glifosato 480'); qs = [E.cel([RQ, 'Glifosato 480'], k) for k in ('Entregue', 'Consumido', 'Devolvido', 'Em custódia')]; print(' ', g, qs)
+    E.ok('Aguardando sinal' in t and 'App' in t and qs == ['320 L', '0 L', '20 L', '300 L'] and 'Aguardando sinal do app' in g,
          'consumo do app sem sinal: movimento "Aguardando sinal"; Glifosato segue consumido 0 L e custódia 300 L até o envio', g)
     # 13 · a O.S. reflete a devolução e o consumo (pode encerrar só sem custódia)
     st = E.cen(f"[c.reqs['{RQ}'].itens.map(i=>i.consumido+'/'+i.devolvido+'/'+i.custodia).join(' '), X.cenPodeEncerrar(c,'OS-0430')]"); print('O.S.:', st)

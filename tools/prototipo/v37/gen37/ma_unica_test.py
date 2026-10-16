@@ -5,7 +5,7 @@ repetição (duplo toque = um efeito). O app (AC-PCM-27) está em ma_app_fluxo_t
 Uso (de gen37/, depois de build.py e montar_render.py): python3 ma_unica_test.py"""
 import sys, os, re, json, time, glob
 from ma_lib import MA
-from ui37 import MENU2
+from ui37 import MENU2, INICIO37
 from areas.maquinas import REDIRECIONA
 
 HERE = os.path.dirname(os.path.abspath(__file__)); PJ = os.path.join(HERE, 'project')
@@ -14,17 +14,24 @@ PRIMS_FORA = "[...document.querySelectorAll('header button,header a,main button,
 PRIMS_PAN = "[...document.querySelectorAll('#ma-painel button,#ma-painel a')].filter(e=>e.getClientRects().length&&getComputedStyle(e).backgroundColor==='rgb(30, 122, 76)').map(e=>e.innerText.replace(/\\s+/g,' ').trim())"
 CEN = "localStorage.getItem('talhao-os-cenario-v1')"
 try:
-    # ---------- AC-PCM-01 · menu com 1 item, link direto; Índice com 1 link ----------
+    # ---------- AC-PCM-01 · menu com 1 item (ícone), link direto para a tela única; o início leva à MA num toque ----------
     m.ir('vis=semordem', perfil='Otávio', limpa=True); m.sem_erro('MA')
     g = [x for x in MENU2 if x[0] == 'Manutenção'][0]
-    mn = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].filter(a=>/^Manutenção/.test(a.innerText.trim())).map(a=>a.innerText.trim()+'|'+a.getAttribute('href'))")
-    tog = J("[...document.querySelectorAll('nav[aria-label=Menu] button')].filter(b=>/^Manutenção/.test(b.innerText.trim())).length")
-    idx = open(os.path.join(PJ, 'Main.dc.html'), encoding='utf-8').read()
-    # v57 (pedido do proprietário, 13/10): o grupo Manutenção tem 4 subitens enxutos, um por visão da mesma tela MA (antes: 1 link direto)
-    VIS4 = [('Pendências sem ordem', 'MA.dc.html#vis=semordem'), ('Ordens de manutenção', 'MA.dc.html#vis=ordens'), ('Ativos e disponibilidade', 'MA.dc.html#vis=ativos'), ('Planos preventivos', 'MA.dc.html#vis=planos')]
-    lk = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>a.getAttribute('href')).filter(h=>/^MA/.test(h||''))")
-    m.ok(g[2] == VIS4 and sorted(set(lk)) == sorted(h for _, h in VIS4) and not re.search(r'(MA-0[1-5]|PM|MA-04det)\.dc\.html', idx) and 'MA.dc.html' in idx,
-         'AC-PCM-01 · menu: grupo Manutenção com os 4 subitens, todos para a tela única MA (#vis=…); nenhuma rota antiga; o Índice leva só à MA', [lk, mn, tog])
+    mn = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].filter(a=>a.getAttribute('aria-label')==='Manutenção').map(a=>[a.getAttribute('href'),a.getAttribute('title'),a.getAttribute('aria-current'),a.innerText.trim()])")
+    tog = J("[...document.querySelectorAll('nav[aria-label=Menu] button,nav[aria-label=Menu] .ml-tog')].filter(e=>e.getClientRects().length).length")
+    idx = open(os.path.join(PJ, 'Main.dc.html'), encoding='utf-8').read(); ini = open(os.path.join(PJ, INICIO37), encoding='utf-8').read()
+    # 13/10 (proprietário): barra lateral só com ícones, sem submenus nem expandir; as 4 visões ficam no seletor da própria MA (v57: 4 subitens no menu).
+    # O índice central saiu (Main.dc.html é página técnica sem menu): o caminho de entrada é o ícone Manutenção na página inicial (Mapa).
+    VIS_OK = {'', 'vis=semordem', 'vis=ordens', 'vis=ativos', 'vis=planos'}
+    # v60 (13/10/2026, proprietário: "o menu de manutenção está sem os submenus na tela igual os demais"): o ícone abre a tela de entrada da
+    # Manutenção (MOD-MAN) com os 4 atalhos, como os outros módulos; cada atalho leva à visão da MA
+    lk = J("[...document.querySelectorAll('nav[aria-label=Menu] a')].map(a=>a.getAttribute('href')).filter(h=>/^(MA|MOD-MAN)/.test(h||''))")
+    vs = J("[...document.querySelectorAll('main .ma-vis button')].map(b=>b.innerText.replace(/\\s*\\d+\\s*$/,'').trim())")
+    li = re.findall(r'<a [^>]*href="((?:MA|MOD-MAN)[^"]*)"', ini)
+    # v65 (PAINEL-01, 14/10): o Painel de Manutenção (PMAN) é o primeiro atalho; os demais são as 4 visões da MA
+    m.ok(g[2][0] == ('Painel', 'PMAN.dc.html') and all(h.split('#')[0] == 'MA.dc.html' and (h.split('#', 1) + [''])[1] in VIS_OK for _, h in g[2][1:]) and lk == ['MOD-MAN.dc.html'] and mn == [['MOD-MAN.dc.html', 'Manutenção', 'page', '']]
+         and tog == 0 and vs == ['Sem ordem', 'Ordens', 'Ativos', 'Planos'] and li == ['MOD-MAN.dc.html'] and not re.search(r'(MA-0[1-5]|PM|MA-04det)\.dc\.html', idx + ini),
+         'AC-PCM-01 · menu: um só ícone Manutenção (destacado, sem subitens nem expandir) que abre a tela de entrada com os atalhos das 4 visões; as 4 visões no seletor da MA; nenhuma rota antiga; o início (Mapa) leva à Manutenção num toque', [lk, mn, tog, vs, li])
     # ---------- AC-PCM-02 · rotas antigas (com e sem âncora) e fora do canvas ----------
     rotas = [('PM.dc.html', 'vis=planos'), ('MA-01.dc.html', 'vis=ativos'), ('MA-02.dc.html', 'vis=semordem&tipo=achados'), ('MA-03.dc.html', 'vis=semordem'),
              ('MA-04.dc.html', 'vis=ordens'), ('MA-05.dc.html', 'vis=ativos&modo=abastecimentos'), ('MA-04det.dc.html', 'om=OM-0233'),
@@ -78,13 +85,13 @@ try:
     m.ir('vis=semordem'); m.clk('Gerar 3 ordens preventivas')
     nova = m.man("['OM-0235','OM-0236','OM-0237'].every(id=>m.oms[id]&&m.oms[id].chk.every(t=>!t.r&&!(t.tent||[]).length))")
     m.ok(not fixos and nova, 'AC-PCM-18/10 · sem selos fixos nem "Marcar pendentes"; as preventivas geradas nascem sem resposta', fixos)
-    # ---------- AC-PCM-17 · cartões ≤ 4, calculados, filtram ----------
+    # ---------- AC-PCM-17 · MAN-LIMPA-01 (proprietário, 14/10: "elimine os cards de manutenção"): nenhuma visão tem cartão; os indicadores ficam
+    # no Painel; o que o cartão "Aptos agora" filtrava continua no filtro de condição da grade de Ativos ----------
     cartoes = {}
-    for v in ('semordem', 'ordens', 'ativos'):
-        m.ir('vis=' + v); cartoes[v] = J("[...document.querySelectorAll('main .ma-card,main button.ma-card')].filter(e=>e.getClientRects().length).length")
-    m.ir('vis=ativos'); apt = J("(()=>{const b=[...document.querySelectorAll('main button')].find(b=>/APTOS AGORA/i.test(b.innerText)); return b?b.innerText.replace(/\\s+/g,' '):'';})()")
-    n0 = len(m.linhas(0)); m.clk('APTOS AGORA'); n1 = len(m.linhas(0))
-    m.ok(all(0 < x <= 4 for x in cartoes.values()) and 'APTOS AGORA' in apt.upper() and 0 < n1 < n0, 'AC-PCM-17 · até 4 cartões por visão; "Aptos agora" (não disponibilidade) e tocar filtra', [cartoes, apt, n0, n1])
+    for v in ('semordem', 'ordens', 'ativos', 'planos'):
+        m.ir('vis=' + v); cartoes[v] = J("[...document.querySelectorAll('main .ma-card,main button.ma-card,main .ma-cards')].filter(e=>e.getClientRects().length).length")
+    m.ir('vis=ativos'); n0 = len(m.linhas(0)); m.clk('Bloqueado 1'); n1 = len(m.linhas(0))
+    m.ok(all(x == 0 for x in cartoes.values()) and 0 < n1 < n0, 'AC-PCM-17 · nenhum cartão nas visões; o filtro de condição dos Ativos mostra os não aptos', [cartoes, n0, n1])
     # ---------- AC-PCM-19 · Ver como: abertura, matriz, pontes do Otávio, estado não muda ----------
     ab = {}
     for k in ('Otávio', 'Zé', 'Ana'):
@@ -112,6 +119,7 @@ try:
         ct = J("(()=>{const i=document.querySelector('aside[role=dialog] [id$=\"_cond_t\"]'); return i?i.value:'';})()") or ''
         x2 = 'Bloqueado' if ct.startswith('Bloqueado') else ('Apto' if ct.startswith('Apto') else '?' + ct)
         m.ir('', pagina='OS.dc.html'); o = J("document.body.innerText") or ''
+        o += ' ' + (J("[...document.querySelectorAll('[data-dica]')].map(e=>e.getAttribute('data-dica')).join(' | ')") or '')   # TEXTO-2 (v66): o motivo do selo vive na dica
         oc = J("(()=>{ try{ const c=window.__cen.cenGet(); const a=c.man.ativos.a01; return a?a.cond:''; }catch(e){ return ''; } })()") or ''
         x3 = 'Bloqueado' if ('Trator T1 bloqueado' in o and oc == 'Bloqueado') else ('Apto' if ('Trator T1 bloqueado' not in o and oc == 'Apto' and 'OS-0431' in o) else '?')
         return [x1, x2, x3]

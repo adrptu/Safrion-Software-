@@ -52,6 +52,8 @@ def mi(mil): return 'R$ '+nf(mil/1000,2)+' mi'
 
 # ---------- vocabulário visual local (igual ao dos módulos adaptados) ----------
 def bloco(titulo,desc,corpo,acao='',tone=None):
+    acao=E.recolhe_acoes(titulo,acao)   # MAIS-01 (15/10/2026): uma secundária à vista, as outras no "⋯ Mais ações" do bloco
+    desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     dot={'yellow':YEL,'red':RED,'gray':'#9AA59E'}.get(tone,ACC)
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; box-shadow: {SH}; display: flex; flex-direction: column; min-width: 0;">'
             f'<div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px 10px; flex-wrap: wrap;">'
@@ -82,9 +84,10 @@ def ibtn(text,hole,ic,title=None,primary=False,small=True):
 def nota(html_):
     return f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.55;">{html_}</div>'
 def kv(pares):
+    # SEP-20261015 (e): pares rótulo → valor separados pelo espaço, sem linha entre eles
     return ('<div style="display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 0; font-size: 13px;">'
-            + ''.join(f'<div style="padding: 7px 4px; border-top: 1px solid {LINE}; color: {MUTED}; font-weight: 600;">{esc(k)}</div>'
-                      f'<div style="padding: 7px 4px; border-top: 1px solid {LINE};">{v}</div>' for k,v in pares) + '</div>')
+            + ''.join(f'<div style="padding: 5px 4px; color: {MUTED}; font-weight: 600;">{esc(k)}</div>'
+                      f'<div style="padding: 5px 4px;">{v}</div>' for k,v in pares) + '</div>')
 def R(rid,v=None,p=None,s=None,ro=False,o=None,kids=None):
     """linha G2: v = dados, p = exibição rica, s = texto p/ busca/filtro (preenchido a partir de p quando faltar)."""
     v=dict(v or {}); p=dict(p or {}); s=dict(s or {})
@@ -203,15 +206,16 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_ver'||!r) r
       + bloco('Cronograma de caixa por versão','Confira o desembolso trimestral de cada versão; o total fecha com o custo total da versão.',g_cx)
       + bloco('Publicação','Submeta a revisão à Direção e publique a previsão para planejamento, programação e compras.',
           '<div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">'
-          + imsg('Submeter orçamento revisado','Submetido à Direção · +R$ 180 mil em defensivos · aparece em Aprovações para decisão.','doc','Enviar a revisão para a Direção decidir')
-          + imsg('Publicar previsão V2','Previsão V2 publicada para planejamento, programação e compras · consumidores passam a ler a nova versão; histórico mantém as anteriores.','check','Publicar a V2 aos consumidores')
-          + imsg('Autorizar versão','Bloqueado · só a alçada Direção autoriza a versão — a submissão já está na caixa de Aprovações.','users','Autorizar a versão (alçada da Direção)')
-          + f'<span style="font-size: 12.5px; color: {MUTED};">Autorizar versão: só a Direção, pela caixa de Aprovações.</span></div>',tone='gray'))
+          + E.recolhe_acoes('Publicação',[imsg('Submeter orçamento revisado','Submetido à Direção · +R$ 180 mil em defensivos · aparece em Aprovações para decisão.','doc','Enviar a revisão para a Direção decidir')
+          ,imsg('Publicar previsão V2','Previsão V2 publicada para planejamento, programação e compras · consumidores passam a ler a nova versão; histórico mantém as anteriores.','check','Publicar a V2 aos consumidores')
+          ,imsg('Autorizar versão','Bloqueado · só a alçada Direção autoriza a versão — a submissão já está na caixa de Aprovações.','users','Autorizar a versão (alçada da Direção)')])
+          + '</div>',tone='gray'))
     shell37('GE-02','Orçamento e previsões',corpo,
       subtitle='Orçado original, revisado e realizado em quantidade, preço e custo — total, por ha e por unidade, com ponte de variações que concilia ao total.',
       status=('V2 publicada · 1 cenário em rascunho','green'),
       primary='Comparar base × previsão × real',primary_href='GE-02det.dc.html',
-      footer='Base V1 aprovada permanece imutável; revisão gera versão nova com aprovador e vigência (cap. 51).')
+      footer='Base V1 aprovada permanece imutável; revisão gera versão nova com aprovador e vigência (cap. 51). '
+             'Autorizar versão: só a Direção, pela caixa de Aprovações.')
 
     # ---- GE-02det · V1 × V2 × real com decomposição (DEMO-12) ----
     fname='GE-02det.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1000; PARENT37[fname]='GE-02.dc.html'
@@ -234,8 +238,7 @@ function EXTRAVALS(self,v){ self.g2after=(gid,rows,r)=>{ if(gid!=='g_ver'||!r) r
                              ('+ CONSUMO','+R$ 480','2,2 L/ha vs. 2,0 L/ha','#8A5A00','#FFF7E0'),('+ PREÇO','+R$ 528','R$ 22/L vs. R$ 20/L','#8A5A00','#FFF7E0'),
                              ('= REAL','R$ 5.808','264 L · dif. total +R$ 1.808',RED,'#FDECEE')])
       +'</div>'
-      + nota(f'Orçamento flexível para os 120 ha·op ao padrão original = <b style="color:{INK};">R$ 4.800</b>; desvio contra essa base = <b style="color:{INK};">R$ 1.008</b>. '
-             f'A matemática explica o desvio, <b style="color:{INK};">mas não prova desperdício</b>: pode ser ajuste técnico autorizado, condição operacional ou erro de registro a investigar.'))
+      + nota(f'Orçamento flexível para os 120 ha·op ao padrão original = <b style="color:{INK};">R$ 4.800</b>; desvio contra essa base = <b style="color:{INK};">R$ 1.008</b>.'))
     prop=idrawer('Propor novo parâmetro de consumo',dict(title='Proposta de parâmetro',sub='mostra a diferença e vale só para novas versões',
             fields=[('Plano','Fungicida · Feijão'),('Consumo (L/ha)','2,2 (antes 2,0)'),('Vigência','a partir da próxima aplicação'),('Justificativa','calda ajustada por pressão de mancha-angular')],
             confirm='Enviar para revisão agronômica',done='Proposta enviada · revisão agronômica decide'),'leaf','Propor consumo de 2,2 L/ha para as próximas versões (revisão agronômica decide)')
@@ -259,7 +262,8 @@ function EXTRAVALS(self,v){ const on=!!((self.state.added||{})[DID]); v.pp_on=on
       subtitle='Decomposição do desvio em quantidade, consumo e preço — base aprovada preservada.',
       status=('Desvio de +R$ 1.808 na operação','yellow'),
       primary='Criar ação do desvio',primary_href='GE-07.dc.html',
-      footer='Base preservada: proposta de parâmetro tem vigência futura e passa por revisão; nada recalcula versões aprovadas (cap. 51).')
+      footer='Base preservada: proposta de parâmetro tem vigência futura e passa por revisão; nada recalcula versões aprovadas (cap. 51). '
+             'A matemática explica o desvio, mas não prova desperdício: pode ser ajuste técnico autorizado, condição operacional ou erro de registro a investigar.')
 
 # =====================================================================================
 # GE-03 · Custos e fechamento
@@ -376,14 +380,14 @@ function EXTRAVALS(self,v){
                  ('AGUARDANDO BANCO','R$ 62 mil','1 remessa'),('SALDO PROJETADO 30 D','R$ 1,31 mi','cenário V2')])
         + bloco('Títulos a pagar','Confira cada título até a origem; clique num título em aberto para programar data e conta de saída.',g_tit,
                 acao=ibtn('Importar retorno do banco','retorno','doc','Importar o retorno bancário e conciliar as liquidações'))
-        + nota(f'Fonte oficial: ERP designado — aqui se propõe, aprova e concilia; a liquidação vem confirmada do banco. '
-               f'{PC88["id"]}: título único de {rs(PC88_VAL)}, sem barter — a mesma obrigação nunca conta duas vezes. '
-               f'Antecipação da Cooperativa Central (CT-77) criou <b style="color:{INK};">crédito vinculado</b> abatido nas retiradas — o sistema não finge recebimento de venda futura.'))
+        + nota(f'{PC88["id"]}: título único de {rs(PC88_VAL)}, sem barter. '
+               f'Antecipação da Cooperativa Central (CT-77) criou <b style="color:{INK};">crédito vinculado</b> abatido nas retiradas.'))
     shell37('GE-04','Contas a pagar e caixa',corpo,
       subtitle='Títulos e previsões com vencimento, parcelas, origem e antecipações — saldo de caixa por cenário do orçamento.',
       status=('R$ 158 mil vencem hoje · 1 aguarda alçada','yellow'),
       primary_html=ibtn('Enviar remessa ao banco','remessa','cash','Enviar ao banco os títulos aprovados na alçada',primary=True,small=False),
-      footer='Todo título rastreia à origem (pedido, O.S., contrato); conciliação bancária fecha o ciclo antes de qualquer “pago”.')
+      footer='Todo título rastreia à origem (pedido, O.S., contrato); conciliação bancária fecha o ciclo antes de qualquer “pago”. '
+             'Fonte oficial: ERP designado; aqui se propõe, aprova e concilia, e a liquidação vem confirmada do banco. A mesma obrigação nunca conta duas vezes; o sistema não finge recebimento de venda futura.')
 
 # =====================================================================================
 # GE-05 · Contas a receber (DEMO-08: RC-12 · PV-027)
@@ -496,9 +500,9 @@ def _ge06():
 
     # ---- GE-06det · indicador → causas → documentos → O.S. ----
     fname='GE-06det.dc.html'; E._reset_screen(fname); HEIGHTS37[fname]=1080; PARENT37[fname]='GE-06.dc.html'
-    ficha=kv([('Fórmula','custo total da operação ÷ ha efetivamente tratados (apontados)'),
-              ('Unidade · denominador','R$/ha · 120 ha·operação (95 ha do P1 + 25 ha reaplicados)'),
-              ('Período',f'set/2026 · {OS_ORC} (encerrada)'),('Fonte','lançamentos de custo documento a documento + apontamentos da O.S.'),
+    # 14/10/2026 (proprietário: "reduza ou elimine ... os demais soltos pela tela"): fórmula e fonte (método) foram para a dica ⓘ da tela
+    ficha=kv([('Unidade · denominador','R$/ha · 120 ha·operação (95 ha do P1 + 25 ha reaplicados)'),
+              ('Período',f'set/2026 · {OS_ORC} (encerrada)'),
               ('Cobertura','100% dos apontamentos sincronizados · 0 conflitos'),('Meta · responsável','R$ 40,00/ha (base V1 aprovada) · Ana (gestora)')])
     g_cau=grid([C('causa','Causa',w=220),C('ef','Efeito',a='r'),C('ev','Evidência'),C('hip','Hipótese a validar',w=300)],
         [R('c1',v=dict(causa='Área tratada acima do plano',ef='+R$ 800',ev='120 vs. 100 ha·op'),p=dict(hip=[ch('reaplicação de 25 ha após chuva — checar','yellow')]),o=[('R$ 20/L × 2 L/ha × 20 ha·op = R$ 800','CA-02.dc.html')]),
@@ -519,7 +523,8 @@ def _ge06():
       subtitle='Indicador abre causas e documentos de origem — o gestor chega à O.S. em dois cliques.',
       status=('21% acima da meta','red'),
       primary='Abrir plano de ação',primary_href='GE-07.dc.html',
-      footer='O índice explica o desvio; a decisão (ação, parâmetro ou nada) é humana e fica registrada em Planos de ação.')
+      footer='O índice explica o desvio; a decisão (ação, parâmetro ou nada) é humana e fica registrada em Planos de ação. '
+             'Fórmula: custo total da operação ÷ ha efetivamente tratados (apontados). Fonte: lançamentos de custo documento a documento + apontamentos da O.S.')
 
 # =====================================================================================
 # GE-07 · Planos de ação
@@ -614,6 +619,9 @@ def _ge08():
     EXTRAJS[0]=JS_BASE+'''
 const DDID='''+json.dumps(DDID)+''', LIB='''+json.dumps(c['liberado'])+''', VAL='''+json.dumps(c['valor'])+r''';
 function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
+  const hv=(String(location.hash).match(/vis=([a-z]+)/)||[])[1]||'', VIS=['contratos','liberacoes','dossie'], vis=VIS.indexOf(hv)>=0?hv:'';
+  VIS.forEach(k=>{ v['cv_'+k]=!vis||vis===k; });
+  if(!self.__creHash){ self.__creHash=true; addEventListener('hashchange',()=>self.setState({}),false); }
   v.cre_hint=sent?('liberado '+LIB+' de '+VAL+' · certidão em conferência pelo credor (responsável: Banco Terra) — a 2ª parcela libera quando o Banco Terra aceitar o documento')
                  :('liberado '+LIB+' de '+VAL+' · próximas parcelas só liberam com a certidão do imóvel atualizada — anexe o documento para destravar');
   v.lib2=()=>self.setState({g2toast:sent?('Bloqueado · certidão em conferência pelo credor (responsável: Banco Terra) — a 2ª parcela aguarda a conferência do credor; liberado até agora '+LIB+' de '+VAL+'.')
@@ -624,22 +632,26 @@ function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
     self.setState({aut:true,g2toast:'Autorizado pela Direção · Banco Terra acessa “Compromissos e garantias” até 31/12/2026, só para análise do '+'''+json.dumps(c['id'])+r'''+'.'}); };
   self.g2after=(gid,rows,r)=>{ if(!r) return; if(gid==='g_dos'){ undate(r,['prz']); self.setState({g2toast:'Acesso do bloco '+r.v.blk+' atualizado · novo consentimento registrado; o credor vê após confirmar.'}); }
     if(gid==='g_cre'){ self.setState({g2toast:'Rascunho '+r.id+' salvo · nada é enviado ao credor sem convite confirmado.'}); } }; }'''
+    # 14/10/2026 (proprietário: "coloque os submenus de crédito como os demais"): a tela de entrada do Crédito abre uma visão por cartão
+    # (GE-08.dc.html#vis=contratos|liberacoes|dossie), como a Manutenção; os indicadores ficam em todas; sem visão no endereço, tudo
+    CV=lambda k: f'<sc-if value="{H("cv_"+k)}" hint-placeholder-val="{H("true")}">'
     acomp=(stepper([('Solicitação','done'),('Dossiê','done'),('Propostas','done'),('Aprovação do credor','done'),('Condição documental','now'),('Liberações','todo'),('Serviço da dívida','todo')],'')
            + f'<div role="status" style="font-size: 13.5px; color: {MUTED};">{H("cre_hint")}</div>'
            + nota(f'Garantias sob controle: penhor de 30% da soja ({nf(penhor)} sc) + CPR de {nf(cpr)} sc (barter CRE-0095) = '
-                  f'<b style="color:{INK};">{nf(comp,0)}% da soja prevista (V2 · {nf(SOJA_V2_SC)} sc) comprometida</b> — o mesmo saco nunca garante dois contratos.'))
+                  f'<b style="color:{INK};">{nf(comp,0)}% da soja prevista (V2 · {nf(SOJA_V2_SC)} sc) comprometida</b>.'))
     corpo=(kpis([('DÍVIDA ATIVA · 3 CONTRATOS','R$ 1,90 mi',''),('SERVIÇO DA DÍVIDA 26/27','R$ 610 mil','pico jul/27'),
                  ('CAPACIDADE LIVRE NO PERÍODO','R$ 480 mil',''),('A LIBERAR · '+c['id'],'R$ 550 mil','condicionado')])
-        + bloco('Solicitações e contratos','Compare propostas e acompanhe cada contrato; clique numa solicitação em rascunho para prepará-la.',g_cre,
+        + CV('contratos') + bloco('Solicitações e contratos','Compare propostas e acompanhe cada contrato; clique numa solicitação em rascunho para prepará-la.',g_cre,
                 acao=imsg('Comparar propostas',f'Comparadas 2 propostas do {c["id"]} por CET/CETCR e valor presente com premissas declaradas · Banco Terra 14,2% a.a. vs. Coop Crédito 13,8% a.a. + tarifa.','scale','Comparar propostas por CET/CETCR e valor presente'))
-        + bloco(f'Acompanhamento do {c["id"]}','Cumpra a condição documental para liberar as próximas parcelas; o pedido não aparece pago nem liberado antes do fato financeiro.',acomp,
+        + '</sc-if>' + CV('liberacoes') + bloco(f'Acompanhamento do {c["id"]}','Cumpra a condição documental para liberar as próximas parcelas; o pedido não aparece pago nem liberado antes do fato financeiro.',acomp,
                 acao=doc+ibtn('Registrar liberação da 2ª parcela','lib2','cash','Registrar a 2ª liberação (exige a condição documental aceita)'),tone='yellow')
-        + bloco('Dossiê e consentimento','Autorize cada bloco com finalidade e prazo; clique num bloco para ajustar quem acessa.',g_dos,tone='gray'))
+        + '</sc-if>' + CV('dossie') + bloco('Dossiê e consentimento','Autorize cada bloco com finalidade e prazo; clique num bloco para ajustar quem acessa.',g_dos,tone='gray') + '</sc-if>')
     shell37('GE-08','Crédito e garantias',corpo,
       subtitle='Solicitações, dossiês autorizados, propostas, decisões, contratos, liberações e serviço da dívida.',
       status=(f'{c["id"]} · condição documental pendente','yellow'),
       primary='Solicitar proposta a credores',primary_href='PT-04.dc.html',
-      footer='Capacidade usa caixa disponível ao serviço da dívida por período; CET/CETCR sempre com método e premissas declarados.')
+      footer='Capacidade usa caixa disponível ao serviço da dívida por período; CET/CETCR sempre com método e premissas declarados. '
+             'O mesmo saco nunca garante dois contratos.')
 
 def build():
     _ge01(); _ge02(); _ge03(); _ge04(); _ge05(); _ge06(); _ge07(); _ge08()

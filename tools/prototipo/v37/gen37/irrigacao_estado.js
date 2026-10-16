@@ -122,6 +122,25 @@ function irrNec(s, sid) {
   const br = d / (x.efic / 100); const np = Math.max(1, Math.ceil(br / x.lmax - 1e-9)); const por = br / np;
   return { liq: d, br, np, por, vol: br * x.ha * 10, dur: irrDur(x, por) };
 }
+// percentímetro (15/10/2026, proprietário: "lâmina recomendada e % velocidade do pivô, baseado na ficha do pivô e da necessidade da cultura"):
+// a lâmina é a de irrNec (déficit pela ETc da cultura, chuva e irrigação; bruta = líquida ÷ eficiência; passadas até o limite do setor); a ficha
+// do pivô dá a velocidade: lâmina = lâmina a 100 % × 100 ÷ percentímetro → percentímetro = ⌊lâmina a 100 % × 100 ÷ lâmina da passada⌋ (para
+// baixo: aplica pelo menos a lâmina; para cima se passaria do limite por passada), entre o menor da tabela da ficha e 100 %; se nem o menor
+// percentímetro dá a lâmina da passada, mais uma passada. Ficha: a registrada (fpvFicha do equipamento) ou a demonstrativa da semente (Lagoa
+// Grande, sintética). Sem ficha: lâmina e passadas, sem percentímetro. Gotejo: sem percentímetro (duração do turno pela vazão).
+function irrPerc(s, sid) {
+  const x = s.setores[sid]; const n = x ? irrNec(s, sid) : null; if (!n) return null;
+  const out = { liq: n.liq, br: n.br, np: n.np, por: n.por, dur: n.dur, pct: null, lamP: null, volta: null, ficha: null, demo: false, l100: null, v100: null };
+  if (!(n.br > 0.05) || x.tipo !== 'pivô') return out;
+  const fr = (x.eq && typeof fpvFicha === 'function') ? fpvFicha(x.eq) : null; const sd = (typeof IRR0 !== 'undefined' && IRR0.setores[sid]) ? IRR0.setores[sid].ficha : null;
+  const f = fr || sd; if (!f || !(Number(f.lamina_100_mm) > 0)) return out;
+  const l100 = Number(f.lamina_100_mm), v100 = Number(f.volta_100_h); const ps = (f.tabela || []).map(r => Number(r[0])).filter(v => v > 0);
+  const pmin = ps.length ? Math.min.apply(null, ps) : (f.pct_min || 10);
+  let np = n.np, por = n.por; const calc = () => { let p = Math.floor(l100 * 100 / por + 1e-9); if (p > 0 && l100 * 100 / p > x.lmax + 1e-9) p = Math.ceil(l100 * 100 / por - 1e-9); return p; };
+  let pct = calc(); while (pct < pmin && np < 24) { np++; por = n.br / np; pct = calc(); }
+  pct = Math.min(100, Math.max(pmin, pct));
+  return Object.assign(out, { np, por, pct, lamP: l100 * 100 / pct, volta: v100 * 100 / pct, ficha: f, demo: !fr, l100, v100 });
+}
 // déficit no fim de cada dia (7 dias fechados) com ≈ nos dias estimados
 function irrSerie(s, sid) {
   const x = s.setores[sid]; const b = x && x.bal; if (!b) return [];

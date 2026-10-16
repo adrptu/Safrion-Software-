@@ -60,7 +60,9 @@ try:
     # ---------- CO-05 · origem única ----------
     go('CO-05.dc.html'); b=BODY()
     chk('CO-05: OB-0110 com origem OC-0510 (sem OC-0507)', 'OC-0510' in b and 'OC-0507' not in b)
-    chk('CO-05: âncoras DEMO-19', all(x in b for x in ['balanço 0,0 t · sem divergência','balanço 0 · conciliado','perdas 4,1%','L27-013 bloqueado · INSP-88','Encerrada ≠ liberada','fechar processo não libera lote']))
+    # TEXTO-2 (14/10/2026): a regra "fechar processo não libera lote" saiu do corpo para a dica ⓘ da tela (data-dica do header button.g2-info); os dados seguem à vista
+    dica=J("(()=>{ const i=document.querySelector('header button.g2-info'); return i?(i.getAttribute('data-dica')||''):''; })()") or ''
+    chk('CO-05: âncoras DEMO-19', all(x in b for x in ['balanço 0,0 t · sem divergência','balanço 0 · conciliado','perdas 4,1%','L27-013 bloqueado · INSP-88','Encerrada ≠ liberada']) and 'Fechar processo não libera lote' in dica, dica[:200])
     # ---------- CO-02det · ciclo OC-0510 ----------
     go('CO-02det.dc.html')
     clk('Registrar avanço'); time.sleep(.3)
@@ -79,7 +81,9 @@ try:
     go('CO-04.dc.html'); b=BODY()
     chk('CO-04: RC-13 como retorno bloqueado e L27-020 fora de carga comum', 'RC-13' in b and 'L27-020 · soja (retorno)' in b and 'L27-020 · café' not in b)
     clk('Receber bloqueado'); t=TOAST(); chk('Receber bloqueado não aumenta vendável', 'estoque vendável não aumenta' in t, t)
-    chk('CO-04: âncoras DEMO-07', 'L38-118' in b and 'entrada NÃO equivale a liberação comercial' in b)
+    # TEXTO-2 (14/10/2026): a regra "a entrada não equivale a liberação comercial" saiu do corpo para a dica ⓘ da tela
+    dica=J("(()=>{ const i=document.querySelector('header button.g2-info'); return i?(i.getAttribute('data-dica')||''):''; })()") or ''
+    chk('CO-04: âncoras DEMO-07', 'L38-118' in b and 'entrada não equivale a liberação comercial' in dica.lower(), dica[:200])
     # ---------- CO-06 · retorno L26-118 ----------
     go('CO-06.dc.html'); b=BODY()
     chk('CO-06: inspeção do L26-118 (RC-12)', 'L26-118 · retorno RC-12' in b and '1 lote bloqueado · decisão até 25/09' in b)

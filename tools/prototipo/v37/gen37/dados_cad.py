@@ -50,6 +50,9 @@ CULTURA_UN={
  'Arroz RS':dict(un='sc',massa='50',prtv='sc/ha',base='comercial',grao=True,u='13',imp='0',prod='Arroz em casca RS'),
  'Arroz SC':dict(un='sc',massa='50',prtv='sc/ha',base='comercial',grao=True,u='13',imp='0',prod='Arroz em casca SC'),
  'Cana-de-açúcar':dict(un='t',massa='1000',prtv='t/ha',base='massa',prod='Cana-de-açúcar'),
+ # UNID-PROD D-U07: algodão em caroço e em pluma (@ de 15 kg, UNIDADES-DE-MERCADO), produtos diferentes que nunca se somam (R-U08); sem fazenda
+ 'Algodão em caroço':dict(un='@',massa='15',prtv='@/ha',base='massa',prod='Algodão em caroço'),
+ 'Algodão em pluma':dict(un='@',massa='15',prtv='@/ha',base='massa',prod='Algodão em pluma'),
 }
 # processo = etapa de custo (dimensão Processo do CD-07); cada operação aponta o seu
 PROCESSOS=[('IMPL','Implantação'),('TRAT','Tratos culturais'),('COLH','Colheita'),('POSC','Pós-colheita')]

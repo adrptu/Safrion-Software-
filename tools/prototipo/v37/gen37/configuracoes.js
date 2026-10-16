@@ -69,7 +69,7 @@ function confPapeis(c, pid, papeis, chave, ator) { const K = confGarante(c); con
   /* revisão CONF 10/10 (extensão da CONF-D34): ninguém retira todos os próprios papéis; o Ver como passaria em silêncio a outra pessoa (R2) e o
      próximo ato sairia em nome e com o poder dela. Retirar parte dos próprios papéis segue valendo (R3) */
   const k0 = (typeof ator === 'string') ? ator : (ator && ator.k);
-  if (!novo.length && k0 && k0 === p.k) throw new Error('Ninguém retira todos os próprios papéis: sem papel, o Ver como passaria a outra pessoa e o próximo ato sairia em nome dela. Peça a outra pessoa com o papel de gestor. Nada foi alterado.');
+  if (!novo.length && k0 && k0 === p.k) throw new Error('Ninguém retira todos os próprios papéis: sem papel, o perfil de demonstração passaria a outra pessoa e o próximo ato sairia em nome dela. Peça a outra pessoa com o papel de gestor. Nada foi alterado.');
   const antes = confSemTitular(K); e.papeis = novo; const sem = confSemTitular(K).filter(x => antes.indexOf(x) < 0);
   const mud = ganha.map(x => '+ ' + confRot(x, p)).concat(perde.map(x => '− ' + confRot(x, p))).join(' · ');
   const dec = confDecide(K, p.k); const ev = confEv(K, chave, imp, { tipo: 'papel', quem, alvo: p.k, t: 'Papéis de ' + p.k + ': ' + mud,
@@ -104,7 +104,7 @@ function confAcesso(c, pid, ativar, chave, ator) { const K = confGarante(c); con
   const sem = confSemTitular(K).filter(x => antes.indexOf(x) < 0);
   const ev = confEv(K, chave, imp, { tipo: 'acesso', quem, alvo: p.k, t: 'Acesso de ' + p.k + (ativar ? ' reativado' : ' desativado') + (e.papeis.length ? ' · ' + confPapT(e.papeis, p) : ''),
     ef: (ativar ? 'Desativado → Ativo desde ' : 'Ativo → Desativado em ') + confBr(CONF0.hoje) + (sem.length ? ' · sem titular: ' + sem.join(', ') : '') + nota });
-  return { msg: 'Acesso de ' + p.k + (ativar ? ' reativado' : ' desativado: some do Ver como e não decide mais; os registros antigos ficam') + ' (' + ev.id + ').' + nota + confSemT(sem), recibo: K.recibos[chave] }; }
+  return { msg: 'Acesso de ' + p.k + (ativar ? ' reativado' : ' desativado: sai dos perfis de demonstração e não decide mais; os registros antigos ficam') + ' (' + ev.id + ').' + nota + confSemT(sem), recibo: K.recibos[chave] }; }
 // ---------- alçadas (R8, R9, R10): mudança com motivo vale para comandos novos; ampliar o próprio poder espera o 2º aprovador ----------
 function confAlcT(a, nivel) { const n = g2alcN(a, nivel); return n ? g2papT(n.papeis) : ''; }
 function confAlcNova(b, cur, mud) { mud = mud || {};
@@ -292,6 +292,9 @@ function confTrilha(c, A) { const L = []; let n = 0; const op = CONF0.hoje; cons
     add({ id: m.id, d: op, at: m.at, sq: m.sq, quem: qi[0], cmd: m.tipo === 'inspecao' ? 'CMD-24' : 'Estoque', oq: MV[m.tipo], obj: m.id + (m.req ? ' · ' + m.req : '') + (m.doc ? ' · ' + m.doc : ''), h: m.tipo === 'recebimento' ? 'MB-05.dc.html' : 'EST.dc.html',
       origem: m.origem || 'web', ef: itens + (qi[1] ? ' · para ' + qi[1] : '') + (m.tipo === 'devolucao' || m.tipo === 'recebimento-nf' ? (m.apto ? ' · ao disponível' : ' · bloqueado para inspeção') : ''), src: m.id }); });
   confTrilhaProd(c, add);
+  /* CONTROLE-02 F2 (CF04, contrato do PR #58): cada recibo completo da referência técnica publicada vira uma linha, pelo adaptador do Codex
+     (PlanoReferencia.trilha: id PLANO:…, sq real, autor e data do registro); recibo incompleto o adaptador recusa e não derruba as outras linhas */
+  if (typeof CONF_PLANO_REF !== 'undefined') (c.planoReferencias || []).forEach(x => { let ls = []; try { ls = CONF_PLANO_REF.trilha((x && x.versoes) || []); } catch (e) { ls = []; } ls.forEach(r => add(r)); });
   if (A && A.orgs && A.orgs[A.demo]) { const org = A.orgs[A.demo]; const cob = (r) => add(Object.assign({ ds: CONF_DS.cob, h: 'CF-05.dc.html', cmd: 'Assinatura' }, r));
     (org.contratos || []).concat((org.desfeitos || []).map(k => Object.assign({ des: true }, k))).filter(k => k.aceite).forEach(k => {
       cob({ id: 'ACE:' + k.v + (k.des ? 'd' : ''), d: k.aceite, sq: k.sq, quem: k.por || '', oq: 'Aceitar contrato da assinatura', obj: 'Contrato v' + k.v, ef: ((assinPlano(k.plano) || {}).nome || k.plano) + ' · ' + assinHa(k.ha) + ' a partir de ' + confBr(k.desde) + (k.recibo ? ' · ' + k.recibo : ''), src: k.recibo || 'contrato v' + k.v });

@@ -1,0 +1,25 @@
+OK  cabeçalho: estado calculado "2 não alocáveis · 1 a renovar em 30 dias" e primária "Cadastrar pessoa" · Cadastros › Pessoas e equipes ‹ Cadastros Pessoas e equipes 2 não alocáveis · 1 a renovar em 30 dias 
+OK  Paula é caldeira da equipe Campo 1 (OS-0424) com NR-31 válida; "Irrigante" no lugar de "Irrigacionista" · Paula Alocável Campo 1 Preparar calda (caldeiro), Conferir CLT — R$ 32,00/h NR-31 30/04/2027
+OK  Lucas (safrista) com NR-31 vencida aparece "Não alocável em O.S." com o motivo e a vigência do contrato · Lucas Não alocável em O.S. : NR-31 vencida em 15/08/2026 Renovar NR-31 › Campo 2 Operar trator, Operar colhedora Safrista 31/07/2027 R$ 38,00/h NR-31 15/08/2026
+OK  filtros do bloco: Função Caldeiros → Paula e Nilton; com A resolver → nenhum caldeiro; Todas → 15 (Caio da CONF-D04; Otávio da manutenção; Dora do comercial; Igor e Marta do beneficiamento) · [['Paula', 'Nilton'], [], '15/15']
+OK  filtro rápido "A resolver" (no bloco) mostra quem precisa de ação (Marcos a renovar, Lucas, Beto) e "Limpar filtros" volta às 15 · [['Marcos', 'Lucas', 'Beto'], ['Marcos', 'Lucas', 'Beto'], True, '15/15']
+OK  formulário: Nome → Equipe → Habilidades → validade da habilitação exigida → vínculo e vigência → calendário → custo com encargos; sem "Função" · ['Nome', 'Equipe', 'Habilidades', 'Validade da NR-31', 'Vínculo', 'Admissão', 'Disponível até', 'Calendário de trabalho', 'Custo-hora com encargos', 'Situação']
+OK  salvar com NR-31 vencida grava (sem bloquear) e mantém "Não alocável em O.S." com aviso do efeito · ['Lucas Não alocável em O.S. : NR-31 vencida em 15/08/2026 Renovar NR-31 › Campo 2 Operar trator, Operar colhedora Safrista 31/07/2027 R$ 40,00/h NR-31 15/08/2026', 'Salvo: Lucas · não alocável em O.S. até resolver NR-31 vencida em 15/08/2026.', '']
+OK  renovar a NR-31 libera o Lucas e o estado do cabeçalho é recalculado · ['Lucas Alocável Campo 2 Operar trator, Operar colhedora Safrista 31/07/2027 R$ 40,00/h NR-31 15/08/2027', 'Cadastros › Pessoas e equipes ‹ Cadastros Pessoas e equipes 1 não alocável · 1 a renovar em 30 dias']
+OK  marcar "Irrigar" faz aparecer a validade da NR-10 exigida (Rui não exigia nenhuma) · ['Habilidades\nOperar trator\nOperar pulverizador\nOperar plantadeira\nOperar colhedora\nPreparar calda (caldeiro)\nIrrigar\nAlmoxarifado\nLiberar O.S. (agrônomo)\nConferir\nManutenção de máquinas\nTestar reparo\nAprovar O.S. de manutenção\nLiberar ativo\nAutorizar rota e liberar ordem de processo\n
+OK  calendário herdado da equipe aparece no campo Equipe; o acesso ao app é só leitura ("Sem acesso") com o link para gerenciar em Configurações · ['Equipe\nAgronomia\nCampo 1\nCampo 2\nIrrigação\nSuprimentos\nOficina\nBeneficiamento e qualidade\nComercial\nCalendário da equipe: seg–sáb · 06–15h · 9 h/dia', ' da equipe.\nCusto-hora com encargos\nR$/h\nSalário e encargos por hora trabalhada; visível só para quem tem permissão de custos.\nSituaç
+OK  a exceção de calendário fica na pessoa (painel) e salvar não envia pedido de acesso · ['escala 6×2 · 8h', 'Salvo: Beto · não alocável em O.S. até resolver NR-31 pendente.']
+OK  quem tem acesso vê "Acesso ao app: Ativo desde 28/06/2026" só em consulta, com o link para Configurações · Custo-hora com encargos
+R$/h
+Salário e encargos por hora trabalhada; visível só para quem tem permissão de custos.
+Situação
+Ativa
+Inativa
+ORIGEM
+Acesso ao app: Ativo desde 28/06/2026 · gerenciar em Configurações › Usuários e alçadas ›
+Cancelar
+Salvar
+OK  safrista sem "Disponível até" é barrado no campo · Corrija os campos destacados; o que você preencheu foi mantido. | Informe até quando o safrista fica disponível.
+OK  caldeira nova sem NR-31 grava como "Não alocável em O.S. · NR-31 pendente" e entra no filtro Caldeiros (3) · ['Rita Não alocável em O.S. : NR-31 pendente Registrar NR-31 › Campo 1 Preparar calda (caldeiro) Safrista 31/03/2027 R$ 32,00/h NR-31 pendente', '']
+OK  nenhum erro de JS na jornada
+RESULTADO: OK 15/15

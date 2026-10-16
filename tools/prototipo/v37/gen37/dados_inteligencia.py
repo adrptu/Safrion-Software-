@@ -56,5 +56,74 @@ def dados():
     return dict(safra=SAFRA, area=_d(area, '0.01'), itens=itens, cot=cot, hist=hist, forn=forn)
 
 
+# ---------------------------------------------------------------------------------------------------------------------
+# INTEL-02 · preços, tendência e melhor mês (pedido do proprietário, 13/10/2026: "inteligência de compras e vendas é mais
+# relativo aos preços, tendências, melhor mês para compra e venda"). A semente não tem histórico de preço de mercado:
+# SÉRIE SINTÉTICA de 60 meses, determinística e rotulada na tela, com o último mês igual à referência atual (vendas:
+# dados_comercial.REF; compras: preço de referência da safra). Forma: sazonalidade típica do produto ou grupo × tendência
+# anual × movimento dos últimos 4 meses × ruído de ±1%. No software real a série vem de fonte pública (CEPEA/Esalq,
+# CONAB, CEAGESP) e das compras da fazenda; nada aqui é cotação real.
+# ---------------------------------------------------------------------------------------------------------------------
+import hashlib
+from datetime import date, timedelta
+MESES = [f'{2021 + (9 + i) // 12}-{(9 + i) % 12 + 1:02d}' for i in range(60)]          # 2021-10 … 2026-09 (mês da demonstração)
+HOJE = '2026-09-26'                                                                       # CEN_DIA_OP
+# desvio sazonal por mês (jan … dez) sobre a média do ano, tendência anual e movimento recente (4 meses) — todos sintéticos
+SAZ = {
+    'Soja em grão':                   ('-0.03 -0.05 -0.07 -0.06 -0.03 0 0.02 0.04 0.05 0.06 0.05 0.02', '0.05', '0.08'),
+    'Milho em grão':                  ('0.04 0.05 0.03 0 -0.03 -0.06 -0.08 -0.06 -0.02 0.02 0.05 0.06', '0.03', '-0.08'),
+    'Mamão Formosa · fruta de campo': ('-0.08 -0.10 -0.06 -0.02 0.04 0.10 0.12 0.08 0.02 -0.03 -0.05 -0.07', '0.06', '-0.07'),
+    'Fertilizantes': ('-0.05 -0.07 -0.06 -0.03 0 0.03 0.05 0.07 0.06 0.03 -0.01 -0.04', '-0.03', '0.09'),
+    'Herbicidas':    ('-0.02 -0.04 -0.05 -0.04 -0.02 0 0.02 0.04 0.05 0.04 0.02 0', '0.02', '-0.07'),
+    'Fungicidas':    ('-0.02 -0.04 -0.05 -0.04 -0.02 0 0.02 0.04 0.05 0.04 0.02 0', '0.02', '0'),
+    'Inseticidas':   ('-0.02 -0.04 -0.05 -0.04 -0.02 0 0.02 0.04 0.05 0.04 0.02 0', '0.03', '0'),
+    'Adjuvantes':    ('-0.01 -0.02 -0.03 -0.02 -0.01 0 0.01 0.02 0.03 0.02 0.01 0', '0.02', '0'),
+    'Inoculantes':   ('-0.01 -0.02 -0.03 -0.02 -0.01 0 0.01 0.02 0.03 0.02 0.01 0', '0.02', '0'),
+    'Sementes':      ('0 -0.02 -0.04 -0.05 -0.04 -0.02 0.01 0.04 0.06 0.05 0.02 0.01', '0.04', '0'),
+}
+UN_VENDA = {'Soja em grão': 'sc', 'Milho em grão': 'sc', 'Mamão Formosa · fruta de campo': 'kg'}
+PERECIVEL = {'Mamão Formosa · fruta de campo'}   # não dá para estocar e esperar o mês bom: a sazonalidade orienta o plantio e a colheita
+PRAZO_PADRAO = 15                                 # dias de entrega quando o insumo não tem cotação (sintético)
+
+
+def _ruido(nome, mes):
+    h = int(hashlib.md5((nome + '|' + mes).encode('utf-8')).hexdigest()[:8], 16)
+    return (Decimal(h % 2001) - 1000) / Decimal(100000)                                   # −1% … +1%
+
+
+def serie(nome, perfil, ancora):
+    saz, tend, mov = perfil; sz = [Decimal(x) for x in saz.split()]; tend = Decimal(tend); mov = Decimal(mov)
+    bruto = []
+    for t, m in enumerate(MESES):
+        k = 1 + tend * Decimal(t - 59) / 12                                               # tendência anual (último mês = 1)
+        r = 1 + mov * Decimal(max(0, t - 55)) / 4                                         # movimento dos 4 últimos meses
+        bruto.append(k * (1 + sz[int(m[5:]) - 1]) * r * (1 + _ruido(nome, m)))
+    f = Decimal(str(ancora)) / bruto[-1]
+    return [dict(m=m, p=_d(b * f, '0.01')) for m, b in zip(MESES, bruto)]
+
+
+def precos():
+    import dados_comercial as DC
+    import dados2 as D2
+    dem = D2.demanda(SAFRA); base = dados()
+    vendas = []
+    for prod, r in DC.REF.items():
+        if not r: vendas.append(dict(prod=prod, un=None, fonte=None, serie=[])); continue   # sem cotação: sem série (ausente ≠ zero)
+        vendas.append(dict(prod=prod, un=UN_VENDA[prod], fonte=r['fonte'], perecivel=prod in PERECIVEL, serie=serie(prod, SAZ[prod], r['p'])))
+    compras = []
+    for i in base['itens']:
+        evs = sorted(e['dt'] for e in dem[i['nome']]['evs'] if e.get('tipo') == 'dem' and e['dt'] >= HOJE)
+        prz = min((c['prazo'] for c in base['cot'].get(i['nome'], [])), default=PRAZO_PADRAO)   # o fornecedor mais rápido
+        lim = (date.fromisoformat(evs[0]) - timedelta(days=prz)).isoformat() if evs else None   # último dia para pedir e receber a tempo
+        compras.append(dict(nome=i['nome'], grupo=i['grupo'], un=i['un'], qtd=i['qtd'], nec=evs[0] if evs else None, prazo=prz, lim=lim,
+                            serie=serie(i['nome'], SAZ[i['grupo']], i['ref'])))
+    return dict(meses=MESES, hoje=HOJE, vendas=vendas, compras=compras,
+                rotulo='série sintética de demonstração (60 meses); no software real: CEPEA/Esalq, CONAB, CEAGESP e as compras da fazenda')
+
+
 def js():
     return 'const INTC = ' + json.dumps(dados(), ensure_ascii=False) + ';\n'
+
+
+def js_precos():
+    return 'const INTP = ' + json.dumps(precos(), ensure_ascii=False) + ';\n'

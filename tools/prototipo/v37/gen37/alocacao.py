@@ -34,6 +34,63 @@ _a(['PV1'], 'OS-0418', '2026-09-24', 21.0, 24.0, 'condicional'); _a(['PV1'], 'OS
 _a(['JOA'], 'OS-0418', '2026-09-24', 21.0, 23.0, 'condicional'); _a(['JOA'], 'OS-0418', '2026-09-25', 6.0, 11.25, 'condicional')
 
 NOME = {r: n for r, t, n in RECURSOS}; TIPO = {r: t for r, t, n in RECURSOS}
+# função do recurso (14/10, troca na O.S.): só troca por outro da mesma função (trator por trator, operador por operador)
+CLASSE = {r: (n.split('·')[-1].strip() if t == 'Pessoa' else n.split(' ')[0]) for r, t, n in RECURSOS}
+# ativo da Manutenção de cada recurso (fonte da condição Bloqueado/Disponível); dados_manutencao lê daqui
+REC_DO_ATIVO = {'a01': 'T1', 'a02': 'T02', 'a03': 'T03', 'a04': 'T04', 'a08': 'COL', 'a15': 'PV1', 'a11': 'PV2', 'a05': 'PJ', 'a06': 'PL', 'a07': 'DI', 'a10': 'ES'}
+
+JS = r"""
+// ===== alocação de recursos às O.S. (alocacao.py): a semana do PCP (AL0) + as trocas gravadas no cenário (c.ordens[os].rec = {original: substituto}) =====
+// Fonte única de quem e o que está em cada O.S.: painel da O.S., Carga do PCP, conflito com a Manutenção e app de campo. Não muda c.
+// alocação vigente: a semana do PCP com as trocas de recurso da O.S. (rec). Ordem cancelada ou que saiu do estado (existia no cenário inicial)
+// deixa de ocupar o recurso (revisão Codex 6167883199: o compromisso futuro é liberado); eventos que nunca foram O.S. do cenário (irrigação,
+// OS-0419/0423) e a manutenção válida continuam. O realizado não vem daqui: fica nos apontamentos da ordem.
+function alVigente(c){ const O=(c&&c.ordens)||{}, S0=(typeof CEN0!=='undefined'&&CEN0&&CEN0.ordens)||{};
+  return AL0.aloc.filter(a=>!(O[a.os]?O[a.os].etapa==='Canceladas':!!S0[a.os])).map(a=>{ const t=O[a.os]&&O[a.os].rec&&O[a.os].rec[a.r]; return t?Object.assign({},a,{r:t,de:a.r}):a; }); }
+function alHh(x){ const h=Math.floor(x), m=Math.round((x-h)*60); return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); }
+function alDm(iso){ return String(iso).slice(8,10)+'/'+String(iso).slice(5,7); }
+function alAtivo(c,r){ const aid=AL0.ativo[r]; return (aid&&c&&c.man&&c.man.ativos&&c.man.ativos[aid])||null; }
+function alBloqueado(c,r){ const a=alAtivo(c,r); return !!a&&a.cond==='Bloqueado'; }
+// bloco de manutenção da semana vale enquanto o ativo segue bloqueado (apto na Manutenção = livre); sem ativo ligado, vale sempre
+function alManVale(c,r){ const a=alAtivo(c,r); return !a||a.cond==='Bloqueado'; }
+// choques do recurso r com os blocos (dia, início, fim) da ordem os: outra O.S. no mesmo horário ou manutenção vigente
+function alChoques(c,r,os,blocos,A){ A=A||alVigente(c); const out=[];
+  blocos.forEach(b=>A.forEach(x=>{ if(x.r===r&&x.dia===b.dia&&x.os!==os&&x.ini<b.fim&&b.ini<x.fim&&(x.sit!=='manutenção'||alManVale(c,r)))
+    out.push({dia:b.dia,ini:Math.max(x.ini,b.ini),fim:Math.min(x.fim,b.fim),com:x.os,manut:x.sit==='manutenção'}); })); return out; }
+function alChoqueTxt(x){ return (x.manut?'Em manutenção':'Conflito com '+x.com)+' em '+alDm(x.dia)+' '+alHh(x.ini)+'–'+alHh(x.fim); }
+// recursos de uma O.S. (painel): janelas, condicional e alertas; de = recurso original quando trocado
+function alDaOrdem(c,os){ const A=alVigente(c), its=A.filter(a=>a.os===os);
+  return [...new Set(its.map(a=>a.r))].map(r=>{ const ja=its.filter(a=>a.r===r);
+    return {r,de:ja[0].de||null,tipo:AL0.tipo[r],nome:AL0.nome[r],classe:AL0.classe[r],janelas:ja.map(a=>alDm(a.dia)+' '+alHh(a.ini)+'–'+alHh(a.fim)).join(' · '),
+      cond:ja.some(a=>a.sit==='condicional'),alertas:alChoques(c,r,os,ja,A).map(alChoqueTxt)}; }); }
+// substitutos de r na O.S.: mesma função, fora da ordem; ok=false com o motivo (bloqueado, em manutenção ou ocupado) e aviso de jornada
+function alCandidatos(c,os,r){ const A=alVigente(c), ja=A.filter(a=>a.os===os&&a.r===r), usados=new Set(A.filter(a=>a.os===os).map(a=>a.r));
+  return Object.keys(AL0.nome).filter(x=>x!==r&&AL0.tipo[x]===AL0.tipo[r]&&AL0.classe[x]===AL0.classe[r]&&!usados.has(x)).map(x=>{
+    const ch=alChoques(c,x,os,ja,A), bl=alBloqueado(c,x);
+    const mot=bl?'bloqueado na Manutenção':(ch.length?((ch[0].manut?'em manutenção':'ocupado na '+ch[0].com)+' em '+alDm(ch[0].dia)+' '+alHh(ch[0].ini)+'–'+alHh(ch[0].fim)):'');
+    const jor=(AL0.jorRec||{})[x]||AL0.jor; const acima=[...new Set(ja.map(b=>b.dia))].filter(d=>A.filter(y=>y.r===x&&y.dia===d&&y.sit!=='manutenção').reduce((s,y)=>s+y.fim-y.ini,0)+ja.filter(b=>b.dia===d).reduce((s,b)=>s+b.fim-b.ini,0)>jor+1e-9);
+    return {r:x,nome:AL0.nome[x],ok:!mot,motivo:mot,aviso:acima.length?'acima da jornada em '+acima.map(alDm).join(', '):''}; }); }
+// CMD · trocar recurso da O.S. (PCP ou quem libera, AL-01): só antes da execução; mesma função; recusa choque e ativo bloqueado
+// (dano evitado: a mesma máquina ou pessoa em duas ordens ao mesmo tempo, ou máquina parada mandada a campo). Origem ganha a linha.
+function alTrocar(c,os,de,para,pf){ const co=c&&c.ordens&&c.ordens[os]; if(!co) throw new Error('Ordem '+os+' não encontrada.');
+  if(['A liberar','Liberadas'].indexOf(co.etapa)<0) throw new Error('Trocar recurso só antes da execução (A liberar ou Liberadas); a '+os+' está '+co.etapa+'. Nada foi alterado.');
+  const quem=pf!==undefined?cenExigeUm(pf,['pcp'].concat(g2alc('AL-01').papeis),'Trocar recurso da '+os):'PCP';
+  const atual=alDaOrdem(c,os).find(x=>x.r===de); if(!atual) throw new Error((AL0.nome[de]||de)+' não está na '+os+'. Nada foi alterado.');
+  const cand=alCandidatos(c,os,de).find(x=>x.r===para); if(!cand) throw new Error((AL0.nome[para]||para)+' não substitui '+AL0.nome[de]+' (outra função ou já está na ordem). Nada foi alterado.');
+  if(!cand.ok) throw new Error('Troca recusada: '+cand.nome+' '+cand.motivo+'. Nada foi alterado.');
+  const orig=atual.de||de, hr=cenAgora(); co.rec=Object.assign({},co.rec||{}); if(para===orig) delete co.rec[orig]; else co.rec[orig]=para;
+  co.recHist=(co.recHist||[]).concat([{de,para,por:quem,at:hr,t:'Recurso trocado: '+AL0.nome[de]+' → '+cand.nome+' por '+quem+' às '+hr}]);
+  return {msg:AL0.nome[de]+' → '+cand.nome+' na '+os+(cand.aviso?' · '+cand.aviso:'')+'.'}; }
+"""
+
+
+def js():
+    """AL0 (semana do PCP, recursos, função e ativo de cada um) + as regras da alocação vigente: entra no prefixo do cenário (toda tela do estado)."""
+    import json
+    al0 = dict(jor=JORNADA, jorRec=JOR_RECURSO, dias=DIAS, nome=NOME, tipo=TIPO, classe=CLASSE, ativo={r: a for a, r in REC_DO_ATIVO.items()},
+               aloc=[dict(r=a['r'], os=a['os'], dia=a['dia'], h=round(a['fim'] - a['ini'], 2), ini=a['ini'], fim=a['fim'], sit=a['sit']) for a in ALOC])
+    return 'const AL0 = ' + json.dumps(al0, ensure_ascii=False) + ';\n' + JS
+
 
 
 def hh(x):

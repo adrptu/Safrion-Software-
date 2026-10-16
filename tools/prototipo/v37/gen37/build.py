@@ -38,16 +38,19 @@ def _interactive(fname):
     s=open(os.path.join(E.P,fname)).read(); return ('onClick=' in s) or ('href=' in s)
 # páginas de redirecionamento (PCM simplificado, D-24): PM, MA-01..05 e MA-04det levam ao endereço novo da tela MA; ficam fora do canvas e do Índice
 from areas.maquinas import REDIRECIONA
-files=sorted(f for f in os.listdir(E.P) if f.endswith('.dc.html') and f not in REDIRECIONA)
+files=sorted(f for f in os.listdir(E.P) if f.endswith('.dc.html') and f not in REDIRECIONA and f!='Main.dc.html')   # Main: página técnica mínima desde 13/10 (o protótipo abre no Mapa)
 boards={}; order=[]; notes={}
 # ---- página 1 · menu vigente ----
-VIS_ROWS=[('Índice',['Main.dc.html']),('Mapa',['IN-04.dc.html'])]+[(nome,list(dict.fromkeys(h.split('#')[0] for _,h in items))) for nome,ic,items in MENU2 if nome!='Mapa']   # visões da mesma tela (Manutenção) = um quadro
+from ui37 import HUB37, OUTROS37, VOLTA37
+VIS_ROWS=[('Mapa',['IN-04.dc.html'])]+[(nome,([HUB37[nome]] if nome in HUB37 else [])+list(dict.fromkeys(h.split('#')[0] for _,h in items))+(sorted(k for k in VOLTA37 if k.startswith('CD-')) if nome=='Cadastros' else [])) for nome,ic,items in MENU2 if nome!='Mapa']   # tela de entrada do módulo à frente; os cadastros que a tela Cadastros abre (13/10)
+VIS_ROWS.append((OUTROS37[0],[OUTROS37[2]]+[h for _,h,_ in OUTROS37[3] if not h.startswith('MB-')]))   # Outros acessos (o app de campo tem linha própria abaixo)   # visões da mesma tela (Manutenção) = um quadro
 # App de campo (prioridade de teste com os primeiros clientes, DEC-2609-13): mesmo cenário da O.S. e do Estoque
 # PCM S4 (§1, §3.7): MB-09 "Máquina" e MB-09det "Ordem de manutenção" deixam de ser ocultos: ligados ao MB-01, gravam no cenário e funcionam sem sinal
 VIS_ROWS.append(('App de campo',['MB-01.dc.html','MB-02.dc.html','MB-03.dc.html','MB-04.dc.html','MB-05.dc.html','MB-07.dc.html','MB-10.dc.html',
                                  'MB-09.dc.html','MB-09det.dc.html']))   # MB-07 e MB-10 no estado (colheita, 06/10)
-detalhes={'Agrícola':['CA-01det.dc.html','CA-01x-os0420.dc.html','OS-0424-app.dc.html','OS-0424-ficha.dc.html','AG-01det.dc.html','IR-02.dc.html','IR-03.dc.html','IR-03det.dc.html','IR-04.dc.html'],
-          'Produção':['BEN.dc.html'] if BEN_PUBLICADO else [],'Cadastros':[f for f in files if f.startswith('CD-') and 'det' in f]}   # v55: BEN só publicado (ui37.BEN_PUBLICADO)
+detalhes={'Agrícola':['CA-01det.dc.html','CA-01x-os0420.dc.html','OS-0424-app.dc.html','OS-0424-ficha.dc.html','AG-01det.dc.html','IR-02.dc.html','IR-03.dc.html','IR-03det.dc.html','IR-04.dc.html']
+          ,   # 13/10: a Produção entrou em Agrícola; o BEN publicado é item próprio do menu (ui37.MENU2, BEN-D39), não detalhe
+          'Cadastros':[f for f in files if f.startswith('CD-') and 'det' in f]}
 y=0; placed=set()
 for nome,fs in VIS_ROWS:
     fs=[f for f in fs+detalhes.get(nome,[]) if f in files]
@@ -56,10 +59,8 @@ for nome,fs in VIS_ROWS:
     notes['v_'+str(len(notes))]={'x':0,'y':y-240,'text':nome,'kind':'title1','maxW':1840,'page':'menu'}
     for f in fs:
         w,h=_wh(f); boards[f]={'x':x,'y':y,'w':w,'h':h,'title':CAT.get(f[:5],{}).get('titulo',f.replace('.dc.html','')) if f[:5] in CAT else f.replace('.dc.html',''),'is_interactive':_interactive(f),'page':'menu'}
-        if f=='Main.dc.html': boards[f]['title']='Índice central · comece aqui'
         if f=='OS-0424-app.dc.html': boards[f]['title']='Agrícola › Ordem de Serviço › OS-0424 · ficha no app (funciona sem internet)'
         if f=='OS-0424-ficha.dc.html': boards[f]['title']='Agrícola › Ordem de Serviço › OS-0424 · ficha impressa'
-        if f=='BEN.dc.html': boards[f]['title']='Produção › Recebimento e beneficiamento › Beneficiamento'   # tela irmã de Cargas (BEN-D14)
         if nome=='App de campo': boards[f]['title']='App de campo › '+boards[f]['title']
         for nm,ic,items in MENU2:
             for l,hh in items:

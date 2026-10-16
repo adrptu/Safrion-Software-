@@ -1,0 +1,5 @@
+OK    S0 a captura de erro funciona (erro provocado é visto)
+OK    S1 143 páginas × 2 tamanhos sem erro de JS (erro, promessa rejeitada e console.error)
+OK    S2 sem rolagem lateral da página
+OK    S3 barra lateral sem submenu nem expandir
+RESULTADO: 4 ok · 0 falhas (143 páginas)

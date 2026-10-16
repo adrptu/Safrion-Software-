@@ -1,0 +1,12 @@
+ben_unit_test.py rc=0 4s :: RESULTADO: OK 206/206
+ben_prop_test.py rc=0 72s :: RESULTADO: OK 360 sequências × 35 passos; 10 casos fixos · invariantes violados: nenhum
+ben_mutantes.py rc=0 228s :: RESULTADO: OK 104/104
+comercial_unit_test.py rc=0 1s :: RESULTADO: OK 118/118
+producao_unit_test.py rc=0 2s :: RESULTADO: OK 160/160
+est_cenario_test.py rc=1 0s :: 
+os_cenario_test.py rc=1 0s :: 
+cen_grava_test.py rc=0 1s :: RESULTADO 10/10
+est_a4_test.py rc=0 1s :: RESULTADO 53/53
+solo_unit_test.py rc=0 0s :: RESULTADO: OK 128/128
+cada_cd04_test.py rc=1 0s :: 
+links_ocultos_test.py rc=0 3s :: TOTAL 16 · falhas 0

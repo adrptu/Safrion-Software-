@@ -7,7 +7,7 @@ horas (B15). Emulação no Chrome headless a 1440 × 900: não é aparelho físi
 Uso: python3 saf_revisao_test.py"""
 import sys, os, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome
+from comp_lib import Chrome, cv_todas_sempre
 import dados2 as D2
 import saf_nav_lib as L
 from saf_nav_lib import *   # chk, rows, nivel0, faixa, toast, nota, painel, campos, fset, botao, salvar, na_linha, clica_linha, abre, estado, linha…
@@ -30,6 +30,7 @@ GRADE = r"""((h0)=>{ const n=s=>(s||'').replace(/\s+/g,' ').trim(); const hn=h=>
 def grade(h0): return c.js(f"({GRADE})({json.dumps(h0)})") or {'hs': [], 'rows': []}
 try:
     c = L.c = Chrome()
+    cv_todas_sempre(c)   # VISOES-2 §3.6 / SAF-TAB: o teste lê colunas fora do padrão
     # ================= S2.1, S1 e E1: duas safras novas no mesmo estado =================
     abre('#saf=S2627&passo=safra')
     n1 = cria_safra('Safra 2027/28', '2027-09-01', '2028-08-31')

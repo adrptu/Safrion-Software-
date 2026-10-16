@@ -1,0 +1,31 @@
+OK   E1 1440: talhão T1 (pelo endereço) + fase Em execução → Tabela agrupada por clique e por teclado: os mesmos chips, talhão e linhas, subtotal só do recorte, ?view=agrupada e o hash intacto
+OK   E2 1440: abrir OS-0421 dentro do grupo abre o painel dela (Tab entra no painel); Esc fecha e o foco volta à linha
+OK   E3 1440 · link Voltar (mesma aba): volta à Tabela agrupada com Fazenda Todas, Safra 2026/27, fase Em execução, rolagem ±4 px e o foco na OS-0421 (ou o painel dela, se a página voltou da memória)
+OK   E3 1440 · link Voltar: a página de detalhe registrou o histórico comprovado (history.length > 1 e a marca própria)
+OK   E3 1440 · trilha (mesma aba): volta à Tabela agrupada com Fazenda Todas, Safra 2026/27, fase Em execução, rolagem ±4 px e o foco na OS-0421 (ou o painel dela, se a página voltou da memória)
+OK   E3 1440 · trilha: a página de detalhe registrou o histórico comprovado (history.length > 1 e a marca própria)
+OK   E3 1440 · history.back() (mesma aba): volta à Tabela agrupada com Fazenda Todas, Safra 2026/27, fase Em execução, rolagem ±4 px e o foco na OS-0421 (ou o painel dela, se a página voltou da memória)
+OK   E3 1440 · history.back(): a página de detalhe registrou o histórico comprovado (history.length > 1 e a marca própria)
+OK   E3 1440 · nova aba (referrer da lista, history.length 1, sem marca): o "Voltar" não usa history.back(); abre OS.dc.html?view=agrupada com Fazenda, Safra, fase e o foco na OS-0421
+OK   E3 1440 · deep-link (detalhe aberto direto, sem contexto): o "Voltar" segue o link (OS.dc.html, sem ?view e sem history.back())
+OK   E1 390: talhão T1 (pelo endereço) + fase Em execução → Tabela agrupada por clique e por teclado: os mesmos chips, talhão e linhas, subtotal só do recorte, ?view=agrupada e o hash intacto
+OK   E2 390: abrir OS-0421 dentro do grupo abre o painel dela (Tab entra no painel); Esc fecha e o foco volta à linha
+OK   E3 390 · link Voltar (mesma aba): volta à Tabela agrupada com Fazenda Todas, Safra 2026/27, fase Em execução, rolagem ±4 px e o foco na OS-0421 (ou o painel dela, se a página voltou da memória)
+OK   E3 390 · link Voltar: a página de detalhe registrou o histórico comprovado (history.length > 1 e a marca própria)
+OK   E3 390 · trilha (mesma aba): volta à Tabela agrupada com Fazenda Todas, Safra 2026/27, fase Em execução, rolagem ±4 px e o foco na OS-0421 (ou o painel dela, se a página voltou da memória)
+OK   E3 390 · trilha: a página de detalhe registrou o histórico comprovado (history.length > 1 e a marca própria)
+OK   E3 390 · history.back() (mesma aba): volta à Tabela agrupada com Fazenda Todas, Safra 2026/27, fase Em execução, rolagem ±4 px e o foco na OS-0421 (ou o painel dela, se a página voltou da memória)
+OK   E3 390 · history.back(): a página de detalhe registrou o histórico comprovado (history.length > 1 e a marca própria)
+OK   E3 390 · nova aba (referrer da lista, history.length 1, sem marca): o "Voltar" não usa history.back(); abre OS.dc.html?view=agrupada com Fazenda, Safra, fase e o foco na OS-0421
+OK   E3 390 · deep-link (detalhe aberto direto, sem contexto): o "Voltar" segue o link (OS.dc.html, sem ?view e sem history.back())
+OK   E5 trocar de visão (clique e teclado, 8 trocas) não muda o cenário talhao-os-cenario-v1 nem outra chave de negócio, byte a byte; só a preferência (safrion.pref.)
+OK   E3b fase Canceladas → Kanban: "Canceladas ficam fora do quadro: 1 ordem no filtro." com "Ver em lista" (o quadro segue com 5 colunas); "Ver em lista" abre a Lista com ?view=lista sem mudar a preferência; F5 continua na Lista; nova entrada sem ?view abre o Kanban (preferência)
+OK   E3c erro ao montar a visão Kanban: "Não foi possível mostrar a visão Kanban: …" + "Ver em lista" (painel não aparece); a Lista abre e funciona (linhas, ?view=lista), sem gravar preferência no fallback
+OK   E3c erro ao montar a visão Carga por recurso: "Não foi possível mostrar a visão Carga por recurso: …" + "Ver em lista" (painel não aparece); a Lista abre e funciona (linhas, ?view=lista), sem gravar preferência no fallback
+OK   E3c cenário ilegível (afeta a Lista também): a Lista e o Kanban dizem o que houve com "Recomeçar a demonstração"; nada é apagado (o gravado fica em talhao-os-cenario-v1:ilegivel)
+OK   E4 sem ?view abre a preferência (Kanban); ?view=lista vence a preferência e não a grava; ?view=xyz abre a preferência com aviso sem o valor e o endereço perde o valor (F5 sem aviso)
+OK   E4b (Codex, item 1) preferência Kanban → escolher Lista grava ?view=lista → F5 continua na Lista (e a Lista vira a preferência)
+OK   E4c (Codex, item 3) trocar o perfil não muda a visão aberta; a próxima entrada sem ?view usa a preferência do perfil (Caio sem preferência: Lista; Ana: Kanban); localStorage limpo abre a Lista
+OK   E6 OS.dc.html?view=kanban#OS-0418 abre o Kanban e a OS-0418; #OS-0430:ajustar abre a ordem para ajustar; ?theme=dark&view=agrupada#tal=Santa Rita|T1 abre a Agrupada com T1, theme e hash intactos
+OK   sem erro de script nas páginas
+RESULTADO: 30 ok · 0 falhas (e2e)

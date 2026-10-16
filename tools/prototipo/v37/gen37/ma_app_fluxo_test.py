@@ -16,6 +16,12 @@ def clkw(t, w=1.2):
     """toque num link que troca de tela: espera a nova tela"""
     r = a.clk(t); time.sleep(w); a.J("window.__errs=window.__errs||[]; if(!window.__errsOn){ window.__errsOn=1; window.addEventListener('error',e=>window.__errs.push(e.message)); }"); return r
 def larg(): return a.J("document.documentElement.scrollWidth")
+# 14/10/2026 (proprietário: "tire das telas ver como simulação"): quem usa o app é escolhido no nome do cabeçalho do MB-01 (lista), não numa faixa
+SELU = "document.querySelector('select[aria-label=\"Usuário do app (demonstração)\"]')"
+def usuario(k):
+    r = a.J(f"(()=>{{const s={SELU}; if(!s) return false; Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(s,{json.dumps(k)}); s.dispatchEvent(new Event('change',{{bubbles:true}})); return true;}})()")
+    time.sleep(.6); return r
+def quem(): return a.J(f"(()=>{{const s={SELU}; return s?s.options[s.selectedIndex].text+' '+s.nextElementSibling.innerText.trim():'';}})()") or ''
 def toast(): return a.J("[...document.querySelectorAll('[role=status],[role=alert]')].map(x=>x.innerText).join(' | ')")
 ERR = []
 def errs(tela):
@@ -26,11 +32,11 @@ try:
     # ---------- Marcos: Minha fila sem OM, cartão Máquina ----------
     go('MB-01.dc.html'); a.clk('Restaurar demonstração'); b = a.body()
     fila = b[b.find('Minha fila'):b.find('Abrir por tipo de trabalho')]
-    a.ok('OM-0' not in fila and 'OS-0421' in fila and a.J("!!document.querySelector('a[href=\"MB-09.dc.html\"]')") and 'Marcos · operador · Santa Rita' in a.hdr(),
+    a.ok('OM-0' not in fila and 'OS-0421' in fila and a.J("!!document.querySelector('a[href=\"MB-09.dc.html\"]')") and quem() == 'Marcos · operador · Santa Rita',
          'MB-01 Marcos: Minha fila só com O.S. (sem OM) e o cartão "Máquina" (MB-09) na vaga vazia')
     # ---------- (a) app · Zé conclui a OM-0233 com teste e declara apto: 7 toques ----------
-    a.clk('Zé · mecânico'); b = a.body(); fila = b[b.find('Minha fila'):b.find('Abrir por tipo de trabalho')]
-    a.ok('Zé · mecânico · Santa Rita' in a.hdr() and 'OM-0233' in fila and 'Teste pendente' in fila and a.foot() == 'Continuar serviço · OM-0233' and cen('c.app.usuario') == 'Zé',
+    usuario('Zé'); b = a.body(); fila = b[b.find('Minha fila'):b.find('Abrir por tipo de trabalho')]
+    a.ok(quem() == 'Zé · mecânico · Santa Rita' and 'OM-0233' in fila and 'Teste pendente' in fila and a.foot() == 'Continuar serviço · OM-0233' and cen('c.app.usuario') == 'Zé',
          'Ver como Zé (c.app.usuario): a OM-0233 na Minha fila com "Teste pendente" e a primária "Continuar serviço · OM-0233"')
     n = 0; clkw('Continuar serviço'); n += 1; errs('MB-01')
     a.ok(a.J("location.pathname.endsWith('MB-09det.dc.html') && location.hash==='#OM-0233'") and 'OM-0233 · Trator T1' in a.hdr() and 'Não opere' in a.body(),
@@ -72,7 +78,7 @@ try:
          'volta do sinal: os 2 lançamentos entram uma vez só; tocar de novo não reenvia')
     errs('MB-09 sem sinal')
     # ---------- sem sinal + OM mudada no escritório = Conflito a resolver · Otávio ----------
-    go('MB-01.dc.html'); a.clk('Restaurar demonstração'); a.clk('Zé · mecânico'); go('MB-09det.dc.html#OM-0233'); a.clk('Sem sinal')
+    go('MB-01.dc.html'); a.clk('Restaurar demonstração'); usuario('Zé'); go('MB-09det.dc.html#OM-0233'); a.clk('Sem sinal')
     a.clk('Aprovado'); a.clk('Anexar foto e registrar Aprovado'); a.setv('#dp-leit', '4320'); a.clk('Previsto (6,5 h)'); a.clk('Concluir serviço')
     a.ok(cen("c.man.oms['OM-0233'].etapa") == 'Em execução' and cen('c.app.manFila.length') == 2 and '2 registros desta ordem no aparelho' in a.body(),
          'sem sinal: teste e conclusão ficam no aparelho (2 na fila); o servidor segue Em execução')
@@ -101,9 +107,9 @@ try:
     a.ok('SM-0153' in a.body() and 'Vazamento no comando da barra' in a.body(), 'tela MA · Sem ordem: o SM-0153 vindo do app aparece para o Otávio decidir')
     errs('MA Sem ordem')
     # ---------- revisão 09/10 · João (A8) e operador do abastecimento (S4) ----------
-    a.c.size(390, 1800); go('MB-01.dc.html'); a.clk('Restaurar demonstração'); a.clk('João · eletricista'); b = a.body(); fila = b[b.find('Minha fila'):b.find('Abrir por tipo de trabalho')]
+    a.c.size(390, 1800); go('MB-01.dc.html'); a.clk('Restaurar demonstração'); usuario('João'); b = a.body(); fila = b[b.find('Minha fila'):b.find('Abrir por tipo de trabalho')]
     a.ok(cen('c.app.usuario') == 'João' and 'OM-0228' in fila, 'A8 · Ver como João no app: a OM-0228 (eletricista, NR-10) na Minha fila · ' + fila[:120].replace('\n', ' '))
-    a.clk('Zé · mecânico'); go('MB-09.dc.html'); n0 = cen('c.man.abast.length')
+    usuario('Zé'); go('MB-09.dc.html'); n0 = cen('c.man.abast.length')
     on = a.J("[...document.querySelectorAll('[role=group][aria-label=\"Operador da máquina\"] button')].filter(x=>x.getAttribute('aria-pressed')==='true').map(x=>x.innerText.trim())") or []
     a.clk('Sede · D-118'); a.setv('#mq-vol', '90'); a.setv('#mq-leit', '4313')   # Trator T1 na Oficina Sede: tanque e comboio elegíveis
     if on: a.clk(on[0])   # tira o operador herdado para conferir a recusa

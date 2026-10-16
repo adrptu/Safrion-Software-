@@ -33,7 +33,8 @@ try:
         E.J("document.querySelector('#pr_x').focus()")
         E.c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Tab','code':'Tab','modifiers':8})
         E.c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':'Tab','code':'Tab','modifiers':8})
-        E.ok(E.J("document.activeElement.innerText")=='Voltar ao plano',f'{w}: Shift+Tab contém foco no painel')
+        # o último focável do painel (desde a F2 composta, "Conferir publicação"; antes era "Voltar ao plano"): mesmo critério do pr_key
+        E.ok(E.J("(()=>{const d=document.querySelector('[role=dialog]'); const xs=[...d.querySelectorAll('button,input,select,[tabindex=\"0\"]')].filter(x=>!x.disabled&&x.offsetParent!==null); return xs.length>1&&document.activeElement===xs[xs.length-1];})()"),f'{w}: Shift+Tab contém foco no painel')
         E.c.call('Input.dispatchKeyEvent',{'type':'keyDown','key':'Escape','code':'Escape'})
         E.c.call('Input.dispatchKeyEvent',{'type':'keyUp','key':'Escape','code':'Escape'})
         time.sleep(.25)

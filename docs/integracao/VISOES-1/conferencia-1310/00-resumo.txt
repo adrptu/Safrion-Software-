@@ -1,0 +1,10 @@
+HEAD df0f272 · 2026-10-13T00:42:28Z
+visoes_comp · exit=0 · 36s · RESULTADO: 9 ok · 0 falhas (comp)
+visoes_celular · exit=0 · 52s · RESULTADO: 9 ok · 0 falhas (celular)
+visoes_e7 · exit=0 · 13s · RESULTADO: 2 ok · 0 falhas (e7)
+visoes_e2e · exit=1 · 399s · RESULTADO: 38 ok · 1 falhas (e2e) · FALHAS: E1c busca "0431" (sem fase) → Agrupada: só o grupo T2, com a OS-0431, e o subtotal = Total (102 ha); a soma dos grupos = Total
+mut_push_E5 · exit=1 · 13s · RESULTADO: 2 ok · 1 falhas (e2e) · FALHAS: E5b 8 trocas de visão não mudam history.length e o Voltar do navegador sai da O.S. (para a tela anterior, Main)
+FIM
+cand_E1c_E8b · exit=0 · 12s · RESULTADO: 3 ok · 0 falhas (e2e)
+antes_E1c_E8b · exit=1 · 12s · RESULTADO: 1 ok · 2 falhas (e2e) · FALHAS: E1c busca "0431" (sem fase) → Agrupada: só o grupo T2, com a OS-0431, e o subtotal = Total (102 ha); a soma dos grupos = Total | E8b Carga com Safra 2025/26: nenhum bloco (as ordens dela não têm alocação) e o estado "Nenhuma ordem de … safra 2025/26 tem alocação…"; com a 2026/27 os blocos aparecem (OS-0419 e OS-0421)
+FIM2

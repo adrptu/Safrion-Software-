@@ -19,7 +19,7 @@ H = AP.H; F = AP.F; IF = AP.IF
 def prim_html():
     """primária do cabeçalho (link ou botão, AP.prim_html) ou, sem o papel do comando, o próximo passo com o dono (texto, não botão)"""
     return (AP.prim_html() + f'<sc-if value="{H("prim_isT")}" hint-placeholder-val="{F()}"><span role="note" class="com-dono" style="display: inline-flex; align-items: center; '
-            f'font-size: 13px; font-weight: 700; color: {MUTED}; padding: 8px 12px; border: 1px dashed {LINE}; border-radius: 10px; white-space: normal;">{H("prim_tt")}</span></sc-if>')
+            f'font-size: 13px; font-weight: 700; color: {MUTED}; padding: 8px 12px; white-space: normal;">{H("prim_tt")}</span></sc-if>')
 
 
 def _shell(fid, title, sub, corpo, fname, altura, foot):

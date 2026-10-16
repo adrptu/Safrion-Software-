@@ -6,14 +6,14 @@ exato; árvore item › lote preservada; página sem rolagem horizontal.
 Uso: python3 tabelas_est_test.py [pasta de capturas]   (< 90 s)"""
 import sys, os, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from comp_lib import Chrome, servir
+from comp_lib import Chrome, servir, cv_todas_sempre
 OUT = sys.argv[1] if len(sys.argv) > 1 else None
 if OUT: os.makedirs(OUT, exist_ok=True)
 OK, FAIL = [], []
 def chk(n, cond, info=''):
     (OK if cond else FAIL).append(n); print(('  ok  ' if cond else '  FALHOU ') + n + (' · ' + str(info)[:300] if info != '' else ''))
 
-p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js
+p, srv = servir(os.path.join(HERE, '_render')); c = Chrome(); J = c.js; cv_todas_sempre(c)   # V2-3: a tabela completa como foi desenhada (TABELAS-FOCO); o padrão é conferido na VISOES-2
 TB = "[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent)"
 def heads(): return [x.upper() for x in (J(f"[...({TB}).querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\\s+/g,' ').trim().replace(/ · \\d+$/,''))") or [])]
 def linhas(): return J(f"[...({TB}).querySelectorAll('[role=row]')].filter(r=>r.offsetParent&&r.querySelector('[role=cell]')).map(r=>[...r.querySelectorAll('[role=cell]')].map(x=>x.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim()))") or []
@@ -79,7 +79,9 @@ try:
         if i == 1:
             nf = next((r for r in d if r.get('NOTA FISCAL') == 'NF 4501'), {}); n33 = next((r for r in d if r.get('NOTA FISCAL') == 'NF 4533'), {})
             chk('seção 1: NF 4501 = 19/09/2026 | PC-088 | Fertisul | KCl 60% | K26-11 | 60.000 kg', [nf.get(k) for k in ('DATA DA NOTA', 'FORNECEDOR', 'ITEM', 'LOTE', 'NA NOTA')] == ['19/09/2026', 'Fertisul', 'KCl 60%', 'K26-11', '60.000 kg'] and nf.get('PEDIDO', '').startswith('PC-088'), nf)
-            chk('seção 1: NF 4533 conferida hoje: Conferida em 23/09/2026 (data, não "hoje"), validade 12/2026, quarentena 2.000 kg', [n33.get(k) for k in ('CONFERIDA EM', 'VALIDADE', 'QUARENTENA')] == ['23/09/2026', '12/2026', '2.000 kg'], n33)
+            # "hoje" é a data operacional única da demonstração (dados_config.DIA_OP, 26/09; EST-1 8d0a86c), não mais 23/09
+            HOJE = '/'.join(reversed(__import__('dados_config').DIA_OP.split('-')))
+            chk(f'seção 1: NF 4533 conferida hoje: Conferida em {HOJE} (data, não "hoje"), validade 12/2026, quarentena 2.000 kg', [n33.get(k) for k in ('CONFERIDA EM', 'VALIDADE', 'QUARENTENA')] == [HOJE, '12/2026', '2.000 kg'], n33)
             filtra('Na nota', ['60.000 kg']); r1 = [r.get('NOTA FISCAL') for r in dicts()]
             chk('seção 1: filtro Na nota = "60.000 kg" (o menu oferece o texto da célula, com a unidade): só a NF 4501', r1 == ['NF 4501'], r1)
             limpa(); ordena('Data da nota'); o1 = [r.get('NOTA FISCAL') for r in dicts()]

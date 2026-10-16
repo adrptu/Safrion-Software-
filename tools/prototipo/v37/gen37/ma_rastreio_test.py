@@ -38,7 +38,7 @@ try:
     cap('om34', 'om=OM-0234'); cap('om33', 'om=OM-0233'); cap('om33ze', 'om=OM-0233', perfil='Zé'); cap('om28', 'om=OM-0228'); cap('om30', 'om=OM-0230')
     cap('ach', 'achado=INSP-104'); cap('venc', 'venc=PM-02|a03|s1')
     cap('cond11', 'ativo=a11', extra=lambda: (m.clk('Mudar condição'), time.sleep(.3)))
-    cap('mais', 'vis=semordem', extra=lambda: m.clk('Mais ações'))
+    cap('mais', 'vis=semordem', extra=lambda: m.clk('Mais ações de Manutenção'))   # ⋯ único (engine.mais, 15/10): o nome diz o contexto
     nlin_pl = len(m.linhas(0)) if m.ir('vis=planos') is None else 0
     row_btn = {}
     for a in ('vis=semordem', 'vis=ordens', 'vis=ativos', 'vis=ativos&modo=abastecimentos', 'vis=planos'):
@@ -54,7 +54,7 @@ try:
     gerar_rows = [r for r in (m.linhas(0) or [])]
     # ---------- F01–F111 ----------
     g = [x for x in MENU2 if x[0] == 'Manutenção'][0]
-    F('F01', 'menu com 4 subitens da mesma tela (13/10, pedido do proprietário); Índice sem MA-01..05 nem PM', g[2] == [('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')] and not re.search(r'(MA-0[1-5]|PM)\.dc\.html', SRC['Main.dc.html']))
+    F('F01', 'menu com 4 subitens da mesma tela (13/10, pedido do proprietário); Índice sem MA-01..05 nem PM', g[2] == [('Painel','PMAN.dc.html'),('Pendências sem ordem','MA.dc.html#vis=semordem'),('Ordens de manutenção','MA.dc.html#vis=ordens'),('Ativos e disponibilidade','MA.dc.html#vis=ativos'),('Planos preventivos','MA.dc.html#vis=planos')] and not re.search(r'(MA-0[1-5]|PM)\.dc\.html', SRC['Main.dc.html']))
     F('F02, F03', 'Sai: faixa e "3 etapas" do PM', etp == 0 and 'Telas da manutenção' not in MAS and nao('pm01', 'Etapa 1', 'Biblioteca de planos'), etp)
     F('F04', 'detalhe do plano: "‹ Planos" e "Publicar vN"', tem('pm01', '‹ Planos') and "'Publicar v'+" in MAS)
     F('F05', 'menu ⋯ do cabeçalho com Restaurar', tem('mais', 'Restaurar demonstração'))
@@ -65,26 +65,28 @@ try:
     F('F18', 'expandir por serviço; "Expandir tudo" sai', 'Mostrar checklist e peças de' in MAS and nao('pm01', 'Expandir tudo'))
     F('F21', 'detalhe do plano › Ativos vinculados só leitura (sem Gerar)', tem('pm01', 'ATIVOS VINCULADOS · SÓ LEITURA') and 'Gerar' not in T['pm01'].split('ATIVOS VINCULADOS')[1].split('Versões')[0])
     F('F22', 'painel Vínculo com marco pré-preenchido (D-41)', 'o marco é a última execução do serviço' in MAS and 'manMarcoSug' in MAS)
-    F('F25, F26', 'cartões de Sem ordem; selo de impedimentos; filtro "Com conflito" em Ordens', tem('so', 'VENCIDAS SEM ORDEM', '1 ativo bloqueado') and tem('or', 'Com conflito'))
+    # MAN-LIMPA-01 (14/10): os cartões saem da tela de trabalho (indicadores no Painel); o recorte vai pela faixa Filtros (Tipo, Criticidade, Grupo)
+    F('F25, F26', 'Sem ordem com a faixa Filtros (Tipo) e sem cartões; selo de impedimentos; filtro "Com conflito" em Ordens', tem('so', 'Todos os tipos', '1 ativo bloqueado') and nao('so', 'VENCIDAS SEM ORDEM') and tem('or', 'Com conflito'))
     F('F27, F28, F29', 'Sem ordem (até 30 d) e bloco "O que vence" do ativo', tem('so', 'Até 30 d', 'Vencida') and tem('a02', 'O que vence'))
     F('F30', 'item com OM sai de Sem ordem; o ativo mostra a OM', 'PM-02 v2' not in so2 and 'OM-0235' in a03 and tem('at', 'OM-0234 · A liberar'))
     F('F31, F32', 'painel do vencimento; primária de Sem ordem; sem "Ver ordens"', tem('venc', 'Gerar ordem preventiva') and 'Gerar 3 ordens preventivas' in T['so'] and nao('so', 'Ver ordens ›'))
     F('F33, F55, F83', 'OM › Janela e equipe › Impacto na produção (AL)', tem('om34', 'Impacto na produção', 'lido da alocação do PCP'))
     F('F34', '"Mover janela" para toda OM a liberar/liberada', tem('om34', 'Mover janela') and tem('om28', 'Mover janela'))
     F('F35', '1b: "Pedir decisão da gerência" (fica para o 1b; hoje a ponte "Liberar mesmo assim")', tem('om34', 'Liberar mesmo assim'))
-    F('F36, F37, F38', 'cartão "Aptos agora"; colunas Leitura e Condição; filtro de condição', tem('at', 'APTOS AGORA', 'LEITURA', 'CONDIÇÃO', 'Bloqueado 1'))
+    F('F36, F37, F38', 'sem o cartão "Aptos agora"; colunas Leitura e Condição; filtro de condição', nao('at', 'APTOS AGORA') and tem('at', 'LEITURA', 'CONDIÇÃO', 'Bloqueado 1'))
     F('F39, F40', 'agenda lida de AL no detalhe; "Elegíveis" sai', tem('a01', 'AGENDA DA SEMANA (O.S. › RECURSOS)') and 'Elegíve' not in MAS)
     F('F41', 'colunas Próxima manutenção e Em aberto', tem('at', 'PRÓXIMA MANUTENÇÃO', 'EM ABERTO'))
     F('F42, F44', 'Sai: uso 30 d fixo', 'Uso 30 d' not in MAS and 'Horas trabalhadas 30 d' not in MAS)
     F('F43, F54', 'painel Condição (Bloquear, Restringir, Encerrar restrição, responsável técnico)', tem('cond11', 'Encerrar restrição', 'Trocar responsável técnico', 'Bloquear') and 'Restringir' in MAS and tem('a01', 'RESPONSÁVEL TÉCNICO'))
     F('F45, F46, F57, F82, F102', 'Sai: navegação repetida e selos fixos', not any(x in MAS for x in ('1 bloqueio ativo', '3 de alta criticidade', '1 desvio a investigar', '1 bloqueado · 1 restrito')))
-    F('F47, F48', 'cartão "Achados críticos"; Sem ordem › Achados; bloco Achados do ativo', tem('so', 'ACHADOS CRÍTICOS SEM AÇÃO', 'Achados') and tem('a02', 'Achados'))
-    F('F49', '"Registrar achado" (Sem ordem e ativo) com componente; app MB-04', tem('so', 'Registrar achado') and tem('a02', 'Registrar achado') and emsrc('Componente', 'Pode operar?', f='MB-04.dc.html'))
+    F('F47, F48', 'Sem ordem › Tipo Inspeção (antes o chip Achados) sem o cartão; bloco Achados do ativo', nao('so', 'ACHADOS CRÍTICOS SEM AÇÃO') and tem('so', 'Inspeção') and tem('a02', 'Achados'))
+    # 15/10/2026 (MAIS-01): em Sem ordem a primária é "Gerar N ordens"; "Registrar achado" fica no ⋯ Mais ações de Manutenção ('mais' abre o ⋯ em Sem ordem)
+    F('F49', '"Registrar achado" (Sem ordem, no ⋯, e ativo) com componente; app MB-04', (tem('so', 'Registrar achado') or tem('mais', 'Registrar achado')) and tem('a02', 'Registrar achado') and emsrc('Componente', 'Pode operar?', f='MB-04.dc.html'))
     F('F50, F51, F52', 'painel do achado: Vincular · Gerar com o achado · Criar ordem corretiva · Fechar sem serviço', tem('ach', 'Vincular à OM-0234', 'Criar ordem corretiva', 'Fechar sem serviço') and tem('so', 'Gerar ordem preventiva com NC-0912'))
     F('F53', 'IDs como links #om=', (idlink or 0) > 0 and '#om=' in MAS)
     F('F56', 'Sai: KPI-PCM-07 fixo (Pareto)', 'Pareto' not in MAS)
     F('F58', 'Sai: cartões de fase (fase só nos chips)', (kan or 0) == 5 and tem('or', 'A liberar 1', 'Em conferência 1') and nao('or', 'ORDENS EM EXECUÇÃO'))
-    F('F59, F60, F61', 'Ordens: chips de fase, Lista e Kanban, colunas Pendência e Executante', tem('or', 'Lista', 'Kanban', 'PENDÊNCIA', 'EXECUTANTE'))
+    F('F59, F60, F61', 'Ordens: chips de fase, Lista e Kanban (ícones com nome; o Kanban abre pelo ícone), colunas Pendência e Executante', (kan or 0) == 5 and tem('or', 'PENDÊNCIA', 'EXECUTANTE'))
     F('F62', 'comando só no painel (nenhum botão nas linhas)', all(v == 0 for v in row_btn.values()), row_btn)
     F('F63', 'Sai: link de bloco', 'Ver todas as ordens' not in MAS)
     F('F64, F65, F84, F85, F93', 'painel da OM: cabeçalho, faixa de continuidade, primária', tem('om34', 'OM-0234 · Trator 02', 'VEIO DE', 'ESTÁ AQUI', 'FALTA', 'PRÓXIMA AÇÃO'))

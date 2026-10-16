@@ -1,0 +1,49 @@
+<title>Safrion</title>
+<style>
+/* Fonte versionada da casca do artefato (gen37/site_index.html; antes só existia na cópia de publicação).
+   Casca do site: a tela do protótipo ocupa a janela inteira num quadro do mesmo site, e a navegação acontece dentro dele.
+   Abre no Mapa (IN-04). O link do artefato aceita #CODIGO (ex.: #PA, #OS, #CD) para abrir direto numa tela. */
+:root {
+  --fundo: #F4F6F3;
+  --texto: #15201A;
+  --verde: #1E7A4C;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --fundo: #101712; --texto: #E6EDE7; --verde: #4FB383; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --fundo: #101712; --texto: #E6EDE7; --verde: #4FB383; color-scheme: dark; }
+html, body { height: 100%; }
+body { background: var(--fundo); color: var(--texto); font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+#tela {
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  bottom: env(safe-area-inset-bottom, 0px);
+  left: 0;
+  width: 100%;
+  height: calc(100% - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  border: 0;
+  background: #F4F6F3;
+}
+noscript a { color: var(--verde); }
+</style>
+<iframe id="tela" title="Protótipo do Safrion" src="IN-04.dc.html"></iframe>
+<noscript><p>Abra <a href="IN-04.dc.html">o protótipo</a>.</p></noscript>
+<script>
+(function () {
+  // 14/10/2026 (proprietário: "me coloque sempre no perfil que tem todos acessos para testar tudo"): cada abertura do artefato entra no perfil
+  // de teste com todos os papéis; trocar no avatar vale até a próxima abertura. Perfil de demonstração, não é segurança de acesso.
+  try { localStorage.setItem('safrion.perfilDemo', 'Proprietário'); } catch (e) { /* armazenamento bloqueado: fica o perfil padrão */ }
+  var tela = document.getElementById('tela');
+  var codigo = /^#([A-Za-z0-9-]+)$/.exec(location.hash || '');
+  // o índice saiu em 13/10/2026: o protótipo abre direto no Mapa, e o link antigo #Main também
+  if (codigo) tela.src = (codigo[1] === 'Main' ? 'IN-04' : codigo[1]) + '.dc.html';
+  // Mantém o código da tela aberta no endereço, para recarregar ou copiar o link sem voltar ao início.
+  tela.addEventListener('load', function () {
+    try {
+      var nome = /([A-Za-z0-9-]+)\.dc\.html$/.exec(tela.contentWindow.location.pathname);
+      if (nome && history.replaceState) history.replaceState(null, '', '#' + nome[1]);
+      document.title = tela.contentDocument.title || 'Safrion';
+    } catch (e) { /* tela de outro endereço: mantém o título */ }
+  });
+})();
+</script>

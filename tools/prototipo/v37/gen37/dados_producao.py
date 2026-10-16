@@ -54,9 +54,19 @@ def catalogo():
     # atividade de colheita de cada plano (a primeira, só como modelo de operação da O.S. nova · spec §3.5)
     colh = {pl['id']: next((a['id'] for a in pl['atividades'] if str(a.get('op', '')).startswith('Colheita')), None) for pl in D2.PLANOS}
     # obrigações físicas da soja 26/27 (CT-203, CRE-0095, BT-090): estão no estado como vendas futuras (Comercial D-C04: dados_comercial.completar)
-    return dict(un=DC.CULTURA_UN, safras=safras, cult=cult, cultDe=de, osCult=oscult, locais=locais, recLocal=REC_LOCAL, proc=list(PROC),
+    return dict(un=DC.CULTURA_UN, unAlt=un_alt(), safras=safras, cult=cult, cultDe=de, osCult=oscult, locais=locais, recLocal=REC_LOCAL, proc=list(PROC),
                 fruta=FRUTA, quem=QUEM, colhAtv={k: v for k, v in colh.items() if v},
                 dest={'MI-BR': 'Mercado interno · Brasil'})
+
+
+def un_alt():
+    """UNID-PROD (D-U08, R-U03): unidades com massa declarada por cultura, lidas da fonte única do packing (dados_cad.EMB_PACK), como
+    equivalência de produtividade (cx 10 kg/ha do mamão). Não indica embalagem: a fruta de campo continua fruta de campo."""
+    out = {}
+    for nome, e in DC.EMB_PACK.items():
+        m = str(e['massa']); mb = m.replace('.', ',')
+        out.setdefault(e['cultura'], []).append(dict(k='cx' + m.replace('.', '_'), un=f'cx{mb} eq./ha', rot=f'cx {mb} kg/ha (equivalência)', massa=m, eq=True, fonte=nome))
+    return out
 
 
 def seed():

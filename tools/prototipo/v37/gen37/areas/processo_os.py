@@ -54,7 +54,7 @@ observacoes (dados coerentes com dados.py / dados2.py / telas vizinhas):
 """
 import json, os, re
 import quantidade as _QTD   # regra única de quantidade de insumo (SINT-C03)
-from engine import (grid,esc,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,GRAYS,DISP,BTN_ST,EXTRA,EXTRAJS,_MINI,_MINIP)
+from engine import (grid,visoes,esc,INK,MUTED,LINE,BG,SURF,ACC,ACCS,YEL,YELS,RED,REDS,GRAYS,DISP,BTN_ST,EXTRA,EXTRAJS,_MINI,_MINIP)
 import engine as E
 from ui37 import shell37, HEIGHTS37, tabs
 import dados as D
@@ -217,10 +217,22 @@ def _nova_ordem_dados():
 JS_NUCLEO=r'''
 // ===== núcleo da O.S. (dados do registro + cenário compartilhado, próximo passo e comandos osc_*): usado pela tela O.S. e pelo Mapa =====
 function nf(n){ return Number(n||0).toLocaleString('pt-BR'); }
-function ords(self){ const c=cenGet(); const ids={};
+// projeção única das ordens (registro OSD + cenário c): a tela O.S., o Mapa e o Painel Agrícola (agrPainelRef) leem a mesma; não muda c
+function osProjecao(c){ const ids={};
   const out=OSD.ords.map(b=>{ ids[b.id]=1; return osMerge(b,c.ordens[b.id],c); });
   Object.keys(c.ordens).forEach(k=>{ const co=c.ordens[k]; if(!ids[k]&&co.osc&&co.osc.novo) out.push(osMerge(co.osc.novo,co,c)); });  // emitidas nesta tela
   return out; }
+function ords(self){ return osProjecao(cenGet()); }
+// projeção só do estado (Painel): c.ordens decide quais ordens existem; o registro OSD só dá a base de cada uma (mesmo osMerge).
+// Estado vazio = []; ordem do registro fora do estado não volta; ordem do estado sem base (nem registro nem emissão) ou sem id/etapa = null.
+// pula(id): ordens fora do escopo de quem lê (ex.: beneficiamento OB-), descartadas antes de procurar a base.
+function osProjecaoEstado(c,pula){ const E=c&&c.ordens; if(!E||typeof E!=='object'||Array.isArray(E)) return null;
+  const reg={}; OSD.ords.forEach(b=>{ reg[b.id]=b; }); const out=[];
+  for(const k of Object.keys(E)){ const co=E[k]; if(!co||typeof co.id!=='string'||co.id!==k||typeof co.etapa!=='string') return null;
+    if(pula&&pula(k)) continue; const b=reg[k]||(co.osc&&co.osc.novo)||null; if(!b) return null; out.push(osMerge(b,co,c)); }
+  return out; }
+// impedida: o selo da projeção (o mesmo do cabeçalho da O.S. e do Painel Agrícola)
+const OS_IMP_RE=/impedida|falta máquina|falta insumo/i;
 // turno fechado sem sinal: o consumo ainda está no aparelho (fila AP|…); o escritório vê consumo e área juntos, quando o app envia.
 // cenFecharTurno já baixa a custódia no aparelho; aqui a requisição exibida devolve essa baixa até o envio (CEN_BAIXA_NO_SINAL desliga).
 function osPendCons(co,prod){ if(typeof CEN_BAIXA_NO_SINAL!=='undefined') return 0;
@@ -237,6 +249,9 @@ function osMerge(b,co,c){ if(!co) return b;
   if(x.aj&&x.aj.length){ o.area=co.area; o.ajv=x.aj[x.aj.length-1].v; o.orig=(b.orig||[]).concat(x.aj.map(a=>a.t));
     o.ins=(co.ins||[]).map(y=>{ const i=(b.ins||[]).find(z=>z.p===y.p); return Object.assign({g:y.g||''},i||{},{p:y.p,dose:y.dose,un:y.un,tot:y.tot,d0:i?i.dose:undefined}); }); }
   if(x.ev&&x.ev.length) o.orig=(o.orig||[]).concat(x.ev.map(e=>e.t));   // aprovação (CMD-42) e liberação (CMD-06) na Origem
+  /* 14/10 (troca de recurso, alocacao.py): o conjunto da atividade mostra a máquina vigente e a troca entra na Origem */
+  if(co.rec&&Object.keys(co.rec).length&&o.atv&&o.atv.conj&&typeof AL0!=='undefined'){ let cj=String(o.atv.conj); Object.keys(co.rec).forEach(k=>{ cj=cj.split(AL0.nome[k]).join(AL0.nome[co.rec[k]]); }); o.atv=Object.assign({},o.atv,{conj:cj}); }
+  if(co.recHist&&co.recHist.length) o.orig=(o.orig||[]).concat(co.recHist.map(h=>h.t));
   (co.ap||[]).forEach(a=>{ (a.revAnt||[]).forEach(r=>{ o.orig=(o.orig||[]).concat(['Dia '+a.dia+' · '+CEN_DIV+' '+r.dec.toLowerCase()+' por '+r.quem+' às '+r.at+': '+r.txt+' · reaberta: '+r.reaberta]); });
     if(a.rev) o.orig=(o.orig||[]).concat(['Dia '+a.dia+' · '+CEN_DIV+' '+a.rev.dec.toLowerCase()+' por '+a.rev.quem+' às '+a.rev.at+': '+a.rev.txt]); });   // B-R8 (revisão reaberta fica no histórico)
   { const vn=osVn(o.versao); const ap=co.etapa==='A liberar'?osAprovada({osc:x},vn):null;   /* R13: aprovada e ainda não liberada (selo na lista, no Kanban e no painel) */
@@ -264,7 +279,7 @@ function osMerge(b,co,c){ if(!co) return b;
   if(co.etapa==='Em conferência'){ o.encM=cenPodeEncerrar(c,co.id)||cdPendente(c,co.id); esp=!!o.encM;   /* bloqueio do encerramento: carga, divergência, sinal, duplicidade ou sobra */
     if(!o.encM){ o.selos=o.selos.filter(s=>!/Sobras a receber|Aguardando sinal|Conferência diária pendente/i.test(s.t)); if(!mine){ o.cond='Apontamentos enviados e nada em custódia. Próximo passo: conferir e encerrar.'; o.dono=o.resp; o.prazo='conferir e encerrar'; } }
     else if(/^Conferência diária pendente/.test(o.encM)){ o.dono=CEN_CONF_AP(); o.prazo='rever a conferência diária'; o.selos=o.selos.filter(s=>s.t!=='Conferência diária pendente').concat([{t:'Conferência diária pendente',c:'yellow'}]); }
-    else if(/^Carga a pesar/.test(o.encM)){ const t=osEncSelo(o.encM);   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Produção › Recebimento e beneficiamento (Cargas) */
+    else if(/^Carga a pesar/.test(o.encM)){ const t=osEncSelo(o.encM);   /* colheita (R-18): carga a pesar ou no aparelho; quem recebe pesa em Agrícola › Recebimento */
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]); o.dono=(typeof prRec==='function'?prRec(prFazDaOS(c,co)):'Recebimento'); o.prazo='pesar e receber a carga'; }
     else if(o.encM.indexOf(CEN_DIV)===0){ o.dono=OS_AGRO(); o.prazo='revisar a divergência de dose'; }   /* B-R8: o selo vem do cenário (cenSeloDiv) */
     else { const sin=/sinal/.test(o.encM); const t=osEncSelo(o.encM);  // o bloqueio também na lista e no Kanban
@@ -556,7 +571,7 @@ function osc_cancTxt(c,id,cx){ cx=cx||['','','']; const o=c.ordens[id]; const r=
     r.id+' cancelada · '+ct+' em custódia · receber devolução']; }
 function osc_cancelar(c,id,mot,cx,ator){ const o=osc_o(c,id); const quem=cenExigeAlc(ator,'AL-04','Cancelar a '+id+' sem execução (CMD-46)');
   if((o.realizado||0)>0||['A liberar','Liberadas'].indexOf(o.etapa)<0) throw new Error('Só ordem sem realizado, em A liberar ou Liberadas, é cancelada sem execução.');
-  { const cg=osCargasVivas(c,id); if(cg.length) throw new Error('Cancelar recusado: a '+id+' tem carga '+cg.map(g=>g.id+' '+String(g.st).toLowerCase()).join(', ')+'. Colheita com carga é fato executado: estorne a carga recebida ou descarte a carga a pesar (com motivo) em Produção › Recebimento e beneficiamento (Cargas) antes de cancelar.'); }
+  { const cg=osCargasVivas(c,id); if(cg.length) throw new Error('Cancelar recusado: a '+id+' tem carga '+cg.map(g=>g.id+' '+String(g.st).toLowerCase()).join(', ')+'. Colheita com carga é fato executado: estorne a carga recebida ou descarte a carga a pesar (com motivo) em Agrícola › Recebimento antes de cancelar.'); }
   cx=osc_cancTxt(c,id,cx); const cust=osc_cancCust(c,id).length>0; const r=o.req&&c.reqs[o.req];
   if(r){ if(o.reservado) r.itens.forEach(it=>{ const l=c.lotes[it.prod+'|'+it.lote]; const res=Math.max(0,it.solicitado-it.entregue); if(l&&res>0) l.reservado=Math.max(0,l.reservado-res); }); r.estado='Cancelada'; }
   const hr=cenAgora(); o.etapa='Canceladas'; o.reservado=false; o.selos=[]; osc_txt(o,{canPor:quem,canEm:hr,cond:'Cancelada sem execução por '+quem+' às '+hr+': '+mot+'. '+cx[1],dono:cust?CEN_CONC_RESP():'',prazo:cust?'receber a devolução':'',insx:cx[2]});
@@ -659,7 +674,12 @@ try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenD
 // filtros do topo (Fazenda e Safra): lista, Kanban, chips de fase e selo do cabeçalho mostram só as ordens do recorte
 function mfFaz(self){ return self.state.mf_faz||'Santa Rita'; }
 function mfSaf(self){ return self.state.mf_saf||'Todas'; }
-function vis(self){ const f=mfFaz(self), s=mfSaf(self); return ords(self).filter(o=>(f==='Todas'||o.faz===f)&&(s==='Todas'||o.saf===s)); }
+function mfCult(self){ return self.state.mf_cult||'Todas'; }   // 13/10: Cultura no filtro principal (cultura do cultivo de cada talhão da ordem)
+function osCults(o){ return o.culturas||(o.cultura?[o.cultura]:[]); }
+// #painel=OS-1,OS-2 (Painel Agrícola, Codex 6166235821): recorte temporário só com o grupo vindo do Painel; não grava nem muda os filtros
+// da tela (Fazenda, Safra, Cultura e colunas continuam os de antes) e sai em "Ver todas as O.S." ou numa nova entrada pelo endereço
+function vis(self,semCult){ const pn=self.state&&self.state.pnIds; if(pn&&pn.length) return ords(self).filter(o=>pn.indexOf(o.id)>=0);
+  const f=mfFaz(self), s=mfSaf(self), cu=semCult?'Todas':mfCult(self); return ords(self).filter(o=>(f==='Todas'||o.faz===f)&&(s==='Todas'||o.saf===s)&&(cu==='Todas'||osCults(o).indexOf(cu)>=0)); }
 function localTxt(o){ return o.talhao+(o.area?' · '+nf(o.area)+' ha':''); }
 function acum(o){ let conf=0,prov=0,sem=0; (o.ap||[]).forEach(a=>{ if(a.sinc===false) sem+=a.ha; else if(a.st==='Conferido') conf+=a.ha; else if(a.st==='Provisório') prov+=a.ha; }); return {conf,prov,sem}; }
 function realTxt(o){ return o.area? (nf(o.realizado)+' / '+nf(o.area)+' ha') : '—'; }
@@ -667,44 +687,48 @@ function pctTxt(o){ return (o.area&&(o.realizado||0)>0)?' · '+Math.round(100*o.
 function salTxt(o){ return 'saldo '+nf(o.saldo)+' ha'+(o.disp?' · dispensado '+nf(o.disp)+' ha':''); }
 function brd(s){ if(!s) return ''; const a=s.split('-'); return a[2]+'/'+a[1]+'/'+a[0]; }
 // canceladas ficam fora da lista e do quadro; aparecem só no chip "Canceladas"
-function vendoCanc(self){ return ((((g2st(self,'g_os').f||{}).fase)||[]).indexOf('Canceladas'))>=0; }
+// recorte do Painel (#painel=IDs, revisão Codex 6167883199): busca, fase e filtros da lista e do topo ficam suspensos (não apagados) enquanto ele vale
+function osPn(self){ const pn=self.state&&self.state.pnIds; return !!(pn&&pn.length); }
+function osSt(self){ const st=g2st(self,'g_os'); return osPn(self)?Object.assign({},st,{q:'',f:{},qv:''}):st; }
+function vendoCanc(self){ return ((((osSt(self).f||{}).fase)||[]).indexOf('Canceladas'))>=0; }
 function PREVALS(self,v){
   cenOuvir(self);  // Estoque e App (outros quadros) mudam o cenário: a tela redesenha sem recarregar
   const canc=vendoCanc(self); const os=vis(self).filter(o=>o.etapa!=='Canceladas'||canc);
   // TABELAS-FOCO (5983172395): uma variável por coluna; Talhão é vínculo estruturado (fazenda|ID), filtrado por pertinência
-  g2keep(self,'g_os');
+  g2keep(self,'g_os',{topo:true,v});   /* VISOES-1 §2.3: Fazenda e Safra do topo voltam junto com os filtros da grade */
   const todas=mfFaz(self)==='Todas';
   const tals=(o)=>(o.talhoes||[]).map(t=>({id:o.faz+'|'+t.id,l:todas?t.nome+' · '+o.faz:t.nome}));
   // troca de fazenda/safra: o talhão escolhido fora do novo recorte sai do filtro, com aviso (nunca muda fazenda/safra para "caber")
-  const ctx=mfFaz(self)+'|'+mfSaf(self); if(self.__osCtx!==undefined&&self.__osCtx!==ctx){ const st0=g2st(self,'g_os'), ft=((st0.f||{}).tal)||[];
+  const ctx=mfFaz(self)+'|'+mfSaf(self)+'|'+mfCult(self); if(self.__osCtx!==undefined&&self.__osCtx!==ctx){ const st0=g2st(self,'g_os'), ft=((st0.f||{}).tal)||[];
     if(ft.length){ const ok=new Set(); os.forEach(o=>tals(o).forEach(t=>ok.add(t.id))); const fica=ft.filter(k=>k==='(vazio)'||ok.has(k)), sai=ft.filter(k=>fica.indexOf(k)<0);
       if(sai.length){ const f=Object.assign({},st0.f||{}); if(fica.length) f.tal=fica; else delete f.tal; const all=Object.assign({},self.state.g2||{}); all.g_os=Object.assign({},st0,{f}); self.state.g2=all;
-        try{ if(G2KEEP.g_os) sessionStorage.setItem(G2KEEP.g_os,JSON.stringify({f,q:st0.q||'',so:st0.so||null,qv:st0.qv||''})); }catch(e){}
-        self.__osMsg='Talhão fora de '+(mfFaz(self)==='Todas'?'todas as fazendas':mfFaz(self))+(mfSaf(self)==='Todas'?'':' · '+mfSaf(self))+': '+sai.map(k=>k.split('|')[1]).join(', ')+' saiu do filtro.'; } } }
+        g2keepGrava(self,'g_os');
+        self.__osMsg='Talhão fora de '+(mfFaz(self)==='Todas'?'todas as fazendas':mfFaz(self))+(mfSaf(self)==='Todas'?'':' · '+mfSaf(self))+(mfCult(self)==='Todas'?'':' · '+mfCult(self))+': '+sai.map(k=>{ const id=k.split('|')[1]; const t=ords(self).map(o=>(o.talhoes||[]).find(x=>x.id===id)).find(Boolean); return t&&t.nome?t.nome:id; }).join(', ')+' saiu do filtro.'; } } }   /* o nome que a pessoa escolheu ("Pivô 4"), não o ID */
   self.__osCtx=ctx;
   const nfx=(x)=>x===null||x===undefined||x===''?null:x;
   // o texto de pendência mistura próxima ação e prazo ("entrega até 15/10"); na tabela vira duas colunas (uma variável por coluna)
   const pzx=(t)=>{ t=String(t||''); const m=t.match(/(?:vence\s+)?(?:hoje\s*)?(?:(?:até|antes de|antes das|em)\s+)?(?:\d{2}\/\d{2}(?:\s+\d{2}:\d{2})?|\d{2}:\d{2})|(?:vence\s+)?hoje/);
     if(!m) return [t.trim(),'']; return [(t.slice(0,m.index)+' '+t.slice(m.index+m[0].length)).replace(/\s+/g,' ').trim(), m[0].replace(/^vence\s+/,'').trim()]; };
   const base=os.map(o=>{ const tl=tals(o), sel=o.selos.map(x=>({id:x.t,l:x.t}));
+   const MES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'], ini=/^\d{4}-\d{2}-\d{2}$/.test(o.ini||'')?o.ini:'';
+   const seg=ini?g2segunda(ini):'';
    return {id:o.id,
+    g:{oque:[(o.atv&&o.atv.op)||String(o.tipo||'').split(' · ')[0],o.tipo],quem:[String(o.resp||'').split(' · ')[0]],
+       quando:[o.saf?'Safra '+o.saf:'',ini?MES[Number(ini.slice(5,7))-1]+' de '+ini.slice(0,4):'',seg?'Semana de '+(seg<ini.slice(0,7)+'-01'?'01/'+ini.slice(5,7):seg.slice(8,10)+'/'+seg.slice(5,7)):''],onde:[o.faz||'',tl.map(t=>t.l)]},   /* VISOES-2 §3.3 */
+    /* Quando (revisão Codex 6167738735, 1): a safra vem do vínculo, não da data; cada O.S. cai num só mês e numa só semana, pela data de início;
+       a semana dentro do mês é a interseção (semana que começa no mês anterior aparece como "Semana de 01/MM") */
+    gs:{quando:[o.saf||'',ini.slice(0,7),seg]},   /* ordem de calendário dos grupos */
     m:{tal:tl,sit:sel},
     v:{id:o.id,ativ:o.tipo,tal:'',local:o.local||'',area:nfx(o.area),ini:o.ini||'',fim:o.fim||'',fase:o.etapa,sit:'',obs:o.obs||'',dono:o.dono||'',acao:pzx(o.prazo)[0],prazo:pzx(o.prazo)[1],
        real:(o.area?o.realizado:null),saldo:(o.area?o.saldo:null),disp:(o.disp||null),prog:(o.area?Math.round(1000*(o.realizado||0)/o.area)/10:null),resp:o.resp},
     s:{id:o.id,tal:tl.map(t=>t.l).join(', '),sit:sel.map(x=>x.l).join(' · ')},
-    p:{id:[{k:'b',t:o.id}],tal:(tl.length?tl.map(t=>({k:'txt',t:t.l})).reduce((a,x,i)=>a.concat(i?[{k:'br'},x]:[x]),[]):[{k:'mut',t:'—'}]),
+    p:{id:(o.selos.length?[(()=>{ const cor=['red','orange','yellow','blue','gray','green'].find(c=>o.selos.some(x=>x.c===c))||'gray', s0=o.selos.find(x=>x.c==='red'); return {k:'ico',t:'Situação: '+o.selos.map(x=>{ const d=osSeloDica(o,x.t)||g2dicaDe(x.t); return x.t+(d?' — '+d:''); }).join(' · '),c:cor,curto:s0?String(s0.t).split(' · ')[0]:''}; })()]:[]).concat([{k:'b',t:o.id}]),tal:(tl.length?tl.map(t=>({k:'txt',t:t.l})).reduce((a,x,i)=>a.concat(i?[{k:'br'},x]:[x]),[]):[{k:'mut',t:'—'}]),
        fase:[{k:'chip',t:o.etapa,c:FCOR[o.etapa],de:1}],sit:(o.selos.length?o.selos.map(x=>({k:'chip',t:x.t,c:x.c,de:1,dv:osSeloDica(o,x.t)})):[{k:'mut',t:'—'}])}}; });   /* de: dica de estado (g2lib G2_DICAS); dv: a do bloqueio do encerramento (osSeloDica) */
   // Agrupar por talhão (TABELAS-FOCO item 7, TF06): a mesma O.S. aparece em cada talhão vinculado, com a mesma identidade; o grupo conta
   // O.S. distintas e soma a área das O.S. vinculadas (não é área física do talhão); o total geral conta cada O.S. uma vez (abaixo, os_gtot)
-  if(self.state.os_agr){ const ft=((g2st(self,'g_os').f||{}).tal)||[]; const gs={}, ord=[];
-    base.forEach(r=>{ const ms=r.m.tal.length?r.m.tal:[{id:'(vazio)',l:'Sem talhão'}];
-      ms.forEach(t=>{ if(ft.length&&ft.indexOf(t.id)<0) return; if(!gs[t.id]){ gs[t.id]={t,kids:[]}; ord.push(t.id); } gs[t.id].kids.push(Object.assign({},r,{id:r.id+'@'+t.id})); }); });
-    ord.sort((a,b)=>gs[a].t.l.localeCompare(gs[b].t.l,'pt-BR',{numeric:true}));
-    GR('g_os').rows=ord.map(k=>{ const g=gs[k], n=g.kids.length, ar=g.kids.reduce((a,x)=>a+(Number(x.v.area)||0),0);
-      return {id:'grp@'+k,ro:true,m:{tal:(k==='(vazio)'?[]:[g.t]),sit:[]},kids:g.kids,
-        v:{id:g.t.l,ativ:'',tal:'',area:ar||null},s:{id:g.t.l,tal:g.t.l},
-        p:{id:[{k:'b',t:g.t.l}],ativ:[{k:'mut',t:n+(n>1?' O.S. vinculadas · área somada das O.S.':' O.S. vinculada · área da O.S.')}],area:(ar?[{k:'txt',t:nf(ar)}]:[{k:'mut',t:'—'}])}}; });
-  } else GR('g_os').rows=base;
+  /* VISOES-2 §3.3: o agrupamento é o Agrupar por da Tabela (motor g2agRows), com descer e trilha; a visão "agrupada" saiu (fundida na Tabela) */
+  GR('g_os').rows=base;
+  GR('g_os').suspende=osPn(self);   /* g2vals: a grade lê o estado sem busca, filtros nem agrupamento enquanto o recorte do Painel vale */
   self.__osBase=base;
 }
 // turnos previstos acompanham o saldo depois de uma dispensa (corta do último para o primeiro)
@@ -746,7 +770,21 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
     const usado=it?it.consumido:((o.id==='OS-0417')?x.tot:(o.area?cenQtd(x.dose,o.realizado||0):0)); const tr=osTrilha(o,it);
     const og=osOrigem(o,x);
     return {p:x.p,g:(x.g||'')+(og?((x.g?' · ':'')+og):''),dose:nd(x.dose)+' '+x.un+'/ha',tot:nd(x.tot)+' '+x.un,usado:(usado?nd(usado)+' '+x.un:'—'),sit:osInsSit(o,x,it),tr,hasTr:tr.length>0}; });
-  v.pan_rec=((OSD.aloc||{})[o.id]||[]).map(r=>({t:r.tipo+' · '+r.nome,j:r.janelas,cond:!!r.cond,al:(r.alertas||[]).map(t=>({t})),hasAl:(r.alertas||[]).length>0}));
+  /* 14/10 (proprietário: "faltando edição de ... recursos (pessoas e máquinas)"): recursos da alocação vigente (alocacao.py: semana do PCP + trocas
+     do cenário) e troca por outro da mesma função antes da execução; quem troca é o PCP ou quem libera (AL-01). Sem o papel, "Trocar" fica
+     indisponível com o motivo. Substituto ocupado, em manutenção ou bloqueado aparece com o motivo e não é escolhível (o comando recusa igual). */
+  const rcC=cenGet(), rcPode=['A liberar','Liberadas'].indexOf(o.etapa)>=0, rcPap=['pcp'].concat(OS_LIB()), rcPapel=!!g2umPapel(PF,rcPap), rt=(st.rt&&st.rt.os===o.id)?st.rt:null;
+  v.pan_rec=(typeof alDaOrdem==='function'?alDaOrdem(rcC,o.id):[]).map(r=>{ const cds=rcPode?alCandidatos(rcC,o.id,r.r):[], ab=!!rt&&rt.r===r.r;
+    return {t:r.tipo+' · '+r.nome,j:r.janelas,cond:r.cond,al:r.alertas.map(t=>({t})),hasAl:r.alertas.length>0,
+      de:r.de?('no lugar de '+AL0.nome[r.de]):'',hasDe:!!r.de,
+      podeT:rcPode&&rcPapel&&cds.length>0&&!ab, offT:rcPode&&!rcPapel&&cds.length>0,
+      offWhy:'Trocar recurso: decisão de '+(g2quemUm(rcPap)||'PCP')+'. Troque o perfil no avatar do menu.',
+      go:()=>self.setState({rt:{os:o.id,r:r.r,para:(cds.find(x=>x.ok)||{}).r||''}}),
+      ab, opts:cds.map(x=>({v:x.r,t:x.nome+(x.ok?(x.aviso?' · livre · '+x.aviso:' · livre'):' · '+x.motivo),dis:!x.ok})), para:ab?rt.para:'',
+      setp:(e)=>self.setState({rt:Object.assign({},rt,{para:e.target.value})}),
+      okDis:!(ab&&cds.some(x=>x.ok&&x.r===rt.para)),
+      ok:()=>{ const R=cenMudar(self,c=>alTrocar(c,o.id,r.r,rt.para,PF)); if(R&&!R.erro) self.setState({rt:null,g2toast:R.msg||'Recurso trocado.'}); },
+      cancel:()=>self.setState({rt:null})}; });
   v.pan_hasRec=v.pan_rec.length>0;
   const EQ={'Pulverização':{cap:3000,un:'L',vaz:100,nome:'tanque útil 3.000 L · 100 L/ha'},'Adubação a lanço':{cap:3000,un:'kg',nome:'distribuidor 3.000 kg'}}[a.op];
   const areaP=(o.etapa==='Em execução')?(o.saldo||0):(o.area||0);
@@ -775,7 +813,8 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   const apP=osApPend(o), apMax=Math.max(0,(o.saldo||0)-apP);
   v.pan_go=()=>{ if(P.fn==='ajustar'){ v.pan_ajgo(); return; } if(P.fn==='apontar'){ const prox=(o.ap||[]).find(x=>x.st==='Previsto'); self.setState({pa:{id:o.id,fn:'apontar',d:CEN_DIA_OP,ha:String(Math.min(apMax,prox?prox.ha:apMax)).replace('.',','),ced:{},chave:'W-'+o.id+'-'+Date.now(),err:''}}); return; } self.setState({pa:{id:o.id,fn:P.fn}}); };
   // confirmação e formulários de decisão só com o papel: aberto por outro perfil (troca no seletor ou em outra aba), não aparece (achado 1)
-  const DSP=g2alc('AL-05').papeis, agr=g2papel(PF,DSP), gest=g2papel(PF,g2alc('AL-04').papeis), AGR=g2papel(PF,g2alc('AL-02').papeis);   /* dispensa (CMD-47; AL-05); cancelar (CMD-46; AL-04); ajustar (AL-02): da alçada vigente */
+  const DSP=g2alc('AL-05').papeis, agr=g2papel(PF,DSP), gest=g2papel(PF,g2alc('AL-04').papeis), AGR=g2papel(PF,g2alc('AL-02').papeis);
+  const LP=g2alc('AL-02').papeis.concat(OS_LIB().filter(x=>g2alc('AL-02').papeis.indexOf(x)<0));   /* dispensa (CMD-47; AL-05); cancelar (CMD-46; AL-04); ajustar (AL-02): da alçada vigente */
   const paOk=!!pa&&({ajustar:AGR,dispensar:agr,cancelar:gest,aprovar:AGR}[pa.fn]!==false)&&!(pa.fn==='liberar'&&b&&b.papel)&&!(pa.fn==='aprovar'&&P.fn!=='aprovar');
   v.pan_conf=paOk&&['liberar','aprovar','iniciar','conferencia','encerrar'].indexOf(pa.fn)>=0; v.pan_apf=paOk&&pa.fn==='apontar'; v.pan_ajf=paOk&&pa.fn==='ajustar'; v.pan_idle=!paOk;
   v.pan_canf=paOk&&pa.fn==='cancelar'; v.pan_disf=paOk&&pa.fn==='dispensar';
@@ -783,6 +822,14 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
   v.pan_setrmot=(e)=>self.setState({pa:Object.assign({},self.state.pa,{motivo:e.target.value,err:''})});
   // ajustar antes de liberar (secundário do passo A liberar com produto, também na confirmação): dose por insumo e área → osc_ajustar
   v.pan_hasAj=!!P.sec&&AGR; v.pan_hasAjc=v.pan_hasAj&&!b&&!!pa&&pa.fn==='liberar'; v.pan_ajbtn=P.sec?P.sec.btn:'';
+  /* 14/10 (proprietário: "faltando edição de insumos ... e botão de liberar"): sem o papel, a ação não some. Fica indisponível (apagada, cursor de
+     proibido) com o motivo ao lado (padrão de botões do design system); a troca de perfil continua só no avatar do menu (sem "ver como" nas telas) */
+  const semPapel=!!(b&&b.papel);
+  v.pan_hasBtnOff=semPapel&&!!P.btn&&!v.pan_hasBtn; v.pan_pbtnOff=P.btn||'';
+  v.pan_hasAjOff=!!P.sec&&!AGR&&P.sec.fn!=='liberar'; v.pan_ajbtnOff=P.sec?P.sec.btn:'';
+  v.pan_offWhy=semPapel?('Disponível para '+(g2quem(LP)||OS_AGRO())+'. O perfil ativo ('+(PF?PF.t:'nenhum')+') não tem esse papel; troque no avatar do menu.'):
+    (v.pan_hasAjOff?('Ajustar: disponível para '+OS_AGRO()+'. Troque o perfil no avatar do menu.'):'');
+  v.pan_hasOffWhy=v.pan_hasBtnOff||v.pan_hasAjOff;
   v.pan_secgo=()=>{ if(P.sec&&P.sec.fn==='liberar') self.setState({pa:{id:o.id,fn:'liberar'}}); else v.pan_ajgo(); };   /* SOLO-01: com o plano mudado, o secundário libera com a dose da O.S. */
   if(o.planoMudou&&pa&&pa.fn==='liberar') v.pan_hasAjc=false;
   const ajAp=AGR&&!g2papel(PF,OS_LIB());   /* CONF-01 R13: quem só aprova grava a versão nova e aprova (CMD-42) no mesmo comando; não libera */
@@ -919,13 +966,21 @@ function EXTRAVALS(self,v){
   // #OS-0430:ajustar (vindo do Mapa) abre o formulário de ajuste; ordem de outra fazenda troca o filtro Fazenda para a dela
   // #tal=Santa Rita|T1 (entrada pelo Mapa ou por outra tela): herda o talhão no filtro, com a fazenda dele à vista no filtro do topo
   const abrirHash=()=>{ let h=''; try{ h=decodeURIComponent(location.hash||''); }catch(e){ h=''; }
+    const pm=/^#painel=([A-Za-z0-9,\-]+)$/.exec(h);
+    if(pm){ const ids=[...new Set(pm[1].split(','))].filter(id=>/^OS-\d+$/.test(id)&&ords(self).some(o=>o.id===id));   /* só O.S. que existem; inválidas e repetidas saem */
+      setTimeout(()=>self.setState(ids.length?{pnIds:ids,pan:null,g2toast:'Do Painel Agrícola: '+ids.length+(ids.length===1?' O.S.':' O.S.')}:{pnIds:null,g2toast:'Nenhuma O.S. do Painel encontrada: a lista mostra todas.'}),0); return; }
+    if(self.state.pnIds) setTimeout(()=>self.setState({pnIds:null}),0);   /* outra entrada pelo endereço encerra o recorte do Painel */
     const tm=/^#tal=([^|]+)\|(.+)$/.exec(h); if(tm){ const k=tm[1]+'|'+tm[2]; const ex=ords(self).some(o=>o.faz===tm[1]&&(o.talhoes||[]).some(t=>t.id===tm[2])); if(!ex) return;
       const f=Object.assign({},g2st(self,'g_os').f||{}); f.tal=[k]; const st={}; if(mfFaz(self)!=='Todas'&&mfFaz(self)!==tm[1]) st.mf_faz=tm[1];
-      setTimeout(()=>{ if(Object.keys(st).length) self.setState(st); g2set(self,'g_os',{f,fmc:null}); },0); return; }
+      /* revisão VISOES-1, achado A1: a Safra guardada na sessão (g2keep) não esvazia a entrada pelo endereço; sem ordem do talhão nela, volta a Todas, com aviso */
+      const sf=mfSaf(self); if(sf!=='Todas'&&!ords(self).some(o=>o.faz===tm[1]&&o.saf===sf&&(o.talhoes||[]).some(t=>t.id===tm[2]))){ st.mf_saf='Todas'; st.g2toast='Safra: Todas (o talhão '+tm[2]+' não tem ordem na '+sf+')'; }
+      setTimeout(()=>{ g2set(self,'g_os',{f,fmc:null}); if(Object.keys(st).length) self.setState(st); },0); return; }
     const nm=/^#nova:([^:]+):([^:]+):(\d{4}-\d{2}-\d{2})$/.exec(h); if(nm){ const sf=OSD.nova.safs.find(x=>(OSD.nova.cult[x.id]||[]).some(k=>k.id===nm[1])); if(!sf) return;   /* Programar colheita (Produção › Previsão e colheita): só preenche; Ana confirma Emitir */
       const st={nv:{saf:sf.id,cult:nm[1],atv:nm[2],jan:nm[3],errs:{},warn:false,pre:true},pan:null}; if(mfFaz(self)!=='Todas'&&sf.faz&&sf.faz!==mfFaz(self)) st.mf_faz=sf.faz; setTimeout(()=>self.setState(st),0); return; }
     const m=/^#(O[SB]-\d+)(?::(ajustar|usar=(.*)))?$/.exec(h); if(!m) return;   /* :usar= vem do "Usar na O.S." do AG-07 (CTL-5) */
     const oh=ords(self).find(o=>o.id===m[1]); if(!oh) return; const f=mfFaz(self); const st={pan:oh.id,pa:null}; if(f!=='Todas'&&oh.faz&&oh.faz!==f) st.mf_faz=oh.faz;
+    /* revisão VISOES-1, achado A1: a ordem pedida aparece na lista atrás do painel; a Safra guardada que a esconde passa à safra dela, com aviso */
+    const sf=mfSaf(self); if(sf!=='Todas'&&oh.saf!==sf){ st.mf_saf=oh.saf||'Todas'; st.g2toast='Safra: '+st.mf_saf+(oh.saf?' (a da '+oh.id+')':''); }
     if(m[2]) self.__ajAuto=oh.id;
     if(m[3]!==undefined){ const u=m[3].split('|'); self.__usar={id:oh.id,p:u[0]||'',cul:u[1]||'',alvo:u[2]||''};   /* "Usar na O.S." do AG-07: produto, cultura e alvo */
       try{ history.replaceState(null,'','#'+oh.id); }catch(e){} }   /* o link é consumido: recarregar não inclui de novo */
@@ -934,47 +989,89 @@ function EXTRAVALS(self,v){
   all.forEach(o=>{ v['op_'+o.id.replace('-','')]=()=>self.setState({pan:o.id,pa:null}); });
   self.g2pick=(gid,rid)=>{ if(gid==='g_os'&&String(rid).indexOf('grp@')!==0) self.setState({pan:String(rid).split('@')[0]}); };
   // agrupar por talhão: liga/desliga; grupos começam abertos; total geral de O.S. distintas (cada O.S. uma vez)
-  v.os_agr=!!self.state.os_agr; v.os_agrT=self.state.os_agr?'Desagrupar':'Agrupar por talhão';
-  v.os_agrgo=()=>{ const on=!self.state.os_agr; const x={}; if(on){ const ks=new Set(); (self.__osBase||[]).forEach(r=>(r.m.tal.length?r.m.tal:[{id:'(vazio)'}]).forEach(t=>ks.add('grp@'+t.id))); ks.forEach(k=>{ x[k]=true; }); }
-    self.setState({os_agr:on}); g2set(self,'g_os',{x}); };
-  { const spB=GR('g_os'), stB=g2st(self,'g_os'); const dist=(self.__osBase||[]).filter(r=>g2match(r,spB,stB)); const ar=dist.reduce((a,r)=>a+(Number(r.v.area)||0),0);
-    if(self.state.os_agr){ v.g_os_count=dist.length; v.g_os_all=(self.__osBase||[]).length; }   // contador da grade = O.S. distintas, não grupos
-    v.os_gtot='Total: '+dist.length+(dist.length===1?' O.S.':' O.S. distintas')+' · '+nf(ar)+' ha (cada O.S. contada uma vez; os grupos se sobrepõem quando a O.S. tem mais de um talhão)'; }
+  const osAg=g2agLer(self,GR('g_os')); v.os_agr=['lista','cartoes'].indexOf(g2visao(self,'g_os'))>=0&&!!osAg&&osAg.d==='onde';   /* VISOES-2: por Onde, a O.S. de vários talhões aparece em cada um */
+  /* VISOES-2 §3.4: toda forma lê o mesmo recorte, inclusive a trilha do Agrupar por (self.__osTr: IDs dentro da trilha; null sem trilha) */
+  { const spB=GR('g_os'), stB=osSt(self); const trB=g2agNoTrilha(self,spB,stB,self.__osBase||[]); self.__osTr=trB?new Set(trB.map(r=>r.id)):null;
+    const dist=(self.__osBase||[]).filter(r=>(!self.__osTr||self.__osTr.has(r.id))&&g2match(r,spB,stB)); const ar=dist.reduce((a,r)=>a+(Number(r.v.area)||0),0);
+    self.__osDist=dist.length;   // contador da grade agrupada = O.S. distintas (g2vals)
+    v.os_gtot=dist.length+' O.S. · '+nf(ar)+' ha · a O.S. de vários talhões aparece em cada um e conta uma vez no total'; }
   const openPan=(id)=>self.setState({pan:id});
   // estado vazio do recorte: uma frase e uma ação que troca o filtro que zerou a tela
   const fz=mfFaz(self), sf=mfSaf(self), semFaz=!all.some(o=>fz==='Todas'||o.faz===fz);
+  const cu=mfCult(self), soCult=cu!=='Todas'&&vis(self,true).length>0;   /* zerou só pela Cultura: a ação devolve todas as culturas */
   v.os_vazio=os.length===0; v.os_tem=!v.os_vazio;
-  v.os_vt=semFaz?('Nenhuma ordem na '+fz):('Nenhuma ordem na safra '+sf);
-  v.os_va=semFaz?'Ver Santa Rita':'Ver todas as safras';
-  v.os_vgo=()=>self.setState(semFaz?{mf_faz:'Santa Rita',g2toast:'Fazenda: Santa Rita'}:{mf_saf:'Todas',g2toast:'Safra: Todas'});
+  v.os_vt=soCult?('Nenhuma ordem de '+cu.toLowerCase()+' neste recorte'):(semFaz?('Nenhuma ordem na '+fz):('Nenhuma ordem na safra '+sf));
+  v.os_va=soCult?'Ver todas as culturas':(semFaz?'Ver Santa Rita':'Ver todas as safras');
+  v.os_vgo=()=>self.setState(soCult?{mf_cult:'Todas',g2toast:'Cultura: Todas'}:(semFaz?{mf_faz:'Santa Rita',g2toast:'Fazenda: Santa Rita'}:{mf_saf:'Todas',g2toast:'Safra: Todas'}));
   // selo do cabeçalho: recalculado do estado (cancelar, iniciar ou enviar para conferência muda as contagens)
   const nEx=os.filter(o=>o.etapa==='Em execução').length;
-  const nIm=os.filter(o=>o.etapa!=='Canceladas'&&o.selos.some(s=>/impedida|falta máquina|falta insumo/i.test(s.t))).length;
+  const nIm=os.filter(o=>o.etapa!=='Canceladas'&&o.selos.some(s=>OS_IMP_RE.test(s.t))).length;
   v.os_st=nEx+' em execução · '+(nIm?nIm+' impedida'+(nIm!==1?'s':''):'nenhuma impedida');
   const stc=nIm?'red':(nEx?'green':'gray');  // vermelho só com impedidas (mesma cor do estado nas outras telas)
   v.os_stst=chipSt(stc).replace('padding:2px 9px;','padding:3px 10px;'); v.os_stdot=dotSt(stc);
   // ---- chips de fase (filtro real da grade: mesma chave do filtro da coluna Fase) ----
-  const gst=g2st(self,'g_os'); const ff=((gst.f||{}).fase)||[];
+  const gst=osSt(self); const ff=((gst.f||{}).fase)||[];
   const chip=(t,n,on,fn)=>({t,n,on:on?'true':'false',fn,st:'display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;'+(on?'border:1px solid #15201A;background:#15201A;color:#fff;':'border:1px solid #E4E9E5;background:#FFFFFF;color:#15201A;'),
     nst:'font-size:11.5px;font-weight:800;padding:0 7px;border-radius:999px;'+(on?'background:rgba(255,255,255,.2);color:#fff;':'background:#EEF1EE;color:#15201A;')});
   const setF=(f)=>()=>{ const cur=Object.assign({},g2st(self,'g_os').f||{}); if(f) cur.fase=[f]; else delete cur.fase; g2set(self,'g_os',{f:cur,fmc:null}); };
   v.fchips=[chip('Todas',os.filter(o=>o.etapa!=='Canceladas').length,ff.length===0,setF(null))].concat(FASES.concat(['Canceladas']).map(f=>chip(f,os.filter(o=>o.etapa===f).length,ff.length===1&&ff[0]===f,setF(f))));
+  if(osPn(self)) v.fchips=[];   /* recorte do Painel: fase suspensa, sem chips que pareçam filtrar */
   // ---- Kanban: cinco colunas fixas; selos no cartão ----
   // UX-ACAO-UNICA-20261003 (DS-33 §74.5.7.1, DS-40): Lista e Kanban são o mesmo trabalho e partilham os filtros (fase pelos chips,
   // colunas e busca da lista). Antes o Kanban ignorava o filtro (reproduzido: Liberadas → lista 2 ordens, Kanban 10). O filtro ativo
   // fica escrito no Kanban, com "Limpar filtros"; Recursos (recurso × dia) diz que o filtro não se aplica, sem descartá-lo em silêncio.
-  const spO=GR('g_os'), stO=g2st(self,'g_os'); const filtrando=g2filtering(stO);
+  const spO=GR('g_os'), stO=osSt(self), trS=self.__osTr||null; const filtrando=g2filtering(stO)||!!trS;
   const osRows=self.__osBase||spO.rows||[];   // linhas canônicas (no agrupado, spO.rows são os grupos)
-  const okId=filtrando?new Set(osRows.filter(r=>g2match(r,spO,stO)).map(r=>r.id)):null; const osK=okId?os.filter(o=>okId.has(o.id)):os;
+  const okId=filtrando?new Set(osRows.filter(r=>(!trS||trS.has(r.id))&&g2match(r,spO,stO)).map(r=>r.id)):null; const osK=okId?os.filter(o=>okId.has(o.id)):os;
+  const agA=g2agLer(self,spO), agD=agA&&spO.ag.find(x=>x.pq===agA.d), trTxt=(trS&&agD)?agD.l+': '+agA.t.join(' › '):'';
   const fDesc=[].concat(((stO.f||{}).fase||[]).length?['fase '+((stO.f||{}).fase||[]).join(', ')]:[])
     .concat(Object.keys(stO.f||{}).filter(k=>k!=='fase'&&((stO.f||{})[k]||[]).length).map(k=>{ const c=spO.cols.find(x=>x.k===k); const vs=(stO.f||{})[k]||[];
       return (c?c.l.toLowerCase():k)+(k==='tal'?' '+vs.map(x=>x==='(vazio)'?'sem talhão':x.split('|')[1]).join(', '):' ('+vs.length+')'); }))
-    .concat((stO.q||'').trim()?['busca “'+(stO.q||'').trim()+'”']:[]).join(' · ');
-  v.kb_filtro=filtrando; v.kb_nota='Filtro da lista aplicado: '+fDesc+' · '+osK.filter(o=>FASES.indexOf(o.etapa)>=0).length+' de '+os.filter(o=>FASES.indexOf(o.etapa)>=0).length+' ordens';
-  v.os_limpar=()=>g2set(self,'g_os',{f:{},q:'',fmc:null});
-  // Recursos (TABELAS-FOCO): o mesmo recorte da lista mostra só os blocos das ordens dentro dele; conflitos e uso continuam da semana inteira
-  v.rc_nota='Recursos mostra a semana do PCP por recurso e dia'+(filtrando?': só os blocos das ordens no filtro da lista ('+fDesc+'); conflitos, manutenção e uso continuam da semana inteira.':', com todas as ordens.');
-  RC_OS.forEach(id=>{ v['rcv_'+id.replace('-','')]=!okId||okId.has(id); });
+    .concat((stO.q||'').trim()?['busca “'+(stO.q||'').trim()+'”']:[]).concat(trTxt?[trTxt.toLowerCase()]:[]).join(' · ');
+  /* VISOES-2 §8 ponto 3: em toda forma, o recorte ativo em chips removíveis acima do conteúdo (trilha, filtros de coluna e busca), com
+     "Limpar filtros"; a fase fica nos chips de fase, acima, que já mostram a escolhida */
+  { const tlab=(c,x)=>x==='(vazio)'?'vazio':(c.k==='tal'?(String(x).split('|')[1]||x):g2flab(osRows,c,x)); const rch=[];
+    if(trTxt) rch.push({t:trTxt,lab:'Tirar a trilha '+trTxt,rm:()=>g2agGrava(self,spO,{d:agA.d,t:[]})});
+    Object.keys(stO.f||{}).filter(k=>k!=='fase'&&((stO.f||{})[k]||[]).length).forEach(k=>{ const c=spO.cols.find(x=>x.k===k)||{k,l:k};
+      const t=c.l+': '+((stO.f||{})[k]||[]).map(x=>tlab(c,x)).join(', ');
+      rch.push({t,lab:'Remover filtro '+t,rm:()=>{ const f=Object.assign({},g2st(self,'g_os').f||{}); delete f[k]; g2set(self,'g_os',{f,fmc:null}); }}); });
+    if((stO.q||'').trim()) rch.push({t:'Busca: “'+(stO.q||'').trim()+'”',lab:'Limpar a busca',rm:()=>g2set(self,'g_os',{q:''})});
+    v.os_rchips=rch; }
+  { const pn=self.state.pnIds||null; v.pn_on=!!(pn&&pn.length); v.pn_txt=v.pn_on?('Do Painel Agrícola: '+pn.length+' O.S. ('+pn.join(', ')+'). Busca, fase e filtros da tela ficam suspensos neste recorte; "Ver todas as O.S." volta a eles.'):''; v.mf_susp=v.pn_on;
+    v.pn_sair=()=>{ try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} self.setState({pnIds:null,g2toast:'Todas as O.S. do recorte da tela.'}); }; }
+  v.kb_filtro=filtrando&&(self.__osDist||0)>0&&!v.pn_on; v.kb_nota=osK.filter(o=>FASES.indexOf(o.etapa)>=0).length+' de '+os.filter(o=>FASES.indexOf(o.etapa)>=0).length+' ordens no recorte';
+  v.os_limpar=()=>{ g2set(self,'g_os',{f:{},q:'',fmc:null}); if(trS&&agA) g2agGrava(self,spO,{d:agA.d,t:[]}); };
+  // Carga por recurso (TABELAS-FOCO; revisão VISOES-1, achados A5 e C3): os blocos, o estado e a faixa "Sem alocação" contam o MESMO recorte
+  // da lista (Fazenda e Safra do topo + filtro da grade). Os blocos da irrigação só com água (do módulo Irrigação, fora da lista) seguem a
+  // Fazenda e a Safra e somem com filtro da grade, como antes. Conflitos, manutenção e uso continuam da semana inteira.
+  const recR=(self.__osBase||[]).filter(r=>(!trS||trS.has(r.id))&&g2match(r,spO,stO)), recIds=new Set(recR.map(r=>r.id));
+  const escD=[mfFaz(self)==='Todas'?'todas as fazendas':mfFaz(self)].concat(mfSaf(self)==='Todas'?[]:['safra '+mfSaf(self)]).join(' · ');
+  const rDesc=escD+(filtrando?' no recorte':'');
+  const extOk=(id)=>{ const x=RC_EXT[id]; return !!x&&!filtrando&&(mfFaz(self)==='Todas'||mfFaz(self)===x[0])&&(mfSaf(self)==='Todas'||mfSaf(self)===x[1]); };
+  v.rc_nota='A carga por recurso mostra a semana do PCP por recurso e dia: só os blocos das ordens de '+rDesc+'; conflitos, manutenção e uso continuam da semana inteira.';
+  g2visaoTenta(self,'g_os','carga',()=>{ RC_OS.forEach(id=>{ v['rcv_'+id.replace('-','')]=recIds.has(id)||extOk(id); }); rcVals(self,v,(id)=>recIds.has(id)||extOk(id)); });   /* 14/10: Carga pela alocação vigente (trocas de recurso) */   /* VISOES-1 §2.8: a falha desta visão não derruba a Lista */
+  // §2.8 "Parcial": ordens do recorte que pedem recurso (a liberar, liberadas, em execução) e não têm bloco na semana; cada ID abre o mesmo painel
+  const semAl=recR.filter(r=>RC_OS.indexOf(r.id)<0&&['A liberar','Liberadas','Em execução'].indexOf(r.v.fase)>=0).map(r=>r.id);
+  const nAl=recR.filter(r=>RC_OS.indexOf(r.id)>=0).length;
+  v.rc_semtem=nAl>0&&semAl.length>0; v.rc_semt='Sem alocação ('+semAl.length+')'; v.rc_sem=semAl.map(id=>({id,lab:'Abrir '+id+' (sem alocação na semana do PCP)',go:()=>openPan(id)}));
+  /* VISOES-1 §2.8 · estado em toda visão (vazio de contexto continua sem seletor: os_vazio): cenário ilegível, vazio de filtro e vazio por regra */
+  { const nDist=self.__osDist||0, nKb=osK.filter(o=>FASES.indexOf(o.etapa)>=0).length;
+    const nCanc=vendoCanc(self)?0:os.filter(o=>o.etapa==='Canceladas').length;
+    const ord=(n)=>n+(n===1?' ordem':' ordens'), lista=()=>g2visaoIr(self,'g_os','lista','fallback');
+    self.g2visaoFoco=()=>self.state.pan||'';
+    self.g2visaoEstado=(gid,k)=>{
+      if(typeof cenIlegivel==='function'&&cenIlegivel()) return {tipo:'cenario',texto:'O cenário gravado neste navegador não pôde ser lido: a tela mostra a demonstração inicial. Nada foi apagado; o gravado fica guardado à parte ao recomeçar.',
+        acao:'Recomeçar a demonstração',fn:()=>{ cenReset(); self.setState({cenrev:Date.now(),g2toast:'Demonstração recomeçada; o cenário ilegível ficou guardado à parte.'}); }};
+      if(filtrando&&nDist===0) return {tipo:'vazio',texto:'Nenhuma ordem no filtro: '+fDesc+'.',acao:'Limpar filtros',fn:v.os_limpar};
+      /* revisão VISOES-1, achado A2: recorte só com canceladas (fora da lista e do quadro por regra) diz o motivo em toda visão */
+      if(!filtrando&&nDist===0&&nCanc>0) return {tipo:'regra',texto:'Só há ordens canceladas neste recorte ('+escD+'): '+ord(nCanc)+'.',acao:'Ver canceladas',fn:setF('Canceladas')};
+      if(k==='kanban'&&nDist>0&&nKb===0) return {tipo:'regra',texto:'Canceladas ficam fora do quadro: '+ord(nDist)+' no filtro.',acao:'Ver em tabela',fn:lista};
+      if(k==='calendario'&&nDist>0&&nKb===0) return {tipo:'regra',texto:'Canceladas ficam fora do calendário: '+ord(nDist)+' no filtro.',acao:'Ver em tabela',fn:lista};
+      /* VISOES-2: semana sem ordem do recorte (há ordem em outra semana): diz e leva à próxima (ou à anterior) */
+      if(k==='calendario'&&self.__cal&&nKb>0&&self.__cal.n===0&&self.__cal.sem===0){ const C=self.__cal, d=C.prox||C.ant;
+        return {tipo:'regra',texto:'Nenhuma ordem do recorte nesta semana.',acao:d?(C.prox?'Ir para a semana de ':'Voltar para a semana de ')+brd(d).slice(0,5):'Ver em tabela',fn:d?()=>C.ir(d):lista}; }
+      if(k==='carga'&&nDist>0&&nAl===0) return {tipo:'regra',texto:'Nenhuma ordem de '+rDesc+' tem alocação na semana do PCP: '+ord(nDist)+'.',acao:'Ver em tabela',fn:lista};
+      return null; }; }
   // ---- Talhão (TABELAS-FOCO): seletor na barra da coleção, fora das abas; o mesmo estado do filtro da coluna Talhão (f.tal) ----
   { const spc=spO.cols.find(c=>c.k==='tal'); const tcnt={}, tlab={};
     osRows.forEach(r=>g2fkeys(r,spc).forEach(k=>{ tcnt[k]=(tcnt[k]||0)+1; if(!tlab[k]){ const x=(g2mem(r,spc)||[]).find(y=>y.id===k); tlab[k]=x?x.l:'Sem talhão'; } }));
@@ -983,6 +1080,11 @@ function EXTRAVALS(self,v){
     const setT=(arr)=>{ const f=Object.assign({},g2st(self,'g_os').f||{}); if(arr.length) f.tal=arr; else delete f.tal; self.__osMsg=''; g2set(self,'g_os',{f,fmc:null}); };
     const nome=(k)=>tlab[k]||(k==='(vazio)'?'Sem talhão':k.split('|')[1]);
     v.ost_open=!!self.state.ost_open; v.ost_q=tq; v.ost_on=tsel.length?'true':'false';
+    /* faixa "Filtros desta tela" (13/10): Talhão é este mesmo filtro (f.tal), escolhido numa lista; Cultura, os cultivos do recorte de Fazenda e Safra */
+    v.mf_tal=tsel.length===1?tsel[0]:(tsel.length?'__v':''); v.mf_tal_opts=[{v:'',t:'Todos'}].concat(tsel.length>1?[{v:'__v',t:tsel.length+' talhões'}]:[]).concat(tks.map(k=>({v:k,t:nome(k)})));
+    v.mf_settal=(e)=>{ const x=e.target.value; if(x==='__v') return; setT(x?[x]:[]); self.setState({g2toast:'Talhão: '+(x?nome(x):'Todos')}); };
+    { const cs=[]; vis(self,true).forEach(o=>osCults(o).forEach(c=>{ if(cs.indexOf(c)<0) cs.push(c); })); cs.sort((a,b)=>a.localeCompare(b,'pt-BR')); const cu=mfCult(self); if(cu!=='Todas'&&cs.indexOf(cu)<0) cs.push(cu);
+      v.mf_cult=cu; v.mf_cult_opts=[{v:'Todas',t:'Todas'}].concat(cs.map(c=>({v:c,t:c}))); v.mf_setcult=(e)=>self.setState({mf_cult:e.target.value,g2toast:'Cultura: '+e.target.value}); }
     v.ost_btn='Talhão: '+(tsel.length?tsel.map(nome).join(', '):'Todos');
     v.ost_btnst='display:inline-flex;align-items:center;gap:6px;font-family:inherit;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;'
       +(tsel.length?'border:1px solid #1E7A4C;background:#E4F3E9;color:#14532D;':'border:1px solid #E4E9E5;background:#fff;color:#15201A;');
@@ -997,7 +1099,9 @@ function EXTRAVALS(self,v){
     v.ost_semres=!v.ost_vals.length; v.ost_todos=()=>setT([]); v.ost_limpa=tsel.length>0;
     v.ost_conta=tsel.length?(osK.length+(osK.length===1?' ordem':' ordens')+' no filtro'):'';
     v.os_tmsg=self.__osMsg||''; v.os_temmsg=!!self.__osMsg; }
-  v.kb=FASES.map(f=>{ const cs=osK.filter(o=>o.etapa===f); const sal=cs.filter(o=>o.area).reduce((s,o)=>s+(o.saldo||0),0);
+  /* VISOES-2 §3.3: com Agrupar por, o Kanban ganha uma raia por grupo do nível atual (a mesma O.S. de dois talhões aparece nas duas raias,
+     como na Tabela); o nome da raia desce. No último nível, um quadro só, do recorte da trilha */
+  v.kb=[]; v.kb_raias=[]; v.kb_temraias=false; g2visaoTenta(self,'g_os','kanban',()=>{ const kbCols=(lst)=>FASES.map(f=>{ const cs=lst.filter(o=>o.etapa===f); const sal=cs.filter(o=>o.area).reduce((s,o)=>s+(o.saldo||0),0);
     return {t:f,n:String(cs.length),nst:chipSt(FCOR[f]),carga:(f==='Encerradas'?osPeriodo(cs):(sal?'saldo '+nf(sal)+' ha':'')),vazio:cs.length===0,
       cards:cs.map(o=>{ const pct=o.area?Math.round(100*(o.realizado||0)/o.area):0;
         const ini=!!o.area&&(o.realizado||0)>0;
@@ -1006,6 +1110,40 @@ function EXTRAVALS(self,v){
           selos:o.selos.map(s=>({t:s.t,dica:osSeloDica(o,s.t)||g2dicaDe(s.t),st:chipSt(s.c).replace('white-space:nowrap;','white-space:normal;line-height:1.3;align-items:baseline;').replace('border-radius:999px;','border-radius:8px;'),dot:dotSt(s.c)+'transform:translateY(-1px);'})),meta:o.resp+' · '+o.janela,dp:(o.dono?o.dono+' · '+o.prazo:''),hasDp:!!o.dono,lab:'Abrir '+o.id+' · '+o.tipo,
           st:'display:flex;flex-direction:column;gap:6px;text-align:left;width:100%;box-sizing:border-box;background:#FFFFFF;border-radius:10px;padding:9px 10px;cursor:pointer;font-family:inherit;color:#15201A;'+(st.pan===o.id?'border:2px solid #1E7A4C;':'border:1px solid #E4E9E5;box-shadow:0 1px 2px rgba(21,32,26,.05);'),
           open:()=>openPan(o.id), key:(e)=>{ if(e&&(e.key==='Enter'||e.key===' ')){ e.preventDefault(); openPan(o.id); } }}; })}; });
+    const R=(agA&&!v.pn_on)?g2agRows(self,spO,g2stBusca(self,'g_os',stO),osRows):null;
+    if(R&&R.a&&R.D&&R.lv<R.D.niv.length){ const niv=R.D.niv[R.lv].toLowerCase();
+      v.kb_raias=R.rows.map(g=>{ const ids=new Set(g.kids.map(x=>String(x.id).split('@')[0])), lst=osK.filter(o=>ids.has(o.id)), n=lst.filter(o=>FASES.indexOf(o.etapa)>=0).length;
+        return {k:g.grp.k,n:n+(n===1?' ordem':' ordens'),lab:'Descer em '+g.grp.k+' ('+niv+'): '+n+(n===1?' ordem':' ordens'),desce:()=>g2agGrava(self,spO,{d:agA.d,t:(R.path||[]).concat([g.grp.k])}),cols:kbCols(lst),tem:n>0}; }).filter(r=>r.tem);
+      /* a O.S. de dois talhões aparece nas duas raias: a 2ª vez diz onde mais está (não é um segundo botão igual ao primeiro) */
+      const visto={}; v.kb_raias.forEach(r=>r.cols.forEach(c=>c.cards.forEach(k=>{ if(visto[k.id]){ k.hasRep=true; k.rep='Também na raia '+visto[k.id]; k.lab+=' · também na raia '+visto[k.id]; } else visto[k.id]=r.k; })));
+      v.kb_temraias=v.kb_raias.length>0; }
+    v.kb=kbCols(osK); });
+  /* VISOES-2 (F2a) · Calendário, só leitura: a semana de segunda a domingo com o mesmo recorte do Kanban (filtros, busca, Talhão; Canceladas
+     fora); a ordem aparece em cada dia da sua janela; sem início, na faixa "Sem data"; o clique abre o mesmo painel. Programar fica no detalhe. */
+  v.cal=[]; v.cal_sem=[]; self.__cal=null; g2visaoTenta(self,'g_os','calendario',()=>{ const hoje=(typeof CEN_DIA_OP!=='undefined'?CEN_DIA_OP:'2026-09-26'); const seg0=g2segunda(hoje);
+    const seg=self.state.cal_seg||seg0; const dias=g2semana(seg); const cs=osK.filter(o=>FASES.indexOf(o.etapa)>=0); const DS=['seg','ter','qua','qui','sex','sáb','dom'];
+    const card=o=>({id:o.id,tipo:o.tipo,local:localTxt(o),fase:o.etapa,fst:chipSt(FCOR[o.etapa]),fdot:dotSt(FCOR[o.etapa]),open:()=>openPan(o.id),
+      lab:'Abrir '+o.id+' · '+o.tipo+' · '+o.etapa+(o.ini?' · janela '+brd(o.ini)+(o.fim&&o.fim!==o.ini?' a '+brd(o.fim):''):' · sem data')});
+    const naSem=new Set();
+    /* ordem de vários dias na semana: uma faixa só, sobre as colunas dos seus dias (antes, um botão igual em cada dia: ação duplicada) */
+    const diasDe=o=>dias.filter(d=>g2noDia(o.ini,o.fim,d)), perDe=o=>brd(o.ini).slice(0,5)+(o.fim&&o.fim!==o.ini?' → '+brd(o.fim).slice(0,5):'');
+    v.cal_multi=cs.filter(o=>diasDe(o).length>1).map(o=>{ const ds=diasDe(o), a=dias.indexOf(ds[0]), k=card(o); ds.forEach(()=>naSem.add(o.id));
+      k.col='grid-column:'+(a+1)+' / span '+ds.length+';'; k.per=perDe(o); return k; });
+    v.cal_temmulti=v.cal_multi.length>0;
+    v.cal=dias.map((d,i)=>{ const ds=cs.filter(o=>g2noDia(o.ini,o.fim,d)); ds.forEach(o=>naSem.add(o.id)); const ehHoje=d===hoje;
+      /* Codex V68-CAL-DIA-01: na agenda do celular (≤ 900 px) a faixa perde o alinhamento com os dias; ali cada dia lista também a ordem de
+         vários dias que corre nele, com a posição na janela ("dia 2 de 3"). No computador essas linhas ficam ocultas e vale a faixa. */
+      const nd=(x,y)=>Math.round((Date.parse(y)-Date.parse(x))/864e5)+1;   // posição na janela inteira da ordem, não só nesta semana
+      const mult=ds.filter(o=>diasDe(o).length>1).map(o=>{ const k=card(o); k.pos='dia '+nd(o.ini,d)+' de '+nd(o.ini,o.fim||o.ini); k.per=perDe(o); k.lab+=' · '+k.pos; return k; });
+      return {d,t:DS[i]+' '+d.slice(8,10)+'/'+d.slice(5,7)+(ehHoje?' · hoje':''),hoje:ehHoje?'true':'false',vazio:ds.length===0,vz:ds.length===0?'true':'false',nt:ds.length?String(ds.length):'',ords:ds.filter(o=>diasDe(o).length<=1).map(card),mult}; });
+    v.cal_sem=cs.filter(o=>!o.ini).map(card); v.cal_temsem=v.cal_sem.length>0;
+    v.cal_tit=brd(dias[0]).slice(0,5)+' a '+brd(dias[6]); v.cal_n=naSem.size+(naSem.size===1?' ordem':' ordens')+' nesta semana'+(v.cal_sem.length?' · '+v.cal_sem.length+' sem data':'');
+    v.cal_naoHoje=seg!==seg0;
+    v.cal_prev=()=>self.setState({cal_seg:g2somaDias(seg,-7)}); v.cal_next=()=>self.setState({cal_seg:g2somaDias(seg,7)}); v.cal_hoje=()=>self.setState({cal_seg:null});
+    /* semana vazia: a próxima com ordem do recorte (a janela que começa ou ainda corre depois do domingo) */
+    const prox=cs.filter(o=>o.ini&&((o.fim&&o.fim>=o.ini?o.fim:o.ini)>dias[6])).map(o=>o.ini>dias[6]?o.ini:g2somaDias(dias[6],1)).sort()[0]||'';
+    const ant=cs.filter(o=>o.ini&&o.ini<dias[0]).map(o=>o.ini).sort().reverse()[0]||'';
+    self.__cal={n:naSem.size,sem:v.cal_sem.length,prox,ant,ir:(d)=>self.setState({cal_seg:g2segunda(d)})}; });
   // ---- painel lateral de consulta ----
   const o=st.pan?all.find(x=>x.id===st.pan):null; v.pan_open=!!o;
   const close=()=>self.setState({pan:null});
@@ -1058,7 +1196,7 @@ function EXTRAVALS(self,v){
     v.pan_cond=o.cond; v.pan_orig=o.orig.map(t=>({t}));
     v.pan_link=o.link||'#'; v.pan_hasLink=!!o.link;
     osWork(self,v,o); panSecs(self,v,o);
-    if(v.pan_ap.some(a=>a.cdAberto)){v.pan_hasBtn=false;v.pan_hasAj=false;v.pan_hasAjc=false;}
+    if(v.pan_ap.some(a=>a.cdAberto)){v.pan_hasBtn=false;v.pan_hasAj=false;v.pan_hasAjc=false;v.pan_hasBtnOff=false;v.pan_hasAjOff=false;v.pan_hasOffWhy=false;}
   }
   // ---- nova ordem (nasce A liberar; nunca liberada automaticamente) ----
   const nv=st.nv; v.nv_show=!!nv;
@@ -1123,6 +1261,8 @@ function EXTRAVALS(self,v){
 '''
 
 def bloco(titulo,desc,corpo,acao=''):
+    acao=E.recolhe_acoes(titulo,acao)   # MAIS-01 (15/10/2026): uma secundária à vista, as outras no "⋯ Mais ações" do bloco
+    desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
     return (f'<section style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; display: flex; flex-direction: column; min-width: 0;">'
             f'<div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px 10px; flex-wrap: wrap;"><div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">'
             f'<h3 style="margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -.01em;">{esc(titulo)}</h3><div style="font-size: 12.8px; color: {MUTED};">{esc(desc)}</div></div>{acao}</div>'
@@ -1133,7 +1273,10 @@ def _chip_hole(t,st,dot,dica=None):   # selo de estado: a dica (significado e pr
     at=f'data-dica="{H(dica)}"' if dica else f'data-dica-de="{H(t)}"'
     return f'<span {at} style="{H(st)}"><span style="{H(dot)}"></span>{H(t)}</span>'
 
-def _kanban():
+_KB_ROLA=('<style>@media (max-width:640px){.os-kb{overflow-x:auto;padding-bottom:6px}.os-kb .os-kbcol{flex:0 0 148px!important;min-width:148px!important}}</style>')
+def _kanban(celular_rola=False,lista="kb"):
+    """Quadro das 5 fases. celular_rola (O.S., revisão VISOES-1 achado B6): até 640 px cada coluna guarda 148 px e o quadro rola na horizontal,
+    em vez de 5 colunas de ~45 px com títulos e cartões encobertos (a página não rola de lado). A Manutenção (MA) usa o quadro sem isso."""
     card=(f'<div role="button" tabIndex="0" aria-label="{H("k.lab")}" onClick="{H("k.open")}" onKeyDown="{H("k.key")}" style="{H("k.st")}">'
           f'<div style="display: flex; align-items: baseline; gap: 6px;"><b style="font-size: 13px;">{H("k.id")}</b></div>'
           f'<div style="font-size: 12.5px; font-weight: 600; line-height: 1.3;">{H("k.tipo")}</div>'
@@ -1143,33 +1286,48 @@ def _kanban():
           f'<div style="display: flex; flex-wrap: wrap; gap: 4px;"><sc-for list="{H("k.selos")}" as="s" hint-placeholder-count="1">{_chip_hole("s.t","s.st","s.dot","s.dica")}</sc-for></div>'
           f'<sc-if value="{H("k.hasObs")}" hint-placeholder-val="{F()}"><div style="font-size: 11.5px; color: {MUTED};">{H("k.obs")}</div></sc-if>'
           f'<sc-if value="{H("k.hasDp")}" hint-placeholder-val="{F()}"><div style="font-size: 11.5px; font-weight: 700; color: {INK};">{H("k.dp")}</div></sc-if>'
-          f'<div style="font-size: 11.5px; color: {MUTED};">{H("k.meta")}</div></div>')
-    col=(f'<div style="flex: 1 1 0; min-width: 0; background: {BG}; border: 1px solid {LINE}; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">'
+          f'<div style="font-size: 11.5px; color: {MUTED};">{H("k.meta")}</div>'
+          f'<sc-if value="{H("k.hasRep")}" hint-placeholder-val="{F()}"><div style="font-size: 11.5px; font-weight: 700; color: {MUTED};">{H("k.rep")}</div></sc-if></div>')
+    col=(f'<div class="os-kbcol" style="flex: 1 1 0; min-width: 0; background: {BG}; border: 1px solid {LINE}; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px;">'
          f'<div style="display: flex; align-items: center; gap: 6px;"><span data-dica-de="{H("c.t")}" style="font-size: 11px; font-weight: 800; letter-spacing: .05em; color: {INK}; text-transform: uppercase;">{H("c.t")}</span>'
          f'<span style="{H("c.nst")} padding: 1px 8px; font-size: 11.5px;">{H("c.n")}</span></div>'
          f'<div style="font-size: 11.5px; color: {MUTED}; margin-top: -4px; min-height: 14px;">{H("c.carga")}</div>'
          f'<sc-for list="{H("c.cards")}" as="k" hint-placeholder-count="2">{card}</sc-for>'
-         f'<sc-if value="{H("c.vazio")}" hint-placeholder-val="{F()}"><div style="font-size: 12px; color: {MUTED}; padding: 10px 4px; text-align: center; border: 1px dashed {LINE}; border-radius: 10px;">Nenhuma ordem nesta fase</div></sc-if></div>')
-    return f'<div role="list" aria-label="Kanban das ordens" style="display: flex; gap: 10px; align-items: flex-start;"><sc-for list="{H("kb")}" as="c" hint-placeholder-count="5">{col}</sc-for></div>'
+         f'<sc-if value="{H("c.vazio")}" hint-placeholder-val="{F()}"><div class="os-kbvazio" style="font-size: 12px; color: {MUTED}; padding: 10px 4px; text-align: center; background: {BG}; border-radius: 10px;">Nenhuma ordem nesta fase</div></sc-if></div>')
+    rola = _KB_ROLA if celular_rola is True else ''   # 'sem_estilo': rola igual, com o estilo já posto por quem chama (_kanban_raias)
+    return rola + f'<div role="list" aria-label="Kanban das ordens" class="{"os-kb" if celular_rola else ""}" style="display: flex; gap: 10px; align-items: flex-start;"><sc-for list="{H(lista)}" as="c" hint-placeholder-count="5">{col}</sc-for></div>'
 
-def _talsel():
-    """Talhão (TABELAS-FOCO, 5983172395): à vista na barra da coleção, fora das abas (vale para Lista, Kanban e Recursos), Todos e
-    escolha pesquisável por ID do cadastro; o mesmo estado do filtro da coluna Talhão. Aplica ao marcar; Esc fecha e devolve o foco."""
-    lk=f'border: 0; background: transparent; padding: 0; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;'
-    return (f'<div style="position: relative; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">'
-            f'<button type="button" id="ost_btn" aria-haspopup="dialog" aria-expanded="{H("ost_open")}" aria-pressed="{H("ost_on")}" onClick="{H("ost_toggle")}" style="{H("ost_btnst")}">{H("ost_btn")} ▾</button>'
-            f'<sc-if value="{H("ost_limpa")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("ost_todos")}" style="{lk}">Todos os talhões</button><span style="font-size: 12px; color: {MUTED};">{H("ost_conta")}</span></sc-if>'
-            f'<button type="button" aria-pressed="{H("os_agr")}" onClick="{H("os_agrgo")}" style="{_MINI}">{H("os_agrT")}</button>'
-            f'<sc-if value="{H("os_agr")}" hint-placeholder-val="{F()}"><span role="note" style="font-size: 12px; color: {MUTED};">{H("os_gtot")}</span></sc-if>'
-            f'<sc-if value="{H("os_temmsg")}" hint-placeholder-val="{F()}"><span role="status" style="font-size: 12px; font-weight: 700; color: #8A5A00;">{H("os_tmsg")}</span></sc-if>'
-            f'<sc-if value="{H("ost_open")}" hint-placeholder-val="{F()}"><div role="dialog" aria-label="Filtrar por talhão" onKeyDown="{H("ost_key")}" style="position: absolute; top: calc(100% + 6px); z-index: 60; box-sizing: border-box; {H("ost_popst")} background: #fff; border: 1px solid {LINE}; border-radius: 12px; box-shadow: 0 14px 34px -14px rgba(21,32,26,.4); padding: 8px; display: flex; flex-direction: column; gap: 6px;">'
-            f'<input id="ost_q" type="search" aria-label="Pesquisar talhão" placeholder="Pesquisar talhão" value="{H("ost_q")}" onChange="{H("ost_setq")}" style="font-family: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid {LINE}; border-radius: 9px;">'
-            f'<button type="button" onClick="{H("ost_todos")}" style="{lk} text-align: left; padding: 4px 6px;">Todos os talhões</button>'
-            f'<div style="max-height: 260px; overflow-y: auto; border: 1px solid {LINE}; border-radius: 9px; padding: 4px;">'
-            f'<sc-for list="{H("ost_vals")}" as="tv" hint-placeholder-count="0"><label style="display: flex; align-items: center; gap: 10px; padding: 8px 6px; border-radius: 7px; font-size: 14px; cursor: pointer; min-height: 32px;">'
-            f'<input type="checkbox" checked="{H("tv.on")}" onChange="{H("tv.tog")}" style="width: 18px; height: 18px; accent-color: {ACC}; margin: 0;"><span style="flex-grow: 1; min-width: 0; overflow-wrap: anywhere;">{H("tv.t")}</span><span style="font-size: 12px; color: {MUTED};">{H("tv.n")}</span></label></sc-for>'
-            f'<sc-if value="{H("ost_semres")}" hint-placeholder-val="{F()}"><div style="padding: 8px; font-size: 12.5px; color: {MUTED};">Nenhum talhão com “{H("ost_q")}”.</div></sc-if></div>'
-            f'<div style="display: flex; justify-content: flex-end;"><button type="button" onClick="{H("ost_fecha")}" style="{_MINI}">Fechar</button></div></div></sc-if></div>')
+def _kanban_raias():
+    """VISOES-2 §3.3: Kanban com Agrupar por = uma raia por grupo do nível atual; o nome da raia desce (mesmo gesto do nome do grupo na Tabela).
+    Sem agrupamento, ou no último nível, o quadro único de sempre."""
+    # na raia, a fase vazia fica só com o título e o 0 (sem a caixa "Nenhuma ordem"): 8 raias × 5 fases não viram 40 caixas vazias
+    raia=(f'<section class="os-raia" style="display: flex; flex-direction: column; gap: 8px;">'
+          f'<button type="button" class="os-raia-cab" aria-label="{H("r.lab")}" onClick="{H("r.desce")}" style="align-self: flex-start; display: inline-flex; align-items: baseline; gap: 8px; min-height: 36px; padding: 4px 8px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; font-family: inherit; color: {ACC};">'
+          f'<b style="font-size: 14px;">{H("r.k")}</b><span style="font-size: 12.5px; color: {MUTED};">{H("r.n")}</span><span aria-hidden="true">›</span></button>'
+          + _kanban(celular_rola='sem_estilo',lista='r.cols') + '</section>')
+    # Codex 6170116165 V2-RAIAS-MOBILE-01: a raia usa a mesma coluna de 148 px com rolagem local do quadro único (antes, 5 colunas de ~45 px);
+    # V2-RAIAS-TOQUE-01: no toque, nome da raia, × do chip e "Limpar filtros" com 44 px
+    return (_KB_ROLA+'<style>.os-raia .os-kbvazio{display:none}@media (pointer:coarse){.os-raia-cab{min-height:44px!important}}</style>'
+            f'<sc-if value="{H("kb_temraias")}" hint-placeholder-val="{F()}"><div style="display: flex; flex-direction: column; gap: 16px;">'
+            f'<sc-for list="{H("kb_raias")}" as="r" hint-placeholder-count="2">{raia}</sc-for></div></sc-if>'
+            f'<sc-if value="{H("!kb_temraias")}" hint-placeholder-val="{T()}">' + _kanban(celular_rola='sem_estilo') + '</sc-if>')
+
+def _culturas_da(o):
+    sid=next((s['id'] for s in D2.SAFRAS if s.get('fazenda')==o.get('faz') and str(s.get('nome','')).endswith(str(o.get('saf','')))),None)
+    cs=D2.CULTIVOS.get(sid,[]) if sid else []; out=[]
+    for t in (o.get('talhoes') or []):
+        tid=str(t.get('id','')); alvo={tid}|({'Pivô '+str(int(tid[2:]))} if tid.startswith('PV') and tid[2:].isdigit() else set())
+        for c in cs:
+            l=c['local']
+            if (l in alvo or any(l.startswith(a+'-') or a.startswith(l+'-') for a in alvo)) and c['cultura'] not in out: out.append(c['cultura'])
+    return out
+
+def _notas_tal():
+    """avisos que eram do seletor de Talhão da barra (subiu para a faixa "Filtros desta tela" em 13/10): o total de O.S. distintas na Tabela
+    agrupada (os grupos se sobrepõem) e o aviso de talhão que saiu do filtro ao trocar Fazenda, Safra ou Cultura."""
+    return (f'<sc-if value="{H("os_agr")}" hint-placeholder-val="{F()}"><span role="note" style="font-size: 12px; color: {MUTED};">{H("os_gtot")}</span></sc-if>'
+            f'<sc-if value="{H("os_temmsg")}" hint-placeholder-val="{F()}"><span role="status" style="font-size: 12px; font-weight: 700; color: #8A5A00;">{H("os_tmsg")}</span></sc-if>')
+
 def _chips():
     return (f'<div role="group" aria-label="Filtrar por fase" style="display: flex; flex-wrap: wrap; gap: 6px;">'
             f'<sc-for list="{H("fchips")}" as="fc" hint-placeholder-count="7"><button type="button" aria-pressed="{H("fc.on")}" onClick="{H("fc.fn")}" style="{H("fc.st")}">{H("fc.t")}<span style="{H("fc.nst")}">{H("fc.n")}</span></button></sc-for></div>')
@@ -1238,6 +1396,9 @@ def _painel():
       f'<sc-if value="{H("pan_idle")}" hint-placeholder-val="{T()}"><div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">'
       f'<sc-if value="{H("pan_hasBtn")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("pan_go")}" style="{BTN_ST(True,True)}">{H("pan_pbtn")}</button></sc-if>'
       f'<sc-if value="{H("pan_hasAj")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("pan_secgo")}" title="Mudar dose ou área antes de liberar (gera a versão seguinte)" style="{_MINI}">{H("pan_ajbtn")}</button></sc-if>'
+      f'<sc-if value="{H("pan_hasBtnOff")}" hint-placeholder-val="{F()}"><button type="button" disabled aria-disabled="true" title="{H("pan_offWhy")}" style="{BTN_ST(True,True)}">{H("pan_pbtnOff")}</button></sc-if>'
+      f'<sc-if value="{H("pan_hasAjOff")}" hint-placeholder-val="{F()}"><button type="button" disabled aria-disabled="true" title="{H("pan_offWhy")}" style="{_MINI}">{H("pan_ajbtnOff")}</button></sc-if>'
+      f'<sc-if value="{H("pan_hasOffWhy")}" hint-placeholder-val="{F()}"><span style="font-size: 12px; color: {MUTED}; flex-basis: 100%;">{H("pan_offWhy")}</span></sc-if>'
       f'<span style="flex-grow: 1;"></span>'
       f'<sc-if value="{H("pan_hasDisp")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("pan_disgo")}" title="Dispensar parte do saldo sem executar (o realizado fica preservado)" style="{_LNK}">Dispensar saldo</button></sc-if>'
       f'<sc-if value="{H("pan_hasDispQ")}" hint-placeholder-val="{F()}"><span style="font-size: 12px; color: {MUTED};">{H("pan_dispQ")}</span></sc-if>'
@@ -1303,7 +1464,7 @@ def _painel():
       f'<div style="display: flex; gap: 8px;"><button type="button" onClick="{H("pan_back")}" style="{_MINI}">Cancelar</button><button type="button" onClick="{H("pan_asave")}" style="{_MINIP}">Salvar apontamento</button></div></div></sc-if></div>')
     return (f'<sc-if value="{H("pan_open")}" hint-placeholder-val="{F()}"><div style="position: fixed; inset: 0; z-index: 60; display: flex; justify-content: flex-end;">'
       f'<button type="button" aria-label="Fechar painel" onClick="{H("pan_close")}" style="position: absolute; inset: 0; border: 0; background: rgba(21,32,26,.32); cursor: pointer;"></button>'
-      f'<aside role="dialog" aria-label="{H("pan_t")}" onKeyDown="{H("pan_key")}" style="position: relative; width: 820px; max-width: 100%; height: 100vh; overflow-y: auto; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px;">'
+      f'<aside role="dialog" data-foco="1" aria-label="{H("pan_t")}" onKeyDown="{H("pan_key")}" style="position: relative; width: 820px; max-width: 100%; height: 100vh; overflow-y: auto; background: {SURF}; box-shadow: -12px 0 40px -12px rgba(21,32,26,.35); padding: 22px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px;">'
       f'<div style="display: flex; align-items: flex-start; gap: 10px;"><h2 style="margin: 0; font-family: {DISP}; font-size: 19px; font-weight: 700; letter-spacing: -.02em; flex-grow: 1; line-height: 1.3;">{H("pan_t")}</h2>'
       f'<sc-if value="{H("pan_hasLink")}" hint-placeholder-val="{F()}"><a href="{H("pan_link")}" style="{_MINI} text-decoration: none; display: inline-flex; align-items: center; white-space: nowrap;">Abrir ordem completa ›</a></sc-if>'
       f'<button type="button" aria-label="Fechar" title="Fechar" onClick="{H("pan_close")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED}; flex-shrink: 0;">×</button></div>'
@@ -1324,8 +1485,17 @@ def _painel():
       f'<sc-if value="{H("pan_hasNota")}" hint-placeholder-val="{F()}"><div style="font-size: 12px; color: {MUTED};">{H("pan_nota")}</div></sc-if></sc-if>'
       f'<sc-if value="{H("pan_noAp")}" hint-placeholder-val="{F()}"><div style="font-size: 12.8px; color: {MUTED}; padding: 6px 0;">{H("pan_noApT")}</div></sc-if>')
       + sec('rec','Recursos alocados',f'<sc-for list="{H("pan_rec")}" as="rc" hint-placeholder-count="3"><div style="display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.3fr); gap: 10px; align-items: center; padding: 7px 0; border-top: 1px solid {LINE}; font-size: 12.8px;">'
-      f'<b>{H("rc.t")}</b><span style="color: {MUTED};">{H("rc.j")}</span><span style="display: flex; flex-wrap: wrap; gap: 4px;"><sc-if value="{H("rc.cond")}" hint-placeholder-val="{F()}"><span style="display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; color: #8A5A00; background: #FFF4D6;">condicional</span></sc-if>'
-      f'<sc-for list="{H("rc.al")}" as="al" hint-placeholder-count="1"><span style="display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; color: #B42318; background: #FDE8E6;">{H("al.t")}</span></sc-for></span></div></sc-for>')
+      f'<span style="display: flex; flex-direction: column; gap: 3px; align-items: flex-start; min-width: 0;"><b>{H("rc.t")}</b>'
+      f'<sc-if value="{H("rc.hasDe")}" hint-placeholder-val="{F()}"><span style="font-size: 11.8px; color: {MUTED};">{H("rc.de")}</span></sc-if>'
+      f'<sc-if value="{H("rc.podeT")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("rc.go")}" title="Trocar por outro da mesma função, livre na janela" style="{_MINI}">Trocar</button></sc-if>'
+      f'<sc-if value="{H("rc.offT")}" hint-placeholder-val="{F()}"><button type="button" disabled aria-disabled="true" title="{H("rc.offWhy")}" style="{_MINI}">Trocar</button></sc-if></span>'
+      f'<span style="color: {MUTED};">{H("rc.j")}</span><span style="display: flex; flex-wrap: wrap; gap: 4px;"><sc-if value="{H("rc.cond")}" hint-placeholder-val="{F()}"><span style="display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; color: #8A5A00; background: #FFF4D6;">condicional</span></sc-if>'
+      f'<sc-for list="{H("rc.al")}" as="al" hint-placeholder-count="1"><span style="display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; color: #B42318; background: #FDE8E6;">{H("al.t")}</span></sc-for></span>'
+      f'<sc-if value="{H("rc.ab")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Trocar recurso" style="grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 10px; background: {BG};">'
+      f'<label style="font-size: 12.5px; font-weight: 700;">Substituto <select aria-label="Substituto" value="{H("rc.para")}" onChange="{H("rc.setp")}" style="font: inherit; font-size: 12.8px; padding: 5px 8px; border-radius: 8px; border: 1px solid {LINE}; background: #fff; min-height: 36px;">'
+      f'<sc-for list="{H("rc.opts")}" as="op" hint-placeholder-count="3"><option value="{H("op.v")}" disabled="{H("op.dis")}">{H("op.t")}</option></sc-for></select></label>'
+      f'<button type="button" onClick="{H("rc.ok")}" disabled="{H("rc.okDis")}" style="{BTN_ST(True,True)}">Confirmar troca</button>'
+      f'<button type="button" onClick="{H("rc.cancel")}" style="{_MINI}">Cancelar</button></div></sc-if></div></sc-for>')
       + sec('atv','Atividade',kvbox("pan_atv"))
       + sec('sit','Situação atual',f'<div style="font-size: 13px; line-height: 1.45;">{H("pan_cond")}</div>')
       + sec('ori','Origem',f'<sc-for list="{H("pan_orig")}" as="og" hint-placeholder-count="2"><div style="font-size: 13px; padding: 5px 0; border-bottom: 1px solid {LINE};">{H("og.t")}</div></sc-for>') +
@@ -1362,53 +1532,83 @@ def _form():
 def _rcv(os_id, html):   # bloco de uma ordem em Recursos: some quando a ordem está fora do recorte da lista (TABELAS-FOCO)
     return f'<sc-if value="{H("rcv_" + os_id.replace("-", ""))}" hint-placeholder-val="{T()}">{html}</sc-if>'
 def _recursos_tab():
-    """Semana do PCP por recurso e dia: ordens e horários, conflitos, manutenção, excesso de jornada e uso."""
-    res, conf = AL.semana()
-    ck = {(c['r'], c['dia'], c['a']) for c in conf} | {(c['r'], c['dia'], c['b']) for c in conf}
-    nconf = len({(c['dia'], c['a'], c['b']) for c in conf if not c['manut']})
-    manut = sorted({AL.NOME[a['r']] + ' (' + a['os'] + ')' for a in AL.ALOC if a['sit'] == 'manutenção'})
-    acima = [f"{x['nome'].split(' · ')[0]} {d['d'][8:10]}/{d['d'][5:7]} ({str(round(d['h'],1)).replace('.',',')} h)" for x in res for d in x['dias'] if d['acima']]
-    ociosos = [x['nome'].split(' · ')[0] for x in res if x['uso'] < 0.2]
-    kpi = lambda t, v, c: f'<div style="display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border-radius: 10px; background: {c}; min-width: 0;"><span style="font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: {MUTED};">{t}</span><span style="font-size: 13px; font-weight: 700;">{v}</span></div>'
+    """Semana do PCP por recurso e dia: ordens e horários, conflitos, manutenção, excesso de jornada e uso. 14/10: a grade é fixa (recursos × dias)
+    e o conteúdo vem da alocação vigente (alVigente: semana do PCP + trocas de recurso das O.S. no cenário), calculado em rcVals; uma troca
+    feita no painel da O.S. aparece aqui na hora (uma fonte só)."""
+    kpi = lambda t, k: (f'<div style="{H("rck_" + k + "_st")}"><span style="font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: {MUTED};">{t}</span>'
+                        f'<span style="font-size: 13px; font-weight: 700;">{H("rck_" + k)}</span></div>')
     top = (f'<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px;">'
-           + kpi('Conflitos', f'{nconf} · mesmo recurso em duas ordens no mesmo horário', REDS if nconf else BG)
-           + kpi('Em manutenção', ', '.join(manut) or '—', BG) + kpi('Acima da jornada', ', '.join(acima) or '—', YELS if acima else BG)
-           + kpi('Ociosos (uso abaixo de 20 %)', ', '.join(ociosos) or '—', BG) + '</div>')
+           + kpi('Conflitos', 'conf') + kpi('Em manutenção', 'man') + kpi('Acima da jornada', 'acima') + kpi('Ociosos (uso abaixo de 20 %)', 'oc') + '</div>')
     cols = f'grid-template-columns: 210px repeat({len(AL.DIAS)}, minmax(118px, 1fr)) 150px;'
     head = (f'<div style="display: grid; {cols} gap: 0; font-size: 10.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: {MUTED}; background: {BG}; border-radius: 10px 10px 0 0;">'
             f'<div style="padding: 8px 10px;">Recurso</div>' + ''.join(f'<div style="padding: 8px 6px;">{lab}</div>' for _, lab in AL.DIAS) + '<div style="padding: 8px 10px;">Uso na semana</div></div>')
+    bloco = (f'<sc-if value="{H("b.vis")}" hint-placeholder-val="{T()}">'
+             f'<sc-if value="{H("b.man")}" hint-placeholder-val="{F()}"><span title="{H("b.tt")}" style="display: block; font-size: 11.5px; font-weight: 700; padding: 3px 6px; border-radius: 6px; background: {GRAYS}; color: {MUTED};">{H("b.t")}</span></sc-if>'
+             f'<sc-if value="{H("b.lam")}" hint-placeholder-val="{F()}"><a href="{H("b.href")}" title="{H("b.tt")}" style="display: block; font-size: 11.5px; font-weight: 700; padding: 3px 6px; border-radius: 6px; text-decoration: none; background: #E8F0F8; color: #2F5F8A; border: 1px solid #C9DBEC;">{H("b.t")}</a></sc-if>'
+             f'<sc-if value="{H("b.btn")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("b.go")}" title="{H("b.tt")}" style="{H("b.st")}">{H("b.t")}</button></sc-if></sc-if>')
     body = ''; tipo0 = None
-    for x in res:
-        if x['tipo'] != tipo0:
-            tipo0 = x['tipo']; body += f'<div style="padding: 10px 10px 4px; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: {MUTED}; border-top: 1px solid {LINE};">{ {"Máquina":"Máquinas","Implemento":"Implementos","Pessoa":"Pessoas"}[tipo0] }</div>'
+    for r, t, n in AL.RECURSOS:
+        if t != tipo0:
+            tipo0 = t; body += f'<div style="padding: 10px 10px 4px; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: {MUTED}; border-top: 1px solid {LINE};">{ {"Máquina":"Máquinas","Implemento":"Implementos","Pessoa":"Pessoas"}[t] }</div>'
         cells = ''
-        for d in x['dias']:
-            its = ''
-            for a in d['itens']:
-                t = f"{a['os']} {AL.hh(a['ini'])}–{AL.hh(a['fim'])}"
-                if a['sit'] == 'manutenção':
-                    its += f'<span title="Indisponível: {a["os"]}" style="display: block; font-size: 11.5px; font-weight: 700; padding: 3px 6px; border-radius: 6px; background: {GRAYS}; color: {MUTED};">Manutenção {a["os"]}</span>'; continue
-                bad = (x['r'], d['d'], a['os']) in ck
-                st = ('background: #FDE8E6; color: #B42318; border: 1px solid #F4C7C1;' if bad else ('background: #FFF4D6; color: #8A5A00; border: 1px dashed #D9B25B;' if a['sit'] == 'condicional' else f'background: {ACCS}; color: {ACC}; border: 1px solid #BFE0CB;'))
-                tt = ('Conflito de horário · ' if bad else ('Condicional · ' if a['sit'] == 'condicional' else '')) + 'abrir ' + a['os']
-                if a['os'] in LAM:   # irrigação só com água: é do módulo Irrigação (01/10), o bloco leva para lá
-                    hr = 'IR-03det.dc.html' if a['os'] == 'OS-0419' else 'IR-03.dc.html'
-                    its += _rcv(a['os'], f'<a href="{hr}" title="Irrigação · abrir {a["os"]} no módulo Irrigação" style="display: block; font-size: 11.5px; font-weight: 700; padding: 3px 6px; border-radius: 6px; text-decoration: none; background: #E8F0F8; color: #2F5F8A; border: 1px solid #C9DBEC;">{esc(t)} · irrigação</a>'); continue
-                its += _rcv(a['os'], f'<button type="button" onClick="{H("op_" + a["os"].replace("-", ""))}" title="{tt}" style="display: block; width: 100%; text-align: left; font-family: inherit; font-size: 11.5px; font-weight: 700; padding: 3px 6px; border-radius: 6px; cursor: pointer; {st}">{t}</button>')
-            hint = (f'<span style="font-size: 11px; color: #8A5A00; font-weight: 700;">{str(round(d["h"],1)).replace(".",",")} h · acima da jornada</span>' if d['acima']
-                    else (f'<span style="font-size: 11px; color: {MUTED};">livre</span>' if not d['itens'] else ''))
-            cells += f'<div style="padding: 6px; display: flex; flex-direction: column; gap: 3px; border-left: 1px solid {LINE};">{its}{hint}</div>'
-        u = round(x['uso'] * 100); cor = '#B42318' if any(d['conf'] for d in x['dias']) else ('#8A968E' if x['uso'] < 0.2 else ('#8A5A00' if x['uso'] > 0.85 else '#1E7A4C'))
-        lab = 'conflito' if any(d['conf'] for d in x['dias']) else ('ocioso' if x['uso'] < 0.2 else ('carga alta' if x['uso'] > 0.85 else 'em uso'))
-        uso = (f'<div style="padding: 8px 10px; border-left: 1px solid {LINE}; display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 13px; font-weight: 800; color: {cor};">{u} % · {lab}</span>'
-               f'<span style="display: block; height: 6px; border-radius: 999px; background: {GRAYS}; overflow: hidden;"><span style="display: block; height: 100%; width: {min(u,100)}%; background: {cor};"></span></span>'
-               f'<span style="font-size: 11px; color: {MUTED};">{str(round(x["h"],1)).replace(".",",")} h de {str(round(x["disp"],1)).replace(".",",")} h</span></div>')
-        body += f'<div role="row" style="display: grid; {cols} border-top: 1px solid {LINE}; font-size: 12.5px;"><div style="padding: 8px 10px; font-weight: 700;">{esc(x["nome"])}</div>{cells}{uso}</div>'
+        for i in range(len(AL.DIAS)):
+            k = f'{r}_{i}'
+            cells += (f'<div style="padding: 6px; display: flex; flex-direction: column; gap: 3px; border-left: 1px solid {LINE};">'
+                      f'<sc-for list="{H("rcc_" + k)}" as="b" hint-placeholder-count="1">{bloco}</sc-for>'
+                      f'<sc-if value="{H("rca_" + k)}" hint-placeholder-val="{F()}"><span style="font-size: 11px; color: #8A5A00; font-weight: 700;">{H("rcat_" + k)}</span></sc-if>'
+                      f'<sc-if value="{H("rcl_" + k)}" hint-placeholder-val="{F()}"><span style="font-size: 11px; color: {MUTED};">livre</span></sc-if></div>')
+        uso = (f'<div style="padding: 8px 10px; border-left: 1px solid {LINE}; display: flex; flex-direction: column; gap: 4px;"><span style="{H("rcu_" + r + "_st")}">{H("rcu_" + r)}</span>'
+               f'<span style="display: block; height: 6px; border-radius: 999px; background: {GRAYS}; overflow: hidden;"><span style="{H("rcu_" + r + "_bar")}"></span></span>'
+               f'<span style="font-size: 11px; color: {MUTED};">{H("rcu_" + r + "_h")}</span></div>')
+        body += f'<div role="row" style="display: grid; {cols} border-top: 1px solid {LINE}; font-size: 12.5px;"><div style="padding: 8px 10px; font-weight: 700;">{esc(n)}</div>{cells}{uso}</div>'
     legenda = (f'<div style="display: flex; gap: 14px; flex-wrap: wrap; font-size: 11.5px; color: {MUTED};">'
                f'<span><b style="color: {ACC};">■</b> alocação firme</span><span><b style="color: #8A5A00;">▭</b> condicional (depende da liberação)</span>'
                f'<span><b style="color: #B42318;">■</b> conflito de horário</span><span><b style="color: #8A968E;">■</b> manutenção</span></div>')
-    return (f'<div style="display: flex; flex-direction: column; gap: 10px;">{top}'
+    # 15/10/2026 (proprietário: "tire esses cards chatos"): sem os 4 cartões de resumo; conflito, manutenção, jornada e ocioso já estão em cada linha
+    return (f'<div style="display: flex; flex-direction: column; gap: 10px;">'
             f'<div role="table" aria-label="Alocação de recursos na semana" style="border: 1px solid {LINE}; border-radius: 10px; overflow-x: auto;">{head}{body}</div>{legenda}</div>')
+
+
+RC_JS = r"""
+// ===== Carga do PCP (visão "carga" da O.S.) pela alocação vigente (alVigente) · 14/10 =====
+function rcSemana(c){ const A=alVigente(c), conf=[];
+  for(let i=0;i<A.length;i++) for(let j=i+1;j<A.length;j++){ const a=A[i], b=A[j];
+    if(a.r===b.r&&a.dia===b.dia&&a.os!==b.os&&a.ini<b.fim&&b.ini<a.fim){ const man=a.sit==='manutenção'||b.sit==='manutenção'; if(man&&!alManVale(c,a.r)) continue; conf.push({r:a.r,dia:a.dia,a:a.os,b:b.os,manut:man}); } }
+  const res=Object.keys(AL0.nome).map(r=>{ const jor=(AL0.jorRec||{})[r]||AL0.jor; let tot=0;
+    const dias=AL0.dias.map(([d])=>{ const its=A.filter(a=>a.r===r&&a.dia===d&&(a.sit!=='manutenção'||alManVale(c,r))); const h=its.filter(a=>a.sit!=='manutenção').reduce((s,a)=>s+a.fim-a.ini,0); tot+=h;
+      return {d,its,h,acima:h>jor+1e-9,conf:conf.some(x=>x.r===r&&x.dia===d)}; });
+    const disp=jor*AL0.dias.length-A.filter(a=>a.r===r&&a.sit==='manutenção'&&alManVale(c,r)).reduce((s,a)=>s+a.fim-a.ini,0);
+    return {r,tipo:AL0.tipo[r],nome:AL0.nome[r],dias,h:tot,disp,uso:disp?tot/disp:0}; });
+  return {res,conf}; }
+function rcN1(x){ return String(Math.round(x*10)/10).replace('.',','); }
+function rcVals(self,v,vis){ const c=cenGet(), S=rcSemana(c), ck=new Set();
+  S.conf.forEach(x=>{ ck.add(x.r+'|'+x.dia+'|'+x.a); ck.add(x.r+'|'+x.dia+'|'+x.b); });
+  const nconf=new Set(S.conf.filter(x=>!x.manut).map(x=>x.dia+'|'+x.a+'|'+x.b)).size;
+  const man=[...new Set(alVigente(c).filter(a=>a.sit==='manutenção'&&alManVale(c,a.r)).map(a=>AL0.nome[a.r]+' ('+a.os+')'))].sort();
+  const acima=[]; S.res.forEach(x=>x.dias.forEach(d=>{ if(d.acima) acima.push(x.nome.split(' · ')[0]+' '+alDm(d.d)+' ('+rcN1(d.h)+' h)'); }));
+  const oc=S.res.filter(x=>x.uso<0.2).map(x=>x.nome.split(' · ')[0]);
+  const kst=(bg)=>'display:flex;flex-direction:column;gap:2px;padding:8px 12px;border-radius:10px;background:'+bg+';min-width:0;';
+  v.rck_conf=nconf+' · mesmo recurso em duas ordens no mesmo horário'; v.rck_conf_st=kst(nconf?RC_COR.reds:RC_COR.bg);
+  v.rck_man=man.join(', ')||'—'; v.rck_man_st=kst(RC_COR.bg);
+  v.rck_acima=acima.join(', ')||'—'; v.rck_acima_st=kst(acima.length?RC_COR.yels:RC_COR.bg);
+  v.rck_oc=oc.join(', ')||'—'; v.rck_oc_st=kst(RC_COR.bg);
+  const base='display:block;width:100%;text-align:left;font-family:inherit;font-size:11.5px;font-weight:700;padding:3px 6px;border-radius:6px;cursor:pointer;';
+  S.res.forEach(x=>{ x.dias.forEach((d,i)=>{ const k=x.r+'_'+i;
+      v['rcc_'+k]=d.its.map(a=>{ const t=a.os+' '+alHh(a.ini)+'–'+alHh(a.fim);
+        if(a.sit==='manutenção') return {vis:true,man:true,lam:false,btn:false,t:'Manutenção '+a.os,tt:'Indisponível: '+a.os};
+        const ok=vis(a.os);
+        if(RC_LAM.indexOf(a.os)>=0) return {vis:ok,man:false,lam:true,btn:false,t:t+' · irrigação',tt:'Irrigação · abrir '+a.os+' no módulo Irrigação',href:a.os==='OS-0419'?'IR-03det.dc.html':'IR-03.dc.html'};
+        const bad=ck.has(x.r+'|'+d.d+'|'+a.os), cond=a.sit==='condicional';
+        const st=bad?'background:#FDE8E6;color:#B42318;border:1px solid #F4C7C1;':(cond?'background:#FFF4D6;color:#8A5A00;border:1px dashed #D9B25B;':'background:'+RC_COR.accs+';color:'+RC_COR.acc+';border:1px solid #BFE0CB;');
+        return {vis:ok,man:false,lam:false,btn:true,t:t+(a.de?' · no lugar de '+AL0.nome[a.de].split(' ').slice(0,2).join(' '):''),
+          tt:(bad?'Conflito de horário · ':(cond?'Condicional · ':''))+'abrir '+a.os,st:base+st,go:()=>self.setState({pan:a.os,pa:null})}; });
+      v['rca_'+k]=d.acima; v['rcat_'+k]=rcN1(d.h)+' h · acima da jornada'; v['rcl_'+k]=!d.acima&&!d.its.length; });
+    const u=Math.round(x.uso*100), temC=x.dias.some(d=>d.conf), cor=temC?'#B42318':(x.uso<0.2?'#8A968E':(x.uso>0.85?'#8A5A00':'#1E7A4C'));
+    const lab=temC?'conflito':(x.uso<0.2?'ocioso':(x.uso>0.85?'carga alta':'em uso'));
+    v['rcu_'+x.r]=u+' % · '+lab; v['rcu_'+x.r+'_st']='font-size:13px;font-weight:800;color:'+cor+';';
+    v['rcu_'+x.r+'_bar']='display:block;height:100%;width:'+Math.min(u,100)+'%;background:'+cor+';'; v['rcu_'+x.r+'_h']=rcN1(x.h)+' h de '+rcN1(x.disp)+' h'; }); }
+"""
+
 
 def _restaurar():
     """Ação discreta no rodapé do bloco: volta o cenário compartilhado (O.S., Estoque e App) ao início, com confirmação."""
@@ -1423,40 +1623,103 @@ def build():
     fname='OS.dc.html'; E._reset_screen(fname)
     ordens=_ordens()
     # TABELAS-FOCO (5983172395): uma variável de negócio por coluna, valor tipado (data ISO, número) e Talhão/Situação multivalorados
-    g_os=grid([dict(k='id',l='O.S.'),dict(k='ativ',l='Atividade',w=190),dict(k='tal',l='Talhão',multi=True,w=120),dict(k='local',l='Local',w=110,zdash=True),
-               dict(k='area',l='Área (ha)',t='num',a='r',d=2,zdash=False),dict(k='ini',l='Início',t='date'),dict(k='fim',l='Fim',t='date'),
-               dict(k='fase',l='Fase'),dict(k='sit',l='Situação',multi=True,w=200),dict(k='obs',l='Observação',w=200),
-               dict(k='dono',l='Quem resolve'),dict(k='acao',l='Próxima ação',w=150),dict(k='prazo',l='Prazo'),
-               dict(k='real',l='Realizado (ha)',t='num',a='r',d=2),dict(k='saldo',l='Saldo (ha)',t='num',a='r',d=2),
-               dict(k='disp',l='Dispensado (ha)',t='num',a='r',d=2,zdash=True),dict(k='prog',l='Progresso (%)',t='num',a='r',d=1),
-               dict(k='resp',l='Responsável')],   # sem coluna Lâmina: a O.S. só com água saiu para a Irrigação (01/10), onde a lâmina tem colunas próprias (IR-03); aqui ela ficava sempre vazia
-              [],edit=dict(m='pick'),gid='g_os',total=False,tree=True)
+    # VISOES-2 §3.6 (pedido do proprietário, 14/10): abre com O.S., Atividade, Talhão, Prazo, Fase e Progresso (ess = posição); as outras 12
+    # ficam em "Mais colunas". pq = pergunta que agrupa o painel de colunas. A Situação sai do padrão e vira ícone com cor antes da O.S.
+    g_os=grid([dict(k='id',l='O.S.',ess=1,pq='oque'),dict(k='ativ',l='Atividade',w=190,ess=2,pq='oque'),dict(k='tal',l='Talhão',multi=True,w=120,ess=3,pq='onde'),dict(k='local',l='Local',w=110,zdash=True,pq='onde'),
+               dict(k='area',l='Área (ha)',t='num',a='r',d=2,zdash=False,pq='medida',agg='sum'),dict(k='ini',l='Início',t='date',pq='quando'),dict(k='fim',l='Fim',t='date',pq='quando'),
+               dict(k='fase',l='Fase',ess=5,pq='situacao'),dict(k='sit',l='Situação',multi=True,w=200,pq='situacao'),dict(k='obs',l='Observação',w=200),
+               dict(k='dono',l='Quem resolve',pq='quem'),dict(k='acao',l='Próxima ação',w=150,pq='situacao'),dict(k='prazo',l='Prazo',ess=4,pq='quando'),
+               dict(k='real',l='Realizado (ha)',t='num',a='r',d=2,pq='medida',agg='sum'),dict(k='saldo',l='Saldo (ha)',t='num',a='r',d=2,pq='medida',agg='sum'),
+               dict(k='disp',l='Dispensado (ha)',t='num',a='r',d=2,zdash=True,pq='medida'),dict(k='prog',l='Progresso (%)',t='num',a='r',d=1,ess=6,pq='medida'),
+               dict(k='resp',l='Responsável',pq='quem')],   # sem coluna Lâmina: a O.S. só com água saiu para a Irrigação (01/10), onde a lâmina tem colunas próprias (IR-03); aqui ela ficava sempre vazia
+              [],edit=dict(m='pick'),gid='g_os',total=False,tree=True,vazio=False,cartoes='externo',   # DS VIS-05: Cartões é uma visão do seletor da VISOES-1 (mesmo painel da Tabela)
+              # VISOES-2 §3.3: Agrupar por (O quê, Quem, Quando, Onde) com os níveis do descer; a linha traz r.g (osLinhas)
+              ag=[dict(pq='oque',l='Atividade',niv=['Operação','Atividade'],um='O.S.',plural='O.S.'),dict(pq='quem',l='Responsável',niv=['Responsável'],um='O.S.',plural='O.S.'),
+                  dict(pq='quando',l='Início',niv=['Safra','Mês','Semana'],um='O.S.',plural='O.S.'),dict(pq='onde',l='Talhão',niv=['Fazenda','Talhão'],fc=['','tal'],um='O.S.',plural='O.S.')])   # vazio de filtro: estado comum das visões (VISOES-1 §2.8)
     # barra da coleção (DS-33 §74.5.7.1): filtros rápidos no começo, seletor de visão no fim; vale para Lista e Kanban (mesmo filtro)
-    kb_nota=(f'<sc-if value="{H("kb_filtro")}" hint-placeholder-val="{F()}"><div role="note" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: {MUTED}; margin-bottom: 8px;">'
-             f'<span>{H("kb_nota")}</span><button type="button" onClick="{H("os_limpar")}" style="{_MINI}">Limpar filtros</button></div></sc-if>')
+    # VISOES-2 §8 ponto 3: o recorte ativo em chips removíveis (trilha, filtros de coluna, busca) e "Limpar filtros", em toda forma
+    rchip=(f'<span style="display: inline-flex; align-items: center; gap: 2px; padding: 2px 4px 2px 10px; border-radius: 999px; background: {ACCS}; color: {ACC}; font-size: 12px; font-weight: 700;">{H("rc.t")}'
+           f'<button type="button" aria-label="{H("rc.lab")}" title="{H("rc.lab")}" onClick="{H("rc.rm")}" style="width: 28px; height: 28px; border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 14px; border-radius: 999px;">×</button></span>')
+    # V2-RAIAS-TOQUE-01 (Codex 6170116165): no toque, × do chip e "Limpar filtros" com 44 px, em toda forma que mostra o recorte
+    kb_nota=(f'<style>@media (pointer:coarse){{[data-os-recorte] button{{min-height:44px!important;min-width:44px!important}}}}</style>'
+             f'<sc-if value="{H("kb_filtro")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Recorte desta visão" data-os-recorte="1" style="display: flex; align-items: center; gap: 6px 8px; flex-wrap: wrap; font-size: 12.5px; color: {MUTED}; margin-bottom: 8px;">'
+             f'<span>{H("kb_nota")}</span><sc-for list="{H("os_rchips")}" as="rc" hint-placeholder-count="1">{rchip}</sc-for>'
+             f'<button type="button" onClick="{H("os_limpar")}" style="{_MINI}">Limpar filtros</button></div></sc-if>')
     rc_nota=f'<div role="note" style="font-size: 12.5px; color: {MUTED}; margin-bottom: 8px;">{H("rc_nota")}</div>'
-    bar,panes=tabs(['Lista','Kanban','Recursos'],[g_os,kb_nota+_kanban(),rc_nota+_recursos_tab()],active=0,label='Visão das ordens')
-    colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_talsel()}{_chips()}</div>'
-            f'<div style="flex: 0 0 auto; margin-left: auto;">{bar}</div></div>')
+    # revisão VISOES-1, achado C3 (§2.8 "Parcial"): ordens do recorte sem bloco na semana do PCP, cada uma abre o mesmo painel
+    rc_nota+=(f'<sc-if value="{H("rc_semtem")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Ordens do recorte sem alocação na semana do PCP" '
+              f'style="display: flex; align-items: center; gap: 6px 8px; flex-wrap: wrap; font-size: 12.5px; margin-bottom: 8px;"><b>{H("rc_semt")}</b>'
+              f'<sc-for list="{H("rc_sem")}" as="s" hint-placeholder-count="2"><button type="button" onClick="{H("s.go")}" style="{_MINI}">{H("s.id")}</button></sc-for></div></sc-if>')
+    # VISOES-1 (proprietário, 10/10/2026): seletor por ícone; Lista e Tabela agrupada na mesma grade (o agrupamento é estado da grade),
+    # Kanban e Carga por recurso migram sem mudança de regra. Visões válidas: visoes.py (fonte única; O.S. sem Mapa: DEC-2609-09)
+    bar,panes=visoes('g_os','os',{'lista':g_os,'cartoes':'lista','kanban':kb_nota+_kanban_raias(),'calendario':kb_nota+_calendario(),'carga':kb_nota+rc_nota+_recursos_tab()},rotulo='Visão das ordens')
+    colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_chips()}{_notas_tal()}</div>'   # o Talhão subiu para a faixa "Filtros desta tela" (13/10); os avisos dele ficam aqui
+            f'<div style="flex: 0 0 auto; margin-left: auto;">{bar}</div></div>'
+            # 15/10/2026 (proprietário: "tabela e kanban devem manter o agrupar por"): no Kanban o mesmo "Agrupar por" da Tabela (as raias seguem o grupo)
+            + (f'<sc-if value="{{{{g_os_vp_kanban}}}}" hint-placeholder-val="{{{{false}}}}"><div class="os-agkb" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-top: 8px;">{E.AG_CTRL["g_os"][0]}</div>{E.AG_CTRL["g_os"][1]}</sc-if>' if 'g_os' in E.AG_CTRL else ''))
     # recorte vazio (Fazenda/Safra do topo): uma frase e uma ação no lugar das visões
-    vazio=(f'<sc-if value="{H("os_vazio")}" hint-placeholder-val="{F()}"><div aria-label="Sem ordens no filtro" style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 36px 16px; border: 1px dashed {LINE}; border-radius: 12px;">'
+    vazio=(f'<sc-if value="{H("os_vazio")}" hint-placeholder-val="{F()}"><div aria-label="Sem ordens no filtro" style="display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 36px 16px; background: {BG}; border-radius: 12px;">'
            f'<span style="font-size: 14px; font-weight: 700;">{H("os_vt")}</span><button type="button" onClick="{H("os_vgo")}" style="{_MINIP}">{H("os_va")}</button></div></sc-if>')
     tem=lambda x: f'<sc-if value="{H("os_tem")}" hint-placeholder-val="{T()}">{x}</sc-if>'
+    pn_nota=(f'<sc-if value="{H("pn_on")}" hint-placeholder-val="{F()}"><div role="note" aria-label="Recorte do Painel Agrícola" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.8px; '
+             f'padding: 8px 12px; border-radius: 10px; background: {ACCS}; color: {INK}; margin-bottom: 8px;"><span style="flex: 1 1 260px;">{H("pn_txt")}</span>'
+             f'<button type="button" onClick="{H("pn_sair")}" style="{_MINI}">Ver todas as O.S.</button></div></sc-if>')
     corpo=bloco('Ordens por fase','Clique numa ordem para ver atividade, insumos e doses e seguir para a próxima fase.',
-                vazio+tem(f'<div style="display: flex; flex-direction: column; gap: 10px;">{colbar}{panes}</div>')+_restaurar(),
-                acao=f'<span style="display: inline-flex; align-items: center; gap: 10px;"><button type="button" onClick="{H("nv_open")}" style="padding: 7px 14px; border-radius: 9px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; background: {ACC}; color: #fff; border: 1px solid {ACC}; flex-shrink: 0;">Nova ordem</button></span>')
+                vazio+tem(f'<div style="display: flex; flex-direction: column; gap: 10px;">{pn_nota}{colbar}{panes}</div>')+_restaurar(),
+                acao='')
     EXTRA.append(_painel()); EXTRA.append(_form())
+    # cultura de cada ordem (13/10, filtro Cultura): a do cultivo de cada talhão da ordem na safra dela (D2.SAFRAS e D2.CULTIVOS, fonte do Planejar safra)
+    for o in ordens: o['culturas']=_culturas_da(o)
     data=dict(ords=ordens,nova=_nova_ordem_dados(),aloc={o['id']:AL.da_ordem(o['id']) for o in ordens},agf=_agf_fichas())
     # cenário compartilhado (O.S. ↔ Estoque ↔ App) antes do JS da tela
-    EXTRAJS[0]=cenario.js_prefixo()+'const OSD = '+json.dumps(data,ensure_ascii=False).replace('</','<\\/')+';\n'+'const RC_OS = '+json.dumps(sorted({a['os'] for a in AL.ALOC if a['sit']!='manutenção'}))+';\n'+JS_NUCLEO+JS
+    # blocos da Carga de ordens fora da lista da O.S. (irrigação só com água, do módulo Irrigação): Fazenda e Safra delas, para seguirem o recorte do topo
+    rc_ext={o['id']:[o['faz'],o['saf']] for o in D.ORDENS if o['id'] in {a['os'] for a in AL.ALOC if a['sit']!='manutenção'} and o['id'] not in {x['id'] for x in ordens}}
+    EXTRAJS[0]=cenario.js_prefixo()+'const OSD = '+json.dumps(data,ensure_ascii=False).replace('</','<\\/')+';\n'+'const RC_EXT = '+json.dumps(rc_ext,ensure_ascii=False)+';\n'+'const RC_OS = '+json.dumps(sorted({a['os'] for a in AL.ALOC if a['sit']!='manutenção'}))+';\n'+'const RC_LAM = '+json.dumps(sorted(LAM))+';\nconst RC_COR = '+json.dumps(dict(bg=BG,reds=REDS,yels=YELS,accs=ACCS,acc=ACC))+';\n'+RC_JS+JS_NUCLEO+JS
     prim=f'<button type="button" onClick="{H("nv_open")}" style="{BTN_ST(True)}">Nova ordem</button>'
     HEIGHTS37[fname]=1000
     shell37('OS','Ordem de Serviço',corpo,fname=fname,
             subtitle='A liberar → Liberadas → Em execução → Em conferência → Encerradas. Pausa, atraso, parcial e impedimento aparecem como selos.',
-            status=(H('os_st'),'red'),primary_html=None,search=False,  # "Nova ordem" mora no bloco Ordens por fase
+            status=(H('os_st'),'red'),primary_html=f'<button type="button" onClick="{H("nv_open")}" style="{BTN_ST(True)}">Criar ordem</button>',search=False,  # BOT-01/03 (15/10/2026): criar é a primária da tela, no cabeçalho, com verbo
             footer='A fase só muda por evento: liberação, início, término físico e encerramento. Finalizar apontamento do turno não encerra a O.S.')
     _status_dinamico(fname)
     return fname
+
+def _calendario():
+    """VISOES-2 (F2a) · Calendário das ordens, só leitura: semana de segunda a domingo com ‹ › e Hoje; cada dia lista as ordens da janela;
+    faixa "Sem data"; abaixo de 900 px vira agenda por dia (só os dias com ordem). Sem arrastar: programar fica no detalhe (DESENHO §2.9)."""
+    css = ('<style>.oscal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}'
+           '.oscal-dia{display:flex;flex-direction:column;gap:6px;min-width:0;padding:8px;border:1px solid #E4E9E5;border-radius:12px;background:#FBFCFA;min-height:140px}'
+           '.oscal-dia[data-hoje=true]{border-color:#1E7A4C;background:#F2F8F4}'
+           '.oscal-dt{display:flex;justify-content:space-between;gap:6px;font-size:12px;font-weight:800;color:#4B5A51;text-transform:capitalize}'
+           '.oscal-o{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;width:100%;box-sizing:border-box;padding:7px 8px;border:1px solid #E4E9E5;'
+           'border-radius:10px;background:#FFFFFF;cursor:pointer;font-family:inherit;color:#15201A;min-height:44px;min-width:0;overflow-wrap:anywhere}'
+           '@media (hover:hover){.oscal-o:hover{border-color:#1E7A4C;background:#F2F8F4}}.oscal-o:focus-visible{outline:2px solid #1E7A4C;outline-offset:1px}'
+           '.oscal-faixa{grid-auto-flow:row dense;margin-bottom:8px}.oscal-multi{flex-direction:row;align-items:center;flex-wrap:wrap;gap:4px 8px;border-left:3px solid #1E7A4C}'
+           '.oscal-cont{display:none!important}'
+           '@media (max-width:900px){.oscal{grid-template-columns:1fr}.oscal-dia{min-height:0}.oscal-dia[data-vazio=true]{display:none}.oscal-faixa{display:none}.oscal-cont{display:flex!important}}</style>')
+    cab = (f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">'
+           f'<button type="button" aria-label="Semana anterior" onClick="{H("cal_prev")}" style="{_MINI}">‹</button>'
+           f'<b style="font-size: 14px;" aria-live="polite">{H("cal_tit")}</b>'
+           f'<button type="button" aria-label="Próxima semana" onClick="{H("cal_next")}" style="{_MINI}">›</button>'
+           f'<sc-if value="{H("cal_naoHoje")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("cal_hoje")}" style="{_MINI}">Hoje</button></sc-if>'
+           f'<span style="font-size: 12.5px; color: {MUTED};">{H("cal_n")}</span></div>')
+    sem = (f'<sc-if value="{H("cal_temsem")}" hint-placeholder-val="{F()}"><div role="group" aria-label="Sem data" style="display: flex; align-items: center; gap: 6px 8px; flex-wrap: wrap; '
+           f'padding: 8px 10px; margin-bottom: 8px; background: {BG}; border-radius: 10px; font-size: 12.5px;"><b>Sem data</b>'
+           f'<sc-for list="{H("cal_sem")}" as="o" hint-placeholder-count="1"><button type="button" aria-label="{H("o.lab")}" onClick="{H("o.open")}" style="{_MINI}">{H("o.id")} · {H("o.tipo")}</button></sc-for></div></sc-if>')
+    faixa = (f'<sc-if value="{H("cal_temmulti")}" hint-placeholder-val="{F()}"><div class="oscal oscal-faixa" role="group" aria-label="Ordens de vários dias">'
+             f'<sc-for list="{H("cal_multi")}" as="o" hint-placeholder-count="2"><button type="button" class="oscal-o oscal-multi" style="{H("o.col")}" aria-label="{H("o.lab")}" onClick="{H("o.open")}">'
+             f'<b style="font-size: 12.5px;">{H("o.id")}</b><span style="font-size: 12px;">{H("o.tipo")}</span><span style="font-size: 11.5px; color: {MUTED};">{H("o.per")} · {H("o.local")}</span>'
+             f'<span style="{H("o.fst")}"><span style="{H("o.fdot")}"></span>{H("o.fase")}</span></button></sc-for></div></sc-if>')
+    dias = (f'<div class="oscal" role="list" aria-label="Semana das ordens"><sc-for list="{H("cal")}" as="d" hint-placeholder-count="7">'
+            f'<div class="oscal-dia" role="listitem" data-hoje="{H("d.hoje")}" data-vazio="{H("d.vz")}" aria-label="{H("d.t")}"><div class="oscal-dt"><span>{H("d.t")}</span><span>{H("d.nt")}</span></div>'
+            f'<sc-for list="{H("d.ords")}" as="o" hint-placeholder-count="1"><button type="button" class="oscal-o" aria-label="{H("o.lab")}" onClick="{H("o.open")}">'
+            f'<b style="font-size: 12.5px;">{H("o.id")}</b><span style="font-size: 12px; line-height: 1.3;">{H("o.tipo")}</span>'
+            f'<span style="font-size: 11.5px; color: {MUTED};">{H("o.local")}</span><span style="{H("o.fst")}"><span style="{H("o.fdot")}"></span>{H("o.fase")}</span></button></sc-for>'
+            f'<sc-for list="{H("d.mult")}" as="o" hint-placeholder-count="1"><button type="button" class="oscal-o oscal-multi oscal-cont" aria-label="{H("o.lab")}" onClick="{H("o.open")}">'
+            f'<b style="font-size: 12.5px;">{H("o.id")}</b><span style="font-size: 12px;">{H("o.tipo")}</span><span style="font-size: 11.5px; color: {MUTED};">{H("o.pos")} · {H("o.per")}</span>'
+            f'<span style="{H("o.fst")}"><span style="{H("o.fdot")}"></span>{H("o.fase")}</span></button></sc-for>'
+            f'<sc-if value="{H("d.vazio")}" hint-placeholder-val="{F()}"><span style="font-size: 12px; color: {MUTED};">sem ordem</span></sc-if></div></sc-for></div>')
+    return css + cab + sem + faixa + dias
 
 def _agf_fichas():
     """Nome usado na fazenda → ficha do Consulta Agrofit (AG-07): id, classe e grupo de ação. Fertilizante, semente e muda ficam fora."""

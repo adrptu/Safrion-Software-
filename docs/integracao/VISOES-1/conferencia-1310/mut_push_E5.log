@@ -1,0 +1,4 @@
+OK   E5 trocar de visão (clique e teclado, 8 trocas) não muda o cenário talhao-os-cenario-v1 nem outra chave de negócio, byte a byte; só a preferência (safrion.pref.)
+FALHA E5b 8 trocas de visão não mudam history.length e o Voltar do navegador sai da O.S. (para a tela anterior, Main) · [3, 11, 'OS.dc.html']
+OK   sem erro de script nas páginas
+RESULTADO: 2 ok · 1 falhas (e2e) · FALHAS: E5b 8 trocas de visão não mudam history.length e o Voltar do navegador sai da O.S. (para a tela anterior, Main)
