@@ -10,7 +10,7 @@ Pedido do proprietário em 16/10/2026: "crie uma skill e metodologia de trabalho
 Esta skill é o **método**. As regras ficam numa fonte única, que não se copia para cá:
 - `AGENTS.md` §4;
 - PRD cap. 74;
-- `docs/design-system/` (na branch do protótipo `claude/v44-v69-mapa`, a partir de 05e3f99: `padroes-1510.md`, `padroes-1610.md`, `diretrizes-ux.md` e os demais; os scripts `ds_inventario.py`, `galeria.py` (com a cobertura conferida: falta de família reprova) e `ds_1610_test.py` ficam em `tools/prototipo/v37/gen37/` no mesmo commit).
+- `docs/design-system/` (na branch do protótipo `claude/v44-v69-mapa`, a partir de e18fe1e: `padroes-1510.md`, `padroes-1610.md`, `diretrizes-ux.md` e os demais; os scripts `ds_inventario.py`, `galeria.py` (cobertura e identidade de cada família conferidas; `--contraprova` prova que estado errado reprova) e `ds_1610_test.py` ficam em `tools/prototipo/v37/gen37/` no mesmo commit).
 
 ## Por que o proprietário precisava corrigir (causas medidas em 16/10)
 
