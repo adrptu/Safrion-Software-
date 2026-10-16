@@ -1,0 +1,8 @@
+início 22:41:37 · Chrome em execução antes: 1
+cand_ben_fluxo (2daee8e) | rc=0 | 93s | RESULTADO: OK 34/34 | MEDIDA tarefa do proprietário (§11.7): 21 cliques/toques e 1 campos digitados (linha de base, AC-36)
+FIM
+--- sem navegador ---
+HEAD 2daee8ecc9332065efec147f7d548aa4fd70f05e; delta 50af2ae..2daee8e = tools/prototipo/v37/gen37/ben_fluxo_test.py (idêntico ao r2/ben_fluxo_medida.patch) + docs/integracao/V72/est-onda0-codex/revisao-n1/
+produto inalterado: render de 50af2ae (156 páginas) reaproveitado
+node est_onda0_unit.js | rc=0 | RESULTADO 24/24
+est_onda0_test.py | rc=0 | RESULTADO 24/24

@@ -1,0 +1,25 @@
+OK E1 abre devolução sem presumir quantidade/condição
+OK E1 salvar o formulário aberto sem editar não registra custódia presumida
+OK E2 pedido e NF vinculados ficam somente leitura, novo recebe seleção
+OK E1 repetir os480 já recebidos devolve recibo mesmo com custódia20
+OK E1 salvar vazio recusa sem alterar cenário
+OK E1 condição ausente recusa mesmo com quantidade
+OK E1 480 aptos deixam custódia20 e um movimento
+OK E1 repetir formulário parcial não duplica
+OK E1 chave repetida com quantidade diferente recusa
+OK E1 bloqueada exige observação e vai para quarentena
+OK E2 NF4533 não aceita PC096 pelo handler
+OK E2 validação informa identidade uma vez sem apagar rascunho
+OK E2 comando direto não aceita NF rebatizada como caixa
+OK E2 mesma NF com id novo continua vinculada
+OK E2 novo documento rejeita item divergente
+OK E2 novo documento rejeita un divergente
+OK E2 novo documento rejeita forn divergente
+OK E2 documento coerente entra uma vez e persiste
+OK E2 formulário novo não descarta item divergente recebido no rascunho
+OK E2 cenário salvo não pode reescrever a identidade da NF de origem
+OK A1 seletor real oferece opção vazia e condições textuais
+OK A3 ajuda mostra 139 de sobra, 869 em custódia e uso730; entrada vazia
+OK A3 ajuda distingue sobra total da parcela desta linha
+OK A5 aba desatualizada pede quantidade e condição, limpa ambas sem movimento
+RESULTADO 24/24
