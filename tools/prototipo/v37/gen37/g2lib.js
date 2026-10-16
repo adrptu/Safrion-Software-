@@ -475,7 +475,7 @@ function g2cdVals(self,sp,v){ const id=sp.id, rows=v[id+'_rows']||[], cols=v[id+
   const larg=ix.map(i=>{ let w=lab(i).length*7.2; dat.forEach(d=>{ if(!g2cdVazio(d[i])) w=Math.max(w,g2cdLarg(d[i])); }); return Math.round(Math.min(240,Math.max(56,w))+18); });
   const fs=(P)=>ix.map(i=>{ const c=P.dat[i], vz=g2cdVazio(c); return {l:lab(i), parts:vz?[]:c.parts, cls:fcls(i)}; });
   const temCar=rows.some(rw=>rw.has||rw.grp), temAc=P0.some(P=>P.tr.some(c=>c&&c.isDel));
-  v[id+'_cdgtc']='grid-template-columns:'+(off?'34px':'0px')+' '+(temCar?'36px':'0px')+' minmax(160px,1fr) '+(larg.length?larg.map(w=>'minmax(0,'+w+'px)').join(' '):'0px')+' '+(temAc?'48px':'0px')+';';
+  v[id+'_cdgtc']='grid-template-columns:'+(temCar?'36px':'0px')+' '+(off?'34px':'0px')+' minmax(160px,1fr) '+(larg.length?larg.map(w=>'minmax(0,'+w+'px)').join(' '):'0px')+' '+(temAc?'48px':'0px')+';';
   v[id+'_cdcar']=temCar?'1':''; v[id+'_cdhd']=ix.map(i=>({l:lab(i), cls:fcls(i)})); v[id+'_cdhdT']=lab(0); v[id+'_cdhdHas']=ix.length>0;
   const base=(rw)=>{ const P=parte(rw), t0=P.dat[0]||{}, ed=/\bg2ed\b/.test(rw.cls||''), fl=/\bg2flash\b/.test(rw.cls||'');
     const notas=P.tr.filter(c=>c&&c.isData&&!g2cdVazio(c));
@@ -516,8 +516,17 @@ function g2modosFim(self,v){ if(typeof GRIDS==='undefined') return;
     if(car) g2cdVals(self,sp,v); else { v[id+'_cdg']=[]; v[id+'_cdtot']=[]; v[id+'_cdtotHas']=false; v[id+'_cdtotx']=[]; v[id+'_cdhd']=[]; v[id+'_cdhdHas']=false; v[id+'_cdgtc']=''; v[id+'_cdcar']=''; } } }
 // TAB-08 (16/10/2026): cabeçalho com ordenar (⇅) e filtrar (funil) e o menu de filtro por valores, para o E.grid e para as tabelas próprias
 // (Atividades do plano): sp = {id, cols:[{k,l,t,a}]}, rows = linhas no formato do motor (id, v, s, ordk). Grava em g2st(self,sp.id): so, f, fmc…
+// largura (px) do rótulo do cabeçalho como desenhado (.g2hb: 10,5 px, 700, maiúsculas, espaçamento .03em); sem canvas (node), estimativa
+let G2_HB_CTX=null;
+function g2hbLarg(t){ t=String(t||'').toUpperCase(); try{ if(!G2_HB_CTX){ const cv=document.createElement('canvas'); G2_HB_CTX=cv.getContext('2d');
+    G2_HB_CTX.font='700 10.5px '+getComputedStyle(document.body).fontFamily; } return G2_HB_CTX.measureText(t).width+t.length*0.315; }catch(e){ return t.length*7.0; } }
 function g2cabVals(self,sp,v,st,rows,cols){ const id=sp.id, so=st.so||sp.so||{};
-  v[id+'_head']=cols.map((c,ci)=>({l:c.l, tt:c.ajuda||g2glossCol(sp,c,rows), un:c.un||'', cls:(ci===0?'g2c0':''), st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;':''),
+  // TAB-10: célula de cabeçalho com 40 px (.g2th); o rótulo que não cabe em 2 linhas de 104 px ganha a largura exata da melhor quebra em
+  // 2 linhas (--g2hbw, até 200 px; medida do texto como desenhado + 16 px do ⇅); o que nem assim couber termina em reticências
+  const hbw=(l)=>{ const w=String(l||'').split(/\s+/).filter(Boolean); if(w.length<2) return ''; let m=1e9;
+    for(let i=1;i<w.length;i++) m=Math.min(m,Math.max(g2hbLarg(w.slice(0,i).join(' ')),g2hbLarg(w.slice(i).join(' '))));
+    const px=Math.ceil(m+18); return px>104?'--g2hbw:'+Math.min(200,px)+'px;':''; };
+  v[id+'_head']=cols.map((c,ci)=>({l:c.l, tt:c.ajuda||g2glossCol(sp,c,rows), un:c.un||'', cls:(ci===0?'g2th g2c0':'g2th')+(c.hcls?' '+c.hcls:''), st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+hbw(c.l)+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;':''),
      arrow:(so.k===c.k?(so.d?'▼':'▲'):'⇅'), astyle:(so.k===c.k?'color:#1E7A4C;':'color:#8A968E;'), sortLabel:'Ordenar por '+c.l,
      sort:()=>{ const cur=g2st(self,id).so||sp.so||{}; let nx; if(cur.k!==c.k) nx={k:c.k,d:false}; else if(!cur.d) nx={k:c.k,d:true}; else nx={}; g2set(self,id,{so:nx}); },
      // 15/10/2026 (proprietário: "troque o ícone de filtrar a coluna por um ícone mais intuitivo de filtro"): funil vazado sem filtro;
@@ -597,6 +606,7 @@ function g2vals(self,sp,v,mask){
         cell.toggle=()=>{ const x=Object.assign({},g2st(self,id).x||sp.x0||{}); x[r.id]=r.fgrp?(x[r.id]===false):!x[r.id]; g2set(self,id,{x}); }; }
       else if(ci===0 && canOpen){ cell.hasCaret=true; cell.caretOk=false; cell.caretNo=false; cell.drill=true; }
       else { cell.hasCaret=false; }
+      cell.carT=!!cell.hasCaret&&!sp.sel;   // TAB-09: com seleção, a seta vai para a 1ª célula (abaixo, depois de todas as linhas)
       cells.push(cell); });
     // SAF-FAZ-3: o grupo transparente (fazenda) é uma faixa de cabeçalho: a 1ª célula ocupa as colunas de dados (nome, área e contagem juntos)
     if(r.fgrp){ const d=cells.filter(x=>x.isData); if(d.length){ d[0].st+='grid-column:span '+(d.length)+';'; d[0].pw='max-width:none;'; } for(let i=cells.length-1;i>=0;i--){ if(cells[i].isData&&cells[i]!==d[0]) cells.splice(i,1); } }
@@ -616,6 +626,12 @@ function g2vals(self,sp,v,mask){
     return {id:r.id, lvl, has, nk:(r.kids||[]).length, grp:!!(r.grp&&typeof r.grp==='object'), gk:(r.grp&&typeof r.grp==='object')?String(r.grp.k):'',
       cls:'g2r'+(canOpen?' g2ed':'')+(st.fl===r.id?' g2flash':'')+(lvl>0&&!pf?' g2kid':'')+(r.fgrp?' g2fgrp':''), tab:(canOpen&&!r.drDup)?'0':'-1',
       open:(e)=>{ if(canOpen) g2open(self,sp,r.id,e); }, key:(e)=>{ if(!canOpen || !e || (e.key!=='Enter'&&e.key!==' ')) return; const t=e.target; if(t&&t.closest&&t.closest('a,button,input,select,textarea,label,[data-noedit],.g2nr')) return; e.preventDefault(); g2open(self,sp,r.id,null); }, cells}; });
+  // TAB-09 (16/10/2026, proprietário: "colone os icones de drill down sempre na esquerda"): com seleção, a seta (▸/▾ ou ›) fica na 1ª célula,
+  // antes da caixa; a linha sem seta guarda o lugar (22 px) para as caixas ficarem alinhadas; o recuo do nível continua na célula do nome
+  v[id+'_selArw']=false;
+  if(sp.sel){ const d0=(rw)=>rw.cells.find(x=>x.isData)||{}; const tem=(c)=>!!(c.hasCaret&&(c.caretOk||c.drill)); v[id+'_selArw']=v[id+'_rows'].some(rw=>tem(d0(rw)));
+    if(v[id+'_selArw']) v[id+'_rows'].forEach(rw=>{ const c=d0(rw), s0=rw.cells[0]; if(!s0||s0===c) return; const ok=!!(c.hasCaret&&c.caretOk), dr=!!(c.hasCaret&&c.drill);
+      Object.assign(s0,{carT:true, caretOk:ok, drill:dr, caretNo:!ok&&!dr, caretSym:c.caretSym||'▸', caretExp:c.caretExp||'false', caretLabel:c.caretLabel||'', toggle:c.toggle||(()=>{})}); }); }
   v[id+'_count']=flat.filter(x=>x.lvl===0).length; v[id+'_all']=rows.length;
   if(rows.some(r=>r.fgrp)){ const fundo=(r)=>g2match(r,sp,st,mask,added)||(r.kids||[]).some(fundo); v[id+'_count']=g2nivel1(g2qrows(sp,st,rows)).filter(fundo).length; v[id+'_all']=g2nivel1(rows).length; }   // SAF-FAZ-3: conta itens, não fazendas
   if(AG.a){ const ids=new Set(); (AG.base||[]).forEach(r=>{ if(g2match(r,sp,st,mask,added)) ids.add(String(r.id)); }); v[id+'_count']=ids.size; v[id+'_all']=rows0.length; }   // agrupado: itens distintos do recorte, não grupos

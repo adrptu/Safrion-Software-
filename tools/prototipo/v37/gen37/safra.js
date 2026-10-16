@@ -1312,7 +1312,7 @@ function etapa3(self,v,saf,ro){ const st=self.state; const S=safList(self); cons
       if(reds.length>3) at.push({t:'e mais '+(reds.length-3),al:'e mais '+(reds.length-3)+' recursos em falta: abrir a capacidade por mês',go:()=>capTog(self),st:'min-height:24px;'}); }
     else { let b=null; Object.values(G).forEach(g=>{ const c=g.max; if(c&&c.ocup!==null&&c.ocup>0&&(!b||c.ocup>b.c.ocup+1e-12)) b={g,c}; });
       if(b) at.push(atalho(b.g,b.c,'Maior uso: '+b.g.nome+' '+fmtOcup(b.c.ocup)+' · '+b.c.mes,false)); } }
-  v.v3_atalhos=at; v.v3_capexp=String(capAb); v.v3_captog=()=>capTog(self); v.v3_capt='Capacidade por mês '+(capAb?'▴':'▾'); v.v3_capab=capAb;
+  v.v3_atalhos=at; v.v3_capexp=String(capAb); v.v3_captog=()=>capTog(self); v.v3_capt=(capAb?'▾':'▸')+' Capacidade por mês';   /* TAB-09: a seta da seção vem antes do nome (▸ fechada, ▾ aberta) */ v.v3_capab=capAb;
   // g_cap: recurso × mês (ocupação); só a célula com demanda desta safra é tocável (filtra a g_op); "—" e cinza ficam inertes
   const capF=(st.cap&&st.cap.saf===saf&&G[st.cap.rec])?st.cap:null; const gc=GR('g_cap_'+sk(saf));
   if(gc){ const mis=capMeses(me.ini,me.fim); gc._c0=gc._c0||gc.cols.slice(); gc.cols=gc._c0.filter(c=>!/^m\d+$/.test(c.k)||mis.indexOf(Number(c.k.slice(1)))>=0); }
@@ -1581,7 +1581,7 @@ function PREVALS(self,v){ cenOuvir(self); compRend(self,self.state.saf||null);
   self.__oc=(saf&&(st.step||1)===2)?syncTalhoes(self,saf,v):null; if(!self.__oc) self.__ocG=null;
   if(self.__xfn&&self.__xfn.sub===saf){ const f=self.__xfn.fn; self.__xfn=null; setTimeout(f,0); }   // SAF-FAZ-3: a ação pedida numa linha de outra fazenda, já na sub-safra dela (sgNaFazenda)
   // etapa 3: valores de partida (o bloco só aparece com safra e plano; os buracos existem sempre)
-  Object.assign(v,{v3_ver:'',v3_vst:'',v3_cop:'',v3_copq:'',v3_atalhos:[],v3_capexp:'false',v3_capt:'Capacidade por mês ▾',v3_capab:false,v3_fil:false,v3_filn:'',v3_filt:''});
+  Object.assign(v,{v3_ver:'',v3_vst:'',v3_cop:'',v3_copq:'',v3_atalhos:[],v3_capexp:'false',v3_capt:'▸ Capacidade por mês',v3_capab:false,v3_fil:false,v3_filn:'',v3_filt:''});
   v.v3_captog=()=>capTog(self); v.v3_filx=()=>capSel(self,null,null);
   self.__e3=null;
   if(!saf) return;

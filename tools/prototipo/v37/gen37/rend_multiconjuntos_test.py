@@ -167,7 +167,7 @@ try:
             chk(f'10 {sf}: Total de horas-conjunto e custo = espelho dados2.plano_op (uma configuração por atividade)', total() == fmt(ms['hconj'], 1) + ' h' and custo() == 'Custo de operação ' + rs(ms['cop']) and ms['multi'] == 0, [total(), custo(), fmt(ms['hconj'], 1), rs(ms['cop'])])
         # 10b (LG2627): o filtro do mês fecha com a célula e com o espelho (Σ horas de Operadores em nov/26 = capSaf)
         G = D2.capacidade('LG2627'); cel = G['oper']['cells'][2]
-        botao('Capacidade por mês ▾')
+        botao('▸ Capacidade por mês')
         r = c.js("""(()=>{ const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent&&/^RECURSO/i.test(t.querySelector('[role=columnheader]').innerText)); if(!t) return null; const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.trim().toLowerCase());
           const i=hs.indexOf('nov/26'); const b=t.querySelector('[role=row][data-rid=oper]').querySelectorAll('[role=cell]')[i].querySelector('button'); if(!b) return 'sem'; b.click(); return b.getAttribute('aria-label'); })()"""); time.sleep(.7)
         chk('10b LG2627 Operadores nov/26: aria-label, Total da g_op e espelho capSaf com as mesmas horas', bool(r) and (fmt(cel['d'], 1) + ' h de ' + fmt(cel['cap'], 1) + ' h') in r and total() == fmt(cel['dThis'], 1) + ' h', [r, total(), fmt(cel['dThis'], 1)])
@@ -241,7 +241,7 @@ try:
         abre('#saf=S2627&passo=operacoes'); expande('op:Adubação a lanço'); clica('at:Adubação a lanço|Adubação de cobertura'); botao('+ Outra configuração para Adubação de cobertura', PAINEL); campo('conj_id', 'prestador'); time.sleep(.2)
         pess0 = valor('pess'); campo('nome', 'Prestador lanço'); campo('maq', '250'); r_ = salvar()
         botao('Resumo da safra'); pn = painel(); esc()
-        hh = re.search(r'([\d.,]+) horas-homem', pn); botao('Capacidade por mês ▾'); clica('oper'); hs = valor('hs_c') or ''
+        hh = re.search(r'([\d.,]+) horas-homem', pn); botao('▸ Capacidade por mês'); clica('oper'); hs = valor('hs_c') or ''
         chk('B6a prestador incluído pelo formulário (Pessoas vinha 1, copiado): horas-homem do Resumo = horas de Operadores na safra', bool(hh) and hs.startswith(fmt(float(hh.group(1).replace('.', '').replace(',', '.')), 1) + ' h'), [pess0, hh and hh.group(1), hs])
         chk('B6b o aviso diz que a tarifa do prestador é a de Máquina e que implemento e pessoas da fazenda não entram', 'Prestador: a tarifa é a de Máquina (R$ 250,00/h)' in (r_[1] or ''), r_)
         chk('B7 sem erros de JS', erros() == '', erros())
