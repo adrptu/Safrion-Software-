@@ -1487,7 +1487,7 @@ def acao_motivo(botao, dis, motivo):
 # em toda coluna (cab_colunas_html, também nas tabelas próprias) e, na 1ª célula, a seta de quem abre: ▸/▾ abre os itens ali mesmo; › abre o detalhe (TAB-04)
 _SETA_DRILL='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>'
 TABELA_CSS=(
-    ".g2rola:has(>[role=table][data-g2g]){border:1px solid #E4E9E5;border-radius:12px;background:#FFFFFF;margin:0 12px 12px;flex:0 1 auto!important}"   # a moldura acaba na última linha; rola só quando passa da altura
+    ".g2rola:has(>[role=table][data-g2g]){border:1px solid #E4E9E5;border-radius:12px;background:#FFFFFF;margin:0 0 12px;flex:0 1 auto!important}"   # a moldura acaba na última linha; rola só quando passa da altura; sem margem lateral: a largura é dos dados (Agrofit a 1280 px sem rolagem lateral) e a borda alinha ao título do bloco
     "[data-g2g] [role=cell]{min-height:44px;box-sizing:border-box}"
     "[data-g2g] [role=columnheader]{min-height:36px;box-sizing:border-box}"
     ".g2so{font-size:11px;line-height:1}"
@@ -1498,7 +1498,7 @@ TABELA_CSS=(
 # 12 px, colunas alinhadas entre os cartões (grade em cada linha, g2cdVals._cdgtc), rótulos uma vez no alto, seta à esquerda que abre os
 # itens dentro do cartão, ⋯ no fim; hover verde (VIS-02), foco de 2 px, 44 px no toque; no estreito os campos descem, com o rótulo
 CARTOES_CSS=(
-    ".g2cartoes{display:flex;flex-direction:column;gap:8px;padding:0 12px 12px;box-sizing:border-box;container-type:inline-size}"
+    ".g2cartoes{display:flex;flex-direction:column;gap:8px;padding:0 0 12px;box-sizing:border-box;container-type:inline-size}"
     ".g2cd-grade{display:flex;flex-direction:column;gap:8px}"
     ".g2cd{min-width:0;border:1px solid #E4E9E5;border-radius:12px;background:#FFFFFF;box-sizing:border-box;font-size:13px}"
     ".g2cd.g2ed{cursor:pointer}.g2cd:focus-visible,.g2cd-k:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}"

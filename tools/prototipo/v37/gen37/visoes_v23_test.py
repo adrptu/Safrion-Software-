@@ -5,7 +5,7 @@ No navegador, nas grades visíveis ao abrir a tela (as que dependem de etapa, ab
 silencioso):
 H 1440: abre exatamente com as colunas de "Abre com", na ordem; "Colunas +N" com N = ocultas (grade com mais de 5 colunas).
 A cada opção do "Agrupar por": os grupos aparecem e a soma das linhas dos grupos é o total da Tabela (coluna multivalorada: ≥ total).
-D descer no 1º grupo filtra pelas linhas dele (o "X de Y" mostra o tamanho do grupo); "Sem agrupar" volta ao total.
+D (AGR-02, 16/10) o nome do grupo não desce; a seta do 1º grupo recolhe as linhas dele; "Sem agrupar" volta ao total.
 C 390: as 3 primeiras de "Abre com". J sem erro de JS.
 Uso: python3 visoes_v23_test.py [página…] (RENDER_DIR=<dir> serve outro _render)."""
 import sys, os, time, json, re
@@ -81,10 +81,12 @@ try:
                     r == 'ok' and r2 == 'ok' and len(gr) >= 1 and all(x[1] > 0 for x in gr) and (soma >= len(base) if multi else soma == len(base)), [r, r2, gr[:6], soma, len(base)])
                 if gr:
                     k0 = gr[0][0][4:]; n0 = gr[0][1]
-                    J("(()=>{const r=document.querySelector('[data-g2g=\"%s\"] [role=row][data-rid=\"grp@%s\"]'); const b=r&&r.querySelector('button.g2desce'); if(b) b.click();})()" % (gid, k0.replace('"', '\\"'))); time.sleep(.45)
-                    ln = J(f"({LINHAS})({json.dumps(gid)})") or []
-                    ln = [x for x in ln if not x.startswith('grp@')]
-                    chk(f'D {pg} {gid} {d["l"]}: descer em "{k0}" mostra as {n0} linhas do grupo', len(ln) == n0, [len(ln), n0])
+                    # AGR-02 (16/10/2026): o nome do grupo não desce; a seta do grupo recolhe as linhas dele, no lugar
+                    l0 = [x for x in (J(f"({LINHAS})({json.dumps(gid)})") or []) if not x.startswith('grp@')]
+                    dz = J("(()=>{const r=document.querySelector('[data-g2g=\"%s\"] [role=row][data-rid=\"grp@%s\"]'); if(!r) return null; const d=!!r.querySelector('button.g2desce'); const b=r.querySelector('button.g2car'); if(b) b.click(); return {desce:d, seta:!!b};})()" % (gid, k0.replace('"', '\\"'))); time.sleep(.45)
+                    ln = [x for x in (J(f"({LINHAS})({json.dumps(gid)})") or []) if not x.startswith('grp@')]
+                    J("(()=>{const r=document.querySelector('[data-g2g=\"%s\"] [role=row][data-rid=\"grp@%s\"]'); const b=r&&r.querySelector('button.g2car'); if(b) b.click();})()" % (gid, k0.replace('"', '\\"'))); time.sleep(.3)
+                    chk(f'D {pg} {gid} {d["l"]}: o grupo "{k0}" não desce pelo nome; a seta recolhe as {n0} linhas dele', dz and not dz['desce'] and dz['seta'] and len(l0) - len(ln) == n0, [dz, len(l0), len(ln), n0])
                 J("(()=>{const b=document.querySelector('[data-g2agb=\"%s\"]'); if(b) b.click();})()" % gid); time.sleep(.3)
                 J("(()=>{const m=document.querySelector('[data-g2agm=\"%s\"]'); const i=m&&[...m.querySelectorAll('[role=menuitemradio]')].find(x=>x.innerText.trim().split('\\n')[0].trim()==='Sem agrupar'); if(i) i.click();})()" % gid); time.sleep(.4)
             fim = J(f"({LINHAS})({json.dumps(gid)})") or []
