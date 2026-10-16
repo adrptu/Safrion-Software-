@@ -358,14 +358,17 @@ function g2agValsF(r,a,D,i,sp,st){ const vs=g2agVals_(r,a,D,i,sp), fk=(D.fc||[])
   const k=m.filter(x=>f.indexOf(x.id)>=0).map(x=>String(x.l||x.id)); return k.length?k:vs; }
 // recorte da trilha para as outras formas (Kanban, Calendário, Carga): as linhas dentro da trilha escolhida, com o mesmo filtro por nível
 // (D.fc) da Tabela; null sem agrupamento ou sem trilha. Sem efeito colateral (VISOES-2 §3.4: toda visão lê o mesmo recorte)
-function g2agNoTrilha(self,sp,st,rows){ if(!g2agTem(sp)||sp.suspende) return null; const a=g2agLer(self,sp); if(!a||!a.t.length) return null; const D=sp.ag.find(x=>x.pq===a.d); if(!D) return null;
+// AGR-02 (16/10/2026, proprietário: "tire esse todas => santa rita por talhão em todas telas. essa funcao ja esta nos filtros e no agrupamento"):
+// sem descer pelo nome do grupo nem trilha; uma trilha gravada antes não recorta mais nada (o recorte é dos filtros)
+function g2agNoTrilha(self,sp,st,rows){ return null; }
+function g2agNoTrilha_antiga(self,sp,st,rows){ if(!g2agTem(sp)||sp.suspende) return null; const a=g2agLer(self,sp); if(!a||!a.t.length) return null; const D=sp.ag.find(x=>x.pq===a.d); if(!D) return null;
   const lv=Math.min(a.t.length,D.niv.length); return rows.filter(r=>a.t.slice(0,lv).every((t,i)=>g2agValsF(r,a,D,i,sp,st).indexOf(t)>=0)); }
-function g2agRows(self,sp,st,rows){ const a=g2agLer(self,sp); if(!a) return {rows,a:null}; const D=sp.ag.find(x=>x.pq===a.d), niv=D.niv.length; let lv=Math.min(a.t.length,niv);
-  let base=rows.filter(r=>a.t.slice(0,lv).every((t,i)=>g2agValsF(r,a,D,i,sp,st).indexOf(t)>=0)); const auto=[];
+function g2agRows(self,sp,st,rows){ const a=g2agLer(self,sp); if(!a) return {rows,a:null}; const D=sp.ag.find(x=>x.pq===a.d), niv=D.niv.length, at=[]; let lv=0;   // AGR-02: sem trilha (at vazia)
+  let base=rows; const auto=[];
   // nível com um valor só no recorte (uma fazenda) não pede escolha: desce sozinho, e o valor aparece na trilha
   while(lv<niv-1){ const vs=new Set(); base.filter(r=>g2match(r,sp,st)).forEach(r=>g2agValsF(r,a,D,lv,sp,st).forEach(k=>vs.add(k))); if(vs.size!==1) break;
     const k=[...vs][0]; auto.push(k); base=base.filter(r=>g2agValsF(r,a,D,lv,sp,st).indexOf(k)>=0); lv++; }
-  const path=a.t.slice(0,Math.min(a.t.length,niv)).concat(auto);
+  const path=at.concat(auto);
   if(lv>=niv) return {rows:base,a,D,lv,base,path};   // último nível: as linhas, filtradas pela trilha
   const gs={}, ord=[], ok={}, c0=sp.cols[0].k, somas=sp.cols.filter(c=>c.agg==='sum');
   base.filter(r=>g2match(r,sp,st)).forEach(r=>{ const vs=g2agValsF(r,a,D,lv,sp,st), so=g2agSo(r,a,D,lv,sp);
@@ -373,7 +376,7 @@ function g2agRows(self,sp,st,rows){ const a=g2agLer(self,sp); if(!a) return {row
   // ordem: a chave própria do nível quando a linha traz (r.gs: mês e semana em ordem de calendário), senão o nome
   ord.sort((x,y)=>(ok[x]!==undefined&&ok[y]!==undefined&&String(ok[x])!==String(ok[y]))?(String(ok[x])<String(ok[y])?-1:1):x.localeCompare(y,'pt-BR',{numeric:true}));
   const out=ord.map(k=>{ const kids=gs[k], n=new Set(kids.map(x=>x.id.split('@')[0])).size; const row={id:'grp@'+k,ro:true,nosel:true,grp:{k,lv},kids,v:{},s:{},p:{},m:{}};
-    row.v[c0]=k; row.s[c0]=k; row.p[c0]=[{k:'act',t:k,fn:sp.id+'_agdesce:'+encodeURIComponent(k),desce:true,al:'Descer em '+k+' ('+D.niv[lv].toLowerCase()+')'}];
+    row.v[c0]=k; row.s[c0]=k; row.p[c0]=[{k:'b',t:k}];   // AGR-02: o nome do grupo não desce (a seta recolhe)
     const c1=g2colsVis(self,sp)[1]; if(c1){ row.p[c1.k]=[{k:'mut',t:n+' '+(n>1?(D.plural||'itens'):(D.um||'item'))}]; }
     somas.forEach(c=>{ const tot=kids.reduce((s2,x)=>s2+(Number((x.v||{})[c.k])||0),0); row.v[c.k]=tot; });
     return row; });
@@ -403,7 +406,7 @@ function g2agMenuVals(self,sp,v,R){ const id=sp.id; if(!g2agTem(sp)){ v[id+'_agh
     go:()=>{ g2agGrava(self,sp,o.pq?{d:o.pq,t:[]}:null); setTimeout(()=>{ const b=document.querySelector('[data-g2agb="'+id+'"]'); if(b) b.focus(); },0); }}));
   // trilha: "Todas › Lagoa Grande › T4"; cada item volta ao nível dele; o último é onde se está
   const sobe=(n)=>{ const a2=g2st(self,id).ag; if(!a2) return; g2agGrava(self,sp,{d:a2.d,t:a2.t.slice(0,n)}); };
-  const path=(R.path||[]); v[id+'_agtrilha']=!!a&&path.length>0;
+  const path=(R.path||[]); v[id+'_agtrilha']=false;   // AGR-02: sem trilha
   v[id+'_agtr']=a?[{t:'Todas',go:()=>sobe(0)}].concat(path.slice(0,-1).map((x,i)=>({t:x,go:()=>sobe(i+1)}))):[];
   v[id+'_agatual']=a&&path.length?path[path.length-1]:'';
   v[id+'_agnivel']=a?(R.lv<D.niv.length?'por '+D.niv[R.lv].toLowerCase():''):'';
@@ -457,57 +460,65 @@ function g2mdVals(self,v,o){ const m=g2mdLer(self,o); ['tabela','cartoes'].forEa
 // parte vazia (só "—" ou nada): no cartão a linha "rótulo: valor" sai (texto só onde muda decisão, ESPEC §3.5)
 function g2cdVazio(c){ if(!c||!c.isData) return true; const ps=c.parts||[]; return !ps.length||ps.every(p=>!p||((p.isTxt||p.isMut||p.isB||p.isBr||(!p.isIco&&!p.isChip&&!p.isTag&&!p.isLink&&!p.isCta&&!p.isAct&&!p.isCn))&&/^[\s—–-]*$/.test(String(p.t||'')))); }
 const G2_CD_MAX=4;   // campos por cartão (16/10/2026, proprietário: "poluição visual... mais clean"); as outras colunas à vista ficam na Tabela e no "Colunas"
+// largura estimada (px) do conteúdo de uma célula na fonte de 13 px, só a 1ª linha: alinha as colunas dos cartões em linha
+function g2cdLarg(c){ let w=0, n=0; for(const p of ((c&&c.parts)||[])){ if(!p) continue; if(p.isBr) break; if(p.isMut&&n) continue; n++;
+    const t=String(p.isIco?(p.icoTem?(p.icoTxt||''):''):(p.t||'')); w+=t.length*(p.isB?7.6:7.1)+(p.isChip?28:p.isTag?20:p.isIco?20:0); }
+  return w+(n>1?(n-1)*6:0); }
+// VIS-06 · cartões em linha (16/10/2026, proprietário: "deixe o modo de visão do cartão igual de planos agronômicos, ficou muito mais bonito,
+// organizado e produtivo"): um cartão por linha, como as Atividades do plano: seta (itens dentro), título, as mesmas colunas em todos os
+// cartões da lista (as G2_CD_MAX primeiras à vista com valor), alinhadas, e o ⋯. Rótulos uma vez, no alto (no celular, dentro do cartão)
 function g2cdVals(self,sp,v){ const id=sp.id, rows=v[id+'_rows']||[], cols=v[id+'_mdcols']||g2colsVis(self,sp), off=sp.sel?1:0, n=cols.length;
   const parte=(rw)=>{ const cs=rw.cells||[]; return {sels:(off&&cs[0]&&cs[0].isSel)?[cs[0]]:[], dat:cs.slice(off,off+n), tr:cs.slice(off+n)}; };
-  const ls=(P,max)=>{ const o=[]; for(let i=1;i<P.dat.length&&o.length<max;i++){ const c=P.dat[i]; if(g2cdVazio(c)||!cols[i]) continue; o.push({l:String(cols[i].l||'').split(' · ')[0], parts:c.parts, cls:cols[i].a==='r'?'g2cd-num':''}); } return o; };   // rótulo curto: "Ingrediente ativo · grupo químico" → "Ingrediente ativo"
+  const P0=rows.map(parte), dat=P0.filter((P,k)=>!rows[k].grp).map(P=>P.dat);
+  const ix=[]; for(let i=1;i<n&&ix.length<G2_CD_MAX;i++) if(cols[i]&&dat.some(d=>!g2cdVazio(d[i]))) ix.push(i);
+  const lab=(i)=>String((cols[i]&&cols[i].l)||'').split(' · ')[0], num=(i)=>!!(cols[i]&&cols[i].a==='r'), fcls=(i)=>'g2cd-f'+(num(i)?' g2cd-num':'');
+  const larg=ix.map(i=>{ let w=lab(i).length*7.2; dat.forEach(d=>{ if(!g2cdVazio(d[i])) w=Math.max(w,g2cdLarg(d[i])); }); return Math.round(Math.min(240,Math.max(56,w))+18); });
+  const fs=(P)=>ix.map(i=>{ const c=P.dat[i], vz=g2cdVazio(c); return {l:lab(i), parts:vz?[]:c.parts, cls:fcls(i)}; });
+  const temCar=rows.some(rw=>rw.has||rw.grp), temAc=P0.some(P=>P.tr.some(c=>c&&c.isDel));
+  v[id+'_cdgtc']='grid-template-columns:'+(off?'34px':'0px')+' '+(temCar?'36px':'0px')+' minmax(160px,1fr) '+(larg.length?larg.map(w=>'minmax(0,'+w+'px)').join(' '):'0px')+' '+(temAc?'48px':'0px')+';';
+  v[id+'_cdcar']=temCar?'1':''; v[id+'_cdhd']=ix.map(i=>({l:lab(i), cls:fcls(i)})); v[id+'_cdhdT']=lab(0); v[id+'_cdhdHas']=ix.length>0;
   const base=(rw)=>{ const P=parte(rw), t0=P.dat[0]||{}, ed=/\bg2ed\b/.test(rw.cls||''), fl=/\bg2flash\b/.test(rw.cls||'');
     const notas=P.tr.filter(c=>c&&c.isData&&!g2cdVazio(c));
     return {P, t0, id:rw.id, ed, fl, tab:rw.tab, open:rw.open, key:rw.key, sels:P.sels, tparts:t0.parts||[], acts:P.tr.filter(c=>c&&c.isDel), nota:notas.length?notas[0].parts:[], temNota:notas.length>0}; };
-  // árvore: o cartão do 1º nível diz "n itens" e abre os filhos dentro dele (a mesma expansão da seta da Tabela, st.x); se o título já diz
-  // a contagem ("Adjuvantes 2 itens", "Pulverização 6 atividades"), o botão só diz Mostrar/Ocultar itens
-  const card=(rw)=>{ const b=base(rw), L=ls(b.P,G2_CD_MAX), t0=b.t0, abre=!!(rw.has&&t0.caretExp==='true'), nk=rw.nk||0, nome=g2cdNome(t0), ja=new RegExp('(^|\\s)'+nk+'\\s+[A-Za-zÀ-ÿ]').test(nome);
-    return Object.assign(b,{cls:'g2cd'+(b.ed?' g2ed':'')+(b.fl?' g2flash':''), ls:L, temLs:L.length>0, temKids:!!rw.has, kopen:abre, kexp:String(abre), ksym:abre?'▾':'▸',
-      kn:ja?(abre?'Ocultar itens':'Mostrar itens'):(nk+(nk===1?' item':' itens')), ktog:t0.toggle||(()=>{}), klab:'Itens de '+nome, kids:[]}); };
-  const kid=(rw,d)=>{ const b=base(rw), t0=b.t0, L=ls(b.P,2);
-    return Object.assign(b,{cls:'g2cd-k'+(b.ed?' g2ed':'')+(b.fl?' g2flash':''), st:'padding-left:'+(14+d*18)+'px;', sub:L, temSub:L.length>0,
+  // árvore: a seta à esquerda abre os filhos dentro do cartão (a mesma expansão da seta da Tabela, st.x); "n itens" ao lado do título, salvo
+  // quando o título já diz a contagem ("Adjuvantes 2 itens")
+  const card=(rw)=>{ const b=base(rw), t0=b.t0, abre=!!(rw.has&&t0.caretExp==='true'), nk=rw.nk||0, nome=g2cdNome(t0), ja=new RegExp('(^|\\s)'+nk+'\\s+[A-Za-zÀ-ÿ]').test(nome), kn=nk+(nk===1?' item':' itens');
+    return Object.assign(b,{cls:'g2cd'+(b.ed?' g2ed':'')+(b.fl?' g2flash':''), fs:fs(b.P), temKids:!!rw.has, kopen:abre, kexp:String(abre), ksym:abre?'▾':'▸',
+      kn, temKn:!!rw.has&&!ja, kal:(abre?'Ocultar ':'Mostrar ')+(ja?'itens':kn)+' de '+nome, ktog:t0.toggle||(()=>{}), klab:'Itens de '+nome, kids:[]}); };
+  const kid=(rw,d)=>{ const b=base(rw), t0=b.t0;
+    return Object.assign(b,{cls:'g2cd-k g2cd-g'+(b.ed?' g2ed':'')+(b.fl?' g2flash':''), tst:'padding-left:'+(8+d*18)+'px;', fs:fs(b.P),
       caretOk:!!(t0.hasCaret&&t0.caretOk), caretLabel:t0.caretLabel||'', caretExp:t0.caretExp||'false', caretSym:t0.caretSym||'▸', toggle:t0.toggle||(()=>{})}); };
+  // grupo (Agrupar por): seta que recolhe, nome e contagem; as somas alinhadas às colunas dos cartões
   const head=(rw)=>{ const b=base(rw), t0=b.t0, ext=[];
-    for(let i=1;i<b.P.dat.length;i++){ const c=b.P.dat[i]; if(g2cdVazio(c)||!cols[i]) continue; const lab=!!cols[i].agg; ext.push({l:lab?cols[i].l:'', temL:lab, parts:c.parts}); }
-    return {temCab:true, id:rw.id, tparts:t0.parts||[], ext, caretOk:!!(t0.hasCaret&&t0.caretOk), caretLabel:t0.caretLabel||'', caretExp:t0.caretExp||'false', caretSym:t0.caretSym||'▸', toggle:t0.toggle||(()=>{}),
+    for(let i=1;i<b.P.dat.length;i++){ const c=b.P.dat[i]; if(g2cdVazio(c)||!cols[i]) continue; if(cols[i].agg&&ix.indexOf(i)>=0) continue; const lb=!!cols[i].agg; ext.push({l:lb?cols[i].l:'', temL:lb, parts:c.parts}); }
+    const fa=ix.map(i=>{ const c=b.P.dat[i]; return {l:lab(i), parts:(cols[i].agg&&!g2cdVazio(c))?c.parts:[], cls:fcls(i)}; });
+    return {temCab:true, id:rw.id, tparts:t0.parts||[], ext, fs:fa, caretOk:!!(t0.hasCaret&&t0.caretOk), caretLabel:t0.caretLabel||'', caretExp:t0.caretExp||'false', caretSym:t0.caretSym||'▸', toggle:t0.toggle||(()=>{}),
       lab:'Cartões · '+(rw.gk||g2cdNome(t0)), cards:[]}; };
   const secs=[]; let cur=null, at=null, lv0=0;
   rows.forEach(rw=>{ const L=rw.lvl||0;
     if(rw.grp){ cur=head(rw); secs.push(cur); at=null; lv0=L+1; return; }
-    if(!cur){ cur={temCab:false, id:'', tparts:[], ext:[], caretOk:false, lab:'Lista em cartões', cards:[]}; secs.push(cur); }
+    if(!cur){ cur={temCab:false, id:'', tparts:[], ext:[], fs:[], caretOk:false, lab:'Lista em cartões', cards:[]}; secs.push(cur); }
     if(L<=lv0||!at){ at=card(rw); cur.cards.push(at); } else at.kids.push(kid(rw,L-lv0-1)); });
   secs.forEach(s=>{ s.temCards=s.cards.length>0; });
   v[id+'_cdg']=secs;
-  const tot=v[id+'_tot'], tt=[]; if(Array.isArray(tot)) tot.forEach((t,i)=>{ const x=String((t&&t.t)||'').trim(); if(i&&x&&cols[i]) tt.push({l:cols[i].l, t:x}); });
-  v[id+'_cdtot']=tt; v[id+'_cdtotHas']=tt.length>0; }
+  const tot=v[id+'_tot'], tt=Array.isArray(tot)?tot:[], tx=(i)=>String((tt[i]&&tt[i].t)||'').trim();
+  v[id+'_cdtot']=ix.map(i=>({l:lab(i), t:tx(i), cls:fcls(i)}));
+  v[id+'_cdtotx']=tt.map((t,i)=>i).filter(i=>i&&cols[i]&&tx(i)&&ix.indexOf(i)<0).map(i=>({l:cols[i].l, t:tx(i)}));   // total de coluna fora dos cartões: no título
+  v[id+'_cdtotHas']=ix.some(i=>tx(i))||v[id+'_cdtotx'].length>0; }
 function g2cdNome(t0){ return ((t0&&t0.parts)||[]).filter(p=>p&&!p.isIco&&!p.isBr).map(p=>String(p.t||'')).join(' ').replace(/\s+/g,' ').trim(); }
 // depois do EXTRAVALS (engine.ENGINE_JS2): modo de cada grade com seletor e, em Cartões, os cartões das linhas que a Tabela desenharia
 function g2modosFim(self,v){ if(typeof GRIDS==='undefined') return;
   if(!self.__g2mdChegou&&GRIDS.some(g2mdTem)){ self.__g2mdChegou=1; setTimeout(()=>{ try{ g2mdChegada(self); }catch(e){} },60); }
   for(const sp of GRIDS){ if(!sp.modo) continue; const id=sp.id, ext=sp.modo==='externo';
-    if(!ext&&!g2mdTem(sp)){ v[id+'_mdhas']=false; v[id+'_mdt']=true; v[id+'_mdc']=false; v[id+'_cdg']=[]; v[id+'_cdtot']=[]; v[id+'_cdtotHas']=false; continue; }
+    if(!ext&&!g2mdTem(sp)){ v[id+'_mdhas']=false; v[id+'_mdt']=true; v[id+'_mdc']=false; v[id+'_cdg']=[]; v[id+'_cdtot']=[]; v[id+'_cdtotHas']=false; v[id+'_cdtotx']=[]; v[id+'_cdhd']=[]; v[id+'_cdhdHas']=false; v[id+'_cdgtc']=''; v[id+'_cdcar']=''; continue; }
     const m=ext?g2mdExterno(self,sp):g2mdVals(self,v,{id,padrao:'tabela',url:'vista'}), car=m==='cartoes';
     v[id+'_mdhas']=!ext; v[id+'_mdt']=!car; v[id+'_mdc']=car;
-    if(car) g2cdVals(self,sp,v); else { v[id+'_cdg']=[]; v[id+'_cdtot']=[]; v[id+'_cdtotHas']=false; } } }
-function g2vals(self,sp,v,mask){
-  const id=sp.id, rows0=g2disp(self,sp), added=self.state.added||{};
-  // sp.suspende (posto pela tela: recorte do Painel na O.S.): a grade lê o estado sem busca, filtros nem agrupamento, sem apagá-los; a busca
-  // some até o recorte acabar. O agrupamento e a trilha também ficam suspensos: senão a trilha esconderia O.S. do recorte (mesma classe do S3 6167883199)
-  const susp=(x)=>sp.suspende?Object.assign({},x,{q:'',f:{},qv:''}):x;
-  const st0=susp(g2stBusca(self,id,g2st(self,id)));
-  const AG=(g2agTem(sp)&&!sp.suspende)?g2agRows(self,sp,st0,rows0):{rows:rows0,a:null}, rows=AG.rows, st=susp(g2stBusca(self,id,g2st(self,id)));   // VISOES-2 §3.3
-  const arv=!!(sp.tree||AG.a);   // V2-3: grade plana do quadro só ganha a seta do grupo quando está agrupada
-  const flat=g2flat(sp,st,g2qrows(sp,st,rows),mask,added); const ed=sp.edit||{m:'none'}; const editable=ed.m&&ed.m!=='none';
-  g2qvals(self,sp,v,st,rows,added);
-  const so=st.so||sp.so||{};
-  const cols=g2colsVis(self,sp); g2cvVals(self,sp,v,cols); v[id+'_ncols']=cols.length+(sp.sel?1:0)+(sp.del?1:0);   // trilhas da grade = colunas visíveis
-  v[id+'_mdcols']=cols;   // modo Cartões (15/10/2026): as colunas à vista, na ordem das células da linha (g2cdVals)
-  v[id+'_head']=cols.map((c,ci)=>({l:c.l, tt:c.ajuda||g2glossCol(sp,c,rows), un:c.un||'', cls:(ci===0?'g2c0':''), st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;box-shadow:1px 0 0 #E4E9E5;':''),
-     arrow:(so.k===c.k?(so.d?'▼':'▲'):'⇅'), astyle:(so.k===c.k?'color:#1E7A4C;':'color:#B7C1BA;'), sortLabel:'Ordenar por '+c.l,
+    if(car) g2cdVals(self,sp,v); else { v[id+'_cdg']=[]; v[id+'_cdtot']=[]; v[id+'_cdtotHas']=false; v[id+'_cdtotx']=[]; v[id+'_cdhd']=[]; v[id+'_cdhdHas']=false; v[id+'_cdgtc']=''; v[id+'_cdcar']=''; } } }
+// TAB-08 (16/10/2026): cabeçalho com ordenar (⇅) e filtrar (funil) e o menu de filtro por valores, para o E.grid e para as tabelas próprias
+// (Atividades do plano): sp = {id, cols:[{k,l,t,a}]}, rows = linhas no formato do motor (id, v, s, ordk). Grava em g2st(self,sp.id): so, f, fmc…
+function g2cabVals(self,sp,v,st,rows,cols){ const id=sp.id, so=st.so||sp.so||{};
+  v[id+'_head']=cols.map((c,ci)=>({l:c.l, tt:c.ajuda||g2glossCol(sp,c,rows), un:c.un||'', cls:(ci===0?'g2c0':''), st:'display:flex;align-items:center;gap:2px;justify-content:'+(c.a==='r'?'flex-end':'flex-start')+';'+(ci===0?'position:sticky;left:0;z-index:2;background:#F4F6F3;':''),
+     arrow:(so.k===c.k?(so.d?'▼':'▲'):'⇅'), astyle:(so.k===c.k?'color:#1E7A4C;':'color:#8A968E;'), sortLabel:'Ordenar por '+c.l,
      sort:()=>{ const cur=g2st(self,id).so||sp.so||{}; let nx; if(cur.k!==c.k) nx={k:c.k,d:false}; else if(!cur.d) nx={k:c.k,d:true}; else nx={}; g2set(self,id,{so:nx}); },
      // 15/10/2026 (proprietário: "troque o ícone de filtrar a coluna por um ícone mais intuitivo de filtro"): funil vazado sem filtro;
      // com filtro, funil cheio verde (sem número: o funil cheio basta; a dica e o leitor de tela dizem "filtro ativo")
@@ -542,12 +553,30 @@ function g2vals(self,sp,v,mask){
       clear:()=>{ const f=Object.assign({},g2st(self,id).f||{}); delete f[fmc]; g2set(self,id,{f,fmc:null,fmd:null,fmq:''}); }, close:fechar,
       podeOcultar:g2cvTem(sp)&&sp.cols.length>5&&fmc!==sp.cols[0].k, ocultar:()=>{ const cur=new Set(g2colsVis(self,sp).map(x=>x.k)); cur.delete(fmc); fechar(); g2cvGrava(self,sp,[...cur]); }};
   } else v[id+'_fm']={open:false,vals:[]};
+}
+// tabela própria: as linhas que passam nos filtros da coluna (st.f), na ordem escolhida (st.so)
+function g2cabAplica(self,sp,rows){ const st=g2st(self,sp.id); return g2sort(rows.filter(r=>g2match(r,sp,st)),sp,st); }
+function g2vals(self,sp,v,mask){
+  const id=sp.id, rows0=g2disp(self,sp), added=self.state.added||{};
+  // sp.suspende (posto pela tela: recorte do Painel na O.S.): a grade lê o estado sem busca, filtros nem agrupamento, sem apagá-los; a busca
+  // some até o recorte acabar. O agrupamento e a trilha também ficam suspensos: senão a trilha esconderia O.S. do recorte (mesma classe do S3 6167883199)
+  const susp=(x)=>sp.suspende?Object.assign({},x,{q:'',f:{},qv:''}):x;
+  const st0=susp(g2stBusca(self,id,g2st(self,id)));
+  const AG=(g2agTem(sp)&&!sp.suspende)?g2agRows(self,sp,st0,rows0):{rows:rows0,a:null}, rows=AG.rows, st=susp(g2stBusca(self,id,g2st(self,id)));   // VISOES-2 §3.3
+  const arv=!!(sp.tree||AG.a);   // V2-3: grade plana do quadro só ganha a seta do grupo quando está agrupada
+  const flat=g2flat(sp,st,g2qrows(sp,st,rows),mask,added); const ed=sp.edit||{m:'none'}; const editable=ed.m&&ed.m!=='none';
+  g2qvals(self,sp,v,st,rows,added);
+  const so=st.so||sp.so||{};
+  const cols=g2colsVis(self,sp); g2cvVals(self,sp,v,cols); v[id+'_ncols']=cols.length+(sp.sel?1:0)+(sp.del?1:0);   // trilhas da grade = colunas visíveis
+  v[id+'_mdcols']=cols;   // modo Cartões (15/10/2026): as colunas à vista, na ordem das células da linha (g2cdVals)
+  g2cabVals(self,sp,v,st,rows,cols);   // cabeçalho (⇅ e funil) e filtro da coluna: a mesma peça das tabelas próprias (TAB-08)
   const total=(sp.total!==false) && sp.cols.some(c=>c.agg);
   const qn=g2norm((st.q||'').trim()), visK=new Set(cols.map(c=>c.k));
   // VISOES-2 C3: busca que casa só em coluna oculta diz na linha onde casou (a coluna continua valendo para a busca)
   const ondeCasou=(r)=>{ if(!qn||!g2cvTem(sp)||r.grp) return ''; if(cols.some(c=>g2norm(g2text(r,c)).indexOf(qn)>=0)) return ''; const oc=sp.cols.filter(c=>!visK.has(c.k)&&g2norm(g2text(r,c)).indexOf(qn)>=0).map(c=>c.l); return oc.length?'encontrado em: '+oc.join(', '):''; };
   const sicoKs=sp.sico?(sp.sico.ks||[sp.sico.k]).filter(k=>!visK.has(k)):[];
   v[id+'_rows']=flat.map(({r,lvl,has,pf})=>{
+    const canOpen=editable && !(ed.leafOnly && has) && !r.fora && !(r.nosel && !r.dr);
     const cells=[]; const exp=(st.x||sp.x0||{}); const casou=ondeCasou(r); const sicoP=sicoKs.map(k=>g2sicoPart(r,sp,k)).filter(Boolean); const acts=[];
     // linha livre (convite para cadastrar, ex.: talhão sem cultivo): sem seleção e sem lixeira
     if(sp.sel&&(r.livre||r.fora||r.nosel)) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.sel) cells.push({isSel:true,isData:false,isDel:false,cls:'',on:!!(st.sel||{})[r.id],selLabel:'Selecionar '+g2text(r,sp.cols[0]),
@@ -561,10 +590,12 @@ function g2vals(self,sp,v,mask){
       // 15/10 (proprietário): os botões da linha vão para o ⋯; o atalho de navegação ("Planejar ›", "Safra 2026/27 ›") fica na célula: diz onde a coisa mora
       if(sp.rmenu){ const vai=p=>p&&p.k==='act'&&!p.desce&&!p.full&&!/›\s*$/.test(String(p.t||'')); const fica=raw.filter(p=>!vai(p)); if(fica.length<raw.length){ raw.forEach(p=>{ if(vai(p)) acts.push(p); }); raw=fica; } }
       const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':'')+(c.nr?' g2nr':'')+(c.a==='r'?' g2celn':''),parts:(ci===0&&casou?raw.concat([{k:'br'},{k:'mut',t:casou}]):raw).map((p,i,arr)=>g2part(g2semSep(arr,i),v)),pw:'max-width:'+(c.w||340)+'px;',
-        st:(c.nr?'padding:0 2px;':'padding:6px 8px;')+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&arv?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:inherit;box-shadow:1px 0 0 #E4E9E5;':'')};
-      if(ci===0 && arv){ cell.hasCaret=true; cell.caretOk=has; cell.caretNo=!has; const open=(r.fgrp?exp[r.id]!==false:!!exp[r.id])||(g2filtering(st)&&has);
+        st:(c.nr?'padding:0 2px;':'padding:6px 8px;')+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&arv?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:inherit;':'')};
+      // TAB-08/TAB-04 (16/10/2026): a linha que abre o detalhe mostra a seta de descer (›) no começo; com filhos, ▸/▾ abre ali mesmo
+      if(ci===0 && arv){ cell.hasCaret=true; cell.caretOk=has; cell.drill=!has&&canOpen&&!r.fgrp; cell.caretNo=!has&&!cell.drill; const open=(r.fgrp?exp[r.id]!==false:!!exp[r.id])||(g2filtering(st)&&has);
         cell.caretSym=open?'▾':'▸'; cell.caretExp=String(open); cell.caretLabel=(open?'Recolher ':'Expandir ')+g2text(r,c);
         cell.toggle=()=>{ const x=Object.assign({},g2st(self,id).x||sp.x0||{}); x[r.id]=r.fgrp?(x[r.id]===false):!x[r.id]; g2set(self,id,{x}); }; }
+      else if(ci===0 && canOpen){ cell.hasCaret=true; cell.caretOk=false; cell.caretNo=false; cell.drill=true; }
       else { cell.hasCaret=false; }
       cells.push(cell); });
     // SAF-FAZ-3: o grupo transparente (fazenda) é uma faixa de cabeçalho: a 1ª célula ocupa as colunas de dados (nome, área e contagem juntos)
@@ -580,7 +611,6 @@ function g2vals(self,sp,v,mask){
     else if(sp.del&&(r.livre||r.fora||r.nosel)) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.del){ const asking=(st.cf===r.id); cells.push({isSel:false,isData:false,isDel:true,trash:true,rm:false,cls:'',asking,notAsking:!asking,st:'padding:4px 10px;white-space:nowrap;',
         delLabel:'Excluir '+g2text(r,sp.cols[0]), ask:()=>g2set(self,id,{cf:r.id}), no:()=>g2set(self,id,{cf:null}),
         yes:()=>{ const g2_0=self.state.g2; const rs=g2clone(g2rows(self,sp)); const rm=(list)=>{ const i=list.findIndex(x=>x.id===r.id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&rm(x.kids)); }; rm(rs); g2set(self,id,{rows:rs,cf:null}); self.setState({g2toast:'Excluído: '+g2text(r,sp.cols[0])}); if(self.g2after) self.g2after(id,rs,null); g2persiste(self,id,g2_0,{cf:null},'Não excluído'); }}); }
-    const canOpen=editable && !(ed.leafOnly && has) && !r.fora && !(r.nosel && !r.dr);
     // lvl…gk: para o modo Cartões (g2cdVals); grp é só o grupo do Agrupar por (r.grp = {k, lv}); o grp:true das linhas-pai da tela (talhão
     // dividido no Planejar safra) é árvore comum: vira cartão com os filhos dentro
     return {id:r.id, lvl, has, nk:(r.kids||[]).length, grp:!!(r.grp&&typeof r.grp==='object'), gk:(r.grp&&typeof r.grp==='object')?String(r.grp.k):'',
