@@ -83,3 +83,24 @@ A base andou de `052b9bf` para `6733a4c` e agora inclui o PR #76, que muda o car
 | `m_d15`, parte D | FALHOU 17/18, só o D15 (1) | `mutante_d15_D_d61bb58.log` |
 | `m_e2`, parte E | FALHOU 4/5, só o E2 (1) | `mutante_e2_E_d61bb58.log` |
 | `ds_unit_test.py` | OK 44/44 e 31/31 (0) | `ds_unit_d61bb58.log` |
+
+## Composição com a base em `c9ffa08`
+
+A base andou de `6733a4c` para `c9ffa08`: integração DS-TAB, PRs #77, #79 e #86 e Cadastros rev2. Ela mexe em `g2lib.js`, `engine.py` e `processo_os.py`, mas não na linha do `g2dicaSelo` nem nos trechos que os mutantes trocam. O merge gerou `4391604`, sem conflito. O `OS.dc.html` mudou, então repeti também os demais testes do módulo. Todos rodaram no render de árvore limpa.
+
+| Execução | Resultado (rc) | Bruto |
+|---|---|---|
+| `ds_test.py` | OK 72/72 (0) | `normal_4391604.log` |
+| `m_d15`, parte D | FALHOU 17/18, só o D15 (1) | `mutante_d15_D_4391604.log` |
+| `m_e2`, parte E | FALHOU 4/5, só o E2 (1) | `mutante_e2_E_4391604.log` |
+| `ds_unit_test.py` | OK 44/44 e 31/31 (0) | `ds_unit_4391604.log` |
+| `ds_padrao_test.py` | 17 ok · 0 falhas (0) | `ds_padrao_test_4391604.log` |
+| `ds_1510_test.py` | 17 ok · 0 falhas (0) | `ds_1510_test_4391604.log` |
+| `ds_1610_test.py` | 14 ok · 0 falhas (0) | `ds_1610_test_4391604.log` |
+| `visoes_test.py` | 9 ok · 0 falhas (0) | `visoes_test_4391604.log` |
+| `regras_toque_test.py` | 5 ok · 0 falhas (0) | `regras_toque_test_4391604.log` |
+
+sha256 do `OS.dc.html` no `4391604`:
+- normal: `f6317eff0468e64a181397957aad27718d694034282a67ade43bf73d28708452`
+- `m_d15`: `4b7e75dee3891ff6ea0c27394200d568830b5468619184d87dd2ba9aa1c17936`
+- `m_e2`: `0252dd688506c80403630af0a19e37d82e1bcac9d9c06a6b3cb3420c8461e814`
