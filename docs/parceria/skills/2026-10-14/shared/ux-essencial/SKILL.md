@@ -5,6 +5,9 @@ description: Desenhe e revise interfaces e fluxos simples, acessíveis e rápido
 
 # UX Essencial — o sistema como braço direito
 
+
+No Safrion, leia `.claude/skills/padrao-safrion/SKILL.md`, `AGENTS.md` §4 e o catálogo vigente em `docs/design-system/` antes de aplicar esta skill. O padrão aprovado vale para todas as telas do mesmo tipo (DEC-1610-12); inventarie as ocorrências e combine os recortes de autoria, sem sobrescrever trabalho alheio. As sugestões genéricas abaixo não substituem o DS.
+
 ## Fluxo contínuo com consequência clara
 
 Na entrada de cada contexto, torne reconhecíveis origem, estado, o que fazer, destino/consequência e recuperação, usando a informação mínima necessária. Nomeie comandos pelo objetivo da pessoa; detalhes internos de implementação não pertencem ao fluxo. Preserve valores, filtros e foco quando o contexto mudar; avançar não executa automaticamente a operação seguinte.
@@ -151,3 +154,4 @@ O snapshot preserva nomes repetidos. Checkbox (inclusive único) e select múlti
 `flush()` retorna `{ok:true}` somente após confirmação (ou conteúdo já confirmado); falha retorna `{ok:false, reason}`. Confira esse resultado antes de navegar. `dirty` e `pending` expõem edição sem recibo e atividade/incerteza. `save(data, {signal})` deve rejeitar falhas ou retornar `{ok:false}` e usar transporte com prazo finito, cancelamento e versão/idempotência no domínio. O kit dá prazo `timeoutMs` (15 s por padrão) e AbortSignal: timeout é resultado incerto, não prova que o servidor cancelou. A fila devolve falha observável em vez de ficar pendurada; não envia a próxima versão até recibo remoto de sucesso ou reconciliação que prove término no servidor. Rejeição local após abort mantém a incerteza, mesmo que a promise termine. `reconcile(readback)` só libera com `{settled:true, data}`: o adaptador deve consultar o resultado terminal da operação e a versão vigente no servidor, devolvendo o snapshot completo confirmado. Um GET de valor momentâneo, sem comprovar que a escrita anterior não pode concluir depois, NÃO autoriza settled:true. A reconciliação mantém o formulário/rascunho e não envia automaticamente; nova tentativa explícita usa versão/idempotência do domínio. Readback sem confirmação ou rejeitado mantém o bloqueio. Se o transporte ignorar cancelamento e nunca terminar, preserve o rascunho e reconcilie no domínio antes de remontar; não faça retry cego nem suponha cancelamento remoto.
 
 `destroy()` recusa desmontagem com edição/pendência (`ok:false`). Para salvar, confira `flush().ok` e o recibo antes de destruir. Somente após preservar o rascunho em armazenamento autorizado ou decisão explícita de descartá-lo use `destroy({discard:true})`. Isso cancela debounce/envios ainda na fila, remove ouvintes e fecha o snackbar da instância; não cancela gravação já recebida pelo servidor. A aplicação deve conferir o retorno e manter a tela aberta quando houver recusa.
+

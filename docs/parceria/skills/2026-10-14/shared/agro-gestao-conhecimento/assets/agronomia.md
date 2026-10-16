@@ -28,7 +28,7 @@
 
 ## Água e irrigação
 - **Lâmina líquida** (mm) = ETc acumulada − chuva efetiva; **lâmina bruta** = líquida / eficiência (pivô 85 %, gotejo 90–95 %, aspersão 75 %). 1 mm = 10 m³/ha.
-- **Capacidade de água disponível** (CAD) = (CC − PMP) × densidade × profundidade radicular; irrigar quando esgotar a fração f (0,4–0,6).
+- **Capacidade de água disponível (CAD), em mm:** com CC e PMP volumétricos em m³/m³, `CAD_mm = (θcc − θpmp) × Z_mm`. Com CC e PMP gravimétricos em % (g de água/100 g de solo seco), densidade aparente `Ds` em g/cm³ e profundidade `Z_cm` em cm, `CAD_mm = (CC_pct − PMP_pct)/10 × Ds × Z_cm`, adotando densidade da água de 1 g/cm³. Não aplicar Ds novamente a teor volumétrico nem misturar fração com percentual. Exemplo: 30%−15%, Ds=1,2 e Z=40 cm → 72 mm; equivalente volumétrico 0,36−0,18 e Z=400 mm → 72 mm. Exigir unidades, CC≥PMP, profundidade e densidade positivas; ausência não é zero. Fração de depleção permitida depende de cultura, estágio e demanda, sem disparo universal. Referência: [FAO-56, capítulo 8](https://www.fao.org/4/X0490E/x0490e0e.htm), consultada em 16/10/2026.
 - **Manejo por sensores** (tensiômetro, capacitivo) ou balanço; **outorga** e volume outorgado (m³/h, h/dia) — alertar consumo vs. outorga; energia (kWh/mm).
 - Fertirrigação: dose por injeção, condutividade elétrica, compatibilidade.
 
@@ -57,3 +57,4 @@
 | Lâmina aplicada vs. ETc | mm aplicados / mm demandados | 0,9–1,1 |
 | Índice de vegetação (NDVI) por talhão | imagem de satélite/drone | tendência e anomalias |
 | Ocorrências acima do nível de ação | monitoramentos ≥ NA | tempo até ação |
+

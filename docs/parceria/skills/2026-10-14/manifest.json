@@ -36,13 +36,13 @@
   },
   {
     "file": "shared/agro-gestao-conhecimento/assets/agronomia.md",
-    "sha256": "8371104cf5df7e2706d679f49b15b61bd42667b7537244ee716201f5bac6186f",
-    "bytes": 8729
+    "sha256": "3319db77bbdb3a630d59703da72645e493c16c35cd2262944f838bd5d392c993",
+    "bytes": 9409
   },
   {
     "file": "shared/agro-gestao-conhecimento/assets/contabilidade-financas.md",
-    "sha256": "27a5d184f060a7459a6178f7ec0355d3a89e91d11337b9539781a28fb0596dca",
-    "bytes": 8536
+    "sha256": "b28068441479ce962794079eb498fb75b139cdaa782f1c48a84d4943f254335d",
+    "bytes": 9615
   },
   {
     "file": "shared/agro-gestao-conhecimento/assets/engenharia-agricola.md",
@@ -191,8 +191,8 @@
   },
   {
     "file": "shared/master-detail-ux/SKILL.md",
-    "sha256": "d55339ccf43287736920584955ef638a866745dad4fc13797ca3d0b2ff2e2813",
-    "bytes": 4632
+    "sha256": "e5f2e43a97d9765efc5bd12f20043ebc1491b0fb9d5f35fd7b911a5068b63203",
+    "bytes": 5156
   },
   {
     "file": "shared/master-detail-ux/references/anatomia.md",
@@ -206,8 +206,8 @@
   },
   {
     "file": "shared/minimalismo-essencial/SKILL.md",
-    "sha256": "ea3ae62aa85873cf8c22e16f6668b6611bfe5d5ed0b4683143092951c1eec6e9",
-    "bytes": 5579
+    "sha256": "5fa92d015a911a3946ae0fb70167cb85fec40668fa1383e122d9d985f3a38764",
+    "bytes": 5955
   },
   {
     "file": "shared/negocios-ecossistema/SKILL.md",
@@ -216,8 +216,8 @@
   },
   {
     "file": "shared/safrion-equipe/SKILL.md",
-    "sha256": "a7cb8152c42fda5fe822689c172bbafb6d9584848d6d29315b01f7017e4263b0",
-    "bytes": 7338
+    "sha256": "cab81776dcbe9c79542a98cc1c78ca05237d10565bbe4801e5fe8a85c282bd07",
+    "bytes": 7441
   },
   {
     "file": "shared/safrion-equipe/agents/openai.yaml",
@@ -226,8 +226,8 @@
   },
   {
     "file": "shared/tabelas-interativas/SKILL.md",
-    "sha256": "4f39b87bd07012be82194a321176daffb7ffacc2b84752c470d6a43b709dd392",
-    "bytes": 11458
+    "sha256": "fc65d993e451156c024372c3029beb71325927383af2bf31b97534a1bb093f20",
+    "bytes": 12260
   },
   {
     "file": "shared/tabelas-interativas/assets/exemplo.html",
@@ -241,8 +241,8 @@
   },
   {
     "file": "shared/ux-essencial/SKILL.md",
-    "sha256": "4fc4fd3ca1d7cf1ff71d7887144f7f5dabf80627e2e38c5ea561a5c79db8e678",
-    "bytes": 19101
+    "sha256": "85c5b70d1d7d1736c31fa601a2e653db2d6ba40b8eea5a5efd7ef2a886a9b547",
+    "bytes": 19477
   },
   {
     "file": "shared/ux-essencial/assets/exemplo.html",

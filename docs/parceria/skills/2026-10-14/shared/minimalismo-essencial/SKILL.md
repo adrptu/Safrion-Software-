@@ -5,6 +5,9 @@ description: Simplifique interfaces, fluxos e artefatos de produto preservando a
 
 # Só o que ajuda a tarefa
 
+
+No Safrion, leia `.claude/skills/padrao-safrion/SKILL.md`, `AGENTS.md` §4 e o catálogo vigente em `docs/design-system/` antes de aplicar esta skill. O padrão aprovado vale para todas as telas do mesmo tipo (DEC-1610-12); inventarie as ocorrências e combine os recortes de autoria, sem sobrescrever trabalho alheio. As sugestões genéricas abaixo não substituem o DS.
+
 ## Simplificação que preserva o trabalho
 
 Cadastros devem reutilizar contexto confiável, seleção rápida e autocomplete acessível dentro das permissões. Campos da mesma tarefa ficam juntos, com validação local e confirmação clara. Não repartir preenchimento entre cards, submenus ou wizards sem etapa real. Resumo, card, tooltip e rodapé só permanecem quando ajudam uma decisão ou recuperação que ainda não está atendida.
@@ -58,3 +61,4 @@ PRD mantém resultado, regras, estados, exceções, permissões e aceite observ�
 Inventarie o que importa ao fluxo, classifique e execute os cortes com justificativa. Reveja somente elementos cuja utilidade esteja em dúvida; não faça cortes por ritual. Só reintroduza ruído removido com evidência de necessidade. Verifique que a tarefa continua completa, acessível e segura; reverifique o comportamento afetado. Entregue três listas curtas: **aplicado**, **deixado de fora**, **cortado**, com motivo.
 
 Não cortar por estética: aprovações exigidas, isolamento/permissões, unidades, incerteza relevante, distinção entre rascunho/pendente/aceito, contexto de ambiente, avisos necessários ou caminhos de recuperação.
+

@@ -24,7 +24,7 @@
 - Insumos: custo médio ponderado; lotes/validade; **inventário físico** periódico e ajuste.
 
 ## Demonstrativos gerenciais
-- **DRE por atividade e safra** (receita bruta → deduções (Funrural, ICMS) → receita líquida → custos (COE/COT) → margem → despesas administrativas → EBITDA → depreciação → juros → resultado antes IR → resultado); consolidado da fazenda e por hectare.
+- **DRE por atividade e safra:** receita bruta → deduções → receita líquida → custos e despesas operacionais sem depreciação, amortização, exaustão e resultado financeiro → EBITDA → depreciação/amortização/exaustão → EBIT → resultado financeiro líquido → resultado antes de tributos sobre o lucro → resultado líquido. Cada parcela entra uma vez, por competência. COE pode conter juros e COT contém depreciação: não os deduzir integralmente antes de EBITDA para depois deduzir esses componentes novamente. Exibir `receita − COT` separadamente como resultado gerencial pelo COT, com reconciliação de contas, sem rotulá-lo EBITDA. Exemplo sintético: receita líquida 1000, custos/despesas operacionais sem D&A 600, depreciação 100, despesa financeira líquida 50 e tributos sobre lucro 25 → EBITDA 400, EBIT 300 e resultado líquido 225; reconciliação 225+25+50+100=400. Referência conceitual: [Resolução CVM 156, art. 2º](https://conteudo.cvm.gov.br/export/sites/cvm/legislacao/resolucoes/anexos/100/resol156.pdf), consultada em 16/10/2026; a norma rege divulgação por companhias abertas, não obriga indistintamente toda fazenda.
 - **Fluxo de caixa** realizado e **projetado por safra** (semanal/mensal): entradas (vendas, fixações, crédito), saídas (insumos por vencimento, operações, folha, parcelas de financiamento, impostos, investimentos); saldo mínimo; **necessidade de capital de giro** e cobertura por custeio/CPR/barter; simulação de cenários de preço/produtividade.
 - **Balanço patrimonial** (terra ao custo/valor, benfeitorias, máquinas, rebanho, estoques, contas a receber; dívidas por linha: custeio, investimento, comercial, fornecedores com vencimentos).
 - **Orçamento de safra** (planejado × realizado por conta e talhão; variação em R$ e %; alerta de desvio > x %).
@@ -35,7 +35,7 @@
 | Margem bruta / operacional / líquida (%) | (receita − COE)/receita; (receita − COT)/receita; resultado/receita | por cultura |
 | Custo/sc, custo/@, custo/L vs. preço | ver custos | CONAB/CEPEA |
 | Ponto de equilíbrio (sc/ha) e margem de segurança | custo/ha ÷ preço | ≥ 20 % |
-| EBITDA e margem EBITDA | resultado antes de juros, IR, depreciação | setor |
+| EBITDA e margem EBITDA | resultado líquido + tributos sobre lucro + despesas financeiras líquidas das receitas financeiras + depreciações/amortizações/exaustões; margem = EBITDA/receita líquida (denominador positivo) | reconciliar com DRE |
 | **ROA** = resultado / ativo total; **ROE** = resultado / patrimônio; **ROIC** | anual | > TMA |
 | Rentabilidade por ha (R$/ha) e por R$ investido | resultado / área | benchmark regional |
 | Liquidez corrente = AC/PC; liquidez seca | balanço | > 1,2 |
@@ -63,3 +63,4 @@
 
 ## Indicadores de saúde financeira no dashboard (dia 1)
 Saldo de caixa e projeção 30/60/90 d · contas a vencer 7 d · custo/sc da safra em andamento vs. preço de mercado · margem projetada por talhão · % orçamento consumido vs. % safra decorrida · dívida/EBITDA · exposição não fixada (sc) × preço · vencimentos de financiamento no mês.
+

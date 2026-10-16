@@ -5,6 +5,9 @@ description: Crie e revise tabelas de gestão com filtro e ordenação no cabeç
 
 # Tabelas interativas
 
+
+No Safrion, leia `.claude/skills/padrao-safrion/SKILL.md`, `AGENTS.md` §4 e o catálogo vigente em `docs/design-system/` antes de aplicar esta skill. O padrão aprovado vale para todas as telas do mesmo tipo (DEC-1610-12); inventarie as ocorrências e combine os recortes de autoria, sem sobrescrever trabalho alheio. As sugestões genéricas abaixo não substituem o DS.
+
 ## Universo, agregação e continuidade
 
 Filtro, grupo, total, contador e drill-down precisam se referir ao mesmo universo autorizado. Declare se o valor representa página, recorte ou total global. Mantenha valores tipados separados da apresentação; ausentes permanecem distintos de zero e sua posição na ordenação deve ser explícita e consistente nos dois sentidos.
@@ -22,7 +25,7 @@ Listagens interativas de gestão seguem os **quatro recursos** abaixo. Adapte a 
 - Indicador sempre visível (⇅ neutro, ▲/▼ destacado quando ativo). `aria-sort` no `<th>`.
 - Vazios sempre no fim, independente da direção. Ordenação numérica/data por valor real, texto com collator `pt-BR` (acentos e números naturais).
 
-## 2. Filtro no cabeçalho
+## 2. Filtro no cabeçalho (referência para projeto sem DS)
 - O campo de filtro fica **dentro da mesma célula `<th>`**, logo abaixo do título — nada de linha extra de filtros, painel lateral ou modal.
 - Sintaxe (dica no `title`/placeholder):
   - texto: contém (sem acento/caixa) · `=exato` · `!não contém` · `a|b` (ou) · `∅` vazios
@@ -39,6 +42,8 @@ Listagens interativas de gestão seguem os **quatro recursos** abaixo. Adapte a 
 - Botões "Expandir tudo / Recolher tudo".
 
 ## 4. Drill-down assertivo e intuitivo
+
+No Safrion, navegação e filtros seguem AGR-02 e TAB-08 (DEC-1610-13) do catálogo vigente; não implante a trilha genérica "Todos › …" nem o campo dentro do `<th>` por seguir o exemplo abaixo. Preserve recorte e retorno pelos controles do DS.
 - **Clique no grupo** → expande/recolhe (▶ gira).
 - **"Detalhar ›" ou duplo clique no grupo** → entra no grupo: vira filtro, aparece trilha **"Todos › Região: Sul › UF: RS"** e o próximo nível de agrupamento assume. "← Voltar" e cada migalha restauram o estado anterior (inclusive grupos que estavam abertos).
 - **Clique na linha** → painel lateral de detalhe com **todos** os campos (inclusive colunas ocultas), posição "12 de 142", navegação ↑/↓ e botão **"Filtrar por este"** em cada valor (entra direto no drill por aquele valor).
@@ -121,7 +126,9 @@ Markdown não é interativo. Para tabelas pequenas (até ~15 linhas) mostre norm
 
 ---
 
-## Checklist antes de entregar qualquer tabela
+## Checklist de referência para projeto sem DS
+
+Em projeto com DS, confira os requisitos equivalentes no catálogo vigente; os controles deste checklist não são imposições de layout.
 - [ ] Clique no cabeçalho ordena; Shift+clique ordena por várias colunas; indicador visível
 - [ ] Campo de filtro dentro do `<th>` de cada coluna, com operadores para números/datas
 - [ ] Menu ▾ com lista de valores (checkbox + contagem + busca)
@@ -133,3 +140,4 @@ Markdown não é interativo. Para tabelas pequenas (até ~15 linhas) mostre norm
 - [ ] Funciona com teclado e nos temas adotados pelo projeto
 
 O asset `Tabela.create` aceita `rowKey` (nome de campo ou função; padrão `id`) para preservar o detalhe em `setRows` com objetos novos. Use uma identidade estável e única. Sem chave, somente o mesmo objeto pode manter seleção; registro removido ou chave duplicada fecha o detalhe, sem escolher outro registro. Atualização conserva grupos expandidos e contexto ainda válido.
+

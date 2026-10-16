@@ -5,6 +5,9 @@ description: Organize entidades de gestão em Menu, Listagem, Detalhe e Sub-deta
 
 # Master-detail: localizar, entender e agir
 
+
+No Safrion, leia `.claude/skills/padrao-safrion/SKILL.md`, `AGENTS.md` §4 e o catálogo vigente em `docs/design-system/` antes de aplicar esta skill. O padrão aprovado vale para todas as telas do mesmo tipo (DEC-1610-12); inventarie as ocorrências e combine os recortes de autoria, sem sobrescrever trabalho alheio. As sugestões genéricas abaixo não substituem o DS.
+
 ## Origem, destino e contexto ativo
 
 Cada tela esclarece origem/contexto, estado atual, ação possível, consequência/destino e recuperação. Modal ou subdetalhe ativo concentra a primária; a tela de fundo não compete. Preserve rascunho, filtros, foco e posição ao abrir/fechar ou voltar. Drill-down temporário pode substituir o recorte visível sem sobrescrever preferências persistidas.
@@ -33,7 +36,7 @@ Anatomia e exemplos em [references/anatomia.md](references/anatomia.md), quando 
 
 ## Aplicação
 
-Em módulo novo, antes de código, mostre uma tabela curta com entidades, estados, ação primária por estado e seções do detalhe. Siga sem esperar aprovação, salvo dúvida que mude materialmente o desenho. Em sistema existente, identifique entidade/nível e reaproveite o padrão; não refatore frentes alheias ao pedido.
+Em módulo novo, antes de código, mostre uma tabela curta com entidades, estados, ação primária por estado e seções do detalhe. Siga sem esperar aprovação, salvo dúvida que mude materialmente o desenho. Em sistema existente, identifique entidade/nível e reaproveite o padrão; respeite o alcance do pedido e as autorias combinadas. No Safrion, aplique o alcance por tipo de tela definido em `padrao-safrion`, inclusive quando a referência inicial for uma só tela.
 
 Rotas refletem a entidade e seu detalhe (`/entidades`, `/entidades/:id`) conforme o roteador do projeto. Estado navegável pode ir à URL, mas nunca segredos ou conteúdo sensível. Criação rápida mantém contexto e oferece acesso imediato ao registro criado.
 
@@ -42,3 +45,4 @@ Login, onboarding, landing page, wizard linear, configuração simples e pagamen
 ## Encerramento
 
 Passe o [checklist](references/checklist.md) e o corte de `minimalismo-essencial`. Entregue três listas curtas: aplicado, deixado de fora e cortado, com motivo. Não remover estado, próximo passo, retorno, acessibilidade ou controles necessários para tornar a tela menor.
+
