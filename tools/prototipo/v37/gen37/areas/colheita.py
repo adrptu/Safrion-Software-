@@ -675,7 +675,7 @@ function CARVALS(self,v){ cenOuvir(self); const c=cenGet(); const L=carLotes(c);
   const Nn=(st,u,p)=>{ const n=ids.filter(k=>av[k].st===st).length; return n+' '+(n===1?u:p); };
   v.car_n=ids.length+' lotes · '+Nn('nao_conforme','não conforme','não conformes')+' · '+Nn('pendente','pendente','pendentes')+' · '+Nn('nao_avaliado','sem destino','sem destino')+' · '+Nn('conforme','conforme no escopo','conformes no escopo');
   v.car_lotes=ids.map(k=>{ const l=L[k], a=av[k]; const on=k===sel;
-    return {id:k,orig:(l.tipo==='campo'?'colhido · ':(l.tipo==='mistura'?'mistura · ':'divisão · '))+orig(l)+(l.tipo!=='campo'&&l.q?' · '+l.q:''),dest:'destino: '+nomeD(a.dest)+(a.lib&&a.lib.valida?' · liberado':'')+(a.libSusp?' · liberação suspensa':''),rot:a.rot,chst:co_chipst(a.cor),acao:a.acao+(on?' ▾':' ›'),on:on?'true':'false',
+    return {id:k,orig:(l.tipo==='campo'?'colhido · ':(l.tipo==='mistura'?'mistura · ':'divisão · '))+orig(l)+(l.tipo!=='campo'&&l.q?' · '+l.q:''),dest:'destino: '+nomeD(a.dest)+(a.lib&&a.lib.valida?' · liberado':'')+(a.libSusp?' · liberação suspensa':''),rot:a.rot,chst:co_chipst(a.cor),acao:a.acao,sym:on?'▾':'▸',on:on?'true':'false',   /* TAB-09: a seta abre a linha, à esquerda; o verbo fica no fim */
       go:()=>self.setState({carsel:on?'':k,cardest:null,carerr:''}),
       st:'display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;width:100%;box-sizing:border-box;text-align:left;padding:9px 12px;border-radius:10px;cursor:pointer;font-family:inherit;color:#15201A;font-size:13px;'+(on?'border:2px solid #1E7A4C;background:#F4FAF6;':'border:1px solid #E4E9E5;background:#FFFFFF;')}; });
   v.car_has=!!sel; v.car_err=self.state.carerr||''; v.car_hasErr=!!v.car_err;
@@ -719,6 +719,7 @@ def _car_sec():
     sel=f'font-family: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid {LINE}; border-radius: 9px; background: #fff; max-width: 100%; box-sizing: border-box;'
     lista=(f'<div role="list" aria-label="Lotes de mamão por avaliação" style="display: flex; flex-direction: column; gap: 6px;"><sc-for list="{H("car_lotes")}" as="l" hint-placeholder-count="3">'
            f'<div role="listitem"><button type="button" onClick="{H("l.go")}" aria-expanded="{H("l.on")}" aria-controls="car-det" style="{H("l.st")}">'
+           f'<span aria-hidden="true" style="width: 14px; flex-shrink: 0; font-size: 13px; color: {INK};">{H("l.sym")}</span>'
            f'<b style="font-weight: 800;">{H("l.id")}</b><span style="color: {MUTED}; min-width: 0;">{H("l.orig")}</span><span style="color: {MUTED};">{H("l.dest")}</span>'
            f'<span style="{H("l.chst")}">{H("l.rot")}</span><span style="margin-left: auto; font-weight: 700; text-decoration: underline; text-underline-offset: 3px;">{H("l.acao")}</span></button></div></sc-for></div>')
     blocos=(f'<sc-for list="{H("car_bls")}" as="b" hint-placeholder-count="3"><div style="display: flex; flex-direction: column; gap: 5px;"><div style="{cap}">{H("b.t")}</div>'

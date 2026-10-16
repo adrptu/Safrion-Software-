@@ -177,7 +177,7 @@ def ficha():
             + f'<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 4px;">{linha("Entregue por (almoxarife)")}{linha("Recebido por (caldeiro)")}</div>'
             + sec('Caldeiro · preparo por carga')
             + f'<div style="font-size: 12.5px;">Tanque útil {nf(EQ["tanque"])} L · vazão {nf(EQ["vazao"])} L/ha · área por carga {nf(AREA_CARGA)} ha. Coloque o produto indicado e complete com água até o volume da carga, na ordem da instrução liberada. A última carga é proporcional à área que falta.</div>'
-            + f'<table style="width: 100%; border-collapse: collapse;"><thead><tr><th style="{th}">Carga</th><th style="{th}">Calda</th><th style="{th}">Área</th>' + ''.join(f'<th style="{th}">{x["p"]} ({nf(x["dose"],2)} {x["un"]}/ha)</th>' for x in PRODS) + f'<th style="{th}">Feito</th><th style="{th}">Hora</th></tr></thead><tbody>{rows}{tot}</tbody></table>'
+            + f'<table style="width: 100%; border-collapse: collapse;"><thead><tr class="g2thr"><th style="{th}">Carga</th><th style="{th}">Calda</th><th style="{th}">Área</th>' + ''.join(f'<th style="{th}">{x["p"]} ({nf(x["dose"],2)} {x["un"]}/ha)</th>' for x in PRODS) + f'<th style="{th}">Feito</th><th style="{th}">Hora</th></tr></thead><tbody>{rows}{tot}</tbody></table>'
             + sec('Operador · aplicação')
             + f'<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">{kv("Vazão", nf(EQ["vazao"])+" L/ha")}{kv("Velocidade", nf(EQ["vel"])+" km/h")}{kv("Barra", nf(EQ["barra"])+" m")}{kv("Bicos · pressão", EQ["bicos"])}{kv("Conjunto", "Trator 04 + PJ-3030")}</div>'
             + sec('Apontamento (lance no app quando houver sinal)')

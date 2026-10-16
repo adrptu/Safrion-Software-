@@ -1303,7 +1303,7 @@ def _kanban_raias():
     # na raia, a fase vazia fica só com o título e o 0 (sem a caixa "Nenhuma ordem"): 8 raias × 5 fases não viram 40 caixas vazias
     raia=(f'<section class="os-raia" style="display: flex; flex-direction: column; gap: 8px;">'
           f'<button type="button" class="os-raia-cab" aria-label="{H("r.lab")}" onClick="{H("r.desce")}" style="align-self: flex-start; display: inline-flex; align-items: baseline; gap: 8px; min-height: 36px; padding: 4px 8px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; font-family: inherit; color: {ACC};">'
-          f'<b style="font-size: 14px;">{H("r.k")}</b><span style="font-size: 12.5px; color: {MUTED};">{H("r.n")}</span><span aria-hidden="true">›</span></button>'
+          f'<span aria-hidden="true">›</span><b style="font-size: 14px;">{H("r.k")}</b><span style="font-size: 12.5px; color: {MUTED};">{H("r.n")}</span></button>'   # TAB-09: seta antes do nome
           + _kanban(celular_rola='sem_estilo',lista='r.cols') + '</section>')
     # Codex 6170116165 V2-RAIAS-MOBILE-01: a raia usa a mesma coluna de 148 px com rolagem local do quadro único (antes, 5 colunas de ~45 px);
     # V2-RAIAS-TOQUE-01: no toque, nome da raia, × do chip e "Limpar filtros" com 44 px
