@@ -541,7 +541,7 @@ PA_TB_CSS = ('.pa-tb{display:grid;grid-template-columns:72px minmax(0,1fr) 110px
              '.pa-tb-cab{border-top:0!important;background:#F4F6F3;border-radius:12px 12px 0 0;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A}'
              '.pa-tb-l{cursor:pointer}@media (hover:hover){.pa-tb-l:hover{background:#F2F8F4}.pa-tb-l:hover .pa-mais{opacity:1}}.pa-tb-l:focus-within .pa-mais,.pa-tb-l .pa-mais[aria-expanded=true]{opacity:1}'
              '.pa-tb-gat{text-align:right;font-variant-numeric:tabular-nums}.pa-tb-gat b{font-size:13px}'
-             '.pa-tb-atv{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.pa-tb-atv .pa-titulo{min-width:0;flex:0 1 auto;overflow-wrap:break-word}'
+             '.pa-tb-atv{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.pa-tb-car{margin-left:-4px}@media (pointer:coarse){.pa-tb-car{width:36px;height:36px}}.pa-tb-atv .pa-titulo{min-width:0;flex:0 1 auto;overflow-wrap:break-word}'
              '.pa-tb-ins{text-align:right;font-size:12px;color:#65736A}.pa-tb-num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}'
              '.pa-tb .pa-mais-w{padding:0!important}.pa-tb-det{border-top:0!important;background:#FBFCFA}.pa-tb-det:empty{display:none}.pa-tb-detc{grid-column:1/-1;padding:0!important}'
              '.pa-tb-detc .pa-insumos{border-radius:0;padding-left:92px}'
@@ -644,7 +644,9 @@ def build():
     # o mesmo filtro por operação, o mesmo "Expandir tudo" e o mesmo clique: a linha (ou o nome) abre os insumos logo abaixo, editáveis
     tb_lin = (f'<div role="row" class="pa-tb-l" data-atv="{H("a.aid")}" onClick="{H("a.rowtog")}" style="{H("a.rst")}">'
               f'<span role="cell" class="pa-tb-gat" title="{H("a.gatlab")}"><b aria-hidden="true">{H("a.gatilho")}</b><span class="g2sr">{H("a.gatlab")}</span></span>'
-              f'<span role="cell" class="pa-tb-atv"><span class="pa-op-ico" role="img" aria-label="{H("a.op")}" title="{H("a.op")}">' + _opico('a') + '</span>'
+              # 16/10/2026 (proprietário: "na tabela tá sem símbolo drill down"): a mesma seta ▸/▾ do modo Cartões, sem dica (TAB-04)
+              f'<span role="cell" class="pa-tb-atv"><button type="button" class="g2car pa-tb-car" aria-label="{H("a.lab")}" aria-expanded="{H("a.open")}" aria-controls="{H("a.detalhesId")}" onClick="{H("a.tog")}">{H("a.sym")}</button>'
+              f'<span class="pa-op-ico" role="img" aria-label="{H("a.op")}" title="{H("a.op")}">' + _opico('a') + '</span>'
               f'<button type="button" class="pa-titulo" aria-label="{H("a.lab")}" aria-expanded="{H("a.open")}" aria-controls="{H("a.detalhesId")}" onClick="{H("a.tog")}">{H("a.nome")}</button>'
               + IF('a.hasChg', f'<span style="{H("a.chgst")} padding: 0 8px; font-size: 11px; line-height: 16px;">{H("a.chg")}</span>') + '</span>'
               f'<span role="cell" class="pa-tb-ins">{H("a.np")}</span><span role="cell" class="pa-tb-num">{H("a.custo")}</span>'

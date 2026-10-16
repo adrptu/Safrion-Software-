@@ -930,7 +930,7 @@ a{{color:{ACC}}}@media (hover:hover){{a:hover{{color:#15603a}}}}
 </helmet>
 <div style="position: relative; width: {W}px; height: {H}px; box-sizing: border-box; display: flex; background: {BG}; font-family: {FONT}; color: {INK}; overflow: hidden;">
 <nav aria-label="Módulos" style="width: 224px; flex-shrink: 0; background: {SIDE}; display: flex; flex-direction: column; padding: 16px 12px 12px; gap: 1px; box-sizing: border-box; overflow: hidden;">
-<div style="display: flex; align-items: center; gap: 10px; padding: 2px 12px 8px; font-family: {DISP}; font-weight: 700; font-size: 15px; letter-spacing: -.01em; color: #fff;"><span style="width: 28px; height: 28px; border-radius: 9px; background: {ACC}; display: inline-flex; align-items: center; justify-content: center;">{icon("Agronomia",16,"#fff")}</span>Talhão à O.S.</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 2px 12px 8px; font-family: {DISP}; font-weight: 700; font-size: 15px; letter-spacing: -.01em; color: #fff;"><span style="width: 28px; height: 28px; border-radius: 9px; background: {ACC}; display: inline-flex; align-items: center; justify-content: center;">{icon("Agronomia",16,"#fff")}</span>Safrion</div>
 {nav}
 <div style="flex-grow: 1;"></div>
 <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; font-size: 12.5px; color: {SIDE_TX}; border-top: 1px solid rgba(255,255,255,.08);"><span style="width: 26px; height: 26px; border-radius: 999px; background: {ACC}; color: #fff; font-weight: 700; font-size: 12px; display: inline-flex; align-items: center; justify-content: center;">A</span><span style="display: flex; flex-direction: column; line-height: 1.2;"><span style="font-weight: 700; color: #fff;">Ana</span><span style="color: {SIDE_MUTED}; font-size: 11.5px;">Fazenda Santa Rita</span></span></div>
@@ -1511,6 +1511,22 @@ CARTOES_CSS=(
     ".g2cd-gx{display:inline-flex;align-items:baseline;gap:4px;font-size:12.5px;font-variant-numeric:tabular-nums}"
     ".g2cd-tot{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;padding:8px 12px;border-radius:10px;background:#F4F6F3;font-size:12.8px;font-variant-numeric:tabular-nums}"
     "@media (pointer:coarse){.g2cd-nk,.g2cd-k{min-height:44px}}"
+
+    # 16/10/2026 (proprietário: "está com poluição visual, deixe mais clean, minimalista e mais organizado"): cartão enxuto, para toda lista
+    # em Cartões. Título forte e uma linha de apoio apagada; até 4 campos em duas colunas, rótulo pequeno em cima e valor numa linha; o texto
+    # secundário da célula (2ª linha, texto apagado) fica na Tabela e no detalhe
+    ".g2cd{gap:12px;padding:14px 16px}"
+    ".g2cd-tit{font-size:14.5px;font-weight:800;line-height:1.3}"
+    ".g2cd-tit .g2pw>:not(:first-child){font-size:12.5px;font-weight:500;color:#65736A}"
+    ".g2cd-tit .g2pw>:not(:first-child):not([style*=\"flex-basis: 100%\"]){display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;max-width:100%}"
+    ".g2cd-ls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px}"
+    ".g2cd-l{flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:2px}"
+    ".g2cd-l dt{max-width:100%;font-size:11.5px;line-height:1.3}"
+    ".g2cd-l dd{width:100%;justify-content:flex-start;text-align:left;font-size:13px;font-weight:600;overflow:hidden}"
+    ".g2cd-l dd .g2pw{display:block;min-width:0;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}"   # bloco: as reticências só valem fora do flex
+    ".g2cd-l dd .g2pw>[style*=\"flex-basis: 100%\"],.g2cd-l dd .g2pw>[style*=\"flex-basis: 100%\"]~*{display:none}"
+    ".g2cd-l dd .g2pw>[style*=\"color: #65736A; font-size: 12px\"]:not(:first-child){display:none}"
+    "@media (max-width:420px){.g2cd-ls{grid-template-columns:minmax(0,1fr)}}"
 )
 G2_CSS=(".g2dsel{position:fixed;z-index:90;box-sizing:border-box;overflow-y:auto;max-width:min(420px,calc(100vw - 16px));padding:6px;background:#FFFFFF;border:1px solid #E4E9E5;border-radius:12px;box-shadow:0 12px 28px -12px rgba(21,32,26,.35);font-family:inherit;outline:none}"   # lista suspensa do DS (15/10)
     ".g2dsel [role=option]{display:flex;align-items:center;gap:6px;min-height:36px;padding:7px 12px 7px 8px;border-radius:8px;font-size:13.5px;font-weight:600;color:#15201A;cursor:pointer;white-space:nowrap}"
@@ -1672,6 +1688,13 @@ _NOVO_RE=re.compile(r'^\s*\+?\s*Nov[oa]s?\s+',re.I)
 def rotulo_criar(t):
     """BOT-03 (15/10/2026): o botão de criar diz o verbo do efeito: \"Novo pedido\" vira \"Criar pedido\" (o título do painel continua o nome)"""
     return _NOVO_RE.sub('Criar ',t) if t else t
+# ícones do "Agrupar por" (VISOES-2 §3.3): o mesmo desenho na grade e em toda barra com agrupamento próprio (Agrofit, 16/10/2026)
+_ip_ag=lambda d: f'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{d}</svg>'
+AG_ICONES={'oque':_ip_ag('<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>'),   # lucide layers
+            'quem':_ip_ag('<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'),   # lucide user
+            'quando':_ip_ag('<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>'),   # lucide calendar
+            'onde':_ip_ag('<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>'),   # lucide map-pin
+            '0':_ip_ag('<path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h18"/>')}   # lucide menu (sem agrupar)
 AG_CTRL={}   # gid: (botão Agrupar por com a trilha, menu), para o mesmo controle fora da Tabela (Kanban da O.S.)
 def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None,vazio=True,ag=None,sico=None,sico_so_icone=False,menu_linha=False,busca_extra='',cartoes=None):
     cols=[_col_un(c) for c in cols]
@@ -1716,12 +1739,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     if modo: spec['modo']='externo' if cartoes=='externo' else True
     mdb=f'<sc-if value="{H("_mdhas")}" hint-placeholder-val="{{{{false}}}}">{modos_html(gid)}</sc-if>' if (modo and cartoes!='externo') else ''
     # VISOES-2 §3.3: "Agrupar por" (ícone da pergunta + nome da coluna) e a trilha do descer, na barra da grade
-    _ip=lambda d: f'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{d}</svg>'
-    _IPQ={'oque':_ip('<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>'),   # lucide layers
-          'quem':_ip('<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'),   # lucide user
-          'quando':_ip('<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>'),   # lucide calendar
-          'onde':_ip('<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>'),   # lucide map-pin
-          '0':_ip('<path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h18"/>')}   # lucide menu (sem agrupar)
+    _IPQ=AG_ICONES
     _icos=''.join(f'<sc-if value="{{{{ao.{k}}}}}" hint-placeholder-val="{{{{false}}}}">{_IPQ[k2]}</sc-if>' for k,k2 in [('i0','0'),('iOque','oque'),('iQuem','quem'),('iQuando','quando'),('iOnde','onde')])
     agb=''
     if ag:
@@ -1750,10 +1768,13 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
             + (f'<sc-if value="{{{{{gid}_hasqf !== true}}}}" hint-placeholder-val="{{{{false}}}}"><span data-g2cnt="{gid}" style="font-size: 12px; color: {MUTED}; font-weight: 600; white-space: nowrap;">{H("_count")} de {H("_all")}</span></sc-if>' if search else '')
             + f'<sc-for list="{H("_fchips")}" as="fc" hint-placeholder-count="0"><span style="display: inline-flex; align-items: center; gap: 2px; padding: 2px 4px 2px 9px; border-radius: 999px; background: {ACCS}; color: {ACC}; font-size: 11.5px; font-weight: 700;">{_h("fc.t")}<button type="button" aria-label="Remover filtro" onClick="{_h("fc.rm")}" style="border: 0; background: transparent; color: {ACC}; cursor: pointer; font-size: 13px; padding: 0 4px;">×</button></span></sc-for>'
             + f'<sc-if value="{H("_filtered")}" hint-placeholder-val="{{{{false}}}}"><button type="button" onClick="{H("_clear")}" style="border: 0; background: transparent; color: {ACC}; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;">Limpar filtros</button></sc-if>'
-            + '<span style="flex-grow: 1;"></span>' + tools + agb + cvb   # 15/10/2026 (proprietário): filtros rápidos ao lado da busca; Agrupar por à esquerda de Colunas
+            # 16/10/2026 (proprietário: "padronize expandir e recolher na melhor posição"): à direita, nesta ordem: ferramentas da tela, Expandir
+            # tudo, Agrupar por, Colunas e Tabela | Cartões (o modo de visão fica sempre na ponta). Filtros rápidos ao lado da busca (15/10)
+            + '<span style="flex-grow: 1;"></span>' + tools
+            + (f'<sc-if value="{H("_xhas")}" hint-placeholder-val="{HL("true")}"><button type="button" onClick="{H("_xtog")}" class="g2xtog">{seta_xtog(H("_xup"),H("_xdown"))}{H("_xlab")}</button></sc-if>' if tree else '')
+            + agb + cvb
             + mdb   # modo Tabela | Cartões (15/10/2026): no fim dos controles de visão, depois de Colunas
             + (f'<sc-if value="{H("_hassel")}" hint-placeholder-val="{{{{false}}}}"><span role="status" style="font-size: 12px; font-weight: 700; color: {ACC};">{H("_selmsg")}</span>{bulk}<button type="button" onClick="{H("_selclear")}" style="{_MINI}">Limpar seleção</button></sc-if>' if sel else '')
-            + (f'<sc-if value="{H("_xhas")}" hint-placeholder-val="{HL("true")}"><button type="button" onClick="{H("_xtog")}" class="g2xtog">{seta_xtog(H("_xup"),H("_xdown"))}{H("_xlab")}</button></sc-if>' if tree else '')   # visão/apresentação: fim da barra, texto discreto (v3)
             + (f'<sc-if value="{H("_semsel")}" hint-placeholder-val="{{{{true}}}}"><button type="button" onClick="{H("_new")}" style="{_MINI}">+ {esc(rotulo_criar(add))}</button></sc-if>' if add else '')   # com seleção, a região de ações dá lugar à do lote (DS-40)
             + '</div>')
     # filtro da coluna no padrão Excel/Google Sheets: menu flutuante sob o cabeçalho, ordenar, pesquisar, marcar valores e aplicar no OK

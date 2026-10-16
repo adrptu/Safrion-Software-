@@ -1,4 +1,4 @@
-<title>Do Talhão à O.S.</title>
+<title>Safrion</title>
 <style>
 /* Fonte versionada da casca do artefato (gen37/site_index.html; antes só existia na cópia de publicação).
    Casca do site: a tela do protótipo ocupa a janela inteira num quadro do mesmo site, e a navegação acontece dentro dele.
@@ -26,7 +26,7 @@ body { background: var(--fundo); color: var(--texto); font-family: 'Manrope', sy
 }
 noscript a { color: var(--verde); }
 </style>
-<iframe id="tela" title="Protótipo Do Talhão à O.S." src="IN-04.dc.html"></iframe>
+<iframe id="tela" title="Protótipo do Safrion" src="IN-04.dc.html"></iframe>
 <noscript><p>Abra <a href="IN-04.dc.html">o protótipo</a>.</p></noscript>
 <script>
 (function () {
@@ -42,7 +42,7 @@ noscript a { color: var(--verde); }
     try {
       var nome = /([A-Za-z0-9-]+)\.dc\.html$/.exec(tela.contentWindow.location.pathname);
       if (nome && history.replaceState) history.replaceState(null, '', '#' + nome[1]);
-      document.title = tela.contentDocument.title || 'Do Talhão à O.S.';
+      document.title = tela.contentDocument.title || 'Safrion';
     } catch (e) { /* tela de outro endereço: mantém o título */ }
   });
 })();

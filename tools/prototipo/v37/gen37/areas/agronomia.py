@@ -1045,13 +1045,16 @@ def _agf_filtros():
             + faixa('agf_hasMiss','agf_missSt','agf_missT','agf_missD','Fechar aviso','agf_missX'))
 
 def _agf_tools():
-    sel=(f'font-family: inherit; font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 999px; border: 1px solid {LINE}; '
-         f'background: {SURF}; color: {INK}; cursor: pointer; max-width: 100%; min-width: 0; text-overflow: ellipsis;')   # encolhe no estreito (390 px)
-    return (f'<label style="display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; max-width: 100%; min-width: 0; font-size: 12px; font-weight: 700; color: {MUTED};">Agrupar por'
-            f'<select aria-label="Agrupar por" value="{H("agf_gb")}" onChange="{H("agf_setgb")}" style="{sel}">'
-            f'<sc-for list="{H("agf_gbs")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label>'
-            f'<sc-if value="{H("agf_grouped")}" hint-placeholder-val="{F_()}"><button type="button" class="g2xtog" onClick="{H(AGF_ID+"_xtog")}">'   # expandir/recolher global: texto discreto (v3.1)
-            f'{E.seta_xtog(H(AGF_ID+"_xup"),H(AGF_ID+"_xdown"))}{H(AGF_ID+"_xlab")}</button></sc-if>')
+    # 16/10/2026 (TAB-01): Expandir tudo antes de Agrupar por, como em toda barra de tabela
+    return (f'<sc-if value="{H("agf_grouped")}" hint-placeholder-val="{F_()}"><button type="button" class="g2xtog" onClick="{H(AGF_ID+"_xtog")}">'   # expandir/recolher global: texto discreto (v3.1)
+            f'{E.seta_xtog(H(AGF_ID+"_xup"),H(AGF_ID+"_xdown"))}{H(AGF_ID+"_xlab")}</button></sc-if>'
+            # 16/10/2026 (proprietário: "Agrupar por nessa tela está diferente o ícone das demais telas"): o mesmo botão da grade (ícone da
+            # pergunta, "Agrupar por" apagado, o valor e ▾); o <select> fica por cima, transparente, e abre a lista do DS (SEL-03)
+            f'<label class="agf-agb" style="{_MINI} position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 32px; max-width: 100%; min-width: 0;">'
+            + ''.join(f'<sc-if value="{H("agf_gbi_"+k)}" hint-placeholder-val="{F_()}">{E.AG_ICONES[k]}</sc-if>' for k in ('0','oque','quem'))
+            + f'<span style="color: {MUTED}; font-weight: 600;">Agrupar por</span> <span style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{H("agf_gbl")}</span> <span aria-hidden="true" style="font-size: 9px;">▾</span>'
+            f'<select aria-label="Agrupar por" value="{H("agf_gb")}" onChange="{H("agf_setgb")}" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 16px;">'
+            f'<sc-for list="{H("agf_gbs")}" as="o" hint-placeholder-count="3"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></label>')
 
 def _agf_estados():
     """carregando (com o tamanho da base) e erro com "Tentar de novo"; a lista só aparece com o índice carregado."""
@@ -1526,7 +1529,7 @@ function PREVALS(self,v){
   v.agf_fonte='Fonte: AGROFIT/MAPA · dados abertos (CC-BY) · '+(m?('arquivo de '+dt+' · '+agNf(nP)+' produtos com registro'):(AGX.st==='erro'?'base indisponível':'carregando…'));
   const sc=AGX.st==='erro'?agChip('Base indisponível','red'):(!ok?agChip('Carregando a base','gray'):(agDiasArq()>7?agChip('Base de '+dt+' · desatualizada','yellow'):agChip('Base atualizada · '+dt,'green')));
   v.agf_stT=sc.t; v.agf_stSt=sc.st; v.agf_stDot=sc.dot;
-  v.agf_hasTD=false; v.agf_gbs=AG_GB; v.agf_gb=st.agf_gb||''; v.agf_grouped=!!st.agf_gb; v.agf_temCul=false; v.agf_hasRef=false; v.agf_hasMiss=false; v.agf_hasRefC=false; v.agf_rc=[];
+  v.agf_hasTD=false; v.agf_gbs=AG_GB; v.agf_gb=st.agf_gb||''; { const o=AG_GB.find(x=>x.v===(st.agf_gb||''))||AG_GB[0]; v.agf_gbl=o.t; v.agf_gbi_0=!o.v; v.agf_gbi_quem=o.v==='tit'; v.agf_gbi_oque=!!o.v&&o.v!=='tit'; } v.agf_grouped=!!st.agf_gb; v.agf_temCul=false; v.agf_hasRef=false; v.agf_hasMiss=false; v.agf_hasRefC=false; v.agf_rc=[];
   v.agf_uLoad=ok&&AGX.uSt==='carregando'; v.agf_uErro=ok&&AGX.uSt==='erro'; v.agf_uErrT=AGX.uErr||''; v.agf_uRetry=()=>{ AGX.uSt=''; agUsosCarregar(self); };
   v.agf_setgb=(e)=>{ self.setState({agf_gb:e.target.value,agf_lim:AG_LIM}); g2set(self,AGF_G,{x:null}); };
   sp.lim=st.agf_lim||AG_LIM;

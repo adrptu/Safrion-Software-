@@ -8,6 +8,7 @@
   A · tom do aviso (node): feito → verde ✓, impedido → âmbar ⚠, informa → branco ⓘ.
   B · navegador a 1440 × 900: O.S. › Kanban com Agrupar por (as raias seguem o grupo), Carga sem cartões de resumo, Fase na área da visão
       (fora da faixa do topo), funil cheio com filtro ativo, lista suspensa do DS no Agrofit (abre, ↓ e Enter escolhem, Esc fecha).
+  C · navegador, todas as telas: linha que abre detalhe abaixo mostra a seta ▸/▾ (TAB-04, 16/10), inclusive Planos › Atividades em Tabela.
 Uso (de gen37/, depois de build.py e montar_render.py): python3 ds_1510_test.py · RENDER_DIR=<dir> serve outro _render · DS_PARTES=S,A,B"""
 import os, re, sys, json, glob, time, subprocess
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -17,7 +18,7 @@ OK, FAIL = [], []
 def chk(n, c, info=''):
     (OK if c else FAIL).append(n); print(('OK    ' if c else 'FALHA ') + n + ('' if c else ' · ' + str(info)[:900]), flush=True)
 R = os.environ.get('RENDER_DIR') or os.path.join(HERE, '_render')
-PARTES = set((os.environ.get('DS_PARTES') or 'S,A,B').split(','))
+PARTES = set((os.environ.get('DS_PARTES') or 'S,A,B,C').split(','))
 PAGS = sorted(f for f in glob.glob(os.path.join(R, '*.dc.html')) if os.path.basename(f) != 'Main.dc.html')   # Main: página técnica mínima, sem tela de uso
 
 def parte_s():
@@ -42,6 +43,16 @@ def parte_s():
     chk('S4 TAB-04 seta de abrir e recolher sem dica (title)', not ruins['car'], ruins['car'][:6])
     chk('S5 AVI-01 toda página com aviso traz o tom (G2_TOAST_TOM)', not ruins['toast'], ruins['toast'][:6])
     chk('S6 SEL-03 toda página traz a lista suspensa do DS (g2dsel)', not ruins['dsel'], ruins['dsel'][:6])
+    # TAB-01 (16/10): na barra da grade, "Expandir tudo" vem antes de Agrupar por e Colunas; o modo de visão fica na ponta
+    ordem = []
+    for f in PAGS:
+        s = open(f, encoding='utf-8').read()
+        for m in re.finditer(r'data-g2cvb="([A-Za-z0-9_]+)"', s):
+            g = m.group(1); ini = s.rfind(f'data-g2q="{g}"', 0, m.start())
+            if ini < 0: continue
+            seg = s[ini:m.start()]
+            if 'class="g2xtog"' not in seg and 'class="g2xtog"' in s[m.start():m.start() + 4000].split('data-g2q=')[0]: ordem.append((os.path.basename(f), g))
+    chk('S8 TAB-01 Expandir tudo antes de Agrupar por e Colunas em toda grade em árvore', not ordem, ordem[:6])
     saf = open(os.path.join(HERE, 'areas', 'processo_safra.py'), encoding='utf-8').read()
     sig = E.grid.__code__.co_varnames[:E.grid.__code__.co_argcount + E.grid.__code__.co_kwonlyargcount]
     chk('S7 TAB-05/06 opções da grade (menu_linha, sico_so_icone) e uso no Planejar safra (Talhões e cultivos; Operações e recursos)',
@@ -116,8 +127,36 @@ def parte_b():
         except Exception: pass
         srv.terminate()
 
+# C · TAB-04 (16/10/2026, proprietário: "na tabela tá sem símbolo drill down de planos agronômicos, verifique nas demais"): toda linha de
+# tabela ou lista que abre um detalhe abaixo (controle com aria-expanded + aria-controls, fora de menu) mostra a seta ▸/▾ na própria linha
+SETA = r"""JSON.stringify((()=>{const vis=e=>e.getClientRects().length>0;
+  const tem=r=>[...r.querySelectorAll('.g2car,svg,[aria-hidden=true]')].some(e=>vis(e)&&(e.classList.contains('g2car')||/[▸▾›⌄]/.test(e.textContent||'')||e.tagName.toLowerCase()==='svg'))||/[▸▾›]/.test(r.innerText||'');
+  const ruins=[]; for(const c of document.querySelectorAll('[aria-expanded][aria-controls]:not([aria-haspopup])')){ if(!vis(c)) continue;
+    const r=c.closest('[role=row],[role=listitem]'); if(!r||!vis(r)) continue; if(!tem(r)) ruins.push((r.innerText||'').replace(/\s+/g,' ').slice(0,50)); }
+  return ruins.slice(0,4);})())"""
+def parte_c():
+    from comp_lib import Chrome, servir
+    p, srv = servir(R); c = Chrome(); J = c.js
+    try:
+        c.aparelho(1440, 900, 1, False); ruins = {}
+        pags = [os.path.basename(f) for f in PAGS] + ['PA.dc.html?view=tabela#plano=SOJA-AT']
+        for pg in pags:
+            try:
+                c.goto(f'http://127.0.0.1:{p}/{pg}', 1.0); r = json.loads(J(SETA) or '[]')
+            except Exception as e: r = ['erro: ' + str(e)[:60]]
+            if r: ruins[pg] = r
+        chk(f'C1 TAB-04 toda linha que abre detalhe abaixo mostra a seta ▸/▾ ({len(pags)} telas, inclusive Planos › Atividades em Tabela)', not ruins, ruins)
+        c.goto(f'http://127.0.0.1:{p}/PA.dc.html?view=tabela#plano=SOJA-AT', 1.6)
+        n = J("(()=>{const b=[...document.querySelectorAll('.pa-tb-l')].filter(r=>r.getClientRects().length); return [b.length, b.filter(r=>r.querySelector('.g2car')).length];})()")
+        chk('C2 Planos › Atividades em Tabela: cada atividade tem a seta de abrir os insumos', n and n[0] > 0 and n[0] == n[1], n)
+    finally:
+        try: c.close()
+        except Exception: pass
+        srv.terminate()
+
 if 'S' in PARTES: parte_s()
 if 'A' in PARTES: parte_a()
 if 'B' in PARTES: parte_b()
+if 'C' in PARTES: parte_c()
 print(f'RESULTADO: {len(OK)} ok · {len(FAIL)} falhas')
 sys.exit(1 if FAIL else 0)

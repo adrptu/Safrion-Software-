@@ -456,10 +456,10 @@ function g2mdGrava(self,o,m){ g2mdPrefGrava(g2mdChave(o.id,g2pfk(),g2arq()),m);
 function g2mdVals(self,v,o){ const m=g2mdLer(self,o); ['tabela','cartoes'].forEach(k=>{ v[o.id+'_md_'+k+'_p']=String(m===k); v[o.id+'_md_'+k+'_go']=()=>{ if(g2mdLer(self,o)!==k) g2mdGrava(self,o,k); }; }); return m; }
 // parte vazia (só "—" ou nada): no cartão a linha "rótulo: valor" sai (texto só onde muda decisão, ESPEC §3.5)
 function g2cdVazio(c){ if(!c||!c.isData) return true; const ps=c.parts||[]; return !ps.length||ps.every(p=>!p||((p.isTxt||p.isMut||p.isB||p.isBr||(!p.isIco&&!p.isChip&&!p.isTag&&!p.isLink&&!p.isCta&&!p.isAct&&!p.isCn))&&/^[\s—–-]*$/.test(String(p.t||'')))); }
-const G2_CD_MAX=5;   // linhas "rótulo: valor" por cartão; as outras colunas à vista ficam na Tabela e no "Colunas"
+const G2_CD_MAX=4;   // campos por cartão (16/10/2026, proprietário: "poluição visual... mais clean"); as outras colunas à vista ficam na Tabela e no "Colunas"
 function g2cdVals(self,sp,v){ const id=sp.id, rows=v[id+'_rows']||[], cols=v[id+'_mdcols']||g2colsVis(self,sp), off=sp.sel?1:0, n=cols.length;
   const parte=(rw)=>{ const cs=rw.cells||[]; return {sels:(off&&cs[0]&&cs[0].isSel)?[cs[0]]:[], dat:cs.slice(off,off+n), tr:cs.slice(off+n)}; };
-  const ls=(P,max)=>{ const o=[]; for(let i=1;i<P.dat.length&&o.length<max;i++){ const c=P.dat[i]; if(g2cdVazio(c)||!cols[i]) continue; o.push({l:cols[i].l, parts:c.parts, cls:cols[i].a==='r'?'g2cd-num':''}); } return o; };
+  const ls=(P,max)=>{ const o=[]; for(let i=1;i<P.dat.length&&o.length<max;i++){ const c=P.dat[i]; if(g2cdVazio(c)||!cols[i]) continue; o.push({l:String(cols[i].l||'').split(' · ')[0], parts:c.parts, cls:cols[i].a==='r'?'g2cd-num':''}); } return o; };   // rótulo curto: "Ingrediente ativo · grupo químico" → "Ingrediente ativo"
   const base=(rw)=>{ const P=parte(rw), t0=P.dat[0]||{}, ed=/\bg2ed\b/.test(rw.cls||''), fl=/\bg2flash\b/.test(rw.cls||'');
     const notas=P.tr.filter(c=>c&&c.isData&&!g2cdVazio(c));
     return {P, t0, id:rw.id, ed, fl, tab:rw.tab, open:rw.open, key:rw.key, sels:P.sels, tparts:t0.parts||[], acts:P.tr.filter(c=>c&&c.isDel), nota:notas.length?notas[0].parts:[], temNota:notas.length>0}; };

@@ -12,5 +12,5 @@ def build():
     from ui37 import INICIO37
     fname='Main.dc.html'; E._reset_screen(fname)
     open(os.path.join(E.P,fname),'w').write('<!doctype html>\n<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'
-        '<title>Do Talhão à O.S.</title></head><body style="font-family: system-ui, sans-serif; color: #15201A; margin: 24px;">'
+        '<title>Safrion</title></head><body style="font-family: system-ui, sans-serif; color: #15201A; margin: 24px;">'
         f'<p>O protótipo começa no <a href="{INICIO37}">Mapa</a>.</p></body></html>')
