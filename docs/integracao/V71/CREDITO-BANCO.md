@@ -27,7 +27,7 @@ ID / resultado útil / persona: CRE-BANCO / o dossiê de crédito sai do sistema
 Requisitos do PRD e fora do escopo: GE-08, PT-04, FO-20, FO-42, FL-22, CAL-19, RN-039, 57.4.2, NFR-17, DEC-1610-14 (CAD-02), AGENTS §3.3 e §4; fora: §Fora do escopo
 Autor / revisor / integrador: Claude / Codex (produto e QA) e Gemini (pelo conector do Codex) / Codex (regime leve do protótipo, §3.5)
 Base (commit ou hashes) / arquivos sob responsabilidade: claude/v44-v69-mapa em b93e06f / areas/gestao.py (_ge08 e GE-08det novo), areas/parceiros.py (pt04, pt04det), ui37.py (Crédito no MENU2 e CURTO37), dados_credito.py (novo: modelos sintéticos e mapa campo → fonte), credito.js (novo: montagem, unidades, coerência, versão e consentimento), credito_menu_test.py (atualizado), cre_dossie_unit.js e cre_dossie_test.py (novos)
-Aceite e comando de verificação: C1–C20 abaixo / node cre_dossie_unit.js; python3 -B cre_dossie_test.py; python3 -B credito_menu_test.py; mais pttest.py e getest.py
+Aceite e comando de verificação: C1–C21 abaixo / node cre_dossie_unit.js; python3 -B cre_dossie_test.py; python3 -B credito_menu_test.py; mais pttest.py e getest.py
 Estado / impedimento / próximo passo: especificado, sem código; revisado pelo Codex e pelo Gemini em 16/10 (§Revisão), achados tratados nesta versão; entra quando uma das frentes abertas entrar na versão publicada (§3.6); depende da CAD-02 (documentos de crédito saem do Cadastro) e usa o mesmo modelo de link da ENTREGA-FAZ, com escopo e token próprios
 ```
 
@@ -45,7 +45,8 @@ Estado / impedimento / próximo passo: especificado, sem código; revisado pelo 
 | Revisor | SHA-256 do texto revisado | Data | Parecer |
 |---|---|---|---|
 | Codex | `0a667ac8b888168e6afd1a423f6806274f9cbba6ae12a3e0134b8f4db78be440` (c9ccbcf, 334 linhas) | 16/10/2026 | Direção aceita: ficha canônica → dossiê por destinatário, com os ajustes 1–8 abaixo. Comentário 6219532066 no PR #47 |
-| Gemini (conector do Codex) | o mesmo texto; requisição com SHA-256 `7c9ca16c21833d2921c0cbe75c2d4fccecea700fb00b32445046a9ea77e1616c` | 16/10/2026, 16:01:11Z | Modelo `gemini-3.1-pro-preview`, esforço HIGH; resposta `SErSao6vNP-Zn_AP4vfzqAc`, fim STOP, 19.682 tokens. Uma consulta, com o texto sintético inteiro, sem ferramentas, fontes externas nem testes. Brutos com o Codex em `work/dupla-20261013/cre-banco-20261016/` |
+| Codex, R2 | `0e9d89c66e9601a3954fbaf6ae4a7305c6643810ff41da9ecfe86cd5a233d1a7` (delta não commitado, 447 linhas) | 16/10/2026 | Tratamentos 1–8 aceitos. Conferiu em Decimal C15, C16, C17 e C19 (oito verificações); C3 e C5 continuam válidos. Pediu os ajustes R2-1 e R2-2 abaixo. Comentário 6220011063 no PR #47 |
+| Gemini (conector do Codex) | o texto de c9ccbcf; requisição com SHA-256 `7c9ca16c21833d2921c0cbe75c2d4fccecea700fb00b32445046a9ea77e1616c` | 16/10/2026, 16:01:11Z | Modelo `gemini-3.1-pro-preview`, esforço HIGH; resposta `SErSao6vNP-Zn_AP4vfzqAc`, fim STOP, 19.682 tokens. Uma consulta, com o texto sintético inteiro, sem ferramentas, fontes externas nem testes. Brutos com o Codex em `work/dupla-20261013/cre-banco-20261016/` |
 
 **Tratamento dos achados** (esta versão; os testes e as contraprovas continuam especificados, não executados):
 
@@ -63,6 +64,8 @@ Estado / impedimento / próximo passo: especificado, sem código; revisado pelo 
 | G2 | Gemini: "o sistema não deve policiar risco" | **Não adotado como regra geral.** Vale só para o dossiê, que expõe o que existe; as travas aprovadas para novas vinculações continuam (FO-20, RN-029) |
 | G3 | Gemini: revalidar valores a cada 6 meses, com redigitação obrigatória e redutor por depreciação | **Recusado.** Não são regras aprovadas, e depreciação contábil não prova valor de mercado |
 | G4 | Gemini: tratar pagamento como custo realizado | **Recusado.** Pagamento não é custo; o realizado é por competência (PRD 51) |
+| R2-1 | A proposta 7 permitia enviar com pendência obrigatória, mas as telas só ofereciam "Autorizar e enviar" no estado Pronto | **Aceito.** Caminho explícito: cada pendência obrigatória recebe "informar até <data>"; com todas respondidas ou datadas, o estado vira "Pronto com N pendências datadas" e a única primária é "Autorizar e enviar com N pendências". A prévia lista as pendências, e o recibo as grava na versão. Consentimento e alçada não mudam. Proposta 7, Fluxo, Telas e C21 |
+| R2-2 | C11 prometia 2 cliques com blocos e consentimento nunca marcados | **Aceito.** A contagem inclui a seleção real: 2 + k cliques, sendo k os blocos escolhidos um a um (9 no caso de teste, com os 7 blocos do modelo completo). Nada vem marcado. C11 |
 
 ## O que os bancos pedem (estrutura das duas planilhas)
 
@@ -196,7 +199,13 @@ O PRD já cita a [Resolução CMN 4.883/2020](https://www.bcb.gov.br/estabilidad
      - área plantada numa mesma época maior que a área em produção dos imóveis (épocas diferentes somam sem aviso);
      - produtividade declarada no histórico diferente da colheita registrada (vale a registrada, e o aviso diz isso).
    - **CAR e PRODES, a conferir antes de codificar** (referência 1): o dossiê mostra se o recibo do CAR está no cadastro e os módulos fiscais. Não afirma regularidade ambiental nem elegibilidade ao crédito.
-   - **Pendência obrigatória do modelo:** não bloqueia o envio. Ela vai ao credor como "a informar até <data>", à vista, nunca escondida nem preenchida com zero.
+   - **Pendência obrigatória do modelo:** pode ir ao credor só **datada**.
+     - Na própria linha, a pessoa responde, ou escolhe "Informar depois" e uma data (atalhos 7, 15 e 30 dias).
+     - Pendência obrigatória sem resposta nem data impede o envio, com o motivo.
+     - A datada vai como "pendente, até <data>", à vista, nunca escondida nem preenchida com zero.
+     - O envio com pendência pede o mesmo consentimento e a mesma alçada (proposta 9).
+     - Data vencida sem resposta aparece como "vencida em <data>" para os dois lados.
+     - A resposta gera a v2 em rascunho (proposta 8).
 8. **Versão congelada e nova versão.**
    - Autorizar congela a versão:
      - as três datas;
@@ -258,10 +267,10 @@ Os passos abaixo são estados de um mesmo detalhe, não telas obrigatórias.
 
 1. **Montar** (Dossiês › "Montar dossiê"): 3 perguntas de um toque. O sistema monta na hora e abre o detalhe com as três datas e a faixa "N do sistema · M calculados · K declarados · P pendências".
 2. **Completar** ("O que falta"): lista única de pendências, das obrigatórias pelo modelo às opcionais. Cada uma é respondida na própria linha, com rascunho guardado e foco preservado; a resposta vai para a Ficha. As verificações da proposta 7 aparecem na mesma lista, com o número e o link da origem.
-3. **Autorizar e enviar:** uma ação só.
-   - Abre a prévia exata da versão: blocos, pessoas, datas, alertas e arquivos.
+3. **Autorizar e enviar:** uma ação só, no estado Pronto ou "Pronto com N pendências datadas".
+   - Abre a prévia exata da versão: blocos, pessoas, datas, alertas, arquivos e, se houver, a lista "Vão como pendentes" (campo, bloco, motivo e "até <data>").
    - Pede o consentimento (proposta 9) e congela a versão (proposta 8).
-   - Devolve o recibo: versão, SHA-256, destinatário, prazo e quem autorizou.
+   - Devolve o recibo: versão, SHA-256, destinatário, blocos, prazo, quem autorizou e por qual alçada, e a lista das pendências enviadas, com a data de cada uma. Essa lista faz parte do conteúdo canônico da versão (entra no SHA-256).
    - No protótipo, o envio é simulado: download e link de demonstração (P1).
 4. **Acompanhar:**
    - acessos e downloads observados;
@@ -277,10 +286,10 @@ Os passos abaixo são estados de um mesmo detalhe, não telas obrigatórias.
 |---|---|---|
 | Entrada do Crédito (MOD-CRE) | 4 cartões na ordem do processo: **Ficha do grupo** · **Dossiês** · **Pedidos e contratos** · **Liberações e garantias** | — (cartões) |
 | Ficha do grupo (GE-08 `#vis=ficha`) | Grade comum (TAB-08) com uma linha por item. Seções: Pessoas · Imóveis e documentos · Bens e avaliações · Contratos anteriores ao sistema · Histórico de safras · Outras atividades. Colunas: item, situação (completo, falta), tipo e idade do valor, atualizado em e "usado em N dossiês". A linha abre o painel com o formulário curto | "Completar ficha" (abre a próxima pendência) |
-| Dossiês (GE-08 `#vis=dossies`) | Uma linha por dossiê: número sintético (DOS-0001), destinatário, finalidade e pedido, modelo, data-base, versão, situação (Rascunho · N pendências, Pronto, Enviado · lido em, v2 em rascunho, Complemento pedido, Expirado, Revogado) e acesso até | "Montar dossiê" |
-| Detalhe do dossiê (GE-08det, novo) | Cabeçalho: destinatário · modelo · data-base, apuração e emissão · versão · situação (chip). Faixa de origem. Tabela dos 7 blocos e dos documentos, com origem e situação. Seção "O que falta" com respostas na linha. Ações secundárias com ícone: baixar no modelo, baixar PDF, ver acessos e downloads, revogar | Uma por situação: "Responder pendências" (rascunho com pendência obrigatória) → "Autorizar e enviar" (pronto) → "Preparar v2" (dados mudaram ou complemento pedido) |
+| Dossiês (GE-08 `#vis=dossies`) | Uma linha por dossiê: número sintético (DOS-0001), destinatário, finalidade e pedido, modelo, data-base, versão, situação (Rascunho · N pendências, Pronto com N pendências datadas, Pronto, Enviado · lido em, v2 em rascunho, Complemento pedido, Expirado, Revogado) e acesso até | "Montar dossiê" |
+| Detalhe do dossiê (GE-08det, novo) | Cabeçalho: destinatário · modelo · data-base, apuração e emissão · versão · situação (chip). Faixa de origem. Tabela dos 7 blocos e dos documentos, com origem e situação. Seção "O que falta" com respostas na linha. Ações secundárias com ícone: baixar no modelo, baixar PDF, ver acessos e downloads, revogar | Uma por situação:<br>• Rascunho com pendência obrigatória sem resposta nem data: "Responder pendências". Cada linha tem "Responder" e "Informar depois" com data<br>• Pronto com N pendências datadas: "Autorizar e enviar com N pendências"<br>• Pronto: "Autorizar e enviar"<br>• Enviado: "Ver acessos e downloads"<br>• Dados mudaram, complemento pedido ou pendência datada respondida: "Preparar v2"<br>A v2 em rascunho repete os mesmos estados |
 | Bloco (painel lateral) | Cada campo com valor, unidade, origem (link, fórmula ou declarante, tipo e data), data do corte e destino no modelo. Campo declarado edita ali mesmo; campo de sistema abre a origem | "Salvar" (só no declarado) |
-| Autorizar e enviar (gaveta) | Prévia da versão; destinatário e pessoas convidadas; finalidade; pessoas do grupo incluídas; blocos (lista discriminada, nenhuma caixa marcada, inclusive no modelo desconhecido); prazo (padrão 90 dias; atalhos 30, 90, 180 dias e 12 meses, política do Safrion); formatos; quem autoriza; aviso "revogar corta acessos futuros, não apaga cópias já baixadas" | "Autorizar e enviar" (devolve o recibo) |
+| Autorizar e enviar (gaveta) | Prévia da versão; destinatário e pessoas convidadas; finalidade; pessoas do grupo incluídas; blocos (lista discriminada, nenhuma caixa marcada, inclusive no modelo desconhecido); prazo (padrão 90 dias; atalhos 30, 90, 180 dias e 12 meses, política do Safrion); formatos; quem autoriza; lista "Vão como pendentes" (campo, bloco, motivo e "até <data>"), quando houver; aviso "revogar corta acessos futuros, não apaga cópias já baixadas" | "Autorizar e enviar" ou "Autorizar e enviar com N pendências" (devolve o recibo) |
 | Dossiê do credor (PT-04det, ajustado) | Versão concedida e as três datas, blocos com origem, pendências "a informar", complemento pedido e situação, histórico de acessos e downloads | "Baixar no meu modelo" |
 | Pedidos e contratos (GE-08 `#vis=contratos`) | Como hoje, mais moeda, parcelas e garantia vinculada ao bem (imóvel, máquina, safra ou pessoa), com a validação "garantia já onerada" (FO-20). A primária deixa de abrir a PT-04 | "Novo pedido" |
 
@@ -402,7 +411,7 @@ Na série de safras, que é a maior parte das células (458 linhas × 10 safras 
 | C8 | Credor pede complemento | Vira pendência no dossiê do produtor, com campo, motivo e prazo. A resposta gera a v2 em rascunho privado. O credor continua vendo a v1, com o mesmo link, o mesmo arquivo e o mesmo SHA-256, mesmo com os blocos iguais. A v2 só chega a ele depois de nova prévia e de "Autorizar e enviar" |
 | C9 | Planilha no modelo | Valores só nas células de entrada; células de fórmula iguais às do modelo; nenhuma macro ou vínculo externo executado; nenhuma aba além das do modelo. **Validação depois de exportar:** limites de linhas, valores aceitos pelas listas, tipos e unidades. Desconhecido fica em branco e listado "a informar", nunca 0. Reler o arquivo devolve os mesmos valores, e os totais conferem com conta independente. O arquivo leva versão e SHA-256, e o download fica registrado. O relatório do teste declara que o modelo sintético não prova fidelidade às planilhas reais |
 | C10 | Dados pessoais mínimos | Só os campos exigidos pelo modelo. CPF mascarado em listagens. Regime de casamento só para tomador ou avalista. Incluir uma pessoa do grupo depois da autorização pede nova autorização. A varredura do gerador não acha CPF ou CNPJ fora da massa sintética |
-| C11 | Cliques e digitação (§3.3), medidos antes e depois | Do cartão Dossiês ao dossiê montado: até 5 cliques. De "Pronto" ao recibo: 2 cliques ("Autorizar e enviar" e confirmar na prévia). Digitação = só as pendências aplicáveis à fazenda sintética. 2º dossiê: 0 campos redigitados. Antes: nenhum dado montado; cada planilha seria preenchida à mão |
+| C11 | Cliques e digitação (§3.3), medidos antes e depois | Do cartão Dossiês ao dossiê montado: até 5 cliques. De "Pronto" ao recibo: 2 + k cliques. São "Autorizar e enviar", a escolha de cada um dos k blocos (um clique cada, nenhum pré-marcado; o prazo já vem com a sugestão de 90 dias, que é valor e não aceite) e a confirmação na prévia. No caso de teste, com os 7 blocos do modelo completo, são 9 cliques. Cada pendência datada soma 2 cliques antes ("Informar depois" e o atalho de data). Digitação = só as pendências aplicáveis à fazenda sintética. 2º dossiê: 0 campos redigitados. Antes: nenhum dado montado; cada planilha seria preenchida à mão |
 | C12 | 390 px e teclado | Sem rolagem lateral; pendências respondidas só pelo teclado, com o foco voltando à próxima; alvos de 44 px no toque |
 | C13 | Entrada do Crédito | 4 cartões, na ordem Ficha do grupo · Dossiês · Pedidos e contratos · Liberações e garantias; cada um abre só a sua parte, com "‹ Crédito" |
 | C14 | Persona certa | Nenhuma ação do produtor abre o portal do credor. A primária de Pedidos e contratos não aponta mais para a PT-04 |
@@ -412,10 +421,11 @@ Na série de safras, que é a maior parte das células (458 linhas × 10 safras 
 | C18 | Duas colheitas: talhão de 100 ha com soja na 1ª safra e milho na 2ª, na 2026/27 | Duas linhas por época, com 200 ha cultivados no total; área em produção dos imóveis = 100 ha; nenhum aviso nem erro. O aviso só aparece se a soma numa mesma época passar de 100 ha |
 | C19 | Valoração e área a abrir | **Valor da terra:** declarado em 10/03/2026 por Ana, tipo "avaliação de mercado", fonte laudo. Confirmado por Carlos em 16/10/2026, mantém fonte, responsável e data originais, e a revalidação fica registrada à parte. Com data-base 30/06/2026, a tela mostra que o valor tem 112 dias na data-base (220 hoje). Avaliação com data posterior à data-base aparece marcada assim. Nenhum redutor automático, nenhum vencimento de 6 meses, nenhuma redigitação obrigatória. **B4.08:** sem documento ambiental, é "desconhecido", mesmo quando total − produção − reserva > 0 |
 | C20 | Modelo desconhecido | Credor sem modelo gera rascunho no dossiê padrão. Na autorização, nenhum bloco vem marcado, e "Autorizar e enviar" fica indisponível, com o motivo, até a escolha de ao menos um bloco |
+| C21 | Enviar com pendência datada: modelo completo, 7 blocos escolhidos, uma pendência obrigatória (B4.10, valor da terra) | **Sem data:** com a pendência sem resposta nem data, a primária é "Responder pendências", e "Autorizar e enviar" não aparece. **Datada:** "Informar depois" + "até 30 dias" com emissão em 16/10/2026 dá "até 15/11/2026"; o estado vira "Pronto com 1 pendência datada", e a única primária é "Autorizar e enviar com 1 pendência". **Prévia:** lista "Vão como pendentes: B4.10 · Terras · exigido pelo modelo completo · até 15/11/2026". **Recibo:** grava versão, SHA-256, destinatário, blocos, prazo, quem autorizou e alçada, e a pendência com a data. Retirar a pendência da versão muda o SHA-256. **Credor:** vê a célula em branco e "pendente, até 15/11/2026", nunca 0. **Controle:** sem a alçada "Autorizar dossiê de crédito", a ação fica indisponível, com o motivo. **Resposta:** responder em 20/10 gera a v2 em rascunho, e o credor continua com a v1 até nova autorização. Sem resposta, em 16/11 os dois lados veem "vencida em 15/11/2026" |
 
 **Contas dos oráculos:** conferidas em Decimal, sem arredondar passos intermediários (executado pelo Claude em 16/10/2026 com `python3` e o módulo `decimal`; as de C3 e C5 também pelo Codex). C15 e C19 também conferidos com `datetime` (executado).
 
-**Contraprova:** a versão de b93e06f (3 blocos fixos, sem dados) reprova os casos que exigem o dossiê (C1 a C11 e C15 a C20), mais C13 e C14; o `credito_menu_test.py` de hoje espera 3 cartões. Os modelos dos testes são sintéticos e gerados pelo próprio teste, com a mesma estrutura de células; os arquivos recebidos do proprietário não entram no repositório. Os campos que só existem na semente da GE-04 e da GE-05 continuam sintéticos, e a permissão provada no protótipo não vale como prova do servidor. Os aceites são propostos; viram teste depois do aceite desta versão pelo Codex.
+**Contraprova:** a versão de b93e06f (3 blocos fixos, sem dados) reprova os casos que exigem o dossiê (C1 a C11 e C15 a C21), mais C13 e C14; o `credito_menu_test.py` de hoje espera 3 cartões. Os modelos dos testes são sintéticos e gerados pelo próprio teste, com a mesma estrutura de células; os arquivos recebidos do proprietário não entram no repositório. Os campos que só existem na semente da GE-04 e da GE-05 continuam sintéticos, e a permissão provada no protótipo não vale como prova do servidor. Os aceites são propostos; viram teste depois do aceite desta versão pelo Codex.
 
 ## Fora do escopo (com condição de retorno)
 
