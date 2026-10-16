@@ -251,7 +251,7 @@ def build():
     # CTL-4: o mesmo cenário compartilhado (O.S., requisições, lotes) entra na demanda (cenDemEntradas/cenOsDem): emitir, liberar, apontar, cancelar ou devolver muda a conta
     # UNID-PROD (D-U14): o conversor único (producao.js) com o prefixo do estado, o mesmo das telas do estado; a tela não chama cenGet nem cenSave
     EXTRA.append('<style>'+UNP.CSS+'</style>')
-    EXTRAJS[0]=cenario.js_prefixo()+DSO.js_prefixo()+SOLO_UI_JS+UNP.JS+'\nconst D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra_grupo.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
+    EXTRAJS[0]=cenario.js_prefixo()+DSO.js_prefixo()+SOLO_UI_JS+UNP.JS+'\nconst D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra_grupo.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'\n'+open(os.path.join(ROOT,'safra_lote.js')).read()+'''
 function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' && r){ const msg=sgAplicar(self,rows,r,isNew);   /* SAF-FAZ-2: uma sub-safra por fazenda */
       if(isNew && !self.state.saf){ if(!r.v.estado) r.v.estado='Rascunho'; self.setState({saf:r.id,step:2,g2toast:msg||('Safra criada: '+r.v.nome+'. Planeje os talhões livres na tabela.')}); } else if(msg) self.setState({g2toast:msg}); }
     if(String(gid).indexOf('g_cult_')===0) cultAfter(self,gid,rows,r,isNew);
@@ -279,7 +279,8 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
     # SOLO-01 §3.4: "Sugestões pelas análises · N" só com 1 sugestão ou mais (R01, D-29): quem não usa análise não vê nada
     sg_lnk=f'<sc-if value="{H("sg_has")}" hint-placeholder-val="{F()}"><button type="button" id="sg_lnk" class="acoes-lnk" onClick="{H("sg_abrir")}" style="min-height: 28px; white-space: nowrap;">{H("sg_lnk")}</button></sc-if>'
     plt_lnk=f'<sc-if value="{H("plt_tem")}" hint-placeholder-val="{F()}"><button type="button" id="plt-abrir" class="acoes-lnk" aria-haspopup="dialog" onClick="{H("plt_abrir")}" style="min-height: 28px; white-space: nowrap;">Planejar talhões livres…</button></sc-if>'   # SAF-FAZ-3 (C)
-    s2=bloco('Talhões e cultivos',H('k2'),cult_html,desc_hole=True,acao=plt_lnk+sg_lnk)   # sem botão: planeja-se pela linha do talhão (Planejar ›, Dividir, Vincular ciclo ›)
+    from areas import saf_lote as SLT   # EDL-01 (16/10/2026): "Editar talhões…" da fazenda numa grade só (safra_lote.js)
+    s2=bloco('Talhões e cultivos',H('k2'),cult_html,desc_hole=True,acao=plt_lnk+SLT.link()+sg_lnk)   # sem botão: planeja-se pela linha do talhão (Planejar ›, Dividir, Vincular ciclo ›)
     # etapa 3: título com o custo de operação e o link "Resumo da safra"; veredito (role=status) e, fora dele, a linha de capacidade;
     # g_cap recolhida; linha de filtro (só com recurso × mês escolhido); g_op por último (estica e só a área de dados rola)
     custo=(f'<span style="display: inline-flex; align-items: baseline; gap: 6px; flex-wrap: wrap; justify-content: flex-end; font-size: 12.8px; color: {MUTED};">'
@@ -429,6 +430,7 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
       f'<sc-if value="{H("dv_warn")}" hint-placeholder-val="{F()}"><div role="alert" class="saida" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{H("dv_discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{H("dv_keep")}" style="{_MINIP}">Continuar editando</button></div></div></sc-if>'
       f'<div class="pe-form" style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};"><sc-if value="{H("dv_edit")}" hint-placeholder-val="{H("true")}"><button type="button" onClick="{H("dv_close")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{H("dv_save")}" style="{BTN_ST(True,True)}">Salvar divisão</button></sc-if>'
       f'<sc-if value="{H("dv_ro")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("dv_discard")}" style="{BTN_ST(False,True)}">Fechar</button></sc-if></div></aside></div></sc-if>')
+    EXTRA.append(SLT.painel())   # EDL-01 · painel "Editar talhões da <fazenda>"
     # ---------- painéis da análise de solo (SOLO-01): Sugestões pelas análises (lote) e Por quê ----------
     from areas.analise_solo import _overlay, _cabeca
     g_sug=grid([dict(k='tal',l='Talhão',w=110),dict(k='item',l='Atividade · produto',w=190),dict(k='pad',l='Padrão',w=130),dict(k='sug',l='Sugestão',w=140),
