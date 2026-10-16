@@ -1,0 +1,6 @@
+Execução local da suíte de demanda, com SAFRION_DADOS=sintetico.
+Resultado: 66 aprovados, 5 falhas.
+As cinco linhas de falha foram comparadas localmente com o bruto da base fornecido pelo revisor e são idênticas.
+As duas divergências adicionais do PR anterior foram resolvidas pelo ajuste do oráculo da demonstração.
+O log detalhado foi preservado somente no workspace: sua publicação foi recusada pela revisão automática por possível exposição de dados internos.
+Nenhuma suíte integral verde é declarada.

@@ -147,7 +147,7 @@ def seed_agrupamento(est):
         parcela='LG-DEMO-%s' % chr(65+i)
         ins=[dict(p='Sulfato de magnésio',g='Fertilizante',dose=dose,un='kg',tot=_QTD.qtd(dose,area),emb='saco 25 kg')]
         origem='Demonstração de agrupamento · parcelas sintéticas sem sobreposição no contexto Lagoa Grande / Mamão Formosa. Não é recomendação agronômica.'
-        no=dict(id=oid,novo=True,tipo='Pulverização · demonstração de agrupamento',talhao='Parcela demonstrativa '+chr(65+i),
+        no=dict(id=oid,novo=True,demoLote=True,tipo='Pulverização · demonstração de agrupamento',talhao='Parcela demonstrativa '+chr(65+i),
                 talhoes=[dict(id=parcela,nome='Parcela demonstrativa '+chr(65+i))],faz=DL.FAZ,saf='2026/27',cult='LG-DEMO',
                 cultura='Mamão Formosa',culturas=['Mamão Formosa'],area=area,etapa='A liberar',selos=[dict(t='Demonstração',c='gray')],
                 versao='v1',realizado=0,saldo=area,ap=[],ins=ins,req=None,reservado=False,resp='A programar',
