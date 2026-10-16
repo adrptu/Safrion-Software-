@@ -669,6 +669,15 @@ function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
                  :('liberado '+LIB+' de '+VAL+' · próximas parcelas só liberam com a certidão do imóvel atualizada — anexe o documento para destravar');
   v.lib2=()=>self.setState({g2toast:sent?('Bloqueado · certidão em conferência pelo credor (responsável: Banco Terra) — a 2ª parcela aguarda a conferência do credor; liberado até agora '+LIB+' de '+VAL+'.')
                                          :('Bloqueado · condição documental pendente — liberado até agora: '+LIB+' de '+VAL+'; a 1ª parcela já é título real em Contas a pagar. Anexe a certidão para liberar.')});
+  // gravação no ponto transacional do motor (revisão do Codex 6221423767, S2): o documento só vale como salvo se o navegador gravou; falhou
+  // (ou é mudança de tipo/fazenda de documento automático), o motor desfaz o comando e reabre o formulário com o rascunho e o motivo
+  self.g2persist=(gid)=>{ if(gid!=='g_doc'||!self._docPend) return ''; const r=self._docPend; self._docPend=null; return credSalvarDoc(r,self._credFz||[],CRED_SEED_DOCS); };
+  // documento automático: tipo e fazenda fixos no formulário (só leitura, com o motivo) e recusados ao salvar
+  self.g2check=(gid,cur,row,d,isNovo)=>{ if(gid!=='g_doc'||isNovo||!row||!credAuto(row.id)) return {}; const e={};
+    if(String(d.tipo||'')!==String(row.v.tipo||'')) e.tipo=CRED_FIXO; if(String(d.tit||'')!==String(row.v.tit||'')) e.tit=CRED_FIXO; return e; };
+  const FD=v.g_doc_F, fmD=g2st(self,'g_doc').fm;
+  if(FD&&FD.open&&fmD&&fmD.rid&&credAuto(fmD.rid)) (FD.fields||[]).forEach(f=>{ if(f.fid==='fx_g_doc_tipo'||f.fid==='fx_g_doc_tit'){ f.dis=true; f.ist=String(f.ist||'').replace('background:#FFFFFF','background:#F4F6F3');
+    if(!f.err){ f.help='Documento automático da fazenda: o tipo e a fazenda não mudam aqui. Para outro documento, use "Incluir documento".'; f.hasHelp=true; } } });
   // seletor "Fazenda ou parceiro" (opções dinâmicas do motor): as fazendas ativas do cadastro atual, inclusive as criadas no CD-01, pelo nome de hoje
   self.g2opts=(gid,k,d)=>{ if(gid!=='g_doc'||k!=='tit') return null; const ns=(self._credFz||[]).filter(f=>f.sit!=='Inativa'&&f.nome).map(f=>f.nome);
     if(d&&d.tit&&ns.indexOf(d.tit)<0) ns.push(d.tit); return [{v:'',t:'Escolha…'}].concat(ns.map(n=>({v:n,t:n}))); };
@@ -678,7 +687,7 @@ function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
     self.setState({aut:true,g2toast:'Autorizado pela Direção · Banco Terra acessa “Compromissos e garantias” até 31/12/2026, só para análise do '+'''+json.dumps(c['id'])+r'''+'.'}); };
   self.g2after=(gid,rows,r)=>{ if(!r) return; if(gid==='g_dos'){ undate(r,['prz']); self.setState({g2toast:'Acesso do bloco '+r.v.blk+' atualizado · novo consentimento registrado; o credor vê após confirmar.'}); }
     if(gid==='g_cre'){ self.setState({g2toast:'Rascunho '+r.id+' salvo · nada é enviado ao credor sem convite confirmado.'}); }
-    if(gid==='g_doc'){ undate(r,['val']); credSalvarDoc(r,self._credFz||[]); self.setState({g2toast:'Salvo: '+r.v.tipo+' · '+r.v.tit+' · '+docSit(self,Object.assign({id:r.id},r.v))[0].toLowerCase()+'.'}); } }; }'''
+    if(gid==='g_doc'){ undate(r,['val']); self._docPend=r; self.setState({g2toast:'Salvo: '+r.v.tipo+' · '+r.v.tit+' · '+docSit(self,Object.assign({id:r.id},r.v))[0].toLowerCase()+'.'}); } }; }'''
     # 14/10/2026 (proprietário: "coloque os submenus de crédito como os demais"): a tela de entrada do Crédito abre uma visão por cartão
     # (GE-08.dc.html#vis=contratos|liberacoes|dossie), como a Manutenção; os indicadores ficam em todas; sem visão no endereço, tudo
     CV=lambda k: f'<sc-if value="{H("cv_"+k)}" hint-placeholder-val="{H("true")}">'

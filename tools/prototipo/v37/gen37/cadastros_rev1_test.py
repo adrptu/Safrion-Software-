@@ -15,7 +15,15 @@
       R2c "Todos" recupera tudo (mesmas linhas e a mesma abertura de antes) e conta fazendas + talhões
       R2d teclado: Enter no chip filtra; Enter na linha da fazenda abre o painel dela
       R2e 390 px: o filtro mostra as três pendências sem rolagem lateral da página
-Contraprova: CONTRAPROVA=1 RENDER_DIR=<_render da 0d37cc1> — a versão revisada tem de reprovar R1a a R1d e R2a a R2c.
+  Revisão do Codex 6221423767 (rev2), na 16ffe95:
+  R3 (S2) gravação do documento que falha não é anunciada como salva: com o navegador recusando só safrion-credito-docs-v1 (QuotaExceededError
+      sintético, ativo desde o carregamento), o cadastro antigo (CAR-LEGADO) aparece no Crédito; Salvar o CAR novo não confirma, o formulário
+      fica aberto com o rascunho e o motivo, nada é gravado; com a gravação de volta, o mesmo Salvar grava; recarregar mostra o valor novo
+  R4 (S2) documento automático (CAR, matrícula, contrato da fazenda) tem tipo e fazenda fixos: só leitura com o motivo no formulário; a mudança
+      forçada no formulário e a chamada direta a credSalvarDoc (fonte da própria página) são recusadas sem gravar; nada muda de fazenda (1 CAR
+      na Santa Rita, 1 na Fazenda Teste). Documento incluído pela pessoa continua editável (fazenda trocada, gravada e mantida ao recarregar)
+Contraprova: CONTRAPROVA=1 RENDER_DIR=<_render da versão revisada> — a 0d37cc1 tem de reprovar R1a a R1d e R2a a R2c; a 16ffe95, R3 e R4
+(CONTRA_ESPERA=R3,R4 diz o que a versão tem de reprovar; o padrão é o conjunto da rev1).
 Uso (de gen37/, depois do build): CHROME_BIN=… SAFRION_DADOS=sintetico python3 -B cadastros_rev1_test.py   (fotos em REV1_FOTOS, se dado)"""
 import sys, os, time, json
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -44,13 +52,18 @@ LEGADO = {'faz': [faz_antiga(SR, car='GO-CAR-EDITADO-77', matr='12.401-E · CRI 
 
 p, srv = servir(R); c = Chrome(); J = c.js
 c.call('Page.addScriptToEvaluateOnNewDocument', {'source': "window.__e=[];addEventListener('error',e=>window.__e.push(String(e.message)))"})
+# R3: o navegador recusa só a chave dos documentos do Crédito, desde o carregamento da página, enquanto a marca __falha_docs estiver ligada
+c.call('Page.addScriptToEvaluateOnNewDocument', {'source': "(()=>{ try{ if(localStorage.getItem('__falha_docs')==='1'){ const s0=Storage.prototype.setItem; window.__setItem0=s0;"
+       " Storage.prototype.setItem=function(k,v){ if(k==='safrion-credito-docs-v1') throw new DOMException('quota sintética','QuotaExceededError'); return s0.call(this,k,v); }; } }catch(e){} })()"})
+VOLTA = "(()=>{ localStorage.removeItem('__falha_docs'); if(window.__setItem0) Storage.prototype.setItem=window.__setItem0; return 1; })()"
 U = lambda x: f'http://127.0.0.1:{p}/{x}'
 def limpa(estado=None, docs=None):
     c.goto(U('Main.dc.html'), .3)
     J("localStorage.clear(); sessionStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana')")
     if estado is not None: J(f"localStorage.setItem({json.dumps(CKEY)}, {json.dumps(json.dumps(estado, ensure_ascii=False))})")
     if docs is not None: J(f"localStorage.setItem({json.dumps(DKEY)}, {json.dumps(json.dumps(docs, ensure_ascii=False))})")
-def ir(url, esp=1.4): c.goto(U(url), esp)
+def ir(url, esp=1.4):   # carga nova sempre (ir para o mesmo endereço com # seria só troca de âncora, sem recarregar)
+    c.call('Page.navigate', {'url': 'about:blank'}); time.sleep(.2); c.goto(U(url), esp)
 def foto(nome):
     if FOTOS: os.makedirs(FOTOS, exist_ok=True); c.shot(os.path.join(FOTOS, nome + '.png'))
 SETV = ("((sel,val)=>{const i=document.querySelector(sel); if(!i) return false; const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:HTMLInputElement.prototype;"
@@ -161,12 +174,65 @@ try:
     sr = next((f for f in (ler(CKEY) or {}).get('faz', []) if f.get('id') == 'SR'), {}); ed = (ler(DKEY) or {}).get('ed', {})
     chk('R1f CD-01det com cadastro antigo: migra para o Crédito antes de ler (o CAR editado fica no Crédito, sai do cadastro) e abre sem erro',
         'car' not in sr.get('v', {}) and ed.get('dc_car_SR', {}).get('num') == 'GO-CAR-EDITADO-77' and 'T1' in (J("(document.querySelector('main')||{}).innerText||''") or ''), [sr.get('v'), ed.get('dc_car_SR')])
+    # ================= R3 · gravação que falha não é anunciada como salva =================
+    c.aparelho(1440, 900, 1, False)
+    # a recusa vale desde antes do CD-01: a migração também não grava, e o Crédito mostra o CAR antigo que o cadastro ainda guarda
+    limpa({'faz': [faz_antiga(SR, car='CAR-LEGADO'), faz_atual(BV), faz_atual(LG)], 'tal': []}); J("localStorage.setItem('__falha_docs','1')")
+    ir('CD-01.dc.html'); abre_linha('g_tal', 'Santa Rita'); fset('nome', 'Santa Rita renomeada', 'g_faz'); btn('Salvar')
+    ir(DOCS)
+    leg = doc('CAR', 'Santa Rita renomeada')
+    abriu = J("(()=>{const t=document.querySelector('[data-g2g=g_doc]'); const r=[...t.querySelectorAll('[role=row][data-rid]')].find(x=>x.getClientRects().length&&x.innerText.indexOf('Santa Rita renomeada')>=0&&/(^|\\s)CAR(\\s|$)/.test(x.innerText)); if(!r) return false; (r.querySelector('[role=cell] .g2pw')||r).click(); return true;})()")
+    time.sleep(.5); fset('num', 'CAR-NOVO-1', 'g_doc'); J("window.__t=[]; new MutationObserver(()=>{ const s=[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).join(' | '); if(s) window.__t.push(s); }).observe(document.body,{subtree:true,childList:true,characterData:true})")
+    btn('Salvar'); time.sleep(.3)
+    aberto = J("!!document.querySelector('aside[role=dialog] #fx_g_doc_num')"); rasc = J("(document.querySelector('aside[role=dialog] #fx_g_doc_num')||{}).value||''")
+    dlg = J("(document.querySelector('aside[role=dialog]')||{}).innerText||''") or ''; hist = J("window.__t") or []
+    avisos = J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
+    ed0 = (ler(DKEY) or {}).get('ed', {})
+    chk('R3a navegador recusando os documentos: o valor antigo do cadastro (CAR-LEGADO) aparece no Crédito com o nome novo; Salvar não confirma, o formulário fica com o rascunho e o motivo, nada gravado',
+        len(leg) == 1 and 'CAR-LEGADO' in leg[0].get('Número ou registro', '') and abriu and aberto and rasc == 'CAR-NOVO-1' and 'não gravou' in dlg
+        and 'Não salvo' in avisos and not any('Salvo: CAR' in x for x in hist + [avisos]) and (ed0.get('dc_car_SR') or {}).get('num') != 'CAR-NOVO-1', [leg, abriu, aberto, rasc, 'não gravou' in dlg, avisos[:300], hist[-3:], ed0])
+    J(VOLTA); btn('Salvar'); time.sleep(.3)
+    fechou = not J("!!document.querySelector('aside[role=dialog] #fx_g_doc_num')"); ed1 = (ler(DKEY) or {}).get('ed', {})
+    ir(DOCS); novo = doc('CAR', 'Santa Rita renomeada'); sr = next((f for f in (ler(CKEY) or {}).get('faz', []) if f.get('id') == 'SR'), {})
+    chk('R3b com a gravação de volta, o mesmo Salvar grava; recarregar mostra CAR-NOVO-1 uma vez, e o cadastro já não guarda o CAR antigo',
+        fechou and ed1.get('dc_car_SR', {}).get('num') == 'CAR-NOVO-1' and len(novo) == 1 and 'CAR-NOVO-1' in novo[0].get('Número ou registro', '') and 'car' not in sr.get('v', {}),
+        [fechou, ed1.get('dc_car_SR'), novo, sorted(sr.get('v', {}).keys())])
+    # ================= R4 · tipo e fazenda do documento automático são fixos =================
+    FT2 = dict(id='FT', v=dict(nome='Fazenda Teste', empresa='Santa Rita Agro', mun='Jataí', uf='GO', fuso=SR['fuso'], area=100, posse='Própria', fim='', sit='Ativa'))
+    limpa({'faz': [faz_atual(SR), faz_atual(BV), faz_atual(LG), FT2], 'tal': []}); ir(DOCS)
+    J("(()=>{const t=document.querySelector('[data-g2g=g_doc]'); const r=[...t.querySelectorAll('[role=row][data-rid]')].find(x=>x.dataset.rid==='dc_car_SR'); r&&(r.querySelector('[role=cell] .g2pw')||r).click();})()"); time.sleep(.5)
+    ro = J("(()=>{const q=s=>document.querySelector('aside[role=dialog] '+s); const a=q('#fx_g_doc_tipo'), b=q('#fx_g_doc_tit'); const d=(document.querySelector('aside[role=dialog]')||{}).innerText||'';"
+           " return {tipo:!!a&&a.disabled, tit:!!b&&b.disabled, motivo:/tipo e a fazenda não mudam/.test(d)};})()") or {}
+    J(f"({SETV})('aside[role=dialog] #fx_g_doc_tit','Fazenda Teste')"); J(f"({SETV})('aside[role=dialog] #fx_g_doc_num','FORCADO-1')"); time.sleep(.2); btn('Salvar'); time.sleep(.3)
+    ainda = J("!!document.querySelector('aside[role=dialog] #fx_g_doc_num')"); btn('Cancelar'); btn('Descartar alterações')
+    ed2 = (ler(DKEY) or {}).get('ed', {}); ir(DOCS); ncar = (len(doc('CAR', 'Santa Rita')), len(doc('CAR', 'Fazenda Teste')))
+    chk('R4a formulário: tipo e fazenda do CAR automático só para leitura, com o motivo; a troca forçada para a Fazenda Teste é recusada, nada gravado (1 CAR em cada fazenda)',
+        ro.get('tipo') and ro.get('tit') and ro.get('motivo') and ainda and 'dc_car_SR' not in ed2 and ncar == (1, 1), [ro, ainda, ed2, ncar])
+    # chamada direta ao comando, com a fonte que a própria página carrega (credito_docs.js embutido no GE-08)
+    pg = open(os.path.join(R, 'GE-08.dc.html'), encoding='utf-8').read(); i = pg.find('const CRED_CADKEY'); j = pg.find(';\n', pg.find('const CRED_SEED_FAZ=')) + 2
+    src = pg[i:j] if i >= 0 and j > i else ''
+    dire = J("(()=>{ " + src + " const fz=credFazendas(CRED_SEED_FAZ); const a=credSalvarDoc({id:'dc_car_SR',v:{tipo:'CAR',tit:'Fazenda Teste',num:'DIRETO-1'}},fz,CRED_SEED_DOCS);"
+             " const b=credSalvarDoc({id:'dc_car_SR',v:{tipo:'Matrícula',tit:'Santa Rita',num:'DIRETO-2'}},fz,CRED_SEED_DOCS);"
+             " const c=credSalvarDoc({id:'dc_mat_FT',v:{tipo:'Matrícula',tit:'Santa Rita',num:'DIRETO-3'}},fz,CRED_SEED_DOCS);"
+             " return {a:a, b:b, c:c, ed:(JSON.parse(localStorage.getItem('safrion-credito-docs-v1')||'{}').ed||{})}; })()") if src else None
+    dd = dire or {}
+    chk('R4b chamada direta a credSalvarDoc: trocar a fazenda ou o tipo de documento automático é recusado com o motivo e nada é gravado',
+        bool(src) and all(isinstance(dd.get(k), str) and 'não mudam' in dd.get(k) for k in ('a', 'b', 'c')) and not any(k in dd.get('ed', {}) for k in ('dc_car_SR', 'dc_mat_FT')), dd)
+    # documento incluído pela pessoa: identidade própria, continua editável (inclusive a fazenda)
+    J("(()=>{const b=[...document.querySelectorAll('main button')].find(b=>b.innerText.trim()==='Incluir documento'); b&&b.click();})()"); time.sleep(.5)
+    fset('tipo', 'Outro', 'g_doc'); fset('tit', 'Fazenda Teste', 'g_doc'); fset('num', 'OUT-1', 'g_doc'); btn('Salvar')
+    J("(()=>{const t=document.querySelector('[data-g2g=g_doc]'); const r=[...t.querySelectorAll('[role=row][data-rid]')].find(x=>x.getClientRects().length&&x.innerText.indexOf('OUT-1')>=0); r&&(r.querySelector('[role=cell] .g2pw')||r).click();})()"); time.sleep(.5)
+    livre = J("(()=>{const a=document.querySelector('aside[role=dialog] #fx_g_doc_tipo'), b=document.querySelector('aside[role=dialog] #fx_g_doc_tit'); return !!a&&!!b&&!a.disabled&&!b.disabled;})()")
+    fset('tit', 'Boa Vista', 'g_doc'); btn('Salvar'); ir(DOCS); out = [d for d in docs() if 'OUT-1' in d.get('Número ou registro', '')]
+    chk('R4c documento incluído pela pessoa continua editável: a fazenda troca para Boa Vista, grava e se mantém ao recarregar (um só)',
+        livre and len(out) == 1 and out[0].get('Fazenda ou parceiro') == 'Boa Vista', [livre, out])
     chk('R0 sem erro de JS', not (J("window.__e") or []), J("window.__e"))
 finally:
     c.close(); srv.terminate()
 tot = ok_n + len(falhas)
 if CONTRA:
     print(f'CONTRAPROVA: a versão revisada reprova {sorted(set(falhas))} · {ok_n}/{tot} passam')
-    sys.exit(0 if {'R1a', 'R1b', 'R1c', 'R1d', 'R2a', 'R2b', 'R2c'} <= set(falhas) else 1)
+    esp = set((os.environ.get('CONTRA_ESPERA') or 'R1a,R1b,R1c,R1d,R2a,R2b,R2c').split(','))
+    sys.exit(0 if esp <= set(falhas) else 1)
 print(f'RESULTADO: {ok_n}/{tot}' + ('' if not falhas else ' · FALHAS: ' + ', '.join(falhas)))
 sys.exit(1 if falhas else 0)
