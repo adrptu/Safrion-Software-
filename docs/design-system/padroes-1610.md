@@ -217,12 +217,14 @@ No celular, o cabeçalho das Atividades agora esconde Insumos e Custo/ha junto c
   - O Crédito mostra o nome, a posse e as fazendas do cadastro atual: fazenda criada no CD-01 já tem CAR e matrícula a informar e entra no seletor.
   - O que foi preenchido no formulário antigo migra uma vez, sem sobrescrever o que já foi editado no Crédito, e sai do cadastro.
   - A edição no Crédito é gravada por id do documento: recarregar não reverte nem duplica.
+  - Documento automático (CAR, matrícula e contrato da fazenda) tem o tipo e a fazenda fixos: só leitura com o motivo no formulário, e o comando recusa a mudança. Documento incluído pela pessoa continua editável (revisão do Codex 6221423767).
+  - Só vale como salvo o que o navegador gravou. Se a gravação falha, nada é confirmado e o formulário volta com o rascunho e o motivo (ponto transacional do motor, como no `cad_gravacao_falha`).
 
 **Prova:** tabela campo a campo em `docs/integracao/V71/cadastros-campos.md`.
 
 **Dano evitado:** formulário longo, com campos que nenhuma tela usa, custa tempo e tira o foco de quem cadastra. Documento de banco misturado ao cadastro operacional aparece como pendência onde não trava nada.
 
-**Teste:** `cadastros_padrao_test.py`, P6a a P6e; `cadastros_rev1_test.py`, R1a a R1f.
+**Teste:** `cadastros_padrao_test.py`, P6a a P6e; `cadastros_rev1_test.py`, R1a a R1f, R3a, R3b e R4a a R4c.
 
 ### CAD-03 · Mãe e filhas numa lista só (fazendas e talhões)
 

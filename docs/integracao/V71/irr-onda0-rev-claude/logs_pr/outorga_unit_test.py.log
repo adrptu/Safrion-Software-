@@ -1,0 +1,32 @@
+oráculo (cadastro): SINT-001/0000 + SINT-002/0000 + SINT-007/0000 + SINT-014/0000 · 186.11 L/s · 13120 m³/dia
+OK    P1 dados_irrigacao: LG-PAR = soma das outorgas de irrigação do Rio A no cadastro (SINT-001/0000 + SINT-002/0000 + SINT-007/0000 + SINT-014/0000)
+OK    P2 dados_irrigacao não guarda outro valor de outorga (sem ls=573, sem as cópias LG-STC e LG-BAR, sem datas de 2023/2024)
+OK    P3 situação da outorga: Python = CD-01 nas 16 linhas do cadastro e em 6 casos de borda (90 dias, vencida ontem, renovação, sem descrição)
+OK    P5 milhar pt-BR e regime contínuo somam ("1.200 m³/h" × 24 h = +333,33 L/s e +28.800 m³/dia); poço e outra finalidade no mesmo curso ficam fora
+OK    P6 a captação leva a lista das outorgas do curso (número, L/s, h/dia, vencimento): a trava avalia cada dia da janela
+OK    P7 cadastro sem outorga de irrigação: "Sem outorga de irrigação no cadastro" (antes "Outorga vencida · sem captação no cadastro")
+OK    P4 CD-01 nomeia a outorga como a IR-04 ("Outorga SINT-002/0000"; antes "Certidão SINT-002/0000"); certidão continua certidão
+OK    J1 trava: a captação dos pivôs vale o cadastro (SINT-001/0000 + SINT-002/0000 + SINT-007/0000 + SINT-014/0000 · 186.11 L/s)
+OK    J2 situação pela regra do cadastro: SINT-002/0000 vence em 20/11/2026 (≤ 90 dias) → "Vence em 90 dias", não trava
+OK    J3 sem cópia na irrigação: LG-STC e LG-BAR (sem setor ligado) só no cadastro; Santa Rita (sem aba Água) continua
+OK    J4 tarefas automáticas da Lagoa Grande: 6 (PV02, PV08, PV09, PV18, PV21, PV24) a partir de OS-0601, Liberadas
+OK    J5 Pivô 2 continua "programada · hoje 21:00"
+   volume comprometido por dia 23–28/09 (m³): [972,8554,9106,8514,6927,6036] · limite 13120
+OK    J6 trava diária: nenhum dia passa do volume outorgado no cadastro (13120 m³)
+OK    J7 NEGATIVO: PV09 + PV21 + PV05 juntos → "Sem vazão outorgada · … de 186 L/s" (gestor)
+OK    J8 janela de hoje (PV01) não cruza o vencimento de 20/11/2026: sem aviso de outorga (revisão S3-2: o aviso só vale se a janela passa do vencimento)
+OK    J9 NEGATIVO 21/11/2026: SINT-002/0000 vencida sai da soma (144 L/s) e fica na observação
+OK    J10 NEGATIVO todas vencidas (vencimentos em 01/01/2026, antes de hoje): captação "Vencida", 0 L/s; as 6 tarefas ficam A liberar
+OK    J11 todas vencidas: bloqueio "Outorga vencida" com o gestor (não só "Janela a definir" do irrigante) e próximo passo "Ajustar à outorga"
+OK    J12 exibição: "186 L/s × 19,6 h/dia · 13.120 m³/dia" (arredonda só a tela; uma conta só para o volume do dia)
+OK    J13 estado salvo com outra outorga (mesma versão) → a leitura repõe a do cadastro; a irrigação não guarda valor próprio
+OK    J14 vencimento na tela diz qual outorga vence e quanto sai da soma ("SINT-002/0000 vence em 20/11/2026 (42 de 186 L/s)"); uma só: "até …"; vencida: "venceu em …"
+OK    J15 NEGATIVO 25/11/2026 21:00 (SINT-002 vencida em 20/11): OS-0602 (Pivô 8) + OS-0605 (Pivô 21) = 164 L/s → "Sem vazão outorgada · 164 de 144 L/s"; a segunda fica A liberar (bloqueada); aviso diz o que mudou
+OK    J16 NEGATIVO janela em 01/07/2033 (todas as outorgas do Rio A vencidas): "Outorga vencida em 30/06/2032 · Rio A (demonstração)" com o gestor, sem cálculo de vazão
+OK    J17 janela que termina à meia-noite do dia seguinte ao vencimento não trava; a que entra no dia seguinte trava (dia com sobreposição positiva)
+OK    J18 todas vencidas com janela: só "Outorga vencida", sem a mensagem extra "Sem vazão outorgada · X de 0 L/s"
+OK    J19 cadastro sem outorga de irrigação: bloqueio "Sem outorga de irrigação no cadastro" com o gestor (antes "Outorga vencida · sem captação no cadastro")
+OK    J20 uso do dia sem vazão outorgada (IR-02 e IR-04, a mesma conta): 0 %, nunca divisão por zero
+JS: 20/20
+
+RESULTADO 27/27

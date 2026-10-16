@@ -39,6 +39,8 @@ try:
         v = J(f"(document.querySelector('#fx_g_set_{k}')||{{}}).value") or ''; clk('Cancelar', 'aside[role=dialog]'); return v
     erros = []
     def errs(nome): e = J("window.__err||''") or ''; (erros.append(nome + ': ' + e) if e else None)
+    def setv(sel, val):
+        return J(f"""(()=>{{const e=document.querySelector({json.dumps(sel)}); if(!e) return 'sem'; const d=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(e),'value'); d.set.call(e,{json.dumps(val)}); e.dispatchEvent(new Event('input',{{bubbles:true}})); e.dispatchEvent(new Event('change',{{bubbles:true}})); return 'ok';}})()""")
     c.size(1440, 1000); goto('IR-01.dc.html', 1.0)
     J("localStorage.removeItem('talhao-os-irrigacao-v1'); localStorage.removeItem('talhao-os-cenario-v1'); sessionStorage.clear();")
     # 1 · conflito da OS-0423: link direto do Mapa (#OS-0423:conflito) abre o painel com opções calculadas
@@ -62,18 +64,24 @@ try:
     # 3 · OS-0394: conferir a medição (hidrômetro prevalece)
     goto('IR-03det.dc.html#OS-0394:conferir'); time.sleep(.5)
     chk('7 IR-03det#OS-0394:conferir abre a conferência com 1.206 m³ medidos × 1.254 m³ estimados', 'Conferir medição · OS-0394' in dlg() and '1.206' in dlg(), dlg()[:300])
-    clk('Validar e encerrar', 'aside[role=dialog]'); t = toast()
+    setv('#cm_mot', 'Hidrômetro conferido em campo'); clk('Aceitar com motivo', 'aside[role=dialog]'); t = toast()
     chk('8 OS-0394 encerrada · hidrômetro prevalece, sem novo crédito (P2 segue 11,2 mm)', 'Encerradas' in head() and 'hidrômetro prevalece' in t and '11,2 mm' in t, [t, head()])
     # 4 · OS-0419: iniciar → término com a leitura da telemetria → conferência automática → crédito
     goto('IR-03det.dc.html#OS-0419'); clk('Iniciar irrigação'); t = toast()
     chk('9 OS-0419 Iniciar → Em execução (início hoje 20:02, EX-5120)', 'Em execução' in head() and '20:02' in t and 'EX-5120' in t, [t, head()])
     goto('IR-03det.dc.html#OS-0419')
-    chk('10 recarregar: segue Em execução e o primário é Confirmar término (Pausar só agora)', 'Em execução' in head() and 'Confirmar término' in head() and J("[...document.querySelectorAll('main button')].some(b=>b.innerText.trim()==='Pausar')"), head())
-    clk('Confirmar término'); d = dlg()
-    chk('11 Confirmar término: volta completa e hidrômetro preenchido pela telemetria (8480 m³)', 'Volta completa · 80 ha' in d and J("document.querySelector('#tm_vol').value") == '8480', [d[:300], J("(document.querySelector('#tm_vol')||{}).value")])
+    chk('10 recarregar: segue Em execução e o primário é Registrar término antecipado (Pausar só agora)', 'Em execução' in head() and 'Registrar término antecipado' in head() and J("[...document.querySelectorAll('main button')].some(b=>b.innerText.trim()==='Pausar')"), head())
+    clk('Registrar término antecipado'); d = dlg()
+    chk('11 término não inventa área/telemetria: campos vazios e motivo temporal necessário', J("document.querySelector('#tm_cob').value") == '' and J("document.querySelector('#tm_vol').value") == '' and 'Simulado' in d, d[:300])
+    clk('Cancelar', 'aside[role=dialog]')
+    # Fixture explícita de tempo decorrido; não é uma ação de produto nem prova de relógio real.
+    J("(()=>{const k='talhao-os-irrigacao-v1'; const s=JSON.parse(localStorage.getItem(k)); const o=s.ordens['OS-0419']; const p=o.passadas.find(p=>p.st==='Em execução'); const pz=(o.exec.pausas||[]).filter(z=>z.n===p.n&&z.fim!==null&&z.fim!==undefined).reduce((a,z)=>a+z.fim-z.ini,0); o.trilha.push({q:p.iniReal+p.dur+pz,ev:'Fixture: tempo decorrido'}); localStorage.setItem(k,JSON.stringify(s)); return 1;})()")
+    goto('IR-01.dc.html', 1.0)   # Recarrega de fato: mesma URL com # não recarrega a página
+    goto('IR-03det.dc.html#OS-0419'); clk('Confirmar término')
+    setv('#tm_cob', '80'); setv('#tm_vol', '8480')
     c.shot(os.path.join(SH, 'fluxo_3_termino.png'))
     clk('Confirmar término', 'aside[role=dialog]'); t = toast()
-    chk('12 término → conferência automática (−1,9 %) → Encerradas; P2 agora 1,7 mm', 'Encerradas' in head() and '−1,9 %' in t and 'agora 1,7 mm' in t, [t, head()])
+    chk('12 leitura explícita no tempo decorrido → conferência automática (−1,9 %) → Encerradas; P2 agora 1,7 mm', 'Encerradas' in head() and '−1,9 %' in t and 'agora 1,7 mm' in t, [t, head()])
     trl = J("[...document.querySelectorAll('[role=table]')].pop().innerText.replace(/\\s+/g,' ')") or ''
     chk('13 trilha com início, término (amanhã 10:33) e conferência automática', 'Início' in trl and 'amanhã 10:33' in trl and 'Conferência automática' in trl, trl[-400:])
     goto('IR-01.dc.html'); errs('IR-01')
@@ -98,8 +106,6 @@ try:
     f2 = painel('Pivô 2 ', 'defT')
     chk('19 IR-01 na Lagoa Grande: 23 pivôs; Pivô 2 programado (OS-0601 hoje 21:00), balanço demonstrativo (no painel do setor)', nlg == 23 and 'OS-0601' in r and 'Programada' in r and 'hoje 21:00' in r and 'demonstrativo' in f2, [nlg, r, f2])
     # 7 · correções da verificação v43 (03/10): estado limpo
-    def setv(sel, val):
-        return J(f"""(()=>{{const e=document.querySelector({json.dumps(sel)}); if(!e) return 'sem'; const d=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(e),'value'); d.set.call(e,{json.dumps(val)}); e.dispatchEvent(new Event('input',{{bubbles:true}})); e.dispatchEvent(new Event('change',{{bubbles:true}})); return 'ok';}})()""")
     def esc():
         for ty in ('keyDown', 'keyUp'): c.call('Input.dispatchKeyEvent', {'type': ty, 'key': 'Escape', 'code': 'Escape', 'windowsVirtualKeyCode': 27})
         time.sleep(.4)
@@ -143,8 +149,9 @@ try:
     chk('30 Restaurar demonstração (Estoque) volta a irrigação à semente: OS-0419 Liberadas sem v2 órfã', 'Liberadas' in h3 and 'Iniciar irrigação' in h3 and 'v2' not in h3, h3[-140:])
     # passagem parcial: crédito só na faixa coberta
     clk('Iniciar irrigação'); goto('IR-03det.dc.html#OS-0419:termino'); time.sleep(.3)
-    J("[...document.querySelectorAll('aside[role=dialog] input[type=radio]')][1].click()"); time.sleep(.3); setv('#tm_cob', '40'); setv('#tm_vol', ''); clk('Confirmar término', 'aside[role=dialog]')
-    goto('IR-03det.dc.html#OS-0419:conferir'); time.sleep(.3); setv('#cm_vol', '3800'); clk('Validar e encerrar', 'aside[role=dialog]'); tt = toast()
+    setv('#tm_cob', '40'); setv('#tm_vol', '3800'); setv('#tm_mot', 'Tempo do sensor a conferir'); clk('Registrar término antecipado', 'aside[role=dialog]')
+    chk('31a área sem tempo compatível permanece Em conferência e não credita antes da validação', 'Em conferência' in head() and J("JSON.parse(localStorage.getItem('talhao-os-irrigacao-v1')).setores.P2.bal.ap.some(a=>a.os==='OS-0419')") is False, head())
+    goto('IR-03det.dc.html#OS-0419:conferir'); time.sleep(.3); setv('#cm_vol', '3800'); setv('#cm_mot', 'Área e leitura verificadas; horário do sensor incorreto'); clk('Aceitar com motivo', 'aside[role=dialog]'); tt = toast()
     goto('IR-01.dc.html'); r2 = ROW('Pivô 2')
     chk('31 parada em 40 de 80 ha (3.800 m³): o Pivô 2 segue 11,2 mm e a faixa coberta (40 ha) é mostrada à parte', 'faixa de 40,0 ha' in tt and '11,2 mm' in r2, [tt, r2])
     # contexto: fazenda do Mapa ↔ Irrigação
@@ -177,3 +184,4 @@ finally:
         if c: c.close()
     finally: srv.terminate()
 print(f'\n{len(OK)} ok · {len(FAIL)} falhas', FAIL)
+

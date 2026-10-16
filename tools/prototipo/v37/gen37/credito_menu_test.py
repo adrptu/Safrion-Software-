@@ -36,7 +36,10 @@ try:
         chk(f'C1 {w}: o Crédito na barra abre a tela de entrada com um cartão por visão da GE-08',
             J("location.pathname").endswith('MOD-CRE.dc.html') and cards == [['Contratos', 'GE-08.dc.html#vis=contratos'], ['Liberações', 'GE-08.dc.html#vis=liberacoes'], ['Dossiê', 'GE-08.dc.html#vis=dossie'], ['Documentos', 'GE-08.dc.html#vis=documentos']], [J("location.pathname"), cards])
         for i, (nome, href) in enumerate(cards):
-            c.goto(U('MOD-CRE.dc.html'), 1.0); J("[...document.querySelectorAll('main a.mod-cartao')].filter(a=>a.offsetParent)[%d].click()" % i); time.sleep(1.2)
+            c.goto(U('MOD-CRE.dc.html'), 1.0); espera("[...document.querySelectorAll('main a.mod-cartao')].filter(a=>a.offsetParent).length>%d" % i)
+            J("[...document.querySelectorAll('main a.mod-cartao')].filter(a=>a.offsetParent)[%d].click()" % i)
+            # espera a parte do cartão e o "‹ Crédito" renderizarem (§3.6); o chk abaixo continua reprovando conteúdo errado
+            espera("location.href.indexOf(%s)>=0&&[...document.querySelectorAll('main h2,main h3')].some(h=>h.offsetParent&&h.innerText.trim()===%s)&&[...document.querySelectorAll('a')].some(a=>a.offsetParent&&/Crédito/.test(a.innerText)&&/MOD-CRE/.test(a.getAttribute('href')||''))" % (json.dumps(href.split('#')[1]), json.dumps(BLOCOS[i])))
             vol = J("[...document.querySelectorAll('a')].some(a=>a.offsetParent&&/Crédito/.test(a.innerText)&&/MOD-CRE/.test(a.getAttribute('href')||''))")
             chk(f'C2 {w} {nome}: só a parte do cartão ({BLOCOS[i]}), com os indicadores e "‹ Crédito"', blocos() == [BLOCOS[i]] and kpis() and vol, [blocos(), kpis(), vol])
         J("location.hash='vis=dossie'"); espera("[...document.querySelectorAll('main h2,main h3')].filter(h=>h.offsetParent).length===1")

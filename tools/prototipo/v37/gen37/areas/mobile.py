@@ -70,7 +70,6 @@ F02=next(l for l in D2.LOTES if l['lote']=='F26-02')
 F02_LIVRE=F02['fisico']-F02['quarentena']-F02['reservado']                            # 480 L
 
 EQ421='Marcos · Pulverizador PJ-3030 + Trator 03'
-CALDA=dict(litros='2.000', vazao='120 L/ha', dose='0,5 L/ha de Fungicida A', cobre='16,7 ha', por_tanque='8,3 L')
 P,POL=D.PIVO,D.POLITICA_AGUA
 AREA_PIVO=80; AREA_COB=round(AREA_PIVO*P['cobertura_pct']/100,1); AREA_RESTO=round(AREA_PIVO-AREA_COB,1)   # ≈11,6 · ≈68,4 ha
 IRR=dict(janela='20:00–amanhã 10:31', ini='20:02', fim='amanhã 10:33', fim_d='24/09 10:33', dur='14,5 h', au='AU-3098', lib='LIB-2287', ex='EX-5120', medido='10,6', dif='−1,9%')
@@ -181,7 +180,7 @@ function mbJan(o){ return (MBJAN[o.id] || {}).j || 'a definir'; }
 function mbMinhas(c){ return Object.values(c.ordens).filter(o => o.resp === c.app.operador && !/^Colheita/.test(String(o.tipo || ''))).sort((a, b) => mbK(a) - mbK(b) || a.id.localeCompare(b.id)); }
 function mbFila(c){ return mbMinhas(c).filter(o => o.etapa === 'Liberadas' || o.etapa === 'Em execução'); }
 function mbReq(c, o){ return (o && o.req && c.reqs[o.req]) || null; }
-function mbProv(o){ return (o.ap || []).filter(a => a.sinc === false).reduce((s, a) => s + (a.ha || 0), 0); }
+function mbProv(o){ return cenApPend(o); }
 function mbTurno(c){ const t = c.app.turno; return t && !t.fim ? t : null; }
 function mbPausado(t){ const p = t && t.pausas[t.pausas.length - 1]; return !!(p && !p.fim); }
 function mbRealTxt(o){ const p = mbProv(o); return 'Realizado ' + cenNum(o.realizado, 1) + ' de ' + cenNum(o.area, 1) + ' ha · saldo ' + cenNum(o.saldo, 1) + ' ha' + (p ? ' · +' + cenNum(p, 1) + ' ha no aparelho, aguardando sinal' : ''); }
@@ -219,13 +218,21 @@ function mbPasso(c, o){
            fn: (self) => cenMudar(self, c => mbIniciar(c, o.id)), tt: 'Iniciar turno na ' + o.id };
 }
 // Insumos da ordem: a retirar, entregues a confirmar, com o operador (custódia) ou já consumidos.
-function mbIns(c, o){ const r = mbReq(c, o); if (!r) return [];
-  return r.itens.map(i => { const L = i.prod + ' · lote ' + i.lote + (i.emb ? ' · ' + i.emb : ''); const k = mbConf(c, o.id, i.prod);
-    if (k) return { t: L, s: 'em conferência · relatado ' + cenNum(k.relatado) + ' ' + k.un + ' · com você ' + cenNum(i.custodia) + ' ' + i.un, st: mbTx('yellow') };
-    if (i.custodia > 0 && !i.confirmado) return { t: L, s: 'entregue ' + cenNum(i.custodia) + ' ' + i.un + ' · a confirmar', st: mbTx('yellow') };
-    if (i.custodia > 0) return { t: L, s: 'com você ' + cenNum(i.custodia) + ' ' + i.un, st: mbTx('green') };
-    const sal = cenSaldoEntregar(i); if (sal > 0) return { t: L, s: 'retirar ' + cenNum(sal) + ' ' + i.un, st: mbTx('gray') };
-    return { t: L, s: 'consumido ' + cenNum(i.consumido) + ' ' + i.un, st: mbTx('gray') }; }); }
+function mbIns(c, o){
+  const proj=cenInsumosOrdem(c,o), r=mbReq(c,o), rows=[];
+  ((r&&r.itens)||[]).forEach(i=>{
+    const x=proj.find(x=>x.p===i.prod),k=mbConf(c,o.id,i.prod);
+    const L=i.prod+' · lote '+i.lote+(i.emb?' · '+i.emb:'');
+    let st='gray',sit='consumido '+cenNum(i.consumido)+' '+i.un;
+    if(k){st='yellow';sit='em conferência · relatado '+cenNum(k.relatado)+' '+k.un+' · com você '+cenNum(i.custodia)+' '+i.un;}
+    else if(i.custodia>0){st=i.confirmado?'green':'yellow';sit=i.confirmado?'com você '+cenNum(i.custodia)+' '+i.un:'entregue '+cenNum(i.custodia)+' '+i.un+' · a confirmar';}
+    else {const sal=cenSaldoEntregar(i);if(sal>0&&(!x||x.falta>0))sit='retirar '+cenNum(sal)+' '+i.un+' ('+mbEmb(i,sal)+')';}
+    rows.push({t:L,s:sit+(x?' · '+cenInsumoSaldoTxt(x):''),st:mbTx(st)});
+  });
+  proj.filter(x=>!x.temReq).forEach(x=>rows.push({t:x.p,s:'Consumo sem registro · '+cenInsumoSaldoTxt(x),st:mbTx('yellow')}));
+  return rows;
+}
+
 function mbCard(self, c, o){ const p = mbPasso(c, o); const ec = MB_ETAPA_COR[o.etapa] || 'gray'; const ins = mbIns(c, o);
   return { id: o.id, tipo: o.tipo, loc: o.talhao + ' · ' + cenNum(o.area, 1) + ' ha · janela ' + mbJan(o), real: mbRealTxt(o),
     e_t: o.etapa, e_st: mbChs(ec), e_dot: mbDot(ec), p_t: p.chip[0], p_st: mbChs(p.chip[1]), p_dot: mbDot(p.chip[1]),
@@ -306,12 +313,13 @@ def qcards(lst,a='q',count=2,abrir=True):
             f'<div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;"><span style="{H(a+".e_st")}"><span style="{H(a+".e_dot")}"></span>{H(a+".e_t")}</span>'
             f'<span style="{H(a+".p_st")}"><span style="{H(a+".p_dot")}"></span>{H(a+".p_t")}</span></div>'
             f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{H(a+".real")}</div>'
-            + IF(a+'.hasIns',f'<div style="display: flex; flex-direction: column; gap: 3px; padding: 7px 10px; border-radius: 10px; background: {BG};"><sc-for list="{H(a+".ins")}" as="i" hint-placeholder-count="1">'
-                 f'<div style="font-size: 12.5px; line-height: 1.4; color: {INK};">{H("i.t")} <span style="{H("i.st")}">· {H("i.s")}</span></div></sc-for></div>')
             + f'<div style="display: flex; flex-wrap: wrap; gap: 8px;">'
             + IF(a+'.nx_isA',f'<a href="{H(a+".nx_href")}" onClick="{H(a+".sel")}" title="{H(a+".nx_tt")}" style="{_NXST} text-decoration: none;">{H(a+".nx_t")}</a>')
             + IF(a+'.nx_isB',f'<button type="button" onClick="{H(a+".nx_fn")}" title="{H(a+".nx_tt")}" style="{_NXST}">{H(a+".nx_t")}</button>')
-            + ab + '</div></div></sc-for>')
+            + ab + '</div>'
+            + IF(a+'.hasIns',f'<div style="display: flex; flex-direction: column; gap: 3px; padding: 7px 10px; border-radius: 10px; background: {BG};"><sc-for list="{H(a+".ins")}" as="i" hint-placeholder-count="1">'
+                 f'<div style="font-size: 12.5px; line-height: 1.4; color: {INK};">{H("i.t")} <span style="{H("i.st")}">· {H("i.s")}</span></div></sc-for></div>')
+            + '</div></sc-for>')
 INP=f'font-family: inherit; font-size: 16px; font-weight: 500; color: {INK}; padding: 12px 14px; border: 1px solid {LINE}; border-radius: 14px; background: {SURF}; width: 100%; box-sizing: border-box;'
 def ffield(label,fid,val,setfn,err,hint='',big=False,area=False,ph=''):
     """Campo do formulário móvel com dica e erro junto ao campo."""
@@ -444,7 +452,6 @@ v.ack=()=>{ if(self.state.ack) return; self.setState({ack:true,g2toast:'Ciência
               'Fechar o turno não encerra a ordem: encerrar é no escritório, com apontamentos enviados e nada em custódia.')
 
     # ---- MB-02det · detalhe da ordem escolhida (cenário) ----
-    PREP421=f"{CALDA['litros']} L de calda · {CALDA['vazao']} · cobre {CALDA['cobre']} · {CALDA['por_tanque']} de Fungicida A ({CALDA['dose']})"
     corpo=(
       sigbar()
       + mcont('Minhas ordens',H('d_aqui'),H('d_falta'),H('d_prox'))
@@ -481,16 +488,17 @@ v.d_falta=({{fechar:'hectares, horas e consumo do turno',confirmar:'confirmar o 
   outro:'fechar o turno da '+(tt?tt.os:'')+' · saldo de '+cenNum(rs,1)+' ha',devolver:'devolver a sobra '+cenAoAlmox()+': '+mbSobraTxt(mbSobra(c,o)),
   enviar:cenNum(mbProv(o),1)+' ha no aparelho, aguardando sinal',rever:'decisão de '+g2alcQuem('AL-02')+' sobre a área restante',none:p.feita?'encerramento no escritório':'liberação no escritório'}})[p.k];
 const kv=[{{l:'Versão',t:o.versao}},{{l:'Janela',t:mbJan(o)}},{{l:'Local',t:o.talhao+' · '+cenNum(o.area,1)+' ha'}},{{l:'Andamento',t:mbRealTxt(o)}}];
-if(o.id==='OS-0421'){{ kv.push({{l:'Equipe/conjunto',t:{json.dumps(EQ421)}}}); kv.push({{l:'Preparo por tanque',t:{json.dumps(PREP421)}}}); }}
+if(o.id==='OS-0421'||o.id==='OS-0424'){{ const prep=cenPreparoOrdem(c,o); kv.push({{l:'Preparo da versão vigente',t:cenPreparoTxt(prep)}}); }}
 v.d_kv=kv; v.d_424=o.id==='OS-0424';
 v.d_req=r?r.id:'sem requisição'; v.d_hasins=(o.ins||[]).length>0;
-v.d_ins=(o.ins||[]).map(x=>{{ const it=r&&r.itens.find(i=>i.prod===x.p);
+const dProj=cenInsumosOrdem(c,o);
+v.d_ins=(o.ins||[]).map(x=>{{ const it=r&&r.itens.find(i=>i.prod===x.p), ip=dProj.find(i=>i.p===x.p);
   let cst='gray', ct=r?'Peça ao escritório antes de usar':'Reserva ao liberar a ordem';
   const kc=mbConf(c,o.id,x.p); if(kc){{cst='yellow'; ct='Em conferência · '+cenConfTxt(kc,c)+' · '+cenConcQuem(c,[kc]);}}
   else if(it){{ if(it.custodia>0&&!it.confirmado){{cst='yellow'; ct='Entregue '+cenNum(it.custodia)+' '+it.un+' · confirme a retirada';}} else if(it.custodia>0){{cst='green'; ct='Com você '+cenNum(it.custodia)+' '+it.un;}} else if(cenSaldoEntregar(it)>0){{cst='gray'; ct='Retirar '+cenNum(cenSaldoEntregar(it))+' '+it.un+' com '+(cenAlmoxNome()||'o almoxarife');}} else {{cst='gray'; ct='Nada em custódia';}} }}
   return {{t:x.p+' · '+cenNum(x.dose,2)+' '+x.un+'/ha × '+cenNum(o.area,2)+' ha = '+cenNum(x.tot)+' '+x.un,
           s:it?('lote '+it.lote+(it.emb?' · '+it.emb:'')+' · entregue '+cenNum(it.entregue)+' '+it.un+' · consumido '+cenNum(it.consumido)+' '+it.un):(r?'fora da '+r.id+' · nada com você':'sem requisição'),
-          c:ct, st:mbTx(cst)}}; }});
+          c:ct+' · '+cenInsumoSaldoTxt(ip), st:mbTx(ip.falta>0?'yellow':cst)}}; }});
 const aps=(o.ap||[]); v.d_semap=!aps.length; const apx=Math.max(0,aps.length-4); v.d_apmais=apx>0; v.d_apmais_t=apx?apx+(apx>1?' turnos anteriores':' turno anterior'):'';
 v.d_aps=aps.slice(-4).map(a=>{{ const ofl=a.sinc===false; const cc=ofl?'yellow':(a.st==='Conferido'?'green':((a.st==='Previsto'||a.st===CEN_AP_DESC)?'gray':'yellow'));
   return {{t:'Dia '+a.dia+' · '+a.d+' · '+cenNum(a.ha,1)+' ha'+(a.h?' em '+cenNum(a.h,1)+' h':''), c:ofl?'No aparelho · aguardando sinal':a.st, st:mbChs(cc), dot:mbDot(cc)}}; }});
@@ -1405,3 +1413,4 @@ function mbAtvCurtos(c, m, u){ const hoje = m.hoje; const t = mbTurno(c); let os
 function mbPillD(on, dis){ return mbPill(on) + (dis ? ' opacity: .55; cursor: not-allowed;' : ''); }
 try { window.__mbman = { mbUsuario, mbOmsDe, mbAtvCurtos, mbManView, mbCond }; } catch (e) {}
 '''
+
