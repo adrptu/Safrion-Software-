@@ -127,6 +127,8 @@ SEP = r"""(()=>{ const vis=e=>!!e&&e.getClientRects().length>0;
   const estrut=(row)=>{ const r0=row.getBoundingClientRect(), nx=row.nextElementSibling, fs=getComputedStyle(row.parentElement).backgroundColor;
     for(const k of [nx,...nx.querySelectorAll('*')].filter(vis).slice(0,80)){ const s=getComputedStyle(k); if(s.display==='contents') continue; const q=k.getBoundingClientRect(); if(q.top-r0.bottom>40) break;
       if(k.matches('.g2visoes-w')) return 'visões'; if(k.matches('.g2caixa,[role=table],table')) return 'tabela';
+      /* TAB-01 (padroes-1510.md): filtro rápido em chips é parte da barra da visão (na O.S. a 390 px os chips quebram em 2 linhas antes do seletor) */
+      if(k.matches('[role=group]')&&k.querySelector('[aria-pressed]')) return 'visões';
       if(k.matches('svg,[role=img]')&&q.width>r0.width*0.4) return 'gráfico'; if(ctrl(k)) continue;
       if(caixaVis(k)) return 'caixa'; if(bordaVis(k)&&q.width>r0.width*0.5) return 'borda';
       const fundo=!tr(s.backgroundColor)&&s.backgroundColor!==fs&&q.height>=16&&!(parseFloat(s.borderTopLeftRadius)>=14&&q.height<=48)&&!k.matches('[aria-current]');

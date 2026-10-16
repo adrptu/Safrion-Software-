@@ -1319,7 +1319,7 @@ function g2visaoLiga(self,gid){ if(typeof window==='undefined'||window.__g2visao
 })();
 // Lista suspensa no desenho do DS (15/10/2026, proprietário: "não está abrindo as opções de filtro e agrupar por com nosso design system
 // como as demais telas. Padronize em todas"): todo <select> simples abre uma lista do DS (verde no item escolhido, ✓, hover verde,
-// teclado: setas, Home/End, letra, Enter/Espaço, Esc). O <select> continua sendo o campo (valor, change, leitor de tela); no toque fica o
+// teclado: Espaço, F4 ou Alt+seta abrem; na lista, setas, Home/End, letra, Enter/Espaço e Esc). O <select> continua sendo o campo (valor, change, leitor de tela); no toque fica o
 // seletor do aparelho, que é melhor no dedo. data-nativo num ancestral mantém o nativo.
 (function g2dsel(){ if(typeof document==='undefined'||window.__g2dsel) return; window.__g2dsel=1;
   const toque=()=>{ try{ return matchMedia('(pointer:coarse)').matches; }catch(e){ return false; } };
@@ -1356,7 +1356,8 @@ function g2visaoLiga(self,gid){ if(typeof window==='undefined'||window.__g2visao
   document.addEventListener('mousedown',e=>{ const t=e.target; if(ab&&!ab.box.contains(t)&&t!==ab.sel) fecha(false);
     if(!alvo(t)||toque()||e.button!==0) return; e.preventDefault(); if(ab&&ab.sel===t){ fecha(true); return; } t.focus({preventScroll:true}); abre(t); },true);
   document.addEventListener('keydown',e=>{ const t=e.target; if(!alvo(t)||toque()) return;
-    if(e.key===' '||e.key==='Enter'||e.key==='F4'||(e.altKey&&(e.key==='ArrowDown'||e.key==='ArrowUp'))){ e.preventDefault(); abre(t); } },true);
+    // como o nativo: Espaço, F4 e Alt+seta abrem; Enter no campo fechado não faz nada (UNID AC-g: Enter não dispara ação)
+    if(e.key===' '||e.key==='F4'||(e.altKey&&(e.key==='ArrowDown'||e.key==='ArrowUp'))){ e.preventDefault(); abre(t); } },true);
   window.addEventListener('resize',()=>fecha(false)); document.addEventListener('scroll',e=>{ if(ab&&!(e.target&&e.target.nodeType===1&&ab.box.contains(e.target))) fecha(false); },true);
   window.g2dselAbre=abre;   // teste e sonda
 })();

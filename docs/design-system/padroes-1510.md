@@ -25,7 +25,7 @@ A coluna "Situação" diz onde o padrão já está aplicado. O detalhe de AVI-01
 
 | ID | Regra | Por quê | Situação |
 |---|---|---|---|
-| SEL-03 | **Lista suspensa do DS.** <ul><li>No computador, toda lista de escolha (`select`) abre a lista do design system: ✓ na opção escolhida, hover verde e teclado (↑ ↓ Home End Enter Esc).</li><li>No toque, fica a lista do próprio aparelho, que é melhor no celular.</li></ul> | Mesma aparência em todas as telas, inclusive Agrofit, Agrupar por e filtros | Toda página (`g2lib`, `g2dsel`) |
+| SEL-03 | **Lista suspensa do DS.** <ul><li>No computador, toda lista de escolha (`select`) abre a lista do design system: ✓ na opção escolhida e hover verde. Teclado como na lista nativa: Espaço, F4 ou Alt+↓ abrem; na lista, ↑ ↓ Home End e letra andam, Enter escolhe e Esc fecha. Enter no campo fechado não faz nada.</li><li>No toque, fica a lista do próprio aparelho, que é melhor no celular.</li></ul> | Mesma aparência em todas as telas, inclusive Agrofit, Agrupar por e filtros | Toda página (`g2lib`, `g2dsel`) |
 | SEL-04 | **Seleção em mais de uma fazenda.** Ao planejar a safra, a pessoa escolhe fazendas e talhões de várias fazendas de uma vez, de forma rápida e visual. Um talhão pode ficar sem plantio. | A safra real cruza fazendas. Talhão em pousio é decisão do produtor | Em aplicação. A regra final entra com a entrega |
 
 ## Ações, avisos e etapas
