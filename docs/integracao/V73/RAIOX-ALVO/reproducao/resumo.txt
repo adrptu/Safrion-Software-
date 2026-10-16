@@ -1,0 +1,139 @@
+artefato raiox-v3.html · 151928 bytes · sha256 00b5d915221eda4c789ec8f7ee8eeb6e526086815de136ace62e023ef10ed72e · node v22.22.0 · 27.8 s
+
+== 1. Semente original, dia 86 (25/09) ==
+acaro: recuperados 4/5 (só Forte/Moderada: 2/5) · falso positivo forte/moderado 0/3 · ruído exibido em qualquer nível: nenhum · a confirmar: nenhum · pares 180 · talhões 20 · semanas 12 · rxGet 60.7 ms
+   gate 3 semanas: ok=true Brier modelo 0.059 × persistência 0.161 · n=31 · eventos=4
+   qs     plantado= 1 proxy=-    nível=anda junto de ur   efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   tmax   plantado= 0 proxy=qs   nível=anda junto de ur   efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   ur     plantado= 0 proxy=qs   nível=fraca              efeito=-17.5 % ic95=[-41.1; 3.8] janela=0 limiar=59 casos=38 talhões=20 semanas=3 q=1
+   dpv    plantado= 0 proxy=qs   nível=anda junto de ur   efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   molh   plantado=-1 proxy=-    nível=anda junto de lav  efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   chuva  plantado= 0 proxy=lav  nível=anda junto de lav  efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   lav    plantado=-1 proxy=-    nível=forte              efeito=-37.7 % ic95=[-45.8; -29.3] janela=0 limiar=1 casos=88 talhões=20 semanas=9 q=0
+   vento  plantado= 0 proxy=-    nível=nulo               efeito=5.9 % ic95=[-14.8; 35] janela=0 limiar=2.6 casos=122 talhões=20 semanas=8 q=1
+   irr    plantado= 0 proxy=def  nível=nulo               efeito=1.3 % ic95=[-19; 27.2] janela=0 limiar=15 casos=147 talhões=20 semanas=12 q=1
+   def    plantado= 1 proxy=-    nível=fraca              efeito=11.6 % ic95=[-2.9; 28.5] janela=0 limiar=10 casos=21 talhões=3 semanas=11 q=0.397
+   n14    plantado= 1 proxy=-    nível=nulo               efeito=6.2 % ic95=[-10.2; 20.5] janela=1 limiar=5.4 casos=140 talhões=20 semanas=12 q=1
+   k14    plantado= 0 proxy=-    nível=nulo               efeito=5.7 % ic95=[-5.2; 16.8] janela=0 limiar=18 casos=123 talhões=16 semanas=12 q=1
+   ndvi   plantado= 0 proxy=def  nível=forte              efeito=-13.2 % ic95=[-18.5; -7.2] janela=0 limiar=0.58 casos=127 talhões=13 semanas=12 q=0
+   aval   plantado= 0 proxy=-    nível=nulo               efeito=-0.6 % ic95=[-10.1; 9.9] janela=0 limiar=1 casos=92 talhões=20 semanas=12 q=1
+   exibidos na tela: lav-:forte[plantado] · ur-:fraca[proxy] · def+:fraca[plantado] · ndvi-:forte[proxy]
+   origem móvel (cortes 43,50,57,64,71,78; n=84; eventos=14) Brier: modelo 0.045 · modelo sem previsão 0.247 · nível+estádio 0.124 · persistência 0/1 0.167 · taxa-base 0.153
+   resíduo: 8 de 180 pares "sem controle" têm resíduo de aplicação ativo no início do par
+   leitura "antes" no próprio dia da aplicação: 4 de 16 · voltas ao NC contadas: 5, das quais 0 sem nenhuma leitura abaixo do NC antes e 0 com menos de 5 dias
+   controle: 16 aplicações com antes/depois · 0 sem controle válido · reaplicação antes de voltar ao NC: 0 · armadilha nº aplicações × nível: ρ=0.59
+      dia quente e seco 57.3 % (n=6; ic90 29.5–77.1) × demais 79.6 % (n=10; ic90 64.2–84.5)
+      chuva até 1 dia   49.4 % (n=3; ic90 28.5–77.8) × sem chuva 78.1 % (n=13; ic90 64.2–82.9)
+      barra 100 L/ha    46.3 % (n=2) × atomizador 77.9 % (n=14; ic90 49.4–82.9)
+      mesmo grupo seguido 0.5 % (n=1) × rotação 77.8 % (n=15; ic90 64.2–82.9)
+mosca: recuperados 3/4 (só Forte/Moderada: 2/4) · falso positivo forte/moderado 0/6 · ruído exibido em qualquer nível: nenhum · a confirmar: nenhum · pares 193 · talhões 20 · semanas 12 · rxGet 33 ms
+   gate 3 semanas: ok=true Brier modelo 0.044 × persistência 0.136 · n=44 · eventos=5
+   qs     plantado= 1 proxy=-    nível=anda junto de ur   efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   tmax   plantado= 0 proxy=qs   nível=anda junto de ur   efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   ur     plantado= 0 proxy=qs   nível=nulo               efeito=-6 % ic95=[-32; 15.8] janela=0 limiar=59 casos=35 talhões=20 semanas=3 q=1
+   dpv    plantado= 0 proxy=qs   nível=anda junto de ur   efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   molh   plantado=-1 proxy=-    nível=anda junto de lav  efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   chuva  plantado= 0 proxy=lav  nível=anda junto de lav  efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   lav    plantado=-1 proxy=-    nível=forte              efeito=-28.1 % ic95=[-35.1; -15.9] janela=0 limiar=1 casos=95 talhões=20 semanas=9 q=0
+   vento  plantado= 0 proxy=-    nível=nulo               efeito=4.1 % ic95=[-10.2; 23.5] janela=0 limiar=2.6 casos=124 talhões=20 semanas=8 q=1
+   irr    plantado= 0 proxy=-    nível=nulo               efeito=9.7 % ic95=[-9.3; 45.7] janela=0 limiar=15 casos=159 talhões=20 semanas=12 q=1
+   def    plantado= 0 proxy=-    nível=nulo               efeito=-0.3 % ic95=[-12.9; 11.4] janela=0 limiar=10 casos=27 talhões=3 semanas=10 q=1
+   n14    plantado= 1 proxy=-    nível=fraca              efeito=12.5 % ic95=[1; 24.2] janela=0 limiar=5.4 casos=167 talhões=20 semanas=12 q=0.191
+   k14    plantado= 0 proxy=-    nível=nulo               efeito=-0.5 % ic95=[-8.6; 6.6] janela=0 limiar=18 casos=132 talhões=16 semanas=12 q=1
+   ndvi   plantado= 0 proxy=-    nível=nulo               efeito=-4.5 % ic95=[-13.8; 5.1] janela=0 limiar=0.79 casos=50 talhões=7 semanas=12 q=0.954
+   aval   plantado= 0 proxy=-    nível=nulo               efeito=3.3 % ic95=[-3.7; 11.6] janela=0 limiar=1 casos=98 talhões=20 semanas=12 q=0.954
+   exibidos na tela: lav-:forte[plantado] · n14+:fraca[plantado]
+   origem móvel (cortes 43,50,57,64,71,78; n=90; eventos=10) Brier: modelo 0.053 · modelo sem previsão 0.181 · nível+estádio 0.086 · persistência 0/1 0.133 · taxa-base 0.102
+   resíduo: 15 de 193 pares "sem controle" têm resíduo de aplicação ativo no início do par
+   leitura "antes" no próprio dia da aplicação: 2 de 16 · voltas ao NC contadas: 3, das quais 0 sem nenhuma leitura abaixo do NC antes e 0 com menos de 5 dias
+   controle: 16 aplicações com antes/depois · 0 sem controle válido · reaplicação antes de voltar ao NC: 2 · armadilha nº aplicações × nível: ρ=0.22
+      dia quente e seco 62.8 % (n=4; ic90 37.4–66.9) × demais 75.5 % (n=12; ic90 71.2–83.6)
+      chuva até 1 dia   73.5 % (n=3; ic90 69.3–75.3) × sem chuva 71.2 % (n=13; ic90 64.4–85.3)
+      barra 100 L/ha    50.9 % (n=2) × atomizador 74.4 % (n=14; ic90 68.1–82)
+      mesmo grupo seguido - % (n=0) × rotação 72.3 % (n=16; ic90 66.1–80.6)
+antrac: recuperados 3/3 (só Forte/Moderada: 2/3) · falso positivo forte/moderado 0/6 · ruído exibido em qualquer nível: def:fraca, ndvi:fraca · a confirmar: nenhum · pares 203 · talhões 20 · semanas 12 · rxGet 35.3 ms
+   gate 3 semanas: ok=true Brier modelo 0.003 × persistência 0.020 · n=49 · eventos=1
+   qs     plantado= 0 proxy=ur   nível=anda junto de ur   efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   tmax   plantado= 0 proxy=ur   nível=fraca              efeito=5.2 % ic95=[-0.5; 12.4] janela=1 limiar=29.8 casos=147 talhões=20 semanas=9 q=0.77
+   ur     plantado= 1 proxy=-    nível=fraca              efeito=4.2 % ic95=[-0.4; 12] janela=0 limiar=59 casos=37 talhões=20 semanas=3 q=0.77
+   dpv    plantado= 0 proxy=ur   nível=anda junto de ur   efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   molh   plantado= 1 proxy=-    nível=forte              efeito=9.6 % ic95=[4; 13.6] janela=0 limiar=2 casos=46 talhões=20 semanas=4 q=0.006
+   chuva  plantado= 0 proxy=molh nível=anda junto de molh efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   lav    plantado= 0 proxy=molh nível=anda junto de molh efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   vento  plantado= 0 proxy=-    nível=nulo               efeito=-2.8 % ic95=[-7.1; 3.2] janela=0 limiar=2.5 casos=150 talhões=20 semanas=9 q=1
+   irr    plantado= 0 proxy=-    nível=nulo               efeito=-1.6 % ic95=[-8.6; 3.9] janela=0 limiar=15 casos=170 talhões=20 semanas=12 q=1
+   def    plantado= 0 proxy=-    nível=fraca              efeito=-6.3 % ic95=[-10; 0] janela=0 limiar=10 casos=29 talhões=3 semanas=12 q=0.058
+   n14    plantado= 0 proxy=-    nível=nulo               efeito=-0.6 % ic95=[-6.6; 5.2] janela=0 limiar=5.4 casos=178 talhões=20 semanas=12 q=1
+   k14    plantado=-1 proxy=-    nível=forte              efeito=-8.1 % ic95=[-11.3; -5] janela=0 limiar=18 casos=147 talhões=16 semanas=12 q=0
+   ndvi   plantado= 0 proxy=-    nível=fraca              efeito=-1.4 % ic95=[-5; 0.3] janela=0 limiar=0.58 casos=143 talhões=13 semanas=12 q=0.77
+   aval   plantado= 0 proxy=-    nível=nulo               efeito=-1.2 % ic95=[-5.5; 3.7] janela=0 limiar=1 casos=105 talhões=20 semanas=12 q=0.87
+   exibidos na tela: molh+:forte[plantado] · ur+:fraca[plantado] · tmax+:fraca[proxy] · k14-:forte[plantado] · def-:fraca[ruído] · ndvi-:fraca[ruído]
+   origem móvel (cortes 43,50,57,64,71,78; n=104; eventos=4) Brier: modelo 0.008 · modelo sem previsão 0.011 · nível+estádio 0.011 · persistência 0/1 0.038 · taxa-base 0.038
+   resíduo: 3 de 203 pares "sem controle" têm resíduo de aplicação ativo no início do par
+   leitura "antes" no próprio dia da aplicação: 1 de 9 · voltas ao NC contadas: 2, das quais 0 sem nenhuma leitura abaixo do NC antes e 0 com menos de 5 dias
+   controle: 9 aplicações com antes/depois · 0 sem controle válido · reaplicação antes de voltar ao NC: 2 · armadilha nº aplicações × nível: ρ=0.72
+      dia quente e seco 47.2 % (n=6; ic90 15–56.8) × demais 53 % (n=3; ic90 32–68.6)
+      chuva até 1 dia   53 % (n=1) × sem chuva 47.2 % (n=8; ic90 27.8–58.2)
+      barra 100 L/ha    6.3 % (n=1) × atomizador 50.4 % (n=8; ic90 38.3–59.5)
+      mesmo grupo seguido - % (n=0) × rotação 47.8 % (n=9; ic90 23.7–56.8)
+cochon: recuperados 2/2 (só Forte/Moderada: 1/2) · falso positivo forte/moderado 0/9 · ruído exibido em qualquer nível: chuva:fraca · a confirmar: nenhum · pares 195 · talhões 20 · semanas 12 · rxGet 31.5 ms
+   gate 3 semanas: ok=true Brier modelo 0.044 × persistência 0.216 · n=37 · eventos=9
+   qs     plantado= 1 proxy=-    nível=anda junto de tmax efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   tmax   plantado= 0 proxy=qs   nível=fraca              efeito=13.1 % ic95=[0.2; 27] janela=0 limiar=32.2 casos=41 talhões=20 semanas=4 q=0.54
+   ur     plantado= 0 proxy=qs   nível=anda junto de tmax efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   dpv    plantado= 0 proxy=qs   nível=anda junto de tmax efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   molh   plantado= 0 proxy=-    nível=anda junto de chuva efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   chuva  plantado= 0 proxy=-    nível=fraca              efeito=4.3 % ic95=[-2.9; 12.2] janela=1 limiar=6 casos=91 talhões=20 semanas=8 q=1
+   lav    plantado= 0 proxy=-    nível=anda junto de chuva efeito=- ic95=- janela=- limiar=- casos=- talhões=- semanas=- q=-
+   vento  plantado= 0 proxy=-    nível=nulo               efeito=-0.5 % ic95=[-6.6; 7.6] janela=2 limiar=2.6 casos=167 talhões=20 semanas=11 q=1
+   irr    plantado= 0 proxy=-    nível=nulo               efeito=3.8 % ic95=[-3.6; 12] janela=0 limiar=18 casos=127 talhões=20 semanas=12 q=1
+   def    plantado= 0 proxy=-    nível=nulo               efeito=1.7 % ic95=[-3.9; 7.4] janela=0 limiar=10 casos=29 talhões=3 semanas=11 q=1
+   n14    plantado= 1 proxy=-    nível=forte              efeito=11.9 % ic95=[5.8; 19.3] janela=0 limiar=5.4 casos=169 talhões=20 semanas=12 q=0.002
+   k14    plantado= 0 proxy=-    nível=nulo               efeito=0.6 % ic95=[-3.4; 5.7] janela=0 limiar=18 casos=134 talhões=16 semanas=12 q=1
+   ndvi   plantado= 0 proxy=-    nível=nulo               efeito=-1.3 % ic95=[-6.4; 3.7] janela=0 limiar=0.79 casos=50 talhões=7 semanas=12 q=1
+   aval   plantado= 0 proxy=-    nível=nulo               efeito=-0.5 % ic95=[-5.8; 5.3] janela=0 limiar=1 casos=95 talhões=20 semanas=12 q=1
+   exibidos na tela: tmax+:fraca[proxy] · chuva+:fraca[ruído] · n14+:forte[plantado]
+   origem móvel (cortes 43,50,57,64,71,78; n=92; eventos=13) Brier: modelo 0.049 · modelo sem previsão 0.058 · nível+estádio 0.049 · persistência 0/1 0.13 · taxa-base 0.133
+   resíduo: 8 de 195 pares "sem controle" têm resíduo de aplicação ativo no início do par
+   leitura "antes" no próprio dia da aplicação: 1 de 15 · voltas ao NC contadas: 2, das quais 0 sem nenhuma leitura abaixo do NC antes e 0 com menos de 5 dias
+   controle: 15 aplicações com antes/depois · 0 sem controle válido · reaplicação antes de voltar ao NC: 3 · armadilha nº aplicações × nível: ρ=0.45
+      dia quente e seco 62.2 % (n=6; ic90 41.4–68.5) × demais 61.9 % (n=9; ic90 47.9–75)
+      chuva até 1 dia   47 % (n=2) × sem chuva 63.6 % (n=13; ic90 60.5–65.7)
+      barra 100 L/ha    30.1 % (n=2) × atomizador 63.6 % (n=13; ic90 60.5–65.7)
+      mesmo grupo seguido - % (n=0) × rotação 61.9 % (n=15; ic90 47.9–65.2)
+TOTAL semente original: recuperados 12/14 (só Forte/Moderada: 7/14) · falso positivo forte/moderado 0/24
+
+== 2. Réplicas (20 sementes; chuva e ondas de calor fixas no gerador) ==
+acaro: recuperados 84/100 (84 %; só Forte/Moderada 45/100 = 45 %) · falso positivo forte/moderado 3/60 · ruído exibido (qualquer nível) 11 · "a confirmar" 0 · previsão venceu persistência em 18/20
+mosca: recuperados 73/80 (91 %; só Forte/Moderada 48/80 = 60 %) · falso positivo forte/moderado 1/120 · ruído exibido (qualquer nível) 10 · "a confirmar" 0 · previsão venceu persistência em 20/20
+antrac: recuperados 50/60 (83 %; só Forte/Moderada 28/60 = 47 %) · falso positivo forte/moderado 0/120 · ruído exibido (qualquer nível) 11 · "a confirmar" 2 · previsão venceu persistência em 17/20
+cochon: recuperados 30/40 (75 %; só Forte/Moderada 9/40 = 23 %) · falso positivo forte/moderado 0/180 · ruído exibido (qualquer nível) 9 · "a confirmar" 0 · previsão venceu persistência em 20/20
+acaro: ruído exibido por variável/nível: k14+:fraca[ruído]×4, vento+:fraca[ruído]×1, vento-:fraca[ruído]×2, vento-:moderada[ruído]×1, aval+:fraca[ruído]×1, k14+:forte[ruído]×1, vento+:forte[ruído]×1
+acaro: Brier médio em origem móvel — modelo 0.059 · sem previsão 0.208 · nível+estádio 0.107 · persistência 0/1 0.146 · taxa-base 0.128 · modelo vence nível+estádio em 19/20 · sem previsão vence persistência em 1/20
+mosca: ruído exibido por variável/nível: vento+:fraca[ruído]×2, aval+:fraca[ruído]×1, irr+:fraca[ruído]×2, ndvi-:fraca[ruído]×1, ndvi-:forte[ruído]×1, vento-:fraca[ruído]×3
+mosca: Brier médio em origem móvel — modelo 0.063 · sem previsão 0.162 · nível+estádio 0.097 · persistência 0/1 0.134 · taxa-base 0.133 · modelo vence nível+estádio em 20/20 · sem previsão vence persistência em 1/20
+antrac: ruído exibido por variável/nível: irr-:fraca[ruído]×6, aval+:fraca[ruído]×2, ndvi+:fraca[ruído]×1, def-:fraca[ruído]×2
+antrac: Brier médio em origem móvel — modelo 0.029 · sem previsão 0.040 · nível+estádio 0.030 · persistência 0/1 0.057 · taxa-base 0.063 · modelo vence nível+estádio em 9/20 · sem previsão vence persistência em 16/20
+cochon: ruído exibido por variável/nível: irr-:fraca[ruído]×3, irr+:fraca[ruído]×1, ndvi-:fraca[ruído]×2, chuva+:fraca[ruído]×1, aval+:fraca[ruído]×2
+cochon: Brier médio em origem móvel — modelo 0.078 · sem previsão 0.089 · nível+estádio 0.077 · persistência 0/1 0.161 · taxa-base 0.168 · modelo vence nível+estádio em 10/20 · sem previsão vence persistência em 20/20
+TOTAL réplicas: recuperados 237/280 (85 %) · falso positivo forte/moderado 4 · réplicas-alvo frias 0
+por réplica: r01:13/14 fp=0 ruídoExibido=2 | r02:12/14 fp=0 ruídoExibido=3 | r03:11/14 fp=0 ruídoExibido=1 | r04:12/14 fp=0 ruídoExibido=4 | r05:14/14 fp=0 ruídoExibido=0 | r06:12/14 fp=0 ruídoExibido=3 | r07:10/14 fp=0 ruídoExibido=4 | r08:11/14 fp=0 ruídoExibido=0 | r09:9/14 fp=1 ruídoExibido=5 | r10:13/14 fp=0 ruídoExibido=3 | r11:13/14 fp=0 ruídoExibido=1 | r12:14/14 fp=0 ruídoExibido=0 | r13:12/14 fp=0 ruídoExibido=3 | r14:10/14 fp=2 ruídoExibido=2 | r15:10/14 fp=0 ruídoExibido=2 | r16:13/14 fp=1 ruídoExibido=4 | r17:12/14 fp=0 ruídoExibido=1 | r18:11/14 fp=0 ruídoExibido=1 | r19:12/14 fp=0 ruídoExibido=0 | r20:13/14 fp=0 ruídoExibido=2
+
+== 3. Nulo do clima (série deslocada só na análise; toda variável de clima exibida é falsa) ==
+desloca21 → acaro: clima exibido (todo falso) vento-:fraca[ruído],lav+:confirmar[plantado] [Forte/Moderada: 0] · outros irr+:fraca[proxy],def+:fraca[plantado],ndvi-:forte[proxy] · gate true || mosca: clima exibido (todo falso) vento+:fraca[ruído],lav-:fraca[plantado],molh+:fraca[plantado] [Forte/Moderada: 0] · outros irr+:fraca[ruído],n14+:fraca[plantado] · gate true || antrac: clima exibido (todo falso) vento+:fraca[ruído],lav+:forte[proxy],tmax-:fraca[proxy] [Forte/Moderada: 1] · outros irr-:fraca[ruído],k14-:forte[plantado],def-:fraca[ruído],ndvi-:fraca[ruído] · gate true || cochon: clima exibido (todo falso) - [Forte/Moderada: 0] · outros irr+:fraca[ruído],n14+:forte[plantado] · gate true
+desloca35 → acaro: clima exibido (todo falso) chuva-:fraca[proxy] [Forte/Moderada: 0] · outros irr+:forte[proxy],def+:fraca[plantado],ndvi-:forte[proxy] · gate true || mosca: clima exibido (todo falso) chuva-:fraca[proxy] [Forte/Moderada: 0] · outros irr+:forte[ruído],n14+:fraca[plantado] · gate true || antrac: clima exibido (todo falso) molh-:confirmar[plantado] [Forte/Moderada: 0] · outros irr-:fraca[ruído],k14-:forte[plantado],def-:fraca[ruído] · gate true || cochon: clima exibido (todo falso) dpv-:confirmar[proxy],chuva-:fraca[ruído] [Forte/Moderada: 0] · outros irr+:fraca[ruído],n14+:forte[plantado] · gate true
+desloca49 → acaro: clima exibido (todo falso) chuva-:fraca[proxy] [Forte/Moderada: 0] · outros irr+:forte[proxy],def+:fraca[plantado],ndvi-:forte[proxy] · gate true || mosca: clima exibido (todo falso) - [Forte/Moderada: 0] · outros irr+:fraca[ruído],n14+:fraca[plantado] · gate true || antrac: clima exibido (todo falso) - [Forte/Moderada: 0] · outros irr-:fraca[ruído],k14-:forte[plantado],def-:fraca[ruído] · gate true || cochon: clima exibido (todo falso) - [Forte/Moderada: 0] · outros irr+:fraca[ruído],n14+:forte[plantado] · gate true
+desloca63 → acaro: clima exibido (todo falso) vento-:fraca[ruído] [Forte/Moderada: 0] · outros irr+:fraca[proxy],def+:fraca[plantado],ndvi-:forte[proxy] · gate true || mosca: clima exibido (todo falso) vento-:fraca[ruído] [Forte/Moderada: 0] · outros irr+:fraca[ruído],n14+:fraca[plantado] · gate true || antrac: clima exibido (todo falso) vento+:fraca[ruído] [Forte/Moderada: 0] · outros irr-:fraca[ruído],k14-:forte[plantado],def-:fraca[ruído] · gate true || cochon: clima exibido (todo falso) ur+:fraca[proxy] [Forte/Moderada: 0] · outros irr+:fraca[ruído],n14+:forte[plantado] · gate true
+Resumo do nulo (4 deslocamentos × 4 alvos): itens de clima exibidos (todos falsos) sem controle de época 18 (Forte/Moderada 1) · com tendência suave 16 (Forte/Moderada 1)
+
+== 4. Controle de época (lição: com 1 safra, controlar a época apaga o clima) ==
+controle "mes" — 21 sementes: recuperados 237/294 (81 %) · só Forte/Moderada 129/294 (44 %) · falso positivo forte/moderado 2 · ruído exibido 49
+   acaro: 84/105 · F/M 46/105 · fp 1 · semente original: 3/5 (F/M 2) · exibidos lav-:forte[plantado] · def+:fraca[plantado] · ndvi-:forte[proxy]
+   mosca: 72/84 · F/M 46/84 · fp 0 · semente original: 3/4 (F/M 2) · exibidos lav-:forte[plantado] · n14+:fraca[plantado] · ndvi-:fraca[ruído]
+   antrac: 49/63 · F/M 30/63 · fp 0 · semente original: 3/3 (F/M 2) · exibidos molh+:forte[plantado] · ur+:fraca[plantado] · k14-:forte[plantado] · def-:fraca[ruído] · ndvi-:fraca[ruído]
+   cochon: 32/42 · F/M 7/42 · fp 1 · semente original: 2/2 (F/M 1) · exibidos tmax+:fraca[proxy] · chuva+:fraca[ruído] · n14+:forte[plantado]
+controle "suave" — 21 sementes: recuperados 234/294 (80 %) · só Forte/Moderada 130/294 (44 %) · falso positivo forte/moderado 3 · ruído exibido 51
+   acaro: 80/105 · F/M 46/105 · fp 1 · semente original: 3/5 (F/M 2) · exibidos lav-:forte[plantado] · def+:fraca[plantado] · ndvi-:forte[proxy]
+   mosca: 76/84 · F/M 49/84 · fp 0 · semente original: 3/4 (F/M 2) · exibidos lav-:forte[plantado] · n14+:fraca[plantado] · ndvi-:fraca[ruído]
+   antrac: 52/63 · F/M 29/63 · fp 0 · semente original: 3/3 (F/M 2) · exibidos molh+:forte[plantado] · ur+:fraca[plantado] · k14-:forte[plantado] · def-:fraca[ruído] · ndvi-:fraca[ruído]
+   cochon: 26/42 · F/M 6/42 · fp 2 · semente original: 2/2 (F/M 1) · exibidos tmax+:fraca[proxy] · n14+:forte[plantado]
