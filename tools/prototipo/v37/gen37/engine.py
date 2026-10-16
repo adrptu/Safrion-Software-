@@ -636,6 +636,8 @@ def corpo_estruturado(body):
         if not m: return False
         at=m.group(2)
         if m.group(1)=='svg' or 'g2caixa' in at or 'g2visoes' in at or 'border: 1px' in at or re.search(r'background: (?!#FFFFFF|#fff\b|transparent|\{)', at): return True
+        # TAB-01 (padroes-1510.md): fileira de filtro rápido em chips (grupo com aria-pressed) é a barra da visão, que já separa sozinha
+        if 'role="group"' in at and 'aria-pressed' in b[m.end():m.end()+900]: return True
         b=b[m.end():]
         if not re.match(r'\s*<', b): return False   # o 1º filho é texto: conteúdo solto
     return False
@@ -1331,6 +1333,8 @@ _SEM_MOLDURA=(f':not(:has(+*>{_BORDA_TOPO}:first-child))'
               f':not(:has(+*>:first-child>[style*="border-top: 1px"]:first-child))'
               f':not(:has(+*>sc-if:first-child>:first-child>[style*="border-top: 1px"]:first-child))'
               ':not(:has(+*>.g2caixa:first-child,+*>sc-if:first-child>.g2caixa:first-child,+* .g2visoes-w))'
+              # TAB-01 (padroes-1510.md): filtro rápido em chips (grupo com aria-pressed) no topo do corpo é a barra da visão
+              ':not(:has(+*>[role=group]:first-child [aria-pressed],+*>:first-child>[role=group]:first-child [aria-pressed],+*>:first-child>:first-child>[role=group]:first-child [aria-pressed]))'
               # cartões (fileira de caixas com borda) e gráfico ou mapa (role=img, svg) logo no topo do corpo
               ':not(:has(+*>:first-child>[style*="border: 1px"]:first-child:not(button,a,label,input,select,span),+*>:is([role=img],svg):first-child))')
 # caixa com borda (seção, cartão, painel, bloco do cadastro, grade): a tabela de dentro fica sem moldura; o cabeçalho com fundo e o espaço separam
