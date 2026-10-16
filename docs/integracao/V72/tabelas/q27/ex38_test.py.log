@@ -1,0 +1,19 @@
+PASS OS421: 80 necessários, 65 em custódia, faltam 15; adjuvante sem registro
+PASS P4/P5 nos blocos reais painel/MB01/MB02det
+PASS consumo zero registrado difere de registro ausente; lotes somam
+PASS custódia acima da necessidade, ausência e unidade inválida
+PASS offline real: 20ha/10L, necessidade 15L, Adjuvante35L, 5cargas e web95L
+PASS toda a área offline não solicita nova retirada
+PASS 0,2 + 39,8ha não cria quinta carga fantasma
+PASS projeção recusa dados inválidos sem lançar erro nem inventar zero
+PASS projeção não altera cenário
+PASS P1/P2: OS421 tanque do PJ e instrução; OS424 painel/app/ficha mesma fonte
+PASS sem conjunto, substituição sem capacidade e instrução ausente não usam padrão
+PASS cenário salvo usa instrução da semente só na mesma versão
+PASS zero, negativos, NaN e infinito
+PASS P3: 400 combinações, cada carga cheia/parcial mantém dose e fecha área/volume
+PASS app real: carga preparada mantém consumo, troca de versão bloqueia e aviso recupera
+PASS v2 sem instrução permite confirmar recebimento antes do preparo
+PASS MB01 preserva retirada, embalagem, custódia e conferência
+17/17 cenários Node; P3: 400 combinações
+Geração: mobile.build + OS0424 app/ficha OK; sem navegador
