@@ -72,3 +72,14 @@ A base andou de `b87f79b` para `052b9bf`: 10 commits, entre eles a frente CADAST
 | `m_d15`, parte D | FALHOU 17/18, só o D15 (1) | `mutante_d15_D_d0eb3a8.log` |
 | `m_e2`, parte E | FALHOU 4/5, só o E2 (1) | `mutante_e2_E_d0eb3a8.log` |
 | `ds_unit_test.py` | OK 44/44 e 31/31 (0) | `ds_unit_d0eb3a8.log` |
+
+## Composição com a base em `6733a4c` (PR #76 integrado)
+
+A base andou de `052b9bf` para `6733a4c` e agora inclui o PR #76, que muda o cartão do `engine.section()`. O merge gerou `d61bb58`, sem conflito. O `OS.dc.html` continua com o mesmo sha256. Repeti no render de árvore limpa:
+
+| Execução | Resultado (rc) | Bruto |
+|---|---|---|
+| `ds_test.py` | OK 72/72 (0) | `normal_d61bb58.log` |
+| `m_d15`, parte D | FALHOU 17/18, só o D15 (1) | `mutante_d15_D_d61bb58.log` |
+| `m_e2`, parte E | FALHOU 4/5, só o E2 (1) | `mutante_e2_E_d61bb58.log` |
+| `ds_unit_test.py` | OK 44/44 e 31/31 (0) | `ds_unit_d61bb58.log` |
