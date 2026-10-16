@@ -84,9 +84,10 @@ def ibtn(text,hole,ic,title=None,primary=False,small=True):
 def nota(html_):
     return f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.55;">{html_}</div>'
 def kv(pares):
+    # SEP-20261015 (e): pares rótulo → valor separados pelo espaço, sem linha entre eles
     return ('<div style="display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 0; font-size: 13px;">'
-            + ''.join(f'<div style="padding: 7px 4px; border-top: 1px solid {LINE}; color: {MUTED}; font-weight: 600;">{esc(k)}</div>'
-                      f'<div style="padding: 7px 4px; border-top: 1px solid {LINE};">{v}</div>' for k,v in pares) + '</div>')
+            + ''.join(f'<div style="padding: 5px 4px; color: {MUTED}; font-weight: 600;">{esc(k)}</div>'
+                      f'<div style="padding: 5px 4px;">{v}</div>' for k,v in pares) + '</div>')
 def R(rid,v=None,p=None,s=None,ro=False,o=None,kids=None):
     """linha G2: v = dados, p = exibição rica, s = texto p/ busca/filtro (preenchido a partir de p quando faltar)."""
     v=dict(v or {}); p=dict(p or {}); s=dict(s or {})

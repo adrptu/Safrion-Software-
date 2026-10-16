@@ -68,8 +68,9 @@ def _nota(txt,state=None):
     bd=f'border-left: 3px solid {YEL}; padding-left: 12px;' if state=='yellow' else ''
     return f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.6; {bd}">{txt}</div>'
 def _ficha(pares):   # ficha de leitura (pares rótulo → valor): não é lista de registros, por isso não é grade
-    return ''.join(f'<div style="display: grid; grid-template-columns: 220px 1fr; gap: 12px; padding: 9px 2px; border-top: {"0" if i==0 else "1px solid "+LINE}; font-size: 13px; line-height: 1.5;">'
-                   f'<div style="color: {MUTED}; font-weight: 600;">{esc(k)}</div><div>{v}</div></div>' for i,(k,v) in enumerate(pares))
+    # SEP-20261015 (e): pares separados pelo espaço, sem linha entre eles
+    return ''.join(f'<div style="display: grid; grid-template-columns: 220px 1fr; gap: 12px; padding: 5px 2px; font-size: 13px; line-height: 1.5;">'
+                   f'<div style="color: {MUTED}; font-weight: 600;">{esc(k)}</div><div>{v}</div></div>' for k,v in pares)
 def _acoes(*xs): return f'<div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">{"".join(xs)}</div>'
 def _pill(tx): return f'<span style="display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 12px; font-weight: 600; color: {MUTED}; border: 1px solid {LINE}; line-height: 1.4;">{esc(tx)}</span>'
 def R(id,v,p=None,s=None,**kw):

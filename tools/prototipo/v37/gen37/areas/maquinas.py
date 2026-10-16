@@ -952,7 +952,7 @@ def _visoes():
             + semana + IF('om_lista',g_om,True) + IF('om_kanban',_kanban()))
     ativos=(f'<div class="ma-top" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">{_chips("at_modos","Modo")}</div>'
             + IF('at_ativos',f'<div class="ma-gat">{g_at}</div>',True) + IF('at_abast',g_ab))
-    planos=(IF('tem_sem',f'<div class="ma-sem" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; border: 1px dashed {LINE}; border-radius: 12px;">'
+    planos=(IF('tem_sem',f'<div class="ma-sem" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; background: {BG}; border-radius: 12px;">'
                f'<span style="font-size: 12.5px; font-weight: 800;">{H("sem_n")}</span>'
                + FOR('sem','a',f'<button type="button" onClick="{H("a.go")}" aria-label="{H("a.lab")}" title="{H("a.lab")}" style="{_MINI}">{H("a.t")} · Criar plano</button>',4) + '</div>')
             + g_pl)
@@ -1057,7 +1057,7 @@ def _pag_plano():
          + IF('ban_n',f'<div style="padding: 8px 14px; border-radius: 12px; background: {YELS}; color: {YEL}; font-size: 13px; font-weight: 700;">Rascunho v1 · publique para o plano gerar vencimentos.</div>')
          + IF('ban_i',f'<div style="padding: 8px 14px; border-radius: 12px; background: {GRAYS}; color: {INK}; font-size: 13px; font-weight: 700;">Inativo · não gera vencimentos; as ordens abertas seguem.</div>'))
     svs=(IF('sv_tem',f'<div style="display: flex; flex-direction: column; gap: 8px;">' + FOR('svs','s',svrow,2) + '</div>')
-         + IF('sv_vazio',f'<div style="padding: 14px; border: 1px dashed {LINE}; border-radius: 12px; font-size: 13px;">Nenhum serviço ainda · use “Incluir serviço”.</div>'))
+         + IF('sv_vazio',f'<div style="padding: 14px; background: {BG}; border-radius: 12px; font-size: 13px;">Nenhum serviço ainda · use “Incluir serviço”.</div>'))
     hist=(f'<section class="ma-bl"><button type="button" class="ma-blh" aria-expanded="{H("hist_open")}" onClick="{H("hist_tog")}"><span aria-hidden="true" style="width: 14px;">{H("hist_sym")}</span>Versões</button>'
           + IF('hist_open','<div class="ma-bl-c">'+FOR('hist','h',f'<div style="display: grid; grid-template-columns: 48px 200px 110px; gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid {LINE}; font-size: 13px;">'
                 f'<b>{H("h.t")}</b><span style="color: {MUTED};">{H("h.at")}</span><span><span style="{H("h.stst")}">{H("h.st")}</span></span></div>',2)+'</div>') + '</section>')

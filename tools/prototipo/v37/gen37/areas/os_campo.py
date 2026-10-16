@@ -89,7 +89,7 @@ function EXTRAVALS(self,v){ cenOuvir(self); const c=cenGet(); const st=self.stat
     :(pend.length?'Entregue por '+d.os.almox+' · confirme o recebimento':'Reservado · retire com '+d.os.almox+' no almoxarifado');
   v.ret_cst='display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;'+(ret?'color:#1E7A4C;background:#E4F3E9;':'color:#8A5A00;background:#FFF4D6;');
   v.cg_t='Carga '+cg.n+' de '+N+(cg.parcial?' · última, parcial':''); v.cg_par=cg.parcial; v.cg_vol=cg.volt; v.cg_area=cg.areat; v.cg_prods=cg.prods;
-  v.cg_st='display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:14px;border:'+(cg.parcial?'2px solid #8A5A00':'1px solid #E4E9E5')+';background:#FFFFFF;';
+  v.cg_st='display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:14px;border:'+(cg.parcial?'2px solid #8A5A00;background:#FFFFFF':'1px solid transparent;background:#F4F6F3')+';';   // SEP-20261015 (d): a carga atual dentro do cartão leva fundo, não moldura
   v.prep=fase!=='ret'; v.feitas_t=feitas+' de '+N+' cargas preparadas'; v.bar_st='display:block;height:100%;border-radius:999px;background:#1E7A4C;width:'+Math.round(100*feitas/N)+'%;';
   v.lista=d.cargas.map((x,i)=>({t:'Carga '+x.n+' · '+x.volt+' · '+x.areat,s:i<feitas?'✓':'',st:'font-size:12.5px;color:'+(i<feitas?'#1E7A4C':(i===feitas&&fase==='prep'?'#15201A':'#8A968E'))+';font-weight:'+(i===feitas&&fase==='prep'?'800':'600')+';'}));
   v.prim_t=fase==='ret'?(pend.length?'Confirmar recebimento':'Retirar no almoxarifado'):(fase==='prep'?('Carga '+cg.n+' preparada'):'Registrar apontamento');
@@ -115,13 +115,14 @@ def app():
     prep = card('Caldeiro · preparo',
                 f'<div style="{H("cg_st")}"><b style="font-size: 16px;">{H("cg_t")}</b>'
                 f'<div style="display: flex; gap: 14px; font-size: 13px;"><span>Tanque: <b>{H("cg_vol")}</b></span><span>Área: <b>{H("cg_area")}</b></span></div>'
-                f'<sc-for list="{H("cg_prods")}" as="p" hint-placeholder-count="1"><div style="display: flex; justify-content: space-between; font-size: 15px; padding: 6px 0; border-top: 1px solid {LINE};"><span>{H("p.p")}</span><b>{H("p.q")}</b></div></sc-for>'
+                f'<sc-for list="{H("cg_prods")}" as="p" hint-placeholder-count="1"><div style="display: flex; justify-content: space-between; font-size: 15px; padding: 6px 0;"><span>{H("p.p")}</span><b>{H("p.q")}</b></div></sc-for>'
                 f'<div style="font-size: 12.5px; color: {MUTED};">Complete com água até o volume do tanque, na ordem da instrução liberada.</div></div>'
                 f'<span style="display: block; height: 6px; border-radius: 999px; background: {GRAYS}; overflow: hidden;"><span style="{H("bar_st")}"></span></span>'
                 f'<div style="font-size: 12px; color: {MUTED};">{H("feitas_t")}</div>'
                 f'<sc-for list="{H("lista")}" as="l" hint-placeholder-count="3"><div style="display: flex; justify-content: space-between; {H("l.st")}"><span>{H("l.t")}</span><span>{H("l.s")}</span></div></sc-for>')
     opr = card('Operador · aplicação', kv('Vazão', f"{nf(EQ['vazao'])} L/ha") + kv('Velocidade', f"{nf(EQ['vel'])} km/h") + kv('Barra', f"{nf(EQ['barra'])} m")
                + kv('Bicos · pressão', EQ['bicos']) + kv('Área por carga', f"{nf(AREA_CARGA)} ha") + kv('Dose', ' · '.join(f"{x['p']} {nf(x['dose'],2)} {x['un']}/ha" for x in PRODS)))
+    # SEP-20261015 (a): a barra de ação fixa no pé, branca sobre o fundo cinza, separa-se por sombra (como a faixa de etapas), sem linha
     body = (f'<div data-mroot="1" style="position: relative; width: 100%; height: 1030px; --mw: 390px; box-sizing: border-box; display: flex; flex-direction: column; background: {BG}; overflow: clip;">'
             f'<header style="padding: 44px 20px 12px; background: {SURF}; border-bottom: 1px solid {LINE}; display: flex; flex-direction: column; gap: 5px;">'
             f'<div style="display: flex; align-items: center; gap: 8px;"><a href="OS.dc.html" aria-label="Voltar para Ordem de Serviço" style="text-decoration: none; font-size: 20px; color: {INK};">‹</a>'
@@ -130,7 +131,7 @@ def app():
             f'<div role="status" style="display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: {ACCS}; color: {ACC}; font-size: 12px; font-weight: 700;">● Disponível sem internet · {OS["versao"].split(" em ")[0]}</div></header>'
             f'<main style="flex-grow: 1; min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px;">{ret}{prep}{opr}'
             f'<a href="OS-0424-ficha.dc.html" style="{_MINI} text-decoration: none; text-align: center;">Abrir ficha para imprimir</a></main>'
-            f'<div style="padding: 12px 16px 26px; background: {SURF}; border-top: 1px solid {LINE};"><button type="button" onClick="{H("prim")}" style="display: block; width: 100%; padding: 17px; border: 0; border-radius: 16px; background: {ACC}; color: #fff; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer;">{H("prim_t")}</button></div></div>')
+            f'<div style="padding: 12px 16px 26px; background: {SURF}; box-shadow: 0 -6px 12px -10px rgba(21,32,26,.25);"><button type="button" onClick="{H("prim")}" style="display: block; width: 100%; padding: 17px; border: 0; border-radius: 16px; background: {ACC}; color: #fff; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer;">{H("prim_t")}</button></div></div>')
     HEIGHTS37[fname] = 1030
     return _page(fname, "OS-0424 · ficha de campo", 390, 1030, body, movel=True)
 

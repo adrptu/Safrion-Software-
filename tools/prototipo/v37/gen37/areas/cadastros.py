@@ -92,7 +92,8 @@ CADX_CSS=(
     ".cadx-dados .g2caixa{flex:1 1 0;min-height:0}.cadx-dados .g2rola{flex:1 1 0;min-height:0;overflow:auto}"
     ".cadx-rola{flex:1 1 0;min-height:0;overflow:auto}"
     # barra da grade: busca e contagem, filtro rápido, filtros ativos ... ações da aba, expandir/recolher, primária por último
-    ".cadx .g2caixa>div:first-child:has(>span),.cadx-barra{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid #E4E9E5}"
+    # SEP-20261015 (c): sem linha entre a barra e o que vem abaixo (cabeçalho da tabela com fundo, cartões, mapa)
+    ".cadx .g2caixa>div:first-child:has(>span),.cadx-barra{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px}"
     ".cadx .g2caixa>div:first-child>label:has(input[type=search]),.cadx .g2caixa>div:first-child>label:has(input[type=search])+span{order:-2}"
     ".cadx-qf{order:-1;display:flex;flex-wrap:wrap;gap:6px}.cadx-prim{order:1;display:inline-flex;margin-left:auto}"
     ".cadx-seg{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:#EEF1EE}"

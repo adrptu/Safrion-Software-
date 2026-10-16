@@ -500,7 +500,7 @@ def _painel_poligono():
             f'<button type="button" aria-label="Fechar" title="Fechar" onClick="{H("pg_fechar")}" style="border: 0; background: {BG}; width: 32px; height: 32px; border-radius: 999px; cursor: pointer; font-size: 18px; color: {MUTED}; flex-shrink: 0;">×</button></div>'
             f'<div style="font-size: 13px; color: {MUTED}; line-height: 1.45;">{H("pg_sub")}</div>'
             f'<div style="display: flex; flex-direction: column; gap: 6px;"><span style="{lab}">Como definir</span>{seg}</div>'
-            f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px dashed {LINE}; border-radius: 10px; font-size: 13px;"><span style="flex-grow: 1;">{H("pg_desc")}</span>'
+            f'<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: {BG}; border-radius: 10px; font-size: 13px;"><span style="flex-grow: 1;">{H("pg_desc")}</span>'
             f'<button type="button" onClick="{H("pg_gerar")}" style="{_MINI}">Gerar prévia</button></div>'
             f'<sc-if value="{H("pg_hasprev")}" hint-placeholder-val="{F_}"><div style="display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 10px; background: {BG};">'
             f'<div style="font-size: 11px; font-weight: 700; color: {MUTED}; letter-spacing: .06em;">PRÉVIA</div>'
