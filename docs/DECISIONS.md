@@ -94,6 +94,27 @@ Ficam em `docs/adr/`, uma por arquivo, no modelo `0000-modelo.md`. As escolhas j
 | DEC-0910-01 | Padronizar o design system para tudo o que existe e o que vier: botões (BOT-01 a BOT-09), seleção que abre detalhe (SEL-01/02), etapa futura neutra (ETP-01), separador, hover verde, retorno visual e dica (VIS-01 a VIS-04), conforme `docs/design-system/README.md`, refinando o PRD cap. 74 | Chat do proprietário, 09/10/2026: "ok, padronize todo esse design system para tudo que temos e faremos" |
 | DEC-0910-02 | Merge na `main` feito pelos agentes: o revisor (Claude ou Codex) integra o PR do outro com CI verde no HEAD e parecer favorável escrito; o proprietário não é chamado para integrar; ninguém integra o próprio PR. Continuam com o proprietário custo, contrato ou conta, dados reais, ERP real, publicação a usuários reais e produção | Chat do proprietário, 09/10/2026: "Faça o merge entre voce e claude, nao quero trabalho pra mim" e, em seguida, "entre vc e codex" |
 
+## Decisões do proprietário de 16/10/2026
+
+Respondidas por Adrianus no canal do Claude, em lista de escolha, e pedidos dele feitos no mesmo dia. Valem como decisão dele (AGENTS §2). O detalhe está no protótipo, em `docs/integracao/V69/decisoes-proprietario-1610.md` e `docs/design-system/padroes-1610.md` (branch `claude/v44-v69-mapa`).
+
+| ID | Decisão | Fonte |
+|---|---|---|
+| DEC-1610-01 | **Peça comprada para manutenção fica reservada para a ordem que a pediu**, ao chegar no recebimento (D5) | Lista de escolha |
+| DEC-1610-02 | **Teste com usuários reais** (3 a 5, 20 minutos) depois de terminar a melhoria dos demais módulos | Lista de escolha |
+| DEC-1610-03 | **Mantida a aprovação agronômica individual de cada O.S.**; pré-autorização por limiares só se revê depois do piloto | PEND-01 (PRD 73.12) |
+| DEC-1610-04 | **Prazos e limites propostos aceitos como valores iniciais**, configuráveis, a rever com os números do piloto | PEND-02 a PEND-16 (PRD 73.12) |
+| DEC-1610-05 | **Nome exibido: Safrion**. "Do Talhão à O.S." fica como nome do PRD; logotipo em SVG quando houver | PEND-DS-04 (PRD 74.12) |
+| DEC-1610-06 | **Propostas do design system aceitas**, sem modo escuro por enquanto | PEND-DS-01 a 15 (PRD 74.12) |
+| DEC-1610-07 | **Relato de problema:**<ul><li>alternativa "não consigo anexar a imagem";</li><li>prints guardados por 180 dias após o encerramento, ou apagados a pedido.</li></ul> | PEND-FB-01 e 02 (PRD 75.8) |
+| DEC-1610-08 | **Equipe pequena com meta ligada a remuneração variável:** exceção permitida, com revisor posterior obrigatório antes do fechamento | PEND-18 (PRD 73.12) |
+| DEC-1610-09 | **Barra do Mapa volta aos 9 nomes de 26/09:**<ul><li>Carência vira filtro de Colheita;</li><li>Insumos vira filtro de Ordens de serviço;</li><li>talhão sem laudo aparece "Sem laudo", em cinza.</li></ul> | DEC-0910-36 (PLA-01) |
+| DEC-1610-10 | **Perfil do piloto aceito:**<ul><li>disponibilidade menor declarada;</li><li>atendimento em horário combinado;</li><li>alerta no celular do proprietário;</li><li>24×7 só na produção comercial.</li></ul> | PEND-OP-01 (PRD 75.8) |
+| DEC-1610-11 | **Assistente de IA desligado** até a estimativa de custo por fazenda e mês, com provedores e local de processamento | PEND-IA-01 (PRD 75.8) |
+| DEC-1610-12 | **Método obrigatório para tela e padrão.** Toda mudança de tela segue a skill `.claude/skills/padrao-safrion`: o pedido vale para todas as telas do mesmo tipo, corrige-se na peça comum, registra-se com ID, prova-se com varredura e contraprova e confere-se nas fotos antes de publicar | Pedido de 16/10: "crie uma skill e metodologia de trabalho melhor, porque toda hora eu preciso ficar te corrigindo, sobre padrões e outros" |
+| DEC-1610-13 | **Padrões de lista** (TAB-08, VIS-06, AGR-02 em `padroes-1610.md`):<ul><li>tabela no visual das Atividades do plano, com seta de abrir e ícones de ordenar e filtrar em cada coluna;</li><li>cartões em linha com colunas alinhadas;</li><li>agrupar sem trilha.</li></ul> | Pedidos de 16/10 |
+| DEC-1610-14 | **Cadastros no padrão comum:**<ul><li>formulários só com o essencial à gestão;</li><li>documentos para crédito no módulo Crédito;</li><li>fazendas e talhões numa lista só.</li></ul> | Pedidos de 16/10 |
+
 ## Decisões delegadas de 09/10/2026 (Claude + Codex)
 
 **Nada nesta seção é aprovação do proprietário**; a EXT-01 só registra, com a fonte, uma autorização anterior dele. São decisões dos dois agentes sob a delegação dele (DEC-0910-03); Adrianus pode mudar qualquer linha. Só entram como decididas as que têm acordo escrito do Codex, com o limite citado; as demais estão em "Pendentes de revisão do Codex", sem aprovação por silêncio. O PRD canônico fica inalterado até a conclusão de todas as implantações atuais; depois, compara-se e muda-se só o necessário, preservando IDs e requisitos (DEC-0910-06).

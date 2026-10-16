@@ -45,3 +45,7 @@ Decisão do proprietário no chat em 09/10/2026: "ok, padronize todo esse design
 - uma ação primária por tela;
 - alvo de toque de 44 × 44 px;
 - WCAG 2.2 AA nos fluxos críticos (NFR-09).
+
+## Método obrigatório (16/10/2026)
+
+Toda mudança de tela, componente ou texto de interface segue a skill [`padrao-safrion`](../../.claude/skills/padrao-safrion/SKILL.md) (DEC-1610-12). O pedido do proprietário sobre uma tela vale para todas as do mesmo tipo e é corrigido na peça comum, com ID, varredura, contraprova e fotos conferidas antes de publicar.
