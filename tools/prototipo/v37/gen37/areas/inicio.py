@@ -784,17 +784,18 @@ function cusReal(t){ return cusTalhao(M,t,OSN.filter(osSaf)); }
 const FASES=['A liberar','Liberadas','Em execução','Em conferência','Encerradas'];
 const FASEC={'A liberar':'gray','Liberadas':'blue','Em execução':'ok','Em conferência':'yellow','Encerradas':'gray'};
 const FASE1={'Liberadas':'Liberada','Encerradas':'Encerrada'};
-function osAb(os){ return os.filter(o=>o.fase!=='Encerradas'); }
+function osAb(os){ return os.filter(o=>o.fase!=='Encerradas'&&o.fase!=='Canceladas'); }   // abertas: sem Encerradas nem Canceladas (Codex 6216014054: cancelada não entra no Avanço nem nos números)
+function osSemAb(os){ return os.length&&os.every(o=>o.fase==='Canceladas')?'cancelada':'encerrada'; }   // rótulo quando não há ordem aberta
 function osImp(o){ return o.selos.some(s=>s[1]==='red'); }
 function osCls(t,f){ const os=ordsOf(t,f.fase); if(!os.length) return {c:'none',l:'sem ordem'+(f.fase==='Todas'?'':' na fase')};
   const mais=(n)=>n>1?' · +'+(n-1):'';
   if(f.ver==='Atrasos'){ const c=worstC(os.map(o=>PZC[o.pz])); const o=os.find(x=>PZC[x.pz]===c); return {c,l:o.id+' · '+o.pz+mais(os.length)}; }
   const ab=osAb(os);
-  if(f.ver==='Impedimentos'){ if(!ab.length) return {c:'none',l:'encerrada'}; const im=ab.filter(osImp), pe=ab.filter(o=>!osImp(o)&&o.selos.length);
+  if(f.ver==='Impedimentos'){ if(!ab.length) return {c:'none',l:osSemAb(os)}; const im=ab.filter(osImp), pe=ab.filter(o=>!osImp(o)&&o.selos.length);
     if(im.length) return {c:'red',l:im[0].id+' · '+im[0].selos.find(s=>s[1]==='red')[0].toLowerCase()+mais(im.length)};
     if(pe.length) return {c:'yellow',l:pe[0].id+' · '+pe[0].selos[0][0].toLowerCase()+mais(pe.length)};
     return {c:'ok',l:'sem impedimento'}; }
-  if(f.ver==='Avanço'){ const xs=ab.filter(o=>o.area>0); if(!xs.length) return {c:'none',l:ab.length?'sem área a executar':'encerrada'};
+  if(f.ver==='Avanço'){ const xs=ab.filter(o=>o.area>0); if(!xs.length) return {c:'none',l:ab.length?'sem área a executar':osSemAb(os)};
     const a=xs.reduce((s,o)=>s+o.area,0), r=xs.reduce((s,o)=>s+Math.min(o.rz||0,o.area),0), p=r/a*100;
     return {c:p<=0?'gray':(p>=99.95?'good':'lime'),l:nfx(r,r%1?1:0)+'/'+nfx(a)+' ha · '+nfx(p,0)+' %'+(xs.length>1?' · '+xs.length+' ordens':'')}; }
   const n={}; os.forEach(o=>{ n[o.fase]=(n[o.fase]||0)+1; }); const fs=FASES.filter(x=>n[x]); const f0=fs.find(x=>x!=='Encerradas')||fs[0]||'';
