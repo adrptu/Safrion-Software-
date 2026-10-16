@@ -39,14 +39,25 @@ OK    L7 · nenhuma leitura: Posição indisponível (nunca o centro do talhão)
 OK    L8 · salto impossível confirmado pela leitura seguinte coerente: suspeita vira posição, a seguinte é a atual
 OK    L9 · salto isolado (a seguinte volta para perto): a suspeita é descartada
 OK    L10 · mesmo instante observado com outro id na mesma fonte: o segundo não troca a posição
-# P · telemetria > app de campo > última posição; pausa informada não é "sem sinal"
+OK    L6c · texto da idade abaixo de 1 min: há menos de 1 min
+OK    L11 · R2 · leitura com o mesmo instante observado da suspeita: sem divisão por zero; não confirma nem descarta; a suspeita segue pendente · atual c · suspeita s
+OK    L12 · R2 · leitura observada em 25 s, entre a aceita (20) e a suspeita (30): avança a posição aceita, não confirma a suspeita (Δt negativo nunca entra), s30 fora do rastro · ['a', 'b', 'c', 't']
+OK    L13 · R2 · mesma situação do L12 com a ordem de chegada invertida: mesmo estado final (nunca ordenar por chegada)
+OK    L14 · R2 · depois do L12, leitura de 40 s coerente com a suspeita: confirma a suspeita (Δt = 10 s)
+# P · posição (telemetria > app > última válida) e estado operacional em saídas separadas; sem posição presumida
 OK    P1 · telemetria e app atuais: vale a telemetria
 OK    P2 · telemetria velha (300 s) e app atual: vale o app (troca marcada no rastro)
 OK    P3 · as duas velhas: a mais recente, como Sem sinal
 OK    P4 · telemetria desconectada e sem app: "Sem fonte" com a última posição (visual de sem sinal)
-OK    P5 · app em pausa informada (aparelho com sinal): "Parada · pausa", não "Sem sinal"
-OK    P6 · app em pausa mas sem sinal do aparelho: volta a ser Sem sinal
+OK    P5 · R2 (oráculo corrigido) · pausa informada há 40 min com o app conversando: estado "Parada · pausa" e posição = última leitura válida com hora e idade, sem chamar de atual · {'posicao': ('app', 'Última posição há 40 min · envio suspenso na pausa'), 'estado': 'Parada · pausa desde 11:02 (app)', 'aviso': None}
+OK    P6 · R2 (oráculo corrigido) · mesma pausa com o app sem sinal: posição "Sem sinal há 40 min" e estado só como última informação · {'posicao': ('app', 'Sem sinal há 40 min'), 'estado': 'Última informação: Parada · pausa desde 11:02 (app) · sem sinal', 'aviso': None}
 OK    P7 · nenhuma fonte com leitura: Posição indisponível
+OK    P8 · R2 · pausa informada sem nenhuma leitura: estado "Parada · pausa"; posição indisponível (nada presumido) · {'posicao': (None, 'Posição indisponível'), 'estado': 'Parada · pausa desde 11:02 (app)', 'aviso': None}
+OK    P9 · R2 · telemetria desconectada com leitura de 10 s (dentro do limite): não é atual
+OK    P10 · R2 · conectada e online são eixos distintos: sem sinal do aparelho ≠ fonte desconectada; leitura de 30 s segue atual até o limite · [('telemetria', 'Sem sinal há 5 min'), ('telemetria', 'Sem fonte: telemetria desconectada · última há 5 min'), ('telemetria', 'Atual')]
+OK    P11 · R2 · compartilhamento do app encerrado pelo operador: posição e estado dessa fonte deixam de ser usados · {'posicao': (None, 'Posição indisponível · compartilhamento encerrado'), 'estado': 'Desconhecido', 'aviso': None}
+OK    P12 · R2 · O.S. impedida sem fonte da máquina: estado Desconhecido (o selo da O.S. não prova máquina parada); posição indisponível · {'posicao': (None, 'Posição indisponível'), 'estado': 'Desconhecido', 'aviso': None}
+OK    P13 · R2 · leitura real contradiz o selo de impedimento: estado da leitura, aviso para conferir, selo da O.S. intacto · {'posicao': ('telemetria', 'Atual'), 'estado': 'Trabalhando (telemetria)', 'aviso': 'Leitura contradiz o impedimento da O.S. · conferir'}
 # V · equipamento do fornecedor × ativo do cadastro (série normalizada; nome nunca vincula)
 OK    V1 · série igual (caixa diferente), mesmo fabricante e modelo: vinculado sozinho
 OK    V2 · série com espaços no lugar dos hífens: mesma série normalizada
@@ -56,9 +67,25 @@ OK    V5 · mesmo nome "Trator T1", série diferente: nunca vincula por nome
 OK    V6 · série repetida no cadastro: confirmar, nunca escolher sozinho
 OK    V7 · fornecedor sem nº de série: confirmar
 OK    V8 · série igual de outro fabricante: confirmar
-# K · um ativo em duas O.S. Em execução incompatíveis = conflito (sem escolher uma); mesmo agrupador não é conflito
+# K · componente físico em duas O.S. Em execução = conflito; só some no MESMO conjunto do MESMO grupo vigente, sem divergência
 OK    K1 · PJ na OS-0421 e na OS-0424, as duas Em execução: conflito com as duas origens
-OK    K2 · as mesmas O.S. no mesmo agrupador (OS-LOTE): sem conflito
+OK    K2 · R2 (oráculo corrigido) · o mesmo PJ ligado a dois tratores (T03 e T04) continua conflito mesmo com as duas O.S. no grupo G1 · [('T03', 'PJ'), ('T04', 'PJ')]
 OK    K3 · O.S. A liberar não ocupa o ativo no mapa
+OK    K4 · R2 · mesmo conjunto (T03 + PJ) nas duas O.S. do G1, programação do grupo em sequência (06–09, 09–11): sem conflito e um marcador
+OK    K5 · R2 · mesmo conjunto e mesmo grupo, mas uma O.S. com programação de outra fonte (alocação antiga ou troca): conflito
+OK    K6 · R2 · mesmo conjunto e mesmo grupo com blocos sobrepostos (06–10 e 09–11): conflito
+OK    K7 · R2 · dois conjuntos distintos (T03 + PJ e T04 + DI) no mesmo grupo: dois marcadores, nunca um
+# Z · pausa congela só a posição EXIBIDA no mapa, com hora e idade próprias; lista e painel seguem a leitura corrente
+OK    Z1 · modo ativo: mapa, lista e painel com a mesma fonte, hora e idade (M15)
+OK    Z2 · pausado: o mapa mostra a posição congelada com a hora dela (1000) e o selo "pausado"; a lista segue a leitura corrente (1060); nunca a coordenada congelada com a hora mais nova
+OK    Z3 · pausado: a idade da posição congelada continua crescendo (65 s → 95 s); a pausa não congela o relógio
+OK    Z4 · Retomar: o mapa volta à leitura corrente
+OK    Z5 · O.S. encerrada ou perfil revogado durante a pausa: mapa e lista sem dado, com recuperação escrita
+OK    Z6 · 21 marcadores no mesmo ponto com o foco no m07: um grupo de 20 sem o m07; o m07 fica solto e identificável
+# X · contraprova: as funções da R1 (87cb077) reproduzem os defeitos do comentário 6224128496
+OK    X1 · R1 com a entrada do L11 (mesmo instante da suspeita): divisão por zero · DivisionByZero
+OK    X2 · R1 com a entrada do L12 (observada em 25 s): aceita a suspeita de 30 s por Δt negativo e termina com atual = t25 e s30 no rastro
+OK    X3 · R1 com pausa sem leitura (obs None): devolve "posição da pausa" (posição presumida)
+OK    X4 · R1 com o PJ em dois tratores e o mesmo grupo G1: o conflito some
 
-54 OK · 0 falhas
+79 OK · 0 falhas

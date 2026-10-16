@@ -7,9 +7,13 @@ Confere, contra as fontes do protótipo (tools/prototipo/v37/gen37), os números
   E  projeção de preparo do EX-38 (tanque ÷ vazão) e "quanto falta" no rendimento de referência, rotulados como projeção;
   G  plausibilidade do percurso sintético (passadas dentro da geometria demonstrativa, tempo × área ÷ (largura × velocidade));
   L  oráculo do contrato de leitura: ordem pelo instante observado, duplicata, atrasada, futura, inválida, salto impossível, idade;
-  P  prioridade de fontes (telemetria > app de campo > última posição) e pausa informada;
+     a suspeita só se decide por leitura com Δt observado estritamente positivo (R2: L11–L14);
+  P  posição e estado operacional em saídas separadas: prioridade de fontes (telemetria > app de campo > última posição),
+     pausa informada sem posição presumida, desconectada ≠ sem sinal do aparelho, selo da O.S. não é estado da máquina (R2: P8–P13);
   V  vínculo do equipamento do fornecedor ao ativo por fabricante + nº de série normalizado (nunca por nome);
-  K  conflito de ativo em duas O.S. Em execução (agrupador compatível não é conflito).
+  K  conflito por componente físico: só some no MESMO conjunto do MESMO grupo vigente, sem divergência nem sobreposição (R2: K2 corrigido, K4–K7);
+  Z  pausa da animação: posição exibida congelada com hora e idade próprias, lista com a leitura corrente, foco fora do grupo (R2);
+  X  contraprova: as funções da R1 (87cb077) reproduzem os quatro defeitos apontados no comentário 6224128496.
 Nada aqui exercita o navegador, o banco ou um fornecedor real. A posição simulada nunca produz área, consumo nem fase.
 Uso: python3 -B docs/integracao/V71/mapa-frota/mapa_frota_chk.py   (sai 0 com todos OK; 1 com falha)
 """
@@ -206,10 +210,13 @@ def processar(recebidas):
         if atual is not None and r['obs'] == atual['obs']:
             recus.append((r['id'], 'mesmo instante'))
             continue
-        if atual is not None and r['obs'] < atual['obs']:
+        if atual is not None and r['obs'] < atual['obs']:   # atrasada: observada antes da posição aceita; só completa o rastro
             rastro.append(dict(r, atrasada=True))
             continue
-        if susp is not None:   # a leitura anterior saltou: esta decide
+        if susp is not None and r['obs'] == susp['obs']:    # Δt = 0: não confirma nem descarta a suspeita
+            recus.append((r['id'], 'mesmo instante da suspeita'))
+            continue
+        if susp is not None and r['obs'] > susp['obs']:     # Δt > 0 (pelo observado): só esta leitura decide a suspeita
             v_s = dist_m(susp, r) / D(r['obs'] - susp['obs']) * D('3.6')
             if v_s <= VMAX:
                 rastro.append(susp)
@@ -217,10 +224,14 @@ def processar(recebidas):
             else:
                 recus.append((susp['id'], 'salto descartado'))
             susp = None
+        # aqui r['obs'] > atual['obs'] (Δt > 0). Com suspeita pendente mais nova, r é anterior a ela: compara-se só com a aceita
         if atual is not None:
             v = dist_m(atual, r) / D(r['obs'] - atual['obs']) * D('3.6')
             if v > VMAX:
-                susp = r
+                if susp is None:
+                    susp = r
+                else:
+                    recus.append((r['id'], 'salto anterior à suspeita pendente'))
                 continue
         rastro.append(r)
         atual = r
@@ -229,6 +240,8 @@ def processar(recebidas):
 
 def idade_txt(seg):
     m = seg // 60
+    if m == 0:
+        return 'há menos de 1 min'
     return f'há {m} min' if m < 60 else f'há {m // 60} h {m % 60:02d} min'
 
 
@@ -271,41 +284,107 @@ res = processar(seq + [R_('s', 30, 31, dlat=salto), R_('u', 40, 41, dlat=3 * m10
 chk('L9', 'salto isolado (a seguinte volta para perto): a suspeita é descartada', res['atual']['id'] == 'u' and ('s', 'salto descartado') in res['recus'])
 res = processar(seq + [R_('c2', 20, 22, dlat=5 * m10)])
 chk('L10', 'mesmo instante observado com outro id na mesma fonte: o segundo não troca a posição', res['atual']['id'] == 'c' and ('c2', 'mesmo instante') in res['recus'])
+chk('L6c', 'texto da idade abaixo de 1 min: há menos de 1 min', idade_txt(10) == 'há menos de 1 min')
+s30 = R_('s', 30, 31, dlat=salto)
+L11_IN = seq + [s30, R_('t', 30, 32, dlat=salto + m10)]
+try:
+    res, erro = processar(L11_IN), ''
+except ArithmeticError as e:
+    res, erro = None, type(e).__name__
+chk('L11', 'R2 · leitura com o mesmo instante observado da suspeita: sem divisão por zero; não confirma nem descarta; a suspeita segue pendente',
+    not erro and res['atual']['id'] == 'c' and res['susp']['id'] == 's' and ('t', 'mesmo instante da suspeita') in res['recus'], erro or 'atual c · suspeita s')
+L12_IN = seq + [s30, R_('t', 25, 32, dlat=D('2.5') * m10)]
+res = processar(L12_IN)
+chk('L12', 'R2 · leitura observada em 25 s, entre a aceita (20) e a suspeita (30): avança a posição aceita, não confirma a suspeita (Δt negativo nunca entra), s30 fora do rastro',
+    res['atual']['id'] == 't' and res['susp']['id'] == 's' and [x['id'] for x in res['rastro']] == ['a', 'b', 'c', 't'], [x['id'] for x in res['rastro']])
+res2 = processar(seq + [R_('t', 25, 22, dlat=D('2.5') * m10), s30])
+chk('L13', 'R2 · mesma situação do L12 com a ordem de chegada invertida: mesmo estado final (nunca ordenar por chegada)',
+    res2['atual']['id'] == res['atual']['id'] and res2['susp']['id'] == res['susp']['id'] and [x['id'] for x in res2['rastro']] == [x['id'] for x in res['rastro']])
+res = processar(L12_IN + [R_('u', 40, 41, dlat=salto + m10)])
+chk('L14', 'R2 · depois do L12, leitura de 40 s coerente com a suspeita: confirma a suspeita (Δt = 10 s)',
+    res['atual']['id'] == 'u' and res['susp'] is None and [x['id'] for x in res['rastro']] == ['a', 'b', 'c', 't', 's', 'u'])
 
-# ------------------------------------------------------------------ P · prioridade de fontes por máquina
-print('# P · telemetria > app de campo > última posição; pausa informada não é "sem sinal"')
+# ------------------------------------------------------------------ P · posição e estado operacional por máquina
+print('# P · posição (telemetria > app > última válida) e estado operacional em saídas separadas; sem posição presumida')
 PRIO = ['telemetria', 'app']
 
 
-def escolher(fontes, agora):
-    """fontes: {tipo: dict(obs=, limite=, conectada=True, pausa=None)}; devolve (fonte, rótulo)."""
-    atuais = [t for t in PRIO if t in fontes and fontes[t].get('conectada', True) and fontes[t]['obs'] is not None
-              and agora - fontes[t]['obs'] <= fontes[t]['limite']]
-    for t in PRIO:
-        f = fontes.get(t)
-        if f and f.get('pausa') is not None and f.get('online', True) and t == 'app' and not atuais:
-            return ('app', 'Parada · pausa desde ' + f['pausa'] + ' · posição da pausa')
+def avaliar(fontes, agora, os_selo=None):
+    """fontes: {tipo: dict(obs=instante da última leitura válida ou None, limite=s, conectada=True, online=True, revogada=False,
+    estado=estado informado pela fonte ou None)}.
+    conectada: a integração está autorizada (desconectar = False). online: o aparelho ou a fonte conversa agora. Eixos distintos.
+    revogada: o titular encerrou o compartilhamento (app); os dados dessa fonte deixam de ser usados.
+    os_selo: selo da O.S. (eixo 1); nunca vira estado da máquina.
+    Devolve dict(posicao=(fonte, rótulo), estado=rótulo, aviso=rótulo ou None)."""
+    vivas = {t: f for t, f in fontes.items() if not f.get('revogada')}
+    revog = [t for t, f in fontes.items() if f.get('revogada')]
+    # posição: só de leitura válida; desconectada nunca é atual; a idade decide "atual" (online não entra na posição)
+    atuais = [t for t in PRIO if t in vivas and vivas[t].get('conectada', True) and vivas[t]['obs'] is not None
+              and agora - vivas[t]['obs'] <= vivas[t]['limite']]
     if atuais:
-        return (atuais[0], 'Atual')
-    ult = [(f['obs'], t) for t, f in fontes.items() if f['obs'] is not None]
-    if not ult:
-        return (None, 'Posição indisponível')
-    obs, t = max(ult)
-    if not fontes[t].get('conectada', True):
-        return (t, 'Sem fonte: ' + t + ' desconectada · última ' + idade_txt(agora - obs))
-    return (t, 'Sem sinal ' + idade_txt(agora - obs))
+        pos = (atuais[0], 'Atual')
+    else:
+        ult = [(f['obs'], t) for t, f in vivas.items() if f['obs'] is not None]
+        if not ult:
+            pos = (None, 'Posição indisponível' + (' · compartilhamento encerrado' if revog else ''))
+        else:
+            obs, t = max(ult)
+            f = vivas[t]
+            if not f.get('conectada', True):
+                pos = (t, 'Sem fonte: ' + t + ' desconectada · última ' + idade_txt(agora - obs))
+            elif f.get('online', True) and str(f.get('estado') or '').startswith('Parada · pausa'):
+                pos = (t, 'Última posição ' + idade_txt(agora - obs) + ' · envio suspenso na pausa')
+            else:
+                pos = (t, 'Sem sinal ' + idade_txt(agora - obs))
+    # estado operacional: da fonte da máquina que informa estado e está conectada; se ela não conversa agora, é "última informação"
+    est = 'Desconhecido'
+    for t in PRIO:
+        f = vivas.get(t)
+        if f and f.get('estado') and f.get('conectada', True):
+            est = (f['estado'] + ' (' + t + ')') if f.get('online', True) else ('Última informação: ' + f['estado'] + ' (' + t + ') · sem sinal')
+            break
+    aviso = None
+    if os_selo and str(os_selo).startswith('Impedida') and est.startswith('Trabalhando'):
+        aviso = 'Leitura contradiz o impedimento da O.S. · conferir'
+    return dict(posicao=pos, estado=est, aviso=aviso)
 
 
-chk('P1', 'telemetria e app atuais: vale a telemetria', escolher({'telemetria': dict(obs=100, limite=60), 'app': dict(obs=100, limite=120)}, 110) == ('telemetria', 'Atual'))
-chk('P2', 'telemetria velha (300 s) e app atual: vale o app (troca marcada no rastro)', escolher({'telemetria': dict(obs=0, limite=60), 'app': dict(obs=250, limite=120)}, 300) == ('app', 'Atual'))
-chk('P3', 'as duas velhas: a mais recente, como Sem sinal', escolher({'telemetria': dict(obs=0, limite=60), 'app': dict(obs=100, limite=120)}, 300) == ('app', 'Sem sinal há 3 min'))
+def pos(fontes, agora):
+    return avaliar(fontes, agora)['posicao']
+
+
+chk('P1', 'telemetria e app atuais: vale a telemetria', pos({'telemetria': dict(obs=100, limite=60), 'app': dict(obs=100, limite=120)}, 110) == ('telemetria', 'Atual'))
+chk('P2', 'telemetria velha (300 s) e app atual: vale o app (troca marcada no rastro)', pos({'telemetria': dict(obs=0, limite=60), 'app': dict(obs=250, limite=120)}, 300) == ('app', 'Atual'))
+chk('P3', 'as duas velhas: a mais recente, como Sem sinal', pos({'telemetria': dict(obs=0, limite=60), 'app': dict(obs=100, limite=120)}, 300) == ('app', 'Sem sinal há 3 min'))
 chk('P4', 'telemetria desconectada e sem app: "Sem fonte" com a última posição (visual de sem sinal)',
-    escolher({'telemetria': dict(obs=0, limite=60, conectada=False)}, 600) == ('telemetria', 'Sem fonte: telemetria desconectada · última há 10 min'))
-chk('P5', 'app em pausa informada (aparelho com sinal): "Parada · pausa", não "Sem sinal"',
-    escolher({'app': dict(obs=0, limite=120, pausa='11:02', online=True)}, 2400) == ('app', 'Parada · pausa desde 11:02 · posição da pausa'))
-chk('P6', 'app em pausa mas sem sinal do aparelho: volta a ser Sem sinal',
-    escolher({'app': dict(obs=0, limite=120, pausa='11:02', online=False)}, 2400) == ('app', 'Sem sinal há 40 min'))
-chk('P7', 'nenhuma fonte com leitura: Posição indisponível', escolher({'telemetria': dict(obs=None, limite=60)}, 10) == (None, 'Posição indisponível'))
+    pos({'telemetria': dict(obs=0, limite=60, conectada=False)}, 600) == ('telemetria', 'Sem fonte: telemetria desconectada · última há 10 min'))
+a = avaliar({'app': dict(obs=0, limite=120, online=True, estado='Parada · pausa desde 11:02')}, 2400)
+chk('P5', 'R2 (oráculo corrigido) · pausa informada há 40 min com o app conversando: estado "Parada · pausa" e posição = última leitura válida com hora e idade, sem chamar de atual',
+    a['estado'] == 'Parada · pausa desde 11:02 (app)' and a['posicao'] == ('app', 'Última posição há 40 min · envio suspenso na pausa'), a)
+a = avaliar({'app': dict(obs=0, limite=120, online=False, estado='Parada · pausa desde 11:02')}, 2400)
+chk('P6', 'R2 (oráculo corrigido) · mesma pausa com o app sem sinal: posição "Sem sinal há 40 min" e estado só como última informação',
+    a['posicao'] == ('app', 'Sem sinal há 40 min') and a['estado'] == 'Última informação: Parada · pausa desde 11:02 (app) · sem sinal', a)
+chk('P7', 'nenhuma fonte com leitura: Posição indisponível', pos({'telemetria': dict(obs=None, limite=60)}, 10) == (None, 'Posição indisponível'))
+a = avaliar({'app': dict(obs=None, limite=120, online=True, estado='Parada · pausa desde 11:02')}, 2400)
+chk('P8', 'R2 · pausa informada sem nenhuma leitura: estado "Parada · pausa"; posição indisponível (nada presumido)',
+    a['posicao'] == (None, 'Posição indisponível') and a['estado'] == 'Parada · pausa desde 11:02 (app)', a)
+chk('P9', 'R2 · telemetria desconectada com leitura de 10 s (dentro do limite): não é atual',
+    pos({'telemetria': dict(obs=590, limite=60, conectada=False)}, 600) == ('telemetria', 'Sem fonte: telemetria desconectada · última há menos de 1 min'))
+p_on = pos({'telemetria': dict(obs=300, limite=60, conectada=True, online=False)}, 600)
+p_cx = pos({'telemetria': dict(obs=300, limite=60, conectada=False, online=True)}, 600)
+p_30 = pos({'telemetria': dict(obs=570, limite=60, conectada=True, online=False)}, 600)
+chk('P10', 'R2 · conectada e online são eixos distintos: sem sinal do aparelho ≠ fonte desconectada; leitura de 30 s segue atual até o limite',
+    p_on == ('telemetria', 'Sem sinal há 5 min') and p_cx == ('telemetria', 'Sem fonte: telemetria desconectada · última há 5 min') and p_on != p_cx
+    and p_30 == ('telemetria', 'Atual'), [p_on, p_cx, p_30])
+a = avaliar({'app': dict(obs=590, limite=120, revogada=True, estado='Trabalhando')}, 600)
+chk('P11', 'R2 · compartilhamento do app encerrado pelo operador: posição e estado dessa fonte deixam de ser usados',
+    a['posicao'] == (None, 'Posição indisponível · compartilhamento encerrado') and a['estado'] == 'Desconhecido', a)
+a = avaliar({}, 600, os_selo='Impedida · ativo bloqueado')
+chk('P12', 'R2 · O.S. impedida sem fonte da máquina: estado Desconhecido (o selo da O.S. não prova máquina parada); posição indisponível',
+    a['estado'] == 'Desconhecido' and a['posicao'] == (None, 'Posição indisponível'), a)
+a = avaliar({'telemetria': dict(obs=595, limite=60, estado='Trabalhando')}, 600, os_selo='Impedida · ativo bloqueado')
+chk('P13', 'R2 · leitura real contradiz o selo de impedimento: estado da leitura, aviso para conferir, selo da O.S. intacto',
+    a['estado'] == 'Trabalhando (telemetria)' and a['aviso'] == 'Leitura contradiz o impedimento da O.S. · conferir' and a['posicao'] == ('telemetria', 'Atual'), a)
 
 # ------------------------------------------------------------------ V · vínculo por fabricante + nº de série
 print('# V · equipamento do fornecedor × ativo do cadastro (série normalizada; nome nunca vincula)')
@@ -347,11 +426,169 @@ chk('V6', 'série repetida no cadastro: confirmar, nunca escolher sozinho', vinc
 chk('V7', 'fornecedor sem nº de série: confirmar', vincular(dict(fab='John Deere', modelo='6M 155', serie=''))[0] == 'confirmar')
 chk('V8', 'série igual de outro fabricante: confirmar', vincular(dict(fab='Case IH', modelo='7719', serie='SINT-MF-7719-0002')) == ('confirmar', 'fabricante diferente'))
 
-# ------------------------------------------------------------------ K · conflito de ativo entre O.S. Em execução
-print('# K · um ativo em duas O.S. Em execução incompatíveis = conflito (sem escolher uma); mesmo agrupador não é conflito')
+# ------------------------------------------------------------------ K · conflito por componente físico entre O.S. Em execução
+print('# K · componente físico em duas O.S. Em execução = conflito; só some no MESMO conjunto do MESMO grupo vigente, sem divergência')
 
 
-def conflitos(conjs, etapa, grupo):
+def conflitos(conjs, etapa, grupos):
+    """conjs: {os: dict(maquina, implemento, prog: grupo|alocacao|troca, blocos=[(ini, fim)])}.
+    grupos: {gid: dict(ids, maquina, implemento)} com a composição e a programação vigentes (programação explícita por O.S., PR #88).
+    O conflito só é suprimido quando todas as O.S. do componente estão no mesmo grupo, com o conjunto do grupo (máquina E implemento),
+    programação vinda do grupo e blocos sem sobreposição. ID de grupo igual não basta."""
+    ex = {o: c for o, c in conjs.items() if etapa.get(o) == 'Em execução'}
+    por = {}
+    for o, c in ex.items():
+        for r in (c['maquina'], c['implemento']):
+            if r:
+                por.setdefault(r, []).append(o)
+    out = {}
+    for r, oss in por.items():
+        if len(oss) < 2:
+            continue
+        gids = {next((g for g, G in grupos.items() if o in G['ids']), None) for o in oss}
+        compat = False
+        if len(gids) == 1 and None not in gids:
+            G = grupos[next(iter(gids))]
+            mesmo = all(ex[o]['maquina'] == G['maquina'] and ex[o]['implemento'] == G['implemento'] and ex[o]['prog'] == 'grupo' for o in oss)
+            bl = sorted(b for o in oss for b in ex[o]['blocos'])
+            compat = mesmo and all(bl[i][1] <= bl[i + 1][0] for i in range(len(bl) - 1))
+        if not compat:
+            out[r] = sorted(oss)
+    return out
+
+
+def marcadores(conjs, etapa):
+    """um marcador por conjunto físico distinto (máquina + implemento); dois conjuntos distintos nunca viram um."""
+    return sorted({(c['maquina'], c['implemento']) for o, c in conjs.items() if etapa.get(o) == 'Em execução'})
+
+
+def C_(m, i, prog='alocacao', blocos=((6, 11),)):
+    return dict(maquina=m, implemento=i, prog=prog, blocos=list(blocos))
+
+
+EX2 = {'OS-0421': 'Em execução', 'OS-0424': 'Em execução', 'OS-0430': 'A liberar'}
+cj = {'OS-0421': C_('T03', 'PJ'), 'OS-0424': C_('T04', 'PJ'), 'OS-0430': C_('T03', 'PJ')}
+chk('K1', 'PJ na OS-0421 e na OS-0424, as duas Em execução: conflito com as duas origens',
+    conflitos(cj, EX2, {}) == {'PJ': ['OS-0421', 'OS-0424']})
+cjg = {'OS-0421': C_('T03', 'PJ', 'grupo', [(6, 9)]), 'OS-0424': C_('T04', 'PJ', 'grupo', [(9, 11)])}
+G1 = {'G1': dict(ids=['OS-0421', 'OS-0424'], maquina='T03', implemento='PJ')}
+chk('K2', 'R2 (oráculo corrigido) · o mesmo PJ ligado a dois tratores (T03 e T04) continua conflito mesmo com as duas O.S. no grupo G1',
+    conflitos(cjg, EX2, G1) == {'PJ': ['OS-0421', 'OS-0424']} and len(marcadores(cjg, EX2)) == 2, marcadores(cjg, EX2))
+chk('K3', 'O.S. A liberar não ocupa o ativo no mapa', conflitos(cj, {'OS-0421': 'Em execução', 'OS-0430': 'A liberar'}, {}) == {})
+cj4 = {'OS-0421': C_('T03', 'PJ', 'grupo', [(6, 9)]), 'OS-0424': C_('T03', 'PJ', 'grupo', [(9, 11)])}
+chk('K4', 'R2 · mesmo conjunto (T03 + PJ) nas duas O.S. do G1, programação do grupo em sequência (06–09, 09–11): sem conflito e um marcador',
+    conflitos(cj4, EX2, G1) == {} and marcadores(cj4, EX2) == [('T03', 'PJ')])
+cj5 = {'OS-0421': C_('T03', 'PJ', 'grupo', [(6, 9)]), 'OS-0424': C_('T03', 'PJ', 'alocacao', [(9, 11)])}
+chk('K5', 'R2 · mesmo conjunto e mesmo grupo, mas uma O.S. com programação de outra fonte (alocação antiga ou troca): conflito',
+    conflitos(cj5, EX2, G1) == {'PJ': ['OS-0421', 'OS-0424'], 'T03': ['OS-0421', 'OS-0424']})
+cj6 = {'OS-0421': C_('T03', 'PJ', 'grupo', [(6, 10)]), 'OS-0424': C_('T03', 'PJ', 'grupo', [(9, 11)])}
+chk('K6', 'R2 · mesmo conjunto e mesmo grupo com blocos sobrepostos (06–10 e 09–11): conflito',
+    conflitos(cj6, EX2, G1) == {'PJ': ['OS-0421', 'OS-0424'], 'T03': ['OS-0421', 'OS-0424']})
+cj7 = {'OS-0421': C_('T03', 'PJ', 'grupo', [(6, 9)]), 'OS-0424': C_('T04', 'DI', 'grupo', [(9, 11)])}
+chk('K7', 'R2 · dois conjuntos distintos (T03 + PJ e T04 + DI) no mesmo grupo: dois marcadores, nunca um',
+    marcadores(cj7, EX2) == [('T03', 'PJ'), ('T04', 'DI')])
+
+# ------------------------------------------------------------------ Z · pausa da animação (exibição) × leitura corrente
+print('# Z · pausa congela só a posição EXIBIDA no mapa, com hora e idade próprias; lista e painel seguem a leitura corrente')
+
+
+def exibir(modo, congelada, corrente, agora, os_em_execucao=True, perfil_ve=True):
+    """modo: ativo | pausado. congelada/corrente: dict(fonte, obs). Devolve dict(mapa, lista, aviso)."""
+    if not os_em_execucao:
+        return dict(mapa=None, lista=None, aviso='A O.S. saiu de Em execução · dados desta máquina retirados · Abrir O.S.')
+    if not perfil_ve:
+        return dict(mapa=None, lista=None, aviso='Seu acesso à localização foi retirado')
+    lista = dict(fonte=corrente['fonte'], hora=corrente['obs'], idade=agora - corrente['obs'], selo='')
+    if modo == 'ativo':
+        return dict(mapa=dict(lista), lista=lista, aviso=None)
+    return dict(mapa=dict(fonte=congelada['fonte'], hora=congelada['obs'], idade=agora - congelada['obs'], selo='pausado'), lista=lista, aviso=None)
+
+
+def agrupar(pts, foco=None, sel=None, lim=28):
+    """pts: [(id, x_px, y_px)]. O marcador com foco e o selecionado nunca entram num grupo."""
+    livres = [p for p in pts if p[0] not in (foco, sel)]
+    grupos, usados = [], set()
+    for p in livres:
+        if p[0] in usados:
+            continue
+        g = [q for q in livres if q[0] not in usados and (q[1] - p[1]) ** 2 + (q[2] - p[2]) ** 2 < lim * lim]
+        usados.update(q[0] for q in g)
+        grupos.append([q[0] for q in g])
+    return grupos, [p[0] for p in pts if p[0] in (foco, sel)]
+
+
+cong, corr = dict(fonte='simulação', obs=1000), dict(fonte='simulação', obs=1060)
+e = exibir('ativo', cong, corr, 1065)
+chk('Z1', 'modo ativo: mapa, lista e painel com a mesma fonte, hora e idade (M15)', e['mapa'] == e['lista'])
+e = exibir('pausado', cong, corr, 1065)
+chk('Z2', 'pausado: o mapa mostra a posição congelada com a hora dela (1000) e o selo "pausado"; a lista segue a leitura corrente (1060); nunca a coordenada congelada com a hora mais nova',
+    e['mapa']['hora'] == 1000 and e['mapa']['selo'] == 'pausado' and e['lista']['hora'] == 1060 and not (e['mapa']['hora'] == 1060 and e['mapa']['selo'] == ''))
+e2 = exibir('pausado', cong, corr, 1095)
+chk('Z3', 'pausado: a idade da posição congelada continua crescendo (65 s → 95 s); a pausa não congela o relógio', e['mapa']['idade'] == 65 and e2['mapa']['idade'] == 95)
+e = exibir('ativo', cong, corr, 1095)
+chk('Z4', 'Retomar: o mapa volta à leitura corrente', e['mapa']['hora'] == 1060 and e['mapa'] == e['lista'])
+e1 = exibir('pausado', cong, corr, 1095, os_em_execucao=False)
+e2 = exibir('pausado', cong, corr, 1095, perfil_ve=False)
+chk('Z5', 'O.S. encerrada ou perfil revogado durante a pausa: mapa e lista sem dado, com recuperação escrita',
+    e1['mapa'] is None and e1['lista'] is None and 'Abrir O.S.' in e1['aviso'] and e2['mapa'] is None and e2['lista'] is None and e2['aviso'])
+gs, soltos = agrupar([('m%02d' % i, 100, 100) for i in range(21)], foco='m07')
+chk('Z6', '21 marcadores no mesmo ponto com o foco no m07: um grupo de 20 sem o m07; o m07 fica solto e identificável',
+    len(gs) == 1 and len(gs[0]) == 20 and 'm07' not in gs[0] and soltos == ['m07'])
+
+# ------------------------------------------------------------------ X · contraprova contra a R1 (87cb077)
+print('# X · contraprova: as funções da R1 (87cb077) reproduzem os defeitos do comentário 6224128496')
+
+
+def _r1_processar(recebidas):
+    atual, rastro, vistos, recus, susp = None, [], set(), [], None
+    for r in recebidas:
+        if r['id'] in vistos:
+            recus.append((r['id'], 'duplicada'))
+            continue
+        vistos.add(r['id'])
+        if not valida(r):
+            recus.append((r['id'], 'inválida'))
+            continue
+        if r['obs'] > r['rec'] + TOL_FUT:
+            recus.append((r['id'], 'futura'))
+            continue
+        if atual is not None and r['obs'] == atual['obs']:
+            recus.append((r['id'], 'mesmo instante'))
+            continue
+        if atual is not None and r['obs'] < atual['obs']:
+            rastro.append(dict(r, atrasada=True))
+            continue
+        if susp is not None:
+            v_s = dist_m(susp, r) / D(r['obs'] - susp['obs']) * D('3.6')
+            if v_s <= VMAX:
+                rastro.append(susp)
+                atual = susp
+            else:
+                recus.append((susp['id'], 'salto descartado'))
+            susp = None
+        if atual is not None:
+            v = dist_m(atual, r) / D(r['obs'] - atual['obs']) * D('3.6')
+            if v > VMAX:
+                susp = r
+                continue
+        rastro.append(r)
+        atual = r
+    return dict(atual=atual, rastro=sorted(rastro, key=lambda x: x['obs']), recus=recus, susp=susp)
+
+
+def _r1_escolher(fontes, agora):
+    atuais = [t for t in PRIO if t in fontes and fontes[t].get('conectada', True) and fontes[t]['obs'] is not None
+              and agora - fontes[t]['obs'] <= fontes[t]['limite']]
+    for t in PRIO:
+        f = fontes.get(t)
+        if f and f.get('pausa') is not None and f.get('online', True) and t == 'app' and not atuais:
+            return ('app', 'Parada · pausa desde ' + f['pausa'] + ' · posição da pausa')
+    if atuais:
+        return (atuais[0], 'Atual')
+    return (None, 'outro')
+
+
+def _r1_conflitos(conjs, etapa, grupo):
     por = {}
     for os_id, rs in conjs.items():
         if etapa.get(os_id) != 'Em execução':
@@ -366,12 +603,20 @@ def conflitos(conjs, etapa, grupo):
     return out
 
 
-cj = {'OS-0421': ['T03', 'PJ'], 'OS-0424': ['T04', 'PJ'], 'OS-0430': ['T03', 'PJ']}
-chk('K1', 'PJ na OS-0421 e na OS-0424, as duas Em execução: conflito com as duas origens',
-    conflitos(cj, {'OS-0421': 'Em execução', 'OS-0424': 'Em execução', 'OS-0430': 'A liberar'}, {}) == {'PJ': ['OS-0421', 'OS-0424']})
-chk('K2', 'as mesmas O.S. no mesmo agrupador (OS-LOTE): sem conflito',
-    conflitos(cj, {'OS-0421': 'Em execução', 'OS-0424': 'Em execução'}, {'OS-0421': 'G1', 'OS-0424': 'G1'}) == {})
-chk('K3', 'O.S. A liberar não ocupa o ativo no mapa', conflitos(cj, {'OS-0421': 'Em execução', 'OS-0430': 'A liberar'}, {}) == {})
+try:
+    _r1_processar(L11_IN)
+    x1 = ''
+except ArithmeticError as e:
+    x1 = type(e).__name__
+chk('X1', 'R1 com a entrada do L11 (mesmo instante da suspeita): divisão por zero', x1 == 'DivisionByZero', x1)
+r1 = _r1_processar(L12_IN)
+chk('X2', 'R1 com a entrada do L12 (observada em 25 s): aceita a suspeita de 30 s por Δt negativo e termina com atual = t25 e s30 no rastro',
+    r1['atual']['id'] == 't' and 's' in [x['id'] for x in r1['rastro']])
+chk('X3', 'R1 com pausa sem leitura (obs None): devolve "posição da pausa" (posição presumida)',
+    _r1_escolher({'app': dict(obs=None, limite=120, pausa='11:02', online=True)}, 2400)[1].endswith('posição da pausa')
+    and _r1_escolher({'app': dict(obs=0, limite=120, pausa='11:02', online=True, conectada=False)}, 2400)[1].endswith('posição da pausa'))
+chk('X4', 'R1 com o PJ em dois tratores e o mesmo grupo G1: o conflito some',
+    _r1_conflitos({'OS-0421': ['T03', 'PJ'], 'OS-0424': ['T04', 'PJ']}, EX2, {'OS-0421': 'G1', 'OS-0424': 'G1'}) == {})
 
 ok = sum(1 for _, x in RES if x)
 print(f'\n{ok} OK · {len(RES) - ok} falhas')

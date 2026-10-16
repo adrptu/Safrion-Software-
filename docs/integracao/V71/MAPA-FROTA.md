@@ -38,19 +38,19 @@
 
 **Pronto quando.**
 
-- M1–M22 (F1), N1–N9 (F2) e T1–T14 (F3a e F3b) passam, cada um na sua fatia e com a contraprova.
+- M1–M24 (F1), N1–N10 (F2) e T1–T14 (F3a e F3b) passam, cada um na sua fatia e com a contraprova.
 - K1–K10 ficam no teto, e nenhum cenário de hoje piora.
-- A conferência em Decimal continua 54/54.
+- A conferência em Decimal continua 79/79: os 54 da R1, com K2, P5 e P6 corrigidos, e 25 casos novos da R2.
 
 ## Acordo curto (AGENTS §3.4)
 
 ```text
 ID / resultado útil / persona: MAPA-FROTA / em 1 clique no Mapa (qualquer função) ou na O.S. em execução, ver onde estão agora os conjuntos das O.S. Em execução, o que fazem (ícone da operação), o estado, a fonte e a idade da posição e quanto falta, e abrir a O.S. com +1 toque; telemetria real pela mesma filosofia / gestor, PCP, agrônomo RT, PCM; operador como fonte e titular do dado
 Requisitos do PRD e fora do escopo: IN-04 (PRD l.397–421), 8.4.4 e OSFASE-07/13 (l.3002–3036), 44.11.1–2 (l.7487–7507), 69.9.3 (l.10302), 67 (l.9514–9540), MAPUX-06/07 (l.9549–9550), DS-14/15 (l.14111–14112), DS-48 a 52 e DS-62 (l.14422–14464, 14587–14593), 74.7.3–4 (l.14641–14670), DS-65 a 68 (l.14720–14723), 36.7 (l.6522–6530), 64 (l.9284) e 64.5 (l.9298), 12.4 (l.4627), RF-INT-004/007/008 (l.2698–2702), CF-03 (l.1845–1857), NFR-17/18 (l.4681–4682), CONC-09/10/13/20/21 (l.12898–12971), AC-110/111 (l.13615–13616), PEND-06/08/13 (l.13682–13689), 1.2 (l.155); DEC-2609-03/06/09/12, DEC-1610-04/09/11/12; fora: §Fora do escopo
-Autor / revisor / integrador: Claude / Codex (produto e QA; crítica antecipada 6223268675) e Gemini (três contraprovas, pelo conector do Codex) / Codex (regime leve do protótipo, §3.5)
-Base (commit ou hashes) / arquivos sob responsabilidade: leitura em c90b062 (claude/v44-v69-mapa, worktree limpo) e PRD/DECISIONS da main 94e19e4 / só este arquivo e mapa-frota/; os arquivos de produto estão em §Fatias e só se reservam quando a fatia entrar
-Aceite e comando de verificação: M1–M22, N1–N9, T1–T14 e K1–K10 abaixo / python3 -B docs/integracao/V71/mapa-frota/mapa_frota_chk.py (54/54, executado em 16/10); produto: node frota_unit.js; python3 -B mapa_frota_test.py (especificados)
-Estado / impedimento / próximo passo: especificado, sem código. A F1 entra quando houver vaga no teto de três frentes (§3.6), com autoria única de areas/inicio.py combinada com EX-42, MAPA-MIP-PROD, SOLO-FOLHA-NIVEIS e SAF-MAPA. A integração real depende do proprietário (custo e contrato)
+Autor / revisor / integrador: Claude / Codex (produto e QA; crítica antecipada 6223268675; revisão R2 6224128496) e Gemini (três contraprovas, pelo conector do Codex) / Codex (regime leve do protótipo, §3.5)
+Base (commit ou hashes) / arquivos sob responsabilidade: leitura do protótipo em c90b062 e PRD/DECISIONS da main 94e19e4; R2 sobre 87cb077 (claude/v44-v72-mapa-frota); alVigente com programação explícita por O.S. do PR #88 (6dfa09c, Codex, ainda fora desta base), só leitura / só este arquivo e mapa-frota/; os arquivos de produto estão em §Fatias, dentro da fronteira aceita pelo Codex (6224071197)
+Aceite e comando de verificação: M1–M24, N1–N10, T1–T14 e K1–K10 abaixo / python3 -B docs/integracao/V71/mapa-frota/mapa_frota_chk.py (79/79, executado em 16/10); produto: node frota_unit.js; python3 -B mapa_frota_test.py (especificados)
+Estado / impedimento / próximo passo: especificado, sem código; R2 trata o 6224128496 e aguarda a R3 do Codex. Fronteira (6224071197): areas/inicio.py em sequência MAPA-FROTA → EX-42 → SOLO-FOLHA-NIVEIS → SAF-MAPA; alocacao.py só leitura depois do PR #88; areas/processo_os.py só o link "Ver no mapa", fora de _kanban_raias, v.kb_raias e cenGrupo*. A F1 entra com vaga no teto de três frentes (§3.6). A integração real depende do proprietário (custo e contrato)
 ```
 
 ## Revisão (Codex e Gemini)
@@ -65,8 +65,9 @@ Estado / impedimento / próximo passo: especificado, sem código. A F1 entra qua
 | Revisor | SHA-256 do texto revisado | Data | Parecer |
 |---|---|---|---|
 | Codex (crítica antecipada) | não se aplica: foi sobre o desenho inicial, antes deste arquivo | 16/10/2026 | Comentário 6223268675. Sete pontos, aceites propostos, pedido de matriz estado × fonte × ação e da lista de arquivos da F1. Tratamento abaixo |
-| Codex (revisão deste arquivo) | pendente | — | pendente |
-| Gemini (três contraprovas) | pendente | — | pendente |
+| Codex (revisão R1 deste arquivo) | `62b29d4a56e903002150772fe57d817a2e48973c0c999d29e8a332ce161a65c8` (87cb077, 698 linhas) | 16/10/2026 | Comentário 6224128496 no PR #86 (HEAD 87cb077): dois S2, dois S3 e a fronteira de arquivos aceita no 6224071197. Tratamento abaixo, na R2 |
+| Codex (revisão R2) | pendente | — | pendente |
+| Gemini (parecer repassado no 6224128496) | conforme o registro do Codex | 16/10/2026 | Propôs trocar a pausa por movimento em saltos. **Recusado** (item 3 abaixo). As três contraprovas seguem pendentes; nenhuma consulta paga nova nesta R2 |
 
 **Tratamento da crítica antecipada (6223268675):**
 
@@ -75,11 +76,22 @@ Estado / impedimento / próximo passo: especificado, sem código. A F1 entra qua
 | 1 | Separar o estado da O.S., o estado operacional e a qualidade/idade da posição. "Sem sinal" não prova parada nem deslocamento. Sem posição, fica na lista com "Posição indisponível", nunca no centro do talhão. O.S. pausada não some | **Aceito.** Decisões 3 e 4, §Entidades e estados, §Matriz, M4, M5 e M7; conferência L7 e P3 a P6 |
 | 2 | Área apontada e ha/h não determinam trajetória, rumo nem coordenada. O percurso sintético é explícito e fica dentro da geometria demonstrativa. Nunca produz apontamento, consumo, carga nem avanço. O rastro leva a marca de simulação | **Aceito.** O primeiro desenho dizia que a posição seria "coerente com a área apontada": isso saiu. O percurso é um dado declarado da fixture; a área e a velocidade só servem para conferir que ele é plausível (G4), sem relação com a área feita. Decisões 7 e 13, M14, M19 e N2 |
 | 3 | Contrato mínimo da leitura, com ordem pelo instante observado: duplicata ou atrasada não faz voltar; futura ou inválida não vira atual. O limite de idade vem do contrato da fonte, e a fixture declara o seu | **Aceito.** Decisão 8 e §Contrato de dados. O oráculo vai de L1 a L10. Limites: fixture com 60 s; bomba e pivô com 15 min, número já aceito na DEC-1610-04; telemetria de máquina pelo contrato do fornecedor; app pela configuração do app. Não há limite universal |
-| 4 | Uma representação por conjunto, com os componentes identificados, sem clonar trator e implemento. O mesmo ativo em duas O.S. incompatíveis vira conflito com acesso às origens | **Aceito.** Decisão 6, M8 e K1–K3. Detalhe acrescentado: duas O.S. do mesmo agrupador (OS-LOTE) não são conflito |
+| 4 | Uma representação por conjunto, com os componentes identificados, sem clonar trator e implemento. O mesmo ativo em duas O.S. incompatíveis vira conflito com acesso às origens | **Aceito.** Decisão 6, M8 e K1–K3. O detalhe acrescentado na R1 ("duas O.S. do mesmo agrupador não são conflito") ficou estreito na R2: vale só para o mesmo conjunto do mesmo grupo, sem divergência de programação ou de horário (item 4 da R2; K2 e K4–K7) |
 | 5 | "Ver no mapa" abre um recorte temporário e acende a camada em 1 clique. A volta preserva o contexto. Se um filtro esconderia o alvo, o recorte é explicado. Sem autorização, nada de operador nem posição, nem em dica ou lista | **Aceito.** Decisões 14 e 15, M12 e M13 |
 | 6 | "Pausar animação" e a redução de movimento param a interpolação, mas o estado e a idade seguem. Pausar a animação não pausa a operação. Nada de pan automático nem de reordenação que roube o foco. Em zoom baixo, o grupo abre a lista, e o selecionado continua identificável | **Aceito.** Decisões 11 e 12, M10, M11, N3, N4 e N6 |
 | 7 | "Carga atual" só com fato. O EX-38 é projeção; sem fato, aparece "Preparo previsto" ou nada | **Aceito.** Decisão 9 e E1–E2. Na colheita, a carga é fato (c.producao.cargas). Na pulverização não há fato de carga no cenário, então aparece "Preparo previsto (projeção da O.S.)" |
 | — | Aceites propostos pelo Codex | Todos entram: pausa e impedimento (M7); fim ou cancelamento com o painel aberto (M9); posição ausente, velha, fora de ordem ou futura (M4–M6); conjunto duplicado (M8); usuário sem autorização (M13); 20 marcadores sobrepostos (M11); ida e volta com filtro (M12); Enter, Espaço e Esc, foco, 390 px, redução e pausa (M10, M16, M17, N3 e N4); a animação e a reentrada não mudam o domínio (M14 e N8); lista e mapa com a mesma origem e idade (M15) |
+
+**Tratamento da revisão R1 (6224128496), nesta R2.** A conferência passou de 54 para 79 casos. Os 54 continuam, três com o oráculo corrigido porque registravam o defeito (K2, P5 e P6). Os casos X1–X4 rodam as funções da R1 e reproduzem os defeitos apontados: são a contraprova.
+
+| # | Achado (sev.) | Tratamento |
+|---|---|---|
+| 1 | Ordem temporal da suspeita (S2). Depois de 0, 10 e 20 s, a suspeita s30 seguida de t30 dava `DivisionByZero`; com t25, a R1 aceitava s30 por Δt negativo e terminava com atual = t25 e s30 no rastro | **Aceito, com um ajuste de leitura.** A suspeita só se decide por leitura com Δt observado estritamente positivo. Leitura com o mesmo instante da suspeita é recusada sem decidir nada (L11). Leitura observada antes da suspeita não a confirma nem a descarta. "Atrasada" é a observada antes da posição **aceita**, e só completa o rastro (L3). Ajuste: uma leitura entre a aceita e a suspeita (t25 entre 20 e 30) é candidata normal contra a aceita e a avança; a suspeita segue pendente e fora do rastro (L12). Fundamento: se t25 só completasse o rastro, o estado final dependeria da ordem de chegada. Com t25 chegando antes de s30 ela viraria a atual; chegando depois, não. Isso fere "nunca ordenar por chegada". L13 prova o mesmo resultado nas duas ordens, e L14 confirma a suspeita com a leitura de 40 s. Contraprova: X1 e X2. Decisão 8 e M6 |
+| 2 | Pausa criava posição presumida e ignorava a desconexão (S2) | **Aceito.** Posição e estado operacional são saídas separadas (`avaliar`). Pausa e impedimento informados ficam no estado, com fonte e hora. Sem leitura válida, a posição é "Posição indisponível" (P8). Fonte desconectada nunca é atual, nem com leitura de 10 s (P9). A última válida mantém hora, idade e qualidade (P5). `conectada` (integração) e `online` (aparelho) são eixos distintos e dão saídas diferentes (P10). Compartilhamento encerrado pelo operador retira os dados dessa fonte (P11). O selo de impedimento da O.S. não vira máquina parada: sem fonte da máquina, o estado é Desconhecido (P12). Leitura real que contradiz o selo mostra o estado lido, com aviso, sem mudar o selo (P13). P5 e P6 corrigidos; contraprova X3. Matriz (linhas 3, 4 e 7, mais 17–20), M1, M7, M24 e decisões 3 e 4 |
+| 3 | Pausa visual × paridade temporal (S3) | **Aceito.** A pausa real fica. Ela congela só a posição **exibida** no mapa, com hora, fonte e idade próprias e o selo "pausado". A idade continua crescendo (Z3), e o marcador nunca leva a hora da leitura mais nova (Z2). Lista e painel seguem a leitura corrente. Retomar vai à leitura corrente (Z4). M15 vale no modo ativo e escreve a exceção pausada. O alternador não prende nem move o foco (WCAG 2.2.2). O marcador com foco não some dentro de um grupo (Z6, M23). O.S. encerrada ou perfil revogado retiram os dados mesmo em pausa, com recuperação escrita (Z5, N10). Decisões 11, 12 e 15; N3 |
+| 3a | Opção do Gemini: trocar a pausa por movimento em saltos | **Recusado.** Saltos continuam sendo movimento, e o 2.2.2 pede um meio de **parar** o movimento. "Movimento em saltos" já existe como outra opção, a redução de movimento (`prefers-reduced-motion`, N4), e as duas ficam separadas. Trocar uma pela outra tiraria a pausa de quem precisa dela |
+| 4 | O agrupador anulava o conflito de conjunto físico (S3). A K2 usava o PJ em dois tratores e apagava o conflito só porque o grupo era G1 | **Aceito.** O conflito é por componente físico. Só se suprime quando todas as O.S. que usam o componente: estão no mesmo grupo vigente; usam o mesmo conjunto do grupo (máquina e implemento); têm programação vinda do grupo (programação explícita por O.S. do PR #88, lida por `alVigente`, sem escritor paralelo); e têm blocos sem sobreposição (K4). O mesmo implemento em dois tratores continua conflito com IDs de grupo iguais (K2 corrigido). Programação de outra fonte (K5) e blocos sobrepostos (K6) também. Dois conjuntos distintos nunca viram um marcador (K7). Contraprova X4. Decisão 6 e M8 |
+| 5 | Fronteira de arquivos (6224071197) | **Aceito.** `inicio.py` em sequência MAPA-FROTA → EX-42 → SOLO-FOLHA-NIVEIS → SAF-MAPA. `alocacao.py` só leitura (depois do PR #88), fora da lista de arquivos alterados da F1. `processo_os.py` só o link "Ver no mapa", fora de `_kanban_raias`, `v.kb_raias` e `cenGrupo*`. O conjunto da Lagoa Grande vem de uma fixture própria declarada em `dados_frota.py` ("conjunto de demonstração"). Ela não escreve na alocação nem no cadastro e cede lugar a `alVigente` quando a O.S. tiver programação. Os ativos sintéticos em `dados_cad.py` e os contadores da Manutenção saíram da F1. Decisão 6, §Fatias, R2 e R3 |
 
 ## Situação em 16/10 (lida no código em c90b062)
 
@@ -106,6 +118,7 @@ Estado / impedimento / próximo passo: especificado, sem código. A F1 entra qua
 | A17 | A O.S. não tem visão Mapa (DEC-2609-09) | `G/areas/processo_os.py:1656` |
 | A18 | Os ícones (`engine.ICONS`) não têm trator, pulverização, plantio nem adubação. Têm Colheita, truck, Irrigação, pivot e wrench | `G/engine.py:12-92` |
 | A19 | O próximo passo da O.S. Em execução é "Registrar apontamento". "Ver no mapa" fica como link secundário e não disputa a primária | `processo_os.py:616-640` (`osProx`) |
+| A20 | O PR #88 (Codex, commit 6dfa09c, ainda fora da base 87cb077) faz o `alVigente` ler a programação explícita por O.S. (`c.ordens[id].prog.blocos`) no lugar dos blocos da alocação. O agrupador guarda a composição em `c.gruposExec`, com um conjunto (máquina, implemento, operador e caldeiro) programado em sequência. É essa a fonte que a regra de conflito lê, só para leitura | `6dfa09c:G/alocacao.py:48-52`; `6dfa09c:G/cenario.js:917-928` (`cenGrupoCriar`), `:1002-1022` (`cenGrupoProgramacao`) |
 
 ## O que o PRD já decide (não se reescreve aqui)
 
@@ -185,6 +198,8 @@ Estar no mercado não prova regra de domínio; o aceite se mede pelos K e M abai
    - estado operacional do conjunto (Trabalhando, Deslocando, Parada, Desligada ou Desconhecido), com fonte e hora próprias;
    - situação da posição (Atual, Sem sinal há N min, Posição indisponível), com fonte, hora, idade e qualidade.
    - Nenhum se deduz do outro: "sem sinal" não é "parada"; pausa informada não é "sem sinal"; "desligada" informada pela fonte não é "sem sinal".
+   - O selo de impedimento é da O.S. (eixo 1) e não vira estado da máquina. Sem fonte da máquina, o estado é Desconhecido (P12). Leitura real que contradiz o selo aparece com o aviso "Leitura contradiz o impedimento da O.S. · conferir", sem mudar o selo (P13).
+   - Integração desconectada (`conectada`) e aparelho sem sinal (`online`) são eixos distintos, com textos distintos (P10).
    - *Dano evitado:* mandar socorro a uma máquina que só perdeu o sinal, ou achar que trabalha uma que parou.
 4. **Sem posição, sem ponto.** Sem leitura válida, o conjunto fica só na lista com "Posição indisponível · motivo". Os motivos:
    - sem fonte vinculada;
@@ -192,6 +207,9 @@ Estar no mercado não prova regra de domínio; o aceite se mede pelos K e M abai
    - app sem turno aberto;
    - perfil sem permissão.
    - Nunca no centro do talhão nem no "local" do cadastro.
+   - Pausa ou impedimento informados não criam posição. Sem leitura válida, a posição é indisponível (P8). Com leitura válida, aparece a última, com hora, idade e qualidade, sem chamar de atual: "Última posição há 40 min · envio suspenso na pausa" (P5).
+   - Fonte desconectada nunca é atual, nem com leitura recente (P9).
+   - Compartilhamento do app encerrado pelo operador retira os dados dessa fonte (P11).
    - *Dano evitado:* procurar a máquina no lugar errado; dar falsa confiança.
 5. **Ícone por operação, nunca só cor.**
    - A família vem da operação da atividade da O.S. (catálogo), não do texto do tipo. Tabela abaixo.
@@ -213,10 +231,19 @@ Estar no mercado não prova regra de domínio; o aceite se mede pelos K e M abai
 
 6. **Um marcador por conjunto vinculado à execução** (trator ou colhedora + implemento).
    - A posição é a do componente que tem fonte; os componentes aparecem no painel.
-   - Ativo em duas O.S. Em execução fora do mesmo agrupador: selo "Conflito · também na OS-xxxx" nos dois, com acesso às duas origens. Nada se escolhe em silêncio (AC-111).
-   - No mesmo agrupador (OS-LOTE): um marcador com as O.S. do grupo e sem conflito.
-   - No protótipo, o vínculo é a alocação do dia operacional, rotulada "pela alocação". No software real é o turno ou apontamento com o recurso (execução).
-   - *Dano evitado:* dois marcadores para um trator; conflito de uso simultâneo escondido.
+   - **Conflito é por componente físico.** Componente em duas O.S. Em execução vira o selo "Conflito · também na OS-xxxx" nos dois conjuntos, com acesso às duas origens. Nada se escolhe em silêncio (AC-111).
+   - O conflito só se suprime quando todas as O.S. que usam o componente:
+     - estão no **mesmo** grupo vigente (OS-LOTE);
+     - usam o **mesmo** conjunto do grupo (máquina e implemento);
+     - têm programação vinda do grupo, lida por `alVigente` (programação explícita do PR #88), sem divergência de fonte;
+     - e têm blocos sem sobreposição (K4).
+   - Nesse caso há um marcador só, com as O.S. do grupo.
+   - ID de grupo igual não basta. O mesmo implemento em dois tratores é conflito (K2). Programação de outra fonte (K5) e blocos sobrepostos (K6) também são. Dois conjuntos distintos nunca viram um marcador (K7).
+   - **Vínculo da execução:**
+     - no software real, o turno ou apontamento com o recurso;
+     - no protótipo, `alVigente` (alocação e programação explícita, **só leitura**), rotulado "pela programação";
+     - na Lagoa Grande, que não tem recurso nessa fonte, uma fixture própria declarada em `dados_frota.py`, rotulada "conjunto de demonstração". Ela não escreve na alocação nem no cadastro e cede lugar a `alVigente` quando a O.S. tiver programação.
+   - *Dano evitado:* dois marcadores para um trator; conflito de uso simultâneo escondido por um ID de grupo; escritor paralelo da alocação.
 7. **"Andando" no protótipo é simulação rotulada.**
    - Percurso sintético explícito na fixture:
      - passadas paralelas a cada 36 m, com recuo de 18 m nas cabeceiras, dentro da geometria demonstrativa;
@@ -228,7 +255,10 @@ Estar no mercado não prova regra de domínio; o aceite se mede pelos K e M abai
    - A marca "Simulação" aparece no marcador (dica e `aria-label`), na lista, no painel e no rastro. A legenda leva o selo persistente "Posições simuladas · demonstração".
    - *Dano evitado:* confundir demonstração com telemetria; o relógio da animação mexer em área ou estoque.
 8. **Contrato de leitura com ordem e idade por fonte** (§Contrato).
-   - Vale o instante **observado**. Duplicata é ignorada; leitura atrasada só completa o rastro; futura ou inválida é recusada; salto impossível fica suspeito até a leitura seguinte confirmar.
+   - Vale o instante **observado**. Duplicata é ignorada; leitura atrasada (observada antes da posição aceita) só completa o rastro; futura ou inválida é recusada; salto impossível fica suspeito.
+   - A suspeita só se decide por leitura com Δt observado **estritamente positivo** (L14).
+   - Leitura com o mesmo instante da suspeita, ou anterior a ela, não a confirma nem a descarta (L11).
+   - Leitura entre a posição aceita e a suspeita avança a aceita (L12). O resultado não depende da ordem de chegada (L13).
    - O limite de idade é o da fonte; a fronteira é inclusiva (L6).
    - No software real, o relógio é o do servidor, e o instante do app é estimado com incerteza (CONC-20/21).
    - *Dano evitado:* a máquina "voltar" no mapa; leitura futura virar atual; posição velha parecer atual.
@@ -257,13 +287,21 @@ Estar no mercado não prova regra de domínio; o aceite se mede pelos K e M abai
 11. **Movimento acessível (F2).**
     - O marcador interpola entre leituras.
     - Com `prefers-reduced-motion`, sem interpolação nem transição: a posição muda só a cada leitura.
-    - **"Pausar animação"** (WCAG 2.2.2) congela as posições exibidas com o rótulo "Posições de hh:mm:ss". O estado e a idade continuam a se atualizar. Não pausa a operação.
+    - **"Pausar animação"** (WCAG 2.2.2) congela só a posição **exibida** no mapa.
+      - O marcador pausado mostra a hora, a fonte e a idade da leitura congelada, com o selo "pausado". A idade continua crescendo (Z3).
+      - Nunca leva a hora da leitura mais nova (Z2).
+      - A lista e o painel seguem a leitura corrente; "Retomar" leva o mapa a ela (Z4).
+      - O botão é um alternador comum: não prende nem move o foco.
+      - Não pausa a operação.
+    - Pausa e redução de movimento são opções separadas; uma não substitui a outra (item 3a da revisão).
+    - O.S. que sai de Em execução, ou perfil que perde a permissão, retira os dados mesmo em pausa, com recuperação escrita (Z5).
     - Sem pan automático.
     - A idade escrita se atualiza a cada 15 s.
     - Só a mudança de estado da máquina selecionada vai para a região `aria-live` "polite".
     - Com a página oculta, nada se anima.
     - *Dano evitado:* distração ou desconforto; leitor de tela falando sem parar; a pessoa perder o lugar.
 12. **Agrupamento.** Marcadores a menos de 28 px na tela viram o botão "N máquinas" (44 px), que abre a lista dos N. O selecionado fica fora do grupo, com anel de seleção.
+    - O marcador com foco também nunca entra num grupo. Se o zoom o juntaria, ele fica solto até o foco ir para um controle equivalente (Z6).
     - *Dano evitado:* 20 marcadores empilhados, ilegíveis e inalcançáveis.
 13. **Rastro curto (F2).**
     - Só do turno corrente da O.S. Em execução, nos últimos 30 min.
@@ -296,9 +334,9 @@ Estar no mercado não prova regra de domínio; o aceite se mede pelos K e M abai
 | Entidade | Estados visíveis | Fonte | Próxima ação |
 |---|---|---|---|
 | O.S. (existente) | As cinco etapas. Só Em execução entra. Selos: turno pausado, impedida, parcial | cenário (`c.ordens[id].etapa`, selos) | Abrir O.S. |
-| Conjunto em execução (derivado, não é fato gravado) | Componentes; vínculo `execucao` (real) ou `alocacao` (protótipo); agrupador; conflito | alocação vigente do dia operacional (protótipo); turno ou apontamento com recurso (real) | Abrir O.S. (o PCP aloca lá) |
-| Estado operacional | Trabalhando · Deslocando · Parada (motivo: pausa, impedida, carregando, sem trabalho) · Desligada · Desconhecido | telemetria (velocidade, implemento engajado, motor); app (turno e pausa); O.S. (selo de impedimento); fixture | — |
-| Posição | Atual · Sem sinal há N min · Sem fonte (desconectada) · Posição indisponível (motivo) · Restrita ao perfil; origem simulada ou observada | leituras (§Contrato) | — |
+| Conjunto em execução (derivado, não é fato gravado) | Componentes; vínculo `execucao` (real), `programacao` (`alVigente`, só leitura) ou `fixture` (conjunto de demonstração); agrupador; conflito por componente | turno ou apontamento com recurso (real); `alVigente` do dia operacional; fixture de `dados_frota.py` só onde `alVigente` não tem conjunto | Abrir O.S. (o PCP programa lá) |
+| Estado operacional | Trabalhando · Deslocando · Parada (motivo: pausa, carregando, sem trabalho) · Desligada · Desconhecido; "última informação" quando a fonte não conversa | telemetria (velocidade, implemento engajado, motor); app (turno e pausa); fixture. O selo de impedimento fica na O.S. (eixo 1) | — |
+| Posição | Atual · Última posição (motivo informado, ex.: pausa) · Sem sinal há N min · Sem fonte (desconectada) · Posição indisponível (motivo) · Restrita ao perfil; origem simulada ou observada | leituras (§Contrato); saída separada do estado | — |
 | Fonte de posição (conexão) | Desconectada · Conectando · Conectada (ambiente de testes) · Conectada · Erro · Revogada | CF-03 | Conectar · Desconectar |
 | Vínculo do equipamento | Vinculado por nº de série · Confirmar vínculo (motivo) · Confirmado (por quem, quando) · Sem ativo no cadastro · Ignorado | CF-03 × CD-03 | Confirmar · Escolher outro · Ignorar · Criar ativo com estes dados |
 
@@ -308,11 +346,11 @@ Estar no mercado não prova regra de domínio; o aceite se mede pelos K e M abai
 |---|---|---|---|---|---|---|---|
 | 1 | Trabalhando | Em execução | Trabalhando (telemetria ou simulação · 10:42:10) | Atual · há 8 s · ±3 m | Sólido, ícone, seta de rumo, rastro (F2) | "Trabalhando · 8 km/h · há 8 s" | Abrir O.S. |
 | 2 | Deslocando | Em execução | Deslocando (telemetria) | Atual | Sólido, seta, rótulo "deslocando" | "Deslocando · fora do T2" | Abrir O.S. |
-| 3 | Turno pausado | Em execução, selo "Turno pausado" | Parada · pausa desde 11:02 (app) | Da pausa (11:02), não "sem sinal" | Sólido, sem seta, selo ‖ | "Parada · pausa desde 11:02" | Abrir O.S. |
-| 4 | Impedida | Em execução, selo vermelho | Parada · impedida: texto do selo (O.S.) | Atual ou indisponível | Selo ‖ com a palavra "impedida" e contorno do traço vermelho | "Parada · impedida: Trator T1 em manutenção" | Abrir O.S.; Ver impedimento |
+| 3 | Turno pausado, app conversando | Em execução, selo "Turno pausado" | Parada · pausa desde 11:02 (app) | Com leitura válida: "Última posição há N min · envio suspenso na pausa", com hora e qualidade; sem leitura: Posição indisponível (P5, P8) | Só com leitura válida: sólido, sem seta, selo ‖ e a hora da leitura; sem leitura, nenhum | "Parada · pausa desde 11:02" (a O.S. continua na lista) | Abrir O.S. |
+| 4 | O.S. impedida | Em execução, selo vermelho "Impedida · …" | Da fonte da máquina; sem ela, **Desconhecido**. O selo não vira estado (P12) | Pela fonte; sem leitura, indisponível | Só com leitura válida; o selo da O.S. aparece como informação da O.S., não como estado da máquina | "O.S. impedida: Trator T1 em manutenção · máquina: estado desconhecido" | Abrir O.S.; Ver impedimento |
 | 5 | Desligada | Em execução | Desligada às 12:03 (telemetria) | Da hora em que desligou | Sólido, sem seta, selo ⏻ | "Desligada às 12:03" | Abrir O.S. |
 | 6 | Sem sinal | Em execução | Último conhecido: "Trabalhando às 10:12" | Sem sinal há 18 min | Vazado cinza, imóvel, sem seta; o rastro termina | "Sem sinal há 18 min · última: Trabalhando 10:12" | Abrir O.S. |
-| 7 | Fonte desconectada | Em execução | Desconhecido desde 10:40 | "Sem fonte: telemetria desconectada às 10:40 · última há N min" | Igual ao sem sinal | "Sem fonte de posição" | Abrir O.S.; (gestor) Ver integração |
+| 7 | Integração desconectada (`conectada` = falso) | Em execução | Desconhecido desde 10:40 | "Sem fonte: telemetria desconectada às 10:40 · última há N min", nunca atual, nem com leitura recente (P9) | Igual ao sem sinal, com a hora da última | "Sem fonte de posição" | Abrir O.S.; (gestor) Ver integração |
 | 8 | Nunca houve posição | Em execução | Pela O.S. ou pelo app | Posição indisponível (motivo) | Nenhum | "Posição indisponível · sem fonte vinculada" | Abrir O.S. |
 | 9 | Sem conjunto | Em execução | Desconhecido | Indisponível | Nenhum | "Sem conjunto alocado hoje" | Abrir O.S. |
 | 10 | Conflito de ativo | Em execução em duas O.S. | Do ativo | Do ativo | Um marcador por conjunto, selo "Conflito" | Duas linhas "Conflito · também na OS-xxxx" | Abrir cada O.S. |
@@ -322,6 +360,10 @@ Estar no mercado não prova regra de domínio; o aceite se mede pelos K e M abai
 | 14 | Ativo fixo de irrigação | Em execução | Da Irrigação | — | Nenhum | "Ativo fixo · ver na Irrigação" | Ver na Irrigação |
 | 15 | Origem simulada | Qualquer linha acima | Origem simulada | Idem, com a marca | + "Simulação" | "Fonte: simulação" | — |
 | 16 | Barra de tempo noutra data (EX-42) | — | — | — | Camada desligada, com aviso | — | Voltar a hoje |
+| 17 | Pausa informada com o app sem sinal (`online` = falso) | Em execução | "Última informação: Parada · pausa desde 11:02 (app) · sem sinal" (P6) | Sem sinal há N min | Vazado cinza, imóvel | Igual ao estado | Abrir O.S. |
+| 18 | Compartilhamento do app encerrado pelo operador | Em execução | Desconhecido (dados dessa fonte retirados) | "Posição indisponível · compartilhamento encerrado" (P11) | Nenhum | Igual | Abrir O.S. |
+| 19 | Leitura real contradiz o selo de impedimento | Em execução, selo "Impedida" | Trabalhando (telemetria · hora) | Atual | Sólido, com o aviso no painel | "Trabalhando · leitura contradiz o impedimento da O.S. · conferir" (P13) | Abrir O.S.; Ver impedimento |
+| 20 | Animação pausada pela pessoa | Qualquer | Atualiza na lista e no painel | Mapa: a posição congelada, com hora, idade e selo "pausado"; lista e painel: a leitura corrente (Z2) | Imóvel, selo "pausado" | Leitura corrente | Retomar |
 
 ## Contrato de dados
 
@@ -349,13 +391,25 @@ Estar no mercado não prova regra de domínio; o aceite se mede pelos K e M abai
 {os_id, versao, etapa, agrupador_id?,
  componentes: [{ativo_id, papel: trator|colhedora|implemento, nome, classe}],
  pessoas: [{papel: operador|caldeiro, nome (conforme permissão)}],
- vinculo: execucao|alocacao, condicional: bool,
+ vinculo: execucao|programacao|fixture, condicional: bool,
  conflitos: [{ativo_id, os_ids}],
  estado_operacional: {valor, motivo?, fonte, em},
  posicao: {fonte_escolhida, leitura?, situacao, idade_s?, motivo?, origem}}
 ```
 
-**Escolha da fonte por máquina** (P1–P7): telemetria com leitura atual vence o app com leitura atual. Sem nenhuma atual, vale a última posição conhecida, como "Sem sinal", dizendo de qual fonte. A troca de fonte fica marcada no rastro e no painel.
+**Posição e estado por máquina** (P1–P13). São duas saídas separadas.
+
+- **Posição:** só de leitura válida. Telemetria com leitura atual vence o app com leitura atual. Fonte desconectada nunca é atual.
+  - Sem nenhuma atual, vale a última posição válida com sua hora, idade e qualidade:
+    - "Sem sinal", se a fonte está conectada;
+    - "Sem fonte: … desconectada", se não está;
+    - "Última posição · envio suspenso na pausa", se a pausa foi informada com o aparelho conversando.
+  - Sem leitura válida: "Posição indisponível".
+  - Fonte revogada pelo titular: seus dados saem.
+  - A troca de fonte fica marcada no rastro e no painel.
+- **Estado:** o informado pela fonte da máquina conectada, com fonte e hora. Se ela não conversa agora, vira "última informação". Sem fonte, é "Desconhecido".
+  - O selo da O.S. nunca entra.
+  - Leitura que contradiz o selo de impedimento gera aviso.
 
 **Agora.**
 
@@ -373,7 +427,7 @@ Estar no mercado não prova regra de domínio; o aceite se mede pelos K e M abai
   - no SVG, um grupo focável (DS-52 corrige o `role="img"` com botões dentro);
   - no MapLibre, um `maplibregl.Marker` com `<button>`, como os rótulos dos pivôs;
   - fica acima dos talhões, sem roubar o clique deles fora do marcador.
-- **Legenda (DS-51):** acrescenta um grupo "Máquinas" com os ícones presentes e os estados (▶ trabalhando, → deslocando, ‖ parada, ⏻ desligada, ◌ sem sinal), mais o selo "Posições simuladas · demonstração".
+- **Legenda (DS-51):** acrescenta um grupo "Máquinas" com os ícones presentes e os estados (▶ trabalhando, → deslocando, ‖ parada, ⏻ desligada, ◌ sem sinal), mais o selo "Posições simuladas · demonstração". Com a animação pausada, a legenda mostra "Animação pausada · posições exibidas de hh:mm:ss · Retomar".
 - **Painel do conjunto:** usa o mesmo contêiner do painel do talhão, com uma primária (Abrir O.S.). Selecionar o marcador não seleciona o talhão.
 - **Etiqueta de modo (DS-50):** com Máquinas ligada e nenhum modo ativo, "Máquinas · toque numa máquina para ver a O.S.".
 
@@ -431,9 +485,10 @@ Estar no mercado não prova regra de domínio; o aceite se mede pelos K e M abai
 - **Nunca se vincula por nome**, nem por nome aproximado (V5).
 - O CD-03 ganha os campos fabricante e nº de série (FO-22). Os ativos de demonstração recebem séries sintéticas óbvias ("SINT-JD-6M155-0001").
 
-**Prioridade e qualidade por máquina:** telemetria > app de campo > última posição conhecida (P1–P7).
+**Prioridade e qualidade por máquina:** telemetria > app de campo > última posição válida (P1–P13).
 
 - A tela mostra a fonte, a hora da leitura e a idade.
+- Posição e estado são saídas separadas; desconectada nunca é atual; `conectada` e `online` são eixos distintos (P9–P10).
 - Leitura velha vira "Sem sinal há N min" e para de andar.
 - Fonte diferente não se mistura no rastro sem marca.
 - Posição velha nunca aparece como atual.
@@ -493,21 +548,21 @@ Estar no mercado não prova regra de domínio; o aceite se mede pelos K e M abai
 
 | ID | Caso | Oráculo |
 |---|---|---|
-| M1 | Universo no cenário inicial | **Santa Rita:** a lista tem exatamente OS-0421 (Trator 03 + Pulverizador PJ-3030, "pela alocação") e OS-0420 (Trator 02 + Plantadeira 24 linhas, alocação condicional, "Parada · impedida", "Posição indisponível"); **1 marcador** (OS-0421). **Lagoa Grande** (com a fixture da F1): OS-0505 (Trator LG-01 + Carreta de colheita LG), OS-0506 e OS-0507 ("Ativo fixo · ver na Irrigação"); **1 marcador** (OS-0505). Os IDs são iguais a `{o \| etapa = Em execução, fazenda, safra}` do `cenGet()`. Iniciar a OS-0424 a faz entrar; enviar a OS-0421 para conferência a faz sair |
+| M1 | Universo no cenário inicial | **Santa Rita:** a lista tem exatamente OS-0421 (Trator 03 + Pulverizador PJ-3030, "pela programação") e OS-0420 (Trator 02 + Plantadeira 24 linhas, condicional; O.S. "Impedida · ativo bloqueado"; máquina "estado desconhecido"; "Posição indisponível"); **1 marcador** (OS-0421). **Lagoa Grande** (fixture de `dados_frota.py`): OS-0505 (Trator LG-01 + Carreta de colheita LG, "conjunto de demonstração"), OS-0506 e OS-0507 ("Ativo fixo · ver na Irrigação"); **1 marcador** (OS-0505). Os IDs são iguais a `{o \| etapa = Em execução, fazenda, safra}` do `cenGet()`. Iniciar a OS-0424 a faz entrar; enviar a OS-0421 para conferência a faz sair |
 | M2 | 1 clique em cada função | Nas nove funções e na tela cheia: 1 clique liga e o seguinte desliga. `aria-pressed` acompanha. Função, filtros, seleção de talhão e zoom ficam iguais (estado comparado antes e depois, exceto a chave da camada) |
 | M3 | 1 toque abre a O.S. | Tocar no marcador ou na linha abre o painel com os campos da decisão 9. "Abrir O.S." leva a `OS.dc.html#OS-0421` com 1 toque |
 | M4 | Posição dentro e sem ponto inventado | Toda leitura simulada fica dentro da geometria do talhão da O.S. (`tgDentro`) ou num trecho de deslocamento declarado (G3, G6). OS-0420 e as O.S. sem fonte não têm marcador; nenhum marcador cai no centroide nem no "local" do cadastro (mutante: com marcador no centroide, M4 reprova) |
 | M5 | Idade na fronteira | Com o relógio de teste: idade de 60 s mostra "Atual"; 61 s mostra "Sem sinal há 1 min", com marcador vazado cinza, imóvel e sem rumo. O texto nunca diz "parada" por causa da idade (L6) |
-| M6 | Ordem, duplicata, futura, inválida, salto | `frota_unit.js` reproduz L1–L10 com as mesmas saídas do `mapa_frota_chk.py` |
-| M7 | Pausa e impedimento | Turno pausado no app: a O.S. continua na lista e no mapa como "Parada · pausa desde hh:mm" (P5). Impedida: "Parada · impedida: …". Nenhuma das duas some |
-| M8 | Conflito | Com a OS-0421 em execução, iniciar a OS-0424: o PJ-3030 fica nas duas. Aparecem duas linhas com "Conflito · também na OS-…" e acesso às duas; nenhuma é escolhida. As mesmas O.S. num agrupador não mostram conflito (K1–K3) |
+| M6 | Ordem, duplicata, futura, inválida, salto | `frota_unit.js` reproduz L1–L14 com as mesmas saídas do `mapa_frota_chk.py`; nenhuma exceção aritmética com Δt zero ou negativo |
+| M7 | Pausa e impedimento | "Nenhuma some" quer dizer que a O.S. continua **na lista**; não obriga marcador sem coordenada. Turno pausado: lista com "Parada · pausa desde hh:mm". O marcador aparece só com leitura válida e mostra a hora dela (P5); sem leitura, só a lista (P8). Impedida: lista com o selo da O.S.; o estado da máquina vem da fonte dela; sem fonte, "estado desconhecido" (P12). Fixtures independentes: pausa sem leitura; pausa de 40 min com o aparelho conversando e sem conversar (P5, P6); fonte revogada (P11); leitura real contradizendo o selo (P13) |
+| M8 | Conflito | Com a OS-0421 em execução, iniciar a OS-0424: o PJ-3030 fica nas duas. Aparecem duas linhas com "Conflito · também na OS-…" e acesso às duas; nenhuma é escolhida. Com as duas no mesmo grupo e o PJ em dois tratores, o conflito continua (K2). Sem conflito e com um marcador só, apenas no mesmo conjunto do mesmo grupo, com programação do grupo e sem sobreposição (K4–K7) |
 | M9 | Fim ou cancelamento com o painel aberto | Com o painel da OS-0421 aberto, enviá-la para conferência noutra aba: o marcador sai; o painel diz "OS-0421 saiu de Em execução (agora Em conferência)" e oferece Abrir O.S.; o foco fica no painel; nenhum outro painel abre sozinho |
 | M10 | Teclado e lista | Tab percorre os marcadores em ordem estável (por O.S.). Enter ou Espaço abre. Esc fecha e devolve o foco ao marcador ou à linha de origem. Lista com as colunas da decisão 10; durante 5 min de leituras, a ordem e o foco não mudam |
 | M11 | 20 sobrepostos | Fixture de teste com 20 conjuntos na mesma posição: um botão "20 máquinas" (44 px) abre a lista com 20 linhas. O selecionado fica fora do grupo, identificável |
 | M12 | Ver no mapa, ida e volta | Do detalhe e do ⋯ da OS-0421, com 1 clique: Mapa da Santa Rita, Máquinas ligada, conjunto selecionado, painel aberto. Com o filtro salvo em Lagoa Grande ou noutra safra: faixa "Recorte temporário" e 'mapa-ctx' inalterado. Voltar devolve a OS-0421 com a mesma visão, filtros e foco. "Sair do recorte" restaura o contexto anterior |
 | M13 | Sem autorização | Perfil Rui (almoxarife): só a lista, sem posição nem operador ("Posição restrita ao seu perfil"). A varredura do DOM, das dicas e dos `aria-label` não acha coordenada, nome de operador nem "há N s" de posição |
 | M14 | Sem efeito no domínio | 30 min de simulação, ligar e desligar 20×, recarregar 5×: o JSON do cenário fica igual byte a byte; área realizada, saldo, estoque, custódia, cargas e fases iguais (mutante: a simulação gravar o realizado reprova M14) |
-| M15 | Mesma origem e idade | Para cada conjunto, mapa (`aria-label`), lista e painel mostram a mesma fonte, hora e idade, com o mesmo arredondamento |
+| M15 | Mesma origem e idade | **No modo ativo**, para cada conjunto, mapa (`aria-label`), lista e painel mostram a mesma fonte, hora e idade, com o mesmo arredondamento (Z1). **Exceção escrita, animação pausada:** o mapa mostra a posição congelada com a hora, a idade e o selo "pausado" dela; lista e painel, a corrente (Z2). Nunca coordenada congelada com a hora mais nova |
 | M16 | 390 px, 1440 px e 44 px | Com 390 px: alternador, Lista, marcadores e grupo com alvo ≥ 44 × 44 px; painel em folha inferior; sem rolagem lateral. Em 1440 e 390 px, nenhum erro de JS |
 | M17 | Movimento reduzido | Com `prefers-reduced-motion`, a duração de transição calculada dos marcadores é 0 s. Na F1 não há animação; na F2, ver N4 |
 | M18 | Nunca só cor | Cada marcador tem ícone da operação, rótulo curto e selo com forma e palavra. A legenda lista os ícones presentes e os estados. A captura em escala de cinza mantém a leitura (inspeção) |
@@ -515,6 +570,8 @@ Estar no mercado não prova regra de domínio; o aceite se mede pelos K e M abai
 | M20 | Função ativa intacta | Com Máquinas ligada, cores (`fl_*`), rótulos e números da faixa da função ativa ficam iguais (snapshot antes e depois) nas nove funções |
 | M21 | EX-42 | Quando houver a barra de tempo, com data diferente de hoje: "Máquinas: só no tempo atual", sem marcadores. Antes do EX-42, não se aplica |
 | M22 | Contraprova | Na versão de antes da F1 (`ANTES`, árvore limpa) não há alternador: M1–M3 e M12 reprovam |
+| M23 | Foco e grupo | Com o foco no marcador da OS-0421, afastar o zoom até o grupo se formar: o marcador com foco fica fora do grupo e identificável, e o foco não se perde. Só depois que o foco vai a um controle equivalente (a linha da lista ou o botão do grupo, que anuncia "contém a máquina com foco") é que ele pode entrar no grupo (Z6) |
+| M24 | Leitura × selo da O.S. | Fixture de teste com leitura "Trabalhando" no conjunto de uma O.S. com o selo "Impedida": estado "Trabalhando (simulação)" com o aviso "Leitura contradiz o impedimento da O.S. · conferir". O selo da O.S. e o cenário não mudam (P13) |
 
 **F2 · Movimento suave e rastro.**
 
@@ -522,13 +579,14 @@ Estar no mercado não prova regra de domínio; o aceite se mede pelos K e M abai
 |---|---|---|
 | N1 | Interpolação | As posições amostradas por quadro ficam no segmento entre leituras consecutivas. Sem extrapolação: sem leitura nova, o marcador para na última |
 | N2 | Rastro | Só do turno corrente, últimos 30 min, linha de 2 px sem largura, marcado "simulação". Quebrado nas lacunas maiores que 60 s; a leitura atrasada preenche com marca, e o marcador não volta |
-| N3 | Pausar animação | 1 clique congela as posições, com o rótulo "Posições de hh:mm:ss"; estado e idade da lista seguem a cada 15 s. "Retomar" pula para a posição atual. O cenário não muda |
+| N3 | Pausar animação | 1 clique congela só a posição exibida no mapa. Cada marcador mostra a hora, a fonte e a idade da leitura congelada, com o selo "pausado"; a idade cresce. Lista e painel seguem a leitura corrente a cada 15 s. "Retomar" leva o mapa à leitura corrente. Tab entra e sai do botão normalmente, e o foco não é movido. O cenário não muda (Z1–Z4) |
 | N4 | Redução de movimento | Sem interpolação nem transição: a posição muda só a cada leitura. "Pausar" continua disponível |
 | N5 | Transição de sinal | Fixture da OS-0505 com lacuna de 3 min a cada 12 min: atual → "Sem sinal há 1 min" → atual de novo. O rastro se completa com as leituras atrasadas, o marcador nunca volta e o estado nunca vira "parada" na lacuna |
 | N6 | Foco e posição | Com o foco numa linha e 5 min de atualizações: o foco e a rolagem ficam; não há pan automático; a região `aria-live` só anuncia a mudança de estado da selecionada |
 | N7 | Desempenho | Fixture de teste com 50 conjuntos, 10 min a 1440 px no Chromium: nenhuma tarefa longa acima de 50 ms vinda da camada (`PerformanceObserver` longtask). Com a página oculta, nenhum `requestAnimationFrame` |
 | N8 | Domínio | Repete o M14 com a animação ligada |
-| N9 | Gemini | As três contraprovas (localização presumida, transição de sinal, foco e movimento) registradas e tratadas |
+| N9 | Gemini | As três contraprovas (localização presumida, transição de sinal, foco e movimento) registradas e tratadas. A opção "pausa vira saltos" fica recusada (revisão, 3a) |
+| N10 | Dados retirados em pausa | Com a animação pausada: enviar a OS-0421 para conferência noutra aba retira o marcador congelado, a linha e o painel, com "A O.S. saiu de Em execução · dados desta máquina retirados · Abrir O.S.". Trocar para um perfil sem permissão retira posição e operador, com "Seu acesso à localização foi retirado". Nada fica congelado na tela (Z5) |
 
 **F3a · Conexão de telemetria (CF-03, ambiente de testes simulado no protótipo).**
 
@@ -537,7 +595,7 @@ Estar no mercado não prova regra de domínio; o aceite se mede pelos K e M abai
 | T1 | Conectar | ≤ 2 toques no Safrion: abrir o fornecedor e Conectar. A tela simulada de consentimento mostra os escopos de somente leitura e o selo "Ambiente de testes simulado"; Permitir conecta |
 | T2 | Vínculo automático | Cinco equipamentos sintéticos John Deere: T1 e Trator 04 (série do CD-03) ficam "Vinculado por nº de série"; um de série desconhecida vira "Sem ativo"; um de série igual e modelo diferente e um sem série vão para "Confirmar". Resumo: "5 equipamentos: 2 vinculados · 2 para confirmar · 1 sem ativo" (V1–V8) |
 | T3 | Confirmar | 1 toque por item. Duplicata e dúvida nunca se vinculam sozinhas. O mesmo nome com outra série não vincula |
-| T4 | Prioridade | Telemetria atual vence o app. Sem telemetria e com app atual, o app assume em ≤ 1 leitura, com a troca marcada no painel e no rastro. Sem nenhuma, "Sem sinal" com a fonte (P1–P7) |
+| T4 | Prioridade | Telemetria atual vence o app. Sem telemetria e com app atual, o app assume em ≤ 1 leitura, com a troca marcada no painel e no rastro. Sem nenhuma, "Sem sinal" com a fonte. Desconectada nunca é atual, e sem leitura válida nada é presumido (P1–P13) |
 | T5 | Desconectar | 1 toque: a fonte some. As máquinas dela viram "Sem fonte: … desconectada às hh:mm" no mesmo desenho; os vínculos ficam guardados; a trilha da CF-04 registra quem e quando |
 | T6 | Nenhuma credencial | Gitleaks e varredura no `_render` e nas fontes: zero token, `client_secret` ou chave. Com interceptação de rede, zero requisições a domínios de fornecedor |
 | T7 | Contrato | As cargas simuladas de cada formato (estilo JD, ISO 15143-3, ISOXML TimeLog) se normalizam no contrato da leitura, com `origem: simulada`; os campos ausentes ficam ausentes, sem zero |
@@ -587,7 +645,7 @@ Contagem a partir da tela já aberta (Mapa em qualquer função, ou tela de trab
 ## Testes (proporcionais ao risco: posição e permissão sem efeito em dinheiro ou estoque)
 
 - **Unidade:**
-  - `frota_unit.js` (node), com os mesmos casos L, P, V e K do `mapa_frota_chk.py`;
+  - `frota_unit.js` (node), com os mesmos casos L, P, V, K e Z do `mapa_frota_chk.py`, mais a contraprova X contra uma cópia da regra da R1;
   - derivação dos conjuntos sobre o `CEN0` (C1–C5);
   - família do ícone por operação, agrupamento e texto da idade.
 - **Navegador:** `mapa_frota_test.py` (Playwright).
@@ -599,7 +657,7 @@ Contagem a partir da tela já aberta (Mapa em qualquer função, ou tela de trab
   - `mapa9_test`, `mapa_filtros_test`, `mapa_faixa_test`, `mapa_cancel_test`, `map_trilha_icones_test`, `talmapa_test`, `colheita_mapa_test`;
   - `componentes_test`, `ds_1610_test`, `regras_toque_test`, `acao_unica_test`;
   - `alocacao_unit_test`, `os_recurso_test`, `os_cenario_test`;
-  - os testes de Cadastros e Manutenção que contam ativos (a F1 acrescenta dois).
+  - os testes de Cadastros e Manutenção que contam ativos não mudam: a F1 não acrescenta ativo nem alocação.
 - **F3a e F3b:** `frota_tel_unit.js`, `cf03_tel_test.py` e `app_turno_posicao_test.py`; Gitleaks.
 - **Estado:** nenhum teste de produto foi executado; é especificação.
 
@@ -607,8 +665,8 @@ Contagem a partir da tela já aberta (Mapa em qualquer função, ou tela de trab
 
 | Fatia | Conteúdo | Arquivos prováveis | Aceite | Cliques |
 |---|---|---|---|---|
-| **F1 · Ver as máquinas** | Contrato e regras puras; fixture simulada com leituras discretas a cada 10 s; alternador e Lista; marcadores nos dois desenhos; painel e lista; conflito; permissão; agrupamento; "Ver no mapa" com recorte temporário; conjunto sintético da Lagoa Grande na fonte única (Trator LG-01 + Carreta de colheita LG, alocados à OS-0505 de 21 a 26/09, 06:00–15:00, enquanto ela está Em execução) | `frota.js` (novo: conjuntos, leitura, fonte, conflito, ícone, grupo, textos); `dados_frota.py` (novo: percursos relativos, velocidades, intervalo e limite, marca); `areas/inicio.py` (`_mapcard` nas duas variantes, `_mapsvg`, `lgEnsure`/`lgSync`, legenda, painel e lista, `#frota=`, recorte, 'mapa-ctx'); `alocacao.py` (recursos e blocos da OS-0505); `dados_cad.py` (a16 Trator LG-01, a17 Carreta de colheita LG); `dados_manutencao.py` (contadores, se a Manutenção exigir); `areas/processo_os.py` (Ver no mapa no detalhe e no ⋯); `engine.py` (ícones novos, pela skill `padrao-safrion`, DEC-1610-12); testes `frota_unit.js` e `mapa_frota_test.py` | M1–M22 | K1–K6 |
-| **F2 · Movimento e rastro** | Interpolação fora do `setState`; rastro do turno; Pausar animação; lacuna de sinal na fixture; desempenho | `frota.js`; `dados_frota.py`; `areas/inicio.py` (laço de quadro, camada de linha no SVG e no MapLibre, botão); testes | N1–N9 | K7 |
+| **F1 · Ver as máquinas** | Contrato e regras puras; fixture simulada com leituras discretas a cada 10 s; alternador e Lista; marcadores nos dois desenhos; painel e lista; conflito; permissão; agrupamento; "Ver no mapa" com recorte temporário; conjunto da Lagoa Grande como "conjunto de demonstração" (Trator LG-01 + Carreta de colheita LG ligados à OS-0505), declarado só na fixture | `frota.js` (novo: conjuntos lidos de `alVigente`, leitura, posição e estado, conflito por componente, ícone, grupo, textos); `dados_frota.py` (novo: percursos relativos, velocidades, intervalo e limite, marca e o conjunto de demonstração da Lagoa Grande, fora da alocação e do cadastro); `areas/inicio.py` (primeira da sequência MAPA-FROTA → EX-42 → SOLO-FOLHA-NIVEIS → SAF-MAPA: `_mapcard` nas duas variantes, `_mapsvg`, `lgEnsure`/`lgSync`, legenda, painel e lista, `#frota=`, recorte, 'mapa-ctx'); `areas/processo_os.py` (só o link "Ver no mapa" no detalhe e no ⋯, fora de `_kanban_raias`, `v.kb_raias` e `cenGrupo*`); `engine.py` (ícones novos, pela skill `padrao-safrion`, DEC-1610-12); testes `frota_unit.js` e `mapa_frota_test.py`. **Só leitura:** `alocacao.py` (`alVigente`, `alDaOrdem`, depois do PR #88), `cenario.js` e `dados_cad.py` | M1–M24 | K1–K6 |
+| **F2 · Movimento e rastro** | Interpolação fora do `setState`; rastro do turno; Pausar animação; lacuna de sinal na fixture; desempenho | `frota.js`; `dados_frota.py`; `areas/inicio.py` (laço de quadro, camada de linha no SVG e no MapLibre, botão); testes | N1–N10 | K7 |
 | **F3a · Conexão de telemetria** | CF-03 por fornecedor; Conectar e Desconectar em ambiente de testes simulado; vínculo por série; prioridade; normalizadores de formato; texto da conexão corrigido | `dados_config.py` (CONEXOES); `configuracoes.js` (conectar, desconectar, vincular, trilha); `areas/configuracoes.py` (linhas, detalhe, confirmar vínculo); `dados_cad.py` + `areas/cad_ativos_pessoas.py` (fabricante e série no CD-03); `dados_frota.py` (catálogo do ambiente de testes); `frota.js` (normalizadores e prioridade); testes | T1–T8 | K8–K9 |
 | **F3b · App como fonte e dados além da posição** | App como fonte com aviso e "Posição em uso"; sugestão de área no apontamento; horas de motor na Manutenção; combustível informativo | `areas/mobile.py`; `cenario.js` (estado de compartilhamento do app, sem mudar os comandos de turno); `areas/configuracoes.py`; `areas/processo_os.py`; manutenção; testes | T9–T14 | K10 |
 | fora do protótipo | Integração real com fornecedor (conta, OAuth, contrato, homologação em HML) | software real (`packages/integrations`) | — | — |
@@ -621,23 +679,24 @@ Contagem a partir da tela já aberta (Mapa em qualquer função, ou tela de trab
   - A semântica de "pausar" é a mesma: nunca mexe numa operação de negócio.
   - Nada aqui cria outro controle de tempo.
 - **OS-LOTE (agrupador):**
-  - Um conjunto que executa O.S. do mesmo agrupador é um marcador só, sem conflito.
-  - A contagem de O.S. não soma o grupo como ordem (decisão 6; K2).
+  - Um marcador só e sem conflito apenas para o **mesmo** conjunto do **mesmo** grupo, com programação do grupo e sem sobreposição (K4). O mesmo implemento em dois tratores continua conflito mesmo com ID de grupo igual (K2, K5–K7).
+  - A composição e a programação vêm do PR #88 (`c.gruposExec`, `c.ordens[id].prog`), lidas por `alVigente`. Não há escritor paralelo.
+  - A contagem de O.S. não soma o grupo como ordem (decisão 6).
 - **SAF-MAPA:** se a peça comum de desenho de talhões for extraída antes, a camada de máquinas entra nela. Se não, entra em `inicio.py` com a mesma interface, para mudar de lugar depois.
 - **MAPA-MIP-PROD (parte 2) e PRD 36.7:**
   - O leitor de ISOXML/ADAPT é peça única com a importação do mapa de colheita e o retorno da aplicação.
   - A F3a só normaliza a posição e o estado.
 - **EX-38:** o preparo previsto é lido de `cenPreparoOrdem` e mostrado como projeção, sem copiar a conta.
 - **PA-OPER:** a família do ícone sai da operação do catálogo, que a PA-OPER organiza; sem tabela paralela.
-- **Autoria de `inicio.py`:** EX-42, MAPA-MIP-PROD, SOLO-FOLHA-NIVEIS e SAF-MAPA também mexem nele. A F1 só começa com a autoria combinada (§3.4, uma solução por problema) e vaga no teto de três frentes (§3.6).
+- **Autoria de `inicio.py`:** fronteira aceita pelo Codex (6224071197). O Claude é o autor, em sequência: MAPA-FROTA → EX-42 → SOLO-FOLHA-NIVEIS → SAF-MAPA. A F1 só começa com vaga no teto de três frentes (§3.6).
 
 ## Riscos
 
 | # | Risco | Mitigação |
 |---|---|---|
 | R1 | O motor do protótipo redesenha tudo a cada `setState`; animar por ele custaria caro | Marcadores movidos direto no DOM (como `LGI.markers`). `setState` só em mudança discreta (estado, idade a cada 15 s); N7 |
-| R2 | Várias frentes no mesmo `inicio.py` | Autoria única e sequência combinadas antes do código; contraprova da composição (§3.6) |
-| R3 | Dois ativos novos e a alocação da Lagoa Grande mudam contagens em Cadastros, Manutenção e Carga do PCP | Atualizar os testes protegidos com a nova contagem, sem afrouxar; regressão listada |
+| R2 | Várias frentes no mesmo `inicio.py` | Sequência aceita (6224071197): MAPA-FROTA → EX-42 → SOLO-FOLHA-NIVEIS → SAF-MAPA; contraprova da composição (§3.6) |
+| R3 | A fixture da Lagoa Grande divergir da programação quando o PR #88 programar a OS-0505 | `alVigente` prevalece e a fixture deixa de valer para essa O.S. (teste: com `prog` na OS-0505, o rótulo passa a "pela programação"). A fixture não escreve na alocação nem no cadastro, e as contagens das outras telas não mudam |
 | R4 | A 8 km/h, o marcador anda cerca de 0,33 unidade/s no desenho e pode parecer parado (G4b) | Seta de rumo, velocidade, "há N s" e rastro; sem acelerar o tempo |
 | R5 | A API de alguns fornecedores não é "ao vivo" (consulta horária em parte das APIs ISO 15143-3, segundo terceiros; 5 s na tela do Operations Center, segundo revenda) | Idade honesta; limite por fornecedor no contrato; pergunta 1 ao proprietário |
 | R6 | A posição pelo celular é dado pessoal do empregado; a base legal e o aviso dependem do cliente | Desligada por padrão; aviso e indicador; nunca fora do turno; jurídico do cliente antes do piloto |
@@ -677,20 +736,27 @@ Só as que dependem dele: custo, contrato e realidade da fazenda. As demais est�
 
 ## Conferência executada
 
-- **Script:** `docs/integracao/V71/mapa-frota/mapa_frota_chk.py` (378 linhas, SHA-256 `9b3ec23af4329884f61a6239a9b5140334c34b58d1d5fbc7fbea6072b0f778d6`). O caminho do gerador é relativo ao próprio script.
+- **Script:** `docs/integracao/V71/mapa-frota/mapa_frota_chk.py` (623 linhas na R2, SHA-256 `aa5c91a6b562cad52c181de47548cd41ae50e6a96181b7712debf8501bce4649`; na R1, 378 linhas e `9b3ec23a…`). O caminho do gerador é relativo ao próprio script.
 - **Comando:** `python3 -B docs/integracao/V71/mapa-frota/mapa_frota_chk.py`.
-- **Execução em 16/10/2026:** saída 0 e **54 OK · 0 falhas**. A saída está em `mapa_frota_chk.out` (SHA-256 `de4b7ec921316d130b794f4be810fd54313b03ed8bea7698efa1660b97c91324`).
+- **Execução em 16/10/2026 (R2):** saída 0 e **79 OK · 0 falhas**. A saída está em `mapa_frota_chk.out` (SHA-256 `e1dc476cff7dc96ee286b7fecaf160f3e7289ede81f73c0663ef60b551e701cf`; na R1, 54 OK e `de4b7ec9…`).
 - **O que confere contra as fontes do protótipo:**
   - **R** (8): rendimento de referência pela DEC-2609-03 e larguras do CD-03;
   - **C** (7): O.S. Em execução, conjuntos pela alocação, conflito latente de 24/09 e ausência de alocação na Lagoa Grande;
   - **E** (3): projeção do EX-38 e tempo restante no rendimento de referência;
   - **G** (7): percurso sintético dentro de T2 e do Pivô 19 e sua plausibilidade.
 - **Oráculos executáveis das regras desta especificação:**
-  - **L** (11): contrato de leitura;
-  - **P** (7): prioridade de fontes;
+  - **L** (16): contrato de leitura, com L6c e L11–L14 da R2;
+  - **P** (13): posição e estado separados, com P5 e P6 corrigidos e P8–P13 da R2;
   - **V** (8): vínculo por série;
-  - **K** (3): conflito.
+  - **K** (7): conflito por componente físico, com K2 corrigido e K4–K7 da R2;
+  - **Z** (6): pausa da animação e foco no agrupamento.
   - Eles conferem a regra escrita, não o produto. O `frota_unit.js` vai reproduzi-los contra o código.
+- **Contraprova X** (4): as funções da R1 (87cb077), copiadas no script, reproduzem os quatro defeitos do 6224128496:
+  - `DivisionByZero` (X1);
+  - suspeita aceita por Δt negativo (X2);
+  - "posição da pausa" sem leitura e com a fonte desconectada (X3);
+  - conflito apagado pelo ID de grupo (X4).
+- **Os 54 casos da R1 continuam.** Os mesmos IDs e as mesmas saídas, exceto K2, P5 e P6, que registravam o defeito e têm agora o oráculo corrigido.
 - **Limites:**
   - nenhum navegador, banco ou fornecedor foi exercitado;
   - a geometria da Lagoa Grande é a sintética (`dados_lagoa_fonte.REAL = False`; "Demonstração sintética");
