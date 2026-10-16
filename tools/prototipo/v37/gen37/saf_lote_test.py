@@ -142,7 +142,6 @@ try:
     tecla('Escape'); botao('Descartar alterações'); cv3 = cultivos('S2627')
     chk('G1 Esc com alteração pede confirmação ("Há alterações não salvas"); Continuar editando fica; Descartar fecha sem gravar', w1 and not w2 and not painel() and cv3['P2']['meta'] == cv2['P2']['meta'] and 'Alterações descartadas' in toast(), [w1, w2, cv3['P2']])
     J("document.getElementById('sl-abrir').click()"); esp(1.2); foca('c7', 'meta'); digita('77')
-    J("(()=>{const k='talhao-os-cenario-v1'; const c=JSON.parse(localStorage.getItem(k)||'null')||null; return !!c;})()")
     J("(()=>{const c=window.__solo.cen(); c.ordens['OS-0430'].etapa='Liberadas'; localStorage.setItem('talhao-os-cenario-v1',JSON.stringify(c));})()")   # outra aba libera a OS-0430 (T1-A)
     botao('Salvar alterações'); g3 = gerr()
     chk('G2 conflito: outra aba liberou a OS-0430 (T1-A) depois de abrir; Salvar recusa com o motivo, nada gravado, o rascunho fica', 'mudaram depois que você abriu' in g3 and val('c7', 'meta') == '77' and cultivos('S2627')['P2']['meta'] == cv2['P2']['meta'], g3)
@@ -227,6 +226,18 @@ try:
     c.shot(os.path.join(PROBE, 'saf_lote_390_aplicar.png'))
     foca('c5', 'meta'); digita('71'); botao('Salvar alterações'); esp(.6)
     chk('H5 390 px: editar e salvar pelo celular', cultivos('S2627')['T3']['meta'] == 71 if cultivos('S2627') else False, cultivos('S2627').get('T3'))
+    J("document.getElementById('sfz-add').click()"); esp(.6)
+    J("(()=>{const l=[...document.querySelectorAll('#sfz-pop label,#sfz-pop [role=option],#sfz-pop button')].find(x=>/Lagoa Grande/.test(x.innerText)); if(l) l.click();})()"); esp(1.4)
+    J("(()=>{const b=[...document.querySelectorAll('#sfz-pop button')].find(b=>b.innerText.trim()==='Fechar'); if(b) b.click();})()"); esp(.5)
+    mm = J("""(()=>{const r=[...document.querySelectorAll('[role=row].g2fgrp')].find(r=>r.offsetParent&&/Lagoa Grande/.test(r.innerText)); if(!r) return null;
+      const lk=[...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Editar talhões ›'); const m=r.querySelector('[aria-label^="Mais ações"]'); const q=m?m.getBoundingClientRect():null;
+      return {lk:!!(lk&&lk.offsetParent),mais:m?[Math.round(q.width),Math.round(q.height)]:null};})()""")
+    J("(()=>{const r=[...document.querySelectorAll('[role=row].g2fgrp')].find(r=>r.offsetParent&&/Lagoa Grande/.test(r.innerText)); r.scrollIntoView({block:'center'});})()"); esp(.3); c.shot(os.path.join(PROBE, 'saf_lote_390_faixa.png'))
+    J("(()=>{const r=[...document.querySelectorAll('[role=row].g2fgrp')].find(r=>r.offsetParent&&/Lagoa Grande/.test(r.innerText)); r.querySelector('[aria-label^=\"Mais ações\"]').click();})()"); esp(.5)
+    it = J("[...document.querySelectorAll('[role=menuitem]')].filter(x=>x.offsetParent).map(x=>x.innerText.trim())")
+    J("(()=>{const b=[...document.querySelectorAll('[role=menuitem]')].find(x=>x.offsetParent&&x.innerText.trim()==='Editar talhões'); if(b) b.click();})()"); esp(1.8)
+    chk('H7 390 px com duas fazendas: "Editar talhões ›" à vista na faixa e também no ⋯ da faixa (alvo de 44 px), que abre o painel da fazenda', mm and mm['lk'] and mm['mais'] and min(mm['mais']) >= 44
+        and 'Editar talhões' in (it or []) and painel().startswith('Editar talhões da Lagoa Grande'), [mm, it, painel()[:60]])
     chk('H6 sem erro de JavaScript', not erros(), erros())
 finally:
     c.close(); srv.terminate()

@@ -29,7 +29,6 @@ CSS = ('<style>'
        f'.sl-pe{{position:sticky;bottom:0;background:{SURF};display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 0 14px;border-top:1px solid {LINE};margin-top:auto;z-index:2}}'
        '.sl-pn :is(input,select,button){min-height:var(--g2-alvo,0px)}'
        '@media (pointer:coarse){#sl-abrir{min-height:44px!important}}'
-       '.sl-l.sl-sel{background:#F2F8F4}'
        # celular: cada linha vira um bloco com os mesmos campos em duas colunas, rótulo em cima; alvo de 44 px; sem rolagem de lado
        '@media (max-width:760px){'
        '.sl-pn{padding:14px 12px 0!important}'

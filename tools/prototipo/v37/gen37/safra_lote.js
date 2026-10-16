@@ -161,7 +161,9 @@ function slAbrir(self){ const saf=self.state.saf; if(!slTem(self,saf)){ self.set
   if(!g2estreito()) setTimeout(()=>{ try{ const el=document.querySelector('#sl-grade [data-c]:not([disabled]):not([readonly])'); if(el){ el.focus({preventScroll:true}); if(el.select) el.select(); } }catch(e){} },60); }
 function slDados(self){ const sl=self.state.sl; if(!sl) return null; const lins=(self.__slLin||[]); return {sl,lins,dados:lins.filter(l=>l.tipo!=='grp')}; }
 function slSet(self,k,col,val){ const sl=self.state.sl; if(!sl) return; const lin=(self.__slLin||[]).find(l=>l.k===k); if(!lin||lin.tipo==='ro'||(lin.trava||{})[col]) return;
-  const ctx=slCtx(self,sl.saf); const vals=slPor(sl.vals,lin,col,val,ctx); const er=Object.assign({},sl.err); if(er[k]){ const e=Object.assign({},er[k]); delete e[col]; if(col==='cult') delete e.plano; if(Object.keys(e).length) er[k]=e; else delete er[k]; }
+  const ctx=slCtx(self,sl.saf);
+  // linha livre: "Não planejar agora" na cultura limpa a linha inteira (volta ao que era: nada a gravar)
+  const vals=(lin.tipo==='novo'&&col==='cult'&&!String(val||'').trim())?Object.assign({},sl.vals,{[k]:Object.assign({},sl.base[k])}):slPor(sl.vals,lin,col,val,ctx); const er=Object.assign({},sl.err); if(er[k]){ const e=Object.assign({},er[k]); delete e[col]; if(col==='cult') delete e.plano; if(Object.keys(e).length) er[k]=e; else delete er[k]; }
   self.setState({sl:Object.assign({},sl,{vals,err:er,warn:false,info:'',gerr:Object.keys(er).length?sl.gerr:''})}); }
 function slDirty(sl,lins){ return slContar(lins.filter(l=>l.tipo!=='grp'&&l.tipo!=='ro'),sl.vals,sl.base)>0; }
 function slFoco(el,d){ const col=el.getAttribute('data-c'); const all=[...document.querySelectorAll('#sl-grade [data-l][data-c="'+col+'"]')].filter(x=>x.offsetParent);
@@ -276,7 +278,7 @@ function slVals(self,v,saf,step,ro){ const multi=sgSubs(self,saf).length>1;
     SL_COLS.forEach(c=>{ const tr=(l.trava||{})[c]||''; const mud=slMudou(vv,bb,c); o[c]=String(vv[c]==null?'':vv[c]); o['ro_'+c]=!!tr; o['tt_'+c]=tr||(e[c]||'');
       o['al_'+c]=SL_ROT[c]+' de '+l.rot+(c==='area'||c==='meta'?'':'')+(tr?' (só leitura)':''); o['s_'+c]=(ev)=>slSet(self,l.k,c,ev.target.value);
       o['st_'+c]='font-family:inherit;font-size:13px;padding:6px 8px;border-radius:8px;box-sizing:border-box;width:100%;min-width:0;color:'+(tr?'#5B6660':'#15201A')+';border:1px solid '+(e[c]?'#B42318':(mud?'#8A5A00':'#E4E9E5'))+';background:'+(tr?'#F4F6F3':(e[c]?'#FDE8E6':(mud?'#FFF8E6':'#FFFFFF')))+';'+(c==='area'||c==='meta'?'text-align:right;':'')+(c==='area'&&tr?'font-weight:700;':''); });
-    o.oc=(vv.cult?[]:[{v:'',t:'Cultura…'}]).concat(CULT.map(x=>({v:x,t:x}))); o.op=planOpts({cult:vv.cult,plano:vv.plano}); o.dl='sl-dl-'+Math.max(0,CULT.indexOf(vv.cult||''));
+    o.oc=((l.tipo==='novo')?[{v:'',t:vv.cult?'Não planejar agora':'Cultura…'}]:(vv.cult?[]:[{v:'',t:'Cultura…'}])).concat(CULT.map(x=>({v:x,t:x}))); o.op=planOpts({cult:vv.cult,plano:vv.plano}); o.dl='sl-dl-'+Math.max(0,CULT.indexOf(vv.cult||''));
     o.unm=vv.cult?(l.meta0?metaUnTela(Object.assign({},l.meta0,{cult:vv.cult,meta:vv.meta})):metaRascunho(vv.cult,'','')._un):'—';
     const errs=Object.keys(e).map(c=>(SL_ROT[c]?SL_ROT[c]+': ':'')+e[c]); o.hasErr=errs.length>0; o.errMsg=l.rot+' · '+errs.join(' · ');
     return o; });

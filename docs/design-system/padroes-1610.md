@@ -293,3 +293,44 @@ E `cadastros_rev1_test.py`, R2a a R2e: "A resolver" com fazenda incompleta sem e
 **Dano evitado:**
 - duas colunas de ícones lado a lado, que se confundem;
 - importar laudo exigir sair do mapa e achar o talhão de novo.
+
+## Entrada rápida (frente SAF-LOTE)
+
+> "coloque um botao para poder editar de uma vez todos talhoes de uma fazenda numa tela só. como no outro anexo. todos inputs do usuário no sistema devem ser mais rápido e fácil."
+
+O "outro anexo" é o painel "Dividir T1 em parcelas" (grade editável com a soma conferida). Detalhe, números e testes: `docs/integracao/V73/SAF-LOTE.md`; próximas telas: `docs/integracao/V73/ENTRADA-RAPIDA.md`.
+
+### EDL-01 · Editar em lote numa grade
+
+**Regra:** quando a tela lista N itens do mesmo tipo com os mesmos campos, ela oferece a edição em grade, num painel largo do mesmo desenho do Dividir.
+- **Onde fica a ação:** secundária, verbo "Editar <itens>…", no título do bloco (com um contexto só) ou na faixa de cada contexto (uma fazenda por faixa, também no modo Cartões). Nunca uma segunda primária.
+- **Grade:** uma linha por item; os filhos (parcelas) recuados embaixo do pai; as colunas do formulário do item; uma coluna Situação curta com o motivo na dica e o link do que trava.
+- **Navegação de planilha:** Tab e Shift+Tab nas colunas; Enter ou ↓ desce e Shift+Enter ou ↑ sobe na mesma coluna; Esc fecha e, com alteração, pergunta antes.
+- **Aplicar aos marcados:** caixa em cada linha e "todas"; uma faixa com os mesmos campos da linha, preenchidos uma vez, vale para as linhas marcadas. Preenche só onde pode e diz quantas recusou e por quê.
+- **Colar do Excel/Planilhas:** bloco (tabulação e quebra de linha) a partir da célula focada, com conversão (vírgula decimal, datas dd/mm/aaaa e dd/mm) e o resumo "Colados 3 × 2: 6 células; 2 recusados (motivo)". Célula vazia do bloco não apaga.
+- **Nada é salvo antes do "Salvar alterações (N)":** o contador diz quantas células mudaram, as alteradas ficam destacadas (borda âmbar), e o selo do resumo diz "N alterações não salvas".
+- **Mesmas regras e mesmo caminho de gravação do formulário do item** (uma fonte só, ENG-011). A gravação é atômica por contexto (fazenda), com a chave do comando gerada ao abrir: o duplo clique não duplica. Falha ou conflito (outra aba mudou o que a grade mostra) não grava nada e mantém o rascunho.
+- **Celular:** cada linha vira um bloco com os mesmos campos em duas colunas e o rótulo em cima; alvos de 44 px; barra de salvar fixa; sem rolagem de lado. A faixa "Aplicar" mostra os campos quando há linha marcada.
+- **Peça própria sem tabela:** é uma grade de edição, como o Dividir (sem ordenar nem filtrar, sem `role=table`, sem CSS sobre classe do motor). A lista continua sendo a do motor.
+
+**Dano evitado:** abrir, preencher e salvar um painel por item quando os itens são muitos e os campos são os mesmos (no cenário medido, 29 cliques e 64 teclas viram 12 cliques e 30 teclas, ou 4 cliques e 2 teclas colando a planilha; ver SAF-LOTE.md).
+
+**Referência e teste:** Planejar safra › Cultivos e planos › "Editar talhões…" (`safra_lote.js`, `areas/saf_lote.py`). `saf_lote_test.py` (1440 e 390 px) e `saf_lote_unit_test.py` (colar, datas, número e recusas no node). A base c9ffa08 reprova (sem o botão).
+
+### INP · Entrada rápida (todo campo do sistema)
+
+| ID | Regra | Onde já vale | Prova |
+|---|---|---|---|
+| INP-01 | **Contexto herdado e visível.** A tela já sabe a organização, a fazenda, a safra, o talhão e a ordem: o painel diz o contexto no título e não pede de novo. Corrigível onde faz sentido. | Planejar safra (título "Editar talhões da Santa Rita", "Safra 2026/27 · Santa Rita") | `saf_lote_test.py` A2 |
+| INP-02 | **Campo calculável não se digita.** Área do talhão inteiro (cadastro CD-01), área livre (ocupação), primeiro plantio possível, totais e selos vêm calculados; a célula fica só leitura com o motivo. | Editar talhões (área do talhão inteiro e da área livre) | `saf_lote_test.py` G8, `saf_lote_unit_test.py` slPode |
+| INP-03 | **Teclado numérico com a unidade à vista.** Quantidade, área, dose e meta abrem o teclado decimal (`inputmode=decimal`), aceitam "1.234,5" e mostram a unidade ao lado (ha, sc/ha, t/ha/ano). | Formulário do motor (já tinha), Dividir, Editar talhões | `saf_lote_test.py` B4 |
+| INP-04 | **Número selecionado ao receber o foco** pelo toque ou pela navegação da tela: o número digitado substitui o anterior. O clique do mouse põe o cursor onde a pessoa clicou; o Tab já seleciona no navegador. | Toda página (`g2lib.js`, `g2inp`) | `saf_lote_test.py` B1 e I1 |
+| INP-05 | **Datas com atalho.** dd/mm sem ano assume o ano que cai dentro da safra; aceita ddmm, ddmmaaaa e dd/mm/aa; data que não existe é recusada com o formato. | Colar e aplicar no Editar talhões | `saf_lote_unit_test.py` slData |
+| INP-06 | **Lista curta em um toque; catálogo com busca.** Cultura em lista (a letra inicial escolhe), variedade com sugestão do cadastro e da safra, plano só da cultura da linha. | Editar talhões | `saf_lote_test.py` C1, D3 |
+| INP-07 | **Número, data e código sem corretor ortográfico nem maiúscula automática** (placa, lote, nota, CPF, CNPJ, chassi, série, matrícula, CAR). | Toda página (`g2lib.js`, `g2inp`) | `saf_lote_test.py` B4 e I1 |
+| INP-08 | **Enter avança só em grade de edição.** Na grade, Enter desce na coluna, como na planilha. Em formulário, o Enter não muda: não envia nem salva sem querer. | Editar talhões | `saf_lote_test.py` B1 e B2 |
+| INP-09 | **Colar em bloco** da planilha, com conversão e resumo do que entrou e do que foi recusado (EDL-01). | Editar talhões | `saf_lote_test.py` D1 a D4 |
+| INP-10 | **Nunca o último valor** para lote, dose, quantidade e autorização (AGENTS §3.3). Sugestão só de contexto (variedade e plano mais usados na safra, primeiro plantio possível), sempre destacada como alteração. A meta nunca é sugerida. | Editar talhões, Planejar ›, Planejar talhões livres | `saf_lote_unit_test.py` slTrocaCult |
+| INP-11 | **Erro junto ao campo.** A célula com problema fica destacada, a mensagem fica na linha, e a recusa é atômica: o que foi digitado continua. | Formulário do motor (já tinha), Dividir, Editar talhões | `saf_lote_test.py` C3 e E1 |
+
+**Dano evitado:** digitar de novo o que a tela já sabe, apagar dígito a dígito, corretor trocando código ou número, data digitada em formato que a tela não aceita e Enter que envia sem querer.

@@ -437,7 +437,8 @@ function syncTalhoes(self,saf,v){ const k=sk(saf); const sp=GR('g_cult_'+k); con
     const res=nPl+' de '+L.length+(L.length===1?' talhão planejado':' talhões planejados')+(nSp?' · '+nSp+' sem plantio':'');
     grupos.push({id:'fzg_'+su.id,fgrp:true,nosel:true,ro:true,v:{local:su.faz,area},s:{local:su.faz+' · '+nfa(area)+' ha · '+res},
       p:{local:[{k:'b',t:su.faz},{k:'mut',t:nfa(area)+' ha · '+res}].concat(nLv&&!m.info.safra.ro?[{k:'act',t:'Planejar talhões livres ›',fn:'pltfaz:'+su.faz,lk:true}]:[])
-        .concat(!m.info.safra.ro&&L.length?[{k:'act',t:'Editar talhões ›',fn:'slfaz:'+su.id,lk:true,al:'Editar talhões da '+su.faz}]:[]),area:[{k:'b',t:nfa(area)}]},kids:m.rows}); });   // EDL-01: todos os talhões da fazenda numa grade (safra_lote.js)
+        .concat(!m.info.safra.ro&&L.length?[{k:'act',t:'Editar talhões ›',fn:'slfaz:'+su.id,lk:true,al:'Editar talhões da '+su.faz}]:[])
+        .concat(!m.info.safra.ro&&L.length&&g2estreito()?[{k:'act',t:'Editar talhões',fn:'slfaz:'+su.id,al:'Editar talhões da '+su.faz}]:[]),area:[{k:'b',t:nfa(area)}]},kids:m.rows}); });   // EDL-01: todos os talhões da fazenda numa grade (safra_lote.js); no estreito, também no ⋯ da faixa
   sp.x0=x0; G2DISP[sp.id]=grupos; self.__ocG=G;
   if(info){ info.bandG=band; info.linhasG=linhas; info.totG=tot; } return info; }
 // linha de outra fazenda na tabela da sub-safra aberta: abrir e Excluir levam antes à sub-safra dela (os atalhos da linha já vão pelo talhão)
