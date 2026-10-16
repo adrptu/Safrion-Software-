@@ -47,7 +47,9 @@ CSS=('.ma-vis-m{display:none}'
      '.ma-cards{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto;gap:8px!important;order:9}.ma-cards .ma-card{flex:0 0 auto!important;min-width:132px;padding:6px 10px!important}.ma-sem{order:9}'
      '.ma-top{gap:6px!important}.ma-top button{padding:4px 9px!important;font-size:12px!important}.ma-top .ma-lbl{font-size:0!important;gap:0!important}'
      '.g2caixa div[role=group]{flex-wrap:nowrap!important;overflow-x:auto}.g2caixa div[role=group]>button{flex:0 0 auto}.g2rola [role=row][data-rid]>[role=cell]{padding-top:6px!important;padding-bottom:6px!important}'
-     '.ma-gat [role=row][data-rid]>[role=cell] .g2pw>*+*{display:none}.ma-gat [role=row][data-rid]>[role=cell]{min-height:46px;box-sizing:border-box}'   # no celular a linha do ativo mostra o essencial de cada coluna; o resto fica no detalhe
+     '.ma-gat [role=row][data-rid]>[role=cell] .g2pw>*+*{display:none}.ma-gat [role=row][data-rid]>[role=cell]{min-height:46px;box-sizing:border-box}'
+     # MA-VINCULO: no celular a ação do "Sem plano" fica à vista na célula Plano (o resto da célula continua no detalhe), com 44 px de alvo
+     '.ma-gat [role=row][data-rid]>[role=cell] .g2pw>a[href*="vincular="],.ma-gat [role=row][data-rid]>[role=cell] .g2pw>a[href*="novo=plano"]{display:inline-flex!important;align-items:center;min-height:44px}'   # no celular a linha do ativo mostra o essencial de cada coluna; o resto fica no detalhe
      '.ma-cards .ma-card>span:last-child{display:none}.ma-cards .ma-card>span:nth-child(2){font-size:18px!important}'
      '.ma-flt{flex-wrap:nowrap!important;overflow-x:auto;padding-bottom:2px}.ma-flt>*{flex:0 0 auto}'
      # faixa Filtros (MAN-LIMPA-01) no celular: uma linha que rola de lado, com o título de cada filtro (proprietário, 14/10: "precisa manter o
@@ -1205,7 +1207,8 @@ PM_CSS=('.pm-sv{border:1px solid #E4E9E5;border-radius:12px;background:#fff}'
         '.pm-sv-linha{display:grid;grid-template-columns:30px minmax(0,1.1fr) minmax(0,1.6fr) 130px 160px 34px;gap:10px;align-items:center;padding:8px 10px;font-size:13px}'
         '.vl-lista{display:flex;flex-direction:column}.vl-l{display:grid;grid-template-columns:minmax(0,230px) minmax(0,1fr);gap:6px 14px;align-items:start;padding:10px 0;border-top:1px solid #E4E9E5}'
         '.vl-ck{display:flex;gap:10px;align-items:flex-start;min-height:40px;cursor:pointer}.vl-ck input{width:20px;height:20px;margin:1px 0 0;accent-color:#1E7A4C;flex-shrink:0}'
-        '.vl-ck:has(input:disabled){cursor:default;opacity:.85}.vl-d{display:flex;flex-direction:column;gap:6px;min-width:0}.vl-in{display:flex;gap:6px 8px;flex-wrap:wrap;align-items:center}'
+        '.vl-ck:has(input:disabled){cursor:default;opacity:.85}.vl-d{display:flex;flex-direction:column;gap:6px;min-width:0}.vl-in{display:flex;gap:8px 14px;flex-wrap:wrap;align-items:center}'
+        '.vl-g{display:inline-flex;gap:6px;align-items:center;flex-wrap:nowrap;max-width:100%}.vl-g input[type=date]{min-width:0;flex:0 1 150px}'
         '.vl-prev{display:flex;flex-direction:column;gap:2px;padding:6px 10px;border-radius:8px;background:#F4F7F5}'
         '@media (max-width:640px){.vl-l{grid-template-columns:minmax(0,1fr)}.vl-ck{min-height:44px}.vl-in input,.vl-at{min-height:44px}.ma-atpl a{display:inline-flex;align-items:center;min-height:44px}}'
         '.pm-sv-det{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;padding:10px 14px 14px 50px;border-top:1px solid #E4E9E5}'
@@ -1408,10 +1411,10 @@ def _paineis_plano():
                   f'<span style="{SECT} color: #1E6B47;">Ao salvar</span>' + FOR('np_ef','e',f'<div>{H("e.t")}</div>',2) + '</div>')
              + IF('np_novo',_selp('np','base','Começar de','np_bases'),True))
     # MA-VINCULO: Vincular a plano (1 ou vários; SEL-04) e Desvincular
-    inp=(f'<div class="vl-in"><label for="{H("r.idd")}" style="{LBL}">Data</label><input id="{H("r.idd")}" type="date" max="{H("vl_hoje")}" value="{H("r.data")}" onChange="{H("r.setd")}" style="{H("r.std")}">'
-         f'<button type="button" class="vl-at" onClick="{H("r.hoje")}" style="{_MINI}">Hoje</button>'
-         + IF('r.cont',f'<label for="{H("r.idl")}" style="{LBL}">Leitura</label><span style="display: inline-flex; align-items: center; gap: 6px;"><input id="{H("r.idl")}" inputMode="numeric" value="{H("r.leit")}" onChange="{H("r.setl")}" style="{H("r.stl")}"><span style="font-size: 12.5px; color: {MUTED};">{H("r.un")}</span></span>'
-              + IF('r.temAtual',f'<button type="button" class="vl-at" onClick="{H("r.atual")}" style="{_MINI}">{H("r.atualT")}</button>'))
+    inp=(f'<div class="vl-in"><span class="vl-g"><label for="{H("r.idd")}" style="{LBL}">Data</label><input id="{H("r.idd")}" type="date" max="{H("vl_hoje")}" value="{H("r.data")}" onChange="{H("r.setd")}" style="{H("r.std")}">'
+         f'<button type="button" class="vl-at" onClick="{H("r.hoje")}" style="{_MINI}">Hoje</button></span>'
+         + IF('r.cont',f'<span class="vl-g"><label for="{H("r.idl")}" style="{LBL}">Leitura</label><input id="{H("r.idl")}" inputMode="numeric" value="{H("r.leit")}" onChange="{H("r.setl")}" style="{H("r.stl")}"><span style="font-size: 12.5px; color: {MUTED};">{H("r.un")}</span>'
+              + IF('r.temAtual',f'<button type="button" class="vl-at" onClick="{H("r.atual")}" style="{_MINI}">{H("r.atualT")}</button>') + '</span>')
          + '</div>' + IF('r.temEd',f'<span role="alert" style="{ERRS}">{H("r.ed")}</span>')
          + IF('r.pedeMot',f'<div class="vl-in"><label for="{H("r.idm")}" style="{LBL}">Motivo da correção</label><input id="{H("r.idm")}" value="{H("r.mot")}" onChange="{H("r.setm")}" style="{H("r.stm")}"></div>'
               + IF('r.temEm',f'<span role="alert" style="{ERRS}">{H("r.em")}</span>')))

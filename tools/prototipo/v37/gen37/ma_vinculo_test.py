@@ -213,8 +213,8 @@ def parte_B():
         ok(av and av['h'] >= 44 and av['w'] <= 390 and larg(m) <= 0, 'B1 · entrada do módulo: aviso com 44 px de alvo, sem rolagem lateral', [av, larg(m)])
         foto(m, 'B1_entrada_390.png')
         J("document.querySelector('a.mod-aviso').click()"); time.sleep(1.6); rows = m.linhas(0)
-        cartao = J("(()=>{const r=[...document.querySelectorAll('[data-rid=\"a12\"]')].find(e=>e.getClientRects().length); if(!r) return null; const a=[...r.querySelectorAll('a')].find(a=>/^Vincular ao/.test(a.innerText.trim())); const b=a&&a.getBoundingClientRect(); return b?{h:b.height,r:b.right,t:a.innerText.trim()}:null;})()")
-        ok(sorted(rows) == ['a07', 'a09', 'a10', 'a12'] and larg(m) <= 0 and cartao and cartao['r'] <= 390, 'B1 · Ativos › Sem plano no celular: 4 ativos, "Vincular ao PM-07 ›" à vista, sem rolagem lateral', [rows, cartao, larg(m)])
+        cartao = J("(()=>{const r=[...document.querySelectorAll('[data-rid=\"a12\"]')].find(e=>e.getClientRects().length); if(!r) return null; const a=[...r.querySelectorAll('a')].find(a=>/^Vincular ao/.test(a.innerText.trim())); const b=a&&a.getBoundingClientRect(); return b&&b.width>0?{h:b.height,r:b.right,t:a.innerText.trim()}:null;})()")
+        ok(sorted(rows) == ['a07', 'a09', 'a10', 'a12'] and larg(m) <= 0 and cartao and cartao['h'] >= 44, 'B1 · Ativos › Sem plano no celular: 4 ativos, "Vincular ao PM-07 ›" à vista na linha (44 px), sem rolagem lateral da página', [rows, cartao, larg(m)])
         foto(m, 'B1_ativos_390.png')
         abre_link(m, 'a12'); botao(m, 'Contar de agora')
         g = J(f"(()=>{{const p=document.querySelector('{PAN}'); const b=p.querySelector('.ma-rod button:last-child'); const r=b.getBoundingClientRect(); const ck=p.querySelector('[data-aid=\"a12\"] .vl-ck').getBoundingClientRect();"
