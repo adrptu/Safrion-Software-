@@ -91,7 +91,20 @@ def desvios(pg, m, menu):
     if m['cartoesProprios'] and pg not in PAINEIS: d['VIS-06'] = ', '.join(m['cartoesProprios'])
     return d
 
+def cobertura(esperadas, pags, medidas=None):
+    """Catraca só vale com o inventário completo: sem página, ou sem uma página da base, ou sem medição de alguma, reprova (S3 do Codex, 6223504783)."""
+    if not esperadas: return 'base sem a lista de páginas (_paginas); regrave com --grava'
+    if not pags: return 'render sem páginas'
+    falta = sorted(set(esperadas) - set(pags))
+    if falta: return f'faltam {len(falta)} página(s) da base: ' + ', '.join(falta[:10])
+    if medidas is not None and set(medidas) != set(pags): return f'{len(set(pags) - set(medidas))} página(s) sem medição'
+    return ''
+
 if __name__ == '__main__':
+    BASEJ = os.path.join(HERE, 'ds_modulos_base.json')
+    if '--catraca' in sys.argv:
+        erro = cobertura(json.load(open(BASEJ)).get('_paginas'), PAGS)
+        if erro: print('RESULTADO: FALHOU ' + erro); sys.exit(1)
     p, srv = servir(R); c = Chrome(); J = c.js; BASE = f'http://127.0.0.1:{p}/'; res = {}
     try:
         c.aparelho(1440, 900, 1, False); c.goto(BASE + 'Main.dc.html', .3); J("localStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana')")
@@ -111,9 +124,12 @@ if __name__ == '__main__':
     tot = sum(len(x['desvios']) for x in res.values())
     print(f'TOTAL: {tot} desvios em {sum(1 for x in res.values() if x["desvios"])} de {len(res)} telas · JSON: {SAIDA}')
     conta = {f'{mod}|{"menu" if menu else "fora"}|{k}': sum(1 for _, x in L if k in x['desvios']) for (mod, menu), L in por.items() for k, _ in REGRAS}
-    BASE = os.path.join(HERE, 'ds_modulos_base.json')
     if '--grava' in sys.argv:
-        json.dump(conta, open(BASE, 'w'), ensure_ascii=False, indent=1, sort_keys=True); print('base gravada:', BASE)
+        erro = cobertura(PAGS, PAGS, res)
+        if erro: print('RESULTADO: FALHOU ' + erro + ' (base não gravada)'); sys.exit(1)
+        json.dump(dict(conta, _paginas=sorted(res)), open(BASEJ, 'w'), ensure_ascii=False, indent=1, sort_keys=True); print('base gravada:', BASEJ)
     elif '--catraca' in sys.argv:
-        b = json.load(open(BASE)); sob = [f'{k} {b.get(k, 0)}→{n}' for k, n in sorted(conta.items()) if n > b.get(k, 0)]
+        b = json.load(open(BASEJ)); erro = cobertura(b.get('_paginas'), PAGS, res)
+        if erro: print('RESULTADO: FALHOU ' + erro); sys.exit(1)
+        sob = [f'{k} {b.get(k, 0)}→{n}' for k, n in sorted(conta.items()) if n > b.get(k, 0)]
         print('RESULTADO: ' + ('catraca ok' if not sob else 'SUBIU: ' + '; '.join(sob))); sys.exit(1 if sob else 0)

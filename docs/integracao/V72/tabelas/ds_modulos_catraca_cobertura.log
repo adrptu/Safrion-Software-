@@ -1,0 +1,7 @@
+# executado em df941bf+mudança local de ds_modulos.py; render de f46e2d6 (148 páginas)
+$ RENDER_DIR=<pasta vazia> python3 -B ds_modulos.py --catraca
+RESULTADO: FALHOU render sem páginas
+exit=1
+$ RENDER_DIR=<render sem CA-01.dc.html> python3 -B ds_modulos.py --catraca
+RESULTADO: FALHOU faltam 1 página(s) da base: CA-01.dc.html
+exit=1
