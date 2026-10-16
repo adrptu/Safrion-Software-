@@ -196,7 +196,7 @@ function paAtvV(self,p,a,pub){ const xa=self.state.xa||{}; const open=!!xa[a.id]
   let chg=''; if(p.rasc&&p.versao){ if(!o) chg='Nova'; else if(paNorm(o)!==paNorm(a)) chg='Alterada'; }
   const gat=paGat(a.g); const np=a.prods.length; const nv=p.rasc?p.rasc.v:p.versao+1; const fl=self.state.flash===a.id;
   const d0=Number(a.g.dias), gatC=a.g.tipo==='DAP'?((d0<0?'−':'')+Math.abs(d0)):gat.t;   /* só o número: a seção já diz DAP; o texto inteiro fica na dica e no leitor */
-  return Object.assign({nome:a.nome, op:a.op, gatilho:gatC, gatlab:gat.t+(gat.full?' · '+gat.full:''), gatilhoFull:gat.full, hasFull:false, detalhesId:'pa-insumos-'+p.id+'-'+a.id, detalhesLab:'Insumos de '+a.nome, np:np?(np+(np>1?' insumos':' insumo')):'Só operação', custo:np?paRS(paCa(a))+'/ha':'—', open, sym:open?'▾':'▸', lab:(open?'Recolher insumos de ':'Mostrar insumos de ')+a.nome,
+  return Object.assign({aid:a.id, nome:a.nome, op:a.op, gatilho:gatC, gatlab:gat.t+(gat.full?' · '+gat.full:''), gatilhoFull:gat.full, hasFull:false, detalhesId:'pa-insumos-'+p.id+'-'+a.id, detalhesLab:'Insumos de '+a.nome, np:np?(np+(np>1?' insumos':' insumo')):'Só operação', custo:np?paRS(paCa(a))+'/ha':'—', open, sym:open?'▾':'▸', lab:(open?'Recolher insumos de ':'Mostrar insumos de ')+a.nome,
     tog:()=>{ const n=Object.assign({},self.state.xa||{}); n[a.id]=!open; self.setState({xa:n}); },
     edit:()=>paEdit(self,a.id), rst:fl?'background:#E4F3E9;':'',
     excluir:()=>paDelDesf(self,p.id,a.id),
@@ -271,6 +271,8 @@ function paS2(self,v,p){ const todas=paWork(p); const ops=paOps(todas); const of
     return {t:PA_GRP[g].t, d:PA_GRP[g].d, n:nat+(nat>1?' atividades':' atividade')+(list.length!==nat?' · '+list.length+(list.length>1?' gatilhos':' gatilho'):''), tot:paRS(tot)+'/ha',
       gats:list.map(t=>({atvs:t.atvs.map(a=>paAtvV(self,p,a,pub))}))}; });
   v.vazio=!todas.length; v.tem_atv=!!todas.length;
+  /* modo Tabela | Cartões (15/10/2026): abre em Cartões (a lista própria); preferência por perfil e ?view=tabela no endereço (g2mdVals) */
+  { const md=g2mdVals(self,v,{id:'pa_atv',padrao:'cartoes',url:true}); v.pa_md_c=md==='cartoes'; v.pa_md_t=md==='tabela'; v.pa_tb_gat=(atv.length&&atv.every(a=>a.g.tipo==='DAP'))?'DAP':'Gatilho'; }
   const u=self.state.paUndo; v.pa_undo=!!(u&&u.pid===p.id); v.pa_undo_t=u?u.t:''; v.pa_desfaz=()=>paDesfaz(self);
   v.x_all=()=>{ const xa={}; atv.forEach(a=>{ xa[a.id]=true; }); self.setState({xg:{},xa}); };
   v.x_none=()=>self.setState({xa:{}});
@@ -533,6 +535,24 @@ ERR = f'font-size: 12px; font-weight: 700; color: {RED};'
 def err(hole_has, hole_msg): return IF(hole_has, f'<span role="alert" style="{ERR}">{H(hole_msg)}</span>')
 
 
+PA_TB_CSS = ('.pa-tb{display:grid;grid-template-columns:72px minmax(0,1fr) 110px 120px 48px;border:1px solid #E4E9E5;border-radius:12px;background:#fff;font-size:13px}'
+             '.pa-tb [role=row]{display:grid;grid-column:1/-1;grid-template-columns:subgrid;align-items:center;border-top:1px solid #E4E9E5}'
+             '.pa-tb [role=row]>[role=cell],.pa-tb [role=row]>[role=columnheader]{padding:6px 10px;min-width:0}'
+             '.pa-tb-cab{border-top:0!important;background:#F4F6F3;border-radius:12px 12px 0 0;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A}'
+             '.pa-tb-l{cursor:pointer}@media (hover:hover){.pa-tb-l:hover{background:#F2F8F4}.pa-tb-l:hover .pa-mais{opacity:1}}.pa-tb-l:focus-within .pa-mais,.pa-tb-l .pa-mais[aria-expanded=true]{opacity:1}'
+             '.pa-tb-gat{text-align:right;font-variant-numeric:tabular-nums}.pa-tb-gat b{font-size:13px}'
+             '.pa-tb-atv{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.pa-tb-atv .pa-titulo{min-width:0;flex:0 1 auto;overflow-wrap:break-word}'
+             '.pa-tb-ins{text-align:right;font-size:12px;color:#65736A}.pa-tb-num{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}'
+             '.pa-tb .pa-mais-w{padding:0!important}.pa-tb-det{border-top:0!important;background:#FBFCFA}.pa-tb-det:empty{display:none}.pa-tb-detc{grid-column:1/-1;padding:0!important}'
+             '.pa-tb-detc .pa-insumos{border-radius:0;padding-left:92px}'
+             '.pa-tb-grpc{grid-column:1/-1;display:flex;align-items:center;gap:6px;padding:8px 10px 4px 12px!important}.pa-tb-gtot{width:120px;padding-right:48px;text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;box-sizing:content-box}'
+             '.pa-tb .pa-titulo:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:4px}'
+             # celular: DAP, Atividade (com o Custo/ha logo abaixo do nome) e ⋯; Insumos fica na linha aberta e no cartão; o título da seção ganha a linha
+             '@media (max-width:640px){.pa-tb{grid-template-columns:44px minmax(0,1fr) 44px}.pa-tb .pa-tb-ins,.pa-tb-cab .pa-tb-num{display:none}'
+             '.pa-tb [role=row]>[role=cell],.pa-tb [role=row]>[role=columnheader]{padding:6px}.pa-tb-l{grid-template-rows:auto auto;row-gap:0}'
+             '.pa-tb-l>.pa-tb-gat{grid-column:1;grid-row:1/3}.pa-tb-l>.pa-tb-atv{grid-column:2;grid-row:1;padding-bottom:0!important;flex-wrap:nowrap;align-items:flex-start}.pa-tb-atv .pa-op-ico{padding-top:7px}'
+             '.pa-tb-l>.pa-tb-num{grid-column:2;grid-row:2;text-align:left;padding-top:0!important;font-size:12.5px}.pa-tb-l>.pa-mais-w{grid-column:3;grid-row:1/3}'
+             '.pa-tb-grpc{flex-wrap:wrap}.pa-tb-grpc>span:first-child{flex-basis:calc(100% - 40px)}.pa-tb-gtot{width:auto;padding-right:0}.pa-tb-detc .pa-insumos{padding-left:12px}}')
 PA_LINHA_CSS = '\n.pa-atividade{border:1px solid #E4E9E5;border-radius:12px;background:#fff;container-type:inline-size}\n.pa-atividade-linha{display:grid;grid-template-columns:38px 56px minmax(0,1fr) 80px 115px 44px;gap:10px;align-items:center;padding:8px 10px;font-size:13px;cursor:pointer}\n.pa-gatilho,.pa-atividade-nome{display:flex;flex-direction:column;gap:3px;min-width:0;overflow-wrap:anywhere}\n.pa-gatilho b{font-size:13px}.pa-gatilho>span,.pa-operacao,.pa-contagem{font-size:12px;color:#65736A}\n.pa-titulo{border:0;background:transparent;padding:6px 0;min-height:32px;font:inherit;font-size:13.5px;font-weight:700;color:#15201A;cursor:pointer;text-align:left}.pa-op-ico{display:inline-flex;color:#4B5A51;flex-shrink:0}.pa-gatilho b{font-variant-numeric:tabular-nums;text-align:right}.pa-mais-w{position:relative;display:flex;justify-content:center}.pa-mais{width:44px;height:44px;border:0;background:transparent;border-radius:8px;font-size:18px;color:#4B5A51;cursor:pointer;opacity:.35}.pa-atividade:hover .pa-mais,.pa-atividade:focus-within .pa-mais,.pa-mais[aria-expanded=true]{opacity:1}@media (hover:none){.pa-mais{opacity:1}}.pa-grp-tot{width:115px;text-align:right;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;padding-right:64px}.pa-grp{container-type:inline-size}.pa-opf{white-space:nowrap}@media (pointer:coarse){.pa-desfaz{min-height:44px}}@container (max-width:760px){.pa-grp-cab{flex-wrap:wrap;row-gap:2px}.pa-grp-cab>div:first-child{flex-basis:100%}.pa-grp-tot{width:auto;padding-right:0}}\n.pa-contagem,.pa-custo{text-align:right}.pa-custo{font-weight:700;font-variant-numeric:tabular-nums}\n.pa-expandir.g2car,.pa-excluir.g2del{width:38px;height:44px}.pa-atividade button:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:4px}\n.pa-insumos{padding:8px 16px 12px 58px;background:#FBFCFA;border-top:1px solid #E4E9E5;border-radius:0 0 12px 12px}\n.pa-insumos-rolagem{overflow-x:auto}.pa-insumos-rolagem>div,.pa-insumos-rolagem>sc-for>div{min-width:720px}\n.pa-dose{font:inherit;font-variant-numeric:tabular-nums;color:inherit;background:transparent;border:0;border-bottom:1px dashed #A9B4AC;border-radius:4px 4px 0 0;padding:3px 5px;cursor:text}\n@media (hover:hover){.pa-dose:hover{background:#EEF5F0;border-bottom-color:#1E7A4C}}.pa-dose:focus-visible{background:#EEF5F0;border-bottom-color:#1E7A4C}\n@container (max-width:760px){.pa-atividade-linha{grid-template-columns:38px minmax(36px,64px) minmax(0,1fr) 44px;gap:4px 8px}.pa-expandir{grid-column:1;grid-row:1 / 4}.pa-gatilho{grid-column:2;grid-row:1 / 4}.pa-atividade-nome{grid-column:3;grid-row:1}.pa-excluir,.pa-mais-w{grid-column:4;grid-row:1 / 4}.pa-contagem{grid-column:3;grid-row:2;text-align:left}.pa-custo{grid-column:3;grid-row:3;text-align:left}.pa-insumos{padding:8px 12px}}\n.pa-disc{border:0;background:transparent;padding:0;font:inherit;color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-align:left}.pa-disc:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px;border-radius:4px}\n@container (max-width:480px){.pa-atividade-linha{grid-template-columns:32px auto auto minmax(0,1fr) 44px;grid-template-areas:"e n n n m" "e g c k m";gap:2px 10px;padding:6px 6px 8px}.pa-expandir{grid-area:e}.pa-atividade-nome{grid-area:n}.pa-gatilho{grid-area:g}.pa-gatilho b{text-align:left}.pa-contagem{grid-area:c;text-align:left}.pa-custo{grid-area:k;text-align:right;white-space:nowrap}.pa-excluir,.pa-mais-w{grid-area:m}}\n'
 
 # ícones do tipo de operação (Lucide, ISC; LICENSES/lucide-ISC.txt): o mesmo no chip e na atividade (VISOES-2 §3.5)
@@ -548,7 +568,7 @@ def _opico(pre):
 
 def build():
     fname = 'PA.dc.html'; E._reset_screen(fname)
-    EXTRA.append('<style>'+PA_LINHA_CSS+'</style>')
+    EXTRA.append('<style>'+PA_LINHA_CSS+PA_TB_CSS+'</style>')
     dd = _dados()
     # ---------- lista · biblioteca por cultura (cards compactos) ----------
     card = (f'<button type="button" class="g2card" aria-current="{H("c.cur")}" onClick="{H("c.open")}" aria-label="{H("c.lab")}" style="{H("c.st")}">'
@@ -604,7 +624,11 @@ def build():
                           f'<button type="button" onClick="{H("a.volta")}" style="{_MINI}">Desfazer</button></div>')
            + IF('a.addOff', f'<div style="padding-top: 8px;"><button type="button" aria-label="{H("a.addLab")}" onClick="{H("a.addIni")}" style="{_MINI} {ICO} gap: 4px;">{MAIS(12)}Incluir insumo</button></div>', True)
            + IF('a.addOn', add_row))
-    atv = (f'<div class="pa-atividade" style="{H("a.rst")}">'
+    # os insumos da atividade aberta: os mesmos nos dois modos (Cartões e Tabela, 15/10/2026)
+    insumos = ('<div class="pa-insumos">'
+               + IF('a.semProd', f'<div style="font-size: 12.5px; color: {MUTED}; padding: 6px 0;">Sem insumos · só operação</div>')
+               + IF('a.temProd', '<div class="pa-insumos-rolagem">' + prod_hdr + FOR('a.prods', 'p', prod_row, 2) + '</div>') + inl + '</div>')
+    atv = (f'<div class="pa-atividade" data-atv="{H("a.aid")}" style="{H("a.rst")}">'
            f'<div class="pa-atividade-linha" onClick="{H("a.rowtog")}">'
            f'<button type="button" class="g2car pa-expandir" aria-label="{H("a.lab")}" aria-expanded="{H("a.open")}" aria-controls="{H("a.detalhesId")}" onClick="{H("a.tog")}">{H("a.sym")}</button>'
            f'<span class="pa-gatilho" title="{H("a.gatlab")}"><b aria-hidden="true">{H("a.gatilho")}</b><span class="g2sr">{H("a.gatlab")}</span></span>'
@@ -614,9 +638,26 @@ def build():
            f'<span class="pa-contagem">{H("a.np")}</span><span class="pa-custo">{H("a.custo")}</span>'
            f'<span class="pa-mais-w">' + E.mais(H('a.nome'), [('Editar atividade', H('a.edit')), ('Excluir atividade', H('a.excluir'), True)], linha=True, cls='pa-mais') + '</span></div>'
            + f'<div id="{H("a.detalhesId")}" role="region" aria-label="{H("a.detalhesLab")}">'
-           + IF('a.open', '<div class="pa-insumos">'
-                + IF('a.semProd', f'<div style="font-size: 12.5px; color: {MUTED}; padding: 6px 0;">Sem insumos · só operação</div>')
-                + IF('a.temProd', '<div class="pa-insumos-rolagem">' + prod_hdr + FOR('a.prods', 'p', prod_row, 2) + '</div>') + inl + '</div>') + '</div></div>')
+           + IF('a.open', insumos) + '</div></div>')
+    # modo Tabela das Atividades do plano (proprietário, 15/10/2026: "nessas 2 por exemplo tem que ter opção tabela e 'Cartões'"): a lista acima é
+    # o modo Cartões (abre nele, VISOES-2 §4); a Tabela tem DAP (ou Gatilho), Atividade com o ícone da operação, Insumos, Custo/ha e o ⋯, com
+    # o mesmo filtro por operação, o mesmo "Expandir tudo" e o mesmo clique: a linha (ou o nome) abre os insumos logo abaixo, editáveis
+    tb_lin = (f'<div role="row" class="pa-tb-l" data-atv="{H("a.aid")}" onClick="{H("a.rowtog")}" style="{H("a.rst")}">'
+              f'<span role="cell" class="pa-tb-gat" title="{H("a.gatlab")}"><b aria-hidden="true">{H("a.gatilho")}</b><span class="g2sr">{H("a.gatlab")}</span></span>'
+              f'<span role="cell" class="pa-tb-atv"><span class="pa-op-ico" role="img" aria-label="{H("a.op")}" title="{H("a.op")}">' + _opico('a') + '</span>'
+              f'<button type="button" class="pa-titulo" aria-label="{H("a.lab")}" aria-expanded="{H("a.open")}" aria-controls="{H("a.detalhesId")}" onClick="{H("a.tog")}">{H("a.nome")}</button>'
+              + IF('a.hasChg', f'<span style="{H("a.chgst")} padding: 0 8px; font-size: 11px; line-height: 16px;">{H("a.chg")}</span>') + '</span>'
+              f'<span role="cell" class="pa-tb-ins">{H("a.np")}</span><span role="cell" class="pa-tb-num">{H("a.custo")}</span>'
+              f'<span role="cell" class="pa-mais-w">' + E.mais(H('a.nome'), [('Editar atividade', H('a.edit')), ('Excluir atividade', H('a.excluir'), True)], linha=True, cls='pa-mais') + '</span></div>'
+              f'<div role="row" class="pa-tb-det" id="{H("a.detalhesId")}" aria-label="{H("a.detalhesLab")}">' + IF('a.open', '<div role="cell" class="pa-tb-detc">' + insumos + '</div>') + '</div>')
+    tb_grp = (f'<div role="row" class="pa-tb-grp"><div role="cell" class="pa-tb-grpc"><span style="font-size: 13.5px; font-weight: 800;">{H("g.t")}</span>'
+              f'<button type="button" class="g2dica-i" aria-label="Como ler: {H("g.t")}" data-dica="{H("g.d")}" style="width: 32px; height: 32px; border: 0; background: transparent; color: {MUTED}; cursor: help;">ⓘ</button>'
+              f'<span style="font-size: 12px; color: {MUTED}; white-space: nowrap; flex-grow: 1;">{H("g.n")}</span><span class="pa-tb-gtot">{H("g.tot")}</span></div></div>'
+              + FOR('g.gats', 't', FOR('t.atvs', 'a', tb_lin, 1), 2))
+    tabela = (f'<div class="rola"><div role="table" class="pa-tb" aria-label="Atividades do plano">'
+              f'<div role="row" class="pa-tb-cab"><span role="columnheader">{H("pa_tb_gat")}</span><span role="columnheader">Atividade</span>'
+              f'<span role="columnheader" class="pa-tb-ins">Insumos</span><span role="columnheader" class="pa-tb-num">Custo/ha</span><span role="columnheader"><span class="g2sr">Ações</span></span></div>'
+              + FOR('grp', 'g', tb_grp, 1) + '</div></div>')
     gat = FOR('t.atvs', 'a', atv, 1)
     grp = FOR('grp', 'g', f'<div class="pa-grp" style="display: flex; flex-direction: column; gap: 8px; padding-top: 4px;">'
                           f'<div class="pa-grp-cab" style="display: flex; align-items: baseline; gap: 10px; border-top: 1px solid {LINE}; padding-top: 10px;"><div style="display: flex; align-items: center; gap: 4px; flex-grow: 1; min-width: 0;">'
@@ -642,9 +683,10 @@ def build():
              + '</div>')
     # barra da coleção (v3 · DS-33): filtros rápidos no começo, expandir/recolher (apresentação) no fim; "Incluir atividade" (filho) no
     # cabeçalho da seção, à direita, separado do avanço
-    barra = (f'<div style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 280px; min-width: 0;">' + IF('tem_opf', qf_op) + '</div>' + xbtn + '</div>')
+    barra = (f'<div style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 280px; min-width: 0;">' + IF('tem_opf', qf_op) + '</div>' + xbtn
+             + E.modos_html('pa_atv', 'Visão das atividades: tabela ou cartões') + '</div>')   # modo Tabela | Cartões (15/10/2026), depois do Expandir tudo
     atividades = bloco('Atividades do plano', 'Na seta, altere dose e insumos direto na tabela. Clique na atividade para mudar gatilho e operação.',
-                       IF('pa_undo', f'<div role="status" style="display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 8px; background: {GRAYS}; font-size: 12.5px;"><span style="flex-grow: 1;">{H("pa_undo_t")}</span><button type="button" class="pa-desfaz" onClick="{H("pa_desfaz")}" style="{_MINI}">Desfazer</button></div>') + IF('vazio', vazio) + IF('tem_atv', barra + f'<div class="rola" style="display: flex; flex-direction: column; gap: 10px;">{grp}</div>', True), acao=incl_sec)
+                       IF('pa_undo', f'<div role="status" style="display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 8px; background: {GRAYS}; font-size: 12.5px;"><span style="flex-grow: 1;">{H("pa_undo_t")}</span><button type="button" class="pa-desfaz" onClick="{H("pa_desfaz")}" style="{_MINI}">Desfazer</button></div>') + IF('vazio', vazio) + IF('tem_atv', barra + IF('pa_md_c', f'<div class="rola" style="display: flex; flex-direction: column; gap: 10px;">{grp}</div>', True) + IF('pa_md_t', tabela), True), acao=incl_sec)
 
     # ---------- detalhe · com rascunho, as alterações logo acima do Próximo passo ----------
     # 14/10/2026 (proprietário: "tire cultivos que usam esse plano e versões. não agregam quase nada"): os blocos saíram do detalhe.

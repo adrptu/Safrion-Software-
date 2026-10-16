@@ -989,7 +989,7 @@ function EXTRAVALS(self,v){
   all.forEach(o=>{ v['op_'+o.id.replace('-','')]=()=>self.setState({pan:o.id,pa:null}); });
   self.g2pick=(gid,rid)=>{ if(gid==='g_os'&&String(rid).indexOf('grp@')!==0) self.setState({pan:String(rid).split('@')[0]}); };
   // agrupar por talhão: liga/desliga; grupos começam abertos; total geral de O.S. distintas (cada O.S. uma vez)
-  const osAg=g2agLer(self,GR('g_os')); v.os_agr=g2visao(self,'g_os')==='lista'&&!!osAg&&osAg.d==='onde';   /* VISOES-2: por Onde, a O.S. de vários talhões aparece em cada um */
+  const osAg=g2agLer(self,GR('g_os')); v.os_agr=['lista','cartoes'].indexOf(g2visao(self,'g_os'))>=0&&!!osAg&&osAg.d==='onde';   /* VISOES-2: por Onde, a O.S. de vários talhões aparece em cada um */
   /* VISOES-2 §3.4: toda forma lê o mesmo recorte, inclusive a trilha do Agrupar por (self.__osTr: IDs dentro da trilha; null sem trilha) */
   { const spB=GR('g_os'), stB=osSt(self); const trB=g2agNoTrilha(self,spB,stB,self.__osBase||[]); self.__osTr=trB?new Set(trB.map(r=>r.id)):null;
     const dist=(self.__osBase||[]).filter(r=>(!self.__osTr||self.__osTr.has(r.id))&&g2match(r,spB,stB)); const ar=dist.reduce((a,r)=>a+(Number(r.v.area)||0),0);
@@ -1632,7 +1632,7 @@ def build():
                dict(k='real',l='Realizado (ha)',t='num',a='r',d=2,pq='medida',agg='sum'),dict(k='saldo',l='Saldo (ha)',t='num',a='r',d=2,pq='medida',agg='sum'),
                dict(k='disp',l='Dispensado (ha)',t='num',a='r',d=2,zdash=True,pq='medida'),dict(k='prog',l='Progresso (%)',t='num',a='r',d=1,ess=6,pq='medida'),
                dict(k='resp',l='Responsável',pq='quem')],   # sem coluna Lâmina: a O.S. só com água saiu para a Irrigação (01/10), onde a lâmina tem colunas próprias (IR-03); aqui ela ficava sempre vazia
-              [],edit=dict(m='pick'),gid='g_os',total=False,tree=True,vazio=False,
+              [],edit=dict(m='pick'),gid='g_os',total=False,tree=True,vazio=False,cartoes='externo',   # DS VIS-05: Cartões é uma visão do seletor da VISOES-1 (mesmo painel da Tabela)
               # VISOES-2 §3.3: Agrupar por (O quê, Quem, Quando, Onde) com os níveis do descer; a linha traz r.g (osLinhas)
               ag=[dict(pq='oque',l='Atividade',niv=['Operação','Atividade'],um='O.S.',plural='O.S.'),dict(pq='quem',l='Responsável',niv=['Responsável'],um='O.S.',plural='O.S.'),
                   dict(pq='quando',l='Início',niv=['Safra','Mês','Semana'],um='O.S.',plural='O.S.'),dict(pq='onde',l='Talhão',niv=['Fazenda','Talhão'],fc=['','tal'],um='O.S.',plural='O.S.')])   # vazio de filtro: estado comum das visões (VISOES-1 §2.8)
@@ -1652,7 +1652,7 @@ def build():
               f'<sc-for list="{H("rc_sem")}" as="s" hint-placeholder-count="2"><button type="button" onClick="{H("s.go")}" style="{_MINI}">{H("s.id")}</button></sc-for></div></sc-if>')
     # VISOES-1 (proprietário, 10/10/2026): seletor por ícone; Lista e Tabela agrupada na mesma grade (o agrupamento é estado da grade),
     # Kanban e Carga por recurso migram sem mudança de regra. Visões válidas: visoes.py (fonte única; O.S. sem Mapa: DEC-2609-09)
-    bar,panes=visoes('g_os','os',{'lista':g_os,'kanban':kb_nota+_kanban_raias(),'calendario':kb_nota+_calendario(),'carga':kb_nota+rc_nota+_recursos_tab()},rotulo='Visão das ordens')
+    bar,panes=visoes('g_os','os',{'lista':g_os,'cartoes':'lista','kanban':kb_nota+_kanban_raias(),'calendario':kb_nota+_calendario(),'carga':kb_nota+rc_nota+_recursos_tab()},rotulo='Visão das ordens')
     colbar=(f'<div class="os-colbar" style="display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap;"><div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">{_chips()}{_notas_tal()}</div>'   # o Talhão subiu para a faixa "Filtros desta tela" (13/10); os avisos dele ficam aqui
             f'<div style="flex: 0 0 auto; margin-left: auto;">{bar}</div></div>'
             # 15/10/2026 (proprietário: "tabela e kanban devem manter o agrupar por"): no Kanban o mesmo "Agrupar por" da Tabela (as raias seguem o grupo)

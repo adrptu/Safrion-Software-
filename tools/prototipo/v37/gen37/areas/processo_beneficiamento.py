@@ -17,10 +17,11 @@ def build():
     fname = 'BEN.dc.html'; E._reset_screen(fname)
     g_ob = grid([dict(k='id', l='Ordem', w=150), dict(k='prod', l='Produto', w=200), dict(k='fase', l='Fase', w=140), dict(k='cond', l='Condição', w=200, multi=True),
                  dict(k='ep', l='Em processo', t='num', a='r', w=130), dict(k='nx', l='Próximo passo', w=230), dict(k='quem', l='Quem resolve', w=200)],
-                [], edit=dict(m='pick'), gid='g_ob', total=False, qf=dict(k='fase', l='Fase', todas='Todas'))
+                [], edit=dict(m='pick'), gid='g_ob', total=False, qf=dict(k='fase', l='Fase', todas='Todas'),
+                cartoes='externo')   # DS VIS-05: Cartões entra no seletor Lista | Cartões | Kanban da tela (bn_vis 'c')
     EXTRAJS[0] = _js(BEN_JS)
     vis = (f'<div class="pr-vis" role="group" aria-label="Visão das ordens"><button type="button" aria-pressed="{H("vl_on")}" onClick="{H("vl_go")}">Lista</button>'
-           f'<button type="button" aria-pressed="{H("vk_on")}" onClick="{H("vk_go")}">Kanban</button></div>')
+           f'<button type="button" aria-pressed="{H("vc_on")}" onClick="{H("vc_go")}">Cartões</button><button type="button" aria-pressed="{H("vk_on")}" onClick="{H("vk_go")}">Kanban</button></div>')
     nova = f'<button type="button" onClick="{H("nova_go")}" style="{_MINI}">Criar ordem</button>'
     kb = (f'<style>@media (max-width:479px){{.bn-kb>div{{flex-direction:column!important}}.bn-kb>div>div{{width:100%!important}}}}</style>'
           f'<div class="bn-kb" style="overflow-x: auto;">{_kanban()}</div>')
@@ -251,7 +252,9 @@ function bnPainel(self,c,o){ const r=benRota(o.ben.rota); const b=benBal(o); con
   if(at==='Em conferência'){ sec.push({t:'Reabrir execução',go:()=>self.setState({pr_modo:'reabrir',pr_form:null,pr_err:''})}); if(!o.ben.conf) sec.push({t:'+ Registrar perda',go:abreSaida}); }
   return PPx; }
 function EXTRAVALS(self,v){ prRst(self,v); const c=self._c||cenGet(); const st=self.state; const ords=self._ords||[];
-  const vis=st.bn_vis||'l'; v.vl=vis==='l'; v.vk=vis==='k'; v.vl_on=String(vis==='l'); v.vk_on=String(vis==='k'); v.vl_go=()=>self.setState({bn_vis:'l'}); v.vk_go=()=>self.setState({bn_vis:'k'});
+  /* DS VIS-05 (15/10/2026): Lista | Cartões | Kanban; Cartões é a mesma grade g_ob em cartões (g2lib.g2modosFim, gancho g2modoExterno) */
+  const vis=st.bn_vis||'l'; v.vl=vis==='l'||vis==='c'; v.vk=vis==='k'; v.vl_on=String(vis==='l'); v.vc_on=String(vis==='c'); v.vk_on=String(vis==='k');
+  v.vl_go=()=>self.setState({bn_vis:'l'}); v.vc_go=()=>self.setState({bn_vis:'c'}); v.vk_go=()=>self.setState({bn_vis:'k'}); self.g2modoExterno=(gid)=>(gid==='g_ob'&&(self.state.bn_vis||'l')==='c')?'cartoes':'tabela';
   v.kb=bnKanban(self,c,ords);
   v.nova_go=()=>self.setState({pr_pan:{g:'nova'},pr_sel:null,pr_form:null,pr_err:'',pr_modo:null,pr_ch:prChave('W-BNN'),bn_rasc:null});
   v.cards_ob=prCards(self,v,'g_ob',id=>{ const o=c.ordens[id]; if(!benEh(o)) return null; const nx=benProx(c,o);
