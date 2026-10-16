@@ -10,7 +10,7 @@ Pedido do proprietário em 16/10/2026: "crie uma skill e metodologia de trabalho
 Esta skill é o **método**. As regras ficam numa fonte única, que não se copia para cá:
 - `AGENTS.md` §4;
 - PRD cap. 74;
-- `docs/design-system/` (na branch do protótipo: `padroes-1510.md`, `padroes-1610.md`, `diretrizes-ux.md` e os demais).
+- `docs/design-system/` (na branch do protótipo `claude/v44-v69-mapa`, a partir de 6b726d6: `padroes-1510.md`, `padroes-1610.md`, `diretrizes-ux.md` e os demais; os scripts `ds_inventario.py`, `galeria.py` e `ds_1610_test.py` ficam em `tools/prototipo/v37/gen37/` no mesmo commit).
 
 ## Por que o proprietário precisava corrigir (causas medidas em 16/10)
 
@@ -44,7 +44,7 @@ Pedido do proprietário sobre uma tela vale para **todas as telas do mesmo tipo*
 3. **Inventariar todas as ocorrências.** Escreva a lista na rodada antes de editar. Procure:
    - telas que usam o componente comum (`E.grid`, `bloco`, `mais`, `modos_html`…);
    - telas com peça própria equivalente (tabela, cartão, barra ou botão feitos à mão);
-   - CSS de área que mira classe do motor (`.cadx .g2…`, `.pa-…` imitando `.g2…`). `python3 -B ds_inventario.py` lista esses casos.
+   - CSS de área que mira classe do motor (`.cadx .g2…`, `.pa-…` imitando `.g2…`). No protótipo, `tools/prototipo/v37/gen37/ds_inventario.py` (branch do protótipo) lista esses casos; no software real, `rg` pelas classes e pelos componentes de `packages/ui`.
 4. **Corrigir na fonte comum:**
    - no protótipo, `engine.py` e `g2lib.js`;
    - no software real, `packages/ui`.
@@ -60,7 +60,8 @@ Pedido do proprietário sobre uma tela vale para **todas as telas do mesmo tipo*
    - contraprova: a versão antiga reprova;
    - a contagem de desvios por padrão não sobe.
 7. **Prova visual:**
-   - `python3 -B galeria.py` fotografa, em 1440 px e 390 px, uma tela de cada família: lista do motor, árvore, agrupada, cadastro, Atividades do plano, Kanban, formulário, mapa e app de campo.
+   - No protótipo, `tools/prototipo/v37/gen37/galeria.py` (branch do protótipo) fotografa, em 1440 px e 390 px, uma tela de cada família: lista do motor, árvore, agrupada, cadastro, Atividades do plano, Kanban, formulário, mapa e app de campo.
+   - No software real, a mesma prova sai do teste de navegador (`pnpm run test:e2e`, Playwright): uma captura por família de tela, nas duas larguras, anexada ao PR.
    - Olhe **cada foto** e compare com a referência aprovada.
    - Desalinhamento, poluição, peça fora do lugar ou estilo diferente do vizinho é achado, e se corrige antes de publicar.
 8. **Entregar:**
@@ -83,7 +84,7 @@ Pedido do proprietário sobre uma tela vale para **todas as telas do mesmo tipo*
 | Tabela | Planos agronômicos › Atividades do plano, modo Tabela, com seta de abrir e ícones de ordenar e filtrar em cada coluna | 16/10 |
 | Cartões | Atividades do plano, modo Cartões: um cartão por linha, com seta, colunas alinhadas e ⋯ | 16/10 |
 | Cabeçalho de tela | Ordem de Serviço: título, estado e a primária verde à direita (BOT-01) | 09/10 |
-| Barra da tabela | Ordem da TAB-01: busca, filtros rápidos, Agrupar por, Colunas, Expandir, Tabela \| Cartões na ponta | 15/10 |
+| Barra da tabela | TAB-01 em `docs/design-system/padroes-1510.md`: a ordem vale como está lá e não se copia aqui | 15/10 |
 
 ## O que nunca fazer
 
