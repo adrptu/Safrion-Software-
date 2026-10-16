@@ -71,10 +71,14 @@ function g2sort(arr,sp,st){ const so=st.so||sp.so; if(!so||!so.k) return arr; co
 function g2filtering(st){ return !!((st.q||'').trim()) || Object.keys(st.f||{}).some(k=>(st.f[k]||[]).length); }
 // ---------- filtro rápido: chips "Todas N · valor n" sobre uma coluna; vale no 1º nível (em árvore, o grupo fica se ele ou um filho tiver o valor) ----------
 function g2qtok(r,c,qf){ let t=g2text(r,c); if(!t||t==='—') return []; if(qf.cut) t=t.split(qf.cut)[0]; if(qf.num) t=t.replace(/\s+\d.*$/,''); return (qf.sep?t.split(qf.sep):[t]).map(x=>x.trim()).filter(x=>x&&x!=='—'); }
-function g2qhas(r,c,qf,val){ return g2qtok(r,c,qf).indexOf(val)>=0 || (!qf.nivel0&&(r.kids||[]).some(k=>g2qhas(k,c,qf,val))); }
-function g2qrows(sp,st,rows){ if(!sp.qf||!st.qv) return rows; const c=sp.cols.find(x=>x.k===sp.qf.k); if(!c) return rows; return rows.filter(r=>g2qhas(r,c,sp.qf,st.qv)); }   // vazio continua vazio (TABELAS-FOCO)
+function g2qhas(r,c,qf,val){ if(r.fgrp) return (r.kids||[]).some(k=>g2qhas(k,c,qf,val)); return g2qtok(r,c,qf).indexOf(val)>=0 || (!qf.nivel0&&(r.kids||[]).some(k=>g2qhas(k,c,qf,val))); }
+// SAF-FAZ-3 (15/10/2026): linha de grupo transparente (r.fgrp, a fazenda na tabela de talhões de várias fazendas): o filtro rápido e a contagem
+// valem no nível de baixo (talhões); o grupo fica com os filhos que passam e some sem nenhum
+function g2nivel1(rows){ const o=[]; (rows||[]).forEach(r=>{ if(r.fgrp) g2nivel1(r.kids).forEach(k=>o.push(k)); else o.push(r); }); return o; }
+function g2qrows(sp,st,rows){ if(!sp.qf||!st.qv) return rows; const c=sp.cols.find(x=>x.k===sp.qf.k); if(!c) return rows;
+  const f=(l)=>l.map(r=>r.fgrp?Object.assign({},r,{kids:f(r.kids||[])}):r).filter(r=>r.fgrp?(r.kids||[]).length>0:g2qhas(r,c,sp.qf,st.qv)); return f(rows); }   // vazio continua vazio (TABELAS-FOCO)
 // os chips contam só as linhas que os outros filtros da tela deixam ver (r.sh)
-function g2qvals(self,sp,v,st,rows0,added){ const id=sp.id, qf=sp.qf; const rows=rows0.filter(r=>!(r.sh&&!(added||{})[r.sh])); v[id+'_hasqf']=false; v[id+'_qf']=[]; v[id+'_qfl']=''; if(!qf) return; const c=sp.cols.find(x=>x.k===qf.k); if(!c) return;
+function g2qvals(self,sp,v,st,rows0,added){ const id=sp.id, qf=sp.qf; const rows=g2nivel1(rows0).filter(r=>!(r.sh&&!(added||{})[r.sh])); v[id+'_hasqf']=false; v[id+'_qf']=[]; v[id+'_qfl']=''; if(!qf) return; const c=sp.cols.find(x=>x.k===qf.k); if(!c) return;
   const cnt={}; const tok=(r)=>{ const s=new Set(g2qtok(r,c,qf)); if(!qf.nivel0) (r.kids||[]).forEach(k=>tok(k).forEach(x=>s.add(x))); return s; };
   rows.forEach(r=>tok(r).forEach(x=>{ cnt[x]=(cnt[x]||0)+1; }));
   const cur=st.qv||''; if(cur&&!(cur in cnt)) cnt[cur]=0;   // escolha sem linhas continua à vista (com 0) para poder ser limpa
@@ -109,11 +113,11 @@ function g2ac(self,chave,itens,escolhido,pick,o){ o=o||{}; const ac=self.state.g
 function g2flat(sp,st,rows,mask,added){
   const out=[]; const exp=st.x||sp.x0||{}; const filt=g2filtering(st);
   const deep=(r)=>g2match(r,sp,st,mask,added)||(r.kids||[]).some(deep);
-  const walk=(list,lvl,parentOk)=>{ g2sort(list,sp,st).forEach(r=>{ const kids=r.kids||[]; const selfOk=g2match(r,sp,st,mask,added);
+  const walk=(list,lvl,parentOk,pf)=>{ g2sort(list,sp,st).forEach(r=>{ const kids=r.kids||[]; const selfOk=g2match(r,sp,st,mask,added);
       const anyKid=kids.some(deep); if(!(selfOk||anyKid||parentOk)) return;
-      out.push({r,lvl,has:kids.length>0});
-      if(kids.length && (exp[r.id] || (filt && anyKid && !selfOk))) walk(kids,lvl+1,selfOk&&!filt); }); };
-  walk(rows,0,false); return out; }
+      out.push({r,lvl,has:kids.length>0,pf:!!pf});
+      if(kids.length && ((r.fgrp?exp[r.id]!==false:exp[r.id]) || (filt && anyKid && !selfOk))) walk(kids,lvl+1,selfOk&&!filt,!!r.fgrp); }); };   // grupo transparente nasce aberto
+  walk(rows,0,false,false); return out; }
 // Selos e chips de estado com significado e próximo passo (DS-DICA-20261009): fonte única das dicas de estado; o texto segue as regras do
 // motor (fases da O.S. do AGENTS §4, PEND-OS-01 e as exceções da aprovação; bloqueios nas mensagens de osEncBloq/osLibErro). Chave = texto
 // do selo antes de " · ". Só vale onde a tela pede (data-dica-de ou parte {de:1}): o mesmo texto noutro contexto pode significar outra coisa.
@@ -175,7 +179,10 @@ function g2glossCol(sp,c,rows){ if(typeof G2_GLOSS==='undefined'||!rows||!rows.l
       if(t&&t!=='—') cel.push(t); if(r.kids) walk(r.kids); } }; walk(rows);
   const all=cel.join('\n'); const out=cel.length?G2GC.__re.filter(([re])=>re.test(all)&&cel.filter(x=>re.test(x)).length>=Math.max(1,0.3*cel.length)).slice(0,2).map(x=>x[1]).join(' '):'';
   return (m.k[c.k]=out); }
-function g2sum(sp,flat,c){ let s=0,n=0; flat.forEach(x=>{ if(x.lvl!==0) return; const k=g2key(x.r,c); if(typeof k==='number'){ s+=k; n++; } }); return n? (c.agg==='avg'? s/n : s) : null; }
+function g2sum(sp,flat,c,F){ let s=0,n=0; const passa=(r)=>!F||!F.filt||F.match(r)||(r.kids||[]).some(passa);
+  // SAF-FAZ-3: grupo transparente (fgrp) soma os filhos que passam no filtro (todos, quando a busca casa com o próprio grupo, como a lista)
+  const um=(r,tudo)=>{ if(r.fgrp){ const t2=tudo||!!(F&&F.filt&&F.match(r)); (r.kids||[]).forEach(k=>{ if(t2||passa(k)) um(k,t2); }); return; } const k=g2key(r,c); if(typeof k==='number'){ s+=k; n++; } };
+  flat.forEach(x=>{ if(x.lvl!==0) return; um(x.r,false); }); return n? (c.agg==='avg'? s/n : s) : null; }
 // condição de campo do formulário: {k, eq} (igual) ou {k, ne} (diferente)
 function g2cond(f,d){ if(!f.cond) return true; const um=(c)=>{ const v=String((d||{})[c.k]===undefined?'':d[c.k]); return (c.ne!==undefined)?v!==String(c.ne):v===String(c.eq); };
   return Array.isArray(f.cond)?f.cond.every(um):um(f.cond); }   // lista = todas valem
@@ -247,6 +254,8 @@ function g2acaoIco(t){ t=String(t||'').toLowerCase();
   if(/plano|aplicar/.test(t)) return 'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M9 14l2 2 4-4';
   if(/vincular|ciclo/.test(t)) return 'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71';
   if(/editar|alterar|ajustar/.test(t)) return 'M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z';
+  if(/não plantar|sem plantio/.test(t)) return 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM4.93 4.93l14.14 14.14';   // SAF-FAZ-3: talhão fora do plantio (círculo cortado)
+  if(/voltar a|desfazer/.test(t)) return 'M3 7v6h6M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13';   // desfazer (seta de volta)
   if(/planejar|incluir|criar|nov[ao]/.test(t)) return 'M12 5v14M5 12h14';
   return 'M9 18l6-6-6-6'; }
 function g2sicoPart(r,sp,k){ k=k||sp.sico.k; const cores=sp.sico.cores||['red','orange','yellow'], c=sp.cols.find(x=>x.k===k); if(!c) return null;
@@ -458,7 +467,7 @@ function g2vals(self,sp,v,mask){
   // VISOES-2 C3: busca que casa só em coluna oculta diz na linha onde casou (a coluna continua valendo para a busca)
   const ondeCasou=(r)=>{ if(!qn||!g2cvTem(sp)||r.grp) return ''; if(cols.some(c=>g2norm(g2text(r,c)).indexOf(qn)>=0)) return ''; const oc=sp.cols.filter(c=>!visK.has(c.k)&&g2norm(g2text(r,c)).indexOf(qn)>=0).map(c=>c.l); return oc.length?'encontrado em: '+oc.join(', '):''; };
   const sicoKs=sp.sico?(sp.sico.ks||[sp.sico.k]).filter(k=>!visK.has(k)):[];
-  v[id+'_rows']=flat.map(({r,lvl,has})=>{
+  v[id+'_rows']=flat.map(({r,lvl,has,pf})=>{
     const cells=[]; const exp=(st.x||sp.x0||{}); const casou=ondeCasou(r); const sicoP=sicoKs.map(k=>g2sicoPart(r,sp,k)).filter(Boolean); const acts=[];
     // linha livre (convite para cadastrar, ex.: talhão sem cultivo): sem seleção e sem lixeira
     if(sp.sel&&(r.livre||r.fora||r.nosel)) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.sel) cells.push({isSel:true,isData:false,isDel:false,cls:'',on:!!(st.sel||{})[r.id],selLabel:'Selecionar '+g2text(r,sp.cols[0]),
@@ -473,16 +482,18 @@ function g2vals(self,sp,v,mask){
       if(sp.rmenu){ const vai=p=>p&&p.k==='act'&&!p.desce&&!p.full&&!/›\s*$/.test(String(p.t||'')); const fica=raw.filter(p=>!vai(p)); if(fica.length<raw.length){ raw.forEach(p=>{ if(vai(p)) acts.push(p); }); raw=fica; } }
       const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':'')+(c.nr?' g2nr':'')+(c.a==='r'?' g2celn':''),parts:(ci===0&&casou?raw.concat([{k:'br'},{k:'mut',t:casou}]):raw).map((p,i,arr)=>g2part(g2semSep(arr,i),v)),pw:'max-width:'+(c.w||340)+'px;',
         st:(c.nr?'padding:0 2px;':'padding:6px 8px;')+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&arv?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:inherit;box-shadow:1px 0 0 #E4E9E5;':'')};
-      if(ci===0 && arv){ cell.hasCaret=true; cell.caretOk=has; cell.caretNo=!has; const open=!!exp[r.id]||(g2filtering(st)&&has);
+      if(ci===0 && arv){ cell.hasCaret=true; cell.caretOk=has; cell.caretNo=!has; const open=(r.fgrp?exp[r.id]!==false:!!exp[r.id])||(g2filtering(st)&&has);
         cell.caretSym=open?'▾':'▸'; cell.caretExp=String(open); cell.caretLabel=(open?'Recolher ':'Expandir ')+g2text(r,c);
-        cell.toggle=()=>{ const x=Object.assign({},g2st(self,id).x||sp.x0||{}); x[r.id]=!x[r.id]; g2set(self,id,{x}); }; }
+        cell.toggle=()=>{ const x=Object.assign({},g2st(self,id).x||sp.x0||{}); x[r.id]=r.fgrp?(x[r.id]===false):!x[r.id]; g2set(self,id,{x}); }; }
       else { cell.hasCaret=false; }
       cells.push(cell); });
+    // SAF-FAZ-3: o grupo transparente (fazenda) é uma faixa de cabeçalho: a 1ª célula ocupa as colunas de dados (nome, área e contagem juntos)
+    if(r.fgrp){ const d=cells.filter(x=>x.isData); if(d.length){ d[0].st+='grid-column:span '+(d.length)+';'; d[0].pw='max-width:none;'; } for(let i=cells.length-1;i>=0;i--){ if(cells[i].isData&&cells[i]!==d[0]) cells.splice(i,1); } }
     const semDel=!sp.del||r.livre||r.fora||r.nosel||!!r.ro;
     if(sp.rmenu&&sp.del&&(!semDel||acts.length)){   // ⋯ da linha: as ações da linha com ícone e, por último, Excluir (com a confirmação de sempre)
       const asking=(st.cf===r.id), nome=g2text(r,sp.cols[0]), fnDe=(p)=>{ if(p.fn&&p.fn.indexOf(':')>0){ const nm=p.fn.split(':')[0], ar=p.fn.slice(nm.length+1); return ()=>{ if(v&&v[nm]) v[nm](ar); }; } return (v&&p.fn&&v[p.fn])||(()=>{}); };
       const its=acts.map(p=>({t:p.al||p.t, ico:g2acaoIco(p.al||p.t), cls:'', fn:fnDe(p)}));
-      if(!semDel) its.push({t:'Excluir', ico:g2acaoIco('Excluir'), cls:'g2mais-destr', fn:()=>g2set(self,id,{cf:r.id})});
+      if(!semDel) its.push({t:'Excluir', ico:g2acaoIco('Excluir'), cls:'g2mais-destr', fn:()=>{ if(r.xdel&&v&&v[r.xdel]){ v[r.xdel](r.id); return; } g2set(self,id,{cf:r.id}); }});   // SAF-FAZ-3: r.xdel = linha guardada em outra grade
       cells.push({isSel:false,isData:false,isDel:true,cls:'',asking,notAsking:!asking,trash:false,rm:true,rmLabel:'Mais ações de '+nome,rmItems:its,st:'padding:4px 6px;white-space:nowrap;',
         delLabel:'Excluir '+nome, ask:()=>g2set(self,id,{cf:r.id}), no:()=>g2set(self,id,{cf:null}),
         yes:()=>{ const g2_0=self.state.g2; const rs=g2clone(g2rows(self,sp)); const rm=(list)=>{ const i=list.findIndex(x=>x.id===r.id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&rm(x.kids)); }; rm(rs); g2set(self,id,{rows:rs,cf:null}); self.setState({g2toast:'Excluído: '+nome}); if(self.g2after) self.g2after(id,rs,null); g2persiste(self,id,g2_0,{cf:null},'Não excluído'); } }); }
@@ -490,9 +501,10 @@ function g2vals(self,sp,v,mask){
         delLabel:'Excluir '+g2text(r,sp.cols[0]), ask:()=>g2set(self,id,{cf:r.id}), no:()=>g2set(self,id,{cf:null}),
         yes:()=>{ const g2_0=self.state.g2; const rs=g2clone(g2rows(self,sp)); const rm=(list)=>{ const i=list.findIndex(x=>x.id===r.id); if(i>=0){ list.splice(i,1); return true; } return list.some(x=>x.kids&&rm(x.kids)); }; rm(rs); g2set(self,id,{rows:rs,cf:null}); self.setState({g2toast:'Excluído: '+g2text(r,sp.cols[0])}); if(self.g2after) self.g2after(id,rs,null); g2persiste(self,id,g2_0,{cf:null},'Não excluído'); }}); }
     const canOpen=editable && !(ed.leafOnly && has) && !r.fora && !(r.nosel && !r.dr);
-    return {id:r.id, cls:'g2r'+(canOpen?' g2ed':'')+(st.fl===r.id?' g2flash':'')+(lvl>0?' g2kid':''), tab:(canOpen&&!r.drDup)?'0':'-1',
+    return {id:r.id, cls:'g2r'+(canOpen?' g2ed':'')+(st.fl===r.id?' g2flash':'')+(lvl>0&&!pf?' g2kid':'')+(r.fgrp?' g2fgrp':''), tab:(canOpen&&!r.drDup)?'0':'-1',
       open:(e)=>{ if(canOpen) g2open(self,sp,r.id,e); }, key:(e)=>{ if(!canOpen || !e || (e.key!=='Enter'&&e.key!==' ')) return; const t=e.target; if(t&&t.closest&&t.closest('a,button,input,select,textarea,label,[data-noedit],.g2nr')) return; e.preventDefault(); g2open(self,sp,r.id,null); }, cells}; });
   v[id+'_count']=flat.filter(x=>x.lvl===0).length; v[id+'_all']=rows.length;
+  if(rows.some(r=>r.fgrp)){ const fundo=(r)=>g2match(r,sp,st,mask,added)||(r.kids||[]).some(fundo); v[id+'_count']=g2nivel1(g2qrows(sp,st,rows)).filter(fundo).length; v[id+'_all']=g2nivel1(rows).length; }   // SAF-FAZ-3: conta itens, não fazendas
   if(AG.a){ const ids=new Set(); (AG.base||[]).forEach(r=>{ if(g2match(r,sp,st,mask,added)) ids.add(String(r.id)); }); v[id+'_count']=ids.size; v[id+'_all']=rows0.length; }   // agrupado: itens distintos do recorte, não grupos
   g2agMenuVals(self,sp,v,AG);
   v[id+'_empty']=flat.length===0; v[id+'_some']=flat.length>0;
@@ -526,7 +538,7 @@ function g2vals(self,sp,v,mask){
   // totalizar o recorte filtrado e não a linha-pai inteira — revisão Codex V58-TOTAL-FILTRO-01); undefined = soma padrão. agg 'fn' = só o serviço.
   if(total){ const topo=flat.filter(x=>x.lvl===0).map(x=>x.r); const F={filt:g2filtering(st),match:(r)=>g2match(r,sp,st,mask,added)};
     v[id+'_tot']=cols.map((c,ci)=>{ const h=(ci&&c.agg&&typeof sp.totf==='function')?sp.totf(c,topo,F):undefined;
-      const s=(h===undefined&&c.agg&&c.agg!=='fn')?g2sum(sp,flat,c):null; return {t:(ci===0?'Total':(h!==undefined?h:(s===null?'':g2fmt(s,c)))), cls:(ci===0?'g2c0':''), st:'padding:8px 10px;font-weight:800;'+(ci===0?'position:sticky;left:0;z-index:1;background:#F4F6F3;':'')+(c.a==='r'?'text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;':'')}; });
+      const s=(h===undefined&&c.agg&&c.agg!=='fn')?g2sum(sp,flat,c,F):null; return {t:(ci===0?'Total':(h!==undefined?h:(s===null?'':g2fmt(s,c)))), cls:(ci===0?'g2c0':''), st:'padding:8px 10px;font-weight:800;'+(ci===0?'position:sticky;left:0;z-index:1;background:#F4F6F3;':'')+(c.a==='r'?'text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;':'')}; });
     v[id+'_totopen']=()=>g2set(self,id,{fm:{tot:true,ro:true,mode:'total',draft:{},orig:{},errs:{}},fmc:null}); }
   // formulário lateral
   const fm=st.fm; const F={open:!!fm};

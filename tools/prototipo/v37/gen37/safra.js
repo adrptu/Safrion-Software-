@@ -399,7 +399,7 @@ function talTot(faz){ return talOrd(faz).reduce((a,x)=>a+x[1],0); }
 function ocDcol(r,k,d,cl){ if(d===null||d===undefined){ r.v[k]=''; r.p[k]=[{k:cl||'mut',t:'sem data'}]; r.s[k]='sem data'; return; }
   if(d>=OC_INF){ r.v[k]=99991231; r.p[k]=[{k:cl||'txt',t:'sem fim'}]; r.s[k]='sem fim'; return; }
   const t=ocBr(d); r.v[k]=Number(ocIso(d).replace(/-/g,'')); r.p[k]=[{k:cl||'txt',t}]; r.s[k]=t; }
-const SIT_COR={'Sobreposição':'red','A conferir':'yellow','Livre':'green','Planejado':'blue','Perene':'gray','Ocupado':'gray'};
+const SIT_COR={'Sobreposição':'red','A conferir':'yellow','Livre':'green','Planejado':'blue','Perene':'gray','Ocupado':'gray','Sem plantio':'gray'};
 // abaixo de 400 px a coluna Situação tem cerca de 98 px: rótulo curto, com o texto inteiro no title e no leitor de tela (OC-18)
 const SIT_CURTO={'A conferir':'Conferir','Sobreposição':'Sobrepor','Planejado':'Planej.'};
 function estreito360(){ try{ return window.innerWidth<400; }catch(e){ return false; } }
@@ -416,9 +416,36 @@ function ocMotivo(L,info){ const by=info.byO, ctx=info.ctx;
   if(L.sit==='Livre') return ocHa(L.area_livre)+' ha livres a partir de '+ocBr(L.desde)+' (folga '+ocDias(ctx.folga)+')';
   return ''; }
 // monta a tabela da etapa 2 da safra aberta sobre cópia (nunca altera o estado nem grava) e devolve a ocupação calculada
-function syncTalhoes(self,saf,v){ const k=sk(saf); const sp=GR('g_cult_'+k); const S=safList(self); const safra=S[saf]; if(!sp||!safra){ return null; }
-  const ctx=ocCtxSaf(); const todos=ocTodos(self); const occ=ocOcupacoes(ctx,S,todos); const byO={}, byCiclo={}; occ.forEach(o=>{ byO[o.id]=o; byCiclo[o.ciclo]=o; });
-  const adj=adjOf(self); const info={ctx,S,todos,occ,byO,safra,linhas:[],band:null,own:{}};
+// SAF-FAZ-3 (proprietário, 15/10/2026: "selecionar fazendas e talhões de mais de 1 fazenda por vez… bem produtiva, rápida, prática e fácil";
+// "pode ser que algum talhão o produtor não deseje plantar nada"): a safra de várias fazendas mostra os talhões de todas juntos, um grupo por
+// fazenda; cada fazenda continua com a própria sub-safra (SAF-FAZ-2: cultivos, ocupação, capacidade e demanda por fazenda). A tabela é a da
+// sub-safra aberta; a linha de outra fazenda leva a ação à sub-safra dela (sgNaFazenda), sem mudar o que a pessoa vê
+function talBase(self,S){ const ctx=ocCtxSaf(); const todos=ocTodos(self); const occ=ocOcupacoes(ctx,S,todos); const byO={}, byCiclo={}; occ.forEach(o=>{ byO[o.id]=o; byCiclo[o.ciclo]=o; });
+  return {ctx,S,todos,occ,byO,byCiclo,adj:adjOf(self)}; }
+function syncTalhoes(self,saf,v){ const k=sk(saf); const sp=GR('g_cult_'+k); const S=safList(self); if(!sp||!S[saf]){ self.__ocG=null; return null; }
+  const subs=sgSubs(self,saf); const B=talBase(self,S);
+  if(subs.length<=1){ const m=talMontar(self,saf,v,B); G2DISP[sp.id]=m.rows; if(m.x0) sp.x0=m.x0; self.__ocG=null; return m.info; }
+  const ffz=subs.some(x=>x.faz===self.state.ffz)?self.state.ffz:''; const grupos=[], x0={}, G={}; let info=null;
+  const band={nesta:0,livre:0,conf:0,perene:0,ocup:0,semp:0}; let linhas=[], tot=0;
+  subs.forEach(su=>{ const m=talMontar(self,su.id,v,B); G[su.id]=m.info; if(su.id===saf) info=m.info;
+    if(m.info.band) Object.keys(band).forEach(q=>{ band[q]=ocR2(band[q]+(Number(m.info.band[q])||0)); }); linhas=linhas.concat(m.info.linhas||[]); tot+=talTot(su.faz);
+    if(su.id!==saf) talDeOutra(self,su.id,m.rows,v);
+    Object.assign(x0,m.x0||{}); x0['fzg_'+su.id]=true;
+    if(ffz&&su.faz!==ffz) return;   // filtro rápido por fazenda (ao lado da busca)
+    const L=m.info.linhas||[]; const nPl=L.filter(l=>l.own.length).length, nSp=L.filter(l=>l.semp).length, nLv=L.filter(l=>l.planejar).length;
+    const area=r2(cultsDe(self,su.id).reduce((a,c)=>a+(Number(c.v.area)||0),0));
+    const res=nPl+' de '+L.length+(L.length===1?' talhão planejado':' talhões planejados')+(nSp?' · '+nSp+' sem plantio':'');
+    grupos.push({id:'fzg_'+su.id,fgrp:true,nosel:true,ro:true,v:{local:su.faz,area},s:{local:su.faz+' · '+nfa(area)+' ha · '+res},
+      p:{local:[{k:'b',t:su.faz},{k:'mut',t:nfa(area)+' ha · '+res}].concat(nLv&&!m.info.safra.ro?[{k:'act',t:'Planejar talhões livres ›',fn:'pltfaz:'+su.faz,lk:true}]:[]),area:[{k:'b',t:nfa(area)}]},kids:m.rows}); });
+  sp.x0=x0; G2DISP[sp.id]=grupos; self.__ocG=G;
+  if(info){ info.bandG=band; info.linhasG=linhas; info.totG=tot; } return info; }
+// linha de outra fazenda na tabela da sub-safra aberta: abrir e Excluir levam antes à sub-safra dela (os atalhos da linha já vão pelo talhão)
+function talDeOutra(self,sub,rows,v){ const gid='g_cult_'+sk(sub);
+  v['xdel_'+sub]=(rid)=>sgNaFazenda(self,sub,()=>g2set(self,gid,{cf:rid}));
+  const w=(l)=>(l||[]).forEach(r=>{ if(!r.fora&&!r.livre&&!r.nosel){ r.xdel='xdel_'+sub; if(!r.dr){ r.dr='xr_'+r.id; v[r.dr]=()=>sgNaFazenda(self,sub,()=>g2open(self,GR(gid),r.id,null)); } } w(r.kids); }); w(rows); }
+// tabela de uma sub-safra (o que era o syncTalhoes de uma fazenda): linhas de exibição sobre cópia, sem gravar
+function talMontar(self,saf,v,B){ const S=B.S; const safra=S[saf]; const ctx=B.ctx, todos=B.todos, occ=B.occ, byO=B.byO, byCiclo=B.byCiclo, adj=B.adj;
+  const sp=GR('g_cult_'+sk(saf)); const info={ctx,S,todos,occ,byO,safra,linhas:[],band:null,own:{}}; const sem=sempDe(self,saf);
   const ocDe=(r)=>byCiclo[r.v.ciclo||r.id]||byO[r.id]||null;
   const ownParts=(r,o,kid,L)=>{ leafParts(r,adj,kid);
     r.p.sit=[{k:'mut',t:''}]; r.s.sit=''; r.v.livre=''; r.p.livre=[{k:'mut',t:'—'}]; r.s.livre=''; ocDcol(r,'desde',undefined); r.p.desde=[{k:'mut',t:'—'}]; r.s.desde=''; r.v.desde='';
@@ -440,18 +467,24 @@ function syncTalhoes(self,saf,v){ const k=sk(saf); const sp=GR('g_cult_'+k); con
     const rows=g2clone(g2rows(self,sp)).filter(r=>!r.livre&&!r.fora);
     rows.forEach(r=>{ const fill=(c,kid)=>{ ownParts(c,ocDe(c),kid,null); c.p.sit=[{k:'mut',t:'—'}]; c.p.saf=[{k:'mut',t:'—'}]; if(c.v.origem) c.p.local=(c.p.local||[]).concat([{k:'mut',t:c.v.origem}]); };
       if(r.grp){ grpParts(r,adj); (r.kids||[]).forEach(c=>fill(c,true)); ['sit','livre','desde','ate','fimpor','saf'].forEach(f=>{ r.p[f]=[{k:'mut',t:'—'}]; r.s[f]=''; }); } else fill(r,false); });
-    G2DISP[sp.id]=rows; info.ro=true; return info; }
+    info.ro=true; return {info,rows,x0:null}; }
   const [linhas,band]=ocTabela(ctx,safra,occ,talOrd(safra.faz),S); info.linhas=linhas; info.band=band;
   const own=cultsDe(self,saf).map(r=>g2clone([r])[0]); const rows=[]; const x0={}; const estreito=g2estreito();
-  linhas.forEach(L=>{ const t=L.t; const mine=own.filter(r=>(r.v.talhao||ocTalhaoDe(r.v.local,r.v.tipo))===t);
-    const dica=ocMotivo(L,info); const curto=SIT_CURTO[L.sit]&&estreito360(); const sitP=[{k:'chip',t:curto?SIT_CURTO[L.sit]:L.sit,c:SIT_COR[L.sit]||'gray',dica:curto?(L.sit+(dica?': '+dica:'')):dica}];
+  linhas.forEach(L=>{ const t=L.t; const mine=own.filter(r=>(r.v.talhao||ocTalhaoDe(r.v.local,r.v.tipo))===t); L._saf=saf;
+    // sem plantio (pedido 2): talhão livre, sem cultivo desta safra, que a pessoa decidiu não plantar. Cinza, sem alerta: não é pendência,
+    // não trava a etapa, não entra em área plantada, demanda, operações nem custo (nenhum cultivo existe); a faixa conta à parte
+    if(!mine.length&&sem[t]&&L.planejar){ band.livre=ocR2(band.livre-L.livre); band.conf=ocR2(band.conf-L.conf); band.semp=ocR2((band.semp||0)+L.livre+L.conf);
+      Object.assign(L,{sit:'Sem plantio',semp:true,planejar:false}); }
+    const dica=L.semp?'Fora do plantio nesta safra: não entra em área plantada, demanda, operações nem custo. Para desfazer: ⋯ › Voltar a planejar.':ocMotivo(L,info);
+    const curto=SIT_CURTO[L.sit]&&estreito360(); const sitP=[{k:'chip',t:curto?SIT_CURTO[L.sit]:L.sit,c:SIT_COR[L.sit]||'gray',dica:curto?(L.sit+(dica?': '+dica:'')):dica}];
     const acts=[]; let dr=null;
-    if(L.planejar){ acts.push({k:'act',t:'Planejar ›',fn:'planejar:'+t,lk:true}); dr='plan_'+t; }
+    if(L.semp) acts.push({k:'chip',t:'Sem plantio',c:'gray',dica:dica},{k:'act',t:'Voltar a planejar',fn:'replanejar:'+t});   // o estado à vista na célula do talhão (a Situação fica em "Colunas")
+    else if(L.planejar){ acts.push({k:'act',t:'Planejar ›',fn:'planejar:'+t,lk:true}); dr='plan_'+t; if(!mine.length) acts.push({k:'act',t:'Não plantar nesta safra',fn:'semplantio:'+t}); }
     else if(L.vinc.length){ acts.push({k:'act',t:'Vincular ciclo ›',fn:'vincular:'+t+'|'+L.vinc[0],lk:true}); dr='vinc_'+t; }
     else if(mine.length&&!mine.some(r=>r.v.ciclo)){ acts.push({k:'act',t:'Dividir',fn:'divide:'+t,lk:true,sec:true}); dr='div_'+t; }   // ciclo vinculado não se divide (R-24)
-    v['plan_'+t]=()=>abrirPlanejar(self,t); if(L.vinc.length) v['vinc_'+t]=()=>abrirVincular(self,t,L.vinc[0]);
+    v['plan_'+t]=()=>sgNaFazenda(self,saf,()=>abrirPlanejar(self,t)); if(L.vinc.length) v['vinc_'+t]=()=>sgNaFazenda(self,saf,()=>abrirVincular(self,t,L.vinc[0]));
     const tal=(r)=>{ r.tal=t; r.p.sit=sitP; r.s.sit=L.sit; r.v.sit=L.sit;
-      if(L.area_livre>0.005){ r.v.livre=L.area_livre; r.p.livre=[{k:'txt',t:nfa(L.area_livre)}]; r.s.livre=nfa(L.area_livre);
+      if(L.area_livre>0.005&&!L.semp){ r.v.livre=L.area_livre; r.p.livre=[{k:'txt',t:nfa(L.area_livre)}]; r.s.livre=nfa(L.area_livre);
         const sd=L.est&&L.fora.some(o=>o.classe==='semdata'&&o.ini<=L.desde&&L.desde<ocLib(ctx,o,'pior'));
         if(sd){ r.v.desde=''; r.p.desde=[{k:'txt',t:'sem data'}]; r.s.desde='sem data'; } else { ocDcol(r,'desde',L.desde); if(L.est){ r.p.desde=[{k:'txt',t:ocBr(L.desde)+' est.'}]; r.s.desde=ocBr(L.desde)+' est.'; } } }
       else { r.v.livre=''; r.p.livre=[{k:'mut',t:'—'}]; r.s.livre=''; r.v.desde=''; r.p.desde=[{k:'mut',t:'—'}]; r.s.desde=''; } };
@@ -469,11 +502,12 @@ function syncTalhoes(self,saf,v){ const k=sk(saf); const sp=GR('g_cult_'+k); con
       if(mine.length===1&&mine[0].v.tipo!=='Parcela'){ const m=mine[0]; g.v.tipo='Talhão inteiro'; g.p.tipo=[{k:'txt',t:'Talhão inteiro'}]; g.s.tipo='Talhão inteiro'; g.v.meta=m.v.meta; g.p.meta=m.p.meta; g.s.meta=m.s.meta; g.ordk=Object.assign({},g.ordk||{},{meta:(m.ordk||{}).meta}); } } else { ['cult','var','plano','ver','dt_plantio','meta','aj'].forEach(f=>{ g.p[f]=[{k:'mut',t:''}]; g.s[f]=''; }); g.v.area=''; g.p.area=[{k:'mut',t:'—'}]; g.p.tipo=[{k:'mut',t:'—'}]; g.s.tipo=''; }
     g.p.local=[{k:'b',t}].concat(acts); g.s.local=t; ['ate','fimpor','saf'].forEach(f=>{ g.p[f]=[{k:'mut',t:''}]; g.s[f]=''; g.v[f]=''; });
     tal(g); rows.push(g); x0[g.id]=!estreito&&(mine.length>1||L.sit==='A conferir'||L.sit==='Sobreposição'); });   // SAF-TAB: abre aberto só o talhão com parcelas ou com pendência
-  sp.x0=x0; G2DISP[sp.id]=rows; return info; }
+  return {info,rows,x0}; }
 // fazenda e talhões da safra para os textos do painel
 function talhaoArea(t){ return Number((D2.talhoes||{})[t])||0; }
 // ---- painel "Planejar T1" e "Vincular ciclo C1" (§2, R-17, R-19, R-24) ----
-function ocLinha(self,t){ const info=self.__oc; return info&&info.linhas?info.linhas.find(x=>x.t===t)||null:null; }
+function ocLinha(self,t){ const info=self.__oc; const L=info&&info.linhas?info.linhas.find(x=>x.t===t)||null:null; if(L||!self.__ocG) return L;
+  for(const k in self.__ocG){ const x=(self.__ocG[k].linhas||[]).find(y=>y.t===t); if(x) return x; } return null; }   // SAF-FAZ-3: talhão de outra fazenda da mesma safra
 function maisUsado(cs,f){ const n={}; cs.forEach(c=>{ const x=c.v[f]; if(x) n[x]=(n[x]||0)+1; }); return Object.keys(n).sort((a,b)=>n[b]-n[a])[0]||''; }
 // nomes que uma parcela nova não pode repetir (R-19): os desta safra e as faixas do talhão ainda ocupadas no início dela, inclusive as de
 // ocupações futuras (SAF-C01: o café plantado numa safra de 2020 não recebe a parcela da soja de 2027, que a T-faixa recusaria)
@@ -794,7 +828,7 @@ function ocAvaliaCultivo(self,saf,rec){ const S=safList(self); const ctx=ocCtxSa
   return {erro:'',pend:ocMsgPend(ctx,chk,saf,pmin),aviso:ocMsgAviso(ctx,chk)}; }
 // começo da busca do plantio mínimo de um cultivo: a liberação da ocupação anterior na mesma faixa (ou o início da safra)
 function ocBaseMin(chk){ const o=chk.o; const ctx=ocCtxSaf(); let b=o.safini; chk.mesmo.forEach(y=>{ if(y!==o&&ocMesmaArea(y,o)&&y.ini<o.ini&&y.classe!=='perene'){ const l=ocLib(ctx,y,'est'); if(l>b&&l<OC_INF) b=l; } }); return b; }
-function cultCheck(self,gid,rows,r,d,isNew){ const e={}; const saf=self.state.saf; self._metaDraft={rid:r?r.id:null,d:Object.assign({},d)};   /* UNID-PROD: o cultAfter grava a meta pelo rascunho deste registro (R-U06) */ const t=isNew?String(d.talhao||''):(r&&r.v.talhao); const T=talhaoArea(t);
+function cultCheck(self,gid,rows,r,d,isNew,safArg){ const e={}; const saf=safArg||self.state.saf;   /* safArg: o lote do SAF-FAZ-3 confere cada talhão na sub-safra dele */ self._metaDraft={rid:r?r.id:null,d:Object.assign({},d)};   /* UNID-PROD: o cultAfter grava a meta pelo rascunho deste registro (R-U06) */ const t=isNew?String(d.talhao||''):(r&&r.v.talhao); const T=talhaoArea(t);
   const pv=isNew&&self._plan&&self._plan.vinc; const vc=!isNew&&r&&!!r.v.ciclo;   // ciclo vinculado: cultura, cultivar, plantio, área e faixa vêm do ciclo (R-24)
   // o que vale para a conta: o rascunho, menos o que vem do ciclo (vincular ou cultivo já vinculado)
   const dd=Object.assign({},(r&&r.v)||{},d,{talhao:t});
@@ -915,13 +949,17 @@ function sgAplicar(self,rows,r,isNew){ const d={nome:r.v.nome,ini:r.v.ini,fim:r.
   self.__sgRec=self.__sgRec||{};
   const res=sgCompor(lista,sgPed(self,r,d,isNew),{rec:self.__sgRec,deps:sgDeps(self),novoId}); self.__sgCh=null;
   if(!res.ok||res.repetido){ delete r.v.fazs; return res.ok?'':(res.bloqueios?sgMotivos(res.bloqueios):'Não salvo.'); }
-  const por={}; rows.forEach(x=>{ por[x.id]=x; }); if(isNew) por[r.id]=r;
-  const novas=res.safs.map(s=>{ const x=por[s.id]||{id:s.id,v:{},s:{},p:{}}; Object.assign(x.v,{nome:s.nome,ini:s.ini,fim:s.fim,faz:s.faz,estado:s.estado||'Rascunho'});
-    if(s.mae) x.v.mae=s.mae; else delete x.v.mae; delete x.v.fazs; x.v.periodo=safPeriodo(s.ini,s.fim)||x.v.periodo||''; return x; });
-  g2set(self,'g_saf',{rows:novas});
-  const sb=res.recibo.subs, ent=sb.filter(x=>x.acao==='criada'||x.acao==='trocada').map(x=>x.faz), sai=sb.filter(x=>x.acao==='removida').map(x=>x.faz).concat(sb.filter(x=>x.acao==='trocada').map(x=>x.de));
+  const novas=sgLinhasNovas(isNew?rows.concat(rows.indexOf(r)<0?[r]:[]):rows,res);
+  g2set(self,'g_saf',{rows:novas}); const sp0=sempSem(self,res); if(sp0) self.setState({semp:sp0});
+  if(isNew){ const sb=res.recibo.subs; const lst=(a)=>a.length>1?a.slice(0,-1).join(', ')+' e '+a[a.length-1]:a[0];
+    return sb.length>1?(res.recibo.nome+' criada em '+sb.length+' fazendas: '+lst(sb.map(x=>x.faz))+'. Cada fazenda planeja os próprios talhões, recursos e demanda.'):''; }
+  return sgMsgMuda(res); }
+// linhas da etapa 1 depois da composição: as que ficam conservam o objeto, o ID e o estado; as novas nascem em rascunho
+function sgLinhasNovas(rows,res){ const por={}; rows.forEach(x=>{ por[x.id]=x; });
+  return res.safs.map(s=>{ const x=por[s.id]||{id:s.id,v:{},s:{},p:{}}; Object.assign(x.v,{nome:s.nome,ini:s.ini,fim:s.fim,faz:s.faz,estado:s.estado||'Rascunho'});
+    if(s.mae) x.v.mae=s.mae; else delete x.v.mae; delete x.v.fazs; x.v.periodo=safPeriodo(s.ini,s.fim)||x.v.periodo||''; return x; }); }
+function sgMsgMuda(res){ const sb=res.recibo.subs, ent=sb.filter(x=>x.acao==='criada'||x.acao==='trocada').map(x=>x.faz), sai=sb.filter(x=>x.acao==='removida').map(x=>x.faz).concat(sb.filter(x=>x.acao==='trocada').map(x=>x.de));
   const lst=(a)=>a.length>1?a.slice(0,-1).join(', ')+' e '+a[a.length-1]:a[0];
-  if(isNew) return sb.length>1?(res.recibo.nome+' criada em '+sb.length+' fazendas: '+lst(sb.map(x=>x.faz))+'. Cada fazenda planeja os próprios talhões, recursos e demanda.'):'';
   return [ent.length?lst(ent)+(ent.length>1?' entraram':' entrou')+' na safra em rascunho.':'',sai.length?lst(sai)+(sai.length>1?' saíram':' saiu')+' da safra.':''].filter(Boolean).join(' '); }   // sem fazenda entrando ou saindo, fica o aviso de sempre ("Salvo · linha e totais atualizados")
 // leitura reunida das fazendas da safra aberta (sgLeitura): área dos cultivos, estado, solicitação e demanda de cada uma
 function sgInfo(self,G,comDem){ const o={}; G.subs.forEach(s=>{ const cs=cultsDe(self,s.id); const sol=solMap(self)[s.id];
@@ -942,6 +980,138 @@ function sgEnviarTela(self,G){ self.__sgEnvRec=self.__sgEnvRec||{}; if(!self.__s
   const fal=r.falhas.map(x=>x.faz+': '+x.erro).join(' · ');
   if(r.ok) self.__sgEnvCh=null;
   self.setState({sol:sols,g2toast:r.ok?('Demanda das '+G.subs.length+' fazendas enviada. '+rec+'.'):((r.parcial?'Envio parcial. Enviado: '+rec+'. ':'Nada foi enviado. ')+'Falhou: '+fal+'. Tente de novo: só a que falhou é enviada.')}); }
+// ===== SAF-FAZ-3 · várias fazendas por vez, com rapidez, e talhão sem plantio (proprietário, 15/10/2026) =====
+// "em planejar safra ainda não aparece opção de selecionar fazendas e talhões de mais de 1 fazenda por vez… bem produtiva, rápida, prática e
+// fácil e visualmente intuitiva e organizada"; "pode ser que algum talhão o produtor não deseje plantar nada, então isso tem que ser permitido".
+// A. Faixa "Trabalhando em": as fazendas da safra em chips (✓) e "+ Fazenda" (lista do DS); marcar/desmarcar compõe a safra pelo domínio único
+//    do SAF-FAZ-2 (sgCompor: tirar fazenda com vínculo é recusado com o motivo no próprio lugar; fazenda nova nasce em rascunho).
+// B. A etapa 2 mostra os talhões de todas as fazendas juntos, um grupo por fazenda (syncTalhoes), com filtro rápido por fazenda.
+// C. "Planejar talhões livres": vários talhões de uma ou mais fazendas de uma vez; cada um pela regra do cultivo único (cultCheck).
+// D. "Não plantar nesta safra": o talhão livre fica "Sem plantio" (estado da safra, como os cultivos), sem pendência nem cultivo.
+// Cada fazenda continua com a própria sub-safra (cultivos, ocupação, capacidade e demanda): nada de uma fazenda cobre a falta de outra.
+function sgSubs(self,saf){ if(!saf) return []; const G=sgGrupo(sgLista(self),saf); return G?G.subs:[]; }
+function sgSubDeTalhao(self,saf,t){ const f=(D2.talfaz||{})[t]; return sgSubs(self,saf).find(s=>s.faz===f)||null; }
+function cultsGrupo(self,saf){ const subs=sgSubs(self,saf); const L=subs.length?subs:(saf?[{id:saf}]:[]); const o=[]; L.forEach(s=>cultsDe(self,s.id).forEach(c=>o.push({c,saf:s.id}))); return o; }
+function temPlanoDe(self,saf){ return cultsDe(self,saf).some(c=>{ const pl=planById(c.v.plano); return pl&&pl.cultura===c.v.cult; }); }
+// a tabela é a da sub-safra aberta; agir numa linha de outra fazenda abre antes a sub-safra dela (a mesma tabela: busca, filtros, colunas e
+// grupos abertos vão junto) e só então age, com a ocupação já calculada para ela (a ação roda no desenho seguinte, PREVALS)
+function sgNaFazenda(self,sub,fn){ const saf=self.state.saf; if(!sub||sub===saf){ fn(); return; }
+  const de='g_cult_'+sk(saf), para='g_cult_'+sk(sub); const all=Object.assign({},self.state.g2||{});
+  if(de!==para){ const o=all[de]||{}; const n=Object.assign({},all[para]||{}); ['q','qv','f','so','x','cv','cvpf'].forEach(k=>{ if(o[k]!==undefined) n[k]=o[k]; else delete n[k]; }); all[para]=n;
+    all[de]=Object.assign({},o,{fm:null,cf:null,fmc:null}); }   // nada fica aberto escondido na grade de antes
+  self.__xfn={sub,fn}; self.setState({saf:sub,g2:all}); }
+function sgPorTalhao(self,t,fn){ const s=sgSubDeTalhao(self,self.state.saf,t); sgNaFazenda(self,s?s.id:null,fn); }
+function sgPorCultivo(self,cid,fn){ const x=cultsGrupo(self,self.state.saf).find(y=>y.c.id===cid); sgNaFazenda(self,x?x.saf:null,fn); }
+function safIrEtapa(self,i,extra){ const saf=self.state.saf; const subs=sgSubs(self,saf); let alvo=saf;
+  if(i>=3&&subs.length>1&&!temPlanoDe(self,saf)){ const s=subs.find(x=>temPlanoDe(self,x.id)); if(s) alvo=s.id; }   // abre a fazenda que tem o que dimensionar
+  g2etapa(self,Object.assign({step:i,corr:null},alvo!==saf?{saf:alvo}:{},extra||{})); }
+// ---- D · talhão sem plantio: estado da safra (por sub-safra e fazenda); só talhão livre sem cultivo desta safra ----
+function sempDe(self,saf){ const o=(self.state.semp||{})[saf]; if(!o) return {}; return o.faz===safFaz(self,saf)?(o.tal||{}):{}; }
+function sempSem(self,res){ const x=self.state.semp; if(!x||!res||!res.recibo) return null; const o=Object.assign({},x); let mud=false;
+  res.recibo.subs.forEach(y=>{ if((y.acao==='removida'||y.acao==='trocada')&&o[y.saf]){ delete o[y.saf]; mud=true; } }); return mud?o:null; }   // fazenda que sai leva as marcas
+function sempMarcar(self,t,on){ const saf=self.state.saf; const su=sgSubDeTalhao(self,saf,t)||{id:saf,faz:safFaz(self,saf)}; const so=safById(self,su.id);
+  if(!so||so.ro){ self.setState({g2toast:'Safra encerrada: somente consulta.'}); return; }
+  if(on&&cultsDe(self,su.id).some(c=>(c.v.talhao||ocTalhaoDe(c.v.local,c.v.tipo))===t)){ self.setState({g2toast:'Não foi possível: '+t+' já tem cultivo nesta safra.'}); return; }
+  const semp=Object.assign({},self.state.semp||{}); const cur=Object.assign({},sempDe(self,su.id)); if(on) cur[t]=true; else delete cur[t];
+  semp[su.id]={faz:su.faz,tal:cur}; self.setState({semp,g2toast:on?(t+' sem plantio nesta safra.'):(t+' volta a ser planejado nesta safra.')}); }
+// ---- A · fazendas da safra na faixa "Trabalhando em" ----
+function sgAlternarFazenda(self,faz){ const saf=self.state.saf; const G=saf?sgGrupo(sgLista(self),saf):null; const so=safById(self,saf); if(!G||!so||so.ro) return;
+  const atuais=G.subs.map(x=>x.faz); const tira=atuais.indexOf(faz)>=0; const fazendas=tira?atuais.filter(f=>f!==faz):atuais.concat([faz]);
+  const ch='saf-faz:'+saf+':'+faz+':'+Date.now()+':'+Math.random().toString(36).slice(2,7);   // chave do comando, gerada por quem age (ENG-021)
+  self.__sgRec=self.__sgRec||{}; const rows=g2clone(g2rows(self,GR('g_saf'))); let k=0;
+  const novoId=(t)=>t==='mae'?('M'+String(Date.now()).slice(-6)):('n'+(rows.length+(++k))+'_'+String(Date.now()).slice(-5));
+  const res=sgCompor(sgLista(self),{chave:ch,nome:G.nome,ini:G.ini,fim:G.fim,fazendas,saf},{rec:self.__sgRec,deps:sgDeps(self),novoId});
+  const P=Object.assign({},self.state.sfz||{});
+  if(!res.ok){ const er=res.bloqueios?sgMotivos(res.bloqueios):((res.erros||{}).fazendas?'A safra precisa de ao menos uma fazenda.':(Object.values(res.erros||{})[0]||'Nada foi alterado.'));
+    self.setState({sfz:Object.assign(P,{err:{[faz]:er}})}); return; }   // recusa no próprio lugar; nada muda
+  const all=Object.assign({},self.state.g2||{}); all.g_saf=Object.assign({},all.g_saf||{},{rows:sgLinhasNovas(rows,res)});
+  const ficam=res.recibo.subs.filter(y=>y.acao!=='removida').map(y=>y.saf); const nsaf=ficam.indexOf(saf)>=0?saf:ficam[0];
+  self.setState(Object.assign({g2:all,saf:nsaf,sfz:Object.assign(P,{err:{}}),g2toast:sgMsgMuda(res)||'Salvo.'},sempSem(self,res)?{semp:sempSem(self,res)}:{})); }
+function sfzAbrir(self,e){ let x=16, y=120; try{ const r=e&&e.currentTarget&&e.currentTarget.getBoundingClientRect(); if(r){ x=r.left; y=r.bottom; } }catch(er){}
+  self.setState({sfz:{open:true,x,y,err:{}}}); setTimeout(()=>{ try{ const i=document.querySelector('#sfz-pop input'); if(i) i.focus(); }catch(er){} },30); }
+function sfzVals(self,v,saf,step,ro){ const G=saf?sgGrupo(sgLista(self),saf):null; const P=self.state.sfz||{}; const fz=G?G.subs.map(x=>x.faz):[];
+  v.sfz_chips_on=!!G&&step<=2; v.sfz_txt_on=!v.sfz_chips_on; v.sfz_add=v.sfz_chips_on&&!ro; v.sfz_exp=String(!!P.open);
+  v.sfz_chips=fz.map(f=>({t:'✓ '+f,al:'Fazenda '+f+(ro?'':', nesta safra: alterar as fazendas'),go:(e)=>{ if(!ro) sfzAbrir(self,e); },dis:ro}));
+  v.sfz_abrir=(e)=>sfzAbrir(self,e);
+  const fechar=()=>{ self.setState({sfz:{open:false}}); setTimeout(()=>{ try{ const b=document.getElementById('sfz-add'); if(b) b.focus(); }catch(er){} },30); };
+  v.sfz_pop=!!P.open&&v.sfz_add; v.sfz_fechar=fechar; v.sfz_key=(e)=>{ if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); fechar(); } };
+  const W=320, vw=(typeof window!=='undefined'?window.innerWidth:1440); v.sfz_pos='top:'+Math.round((P.y||120)+6)+'px;left:'+Math.round(Math.max(8,Math.min(P.x||16,vw-W-8)))+'px;width:'+Math.min(W,vw-16)+'px;';
+  v.sfz_ops=Object.keys(D2.talOrd||{}).map((f,i)=>{ const er=(P.err||{})[f]||''; const n=talOrd(f).length;
+    return {t:f,sub:nfa(talTot(f))+' ha · '+n+(n===1?' talhão':' talhões'),on:fz.indexOf(f)>=0,tog:()=>sgAlternarFazenda(self,f),err:er,hasErr:!!er,id:'sfz-o'+i}; }); }
+// ---- B · filtro rápido por fazenda, ao lado da busca (só com mais de uma fazenda) ----
+function ffzVals(self,v,saf,step){ const subs=step===2?sgSubs(self,saf):[]; const cur=subs.some(x=>x.faz===self.state.ffz)?self.state.ffz:'';
+  v.ffz_tem=subs.length>1;
+  v.ffz_l=v.ffz_tem?[{t:'Todas',on:String(!cur),al:'Mostrar todas as fazendas',go:()=>self.setState({ffz:''})}].concat(subs.map(x=>({t:x.faz,on:String(cur===x.faz),al:cur===x.faz?'Mostrar todas as fazendas':'Mostrar só '+x.faz,go:()=>self.setState({ffz:cur===x.faz?'':x.faz})}))):[]; }
+// ---- C · planejar vários talhões livres de uma vez ----
+// livres = com área a planejar (os mesmos do "Planejar ›" da linha, inclusive o resto livre de um talhão já dividido) e sem a marca "sem plantio";
+// de uma fazenda (faz) ou de todas as da safra
+function pltLivres(self,saf,faz){ const subs=sgSubs(self,saf); const L=subs.length?subs:[{id:saf,faz:safFaz(self,saf)}]; const out=[];
+  L.forEach(su=>{ if(faz&&su.faz!==faz) return; const info=(self.__ocG&&self.__ocG[su.id])||(su.id===saf?self.__oc:null); if(!info||!info.linhas||info.ro) return;
+    info.linhas.forEach(l=>{ if(l.planejar&&!l.semp) out.push({sub:su.id,faz:su.faz,t:l.t,L:l}); }); }); return out; }
+function pltAbrir(self,faz){ const saf=self.state.saf; const so=safById(self,saf); if(!so||so.ro) return;
+  const lv=pltLivres(self,saf,faz||''); if(!lv.length){ self.setState({g2toast:'Nenhum talhão livre para planejar.'}); return; }
+  // contexto herdado: cultura, variedade e plano mais usados na safra (todas as fazendas); quantidade, meta e data nunca vêm do último valor
+  const cs=cultsGrupo(self,saf).map(x=>x.c); const cult=maisUsado(cs,'cult'); const vr=cult?maisUsado(cs.filter(c=>c.v.cult===cult),'var'):''; const pl=cult?maisUsado(cs.filter(c=>c.v.cult===cult&&planById(c.v.plano)),'plano'):'';
+  const sel={}; lv.forEach(x=>{ sel[x.t]=true; });
+  self.setState({plt:{ch:'plt:'+saf+':'+Date.now()+':'+Math.random().toString(36).slice(2,7),faz:faz||'',sel,cult,var:vr,plano:pl,plantio:'',pt:false,meta:'',err:{},gerr:''}}); }
+function pltRascunho(self,P,x,plantio){ const L=x.L; const area=L.area_livre;
+  return Object.assign({modo:'plan',talhao:x.t,cult:P.cult,var:String(P.var||'').trim(),plano:P.plano||'',plantio,local:sugerirParcela(self,x.sub,L,area),area:String(r2(area)).replace('.',','),colheita:''},
+    metaRascunho(P.cult,'',''),{meta:String(P.meta===undefined?'':P.meta)}); }
+// primeiro plantio possível do talhão com a cultura e o plano escolhidos (a mesma busca do painel do cultivo, PlantioMin)
+function pltPmin(self,P,x){ if(!P.cult) return x.L.desde; const d=pltRascunho(self,P,x,''); const pm=pminDraft(self,x.sub,d,x.L.desde); return pm!==null?pm:x.L.desde; }
+function pltData(self,P,lv){ if(P.pt) return P.plantio||''; const ms=lv.filter(x=>P.sel[x.t]).map(x=>pltPmin(self,P,x)).filter(n=>n!==null&&n!==undefined); return ms.length?ocIso(Math.max.apply(null,ms)):''; }
+function pltCultivo(self,x,d,id){ const T=talhaoArea(x.t); const a=g2num(d.area); const mg=metaGravar(d);
+  const c={id,v:{talhao:x.t,faz:x.faz,cult:d.cult,var:d.var,plano:d.plano||'',plantio:d.plantio,area:r2(a),colheita:'',meta:mg.meta,unm:unMetaDe(d.cult,mg.unm)},s:{},p:{}};
+  if(sk(x.sub)==='NOVA') c.v.saf=x.sub;
+  if(a>=T-0.005){ c.v.local=x.t; c.v.tipo='Talhão inteiro'; c.decl=false; } else { c.v.local=parcelaFinal(self,x.sub,x.t,a,d.local,id); c.v.tipo='Parcela'; c.decl=true; }
+  c.s.local=c.v.local; return c; }
+function pltGravar(self){ const P=self.state.plt; if(!P) return; self.__pltRec=self.__pltRec||{};
+  if(self.__pltRec[P.ch]){ self.setState({plt:null}); return; }   // o mesmo comando repetido (duplo clique) não grava de novo (ENG-021)
+  const saf=self.state.saf; const lv=pltLivres(self,saf,P.faz).filter(x=>P.sel[x.t]); const e={};
+  const plantio=pltData(self,P,pltLivres(self,saf,P.faz));
+  if(!P.cult) e.cult='Escolha a cultura.'; if(!String(P.var||'').trim()) e.var='Informe a variedade.';
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(String(plantio))) e.plantio='Informe o plantio.';
+  const m=g2num(P.meta); if(String(P.meta===undefined?'':P.meta).trim()===''||isNaN(m)||m<0) e.meta='Informe a meta (≥ 0).';
+  const pl=planById(P.plano); if(pl&&pl.cultura!==P.cult) e.plano='Este plano é de '+pl.cultura+'. Escolha um plano de '+P.cult+' ou deixe sem plano.';
+  if(Object.keys(e).length||!lv.length){ self.setState({plt:Object.assign({},P,{err:e,gerr:lv.length?'Corrija os campos destacados; o que você digitou foi mantido.':'Marque ao menos um talhão.'})}); return; }
+  // cada talhão pela regra do cultivo único (cultCheck: plano da mesma cultura, área do talhão, plantio na janela, sobreposição); recusa atômica
+  const errT={}, avisos=[], novos=[]; const plan0=self._plan; self._plan=null;
+  lv.forEach(x=>{ const d=pltRascunho(self,P,x,plantio); const gid='g_cult_'+sk(x.sub); const er=cultCheck(self,gid,g2rows(self,GR(gid)),null,d,true,x.sub);
+    if(Object.keys(er).length) errT['t:'+x.t]=Object.values(er)[0]; else { if(self._ocMsg) avisos.push(x.t+': '+String(self._ocMsg).replace(/\.$/,'')); novos.push({x,d}); } });
+  self._plan=plan0; self._ocMsg=null; self._metaDraft=null; self._planoAntes=null;
+  if(Object.keys(errT).length){ const n=Object.keys(errT).length;
+    self.setState({plt:Object.assign({},P,{err:errT,gerr:n+(n>1?' talhões não podem ser planejados':' talhão não pode ser planejado')+' com estes dados: ajuste a data ou desmarque. Nada foi gravado.'})}); return; }
+  // um cultivo por talhão, na grade da sub-safra dele; um setState só (as fazendas novas dividem a grade das safras novas)
+  const all=Object.assign({},self.state.g2||{}); const porG={}; const stamp=String(Date.now()).slice(-6);
+  novos.forEach(({x,d},i)=>{ const gid='g_cult_'+sk(x.sub); if(!porG[gid]) porG[gid]=g2clone(soDaSafra(g2rows(self,GR(gid)))); porG[gid].push(pltCultivo(self,x,d,'c'+String(x.t).replace(/\W/g,'')+'_'+stamp+'_'+i)); });
+  Object.keys(porG).forEach(gid=>{ const st=all[gid]||{}; all[gid]=Object.assign({},st,{rows:normCult(porG[gid]),x:Object.assign({},GR(gid).x0||{},st.x||{})}); });
+  self.__pltRec[P.ch]={n:novos.length};
+  const fz={}; novos.forEach(({x})=>{ (fz[x.faz]||(fz[x.faz]=[])).push(x.t); }); const fks=Object.keys(fz);
+  const onde=fks.length>1?fks.map(f=>fz[f].join(', ')+' ('+f+')').join(' e '):fz[fks[0]].join(', ');
+  self.setState({g2:all,plt:null,g2toast:novos.length+(novos.length>1?' talhões planejados: ':' talhão planejado: ')+onde+' · '+P.cult+(pl?' · plano '+pl.nome+'.':'. Escolha o plano agronômico na linha.')+(avisos.length?' Atenção: '+avisos.join('; ')+'.':'')}); }
+function pltVals(self,v,saf,step,ro){ const P=self.state.plt; const lv0=(saf&&step===2&&!ro)?pltLivres(self,saf,''):[];
+  v.plt_tem=lv0.length>0; v.plt_abrir=()=>pltAbrir(self,(sgSubs(self,saf).some(x=>x.faz===self.state.ffz)?self.state.ffz:'')||'');   // com o filtro de uma fazenda, só ela
+  v.plt_open=!!P&&step===2; if(!v.plt_open) return;
+  const so=safById(self,saf); const lv=pltLivres(self,saf,P.faz); const set=(o)=>self.setState({plt:Object.assign({},self.state.plt,o)});
+  const subs=sgSubs(self,saf); const fzs=[...new Set(lv.map(x=>x.faz))]; const E=P.err||{};
+  v.plt_titulo='Planejar talhões livres'; v.plt_sub=(so?so.v.nome:'')+' · '+(fzs.length>1?fzs.slice(0,-1).join(', ')+' e '+fzs[fzs.length-1]:(fzs[0]||safFaz(self,saf)))+'. Um cultivo por talhão, na área livre de cada um.';
+  v.plt_grupos=fzs.map(f=>{ const its=lv.filter(x=>x.faz===f); return {cab:f+' · '+its.length+(its.length>1?' livres':' livre'),multi:fzs.length>1||subs.length>1,
+    itens:its.map(x=>{ const pm=pltPmin(self,P,x); const er=E['t:'+x.t]||''; return {t:x.t,id:'plt-'+String(x.t).replace(/\W/g,''),on:!!P.sel[x.t],
+      txt:nfa(x.L.area_livre)+' ha livres'+(x.L.own.length?' (o resto do talhão)':'')+' · plantio a partir de '+ocBr(pm)+(x.L.est?' (estimado)':''),err:er,hasErr:!!er,
+      tog:()=>{ const s2=Object.assign({},self.state.plt.sel); s2[x.t]=!s2[x.t]; const e2=Object.assign({},self.state.plt.err||{}); delete e2['t:'+x.t]; set({sel:s2,err:e2}); }}; })}; });
+  const n=lv.filter(x=>P.sel[x.t]).length; v.plt_n=n; v.plt_btn='Planejar '+n+(n===1?' talhão':' talhões'); v.plt_btnSt=n?'':'opacity:.5;cursor:not-allowed;';
+  v.plt_todos=()=>{ const s2={}; lv.forEach(x=>{ s2[x.t]=true; }); set({sel:s2}); }; v.plt_nenhum=()=>set({sel:{}});
+  v.plt_cults=(P.cult?[]:[{v:'',t:'Escolha a cultura'}]).concat(Object.keys(D2.culturas||{}).map(c=>({v:c,t:c}))); v.plt_cult=P.cult||'';
+  v.plt_setCult=(e)=>{ const cu=e.target.value; const cs=cultsGrupo(self,saf).map(x=>x.c); set({cult:cu,var:maisUsado(cs.filter(c=>c.v.cult===cu),'var')||'',plano:maisUsado(cs.filter(c=>c.v.cult===cu&&planById(c.v.plano)),'plano')||'',err:{}}); };
+  v.plt_var=P.var||''; v.plt_setVar=(e)=>set({var:e.target.value});
+  v.plt_planos=planOpts({cult:P.cult,plano:P.plano}); v.plt_plano=P.plano||''; v.plt_setPlano=(e)=>set({plano:e.target.value});
+  v.plt_plantio=pltData(self,P,lv); v.plt_setPlantio=(e)=>set({plantio:e.target.value,pt:true});
+  v.plt_pminT=P.pt?'':'O primeiro dia em que todos os talhões marcados estão livres.';
+  v.plt_meta=String(P.meta===undefined?'':P.meta); v.plt_setMeta=(e)=>set({meta:e.target.value}); v.plt_un=P.cult?metaRascunho(P.cult,'','')._un:'';
+  ['cult','var','plantio','meta','plano'].forEach(k=>{ v['plt_e_'+k]=E[k]||''; v['plt_he_'+k]=!!E[k]; });
+  v.plt_gerr=P.gerr||''; v.plt_hasg=!!P.gerr;
+  v.plt_fechar=()=>self.setState({plt:null}); v.plt_salvar=()=>pltGravar(self);
+  v.plt_key=(e)=>{ if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); self.setState({plt:null}); } }; }
 function safOpenDraft(self,gid,r,d){ if(gid==='g_saf'&&r){ self.__sgCh='saf-form:'+r.id+':'+Date.now(); const G=sgGrupo(sgLista(self),r.id); return Object.assign({},d,{fazs:G?G.subs.map(x=>x.faz).join('; '):(r.v.faz||'')}); }
   if(String(gid).indexOf('g_cult_')!==0||!r||!r.v) return d; return Object.assign({},d,metaRascunho(r.v.cult,r.v.meta,r.v.unm)); }
 /* UNID-PROD · seletor "Unidade de produtividade" da tabela de cultivos (D-U01): contexto = cultura do cultivo com o painel aberto; sem painel,
@@ -1408,7 +1578,8 @@ function PREVALS(self,v){ cenOuvir(self); compRend(self,self.state.saf||null);
   // ---- etapa 2: partes calculadas do cultivo (plano aplicado, ajustes) ----
   const adj=adjOf(self);
   ['S2627','S27SF','S2526','LG2627','NOVA'].forEach(k=>{ delete G2DISP['g_cult_'+k]; });
-  self.__oc=(saf&&(st.step||1)===2)?syncTalhoes(self,saf,v):null;
+  self.__oc=(saf&&(st.step||1)===2)?syncTalhoes(self,saf,v):null; if(!self.__oc) self.__ocG=null;
+  if(self.__xfn&&self.__xfn.sub===saf){ const f=self.__xfn.fn; self.__xfn=null; setTimeout(f,0); }   // SAF-FAZ-3: a ação pedida numa linha de outra fazenda, já na sub-safra dela (sgNaFazenda)
   // etapa 3: valores de partida (o bloco só aparece com safra e plano; os buracos existem sempre)
   Object.assign(v,{v3_ver:'',v3_vst:'',v3_cop:'',v3_copq:'',v3_atalhos:[],v3_capexp:'false',v3_capt:'Capacidade por mês ▾',v3_capab:false,v3_fil:false,v3_filn:'',v3_filt:''});
   v.v3_captog=()=>capTog(self); v.v3_filx=()=>capSel(self,null,null);
@@ -1464,23 +1635,26 @@ function EXTRAVALS(self,v){ try{ window.__safSelf=self; self.__cultivos=(k)=>lea
   const st=self.state; const step=st.step||1; const saf=st.saf||null;
   const safRows=g2rows(self,GR('g_saf')); const safObj=saf?safRows.find(r=>r.id===saf):null; const ro=!!(safObj&&safObj.ro);
   const temPlano=saf && cultRows(self,saf).some(c=>{ const pl=planById(c.v.plano); return pl&&pl.cultura===c.v.cult; });
+  // SAF-FAZ-3: na etapa 2 a safra de várias fazendas conta as fazendas juntas (cultivos, sem plano, primária e cartões); 3 e 4 seguem por fazenda
+  const subsG=saf?sgSubs(self,saf):[]; const multi=subsG.length>1; const csG=multi?[].concat(...subsG.map(x=>cultsDe(self,x.id))):(saf?cultRows(self,saf):[]);
+  const temPlanoG=multi?subsG.some(x=>temPlanoDe(self,x.id)):temPlano;
   // 4 etapas (05/10/2026: as antigas 3, 4 e 5 viraram "Dimensione operações e recursos"); sem plano (R0) o bloco da etapa 3 não aparece
   for(let i=1;i<=4;i++) v['s'+i]=(step===i); v.s3=step===3&&!!temPlano;
-  const whys={}; for(let i=2;i<=4;i++){ if(!saf) whys[i]='Escolha a safra'; else if(i>=3 && !temPlano) whys[i]='Aplique um plano'; }
+  const whys={}; for(let i=2;i<=4;i++){ if(!saf) whys[i]='Escolha a safra'; else if(i>=3 && !temPlanoG) whys[i]='Aplique um plano'; }
   // cartões do fluxo (15/10/2026): o número da etapa e a frase curta (safras abertas e a escolhida; cultivos da safra e quantos sem plano)
-  const csx=saf?cultRows(self,saf):[]; const semP=csx.filter(c=>{ const pl=planById(c.v.plano); return !(pl&&pl.cultura===c.v.cult); }).length;
+  const csx=saf?csG:[]; const semP=csx.filter(c=>{ const pl=planById(c.v.plano); return !(pl&&pl.cultura===c.v.cult); }).length;
   const info={1:{cnt:safRows.length,sub:safObj?String((safObj.s&&safObj.s.nome)||safObj.v.nome||''):''},2:saf?{cnt:csx.length,sub:semP?semP+' sem plano':''}:{}};
-  g2steps(self,v,'stp',4,step,whys,(i)=>{ if(whys[i]){ self.setState({g2toast:whys[i]}); return; } g2etapa(self,{step:i,corr:null}); },info);   // cartão leva à etapa (15/10); avanço e retorno também na área de ações
+  g2steps(self,v,'stp',4,step,whys,(i)=>{ if(whys[i]){ self.setState({g2toast:whys[i]}); return; } safIrEtapa(self,i); },info);   // cartão leva à etapa (15/10); avanço e retorno também na área de ações
   v.saf_nome=safObj?safObj.v.nome:'nenhuma safra escolhida'; v.saf_ro=ro; v.saf_ok=!!saf; v.saf_none=!saf;
   v.ctx_saf=safObj?(safObj.v.nome+(ro?' · consulta':'')):'Nenhuma safra escolhida';
   // a faixa diz a fazenda da safra aberta; sem safra, a fazenda escolhida nos chips da etapa 1 (ou todas): antes dizia sempre Santa Rita
   const fq=g2st(self,'g_saf').qv; v.ctx_faz=safObj?('Fazenda '+(safObj.v.faz||'Santa Rita')):(fq?'Fazenda '+fq:'Todas as fazendas');
   for(const k of ['S2627','S27SF','S2526','LG2627','NOVA']){ v['cult_'+k]=(saf&&sk(saf)===k); v['cap_'+k]=(saf&&sk(saf)===k); }
-  const cs=cultRows(self,saf); const area=cs.reduce((a,c)=>a+(Number(c.v.area)||0),0); const comp=cs.filter(c=>{ const pl=planById(c.v.plano); return pl&&pl.cultura===c.v.cult; }).length;
+  const cs=(multi&&step===2)?csG:cultRows(self,saf); const area=cs.reduce((a,c)=>a+(Number(c.v.area)||0),0); const comp=cs.filter(c=>{ const pl=planById(c.v.plano); return pl&&pl.cultura===c.v.cult; }).length;
   const adj=adjOf(self); const naj=cs.reduce((a,c)=>a+Object.keys(adj[c.id]||{}).length,0);
   const sp=semPlano(cs);
   // faixa de resumo (§3.4): hectares por classe; os chips contam talhões pela Situação. Safra encerrada: consulta dos cultivos dela
-  const oci=self.__oc; v.k2=(oci&&oci.band)?ocFaixaTxt(oci.band,oci.linhas,talTot(oci.safra.faz)):(cs.length+' cultivos · '+nf(area)+' ha · '+comp+' com plano'+(sp.length?' · '+sp.length+' sem plano':'')+' · '+naj+(naj===1?' ajuste local':' ajustes locais'));
+  const oci=self.__oc; v.k2=(oci&&oci.band)?ocFaixaTxt(oci.bandG||oci.band,oci.linhasG||oci.linhas,oci.totG||talTot(oci.safra.faz)):(cs.length+' cultivos · '+nf(area)+' ha · '+comp+' com plano'+(sp.length?' · '+sp.length+' sem plano':'')+' · '+naj+(naj===1?' ajuste local':' ajustes locais'));
   // ação primária por etapa: nomeia o próximo passo (na etapa 2, o que falta: aplicar plano; depois, avançar)
   const cultSp={}; sp.forEach(c=>{ (cultSp[c.v.cult]||(cultSp[c.v.cult]=[])).push(c.id); }); const cuK=Object.keys(cultSp).sort((a,b)=>cultSp[b].length-cultSp[a].length)[0];
   const apIds=cuK?cultSp[cuK]:[]; const apT='Aplicar plano em '+apIds.length+(apIds.length>1?' cultivos':' cultivo')+(Object.keys(cultSp).length>1?' de '+cuK.toLowerCase():'');
@@ -1488,7 +1662,7 @@ function EXTRAVALS(self,v){ try{ window.__safSelf=self; self.__cultivos=(k)=>lea
   // com SOL enviada e insumo acima da demanda, a primária diz "Atualizar" também quando há complemento junto (ela baixa e sobe na mesma versão)
   const p6=(enviado&&!v.k6pend)?{t:'Abrir Compra de insumos ›',h:solHref(saf,solA),a:'abrir'}:((enviado&&v.k6exc)?{t:'Atualizar '+solA.id,fn:()=>enviar(self),a:'comando'}:{t:'Enviar para cotação',fn:()=>enviar(self),a:'comando'});
   v.sol_link=v.sol_link&&!p6.h;   // "Abrir em Compra de insumos ›" do bloco só quando a primária é enviar (complemento pendente): sem cópia do mesmo link
-  { const G=saf?sgGrupo(sgLista(self),saf):null; v.sg_tem=!!(G&&G.mae)&&step>=2;
+  { const G=saf?sgGrupo(sgLista(self),saf):null; v.sg_tem=!!(G&&G.mae)&&step>=3;   // SAF-FAZ-3: na etapa 2 as fazendas ficam juntas na tabela; 3 e 4 seguem por fazenda
     v.sg_fz=v.sg_tem?G.subs.map(s=>({t:s.faz,on:s.id===saf?'true':'false',al:s.id===saf?'Fazenda '+s.faz+', aberta':'Abrir a fazenda '+s.faz+' nesta etapa',
       go:()=>{ if(s.id===saf) return; g2etapa(self,{saf:s.id,step,atv:null,rec:null,corr:null,cap:null,rsOpen:false,g2toast:'Fazenda '+s.faz+' · '+SAF_CURTO[step-1]}); }})):[];
     if(v.sg_tem){ const L=sgLeitura(G,sgInfo(self,G,false)); const nf2=(x)=>nf(x);
@@ -1500,13 +1674,17 @@ function EXTRAVALS(self,v){ try{ window.__safSelf=self; self.__cultivos=(k)=>lea
   v.pickat=(arg)=>{ const a=String(arg).split('|'); const id=a[0], s=Number(a[1])||2; g2etapa(self,{saf:id,step:s,atv:null,rec:null,corr:null,cap:null,rsOpen:false,g2toast:'Safra aberta: '+((safRows.find(r=>r.id===id)||{v:{}}).v.nome||'')+' · '+SAF_CURTO[s-1]}); };
   safRows.forEach(r=>{ v['open_'+r.id]=()=>v.pickat(r.id+'|'+(r._prox||2)); });
   v.safedit=(id)=>{ const sp=GR('g_saf'); const r=g2rows(self,sp).find(x=>x.id===id); if(!r) return; const dr=r.dr; r.dr=null; g2open(self,sp,id,null); r.dr=dr; };
-  v.applyone=(cid)=>openApply(self,[cid]); v.openlp=(cid)=>openLP(self,cid);
-  Object.keys(D2.talhoes||{}).forEach(t=>{ v['div_'+t]=()=>openDiv(self,t); }); v.divide=(t)=>openDiv(self,t);
-  v.planejar=(t)=>abrirPlanejar(self,t); v.vincular=(arg)=>{ const a=String(arg).split('|'); abrirVincular(self,a[0],a[1]); };
+  // SAF-FAZ-3: a ação da linha vale na sub-safra da fazenda do talhão (ou do cultivo); com uma fazenda só, é a de sempre
+  v.applyone=(cid)=>sgPorCultivo(self,cid,()=>openApply(self,[cid])); v.openlp=(cid)=>sgPorCultivo(self,cid,()=>openLP(self,cid));
+  Object.keys(D2.talhoes||{}).forEach(t=>{ v['div_'+t]=()=>sgPorTalhao(self,t,()=>openDiv(self,t)); }); v.divide=(t)=>sgPorTalhao(self,t,()=>openDiv(self,t));
+  v.planejar=(t)=>sgPorTalhao(self,t,()=>abrirPlanejar(self,t)); v.vincular=(arg)=>{ const a=String(arg).split('|'); sgPorTalhao(self,a[0],()=>abrirVincular(self,a[0],a[1])); };
+  v.semplantio=(t)=>sempMarcar(self,t,true); v.replanejar=(t)=>sempMarcar(self,t,false); v.pltfaz=(f)=>pltAbrir(self,f);
+  sfzVals(self,v,saf,step,ro); ffzVals(self,v,saf,step); pltVals(self,v,saf,step,ro);
   v.abrirsaf=(arg)=>{ const a=String(arg).split('|'); abrirCultivo(self,a[0],a[1]||''); };
   // painéis
   apVals(self,v); lpVals(self,v); divVals(self,v); sgVals(self,v); pqSafVals(self,v);
-  try{ window.__safRef={impedimentos:(saf)=>safImpedimentosRef(self,saf||self.state.saf,cenGet()),linhas:()=>sgLista(self)}; }catch(e){}   /* adaptador do comando da F2 (PR #58) e teste */
+  try{ window.__safRef={impedimentos:(saf)=>safImpedimentosRef(self,saf||self.state.saf,cenGet()),linhas:()=>sgLista(self),
+    semPlantio:()=>JSON.parse(JSON.stringify(self.state.semp||{})),cultivos:(saf)=>cultsGrupo(self,saf||self.state.saf).map(x=>({saf:x.saf,id:x.c.id,talhao:x.c.v.talhao,faz:x.c.v.faz,local:x.c.v.local,cult:x.c.v.cult,area:x.c.v.area,plano:x.c.v.plano,plantio:x.c.v.plantio}))}; }catch(e){}   /* SAF-FAZ-3: testes leem as marcas e os cultivos do grupo */   /* adaptador do comando da F2 (PR #58) e teste */
   try{ window.__solo={cen:()=>cenGet(),aceitarLote:(itens,ch,a)=>cenMudar(self,c=>soloAceitarLote(c,itens,ch,a||'Ana')),desfazer:(k,ch,a)=>cenMudar(self,c=>soloDesfazer(c,k,'desfeito',ch,a||'Ana')),
     registrar:(d,ch,a)=>cenMudar(self,c=>soloRegistrar(c,d,ch,a||'Ana')),validar:(id,ch,a)=>cenMudar(self,c=>soloValidar(c,id,ch,a||'Ana')),   /* teste: o que outra aba (AG-02) grava */
     sugs:(saf)=>sgSugs(self,saf||self.state.saf).map(x=>x.s),
@@ -1579,7 +1757,7 @@ const SAF_ETAPA6={1:1,2:2,3:3,4:3,5:3,6:4};
 function safPasso(p,e){ if(p&&SAF_PASSO[p]) return SAF_PASSO[p]; if(e&&SAF_ETAPA6[e]) return SAF_ETAPA6[e]; return 4; }
 function safAcoes(self,v,x){ const st=self.state, step=x.step, ro=x.ro, corr=st.corr||null;
   const ir=(i)=>({t:'‹ '+SAF_CURTO[i-1],fn:()=>g2etapa(self,{step:i,corr:null}),to:i,a:'voltar'});
-  const av=(i,t)=>({t:t+' ›',fn:()=>g2etapa(self,{step:i,corr:null}),to:i,a:'avancar'});
+  const av=(i,t)=>({t:t+' ›',fn:()=>safIrEtapa(self,i),to:i,a:'avancar'});   // SAF-FAZ-3: com várias fazendas, a etapa 3 abre numa fazenda que tem plano
   const aplicar={t:x.apT,fn:()=>openApply(self,x.apIds),a:'resolver'};
   const nSp=x.sp.length; const semTxt=nSp+(nSp>1?' cultivos sem plano agronômico':' cultivo sem plano agronômico')+' ('+safLocs(x.sp)+')';
   let c={};
@@ -1591,13 +1769,13 @@ function safAcoes(self,v,x){ const st=self.state, step=x.step, ro=x.ro, corr=st.
       c=pend.length?{nota:'Correção pedida pela revisão: '+pend.length+(pend.length>1?' cultivos sem plano':' cultivo sem plano')+' ('+safLocs(pend)+').',prim:{t:safAplicarT(m),fn:()=>openApply(self,m.ids),a:'resolver'},sec:volta}
                    :{nota:'Cultivos corrigidos: volte à revisão para conferir a demanda.',prim:volta}; }
     else if(ro) c={prim:av(3,'Ver operações e recursos')};
-    else { const L=(info&&info.linhas)||[]; const sob=L.find(l=>l.sit==='Sobreposição');
+    else { const L=(info&&(info.linhasG||info.linhas))||[]; const sob=L.find(l=>l.sit==='Sobreposição');   // SAF-FAZ-3: todas as fazendas da tabela
       // "Corrigir" abre o cultivo desta safra que está na trava mostrada (o mais tardio do par), não o 1º do talhão (revisão SAF, S3.4);
       // a nota descreve essa mesma trava, sem repetir o rótulo "Sobreposição" (S4)
       if(sob){ const ids=(y)=>[y[2]].concat(String(y[1]).split('+')); const tv=sob.trav.find(y=>ids(y).some(i=>sob.own.some(q=>q.id===i)))||sob.trav[0];
         const o=ids(tv).map(i=>sob.own.find(q=>q.id===i)).find(Boolean)||sob.own[0];
-        c={nota:'Sobreposição em '+sob.t+': '+ocMotivo(Object.assign({},sob,{trav:[tv]}),info).replace(/^Sobreposição: /,'')+'.',prim:{t:'Corrigir '+sob.t,fn:()=>{ if(o) abrirCultivo(self,x.saf,o.id); else openDiv(self,sob.t); },a:'resolver'},sec:x.cs.length?av(3,'Dimensionar operações'):null}; }
-      else if(!x.cs.length){ const nl=L.filter(l=>l.sit==='Livre'), nc=L.filter(l=>l.sit==='A conferir'), nv=L.reduce((a,l)=>a+l.vinc.length,0); const b=(info&&info.band)||{};
+        c={nota:'Sobreposição em '+sob.t+': '+ocMotivo(Object.assign({},sob,{trav:[tv]}),info).replace(/^Sobreposição: /,'')+'.',prim:{t:'Corrigir '+sob.t,fn:()=>{ const sf=sob._saf||x.saf; sgNaFazenda(self,sf,()=>{ if(o) abrirCultivo(self,sf,o.id); else openDiv(self,sob.t); }); },a:'resolver'},sec:x.cs.length?av(3,'Dimensionar operações'):null}; }
+      else if(!x.cs.length){ const nl=L.filter(l=>l.sit==='Livre'), nc=L.filter(l=>l.sit==='A conferir'), nv=L.reduce((a,l)=>a+l.vinc.length,0); const b=(info&&(info.bandG||info.band))||{};
         const sop=L.length&&L.every(l=>!l.planejar&&!l.vinc.length&&l.sit==='Perene');
         if(sop){ const o=L[0].fora.find(y=>y.classe==='perene'); const per=L.reduce((a,l)=>a+l.T,0);
           c={nota:'Todos os talhões estão com perenes da '+(o?o.safnome:'outra safra')+' neste período ('+ocHa(per)+' ha).',lnks:o?[{t:'Planeje por ela ›',fn:()=>abrirCultivo(self,o.saf,'')}]:[]}; }
@@ -1622,12 +1800,13 @@ function openApply(self,ids){ const saf=self.state.saf; if(!saf){ self.setState(
   const sel=[...new Set([].concat(...(ids||[]).map(id=>{ const r=g2find(all,id); return (r&&r.grp)?(r.kids||[]).map(k=>k.id):[id]; })))];
   if(!sel.length){ self.setState({g2toast:'Nenhum cultivo sem plano nesta safra.'}); return; }
   // sugestão: o plano mais usado pela mesma cultura nesta safra (a pessoa pode trocar)
-  const cs=cultRows(self,saf); const cu=(cs.find(c=>c.id===sel[0])||{v:{}}).v.cult; const uso={};
+  const cs=cultsGrupo(self,saf).map(x=>x.c); const cu=(cs.find(c=>c.id===sel[0])||{v:{}}).v.cult; const uso={};   // SAF-FAZ-3: todas as fazendas da safra
   cs.forEach(c=>{ const pl=planById(c.v.plano); if(pl&&pl.cultura===cu&&c.v.cult===cu) uso[c.v.plano]=(uso[c.v.plano]||0)+1; });
   const sug=Object.keys(uso).sort((a,b)=>uso[b]-uso[a])[0]||'';
   self.setState({ap:{ids:sel,plan:sug,confirm:false}}); }
-function apVals(self,v){ const ap=self.state.ap; v.ap_open=!!ap; if(!ap) return; const saf=self.state.saf; const rows=cultRows(self,saf).filter(r=>ap.ids.indexOf(r.id)>=0);
-  const culturas=[...new Set(rows.map(r=>r.v.cult))]; const av=apAvalia(self,saf,rows,ap.plan); const tv={}, pv={}; av.trava.forEach(x=>{ tv[x.r.id]=x.t; }); av.pend.forEach(x=>{ pv[x.r.id]=x.t; });
+function apVals(self,v){ const ap=self.state.ap; v.ap_open=!!ap; if(!ap) return; const saf=self.state.saf; const CG=cultsGrupo(self,saf); const safDe={}; CG.forEach(x=>{ safDe[x.c.id]=x.saf; });
+  const rows=CG.map(x=>x.c).filter(r=>ap.ids.indexOf(r.id)>=0);   // SAF-FAZ-3: o lote vale para os cultivos de todas as fazendas da safra, cada um na sub-safra dele
+  const culturas=[...new Set(rows.map(r=>r.v.cult))]; const av=apAvalia(self,saf,rows,ap.plan,safDe); const tv={}, pv={}; av.trava.forEach(x=>{ tv[x.r.id]=x.t; }); av.pend.forEach(x=>{ pv[x.r.id]=x.t; });
   v.ap_itens=rows.map(r=>({t:r.v.local+' · '+r.v.cult+' '+r.v.var+' · '+nf(r.v.area)+' ha'+(planById(r.v.plano)?' · plano atual: '+planById(r.v.plano).nome:'')+(tv[r.id]?' · não recebe: '+tv[r.id]:(pv[r.id]?' · recebe com pendência: '+pv[r.id]:''))}));
   const nOk=rows.length-av.trava.length; v.ap_btn='Aplicar plano em '+nOk+(nOk===1?' cultivo':' cultivos');
   v.ap_titulo='Aplicar plano a '+rows.length+(rows.length>1?' cultivos':' cultivo'); v.ap_mix=culturas.length>1; v.ap_mixmsg='Culturas diferentes na seleção ('+culturas.join(', ')+'). Selecione cultivos de uma só cultura: o plano precisa respeitar a cultura.';
@@ -1644,14 +1823,16 @@ function apVals(self,v){ const ap=self.state.ap; v.ap_open=!!ap; if(!ap) return;
     if(subst.length && !a.confirm){ self.setState({ap:Object.assign({},a,{confirm:true})}); return; } doApply(self,rows,a.plan); };
   v.ap_yes=()=>doApply(self,rows,self.state.ap.plan); v.ap_back=()=>self.setState({ap:Object.assign({},self.state.ap,{confirm:false})}); }
 // R-16 lote: antes de confirmar, quem trava (não recebe) e quem recebe com pendência; cada cultivo é avaliado com o plano novo
-function apAvalia(self,saf,rows,pid){ const out={trava:[],pend:[]}; const so=safList(self)[saf]; if(!pid||!planById(pid)||!so||so.ro) return out; const faz=so.faz;
-  rows.forEach(r=>{ const rec=ocCult(r,saf,faz); rec.plano=pid; const av=ocAvaliaCultivo(self,saf,rec); if(av.erro) out.trava.push({r,t:av.erro}); else if(av.pend) out.pend.push({r,t:av.pend}); }); return out; }
-function doApply(self,rows,pid){ const saf=self.state.saf; const gid='g_cult_'+sk(saf); const all=g2clone(soDaSafra(g2rows(self,GR(gid)))); const adj=JSON.parse(JSON.stringify(adjOf(self)));
-  const av=apAvalia(self,saf,rows,pid); const fora=av.trava.map(x=>x.r.id); const ok=rows.filter(r=>fora.indexOf(r.id)<0);
-  ok.forEach(r=>{ const x=g2find(all,r.id); if(x){ x.v.plano=pid; x.v.colheita=''; delete adj[r.id]; } });
-  const pl=planById(pid); g2set(self,gid,{rows:all,sel:{}});
+function apAvalia(self,saf,rows,pid,safDe){ const out={trava:[],pend:[]}; const S=safList(self); const so=S[saf]; if(!pid||!planById(pid)||!so||so.ro) return out;
+  rows.forEach(r=>{ const s2=(safDe&&safDe[r.id]&&S[safDe[r.id]])?safDe[r.id]:saf; const rec=ocCult(r,s2,S[s2].faz); rec.plano=pid; const av=ocAvaliaCultivo(self,s2,rec); if(av.erro) out.trava.push({r,t:av.erro}); else if(av.pend) out.pend.push({r,t:av.pend}); }); return out; }
+function doApply(self,rows,pid){ const saf=self.state.saf; const safDe={}; cultsGrupo(self,saf).forEach(x=>{ safDe[x.c.id]=x.saf; }); const adj=JSON.parse(JSON.stringify(adjOf(self)));
+  const av=apAvalia(self,saf,rows,pid,safDe); const fora=av.trava.map(x=>x.r.id); const ok=rows.filter(r=>fora.indexOf(r.id)<0);
+  // cada cultivo na grade da sub-safra dele; as grades mudam juntas, num setState só (SAF-FAZ-3)
+  const g0='g_cult_'+sk(saf); const porG={[g0]:g2clone(soDaSafra(g2rows(self,GR(g0))))};
+  ok.forEach(r=>{ const gid='g_cult_'+sk(safDe[r.id]||saf); if(!porG[gid]) porG[gid]=g2clone(soDaSafra(g2rows(self,GR(gid)))); const x=g2find(porG[gid],r.id); if(x){ x.v.plano=pid; x.v.colheita=''; delete adj[r.id]; } });
+  const pl=planById(pid); const g2all=Object.assign({},self.state.g2||{}); Object.keys(porG).forEach(gid=>{ g2all[gid]=Object.assign({},g2all[gid]||{},{rows:porG[gid],sel:{}}); });
   const pend=av.pend.length?' Com pendência: '+av.pend.map(x=>x.t).join(' '):''; const tr=av.trava.length?' Não receberam ('+av.trava.length+'): '+av.trava.map(x=>x.r.v.local).join(', ')+'.':'';
-  self.setState({adj,ap:null,g2toast:pl.nome+' v'+pl.versao+' aplicado a '+ok.length+(ok.length>1?' cultivos':' cultivo')+'.'+pend+tr+' Plano operacional, recursos e demanda recalculados.'}); }
+  self.setState({g2:g2all,adj,ap:null,g2toast:pl.nome+' v'+pl.versao+' aplicado a '+ok.length+(ok.length>1?' cultivos':' cultivo')+'.'+pend+tr+' Plano operacional, recursos e demanda recalculados.'}); }
 // Insumos e doses de um cultivo, sem mudar o plano padrão. adj[cultivo] guarda só o que difere do padrão:
 // 'atividade|i' = dose nova (número) ou '-' (insumo retirado deste talhão); 'atividade|+n' = insumo incluído {prod,grupo,un,preco,dose}.
 // autocompletar do cadastro no "+ Incluir insumo nesta atividade": nome (semente com a variedade do cultivo), grupo, unidade e preço
