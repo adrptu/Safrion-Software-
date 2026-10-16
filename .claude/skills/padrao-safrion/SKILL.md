@@ -44,7 +44,7 @@ Pedido do proprietário sobre uma tela vale para **todas as telas do mesmo tipo*
 3. **Inventariar todas as ocorrências.** Escreva a lista na rodada antes de editar. Procure:
    - telas que usam o componente comum (`E.grid`, `bloco`, `mais`, `modos_html`…);
    - telas com peça própria equivalente (tabela, cartão, barra ou botão feitos à mão);
-   - CSS de área que mira classe do motor (`.cadx .g2…`, `.pa-…` imitando `.g2…`). `python3 -B ds_inventario.py` lista esses casos.
+   - CSS de área que mira classe do motor (`.cadx .g2…`, `.pa-…` imitando `.g2…`). No protótipo, `tools/prototipo/v37/gen37/ds_inventario.py` (branch do protótipo) lista esses casos; no software real, `rg` pelas classes e pelos componentes de `packages/ui`.
 4. **Corrigir na fonte comum:**
    - no protótipo, `engine.py` e `g2lib.js`;
    - no software real, `packages/ui`.
@@ -60,7 +60,8 @@ Pedido do proprietário sobre uma tela vale para **todas as telas do mesmo tipo*
    - contraprova: a versão antiga reprova;
    - a contagem de desvios por padrão não sobe.
 7. **Prova visual:**
-   - `python3 -B galeria.py` fotografa, em 1440 px e 390 px, uma tela de cada família: lista do motor, árvore, agrupada, cadastro, Atividades do plano, Kanban, formulário, mapa e app de campo.
+   - No protótipo, `tools/prototipo/v37/gen37/galeria.py` (branch do protótipo) fotografa, em 1440 px e 390 px, uma tela de cada família: lista do motor, árvore, agrupada, cadastro, Atividades do plano, Kanban, formulário, mapa e app de campo.
+   - No software real, a mesma prova sai do teste de navegador (`pnpm run test:e2e`, Playwright): uma captura por família de tela, nas duas larguras, anexada ao PR.
    - Olhe **cada foto** e compare com a referência aprovada.
    - Desalinhamento, poluição, peça fora do lugar ou estilo diferente do vizinho é achado, e se corrige antes de publicar.
 8. **Entregar:**

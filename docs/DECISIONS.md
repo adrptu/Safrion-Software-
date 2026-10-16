@@ -105,7 +105,7 @@ Respondidas por Adrianus no canal do Claude, em lista de escolha, e pedidos dele
 | DEC-1610-03 | **Mantida a aprovação agronômica individual de cada O.S.**; pré-autorização por limiares só se revê depois do piloto | PEND-01 (PRD 73.12) |
 | DEC-1610-04 | **Prazos e limites propostos aceitos como valores iniciais**, configuráveis, a rever com os números do piloto | PEND-02 a PEND-16 (PRD 73.12) |
 | DEC-1610-05 | **Nome exibido: Safrion**. "Do Talhão à O.S." fica como nome do PRD; logotipo em SVG quando houver | PEND-DS-04 (PRD 74.12) |
-| DEC-1610-06 | **Propostas do design system aceitas**, sem modo escuro por enquanto | PEND-DS-01 a 15 (PRD 74.12) |
+| DEC-1610-06 | **Propostas do design system aceitas**, sem modo escuro por enquanto. **Exceto a PEND-DS-04:** o nome exibido é o da DEC-1610-05 (Safrion), não o da proposta | PEND-DS-01 a 03 e 05 a 15 (PRD 74.12) |
 | DEC-1610-07 | **Relato de problema:**<ul><li>alternativa "não consigo anexar a imagem";</li><li>prints guardados por 180 dias após o encerramento, ou apagados a pedido.</li></ul> | PEND-FB-01 e 02 (PRD 75.8) |
 | DEC-1610-08 | **Equipe pequena com meta ligada a remuneração variável:** exceção permitida, com revisor posterior obrigatório antes do fechamento | PEND-18 (PRD 73.12) |
 | DEC-1610-09 | **Barra do Mapa volta aos 9 nomes de 26/09:**<ul><li>Carência vira filtro de Colheita;</li><li>Insumos vira filtro de Ordens de serviço;</li><li>talhão sem laudo aparece "Sem laudo", em cinza.</li></ul> | DEC-0910-36 (PLA-01) |
