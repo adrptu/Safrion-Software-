@@ -1,19 +1,14 @@
 {
  "tot": {
-  "css": 21,
+  "css": 6,
   "tabela": 5,
-  "cartao": 7
+  "cartao": 5
  },
  "arquivos": {
   "agronomia.py": {
    "css": 0,
    "tabela": 3,
    "cartao": 0
-  },
-  "cadastros.py": {
-   "css": 15,
-   "tabela": 0,
-   "cartao": 2
   },
   "maquinas.py": {
    "css": 4,
