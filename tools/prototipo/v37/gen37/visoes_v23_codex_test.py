@@ -124,16 +124,9 @@ try:
             check('Multivalor conta cada membro exatamente uma vez',sorted(counts)==[1,2,3,7,8] and sum(counts)==21 and len(base)==20,counts)
         multi=any(col.get('multi') and col['k']==dimension.get('ck',[None])[0] for col in spec['cols'])
         check('Grupos '+dimension['l']+' conservam contagem',chosen and groups and len(counts)==len(groups) and (sum(counts)>=len(base) if multi else sum(counts)==len(base)),groups)
-        if groups and groups[0].get('n'):
-            click(query('[data-g2g=g_forn] .g2desce'))
-            wait(query('[data-g2agtr=g_forn]'))
-            descended=rows(gid)
-            check('Descer '+dimension['l']+' mantém cardinalidade do grupo',len(descended)==int(groups[0]['n']),descended)
-            c.tecla('Escape','Escape',27)
-            check('Esc sobe '+dimension['l']+' sem perder registros',rows(gid)==base,rows(gid))
-            click(query('[data-g2g=g_forn] .g2desce'))
-            click(text_button('Todas',query('[data-g2agtr=g_forn]')))
-            check('Trilha sobe '+dimension['l']+' sem perder registros',rows(gid)==base,rows(gid))
+        # AGR-02 (16/10): o grupo só recolhe; recorte é dos filtros, sem Descer/Esc/Trilha.
+        # Ausência de trilha e preservação das linhas: visoes2_agrupar_test.py G1–G3;
+        # varredura de todas as páginas: ds_1610_test.py S3. Não duplicar esses casos aqui.
         group(gid,'Sem agrupar')
     group(gid,'Papéis')
     c.goto(f'http://127.0.0.1:{p}/CD-05.dc.html',.2)
