@@ -245,6 +245,7 @@ function osApPend(o){ return cenApPend(o); }
 function osMerge(b,co,c){ if(!co) return b;
   const x=co.osc||{}; const r=co.req?osReqVis(co,c.reqs[co.req]||null):null; const mine=(x.cond!==undefined&&x.fase===co.etapa);
   const o=Object.assign({},b,{etapa:co.etapa,ap:co.ap||[],req:co.req||null,reservado:!!co.reservado,selos:co.selos||b.selos||[],versao:co.versao||b.versao,r});
+  if(co.prog){o.resp=co.resp;const rs=typeof alDaOrdem==='function'?alDaOrdem(c,co.id):[];o.atv=Object.assign({},o.atv||{},{conj:rs.filter(x=>x.tipo!=='Pessoa').map(x=>x.nome).join(' + ')});}
   // ajustada ao liberar (osc_ajustar): área e doses do cenário; a linha de histórico entra na Origem
   if(x.aj&&x.aj.length){ o.area=co.area; o.ajv=x.aj[x.aj.length-1].v; o.orig=(b.orig||[]).concat(x.aj.map(a=>a.t));
     o.ins=(co.ins||[]).map(y=>{ const i=(b.ins||[]).find(z=>z.p===y.p); return Object.assign({g:y.g||''},i||{},{p:y.p,dose:y.dose,un:y.un,tot:y.tot,d0:i?i.dose:undefined}); }); }
@@ -961,8 +962,74 @@ function osWork(self,v,o){ const st=self.state; const a=o.atv||{}; const PF=g2pe
     if(!mot) return err('Informe o motivo da dispensa.');
     osRun(self,c=>osc_dispensar(c,o.id,n,mot,g2perfil(),cur.chave),{pa:null}); };
 }
+// OS-LOTE: mesma coleção e contexto, rascunho preservado ao fechar. Sem seleção implícita.
+function osGrupoVals(self,v,recorte){
+  const c=cenGet(),pf=g2perfil(),perfil=(g2pf(pf)||{}).k;
+  const put=x=>self.setState({og:Object.assign({},self.state.og||{},x)});
+  const key=()=> 'os-grupo-'+Date.now()+'-'+Math.random().toString(36).slice(2);
+  const snap=g=>Object.fromEntries(g.ids.map(id=>[id,cenGrupoSnapshot(c,id)]));
+  let permitido=true;try{cenGrupoAtor(pf)}catch(e){permitido=false}
+  v.og_pode=permitido;
+  v.og_abrir=()=>{ const old=self.state.og;
+    if(old&&old.perfil===perfil) put({aberto:true});
+    else self.setState({og:{aberto:true,perfil,ids:[],candidatos:recorte.map(x=>x.id),contexto:[mfFaz(self),mfSaf(self),mfCult(self)].join(' · '),chave:key()}});
+  };
+  const permitidos=new Set(vis(self,true).map(o=>o.id));
+  v.og_grupos=Object.values(c.gruposExec||{}).filter(g=>g.ids.length&&g.ids.every(id=>permitidos.has(id))).map(g=>({id:g.id,t:g.id+' · '+g.ids.length+' destinos · v'+g.versao,go:()=>self.setState({og:{aberto:true,perfil,grupo:g.id,ids:[],contexto:[mfFaz(self),mfSaf(self)].join(' · '),chave:key()}})}));
+  v.og_temgrupos=v.og_grupos.length>0;
+  const st=self.state.og||{},g=st.grupo&&(c.gruposExec||{})[st.grupo];
+  v.og_show=!!st.aberto&&st.perfil===perfil;
+  v.og_fechar=()=>put({aberto:false});v.og_key=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();v.og_fechar()}};
+  v.og_titulo=g?g.id+' · versão '+g.versao:'Agrupar operações';v.og_contexto=st.contexto||'';
+  v.og_erro=st.erro||'';v.og_temerro=!!st.erro;v.og_criar=!g;v.og_detalhe=!!g;
+  v.og_voltar=()=>put({previa:null,confirmacao:null,erro:'',chave:key()});
+  v.og_revisao=!!(st.previa||st.confirmacao);v.og_selecao=!v.og_revisao&&!st.modoPrograma;v.og_semcheckbox=!v.og_selecao;
+  const selecionar=id=>{const ids=(self.state.og.ids||[]).slice(),i=ids.indexOf(id);if(i<0)ids.push(id);else ids.splice(i,1);put({ids,previa:null,confirmacao:null,erro:'',resultado:null,chave:key()})};
+  const ids=st.ids||[],lista=st.previa?st.previa.ids:(st.confirmacao&&st.confirmacao.tipo==='liberar'?st.confirmacao.ids:(g?g.ids:(st.candidatos||[])));
+  const fatos=g?cenGrupoRealizado(c,g.id):[];
+  v.og_linhas=lista.map(id=>{const o=c.ordens[id],po=ords(self).find(x=>x.id===id);let motivo='';
+    if(!o)motivo='Origem não encontrada · reabra o recorte';
+    else if(g){if(o.etapa!=='A liberar')motivo=o.etapa;else if(!osAprovada(o,osVn(o.versao)))motivo='Aprovação '+o.versao+' pendente';else motivo=cenGrupoRecursos(c,[id]).map(x=>x.motivo).join(' · ')}
+    else try{const f=cenGrupoFicha(c,id);const outra=ids.find(k=>k!==id);if(outra&&f.eq!==cenGrupoFicha(c,outra).eq)motivo='Receita ou parâmetros incompatíveis com a seleção'}catch(e){motivo=e.message}
+    return {id,t:id+' · '+(po?po.talhao:(o&&o.talhao)||'origem ausente'),area:o?nf(o.area)+' ha':'—',estado:motivo||'Compatível · '+(o&&o.versao),marcado:ids.includes(id),desabilitado:!ids.includes(id)&&!!motivo,
+      mudar:()=>selecionar(id),abrir:()=>{put({aberto:false});self.setState({pan:id,pa:null})},
+      feito:o?(()=>{const f=fatos.find(x=>x.os===id),s={};if(f)f.consumo.forEach(a=>Object.keys(a.cons||{}).forEach(p=>s[p]=(s[p]||0)+a.cons[p]));return nf(o.realizado||0)+' ha realizados · '+nf(o.saldo)+' ha de saldo'+Object.keys(s).map(p=>' · consumido '+p+': '+nf(s[p])+' '+((o.ins||[]).find(x=>x.p===p)||{}).un).join('')+(f&&f.pendentes?' · '+f.pendentes+' registros aguardam sinal ou conferência':'')})():'',
+      separar:()=>{try{cenGrupoAtor(pf);g.ids.forEach(k=>cenGrupoFicha(c,k,g.id));put({confirmacao:{tipo:'separar',os:id,versao:g.versao,versoes:snap(g)},erro:'',chave:key()})}catch(e){put({erro:e.message})}}};
+  });
+  v.og_vazia=!v.og_linhas.length;v.og_n=st.modoPrograma&&g?g.ids.length+' destinos do grupo':ids.length+' selecionadas';
+  v.og_programar_grupo=()=>put({modoPrograma:true,programar:true,previa:null,confirmacao:null,erro:'',chave:key()});
+  v.og_programar=!!st.programar;v.og_programar_mudar=e=>put({programar:!!e.target.checked,previa:null,erro:'',chave:key()});
+  v.og_inicio=st.inicio||'';v.og_inicio_mudar=e=>put({inicio:e.target.value,previa:null,erro:'',chave:key()});
+  v.og_fuso=st.fuso||'';v.og_fuso_mudar=e=>put({fuso:e.target.value,previa:null,erro:'',chave:key()});
+  v.og_campos=[['maquina','Máquina','Máquina'],['implemento','Implemento','Implemento'],['operador','Operador','Pessoa','operador'],['caldeiro','Caldeiro','Pessoa','caldeiro']].filter(([k])=>k!=='caldeiro'||!((c.ordens[(g?g.ids:ids)[0]]||{}).loteFicha)||c.ordens[(g?g.ids:ids)[0]].loteFicha.tipo==='liquido').map(([k,l,t,cl])=>({k,l,val:st[k]||'',mudar:e=>put({[k]:e.target.value,previa:null,erro:'',chave:key()}),opcoes:[{v:'',t:'Escolha…'}].concat(Object.keys(AL0.nome).filter(r=>AL0.tipo[r]===t&&(!cl||AL0.classe[r]===cl)).map(r=>({v:r,t:AL0.nome[r]})))}));
+  v.og_edprograma=(!g||st.modoPrograma)&&!v.og_revisao;
+  v.og_previa=()=>{try{if(!g||st.modoPrograma){const p=cenGrupoPrevia(c,g?g.ids:ids,pf,g?g.id:undefined,st.programar?{maquina:st.maquina,implemento:st.implemento,operador:st.operador,caldeiro:st.caldeiro,inicio:(st.inicio||'')+(st.fuso||'')}:null);put({previa:p,versaoGrupo:g?g.versao:null,erro:'',chave:key()})}
+    else{if(!ids.length)throw Error('Selecione as origens que deseja liberar.');cenExigeAlc(pf,'AL-01','Liberar selecionadas');put({confirmacao:{tipo:'liberar',ids:ids.slice(),versao:g.versao,versoes:snap(g)},erro:'',chave:key()})}}catch(e){put({erro:e.message})}};
+  const p=st.previa,q=st.confirmacao;
+  v.og_resumo=p?nf(p.area)+' ha · receita '+p.receita+' '+p.receitaVersao+(p.horas===null?' · horas não calculadas':' · '+nf(p.horas)+' h'):
+    q?(q.tipo==='separar'?'Separar '+q.os+' do grupo. IDs, versões e demanda das origens permanecem.':'Liberar '+q.ids.join(', ')+'. Cada origem terá seu resultado; nenhuma aprovação será criada.'):'Escolha explicitamente as origens deste recorte.';
+  v.og_janela=p?'Janela comum: '+new Date(p.inicio).toLocaleString('pt-BR',{timeZone:'UTC'})+' a '+new Date(p.fim).toLocaleString('pt-BR',{timeZone:'UTC'})+' UTC':'';
+  v.og_produtos=p?p.produtos.map(x=>({t:x.p+' · '+nf(x.q)+' '+x.un+' ('+nf(x.dose)+' '+x.un+'/ha)'})):[];
+  v.og_cargas=p?(p.cargas||[]).map(x=>({t:'Carga '+x.n+' · '+nf(x.vol)+' L · '+x.destinos.map(d=>d.os+': '+nf(d.area)+' ha').join(' / ')})):[];
+  v.og_pendencias=p?p.pendencias.map(t=>({t})):[];
+  const programacao=p?p.programacao:g?Object.fromEntries(g.ids.map(id=>[id,(c.ordens[id]||{}).prog])):null;
+  v.og_recursos=programacao?Object.keys(programacao).flatMap(id=>{const x=programacao[id];return x?(x.blocos||[]).map(b=>({t:id+' · '+AL0.nome[b.r]+' · '+b.dia+' '+alHh(b.ini)+'–'+alHh(b.fim)+' '+x.fuso})):[]}):[];
+  v.og_consequencia=p?(st.modoPrograma?'Confirmar atualiza apenas a programação operacional. Aprovação e liberação continuam separadas.':'Confirmar vincula as origens. Não aprova, libera ou reserva insumos. A programação pendente continua pendente.') : '';
+  v.og_botao=v.og_revisao?(q&&q.tipo==='separar'?'Confirmar separação':st.modoPrograma?'Confirmar programação':g?'Liberar selecionadas':'Confirmar agrupamento'):st.modoPrograma?'Conferir programação':g?'Conferir liberação':'Conferir agrupamento';
+  v.og_acao=()=>{if((g2pf(g2perfil())||{}).k!==perfil){put({aberto:false,erro:'Perfil mudou: reabra para conferir.'});return}if(!v.og_revisao){v.og_previa();return}
+    const atual=self.state.og||{};if(atual!==st)return;
+    const r=cenMudar(null,k=>p?(g?cenGrupoProgramar(k,g.id,st.versaoGrupo,p,pf,st.chave):cenGrupoCriar(k,p,pf,st.chave)):q.tipo==='separar'?cenGrupoSeparar(k,g.id,q.os,q.versao,q.versoes,pf,st.chave):cenGrupoLiberar(k,g.id,q.ids,q.versao,q.versoes,pf,st.chave),{estrito:true});
+    if(r.erro){put({erro:r.erro});return}
+    put({grupo:r.grupo,modoPrograma:false,previa:null,confirmacao:null,resultado:r,ids:[],erro:'',chave:key()});self.setState({cenrev:cenGet().rev});
+  };
+  v.og_temresultado=!!st.resultado;v.og_resultado=st.resultado?st.resultado.msg:'';
+  v.og_recibos=st.resultado?(st.resultado.itens||[]).map(x=>({t:x.os+' · '+x.estado+(x.motivo?' · '+x.motivo:'')})):[];
+  v.og_hist=g?g.historico.map(x=>({t:x.acao+' · v'+x.versao+' · '+x.por+' · '+x.at})):[];
+}
+
+
 function EXTRAVALS(self,v){
-  self.g2perfilFecha={pa:null,dvr:null,cdAtivo:null};   /* trocar o perfil fecha a confirmação e os formulários de decisão (liberar, ajustar, dispensar, cancelar, revisão de dose) */
+  self.g2perfilFecha={pa:null,dvr:null,cdAtivo:null,og:null};   /* trocar o perfil fecha a confirmação e os formulários de decisão (liberar, ajustar, dispensar, cancelar, revisão de dose) */
   const st=self.state, all=ords(self), os=vis(self);
   // OS.dc.html#OS-0420 (vindo do Mapa ou de outra tela): abre a ordem na tela de trabalho, uma vez
   // #OS-0430:ajustar (vindo do Mapa) abre o formulário de ajuste; ordem de outra fazenda troca o filtro Fazenda para a dela
@@ -1048,6 +1115,7 @@ function EXTRAVALS(self,v){
   // Fazenda e a Safra e somem com filtro da grade, como antes. Conflitos, manutenção e uso continuam da semana inteira.
   const recR=(self.__osBase||[]).filter(r=>(!trS||trS.has(r.id))&&g2match(r,spO,stO)), recIds=new Set(recR.map(r=>r.id));
   const escD=[mfFaz(self)==='Todas'?'todas as fazendas':mfFaz(self)].concat(mfSaf(self)==='Todas'?[]:['safra '+mfSaf(self)]).join(' · ');
+  osGrupoVals(self,v,recR);
   const rDesc=escD+(filtrando?' no recorte':'');
   const extOk=(id)=>{ const x=RC_EXT[id]; return !!x&&!filtrando&&(mfFaz(self)==='Todas'||mfFaz(self)===x[0])&&(mfSaf(self)==='Todas'||mfSaf(self)===x[1]); };
   v.rc_nota='A carga por recurso mostra a semana do PCP por recurso e dia: só os blocos das ordens de '+rDesc+'; conflitos, manutenção e uso continuam da semana inteira.';
@@ -1667,9 +1735,9 @@ def build():
              f'padding: 8px 12px; border-radius: 10px; background: {ACCS}; color: {INK}; margin-bottom: 8px;"><span style="flex: 1 1 260px;">{H("pn_txt")}</span>'
              f'<button type="button" onClick="{H("pn_sair")}" style="{_MINI}">Ver todas as O.S.</button></div></sc-if>')
     corpo=bloco('Ordens por fase','Clique numa ordem para ver atividade, insumos e doses e seguir para a próxima fase.',
-                vazio+tem(f'<div style="display: flex; flex-direction: column; gap: 10px;">{pn_nota}{colbar}{panes}</div>')+_restaurar(),
+                vazio+tem(f'<div style="display: flex; flex-direction: column; gap: 10px;">{pn_nota}{colbar}{_grupos_barra()}{panes}</div>')+_restaurar(),
                 acao='')
-    EXTRA.append(_painel()); EXTRA.append(_form())
+    EXTRA.append(_painel()); EXTRA.append(_form()); EXTRA.append(_grupo())
     # cultura de cada ordem (13/10, filtro Cultura): a do cultivo de cada talhão da ordem na safra dela (D2.SAFRAS e D2.CULTIVOS, fonte do Planejar safra)
     for o in ordens: o['culturas']=_culturas_da(o)
     data=dict(ords=ordens,nova=_nova_ordem_dados(),aloc={o['id']:AL.da_ordem(o['id']) for o in ordens},agf=_agf_fichas())
@@ -1781,3 +1849,42 @@ def _car_rev_html():
             f'<button type="button" onClick="{H("car_bula_go")}" style="{H("car_bula_st")}">Registrar carência conferida</button></div>'
             f'<sc-if value="{H("car_bula_hasErr")}" hint-placeholder-val="{F()}"><div role="alert" style="font-size: 12.5px; font-weight: 700; color: {RED};">{H("car_bula_err")}</div></sc-if></div></sc-if>')
 
+
+
+# OS-LOTE-F1 · coleção e detalhe contextual, sem menu novo.
+def _grupos_barra():
+    return (f'<div role="group" aria-label="Agrupamentos de execução" style="display:flex;gap:8px;flex-wrap:wrap">'
+        f'<sc-if value="{H("og_pode")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("og_abrir")}" style="{_MINI};min-height:44px">Agrupar operações compatíveis</button></sc-if>'
+        f'<sc-for list="{H("og_grupos")}" as="g" hint-placeholder-count="0"><button type="button" onClick="{H("g.go")}" style="{_MINI};min-height:44px">{H("g.t")}</button></sc-for></div>')
+
+def _grupo():
+    linha=(f'<div style="display:flex;flex-direction:column;gap:6px;border-bottom:1px solid {LINE};padding:10px 0">'
+        f'<sc-if value="{H("og_selecao")}" hint-placeholder-val="{T()}"><label style="display:flex;align-items:center;gap:10px;min-height:44px">'
+        f'<input type="checkbox" checked="{H("o.marcado")}" disabled="{H("o.desabilitado")}" onChange="{H("o.mudar")}" aria-label="{H("o.t")}" style="width:20px;height:20px;flex-shrink:0"/><span>{H("o.t")} · {H("o.area")}</span></label></sc-if>'
+        f'<sc-if value="{H("og_semcheckbox")}" hint-placeholder-val="{F()}"><b>{H("o.t")} · {H("o.area")}</b></sc-if>'
+        f'<span>{H("o.estado")}</span><sc-if value="{H("og_detalhe")}" hint-placeholder-val="{F()}"><span>{H("o.feito")}</span></sc-if>'
+        f'<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" onClick="{H("o.abrir")}" style="{_MINI};min-height:44px">Abrir origem</button>'
+        f'<sc-if value="{H("og_detalhe")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("o.separar")}" style="{_MINI};min-height:44px">Separar destino</button></sc-if></div></div>')
+    def textos(nome):
+        return f'<sc-for list="{H(nome)}" as="r" hint-placeholder-count="0"><p style="margin:4px 0;overflow-wrap:anywhere">{H("r.t")}</p></sc-for>'
+    programar=(f'<sc-if value="{H("og_edprograma")}" hint-placeholder-val="{F()}"><label style="display:flex;align-items:center;gap:8px;min-height:44px"><input type="checkbox" checked="{H("og_programar")}" onChange="{H("og_programar_mudar")}"/>Programar recursos nesta composição</label>'
+        f'<sc-if value="{H("og_programar")}" hint-placeholder-val="{F()}"><div style="display:flex;flex-direction:column;gap:8px">'
+        f'<label>Início da sequência<input type="datetime-local" value="{H("og_inicio")}" onChange="{H("og_inicio_mudar")}" style="display:block;min-height:44px;max-width:100%;box-sizing:border-box"/></label>'
+        f'<label>Fuso da fazenda<select value="{H("og_fuso")}" onChange="{H("og_fuso_mudar")}" style="display:block;min-height:44px"><option value="">Escolha…</option><option value="-03:00">UTC−3</option><option value="-04:00">UTC−4</option><option value="-05:00">UTC−5</option></select></label>'
+        f'<sc-for list="{H("og_campos")}" as="f" hint-placeholder-count="4"><label>{H("f.l")}<select value="{H("f.val")}" onChange="{H("f.mudar")}" style="display:block;min-height:44px;width:100%"><sc-for list="{H("f.opcoes")}" as="r" hint-placeholder-count="2"><option value="{H("r.v")}">{H("r.t")}</option></sc-for></select></label></sc-for>'
+        '<p>A sequência usa a capacidade, o deslocamento e o setup de cada origem. Sem programação, a composição fica pendente.</p></div></sc-if></sc-if>')
+    return (f'<sc-if value="{H("og_show")}" hint-placeholder-val="{F()}"><div style="position:fixed;inset:0;z-index:60;display:flex;justify-content:flex-end">'
+        f'<button type="button" aria-label="Fechar agrupamento" onClick="{H("og_fechar")}" style="position:absolute;inset:0;border:0;background:rgba(21,32,26,.32)"></button>'
+        f'<aside role="dialog" aria-modal="true" aria-label="Agrupamento de operações" onKeyDown="{H("og_key")}" style="position:relative;width:560px;max-width:100%;height:100dvh;background:{SURF};display:flex;flex-direction:column;box-sizing:border-box;min-width:0">'
+        f'<header style="padding:16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid {LINE}"><h2 style="font-size:18px;flex:1;margin:0">{H("og_titulo")}</h2>'
+        f'<button type="button" aria-label="Fechar e preservar rascunho" onClick="{H("og_fechar")}" style="{_MINI};min-height:44px;min-width:44px">×</button></header>'
+        f'<div style="flex:1;overflow-y:auto;min-height:0;padding:16px;font-size:13px;line-height:1.5;overflow-wrap:anywhere">'
+        f'<p>{H("og_contexto")} · recorte da abertura</p><p>{H("og_n")}</p>'
+        f'<sc-if value="{H("og_temresultado")}" hint-placeholder-val="{F()}"><div role="status"><b>{H("og_resultado")}</b>{textos("og_recibos")}</div></sc-if>'
+        f'<sc-if value="{H("og_temerro")}" hint-placeholder-val="{F()}"><p role="alert">{H("og_erro")}</p></sc-if>'
+        f'<sc-if value="{H("og_detalhe")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("og_programar_grupo")}" style="{_MINI};min-height:44px">Programar grupo</button></sc-if>{programar}<p>{H("og_resumo")}</p><p>{H("og_janela")}</p>{textos("og_produtos")}{textos("og_cargas")}{textos("og_pendencias")}{textos("og_recursos")}'
+        f'<p>{H("og_consequencia")}</p><sc-for list="{H("og_linhas")}" as="o" hint-placeholder-count="2">{linha}</sc-for>'
+        f'<sc-if value="{H("og_vazia")}" hint-placeholder-val="{F()}"><p>Nenhuma origem neste recorte. Feche e confira os filtros da lista.</p></sc-if>'
+        f'{textos("og_hist")}</div><footer style="flex-shrink:0;display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px max(12px,env(safe-area-inset-bottom));border-top:1px solid {LINE}">'
+        f'<sc-if value="{H("og_revisao")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("og_voltar")}" style="{_MINI};min-height:44px">Rever seleção</button></sc-if>'
+        f'<button type="button" onClick="{H("og_acao")}" style="{_MINIP};min-height:44px;flex:1">{H("og_botao")}</button></footer></aside></div></sc-if>')
