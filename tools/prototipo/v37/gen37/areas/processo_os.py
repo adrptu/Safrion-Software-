@@ -1028,6 +1028,15 @@ function osGrupoVals(self,v,recorte){
 }
 
 
+// AGR-02: recolher é estado visual local; não altera a trilha, filtros ou seleção da coleção.
+function osKbRaia(self,dim,path,nome,n,cols,nivel){
+  const key=JSON.stringify([g2perfil().k,mfFaz(self),mfSaf(self),dim,path||[],nome]);
+  const aberta=!(self.state.kbFechadas||{})[key];
+  return {k:nome,n:n+(n===1?' ordem':' ordens'),aberta,expandida:String(aberta),seta:aberta?'▾':'▸',
+    lab:(aberta?'Recolher':'Expandir')+' raia '+nome+' ('+nivel+'): '+n+(n===1?' ordem':' ordens'),
+    alterna:()=>{const fechadas=Object.assign({},self.state.kbFechadas||{});if(fechadas[key])delete fechadas[key];else fechadas[key]=true;self.setState({kbFechadas:fechadas});},
+    cols,tem:n>0};
+}
 function EXTRAVALS(self,v){
   self.g2perfilFecha={pa:null,dvr:null,cdAtivo:null,og:null};   /* trocar o perfil fecha a confirmação e os formulários de decisão (liberar, ajustar, dispensar, cancelar, revisão de dose) */
   const st=self.state, all=ords(self), os=vis(self);
@@ -1170,7 +1179,7 @@ function EXTRAVALS(self,v){
     v.ost_conta=tsel.length?(osK.length+(osK.length===1?' ordem':' ordens')+' no filtro'):'';
     v.os_tmsg=self.__osMsg||''; v.os_temmsg=!!self.__osMsg; }
   /* VISOES-2 §3.3: com Agrupar por, o Kanban ganha uma raia por grupo do nível atual (a mesma O.S. de dois talhões aparece nas duas raias,
-     como na Tabela); o nome da raia desce. No último nível, um quadro só, do recorte da trilha */
+     como na Tabela); o cabeçalho recolhe/expande sem mudar a trilha. No último nível, um quadro só, do recorte da trilha */
   v.kb=[]; v.kb_raias=[]; v.kb_temraias=false; g2visaoTenta(self,'g_os','kanban',()=>{ const kbCols=(lst)=>FASES.map(f=>{ const cs=lst.filter(o=>o.etapa===f); const sal=cs.filter(o=>o.area).reduce((s,o)=>s+(o.saldo||0),0);
     return {t:f,n:String(cs.length),nst:chipSt(FCOR[f]),carga:(f==='Encerradas'?osPeriodo(cs):(sal?'saldo '+nf(sal)+' ha':'')),vazio:cs.length===0,
       cards:cs.map(o=>{ const pct=o.area?Math.round(100*(o.realizado||0)/o.area):0;
@@ -1183,7 +1192,7 @@ function EXTRAVALS(self,v){
     const R=(agA&&!v.pn_on)?g2agRows(self,spO,g2stBusca(self,'g_os',stO),osRows):null;
     if(R&&R.a&&R.D&&R.lv<R.D.niv.length){ const niv=R.D.niv[R.lv].toLowerCase();
       v.kb_raias=R.rows.map(g=>{ const ids=new Set(g.kids.map(x=>String(x.id).split('@')[0])), lst=osK.filter(o=>ids.has(o.id)), n=lst.filter(o=>FASES.indexOf(o.etapa)>=0).length;
-        return {k:g.grp.k,n:n+(n===1?' ordem':' ordens'),lab:'Descer em '+g.grp.k+' ('+niv+'): '+n+(n===1?' ordem':' ordens'),desce:()=>g2agGrava(self,spO,{d:agA.d,t:(R.path||[]).concat([g.grp.k])}),cols:kbCols(lst),tem:n>0}; }).filter(r=>r.tem);
+        return osKbRaia(self,agA.d,R.path,g.grp.k,n,kbCols(lst),niv); }).filter(r=>r.tem);
       /* a O.S. de dois talhões aparece nas duas raias: a 2ª vez diz onde mais está (não é um segundo botão igual ao primeiro) */
       const visto={}; v.kb_raias.forEach(r=>r.cols.forEach(c=>c.cards.forEach(k=>{ if(visto[k.id]){ k.hasRep=true; k.rep='Também na raia '+visto[k.id]; k.lab+=' · também na raia '+visto[k.id]; } else visto[k.id]=r.k; })));
       v.kb_temraias=v.kb_raias.length>0; }
@@ -1368,13 +1377,13 @@ def _kanban(celular_rola=False,lista="kb"):
     return rola + f'<div role="list" aria-label="Kanban das ordens" class="{"os-kb" if celular_rola else ""}" style="display: flex; gap: 10px; align-items: flex-start;"><sc-for list="{H(lista)}" as="c" hint-placeholder-count="5">{col}</sc-for></div>'
 
 def _kanban_raias():
-    """VISOES-2 §3.3: Kanban com Agrupar por = uma raia por grupo do nível atual; o nome da raia desce (mesmo gesto do nome do grupo na Tabela).
+    """VISOES-2 §3.3: Kanban com Agrupar por = uma raia por grupo do nível atual; o cabeçalho recolhe/expande o conteúdo, preservando a trilha da Tabela.
     Sem agrupamento, ou no último nível, o quadro único de sempre."""
     # na raia, a fase vazia fica só com o título e o 0 (sem a caixa "Nenhuma ordem"): 8 raias × 5 fases não viram 40 caixas vazias
     raia=(f'<section class="os-raia" style="display: flex; flex-direction: column; gap: 8px;">'
-          f'<button type="button" class="os-raia-cab" aria-label="{H("r.lab")}" onClick="{H("r.desce")}" style="align-self: flex-start; display: inline-flex; align-items: baseline; gap: 8px; min-height: 36px; padding: 4px 8px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; font-family: inherit; color: {ACC};">'
-          f'<b style="font-size: 14px;">{H("r.k")}</b><span style="font-size: 12.5px; color: {MUTED};">{H("r.n")}</span><span aria-hidden="true">›</span></button>'
-          + _kanban(celular_rola='sem_estilo',lista='r.cols') + '</section>')
+          f'<button type="button" class="os-raia-cab" aria-label="{H("r.lab")}" aria-expanded="{H("r.expandida")}" onClick="{H("r.alterna")}" style="align-self: flex-start; display: inline-flex; align-items: baseline; gap: 8px; min-height: 36px; padding: 4px 8px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; font-family: inherit; color: {ACC};">'
+          f'<span aria-hidden="true">{H("r.seta")}</span><b style="font-size: 14px;">{H("r.k")}</b><span style="font-size: 12.5px; color: {MUTED};">{H("r.n")}</span></button>'
+          + f'<sc-if value="{H("r.aberta")}" hint-placeholder-val="{T()}">' + _kanban(celular_rola='sem_estilo',lista='r.cols') + '</sc-if></section>')
     # Codex 6170116165 V2-RAIAS-MOBILE-01: a raia usa a mesma coluna de 148 px com rolagem local do quadro único (antes, 5 colunas de ~45 px);
     # V2-RAIAS-TOQUE-01: no toque, nome da raia, × do chip e "Limpar filtros" com 44 px
     return (_KB_ROLA+'<style>.os-raia .os-kbvazio{display:none}@media (pointer:coarse){.os-raia-cab{min-height:44px!important}}</style>'
