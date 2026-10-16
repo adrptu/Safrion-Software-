@@ -1,0 +1,13 @@
+== desktop · O.S. com a análise de solo
+RESULTADO: OK 0/0
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr77/tools/prototipo/v37/gen37/solo_os_test.py", line 64, in <module>
+    t.chk('Planejar safra: "Usar 1.800" grava o uso da análise na calagem do Pivô 12', cen("((c.solo||{}).aceites||{})['lg12|i1|Calcário dolomítico filler']") and cen("c.solo.aceites['lg12|i1|Calcário dolomítico filler'].dose") == 1800, [r, toast()])
+                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr77/tools/prototipo/v37/gen37/solo_os_test.py", line 50, in cen
+    def cen(expr): return J(f"(()=>{{ const c=CENO(); return ({expr}); }})()")
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/pr77/tools/prototipo/v37/gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

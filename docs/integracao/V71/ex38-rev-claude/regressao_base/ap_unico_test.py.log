@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/tmp/claude-0/pr77base/tools/prototipo/v37/gen37/ap_unico_test.py", line 38, in <module>
+    if 'unit' in MODOS: FALHAS += unit()
+                                  ^^^^^^
+  File "/tmp/claude-0/pr77base/tools/prototipo/v37/gen37/ap_unico_test.py", line 19, in unit
+    custo = ('const CUSTO=(function(M){ ' + re.search(r'function precoDe\(p\)\{.*?\n', ini).group(0) + re.search(r'function ordCusto\(o\)\{.*?return r; \}\n', ini, re.S).group(0)
+                                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'group'

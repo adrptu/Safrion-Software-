@@ -1,0 +1,27 @@
+OK    U1 semente: cultura de cada talhão das 23 ordens = a do talhão no cadastro (21 pares)
+OK    U2 ordem nova da safrinha no T1-A: cultura do cultivo (Milho), não a do talhão (Soja)
+OK    U3 AG-07: a ordem nova de milho é candidata em Milho e não em Soja
+OK    U4 semente: Soja = OS-0430 (dessecação) · Mamão = OS-0501 (dessecação) · Feijão, Milho e Café = nenhuma
+OK    U5 liberada sai da lista: depois de liberar a OS-0430, Soja = nenhuma
+OK    U14 NEGATIVO Calagem (OS-0502), Sexagem e desbaste (OS-0511), Fertirrigação (OS-0418, OS-0442) e Colheita (OS-0440) não são candidatas; pulverização nova (OS-0441) é
+OK    U15 NEGATIVO ordem OB (beneficiamento) nunca é candidata, nem com operação de pulverização
+OK    U6 incluir pela O.S. libera a v2 com o alvo: ins.alvo, linha da versão "incluído Tebuconazol 200 EC 0,8 L/ha para antracnose"
+OK    U7 a aprovação (CMD-42) grava produto, dose e alvo; a liberação (CMD-06) fica separada
+OK    U8 total pela regra única: 0,8 L/ha × 49,31 ha
+OK    U9 RECUSA trava legal (a do CTL-1): Abamectina 18 EC na soja → "sem registro para soja"; nada gravado
+OK    U10 RECUSA dose fora da bula: Tebuconazol 3 L/ha no mamão → "dose fora da bula: 0,5–1 L/ha"; nada gravado
+OK    U11 RECUSA sem o papel: Caio (PCP) não inclui produto (decisão do agrônomo); nada gravado
+OK    U12 REPETIÇÃO: usar o mesmo produto de novo na mesma ordem é recusado ("já está na ordem"); não duplica nem muda a versão
+OK    U16 RECUSA alvo fora da referência: Acetamiprido 200 SP para Cochonilha no mamão (referência: mosca-branca) → "Cochonilha não está na referência conferida em mamão (mosca-branca)"; nada gravado
+OK    U17 alvo da referência (mosca-branca) passa: CMD-42 "Acetamiprido 200 SP 0,3 kg/ha para mosca-branca"
+OK    U18 regra única do alvo (carAlvoRef: AG-07 e trava da O.S.): nome igual, nome antes de "·" ou "(", ou item entre parênteses; herbicida: referência por grupo de plantas daninhas cobre a espécie; sem uso na cultura: nada
+OK    U13 ordem sem alvo (semente): CMD-42 igual ao de antes, sem "para"
+JS: 18/18
+OK    F1 AG-07 sem fluxo paralelo de receituário (gaveta, "Emitir receituário", "Receituário emitido · assinado por …")
+OK    F2 AG-07 oferece "Usar na O.S." com cultura, alvo e ordem A liberar, e leva produto, cultura e o alvo como a referência da fazenda o escreve (ar, carAlvoRef)
+OK    F3 o link da O.S. aceita #OS-xxxx:usar=<produto>|<cultura>|<alvo> e abre o ajuste com o produto incluído, dose em branco
+OK    F4 o AG-07 só oferece produto que a O.S. aceita: AGF.osp = catálogo do "Incluir produto" da O.S. (sem link sem saída para produto só de referência)
+OK    F5 perfil sem o papel de agrônomo: o AG-07 desliga "Usar na O.S." e diz quem decide (g2perfil/g2papel/g2quem; revisão do CTL-5, S4-1)
+OK    F6 o link da O.S. confere a operação (carOpDef) antes de incluir: ordem que não pulveriza não recebe produto da Consulta Agrofit (S3-1)
+
+RESULTADO 24/24

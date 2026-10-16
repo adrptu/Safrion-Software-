@@ -1,0 +1,12 @@
+  OK  antes da entrega: retirada reservada e botão "Retirar no almoxarifado"
+  OK  sem entrega o app não confirma nada: ● Disponível sem internet ·
+v1 | 3.000 L · 100 L/ha · 30 ha 
+   pré-carga: 65 L de Fungicida A entregues a Marcos (OS-0424). Aguarda confirmação no app. · Sem sinal: o app continua funcionando e 
+  OK  entregue: mostra lote e embalagem da REQ-039
+  OK  confirmar sem sinal grava no cenário e vai para a fila do aparelho
+  OK  fichas do caldeiro seguem: carga a carga depois do recebimento
+  OK  sinal volta no app: recebimento enviado uma vez
+  OK  OS-0424-app mostra recebido e enviado
+  OK  ficha impressa mantém retirada, lote e assinaturas
+  OK  sem erros JS
+9/9 ok · FALHAS: 0
