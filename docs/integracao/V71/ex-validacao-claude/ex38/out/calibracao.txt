@@ -1,0 +1,7 @@
+vazao alvo por bico (L/min) = 0.666666666667
+110-015 nominal a 40 psi (L/min)= 0.5678 | 40 psi em bar= 2.7579 | a 3 bar= 0.5922
+taxa real (L/ha)= 88.83 | desvio= -11.2 %
+pressao p/ alvo (bar)= 3.80 | velocidade p/ 100 L/ha a 3 bar (km/h)= 7.11
+dose real de Fungicida A (calda feita p/100 L/ha, 0,5 L/ha): 0.444 L/ha
+app 120 L/ha -> alvo 0.8000 L/min; desvio com 110-015 a 3 bar: -26.0 %
+OS x app: calda O.S. (15 L/3000 L) aplicada a 120 L/ha = 0.600 L/ha; calda app (8,3 L/2000 L) a 100 L/ha = 0.415 L/ha; 8,3 L em 3000 L a 100 L/ha = 0.277

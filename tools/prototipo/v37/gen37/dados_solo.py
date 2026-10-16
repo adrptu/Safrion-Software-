@@ -141,13 +141,11 @@ REGRA = dict(estado='demonstração', rotulo=ROTULO,
                     faixa=['2400', '4800'], tabela=[['3600', {'baixo': '90', 'médio': '72', 'adequado': '48', 'alto': '0'}],
                                                     ['4800', {'baixo': '108', 'médio': '90', 'adequado': '60', 'alto': '0'}]]),
              gesso=dict(estado='demonstração', ca='0.5', m='20', k={'Anual': '50', 'Perene': '75'}),
-             validade=dict(meses=24, irrigado=12),
+             validade=dict(meses=24),   # DEC-1610-04 (16/10/2026): 24 meses da coleta para todo talhão (PEND-13); a exceção de 12 meses para irrigado saiu
              tol=dict(pp='0.5', cmolc='0.05'))   # D-17: diferença do laboratório acima disto mostra "difere do laboratório"
 assert next(i for i in IND if i['k'] == 'K')['cortes'] == REGRA['k']['cortes'], 'K do mapa de calor = K da regra (fonte única)'
 # produto padrão de correção por fazenda (D-12); trocar o produto é ação explícita no painel (R19)
 CORR = {SR: dict(cal='Calcário dolomítico'), LG: dict(cal='Calcário dolomítico filler', ges='Gesso agrícola')}
-# talhões irrigados (validade de 12 meses, D-18): setores do módulo Irrigação (dados_irrigacao: P1, P2, T7) e os pivôs da Lagoa Grande
-IRRIGADOS = ['P1', 'P2', 'T7'] + sorted(DLS.TALHOES)
 
 # ---------- água no solo (pedido do proprietário 05–09/10: teste de capacidade de campo por talhão) ----------
 # Propriedade do solo, medida por talhão ou zona. Não é capacidade do equipamento (pivô) nem recomendação técnica: a lâmina continua
@@ -200,7 +198,7 @@ def dados():
             for x in a['prods']: itens.setdefault(x['prod'], dict(un=x['un'], grupo=x['grupo']))
     for n, x in DC.ITENS_NOVOS.items(): itens.setdefault(n, dict(un=x['un'], grupo=x['grupo']))
     corr_prods = sorted({p for f in CORR.values() for p in f.values()})
-    return dict(hoje=HOJE, viavel=VIAVEL, laudos=LAUDOS, exemplo=EXEMPLO, ind=IND, labs=LABS, regra=REGRA, corr=CORR, irrigados=IRRIGADOS,
+    return dict(hoje=HOJE, viavel=VIAVEL, laudos=LAUDOS, exemplo=EXEMPLO, ind=IND, labs=LABS, regra=REGRA, corr=CORR,
                 gar={n: {k: v for k, v in g.items() if k != 'txt'} for n, g in DC.GARANTIA.items()},
                 preco={n: DC.preco_ref(n) for n in list(itens) if DC.preco_ref(n) != ''},
                 itens={n: itens[n] for n in corr_prods + ['KCl 60%'] if n in itens},

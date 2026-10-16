@@ -1,0 +1,165 @@
+RECURSO
+SEG 22/09
+TER 23/09
+QUA 24/09
+QUI 25/09
+SEX 26/09
+SÁB 27/09
+USO NA SEMANA
+MÁQUINAS
+Trator T1 JD 6M 155
+OS-0420 06:00–09:30
+Manutenção OM-0233
+Manutenção OM-0233
+Manutenção OM-0233
+OS-0431 06:00–16:00
+livre
+livre
+livre
+49 % · conflito
+13,5 h de 27,5 h
+Trator 02 MF 7719
+livre
+livre
+OS-0420 06:00–16:00
+OS-0420 06:00–16:00
+OS-0420 06:00–16:00
+OS-0420 06:00–16:00
+67 % · em uso
+40 h de 60 h
+Trator 03
+OS-0421 06:00–11:00
+OS-0421 06:00–11:00
+OS-0421 06:00–11:00
+OS-0421 06:00–11:00
+OS-0430 13:00–20:24
+12,4 h · acima da jornada
+OS-0421 06:00–12:00
+livre
+56 % · em uso
+33,4 h de 60 h
+Trator 04
+livre
+livre
+OS-0424 06:00–11:00
+livre
+livre
+livre
+8 % · ocioso
+5 h de 60 h
+Colhedora Axial-Flow 7250
+livre
+livre
+livre
+livre
+livre
+livre
+0 % · ocioso
+0 h de 60 h
+Pivô 1
+livre
+livre
+OS-0418 21:00–24:00
+OS-0418 00:00–11:15
+livre
+livre
+10 % · ocioso
+14,3 h de 144 h
+Pivô 2
+livre
+OS-0419 20:00–24:00 · irrigação
+OS-0419 00:00–10:31 · irrigação
+livre
+livre
+livre
+10 % · ocioso
+14,5 h de 144 h
+IMPLEMENTOS
+Pulverizador PJ-3030 36 m
+OS-0421 06:00–11:00
+OS-0421 06:00–11:00
+OS-0421 06:00–11:00
+OS-0424 06:00–11:00
+OS-0421 06:00–11:00
+OS-0430 13:00–20:24
+12,4 h · acima da jornada
+OS-0421 06:00–12:00
+livre
+64 % · conflito
+38,4 h de 60 h
+Plantadeira 24 linhas
+OS-0420 06:00–09:30
+livre
+OS-0420 06:00–16:00
+OS-0431 06:00–16:00
+20 h · acima da jornada
+OS-0420 06:00–16:00
+OS-0420 06:00–16:00
+OS-0420 06:00–16:00
+89 % · conflito
+53,5 h de 60 h
+Distribuidor 3 t
+livre
+livre
+livre
+livre
+livre
+livre
+0 % · ocioso
+0 h de 60 h
+Esqueletadeira
+livre
+livre
+livre
+livre
+livre
+livre
+0 % · ocioso
+0 h de 60 h
+PESSOAS
+Marcos · operador
+OS-0421 06:00–11:00
+OS-0421 06:00–11:00
+OS-0421 06:00–11:00
+OS-0424 06:00–11:00
+OS-0421 06:00–11:00
+OS-0430 13:00–20:24
+12,4 h · acima da jornada
+OS-0421 06:00–12:00
+livre
+64 % · conflito
+38,4 h de 60 h
+Carlos · operador
+OS-0420 06:00–09:30
+livre
+OS-0420 06:00–16:00
+OS-0431 06:00–16:00
+20 h · acima da jornada
+OS-0420 06:00–16:00
+OS-0420 06:00–16:00
+OS-0420 06:00–16:00
+89 % · conflito
+53,5 h de 60 h
+Paula · caldeiro
+OS-0421 06:00–11:00
+OS-0421 06:00–11:00
+OS-0421 06:00–11:00
+OS-0424 06:00–11:00
+OS-0421 06:00–11:00
+OS-0430 13:00–20:24
+12,4 h · acima da jornada
+OS-0421 06:00–12:00
+livre
+64 % · conflito
+38,4 h de 60 h
+João · irrigante
+livre
+OS-0419 20:00–22:00 · irrigação
+OS-0423 14:00–16:00 · irrigação
+OS-0419 06:00–10:31 · irrigação
+OS-0418 21:00–23:00
+OS-0418 06:00–11:15
+livre
+livre
+26 % · em uso
+15,8 h de 60 h

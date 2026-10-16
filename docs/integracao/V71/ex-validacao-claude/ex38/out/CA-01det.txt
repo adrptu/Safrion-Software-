@@ -1,0 +1,128 @@
+A
+Proprietário · todos os papéis (teste)
+Ana · Gestora e RT
+Caio · PCP
+Rui · Almoxarife e expedição
+Paula · Conferência
+Zé · Mecânico
+Otávio · Manutenção (PCM)
+João · Irrigante (eletricista NR-10)
+Igor · Produção
+Dora · Comercial
+Marta · Qualidade
+Agrícola › Ordem de Serviço › OS-0421
+OS-0421 · Fungicida 1ª aplicação
+i
+Em execução · Parcial · dia 4 de 7
+Registrar avanço
+VEIO DE
+Plano de safra · janela 20–26/09
+→
+ESTÁ AQUI
+Em execução · 190/350 ha
+→
+FALTA
+160 ha em 3 turnos
+→
+PRÓXIMA AÇÃO
+Registrar avanço
+A liberar
+Liberadas
+Em execução
+Em conferência
+Encerradas
+Autorizado
+350 ha v2
+Realizado
+190 ha 150 conf. + 40 prov.
+Saldo
+160 ha 3 turnos
+Hoje
+Dia 4 de 7 40 ha · chuva
+Apontamentos de turno
+Pausar execução
+⋯
+DATA
+⇅
+TURNO
+⇅
+ÁREA DO DIA
+⇅
+ACUMULADO
+⇅
+CONFERÊNCIA
+⇅
+ORIGEM · SINCRONIZAÇÃO
+⇅
+20/09
+Dia 1 de 7
+50 ha
+50 / 350 ha
+Conferido
+app · sincronizado
+21/09
+Dia 2 de 7
+50 ha
+100 / 350 ha
+Conferido
+app · sincronizado
+22/09
+Dia 3 de 7
+50 ha
+150 / 350 ha
+Conferido
+app · sincronizado
+23/09 (hoje)
+Dia 4 de 7
+40 ha
+190 / 350 ha
+Provisório · aguardando conferência
+app · sincronizado 17:40 · encerrado por chuva
+24/09
+Dia 5 de 7
+50 ha
+prev. 240 / 350 ha
+Previsto
+—
+25/09
+Dia 6 de 7
+50 ha
+prev. 290 / 350 ha
+Previsto
+—
+26/09
+Dia 7 de 7
+60 ha
+prev. 350 / 350 ha
+Previsto
+—
+Materiais em custódia da equipe
+Requisitar material
+⋯
+ITEM · LOTE
+⇅
+SOLICITADO
+⇅
+ENTREGUE
+⇅
+CONSUMIDO
+⇅
+EM CUSTÓDIA
+⇅
+A ENTREGAR
+⇅
+CUSTÓDIA DE
+⇅
+Fungicida A · lote F26-02
+REQ-035 · 0,50 L/ha da v2
+175 L
+160 L
+95 L
+65 L
+15 L
+Marcos (equipe de campo)
+Plano, versão e fichas
+Ajustar produtos e doses do saldo
+⋯
+Recomendação de origem: fungicida 1ª aplicação · protocolo do plano técnico · v2 aprovada.
+Tela: OS-0421 · Fungicida 1ª aplicação · Em execução · Parcial · dia 4 de 7

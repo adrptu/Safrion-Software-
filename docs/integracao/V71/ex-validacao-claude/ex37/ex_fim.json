@@ -1,0 +1,106 @@
+{
+ "1_aplica": "ok 2026/27",
+ "1_form": [
+  [
+   "Safra",
+   ""
+  ],
+  [
+   "Cultivo",
+   ""
+  ],
+  [
+   "Atividade",
+   ""
+  ],
+  [
+   "Início da janela",
+   ""
+  ]
+ ],
+ "2_VE-06": {
+  "clique": {
+   "txt": "Abrir caso",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "url": "http://127.0.0.1:38511/VE-06.dc.html",
+  "painel": [
+   {
+    "tag": "ASIDE",
+    "role": "dialog",
+    "txt": "Novo caso × Vincule o caso à entrega e ao lote de origem. A decisão muda só pelos comandos da linha; reclamação não libera estoque. Pedido · entrega Ex.: PV-030 · entrega 1 de 3 Motivo Avaria no transporte Impureza acima do padrão Umidade acima do padrão Grãos ardidos Maturação avançada Classe divergente Lote Genealogia e clientes afetados são carregados pelo lote. Quantidade Com unidade: ex.: 200 sc ou 0,4 t Evidências Laudos, fotos, comprovantes Tratamento financeiro a definir Crédito solicitado Crédito emitido Sem crédito Cancelar Salvar",
+    "campos": [
+     "=(text)",
+     "=Impureza acima do padrão(select-one)",
+     "=(text)",
+     "=(text)",
+     "=(text)",
+     "=a definir(select-one)"
+    ],
+    "verdes": [
+     "Salvar"
+    ]
+   }
+  ],
+  "aviso": "Tela: Reclamações e devoluções · RC-12 aguarda destinação · RC-15 aberto hoje"
+ },
+ "2_CA-03det": {
+  "clique": {
+   "txt": "Abrir manutenção",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "url": "http://127.0.0.1:38511/CA-03det.dc.html",
+  "painel": [],
+  "aviso": "A OM-0233 já está aberta para esta ocorrência — nada foi duplicado; o pedido foi somado ao caso existente. | Tela: OC-114 · Quebra do Trator T1 · Em tratamento · Grave"
+ },
+ "2_PT-05det": {
+  "clique": {
+   "txt": "Abrir divergência",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "url": "http://127.0.0.1:38511/PT-05det.dc.html",
+  "painel": [],
+  "aviso": "Divergência aberta e vinculada ao PC-088 · o comprador responde dentro do negócio — nada muda no estoque de ninguém sem tratativa. | Divergência aberta e vinculada ao PC-088 · o comprador responde dentro do negócio — nada muda no estoque de ninguém sem tratativa."
+ },
+ "3_antes": [
+  "Dose (L/ha)"
+ ],
+ "3_depois": [
+  "Dose (kg/ha)"
+ ],
+ "3_trecho": [
+  "Dose (kg/ha)",
+  "Estoque: 60 de 95 kg · a liberação na O.S. aguarda a compra."
+ ],
+ "4_co06det": {
+  "clique": {
+   "txt": "Liberar para destinação compatível",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "aviso": "Liberado para blend/mercado interno tipo 7 · reservas voltam a ser elegíveis só nessas destinações · OB-0104 permanece Encerrada. Recibo QL-1148. | Tela: INSP-88 · Lote L27-013 bloqueado · Bloqueado · decisão até 25/09",
+  "painel": []
+ },
+ "5_cd08": {
+  "clique": {
+   "txt": "Comparar com o realizado",
+   "dis": false,
+   "tag": "BUTTON",
+   "href": null
+  },
+  "aviso": "Pulverização: padrão 21,6 ha/h × realizado 19,8 ha/h (OS-0421, 4 dias) · revisão sugerida, nada alterado. | Pulverização: padrão 21,6 ha/h × realizado 19,8 ha/h (OS-0421, 4 dias) · revisão sugerida, nada alterado.",
+  "aplicar": [],
+  "painel": []
+ },
+ "6_cd04_vazio": {
+  "aviso": "Corrija os campos destacados; o que você preencheu foi mantido. | Informe nome. | Escolha ao menos uma opção. | Informe admissão. | Informe custo-hora com encargos. | Tela: Pessoas e equipes · 2 não alocáveis · 1 a renovar em 30 dias",
+  "dlg": "Cadastrar pessoa × Marque o que a pessoa faz; a habilitação exigida aparece abaixo. Cadastrar não cria login. Inative em vez de excluir. Corrija os campos destacados; o que você preencheu foi mantido. Nome Informe nome. Equipe Agronomia Campo 1 Campo 2 Irrigação Suprimentos Oficina Beneficiamento e qualidade Comercial Calendário da equipe: seg–sáb · 06–15h · 9 h/dia Habilidades Operar trator Opera"
+ }
+}

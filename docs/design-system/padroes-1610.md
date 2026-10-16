@@ -115,6 +115,16 @@ A tabela própria das Atividades do plano usa a mesma peça; não há cópia de 
 
 **Teste:** `mapa9_test.py` (13/13; a base reprova 8 e para no ícone que não existe).
 
+**MAP-04 · Faixa branca da função com a mesma altura em todas** (16/10: "deixe a espessura da parte branca da opção solo igual aos demais, manter um padrão visual"):
+- No computador, uma linha só (52 px) em todas as funções e larguras: filtros inteiros à esquerda; números, atalho e ações à direita, no espaço que sobra.
+- Número que não cabe rola dentro da própria faixa; nunca desce para uma 2ª linha. Seletor da faixa com até 150 px.
+- No celular (≤ 760 px), sempre duas linhas: filtros e números, cada uma com rolagem própria.
+- Causa: a faixa quebrava linha quando os números não cabiam (Solo a 1440; Pragas e O.S. a 1280).
+
+**FIL-01 · Faixa de filtros só pela peça comum** (16/10: "não falta o símbolo do filtro que é nosso padrão?"): toda faixa que filtra dados usa `ui37.faixa_filtros` (funil, rótulo e controles). A faixa das fazendas do Planejar safra era desenho próprio, sem funil; agora usa a peça comum. Inventário: era a única faixa de filtros montada à mão.
+
+**Teste:** `mapa_faixa_test.py` (25/25: 2 fazendas × 9 funções × 1440, 1280, 1024 e 390; mais a faixa do Planejar safra). O render de ff3903d reprova 15 (Solo 78 px contra 47; sem funil).
+
 **Dano evitado:**
 - duas colunas de ícones lado a lado, que se confundem;
 - importar laudo exigir sair do mapa e achar o talhão de novo.
