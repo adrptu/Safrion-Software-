@@ -1,0 +1,7 @@
+OK    S0 a captura de erro funciona (erro provocado é visto)
+OK    S1 148 páginas × 2 tamanhos sem erro de JS (erro, promessa rejeitada e console.error)
+OK    S2 sem rolagem lateral da página
+OK    S3 barra lateral sem submenu nem expandir
+FALHA S4 cartões de bloco (470 medidos) com o conteúdo dentro da borda · [(1440, 'CO-01.dc.html', '0/220 px Qualidade da previsãoRevisar amo'), (1440, 'CO-02det.dc.html', '258/265 px Cargas vinculadasRegistrar carga'), (1440, 'CO-05det.dc.html', '104/112 px Qualidade separada da produçãoEn'), (1440, 'CO-06.dc.html', '0/48 px Árvore de lotes e recolhimentoRa'), (1440, 'CO-06det.dc.html', '0/97 px DecisãoLiberar para destinação c'), (1440, 'CO-07.dc.html', '0/99 px Reserva não conta duas vezesSoja'), (1440, 'IR-01.dc.html', '639/1233 px SetoresTodos 23Sem necessidade 1'), (1440, 'IR-03det.dc.html', '106/203 px Trilha e recibosQuando ⇅Recibo ⇅')]
+RESULTADO: 4 ok · 1 falhas (148 páginas)
+rc=1
