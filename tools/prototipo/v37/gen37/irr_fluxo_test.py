@@ -75,7 +75,8 @@ try:
     chk('11 término não inventa área/telemetria: campos vazios e motivo temporal necessário', J("document.querySelector('#tm_cob').value") == '' and J("document.querySelector('#tm_vol').value") == '' and 'Simulado' in d, d[:300])
     clk('Cancelar', 'aside[role=dialog]')
     # Fixture explícita de tempo decorrido; não é uma ação de produto nem prova de relógio real.
-    J("irrMudar(null,s=>{const o=s.ordens['OS-0419']; o.trilha.push({q:irrFimP(o,irrPassAtual(o)),ev:'Fixture: tempo decorrido'}); return {msg:''};})")
+    J("(()=>{const k='talhao-os-irrigacao-v1'; const s=JSON.parse(localStorage.getItem(k)); const o=s.ordens['OS-0419']; const p=o.passadas.find(p=>p.st==='Em execução'); const pz=(o.exec.pausas||[]).filter(z=>z.n===p.n&&z.fim!==null&&z.fim!==undefined).reduce((a,z)=>a+z.fim-z.ini,0); o.trilha.push({q:p.iniReal+p.dur+pz,ev:'Fixture: tempo decorrido'}); localStorage.setItem(k,JSON.stringify(s)); return 1;})()")
+    goto('IR-01.dc.html', 1.0)   # Recarrega de fato: mesma URL com # não recarrega a página
     goto('IR-03det.dc.html#OS-0419'); clk('Confirmar término')
     setv('#tm_cob', '80'); setv('#tm_vol', '8480')
     c.shot(os.path.join(SH, 'fluxo_3_termino.png'))
@@ -149,7 +150,7 @@ try:
     # passagem parcial: crédito só na faixa coberta
     clk('Iniciar irrigação'); goto('IR-03det.dc.html#OS-0419:termino'); time.sleep(.3)
     setv('#tm_cob', '40'); setv('#tm_vol', '3800'); setv('#tm_mot', 'Tempo do sensor a conferir'); clk('Registrar término antecipado', 'aside[role=dialog]')
-    chk('31a área sem tempo compatível permanece Em conferência e não credita antes da validação', 'Em conferência' in head() and J("irrGet().setores.P2.bal.ap.some(a=>a.os==='OS-0419')") is False, head())
+    chk('31a área sem tempo compatível permanece Em conferência e não credita antes da validação', 'Em conferência' in head() and J("JSON.parse(localStorage.getItem('talhao-os-irrigacao-v1')).setores.P2.bal.ap.some(a=>a.os==='OS-0419')") is False, head())
     goto('IR-03det.dc.html#OS-0419:conferir'); time.sleep(.3); setv('#cm_vol', '3800'); setv('#cm_mot', 'Área e leitura verificadas; horário do sensor incorreto'); clk('Aceitar com motivo', 'aside[role=dialog]'); tt = toast()
     goto('IR-01.dc.html'); r2 = ROW('Pivô 2')
     chk('31 parada em 40 de 80 ha (3.800 m³): o Pivô 2 segue 11,2 mm e a faixa coberta (40 ha) é mostrada à parte', 'faixa de 40,0 ha' in tt and '11,2 mm' in r2, [tt, r2])
