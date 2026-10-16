@@ -82,6 +82,9 @@ OK    O19 Santa Rita · P · fora do ideal: T1 (alto) + T2 (médio) = 610 ha; T4
 OK    O20 exemplo novo do T7: SB 2,41 · T 5,91 · V 40,78 % · NC (50 − V) × T ÷ 100 = 0,545 t/ha → (Decimal('2.41'), Decimal('5.91'), Decimal('40.78'), Decimal('0.545'))
 OK    O20b exemplo de hoje (V 66 %) com alvo 50 %: sem calagem (contraprova da jornada D-23) → (Decimal('66.0'), True)
 OK    O21 LAU-2043 sat. K = 100 × 0,08 ÷ 9,20 = 0,87 % → "baixa" (adequada 2 a 3 %) → (Decimal('9.20'), Decimal('0.87'), 'baixa')
+OK    O21a sat. K 1,999 % → "média" → média
+OK    O21b sat. K 2,00 % → "sobreposição na fonte" (média 1 a 2 e adequada 2 a 3) → sobreposição na fonte
+OK    O21c sat. K 2,001 % → "adequada" → adequada
 OK    O22 LAU-2063 Ca:Mg = 1,25 ÷ 0,44 = 2,84 → "adequada", mas Mg 0,44 < 0,5 (mínimo da mesma observação) → (Decimal('2.84'), True, True)
 OK    O23 P (argila 36–60): 12,0 → "adequado"; 12,05 → "alto"; 8,05 → entre classes (8,0 e 8,1) → ('adequado', 'alto', 'entre classes')
 OK    O23b V 60,5 → Tab. 9 entre classes (60 e 61) e acima do ideal 50–60 (p. 84) → ('entre classes', True)
@@ -115,4 +118,4 @@ OK    G7 safra alterada, o mesmo laudo: P1 soja 2026/27 sequeiro → (médio, 0,
 OK    C1 café: alvo de V sem linha conferida → "sem referência adotada", sem NC; contraprova: a demonstração (60 %) daria 0,900 t/ha → ('sem referência adotada', Decimal('0.900'))
 OK    E1 indeterminado: R3 inicial com V8/V10 → na época; R3 inicial sem V8/V10 → fora; determinado em R3 inicial → fora; determinado em R1 → na época → ('na época', 'fora da época de referência', 'fora da época de referência', 'na época')
 
-Resumo: 110 OK · 0 falhas
+Resumo: 113 OK · 0 falhas

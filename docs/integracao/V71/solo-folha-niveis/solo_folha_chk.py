@@ -230,8 +230,12 @@ chk('O20b exemplo de hoje (V 66 %) com alvo 50 %: sem calagem (contraprova da jo
 
 # O21 · saturação por K na CTC (CER04 Tab. 13: baixa < 1 · média 1 a 2 · adequada 2 a 3 · alta > 3) — o "alvo 3 %" fixo do AG-03det não é a faixa da fonte
 r43 = idx('LAU-2043'); satk = 100 * cmolc_k(an('LAU-2043', 'K')[0]) / r43['T']
-SATK = [C('baixa', 'baixo', None, True, '1', False), C('média', 'médio', '1', True, '2', True), C('adequada', 'adequado', '2', False, '3', True), C('alta', 'alto', '3', False, None, True)]
+SATK = [C('baixa', 'baixo', None, True, '1', False), C('média', 'médio', '1', True, '2', True), C('adequada', 'adequado', '2', True, '3', True), C('alta', 'alto', '3', False, None, True)]
 chk('O21 LAU-2043 sat. K = 100 × 0,08 ÷ 9,20 = 0,87 % → "baixa" (adequada 2 a 3 %)', (q(r43['T'], 2), q(satk, 2), classifica(SATK, satk)[0]), (D('9.20'), D('0.87'), 'baixa'))
+# Borda da Tab. 13 (p. 396), como escrita: média 1 a 2 e adequada 2 a 3 (as duas inclusivas) → 2,00 é sobreposição na fonte (Codex 6222002886)
+chk('O21a sat. K 1,999 % → "média"', classifica(SATK, D('1.999'))[0], 'média')
+chk('O21b sat. K 2,00 % → "sobreposição na fonte" (média 1 a 2 e adequada 2 a 3)', classifica(SATK, D('2.00'))[0], 'sobreposição na fonte')
+chk('O21c sat. K 2,001 % → "adequada"', classifica(SATK, D('2.001'))[0], 'adequada')
 # O22 · relação Ca:Mg (CER04 Tab. 3, Obs.: estreita < 2 · adequada 2 a 10 · alta > 10, respeitado o mínimo de 0,5 cmolc/dm³ de Mg)
 ca63, mg63 = an('LAU-2063', 'Ca')[0], an('LAU-2063', 'Mg')[0]
 chk('O22 LAU-2063 Ca:Mg = 1,25 ÷ 0,44 = 2,84 → "adequada", mas Mg 0,44 < 0,5 (mínimo da mesma observação)', (q(ca63 / mg63, 2), D(2) <= ca63 / mg63 <= D(10), mg63 < D('0.5')), (D('2.84'), True, True))
