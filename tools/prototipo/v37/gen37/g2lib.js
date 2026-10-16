@@ -1160,9 +1160,12 @@ function g2dicaAlvo(n){ for(let e=n,i=0;e&&e.nodeType===1&&i<6;e=e.parentElement
 // revisão DS (achado 2): o selo de estado não recebe foco; a linha da grade e o cartão do Kanban, sim. Com foco de teclado (:focus-visible) numa
 // linha ou cartão sem dica própria, a dica é a do selo mais grave de dentro dele (vermelho > amarelo/laranja > os demais; empate: o primeiro),
 // com o nome do selo à frente; ela descreve a linha ou o cartão (aria-describedby). O clique do ponteiro na linha não abre dica.
+// Desde a VISOES-2 V2-1 (14/10) a situação fora das colunas do "Abre com" vira ícone antes da identidade (parte {k:'ico'}: span role=img com
+// data-dica, sem borda arredondada): ele é o selo da linha e entra na escolha. Sem isso o Tab na OS-0418 (Falta insumo) mostrava a dica da
+// fase, "A liberar… Próximo passo: liberar", numa ordem bloqueada (ds_test D13).
 function g2dicaSelo(n){ if(!n||n.nodeType!==1||!n.matches('[role=row],[role=list] [role=button],[role=list] [role=listitem]')) return null;
   try{ if(!n.matches(':focus-visible')) return null; }catch(e){}
-  const ss=[...n.querySelectorAll('[data-dica-de],span[data-dica][style*="border-radius"]')].filter(s=>g2vis(s)&&!s.closest('[role=columnheader]')).map(s=>({s,t:g2dicaTexto(s)})).filter(x=>x.t);
+  const ss=[...n.querySelectorAll('[data-dica-de],span[data-dica][style*="border-radius"],span[role=img][data-dica]')].filter(s=>g2vis(s)&&!s.closest('[role=columnheader]')).map(s=>({s,t:g2dicaTexto(s)})).filter(x=>x.t);
   if(!ss.length) return null;
   const grav=(s)=>{ const c=getComputedStyle(s).color; return c==='rgb(180, 35, 24)'?3:((c==='rgb(138, 90, 0)'||c==='rgb(154, 63, 0)')?2:1); };
   let m=ss[0], g=grav(m.s); ss.slice(1).forEach(x=>{ const k=grav(x.s); if(k>g){ m=x; g=k; } });

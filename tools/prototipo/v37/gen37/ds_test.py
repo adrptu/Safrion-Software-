@@ -16,7 +16,7 @@ Chrome headless por CDP (comp_lib.Chrome), servindo o _render:
      Ordem de execução: A, B, C, D, F, E, G (ligar o toque tira o hover da janela do teste).
 Uso: python3 ds_test.py · DS_RENDER=<dir> serve outro _render (ex.: o da base ecc8b00, para ver o defeito) · DS_PARTES=A,B,C,D,E,F,G
 · DS_ANTES=<dir> liga as capturas "antes"."""
-import os, sys, time, json, glob
+import os, re, sys, time, json, glob
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 from comp_lib import Chrome, servir, troca_visao, cv_todas_sempre, cv_padrao
 R = os.environ.get('DS_RENDER') or os.path.join(HERE, '_render')
@@ -379,8 +379,10 @@ try:
             c.tab(shift=(pos < 0)); time.sleep(.4)
             return J("(()=>{const a=document.activeElement, d=document.getElementById('g2-dica'); return {foco:(a.innerText||'').replace(/\\s+/g,' ').slice(0,40), fv:a.matches(':focus-visible'), db:a.getAttribute('aria-describedby')||'', vis:!!d&&!d.hidden, t:d?d.textContent:''};})()")
         rl = tab_ate('[role=row].g2ed', '/OS-0418/')
+        # VISOES-2 V2-1 (14/10): na lista, o selo é o ícone de situação antes do código, com a dica "Situação: Falta insumo · …" (a mesma do
+        # hover, D10); no cartão do Kanban continua "Falta insumo: …" (D13c). Nos dois, o nome do selo vem antes da explicação
         chk('D13 Tab até a linha da OS-0418: a dica do selo "Falta insumo" (o que falta e quem resolve) abre e descreve a linha (aria-describedby)', bool(rl) and 'OS-0418' in rl['foco'] and rl['fv'] and rl['vis']
-            and rl['t'].startswith('Falta insumo:') and 'Estoque' in rl['t'] and 'agrônomo' in rl['t'] and 'g2-dica' in rl['db'], rl)
+            and re.match(r'(Situação: )?Falta insumo\b', rl['t']) and 'Estoque' in rl['t'] and 'agrônomo' in rl['t'] and 'g2-dica' in rl['db'], rl)
         c.tecla('Escape', 'Escape', 27); time.sleep(.2)
         p = centro("[...document.querySelectorAll('[role=row].g2ed')].find(r=>/OS-0418/.test(r.innerText)).firstElementChild")
         c.mouse(p[0], p[1]); c.mouse(p[0], p[1], 'mousePressed', 'left'); c.mouse(p[0], p[1], 'mouseReleased', 'left'); time.sleep(.45); d = J(DICA)
@@ -390,14 +392,17 @@ try:
         kb = tab_ate('[role=list] [role=button]', '/OS-0418/')
         chk('D13c Tab até o cartão da OS-0418 no Kanban: a mesma dica do selo, descrevendo o cartão', bool(kb) and 'OS-0418' in kb['foco'] and kb['vis'] and kb['t'].startswith('Falta insumo:') and 'g2-dica' in kb['db'], kb)
         c.tecla('Escape', 'Escape', 27); time.sleep(.2); troca_visao(J, 'lista')
-        # revisão DS (achado 6): o selo do bloqueio do encerramento leva o mesmo texto do painel e do comando (osEncBloq), com quem resolve
-        SEL = "[...document.querySelectorAll('[role=row].g2ed')].find(r=>/OS-0417/.test(r.innerText)).querySelector('[data-dica^=\"Encerrar bloqueado\"]')"
-        hover(SEL, .7); d = J(DICA); fora()
+        # revisão DS (achado 6): o selo do bloqueio do encerramento leva o mesmo texto do painel e do comando (osEncBloq), com quem resolve.
+        # VISOES-2 V2-1 (14/10): o selo amarelo é o ícone de situação sem texto, com a dica "Situação: Sobras a receber — Encerrar bloqueado: …";
+        # o seletor antigo ([data-dica^="Encerrar bloqueado"]) não achava nada e o teste lia a dica que estivesse aberta. Sem o selo, reprova
+        SEL = "[...document.querySelectorAll('[role=row].g2ed')].find(r=>/OS-0417/.test(r.innerText)).querySelector('[data-dica*=\"Encerrar bloqueado\"]')"
+        achou = hover(SEL, .7); d = J(DICA); fora()
         J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/OS-0417/.test(r.innerText)); (r.querySelector('.g2pw')||r).click(); return 1;})()"); time.sleep(.5)
         pn = J("(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
-        bt, _, bq = (d.get('t') or '').partition(' Próximo passo: ')
-        chk('D15 selo "Sobras a receber" da OS-0417: a dica é o bloqueio do encerramento (o mesmo texto do painel) e quem resolve (Rui, almoxarife)', d['vis'] and bt.startswith('Encerrar bloqueado: sobra em custódia')
-            and 'Rui (almoxarife) recebe a devolução no Estoque' in bq and bt in pn and bq.rstrip('.') in pn, [d, pn[:400]])
+        t15 = d.get('t') or ''; i = t15.find('Encerrar bloqueado'); cab = t15[:max(i, 0)]   # cab: o nome do selo, que o ícone não mostra
+        bt, _, bq = (t15[i:] if i >= 0 else '').partition(' Próximo passo: ')
+        chk('D15 selo "Sobras a receber" da OS-0417: a dica é o bloqueio do encerramento (o mesmo texto do painel) e quem resolve (Rui, almoxarife)', bool(achou) and d['vis'] and 'Sobras a receber' in cab
+            and bt.startswith('Encerrar bloqueado: sobra em custódia') and 'Rui (almoxarife) recebe a devolução no Estoque' in bq and bt in pn and bq.rstrip('.') in pn, [achou, d, pn[:400]])
         chk('D12 sem erro de execução', not errs(), errs())
 
     # ======================= F · capturas antes/depois =======================
@@ -445,11 +450,17 @@ try:
         J("(()=>{const r=[...document.querySelectorAll('main [role=row]')].find(r=>/Safra 2026\\/27/.test(r.innerText)); const b=[...r.querySelectorAll('button')].find(b=>/^Continuar/.test(b.innerText.trim())); b.click(); return 1;})()")
         time.sleep(.6); v = vivo(); rs = realces(n0)
         chk('E1 390 px · Planejar safra: etapa 2 realçada e anunciada', v.startswith('Etapa 2 de 4') and len(rs) >= 1, [v, rs])
-        abre('OS.dc.html', 390, 844, toque=True)
+        # a 390 px a linha mostra as 3 primeiras colunas do padrão (g2colsVis, VISOES-2 V2-1, 14/10): a Fase não está nela. O que a pessoa vê:
+        # o painel da ordem, aberto por cima da lista, na fase nova, e a contagem dos chips de fase da lista
+        FZ = "(()=>{const o={}; document.querySelectorAll('[aria-label=\"Filtrar por fase\"] button').forEach(b=>{const m=b.innerText.replace(/\\s+/g,' ').trim().match(/^(.*?) (\\d+)$/); if(m) o[m[1]]=+m[2];}); return o;})()"
+        abre('OS.dc.html', 390, 844, toque=True); f0 = J(FZ) or {}
         J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/OS-0430/.test(r.innerText)); (r.querySelector('.g2pw')||r).click(); return 1;})()"); time.sleep(.5)
         clk('Liberar para execução', 'aside[role=dialog]'); time.sleep(.4); n1 = nreal(); clk('Confirmar liberação', 'aside[role=dialog]'); time.sleep(.7)
-        t = toast(); v = vivo(); rs = realces(n1); fase = J("(()=>{const r=[...document.querySelectorAll('[role=row].g2ed')].find(r=>/OS-0430/.test(r.innerText)); return r?r.innerText.replace(/\\s+/g,' '):'';})()")
-        chk('E2 390 px · liberar a OS-0430 pela lista: a linha muda para Liberadas, o que mudou é realçado e o aviso é anunciado', 'Liberadas' in fase and len(rs) >= 1 and t and v.startswith(t.split(' | ')[0][:40]), [fase, t, v, rs])
+        t = toast(); v = vivo(); rs = realces(n1); f1 = J(FZ) or {}
+        pf = J("(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); const h=a&&a.querySelector('h2'), e=a&&a.querySelector('[aria-label=\"Fase da ordem\"] [aria-current=step]'); return [h?h.innerText.trim():'', e?e.innerText.trim():''];})()") or ['', '']
+        chk('E2 390 px · liberar a OS-0430 pela lista: a ordem passa a Liberadas (painel; chips de fase A liberar −1, Liberadas +1), o que mudou é realçado e o aviso é anunciado',
+            pf[0].startswith('OS-0430') and pf[1] == 'Liberadas' and f0.get('A liberar') is not None and f1.get('A liberar') == f0['A liberar'] - 1 and f1.get('Liberadas') == f0.get('Liberadas', -9) + 1
+            and len(rs) >= 1 and t and v.startswith(t.split(' | ')[0][:40]), [pf, f0, f1, t, v, rs])
         abre('BO-02.dc.html', 390, 844, toque=True)
         p = centro("[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Conciliar pagamentos')"); c.toque(p[0], p[1]); time.sleep(.6)
         t = toast(); p = centro("[...document.querySelectorAll('header button')].find(x=>x.innerText.trim()==='Conciliar pagamentos')")
