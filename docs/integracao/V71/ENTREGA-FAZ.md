@@ -29,7 +29,7 @@ ID / resultado útil / persona: ENTREGA-FAZ / comprar o total da safra numa nego
 Requisitos do PRD e fora do escopo: §IDs do PRD abaixo; fora: §Fora do escopo
 Autor / revisor / integrador: Claude / Codex / Codex (regime leve do protótipo, §3.5)
 Base (commit ou hashes) / arquivos sob responsabilidade: claude/v44-v69-mapa em a685f5e / safra.js (etapa 4), areas/processo_compras.py, entrega.js (novo: programação e invariantes), areas/parceiros.py (página do link), areas/processo_estoque.py (recebimento por entrega), dados2.py e dados_cad.py (antecedência, recebimento da fazenda, classe e capacidade do local), cenario.js (estado das entregas), testes novos entrega_faz_unit.js e entrega_faz_test.py
-Aceite e comando de verificação: E1–E19 (com E4b, E5b, E8b e E16b) abaixo / node entrega_faz_unit.js; python3 -B entrega_faz_test.py; mais cal01_test.py, cmptest.py, est_cenario_test.py, node safra_grupo_contrato_test.js, pt06_unit.py, ds_1610_test.py
+Aceite e comando de verificação: E1–E19 (com E4b, E4c, E5b, E8b e E16b) abaixo / node entrega_faz_unit.js; python3 -B entrega_faz_test.py; mais cal01_test.py, cmptest.py, est_cenario_test.py, node safra_grupo_contrato_test.js, pt06_unit.py, ds_1610_test.py
 Estado / impedimento / próximo passo: especificado, sem código; revisado pelo Codex e pelo Gemini em 16/10 (§Revisão), achados tratados nesta versão; na fila sem ampliar frentes nem autorias (§3.6), depois de Cadastros e da Onda 0; no protótipo tudo é simulado; P1 e P2 só travam o software real
 ```
 
@@ -40,7 +40,8 @@ Estado / impedimento / próximo passo: especificado, sem código; revisado pelo 
 | Revisor | SHA-256 do texto revisado | Data | Parecer |
 |---|---|---|---|
 | Codex | `ac2dec62796db1270a2476a5c54abcb6520d745d820250c643f9d0a16e033933` (b93e06f, 300 linhas) | 16/10/2026 | Direção aceita: compra agregada e entrega identificada por fazenda, com os ajustes 1–8 abaixo. Comentário 6219426486 no PR #47. Executou um script independente em Decimal, com calendário, com 7 verificações aritméticas: reproduziu S1 (Óleo 860 = 220 + 640; Glifosato 320 = 20 + 300), as três entregas e janelas, o E12 em quatro entregas com as quantidades preservadas, e a falta de 90 L do E6, coerente com a sobra de 10 L. Não executou CAL-01, `entrega.js` nem navegador. Brutos com o Codex em `work/dupla-20261013/entrega-faz-20261016/`. |
-| Gemini (conector do Codex) | o mesmo texto; requisição com SHA-256 `88a9968d3d8afaaa70d1e740d4c920a43d79af4af15c7b018d77975c726a371d` | 16/10/2026, início 15:54:55Z | Modelo `gemini-3.1-pro-preview`, esforço HIGH; resposta `0EjSaruFH-qDn_APgPSKuAk`, fim STOP, 17.165 tokens. Uma consulta, com o documento sintético inteiro, sem ferramentas, testes nem fontes externas. Sugestões 1 e 5 incorporadas com restrição; 6 e 3 corrigidas; 2 recusada. |
+| Codex (R2) | `0184cd89683d85ab3c923a5992627f4d92d8d163ce145fdcba7b8cf0b5a08814` (0d26443, 398 linhas) | 16/10/2026 | Aceitou os 8 encaminhamentos e reproduziu o Decimal. Restaram 1 achado S2 no script de prova e 1 ajuste de texto (R2-1 e R2-2, abaixo). Comentário 6220011063 no PR #47. |
+| Gemini (conector do Codex) | o texto de b93e06f; requisição com SHA-256 `88a9968d3d8afaaa70d1e740d4c920a43d79af4af15c7b018d77975c726a371d` | 16/10/2026, início 15:54:55Z | Modelo `gemini-3.1-pro-preview`, esforço HIGH; resposta `0EjSaruFH-qDn_APgPSKuAk`, fim STOP, 17.165 tokens. Uma consulta, com o documento sintético inteiro, sem ferramentas, testes nem fontes externas. Sugestões 1 e 5 incorporadas com restrição; 6 e 3 corrigidas; 2 recusada. |
 
 **Tratamento dos achados** (esta versão; os testes continuam especificados; as contas marcadas "executado" rodaram no script de conferência do Claude, não no `entrega.js`, no CAL-01 nem no navegador):
 
@@ -55,6 +56,8 @@ Estado / impedimento / próximo passo: especificado, sem código; revisado pelo 
 | 6 | Calendário implícito; o guloso prometia o mínimo de caminhões | **Aceito.** Dias corridos, data civil no fuso da fazenda, interseção com os dias de recebimento e com a chegada viável. Janela vazia é conflito recuperável, nunca adiada em silêncio. O guloso dá o mínimo só em intervalos sem outras restrições, e o desempate é fixo. "Confirmar entregas" mostra datas e versão no próprio lugar. Propostas 2 e 4; E8 e E8b (executado). |
 | 7 | NR-31 lida como capacidade física "L/kg" (a sugestão G3 também estava imprecisa) | **Aceito.** O 31.7.16 é um critério regulatório conjunto (litros mais quilos ≤ 100) só para o armário. Não converte L em kg nem cria total físico. As grandezas ficam separadas, e a regra é nomeada com fonte e versão. A capacidade física declarada também vale, e a classe do local não prova os requisitos do 31.7.14. Nenhuma linha de total soma unidades ou produtos diferentes. Conferido no PDF oficial pelo Codex (págs. 22–23 na contagem dele) e pelo Claude com `pdftotext` (31.7.14 começa na pág. 23 e 31.7.16 está na 24, num arquivo de 81 páginas). Referência 5, proposta 4; E5 e E5b (executado). |
 | 8 | Isolamento e escopo | **Aceito.** Mover quantidade exige permissão nas duas fazendas. O token cobre só pedido, contato e ações autorizadas, com expiração e revogação no servidor, e a nota fica restrita à entrega. O protótipo marca "Simulação", e o E7 visual não prova autorização no servidor. A P2 segue pendente no software real. Os IDs ficam estáveis, e filtros, rascunho e foco são preservados. Visões extras cortadas. Propostas 3, 4, 6 e 7; E6, E7 e E17. |
+| R2-1 | O script de prova tirava do local a quantidade arredondada à embalagem e apagava a sobra (S2). Contraprova executada pelo Codex: local com 20 L, usos de 11 L e 20 L, galão de 20 L; o script aceitava 20 + 20 | **Aceito.** A simulação passou a ser diária e por item: sai o uso efetivo, a sobra fica no local e passa ao uso seguinte do item, e o estoque final é conferido. Novo E4c (29 L > 20 L, executado). E4 e E4b rodaram de novo sem mudança de número. Proposta 4 e §Contas conferidas. |
+| R2-2 | A contraprova dizia "reprova" sem execução na base | **Aceito.** O texto passa a dizer o resultado esperado na base, sem declarar falha executada. |
 | G1 | Gemini: regenerar a programação pela demanda | **Incorporada com restrição** (item 1). |
 | G2 | Gemini: senha ou liberação por terceiro na chegada divergente | **Recusada** (Codex e Claude): a autorização é do servidor, pela permissão do usuário. |
 | G3 | Gemini: regra de armazenagem da NR-31 | **Corrigida** (item 7). |
@@ -142,6 +145,7 @@ Estar num sistema do mercado não prova a regra de domínio. As travas daqui nom
      3. Cada linha arredonda para embalagem inteira. A sobra cobre o uso seguinte do item (PRD 65.5), e a diferença aparece ("arredondamento +10 L"), nunca some.
      4. **Capacidade física no tempo:**
         - a ocupação do local em cada dia soma o estoque físico (apto, reservado e quarentena), as chegadas de **todos** os pedidos e itens com destino a ele e tira os usos planejados identificados (O.S. e plano) até o dia anterior;
+        - sai do local o **uso efetivo**, nunca a quantidade arredondada à embalagem. A sobra de embalagem fica no local e passa ao uso seguinte do mesmo item, e o estoque final, depois do último uso, também é conferido (E4c);
         - no mesmo dia, a chegada conta antes do uso, como no CAL-01. O pico do dia é que se compara;
         - reserva não libera espaço (RN-011). O fim da janela não é uso nem saída;
         - chegada sem data prometida conta desde o primeiro dia da janela (o caso mais cheio);
@@ -304,6 +308,7 @@ O arredondamento fica visível: Óleo +20 L (10 L em cada fazenda) e Glifosato +
 | E3 | Programação sugerida (S1) | Exatamente LG-1, SR-1 e LG-2, com as janelas e embalagens da tabela. Arredondamento visível (+20 L e +6,66 L). Rodar duas vezes dá o mesmo resultado |
 | E4 | Capacidade no tempo (S1 só com o Óleo da Lagoa Grande; Almox. Lagoa Grande com 500 L) | Duas entregas: 400 L em 30/09–25/10 e 240 L em 31/10–15/11. Em 30/10 a chegada conta antes do uso: 640 L > 500 L. Com 300 L: conflito "400 L > 300 L no Almox. Lagoa Grande em 25/10", nada cortado, e a de 240 L em 31/10–15/11. Com 500 L e 150 L em quarentena no local: conflito "550 L > 500 L" (quarentena e reserva ocupam espaço). Capacidade em branco: pendência "capacidade não informada", sem conflito e sem "aprovada" |
 | E4b | Duas chegadas antes do consumo e concorrência (S1 completo; Lagoa Grande com 500 L) | Glifosato 300 L (30/09–20/10, uso em 25/10) e Óleo 400 L (até 25/10, uso em 30/10) estariam juntos no local em 25/10: 700 L > 500 L. Sai o Óleo (fim mais tardio) e não há dia que caiba até 25/10: conflito recuperável "pico de 700 L > 500 L em 25/10", nada cortado nem adiado. O Glifosato fica em 30/09–20/10 e a de 240 L em 31/10–15/11. Dois fornecedores confirmam ao mesmo tempo 400 L e 300 L para o mesmo local antes do consumo: a primeira grava; a segunda é recusada com o pico de 700 L > 500 L e continua como proposta |
+| E4c | A sobra de embalagem ocupa espaço (contraprova do Codex) | Local com 20 L; Óleo com usos de 11 L em 20/10 e 20 L em 20/11; galão de 20 L; físico 0. A 1ª entrega é de 20 L, em 30/09–15/10, e depois do uso sobram 9 L no local. A 2ª precisa de 11 L e chega como 20 L: 9 + 20 = 29 L > 20 L, conflito recuperável, nada cortado. O estoque final (9 L em 21/11) também é conferido |
 | E5 | Classe de armazenagem | Levar a linha do Óleo da SR-1 para "Galpão 2" ou "Câmara fria" é recusado ("adjuvante: só em local de defensivos e afins, NR-31 31.7.14"). Local de outra fazenda é recusado. Nada muda. A classe do local não vale como atestado dos requisitos do 31.7.14 |
 | E5b | Critério regulatório do armário (NR-31 31.7.16) | Armário de defensivos na Lagoa Grande com 60 L de Óleo e 50 kg de Acetamiprido 200 SP: conflito "NR-31 31.7.16: 60 L + 50 kg = 110 > 100". As quantidades ficam em L e kg, separadas, sem conversão. Se o armário declara capacidade de 80 L, ela também vale. Nenhuma tela mostra "110" como quantidade de estoque |
 | E6 | Invariantes, mover entre fazendas e permissão | Entrega sem fazenda é recusada. Mover 100 L de Óleo da LG-2 para a SR-1 deixa Santa Rita com 320 L e Lagoa Grande com 540 L; o total continua 860 L; a LG-2 aparece com a falta de 90 L e pede motivo; SR-1 e LG-2 voltam a "Aguarda confirmação". Reduzir só a SR-1 sem aditivo é recusado ("o total mudaria de 860 para 760 L"). Comprador com permissão só na Santa Rita: mover é recusado no servidor ("sem permissão na Lagoa Grande") e nada muda |
@@ -324,17 +329,22 @@ O arredondamento fica visível: Óleo +20 L (10 L em cada fazenda) e Glifosato +
 | E19 | Rascunho × versão enviada | O comprador muda a SR-1 para 15/10 no rascunho v4: o link continua na v3, e o selo diz "Rascunho · v3 enviada". "Enviar programação" publica a v4 e o recibo juntos; se a gravação falha, não existe nem v4 nem recibo, e o rascunho fica. A confirmação seguinte cita a v4, a SR-1 e 15/10 |
 
 **Contas conferidas:**
-- **Executado pelo Claude**, no script de conferência em Decimal com calendário (não é o `entrega.js`, o CAL-01 nem o navegador): S1, E4, E4b, E5b, E8b, E11, E12 e E18, inclusive a repetição sem mudança.
-- **Executado pelo Codex:** S1, E6 e E12.
+- **Executado pelo Claude**, no script de conferência em Decimal com calendário: S1, E4, E4b, E4c, E5b, E8b, E11, E12 e E18, inclusive a repetição sem mudança. Não é o `entrega.js`, o CAL-01 nem o navegador.
+  - O script e a saída estão em `docs/integracao/V71/entrega-faz/` (`entrega_chk.py` e `entrega_chk.out`, gerado com `python3 -I entrega_chk.py > entrega_chk.out`).
+  - Depois do R2-1, a capacidade é simulada por item, com o uso efetivo, e E4 e E4b rodaram de novo com os mesmos números.
+- **Executado pelo Codex:** S1, E6, E12 e a contraprova do E4c.
 - **Só especificado:** o restante.
 
-**Contraprova:** a versão de a685f5e não tem antecedência, compra única, entrega por fazenda nem link, e reprova E1 a E11 e E15 a E19. Os aceites são propostos; viram teste depois dos aceites desta versão.
+**Contraprova (resultado esperado, não executado):**
+- Na base a685f5e não existem antecedência por item, compra única da safra, entrega por fazenda, link do fornecedor nem chegada fora da programação. Por isso se espera que E1 a E11 e E15 a E19 não passem quando o teste existir: as telas e os campos que eles procuram não estão lá.
+- Não é falha executada de CAL-01 nem do produto real, que ainda não existe.
+- A contraprova roda junto com `entrega_faz_test.py`, contra o render da base. Os aceites são propostos e viram teste depois dos aceites desta versão.
 
 ## Testes (proporcionais ao risco: estoque, demanda e dinheiro)
 
 - **Unidade (`node entrega_faz_unit.js`):**
   - janela com calendário (dias corridos, data local, dias de recebimento), guloso com desempate, arredondamento com sobra;
-  - capacidade física no tempo (pico do dia, todos os pedidos, quarentena e reserva), critério regulatório NR-31 31.7.16 e classe;
+  - capacidade física no tempo (pico do dia, todos os pedidos, quarentena e reserva, uso efetivo com sobra de embalagem e estoque final), critério regulatório NR-31 31.7.16 e classe;
   - invariantes, mover entre fazendas com permissão nas duas, conciliação, encerramento parcial e cancelamento;
   - simulação sem as previsões abertas da própria programação (E18);
   - idempotência, versão, rascunho × enviada e recusa por concorrência que preserva a intenção.
@@ -344,7 +354,8 @@ O arredondamento fica visível: Óleo +20 L (10 L em cada fazenda) e Glifosato +
   - janela vazia sempre vira conflito, nunca adiamento;
   - o total fica entre a necessidade e a necessidade + 1 embalagem por linha;
   - repetir a simulação sem mudança não muda a lista nem as quantidades;
-  - a ocupação de nenhum dia passa da capacidade sem um conflito registrado.
+  - a ocupação de nenhum dia, inclusive depois do último uso, passa da capacidade sem um conflito registrado;
+  - a sobra de embalagem só sai do local pelo uso efetivo.
 - **Navegador (`entrega_faz_test.py`):**
   - E2, E7 a E10, E16, E16b, E17 e E19, a 1440 e a 390 px;
   - sem erro de JS;
