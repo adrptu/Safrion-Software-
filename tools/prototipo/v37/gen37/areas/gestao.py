@@ -658,7 +658,10 @@ def _ge08():
                     F('data','Data original da declaração',t='date',cond=dc),F('responsavel','Responsável pela declaração original',t='txt',cond=dc),
                     F('fonte','Fonte do valor',t='txt',cond=dc,help='Ex.: laudo de avaliação ou declaração do produtor.'),
                     F('hist','Versões anteriores',t='area',ro=True)]))
-    g_ficha=g_ficha.replace('>Salvar</button>','>'+H('cre_ficha_salvar_rotulo')+'</button>')
+    # o painel do motor vai para EXTRA (engine._g2form), fora do HTML da grade: o rótulo "Salvar declaração | Confirmar vigência" entra lá
+    i_fm=next(i for i,x in enumerate(EXTRA) if '{{g_ficha_F.save}}' in x)
+    assert EXTRA[i_fm].count('>Salvar</button>')==1
+    EXTRA[i_fm]=EXTRA[i_fm].replace('>Salvar</button>','>'+H('cre_ficha_salvar_rotulo')+'</button>')
     EXTRAJS[0]=JS_BASE+CRED_JS+'''
 const DDID='''+json.dumps(DDID)+''', LIB='''+json.dumps(c['liberado'])+''', VAL='''+json.dumps(c['valor'])+r''', HOJE_DOC='2026-09-23', HOJE_FICHA='2026-10-16';
 // documentos para crédito: pendente sem número ou com pendência; vencido depois da validade; a certidão do CRE-0102 enviada fica em conferência
@@ -686,6 +689,8 @@ function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
   v.cv_ficha=vis==='ficha'; v.cv_ficha_nao=!v.cv_ficha; // entrada pela área de Documentos; não altera o conjunto legado sem recorte
   v.cre_ficha_sem_papel=!g2umPapel(g2perfil(),['direcao','financeiro']);
   v.cre_ficha_erro=!!self._fichaErr;v.cre_ficha_motivo=self._fichaErr||'';
+  v.cre_ficha_vazia=!self._fichaErr&&!(g2rows(self,GRIDS.find(g=>g.id==='g_ficha'))||[]).length; if(v.cre_ficha_vazia||v.cre_ficha_erro) v.g_ficha_empty=false;
+  v.cre_ficha_vazia_motivo=v.cre_ficha_sem_papel?'Nenhum bem na ficha ainda. A direção pode incluir o primeiro.':'Nenhum bem na ficha ainda. Use “Incluir bem” para declarar o primeiro.';
   v.cre_ficha_novo=()=>{if(v.cre_ficha_sem_papel){self.setState({g2toast:'Somente a direção pode alterar a ficha nesta demonstração.'});return;}g2new(self,GRIDS.find(g=>g.id==='g_ficha'));};
   v.cre_ficha_reler=()=>self.setState({});
   const fmF=g2st(self,'g_ficha').fm, FF=v.g_ficha_F;
@@ -693,7 +698,7 @@ function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
   if(FF&&FF.fields&&fmF&&fmF.isNew)FF.fields=FF.fields.filter(f=>!['oper','resumo','confirmacao','hist'].some(k=>f.fid==='fx_g_ficha_'+k));
   if(FF&&FF.fields)FF.fields.forEach(f=>{if(f.fid==='fx_g_ficha_valor')f.im='decimal';});
   self.g2openDraft=(gid,r,d)=>{if(gid!=='g_ficha')return d;
-    try{const atual=credFichaLer().items.find(x=>x.id===r.id);if(atual){const linha=credFichaLinha(atual,HOJE_FICHA);Object.assign(r,linha);Object.keys(d).forEach(k=>{d[k]=String(linha.v[k]??'');});d.valor=atual.valor===null?'':atual.valor.replace('.',',');d._fichaRev=atual.rev;}}
+    try{const atual=credFichaLer().items.find(x=>x.id===r.id);if(atual){const linha=credFichaLinha(atual,HOJE_FICHA);Object.assign(r,linha);Object.keys(d).forEach(k=>{d[k]=String(linha.v[k]??'');});d.valor=atual.valor===null?'':credFichaDinheiro(atual.valor).slice(3);d._fichaRev=atual.rev;}}
     catch(e){self._fichaErr=e.message;}return d;};
   self.g2newDraft=(gid,d)=>gid==='g_ficha'?{_fichaRev:0}:{};
   if(!self.__creHash){ self.__creHash=true; addEventListener('hashchange',()=>self.setState({}),false); }
@@ -714,7 +719,7 @@ function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
   // documento automático: tipo e fazenda fixos no formulário (só leitura, com o motivo) e recusados ao salvar
   self.g2check=(gid,cur,row,d,isNovo)=>{
     if(gid==='g_ficha'){
-      if(!g2umPapel(g2perfil(),['direcao','financeiro']))return {oper:'Somente a direção pode alterar a ficha nesta demonstração.'};
+      if(!g2umPapel(g2perfil(),['direcao','financeiro']))return {[isNovo?'nome':'oper']:'Somente a direção pode alterar a ficha nesta demonstração.'};
       const e=credFichaErros(d,row&&row.v?Object.assign({},row.v,{valor:row.v.valor===''?null:row.v.valor}):null,HOJE_FICHA);
       if(!Object.keys(e).length)self._fichaCmd={id:row&&row.id,d:Object.assign({},d),rev:Number(d._fichaRev)||0};return e;
     }
@@ -745,7 +750,8 @@ function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
     ficha=(f'<p style="color:{MUTED}; margin:0;">Ficha do grupo · valores declarados · referência da demonstração: 16/10/2026.</p>'
         + f'<sc-if value="{H("cre_ficha_sem_papel")}"><p role="note">Consulta: somente a direção pode alterar ou confirmar valores. O papel financeiro ainda não está disponível nesta demonstração.</p></sc-if>'
         + f'<sc-if value="{H("cre_ficha_erro")}"><p role="alert">{H("cre_ficha_motivo")}</p>'
-        + ibtn('Tentar novamente','cre_ficha_reler','doc')+'</sc-if>'+g_ficha)
+        + ibtn('Tentar novamente','cre_ficha_reler','doc')+'</sc-if>'+g_ficha
+        + f'<sc-if value="{H("cre_ficha_vazia")}"><p role="status" style="color:{MUTED}; margin:0; font-size: 13px;">{H("cre_ficha_vazia_motivo")}</p></sc-if>')
     corpo=(CV('ficha')+bloco('Ficha do grupo · Bens e avaliações','',ficha,
               acao=ilink('Ver documentos','GE-08.dc.html#vis=documentos','doc'))+'</sc-if>'
         + f'<sc-if value="{H("cv_ficha_nao")}">'
@@ -758,9 +764,10 @@ function EXTRAVALS(self,v){ const sent=!!((self.state.added||{})[DDID]);
                 acao=doc+ibtn('Registrar liberação da 2ª parcela','lib2','cash','Registrar a 2ª liberação (exige a condição documental aceita)'),tone='yellow')
         + '</sc-if>' + CV('dossie') + bloco('Dossiê e consentimento','Autorize cada bloco com finalidade e prazo; clique num bloco para ajustar quem acessa.',g_dos,tone='gray') + '</sc-if>'
         + CV('documentos') + bloco('Documentos para crédito','CAR, matrícula, contrato de arrendamento e certidões que o credor pede, por fazenda.',g_doc,
-                acao=ilink('Bens e avaliações','GE-08.dc.html#vis=ficha','doc')+f'<button type="button" onClick="{H("g_doc_new")}" style="{BTN_ST(False,True)} display: inline-flex; align-items: center; gap: 6px;">{__import__("areas.processo_planos",fromlist=["MAIS"]).MAIS(14)}Incluir documento</button>',tone='gray') + '</sc-if>')
+                acao=f'<button type="button" onClick="{H("g_doc_new")}" style="{BTN_ST(False,True)} display: inline-flex; align-items: center; gap: 6px;">{__import__("areas.processo_planos",fromlist=["MAIS"]).MAIS(14)}Incluir documento</button>'+ilink('Bens e avaliações','GE-08.dc.html#vis=ficha','doc'),tone='gray') + '</sc-if>')
     shell37('GE-08','Crédito e garantias',corpo,
       subtitle='Solicitações, dossiês autorizados, propostas, decisões, contratos, liberações e serviço da dívida.',
+      status=(f'{c["id"]} · condição documental pendente','yellow'),
       primary_html=CV('ficha')+f'<button type="button" disabled="{H("cre_ficha_sem_papel")}" onClick="{H("cre_ficha_novo")}" style="{BTN_ST(True,True)}">Incluir bem</button></sc-if>',
       footer='Capacidade usa caixa disponível ao serviço da dívida por período; CET/CETCR sempre com método e premissas declarados. '
              'O mesmo saco nunca garante dois contratos.')
