@@ -1,0 +1,156 @@
+== 392bc494 irr_onda0_test.py
+OK R1 término antes do previsto exige confirmação e não fabrica crédito
+OK R1 antecipado exige área e leitura; ausência não vale zero
+OK R1 parcial explícita credita só a faixa e mantém déficit global
+OK R1 zero medido é conservado como divergência
+OK R1 término normal e replay conservam crédito único
+OK R1 avanço disponível e pausa impede término
+OK R1 pausa, retomada e avanço não ficam depois do término
+OK R1 relógio já adiantado não regride com pausa/retomada
+OK F2 cenário salvo usa último evento sem deslocar o relógio global
+OK F2 início de outra ordem respeita sua janela 15:02 após OS0419 20:02
+OK F1 volta completa a 0h exige motivo, sem mutar ou creditar
+OK F1 área incompatível com tempo aguarda conferência sem crédito
+OK F1 parcela maior que o giro disponível exige conferência
+OK R2 P2 programa piso 6,7 mm e 9 h
+OK R2 PV19 respeita lâmina e duração mínimas
+OK R2 ficha incompatível rejeita sem criar ordem
+OK R2 cenário salvo não muda ao carregar/recalcular
+OK R3 Rui não aceita nem devolve; medição intacta
+OK R3 Ana sem motivo não aceita desvio maior que 3%
+OK R3 aceite com motivo e recibo; replay não duplica
+OK R3 irrigante devolve mantendo medição e crédito provisório
+OK R3 rateio pequeno conserva total sem negativo
+OK R3 tolerância exata sem motivo; ausência de perfil bloqueia
+OK UI término abre vazio, valida junto ao campo e preserva rascunho no Escape
+OK UI motivo obrigatório, preserva leitura e permite devolver
+OK F1 passada pendente conserva estado e crédito até conferência do conjunto
+OK F3 UI e comando usam 1253.96: 1291.6 exige motivo
+OK F1 UI pede motivo e conserva rascunho antes de conferência
+{"ok":28,"fail":0,"navegador":false}
+rc=0
+== contraprova: testes 392b contra domínio+tela ec650424
+FAIL R1 término antes do previsto exige confirmação e não fabrica crédito :: Expected values to be strictly equal:
+
+1202 !== 372
+
+OK R1 antecipado exige área e leitura; ausência não vale zero
+OK R1 parcial explícita credita só a faixa e mantém déficit global
+OK R1 zero medido é conservado como divergência
+OK R1 término normal e replay conservam crédito único
+OK R1 avanço disponível e pausa impede término
+FAIL R1 pausa, retomada e avanço não ficam depois do término :: Expected values to be strictly equal:
+
+1300 !== 372
+
+OK R1 relógio já adiantado não regride com pausa/retomada
+FAIL F2 cenário salvo usa último evento sem deslocar o relógio global :: O relógio simulado está antes do último evento registrado. Avance a simulação até esse horário antes de encerrar.
+FAIL F2 início de outra ordem respeita sua janela 15:02 após OS0419 20:02 :: A passada 1 começa antes de agora (hoje 20:02).
+FAIL F1 volta completa a 0h exige motivo, sem mutar ou creditar :: Missing expected exception.
+FAIL F1 área incompatível com tempo aguarda conferência sem crédito :: Expected values to be strictly equal:
++ actual - expected
+
++ 'Encerradas'
+- 'Em conferência'
+
+FAIL F1 parcela maior que o giro disponível exige conferência :: Missing expected exception.
+OK R2 P2 programa piso 6,7 mm e 9 h
+OK R2 PV19 respeita lâmina e duração mínimas
+OK R2 ficha incompatível rejeita sem criar ordem
+OK R2 cenário salvo não muda ao carregar/recalcular
+OK R3 Rui não aceita nem devolve; medição intacta
+OK R3 Ana sem motivo não aceita desvio maior que 3%
+OK R3 aceite com motivo e recibo; replay não duplica
+OK R3 irrigante devolve mantendo medição e crédito provisório
+OK R3 rateio pequeno conserva total sem negativo
+OK R3 tolerância exata sem motivo; ausência de perfil bloqueia
+OK UI término abre vazio, valida junto ao campo e preserva rascunho no Escape
+OK UI motivo obrigatório, preserva leitura e permite devolver
+FAIL F1 passada pendente conserva estado e crédito até conferência do conjunto :: The input did not match the regular expression /crédito pendente/. Input:
+
+'Passada 1 encerrada · OS-0419 segue Em execução · próxima passada 25/09 05:22.'
+
+FAIL F3 UI e comando usam 1253.96: 1291.6 exige motivo :: Expected values to be strictly equal:
+
+false !== true
+
+FAIL F1 UI pede motivo e conserva rascunho antes de conferência :: Cannot read properties of null (reading 'err')
+{"ok":18,"fail":10,"navegador":false}
+rc=1
+== contraprova: testes 392b contra domínio+tela base 8aa0a17
+FAIL R1 término antes do previsto exige confirmação e não fabrica crédito :: irrAgora is not defined
+FAIL R1 antecipado exige área e leitura; ausência não vale zero :: Missing expected exception.
+FAIL R1 parcial explícita credita só a faixa e mantém déficit global :: The input did not match the regular expression /antecipado \(simulado\)/. Input:
+
+'[{"q":372,"rec":"AU-3098","ev":"Necessidade calculada pelo balanço · déficit 11,2 mm → 10,81 mm brutos em 1 passada","quem":"sistema"},{"q":372,"rec":"LIB-2287","ev":"Liberada pela prontidão · janela, Bomba do Pivô 2, energia e outorga conferidas","quem":"sistema"},{"q":1202,"rec":"EX-5120","ev":"Início · telemetria da Bomba do Pivô 2 ativa","quem":"João"},{"q":1311,"rec":"EX-5120","ev":"Término · 1,8 h de bombeamento · parou antes: 10 de 80 ha · hidrômetro 1.000 m³","quem":"João"},{"q":1312,"rec":"EX-5120","ev":"Conferência: 1.000 m³ medidos × 1.081 m³ estimados (−7,5 %) · acima da tolerância de 3 %","quem":"sistema"}]'
+
+OK R1 zero medido é conservado como divergência
+OK R1 término normal e replay conservam crédito único
+OK R1 avanço disponível e pausa impede término
+FAIL R1 pausa, retomada e avanço não ficam depois do término :: Expected values to be strictly equal:
+
+false !== true
+
+OK R1 relógio já adiantado não regride com pausa/retomada
+FAIL F2 cenário salvo usa último evento sem deslocar o relógio global :: Expected values to be strictly equal:
+
+1235 !== 1382
+
+OK F2 início de outra ordem respeita sua janela 15:02 após OS0419 20:02
+FAIL F1 volta completa a 0h exige motivo, sem mutar ou creditar :: Missing expected exception.
+FAIL F1 área incompatível com tempo aguarda conferência sem crédito :: Expected values to be strictly equal:
++ actual - expected
+
++ 'Encerradas'
+- 'Em conferência'
+
+FAIL F1 parcela maior que o giro disponível exige conferência :: Missing expected exception.
+FAIL R2 P2 programa piso 6,7 mm e 9 h :: Expected values to be strictly equal:
++ actual - expected
+
++ 6.222222222222221
+- 6.7
+
+FAIL R2 PV19 respeita lâmina e duração mínimas :: Expected values to be strictly equal:
++ actual - expected
+
++ 2.3529411764705883
+- 7.21
+
+FAIL R2 ficha incompatível rejeita sem criar ordem :: Missing expected exception.
+OK R2 cenário salvo não muda ao carregar/recalcular
+FAIL R3 Rui não aceita nem devolve; medição intacta :: Missing expected exception.
+FAIL R3 Ana sem motivo não aceita desvio maior que 3% :: Missing expected exception.
+FAIL R3 aceite com motivo e recibo; replay não duplica :: Expected values to be strictly equal:
+
+undefined !== 'Ana'
+
+FAIL R3 irrigante devolve mantendo medição e crédito provisório :: irrDevolver is not defined
+FAIL R3 rateio pequeno conserva total sem negativo :: Expected values to be strictly equal:
+
+4 !== 2
+
+FAIL R3 tolerância exata sem motivo; ausência de perfil bloqueia :: Missing expected exception.
+FAIL UI término abre vazio, valida junto ao campo e preserva rascunho no Escape :: Expected values to be strictly equal:
+
+'8480' !== ''
+
+FAIL UI motivo obrigatório, preserva leitura e permite devolver :: Expected values to be strictly equal:
++ actual - expected
+
++ undefined
+- 'Aceitar com motivo'
+
+FAIL F1 passada pendente conserva estado e crédito até conferência do conjunto :: The input did not match the regular expression /crédito pendente/. Input:
+
+'Passada 1 encerrada · OS-0419 segue Em execução · próxima passada 25/09 05:22.'
+
+FAIL F3 UI e comando usam 1253.96: 1291.6 exige motivo :: Expected values to be strictly equal:
++ actual - expected
+
++ undefined
+- true
+
+FAIL F1 UI pede motivo e conserva rascunho antes de conferência :: Cannot read properties of null (reading 'err')
+{"ok":6,"fail":22,"navegador":false}
+rc=1
