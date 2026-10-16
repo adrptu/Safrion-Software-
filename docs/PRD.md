@@ -13668,6 +13668,8 @@ AC-73 a AC-82 são os dez cenários do item 8 do pedido, na ordem do pedido. AC-
 
 ### 73.12 Decisões pendentes do proprietário
 
+> **Respondidas pelo proprietário em 16/10/2026** (DEC-1610-03, 04 e 08 em `docs/DECISIONS.md`). PEND-01 (DEC-1610-03) e PEND-18 (DEC-1610-08) ficam decididas no seu escopo. A DEC-1610-04 aprova somente os valores numéricos de prazos e limites das pendências que ela cita; suas demais cláusulas mantêm o estado anterior, salvo decisão específica referenciada. Valem desde então; o texto das regras e esta tabela mudam no registro da versão seguinte do PRD, como diz 73.12.
+
 Estas são propostas, não requisitos aprovados. Nenhuma foi decidida em nome do proprietário. Cada linha diz a proposta, o que ela muda e o que vale até a decisão; o valor em vigor nesse intervalo aparece em CF-02 ou CF-03 marcado como "valor proposto" e não é apresentado em treinamento nem em material comercial como regra aprovada. Decidida uma pendência, o texto da regra citada passa a trazer o valor decidido, e a linha sai desta tabela no registro da versão seguinte. Tempos técnicos iniciais de engenharia (espera progressiva, limites de consulta, tentativas por conector, retenção da outbox) não são pendência: são ajustados pela homologação (IDEM-06, IDEM-15, INTEG-21). As pendências do design system estão em 74.12 (PEND-DS) e as de melhoria contínua em 75.8 (PEND-FB, PEND-OP e PEND-IA).
 
 | ID | Decisão pendente | Proposta | Impacto | Até decidir, vale |
@@ -15154,6 +15156,8 @@ Cada critério tem precondição, ação e resultado. "Automático" significa te
 
 ### 74.12 Pendências do proprietário
 
+> **Respondidas pelo proprietário em 16/10/2026** (DEC-1610-05 e 06 em `docs/DECISIONS.md`). Valem desde então; o texto das regras e esta tabela mudam no registro da versão seguinte do PRD, como diz 73.12.
+
 São temas sem decisão do proprietário. Cada um tem proposta e o que vale até a decisão. Conforme 74.1, a implementação usa o que está na coluna "Até decidir, vale", e o espécime marca como proposta tudo o que vem daqui. A decisão vira mudança de token com versão (74.10.4). Os números 01 a 09 são os citados em 74.1 a 74.6.
 
 | ID | Pendência | Proposta | Até decidir, vale |
@@ -15368,6 +15372,8 @@ Situação de todos: **especificado; não executado** (não há software de prod
 | IAG-AC-04 | Prazo sem evento novo | Ordem liberada com janela abrindo amanhã às 06:00; nenhum evento depois de ontem | Verificações agendadas às 05:00, 06:00 e 07:00 | Um único aviso na abertura da janela; as verificações seguintes não repetem; nenhuma chamada aos modelos quando nada mudou |
 
 ### 75.8 Decisões pendentes do proprietário
+
+> **Respondidas pelo proprietário em 16/10/2026** (DEC-1610-07, 10 e 11 em `docs/DECISIONS.md`). Valem desde então; o texto das regras e esta tabela mudam no registro da versão seguinte do PRD, como diz 73.12.
 
 Até decidir, vale o comportamento indicado.
 

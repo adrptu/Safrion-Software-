@@ -4,3 +4,43 @@
 # Só este achado exato: commit, arquivo, regra e linha. A mesma linha em outro commit, outro valor ou outro arquivo
 # continua reprovando. Não amplia o .gitleaks.toml.
 7d38e5d50083a96b03d5a1247c31cd7518803b09:docs/integracao/PCM/diff-cdc185f-ba03515.patch:generic-api-key:3922
+
+# HML-SECRET-06 (DEC-1610-15, decisão do proprietário em 16/10/2026: "Exceção exata", no canal do Claude; achados
+# listados no PR #73, comentário 6217016316): 31 falsos positivos da varredura do histórico completo. Todos são nomes
+# de chave de localStorage do protótipo (prefixo "talhao-", mesma família da HML-SECRET-04/05) em constantes, em
+# comparações do evento "storage" e num teste que semeia o cenário. Não são credenciais. Estão em commits antigos de
+# branches de frente (f6d7486eb7: render e projeto v37 na claude/v44-v57-base; 207f3623cd: teste do painel).
+# Só estes achados exatos: commit, arquivo, regra e linha. A mesma linha em outro commit, outro valor ou outro
+# arquivo continua reprovando. Nada apagado do histórico; não amplia o .gitleaks.toml; canários e escopo da
+# varredura (tools/ci/varrer_segredos.py) inalterados.
+207f3623cdfb9059b46774f64245bc4ef735993f:work/prototipo-fase1/gen37/painel_modulos_test.py:generic-api-key:91
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/CD-03.dc.html:generic-api-key:3724
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IN-03.dc.html:generic-api-key:3591
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IN-03.dc.html:generic-api-key:3648
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IN-04.dc.html:generic-api-key:3591
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IN-04.dc.html:generic-api-key:3648
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-01.dc.html:generic-api-key:3591
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-01.dc.html:generic-api-key:3648
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-02.dc.html:generic-api-key:3591
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-02.dc.html:generic-api-key:3648
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-03.dc.html:generic-api-key:3591
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-03.dc.html:generic-api-key:3648
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-03det.dc.html:generic-api-key:3591
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-03det.dc.html:generic-api-key:3648
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-04.dc.html:generic-api-key:3591
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/_render/IR-04.dc.html:generic-api-key:3648
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/CD-03.dc.html:generic-api-key:3724
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IN-03.dc.html:generic-api-key:3591
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IN-03.dc.html:generic-api-key:3648
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IN-04.dc.html:generic-api-key:3591
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IN-04.dc.html:generic-api-key:3648
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-01.dc.html:generic-api-key:3591
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-01.dc.html:generic-api-key:3648
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-02.dc.html:generic-api-key:3591
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-02.dc.html:generic-api-key:3648
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-03.dc.html:generic-api-key:3591
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-03.dc.html:generic-api-key:3648
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-03det.dc.html:generic-api-key:3591
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-03det.dc.html:generic-api-key:3648
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-04.dc.html:generic-api-key:3591
+f6d7486eb732c259bdf89cfbaaf26ef269299b8d:tools/prototipo/v37/gen37/project/IR-04.dc.html:generic-api-key:3648
