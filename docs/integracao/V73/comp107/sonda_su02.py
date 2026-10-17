@@ -1,0 +1,56 @@
+import sys, os, time, json
+G=os.environ['GEN37']; sys.path.insert(0,G)
+from cada_lib import T
+SH=os.environ['SHOTS']; os.makedirs(SH,exist_ok=True)
+t=T(); J=t.J
+def st(): return J("JSON.parse(localStorage.getItem('safrion.su02.politicas.v1')||'null')")
+def rows(): return J("[...document.querySelectorAll('[role=table]')[0].querySelectorAll('[role=row]')].slice(1).map(r=>r.innerText.replace(/\\s+/g,' ').slice(0,220))")
+def rowbtn(txt,b): return J(f"(()=>{{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf({json.dumps(txt)})>=0); if(!r) return 'sem linha'; const e=[...r.querySelectorAll('button,a')].find(x=>x.innerText.replace(/\\s+/g,' ').trim().startsWith({json.dumps(b)})); if(!e) return 'sem botão'; e.click(); return 'ok'}})()")
+def anybtn(b): return J(f"(()=>{{const e=[...document.querySelectorAll('button')].filter(x=>x.getClientRects().length).find(x=>x.innerText.replace(/\\s+/g,' ').trim()===({json.dumps(b)})); if(!e) return 'sem botão'; e.click(); return 'ok'}})()")
+try:
+  t.goto('Main.dc.html'); J("localStorage.clear(); sessionStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana'); 1")
+  t.goto('SU-02.dc.html'); time.sleep(.5)
+  print('A linhas iniciais:'); [print('   ',r) for r in rows()]
+  print('A cabeçalho:', t.header()[:300])
+  t.openrow(0,'Fertilizantes'); print('B form aberto:', t.isopen(), '| título:', t.title())
+  t.fset('seg','20'); t.fset('just','Colheita antecipada'); t.btn('Salvar'); time.sleep(.5)
+  s=st(); p1=s and s['politicas']['p1']
+  print('B após salvar: toast=', t.toast(), '| form aberto=', t.isopen())
+  print('B estado: vigente.seg=', p1 and p1['vigente']['seg'], 'proposta=', p1 and p1['proposta'] and (p1['proposta']['dados']['seg'], p1['proposta']['estado'], p1['proposta']['rev']))
+  print('B selo:', t.header()[-120:]); print('B linha:', t.anyrow(0,'Fertilizantes'))
+  t.c.shot(f'{SH}/b_proposta.png') if hasattr(t.c,'shot') else None
+  print('C revisar:', rowbtn('Fertilizantes','Revisar proposta')); time.sleep(.4)
+  print('C painel:', J("(document.querySelector('aside[role=dialog]')||document.querySelector('[role=dialog]')||{}).innerText||''")[:400].replace('\n',' | '))
+  print('C aprovar:', anybtn('Aprovar proposta')); time.sleep(.5)
+  s=st(); p1=s['politicas']['p1']; print('C estado: proposta.estado=', p1['proposta'] and p1['proposta']['estado'], 'vigente.seg=', p1['vigente']['seg'], '| toast=', t.toast())
+  print('C selo:', t.header()[-120:]); print('C linha:', t.anyrow(0,'Fertilizantes'))
+  print('D publicar:', rowbtn('Fertilizantes','Publicar versão aprovada')); time.sleep(.4)
+  print('D painel:', J("(document.querySelector('[role=dialog]')||{}).innerText||''")[:300].replace('\n',' | '))
+  print('D confirmar:', anybtn('Publicar versão')); time.sleep(.5)
+  s=st(); p1=s['politicas']['p1']; print('D estado: versao=', p1['versao'], 'vigente.seg=', p1['vigente']['seg'], 'recibos=', p1['recibos'], 'proposta=', p1['proposta'], '| toast=', t.toast())
+  print('D selo:', t.header()[-120:]); print('D linha:', t.anyrow(0,'Fertilizantes'))
+  t.goto('SU-02.dc.html'); time.sleep(.4); print('E recarregar:', t.anyrow(0,'Fertilizantes'))
+  # perfil sem gestão
+  J("localStorage.setItem('safrion.perfilDemo','Caio'); 1"); t.goto('SU-02.dc.html'); time.sleep(.4)
+  t.openrow(0,'Sementes'); t.fset('prazo','12'); t.fset('just','Teste PCP'); t.btn('Salvar'); time.sleep(.4)
+  print('F Caio salvou proposta:', t.toast(), '|', t.anyrow(0,'Sementes'))
+  print('F revisar:', rowbtn('Sementes','Revisar proposta')); time.sleep(.3); print('F aprovar:', anybtn('Aprovar proposta')); time.sleep(.4)
+  s=st(); print('F estado Sementes:', s['politicas']['p3']['proposta'] and s['politicas']['p3']['proposta']['estado'], '| toast=', t.toast(), '| painel=', J("(document.querySelector('[role=dialog]')||{}).innerText||''")[:200].replace('\n',' | '))
+  J("localStorage.setItem('safrion.perfilDemo','Ana'); 1"); t.goto('SU-02.dc.html'); time.sleep(.4)
+  print('G simular:', t.clk('Simular antecedência')); time.sleep(.3); print('G painel:', J("(document.querySelector('[role=dialog]')||{}).innerText||''")[:200].replace('\n',' | ')); print('G ok:', anybtn('Simular')); time.sleep(.4); print('G toast:', t.toast(), '| dialog:', J("(document.querySelector('[role=dialog]')||{}).innerText||'(fechado)'")[:120].replace('\n',' | '))
+  print('H sem bloco de publicação:', 'Publicação de vigência' not in t.bloco() and 'Publicar vigência' not in t.bloco())
+  print('I Diesel:', t.anyrow(0,'Diesel'), '| Peças:', t.anyrow(0,'Peças'))
+  print('I2 revisar Diesel:', rowbtn('Diesel','Revisar proposta')); time.sleep(.3); print('I2 painel:', J("(document.querySelector('[role=dialog]')||{}).innerText||''")[:400].replace('\n',' | ')); print('I2 campos:', J("[...document.querySelectorAll('[role=dialog] input,[role=dialog] select')].map(e=>e.id+'='+e.value)"))
+  print('erros JS:', t.errs())
+  t.c.size(390,844); t.goto('SU-02.dc.html'); time.sleep(.5)
+  print('J 390 rolagem horizontal:', J("document.documentElement.scrollWidth>document.documentElement.clientWidth+1"))
+  print('J 390 ação visível:', J("[...document.querySelectorAll('button')].some(b=>/Revisar proposta/.test(b.innerText)&&b.getClientRects().length)"))
+  t.c.size(1440,1100); t.goto('SU-02.dc.html'); time.sleep(.4)
+  f=J("(()=>{const b=[...document.querySelectorAll('[role=row] button')].find(x=>/Revisar proposta/.test(x.innerText)); if(!b) return 'sem'; b.focus(); return document.activeElement===b})()"); print('K foco teclado em Revisar proposta:', f)
+  t.c.tecla('Enter',vk=13) if hasattr(t.c,'tecla') else J("document.activeElement.click()"); time.sleep(.4)
+  print('K Enter abre painel:', J("(document.querySelector('[role=dialog]')||{}).innerText||''")[:120].replace('\n',' | '))
+  print('erros JS final:', t.errs())
+finally:
+  try: t.c.close()
+  except Exception: pass
+  t.srv.terminate()

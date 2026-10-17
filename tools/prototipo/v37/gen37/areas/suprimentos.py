@@ -28,6 +28,7 @@ observacoes (dados locais coerentes com dados2/dados; declarados):
 - OS-0420 segue 30/70 ha de dados.OS (o card 60/40 do PRD fica para reconciliação).
 """
 import json, os, datetime as _dt
+from pathlib import Path
 from engine import (grid, esc, icon, chip, INK, MUTED, LINE, BG, SURF, ACC, ACCS, YEL, YELS, RED, REDS, GRAYS, SH, DISP,
                     BTN_ST, EXTRA, EXTRAJS, _MINI, _MINIP)
 import engine as E
@@ -326,32 +327,41 @@ def su02():
     pn={'exc':dict(title='Submeter exceção versionada',sub='A exceção vale só no período informado e passa pela alçada do gestor.',ok='Submeter exceção',
         fields=[fs('grp','Item/grupo','sel',opts=[p[1] for p in POL],req=True,**{'def':'Peças de manutenção'}),fs('alt','Alteração','txt',req=True,**{'def':'mínimo 2 → 4 un durante a colheita'}),
                 fs('ini','Início','date',req=True,**{'def':'2026-10-01'}),fs('fim','Fim','date',req=True,**{'def':'2026-12-20'}),fs('just','Justificativa','area',req=True)])}
-    js(pn,r'''
-CHECK.exc=(self,d)=>(d.fim<=d.ini?{fim:'O fim precisa ser depois do início.'}:null);
-RUN.exc=(self,d)=>{ setRows(self,'g_pol',rows=>{ const r=rows.find(x=>x.v.grp===d.grp); if(r) r.v.estado='Exceção submetida · aguarda gestor'; });
-  return 'Exceção de '+d.grp+' submetida ('+dm(d.ini)+' a '+dm(d.fim)+') · aguarda o gestor · a política vigente não muda até a aprovação'; };
-function PREVALS(self,v){ RW(self,'g_pol').forEach(r=>{ const V=r.v;
+    for key,title,ok in [('aprovar','Revisar proposta de política','Aprovar proposta'),('publicar','Publicar versão aprovada','Publicar versão')]:
+        pn[key]=dict(title=title,sub='Confira a versão e os valores. Aprovar não publica; publicar altera a vigência e gera recibo.',ok=ok,
+                     fields=[fs('id','Política','txt',ro=True,req=True,cond=dict(k='_meta',eq='mostrar')),fs('rev','Revisão da proposta','num',ro=True,req=True,cond=dict(k='_meta',eq='mostrar'))])
+    pn['simular']=dict(title='Simular antecedência',sub='Calcula prazo mais segurança; não presume consumo nem risco de ruptura.',ok='Simular',
+                       fields=[fs('id','Política','sel',opts=[r['v']['grp'] for r in rows],req=True,**{'def':rows[0]['v']['grp']})])
+    seedrows=[dict(id=r['id'],v=r['v']) for r in rows]
+    root=os.path.dirname(os.path.dirname(__file__))
+    service=Path(root,'sup_politicas.js').read_text(encoding='utf-8')
+    adapter=Path(root,'sup_politicas_ui.js').read_text(encoding='utf-8')
+    js(pn,service+'\nconst SUP_POL_SEED=supPolSeed('+json.dumps(seedrows,ensure_ascii=False)+');\n'+adapter+r'''
+// selo do cabeçalho pelo estado das políticas (composição do integrador, PR #107)
+function supPolSelo(v,ps){ if(!ps) return hstatus(v,'Políticas ilegíveis · confira os dados','red'); const qs=Object.values(ps.politicas).map(p=>p.proposta).filter(Boolean), ap=qs.filter(q=>q.estado==='Aprovada').length, ag=qs.length-ap;
+  if(!qs.length) return hstatus(v,'Políticas vigentes · nenhuma proposta pendente','green');
+  hstatus(v,[ag?ag+(ag===1?' proposta aguardando gestor':' propostas aguardando gestor'):'',ap?ap+(ap===1?' aprovada a publicar':' aprovadas a publicar'):''].filter(Boolean).join(' · '),'yellow'); }
+function PREVALS(self,v){ const ps=supPolRefresh(self); supPolSelo(v,ps); if(!ps)return; RW(self,'g_pol').forEach(r=>{ const V=r.v;
   r.p.grp=[B(V.grp),M(V.dep)]; r.s.grp=V.grp+' '+V.dep;
   r.p.abc=[T(V.abc+' ·'),chipc(V.crit,V.crit==='Alta'?'red':(V.crit==='Média'?'yellow':'gray'))]; r.s.abc=V.abc+' '+V.crit;
   r.p.seg=[T(nf(V.seg)+' d · '+nf(V.prazo)+' d')]; r.s.seg=String(V.seg);
-  const e=String(V.estado); const i=e.lastIndexOf(' · '); r.p.estado=[chipc(i>0?e.slice(0,i):e,e.indexOf('Vigente')===0?'green':'yellow')].concat(i>0?[BRK,M(e.slice(i+3))]:[]); r.s.estado=e; }); }
-function EXTRAVALS(self,v){ pnVals(self,v); sims(self,v);
-  self.g2after=(gid,rows,r)=>{ if(gid==='g_pol'&&r){ const m=String(r.v.estado).match(/v(\d+)/); const nv='v'+(m?Number(m[1])+1:2);
-    r.v.estado='Proposta '+nv+' · aguarda gestor'; self.setState({g2toast:'Proposta '+nv+' de '+r.v.grp+' salva · aguarda aprovação do gestor; a versão vigente segue valendo'}); } }; }''',
-    simsd=dict(sim='Simulação do Diesel S10: mínimo de 40 % cobre 9 dias do pico do plantio sem ruptura · a política vigente não foi alterada',
-               pub='Ainda não publicável · a proposta v5 do Diesel S10 aguarda o gestor (vence em 5 dias). Depois da aprovação, publique aqui; a versão vigente não é sobrescrita.'))
+  const e=String(V.estado); const i=e.lastIndexOf(' · '); r.p.estado=[chipc(i>0?e.slice(0,i):e,e.indexOf('Vigente')===0?'green':'yellow')].concat(i>0?[BRK,M(e.slice(i+3))]:[]); r.s.estado=e; }); supPolActions(self,ps); }
+
+CHECK.exc=(self,d)=>(d.fim<=d.ini?{fim:'O fim precisa ser depois do início.'}:null);
+RUN.exc=(self,d)=>{const s=supPolCurrent(),n=supPolClone(s);const id=Object.keys(n.politicas).find(k=>n.politicas[k].vigente.grp===d.grp);if(!id)throw Error('Política não encontrada.');const p=n.politicas[id];p.excecoes=(p.excecoes||[]).concat([{alteracao:d.alt,inicio:d.ini,fim:d.fim,just:d.just,estado:'Submetida'}]);n.rev++;supPolCommit(n,s.rev);return 'Exceção registrada para análise; não altera a política vigente.';};
+function EXTRAVALS(self,v){pnVals(self,v);supPolBind(self,v);}''')
     painel()
     corpo=(bloco('Políticas por item e depósito','Confira segurança, prazo e limites de cada política; clique na linha para propor uma nova versão.',
                  g,
-                 acao=mini('sim_sim','Simular cobertura','Simula o efeito de uma política sem alterá-la','calc')+alink('SU-01.dc.html','Ver efeito em Necessidades','Abre Necessidades com a cobertura calculada','trend'))
-           + bloco('Publicação de vigência','Publique só a versão aprovada; a simulação e as propostas não alteram a política vigente.',
-                   nota('Propostas e exceções aguardando: Diesel S10 v5 (gestor, vence em 5 dias).'),acao=mini('sim_pub','Publicar vigência','Publica a versão aprovada','check')))
+                 acao=mini('sim_sim','Simular antecedência','Prazo mais segurança de uma política, sem alterá-la','calc')+alink('SU-01.dc.html','Ver efeito em Necessidades','Abre Necessidades com a cobertura calculada','trend')))
+    # EX-50(a)-SUP (PR #107): revisar, aprovar e publicar ficam na própria linha; sem bloco de publicação com nota fixa
     HEIGHTS37[fname]=900
     shell37('SU-02','Políticas de estoque',corpo,fname=fname,
       subtitle='Política por item e local com segurança, prazo, lote, múltiplo, validade e justificativa; exceções versionadas.',
-      status=('1 proposta aguardando gestor','yellow'),primary_html=primb('open_exc','Submeter exceção'),
+      status=(MARK,'gray'),primary_html=primb('open_exc','Submeter exceção'),
       footer='Publicar vigência exige aprovação (FO-31); simulação nunca altera a política vigente (SU-02, cap. 65). '
              'Classe ABC financeira não substitui criticidade: Diesel é B em valor e Alta em criticidade. Limites do depósito e validade restringem a entrega, sem equivaler ao tamanho do contrato.')
+    dyn_status(fname)
 
 # ================= SU-03 · Saldos e lotes de materiais =================
 LOTES_X=[  # além de dados2.LOTES: sobras da REQ-031, lote zerado com custódia da OS-0420, consignado, diesel e café (produção)
@@ -1173,4 +1183,5 @@ function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_inv');
       footer='Diferença vira ajuste com causa, evidência e alçada, nunca correção silenciosa; limite e segregação seguem Configurações › Usuários e alçadas (SU-09 · FO-32). '
              'O contador não vê o saldo do sistema e os movimentos do escopo ficam suspensos entre o corte e o encerramento: movimentação durante a contagem não vira diferença fictícia. Quem conta não aprova o ajuste.')
     dyn_status(fname)
+
 
