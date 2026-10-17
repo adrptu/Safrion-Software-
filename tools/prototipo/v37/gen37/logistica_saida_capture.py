@@ -17,7 +17,7 @@ def grid(cols,rows,**kw):
  grids.append(dict(id=kw['gid'],cols=cols,rows=rows,edit=kw['edit']))
  return ''
 g=dict(__file__=str(p/'areas/logistica.py'),E=SimpleNamespace(_reset_screen=lambda x:None),grid=grid,C=lambda k,l,**kw:dict(k=k,l=l,**kw),EXTRAJS=[''],HEIGHTS37={},PARENT37={},H=lambda x:'{{'+x+'}}',esc=str,MUTED='',PRIM='')
-for k in ['continuity','bloco','nota','ilink','shell37','faixa']:g[k]=lambda *a,**kw:''
+for k in ['continuity','bloco','nota','ilink','shell37','faixa','BTN_ST','_selo_dinamico']:g[k]=lambda *a,**kw:''
 exec(compile(ast.Module(body=nodes,type_ignores=[]),'<LO02det>','exec'),g)
 (p/'logistica_saida_captured.js').write_text('var GRIDS='+json.dumps(grids)+';\n'+g['EXTRAJS'][0])
 print('LO02det AST/adapter captured; layout e prefixo substituídos, não é build/UI.')

@@ -59,6 +59,11 @@ def ibtn(label,hole,ic,title,primary=False):
             f'{icon(ic,14)}{esc(label)}</button>')
 def ilink(label,href,ic,title):
     return (f'<a href="{href}" title="{esc(title)}" style="{BTN_ST(False,True)} text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">{icon(ic,14)}{esc(label)}</a>')
+def _selo_dinamico(fname,hole):
+    """selo do cabeçalho com cor ligada ao estado ({{hole}}, {{hole_st}}, {{hole_dot}}), como na Colheita."""
+    p=f'{E.P}/{fname}'; s=open(p).read(); old=chip(H(hole),'green')
+    assert old in s, 'selo dinâmico não encontrado'
+    open(p,'w').write(s.replace(old,f'<span style="{H(hole+"_st")}"><span style="{H(hole+"_dot")}"></span>{H(hole)}</span>',1))
 def bloco(titulo,desc,corpo,acao='',state='green'):
     acao=E.recolhe_acoes(titulo,acao)   # MAIS-01 (15/10/2026): uma secundária à vista, as outras no "⋯ Mais ações" do bloco
     desc=''   # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos ... somos minimalistas e essencialistas")
@@ -381,27 +386,25 @@ function EXTRAVALS(self,v){ const s=self.state;
       edit=dict(m='form',title='Confirmar saída',sub='Informe os pesos do ticket em kg. Salvar confirma a saída e baixa o estoque uma única vez, após validar permissão, reserva e crédito.',fields=[dict(k='bruto',l='Peso bruto (kg)',t='txt',req=True),dict(k='tara',l='Tara (kg)',t='txt',req=True)]),gid='g_ps',total=False)
     g_ck=grid([C('item','Verificação'),C('estado','Estado'),C('resp','Próximo passo')],[],edit=dict(m='ro',fields=[]),gid='g_ck',total=False)
     g_sa=grid([C('ev','Movimento'),C('estado','Lote · quantidade'),C('quem','Quem · quando')],[],edit=dict(m='ro',fields=[]),gid='g_sa',total=False)
-    ETAPAS=['A preparar','Em separação','Conferência','Pronta p/ carregar','Carregada','Saída confirmada']
-    stp=''.join(f'<span style="{H("stg"+str(i)+"_st")}">{esc(t)}</span>'+(f'<span aria-hidden="true" style="color: {MUTED};">→</span>' if i<len(ETAPAS)-1 else '') for i,t in enumerate(ETAPAS))
-    stepper=f'<div aria-label="Etapa da expedição" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px;">{stp}</div>'
     import cenario, dados_comercial
     from areas.processo_os import JS_NUCLEO
     from pathlib import Path
     EXTRAJS[0]=cenario.js_prefixo()+JS_NUCLEO+dados_comercial.js_regras()+'\n'+(Path(__file__).resolve().parent.parent/'logistica_saida_ui.js').read_text(encoding='utf-8')
+    # Composição (EX-50, PR #110): tudo vem da RM oficial; sem etapas, continuidade ou viagem fictícias.
     corpo=(
-      continuity('Fila de expedição · T2 chamado 08:35',H('c_aqui'),H('c_falta'),H('c_prox'))
-      + stepper
-      + bloco('Conferência por pedido e lote','Confira pedido, separado e carregado por lote.',g_cf)
-      + bloco('Pesagem e base comercial','Confira tara, bruto e líquido na base comercial; tara não é vendida como produto.',g_ps,state='gray')
-      + bloco('Checklist e documentos','Registre o lacre pela linha; a saída exige todos os itens verdes.',
-              g_ck+nota('Frete: retirada pelo cliente — custo e transportador do cliente.'),state='yellow')
-      + bloco('Saída','Confirme a saída uma única vez; o estoque baixa nesse evento.',g_sa,
-              ilink('Acompanhar viagem','LO-03.dc.html','map','Abrir a viagem VG-118 em Acompanhe viagens'))
+      bloco('Conferência por pedido e lote','Previsto da RM por lote; a coluna Saída mostra o que baixou do estoque.',g_cf)
+      + bloco('Pesagem','Clique na RM para informar bruto e tara em kg; salvar confirma a saída e baixa o estoque uma única vez.',g_ps,state='gray')
+      + bloco('Lacre e documentos','Prévia: lacre e autorização são registrados no processo responsável; nada aqui libera a saída.',g_ck,state='gray')
+      + bloco('Movimentos da saída','Movimentos oficiais de estoque desta RM; correção é estorno com vínculo, nunca apagar.',g_sa,
+              ilink('Abrir Expedição',H('lo_expedicao'),'truck','Abrir esta carga em Expedição'))
     )
-    shell37('LO-02','Conferir carga · T2 · VD-2101',corpo,fname='LO-02det.dc.html',crumbs_extra=['T2 · VD-2101 · 2ª de 3'],
-      subtitle='Retirada pelo cliente: conferência, pesagem, documentos e saída física única no ponto contratado.',
-      status=(H('st_t'),'yellow'),primary_html=PRIM,steps=faixa(2),
-      footer='Confirmar saída comprova retirada no ponto contratado; não prova chegada ao destino (48.2). CMD-26 acontece uma única vez, aqui. Retirada pelo cliente: o rateio da instalação não se aplica à carga.')
+    lo_prim=(f'<button type="button" onClick="{H("lo_revisar")}" title="Confirma a saída da carga programada ou abre a Expedição" '
+             f'style="{BTN_ST(True)} display: inline-flex; align-items: center; gap: 8px;">{H("lo_proximo")}</button>')
+    shell37('LO-02','Conferir carga',corpo,fname='LO-02det.dc.html',crumbs_extra=[H('lo_contexto')],
+      subtitle='Confere a carga programada pela RM, registra a pesagem e confirma a saída física com baixa única do estoque.',
+      status=(H('lo_estado'),'green'),primary_html=lo_prim,steps=faixa(2),
+      footer='Confirmar saída comprova retirada no ponto contratado; não prova chegada ao destino (48.2). CMD-26 acontece uma única vez, aqui.')
+    _selo_dinamico(fname,'lo_estado')
 
     # =====================================================================
     # LO-03 · Acompanhe viagens

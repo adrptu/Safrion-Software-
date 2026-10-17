@@ -110,7 +110,7 @@ TIRADAS = [
     ('VE-06', 'O ajuste financeiro fica vinculado ao caso — crédito não é emitido pelo retorno em si. Recolhimento, se decidido, …', 'crédito não é emitido pelo retorno', 'crédito não é emitido pelo retorno em si', 'areas/comercial.py:544'),
     ('LO-02', 'Política v4: elegibilidade (presença, prontidão, doca livre, documentos) › janela em risco › … Tolerância de chegada: 30 min.', 'política v4: elegibilidade', 'elegibilidade (presença, prontidão, doca livre, documentos)', 'areas/logistica.py:360'),
     ('LO-02', 'A preparar → Em separação → Conferência → … Qualidade, financeiro e documentos são dimensões separadas.', 'documentos são dimensões separadas', 'qualidade, financeiro e documentos são dimensões separadas', 'areas/logistica.py:364'),
-    ('LO-02det', 'o rateio da instalação não se aplica a esta carga', 'o rateio da instalação não se aplica', 'o rateio da instalação não se aplica', 'areas/logistica.py:438'),
+    ('LO-02det', 'o rateio da instalação não se aplica a esta carga', 'o rateio da instalação não se aplica', None, 'areas/logistica.py:438'),  # EX-50 (PR #110): frase da retirada T2 apagada; a tela lê a RM oficial
     ('LO-04', 'Sugestão não despacha transportador.', 'sugestão não despacha transportador', 'sugestão de rota não despacha transportador', 'areas/logistica.py:573'),
     ('GE-02', 'Autorizar versão: só a Direção, pela caixa de Aprovações.', 'autorizar versão: só a direção', 'autorizar versão: só a direção, pela caixa de aprovações', 'areas/gestao.py:210'),
     ('GE-02det', 'A matemática explica o desvio, mas não prova desperdício: pode ser ajuste técnico autorizado, condição operacional ou erro de registro a investigar.', 'mas não prova desperdício', 'a matemática explica o desvio, mas não prova desperdício', 'areas/gestao.py:239'),
@@ -153,7 +153,7 @@ FICAM = [
     ('SU-01', 'KCl 60%: falta firme 140 − 50 − 40 = 50 t'), ('SU-02', '1 proposta aguardando gestor'),
     ('PL-03', 'elegível só após confirmação do PCP'), ('PL-03', 'Última atualização 07:42'), ('PL-06', 'Proposta · não divide a área vigente'),
     ('VE-01', 'Atualizado hoje 06:30'), ('VE-02', 'Câmbio da simulação: R$ 5,32/US$ (PTAX D-1)'), ('VE-06', 'o lote L26-118'),
-    ('LO-02det', 'Frete: retirada pelo cliente'), ('LO-04', 'Mesma base: 9,6 t · 512 km · refrigerado'),
+    ('LO-02det', 'Nenhuma carga programada'), ('LO-04', 'Mesma base: 9,6 t · 512 km · refrigerado'),
     ('GE-02det', 'desvio contra essa base = R$ 1.008'), ('GE-04', 'título único de R$ 233.000'), ('GE-06det', 'R$/ha · 120 ha·operação'),
     ('GE-08', 'comprometida'), ('CF-03', 'nenhuma credencial existe nesta demonstração'),
     ('CF-05', 'Pessoas com acesso: 14 · fora da cobrança'), ('CF-05', 'exemplo · a decidir pelo proprietário'), ('CF-05', 'Data simulada da cobrança'),
