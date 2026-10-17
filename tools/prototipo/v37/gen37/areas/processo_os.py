@@ -287,7 +287,12 @@ function osMerge(b,co,c){ if(!co) return b;
       if(!o.selos.some(s=>s.t===t)) o.selos=o.selos.concat([{t,c:'yellow'}]);
       if(sin){ o.dono=o.resp; o.prazo='reconectar o app'; } else if(/duplicidade/.test(o.encM)){ o.dono=CEN_CONF_AP(); o.prazo='decidir a duplicidade'; } else if(!/almoxarife/.test(o.dono||'')){ o.dono=cenAlmox(); o.prazo='receber a devolução'; } } }
   // A liberar: o Estoque (reserva por lote) pode segurar a liberação desde a abertura → selo vermelho e dono na lista, no Kanban e no painel
-  if(co.etapa==='A liberar'&&!o.agua&&(co.ins||[]).length){ const e=osLibErro(o,c); esp=!!e;
+  /* B-3 (composição Claude, PR #113): receituário divergente ou indisponível segura aprovar e liberar (osc_exigeReceita); o motivo, o dono e o
+     caminho aparecem antes do clique, na lista, no Kanban e no painel. Dano evitado: dose, produto ou área fora do receituário emitido. */
+  const rcE=(co.etapa==='A liberar'&&typeof osReceitaErro==='function')?osReceitaErro(c,co):'';
+  if(rcE){ o.libErr=rcE; o.receita=true; esp=true; o.selos=o.selos.filter(s=>!/^Falta insumo|^Receituário/.test(s.t)).concat([{t:'Receituário divergente',c:'red'}]); o.dono=OS_AGRO(); o.prazo='conferir e reemitir o receituário';
+    passo='Próximo passo: conferir a decisão em Pragas e doenças.'; o.cond=String(o.cond||'').replace('Próximo passo: liberar para execução.',passo); }
+  else if(co.etapa==='A liberar'&&!o.agua&&(co.ins||[]).length){ const e=osLibErro(o,c); esp=!!e;
     const z=e&&/Dose × área de (.+?) dá 0/.exec(e);   // total 0: quem resolve é o agrônomo, não o Estoque (PRE-REV Y3)
     const lg=!z&&!!e&&e===osUsoErro(c,co);   // regra legal (Frente E): quem resolve é o agrônomo
     if(lg){ const pr=((co.ins||[]).find(x=>osUsoItem(c,co,x))||{}).p||''; o.libErr=e; o.legal=true;
@@ -710,6 +715,7 @@ function osProx(o,PF){
   if(pm) P=Object.assign({},P,{t:'O plano mudou pela análise ('+pm.ac.laudo+'): '+(pm.ac.dose==='-'?'retirar '+pm.p:pm.p+' '+cenNum(pm.ac.dose,4)+' '+pm.un+'/ha')+'; a O.S. tem '+cenNum(pm.os,4)+' '+pm.un+'/ha. O agrônomo ajusta antes de liberar ou libera com a dose da O.S.'});
   // impedimento do próximo passo: do registro (máquina, janela, conflito) ou do cenário (saldo no Estoque; sinal ou sobra no encerramento)
   let b=(o.bloq&&o.bloq.fase===o.etapa&&o.bloq.acao===P.fn)?o.bloq:null;
+  if(!b&&P.fn==='liberar'&&o.receita) b={acao:'liberar',t:'Liberar e aprovar bloqueados: '+o.libErr.charAt(0).toLowerCase()+o.libErr.slice(1),q:OS_AGRO()+', conferindo a decisão em Pragas e doenças.',h:'AG-01.dc.html',hl:'Abrir Pragas e doenças',receita:true};   /* B-3 */
   if(!b&&P.fn==='liberar'&&!o.agua){ const e=o.libErr||''; if(e) b=o.legal?{acao:'liberar',t:'Liberar bloqueado: '+e,q:OS_AGRO()+', ajustando produto ou dose antes de liberar.',legal:true}:o.total0?{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:OS_AGRO()+', ajustando a dose ou a área antes de liberar.',total0:true}
       :{acao:'liberar',t:'Liberar bloqueado: '+e.charAt(0).toLowerCase()+e.slice(1),q:'Suprimentos, recebendo o insumo no Estoque.',h:'EST.dc.html',hl:'Ver saldos no Estoque'}; }
   if(!b&&P.fn==='encerrar'&&o.encM) b=osEncBloq(o);
@@ -722,7 +728,7 @@ function osProx(o,PF){
   const LP=g2alc('AL-02').papeis.concat(OS_LIB().filter(x=>g2alc('AL-02').papeis.indexOf(x)<0));   /* CTL-3 · ATOR: sem os dois papéis (AL-02 e AL-01), a tela diz quem decide; o comando recusa do mesmo jeito */
   /* revisão CONF F4: quem só aprova (AL-02, R13) aprova mesmo com a liberação impedida por estoque ou máquina (osc_aprovar não depende disso);
      só a regra legal, o total 0 e a carência seguram a aprovação. O impedimento segue no texto, para a liberação depois. */
-  let espera=null; if(b&&P.fn==='liberar'&&!o.agua&&PF&&!b.legal&&!b.total0&&!o.carB&&!o.aprov&&g2papel(PF,g2alc('AL-02').papeis)&&!g2papel(PF,OS_LIB())){ espera=b; b=null; }
+  let espera=null; if(b&&P.fn==='liberar'&&!o.agua&&PF&&!b.legal&&!b.total0&&!b.receita&&!o.carB&&!o.aprov&&g2papel(PF,g2alc('AL-02').papeis)&&!g2papel(PF,OS_LIB())){ espera=b; b=null; }
   if(!b&&P.fn==='liberar'&&!o.agua&&PF){ const hasA=g2papel(PF,g2alc('AL-02').papeis), hasL=g2papel(PF,OS_LIB()), vn=osVn(o.versao), ap=o.aprov||null;
     if(hasA&&hasL){ if(ap) P=Object.assign({},P,{t:'Aprovada '+vn+' por '+ap.por+'. Confira máquina, janela e insumos e libere; os insumos são reservados no Estoque.',sec:null}); }   /* versão já aprovada: só o CMD-06 */
     else if(hasA){ /* CONF-01 R13: só o AL-02 aprova (CMD-42) e a ordem fica em A liberar; o liberador libera depois */
@@ -750,7 +756,7 @@ function dotSt(c){ const cc=G2C[c]||G2C.gray; return 'width:6px;height:6px;borde
 // ===== O.S. × cenário compartilhado (cenario.js, o mesmo estado do Estoque e do App) =====
 // Fase, realizado/saldo, apontamentos, requisição e insumos vêm de cenGet(); o que o cenário não tem vem de OSD (registro).
 // Gancho de teste/inspeção (o script da tela roda isolado): os testes os_* leem e mudam o cenário na própria página.
-try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar, osc_apontar, osc_dispensar, osc_cancelar, osc_apDecidir, osc_conferencia, cenDivRever }; } catch (e) {}
+try { window.__cen = { cenGet, cenMudar, cenReset, cenLiberar, cenEntregar, cenDevolver, cenConfirmarRecebimento, cenIniciarTurno, cenPausar, cenFecharTurno, cenOcorrencia, cenSinal, cenPodeEncerrar, osc_liberar, osc_ajustar, osc_encerrar, osc_apontar, osc_dispensar, osc_cancelar, osc_apDecidir, osc_conferencia, cenDivRever, osc_aprovar, osReceitaErro, cenGrupoAprovar, cenGrupoLiberar, cenGrupoEscopo, cenGrupoSnapshot, cenGrupoPrevia, cenGrupoCriar }; } catch (e) {}   // N-1/B-3: portas da aprovação e do grupo para o n1_fluxo_test
 // filtros do topo (Fazenda e Safra): lista, Kanban, chips de fase e selo do cabeçalho mostram só as ordens do recorte
 function mfFaz(self){ return self.state.mf_faz||'Santa Rita'; }
 function mfSaf(self){ return self.state.mf_saf||'Todas'; }

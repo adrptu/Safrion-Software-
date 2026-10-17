@@ -631,7 +631,10 @@ function agDecIni(self,id){ const s=mipGet(), v=s.vis[id], c=agC(); const R=mipR
   const kind=K[0][0]; const area=kind==='localizado'?Math.max(1,Math.round((R.reb||1)*t.area/v.npts)):(kind==='erradicar'?1:t.area);
   const data=mipAmanha();
   // Produto e dose são decisões explícitas do RT; a faixa de bula não é prescrição.
-  self.setState({pan:id,dec:{vid:id,kind,prod:'',dose:'',area:mipN(area,2),data,mot:'',err:''}}); agFoco('pan_x'); }
+  // N-1 (interface 6241782009): versão da decisão e chave de idempotência nascem ao abrir; a chave fica na repetição e muda com o conteúdo
+  const dver=((v.dec&&v.dec.ver)||0)+1;
+  self.setState({pan:id,dec:{vid:id,kind,prod:'',dose:'',area:mipN(area,2),data,mot:'',err:'',dver,chave:agChave(id,dver),chaveSig:null}}); agFoco('pan_x'); }
+function agChave(vid,dver){ return 'MIP-EMI-'+vid+'-v'+dver+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 function agDec(self,v){ const st=self.state; const d=st.dec; const s=mipGet(); const vv=s.vis[d.vid]; const c=agC(); const R=mipRes(vv,s), t=mipT(vv), p=mipP(vv);
   const up=(patch)=>self.setState({dec:Object.assign({},self.state.dec,patch,{err:''})});
   const K=agKinds(Object.assign({},R,{k:mipSit(s,vv,c).k}),p);
@@ -660,6 +663,7 @@ function agDec(self,v){ const st=self.state; const d=st.dec; const s=mipGet(); c
   if(insp) v.dc_monT='Registra a causa e programa nova inspeção para '+mipBr(px)+'. Se for praga ou doença do protocolo, programe a vistoria do alvo.';
   const ck=mipChecks(s,vv,a,c); const extra=[];
   if(d.kind==='monitorar'&&v.dc_pedeMot&&!String(d.mot||'').trim()) extra.push({t:insp?'Informe a causa observada.':'Informe o motivo para não controlar.'});
+  if(d.kind!=='monitorar'){ try{ cenExigeAlc(g2perfil(),'AL-02','Emitir a decisão de '+d.vid); }catch(e){ extra.push({t:String(e.message||e)}); } }   /* N-1: o mesmo teste do comando */
   v.dc_tr=ck.tr.map(t0=>({t:t0})).concat(extra).concat(d.err?[{t:d.err}]:[]); v.dc_al=ck.al.map(t0=>({t:t0})); v.dc_inf=ck.inf.map(t0=>({t:t0}));
   const bloq=ck.tr.length>0||extra.length>0||(ctl&&!L.length); v.dc_bloq=bloq;
   v.dc_okt=ctl?'Emitir receituário e gerar O.S.':(d.kind==='erradicar'?'Gerar O.S. de erradicação':'Registrar e programar próxima');
@@ -669,8 +673,10 @@ function agDec(self,v){ const st=self.state; const d=st.dec; const s=mipGet(); c
   v.dc_cancel=()=>self.setState({dec:null});
   v.dc_ok=()=>{ const cur=self.state.dec; if(bloq||!cur||self.__emitindo) return; self.__emitindo=true; setTimeout(()=>{ self.__emitindo=false; },400);
     if(cur.kind==='monitorar'){ const r=mipMudar(self,s2=>mipMonitorar(s2,cur.vid,cur.mot)); if(!r.erro) self.setState({dec:null}); else self.setState({dec:Object.assign({},cur,{err:r.erro})}); agFoco(); return; }
-    const r=mipEmitir(self,cur.vid,{kind:cur.kind,prod:cur.prod,dose:cur.dose,area:cur.area,data:cur.data});
-    if(r.erro){ self.setState({dec:Object.assign({},cur,{err:r.erro}),g2toast:r.erro}); return; } self.setState({dec:null}); agFoco('pan_prim_a'); }; }
+    const sig=JSON.stringify([cur.kind,cur.prod,cur.dose,cur.area,cur.data]), dver=cur.dver||1;
+    const chave=(cur.chaveSig===null||cur.chaveSig===sig)&&cur.chave?cur.chave:agChave(cur.vid,dver); const cur2=Object.assign({},cur,{chave,chaveSig:sig});
+    const r=mipEmitir(self,cur.vid,{kind:cur.kind,prod:cur.prod,dose:cur.dose,area:cur.area,data:cur.data,ator:g2perfil(),chave,dver});
+    if(r.erro){ self.setState({dec:Object.assign({},cur2,{err:r.erro}),g2toast:r.erro}); return; } self.setState({dec:null}); agFoco('pan_prim_a'); }; }
 // ---------- painel da vistoria ----------
 function agPanel(self,v){ const st=self.state; const s=mipGet(), c=agC(); const vv=st.pan?s.vis[st.pan]:null; v.pan_open=!!vv;
   const close=()=>{ const id=self.state.pan; agSetHash(''); self.setState({pan:null,dec:null}); agVolta(self,id); };
@@ -764,8 +770,11 @@ function EXTRAVALS(self,v){ const st=self.state; const s=mipGet(), c=agC(), f=ag
   // selo do cabeçalho: acima do NC sem decisão e focos a confirmar no recorte da faixa (fazenda, cultura e talhão)
   const vs=Object.values(s.vis).filter(x=>agRec(self,x)).map(x=>mipSit(s,x,c).k);
   const na=vs.filter(k=>k==='acima').length, nf=vs.filter(k=>k==='foco').length, ns=vs.filter(k=>k==='sinc'||k==='incompleta').length;
-  v.ag_st=[na?na+' acima do NC sem decisão':'',nf?nf+(nf>1?' focos a confirmar':' foco a confirmar'):'',(!na&&!nf&&ns)?ns+' coleta a completar':''].filter(Boolean).join(' · ')||'Em dia';
-  const cs=agCh(na?'red':((nf||ns)?'yellow':'green')); v.ag_stst=cs.st; v.ag_stdot=cs.dot;
+  const mer=(typeof mipErro==='function')?mipErro():'';
+  v.ag_st=mer?'Dados ilegíveis':([na?na+' acima do NC sem decisão':'',nf?nf+(nf>1?' focos a confirmar':' foco a confirmar'):'',(!na&&!nf&&ns)?ns+' coleta a completar':''].filter(Boolean).join(' · ')||'Em dia');
+  const cs=agCh((na||mer)?'red':((nf||ns)?'yellow':'green')); v.ag_stst=cs.st; v.ag_stdot=cs.dot;
+  // N-1: cópia de Pragas e doenças ilegível ou incompatível: a lista diz o que houve e a saída; nada é gravado antes (mipTransacao recusa)
+  v.ag_ileg=!!mer; v.ag_ilegT=mer?mer+' A lista fica vazia e nada é gravado até restaurar a demonstração; a cópia antiga fica guardada sem alteração.':'';
   // restaurar a demonstração (vistorias + O.S., estoque e app)
   v.rs_no=!st.rs; v.rs_yes=!!st.rs; v.rs_ask=()=>self.setState({rs:true}); v.rs_cancel=()=>self.setState({rs:false});
   v.rs_ok=()=>{ mipReset(); if(typeof cenReset==='function') cenReset(); agSetHash(''); self.setState({rs:false,pan:null,dec:null,pv:null,miprev:Date.now(),cenrev:Date.now(),g2toast:'Demonstração restaurada: vistorias, O.S., estoque e app voltaram ao início.'}); }; }
@@ -799,7 +808,10 @@ def ag01():
     # filtro rápido por situação, na ordem de gravidade (acima do NC primeiro), com a contagem do recorte da faixa
     chips=(f'<div role="group" aria-label="Filtrar por situação" style="display: flex; flex-wrap: wrap; gap: 6px;"><sc-for list="{H("ag_chips")}" as="q" hint-placeholder-count="5">'
            f'<button type="button" aria-pressed="{H("q.on")}" onClick="{H("q.go")}" style="{H("q.st")}">{H("q.t")} <span style="opacity: .75;">{H("q.n")}</span></button></sc-for></div>')
-    corpo=bloco('Vistorias','',f'<div style="display: flex; flex-direction: column; gap: 10px; min-height: 0; flex: 1 1 auto;">{chips}{g}</div>'+_ag01_restaurar())
+    # N-1: dados de Pragas e doenças ilegíveis: o aviso diz o que houve e a saída (restaurar); escondido no estado normal
+    ileg=(f'<sc-if value="{H("ag_ileg")}" hint-placeholder-val="{F_()}"><div role="alert" style="{_BOX_RED} display: flex; flex-direction: row; align-items: center; gap: 10px; flex-wrap: wrap;">'
+          f'<span style="flex: 1 1 260px;">{H("ag_ilegT")}</span><button type="button" onClick="{H("rs_ok")}" style="{BTN_ST(False)}">Restaurar demonstração</button></div></sc-if>')
+    corpo=bloco('Vistorias','',f'<div style="display: flex; flex-direction: column; gap: 10px; min-height: 0; flex: 1 1 auto;">{ileg}{chips}{g}</div>'+_ag01_restaurar())
     EXTRA.append(_ag01_painel()); EXTRA.append(_ag01_programar())
     EXTRAJS[0]=cenario.js_prefixo()+DM.js_prefixo()+JS_AG01
     prim=f'<button type="button" onClick="{H("pv_new")}" style="{BTN_ST(True)} display: inline-flex; align-items: center; gap: 6px;">{icon("calendar",15)}Programar vistoria</button>'

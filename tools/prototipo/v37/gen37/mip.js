@@ -4,10 +4,19 @@
 // Persistência N-1: MIP e O.S. compartilham o envelope durável do cenário.
 // A chave antiga é somente fonte de migração; nunca é apagada ou atualizada.
 const MIP_KEY = 'talhao-os-mip-v1';
+// Composição N-1 (Claude, integrador): a chave antiga migra uma vez. Depois da migração (ou de restaurar a demonstração) esta marca impede
+// que a cópia antiga volte quando o cenário recomeça (Restaurar demonstração em outra tela, versão nova do cenário).
+// Dano evitado: decisões e receituários antigos reaparecerem apontando para O.S. que não existem mais.
+const MIP_MIGRADO = MIP_KEY + ':migrado';
+function mipLS() { try { return (typeof localStorage !== 'undefined' && localStorage) || null; } catch (e) { return null; } }
+function mipMarcado() { const ls = mipLS(); try { return !!ls && ls.getItem(MIP_MIGRADO) !== null; } catch (e) { return false; } }
+function mipMarcar() { const ls = mipLS(); try { if (ls && ls.getItem(MIP_MIGRADO) === null) ls.setItem(MIP_MIGRADO, new Date().toISOString()); } catch (e) {} }
+function mipCenKey() { return typeof CEN_KEY === 'string' ? CEN_KEY : ''; }   // a chave do cenário vem de cenario.js (fonte única)
 function mipClone(o) { return JSON.parse(JSON.stringify(o)); }
 function mipValido(s) { return !!(s && s.v === MIP0.v && s.vis && s.dia && s.rec && s.seq && Array.isArray(s.apl)); }
 function mipLoad() {
-  const t = localStorage.getItem(MIP_KEY);
+  // armazenamento bloqueado (sandbox, janela privada): não há cópia antiga a migrar; não é dado ilegível
+  const ls = mipLS(); let t = null; try { t = ls ? ls.getItem(MIP_KEY) : null; } catch (e) { return null; }
   if (t === null) return null;
   let s; try { s = JSON.parse(t); } catch (e) { throw new Error('Dados antigos de Pragas e doenças ilegíveis. Preserve os dados e recupere a cópia antes de gravar.'); }
   if (!mipValido(s)) throw new Error('Versão ou estrutura de Pragas e doenças incompatível. Preserve os dados antes de continuar.');
@@ -18,17 +27,28 @@ function mipEstado(c, migrar) {
     if (!mipValido(c.mip)) throw new Error('Pragas e doenças no cenário estão incompatíveis. Recupere os dados antes de gravar.');
     return c.mip;
   }
-  const antigo = mipLoad(), s = mipClone(antigo || MIP0);
+  const antigo = mipMarcado() ? null : mipLoad(), s = mipClone(antigo || MIP0);
   if (migrar) {
     s.migradoDe = { rev: antigo ? (antigo.rev || 0) : null, em: new Date().toISOString() };
     c.mip = s;
   }
   return s;
 }
-function mipGet() { return mipEstado(typeof cenGet === 'function' ? cenGet() : null, false); }
+// Leitura das telas: nunca derruba o desenho. Com dados ilegíveis ou incompatíveis, a tela mostra o aviso (mipErro) e nenhuma vistoria;
+// toda gravação segue recusada por mipTransacao até restaurar a demonstração (a cópia antiga fica preservada, sem alteração).
+let MIP_ERRO = '';
+function mipErro() { return MIP_ERRO; }
+function mipVazio() { const s = mipClone(MIP0); s.vis = {}; s.dia = {}; s.rec = {}; s.apl = []; return s; }
+function mipGet() {
+  try { const s = mipEstado(typeof cenGet === 'function' ? cenGet() : null, false); MIP_ERRO = ''; return s; }
+  catch (e) { MIP_ERRO = String(e.message || e); return mipVazio(); }
+}
 function mipCenarioGravavel() {
   if (typeof cenMudar !== 'function' || typeof cenGet !== 'function') throw new Error('Cenário das O.S. indisponível nesta tela. Reabra Pragas e doenças para gravar.');
-  const raw = localStorage.getItem('talhao-os-cenario-v1');
+  // sem armazenamento (bloqueado, janela privada): a gravação durável não acontece; a mensagem diz isso, não o erro bruto do navegador
+  const ls = mipLS(), semGravar = typeof CEN_GRAVA_ERRO === 'string' ? CEN_GRAVA_ERRO : 'Não foi possível gravar no navegador. Nada foi alterado.';
+  if (!ls) throw new Error(semGravar);
+  let raw; try { raw = ls.getItem(mipCenKey()); } catch (e) { throw new Error(semGravar); }
   if (raw !== null) {
     let c; try { c = JSON.parse(raw); } catch (e) { throw new Error('Cenário ilegível. Preserve os dados e recupere a cópia antes de gravar.'); }
     if (!c || c.v !== CEN0.v || !c.ordens) throw new Error('Cenário incompatível. Preserve os dados antes de continuar.');
@@ -42,20 +62,31 @@ function mipTransacao(self, fn) {
   const r = cenMudar(null, c => {
     const s = mipEstado(c, true), out = fn(s, c) || {};
     if (out.erro) return out;
-    if (localStorage.getItem('talhao-os-cenario-v1') !== raw) throw new Error('O cenário mudou durante a operação. Reabra a decisão e confira os dados.');
+    if (mipLS().getItem(mipCenKey()) !== raw) throw new Error('O cenário mudou durante a operação. Reabra a decisão e confira os dados.');
     s.rev = (s.rev || 0) + 1;
     return out;
   }, {estrito:true});
+  if (!r.erro) mipMarcar();   // o cenário gravado já tem o MIP: a cópia antiga não volta
   if(self) self.setState({miprev:Date.now(),cenrev:Date.now(),g2toast:r.erro || r.msg || ''});
   return r;
 }
 function mipMudar(self, fn) { return mipTransacao(self, s => fn(s)); }
 function mipSave(s) { return mipTransacao(null, (atual,c) => { if(!mipValido(s)) throw new Error('Dados de Pragas e doenças inválidos.'); c.mip=mipClone(s); c.mip.rev=(atual.rev || 0)+1; c.mip.migradoDe=atual.migradoDe; return {}; }); }
-function mipReset() { return mipSave(mipClone(MIP0)); }
+// restaurar descarta a cópia antiga de propósito (marca antes): é também a saída quando ela está ilegível; a cópia segue preservada
+function mipReset() { mipMarcar(); return mipSave(mipClone(MIP0)); }
+// Composição N-1: a migração da cópia antiga acontece ao abrir uma tela de Pragas e doenças (Mapa, AG-01, app de campo), uma vez.
+// Sem isso, uma O.S. de controle criada antes da migração ficava travada na aprovação (B-3) sem caminho visível.
+function mipMigrarAoAbrir() {
+  try { if (typeof cenGet !== 'function' || mipMarcado()) return; const c = cenGet(); const ls = mipLS();
+    if (Object.prototype.hasOwnProperty.call(c, 'mip')) { mipMarcar(); return; }
+    if (!ls || ls.getItem(MIP_KEY) === null) return; } catch (e) { return; }
+  mipTransacao(null, () => ({}));   // erro (cópia ilegível, cenário ilegível, sem armazenamento): nada gravado; a tela mostra o aviso
+}
 // outras telas (outras abas ou quadros) redesenham quando o MIP ou o cenário das O.S. mudam
 function mipOuvir(self) {
   if (self.__mipOuv) return; self.__mipOuv = true;
-  try { window.addEventListener('storage', (e) => { if (e.key === MIP_KEY || e.key === 'talhao-os-cenario-v1') self.setState({ miprev: Date.now() }); }); } catch (e) {}
+  mipMigrarAoAbrir();
+  try { window.addEventListener('storage', (e) => { if (e.key === MIP_KEY || e.key === MIP_MIGRADO || (mipCenKey() && e.key === mipCenKey())) self.setState({ miprev: Date.now() }); }); } catch (e) {}
 }
 // ---------- datas (iso aaaa-mm-dd) e números pt-BR ----------
 function mipDt(iso) { const a = String(iso).split('-').map(Number); return new Date(Date.UTC(a[0], a[1] - 1, a[2])); }
@@ -410,5 +441,5 @@ function mipDoTal(s, tal, dias, c) {
     .filter(x => x.v.data >= lim || x.S.k !== 'encerrada')
     .sort((a, b) => (a.S.ord - b.S.ord) || (a.v.data < b.v.data ? 1 : -1));
 }
-try { window.__mip = { mipGet, mipMudar, mipReset, mipRes, mipSit, mipProx, mipChecks, mipNovaVis, mipEmitir, mipMonitorar, mipColetar, mipCorrigir, mipConcluir }; } catch (e) {}
+try { window.__mip = { chaves: { mip: MIP_KEY, marca: MIP_MIGRADO, cen: mipCenKey() }, mipGet, mipErro, mipMudar, mipReset, mipRes, mipSit, mipProx, mipChecks, mipNovaVis, mipEmitir, mipMonitorar, mipColetar, mipCorrigir, mipConcluir }; } catch (e) {}
 
