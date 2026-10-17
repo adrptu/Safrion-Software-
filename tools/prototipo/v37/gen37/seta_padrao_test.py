@@ -109,6 +109,8 @@ TECLA_PREP = r"""(()=>{ const b=window.__spB; if(!b) return null; const cs=getCo
 TECLA_LE = r"""(()=>{ const b=window.__spB; if(!b||!b.isConnected){ const n=[...document.querySelectorAll('button.g2car[aria-expanded]')].find(x=>x.getAttribute('aria-label')&&x===document.activeElement); return n?{exp:n.getAttribute('aria-expanded'),foco:true,dlg:document.querySelectorAll('aside[role=dialog]').length}:{exp:null,foco:false,dlg:document.querySelectorAll('aside[role=dialog]').length}; }
  return {exp:b.getAttribute('aria-expanded'), foco:document.activeElement===b, dlg:document.querySelectorAll('aside[role=dialog]').length}; })()"""
 
+# espera as transições em curso terminarem (no máximo 2 s): condição observável, não espera fixa
+ANIM = "Promise.race([Promise.all(document.getAnimations().map(a=>a.finished.catch(()=>0))), new Promise(r=>setTimeout(r,2000))]).then(()=>true)"
 def varre(c, J, BASE, w):
     res = {'a': [], 'b': [], 'd': [], 'f': [], 'e': [], 'err': []}; estilos = {}; telas = {k: set() for k in res}
     n = {'ctl': 0, 'ico': 0, 'drill': 0, 'tecla': 0}
@@ -122,6 +124,7 @@ def varre(c, J, BASE, w):
             if est != 'inicial':
                 if acao or not J(f"{ESTADOS}('{est}')"): continue
                 time.sleep(.7)
+            J(ANIM)   # o giro (120 ms) termina antes de medir: com a abertura recolhida (TAB-12) a seta gira no clique, e a máquina carregada atrasa a transição
             m = J(f"{MEDE}({w})") or {}
             n['ctl'] += m.get('nCtl', 0); n['ico'] += m.get('nIco', 0); n['drill'] += m.get('nDrill', 0)
             for k in ('a', 'b', 'd', 'f'):
