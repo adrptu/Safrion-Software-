@@ -1,0 +1,67 @@
+OK    1440 S2627 abre
+OK    1440 S2627 (menu+del) N1 alinhamento: 16 linhas, 6 trilhas, soma dos spans = trilhas em todas
+OK    1440 S2627 (menu+del) N1 o ⋯ (11) cai na última coluna
+OK    1440 S2627 (menu+del) N2 Excluir só onde é permitido (dele=True)
+OK    1440 S2627 (menu+del) N2 sem lixeira solta numa grade com ⋯
+OK    1440 S2627 (menu+del) N3 nenhum controle vazio; ⋯ com item e rótulo "Mais ações de <linha>"
+      1440 S2627: ⋯ em [('grp_T1', ['Dividir']), ('c1', ['Excluir']), ('c2', ['Excluir']), ('grp_T2', ['Dividir']), ('c5', ['Dividir', 'Aplicar plano', 'Excluir']), ('c4', ['Dividir', 'Aplicar plano', 'Excluir']), ('grp_P1', ['Dividir']), ('c6', ['Aplicar plano', 'Excluir']), ('grp_P2', ['Dividir']), ('c8', ['Dividir', 'Excluir']), ('c9', ['Dividir', 'Excluir'])]
+OK    1440 S2627 N5 Excluir no ⋯ pergunta "Excluir?" na linha c1
+OK    1440 S2627 N5 alinhamento com a pergunta aberta
+OK    1440 S2627 N5 Manter volta ao ⋯ e a linha continua
+OK    1440 S2627 N6 Cartões: 11 ⋯ no cartão = 11 da Tabela
+OK    1440 S2627 N6 Cartões sem controle vazio (o espaçador da trilha de ações, sem papel nem foco, é estrutural: 5)
+OK    1440 S2526 abre
+OK    1440 S2526 (menu sem del) N1 alinhamento: 7 linhas, 5 trilhas, soma dos spans = trilhas em todas
+OK    1440 S2526 (menu sem del) N1 o ⋯ (0) cai na última coluna
+OK    1440 S2526 (menu sem del) N2 Excluir só onde é permitido (dele=False)
+OK    1440 S2526 (menu sem del) N2 sem lixeira solta numa grade com ⋯
+OK    1440 S2526 (menu sem del) N3 nenhum controle vazio; ⋯ com item e rótulo "Mais ações de <linha>"
+OK    1440 S2526 sem ação na linha nos dados sintéticos: nenhum ⋯ e nenhum "Excluir"
+OK    1440 S2526 N6 Cartões: 0 ⋯ no cartão = 0 da Tabela
+OK    1440 S2526 N6 Cartões sem controle vazio (o espaçador da trilha de ações, sem papel nem foco, é estrutural: 0)
+OK    1440 S2526 + ação injetada (T1 Soja com plano de Milho) N1 alinhamento: 7 linhas, 6 trilhas, soma dos spans = trilhas em todas
+OK    1440 S2526 + ação injetada (T1 Soja com plano de Milho) N1 o ⋯ (1) cai na última coluna
+OK    1440 S2526 + ação injetada (T1 Soja com plano de Milho) N2 Excluir só onde é permitido (dele=False)
+OK    1440 S2526 + ação injetada (T1 Soja com plano de Milho) N2 sem lixeira solta numa grade com ⋯
+OK    1440 S2526 + ação injetada (T1 Soja com plano de Milho) N3 nenhum controle vazio; ⋯ com item e rótulo "Mais ações de <linha>"
+OK    1440 S2526 N4 ⋯ de T1 só com "Reaplicar" (sem Excluir), rótulo "Mais ações de T1"
+OK    1440 S2526 N4 ↓ no ⋯ abre o menu e foca "Reaplicar"
+OK    1440 S2526 N4 Esc fecha e devolve o foco ao ⋯
+OK    1440 S2526 N4 Enter no ⋯ abre e foca o item
+OK    1440 S2526 N4 Enter no item executa (trava de domínio: "Safra encerrada: somente consulta."), fecha e devolve o foco
+OK    1440 S2526 N4 cf obsoleto (cf=e1) não pergunta "Excluir?" na grade sem exclusão
+OK    1440 S2526 + ação injetada N6 Cartões: 1 ⋯ no cartão = 1 da Tabela
+OK    1440 S2526 + ação injetada N6 Cartões sem controle vazio (o espaçador da trilha de ações, sem papel nem foco, é estrutural: 6)
+OK    390 S2627 abre
+OK    390 S2627 (menu+del) N1 alinhamento: 10 linhas, 4 trilhas, soma dos spans = trilhas em todas
+OK    390 S2627 (menu+del) N1 o ⋯ (8) cai na última coluna
+OK    390 S2627 (menu+del) N2 Excluir só onde é permitido (dele=True)
+OK    390 S2627 (menu+del) N2 sem lixeira solta numa grade com ⋯
+OK    390 S2627 (menu+del) N3 nenhum controle vazio; ⋯ com item e rótulo "Mais ações de <linha>"
+      390 S2627: ⋯ em [('grp_T1', ['Dividir']), ('grp_T2', ['Dividir']), ('c5', ['Dividir', 'Aplicar plano', 'Excluir']), ('c4', ['Dividir', 'Aplicar plano', 'Excluir']), ('grp_P1', ['Dividir']), ('grp_P2', ['Dividir']), ('c8', ['Dividir', 'Excluir']), ('c9', ['Dividir', 'Excluir'])]
+OK    390 S2627 N7 ⋯ alcançável, sem rolagem lateral da página
+OBS   390 S2627 N7b tamanho do ⋯ no toque: 32×32 px (DS: 44 px; anterior ao PR)
+OK    390 S2627 N6 Cartões: 8 ⋯ no cartão = 8 da Tabela
+OK    390 S2627 N6 Cartões sem controle vazio (o espaçador da trilha de ações, sem papel nem foco, é estrutural: 0)
+OK    390 S2526 abre
+OK    390 S2526 (menu sem del) N1 alinhamento: 7 linhas, 3 trilhas, soma dos spans = trilhas em todas
+OK    390 S2526 (menu sem del) N1 o ⋯ (0) cai na última coluna
+OK    390 S2526 (menu sem del) N2 Excluir só onde é permitido (dele=False)
+OK    390 S2526 (menu sem del) N2 sem lixeira solta numa grade com ⋯
+OK    390 S2526 (menu sem del) N3 nenhum controle vazio; ⋯ com item e rótulo "Mais ações de <linha>"
+OK    390 S2526 sem ação na linha nos dados sintéticos: nenhum ⋯ e nenhum "Excluir"
+OK    390 S2526 N6 Cartões: 0 ⋯ no cartão = 0 da Tabela
+OK    390 S2526 N6 Cartões sem controle vazio (o espaçador da trilha de ações, sem papel nem foco, é estrutural: 0)
+OK    390 S2526 + ação injetada (T1 Soja com plano de Milho) N1 alinhamento: 7 linhas, 4 trilhas, soma dos spans = trilhas em todas
+OK    390 S2526 + ação injetada (T1 Soja com plano de Milho) N1 o ⋯ (1) cai na última coluna
+OK    390 S2526 + ação injetada (T1 Soja com plano de Milho) N2 Excluir só onde é permitido (dele=False)
+OK    390 S2526 + ação injetada (T1 Soja com plano de Milho) N2 sem lixeira solta numa grade com ⋯
+OK    390 S2526 + ação injetada (T1 Soja com plano de Milho) N3 nenhum controle vazio; ⋯ com item e rótulo "Mais ações de <linha>"
+OK    390 S2526 N4 ⋯ de T1 só com "Reaplicar" (sem Excluir), rótulo "Mais ações de T1"
+OK    390 S2526 N7 ⋯ alcançável, sem rolagem lateral da página
+OBS   390 S2526 N7b tamanho do ⋯ no toque: 32×32 px (DS: 44 px; anterior ao PR)
+OK    390 S2526 + ação injetada N6 Cartões: 1 ⋯ no cartão = 1 da Tabela
+OK    390 S2526 + ação injetada N6 Cartões sem controle vazio (o espaçador da trilha de ações, sem papel nem foco, é estrutural: 0)
+OK    N8 sem erro de JS
+
+61 OK, 0 falhas

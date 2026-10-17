@@ -1,0 +1,43 @@
+## HEAD 4cbfa71
+EX47: ações, chamada, navegação, alinhamento, confirmação obsoleta, exclusão e quatro guardas OK
+rmenu_unit exit=0
+----------------------------------------------------------------------
+Ran 1 test in 0.052s
+
+OK
+rmenu_generator exit=0
+rmenu+del: linhas cuja célula de ação muda da base para o HEAD: d base[lixeira] → HEAD[vazia]
+sonda EX47: 561 OK, 0 falhas
+rmenu_alignment (base A6 = 6631d58) exit=0
+rmenu+del: linhas cuja célula de ação muda da base para o HEAD: d base[lixeira] → HEAD[vazia]
+sonda EX47: 547 OK, 0 falhas
+sonda Claude aaa054b exit=0
+## contraprova: rmenu_alignment_test.js sobre o g2lib do 3010fc9
+rmenu+del: linhas cuja célula de ação muda da base para o HEAD: d base[lixeira] → HEAD[vazia]
+sonda EX47: 547 OK, 14 falhas
+exit=1
+FALHA rmenu=false del=false sel=false A6 caminho antigo idêntico à base · "difere"
+FALHA rmenu=false del=false sel=true A6 caminho antigo idêntico à base · "difere"
+FALHA rmenu=false del=true sel=false A6 caminho antigo idêntico à base · "difere"
+FALHA rmenu=false del=true sel=true A6 caminho antigo idêntico à base · "difere"
+FALHA sem ações: flag falsa · undefined
+FALHA sem ações: trilhas sem coluna extra · 4
+FALHA sem ações: flag falsa · undefined
+FALHA sem ações: trilhas sem coluna extra · 4
+FALHA sem ações: flag falsa · undefined
+FALHA sem ações: trilhas sem coluna extra · 5
+FALHA sem ações: flag falsa · undefined
+FALHA sem ações: trilhas sem coluna extra · 5
+FALHA filtro só consulta remove coluna · undefined
+FALHA grade vazia sem coluna de ações · 4
+## contraprova: rmenu_alignment_test.js sobre o g2lib do 6631d58 (sem o PR)
+sonda EX47: 484 OK, 53 falhas
+## contraprova: rmenu_alignment_test.js sobre o g2lib do 3010fc9, A6 contra 2f22375d (base do 3010fc9)
+rmenu+del: linhas cuja célula de ação muda da base para o HEAD: d base[lixeira] → HEAD[vazia]
+sonda EX47: 551 OK, 10 falhas
+exit=1
+      1 FALHA filtro só consulta remove coluna · undefined
+      1 FALHA grade vazia sem coluna de ações · 4
+      4 FALHA sem ações: flag falsa · undefined
+      2 FALHA sem ações: trilhas sem coluna extra · 4
+      2 FALHA sem ações: trilhas sem coluna extra · 5
