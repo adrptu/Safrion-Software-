@@ -1,0 +1,14 @@
+== node agro06_analitos_unit.js (74f13a6)
+PASS:15 analitos; zero/LD0; qualificador fechado e soloKmg real; extrator P/K; detalhes sem valor recusados pelo handler real; CSS/markup estáticos. Sem DOM/E2E.
+exit=0
+== contraprova: teste novo contra analise_solo.py de a10656a
+ReferenceError: soRlErroAnalitos is not defined
+exit=1
+== solo_unit_test
+RESULTADO: OK 129/129
+== solo_regressao_test
+RESULTADO: OK 2/2
+== build
+148 artboards → /tmp/claude-0/rev95/tools/prototipo/v37/gen37/project · menu vigente: 68 · ocultos: 80
+_render montado: 156 páginas + 20 arquivos do site · dados da Lagoa Grande: sintéticos 5/5
+exit=0

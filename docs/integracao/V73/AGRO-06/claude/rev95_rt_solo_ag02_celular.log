@@ -1,0 +1,9 @@
+== solo_ag02_celular · início 04:12:11 · chrome principais: 1
+== celular · 390 × 844
+OK  AC-SOLO-18 390 px: sem rolagem horizontal da página · [390, 390]
+OK  primária "Registrar laudo" visível no celular · [True, 42]
+OK  painel do laudo em tela cheia; original recolhido em "Ver original"; primária presa no rodapé com 44 px; sem estouro lateral · [390, False, True, False, [['Fechar', True, 44], ['Ver no plano', True, 44]], True]
+OK  formulário de registro a 390 px sem estouro lateral · [True, 390]
+OK  nenhum erro de JS (celular)
+RESULTADO: OK 5/5
+exit=0

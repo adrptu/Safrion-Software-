@@ -34,7 +34,7 @@ try:
         chk(f'{tag} formulário com os 15 analitos na ordem do laudo', nomes == [v[0] for v in VALS], nomes)
         # leitor de tela: nome de cada campo (valor e unidade) e dos detalhes
         an = J("(()=>{ const d=DLG(); if(!d) return null; return [...d.querySelectorAll('input[aria-label^=\"Valor de \"]')].map(i=>{ const row=i.closest('div').parentElement; const s=row.querySelector('select'); const det=row.querySelector('details');"
-               " return [i.getAttribute('aria-label'), s&&s.getAttribute('aria-label'), s&&s.value, det?[...det.querySelectorAll('input')].map(x=>x.getAttribute('aria-label')):null, i.getAttribute('inputmode')||i.inputMode]; }); })()") or []
+               " return [i.getAttribute('aria-label'), s&&s.getAttribute('aria-label'), s&&s.value, det?[...det.querySelectorAll('input,select')].map(x=>x.getAttribute('aria-label')):null, i.getAttribute('inputmode')||i.inputMode]; }); })()") or []
         chk(f'{tag} leitor de tela: valor, unidade e os três detalhes com nome próprio por analito', len(an) == 15 and all(x[0] == 'Valor de ' + v[0] and x[1] == 'Unidade de ' + v[0] and x[3] == ['Método de ' + v[0], 'Limite de detecção de ' + v[0], 'Qualificador de ' + v[0]] and x[4] == 'decimal' for x, v in zip(an, VALS)), an[:3])
         # contexto e valores (setter nativo + input/change, como os testes do solo)
         J("(()=>{ const d=DLG(); SETV(d.querySelector('#rl_tal'),'T3'); })()"); time.sleep(.2)

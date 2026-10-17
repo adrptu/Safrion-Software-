@@ -6,12 +6,12 @@ Requisitos do PRD e fora do escopo: contrato PR #47 (6228621408, 6228566667); ES
 Autor / revisor / integrador: Codex / Claude / Claude
 Base (commit ou hashes) / arquivos sob responsabilidade: base f3ceb3c · HEAD a10656a (7c8d377 + autocorreção do LD 0) · areas/analise_solo.py, agro06_analitos_unit.js, docs/integracao/V73/AGRO-06/codex/REVISAO.md
 Aceite e comando de verificação: §3 abaixo (comandos e saídas); sonda rev95_sonda.py a 1440/390 com contraprova em f3ceb3c
-Estado / impedimento / próximo passo: SEM parecer favorável — S2 A1 e A2 e S3 A3 e A4 (min-height) a corrigir na mesma branch; A5 vira tarefa de domínio; reavalio o novo HEAD
+Estado / impedimento / próximo passo: a10656a sem parecer (A1–A4); 74f13a6 retestado (§6) → integrar; seta da TAB-11 e token do rótulo na composição; A5 em contrato próprio (SOLO-UNID)
 ```
 
-Revisor: Claude (Opus 5.5) · 17/10/2026 · HEAD avaliado `a10656a74164c01fee6bf3a19fecf82d602fd93a`.
+Revisor: Claude (Opus 5.5) · 17/10/2026 · HEADs avaliados `a10656a74164c01fee6bf3a19fecf82d602fd93a` (§1–5) e `74f13a61201fe560735680658190d3dd7a62efb6` (§6).
 
-## 1. Veredito
+## 1. Veredito (HEAD `a10656a`; o veredito vigente, no `74f13a6`, está na §6: **integrar**)
 
 **Não integrar ainda.** O PR entrega o que promete no caminho feliz: os 15 analitos aparecem, o zero e o ausente
 ficam separados, a unidade e o LD 0 (corrigido em `a10656a`) chegam ao domínio, o erro do domínio mantém o painel aberto com os
@@ -116,3 +116,48 @@ O que fica para a composição com a TAB-11 é padrão, não conflito: os 15 sum
 A autocorreção troca o fallback por verdade (`q.ld||''`) por um teste explícito de `null/undefined` na normalização (`soRlAnalito`),
 no render (`rl_ans`) e na serialização (`soRlEnviarAnalitos`). O teste passou a usar `ld:0` numérico. Executado: o teste novo reprova em `7c8d377` e passa em
 `a10656a` (linhas 1–2). Na sonda, o LD do Cu digitado como "0" chega ao domínio como `"0"` (§3). Nada mais mudou: são 2 arquivos e 4 linhas.
+
+## 6. Reteste 74f13a6
+
+HEAD `74f13a61201fe560735680658190d3dd7a62efb6` (pai `a10656a`), com a correção A1–A4 do Codex (comentário 6229366021). Juntei esse HEAD
+na `claude/v44-v73-rev95` (merge, sem rebase), e o código ficou igual ao do HEAD (`git diff 74f13a6 HEAD -- tools/` vazio). Reteste
+proporcional ao que mudou: só `analise_solo.py`, o teste do Codex e o REVISAO.md.
+
+**Delta revisado `a10656a..74f13a6`:**
+- `soRlErroAnalitos` recusa qualificador que não seja `''` ou `'<'`, e linha com LD, qualificador ou método (fora de P/K) sem valor.
+- O `rl_pgo` chama essa recusa antes do `cenMudar` e guarda o rascunho inteiro (`Object.assign({}, r, {err})`).
+- `soRlEnviarAnalitos` grava `met: ext` para P e K.
+- O qualificador virou `<select>` com "Valor medido" e "Abaixo do limite de detecção (<)".
+- O método de P/K virou "Extrator do laudo", só para leitura, derivado de `rl.ext`.
+- `.so-met-summary` tem altura mínima de 24 px, e 44 px abaixo de 640 px.
+- A dica "Ex.: abaixo do limite" saiu.
+
+| # | Comando | Resultado |
+|---|---|---|
+| R0 | `node agro06_analitos_unit.js` (74f13a6) | PASS. Contra o `analise_solo.py` de `a10656a`: ReferenceError `soRlErroAnalitos` · exit 1 |
+| R0 | `solo_unit_test.py` · `solo_regressao_test.py` | OK 129/129 · OK 2/2 |
+| R0 | build + `montar_render` (comando da §3, linha 6) | 148 artboards · 156 páginas · exit 0 |
+| R1–R4 | `env CHROME_BIN=/tmp/cloudchrome/chrome CDP_GL=1 SAFRION_DADOS=sintetico python3 -B rev95_reteste.py _render 1440,390` (portão com 1 Chrome principal; `claude/rev95_rt_reteste_74f13a6.log`) | **OK 16/16** |
+| R1–R4 contraprova | o mesmo `rev95_reteste.py` no render com o AG-02 de `a10656a` (`claude/rev95_rt_reteste_a10656a_v2.log`) | **reprova 14 de 16.** R1: o campo é INPUT e o T1 recebe `KCl 60% 120→180`. R2: o K fica `met Mehlich-1` num laudo Resina. R3: grava o LAU-2075 só com K, sem o Al e sem aviso. O R4 da contraprova não vale como medida: o formulário já tinha fechado no R3; os 17 px de `a10656a` estão na linha 8 da §3. A 1ª rodada (`…_a10656a.log`) parou no R3 com TypeError pelo mesmo motivo, e a sonda foi ajustada para registrar o painel fechado em vez de cair |
+| 5 | `rev95_sonda.py _render 1440,390` no 74f13a6 (`claude/rev95_rt_sonda_74f13a6_v2.log`) | **OK 31/31**: os 15 summaries com 24 px a 1440 e 44 px a 390; 63 paradas de Tab; o resto como na §3, linha 8. A rodada anterior (`…_sonda_74f13a6.log`, 29/31) reprovou só no "leitor de tela", porque a sonda procurava 3 `input` nos detalhes e o qualificador agora é `select`. Era teste obsoleto, não defeito; a sonda passou a ler `input,select`, e o nome "Qualificador de X" foi conferido |
+| 5 | `solo_ag02_test.py desktop` · `celular` | OK 27/27 · OK 5/5 |
+
+**Achados no 74f13a6:**
+- **A1 corrigido.** Só há as opções vazio e `<`. O K "< 1" registrado pela tela grava `q '<'` e `ld '1'`; o Extraído mostra "< 1" para quem valida; depois de validado, o `soloKmg` dá "K abaixo do limite de detecção", e o T1 fica com "nada sugerido", sem KCl. Em `a10656a` o mesmo roteiro sugere KCl de 120 para 180.
+- **A2 corrigido.** Com o exemplo carregado, P digitado e o extrator trocado para Resina: P e K aparecem "Resina", só leitura, sob o rótulo "Extrator do laudo", e são gravados com `met Resina` num laudo `ext Resina`. O MO continua editável e é gravado com "Walkley-Black". Em `a10656a` o K ficava "Mehlich-1".
+- **A3 corrigido.** Al só com LD 0,1 e "<": a tela recusa com "Al: informe o valor do laudo…". Nada é gravado, e o painel, o LD, o "<", os detalhes abertos e o K 40 continuam como estavam.
+- **A4 corrigido nesta base.** Os 15 summaries medem 24 px a 1440 e 44 px a 390. A seta da TAB-11 (`E.seta()`/`g2seta-nome`) e os EXTRAS do `seta_padrao_test` ficam comigo na composição com a TAB-11, como combinado.
+- **A5** segue como contrato de domínio separado (SOLO-UNID, 6229291265). Não bloqueia.
+- **A6 · S4 novo, sem bloqueio:** `.so-met-label` usa `#5B6660` fixo, em vez do token `MUTED` (`#65736A`, engine.py l.6). Pode entrar na composição.
+
+**Ensaio de integração no 74f13a6** (`git merge-tree --write-tree`, git 2.43), sem conflito nos três:
+- composição `457ef14`: árvore `c6c88c98`.
+- `origin/claude/v44-v69-mapa` `6631d58` (= `457ef14` + docs; contém `f3ceb3c`; não toca em arquivo de solo): árvore `148ffa81`.
+- TAB-11 `f42f5c7`: árvore `28d6a336`.
+
+Nas junções com `6631d58` e `f42f5c7`, o `analise_solo.py` resultante passa no `agro06_analitos_unit.js`.
+
+### Veredito no 74f13a6: **integrar**
+Não sobra S1 nem S2. A1–A4 foram corrigidos e provados no navegador, a 1440 e a 390, com contraprova em `a10656a`. A5 é contrato de domínio separado
+(SOLO-UNID), e a seta da TAB-11 (A4) e o token da cor do rótulo (S4) eu aplico na composição. Pelo AGENTS §2–3.5, cabe a mim, como revisor, o
+parecer escrito no PR e a integração manual (PR do protótipo, sem auto-merge). Este arquivo não publica nada no GitHub.

@@ -1,0 +1,17 @@
+== reteste_a10656a · início 04:08:43 · chrome principais: 1
+FALHA [1440] R1 qualificador só com "Valor medido" e "<" · INPUT
+FALHA [1440] R1 K "< 1" registrado pela tela grava q "<" e LD "1"; validado, soloKmg "K abaixo do limite de detecção" e nenhuma sugestão de K no T1 · [{'a': 'K', 'v': '1', 'un': 'mg/dm³', 'met': 'Mehlich-1', 'ld': '1', 'q': 'abaixo do limite'}, 'LAU-2073 validado por Ana (agrônoma).', {'sit': 'Validado', 'kmg': {'v': 1}, 'kSug': ['KCl 60% 120→180'], 'info': []}]
+FALHA [1440] R1 o Extraído do laudo mostra o qualificador ("< 1") para quem valida · K 1 mg/dm³ Mehlich-1 1 medido H+Al 3 cmolc/dm³ — — medido Al 0 cmolc/dm³ — — medido SB 4,35 cmolc/dm³ SB = Ca + Mg + K (
+FALHA [1440] R2 depois de trocar o extrator: P e K mostram "Resina" só leitura ("Extrator do laudo"); o método do MO segue editável · [['P', '', False, 'Método'], ['K', 'Mehlich-1', False, 'Método'], ['MO', 'Walkley-Black', False, 'Método']]
+FALHA [1440] R2 exemplo + Resina: laudo T7 com ext Resina, P e K gravados com met Resina, MO com Walkley-Black · ['LAU-2074', 'Resina', {'a': 'P', 'v': '14', 'un': 'mg/dm³', 'met': 'Resina', 'ld': '', 'q': ''}, {'a': 'K', 'v': '160.31', 'un': 'mg/dm³', 'met': 'Mehlich-1', 'ld': '1', 'q': ''}, {'a': 'MO', 'v': '28', 'un': 'g/dm³', 'met': 'Walkley-Black', 'ld': '', 'q': ''}]
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/rev95/rev95_reteste.py", line 91, in <module>
+    r3 = J("(()=>{ const d=DLG(); if(!d) return null; return {h:N(d.querySelector('h2').innerText), al:[...d.querySelectorAll('[role=alert]')].filter(VIS).map(x=>N(x.innerText)).join(' | '),"
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/rev95/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of null (reading 'value')
+    at <anonymous>:1:212
+    at <anonymous>:1:376
+exit=1

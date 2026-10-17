@@ -1,0 +1,19 @@
+== reteste_74f13a6 · início 04:05:31 · chrome principais: 1
+OK    [1440] R1 qualificador só com "Valor medido" e "<"
+OK    [1440] R1 K "< 1" registrado pela tela grava q "<" e LD "1"; validado, soloKmg "K abaixo do limite de detecção" e nenhuma sugestão de K no T1
+OK    [1440] R1 o Extraído do laudo mostra o qualificador ("< 1") para quem valida
+OK    [1440] R2 depois de trocar o extrator: P e K mostram "Resina" só leitura ("Extrator do laudo"); o método do MO segue editável
+OK    [1440] R2 exemplo + Resina: laudo T7 com ext Resina, P e K gravados com met Resina, MO com Walkley-Black
+OK    [1440] R3 Al só com LD 0,1 e "<": recusado no painel ("Al: informe o valor…"), nada gravado; LD, "<", detalhes abertos e K 40 mantidos
+OK    [1440] R4 os 15 summaries "Método e limites" com altura ≥ 24 px; sem estouro lateral
+OK    [1440] nenhum erro de JS
+OK    [390] R1 qualificador só com "Valor medido" e "<"
+OK    [390] R1 K "< 1" registrado pela tela grava q "<" e LD "1"; validado, soloKmg "K abaixo do limite de detecção" e nenhuma sugestão de K no T1
+OK    [390] R1 o Extraído do laudo mostra o qualificador ("< 1") para quem valida
+OK    [390] R2 depois de trocar o extrator: P e K mostram "Resina" só leitura ("Extrator do laudo"); o método do MO segue editável
+OK    [390] R2 exemplo + Resina: laudo T7 com ext Resina, P e K gravados com met Resina, MO com Walkley-Black
+OK    [390] R3 Al só com LD 0,1 e "<": recusado no painel ("Al: informe o valor…"), nada gravado; LD, "<", detalhes abertos e K 40 mantidos
+OK    [390] R4 os 15 summaries "Método e limites" com altura ≥ 44 px; sem estouro lateral
+OK    [390] nenhum erro de JS
+RESULTADO: OK 16/16
+exit=0
