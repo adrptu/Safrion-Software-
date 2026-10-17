@@ -1,20 +1,57 @@
 // ===== Pragas e doenças (MIP/MID): estado compartilhado entre Mapa, AG-01, AG-01det, AG-03/AG-04 e app de campo (MB-06) =====
 // MIPD (estático: protocolos, talhões, Agrofit) e MIP0 (semente) vêm de dados_mip.py. Um único estado no navegador ('talhao-os-mip-v1');
 // a O.S. de controle vai para o cenário das O.S. (cenario.js, cenMudar) no formato osc.novo, sempre em A liberar.
+// Persistência N-1: MIP e O.S. compartilham o envelope durável do cenário.
+// A chave antiga é somente fonte de migração; nunca é apagada ou atualizada.
 const MIP_KEY = 'talhao-os-mip-v1';
-let MIP_MEM = null;
 function mipClone(o) { return JSON.parse(JSON.stringify(o)); }
-function mipLoad() { try { const t = localStorage.getItem(MIP_KEY); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
-function mipSave(s) { MIP_MEM = s; try { localStorage.setItem(MIP_KEY, JSON.stringify(s)); } catch (e) {} }
-function mipGet() { const s = mipLoad() || MIP_MEM; if (s && s.v === MIP0.v) return s; MIP_MEM = mipClone(MIP0); return MIP_MEM; }
-function mipReset() { MIP_MEM = mipClone(MIP0); try { localStorage.removeItem(MIP_KEY); } catch (e) {} }
-// mudança atômica: aplica fn numa cópia; erro não grava nada
-function mipMudar(self, fn) {
-  const s = mipClone(mipGet()); let r;
-  try { r = fn(s) || {}; } catch (e) { r = { erro: String(e.message || e) }; }
-  if (r.erro) { if (self) self.setState({ g2toast: r.erro }); return r; }
-  s.rev = (s.rev || 0) + 1; mipSave(s); if (self) self.setState({ miprev: s.rev, g2toast: r.msg || '' }); return r;
+function mipValido(s) { return !!(s && s.v === MIP0.v && s.vis && s.dia && s.rec && s.seq && Array.isArray(s.apl)); }
+function mipLoad() {
+  const t = localStorage.getItem(MIP_KEY);
+  if (t === null) return null;
+  let s; try { s = JSON.parse(t); } catch (e) { throw new Error('Dados antigos de Pragas e doenças ilegíveis. Preserve os dados e recupere a cópia antes de gravar.'); }
+  if (!mipValido(s)) throw new Error('Versão ou estrutura de Pragas e doenças incompatível. Preserve os dados antes de continuar.');
+  return s;
 }
+function mipEstado(c, migrar) {
+  if (c && Object.prototype.hasOwnProperty.call(c, 'mip')) {
+    if (!mipValido(c.mip)) throw new Error('Pragas e doenças no cenário estão incompatíveis. Recupere os dados antes de gravar.');
+    return c.mip;
+  }
+  const antigo = mipLoad(), s = mipClone(antigo || MIP0);
+  if (migrar) {
+    s.migradoDe = { rev: antigo ? (antigo.rev || 0) : null, em: new Date().toISOString() };
+    c.mip = s;
+  }
+  return s;
+}
+function mipGet() { return mipEstado(typeof cenGet === 'function' ? cenGet() : null, false); }
+function mipCenarioGravavel() {
+  if (typeof cenMudar !== 'function' || typeof cenGet !== 'function') throw new Error('Cenário das O.S. indisponível nesta tela. Reabra Pragas e doenças para gravar.');
+  const raw = localStorage.getItem('talhao-os-cenario-v1');
+  if (raw !== null) {
+    let c; try { c = JSON.parse(raw); } catch (e) { throw new Error('Cenário ilegível. Preserve os dados e recupere a cópia antes de gravar.'); }
+    if (!c || c.v !== CEN0.v || !c.ordens) throw new Error('Cenário incompatível. Preserve os dados antes de continuar.');
+  }
+  return raw;
+}
+// A comparação detecta alterações já observáveis; não é trava entre abas.
+function mipTransacao(self, fn) {
+  let raw;
+  try { raw = mipCenarioGravavel(); } catch (e) { const r = {erro:String(e.message || e)}; if(self) self.setState({g2toast:r.erro}); return r; }
+  const r = cenMudar(null, c => {
+    const s = mipEstado(c, true), out = fn(s, c) || {};
+    if (out.erro) return out;
+    if (localStorage.getItem('talhao-os-cenario-v1') !== raw) throw new Error('O cenário mudou durante a operação. Reabra a decisão e confira os dados.');
+    s.rev = (s.rev || 0) + 1;
+    return out;
+  }, {estrito:true});
+  if(self) self.setState({miprev:Date.now(),cenrev:Date.now(),g2toast:r.erro || r.msg || ''});
+  return r;
+}
+function mipMudar(self, fn) { return mipTransacao(self, s => fn(s)); }
+function mipSave(s) { return mipTransacao(null, (atual,c) => { if(!mipValido(s)) throw new Error('Dados de Pragas e doenças inválidos.'); c.mip=mipClone(s); c.mip.rev=(atual.rev || 0)+1; c.mip.migradoDe=atual.migradoDe; return {}; }); }
+function mipReset() { return mipSave(mipClone(MIP0)); }
 // outras telas (outras abas ou quadros) redesenham quando o MIP ou o cenário das O.S. mudam
 function mipOuvir(self) {
   if (self.__mipOuv) return; self.__mipOuv = true;
@@ -300,33 +337,39 @@ function mipNo(c, s, v, a, ck, ids) {
 }
 // emitir (agrônomo RT): numa só ação grava a O.S. (A liberar) no cenário e DIA + REC/RA + decisão no MIP; nada é liberado aqui
 function mipEmitir(self, vid, a) {
-  const s = mipGet(); const v = s.vis[vid]; if (!v) return { erro: 'Vistoria não encontrada.' };
-  if (v.dec && v.dec.os) { const et = mipOsEt(typeof cenGet === 'function' ? cenGet() : null, v.dec.os); if (et && et !== 'Canceladas') return { erro: vid + ' já tem controle em ' + v.dec.os + '.' }; }
-  if (typeof cenMudar !== 'function') return { erro: 'Cenário das O.S. indisponível nesta tela.' };
-  const c0 = cenGet(); const ck = mipChecks(s, v, a, c0); if (ck.tr.length) return { erro: ck.tr[0] };
-  const ids = mipIds(s, v, a, c0); let osId = '';
-  const r1 = cenMudar(null, (c) => { const no = mipNo(c, s, v, a, ck, ids); osId = no.id; return mipOsNova(c, no); });
-  if (r1.erro) return { erro: r1.erro };
-  const p = mipP(v), u = ck.u, er = a.kind === 'erradicar';
-  const r2 = mipMudar(null, (s2) => {
-    const v2 = s2.vis[vid]; const hoje = MIPD.hoje;
+  a = a || {};
+  if(!a.ator || !a.chave || typeof a.chave !== 'string' || !Number.isInteger(a.dver) || a.dver < 1) return {erro:'Decisão sem autor, chave ou versão. Reabra o formulário antes de emitir.'};
+  return mipTransacao(self, (s,c) => {
+    const autor = cenExigeAlc(a.ator,'AL-02','Emitir a decisão de '+vid);
+    const perfil = g2pf(a.ator);
+    if(!perfil || !perfil.k) throw new Error('Perfil da decisão indisponível. Reabra o formulário.');
+    const imp = JSON.stringify([vid,a.dver,a.kind,a.prod || '',Number(String(a.dose || 0).replace(',','.')),Number(String(a.area).replace(',','.')),a.data,a.nota || '',perfil.k]);
+    return cenIdem(c,a.chave,imp,'Emissão MIP',() => {
+      const v = s.vis[vid]; if(!v) throw new Error('Vistoria não encontrada.');
+      if(a.dver !== ((v.dec && v.dec.ver) || 0) + 1) throw new Error('A decisão mudou. Reabra a vistoria e confira a versão.');
+      if(v.dec && v.dec.os) { const et=mipOsEt(c,v.dec.os); if(et && et!=='Canceladas') throw new Error(vid+' já tem controle em '+v.dec.os+'.'); }
+      const ck=mipChecks(s,v,a,c); if(ck.tr.length) throw new Error(ck.tr[0]);
+      const ids=mipIds(s,v,a,c), no=mipNo(c,s,v,a,ck,ids), osId=no.id;
+      no.mip={vis:vid,rec:ids.rec,ra:ids.ra,dver:a.dver,kind:a.kind};
+      const criada=mipOsNova(c,no); if(criada && criada.erro) throw new Error(criada.erro);
+      const p=mipP(v), u=ck.u, er=a.kind==='erradicar';
+    const s2 = s, v2 = v; const hoje = MIPD.hoje;
+    if(v2.dec) v2.historicoDec = (v2.historicoDec || []).concat([mipClone(v2.dec)]);
     if (ids.dia === 'DIA-' + String(s2.seq.dia).padStart(3, '0')) s2.seq.dia++;
     const R = mipRes(v2, s2);
     s2.dia[ids.dia] = Object.assign(s2.dia[ids.dia] || { id: ids.dia, vis: vid, tal: v2.tal, hip: p.alvo + ' · ' + MIP_SIT[R.kr || R.k][0].toLowerCase(), risco: 'alto' },
-      { sit: 'Registrada', dec: er ? 'Erradicar plantas' : (a.kind === 'localizado' ? 'Controle localizado' : 'Controlar'), em: hoje, por: 'Ana', rec: ids.rec });
+      { sit: 'Registrada', dec: er ? 'Erradicar plantas' : (a.kind === 'localizado' ? 'Controle localizado' : 'Controlar'), em: hoje, por: autor, rec: ids.rec });
     if (ids.old) mipRecCancelar(s2, ids.old, v2.dec.os, ids.rec);
     if (ids.rec) { if (ids.rec === 'REC-' + String(s2.seq.rec).padStart(3, '0')) s2.seq.rec++; s2.seq.ra++;
       s2.rec[ids.rec] = Object.assign(s2.rec[ids.rec] || { id: ids.rec, dia: ids.dia, vis: vid, tal: v2.tal },
         { sit: 'Receituário emitido', ra: ids.ra, prod: u.id, nome: u.nome, g: u.g, dose: Number(String(a.dose).replace(',', '.')), un: u.un, area: Number(String(a.area).replace(',', '.')), data: a.data, os: osId, cond: ck.cond, em: hoje }); }
     v2.dia = ids.dia;
-    v2.dec = { t: a.kind, por: 'Ana', em: hoje, dia: ids.dia, rec: ids.rec, ra: ids.ra, os: osId, prod: u ? u.id : '', dose: u ? Number(String(a.dose).replace(',', '.')) : 0, area: Number(String(a.area).replace(',', '.')), data: a.data, cond: ck.cond, nota: a.nota || '' };
+    v2.dec = { ver: a.dver, t: a.kind, por: autor, em: hoje, dia: ids.dia, rec: ids.rec, ra: ids.ra, os: osId, prod: u ? u.id : '', dose: u ? Number(String(a.dose).replace(',', '.')) : 0, area: Number(String(a.area).replace(',', '.')), data: a.data, cond: ck.cond, nota: a.nota || '' };
     if (u) s2.apl.push({ tal: v2.tal, data: a.data, prod: u.id, chave: p.chave, os: osId });
-    return { msg: er ? (osId + ' de erradicação emitida em A liberar (' + ids.dia + ') · Ana libera na O.S.')
+    return { os: osId, dia: ids.dia, rec: ids.rec, ra: ids.ra, msg: er ? (osId + ' de erradicação emitida em A liberar (' + ids.dia + ') · Ana libera na O.S.')
       : ('Receituário ' + ids.ra + ' emitido (' + ids.dia + ' · ' + ids.rec + ') · ' + osId + ' em A liberar · Ana libera na O.S.') };
+    },{resultado:true});
   });
-  if (r2.erro) return r2;
-  if (self) self.setState({ miprev: Date.now(), cenrev: Date.now(), g2toast: r2.msg });
-  return { msg: r2.msg, os: osId };
 }
 // seguir monitorando: registra a decisão e programa a próxima (ritmo do protocolo; perto do NC = 3 dias; nunca antes de amanhã)
 function mipMonitorar(s, vid, motivo) {
@@ -338,7 +381,8 @@ function mipMonitorar(s, vid, motivo) {
   if (R.k === 'foco' || R.k === 'acima' || red) { dia = (v.dia && s.dia[v.dia] && (s.dia[v.dia].sit === 'A decidir' || red)) ? v.dia : 'DIA-' + String(s.seq.dia++).padStart(3, '0');
     s.dia[dia] = Object.assign(s.dia[dia] || { id: dia, vis: vid, tal: v.tal, hip: p.alvo + ' · ' + MIP_SIT[R.k][0].toLowerCase(), risco: 'médio' }, { sit: 'Registrada', dec: 'Seguir monitorando', em: hoje, por: 'Ana', motivo: motivo || '', rec: '' });
     v.dia = dia; }
-  v.dec = { t: 'monitorar', por: 'Ana', em: hoje, prox, dia, nota: motivo || '' };
+  const anterior=v.dec; if(anterior) v.historicoDec=(v.historicoDec || []).concat([mipClone(anterior)]);
+  v.dec = { ver: ((anterior && anterior.ver) || 0)+1, t: 'monitorar', por: 'Ana', em: hoje, prox, dia, nota: motivo || '' };
   let nova = ''; if (!mipAberta(s, v.tal, v.prot)) { nova = mipNovaVis(s, v.tal, v.prot, prox, v.resp, 'monitorar').id; }
   return { msg: 'Seguir monitorando registrado em ' + vid + (nova ? ' · ' + nova + ' programada para ' + mipBr(prox) : ' · já há vistoria aberta') + (R.kr === 'perto' ? ' (perto do NC: revisita em 3 dias)' : '') + '.', nova };
 }
@@ -367,3 +411,4 @@ function mipDoTal(s, tal, dias, c) {
     .sort((a, b) => (a.S.ord - b.S.ord) || (a.v.data < b.v.data ? 1 : -1));
 }
 try { window.__mip = { mipGet, mipMudar, mipReset, mipRes, mipSit, mipProx, mipChecks, mipNovaVis, mipEmitir, mipMonitorar, mipColetar, mipCorrigir, mipConcluir }; } catch (e) {}
+

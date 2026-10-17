@@ -418,7 +418,26 @@ function osLibTxt(PF,o){ const q=(id)=>{ const a=g2alc(id); return g2papel(PF,a.
   const ap=o&&o.aprov; if(ap) return q('AL-01')+' libera a '+ap.v+' aprovada por '+ap.por;   /* versão já aprovada (R13): só o CMD-06 */
   return q('AL-02')+' aprova esta versão e '+q('AL-01')+' libera'; }   /* confirmação (O.S. e Mapa) */
 // aprovar sem liberar (R13, quem tem só o AL-02): confere a regra legal e o total > 0 antes de gravar e grava só o CMD-42; fica em A liberar
+// B-3: a aprovação/liberação não pode alterar o conteúdo prescrito silenciosamente.
+function osReceitaErro(c,o) {
+  const novo=(o.osc||{}).novo||{}, vinc=novo.mip||null;
+  const origem=!!vinc || (novo.keys||[]).some(k=>String(k).indexOf('mip|')===0);
+  const receitas=Object.values((c.mip||{}).rec||{}).filter(r=>r.os===o.id);
+  if(!origem && !receitas.length) return '';
+  // Erradicação é uma decisão sem receituário; não isenta uma pulverização sem produto.
+  if(origem && !vinc && /Erradicação de plantas/.test(String(novo.tipo||'')) && !(o.ins||[]).length) return '';
+  if(vinc && !vinc.rec && vinc.kind==='erradicar' && !(o.ins||[]).length) return '';
+  const fail='Receituário divergente ou indisponível para '+o.id+'. Confira a decisão em Pragas e doenças e reemita antes de aprovar ou liberar.';
+  if(receitas.length!==1) return fail;
+  const r=receitas[0], ins=o.ins||[];
+  if(r.sit!=='Receituário emitido' || (vinc && (r.id!==vinc.rec || r.ra!==vinc.ra)) || ins.length!==1) return fail;
+  const x=ins[0], igual=(a,b)=>Number.isFinite(Number(a))&&Number.isFinite(Number(b))&&Math.abs(Number(a)-Number(b))<=1e-9;
+  if(x.p!==r.nome || x.un!==r.un || !igual(x.dose,r.dose) || !igual(o.area,r.area) || !igual(x.tot,cenQtd(r.dose,r.area))) return fail;
+  return '';
+}
+function osc_exigeReceita(c,o) { const erro=osReceitaErro(c,o); if(erro) throw new Error(erro); }
 function osc_aprovar(c,id,ator){ const o=osc_o(c,id); const vn=osVn(o.versao); const qa=cenExigeAlc(ator,'AL-02','Aprovar a '+vn+' da '+id+' (CMD-42)');
+  osc_exigeReceita(c,o);
   if(o.etapa!=='A liberar') throw new Error(id+' não está em A liberar.');
   if(!(o.ins||[]).length&&osSoAgua(o)) throw new Error(id+' é irrigação só com água: libera pela prontidão, sem aprovação agronômica (DEC-2609-10).');
   const ap=osAprovada(o,vn); if(ap) throw new Error('A '+vn+' da '+id+' já está aprovada por '+ap.por+' às '+ap.at+': nada foi gravado de novo.');
@@ -435,6 +454,7 @@ function osc_liberar(c,id,agua,jan,ator){ const o=osc_o(c,id);
   /* só água (DEC-2609-10): sem aprovação agronômica, mas o CMD-06 tem autor (revisão CONF 13/10): perfil ativo de quem age, conferido antes de gravar,
      e o registro em o.osc.ev (a trilha lê). Sem alçada própria: a AL-01 deixa a água fora (prontidão operacional). Dano evitado: ordem liberada sem autor. */
   const qw=agua?cenQuem(ator===undefined?g2perfil():ator,[],'Liberar a '+id+' (CMD-06, irrigação só com água)'):'';
+  osc_exigeReceita(c,o);
   const r=osc_libEfeito(c,id,agua,jan); if(q) r.msg+=osc_aprovLib(o,q[0],q[1]);
   if(qw){ const vn=osVn(o.versao), hr=cenAgora(); o.osc.ev=(o.osc.ev||[]).concat([{cmd:'CMD-06',v:vn,por:qw,at:hr,t:vn+' liberada por '+qw+' às '+hr+' · irrigação só com água, sem aprovação agronômica (DEC-2609-10) (CMD-06)'}]);
     r.msg=r.msg.replace(/ liberada pela prontidão operacional\./,' liberada pela prontidão operacional por '+qw+'.'); }
