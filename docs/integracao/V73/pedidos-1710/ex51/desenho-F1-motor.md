@@ -246,13 +246,27 @@ O pós-processamento seguro tem duas partes:
   - onde a dona não faz isso, a F1 garante só abrir o painel; trocar o filtro é F2.
 - **Contrato para a F2:** com o escopo único da sessão, `g2voltaValida` deixa de recusar por "outro escopo". Passa a aplicar o contexto no escopo atual, com o aviso "Escopo: Lagoa Grande, escolhido depois". Assim a F1 e a F2 não se contradizem.
 
-**Divergência do pedido para o Codex revisar: a forma `#OS-0502>PC-…` não entra.**
+**Contrato de volta e recarga, versão 1** (decisão de UX do Codex em 6241254289; substitui a divergência da revisão anterior).
 
-- **Por quê:** os leitores acima são estritos, e o `ma_hashSync` reescreve o hash a cada desenho (`maquinas.py:96`).
-- **Em troca:**
-  - o empilhado é passageiro e não vai ao endereço;
-  - recarregar ou voltar reabre o detalhe, com o foco na referência que abriu o empilhado;
-  - isso também mantém válida a conferência do robô, que compara o título do diálogo de cima.
+O endereço continua sem a pilha, porque os leitores acima são estritos e o `ma_hashSync` reescreve o hash a cada desenho (`maquinas.py:96`). A sintaxe `#OS-0502>PC-…` não entra. O contexto completo vai num contrato versionado em `history.state`, que sobrevive ao Voltar e ao recarregar.
+
+- **Estado:** `history.state.g2ctx = {v:1, h, sec, rol, gat, foco, pilha:[{ref, gat}], t}`.
+  - `h`: o hash do registro de baixo;
+  - `sec`, `rol`: a seção aberta e a rolagem do painel;
+  - `gat`: o `data-ref` que levou para fora;
+  - `foco`: o elemento focado na saída;
+  - `pilha`: os empilhados abertos, até 2, cada um com o gatilho que o abriu.
+- **Quem grava:** `g2hashReg` grava o `g2ctx` na saída (clique em link para outra tela) e a cada abertura ou fechamento de empilhado (`replaceState`, sem entrada nova no histórico).
+
+| Como a pessoa chega | O que reabre |
+|---|---|
+| **Voltar do navegador** (`back_forward`), com `g2ctx` válido | O contexto completo de origem: o detalhe de baixo, a seção, a rolagem, a pilha na mesma ordem e o foco no elemento da saída. Sem foco gravado, o foco vai para o título do empilhado de cima. |
+| **Recarregar** (`reload`) | O mesmo que o Voltar, porque o `history.state` persiste no recarregar. Anuncia "Contexto restaurado" pelo `g2vivo`. |
+| **Link compartilhado, favorito, nova aba** (sem `g2ctx`) | Só o registro do hash, com o painel na seção padrão da dona. Sem pilha e sem restauração. A faixa "Aberto a partir de" aparece só com `?de=`. |
+| **`g2ctx` de outra versão, malformado ou com mais de 1 h** | Tratado como link: só o registro do hash, com aviso `[R4]` no console. |
+
+- **Validação na restauração:** cada nível da pilha é conferido (o registro ainda existe e a dona ainda o resume). Nível inválido sai da pilha, com o aviso "OS-0502 › PC-101 não está mais disponível" no `g2vivo`, e os níveis abaixo dele continuam.
+- **Robô:** o diálogo de cima depois do Voltar precisa ter o título do empilhado de origem quando havia pilha, ou do detalhe quando não havia. O critério (b) do §4 passa a exigir isso.
 
 ### 2.3 R3 · painel empilhado, só leitura
 
@@ -391,18 +405,33 @@ O pós-processamento seguro tem duas partes:
 
 ## 4. Aceite medido, combinado antes do código
 
-**Robô.** Valores v108 de `robo-v5-base/comparar.py:7`. A medida nova da base substitui esses números quando sair. O pedido cita 29 % e 11 % de base no aceite e 50 % e 18 % no texto.
+**Robô.** A coluna v108 é só referência histórica e não é comparável (robô com histórico compartilhado entre quadros). Na base isolada de `259c13bc`, medida em `c709db66`, os valores são: IDs 39/85, chegada 85/153, volta 22/153, Voltar 10/107 e escopo 0/28. A linha de base que vale para o aceite é a do v5.1.
 
 | Medida | Definição (`anexo-robo-v5-resumo.py`) | v108 | Meta da F1 |
 |---|---|---|---|
 | IDs clicáveis no detalhe | `refsClic/refsTotal` | 17/55 | ≥ 95 % |
 | Chegada no registro | `chegou/navRegistro`, com a 2ª passada (`leva-check`) | 44/88 | ≥ 95 % |
 | Volta à origem | `voltaOrigem/navRegistro` | 16/88 | ≥ 95 % |
-| Voltar do navegador reabre o detalhe | `reabre/voltarDet` | 0/59 | ≥ 95 % |
+| Voltar do navegador reabre o contexto de origem (detalhe e, se havia, a pilha; ver contrato §2.2) | `reabre/voltarDet` | 0/59 | ≥ 95 % |
 | Cadastro clicável (informativo) | `rotClic/rotTotal` | 6/71 | Medir. A meta de 90 % fica para o passo de cadastros. |
 | Portões | Nenhuma passagem para tela Excluir; cliques sem efeito (`nada`) não aumentam | — | 0; ≤ base |
 
-**Robô v5.1.** O Codex implementa e o Claude revisa. Contraprova: rodado na base, o v5.1 dá os mesmos numeradores do v5, salvo o item a.
+**Robô v5.1** (contrato fechado em 6241229682 e 6241254289). O Codex implementa sobre `robo-v5-base/`; o Claude revisa, roda e publica.
+- **Regras de medição:**
+  - isolamento por origem, verificado por marcas;
+  - alvo capturado na origem antes do clique, com igualdade exata de ID;
+  - a chegada se prova pelo título do painel ou pelo estado de seleção do item;
+  - RA entra no denominador; CMD, EX e DEC saem;
+  - prefixos sem dona ficam no inventário de lacunas;
+  - empilhado e navegação até a dona são medidos separadamente;
+  - o `escopo28` fica.
+- **Relatório:** traz o total e a proporção de passagens inconclusivas.
+- **Linha de base nova e imutável** na mesma candidata, com comparação dos brutos caso a caso. Os números da v108 e do modo "como veio" ficam como medição não comparável.
+- **Aceite:**
+  - ≥ 95 % em cada meta;
+  - **100 %** nos percursos críticos: O.S. → EST (entregar, devolver, saldo), O.S. ↔ receituário (VIS/RA), Aprovações → O.S. e OM ↔ O.S. impedida;
+  - nenhum alvo errado;
+  - **um percurso crítico inconclusivo bloqueia o aceite.**
 
 - **a) Denominador de IDs sem prefixos que não são registro:** `CMD-`, `EX-` e `DEC-`, que são regras e itens do projeto. Hoje entram no `ENT_SRC` (`anexo-robo-v5.html:23`).
 - **b) Passagem que abre o empilhado** (`[data-g2pilha]`):
