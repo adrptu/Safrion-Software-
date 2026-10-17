@@ -11,6 +11,8 @@ root = Path(__file__).resolve().parent
 env = dict(esc=html.escape, BTN_ST=lambda *a: "", OS_DES={"id":"OS-0430"},
            OS_DEMO17={"id":"OS-0431"},
            msgbtn=lambda label,msg,**kw: msg, imsg=lambda label,msg,*a,**kw: msg)
+# TAB-11 (seta única): o summary da prévia leva a seta do motor (E.seta()); a expressão real precisa do engine
+sys.path.insert(0, str(root)); import engine as _E; env["E"] = _E
 env["ords"] = [
     dict(v=dict(os="OS-TESTE",etp="A liberar"),p=dict(sel=[dict(t="Falta <insumo>")])),
     dict(v=dict(os="OS-IGNORADA",etp="Encerradas"),p={})]

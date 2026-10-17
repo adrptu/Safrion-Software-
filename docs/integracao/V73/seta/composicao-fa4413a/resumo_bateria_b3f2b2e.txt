@@ -1,0 +1,17 @@
+06:33 rc=0 79s rev93_reteste_navegador :: 44 OK, 0 falhas
+06:45 rc=1 741s seta_padrao_test :: RESULTADO: 12 ok · 2 falhas · B1440 todo controle de abrir/recolher usa o componente da seta (389 controles; telas com desvio: 1); B390 todo controle de abrir
+06:46 rc=0 62s tabelas_saf_test :: RESULTADO: 24/24 ok
+06:47 rc=0 34s saf_tab_test :: RESULTADO: 14/14
+06:56 rc=0 529s cartoes_test :: RESULTADO: 70/70
+06:59 rc=0 233s ds_1510_test :: RESULTADO: 17 ok · 0 falhas
+07:04 rc=0 253s ds_1610_test :: RESULTADO: 14 ok · 0 falhas
+07:05 rc=0 71s tabelas_os_test :: RESULTADO: 40/40 ok
+07:06 rc=0 56s os_cenario_test :: RESULTADO: 22/22 ok
+07:17 rc=0 647s tab_drill_cab_test :: RESULTADO: 6 ok · 0 falhas
+07:17 rc=0 36s visoes2_formas_test :: RESULTADO: 23/23
+07:22 rc=0 292s pa_lista_test :: RESULTADO: 24 ok · 0 falhas
+07:25 rc=0 172s ma_unica_test :: RESULTADO: 23/23 ok
+07:27 rc=0 100s ma_rastreio_test :: RESULTADO: 58/58 ok
+07:29 rc=0 119s solo_os_test :: RESULTADO: OK 18/18
+07:35 rc=0 395s paginas_scan_test :: RESULTADO: 5 ok · 0 falhas (148 páginas)
+FIM

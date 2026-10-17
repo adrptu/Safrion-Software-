@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """TAB-09 e TAB-10 (proprietário, 16/10/2026; docs/design-system/padroes-1610.md), com a skill padrao-safrion: varredura de todas as telas.
-  TAB-09 "colone os icones de drill down sempre na esquerda, fica mais intuitivo em todas telas": a seta de abrir/expandir (▸ ▾ ›) fica na
+  TAB-09 "colone os icones de drill down sempre na esquerda, fica mais intuitivo em todas telas": a seta de abrir/expandir (TAB-11) fica na
          1ª coluna, à esquerda de qualquer outra coluna da linha (seleção, número, texto, ícone). Em árvore e grupos o recuo do nível continua.
          Seta de seção (botão com aria-expanded, sem lista suspensa) vem antes do nome.
   TAB-10 "padronize a altura das colunas cabeçalho das tabelas, em diferentes telas temos diferentes alturas": toda linha de cabeçalho de tabela
@@ -47,11 +47,13 @@ SETA = r"""(()=>{
    row.querySelectorAll('input,select,textarea,img,svg,button').forEach(el=>{ if(A.contains(el)||el.contains(A)||(el.tagName==='svg'&&el.closest('button')&&!el.closest('button').contains(A)&&el.closest('button')!==el)||!vis(el)||!dentro(el)) return;
      const r=el.getBoundingClientRect(); if(r.top<cy&&r.bottom>cy&&r.right<=a.left+1) esq.push('<'+(el.type==='checkbox'?'checkbox':el.tagName.toLowerCase())+'>'); });
    if(esq.length) out.ruins.push({k:'linha', seta:nome(A), linha:txt(row), esq:[...new Set(esq)].slice(0,3)}); }
- // 2) seta de seção ou de item que abre ali (botão com aria-expanded, sem lista suspensa): a seta vem antes do nome
+ // 2) seta de seção ou de item que abre ali (botão com aria-expanded, sem lista suspensa): a seta vem antes do nome. A seta é o componente
+ //    da TAB-11 (.g2seta, filho do botão) ou, nas versões antigas, o glifo de texto (▸ ▾ …): os dois são medidos
  const GL=/[▸▾▴▶▼›]/;
  for(const B of [...document.querySelectorAll('button[aria-expanded]:not([aria-haspopup]):not(.g2car):not(.g2mais):not(.g2xtog),summary:not(.acoes-mais summary)')].filter(vis)){
    const its=[]; const tw=document.createTreeWalker(B,NodeFilter.SHOW_TEXT); let t, gl=null, antes=false;
-   while(t=tw.nextNode()){ const s=t.textContent; if(!/\S/.test(s)||!vis(t.parentElement)) continue; const i=s.search(GL);
+   const ic=[...B.querySelectorAll('.g2seta')].find(vis); if(ic) gl=ic.getBoundingClientRect().left;
+   while(t=tw.nextNode()){ const s=t.textContent; if(!/\S/.test(s)||!vis(t.parentElement)) continue; const i=ic?-1:s.search(GL);
      if(i>=0&&gl===null){ if(s.slice(0,i).trim()) antes=true; const rg=document.createRange(); rg.setStart(t,i); rg.setEnd(t,i+1); gl=rg.getBoundingClientRect().left; }
      const rg=document.createRange(); rg.selectNodeContents(t); const r=[...rg.getClientRects()].find(r=>r.width>0); if(r&&!(i>=0&&!s.replace(GL,'').trim())) its.push(r.left); }
    if(gl===null) continue; out.n++;

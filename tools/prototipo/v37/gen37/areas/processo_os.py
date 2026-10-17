@@ -1069,8 +1069,8 @@ function osGrupoVals(self,v,recorte){
 function osKbRaia(self,dim,path,nome,n,cols,nivel){
   const key=JSON.stringify([g2perfil().k,mfFaz(self),mfSaf(self),dim,path||[],nome]);
   const aberta=!(self.state.kbFechadas||{})[key];
-  return {k:nome,n:n+(n===1?' ordem':' ordens'),aberta,expandida:String(aberta),seta:aberta?'▾':'▸',
-    lab:(aberta?'Recolher':'Abrir')+' raia '+nome+' ('+nivel+'): '+n+(n===1?' ordem':' ordens'),
+  const sx=g2seta(aberta,'raia '+nome+' ('+nivel+'): '+n+(n===1?' ordem':' ordens'));   // TAB-11: estado e nome "Abrir …"/"Recolher …" únicos
+  return {k:nome,n:n+(n===1?' ordem':' ordens'),aberta,expandida:sx.exp,lab:sx.lab,
     alterna:()=>{const fechadas=Object.assign({},self.state.kbFechadas||{});if(fechadas[key])delete fechadas[key];else fechadas[key]=true;self.setState({kbFechadas:fechadas});},
     cols,tem:n>0};
 }
@@ -1420,8 +1420,9 @@ def _kanban_raias():
     Sem agrupamento, ou no último nível, o quadro único de sempre."""
     # na raia, a fase vazia fica só com o título e o 0 (sem a caixa "Nenhuma ordem"): 8 raias × 5 fases não viram 40 caixas vazias
     raia=(f'<section class="os-raia" style="display: flex; flex-direction: column; gap: 8px;">'
-          f'<button type="button" class="os-raia-cab" aria-label="{H("r.lab")}" aria-expanded="{H("r.expandida")}" onClick="{H("r.alterna")}" style="align-self: flex-start; display: inline-flex; align-items: baseline; gap: 8px; min-height: 36px; padding: 4px 8px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; font-family: inherit; color: {ACC};">'
-          f'<span aria-hidden="true">{H("r.seta")}</span><b style="font-size: 14px;">{H("r.k")}</b><span style="font-size: 12.5px; color: {MUTED};">{H("r.n")}</span></button>'   # TAB-09: seta antes do nome (DS87); AGR-02: ▸/▾ pelo estado da raia
+          f'<button type="button" class="os-raia-cab" aria-label="{H("r.lab")}" aria-expanded="{H("r.expandida")}" onClick="{H("r.alterna")}" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 4px 8px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; font-family: inherit; color: {ACC};">'
+          + E.seta() +   # TAB-09/TAB-11: a seta única antes do nome, 1º filho do botão: gira com o aria-expanded (AGR-02: recolhe a raia)
+          f'<b style="font-size: 14px;">{H("r.k")}</b><span style="font-size: 12.5px; color: {MUTED};">{H("r.n")}</span></button>'
           + f'<sc-if value="{H("r.aberta")}" hint-placeholder-val="{T()}">' + _kanban(celular_rola='sem_estilo',lista='r.cols') + '</sc-if></section>')
     # Codex 6170116165 V2-RAIAS-MOBILE-01: a raia usa a mesma coluna de 148 px com rolagem local do quadro único (antes, 5 colunas de ~45 px);
     # V2-RAIAS-TOQUE-01: no toque, nome da raia, × do chip e "Limpar filtros" com 44 px
@@ -1455,13 +1456,12 @@ _LNKB=('font-family: inherit; font-size: 12.5px; font-weight: 700; color: #15201
        'text-decoration: underline; text-underline-offset: 3px; white-space: nowrap;')   # ação de texto dentro da linha (Tirar/Desfazer)
 def _painel():
     lab=lambda t: f'<div style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase;">{t}</div>'
-    sv_dn='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M6 9l6 6 6-6"/></svg>'
-    sv_rt='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M9 6l6 6-6 6"/></svg>'
-    # seção recolhível: título + uma linha de resumo; abre por padrão só o que faz a ordem andar na fase (panSecs)
+    # seção recolhível: título + uma linha de resumo; abre por padrão só o que faz a ordem andar na fase (panSecs). A seta é a da TAB-11
+    # (engine.seta, 1º filho do botão): a mesma em todas as telas, gira com o aria-expanded
     def sec(k,titulo,corpo):
         return (f'<sc-if value="{H("psx_"+k+"_show")}" hint-placeholder-val="{T()}"><section aria-label="{titulo}" style="border: 1px solid {LINE}; border-radius: 12px;">'
           f'<button type="button" onClick="{H("psx_"+k+"_tog")}" aria-expanded="{H("psx_"+k+"_ex")}" style="display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; border: 0; background: transparent; cursor: pointer; font-family: inherit; text-align: left; color: {INK};">'
-          f'<sc-if value="{H("psx_"+k)}" hint-placeholder-val="{F()}">{sv_dn}</sc-if><sc-if value="{H("psx_"+k+"_c")}" hint-placeholder-val="{T()}">{sv_rt}</sc-if>'
+          + E.seta() +
           f'<span style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase; flex-shrink: 0;">{titulo}</span>'
           f'<sc-if value="{H("psx_"+k+"_c")}" hint-placeholder-val="{T()}"><span style="font-size: 12.5px; color: {MUTED}; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{H("psx_"+k+"_sum")}</span></sc-if></button>'
           f'<sc-if value="{H("psx_"+k)}" hint-placeholder-val="{F()}"><div style="padding: 0 12px 12px; display: flex; flex-direction: column; gap: 6px;">{corpo}</div></sc-if></section></sc-if>')

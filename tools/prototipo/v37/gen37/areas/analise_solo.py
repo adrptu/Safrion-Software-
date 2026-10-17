@@ -245,7 +245,7 @@ def _painel_laudo(g_ext,g_uso):
            + kv
            + f'<div class="so-lado"><div class="so-orig-d">{orig}</div><div style="min-width: 0; display: flex; flex-direction: column; gap: 6px;">{LAB("Extraído · valores e índices")}'
              f'<div style="font-size: 12.5px; color: {MUTED};">Clique na linha para corrigir valor ou unidade; os índices calculados mostram a fórmula e as entradas.</div>{g_ext}</div>'
-             f'<details class="so-orig-m" style="border: 1px solid {LINE}; border-radius: 12px; padding: 8px 12px;"><summary style="cursor: pointer; font-weight: 700; font-size: 13px; min-height: 32px;">Ver original</summary>{orig}</details></div>'
+             f'<details class="so-orig-m" style="border: 1px solid {LINE}; border-radius: 12px; padding: 8px 12px;"><summary class="g2seta-nome" style="cursor: pointer; font-weight: 700; font-size: 13px; min-height: 32px;">{E.seta()}Ver original</summary>{orig}</details></div>'
            + f'<sc-if value="{H("ld_hasUso")}" hint-placeholder-val="{F()}"><section aria-label="Uso no plano" style="display: flex; flex-direction: column; gap: 6px;">{LAB("Uso no plano")}'
              f'<div style="font-size: 12.5px; color: {MUTED};">Clique na linha para ver o porquê. Usar a sugestão é no Planejar safra.</div>{g_uso}</section></sc-if>'
            + f'<sc-if value="{H("ld_semUso")}" hint-placeholder-val="{F()}"><div style="font-size: 12.5px; color: {MUTED};">{H("ld_semUsoT")}</div></sc-if>'
@@ -263,7 +263,7 @@ def _painel_registro():
            f'<div style="display: grid; grid-template-columns: 48px minmax(0,1fr) minmax(0,1fr); gap: 8px; align-items: center;">'
            f'<b style="font-size: 13px;">{H("x.a")}</b><input id="{H("x.id")}" aria-label="{H("x.lab")}" inputMode="decimal" autoComplete="off" value="{H("x.v")}" onChange="{H("x.set")}" style="{H("x.st")}">'
            f'<select aria-label="{H("x.ulab")}" value="{H("x.un")}" onChange="{H("x.setu")}" style="{H("x.ust")}"><sc-for list="{H("x.uns")}" as="o" hint-placeholder-count="2"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></div>'
-           f'<details style="margin-top:4px;"><summary class="so-met-summary" style="cursor:pointer;font-size:12px;">Método e limites · {H("x.a")}</summary>'
+           f'<details style="margin-top:4px;"><summary class="so-met-summary" style="cursor:pointer;font-size:12px;">{E.seta()}Método e limites · {H("x.a")}</summary>'
            f'<div style="display:flex;flex-direction:column;gap:6px;padding:6px 0;">'
            f'<label class="so-met-label">{H("x.metrot")}<input aria-label="{H("x.mlab")}" readOnly="{H("x.metfix")}" placeholder="Conforme o laudo" value="{H("x.met")}" onChange="{H("x.setm")}" style="{H("rl_inst")}"></label>'
            f'<label class="so-met-label">Limite de detecção<input aria-label="{H("x.llab")}" placeholder="Conforme o laudo" value="{H("x.ld")}" onChange="{H("x.setld")}" style="{H("rl_inst")}"></label>'

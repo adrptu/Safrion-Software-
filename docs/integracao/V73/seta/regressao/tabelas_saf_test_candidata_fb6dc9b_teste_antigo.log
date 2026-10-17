@@ -1,0 +1,26 @@
+  ok  §3.4 cabeçalhos: 9 colunas, uma variável por coluna, sem unidade entre parênteses (a unidade vai na célula) · ['OPERAÇÃO › ATIVIDADE › TALHÃO', 'SITUAÇÃO', 'DATA', 'CONJUNTO', 'RENDIMENTO', 'ÁREA TRABALHADA', 'HORAS-CONJUNTO', 'CUSTO R$/HA', 'CUSTO TOTAL']
+  ok  nenhuma célula junta duas medidas ("12 m × 7 km/h", "R$/kg", "Parte: …") · []
+  ok  Situação só com os valores de s.sit (S2627: "Janela não informada" nas 8 operações, sem números) · ['Janela não informada', 'Janela não informada', 'Janela não informada', 'Janela não informada', 'Janela não informada', 'Janela não informada', 'Janela não informada', 'Janela não informada']
+  ok  unidade por nível: operação em ha-op (área e custo); horas com "h"; rendimento "ha/h" ou "varia"; custo total em R$ · [('Pulverização 6 atividades', '21,60 ha/h', '2.520 ha-op', '116,7 h', 'R$ 14,49/ha-op', 'R$ 36.516,67'), ('Fertirrigação 2 atividades', '10,00 ha/h', '84 ha-op', '8,4 h', 'R$ 5,70/ha-op', 'R$ 478,80'), ('Tratamento de sementes 1 atividade', '40,00 ha/h', '610 ha-op', '15,3 h', 'R$ 3,40/ha-op', 'R$ 
+  ok  atividades em "ha" (uma passada por cultivo) e talhões em "ha" · [('Dessecação pré-plantio', '610 ha'), ('Controle de ácaro', '42 ha'), ('Herbicida pós-emergente', '610 ha'), ('Fungicida 1ª aplicação', '610 ha')]
+  ok  ordenar Custo R$/ha crescente (número, não texto): R$ 3,40/ha-op primeiro, R$ 662,86/ha-op por último · ['R$ 3,40/ha-op', 'R$ 5,70/ha-op', 'R$ 12,94/ha-op', 'R$ 14,49/ha-op', 'R$ 73,59/ha-op', 'R$ 165,33/ha-op', 'R$ 229,20/ha-op', 'R$ 662,86/ha-op']
+  ok  filtro Conjunto (valor exato da célula): só a Pulverização · ['Pulverização 6 atividades']
+  ok  filtro Situação = "Janela não informada": as 8 operações · 8
+  ok  busca "T2": só ocorrências do T2 (com operação e atividade que as agrupam) · ['T2 · Soja 58 W', 'T2 · Soja 58 W', 'T2 · Soja 58 W', 'T2 · Soja 58 W', 'T2 · Soja 58 W']
+  ok  Data: Pulverização "set/26 – jan/27" (faixa real de meses da operação) · ['Pulverização 6 atividades', 'Janela não informada', 'set/26 – jan/27', 'Trator 02 MF 7719 + Pulverizador PJ-3030 36 m', '21,60 ha/h', '2.520 ha-op', '116,7 h', 'R$ 14,49/ha-op', 'R$ 36.516,67']
+  ok  TF03 Adubação de cobertura 24 → 12 m (só esta): 9,00 ha/h e R$ 25,89/ha na mesma linha; a operação "varia" no rendimento · (['Adubação de cobertura', '', 'nov/26', '', '9,00 ha/h', '610 ha', '67,8 h', 'R$ 25,89/ha', 'R$ 15.792,22'], ['Adubação a lanço 4 atividades', 'Janela não informada', 'out/26 – jun/27', 'Trator 03 + Distribuidor 3 t', 'varia', '724 ha-op', '74,1 h', 'R$ 23,85/ha-op', 'R$ 17.267,89'])
+  ok  sem erro de script (1440) · None
+  ok  2b etapa 2: Tipo, Área livre, Plano, Versão e Ajustes em colunas próprias; Meta com a unidade junto (sem coluna de unidade) · ['TALHÃO OU PARCELA', 'SITUAÇÃO', 'ÁREA LIVRE', 'LIVRE A PARTIR DE', 'ÁREA', 'CULTURA', 'OCUPA ATÉ', 'FIM POR', 'SAFRA', 'VARIEDADE', 'PLANO AGRONÔMICO', 'VERSÃO', 'PLANTIO', 'META', 'AJUSTES LOCAIS', 'TIPO', '']
+  ok  2b T7: meta "45 t/ha/ano" (valor com a unidade); plano sem a versão colada (v3 na coluna Versão) · {'TALHÃO OU PARCELA': 'T7', 'SITUAÇÃO': 'Planejado', 'ÁREA LIVRE': '—', 'LIVRE A PARTIR DE': '—', 'ÁREA': '42 ha', 'CULTURA': 'Mamão Formosa', 'OCUPA ATÉ': 'sem fim', 'FIM POR': 'Perene', 'SAFRA': '—', 'VARIEDADE': 'Formosa', 'PLANO AGRONÔMICO': 'Mamão Formosa produção', 'VERSÃO': 'v3', 'PLANTIO': '
+  ok  2b filtro Meta = "45 t/ha/ano" (o filtro mostra o valor com a unidade, como a célula): só o T7 · [('T7', '45 t/ha/ano')]
+  ok  2b filtro Tipo = Parcela: as parcelas T1-A e T1-B (com o talhão T1 que as agrupa), sem talhão inteiro · [('T1', '2 parcelas'), ('T1-A', 'Parcela'), ('T1-B', 'Parcela')]
+Traceback (most recent call last):
+  File "/tmp/claude-0/seta/tools/prototipo/v37/gen37/tabelas_saf_test.py", line 108, in <module>
+    J("""(()=>{const i=document.querySelector('aside [id$="_meta"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'62,5'); i.dispatchEvent(new Event('input',{bubbles:true}));})()"""); time.sleep(.2)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/seta/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Illegal invocation
+    at <anonymous>:1:134
+    at <anonymous>:1:203
