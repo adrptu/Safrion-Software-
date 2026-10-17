@@ -3,7 +3,10 @@ function caFila(){const c=cenGet(),out=[];Object.values(c.ordens||{}).forEach(o=
  const r=a.conferenciaDia,caso=r&&r.caso,resolver=!!r&&r.estado==='Não conforme',imp=cdImpedimento(c,o.id,a.dia);
  const estado=imp||((r&&r.fato!==cdFato(c,o.id,a.dia))?'Dados alterados · revisar':r?r.estado:a.st);
  const decisao=resolver?(a.st===CEN_AP_DESC?'Arquivar caso substituído':'Vincular evidência'):'Conferir dia';
- out.push({id:o.id+':'+a.dia,ro:!!imp,v:{ap:o.id+' · dia '+a.dia+' · '+a.d,os:o.id,dia:a.dia,eq:a.quem||o.resp||'Responsável não informado',real:a.ha,horas:a.h,cons:Object.entries(a.cons||{}).map(([p,q])=>p+': '+q+' '+(((o.ins||[]).find(x=>x.p===p)||{}).un||'unidade não informada')).join(' · ')||'Sem consumo informado',orig:(a.origem||'web')+' · '+(a.sinc===false?'aguarda envio':'sincronizado'),cf:estado,motivo:'',decisao,referencia:resolver?cdCasoReferencia(c,o.id,a.dia):cdReferencia(c,o.id,a.dia)},s:{},p:{},o:[{t:'Conferir não altera a fase, a área executada, as horas ou o consumo.'},{t:r?'Última decisão: '+r.estado+' · '+r.por+' · '+r.motivo:'Sem recibo de conferência diária.'},{t:caso?'Caso '+caso.id+' · '+caso.estado:'Correção de quantidade ainda não disponível; registre divergência se o fato precisar de ajuste.'},{t:'Abrir O.S.',h:'OS.dc.html#'+o.id}]});}));return out;}
+ out.push({id:o.id+':'+a.dia,ro:!!imp,v:{ap:o.id+' · dia '+a.dia+' · '+a.d,os:o.id,dia:a.dia,eq:a.quem||o.resp||'Responsável não informado',real:a.ha,horas:a.h,cons:Object.entries(a.cons||{}).map(([p,q])=>p+': '+q+' '+(((o.ins||[]).find(x=>x.p===p)||{}).un||'unidade não informada')).join(' · ')||'Sem consumo informado',orig:(a.origem||'web')+' · '+(a.sinc===false?'aguarda envio':'sincronizado'),cf:estado,motivo:'',decisao,referencia:resolver?cdCasoReferencia(c,o.id,a.dia):cdReferencia(c,o.id,a.dia)},s:{},p:{},o:[{t:'Conferir não altera a fase, a área executada, as horas ou o consumo.'},{t:r?'Última decisão: '+r.estado+' · '+r.por+' · '+r.motivo:'Sem recibo de conferência diária.'},{t:caso?'Caso '+caso.id+' · '+caso.estado:'Correção de quantidade ainda não disponível; registre divergência se o fato precisar de ajuste.'},{t:'Abrir O.S.',h:'OS.dc.html#'+o.id}]});}));
+ // ordem da fila (integrador, PR #109): o que pede ação primeiro; o que a fase não admite fica por último
+ const CA_ORD=e=>e==='Provisório'?0:(/^Dados alterados/.test(e)?1:(e==='Não conforme'?2:(e==='Conferido'?3:4)));
+ return out.sort((x,y)=>CA_ORD(x.v.cf)-CA_ORD(y.v.cf)||String(x.id).localeCompare(String(y.id)));}
 function caRefresh(self){const sp=GRIDS.find(g=>g.id==='g_fila'),rows=g2rows(self,sp);rows.splice(0,rows.length,...caFila());}
 function PREVALS(self,v){caRefresh(self);}
 function EXTRAVALS(self,v){cenOuvir(self);
@@ -15,4 +18,6 @@ function EXTRAVALS(self,v){cenOuvir(self);
  v.ca_revisar=id=>{const sp=GRIDS.find(g=>g.id==='g_fila');g2open(self,sp,id);};
  v.ca_proximo=()=>{const r=caFila().find(r=>!r.ro&&!['Conferido'].includes(r.v.cf));if(r)v.ca_revisar(r.id);else self.setState({g2toast:'Nenhum apontamento disponível para revisão.'});};
  v.ca_pendentes=String(caFila().filter(r=>!r.ro&&r.v.cf!=='Conferido').length);
+ // selo do cabeçalho (integrador, PR #109)
+ {const n=Number(v.ca_pendentes);v.ca_st=n?n+(n===1?' apontamento a revisar':' apontamentos a revisar'):'Fila em dia · nada a conferir';}
 }

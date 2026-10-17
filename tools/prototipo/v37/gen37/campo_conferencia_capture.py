@@ -11,7 +11,7 @@ def grid(cols,rows,**kw):
  if kw.get('gid')=='g_fila':grids.append(dict(id=kw['gid'],cols=cols,rows=rows,edit=kw['edit']))
  return ''
 pt=SimpleNamespace(**{k:(lambda *a,**kw:dict(t=str(a[0]) if a else '')) for k in ['txt','chip','br','mut','link','b','act']})
-g=dict(__file__=str(p/'areas/campo.py'),E=SimpleNamespace(_reset_screen=lambda x:None),Pt=pt,grid=grid,EXTRAJS=[''],HEIGHTS37={},H=lambda s:'{{'+s+'}}')
+g=dict(__file__=str(p/'areas/campo.py'),E=SimpleNamespace(_reset_screen=lambda x:None),Pt=pt,grid=grid,EXTRAJS=[''],HEIGHTS37={},H=lambda s:'{{'+s+'}}',BTN_ST=lambda *a,**kw:'')
 for k in ['imsg','ilink','bloco','kpis','shell37']:g[k]=lambda *a,**kw:''
 exec(compile(ast.Module(body=[node],type_ignores=[]),'<CA02>','exec'),g);g['_ca02']()
 (p/'campo_conferencia_captured.js').write_text('var GRIDS='+json.dumps(grids)+';\n'+g['EXTRAJS'][0])

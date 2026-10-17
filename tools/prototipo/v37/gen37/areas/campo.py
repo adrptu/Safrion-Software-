@@ -394,9 +394,8 @@ def _ca02():
         search=False,gid='g_proj',total=False,headtools=False)
     reabrir=imsg('Conferir reabertura do saldo', 'Prévia · nada foi alterado. A reabertura do saldo da OS-0417 ainda não está disponível neste protótipo. Confira os apontamentos e as condições na O.S.; a conferência e a aprovação continuam necessárias.', 'calendar', 'Ver disponibilidade da reabertura do saldo')+ilink('Abrir O.S.','OS.dc.html#OS-0417','arrow','Conferir a OS-0417')
     corpo=(
-      kpis([('PROVISÓRIOS','52 ha','aguardam conferência'),('FORA DA TOLERÂNCIA','1','horas · OS-0420'),('SOBRAS A RECEBER','10 sc','OS-0417 · com Paula')])
-      + bloco('Fila de conferência diária','Confira previsto contra observado por turno; clique no apontamento para corrigir com histórico.',g_fila,
-          imsg('Devolver para esclarecimento','Apontamento do dia 2 da OS-0420 devolvido a Carlos com a pergunta registrada — o fato permanece registrado, nada é apagado.','alert','Devolver o apontamento ao executor com uma pergunta'))
+      # EX-50(a)-SUP (PR #109) + TAB-07: sem cartões de resumo fixos; o selo conta o que falta revisar. Divergência é decisão do formulário da linha
+      bloco('Fila de conferência diária','Clique no apontamento para conferir o dia ou registrar divergência com motivo; nada altera área, horas ou consumo.',g_fila)
       + bloco('Reabrir saldo para execução','Reabra o saldo quando a conferência encontrar trabalho físico adicional (conferente ou PCP com permissão).',
           '',reabrir,tone='yellow')
       + bloco('Encerramento','Encerre a ordem só com término físico e todas as condições satisfeitas.',
@@ -405,11 +404,10 @@ def _ca02():
       + bloco('Roteiro da OS-0418 após a liberação','Confira como a fertirrigação será liberada, entregue, apontada e conciliada; cenário projetado, a ordem atual segue A liberar.',g_proj,
           ilink('Liberar OS-0418','OS.dc.html#OS-0418','check','Abrir a OS-0418 para o agrônomo liberar (pode ajustar)'),tone='yellow'))
     EXTRAJS[0]=cenario.js_prefixo()+CD.js_nucleo()+(Path(__file__).resolve().parent.parent/'campo_conferencia_ui.js').read_text()
-    prim=imsg('Conferir 2 apontamentos','Conferidos 2 de 2 · OS-0421 dia 4: 40 ha confirmados (190/350) · OS-0420 dia 2: 12 ha confirmados (30/100), horas acima do previsto registradas. Nenhuma ordem muda de etapa; o selo Impedida da OS-0420 permanece.',
-              'check','Conferir os apontamentos provisórios da fila',primary=True,small=False)
+    prim='<button type="button" onClick="{{ca_proximo}}" title="Abre o próximo apontamento a revisar" style="'+BTN_ST(True)+' display: inline-flex; align-items: center; gap: 8px;">Revisar próximo apontamento</button>'
     HEIGHTS37[fname]=1560
     shell37('CA-02','Apontamentos e conferência',corpo,primary_html=prim,
-      status=('2 a conferir · 1 divergência','yellow'),
+      status=('{{ca_st}}','yellow'),
       subtitle='Conferência diária confirma provisórios sem mudar a fase da ordem; consumo recebe um único evento de efeito.',
       footer='Fato permanece registrável fora da tolerância. Conferir um dia não conclui a ordem de vários dias; conferência posterior não repete baixa. '
              'Reabrir saldo: se a liberação não estiver mais vigente, o saldo reaberto recebe o selo Pausada até renovar as condições; correção só documental permanece Em conferência, sem reabrir período contábil nem reescrever fatos. '
