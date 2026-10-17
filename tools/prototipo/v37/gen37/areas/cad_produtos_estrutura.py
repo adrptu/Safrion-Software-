@@ -388,8 +388,10 @@ function EXTRAVALS(self,v){ const ver=c7ver(self), mud=c7mud(self), n=Object.key
       +(exc.length?' · '+exc.length+(exc.length>1?' códigos excluídos':' código excluído'):'')+' · v'+ver+' preservada'+(pend.length?' · fora até ter conta: '+pend.map(r=>r.v.cod).join(', '):'')+'.'}); }; }
 ''')
     HEIGHTS37[fname]=1000   # sem rolagem de página: só a árvore rola
-    pub=se('c7pub_tem',f'<button type="button" data-acao="publicar" onClick="{H("c7pub_go")}" style="{E.BTN_ST(False)}">{H("c7pub_t")}</button>')
-    shell37('CD-07','Estrutura gerencial',corpo,fname=fname,status=None,primary_html=pub+prim_cab('Criar código','g_dim_new'),search=False)
+    # MAIS-02 (proprietário, 17/10/2026: "toda tela que tiver mais ações pode ter esses 3 pontinhos nesses botões dessa região da tela"): com
+    # rascunho, "Publicar versão vN" vai para o ⋯ ao lado da primária "Criar código"; sem rascunho, nem o ⋯ aparece
+    pub=se('c7pub_tem',E.mais('Estrutura gerencial',[f'<button type="button" data-acao="publicar" onClick="{H("c7pub_go")}">{H("c7pub_t")}</button>']))
+    shell37('CD-07','Estrutura gerencial',corpo,fname=fname,status=None,primary_html=prim_cab('Criar código','g_dim_new')+pub,search=False)
     estado_cab(fname,'Estrutura gerencial','c7e')
     from areas.cadastros import ncol_dinamico
     ncol_dinamico(fname,['c7_ncol'])   # "No rascunho" entra e sai com o rascunho

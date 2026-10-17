@@ -31,7 +31,9 @@ try:
     cur=lambda: J("(document.querySelector('[aria-current=step]')||{innerText:''}).innerText.replace(/\\s+/g,' ')") or ''
     body=lambda: J("document.body.innerText") or ''
     url=lambda: J("location.pathname+location.hash") or ''
-    rowtxt=lambda t: J(f"(()=>{{const r=[...document.querySelectorAll('[role=row]')].filter(x=>x.offsetParent).find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); return r?r.innerText.replace(/\\s+/g,' '):'sem linha';}})()") or ''
+    # TAB-05 no motor (DS-MODULOS-2, 17/10/2026): as ações da linha ("Abrir compra", "Continuar…") moram no ⋯ da própria linha; o texto da linha
+    # termina com os itens desse ⋯
+    rowtxt=lambda t: J(f"(()=>{{const r=[...document.querySelectorAll('[role=row]')].filter(x=>x.offsetParent).find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); if(!r) return 'sem linha'; const m=[...r.querySelectorAll('.g2mais-menu [role=menuitem]')].map(i=>i.textContent.trim()).filter(Boolean).join(' '); return (r.innerText+(m?' '+m:'')).replace(/\\s+/g,' ');}})()") or ''
     def rowclick(t): r=J(f"(()=>{{const r=[...document.querySelectorAll('[role=row].g2ed')].filter(x=>x.offsetParent).find(r=>r.innerText.replace(/\\s+/g,' ').indexOf({json.dumps(t)})>=0); if(!r) return 'sem linha'; (r.querySelector('[role=cell] b')||r.querySelector('[role=cell] span')||r).click(); return 'ok';}})()"); time.sleep(.45); return r
     def cel(nome,col):   # TABELAS-FOCO: valor de uma coluna (cabeçalho) na linha cujo Insumo é nome
         return J(f"""(()=>{{const t=[...document.querySelectorAll('[role=table]')].find(t=>t.offsetParent); const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴]/g,'').replace(/\\s+/g,' ').trim().toUpperCase());

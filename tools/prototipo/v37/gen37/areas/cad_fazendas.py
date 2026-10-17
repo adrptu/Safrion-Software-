@@ -718,7 +718,9 @@ function EXTRAVALS(self,v){ const t=curT(self); const T=g2find(RW(self,'g_idt'),
     ui37.H_OVR.pop(fname,None); HEIGHTS37[fname]=1000
     # primária do cabeçalho (BOT-01): o próximo passo do talhão, quando falta o polígono (talhão ou parcela da safra aberta)
     prim=se('det_pend',f'<button type="button" data-acao="definir" onClick="{H("pg_abrir")}" style="{E.BTN_ST(True)}">{H("det_prim")}</button>')
-    shell37('CD-01','Talhão',corpo,fname=fname,crumbs_extra=[H('det_crumb')],status=None,primary_html=prim,search=False)
-    seletor=(f'<select aria-label="Talhão" value="{H("det_t")}" onChange="{H("det_set")}" style="font-family: inherit; font-size: 15px; font-weight: 800; color: {INK}; padding: 6px 30px 6px 12px; border-radius: 10px; border: 1px solid {LINE}; background: {SURF}; cursor: pointer;">'
+    # FIL-01 (DS-MODULOS-2, 17/10/2026): a escolha do talhão sai do lado do título e vai para a faixa comum de filtros (ui37.faixa_filtros), com o
+    # mesmo seletor das demais telas; o estado do talhão continua ao lado do título
+    seletor=(f'<select aria-label="Talhão" value="{H("det_t")}" onChange="{H("det_set")}" style="' + ui37.MF_SEL.format(LINE=LINE, SURF=SURF, INK=INK) + '">'
              f'<sc-for list="{H("det_opts")}" as="o" hint-placeholder-count="2"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select>')
-    _injeta(fname,'Talhão',seletor+estado_html('det')); _rolagem(fname)
+    shell37('CD-01','Talhão',corpo,fname=fname,crumbs_extra=[H('det_crumb')],status=None,primary_html=prim,search=False,mf_extra=ui37.faixa_campo('Talhão',seletor))
+    _injeta(fname,'Talhão',estado_html('det')); _rolagem(fname)

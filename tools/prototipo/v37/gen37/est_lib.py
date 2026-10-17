@@ -11,12 +11,15 @@ SETV = """((sel,val)=>{const i=document.querySelector(sel); if(!i) return 'sem c
 FIND = """((ts)=>[...document.querySelectorAll('[role=row]')].find(r=>ts.every(t=>r.innerText.indexOf(t)>=0)))"""
 
 
-LEGE = r"""(r=>{ const t=r.closest('[role=table]'); const raw=r.innerText.replace(/\s+/g,' '); if(!t) return raw;
-  const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\s+/g,' ').trim().replace(/ · \d+$/,'').toUpperCase()); if(hs.indexOf('LOTE')<0&&hs.indexOf('COM QUEM')<0) return raw;
+# TAB-05 no motor (DS-MODULOS-2, 17/10/2026): os botões de ação da linha moram no ⋯ da própria linha; o texto da linha termina com os itens
+# desse ⋯ ("ações que a linha oferece"), para "a linha oferece X" continuar valendo (contraprova da regra: esttest "TAB-05 …")
+LEGE = r"""(r=>{ const mais=[...r.querySelectorAll('.g2mais-menu [role=menuitem]')].map(i=>i.textContent.replace(/\s+/g,' ').trim()).filter(Boolean).join(' ');
+  const fim=x=>mais?(x+' '+mais):x; const t=r.closest('[role=table]'); const raw=r.innerText.replace(/\s+/g,' '); if(!t) return fim(raw);
+  const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>h.innerText.replace(/[⇅▾▴▼▲]/g,'').replace(/\s+/g,' ').trim().replace(/ · \d+$/,'').toUpperCase()); if(hs.indexOf('LOTE')<0&&hs.indexOf('COM QUEM')<0) return fim(raw);
   const cs=[...r.querySelectorAll('[role=cell]')]; const lotePre=hs.indexOf('REQUISIÇÃO')>=0||hs.indexOf('MOVIMENTO')>=0;
-  return cs.map((c,i)=>{ const v=c.innerText.replace(/\s+/g,' ').trim(); const h=hs[i]||'';
+  return fim(cs.map((c,i)=>{ const v=c.innerText.replace(/\s+/g,' ').trim(); const h=hs[i]||'';
     if(h==='LOTE'&&lotePre&&v&&v!=='—'&&!/^sem lote|^fora da/.test(v)) return 'lote '+v;
-    if(h==='COM QUEM'&&v&&v!=='—') return 'com '+v; if(h==='VALIDADE'&&v&&v!=='—'&&/^\d/.test(v)) return 'validade '+v; return v; }).filter(x=>x!=='').join(' ').replace(/\s+/g,' '); })"""
+    if(h==='COM QUEM'&&v&&v!=='—') return 'com '+v; if(h==='VALIDADE'&&v&&v!=='—'&&/^\d/.test(v)) return 'validade '+v; return v; }).filter(x=>x!=='').join(' ').replace(/\s+/g,' ')); })"""
 
 
 class Est:

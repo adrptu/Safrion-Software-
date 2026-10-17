@@ -22,10 +22,12 @@ PRI = BTN_ST(True, True)
 LNK = f'border: 0; background: transparent; padding: 0; color: {ACC}; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;'
 # escolha (Pix/boleto/cartão, Essencial/Completo, filtro rápido escolhido): tonal (DS-36), nunca o verde cheio da primária (A11)
 CSS = ('<style>'
-       '.assin-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}'
-       '.assin-kpi{padding:14px 16px;background:#FFFFFF;border:1px solid #E4E9E5;border-radius:16px;display:flex;flex-direction:column;gap:6px;min-width:0}'
-       '.assin-kl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#65736A;font-weight:700}'
-       ".assin-kv{font-family:'Sora','Manrope',sans-serif;font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.15;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}"
+       # TAB-07 (DS-MODULOS-2, 17/10/2026): os dados da assinatura são pares rótulo × valor do próprio registro (SEP-20261015 e), não cartões de
+       # resumo com número grande sobre a lista de faturas
+       '.assin-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 18px;padding:0 2px}'
+       '.assin-kpi{display:flex;flex-direction:column;gap:2px;min-width:0}'
+       '.assin-kl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#65736A;font-weight:700}'
+       '.assin-kv{font-size:15px;font-weight:700;line-height:1.3;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}'
        '.assin-ks{font-size:12.5px;color:#65736A;line-height:1.35}'
        '.assin-esc{font-family:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;border:1px solid #E4E9E5;background:#FFFFFF;color:#15201A;cursor:pointer}'
        '.assin-esc[aria-checked=true]{border-color:#1E7A4C;background:#E4F3E9;color:#1E7A4C}'
@@ -35,12 +37,12 @@ CSS = ('<style>'
        '.assin-lin>span:first-child{color:#65736A;flex-shrink:0;max-width:46%}.assin-lin>span:last-child{text-align:right;min-width:0;overflow-wrap:anywhere}'
        '.assin-pv{display:flex;flex-direction:column;gap:2px;padding:7px 0;border-bottom:1px solid #E4E9E5;font-size:13px}'
        '.assin-pv b{font-weight:700}.assin-pv .mud{color:#1E7A4C;font-weight:800}'
-       '@media (max-width:640px){.assin-kpis{grid-template-columns:1fr 1fr;gap:10px}.assin-kv{font-size:19px}.assin-kpi{padding:12px}}'
+       '@media (max-width:640px){.assin-kpis{grid-template-columns:1fr 1fr;gap:10px 14px}.assin-kv{font-size:14px}}'
        '</style>')
 
 
 def kpis_dyn(pre, rotulos):
-    """resumo de 4 números com valores do estado (2 × 2 no celular)."""
+    """pares rótulo × valor do registro, com valores do estado (4 por linha; 2 × 2 no celular). TAB-07: não é cartão de resumo."""
     return '<div class="assin-kpis">' + ''.join(
         f'<div class="assin-kpi"><div class="assin-kl">{esc(r)}</div><div class="assin-kv">{H(f"{pre}{i}v")}</div><div class="assin-ks">{H(f"{pre}{i}s")}</div></div>'
         for i, r in enumerate(rotulos)) + '</div>'

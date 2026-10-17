@@ -24,9 +24,9 @@
 | 17/10 00:03 | Excelência EX-01..48, entrada e ações (varredura e robô) | **Em parte:** os achados de entrada e ações viraram PRs do Codex, já publicados na v113 a v116; o restante está validado, mas não implantado | O.S., CA-01det, Kanban |
 | 17/10 08:40 | Agrupar por fazenda também com uma só | **Em implantação** (frente DRILL) | — |
 | 17/10 (manhã) | Cartões e tabelas com drill down recolhido por padrão | **Em implantação** (frente DRILL) | — |
-| 17/10 09:00 | Design system do Agrícola nos demais módulos; "⋯" no topo das telas | **Em implantação** (frente DS-MODULOS-2) | — |
+| 17/10 09:00 | Design system do Agrícola nos demais módulos; "⋯" no topo das telas | **Publicado na v128** (artefato versão 130): desvios do padrão 175 → 13 nas 148 telas; no topo, só a ação principal e o ⋯; as ações da linha no ⋯; telas fora do menu com "‹ Módulo" e Fazenda/Safra na faixa "Trabalhando em"; sem cartões de resumo soltos sobre as listas. Os 13 que restam estão em telas da frente aberta do Codex (CA-02, GE-*) ou na ficha impressa | Qualquer módulo: Compras, Estoque, Manutenção, Comercial |
 | 17/10 09:18 | Hover e UX dentro do mapa | **Em implantação** (MAPA-UX) | — |
-| 17/10 09:40 | Cartões da O.S. fora do padrão | **Em implantação** (DS-MODULOS-2) | — |
+| 17/10 09:40 | Cartões da O.S. fora do padrão | **Publicado na v128**: cartões compactos em grade (4 por fileira a 1440), selo da fase no título, até 4 campos; também no Agrupar por e a 390 px | Ordens de serviço › Cartões |
 | 17/10 09:42 | Seta de drill down só onde há detalhamento | **Em implantação** (DRILL) | — |
 | 17/10 09:55 | Agrupar O.S. de vários talhões com a mesma calda ou entrada, para aprovar uma a uma, liberar as aprovadas, separar os insumos de uma vez e seguir uma sequência contínua; modal fora do design system | **Publicado e integrado** (v121; PR #105 em 461e296): grupo proposto por calda, aprovação uma a uma, liberar as aprovadas, separação e sequência | O.S. › "Agrupar operações compatíveis" › Sulfato de magnésio 2 kg/ha |
 | 17/10 10:35 | Agrupar O.S.: mostrar insumos e datas de cada O.S./talhão logo ao abrir, para conferir e agrupar | **Publicado e integrado** (v121): insumos e datas visíveis ao abrir | O.S. › "Agrupar operações compatíveis" |

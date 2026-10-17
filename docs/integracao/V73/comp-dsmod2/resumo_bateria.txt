@@ -1,0 +1,25 @@
+build rc=0 _render montado: 156 páginas + 20 arquivos do site · dados da Lagoa Grande: sintéticos 5/5
+logistica_saida rc=0 14 testes G2/comSair/produção reais, fixture sintética de abertura; sem navegador.
+campo_conferencia rc=0 7 testes: G2 e comandos reais; perfil/storage simulados, sem UI/browser.
+ds_modulos rc=0 RESULTADO: catraca ok
+ds_1610_test rc=0 RESULTADO: 16 ok · 0 falhas
+cartoes_test rc=0 RESULTADO: 70/70
+ds_test rc=0 RESULTADO: OK 72/72
+visoes2_colunas_test rc=0 RESULTADO: 14/14
+tabelas_os_test rc=0 RESULTADO: 40/40 ok
+os_lote_test rc=1 
+seta_padrao_test rc=0 RESULTADO: 14 ok · 0 falhas
+sutest rc=0 RESULTADO: OK
+ma_vinculo_test rc=0 RESULTADO: 101/101 ok
+ma_rastreio_test rc=0 RESULTADO: 58/58 ok
+ma_unica_test rc=0 RESULTADO: 23/23 ok
+ma_revisao_test rc=0 RESULTADO: 18/18 ok
+ma_correcoes_pm_test rc=0 RESULTADO: 12/12 ok
+painel_fixo_2_test rc=1 
+textos_soltos_test rc=1 266 OK · 1 falhas · 66 telas · render /tmp/claude-0/int90/tools/prototipo/v37/gen37/_render
+links_ocultos_test rc=0 TOTAL 16 · falhas 0
+acao_unica_test rc=0 RESULTADO: 10 ok · 0 falhas (saf)
+componentes_test rc=0 RESULTADO: 3 ok · 0 falhas (matriz)
+paginas_scan_test rc=0 RESULTADO: 5 ok · 0 falhas (148 páginas)
+
+[exited with code 0]

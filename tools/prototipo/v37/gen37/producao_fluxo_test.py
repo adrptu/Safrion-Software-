@@ -34,7 +34,11 @@ window.N=s=>(s||'').replace(/\s+/g,' ').trim();
 window.VIS=e=>{ if(!e) return false; const r=e.getBoundingClientRect(); const cs=getComputedStyle(e); return r.width>1&&r.height>1&&cs.visibility!=='hidden'&&cs.display!=='none'; };
 window.__cl=window.__cl||0; window.__tx=window.__tx||0;
 window.CLK=(t,root)=>{ const r=root?document.querySelector(root):document; if(!r) return 'SEM RAIZ '+root; const els=[...r.querySelectorAll('button,a,[role=tab]')].filter(VIS);
-  const e=els.find(x=>N(x.innerText)===t)||els.find(x=>N(x.innerText).startsWith(t))||els.find(x=>(x.getAttribute('aria-label')||'')===t); if(!e) return 'NÃO ACHEI: '+t; window.__cl++; e.click(); return 'ok'; };
+  const e=els.find(x=>N(x.innerText)===t)||els.find(x=>N(x.innerText).startsWith(t))||els.find(x=>(x.getAttribute('aria-label')||'')===t);
+  if(!e){ /* TAB-05 no motor (DS-MODULOS-2, 17/10/2026): a ação da linha mora no ⋯ da linha; abre-se o ⋯ e escolhe-se o item (2 cliques, contados) */
+    const it=[...r.querySelectorAll('.g2mais-menu [role=menuitem]')].find(x=>N(x.textContent)===t||N(x.textContent).startsWith(t)); if(!it) return 'NÃO ACHEI: '+t;
+    window.__cl+=2; it.closest('.g2mais-w').querySelector('.g2mais').click(); it.click(); return 'ok (⋯ da linha)'; }
+  window.__cl++; e.click(); return 'ok'; };
 window.SETV=(sel,val,conta)=>{ const i=document.querySelector(sel); if(!i) return 'sem '+sel; const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:(i.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype);
   Object.getOwnPropertyDescriptor(P,'value').set.call(i,val); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true})); if(conta) window.__tx++; return 'ok'; };
 window.ROW=(t)=>{ const r=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>N(x.innerText).indexOf(t)>=0); if(!r) return 'sem linha '+t; window.__cl++; (r.querySelector('.g2pw')||r).click(); return 'ok'; };

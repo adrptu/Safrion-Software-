@@ -864,9 +864,11 @@ def ag01det():
     fname='AG-01det.dc.html'; E._reset_screen(fname)
     cp=[dict(k='pt',l='Ponto'),dict(k='gps',l='GPS'),dict(k='hora',l='Hora'),dict(k='cont',l='Contagem',t='num',a='r'),dict(k='nc',l='× NC'),dict(k='fotos',l='Fotos',t='num',a='r'),dict(k='qual',l='Qualidade',w=220)]
     gp=grid(cp,[],edit=dict(m='none'),search=False,gid='g_pts',total=False)
-    kpi=(f'<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px;"><sc-for list="{H("dt_kpi")}" as="k" hint-placeholder-count="4">'
-         f'<div style="background: {SURF}; border: 1px solid {LINE}; border-radius: 14px; padding: 12px 14px;"><div style="font-size: 10.5px; font-weight: 700; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase;">{H("k.l")}</div>'
-         f'<div style="font-family: {DISP}; font-size: 22px; font-weight: 700; margin-top: 2px;">{H("k.v")}</div><div style="font-size: 12px; color: {MUTED};">{H("k.s")}</div></div></sc-for></div>')
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): o resultado da vistoria são pares rótulo × valor do próprio registro (SEP-20261015 e), não cartões
+    # de resumo com número grande sobre a lista de pontos
+    kpi=(f'<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 18px; padding: 0 2px;"><sc-for list="{H("dt_kpi")}" as="k" hint-placeholder-count="4">'
+         f'<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;"><div style="font-size: 10.5px; font-weight: 700; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase;">{H("k.l")}</div>'
+         f'<div style="font-size: 15px; font-weight: 700;">{H("k.v")}</div><div style="font-size: 12px; color: {MUTED};">{H("k.s")}</div></div></sc-for></div>')
     rota=(f'<div style="position: relative; width: 100%; height: 300px; border-radius: 10px; overflow: hidden; background: #E3EBDD;" role="img" aria-label="Rota em W da vistoria">'
           f'<svg viewBox="0 0 1000 300" preserveAspectRatio="none" style="position: absolute; inset: 0; width: 100%; height: 100%;"><rect x="14" y="14" width="972" height="272" rx="18" fill="#B5E61D" fill-opacity=".45" stroke="#fff" stroke-width="3"/>'
           f'<polyline points="{H("dt_line")}" fill="none" stroke="{INK}" stroke-width="2" stroke-dasharray="6 5" opacity=".55"/></svg>'

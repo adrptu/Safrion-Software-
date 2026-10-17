@@ -121,6 +121,12 @@ def parte3(E):
     E.ok(not E.aberto(), 'salvar sempre grava (sem exigir causa ao contar)')
     t = E.rowtxt('INV-2611'); print('linha:', t); E.ok('aguardando aprovação' in t and 'informe a causa' in t and '1.200 L' in t, 'diferença vira ajuste aguardando aprovação; pede causa')
     E.ok('Recontar' in t and 'Aprovar ajuste' in t, 'linha oferece Recontar e Aprovar ajuste')
+    # TAB-05 no motor (DS-MODULOS-2, 17/10/2026): as duas ações ficam no ⋯ da linha, não como botão com texto na célula (contraprova: o render
+    # anterior mostra os botões na célula e reprova aqui)
+    tb = E.J("""(()=>{const r=[...document.querySelectorAll('[role=row]')].find(r=>r.innerText.indexOf('INV-2611')>=0); if(!r) return null; const vis=e=>e.getClientRects().length>0;
+      return {cel:[...r.querySelectorAll('[role=cell] button')].filter(b=>vis(b)&&!b.closest('.g2mais-w')).map(b=>b.innerText.trim()).filter(x=>/^(Recontar|Aprovar ajuste)/.test(x)),
+              mais:[...r.querySelectorAll('.g2mais-menu [role=menuitem]')].map(i=>i.textContent.trim())};})()""") or {}
+    E.ok(tb.get('cel') == [] and 'Recontar' in tb.get('mais', []) and 'Aprovar ajuste' in tb.get('mais', []), 'TAB-05: Recontar e Aprovar ajuste no ⋯ da linha, nenhum botão com texto na célula', tb)
     E.clk('Confira saldos'); t = E.rowtxt('G26-14'); print('glifosato:', t); E.ok('1.200 L' in t, 'saldo NÃO muda sem aprovação')
     E.row('G26-14'); og = E.aside(); print('origem:', og[:300]); E.ok('aguardando aprovação' in og, 'origem mostra ajuste pendente não aplicado')
     E.fechar()

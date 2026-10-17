@@ -20,8 +20,10 @@ shot = lambda n: a.c.shot(os.path.join(HERE, '_probe', n))
 def etapa(i):
     a.c.size(1440, 1100); a.abrir('EST'); a.J("document.querySelectorAll('nav[aria-label=\"Seções do estoque\"] button')[%d].click()" % i); time.sleep(.5)
 est3 = lambda: etapa(2)
+# TAB-05 no motor (DS-MODULOS-2, 17/10/2026): as ações da linha moram no ⋯ da própria linha; o texto da linha termina com os itens desse ⋯
 def linha(*ts):
-    return a.J("(()=>{const ts=%s; const r=[...document.querySelectorAll('[role=row]')].find(r=>ts.every(t=>r.innerText.indexOf(t)>=0)); return r?r.innerText.replace(/\\s+/g,' '):'';})()" % repr(list(ts)).replace("'", '"')) or ''
+    return a.J("(()=>{const ts=%s; const r=[...document.querySelectorAll('[role=row]')].find(r=>ts.every(t=>r.innerText.indexOf(t)>=0)); if(!r) return '';"
+               " const m=[...r.querySelectorAll('.g2mais-menu [role=menuitem]')].map(i=>i.textContent.trim()).filter(Boolean).join(' '); return (r.innerText+(m?' '+m:'')).replace(/\\s+/g,' ');})()" % repr(list(ts)).replace("'", '"')) or ''
 def btn_linha(ts, b):
     r = a.J("(()=>{const ts=%s; const r=[...document.querySelectorAll('[role=row]')].find(r=>ts.every(t=>r.innerText.indexOf(t)>=0)); if(!r) return 'sem linha'; const x=[...r.querySelectorAll('button')].find(x=>x.innerText.trim()===%s); if(!x) return 'sem botão'; x.click(); return 'ok';})()"
             % (repr(list(ts)).replace("'", '"'), '"' + b + '"')); time.sleep(.5); return r

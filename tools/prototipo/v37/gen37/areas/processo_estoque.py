@@ -228,8 +228,8 @@ function ecfCel(k,c,ask,PF){ const h=[{k:'chip',t:'Consumo em conferência',c:'y
   const AL=g2alc('AL-10'), AX=g2alcN(AL,'acima'), pode=exc?g2papel(PF,AX.papeis):!!g2umPapel(PF,AL.papeis);   /* coberto pela custódia: almoxarife ou gestor; acima: nível acima da AL-10 (CONF-01 R7) */
   if(ask!==k.id||!pode) return h.concat(pode?[{k:'act',t:'Aceitar consumo',fn:'cfa:'+k.id}]:[{k:'mut',t:'aceite: '+g2alcQuem('AL-10',exc?'acima':'base')}]).concat([{k:'act',t:'Recusar relato',fn:'cfr:'+k.id}]);
   let p; try{ p=cenConcPrevia(c,k.id); }catch(e){ p={erro:String(e.message||e)}; }
-  if(p.erro) return h.concat([{k:'mut',t:p.erro},{k:'act',t:'Recusar relato',fn:'cfr:'+k.id},{k:'act',t:'Voltar',fn:'cfno:x'}]);
-  return h.concat([{k:'txt',t:p.txt},{k:'act',t:'Confirmar aceite',fn:'cfok:'+k.id},{k:'act',t:'Voltar',fn:'cfno:x'}]); }
+  if(p.erro) return h.concat([{k:'mut',t:p.erro},{k:'act',t:'Recusar relato',fn:'cfr:'+k.id,decide:true},{k:'act',t:'Voltar',fn:'cfno:x',decide:true}]);
+  return h.concat([{k:'txt',t:p.txt},{k:'act',t:'Confirmar aceite',fn:'cfok:'+k.id,decide:true},{k:'act',t:'Voltar',fn:'cfno:x',decide:true}]); }   /* TAB-05: a pergunta da linha fica à vista (decide) */
 function eitens(c){ const out=[]; Object.keys(c.reqs||{}).sort((a,b)=>ereqN(a)-ereqN(b)).forEach(k=>{ const r=c.reqs[k]; (r.itens||[]).forEach(it=>out.push(eitem(c,r,it))); }); return out; }
 function econta(x){ return eq(x.it.solicitado,x.un)+' solicitado'+(x.dpart||[]).map(p=>' − '+eq(p[0],x.un)+' '+p[1]).join('')+' − '+eq(x.it.consumido,x.un)+' consumido − '+eq(x.it.custodia,x.un)+' em custódia'; }
 function elotes(c){ return Object.keys(c.lotes).map(k=>Object.assign({key:k},c.lotes[k])); }
@@ -478,7 +478,7 @@ function elotRow(c,l,ask,INV,GEST){ const un=l.un; const venc=evenc(l);
   const qrep=Math.min(l.quarentena||0,l.quarRep||0), qpen=(l.quarentena||0)-qrep;   // reprovado: segregado para devolução ao fornecedor (revisão do 853a6a8, achado 2)
   const rps=qrep>1e-9?cenRepsLote(c,l,qrep):[];   /* cada laudo com a sua quantidade, do histórico do lote (revisão do 16fb55e, ajuste 2) */
   const blq=l.quarentena>1e-9?[{k:'chip',t:eq(l.quarentena,un),c:'yellow'}].concat(qrep>1e-9?[{k:'chip',t:'Reprovado · '+eq(qrep,un)+' · '+(rps.length>1?'laudos '+rps.map(r=>(r.laudo||'—')+' '+eq(r.q,un)).join(' + '):'laudo '+((rps[0]||l.rep||{}).laudo||'—')),c:'red'}]:[])
-    .concat((venc||!(qpen>1e-9))?[]:(!GEST?[{k:'mut',t:'aguarda laudo · '+g2alcQuem('AL-11')+' libera ou reprova'}]:(ask===l.key?[{k:'mut',t:'informe o laudo acima'},{k:'act',t:'Manter',fn:'libno:x'}]:[{k:'act',t:'Liberar após inspeção',fn:'libq:'+l.key}]))):[{k:'mut',t:'—'}];
+    .concat((venc||!(qpen>1e-9))?[]:(!GEST?[{k:'mut',t:'aguarda laudo · '+g2alcQuem('AL-11')+' libera ou reprova'}]:(ask===l.key?[{k:'mut',t:'informe o laudo acima'},{k:'act',t:'Manter',fn:'libno:x',decide:true}]:[{k:'act',t:'Liberar após inspeção',fn:'libq:'+l.key}]))):[{k:'mut',t:'—'}];
   return {id:'L|'+l.key,ro:true,v:{nome:l.lote,prod:l.prod,un,local:l.local,fis:l.fisico,res:l.reservado,blq:l.quarentena,disp:cenDisp(l),expo:'',cust:'',cos:'',val:l.validade,vali:eym(l.validade),sitl:(venc?'Vencido':(l.quarentena>1e-9?'Em quarentena':'Disponível'))},
     s:{nome:l.lote,prod:l.prod,un,vali:(l.validade&&l.validade!=='—'?l.validade:''),sitl:(venc?'Vencido':(l.quarentena>1e-9?'Em quarentena':'Disponível'))},
     p:{prod:[{k:'mut',t:l.prod}],fis:[{k:'txt',t:eq(l.fisico,un)}],res:l.reservado>1e-9?[{k:'txt',t:eq(l.reservado,un)}]:[{k:'mut',t:'—'}],blq,disp:[{k:'b',t:eq(cenDisp(l),un)}],expo:[{k:'mut',t:''}],cust:[{k:'mut',t:''}],cos:[{k:'mut',t:''}],

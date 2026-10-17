@@ -11,7 +11,7 @@ from engine import (esc, INK, MUTED, LINE, BG, SURF, ACC, ACCS, YEL, YELS, RED, 
 import engine as E
 import dados2 as D2
 import cenario
-from ui37 import HEIGHTS37
+from ui37 import HEIGHTS37, volta_pilula   # CAB-1 (DS-MODULOS-2): o mesmo "‹ …" das telas, também na ficha impressa (fora da impressão)
 
 H = lambda s: '{{' + s + '}}'
 F = lambda: H('false')
@@ -177,7 +177,7 @@ def ficha():
     linha = lambda l: f'<div style="display: flex; gap: 8px; align-items: flex-end; font-size: 13px;"><span style="white-space: nowrap;">{l}</span><span style="flex-grow: 1; border-bottom: 1px solid #15201A; height: 18px;"></span></div>'
     sec = lambda t: f'<div style="font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; margin-top: 14px;">{t}</div>'
     body = (f'<div style="width: 794px; min-height: 1123px; box-sizing: border-box; padding: 36px 44px; background: #fff; display: flex; flex-direction: column; gap: 10px;">'
-            f'<div class="noprint" style="display: flex; gap: 8px; justify-content: flex-end;"><a href="OS-0424-app.dc.html" style="{_MINI} text-decoration: none;">Voltar à ficha do app</a><button type="button" onClick="{H("imprimir")}" disabled="{H("preparoBloq")}" style="{_MINIP}">Imprimir</button></div>'
+            f'<div class="noprint" style="display: flex; gap: 8px; justify-content: space-between; align-items: center;">{volta_pilula("Ficha do app","OS-0424-app.dc.html")}<button type="button" onClick="{H("imprimir")}" disabled="{H("preparoBloq")}" style="{_MINIP}">Imprimir</button></div>'
             f'<header class="g2-cab" style="display: flex; gap: 18px; align-items: flex-start;"><div style="flex-grow: 1;">'
             f'<div style="font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: {MUTED};">Ficha de preparo e aplicação · uso sem internet</div>'
             f'<h1 style="margin: 4px 0 2px; font-family: {DISP}; font-size: 24px;">{OS["id"]} · {OS["ativ"]} · {OS["local"]}</h1>'

@@ -212,10 +212,9 @@ function EXTRAVALS(self,v){
       r.s.estado=r.p.estado[0].t; self.setState({tick:Date.now()}); } };
 }
 '''
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
     corpo=(
-      kpis([('CARGAS HOJE','5','3 retiradas · 1 entrega · 1 transf.'),('ATRASADAS','1','T1 · prev. 09:10'),
-            ('OCUPAÇÃO DAS DOCAS','64%','doca 1 crítica até 10:45'),('FRETE PREVISTO','R$ 1,8 mil','só entrega do agricultor')])
-      + bloco('Agenda de cargas do dia','Confira janela, veículo e compatibilidade; clique na carga para reprogramar a janela.',g_ag,
+      bloco('Agenda de cargas do dia','Confira janela, veículo e compatibilidade; clique na carga para reprogramar a janela.',g_ag,
               ilink('Cotar frete','LO-04.dc.html','cash','Comparar cotações de frete em Controle fretes'))
       + bloco('Agrupar entregas compatíveis','Agrupe só entregas compatíveis em produto, conservação e rota.',g_cp,
               ibtn('Agrupar entregas','say_agrupar','layers','Simular agrupamento das entregas compatíveis com a Carga 07'),state='gray')
@@ -224,7 +223,7 @@ function EXTRAVALS(self,v){
     )
     shell37('LO-01','Programação de transporte',corpo,
       subtitle='Capacidade, janelas e docas das cargas de venda, transferência e compra.',
-      status=('1 carga atrasada · T1','red'),primary='Expedir cargas',primary_href='LO-02.dc.html',steps=faixa(1),
+      status=('5 cargas hoje · 1 atrasada (T1)','red'),primary='Expedir cargas',primary_href='LO-02.dc.html',steps=faixa(1),
       footer='Agendamento comercial e sequência real de carga são registros diferentes (48.2); atraso perde prioridade, não a janela original. DEMO-20.')
 
     # =====================================================================
@@ -308,6 +307,7 @@ function EXTRAVALS(self,v){ const s=self.state;
   SAY(self,v,{nf:'NF da Carga 07 reenviada à SEFAZ 09:32 · protocolo 8841 · autorização ainda pendente — solicitar não é obter; a saída continua bloqueada.',
     nf2:'NF da Carga 07 já solicitada 08:55 à Sandra (fiscal) · prazo 10:00 · protocolo 8841 pendente — a saída continua bloqueada (simulado · nenhuma mensagem real enviada).'});
   v.k_patio=s.t1?'4':'3'; v.k_patio_u=s.t1?'T2 em doca · T3 · T4 · T1 chegou '+s.t1:'T2 em doca · T3 pronto · T4 antecipado';
+  v.lo2_st='Doca 1 ocupada · Carga 07 impedida · '+v.k_patio+' no pátio'+(s.t1?' (T1 chegou '+s.t1+')':'');
   v.chamar=()=>{ toast(self,'Chamada bloqueada: doca 1 ocupada pelo T2 até a saída (lacre pendente; slot 08:35–09:40 excedido). O T3 é o próximo elegível e será chamado quando a doca 1 liberar'+(s.t1?'; o T1 (chegou '+s.t1+') entra depois do T3':'')+'. Resolva em Conferir carga do T2.'); };
   // ---- separação de lotes ----
   const openSep=(ped)=>PNLopen(self,'ps',{ped:ped||'',lote:'',qtd:ped==='TR-0459'?'10000':''});
@@ -359,10 +359,9 @@ function EXTRAVALS(self,v){ const s=self.state;
     self.setState({fv:(self.state.fv||4)+1,g2toast:'Fila v'+((self.state.fv||4)+1)+' publicada · '+r.id+' na posição '+alvo+' · motivo, autor e horário registrados; janelas originais e esperas preservadas.'}); };
 }
 '''
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
     corpo=(
-      kpis([('NO PÁTIO',H('k_patio'),H('k_patio_u')),('ATRASADOS','1','T1 · janela 08:00'),
-            ('IMPEDIDAS','1','Carga 07 · NF pendente'),('DOCA OCIOSA EVITÁVEL','0 min','fila reordenada com motivo')])
-      + bloco('Fila ao vivo','Chame o próximo elegível; clique na linha para reordenar com motivo.',
+      bloco('Fila ao vivo','Chame o próximo elegível; clique na linha para reordenar com motivo.',
               g_fi + enc,
               ibtn('Chamar próximo elegível','chamar','truck','Chamar o próximo caminhão elegível para a doca livre'),state='yellow')
       + bloco('Expedições em preparação','Separe os lotes aptos e acompanhe cada carga até a saída.',
@@ -372,7 +371,8 @@ function EXTRAVALS(self,v){ const s=self.state;
     )
     shell37('LO-02','Expedições e cargas',corpo,
       subtitle='Fila de presentes aptos, bloqueados e atrasados sobre as cargas da agenda; chamar exige doca livre e carga pronta.',
-      status=('Doca 1 ocupada · Carga 07 impedida','red'),primary='Conferir carga do T2',primary_href='LO-02det.dc.html',steps=faixa(2),
+      # TAB-07 (17/10/2026): o "no pátio" saiu do cartão de resumo e vai no selo, atualizado com a chegada
+      status=(H('lo2_st'),'red'),primary='Conferir carga do T2',primary_href='LO-02det.dc.html',steps=faixa(2),
       footer='Sem conectividade a fila local tem escritor único (portaria) e reconciliação idempotente — nunca duas filas autoritativas (FILA-07). DEMO-19/20. '
              f'Política v4 da fila: elegibilidade (presença, prontidão, doca livre, documentos) › janela em risco › perecibilidade › pontualidade › espera acumulada; tolerância de chegada: {TOLERANCIA}. '
              'Expedição: A preparar → Em separação → Conferência → Pronta p/ carregar → Carregada → Saída confirmada; qualidade, financeiro e documentos são dimensões separadas.')
@@ -445,17 +445,16 @@ function EXTRAVALS(self,v){
     toast(self,r.id+': saída prevista '+r.v.prev+' com '+r.v.transp+' · previsão de chegada recalculada (estimativa, não nova garantia); a saída continua bloqueada até a NF.'); self.setState({tick:Date.now()}); };
 }
 '''
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
     corpo=(
-      kpis([('AGUARDANDO SAÍDA','2','VG-118 lacre · VG-119 NF'),('DIVERGÊNCIAS ABERTAS','1',f'VG-117 · caso {VG117["caso"]}'),
-            ('CONCLUÍDAS 7 D','2','VG-117 parcial · VG-112'),('OTIF 30 D','92%','contra a janela original')])
-      + bloco('Viagens','Acompanhe cada viagem por eventos e abra o caso de cada recusa.',g_vg,
+      bloco('Viagens','Acompanhe cada viagem por eventos e abra o caso de cada recusa.',g_vg,
               ilink('Ver financeiro','GE-05.dc.html','cash','Ver recebíveis dos pedidos entregues (GE-05)'))
       + bloco('Entrega tardia · VG-117','Compare o compromisso original com a reprogramação aceita.',g_tar,state='yellow')
       + bloco('Rateio aplicado à viagem','Confira o rateio copiado da versão vigente na expedição.',g_rt,state='gray')
     )
     shell37('LO-03','Viagens e entregas',corpo,
       subtitle='Entrega tardia distingue causa, reprogramação e compromisso original; recusa parcial vira caso comercial com saldo preservado.',
-      status=('1 divergência aberta','yellow'),primary='Conciliar frete da VG-117',primary_href='LO-04.dc.html',steps=faixa(3),
+      status=('2 aguardando saída · 1 divergência aberta','yellow'),primary='Conciliar frete da VG-117',primary_href='LO-04.dc.html',steps=faixa(3),
       footer='Frete devido ao prestador é obrigação separada do recebível do cliente; o marco de pagamento usa o evento contratado no pedido (48.5). DEMO-08.')
 
     # =====================================================================
@@ -528,10 +527,9 @@ function EXTRAVALS(self,v){ const s=self.state;
       toast(self,'Cotação pedida a '+r.v.prest+' ('+r.v.carga+') · resposta até '+r.v.prazo+' (simulado · nenhuma mensagem real enviada).'); self.setState({tick:Date.now()}); } };
 }
 '''
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
     corpo=(
-      kpis([('PRESTADORES ELEGÍVEIS','1','+ frota própria · TransGrão inelegível'),('COTAÇÃO ABERTA','1','Carga 07 · até 10:30'),
-            ('A PAGAR','R$ 1.882','VG-117 · medição aceita'),('OTIF MÉDIO 30 D','92%','vs. janela original')])
-      + bloco('Comparar cotações · Carga 07','Compare o custo total na mesma base e contrate a melhor opção elegível.',
+      bloco('Comparar cotações · Carga 07','Compare o custo total na mesma base e contrate a melhor opção elegível.',
               nota('Mesma base: 9,6 t · 512 km · refrigerado')+g_ct,state='yellow')
       + bloco('Prestadores e frota','Mantenha preço e condição de cada prestador; clique na linha para ajustar.',g_pr)
       + bloco('Conferência e pagamento do serviço','Encaminhe ao pagamento só o serviço medido e aceito.',g_sv,
