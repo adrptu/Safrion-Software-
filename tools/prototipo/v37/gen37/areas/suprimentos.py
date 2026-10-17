@@ -329,9 +329,9 @@ def su02():
                 fs('ini','Início','date',req=True,**{'def':'2026-10-01'}),fs('fim','Fim','date',req=True,**{'def':'2026-12-20'}),fs('just','Justificativa','area',req=True)])}
     for key,title,ok in [('aprovar','Revisar proposta de política','Aprovar proposta'),('publicar','Publicar versão aprovada','Publicar versão')]:
         pn[key]=dict(title=title,sub='Confira a versão e os valores. Aprovar não publica; publicar altera a vigência e gera recibo.',ok=ok,
-                     fields=[fs('id','Política','txt',ro=True,req=True),fs('rev','Revisão da proposta','num',ro=True,req=True)])
+                     fields=[fs('id','Política','txt',ro=True,req=True,cond=dict(k='_meta',eq='mostrar')),fs('rev','Revisão da proposta','num',ro=True,req=True,cond=dict(k='_meta',eq='mostrar'))])
     pn['simular']=dict(title='Simular antecedência',sub='Calcula prazo mais segurança; não presume consumo nem risco de ruptura.',ok='Simular',
-                       fields=[fs('id','Política','sel',opts=[r['v']['grp'] for r in rows],req=True)])
+                       fields=[fs('id','Política','sel',opts=[r['v']['grp'] for r in rows],req=True,**{'def':rows[0]['v']['grp']})])
     seedrows=[dict(id=r['id'],v=r['v']) for r in rows]
     root=os.path.dirname(os.path.dirname(__file__))
     service=Path(root,'sup_politicas.js').read_text(encoding='utf-8')

@@ -6,6 +6,7 @@ function supPolRefresh(self){let state;try{state=supPolCurrent();}catch(e){RW(se
  {t:p.proposta?'Proposta r'+p.proposta.rev+': '+p.proposta.dados.just:'Nenhuma proposta pendente.'}].concat(p.recibos.map(x=>({t:'Recibo '+x.id+' · v'+x.versao+' · publicado por '+x.por})),(p.excecoes||[]).map(x=>({t:'Exceção submetida · '+x.alteracao+' · '+x.inicio+' a '+x.fim+' · '+x.just})));});return state;}
 function supPolActions(self,state){if(!state)return;RW(self,'g_pol').forEach(r=>{const p=state.politicas[r.id],q=p&&p.proposta;if(q)r.p.estado.push({k:'act',t:q.estado==='Aprovada'?'Publicar versão aprovada':'Revisar proposta',fn:(q.estado==='Aprovada'?'pol_publicar:':'pol_aprovar:')+r.id,sec:true});});}
 function supPolBind(self,v){
+ self.g2openDraft=(gid,r,draft)=>gid==='g_pol'?Object.assign({},draft,{_rev:String(r.v._rev)}):draft;
  v.pol_aprovar=id=>{const p=supPolCurrent().politicas[id];if(!p||!p.proposta)return;pnOpen(self,'aprovar',{id,rev:p.proposta.rev});};
  v.pol_publicar=id=>{const p=supPolCurrent().politicas[id];if(!p||!p.proposta)return;pnOpen(self,'publicar',{id,rev:p.proposta.rev});};
  v.sim_sim=()=>pnOpen(self,'simular');v.sim_pub=()=>toast(self,'Abra a política e publique a proposta aprovada na própria linha.');

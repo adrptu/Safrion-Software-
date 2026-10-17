@@ -1,7 +1,12 @@
 // SU-02: propostas e aprovações do protótipo; perfil de demonstração não é autorização de servidor.
 const SUP_POL_KEY='safrion.su02.politicas.v1';
 function supPolClone(x){return JSON.parse(JSON.stringify(x));}
-function supPolSeed(rows){return {schema:1,rev:0,politicas:Object.fromEntries(rows.map(r=>[r.id,{vigente:supPolClone(r.v),versao:Number((String(r.v.estado).match(/v([0-9.]+)/)||[])[1])||1,nextRevision:1,proposta:null,recibos:[]}]))};}
+function supPolSeed(rows){const state={schema:1,rev:0,politicas:Object.fromEntries(rows.map(r=>[r.id,{vigente:supPolClone(r.v),versao:Number((String(r.v.estado).match(/v([0-9.]+)/)||[])[1])||1,nextRevision:1,proposta:null,recibos:[]}]))};
+ // Dados sintéticos migrados para estados explícitos; nenhum aceite é presumido.
+ const diesel=state.politicas.p4;if(diesel&&diesel.vigente.grp==='Diesel S10'){diesel.versao=4;diesel.vigente.estado='Vigente · v4';diesel.proposta={dados:Object.assign({},supPolClone(diesel.vigente),{just:'Exemplo de proposta de reposição de diesel para o plantio; aguarda análise do gestor.'}),base:4,rev:1,estado:'Proposta',aprovacao:null};diesel.nextRevision=2;}
+ const pecas=state.politicas.p5;if(pecas&&pecas.vigente.grp==='Peças de manutenção'){pecas.versao=3;pecas.vigente.estado='Vigente · v3';pecas.excecoes=[{alteracao:'Mínimo 2 → 4 un durante a colheita (exemplo)',inicio:'2026-10-01',fim:'2026-12-20',just:'Exemplo sintético migrado; exige análise antes de vigorar.',estado:'Submetida'}];}
+ return state;}
+
 function supPolRead(storage,seed){const raw=storage.getItem(SUP_POL_KEY);if(!raw)return supPolClone(seed);const x=JSON.parse(raw);if(x.schema!==1||!Number.isSafeInteger(x.rev)||!x.politicas)throw Error('Dados de políticas inválidos; preserve os dados e recupere a cópia anterior.');return x;}
 function supPolWrite(storage,seed,next,expected){const atual=supPolRead(storage,seed);if(atual.rev!==expected)throw Error('A política mudou; reabra e confira a versão atual.');storage.setItem(SUP_POL_KEY,JSON.stringify(next));return next;}
 function supPolValida(v){if(!String(v.just||'').trim())throw Error('Informe a justificativa.');for(const [k,max] of [['seg',60],['prazo',120]])if(!Number.isSafeInteger(v[k])||v[k]<0||v[k]>max)throw Error('Informe dias inteiros válidos de segurança e prazo.');if(!Number.isFinite(v.lim)||v.lim<0)throw Error('Informe um limite econômico válido.');for(const k of ['lote','dep','abc','crit','met'])if(!String(v[k]||'').trim())throw Error('Informe '+k+'.');}
