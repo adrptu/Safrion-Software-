@@ -468,13 +468,17 @@ const G2_CD_MAX=4;   // campos por cartão (16/10/2026, proprietário: "poluiç�
 function g2cdLarg(c){ let w=0, n=0; for(const p of ((c&&c.parts)||[])){ if(!p) continue; if(p.isBr) break; if(p.isMut&&n) continue; n++;
     const t=String(p.isIco?(p.icoTem?(p.icoTxt||''):''):(p.t||'')); w+=t.length*(p.isB?7.6:7.1)+(p.isChip?28:p.isTag?20:p.isIco?20:0); }
   return w+(n>1?(n-1)*6:0); }
-// VIS-06 · cartões em linha (16/10/2026, proprietário: "deixe o modo de visão do cartão igual de planos agronômicos, ficou muito mais bonito,
-// organizado e produtivo"): um cartão por linha, como as Atividades do plano: seta (itens dentro), título, as mesmas colunas em todos os
-// cartões da lista (as G2_CD_MAX primeiras à vista com valor), alinhadas, e o ⋯. Rótulos uma vez, no alto (no celular, dentro do cartão)
+// VIS-07 · cartões compactos (17/10/2026, proprietário: "os cartoes em ordem de serviço estao fora do padrao design system"; revê a VIS-06 de
+// 16/10, "um cartão por linha com colunas alinhadas"): grade de cartões (engine.CARTOES_CSS); em cada um, seta (itens dentro), título com o selo
+// de estado, as G2_CD_MAX primeiras colunas à vista com valor, cada uma com o seu rótulo, e o ⋯. A largura medida (_cdgtc) fica sem uso no desenho
 function g2cdVals(self,sp,v){ const id=sp.id, rows=v[id+'_rows']||[], cols=v[id+'_mdcols']||g2colsVis(self,sp), off=sp.sel?1:0, n=cols.length;
   const parte=(rw)=>{ const cs=rw.cells||[]; return {sels:(off&&cs[0]&&cs[0].isSel)?[cs[0]]:[], dat:cs.slice(off,off+n), tr:cs.slice(off+n)}; };
   const P0=rows.map(parte), dat=P0.filter((P,k)=>!rows[k].grp).map(P=>P.dat);
-  const ix=[]; for(let i=1;i<n&&ix.length<G2_CD_MAX;i++) if(cols[i]&&dat.some(d=>!g2cdVazio(d[i]))) ix.push(i);
+  // VIS-07 (17/10/2026): o selo de estado (1ª coluna à vista em que toda célula com valor começa por um selo: Fase, Situação) vai ao lado do
+  // título e sai dos campos; os campos são as G2_CD_MAX colunas seguintes com valor
+  const ini=(c)=>((c&&c.parts)||[]).find(p=>p&&!p.isBr), sl=(()=>{ for(let i=1;i<n;i++){ if(!cols[i]) continue; const cs=dat.map(d=>d[i]).filter(c=>!g2cdVazio(c)); if(cs.length&&cs.every(c=>{ const p=ini(c); return !!(p&&p.isChip); })) return i; } return -1; })();
+  const ix=[]; for(let i=1;i<n&&ix.length<G2_CD_MAX;i++) if(i!==sl&&cols[i]&&dat.some(d=>!g2cdVazio(d[i]))) ix.push(i);
+  const selo=(P)=>{ if(sl<0) return []; const c=P.dat[sl]; if(g2cdVazio(c)) return []; const out=[]; for(const p of (c.parts||[])){ if(!p||p.isBr) break; if(p.isChip) out.push(p); } return out; };
   const lab=(i)=>String((cols[i]&&cols[i].l)||'').split(' · ')[0], num=(i)=>!!(cols[i]&&cols[i].a==='r'), fcls=(i)=>'g2cd-f'+(num(i)?' g2cd-num':'');
   const larg=ix.map(i=>{ let w=lab(i).length*7.2; dat.forEach(d=>{ if(!g2cdVazio(d[i])) w=Math.max(w,g2cdLarg(d[i])); }); return Math.round(Math.min(240,Math.max(56,w))+18); });
   const fs=(P)=>ix.map(i=>{ const c=P.dat[i], vz=g2cdVazio(c); return {l:lab(i), parts:vz?[]:c.parts, cls:fcls(i)}; });
@@ -483,7 +487,8 @@ function g2cdVals(self,sp,v){ const id=sp.id, rows=v[id+'_rows']||[], cols=v[id+
   v[id+'_cdcar']=temCar?'1':''; v[id+'_cdhd']=ix.map(i=>({l:lab(i), cls:fcls(i)})); v[id+'_cdhdT']=lab(0); v[id+'_cdhdHas']=ix.length>0;
   const base=(rw)=>{ const P=parte(rw), t0=P.dat[0]||{}, ed=/\bg2ed\b/.test(rw.cls||''), fl=/\bg2flash\b/.test(rw.cls||'');
     const notas=P.tr.filter(c=>c&&c.isData&&!g2cdVazio(c));
-    return {P, t0, id:rw.id, ed, fl, tab:rw.tab, open:rw.open, key:rw.key, sels:P.sels, tparts:t0.parts||[], acts:P.tr.filter(c=>c&&c.isDel), nota:notas.length?notas[0].parts:[], temNota:notas.length>0}; };
+    const se=selo(P);
+    return {P, t0, id:rw.id, ed, fl, tab:rw.tab, open:rw.open, key:rw.key, sels:P.sels, tparts:t0.parts||[], acts:P.tr.filter(c=>c&&c.isDel), nota:notas.length?notas[0].parts:[], temNota:notas.length>0, selo:se, temSelo:se.length>0}; };
   // árvore: a seta à esquerda abre os filhos dentro do cartão (a mesma expansão da seta da Tabela, st.x); "n itens" ao lado do título, salvo
   // quando o título já diz a contagem ("Adjuvantes 2 itens")
   const card=(rw)=>{ const b=base(rw), t0=b.t0, abre=!!(rw.has&&t0.caretExp==='true'), nk=rw.nk||0, nome=g2cdNome(t0), ja=new RegExp('(^|\\s)'+nk+'\\s+[A-Za-zÀ-ÿ]').test(nome), kn=nk+(nk===1?' item':' itens');
@@ -601,7 +606,7 @@ function g2vals(self,sp,v,mask){
       const raw1=c.un?raw0.map(p=>(p&&typeof p.t==='string'&&['txt','b','cn','chip'].indexOf(p.k)>=0)?Object.assign({},p,{t:g2unf(p.t,c)}):p):raw0;
       let raw=(ci===0&&sicoP.length)?sicoP.concat(raw1):raw1;
       // 15/10 (proprietário): os botões da linha vão para o ⋯; o atalho de navegação ("Planejar ›", "Safra 2026/27 ›") fica na célula: diz onde a coisa mora
-      if(sp.rmenu){ const vai=p=>p&&p.k==='act'&&!p.desce&&!p.full&&!/›\s*$/.test(String(p.t||'')); const fica=raw.filter(p=>!vai(p)); if(fica.length<raw.length){ raw.forEach(p=>{ if(vai(p)) acts.push(p); }); raw=fica; } }
+      if(sp.rmenu){ const vai=p=>p&&p.k==='act'&&!p.desce&&!p.full&&!p.decide&&!/›\s*$/.test(String(p.t||''))&&!/^\+?\s*Incluir\b/.test(String(p.t||''));   /* ficam na célula: a decisão do momento (decide: confirmar ou voltar de uma pergunta da linha) e o "Incluir" da linha de inclusão ou da mãe vazia (BOT-10, CAD-03) */ const fica=raw.filter(p=>!vai(p)); if(fica.length<raw.length){ raw.forEach(p=>{ if(vai(p)) acts.push(p); }); raw=fica; } }
       const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':'')+(c.nr?' g2nr':'')+(c.a==='r'?' g2celn':''),parts:(ci===0&&casou?raw.concat([{k:'br'},{k:'mut',t:casou}]):raw).map((p,i,arr)=>g2part(g2semSep(arr,i),v)),pw:'max-width:'+(c.w||340)+'px;',
         st:(c.nr?'padding:0 2px;':'padding:6px 8px;')+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&arv?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:inherit;':'')};
       // TAB-08/TAB-04 (16/10/2026): a linha que abre o detalhe mostra a seta (TAB-11, sem girar) no começo; com filhos, a seta gira e abre ali mesmo

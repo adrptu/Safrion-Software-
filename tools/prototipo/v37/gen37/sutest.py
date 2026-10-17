@@ -23,10 +23,12 @@ try:
     c.size(1440,1100)
     # ---------- SU-06 · DEMO-02 ----------
     go('SU-06.dc.html')
-    ok('10 t' in txt('EM QUARENTENA\\s+10 t'),'SU-06 KPI quarentena inicial 10 t')
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): o cartão "EM QUARENTENA" saiu de cima da lista; a quarentena é lida no selo do cabeçalho
+    # (contraprova: o render anterior ainda tem o cartão e reprova o 2º ok)
+    ok('10 t em quarentena' in J("document.querySelector('h1').parentElement.innerText"),'SU-06 selo do cabeçalho: 10 t em quarentena')
+    ok(not J("/EM QUARENTENA\\s+\\d/.test(document.querySelector('main').innerText)"),'SU-06 TAB-07: sem cartão de resumo da quarentena sobre a lista')
     clk('Liberar qualidade'); t=T(); print('   ',t)
     ok('10.000 kg liberados' in t and 'LQ-2031' in t,'SU-06 liberar qualidade soma uma vez com recibo')
-    ok(txt('EM QUARENTENA\\s+\\S+ t').endswith(' 0 t') or txt('EM QUARENTENA\\s+\\S+ t').endswith('\n0 t'),'SU-06 KPI quarentena vai a 0 t')
     r=row('^NF 4501\\s+PC-088'); print('   ',r)
     ok('60.000 kg' in r and 'Liberar qualidade' not in r and 'LQ-2031' in r,'SU-06 linha PC-088 60.000 aptos e botão trocado pelo recibo')
     ok('quarentena' not in J("document.querySelector('h1').parentElement.innerText").lower(),'SU-06 selo sem quarentena')

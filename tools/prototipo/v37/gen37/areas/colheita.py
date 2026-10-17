@@ -189,10 +189,9 @@ def co01():
          o=['Previsto 8.990 sc × realizado 8.612 sc (T3 · 96 ha)','Versão medida: v ago-26 (congelada em 01/08)'])],
       edit=dict(m='origin',title='Erro da previsão',fields=[dict(k='ciclo',l='Ciclo',ro=True),dict(k='ver',l='Versão congelada',ro=True)]),
       search=False,gid='g_wape',total=False)
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
     corpo=(
-      kpis([('OFERTA S39 (BRUTA)','12,0 t','mamão · T7'),('RENDIMENTO CLASSE A','80%','curva de packing'),
-            ('FALTA NO PV-031','0,4 t','renegociar ou outra origem'),('FUTURAS EM CLASSE A','9,6 t','contra pedido de 10,0 t')])
-      + sec('Oferta semanal por parcela','Confira a faixa prevista por parcela; clique na linha para revisar a previsão em rascunho.',
+      sec('Oferta semanal por parcela','Confira a faixa prevista por parcela; clique na linha para revisar a previsão em rascunho.',
         [ilnk('Coletar contagem','MB-07.dc.html','leaf','Coletar contagem de frutos no celular (observação, não publica)'),
          imsg('Publicar versão','Não publicada: você não tem autorização de publicação. A agrônoma responsável (Ana) recebe o rascunho v S39-03 para publicar · a v S39-02 segue vigente e congelada para medir erro.',
               'doc','Publicar a versão em rascunho (exige autorização)')],g_of)
@@ -235,10 +234,9 @@ def co02():
                 dict(k='equipe',l='Equipe e máquinas',t='sel',req=True,opts=['Turma A (8) · 2 carretas','Turma B (12) · 1 colhedora','Colhedora CH-01','a alocar']),
                 dict(k='prev',l='Previsto',ro=True,help='Vem da previsão publicada (CO-01).')]),
       gid='g_oc',total=False)
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
     corpo=(
-      kpis([('JANELA S39','22–27/09',''),('EM EXECUÇÃO','1','+1 em conferência'),
-            ('SALDO DA SEMANA','2,7 t','+ 15 sc café'),('RECEBIMENTO','14 t/d','packing')])
-      + sec('Ordens de colheita do período','Prepare e libere as ordens; clique na linha para ajustar janela e equipe.',
+      sec('Ordens de colheita do período','Prepare e libere as ordens; clique na linha para ajustar janela e equipe.',
         [idrw('Preparar ordens do período',dict(title='Preparar ordens · semana 40',sub='deriva da previsão publicada e reserva recursos compartilhados',
            fields=[('Período','29/09 – 04/10'),('Origem da demanda','Previsão S40 + pedido PV-031'),('Equipe','Turma A (8)'),('Máquinas','2 carretas · 1 empilhadeira'),
                    ('Capacidade de recebimento','14 t/dia · packing Sede')],
@@ -247,7 +245,7 @@ def co02():
               'check','Liberar as ordens em A liberar que têm recursos e capacidade')],g_oc))
     shell37('CO-02','Programação e ordens de colheita',corpo,
       subtitle='Recorte da agenda integrada com maturação, pedido, equipe, embalagem, packing e transporte — capacidade em unidades compatíveis.',
-      status=('1 impedida · 1 em conferência','yellow'),steps=faixa(2),
+      status=('Janela 22–27/09 · 1 impedida · 1 em conferência','yellow'),steps=faixa(2),
       footer='Ciclo canônico: A liberar → Liberadas → Em execução → Em conferência → Encerradas. Finalizar turno mantém Em execução; término físico entra em Em conferência. '
              'Avanço × carga: área e horas vão no avanço e o peso na carga, sem misturar unidades. Hectares concluídos não geram quilogramas de estoque, e pesagens não duplicam a produção da mesma carga '
              '(ex.: avanço de 30 ha numa ordem de 100 ha fica como 30 ha realizados e 70 ha de saldo; a pesagem é conciliada depois, sem impedir o registro do turno).')
@@ -629,10 +627,9 @@ def co07():
     VIS=[('Tudo',''),('Livres','L'),('Comprometidos','C'),('Bloqueados','B')]
     segh=('<div role="group" aria-label="Visão do estoque" style="display: inline-flex; flex-wrap: wrap; padding: 3px; border-radius: 999px; background: '+GRAYS+'; gap: 2px;">'
           + ''.join(f'<button type="button" onClick="{H("c7v"+str(i))}" title="Mostrar {esc(t.lower())}" style="{H("c7s"+str(i))}">{esc(t)}</button>' for i,(t,_) in enumerate(VIS))+'</div>')
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
     corpo=(
-      kpis([('GRÃOS · FÍSICO',f'{milhar(GRAOS_FIS)} sc','50 kg'),('CAFÉ BLOQUEADO',f'{milhar(LB["sc"])} sc','60 kg'),
-            ('MAMÃO INDISPONÍVEL','11,7 t','9,6 A + 1,8 B em inspeção · 0,3 retorno'),('GRÃOS · DISPONÍVEL',f'{milhar(GRAOS_DISP)} sc','50 kg')])
-      + sec('Saldo por lote, classe, local e proprietário','Escolha a visão e clique no lote para ver os movimentos que formam o saldo.',
+      sec('Saldo por lote, classe, local e proprietário','Escolha a visão e clique no lote para ver os movimentos que formam o saldo.',
         [segh,ilnk('Transferir','SU-08.dc.html','truck','Transferir saldo entre locais'),ilnk('Inventariar','SU-09.dc.html','lista','Abrir contagem de inventário')],g_es)
       + sec('Reserva não conta duas vezes','Desconte a reserva uma única vez do físico apto.','',
         nota(f'Soja: físico apto {B("38.420 sc")} − reserva {B("3.875 sc")} = disponível {B("34.545 sc")}.'),state='gray'))

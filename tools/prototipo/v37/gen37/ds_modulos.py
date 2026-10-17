@@ -7,10 +7,13 @@ passo 3). Abre cada tela do _render a 1440 × 900, no estado inicial, e mede as 
   BOT-01  mais de um botão verde no mesmo contexto (cabeçalho ou bloco)
   FIL-01  filtro (Fazenda, Safra, Cultura, Talhão, Filtrar…) fora da faixa comum ou faixa sem o funil
   TAB-07  cartões de resumo (números grandes) acima da lista de trabalho
-  TAB-05  botão de ação com texto dentro da célula da tabela (fora do ⋯; link e atalho "… ›" ficam)
+  TAB-05  botão de ação com texto dentro da célula da tabela (fora do ⋯; link, atalho "… ›" e o "Incluir" da linha de inclusão ficam)
   TAB-08  tabela própria sem ⇅ e funil no cabeçalho
   VIS-05  lista do motor sem o modo Cartões (Tabela | Cartões ou seletor de visões)
   VIS-06  lista de cartões própria (fora do motor e das telas de entrada)
+  MAIS-02 região de ações do cabeçalho (à direita do título) com mais que a primária e o "⋯ Mais ações" (fora: "‹ Módulo", Tabela | Cartões e
+          a decisão do momento, data-decide); proprietário, 17/10/2026, sobre Manutenção › Planos: "toda tela que tiver mais ações pode ter esses
+          3 pontinhos nesses botões dessa região da tela"
 Saída: tabela por módulo e por regra e o JSON em DS_MOD_JSON (padrão: docs/integracao/V72/ds-modulos.json no repositório).
 Catraca ("mantenha sempre o padrão"): --catraca falha se a contagem de alguma regra em algum módulo passar da base gravada
 (ds_modulos_base.json); --grava grava a base atual. Desvio corrigido baixa a base na próxima gravação.
@@ -60,22 +63,28 @@ MEDE = r"""(()=>{
      const r=d.getBoundingClientRect(); if(r.bottom>lt||r.height>240||r.width>900) return false; return [...d.querySelectorAll('div,span,b')].some(x=>parseFloat(getComputedStyle(x).fontSize)>=20&&[...x.childNodes].some(t=>t.nodeType===3&&/\d/.test(t.textContent))); });
    const fora=big.filter(d=>!big.some(o=>o!==d&&o.contains(d))); out.resumo=fora.length; out.resumoTx=fora.slice(0,4).map(d=>n(d.innerText).slice(0,40)); } else { out.resumo=0; out.resumoTx=[]; }
  // TAB-05: ação com texto na célula
- out.acaoCelula=[...document.querySelectorAll('[role=table][data-g2g] [role=cell] button')].filter(b=>vis(b)&&!b.closest('.g2mais-w,.g2mais-menu')&&!b.matches('.g2car,.g2del,.g2mais,input')&&/[A-Za-zÀ-ÿ]{3}/.test(n(b.innerText))&&!/›\s*$/.test(n(b.innerText))).map(b=>n(b.innerText).slice(0,24));
+ out.acaoCelula=[...document.querySelectorAll('[role=table][data-g2g] [role=cell] button')].filter(b=>vis(b)&&!b.closest('.g2mais-w,.g2mais-menu')&&!b.matches('.g2car,.g2del,.g2mais,input')&&/[A-Za-zÀ-ÿ]{3}/.test(n(b.innerText))&&!/›\s*$/.test(n(b.innerText))&&!/^\+?\s*Incluir\b/.test(n(b.innerText))).map(b=>n(b.innerText).slice(0,24));   // "Incluir" da linha de inclusão fica (BOT-10, CAD-03)
  out.acaoCelulaN=out.acaoCelula.length; out.acaoCelula=[...new Set(out.acaoCelula)].slice(0,4);
  // TAB-08: tabela própria sem ⇅ e funil
  out.tabPropria=[...document.querySelectorAll('[role=table],table')].filter(t=>vis(t)&&!t.hasAttribute('data-g2g')).filter(t=>{ const h=t.querySelector('[role=columnheader],th'); return h&&!t.querySelector('.g2hb'); }).map(t=>n(t.getAttribute('aria-label')||t.className||'tabela').slice(0,40));
  // VIS-05: lista do motor sem Cartões
  const temCart=!!document.querySelector('[data-modo=cartoes],[data-visao=cartoes],[data-visao-menu=cartoes]')||[...document.querySelectorAll('main button')].some(b=>n(b.innerText)==='Cartões');
  out.semCartoes=temCart?[]:[...document.querySelectorAll('[role=table][data-g2g]')].filter(vis).map(t=>t.getAttribute('data-g2g'));
+ // MAIS-02: ações à direita do título, no cabeçalho da tela; o ⋯, o ⓘ, o "‹ Módulo", a troca de visão e a decisão do momento não contam
+ const h1=hd&&hd.querySelector('h1');
+ out.cabAcoes=h1?[...h1.parentElement.querySelectorAll('button,a[href]')].filter(b=>vis(b)&&(h1.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING)&&!b.closest('.g2mais-menu,[role=group],[role=tablist],[role=radiogroup],[data-decide]')&&!b.matches('.g2mais,.volta37,.g2-info,[aria-label^="Voltar"],[aria-pressed],[role=tab]')).map(b=>n(b.innerText||b.getAttribute('aria-label')).slice(0,28)):[];
  // VIS-06: cartões próprios (classe com card/cartao fora do motor e das telas de entrada)
  const cs=[...main.querySelectorAll('[class]')].filter(e=>vis(e)&&typeof e.className==='string'&&/(^|[\s-])(card|cartao|cartoes)(\s|$|-)/.test(e.className)&&!/\bg2cd|\bg2card|\bmod-|\bg2cartoes/.test(e.className));
  out.cartoesProprios=[...new Set(cs.map(e=>e.className.split(/\s+/).find(c=>/card|cartao/.test(c))))].slice(0,4);
  return out; })()"""
 
-PAINEIS = {'PAGR.dc.html', 'PMAN.dc.html', 'PSUP.dc.html', 'PCOM.dc.html'}   # TAB-07: "Indicador em cartão é do Painel" (cartões do painel não são VIS-06)
+# TAB-07: "Indicador em cartão é do Painel" (cartões do painel não são VIS-06). PT-06 "Indicadores" é o painel do Portal do parceiro (o item
+# Indicadores do portal: taxa de resposta, conversão, prazo e receita, sem fila de trabalho); classificado aqui em 17/10/2026 (DS-MODULOS-2)
+PAINEIS = {'PAGR.dc.html', 'PMAN.dc.html', 'PSUP.dc.html', 'PCOM.dc.html', 'PT-06.dc.html'}
 REGRAS = [('CAB-1', 'cabeçalho sem "‹ Módulo"'), ('CAB-2', 'contexto como texto no cabeçalho'), ('BOT-01', 'mais de um verde no contexto'),
           ('FIL-01', 'filtro fora da faixa comum'), ('TAB-07', 'cartões de resumo sobre a lista'), ('TAB-05', 'ação com texto na célula'),
-          ('TAB-08', 'tabela própria sem ⇅/funil'), ('VIS-05', 'lista sem Cartões'), ('VIS-06', 'cartões próprios')]
+          ('TAB-08', 'tabela própria sem ⇅/funil'), ('VIS-05', 'lista sem Cartões'), ('VIS-06', 'cartões próprios'),
+          ('MAIS-02', 'cabeçalho com mais que a primária e o ⋯')]
 
 def desvios(pg, m, menu):
     d = {}
@@ -89,6 +98,7 @@ def desvios(pg, m, menu):
     if m['tabPropria']: d['TAB-08'] = ', '.join(m['tabPropria'])[:100]
     if m['semCartoes']: d['VIS-05'] = ', '.join(m['semCartoes'])[:100]
     if m['cartoesProprios'] and pg not in PAINEIS: d['VIS-06'] = ', '.join(m['cartoesProprios'])
+    if len(m.get('cabAcoes') or []) > 1: d['MAIS-02'] = f'{len(m["cabAcoes"])} ações à vista: ' + ' | '.join(m['cabAcoes'])[:110]
     return d
 
 def cobertura(esperadas, pags, medidas=None):
@@ -117,10 +127,10 @@ if __name__ == '__main__':
     os.makedirs(os.path.dirname(SAIDA), exist_ok=True); json.dump(res, open(SAIDA, 'w'), ensure_ascii=False, indent=1)
     por = collections.OrderedDict()
     for pg, x in res.items(): por.setdefault((x['modulo'], x['menu']), []).append((pg, x))
-    print(f'{"módulo":28} {"menu":5} {"telas":>5} ' + ' '.join(f'{k:>6}' for k, _ in REGRAS))
+    print(f'{"módulo":28} {"menu":5} {"telas":>5} ' + ' '.join(f'{k:>7}' for k, _ in REGRAS))
     for (mod, menu), L in sorted(por.items(), key=lambda kv: (not kv[0][1], kv[0][0])):
         cont = [sum(1 for _, x in L if k in x['desvios']) for k, _ in REGRAS]
-        print(f'{mod:28} {"sim" if menu else "não":5} {len(L):>5} ' + ' '.join(f'{n:>6}' for n in cont))
+        print(f'{mod:28} {"sim" if menu else "não":5} {len(L):>5} ' + ' '.join(f'{n:>7}' for n in cont))
     tot = sum(len(x['desvios']) for x in res.values())
     print(f'TOTAL: {tot} desvios em {sum(1 for x in res.values() if x["desvios"])} de {len(res)} telas · JSON: {SAIDA}')
     conta = {f'{mod}|{"menu" if menu else "fora"}|{k}': sum(1 for _, x in L if k in x['desvios']) for (mod, menu), L in por.items() for k, _ in REGRAS}

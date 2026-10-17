@@ -159,7 +159,10 @@ try:
     abre_linha(0, 'B1'); setv('#fx_g_tal_sit', 'Ativo'); clk('Salvar', 'aside[role=dialog]'); a = J(ALERTA) or dlg()
     chk('A9d Reativar B1 recusado ao salvar (CD-01)', 'suspenso' in a and 'B1' in J("JSON.stringify(JSON.parse(localStorage.getItem('talhao-os-cd01-v1')).tal.filter(t=>t.id==='B1'&&t.v.sit==='Inativo'))"), a[:300])
     clk('Cancelar', 'aside[role=dialog]'); clk('Descartar alterações', 'aside[role=dialog]')
-    go('CD-01det.dc.html', '#talhao=B1'); clk('Reativar B1'); clk('Salvar', 'aside[role=dialog]'); a = dlg()
+    go('CD-01det.dc.html', '#talhao=B1')
+    # TAB-05 no motor (DS-MODULOS-2, 17/10/2026): "Reativar B1" saiu da célula para o ⋯ da linha; abre-se o ⋯ como o usuário e o item fica à vista
+    J("(()=>{const b=[...document.querySelectorAll('button.g2mais')].find(b=>[...b.nextElementSibling.querySelectorAll('[role=menuitem]')].some(i=>i.textContent.trim().startsWith('Reativar B1'))); if(b) b.click();})()"); time.sleep(.3)
+    clk('Reativar B1'); clk('Salvar', 'aside[role=dialog]'); a = dlg()
     chk('A9e Reativar no detalhe (CD-01det) também recusado ao salvar', 'suspenso' in a, a[:300])
     # Mapa (Lagoa Grande): Desenhar recusa antes de abrir; importação: linha "Talhão novo" recusada, contorno de pivô existente importado
     go('IN-04.dc.html')

@@ -28,7 +28,8 @@ try:
     def ir_hash(pg): ir(pg,1.5); time.sleep(.4)   # outra página: carga nova; mesma página: o hashchange abre o registro
     T=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
     aside=lambda: J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText") or ''
-    linhas=lambda: J("[...document.querySelectorAll('[role=row].g2r')].map(r=>r.innerText.replace(/\\s+/g,' ').trim())") or []
+    # TAB-05 no motor (DS-MODULOS-2, 17/10/2026): as ações da linha moram no ⋯ da própria linha; o texto da linha termina com os itens desse ⋯
+    linhas=lambda: J("[...document.querySelectorAll('[role=row].g2r')].map(r=>(r.innerText+' '+[...r.querySelectorAll('.g2mais-menu [role=menuitem]')].map(i=>i.textContent.trim()).join(' ')).replace(/\\s+/g,' ').trim())") or []
     def mapa(tal,lay='MIP/MID'):
         J(f"sessionStorage.setItem('mapa-ctx',{json.dumps(json.dumps(dict(mf_faz='Santa Rita',lay=lay,tsel=[tal])))})"); ir('IN-04.dc.html',1.5)
     pan=lambda t: J(f"(document.querySelector('aside[aria-label^=\"{t}\"]')||{{}}).innerText||''") or ''

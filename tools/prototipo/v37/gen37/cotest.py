@@ -8,7 +8,9 @@ from journeys import free
 R=os.path.join(os.path.dirname(os.path.abspath(__file__)),'_render'); p=free()
 srv=subprocess.Popen(['python3','-m','http.server',str(p),'--bind','127.0.0.1','--directory',R],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL); time.sleep(0.8)
 c=Chrome(port=free()); J=c.js
-CLK="""((t,root)=>{const r=root?document.querySelector(root):document; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a')].filter(e=>e.offsetParent!==null); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t)); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok';})"""
+CLK="""((t,root)=>{const r=root?document.querySelector(root):document; const n=s=>(s||'').replace(/\\s+/g,' ').trim(); const els=[...r.querySelectorAll('button,a')].filter(e=>e.offsetParent!==null); const e=els.find(x=>n(x.innerText)===t)||els.find(x=>n(x.innerText).startsWith(t));
+  if(!e){ const it=[...r.querySelectorAll('.g2mais-menu [role=menuitem]')].find(x=>n(x.textContent)===t||n(x.textContent).startsWith(t)); if(!it) return 'NÃO ACHEI: '+t; it.closest('.g2mais-w').querySelector('.g2mais').click(); it.click(); return 'ok (⋯ da linha)'; }
+  e.click(); return 'ok';})"""   # TAB-05 no motor (DS-MODULOS-2, 17/10/2026): a ação da linha mora no ⋯; abre-se o ⋯ e escolhe-se o item, como o usuário
 SETV="""((sel,val)=>{const i=document.querySelector(sel); const P=i.tagName==='SELECT'?HTMLSelectElement.prototype:(i.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype); Object.getOwnPropertyDescriptor(P,'value').set.call(i,val); i.dispatchEvent(new Event('input',{bubbles:true})); i.dispatchEvent(new Event('change',{bubbles:true}));})"""
 TOAST=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')")
 BODY=lambda: J("document.body.innerText")

@@ -70,7 +70,8 @@ try:
     clk('Confirmar chegada do T1','aside[role=dialog]'); ok('identificação' in J("document.querySelector('aside[role=dialog]').innerText").lower(),'exige identificação verificada')
     setv('#pc_doc','ok'); clk('Confirmar chegada do T1','aside[role=dialog]')
     ok('Presente · apto' in row('check-in') and 'depois do T3' in T(),'T1 presente, entra depois do T3')
-    ok(J("document.body.innerText.indexOf('T1 chegou')>=0"),'KPI no pátio atualizado')
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): o "no pátio" saiu do cartão de resumo para o selo do cabeçalho (contraprova: o render anterior não tem "4 no pátio" no selo)
+    ok(J("/4 no pátio \\(T1 chegou/.test(document.querySelector('header').innerText)"),'selo do cabeçalho com o pátio atualizado (4 no pátio, T1 chegou)')
     clk('Chamar próximo elegível'); ok('T1 (chegou' in T(),'chamada cita T1 depois do T3')
     # reordenar pela linha
     rowclick('Presente · carga pronta',0); ok(J("(document.querySelector('aside[role=dialog] h2')||{}).innerText").startswith('Posição na fila · T3'),'linha abre form de posição')

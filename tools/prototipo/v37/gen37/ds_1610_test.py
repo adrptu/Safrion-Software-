@@ -8,8 +8,9 @@
       B1 a tabela tem moldura (borda e raio de 12 px) e o cabeçalho tem ⇅ e funil em toda coluna;
       B2 toda linha que abre o detalhe (g2ed) mostra a seta na 1ª célula (› ou ▸/▾), sem texto (TAB-04);
       B3 sem linha vertical no cabeçalho e nas células da 1ª coluna.
-  C · navegador: Cartões em linha (VIS-06) em O.S., Planejar safra, Parceiros e Produtos (árvore): um cartão por linha (mesma esquerda e
-      largura), colunas alinhadas entre os cartões, rótulos uma vez no alto; Atividades em Tabela ordenam por Custo/ha e filtram por Insumos.
+  C · navegador: Cartões (VIS-07, 17/10, revê a VIS-06) em O.S. (também agrupada por talhão), Planejar safra, Parceiros e Produtos (árvore):
+      grade de cartões compactos, sem cabeçalho de colunas, título com o selo de estado, até 4 campos rotulados; Atividades em Tabela ordenam
+      por Custo/ha e filtram por Insumos.
 Contraprova: RENDER_DIR=<render da versão anterior> python3 ds_1610_test.py reprova.
 Uso (de gen37/): CHROME_BIN=… SAFRION_DADOS=sintetico python3 -B ds_1610_test.py   · DS_PARTES=S,B,C"""
 import os, re, sys, json, glob, time
@@ -66,15 +67,30 @@ def parte_b(c, J, BASE):
     chk('B3 TAB-08 sem linha vertical na 1ª coluna', not ruins['vert'], ruins['vert'][:6])
 
 def parte_c(c, J, BASE):
-    for pg, gid in [('OS.dc.html?view=cartoes', 'g_os'), ('SAF.dc.html?view=cartoes', 'g_saf'), ('CD-05.dc.html?view=cartoes', 'g_forn'), ('CD-06.dc.html?view=cartoes', 'g_itm')]:
+    # VIS-07 (17/10/2026, proprietário: "os cartoes em ordem de serviço estao fora do padrao design system"; revê a VIS-06 de 16/10): o oráculo
+    # antigo pedia um cartão por linha, colunas alinhadas e rótulos uma vez no alto. Agora: grade de cartões compactos (vários por fileira a
+    # 1440 px), inclusive agrupada; sem cabeçalho de colunas; título com o selo de estado; até 4 campos, cada um com o rótulo.
+    # Contraprova: o render anterior (cartão em linha com cabeçalho de colunas) reprova C1.
+    for pg, gid, selo in [('OS.dc.html?view=cartoes', 'g_os', True), ('OS.dc.html?view=cartoes&ag=onde', 'g_os', True), ('SAF.dc.html?view=cartoes', 'g_saf', False),
+                          ('CD-05.dc.html?view=cartoes', 'g_forn', False), ('CD-06.dc.html?view=cartoes', 'g_itm', False)]:
         c.goto(BASE + pg, 1.6)
-        m = J(f"""(()=>{{ const box=document.querySelector('[data-g2cd="{gid}"]'); if(!box) return null; const ks=[...box.querySelectorAll('.g2cd')].filter(k=>k.getClientRects().length);
-            const L=new Set(ks.map(k=>Math.round(k.getBoundingClientRect().left))), W=new Set(ks.map(k=>Math.round(k.getBoundingClientRect().width)));
-            const col=(k,i)=>{{ const f=k.querySelectorAll('.g2cd-lin .g2cd-f')[i]; return f?Math.round(f.getBoundingClientRect().left):null; }};
-            const n=ks.length?ks[0].querySelectorAll('.g2cd-lin .g2cd-f').length:0, alinh=[...Array(n).keys()].every(i=>new Set(ks.map(k=>col(k,i))).size===1);
-            const hd=box.querySelector('.g2cd-hd'); return {{n:ks.length, esquerda:L.size, largura:W.size, campos:n, alinh, rotulos:hd?hd.innerText.replace(/\\s+/g,' ').trim():''}}; }})()""")
-        chk(f'C1 VIS-06 {pg}: um cartão por linha ({m and m["n"]}), colunas alinhadas e rótulos uma vez no alto',
-            m and m['n'] > 0 and m['esquerda'] == 1 and m['largura'] == 1 and m['alinh'] and (m['campos'] == 0 or m['rotulos']), m)
+        m = J(f"""(()=>{{ const box=document.querySelector('[data-g2cd="{gid}"]'); if(!box) return null; const vis=e=>!!e&&e.getClientRects().length>0;
+            const ks=[...box.querySelectorAll('.g2cd')].filter(vis), hd=[...box.querySelectorAll('.g2cd-hd')].filter(vis).length;
+            const fil={{}}; ks.forEach(k=>{{ const t=Math.round(k.getBoundingClientRect().top); fil[t]=(fil[t]||0)+1; }});
+            const fs=k=>[...k.querySelectorAll(':scope > .g2cd-lin .g2cd-f')].filter(vis), nf=ks.map(k=>fs(k).length);
+            const rot=ks.every(k=>fs(k).every(f=>{{ const l=f.querySelector('.g2cd-fl'); return vis(l)&&l.innerText.trim().length>0; }}));
+            const grupos=[...box.querySelectorAll('.g2cd-gcab')].filter(vis).length, arvore=ks.some(k=>vis(k.querySelector('.g2cd-nk')));   /* árvore: categorias com itens dentro (as vazias ficam sem seta) */
+            return {{n:ks.length, hd, porFileira:Math.max(0,...Object.values(fil)), cmax:Math.max(0,...nf), rot, grupos, arvore,
+                     selo:ks.filter(k=>vis(k.querySelector(':scope > .g2cd-lin .g2cd-selo'))).length}}; }})()""")
+        if m and m.get('arvore') and m['cmax'] == 0:   # árvore (Produtos): o cartão é a categoria; os campos rotulados estão nos itens, ao abrir
+            J(f"[...document.querySelectorAll('[data-g2cd=\"{gid}\"] .g2cd .g2cd-nk')].find(e=>e.getClientRects().length).click()"); time.sleep(.6)
+            k = J(f"""(()=>{{ const vis=e=>!!e&&e.getClientRects().length>0; const ks=[...document.querySelectorAll('[data-g2cd="{gid}"] .g2cd-k')].filter(vis);
+                const fs=k=>[...k.querySelectorAll('.g2cd-f')].filter(vis); return {{n:ks.length, cmax:Math.max(0,...ks.map(k=>fs(k).length)),
+                rot:ks.every(k=>fs(k).every(f=>{{ const l=f.querySelector('.g2cd-fl'); return vis(l)&&l.innerText.trim().length>0; }}))}}; }})()""") or {}
+            m['cmax'] = k.get('cmax', 0) if k.get('n') else 0; m['rot'] = m['rot'] and k.get('rot', False); m['itens'] = k
+        chk(f'C1 VIS-07 {pg}: grade de cartões compactos ({m and m["n"]}), sem cabeçalho de colunas, até 4 campos rotulados' + (' e o selo de fase no título' if selo else ''),
+            m and m['n'] > 0 and m['hd'] == 0 and (m['porFileira'] >= 2 or m['n'] == 1) and 1 <= m['cmax'] <= 4 and m['rot'] and (not selo or m['selo'] == m['n'])
+            and ('ag=' not in pg or m['grupos'] >= 2), m)
     c.goto(BASE + 'PA.dc.html?view=tabela#plano=SOJA-AT', 1.6)
     ids = lambda: J("[...document.querySelectorAll('.pa-tb-l[data-atv]')].map(x=>x.getAttribute('data-atv'))") or []
     a0 = ids()

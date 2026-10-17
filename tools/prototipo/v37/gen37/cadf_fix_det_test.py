@@ -29,13 +29,13 @@ def aba(t): J(f"(()=>{{const b=[...document.querySelectorAll('[role=tab]')].find
 def erro_js(): return J("[...document.querySelectorAll('.sc-logic-error')].map(e=>e.innerText).join(' | ')")
 def save(): J(f"({BTN})('Salvar')"); time.sleep(.4)
 def fechar(): J(f"({BTN})('Cancelar')"); time.sleep(.2); J(f"({BTN})('Descartar alterações')"); time.sleep(.2)
-def tal(t): J(f"({SETV})('header select',{json.dumps(t)})"); time.sleep(.4)
+def tal(t): J(f"({SETV})('select[aria-label=Talhão]',{json.dumps(t)})"); time.sleep(.4)
 ok=[]
 def chk(nome,cond,extra=''):
     ok.append(bool(cond)); print(('OK  ' if cond else 'FALHOU ')+nome+(' · '+str(extra)[:300] if extra else ''), flush=True)
 try:
     c.size(1440,1000); c.goto(f'http://127.0.0.1:{p}/CD-01det.dc.html#talhao=T3',wait=1.2)
-    chk('1 sem erro JS; T3 aberto', erro_js()=='' and J("document.querySelector('header select').value")=='T3', erro_js())
+    chk('1 sem erro JS; T3 aberto', erro_js()=='' and J("document.querySelector('select[aria-label=Talhão]').value")=='T3', erro_js())
     # ---------- safra encerrada mantém o resumo da época ----------
     openrow(0,'Santa Rita'); fset('decl','100'); fset('motivo','Documento desatualizado'); save()
     J(f"({CLK})('Expandir tudo')"); time.sleep(.3)

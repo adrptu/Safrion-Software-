@@ -15,6 +15,10 @@ NAV = "JSON.stringify((()=>{const n=document.querySelector('nav[aria-label=Menu]
 CARDS = "JSON.stringify([...document.querySelectorAll('a.mod-cartao')].filter(a=>a.getClientRects().length).map(a=>[a.getAttribute('href'),a.innerText.replace(/\\s+/g,' ').trim()]))"
 KPI = "[...document.querySelectorAll('[aria-label=Indicadores]')].map(x=>x.innerText).join(' ').replace(/\\s+/g,' ').toLowerCase()"
 KPI1 = "(document.querySelector('[aria-label=Indicadores]')||{innerText:''}).innerText.replace(/\\s+/g,' ').toLowerCase()"
+# TAB-07 (DS-MODULOS-2, 17/10/2026): grupos de indicadores acima da 1ª lista (devem ser 0), os filtros rápidos da 1ª lista e o selo do cabeçalho
+ACIMA = "(g=>{const l=document.querySelector('[role=table][data-g2g='+g+']'); if(!l) return -1; const lt=l.getBoundingClientRect().top; return [...document.querySelectorAll('[aria-label=Indicadores]')].filter(x=>x.getClientRects().length&&x.getBoundingClientRect().bottom<=lt).length;})"
+QF = "(g=>[...document.querySelectorAll('button[aria-pressed]')].filter(b=>{const s=b.closest('section'); return !!s&&!!s.querySelector('[data-g2g='+g+']');}).map(b=>b.innerText.replace(/\\s+/g,' ').trim().toLowerCase()))"
+CAB = "((document.querySelector('header h1')||{}).parentElement||{innerText:''}).innerText.replace(/\\s+/g,' ').toLowerCase()"
 SAZ = "(()=>{const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); if(!a) return 0; const t=a.innerText; return (t.match(/▮/g)||[]).length>0 ? (t.split('\\n').filter(l=>/▮/.test(l)).length) : 0;})()"
 m = MA(1440, 900); J = m.J
 def espera(js, ate=20.0):
@@ -41,8 +45,10 @@ try:
     par = [['PCOM.dc.html', 'Painel'], ['IV.dc.html', 'Inteligência']]
     m.ok(nv.get('cur') == ['Comercial'] and nv.get('volta') == ['MOD-COM.dc.html', '‹ Comercial'] and cs[:1] == par[:1] and par[1] in cs and chegou and not e_hub and not e_iv,
          'IV na tela de entrada do Comercial, que começa pelo Painel (PAINEL-01) (ícone Comercial marcado; "‹ Comercial" → cartão "Inteligência" abre a IV sem erro de JS)', [nv, cs, chegou, e_hub, e_iv])
-    k1 = J(KPI1) or ''
-    m.ok('produtos em alta 1' in k1 and 'vender agora 1' in k1 and 'soja set · milho fev · mamão jul' in k1, 'INTEL-02 IV: indicadores de preço no topo (1 em alta, 1 vender agora, melhor mês de cada produto)', k1)
+    # TAB-07 (17/10/2026): o oráculo antigo pedia os cartões "em alta / vender agora / melhor mês" acima da lista; a regra os tira de lá e a
+    # contagem fica no filtro rápido e no selo do cabeçalho (contraprova: o render anterior tem 1 grupo acima da lista e reprova aqui)
+    ac = J(f"{ACIMA}('g_ivm')"); qf = J(f"{QF}('g_ivm')") or []; cab = J(CAB) or ''
+    m.ok(ac == 0 and 'vender agora 1' in qf and 'vender agora: soja' in cab, 'INTEL-02 IV + TAB-07: sem cartões acima da lista; "Vender agora 1" no filtro rápido e no selo do cabeçalho', [ac, qf, cab])
     sj = m.linha('m:Soja em grão'); mi = m.linha('m:Milho em grão'); ma = m.linha('m:Mamão Formosa · fruta de campo'); fj = m.linha('m:Feijão em grão')
     m.ok('R$ 129,40/sc' in sj and 'Alta' in sj and 'Vender agora' in sj and 'set' in sj, 'INTEL-02 IV: soja R$ 129,40/sc em alta, melhor mês set, "Vender agora"', sj)
     # regra do ganho líquido (revisão Codex de 13/10, INTEL-02; oráculo e contraprova em inteligencia_unit P5/P11–P13): o alvo é o mês de maior
@@ -74,8 +80,9 @@ try:
     nv, cs, e_hub, chegou, e_ic = pelo_modulo('Voltar para Suprimentos', 'MOD-SUP.dc.html', 'Inteligência', 'IC.dc.html')
     m.ok(nv.get('cur') == ['Suprimentos'] and nv.get('volta') == ['MOD-SUP.dc.html', '‹ Suprimentos'] and ['IC.dc.html', 'Inteligência'] in cs and chegou and not e_hub and not e_ic,
          'IC na tela de entrada do Suprimentos (ícone Suprimentos marcado; "‹ Suprimentos" → cartão "Inteligência" abre a IC sem erro de JS)', [nv, cs, chegou, e_hub, e_ic])
-    b1 = J(KPI1) or ''
-    m.ok('insumos em alta 6' in b1 and 'comprar agora 4' in b1 and 'r$ 23.103,6' in b1, 'INTEL-02 IC: indicadores (6 em alta, 4 comprar agora, economia esperando o mês certo)', b1)
+    b1 = J(KPI1) or ''; ac = J(f"{ACIMA}('g_icm')"); qf = J(f"{QF}('g_icm')") or []
+    m.ok(ac == 0 and 'comprar agora 4' in qf and 'economia esperando o mês certo' in b1 and 'r$ 23.103,6' in b1,
+         'INTEL-02 IC + TAB-07: sem cartões acima da lista; "Comprar agora 4" no filtro rápido; a economia esperando o mês certo abre os indicadores, depois da lista', [ac, qf, b1])
     se = m.linha('m:Semente de soja 58 W'); gl = m.linha('m:Glifosato 480')
     m.ok('Esperar' in se and 'pedir até 05/10' in se and 'R$ 13.554' in se, 'INTEL-02 IC: semente 58 W espera out, pedindo até 05/10 (necessidade 15/10 − 10 dias de entrega)', se)
     m.ok('Comprar agora' in gl and '28/09' in gl, 'INTEL-02 IC: glifosato com uso em 28/09 compra agora', gl)

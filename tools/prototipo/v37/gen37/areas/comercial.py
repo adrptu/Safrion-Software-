@@ -361,15 +361,14 @@ function PREVALS(self,v){ cenOuvir(self); const c=cenGet(); self._c=c;
 const _EXV_VE=EXTRAVALS; EXTRAVALS=function(self,v){ _EXV_VE(self,v); const c=self._c||cenGet(); const P=prP(c); const pan=self.state.pr_pan;
   prPainel(self,v,(pan&&pan.g==='g_rsv'&&P.pedidos[pan.id])?prPanPed(self,c,P.pedidos[pan.id]):null); };
 '''
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
     corpo=(
-      kpis([('A CONFIRMAR','3','PV-031 · PV-032 · PV-033'),('DISPUTA DE SALDO','3,0 t × 1,8 t','Mamão B · 28/09–04/10'),
-            ('SEM ALOCAÇÃO','2',f'{PV["id"]} falta {n1(PV["falta_t"])} t · PV-028'),('RECEBÍVEIS EM ABERTO','R$ 244 mil','PV-029')])
-      + section('Carteira de pedidos','Confirme pedidos pela linha de ação e clique na linha para ajustar um pedido ainda a confirmar.',
+      section('Carteira de pedidos','Confirme pedidos pela linha de ação e clique na linha para ajustar um pedido ainda a confirmar.',
         '',g_cart)
       + section('Reservas de produto','Pedidos do estado: clique num pedido para reservar lote apto ou cancelar reserva (o mesmo comando do Estoque de produto).','',g_rsv))
     shell37('VE-04','Pedidos de venda',corpo,
       subtitle='Confirmação valida preço, crédito, saldo e capacidade numa transação única; alocações futuras e físicas ficam separadas.',
-      status=('2 pedidos em risco · 1 disputa','yellow'),
+      status=('3 a confirmar · 2 em risco · 1 disputa','yellow'),
       primary=f'Resolver alocação do {PV["id"]}',primary_href='VE-04det.dc.html',steps=faixa(4),
       footer='Expedição parcial mantém saldo; recebimento não é inferido da entrega; confirmar é idempotente — repetir devolve o mesmo recibo (49.3, ATP-05).')
 
