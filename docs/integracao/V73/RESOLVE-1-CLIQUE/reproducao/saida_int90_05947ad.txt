@@ -1,0 +1,97 @@
+# RESOLVE-1-CLIQUE · reprodução no motor · composição int90 05947ad (b989864 + PR #81 EST-ONDA0 + PRs #90/#91), só leitura · CEN0.v=7 · hoje do cenário=2026-09-23
+
+## R0 · retrato: O.S. agrícolas em A liberar com insumo (medida "antes": % liberável sem falta)
+  OS-0418 (Santa Rita) · bloqueada: Sem lote de Ureia 45% no Estoque.
+  OS-0430 (Santa Rita) · liberável
+  OS-0431 (Santa Rita) · liberável
+  OS-0501 (Lagoa Grande) · liberável só com lote de outra fazenda: Glifosato 480, Óleo mineral
+  OS-0502 (Lagoa Grande) · bloqueada: Saldo insuficiente de Calcário dolomítico filler: 60.000 kg disponíveis para 96.940 kg.
+  liberáveis sem falta e na própria fazenda: 2 de 5 · liberáveis só com estoque de outra fazenda: 1
+  lote N26-03 no cenário vivo: físico 8.000 · reservado 8.000 (anexo A-02/A-03: telas estáticas mostram outro valor)
+  lote S58-0801 no cenário vivo: físico 12.000 · reservado 0 (anexo A-02/A-03: telas estáticas mostram outro valor)
+
+## R1 · OS-0418 · Ureia 45% sem lote
+  lotes de Ureia 45% no cenário: 0 · necessidade 1.140 kg · etapa A liberar
+  osLibErro: "Sem lote de Ureia 45% no Estoque."
+  linha da lista: selos=["Falta insumo · Ureia 45%"] · dono=Suprimentos · prazo=receber o insumo no Estoque
+  papel "Suprimentos" no catálogo G2_PAPEIS: false · papéis: gestor,agronomo,pcp,almoxarife,conferente,mecanico,producao,qualidade,expedicao,pcm,eletricista,comercial,direcao
+  CONFIRMA [A-08] OS-0418 recusa por falta de lote de Ureia
+  CONFIRMA [A-05] dono "Suprimentos" que não é papel do catálogo
+
+## R2 · OS-0502 · calcário 96.940 kg × 60.000 kg
+  necessidade 96.940 kg · osLibErro: "Saldo insuficiente de Calcário dolomítico filler: 60.000 kg disponíveis para 96.940 kg."
+  linha: dono=Suprimentos · prazo=receber o insumo no Estoque · janela "25–27/09 (DAP −60)"
+  situação do insumo na linha (texto semeado em dados_lagoa_safra.INS): "Reserva ao liberar · estoque 60.000 kg · pedido de 50.000 kg em 30/09"
+  recebimentos previstos da demanda (cenEstDem, Lagoa Grande): [["Calcário dolomítico filler",50000,"2026-09-30",null,"Recebimento previsto (pedido de 30/09)"]]
+  falta numérica = 36.940 kg; pedido previsto 50.000 kg em 2026-09-30 (depois da janela 25–27/09)
+  CONFIRMA [A-09a] liberação recusa 60.000 para 96.940
+  CONFIRMA [A-09b] o "pedido de 50.000 kg em 30/09" EXISTE na demanda (recebimento previsto sem PC), mas a liberação não o lê: o anexo diz "não está no cenário" (confirma em parte)
+
+## R3 · OS-0501 (Lagoa Grande) reserva glifosato da Santa Rita sem aviso
+  fazenda da ordem: Lagoa Grande · osLibErro: ""
+  liberação (cópia): "OS-0501 liberada. REQ-041 reservou no Estoque: Glifosato 480 147,93 L, Óleo mineral 24,66 L."
+   - Glifosato 480 147,93 L no lote G26-14 · Almox. defensivos · fazenda Santa Rita
+   - Óleo mineral 24,66 L no lote O26-05 · Almox. defensivos · fazenda Santa Rita
+  demanda única (DEM-07) antes de liberar: OS-0501 pede comprar [["Glifosato 480",147.93],["Óleo mineral",24.66]] na Lagoa Grande
+  CONFIRMA [A-10] liberação reservaria 2 itens em lote de outra fazenda, sem transferência nem aviso
+  CONFIRMA [A-10b] duas respostas para a mesma pergunta: a liberação diz "coberto"; a demanda única diz "falta comprar" (cenLote × cenOsDem)
+
+## R4 · OS-0425 · NPK 11.400 kg com lote de 8.000 kg ("parcial semeado")
+  etapa Liberadas · necessidade 11.400 kg · reservado na REQ-040: 8.000 kg no N26-03
+  situação do insumo: "Reservado no Estoque · lote N26-03 · REQ-040 · faltam 3.400 kg"
+  contrafactual (mesma ordem em A liberar, sem a reserva semeada): osLibErro "Saldo insuficiente de NPK 20-05-20: 8.000 kg disponíveis para 11.400 kg."
+  CONFIRMA [A-11] estado "liberada com falta" só existe na semente; a regra atual recusaria (tudo ou nada)
+
+## R5 · dois lotes que juntos cobrem ainda bloqueiam (sintético derivado: G26-14 com 200 L + lote G26-15 com 200 L)
+  OS-0430 pede 320 L; disponível 200 + 200 = 400 L · osLibErro "Saldo insuficiente de Glifosato 480: 200 L disponíveis para 320 L."
+  CONFIRMA [A-12] reserva em um único lote (cenLote: maior disponível), sem divisão nem FEFO
+
+## R6 · corrida pela demanda futura + reserva entre fazendas (sintético derivado: G26-14 com 400 L)
+  antes: OS-0430 (Santa Rita, 320 L) "" · OS-0501 (Lagoa Grande, 147,93 L) ""
+  libera OS-0501 primeiro: "OS-0501 liberada. REQ-041 reservou no Estoque: Glifosato 480 147,93 L, Óleo mineral 24,66 L."
+  depois: OS-0430 "Saldo insuficiente de Glifosato 480: 252,07 L disponíveis para 320 L."
+  CONFIRMA [A-13] quem libera primeiro leva; a liberação da OS-0501 não avisa que deixa a OS-0430 (outra fazenda) sem saldo
+
+## R7 · padrão MA de 1 clique (OM-0235, filtro MF 4292)
+  manFalta: [["FIL-MF4292",1,0]] · criticidade da OM: Alta
+  1º clique "Solicitar compra": "SC-041 enviada a Compras (Materiais, peças e serviços): Filtro de óleo MF 4292 1 un · a OM-0235 libera quando a peça chegar."
+  SC na fila de Compras: orig=om · om=OM-0235 · ativo=a03 · urg=Alta · etapa=A cotar · qtd=1 · motivo="Falta peça para liberar a OM-0235 · Revisão 250 h" · tem safra? false
+  2º clique: {"nada":true,"msg":"A SC-041 já foi enviada a Compras (simulado)."} · SCs da OM: 1
+  recebimento (Rui, chave REC-K1): "Recebimento PC-202/1 da SC-041: Filtro de óleo MF 4292 1 un · Reservado para OM-0235: Filtro de óleo MF 4292 1 un (fora do estoque livre) · OM-0235 pronta para liberar."
+  depois: saldo 0→1 · reservado 1 · peça da OM res=1 · manFalta=0
+  repetir recebimento com a mesma chave: {"repetido":true,"saldo":1,"reservado":1}
+  liberar a OM: "OM-0235 liberada para a oficina · executante Zé · reservado: Filtro de óleo MF 4292 1 un, Óleo de motor 15W-40 12 L."
+  CONFIRMA [A-30] 1 clique cria a SC só com a falta, não duplica, carrega OM e ativo; o recebido fica reservado para a OM (D5) e a mesma chave não soma de novo
+  CONFIRMA [A-31] urgência vem da criticidade da OM (Alta→Alta, senão Normal), não de ativo parado
+  papéis por passo: Solicitar=PCM · Cotar/Pedir=gestora ou direção · Receber=almoxarife ou gestora · Liberar=PCM (cmmPode, manPode)
+
+## R7b · segregação: a mesma pessoa pede, aprova (emite) e recebe a própria compra
+  Ana abre SC-041: "SC-041 aberta: Material sintético 2 un · centro de custo Oficina · urgência urgente."
+   - Cotação da SC-041 enviada a 2 fornecedores homologados (simulado · nenhuma mensagem real) · 2 propostas recebidas.
+   - PC-202 emitido para Ferragens São Bento · R$ 206,00 · previsão 24/09 · vinculado à SC-041.
+   - Recebimento PC-202/1 da SC-041: Material sintético 2 un · entregue a centro de custo Oficina (consumo direto, sem estoque).
+  CONFIRMA [A-25] nenhuma trava impede quem pediu de aprovar e receber a própria compra (alçada só por valor no pedido)
+
+## R7c · corrida do livre na OM: a SC pede nec − livre, o livre some, e a OM fica num beco (sintético derivado)
+  OM-0235 precisa 2, livre 1 → "SC-041 enviada a Compras (Materiais, peças e serviços): Filtro de óleo MF 4292 1 un · a OM-0235 libera quando a peça chegar."
+  OM-0236 libera antes e leva o livre: "OM-0236 liberada para a oficina · executante Zé · reservado: Disco de corte 15" 8 un, Graxa EP2 2 kg, Filtro de óleo MF 4292 1 un · conflito com a OS-0420 e OS-0431 aceito e avisado ao PCP."
+  SC recebida: etapa Recebida · res na OM-0235 1 de 2 · manFalta 1
+  "Solicitar compra" de novo: {"nada":true,"msg":"A SC-041 já foi enviada a Compras (simulado)."}
+  liberar OM-0235: "Não liberada: falta peça · Filtro de óleo MF 4292 (livre 0 de 1 un · 1 un reservada para a OM-0236, que ninguém usa em outra ordem). Aguarda o recebimento da SC-041."
+  CONFIRMA [NOVO-1] idempotência por "OM já tem SC" trava a 2ª compra; a mensagem manda aguardar uma SC já recebida (beco sem saída)
+
+## R8 · o único caminho avulso (SC de materiais) não resolve a falta de insumo da O.S.
+  centros de custo da avulsa: ["Oficina","Sede","Irrigação","Armazém e beneficiamento"] · urgência: ["Normal","Alta","Urgente"] · prazo por urgência {"Alta":3,"Urgente":1}
+  SC-041 aberta: Ureia 45% 1.140 kg · centro de custo Sede · urgência urgente. · grupo Materiais gerais
+   - Cotação da SC-041 enviada a 2 fornecedores homologados (simulado · nenhuma mensagem real) · 2 propostas recebidas.
+   - PC-202 emitido para Ferragens São Bento · R$ 3.522,60 · previsão 24/09 · vinculado à SC-041.
+   - Recebimento PC-202/1 da SC-041: Ureia 45% 1.140 kg · entregue a centro de custo Sede (consumo direto, sem estoque).
+  depois: lotes de Ureia 0 · OS-0418 osLibErro "Sem lote de Ureia 45% no Estoque."
+  CONFIRMA [A-20] a avulsa aceita "Ureia" como material sem código (consumo direto no centro de custo) e não abastece o lote: a O.S. continua bloqueada; não há recusa explícita de insumo, a barreira é estrutural
+
+## R9 · idempotência: mesma chave, outro conteúdo
+  Compras (manCmd): 10 kg com K9 → "Recebimento PC-202/1 da SC-041: Graxa EP2 10 kg · no estoque da oficina: Graxa EP2 · saldo…" · 12 kg com K9 → {"repetido":true,"msg":"Recebimento já registrado com esta chave · nada somado nem reservado de novo (Recebimento PC-202/1 da SC-041: Graxa EP2 "}
+  Estoque (cenIdem): 5 L com E9 e 6 L com E9 → "Este registro (E9) já foi gravado com outro conteúdo: conflito, nada gravado."
+  CONFIRMA [NOVO-2] duas regras de idempotência: Compras/MA (manCmd) aceita a mesma chave com outro conteúdo como "repetido"; o Estoque (cenIdem) acusa conflito (PRD 73.3: chave + hash do conteúdo)
+
+RESUMO 15 confirmações · 0 não reproduz · 0 exceções
