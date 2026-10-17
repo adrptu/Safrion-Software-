@@ -46,6 +46,7 @@ Estado / impedimento / próximo passo: executado na branch claude/v44-v73-ma-vin
 | Contador ausente não vira 0; ativo com contador sem leitura não "conta de agora" | trava | vencimento calculado de um zero falso |
 | Ativo inativo não é candidato nem "Sem plano" | trava | plano para máquina que não roda |
 | Lote: tudo ou nada; repetir com a mesma chave ou com o vínculo existente não muda nada | trava | metade gravada; duplo clique gravando duas vezes |
+| Lote = o conjunto marcado (revisão Codex): a busca não tira nem põe ninguém (o marcado continua na lista e no rótulo mesmo fora da busca); ao gravar, todos os marcados são conferidos de novo e um que ficou inválido (inativo, já vinculado, fora do cadastro) bloqueia o lote inteiro: nada gravado, sem recibo, painel aberto com a seleção e o motivo até a pessoa desmarcá-lo | trava | lote gravado pela metade em silêncio (a busca ou uma mudança de cadastro tirava ativos da gravação sem aviso) |
 | Desvincular pede motivo, guarda o vínculo (fim + histórico) e não apaga a OM aberta; vincular de novo retoma a mesma contagem | trava | histórico perdido; ordem apagada; ciclo recomeçado do zero |
 | Permissão pela regra que já existia (`manExige(c,pf,'plano')`): quem não pode vê o motivo e o botão desligado | trava | vínculo feito por quem não responde pelo plano |
 | "Sem plano" = sem vínculo em plano ativo **e publicado**; vínculo só em rascunho ou em plano inativo aparece como Rascunho/Plano inativo | informação | ativo que parece coberto e não gera vencimento |
@@ -87,6 +88,7 @@ Ambiente: `tools/prototipo/v37/gen37`, `SAFRION_DADOS=sintetico`, montagem `buil
 | Teste | Resultado | Observação |
 |---|---|---|
 | `ma_vinculo_test.py U A B` (1440 e 390) | **88/88** (rodada 4, 811bf7c) | 1ª rodada: 1 falha de tempo em A4 (grade ainda desenhando); corrigido com espera pela condição |
+| `ma_vinculo_test.py A` com A14 e A15 (revisões Codex 6229032017 e lote = seleção explícita) | **53/53** na correção; contraprova no `_render` de ad7af21 (maquinas.py e dados_manutencao.py idênticos a 4d76bd1): **47/53 — reprova** A14 (2) e A15 (4) | 4d76bd1 gravava só a02 quando a03 ficava Inativo depois de marcado, e a busca "Trator 02" gravava só a02 dos 3 marcados; brutos em `ma-vinculo/codex-lote-selecao/` |
 | `ma_vinculo_test.py A B` na **base** (pasta de symlinks → render 8bdc1a1) | **1/11 — reprova** | sem aviso na entrada, `pend=semplano` ignorado (16 linhas), sem coluna Plano, sem painel; as duas partes param |
 | `ma_app_fluxo_test` · `ma_atrito_test` · `ma_correcoes_om_test` | 24/24 · 13/13 · 15/15 | |
 | `ma_correcoes_pm_test` | 11/12 → **12/12** (rodada 4) | falha real: candidato do "Aplica a" recusado sumia do painel; corrigido no produto |

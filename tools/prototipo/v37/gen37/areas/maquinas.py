@@ -929,9 +929,12 @@ function vlLista(c,st){ const p=c.planos[st.d.pid]; const rows=[], seen={};
   const cs=c.ordem.map(id=>c.ativos[id]).filter(a=>a&&!manVincVale(c.vinc[p.id+'|'+a.id])).map(a=>({a,cp:manVincCompat(c,p,a)}));
   cs.filter(x=>!x.cp.erro).sort((x,y)=>MAN_NIV[x.cp.nivel]-MAN_NIV[y.cp.nivel]).forEach(x=>add(x.a,false));
   cs.filter(x=>x.cp.erro&&manAtvAtivo(x.a)&&manCabe(c,p,x.a)).forEach(x=>add(x.a,false));   /* do "Aplica a" mas recusado: aparece com o motivo */
+  const on=(st.d&&st.d.on)||{}; Object.keys(on).filter(k=>on[k]).forEach(aid=>{ if(c.ativos[aid]){ add(c.ativos[aid],false); return; } if(seen[aid]) return; seen[aid]=1;   /* marcado é marcado: fica na lista até ser desmarcado, mesmo inválido */
+    rows.push({a:{id:aid,nome:aid,modelo:'—',local:'fora do cadastro',classe:''},cp:{erro:aid+' não está mais no cadastro.',avisos:[],nivel:''},ja:false,pre:false,sumiu:true}); });
   const q=g2norm(st.q||'').trim(); if(!q) return rows;
   cs.filter(x=>x.cp.erro).forEach(x=>add(x.a,false));   /* na busca, o que não serve aparece com o motivo */
-  return rows.filter(r=>r.pre||g2norm(r.a.nome+' '+r.a.modelo+' '+r.a.local+' '+r.a.classe).indexOf(q)>=0); }
+  rows.forEach(r=>{ r.casa=g2norm(r.a.nome+' '+r.a.modelo+' '+r.a.local+' '+r.a.classe).indexOf(q)>=0; });
+  return rows.filter(r=>r.pre||on[r.a.id]||r.casa); }   /* a busca só filtra o que ainda não foi marcado: o lote não muda com ela */
 function vlMarcaIni(c,st){ const on={}; vlLista(c,st).forEach(r=>{ if(r.ja||r.cp.erro) return; if(r.pre||(st.fixo&&r.cp.nivel==='escopo')) on[r.a.id]=true; }); return on; }
 function vlAbrir(self,o){ pmRet(self); const c=manGet(); o=o||{}; const pre=(o.aids||[]).filter(id=>c.ativos[id]);
   const pid=o.pid||((vlOps(c,pre)[0]||{}).p||{}).id||'';
@@ -941,8 +944,11 @@ function vlAbrir(self,o){ pmRet(self); const c=manGet(); o=o||{}; const pre=(o.a
 function vlSet(self,patch,dpatch){ const cur=self.state.vl; if(!cur) return; self.setState({vl:Object.assign({},cur,patch||{},dpatch?{d:Object.assign({},cur.d,dpatch)}:{},{warn:false,falha:''})}); }
 function vlSetB(self,aid,patch){ const cur=self.state.vl; if(!cur) return; const b=Object.assign({},cur.d.b||{}); b[aid]=Object.assign({},b[aid]||{},patch); const er=Object.assign({},cur.errs||{});
   Object.keys(patch).forEach(k=>{ delete er[aid+'.'+k]; }); self.setState({vl:Object.assign({},cur,{d:Object.assign({},cur.d,{b}),errs:er,warn:false,falha:''})}); }
-function vlSalvar(self){ const st=self.state.vl; if(!st) return; const c=manGet(); const p=c.planos[st.d.pid]; if(!p) return;
-  const on=st.d.on||{}; const L=vlLista(c,st).filter(r=>on[r.a.id]&&!r.ja&&!r.cp.erro); const errs={};
+function vlRuins(c,p,L){ return L.filter(r=>r.ja||r.cp.erro).map(r=>r.ja?(r.a.nome+' já está vinculado ao '+p.id):r.cp.erro.replace(/\.$/,'')); }
+function vlSalvar(self){ const st=self.state.vl; if(!st) return; const c=manGet(); const p=c.planos[st.d.pid];
+  if(!p){ self.setState({vl:Object.assign({},st,{falha:'Nada foi gravado: o plano '+st.d.pid+' não existe mais.'})}); return; }
+  const on=st.d.on||{}; const L=vlLista(c,Object.assign({},st,{q:''})).filter(r=>on[r.a.id]); const errs={};   /* o lote é o conjunto marcado (st.d.on), revalidado agora; a busca não entra */
+  const ruins=vlRuins(c,p,L); if(ruins.length){ self.setState({vl:Object.assign({},st,{errs:{},falha:'Nada foi gravado. Desmarque '+(ruins.length>1?'estes ativos':'este ativo')+' ou ajuste: '+ruins.join(' · ')+'.'})}); return; }
   L.forEach(r=>{ if(manVincBase(c,p,r.a).modo==='hist') return; const x=manVincRef(c,p,r.a,vlB(st,r.a.id)); Object.keys(x.errs).forEach(k=>{ errs[k==='modo'?'_modo':(r.a.id+'.'+k)]=x.errs[k]; }); });
   if(Object.keys(errs).length){ self.setState({vl:Object.assign({},st,{errs,falha:''})}); return; }
   const ids=L.map(r=>r.a.id); const itens=L.map(r=>({aid:r.a.id,base:vlB(st,r.a.id)}));
@@ -967,7 +973,7 @@ function vlP(self,v,c,pf){ const st=self.state.vl; const p=st?c.planos[st.d.pid]
   v.vl_criar=()=>{ const aid=st.pre[0]; self.setState({vl:null}); pmNovo(self,manGet(),aid); };
   v.vl_q=st.q||''; v.vl_setq=(e)=>vlSet(self,{q:e.target.value}); v.vl_busca=!!st.fixo||!!st.q||vlLista(c,Object.assign({},st,{q:''})).length>6;   /* busca onde a lista é longa (o plano e suas candidatas) */
   const L=vlLista(c,st); const on=st.d.on||{}; const ers=st.errs||{};
-  const marc=L.filter(r=>on[r.a.id]&&!r.ja&&!r.cp.erro); const semH=p?marc.filter(r=>manVincBase(c,p,r.a).modo===''):[];
+  const LT=vlLista(c,Object.assign({},st,{q:''})).filter(r=>on[r.a.id]); const marc=LT.filter(r=>!r.ja&&!r.cp.erro); const ruins=p?vlRuins(c,p,LT):[]; const semH=p?marc.filter(r=>manVincBase(c,p,r.a).modo===''):[];
   v.vl_temSem=semH.length>0; v.vl_semT='Sem execução registrada ('+semH.map(r=>r.a.nome).join(', ')+'): como contar?';
   v.vl_semAj=st.d.bmodo==='agora'?'Conta de hoje e da leitura atual de cada ativo (marco estimado, fica marcado). Se houve revisão, informe-a.':(st.d.bmodo==='ult'?'Informe a data e a leitura da última execução de cada um.':'Escolha uma das duas: nada é inferido.');
   v.vl_agoraOn=String(st.d.bmodo==='agora'); v.vl_ultOn=String(st.d.bmodo==='ult'); v.vl_agoraSt=vlChipSt(st.d.bmodo==='agora'); v.vl_ultSt=vlChipSt(st.d.bmodo==='ult');
@@ -975,7 +981,7 @@ function vlP(self,v,c,pf){ const st=self.state.vl; const p=st?c.planos[st.d.pid]
   v.vl_ult=()=>{ const cur=self.state.vl; const er=Object.assign({},cur.errs||{}); delete er._modo; self.setState({vl:Object.assign({},cur,{d:Object.assign({},cur.d,{bmodo:'ult'}),errs:er,warn:false,falha:''})}); };
   v.vl_eModo=ers._modo||''; v.vl_temEModo=!!ers._modo; v.vl_hoje=c.hoje;
   const IN='font-family:inherit;font-size:13.5px;padding:7px 9px;border-radius:8px;box-sizing:border-box;background:#fff;color:#15201A;min-height:var(--g2-alvo,36px);';
-  v.vl_ls=L.map(r=>{ const a=r.a, id=a.id; const ok=!r.ja&&!r.cp.erro; const isOn=!!on[id]&&ok; const b0=p&&ok?manVincBase(c,p,a):{modo:''}; const bb=vlB(st,id);
+  v.vl_ls=L.map(r=>{ const a=r.a, id=a.id; const ok=!r.ja&&!r.cp.erro; const marcado=!!on[id]; const isOn=marcado&&ok; const b0=p&&ok?manVincBase(c,p,a):{modo:''}; const bb=vlB(st,id);
     const x=isOn&&b0.modo!=='hist'?manVincRef(c,p,a,bb):null; const ref=x&&x.ref; let orig='', inp=false, temCorr=false, corrT='';
     if(b0.modo==='hist'){ const f=b0.v.fim; orig='Retoma a contagem de antes (desvinculado em '+manBr(f.em)+' · '+f.mot+'): base '+manVincDeTxt(a,b0.v.marco)+(Object.keys(b0.v.ult||{}).length?' e as últimas execuções guardadas.':'.'); }
     else if(b0.modo==='om'){ const t0=b0.om+' · '+manBr(b0.data)+(a.un&&b0.leit!==null&&b0.leit!==undefined?' · '+manQ(b0.leit,a.un):''); orig=bb.corr?('Corrigindo a base da '+t0+':'):('Última execução registrada: '+t0+'.'); temCorr=true; corrT=bb.corr?('Usar a da '+b0.om):'Corrigir'; inp=bb.corr; }
@@ -986,7 +992,7 @@ function vlP(self,v,c,pf){ const st=self.state.vl; const p=st?c.planos[st.d.pid]
     const prev=isOn&&p&&vv?manVincPrev(c,p,a,vv).map(z=>({nome:z.nome,txt:z.txt,st:'font-size:12.5px;color:'+({'Vencida':'#B42318','Vence em breve':'#8A5A00'}[z.sit]||'#15201A')+';'})):[];
     const ed=ers[id+'.data']||'', el=ers[id+'.leit']||(x&&st.d.bmodo==='agora'&&x.errs.leit)||'', em=ers[id+'.mot']||'';
     const brd=(er)=>IN+'border:1px solid '+(er?'#B42318':'#E4E9E5')+';';
-    return {id,idx:'vl-x-'+id,nome:a.nome,sub:a.modelo+' · '+a.local+(a.leit&&a.un?' · '+manLeitTxt(a):(a.un?'':' · sem contador')),on:isOn,dis:!ok,
+    return {id,idx:'vl-x-'+id,nome:a.nome,sub:a.modelo+' · '+a.local+(a.leit&&a.un?' · '+manLeitTxt(a):(a.un?'':' · sem contador')),on:marcado,dis:!ok&&!marcado,
       tog:()=>{ const cur=self.state.vl; const o2=Object.assign({},cur.d.on||{}); o2[id]=!o2[id]; vlSet(self,null,{on:o2}); },
       temErro:!!(r.cp.erro||r.ja),erro:r.ja?('Já vinculado ao '+(p?p.id:'')+'.'):(r.cp.erro?'Não serve: '+r.cp.erro:''),avs:ok?r.cp.avisos.map(t=>({t})):[],
       mostra:isOn,orig,temCorr,corrT,corr:()=>vlSetB(self,id,bb.corr?{corr:false}:{corr:true,data:b0.data||'',leit:(b0.leit===null||b0.leit===undefined)?'':String(b0.leit)}),
@@ -994,9 +1000,9 @@ function vlP(self,v,c,pf){ const st=self.state.vl; const p=st?c.planos[st.d.pid]
       setd:(ev)=>vlSetB(self,id,{data:ev.target.value}),setl:(ev)=>vlSetB(self,id,{leit:ev.target.value}),setm:(ev)=>vlSetB(self,id,{mot:ev.target.value}),
       hoje:()=>vlSetB(self,id,{data:c.hoje}),temAtual:!!(a.leit&&a.un),atualT:a.leit&&a.un?('Atual · '+manQ(a.leit.val,a.un)):'',atual:()=>vlSetB(self,id,{leit:a.leit?String(a.leit.val):''}),
       std:brd(ed),stl:brd(el)+'width:110px;text-align:right;',stm:brd(em)+'flex:1 1 180px;min-width:0;',temEd:!!ed,ed,temEl:!!el,el,temEm:!!em,em,prev,temPrev:prev.length>0}; });
-  v.vl_vazio=!L.length; v.vl_vazioT=st.q?'Nenhum ativo com “'+st.q+'”.':'Nenhum ativo para vincular.';
+  v.vl_vazio=st.q?!L.some(r=>r.casa):!L.length; v.vl_vazioT=st.q?(L.length?'Nenhum outro ativo com “'+st.q+'”: os marcados continuam na lista.':'Nenhum ativo com “'+st.q+'”.'):'Nenhum ativo para vincular.';
   const n=marc.length; const pp=manPode(c,pf,'plano');
-  const why=pp||(!p?'Escolha o plano':(!n?'Marque ao menos um ativo':((semH.length&&!st.d.bmodo)?'Escolha como contar os ativos sem execução registrada':'')));
+  const why=pp||(!p?'Escolha o plano':(ruins.length?('Desmarque '+(ruins.length>1?'os que não servem':'o que não serve')+': '+ruins.join(' · ')):(!n?'Marque ao menos um ativo':((semH.length&&!st.d.bmodo)?'Escolha como contar os ativos sem execução registrada':''))));
   v.vl_rot=p?('Vincular '+(n>1?n+' ativos ':'')+'ao '+p.id):'Vincular'; v.vl_sdis=!!why; v.vl_swhy=why; v.vl_temWhy=!!why; v.vl_sst=why?MA_SEC:MA_PRIM;
   v.vl_temFalha=!!st.falha; v.vl_falha=st.falha?(st.falha+' Suas escolhas continuam aqui.'):''; }
 /* ---------- Desvincular (com motivo; histórico guardado; a OM aberta continua) ---------- */

@@ -59,6 +59,8 @@ def prim(m):   # primária do painel (rodapé): texto, desligada, motivo
 def marcado(m, aid): return m.J(f"(()=>{{const i=document.querySelector('{PAN} [data-aid=\"{aid}\"] input[type=checkbox]'); return i?{{on:i.checked,dis:i.disabled}}:null;}})()")
 def linha_vl(m, aid): return m.J(f"(()=>{{const e=document.querySelector('{PAN} [data-aid=\"{aid}\"]'); return e?e.innerText.replace(/\\s+/g,' '):'';}})()") or ''
 def plano_ativo(m): return m.J(f"(()=>{{const b=[...document.querySelectorAll('{PAN} [role=radio]')].find(b=>b.getAttribute('aria-checked')==='true'); return b?b.innerText.replace(/\\s+/g,' ').trim():'';}})()") or ''
+def marca(m, aid):   # alterna a caixa do ativo no painel
+    r = m.J(f"(()=>{{const i=document.querySelector('{PAN} [data-aid=\"{aid}\"] input[type=checkbox]'); if(!i) return false; i.click(); return true;}})()"); time.sleep(.35); return r
 def botao(m, txt, root=PAN): return m.clk(txt, root, w=.5)
 def salvar(m, w=.9):
     r = m.J(f"(()=>{{const b=document.querySelector('{PAN} .ma-rod button:last-child'); if(!b||b.disabled) return false; b.click(); return true;}})()"); time.sleep(w); return r
@@ -238,6 +240,28 @@ def parte_A():
         ok(pb and pb['dis'] and 'Ativo vinculado ficaria sem gatilho: Revisão conta só por 1.000 km e Distribuidor 3 t conta horas' in pb['t'] and 'Em dia' in a7,
            'A14 · publicado por dias e rascunho só por km: o vínculo vale pelo publicado (Em dia) e "Publicar v2" fica desligado com o motivo', [pb, a7[:160]])
         m.sem_erro('A14')
+        # A15 · revisão Codex (lote = seleção explícita): ativo marcado que fica inválido bloqueia o lote inteiro; a busca não muda o lote
+        def abre11():
+            m.ir('vis=ativos', perfil='Otávio', limpa=True); J(PM11); m.ir('plano=PM-11'); m.clk('Vincular ativos', 'main')
+            espera(m, f"!!document.querySelector('{PAN} [data-aid=\"a04\"]')"); botao(m, 'Contar de agora')
+        def recs(): return m.man("Object.values(m.recibos||{}).filter(r=>r.nome==='vincular').length")
+        abre11(); marca(m, 'a04'); n3 = m.man("m.ativos.a03.nome"); p0 = prim(m)
+        J(f"(()=>{{ window.__man.manMudar(null,(m)=>{{ m.ativos.a03.sit='Inativo'; return {{msg:''}}; }}); document.querySelector('{PAN} .ma-rod button:last-child').click(); return 1; }})()"); time.sleep(.9)
+        v2, v3, rc, k3, p1, fl = vinc(m, 'PM-11|a02'), vinc(m, 'PM-11|a03'), recs(), marcado(m, 'a03'), prim(m), pan(m)
+        ok(p0.get('t') == 'Vincular 2 ativos ao PM-11' and not p0.get('dis') and aberto(m) and v2 is None and v3 is None and rc == 0
+           and 'Nada foi gravado' in fl and n3 + ' está inativo' in fl and k3 == {'on': True, 'dis': False} and p1.get('dis') and 'Desmarque o que não serve: ' + n3 + ' está inativo' in p1.get('why', ''),
+           'A15 · 2 marcados e um fica Inativo antes de gravar: nada gravado (sem vínculo nem recibo), painel aberto com a seleção e o motivo; primária desligada', [p0, v2, v3, rc, k3, p1, fl[:240]])
+        marca(m, 'a03'); p2 = prim(m); salvar(m); v2, v3 = vinc(m, 'PM-11|a02'), vinc(m, 'PM-11|a03')
+        ok(p2.get('t') == 'Vincular ao PM-11' and not p2.get('dis') and not aberto(m) and v2 and v3 is None and recs() == 1,
+           'A15 · desmarcado o inválido, grava só o que continua marcado (decisão explícita)', [p2, bool(v2), v3])
+        abre11(); m.setv('#vl_q', 'xyz'); ks = {a: marcado(m, a) for a in ('a02', 'a03', 'a04')}; p3 = prim(m); vz = pan(m)
+        ok(all(k == {'on': True, 'dis': False} for k in ks.values()) and p3.get('t') == 'Vincular 3 ativos ao PM-11' and not p3.get('dis') and 'os marcados continuam na lista' in vz,
+           'A15 · busca sem resultado: os 3 marcados continuam na lista e no rótulo ("Vincular 3 ativos ao PM-11")', [ks, p3, vz[-160:]])
+        m.setv('#vl_q', m.man("m.ativos.a02.nome")); ks = {a: marcado(m, a) for a in ('a02', 'a03', 'a04')}; p4 = prim(m); salvar(m)
+        vs = {a: vinc(m, 'PM-11|' + a) for a in ('a02', 'a03', 'a04')}
+        ok(all(k and k['on'] for k in ks.values()) and p4.get('t') == 'Vincular 3 ativos ao PM-11' and all(vs.values()) and not aberto(m),
+           'A15 · busca que esconde 2 marcados não os tira do lote: grava os 3', [ks, p4, {a: bool(x) for a, x in vs.items()}])
+        m.sem_erro('A15')
     finally:
         fecha(m)
 
