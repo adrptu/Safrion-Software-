@@ -51,8 +51,8 @@ Pedido do proprietário de 16/10/2026, cobrado em 17/10, transformado em padrão
 
 | Item | Conteúdo |
 |---|---|
-| **Regra** | <ul><li>Cada classe é um botão com a contagem e a área ("foco · 2 · 137 ha").</li><li>Passar o mouse ou focar realça os talhões dela.</li><li>Clicar filtra o mapa e a lista: os outros esmaecem e a Lista mostra "N de M". Clicar de novo limpa.</li><li>O contêiner da legenda não pega o clique fora dos itens.</li></ul> |
-| **Dano evitado** | Legenda decorativa; contar talhões de uma condição à mão. |
+| **Regra** | <ul><li>Cada classe é um botão com a contagem e a área ("foco · 2 · 137 ha").</li><li>Passar o mouse ou focar realça os talhões dela.</li><li>Clicar filtra o mapa e a lista: os outros esmaecem e a Lista mostra "N de M". Clicar de novo limpa.</li><li>O contêiner da legenda não pega o clique fora dos itens.</li><li>Escala relativa (Satélite no contraste Talhão; Solo fora do Absoluto) não conta nem filtra talhões: a cor do talhão não é uma classe dela. Sem cultura, sem laudo e nuvem contam.</li><li>No mapa estreito (≤ 700 px), a legenda é uma linha que rola de lado.</li></ul> |
+| **Dano evitado** | Legenda decorativa; contar talhões de uma condição à mão; contagem que diz "Médio 20" quando os rótulos dizem fraco e bom; legenda que cobre metade do mapa no celular. |
 | **Teste** | `mapa_mux_f2_test.py` L1 |
 
 ## MUX-P6 · Ver dados: Lista | Mapa no mesmo bloco

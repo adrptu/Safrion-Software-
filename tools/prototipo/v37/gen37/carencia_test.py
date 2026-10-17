@@ -74,7 +74,8 @@ def fluxo():
         ok('Carência e destino' not in rail and 'Colheita e produtividade' in rail and filtro == 'true', 'Carência e destino é filtro (Mostrar) de Colheita e produtividade, fora da barra', [rail, filtro])
         sel = J("(()=>{const b=[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')].find(b=>b.innerText.trim()==='Colheita e produtividade'); return b?b.getAttribute('aria-selected'):'';})()")
         p = pan(); a = acts()
-        ok(sel == 'true' and 'Pivô 23' in p and 'carência até 26/09' in rot('PV23'), 'link #car:PV23 abre Colheita e produtividade › Carência e destino com o Pivô 23 selecionado; rótulo do pivô "carência até 26/09" = último dia em carência (texto, não só cor)', [sel, rot('PV23'), p[:160]])
+        # MUX-F0 (17/10/2026, D27): um nome só por pivô no IN-04; o painel abre com "P23 · 64 ha", não mais "Pivô 23". Oráculo obsoleto no nome; a asserção não muda
+        ok(sel == 'true' and p.startswith('P23 · ') and 'carência até 26/09' in rot('PV23'), 'link #car:PV23 abre Colheita e produtividade › Carência e destino com o Pivô 23 selecionado; rótulo do pivô "carência até 26/09" = último dia em carência (texto, não só cor)', [sel, rot('PV23'), p[:160]])
         ok('Colheita impedida até 26/09 · Tebuconazol 200 EC (OS-0508)' in p and 'determina o prazo' in p and 'faixa não registrada: vale o talhão todo' in p and 'Consultado em 23/09/2026 (hoje)' in p and 'Atualização' in p,
            'painel: prazo determinante, faixa não identificada vale para o pivô, data consultada e atualização', p[:600])
         ok(a == [['Ver restrição', 'OS.dc.html#OS-0508']], 'uma ação primária no estado: Ver restrição → OS-0508', a)
@@ -99,7 +100,10 @@ def fluxo():
         J("(()=>{const b=[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')].find(b=>b.innerText.trim()==='Integrado'); b.click();})()"); time.sleep(.6); p = pan()
         ok('Carência e destino carência até 26/09' in p and 'Ver carência' in p, 'Integrado: linha "Carência e destino" com Ver carência', p[:700])
         btn('Ver carência', 'aside'); time.sleep(.5)
-        ok('CARÊNCIA E DESTINO' in pan().upper() and J("location.hash")=='', 'Ver carência abre a camada sem perder o talhão', pan()[:200])
+        # MUX-F1 (17/10/2026, item 8): o endereço passou a guardar o estado do mapa (#faz=&lay=&t=&dt=). Antes a asserção era "hash vazio" (o comando
+        # #car consumido); agora: nenhum comando sobra e o estado diz a camada e o talhão. Oráculo obsoleto na forma; a asserção não fica mais fraca
+        hs = J("location.hash") or ''
+        ok('CARÊNCIA E DESTINO' in pan().upper() and not hs.startswith('#car') and 'lay=colheita' in hs and 't=PV23' in hs, 'Ver carência abre a camada sem perder o talhão', [hs, pan()[:200]])
         ok(t.errs() == '', 'mapa sem erro de JavaScript', t.errs())
         # ---------- 5 · O.S.: colheita no Pivô 23 impedida pela carência (comando, não cor) e recuperação ----------
         t.goto('OS.dc.html'); time.sleep(.5)
@@ -192,8 +196,9 @@ def fluxo():
         # ---------- 8b · link "Ver carência no mapa" (#car, sem talhão) não troca fazenda nem seleção ----------
         t.goto('Main.dc.html'); J("sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:'Santa Rita',lay:'Lavoura',tsel:['T7'],flt:{}}))")
         t.goto('IN-04.dc.html#car'); time.sleep(1.2); ctx = J("sessionStorage.getItem('mapa-ctx')") or ''
-        ok('"mf_faz":"Santa Rita"' in ctx and '"tsel":["T7"]' in ctx and '"lay":"Colheita"' in ctx and '"ver":"Carência e destino"' in ctx and J("location.hash") == '',
-           'link #car vindo da CO-06 abre Colheita e produtividade › Carência e destino na fazenda e com o talhão que já estavam (Santa Rita, T7)', ctx)
+        hs = J("location.hash") or ''   # MUX-F1: o endereço guarda o estado (antes: vazio); o comando #car não sobra
+        ok('"mf_faz":"Santa Rita"' in ctx and '"tsel":["T7"]' in ctx and '"lay":"Colheita"' in ctx and '"ver":"Carência e destino"' in ctx and not hs.startswith('#car') and 'faz=SR' in hs and 't=T7' in hs,
+           'link #car vindo da CO-06 abre Colheita e produtividade › Carência e destino na fazenda e com o talhão que já estavam (Santa Rita, T7)', [hs, ctx])
         ok(t.errs() == '', 'link #car sem erro de JavaScript', t.errs())
         # ---------- 9 · celular (390 × 844): camada e lotes alcançáveis, sem erro ----------
         t.c.size(390, 844); t.goto('IN-04.dc.html#car:PV23'); pronto(); time.sleep(1.0)

@@ -6,7 +6,8 @@ proprietário de 16/10/2026; implantação de 17/10). Chrome a 1440 × 900 (mous
   F0-2 com o contexto salvo na Santa Rita, IN-04.dc.html#talhao=PV05 abre a Lagoa Grande com o P5 escolhido; #talhao=PV99 mostra o aviso
        (visível, role=status) e não escolhe nenhum talhão
   F0-3 Satélite sem link para o AG-06 (Eficácia e histórico de pragas), na faixa e no painel
-  F0-4 Solo e Colheita e produtividade › Situação com o link do módulo na faixa (AG-02 e COLH)
+  F0-4 Colheita e produtividade › Situação com o link do módulo na faixa (COLH); Solo leva ao AG-02 pelo painel do talhão (na faixa, o link
+       cortava os números a 1440: MAP-04)
   F0-5 as ações de Colheita e produtividade levam o ícone que a barra das funções já usa (engine.ICONS['Colheita'])
   F0-6 no IN-04 o pivô tem um nome só, "P5": no marcador, no título do painel e no nome acessível; "Pivô 5" não aparece no painel
   F0-7 sem erro de JavaScript (as duas larguras)
@@ -62,9 +63,14 @@ try:
         MED[f'ag06_{tag}'] = ag6
         chk(f'F0-3 {tag}: Satélite sem link para o AG-06 na faixa e no painel do P1', not ag6 and painel(J) != '', ag6)
         # ---------- F0-4 Solo e Colheita › Situação com o link do módulo ----------
-        camada(J, 'Solo'); l_solo = [(t, h) for t, h in links() if (h or '').startswith('AG-02.dc.html') and t.startswith('Abrir')]
+        # Solo: o link do módulo na faixa cortava os números a 1440 (MAP-04, pedido do proprietário de 16/10, mapa_faixa_test F3); o AG-02 fica no
+        # painel do talhão com laudo ("Abrir <laudo>") e a faixa mantém os números inteiros
+        camada(J, 'Solo'); clica_tal('T1'); espera(J, "!!document.querySelector('main aside[aria-label]')", 4); time.sleep(.3)
+        l_solo = [(t, h) for t, h in links() if (h or '').startswith('AG-02.dc.html#') and t.startswith('Abrir') and 'registrar' not in h]
+        cort = J("(()=>{const n=document.querySelector('[role=group][aria-label^=\"Indicadores de\"]'); return n?n.scrollWidth>n.clientWidth+1:null;})()")
         camada(J, 'Colheita e produtividade'); filtro(J, 'Mostrar', 'Situação'); l_col = [(t, h) for t, h in links() if (h or '').startswith('COLH.dc.html') and t.startswith('Abrir Previsão')]
-        chk(f'F0-4 {tag}: Solo e Colheita › Situação com o link do módulo (Abrir Análises de solo › AG-02; Abrir Previsão e colheita › COLH)', bool(l_solo) and bool(l_col), [l_solo, l_col])
+        chk(f'F0-4 {tag}: Colheita › Situação com o link do módulo (Abrir Previsão e colheita › COLH); Solo leva ao AG-02 pelo painel do T1 e a faixa do Solo não corta os números (a 1440)',
+            bool(l_solo) and bool(l_col) and (cort is False or larg != 1440), [l_solo, cort, l_col])
         # ---------- F0-5 ícone das ações de Colheita ----------
         ICO = E.ICONS.get('Colheita', '')
         acs = []

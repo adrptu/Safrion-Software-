@@ -12,7 +12,7 @@ proprietário de 16/10/2026, §1; confronto §7 e §8.1 itens 3 a 5; implantaç�
   K2 rótulos: no máximo 3 linhas (número / valor / estado curto), sobre placa branca a 90 % com texto #15201A e nenhum opacity no caminho: contraste
      ≥ 13,4:1 sobre qualquer fundo (≥ 4,5:1); seleção e foco em duas cores (escuro e branco: ≥ 3:1 sobre qualquer preenchimento)
   L1 legenda que trabalha: cada classe com contagem e área (a soma bate com os talhões); hover realça os talhões da classe; clique filtra o mapa e a
-     lista ("N de M"); clique de novo limpa; no Satélite com contraste Talhão a escala dos pixels (relativa a cada talhão) não conta talhões
+     lista ("N de M"); clique de novo limpa; no Satélite com contraste Talhão e no Solo fora do Absoluto, a escala relativa não conta talhões
   S1 seleção: contorno forte (7 px escuro + linha branca) e número em destaque; no mapa real, o clique não muda zoom nem centro
   M1 390 com toque: tocar não abre cartão (não atrapalha); o cartão do foco cabe na janela
   E1 sem erro de JavaScript
@@ -157,6 +157,12 @@ try:
     l_abs = json.loads(J(LEGQ) or '[]'); s_abs = sum(int((x[1] or '0').split(' ')[0]) for x in l_abs)
     chk('L1e Satélite: no contraste Talhão a escala dos pixels não conta talhões (só sem cultura e nuvem); no Absoluto a soma é 8',
         bool(l_tal) and all(x[0] in ('c:gray', 'c:cloud') for x in l_tal) and s_abs == 8 and any(x[0].startswith('h:') for x in l_abs), [l_tal, l_abs])
+    filtro(J, 'Contraste', 'Talhão')
+    # Solo: a escala da legenda só é a classe do talhão no contraste Absoluto; nos outros (sextos de cada talhão ou da fazenda) ela não conta talhões
+    camada(J, 'Solo'); time.sleep(.4); s_tal = json.loads(J(LEGQ) or '[]')
+    filtro(J, 'Contraste', 'Absoluto'); time.sleep(.4); s_abs = json.loads(J(LEGQ) or '[]'); n_abs = sum(int((x[1] or '0').split(' ')[0]) for x in s_abs)
+    chk('L1f Solo: nos sextos de cada talhão a escala não conta talhões (só sem laudo); no Absoluto a soma é 8',
+        bool(s_tal) and all(not x[0].startswith('h:') for x in s_tal) and n_abs == 8 and any(x[0].startswith('h:') for x in s_abs), [s_tal, s_abs])
     filtro(J, 'Contraste', 'Talhão'); camada(J, 'Integrado')
     J("(()=>{const g=document.querySelector('[role=group][aria-label=\"Ver dados\"]'); const b=g&&[...g.querySelectorAll('button')].find(x=>x.innerText.trim()==='Mapa'); b&&b.click();})()"); time.sleep(.4)
     # ================= S · seleção =================

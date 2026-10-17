@@ -124,6 +124,7 @@ try:
         if not ok_b: falta.append(antiga)
     abre({'mf_faz': 'Santa Rita', 'lay': 'Insumos', 'flt': {'Insumos': {'per': 'Safra toda'}}}); ctx_ins = [ativa(), dict(grupo('Mostrar')).get('Insumos'), dict(grupo('Período')).get('Safra toda')]
     abre({'mf_faz': 'Santa Rita', 'lay': 'Integrado'}, '#car:PV23', lg=True); time.sleep(.6)
+    # MUX-F0 (17/10/2026, D27): um nome só por pivô no IN-04; o painel abre com "P23 · 64 ha", não mais "Pivô 23". Oráculo obsoleto no nome; a asserção (o painel do pivô 23) não muda
     lk_car = [ativa(), dict(grupo('Mostrar')).get('Carência e destino'), painel()[:80]]
     J(f"{TRI}.find(b=>b.innerText.trim()==='Integrado').click()"); time.sleep(.8)
     hub = json.loads(J("JSON.stringify((()=>{const s=document.querySelector('main aside[aria-label] section[aria-label=\"Neste talhão\"]'); return s?[...s.children].filter(d=>d.querySelector('button')).map(d=>[d.firstElementChild.innerText.trim(),[...d.querySelectorAll('button')].map(b=>b.innerText.trim())]):[];})())") or '[]')
@@ -131,7 +132,7 @@ try:
     J("(()=>{const b=[...document.querySelectorAll('main aside[aria-label] button')].find(b=>b.innerText.trim()==='Ver insumos'); b&&b.click();})()"); time.sleep(.8)
     ver_ins = [ativa(), dict(grupo('Mostrar')).get('Insumos')]
     chk('N5 nenhuma função sumiu: as 11 camadas de antes são alcançáveis (9 na barra, Insumos e Carência como filtro); contexto "Insumos" e link #car:PV23 abrem a função nova; Integrado do Pivô 23 com Insumos e Carência e destino e o "Ver …" de cada um',
-        not falta and ctx_ins == [['Ordens de serviço'], 'true', 'true'] and lk_car[0] == ['Colheita e produtividade'] and lk_car[1] == 'true' and 'Pivô 23' in lk_car[2]
+        not falta and ctx_ins == [['Ordens de serviço'], 'true', 'true'] and lk_car[0] == ['Colheita e produtividade'] and lk_car[1] == 'true' and lk_car[2].startswith('P23 · ')
         and [h[0] for h in hub] == ESP_HUB and all(len(h[1]) == 1 and h[1][0].startswith('Ver ') for h in hub) and ver_ins == [['Ordens de serviço'], 'true'],
         [falta, ctx_ins, lk_car, hub, ver_ins])
     # ---------- N7 · ícone "Importar laudo de análise de solo" (proprietário, 16/10/2026) ----------

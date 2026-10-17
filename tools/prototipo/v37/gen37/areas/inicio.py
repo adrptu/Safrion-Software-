@@ -1181,8 +1181,9 @@ function MAPVALS(self,v){
   // ===== MUX: a classe de cada talhão uma vez por desenho; o que ele diz na camada (cartão, nome acessível, rótulo, lista) =====
   const CL={}; TIDS().forEach(t=>{ CL[t]=cls(l,f,t); });
   // Satélite com contraste Talhão: as cores são relativas a cada talhão (todo pivô tem as seis), então a escala dos pixels não conta nem filtra
-  // talhões (antes: "Médio 20 · 1.137 ha" enquanto os rótulos diziam fraco, atenção e bom). Sem cultura e nuvem continuam contando
-  const escalaRel=(l==='Satélite'&&f.ctr==='Talhão');
+  // talhões (antes: "Médio 20 · 1.137 ha" enquanto os rótulos diziam fraco, atenção e bom). No Solo, a escala da legenda só é a classe do
+  // talhão no contraste Absoluto (nos outros, sextos de cada talhão ou da fazenda). Sem cultura, sem laudo e nuvem continuam contando
+  const escalaRel=(l==='Satélite'&&f.ctr==='Talhão')||(l===SOLO_L&&f.ctr!=='Absoluto');
   const leg0=legend(self,l,f,sel).map(x=>Object.assign({},x,{key:x.k?'c:'+x.k:(x.hx&&!escalaRel?'h:'+x.hx:''),nm:x.t}));
   MUX.info=muxInfo(l,f,TIDS(),CL,leg0);
   // legenda que trabalha (MUX-F2): cada classe com a contagem e a área; passar o mouse ou focar realça os talhões dela; clicar filtra o mapa
@@ -1203,10 +1204,12 @@ function MAPVALS(self,v){
   const at=muxAtivo(sel); const FI=MUX.filtroIds;
   v.zst='transform:scale('+z+');transform-origin:50% 50%;transition:transform .2s;width:100%;height:100%;'; v.zin=()=>{ if(FAZ==='Lagoa Grande'&&LGI.map){ LGI.map.zoomIn(); return; } self.setState({zoom:Math.min(2,(self.state.zoom||1)+0.25)}); }; v.zout=()=>{ if(FAZ==='Lagoa Grande'&&LGI.map){ LGI.map.zoomOut(); return; } self.setState({zoom:Math.max(1,(self.state.zoom||1)-0.25)}); };
   // MUX-F0: destinos com contexto. "Abrir ordens" com um talhão escolhido leva #tal=Fazenda|Talhão (D8); o Satélite não leva mais ao AG-06,
-  // que é eficácia e histórico de pragas (D7: sem link até o EX-42 publicar a série do índice); Solo e Colheita ganham o link do módulo (D24)
+  // que é eficácia e histórico de pragas (D7: sem link até o EX-42 publicar a série do índice); Colheita ganha o link do módulo (D24). O Solo não:
+  // a 1440 o link cortava os números da faixa (MAP-04, pedido do proprietário de 16/10: números do Solo inteiros); o AG-02 fica no painel
+  // ("Abrir <laudo>") e no ícone de registrar laudo
   const osH=sel.length===1?muxOsTal(sel[0]):'OS.dc.html';
   const FL={'Integrado':['Abrir ordens',osH],'Lavoura':['Abrir safra','SAF.dc.html'],'O.S./prazos':['Abrir ordens',osH],'Irrigação':['Abrir irrigação','IR-01.dc.html#faz='+encodeURIComponent(FAZ)],'MIP/MID':['Abrir Pragas e doenças','AG-01.dc.html'],'Insumos':['Abrir compras','CMP.dc.html'],'Custos':['Abrir safra','SAF.dc.html']};
-  FL[SOLO_L]=['Abrir Análises de solo','AG-02.dc.html']; FL[COLH_L]=['Abrir Previsão e colheita','COLH.dc.html'];
+  FL[COLH_L]=['Abrir Previsão e colheita','COLH.dc.html'];
   FL[CAR_L]=['Abrir qualidade dos lotes','CO-06.dc.html'];   // MAPA-CARENCIA-LMR-20261003
   const fk=isIns(l,f)?OS_INS:(isCar(l,f)?CAR_L:l);   // Insumos e Carência (filtros) levam ao módulo deles
   // importar laudo (só na camada Solo): o Registrar laudo do AG-02 com o talhão escolhido (um só) ou só a fazenda do mapa
