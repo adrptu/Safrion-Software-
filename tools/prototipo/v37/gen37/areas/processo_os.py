@@ -1061,24 +1061,29 @@ function osGrupoVals(self,v,recorte){
     else try{const f=cenGrupoFicha(c,id);const outra=ids.find(k=>k!==id);if(outra&&f.eq!==cenGrupoFicha(c,outra).eq)motivo='Receita ou parâmetros incompatíveis com a seleção'}catch(e){motivo=e.message}
     return {id,podeInstrucao:!g&&aprova&&o&&!o.loteFicha&&o.etapa==='A liberar'&&!v.og_revisao,instrucao:()=>put({instrucao:{id,snapshot:cenGrupoSnapshot(c,id),vazao:o.instrucao&&o.instrucao.versao===o.versao?String(o.instrucao.vazao):''},erro:'',chave:key()}),podeSeparar:separavel,podeAprovar:!!g&&aprova&&!v.og_revisao&&o&&o.etapa==='A liberar'&&!osAprovada(o,osVn(o.versao)),receita:o?o.versao+' · '+((o.loteFicha||{}).receita||((((o.osc||{}).novo||{}).atv||{}).nome)||'Instrução da origem')+' · '+(o.ins||[]).map(i=>i.p+': '+nf(i.dose)+' '+i.un+'/ha').join(' · '):'',
       aprovar:()=>put({confirmacao:{tipo:'aprovar',os:id,versao:g.versao,esperada:cenGrupoSnapshot(c,id)},erro:'',chave:key()}),
-      t:id+' · '+(po?po.talhao:(o&&o.talhao)||'origem ausente'),area:o?nf(o.area)+' ha':'—',estado:motivo||'Compatível · '+(o&&o.versao),marcado:ids.includes(id),desabilitado:!ids.includes(id)&&!!motivo,
+      t:id+' · '+(po?po.talhao:(o&&o.talhao)||'origem ausente'),area:o?nf(o.area)+' ha':'—',estado:motivo==='Liberadas'?'Liberada':motivo||'Compatível · '+(o&&o.versao),marcado:ids.includes(id),desabilitado:!ids.includes(id)&&!!motivo,
       mudar:()=>selecionar(id),abrir:()=>{put({aberto:false});self.setState({pan:id,pa:null})},
       feito:o?(()=>{const f=fatos.find(x=>x.os===id),s={};if(f)f.consumo.forEach(a=>Object.keys(a.cons||{}).forEach(p=>s[p]=(s[p]||0)+a.cons[p]));return nf(o.realizado||0)+' ha realizados · '+nf(o.saldo)+' ha de saldo'+Object.keys(s).map(p=>' · consumido '+p+': '+nf(s[p])+' '+((o.ins||[]).find(x=>x.p===p)||{}).un).join('')+(f&&f.pendentes?' · '+f.pendentes+' registros aguardam sinal ou conferência':'')})():'',
       separar:()=>{try{cenGrupoAtor(pf);cenGrupoSeparavel(c,g.ids);put({confirmacao:{tipo:'separar',os:id,versao:g.versao,versoes:snap(g)},erro:'',chave:key()})}catch(e){put({erro:e.message})}}};
   });
+  const conferir=id=>{const o=c.ordens[id]||{},b=(o.osc||{}).novo||ords(self).find(x=>x.id===id)||o;
+    const iso=x=>/^\d{4}-\d{2}-\d{2}/.test(String(x||''))?String(x).slice(0,10):'',ini=iso(b.ini||b.jan),fim=iso(b.fim||b.jan),fmt=x=>x?x.slice(8,10)+'/'+x.slice(5,7)+'/'+x.slice(0,4):'Não informada';
+    return {id,talhao:b.talhao||o.talhao||'Não informado',area:nf(o.area)+' ha',insumos:(o.ins||[]).map(i=>i.p+' · '+nf(i.dose)+' '+i.un+'/ha · total '+(Number.isFinite(i.tot)?nf(i.tot)+' '+i.un:'não informado')).join(' / '),data:ini||fim?'Início '+fmt(ini)+' · prazo '+fmt(fim):(b.janela||'Data não informada'),ini,fim,estado:o.etapa==='Liberadas'?'Liberada':o.etapa||'Não informado'};
+  };
   const propostas=new Map(),fora=[];
   if(!g){for(const id of st.candidatos||[]){try{const x=cenGrupoFicha(c,id);if(!propostas.has(x.eq))propostas.set(x.eq,[]);propostas.get(x.eq).push(x)}catch(e){fora.push({id,t:id,motivo:String(e.message).replace(id+': ','')})}}}
   v.og_sugestoes=[];for(const rows of propostas.values()){
     const destinos=new Set(rows.map(x=>x.f.parcela));
     if(rows.length<2||destinos.size!==rows.length){rows.forEach(x=>fora.push({id:x.o.id,t:x.o.id,motivo:rows.length<2?'Sem outra O.S. compatível neste contexto':'Talhão repetido: conferir O.S. sobrepostas'}));continue}
     const escolhidas=rows.map(x=>x.o.id),area=rows.reduce((a,x)=>a+x.o.area,0);
-    v.og_sugestoes.push({t:rows[0].prods.map(x=>x.p+' '+nf(x.dose)+' '+x.un+'/ha').join(' + ')+' · '+rows.length+' O.S. · '+rows.length+' talhões · '+nf(area)+' ha',escolher:()=>put({ids:escolhidas,previa:null,confirmacao:null,resultado:null,erro:'',chave:key()})});
+    const linhas=escolhidas.map(conferir),datas=linhas.flatMap(x=>[x.ini,x.fim]).filter(Boolean).sort(),dias=datas.length?Math.round((Date.parse(datas[datas.length-1]+'T00:00:00Z')-Date.parse(datas[0]+'T00:00:00Z'))/86400000):0;
+    v.og_sugestoes.push({linhas,acao:'Agrupar estas '+rows.length,periodo:datas.length?datas[0]+' a '+datas[datas.length-1]:'Datas não informadas',aviso:dias?'Datas abrangem '+dias+' dias. Confira a sequência antes de liberar.':'',t:rows[0].prods.map(x=>x.p+' '+nf(x.dose)+' '+x.un+'/ha').join(' + ')+' · '+rows.length+' O.S. · '+rows.length+' talhões · '+nf(area)+' ha',escolher:()=>put({ids:escolhidas,previa:null,confirmacao:null,resultado:null,erro:'',chave:key()})});
   }
   v.og_mostra_sugestoes=!g&&!ids.length&&!v.og_revisao&&!st.instrucao;
   if(v.og_mostra_sugestoes)v.og_acao_visivel=false;
-  v.og_fora=fora.map(x=>Object.assign(x,{instrucao:()=>{const r=v.og_linhas.find(o=>o.id===x.id);if(r&&r.podeInstrucao)r.instrucao()},podeInstrucao:!!(v.og_linhas.find(o=>o.id===x.id)||{}).podeInstrucao}));v.og_fora_t='Fora de grupo ('+fora.length+')';
-  v.og_escolhidas=v.og_linhas.filter(x=>st.instrucao?st.instrucao.id===x.id:(g||ids.includes(x.id))).map(x=>Object.assign({},x,{talhao:(c.ordens[x.id]||{}).talhao||((ords(self).find(o=>o.id===x.id)||{}).talhao)||'—',podeRetirar:!g&&!v.og_revisao,retirar:()=>selecionar(x.id)}));
-  v.og_vazia=!v.og_linhas.length;v.og_n=st.modoPrograma&&g?g.ids.length+' destinos do grupo':ids.length+' selecionadas';
+  v.og_fora=fora.map(x=>Object.assign(x,conferir(x.id),{instrucao:()=>{const r=v.og_linhas.find(o=>o.id===x.id);if(r&&r.podeInstrucao)r.instrucao()},podeInstrucao:!!(v.og_linhas.find(o=>o.id===x.id)||{}).podeInstrucao}));v.og_fora_t='Fora de grupo ('+fora.length+')';
+  v.og_escolhidas=v.og_linhas.filter(x=>st.instrucao?st.instrucao.id===x.id:(g||ids.includes(x.id))).map(x=>Object.assign({},x,conferir(x.id),{estado:x.estado,talhao:(c.ordens[x.id]||{}).talhao||((ords(self).find(o=>o.id===x.id)||{}).talhao)||'—',podeRetirar:!g&&!v.og_revisao,retirar:()=>selecionar(x.id)}));
+  v.og_vazia=!v.og_linhas.length;v.og_n=g?'':ids.length+' selecionadas';
   v.og_programar_grupo=()=>put({modoPrograma:true,programar:true,previa:null,confirmacao:null,erro:'',chave:key()});
   v.og_programar=!!st.programar;v.og_programar_mudar=e=>put({programar:!!e.target.checked,previa:null,erro:'',chave:key()});
   const fz0=(()=>{const id=(g?g.ids:ids)[0],f=id&&c.ordens[id]&&c.ordens[id].loteFicha,m=f&&f.janela&&/([+-]\d\d:\d\d)$/.exec(f.janela[0]);return m?m[1]:'';})();
@@ -1100,7 +1105,7 @@ function osGrupoVals(self,v,recorte){
   v.og_preparo_motivo=preparo.motivo;
   v.og_pendencias=p?p.pendencias.map(t=>({t})):[];
   const programacao=p?p.programacao:g?Object.fromEntries(g.ids.map(id=>[id,(c.ordens[id]||{}).prog])):null;
-  v.og_recursos=programacao?Object.keys(programacao).flatMap(id=>{const x=programacao[id];return x?(x.blocos||[]).map(b=>({t:id+' · '+AL0.nome[b.r]+' · '+alDm(b.dia)+' '+alHh(b.ini)+'–'+alHh(b.fim)+' (UTC'+x.fuso+')'})):[]}):[];
+  v.og_recursos=programacao?Object.keys(programacao).flatMap(id=>{const x=programacao[id];return x?(x.blocos||[]).map(b=>({os:id,recurso:AL0.nome[b.r]||b.r,papel:AL0.classe[b.r]||AL0.tipo[b.r]||'Recurso',janela:alDm(b.dia)+' '+alHh(b.ini)+'–'+alHh(b.fim)+' (UTC'+x.fuso+')'})):[]}):[];
   v.og_consequencia=p?(st.modoPrograma?'Confirmar atualiza apenas a programação operacional. Aprovação e liberação continuam separadas.':'Confirmar vincula as origens. Não aprova, libera ou reserva insumos. '+(p.programacao?'A programação dos recursos será registrada.':p.comum?'Recursos da alocação de cada O.S. preservados.':'Programação ainda pendente: escolher recursos e início no grupo.')) : '';
   v.og_botao=revisaAprovacao?'Aprovar '+q.os+' · '+c.ordens[q.os].versao:v.og_revisao?(q&&q.tipo==='separar'?'Confirmar separação':st.modoPrograma?'Confirmar programação':g?'Liberar as '+q.ids.length+' aprovadas':'Confirmar agrupamento'):st.modoPrograma?'Conferir programação':g?(!ids.length&&aprovadas.length?'Conferir liberação das '+aprovadas.length+' aprovadas':'Conferir liberação'):'Conferir agrupamento';
   v.og_acao=()=>{if(!v.og_acao_permitida)return;if(st.resultado&&!st.previa&&!st.confirmacao&&!ids.length&&!st.modoPrograma&&!aprovadas.length)return;if((g2pf(g2perfil())||{}).k!==perfil){put({aberto:false,erro:'Perfil mudou: reabra para conferir.'});return}if(!v.og_revisao){v.og_previa();return}
@@ -1121,6 +1126,7 @@ function osGrupoVals(self,v,recorte){
     v.og_acao=()=>{if(!aprova||self.state.og!==st)return;const r=cenMudar(null,k=>cenGrupoVazao(k,f.id,f.snapshot,g2num(f.vazao),pf,st.chave),{estrito:true});if(r.erro){put({erro:r.erro});return}put({instrucao:null,previa:null,confirmacao:null,erro:'',resultado:r,chave:key()});self.setState({cenrev:cenGet().rev})};
   }
 
+  for(const k of ['recursos','historico']){v['og_'+k+'_aberto']=!!st[k+'Aberto'];v['og_'+k+'_rotulo']=(st[k+'Aberto']?'Recolher ':'Abrir ')+(k==='recursos'?'recursos':'histórico');v['og_'+k+'_alternar']=()=>put({[k+'Aberto']:!st[k+'Aberto']})}
   v.og_hist=g?g.historico.map(x=>({t:x.acao+' · v'+x.versao+' · '+x.por+' · '+x.at})):[];
 }
 
@@ -1970,25 +1976,35 @@ def _grupo():
         return f'<sc-for list="{H(nome)}" as="r" hint-placeholder-count="0"><p style="margin:4px 0;overflow-wrap:anywhere">{H("r.t")}</p></sc-for>'
     def tabela(nome, colunas, acao=''):
         cab=''.join(f'<th scope="col" style="padding:10px 12px;text-align:left;font-size:12px;color:{MUTED};border-bottom:1px solid {LINE}">{titulo}</th>' for titulo,k in colunas)
-        cel=''.join(f'<td style="padding:10px 12px;border-bottom:1px solid {LINE};vertical-align:top;overflow-wrap:anywhere">{H("o."+k)}</td>' for titulo,k in colunas)
+        cel=''.join(f'<td data-label="{titulo}" style="padding:10px 12px;border-bottom:1px solid {LINE};vertical-align:top;overflow-wrap:anywhere">{H("o."+k)}</td>' for titulo,k in colunas)
         if acao: cab+='<th scope="col" aria-label="Ações"></th>';cel+='<td style="padding:8px;vertical-align:top">'+acao+'</td>'
-        return f'<sc-if value="{H(nome+".length")}" hint-placeholder-val="{F()}"><div style="max-width:100%;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr>{cab}</tr></thead><tbody><sc-for list="{H(nome)}" as="o" hint-placeholder-count="0"><tr>{cel}</tr></sc-for></tbody></table></div></sc-if>'
+        return f'<sc-if value="{H(nome+".length")}" hint-placeholder-val="{F()}"><div style="max-width:100%;overflow-x:auto"><table class="og-table" style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr>{cab}</tr></thead><tbody><sc-for list="{H(nome)}" as="o" hint-placeholder-count="0"><tr>{cel}</tr></sc-for></tbody></table></div></sc-if>'
     acoes=(f'<sc-if value="{H("o.podeAprovar")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("o.aprovar")}" style="{_MINI};min-height:44px">Aprovar</button></sc-if>'
         +E.mais(H("o.id"),[("Abrir O.S.",H("o.abrir")),
           f'<sc-if value="{H("o.podeRetirar")}" hint-placeholder-val="{F()}"><button type="button" role="menuitem" onClick="{H("o.retirar")}">Retirar desta seleção</button></sc-if>',
           f'<sc-if value="{H("o.podeSeparar")}" hint-placeholder-val="{F()}"><button type="button" role="menuitem" onClick="{H("o.separar")}">Separar do grupo</button></sc-if>'],linha=True))
-    escolhidas=tabela('og_escolhidas',[('O.S.','id'),('Talhão','talhao'),('Área','area'),('Calda e versão','receita'),('Estado','estado')],acoes)
+    def recolhido(k, titulo, lista, conteudo):
+        return (f'<sc-if value="{H(lista+".length")}" hint-placeholder-val="{F()}"><section><div style="display:flex;align-items:center;gap:8px">'
+            +E.seta_abrir(H('og_'+k+'_aberto'),H('og_'+k+'_rotulo'),H('og_'+k+'_alternar'))
+            +f'<h3>{titulo}</h3></div><sc-if value="{H("og_"+k+"_aberto")}" hint-placeholder-val="{F()}">{conteudo}</sc-if></section></sc-if>')
+    recursos=recolhido('recursos','Recursos','og_recursos',tabela('og_recursos',[('O.S.','os'),('Recurso','recurso'),('Papel','papel'),('Janela','janela')]))
+    historico=recolhido('historico','Histórico','og_hist',textos('og_hist'))
+    escolhidas=tabela('og_escolhidas',[('O.S.','id'),('Talhão','talhao'),('Área','area'),('Calda e versão','receita'),('Insumos','insumos'),('Data','data'),('Estado','estado')],acoes)
     separacao=tabela('og_separacao',[('Produto','produto'),('Lote','lote'),('Quantidade','quantidade'),('O.S. / REQ','origens')])
     sequencia=tabela('og_sequencia',[('Ordem','ordem'),('Talhão','talhao'),('O.S.','os'),('Área','area'),('Cargas','cargas'),('Volume','volume')])
-    propostas=(f'<sc-if value="{H("og_mostra_sugestoes")}" hint-placeholder-val="{T()}"><h3>Caldas compatíveis</h3><sc-for list="{H("og_sugestoes")}" as="s" hint-placeholder-count="0"><button type="button" onClick="{H("s.escolher")}" style="{_MINI};min-height:44px;text-align:left;white-space:normal;margin-bottom:8px">{H("s.t")}</button></sc-for>'
-        f'<details><summary style="min-height:44px;cursor:pointer">{H("og_fora_t")}</summary><sc-for list="{H("og_fora")}" as="r" hint-placeholder-count="0"><p>{H("r.id")} · {H("r.motivo")}</p><sc-if value="{H("r.podeInstrucao")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("r.instrucao")}" style="{_MINI};min-height:44px">Conferir instrução de {H("r.id")}</button></sc-if></sc-for></details></sc-if>')
+    colunas=[('O.S.','id'),('Talhão','talhao'),('Área','area'),('Insumos','insumos'),('Data','data'),('Estado','estado')]
+    foraAcao=f'<sc-if value="{H("o.podeInstrucao")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("o.instrucao")}" style="{_MINI};min-height:44px">Conferir instrução</button></sc-if>'
+    propostas=(f'<sc-if value="{H("og_mostra_sugestoes")}" hint-placeholder-val="{T()}"><h3>Caldas compatíveis</h3><sc-for list="{H("og_sugestoes")}" as="s" hint-placeholder-count="0"><section><header><h4>{H("s.t")} · {H("s.periodo")}</h4><button type="button" onClick="{H("s.escolher")}" style="{_MINI};min-height:44px">{H("s.acao")}</button></header><p>{H("s.aviso")}</p>'
+        +tabela('s.linhas',colunas)+'</section></sc-for>'
+        +f'<details><summary style="min-height:44px;cursor:pointer">{H("og_fora_t")}</summary>'+tabela('og_fora',colunas+[('Motivo','motivo')],foraAcao)+'</details></sc-if>')
     programar=(f'<sc-if value="{H("og_edprograma")}" hint-placeholder-val="{F()}"><label style="display:flex;align-items:center;gap:8px;min-height:44px"><input type="checkbox" checked="{H("og_programar")}" onChange="{H("og_programar_mudar")}"/>Programar recursos do grupo</label>'
         f'<sc-if value="{H("og_programar")}" hint-placeholder-val="{F()}"><div style="display:flex;flex-direction:column;gap:8px">'
         f'<label>Início da sequência<input type="datetime-local" value="{H("og_inicio")}" onChange="{H("og_inicio_mudar")}" style="display:block;min-height:44px;max-width:100%;box-sizing:border-box"/></label>'
         f'<label>Fuso da fazenda<select value="{H("og_fuso")}" onChange="{H("og_fuso_mudar")}" style="display:block;min-height:44px"><option value="">Escolha…</option><option value="-03:00">UTC−3</option><option value="-04:00">UTC−4</option><option value="-05:00">UTC−5</option></select></label>'
         f'<sc-for list="{H("og_campos")}" as="f" hint-placeholder-count="4"><label>{H("f.l")}<select value="{H("f.val")}" onChange="{H("f.mudar")}" style="display:block;min-height:44px;width:100%"><sc-for list="{H("f.opcoes")}" as="r" hint-placeholder-count="2"><option value="{H("r.v")}">{H("r.t")}</option></sc-for></select></label></sc-for>'
         '<p>A sequência usa a capacidade, o deslocamento e o setup de cada O.S. Sem programação, o grupo fica pendente.</p></div></sc-if></sc-if>')
-    return (f'<sc-if value="{H("og_show")}" hint-placeholder-val="{F()}"><div style="position:fixed;inset:0;z-index:60;display:flex;justify-content:center;align-items:center;padding:12px;box-sizing:border-box">'
+    return ('<style>@media(max-width:600px){.og-table,.og-table tbody,.og-table tr,.og-table td{display:block;width:100%;box-sizing:border-box}.og-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.og-table tr{margin:8px 0;border:1px solid #dce4dd;border-radius:8px}.og-table td:before{content:attr(data-label);display:block;font-weight:600}.og-table td{min-width:0;overflow-wrap:anywhere}}</style>'
+        f'<sc-if value="{H("og_show")}" hint-placeholder-val="{F()}"><div style="position:fixed;inset:0;z-index:60;display:flex;justify-content:center;align-items:center;padding:12px;box-sizing:border-box">'
         f'<button type="button" aria-label="Fechar agrupamento" onClick="{H("og_fechar")}" style="position:absolute;inset:0;border:0;background:rgba(21,32,26,.32)"></button>'
         f'<aside role="dialog" data-foco="1" aria-modal="true" aria-label="Agrupamento de operações" onKeyDown="{H("og_key")}" style="position:relative;width:960px;max-width:100%;height:min(900px,calc(100dvh - 24px));border-radius:16px;border:1px solid {LINE};box-shadow:0 24px 64px rgba(21,32,26,.2);background:{SURF};display:flex;flex-direction:column;box-sizing:border-box;min-width:0">'
         f'<header style="padding:16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid {LINE}"><h2 style="font-size:18px;flex:1;margin:0">{H("og_titulo")}</h2>'
@@ -1997,10 +2013,10 @@ def _grupo():
         f'<p>{H("og_contexto")}</p><p>{H("og_n")}</p>{propostas}'
         f'<sc-if value="{H("og_temresultado")}" hint-placeholder-val="{F()}"><div role="status"><b>{H("og_resultado")}</b>{textos("og_recibos")}</div></sc-if>'
         f'<sc-if value="{H("og_temerro")}" hint-placeholder-val="{F()}"><p role="alert">{H("og_erro")}</p></sc-if>'
-        f'<sc-if value="{H("og_pode_programar")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("og_programar_grupo")}" style="{_MINI};min-height:44px">Programar grupo</button></sc-if>{programar}<p>{H("og_resumo")}</p><p>{H("og_janela")}</p>{textos("og_produtos")}{textos("og_cargas")}{sequencia}<p>{H("og_preparo_motivo")}</p>{textos("og_pendencias")}{textos("og_recursos")}'
+        f'<sc-if value="{H("og_pode_programar")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("og_programar_grupo")}" style="{_MINI};min-height:44px">Programar grupo</button></sc-if>{programar}<p>{H("og_resumo")}</p><p>{H("og_janela")}</p>{textos("og_produtos")}{sequencia}<p>{H("og_preparo_motivo")}</p>{textos("og_pendencias")}{recursos}'
         f'<sc-if value="{H("og_instrucao")}" hint-placeholder-val="{F()}"><label>Vazão da aplicação (L/ha)<input type="text" inputmode="decimal" value="{H("og_instrucao_val")}" onChange="{H("og_instrucao_mudar")}" style="display:block;min-height:44px;width:100%;box-sizing:border-box"/></label></sc-if><p>{H("og_consequencia")}</p>{escolhidas}'
         f'<sc-if value="{H("og_vazia")}" hint-placeholder-val="{F()}"><p>Nenhuma O.S. neste contexto. Feche e confira os filtros da lista.</p></sc-if>'
         f'<sc-if value="{H("og_detalhe")}" hint-placeholder-val="{F()}"><h3>Separação de insumos</h3><p>Reservas por produto e lote. A entrega continua vinculada a cada requisição no Estoque.</p>{separacao}{textos("og_sep_pendencias")}</sc-if>'
-        f'{textos("og_hist")}</div><footer style="flex-shrink:0;display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px max(12px,env(safe-area-inset-bottom));border-top:1px solid {LINE}">'
+        f'{historico}</div><footer style="flex-shrink:0;display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px max(12px,env(safe-area-inset-bottom));border-top:1px solid {LINE}">'
         f'<sc-if value="{H("og_revisao")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("og_voltar")}" style="{_MINI};min-height:44px">Rever seleção</button></sc-if>'
         f'<span>{H("og_motivo_acao")}</span><sc-if value="{H("og_acao_visivel")}" hint-placeholder-val="{T()}"><button type="button" onClick="{H("og_acao")}" style="{_MINIP};min-height:44px;margin-left:auto">{H("og_botao")}</button></sc-if></footer></aside></div></sc-if>')
