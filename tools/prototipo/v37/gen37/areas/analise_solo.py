@@ -19,7 +19,9 @@ T=lambda: H('true')
 MACRO['AG-02.dc.html']=dict(faz='filtro')
 LAB=lambda t: f'<div style="font-size: 10.5px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase;">{t}</div>'
 
-CSS=('.so-lado{display:grid;grid-template-columns:minmax(0,.75fr) minmax(0,1.7fr);gap:12px;align-items:start}'
+CSS=('.so-met-summary{min-height:24px;box-sizing:border-box;padding:3px 0}.so-met-label{font-size:12px;font-weight:700;color:#5B6660}'
+     '@media(max-width:640px){.so-met-summary{min-height:44px;padding:12px 0}}'
+     '.so-lado{display:grid;grid-template-columns:minmax(0,.75fr) minmax(0,1.7fr);gap:12px;align-items:start}'
      '.so-orig-m{display:none}'
      '.so-kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 16px}'
      '@media (max-width:899px){.so-lado{grid-template-columns:minmax(0,1fr)}.so-orig-d{display:none}.so-orig-m{display:block}}'
@@ -104,7 +106,13 @@ function GR(id){ return GRIDS.find(g=>g.id===id); }
 const SO_UN={'pH':['CaCl₂','H₂O'],'P':['mg/dm³'],'MO':['g/dm³'],'Ca':['cmolc/dm³','mmolc/dm³','mg/dm³'],'Mg':['cmolc/dm³','mmolc/dm³','mg/dm³'],'K':['mg/dm³','cmolc/dm³','mmolc/dm³'],'H+Al':['cmolc/dm³','mmolc/dm³'],'Al':['cmolc/dm³','mmolc/dm³'],'S':['mg/dm³'],'B':['mg/dm³'],'Cu':['mg/dm³'],'Fe':['mg/dm³'],'Mn':['mg/dm³'],'Zn':['mg/dm³'],'Argila':['%','g/kg']};
 const SO_AN=['pH','P','MO','Ca','Mg','K','H+Al','Al','S','B','Cu','Fe','Mn','Zn','Argila'];
 function soRlAnalito(a,q){ return {a,v:q&&q.v!==undefined&&q.v!==null?String(q.v).replace('.',','):'',un:q&&q.un||SO_UN[a][0],met:q&&q.met||'',ld:q&&q.ld!==undefined&&q.ld!==null?String(q.ld):'',q:q&&q.q||''}; }
-function soRlEnviarAnalitos(an,ext){ return an.filter(x=>String(x.v).trim()!=='').map(x=>({a:x.a,v:x.v,un:x.un,met:x.met||((x.a==='P'||x.a==='K')?ext:''),ld:x.ld===undefined||x.ld===null?'':String(x.ld),q:x.q||''})); }
+function soRlErroAnalitos(an){ for(const x of an){
+  if(x.q&&x.q!=='<') return x.a+': selecione Valor medido ou Abaixo do limite de detecção.';
+  const detalhes=(x.a!=='P'&&x.a!=='K'&&String(x.met||'').trim())||String(x.ld==null?'':x.ld).trim()||x.q;
+  if(String(x.v==null?'':x.v).trim()===''&&detalhes) return x.a+': informe o valor do laudo (para < 0,1: valor 0,1 e qualificador <) ou limpe os detalhes.';
+} return ''; }
+function soRlEnviarAnalitos(an,ext){ const erro=soRlErroAnalitos(an); if(erro) throw new Error(erro);
+  return an.filter(x=>String(x.v==null?'':x.v).trim()!=='').map(x=>({a:x.a,v:x.v,un:x.un,met:(x.a==='P'||x.a==='K')?ext:(x.met||''),ld:x.ld===undefined||x.ld===null?'':String(x.ld),q:x.q||''})); }
 function soFazOk(self,f){ const x=self.state.mf_faz||'Todas'; return x==='Todas'||f===x; }
 function soFz(self){ const x=self.state.mf_faz||'Todas'; return x==='Todas'?'Santa Rita':x; }
 function soAtor(){ return g2perfil().k; }
@@ -204,7 +212,7 @@ function soRlVals(self,v){ const rl=self.state.rl; v.rl_open=!!rl; if(!rl) retur
   v.rl_atalhos=[['Hoje',hoje],['Ontem',soloMaisDias(hoje,-1)],['Há 5 dias',soloMaisDias(hoje,-5)]].map(a=>({t:a[0],st:pill(rl.coleta===a[1]),on:String(rl.coleta===a[1]),go:()=>upd({coleta:a[1]})}));
   v.rl_lab=rl.lab; v.rl_labs=[{v:'',t:'Escolha o laboratório'}].concat(SOLO0.labs.map(x=>({v:x,t:x}))); v.rl_setlab=(e)=>upd({lab:e.target.value});
   v.rl_arq=rl.arq; v.rl_setarq=(e)=>upd({arq:e.target.value});
-  v.rl_ans=rl.an.map((x,i)=>({a:x.a,v:x.v,id:'rl_v'+i,lab:'Valor de '+x.a,ulab:'Unidade de '+x.a,un:x.un,met:x.met||'',ld:x.ld===undefined||x.ld===null?'':String(x.ld),q:x.q||'',mlab:'Método de '+x.a,llab:'Limite de detecção de '+x.a,qlab:'Qualificador de '+x.a,uns:Array.from(new Set(SO_UN[x.a].concat(x.un||[]))).map(u=>({v:u,t:u})),st:inSt+'max-width:130px;text-align:right;',ust:inSt+'max-width:150px;',
+  v.rl_ans=rl.an.map((x,i)=>({a:x.a,v:x.v,id:'rl_v'+i,lab:'Valor de '+x.a,ulab:'Unidade de '+x.a,un:x.un,met:(x.a==='P'||x.a==='K')?rl.ext:(x.met||''),metfix:x.a==='P'||x.a==='K',metrot:(x.a==='P'||x.a==='K')?'Extrator do laudo':'Método',ld:x.ld===undefined||x.ld===null?'':String(x.ld),q:x.q||'',mlab:'Método de '+x.a,llab:'Limite de detecção de '+x.a,qlab:'Qualificador de '+x.a,uns:Array.from(new Set(SO_UN[x.a].concat(x.un||[]))).map(u=>({v:u,t:u})),st:inSt+'max-width:130px;text-align:right;',ust:inSt+'max-width:150px;',
     set:(e)=>{ const an=self.state.rl.an.slice(); an[i]=Object.assign({},an[i],{v:e.target.value}); upd({an}); },
     setu:(e)=>{ const an=self.state.rl.an.slice(); an[i]=Object.assign({},an[i],{un:e.target.value}); upd({an}); },
     setm:(e)=>{ const an=self.state.rl.an.slice(); an[i]=Object.assign({},an[i],{met:e.target.value}); upd({an}); },
@@ -218,6 +226,7 @@ function soRlVals(self,v){ const rl=self.state.rl; v.rl_open=!!rl; if(!rl) retur
   v.rl_key=(e)=>{ if(e&&e.key==='Escape'){ e.preventDefault(); v.rl_close(); } };
   v.rl_closeT='Cancelar'; v.rl_sec=[]; v.rl_hasPB=true; v.rl_hasPA=false; v.rl_ph='#'; v.rl_pt='Registrar laudo';
   v.rl_pgo=()=>{ const r=self.state.rl; const area=((SOLO_TAL[r.faz]||[]).find(x=>x[0]===r.tal)||[])[1]||'';
+    const erro=soRlErroAnalitos(r.an); if(erro){ self.setState({rl:Object.assign({},r,{err:erro})}); return; }
     const d={faz:r.faz,tal:r.tal,prof:r.prof,coleta:r.coleta,lab:r.lab,ext:r.ext,arq:r.arq,area,an:soRlEnviarAnalitos(r.an,r.ext)};
     const res=cenMudar(null,c=>soloRegistrar(c,d,r.chave,soAtor()));
     if(res.erro){ self.setState({rl:Object.assign({},self.state.rl,{err:res.erro})}); return; }
@@ -254,11 +263,11 @@ def _painel_registro():
            f'<div style="display: grid; grid-template-columns: 48px minmax(0,1fr) minmax(0,1fr); gap: 8px; align-items: center;">'
            f'<b style="font-size: 13px;">{H("x.a")}</b><input id="{H("x.id")}" aria-label="{H("x.lab")}" inputMode="decimal" autoComplete="off" value="{H("x.v")}" onChange="{H("x.set")}" style="{H("x.st")}">'
            f'<select aria-label="{H("x.ulab")}" value="{H("x.un")}" onChange="{H("x.setu")}" style="{H("x.ust")}"><sc-for list="{H("x.uns")}" as="o" hint-placeholder-count="2"><option value="{H("o.v")}">{H("o.t")}</option></sc-for></select></div>'
-           f'<details style="margin-top:4px;"><summary style="cursor:pointer;font-size:12px;">Método e limites · {H("x.a")}</summary>'
+           f'<details style="margin-top:4px;"><summary class="so-met-summary" style="cursor:pointer;font-size:12px;">Método e limites · {H("x.a")}</summary>'
            f'<div style="display:flex;flex-direction:column;gap:6px;padding:6px 0;">'
-           f'<label>Método<input aria-label="{H("x.mlab")}" placeholder="Conforme o laudo" value="{H("x.met")}" onChange="{H("x.setm")}" style="{H("rl_inst")}"></label>'
-           f'<label>Limite de detecção<input aria-label="{H("x.llab")}" placeholder="Conforme o laudo" value="{H("x.ld")}" onChange="{H("x.setld")}" style="{H("rl_inst")}"></label>'
-           f'<label>Qualificador<input aria-label="{H("x.qlab")}" placeholder="Ex.: abaixo do limite" value="{H("x.q")}" onChange="{H("x.setq")}" style="{H("rl_inst")}"></label></div></details></div>')
+           f'<label class="so-met-label">{H("x.metrot")}<input aria-label="{H("x.mlab")}" readOnly="{H("x.metfix")}" placeholder="Conforme o laudo" value="{H("x.met")}" onChange="{H("x.setm")}" style="{H("rl_inst")}"></label>'
+           f'<label class="so-met-label">Limite de detecção<input aria-label="{H("x.llab")}" placeholder="Conforme o laudo" value="{H("x.ld")}" onChange="{H("x.setld")}" style="{H("rl_inst")}"></label>'
+           f'<label class="so-met-label">Qualificador<select aria-label="{H("x.qlab")}" value="{H("x.q")}" onChange="{H("x.setq")}" style="{H("rl_inst")}"><option value="">Valor medido</option><option value="&lt;">Abaixo do limite de detecção (&lt;)</option></select></label></div></details></div>')
     corpo=(_cabeca('rl_',chip=False)
            + f'<div style="display: flex;"><button type="button" onClick="{H("rl_ex")}" style="{_MINI}">Preencher com o laudo de exemplo</button></div>'
            + campo('Fazenda','rl_faz',sel('rl_faz','rl_faz','rl_fazs','rl_setfaz'))
@@ -351,4 +360,5 @@ function soAgDados(x){ return {faz:x.faz,tal:x.talv,zona:x.zona||'',data:x.datav
     p=os.path.join(E.P,fname); s=open(p,encoding='utf-8').read(); old=ui37.chip(H('st_t'),'yellow')
     assert s.count(old)==1, 'selo do cabeçalho não encontrado em '+fname
     open(p,'w',encoding='utf-8').write(s.replace(old,f'<span style="{H("st_st")}"><span style="{H("st_dot")}"></span>{H("st_t")}</span>'))
+
 
