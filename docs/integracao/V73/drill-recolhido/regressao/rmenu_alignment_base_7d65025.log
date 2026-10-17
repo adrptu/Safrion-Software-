@@ -1,0 +1,6 @@
+rmenu+del: linhas cuja célula de ação muda da base para o HEAD: d base[lixeira] → HEAD[vazia]
+sonda EX47: 557 OK, 4 falhas
+FALHA rmenu=false del=false sel=false A6 caminho antigo idêntico à base · "difere"
+FALHA rmenu=false del=false sel=true A6 caminho antigo idêntico à base · "difere"
+FALHA rmenu=false del=true sel=false A6 caminho antigo idêntico à base · "difere"
+FALHA rmenu=false del=true sel=true A6 caminho antigo idêntico à base · "difere"

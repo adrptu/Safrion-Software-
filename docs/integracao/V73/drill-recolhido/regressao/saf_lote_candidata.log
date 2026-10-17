@@ -1,0 +1,24 @@
+OK    A1 Safra 2026/27 (uma fazenda): "Editar talhões ›" na faixa da fazenda (a tabela agrupa por fazenda também com uma só, 17/10) e não no título do bloco
+OK    A2 abre "Editar talhões da Santa Rita" com uma linha por talhão (T1 com as parcelas recuadas embaixo), resumo da área e selo "Tudo salvo"; Salvar com contador 0
+OK    A3 no computador o foco já está na 1ª célula editável (área de T1-A) com o número selecionado (digitar substitui)
+OK    B1 foco no número seleciona o conteúdo (INP-04): "70" substitui 62 em T3; Enter desce para a meta de T4 já selecionada; "68"; ↑ volta para T3
+OK    B2 Tab anda para a coluna seguinte (variedade → plantio de T3), Shift+Tab volta; ↓ desce na mesma coluna (também na célula travada, que só se lê)
+OK    B3 células alteradas destacadas (borda âmbar) e contador "Salvar alterações (2)"; selo "2 alterações não salvas"
+OK    B4 meta com teclado decimal, sem corretor e sem autocompletar; unidade à vista ao lado (sc/ha; mamão t/ha/ano)
+OK    E2 T2 com a OS-0421 em execução: cultura, variedade e plano travados na célula com o motivo; meta e plantio editáveis; Situação "Bloqueado · OS-0421" com o link OS-0421 ›
+OK    C1 Aplicar aos 4 marcados (cultura Milho e plano Milho safrinha): T3, P1 e P2 recebem; T4 recusa os dois pela OS-0420 e o resumo diz quantos e por quê
+OK    C2 trocar a cultura limpa a variedade que era da soja (62 X, 58 W): nada fica com variedade de outra cultura
+OK    C3 salvar com variedade vazia: recusa atômica nas células (Variedade: Informe a variedade), nada gravado, o digitado fica
+OK    C4 variedade aplicada aos marcados; T4 recusa (OS-0420)
+OK    C5 (revisão do app do Codex, #98 P2) a variedade aplicada aos marcados apaga o erro "Informe a variedade" dessas linhas e a mensagem geral da recusa
+OK    C6 (revisão do app do Codex, #98 P2) na faixa, trocar Soja por Milho tira do campo Variedade a cultivar de soja (58 W)
+OK    D1 colar 3 × 2 a partir do plantio de T3: datas dd/mm (o ano da safra) e vírgula decimal; "Colados 3 × 2: 6 células"; nada salvo
+OK    D2 colar com recusas: T4 (OS-0420) recusa cultura e variedade; "Trigo" fora do cadastro recusado; o resto colado
+OK    D3 colar um plano de outra cultura (Feijão pivô em T3 de milho): recusado com o motivo; o plano fica
+OK    D4 colar área acima do talhão na parcela: recusada (acima dos 312 ha do talhão)
+OK    E1 T1-A com 200 ha (T1-B 152): Salvar recusa com a conta do Dividir ("As parcelas somam 352 ha; o talhão tem 312 ha"), nada gravado, o rascunho fica
+OK    F1 salvar: um aviso de sucesso com as alterações; o painel fecha; os cultivos mudaram (T3, P1, P2 milho; T1-A 150 ha; metas e plantios colados)
+OK    F2 demanda recalculada pela mesma conta: Atrazina 500 (só no plano do milho) passa a ter demanda; Glifosato (só no da soja de T1/T2) não cresce
+OK    F3 a tabela mostra os valores novos (T3 e P2 com milho e Milho safrinha)
+OK    F4 reabrir mostra o salvo (T3 milho, meta 181) e o resumo com 1.155 ha planejados (T1-A 150)
+OK    G1 Esc com alteração pede confirmação ("Há alterações não salvas"); Continuar editando fica; Descartar fecha sem gravar

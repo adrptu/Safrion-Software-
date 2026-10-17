@@ -1,0 +1,2 @@
+fotos depois exit=0
+fotos antes exit=0

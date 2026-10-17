@@ -1,0 +1,73 @@
+# DRILL-RECOLHIDO · TAB-12 e TAB-13 (17/10/2026)
+
+```text
+ID / resultado útil / persona: DRILL-RECOLHIDO (TAB-12, TAB-13) · toda tabela e cartão abre na visão macro (recolhido) e só mostra a seta onde há o que abrir; Planejar safra › etapa 2 agrupa por fazenda também com uma só · quem usa qualquer lista do protótipo, primeiro o gestor no Planejar safra
+Requisitos do PRD e fora do escopo: PRD cap. 74 (DS), padroes-1610 (TAB-08, TAB-11, TAB-12, TAB-13), padroes-1510 (TAB-04); fora: cabeçalho da tela, ds_modulos.py, raia do Kanban da O.S., seções do painel de UM registro, menus, listas suspensas e formulários
+Autor / revisor / integrador: Claude / Codex / Codex (regime leve, AGENTS §3.5)
+Base (commit ou hashes) / arquivos sob responsabilidade: 7d65025 · g2lib.js, engine.py, safra.js, safra_lote.js, areas/*.py listados abaixo, testes listados abaixo
+Aceite e comando de verificação: drill_recolhido_test.py e saf_fazenda_recolhida_test.py verdes a 1440 e 390 e vermelhos na 7d65025; bateria pelo impacto sem vermelho novo
+Estado / impedimento / próximo passo: ver "Testes"
+```
+
+## Pedidos do proprietário (17/10/2026, literais)
+
+1. Planejar safra › etapa 2 › "Talhões e cultivos": "quando so tem 1 fazenda nao agrupa por fazenda, só quando tem 2 ou mais. corrija."
+2. "Por padrão coloque sempre os cartoes e tabelas com drill down recolhido, primeiro usuario tem a visao macro e depois consegue escolher onde precisar detalhar no drill down expandido. Em todas as telas."
+3. Esclarecimento: "esse pedido de dril down recolhido por fazenda é em planejar safra etapa 2". Aceite principal: a tabela agrupa sempre por fazenda; cada fazenda começa recolhida, com a contagem e a área; a pessoa expande só a que quer.
+4. Com o print da O.S. › Tabela agrupada por Talhão: "em C1 observe que OS do drill down tem também drill down, mas na verdade nao tem. o simbolo de drill down so deve aparecer onde de fato terá um detalhamento drill down".
+
+Regras no DS: TAB-12 e TAB-13 em `docs/design-system/padroes-1610.md`; TAB-04 atualizada em `docs/design-system/padroes-1510.md`.
+
+## O que mudou
+
+### Motor (fonte única, `g2lib.js` e `engine.py`)
+
+- `g2flat` decide a abertura de cada linha (`ab`) só pelo que a pessoa abriu (`st.x`): a seta (clique, Enter, Espaço) e "Expandir tudo". A faixa da fazenda (`r.fgrp`) deixou de nascer aberta.
+- Abrem sozinhos, por serem escolha da pessoa: a busca e o filtro de coluna abrem o caminho até o filho que casou; o filtro rápido abre a faixa da fazenda (ele vale nos talhões dela). A seta recolhe esse caminho também (`x[id]=false`).
+- A seta, os Cartões (`g2cdVals`) e o "Expandir tudo" leem o mesmo `ab`; antes a seta podia dizer "aberta" com a busca ativa sem os filhos à vista.
+- `g2agRows` ("Agrupar por"): os grupos nascem recolhidos a cada novo agrupamento ou nível (antes, abertos).
+- `g2caminho` (novo, chamado no `g2open`): abrir um registro pelo endereço ou por uma ação abre os pais recolhidos dele; o resto fica como está.
+- `engine.grid` sem o parâmetro `x0` (abertura padrão); `engine.table` também.
+- TAB-13: a seta só na linha com filhos (`caretOk`); a folha da árvore guarda o lugar dela (`SETA_VAZIO`) quando há alguma seta à vista; lista sem filhos não reserva espaço; a seta de ir (`seta_ir`, `.g2drill`) saiu da linha. Com seleção (TAB-09), só a seta de abrir vai para a 1ª célula.
+
+### Telas que abriam linhas por padrão (`x0`), todas recolhidas agora
+
+| Tela · grade | Abria por padrão | Papel que continua |
+|---|---|---|
+| Planejar safra etapa 2 · `g_cult_*` (`safra.js`) | a faixa da fazenda (sempre) e o talhão com parcelas ou pendência (fora do celular) | gravar um cultivo, dividir um talhão, "Planejar talhões livres" e "Editar talhões" abrem só o caminho do que foi gravado (faixa e talhão) |
+| Planejar safra etapa 3 · `g_op` | operações e atividades "Com pendência"; com o filtro da Capacidade, tudo | a célula de Capacidade escolhida (filtro da pessoa) abre o caminho até as ocorrências, uma vez por escolha (`xcap`); a seta recolhe |
+| Planejar safra · `g_rend_*` (fonte do formulário Rendimento, não desenhada no corpo) | todas as operações e atividades divididas | a nova configuração abre o caminho dela (`rendAfter`) |
+| Planejar safra · "Editar talhões" (`safra_lote.js`) | todos os talhões divididos depois de gravar | abre a faixa da fazenda gravada |
+| Cadastros · CD-01 `g_tal` (fazendas), CD-01det `g_parc` (safras abertas), CD-02 `g_cv` (culturas), CD-08 `g_rend` (operações), CD-06 `g_itm` (grupos de itens, `cad_produtos_estrutura.py` e `cadastros.py`), CD-07 `g_dim` | todos os grupos | gravar um item abre o pai dele; o filtro rápido em chips abre o pai com filho que passa (`cadQfX`) |
+| Agronomia · AG-01 `g_vis` (agrupamento de visitas) | todos os grupos | — |
+| Estoque (EST) · saldos por lote `g_lot` | todos os itens | — |
+| Produção · PROD `g_lot` (produtos) e COLH `g_tal` (culturas) | todos | o endereço do lote (`PROD.dc.html#<lote>`) abre o produto dele (`g2caminho`) |
+| Vendas · PCOM `g_of` (produtos) | todos | — |
+| Compras (CMP) · `g_ent` (pedidos da compra aprovada), `g_dem`, `g_conv`, `g_cmp` (grupos e o item de maior valor), `g_apr` | todos | os toques que abrem e recolhem o grupo (`tog`) |
+| Irrigação · IR-02 `g_ag` (captações) | todas | — |
+| Gestão · GE-05 `g_rec` (clientes) | todos | — |
+
+### Expansores próprios das telas
+
+| Onde | Antes | Agora |
+|---|---|---|
+| Manutenção · blocos do ativo | abria o da situação (leitura suspeita, situação, achados ou o que vence) | todos recolhidos, com o resumo |
+| Manutenção · blocos da ordem | abria o da fase (Janela e equipe, Tarefas, Peças, Custo) e Conclusão em execução | todos recolhidos, com o resumo |
+| Planejar safra · ajuste local do plano | grupos de gatilho e atividades abertos | recolhidos; erro de gravação abre o grupo e a atividade do campo |
+| Atividades do plano, serviços do plano e Versões (Manutenção), lotes do CO-06, "Capacidade por mês" | já nasciam recolhidos | sem mudança (conferido no teste) |
+
+## Decisões tomadas sozinho
+
+| Decisão | Por quê |
+|---|---|
+| Raia do Kanban da O.S. (Agrupar por) continua aberta | Recolhida, a raia mostra só o total ("T2 · 5 ordens"), não a contagem por fase; a visão macro do Kanban são as 5 fases. Critério da tarefa. |
+| Seções do painel de UM registro (O.S.) ficam como estão, com `data-secao-registro` | Não são tabela nem cartão; abrem o que faz a ordem andar na fase. Exclusão da tarefa; o atributo marca a exceção para o teste. |
+| Blocos da Manutenção entram, mesmo sendo seções de detalhe de um registro | A tarefa os lista entre os expansores que nascem recolhidos. Custo: o bloco da fase (por exemplo, Janela e equipe, com executante e tempo para "Liberar serviço") pede um clique; o resumo do bloco segue à vista e a primária diz o que falta. |
+| Ajuste local do plano entra, e o erro de gravação abre o caminho do campo | A tarefa o lista. Sem abrir no erro, a recusa ficaria escondida numa atividade recolhida. |
+| Busca e filtro abrem o caminho, mas a seta recolhe | Antes a seta não fazia nada com a busca ativa (o caminho era forçado aberto). |
+| O filtro rápido abre a faixa da fazenda; o filtro por fazenda (`ffz`) não | O filtro rápido (Situação) casa nos talhões, dentro da faixa; o filtro por fazenda casa na própria faixa, que fica à vista recolhida, como na busca que casa no pai. |
+| `x0` removido do motor em vez de ignorado | Uma fonte só: parâmetro passado por engano quebra o build em Python; no JS, nenhuma tela grava mais `x0`. |
+| `_parc_rows` (CD-01det) devolve só as linhas | A segunda saída era a abertura padrão; `tabelas_cad_irr_unit.py` passou a ler a lista (interface, não oráculo). |
+| Agrupar por: ao trocar o agrupamento, a abertura volta a vazia | Grupos novos nascem recolhidos; a abertura de antes (de outras linhas) não vale para os grupos novos. |
+| TAB-13: folha da árvore guarda o lugar; lista sem nenhuma linha que abra não reserva | O pedido manda alinhar a folha com a linha que tem seta; numa lista plana não há o que alinhar. |
+| Atividade do plano e do ajuste local sem insumo continua com seta | O detalhe embutido existe (inclusão de insumo, mensagem de vazio). |
