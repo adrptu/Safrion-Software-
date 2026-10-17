@@ -22,3 +22,28 @@ OK    F2 demanda recalculada pela mesma conta: Atrazina 500 (só no plano do mil
 OK    F3 a tabela mostra os valores novos (T3 e P2 com milho e Milho safrinha)
 OK    F4 reabrir mostra o salvo (T3 milho, meta 181) e o resumo com 1.155 ha planejados (T1-A 150)
 OK    G1 Esc com alteração pede confirmação ("Há alterações não salvas"); Continuar editando fica; Descartar fecha sem gravar
+OK    G2 conflito: outra aba liberou a OS-0430 (T1-A) depois de abrir; Salvar recusa com o motivo, nada gravado, o rascunho fica
+OK    G3 reaberto, T1-A passa a travar cultura, variedade e plano pela OS-0430 (a fase vem do cenário compartilhado)
+OK    G4 falha no meio da gravação: "Não foi possível salvar (falha simulada)", nada gravado, painel aberto com o rascunho
+OK    G5 repetir depois grava uma vez (P2 meta 79)
+OK    G6 "Dividir T1" na linha: com alteração pergunta antes; descartado, abre o painel Dividir existente
+OK    G7 sem erro de JavaScript até aqui
+OK    G8 Safrinha 2027: perenes de outra safra (T7 mamão e C1 café) só leitura, com o motivo; talhões livres com a área livre calculada (não digitada)
+OK    F5 duas linhas livres marcadas recebem os 5 campos de uma vez; Salvar alterações (10)
+OK    F6 duplo clique no Salvar: grava uma vez (2 cultivos novos, T3 e T4, não 4)
+OK    F7 o resumo da fazenda muda (planejados e livres) e as linhas planejadas passam a cultivo
+OK    A4 com Santa Rita e Lagoa Grande: cada faixa de fazenda tem "Editar talhões ›" (e o título do bloco não repete a ação)
+OK    A5 a da Lagoa Grande abre "Editar talhões da Lagoa Grande" na sub-safra dela, com os 23 pivôs; ocupados pelo mamão de outra safra só leitura, com o motivo
+OK    A6 salvar pela faixa da Santa Rita atualiza a faixa da fazenda (1.155 ha · 8 de 8)
+OK    A7 no modo Cartões a faixa de cada fazenda continua com "Editar talhões ›"
+OK    A8 e abre o mesmo painel pelos Cartões
+OK    I1 formulário do motor: o campo numérico (Meta) recebe o foco com o número selecionado e sem corretor (INP-04, INP-07 no g2lib, todas as telas)
+OK    H1 390 px: "Editar talhões ›" da faixa com 44 px; painel sem rolagem de lado (página e painel), cabeçalho de colunas trocado por rótulos em cada campo, foco não abre o teclado
+OK    H2 390 px: todo campo, lista, botão e caixa de marcar com alvo de 44 px ou mais
+OK    H3 390 px: barra de salvar fixa à vista no meio da lista; faixa "Aplicar" sem campos até marcar uma linha
+OK    H4 390 px: marcada uma linha, a faixa mostra os campos (cultura, variedade, plantio, meta e plano)
+OK    H5 390 px: editar e salvar pelo celular
+     (medido) 390 px, faixa da fazenda: link 'Editar talhões ›' 44 px de altura; ⋯ [32, 32] px
+OK    H7 390 px com duas fazendas: "Editar talhões ›" à vista na faixa e também no ⋯ da faixa ("Editar talhões da Lagoa Grande"), que abre o painel da fazenda
+OK    H6 sem erro de JavaScript
+RESULTADO: OK 47/47

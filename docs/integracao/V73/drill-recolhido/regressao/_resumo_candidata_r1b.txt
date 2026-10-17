@@ -1,0 +1,2 @@
+saf_fazenda_recolhida exit=1 76s RESULTADO: 14 ok · 4 falhas · E4 1440 teclado: Enter na seta da faixa abre a fazenda, Espaço recolhe; E5 1440 Cartões: a fazenda é um cartão recolhido (sem a lista de talhões) com área e conta
+seta_padrao exit=1 784s RESULTADO: 12 ok · 2 falhas · D1440 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 1); E390 teclado: Enter e Espaço alternam a seta sem abrir pai

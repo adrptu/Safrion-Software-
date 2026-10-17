@@ -24,7 +24,8 @@ D  TAB-13 (proprietário, 17/10/2026, print da O.S. › Tabela agrupada por Talh
    D2 toda seta aberta tem o que mostrar: linha filha logo abaixo (tabela), lista de filhos com itens (cartão), cartões (grupo dos cartões).
 C  exceções que continuam abrindo:
    C1 busca que acha um talhão (T3) abre o caminho até ele (faixa da fazenda); limpar a busca volta a recolher;
-   C2 endereço de um registro dentro de grupo (PROD.dc.html#<lote>) abre só o caminho dele e mostra a linha.
+   C2 endereço de um registro dentro de grupo (PROD.dc.html#<lote>) abre o painel e só o caminho dele na lista (a 390 o painel ocupa a tela:
+      confere o estado da lista por baixo).
 Contraprova: RENDER_DIR=<render da 7d65025> reprova A1/A2/A3 e B (abria por padrão) e D1 (seta de ir nas linhas folha).
 Uso (de gen37/): CHROME_BIN=… CDP_GL=1 SAFRION_DADOS=sintetico python3 -B drill_recolhido_test.py · DRT_LARG=1440 ou 390 (padrão: as duas)
 · DRT_SO=CD-01,SAF (diagnóstico de poucas telas; a contagem mínima faz a rodada parcial reprovar: não vale como prova).
@@ -219,12 +220,11 @@ def excecoes(c, J, BASE, w):
     lote = J("(()=>{ const t=document.querySelector('[role=table][data-g2g=\"g_lot\"]'); if(!t) return ''; const r=[...t.querySelectorAll('[role=row][data-rid]')].find(r=>{ const c0=r.querySelector('.g2c0'); return c0&&parseFloat(c0.style.paddingLeft||'0')>=27.5; }); return r?r.getAttribute('data-rid'):''; })()") or ''
     c.call('Page.navigate', {'url': 'about:blank'}); time.sleep(.1); c.goto(BASE + 'PROD.dc.html#' + lote, 1.4)
     espera(J, "[...document.querySelectorAll('[role=table][data-g2g=\"g_lot\"] [role=row][data-rid]')].some(r=>r.getAttribute('data-rid')===%s)" % json.dumps(lote), 4)
-    if not J("(()=>{ const t=document.querySelector('[role=table][data-g2g=\"g_lot\"]'); return !!t&&t.getClientRects().length>0; })()"):   # no celular o painel do lote cobre a lista: fecha (Esc) e olha a lista
-        c.tecla('Escape', 'Escape', 27); time.sleep(.6)
-        J("(()=>{ const a=[...document.querySelectorAll('aside[role=dialog]')].find(x=>x.getClientRects().length); const b=a&&[...a.querySelectorAll('button')].find(b=>/^(Fechar|Voltar)/.test((b.getAttribute('aria-label')||b.innerText||'').trim())); if(b) b.click(); })()"); time.sleep(.6)
-    d = J("(()=>{ %s const t=document.querySelector('[role=table][data-g2g=\"g_lot\"]'); if(!t) return null; const S=[...t.querySelectorAll('button.g2car[aria-expanded]')].filter(vis);"
-          " const r=[...t.querySelectorAll('[role=row][data-rid]')].find(x=>x.getAttribute('data-rid')===%s); return {n:S.length, ab:S.filter(b=>b.getAttribute('aria-expanded')==='true').length, linha:!!r&&vis(r)}; })()" % (VIS, json.dumps(lote))) or {}
-    chk(f'C{w} C2 endereço do lote {lote or "?"} (PROD.dc.html#…) abre só o caminho dele e mostra a linha', bool(lote) and d.get('linha') and d.get('ab') == 1 and d.get('n', 0) >= 2, [lote, d])
+    # no celular o painel do lote ocupa a tela e a lista fica por baixo (mestre-detalhe): lá se confere o estado da lista (DOM), não a vista
+    d = J("(()=>{ %s const t=document.querySelector('[role=table][data-g2g=\"g_lot\"]'); if(!t) return null; const S=[...t.querySelectorAll('button.g2car[aria-expanded]')];"
+          " const r=[...t.querySelectorAll('[role=row][data-rid]')].find(x=>x.getAttribute('data-rid')===%s); return {n:S.length, ab:S.filter(b=>b.getAttribute('aria-expanded')==='true').length, linha:!!r, vista:!!r&&vis(r), painel:[...document.querySelectorAll('aside[role=dialog]')].some(vis)}; })()" % (VIS, json.dumps(lote))) or {}
+    chk(f'C{w} C2 endereço do lote {lote or "?"} (PROD.dc.html#…) abre o painel e só o caminho dele na lista; a linha está na lista' + (' e à vista' if w > 500 else ' (o painel ocupa a tela)'),
+        bool(lote) and d.get('linha') and (d.get('vista') or w <= 500) and d.get('painel') and d.get('ab') == 1 and d.get('n', 0) >= 2, [lote, d])
 
 p, srv = servir(R); c = Chrome(); J = c.js; BASE = f'http://127.0.0.1:{p}/'
 try:

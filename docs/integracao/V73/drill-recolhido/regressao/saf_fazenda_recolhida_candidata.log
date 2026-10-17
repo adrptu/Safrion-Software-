@@ -1,0 +1,19 @@
+OK    E1 1440 uma fazenda: a tabela agrupa por fazenda; faixa "Santa Rita" recolhida com área e contagem; nenhum talhão à vista; sem filtro por fazenda
+OK    E2 1440 a seta da faixa abre a Santa Rita: os 8 talhões aparecem um nível abaixo; a seta diz "Recolher Santa Rita…"
+OK    E6 1440 TAB-13 com tudo aberto: seta só na linha que tem linhas filhas (faixa e talhão dividido); talhão folha sem seta e sem seta de ir
+OK    E2b 1440 clicar de novo na seta recolhe a fazenda (só a faixa à vista)
+OK    E4 1440 teclado: Enter na seta da faixa abre a fazenda, Espaço recolhe
+OK    E5 1440 Cartões: a fazenda é um cartão recolhido (sem a lista de talhões) com área e contagem; a seta abre os 8 talhões no cartão
+OK    E3 1440 duas fazendas (Boa Vista incluída): duas faixas recolhidas, cada uma com área e contagem; nenhum talhão à vista; filtro por fazenda à vista
+OK    E3b 1440 abrir só a Boa Vista mostra só os 1 talhões dela; a Santa Rita continua recolhida
+OK    G 1440 sem erro de JavaScript
+OK    E1 390 uma fazenda: a tabela agrupa por fazenda; faixa "Santa Rita" recolhida com área e contagem; nenhum talhão à vista; sem filtro por fazenda
+OK    E2 390 a seta da faixa abre a Santa Rita: os 8 talhões aparecem um nível abaixo; a seta diz "Recolher Santa Rita…"
+OK    E6 390 TAB-13 com tudo aberto: seta só na linha que tem linhas filhas (faixa e talhão dividido); talhão folha sem seta e sem seta de ir
+OK    E2b 390 clicar de novo na seta recolhe a fazenda (só a faixa à vista)
+OK    E4 390 teclado: Enter na seta da faixa abre a fazenda, Espaço recolhe
+OK    E5 390 Cartões: a fazenda é um cartão recolhido (sem a lista de talhões) com área e contagem; a seta abre os 8 talhões no cartão
+OK    E3 390 duas fazendas (Boa Vista incluída): duas faixas recolhidas, cada uma com área e contagem; nenhum talhão à vista; filtro por fazenda à vista
+OK    E3b 390 abrir só a Boa Vista mostra só os 1 talhões dela; a Santa Rita continua recolhida
+OK    G 390 sem erro de JavaScript
+RESULTADO: 18 ok · 0 falhas

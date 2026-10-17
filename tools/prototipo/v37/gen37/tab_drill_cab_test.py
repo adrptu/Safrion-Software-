@@ -21,8 +21,8 @@ from areas.maquinas import REDIRECIONA
 R = os.environ.get('RENDER_DIR') or os.path.join(HERE, '_render')
 CAB_PX = 40   # TAB-10: altura do cabeçalho (engine.TABELA_CSS, .g2th)
 # mínimo de setas medidas na rodada completa: desde 17/10 a abertura é recolhida (TAB-12) e a linha folha não tem a seta de ir (TAB-13);
-# antes, 500 (a maioria eram setas de ir das linhas folha)
-MIN_SETAS = 150
+# antes, 500 (a maioria eram setas de ir das linhas folha); medido na candidata 1c8e2b8: 342 a 1440 e 312 a 390
+MIN_SETAS = 250
 LARGS = [int(x) for x in (os.environ.get('TDC_LARG') or '1440,390').split(',')]
 FORA = set(REDIRECIONA) | {'Main.dc.html'}
 PAGS = sorted(os.path.basename(f) for f in glob.glob(os.path.join(R, '*.dc.html')) if os.path.basename(f) not in FORA)

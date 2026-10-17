@@ -71,3 +71,24 @@ Regras no DS: TAB-12 e TAB-13 em `docs/design-system/padroes-1610.md`; TAB-04 at
 | Agrupar por: ao trocar o agrupamento, a abertura volta a vazia | Grupos novos nascem recolhidos; a abertura de antes (de outras linhas) não vale para os grupos novos. |
 | TAB-13: folha da árvore guarda o lugar; lista sem nenhuma linha que abra não reserva | O pedido manda alinhar a folha com a linha que tem seta; numa lista plana não há o que alinhar. |
 | Atividade do plano e do ajuste local sem insumo continua com seta | O detalhe embutido existe (inclusão de insumo, mensagem de vazio). |
+
+## Oráculos de teste mudados
+
+O que cada teste verifica continua o mesmo; muda só o que a pessoa faz antes de olhar (abrir o que agora nasce recolhido) ou, onde o oráculo contrariava um pedido de 17/10, a regra nova.
+
+| Teste | Antes | Agora | Por quê |
+|---|---|---|---|
+| `rmenu_alignment_test.js` | a faixa `fz` abria pela abertura padrão (`x0` / faixa nascia aberta) | a sonda abre a faixa como a seta abriria (`st.x = {fz:true}`) | TAB-12; o conteúdo medido é o mesmo (A1 a A7) |
+| `tabelas_cad_irr_unit.py` | `_parc_rows` devolvia `(linhas, abertura)` | lê só as linhas | interface: a abertura padrão saiu |
+| `saf_lote_test.py` A1, cliques, H1 | "Editar talhões…" no título do bloco (uma fazenda) | "Editar talhões ›" na faixa da fazenda, e o título sem a ação; `abrir_saf` abre a faixa | pedido 1 (agrupa sempre por fazenda; a ação fica na faixa) e TAB-12 |
+| `saf_multi_fazenda_test.py` B1 | grupo da fazenda incluída nascia aberto | chega recolhido, a seta o abre, e os talhões aparecem | TAB-12 |
+| `saf_multi_fazenda_test.py` B5 | "uma fazenda sem o nível de grupo" | uma faixa "Santa Rita" recolhida; a seta abre os 8 talhões | pedido 1 |
+| `saf_tab_test.py` T6 | T1 (parcelas) e P1 (a conferir) abertos | todo talhão recolhido; `abre` abre a faixa | TAB-12 |
+| `saf_fazendas_test.py` F2 | os talhões das duas fazendas à vista ao entrar | a pessoa abre as duas faixas | TAB-12 |
+| `tabelas_saf_test.py` etapa 2 | talhões à vista ao entrar | abre a faixa antes de ler | TAB-12 |
+| `saf_nav_lib.py` (`rows`) | linhas à vista ao entrar | abre as faixas recolhidas antes de ler | TAB-12 (usado por `saf_revisao`, `saf_totais`, `saf_c01`) |
+| `solo_saf_test.py`, `solo_os_test.py`, `solo_rev_test.py` (`ins`) | grupos e atividades do ajuste local abertos | abre a faixa e os grupos e atividades do painel antes de ler as doses | TAB-12 no ajuste local |
+| `seta_padrao_test.py` | AJUSTE achava a linha do cultivo direto; mínimos 300 controles e 500 setas | AJUSTE abre a faixa antes; mínimos 150 e 150; espera o giro terminar antes de medir | TAB-12 (menos setas à vista na abertura), TAB-13 (sem as 1.340 setas de ir) e giro no clique |
+| `tab_drill_cab_test.py` A | mínimo de 500 setas | 150 | TAB-12 e TAB-13 |
+| `ds_1610_test.py` B2 | toda linha que abre o detalhe mostra a seta (TAB-04) | nenhuma linha com a seta de ir | TAB-13 substitui a TAB-04 neste ponto |
+| `tabelas_lib.py` (`Grade.linhas`), `tabelas_cad_test.py` (`grupos`), `tabelas_irr_test.py` (`por_grupo`), `tabelas_est_test.py` (seções) | árvores abertas ao entrar | "Expandir tudo" antes de ler | TAB-12; a abertura de antes era tudo aberto nessas árvores |

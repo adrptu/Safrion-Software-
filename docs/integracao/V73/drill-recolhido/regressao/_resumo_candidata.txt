@@ -1,3 +1,31 @@
-saf_fazenda_recolhida exit=1 76s RESULTADO: 14 ok · 4 falhas · E4 1440 teclado: Enter na seta da faixa abre a fazenda, Espaço recolhe; E5 1440 Cartões: a fazenda é um cartão recolhido (sem a lista de talhões) com área e conta
+drill_recolhido exit=1 1198s RESULTADO: 65 ok · 1 falhas · C390 C2 endereço do lote L38-115 (PROD.dc.html#…) abre só o caminho dele e mostra a linha
+saf_fazenda_recolhida exit=0 105s RESULTADO: 18 ok · 0 falhas
+saf_lote exit=0 168s RESULTADO: OK 47/47
+tabelas_saf exit=0 65s RESULTADO: 24/24 ok
+saf_tab exit=0 35s RESULTADO: 14/14
+saf_c01 exit=0 199s RESULTADO: 68 ok · 0 falhas (tudo)
+saf_fazendas exit=0 79s RESULTADO: 14/14
+saf_multi_fazenda exit=0 68s RESULTADO: 23/23
+saf_operacoes exit=0 149s RESULTADO: 87 ok · 0 falhas (tudo)
+saf_revisao exit=1 172s RESULTADO: 41 ok · 1 falhas
+saf_totais exit=0 18s RESULTADO: 14 ok · 0 falhas
+saf_contexto exit=0 54s RESULTADO: 10/10
+solo_saf exit=0 281s RESULTADO: OK 36/36
+cartoes exit=1 531s RESULTADO: 69/70 · FALHAS: M2h CD-06 (árvore): os mesmos itens nos dois modos; o cartão do grupo recolhe e abre os filhos dentro dele, como a seta da Tabela
+tabelas_os exit=1 73s RESULTADO: 37/40 ok · FALHAS: TF06 OS-0421 aparece nos grupos T1 e T2 com a mesma identidade; TF06 total geral conta O.S. distintas (10), não a soma dos grupos (11): "10 O.S. · … · a O.S. de vá
+tabelas_cad exit=0 579s RESULTADO: 206/206 ok
+tabelas_est exit=0 49s RESULTADO: 34/34 ok
+tabelas_irr exit=1 227s RESULTADO: 98/106 ok · FALHAS: TABR-CTX-02 1440 clique IR-01 topo = Lagoa Grande: a coluna Fazenda sai com o filtro dela (sem chip "faz: Santa Rita"); a Situação e a busca ficam e a lista é da Lag
+tabelas_ben exit=0 31s RESULTADO: OK 12/12
+pa_lista exit=0 301s RESULTADO: 24 ok · 0 falhas
+ma_unica exit=1 182s RESULTADO: 21/23 ok · FALHAS: AC-PCM-12/13 · a OM-0233 traz a 1ª tentativa Reprovada; quem não executa vê o Teste sem comando e o motivo; MA-04det é só redirecionamento; AC-PCM-14 · Trator T1 
+ma_rastreio exit=1 109s RESULTADO: 57/58 ok · FALHAS: F30 → item com OM sai de Sem ordem; o ativo mostra a OM
+kanban_raias exit=0 2s RESULTADO 9/9
+visoes2_formas exit=0 40s RESULTADO: 23/23
+tab_drill_cab exit=0 679s RESULTADO: 6 ok · 0 falhas
+ds_1510 exit=0 253s RESULTADO: 17 ok · 0 falhas
+ds_1610 exit=0 262s RESULTADO: 14 ok · 0 falhas
+paginas_scan exit=0 411s RESULTADO: 5 ok · 0 falhas (148 páginas)
+seta_padrao exit=1 814s RESULTADO: 13 ok · 1 falhas · E390 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (12 telas; desvios: 1)
+rev93_reteste_navegador exit=1 36s 
 FIM
-seta_padrao exit=1 784s RESULTADO: 12 ok · 2 falhas · D1440 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 1); E390 teclado: Enter e Espaço alternam a seta sem abrir pai

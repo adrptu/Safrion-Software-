@@ -38,8 +38,9 @@ COR, TAM, TRACO = 'rgb(101, 115, 106)', 16, '1.75'
 OK, FAIL = [], []
 # mínimos da rodada completa (contagem de controles e de setas desenhadas, somando os estados): desde 17/10 a abertura é recolhida (TAB-12:
 # os filhos e as setas deles só aparecem com "Expandir tudo") e a seta de ir saiu das linhas folha (TAB-13), então há menos setas à vista;
-# antes eram 300 controles e 500 setas (1.340 delas de ir, na composição bde9f57)
-MIN_CTL, MIN_ICO = 150, 150
+# antes eram 300 controles e 500 setas (1.340 delas de ir, na composição bde9f57); medido na candidata 1c8e2b8: 470/440 controles e
+# 468/438 setas (1440/390)
+MIN_CTL, MIN_ICO = 350, 350
 def chk(n, c, info=''):
     (OK if c else FAIL).append(n); print(('OK    ' if c else 'FALHA ') + n + ('' if c else ' · ' + str(info)[:1500]), flush=True)
 
@@ -134,6 +135,8 @@ def varre(c, J, BASE, w):
                 p0 = None
                 if J(TECLA_ACHA):
                     c.tab(); c.tab(shift=True); time.sleep(.1); p0 = J(TECLA_PREP)
+                    if p0 and not p0.get('fv') and J(TECLA_ACHA):   # a seta é o último foco da página (árvore recolhida, TAB-12): o Tab sai do documento; volta e avança
+                        c.tab(shift=True); c.tab(); time.sleep(.1); p0 = J(TECLA_PREP)
                 if p0:
                     n['tecla'] += 1; d0 = J("document.querySelectorAll('aside[role=dialog]').length")
                     c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.35); p1 = J(TECLA_LE) or {}

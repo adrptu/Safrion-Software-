@@ -48,7 +48,11 @@ try:
     for a in ('vis=semordem', 'vis=ordens', 'vis=ativos', 'vis=planos', 'plano=PM-01'):
         m.ir(a); etp += J("document.querySelectorAll('.etp-ind,nav[aria-label=\"Telas da manutenção\"]').length") or 0
     m.ir('vis=ordens'); m.clk('Kanban'); kan = J("[...document.querySelectorAll('[aria-label=\"Kanban das ordens\"]>*')].filter(e=>e.getClientRects().length).length")
-    m.ir('vis=semordem'); m.clk('Gerar 3 ordens preventivas'); m.ir('vis=semordem'); so2 = m.body(); m.ir('ativo=a03'); a03 = m.body() + m.pan()
+    m.ir('vis=semordem'); m.clk('Gerar 3 ordens preventivas'); m.ir('vis=semordem'); so2 = m.body(); m.ir('ativo=a03')
+    for _ in range(3):   # TAB-12 (17/10/2026): os blocos do ativo nascem recolhidos (antes abria o da situação); a pessoa abre para ver as ordens
+        if not J(ABRE): break
+        time.sleep(.3)
+    a03 = m.body() + m.pan()
     exe = J("(()=>{ try{ const M=window.__man; const c=M.manClone(M.manGet()); c.oms['OM-0237'].executante=''; M.manLiberar(c,'OM-0237',false,'Otávio',{executante:'',tempo:'4'}); return 'liberou'; }catch(e){ return e.message; } })()")
     cap('om35', 'om=OM-0235')
     gerar_rows = [r for r in (m.linhas(0) or [])]

@@ -107,7 +107,13 @@ try:
     m.ir('om=OM-0235'); m.clk('Solicitar compra (simulado · Compras recebe no 1c)', '#ma-painel'); m.clk('Registrar recebimento (simulado · papel do Almoxarifado)', '#ma-painel'); m.clk('Liberar serviço', '#ma-painel')
     m.ok(m.man("m.oms['OM-0230'].etapa") == 'Encerradas' and m.man("m.oms['OM-0235'].etapa") == 'Liberadas', 'AC-PCM-19 · pontes do Otávio rotuladas "(simulado · …)": a OM-0230 encerra e a OM-0235 sai de A liberar', [m.man("m.oms['OM-0230'].etapa"), m.man("m.oms['OM-0235'].etapa")])
     # ---------- AC-PCM-12/13 (tela) · teste com tentativas; motivo para quem não executa; MA-04det não é gerado ----------
-    m.ir('om=OM-0233', perfil='Ana', limpa=True); p = m.pan()
+    # TAB-12 (17/10/2026): os blocos da ordem nascem recolhidos (antes abria o da fase); a pessoa abre o que vai ler ou usar
+    ABRE_BL = "(()=>{let n=0; [...document.querySelectorAll('#ma-painel button[aria-expanded=false], main .ma-bl>button[aria-expanded=false]')].forEach(b=>{b.click(); n++;}); return n;})()"
+    def abre_blocos():
+        for _ in range(3):
+            if not J(ABRE_BL): break
+            time.sleep(.3)
+    m.ir('om=OM-0233', perfil='Ana', limpa=True); abre_blocos(); p = m.pan()
     det = open(os.path.join(PJ, 'MA-04det.dc.html'), encoding='utf-8').read()
     m.ok('1ª tentativa · Reprovado' in p and 'Anexar foto' not in p and 'Ação de Zé, executante' in p and 'location.replace' in det and len(det) < 3000,
          'AC-PCM-12/13 · a OM-0233 traz a 1ª tentativa Reprovada; quem não executa vê o Teste sem comando e o motivo; MA-04det é só redirecionamento', p[-160:])
@@ -124,7 +130,7 @@ try:
         x3 = 'Bloqueado' if ('Trator T1 bloqueado' in o and oc == 'Bloqueado') else ('Apto' if ('Trator T1 bloqueado' not in o and oc == 'Apto' and 'OS-0431' in o) else '?')
         return [x1, x2, x3]
     antes = tres()
-    m.ir('om=OM-0233', perfil='Zé'); m.clk('Aprovado', '#ma-painel'); m.clk('Anexar foto e registrar Aprovado', '#ma-painel'); m.setv('#om-leitura', '4320'); m.clk('Previsto (6,5 h)', '#ma-painel')
+    m.ir('om=OM-0233', perfil='Zé'); abre_blocos(); m.clk('Aprovado', '#ma-painel'); m.clk('Anexar foto e registrar Aprovado', '#ma-painel'); m.setv('#om-leitura', '4320'); m.clk('Previsto (6,5 h)', '#ma-painel')
     m.clk('Concluir serviço', '#ma-painel'); m.clk('Declarar Trator T1 apto', '#ma-painel'); depois = tres()
     m.ok(antes == ['Bloqueado'] * 3 and depois == ['Apto'] * 3, 'AC-PCM-14 · Trator T1 com a mesma condição na MA, no CD-03 e na O.S. (bloqueado; depois de Declarar apto, apto nos três)', [antes, depois])
     # ---------- AC-PCM-20 · F5 reabre os endereços; "‹ Ativos" volta com o filtro ----------
