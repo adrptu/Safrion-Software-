@@ -157,8 +157,13 @@ try:
         chk('AL-01 alinhada ao comando (CONF-D10): gestor · Ana, editável; nenhum "Caio (PCP)" como liberador', 'gestor · Ana' in l and 'Editável: papel' in l and 'Liberador do domínio' not in J("document.body.innerText"), l)
         # ---------- AL-01 → PCP (vale na hora; R13 na O.S.) ----------
         abre(1, 'AL-01 · Liberar'); d = dlg()
-        chk('painel da AL-01: definição, ordens afetadas (6 em A liberar) e versões; com o painel aberto, nenhuma primária fora dele', 'ordens e registros afetados agora (6)' in d.lower() and 'v1 · 01/07/2026 implantação · gestor' in d and prims()['dialogo'], [d[-500:], prims()])
+        chk('painel da AL-01: definição, ordens afetadas (10 em A liberar: 6 + as 4 origens de demonstração OS-0590…0593 do OS-LOTE) e versões; com o painel aberto, nenhuma primária fora dele', 'ordens e registros afetados agora (10)' in d.lower() and 'v1 · 01/07/2026 implantação · gestor' in d and prims()['dialogo'], [d[-500:], prims()])
+        TI = "(()=>{const g=[...document.querySelectorAll('aside[role=dialog] [role=radiogroup]')].find(x=>x.getClientRects().length&&/Papel que decide/.test(x.getAttribute('aria-label')||''));return g?[...g.querySelectorAll('[role=radio]')].filter(b=>b.tabIndex===0).map(b=>b.innerText.trim()):null;})()"
+        ti0 = J(TI)
+        chk('rádios de papel com um só ponto de Tab (roving tabindex; achado do app 6227866897): só a opção marcada tem tabIndex 0', ti0 is not None and len(ti0) == 1 and 'vigente' in ti0[0], ti0)
         clk('PCP', 'aside[role=dialog]'); setv('#cf1_mot', 'decisão do proprietário'); d = dlg()
+        ti1 = J(TI)
+        chk('ao escolher PCP, o ponto de Tab acompanha a escolha (um só, em PCP)', ti1 is not None and len(ti1) == 1 and ti1[0].startswith('PCP'), ti1)
         chk('prévia: muda gestor → PCP, Caio ganha, Ana perde, vale na hora; primária do painel "Salvar alçada" (uma só)', 'gestor → PCP' in d and 'Quem ganha Caio' in d and 'Quem perde Ana' in d and 'vale na hora' in d
             and prims()['prims'] == ['Salvar alçada'], [d[:600], prims()])
         n0 = nev(); clk('Salvar alçada', 'aside[role=dialog]'); l = linha(1, 'AL-01 · Liberar') or ''

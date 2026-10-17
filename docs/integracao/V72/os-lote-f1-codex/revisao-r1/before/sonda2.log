@@ -1,0 +1,10 @@
+S3 cancelar => Canceladas
+S3 separar cancelada => {"erro":"OS-0592: Somente A liberar, antes de compromissos"}
+S3 separar outra => {"erro":"OS-0592: Somente A liberar, antes de compromissos"}
+S3 programar grupo => OS-0592: Somente A liberar, antes de compromissos
+S3 linhas do grupo => ["OS-0590","OS-0591","OS-0592"]
+S4b prévia q (bruto) => 4.5135
+S4b prévia exibida nf => 4,514 kg
+S4b soma das demandas (tot por O.S.) => 1.5 + 2.25 + 0.75 = 4,5
+S6b −03:00 (11:00 local) => OS-0591: Conflito com OS-0415 em 29/09 16:00–16:45 · OS-0592: Conflito com OS-0415 em 29/09 16:45–17:45
+S6b −05:00 (mesmo instante, 11:00 local) => aceita · blocos 9–11.75 -05:00, 11.75–14.75 -05:00, 14.75–15.75 -05:00

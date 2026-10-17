@@ -284,7 +284,7 @@ function mipNo(c, s, v, a, ck, ids) {
   const novos = Object.values(c.ordens).filter(o => o.osc && o.osc.novo);
   const key = 'mip|' + v.id + '|' + v.prot; const dup = novos.find(o => (o.osc.novo.keys || []).indexOf(key) >= 0 && o.etapa !== 'Canceladas');
   if (dup) throw new Error('Já existe ' + dup.id + ' para ' + v.id + ' (' + p.alvo.toLowerCase() + ').');
-  const id = 'OS-0' + (440 + novos.length);
+  const id = 'OS-0' + (440 + novos.filter(o => !o.osc.novo.demoLote).length);   // OS-LOTE: semente de demonstração fora da numeração
   const area = Number(String(a.area).replace(',', '.')), dose = er ? 0 : Number(String(a.dose).replace(',', '.'));
   const op = er ? 'Tratos culturais' : 'Pulverização'; const cj = MIPD.conj[er ? 'Tratos culturais' : (t.cultura === 'Mamão' ? 'Pulverização · mamão' : 'Pulverização')];
   const nome = er ? 'Erradicação de plantas · ' + p.alvo.toLowerCase() : 'Controle de ' + p.alvo.toLowerCase() + (a.kind === 'localizado' ? ' · foco' : '');

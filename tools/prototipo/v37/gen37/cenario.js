@@ -106,7 +106,8 @@ function cenPreparoOrdem(c, ordem) {
   if (!instr || instr.versao !== o.versao || !(typeof instr.vazao==='number' && Number.isFinite(instr.vazao) && instr.vazao>0))
     return fail('Vazão não informada · conferir instrução da versão vigente');
   const vazao=instr.vazao, saldo=o.saldo;
-  const area=typeof saldo==='number'&&Number.isFinite(saldo)&&saldo>=0?Math.max(0,saldo-cenApPend(o)):saldo;
+  const restante=typeof saldo==='number'&&Number.isFinite(saldo)&&saldo>=0?Math.max(0,saldo-cenApPend(o)):saldo;
+  const area=typeof restante==='number'&&restante>=0&&restante<1e-9?0:restante; // Y4: resíduo aritmético não é nova carga
   if (!(typeof area==='number' && Number.isFinite(area) && area>=0)) return fail('Área restante inválida · conferir a O.S.');
   if (!(o.ins||[]).length || o.ins.some(x=>typeof x.dose!=='number'||!Number.isFinite(x.dose)||x.dose<0||!Number.isFinite(x.dose*area)||!Number.isFinite(x.dose*(tanque/vazao)))) return fail('Dose não informada · conferir instrução');
   const haCarga=tanque/vazao, n=area>0?Math.max(1,Math.ceil(area/haCarga-1e-9)):0;
@@ -302,10 +303,11 @@ function cenQuem(ator, papel, acao) { const q = g2ator(ator, papel); if (!q) thr
    A mesma chave com o mesmo conteúdo devolve o recibo sem gravar de novo; com outro conteúdo, conflito. Sem chave, o comando segue como antes
    (chamadas internas e testes de outras frentes); as telas da web sempre passam a chave. Dano evitado: dispensa, entrega ou recebimento
    duplicados (movimento e linha da trilha em dobro) quando o mesmo comando chega duas vezes. */
-function cenIdem(c, chave, imp, oque, fn) { if (!chave) return fn(); const R = c.recibos || (c.recibos = {}); const r0 = R[chave];
+function cenIdem(c, chave, imp, oque, fn, opt) { if (!chave) return fn(); const R = c.recibos || (c.recibos = {}); const r0 = R[chave];
   if (r0) { if (r0.imp !== imp) throw new Error('Este registro (' + chave + ') já foi gravado com outro conteúdo: conflito, nada gravado.');
+    if(r0.resultado) return Object.assign(cenClone(r0.resultado),{repetido:true,recibo:r0});
     return { msg: oque + ' já registrado (' + chave + '): nada foi gravado de novo.', repetido: true, recibo: r0 }; }
-  const r = fn() || {}; R[chave] = { imp, cmd: oque }; return r; }
+  const r = fn() || {}; const rs=c.recibos||(c.recibos={}); rs[chave] = { imp, cmd: oque }; if(opt&&opt.resultado) rs[chave].resultado=cenClone(r); return r; }
 function cenRevisao(ator, autor, fato) { const q = g2pf(ator); return q && g2mesma(q.k, autor) ? 'revisão posterior pendente (' + q.k + ' ' + fato + ' e decidiu)' : ''; }
 
 // ---------- O.S. (web) ----------
@@ -825,3 +827,193 @@ function cenPodeEncerrar(c, id) { const o = c.ordens[id]; const r = o.req && c.r
   if (typeof prPodeEncerrar === 'function') { const pm = prPodeEncerrar(c, id); if (pm) return pm; }   // colheita: nenhuma carga a pesar ou sem sinal (R-18)
   return ''; }
 
+
+
+// OS-LOTE-F1: agrupador operacional; a demanda e os fatos continuam nas O.S. de origem.
+function cenGrupoAtor(ator) { return cenExigeAlc(ator,'AL-19','Agrupar e programar O.S.'); }
+function cenGrupoCanon(x) {
+  if(Array.isArray(x)) return '['+x.map(cenGrupoCanon).join(',')+']';
+  if(x&&typeof x==='object') return '{'+Object.keys(x).sort().map(k=>JSON.stringify(k)+':'+cenGrupoCanon(x[k])).join(',')+'}';
+  return JSON.stringify(x);
+}
+function cenGrupoDose(n,un) {
+  const U={L:['L',1],mL:['L',1000],kg:['kg',1],g:['kg',1000]};
+  if(!U[un]||typeof n!=='number'||!Number.isFinite(n)||n<=0) throw new Error('Dose ou unidade não definida para agrupar.');
+  const d=cenDec(n); let a=d.n, e=d.e+(U[un][1]===1000?3:0);
+  while(e>0&&a%10n===0n){ a/=10n;e--; }
+  return {un:U[un][0],chave:String(a)+'e-'+e,dose:Number(a)/10**e};
+}
+function cenGrupoCompromisso(c,o) {
+  if(o.etapa!=='A liberar') return 'Somente A liberar, antes de compromissos';
+  if((o.realizado||0)>0||o.reservado||o.preparo||(o.ap||[]).some(a=>a.st!=='Previsto')) return 'Há realização, reserva ou preparo';
+  const r=o.req&&c.reqs[o.req];
+  if(r&&(r.itens||[]).some(i=>['solicitado','entregue','custodia','consumido'].some(k=>(i[k]||0)>0))) return 'Há requisição ou material comprometido';
+  if((c.movs||[]).some(m=>m.os===o.id)) return 'Há movimento vinculado: conferir a origem';
+  return '';
+}
+function cenGrupoFicha(c,id,grupoPermitido) {
+  const o=c.ordens[id]; if(!o) throw new Error(id+': ordem não encontrada');
+  const bloqueio=cenGrupoCompromisso(c,o); if(bloqueio) throw new Error(id+': '+bloqueio);
+  const outro=Object.values(c.gruposExec||{}).find(g=>g.id!==grupoPermitido&&g.ids.includes(id));
+  if(outro) throw new Error(id+': vinculada a '+outro.id);
+  const f=o.loteFicha;
+  if(!f||f.versaoOS!==o.versao) throw new Error(id+': definir parâmetros da versão vigente');
+  const keys=['organizacao','fazenda','safra','cultura','operacao','metodo','receita','receitaVersao','perfil','regulagem','ocorrencia','parcela'];
+  if(keys.some(k=>typeof f[k]!=='string'||!f[k].trim())) throw new Error(id+': parâmetro técnico ou origem ausente');
+  if(!['liquido','solido'].includes(f.tipo)||f.base!=='ha') throw new Error(id+': base ou tipo fora desta fatia');
+  if(!(Number.isFinite(o.area)&&o.area>0&&o.saldo===o.area)) throw new Error(id+': área autorizada deve estar integralmente disponível');
+  if(!Array.isArray(f.janela)||f.janela.length!==2||!f.janela.every(x=>typeof x==='string'&&/Z$|[+-]\d\d:\d\d$/.test(x)&&Number.isFinite(Date.parse(x)))||Date.parse(f.janela[0])>=Date.parse(f.janela[1])) throw new Error(id+': janela técnica com fuso ausente ou inválida');
+  if(f.tipo==='liquido'&&!(Number.isFinite(f.volumeHa)&&f.volumeHa>0)) throw new Error(id+': volume de aplicação não definido');
+  if(!(o.ins||[]).length||!Array.isArray(f.insumos)||f.insumos.length!==o.ins.length) throw new Error(id+': instrução de produtos incompleta');
+  if(!f.recursos||!f.recursos.maquina||!f.recursos.implemento)throw Error(id+': classe de recursos ausente');
+  const prods=o.ins.map(x=>{
+    const ms=f.insumos.filter(m=>m.p===x.p),m=ms[0];
+    if(ms.length!==1||!m.id||!m.formulacao||!m.concentracao||m.base!==f.base) throw new Error(id+': identidade, formulação ou base de '+x.p+' ausente');
+    const d=cenGrupoDose(x.dose,x.un); return {id:m.id,p:x.p,formulacao:m.formulacao,concentracao:m.concentracao,base:m.base,un:d.un,dose:d.dose,chave:d.chave};
+  }).sort((a,b)=>a.id.localeCompare(b.id));
+  if(new Set(prods.map(x=>x.id)).size!==prods.length) throw new Error(id+': produto repetido na receita');
+  const eq={}; ['organizacao','fazenda','safra','cultura','operacao','metodo','receita','receitaVersao','perfil','regulagem','tipo','base'].forEach(k=>eq[k]=f[k]);
+  eq.recursos=f.recursos;
+  eq.volumeHa=f.tipo==='liquido'?f.volumeHa:null;
+  eq.insumos=prods.map(({id,formulacao,concentracao,base,un,chave})=>({id,formulacao,concentracao,base,un,chave}));
+  return {o,f,prods,eq:cenGrupoCanon(eq)};
+}
+function cenGrupoEscopo(c,id){const o=c.ordens[id];return cenGrupoCanon({area:o.area,ins:o.ins,ficha:o.loteFicha});}
+function cenGrupoSnapshot(c,id) {
+  const o=c.ordens[id];return cenGrupoCanon({o,req:o&&o.req?c.reqs[o.req]:null,movs:(c.movs||[]).filter(m=>m.os===id)});
+}
+// ENG-011: arredondar na unidade da origem antes de converter; 5 mL não vira 0,01 L.
+function cenGrupoQuantidade(rows,produto){
+  const ds=rows.map(r=>{const m=r.f.insumos.find(x=>x.id===produto),i=r.o.ins.find(x=>x.p===m.p),d=cenDec(cenQtd(i.dose,r.o.area));
+    return {n:d.n,e:d.e+(['mL','g'].includes(i.un)?3:0)};});
+  const e=Math.max(...ds.map(d=>d.e)),n=ds.reduce((s,d)=>s+d.n*10n**BigInt(e-d.e),0n);
+  return Number(n)/10**e;
+}
+function cenGrupoPrevia(c,ids,ator,grupoPermitido,programa) {
+  cenGrupoAtor(ator);
+  if(!Array.isArray(ids)||ids.length<2||new Set(ids).size!==ids.length) throw new Error('Selecione ao menos duas O.S. distintas.');
+  const rows=ids.map(id=>cenGrupoFicha(c,id,grupoPermitido)),a=rows[0];
+  if(rows.some(x=>x.eq!==a.eq)) throw new Error('Receita, dose, base, cultura ou método incompatíveis: reveja as origens.');
+  if(new Set(rows.map(x=>x.f.ocorrencia+'|'+x.f.parcela)).size!==rows.length||new Set(rows.map(x=>x.f.parcela)).size!==rows.length) throw new Error('Destino repetido ou sobreposto na mesma operação.');
+  const inicio=Math.max(...rows.map(x=>Date.parse(x.f.janela[0]))),fim=Math.min(...rows.map(x=>Date.parse(x.f.janela[1])));
+  if(inicio>=fim) throw new Error('As janelas não têm interseção comum.');
+  const area=rows.reduce((s,x)=>s+x.o.area,0); if(!Number.isFinite(area)) throw new Error('Área total fora da faixa.');
+  const produtos=a.prods.map(x=>({id:x.id,p:x.p,un:x.un,dose:x.dose,q:cenGrupoQuantidade(rows,x.id)}));
+  if(produtos.some(x=>!Number.isFinite(x.q))) throw new Error('Quantidade fora da faixa.');
+  const capacidades=rows.every(x=>Number.isFinite(x.f.capacidadeHaH)&&x.f.capacidadeHaH>0&&Number.isFinite(x.f.deslocamentoH)&&x.f.deslocamentoH>=0&&Number.isFinite(x.f.setupH)&&x.f.setupH>=0);
+  const horas=capacidades?rows.reduce((s,x)=>s+x.o.area/x.f.capacidadeHaH+x.f.deslocamentoH+x.f.setupH,0):null;
+  const pendencias=[];if(horas===null) pendencias.push('Horas não calculadas · informar capacidade e tempos');
+  else if(horas>(fim-inicio)/3600000) pendencias.push('Duração não cabe na janela comum · rever programação');
+  // Preparo é projeção. Capacidade útil deve ser explícita e igual; não escolher conjunto da primeira ordem.
+  const tanques=rows.map(x=>x.f.tanqueUtil),tanque=tanques.every(t=>Number.isFinite(t)&&t>0&&t===tanques[0])?tanques[0]:null;
+  let cargas=null;
+  if(a.f.tipo==='liquido'&&tanque!==null){
+    const volume=area*a.f.volumeHa,n=Math.max(1,Math.ceil(volume/tanque-1e-9));
+    if(!Number.isSafeInteger(n)||n<1||n>10000) throw new Error('Preparo fora da faixa.');
+    let ri=0,rest=rows[0].o.area;
+    cargas=Array.from({length:n},(_,i)=>{const vol=Math.min(tanque,Math.max(0,volume-i*tanque));let ha=vol/a.f.volumeHa;const destinos=[];
+      while(ha>0&&ri<rows.length){const q=Math.min(ha,rest);destinos.push({os:rows[ri].o.id,area:q});ha-=q;rest-=q;if(rest<=0){ri++;rest=ri<rows.length?rows[ri].o.area:0;}}
+      return {n:i+1,vol,destinos,produtos:a.prods.map(x=>({id:x.id,p:x.p,un:x.un,q:x.dose*vol/a.f.volumeHa}))}; });
+  } else if(a.f.tipo==='liquido') pendencias.push('Preparo não calculado · conferir capacidade útil do conjunto');
+  const versoes={};ids.forEach(id=>versoes[id]=cenGrupoSnapshot(c,id));
+  const previa={ids:ids.slice(),versoes,assinatura:a.eq,origens:Object.fromEntries(rows.map(x=>[x.o.id,x.o.versao])),receita:a.f.receita,receitaVersao:a.f.receitaVersao,area,produtos,cargas,horas,inicio:new Date(inicio).toISOString(),fim:new Date(fim).toISOString(),pendencias};
+  previa.programa=programa?cenClone(programa):null;previa.programacao=cenGrupoProgramacao(c,ids,programa,previa);
+  if(!programa)previa.pendencias.push('Programação não confirmada · escolher recursos e início');
+  return previa;
+}
+function cenGrupoCriar(c,previa,ator,chave) {
+  const por=cenGrupoAtor(ator);if(!chave) throw new Error('Intenção ausente: refaça a prévia.');
+  return cenIdem(c,chave,cenGrupoCanon(['grupo',previa,por]),'Agrupamento',()=>{
+    const p=cenGrupoPrevia(c,previa.ids,ator,undefined,previa.programa);
+    if(cenGrupoCanon(p.versoes)!==cenGrupoCanon(previa.versoes)) throw new Error('Uma origem mudou: confira versões e refaça a prévia.');
+    const gs=c.gruposExec||(c.gruposExec={});let seq=1;while(gs['GRP-'+seq])seq++;
+    const id='GRP-'+seq,g={id,versao:1,ids:p.ids,receita:p.receita,assinatura:p.assinatura,origens:p.origens,escopos:Object.fromEntries(p.ids.map(os=>[os,cenGrupoEscopo(c,os)])),por,at:cenAgora(),historico:[{acao:'Composição confirmada',versao:1,ids:p.ids.slice(),por,at:cenAgora()}]};
+    if(p.programacao){for(const os of p.ids){const o=c.ordens[os];o.prog=p.programacao[os];o.rec={};o.resp=AL0.pessoas[p.programa.operador].nome;o.recHist=(o.recHist||[]).concat([{por,at:cenAgora(),t:'Programação confirmada no '+id}]);}g.programa=p.programa;}
+    gs[id]=g;
+    return {msg:id+' confirmado · origens preservadas; aprovação e liberação continuam por O.S.',grupo:id,versao:1,itens:p.ids.map(os=>({os,estado:'Vinculada',versao:c.ordens[os].versao}))};
+  },{resultado:true});
+}
+// Separar exige só ausência de compromisso nas linhas vivas: versão nova ou cancelamento de uma origem não pode prender o grupo.
+function cenGrupoSeparavel(c,ids){ ids.forEach(k=>{const o=c.ordens[k];if(o&&o.etapa==='Canceladas')return;const b=o?cenGrupoCompromisso(c,o):'origem ausente';if(b)throw new Error(k+': '+b);}); }
+function cenGrupoSeparar(c,id,os,versao,esperadas,ator,chave) {
+  const por=cenGrupoAtor(ator);if(!chave) throw new Error('Intenção ausente.');
+  return cenIdem(c,chave,cenGrupoCanon(['separar',id,os,versao,esperadas,por]),'Separação',()=>{
+    const g=(c.gruposExec||{})[id];if(!g||g.versao!==versao||!g.ids.includes(os)) throw new Error('Composição mudou: releia o grupo.');
+    // Compromisso em qualquer linha impede desfazer coordenação que já serviu à execução.
+    g.ids.forEach(k=>{ if(!esperadas||cenGrupoSnapshot(c,k)!==esperadas[k]) throw new Error(k+': origem mudou; refaça a prévia de separação.'); }); cenGrupoSeparavel(c,g.ids);
+    g.ids=g.ids.filter(k=>k!==os);g.versao++;g.historico.push({acao:'Destino separado',os,versao:g.versao,por,at:cenAgora()});
+    return {msg:os+' separada de '+id+' · origem, aprovação e demanda preservadas.',grupo:id,versao:g.versao,itens:[{os,estado:'Separada'}]};
+  },{resultado:true});
+}
+function cenGrupoRealizado(c,id) {
+  const g=(c.gruposExec||{})[id];if(!g) throw new Error('Grupo não encontrado.');
+  return g.ids.map(os=>{const o=c.ordens[os];if(!o)return {os,etapa:'Origem ausente',area:null,realizado:null,saldo:null,pendentes:1,consumo:[]};return {os,etapa:o.etapa,area:o.area,realizado:o.realizado||0,saldo:o.saldo,pendentes:(o.ap||[]).filter(a=>a.sinc===false||!['Previsto','Conferido','Provisório'].includes(a.st)).length,consumo:(o.ap||[]).filter(a=>a.sinc!==false&&['Conferido','Provisório'].includes(a.st)).map(a=>({dia:a.dia,cons:a.cons,sinc:a.sinc}))};});
+}
+function cenGrupoRecursos(c,ids) {
+  const A=typeof alVigente==='function'?alVigente(c):[],out=[];
+  ids.forEach(id=>{
+    const blocos=A.filter(x=>x.os===id);
+    if(!blocos.length) out.push({os:id,motivo:'Sem programação de recursos · alocar na O.S.'});
+    const o=c.ordens[id],f=o&&o.loteFicha||{},recs=[...new Set(blocos.map(x=>x.r))];
+    const maquinas=recs.filter(r=>AL0.tipo[r]==='Máquina'),impl=recs.filter(r=>AL0.tipo[r]==='Implemento'),pessoas=recs.filter(r=>AL0.tipo[r]==='Pessoa');
+    if(maquinas.length!==1||impl.length!==1||pessoas.length!==(f.tipo==='liquido'?2:1))out.push({os:id,motivo:'Conjunto incompleto · conferir máquina, implemento, operador e caldeiro'});
+    const req=f.recursos;
+    if(!req||!req.maquina||!req.implemento)out.push({os:id,motivo:'Classe do conjunto pendente na instrução técnica'});
+    else if(maquinas.some(r=>AL0.classe[r]!==req.maquina)||impl.some(r=>AL0.classe[r]!==req.implemento))out.push({os:id,motivo:'Classe incompatível com a instrução'});
+    const ativos=AL0.ativos||{},preq=AL0.preq||{};
+    for(const im of impl){const aid=AL0.ativo[im],pot=maquinas.map(r=>(ativos[AL0.ativo[r]]||{}).pot);
+      if(!(Number.isFinite(preq[aid])&&pot.length===1&&Number.isFinite(pot[0])&&pot[0]>=preq[aid]))out.push({os:id,motivo:'Potência do conjunto insuficiente ou não informada'});}
+    const habs=AL0.ophab&&AL0.ophab[f.operacao];
+    const op=pessoas.find(r=>AL0.classe[r]==='operador'),cal=pessoas.find(r=>AL0.classe[r]==='caldeiro');
+    if(!op||(f.tipo==='liquido'&&!cal)||!Array.isArray(habs))out.push({os:id,motivo:'Habilidades da operação pendentes'});
+    for(const r of pessoas){const pessoa=(AL0.pessoas||{})[r],ex=r===cal?[AL0.calda]:(habs||[]);
+      if(!pessoa||typeof AL_HABIL==='undefined'||!pessoa.hab)out.push({os:id,motivo:'Habilitação pendente · '+r});
+      else{const datas=[AL_HABIL.dia,...blocos.filter(b=>b.r===r).map(b=>b.dia)],valida=datas.map(d=>AL_HABIL.verificar(pessoa,d)).find(x=>!x.ok)||{ok:true},tem=String(pessoa.hab).split(';').map(x=>x.trim());
+        if(!valida.ok)out.push({os:id,motivo:AL0.nome[r]+' · '+valida.m});
+        if(ex.some(h=>!h||!tem.includes(h)))out.push({os:id,motivo:AL0.nome[r]+' · habilidade da operação ausente'});}}
+    const fuso=(o.prog||{}).fuso||(f.janela&&f.janela[0].slice(-6));
+    for(const b of blocos){const dt=Date.parse(b.dia+'T00:00:00'+fuso),ini=dt+b.ini*3600000,fim=dt+b.fim*3600000;
+      if(!Number.isFinite(ini)||!Number.isFinite(fim)||fim<=ini||!f.janela||ini<Date.parse(f.janela[0])||fim>Date.parse(f.janela[1]))out.push({os:id,motivo:'Programação fora da janela técnica ou inválida'});}
+    for(const r of new Set(blocos.map(x=>x.r))){
+      if(alBloqueado(c,r)) out.push({os:id,motivo:'Recurso '+r+' bloqueado na Manutenção'});
+      alChoques(c,r,id,blocos.filter(x=>x.r===r),A).forEach(x=>out.push({os:id,motivo:alChoqueTxt(x)}));
+    }
+  });return out;
+}
+function cenGrupoProgramacao(c,ids,proposta,previa){
+  if(!proposta)return null;
+  const campos=['maquina','implemento','operador'].concat(c.ordens[ids[0]].loteFicha.tipo==='liquido'?['caldeiro']:[]),recs=campos.map(k=>proposta[k]);
+  if(recs.some(r=>!r||!AL0.nome[r])||new Set(recs).size!==recs.length)throw Error('Escolha máquina, implemento, operador e caldeiro distintos.');
+  if(typeof proposta.inicio!=='string'||!/[+-]\d\d:\d\d$/.test(proposta.inicio)||!Number.isFinite(Date.parse(proposta.inicio)))throw Error('Informe o início com o fuso da fazenda.');
+  if(previa.horas===null)throw Error('Informe capacidade, deslocamento e setup antes de programar.');
+  const comeco=Date.parse(proposta.inicio),fim=comeco+previa.horas*3600000;
+  if(comeco<Date.parse(previa.inicio)||fim>Date.parse(previa.fim))throw Error('A sequência não cabe na janela comum.');
+  const fusos=ids.map(id=>c.ordens[id].loteFicha.janela.map(iso=>/Z$/.test(iso)?'+00:00':iso.slice(-6))).flat();
+  if(new Set(fusos).size!==1)throw Error('Fusos das origens divergentes: confira a janela da fazenda antes de programar.');
+  if(proposta.inicio.slice(-6)!==fusos[0])throw Error('Use o fuso da fazenda da janela técnica (UTC'+fusos[0]+'): outro fuso desloca os blocos e esconde conflitos.');
+  const fuso=proposta.inicio.slice(-6),sinal=fuso[0]==='-'?-1:1,offset=sinal*(Number(fuso.slice(1,3))*60+Number(fuso.slice(4)))*60000;
+  const prog={},k=cenClone(c);let cursor=comeco;
+  for(const id of ids){const f=c.ordens[id].loteFicha,h=c.ordens[id].area/f.capacidadeHaH+f.deslocamentoH+f.setupH;
+    const a=new Date(cursor+offset),b=new Date(cursor+h*3600000+offset),dia=a.toISOString().slice(0,10);
+    if(dia!==b.toISOString().slice(0,10))throw Error(id+': sequência cruza meia-noite; reveja a janela operacional.');
+    const ini=a.getUTCHours()+a.getUTCMinutes()/60+a.getUTCSeconds()/3600,fim=b.getUTCHours()+b.getUTCMinutes()/60+b.getUTCSeconds()/3600;
+    if(fim<=ini)throw Error(id+': duração insuficiente para programar.');
+    prog[id]={fuso,blocos:recs.map(r=>({r,os:id,dia,ini,fim,h:fim-ini,sit:'condicional'}))};
+    k.ordens[id].prog=prog[id];k.ordens[id].rec={};cursor+=h*3600000;
+  }
+  const problemas=cenGrupoRecursos(k,ids);if(problemas.length)throw Error(problemas.map(x=>x.os+': '+x.motivo).join(' · '));
+  return prog;
+}
+function cenGrupoProgramar(c,id,versao,previa,ator,chave){
+  const por=cenGrupoAtor(ator);if(!chave)throw Error('Intenção ausente.');
+  return cenIdem(c,chave,cenGrupoCanon(['programar',id,versao,previa,por]),'Programação',()=>{
+    const g=(c.gruposExec||{})[id];if(!g||g.versao!==versao||cenGrupoCanon(g.ids)!==cenGrupoCanon(previa.ids))throw Error('Composição mudou: releia o grupo.');
+    const p=cenGrupoPrevia(c,g.ids,ator,id,previa.programa);
+    if(cenGrupoCanon(p.versoes)!==cenGrupoCanon(previa.versoes))throw Error('Uma origem mudou: refaça a prévia de programação.');
+    if(!p.programacao)throw Error('Escolha recursos e início para programar.');
+    if(p.assinatura!==g.assinatura||g.ids.some(os=>g.origens[os]!==c.ordens[os].versao||!g.escopos||g.escopos[os]!==cenGrupoEscopo(c,os)))throw Error('Versão técnica mudou após a composição.');
+    for(const os of g.ids){c.ordens[os].prog=p.programacao[os];c.ordens[os].rec={};c.ordens[os].resp=AL0.pessoas[p.programa.operador].nome;c.ordens[os].recHist=(c.ordens[os].recHist||[]).concat([{por,at:cenAgora(),t:'Programação revista no '+id}]);}
+    g.programa=p.programa;g.versao++;g.historico.push({acao:'Programação confirmada',versao:g.versao,por,at:cenAgora()});
+    return {grupo:id,versao:g.versao,msg:id+' programado · aprovação e liberação permanecem por origem.',itens:g.ids.map(os=>({os,estado:'Programada'}))};
+  },{resultado:true});
+}

@@ -46,7 +46,10 @@ JS = r"""
 // deixa de ocupar o recurso (revisão Codex 6167883199: o compromisso futuro é liberado); eventos que nunca foram O.S. do cenário (irrigação,
 // OS-0419/0423) e a manutenção válida continuam. O realizado não vem daqui: fica nos apontamentos da ordem.
 function alVigente(c){ const O=(c&&c.ordens)||{}, S0=(typeof CEN0!=='undefined'&&CEN0&&CEN0.ordens)||{};
-  return AL0.aloc.filter(a=>!(O[a.os]?O[a.os].etapa==='Canceladas':!!S0[a.os])).map(a=>{ const t=O[a.os]&&O[a.os].rec&&O[a.os].rec[a.r]; return t?Object.assign({},a,{r:t,de:a.r}):a; }); }
+  const explicitas=Object.values(O).filter(o=>o.prog&&Array.isArray(o.prog.blocos));
+  const trocadas=new Set(explicitas.map(o=>o.id));
+  const A=AL0.aloc.filter(a=>!trocadas.has(a.os)).concat(explicitas.flatMap(o=>o.prog.blocos.map(b=>Object.assign({},b,{os:o.id}))));
+  return A.filter(a=>!(O[a.os]?O[a.os].etapa==='Canceladas':!!S0[a.os])).map(a=>{ const t=O[a.os]&&O[a.os].rec&&O[a.os].rec[a.r]; return t?Object.assign({},a,{r:t,de:a.r}):a; }); }
 function alHh(x){ const h=Math.floor(x), m=Math.round((x-h)*60); return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); }
 function alDm(iso){ return String(iso).slice(8,10)+'/'+String(iso).slice(5,7); }
 function alAtivo(c,r){ const aid=AL0.ativo[r]; return (aid&&c&&c.man&&c.man.ativos&&c.man.ativos[aid])||null; }
@@ -89,7 +92,20 @@ def js():
     import json
     al0 = dict(jor=JORNADA, jorRec=JOR_RECURSO, dias=DIAS, nome=NOME, tipo=TIPO, classe=CLASSE, ativo={r: a for a, r in REC_DO_ATIVO.items()},
                aloc=[dict(r=a['r'], os=a['os'], dia=a['dia'], h=round(a['fim'] - a['ini'], 2), ini=a['ini'], fim=a['fim'], sit=a['sit']) for a in ALOC])
-    return 'const AL0 = ' + json.dumps(al0, ensure_ascii=False) + ';\n' + JS
+    # Mesmo cadastro/regra de CD-03/CD-04, em escopo local para não declarar AL/HOJE duas vezes na tela de cadastro.
+    from areas import cad_ativos_pessoas as CP, cadastros as CAD
+    import dados_cad as DC
+    ps = dict(CP.pessoas())
+    mapa = {'MAR':'p2', 'CAR':'p3', 'PAU':'p6', 'JOA':'p5'}
+    al0.update(pessoas={r:ps[pid] for r,pid in mapa.items() if pid in ps and ps[pid].get('nome') == NOME[r].split(' · ')[0]}, ophab=CP.OPHAB,
+               calda=CP.CALDA, ativos={a['id']:a for a in DC.ATIVOS}, preq=CP.PREQ)
+    import re
+    data_ref = re.search(r"const HOJE='([^']+)';", CAD.CDJS)
+    if not data_ref: raise ValueError('Data de referência do CD-04 ausente')
+    # A mesma regra também confere a data proposta: habilitação válida hoje não autoriza data após o vencimento.
+    cd_regra = CAD.CDJS[:data_ref.start()] + 'const HOJE=dia;' + CAD.CDJS[data_ref.end():]
+    hab = 'const AL_HABIL={dia:' + json.dumps(data_ref.group(1)) + ',verificar:function(V,dia){dia=dia||this.dia;\n' + cd_regra + CP.ALOC_JS + '\nreturn alocavel(V);}};\n'
+    return 'const AL0 = ' + json.dumps(al0, ensure_ascii=False) + ';\n' + hab + JS
 
 
 
@@ -143,3 +159,4 @@ if __name__ == '__main__':
     for x in res: print(f"{x['nome']:32s} {x['h']:5.1f} h / {x['disp']:4.1f} h = {x['uso']*100:5.1f} %", '·', sum(len(d['conf']) for d in x['dias']), 'conflitos')
     for c in conf: print(c)
     print(da_ordem('OS-0424'))
+

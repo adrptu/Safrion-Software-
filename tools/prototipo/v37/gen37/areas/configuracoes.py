@@ -175,7 +175,8 @@ function EXTRAVALS(self,v){ const K=self._cf1.K; const st=self.state; const PF=g
       try{ nv=Object.keys(mud).length?confAlcNova(b,cur,mud):null; }catch(x){ erro=String(x.message||x); }
       v.cf1_alim=b.edita==='lim'; v.cf1_apap=b.edita!=='lim';
       v.cf1_aopc=(b.opc||[]).map(x=>{ const atual=b.edita==='acima'?cur.acima.papeis.join():cur.papeis.join(); const sel=mud.papel!==undefined?mud.papel:atual;
-        return {t:(G2_PAPEIS.find(y=>y.k===x)||{}).t+(x===atual?' (vigente)':''),on:String(sel===x),go:()=>self.setState({cf1_mud:{papel:x},cf1_err:''})}; });
+        const foco=(b.opc||[]).includes(sel)?sel:(b.opc||[])[0];   // um só ponto de Tab no grupo: a opção marcada (setas trocam), como no cf1_acand
+        return {t:(G2_PAPEIS.find(y=>y.k===x)||{}).t+(x===atual?' (vigente)':''),on:String(sel===x),ti:x===foco?'0':'-1',go:()=>self.setState({cf1_mud:{papel:x},cf1_err:''})}; });
       v.cf1_aoptit=b.edita==='acima'?'Quem aceita o excedente da custódia':'Papel que decide';
       v.cf1_alimv=mud.lim!==undefined?String(mud.lim):String(cur.lim); v.cf1_aset=(ev)=>self.setState({cf1_mud:{lim:ev.target.value},cf1_err:''});
       v.cf1_amot=st.cf1_mot||''; v.cf1_asetm=(ev)=>self.setState({cf1_mot:ev.target.value,cf1_err:''});

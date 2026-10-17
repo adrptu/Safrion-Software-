@@ -1,0 +1,23 @@
+OK OS-0430: Trator 03, pulverizador, Marcos e Paula, condicionais (seed da semana do PCP)
+OK leitura não muda o cenário
+OK substitutos do Trator 03 em 25/09 13:00–20:24: T1 bloqueado, T02 ocupado na OS-0420, T04 livre
+OK implemento sem outro da mesma função: nenhum substituto
+OK operador só por operador (Paula é caldeiro): Carlos, ocupado na OS-0420
+OK sem o papel (Otávio, PCM): recusa e nada muda
+OK substituto ocupado: recusa com o motivo
+OK ordem em execução (OS-0420): recusa
+OK Caio (PCP) troca Trator 03 → Trator 04
+OK painel: Trator 04 no lugar, com o original
+OK histórico da troca com quem e quando
+OK outras ordens com o Trator 03 seguem iguais (OS-0421)
+OK alocação vigente: blocos da OS-0430 no Trator 04
+OK repetir a mesma troca (duplo clique): recusa, sem segundo efeito
+OK Trator 03 volta a ser substituto do Trator 04 (livre na janela)
+OK voltar ao original apaga a troca e registra no histórico (perfil com todos os papéis)
+OK Trator T1 apto na Manutenção: deixa de ser bloqueado e o bloco de manutenção não conta
+OK OS-0431 (T1 em 24/09): com o T1 bloqueado, alerta de manutenção; apto, sem alerta
+OK cancelar a OS-0430 (comando real) libera os 4 blocos dela; o Trator 03 fica só com a OS-0421
+OK com a OS-0430 cancelada, o Trator 03 deixa de ser ocupado nela: substituto da OS-0421 vê só os choques reais
+OK ordem que saiu do estado não ressuscita na alocação; eventos de fora do cenário (OS-0419, OS-0423) e a manutenção ficam
+RESULTADO 21/21
+
