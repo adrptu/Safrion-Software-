@@ -103,8 +103,9 @@ try:
     limpa()
     # SAF-TAB (14/10): talhão de um cultivo abre recolhido; abre tudo, como a pessoa faria, para editar o cultivo do T2
     J("(()=>{const b=[...document.querySelectorAll('button.g2xtog')].find(b=>b.offsetParent&&/Expandir tudo/.test(b.innerText)); if(b) b.click();})()"); time.sleep(.4)
-    # meta decimal: a célula e o filtro mostram o valor exato com a unidade ("62,5 sc/ha"), sem arredondar
-    J(f"(()=>{{const r=[...({TB}).querySelectorAll('[role=row].g2ed')].filter(x=>x.offsetParent).find(x=>/^T2\\b/.test(x.innerText.trim())); r.querySelector('[role=cell]:nth-child(2)').click();}})()"); time.sleep(.5)
+    # meta decimal: a célula e o filtro mostram o valor exato com a unidade ("62,5 sc/ha"), sem arredondar. A linha é a do cultivo do T2, não a
+    # linha-grupo do talhão (com a seta de abrir): antes da TAB-11 o texto da linha-grupo começava pelo glifo ▾/▸ e o /^T2/ já a deixava de fora
+    J(f"(()=>{{const r=[...({TB}).querySelectorAll('[role=row].g2ed')].filter(x=>x.offsetParent&&!x.querySelector('button.g2car')).find(x=>/^T2\\b/.test(x.innerText.trim())); r.querySelector('[role=cell]:nth-child(2)').click();}})()"); time.sleep(.5)
     J("""(()=>{const i=document.querySelector('aside [id$="_meta"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(i,'62,5'); i.dispatchEvent(new Event('input',{bubbles:true}));})()"""); time.sleep(.2)
     J("[...document.querySelectorAll('aside[role=dialog] button')].find(b=>b.innerText.trim()==='Salvar').click()"); time.sleep(.6)
     t2 = next((r for r in dicts() if r.get('TALHÃO OU PARCELA', '').startswith('T2')), {})
