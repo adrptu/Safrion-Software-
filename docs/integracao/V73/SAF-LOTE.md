@@ -201,3 +201,21 @@ Em `tools/prototipo/v37/gen37/_probe/` (não versionadas), geradas pelo `saf_lot
 - O grupo B rodou inteiro na f2f74f8 (executado): `tabelas_cad` 206/206, `cadastros_padrao` 44/44 e `ds_1510` 17/17. Os brutos estão nesta pasta.
 - O `saf_revisao_test.py` dá 40/42 na base e 40/42 na candidata, com as mesmas 2 falhas. Portanto não são regressão desta frente.
 - Causa provável: o seletor do teste procura "Capacidade por mês ▾", e desde a TAB-09 a tela mostra "▸ Capacidade por mês". Isso é leitura de código, não verificação. A correção do seletor fica fora desta frente.
+
+## Correção da revisão do Codex (comentário 6229216931, PR #47)
+
+**Achado:** o `slPlano` aceitava o primeiro prefixo e também o nome repetido. Com o catálogo P1 "Soja v1", P2 "Soja precoce v1" e P3 "Soja v2", as entradas "Soja precoce v9", "Soja v99" e "Soja" resolviam para P1. Como a cultura coincidia, o `slPode` deixava passar uma receita errada para o talhão (resultado técnico).
+
+**Correção (`abea501`):**
+- O plano só entra por correspondência exata:
+  - o código do plano;
+  - o nome com a versão (também o rótulo da lista, "… · N atividades");
+  - o nome sem a versão, só quando é único entre os planos da cultura da linha.
+- Sem prefixo, e a ordem do catálogo não decide.
+- Ambíguo ou não encontrado: recusa com o motivo na célula e mantém o rascunho. Exemplo de motivo: "plano "Soja" ambíguo: Soja v1, Soja v2; informe com a versão".
+- Vale na colagem, no "Aplicar aos marcados" e na escolha da célula: o `slSet` passa o plano pelo mesmo `slPode`.
+
+**Provas:**
+- `saf_lote_unit_test.py`: 54/54 na `abea501`. São 7 casos novos, com as 24 ordens do catálogo.
+- Contraprova: os mesmos casos com o `safra_lote.js` da `da2edd4` dão 49/54, com 5 reprovações. Bruto: `saf-lote/fix_contraprova_da2edd4.log`.
+- Navegador na `abea501` (executado, render de árvore limpa, um Chrome por vez): `saf_lote_test.py` deu 45/45 (1440 e 390 px) e `saf_c01_test.py` deu 68/68. Brutos: `saf-lote/fix_saf_lote_test.log` e `saf-lote/fix_saf_c01_test.log`.
