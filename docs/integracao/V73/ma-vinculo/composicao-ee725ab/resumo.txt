@@ -1,0 +1,11 @@
+FIM ma_vinculo_unit rc=1 :: Node.js v22.22.0
+FIM rmenu_unit rc=0 :: EX47: ações, chamada, navegação, alinhamento, confirmação obsoleta, exclusão e quatro guardas OK
+FIM rmenu_generator_test rc=0 :: OK
+FIM ma_vinculo_test rc=0 110s :: RESULTADO: 101/101 ok
+FIM ma_regras_test rc=0 1s :: RESULTADO: 150/150 ok
+FIM ma_correcoes_pm_test rc=0 55s :: RESULTADO: 12/12 ok
+FIM ma_unica_test rc=0 175s :: RESULTADO: 23/23 ok
+FIM ma_rastreio_test rc=0 101s :: RESULTADO: 58/58 ok
+FIM ma_revisao_test rc=0 55s :: RESULTADO: 18/18 ok
+FIM cartoes_test rc=0 530s :: RESULTADO: 70/70
+TUDO

@@ -86,10 +86,10 @@ def blocos_do(nome, itens):
     return [(t, b) for t, b in bl if b]
 
 
-def _hub(fname, titulo, itens, blocos=None):
+def _hub(fname, titulo, itens, blocos=None, topo='', js=''):
     E._reset_screen(fname); HEIGHTS37[fname] = 760
-    E.EXTRAJS[0] = JS_VOLTA + 'function EXTRAVALS(self, v) { modVolta(self); }\n'
-    corpo = CSS + (CSS_FLUXO + fluxo(blocos) if blocos else grade(itens, titulo))
+    E.EXTRAJS[0] = JS_VOLTA + js + 'function EXTRAVALS(self, v) { modVolta(self);' + (' modExtra(self, v);' if js else '') + ' }\n'
+    corpo = CSS + topo + (CSS_FLUXO + fluxo(blocos) if blocos else grade(itens, titulo))
     shell37(fname.replace('.dc.html', ''), titulo, corpo, fname=fname, status=None, primary_html=None, search=False)
 
 
@@ -110,7 +110,14 @@ def itens_do(nome):
     return its
 
 
+def _extra_do(nome):
+    """MA-VINCULO (16/10/2026, só Manutenção): aviso "N ativos sem plano" acima dos cartões, que abre Ativos já no filtro com a ação em lote."""
+    if nome != 'Manutenção': return {}
+    from areas.maquinas import hub_aviso
+    return hub_aviso()
+
+
 def build():
     for nome, ic, items in MENU2:
-        if nome in HUB37: its = itens_do(nome); _hub(HUB37[nome], nome, its, blocos_do(nome, its) if nome in FLUXO37 else None)
+        if nome in HUB37: its = itens_do(nome); _hub(HUB37[nome], nome, its, blocos_do(nome, its) if nome in FLUXO37 else None, **_extra_do(nome))
     _hub(OUTROS37[2], OUTROS37[0], [(h, n, i2) for n, h, i2 in OUTROS37[3]])

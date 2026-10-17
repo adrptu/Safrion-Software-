@@ -197,7 +197,8 @@ def cd03():
                pes=[dict(v,id=pid) for pid,v in pessoas()])
     EXTRA_FP=FP.painel()   # gaveta "Ficha do pivô" (o mesmo componente do IR-01)
     import cenario   # PCM simplificado S3: condição, responsável técnico e leitura do cenário único (c.man)
-    js({},cenario.js_prefixo()+ALOC_JS+CAPCOL_JS+FP.store_js()+FP.js('CD')+'const C3='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
+    import dados_manutencao as DM   # MA-VINCULO: "Plano: PM-01 ›" (só leitura; um único lugar edita: a Manutenção) pela regra comum do vínculo
+    js({},cenario.js_prefixo()+ALOC_JS+CAPCOL_JS+FP.store_js()+FP.js('CD')+DM.JS_VINC_BASE+'const C3='+json.dumps(dados,ensure_ascii=False)+';\n'+r'''
 function c3v(V,k){ return V[k+'_'+(C3.cod[V.classe]||'')]; }
 function c3n(V,k){ const x=c3v(V,k); return isnum(x)?Number(x):null; }
 function c3larg(V){ const c=V.classe; if(c==='Plantadeira'){ const a=c3n(V,'linhas'), b=c3n(V,'esp'); return (a!==null&&b!==null)?Math.round(a*b*100)/100:null; }
@@ -224,6 +225,10 @@ function c3cond(r){ const V=r.v; if(V.sit==='Inativo') return {t:'Inativo',c:'gr
     return {t:'Bloqueado',c:'red',ok:false,m:xx.m,x:xx,curto:'bloqueado',aid:a.id}; }
   if(a&&a.cond==='Restrito'){ const i=a.condInfo||{}; return {t:'Restrito',c:'yellow',ok:true,m:(i.lim||i.motivo||'')+(i.ate?' · até '+i.ate.split('-').reverse().slice(0,2).join('/'):''),curto:'restrito',aid:a.id}; }
   return {t:'Apto',c:'green',ok:true}; }
+// MA-VINCULO (16/10/2026): plano de manutenção do ativo, só leitura, com link para a Manutenção (o vínculo se edita só lá); o painel põe o ›
+function c3planos(id){ let m=null; try{ m=cenGet().man; }catch(e){ m=null; } if(!m) return [];
+  const ps=manPlanosDe(m,id); const out=ps.map(p=>({t:'Plano: '+p.id+(manPlVale(p)?'':(p.estado==='Inativo'?' (inativo)':' (rascunho)')),h:'MA.dc.html#plano='+p.id}));
+  if(!ps.some(manPlVale)&&manAtvAtivo(m.ativos[id])) out.push({t:'Sem plano de manutenção · Vincular na Manutenção',h:'MA.dc.html#vis=ativos&vincular='+id}); return out; }
 function c3calib(V){ if(V.exige!=='Sim') return {p:[{k:'mut',t:'não exige'}],s:'não exige',bad:false};
   if(!V.calib) return {p:[chipc('Aferir','yellow'),{k:'mut',t:'sem registro'}],s:'Aferir',bad:true};
   const venc=addd(V.calib,V.interv||0); const d=ddiff(HOJE,venc);
@@ -290,7 +295,7 @@ function PREVALS(self,v){ cadActsIni(self); fpvVals(self,v);
     const CP=emCap(V)?c3capn(V):null; V.capn=CP?CP.n:''; r.p.capn=[CP?{k:'txt',t:nfa(CP.n)}:{k:'mut',t:'—'}]; r.s.capn=CP?nfa(CP.n):'';   /* a coluna põe a unidade da classe */
     const K=c3calib(V); V.calv=K.venc||''; r.p.calv=[K.venc?(K.s==='Em dia'?{k:'txt',t:br(K.venc)}:{k:'cn',t:br(K.venc),c:K.s==='Vencida'?'red':'yellow'}):{k:'mut',t:'—'}]; r.s.calv=K.venc?br(K.venc):'';
     V.cond_t=C.m?C.t+' · '+C.m:C.t; const am=c3man(r.id); if(am){ V.rt=am.rt||'Otávio'; const cd=C3.cod[V.classe]; if(cd&&am.leit) V['cont_'+cd]=am.leit.val; }
-    r.o=(C.x?[{t:'Ver ordens afetadas · '+C.x.ordens.join(' e '),h:'OS.dc.html'}].concat(C.x.om?[{t:'Abrir '+C.x.om+' na Manutenção',h:'MA.dc.html#om='+C.x.om}]:[]):[]).concat(am?[{t:'Abrir '+V.nome+' na Manutenção',h:'MA.dc.html#ativo='+r.id}]:[]);
+    r.o=(C.x?[{t:'Ver ordens afetadas · '+C.x.ordens.join(' e '),h:'OS.dc.html'}].concat(C.x.om?[{t:'Abrir '+C.x.om+' na Manutenção',h:'MA.dc.html#om='+C.x.om}]:[]):[]).concat(am?c3planos(r.id):[]).concat(am?[{t:'Abrir '+V.nome+' na Manutenção',h:'MA.dc.html#ativo='+r.id}]:[]);
     const ch=isnum(V.custo_h)&&String(V.custo_h)!==''; r.p.custo_h=ch?[{k:'txt',t:nf(V.custo_h,2)}]:[{k:'mut',t:'—'}]; r.s.custo_h=ch?nf(V.custo_h,2):'';   // a coluna põe "R$ …/h"
     const n=(usos[V.nome]||[]).length; V.ncj=n; r.p.ncj=[{k:(n?'txt':'mut'),t:n?String(n):'—'}]; r.s.ncj=n?String(n):'';
     const S=c3sit(r); r.p.est=S.p; r.s.est=S.t; });

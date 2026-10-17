@@ -1,0 +1,24 @@
+  ok  MA: sem erro de JS
+  ok  AC-PCM-01 · menu: um só ícone Manutenção (destacado, sem subitens nem expandir) que abre a tela de entrada com os atalhos das 4 visões; as 4 visões no seletor da MA; nenhuma rota antiga; o início (Mapa) leva à Manutenção num toque
+  ok  AC-PCM-02 · PM, MA-01..05 e MA-04det (com #OM-, #PM-, #novo:) levam ao endereço novo; fora do canvas
+  ok  AC-PCM-02 · o destino abre o registro (painel da OM-0234, plano PM-01, Novo plano do Silo 01)
+  ok  AC-PCM-03 · nenhum project/*.dc.html (fora dos redirecionamentos) aponta para MA-01..05, MA-04det ou PM
+  ok  AC-PCM-04 · Kanban com exatamente 5 colunas (A liberar → Encerradas) e só OMs nos cartões
+  FALHA AC-PCM-05/06/07 · ≤ 1 primária por visão, detalhe e painel; com painel aberto nenhuma primária fora dele; nenhum botão de comando nas linhas; sem faixa ou etapas · {'plano=PM-01': ([], 1, False)}
+  ok  AC-PCM-18/10 · sem selos fixos nem "Marcar pendentes"; as preventivas geradas nascem sem resposta
+  ok  AC-PCM-17 · nenhum cartão nas visões; o filtro de condição dos Ativos mostra os não aptos
+  ok  AC-PCM-19 · Otávio abre em Sem ordem, Zé em Ordens, Ana em Ativos; Gerar só do Otávio; condição: Zé só no ativo de que é responsável técnico (T1 sim, Bomba do Pivô 2 não); trocar o papel não muda o estado
+  ok  AC-PCM-19 · pontes do Otávio rotuladas "(simulado · …)": a OM-0230 encerra e a OM-0235 sai de A liberar
+  ok  AC-PCM-12/13 · a OM-0233 traz a 1ª tentativa Reprovada; quem não executa vê o Teste sem comando e o motivo; MA-04det é só redirecionamento
+  ok  AC-PCM-14 · Trator T1 com a mesma condição na MA, no CD-03 e na O.S. (bloqueado; depois de Declarar apto, apto nos três)
+  ok  AC-PCM-20 · F5 reabre #om=, #achado=, #venc=, #ativo=, #plano=, #vis=…&tipo=, &modo=; "‹ Ativos" volta com o filtro
+  ok  AC-PCM-21 · as 5 grades com busca, filtro e ordenação; "Custo R$/h da oficina" no painel
+  ok  fluxo · recusa: Ana vê "Gerar" desabilitado com o motivo (Ação do Otávio)
+  ok  fluxo · repetição: duplo toque em "Gerar 3 ordens preventivas" gera 3, não 6
+  ok  fluxo · normal: a OM-0237 (sem conflito) libera para João; tocar de novo não faz nada
+  ok  AC-PCM-22 · 390 px: sem rolagem lateral; ≥ 5 linhas acima da dobra; painel em tela cheia com a primária sem rolar
+  ok  fluxo a 390 px · recusa: Ana vê "Mover janela"/"Liberar" desabilitados com o motivo (Ação do Otávio); tocar não muda a OM-0234
+  ok  fluxo a 390 px · com conflito, "Liberar mesmo assim" (ponte até o 1b) libera uma vez; duplo toque reserva as peças uma vez só
+  ok  AC-PCM-22 · a ≥ 1024 px o painel abre sozinho, não modal (o Tab não fica preso)
+  ok  fim: sem erro de JS
+RESULTADO: 22/23 ok · FALHAS: AC-PCM-05/06/07 · ≤ 1 primária por visão, detalhe e painel; com painel aberto nenhuma primária fora dele; nenhum botão de comando nas linhas; sem faixa ou etapas

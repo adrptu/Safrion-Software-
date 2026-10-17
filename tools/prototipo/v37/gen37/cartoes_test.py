@@ -70,9 +70,11 @@ BARRA = "(document.querySelector('[data-g2md=\"%s\"]')||{}).parentElement"
 def busca(gid, termo):
     J("(()=>{const b=%s; const i=b&&b.querySelector('input[type=search]'); if(!i) return; const set=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set; set.call(i,%s); i.dispatchEvent(new Event('input',{bubbles:true}));})()" % (BARRA % gid, json.dumps(termo)))
     time.sleep(.45)
-def chips(gid): return J("(()=>{const b=%s; return b?[...b.querySelectorAll('button[aria-pressed]')].filter(x=>!x.closest('[data-g2md]')&&x.getClientRects().length).map(x=>x.innerText.replace(/\\s+/g,' ').trim()):[]})()" % (BARRA % gid)) or []
+# MA-VINCULO (16/10): um filtro da tela marcado com data-filtro-tela na mesma barra (o "Sem plano" da Manutenção › Ativos, no lugar da
+# busca_extra) não entra na conta do "2º chip"; nas outras telas a escolha é a mesma de antes
+def chips(gid): return J("(()=>{const b=%s; return b?[...b.querySelectorAll('button[aria-pressed]')].filter(x=>!x.closest('[data-g2md]')&&!x.matches('[data-filtro-tela]')&&x.getClientRects().length).map(x=>x.innerText.replace(/\\s+/g,' ').trim()):[]})()" % (BARRA % gid)) or []
 def chip(gid, i):
-    J("(()=>{const b=%s; const xs=[...b.querySelectorAll('button[aria-pressed]')].filter(x=>!x.closest('[data-g2md]')&&x.getClientRects().length); if(xs[%d]) xs[%d].click();})()" % (BARRA % gid, i, i)); time.sleep(.45)
+    J("(()=>{const b=%s; const xs=[...b.querySelectorAll('button[aria-pressed]')].filter(x=>!x.closest('[data-g2md]')&&!x.matches('[data-filtro-tela]')&&x.getClientRects().length); if(xs[%d]) xs[%d].click();})()" % (BARRA % gid, i, i)); time.sleep(.45)
 def ag_rotulos(gid):
     J(f"(()=>{{const b=document.querySelector('[data-g2agb=\"{gid}\"]'); if(b&&b.getAttribute('aria-expanded')!=='true') b.click();}})()"); time.sleep(.35)
     r = J(f"(()=>{{const m=document.querySelector('[data-g2agm=\"{gid}\"]'); return m?[...m.querySelectorAll('[role=menuitemradio]')].map(x=>(x.innerText||'').trim().split('\\n')[0].trim()):[]}})()") or []

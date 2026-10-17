@@ -1,0 +1,4 @@
+rc=0 53s ma_correcoes_pm_test :: RESULTADO: 12/12 ok
+rc=0 179s ma_unica_test :: RESULTADO: 23/23 ok
+rc=0 527s cartoes_test :: RESULTADO: 69/69
+FIM
