@@ -108,6 +108,21 @@ console.log('— slPlano exato (revisão do Codex 6229216931, PR #47): sem prefi
   const col = slColarBloco([L], V, 0, 'plano', [['Soja']], cx); const apl = slAplicarSel([L], V, { c5: true }, { plano: 'Soja v99' }, cx);
   ok('colar e "Aplicar aos marcados" recusam com o motivo e o rascunho fica (P1)', col.n === 0 && /ambíguo/.test(col.recusas[0].motivo) && col.vals.c5.plano === 'P1' && apl.n === 0 && /não encontrado/.test(apl.recusas[0].motivo) && apl.vals.c5.plano === 'P1', [col.recusas, apl.recusas]);
 }
+console.log('— revisão do app do Codex (#98, P2): cultivar de outra cultura e erro já corrigido');
+{
+  const L = { k: 'c5', tipo: 'tal', rot: 'T3', T: 96, cult: 'Soja', trava: {} };
+  const pm = slPode(L, 'var', '58 W', CTX, 'Milho');
+  ok('cultivar cadastrada de outra cultura é recusada pela regra (vale para célula, colagem e faixa); a da própria cultura e o texto livre passam',
+    !pm.ok && /cultivar de Soja, não de Milho/.test(pm.motivo) && slPode(L, 'var', '58 W', CTX, 'Soja').ok && slPode(L, 'var', 'Cultivar própria', CTX, 'Milho').ok, pm);
+  const b = slAplicarSel([L], { c5: Object.assign({}, V0.c5) }, { c5: true }, { cult: 'Milho', var: '58 W' }, CTX);
+  ok('faixa com Milho e a cultivar de soja (58 W) que sobrou: a linha fica Milho sem a 58 W, e a recusa diz por quê', b.vals.c5.cult === 'Milho' && b.vals.c5.var !== '58 W' && b.recusas.some(x => x.col === 'var' && /cultivar de Soja/.test(x.motivo)), b);
+  const cb = slColarBloco([L], { c5: Object.assign({}, V0.c5, { cult: 'Milho', var: '' }) }, 0, 'var', [['62 X']], CTX);
+  ok('colar a cultivar de soja (62 X) numa linha de milho: recusado, o rascunho fica', cb.n === 0 && cb.vals.c5.var === '' && /cultivar de Soja/.test((cb.recusas[0] || {}).motivo), cb);
+  const SE = typeof slSemErro === 'function' ? slSemErro : null; const E = { c5: { var: 'Informe a variedade', meta: 'Informe a meta' }, c3: { cult: 'x', plano: 'y' } };
+  ok('slSemErro: a célula corrigida sai do erro, o resto fica; a cultura leva junto o erro do plano', !!SE && eq(SE(E, [['c5', 'var'], ['c3', 'cult']]), { c5: { meta: 'Informe a meta' } }), SE && SE(E, [['c5', 'var'], ['c3', 'cult']]));
+  ok('aplicar e colar devolvem as células feitas (para limpar o erro)', eq(slAplicarSel([L], { c5: Object.assign({}, V0.c5) }, { c5: true }, { meta: '70' }, CTX).feitos, [['c5', 'meta']])
+    && eq(slColarBloco([L], { c5: Object.assign({}, V0.c5) }, 0, 'meta', [['70']], CTX).feitos, [['c5', 'meta']]));
+}
 console.log('— slContar: células alteradas (contador do Salvar)');
 ok('sem mudança → 0', slContar(dados, V0, V0) === 0);
 ok('mudança de espaço nas pontas não conta', slContar(dados, Object.assign({}, V0, { c5: Object.assign({}, V0.c5, { var: ' 62 X ' }) }), V0) === 0);

@@ -57,7 +57,8 @@ function slPode(lin,col,txt,ctx,cultAtual){ if(!lin||lin.tipo==='grp') return {o
   if(col==='meta'){ const n=slNumTxt(s); return n===null?{ok:false,motivo:'meta inválida'}:{ok:true,v:n}; }
   if(col==='plantio'){ const d=slData(s,ctx); return d===null?{ok:false,motivo:'data inválida (use dd/mm/aaaa)'}:{ok:true,v:d}; }
   if(col==='cult'){ const c=slCultura(s,ctx); return c?{ok:true,v:c}:{ok:false,motivo:'cultura "'+s+'" não está no cadastro'}; }
-  if(col==='var') return {ok:true,v:s};
+  if(col==='var'){ const vc=s&&(ctx.cultivares||[]).find(x=>slSemAc(x[1])===slSemAc(s));   // revisão do app do Codex (#98, P2): a mesma regra do slTrocaCult
+    if(vc&&cultAtual&&vc[0]!==cultAtual) return {ok:false,motivo:'cultivar de '+vc[0]+', não de '+cultAtual}; return {ok:true,v:s}; }
   if(col==='plano'){ const cu=cultAtual===undefined?lin.cult:cultAtual; const p=slPlano(s,ctx,cu);
     if(!p) return {ok:false,motivo:'plano "'+s+'" não encontrado (use o código ou o nome com a versão)'};
     if(p.ambiguo) return {ok:false,motivo:'plano "'+s+'" ambíguo: '+[...p.ambiguo].map(x=>x.nome+' v'+x.versao).sort().join(', ')+'; informe com a versão'};
@@ -78,20 +79,23 @@ function slTrocaCult(v,nova,ctx,lin){ const o=Object.assign({},v,{cult:nova});
 function slPor(vals,lin,col,v,ctx){ const cur=vals[lin.k]||{}; return Object.assign({},vals,{[lin.k]:col==='cult'?slTrocaCult(cur,v,ctx,lin):Object.assign({},cur,{[col]:v})}); }
 // colar um bloco a partir da célula (l0 = índice na lista de linhas de dados, sem os títulos; col0 = coluna): célula vazia não apaga;
 // devolve {vals, n (células coladas), recusas:[{rot, col, motivo}], dim:[linhas, colunas]}
-function slColarBloco(lins,vals,l0,col0,M,ctx){ const c0=SL_COLS.indexOf(col0); let out=vals, n=0; const rec=[]; const nc=M.reduce((a,l)=>Math.max(a,l.length),0);
+function slColarBloco(lins,vals,l0,col0,M,ctx){ const c0=SL_COLS.indexOf(col0); let out=vals, n=0; const rec=[], feitos=[]; const nc=M.reduce((a,l)=>Math.max(a,l.length),0);
   if(c0<0) return {vals,n:0,recusas:[{rot:'',col:col0,motivo:'coluna sem edição'}],dim:[M.length,nc]};
   M.forEach((row,i)=>{ const lin=lins[l0+i];
     row.forEach((txt,j)=>{ const col=SL_COLS[c0+j]; if(String(txt).trim()==='') return;
       if(!lin){ rec.push({rot:'linha '+(l0+i+1),col:col||'',motivo:'além da última linha'}); return; }
       if(!col){ rec.push({rot:lin.rot,col:'',motivo:'além da última coluna'}); return; }
       const r=slPode(lin,col,txt,ctx,(out[lin.k]||{}).cult); if(!r.ok){ rec.push({rot:lin.rot,col,motivo:r.motivo}); return; }
-      out=slPor(out,lin,col,r.v,ctx); n++; }); });
-  return {vals:out,n,recusas:rec,dim:[M.length,nc]}; }
+      out=slPor(out,lin,col,r.v,ctx); n++; feitos.push([lin.k,col]); }); });
+  return {vals:out,n,recusas:rec,dim:[M.length,nc],feitos}; }
 // aplicar aos marcados: os campos preenchidos da faixa (ap) em cada linha marcada, na ordem das colunas (a cultura antes do plano)
-function slAplicarSel(lins,vals,sel,ap,ctx){ let out=vals, n=0; const rec=[]; const cols=SL_COLS.filter(c=>String(ap[c]==null?'':ap[c]).trim()!=='');
+function slAplicarSel(lins,vals,sel,ap,ctx){ let out=vals, n=0; const rec=[], feitos=[]; const cols=SL_COLS.filter(c=>String(ap[c]==null?'':ap[c]).trim()!=='');
   lins.filter(l=>sel[l.k]).forEach(lin=>{ cols.forEach(col=>{ const r=slPode(lin,col,ap[col],ctx,(out[lin.k]||{}).cult);
-    if(!r.ok){ rec.push({rot:lin.rot,col,motivo:r.motivo}); return; } out=slPor(out,lin,col,r.v,ctx); n++; }); });
-  return {vals:out,n,recusas:rec,cols}; }
+    if(!r.ok){ rec.push({rot:lin.rot,col,motivo:r.motivo}); return; } out=slPor(out,lin,col,r.v,ctx); n++; feitos.push([lin.k,col]); }); });
+  return {vals:out,n,recusas:rec,cols,feitos}; }
+// célula corrigida pela colagem ou pelo "Aplicar aos marcados" sai do erro, como na edição da célula (revisão do app do Codex, #98, P2)
+function slSemErro(err,feitos){ const er=Object.assign({},err||{}); (feitos||[]).forEach(([k,col])=>{ if(!er[k]) return; const e=Object.assign({},er[k]); delete e[col]; if(col==='cult') delete e.plano;
+  if(Object.keys(e).length) er[k]=e; else delete er[k]; }); return er; }
 // células alteradas (o contador do Salvar e o destaque)
 function slMudou(v,b,col){ return String((v||{})[col]==null?'':(v||{})[col]).trim()!==String((b||{})[col]==null?'':(b||{})[col]).trim(); }
 function slContar(lins,vals,base){ let n=0; lins.forEach(l=>{ SL_COLS.forEach(c=>{ if(slMudou(vals[l.k],base[l.k],c)) n++; }); }); return n; }
@@ -171,7 +175,7 @@ function slDados(self){ const sl=self.state.sl; if(!sl) return null; const lins=
 function slSet(self,k,col,val){ const sl=self.state.sl; if(!sl) return; const lin=(self.__slLin||[]).find(l=>l.k===k); if(!lin||lin.tipo==='ro'||(lin.trava||{})[col]) return;
   const ctx=slCtx(self,sl.saf);
   // plano escolhido na célula: a mesma conferência da colagem e do "Aplicar aos marcados" (código exato e da cultura da linha)
-  if(col==='plano'&&String(val||'')!==''){ const r=slPode(lin,'plano',val,ctx,(sl.vals[k]||{}).cult); if(!r.ok){ const er=Object.assign({},sl.err); er[k]=Object.assign({},er[k]||{},{plano:r.motivo});
+  if((col==='plano'||col==='var')&&String(val||'')!==''){ const r=slPode(lin,col,val,ctx,(sl.vals[k]||{}).cult); if(!r.ok){ const er=Object.assign({},sl.err); er[k]=Object.assign({},er[k]||{},{[col]:r.motivo});
     self.setState({sl:Object.assign({},sl,{err:er,warn:false})}); return; } val=r.v; }
   // linha livre: "Não planejar agora" na cultura limpa a linha inteira (volta ao que era: nada a gravar)
   const vals=(lin.tipo==='novo'&&col==='cult'&&!String(val||'').trim())?Object.assign({},sl.vals,{[k]:Object.assign({},sl.base[k])}):slPor(sl.vals,lin,col,val,ctx); const er=Object.assign({},sl.err); if(er[k]){ const e=Object.assign({},er[k]); delete e[col]; if(col==='cult') delete e.plano; if(Object.keys(e).length) er[k]=e; else delete er[k]; }
@@ -182,13 +186,13 @@ function slFoco(el,d){ const col=el.getAttribute('data-c'); const all=[...docume
 function slColar(self,l0k,col,txt){ const D=slDados(self); if(!D) return; const {sl,dados}=D; const M=slTsv(txt); if(!M.length) return; const l0=dados.findIndex(l=>l.k===l0k);
   const r=slColarBloco(dados,sl.vals,Math.max(0,l0),col,M,slCtx(self,sl.saf));
   const info='Colados '+r.dim[0]+' × '+r.dim[1]+': '+r.n+(r.n===1?' célula':' células')+(r.recusas.length?'; '+slRecusasTxt(r.recusas):'')+'. Nada foi salvo ainda.';
-  self.setState({sl:Object.assign({},sl,{vals:r.vals,info,warn:false})}); }
+  const er=slSemErro(sl.err,r.feitos); self.setState({sl:Object.assign({},sl,{vals:r.vals,info,warn:false,err:er,gerr:Object.keys(er).length?sl.gerr:''})}); }
 function slAplicar(self){ const D=slDados(self); if(!D) return; const {sl,dados}=D; const n0=dados.filter(l=>sl.sel[l.k]).length;
   if(!n0){ self.setState({sl:Object.assign({},sl,{info:'Marque as linhas que vão receber os valores.'})}); return; }
   const r=slAplicarSel(dados,sl.vals,sl.sel,sl.ap||{},slCtx(self,sl.saf));
   if(!r.cols.length){ self.setState({sl:Object.assign({},sl,{info:'Preencha ao menos um campo da faixa "Aplicar aos marcados".'})}); return; }
   const info='Aplicado em '+r.n+(r.n===1?' célula':' células')+' de '+n0+(n0===1?' linha':' linhas')+(r.recusas.length?'; '+slRecusasTxt(r.recusas):'')+'. Nada foi salvo ainda.';
-  self.setState({sl:Object.assign({},sl,{vals:r.vals,info,warn:false})}); }
+  const er=slSemErro(sl.err,r.feitos); self.setState({sl:Object.assign({},sl,{vals:r.vals,info,warn:false,err:er,gerr:Object.keys(er).length?sl.gerr:''})}); }
 // sair do painel por um link (Dividir, Vincular ciclo, O.S.): com alteração, pergunta antes (o rascunho não se perde em silêncio)
 function slSair(self,fn){ const D=slDados(self); if(!D) return; if(slDirty(D.sl,D.lins)){ self.setState({sl:Object.assign({},D.sl,{warn:true,ir:fn})}); return; } self.setState({sl:null}); setTimeout(fn,0); }
 
@@ -266,7 +270,7 @@ function slVals(self,v,saf,step,ro){ const multi=sgSubs(self,saf).length>1;
   v.sl_salvarT='Salvar alterações ('+n+')'; v.sl_salvarSt=n?'':'opacity:.55;cursor:not-allowed;'; v.sl_salvarDis=n?'false':'true';
   // faixa "Aplicar aos marcados": os mesmos campos da linha, uma vez
   const ap=sl.ap||{}; const nSel=dados.filter(l=>sl.sel[l.k]).length; const setAp=(c)=>(e)=>{ const cur=self.state.sl; const a=Object.assign({},cur.ap||{},{[c]:e.target.value});
-    if(c==='cult'){ if(a.plano&&slCultDoPlano(a.plano,ctx)!==a.cult) a.plano=''; } self.setState({sl:Object.assign({},cur,{ap:a,info:''})}); };
+    if(c==='cult'){ if(a.plano&&slCultDoPlano(a.plano,ctx)!==a.cult) a.plano=''; const vc=a.var&&(ctx.cultivares||[]).find(x=>slSemAc(x[1])===slSemAc(a.var)); if(a.cult&&vc&&vc[0]!==a.cult) a.var=''; } self.setState({sl:Object.assign({},cur,{ap:a,info:''})}); };
   v.sl_apN=nSel; v.sl_apVazio=nSel?'false':'true'; v.sl_apSub=nSel?(nSel+(nSel===1?' linha marcada':' linhas marcadas')):'marque as linhas'; v.sl_apT='Aplicar a '+nSel+(nSel===1?' marcado':' marcados'); v.sl_apSt=nSel?'':'opacity:.55;';
   v.sl_apCults=[{v:'',t:'Cultura…'}].concat(ctx.culturas.map(c=>({v:c,t:c}))); v.sl_apCult=ap.cult||''; v.sl_apSetCult=setAp('cult');
   v.sl_apVar=ap.var||''; v.sl_apSetVar=setAp('var'); v.sl_apDl='sl-dl-'+Math.max(0,ctx.culturas.indexOf(ap.cult||''));

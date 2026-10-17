@@ -104,6 +104,12 @@ try:
         and J("[...document.querySelectorAll('#sl-grade .sl-err')].map(e=>e.innerText).join(' | ')").count('Variedade: Informe a variedade') == 3, [g1, J("[...document.querySelectorAll('#sl-grade .sl-err')].map(e=>e.innerText).join(' | ')")])
     ap('var', 'Híbrido AG 8700'); ap('cult', ''); ap('plano', ''); botao('Aplicar a 4 marcados')
     chk('C4 variedade aplicada aos marcados; T4 recusa (OS-0420)', [val(k, 'var') for k in ('c5', 'c6', 'c7', 'c4')] == ['Híbrido AG 8700'] * 3 + ['58 W'] and 'T4 · Variedade: OS-0420' in info(), info())
+    er4 = J("[...document.querySelectorAll('#sl-grade .sl-err')].map(e=>e.innerText).join(' | ')") or ''
+    chk('C5 (revisão do app do Codex, #98 P2) a variedade aplicada aos marcados apaga o erro "Informe a variedade" dessas linhas e a mensagem geral da recusa',
+        'Informe a variedade' not in er4 and not gerr(), [er4, gerr()])
+    ap('cult', 'Soja'); ap('var', '58 W'); ap('cult', 'Milho'); vf = J("(document.querySelector('#sl-grade [aria-label=\"Variedade para os marcados\"]')||{}).value")
+    chk('C6 (revisão do app do Codex, #98 P2) na faixa, trocar Soja por Milho tira do campo Variedade a cultivar de soja (58 W)', vf == '', vf)
+    ap('cult', ''); ap('var', '')
     for k in ('c5', 'c6', 'c7', 'c4'): marca(k)
     # ---------------- D · colar bloco ----------------
     cola('c5', 'plantio', '05/11/2026\t181\n06/11\t62\n07/11/2026\t183,5\n')
