@@ -1,0 +1,6 @@
+git merge-tree --write-tree --name-only b44ea32 457ef14
+a001598b6be5857d31447526e5a4bf42168fba94
+rc=0
+merge-base: d995dedf1f94f6f0819b3c873f74fabe2439b57f
+git diff --stat d995ded 457ef14 -- areas/agronomia.py mip.js cenario.js:
+(vazio = sem mudança)

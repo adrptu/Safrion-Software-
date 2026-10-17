@@ -1,0 +1,19 @@
+OK    A1 1440: Cultura, Classe e Orgânicos na faixa "Filtros" (grupo com funil, a mesma faixa das outras telas), rótulo ao lado de cada lista; nenhum filtro da tela fora dela, sem rótulo solto nem chips de classe
+OK    A2 1440: as listas da faixa alinhadas (mesmo topo e mesma altura, rótulo na mesma linha) e com o seletor padrão da faixa da O.S. (altura, fonte, cantos)
+OK    A3 1440 · Cultura = Soja: Praga-alvo entra na mesma faixa, depois de Cultura, e as 4 listas seguem alinhadas numa linha
+OK    A4 Classe = Inseticida → 1.507 produtos (a opção diz "Inseticida (1.507)"); + Orgânicos = Só aprovados → 376 (a opção diz o mesmo número)
+OK    A5 voltar Classe e Orgânicos a "Todas"/"Todos" devolve a lista inteira
+OK    B1 por produto, o padrão abre sem Tox · amb (6 colunas) e o botão "Colunas" diz que há 1 oculta
+OK    B2 no painel "Colunas", Tox · amb vem desmarcada; marcar mostra a coluna antes de Na fazenda, com a classificação de cada produto
+OK    B3 a escolha vale por modo: com Soja (por uso) o padrão segue sem Tox · amb e com Praga-alvo, Nome científico e Cultura do uso; sem cultura volta com Tox · amb
+OK    B4 "Restaurar padrão" volta às 6 colunas, sem Tox · amb
+OK    C1 a busca "806" acha pela concentração: 57 produtos (≥ 46 com algum ingrediente a 806 no índice) e toda linha à vista tem 806
+OK    C2 "2,4-D AGCN" (reg. 07508, sem 806 na marca): achado por "806 2,4-D AGCN" e a célula começa pela concentração: "806 g/L 2,4-D"
+OK    C3 mistura com decimal (2,4-D (240) + Picloram (64) SL): "406 g/L 2,4-D + 103,6 g/L picloram" na lista; a ficha traz a mesma concentração, sem arredondar
+OK    C4 ordenar por Ingrediente ativo (busca "2,4-D"): 50 linhas pelo nome do ingrediente e, no mesmo ingrediente, da menor à maior concentração
+OK    C5 filtrar a coluna: os valores são os nomes ("2,4-D-dimetilamina · …"), sem a concentração na frente; marcar o só-dimetilamina → 19 produtos, cada célula "<concentração> 2,4-D-dimetilamina"
+OK    C6 ingrediente sem concentração na fonte: só o nome (sem número), listado para a dica "Concentração não informada no AGROFIT"
+OK    A6 390 px: a faixa quebra em linhas sem rolagem lateral; cada lista com o rótulo (numa linha só) cabe na faixa (sem e com Soja), alvo de toque ≥ 44 px
+OK    A7 sem erro de execução
+
+RESULTADO: 17/17 ok []

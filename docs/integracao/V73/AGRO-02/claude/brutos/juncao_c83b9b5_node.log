@@ -1,0 +1,33 @@
+junção local c83b9b5 (pais 457ef14 e b44ea32; árvore a001598), não enviada
+c83b9b5389531794352c7800b22d02ac5e8b412f 457ef1455e840cdeb26a3c8fa6b673f05aeffeeb b44ea3294a8384c0828f04fbf110c5d5b60104c5
+== delta 457ef14 → junção
+ docs/integracao/V73/AGRO-02/codex/REVISAO.md     | 20 ++++++++++++++++++
+ tools/prototipo/v37/gen37/agro02_selecao_unit.js | 27 ++++++++++++++++++++++++
+ tools/prototipo/v37/gen37/areas/agronomia.py     |  8 +++----
+ 3 files changed, 51 insertions(+), 4 deletions(-)
+== delta de agronomia.py igual ao do PR:
+sim
+== node agro02_selecao_unit.js
+PASS open requires explicit product and dose eligible
+PASS open requires explicit product and dose empty
+PASS first selection stays blank
+PASS changing product clears typed comma dose
+PASS same product preserves typed comma dose
+PASS same product preserves explicit zero for validation
+PASS same product preserves incomplete draft
+7 passed; 0 failed
+rc=0
+== rev94_node.py
+FALHOU A quantidade_test 9 isolado: agDecIni em 10 vistorias da Lagoa; 0 travariam com 1 casa (contraprova precisa de ≥ 1); nenhuma trava de área no formulário · [["VIS-051", "", "", "Escolha um produto registrado."], ["VIS-052", "", "", "Escolha um produto registrado."], ["VIS-053", "", "", ""], ["VIS-054", "", "", "Escolha um produto registrado."], ["VIS-055", "", "", ""], ["VIS-056", "", "", "Escolha um produto registrado."], ["VIS-057", "", "", "Escolha um produto registrado."], ["VIS-058", "", "", "Escolha um produto registrado."], ["VIS-059", "", "", "Escolha um produto registrado."], ["VIS-060", "", "", "Escolha um produto registrado."]]
+OK    A2 verificação 9 com o ajuste proposto: abre vazio em 10/10; 5 travariam com 1 casa; nenhuma trava de área no formulário
+OK    B guarda mipEmitir (sem produto: prod='', dose='') recusa com "Escolha um produto registrado." e não cria O.S.
+OK    B guarda mipEmitir (sem dose: prod='ciantraniliprole-100-od', dose='') recusa com "Informe a dose." e não cria O.S.
+OK    B guarda mipEmitir (dose 0: prod='ciantraniliprole-100-od', dose='0') recusa com "Informe a dose." e não cria O.S.
+OK    B guarda mipEmitir (rascunho 0,: prod='ciantraniliprole-100-od', dose='0,') recusa com "Informe a dose." e não cria O.S.
+OK    B guarda mipEmitir (texto: prod='ciantraniliprole-100-od', dose='abc') recusa com "Informe a dose." e não cria O.S.
+OK    B guarda mipEmitir (fora da bula: prod='ciantraniliprole-100-od', dose='2,25') recusa com "Dose fora da bula: 0,5–0,75 L/ha." e não cria O.S.
+OK    B emissão com dose explícita 0,625 L/ha × 95 ha: O.S. OS-0440 em A liberar com essa dose (mínima 0.5) e total 59.38 L; receituário com a mesma dose
+OK    C1 registro cancelado (Paraquate 200 SL, VIS-017 soja × daninhas) com dose da bula: trava "Registro cancelado: uso proibido."
+OK    C2 produto sem registro para feijão × mosca-branca (2,4-D 806) na VIS-013: trava "Sem registro para …" e mipEmitir recusa
+RESULTADO 10/11
+rc=1

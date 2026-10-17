@@ -1,0 +1,60 @@
+--- a/tools/prototipo/v37/gen37/mip_fluxo_test.py
++++ b/tools/prototipo/v37/gen37/mip_fluxo_test.py
+@@ -65,11 +65,13 @@
+         nomes==['Ciantraniliprole 100 OD','Acaricida D','Inseticida B','Piriproxifem 100 EC'] and any('Inseticida B' in x and 'Rotação' in x for x in chips), [nomes,chips])
+     # 7 · trava de carência × colheita (10/10) com a data de aplicação
+     J("[...document.querySelectorAll('aside input[name=dc_prod]')][1].click()"); time.sleep(.3)
++    setv('aside #dc_dose','0,4')   # AGRO-02: produto e dose são escolha explícita do RT (o formulário não preenche a dose)
+     setv('aside input[aria-label="Data da aplicação"]','2026-09-28'); a=aside(); dis=J("[...document.querySelectorAll('aside button')].find(b=>b.innerText.trim()==='Emitir receituário e gerar O.S.').disabled")
+     chk('7 Acaricida D aplicado em 28/09: trava "carência de 14 dias passa da colheita prevista (10/10): aplicar até 26/09" e o botão fica bloqueado',
+         'Carência de 14 dias passa da colheita prevista (10/10): aplicar até 26/09.' in a and dis is True, [a[a.find('Carência'):a.find('Carência')+160],dis])
+     # 8 · emitir: receituário RA + O.S. em A liberar
+     setv('aside input[aria-label="Data da aplicação"]','2026-09-24'); J("[...document.querySelectorAll('aside input[name=dc_prod]')][0].click()"); time.sleep(.3)
++    setv('aside #dc_dose','0,5')   # AGRO-02: trocar de produto limpa a dose; o RT digita a do novo produto
+     clk('Emitir receituário e gerar O.S.','aside'); t1=T(); a=aside()
+     chk('8 Emitir: receituário RA-0142 (DIA-009 · REC-015) e OS-0440 em A liberar · painel "Em controle" com "Abrir OS-0440"',
+         'Receituário RA-0142 emitido (DIA-009 · REC-015) · OS-0440 em A liberar' in t1 and 'Em controle' in a and 'OS-0440 · A liberar' in a
+--- a/tools/prototipo/v37/gen37/mip_correcoes_test.py
++++ b/tools/prototipo/v37/gen37/mip_correcoes_test.py
+@@ -81,10 +81,12 @@
+     if 'b' in PARTE:
+         # 8 · O.S. cancelada sem execução: não conta no nº máximo nem na rotação; nova decisão reaproveita o DIA-009; clique duplo sem erro
+         ir('AG-01.dc.html#VIS-013:decidir'); J("[...document.querySelectorAll('aside input[name=dc_prod]')][2].click()"); time.sleep(.3)
++        setv('aside #dc_dose','1')   # AGRO-02: dose digitada pelo RT (Inseticida B, 1,0 kg/ha)
+         clk('Emitir receituário e gerar O.S.','aside'); t0=T()
+         # cancelamento sem execução feito na tela O.S. (o núcleo da O.S. é de outra trilha): grava a etapa no cenário e volta ao AG-01 vindo da O.S.
+         J("(()=>{const c=JSON.parse(localStorage.getItem('talhao-os-cenario-v1')); c.ordens['OS-0440'].etapa='Canceladas'; localStorage.setItem('talhao-os-cenario-v1',JSON.stringify(c));})()")
+         ir('OS.dc.html#OS-0440'); ir('AG-01.dc.html#VIS-013'); a=aside(); clk('Decidir controle','aside'); J("[...document.querySelectorAll('aside input[name=dc_prod]')][2].click()"); time.sleep(.3)
++        setv('aside #dc_dose','1')   # AGRO-02: a nova decisão também começa sem dose
+         a2=aside(); dis=J("[...document.querySelectorAll('aside button')].find(b=>b.innerText.trim()==='Emitir receituário e gerar O.S.').disabled")
+         J("window.__errs=[]; window.addEventListener('error',e=>window.__errs.push(String(e.message)));")
+         J("(()=>{const b=[...document.querySelectorAll('aside button')].find(b=>b.innerText.trim()==='Emitir receituário e gerar O.S.'); b.click(); b.click();})()"); time.sleep(.6)
+--- a/tools/prototipo/v37/gen37/quantidade_test.py
++++ b/tools/prototipo/v37/gen37/quantidade_test.py
+@@ -71,10 +71,13 @@
+ const R={mip:[],fert:[],area:[]};
+ const s0=mipGet(); const maior=a=>a.tr.filter(x=>/Área maior/.test(x));
+ // formulário "Decidir controle" (agDecIni real do AG-01), em toda vistoria da Lagoa: o que ele preenche passa nas checagens de área
++// AGRO-02: o formulário abre sem produto nem dose (vazio); para a checagem de área chegar ao fim, o teste escolhe explicitamente
++// o 1º registrado não cancelado e digita a dose mínima da bula, como o RT faria
+ if(typeof agDecIni==='function') for(const v of Object.values(s0.vis).filter(v=>/^PV/.test(v.tal))){ const t=mipT(v); let st=null;
+   agDecIni({state:{},setState:x=>{ st=x; }},v.id); const d=st.dec;
+-  const ck=(ar)=>mipChecks(mipGet(),v,{kind:d.kind,prod:d.prod,dose:d.dose,area:ar,data:d.data},cenGet());
+-  R.area.push({vis:v.id,kind:d.kind,form:d.area,trava:maior(ck(d.area)),antes:d.kind==='controlar'&&maior(ck(mipN(t.area,1))).length>0}); }
++  const u=(d.kind==='controlar'||d.kind==='localizado')?mipElig(v).find(x=>x.sit!=='Cancelado'):null;
++  const ck=(ar)=>mipChecks(mipGet(),v,{kind:d.kind,prod:u?u.id:'',dose:u?String(u.dmin):'',area:ar,data:d.data},cenGet());
++  R.area.push({vis:v.id,kind:d.kind,form:d.area,vazio:d.prod===''&&d.dose==='',trava:maior(ck(d.area)),antes:d.kind==='controlar'&&maior(ck(mipN(t.area,1))).length>0}); }
+ // emissão pelo MIP: área do talhão e a maior área em que 3 casas ficariam ABAIXO da regra única (o caso que recusava o apontamento)
+ const tres=(dose,ar)=>Math.round(dose*ar*1000)/1000;
+ const sobe=(dose,max)=>{ for(let k=0;k<400;k++){ const ar=Math.round(max*100-k)/100; if(ar<=0) break; if(tres(dose,ar)<cenQtd(dose,ar)) return ar; } return null; };
+@@ -188,8 +191,8 @@
+     [x for x in fa if not ok(x)][:4] or [x for x in pc if not okp(x)][:4] or [x['msg'][-90:] for x in fa][:2])
+ ar = F['area']
+ na = sum(1 for x in ar if x['antes'])
+-chk(f'9 "Decidir controle" (agDecIni em {len(ar)} vistorias da Lagoa): a área que o formulário preenche nunca passa do talhão '
+-    f'(com 1 casa, {na} travariam)', len(ar) >= 8 and na >= 1 and not any(x['trava'] for x in ar), [x for x in ar if x['trava']])
++chk(f'9 "Decidir controle" (agDecIni em {len(ar)} vistorias da Lagoa): abre sem produto nem dose e a área que o formulário preenche nunca passa do talhão '
++    f'(com 1 casa, {na} travariam)', len(ar) >= 8 and na >= 1 and all(x['vazio'] for x in ar) and not any(x['trava'] for x in ar), [x for x in ar if x['trava'] or not x['vazio']])
+ # 10 · varredura de todo o gen37 (JS e JS embutido nos .py, sem testes): produto dose × área fora da regra única. Exceções nomeadas, que não
+ #      são quantidade de custódia: custo (dose × preço), carga do tanque e demanda do planejamento (CAL-01, exata por desenho).
+ import glob

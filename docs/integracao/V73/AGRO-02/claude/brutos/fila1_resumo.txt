@@ -1,0 +1,8 @@
+03:10:51 rc=1 18s base_sonda :: 
+03:23:01 rc=1 60s cand_mip_correcoes :: 
+03:36:49 rc=0 52s base_mip_correcoes_b :: RESULTADO 7/7
+03:37:42 rc=0 53s cand_agtest :: RESULTADO 16/16
+03:38:24 rc=0 42s cand_agrofit :: RESULTADO: 18/18 ok · 41 s []
+03:39:03 rc=0 39s cand_agrofit_faixa :: RESULTADO: 17/17 ok []
+03:45:39 rc=0 396s cand_paginas_scan :: RESULTADO: 5 ok · 0 falhas (148 páginas)
+FIM

@@ -1,0 +1,13 @@
+FALHOU HEAD: produto escolhido com dose '' não mostra "Conferido" · {"dose": "", "selo": "Conferido", "cor": "background:#E4F3E9", "bloq": true, "tr": ["Informe a dose."]}
+FALHOU HEAD: produto escolhido com dose '0' não mostra "Conferido" · {"dose": "0", "selo": "Conferido", "cor": "background:#E4F3E9", "bloq": true, "tr": ["Informe a dose."]}
+FALHOU HEAD: produto escolhido com dose '0,' não mostra "Conferido" · {"dose": "0,", "selo": "Conferido", "cor": "background:#E4F3E9", "bloq": true, "tr": ["Informe a dose."]}
+FALHOU HEAD: produto escolhido com dose 'abc' não mostra "Conferido" · {"dose": "abc", "selo": "Conferido", "cor": "background:#E4F3E9", "bloq": true, "tr": ["Informe a dose."]}
+OK    HEAD: dose válida 0,625 mantém o selo da conferência · {"dose": "0,625", "selo": "Sem estoque", "cor": "background:#FFF3D6", "bloq": false, "tr": []}
+  sem escolha: ['Ciantraniliprole 100 OD: Sem estoque', 'Acaricida D: Sem estoque', 'Inseticida B: Rotação · Sem estoque', 'Piriproxifem 100 EC: Sem estoque']
+OK    correção proposta: dose '' → selo neutro "Informe a dose" e emissão bloqueada · {"dose": "", "selo": "Informe a dose", "cor": "background:#EEF1EE", "bloq": true, "tr": ["Informe a dose."]}
+OK    correção proposta: dose '0' → selo neutro "Informe a dose" e emissão bloqueada · {"dose": "0", "selo": "Informe a dose", "cor": "background:#EEF1EE", "bloq": true, "tr": ["Informe a dose."]}
+OK    correção proposta: dose '0,' → selo neutro "Informe a dose" e emissão bloqueada · {"dose": "0,", "selo": "Informe a dose", "cor": "background:#EEF1EE", "bloq": true, "tr": ["Informe a dose."]}
+OK    correção proposta: dose 'abc' → selo neutro "Informe a dose" e emissão bloqueada · {"dose": "abc", "selo": "Informe a dose", "cor": "background:#EEF1EE", "bloq": true, "tr": ["Informe a dose."]}
+OK    correção proposta: dose válida 0,625 → mesmo selo do HEAD (Sem estoque) · [{"dose": "0,625", "selo": "Sem estoque", "cor": "background:#FFF3D6", "bloq": false, "tr": []}, {"dose": "0,625", "selo": "Sem estoque", "cor": "background:#FFF3D6", "bloq": false, "tr": []}]
+OK    correção proposta: sem escolha, os selos de prévia não mudam · [{"dose": "(nenhum escolhido)", "selos": ["Ciantraniliprole 100 OD: Sem estoque", "Acaricida D: Sem estoque", "Inseticida B: Rotação · Sem estoque", "Piriproxifem 100 EC: Sem estoque"]}, {"dose": "(nenhum escolhido)", "selos": ["Ciantraniliprole 100 OD: Sem estoque", "Acaricida D: Sem estoque", "Inseticida B: Rotação · Sem estoque", "Piriproxifem 100 EC: Sem estoque"]}]
+RESULTADO 7/11

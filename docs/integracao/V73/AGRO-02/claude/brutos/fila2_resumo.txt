@@ -1,0 +1,9 @@
+03:51:14 rc=1 52s cand_sonda :: RESULTADO 28/32
+03:54:40 rc=1 30s base_sonda :: RESULTADO 2/12
+patch aplicado:  3 files changed, 11 insertions(+), 4 deletions(-)
+04:05:30 rc=0 56s cand_patch_mip_fluxo :: RESULTADO 15/15
+04:06:55 rc=0 85s cand_patch_mip_correcoes :: RESULTADO 14/14
+patch revertido: 0 arquivos versionados alterados
+04:07:51 rc=0 56s base_patch_mip_fluxo :: RESULTADO 15/15
+04:08:43 rc=0 52s base_patch_mip_correcoes_b :: RESULTADO 7/7
+FIM

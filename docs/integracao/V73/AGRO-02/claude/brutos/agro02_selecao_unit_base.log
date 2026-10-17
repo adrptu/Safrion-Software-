@@ -1,0 +1,27 @@
+FAIL open requires explicit product and dose eligible: Expected values to be strictly equal:
+
+'a' !== ''
+
+PASS open requires explicit product and dose empty
+FAIL first selection stays blank: Expected values to be strictly equal:
+
+'0.3' !== ''
+
+FAIL changing product clears typed comma dose: Expected values to be strictly equal:
+
+'0.3' !== ''
+
+FAIL same product preserves typed comma dose: Expected values to be strictly equal:
+
+'0.3' !== '0,7'
+
+FAIL same product preserves explicit zero for validation: Expected values to be strictly equal:
+
+'0.3' !== '0'
+
+FAIL same product preserves incomplete draft: Expected values to be strictly equal:
+
+'0.3' !== '0,'
+
+1 passed; 6 failed
+rc=1

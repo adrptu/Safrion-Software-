@@ -1,0 +1,16 @@
+OK    1 AG-01 "Pragas e doenças" (Santa Rita): selo "1 acima do NC sem decisão", VIS-013 primeiro com "Decidir controle", primário único "Programar vistoria" 
+OK    2 Fazenda Lagoa Grande: VIS-051…060 no AG-01 (10), VIS-051 em controle pela OS-0504 
+OK    3 AG-01.dc.html#VIS-053 abre o painel da meleira (Pivô 9) e troca a fazenda para Lagoa Grande · próximo passo "Confirmar foco" 
+OK    4 Mapa P1: "Mosca-branca · acima do NC" (+2: VIS-014 em coleta e VIS-006 atrasada, iguais ao AG-01) · primário "Decidir controle" abre a decisão da VIS-013 
+OK    5 Mapa T7 "Seguir monitorando" (botão, não link) registra na VIS-008 e programa VIS-018 (ácaro-rajado), que persiste e aparece no AG-01 como Programada · "Coletar no app" 
+OK    6 Decidir controle (VIS-013): só os 4 registrados para feijão × mosca-branca · Inseticida B com alerta de rotação (IRAC 1B) 
+OK    7 Acaricida D aplicado em 28/09: trava "carência de 14 dias passa da colheita prevista (10/10): aplicar até 26/09" e o botão fica bloqueado 
+FALHA 8 Emitir: receituário RA-0142 (DIA-009 · REC-015) e OS-0440 em A liberar · painel "Em controle" com "Abrir OS-0440" ['', 'VIS-013 · Mosca-branca · P1\n×\nAcima do NC\nSanta Rita · P1 · Feijão R5 · 95 ha · coleta de 18/09/2026 · Marcos · MIP Feijão v2\nColeta\nResultado\nDecisão\nControle\nAvaliação\nPRÓXIMO PASSO\nMédia 5,1 / 4 adultos/folíolo · 128 % do NC. Escolha um produto registrado e emita o receituário: a O.S. nasce em A ']
+Traceback (most recent call last):
+  File "/tmp/claude-0/rev94/tools/prototipo/v37/gen37/mip_fluxo_test.py", line 78, in <module>
+    ir_hash('OS.dc.html#OS-0440'); a=aside(); org=J("(JSON.parse(localStorage.getItem('talhao-os-cenario-v1')).ordens['OS-0440'].osc.novo.orig||[]).join(' · ')") or ''
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/rev94/tools/prototipo/v37/gen37/cdp.py", line 101, in js
+    if 'exceptionDetails' in r: raise RuntimeError(r['exceptionDetails'].get('text','js'))
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Uncaught

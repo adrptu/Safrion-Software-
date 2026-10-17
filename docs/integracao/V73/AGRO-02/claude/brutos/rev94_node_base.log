@@ -1,0 +1,12 @@
+OK    A quantidade_test 9 isolado: agDecIni em 10 vistorias da Lagoa; 5 travariam com 1 casa (contraprova precisa de ≥ 1); nenhuma trava de área no formulário
+FALHOU A2 verificação 9 com o ajuste proposto: abre vazio em 2/10; 5 travariam com 1 casa; nenhuma trava de área no formulário · [{"vis": "VIS-051", "kind": "controlar", "form": "62,79", "vazio": false, "trava": [], "antes": true}, {"vis": "VIS-052", "kind": "controlar", "form": "63,99", "vazio": false, "trava": [], "antes": true}, {"vis": "VIS-053", "kind": "erradicar", "form": "1", "vazio": true, "trava": [], "antes": false}, {"vis": "VIS-054", "kind": "controlar", "form": "37,75", "vazio": false, "trava": [], "antes": true}, {"vis": "VIS-055", "kind": "erradicar", "form": "1", "vazio": true, "trava": [], "antes": false}, {"vis": "VIS-056", "kind": "controlar", "form": "48,93", "vazio": false, "trava": [], "antes": fa
+OK    B guarda mipEmitir (sem produto: prod='', dose='') recusa com "Escolha um produto registrado." e não cria O.S.
+OK    B guarda mipEmitir (sem dose: prod='ciantraniliprole-100-od', dose='') recusa com "Informe a dose." e não cria O.S.
+OK    B guarda mipEmitir (dose 0: prod='ciantraniliprole-100-od', dose='0') recusa com "Informe a dose." e não cria O.S.
+OK    B guarda mipEmitir (rascunho 0,: prod='ciantraniliprole-100-od', dose='0,') recusa com "Informe a dose." e não cria O.S.
+OK    B guarda mipEmitir (texto: prod='ciantraniliprole-100-od', dose='abc') recusa com "Informe a dose." e não cria O.S.
+OK    B guarda mipEmitir (fora da bula: prod='ciantraniliprole-100-od', dose='2,25') recusa com "Dose fora da bula: 0,5–0,75 L/ha." e não cria O.S.
+OK    B emissão com dose explícita 0,625 L/ha × 95 ha: O.S. OS-0440 em A liberar com essa dose (mínima 0.5) e total 59.38 L; receituário com a mesma dose
+OK    C1 registro cancelado (Paraquate 200 SL, VIS-017 soja × daninhas) com dose da bula: trava "Registro cancelado: uso proibido."
+OK    C2 produto sem registro para feijão × mosca-branca (2,4-D 806) na VIS-013: trava "Sem registro para …" e mipEmitir recusa
+RESULTADO 10/11

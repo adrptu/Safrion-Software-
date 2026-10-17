@@ -1,0 +1,33 @@
+OK    1440 S1 abertura: 4 produtos, nenhum marcado, dose vazia, Emitir desligado com "Escolha um produto registrado." à vista
+OK    1440 S1a leitor de tela: 4 rádios com o nome do produto e checked=false; botão Emitir disabled com a descrição do motivo
+OK    1440 S2 escolher Ciantraniliprole 100 OD: marcado, dose vazia (não 0,5), rótulo "Dose (L/ha)", Emitir desligado com "Informe a dose."
+FALHA 1440 S2a o selo do produto escolhido sem dose não diz "Conferido" · "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Conferido Ficha ›"
+OK    1440 S9 emitir sem dose: clique no botão não grava OS-0440; "Informe a dose." à vista; botão desligado (title "")
+OK    1440 S3 dose 0,625 L/ha × 95 ha = 59,38 L na mensagem de estoque; sem trava de dose
+OK    1440 S4 trocar para Acaricida D: dose digitada (0,625) some, rótulo "Dose (L/ha)", Emitir desligado
+OK    1440 S5 reclicar Acaricida D e Espaço no rádio marcado: dose 0,5 preservada
+OK    1440 S5b voltar a Ciantraniliprole 100 OD: dose vazia (nem 0,5 do Acaricida D nem 0,625 digitada antes)
+OK    1440 S7 dose 2,25 fora da bula trava ("Dose fora da bula") e 0 trava ("Informe a dose."); Emitir desligado nos dois
+FALHA 1440 S7a o selo do produto escolhido com dose 0 não diz "Conferido" · "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Conferido Ficha ›"
+OK    1440 S8 Acaricida D em 28/09: trava de carência × colheita à vista, selo vermelho e Emitir desligado com dose válida
+OK    1440 S10 Esc fecha a decisão e "Decidir controle" reabre sem produto nem dose; foco em pan_x
+OK    1440 S11 Tab: foco preso no diálogo e o 1º produto é alcançado no Tab nº 4 (a partir de "Fechar")
+OK    1440 S11a seta para baixo no grupo marca Acaricida D com dose vazia
+OK    1440 S12 emitir Ciantraniliprole 100 OD 0,625 L/ha × 95 ha: O.S. em A liberar com dose 0,625 (não a mínima 0,5) e total 59,38 L
+OK    390 S1 abertura: 4 produtos, nenhum marcado, dose vazia, Emitir desligado com "Escolha um produto registrado." à vista
+OK    390 S1a leitor de tela: 4 rádios com o nome do produto e checked=false; botão Emitir disabled com a descrição do motivo
+OK    390 S2 escolher Ciantraniliprole 100 OD: marcado, dose vazia (não 0,5), rótulo "Dose (L/ha)", Emitir desligado com "Informe a dose."
+FALHA 390 S2a o selo do produto escolhido sem dose não diz "Conferido" · "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Conferido Ficha ›"
+OK    390 S9 emitir sem dose: clique no botão não grava OS-0440; "Informe a dose." à vista; botão desligado (title "Resolva a trava acima para continuar")
+OK    390 S3 dose 0,625 L/ha × 95 ha = 59,38 L na mensagem de estoque; sem trava de dose
+OK    390 S4 trocar para Acaricida D: dose digitada (0,625) some, rótulo "Dose (L/ha)", Emitir desligado
+OK    390 S5 reclicar Acaricida D: dose 0,5 preservada
+OK    390 S5b voltar a Ciantraniliprole 100 OD: dose vazia (nem 0,5 do Acaricida D nem 0,625 digitada antes)
+OK    390 S7 dose 2,25 fora da bula trava ("Dose fora da bula") e 0 trava ("Informe a dose."); Emitir desligado nos dois
+FALHA 390 S7a o selo do produto escolhido com dose 0 não diz "Conferido" · "Ciantraniliprole 100 OD IRAC 28 · 0,50–0,75 L/ha · carência 7 dias · máx. 2 por ciclo Conferido Ficha ›"
+OK    390 S8 Acaricida D em 28/09: trava de carência × colheita à vista, selo vermelho e Emitir desligado com dose válida
+OK    390 S10 Cancelar fecha a decisão e "Decidir controle" reabre sem produto nem dose; foco em pan_x
+OK    390 S12 emitir Ciantraniliprole 100 OD 0,625 L/ha × 95 ha: O.S. em A liberar com dose 0,625 (não a mínima 0,5) e total 59,38 L
+OK    390 L1 sem rolagem horizontal na página nem no painel [390, 390, 390, 390]
+OK    390 L2 linha do produto (rótulo inteiro é alvo) com ≥ 44 px de altura: [134, 118, 264, 118]
+RESULTADO 28/32
