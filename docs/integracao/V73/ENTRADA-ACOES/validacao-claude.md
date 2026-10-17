@@ -312,7 +312,8 @@ Duas correções do motor também são da onda 1, mesmo não sendo componente: o
 ## 4. Riscos de quebrar decisão fixa
 
 1. **Aprovação agronômica individual** (DEC-1610-03, EX-32):
-   - Já quebrada em tela alcançável: PL-04 "Liberar prontas" (AGRO-01) e CA-01 "Liberar selecionadas" (OS-05). O IN-02 mistura alçadas no lote (OS-32).
+   - ~~Já quebrada em tela alcançável: PL-04 "Liberar prontas" (AGRO-01) e CA-01 "Liberar selecionadas" (OS-05).~~ → Δ 17/10-1: **errado**. Não há aprovação em lote nessas telas. As duas são mensagens fixas, sem operação (`msgbtn`/`imsg`), e liberar não é aprovar (CMD-06 ≠ CMD-42; DEC-1610-03 trata da aprovação). O O.S. em lote real (`cenGrupoLiberar`) revalida cada origem pelo `osc_liberar`, que exige a aprovação da versão. Ver §Δ.
+   - O IN-02 mistura alçadas no lote (OS-32).
    - A barra de lote genérica repetiria o erro se não tiver o contrato por ação (§3).
    - Contraprova: um teste que reprova a base (lote com O.S. com produto) e passa na candidata.
 2. **Último valor e medição real:**
@@ -334,7 +335,7 @@ Duas correções do motor também são da onda 1, mesmo não sendo componente: o
 ## 5. Três listas
 
 **Aplicar**
-- **Onda 0 (13 achados, todos P):** fecha as violações de decisão fixa e os atos sem fricção (AGRO-01, OS-05, OS-32, SUP-08, GES-19, POS-34, POS-22, AGRO-29, GES-07, POS-21, POS-24, POS-25, SUP-33).
+- **Onda 0 (11 achados, todos P; Δ 17/10-1 tirou AGRO-01 e OS-05, que passam à onda 1 como "sucesso sem operação"):** fecha as violações de decisão fixa e os atos sem fricção (OS-32, SUP-08, GES-19, POS-34, POS-22, AGRO-29, GES-07, POS-21, POS-24, POS-25, SUP-33).
 - **Componentes da onda 1 e cinco correções do motor** (⋯ sem `del`, opção vazia, lista declarada, motivo do estado, data com atalhos), cada um numa peça comum. Atendem os 28 achados da onda 1 e tiram a causa de vários médios.
 - **Fechar as portas dos fundos** antes de polir: 28 achados viram consolidação, e cai a divergência de números entre telas (EX-01).
 - **RESOLVE-1-CLIQUE como dona dos 18 achados de falta de material:** uma fonte de disponibilidade (`supCobertura`) antes de qualquer botão de 1 clique.
@@ -393,3 +394,30 @@ Duas correções do motor também são da onda 1, mesmo não sendo componente: o
 
 - `<site70>` é o render somente leitura da varredura; `<gen37>` é `tools/prototipo/v37/gen37` desta worktree. O `-B` evita gravar bytecode na pasta do gerador. O anexo vem de `git show 529adf7:docs/integracao/V73/pedidos-1610/entrada-acoes-revisao-anexo-achados.md`.
 - O robô não foi rodado (P1). As primeiras execuções, sem `-B`, criaram `__pycache__` na pasta do gerador; apaguei e rodei de novo com `-B`, com as mesmas saídas. Nada foi gravado no render nem versionado fora de `docs/integracao/V73/ENTRADA-ACOES/`.
+
+## Δ 17/10-1: AGRO-01 e OS-05 não quebram a aprovação individual
+
+O gatilho foi o comentário 6228421250 do Codex no PR #47, que eu li depois de entregar a validação. A conferência abaixo é minha, no código de `f3ceb3c`.
+
+**Por que a classificação anterior estava errada.**
+- `areas/planejamento.py:440`, "Liberar prontas" (PL-04): é `msgbtn`. Mostra uma mensagem fixa ("… liberada por Ana …") e não chama o motor.
+- `areas/campo.py:196`, "Liberar selecionadas" (CA-01): é `imsg`. Mostra um resultado fixo por item e também não chama o motor.
+- A liberação real em lote é o `cenGrupoLiberar` (`areas/processo_os.py:444`):
+  - passa origem por origem pelo `osc_liberar` (`:432`), que exige a aprovação da versão (`osLibPor`);
+  - só dispensa a aprovação na irrigação só com água (DEC-2609-10);
+  - exige a AL-01 ("Liberar selecionadas").
+- A DEC-1610-03 trata da **aprovação**, que é individual: "Mantida a aprovação agronômica individual de cada O.S.". A liberação é outro comando: CMD-06 ≠ CMD-42 (PRD 41.2/41.3, blob `f50555e`).
+- Conclusão: liberar várias O.S., cada uma já aprovada e revalidada uma por uma, não quebra a decisão.
+
+**A nova classificação.**
+- AGRO-01 e OS-05 passam a "sucesso sem operação comprovada": a tela afirma um resultado que o motor não produziu.
+- Severidade S3: a mensagem engana, mas existe o caminho real pela O.S.
+- Prioridade P, onda 1, junto com o contrato do lote.
+- A correção mínima é escolher um dos dois:
+  - a ação chama o domínio real e mostra o estado de cada linha;
+  - ou a ação vira prévia, sem afirmar sucesso.
+- Não se remove a liberação em lote.
+
+**Contraprova proposta, ainda não executada:** um teste que clica em "Liberar prontas" e confere que o estado da O.S. no motor não mudou. Ele precisa reprovar a base, onde a mensagem diz "liberada" e o estado não muda.
+
+**Efeito no resto da validação:** os demais itens da onda 0 continuam. O total de confirmados (167) também não muda: os dois achados continuam confirmados, só mudam de classe.
