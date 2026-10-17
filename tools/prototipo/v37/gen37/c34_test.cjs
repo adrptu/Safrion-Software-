@@ -25,3 +25,11 @@ test('EST seleciona linha exata e recusa PC multi-item sem linha',()=>{const x=s
 });
 test('quarentena de origem desconhecida não é atribuída à linha',()=>{const x=setup();x.ctx.c=recs();x.ctx.c.lotes['A|L'].quarentena=100;x.ctx.p={id:'PC-X',item:'A',un:'kg',qtd:100};assert.equal(x.run('cenCompSaldo(c,p).quar'),null);});
 console.log('TOTAL FINAL '+n+' PASS');
+test('emitir real só confirma compra após recibo; falha mantém formulário e retry',()=>{const x=setup();const ui=fs.readFileSync(__dirname+'/areas/processo_compras.py','utf8');x.ctx.solDe=()=>({key:'v1',sol:{id:'SOL'}});x.ctx.estadoCompra=(self)=>({t:self.state.aprov?'Pedidos emitidos':'A cotar'});x.ctx.cmpPerfil=()=>({nome:'Ana'});x.ctx.M=()=>({});x.ctx.CD={hojeIso:'2026-10-17'};x.ctx.addd=()=> '2026-10-20';x.ctx.pcIds=()=> 'PC-X';
+ vm.runInContext("let SX={safra:'S',nome:'Safra',sol:{id:'SOL'},key:'v1'};"+ui.slice(ui.indexOf('const PROC='),ui.indexOf('function trocaSafra'))+ui.slice(ui.indexOf('function emitir('),ui.indexOf('function podeAprovar')),x.ctx);
+ const shown=[];x.ctx.self={state:{saf:'S',conf5:true,esc:{I_1:{ped:100}}},setState(p){if(p.aprov)assert(x.data.has(key),'aprovação antes da gravação');shown.push(p);Object.assign(this.state,p);}};
+ x.ctx.m={total:100,sig:'sig',pcs:[{id:'PC-X',nome:'F',prazo:3,itens:[{i:1,nome:'A',un:'kg',ped:100}]}]};x.quota(true);x.run("emitir(self,m,'Ana')");assert(!x.ctx.self.state.aprov);assert(x.ctx.self.state.conf5);assert.equal(x.ctx.self.state.esc.I_1.ped,100);const k=x.ctx.self._procWrite.S.chave;
+ // PREVALS pode passar pelo rascunho antigo entre tentativas; a chave do comando original não é perdida.
+ x.run('procGravar(self,{})');x.quota(false);x.run("emitir(self,m,'Ana')");assert.equal(x.ctx.self._procWrite.S.chave,k);assert.equal(x.ctx.self.state.aprov.estado,'aprovada');assert.equal(shown.filter(p=>p.aprov).length,1);
+});
+console.log('TOTAL COM CONFIRMACAO '+n+' PASS');

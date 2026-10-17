@@ -312,15 +312,22 @@ function calDe(d){ return cal01(d.est+(Number(d.cust)||0)+(Number(d.quarC)||0),d
 // O andamento também fica no registro compartilhado (talhao-os-compras-v1 · proc[safra]), ligado à versão da solicitação: recarregar ou ir
 // à origem e voltar não perde a compra, e o Planejar safra mostra o estado.
 const PROC=['env','nresp','conv','esc','aprov','pcx','dec5']; const PROC_REG=['env','nresp','conv','esc','aprov','pcx'];
-function procLer(id){ const x=solDe(id); if(!x)return null; const r=cenCompLer(id); procLer.erro=r.erro||''; const p=r.proc;
+function procLer(id){const r=cenCompLer(id);procLer.erro=r.erro||'';const x=solDe(id);if(!x)return null;const p=r.proc;
   return (p&&p.key===x.key&&p.sol===x.sol.id)?p:null; }
-function procGravar(self,m){ const st=self.state,id=st.saf;if(!id||!SX||SX.safra!==id)return;
+function procGravar(self,m){ const st=self.state,id=st.saf;const leitura=cenCompLer(id);if(leitura.erro){if(st.g2toast!==leitura.erro)self.setState({g2toast:leitura.erro});return leitura;}if(!id||!SX||SX.safra!==id)return;
   const snap={sol:SX.sol.id,key:SX.key,comp:SX.comp||0};PROC_REG.forEach(k=>{snap[k]=st[k]===undefined?null:st[k];});snap.estado=estadoCompra(self,m,id).t;
   const js=JSON.stringify(snap),memo=self._procJs||(self._procJs={});if(memo[id]===js)return;
-  const pend=self._procWrite||(self._procWrite={});if(!pend[id]||pend[id].js!==js)pend[id]={js,chave:'CMP-'+id+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)};
+  const pend=self._procWrite||(self._procWrite={});const keys=self._procKeys||(self._procKeys={});const k=id+'\n'+js; if(!keys[k])keys[k]='CMP-'+id+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);pend[id]={js,chave:keys[k]};
   const r=cenCompGravar(id,snap,pend[id].chave,cmpPerfil().nome);
   if(r.erro){const msg='Compra não gravada: '+r.erro+' O rascunho foi mantido; repita após corrigir.';if(st.g2toast!==msg)self.setState({g2toast:msg});return r;}
   memo[id]=js;return r; }
+// Confirmações só aparecem depois do recibo; o formulário original fica intacto na falha.
+function procAplicar(self,patch){
+  const tmp=Object.create(self);tmp.state=Object.assign({},self.state,patch);let aviso={};tmp.setState=p=>{aviso=p;};
+  tmp._procJs=self._procJs||(self._procJs={});tmp._procWrite=self._procWrite||(self._procWrite={});tmp._procKeys=self._procKeys||(self._procKeys={});
+  const r=procGravar(tmp,M(tmp));if(r&&r.erro){self.setState(aviso);return false;}
+  self.setState(patch);return true;
+}
 function trocaSafra(self,id,extra){ const st=self.state; const patch={saf:id,conf5:false};
   if(st.saf!==id){ const bag=Object.assign({},st.porSaf||{}); if(st.saf){ const cur={}; PROC.forEach(k=>{ cur[k]=st[k]; }); bag[st.saf]=cur; }
     const salvo=procLer(id); const nx=bag[id]||salvo||{}; if(procLer.erro)patch.g2toast=procLer.erro; PROC.forEach(k=>{ patch[k]=(nx[k]===undefined?null:nx[k]); }); if(!patch.nresp) patch.nresp=0; patch.porSaf=bag; }
@@ -342,7 +349,7 @@ function faltaDe(st,nome,excl,src){ const d=(src||(SX?SX.dem:[])).find(x=>x.nome
 // respostas simuladas chegando uma a uma (um único relógio por tela)
 function tickResp(self){ if(self._tk) return; self._tk=true;
   const tick=()=>{ const s=self.state; if(!s.env){ self._tk=false; return; } const n=(s.nresp||0)+1; if(n>s.env.ordem.length){ self._tk=false; return; } const done=(n===s.env.ordem.length);
-    self.setState(Object.assign({nresp:n},done?{g2toast:'Respostas simuladas: '+n+' propostas recebidas de '+s.env.n+' convites.'}:{})); if(done) self._tk=false; else setTimeout(tick,320); };
+    if(!procAplicar(self,Object.assign({nresp:n},done?{g2toast:'Respostas simuladas: '+n+' propostas recebidas de '+s.env.n+' convites.'}:{}))){self._tk=false;return;} if(done) self._tk=false; else setTimeout(tick,320); };
   setTimeout(tick,700); }
 // grava a edição da linha no estado do processo e devolve a grade às linhas calculadas
 function keep(self,gid,rid,patch){ const all=Object.assign({},self.state.g2||{}); all[gid]=Object.assign({},all[gid]||{},{rows:undefined,fm:null,fl:rid}); patch.g2=all; self.setState(patch); }
@@ -550,8 +557,8 @@ function enviar(self){ const st=self.state; if(st.env){ toast(self,'Convites já
   const fila=m.G.map(g=>inv.filter(c=>c.g===g&&c.temProp).map(c=>c.rid)); const ordem=[];
   for(let k=0;fila.some(l=>l.length);k++){ fila.forEach(l=>{ if(l.length) ordem.push(l.shift()); }); }
   const horas=ordem.map((x,ix)=>{ const mm=10*60+52+ix*9; return '23/09 '+String(Math.floor(mm/60)).padStart(2,'0')+':'+String(mm%60).padStart(2,'0'); });
-  self.setState({env:{em:'23/09/2026 10:47',n:inv.length,conv:inv.map(c=>c.rid),ordem,horas},nresp:0,
-    g2toast:'Convites simulados: nenhuma mensagem real foi enviada · '+inv.length+' convites em '+(m.G.length-m.semForn.length)+' grupos. Acompanhe as respostas chegando.'+fora});
+  if(!procAplicar(self,{env:{em:'23/09/2026 10:47',n:inv.length,conv:inv.map(c=>c.rid),ordem,horas},nresp:0,
+    g2toast:'Convites simulados: nenhuma mensagem real foi enviada · '+inv.length+' convites em '+(m.G.length-m.semForn.length)+' grupos. Acompanhe as respostas chegando.'+fora}))return;
   tickResp(self); }
 // convites adicionais depois do envio (antes da compra aprovada): só os novos; quem já recebeu não recebe de novo
 function enviarAdic(self){ const st=self.state; const env=st.env; if(!env) return;
@@ -564,14 +571,14 @@ function enviarAdic(self){ const st=self.state; const env=st.env; if(!env) retur
   const f2=(mm)=>String(Math.floor(mm/60)).padStart(2,'0')+':'+String(mm%60).padStart(2,'0');
   const base=Math.max(hm(env.horas[env.horas.length-1]),hm(env.em))+6; const em='23/09/2026 '+f2(base);
   const emx=Object.assign({},env.emx||{}); novos.forEach(c=>{ emx[c.rid]=em; });
-  self.setState({env:Object.assign({},env,{n:env.n+novos.length,conv:env.conv.concat(novos.map(c=>c.rid)),ordem:env.ordem.concat(add),
+  if(!procAplicar(self,{env:Object.assign({},env,{n:env.n+novos.length,conv:env.conv.concat(novos.map(c=>c.rid)),ordem:env.ordem.concat(add),
       horas:env.horas.concat(add.map((x,ix)=>'23/09 '+f2(base+5+ix*9))),emx,adic:(env.adic||0)+novos.length}),
-    g2toast:'Convites adicionais simulados: nenhuma mensagem real foi enviada · '+novos.length+' para '+[...new Set(novos.map(c=>c.f.nome))].join(', ')+'. Quem já recebeu não recebe de novo.'});
+    g2toast:'Convites adicionais simulados: nenhuma mensagem real foi enviada · '+novos.length+' para '+[...new Set(novos.map(c=>c.f.nome))].join(', ')+'. Quem já recebeu não recebe de novo.'}))return;
   tickResp(self); }
 function emitir(self,m,por){ const pcs=JSON.parse(JSON.stringify(m.pcs.map(p=>({id:p.id,f:p.f,nome:p.nome,valor:p.valor,prazo:p.prazo,pag:p.pag,prev:addd(CD.hojeIso,p.prazo),
     itens:p.itens.map(it=>({i:it.i,nome:it.nome,grupo:it.grupo,un:it.un,nec:it.nec,ped:it.ped,tot:it.tot,naoMenor:it.naoMenor,just:it.just,ch:it.ch,low:it.low,esc:it.esc,falta:it.falta}))}))));
-  self.setState({aprov:{estado:'aprovada',por,em:'23/09/2026',total:m.total,sig:m.sig,pcs},conf5:false,
-    g2toast:'Compra aprovada por '+por+' · emitidos '+pcIds(pcs)+' vinculados à '+SX.nome+', à '+SX.sol.id+' e às propostas escolhidas.'}); }
+  if(!procAplicar(self,{aprov:{estado:'aprovada',por,em:'23/09/2026',total:m.total,sig:m.sig,pcs},conf5:false,
+    g2toast:'Compra aprovada por '+por+' · emitidos '+pcIds(pcs)+' vinculados à '+SX.nome+', à '+SX.sol.id+' e às propostas escolhidas.'}))return; }
 function podeAprovar(self,m){ if(!m.pcs.length){ toast(self,'Nada a aprovar: escolha propostas com quantidade a pedir na etapa 4.'); return false; }
   if(m.njust){ toast(self,'Justifique '+m.njust+(m.njust>1?' escolhas que não são':' escolha que não é')+' a de menor custo que chega a tempo (etapa 4).'); return false; } return true; }
 function aprovar(self){ const st=self.state; const m=M(self); const apr=aprOf(st);
@@ -581,16 +588,16 @@ function aprovar(self){ const st=self.state; const m=M(self); const apr=aprOf(st
   const a=st.aprov; if(a&&a.estado==='pendente'&&a.sig===m.sig){ emitir(self,m,a.quem+' (simulado)'); return; }
   if(a&&a.estado==='devolvida'&&a.sig===m.sig){ toast(self,'Devolvida pela '+a.quem+': ajuste escolhas ou quantidades na etapa 4 antes de reenviar.'); return; }
   if(a&&a.estado==='recusada'&&a.sig===m.sig){ toast(self,'Recusada pela '+a.quem+': nada foi contratado. Para uma nova proposta de compra, altere escolhas ou quantidades na etapa 4.'); return; }
-  self.setState({aprov:{estado:'pendente',sig:m.sig,quem:m.quem,em:'23/09/2026 11:40',total:m.total},conf5:false,dec5:null,
-    g2toast:(a?'Reenviado':'Enviado')+' para aprovação da '+m.quem+' (simulado · nenhuma mensagem real enviada). Nada é aprovado até a '+m.quem+' decidir.'}); }
+  if(!procAplicar(self,{aprov:{estado:'pendente',sig:m.sig,quem:m.quem,em:'23/09/2026 11:40',total:m.total},conf5:false,dec5:null,
+    g2toast:(a?'Reenviado':'Enviado')+' para aprovação da '+m.quem+' (simulado · nenhuma mensagem real enviada). Nada é aprovado até a '+m.quem+' decidir.'}))return; }
 // devolução ou recusa registrada pela alçada (simulada), sempre com motivo; nenhuma das duas emite pedido
 function decidir(self){ const st=self.state; const d=st.dec5; const a=st.aprov; const m=M(self);
   if(!d||!a||a.estado!=='pendente'||a.sig!==m.sig){ self.setState({dec5:null}); return; }
   const mot=String(d.motivo||'').trim(); const dev=(d.tipo==='dev');
   if(!mot){ self.setState({dec5:Object.assign({},d,{err:'Informe o motivo da '+(dev?'devolução':'recusa')+'.'})}); return; }
-  self.setState({dec5:null,aprov:Object.assign({},a,{estado:dev?'devolvida':'recusada',motivo:mot,dec:'23/09/2026 14:10'}),
+  if(!procAplicar(self,{dec5:null,aprov:Object.assign({},a,{estado:dev?'devolvida':'recusada',motivo:mot,dec:'23/09/2026 14:10'}),
     g2toast:dev?('Devolução da '+a.quem+' registrada (simulado): '+mot+'. Ajuste na etapa 4 e reenvie.')
-               :('Recusa da '+a.quem+' registrada (simulado): '+mot+'. Nada foi contratado; a necessidade da '+SX.sol.id+' continua aberta.')}); }
+               :('Recusa da '+a.quem+' registrada (simulado): '+mot+'. Nada foi contratado; a necessidade da '+SX.sol.id+' continua aberta.')}))return; }
 function hooks(self){ if(self._hk) return; self._hk=true;
   self.g2pick=(gid,rid)=>{ if(gid==='g_saf') pick(self,rid); else if(gid==='g_mat') cmAbrir(self,rid); };
   self.g2after=(gid,rows,r)=>{ if(!r) return; const st=self.state;
@@ -701,7 +708,7 @@ function EXTRAVALS(self,v){ hooks(self);
   else { v.k6=''; v.k6st=MUT; }
   v.pcconf=(id)=>{ const s=self.state; const ap=aprOf(s); if(!ap) return; const p=ap.pcs.find(x=>x.id===id); if(!p) return; const x=Object.assign({},s.pcx||{}); const cur=x[id]||{};
     if(cur.conf){ toast(self,id+' já confirmado · nada registrado de novo.'); return; } x[id]=Object.assign({},cur,{conf:true});
-    self.setState({pcx:x,g2toast:'Confirmação de '+p.nome+' registrada para '+id+' (simulada · nenhuma mensagem real enviada) · previsão '+brd(cur.prev||p.prev)+'.'}); };
+    if(!procAplicar(self,{pcx:x,g2toast:'Confirmação de '+p.nome+' registrada para '+id+' (simulada · nenhuma mensagem real enviada) · previsão '+brd(cur.prev||p.prev)+'.'}))return; };
   (apr?apr.pcs:[]).forEach(p=>{ v['entp_'+p.id]=()=>{ const r=(GR('g_ent').rows||[]).find(y=>y.id===p.id); if(r) g2open(self,GR('g_ent'),p.id,null); }; });
   // formulário Convite: destinatário e escopo que o fornecedor vai ver
   const Fv=v.g_conv_F; const fm3=g2st(self,'g_conv').fm; if(Fv&&Fv.open&&fm3&&fm3.rid&&m.conv[fm3.rid]){ const c=m.conv[fm3.rid]; const d=fm3.draft||{};
