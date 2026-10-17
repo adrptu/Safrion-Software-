@@ -1,0 +1,10 @@
+# HEAD 3010fc9
+[portão: 2 após 500s]
+1440 {"trilhas": 6, "ultimaTrilha": "116.516px", "ultimoCab": 116.5, "nome": "", "cabs": ["TALHÃO OU PARCELA", "CULTURA", "PLANO AGRONÔMICO", "ÁREA", "PLANTIO", ""], "lado": false}
+390 {"trilhas": 4, "ultimaTrilha": "0px", "ultimoCab": 0, "nome": "", "cabs": ["TALHÃO OU PARCELA", "CULTURA", "PLANO AGRONÔMICO", ""], "lado": false}
+exit=0
+# base 2f22375d
+[portão: 1 após 0s]
+1440 {"trilhas": 5, "ultimaTrilha": "236.656px", "ultimoCab": 236.7, "nome": "PLANTIO\n⇅", "cabs": ["TALHÃO OU PARCELA", "CULTURA", "PLANO AGRONÔMICO", "ÁREA", "PLANTIO"], "lado": false}
+390 {"trilhas": 3, "ultimaTrilha": "139px", "ultimoCab": 139, "nome": "PLANO AGRONÔMICO\n⇅", "cabs": ["TALHÃO OU PARCELA", "CULTURA", "PLANO AGRONÔMICO"], "lado": false}
+exit=0
