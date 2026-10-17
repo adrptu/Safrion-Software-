@@ -1,0 +1,106 @@
+fonte v3 · 151382 bytes · sha256 e7872cb02fc667330354560a6b88b82cd5485ab656b2d7546b2500d645805e5e · node v22.22.0
+autoconferência: rxHT instrumentado igual ao do v3 (E e nCtrl em D = 30, 50, 70, 86): true
+semente original: gabarito acaro 4/5 · mosca 3/4 · antrac 3/3 · cochon 2/2 · gate acaro 0.0588×0.1613 · mosca 0.0443×0.1364 · antrac 0.003×0.0204 · cochon 0.0441×0.2162
+
+== C1 · controle lido depois de D (contraprova 1 do Codex) ==
+fixture do Codex no rxHT extraído do v3 (D = 10):
+  controles D1 = 10 e D12 = 10: E = 0.4762 com 2 controles lidos depois de D
+  controles só com leitura até D: E = null (sem comparação válida)
+  só a leitura de D12 dos controles muda para 30: E = 0.8197
+dados do v3, toda data D de 1 a 86 da linha do tempo, rxHT × rxHT só com dados até D (semente original):
+  acaro: 13/293 item-data mudam E (9 aplicações, 7 datas) · viram "sem comparação" 3 · maior |ΔE| 27 p.p. · em D = 86: 0
+  mosca: 14/392 item-data mudam E (9 aplicações, 8 datas) · viram "sem comparação" 3 · maior |ΔE| 15.3 p.p. · em D = 86: 0
+  antrac: 10/152 item-data mudam E (8 aplicações, 7 datas) · viram "sem comparação" 0 · maior |ΔE| 6.8 p.p. · em D = 86: 0
+  cochon: 10/243 item-data mudam E (7 aplicações, 9 datas) · viram "sem comparação" 1 · maior |ΔE| 3.7 p.p. · em D = 86: 0
+21 sementes: item-data com controle lido depois de D 1112 · E muda 1055 · em D = 86 0 · maior |ΔE| 74.9 p.p.
+
+== C3 · nível de pareamento usado pelo rxHT em D = 86 (contraprova 3 do Codex) ==
+  acaro: 16 aplicações · nível 1 (estádio e nível) 13 · nível 2 (só estádio) 0 · nível 3 (qualquer candidato) 3 · sem comparação 0 · regra estrita da crítica: válidas 6, sem comparação 6, leitura do dia excluída 4
+  mosca: 16 aplicações · nível 1 (estádio e nível) 12 · nível 2 (só estádio) 0 · nível 3 (qualquer candidato) 4 · sem comparação 0 · regra estrita da crítica: válidas 9, sem comparação 5, leitura do dia excluída 2
+  antrac: 9 aplicações · nível 1 (estádio e nível) 3 · nível 2 (só estádio) 0 · nível 3 (qualquer candidato) 6 · sem comparação 0 · regra estrita da crítica: válidas 2, sem comparação 6, leitura do dia excluída 1
+  cochon: 15 aplicações · nível 1 (estádio e nível) 11 · nível 2 (só estádio) 0 · nível 3 (qualquer candidato) 4 · sem comparação 0 · regra estrita da crítica: válidas 9, sem comparação 5, leitura do dia excluída 1
+semente original: 17/56 aplicações só chegam a 2 controles pelo nível 3; sem comparação 0
+21 sementes: nível 3 282/1193 · sem comparação 0 · regra estrita sem comparação 479
+
+== C4 · seguimento do NC (EX-42 §8) × "dias de proteção" do v3, D = 86 ==
+  acaro: 16 itens · v3 eventos 5, censurados 11 · retorno demonstrado 5 (intervalo 7–7 dias) · 1ª leitura pós já acima 0 · seguiu abaixo até a última leitura 11 (v3 acrescenta 0–6 dias, média 3) · outra aplicação no seguimento 0
+  mosca: 16 itens · v3 eventos 3, censurados 13 · retorno demonstrado 3 (intervalo 7–7 dias) · 1ª leitura pós já acima 0 · seguiu abaixo até a última leitura 13 (v3 acrescenta 0–6 dias, média 3.1538) · outra aplicação no seguimento 2
+  antrac: 9 itens · v3 eventos 2, censurados 7 · retorno demonstrado 2 (intervalo 7–7 dias) · 1ª leitura pós já acima 0 · seguiu abaixo até a última leitura 7 (v3 acrescenta 0–1 dias, média 0.2857) · outra aplicação no seguimento 2
+  cochon: 15 itens · v3 eventos 2, censurados 13 · retorno demonstrado 2 (intervalo 7–7 dias) · 1ª leitura pós já acima 0 · seguiu abaixo até a última leitura 13 (v3 acrescenta 0–6 dias, média 3.5385) · outra aplicação no seguimento 3
+21 sementes: 1ª leitura pós já acima do NC 21 · outra aplicação no seguimento 112 de 1193 itens
+
+== C2 · teste da previsão (contraprova 2 do Codex), desenho do gate do v3: corte D − 21, D = 86 ==
+  acaro: n 31, eventos 4 · variáveis de janela no teste com dias depois da 1ª vistoria: 217/217
+     v3_climaRealizado                    Brier modelo 0.0588 × persistência 0.1613 → vence
+     climaPosCorteTrocadoPor35DiasAntes   Brier modelo 0.1083 × persistência 0.1613 → vence
+     honesto_tempoDosDiasAntesDaOrigem    Brier modelo 0.193 × persistência 0.1613 → perde
+     climatologia4Semanas                 Brier modelo 0.1686 × persistência 0.1613 → perde
+     previsaoMetadeDosDiasCerta           Brier modelo 0.0967 × persistência 0.1613 → vence
+  mosca: n 44, eventos 5 · variáveis de janela no teste com dias depois da 1ª vistoria: 264/308
+     v3_climaRealizado                    Brier modelo 0.0443 × persistência 0.1364 → vence
+     climaPosCorteTrocadoPor35DiasAntes   Brier modelo 0.0877 × persistência 0.1364 → vence
+     honesto_tempoDosDiasAntesDaOrigem    Brier modelo 0.2074 × persistência 0.1364 → perde
+     climatologia4Semanas                 Brier modelo 0.1301 × persistência 0.1364 → vence
+     previsaoMetadeDosDiasCerta           Brier modelo 0.1116 × persistência 0.1364 → vence
+  antrac: n 49, eventos 1 · variáveis de janela no teste com dias depois da 1ª vistoria: 294/343
+     v3_climaRealizado                    Brier modelo 0.003 × persistência 0.0204 → vence
+     climaPosCorteTrocadoPor35DiasAntes   Brier modelo 0.0004 × persistência 0.0204 → vence
+     honesto_tempoDosDiasAntesDaOrigem    Brier modelo 0.0029 × persistência 0.0204 → vence
+     climatologia4Semanas                 Brier modelo 0.0029 × persistência 0.0204 → vence
+     previsaoMetadeDosDiasCerta           Brier modelo 0.0036 × persistência 0.0204 → vence
+  cochon: n 37, eventos 9 · variáveis de janela no teste com dias depois da 1ª vistoria: 222/259
+     v3_climaRealizado                    Brier modelo 0.0441 × persistência 0.2162 → vence
+     climaPosCorteTrocadoPor35DiasAntes   Brier modelo 0.0569 × persistência 0.2162 → vence
+     honesto_tempoDosDiasAntesDaOrigem    Brier modelo 0.0682 × persistência 0.2162 → vence
+     climatologia4Semanas                 Brier modelo 0.1044 × persistência 0.2162 → vence
+     previsaoMetadeDosDiasCerta           Brier modelo 0.0527 × persistência 0.2162 → vence
+21 sementes, quantas vezes o modelo vence a persistência no gate do v3:
+  v3_climaRealizado                    acaro 19/21 · mosca 21/21 · antrac 18/21 · cochon 21/21
+  honesto_tempoDosDiasAntesDaOrigem    acaro 2/21 · mosca 4/21 · antrac 18/21 · cochon 21/21
+  climatologia4Semanas                 acaro 3/21 · mosca 7/21 · antrac 20/21 · cochon 21/21
+  previsaoMetadeDosDiasCerta           acaro 13/21 · mosca 19/21 · antrac 20/21 · cochon 21/21
+conjunto de teste condicionado ao futuro (pares candidatos com fim no teste, excluídos por aplicação entre as vistorias):
+  acaro: 10/56 excluídos por aplicação depois da 1ª vistoria (com nível ≥ 90 % do NC na origem: 10; abaixo do NC: 2) · 15 por aplicação até a origem
+  mosca: 6/60 excluídos por aplicação depois da 1ª vistoria (com nível ≥ 90 % do NC na origem: 6; abaixo do NC: 2) · 10 por aplicação até a origem
+  antrac: 6/60 excluídos por aplicação depois da 1ª vistoria (com nível ≥ 90 % do NC na origem: 6; abaixo do NC: 3) · 5 por aplicação até a origem
+  cochon: 12/60 excluídos por aplicação depois da 1ª vistoria (com nível ≥ 90 % do NC na origem: 12; abaixo do NC: 5) · 11 por aplicação até a origem
+21 sementes: excluídos por aplicação depois da origem 731/4863, desses abaixo do NC na origem 213
+"Próximos 7 dias" numa data passada (semente original): trocar só o clima depois de D pelo de 35 dias antes:
+  acaro: D58 17/17 talhões mudam, até 54.2 p.p. · D65 7/8 talhões mudam, até 54.7 p.p. · D72 6/10 talhões mudam, até 6.7 p.p. · D79 8/17 talhões mudam, até 24.5 p.p.
+  mosca: D58 16/16 talhões mudam, até 51.7 p.p. · D65 13/13 talhões mudam, até 49.7 p.p. · D72 13/14 talhões mudam, até 12 p.p. · D79 8/17 talhões mudam, até 14.3 p.p.
+  antrac: D58 0/19 talhões mudam, até 0 p.p. · D65 3/18 talhões mudam, até 3.2 p.p. · D72 14/18 talhões mudam, até 13.7 p.p. · D79 0/16 talhões mudam, até 0 p.p.
+  cochon: D58 8/15 talhões mudam, até 56.8 p.p. · D65 8/16 talhões mudam, até 5.3 p.p. · D72 11/12 talhões mudam, até 63.3 p.p. · D79 0/11 talhões mudam, até 0 p.p.
+manejo depois da origem (D = 72, P1): +70 mm de irrigação no dia 75 muda a irrigação da janela de 29 para 99 mm/semana · 12 adubações em 12 talhões caem na janela (D, D + 7]
+
+== C5 · seleção refeita em cada uma de 200 reamostras (semente original, D = 86) ==
+  acaro qs    plantado sobe · v3 grupo de ur:fraca    IC95 v3 [-0.5291,0.0371] · com seleção refeita [-0.0721,0.5449] → exclui zero com o sinal certo: não
+  acaro molh  plantado desce · v3 grupo de lav:forte   IC95 v3 [-0.6125,-0.3464] · com seleção refeita [-0.6526,0.1529] → exclui zero com o sinal certo: não
+  acaro lav   plantado desce · v3 forte                IC95 v3 [-0.6125,-0.3464] · com seleção refeita [-0.6526,0.358] → exclui zero com o sinal certo: não
+  acaro def   plantado sobe · v3 fraca                IC95 v3 [-0.0298,0.2505] · com seleção refeita [-0.2017,0.4116] → exclui zero com o sinal certo: não
+  acaro n14   plantado sobe · v3 nulo                 IC95 v3 [-0.1071,0.1864] · com seleção refeita [-0.1241,0.3273] → exclui zero com o sinal certo: não
+  mosca qs    plantado sobe · v3 grupo de ur:nulo     IC95 v3 [-0.386,0.1463] · com seleção refeita [-0.1312,0.3119] → exclui zero com o sinal certo: não
+  mosca molh  plantado desce · v3 grupo de lav:forte   IC95 v3 [-0.4316,-0.1735] · com seleção refeita [-0.4226,-0.1506] → exclui zero com o sinal certo: sim
+  mosca lav   plantado desce · v3 forte                IC95 v3 [-0.4316,-0.1735] · com seleção refeita [-0.4226,-0.1654] → exclui zero com o sinal certo: sim
+  mosca n14   plantado sobe · v3 fraca                IC95 v3 [0.0101,0.2168] · com seleção refeita [-0.0537,0.2517] → exclui zero com o sinal certo: não
+  antrac ur    plantado sobe · v3 fraca                IC95 v3 [-0.0038,0.1136] · com seleção refeita [-0.1012,0.145] → exclui zero com o sinal certo: não
+  antrac molh  plantado sobe · v3 forte                IC95 v3 [0.0395,0.1278] · com seleção refeita [-0.0582,0.1456] → exclui zero com o sinal certo: não
+  antrac k14   plantado desce · v3 forte                IC95 v3 [-0.1203,-0.051] · com seleção refeita [-0.143,0.0304] → exclui zero com o sinal certo: não
+  cochon qs    plantado sobe · v3 grupo de tmax:fraca  IC95 v3 [0.0019,0.239] · com seleção refeita [-0.057,0.1961] → exclui zero com o sinal certo: não
+  cochon n14   plantado sobe · v3 forte                IC95 v3 [0.0561,0.1763] · com seleção refeita [-0.0632,0.1561] → exclui zero com o sinal certo: não
+efeitos plantados com IC95 (seleção refeita) sem o zero e sinal certo: 2/14 · variáveis de ruído com IC95 sem o zero: 0
+
+== C6 · o "nulo do clima" da crítica: clima deslocado × clima verdadeiro (Spearman) ==
+  diário desloca21: tmax -0.0808 · ur -0.0155 · chuva 0.0023
+  diário desloca35: tmax -0.1226 · ur -0.0512 · chuva -0.1149
+  diário desloca49: tmax -0.2245 · ur -0.1708 · chuva 0.0231
+  diário desloca63: tmax -0.0873 · ur -0.1566 · chuva -0.1149
+  janela 0 desloca21: acaro qs 0.0447 tmax 0.0699 lav -0.2881 | mosca qs 0.0256 tmax 0.0168 lav -0.2549 | antrac qs 0.0285 tmax 0.0294 lav -0.27 | cochon qs 0.0707 tmax 0.0775 lav -0.2422
+  janela 0 desloca35: acaro qs -0.2824 tmax -0.256 lav 0.0529 | mosca qs -0.3936 tmax -0.2811 lav 0.0555 | antrac qs -0.3835 tmax -0.2608 lav 0.0664 | cochon qs -0.2646 tmax -0.1955 lav 0.0649
+  janela 0 desloca49: acaro qs -0.7172 tmax -0.4222 lav 0.0094 | mosca qs -0.6824 tmax -0.4255 lav -0.0168 | antrac qs -0.7333 tmax -0.4929 lav -0.111 | cochon qs -0.7648 tmax -0.4829 lav -0.0492
+  janela 0 desloca63: acaro qs -0.2716 tmax -0.2592 lav -0.1288 | mosca qs -0.2283 tmax -0.2435 lav -0.1536 | antrac qs -0.1845 tmax -0.1791 lav -0.1607 | cochon qs -0.2615 tmax -0.2538 lav -0.1958
+
+== C7 · contrato do backtest em origem móvel da crítica (raiox_repro.mjs, backtest) ==
+  acaro: 84 pares de teste · 1ª vistoria depois da origem 0 · horizonte (2ª vistoria − origem) em dias: 1d 29, 2d 41, 7d 14
+  mosca: 90 pares de teste · 1ª vistoria depois da origem 0 · horizonte (2ª vistoria − origem) em dias: 1d 34, 2d 41, 7d 15
+  antrac: 104 pares de teste · 1ª vistoria depois da origem 0 · horizonte (2ª vistoria − origem) em dias: 1d 33, 2d 53, 7d 18
+  cochon: 92 pares de teste · 1ª vistoria depois da origem 0 · horizonte (2ª vistoria − origem) em dias: 1d 36, 2d 40, 7d 16

@@ -1,0 +1,16 @@
+# bash reproducao/confronto/rodar.sh <v3.html @ 529adf7> <saída> · 17/10/2026 · executado
+node v22.22.0 · v3 sha256 e7872cb02fc667330354560a6b88b82cd5485ab656b2d7546b2500d645805e5e
+== 1. crítica
+sha256 do HTML: e7872cb02fc667330354560a6b88b82cd5485ab656b2d7546b2500d645805e5e
+== 2. confronto
+ok · 29.6 s
+== 3. harness do Codex (b291746)
+  raiox-core: igual ao bruto do Codex
+  raiox-ht-futuro: igual ao bruto do Codex
+  raiox-forecast-futuro: igual ao bruto do Codex
+== 4. conferência com os brutos versionados
+crítica · repro.json: igual ao versionado
+crítica · resumo.txt: igual ao versionado
+crítica · calor.txt: igual ao versionado
+confronto · confronto.json: igual ao versionado
+confronto · confronto.txt: igual ao versionado

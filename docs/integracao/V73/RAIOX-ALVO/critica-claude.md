@@ -2,6 +2,7 @@
 
 Versão 2 · 17/10/2026 · autor Claude · sem leitura da crítica do Codex · Gemini não consultado nem simulado (as perguntas de domínio estão na §9).
 Mudança da v2: a fonte do v3 passa a ser a cópia versionada (commit 529adf7); a reprodução refeita sobre ela deu os mesmos números; as linhas `ART:n` foram recontadas nessa cópia (−1).
+**Errata (17/10, confronto com o Codex):** 7 correções (E1 a E7) estão em `confronto-claude-codex.md` §5, com prova. O texto abaixo fica como foi entregue no passo 1; as linhas `CL:n` citadas no confronto contam sem esta linha.
 Só leitura e reprodução. Nenhum arquivo de produto foi alterado; nada aqui é decisão final: o Codex registra o desenho e as fatias no checkpoint.
 
 ## 0. Acordo curto (AGENTS §3.4)
