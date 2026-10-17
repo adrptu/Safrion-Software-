@@ -149,7 +149,10 @@ Estado / impedimento / próximo passo: executado na branch claude/v44-v73-saf-lo
 | `tab_drill_cab_test.py` | 6/6 | |
 | `cartoes_test.py` | 70/70 | |
 | `paginas_scan_test.py` | 5/5 (148 páginas) | |
-| `tabelas_cad_test.py`, `cadastros_padrao_test.py`, `ds_1510_test.py` e a base do `saf_revisao_test.py` | em execução na entrega deste relatório (bateria `saf_lote_bateria.sh`, saída em `final_b.out`) | não declarado |
+| `tabelas_cad_test.py` | 206/206 | |
+| `cadastros_padrao_test.py` | 44/44 | |
+| `ds_1510_test.py` | 17/17 | |
+| `saf_revisao_test.py` na **base** (render de c9ffa08) | 40/42 | as mesmas 2 falhas S3.1 (g_cap da S27SF e da safra nova): já existiam antes desta frente (`base_saf_revisao_test.py.log`) |
 
 **Sem navegador (executados):**
 
@@ -192,3 +195,9 @@ Em `tools/prototipo/v37/gen37/_probe/` (não versionadas), geradas pelo `saf_lot
   - A correção é do motor (DS-ALVO para link de célula e ⋯ da linha) e vale para todas as tabelas. No painel, todos os alvos têm 44 px (H2).
 - **Custo de desenho (medido numa sonda, fora do teste):** cada tecla na grade leva de 200 a 280 ms, porque redesenha a tela inteira, como no Dividir. Não atrapalhou a digitação nos testes. Se pesar com fazendas muito grandes, a saída é guardar o cálculo da etapa 4 enquanto o painel está aberto.
 - **`docs/STATUS.md`:** não foi alterado por esta frente. A integração da composição atualiza.
+
+## Fechamento da bateria (17/10, depois da entrega)
+
+- O grupo B rodou inteiro na f2f74f8 (executado): `tabelas_cad` 206/206, `cadastros_padrao` 44/44 e `ds_1510` 17/17. Os brutos estão nesta pasta.
+- O `saf_revisao_test.py` dá 40/42 na base e 40/42 na candidata, com as mesmas 2 falhas. Portanto não são regressão desta frente.
+- Causa provável: o seletor do teste procura "Capacidade por mês ▾", e desde a TAB-09 a tela mostra "▸ Capacidade por mês". Isso é leitura de código, não verificação. A correção do seletor fica fora desta frente.
