@@ -553,9 +553,6 @@ def su04():
                  estado=[ch('Pronta','green') if nresp==len(conv) else ch(f'Falta {len(conv)-nresp} resposta','yellow')]),
             ro=True,o=[dict(t=f"{c['nome']}: mercadoria R$ {nf(c['merc'])} + frete R$ {nf(c['frete'])} = R$ {nf(c['tot'])} · {c['prazo']} d · {c['cond']}") for c in cot]
                      +[dict(t='Convites enviados em 23/09 10:40 por Ana (gestora) · só a homologados do grupo'),dict(t='Abrir em Compra de insumos',h='CMP.dc.html')]))
-    rows.append(R('COT-113',dict(cot='COT-113 · necessidade da OM-0234',itens=0,forn=0,resp=0,melhor=0,estado='consulta',tipo='Consulta da origem'),
-        dict(cot=[b('COT-113 · OM-0234'),mut('Conferir necessidade atual da manutenção')]),ro=True,
-        o=[dict(t='Abrir a ordem de manutenção',h='MA.dc.html#om=OM-0234')]))
     rows.append(R('COT-110',dict(cot='COT-110 · Kit filtros + óleo 15W40',itens=1,forn=3,resp=1,melhor=0,estado='aguardando',tipo='Enviada em 21/09 · consulta'),
         dict(cot=[b('COT-110 · Kit filtros + óleo 15W40'),mut('Manutenção · OM-0234')],itens=[txt('1 item'),mut('1 kit')],forn=[txt('3 convidados')],resp=[ch('1/3','yellow')],melhor=[mut('—')],
              estado=[ch('Até 24/09','yellow')]),ro=True,o=[dict(t='Respostas até 24/09; depois disso compara com as recebidas')]))
@@ -573,15 +570,15 @@ def su04():
     gc=grid([dict(k='nome',l='Fornecedor',w=200),dict(k='merc',l='Mercadoria',t='num',a='r',pre='R$ '),dict(k='frete',l='Frete',t='num',a='r',pre='R$ '),
              dict(k='prazo',l='Prazo de entrega',t='num',a='r',u='dias'),dict(k='cond',l='Condição'),dict(k='tot',l='Custo comparável',t='num',a='r',pre='R$ '),dict(k='sit',l='Situação')],
         crow,gid='g_cmp',search=False,total=False,edit=dict(m='origin',title='Proposta',fields=[fs('nome','Fornecedor',ro=True),fs('cond','Condição',ro=True)]))
-    js({},_sup_man_js()+r'''
+    js({},r'''
 const BEST=%s, ALC=%s;
 function PREVALS(self,v){ const sel=self.state.selp;
   RW(self,'g_cmp').forEach((r,i)=>{ r.p.tot=[i===0?B('R$ '+nf(r.v.tot)):T('R$ '+nf(r.v.tot))];
     r.p.sit=(sel===r.id)?[chipc('Selecionada','green')]:(i===0?[chipc('Melhor equalizado','green')]:[M('+R$ '+nf(r.v.tot-RW(self,'g_cmp')[0].v.tot))]); });
-  cenOuvir(self); supAtualizaCot(self); }
+  }
 function EXTRAVALS(self,v){
   v.sel_prop=()=>{ if(self.state.selp) return toast(self,BEST.nome+' já foi selecionada · justificativa registrada; nada muda'); self.setState({selp:BEST.id,g2toast:BEST.nome+' selecionada (R$ '+nf(BEST.tot)+' equalizado) · segue para aprovação de contratação: '+ALC}); };
-  v.env113=()=>{ const x=supNecMan(manGet(),'OM-0234',null); return toast(self,x.itens.some(i=>i.falta>0)?'Necessidade da OM-0234 conferida. Abra Compras de materiais para cotar; nenhum convite enviado.':(x.pendencias.length?'Conferência pendente da OM-0234; abra a origem.':'Sem falta da OM-0234 para cotar; confira a origem.')); }; }''' % (json.dumps(dict(id=best['f'],nome=best['nome'],tot=round(best['tot']))),json.dumps(_alcada(best['tot']))))
+  v.env113=()=>{ window.location.href='SU-01.dc.html'; }; }''' % (json.dumps(dict(id=best['f'],nome=best['nome'],tot=round(best['tot']))),json.dumps(_alcada(best['tot']))))
     corpo=(bloco('Cotações em andamento','Confira as respostas de cada cotação; clique no rascunho para revisar destinatários antes de enviar.',g
                  ,
                  acao=mini('env113','Enviar COT-113','Envia o rascunho aos destinatários escolhidos (simulado)','doc'))

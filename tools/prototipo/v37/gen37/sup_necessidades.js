@@ -17,7 +17,6 @@ function supNecMan(c, id, politica) {
   // A consulta segue a mesma etapa que manFalta; execução já reservada não compra novamente.
   if (o.etapa !== 'A liberar') return out;
   out.pedirAte = supPedirAte(o.janIso, politica);
-  if (!out.pedirAte) out.pendencias.push('Conferir data necessária e política de prazo/segurança.');
   const itens = new Map(), invalidos = new Set();
   for (const p of o.pecas || []) {
     const it = c.itens && c.itens[p.item];
@@ -29,7 +28,7 @@ function supNecMan(c, id, politica) {
     const r=itens.get(p.item);
     r.demanda+=p.qtd; r.reservaPropria+=p.res; r.necessidade+=manNec(p);
   }
-  for (const r of itens.values()) { if(invalidos.has(r.item)) continue; r.falta=Math.max(0,r.necessidade-r.livre); out.itens.push(r); }
+  for (const r of itens.values()) { if(invalidos.has(r.item)) continue; r.falta=Math.max(0,r.necessidade-r.livre); r.pendenciaPrazo=r.falta>0&&!out.pedirAte; out.itens.push(r); }
   return out;
 }
 function supAtualizaNec(self) {
@@ -41,21 +40,11 @@ function supAtualizaNec(self) {
       disp:[T(nf(it.livre)+' '+it.un),M('reserva própria '+nf(it.reservaPropria)+' '+it.un)],
       firm:[M('Conferir em Compras de materiais')],
       falta:[chipc(it.falta>0?nf(it.falta)+' '+it.un:'Coberta no estoque',it.falta>0?'yellow':'green')],
-      pedir:[M('Prazo de compra a configurar'),M('necessária '+dm(x.necessaria))],
+      pedir:[M(it.falta>0?'Pendente · sem prazo de fornecedor/segurança cadastrado':'Sem necessidade de comprar'),M('necessária '+dm(x.necessaria))],
       acao:[{k:'link',t:'Conferir origem',h:'MA.dc.html#om='+x.origem}]},
     o:[{t:'Necessidade '+nf(it.demanda)+' − reserva própria '+nf(it.reservaPropria)+' − livre '+nf(it.livre)+' = '+nf(it.falta)+' '+it.un},
-      {t:'Saldo da manutenção atual. Entregas futuras e prazo não presumidos.'},
+      {t:it.pendenciaPrazo?'Conferir data necessária e política de prazo/segurança.':'Saldo da manutenção atual. Entregas futuras não presumidas.'},
       {t:'Abrir a ordem',h:'MA.dc.html#om='+x.origem}]});
   if(x.pendencias.length) rows.push({id:'MAN|pendencias',ro:true,v:{item:x.origem},s:{},
     p:{item:[B(x.origem)],falta:[M(x.pendencias.join(' '))],acao:[{k:'link',t:'Conferir origem',h:'MA.dc.html#om='+x.origem}]}});
-}
-function supAtualizaCot(self) {
-  const r=RF(self,'g_cot','COT-113'); if(!r) return;
-  const x=supNecMan(manGet(),'OM-0234',null), faltas=x.itens.filter(i=>i.falta>0);
-  r.ro=true; r.v.tipo='Consulta da origem'; r.v.itens=faltas.length;
-  r.p.cot=[B('COT-113 · '+x.origem),M(x.servico||'Origem indisponível')];
-  r.p.itens=faltas.length?faltas.map(i=>T(i.nome+' · '+nf(i.falta)+' '+i.un)):[M(x.pendencias.length?'Conferir pendências da origem':'Sem falta no estoque atual')];
-  r.p.estado=[chipc(faltas.length?'Conferir compra na origem':(x.pendencias.length?'Conferência pendente':'Sem necessidade de cotar'),faltas.length||x.pendencias.length?'yellow':'green')];
-  r.o=[{t:'Consulta da OM atual; não é cotação enviada.'},{t:'Abrir necessidade',h:'SU-01.dc.html'},
-    {t:'Abrir a OM',h:'MA.dc.html#om='+x.origem}];
 }

@@ -22,11 +22,7 @@ test('ano bissexto e data civil',()=>{const c=fixture();c.oms['OM-0234'].janIso=
 test('consulta não reserva nem modifica estado',()=>{const c=fixture(),before=JSON.stringify(c);run(c);assert.equal(JSON.stringify(c),before);});
 test('OM inexistente é pendência explícita',()=>assert.equal(run({oms:{},itens:{}}).pendencias.length,1));
 test('linha inválida não produz necessidade parcial do mesmo item',()=>{const c=fixture();c.oms['OM-0234'].pecas.push({item:'F',qtd:-1,res:0});assert.equal(run(c).itens.length,0);});
-test('consumidores recalculam sem duplicar nem manter saldo antigo',()=>{
- const c=fixture(),rows=[],cot={v:{},p:{}};
- Object.assign(ctx,{manGet:()=>c,RW:()=>rows,RF:()=>cot,B:x=>x,M:x=>x,T:x=>x,nf:String,dm:String,chipc:(t,c)=>({t,c})});
- ctx.supAtualizaNec({});ctx.supAtualizaCot({});assert.equal(rows.find(r=>r.id==='MAN|F').v.falta,3);assert.equal(cot.v.itens,1);
- c.itens.F.saldo=10;ctx.supAtualizaNec({});ctx.supAtualizaCot({});assert.equal(rows.filter(r=>r.id==='MAN|F').length,1);assert.equal(rows.find(r=>r.id==='MAN|F').v.falta,0);assert.equal(cot.v.itens,0);
- delete c.oms['OM-0234'];ctx.supAtualizaNec({});ctx.supAtualizaCot({});assert.equal(rows.some(r=>r.id==='MAN|F'),false);assert.equal(cot.p.estado[0].c,'yellow');
-});
+test('estoque coberto não exige política de compra',()=>{const c=fixture();c.itens.F.saldo=10;assert.equal(run(c,null).pendencias.length,0);});
+test('falta exige política e fica junto à linha',()=>{const c=fixture(),rows=[];Object.assign(ctx,{manGet:()=>c,RW:()=>rows,B:x=>x,M:x=>x,T:x=>x,nf:String,dm:String,chipc:(t,c)=>({t,c})});ctx.supAtualizaNec({});assert.equal(rows.length,1);assert.ok(rows[0].o.some(x=>/prazo/.test(x.t)));c.itens.F.saldo=10;ctx.supAtualizaNec({});assert.equal(rows.length,1);assert.equal(rows[0].v.falta,0);assert.ok(!rows[0].o.some(x=>/Conferir data/.test(x.t)));});
+test('COT113 fictícia não aparece como cotação',()=>{const src=fs.readFileSync(path.join(__dirname,'areas/suprimentos.py'),'utf8');assert.ok(!src.includes("rows.append(R('COT-113'"));assert.ok(!src.includes('supAtualizaCot(self)'));});
 console.log(tests+' testes aprovados');
