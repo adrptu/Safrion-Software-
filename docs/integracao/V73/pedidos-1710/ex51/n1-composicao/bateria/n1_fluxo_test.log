@@ -1,0 +1,11 @@
+OK    N1 AG-01 emite pela tela: O.S. em A liberar com o REC ligado a ela, decisão v1 com autor, 1 recibo MIP-EMI-VIS-013-v1-… com resultado, MIP no cenário; a chave antiga não é criada 
+OK    N2 a mesma chave com o mesmo conteúdo devolve o recibo (repetido, mesma O.S.) e não cria outra 
+OK    N3 OS.dc.html#OS-0440: em A liberar, sem "Receituário divergente" (o que segura a liberação, se houver, é o Estoque) 
+OK    N4 dose da O.S. diferente do receituário: painel "Liberar e aprovar bloqueados: receituário divergente…" com o caminho para Pragas e doenças; selo na lista; liberar e aprovar recusam; segue em A liberar, sem aprovação nem requisição nova 
+OK    N5 grupo: com a O.S. do MIP ainda sem pulverizador, a composição recusa ("Sem conjunto"), nenhum grupo é gravado e a O.S. segue em A liberar 
+OK    N6 de volta à dose do receituário: o painel deixa de acusar o receituário e a liberação passa da trava B-3 (para só no Estoque, sem lote do produto na demonstração) 
+OK    N7 abrir o AG-01 com a cópia antiga leva-a ao cenário (migradoDe.rev 41) e marca a migração; a cópia antiga fica igual 
+OK    N8 depois de restaurar o cenário (outra tela), o AG-01 mostra a semente, não a cópia antiga 
+OK    N9 cópia ilegível: AG-01 com "Dados ilegíveis" e "Restaurar demonstração" (lista vazia), Mapa e app abrem; restaurar volta as vistorias e a cópia segue intacta 
+OK    N10 MB-06 registra o ponto 1 da VIS-017 (3,5) no cenário, sem erro de gravação 
+RESULTADO 10/10
