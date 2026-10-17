@@ -1,0 +1,913 @@
+{
+ "AG-01.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Pragas e doenças",
+  "desvios": {}
+ },
+ "AG-01det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Rota e evidências",
+  "desvios": {}
+ },
+ "AG-02.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Análises de solo",
+  "desvios": {}
+ },
+ "AG-03.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Diagnósticos",
+  "desvios": {}
+ },
+ "AG-03det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Diagnóstico · DIA-007 nematoide T4",
+  "desvios": {}
+ },
+ "AG-04.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Recomendações",
+  "desvios": {}
+ },
+ "AG-04det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Recomendação · REC-014 plantio T4",
+  "desvios": {}
+ },
+ "AG-05.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Biblioteca e planos técnicos",
+  "desvios": {}
+ },
+ "AG-06.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Eficácia e histórico",
+  "desvios": {}
+ },
+ "AG-07.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Consulta Agrofit",
+  "desvios": {}
+ },
+ "BEN.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Beneficiamento",
+  "desvios": {}
+ },
+ "BO-01.dc.html": {
+  "modulo": "Onboarding e backoffice",
+  "menu": false,
+  "h1": "Planos e preços",
+  "desvios": {}
+ },
+ "BO-02.dc.html": {
+  "modulo": "Onboarding e backoffice",
+  "menu": true,
+  "h1": "Assinaturas e cobrança",
+  "desvios": {}
+ },
+ "CA-01.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Ordens de campo",
+  "desvios": {
+   "TAB-07": "4 cartões acima da lista: A liberar 5 3 com produto · 2 só água | Em conferência 1 sobras a receber | Saldo parado 70 ha OS-0420 · Trato"
+  }
+ },
+ "CA-01det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "OS-0421 · Fungicida 1ª aplicação",
+  "desvios": {
+   "TAB-07": "4 cartões acima da lista: Autorizado 350 ha v2 | Realizado 190 ha 150 conf. + 40 prov. | Saldo 160 ha 3 turnos | Hoje Dia 4 de 7 40 ha ·"
+  }
+ },
+ "CA-01x-os0420.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "OS-0420 · Plantio Soja 58 W",
+  "desvios": {
+   "TAB-07": "4 cartões acima da lista: Autorizado 100 ha v2 no realizado · v3 n | Realizado 30 ha 18 conf. + 12 prov. | Saldo 70 ha parado · Trator T"
+  }
+ },
+ "CA-02.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Apontamentos e conferência",
+  "desvios": {
+   "CAB-1": "sem voltar no cabeçalho",
+   "TAB-07": "3 cartões acima da lista: Provisórios 52 ha aguardam conferência | Fora da tolerância 1 horas · OS-0420 | Sobras a receber 10 sc OS-0417",
+   "TAB-05": "2 botões: Conferir"
+  }
+ },
+ "CA-03.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Ocorrências",
+  "desvios": {}
+ },
+ "CA-03det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "OC-114 · Quebra do Trator T1",
+  "desvios": {}
+ },
+ "CA-04.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Minhas requisições",
+  "desvios": {}
+ },
+ "CARGA.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Cargas e recebimento",
+  "desvios": {}
+ },
+ "CD-01.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Fazendas, áreas e talhões",
+  "desvios": {}
+ },
+ "CD-01det.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Talhão",
+  "desvios": {}
+ },
+ "CD-02.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Culturas e cultivares",
+  "desvios": {}
+ },
+ "CD-03.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Máquinas, instalações e setores",
+  "desvios": {}
+ },
+ "CD-04.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Pessoas e equipes",
+  "desvios": {}
+ },
+ "CD-05.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Parceiros e fornecedores",
+  "desvios": {}
+ },
+ "CD-06.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Produtos, unidades e locais",
+  "desvios": {}
+ },
+ "CD-07.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Estrutura gerencial",
+  "desvios": {}
+ },
+ "CD-08.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Operações e rendimentos",
+  "desvios": {}
+ },
+ "CD.dc.html": {
+  "modulo": "Cadastros",
+  "menu": true,
+  "h1": "Cadastros",
+  "desvios": {}
+ },
+ "CF-01.dc.html": {
+  "modulo": "Configurações",
+  "menu": true,
+  "h1": "Usuários e alçadas",
+  "desvios": {}
+ },
+ "CF-03.dc.html": {
+  "modulo": "Configurações",
+  "menu": true,
+  "h1": "Integrações",
+  "desvios": {}
+ },
+ "CF-04.dc.html": {
+  "modulo": "Configurações",
+  "menu": true,
+  "h1": "Auditoria",
+  "desvios": {}
+ },
+ "CF-05.dc.html": {
+  "modulo": "Configurações",
+  "menu": true,
+  "h1": "Assinatura e cobrança",
+  "desvios": {}
+ },
+ "CMP.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": true,
+  "h1": "Compras",
+  "desvios": {}
+ },
+ "CO-01.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Previsão e maturação",
+  "desvios": {}
+ },
+ "CO-02.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Programação e ordens de colheita",
+  "desvios": {}
+ },
+ "CO-02det.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "OC-0510 · Colheita de mamão T7",
+  "desvios": {}
+ },
+ "CO-03.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Cargas, pesagens e romaneios",
+  "desvios": {}
+ },
+ "CO-04.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Recebimento da produção",
+  "desvios": {}
+ },
+ "CO-05.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Beneficiamento",
+  "desvios": {}
+ },
+ "CO-05det.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "OB-0110 · Packing do mamão",
+  "desvios": {}
+ },
+ "CO-06.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Qualidade e rastreabilidade",
+  "desvios": {}
+ },
+ "CO-06det.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "INSP-88 · Lote L27-013 bloqueado",
+  "desvios": {}
+ },
+ "CO-07.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Estoque de produção",
+  "desvios": {}
+ },
+ "COLH.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Previsão e colheita",
+  "desvios": {}
+ },
+ "EST.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": true,
+  "h1": "Estoque",
+  "desvios": {}
+ },
+ "EXPED.dc.html": {
+  "modulo": "Comercial",
+  "menu": true,
+  "h1": "Expedição e entregas",
+  "desvios": {}
+ },
+ "GE-01.dc.html": {
+  "modulo": "Gestão",
+  "menu": false,
+  "h1": "Visão gerencial",
+  "desvios": {
+   "TAB-07": "4 cartões acima da lista: Receita prevista 26/27 R$ 18,35 mi 5 cul | Margem projetada R$ 3,67 mi 20,0% | Roic consolidado 4,2% com terra"
+  }
+ },
+ "GE-02.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Orçamento e previsões",
+  "desvios": {}
+ },
+ "GE-02det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Comparar · V1 × V2 × real",
+  "desvios": {}
+ },
+ "GE-03.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Custos e fechamento",
+  "desvios": {
+   "TAB-07": "4 cartões acima da lista: Competência 09/2026 fecha 05/10 | Lançamentos 1.412 98% com doc. | Provisórios R$ 22.736 4 lançamentos | Conci"
+  }
+ },
+ "GE-04.dc.html": {
+  "modulo": "Gestão",
+  "menu": false,
+  "h1": "Contas a pagar e caixa",
+  "desvios": {
+   "TAB-07": "4 cartões acima da lista: Caixa hoje R$ 1,84 mi 2 contas | Vence hoje R$ 158 mil 2 títulos | Aguardando banco R$ 62 mil 1 remessa | Sald"
+  }
+ },
+ "GE-05.dc.html": {
+  "modulo": "Gestão",
+  "menu": false,
+  "h1": "Contas a receber",
+  "desvios": {
+   "TAB-07": "4 cartões acima da lista: Carteira em aberto R$ 289.900 4 títulos | Vencidos R$ 244.000 PV-029 · 4 d | Créditos solicitados 1 RC-12 · R$"
+  }
+ },
+ "GE-06.dc.html": {
+  "modulo": "Gestão",
+  "menu": false,
+  "h1": "Indicadores operacionais",
+  "desvios": {}
+ },
+ "GE-06det.dc.html": {
+  "modulo": "Gestão",
+  "menu": false,
+  "h1": "Detalhar · custo de pulverização",
+  "desvios": {}
+ },
+ "GE-07.dc.html": {
+  "modulo": "Gestão",
+  "menu": false,
+  "h1": "Planos de ação",
+  "desvios": {}
+ },
+ "GE-08.dc.html": {
+  "modulo": "Crédito",
+  "menu": true,
+  "h1": "Crédito e garantias",
+  "desvios": {
+   "TAB-07": "4 cartões acima da lista: Dívida ativa · 3 contratos R$ 1,90 mi | Serviço da dívida 26/27 R$ 610 mil pico  | Capacidade livre no período",
+   "TAB-05": "1 botões: Autorizar bloco"
+  }
+ },
+ "IC.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": true,
+  "h1": "Inteligência de compras",
+  "desvios": {}
+ },
+ "IN-01.dc.html": {
+  "modulo": "Mapa e Início",
+  "menu": false,
+  "h1": "Meu dia",
+  "desvios": {}
+ },
+ "IN-02.dc.html": {
+  "modulo": "Mapa e Início",
+  "menu": false,
+  "h1": "Aprovações",
+  "desvios": {}
+ },
+ "IN-03.dc.html": {
+  "modulo": "Mapa e Início",
+  "menu": false,
+  "h1": "Agenda e pendências",
+  "desvios": {}
+ },
+ "IN-04.dc.html": {
+  "modulo": "Mapa",
+  "menu": true,
+  "h1": "Mapa da fazenda",
+  "desvios": {}
+ },
+ "IR-01.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Irrigação",
+  "desvios": {}
+ },
+ "IR-02.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Programação",
+  "desvios": {}
+ },
+ "IR-03.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Ordens de irrigação",
+  "desvios": {}
+ },
+ "IR-03det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "OS-0419 · Irrigação · Pivô 2",
+  "desvios": {}
+ },
+ "IR-04.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Clima e sensores",
+  "desvios": {}
+ },
+ "IV.dc.html": {
+  "modulo": "Comercial",
+  "menu": true,
+  "h1": "Inteligência de vendas",
+  "desvios": {}
+ },
+ "LO-01.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Programação de transporte",
+  "desvios": {}
+ },
+ "LO-02.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Expedições e cargas",
+  "desvios": {}
+ },
+ "LO-02det.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Conferir carga · T2 · VD-2101",
+  "desvios": {}
+ },
+ "LO-03.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Viagens e entregas",
+  "desvios": {}
+ },
+ "LO-04.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Fretes e transportadores",
+  "desvios": {}
+ },
+ "MA.dc.html": {
+  "modulo": "Manutenção",
+  "menu": true,
+  "h1": "Manutenção",
+  "desvios": {}
+ },
+ "MB-01.dc.html": {
+  "modulo": "App de campo",
+  "menu": true,
+  "h1": "Hoje no campo",
+  "desvios": {}
+ },
+ "MB-02.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Minhas ordens",
+  "desvios": {}
+ },
+ "MB-02det.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "OS-0421 · Pulverização",
+  "desvios": {}
+ },
+ "MB-03.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Apontamento do turno",
+  "desvios": {}
+ },
+ "MB-03x-recibo.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Envios e recibos",
+  "desvios": {}
+ },
+ "MB-04.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Registrar ocorrência",
+  "desvios": {}
+ },
+ "MB-05.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Almoxarifado móvel",
+  "desvios": {}
+ },
+ "MB-05det.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Receber devolução",
+  "desvios": {}
+ },
+ "MB-06.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Vistoria VIS-014",
+  "desvios": {}
+ },
+ "MB-07.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Contagem de frutos",
+  "desvios": {}
+ },
+ "MB-08.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Irrigação de hoje",
+  "desvios": {}
+ },
+ "MB-08x-recibo.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Irrigação · recibo do término",
+  "desvios": {}
+ },
+ "MB-09.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Máquina",
+  "desvios": {}
+ },
+ "MB-09det.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "OM-0233 · Trator T1",
+  "desvios": {}
+ },
+ "MB-10.dc.html": {
+  "modulo": "App de campo",
+  "menu": false,
+  "h1": "Cargas e entregas",
+  "desvios": {}
+ },
+ "MOD-AGR.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Agrícola",
+  "desvios": {}
+ },
+ "MOD-CFG.dc.html": {
+  "modulo": "Configurações",
+  "menu": true,
+  "h1": "Configurações",
+  "desvios": {}
+ },
+ "MOD-COM.dc.html": {
+  "modulo": "Comercial",
+  "menu": true,
+  "h1": "Comercial",
+  "desvios": {}
+ },
+ "MOD-CRE.dc.html": {
+  "modulo": "Crédito",
+  "menu": true,
+  "h1": "Crédito",
+  "desvios": {}
+ },
+ "MOD-MAN.dc.html": {
+  "modulo": "Manutenção",
+  "menu": true,
+  "h1": "Manutenção",
+  "desvios": {}
+ },
+ "MOD-OUT.dc.html": {
+  "modulo": "Onboarding e backoffice",
+  "menu": true,
+  "h1": "Outros acessos",
+  "desvios": {}
+ },
+ "MOD-SUP.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": true,
+  "h1": "Suprimentos",
+  "desvios": {}
+ },
+ "ON-01.dc.html": {
+  "modulo": "Onboarding e backoffice",
+  "menu": true,
+  "h1": "Entrada e implantação guiada",
+  "desvios": {}
+ },
+ "ON-01det.dc.html": {
+  "modulo": "Onboarding e backoffice",
+  "menu": false,
+  "h1": "Importação · prévia e erros",
+  "desvios": {}
+ },
+ "OS-0424-app.dc.html": {
+  "modulo": "App de campo",
+  "menu": true,
+  "h1": "OS-0424 · Fungicida",
+  "desvios": {}
+ },
+ "OS-0424-ficha.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "OS-0424 · Fungicida · T1-B · Soja 62 X",
+  "desvios": {
+   "TAB-08": "Cargas de preparo"
+  }
+ },
+ "OS.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Ordem de Serviço",
+  "desvios": {}
+ },
+ "PA.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Planos agronômicos",
+  "desvios": {}
+ },
+ "PAGR.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Painel",
+  "desvios": {}
+ },
+ "PCOM.dc.html": {
+  "modulo": "Comercial",
+  "menu": true,
+  "h1": "Painel comercial",
+  "desvios": {}
+ },
+ "PL-01.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Safras, ciclos e metas",
+  "desvios": {}
+ },
+ "PL-02.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Plano operacional",
+  "desvios": {}
+ },
+ "PL-02det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Plano do talhão T1-A · gatilhos",
+  "desvios": {}
+ },
+ "PL-03.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Capacidade e recursos",
+  "desvios": {}
+ },
+ "PL-04.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Programação integrada",
+  "desvios": {}
+ },
+ "PL-05.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Impedimentos e reprogramação",
+  "desvios": {}
+ },
+ "PL-05det.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Impedimento · OS-0431 ativo bloqueado",
+  "desvios": {}
+ },
+ "PL-06.dc.html": {
+  "modulo": "Agrícola",
+  "menu": false,
+  "h1": "Parcelas e escalonamento",
+  "desvios": {}
+ },
+ "PMAN.dc.html": {
+  "modulo": "Manutenção",
+  "menu": true,
+  "h1": "Painel",
+  "desvios": {}
+ },
+ "PROD.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Estoque de produto",
+  "desvios": {}
+ },
+ "PSUP.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": true,
+  "h1": "Painel",
+  "desvios": {}
+ },
+ "PT-01.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": true,
+  "h1": "Portal do parceiro",
+  "desvios": {}
+ },
+ "PT-02.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Cotações concedidas",
+  "desvios": {}
+ },
+ "PT-02det.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Proposta · SOL-2026-07 · Fertilizantes",
+  "desvios": {}
+ },
+ "PT-03.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Ofertas",
+  "desvios": {}
+ },
+ "PT-04.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Crédito",
+  "desvios": {}
+ },
+ "PT-04det.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Dossiê · CRE-0102 custeio",
+  "desvios": {}
+ },
+ "PT-05.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Negócios e documentos",
+  "desvios": {}
+ },
+ "PT-05det.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Negócio · CT-2026-11 KCl 60%",
+  "desvios": {}
+ },
+ "PT-06.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Indicadores",
+  "desvios": {}
+ },
+ "PT-07.dc.html": {
+  "modulo": "Portal do parceiro",
+  "menu": false,
+  "h1": "Perfil e assinatura",
+  "desvios": {}
+ },
+ "SAF.dc.html": {
+  "modulo": "Agrícola",
+  "menu": true,
+  "h1": "Planejar safra",
+  "desvios": {}
+ },
+ "SU-01.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Necessidades e cobertura",
+  "desvios": {}
+ },
+ "SU-02.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Políticas de estoque",
+  "desvios": {}
+ },
+ "SU-03.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Saldos e lotes de materiais",
+  "desvios": {}
+ },
+ "SU-03det.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Lote F26-02 · reservas",
+  "desvios": {}
+ },
+ "SU-04.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Solicitações e cotações",
+  "desvios": {}
+ },
+ "SU-05.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Contratos, pedidos e entregas",
+  "desvios": {}
+ },
+ "SU-05det.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "CT-2026-11 · Fertisul · KCl 60%",
+  "desvios": {}
+ },
+ "SU-06.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Recebimentos e divergências",
+  "desvios": {}
+ },
+ "SU-07.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Requisições e entregas",
+  "desvios": {}
+ },
+ "SU-07det.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "REQ-031 · OS-0417 · MAP 11-52",
+  "desvios": {}
+ },
+ "SU-08.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Transferências e movimentos",
+  "desvios": {}
+ },
+ "SU-09.dc.html": {
+  "modulo": "Suprimentos",
+  "menu": false,
+  "h1": "Inventários e ajustes",
+  "desvios": {}
+ },
+ "VE-01.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Demanda e oferta",
+  "desvios": {}
+ },
+ "VE-02.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Mercado e preços",
+  "desvios": {}
+ },
+ "VE-03.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Ofertas e propostas",
+  "desvios": {}
+ },
+ "VE-04.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Pedidos de venda",
+  "desvios": {}
+ },
+ "VE-04det.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Pedido PV-031 · Mamão Formosa A",
+  "desvios": {}
+ },
+ "VE-05.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Contratos e compromissos",
+  "desvios": {}
+ },
+ "VE-06.dc.html": {
+  "modulo": "Comercial",
+  "menu": false,
+  "h1": "Reclamações e devoluções",
+  "desvios": {}
+ },
+ "VEN.dc.html": {
+  "modulo": "Comercial",
+  "menu": true,
+  "h1": "Contratos e pedidos",
+  "desvios": {}
+ }
+}

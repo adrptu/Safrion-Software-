@@ -29,7 +29,7 @@ def chk(nome,cond,extra=''):
     ok.append(bool(cond)); print(('OK  ' if cond else 'FALHOU ')+nome+(' · '+str(extra)[:300] if extra else ''))
 try:
     c.size(1440,1100); c.goto(f'http://127.0.0.1:{p}/CD-01det.dc.html',wait=1.2)
-    chk('1 CD-01det sem erro JS e T1 escolhido às claras no seletor', erro_js()=='' and J("document.querySelector('header select').value")=='T1' and 'T1-B sem polígono' in head(), [erro_js(),head()])
+    chk('1 CD-01det sem erro JS e T1 escolhido às claras no seletor', erro_js()=='' and J("document.querySelector('select[aria-label=Talhão]').value")=='T1' and 'T1-B sem polígono' in head(), [erro_js(),head()])
     s1=rowtxt(1,'Safra 2026/27'); s2=rowtxt(1,'Safrinha 2027')
     # TABELAS-FOCO (06/10/2026): a linha da safra mostra Área (alocada) e Livre em colunas próprias ("312 ha | 0 ha"), em vez de "312 de 312 ha · Área conferida"
     chk('2 resumo por safra pela área cultivável (312 ha), não pelo polígono (312,4 ha)', '312 ha 0 ha' in s1 and 'Em planejamento' in s1 and '160 ha 152 ha' in s2 and 'Rascunho' in s2 and '312,4' not in s1+s2, [s1,s2])
@@ -60,17 +60,17 @@ try:
         and 'Definir polígono' not in hd
         and J("(()=>{const a=[...document.querySelectorAll('main a')].find(a=>a.innerText.trim()==='Planejar T1 na safra ›'); return a&&a.getAttribute('href');})()")=='SAF.dc.html', [t1b,hd])
     # ---------- seletor: outro talhão, sem misturar linhas ----------
-    J(f"({SETV})('header select','T4')"); time.sleep(.35); m=main()
+    J(f"({SETV})('select[aria-label=Talhão]','T4')"); time.sleep(.35); m=main()
     # Área e Livre em colunas próprias (TABELAS-FOCO): Safra 2026/27 204 ha alocados e 0 livre; Safrinha 2027 0 alocado e 204 ha livres
     # revisão TABR (09/10/2026, A1): a Situação da safra vem logo depois do nome ("Safra 2026/27 <situação> … 204 ha 0 ha")
     chk('11 seletor troca para T4: só as safras do T4 e a primária do T4', 'T1-A' not in m and re.search(r'Safra 2026/27 [^0-9]{0,60}204 ha 0 ha', m) and re.search(r'Safrinha 2027 [^0-9]{0,60}0 ha 204 ha', m) and 'T4 · 204 ha' in head() and 'Planejar T4 na safra' in m, [m[:400],head()])
-    J(f"({SETV})('header select','B1')"); time.sleep(.35); aba('Geometria'); J(f"({CLK})('Definir polígono do B1','header button')"); time.sleep(.3)
+    J(f"({SETV})('select[aria-label=Talhão]','B1')"); time.sleep(.35); aba('Geometria'); J(f"({CLK})('Definir polígono do B1','header button')"); time.sleep(.3)
     J(f"({BTN})('Gerar prévia')"); time.sleep(.2); J(f"({BTN})('Cancelar')"); time.sleep(.2); w=alerts()
     J(f"({BTN})('Continuar editando')"); time.sleep(.2); J(f"({BTN})('Salvar polígono')"); time.sleep(.4)
     b1=rowtxt(0,'Boa Vista')
     chk('12 B1: fechar com prévia avisa; importar dentro de 1 % salva a v1 e preenche o polígono', 'Há alterações não salvas.' in w and '119,6 ha' in (b1 or '') and 'v1' in (b1 or '') and 'Polígono validado' in head(), [w,b1,toast()])
     c.goto(f'http://127.0.0.1:{p}/CD-01det.dc.html?nova=1#talhao=ZZ',wait=1.2)
-    chk('13 talhão desconhecido não abre outro em silêncio', 'Talhão não encontrado' in main() and J("document.querySelector('header select').value")=='' and 'Escolha um talhão' in head(), [main()[:200],head()])
+    chk('13 talhão desconhecido não abre outro em silêncio', 'Talhão não encontrado' in main() and J("document.querySelector('select[aria-label=Talhão]').value")=='' and 'Escolha um talhão' in head(), [main()[:200],head()])
     c.shot(os.path.join(os.path.dirname(os.path.abspath(__file__)),'_probe','cadf_det_nf.png'))
 finally:
     c.close(); srv.terminate()

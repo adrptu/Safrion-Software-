@@ -1282,6 +1282,31 @@ def recolhe_acoes(contexto,acoes,linha=False,visiveis=1):
     # o verde vai por último (fim da linha, à direita); o ⋯ fica logo antes dele
     sec=[a for a in vis if not _verde(a)]; prim=[a for a in vis if _verde(a)]
     return ''.join(sec)+mais(contexto,menu,linha)+''.join(prim)
+def recolhe_cabecalho(contexto,acoes):
+    """Regra MAIS-02 (proprietário, 17/10/2026, sobre Manutenção › Planos: "os 3 pontinhos no topo da tela a direita em criar plano.... é uma
+    boa, toda tela que tiver mais ações pode ter esses 3 pontinhos nesses botões dessa região da tela"): na região de ações do cabeçalho da
+    tela fica à vista só a primária verde e, à direita dela, o ⋯ com as outras ações do contexto. Sem primária, fica à vista a 1ª secundária.
+    Substitui, só no cabeçalho da tela, o "primária e uma secundária à vista" da MAIS-01. Ficam como vieram: o que não é botão simples (troca
+    de visão, texto de estado, ação com motivo, decisão do momento) e o ⋯ que a tela já tem, que recebe as ações recolhidas (um ⋯ só)."""
+    if isinstance(acoes,str): acoes=[acoes]
+    partes=[q for x in acoes if x for q in (partes_html(x) if isinstance(x,str) else [x])]
+    ja=[i for i,a in enumerate(partes) if isinstance(a,str) and 'class="g2mais-w"' in a]
+    resto=[a for i,a in enumerate(partes) if i not in ja]
+    lim=0 if any(isinstance(a,str) and _verde(a) for a in resto) else 1
+    vis=[]; menu=[]; nsec=0
+    for a in resto:
+        if not isinstance(a,str): menu.append(a); continue
+        if _verde(a) or 'data-decide' in a.split('>',1)[0]: vis.append(a); continue
+        simples=item_menu(a) is not None
+        if nsec<lim or not simples: vis.append(a); nsec+=simples; continue
+        menu.append(a)
+    if not menu: return ''.join(partes)
+    sec=[a for a in vis if not _verde(a)]; prim=[a for a in vis if _verde(a)]
+    if ja:   # o ⋯ da tela recebe as ações recolhidas, antes das que já tinha
+        alvo=partes[ja[0]]; k=alvo.find('class="g2mais-menu"'); j=alvo.find('>',k)+1
+        its=''.join((item_menu(i) or i) if isinstance(i,str) else _item_tupla(i) for i in menu)
+        return ''.join(sec)+''.join(prim)+alvo[:j]+its+alvo[j:]+''.join(partes[i] for i in ja[1:])
+    return ''.join(sec)+''.join(prim)+mais(contexto,menu)
 # DS-ALVO-20261015: liga o alvo de toque dos componentes (ALVO_ST) só com ponteiro grosso. Um link com cara de botão (inline-block) passa
 # a flex para o texto ficar no meio da altura maior; um link em bloco continua em bloco (flex). A escolha em pílula com estado (chip de
 # filtro rápido, segmento, aria-pressed) também ganha os 44 px, inclusive as cópias do estilo do chip feitas nas telas
@@ -1551,29 +1576,40 @@ TABELA_CSS=(
     # Tabela | Cartões e sobrar altura para as linhas (AC-PCM-22: ≥ 5 linhas acima da dobra a 390 px)
     "@media (max-width:480px){.g2rot{display:none}}"
 )
-# VIS-06 · cartões em linha (16/10/2026, _cartoes_html; referência: Atividades do plano › Cartões): um cartão por linha com borda e raio de
-# 12 px, colunas alinhadas entre os cartões (grade em cada linha, g2cdVals._cdgtc), rótulos uma vez no alto, seta à esquerda que abre os
-# itens dentro do cartão, ⋯ no fim; hover verde (VIS-02), foco de 2 px, 44 px no toque; no estreito os campos descem, com o rótulo
+# Cartões do motor (_cartoes_html): VIS-06 de 16/10 (cartão em linha, colunas alinhadas) revista pela VIS-07 de 17/10 (abaixo). Continua:
+# borda e raio de 12 px, seta à esquerda que abre os itens dentro do cartão, ⋯ no fim; hover verde (VIS-02), foco de 2 px, 44 px no toque
 CARTOES_CSS=(
-    ".g2cartoes{display:flex;flex-direction:column;gap:8px;padding:0 0 12px;box-sizing:border-box;container-type:inline-size}"
-    ".g2cd-grade{display:flex;flex-direction:column;gap:8px}"
+    # VIS-07 (17/10/2026, proprietário, sobre a O.S. em Cartões agrupada por talhão: "os cartoes em ordem de serviço estao fora do padrao
+    # design system"): o modo Cartões do motor é uma grade de cartões compactos em toda largura, inclusive dentro de cada grupo; sem cabeçalho
+    # de colunas; cada cartão com a seta (itens dentro), o título (identificador) com o selo de estado, até G2_CD_MAX campos rotulados em
+    # duas colunas e o ⋯. Substitui o "um cartão por linha, colunas alinhadas e rótulos no alto" de 16/10 (VIS-06) no motor
+    ".g2cartoes{display:flex;flex-direction:column;gap:10px;padding:0 0 12px;box-sizing:border-box;container-type:inline-size}"
+    ".g2cd-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:10px;align-items:start}"
     ".g2cd{min-width:0;border:1px solid #E4E9E5;border-radius:12px;background:#FFFFFF;box-sizing:border-box;font-size:13px}"
     ".g2cd.g2ed{cursor:pointer}.g2cd:focus-visible,.g2cd-k:focus-visible{outline:2px solid #1E7A4C;outline-offset:2px}"
     "@media (hover:hover){.g2cd.g2ed:hover{border-color:#9DBFAA}}"
-    ".g2cd-g{display:grid;align-items:center;min-width:0;box-sizing:border-box;padding:0 4px 0 6px}"
-    ".g2cd-lin{min-height:52px}.g2cd-fs{display:contents}"
+    # grade de cada cartão: seta · seleção · título · ⋯ na 1ª linha; os campos descem, em duas colunas, com o rótulo
+    ".g2cd-g{display:grid;align-items:center;min-width:0;box-sizing:border-box;padding:0 4px 0 6px;grid-template-columns:0px auto minmax(0,1fr) auto!important}"
+    ".g2cartoes[data-car=\"1\"] .g2cd-g{grid-template-columns:max(36px,var(--g2seta-alvo)) auto minmax(0,1fr) auto!important}"
+    # o título do grupo (Agrupar por) sempre tem a seta que recolhe; o cartão só reserva a coluna da seta quando algum cartão tem itens dentro
+    # (17/10: agrupada por talhão, cada cartão abria com ~40 px vazios à esquerda)
+    ".g2cd-gcab.g2cd-g{grid-template-columns:max(36px,var(--g2seta-alvo)) auto minmax(0,1fr) auto!important}"
+    ".g2cd-lin{min-height:52px}"
+    ".g2cd-fs{display:grid;grid-column:3/4;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;padding:0 8px 10px}"
+    ".g2cd-c{grid-column:1;grid-row:1}.g2cd-s{grid-column:2;grid-row:1}.g2cd-tit{grid-column:3;grid-row:1}.g2cd-a{grid-column:4;grid-row:1}"
     ".g2cd-s,.g2cd-c,.g2cd-a{display:flex;align-items:center;justify-content:center;min-width:0}"
-    ".g2cd-tit{min-width:0;padding:6px 8px;display:flex;flex-direction:column;gap:2px}"
-    ".g2cd-tl{display:flex;align-items:center;gap:8px;min-width:0}"
+    ".g2cd-tit{min-width:0;padding:8px 8px 6px;display:flex;flex-direction:column;gap:2px}"
+    ".g2cd-tl{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}"
     ".g2cd-tl>.g2pw{flex:0 1 auto;flex-wrap:nowrap;min-width:0;overflow:hidden;font-size:13.5px;font-weight:700;line-height:1.3}"
     ".g2cd-tl>.g2pw>*{white-space:nowrap}"
     ".g2cd-tl>.g2pw>[style*=\"flex-basis: 100%\"],.g2cd-tl>.g2pw>[style*=\"flex-basis: 100%\"]~*{display:none}"   # 2ª linha da célula: fica na Tabela e no detalhe
     ".g2cd-tl>.g2pw>:not(:first-child):not(b):not([data-dica]){font-weight:500;color:#65736A;font-size:12.5px}"
+    ".g2cd-selo{display:inline-flex;flex-shrink:0;min-width:0}.g2cd-selo .g2pw{flex-wrap:nowrap}"   # selo de estado (fase, situação) ao lado do título
     ".g2cd-kn{flex-shrink:0;font-size:12px;color:#65736A;white-space:nowrap}"
     ".g2cd-nota{font-size:12px;color:#65736A;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}"
-    ".g2cd-f{min-width:0;padding:6px 8px;display:flex;flex-direction:column;gap:2px;font-size:13px}"
-    ".g2cd-f.g2cd-num{align-items:flex-end;text-align:right;font-variant-numeric:tabular-nums}"
-    ".g2cd-fl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}"   # no largo o rótulo vem do alto; fica para o leitor
+    ".g2cd-f{min-width:0;padding:0;display:flex;flex-direction:column;gap:2px;font-size:13px}"
+    ".g2cd-f.g2cd-num{font-variant-numeric:tabular-nums}"
+    ".g2cd-fl{font-size:11.5px;color:#65736A;white-space:normal}"
     ".g2cd-fv{min-width:0;max-width:100%;overflow:hidden}"
     ".g2cd-fv .g2pw{display:block;min-width:0;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}"   # bloco: as reticências só valem fora do flex
     ".g2cd-fv .g2pw>[style*=\"flex-basis: 100%\"],.g2cd-fv .g2pw>[style*=\"flex-basis: 100%\"]~*{display:none}"
@@ -1581,8 +1617,8 @@ CARTOES_CSS=(
     # partes do valor ganham o espaço que o flex da Tabela dava (16/10: "Fungicida AF26-02" colava as partes nos cartões)
     ".g2cd-fv .g2pw>:is([style*=\"color: #65736A; font-size: 12px\"],[style*=\"color: rgb(101, 115, 106); font-size: 12px\"]):not(:first-child){display:none}"
     ".g2cd-fv .g2pw>*+*{margin-left:6px}"
-    ".g2cd-hd{min-height:24px;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#65736A;border:1px solid transparent}"
-    ".g2cd-hd .g2cd-tit,.g2cd-hd .g2cd-f{padding-top:0;padding-bottom:0;display:block;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
+    ".g2cd-hd{display:none}"   # VIS-07: sem cabeçalho de colunas; o rótulo vem em cada campo
+    ".g2cd-gcab .g2cd-fs:not(:has(.g2pw>*)),.g2cd-f:not(:has(.g2cd-fv .g2pw>*)):not(:has(.g2cd-fv>b)){display:none}"   # campo vazio não ocupa lugar
     ".g2cd-tot{min-height:40px;border-radius:10px;background:#F4F6F3;border:1px solid transparent;font-variant-numeric:tabular-nums}"
     ".g2cd-gcab{min-height:40px;padding-top:6px;border:1px solid transparent}.g2cd-gcab .g2cd-gnome{font-weight:800}"
     ".g2cd-gx{display:inline-flex;align-items:baseline;gap:4px;font-size:12.5px;color:#65736A;white-space:nowrap;font-variant-numeric:tabular-nums}"
@@ -1592,17 +1628,6 @@ CARTOES_CSS=(
     ".g2cd-k .g2cd-tl>.g2pw{font-size:13px;font-weight:600}"
     "@media (hover:hover){.g2cd-k.g2ed:hover{background:#F2F8F4}}"
     "@media (pointer:coarse){.g2cd-k{min-height:48px}}"
-    # estreito (contêiner até 640 px): título e ⋯ na 1ª linha; os campos descem, em duas colunas, com o rótulo
-    "@container (max-width:640px){"
-    ".g2cd-g{grid-template-columns:0px auto minmax(0,1fr) auto!important}"
-    ".g2cartoes[data-car=\"1\"] .g2cd-g{grid-template-columns:max(36px,var(--g2seta-alvo)) auto minmax(0,1fr) auto!important}"
-    ".g2cd-hd{display:none}"
-    ".g2cd-fs{display:grid;grid-column:3/4;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;padding:0 8px 10px}"
-    ".g2cd-c{grid-column:1;grid-row:1}.g2cd-s{grid-column:2;grid-row:1}.g2cd-tit{grid-column:3;grid-row:1}.g2cd-a{grid-column:4;grid-row:1}"
-    ".g2cd-f{padding:0}.g2cd-f.g2cd-num{align-items:flex-start;text-align:left}"
-    ".g2cd-fl{position:static;width:auto;height:auto;clip:auto;font-size:11.5px;color:#65736A;white-space:normal}"
-    ".g2cd-gcab .g2cd-fs:not(:has(.g2pw>*)),.g2cd-f:not(:has(.g2cd-fv .g2pw>*)):not(:has(.g2cd-fv>b)){display:none}"   # campo vazio não ocupa lugar
-    "}"
 )
 G2_CSS=(".g2dsel{position:fixed;z-index:90;box-sizing:border-box;overflow-y:auto;max-width:min(420px,calc(100vw - 16px));padding:6px;background:#FFFFFF;border:1px solid #E4E9E5;border-radius:12px;box-shadow:0 12px 28px -12px rgba(21,32,26,.35);font-family:inherit;outline:none}"   # lista suspensa do DS (15/10)
     ".g2dsel [role=option]{display:flex;align-items:center;gap:6px;min-height:36px;padding:7px 12px 7px 8px;border-radius:8px;font-size:13.5px;font-weight:600;color:#15201A;cursor:pointer;white-space:nowrap}"
@@ -1771,7 +1796,8 @@ AG_ICONES={'oque':_ip_ag('<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0
             'onde':_ip_ag('<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>'),   # lucide map-pin
             '0':_ip_ag('<path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h18"/>')}   # lucide menu (sem agrupar)
 AG_CTRL={}   # gid: (botão Agrupar por com a trilha, menu), para o mesmo controle fora da Tabela (Kanban da O.S.)
-def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None,vazio=True,ag=None,sico=None,sico_so_icone=False,menu_linha=False,busca_extra='',cartoes=None):
+TAB05_FORA={'CA-02.dc.html','GE-02det.dc.html','GE-03.dc.html','GE-08.dc.html'}   # frente PAINEL-FIXO-2 do Codex (17/10/2026): não mexer
+def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None,vazio=True,ag=None,sico=None,sico_so_icone=False,menu_linha=None,busca_extra='',cartoes=None):
     cols=[_col_un(c) for c in cols]
     # rótulos que ficariam iguais sem a unidade ("Custo (R$/h)" e "Custo (R$/ha)") mantêm a unidade, sem parênteses: "Custo R$/h", "Custo R$/ha"
     # (proprietário, 05/10/2026: "Custo R$/h e R$/ha é melhor e mais intuitivo")
@@ -1787,6 +1813,9 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     edit: dict(m='form'|'ro'|'origin'|'none', title, sub, fields=[dict(k,l,t='txt'|'num'|'sel'|'date'|'area',opts,req,min,max,u,cond=dict(k,eq),help,def,ro)], calc, newTitle, leafOnly)."""
     gid=gid or wid('g'); edit=edit or {'m':'none'}
     if FIRST_TBL[0] is None: FIRST_TBL[0]=gid
+    # TAB-05 em toda tabela (DS-MODULOS-2, 17/10/2026): o botão de ação da célula vai para o ⋯ da linha por padrão (menu_linha=None). A grade
+    # com lixeira (dele) segue com a lixeira até pedir menu_linha=True; as telas da frente aberta do Codex ficam como estão até ela fechar
+    if menu_linha is None: menu_linha=not dele and CUR not in TAB05_FORA
     acoes_linha=dele or menu_linha
     n=len(cols)+(1 if sel else 0)+(1 if acoes_linha else 0)
     # qf: filtro rápido por uma coluna, k (chave), cut (fica o texto antes do separador), sep (vários valores na célula), todas ('Todas'|'Todos')
@@ -1945,25 +1974,27 @@ def cab_colunas_html(gid,ncols,headtools=True):
              f'<span class="g2hb" style="cursor: default;"><span class="g2hl">{_h("h.l")}</span></span>')
           + '</div></sc-for>')
 def _cartoes_html(gid,cel_sel,cel_del):
-    """Modo Cartões da grade, VIS-06 (16/10/2026, proprietário: "deixe o modo de visão do cartão igual de planos agronômicos"): um cartão por
-    linha, como as Atividades do plano. Grade de cada linha (g2lib.g2cdVals, _cdgtc): seta · seleção · título (TAB-09) · até G2_CD_MAX colunas alinhadas
-    em todos os cartões · ⋯. Rótulos das colunas uma vez, no alto (_cdhd); no estreito (contêiner até 640 px) os campos descem para baixo do
-    título, com o rótulo. Árvore: a seta abre os filhos dentro do cartão, nas mesmas colunas. Agrupar por: título do grupo com as somas
-    alinhadas. Total numa linha acima, alinhado. Clique ou Enter abre o mesmo detalhe da linha da Tabela; listas com rótulo (role=list)."""
+    """Modo Cartões da grade. VIS-07 (17/10/2026, proprietário: "os cartoes em ordem de serviço estao fora do padrao design system"; revê o
+    "um cartão por linha com colunas alinhadas" da VIS-06 de 16/10): grade de cartões compactos (CARTOES_CSS), inclusive dentro de cada grupo.
+    Cada cartão: seta · seleção · título com o selo de estado (TAB-09) · ⋯ na 1ª linha; embaixo, até G2_CD_MAX campos rotulados em duas
+    colunas (g2lib.g2cdVals). Sem cabeçalho de colunas (_cdhd fica só para o leitor antigo e não aparece). Árvore: a seta abre os filhos dentro
+    do cartão. Agrupar por: título do grupo com as somas. Total numa faixa acima. Clique ou Enter abre o mesmo detalhe da linha da Tabela;
+    listas com rótulo (role=list)."""
     H=lambda s:_h(gid+s); F_='{{false}}'; T_='{{true}}'; G=f'style="{H("_cdgtc")}"'
     pt=lambda lst: f'<sc-for list="{_h(lst)}" as="p" hint-placeholder-count="1">{_PARTS}</sc-for>'
     acao=lambda lst: f'<span class="g2cd-a" data-noedit="1"><sc-for list="{_h(lst)}" as="c" hint-placeholder-count="0">{cel_del}</sc-for></span>'
     campos=lambda lst: (f'<div class="g2cd-fs"><sc-for list="{_h(lst)}" as="f" hint-placeholder-count="3"><div class="{_h("f.cls")}">'
                         f'<span class="g2cd-fl">{_h("f.l")}</span><span class="g2cd-fv"><span class="g2pw">{pt("f.parts")}</span></span></div></sc-for></div>')
     vazio='<span class="g2cd-c"></span><span class="g2cd-s"></span>'   # TAB-09: a coluna da seta vem antes da seleção
+    selo=lambda x: (f'<sc-if value="{_h(x+".temSelo")}" hint-placeholder-val="{F_}"><span class="g2cd-selo"><span class="g2pw">{pt(x+".selo")}</span></span></sc-if>')   # VIS-07
     kid=(f'<div role="listitem" data-rid="{_h("k.id")}" class="{_h("k.cls")}" {G} tabIndex="{_h("k.tab")}" onClick="{_h("k.open")}" onKeyDown="{_h("k.key")}">' + vazio
          + f'<div class="g2cd-tit" style="{_h("k.tst")}"><span class="g2cd-tl">'
          f'<sc-if value="{_h("k.caretOk")}" hint-placeholder-val="{F_}">{seta_abrir(_h("k.caretExp"),_h("k.caretLabel"),_h("k.toggle"))}</sc-if>'
-         f'<span class="g2pw">{pt("k.tparts")}</span></span></div>' + campos('k.fs') + acao('k.acts') + '</div>')
+         f'<span class="g2pw">{pt("k.tparts")}</span>{selo("k")}</span></div>' + campos('k.fs') + acao('k.acts') + '</div>')
     card=(f'<div role="listitem" data-rid="{_h("cd.id")}" class="{_h("cd.cls")}" tabIndex="{_h("cd.tab")}" onClick="{_h("cd.open")}" onKeyDown="{_h("cd.key")}">'
           f'<div class="g2cd-g g2cd-lin" {G}><span class="g2cd-c"><sc-if value="{_h("cd.temKids")}" hint-placeholder-val="{F_}">{seta_abrir(_h("cd.kexp"),_h("cd.kal"),_h("cd.ktog"),cls="g2cd-nk")}</sc-if></span>'
           f'<span class="g2cd-s" data-noedit="1"><sc-for list="{_h("cd.sels")}" as="c" hint-placeholder-count="0">{cel_sel}</sc-for></span>'
-          f'<div class="g2cd-tit"><span class="g2cd-tl"><span class="g2pw">{pt("cd.tparts")}</span><sc-if value="{_h("cd.temKn")}" hint-placeholder-val="{F_}"><span class="g2cd-kn">{_h("cd.kn")}</span></sc-if></span>'
+          f'<div class="g2cd-tit"><span class="g2cd-tl"><span class="g2pw">{pt("cd.tparts")}</span>{selo("cd")}<sc-if value="{_h("cd.temKn")}" hint-placeholder-val="{F_}"><span class="g2cd-kn">{_h("cd.kn")}</span></sc-if></span>'
           f'<sc-if value="{_h("cd.temNota")}" hint-placeholder-val="{F_}"><span class="g2cd-nota"><span class="g2pw">{pt("cd.nota")}</span></span></sc-if></div>'
           + campos('cd.fs') + acao('cd.acts') + '</div>'
           f'<sc-if value="{_h("cd.kopen")}" hint-placeholder-val="{F_}"><div role="list" aria-label="{_h("cd.klab")}" class="g2cd-kids">'

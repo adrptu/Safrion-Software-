@@ -4,7 +4,7 @@ tradução edita), vínculos (grupos da natureza, operações do processo, ratei
 'Importar do ERP' simulado com prévia, 'Publicar estrutura' e rótulos sem jargão."""
 # TABELAS-FOCO (06/10/2026): origem, código superior (painel) e o que muda no rascunho (coluna No rascunho; a versão v6 está no cabeçalho)
 from cadc_lib import T
-import time
+import time, json
 t=T(); J=t.J
 try:
     t.goto('CD-07.dc.html'); body=J("document.body.innerText")
@@ -13,7 +13,14 @@ try:
     # na faixa de atenção) no cabeçalho como secundária, só com rascunho; Importar do ERP é ferramenta da barra da grade
     t.chk('cabeçalho com versão em vigor, rascunho e pendência; primária "Criar código"; secundárias Importar (na barra) e "Publicar versão v6" (no cabeçalho)',
           'v5 em vigor · rascunho v6 com 3 alterações · 1 tradução pendente' in t.header() and 'Criar código' in t.header()
-          and 'Importar do ERP' in body and 'Publicar versão v6' in t.header() and not t.errs(), t.header())
+          and 'Importar do ERP' in body and not t.errs(), t.header())
+    # MAIS-02 (17/10/2026): o oráculo antigo pedia "Publicar versão v6" à vista no cabeçalho; agora fica no ⋯ ao lado da primária, e à vista só
+    # "Criar código" e o ⋯ (contraprova: o render anterior mostra Publicar à vista e reprova aqui)
+    cab=json.loads(J("JSON.stringify((()=>{const h=document.querySelector('header h1').parentElement; const vis=e=>e.getClientRects().length>0; const n=s=>(s||'').replace(/\\s+/g,' ').trim();"
+                     " const m=h.querySelector('button.g2mais'); return {vis:[...h.querySelectorAll('button,a[href]')].filter(b=>vis(b)&&!b.matches('.g2mais,.volta37,.g2-info')&&!b.closest('.g2mais-menu')).map(b=>n(b.innerText)),"
+                     " mais:m?m.getAttribute('aria-label'):null, itens:m?[...m.nextElementSibling.querySelectorAll('[role=menuitem]')].map(i=>n(i.textContent)):[]};})())") or '{}')
+    t.chk('MAIS-02: à direita do título só "Criar código" e o ⋯, que guarda "Publicar versão v6"',
+          cab.get('vis') == ['Criar código'] and cab.get('mais') == 'Mais ações de Estrutura gerencial' and cab.get('itens') == ['Publicar versão v6'], cab)
     t.chk('Cultura vem do CD-02 (5 culturas, com milho) e Processo é etapa (TRAT), sem PULV nem CR-SOJA',
           # TABELAS-FOCO (06/10/2026); revisão TABR (09/10/2026, A1): a origem e os vínculos ficam no painel do código
           'Cultura 5 códigos' in (t.anyrow(0,'Cultura 5') or '') and pv('MILHO','origT')=='Culturas e cultivares' and 'operações Pulverização' in pv('TRAT','vincT')

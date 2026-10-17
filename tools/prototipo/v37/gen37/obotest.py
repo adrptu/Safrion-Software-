@@ -26,7 +26,7 @@ try:
     go('ON-01.dc.html')
     r=clk('Continuar cultura e ciclo'); chk('ON-01 ação de linha abre painel',r=='ok' and J("document.body.innerText.indexOf('Salvar cultura e ciclo')>=0") and not FORM())
     clk('Salvar cultura e ciclo'); chk('ON-01 painel confirma e passo avança', cell(0,'3 · Cultura',1)=='Concluído' and cell(0,'3 · Cultura',3)=='Cultura e ciclo salvos', cell(0,'3 · Cultura',3))
-    clk('Anexar CAR'); clk('Anexar documento'); chk('ON-01 CAR baixa pendência', bool(J("/PENDÊNCIAS\\s*2\\s*polígono · prévia/.test(document.body.innerText)")))
+    clk('Anexar CAR'); clk('Anexar documento'); chk('ON-01 CAR baixa pendência (TAB-07, 17/10: a contagem fica no selo do cabeçalho, não num cartão)', bool(J("/Passo 3 de 6 · 2 pendências/.test(document.querySelector('header').innerText)")))
     rowclick(0,'5 · Importação'); chk('ON-01 linha abre consulta', FORM() and J("document.body.innerText.indexOf('Consulta')>=0")); clk('Fechar','aside[role=dialog]')
     # ---- ON-01det: validar sem corrigir, corrigir estoque na linha, validar de novo
     go('ON-01det.dc.html')

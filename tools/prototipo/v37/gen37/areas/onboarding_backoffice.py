@@ -97,10 +97,10 @@ def on01():
     # ações de linha: quando o painel é confirmado, a linha mostra o resultado e o estado do passo avança
     acts={i:a for i,_,_,_,_,a in P}
     EXTRAJS[0]='const ON_ACTS='+json.dumps(acts,ensure_ascii=False)+';\n'+ON1_JS
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre os passos; passo, pendências e dia do trial vão no selo do cabeçalho; a área
+    # declarada, o fim do trial e o modo autônomo já estão em "Direitos do trial" e nos passos
     corpo=(
-      kpis([('TRIAL',H('k_tdia'),H('k_tfim')),('ÁREA DECLARADA',f'{TRIAL["area_ha"]} ha','limite do trial'),
-            ('PENDÊNCIAS',H('k_pend'),H('k_pendd')),('MODO','Autônomo','sem integração')])
-      + section('Passos do assistente','Continue de onde parou: cada dado é pedido quando for usado e nada fictício é gravado como fato.',
+      section('Passos do assistente','Continue de onde parou: cada dado é pedido quando for usado e nada fictício é gravado como fato.',
         [idrw('Importar arquivo',d_imp,'doc','Importar planilha ou shapefile com prévia obrigatória'),
          idrw('Configurar integração',d_int,'layers','Conectar um sistema de origem (opcional)'),
          ilnk('Abrir mapa','IN-04.dc.html','map','Ver as áreas no mapa')],g_p)
@@ -108,7 +108,7 @@ def on01():
         chip('Valores de piloto · hipótese','yellow'),g_t,state='yellow'))
     shell37('ON-01','Entrada e implantação guiada',corpo,ctx=CTX_ON,perfil=PERFIL_ON,
       subtitle='Veja o mapa cedo; operar exige os dados e autorizações do processo, pedidos no momento do uso.',
-      status=('Passo 3 de 6 · retomável','yellow'),
+      status=(H('on_st'),'yellow'),
       primary='Criar primeiro planejamento',primary_href='SAF.dc.html',
       footer='Entrada por Google, Apple ou e-mail leva à mesma conta; contratar não exige cartão para tarefas gratuitas (ONB-04/06, cap. 58).')
 
@@ -121,7 +121,8 @@ function PREVALS(self,v){ const ad=self.state.added||{}; let pend=['polígono','
     if(all && ON_EST[r.id]){ r.p.estado=[{k:'chip',t:ON_EST[r.id][0],c:ON_EST[r.id][1]}]; r.s.estado=ON_EST[r.id][0]; } });
   v.k_pend=String(pend.length); v.k_pendd=pend.join(' · ')||'nenhuma';
   /* dia do trial pela mesma data simulada do BO-02 (PLAT-D19; revisão PLAT, achado 8) */
-  const A=assinLer(), tr=assinTrial(A.orgs.boaesp,A.hoje); v.k_tdia=tr.acabou?'encerrado':tr.t; v.k_tfim='até '+assinBrC(tr.fim); }
+  const A=assinLer(), tr=assinTrial(A.orgs.boaesp,A.hoje); v.k_tdia=tr.acabou?'encerrado':tr.t; v.k_tfim='até '+assinBrC(tr.fim);
+  v.on_st='Passo 3 de 6 · '+(pend.length?pend.length+(pend.length===1?' pendência':' pendências'):'sem pendência')+' · '+(tr.acabou?'trial encerrado':'trial '+tr.t); }   /* o mesmo dia do BO-02 (achado 8) */
 '''
 # =====================================================================================
 ON_JS=r'''

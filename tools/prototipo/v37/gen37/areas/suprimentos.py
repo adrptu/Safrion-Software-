@@ -291,15 +291,14 @@ function PREVALS(self,v){ cenOuvir(self); supAtualizaNec(self); RW(self,'g_nec')
   r.p.pedir=((V.falta>0.001)?[faixa(pa)]:[M('—')]).concat([BRK,M('necessária '+dm(V.data))]); r.s.pedir=(V.falta>0.001)?pa:''; }); }
 function EXTRAVALS(self,v){ pnVals(self,v); }''')
     painel()
-    corpo=(kpis([('Itens com falta firme',str(nfalta),'SOL-2026-07 em cotação + KCl, diesel e rolamento'),('Pedido atrasado',str(natr),'o “pedir até” já passou'),
-                 ('Condicionado à qualidade','10 t','KCl 60% · K26-11 · laudo 27/09'),('Valor da falta firme',f'R$ {nf(valor/1000,1)} mil','SOL-2026-07 · preço de referência')])
-           + bloco('Necessidade líquida por data','Confira a falta firme de cada item e abra a cotação; expanda o item para ver a origem da demanda.',g
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas; o valor da falta firme entra no selo do cabeçalho
+    corpo=(bloco('Necessidade líquida por data','Confira a falta firme de cada item e abra a cotação; expanda o item para ver a origem da demanda.',g
                    + nota('KCl 60%: falta firme 140 − 50 − 40 = 50 t.'),
                    acao=mini('open_rep','Reprogramar proposta','Muda a data necessária de um item sem enviar nova cotação','calendar')))
     HEIGHTS37[fname]=1760
     shell37('SU-01','Necessidades e cobertura',corpo,fname=fname,
       subtitle='Necessidade líquida por data com origem, físico apto, reservas, entregas firmes e data limite de compra.',
-      status=(f'{nfalta} itens com falta firme · {natr} atrasados','red'),primary_html=prima('CMP.dc.html','Abrir cotação da SOL-2026-07'),
+      status=(f'{nfalta} itens com falta firme · {natr} atrasados · R$ {nf(valor/1000,1)} mil','red'),primary_html=prima('CMP.dc.html','Abrir cotação da SOL-2026-07'),
       footer='Revisar uma falta não envia cotação; cobertura prevista e estoque físico aparecem em colunas separadas (SU-01 · CAL-01). '
              'As toneladas em quarentena não entram na falta firme e ficam como coberto se o laudo aprovar, somadas uma única vez; a linha abre a memória de cálculo.')
 
@@ -405,7 +404,7 @@ def su03():
                  val=([txt(f'R$ {nf(val/1000,1)} mil')] if val else [mut('do proprietário' if 'consignado' in l['prop'] else ('fora do total' if l['item']=='Café beneficiado' else '—'))])),o=o))
     g=grid([dict(k='item',l='Item · lote',w=230),dict(k='loc',l='Local'),dict(k='fis',l='Físico',t='num',a='r'),dict(k='ret',l='Retido'),
             dict(k='util',l='Utilizável',t='num',a='r'),dict(k='res',l='Reservado',t='num',a='r'),dict(k='disp',l='Disponível',t='num',a='r'),dict(k='cust',l='Custódia',t='num',a='r'),
-            dict(k='val',l='Valor',t='num',a='r')],rows,gid='g_sal',total=False,
+            dict(k='val',l='Valor',t='num',a='r',pre='R$ ',agg='sum')],rows,gid='g_sal',total=True,   # TAB-07: o valor em insumos é a linha de total
         edit=dict(m='origin',title='Saldo',fields=[fs('item','Item · lote',ro=True),fs('loc','Local',ro=True)]))
     pn={'res':dict(title='Reservar saldo para ordem',sub='A reserva nunca passa do disponível do lote e fica ligada à ordem de destino.',ok='Reservar',
         fields=[fs('os','Ordem de destino','sel',opts=[f"OS-0421 · Fungicida 1ª aplicação (REQ-035 · faltam {nq(R35['solicitado']-R35['entregue'])} L)"],req=True,**{'def':f"OS-0421 · Fungicida 1ª aplicação (REQ-035 · faltam {nq(R35['solicitado']-R35['entregue'])} L)"}),
@@ -423,9 +422,8 @@ function PREVALS(self,v){ RW(self,'g_sal').forEach(r=>{ const V=r.v, u=' '+V.un;
 function EXTRAVALS(self,v){ pnVals(self,v); }''' % (R35['solicitado']-R35['entregue']))
     painel()
     ncust=len([l for l in _lotes() if l['cust']])
-    corpo=(kpis([('Conflito de reserva','1',f'F26-02 · pendência {nq(SOL_FA)} L') if CONFL_FA else ('Conflito de reserva','0','F26-02 · uso da safra e pendência de compra na demanda única'),('Lotes retidos','3','K26-11 · M26-05 · L27-013'),
-                 ('Custódia em campo',f'{ncust} ordens','OS-0417 · OS-0421 · OS-0420'),('Valor em insumos',f'R$ {nf(tot/1e6,2)} mi','próprio · sem café e consignado')])
-           + bloco('Estoque por item, lote, proprietário e local','Confira físico, retido, reservado e disponível de cada lote; clique na linha para ver a origem do saldo.',
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas; o valor em insumos é o total da coluna Valor
+    corpo=(bloco('Estoque por item, lote, proprietário e local','Confira físico, retido, reservado e disponível de cada lote; clique na linha para ver a origem do saldo.',
                    g,
                    acao=alink('SU-08.dc.html','Ver movimentos','Abre o extrato de movimentos','lista')))
     HEIGHTS37[fname]=1000
@@ -676,8 +674,8 @@ function EXTRAVALS(self,v){ pnVals(self,v); sims(self,v); }''',
                conf='Fertisul confirmou a carga 3 (40 t) para 02/10 · programação atualizada sem alterar o contratado (simulado · nenhuma mensagem real enviada)',
                pico=f"Pico projetado {_rs(C['exp'])} em 02/10 (carga 3) · dentro do limite de {_rs(C['limite'])} · emitir a carga 4 antes de receber a 3 levaria o pico a {_rs(C['pico'])} (conflito)"))
     painel()
-    corpo=(kpis([('Conflitos','1','carga 4 · CT-2026-11'),('A receber até 26/09','3','NF 4533 · PC-093 · PC-094'),('Liberado a entregar',_rs(C['exp']+DIESEL_EXP),'KCl · diesel'),('Contratos vigentes','3','Fertisul · Ipiranga · Santa Rita Insumos')])
-           + bloco('Contratos de fornecimento','Confira contratado, liberado e exposição de cada contrato; clique na linha para ajustar condição e vigência.',gctr
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
+    corpo=(bloco('Contratos de fornecimento','Confira contratado, liberado e exposição de cada contrato; clique na linha para ajustar condição e vigência.',gctr
                    ,
                    acao=mini('open_ctr','Formalizar contrato','Cria o contrato a partir da proposta selecionada','doc'))
            + bloco('Pedidos','Confira o que falta entregar em cada pedido; clique na linha para ajustar chegada, uso e depósito.',gped
@@ -832,8 +830,8 @@ function EXTRAVALS(self,v){ pnVals(self,v); sims(self,v); const rs=RW(self,'g_re
     self.setState({g2toast:'NF 4533 conferida: '+qq(c,'kg')+' · apto '+nf(r.v.apto)+' · retido '+nf(r.v.quar)+' kg · PC-090 a entregar 20.000 → '+nf(r.v.aberto)+' kg · título a encaminhar (aceite físico ≠ aprovação financeira)'}); }; }'''
     js(pn,code.replace('__DOK__',str(DIESEL['preco'])).replace('__DNF__',str(PRECO_NF_DIESEL)).replace('__DQ__',str(DIESEL['q'])))
     painel()
-    corpo=(kpis([('Divergências abertas',H('k_div'),H('k_div_s')),('Em quarentena',H('k_quar'),H('k_quar_s')),('A receber',H('k_pend'),H('k_pend_s')),('Pedidos com saldo aberto',H('k_ab'),H('k_ab_s'))])
-           + bloco('Conferência de pedido, documento e material','Confira cada entrega contra o pedido e a NF; clique na linha pendente para registrar o conferido.',
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
+    corpo=(bloco('Conferência de pedido, documento e material','Confira cada entrega contra o pedido e a NF; clique na linha pendente para registrar o conferido.',
                    g,
                    acao=mini('ler','Ler documento/QR','Lê a chave da NF e localiza o pedido (simulado)','doc')+mini('open_seg','Segregar lote','Retém parte do apto de um lote','alert')
                         +mini('open_div','Resolver diferença','Decide a divergência de preço da NF 8812','cash')))
@@ -937,8 +935,8 @@ function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_req');
     js(pn,code.replace('__R36__',str(SEM_RESID)).replace('__KS__',str(kcl_saldo)).replace('__V3T__',str(R37['consumido']+R37['resid_v3']))
             .replace('__N26__',str(R40['disp'])).replace('__PEN__',str(R40['solicitado']-R40['disp'])))
     painel()
-    corpo=(kpis([('Em custódia',H('k_cu'),H('k_cu_s')),('Fila de separação',H('k_se'),H('k_se_s')),('Impedidas',H('k_im'),H('k_im_s')),('Sobras a receber',f"{R31['custodia']} sc",'REQ-031 · OS-0417 em conferência')])
-           + bloco('Fila de separação por ordem','Separe e entregue só o saldo autorizado da versão aprovada; clique na linha para ajustar recebedor, local e data.',
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
+    corpo=(bloco('Fila de separação por ordem','Separe e entregue só o saldo autorizado da versão aprovada; clique na linha para ajustar recebedor, local e data.',
                    g,
                    acao=mini('open_sol','Solicitar','Cria requisição a partir da versão aprovada da O.S.','doc')+alink('MB-05.dc.html','Ler QR no app','Confere a entrega pelo app de campo','box')))
     HEIGHTS37[fname]=1080
@@ -1133,8 +1131,8 @@ function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_inv');
     setRows(self,'g_inv',rows=>{ rows.find(y=>y.id===id).v.st='aguarda'; }); toast(self,id+' submetido a '+r.v.apr+' · R$ '+nf(r.v.val)+' dentro da alçada do gestor · o saldo só muda depois da aprovação'); }; }'''
     js(pn,code)
     painel()
-    corpo=(kpis([('Ajustes aguardando gestor',H('k_ag'),H('k_ag_s')),('Diferenças a submeter',H('k_di'),H('k_di_s')),('Contagens planejadas',H('k_pl'),H('k_pl_s'))])
-           + bloco('Contagens cegas por local, item e lote','Planeje, conte e trate cada diferença com causa, evidência e aprovador; clique na linha para completar os dados.',
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
+    corpo=(bloco('Contagens cegas por local, item e lote','Planeje, conte e trate cada diferença com causa, evidência e aprovador; clique na linha para completar os dados.',
                    g,
                    acao=mini('open_plan','Planejar contagem','Cria contagem cega com corte de movimentos','calendar')+alink('MB-05.dc.html','Contar no app','Abre a contagem no app de campo','box')))
     prim=(f'<sc-if value="{H("has2609")}" hint-placeholder-val="{T()}">{primb("apr2609","Aprovar ajuste INV-2609","check")}</sc-if>'

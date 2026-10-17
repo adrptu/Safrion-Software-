@@ -92,7 +92,8 @@ try:
     chk('A12i contestação aberta e nada a conciliar: primária Resolver contestação abre a Santa Rita; Registrar resolução (manter) volta a primária desabilitada',
         p0 == ['Resolver contestação'] and 'Grupo Santa Rita' in d and 'Contestação de set/2026' in d and 'resolvida (RES-0001): valor mantido' in t and pb is True, [p0, d[:300], t, pb])
     # dia do trial pela mesma data simulada no ON-01 e no BO-02 (achado 8)
-    go('ON-01.dc.html'); on16 = J("document.querySelector('main').innerText.replace(/\\s+/g,' ')") or ''; go('BO-02.dc.html'); bo16 = linha(0, 'Boa Esperança')
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): no ON-01 o dia do trial saiu do cartão de resumo e está no selo do cabeçalho; lê-se cabeçalho e corpo
+    go('ON-01.dc.html'); on16 = J("(document.querySelector('header').innerText+' '+document.querySelector('main').innerText).replace(/\\s+/g,' ')") or ''; go('BO-02.dc.html'); bo16 = linha(0, 'Boa Esperança')
     chk('A12j trial da Boa Esperança em 01/10: ON-01 e BO-02 dizem "dia 13 de 30" (mesma data simulada, nada fixo)', 'dia 13 de 30' in on16 and 'dia 13 de 30' in bo16, [on16[:300], bo16])
     # ============ BO-01 ============
     go('BO-01.dc.html'); b = body()

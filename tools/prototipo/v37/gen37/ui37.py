@@ -88,6 +88,19 @@ CURTO37={'PAGR.dc.html':('Painel','grafico'),'PMAN.dc.html':('Painel','grafico')
 OUTROS37=('Outros acessos','grid','MOD-OUT.dc.html',[('App de campo','MB-01.dc.html','celular'),('Portal do parceiro','PT-01.dc.html','users'),
                                                     ('Onboarding','ON-01.dc.html','check'),('Backoffice','BO-02.dc.html','escudo')])
 VOLTA37.update({_hv.split('#')[0]:(_nv,HUB37[_nv]) for _nv,_iv,_itv in MENU2 if _nv in HUB37 for _lv,_hv in _itv})
+# CAB-1 (DS-MODULOS-2, 17/10/2026; proprietário: "aplicacao do design system padrao, referencia modulo agricola ainda nao foi para demais
+# modulos"): Onboarding e Backoffice abrem por "Outros acessos" e voltam por ele, com o mesmo "‹ Módulo" das telas do menu
+VOLTA37.update({'ON-01.dc.html':(OUTROS37[0],OUTROS37[2]),'BO-02.dc.html':(OUTROS37[0],OUTROS37[2])})
+# Telas fora do menu (legado ainda gerado, abertas por links): o mesmo cabeçalho do Agrícola. "‹ Módulo" pelo prefixo, para o módulo do menu
+# onde o assunto mora hoje (Campo, Planejamento, Irrigação e Gestão moram em Agrícola; Colheita, Vendas e Logística em Comercial); o caminho
+# diz o mesmo módulo. O detalhe (crumbs_extra) continua voltando à sua lista pela seta.
+VOLTA_PREF={'AG':'Agrícola','CA':'Agrícola','PL':'Agrícola','IR':'Agrícola','GE':'Agrícola','SU':'Suprimentos','CO':'Comercial','VE':'Comercial',
+            'LO':'Comercial','MA':'Manutenção','CF':'Configurações','CD':'Cadastros','IN':'Mapa','PT':'Portal do parceiro','BO':OUTROS37[0],'ON':OUTROS37[0]}
+_VOLTA_DEST={'Mapa':'IN-04.dc.html','Portal do parceiro':'PT-01.dc.html',OUTROS37[0]:OUTROS37[2],'Cadastros':'CD.dc.html'}
+def volta_modulo(fname):
+    """(rótulo, destino) do "‹ Módulo" de uma tela fora do menu, pelo prefixo; None quando o prefixo não tem módulo."""
+    nome=VOLTA_PREF.get(fname[:2])
+    return (nome,HUB37.get(nome) or _VOLTA_DEST.get(nome)) if nome else None
 INICIO37='IN-04.dc.html'   # o protótipo começa no Mapa (1º item do menu)
 MENU_OF={'CA-01det.dc.html':'OS.dc.html','CA-02.dc.html':'OS.dc.html','CA-01x-os0420.dc.html':'OS.dc.html',
  'IR-02.dc.html':'IR-01.dc.html','IR-03.dc.html':'IR-01.dc.html','IR-03det.dc.html':'IR-01.dc.html','IR-04.dc.html':'IR-01.dc.html'}  # detalhes e telas irmãs que pertencem a um item do menu (o BEN é item próprio de Agrícola desde 13/10)
@@ -307,6 +320,13 @@ MF_LBL = 'display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px
 def faixa_campo(rot, ctl):
     """filtro da tela na faixa: rótulo (MF_LBL) + controle (seletor ou grupo de chips com aria-pressed), sem quebrar entre os dois"""
     return f'<span style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;"><span style="{MF_LBL.format(MUTED=MUTED)}">{rot}</span>{ctl}</span>'
+def volta_pilula(rot, href):
+    """botão "‹ Módulo" do cabeçalho (CAB-1): o mesmo em toda tela que volta ao módulo ou à tela de entrada"""
+    return (f'<a href="{href}" class="volta37" aria-label="Voltar para {esc(rot)}" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 14px 0 10px; '
+            f'border: 1px solid {LINE}; border-radius: 999px; background: {SURF}; color: {INK}; font-size: 13px; font-weight: 700; flex-shrink: 0;">'
+            f'<span aria-hidden="true" style="font-size: 16px; line-height: 1;">‹</span>{esc(rot)}</a>')
+# contexto só de leitura (fazenda da safra, safra, parceiro) na faixa "Trabalhando em": pílula cinza, o mesmo desenho do _macro_html
+CTX_LAB = f'display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: {GRAYS}; font-weight: 700; font-size: 11.5px;'
 def faixa_filtros(inner, rot='Filtros', fim=''):
     cab = (f'<span class="mf-rot" data-dica="Filtros" style="display: inline-flex; align-items: center; color: {MUTED};">{icon("filtro",18,MUTED)}</span>' if rot == 'Filtros'
            else f'<span class="mf-rot" style="font-size: 11.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: {MUTED};">{rot}</span>')
@@ -316,7 +336,7 @@ def faixa_filtros(inner, rot='Filtros', fim=''):
 def _macro_html(fname, ctx, sep=True):
     cfg = MACRO.get(fname)
     sel = MF_SEL
-    lab = f'display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: {GRAYS}; font-weight: 700; font-size: 11.5px;'
+    lab = CTX_LAB
     if cfg is None:
         return ''
     out = ''
@@ -370,6 +390,9 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
         m=MAPA.get(fid) or {'area':area_of(fid) or 'Módulo oculto','submenu':CAT.get(fid,{}).get('titulo',fid)}
     if fname==OUTROS37[2]: m={'area':OUTROS37[0],'submenu':OUTROS37[0]}
     if fname in VOLTA37 and not crumbs_extra: m={'area':m['area'],'submenu':title}   # cadastro aberto pela tela inicial: o caminho diz qual
+    _oc=oculto(fname); _area0=m['area']
+    vmod=volta_modulo(fname) if _oc else None   # CAB-1 (DS-MODULOS-2): tela fora do menu volta ao módulo e o caminho diz o mesmo módulo
+    if vmod: m=dict(m,area=vmod[0])
     crumbs=([m['area']] if m['area']==m['submenu'] and not crumbs_extra else [m['area'],m['submenu']])+(crumbs_extra or [])   # "Cadastros", não "Cadastros › Cadastros"
     back=PARENT37.get(fname) or ffile(fid) if crumbs_extra else (PARENT37.get(fname) or fname)
     _sep=f' <span style="color: {MUTED};">›</span> '
@@ -380,9 +403,12 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
         else: parts.append(f'<span>{esc(c)}</span>')
     crumb=_sep.join(parts)
     if crumbs==[title]: crumb=''   # tela de entrada do módulo: o caminho repetiria o título (13/10, mais essencial)
-    if oculto(fname):
-        ctxp=''.join(f'<span style="font-size: 11.5px; color: {MUTED}; font-weight: 600;">{esc(c)}</span>' for c in tuple(ctx) if c)   # 14/10 (menos é mais): saiu o rótulo "Módulo oculto no menu · preservado"
-        ctxp+=f'<span style="width: 1px; height: 18px; background: {LINE};"></span>'
+    if _oc:
+        # CAB-2 (DS-MODULOS-2, 17/10/2026): o contexto (fazenda, safra, parceiro) sai do topo e vai para a faixa "Trabalhando em" da FIL-01,
+        # o mesmo lugar e desenho das telas do menu (Compras, Planejar safra); o que o caminho já diz (módulo) não se repete
+        ctxp=''
+        _cx=[c for c in tuple(ctx) if c and c not in (m['area'],_area0)]
+        if _cx: body=faixa_filtros(''.join(f'<span title="Contexto desta tela" style="{CTX_LAB}">{esc(c)}</span>' for c in _cx),'Trabalhando em')+body
     else:
         ctxp=''   # Fazenda e Safra não ficam mais no topo (13/10/2026): vão para a tela, junto dos dados
         mf=_macro_html(fname,ctx,sep=False)+mf_extra   # FIL-02 (15/10/2026): filtro da tela (chips, seletor) entra na mesma faixa, não numa linha própria
@@ -402,6 +428,7 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
     # BOT-08 (15/10/2026): verde é comando; o destino que só abre outra tela (Abrir, Ver, Voltar, Consultar, Ir) é link secundário
     navega=bool(primary and primary_href and re.match(r'^(Abrir|Ver|Voltar|Consultar|Ir|Acessar)\b',str(primary)))
     prim=primary_html or (btn(primary,not navega,href=primary_href) if primary else '')
+    prim=E.recolhe_cabecalho(title,prim) if prim else ''   # MAIS-02 (17/10/2026): à direita do título, a primária e o ⋯ com as outras ações
     controw=cont if cont else ''
     # 13/10/2026 (proprietário: "reduza ou elimine todas essas descrições abaixo dos títulos e os demais soltos pela tela ... somos minimalistas e essencialistas"):
     # a regra que ficava numa faixa no rodapé vira uma dica (ⓘ ao lado do título, com nome acessível; abre no hover, no foco e no toque)
@@ -409,11 +436,7 @@ def shell37(fid,title,body,subtitle='',status=None,primary=None,primary_href=Non
     info=(f'<button type="button" class="g2-info" aria-label="Regras desta tela" data-dica="{esc(footer)}" style="flex-shrink: 0; width: 32px; height: 32px; border-radius: 999px; '
           f'border: 1px solid {LINE}; background: {SURF}; color: {MUTED}; font-family: inherit; font-size: 15px; font-weight: 700; cursor: help; display: inline-flex; align-items: center; justify-content: center;">i</button>') if footer else ''
     voltar=f'<a href="{back}" aria-label="Voltar" style="text-decoration: none; display: inline-flex; align-items: center;">{chev()}</a>' if crumbs_extra else ''
-    if not crumbs_extra and fname in VOLTA37:
-        _vr,_vh=VOLTA37[fname]
-        voltar=(f'<a href="{_vh}" class="volta37" aria-label="Voltar para {esc(_vr)}" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 14px 0 10px; '
-                f'border: 1px solid {LINE}; border-radius: 999px; background: {SURF}; color: {INK}; font-size: 13px; font-weight: 700; flex-shrink: 0;">'
-                f'<span aria-hidden="true" style="font-size: 16px; line-height: 1;">‹</span>{esc(_vr)}</a>')
+    if not crumbs_extra and (fname in VOLTA37 or vmod): voltar=volta_pilula(*(VOLTA37.get(fname) or vmod))
     html=f'''<!doctype html>
 <html lang="pt-BR">
 <head>

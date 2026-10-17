@@ -306,10 +306,15 @@ try:
         # revisão DS (achado 3): trocar de etapa pelo botão da linha (Enter) tira o botão da tela; o foco vai ao título do novo contexto, não ao BODY
         for pg, rot in (('CMP.dc.html', 'Abrir compra'), ('SAF.dc.html', 'Continuar')):
             abre(pg)
-            okb = J(f"(()=>{{const b=[...document.querySelectorAll('main [role=row] button')].find(b=>b.getClientRects().length&&b.innerText.trim().startsWith({json.dumps(rot)})); if(!b) return false; b.focus(); return document.activeElement===b;}})()")
+            # TAB-05 no motor (DS-MODULOS-2, 17/10/2026): a ação mora no ⋯ da linha; pelo teclado: foco no ⋯, Enter abre o menu, ↓ até o item, Enter
+            okb = J(f"(()=>{{const b=[...document.querySelectorAll('main [role=row] button.g2mais')].find(b=>b.getClientRects().length&&[...b.nextElementSibling.querySelectorAll('[role=menuitem]')].some(i=>i.textContent.trim().startsWith({json.dumps(rot)}))); if(!b) return false; b.focus(); return document.activeElement===b;}})()")
+            c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.3)
+            for _ in range(8):
+                if (J("(document.activeElement&&document.activeElement.getAttribute('role')==='menuitem')?document.activeElement.textContent.trim():''") or '').startswith(rot): break
+                c.tecla('ArrowDown', 'ArrowDown', 40); time.sleep(.12)
             n7 = nreal(); c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.9); v = vivo(); rs = realces(n7)
             fo = J("(()=>{const a=document.activeElement; return a?[a.tagName,(a.innerText||'').trim().slice(0,60),!!(document.querySelector('main')||document.body).contains(a)]:null;})()")
-            chk(f'C17 {pg[:-8]} · Enter em "{rot}" na linha: a etapa 2 é anunciada e realçada, e o foco vai ao título do novo contexto (h2/h3), não ao BODY', okb and v.startswith('Etapa 2 de') and len(rs) >= 1 and fo and fo[0] in ('H2', 'H3') and fo[2], [okb, v, fo, rs])
+            chk(f'C17 {pg[:-8]} · Enter em "{rot}" no ⋯ da linha: a etapa 2 é anunciada e realçada, e o foco vai ao título do novo contexto (h2/h3), não ao BODY', okb and v.startswith('Etapa 2 de') and len(rs) >= 1 and fo and fo[0] in ('H2', 'H3') and fo[2], [okb, v, fo, rs])
         chk('C16 sem erro de execução', not errs(), errs())
 
     # ======================= D · dica =======================

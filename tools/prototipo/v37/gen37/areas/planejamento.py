@@ -174,10 +174,9 @@ def build():
                          dict(k='area',l='Área',t='num',u='ha',min=1,max=400,req=True),dict(k='plant',l='Plantio previsto',t='date',req=True,help='A data prevista nunca vira plantio realizado.'),
                          dict(k='meta',l='Meta de produtividade (hipótese)',req=True),dict(k='plano',l='Plano',t='sel',opts=list(PLN.values())+['Sem plano'],req=True)]),
        search=True,total=True,gid='g_cult')
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
     corpo=(
-      kpis([('SAFRAS ABERTAS','2','2026/27 · Safrinha 2027'),('ÁREA PLANEJADA',f'{_n(area)} ha',f'Safra 2026/27 · {len(cults)} cultivos'),
-            ('CULTIVOS SEM PLANO',str(len(semplano)),' · '.join(semplano)),('ORÇAMENTO 2026/27','Pendente','aguarda Direção')])
-      + section('Safras e períodos','Abra a safra para planejar; autorize a execução só com plano e orçamento aprovados.','',g_saf)
+      section('Safras e períodos','Abra a safra para planejar; autorize a execução só com plano e orçamento aprovados.','',g_saf)
       + section('Grade de cultivo · Safra 2026/27','Defina variedade, área, plantio previsto e plano de cada talhão ou parcela antes de detalhar as operações.',
           [imsg('Vincular ciclo','Ciclo 2026/27 do café vinculado ao pomar C1 (2019) · a ocupação mantém identidade própria · nada é recriado.','leaf','Vincular o ciclo perene ao pomar existente'),
            imsg('Revisar idades','Idades revisadas: C1 pomar 2019 · 7 anos · T7 mamão · 18 meses — atividades por idade recalculadas só no rascunho.','clock','Recalcular atividades por idade das perenes'),
@@ -196,7 +195,7 @@ function EXTRAVALS(self,v){
 }'''
     shell37('PL-01','Safras, ciclos e metas',corpo,
       subtitle='Períodos, ciclos e metas por fazenda, talhão e parcela — o cálculo existe desde o rascunho.',
-      status=('2026/27 em planejamento','yellow'),primary='Autorizar execução 2026/27',
+      status=(f'2026/27 em planejamento · {len(semplano)} sem plano','yellow'),primary='Autorizar execução 2026/27',
       footer='Autorizar execução exige plano e orçamento aplicáveis aprovados; a passagem da data nunca supre aprovação (JANELA-01).')
 
     # ================= PL-02 · Plano operacional =================
@@ -356,10 +355,9 @@ function EXTRAVALS(self,v){
                   fields=[dict(k='cen',l='Cenário',ro=True),dict(k='cobre',l='Horas cobertas',t='num',u='h',min=0,max=270,req=True),
                           dict(k='custo',l='Custo estimado (hipótese)',t='num',u='R$ mil',min=0,req=True),dict(k='rest',l='Restrição',req=True)]),
        search=False,total=False,gid='g_cen')
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
     corpo=(
-      kpis([('CARGA OUT/26','2.410 h','demanda do plano'),('CAPACIDADE LÍQUIDA','2.640 h','após manutenção'),
-            ('DÉFICIT','270 h','tratores 150+ cv'),('OCIOSIDADE OUT/26','180 h','colhedoras')])
-      + section('Carga × capacidade por recurso/classe','Compare a carga herdada do plano com a capacidade líquida; clique na classe para ver a origem dos números.',
+      section('Carga × capacidade por recurso/classe','Compare a carga herdada do plano com a capacidade líquida; clique na classe para ver a origem dos números.',
         [ilnk('Ver rendimentos','CD-08.dc.html','calc','Abrir a tabela de rendimentos das operações')],g_cap,state='red')
       + section('Cenários para o déficit de 270 h','Compare custo e restrição de cada cenário; publicar não contrata nem compra automaticamente.',
         [imsg('Simular turnos e conjuntos','Simulação: 2º turno nos tratores (out) cobre 190 h · custo estimado +R$ 26 mil · restrição: contratar 1 operador habilitado. Nada é alterado.','calc','Simular turnos, equipes e conjuntos'),
@@ -432,8 +430,7 @@ function EXTRAVALS(self,v){
       toolrow(f'<span style="font-size: 13px; font-weight: 700; white-space: nowrap;">Período de trabalho</span>'
               + seg(['Hoje','Próximos 7 dias','Próximos 14 dias'],1)
               + f'<span style="font-size: 12.5px; color: {MUTED}; white-space: nowrap;">23/09 → 29/09 · fuso da fazenda</span>')
-      + '<div style="height: 12px;"></div>'
-      + kpis([('JÁ EMITIDAS','8','7 O.S. + 1 O.M.'),('NOVAS ELEGÍVEIS','5','prévia de emissão'),('AGUARDANDO DADOS','2','sem previsão confirmada'),('FORA DO PERÍODO','1','não entra na fila')])
+      # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
       + section('Ordens do período 23–29/09','Prepare, programe e libere em passos separados; clique na ordem para ajustar janela, conjunto e operador.',
         [imsg('Preparar O.S. do período','Prévia: 13 ocorrências no período · 8 já com ordem (recuperadas, sem duplicar) · 5 novas propostas · 2 aguardando dados · itens impedidos não são emitidos como executáveis.','doc','Montar a prévia de emissão do período'),
          imsg('Conferir prontidão',f'Prontidão A liberar: {OS_DES["id"]} pronta (material separado) · Ana (agrônoma) libera · OS-0418 a liberar pelo agrônomo · Ureia sem saldo apto · {OS_DEMO17["id"]} impedida por ativo bloqueado · OS-0422 sem janela e OS-0423 em conflito com a parada da B3 (água não passa pelo agrônomo). Material previsto não significa disponível físico.','check','Conferir prontidão das ordens A liberar'),
@@ -453,7 +450,7 @@ function EXTRAVALS(self,v){
 }'''
     shell37('PL-04','Programação integrada',corpo,
       subtitle='Janela móvel de emissão e liberação: o plano projeta tudo, a janela emite pouco e libera menos.',
-      status=('1 pronta · 4 com impedimento','yellow'),
+      status=('5 novas elegíveis · 1 pronta · 4 impedidas','yellow'),
       footer='DAP/DAC/calendário mostram âncora prevista ou real; mudança recalcula apenas saldo futuro e o agrônomo ajusta ao liberar, onde cabível (JANELA-01 a 10).')
 
     # ================= PL-05 · Impedimentos e reprogramação =================
@@ -492,9 +489,9 @@ function EXTRAVALS(self,v){
                  fields=[dict(k='causa',l='Causa',ro=True),dict(k='resp',l='Responsável',t='sel',opts=RESP,req=True),
                          dict(k='prazo',l='Prazo',t='sel',opts=['vence hoje','até 3 dias','no prazo'],req=True),dict(k='alt',l='Alternativa',req=True),dict(k='apr',l='Aprovação',ro=True)]),
        search=True,total=False,gid='g_imp')
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a lista; o que pede atenção vai no selo do cabeçalho e o resto já está nas linhas
     corpo=(
-      kpis([('IMPEDIMENTOS ABERTOS','5','fila única'),('ORDENS AFETADAS','3','+ 2 itens do plano · 1 lote'),('VENCEM HOJE','1','com dono nomeado'),('ÁREA PARADA','172 ha','102 + 70 ha, sem dupla contagem')])
-      + section('Fila única de impedimentos','Trate cada impedimento com dono, prazo e alternativa; clique na linha para ajustá-los.',
+      section('Fila única de impedimentos','Trate cada impedimento com dono, prazo e alternativa; clique na linha para ajustá-los.',
         [imsg('Notificar responsáveis','Notificados 5 donos · alertas do mesmo impedimento agrupados num caso único (simulado · nenhuma mensagem real enviada).','users','Avisar os donos dos impedimentos abertos')],g_imp,state='red')
       + section('O que resolver faz — e não faz','Reprograme só o saldo futuro; o realizado e as aprovações ficam preservados.',
         [idrw('Reprogramar saldo',dict(title='Reprogramar saldo',sub='somente o saldo; realizado e aprovações preservados',
@@ -511,7 +508,7 @@ function EXTRAVALS(self,v){
 }'''
     shell37('PL-05','Impedimentos e reprogramação',corpo,
       subtitle='Fila única de faltas, chuva, ativo, técnica, pessoas, qualidade e integração — propostas lado a lado.',
-      status=('1 vence hoje','red'),
+      status=('5 impedimentos · 1 vence hoje · 172 ha parados','red'),
       footer='Impedimento tem dono e prazo; o selo fica na ordem (nunca vira etapa do Kanban). '
              'Resolver compra ou manutenção revalida prontidão; não inicia máquina nem muda a agenda automaticamente. A liberação técnica do ativo após teste válido não reassume a agenda antiga: o PCP reconfirma o saldo necessário. A adubação pós-colheita do C1 (NEC-019) não entra nesta fila: aguarda a decisão da pendência no plano operacional, sem compra.')
 

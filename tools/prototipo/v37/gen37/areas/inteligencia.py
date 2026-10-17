@@ -160,8 +160,10 @@ def iv():
                   dict(k='liq', l='Líquido', t='num', a='r', w=130)],
                  [], edit=dict(m='pick'), gid='g_ivc', total=False)
     V.EXTRAJS[0] = V._js(DI.js_precos() + _ijs() + IV_JS)
-    corpo = (_ind(('Produtos em alta', 'k_al', 'k_aln'), ('Vender agora', 'k_ag', 'k_agn'), ('Mês de melhor preço', 'k_mm', 'k_mmn'))
-             + AP.bloco('Preço e melhor mês para vender', 'Preço de agora, variação, tendência sem o efeito da época e o mês que historicamente paga mais. Esperar só aparece quando o ganho da época passa de 3% depois do custo do dinheiro (1,2% a.m.). Série sintética de 60 meses: histórico não é previsão.', g_ivm + AP.cartoes('cards_ivm'))
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a 1ª lista; "em alta" e o melhor mês estão nas colunas Tendência e
+    # Melhor mês, "Vender agora N" no filtro rápido de "O que fazer" e o resumo no selo do cabeçalho. Os indicadores dos blocos seguintes ficam
+    # entre os blocos: são o painel do assunto desta tela de análise
+    corpo = (AP.bloco('Preço e melhor mês para vender', 'Preço de agora, variação, tendência sem o efeito da época e o mês que historicamente paga mais. Esperar só aparece quando o ganho da época passa de 3% depois do custo do dinheiro (1,2% a.m.). Série sintética de 60 meses: histórico não é previsão.', g_ivm + AP.cartoes('cards_ivm'))
              + _ind(('Vendas abaixo da referência', 'k_ab', 'k_abn'), ('Venda sem oferta que cubra', 'k_rk', 'k_rkn'), ('Melhor recebimento líquido', 'k_liq', 'k_liqn'))
              + AP.bloco('Preço × mercado', 'Preço médio contratado (Σ valor ÷ Σ quantidade, só venda) × referência de mercado com fonte. Abaixo de −5% vira alerta; sem cotação, fica em branco.', g_ivp + AP.cartoes('cards_ivp'))
              + AP.bloco('Safra comercializada', 'Vendido ÷ oferta da safra (previsão publicada ou estoque apto, todas as fazendas). Acima de 100% é venda maior que a oferta.', g_ivs + AP.cartoes('cards_ivs'))
@@ -287,9 +289,10 @@ def ic():
     g_ich = grid([dict(k='grupo', l='Grupo', w=200), dict(k='total', l='Total orçado', t='num', a='r', w=160), dict(k='rsha', l='R$/ha', t='num', a='r', w=140)],
                  [], edit=dict(m='pick'), gid='g_ich', total=False)
     V.EXTRAJS[0] = V._js(DI.js() + DI.js_precos() + _ijs() + IC_JS)
-    corpo = (_ind(('Insumos em alta', 'k_al', 'k_aln'), ('Comprar agora', 'k_ag', 'k_agn'), ('Economia esperando o mês certo', 'k_es', 'k_esn'))
-             + AP.bloco('Preço e melhor mês para comprar', 'Preço de agora, tendência sem o efeito da época, o mês mais barato no histórico e o que fazer até a próxima necessidade do Planejar safra, já descontado o prazo de entrega. Esperar só aparece quando a época barateia 3% ou mais. Série sintética de 60 meses: histórico não é previsão.', g_icm + AP.cartoes('cards_icm'))
-             + _ind(('Cotações acima da referência', 'k_ac', 'k_acn'), ('Economia pela melhor cotação', 'k_ec', 'k_ecn'), ('Insumos por hectare', 'k_ha', 'k_han'))
+    # TAB-07 (DS-MODULOS-2, 17/10/2026): sem cartões de resumo sobre a 1ª lista; "em alta" está na coluna Tendência e "Comprar agora N" no
+    # filtro rápido de "O que fazer"; a economia esperando o mês certo é o total da lista e abre os indicadores entre os blocos
+    corpo = (AP.bloco('Preço e melhor mês para comprar', 'Preço de agora, tendência sem o efeito da época, o mês mais barato no histórico e o que fazer até a próxima necessidade do Planejar safra, já descontado o prazo de entrega. Esperar só aparece quando a época barateia 3% ou mais. Série sintética de 60 meses: histórico não é previsão.', g_icm + AP.cartoes('cards_icm'))
+             + _ind(('Economia esperando o mês certo', 'k_es', 'k_esn'), ('Cotações acima da referência', 'k_ac', 'k_acn'), ('Economia pela melhor cotação', 'k_ec', 'k_ecn'), ('Insumos por hectare', 'k_ha', 'k_han'))
              + AP.bloco('Preço por insumo', 'Último preço pago × referência da safra × melhor cotação atual. Cotação 5% acima da referência vira alerta. O histórico de preço é sintético e vem marcado.', g_ici + AP.cartoes('cards_ici'))
              + AP.bloco('Fornecedores', 'Preço relativo (média das cotações contra a referência), prazo de entrega cotado e pontualidade (entregas no prazo ÷ entregas).', g_icf + AP.cartoes('cards_icf'))
              + AP.bloco('Custo de insumos por hectare', 'Σ (quantidade da safra × referência) ÷ área da safra, por grupo. Use para comparar com o orçamento.', g_ich + AP.cartoes('cards_ich')))
