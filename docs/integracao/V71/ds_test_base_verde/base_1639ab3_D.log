@@ -1,0 +1,20 @@
+OK  D1 botão indisponível com motivo continua focável (aria-disabled="true", sem disabled) e traz o motivo em data-dica
+OK  D2 hover: a dica abre (role=tooltip) com o porquê; o leitor de tela recebe aria-describedby; a dica nativa (title) sai de cima
+OK  D3 tirar o ponteiro fecha a dica e devolve o title
+OK  D4 foco de teclado: a dica abre e descreve o botão (aria-describedby="g2-dica")
+OK  D5 Esc fecha a dica sem tirar o foco do botão
+OK  D6 Enter no botão indisponível: o comando não roda (1 recibo), a dica mostra o porquê e a recusa é anunciada
+OK  D7 ícone sem texto (ícone "Mapa" da barra recolhida): a dica mostra o nome do módulo e não vira descrição repetida; a dica nativa sai enquanto ela está aberta e volta quando o ponteiro sai
+OK  D8 título igual ao rótulo visível (rótulo cortado no IN-04): sem dica
+OK  D8b ponteiro no rótulo cortado (title igual ao texto): o title sai (sem a dica nativa repetida) e volta quando o ponteiro sai
+OK  D9 selo de estado (coluna A liberar do Kanban): significado e próximo passo (Aprovar e liberar)
+OK  D10 selo da lista (Falta insumo · …): o que falta e quem resolve
+OK  D11 unidade no cabeçalho da coluna (R$/ha): a dica explica a conta no foco do botão de ordenar
+OK  D14 sigla ou unidade na célula vira dica do cabeçalho: DAP (PL-02 Gatilho por extenso) e sc/ha (GE-02 Premissas, "rendimento 62 sc/ha"), aberta no foco do botão de ordenar
+FALHOU D13 Tab até a linha da OS-0418: a dica do selo "Falta insumo" (o que falta e quem resolve) abre e descreve a linha (aria-describedby) · {'foco': 'Falta insumo OS-0418 Fertirrigação · rec', 'fv': True, 'db': 'g2-dica', 'vis': True, 't': 'A liberar: Criada e ainda fora do campo. Próximo passo: liberar. O.S. agrícola: Aprovar e liberar (o agrônomo aprova a versão e o gestor libera, em dois registros); irrigação só com água, manutenção e beneficiamento: libera o responsável próprio.'}
+OK  D13b o clique do ponteiro na linha não abre a dica do selo (só o foco de teclado)
+OK  D13c Tab até o cartão da OS-0418 no Kanban: a mesma dica do selo, descrevendo o cartão
+OK  D15 selo "Sobras a receber" da OS-0417: a dica é o bloqueio do encerramento (o mesmo texto do painel) e quem resolve (Rui, almoxarife)
+OK  D12 sem erro de execução
+RESULTADO: FALHOU 17/18
+rc=1

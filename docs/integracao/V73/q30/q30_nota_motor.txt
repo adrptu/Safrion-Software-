@@ -1,0 +1,1 @@
+Nota: credito_ficha_motor_unit.js rodou antes de credito_ficha_build.py gerar credito_ficha_generated.js (ordem do q30.sh; ENOENT). Reexecutado em 05947ad após a geração: rc=0, RESULTADO 17/17 (q30_credito_ficha_motor_unit.js.rerun.log).
