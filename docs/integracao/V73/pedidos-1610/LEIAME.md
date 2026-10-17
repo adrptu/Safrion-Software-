@@ -17,10 +17,12 @@ Esta pasta guarda as fontes dos três pedidos, copiadas sem alteração dos arqu
 ## Gabarito do Raio-X (12 de 14)
 
 - O enunciado do gabarito está em `raiox-alvo-pedido.md`, linhas 19–25 (efeitos plantados e o resultado de 25/09) e linha 249 (a forma de entregar).
-- A simulação que o produz é `docs/integracao/V71/insumos/pragas-no-tempo.html`, já versionada na base.
-  - SHA-256 `8b9e105e7ee7e9f0692c2264b3f41fe45bcb3da1bec3916f23e8a0e72a717f15`.
-  - Esse hash é igual ao do anexo `714f7525-pragas-no-tempo.html` que o proprietário mandou em 16/10.
-- O artefato privado do Raio-X (versão 3) não está no repositório. O pedido o cita só como referência.
+- **Correção (17/10):** a simulação que produz o resultado de 12 de 14 está no artefato privado do Raio-X (versão 3), e não no `pragas-no-tempo.html`.
+  - O artefato v3 tem SHA-256 `00b5d915221eda4c789ec8f7ee8eeb6e526086815de136ace62e023ef10ed72e`, com 151.928 bytes, lido pelo Claude com a ferramenta Artifact.
+  - Ele não está no repositório: a cópia depende de o proprietário autorizar.
+- O `docs/integracao/V71/insumos/pragas-no-tempo.html` já versionado na base é o anexo que o proprietário mandou em 16/10.
+  - SHA-256 `8b9e105e7ee7e9f0692c2264b3f41fe45bcb3da1bec3916f23e8a0e72a717f15`, igual ao do anexo `714f7525-pragas-no-tempo.html`.
+  - Não contém o Raio-X.
 
 ## Onde está o código de cada recorte (fonte vigente)
 
