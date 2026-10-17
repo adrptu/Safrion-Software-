@@ -1,0 +1,15 @@
+LO02det AST/adapter captured; layout e prefixo substituídos, não é build/UI.
+PASS saída real baixa mil kg uma vez e gera recibo
+PASS perfil Caio recusado com rascunho preservado
+PASS falha de storage não baixa e mantém pesos para repetir
+PASS bruto/tara inválidos ficam no formulário
+PASS RM alterada depois da abertura bloqueia
+PASS âncora inexistente não escolhe outra carga
+PASS sem programada não restaura cenário fictício
+PASS estado encerrado continua no mesmo detalhe após saída
+PASS dois lotes exigem soma igual ao líquido e baixam cada origem
+PASS crédito sem pagamento antecipado recusa a saída
+PASS coluna Saída mostra os kg baixados do lote, não undefined (A1 da revisão)
+PASS consulta de RM já saída explica o motivo, não permissão (A2 da revisão)
+PASS endereço guarda a RM após a saída e o botão muda para Expedição (A3 da revisão)
+13 testes G2/comSair/produção reais, fixture sintética de abertura; sem navegador.
