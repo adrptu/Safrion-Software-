@@ -88,7 +88,9 @@ try:
     # Santa Rita
     limpa(); J("sessionStorage.setItem('mapa-ctx',JSON.stringify({mf_faz:'Santa Rita',lay:'Colheita'})); 1"); c.goto(U('IN-04.dc.html'), 1.8)
     tids_sr = ['T1', 'T2', 'P1', 'P2', 'T4', 'T3', 'T7', 'C1']   # geometria da Santa Rita (inicio.GEO)
-    rot_sr = {t: J(f"(()=>{{const e=[...document.querySelectorAll('svg [aria-label]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); return e?e.getAttribute('aria-label'):'';}})()") or '' for t in tids_sr}
+    # MUX-F1 (17/10/2026): o nome acessível do talhão passou a ser o completo do pedido ("T4, 120 ha, …"); o talhão se acha por data-talhao e o
+    # rótulo da camada vem de data-rotulo, o mesmo texto que vinha depois de "T4: " (oráculo obsoleto na forma de achar; a asserção não muda)
+    rot_sr = {t: J(f"(()=>{{const e=[...document.querySelectorAll('svg [aria-label]')].find(x=>x.getAttribute('data-talhao')==='{t}'); return e?e.getAttribute('data-talhao')+': '+e.getAttribute('data-rotulo'):'';}})()") or '' for t in tids_sr}
     esp_sr, _ = esperado('Santa Rita', tids_sr)
     ruins_sr = {t: [rot_sr[t], e] for t, e in esp_sr.items() if e.split(' · +')[0] not in rot_sr[t] or (('+' in e) and e.split(' · ')[-1] not in rot_sr[t])}
     chk(f'C2 rótulo de cada talhão = situação da Previsão e colheita (Lagoa Grande {len(esp_lg)} pivôs, Santa Rita {len(esp_sr)} talhões; "+N" com mais cultivos)',

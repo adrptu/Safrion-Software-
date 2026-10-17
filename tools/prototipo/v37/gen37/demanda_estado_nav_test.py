@@ -64,8 +64,10 @@ try:
               const hs=[...t.querySelectorAll('[role=columnheader]')].map(h=>n(h.innerText.replace(/[⇅▾▴▼▲]/g,'')).replace(/ · \\d+$/,'').toUpperCase()); const r=[...t.querySelectorAll('[role=row]')].find(x=>{{const c=x.querySelector('[role=cell]'); return c&&n(c.innerText)==={json.dumps(nome)};}});
           if(!r) return {{}}; const cs=[...r.querySelectorAll('[role=cell]')]; const o={{}}; ['ESTOQUE APTO','A RECEBER','NECESSIDADE','NA COMPRA'].forEach(k=>{{const i=hs.indexOf(k); o[k]=i>=0&&cs[i]?n(cs[i].innerText):'';}}); return o;}})()""") or {}
         return dict(row=r,k2=k2,cl=cl,memo=(memo(nome) if memo_ else []))
+    # MUX-F1 (17/10/2026): o talhão é um botão com data-talhao e o rótulo da camada em data-rotulo (o aria-label agora é o nome completo:
+    # "T4, 204 ha, …"). Oráculo obsoleto na forma de achar; a asserção não muda
     SV="[...document.querySelectorAll('svg [role=button]')]"
-    def tap(t): J(f"(()=>{{const e={SV}.find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); e&&e.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}})()"); time.sleep(.5)
+    def tap(t): J(f"(()=>{{const e={SV}.find(x=>x.getAttribute('data-talhao')==='{t}'); e&&e.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}})()"); time.sleep(.5)
     pan=lambda t: (J(f"(document.querySelector('aside[aria-label^=\"{t}\"]')||{{}}).innerText||''") or '').replace('\n',' · ')
     def mapa(tal,faz='Santa Rita'):
         J(f"sessionStorage.setItem('mapa-ctx',{json.dumps(json.dumps({'mf_faz':faz,'lay':'Insumos','tsel':[],'flt':{'Insumos':{'per':'Safra toda'}}}))})"); ir('IN-04.dc.html',w=2.0)

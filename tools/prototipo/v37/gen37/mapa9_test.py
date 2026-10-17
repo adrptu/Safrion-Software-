@@ -59,8 +59,10 @@ ativa = lambda: J(f"{TRI}.filter(b=>b.getAttribute('aria-selected')==='true').ma
 BLOCO = "(()=>{const n=document.querySelector('nav[aria-label=\"Funcionalidades do mapa\"]'); let s=n; while(s&&s.parentElement&&!(s.innerText||'').match(/Selecionar área/)) s=s.parentElement; return s;})()"
 legenda = lambda: J(f"(()=>{{const s={BLOCO}; const d=s&&[...s.querySelectorAll('div')].filter(x=>x.getClientRects().length&&/position: absolute; left: 12px; bottom: 12px/.test(x.getAttribute('style')||''))[0]; return d?d.innerText.replace(/\\s+/g,' '):'';}})()") or ''
 def tal(t):   # rótulo (aria-label sem o "T1: ") e cor do talhão desenhado (Santa Rita)
-    return json.loads(J(f"JSON.stringify((()=>{{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); return e?[e.getAttribute('aria-label').slice({len(t) + 2}),e.getAttribute('fill')]:['',''];}})())") or '["",""]')
-def toca(t): J(f"(()=>{{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); e&&e.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}})()"); time.sleep(.6)
+    # MUX-F1 (17/10/2026): o nome acessível do talhão passou a ser o completo do pedido ("T4, 120 ha, …"); o talhão se acha por data-talhao e o
+    # rótulo da camada vem de data-rotulo, o mesmo texto que vinha depois de "T4: " (oráculo obsoleto na forma de achar; a asserção não muda)
+    return json.loads(J(f"JSON.stringify((()=>{{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>x.getAttribute('data-talhao')==='{t}'); return e?[e.getAttribute('data-rotulo'),e.getAttribute('fill')]:['',''];}})())") or '["",""]')
+def toca(t): J(f"(()=>{{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>x.getAttribute('data-talhao')==='{t}'); e&&e.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}})()"); time.sleep(.6)
 painel = lambda: (J("(()=>{const a=[...document.querySelectorAll('main aside[aria-label]')].find(x=>x.getClientRects().length); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or '')
 try:
     c.call('Page.addScriptToEvaluateOnNewDocument', {'source': "window.__err='';addEventListener('error',e=>{window.__err+=(e.message||'erro')+' | ';});"})
@@ -122,6 +124,7 @@ try:
         if not ok_b: falta.append(antiga)
     abre({'mf_faz': 'Santa Rita', 'lay': 'Insumos', 'flt': {'Insumos': {'per': 'Safra toda'}}}); ctx_ins = [ativa(), dict(grupo('Mostrar')).get('Insumos'), dict(grupo('Período')).get('Safra toda')]
     abre({'mf_faz': 'Santa Rita', 'lay': 'Integrado'}, '#car:PV23', lg=True); time.sleep(.6)
+    # MUX-F0 (17/10/2026, D27): um nome só por pivô no IN-04; o painel abre com "P23 · 64 ha", não mais "Pivô 23". Oráculo obsoleto no nome; a asserção (o painel do pivô 23) não muda
     lk_car = [ativa(), dict(grupo('Mostrar')).get('Carência e destino'), painel()[:80]]
     J(f"{TRI}.find(b=>b.innerText.trim()==='Integrado').click()"); time.sleep(.8)
     hub = json.loads(J("JSON.stringify((()=>{const s=document.querySelector('main aside[aria-label] section[aria-label=\"Neste talhão\"]'); return s?[...s.children].filter(d=>d.querySelector('button')).map(d=>[d.firstElementChild.innerText.trim(),[...d.querySelectorAll('button')].map(b=>b.innerText.trim())]):[];})())") or '[]')
@@ -129,7 +132,7 @@ try:
     J("(()=>{const b=[...document.querySelectorAll('main aside[aria-label] button')].find(b=>b.innerText.trim()==='Ver insumos'); b&&b.click();})()"); time.sleep(.8)
     ver_ins = [ativa(), dict(grupo('Mostrar')).get('Insumos')]
     chk('N5 nenhuma função sumiu: as 11 camadas de antes são alcançáveis (9 na barra, Insumos e Carência como filtro); contexto "Insumos" e link #car:PV23 abrem a função nova; Integrado do Pivô 23 com Insumos e Carência e destino e o "Ver …" de cada um',
-        not falta and ctx_ins == [['Ordens de serviço'], 'true', 'true'] and lk_car[0] == ['Colheita e produtividade'] and lk_car[1] == 'true' and 'Pivô 23' in lk_car[2]
+        not falta and ctx_ins == [['Ordens de serviço'], 'true', 'true'] and lk_car[0] == ['Colheita e produtividade'] and lk_car[1] == 'true' and lk_car[2].startswith('P23 · ')
         and [h[0] for h in hub] == ESP_HUB and all(len(h[1]) == 1 and h[1][0].startswith('Ver ') for h in hub) and ver_ins == [['Ordens de serviço'], 'true'],
         [falta, ctx_ins, lk_car, hub, ver_ins])
     # ---------- N7 · ícone "Importar laudo de análise de solo" (proprietário, 16/10/2026) ----------

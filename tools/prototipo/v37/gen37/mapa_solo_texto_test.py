@@ -116,7 +116,9 @@ try:
     # S4 · Santa Rita
     c.goto(U('Main.dc.html'), .3); J("sessionStorage.setItem('mapa-ctx','{\"mf_faz\":\"Santa Rita\"}'); 1"); c.goto(U('IN-04.dc.html'), 1.6)
     camada('Solo'); fxs = (J("(document.querySelector('[role=group][aria-label^=Indicadores]')||{}).innerText||''") or '').replace('\n', ' ')
-    c1 = J("(()=>{const e=[...document.querySelectorAll('svg [aria-label]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('C1:')); return e?e.getAttribute('aria-label'):'';})()") or ''
+    # MUX-F1 (17/10/2026): o nome acessível do talhão passou a ser o completo do pedido ("T4, 120 ha, …"); o talhão se acha por data-talhao e o
+    # rótulo da camada vem de data-rotulo, o mesmo texto que vinha depois de "T4: " (oráculo obsoleto na forma de achar; a asserção não muda)
+    c1 = J("(()=>{const e=[...document.querySelectorAll('svg [aria-label]')].find(x=>x.getAttribute('data-talhao')==='C1'); return e?e.getAttribute('data-talhao')+': '+e.getAttribute('data-rotulo'):'';})()") or ''
     chk(f'S4 Santa Rita: {ESP_SR["Com análise"]} laudos 0–20 (T1, T2, T4 e C1) pelo oráculo; C1 aguardando validação e sem H+Al: V não calculável',
         f'Laudos {ESP_SR["Com análise"]}' in fxs and 'não calculável' in c1, [fxs, c1])
     # S5 · talhão sem análise: "Registrar laudo" leva ao AG-02 com fazenda e talhão no formulário (contexto herdado, visível e corrigível)

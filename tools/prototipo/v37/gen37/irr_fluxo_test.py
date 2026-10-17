@@ -56,7 +56,9 @@ try:
     chk('4 IR-03 lê o mesmo estado: OS-0423 Liberadas, sem conflito', 'Liberadas' in ROW('OS-0423') and 'Conflito' not in ROW('OS-0423'), ROW('OS-0423'))
     # 2 · Mapa (Santa Rita): o T7 deixa de estar em conflito
     J("sessionStorage.setItem('mapa-ctx','{\"mf_faz\":\"Santa Rita\"}')"); goto('IN-04.dc.html', 2.0); errs('IN-04')
-    lab = lambda t: J(f"(()=>{{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); return e?[e.getAttribute('aria-label'),e.getAttribute('fill')]:[null,null];}})()")
+    # MUX-F1 (17/10/2026): o talhão é um botão com data-talhao e o rótulo da camada em data-rotulo (o aria-label agora é o nome completo:
+    # "T4, 204 ha, …"). Oráculo obsoleto na forma de achar; a asserção não muda
+    lab = lambda t: J(f"(()=>{{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>x.getAttribute('data-talhao')==='{t}'); return e?[e.getAttribute('data-talhao')+': '+e.getAttribute('data-rotulo'),e.getAttribute('fill')]:[null,null];}})()")
     l7 = lab('T7'); chk('5 Mapa Integrado: T7 sem "irrigação em conflito" (amarelo pela mancha do satélite)', l7[0] and 'conflito' not in l7[0] and l7[1] != '#C8553D', l7)
     J("[...document.querySelectorAll('nav[aria-label=\"Funcionalidades do mapa\"] button')].find(b=>(b.getAttribute('title')||'').startsWith('Mostrar Irrigação')).click()"); time.sleep(.6)
     chk('6 Mapa camada Irrigação: T7 "programada · hoje 15:00" e P2 "conferir medição · OS-0394"', 'programada · hoje 15:00' in (lab('T7')[0] or '') and 'conferir medição · OS-0394' in (lab('P2')[0] or ''), [lab('T7'), lab('P2')])
