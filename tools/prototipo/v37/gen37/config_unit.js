@@ -74,6 +74,7 @@ const KQ = () => Object.keys(G().lotes).find(k => G().lotes[k].quarentena > 0);
 const dupDia = () => { M(dup); return 6; };
 const ccAcima = () => M(c => osc_apontar(c, 'OS-0421', '26/09', 50, { 'Fungicida A': 80, 'Adjuvante espalhante': 0 }, [], 'W-cc'));
 const CASOS = {
+  'AL-19': [() => {}, ator => M(c => cenGrupoCriar(c, cenGrupoPrevia(c, ['OS-0590','OS-0591'], ator), ator, confChave('grupo'))), 'Caio', 'Rui'],
   'AL-01': [() => {}, ator => M(c => osc_liberar(c, 'OS-0430', false, '', ator)), 'Ana', 'Caio'],
   'AL-02': [() => {}, ator => M(c => osc_ajustar(c, 'OS-0430', 150, {}, '', [], [], false, ator)), 'Ana', 'Rui'],
   'AL-04': [() => {}, ator => M(c => osc_cancelar(c, 'OS-0430', 'teste', ['', '', ''], ator)), 'Ana', 'Caio'],
@@ -91,6 +92,13 @@ const CASOS = {
   /* AL-18 (CONTROLE-02 F2): o comando real (PlanoReferenciaComando.publicar, PR #58) precisa da tela do Planejar safra; ele lê a alçada por
      cenExigeAlc(ator, 'AL-18', …) dentro do cenMudar, e este caso lê pelo mesmo ponto */
   'AL-18': [() => {}, ator => M(c => { cenExigeAlc(ator, 'AL-18', 'Publicar referência técnica'); c.__al18 = ator; return { msg: 'ok' }; }), 'Ana', 'Rui'] };
+caso('A4 AL-19 configurável', () => { ini();
+  const r = M(c => confAlcMudar(c, 'AL-19', {papel:'gestor'}, 'Coordenação com a gestão', confChave('alc-grupo'), 'Ana'));
+  ok('A4 AL-19 mudança aceita pelo CF-01 sem aprovar ou liberar O.S.', !r.erro && g2alc('AL-19').papeis.join() === 'gestor', r);
+  const rv=G().rev, neg=CASOS['AL-19'][1]('Caio');
+  ok('A4 AL-19 PCP revogado é recusado no comando real, sem gravar', !!neg.erro && G().rev===rv, neg);
+  const pos=CASOS['AL-19'][1]('Ana');
+  ok('A4 AL-19 novo papel compõe sem CMD-42/CMD-06', !pos.erro && ['OS-0590','OS-0591'].every(id => G().ordens[id].etapa==='A liberar' && !(G().ordens[id].osc.ev||[]).some(e=>['CMD-42','CMD-06'].includes(e.cmd))), pos); });
 caso('A4 AL-18 fixa', () => { ini(); const rv = G().rev; const r = M(c => confAlcMudar(c, 'AL-18', { papel: 'agronomo' }, 'teste', confChave('t'), 'Ana'));
   ok('A4 AL-18 é fixa (contrato da F2, 6147460986): trocar o papel para agrônomo é recusado sem gravar; segue gestor', !!r.erro && G().rev === rv && g2alc('AL-18').papeis.join() === 'gestor' && g2alc('AL-18').edita === '', [r.erro || r.msg, g2alc('AL-18').papeis]); });
 G2_ALCADAS.forEach(a => caso('A4 ' + a.id, () => { const X = CASOS[a.id]; if (!X) { ok('A4 ' + a.id + ' tem caso de teste', false); return; }

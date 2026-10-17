@@ -724,6 +724,7 @@ const G2_PAPEIS=[{k:'gestor',t:'Gestor',m:'gestor',f:'gestora'},{k:'agronomo',t:
 // alçadas (CONF-01 §4, R7): papeis/modo = quem decide ('todos' os papéis ou 'um' deles); acima = nível acima do limite; edita = o que o CF-01 muda
 // ('papel', 'lim', 'acima' ou '' = fixa, com o motivo em fixa). Versão e vigência vêm dos eventos de Configurações (c.conf); a v1 vale desde a implantação.
 const G2_ALCADAS=[
+  {id:'AL-19',t:'Agrupar e programar O.S.',cmd:'OS-LOTE · composição e programação',papeis:['pcp','agronomo'],modo:'um',edita:'papel',opc:['pcp','agronomo','gestor'],obs:'coordenação operacional; não aprova versão, não libera execução nem reserva insumos'},
   {id:'AL-01',t:'Liberar O.S. agrícola',cmd:'CMD-06',papeis:['gestor'],modo:'todos',edita:'papel',opc:['gestor','pcp','agronomo'],obs:'fora desta alçada: irrigação só com água, que libera pela prontidão (DEC-2609-10)',pend:'PEND-OS-01'},
   {id:'AL-02',t:'Aprovar a versão da O.S. e ajustar antes de liberar',cmd:'CMD-42',papeis:['agronomo'],modo:'todos',edita:'',fixa:'lei (receituário agronômico) e PRD 41'},
   {id:'AL-04',t:'Cancelar O.S. sem execução',cmd:'CMD-46',papeis:['gestor'],modo:'todos',edita:'',lim:'só sem realizado',fixa:'ordem com realizado não se cancela: dispensa o saldo (AL-05)'},
