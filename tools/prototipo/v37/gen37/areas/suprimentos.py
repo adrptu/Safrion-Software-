@@ -337,7 +337,11 @@ def su02():
     service=Path(root,'sup_politicas.js').read_text(encoding='utf-8')
     adapter=Path(root,'sup_politicas_ui.js').read_text(encoding='utf-8')
     js(pn,service+'\nconst SUP_POL_SEED=supPolSeed('+json.dumps(seedrows,ensure_ascii=False)+');\n'+adapter+r'''
-function PREVALS(self,v){ const ps=supPolRefresh(self); if(!ps)return; RW(self,'g_pol').forEach(r=>{ const V=r.v;
+// selo do cabeçalho pelo estado das políticas (composição do integrador, PR #107)
+function supPolSelo(v,ps){ if(!ps) return hstatus(v,'Políticas ilegíveis · confira os dados','red'); const qs=Object.values(ps.politicas).map(p=>p.proposta).filter(Boolean), ap=qs.filter(q=>q.estado==='Aprovada').length, ag=qs.length-ap;
+  if(!qs.length) return hstatus(v,'Políticas vigentes · nenhuma proposta pendente','green');
+  hstatus(v,[ag?ag+(ag===1?' proposta aguardando gestor':' propostas aguardando gestor'):'',ap?ap+(ap===1?' aprovada a publicar':' aprovadas a publicar'):''].filter(Boolean).join(' · '),'yellow'); }
+function PREVALS(self,v){ const ps=supPolRefresh(self); supPolSelo(v,ps); if(!ps)return; RW(self,'g_pol').forEach(r=>{ const V=r.v;
   r.p.grp=[B(V.grp),M(V.dep)]; r.s.grp=V.grp+' '+V.dep;
   r.p.abc=[T(V.abc+' ·'),chipc(V.crit,V.crit==='Alta'?'red':(V.crit==='Média'?'yellow':'gray'))]; r.s.abc=V.abc+' '+V.crit;
   r.p.seg=[T(nf(V.seg)+' d · '+nf(V.prazo)+' d')]; r.s.seg=String(V.seg);
@@ -349,15 +353,15 @@ function EXTRAVALS(self,v){pnVals(self,v);supPolBind(self,v);}''')
     painel()
     corpo=(bloco('Políticas por item e depósito','Confira segurança, prazo e limites de cada política; clique na linha para propor uma nova versão.',
                  g,
-                 acao=mini('sim_sim','Simular cobertura','Simula o efeito de uma política sem alterá-la','calc')+alink('SU-01.dc.html','Ver efeito em Necessidades','Abre Necessidades com a cobertura calculada','trend'))
-           + bloco('Publicação de vigência','Publique só a versão aprovada; a simulação e as propostas não alteram a política vigente.',
-                   nota('Propostas e exceções aguardando: Diesel S10 v5 (gestor, vence em 5 dias).'),acao=mini('sim_pub','Publicar vigência','Publica a versão aprovada','check')))
+                 acao=mini('sim_sim','Simular antecedência','Prazo mais segurança de uma política, sem alterá-la','calc')+alink('SU-01.dc.html','Ver efeito em Necessidades','Abre Necessidades com a cobertura calculada','trend')))
+    # EX-50(a)-SUP (PR #107): revisar, aprovar e publicar ficam na própria linha; sem bloco de publicação com nota fixa
     HEIGHTS37[fname]=900
     shell37('SU-02','Políticas de estoque',corpo,fname=fname,
       subtitle='Política por item e local com segurança, prazo, lote, múltiplo, validade e justificativa; exceções versionadas.',
-      status=('1 proposta aguardando gestor','yellow'),primary_html=primb('open_exc','Submeter exceção'),
+      status=(MARK,'gray'),primary_html=primb('open_exc','Submeter exceção'),
       footer='Publicar vigência exige aprovação (FO-31); simulação nunca altera a política vigente (SU-02, cap. 65). '
              'Classe ABC financeira não substitui criticidade: Diesel é B em valor e Alta em criticidade. Limites do depósito e validade restringem a entrega, sem equivaler ao tamanho do contrato.')
+    dyn_status(fname)
 
 # ================= SU-03 · Saldos e lotes de materiais =================
 LOTES_X=[  # além de dados2.LOTES: sobras da REQ-031, lote zerado com custódia da OS-0420, consignado, diesel e café (produção)
