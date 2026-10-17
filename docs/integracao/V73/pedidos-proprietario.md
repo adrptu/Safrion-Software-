@@ -1,12 +1,12 @@
-# Pedidos do proprietário desde 16/10/2026, 12h: situação conferida em 17/10, 09h50 UTC
+# Pedidos do proprietário desde 16/10/2026, 12h: situação conferida em 17/10, 22h50 UTC
 
 **Fonte dos pedidos:** a transcrição da sessão do Claude.
-**Fonte da situação:** a composição `claude/v44-v69-mapa` e o artefato publicado, com estado completo na v116 (`1792228309-802d`).
+**Fonte da situação:** a composição `claude/v44-v69-mapa` e o artefato publicado, com estado completo na v129 (versão 133, `1792275554-f410`).
 
 **Conferência do artefato (executada):**
-- 148 de 148 páginas presentes, com o tamanho igual ao do manifesto (`artefato-v115/manifesto.tsv`);
-- 4 páginas conferidas por sha256;
-- origem: composição `5bb8f5e`.
+- 148 páginas enviadas em 3 lotes (versões 131 a 133); os arquivos de apoio são iguais aos da v128;
+- 4 páginas lidas de volta e conferidas por sha256 (`artefato-v129/LEIAME.md`);
+- origem: `ac10d029`, integrada na composição.
 
 | Quando | Pedido | Situação | Onde conferir no artefato |
 |---|---|---|---|
@@ -19,15 +19,15 @@
 | 16/10 21:29 | Seta do drill down mais amigável, como padrão em tudo | **Publicado** (v116, TAB-11) | Qualquer tabela: a seta fica à esquerda |
 | 16/10 21:42 | Editar todos os talhões de uma fazenda numa tela só; entradas mais rápidas | **Publicado** (v116, SAF-LOTE/INP) | Planejar safra › Talhões e cultivos › "Editar talhões…" |
 | 16/10 22:52 | Manutenção: vincular ativos a planos, de forma intuitiva | **Publicado** (v117; PR #101 integrado pelo Codex em acf65e1) | Manutenção › Planos: "4 ativos sem plano · Criar plano" e "Vincular a plano" |
-| 16/10 23:38 | Mapa com UX/UI de excelência (hover, clique, detalhe) | **Em implantação** desde 17/10 09:20 (MUX-F0/F1/F2) | — |
+| 16/10 23:38 | Mapa com UX/UI de excelência (hover, clique, detalhe) | **Publicado na v129** (MUX-F0/F1/F2: hover, clique e painel; mapa_mux 17/48/29 sem falha) | Mapa |
 | 16/10 23:40 | Resolver em 1 clique | **Não implantado** (só a crítica do Claude) | — |
 | 17/10 00:03 | Excelência EX-01..48, entrada e ações (varredura e robô) | **Em parte:** os achados de entrada e ações viraram PRs do Codex, já publicados na v113 a v116; o restante está validado, mas não implantado | O.S., CA-01det, Kanban |
-| 17/10 08:40 | Agrupar por fazenda também com uma só | **Em implantação** (frente DRILL) | — |
-| 17/10 (manhã) | Cartões e tabelas com drill down recolhido por padrão | **Em implantação** (frente DRILL) | — |
+| 17/10 08:40 | Agrupar por fazenda também com uma só | **Publicado na v129** (artefato versão 133): o Planejar safra agrupa por fazenda mesmo com uma só, recolhida ao abrir | Planejar safra › Talhões e cultivos |
+| 17/10 (manhã) | Cartões e tabelas com drill down recolhido por padrão | **Publicado na v129**: tabelas e cartões abrem recolhidos; busca e endereço de um registro abrem só o caminho dele; Expandir/Recolher tudo | Qualquer tabela com seta (O.S., Estoque, Produção, Qualidade) |
 | 17/10 09:00 | Design system do Agrícola nos demais módulos; "⋯" no topo das telas | **Publicado na v128** (artefato versão 130): desvios do padrão 175 → 13 nas 148 telas; no topo, só a ação principal e o ⋯; as ações da linha no ⋯; telas fora do menu com "‹ Módulo" e Fazenda/Safra na faixa "Trabalhando em"; sem cartões de resumo soltos sobre as listas. Os 13 que restam estão em telas da frente aberta do Codex (CA-02, GE-*) ou na ficha impressa | Qualquer módulo: Compras, Estoque, Manutenção, Comercial |
-| 17/10 09:18 | Hover e UX dentro do mapa | **Em implantação** (MAPA-UX) | — |
+| 17/10 09:18 | Hover e UX dentro do mapa | **Publicado na v129** (MAPA-UX F1): realce e dica no hover do talhão, clique abre o painel do talhão | Mapa |
 | 17/10 09:40 | Cartões da O.S. fora do padrão | **Publicado na v128**: cartões compactos em grade (4 por fileira a 1440), selo da fase no título, até 4 campos; também no Agrupar por e a 390 px | Ordens de serviço › Cartões |
-| 17/10 09:42 | Seta de drill down só onde há detalhamento | **Em implantação** (DRILL) | — |
+| 17/10 09:42 | Seta de drill down só onde há detalhamento | **Publicado na v129**: a seta só aparece em linha com filhos | Qualquer tabela |
 | 17/10 09:55 | Agrupar O.S. de vários talhões com a mesma calda ou entrada, para aprovar uma a uma, liberar as aprovadas, separar os insumos de uma vez e seguir uma sequência contínua; modal fora do design system | **Publicado e integrado** (v121; PR #105 em 461e296): grupo proposto por calda, aprovação uma a uma, liberar as aprovadas, separação e sequência | O.S. › "Agrupar operações compatíveis" › Sulfato de magnésio 2 kg/ha |
 | 17/10 10:35 | Agrupar O.S.: mostrar insumos e datas de cada O.S./talhão logo ao abrir, para conferir e agrupar | **Publicado e integrado** (v121): insumos e datas visíveis ao abrir | O.S. › "Agrupar operações compatíveis" |
 | 17/10 10:40 | EX-49: padrão único para listas, cartões, pai e filho, botões e ⋯ com ícone | **Combinado com o Codex:** Claude implanta no motor logo depois do DRILL; medida pelo robô v4 antes e depois | — |
@@ -41,7 +41,7 @@ A partir de 17/10, a regra muda. No protótipo, a implantação começa logo, co
 
 ## Ordem de implantação a partir de agora
 
-- **Claude:** MAPA-UX (em curso) → MAPA-FROTA F1 (máquinas no mapa) → SAF-MAPA (planejar safra no mapa) → MAPA-MIP-PROD (correlação) → PA-OPER F1.
+- **Claude:** MAPA-UX (publicado na v129) → N-1/B-3 do EX-51 (composição do PR #113 em curso) → MAPA-FROTA F1 (máquinas no mapa) → SAF-MAPA (planejar safra no mapa) → MAPA-MIP-PROD (correlação) → PA-OPER F1.
 - **Proposto ao Codex:** RESOLVE-1-CLIQUE e RAIOX-ALVO RX-0.
 
 O artefato é republicado a cada frente integrada. Esta tabela é atualizada na mesma entrega.
