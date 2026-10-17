@@ -28,6 +28,7 @@
 | 17/10 09:18 | Hover e UX dentro do mapa | **Em implantação** (MAPA-UX) | — |
 | 17/10 09:40 | Cartões da O.S. fora do padrão | **Em implantação** (DS-MODULOS-2) | — |
 | 17/10 09:42 | Seta de drill down só onde há detalhamento | **Em implantação** (DRILL) | — |
+| 17/10 09:55 | Agrupar O.S. de vários talhões com a mesma calda ou entrada, para aprovar uma a uma, liberar as aprovadas, separar os insumos de uma vez e seguir uma sequência contínua; modal fora do design system | **Com o Codex**, autor do OS-LOTE (pedido 6232423415) | — |
 
 ## Por que quase nada da noite chegou ao artefato
 
