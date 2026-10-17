@@ -108,13 +108,13 @@ Mesmos testes no render da base 0b3d0d4 (montado do checkout limpo, antes de qua
 | Endereço depois de escolher o P5 no Satélite, cena 25/09 | vazio | `#faz=LG&lay=sat&t=PV05&dt=25-09` | F1-8a |
 | Lista dos talhões | não existia | 8 (SR) e 23 (LG) linhas, da pior para a melhor | F1-5 |
 | Cartão no hover e no foco | 0 de 9 camadas | 9 de 9 | F2 C1–C5 |
-| Tempo do evento ao cartão (hover entre vizinhos) | — | p50 29,2 ms · p95 114,5 ms (24 hovers; SwiftShader, com até três Chromes de outros agentes na máquina: indicativo, não prova a meta de p95 < 100 ms) | F2 C2b |
+| Tempo do evento ao cartão (hover entre vizinhos) | — | do evento ao quadro: p50 52,4 ms · p95 292,7 ms; trabalho do cartão (JS): p50 14,8 ms · p95 34 ms (24 hovers em f37d71ce; SwiftShader, máquina dividida com outros agentes). O quadro inclui a pintura do mapa e pesa com a carga; não prova a meta de p95 < 100 ms | F2 C2b |
 | Contraste mínimo do texto do rótulo | texto direto sobre a cor do talhão, sem placa (K2 reprova) | 13,36:1 (Santa Rita e Lagoa Grande) | F2 K2 |
 | Legenda a 390 px (altura sobre o mapa) | — | 34 px numa linha que rola (com a contagem e quebrando em linhas, eram 157 px) | sonda de leiaute |
 
 ## 4. Testes (executado em 17/10/2026)
 
-Comandos de `G`, com `env CHROME_BIN=… CDP_GL=1 SAFRION_DADOS=sintetico RENDER_DIR=<render>`, um navegador por vez. Render montado do commit bb41f12 (`python3 -W error::SyntaxWarning -B build.py && python3 -B montar_render.py`, 156 páginas, 0 FALHA no build).
+Comandos de `G`, com `env CHROME_BIN=… CDP_GL=1 SAFRION_DADOS=sintetico RENDER_DIR=<render>`, um navegador por vez. Versão composta: **f37d71ce** = composição ac5cd1d7 (v125) + esta frente, sem conflito. Render montado desse commit (`python3 -W error::SyntaxWarning -B build.py && python3 -B montar_render.py`, 156 páginas, 0 FALHA no build). Brutos em `brutos/`.
 
 ### 4.1 Novos
 
@@ -122,26 +122,67 @@ Comandos de `G`, com `env CHROME_BIN=… CDP_GL=1 SAFRION_DADOS=sintetico RENDER
 |---|---|---|
 | `mapa_mux_f0_test.py` | 17 ok · 0 falhas | 3 ok · 14 falhas. Passam F0-1b (a O.S. já lia o `#tal=`) e F0-7 (sem erro de JavaScript, nas duas larguras) |
 | `mapa_mux_f1_test.py` (1440 e 390) | 48 ok · 0 falhas | 6 ok · 42 falhas. Passam os itens de não regressão: o Tab seguinte sai do mapa (F1-1g, duas fazendas), Enter e Esc não mexem na câmera (F1-4d), Esc não apaga o rascunho (F1-7c) e nenhum erro de JavaScript (F1-12a/b) |
-| `mapa_mux_f2_test.py` | 28 ok · 0 falhas | 4 ok · 24 falhas. Passam C4c (sem cartão, nada fica aberto), K1a (a hachura da nuvem na Santa Rita já existia) e E1a/b (sem erro de JavaScript); L1e reprova |
+| `mapa_mux_f2_test.py` | 29 ok · 0 falhas | 4 ok · 25 falhas. Passam C4c (sem cartão, nada fica aberto), K1a (a hachura da nuvem na Santa Rita já existia) e E1a/b (sem erro de JavaScript); L1e e L1f reprovam |
 | `node mapa_mux_unit.js` (funções puras: vizinho, ordem, endereço, busca) | 28 ok · 0 falhas | 0 ok · 1 falha: o bloco `<mux-puro>` não existe |
 | `node mapa_insfaz_unit.js` (CTL-4 S3) | 4 ok · 0 falhas | 3 ok · 1 falha: C2 dá 10 em vez de 20 (o cache segura a dose antiga) |
 
 ### 4.2 Existentes
 
-⟨EXISTENTES⟩
+Todos no render de f37d71ce (`brutos/bateria_f37d71ce.txt`), na ordem em que rodaram. O job parou no limite de 2 h durante o `seta_padrao_test`; ele, o `credito_menu_test` e o `dose_divergente nav` rodaram de novo na segunda parte do mesmo arquivo.
 
-Sem navegador: `links_ocultos_test.py` 16 · falhas 0; `ds_inventario.py --catraca` "catraca ok"; `node mapa_os_unit.js` 7 · OK 7.
+| Teste | Resultado | Classificação do vermelho |
+|---|---|---|
+| `mapa_filtros_test` | 7/7 | |
+| `solo_mapa_calor_test` | 9/9 | |
+| `colheita_mapa_test` | 7 ok · 0 falhas | |
+| `map_trilha_icones_test` | 9 ok · 0 falhas | |
+| `mapa_solo_texto_test` | 9 ok · 0 falhas | |
+| `mapa9_test` | 13 ok · 0 falhas | |
+| `mapa_faixa_test` | 25/25 | |
+| `mapa_cancel_test` | 6/6 | |
+| `map_aprov_test` | 4 ok · 1 falha (2: OS-0418 na tela O.S.) | Pré-existente: reprova igual no render da base 0b3d0d4 (`brutos/classificacao_base.txt`) |
+| `map_decisoes_test` | 18 ok · 0 falhas | |
+| `map_irrig_filtro_test` | 14 ok · 1 falha (15: contagens da tela O.S.) | Pré-existente: reprova igual na base 0b3d0d4 |
+| `mip_correcoes_test` | 14/14 | |
+| `carencia_test` | 90/90 | |
+| `talmapa_test` | 8/8 | |
+| `filtros_cultura_test` | 10 ok · 0 falhas | |
+| `componentes_test` | 3 ok · 0 falhas | |
+| `acao_unica_test` | 10 ok · 0 falhas | |
+| `assinatura_test` | 45 ok · 0 falhas | |
+| `credito_menu_test` | 26/26 | Falha da ferramenta, corrigida: "Inspected target navigated or closed" ao avaliar durante a troca de página (três vezes sob carga; 26/26 nas repetições, inclusive na base 0b3d0d4). A espera passou a tolerar a navegação (ba3f51f0), sem mudar limite nem asserção |
+| `demanda_estado_nav_test` | 14 ok · 0 falhas | |
+| `demanda_unica_nav_test` | 19 ok · 10 falhas (totais da demanda) | Pré-existente na composição: reprova igual, os mesmos 10 itens, na base ac5cd1d7 (teste e render da base). A SU-01 pôs a necessidade da OM na demanda (R$ 428.483,50 · 15 insumos, em vez de R$ 428.305,00 · 14), e o oráculo guarda os números antigos. O Mapa › Insumos acompanha a mesma conta. Antes do merge, a frente passava 29/29 |
+| `ds_test` | 72/72 | |
+| `est_laudo_lote_nav_test` | 7 ok · 0 falhas | |
+| `irr_fluxo_test` | 34 ok · 0 falhas | |
+| `mip_fluxo_test` | 15/15 | |
+| `producao_fluxo_test` | 92/93 (AC-h Mapa) | Pré-existente e de propósito: o teste reprova sempre que a camada Colheita e produtividade está na barra ("falta ligar ao conversor (P5)"), o que vale desde a DEC-0910-36, antes da base |
+| `regras_toque_test` | 5 ok · 0 falhas | |
+| `solo_rev_test` | 22/22 | |
+| `ma_atrito_test` | 13/13 | |
+| `saf_capacidade_simetrica_test` | 38 ok · 0 falhas | |
+| `nav_modulos_test` | 14 ok · 1 falha (N2: cartões do Crédito) | Pré-existente: reprova igual na base 0b3d0d4 (Crédito, CRE F2) |
+| `paginas_scan_test` | 5 ok · 0 falhas (148 páginas) | |
+| `seta_padrao_test` | 14 ok · 0 falhas | Numa rodada anterior (14074537, antes do merge) o D1440 reprovou no CD-01det, tela de outra frente; não se repetiu na composição |
+| `dose_divergente_test.py nav` | 7/16 · 9 falhas (lista e painel da O.S.) | Pré-existente: reprova igual, item a item, na base ac5cd1d7 (teste e render da base). O modo `unit`, que cobre o Início (IN-04), passa: 35/35 e 2/2 |
+
+Sem navegador (`brutos/sem_navegador_f37d71ce.txt`): `links_ocultos_test.py` 16 · falhas 0; `ds_inventario.py --catraca` "catraca ok"; `node mapa_os_unit.js` 7 · OK 7; `dose_divergente_test.py unit` 35/35 e Início 2/2.
 
 ### 4.3 Oráculos mudados, e por quê
 
-- **Dez testes do mapa** acham o talhão por `data-talhao` e `data-rotulo`, e não mais pelo texto do desenho antigo: `mapa9_test`, `mapa_filtros_test`, `solo_mapa_calor_test`, `colheita_mapa_test`, `map_decisoes_test`, `map_aprov_test`, `mapa_cancel_test`, `map_irrig_filtro_test`, `mip_correcoes_test` e `mapa_solo_texto_test`.
+- **Quinze testes** acham o talhão por `data-talhao` e `data-rotulo`, e não mais pelo texto do desenho antigo: `mapa9_test`, `mapa_filtros_test`, `solo_mapa_calor_test`, `colheita_mapa_test`, `map_decisoes_test`, `map_aprov_test`, `mapa_cancel_test`, `map_irrig_filtro_test`, `mip_correcoes_test` e `mapa_solo_texto_test`; na bateria final, também `demanda_estado_nav_test`, `demanda_unica_nav_test`, `est_laudo_lote_nav_test`, `irr_fluxo_test` e `mip_fluxo_test` (eles procuravam o aria-label "T4: …", que agora é o nome completo "T4, 204 ha, …").
   - Cada mudança tem o comentário "MUX-F1 (17/10/2026): … oráculo obsoleto na forma de achar; a asserção não muda".
   - Nenhuma asserção ficou mais fraca.
 - **`links_ocultos_test.py`:** sai o par IN-04 → AG-06 da lista RESIDUAL. O link saiu de propósito (D7), e a regra L2b pede que a lista só tenha links que existem.
 - **Vermelhos da bateria final, classificados:**
   - **Defeito do produto, corrigido:** `mapa_faixa_test` F3 (Lagoa Grande e Santa Rita, 1440). O link "Abrir Análises de solo ›" que esta entrega pôs na faixa do Solo cortava os números. O link saiu da faixa (§2.1, item 4), e o F0-4 passou a conferir os números inteiros.
   - **Oráculo obsoleto pelo D27 (um nome só por pivô):** `mapa9_test` N5 e `carencia_test` ("link #car:PV23…") procuravam "Pivô 23" no painel, que agora abre com "P23 · 64 ha". Passam a exigir que o painel comece por "P23 · ".
+  - **Defeito do produto, corrigido:** `map_irrig_filtro_test` 10. O aviso novo de "Todas" tinha perdido a frase "Boa Vista sem geometria", que o teste trava. Texto atual: "Santa Rita no mapa · Lagoa Grande na Lista · Boa Vista sem geometria".
+  - **Oráculo obsoleto pelo D8:** `map_decisoes_test` 4 esperava "Nova O.S. neste talhão" → `OS.dc.html`; agora exige `OS.dc.html#tal=Santa%20Rita%7CT1` (mais estrito).
   - **Oráculo obsoleto pela MUX-F1, item 8 (endereço é estado):** `carencia_test` ("Ver carência abre a camada…" e "link #car vindo da CO-06…") exigia `location.hash` vazio, ou seja, o comando `#car` consumido. Agora o endereço guarda o estado. A asserção passa a exigir que nenhum comando `#car` sobre e que o estado traga a camada e o talhão (`lay=colheita&t=PV23`; `faz=SR&t=T7`). Não ficou mais fraca.
+  - **Falha da ferramenta, corrigida:** `credito_menu_test` (ver §4.2).
+  - **Pré-existentes, fora do Mapa, não bloqueiam:** `map_aprov_test` 2 e `map_irrig_filtro_test` 15 (tela O.S.), `nav_modulos_test` N2 (Crédito), `producao_fluxo_test` AC-h (de propósito), `dose_divergente_test.py nav` (O.S.) e `demanda_unica_nav_test` (§4.2). Cada um reprova igual na base indicada; os brutos estão em `brutos/classificacao_base.txt`.
 
 ## 5. Decisões de implantação (técnicas, dos agentes)
 
@@ -158,7 +199,7 @@ Sem navegador: `links_ocultos_test.py` 16 · falhas 0; `ds_inventario.py --catra
 - **F1 item 9, leitor de tela real (NVDA ou VoiceOver):** não executado.
   - Os testes conferem papel, nome, `aria-pressed`, `aria-describedby` e foco, mas não o que o leitor anuncia.
   - Precisa de uma pessoa com o leitor.
-- **Tempo do cartão no aparelho de referência:** só medido no Chrome headless com SwiftShader. Nesta rodada, com a máquina dividida com outros agentes, o p95 foi 114,5 ms, acima da meta de 100 ms. Medir num computador comum, sem carga, antes de dar a meta por cumprida.
+- **Tempo do cartão no aparelho de referência:** só medido no Chrome headless com SwiftShader. Nas rodadas de 17/10, com a máquina dividida com outros agentes, o p95 do evento ao quadro variou de 114,5 a 292,7 ms, acima da meta de 100 ms. O trabalho do próprio cartão ficou em p95 de 20,8 a 34 ms; o resto é a pintura. Medir num computador comum, sem carga, antes de dar a meta por cumprida.
 - **Gemini G1 (paleta) e G2 (teclado e leitor de tela):** não consultados. A paleta das classes não mudou; quando o G1 vier, mudam os tokens.
 - **Revisão do Codex:** pendente, pela branch e pelo artefato, no regime leve (AGENTS §3.5).
 - **Ordem do confronto:** a MAPA-FROTA F1, o SHA do Codex e o G2 eram portões antes desta fatia. A implantação veio antes por causa da cobrança do proprietário de 17/10. Se a MAPA-FROTA mexer no `inicio.py`, a composição confere o delta.

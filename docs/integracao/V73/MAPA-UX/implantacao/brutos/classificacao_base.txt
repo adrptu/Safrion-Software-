@@ -1,0 +1,197 @@
+# Classificação dos vermelhos na base, 17/10/2026
+# A) render da base 0b3d0d4 (montado do checkout limpo); o seta_padrao_test foi interrompido de propósito (o D1440 não se repetiu na composição)
+=== map_irrig_filtro_test.py 16:01:27
+OK    1 IN-04 abre sem erro, Santa Rita, sem rolagem 
+OK    2 cabeçalho: OS-0420 e OS-0431 impedidas · 2 a liberar (OS-0418 e OS-0430), sem "decisões" 
+OK    3 barra: Integrado, Satélite, Solo, Pragas e doenças, Ordens de serviço, Irrigação, Estádio, Colheita e produtividade, Custos 
+OK    4 Integrado: T7 vermelho (irrigação em conflito); P2 amarelo (irrigação · conferir medição da passagem parcial), sem número de ordem de água 
+OK    5 camada Irrigação, painel T7: OS-0423 em conflito com a parada da B3, dono Caio (PCP), Resolver conflito → IR-03det#OS-0423:conflito e Abrir ordem → IR-03det#OS-0423 
+OK    6 camada Irrigação, painel P2: primário Conferir medição → IR-03det#OS-0394:conferir; OS-0419 Liberadas e OS-0422 Janela a definir com link ao registro · P1: OS-0418 parada por falta de insumo (link à O.S.) e primário Programar só água → IR-02#programar=P1 
+OK    7 mapa sem exceção de água: nenhum link para IN-02x-os0422 nem "política" 
+OK    8 Boa Vista: estado vazio com Cadastrar talhões → CD-01, sem talhões nem indicadores 
+OK    9 Boa Vista: cabeçalho "Boa Vista sem talhões desenhados" e sem rolagem 
+OK    10 Todas: Santa Rita desenhada (8 talhões) + aviso "Boa Vista sem geometria" 
+OK    11 cenário (camada Ordens de serviço): OS-0424 (T1-B) aparece Em execução com 20/128 ha · saldo 108 ha no T1 (sem recarregar) · P2 sem a OS-0424 e sem as ordens de água OS-0419/OS-0422 
+OK    12 cenário: sobra da OS-0417 recebida → sem custódia, sem selo "Sobras a receber" e sem "Receber sobras" 
+OK    13 Aprovações sem O.S., sem exceção de água nem PA-08: 4 decisões · 1 vence hoje 
+OK    14 Agenda (lida do estado da irrigação): sem "Renovar política"; conflito da OS-0423 com a parada da B3 com Caio e janela da OS-0422 com João 
+FALHA 15 contagens sem água: camada Ordens de serviço "Ordens" = ordens OS da tela O.S. e "Ordens abertas" do Integrado = abertas da tela O.S.; nenhum rótulo nem a tela O.S. com OS-0419/0422/0423 ['Santa Rita', ['OS-0415', 'OS-0417', 'OS-0421', 'OS-0424', 'OS-0425', 'OS-0430'], ['OS-0417', 'OS-0421', 'OS-0424', 'OS-0425', 'OS-0430'], 'Ordens 9 A liberar 3 Em execução 2 Em conferência 1', '1.165 ha Ordens abertas 8 Impedidas 2 A liberar 2', ['T1: 1 a liberar · 1 liberada · 1 em execução', 'T2: 1 a liberar · 1 em execução', 'P1: 1 a liberar · 1 em conferência', 'P2: sem ordem', 'T4: OS-0420 · em execução', 'T3: OS-0415 · encerrada', 'T7: sem ordem', 'C1: OS-0425 · liberada']]
+
+14 ok · 1 falhas ['15 contagens sem água: camada Ordens de serviço "Ordens" = ordens OS da tela O.S. e "Ordens abertas" do Integrado = abertas da tela O.S.; nenhum rótulo nem a tela O.S. com OS-0419/0422/0423']
+=== fim map_irrig_filtro_test.py rc=0 16:02:06
+=== map_aprov_test.py 16:02:06
+OK    1 Aprovações sem O.S.: 4 decisões (inventário, Diesel, orçamento e acesso) · 4 pendentes · 1 vence hoje 
+FALHA 2 O.S.: OS-0418 A liberar com "Liberar bloqueado: sem lote de Ureia 45%", sem "Aguardando agrônomo", "Aprovada pelo agrônomo", AP-2201 nem "Revisar versão" 
+OK    3 Mapa: sem "Decisões pendentes", "A liberar 2", cabeçalho sem "decis" e T4 "OS-0420 impedida" 
+OK    4 Meu dia: "Receber devolução" → EST.dc.html 
+OK    5 Agenda: REQ-031 "Receber devolução" → EST.dc.html 
+
+4 ok · 1 falhas ['2 O.S.: OS-0418 A liberar com "Liberar bloqueado: sem lote de Ureia 45%", sem "Aguardando agrônomo", "Aprovada pelo agrônomo", AP-2201 nem "Revisar versão"']
+=== fim map_aprov_test.py rc=0 16:02:20
+=== credito_menu_test.py 16:02:20
+OK  C1 1440: o Crédito na barra abre a tela de entrada com um cartão por visão da GE-08
+OK  C2 1440 Ficha do grupo: só a parte do cartão (Ficha do grupo · Bens e avaliações), com indicadores pertinentes e "‹ Crédito"
+OK  C2D 1440: documentos acessíveis pela ficha
+OK  C2F 1440 Ficha do grupo: retorno preserva foco no cartão de origem
+OK  C2 1440 Dossiês: só a parte do cartão (Dossiê e consentimento), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 1440 Dossiês: retorno preserva foco no cartão de origem
+OK  C2 1440 Pedidos e contratos: só a parte do cartão (Solicitações e contratos), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 1440 Pedidos e contratos: retorno preserva foco no cartão de origem
+OK  C2 1440 Liberações e garantias: só a parte do cartão (Acompanhamento do CRE-0102), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 1440 Liberações e garantias: retorno preserva foco no cartão de origem
+OK  C3 1440: trocar a visão pelo endereço troca a parte sem recarregar
+OK  C4 1440: GE-08 sem visão no endereço (links de outras telas) mostra as quatro partes
+OK  C5 1440: sem rolagem lateral e sem erro de JS
+OK  C1 390: o Crédito na barra abre a tela de entrada com um cartão por visão da GE-08
+OK  C2 390 Ficha do grupo: só a parte do cartão (Ficha do grupo · Bens e avaliações), com indicadores pertinentes e "‹ Crédito"
+OK  C2D 390: documentos acessíveis pela ficha
+OK  C2F 390 Ficha do grupo: retorno preserva foco no cartão de origem
+OK  C2 390 Dossiês: só a parte do cartão (Dossiê e consentimento), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 390 Dossiês: retorno preserva foco no cartão de origem
+OK  C2 390 Pedidos e contratos: só a parte do cartão (Solicitações e contratos), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 390 Pedidos e contratos: retorno preserva foco no cartão de origem
+OK  C2 390 Liberações e garantias: só a parte do cartão (Acompanhamento do CRE-0102), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 390 Liberações e garantias: retorno preserva foco no cartão de origem
+OK  C3 390: trocar a visão pelo endereço troca a parte sem recarregar
+OK  C4 390: GE-08 sem visão no endereço (links de outras telas) mostra as quatro partes
+OK  C5 390: sem rolagem lateral e sem erro de JS
+RESULTADO: 26/26
+=== fim credito_menu_test.py rc=0 16:02:53
+=== nav_modulos_test.py 16:02:53
+OK    N1 barra: um ícone por módulo (o Mapa primeiro, sem o logotipo repetido) + Outros acessos, sem submenu nem expandir, ≤ 72 px, sem texto visível, nome acessível e dica
+OK    N1 O.S. aberta: o ícone Agrícola marcado (aria-current) e só ele
+OK    N1 hover no ícone Suprimentos: a dica mostra "Suprimentos"
+FALHA N2 6 telas de entrada (Agrícola, Comercial, Suprimentos, Configurações, Manutenção, Crédito): cartões só com ícone e nome curto, na ordem do menu (Agrícola: do fluxo); caminho sem repetir o título · [['Crédito', [['GE-08.dc.html#vis=ficha', 'Ficha do grupo', True], ['GE-08.dc.html#vis=dossie', 'Dossiês', True], ['GE-08.dc.html#vis=contratos', 'Pedidos e contratos', True], ['GE-08.dc.html#vis=liberacoes', 'Liberações e garantias', True]], [['GE-08.dc.html#vis=contratos', 'Contratos', True], ['GE-08.dc.html#vis=liberacoes', 'Liberações', True], ['GE-08.dc.html#vis=dossie', 'Dossiê', True], ['GE-08.dc.html#vis=documentos', 'Documentos', True]], '']]
+OK    N3 cada tela dos módulos tem "‹ Módulo" (≥ 36 px) para a tela de entrada
+OK    N3 um toque no cartão abre a tela e "‹ Agrícola" volta, com o foco no cartão aberto (ponto útil da volta)
+OK    N3 cartões das telas de entrada: link nativo dentro de item de lista
+OK    N2 o Mapa abre direto; a Manutenção abre a sua tela de entrada com um cartão por visão (Painel · Sem ordem · Ordens · Ativos · Planos)
+OK    N4 Outros acessos: app de campo, portal do parceiro, onboarding e backoffice
+OK    N5 nenhuma tela aponta para o índice (Main.dc.html); sem o logotipo "Início (Mapa)": o 1º ícone da barra é o Mapa
+OK    N6 o avatar troca o perfil (seletor por cima do avatar, ≥ 32 px) e a dica diz o perfil
+OK    N7 busca em pílula: sem caixa no campo de dentro (hover e foco); o contorno da pílula dá o retorno
+OK    N8 O.S.: tabela na largura natural (nunca menor que o contêiner) e cada selo de Fase em uma linha
+OK    N9 390 px: sem rolagem lateral da página (telas de entrada e O.S.)
+OK    N9 sem erro de JS
+RESULTADO: 14 ok · 1 falhas
+=== fim nav_modulos_test.py rc=1 16:04:39
+=== TUDO
+=== seta_padrao_test.py 16:04:39
+Traceback (most recent call last):
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/seta_padrao_test.py", line 145, in <module>
+    c.aparelho(w, h, e, t); c.goto(BASE + 'Main.dc.html', .3); J("localStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana')")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/comp_lib.py", line 66, in goto
+    time.sleep(.2)
+KeyboardInterrupt
+
+# B) base ac5cd1d7 (worktree limpa, teste e render da base); o seta_padrao_test foi interrompido de propósito pelo mesmo motivo
+=== seta_padrao_test.py 18:28:24
+=== dose_divergente_test.py nav (base ac5cd1d7) 18:29:03
+Traceback (most recent call last):
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/seta_padrao_test.py", line 146, in <module>
+    res, estilos, telas, n = varre(c, J, BASE, w)
+                             ^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/seta_padrao_test.py", line 112, in varre
+    c.call('Page.navigate', {'url': 'about:blank'}); time.sleep(.1); c.goto(BASE + url, 1.0)
+                                                                     ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/comp_lib.py", line 64, in goto
+    if self.js("document.readyState")=='complete' and self.js("!!document.body && document.body.innerText.length>50"): break
+                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/comp_lib.py", line 50, in js
+    r=self.call('Runtime.evaluate',{'expression':expr,'awaitPromise':True,'returnByValue':True})
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/comp_lib.py", line 45, in call
+    m=json.loads(self.ws.recv(timeout=max(.1,fim-time.monotonic())))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/cdp.py", line 49, in recv
+    return self._recv_message()
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/cdp.py", line 56, in _recv_message
+    b0,b1=self._read(2); fin=b0&0x80; op=b0&0x0f; n=b1&0x7f
+          ^^^^^^^^^^^^^
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/cdp.py", line 35, in _read
+    ch=self.s.recv(1<<20)
+       ^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+  OK  preparo: OS-0430 liberada por Ana, insumos entregues e confirmados: Recebimento confirmado: Glifosato 480 320 L, 2,4-D 806 160 L, Óleo mineral 80 L.
+  OK  MB-03: sugestão 20/10/5; informado 20/0/0 fecha o turno e o aviso diz a divergência e quem revisa: ['20', '10', '5'] · Turno fechado: 10 ha em 1 h. A ordem continua em execução. Divergência de consumo/dose: 2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L · revisão técnica de Ana (agrônoma).
+  OK  recibo do turno no app: selo e planejado × informado com unidade, sem "S2": Turno fechado · OS-0430 · dia 1 · 10 ha em 1 h / Enviado · a ordem continua aberta / Divergência de consumo/dose / Consumo: Glifosato 480 20 L / 2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L · revisão técnica de Ana (agrônoma) / Realizado 10 de 160 ha · saldo 1
+  OK  app a 390 px sem rolagem horizontal
+  FALHA lista: selo por produto, quem resolve Ana (agrônoma) e a próxima ação: 
+  OK  Kanban (5 fases, sem coluna nova): cartão com o selo e a pendência: OS-0430 Dessecação pré-plantio T1-A · 160 ha 10/160 ha · 6 % · saldo 150 ha Divergência de consumo/dose · 2,4-D 806, Óleo mineral Ana (agrônoma) · revisar a divergência de dose do dia 1 Marcos · 25/09 (DAP −20)
+  FALHA painel: linha do dia 1 com planejado × informado, Aceitar com motivo e Registrar correção (perfil Ana): 
+  FALHA perfil Rui: sem os botões, a linha diz quem decide; comando direto recusado, nada gravado: Revisar a divergência de consumo/dose do dia 1 da OS-0430: decisão de Ana (agrônoma). Nada foi alterado.
+  FALHA aceitar sem motivo: erro junto ao campo, revisão continua pendente: 
+  FALHA Ana aceita com motivo: selo sai da lista, a linha mostra quem e quando; consumo informado preservado (Glifosato 480 20, 2,4-D 806 0, Óleo mineral 0): 
+  FALHA repetição sem efeito; outra decisão é conflito: Divergência de consumo/dose do dia 1 da OS-0430 aceita por Ana (agrônoma): Calda sem 2,4-D · A divergência do dia 1 da OS-0430 já foi revisada (aceita por Ana (agrônoma) às 18:29): ou
+  OK  turno de 150 ha com Óleo 50 L (75 L planejado) e envio para conferência: execução. Divergência de consumo/dose: Óleo mineral planejado 75 L × informado 50 L · revisão técnica de Ana (agrônoma). · OS-0430 enviada para conferência por Ana (gestora).
+  FALHA Em conferência: selo e encerramento bloqueado com quem resolve; sem "Conferir e encerrar": 
+  OK  Kanban em conferência: selo e pendência com Ana, sem "Sobras a receber": OS-0430 Dessecação pré-plantio T1-A · 160 ha 160/160 ha · 100 % · saldo 0 ha Divergência de consumo/dose · Óleo mineral Ana (agrônoma) · revisar a divergência de dose Marcos · 25/09 (DAP −20)
+  FALHA 390 px: Registrar correção grava a decisão, sem rolagem horizontal: 
+  FALHA Revisão técnica não substitui conferência diária
+7/16 ok · FALHAS: 9
+ - lista: selo por produto, quem resolve Ana (agrônoma) e a próxima ação: 
+ - painel: linha do dia 1 com planejado × informado, Aceitar com motivo e Registrar correção (perfil Ana): 
+ - perfil Rui: sem os botões, a linha diz quem decide; comando direto recusado, nada gravado: Revisar a divergência de consumo/dose do dia 1 da OS-0430: decisão de Ana (agrônoma). Nada foi alterado.
+ - aceitar sem motivo: erro junto ao campo, revisão continua pendente: 
+ - Ana aceita com motivo: selo sai da lista, a linha mostra quem e quando; consumo informado preservado (Glifosato 480 20, 2,4-D 806 0, Óleo mineral 0): 
+ - repetição sem efeito; outra decisão é conflito: Divergência de consumo/dose do dia 1 da OS-0430 aceita por Ana (agrônoma): Calda sem 2,4-D · A divergência do dia 1 da OS-0430 já foi revisada (aceita por Ana (agrônoma) às 18:29): ou
+ - Em conferência: selo e encerramento bloqueado com quem resolve; sem "Conferir e encerrar": 
+ - 390 px: Registrar correção grava a decisão, sem rolagem horizontal: 
+ - Revisão técnica não substitui conferência diária
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/wt_ac5/tools/prototipo/v37/gen37/dose_divergente_test.py", line 85, in <module>
+    FALHAS += dose_divergente_nav.rodar()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/wt_ac5/tools/prototipo/v37/gen37/dose_divergente_nav.py", line 114, in rodar
+    conferir_dias(J,OS,[1,2])
+  File "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/wt_ac5/tools/prototipo/v37/gen37/conferencia_diaria_nav_helpers.py", line 14, in conferir_dias
+    assert J(f"(()=>{{const b=document.getElementById({json.dumps(fid+'_open')});if(!b)return false;b.click();return true}})()"),'Dia não oferece conferência'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Dia não oferece conferência
+=== fim dose_divergente_test.py nav (base) rc=1 18:29:35
+=== demanda_unica_nav_test.py (base ac5cd1d7) 18:29:35
+FALHA · N1 Planejar safra › etapa 4 (2026/27): R$ 428.305,00 · 14 insumos a comprar · SOL-2026-07 em cotação (a mesma conta da Compra) · Valor da necessidade líquida R$ 428.483,50 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação
+OK    · N2 compra em dobro desfeita: Fungicida A "0,0 L · Coberto pelo estoque" (nunca 145,2 L); compra a menos desfeita: MAP "79.500 kg" em 18/10/2026 e Ureia da OS-0418 "1.140 kg" em 24/09/2026 · coluna "Antes de hoje sem O.S." (nunca "Já realizado")
+OK    · N3 memória do Fungicida A: a OS-0421 conta pelo pendente (15 L), a reserva da OS-0424 conta uma vez e o plano entra só na parte sem O.S.
+FALHA · N4 Compra › etapa 2 lê a mesma demanda: total R$ 428.305,00, Ureia 1.140 kg e a memória do MAP igual, linha a linha, à do Planejar safra (com a OS-0420 e a OS-0431) · ('Total\nR$ 428.483,50', 'Ureia 45% 1.140 0 0 1.140 kg 24/09/2026 3,10 R$ 3.534,00 A cotar', ['Estoque apto hoje: 90.000 kg + 500 kg em custódia sem uso nas O.S., a devolver ao Estoque (500 kg · REQ-031 · OS-0417 (em conferência)) = 90.500 kg', '23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 250,00 kg/ha × 70 ha = 17.500,0 kg → saldo 73.000 kg', '24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 250,00 kg/ha × 102 ha = 25.500,0 kg → saldo 47.500 kg', '15/10/2026 · T1-A · Plantio
+FALHA · N5 Mapa › Insumos (Santa Rita, safra toda): 19 produtos · 14 faltam · 3 a receber · 2 estoque cobre; T4 "MAP 11-52 · 17.500 kg" com "Falta 79.500 kg"; T1 Fungicida A "Estoque cobre"; a fonte (dica ⓘ da camada) diz que é a necessidade líquida da Safra 2026/27, a mesma do Planejar safra e da Compra · ('Produtos 20 Faltam 15 A receber 3 Estoque cobre 2', 'T4 · 204 ha · Soja 58 W · 30 de 204 ha plantados (DAP 1–2) · Santa Rita · falta MAP 11-52 · × · INSUMOS · Período · Safra toda (filtro Insumos das Ordens de serviço) · Estoque · compartilhado da fazenda · não é dividido por talhão · Semente de soja 58 W · 3.640 kg · Pedido a receber · PC-090 · 05/10 · a partir de 23/09 · T4 · OS-0420 · Plantio e adubação de base · precisa de 27.456 kg · estoque ap', 'T1 · 312 ha · Pousio · soja prevista em 2
+OK    · N6 Mapa › Insumos (Lagoa Grande): PV13 Glifosato "Falta 293 L" — o estoque da Santa Rita não cobre outra fazenda
+OK    · R1 recusa: cancelar a OS-0418 sem motivo é recusado ("Informe o motivo do cancelamento."), a ordem segue A liberar e a Ureia continua 1.140 kg na demanda
+FALHA · I1 OS-0418 cancelada na tela O.S. → Planejar safra recalcula na hora: Ureia sai da demanda (0 kg; a linha fica só porque a SOL ainda a pede, U1); R$ 424.771,00 · 13 insumos a comprar · ('OS-0418 cancelada sem execução. Nenhum insumo estava reservado. Cancelada por Ana (gestora).', '0 kg', 'Valor da necessidade líquida R$ 424.949,50 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação · 1 insumo acima da demanda')
+FALHA · I2 Mapa › Insumos acompanha: 18 produtos · 13 faltam; P1 sem Ureia · ('Produtos 19 Faltam 14 A receber 3 Estoque cobre 2', 'P1 · 95 ha · Feijão BRS Estilo · DAP 80 · R5 · Santa Rita · sem plano na safra · × · INSUMOS · Período · Safra toda (filtro Insumos das Ordens de serviço) · Estoque · compartilhado da fazenda · não é dividido por talhão · REQ-031 · OS-0417 · MAP 11-52 · em custódia · reservado 5.000 kg · lote M26-07')
+OK    · U1 a SOL-2026-07 ainda pede os 1.140 kg de Ureia da OS-0418 cancelada: a linha fica "0 kg · Acima da demanda · 1.140 kg · SOL-2026-07", a faixa conta "1 insumo acima da demanda" e a primária é "Atualizar SOL-2026-07" (nunca comprar a mais em silêncio)
+OK    · U2 atualizar: a SOL-2026-07 perde só a Ureia (toast com 1.140 kg e R$ 3.534,00), a linha some e a primária volta a "Abrir Compra de insumos ›"
+FALHA · U3 a Compra lê a versão nova da SOL-2026-07: total R$ 424.771,00 (o mesmo do Planejar safra) e nenhuma linha de Ureia · ('Total\nR$ 424.949,50', False)
+OK    · U4 repetição: com a SOL já atualizada não há o que atualizar; a primária segue "Abrir Compra de insumos ›"
+FALHA · P1 repetição: recarregar duas vezes dá a mesma conta (R$ 424.771,00) e não duplica a ordem na memória (OS-0421 uma vez pelo pendente) · ('Valor da necessidade líquida R$ 424.949,50 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação', 'Valor da necessidade líquida R$ 424.949,50 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação', ['Estoque apto hoje: 545 L (inclui 65 L reservados)', '23/09/2026 · T1+T2 · OS-0421 · Fungicida 1ª aplicação · 0,50 L/ha × 160 ha − 65 L em custódia = 15,0 L → saldo 530 L', '24/09/2026 · Reserva REQ-039 · OS-0424 (T1-B) · 65,0 L da mesma demanda, contados uma vez'])
+OK    · P2 repetição: a OS-0418 cancelada não oferece cancelar de novo; o comando repetido é recusado e a demanda não muda
+FALHA · P3 restaurar a demonstração volta aos números da semente (R$ 428.305,00 · 14 insumos) · Valor da necessidade líquida R$ 428.483,50 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação
+OK    · V1 entrega comum no Estoque (8.000 kg de NPK da REQ-040 para a OS-0425) não muda a compra: NPK "14.800 kg", estoque apto "0 kg", sem "Acima da demanda"; R$ 428.305,00 e a primária segue "Abrir Compra de insumos ›" (na base: 6.800 kg e "Atualizar SOL-2026-07" cortava R$ 27.200)
+OK    · V2 Mapa › Insumos depois da entrega: C1 continua "Falta 14.800 kg" (o mesmo de antes)
+OK    · C1 Compra › etapa 2 com a OS-0418 cancelada: a Ureia mostra "Acima da demanda · 1.140 kg · o Planejar safra atualiza a SOL-2026-07" e a faixa conta "1 insumo acima da demanda de agora" (o NPK entregue não aparece)
+OK    · R2 Compra › etapa 4 (DEM-08): Ureia sai em Casa do Adubo "Chega primeiro", sem justificativa pendente; escolher a Coop. Vale (mais cara e mais tardia) é recusado sem justificativa
+OK    · C2 a mesma Ureia avisa na etapa 4 (comparação) e na 5 (aprovação): "Acima da demanda · 1.140 kg", sem trava
+OK    · Q1 o perfil Zé (mecânico) não atualiza a SOL: "Atualizar a SOL-2026-07: decisão de Ana (gestora). Nada foi alterado." e o registro não muda
+OK    · Q2 Ana (gestora) atualiza: o envio original fica (23/09/2026 10:40 por Ana (gestora)), a versão nova grava quem e quando ("Ureia 45% −1.140 kg"), o toast avisa que a cotação em andamento recomeça e a Compra mostra "atualizada em … por Ana (gestora)" sem aviso de acima da demanda
+OK    · P1 pedido emitido e depois complemento (MAP 62.500 → 79.500 kg): a versão nova guarda o pedido emitido; com a OS-0418 cancelada a Ureia fica "Acima da demanda · 1.140 kg" com "Pedido já emitido", a primária é "Abrir Compra de insumos ›" (não "Atualizar"), a SOL mantém os 1.140 kg e a Compra avisa "pedido já emitido: o excedente entra no estoque"
+OK    · A1 "Aplicar plano em 4 cultivos" na tela e complemento enviado: a versão da SOL guarda o plano da conta e a Compra não avisa "acima da demanda" (com o plano da semente avisaria os insumos do complemento à toa)
+FALHA · M1 390 px · Planejar safra etapa 4: a página não rola na horizontal; mesma conta (R$ 428.305,00 · 14 insumos), Ureia 1.140 kg e a memória do MAP igual à do desktop · ([390, 390], 'Valor da necessidade líquida R$ 428.483,50 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação', '1.140 kg', ['Estoque apto hoje: 90.000 kg + 500 kg em custódia sem uso nas O.S., a devolver ao Estoque (500 kg · REQ-031 · OS-0417 (em conferência)) = 90.500 kg', '23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 250,00 kg/ha × 70 ha = 17.500,0 kg → saldo 73.000 kg', '24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 250,00 kg/ha × 102 ha = 25.500,0 kg → saldo 47
+OK    · M2 390 px · Mapa › Insumos: sem rolagem horizontal; T4 "MAP 11-52 · 17.500 kg" e "Falta 79.500 kg"
+FALHA · M3 390 px · Compra etapa 2: sem rolagem horizontal da página e o mesmo total R$ 428.305,00 · ([390, 390],)
+OK    · E1 sem erro JS nas telas abertas (Planejar safra, Compra, Mapa, O.S.)
+
+RESULTADO: 19 ok · 10 falhas
+  - N1 Planejar safra › etapa 4 (2026/27): R$ 428.305,00 · 14 insumos a comprar · SOL-2026-07 em cotação (a mesma conta da Compra)
+  - N4 Compra › etapa 2 lê a mesma demanda: total R$ 428.305,00, Ureia 1.140 kg e a memória do MAP igual, linha a linha, à do Planejar safra (com a OS-0420 e a OS-0431)
+  - N5 Mapa › Insumos (Santa Rita, safra toda): 19 produtos · 14 faltam · 3 a receber · 2 estoque cobre; T4 "MAP 11-52 · 17.500 kg" com "Falta 79.500 kg"; T1 Fungicida A "Estoque cobre"; a fonte (dica ⓘ da camada) diz que é a necessidade líquida da Safra 2026/27, a mesma do Planejar safra e da Compra
+  - I1 OS-0418 cancelada na tela O.S. → Planejar safra recalcula na hora: Ureia sai da demanda (0 kg; a linha fica só porque a SOL ainda a pede, U1); R$ 424.771,00 · 13 insumos a comprar
+  - I2 Mapa › Insumos acompanha: 18 produtos · 13 faltam; P1 sem Ureia
+  - U3 a Compra lê a versão nova da SOL-2026-07: total R$ 424.771,00 (o mesmo do Planejar safra) e nenhuma linha de Ureia
+  - P1 repetição: recarregar duas vezes dá a mesma conta (R$ 424.771,00) e não duplica a ordem na memória (OS-0421 uma vez pelo pendente)
+  - P3 restaurar a demonstração volta aos números da semente (R$ 428.305,00 · 14 insumos)
+  - M1 390 px · Planejar safra etapa 4: a página não rola na horizontal; mesma conta (R$ 428.305,00 · 14 insumos), Ureia 1.140 kg e a memória do MAP igual à do desktop
+  - M3 390 px · Compra etapa 2: sem rolagem horizontal da página e o mesmo total R$ 428.305,00
+=== fim demanda_unica_nav_test.py (base) rc=1 18:39:34
+=== LOTE9 FIM
