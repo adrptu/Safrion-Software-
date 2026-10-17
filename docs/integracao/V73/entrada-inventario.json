@@ -1,0 +1,1192 @@
+[
+{
+"pag": "AG-02",
+"gid": "g_agua",
+"tit": "Medição de água no solo",
+"linhas": 0,
+"campos": 12,
+"num": 3,
+"num_sem_unidade": [
+"Capacidade de campo (CC)",
+"Ponto de murcha permanente (PMP)"
+],
+"datas": 1,
+"listas": 7
+},
+{
+"pag": "AG-02",
+"gid": "g_ext",
+"tit": "Valor do laudo",
+"linhas": 0,
+"campos": 2,
+"num": 1,
+"num_sem_unidade": [
+"Valor"
+],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "AG-03",
+"gid": "g_dia",
+"tit": "Diagnóstico",
+"linhas": 0,
+"campos": 7,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 3
+},
+{
+"pag": "AG-04",
+"gid": "g_rec",
+"tit": "Recomendação",
+"linhas": 3,
+"campos": 5,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 3
+},
+{
+"pag": "AG-05",
+"gid": "g_bib",
+"tit": "Item da biblioteca",
+"linhas": 6,
+"campos": 6,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 2
+},
+{
+"pag": "AG-06",
+"gid": "g_ef",
+"tit": "Avaliação de eficácia",
+"linhas": 5,
+"campos": 4,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "CA-01",
+"gid": "g_os",
+"tit": "Ordem",
+"linhas": 12,
+"campos": 2,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "CA-01det",
+"gid": "g_ap",
+"tit": "Turno",
+"linhas": 7,
+"campos": 3,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 0
+},
+{
+"pag": "CA-02",
+"gid": "g_fila",
+"tit": "Corrigir apontamento",
+"linhas": 4,
+"campos": 3,
+"num": 2,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 0
+},
+{
+"pag": "CA-03",
+"gid": "g_oc",
+"tit": "Ocorrência",
+"linhas": 4,
+"campos": 7,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 4
+},
+{
+"pag": "CD-01",
+"gid": "g_faz",
+"tit": "Fazenda",
+"linhas": 3,
+"campos": 8,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 4
+},
+{
+"pag": "CD-01",
+"gid": "g_tal",
+"tit": "Talhão",
+"linhas": 35,
+"campos": 8,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 5
+},
+{
+"pag": "CD-01det",
+"gid": "g_idt",
+"tit": "Talhão",
+"linhas": 32,
+"campos": 8,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 5
+},
+{
+"pag": "CD-02",
+"gid": "g_cv",
+"tit": "Cultivar",
+"linhas": 12,
+"campos": 9,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 6
+},
+{
+"pag": "CD-02",
+"gid": "g_cult",
+"tit": "Cultura",
+"linhas": 5,
+"campos": 2,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "CD-03",
+"gid": "g_atv",
+"tit": "Máquina",
+"linhas": 15,
+"campos": 27,
+"num": 19,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 5
+},
+{
+"pag": "CD-03",
+"gid": "g_cj",
+"tit": "Conjunto",
+"linhas": 7,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 2
+},
+{
+"pag": "CD-04",
+"gid": "g_pes",
+"tit": "Pessoa",
+"linhas": 15,
+"campos": 12,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 6,
+"listas": 3
+},
+{
+"pag": "CD-04",
+"gid": "g_eq",
+"tit": "Equipe",
+"linhas": 8,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 2
+},
+{
+"pag": "CD-05",
+"gid": "g_forn",
+"tit": "Parceiro",
+"linhas": 20,
+"campos": 22,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 1
+},
+{
+"pag": "CD-06",
+"gid": "g_itm",
+"tit": "Item",
+"linhas": 50,
+"campos": 13,
+"num": 2,
+"num_sem_unidade": [
+"Conteúdo da embalagem",
+"Preço de referência"
+],
+"datas": 1,
+"listas": 7
+},
+{
+"pag": "CD-06",
+"gid": "g_grp",
+"tit": "Grupo",
+"linhas": 12,
+"campos": 2,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "CD-06",
+"gid": "g_loc",
+"tit": "Local",
+"linhas": 11,
+"campos": 4,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 2
+},
+{
+"pag": "CD-07",
+"gid": "g_dim",
+"tit": "Código",
+"linhas": 30,
+"campos": 10,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 2,
+"listas": 3
+},
+{
+"pag": "CD-08",
+"gid": "g_rend",
+"tit": "Rendimento",
+"linhas": 22,
+"campos": 16,
+"num": 8,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 5
+},
+{
+"pag": "CD-08",
+"gid": "g_op",
+"tit": "Operação",
+"linhas": 11,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "CMP",
+"gid": "g_conv",
+"tit": "Convite",
+"linhas": 0,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 3
+},
+{
+"pag": "CMP",
+"gid": "g_cmp",
+"tit": "Escolha",
+"linhas": 0,
+"campos": 3,
+"num": 1,
+"num_sem_unidade": [
+"Quantidade a pedir"
+],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "CMP",
+"gid": "g_ent",
+"tit": "Pedido",
+"linhas": 0,
+"campos": 2,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 0
+},
+{
+"pag": "CO-01",
+"gid": "g_of",
+"tit": "Revisar previsão",
+"linhas": 4,
+"campos": 7,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 0
+},
+{
+"pag": "CO-02",
+"gid": "g_oc",
+"tit": "Ordem de colheita",
+"linhas": 6,
+"campos": 2,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "CO-02det",
+"gid": "g_ap",
+"tit": "Avanço do turno · OC-0510",
+"linhas": 2,
+"campos": 4,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 0
+},
+{
+"pag": "CO-03",
+"gid": "g_cg",
+"tit": "Carga",
+"linhas": 5,
+"campos": 6,
+"num": 2,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 3
+},
+{
+"pag": "CO-04",
+"gid": "g_rc",
+"tit": "Recebimento",
+"linhas": 6,
+"campos": 5,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 2
+},
+{
+"pag": "CO-05",
+"gid": "g_ob",
+"tit": "Ordem de processo",
+"linhas": 4,
+"campos": 4,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 2
+},
+{
+"pag": "CO-05det",
+"gid": "g_bal",
+"tit": "Saída do packing · OB-0110",
+"linhas": 4,
+"campos": 2,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 0
+},
+{
+"pag": "CO-06",
+"gid": "g_in",
+"tit": "Inspeção",
+"linhas": 5,
+"campos": 2,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "EST",
+"gid": "g_rec",
+"tit": "Recebimento",
+"linhas": 0,
+"campos": 11,
+"num": 4,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 3
+},
+{
+"pag": "EST",
+"gid": "g_ent",
+"tit": "Entrega",
+"linhas": 0,
+"campos": 2,
+"num": 1,
+"num_sem_unidade": [
+"Quantidade a entregar"
+],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "EST",
+"gid": "g_dev",
+"tit": "Receber devolução",
+"linhas": 0,
+"campos": 3,
+"num": 1,
+"num_sem_unidade": [
+"Quantidade conferida"
+],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "EST",
+"gid": "g_cnt",
+"tit": "Contagem",
+"linhas": 0,
+"campos": 4,
+"num": 1,
+"num_sem_unidade": [
+"Quantidade contada"
+],
+"datas": 0,
+"listas": 2
+},
+{
+"pag": "GE-02",
+"gid": "g_ver",
+"tit": "Versão",
+"linhas": 3,
+"campos": 5,
+"num": 3,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 0
+},
+{
+"pag": "GE-03",
+"gid": "g_lan",
+"tit": "Lançamento",
+"linhas": 10,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "GE-04",
+"gid": "g_tit",
+"tit": "Título",
+"linhas": 7,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 1
+},
+{
+"pag": "GE-05",
+"gid": "g_rec",
+"tit": "Título",
+"linhas": 9,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 1
+},
+{
+"pag": "GE-07",
+"gid": "g_ac",
+"tit": "Caso",
+"linhas": 5,
+"campos": 7,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 2
+},
+{
+"pag": "GE-08",
+"gid": "g_cre",
+"tit": "Solicitação",
+"linhas": 4,
+"campos": 4,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 2
+},
+{
+"pag": "GE-08",
+"gid": "g_dos",
+"tit": "Bloco do dossiê",
+"linhas": 3,
+"campos": 2,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 0
+},
+{
+"pag": "GE-08",
+"gid": "g_doc",
+"tit": "Documento",
+"linhas": 8,
+"campos": 7,
+"num": 2,
+"num_sem_unidade": [
+"Módulos fiscais"
+],
+"datas": 1,
+"listas": 2
+},
+{
+"pag": "IN-01",
+"gid": "g_dia",
+"tit": "Tarefa",
+"linhas": 7,
+"campos": 2,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 2
+},
+{
+"pag": "IN-03",
+"gid": "g_ag",
+"tit": "Compromisso",
+"linhas": 6,
+"campos": 4,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 2
+},
+{
+"pag": "IR-01",
+"gid": "g_set",
+"tit": "Setor",
+"linhas": 0,
+"campos": 3,
+"num": 3,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 0
+},
+{
+"pag": "IR-04",
+"gid": "g_src",
+"tit": "Fonte",
+"linhas": 0,
+"campos": 4,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 2
+},
+{
+"pag": "LO-01",
+"gid": "g_ag",
+"tit": "Reprogramar janela",
+"linhas": 5,
+"campos": 2,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "LO-01",
+"gid": "g_sl",
+"tit": "Slot de doca",
+"linhas": 5,
+"campos": 4,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "LO-02",
+"gid": "g_fi",
+"tit": "Posição na fila",
+"linhas": 5,
+"campos": 2,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 2
+},
+{
+"pag": "LO-02",
+"gid": "g_ex",
+"tit": "Expedição",
+"linhas": 5,
+"campos": 2,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "LO-02det",
+"gid": "g_ck",
+"tit": "Registrar lacre",
+"linhas": 5,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 2
+},
+{
+"pag": "LO-03",
+"gid": "g_vg",
+"tit": "Viagem programada",
+"linhas": 4,
+"campos": 2,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "LO-04",
+"gid": "g_ct",
+"tit": "Cotação recebida",
+"linhas": 3,
+"campos": 4,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 3
+},
+{
+"pag": "LO-04",
+"gid": "g_pr",
+"tit": "Prestador",
+"linhas": 3,
+"campos": 4,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "ON-01det",
+"gid": "g_imp",
+"tit": "Objeto da importação",
+"linhas": 4,
+"campos": 5,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 3
+},
+{
+"pag": "PL-01",
+"gid": "g_saf",
+"tit": "Safra",
+"linhas": 4,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "PL-01",
+"gid": "g_cult",
+"tit": "Cultivo",
+"linhas": 9,
+"campos": 5,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 2
+},
+{
+"pag": "PL-02",
+"gid": "g_op",
+"tit": "Operação",
+"linhas": 7,
+"campos": 8,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 2
+},
+{
+"pag": "PL-02det",
+"gid": "g_tal",
+"tit": "Ajuste local",
+"linhas": 9,
+"campos": 2,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 0
+},
+{
+"pag": "PL-03",
+"gid": "g_cen",
+"tit": "Cenário",
+"linhas": 5,
+"campos": 3,
+"num": 2,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 0
+},
+{
+"pag": "PL-04",
+"gid": "g_ord",
+"tit": "Programar",
+"linhas": 8,
+"campos": 4,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 2
+},
+{
+"pag": "PL-05",
+"gid": "g_imp",
+"tit": "Impedimento",
+"linhas": 5,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 2
+},
+{
+"pag": "PL-06",
+"gid": "g_par",
+"tit": "Parcela",
+"linhas": 4,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 1
+},
+{
+"pag": "PT-02det",
+"gid": "g_it",
+"tit": "Item da proposta",
+"linhas": 5,
+"campos": 1,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 0
+},
+{
+"pag": "PT-02det",
+"gid": "g_cd",
+"tit": "Condições da proposta",
+"linhas": 1,
+"campos": 5,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 2
+},
+{
+"pag": "PT-02det",
+"gid": "g_esc",
+"tit": "Esclarecimento",
+"linhas": 2,
+"campos": 1,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 0
+},
+{
+"pag": "PT-03",
+"gid": "g_pp",
+"tit": "Proposta de compra · OF-103",
+"linhas": 1,
+"campos": 5,
+"num": 2,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 2
+},
+{
+"pag": "PT-05det",
+"gid": "g_cg",
+"tit": "Previsão da carga",
+"linhas": 3,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 0
+},
+{
+"pag": "PT-06",
+"gid": "g_co",
+"tit": "Ação interna da Fertisul",
+"linhas": 2,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 1
+},
+{
+"pag": "PT-07",
+"gid": "g_emp",
+"tit": "Credenciamento",
+"linhas": 1,
+"campos": 5,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 0
+},
+{
+"pag": "PT-07",
+"gid": "g_pref",
+"tit": "Preferência de aviso",
+"linhas": 4,
+"campos": 1,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "PT-07",
+"gid": "g_us",
+"tit": "Usuário",
+"linhas": 3,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "SAF",
+"gid": "g_saf",
+"tit": "Safra",
+"linhas": 4,
+"campos": 5,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 2,
+"listas": 1
+},
+{
+"pag": "SAF",
+"gid": "g_cult_S2627",
+"tit": "Cultivo",
+"linhas": 9,
+"campos": 8,
+"num": 2,
+"num_sem_unidade": [
+"Meta de produtividade"
+],
+"datas": 2,
+"listas": 2
+},
+{
+"pag": "SAF",
+"gid": "g_cult_S27SF",
+"tit": "Cultivo",
+"linhas": 3,
+"campos": 8,
+"num": 2,
+"num_sem_unidade": [
+"Meta de produtividade"
+],
+"datas": 2,
+"listas": 2
+},
+{
+"pag": "SAF",
+"gid": "g_cult_S2526",
+"tit": "Cultivo",
+"linhas": 5,
+"campos": 8,
+"num": 2,
+"num_sem_unidade": [
+"Meta de produtividade"
+],
+"datas": 2,
+"listas": 2
+},
+{
+"pag": "SAF",
+"gid": "g_cult_LG2627",
+"tit": "Cultivo",
+"linhas": 23,
+"campos": 8,
+"num": 2,
+"num_sem_unidade": [
+"Meta de produtividade"
+],
+"datas": 2,
+"listas": 2
+},
+{
+"pag": "SAF",
+"gid": "g_cult_NOVA",
+"tit": "Cultivo",
+"linhas": 0,
+"campos": 8,
+"num": 2,
+"num_sem_unidade": [
+"Meta de produtividade"
+],
+"datas": 2,
+"listas": 2
+},
+{
+"pag": "SAF",
+"gid": "g_rend_S2627",
+"tit": "Rendimento",
+"linhas": 43,
+"campos": 19,
+"num": 13,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 4
+},
+{
+"pag": "SAF",
+"gid": "g_rend_S27SF",
+"tit": "Rendimento",
+"linhas": 42,
+"campos": 19,
+"num": 13,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 4
+},
+{
+"pag": "SAF",
+"gid": "g_rend_LG2627",
+"tit": "Rendimento",
+"linhas": 42,
+"campos": 19,
+"num": 13,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 4
+},
+{
+"pag": "SAF",
+"gid": "g_rend_NOVA",
+"tit": "Rendimento",
+"linhas": 42,
+"campos": 19,
+"num": 13,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 4
+},
+{
+"pag": "SAF",
+"gid": "g_recp_maq",
+"tit": "Recurso",
+"linhas": 5,
+"campos": 4,
+"num": 4,
+"num_sem_unidade": [
+"Unidades que você tem",
+"Turnos por dia"
+],
+"datas": 0,
+"listas": 0
+},
+{
+"pag": "SAF",
+"gid": "g_recp_pes",
+"tit": "Recurso",
+"linhas": 1,
+"campos": 3,
+"num": 3,
+"num_sem_unidade": [
+"Pessoas que você tem"
+],
+"datas": 0,
+"listas": 0
+},
+{
+"pag": "SU-02",
+"gid": "g_pol",
+"tit": "Política",
+"linhas": 6,
+"campos": 10,
+"num": 3,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 4
+},
+{
+"pag": "SU-04",
+"gid": "g_cot",
+"tit": "Cotação",
+"linhas": 8,
+"campos": 5,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 1
+},
+{
+"pag": "SU-05",
+"gid": "g_ctr",
+"tit": "Contrato",
+"linhas": 3,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 2
+},
+{
+"pag": "SU-05",
+"gid": "g_ped",
+"tit": "Pedido",
+"linhas": 5,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 1
+},
+{
+"pag": "SU-06",
+"gid": "g_rec",
+"tit": "Recebimento",
+"linhas": 5,
+"campos": 6,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 3
+},
+{
+"pag": "SU-07",
+"gid": "g_req",
+"tit": "Requisição",
+"linhas": 7,
+"campos": 3,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 1
+},
+{
+"pag": "SU-09",
+"gid": "g_inv",
+"tit": "Inventário",
+"linhas": 4,
+"campos": 6,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 3
+},
+{
+"pag": "VE-01",
+"gid": "g_res",
+"tit": "Reserva",
+"linhas": 3,
+"campos": 2,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 0
+},
+{
+"pag": "VE-02",
+"gid": "g_al",
+"tit": "Alerta",
+"linhas": 2,
+"campos": 6,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 1,
+"listas": 4
+},
+{
+"pag": "VE-03",
+"gid": "g_of",
+"tit": "Oferta",
+"linhas": 5,
+"campos": 7,
+"num": 2,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 3
+},
+{
+"pag": "VE-04",
+"gid": "g_cart",
+"tit": "Pedido",
+"linhas": 9,
+"campos": 7,
+"num": 2,
+"num_sem_unidade": [
+"Quantidade"
+],
+"datas": 0,
+"listas": 4
+},
+{
+"pag": "VE-04det",
+"gid": "g_ver",
+"tit": "Versão",
+"linhas": 1,
+"campos": 4,
+"num": 2,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 1
+},
+{
+"pag": "VE-05",
+"gid": "g_ob",
+"tit": "Obrigação",
+"linhas": 5,
+"campos": 5,
+"num": 1,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 2
+},
+{
+"pag": "VE-06",
+"gid": "g_rc",
+"tit": "Caso",
+"linhas": 5,
+"campos": 6,
+"num": 0,
+"num_sem_unidade": [],
+"datas": 0,
+"listas": 2
+}
+]

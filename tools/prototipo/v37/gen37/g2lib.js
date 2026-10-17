@@ -1511,4 +1511,21 @@ function g2visaoLiga(self,gid){ if(typeof window==='undefined'||window.__g2visao
   window.addEventListener('resize',()=>fecha(false)); document.addEventListener('scroll',e=>{ if(ab&&!(e.target&&e.target.nodeType===1&&ab.box.contains(e.target))) fecha(false); },true);
   window.g2dselAbre=abre;   // teste e sonda
 })();
+// INP-04 e INP-07 (16/10/2026, proprietário: "todos inputs do usuário no sistema devem ser mais rápido e fácil"; docs/design-system/padroes-1610.md).
+// Vale em toda página, para todo campo, do motor ou da tela:
+// - campo de número (teclado decimal ou numérico) que recebe o foco pelo toque ou pela navegação da tela fica com o conteúdo selecionado: o
+//   número digitado substitui o anterior, sem apagar dígito a dígito. O clique do mouse continua pondo o cursor onde a pessoa clicou, e o Tab já
+//   seleciona por padrão no navegador;
+// - número, data e código (placa, lote, nota, CPF, CNPJ, chassi, série, matrícula, CAR) não passam pelo corretor ortográfico nem pela
+//   maiúscula automática do celular. Enter não muda de comportamento aqui (não envia formulário por conta própria).
+(function g2inp(){ if(typeof document==='undefined'||window.__g2inp) return; window.__g2inp=1;
+  const COD=/(c[óo]digo|placa|\blote\b|chassi|s[ée]rie|\bcpf\b|\bcnpj\b|nota fiscal|\bnf\b|renavam|inscri[çc][ãa]o|matr[íi]cula|\bcar\b)/i;
+  let mouse=false; document.addEventListener('pointerdown',e=>{ mouse=e.pointerType==='mouse'; setTimeout(()=>{ mouse=false; },0); },true);
+  document.addEventListener('focusin',e=>{ const t=e.target; if(!t||t.tagName!=='INPUT') return; const im=String(t.getAttribute('inputmode')||'').toLowerCase();
+    const num=im==='decimal'||im==='numeric'||t.type==='number';
+    let rot=(t.getAttribute('aria-label')||'')+' '+(t.getAttribute('placeholder')||''); try{ if(t.labels&&t.labels[0]) rot+=' '+t.labels[0].textContent; }catch(er){}
+    if(num||t.type==='date'||t.hasAttribute('data-cod')||COD.test(rot)){ if(!t.hasAttribute('spellcheck')) t.setAttribute('spellcheck','false'); if(!t.hasAttribute('autocapitalize')) t.setAttribute('autocapitalize','off'); }
+    if(num&&!mouse&&!t.readOnly&&!t.disabled&&t.type!=='number'){ try{ t.select(); }catch(er){} } },true);
+  window.g2inpCod=COD;   // teste
+})();
 
