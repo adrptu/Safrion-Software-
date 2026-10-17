@@ -1,0 +1,23 @@
+[
+  {
+    "worker": 0,
+    "origin": "http://127.0.0.1:33811",
+    "marks": [
+      "ex51-isolation-0"
+    ]
+  },
+  {
+    "worker": 1,
+    "origin": "http://127.0.0.1:36409",
+    "marks": [
+      "ex51-isolation-1"
+    ]
+  },
+  {
+    "worker": 2,
+    "origin": "http://127.0.0.1:42783",
+    "marks": [
+      "ex51-isolation-2"
+    ]
+  }
+]

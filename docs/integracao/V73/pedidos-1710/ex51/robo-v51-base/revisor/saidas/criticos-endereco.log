@@ -1,0 +1,17 @@
+22:05:45 Chrome principais em execução: 1 (< 4), pode abrir
+22:05:45 Chrome iniciado, PID 20701
+22:05:46 servidor em 127.0.0.1:40765, PID 20784
+22:05:50 OS#OS-0504: 15 linhas, 0 passagens em detalhes, 0 na tela
+22:05:55 OS#OS-0508: 15 linhas, 0 passagens em detalhes, 0 na tela
+22:05:59 OS#OS-0420: 15 linhas, 3 passagens em detalhes, 3 na tela
+22:06:03 OS#OS-0431: 15 linhas, 1 passagens em detalhes, 1 na tela
+22:06:07 OS#OS-0507: 15 linhas, 0 passagens em detalhes, 0 na tela
+22:06:11 MA#om=OM-0233: 16 linhas, 3 passagens em detalhes, 1 na tela
+22:06:14 MA#om=OM-0228: 16 linhas, 2 passagens em detalhes, 1 na tela
+22:06:18 MA#om=OM-0219: 16 linhas, 2 passagens em detalhes, 1 na tela
+22:06:23 OM→OS/ MA[0] 'Achado SM-0147 · Pressão hidráulica baix' → r=mesma tela alvo='' abriu=False destacou=False
+22:06:28 OS→EST/outro OS[0] 'Retirar no almoxarifado ›' → r=navega alvo='' abriu=False destacou=False
+22:06:33 OS→OM/MA OS[0] 'Acompanhar OM-0233 ›' → r=navega alvo='OM-0233' abriu=True destacou=False
+22:06:33 Chrome PID 20701 encerrado
+22:06:33 servidor PID 20784 encerrado
+22:06:33 casos críticos: 3 em 0.8 min → /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/rob51/casos-criticos-endereco.json

@@ -1,0 +1,1946 @@
+{
+ "quando": "2026-10-17T22:08:24Z",
+ "origens": [
+  {
+   "tela": "OS",
+   "hv": "",
+   "landed": "OS",
+   "linhas": 15,
+   "land": [],
+   "det": [
+    {
+     "linha": 0,
+     "titulo": "OS-0415 · Dessecação pós-colheita",
+     "impedida": false,
+     "sigs": []
+    },
+    {
+     "linha": 1,
+     "titulo": "OS-0417 · Adubação de cobertura",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Receber devolução no Estoque ›",
+       "h": "EST.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 2,
+     "titulo": "OS-0418 · Fertirrigação · reclassificada",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Ver saldos no Estoque ›",
+       "h": "EST.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 3,
+     "titulo": "OS-0420 · Plantio · Soja 58 W",
+     "impedida": true,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Abrir ordem completa ›",
+       "h": "CA-01x-os0420.dc.html"
+      },
+      {
+       "k": "a",
+       "t": "Abrir a ordem completa ›",
+       "h": "CA-01x-os0420.dc.html"
+      },
+      {
+       "k": "a",
+       "t": "Retirar no almoxarifado ›",
+       "h": "EST.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 4,
+     "titulo": "OS-0421 · Pulverização · Fungicida 1ª aplicação",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Abrir ordem completa ›",
+       "h": "CA-01det.dc.html"
+      },
+      {
+       "k": "a",
+       "t": "Retirar no almoxarifado ›",
+       "h": "EST.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 5,
+     "titulo": "OS-0424 · Pulverização · Fungicida A",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Entregar no Estoque ›",
+       "h": "EST.dc.html"
+      },
+      {
+       "k": "a",
+       "t": "Ficha no app (sem internet) ›",
+       "h": "OS-0424-app.dc.html"
+      },
+      {
+       "k": "a",
+       "t": "Ficha impressa ›",
+       "h": "OS-0424-ficha.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 6,
+     "titulo": "OS-0425 · Adubação 1ª parcela · café",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Entregar no Estoque ›",
+       "h": "EST.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 7,
+     "titulo": "OS-0430 · Dessecação pré-plantio",
+     "impedida": false,
+     "sigs": []
+    },
+    {
+     "linha": 8,
+     "titulo": "OS-0431 · Plantio · Soja 58 W",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Acompanhar OM-0233 ›",
+       "h": "MA.dc.html#om=OM-0233"
+      }
+     ]
+    },
+    {
+     "linha": 9,
+     "titulo": "OB-0104 · Beneficiamento · grãos",
+     "impedida": false,
+     "sigs": []
+    },
+    {
+     "linha": 10,
+     "titulo": "OS-0595 · Pulverização · demonstração de agrupamento",
+     "impedida": false,
+     "sigs": []
+    },
+    {
+     "linha": 11,
+     "titulo": "OS-0596 · Pulverização · demonstração de agrupamento",
+     "impedida": false,
+     "sigs": []
+    },
+    {
+     "linha": 12,
+     "titulo": "OS-0597 · Pulverização · demonstração de agrupamento",
+     "impedida": false,
+     "sigs": []
+    },
+    {
+     "linha": 13,
+     "titulo": "OS-0598 · Pulverização · demonstração de agrupamento",
+     "impedida": false,
+     "sigs": []
+    },
+    {
+     "linha": 14,
+     "titulo": "OS-0599 · Pulverização · demonstração de agrupamento",
+     "impedida": false,
+     "sigs": []
+    }
+   ]
+  },
+  {
+   "tela": "IN-02",
+   "hv": "",
+   "landed": "IN-02",
+   "linhas": 4,
+   "land": [
+    {
+     "k": "a",
+     "t": "Decidir",
+     "h": "SU-09.dc.html"
+    },
+    {
+     "k": "a",
+     "t": "Decidir",
+     "h": "SU-02.dc.html"
+    },
+    {
+     "k": "a",
+     "t": "Decidir",
+     "h": "GE-02det.dc.html"
+    },
+    {
+     "k": "a",
+     "t": "Decidir",
+     "h": "CF-01.dc.html"
+    }
+   ],
+   "det": [
+    {
+     "linha": 0,
+     "titulo": "Decisão · Ajuste de inventário Galpão 2 Ajuste de inventário",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Abrir a decisão no módulo de origem ›",
+       "h": "SU-09.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 1,
+     "titulo": "Decisão · Política de estoque · Diesel S10 Política de estoque",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Abrir a decisão no módulo de origem ›",
+       "h": "SU-02.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 2,
+     "titulo": "Decisão · Orçamento revisado · safra 26/27 Orçamento",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Abrir a decisão no módulo de origem ›",
+       "h": "GE-02det.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 3,
+     "titulo": "Decisão · Acesso · novo operador (Beto) Acesso e alçada",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Abrir a decisão no módulo de origem ›",
+       "h": "CF-01.dc.html"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "tela": "MA",
+   "hv": "#vis=ordens",
+   "landed": "MA#vis=ordens&om=OM-0118",
+   "linhas": 16,
+   "land": [
+    {
+     "k": "b",
+     "t": "Abrir Pulverizador PJ-3030 ›",
+     "h": ""
+    }
+   ],
+   "det": [
+    {
+     "linha": 0,
+     "titulo": "OM-0230 · Pulverizador PJ-3030",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Pulverizador PJ-3030 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Abrir PM-04 · a ordem segue na v2 ›",
+       "h": ""
+      }
+     ]
+    },
+    {
+     "linha": 1,
+     "titulo": "OM-0228 · Bomba do Pivô 2",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Bomba do Pivô 2 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Achado SM-0152 · Pressão baixa 3 vezes esta noite · Na OM ›",
+       "h": ""
+      }
+     ]
+    },
+    {
+     "linha": 2,
+     "titulo": "OM-0233 · Trator T1",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Trator T1 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Achado SM-0147 · Pressão hidráulica baixa · parou aos 30 ha da OS-0420 · Na OM ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Achado INSP-105 · Pressão hidráulica abaixo da faixa no pré-uso das 07:10 · Na OM ›",
+       "h": ""
+      }
+     ]
+    },
+    {
+     "linha": 3,
+     "titulo": "OM-0234 · Trator 02",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Trator 02 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Abrir PM-01 · a ordem segue na v3 ›",
+       "h": ""
+      }
+     ]
+    },
+    {
+     "linha": 4,
+     "titulo": "OM-0229 · Bomba do Pivô 1",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Bomba do Pivô 1 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Abrir PM-07 · a ordem segue na v3 ›",
+       "h": ""
+      }
+     ]
+    },
+    {
+     "linha": 5,
+     "titulo": "OM-0221 · Colhedora Axial-Flow 7250",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Colhedora Axial-Flow 7250 ›",
+       "h": ""
+      }
+     ]
+    },
+    {
+     "linha": 6,
+     "titulo": "OM-0231 · Trator T1",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Trator T1 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Abrir PM-03 · a ordem segue na v4 ›",
+       "h": ""
+      }
+     ]
+    },
+    {
+     "linha": 7,
+     "titulo": "OM-0225 · Packing linha 1",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Packing linha 1 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Abrir PM-08 · a ordem segue na v1 ›",
+       "h": ""
+      }
+     ]
+    },
+    {
+     "linha": 8,
+     "titulo": "OM-0219 · Trator 02",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Trator 02 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Abrir PM-01 · a ordem segue na v3 ›",
+       "h": ""
+      }
+     ]
+    },
+    {
+     "linha": 9,
+     "titulo": "OM-0222 · Bomba do Pivô 2",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Bomba do Pivô 2 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Abrir PM-07 · a ordem segue na v3 ›",
+       "h": ""
+      }
+     ]
+    },
+    {
+     "linha": 10,
+     "titulo": "OM-0212 · Trator 03",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Trator 03 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Abrir PM-02 · a ordem segue na v2 ›",
+       "h": ""
+      }
+     ]
+    },
+    {
+     "linha": 11,
+     "titulo": "OM-0207 · Silo 01",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Silo 01 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Abrir PM-09 · a ordem segue na v1 ›",
+       "h": ""
+      }
+     ]
+    },
+    {
+     "linha": 12,
+     "titulo": "OM-0205 · Trator 04",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Trator 04 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Abrir PM-03 · a ordem segue na v4 ›",
+       "h": ""
+      }
+     ]
+    },
+    {
+     "linha": 13,
+     "titulo": "OM-0181 · Comboio CB-01",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Comboio CB-01 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Abrir PM-10 · a ordem segue na v1 ›",
+       "h": ""
+      }
+     ]
+    },
+    {
+     "linha": 14,
+     "titulo": "OM-0102 · Colhedora Axial-Flow 7250",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Colhedora Axial-Flow 7250 ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Abrir PM-06 · a ordem segue na v2 ›",
+       "h": ""
+      }
+     ]
+    },
+    {
+     "linha": 15,
+     "titulo": "OM-0118 · Plantadeira 24 linhas",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "b",
+       "t": "Abrir Plantadeira 24 linhas ›",
+       "h": ""
+      },
+      {
+       "k": "b",
+       "t": "Abrir PM-05 · a ordem segue na v1 ›",
+       "h": ""
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "tela": "AG-01",
+   "hv": "",
+   "landed": "AG-01#VIS-058",
+   "linhas": 10,
+   "land": [
+    {
+     "k": "a",
+     "t": "Abrir OS-0504",
+     "h": "OS.dc.html#OS-0504"
+    },
+    {
+     "k": "a",
+     "t": "Abrir OS-0508",
+     "h": "OS.dc.html#OS-0508"
+    }
+   ],
+   "det": [
+    {
+     "linha": 0,
+     "titulo": "VIS-055 · Mancha-anelar (PRSV) · Pivô 22",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Ver rota e evidências ›",
+       "h": "AG-01det.dc.html#VIS-055"
+      }
+     ]
+    },
+    {
+     "linha": 1,
+     "titulo": "VIS-053 · Meleira (virose) · Pivô 9",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Ver rota e evidências ›",
+       "h": "AG-01det.dc.html#VIS-053"
+      }
+     ]
+    },
+    {
+     "linha": 2,
+     "titulo": "VIS-054 · Mosca-branca · Pivô 2",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Ver rota e evidências ›",
+       "h": "AG-01det.dc.html#VIS-054"
+      }
+     ]
+    },
+    {
+     "linha": 3,
+     "titulo": "VIS-051 · Ácaro-rajado · Pivô 6",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Abrir OS-0504",
+       "h": "OS.dc.html#OS-0504"
+      },
+      {
+       "k": "a",
+       "t": "Ver rota e evidências ›",
+       "h": "AG-01det.dc.html#VIS-051"
+      },
+      {
+       "k": "a",
+       "t": "Ficha do produto ›",
+       "h": "AG-07.dc.html#abamectina-18-ec"
+      },
+      {
+       "k": "a",
+       "t": "Aplicação · Abamectina 18 EC",
+       "h": "OS.dc.html#OS-0504"
+      }
+     ]
+    },
+    {
+     "linha": 4,
+     "titulo": "VIS-052 · Antracnose · Pivô 23",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Abrir OS-0508",
+       "h": "OS.dc.html#OS-0508"
+      },
+      {
+       "k": "a",
+       "t": "Ver rota e evidências ›",
+       "h": "AG-01det.dc.html#VIS-052"
+      },
+      {
+       "k": "a",
+       "t": "Ficha do produto ›",
+       "h": "AG-07.dc.html#tebuconazol-200-ec"
+      },
+      {
+       "k": "a",
+       "t": "Aplicação · Tebuconazol 200 EC",
+       "h": "OS.dc.html#OS-0508"
+      }
+     ]
+    },
+    {
+     "linha": 5,
+     "titulo": "VIS-060 · Ácaro-rajado · Pivô 17",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Ver rota e evidências ›",
+       "h": "AG-01det.dc.html#VIS-060"
+      }
+     ]
+    },
+    {
+     "linha": 6,
+     "titulo": "VIS-057 · Ácaro-rajado · Pivô 4",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Ver rota e evidências ›",
+       "h": "AG-01det.dc.html#VIS-057"
+      }
+     ]
+    },
+    {
+     "linha": 7,
+     "titulo": "VIS-059 · Antracnose · Pivô 19",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Ver rota e evidências ›",
+       "h": "AG-01det.dc.html#VIS-059"
+      }
+     ]
+    },
+    {
+     "linha": 8,
+     "titulo": "VIS-056 · Cochonilha · Pivô 18",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Ver rota e evidências ›",
+       "h": "AG-01det.dc.html#VIS-056"
+      }
+     ]
+    },
+    {
+     "linha": 9,
+     "titulo": "VIS-058 · Mosca-branca · Pivô 1",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Ver rota e evidências ›",
+       "h": "AG-01det.dc.html#VIS-058"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "tela": "AG-01det",
+   "hv": "",
+   "landed": "AG-01det",
+   "linhas": 14,
+   "land": [
+    {
+     "k": "a",
+     "t": "VIS-011",
+     "h": "AG-01det.dc.html#VIS-011"
+    }
+   ],
+   "det": [
+    {
+     "linha": 0,
+     "titulo": null,
+     "sigs": []
+    },
+    {
+     "linha": 1,
+     "titulo": null,
+     "sigs": []
+    },
+    {
+     "linha": 2,
+     "titulo": null,
+     "sigs": []
+    },
+    {
+     "linha": 3,
+     "titulo": null,
+     "sigs": []
+    },
+    {
+     "linha": 4,
+     "titulo": null,
+     "sigs": []
+    },
+    {
+     "linha": 5,
+     "titulo": null,
+     "sigs": []
+    },
+    {
+     "linha": 6,
+     "titulo": null,
+     "sigs": []
+    },
+    {
+     "linha": 7,
+     "titulo": null,
+     "sigs": []
+    },
+    {
+     "linha": 8,
+     "titulo": null,
+     "sigs": []
+    },
+    {
+     "linha": 9,
+     "titulo": null,
+     "sigs": []
+    },
+    {
+     "linha": 10,
+     "titulo": null,
+     "sigs": []
+    },
+    {
+     "linha": 11,
+     "titulo": null,
+     "sigs": []
+    },
+    {
+     "linha": 12,
+     "titulo": null,
+     "sigs": []
+    },
+    {
+     "linha": 13,
+     "titulo": null,
+     "sigs": []
+    }
+   ]
+  },
+  {
+   "tela": "AG-04",
+   "hv": "",
+   "landed": "AG-04",
+   "linhas": 4,
+   "land": [
+    {
+     "k": "a",
+     "t": "Ver demanda gerada",
+     "h": "PL-02.dc.html"
+    },
+    {
+     "k": "a",
+     "t": "REC-014",
+     "h": "AG-04det.dc.html"
+    },
+    {
+     "k": "a",
+     "t": "DIA-007",
+     "h": "AG-03det.dc.html"
+    },
+    {
+     "k": "a",
+     "t": "Abrir REC-014",
+     "h": "AG-04det.dc.html"
+    },
+    {
+     "k": "a",
+     "t": "VIS-013",
+     "h": "AG-01.dc.html#VIS-013"
+    },
+    {
+     "k": "a",
+     "t": "Decidir controle",
+     "h": "AG-01.dc.html#VIS-013:decidir"
+    },
+    {
+     "k": "a",
+     "t": "Abrir OS-0421",
+     "h": "OS.dc.html#OS-0421"
+    },
+    {
+     "k": "a",
+     "t": "Liberar OS-0418",
+     "h": "OS.dc.html#OS-0418"
+    }
+   ],
+   "det": [
+    {
+     "linha": 0,
+     "titulo": null,
+     "sigs": []
+    },
+    {
+     "linha": 1,
+     "titulo": "VIS-013 · Mosca-branca · P1",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Ver rota e evidências ›",
+       "h": "AG-01det.dc.html#VIS-013"
+      },
+      {
+       "k": "a",
+       "t": "Diagnósticos ›",
+       "h": "AG-03.dc.html"
+      },
+      {
+       "k": "a",
+       "t": "VIS-014 · Ácaro-branco",
+       "h": "AG-01.dc.html#VIS-014"
+      },
+      {
+       "k": "a",
+       "t": "VIS-006 · Percevejo",
+       "h": "AG-01.dc.html#VIS-006"
+      }
+     ]
+    },
+    {
+     "linha": 2,
+     "titulo": "Recomendação · REC-016 v1",
+     "impedida": false,
+     "sigs": []
+    },
+    {
+     "linha": 3,
+     "titulo": "Recomendação · REC-017 v2",
+     "impedida": false,
+     "sigs": []
+    }
+   ]
+  },
+  {
+   "tela": "AG-04det",
+   "hv": "",
+   "landed": "AG-04det",
+   "linhas": 15,
+   "land": [
+    {
+     "k": "a",
+     "t": "Ficha da abamectina 500 FS ›",
+     "h": "AG-07.dc.html#abamectina-500-fs"
+    },
+    {
+     "k": "a",
+     "t": "Pasteuria nishizawae FS (registrada para cisto) ›",
+     "h": "AG-07.dc.html#pasteuria-nishizawae-fs"
+    },
+    {
+     "k": "a",
+     "t": "NEC-028",
+     "h": "PL-02.dc.html"
+    },
+    {
+     "k": "a",
+     "t": "OS-0420",
+     "h": "OS.dc.html#OS-0420"
+    },
+    {
+     "k": "a",
+     "t": "REQ-036",
+     "h": "SU-07.dc.html"
+    },
+    {
+     "k": "a",
+     "t": "REQ-037",
+     "h": "SU-07.dc.html"
+    },
+    {
+     "k": "a",
+     "t": "Apontamentos dias 1 e 2",
+     "h": "CA-02.dc.html"
+    },
+    {
+     "k": "a",
+     "t": "Abastecimento",
+     "h": "MA.dc.html#vis=ativos&modo=abastecimentos"
+    }
+   ],
+   "det": [
+    {
+     "linha": 0,
+     "titulo": "Item da recomendação · KCl 60 %",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "IAC Boletim 100 · K trocável 0,08 cmolc/dm³ ›",
+       "h": "AG-02.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 1,
+     "titulo": "Item da recomendação · TS nematicida (abamectina)",
+     "impedida": false,
+     "sigs": []
+    },
+    {
+     "linha": 2,
+     "titulo": "Item da recomendação · Semente 58 W (resistente)",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Decisão do DIA-007 · cultivar resistente ›",
+       "h": "AG-03det.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 3,
+     "titulo": "Versão da recomendação · v1",
+     "impedida": false,
+     "sigs": []
+    },
+    {
+     "linha": 4,
+     "titulo": "Versão da recomendação · v2",
+     "impedida": false,
+     "sigs": []
+    },
+    {
+     "linha": 5,
+     "titulo": "Versão da recomendação · v3",
+     "impedida": false,
+     "sigs": []
+    },
+    {
+     "linha": 6,
+     "titulo": "Dose da zona · Z1 (reboleiras)",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "LAU-2043 · zona 1 · K 0,05 cmolc/dm³ ›",
+       "h": "AG-02.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 7,
+     "titulo": "Dose da zona · Z2",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "LAU-2043 · zona 2 · K 0,08 cmolc/dm³ ›",
+       "h": "AG-02.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 8,
+     "titulo": "Dose da zona · Z3",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "LAU-2043 · zona 3 · K 0,12 cmolc/dm³ ›",
+       "h": "AG-02.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 9,
+     "titulo": "Registro vinculado · NEC-028",
+     "impedida": false,
+     "sigs": []
+    },
+    {
+     "linha": 10,
+     "titulo": "Registro vinculado · OS-0420",
+     "impedida": false,
+     "sigs": []
+    },
+    {
+     "linha": 11,
+     "titulo": "Custo realizado · Semente de soja 58 W",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "REQ-036 · 1.560 kg × R$ 9,50 ›",
+       "h": "SU-07.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 12,
+     "titulo": "Custo realizado · KCl 60 %",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "REQ-037 · 3.600 kg × R$ 2,40 ›",
+       "h": "SU-07.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 13,
+     "titulo": "Custo realizado · Máquina e equipe · plantio",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Apontamentos dias 1 e 2 · 6,0 h × R$ 396,00 ›",
+       "h": "CA-02.dc.html"
+      }
+     ]
+    },
+    {
+     "linha": 14,
+     "titulo": "Custo realizado · Diesel S10 · Trator T1",
+     "impedida": false,
+     "sigs": [
+      {
+       "k": "a",
+       "t": "Abastecimento · 84 L × R$ 5,92 ›",
+       "h": "MA.dc.html#vis=ativos&modo=abastecimentos"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "casos": [
+  {
+   "percurso": "OM→OS",
+   "sub": "",
+   "tela": "MA",
+   "visao": "#vis=ordens",
+   "linha": 2,
+   "detalhe": "OM-0233 · Trator T1",
+   "impedida": false,
+   "el": {
+    "k": "b",
+    "t": "Achado SM-0147 · Pressão hidráulica baixa · parou aos 30 ha da OS-0420 · Na OM ›",
+    "h": ""
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "",
+     "source": "origem sem alvo único"
+    },
+    "inconclusivo": true,
+    "empilhado": null,
+    "r": "mesma tela",
+    "de": "MA",
+    "origemId": "OM-0233",
+    "mencionaOrigem": true,
+    "dlgOrigem": false,
+    "para": "MA#vis=ordens&achado=SM-0147",
+    "telaDestino": "MA",
+    "alvo": "",
+    "abriu": false,
+    "titulo": "SM-0147 · Trator T1",
+    "destacou": false,
+    "foco": "SM-0147 · Trator T1 Relato · Hidráulico · na OM-0233 × SINTOMA Pressão hidráulic",
+    "volta": [
+     "Voltar para Manutenção → MOD-MAN.dc.html",
+     "OM-0233 → #om=OM-0233",
+     "Abrir OM-0233 ›"
+    ],
+    "voltaOrigem": true,
+    "avisos": [
+     "Painel da OM-0230 aberto ao lado.",
+     "Tela: Manutenção · 1 ativo bloqueado · 1 conflito"
+    ],
+    "escopo": [],
+    "voltar": {
+     "chegou": "AG-04det",
+     "mesmaTela": false,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "OS→EST",
+   "sub": "devolver",
+   "tela": "OS",
+   "visao": "",
+   "linha": 1,
+   "detalhe": "OS-0417 · Adubação de cobertura",
+   "impedida": false,
+   "el": {
+    "k": "a",
+    "t": "Receber devolução no Estoque ›",
+    "h": "EST.dc.html"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "",
+     "source": "origem sem alvo único"
+    },
+    "inconclusivo": true,
+    "empilhado": null,
+    "r": "navega",
+    "de": "OS",
+    "origemId": "OS-0417",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "EST",
+    "telaDestino": "EST",
+    "alvo": "",
+    "abriu": false,
+    "titulo": "",
+    "destacou": false,
+    "foco": "Estoque",
+    "volta": [
+     "Voltar para Suprimentos → MOD-SUP.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [],
+    "escopo": [
+     "Filtrar por fazenda=Santa Rita"
+    ],
+    "voltar": {
+     "chegou": "OS",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "OS→EST",
+   "sub": "entregar",
+   "tela": "OS",
+   "visao": "",
+   "linha": 5,
+   "detalhe": "OS-0424 · Pulverização · Fungicida A",
+   "impedida": false,
+   "el": {
+    "k": "a",
+    "t": "Entregar no Estoque ›",
+    "h": "EST.dc.html"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "",
+     "source": "origem sem alvo único"
+    },
+    "inconclusivo": true,
+    "empilhado": null,
+    "r": "navega",
+    "de": "OS",
+    "origemId": "OS-0424",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "EST",
+    "telaDestino": "EST",
+    "alvo": "",
+    "abriu": false,
+    "titulo": "",
+    "destacou": false,
+    "foco": "Estoque",
+    "volta": [
+     "Voltar para Suprimentos → MOD-SUP.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [],
+    "escopo": [
+     "Filtrar por fazenda=Santa Rita"
+    ],
+    "voltar": {
+     "chegou": "OS",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "OS→EST",
+   "sub": "entregar",
+   "tela": "OS",
+   "visao": "",
+   "linha": 6,
+   "detalhe": "OS-0425 · Adubação 1ª parcela · café",
+   "impedida": false,
+   "el": {
+    "k": "a",
+    "t": "Entregar no Estoque ›",
+    "h": "EST.dc.html"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "",
+     "source": "origem sem alvo único"
+    },
+    "inconclusivo": true,
+    "empilhado": null,
+    "r": "navega",
+    "de": "OS",
+    "origemId": "OS-0425",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "EST",
+    "telaDestino": "EST",
+    "alvo": "",
+    "abriu": false,
+    "titulo": "",
+    "destacou": false,
+    "foco": "Estoque",
+    "volta": [
+     "Voltar para Suprimentos → MOD-SUP.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [],
+    "escopo": [
+     "Filtrar por fazenda=Santa Rita"
+    ],
+    "voltar": {
+     "chegou": "OS",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "OS→EST",
+   "sub": "outro",
+   "tela": "OS",
+   "visao": "",
+   "linha": 3,
+   "detalhe": "OS-0420 · Plantio · Soja 58 W",
+   "impedida": true,
+   "el": {
+    "k": "a",
+    "t": "Retirar no almoxarifado ›",
+    "h": "EST.dc.html"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "",
+     "source": "origem sem alvo único"
+    },
+    "inconclusivo": true,
+    "empilhado": null,
+    "r": "navega",
+    "de": "OS",
+    "origemId": "OS-0420",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "EST",
+    "telaDestino": "EST",
+    "alvo": "",
+    "abriu": false,
+    "titulo": "",
+    "destacou": false,
+    "foco": "Estoque",
+    "volta": [
+     "Voltar para Suprimentos → MOD-SUP.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [],
+    "escopo": [
+     "Filtrar por fazenda=Santa Rita"
+    ],
+    "voltar": {
+     "chegou": "OS",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "OS→EST",
+   "sub": "outro",
+   "tela": "OS",
+   "visao": "",
+   "linha": 4,
+   "detalhe": "OS-0421 · Pulverização · Fungicida 1ª aplicação",
+   "impedida": false,
+   "el": {
+    "k": "a",
+    "t": "Retirar no almoxarifado ›",
+    "h": "EST.dc.html"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "",
+     "source": "origem sem alvo único"
+    },
+    "inconclusivo": true,
+    "empilhado": null,
+    "r": "navega",
+    "de": "OS",
+    "origemId": "OS-0421",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "EST",
+    "telaDestino": "EST",
+    "alvo": "",
+    "abriu": false,
+    "titulo": "",
+    "destacou": false,
+    "foco": "Estoque",
+    "volta": [
+     "Voltar para Suprimentos → MOD-SUP.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [],
+    "escopo": [
+     "Filtrar por fazenda=Santa Rita"
+    ],
+    "voltar": {
+     "chegou": "OS",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "OS→EST",
+   "sub": "saldo",
+   "tela": "OS",
+   "visao": "",
+   "linha": 2,
+   "detalhe": "OS-0418 · Fertirrigação · reclassificada",
+   "impedida": false,
+   "el": {
+    "k": "a",
+    "t": "Ver saldos no Estoque ›",
+    "h": "EST.dc.html"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "",
+     "source": "origem sem alvo único"
+    },
+    "inconclusivo": true,
+    "empilhado": null,
+    "r": "navega",
+    "de": "OS",
+    "origemId": "OS-0418",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "EST",
+    "telaDestino": "EST",
+    "alvo": "",
+    "abriu": false,
+    "titulo": "",
+    "destacou": false,
+    "foco": "Estoque",
+    "volta": [
+     "Voltar para Suprimentos → MOD-SUP.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [],
+    "escopo": [
+     "Filtrar por fazenda=Santa Rita"
+    ],
+    "voltar": {
+     "chegou": "OS",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "OS→OM",
+   "sub": "MA",
+   "tela": "OS",
+   "visao": "",
+   "linha": 8,
+   "detalhe": "OS-0431 · Plantio · Soja 58 W",
+   "impedida": false,
+   "el": {
+    "k": "a",
+    "t": "Acompanhar OM-0233 ›",
+    "h": "MA.dc.html#om=OM-0233"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "OM-0233",
+     "source": "href"
+    },
+    "inconclusivo": false,
+    "empilhado": null,
+    "r": "navega",
+    "de": "OS",
+    "origemId": "OS-0431",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "MA#vis=ordens&om=OM-0233",
+    "telaDestino": "MA",
+    "alvo": "OM-0233",
+    "abriu": true,
+    "titulo": "OM-0233 · Trator T1",
+    "destacou": false,
+    "foco": "",
+    "volta": [
+     "Voltar para Manutenção → MOD-MAN.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [
+     "Tela: Manutenção · 1 ativo bloqueado · 1 conflito"
+    ],
+    "escopo": [],
+    "voltar": {
+     "chegou": "OS",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "receituário→OS",
+   "sub": "AG-01",
+   "tela": "AG-01",
+   "visao": "",
+   "linha": null,
+   "detalhe": null,
+   "impedida": null,
+   "el": {
+    "k": "a",
+    "t": "Abrir OS-0504",
+    "h": "OS.dc.html#OS-0504"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "OS-0504",
+     "source": "href"
+    },
+    "inconclusivo": false,
+    "empilhado": null,
+    "r": "navega",
+    "de": "AG-01",
+    "origemId": "",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "OS#OS-0504",
+    "telaDestino": "OS",
+    "alvo": "OS-0504",
+    "abriu": true,
+    "titulo": "OS-0504 · Controle de ácaro e cochonilha",
+    "destacou": false,
+    "foco": "×",
+    "volta": [
+     "Voltar para Agrícola → MOD-AGR.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [
+     "Tela: Ordem de Serviço · 3 em execução · 2 impedidas"
+    ],
+    "escopo": [
+     "Filtrar por fazenda=Lagoa Grande",
+     "Filtrar por safra=Todas"
+    ],
+    "voltar": {
+     "chegou": "AG-01",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "receituário→OS",
+   "sub": "AG-01",
+   "tela": "AG-01",
+   "visao": "",
+   "linha": null,
+   "detalhe": null,
+   "impedida": null,
+   "el": {
+    "k": "a",
+    "t": "Abrir OS-0508",
+    "h": "OS.dc.html#OS-0508"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "OS-0508",
+     "source": "href"
+    },
+    "inconclusivo": false,
+    "empilhado": null,
+    "r": "navega",
+    "de": "AG-01",
+    "origemId": "",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "OS#OS-0508",
+    "telaDestino": "OS",
+    "alvo": "OS-0508",
+    "abriu": true,
+    "titulo": "OS-0508 · Fungicida para antracnose",
+    "destacou": false,
+    "foco": "×",
+    "volta": [
+     "Voltar para Agrícola → MOD-AGR.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [
+     "Tela: Ordem de Serviço · 3 em execução · 2 impedidas"
+    ],
+    "escopo": [
+     "Filtrar por fazenda=Lagoa Grande",
+     "Filtrar por safra=Todas"
+    ],
+    "voltar": {
+     "chegou": "AG-01",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "receituário→OS",
+   "sub": "AG-01",
+   "tela": "AG-01",
+   "visao": "",
+   "linha": 3,
+   "detalhe": "VIS-051 · Ácaro-rajado · Pivô 6",
+   "impedida": false,
+   "el": {
+    "k": "a",
+    "t": "Abrir OS-0504",
+    "h": "OS.dc.html#OS-0504"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "OS-0504",
+     "source": "href"
+    },
+    "inconclusivo": false,
+    "empilhado": null,
+    "r": "navega",
+    "de": "AG-01",
+    "origemId": "VIS-051",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "OS#OS-0504",
+    "telaDestino": "OS",
+    "alvo": "OS-0504",
+    "abriu": true,
+    "titulo": "OS-0504 · Controle de ácaro e cochonilha",
+    "destacou": false,
+    "foco": "×",
+    "volta": [
+     "Voltar para Agrícola → MOD-AGR.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [
+     "Tela: Ordem de Serviço · 3 em execução · 2 impedidas"
+    ],
+    "escopo": [
+     "Filtrar por fazenda=Lagoa Grande",
+     "Filtrar por safra=Todas"
+    ],
+    "voltar": {
+     "chegou": "AG-01#VIS-051",
+     "mesmaTela": true,
+     "detalheReaberto": true,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "receituário→OS",
+   "sub": "AG-01",
+   "tela": "AG-01",
+   "visao": "",
+   "linha": 3,
+   "detalhe": "VIS-051 · Ácaro-rajado · Pivô 6",
+   "impedida": false,
+   "el": {
+    "k": "a",
+    "t": "Aplicação · Abamectina 18 EC",
+    "h": "OS.dc.html#OS-0504"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "OS-0504",
+     "source": "href"
+    },
+    "inconclusivo": false,
+    "empilhado": null,
+    "r": "navega",
+    "de": "AG-01",
+    "origemId": "VIS-051",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "OS#OS-0504",
+    "telaDestino": "OS",
+    "alvo": "OS-0504",
+    "abriu": true,
+    "titulo": "OS-0504 · Controle de ácaro e cochonilha",
+    "destacou": false,
+    "foco": "×",
+    "volta": [
+     "Voltar para Agrícola → MOD-AGR.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [
+     "Tela: Ordem de Serviço · 3 em execução · 2 impedidas"
+    ],
+    "escopo": [
+     "Filtrar por fazenda=Lagoa Grande",
+     "Filtrar por safra=Todas"
+    ],
+    "voltar": {
+     "chegou": "AG-01#VIS-051",
+     "mesmaTela": true,
+     "detalheReaberto": true,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "receituário→OS",
+   "sub": "AG-01",
+   "tela": "AG-01",
+   "visao": "",
+   "linha": 4,
+   "detalhe": "VIS-052 · Antracnose · Pivô 23",
+   "impedida": false,
+   "el": {
+    "k": "a",
+    "t": "Abrir OS-0508",
+    "h": "OS.dc.html#OS-0508"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "OS-0508",
+     "source": "href"
+    },
+    "inconclusivo": false,
+    "empilhado": null,
+    "r": "navega",
+    "de": "AG-01",
+    "origemId": "VIS-052",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "OS#OS-0508",
+    "telaDestino": "OS",
+    "alvo": "OS-0508",
+    "abriu": true,
+    "titulo": "OS-0508 · Fungicida para antracnose",
+    "destacou": false,
+    "foco": "×",
+    "volta": [
+     "Voltar para Agrícola → MOD-AGR.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [
+     "Tela: Ordem de Serviço · 3 em execução · 2 impedidas"
+    ],
+    "escopo": [
+     "Filtrar por fazenda=Lagoa Grande",
+     "Filtrar por safra=Todas"
+    ],
+    "voltar": {
+     "chegou": "AG-01#VIS-052",
+     "mesmaTela": true,
+     "detalheReaberto": true,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "receituário→OS",
+   "sub": "AG-01",
+   "tela": "AG-01",
+   "visao": "",
+   "linha": 4,
+   "detalhe": "VIS-052 · Antracnose · Pivô 23",
+   "impedida": false,
+   "el": {
+    "k": "a",
+    "t": "Aplicação · Tebuconazol 200 EC",
+    "h": "OS.dc.html#OS-0508"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "OS-0508",
+     "source": "href"
+    },
+    "inconclusivo": false,
+    "empilhado": null,
+    "r": "navega",
+    "de": "AG-01",
+    "origemId": "VIS-052",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "OS#OS-0508",
+    "telaDestino": "OS",
+    "alvo": "OS-0508",
+    "abriu": true,
+    "titulo": "OS-0508 · Fungicida para antracnose",
+    "destacou": false,
+    "foco": "×",
+    "volta": [
+     "Voltar para Agrícola → MOD-AGR.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [
+     "Tela: Ordem de Serviço · 3 em execução · 2 impedidas"
+    ],
+    "escopo": [
+     "Filtrar por fazenda=Lagoa Grande",
+     "Filtrar por safra=Todas"
+    ],
+    "voltar": {
+     "chegou": "AG-01#VIS-052",
+     "mesmaTela": true,
+     "detalheReaberto": true,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "receituário→OS",
+   "sub": "AG-04",
+   "tela": "AG-04",
+   "visao": "",
+   "linha": null,
+   "detalhe": null,
+   "impedida": null,
+   "el": {
+    "k": "a",
+    "t": "Abrir OS-0421",
+    "h": "OS.dc.html#OS-0421"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "OS-0421",
+     "source": "href"
+    },
+    "inconclusivo": false,
+    "empilhado": null,
+    "r": "navega",
+    "de": "AG-04",
+    "origemId": "",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "OS#OS-0421",
+    "telaDestino": "OS",
+    "alvo": "OS-0421",
+    "abriu": true,
+    "titulo": "OS-0421 · Pulverização · Fungicida 1ª aplicação",
+    "destacou": false,
+    "foco": "Abrir ordem completa ›",
+    "volta": [
+     "Voltar para Agrícola → MOD-AGR.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [
+     "Tela: Ordem de Serviço · 2 em execução · 3 impedidas"
+    ],
+    "escopo": [
+     "Filtrar por fazenda=Santa Rita",
+     "Filtrar por safra=Todas"
+    ],
+    "voltar": {
+     "chegou": "AG-04",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "receituário→OS",
+   "sub": "AG-04",
+   "tela": "AG-04",
+   "visao": "",
+   "linha": null,
+   "detalhe": null,
+   "impedida": null,
+   "el": {
+    "k": "a",
+    "t": "Liberar OS-0418",
+    "h": "OS.dc.html#OS-0418"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "OS-0418",
+     "source": "href"
+    },
+    "inconclusivo": false,
+    "empilhado": null,
+    "r": "navega",
+    "de": "AG-04",
+    "origemId": "",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "OS#OS-0418",
+    "telaDestino": "OS",
+    "alvo": "OS-0418",
+    "abriu": true,
+    "titulo": "OS-0418 · Fertirrigação · reclassificada",
+    "destacou": false,
+    "foco": "×",
+    "volta": [
+     "Voltar para Agrícola → MOD-AGR.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [
+     "Tela: Ordem de Serviço · 2 em execução · 3 impedidas"
+    ],
+    "escopo": [
+     "Filtrar por fazenda=Santa Rita",
+     "Filtrar por safra=Todas"
+    ],
+    "voltar": {
+     "chegou": "AG-04",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  },
+  {
+   "percurso": "receituário→OS",
+   "sub": "AG-04det",
+   "tela": "AG-04det",
+   "visao": "",
+   "linha": null,
+   "detalhe": null,
+   "impedida": null,
+   "el": {
+    "k": "a",
+    "t": "OS-0420",
+    "h": "OS.dc.html#OS-0420"
+   },
+   "res": {
+    "metodo": "v5.1",
+    "esperado": {
+     "id": "OS-0420",
+     "source": "href"
+    },
+    "inconclusivo": false,
+    "empilhado": null,
+    "r": "navega",
+    "de": "AG-04det",
+    "origemId": "",
+    "mencionaOrigem": false,
+    "dlgOrigem": false,
+    "para": "OS#OS-0420",
+    "telaDestino": "OS",
+    "alvo": "OS-0420",
+    "abriu": true,
+    "titulo": "OS-0420 · Plantio · Soja 58 W",
+    "destacou": false,
+    "foco": "Abrir ordem completa ›",
+    "volta": [
+     "Voltar para Agrícola → MOD-AGR.dc.html"
+    ],
+    "voltaOrigem": false,
+    "avisos": [
+     "Tela: Ordem de Serviço · 2 em execução · 3 impedidas"
+    ],
+    "escopo": [
+     "Filtrar por fazenda=Santa Rita",
+     "Filtrar por safra=Todas"
+    ],
+    "voltar": {
+     "chegou": "AG-04det",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  }
+ ],
+ "naoRodados": [],
+ "min": 4.0
+}

@@ -1,0 +1,7286 @@
+{
+ "chave": "tela|k|texto|href",
+ "passagens_v5": 247,
+ "passagens_v51": 247,
+ "erros_v5": [],
+ "erros_v51": [],
+ "iguais": 145,
+ "diferentes": 102,
+ "razoes": [
+  [
+   "igual",
+   145
+  ],
+  [
+   "denominador: v5 contava como não chegou; v5.1 inconclusiva",
+   51
+  ],
+  [
+   "denominador: v5 contava …; v5.1 inconclusiva",
+   34
+  ],
+  [
+   "chegada: v5 aceitava por …; v5.1 recusa …",
+   17
+  ],
+  [
+   "alvo: v5 inferia … …; v5.1 sem alvo único na origem … → inconclusiva",
+   8
+  ],
+  [
+   "Voltar: v5 True × v5.1 False …",
+   1
+  ]
+ ],
+ "refsDiferentes": [
+  [
+   "prefixo CMD saiu do denominador (CMD/EX/DEC)",
+   4
+  ],
+  [
+   "prefixo DEC saiu do denominador (CMD/EX/DEC)",
+   1
+  ]
+ ],
+ "casos": [
+  {
+   "tela": "AG-01",
+   "k": "a",
+   "clique": "Abrir OS-0504",
+   "href": "OS.dc.html#OS-0504",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0504",
+    "alvo": "OS-0504",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0504",
+    "alvo": "OS-0504",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "AG-01",
+   "k": "a",
+   "clique": "Abrir OS-0508",
+   "href": "OS.dc.html#OS-0508",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0508",
+    "alvo": "OS-0508",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0508",
+    "alvo": "OS-0508",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "AG-01",
+   "k": "a",
+   "clique": "Ver rota e evidências ›",
+   "href": "AG-01det.dc.html#VIS-055",
+   "v5": {
+    "r": "navega",
+    "para": "AG-01det#VIS-055",
+    "alvo": "VIS-055",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": true,
+    "reabre": true
+   },
+   "v51": {
+    "r": "navega",
+    "para": "AG-01det#VIS-055",
+    "alvo": "VIS-055",
+    "fonte": "href",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": true,
+    "reabre": true,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "AG-01",
+   "k": "a",
+   "clique": "Ver rota e evidências ›",
+   "href": "AG-01det.dc.html#VIS-058",
+   "v5": {
+    "r": "navega",
+    "para": "AG-01det#VIS-058",
+    "alvo": "VIS-058",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": true,
+    "reabre": true
+   },
+   "v51": {
+    "r": "navega",
+    "para": "AG-01det#VIS-058",
+    "alvo": "VIS-058",
+    "fonte": "href",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": true,
+    "reabre": true,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "AG-01",
+   "k": "a",
+   "clique": "Ver rota e evidências ›",
+   "href": "AG-01det.dc.html#VIS-060",
+   "v5": {
+    "r": "navega",
+    "para": "AG-01det#VIS-060",
+    "alvo": "VIS-060",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": true,
+    "reabre": true
+   },
+   "v51": {
+    "r": "navega",
+    "para": "AG-01det#VIS-060",
+    "alvo": "VIS-060",
+    "fonte": "href",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": true,
+    "reabre": true,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "AG-01det",
+   "k": "a",
+   "clique": "VIS-011",
+   "href": "AG-01det.dc.html#VIS-011",
+   "v5": {
+    "r": "mesma tela",
+    "para": "AG-01det#VIS-011",
+    "alvo": "VIS-011",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "mesma tela",
+    "para": "AG-01det#VIS-011",
+    "alvo": "VIS-011",
+    "fonte": "href",
+    "chegou": null,
+    "como": "fora do denominador v5.1",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "AG-02",
+   "k": "a",
+   "clique": "Ver no plano",
+   "href": "SAF.dc.html#saf=LG2627&passo=cultivos&sug=1",
+   "v5": {
+    "r": "navega",
+    "para": "SAF#saf=LG2627&passo=cultivos&sug=1",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SAF#saf=LG2627&passo=cultivos&sug=1",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "AG-04",
+   "k": "a",
+   "clique": "Abrir REC-014",
+   "href": "AG-04det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "AG-04det",
+    "alvo": "REC-014",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "AG-04det",
+    "alvo": "REC-014",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "AG-04",
+   "k": "a",
+   "clique": "DIA-007",
+   "href": "AG-03det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "AG-03det",
+    "alvo": "DIA-007",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "AG-03det",
+    "alvo": "DIA-007",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "AG-04",
+   "k": "a",
+   "clique": "REC-014",
+   "href": "AG-04det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "AG-04det",
+    "alvo": "REC-014",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "AG-04det",
+    "alvo": "REC-014",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "AG-04",
+   "k": "a",
+   "clique": "Ver demanda gerada",
+   "href": "PL-02.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PL-02",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PL-02",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "AG-04det",
+   "k": "a",
+   "clique": "Abastecimento · 84 L × R$ 5,92 ›",
+   "href": "MA.dc.html#vis=ativos&modo=abastecimentos",
+   "v5": {
+    "r": "navega",
+    "para": "MA#vis=ativos&modo=abastecimentos",
+    "alvo": "",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MA#vis=ativos&modo=abastecimentos",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "AG-04det",
+   "k": "a",
+   "clique": "Ficha da abamectina 500 FS ›",
+   "href": "AG-07.dc.html#abamectina-500-fs",
+   "v5": {
+    "r": "navega",
+    "para": "AG-07#abamectina-500-fs",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "AG-07#abamectina-500-fs",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "AG-04det",
+   "k": "a",
+   "clique": "IAC Boletim 100 · K trocável 0,08 cmolc/dm³ ›",
+   "href": "AG-02.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "AG-02",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "AG-02",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "AG-04det",
+   "k": "a",
+   "clique": "LAU-2043 · zona 2 · K 0,08 cmolc/dm³ ›",
+   "href": "AG-02.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "AG-02",
+    "alvo": "LAU-2043",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "AG-02",
+    "alvo": "LAU-2043",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "AG-04det",
+   "k": "a",
+   "clique": "NEC-028",
+   "href": "PL-02.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PL-02",
+    "alvo": "NEC-028",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PL-02",
+    "alvo": "NEC-028",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "AG-04det",
+   "k": "a",
+   "clique": "OS-0420",
+   "href": "OS.dc.html#OS-0420",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0420",
+    "alvo": "OS-0420",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0420",
+    "alvo": "OS-0420",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "AG-04det",
+   "k": "a",
+   "clique": "Pasteuria nishizawae FS (registrada para cisto) ›",
+   "href": "AG-07.dc.html#pasteuria-nishizawae-fs",
+   "v5": {
+    "r": "navega",
+    "para": "AG-07#pasteuria-nishizawae-fs",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "AG-07#pasteuria-nishizawae-fs",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "AG-05",
+   "k": "a",
+   "clique": "Simular",
+   "href": "PL-02.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PL-02",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PL-02",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "AG-05",
+   "k": "a",
+   "clique": "Ver uso",
+   "href": "AG-04det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "AG-04det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "AG-04det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "AG-07",
+   "k": "a",
+   "clique": "Abrir no Estoque ›",
+   "href": "EST.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "EST",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": true
+   },
+   "v51": {
+    "r": "navega",
+    "para": "EST",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": true,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "AG-07",
+   "k": "a",
+   "clique": "MAMAO-IMP ›",
+   "href": "PA.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PA",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": true
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PA",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": true,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "AG-07",
+   "k": "a",
+   "clique": "MAMAO-PROD ›",
+   "href": "PA.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PA",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": true
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PA",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": true,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "AG-07",
+   "k": "a",
+   "clique": "OS-0420 ›",
+   "href": "CA-01x-os0420.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CA-01x-os0420",
+    "alvo": "OS-0420",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": true
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CA-01x-os0420",
+    "alvo": "OS-0420",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": true,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "AG-07",
+   "k": "a",
+   "clique": "OS-0504 ›",
+   "href": "OS.dc.html#OS-0504",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0504",
+    "alvo": "OS-0504",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": true
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0504",
+    "alvo": "OS-0504",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": true,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "AG-07",
+   "k": "a",
+   "clique": "REC-014 v2 ›",
+   "href": "AG-04det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "AG-04det",
+    "alvo": "REC-014",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": true
+   },
+   "v51": {
+    "r": "navega",
+    "para": "AG-04det",
+    "alvo": "REC-014",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": true,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "BEN",
+   "k": "a",
+   "clique": "Abrir no Estoque ›",
+   "href": "EST.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "EST",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "EST",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "BEN",
+   "k": "a",
+   "clique": "Conferir a NF 7731 das caixas no Estoque ›",
+   "href": "EST.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "EST",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "EST",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "BEN",
+   "k": "a",
+   "clique": "Ver no Estoque de produto ›",
+   "href": "PROD.dc.html#L38-115",
+   "v5": {
+    "r": "navega",
+    "para": "PROD#L38-115",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": true,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PROD#L38-115",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "BEN",
+   "k": "a",
+   "clique": "Ver no Estoque de produto ›",
+   "href": "PROD.dc.html#L38-116",
+   "v5": {
+    "r": "navega",
+    "para": "PROD#L38-116",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": true,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PROD#L38-116",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "BEN",
+   "k": "a",
+   "clique": "Ver no Estoque de produto ›",
+   "href": "PROD.dc.html#L38-117",
+   "v5": {
+    "r": "navega",
+    "para": "PROD#L38-117",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": true,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PROD#L38-117",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "BEN",
+   "k": "a",
+   "clique": "Ver no Estoque de produto ›",
+   "href": "PROD.dc.html#L38-118",
+   "v5": {
+    "r": "navega",
+    "para": "PROD#L38-118",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": true,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PROD#L38-118",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "BEN",
+   "k": "a",
+   "clique": "Ver no Estoque de produto ›",
+   "href": "PROD.dc.html#L39-117",
+   "v5": {
+    "r": "navega",
+    "para": "PROD#L39-117",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": true,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PROD#L39-117",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "BEN",
+   "k": "a",
+   "clique": "Ver no Estoque de produto ›",
+   "href": "PROD.dc.html#L39-118",
+   "v5": {
+    "r": "navega",
+    "para": "PROD#L39-118",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": true,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PROD#L39-118",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "BEN",
+   "k": "a",
+   "clique": "Ver no Estoque de produto ›",
+   "href": "PROD.dc.html#L39-119",
+   "v5": {
+    "r": "navega",
+    "para": "PROD#L39-119",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PROD#L39-119",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "BO-02",
+   "k": "a",
+   "clique": "Consulta contratual (CF-05) ›",
+   "href": "CF-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CF-05",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CF-05",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CA-02",
+   "k": "a",
+   "clique": "Abrir O.S. ›",
+   "href": "OS.dc.html#OS-0420",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0420",
+    "alvo": "OS-0420",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0420",
+    "alvo": "OS-0420",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CA-02",
+   "k": "a",
+   "clique": "Abrir O.S. ›",
+   "href": "OS.dc.html#OS-0508",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0508",
+    "alvo": "OS-0508",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0508",
+    "alvo": "OS-0508",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CA-02",
+   "k": "a",
+   "clique": "Liberar OS-0418",
+   "href": "OS.dc.html#OS-0418",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0418",
+    "alvo": "OS-0418",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0418",
+    "alvo": "OS-0418",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CA-03",
+   "k": "a",
+   "clique": "Abrir ocorrência ›",
+   "href": "CA-03det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CA-03det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CA-03det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CA-03",
+   "k": "a",
+   "clique": "Encaminhar à agronomia ›",
+   "href": "AG-03.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "AG-03",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "AG-03",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CA-03",
+   "k": "a",
+   "clique": "Reprogramar saldo ›",
+   "href": "PL-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PL-05",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PL-05",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CA-03",
+   "k": "a",
+   "clique": "Ver tratamento ›",
+   "href": "IR-03.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "IR-03",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "IR-03",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CA-03det",
+   "k": "a",
+   "clique": "OM-0233",
+   "href": "MA.dc.html#om=OM-0233",
+   "v5": {
+    "r": "navega",
+    "para": "MA#vis=ordens&om=OM-0233",
+    "alvo": "OM-0233",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MA#vis=ordens&om=OM-0233",
+    "alvo": "OM-0233",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CA-03det",
+   "k": "a",
+   "clique": "OS-0420",
+   "href": "CA-01x-os0420.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CA-01x-os0420",
+    "alvo": "OS-0420",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CA-01x-os0420",
+    "alvo": "OS-0420",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "CA-03det",
+   "k": "a",
+   "clique": "Trator 02 · MF 7719",
+   "href": "PL-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PL-05",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PL-05",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CA-03det",
+   "k": "a",
+   "clique": "Trator T1",
+   "href": "MA.dc.html#ativo=a01",
+   "v5": {
+    "r": "navega",
+    "para": "MA#ativo=a01",
+    "alvo": "",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MA#ativo=a01",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CARGA",
+   "k": "a",
+   "clique": "Abrir no estoque ›",
+   "href": "PROD.dc.html#L38-131",
+   "v5": {
+    "r": "navega",
+    "para": "PROD#L38-131",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PROD#L38-131",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CARGA",
+   "k": "a",
+   "clique": "Abrir no estoque ›",
+   "href": "PROD.dc.html#L38-132",
+   "v5": {
+    "r": "navega",
+    "para": "PROD#L38-132",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PROD#L38-132",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CARGA",
+   "k": "a",
+   "clique": "Abrir no estoque ›",
+   "href": "PROD.dc.html#L39-132",
+   "v5": {
+    "r": "navega",
+    "para": "PROD#L39-132",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PROD#L39-132",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CARGA",
+   "k": "a",
+   "clique": "Abrir ordem de beneficiamento · Igor (responsável de produção)",
+   "href": "BEN.dc.html#nova=L38-132",
+   "v5": {
+    "r": "navega",
+    "para": "BEN#nova=L38-132",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "BEN#nova=L38-132",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CARGA",
+   "k": "a",
+   "clique": "Abrir ordem de beneficiamento · Igor (responsável de produção)",
+   "href": "BEN.dc.html#nova=L39-131",
+   "v5": {
+    "r": "navega",
+    "para": "BEN#nova=L39-131",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "BEN#nova=L39-131",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CARGA",
+   "k": "a",
+   "clique": "Abrir ordem de beneficiamento · Igor (responsável de produção)",
+   "href": "BEN.dc.html#nova=L39-132",
+   "v5": {
+    "r": "navega",
+    "para": "BEN#nova=L39-132",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "BEN#nova=L39-132",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CD-01",
+   "k": "b",
+   "clique": "Abrir talhão ›",
+   "href": "",
+   "v5": {
+    "r": "navega",
+    "para": "CD-01det#talhao=PV06",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": true,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CD-01det#talhao=PV06",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CD-01",
+   "k": "b",
+   "clique": "Documentos para crédito ›",
+   "href": "",
+   "v5": {
+    "r": "navega",
+    "para": "GE-08#vis=documentos",
+    "alvo": "",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-08#vis=documentos",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CD-01det",
+   "k": "a",
+   "clique": "Planejar T1 na safra ›",
+   "href": "SAF.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SAF",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SAF",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CD-01det",
+   "k": "a",
+   "clique": "Planejar safra › Safra 2026/27 › T1-B ›",
+   "href": "SAF.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SAF",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SAF",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CD-03",
+   "k": "a",
+   "clique": "Abrir Colhedora Axial-Flow 7250 na Manutenção ›",
+   "href": "MA.dc.html#ativo=a08",
+   "v5": {
+    "r": "navega",
+    "para": "MA#ativo=a08",
+    "alvo": "",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MA#ativo=a08",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CD-03",
+   "k": "a",
+   "clique": "Abrir OM-0233 na Manutenção ›",
+   "href": "MA.dc.html#om=OM-0233",
+   "v5": {
+    "r": "navega",
+    "para": "MA#vis=ordens&om=OM-0233",
+    "alvo": "OM-0233",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MA#vis=ordens&om=OM-0233",
+    "alvo": "OM-0233",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CD-03",
+   "k": "a",
+   "clique": "Abrir Trator T1 na Manutenção ›",
+   "href": "MA.dc.html#ativo=a01",
+   "v5": {
+    "r": "navega",
+    "para": "MA#ativo=a01",
+    "alvo": "",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MA#ativo=a01",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CD-03",
+   "k": "a",
+   "clique": "Plano: PM-03 ›",
+   "href": "MA.dc.html#plano=PM-03",
+   "v5": {
+    "r": "navega",
+    "para": "MA#plano=PM-03",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MA#plano=PM-03",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CD-03",
+   "k": "a",
+   "clique": "Plano: PM-06 ›",
+   "href": "MA.dc.html#plano=PM-06",
+   "v5": {
+    "r": "navega",
+    "para": "MA#plano=PM-06",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MA#plano=PM-06",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CD-03",
+   "k": "a",
+   "clique": "Plano: PM-09 ›",
+   "href": "MA.dc.html#plano=PM-09",
+   "v5": {
+    "r": "navega",
+    "para": "MA#plano=PM-09",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MA#plano=PM-09",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CD-03",
+   "k": "a",
+   "clique": "Ver ordens afetadas · OS-0420 e OS-0431 ›",
+   "href": "OS.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "OS",
+    "alvo": "OS-0420",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "alvo: v5 inferia \"OS-0420\" (hash do destino ou texto); v5.1 sem alvo único na origem (origem sem alvo único) → inconclusiva",
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CD-03",
+   "k": "b",
+   "clique": "Colheita de grãos ›",
+   "href": "",
+   "v5": {
+    "r": "abre no lugar",
+    "para": null,
+    "alvo": null,
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": null,
+    "reabre": null
+   },
+   "v51": {
+    "r": "abre no lugar",
+    "para": null,
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "fora do denominador v5.1",
+    "volta": null,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CD-03",
+   "k": "b",
+   "clique": "Plantadeira 24 linhas · Plantio ›",
+   "href": "",
+   "v5": {
+    "r": "abre no lugar",
+    "para": null,
+    "alvo": null,
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": null,
+    "reabre": null
+   },
+   "v51": {
+    "r": "abre no lugar",
+    "para": null,
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "fora do denominador v5.1",
+    "volta": null,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CD-04",
+   "k": "a",
+   "clique": "Acesso ao app: Ativo desde 01/07/2026 · gerenciar em Configurações › Usuários e alçadas ›",
+   "href": "CF-01.dc.html#pessoa=Dora",
+   "v5": {
+    "r": "navega",
+    "para": "CF-01#pessoa=Dora",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CF-01#pessoa=Dora",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CD-04",
+   "k": "a",
+   "clique": "Acesso ao app: Ativo desde 01/07/2026 · gerenciar em Configurações › Usuários e alçadas ›",
+   "href": "CF-01.dc.html#pessoa=Jo%C3%A3o",
+   "v5": {
+    "r": "navega",
+    "para": "CF-01#pessoa=Jo%C3%A3o",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CF-01#pessoa=Jo%C3%A3o",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CD-04",
+   "k": "a",
+   "clique": "Acesso ao app: Ativo desde 28/06/2026 · gerenciar em Configurações › Usuários e alçadas ›",
+   "href": "CF-01.dc.html#pessoa=Ana",
+   "v5": {
+    "r": "navega",
+    "para": "CF-01#pessoa=Ana",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CF-01#pessoa=Ana",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CF-01",
+   "k": "a",
+   "clique": "Abrir no cadastro",
+   "href": "CD-04.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CD-04",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CD-04",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CF-01",
+   "k": "a",
+   "clique": "OS-0418 · P1",
+   "href": "OS.dc.html#OS-0418",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0418",
+    "alvo": "OS-0418",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0418",
+    "alvo": "OS-0418",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CF-01",
+   "k": "a",
+   "clique": "OS-0430 · T1-A",
+   "href": "OS.dc.html#OS-0430",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0430",
+    "alvo": "OS-0430",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0430",
+    "alvo": "OS-0430",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CF-01",
+   "k": "a",
+   "clique": "OS-0431 · T2",
+   "href": "OS.dc.html#OS-0431",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0431",
+    "alvo": "OS-0431",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0431",
+    "alvo": "OS-0431",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CF-01",
+   "k": "a",
+   "clique": "OS-0501 · Pivô 13",
+   "href": "OS.dc.html#OS-0501",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0501",
+    "alvo": "OS-0501",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0501",
+    "alvo": "OS-0501",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CF-01",
+   "k": "a",
+   "clique": "OS-0502 · Pivô 12",
+   "href": "OS.dc.html#OS-0502",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0502",
+    "alvo": "OS-0502",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0502",
+    "alvo": "OS-0502",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CF-01",
+   "k": "a",
+   "clique": "OS-0511 · Pivô 15",
+   "href": "OS.dc.html#OS-0511",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0511",
+    "alvo": "OS-0511",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0511",
+    "alvo": "OS-0511",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CF-01",
+   "k": "a",
+   "clique": "OS-0590 · Parcela demonstrativa A",
+   "href": "OS.dc.html#OS-0590",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0590",
+    "alvo": "OS-0590",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0590",
+    "alvo": "OS-0590",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CF-01",
+   "k": "a",
+   "clique": "OS-0591 · Parcela demonstrativa B",
+   "href": "OS.dc.html#OS-0591",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0591",
+    "alvo": "OS-0591",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0591",
+    "alvo": "OS-0591",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CF-04",
+   "k": "a",
+   "clique": "Abrir no domínio",
+   "href": "CF-01.dc.html#pessoa=Rui",
+   "v5": {
+    "r": "navega",
+    "para": "CF-01#pessoa=Rui",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CF-01#pessoa=Rui",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CF-04",
+   "k": "a",
+   "clique": "Abrir no domínio",
+   "href": "CF-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CF-05",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CF-05",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CF-04",
+   "k": "a",
+   "clique": "Contrato v2",
+   "href": "CF-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CF-05",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CF-05",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CF-04",
+   "k": "a",
+   "clique": "Fatura ago/2026",
+   "href": "CF-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CF-05",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CF-05",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CF-04",
+   "k": "a",
+   "clique": "Fatura jul/2026",
+   "href": "CF-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CF-05",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CF-05",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CF-04",
+   "k": "a",
+   "clique": "Lucas",
+   "href": "CF-01.dc.html#pessoa=Lucas",
+   "v5": {
+    "r": "navega",
+    "para": "CF-01#pessoa=Lucas",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CF-01#pessoa=Lucas",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CF-05",
+   "k": "a",
+   "clique": "Abrir no cadastro ›",
+   "href": "CD-01det.dc.html#talhao=PV07",
+   "v5": {
+    "r": "navega",
+    "para": "CD-01det#talhao=PV07",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CD-01det#talhao=PV07",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CF-05",
+   "k": "a",
+   "clique": "Abrir no cadastro ›",
+   "href": "CD-01det.dc.html#talhao=T1",
+   "v5": {
+    "r": "navega",
+    "para": "CD-01det#talhao=T1",
+    "alvo": "",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CD-01det#talhao=T1",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CMP",
+   "k": "a",
+   "clique": "Abrir Planejar safra",
+   "href": "SAF.dc.html#saf=LG2627&passo=demanda",
+   "v5": {
+    "r": "navega",
+    "para": "SAF#saf=LG2627&passo=demanda",
+    "alvo": "",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SAF#saf=LG2627&passo=demanda",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CMP",
+   "k": "a",
+   "clique": "Abrir Planejar safra",
+   "href": "SAF.dc.html#saf=S27SF&passo=demanda",
+   "v5": {
+    "r": "navega",
+    "para": "SAF#saf=S27SF&passo=demanda",
+    "alvo": "",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SAF#saf=S27SF&passo=demanda",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CMP",
+   "k": "a",
+   "clique": "Ver origem",
+   "href": "SAF.dc.html#saf=S2627&passo=demanda",
+   "v5": {
+    "r": "navega",
+    "para": "SAF#saf=S2627&passo=demanda",
+    "alvo": "",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SAF#saf=S2627&passo=demanda",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "CO-06",
+   "k": "a",
+   "clique": "Decidir lote",
+   "href": "CO-06det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CO-06det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CO-06det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "CO-06",
+   "k": "a",
+   "clique": "Ver carência no mapa",
+   "href": "IN-04.dc.html#car",
+   "v5": {
+    "r": "navega",
+    "para": "IN-04",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "IN-04",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "EXPED",
+   "k": "a",
+   "clique": "Abrir lote ›",
+   "href": "PROD.dc.html#L38-131",
+   "v5": {
+    "r": "navega",
+    "para": "PROD#L38-131",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PROD#L38-131",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "EXPED",
+   "k": "a",
+   "clique": "PV-037",
+   "href": "VEN.dc.html#PV-037",
+   "v5": {
+    "r": "navega",
+    "para": "VEN#PV-037",
+    "alvo": "PV-037",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VEN#PV-037",
+    "alvo": "PV-037",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-01",
+   "k": "a",
+   "clique": "Abrir lote",
+   "href": "CO-06det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CO-06det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CO-06det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-01",
+   "k": "a",
+   "clique": "Abrir origem do desvio",
+   "href": "GE-02det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-02det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-02det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-01",
+   "k": "a",
+   "clique": "CT-198 e PV-028 dependem do lote ›",
+   "href": "VE-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "VE-05",
+    "alvo": "CT-198",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VE-05",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "alvo: v5 inferia \"CT-198\" (hash do destino ou texto); v5.1 sem alvo único na origem (origem sem alvo único) → inconclusiva",
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "GE-01",
+   "k": "a",
+   "clique": "Comparar cenário",
+   "href": "GE-02.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-02",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-02",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-01",
+   "k": "a",
+   "clique": "Criar ação",
+   "href": "GE-07.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-07",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-07",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-01",
+   "k": "a",
+   "clique": "Custo = R$ 1,31 mi da previsão V2 · composição documento a documento ›",
+   "href": "GE-03.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-03",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-03",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "GE-01",
+   "k": "a",
+   "clique": "Custo = R$ 5,84 mi da previsão V2 · composição documento a documento ›",
+   "href": "GE-03.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-03",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-03",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "GE-01",
+   "k": "a",
+   "clique": "L27-013 · INSP-88 aberta · Qualidade · prazo 25/09 ›",
+   "href": "CO-06det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CO-06det",
+    "alvo": "INSP-88",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CO-06det",
+    "alvo": "INSP-88",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "GE-01",
+   "k": "a",
+   "clique": "Premissas da versão V2 (rendimento e preço) ›",
+   "href": "GE-02.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-02",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-02",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "GE-02",
+   "k": "a",
+   "clique": "Composição de custos ›",
+   "href": "GE-03.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-03",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-03",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "GE-02det",
+   "k": "a",
+   "clique": "Indicador de custo de pulverização ›",
+   "href": "GE-06det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-06det",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-06det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "GE-02det",
+   "k": "a",
+   "clique": "OS-0409 · 95 ha do P1 + 25 ha reaplicados após chuva ›",
+   "href": "CA-02.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CA-02",
+    "alvo": "OS-0409",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CA-02",
+    "alvo": "OS-0409",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-02det",
+   "k": "a",
+   "clique": "Requisições da OS-0409 · 264 L retirados ›",
+   "href": "SU-07.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-07",
+    "alvo": "OS-0409",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-07",
+    "alvo": "OS-0409",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-03",
+   "k": "a",
+   "clique": "Apontamento · OS-0420 · Máquina e equipe · plantio ›",
+   "href": "CA-02.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CA-02",
+    "alvo": "OS-0420",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CA-02",
+    "alvo": "OS-0420",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-03",
+   "k": "a",
+   "clique": "Apontamento · OS-0421",
+   "href": "CA-02.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CA-02",
+    "alvo": "OS-0421",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CA-02",
+    "alvo": "OS-0421",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-03",
+   "k": "a",
+   "clique": "NF 8842 · recebimento",
+   "href": "SU-06.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-06",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-06",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-03",
+   "k": "a",
+   "clique": "NF 8842 · recebimento · Defensivo · fungicida ›",
+   "href": "SU-06.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-06",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-06",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "GE-03",
+   "k": "a",
+   "clique": "Ordem OS-0420 · plantio T4 · 30 de 100 ha ›",
+   "href": "CA-01.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CA-01",
+    "alvo": "OS-0420",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": true,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CA-01",
+    "alvo": "OS-0420",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": true,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-03",
+   "k": "a",
+   "clique": "REQ-035 · OS-0421",
+   "href": "SU-07.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-07",
+    "alvo": "REQ-035",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-07",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "alvo: v5 inferia \"REQ-035\" (hash do destino ou texto); v5.1 sem alvo único na origem (origem sem alvo único) → inconclusiva",
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "GE-03",
+   "k": "a",
+   "clique": "REQ-036 · OS-0420",
+   "href": "SU-07.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-07",
+    "alvo": "REQ-036",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-07",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "alvo: v5 inferia \"REQ-036\" (hash do destino ou texto); v5.1 sem alvo único na origem (origem sem alvo único) → inconclusiva",
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "GE-04",
+   "k": "a",
+   "clique": "Abrir aprovação",
+   "href": "IN-02.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "IN-02",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "IN-02",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-04",
+   "k": "a",
+   "clique": "Abrir crédito",
+   "href": "GE-08.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-08",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-08",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-04",
+   "k": "a",
+   "clique": "Abrir pedido",
+   "href": "SU-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-05",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-05",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-04",
+   "k": "a",
+   "clique": "NF 8790 · parcela 2 de 3 · alçada do Gerente da fazenda (até R$ 300 mil) ›",
+   "href": "IN-02.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "IN-02",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "IN-02",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "GE-04",
+   "k": "a",
+   "clique": "Pedido PC-088 · Fertisul · 100 t × R$ 2,33/kg = R$ 233.000 ›",
+   "href": "SU-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-05",
+    "alvo": "PC-088",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-05",
+    "alvo": "PC-088",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-04",
+   "k": "a",
+   "clique": "Pedido PC-090 · entrega prevista 05/10/2026 ›",
+   "href": "SU-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-05",
+    "alvo": "PC-090",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-05",
+    "alvo": "PC-090",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-04",
+   "k": "a",
+   "clique": "Ver retiradas",
+   "href": "LO-01.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "LO-01",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "LO-01",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-05",
+   "k": "a",
+   "clique": "Caso RC-12 · retorno de 300 kg do lote L26-118 recebido bloqueado · crédito de 300 kg × R$",
+   "href": "VE-06.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "VE-06",
+    "alvo": "RC-12",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VE-06",
+    "alvo": "RC-12",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-05",
+   "k": "a",
+   "clique": "Caso RC-13 · umidade acima do padrão ›",
+   "href": "VE-06.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "VE-06",
+    "alvo": "RC-13",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VE-06",
+    "alvo": "RC-13",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-05",
+   "k": "a",
+   "clique": "PV-027",
+   "href": "VE-04.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "VE-04",
+    "alvo": "PV-027",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VE-04",
+    "alvo": "PV-027",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-05",
+   "k": "a",
+   "clique": "PV-029",
+   "href": "VE-04.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "VE-04",
+    "alvo": "PV-029",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VE-04",
+    "alvo": "PV-029",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-05",
+   "k": "a",
+   "clique": "Pedido PV-027 · entrega 2 de 2 em 20/09 · o pedido original não muda ›",
+   "href": "VE-04.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "VE-04",
+    "alvo": "PV-027",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VE-04",
+    "alvo": "PV-027",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-05",
+   "k": "a",
+   "clique": "RC-14",
+   "href": "VE-06.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "VE-06",
+    "alvo": "RC-14",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VE-06",
+    "alvo": "RC-14",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-05",
+   "k": "a",
+   "clique": "abrir caso ›",
+   "href": "VE-06.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "VE-06",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VE-06",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-06",
+   "k": "a",
+   "clique": "Detalhar",
+   "href": "GE-06det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-06det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-06det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-06",
+   "k": "a",
+   "clique": "Pivô 2 a 62% da volta · 10,81 mm aplicados ›",
+   "href": "IR-03.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "IR-03",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "IR-03",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "GE-06",
+   "k": "a",
+   "clique": "R$ 5.808 ÷ 120 ha·op (OS-0409) ›",
+   "href": "GE-06det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-06det",
+    "alvo": "OS-0409",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": true,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-06det",
+    "alvo": "OS-0409",
+    "fonte": "texto",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": true,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-06",
+   "k": "a",
+   "clique": "Telemetria do pivô ›",
+   "href": "IR-01.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "IR-01",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "IR-01",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "GE-06",
+   "k": "a",
+   "clique": "Ver ações",
+   "href": "GE-07.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-07",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-07",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-06",
+   "k": "a",
+   "clique": "Ver ordens",
+   "href": "CA-01.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CA-01",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CA-01",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-06",
+   "k": "a",
+   "clique": "Ver packing",
+   "href": "CO-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CO-05",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CO-05",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-08",
+   "k": "a",
+   "clique": "Dossiê de crédito ›",
+   "href": "GE-08.dc.html#vis=dossie",
+   "v5": {
+    "r": "mesma tela",
+    "para": "GE-08#vis=dossie",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "mesma tela",
+    "para": "GE-08#vis=dossie",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "fora do denominador v5.1",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-08",
+   "k": "a",
+   "clique": "Liberado R$ 300 mil de R$ 850 mil · 1ª parcela é título em Contas a pagar ›",
+   "href": "GE-04.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-04",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-04",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "GE-08",
+   "k": "a",
+   "clique": "Ver CPR",
+   "href": "VE-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "VE-05",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VE-05",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "GE-08",
+   "k": "a",
+   "clique": "Ver título",
+   "href": "GE-04.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-04",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-04",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "IC",
+   "k": "a",
+   "clique": "Abrir Compra de insumos",
+   "href": "CMP.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CMP",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CMP",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "IN-01",
+   "k": "a",
+   "clique": "Liberar",
+   "href": "OS.dc.html#OS-0418",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0418",
+    "alvo": "OS-0418",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0418",
+    "alvo": "OS-0418",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "IN-01",
+   "k": "a",
+   "clique": "Liberar",
+   "href": "OS.dc.html#OS-0430",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0430",
+    "alvo": "OS-0430",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0430",
+    "alvo": "OS-0430",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "IN-01",
+   "k": "a",
+   "clique": "Receber devolução",
+   "href": "EST.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "EST",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "EST",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "IN-01",
+   "k": "a",
+   "clique": "Reprogramar saldo",
+   "href": "PL-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PL-05",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PL-05",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "IN-02",
+   "k": "a",
+   "clique": "Abrir a decisão no módulo de origem ›",
+   "href": "CF-01.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CF-01",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CF-01",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "IN-02",
+   "k": "a",
+   "clique": "Abrir a decisão no módulo de origem ›",
+   "href": "GE-02det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-02det",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-02det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "IN-02",
+   "k": "a",
+   "clique": "Abrir a decisão no módulo de origem ›",
+   "href": "SU-09.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-09",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-09",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "IN-02",
+   "k": "a",
+   "clique": "Decidir",
+   "href": "CF-01.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CF-01",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CF-01",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "IN-02",
+   "k": "a",
+   "clique": "Decidir",
+   "href": "GE-02det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-02det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-02det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "IN-02",
+   "k": "a",
+   "clique": "Decidir",
+   "href": "SU-02.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-02",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-02",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "IN-02",
+   "k": "a",
+   "clique": "Decidir",
+   "href": "SU-09.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-09",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-09",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "IN-04",
+   "k": "a",
+   "clique": "Abrir ordens ›",
+   "href": "OS.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "OS",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "IR-01",
+   "k": "a",
+   "clique": "Conferir medição",
+   "href": "IR-03det.dc.html#OS-0394:conferir",
+   "v5": {
+    "r": "navega",
+    "para": "IR-03det#OS-0394:conferir",
+    "alvo": "OS-0394",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "IR-03det#OS-0394:conferir",
+    "alvo": "OS-0394",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "IR-01",
+   "k": "a",
+   "clique": "Fontes: Estação Santa Rita · Sonda de umidade · P1 (20 cm) suspeita (salto de 18 p.p.) ›",
+   "href": "IR-04.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "IR-04",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": true,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "IR-04",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "IR-01",
+   "k": "a",
+   "clique": "Fontes: Estação Santa Rita · Sonda de umidade · T7 sem dado ›",
+   "href": "IR-04.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "IR-04",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": true,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "IR-04",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "IR-01",
+   "k": "a",
+   "clique": "OS-0392 · Encerradas · 19/09 14:00–16:00 ›",
+   "href": "IR-03det.dc.html#OS-0392",
+   "v5": {
+    "r": "navega",
+    "para": "IR-03det#OS-0392",
+    "alvo": "OS-0392",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "IR-03det#OS-0392",
+    "alvo": "OS-0392",
+    "fonte": "href",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "IR-01",
+   "k": "a",
+   "clique": "OS-0394 · Em conferência · ontem 20:00–22:06 ›",
+   "href": "IR-03det.dc.html#OS-0394",
+   "v5": {
+    "r": "navega",
+    "para": "IR-03det#OS-0394",
+    "alvo": "OS-0394",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "IR-03det#OS-0394",
+    "alvo": "OS-0394",
+    "fonte": "href",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "IR-01",
+   "k": "a",
+   "clique": "OS-0419 · Liberadas · hoje 20:00–amanhã 10:31 ›",
+   "href": "IR-03det.dc.html#OS-0419",
+   "v5": {
+    "r": "navega",
+    "para": "IR-03det#OS-0419",
+    "alvo": "OS-0419",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "IR-03det#OS-0419",
+    "alvo": "OS-0419",
+    "fonte": "href",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "IR-01",
+   "k": "a",
+   "clique": "OS-0423 · A liberar · hoje 14:00–16:00 ›",
+   "href": "IR-03det.dc.html#OS-0423",
+   "v5": {
+    "r": "navega",
+    "para": "IR-03det#OS-0423",
+    "alvo": "OS-0423",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "IR-03det#OS-0423",
+    "alvo": "OS-0423",
+    "fonte": "href",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "IR-01",
+   "k": "a",
+   "clique": "Programar só água",
+   "href": "IR-02.dc.html#programar=P1",
+   "v5": {
+    "r": "navega",
+    "para": "IR-02#programar=P1",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "IR-02#programar=P1",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "IR-01",
+   "k": "a",
+   "clique": "Resolver conflito",
+   "href": "IR-03det.dc.html#OS-0423:conflito",
+   "v5": {
+    "r": "navega",
+    "para": "IR-03det#OS-0423:conflito",
+    "alvo": "OS-0423",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "IR-03det#OS-0423:conflito",
+    "alvo": "OS-0423",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "IV",
+   "k": "a",
+   "clique": "Abrir venda ›",
+   "href": "VEN.dc.html#PV-037",
+   "v5": {
+    "r": "navega",
+    "para": "VEN#PV-037",
+    "alvo": "PV-037",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VEN#PV-037",
+    "alvo": "PV-037",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "LO-02det",
+   "k": "a",
+   "clique": "Abrir Expedição",
+   "href": "EXPED.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "EXPED",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "EXPED",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "LO-02det",
+   "k": "b",
+   "clique": "Abrir Expedição",
+   "href": "",
+   "v5": {
+    "r": "navega",
+    "para": "EXPED",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "EXPED",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MA",
+   "k": "b",
+   "clique": "Abrir PM-02 ›",
+   "href": "",
+   "v5": {
+    "r": "mesma tela",
+    "para": "MA#plano=PM-02",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "mesma tela",
+    "para": "MA#plano=PM-02",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "fora do denominador v5.1",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MA",
+   "k": "b",
+   "clique": "Mudar condição ›",
+   "href": "",
+   "v5": {
+    "r": "mesma tela",
+    "para": "MA#vis=semordem",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": true,
+    "reabre": false
+   },
+   "v51": {
+    "r": "mesma tela",
+    "para": "MA#vis=semordem",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "fora do denominador v5.1",
+    "volta": true,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-01",
+   "k": "a",
+   "clique": "Abrir ordem",
+   "href": "MB-02det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-02det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-02det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-01",
+   "k": "a",
+   "clique": "Minhas ordens lista e detalhe da O.S.",
+   "href": "MB-02.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-02",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-02",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-01",
+   "k": "a",
+   "clique": "Retirar no almoxarifado",
+   "href": "MB-05.dc.html#OS-0424",
+   "v5": {
+    "r": "navega",
+    "para": "MB-05#OS-0424",
+    "alvo": "OS-0424",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-05#OS-0424",
+    "alvo": "OS-0424",
+    "fonte": "href",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "MB-01",
+   "k": "a",
+   "clique": "Ver envios",
+   "href": "MB-03x-recibo.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-02",
+   "k": "a",
+   "clique": "Abrir ordem",
+   "href": "MB-02det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-02det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-02det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-02",
+   "k": "a",
+   "clique": "Registrar ocorrência",
+   "href": "MB-04.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-04",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-04",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-02",
+   "k": "a",
+   "clique": "Retirar no almoxarifado",
+   "href": "MB-05.dc.html#OS-0424",
+   "v5": {
+    "r": "navega",
+    "para": "MB-05#OS-0424",
+    "alvo": "OS-0424",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-05#OS-0424",
+    "alvo": "OS-0424",
+    "fonte": "href",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "MB-02",
+   "k": "a",
+   "clique": "Ver envios",
+   "href": "MB-03x-recibo.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-02det",
+   "k": "a",
+   "clique": "Registrar ocorrência",
+   "href": "MB-04.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-04",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-04",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-02det",
+   "k": "a",
+   "clique": "Ver envios",
+   "href": "MB-03x-recibo.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-02det",
+   "k": "a",
+   "clique": "Ver retirada",
+   "href": "MB-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-05",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-05",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-03",
+   "k": "a",
+   "clique": "Abrir ordem",
+   "href": "MB-02det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-02det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-02det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-03",
+   "k": "a",
+   "clique": "Retirar no almoxarifado",
+   "href": "MB-05.dc.html#OS-0424",
+   "v5": {
+    "r": "navega",
+    "para": "MB-05#OS-0424",
+    "alvo": "OS-0424",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-05#OS-0424",
+    "alvo": "OS-0424",
+    "fonte": "href",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "chegada: v5 aceitava por \"2ª passada v5\"; v5.1 recusa (não chegou)"
+   ]
+  },
+  {
+   "tela": "MB-03",
+   "k": "a",
+   "clique": "Ver envios",
+   "href": "MB-03x-recibo.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-03x-recibo",
+   "k": "a",
+   "clique": "Voltar à fila",
+   "href": "MB-01.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-01",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-01",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-04",
+   "k": "a",
+   "clique": "Ver envios",
+   "href": "MB-03x-recibo.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-05",
+   "k": "a",
+   "clique": "Ver envios",
+   "href": "MB-03x-recibo.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-05",
+   "k": "a",
+   "clique": "Voltar à fila",
+   "href": "MB-01.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-01",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-01",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-06",
+   "k": "a",
+   "clique": "VIS-017 · T2 · Daninhas pré-plantio 26/09",
+   "href": "MB-06.dc.html#VIS-017",
+   "v5": {
+    "r": "mesma tela",
+    "para": "MB-06#VIS-017",
+    "alvo": "VIS-017",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "mesma tela",
+    "para": "MB-06#VIS-017",
+    "alvo": "VIS-017",
+    "fonte": "href",
+    "chegou": null,
+    "como": "fora do denominador v5.1",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-07",
+   "k": "a",
+   "clique": "Ver envios",
+   "href": "MB-03x-recibo.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-07",
+   "k": "a",
+   "clique": "Voltar a Hoje no campo",
+   "href": "MB-01.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-01",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-01",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-08",
+   "k": "a",
+   "clique": "Confirmar término da irrigação",
+   "href": "MB-08x-recibo.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-08x-recibo",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-08x-recibo",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-08",
+   "k": "b",
+   "clique": "Ver próximo setor",
+   "href": "",
+   "v5": {
+    "r": "nada",
+    "para": null,
+    "alvo": null,
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": null,
+    "reabre": null
+   },
+   "v51": {
+    "r": "nada",
+    "para": null,
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "fora do denominador v5.1",
+    "volta": null,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-08x-recibo",
+   "k": "a",
+   "clique": "Voltar à fila do turno",
+   "href": "MB-01.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-01",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-01",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-09",
+   "k": "a",
+   "clique": "Reportar falha",
+   "href": "MB-04.dc.html#ativo=a03",
+   "v5": {
+    "r": "navega",
+    "para": "MB-04#ativo=a03",
+    "alvo": "",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-04#ativo=a03",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "MB-09",
+   "k": "a",
+   "clique": "Ver envios",
+   "href": "MB-03x-recibo.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-09det",
+   "k": "a",
+   "clique": "Abrir Trator T1 ›",
+   "href": "MB-09.dc.html#ativo=a01",
+   "v5": {
+    "r": "navega",
+    "para": "MB-09#ativo=a01",
+    "alvo": "",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-09#ativo=a01",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "MB-09det",
+   "k": "a",
+   "clique": "Ver envios",
+   "href": "MB-03x-recibo.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-09det",
+   "k": "a",
+   "clique": "Voltar à fila",
+   "href": "MB-01.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-01",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-01",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "MB-10",
+   "k": "a",
+   "clique": "Ver envios",
+   "href": "MB-03x-recibo.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-03x-recibo",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "ON-01",
+   "k": "a",
+   "clique": "Corrigir prévia",
+   "href": "ON-01det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "ON-01det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "ON-01det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "OS-0424-app",
+   "k": "a",
+   "clique": "Abrir ficha para imprimir",
+   "href": "OS-0424-ficha.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "OS-0424-ficha",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS-0424-ficha",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PA",
+   "k": "b",
+   "clique": "Abrir plano Feijão pivô",
+   "href": "",
+   "v5": {
+    "r": "mesma tela",
+    "para": "PA#plano=FEIJ-PV",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "mesma tela",
+    "para": "PA#plano=FEIJ-PV",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "fora do denominador v5.1",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PA",
+   "k": "b",
+   "clique": "Abrir plano Milho safrinha",
+   "href": "",
+   "v5": {
+    "r": "mesma tela",
+    "para": "PA#plano=MILHO-SF",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "mesma tela",
+    "para": "PA#plano=MILHO-SF",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "fora do denominador v5.1",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PA",
+   "k": "b",
+   "clique": "Abrir plano Soja alta tecnologia",
+   "href": "",
+   "v5": {
+    "r": "mesma tela",
+    "para": "PA#plano=SOJA-AT",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "mesma tela",
+    "para": "PA#plano=SOJA-AT",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "fora do denominador v5.1",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PA",
+   "k": "b",
+   "clique": "Abrir plano Soja padrão",
+   "href": "",
+   "v5": {
+    "r": "mesma tela",
+    "para": "PA#plano=SOJA-PD",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "mesma tela",
+    "para": "PA#plano=SOJA-PD",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "fora do denominador v5.1",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PAGR",
+   "k": "a",
+   "clique": "Abrir 2 O.S. por causa: Insumo no Estoque",
+   "href": "OS.dc.html#painel=OS-0418,OS-0502",
+   "v5": {
+    "r": "navega",
+    "para": "OS#painel=OS-0418,OS-0502",
+    "alvo": "OS-0418",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#painel=OS-0418,OS-0502",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "alvo: v5 inferia \"OS-0418\" (hash do destino ou texto); v5.1 sem alvo único na origem (origem sem alvo único) → inconclusiva",
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "PAGR",
+   "k": "a",
+   "clique": "Abrir 2 O.S. por quem resolve: Manutenção",
+   "href": "OS.dc.html#painel=OS-0420,OS-0507",
+   "v5": {
+    "r": "navega",
+    "para": "OS#painel=OS-0420,OS-0507",
+    "alvo": "OS-0420",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#painel=OS-0420,OS-0507",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "alvo: v5 inferia \"OS-0420\" (hash do destino ou texto); v5.1 sem alvo único na origem (origem sem alvo único) → inconclusiva",
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "PAGR",
+   "k": "a",
+   "clique": "Abrir 2 O.S. por quem resolve: Suprimentos",
+   "href": "OS.dc.html#painel=OS-0418,OS-0502",
+   "v5": {
+    "r": "navega",
+    "para": "OS#painel=OS-0418,OS-0502",
+    "alvo": "OS-0418",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#painel=OS-0418,OS-0502",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "alvo: v5 inferia \"OS-0418\" (hash do destino ou texto); v5.1 sem alvo único na origem (origem sem alvo único) → inconclusiva",
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "PAGR",
+   "k": "a",
+   "clique": "Abrir 3 O.S. por causa: Máquina ou equipamento",
+   "href": "OS.dc.html#painel=OS-0420,OS-0431,OS-0507",
+   "v5": {
+    "r": "navega",
+    "para": "OS#painel=OS-0420,OS-0431,OS-0507",
+    "alvo": "OS-0420",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#painel=OS-0420,OS-0431,OS-0507",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "alvo: v5 inferia \"OS-0420\" (hash do destino ou texto); v5.1 sem alvo único na origem (origem sem alvo único) → inconclusiva",
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "PAGR",
+   "k": "a",
+   "clique": "Coletar contagem",
+   "href": "MB-07.dc.html#lg24",
+   "v5": {
+    "r": "navega",
+    "para": "MB-07#lg24",
+    "alvo": "",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": true
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MB-07#lg24",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva",
+    "Voltar: v5 True × v5.1 False (v5.1 exige a mesma tela de origem)"
+   ]
+  },
+  {
+   "tela": "PCOM",
+   "k": "a",
+   "clique": "Abrir lote ›",
+   "href": "PROD.dc.html#L10-031",
+   "v5": {
+    "r": "navega",
+    "para": "PROD#L10-031",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PROD#L10-031",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "PCOM",
+   "k": "a",
+   "clique": "Abrir venda ›",
+   "href": "VEN.dc.html#BT-090",
+   "v5": {
+    "r": "navega",
+    "para": "VEN#BT-090",
+    "alvo": "",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VEN#BT-090",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava (chegou por \"2ª passada v5\"); v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "PCOM",
+   "k": "a",
+   "clique": "Abrir venda ›",
+   "href": "VEN.dc.html#CRE-0095",
+   "v5": {
+    "r": "navega",
+    "para": "VEN#CRE-0095",
+    "alvo": "CRE-0095",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VEN#CRE-0095",
+    "alvo": "CRE-0095",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PCOM",
+   "k": "a",
+   "clique": "Abrir venda ›",
+   "href": "VEN.dc.html#CT-203",
+   "v5": {
+    "r": "navega",
+    "para": "VEN#CT-203",
+    "alvo": "CT-203",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VEN#CT-203",
+    "alvo": "CT-203",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PCOM",
+   "k": "a",
+   "clique": "Abrir venda ›",
+   "href": "VEN.dc.html#PV-030",
+   "v5": {
+    "r": "navega",
+    "para": "VEN#PV-030",
+    "alvo": "PV-030",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VEN#PV-030",
+    "alvo": "PV-030",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PCOM",
+   "k": "a",
+   "clique": "Registrar a saca do PV-030",
+   "href": "VEN.dc.html#PV-030",
+   "v5": {
+    "r": "navega",
+    "para": "VEN#PV-030",
+    "alvo": "PV-030",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VEN#PV-030",
+    "alvo": "PV-030",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PL-04",
+   "k": "a",
+   "clique": "",
+   "href": "OS.dc.html#OS-0418",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0418",
+    "alvo": "OS-0418",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0418",
+    "alvo": "OS-0418",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PL-04",
+   "k": "a",
+   "clique": "",
+   "href": "OS.dc.html#OS-0422",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0422",
+    "alvo": "OS-0422",
+    "chegou": false,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0422",
+    "alvo": "OS-0422",
+    "fonte": "href",
+    "chegou": false,
+    "como": "não chegou",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PL-04",
+   "k": "a",
+   "clique": "",
+   "href": "OS.dc.html#OS-0430",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0430",
+    "alvo": "OS-0430",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0430",
+    "alvo": "OS-0430",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PL-04",
+   "k": "a",
+   "clique": "",
+   "href": "OS.dc.html#OS-0431",
+   "v5": {
+    "r": "navega",
+    "para": "OS#OS-0431",
+    "alvo": "OS-0431",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "OS#OS-0431",
+    "alvo": "OS-0431",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PROD",
+   "k": "a",
+   "clique": "Abrir a OB-0112",
+   "href": "BEN.dc.html#OB-0112",
+   "v5": {
+    "r": "navega",
+    "para": "BEN#OB-0112",
+    "alvo": "OB-0112",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "BEN#OB-0112",
+    "alvo": "OB-0112",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PROD",
+   "k": "a",
+   "clique": "Abrir venda ›",
+   "href": "VEN.dc.html#PV-030",
+   "v5": {
+    "r": "navega",
+    "para": "VEN#PV-030",
+    "alvo": "PV-030",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "VEN#PV-030",
+    "alvo": "PV-030",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PT-01",
+   "k": "a",
+   "clique": "Abrir a proposta ›",
+   "href": "PT-02det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PT-02det",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PT-02det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "PT-01",
+   "k": "a",
+   "clique": "Abrir negócio",
+   "href": "PT-05det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PT-05det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PT-05det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PT-01",
+   "k": "a",
+   "clique": "Abrir proposta",
+   "href": "PT-02det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PT-02det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PT-02det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PT-01",
+   "k": "a",
+   "clique": "Responder esclarecimento",
+   "href": "PT-02det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PT-02det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PT-02det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PT-01",
+   "k": "a",
+   "clique": "Ver negócios",
+   "href": "PT-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PT-05",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PT-05",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PT-02",
+   "k": "a",
+   "clique": "Abrir a proposta ›",
+   "href": "PT-02det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PT-02det",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": true,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PT-02det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "PT-02",
+   "k": "a",
+   "clique": "Abrir negócio",
+   "href": "PT-05det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PT-05det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PT-05det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PT-02",
+   "k": "a",
+   "clique": "Abrir proposta",
+   "href": "PT-02det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PT-02det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PT-02det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PT-04",
+   "k": "a",
+   "clique": "Abrir dossiê",
+   "href": "PT-04det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PT-04det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PT-04det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PT-04",
+   "k": "a",
+   "clique": "Abrir o dossiê ›",
+   "href": "PT-04det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PT-04det",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": true,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PT-04det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "PT-05",
+   "k": "a",
+   "clique": "Abrir negócio",
+   "href": "PT-05det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PT-05det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PT-05det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PT-05",
+   "k": "a",
+   "clique": "Abrir o negócio ›",
+   "href": "PT-05det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PT-05det",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": true,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PT-05det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "PT-05",
+   "k": "a",
+   "clique": "Abrir proposta",
+   "href": "PT-02det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "PT-02det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "PT-02det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PT-05det",
+   "k": "b",
+   "clique": "Abrir divergência",
+   "href": "",
+   "v5": {
+    "r": "nada",
+    "para": null,
+    "alvo": null,
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": null,
+    "reabre": null
+   },
+   "v51": {
+    "r": "nada",
+    "para": null,
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "fora do denominador v5.1",
+    "volta": null,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "PT-07",
+   "k": "b",
+   "clique": "Ver assinatura e fatura",
+   "href": "",
+   "v5": {
+    "r": "nada",
+    "para": null,
+    "alvo": null,
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": null,
+    "reabre": null
+   },
+   "v51": {
+    "r": "nada",
+    "para": null,
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "fora do denominador v5.1",
+    "volta": null,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "SU-01",
+   "k": "a",
+   "clique": "Abrir a ordem ›",
+   "href": "MA.dc.html#om=OM-0234",
+   "v5": {
+    "r": "navega",
+    "para": "MA#vis=ordens&om=OM-0234",
+    "alvo": "OM-0234",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MA#vis=ordens&om=OM-0234",
+    "alvo": "OM-0234",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "SU-01",
+   "k": "a",
+   "clique": "Conferir origem",
+   "href": "MA.dc.html#om=OM-0234",
+   "v5": {
+    "r": "navega",
+    "para": "MA#vis=ordens&om=OM-0234",
+    "alvo": "OM-0234",
+    "chegou": true,
+    "como": "2ª passada v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "MA#vis=ordens&om=OM-0234",
+    "alvo": "OM-0234",
+    "fonte": "href",
+    "chegou": true,
+    "como": "título (ID exato)",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "SU-01",
+   "k": "a",
+   "clique": "Em cotação",
+   "href": "CMP.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CMP",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CMP",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "SU-01",
+   "k": "a",
+   "clique": "Na SOL-2026-07 · abrir em Compra de insumos ›",
+   "href": "CMP.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "CMP",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "CMP",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "SU-01",
+   "k": "a",
+   "clique": "Ver contrato",
+   "href": "SU-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-05",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-05",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "SU-01",
+   "k": "a",
+   "clique": "Ver contrato",
+   "href": "SU-05det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-05det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-05det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "SU-02",
+   "k": "a",
+   "clique": "Ver efeito em Necessidades ›",
+   "href": "SU-01.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-01",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-01",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "SU-05",
+   "k": "a",
+   "clique": "Abrir contrato",
+   "href": "SU-05det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-05det",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": true,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-05det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "SU-05",
+   "k": "a",
+   "clique": "Abrir o contrato ›",
+   "href": "SU-05det.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-05det",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": true,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-05det",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": true,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "SU-05",
+   "k": "a",
+   "clique": "Receber ›",
+   "href": "SU-06.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-06",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-06",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  },
+  {
+   "tela": "SU-06",
+   "k": "a",
+   "clique": "Título encaminhado a Contas a pagar ›",
+   "href": "GE-04.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "GE-04",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "GE-04",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "SU-06",
+   "k": "a",
+   "clique": "Ver o pedido ›",
+   "href": "SU-05.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-05",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-05",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "SU-06",
+   "k": "a",
+   "clique": "Ver o saldo do lote ›",
+   "href": "SU-03.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-03",
+    "alvo": "",
+    "chegou": false,
+    "como": "não leva",
+    "volta": false,
+    "reabre": false
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-03",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": false,
+    "empilhado": null
+   },
+   "razao": [
+    "denominador: v5 contava como não chegou; v5.1 inconclusiva"
+   ]
+  },
+  {
+   "tela": "SU-08",
+   "k": "a",
+   "clique": "Devolver ›",
+   "href": "SU-07.dc.html",
+   "v5": {
+    "r": "navega",
+    "para": "SU-07",
+    "alvo": "",
+    "chegou": null,
+    "como": "fora do denominador v5",
+    "volta": false,
+    "reabre": null
+   },
+   "v51": {
+    "r": "navega",
+    "para": "SU-07",
+    "alvo": "",
+    "fonte": "origem sem alvo único",
+    "chegou": null,
+    "como": "inconclusiva",
+    "volta": false,
+    "reabre": null,
+    "empilhado": null
+   },
+   "razao": [
+    "igual"
+   ]
+  }
+ ],
+ "refs": [
+  {
+   "tela": "BEN",
+   "linha": 1,
+   "titulo5": "OB-0110 · Mamão Formosa · PACK-FRU v3",
+   "titulo51": "OB-0110 · Mamão Formosa · PACK-FRU v3",
+   "id": "CMD-06",
+   "v5": {
+    "clic": 0,
+    "texto": 1
+   },
+   "v51": null,
+   "razao": "prefixo CMD saiu do denominador (CMD/EX/DEC)"
+  },
+  {
+   "tela": "BEN",
+   "linha": 1,
+   "titulo5": "OB-0110 · Mamão Formosa · PACK-FRU v3",
+   "titulo51": "OB-0110 · Mamão Formosa · PACK-FRU v3",
+   "id": "CMD-42",
+   "v5": {
+    "clic": 0,
+    "texto": 1
+   },
+   "v51": null,
+   "razao": "prefixo CMD saiu do denominador (CMD/EX/DEC)"
+  },
+  {
+   "tela": "CF-01",
+   "linha": 15,
+   "titulo5": "AL-01 · Liberar O.S. agrícola",
+   "titulo51": "AL-01 · Liberar O.S. agrícola",
+   "id": "CMD-06",
+   "v5": {
+    "clic": 0,
+    "texto": 1
+   },
+   "v51": null,
+   "razao": "prefixo CMD saiu do denominador (CMD/EX/DEC)"
+  },
+  {
+   "tela": "CF-01",
+   "linha": 15,
+   "titulo5": "AL-01 · Liberar O.S. agrícola",
+   "titulo51": "AL-01 · Liberar O.S. agrícola",
+   "id": "DEC-2609",
+   "v5": {
+    "clic": 0,
+    "texto": 1
+   },
+   "v51": null,
+   "razao": "prefixo DEC saiu do denominador (CMD/EX/DEC)"
+  },
+  {
+   "tela": "CF-03",
+   "linha": 0,
+   "titulo5": "App de campo",
+   "titulo51": "App de campo",
+   "id": "CMD-09",
+   "v5": {
+    "clic": 0,
+    "texto": 1
+   },
+   "v51": null,
+   "razao": "prefixo CMD saiu do denominador (CMD/EX/DEC)"
+  }
+ ]
+}

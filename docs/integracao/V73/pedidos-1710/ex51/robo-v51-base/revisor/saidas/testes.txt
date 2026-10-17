@@ -1,0 +1,15 @@
+$ node robo-v51/oraculo_test.cjs
+PASS 13 contraprovas do oráculo JS real: alvo errado/ambíguo/ausente, prefixos, igualdade e painel/seleção. Sem navegador.
+exit 0
+$ python3 -I robo-v51/resumo_test.py
+PASS resumo: alvo errado e texto corporal da 2ª passada recusados; inconclusiva separada; controle positivo passa
+exit 0
+$ node revisor/contraprova_alvo.cjs robo-v51/robot.html
+DIF F1 ?de= com %23 na query (link sem data-ref) | obtido="OS-0502" | esperado=REQ-039
+DIF F1 ?de= com %23, hash sem ID | obtido="OS-0420" | esperado=
+DIF hash com parâmetro de contexto para=OS | obtido="OS-0502" | esperado=(contexto: OS-0502 é a origem)
+OK  hash painel com 3 OS | obtido="" | esperado=
+OK  texto com 2 IDs, sem hash | obtido="" | esperado=
+DIF exactId sufixo /2 | obtido="true" | esperado=false?
+DIF exactId título com 2 IDs (registro aberto é outro) | obtido="true" | esperado=false?
+exit 0

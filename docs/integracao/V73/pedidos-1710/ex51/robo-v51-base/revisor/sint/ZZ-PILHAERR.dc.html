@@ -1,0 +1,13 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>ZZ origem</title></head><body>
+<h1>Origem sintética do teste de empilhado</h1><p>Texto de apoio para o robô considerar a página montada, com mais de cinquenta caracteres.</p>
+<div class="g2r" style="display:flex;gap:8px;padding:6px"><span>Linha 1</span><span>Registro de teste OS-0901</span></div>
+<script>
+const ALVO_LINK = 'OS-0502', ALVO_PILHA = 'OS-0503', DONA = 'ZZ-DONA';
+function dlg(html, pilha) { const d = document.createElement('div'); d.setAttribute('role', 'dialog'); if (pilha) d.setAttribute('data-g2pilha', '');
+  d.style.cssText = 'position:fixed;top:20px;right:20px;width:400px;background:#fff;border:1px solid #333;padding:10px'; d.innerHTML = html; document.body.appendChild(d); return d; }
+document.querySelector('.g2r').addEventListener('click', () => {
+  const d = dlg('<h2>OS-0901 · detalhe de origem</h2><p>Referência: <a href="' + DONA + '.dc.html#' + ALVO_LINK + '">' + ALVO_LINK + '</a></p>', false);
+  d.querySelector('a').addEventListener('click', ev => { ev.preventDefault();
+    dlg('<h2>' + ALVO_PILHA + ' · resumo empilhado</h2><p>Resumo somente leitura.</p><a href="' + DONA + '.dc.html#' + ALVO_PILHA + '">Abrir na tela de Dona</a>', true); });
+});
+</script></body></html>

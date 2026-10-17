@@ -1,0 +1,30 @@
+22:08:24 Chrome principais em execução: 0 (< 4), pode abrir
+22:08:24 Chrome iniciado, PID 21476
+22:08:24 servidor em 127.0.0.1:44419, PID 21558
+22:09:04 OS: 15 linhas, 12 passagens em detalhes, 0 na tela
+22:09:12 IN-02: 4 linhas, 4 passagens em detalhes, 4 na tela
+22:09:53 MA#vis=ordens: 16 linhas, 32 passagens em detalhes, 1 na tela
+22:10:10 AG-01: 10 linhas, 16 passagens em detalhes, 2 na tela
+22:10:33 AG-01det: 14 linhas, 0 passagens em detalhes, 1 na tela
+22:10:41 AG-04: 4 linhas, 4 passagens em detalhes, 8 na tela
+22:11:05 AG-04det: 15 linhas, 9 passagens em detalhes, 8 na tela
+22:11:10 OM→OS/ MA[2] 'Achado SM-0147 · Pressão hidráulica baix' → r=mesma tela alvo='' abriu=False destacou=False
+22:11:15 OS→EST/devolver OS[1] 'Receber devolução no Estoque ›' → r=navega alvo='' abriu=False destacou=False
+22:11:20 OS→EST/entregar OS[5] 'Entregar no Estoque ›' → r=navega alvo='' abriu=False destacou=False
+22:11:25 OS→EST/entregar OS[6] 'Entregar no Estoque ›' → r=navega alvo='' abriu=False destacou=False
+22:11:31 OS→EST/outro OS[3] 'Retirar no almoxarifado ›' → r=navega alvo='' abriu=False destacou=False
+22:11:36 OS→EST/outro OS[4] 'Retirar no almoxarifado ›' → r=navega alvo='' abriu=False destacou=False
+22:11:41 OS→EST/saldo OS[2] 'Ver saldos no Estoque ›' → r=navega alvo='' abriu=False destacou=False
+22:11:47 OS→OM/MA OS[8] 'Acompanhar OM-0233 ›' → r=navega alvo='OM-0233' abriu=True destacou=False
+22:11:50 receituário→OS/AG-01 AG-01[None] 'Abrir OS-0504' → r=navega alvo='OS-0504' abriu=True destacou=False
+22:11:54 receituário→OS/AG-01 AG-01[None] 'Abrir OS-0508' → r=navega alvo='OS-0508' abriu=True destacou=False
+22:11:58 receituário→OS/AG-01 AG-01[3] 'Abrir OS-0504' → r=navega alvo='OS-0504' abriu=True destacou=False
+22:12:02 receituário→OS/AG-01 AG-01[3] 'Aplicação · Abamectina 18 EC' → r=navega alvo='OS-0504' abriu=True destacou=False
+22:12:07 receituário→OS/AG-01 AG-01[4] 'Abrir OS-0508' → r=navega alvo='OS-0508' abriu=True destacou=False
+22:12:11 receituário→OS/AG-01 AG-01[4] 'Aplicação · Tebuconazol 200 EC' → r=navega alvo='OS-0508' abriu=True destacou=False
+22:12:15 receituário→OS/AG-04 AG-04[None] 'Abrir OS-0421' → r=navega alvo='OS-0421' abriu=True destacou=False
+22:12:18 receituário→OS/AG-04 AG-04[None] 'Liberar OS-0418' → r=navega alvo='OS-0418' abriu=True destacou=False
+22:12:22 receituário→OS/AG-04det AG-04det[None] 'OS-0420' → r=navega alvo='OS-0420' abriu=True destacou=False
+22:12:22 Chrome PID 21476 encerrado
+22:12:22 servidor PID 21558 encerrado
+22:12:22 casos críticos: 17 em 4.0 min → /tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/rob51/casos-criticos.json

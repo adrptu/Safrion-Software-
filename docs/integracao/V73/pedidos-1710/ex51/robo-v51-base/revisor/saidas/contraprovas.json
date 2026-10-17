@@ -1,0 +1,78 @@
+{
+ "A": "PASS: reprovou · armazenamento não isolado: [{'worker': 0, 'origin': 'http://127.0.0.1:35419', 'marks': ['ex51-isolation-1', 'ex51-isolation-0']}]",
+ "B_isolamento": [
+  {
+   "worker": 0,
+   "origin": "http://127.0.0.1:33499",
+   "marks": [
+    "ex51-isolation-0"
+   ]
+  },
+  {
+   "worker": 1,
+   "origin": "http://127.0.0.1:46005",
+   "marks": [
+    "ex51-isolation-1"
+   ]
+  }
+ ],
+ "B_passagens": {
+  "ZZ-PILHAOK": [
+   {
+    "r": "navega",
+    "alvo": "OS-0502",
+    "esperado": {
+     "id": "OS-0502",
+     "source": "href"
+    },
+    "empilhado": {
+     "alvo": "OS-0502",
+     "abriu": true,
+     "titulo": "OS-0502 · resumo empilhado"
+    },
+    "abriu": true,
+    "destacou": false,
+    "titulo": "OS-0502 · registro na dona",
+    "voltar": {
+     "chegou": "ZZ-PILHAOK",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  ],
+  "ZZ-PILHAERR": [
+   {
+    "r": "navega",
+    "alvo": "OS-0502",
+    "esperado": {
+     "id": "OS-0502",
+     "source": "href"
+    },
+    "empilhado": {
+     "alvo": "OS-0502",
+     "abriu": false,
+     "titulo": "OS-0503 · resumo empilhado"
+    },
+    "abriu": false,
+    "destacou": false,
+    "titulo": "OS-0503 · registro na dona",
+    "voltar": {
+     "chegou": "ZZ-PILHAERR",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  ]
+ },
+ "C_ZZ-LEVASEM": {
+  "dlg": "Vínculos: OS-0502 aparece só no corpo deste painel aberto pa",
+  "chegouEstrito": true
+ },
+ "C_ZZ-LEVACOM": {
+  "dlg": "OS-0503 · outro registro",
+  "chegouEstrito": false
+ },
+ "B_resumo": "{\"processo\": {\"det\": 0, \"passo\": 0, \"quem\": 0}, \"telas\": 2, \"detalhes\": 2, \"refsTotal\": 2, \"refsClic\": 2, \"rotTotal\": 0, \"rotClic\": 0, \"passagens\": 2, \"navega\": 2, \"noLugar\": 0, \"nada\": 0, \"metodo\": \"v5.1\", \"erros\": 0, \"inconclusivasProporcao\": 0.0, \"inconclusivas\": 0, \"empilhados\": 2, \"empilhadosCorretos\": 1, \"navRegistro\": 2, \"naoLeva\": 0, \"levaIgnora\": 1, \"chegou\": 1, \"voltaOrigem\": 0, \"voltarDet\": 2, \"reabre\": 0, \"passoTotal\": 0, \"passoPessoa\": 0, \"semPasso\": 2, \"escopo\": {\"telas\": 28, \"faz\": 0, \"saf\": 0, \"herda\": 0}}\nlinhas 2 com problema 2"
+}

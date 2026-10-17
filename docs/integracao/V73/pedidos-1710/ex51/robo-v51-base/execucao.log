@@ -1,0 +1,96 @@
+{"render": "/tmp/claude-0/-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/rob51/render", "sha256_conjunto": "39b88342b9aa985f011dd9fabc9c5482d7a03a0c983b23fb740e8845158dd038", "arquivos": 181, "paginas": 156, "excluir_itens": 50, "excluir_paginas": "46 itens", "excluir_sem_pagina": ["Ferramentas de demonstração", "GE-08 › #vis=", "MB-10 › aba Motorista", "OS › \"Abrir ordem completa ›\""], "sem_aplicativo": ["MA-01", "MA-02", "MA-03", "MA-04", "MA-04det", "MA-05", "Main", "PM"], "telas_robo": 102, "retiradas": ["MA-01", "MA-02", "MA-03", "MA-04", "MA-04det", "MA-05", "Main", "PM"]}
+21:34:51 Chrome principais em execução: 1 (< 4), pode abrir
+21:34:51 Chrome iniciado, PID 4043
+21:34:52 servidor em 127.0.0.1:33811, PID 4125
+21:34:52 servidor em 127.0.0.1:36409, PID 4129
+21:34:53 servidor em 127.0.0.1:42783, PID 4163
+21:34:53 robô (isolado): 102 telas em 3 aba(s)
+21:35:02 robô (isolado): feitas 0 de 102 · 0.2 min
+21:35:11 robô (isolado): feitas 2 de 102 · 0.3 min
+21:35:20 robô (isolado): feitas 3 de 102 · 0.5 min
+21:35:29 robô (isolado): feitas 4 de 102 · 0.6 min
+21:35:38 robô (isolado): feitas 5 de 102 · 0.8 min
+21:35:47 robô (isolado): feitas 6 de 102 · 0.9 min
+21:35:57 robô (isolado): feitas 7 de 102 · 1.1 min
+21:36:06 robô (isolado): feitas 8 de 102 · 1.2 min
+21:36:15 robô (isolado): feitas 11 de 102 · 1.4 min
+21:36:33 robô (isolado): feitas 12 de 102 · 1.7 min
+21:36:42 robô (isolado): feitas 13 de 102 · 1.8 min
+21:36:51 robô (isolado): feitas 14 de 102 · 2.0 min
+21:37:00 robô (isolado): feitas 16 de 102 · 2.1 min
+21:37:09 robô (isolado): feitas 17 de 102 · 2.3 min
+21:37:18 robô (isolado): feitas 20 de 102 · 2.4 min
+21:37:36 robô (isolado): feitas 22 de 102 · 2.7 min
+21:37:46 robô (isolado): feitas 23 de 102 · 2.9 min
+21:37:55 robô (isolado): feitas 25 de 102 · 3.0 min
+21:38:04 robô (isolado): feitas 29 de 102 · 3.2 min
+21:38:13 robô (isolado): feitas 31 de 102 · 3.3 min
+21:38:22 robô (isolado): feitas 33 de 102 · 3.5 min
+21:38:31 robô (isolado): feitas 35 de 102 · 3.6 min
+21:38:40 robô (isolado): feitas 38 de 102 · 3.8 min
+21:38:49 robô (isolado): feitas 40 de 102 · 3.9 min
+21:38:58 robô (isolado): feitas 41 de 102 · 4.1 min
+21:39:07 robô (isolado): feitas 42 de 102 · 4.2 min
+21:39:16 robô (isolado): feitas 43 de 102 · 4.4 min
+21:39:25 robô (isolado): feitas 44 de 102 · 4.5 min
+21:39:34 robô (isolado): feitas 48 de 102 · 4.7 min
+21:39:43 robô (isolado): feitas 50 de 102 · 4.8 min
+21:39:52 robô (isolado): feitas 51 de 102 · 5.0 min
+21:40:01 robô (isolado): feitas 52 de 102 · 5.1 min
+21:40:10 robô (isolado): feitas 54 de 102 · 5.3 min
+21:40:19 robô (isolado): feitas 57 de 102 · 5.4 min
+21:40:29 robô (isolado): feitas 59 de 102 · 5.6 min
+21:40:38 robô (isolado): feitas 63 de 102 · 5.7 min
+21:40:56 robô (isolado): feitas 65 de 102 · 6.1 min
+21:41:05 robô (isolado): feitas 67 de 102 · 6.2 min
+21:41:14 robô (isolado): feitas 69 de 102 · 6.4 min
+21:41:24 robô (isolado): feitas 71 de 102 · 6.5 min
+21:41:33 robô (isolado): feitas 72 de 102 · 6.7 min
+21:41:42 robô (isolado): feitas 73 de 102 · 6.8 min
+21:41:51 robô (isolado): feitas 74 de 102 · 7.0 min
+21:42:00 robô (isolado): feitas 77 de 102 · 7.1 min
+21:42:09 robô (isolado): feitas 78 de 102 · 7.3 min
+21:42:19 robô (isolado): feitas 80 de 102 · 7.4 min
+21:42:28 robô (isolado): feitas 81 de 102 · 7.6 min
+21:42:37 robô (isolado): feitas 83 de 102 · 7.7 min
+21:43:13 robô (isolado): feitas 84 de 102 · 8.3 min
+21:43:22 robô (isolado): feitas 85 de 102 · 8.5 min
+21:43:31 robô (isolado): feitas 86 de 102 · 8.6 min
+21:43:40 robô (isolado): feitas 87 de 102 · 8.8 min
+21:43:49 robô (isolado): feitas 89 de 102 · 8.9 min
+21:43:58 robô (isolado): feitas 91 de 102 · 9.1 min
+21:44:16 robô (isolado): feitas 92 de 102 · 9.4 min
+21:44:25 robô (isolado): feitas 93 de 102 · 9.5 min
+21:44:34 robô (isolado): feitas 94 de 102 · 9.7 min
+21:44:43 robô (isolado): feitas 95 de 102 · 9.8 min
+21:45:01 robô (isolado): feitas 96 de 102 · 10.1 min
+21:45:19 robô (isolado): feitas 97 de 102 · 10.4 min
+21:45:37 robô (isolado): feitas 98 de 102 · 10.7 min
+21:45:46 robô (isolado): feitas 99 de 102 · 10.9 min
+21:45:55 robô (isolado): feitas 100 de 102 · 11.0 min
+21:46:22 robô (isolado): feitas 101 de 102 · 11.5 min
+21:46:40 robô (isolado): feitas 102 de 102 · 11.8 min
+21:46:40 robô (isolado) terminou em 11.8 min
+21:46:40 2ª passada (isolado): 123 passagens que levam um registro
+21:48:34 2ª passada (isolado): 25/123
+21:50:07 2ª passada (isolado): 50/123
+21:51:49 2ª passada (isolado): 75/123
+21:53:32 2ª passada (isolado): 100/123
+21:54:49 2ª passada (isolado): leva-check.json gravado
+21:54:49 Chrome PID 4043 encerrado
+21:54:49 servidor PID 4125 encerrado
+21:54:49 servidor PID 4129 encerrado
+21:54:49 servidor PID 4163 encerrado
+21:54:49 Chrome principais em execução: 1 (< 4), pode abrir
+21:54:49 Chrome iniciado, PID 14790
+21:54:49 servidor em 127.0.0.1:41461, PID 14872
+21:57:32 navegacao.json: 156 páginas
+21:59:53 escopo-28.json: não herda=9, sem seletor=19
+21:59:53 Chrome PID 14790 encerrado
+21:59:53 servidor PID 14872 encerrado
+resumo-isolado.json {"processo": {"det": 40, "passo": 21, "quem": 11}, "telas": 94, "detalhes": 190, "refsTotal": 80, "refsClic": 39, "rotTotal": 84, "rotClic": 6, "passagens": 247, "navega": 233, "noLugar": 11, "nada": 3, "metodo": "v5.1", "erros": 0, "inconclusivasProporcao": 0.7081545064377682, "inconclusivas": 165, "empilhados": 0, "empilhadosCorretos": 0, "navRegistro": 68, "naoLeva": 0, "levaIgnora": 34, "chegou": 34, "voltaOrigem": 8, "voltarDet": 107, "reabre": 9, "passoTotal": 32, "passoPessoa": 13, "semPasso": 158, "escopo": {"telas": 28, "faz": 9, "saf": 5, "herda": 0}}
+linhas 247 com problema 218 
+resumo-isolado-1a-passada.json {"processo": {"det": 40, "passo": 21, "quem": 11}, "telas": 94, "detalhes": 190, "refsTotal": 80, "refsClic": 39, "rotTotal": 84, "rotClic": 6, "passagens": 247, "navega": 233, "noLugar": 11, "nada": 3, "metodo": "v5.1", "erros": 0, "inconclusivasProporcao": 0.7081545064377682, "inconclusivas": 165, "empilhados": 0, "empilhadosCorretos": 0, "navRegistro": 68, "naoLeva": 0, "levaIgnora": 34, "chegou": 34, "voltaOrigem": 8, "voltarDet": 107, "reabre": 9, "passoTotal": 32, "passoPessoa": 13, "semPasso": 158, "escopo": {"telas": 28, "faz": 9, "saf": 5, "herda": 0}}
+linhas 247 com problema 218 
+21:59:53 entrega em /tmp/claude-0/rob51/docs/integracao/V73/pedidos-1710/ex51/robo-v51-base: 104 brutos (0.3 MB)
+21:59:53 fim em 25.0 min

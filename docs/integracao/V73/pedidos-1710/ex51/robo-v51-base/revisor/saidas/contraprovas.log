@@ -1,0 +1,95 @@
+22:07:25 Chrome principais em execução: 1 (< 4), pode abrir
+22:07:25 Chrome iniciado, PID 21072
+22:07:25 servidor em 127.0.0.1:35419, PID 21154
+22:07:26 Chrome PID 21072 encerrado
+22:07:26 servidor PID 21154 encerrado
+22:07:26 Chrome iniciado, PID 21169
+22:07:26 servidor em 127.0.0.1:33499, PID 21253
+22:07:27 servidor em 127.0.0.1:46005, PID 21259
+22:07:27 robô (isolado): 2 telas em 2 aba(s)
+22:07:33 robô (isolado): feitas 0 de 2 · 0.1 min
+22:07:45 robô (isolado): feitas 2 de 2 · 0.3 min
+22:07:45 robô (isolado) terminou em 0.3 min
+22:07:45 servidor em 127.0.0.1:39065, PID 21354
+22:07:48 Chrome PID 21169 encerrado
+22:07:48 servidor PID 21253 encerrado
+22:07:48 servidor PID 21259 encerrado
+22:07:48 servidor PID 21354 encerrado
+{
+ "A": "PASS: reprovou · armazenamento não isolado: [{'worker': 0, 'origin': 'http://127.0.0.1:35419', 'marks': ['ex51-isolation-1', 'ex51-isolation-0']}]",
+ "B_isolamento": [
+  {
+   "worker": 0,
+   "origin": "http://127.0.0.1:33499",
+   "marks": [
+    "ex51-isolation-0"
+   ]
+  },
+  {
+   "worker": 1,
+   "origin": "http://127.0.0.1:46005",
+   "marks": [
+    "ex51-isolation-1"
+   ]
+  }
+ ],
+ "B_passagens": {
+  "ZZ-PILHAOK": [
+   {
+    "r": "navega",
+    "alvo": "OS-0502",
+    "esperado": {
+     "id": "OS-0502",
+     "source": "href"
+    },
+    "empilhado": {
+     "alvo": "OS-0502",
+     "abriu": true,
+     "titulo": "OS-0502 · resumo empilhado"
+    },
+    "abriu": true,
+    "destacou": false,
+    "titulo": "OS-0502 · registro na dona",
+    "voltar": {
+     "chegou": "ZZ-PILHAOK",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  ],
+  "ZZ-PILHAERR": [
+   {
+    "r": "navega",
+    "alvo": "OS-0502",
+    "esperado": {
+     "id": "OS-0502",
+     "source": "href"
+    },
+    "empilhado": {
+     "alvo": "OS-0502",
+     "abriu": false,
+     "titulo": "OS-0503 · resumo empilhado"
+    },
+    "abriu": false,
+    "destacou": false,
+    "titulo": "OS-0503 · registro na dona",
+    "voltar": {
+     "chegou": "ZZ-PILHAERR",
+     "mesmaTela": true,
+     "detalheReaberto": false,
+     "moveu": true
+    }
+   }
+  ]
+ },
+ "C_ZZ-LEVASEM": {
+  "dlg": "Vínculos: OS-0502 aparece só no corpo deste painel aberto pa",
+  "chegouEstrito": true
+ },
+ "C_ZZ-LEVACOM": {
+  "dlg": "OS-0503 · outro registro",
+  "chegouEstrito": false
+ },
+ "B_resumo": "{\"processo\": {\"det\": 0, \"passo\": 0, \"quem\": 0}, \"telas\": 2, \"detalhes\": 2, \"refsTotal\": 2, \"refsClic\": 2, \"rotTotal\": 0, \"rotClic\": 0, \"passagens\": 2, \"navega\": 2, \"noLugar\": 0, \"nada\": 0, \"metodo\": \"v5.1\", \"erros\": 0, \"inconclusivasProporcao\": 0.0, \"inconclusivas\": 0, \"empilhados\": 2, \"empilhadosCorretos\": 1, \"navRegistro\": 2, \"naoLeva\": 0, \"levaIgnora\": 1, \"chegou\": 1, \"voltaOrigem\": 0, \"voltarDet\": 2, \"reabre\": 0, \"passoTotal\": 0, \"passoPessoa\": 0, \"semPasso\": 2, \"escopo\": {\"telas\": 28, \"faz\": 0, \"saf\": 0, \"herda\": 0}}\nlinhas 2 com problema 2"
+}
