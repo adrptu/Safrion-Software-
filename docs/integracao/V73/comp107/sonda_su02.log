@@ -1,0 +1,45 @@
+A linhas iniciais:
+    Fertilizantes Galpão 2 A · Alta Necessidade datada 7 d · 12 d carreta 36 t — R$ 400.000 Vigente v4
+    Defensivos Almox. defensivos A · Alta Datada + proteção 5 d · 8 d caixa 12 un 18 meses · FEFO R$ 250.000 Vigente v2
+    Sementes Câmara fria A · Alta Necessidade datada 5 d · 10 d big bag 1 t 12 meses R$ 180.000 Vigente v3
+    Diesel S10 Tanque Sede B · Alta Mínimo/máximo 2 d · 2 d 15 mil L — R$ 90.000 Proposta r1 vigente v4 Revisar proposta
+    Peças de manutenção Almox. oficina C · Alta Mínimo/máximo 0 d · 15 d un — R$ 60.000 Vigente v3
+    EPIs Almox. oficina C · Média Mínimo/máximo 0 d · 7 d par/un 24 meses R$ 12.000 Vigente v1
+A cabeçalho: Fazenda Santa Rita Safra 2026/27 Suprimentos › Políticas de estoque Políticas de estoque i 1 proposta aguardando gestor Submeter exceção
+B form aberto: True | título: Política · Fertilizantes Galpão 2
+B após salvar: toast= Proposta salva; a política vigente foi preservada. | form aberto= False
+B estado: vigente.seg= 7 proposta= (20, 'Proposta', 1)
+B selo: a Safra 2026/27 Suprimentos › Políticas de estoque Políticas de estoque i 2 propostas aguardando gestor Submeter exceção
+B linha: Fertilizantes Galpão 2 A · Alta Necessidade datada 20 d · 12 d carreta 36 t — R$ 400.000 Proposta r1 vigente v4 Revisar proposta
+C revisar: ok
+C painel: Revisar proposta de política | × | Confira a versão e os valores. Aprovar não publica; publicar altera a vigência e gera recibo. | Política | Fertilizantes | Vigente | v4 · segurança 7 d · prazo 12 d | Proposta | r1 · segurança 20 d · prazo 12 d | Justificativa | Colheita antecipada | Cancelar | Aprovar proposta
+C aprovar: ok
+C estado: proposta.estado= Aprovada vigente.seg= 7 | toast= Proposta aprovada; publique a versão na linha para alterar a vigência.
+C selo: ntos › Políticas de estoque Políticas de estoque i 1 proposta aguardando gestor · 1 aprovada a publicar Submeter exceção
+C linha: Fertilizantes Galpão 2 A · Alta Necessidade datada 20 d · 12 d carreta 36 t — R$ 400.000 Aprovada r1 vigente v4 Publicar versão aprovada
+D publicar: ok
+D painel: Publicar versão aprovada | × | Confira a versão e os valores. Aprovar não publica; publicar altera a vigência e gera recibo. | Política | Fertilizantes | Vigente | v4 · segurança 7 d · prazo 12 d | Proposta | r1 · segurança 20 d · prazo 12 d | Justificativa | Colheita antecipada | Cancelar | Publicar versão
+D confirmar: ok
+D estado: versao= 5 vigente.seg= 20 recibos= [{'id': 'p1:1', 'versao': 5, 'por': 'Ana', 'aprovadoPor': 'Ana'}] proposta= None | toast= Publicação confirmada · recibo p1:1 · vigente v5
+D selo: ta Safra 2026/27 Suprimentos › Políticas de estoque Políticas de estoque i 1 proposta aguardando gestor Submeter exceção
+D linha: Fertilizantes Galpão 2 A · Alta Necessidade datada 20 d · 12 d carreta 36 t — R$ 400.000 Vigente v5
+E recarregar: Fertilizantes Galpão 2 A · Alta Necessidade datada 20 d · 12 d carreta 36 t — R$ 400.000 Vigente v5
+F Caio salvou proposta: Proposta salva; a política vigente foi preservada. | Sementes Câmara fria A · Alta Necessidade datada 5 d · 12 d big bag 1 t 12 meses R$ 180.000 Proposta r1 vigente v3 Revisar proposta
+F revisar: ok
+F aprovar: ok
+F estado Sementes: Proposta | toast= Não concluído: A aprovação exige gestor ou direção. | painel= Revisar proposta de política | × | Confira a versão e os valores. Aprovar não publica; publicar altera a vigência e gera recibo. | Política | Sementes | Vigente | v3 · segurança 5 d · prazo 10 d | Proposta | r1 · seg
+G simular: ok
+G painel: Simular antecedência | × | Calcula prazo mais segurança; não presume consumo nem risco de ruptura. | Política * | Fertilizantes | Defensivos | Sementes | Diesel S10 | Peças de manutenção | EPIs | Cancelar | Simular
+G ok: ok
+G toast: Vigente: 12 dias de prazo + 20 dias de segurança = 32 dias de antecedência. Sem previsão de consumo, não estima ruptura; vigente preservada. | dialog: (fechado)
+H sem bloco de publicação: True
+I Diesel: Diesel S10 Tanque Sede B · Alta Mínimo/máximo 2 d · 2 d 15 mil L — R$ 90.000 Proposta r1 vigente v4 Revisar proposta | Peças: Peças de manutenção Almox. oficina C · Alta Mínimo/máximo 0 d · 15 d un — R$ 60.000 Vigente v3
+I2 revisar Diesel: ok
+I2 painel: Revisar proposta de política | × | Confira a versão e os valores. Aprovar não publica; publicar altera a vigência e gera recibo. | Política | Diesel S10 | Vigente | v4 · segurança 2 d · prazo 2 d | Proposta | r1 · segurança 2 d · prazo 2 d | Justificativa | Exemplo de proposta de reposição de diesel para o plantio; aguarda análise do gestor. | Cancelar | Aprovar proposta
+I2 campos: []
+erros JS: 
+J 390 rolagem horizontal: False
+J 390 ação visível: True
+K foco teclado em Revisar proposta: True
+K Enter abre painel: Revisar proposta de política | × | Confira a versão e os valores. Aprovar não publica; publicar altera a vigência e gera rec
+erros JS final: 
