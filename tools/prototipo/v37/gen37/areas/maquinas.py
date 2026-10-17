@@ -492,8 +492,10 @@ function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const 
   const pr=ma_omPrim(self,c,o,pf,f); const sl=manSelos(c,o); const p0=sl[0];
   v.om_veio=o.de?('Pendência da '+o.de):(o.pid?(o.pid+' v'+o.ver+' · '+o.serv):(o.origAch?o.origAch+' · achado':String(o.origem||'').split(' · ')[0]));
   v.om_aqui=o.etapa==='Canceladas'&&o.canc?('Cancelada em '+manBr(o.canc.em)+' por '+o.canc.por+' · '+o.canc.motivo):o.etapa; v.om_falta=p0?(p0.t+(p0.dono?' · '+p0.dono:'')+(p0.prazo?' · '+p0.prazo:'')+(sl.length>1?' · +'+(sl.length-1):'')):'nada'; v.om_prox=pr.P?pr.P.t:(o.etapa==='Encerradas'?'—':'—');
-  const bo=st.oblk||{};   // TAB-12 (17/10/2026): todo bloco nasce recolhido, com o resumo à vista (antes abria o da fase atual)
-  const B=(k,t,sum)=>{ const open=!!bo[o.id+k]; const tog=()=>self.setState({oblk:Object.assign({},self.state.oblk||{},{[o.id+k]:!open})});
+  // TAB-12 (17/10/2026): o painel da ordem é o detalhe de UM registro, como o painel da O.S. (exceção da TAB-12): abre o bloco da fase, o que faz a
+  // ordem andar (Janela e equipe, Tarefas e Conclusão, Peças, Custo); recolher os blocos daqui custava 2 cliques a cada ordem concluída (AC-PCM-28)
+  const ab=o.etapa==='A liberar'||o.etapa==='Liberadas'?'jan':(o.etapa==='Em execução'?'tk':(o.etapa==='Em conferência'?(o.trata&&!o.aptidao?'tk':'pc'):'cus')); const bo=st.oblk||{};
+  const B=(k,t,sum)=>{ const open=bo[o.id+k]===undefined?(k===ab||(k==='con'&&o.etapa==='Em execução')):!!bo[o.id+k]; const tog=()=>self.setState({oblk:Object.assign({},self.state.oblk||{},{[o.id+k]:!open})});
     v['ob_'+k]=open; v['obk_'+k+'_t']=t; v['obk_'+k+'_s']=sum; v['obk_'+k+'_o']=g2seta(open).exp; v['obk_'+k+'_g']=tog; return {k,t,sum,open:String(open),tog}; };
   const cf=(o.etapa==='A liberar'||o.etapa==='Liberadas')?manConflito(c,o):null; const nr=o.chk.filter(t=>t.tipo==='Teste'?((t.tent||[]).slice(-1)[0]||{}).r==='Aprovado':!!t.r).length;
   const custoE=manCusto(c,o,'est'), custoF=o.etapa==='Encerradas'?manCustoFinal(c,o):null;
@@ -1039,8 +1041,10 @@ def _chiph(t,st,dot): return f'<span style="{H(st)}"><span style="{H(dot)}"></sp
 def _lab(t): return f'<div style="{SECT}">{t}</div>'
 def _fld(rot,inner): return f'<label style="display: flex; flex-direction: column; gap: 4px; {LBL} min-width: 0;">{rot}{inner}</label>'
 def _blk(pre,k,corpo):
-    """bloco recolhível: nasce recolhido, com uma linha de resumo (TAB-12, 17/10/2026); a seta abre"""
-    return (f'<section class="ma-bl" aria-label="{H(pre+k+"_t")}"><button type="button" class="ma-blh" aria-expanded="{H(pre+k+"_o")}" onClick="{H(pre+k+"_g")}">'
+    """bloco recolhível com uma linha de resumo; a seta abre. Detalhe do ativo: nasce recolhido (TAB-12, 17/10/2026). Painel da ordem (obk_): abre o
+    da fase, como o painel da O.S. (seção de UM registro, exceção da TAB-12; data-secao-registro)"""
+    reg = ' data-secao-registro="1"' if pre == 'obk_' else ''
+    return (f'<section class="ma-bl" aria-label="{H(pre+k+"_t")}"><button type="button" class="ma-blh"{reg} aria-expanded="{H(pre+k+"_o")}" onClick="{H(pre+k+"_g")}">'
             f'{E.seta()}<span>{H(pre+k+"_t")}</span><span style="font-weight: 600; color: {MUTED}; font-size: 12.5px; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">· {H(pre+k+"_s")}</span></button>'
             + IF(pre.replace('_','')+'_'+k if False else ('ob_'+k if pre=='obk_' else 'ab_'+k),f'<div class="ma-bl-c">{corpo}</div>') + '</section>')
 def _btns(lst):

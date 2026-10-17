@@ -26,7 +26,8 @@ try:
          'A1 · "Registrar e bloquear" no T1 já bloqueado acrescenta o INSP-106 como 2º motivo e diz "segue bloqueado"', [p1, nm, aid, t[:200]])
     m.ir('ativo=a01'); m.bloco('Situação'); b = J("document.querySelector('main').innerText") or ''
     m.ok('2 motivos' in b and 'MOTIVO 2' in b.upper() and 'INSP-106 · sem ordem' in b, 'A1 · o detalhe do T1 lista os 2 motivos, cada um com achado e ordem', b[b.find('Situação'):][:700])
-    m.ir('om=OM-0233', perfil='Zé'); m.clk('Aprovado', '#ma-painel'); m.clk('Anexar foto e registrar Aprovado', '#ma-painel'); m.setv('#om-leitura', '4320')
+    # TAB-12 (17/10/2026): os blocos da ordem nascem recolhidos (antes, Tarefas e Conclusão abriam em execução); a pessoa abre os que usa
+    m.ir('om=OM-0233', perfil='Zé'); m.bloco('Tarefas'); m.clk('Aprovado', '#ma-painel'); m.clk('Anexar foto e registrar Aprovado', '#ma-painel'); m.bloco('Conclusão'); m.setv('#om-leitura', '4320')
     m.clk('Previsto (6,5 h)', '#ma-painel'); m.clk('Concluir serviço', '#ma-painel'); p2 = J(PRIMS_PAN)
     m.ok(p2 == ['Encerrar o motivo da OM-0233 · Trator T1 segue bloqueado'] and 'outros motivos: INSP-106 · sem ordem' in m.pan(),
          'A1 · em Em conferência a primária da OM-0233 diz que encerra só o motivo dela e o T1 segue bloqueado', [p2, m.pan()[:300]])
@@ -56,7 +57,7 @@ try:
     # ---------- A8 · João executa a OM-0228 e declara a Bomba do Pivô 2 apta ----------
     m.ir('om=OM-0228', perfil='João', limpa=True); vc = J("(document.querySelector('select[aria-label=\"Trocar perfil de demonstração\"]')||{}).value")   # 14/10: o perfil é o do avatar (sem a faixa Ver como)
     pr = J(PRIMS_PAN); m.clk('Iniciar serviço', '#ma-painel'); m.bloco('Tarefas'); n = m.responder('Conforme')
-    m.setv('#ma-painel input[aria-label^="Valor · Medir pressão"]', '3,4'); m.setv('#om-leitura', '8930'); m.clk('Previsto (3 h)', '#ma-painel'); m.clk('Concluir serviço', '#ma-painel')
+    m.setv('#ma-painel input[aria-label^="Valor · Medir pressão"]', '3,4'); m.bloco('Conclusão'); m.setv('#om-leitura', '8930'); m.clk('Previsto (3 h)', '#ma-painel'); m.clk('Concluir serviço', '#ma-painel')
     p3 = J(PRIMS_PAN); m.clk(p3[0] if p3 else 'Declarar', '#ma-painel')
     m.ok(vc == 'João' and pr == ['Iniciar serviço'] and n == 3 and m.man("m.oms['OM-0228'].etapa") == 'Em conferência' and (p3 or [''])[0].startswith('Declarar ') and m.man("m.ativos.a11.cond") == 'Apto' and 'João' in (m.man("m.oms['OM-0228'].aptidao.por") or ''),
          'A8 (S3) · Ver como João: inicia a OM-0228, mede conforme, conclui e declara a bomba apta (responsável técnico)', [vc, pr, n, m.man("m.oms['OM-0228'].etapa"), p3, m.man("m.ativos.a11.cond")])

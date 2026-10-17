@@ -1,0 +1,44 @@
+OK    · S2.1 N1 (Safra 2027/28): soja no T1 inteiro
+OK    · S2.1 N2 (Safrinha 2028) no mesmo estado: T1 Livre 312 ha depois da soja da N1
+OK    · S2.1 N2: Planejar T1 com os padrões grava (nunca "Já existe T1 nesta safra", que vinha do T1 da N1)
+OK    · S2.1/R-22 g_cult_NOVA com um T1 de 312 ha em cada safra nova
+OK    · E5 meta gravada na unidade de mercado do Milho: "170 sc/ha"
+OK    · S1 preparo: N1 com T1-A (150 ha) e N2 com T1 inteiro, no mesmo estado
+OK    · S1 Dividir T1 na N2 abre só o cultivo da N2 (o T1-A da N1 não entra no painel)
+OK    · S1 depois de dividir: o T1-A da N1 continua na N1 (150 ha) e a N2 tem T1-A e T1-B
+OK    · S1 estado da g_cult_NOVA sem id de grupo repetido (um grupo por safra e talhão)
+OK    · S1 N1 intacta: "Nesta safra 150" e o T1-A dela na tabela
+OK    · E4/OC-21 painel mostra o plantio mínimo: "Plantio a partir de 21/02/2027 com este plano"
+OK    · S2.2 Parcela "T1" com área parcial não contorna a trava: recusa M2 com o nome que seria gravado (T1-B), nada gravado
+OK    · S2.2 Parcela vazia em 21/02/2027 (o PlantioMin): grava como T1-B, sem recusa falsa citando o Milho de T1-A
+OK    · S4 nota da sobreposição sem o rótulo repetido ("Sobreposição em T1: Soja (T1-B, Safra 2026/27) × Soja (T1-B, Safrinha 2027) em 10/02/2027")
+OK    · S3.4 "Corrigir T1" abre o cultivo da trava (x9, T1-B), não o d1 (T1-A, fora do conflito)
+OK    · S3.3 c1 tem plano: o atalho é "Ver T1-A na Safra 2026/27 ›" (nunca "Informar colheita", sem campo no painel)
+OK    · S3.3 sem plano continua "Informar colheita" (T3 da Safra 2026/27)
+OK    · S3.3 o atalho abre o c1 na Safra 2026/27
+OK    · S3.5 2º toque no mesmo atalho (endereço igual) abre de novo a S2627 com o painel do T3
+OK    · S3.6 1º Planejar de safra sem cultivo: Cultura mostra "Escolha a cultura", como o rascunho (vazio)
+OK    · S3.6 Ocupação prevista "—" enquanto não há cultura
+OK    · S3.6 Salvar sem cultura pede a cultura, e o que se vê bate com o motivo
+OK    · E5 meta do Mamão gravada na unidade de mercado: "45 t/ha/ano"
+OK    · S3.2 C1 vinculado sem "Dividir" na linha
+OK    · S3.2 ao editar o vinculado, cultura, variedade, plantio, área e parcela ficam só leitura; meta e plano seguem editáveis
+OK    · S3.2 salvar não muda área, plantio nem cultura do ciclo (só a meta)
+OK    · S3.7 Dividir sem seletor de unidade da meta
+OK    · S3.7 a unidade segue a cultura da linha: sc/ha (Milho) e t/ha/ano (Mamão Formosa)
+OK    · S3.7 gravado com a unidade de mercado de cada cultura
+OK    · S3.8 sem caixas de seleção nem "Selecionar as N linhas visíveis" na grade de cultivos (pedido do proprietário, 13/10)
+OK    · S3.1 veredito: "Fora da conta: 2 ocorrências depois do fim da safra", sem falta em ago/27
+OK    · S3.1 nenhuma hora desta safra em ago/27 (Colhedoras e Operadores somavam 19 h e 42,4 h)
+OK    · S3.1 g_cap da S27SF com os meses do período (fev/27 a jul/27), sem ago/27
+OK    · B10 g_op: etiqueta "depois do fim da safra" na colheita do P1
+OK    · S3.1 g_cap de safra nova (mar/27 a ago/27) com os meses do período, pelos dados
+OK    · E3 preparo: milho sem plano no T3 em 05/02/2027 grava (previsão não trava)
+OK    · E3 prévia do lote: com o plano, o T3 trava (núcleo da soja até 10/02/2027) e "não recebe"; botão conta 0
+OK    · E3 aplicar recusa ("Nenhum cultivo pode receber") e o cultivo continua sem plano
+OK    · B1 janela 50 h na Colheita: 48 ha sem conjunto e Custo R$/ha = custo ÷ área atendida (R$ 229,20/ha-op, nunca ÷ 610 ha)
+OK    · B11 g_op LG2627: chip de falta de recurso na operação ("Operadores e equipe … %")
+OK    · B15 ocorrência pendente (sem alocação) não mostra horas
+OK    · sem erro de JS
+
+RESULTADO: 42 ok · 0 falhas

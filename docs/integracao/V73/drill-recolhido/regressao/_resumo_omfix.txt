@@ -1,0 +1,3 @@
+ma_revisao exit=0 66s RESULTADO: 18/18 ok
+ma_correcoes_pm exit=0 60s RESULTADO: 12/12 ok
+FIM

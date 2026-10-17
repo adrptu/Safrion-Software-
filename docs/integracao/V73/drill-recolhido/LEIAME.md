@@ -52,7 +52,7 @@ Regras no DS: TAB-12 e TAB-13 em `docs/design-system/padroes-1610.md`; TAB-04 at
 | Onde | Antes | Agora |
 |---|---|---|
 | Manutenção · blocos do ativo | abria o da situação (leitura suspeita, situação, achados ou o que vence) | todos recolhidos, com o resumo |
-| Manutenção · blocos da ordem | abria o da fase (Janela e equipe, Tarefas, Peças, Custo) e Conclusão em execução | todos recolhidos, com o resumo |
+| Manutenção · blocos da ordem (painel de UM registro) | abria o da fase (Janela e equipe, Tarefas, Peças, Custo) e Conclusão em execução | sem mudança: exceção, como o painel da O.S. (ver Decisões); `data-secao-registro` |
 | Planejar safra · ajuste local do plano | grupos de gatilho e atividades abertos | recolhidos; erro de gravação abre o grupo e a atividade do campo |
 | Atividades do plano, serviços do plano e Versões (Manutenção), lotes do CO-06, "Capacidade por mês" | já nasciam recolhidos | sem mudança (conferido no teste) |
 
@@ -62,7 +62,8 @@ Regras no DS: TAB-12 e TAB-13 em `docs/design-system/padroes-1610.md`; TAB-04 at
 |---|---|
 | Raia do Kanban da O.S. (Agrupar por) continua aberta | Recolhida, a raia mostra só o total ("T2 · 5 ordens"), não a contagem por fase; a visão macro do Kanban são as 5 fases. Critério da tarefa. |
 | Seções do painel de UM registro (O.S.) ficam como estão, com `data-secao-registro` | Não são tabela nem cartão; abrem o que faz a ordem andar na fase. Exclusão da tarefa; o atributo marca a exceção para o teste. |
-| Blocos da Manutenção entram, mesmo sendo seções de detalhe de um registro | A tarefa os lista entre os expansores que nascem recolhidos. Custo: o bloco da fase (por exemplo, Janela e equipe, com executante e tempo para "Liberar serviço") pede um clique; o resumo do bloco segue à vista e a primária diz o que falta. |
+| Blocos do detalhe do ativo (Manutenção) entram | A tarefa os lista; são resumos de listas (situação, o que vence, achados, ordens, leituras, custo): recolhidos mostram a visão macro. |
+| Blocos do painel da ordem de manutenção ficam como estavam (exceção, igual ao painel da O.S.) | Primeiro foram recolhidos, como a tarefa pedia. Na composição ac5cd1d7, `ma_revisao` e `ma_correcoes_pm` (que passavam na composição) e o `ma_atrito` (AC-PCM-28: nenhum total de cliques sobe) mostraram o custo: concluir uma ordem passava a pedir abrir Tarefas e Conclusão, 2 cliques a mais por ordem. O painel da ordem é o detalhe de UM registro, o mesmo papel do painel da O.S., que a tarefa deixa fora. A decisão fica para o coordenador confirmar. |
 | Ajuste local do plano entra, e o erro de gravação abre o caminho do campo | A tarefa o lista. Sem abrir no erro, a recusa ficaria escondida numa atividade recolhida. |
 | Busca e filtro abrem o caminho, mas a seta recolhe | Antes a seta não fazia nada com a busca ativa (o caminho era forçado aberto). |
 | O filtro rápido abre a faixa da fazenda; o filtro por fazenda (`ffz`) não | O filtro rápido (Situação) casa nos talhões, dentro da faixa; o filtro por fazenda casa na própria faixa, que fica à vista recolhida, como na busca que casa no pai. |

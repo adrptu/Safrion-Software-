@@ -193,10 +193,10 @@ No mesmo dia, sobre Planejar safra › etapa 2 › "Talhões e cultivos": "quand
   - a célula escolhida na "Capacidade por mês" (Planejar safra › etapa 3) abre o caminho até as ocorrências dela;
   - o endereço ou a ação que leva a um registro abre o caminho dele: abrir o registro (`g2open`), o lote pelo endereço na Produção, gravar um cultivo, dividir um talhão, "Planejar talhões livres" e "Editar talhões" no Planejar safra, gravar um item numa estrutura dos Cadastros;
   - erro de gravação no ajuste local do plano abre o grupo e a atividade do campo com erro.
-- **Expansores próprios** seguem a mesma regra: blocos do ativo e da ordem, serviços do plano e Versões da Manutenção; "Capacidade por mês" e ajuste local do plano (grupos e atividades) no Planejar safra; Atividades do plano; lotes do CO-06.
+- **Expansores próprios** seguem a mesma regra: blocos do detalhe do ativo, serviços do plano e Versões da Manutenção; "Capacidade por mês" e ajuste local do plano (grupos e atividades) no Planejar safra; Atividades do plano; lotes do CO-06.
 - **Fora, com motivo:**
   - raia do Kanban da O.S. com Agrupar por: recolhida, mostra só o total da raia, sem a contagem por fase; a visão macro do Kanban são as 5 fases. Continua aberta;
-  - seções do painel de detalhe de UM registro (O.S.): não são tabela nem cartão; abrem o que faz a ordem andar na fase (`data-secao-registro`);
+  - seções do painel de detalhe de UM registro (O.S. e ordem de manutenção): não são tabela nem cartão; abrem o que faz a ordem andar na fase (`data-secao-registro`). Recolher os blocos da ordem de manutenção custava 2 cliques a cada ordem concluída (Tarefas e Conclusão; AC-PCM-28);
   - `<details>` de nota e de método (já fechados), menus, listas suspensas e formulários (ex.: "Contestar fatura").
 
 **Peça única:**
