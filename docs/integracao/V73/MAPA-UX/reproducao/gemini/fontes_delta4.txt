@@ -1,0 +1,8 @@
+200 409001 bytes sha256=41310724809c3030 https://www.w3.org/TR/mediaqueries-4/ (UTC 2026-10-17T02:03Z)
+
+## The pointer media feature is used to query the presence and accuracy of a pointing device such as a mouse. If multiple pointing devices are present, the pointer media feature must reflect the characteristics of the “primary” pointing device, as determined by t
+
+## the primary input mechanism for a device is not a pointing device, but there is a secondary – and less frequently used – input that is a pointing devices, the user agent may decide to treat the non-po
+
+## The any-pointer and any-hover media features are identical to the pointer and hover media features, but they correspond to the union of capabilities of all the pointing devices available to the user. In the case of any-pointer , more than one of the values can match, if different pointing devices have different characteristics. 
+

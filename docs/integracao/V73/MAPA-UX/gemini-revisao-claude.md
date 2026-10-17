@@ -18,13 +18,13 @@ ID / resultado útil / persona: MAPA-UX · revisão G1–G3 / dizer o que da con
 Requisitos do PRD e fora do escopo: pedido §1 (teclado, celular, 48 px), §4 (aceite de teclado e leitor), 74.5.24–26, SEL-02, DS-15; WCAG 2.2 (1.4.10, 1.4.11, 1.4.13, 2.1.4, 2.4.11, 2.5.1, 2.5.7); fora: implantar, editar PRD, nova consulta ao Gemini
 Autor / revisor / integrador: Claude / Codex / Codex
 Base / arquivos sob responsabilidade: 87e524e × 59572be / docs/integracao/V73/MAPA-UX/gemini-revisao-claude.md e reproducao/gemini/
-Aceite e comando de verificação: §R; node reproducao/gemini/vizinho_unit.js; sh reproducao/gemini/fontes_gemini.sh <pasta vazia>
+Aceite e comando de verificação: §R; node reproducao/gemini/vizinho_unit.js; sh reproducao/gemini/fontes_gemini.sh <pasta vazia>; sh reproducao/gemini/fontes_delta4.sh <pasta vazia> (Δ4)
 Estado / impedimento / próximo passo: entregue; a contraprova do G2 (§2) espera quem tenha leitor real; a fronteira do G3 (§3) entra no contrato da F3 depois da MAPA-FROTA
 ```
 
 ## Resumo
 
-- **Contagem:** 30 itens da consolidação. **Concordo com 23, ajusto 7, divirjo de 0** (§1). Há também 3 acréscimos sobre o parecer do Gemini que a consolidação não tratou (§1.1).
+- **Contagem:** 30 itens da consolidação. ~~**Concordo com 23, ajusto 7, divirjo de 0**~~ **Δ4 17/10:** **concordo com 24, ajusto 6, divirjo de 0** (§1); o item 1 passou a concordo pela procedência que o Codex informou. Há também 3 acréscimos sobre o parecer do Gemini que a consolidação não tratou (§1.1).
 - **Ajuste principal no G2:**
   - O bloqueio "o `group` não garante que as setas cheguem em modo de navegação" é verdadeiro, mas a pergunta está um passo ao lado.
   - Com tabindex móvel, os botões continuam no documento, e o cursor virtual do leitor chega a todos eles na ordem da lista. O aceite do pedido ("teclado e leitor de tela percorrem os talhões com nome acessível completo") não depende das setas chegarem.
@@ -35,11 +35,18 @@ Estado / impedimento / próximo passo: entregue; a contraprova do G2 (§2) esper
   - O "/" é atalho de um caractere e cai na WCAG 2.1.4: fica ativo só com o foco dentro do bloco do mapa.
   - Ida e volta: o `panBy` em pixels é simétrico na projeção; só o limite e a mudança de zoom quebram a simetria.
 - **Contraprova do G2 (§2):** página sintética `reproducao/gemini/g2_contraprova.html` com `group`, `toolbar` e `application` só no grupo. Roteiro de 7 passos, matriz mínima de 6 combinações, regra de decisão, e a fronteira do que o Chrome sem tela prova.
+- **Δ4 17/10 (Codex, PR #47, [6228236159](https://github.com/adrptu/Safrion-Software-/pull/47#issuecomment-6228236159)):** seis correções, com o texto anterior riscado.
+  - Item 1: a procedência Vertex fica pela cadeia adaptador + bruto.
+  - §2.6: a página só cobre setas, Tab, Enter, Home/End e a árvore; "/", campos, IME e Esc → talhão são da integração.
+  - §2.4: o G2 final exige as combinações obrigatórias.
+  - §3.1: sem conclusão antecipada sobre o foco; a prova é o T6.
+  - T3: cobertura separada da visão simultânea.
+  - §3.2: 48 px por padrão, com teste em dispositivo híbrido.
 - **Fronteira do G3 (§3):**
   - Lugar: o grupo de zoom atual (direita, `top: 96px`), com um botão "Mover o mapa" que abre a cruz. Nada de barra nova, `nav` ou `fieldset`.
-  - Tamanho: 48 px no toque e 36 px no mouse. Passo: 1/3 da vista.
+  - Tamanho: ~~48 px no toque e 36 px no mouse~~ Δ4: 48 px por padrão; 36 px só sem nenhum dispositivo de toque disponível (`any-pointer`). Passo: 1/3 da vista.
   - Limites: o último passo é parcial, e o botão fica `aria-disabled`, mas focável.
-  - Testes: ida e volta, limite, cobertura, 390 px e foco não encoberto.
+  - Testes: ida e volta, limite, cobertura, 390 px, dispositivo híbrido (Δ4) e foco não encoberto.
 
 ## 1. Revisão item a item
 
@@ -47,7 +54,7 @@ Fonte "fontes" = `reproducao/gemini/fontes_gemini.txt` (trecho, URL, SHA-256 da 
 
 | # | Item da consolidação | Parecer | Fundamento | Fonte |
 |---|---|---|---|---|
-| 1 | Metadados da consulta (cons. l.2): única, modelo, HIGH, STOP, `responseId`, 8176 tokens (3565 + 1984 + 2627), pacote de 6128 bytes | **Ajuste** | Tudo confere no bruto, menos "Vertex", que o `parecer.json` não nomeia (só `project` e `authenticationMode`). O `payloadSha256` não é o SHA-256 do `pacote.txt` (`9d1dbae4…`), o que é esperado se o payload levou a skill `dev-revisao`; vale dizer isso para não parecer divergência | `parecer.json:2-49`; `wc -c` e `sha256sum` do `pacote.txt` |
+| 1 | Metadados da consulta (cons. l.2): única, modelo, HIGH, STOP, `responseId`, 8176 tokens (3565 + 1984 + 2627), pacote de 6128 bytes | ~~**Ajuste**~~ **Δ4 17/10:** **Concordo** | ~~Tudo confere no bruto, menos "Vertex", que o `parecer.json` não nomeia (só `project` e `authenticationMode`).~~ Δ4: tudo confere no bruto. A plataforma vem da cadeia adaptador + bruto: segundo o Codex, o adaptador executado (`work/agentes-config/gemini-consult-1d2e6a3b.py:104`) chama `aiplatform.googleapis.com/…:generateContent`, e não houve outra consulta. Essa confirmação é do Codex; **não li o adaptador**. A procedência não cai só porque o JSON não traz o rótulo. Nota que fica: o `payloadSha256` não é o SHA-256 do `pacote.txt` (`9d1dbae4…`), o que é esperado se o payload levou a skill `dev-revisao`; vale dizer isso para não parecer divergência | `parecer.json:2-49`; `wc -c` e `sha256sum` do `pacote.txt` |
 | 2 | G1: manter A como candidata, não aprovação final (l.5) | Concordo | É o que o confronto já dizia: nada se aplica antes dos pares reais | `confronto-claude-codex.md` §8, item 4 |
 | 3 | G1: branco 90 % é translúcido, não "sólido/opaco" como o Gemini escreveu (l.5) | Concordo | O parecer diz "placa opaca 90%" e "placa de fundo sólido" | `parecer.json:27`; `contraste_pares_placa.txt` |
 | 4 | G1: os 4,76 são do texto escuro sobre o token, não do token sobre branco (l.5) | Concordo | `#7D8C85` opaco: escuro 4,76:1; branco 3,52:1. O Gemini escreveu "4.76:1 sobre fundo branco" | `contraste_pares.txt` E |
@@ -70,7 +77,7 @@ Fonte "fontes" = `reproducao/gemini/fontes_gemini.txt` (trecho, URL, SHA-256 da 
 | 21 | G3i: expandir e recolher a folha precisa de botão, não só de alça arrastável (l.9) | Concordo | Arrastar a alça é movimento de arrasto (2.5.7) | fontes: Understanding 2.5.7 |
 | 22 | G3ii: (a), os direcionais no grupo existente, é a candidata mínima, compatível com o exemplo W3C de mapa (l.11) | Concordo | O exemplo existe: "A map allows users to drag the view … and the map has up/down/left/right buttons" | fontes: Understanding 2.5.7 |
 | 23 | G3ii: sem `opacity` de 80 % nos controles (l.11) | Concordo | A 1.4.11 pede 3:1 contra as cores adjacentes; translúcido depende do que está embaixo, e não libera área | fontes: Understanding 1.4.11 |
-| 24 | G3ii: fundo sólido e `stopPropagation` não tornam selecionável um talhão coberto (l.11) | Concordo | O problema é alcance e visibilidade, não vazamento de evento. A regra da §3 fecha a cruz quando o foco entra num talhão (2.4.11) e mantém lista, busca e teclado como caminhos | fontes: Understanding 2.4.11 |
+| 24 | G3ii: fundo sólido e `stopPropagation` não tornam selecionável um talhão coberto (l.11) | Concordo | O problema é alcance e visibilidade, não vazamento de evento. A regra da §3 fecha a cruz quando o foco entra num talhão (2.4.11) e mantém lista, busca e teclado como caminhos. Δ4 17/10: fechar a cruz não basta sozinho; a prova é o T6 | fontes: Understanding 2.4.11 |
 | 25 | G3ii: passo de 1/3 explora com sobreposição, sem centralizar exato; ida 3 + volta 3 só é simétrica sem limite, projeção ou zoom alterado; não exigir precisão infinita (l.11) | **Ajuste** | Concordo, menos "projeção". O `panBy` do MapLibre move em pixels de tela; voltar o mesmo número de pixels no mesmo zoom devolve o centro, porque projetar e desprojetar se inverte (a rotação está desligada, `inicio.py:620-621`). Quebram a simetria o limite (`lgLimites`, `:612`) e a mudança de zoom. Aceite de equivalência: **cobertura** (§3.5, T3) | `inicio.py:612`, `:619-621` |
 | 26 | G3ii: os botões de pan não usam as setas dos talhões (l.11) | Concordo | Acrescento: o canvas deixa de ser parada de Tab (hoje `tabindex=0`, nome "Map", M0), para não haver dois modelos de seta. O teclado move o mapa pelos botões | avaliação §R M0 |
 | 27 | G3ii: verificar 390 px, folha aberta, teclado e bordas (l.11) | Concordo | O teclado virtual não se emula no Chrome sem tela: vai para o teste em aparelho (§3.5) | — |
@@ -104,7 +111,7 @@ Para cada papel do contêiner, `group` (A), `toolbar` (A2) e `application` só n
   - Um registro de toda tecla que **a página** recebe: variante, tecla, alvo, `defaultPrevented` e foco depois. Tecla consumida pelo leitor não aparece no registro, e essa é a medida.
   - "Mostrar registro" gera o JSON para copiar.
 - `reproducao/gemini/vizinho_unit.js`: a regra de vizinho espacial da página, extraída e testada em Node (**executado**: 10 de 10, incluindo a propriedade "o escolhido está sempre no semiplano da direção" em 2000 casos sintéticos × 4 setas). O script da página compila (sintaxe conferida em Node).
-- **Não executado:** a página num navegador. É o portão da §2.6, antes de chamar qualquer pessoa.
+- **Não executado:** a página num navegador. É o portão da §2.6, antes de chamar qualquer pessoa. **Δ4 17/10:** esse portão da página cobre só setas, Tab, Enter, Home/End e a árvore de acessibilidade. Os checks de "/", campos, `contenteditable`, IME e Esc → talhão com sobreposição não estão nesta página e ficam para a integração da MUX-F1 (§2.6).
 
 ### 2.3 Roteiro, por combinação de leitor e navegador
 
@@ -134,9 +141,11 @@ No toque (VoiceOver iOS e TalkBack), os passos 2, 3 e 6 viram: deslizar para o p
 | 6 | TalkBack | Chrome, Android, no toque | obrigatória para o campo (uma de 5 ou 6) |
 
 **Regra de decisão:**
-- Fica **A** (`group`) se cumprir o obrigatório da §2.1 em todas as combinações executadas. O informativo (setas chegam ou não) muda só o texto da instrução para usuário de leitor.
+- ~~Fica **A** (`group`) se cumprir o obrigatório da §2.1 em todas as combinações executadas.~~ **Δ4 17/10:** fica **A** (`group`) se cumprir o obrigatório da §2.1 em **todas as combinações obrigatórias da matriz** (1, 2, e 5 ou 6) e em todas as desejáveis que forem executadas. O informativo (setas chegam ou não) muda só o texto da instrução para usuário de leitor.
 - Passa para A2 ou A3 só se A falhar no obrigatório e a outra cumprir. A3 sempre restrito ao grupo e com todo texto associado.
 - Nenhuma conclusão vale para combinação não executada.
+- **Δ4 17/10:** se alguma combinação obrigatória ficar bloqueada (sem ambiente, sem pessoa ou sem licença), registra-se **aprovação parcial**: as combinações aprovadas, as bloqueadas e o motivo de cada uma. O G2 não congela como final enquanto houver obrigatória bloqueada.
+- **Δ4 17/10:** passar só no Chrome sem leitor **nunca** seleciona o G2 final; é só o portão para chamar uma pessoa.
 
 ### 2.5 Quem pode executar
 
@@ -148,12 +157,14 @@ No toque (VoiceOver iOS e TalkBack), os passos 2, 3 e 6 viram: deslizar para o p
 
 ### 2.6 O que o Chrome sem tela prova e o que não prova
 
+Δ4 17/10: na tabela, só as duas primeiras linhas valem para a página atual. A página não tem campo, `contenteditable`, handler de "/", painel sobreposto nem Esc; as linhas 3 e 4 são checks do teste de integração da MUX-F1 (`mapa_mux_f1_test.py`, especificado), no IN-04 com o painel real. O portão da página **não** cobre essas linhas.
+
 | Prova (portão antes de chamar uma pessoa) | Não prova |
 |---|---|
 | Com `Input.dispatchKeyEvent` (CDP), nas três variantes: Tab chega ao 1º botão; as setas levam aos vizinhos esperados (os mesmos da unidade); Home e End; Enter alterna `aria-pressed`; Tab sai do grupo; as setas ficam com `defaultPrevented` | Se o leitor troca de modo, captura a tecla ou a deixa passar: o CDP entrega a tecla direto à página, sem leitor no meio |
 | Pela árvore de acessibilidade (`Accessibility.getFullAXTree`): papel, nome e descrição do contêiner; 4 botões com nome e estado; nenhum ancestral `img` | O que o leitor fala, a verbosidade e a ordem de anúncio |
-| Que o "/" é ignorado em campo, `contenteditable` e composição de IME (`Input.imeSetComposition`) | O mapeamento em cada API de plataforma (AX no macOS, UIA e IA2 no Windows, Android): a árvore do Chrome é uma só |
-| Que o foco volta ao botão do talhão depois de Esc, com a sobreposição já fechada (regra do Δ2) | Exploração por toque, gestos do leitor e braile |
+| Que o "/" é ignorado em campo, `contenteditable` e composição de IME (`Input.imeSetComposition`). **Δ4: integração da MUX-F1, não esta página** | O mapeamento em cada API de plataforma (AX no macOS, UIA e IA2 no Windows, Android): a árvore do Chrome é uma só |
+| Que o foco volta ao botão do talhão depois de Esc, com a sobreposição já fechada (regra do Δ2). **Δ4: integração da MUX-F1, não esta página** | Exploração por toque, gestos do leitor e braile |
 
 ## 3. Fronteira de layout do G3 (ii) para o contrato
 
@@ -172,15 +183,19 @@ Entra no contrato da F3, depois da MAPA-FROTA e com o SHA fixado (confronto §8.
 - **Fecha quando:**
   - "Mover o mapa" é acionado de novo;
   - Esc é pressionado com o foco na cruz (o foco volta ao "Mover o mapa");
-  - o foco entra no grupo de talhões. Assim, o talhão focado nunca fica inteiramente coberto (2.4.11). A cruz aberta é conteúdo aberto pelo usuário, que ele fecha sem mover o foco (Nota 2 da 2.4.11).
+  - o foco entra no grupo de talhões. ~~Assim, o talhão focado nunca fica inteiramente coberto (2.4.11). A cruz aberta é conteúdo aberto pelo usuário, que ele fecha sem mover o foco (Nota 2 da 2.4.11).~~ **Δ4 17/10:** fechar a cruz reduz a área coberta, mas sozinho não garante que o foco não fique encoberto por outros controles (coluna de zoom, ferramentas, legenda, painel ou folha). A prova é o T6, sem conclusão antes dele.
 - **Enquadramento inicial:** reserva a margem da coluna fechada, não a da cruz. É o estado inicial da câmera, não um movimento.
 
 ### 3.2 Tamanho
 
-- **48 × 48 px** por botão com ponteiro grosso (`@media (pointer: coarse)`), como pede o pedido (l.67).
-- **36 × 36 px** com ponteiro fino, como o zoom de hoje (74.5.24); o piso de 24 px do DS-15 no desktop continua.
+- ~~**48 × 48 px** por botão com ponteiro grosso (`@media (pointer: coarse)`), como pede o pedido (l.67).~~
+- ~~**36 × 36 px** com ponteiro fino, como o zoom de hoje (74.5.24); o piso de 24 px do DS-15 no desktop continua.~~
+- **Δ4 17/10:** **48 × 48 px por padrão** em todos os controles do mapa, como pede o pedido (l.67). Reduz para **36 × 36 px** só quando nenhum dispositivo de toque está disponível: `@media not all and (any-pointer: coarse)`.
+  - Motivo: `pointer` reflete só o dispositivo principal; `any-pointer` reflete a união de todos (Media Queries 4, `reproducao/gemini/fontes_delta4.txt`).
+  - Num híbrido com mouse principal e tela de toque, `pointer: coarse` é falso, mas `any-pointer: coarse` é verdadeiro, e os 48 px ficam.
+  - O piso de 24 px do DS-15 no desktop continua; a área ocupada abaixo usa 48 px como padrão.
 - Espaço entre botões: 6 px, o atual.
-- **Área ocupada:** fechado, 48 × 156 px no toque (36 × 120 no mouse); aberto, 210 × 156 px no toque (162 × 120 no mouse).
+- **Área ocupada:** fechado, 48 × 156 px ~~no toque~~ por padrão (36 × 120 ~~no mouse~~ só sem nenhum toque, Δ4); aberto, 210 × 156 px ~~no toque~~ por padrão (162 × 120 só sem nenhum toque).
   - A 390 px, o grupo vai de y = 96 a y = 252. A faixa de ferramentas termina por volta de y = 87 (`top: 52px`, `inicio.py:1659`), e a legenda ocupa no máximo os 30 % de baixo do mapa.
   - **Medir na F3:** sem interseção com ferramentas, legenda e folha. Se a largura do mapa a 390 px for menor que 2 × 210 px, a cruz aberta cobre mais da metade da largura nessa faixa; por isso ela é temporária e fecha pelas regras da §3.1.
 
@@ -213,10 +228,11 @@ Especificados; o render `05947ad` reprova T1, porque não há botões de pan.
 |---|---|---|---|
 | T1 | Ida e volta longe dos limites | Em dois zooms (enquadramento + 1 e + 3), com pelo menos 3 passos livres em cada direção: → × 3 e ← × 3 devolvem o centro com até 1 px de diferença (em `map.project`). O mesmo com ↑ × 3 e ↓ × 3. Zoom, seleção, painel, rascunho e URL da seleção iguais; foco no último botão acionado. Repetir na Santa Rita depois do D4 | Chrome sem tela |
 | T2 | Limite | → até ficar `aria-disabled` (k acionamentos). O último passo é parcial (até L/3), e a borda da vista coincide com a do limite (± 1 px). Acionar no limite não move (0 px) e anuncia uma vez. ← × k volta para dentro de um passo do centro inicial. "Ajustar à fazenda" devolve o enquadramento inicial (± 1 px) | Chrome sem tela |
-| T3 | Cobertura (equivalência para explorar) | No enquadramento + 3, a busca em largura pelos passos alcança vistas cuja união cobre 100 % da área navegável (amostra a cada 10 px). Cada um dos 31 talhões pode ficar inteiro fora da área da cruz aberta em alguma vista alcançável | Chrome sem tela |
+| T3 | Cobertura (equivalência para explorar) | ~~No enquadramento + 3, a busca em largura pelos passos alcança vistas cuja união cobre 100 % da área navegável (amostra a cada 10 px). Cada um dos 31 talhões pode ficar inteiro fora da área da cruz aberta em alguma vista alcançável~~<br>**Δ4 17/10:**<br>**T3a, cobertura integral:** no enquadramento + 3, a busca em largura pelos passos alcança vistas cuja união cobre 100 % da área navegável (amostra a cada 10 px). Assim, todo ponto da área e do contorno de cada talhão fica visível, fora de qualquer controle, em alguma vista alcançável; não precisa ser tudo ao mesmo tempo.<br>**T3b, visão simultânea:** para cada um dos 31 talhões, existe um estado alcançável só por comandos explícitos (passos, Afastar ou "Ajustar à fazenda") com o talhão inteiro na vista e fora de qualquer controle. No zoom + 3 isso só se exige do talhão cuja caixa cabe na vista menos a área dos controles; o maior usa Afastar ou "Ajustar à fazenda", e o teste registra o zoom usado | Chrome sem tela |
 | T4 | 390 px e toque | Todos os botões do grupo com pelo menos 48 × 48 px. O grupo não cruza ferramentas, legenda nem folha aberta (interseção = 0). Abrir e fechar a cruz não move a câmera | Chrome sem tela, com ponteiro grosso emulado |
+| T4h | Δ4 17/10: dispositivo híbrido (mouse e toque) | (a) Estático: nenhuma regra deixa controle do mapa abaixo de 48 px fora de `not all and (any-pointer: coarse)`. (b) Com emulação de toque: 48 px; sem nenhum toque: 36 px. (c) Num híbrido real (notebook com tela de toque ou tablet com mouse ou trackpad), com o mouse como principal: todos os controles com pelo menos 48 × 48 px | (a) leitura do CSS; (b) Chrome sem tela, que não reproduz fielmente um híbrido (a emulação de toque muda o dispositivo principal; não verifiquei se o CDP emula `any-pointer` separado de `pointer`); (c) aparelho real |
 | T5 | Sem conflito | Acionar pan nunca muda a seleção nem abre o painel. Setas num talhão nunca mudam o centro (0 px) | Chrome sem tela |
-| T6 | Foco não encoberto | Com a cruz aberta, Tab até um talhão: a cruz fecha, e a caixa do talhão focado não fica inteiramente coberta por nenhum controle | Chrome sem tela |
+| T6 | Foco não encoberto | ~~Com a cruz aberta, Tab até um talhão: a cruz fecha, e a caixa do talhão focado não fica inteiramente coberta por nenhum controle~~<br>**Δ4 17/10:** com a cruz aberta, Tab até um talhão: a cruz fecha. Com a coluna de zoom, as ferramentas, a legenda, o painel e a folha nas posições reais, a caixa de cada talhão focado não fica inteiramente coberta (interseção menor que a área do talhão). Vale para os 31 talhões, a 1440 e a 390 px. É a prova; nada se conclui antes dela | Chrome sem tela |
 | T7 | Teclado virtual e leitor no toque | Folha aberta com o teclado virtual: botões e detalhe alcançáveis. VoiceOver e TalkBack: os 8 botões anunciados com nome e estado, ativados com toque duplo | Aparelho real (o Chrome sem tela não emula) |
 
 ## R. Reprodução
@@ -225,6 +241,7 @@ Especificados; o render `05947ad` reprova T1, porque não há botões de pan.
 |---|---|---|
 | `node reproducao/gemini/vizinho_unit.js` | `vizinho_unit.txt` | **Executado.** 10 de 10: casos da grade 2 × 2, bordas, desvio lateral, empate e propriedade em 2000 casos sintéticos × 4 setas. O script da página compila |
 | `sh reproducao/gemini/fontes_gemini.sh <pasta vazia>` | `fontes_gemini.txt` | **Executado em 17/10, 01:52 UTC.** 13 páginas com HTTP 200: APG Toolbar, Teclado e Listbox; ARIA 1.2; Understanding 2.5.7, 2.5.1, 2.1.4, 1.4.10, 1.4.11, 2.4.11 e 1.4.13; NVDA 2026.2 User Guide; Chrome, viewport-resize-behavior. Guarda o SHA-256 parcial de cada página e os trechos citados; as páginas não entram no repositório |
+| `sh reproducao/gemini/fontes_delta4.sh <pasta vazia>` | `fontes_delta4.txt` | **Executado em 17/10, 02:03 UTC** (Δ4). Media Queries Level 4, HTTP 200: `pointer` é o dispositivo principal; `any-pointer` é a união de todos |
 | `reproducao/gemini/g2_contraprova.html` | — | **Especificado.** Página da contraprova; o portão do Chrome sem tela (§2.6) vem antes de qualquer pessoa |
 
 Fora do escopo:
