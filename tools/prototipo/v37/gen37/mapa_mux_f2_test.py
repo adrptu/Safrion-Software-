@@ -5,17 +5,18 @@ proprietário de 16/10/2026, §1; confronto §7 e §8.1 itens 3 a 5; implantaç�
      sem ação dentro; dentro da janela; sem cobrir o talhão; contorno realçado (anel em duas cores / camada pv-hov) e cursor de mão
   C2 sem espera programada: o cartão já está visível no mesmo turno do evento (pointerover sintético); tempos do evento ao quadro (indicativo, SwiftShader)
   C3 o foco de teclado mostra o mesmo cartão (mesmo texto do hover)
+  C5 nas 9 camadas o cartão abre completo (P1 da Santa Rita)
   C4 WCAG 1.4.13: o ponteiro vai do talhão ao cartão sem ele sumir; Esc dispensa (o foco fica no talhão); sair do talhão e do cartão fecha
   K1 cor honesta: nuvem em hachura (Satélite 06/09, Santa Rita) e camada de hachura no mapa real; "estimado" (Irrigação › Balanço, T7) na cor do
      valor com "≈ … estimado", nunca na hachura (NC10); "não se aplica" com contorno tracejado (D14)
   K2 rótulos: no máximo 3 linhas (número / valor / estado curto), sobre placa branca a 90 % com texto #15201A e nenhum opacity no caminho: contraste
      ≥ 13,4:1 sobre qualquer fundo (≥ 4,5:1); seleção e foco em duas cores (escuro e branco: ≥ 3:1 sobre qualquer preenchimento)
   L1 legenda que trabalha: cada classe com contagem e área (a soma bate com os talhões); hover realça os talhões da classe; clique filtra o mapa e a
-     lista ("N de M"); clique de novo limpa
+     lista ("N de M"); clique de novo limpa; no Satélite com contraste Talhão a escala dos pixels (relativa a cada talhão) não conta talhões
   S1 seleção: contorno forte (7 px escuro + linha branca) e número em destaque; no mapa real, o clique não muda zoom nem centro
   M1 390 com toque: tocar não abre cartão (não atrapalha); o cartão do foco cabe na janela
   E1 sem erro de JavaScript
-Contraprova: RENDER_DIR=<render da base 0b3d0d4> reprova C1–C4, K1 (estimado e tracejado), K2, L1 e S1.
+Contraprova: RENDER_DIR=<render da base 0b3d0d4> reprova C1–C5, K1 (estimado e tracejado), K2, L1 e S1.
 Uso (de gen37/): env CHROME_BIN=… CDP_GL=1 SAFRION_DADOS=sintetico RENDER_DIR=$PWD/_render python3 -B mapa_mux_f2_test.py"""
 import os, sys, json, time
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -42,7 +43,7 @@ def cobre(card, bx):
 def fora_janela(card):
     l, t, r, b = card['r']; return l < 0 or t < 0 or r > card['vw'] or b > card['vh']
 def campos(txt, nome):
-    return [txt.startswith(nome + ' · '), ' ha' in txt, 'Clique para detalhar' in txt, ('(hoje)' in txt or 'cena de' in txt or 'vistoria' in txt or 'coleta' in txt or 'balanço' in txt)]
+    return [txt.startswith(nome + ' · '), ' ha' in txt, 'Clique para detalhar' in txt, ('(hoje)' in txt or 'cena de' in txt or 'vistoria' in txt or 'coleta' in txt or 'laudo' in txt or 'balanço' in txt)]
 try:
     # ================= C · cartão (1440) =================
     abre(c, U, 1440, 900, False, faz='Santa Rita'); camada(J, 'Pragas e doenças')
@@ -70,8 +71,8 @@ try:
     chk('C3 o foco de teclado no T4 mostra o mesmo cartão do hover (mesmo texto)', kf.get('on') and kf.get('modo') == 'foco' and kf.get('txt') == kh.get('txt') and bool(kh.get('txt')), [kh.get('txt'), kf.get('txt')])
     c.tecla('Escape', 'Escape', 27); time.sleep(.2)
     chk('C4a Esc dispensa o cartão e o foco fica no talhão (o painel não abre nem fecha nada)', not cartao(J).get('on') and ativo(J) == 'T4', [cartao(J).get('on'), ativo(J)])
-    bb = caixa(J, 'T4'); c.mouse(bb['x'], bb['y']); espera(J, "!document.getElementById('mux-cartao').hidden", 2); k1 = cartao(J)
-    cx, cy = (k1['r'][0] + k1['r'][2]) / 2, (k1['r'][1] + k1['r'][3]) / 2; c.mouse(cx, cy); time.sleep(.45)
+    bb = caixa(J, 'T4'); c.mouse(bb['x'], bb['y']); espera(J, "!!document.getElementById('mux-cartao')&&!document.getElementById('mux-cartao').hidden", 2); k1 = cartao(J)
+    if k1.get('r'): cx, cy = (k1['r'][0] + k1['r'][2]) / 2, (k1['r'][1] + k1['r'][3]) / 2; c.mouse(cx, cy); time.sleep(.45)   # sem cartão (base): reprova sem abortar
     chk('C4b o ponteiro vai do talhão até o cartão e o cartão continua (hoverable, WCAG 1.4.13)', cartao(J).get('on') and cartao(J).get('tal') == 'T4', cartao(J))
     c.mouse(5, 890); time.sleep(.5)
     chk('C4c sair do talhão e do cartão fecha o cartão', not cartao(J).get('on'), cartao(J))
@@ -84,9 +85,18 @@ try:
     pb = json.loads(J("JSON.stringify((()=>{const m=__LGI.map; const mk=__LGI.markers['PV05']; const ll=mk.getLngLat(); const a=m.project(ll); const o=m.getContainer().getBoundingClientRect(); const r=476/(111320*Math.cos(ll.lat*Math.PI/180)); const b=m.project([ll.lng+r,ll.lat]); const R=Math.abs(b.x-a.x); return {l:o.left+a.x-R,t:o.top+a.y-R,r:o.left+a.x+R,b:o.top+a.y+R};})())") or 'null')
     chk('C1d hover no P5 (mapa real): cartão completo, sem ação, dentro da janela, sem cobrir o pivô; contorno realçado (pv-hov) e cursor de mão',
         k5.get('on') and all(campos(k5.get('txt', ''), 'P5')) and k5.get('acoes') == 0 and not fora_janela(k5) and pb and not cobre(k5['r'], pb) and 'PV05' in (hv[0] or '') and hv[1] == 'pointer', [k5, pb, hv])
+    # C5 · as 9 camadas: o cartão abre em todas, com o valor da camada (o mesmo texto do rótulo do talhão no mapa)
+    fazenda(J, 'Santa Rita'); por = {}
+    for cam in ('Integrado', 'Satélite', 'Solo', 'Pragas e doenças', 'Ordens de serviço', 'Irrigação', 'Estádio', 'Colheita e produtividade', 'Custos'):
+        camada(J, cam); c.mouse(5, 890); time.sleep(.3); bb = caixa(J, 'P1'); c.mouse(bb['x'], bb['y']); espera(J, "(document.getElementById('mux-cartao')||{dataset:{}}).dataset.talhao==='P1'", 2)
+        k = cartao(J); rot = J("(%s||{getAttribute:()=>''}).getAttribute('data-rotulo')||''" % tal_el('P1')) or ''
+        por[cam] = bool(k.get('on')) and all(campos(k.get('txt', ''), 'P1')) and k.get('acoes') == 0 and not fora_janela(k)
+    MED['cartao_camadas'] = sum(por.values())
+    chk('C5 o cartão abre nas 9 camadas (P1 da Santa Rita), completo, sem ação e dentro da janela', all(por.values()) and len(por) == 9, por)
+    c.mouse(5, 890); time.sleep(.3)
     # ================= K · cor honesta e rótulos =================
     fazenda(J, 'Santa Rita'); camada(J, 'Satélite'); filtro(J, 'Cena', '06/09')
-    nuv = J("[...document.querySelectorAll('svg[data-mux-grupo] [data-talhao]')].filter(x=>x.getAttribute('fill')==='url(#hatch)').map(x=>x.getAttribute('data-talhao'))") or []
+    nuv = J("[...document.querySelectorAll('svg [role=button]')].filter(x=>x.getAttribute('fill')==='url(#hatch)').map(x=>x.getAttribute('data-talhao')||(x.getAttribute('aria-label')||'').split(':')[0])") or []   # vale também na base (preservação)
     chk('K1a Satélite 06/09 (Santa Rita): P2 e T7 sob nuvem em hachura, nunca com a cor de um valor', sorted(nuv) == ['P2', 'T7'], nuv)
     camada(J, 'Irrigação'); filtro(J, 'Mostrar', 'Balanço hídrico')
     t7 = json.loads(J("JSON.stringify((()=>{const e=%s; return e?[e.getAttribute('fill'),e.getAttribute('data-rotulo')||e.getAttribute('aria-label')]:null;})())" % tal_el('T7')) or 'null') or [None, '']
@@ -124,20 +134,30 @@ try:
     lb = json.loads(J("JSON.stringify([...document.querySelectorAll('[data-mux-leg]')].map(b=>[b.getAttribute('data-mux-leg'),b.innerText.replace(/\\s+/g,' ').trim(),(b.querySelector('.mux-qt')||{}).innerText||'']))") or '[]')
     soma = sum(int((x[2] or '0').split(' ')[0]) for x in lb)
     chk('L1a cada classe da legenda mostra contagem e área ("2 · 610 ha"); a soma das contagens é a dos 8 talhões', bool(lb) and soma == 8 and all(x[2] == '0' or ' ha' in x[2] for x in lb), [lb, soma])
-    cls = next((x for x in lb if x[2] not in ('', '0')), None)
+    cls = next((x for x in lb if x[2] not in ('', '0')), None) or ['', 'nenhuma classe', '0']   # sem a legenda que trabalha (base): os itens reprovam sem abortar
     nc = int(cls[2].split(' ')[0]) if cls else 0
-    bl = json.loads(J("JSON.stringify((()=>{const r=document.querySelector('[data-mux-leg=\"%s\"]').getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2};})())" % (cls[0] if cls else '')) or 'null')
-    c.mouse(bl['x'], bl['y']); time.sleep(.3)
+    bl = json.loads(J("JSON.stringify((()=>{const e=document.querySelector('[data-mux-leg=\"%s\"]'); if(!e) return null; const r=e.getBoundingClientRect(); return {x:r.left+r.width/2,y:r.top+r.height/2};})())" % cls[0]) or 'null')
+    if bl: c.mouse(bl['x'], bl['y']); time.sleep(.3)
     na = J("(document.querySelector('svg[data-mux-grupo] [data-mux-anel]')||{children:[]}).children.length")
     chk(f'L1b passar o mouse em "{cls[1] if cls else ""}" realça os {nc} talhões dela (anel em duas cores em cada um)', na == 2 * nc and nc > 0, [na, nc])
-    J("document.querySelector('[data-mux-leg=\"%s\"]').click()" % cls[0]); time.sleep(.5)
-    st = json.loads(J("JSON.stringify({p:document.querySelector('[data-mux-leg=\"%s\"]').getAttribute('aria-pressed'), op:[...document.querySelectorAll('svg[data-mux-grupo] [data-talhao]')].map(x=>x.getAttribute('fill-opacity'))})" % cls[0]) or '{}')
+    J("(()=>{const e=document.querySelector('[data-mux-leg=\"%s\"]'); e&&e.click();})()" % cls[0]); time.sleep(.5)
+    st = json.loads(J("JSON.stringify({p:(document.querySelector('[data-mux-leg=\"%s\"]')||{getAttribute:()=>null}).getAttribute('aria-pressed'), op:[...document.querySelectorAll('svg[data-mux-grupo] [data-talhao]')].map(x=>x.getAttribute('fill-opacity'))})" % cls[0]) or '{}')
     J("(()=>{const g=document.querySelector('[role=group][aria-label=\"Ver dados\"]'); const b=g&&[...g.querySelectorAll('button')].find(x=>x.innerText.trim()==='Lista'); b&&b.click();})()"); time.sleep(.5)
     nl = [J("document.querySelectorAll('.mux-lista [data-talhao-lista]').length"), J("((document.querySelector('.mux-lista [role=status]')||{}).innerText||'')")]
     chk('L1c clicar na classe filtra: botão pressionado, os outros talhões esmaecem no mapa e a Lista mostra só a classe ("N de 8")', st.get('p') == 'true' and st.get('op', []).count('0.25') == 8 - nc and nl[0] == nc and nl[1].startswith(f'{nc} de 8'), [st, nl])
-    J("document.querySelector('[data-mux-leg=\"%s\"]').click()" % cls[0]); time.sleep(.5)
-    nl2 = J("document.querySelectorAll('.mux-lista [data-talhao-lista]').length"); p2 = J("document.querySelector('[data-mux-leg=\"%s\"]').getAttribute('aria-pressed')" % cls[0])
+    J("(()=>{const e=document.querySelector('[data-mux-leg=\"%s\"]'); e&&e.click();})()" % cls[0]); time.sleep(.5)
+    nl2 = J("document.querySelectorAll('.mux-lista [data-talhao-lista]').length"); p2 = J("(document.querySelector('[data-mux-leg=\"%s\"]')||{getAttribute:()=>null}).getAttribute('aria-pressed')" % cls[0])
     chk('L1d clicar de novo limpa o filtro (8 linhas; botão solto)', nl2 == 8 and p2 == 'false', [nl2, p2])
+    # Satélite: com o contraste Talhão as cores são relativas a cada talhão; a escala dos pixels não conta talhões (antes: "Médio 20" na Lagoa
+    # Grande com rótulos fraco, atenção e bom). Com o contraste Absoluto a classe do talhão é a da escala: a soma volta a ser 8
+    camada(J, 'Satélite'); time.sleep(.4)
+    LEGQ = "JSON.stringify([...document.querySelectorAll('[data-mux-leg]')].map(b=>[b.getAttribute('data-mux-leg'),(b.querySelector('.mux-qt')||{}).innerText||'']))"
+    l_tal = json.loads(J(LEGQ) or '[]')
+    filtro(J, 'Contraste', 'Absoluto'); time.sleep(.4)
+    l_abs = json.loads(J(LEGQ) or '[]'); s_abs = sum(int((x[1] or '0').split(' ')[0]) for x in l_abs)
+    chk('L1e Satélite: no contraste Talhão a escala dos pixels não conta talhões (só sem cultura e nuvem); no Absoluto a soma é 8',
+        bool(l_tal) and all(x[0] in ('c:gray', 'c:cloud') for x in l_tal) and s_abs == 8 and any(x[0].startswith('h:') for x in l_abs), [l_tal, l_abs])
+    filtro(J, 'Contraste', 'Talhão'); camada(J, 'Integrado')
     J("(()=>{const g=document.querySelector('[role=group][aria-label=\"Ver dados\"]'); const b=g&&[...g.querySelectorAll('button')].find(x=>x.innerText.trim()==='Mapa'); b&&b.click();})()"); time.sleep(.4)
     # ================= S · seleção =================
     J("(%s).dispatchEvent(new MouseEvent('click',{bubbles:true}))" % tal_el('T4')); time.sleep(.5)
@@ -147,7 +167,7 @@ try:
     fazenda(J, 'Lagoa Grande'); cam0 = J("(()=>{const m=__LGI.map; const c=m.getCenter(); return [c.lng,c.lat,m.getZoom()];})()")
     b5 = caixa(J, 'PV05'); c.mouse(b5['x'], b5['y'], 'mousePressed', 'left'); c.mouse(b5['x'], b5['y'], 'mouseReleased', 'left'); espera(J, "!!document.querySelector('main aside[data-mux-painel]')", 4); time.sleep(.6)
     cam1 = J("(()=>{const m=__LGI.map; const c=m.getCenter(); return [c.lng,c.lat,m.getZoom()];})()")
-    sl = J("(()=>{const m=__LGI.map; return [JSON.stringify(m.getFilter('pv-sel')),JSON.stringify(m.getFilter('pv-sel2')),m.getPaintProperty('pv-sel','line-color'),m.getPaintProperty('pv-sel2','line-color'),(document.querySelector('[data-mux-grupo=LG] [data-talhao=PV05]')||{getAttribute:()=>null}).getAttribute('aria-pressed')];})()") or []
+    sl = J("(()=>{const m=__LGI.map; try{ return [JSON.stringify(m.getFilter('pv-sel')),JSON.stringify(m.getFilter('pv-sel2')),m.getPaintProperty('pv-sel','line-color'),m.getPaintProperty('pv-sel2','line-color'),(document.querySelector('[data-mux-grupo=LG] [data-talhao=PV05]')||{getAttribute:()=>null}).getAttribute('aria-pressed')]; }catch(e){ return ['sem '+e.message]; }})()") or []
     chk('S1b seleção no mapa real: contorno em duas cores (pv-sel escuro + pv-sel2 branco), rótulo em destaque (aria-pressed) e a câmera não se move', 'PV05' in (sl[0] or '') and 'PV05' in (sl[1] or '') and sl[2:] == ['#15201A', '#FFFFFF', 'true'] and cam0 == cam1, [sl, cam0, cam1])
     ee = erros(J); chk('E1a 1440: sem erro de JavaScript', not ee, ee[:3])
     # ================= M · 390 com toque =================

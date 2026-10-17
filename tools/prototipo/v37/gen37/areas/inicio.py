@@ -565,9 +565,9 @@ function lgCss(){ if(LGI.css) return; LGI.css=true; const s=document.createEleme
    // MUX-F2 (17/10/2026): cada pivô é um botão (tabindex móvel, aria-pressed) com o rótulo numa placa branca a 90 % e texto opaco #15201A
    // (≥ 13,4:1 sobre qualquer fundo, NC11): número / valor / estado curto; por tamanho na tela: só o número (peq) ou número e valor (med).
    // O clique continua no polígono (pointer-events: none no botão): o teclado e o leitor de tela usam o botão. Selecionado: placa escura (número em destaque)
-   +'.lg-rot{display:flex;flex-direction:column;align-items:center;pointer-events:none;text-align:center;font-family:Manrope,system-ui,sans-serif;color:#15201A;background:rgba(255,255,255,.9);border:0;border-radius:8px;padding:2px 7px 3px;margin:0;box-shadow:0 1px 3px rgba(21,32,26,.28);max-width:112px;box-sizing:border-box;cursor:pointer}'
-   +'.lg-rot b{font-size:14px;font-weight:800;line-height:1.1}.lg-rot span{font-size:11px;font-weight:700;max-width:100px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
-   +'.lg-rot i{font-style:normal;font-size:10.5px;font-weight:600;color:#15201A;max-width:100px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+   +'.lg-rot{display:flex;flex-direction:column;align-items:center;pointer-events:none;text-align:center;font-family:Manrope,system-ui,sans-serif;color:#15201A;background:rgba(255,255,255,.9);border:0;border-radius:8px;padding:2px 7px 3px;margin:0;box-shadow:0 1px 3px rgba(21,32,26,.28);max-width:140px;box-sizing:border-box;cursor:pointer}'
+   +'.lg-rot b{font-size:14px;font-weight:800;line-height:1.1}.lg-rot span{font-size:11px;font-weight:700;max-width:126px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+   +'.lg-rot i{font-style:normal;font-size:10.5px;font-weight:600;color:#15201A;max-width:126px;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
    +'.lg-rot.peq span,.lg-rot.peq i,.lg-rot.med i{display:none}.lg-rot.peq{padding:1px 6px}.lg-rot[aria-pressed=true]{background:#15201A;color:#FFFFFF;box-shadow:0 0 0 2px #FFFFFF}.lg-rot[aria-pressed=true] i{color:#FFFFFF}'
    +'.lg-rot.mux-fora span,.lg-rot.mux-fora i{display:none}.lg-rot:focus{outline:none}.lg-rot:focus-visible{outline:2px dashed #15201A;outline-offset:3px;box-shadow:0 0 0 3px #FFFFFF,0 1px 3px rgba(21,32,26,.28)}';
 
@@ -1180,7 +1180,10 @@ function MAPVALS(self,v){
   v.fonte=fonte(l,f); v.nums=strip(self,l,f); v.lay_t=(M.nome[l]||l); const z=st.zoom||1;
   // ===== MUX: a classe de cada talhão uma vez por desenho; o que ele diz na camada (cartão, nome acessível, rótulo, lista) =====
   const CL={}; TIDS().forEach(t=>{ CL[t]=cls(l,f,t); });
-  const leg0=legend(self,l,f,sel).map(x=>Object.assign({},x,{key:x.k?'c:'+x.k:(x.hx?'h:'+x.hx:''),nm:x.t}));
+  // Satélite com contraste Talhão: as cores são relativas a cada talhão (todo pivô tem as seis), então a escala dos pixels não conta nem filtra
+  // talhões (antes: "Médio 20 · 1.137 ha" enquanto os rótulos diziam fraco, atenção e bom). Sem cultura e nuvem continuam contando
+  const escalaRel=(l==='Satélite'&&f.ctr==='Talhão');
+  const leg0=legend(self,l,f,sel).map(x=>Object.assign({},x,{key:x.k?'c:'+x.k:(x.hx&&!escalaRel?'h:'+x.hx:''),nm:x.t}));
   MUX.info=muxInfo(l,f,TIDS(),CL,leg0);
   // legenda que trabalha (MUX-F2): cada classe com a contagem e a área; passar o mouse ou focar realça os talhões dela; clicar filtra o mapa
   // e a lista por ela; clicar de novo limpa. A contagem é dos talhões dentro do filtro de cultura
@@ -1192,8 +1195,8 @@ function MAPVALS(self,v){
     return Object.assign({},x,{btn:true,sp:false,qt:q.n?(q.n+' · '+nfx(q.ha)+' ha'):'0',on:on?'true':'false',
       rot:x.t+': '+q.n+(q.n===1?' talhão':' talhões')+(q.n?', '+nfx(q.ha)+' ha':'')+(on?' (filtro ligado: clique para limpar)':' (clique para filtrar)'),
       go:()=>self.setState({lgf:self.state.lgf===x.key?null:x.key,g2toast:self.state.lgf===x.key?'Filtro da legenda limpo':'Só '+x.t+' no mapa e na lista'}),
-      bst:'display:inline-flex;align-items:center;gap:5px;white-space:nowrap;border:0;margin:0;padding:3px 7px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:11.5px;color:#3E4A43;min-height:26px;'
-        +(on?'background:#E4F3E9;box-shadow:inset 0 0 0 1.5px #1E7A4C;color:#15201A;':'background:transparent;')}); });
+      bst:'display:inline-flex;align-items:center;gap:5px;white-space:nowrap;border:0;margin:0;padding:2px 5px;border-radius:7px;cursor:pointer;font-family:inherit;font-size:11.5px;color:#3E4A43;min-height:24px;'
+        +(on?'background:#E4F3E9;box-shadow:inset 0 0 0 1.5px #1E7A4C;color:#15201A;':'background:transparent;')}); });   // compacta: a legenda não deve cobrir mais o mapa
   v.leg_filtro=!!LF; v.leg_limpa=()=>self.setState({lgf:null});
   v.mux_grp=(FAZ==='Lagoa Grande'?'Talhões da Fazenda Lagoa Grande · ':'Talhões da Fazenda Santa Rita · ')+TIDS().length+' talhões';
   v.mux_fundo=()=>{ const s=self.state; if(s.medir||s.cvis||s.selm||s.dw) return; if((s.tsel||[]).length) self.setState({tsel:[],px:null,mpa:null}); };   // D16: clique no fundo desmarca
@@ -1874,7 +1877,7 @@ def _mux_lista():
       f'<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px;"><sc-for list="{H("mux_rows")}" as="r" hint-placeholder-count="4"><li style="display: flex; align-items: stretch; gap: 6px; min-width: 0;">'
       f'<sc-if value="{H("r.bt")}" hint-placeholder-val="{T()}"><button type="button" class="mux-linha" data-talhao-lista="{H("r.id")}" aria-pressed="{H("r.on")}" onClick="{H("r.go")}">'
       f'<span style="{H("r.dot")}"></span><span class="mux-l-n">{H("r.nome")}<small>{H("r.ha")}</small></span><span class="mux-l-v">{H("r.valor")}</span><span class="mux-l-e">{H("r.estado")}</span><span class="mux-l-d">{H("r.data")}</span>{E.seta_ir()}</button>'
-      f'<button type="button" class="mux-loc" onClick="{H("r.loc")}" aria-label="{H("r.lrot")}">{icon("map",15,INK)}<span>Localizar no mapa</span></button></sc-if>'
+      f'<button type="button" class="mux-loc" onClick="{H("r.loc")}" aria-label="{H("r.lrot")}" data-dica="Localizar no mapa">{icon("map",17,INK)}</button></sc-if>'
       f'<sc-if value="{H("r.sb")}" hint-placeholder-val="{F()}"><div class="mux-linha mux-linha-sg"><span></span><span class="mux-l-n">{H("r.nome")}<small>{H("r.ha")}</small></span><span class="mux-l-v">{H("r.valor")}</span></div></sc-if>'
       f'</li></sc-for></ul></section></sc-if>')
 # MUX: cartão do talhão (claro, como o do Raio-X), linhas da Lista e ajustes do celular; só no IN-04
@@ -1890,9 +1893,12 @@ MUX_CSS=('.mux-cartao{position:fixed;z-index:2147483000;max-width:300px;box-sizi
   '.mux-linha[aria-pressed=true]{border-color:#1E7A4C;box-shadow:inset 0 0 0 1px #1E7A4C;background:#F4FAF6}.mux-linha-sg{cursor:default;color:#65736A}'
   '.mux-l-n{font-weight:800;font-size:13.5px;min-width:0}.mux-l-n small{display:block;font-size:11.5px;font-weight:600;color:#65736A}.mux-l-v{font-weight:700;min-width:0;overflow-wrap:anywhere}'
   '.mux-l-e{color:#3E4A43;min-width:0;overflow-wrap:anywhere}.mux-l-d{color:#65736A;font-size:12px;min-width:0}'
-  '.mux-loc{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;padding:0 12px;min-height:44px;border:1px solid #E4E9E5;border-radius:10px;background:#FFFFFF;font-family:inherit;font-size:12px;font-weight:700;color:#15201A;cursor:pointer;white-space:nowrap}'
-  '@container in04mapa (max-width: 700px){ .mux-linha{grid-template-columns:12px minmax(0,1fr) 16px} .mux-l-v,.mux-l-e,.mux-l-d{grid-column:2} .mux-loc{padding:0 13px} .mux-loc span{display:none}'
-  ' .mapa-area .mux-modo,.mapa-area .mux-aviso{top:98px!important} .mux-busca input{width:92px!important} }')
+  '.mux-loc{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;width:44px;min-height:44px;border:1px solid #E4E9E5;border-radius:10px;background:#FFFFFF;font-family:inherit;font-size:12px;font-weight:700;color:#15201A;cursor:pointer;white-space:nowrap}'
+  '@container in04mapa (max-width: 700px){ .mux-linha{grid-template-columns:12px minmax(0,1fr) 16px} .mux-l-v,.mux-l-e,.mux-l-d{grid-column:2}'
+  ' .mapa-area .mux-modo,.mapa-area .mux-aviso{top:98px!important} .mux-busca input{width:104px!important}'
+  # na tela estreita a legenda é uma linha só, que rola de lado: com a contagem e a área, quebrar em linhas cobria metade do mapa
+  ' .mux-legenda{flex-wrap:nowrap!important;overflow-x:auto;pointer-events:auto!important;scrollbar-width:none;touch-action:pan-x} .mux-legenda::-webkit-scrollbar{display:none}'
+  ' .mux-legenda>*{flex:none;white-space:nowrap} }')
 def _mapcard(h,full=False):
     ins_id='' if full else ' id="mux-instr"'   # instruções do teclado (aria-describedby do grupo de talhões): um id só na página
     fgroups=(f'<sc-for list="{H("flt")}" as="g" hint-placeholder-count="2">'
@@ -1956,11 +1962,11 @@ def _mapcard(h,full=False):
       + ('' if full else _mux_lista()) + f'{tools}{zoom}{_tm_barra()}' + ('' if full else _mux_barra()) +
       f'<sc-if value="{H("aviso_bv")}" hint-placeholder-val="{F()}"><span role="note" class="mux-aviso" style="position: absolute; left: 12px; top: 56px; padding: 5px 10px; border-radius: 999px; background: {YELS}; color: {YEL}; font-size: 12px; font-weight: 700; box-shadow: 0 1px 3px rgba(21,32,26,.14);">Todas: o mapa mostra a Santa Rita · Lagoa Grande e Boa Vista (sem geometria) na Lista</span></sc-if>'
       # MUX-F2: legenda que trabalha (cada classe é um botão com contagem e área: realça no hover e no foco, filtra no clique) e as instruções do teclado
-      f'<div style="position: absolute; left: 12px; bottom: 12px; right: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 6px 10px; border-radius: 10px; background: rgba(255,255,255,.94); box-shadow: 0 1px 4px rgba(21,32,26,.14); font-size: 11.5px; color: {MUTED}; z-index: 3; pointer-events: none;">'
+      f'<div class="mux-legenda" style="position: absolute; left: 12px; bottom: 12px; right: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; padding: 5px 9px; border-radius: 10px; background: rgba(255,255,255,.94); box-shadow: 0 1px 4px rgba(21,32,26,.14); font-size: 11.5px; color: {MUTED}; z-index: 3; pointer-events: none;">'
       f'<sc-for list="{H("leg")}" as="x" hint-placeholder-count="5"><sc-if value="{H("x.btn")}" hint-placeholder-val="{T()}"><button type="button" data-mux-leg="{H("x.key")}" aria-pressed="{H("x.on")}" aria-label="{H("x.rot")}" onClick="{H("x.go")}" style="{H("x.bst")}"><span style="{H("x.dot")}"></span>{H("x.t")}<b class="mux-qt" style="font-weight: 700; color: {INK};">{H("x.qt")}</b></button></sc-if>'
       f'<sc-if value="{H("x.sp")}" hint-placeholder-val="{F()}"><span class="mux-leg-it" style="{H("x.st")}"><span style="{H("x.dot")}"></span>{H("x.t")}</span></sc-if></sc-for>'
       f'<sc-if value="{H("leg_filtro")}" hint-placeholder-val="{F()}"><button type="button" class="mux-leg-it" onClick="{H("leg_limpa")}" style="border: 0; background: transparent; font-family: inherit; font-size: 11.5px; font-weight: 700; color: {INK}; text-decoration: underline; cursor: pointer; padding: 3px 4px;">Limpar filtro</button></sc-if>'
-      f'<span style="flex-grow: 1;"></span><span{ins_id} class="mux-instr">Teclado: setas vão ao talhão vizinho · Enter abre · Esc fecha · / busca</span><span>{H("leg_nota")}</span></div>'
+      f'<span style="flex-grow: 1;"></span><span{ins_id} class="mux-instr">Setas: vizinho · Enter: abrir · Esc: fechar · /: buscar</span><span>{H("leg_nota")}</span></div>'
       f'<sc-if value="{H("has_modo")}" hint-placeholder-val="{F()}"><span role="status" class="mux-modo" style="position: absolute; left: 12px; top: 56px; padding: 5px 10px; border-radius: 999px; background: {INK}; color: #fff; font-size: 12px; font-weight: 700; z-index: 3;">{H("modo")}</span></sc-if></div></sc-if>'
       f'<sc-if value="{H("map_vazio")}" hint-placeholder-val="{F()}"><section aria-label="Mapa da Boa Vista" style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: {BG};">'
       f'{icon("map",40,MUTED)}<b style="font-size: 16px;">Nenhum talhão desenhado na Boa Vista</b>'

@@ -87,7 +87,7 @@ try:
         c.tab(); sai = J("(()=>{const a=document.activeElement; return !!a&&!a.closest('[data-mux-grupo]');})()")
         chk(f'F1-1g {fz}: o Tab seguinte sai do mapa', bool(sai), ativo(J))
         ins = json.loads(J("JSON.stringify((()=>{const g=document.querySelector('[data-mux-grupo]'); const id=g&&g.getAttribute('aria-describedby'); const i=id&&document.getElementById(id); return i?[i.innerText,i.getClientRects().length>0&&getComputedStyle(i).visibility!=='hidden']:null;})())") or 'null')
-        chk(f'F1-2 {fz}: instruções visíveis junto do mapa e no aria-describedby do grupo (setas, Enter, Esc, /)', bool(ins) and ins[1] and all(x in ins[0] for x in ('setas', 'Enter', 'Esc', '/')), ins)
+        chk(f'F1-2 {fz}: instruções visíveis junto do mapa e no aria-describedby do grupo (setas, Enter, Esc, /)', bool(ins) and ins[1] and all(x in ins[0].lower() for x in ('setas', 'enter', 'esc', '/')), ins)
         al3 = J("(%s||{getAttribute:()=>''}).getAttribute('aria-label')" % tal_el(alvo)) or ''
         partes = al3.split(', ')
         chk(f'F1-3a {fz}: nome acessível completo no formato do pedido ("{nome}, N ha, cultura e estádio, valor, estado, data")', partes[0] == nome and len(partes) >= 5 and partes[1].endswith(' ha') and ('hoje' in al3 or '/' in partes[-1]), al3)
@@ -101,7 +101,7 @@ try:
         for txt, esp_id in termos:
             ESC(); time.sleep(.2); J("(()=>{const a=document.querySelector('main aside[data-mux-painel] button[aria-label=\"Fechar painel\"]'); a&&a.click();})()"); time.sleep(.3)
             cam0 = J("(()=>{const m=window.__LGI&&__LGI.map; if(!m) return null; const c=m.getCenter(); return [c.lng,c.lat,m.getZoom()];})()")
-            J("(()=>{const i=document.getElementById('mux-busca'); i.focus(); i.value='';})()")
+            J("(()=>{const i=document.getElementById('mux-busca'); if(i){ i.focus(); i.value=''; }})()")   # sem a busca (base): o item reprova sem abortar
             for ch in txt: c.call('Input.insertText', {'text': ch}); time.sleep(.02)
             ENTER(); espera(J, "document.activeElement&&document.activeElement.id==='mux-pan-t'", 5); time.sleep(.6)
             cam1 = J("(()=>{const m=window.__LGI&&__LGI.map; if(!m) return null; const c=m.getCenter(); return [c.lng,c.lat,m.getZoom()];})()")
@@ -157,9 +157,9 @@ try:
     foca('T1'); time.sleep(.1); ESC(); ESC(); time.sleep(.4)   # 1º Esc: cartão do foco; 2º: o modo
     md = J("(()=>{const b=[...document.querySelectorAll('[role=toolbar][aria-label=\"Ferramentas do mapa\"] button')].find(x=>x.innerText.trim()==='Medir'); return b?b.getAttribute('aria-pressed'):null;})()")
     chk('F1-7a Esc desliga o modo Medir (antes da seleção)', md == 'false', md)
-    J("(()=>{const b=%s; b&&b.dispatchEvent(new MouseEvent('click',{bubbles:true}));})()" % tal_el('T2')); espera(J, "!!document.querySelector('main aside[data-mux-painel]')", 3)
-    J("(()=>{const r=document.querySelector('svg[data-mux-grupo] > rect'); r&&r.dispatchEvent(new MouseEvent('click',{bubbles:true}));})()"); time.sleep(.4)
-    chk('F1-7b clique no fundo do mapa desmarca (D16)', J("!document.querySelector('main aside[data-mux-painel]')&&!document.querySelector('[data-mux-grupo] [aria-pressed=true]')"), painel(J)[:80])
+    J("(()=>{const b=%s; b&&b.dispatchEvent(new MouseEvent('click',{bubbles:true}));})()" % tal_el('T2')); antes = espera(J, "!!document.querySelector('main aside[aria-label]')", 3)
+    J("(()=>{const r=document.querySelector('svg [role=button]').ownerSVGElement.querySelector(':scope > rect'); r&&r.dispatchEvent(new MouseEvent('click',{bubbles:true}));})()"); time.sleep(.4)
+    chk('F1-7b clique no fundo do mapa desmarca (D16): o painel do T2 estava aberto e fecha', antes and J("(()=>{const r=document.querySelector('svg [role=button]').ownerSVGElement.querySelector(':scope > rect'); return !!r;})()") and J("!document.querySelector('main aside[aria-label]')&&!document.querySelector('[data-mux-grupo] [aria-pressed=true]')"), [antes, painel(J)[:80]])
     fazenda(J, 'Lagoa Grande')
     J("(()=>{const b=[...document.querySelectorAll('[role=toolbar][aria-label=\"Ferramentas do mapa\"] button')].find(x=>x.innerText.trim()==='Desenhar'); b&&b.click();})()"); time.sleep(.5)
     b = caixa(J, 'PV05') or {'x': 600, 'y': 500}
