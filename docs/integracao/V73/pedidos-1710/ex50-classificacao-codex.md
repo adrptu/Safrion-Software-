@@ -621,3 +621,105 @@ App confirma recebimento via comando; cargas preparadas ficam no estado da tela,
 
 
 Consolidação recuperável para revisão crítica do Claude: os recibos incrementais continuam válidos, inclusive correção do diagnóstico do menu de linha (item26). Não substitui o checkpoint da issue1 nem cria fila. Próxima ação de autoria Codex permanece SU01 no contrato EX50(a)-SUP, após SHA/liberação da composição; nenhum arquivo do Claude alterado.
+
+<!-- Delta do Codex, comentário 6234472649 no PR #47 (cópia fiel) -->
+
+## Delta: correção da devolução 6234433177
+
+Complementa a classificação versionada por Claude em533338b; não substitui histórico. 16 itens específicos; contraprovas abaixo são PROPOSTAS, não executadas.
+
+## 3 · AG-04det
+Fonte: Base4d06b39; agronomia.py:270-321
+Preservar versoes, alcance somente do saldo, origem/RT e advertencia de uso sem registro. Versoes/advertencias seed nao comprovam validacao regulatoria.
+Contraprova proposta: Trocar versao do saldo sem reescrever executado; registro ausente continua impedimento, nao sucesso por texto.
+
+## 5 · CA-02
+Fonte: Base4d06b39; processo_os.py:1306-1317;campo.py CA02
+Preservar cdLinha e acoes enquanto conferência aberta; entrada A conferir deve reunir todas as OS, inclusive fora do recorte atual. CA02 so sai com fila global equivalente.
+Contraprova proposta: Duas OS com apontamentos pendentes: ambas aparecem no filtro global; conferir uma nao encerra outra; reabrir preserva historico.
+
+## 8 · CO-06
+Fonte: Base4d06b39; colheita.py:541-544
+Preservar genealogia lote/carga/cliente e vinculo VE06; Rastrear clientes e imsg fixo, nao rastreamento executado.
+Contraprova proposta: Lote enviado a dois clientes: destino deve listar ambos a partir da genealogia; toast fixo nao satisfaz.
+
+## 9 · GE-01
+Fonte: Base4d06b39; gestao.py:118-145
+Preservar formula, unidades e origem por cultura; RESULT e cenario e IR0.34 premissa de demonstracao, nao regra geral.
+Contraprova proposta: Alterar parametro IR/cultura deve mudar resultado correspondente, mantendo receita/custo identificados; ausencia de dado nao vira zero real.
+
+## 10 · GE-06
+Fonte: Base4d06b39; gestao.py:473-478;maquinas.py:397
+MTBF/MTTR exigem origem, periodo e denominador dos apontamentos/OM. Sem base, nao estimavel com motivo.
+Contraprova proposta: Sem horas/falhas validas nao mostrar taxa fixa; mudar periodo recalcula numerador/denominador coerentes.
+
+## 12 · IN-02
+Fonte: Base4d06b39; inicio.py:1686;recibo6233013087
+Aprovar selecionados deve migrar para um objeto por vez, aprovou abre proximo; alçada e recibo individuais. Liberar N ja aprovadas continua permitido conforme PR105.
+Contraprova proposta: Selecionar duas pendentes nao aprova ambas; aprovar primeira nao muda segunda. Liberacao de aprovada nao contorna CMD42 da outra.
+
+## 14 · LO-02det
+Fonte: Base4d06b39; logistica.py:390-439
+Preservar NF-e/lacre ligados a carga/pedido, papeis e evidencia. self.state.lacre e selecao textual nao provam persistencia nem anexo.
+Contraprova proposta: Lacre divergente bloqueia despacho; cargaB nao herda evidencia deA; recarregar mostra recibo ou pendencia real, nao sucesso vazio.
+
+## 19 · PL-04
+Fonte: Base4d06b39; planejamento.py:430-440
+Preparar periodo e previa com encaminhamento OS; nao reintroduzir aprovacao coletiva. Emissao nao equivale a CMD42.
+Contraprova proposta: Preparar varias ordens nao aprova nenhuma; liberar exige cada CMD42 previo e recibo CMD06 porOS.
+
+## 20 · PL-05det
+Fonte: Base4d06b39; planejamento.py:518-553
+Comparacoes seed/msgbtn nao fazem substituicao. Destino reutiliza comando vigente de alocacao, aptidao, agenda e versao do saldo.
+Contraprova proposta: Substituto bloqueado ou em conflito nao assume; trocar saldo nao altera recurso/versao historica ja executados.
+
+## 21 · SU-01
+Fonte: Base4d06b39; suprimentos.py:235-271;dados_manutencao.py:261-264;6233966820
+Pedir ate=data de necessidade-prazo-seguranca. Derivar OM0234/servico/pecas canonicos, reserva propria e saldo apto; remover Rolamento6310 se sem origem. COT113 acompanha origem corrigida.
+Contraprova proposta: Demanda4, estoque0, reserva propria1 resulta falta3 e explica4-0-1; reserva alheia/quarentena nao cobre. Mudar janela OM altera pedir ate; item inexistente nao gera compra.
+
+## 22 · SU-02
+Fonte: Base4d06b39; suprimentos.py:307-353
+Dias/lote/metodo editaveis locais; minimo em texto nao comprova ponto editavel. Separar proposta, simulacao, versao vigente e publicacao.
+Contraprova proposta: Editar/simular proposta nao muda politica ativa; publicar validada cria versao/recibo, repetir nao duplica; falha conserva proposta e vigente.
+
+## 23 · SU-05
+Fonte: Base4d06b39; suprimentos.py:635-680
+Preservar programacao de cargas, contratado/liberado/recebido/saldo e exposicao. Emitir/confirmar simsd nao comprovam pedido criado.
+Contraprova proposta: Liberar parcial nao aumenta contratado; repetir confirmacao nao duplica pedido/titulo; saldo nao fica negativo.
+
+## 24 · SU-06
+Fonte: Base4d06b39; suprimentos.py:820-834
+ler abre r4533 fixa e declara simulado: manter rotulo Abrir NF de demonstracao ate leitor validado. Vinculo documento/pedido e unidade sao essenciais.
+Contraprova proposta: XML desconhecido/invalido nao deve abrir NF fixa como se fosse lida; documento repetido nao duplica recebimento.
+
+## 25 · SU-08
+Fonte: Base4d06b39; suprimentos.py:1055-1090
+RUN.trf/per/est e conf/apr alteram g_mov local. Destino deve comandar fonte unica de estoque com alçada/recibo ou rotular previa; preservar lote/unidade/origem/destino/motivo.
+Contraprova proposta: Transferencia conserva soma origem+destino; perda baixa uma vez; estorno restaura somente movimento elegivel sem afetar reserva alheia; repetir chave nao duplica.
+
+## 28 · BO-02
+Fonte: Base4d06b39; ui37.py:88-89;decisoes-proprietario.md@533338b
+BO02 sai do menu da fazenda e vira administracao separada; nao apenas link escondido. Dados de cobranca de outras organizacoes nao podem vazar.
+Contraprova proposta: Perfil fazenda nao acessa BO02 por URL direta nem ve organizacoes alheias; administracao autorizada conserva acesso proprio.
+
+## 75 · Main
+Fonte: Base4d06b39; areas/indice.py:7-10;ui37.py:91;build.py:40
+Main fica como pagina neutra usada pelos testes/publicador, fora do menu e canvas. Retirada da lista de exclusao aceita6233013087.
+Contraprova proposta: Smoke de teste/publicador que abre Main continua resolvendo; menu de trabalho nao a reexpoe.
+
+## Decisões já tomadas
+Fonte: docs/integracao/V73/pedidos-1710/decisoes-proprietario.md@533338b, lida nesta correção.
+- ID27: Saida do menu da fazenda decidida; administracao separada. Somente preco da assinatura segue pendente.
+- ID31: Retirar entradas apenas depois de destino substituto comprovado; portal minimo e onboarding assistido ja decididos. Manter acesso de QA do app.
+- ID32: Implantacao assistida decidida: abre na primeira entrada, passo N de6 no Mapa, fora do menu. Preservar retomada e evitar cadastro ficticio por drawer.
+- ID33: Portal minimo decidido: PT02det cotacao por convite e PT05det XMLNF-e, login proprio fora do menu da fazenda; demais destinos seguem decisao de escopo, sem ampliar portal.
+- IDs29/30: GE04/05 no ERP; Safrion conserva situação do título e aprovação individual. Ressalvas de domínio anteriores não exigem reconstruir ERP no Safrion.
+
+Autoria do arquivo remoto permanece com Claude, que o versionou. Favor incorporar este delta no mesmo arquivo e revisar criticamente. Mantidos123 IDs, destinos condicionados, recibos e provas válidas; nenhum gatilho de auditoria integral/PRD/Next. SUP aguarda SHA/liberação combinados.
+
+
+
+<!-- Delta do Codex, comentário 6234517837 no PR #47 (cópia fiel) -->
+
+Complemento focal à correção6234472649: conferência documental executada preserva os123 IDs, nomes e destinos do anexo original. O único destino originalmente vazio é ID85/PT06, marcado Excluir. Reconciliação com a decisão de portal mínimo@533338b: PT06 não ganha destino funcional por inferência; fonte/histórico ficam recuperáveis e retirada exige conferência de links/escopo na candidata. Os guards descritos no parecer caracterizam a implementação existente, não obrigam a recriar indicadores fora do portal mínimo. Mantidas16 contraprovas identificadas como propostas, sem afirmar execução. Readback da correção6234472649 confirmado; aguardando revisão do delta e SHA/liberação SUP já solicitados.
