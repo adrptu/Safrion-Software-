@@ -1,0 +1,179 @@
+<!--
+Robô da varredura do Safrion (versão usada em 16/10/2026 na versão 1792184197-5a81 do protótipo).
+Como usar para repetir a medida:
+1. Sirva na mesma origem: as telas do protótipo em /v3/<TELA>.dc.html (com support.js e os dados), este arquivo em /robot3/index.html e a lista /robot3/screens.json ([{"n":"OS","mobile":false}, ...]).
+2. O servidor precisa aceitar POST /save?name=<arquivo> e gravar o corpo (JSON) numa pasta de saída.
+3. Abra /robot3/index.html no navegador e rode no console: run() para a varredura completa (inventário + clique em cada ação + selecionar todos) e runInv2() para o inventário de listas e cartões.
+4. Saída por tela: <TELA>.json (inv, results, batch) e <TELA>.inv2.json (records).
+O robô não preenche nem envia formulários e não clica dentro de modais. Restaura o localStorage antes de cada tela e recarrega a tela depois de cada ação.
+-->
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>robo3</title>
+<style>body{font:12px system-ui;margin:8px} iframe{border:1px solid #ccc;margin:4px;vertical-align:top} #log{white-space:pre;height:140px;overflow:auto;background:#f4f4f4}</style></head>
+<body><div id="st">parado</div><div id="log"></div><div id="frames"></div>
+<script>
+'use strict';
+const W = new Worker(URL.createObjectURL(new Blob(["onmessage=e=>setTimeout(()=>postMessage(e.data[0]),e.data[1])"])));
+let wid = 0; const waits = {}; W.onmessage = e => { const f = waits[e.data]; delete waits[e.data]; f && f(); };
+const sleep = ms => new Promise(r => { const i = ++wid; waits[i] = r; W.postMessage([i, ms]); });
+const log = t => { const l = document.getElementById('log'); l.textContent += t + '\n'; l.scrollTop = 1e9; };
+const VERB = /\b(abrir|adicionar|agendar|ajustar|alterar|anexar|apontar|aprovar|atribuir|avaliar|baixar|bloquear|buscar|calcular|cancelar|classificar|comparar|concluir|conferir|confirmar|contratar|copiar|corrigir|cotar|criar|decidir|definir|desbloquear|desfazer|detalhar|devolver|dividir|duplicar|editar|emitir|encerrar|enviar|estornar|excluir|exportar|filtrar|gerar|importar|imprimir|inativar|incluir|informar|iniciar|lançar|lancar|liberar|marcar|mover|novo|nova|pagar|pausar|pedir|pesar|planejar|programar|publicar|reabrir|receber|recusar|registrar|reprogramar|requisitar|reservar|retirar|retomar|revisar|salvar|selecionar|separar|simular|solicitar|substituir|trocar|transferir|usar|validar|vincular|vender|comprar|repor|abastecer|carregar|expedir|faturar|conciliar|lacrar|assinar|convidar|testar|reenviar|sincronizar|escanear|ler|fotografar|anotar|colher|aplicar|medir|contar|ajuste|entrada|saída|saida)\b/i;
+const KEBAB = /^(⋯|…|\.\.\.|⋮|•••)$/;
+const ACCENT = ['rgb(30, 122, 76)'];
+const norm = t => (t || '').replace(/\s+/g, ' ').trim();
+const keyOf = t => norm(t).toLowerCase().replace(/\b[a-z]{1,4}-\d{2,}\b/gi, '#id').replace(/\d+([.,]\d+)?/g, '#').slice(0, 60);
+const vis = e => !!(e && e.getClientRects().length) && e.ownerDocument.defaultView.getComputedStyle(e).visibility !== 'hidden';
+const txt = e => norm(e.getAttribute('aria-label') || e.innerText || e.value || e.title || '').slice(0, 90);
+const inDlg = e => !!e.closest('[role=dialog],dialog,[aria-modal=true]');
+function labelOf(el) {
+  const d = el.ownerDocument; let l = el.getAttribute('aria-label');
+  if (!l && el.getAttribute('aria-labelledby')) l = el.getAttribute('aria-labelledby').split(/\s+/).map(i => (d.getElementById(i) || {}).innerText || '').join(' ');
+  if (!l && el.id) { const lb = d.querySelector('label[for="' + CSS.escape(el.id) + '"]'); if (lb) l = lb.innerText; }
+  if (!l) { const lb = el.closest('label'); if (lb) l = lb.innerText; }
+  if (!l) { let p = el.parentElement, k = 0; while (p && k < 3 && !l) { const c = [...p.childNodes].filter(n => n !== el && n.nodeType === 1 && !n.contains(el) && /^(LABEL|SPAN|DIV|P|B|STRONG|SMALL)$/.test(n.tagName) && n.innerText && n.innerText.length < 60); if (c.length) l = c[0].innerText; p = p.parentElement; k++; } }
+  return norm(l || el.placeholder || el.name || '').slice(0, 80);
+}
+function fieldInfo(el) {
+  const tag = el.tagName, role = el.getAttribute('role');
+  const o = { l: labelOf(el), type: tag === 'SELECT' ? 'select' : tag === 'TEXTAREA' ? 'textarea' : role && role !== 'textbox' ? role : (el.type || 'text') };
+  if ('value' in el && el.type !== 'checkbox' && el.type !== 'radio') o.v = norm(String(el.value)).slice(0, 50);
+  if (el.type === 'checkbox' || el.type === 'radio') o.checked = el.checked;
+  if (el.placeholder) o.ph = el.placeholder.slice(0, 50);
+  if (el.required || el.getAttribute('aria-required') === 'true') o.req = true;
+  if (el.readOnly) o.ro = true; if (el.disabled) o.dis = true;
+  ['inputmode', 'autocomplete', 'pattern', 'min', 'max', 'step'].forEach(a => { const v = el.getAttribute(a); if (v) o[a] = v; });
+  if (el.list) o.datalist = el.list.options.length;
+  if (role === 'combobox' || el.getAttribute('aria-autocomplete')) o.combo = true;
+  if (tag === 'SELECT') { o.nOpt = el.options.length; o.sel = el.selectedIndex >= 0 ? norm(el.options[el.selectedIndex].text).slice(0, 40) : ''; }
+  const box = el.closest('label, .field, [class*=field], [class*=campo], div'); if (box) { const t = norm(box.innerText || ''); const m = t.match(/(?:^|\s)(kg\/ha|L\/ha|g\/ha|mL\/ha|kg|L|ha|mm|%|R\$|un|sc|t|h|km|°C|m³|m3|L\/h|ha\/h|cx|@)(?:\s|$)/); if (m) o.unit = m[1];
+    const chips = [...box.querySelectorAll('button')].map(b => norm(b.innerText)).filter(s => /^(hoje|ontem|amanhã|\+\s?\d+|−\s?\d+|-\s?\d+|semana|mês)/i.test(s)); if (chips.length) o.chips = chips.slice(0, 5); }
+  return o;
+}
+const fieldsIn = root => [...root.querySelectorAll('input:not([type=hidden]), select, textarea, [role=combobox], [role=switch], [contenteditable=true]')].filter(vis).map(fieldInfo);
+function btnInfo(b) { const cs = b.ownerDocument.defaultView.getComputedStyle(b); const o = { t: txt(b) }; if (ACCENT.includes(cs.backgroundColor)) o.primary = true; if (b.disabled || b.getAttribute('aria-disabled') === 'true') o.dis = true; if (b.title && b.title !== o.t) o.title = b.title.slice(0, 120); return o; }
+function dlgInfo(d) { const h = d.querySelector('h1,h2,h3,[role=heading]'); return { title: h ? norm(h.innerText).slice(0, 100) : txt(d).slice(0, 60), text: norm(d.innerText).slice(0, 600), fields: fieldsIn(d), btns: [...d.querySelectorAll('button,[role=button],a[href]')].filter(vis).map(btnInfo) }; }
+const dialogs = doc => [...doc.querySelectorAll('[role=dialog],dialog[open],[aria-modal=true]')].filter(vis);
+const menus = doc => [...doc.querySelectorAll('[role=menu],[role=listbox]')].filter(vis);
+function inventory(doc) {
+  const out = { h1: norm((doc.querySelector('h1') || {}).innerText || ''), tabs: [...doc.querySelectorAll('[role=tab]')].filter(vis).map(txt).slice(0, 20) };
+  const all = [...doc.querySelectorAll('button,[role=button]')].filter(b => vis(b) && !inDlg(b));
+  out.nButtons = all.length; out.primary = all.filter(b => btnInfo(b).primary).map(txt).slice(0, 12);
+  out.tables = [...doc.querySelectorAll('table,[role=table],[role=grid]')].filter(vis).slice(0, 8).map(t => {
+    const heads = [...t.querySelectorAll('th,[role=columnheader]')].map(txt).slice(0, 20);
+    const rows = [...t.querySelectorAll('tbody tr,[role=row]')].filter(r => !r.querySelector('th,[role=columnheader]') && vis(r));
+    const rowsInfo = rows.slice(0, 6).map(r => { const acts = [...r.querySelectorAll('button,a[href],[role=button],input[type=checkbox],select')].filter(vis);
+      const cs = doc.defaultView.getComputedStyle(r);
+      return { text: norm(r.innerText).slice(0, 120), acts: acts.map(a => ({ t: txt(a), tag: a.tagName === 'INPUT' ? 'checkbox' : a.tagName === 'SELECT' ? 'select' : a.tagName === 'A' ? 'link' : 'button', primary: btnInfo(a).primary || undefined })),
+        kebab: acts.some(a => KEBAB.test(norm(a.innerText)) || /mais (ações|opções)|^ações|menu/i.test(a.getAttribute('aria-label') || '')), clickable: cs.cursor === 'pointer' || r.tabIndex >= 0 }; });
+    const sel = !!t.querySelector('th input[type=checkbox], [role=columnheader] input[type=checkbox], [aria-label*="Selecionar todos" i]');
+    return { heads, nRows: rows.length, rows: rowsInfo, selectAll: sel }; });
+  const cards = [...doc.querySelectorAll('article,[role=listitem],li,[class*=card],[class*=Card],[class*=item]')].filter(c => vis(c) && !c.closest('table,[role=table],[role=grid],nav,[role=dialog]') && c.querySelector('button,[role=button],a[href]') && (c.innerText || '').length > 20 && (c.innerText || '').length < 900);
+  const leaf = cards.filter(c => !cards.some(o => o !== c && c.contains(o)));
+  out.nCards = leaf.length;
+  out.cards = leaf.slice(0, 8).map(c => { const acts = [...c.querySelectorAll('button,[role=button],a[href]')].filter(vis); return { text: norm(c.innerText).slice(0, 100), acts: acts.map(txt).slice(0, 8), kebab: acts.some(a => KEBAB.test(norm(a.innerText)) || /mais (ações|opções)/i.test(a.getAttribute('aria-label') || '')) }; });
+  out.fields = fieldsIn(doc.body).filter(f => true).slice(0, 40);
+  out.links = [...doc.querySelectorAll('a[href]')].filter(a => vis(a) && !a.closest('nav')).map(a => ({ t: txt(a), href: a.getAttribute('href') })).filter(a => /\.dc\.html/.test(a.href)).slice(0, 60);
+  return out;
+}
+function candidates(doc) {
+  const seen = new Set(), out = [];
+  const els = [...doc.querySelectorAll('button,[role=button],[role=menuitem]')].filter(b => vis(b) && !inDlg(b) && !b.closest('nav,[role=tablist],thead,[role=columnheader]') && !b.disabled);
+  els.forEach(b => { const t = txt(b); if (!t) return; const inRow = !!b.closest('tbody tr,[role=row]'); const kb = KEBAB.test(norm(b.innerText)) || /mais (ações|opções)/i.test(b.getAttribute('aria-label') || '');
+    const green = btnInfo(b).primary; if (!(VERB.test(t) || green || kb || /^\+/.test(t))) return;
+    const k = (inRow ? 'row:' : '') + keyOf(t); if (seen.has(k)) return; seen.add(k); out.push({ t, k, inRow, kb, green: !!green }); });
+  // primeira linha clicável de cada tabela
+  [...doc.querySelectorAll('tbody tr,[role=row]')].filter(r => vis(r) && !r.querySelector('th,[role=columnheader]')).forEach(r => { const tb = r.closest('table,[role=table],[role=grid]'); const k = 'rowclick:' + (tb ? [...doc.querySelectorAll('table,[role=table],[role=grid]')].indexOf(tb) : 0); if (seen.has(k)) return;
+    const cs = doc.defaultView.getComputedStyle(r); if (cs.cursor === 'pointer' || r.tabIndex >= 0) { seen.add(k); out.push({ t: norm(r.innerText).slice(0, 60), k, row: true }); } });
+  return out.slice(0, 28);
+}
+function findCand(doc, c) {
+  if (c.row) { const idx = +c.k.split(':')[1]; const tb = [...doc.querySelectorAll('table,[role=table],[role=grid]')][idx]; const rows = [...(tb || doc).querySelectorAll('tbody tr,[role=row]')].filter(r => vis(r) && !r.querySelector('th,[role=columnheader]')); return rows[0]; }
+  return [...doc.querySelectorAll('button,[role=button],[role=menuitem]')].filter(b => vis(b) && !inDlg(b) && !b.disabled).find(b => ((c.inRow ? 'row:' : '') + keyOf(txt(b))) === c.k && (!!b.closest('tbody tr,[role=row]')) === c.inRow);
+}
+let BASE_LS = null;
+function restoreLS() { localStorage.clear(); for (const k in BASE_LS) localStorage.setItem(k, BASE_LS[k]); }
+let LOADN = 0;
+async function load(fr, url) {
+  restoreLS(); const u = url + '?r=' + (++LOADN);
+  await new Promise(res => { let done = false; const fin = () => { if (!done) { done = true; res(); } };
+    fr.onload = () => { try { if (fr.contentWindow.location.href !== 'about:blank') fin(); } catch (e) { fin(); } }; fr.src = u; setTimeout(fin, 20000); });
+  await sleep(700); for (let i = 0; i < 30 && !(fr.contentDocument && fr.contentDocument.body && fr.contentDocument.body.innerText.length > 50); i++) await sleep(300);
+}
+const cur = fr => { try { return fr.contentWindow.location.pathname.split('/').pop().replace('.dc.html', '') + fr.contentWindow.location.hash; } catch (e) { return '?'; } };
+async function closeAll(doc) {
+  for (let i = 0; i < 3; i++) { const d = dialogs(doc)[0] || menus(doc)[0]; if (!d) return true;
+    const x = [...d.querySelectorAll('button,[role=button]')].find(b => /^(×|✕|x|fechar|cancelar|voltar|agora não)$/i.test(txt(b)) || /fechar|close/i.test(b.getAttribute('aria-label') || ''));
+    if (x) x.click(); else { doc.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); doc.activeElement && doc.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); }
+    await sleep(250); }
+  return !dialogs(doc).length;
+}
+async function doScreen(fr, s) {
+  const url = '/v3/' + s.n + '.dc.html'; fr.style.width = s.mobile ? '390px' : '1280px'; fr.style.height = s.mobile ? '844px' : '900px';
+  await load(fr, url); let doc = fr.contentDocument; const start = cur(fr);
+  const R = { screen: s.n, mobile: s.mobile, landed: start, inv: inventory(doc), results: [], batch: [] };
+  const cands = candidates(doc); R.cands = cands.map(c => c.t);
+  let dirty = false;
+  for (const c of cands) {
+    if (dirty) { await load(fr, url); doc = fr.contentDocument; dirty = false; }
+    const el = findCand(doc, c); if (!el) { R.results.push({ cand: c.t, kind: 'notfound' }); continue; }
+    const before = { url: cur(fr), dlg: new Set(dialogs(doc)), menu: new Set(menus(doc)), inputs: new Set(doc.querySelectorAll('input,select,textarea')), text: doc.body.innerText.length };
+    const status0 = [...doc.querySelectorAll('[role=status],[aria-live]')].map(e => e.innerText).join('|');
+    try { el.scrollIntoView({ block: 'center' }); el.click(); } catch (e) { R.results.push({ cand: c.t, kind: 'error', err: String(e) }); dirty = true; continue; }
+    await sleep(450);
+    let nd; try { nd = fr.contentDocument; } catch (e) { nd = null; }
+    const res = { cand: c.t, inRow: c.inRow || undefined, row: c.row || undefined, kebab: c.kb || undefined, green: c.green || undefined };
+    if (!nd || cur(fr) !== before.url && cur(fr).split('#')[0] !== before.url.split('#')[0]) { res.kind = 'navigate'; res.to = cur(fr); await sleep(500); try { const d2 = fr.contentDocument; const dl = dialogs(d2); if (dl.length) { res.kind = 'navigate+dialog'; res.dlg = dlgInfo(dl[0]); } } catch (e) {} dirty = true; }
+    else {
+      doc = nd; const dl = dialogs(doc).filter(d => !before.dlg.has(d)), mn = menus(doc).filter(m => !before.menu.has(m));
+      if (dl.length) { res.kind = 'dialog'; res.dlg = dlgInfo(dl[dl.length - 1]); if (cur(fr) !== before.url) res.hash = cur(fr); dirty = !(await closeAll(doc)) || true; }
+      else if (mn.length) { res.kind = 'menu'; res.items = [...mn[0].querySelectorAll('[role=menuitem],[role=option],button,li')].filter(vis).map(txt).slice(0, 20); await closeAll(doc); dirty = true; }
+      else { const newIn = [...doc.querySelectorAll('input,select,textarea')].filter(i => !before.inputs.has(i) && vis(i));
+        if (newIn.length) { res.kind = 'inline'; res.fields = newIn.map(fieldInfo).slice(0, 20); }
+        else if (cur(fr) !== before.url) { res.kind = 'hash'; res.to = cur(fr); }
+        else { const st = [...doc.querySelectorAll('[role=status],[aria-live]')].map(e => e.innerText).join('|'); res.kind = doc.body.innerText.length !== before.text ? 'effect' : 'none'; if (st !== status0) res.status = norm(st).slice(0, 300); }
+        dirty = true; }
+    }
+    R.results.push(res);
+  }
+  // lote: marcar todos e ver as ações que aparecem
+  await load(fr, url); doc = fr.contentDocument;
+  const sa = [...doc.querySelectorAll('th input[type=checkbox],[role=columnheader] input[type=checkbox],input[aria-label*="todos" i],input[aria-label*="todas" i],button[aria-label*="Selecionar todos" i]')].filter(vis);
+  for (const box of sa.slice(0, 2)) { const b0 = new Set([...doc.querySelectorAll('button,[role=button]')].filter(vis)); box.click(); await sleep(350);
+    const nb = [...doc.querySelectorAll('button,[role=button]')].filter(b => vis(b) && !b0.has(b)).map(btnInfo); R.batch.push({ sel: txt(box) || 'checkbox', newBtns: nb, bar: norm(((doc.querySelector('[role=toolbar],[class*=bulk],[class*=lote],[class*=selec]') || {}).innerText) || '').slice(0, 200) }); }
+  return R;
+}
+async function worker(fr, q, id) {
+  while (q.length) { const s = q.shift(); const t0 = Date.now();
+    try { const R = await doScreen(fr, s); await fetch('/save?name=' + s.n + '.json', { method: 'POST', body: JSON.stringify(R) }); log(id + ' ' + s.n + ' ok ' + R.results.length + ' ações ' + ((Date.now() - t0) / 1000).toFixed(0) + 's'); }
+    catch (e) { log(id + ' ' + s.n + ' ERRO ' + e); await fetch('/save?name=' + s.n + '.err.json', { method: 'POST', body: JSON.stringify({ screen: s.n, err: String(e && e.stack || e) }) }); }
+    window.__done = (window.__done || 0) + 1; document.getElementById('st').textContent = 'feitas ' + window.__done + ' de ' + window.__total; }
+}
+
+function records(doc) {   // itens repetidos fora de tabela (cartões, linhas de lista, itens de fila) e suas ações
+  const acts = [...doc.querySelectorAll('button,[role=button],a[href]')].filter(b => vis(b) && !b.closest('nav,[role=tablist],table,[role=table],[role=grid],[role=dialog],thead'));
+  const seen = new Map();
+  acts.forEach(b => { let c = b.parentElement;
+    while (c && c !== doc.body) { const p = c.parentElement; if (!p) break; const sibs = [...p.children].filter(x => x !== c && x.tagName === c.tagName && vis(x) && x.querySelector('button,[role=button],a[href]'));
+      const t = (c.innerText || '').length; if (sibs.length >= 1 && t > 25 && t < 1200 && c.querySelectorAll('button,[role=button],a[href]').length <= 10) break; c = p; }
+    if (!c || c === doc.body) return; if (!seen.has(c)) seen.set(c, []); seen.get(c).push(b); });
+  const groups = new Map(); seen.forEach((bs, c) => { const p = c.parentElement; if (!groups.has(p)) groups.set(p, []); groups.get(p).push({ c, bs }); });
+  const out = []; groups.forEach((items, p) => { if (items.length < 2) return; const it = items.slice(0, 3).map(({ c, bs }) => ({ text: norm(c.innerText).slice(0, 110), acts: bs.map(b => ({ t: txt(b), tag: b.tagName === 'A' ? 'link' : 'button', primary: btnInfo(b).primary || undefined })), kebab: bs.some(b => KEBAB.test(norm(b.innerText)) || /mais (ações|opções)/i.test(b.getAttribute('aria-label') || '')), clickable: doc.defaultView.getComputedStyle(c).cursor === 'pointer' }));
+    out.push({ n: items.length, items: it }); });
+  return out.slice(0, 10);
+}
+window.runInv2 = async function (only) {
+  localStorage.setItem('safrion.perfilDemo', 'Proprietário'); BASE_LS = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); BASE_LS[k] = localStorage.getItem(k); }
+  let list = await (await fetch('/robot3/screens.json')).json(); if (only) list = list.filter(s => only.includes(s.n)); const q = [...list]; window.__total = list.length; window.__done = 0;
+  const frs = [0, 1, 2].map(() => { const f = document.createElement('iframe'); document.getElementById('frames').appendChild(f); return f; });
+  await Promise.all(frs.map(async (fr, i) => { while (q.length) { const s = q.shift(); fr.style.width = s.mobile ? '390px' : '1280px'; fr.style.height = s.mobile ? '844px' : '900px';
+    try { await load(fr, '/v3/' + s.n + '.dc.html'); const doc = fr.contentDocument; await fetch('/save?name=' + s.n + '.inv2.json', { method: 'POST', body: JSON.stringify({ screen: s.n, landed: cur(fr), records: records(doc) }) }); } catch (e) { log(s.n + ' inv2 ERRO ' + e); }
+    window.__done++; document.getElementById('st').textContent = 'inv2 ' + window.__done + ' de ' + window.__total; } }));
+  document.getElementById('st').textContent += ' · FIM'; window.__fim2 = true;
+};
+window.run = async function (only) {
+  localStorage.setItem('safrion.perfilDemo', 'Proprietário'); BASE_LS = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); BASE_LS[k] = localStorage.getItem(k); }
+  let list = await (await fetch('/robot3/screens.json')).json(); if (only) list = list.filter(s => only.includes(s.n));
+  window.__total = list.length; window.__done = 0; const q = [...list];
+  const frs = [0, 1, 2].map(() => { const f = document.createElement('iframe'); document.getElementById('frames').appendChild(f); return f; });
+  await Promise.all(frs.map((f, i) => worker(f, q, 'w' + i))); document.getElementById('st').textContent += ' · FIM'; window.__fim = true;
+};
+</script></body></html>

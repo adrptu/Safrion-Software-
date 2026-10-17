@@ -1,0 +1,1339 @@
+<meta charset="utf-8">
+<title>Pragas e doenças no tempo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: mapa da fazenda com a linha do tempo de manejo e clima embaixo; painel do talhão à direita (embaixo no celular). */
+:root {
+  --bg: #F4F6F3; --surface: #FFFFFF; --surface-2: #F2F5F1; --line: #E1E7E2;
+  --ink: #15201A; --ink-2: #3E4A43; --muted: #65736A;
+  --accent: #1E7A4C; --accent-weak: #E4F3E9;
+  --ok: #2E7A4F; --warn: #946210; --bad: #A3261B; --nodata: #66716B; --nocrop: #8A7C5C; --water: #3F6E8C;
+  --field-a: #7C8C55; --field-b: #6E7E4A; --field-line: rgba(255,255,255,.18);
+  --chart-line: #1E7A4C; --chart-fill: rgba(30,122,76,.12); --band: rgba(30,122,76,.10); --global: #65736A; --nc: #A3261B;
+  --def: #1F5F8B; --adub: #7B4FA0; --oper: #5B6660; --rain: #8DB9D8; --irr: #2A9BAE; --fav: #A3261B;
+  --c1: #E4002B; --c2: #FF6A00; --c3: #FFD500; --c4: #B5E61D; --c5: #3FBF2A; --c6: #0B7A1E;
+  --t1: #FCEBCF; --t2: #F8C98B; --t3: #F09E50; --t4: #DA6A2C; --t5: #B33A15;
+  --u1: #E7F1F8; --u2: #BDD9EC; --u3: #8DBBDC; --u4: #5A95C3; --u5: #2D6C9C;
+  --shadow: 0 12px 28px -14px rgba(21,32,26,.35);
+  --font: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1611; --surface: #161F19; --surface-2: #1B261F; --line: #29362E; --ink: #E5ECE6; --ink-2: #C3CEC6; --muted: #93A398;
+    --accent: #4FB383; --accent-weak: #1D3527; --ok: #2F7D52; --warn: #946210; --bad: #B03328; --nodata: #5C6862; --nocrop: #7A6D50; --water: #355E78;
+    --field-a: #4A5734; --field-b: #414D2E; --field-line: rgba(255,255,255,.10);
+    --chart-line: #4FB383; --chart-fill: rgba(79,179,131,.16); --band: rgba(79,179,131,.14); --global: #93A398; --nc: #E07A6E;
+    --def: #6FA8D6; --adub: #B48AD8; --oper: #9AA8A0; --rain: #4E7FA3; --irr: #48B9CB; --fav: #E07A6E;
+    --shadow: 0 12px 28px -14px rgba(0,0,0,.6); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1611; --surface: #161F19; --surface-2: #1B261F; --line: #29362E; --ink: #E5ECE6; --ink-2: #C3CEC6; --muted: #93A398;
+  --accent: #4FB383; --accent-weak: #1D3527; --ok: #2F7D52; --warn: #946210; --bad: #B03328; --nodata: #5C6862; --nocrop: #7A6D50; --water: #355E78;
+  --field-a: #4A5734; --field-b: #414D2E; --field-line: rgba(255,255,255,.10);
+  --chart-line: #4FB383; --chart-fill: rgba(79,179,131,.16); --band: rgba(79,179,131,.14); --global: #93A398; --nc: #E07A6E;
+  --def: #6FA8D6; --adub: #B48AD8; --oper: #9AA8A0; --rain: #4E7FA3; --irr: #48B9CB; --fav: #E07A6E;
+  --shadow: 0 12px 28px -14px rgba(0,0,0,.6); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 14px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 24px; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+
+.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 16px; margin-bottom: 12px; }
+.crumb { font-size: 12px; color: var(--muted); font-weight: 600; }
+h1 { font-size: 22px; line-height: 1.2; margin: 2px 0 0; font-weight: 800; letter-spacing: -.01em; text-wrap: balance; }
+.ctx { display: flex; flex-wrap: wrap; gap: 6px; }
+.ctx span { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
+.ctx b { color: var(--muted); font-weight: 600; margin-right: 4px; }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 410px); gap: 12px; align-items: start; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.mapcard { overflow: visible; }
+.mapcard .bar { border-radius: 14px 14px 0 0; }
+
+.bar { display: grid; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.barrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.lbl { font-size: 12px; color: var(--muted); font-weight: 600; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; background: var(--surface-2); border-radius: 999px; padding: 3px; }
+.seg button { border: 0; background: transparent; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; min-height: 32px; }
+.seg button[aria-checked="true"], .seg button[aria-pressed="true"] { background: var(--surface); color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.seg.big button { font-size: 13.5px; padding: 7px 14px; }
+.measure { font-size: 12.5px; color: var(--muted); }
+.measure b { color: var(--ink-2); }
+
+.map { position: relative; container-type: inline-size; aspect-ratio: 16 / 7.4; width: 100%;
+  background:
+    linear-gradient(90deg, var(--field-line) 1px, transparent 1px) 0 0 / 16.66% 100%,
+    linear-gradient(0deg, var(--field-line) 1px, transparent 1px) 0 0 / 100% 25%,
+    radial-gradient(circle at 20% 30%, var(--field-a) 0 2px, transparent 3px) 0 0 / 14px 14px,
+    radial-gradient(circle at 70% 60%, var(--field-b) 0 2px, transparent 3px) 0 0 / 11px 11px,
+    var(--field-a); }
+.lake { position: absolute; border-radius: 50%; background: var(--water); opacity: .9; }
+.pv { position: absolute; transform: translate(-50%, -50%); aspect-ratio: 1; border-radius: 50%; border: 2px solid rgba(255,255,255,.85);
+  display: grid; place-content: center; text-align: center; color: #fff; cursor: pointer; padding: 0; line-height: 1.12;
+  text-shadow: 0 1px 2px rgba(0,0,0,.55); transition: background-color .25s ease, box-shadow .2s ease; }
+.pv.dark { color: #15201A; text-shadow: 0 0 3px rgba(255,255,255,.9); }
+.pv .id { font-weight: 800; font-size: clamp(9px, 1.55cqw, 15px); }
+.pv .v { font-weight: 700; font-size: clamp(8px, 1.2cqw, 12.5px); }
+.pv .s { font-weight: 600; font-size: clamp(7px, .95cqw, 11px); opacity: .95; }
+.pv.ok { background: var(--ok); } .pv.warn { background: var(--warn); } .pv.bad { background: var(--bad); }
+.pv.nodata { background: repeating-linear-gradient(135deg, var(--nodata) 0 6px, color-mix(in srgb, var(--nodata) 80%, #fff) 6px 9px); }
+.pv.cloud { background: repeating-linear-gradient(135deg, #9E9E9E 0 6px, #C9C9C9 6px 9px); color: #15201A; text-shadow: 0 0 3px rgba(255,255,255,.9); }
+.pv.nocrop { background: var(--nocrop); cursor: default; }
+.pv[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--ink), 0 0 0 6px rgba(255,255,255,.7); z-index: 2; }
+@media (hover: hover) { .pv:not(.nocrop):hover { box-shadow: 0 0 0 3px rgba(255,255,255,.9); } }
+.badges { position: absolute; top: -5px; right: -6px; display: flex; gap: 2px; }
+.badge { width: clamp(15px, 2.2cqw, 20px); height: clamp(15px, 2.2cqw, 20px); border-radius: 50%; background: var(--surface); display: grid; place-items: center; border: 2px solid; }
+.badge svg { width: 62%; height: 62%; fill: currentColor; }
+.maptip { position: absolute; z-index: 5; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 12.5px; box-shadow: var(--shadow); max-width: 250px; text-shadow: none; }
+.maptip b { display: block; }
+.demo { position: absolute; right: 8px; bottom: 8px; font-size: 11px; color: #fff; background: rgba(0,0,0,.4); padding: 2px 8px; border-radius: 999px; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 14px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex: none; }
+.legend i.hatch { background: repeating-linear-gradient(135deg, #9E9E9E 0 3px, #C9C9C9 3px 5px); }
+
+.time { padding: 12px 14px 14px; border-top: 1px solid var(--line); }
+.timehead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin-bottom: 6px; }
+.now { font-size: 13px; color: var(--ink-2); }
+.now strong { font-size: 15px; color: var(--ink); }
+.ctrls { display: flex; gap: 6px; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 12px; font-weight: 700; font-size: 13px; cursor: pointer; min-height: 34px; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn.primary:hover { filter: brightness(1.06); color: #fff; }
+.btn svg { width: 14px; height: 14px; fill: currentColor; }
+.toggles { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 2px 0 6px; font-size: 12px; color: var(--muted); }
+.tg { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 10px 4px 5px; font-weight: 700; font-size: 12.5px; cursor: pointer; color: var(--ink-2); min-height: 30px; }
+.tg[aria-pressed="false"] { opacity: .5; }
+.tg .ic { width: 19px; height: 19px; border-radius: 50%; display: grid; place-items: center; border: 2px solid; }
+.tg .ic svg { width: 11px; height: 11px; fill: currentColor; }
+
+.chartbox { position: relative; }
+.chartwrap { position: relative; touch-action: none; user-select: none; cursor: ew-resize; border-radius: 10px; }
+.chartwrap:focus-visible { outline-offset: 4px; }
+svg.chart { display: block; width: 100%; height: auto; overflow: visible; }
+svg text { fill: var(--muted); font-family: var(--font); font-size: 11px; }
+.ax { stroke: var(--line); stroke-width: 1; }
+.grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 4; }
+.ncl { stroke: var(--nc); stroke-width: 1.5; stroke-dasharray: 5 4; fill: none; }
+.gl { stroke: var(--global); stroke-width: 2; stroke-dasharray: 5 4; fill: none; }
+.ml { stroke: var(--chart-line); stroke-width: 2; fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.mf { fill: var(--chart-fill); stroke: none; }
+.bandf { fill: var(--band); stroke: none; }
+.rainb { fill: var(--rain); } .irrb { fill: var(--irr); } .favb { fill: var(--fav); }
+.evline { stroke-width: 1; stroke-dasharray: 2 3; opacity: .5; }
+.cursor { stroke: var(--ink); stroke-width: 1.5; }
+.knob { fill: var(--ink); }
+.knobtxt { fill: var(--surface); font-weight: 800; font-size: 11px; }
+.hoverline { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; }
+.pt { fill: var(--surface); stroke: var(--chart-line); stroke-width: 2; }
+.pt.bad { stroke: var(--nc); }
+.pt.cloud { fill: var(--surface); stroke: #9E9E9E; stroke-dasharray: 2 2; }
+.scn { stroke: var(--muted); stroke-width: 1; }
+.evt { position: absolute; transform: translate(-50%, -50%); width: 22px; height: 22px; border-radius: 50%; border: 2px solid; background: var(--surface); display: grid; place-items: center; padding: 0; cursor: pointer; z-index: 3; }
+.evt svg { width: 12px; height: 12px; fill: currentColor; }
+.evt .n { position: absolute; top: -8px; right: -9px; min-width: 15px; height: 15px; border-radius: 8px; background: var(--ink); color: var(--surface); font-size: 9.5px; font-weight: 800; display: grid; place-items: center; padding: 0 3px; }
+.evt[aria-expanded="true"] { box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px currentColor; }
+.evt.def { border-color: var(--def); color: var(--def); } .evt.adub { border-color: var(--adub); color: var(--adub); }
+.lanelab { position: absolute; left: 0; font-size: 10.5px; color: var(--muted); transform: translateY(-50%); pointer-events: none; }
+.tip { position: absolute; z-index: 6; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 12.5px; box-shadow: var(--shadow); min-width: 180px; max-width: 270px; }
+.tip b { display: block; margin-bottom: 2px; }
+.tip .row, .pop .row { display: flex; justify-content: space-between; gap: 12px; color: var(--ink-2); }
+.pop { position: absolute; z-index: 8; width: min(340px, calc(100% - 8px)); max-height: 420px; overflow: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 10px 12px 12px; font-size: 12.5px; display: grid; gap: 8px; cursor: default; }
+.pop h4 { margin: 0; font-size: 13.5px; font-weight: 800; padding-right: 26px; }
+.pop .x { position: absolute; top: 6px; right: 6px; border: 0; background: transparent; width: 28px; height: 28px; border-radius: 8px; cursor: pointer; font-size: 18px; line-height: 1; color: var(--muted); }
+.pop .x:hover { background: var(--surface-2); }
+.pop .ev { display: grid; gap: 4px; border-top: 1px solid var(--line); padding-top: 8px; }
+.pop h4 + .ev { border-top: 0; padding-top: 0; }
+.pop .k { color: var(--muted); }
+.pop .k.warn { color: var(--warn); font-weight: 600; }
+.pop table { width: 100%; border-collapse: collapse; }
+.pop td { padding: 2px 0; vertical-align: top; }
+.pop td.r { text-align: right; white-space: nowrap; padding-left: 8px; }
+.pop .eff { background: var(--surface-2); border-radius: 8px; padding: 6px 8px; color: var(--ink-2); }
+.pop .eff b { color: var(--ink); }
+.pop .go { justify-self: start; border: 0; background: transparent; color: var(--accent); font-weight: 700; padding: 2px 0; cursor: pointer; }
+.keys { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--ink-2); margin-top: 6px; }
+.keys span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 18px; height: 0; border-top: 2px solid; display: inline-block; }
+.sw.d { border-top-style: dashed; }
+.sq { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.ramp { display: inline-flex; } .ramp i { width: 8px; height: 10px; display: inline-block; }
+
+.panel { position: sticky; top: max(12px, env(safe-area-inset-top, 0px)); }
+.panel .ph { padding: 14px 14px 10px; border-bottom: 1px solid var(--line); display: grid; gap: 6px; }
+.panel h3 { margin: 0; font-size: 16px; font-weight: 800; }
+.panel .sub { font-size: 12.5px; color: var(--muted); }
+.panel .pb { padding: 12px 14px 14px; display: grid; gap: 12px; }
+.back { justify-self: start; border: 0; background: transparent; color: var(--accent); font-weight: 700; padding: 4px 0; cursor: pointer; font-size: 13px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); }
+.chip i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.state { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.insights { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.insights li { background: var(--surface-2); border-radius: 10px; padding: 9px 11px; font-size: 13px; color: var(--ink-2); }
+.insights li strong { color: var(--ink); }
+.note { font-size: 12px; color: var(--muted); }
+.tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.tblwrap { overflow-x: auto; }
+.tbl th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 700; padding: 6px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.tbl th button { border: 0; background: transparent; padding: 0; font: inherit; color: inherit; cursor: pointer; text-transform: inherit; letter-spacing: inherit; }
+.tbl td { padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tbl td.r, .tbl th.r { text-align: right; }
+.apps { display: grid; gap: 8px; }
+.app { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; align-items: start; text-align: left; width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 9px 10px; cursor: pointer; }
+.app:hover { border-color: var(--accent); }
+.app .d { font-weight: 800; font-size: 13px; }
+.app .p { font-weight: 700; font-size: 13px; }
+.app .m { grid-column: 2 / 4; font-size: 12px; color: var(--muted); }
+.app .e { font-weight: 800; font-size: 13px; text-align: right; }
+.app .e.good { color: var(--ok); } .app .e.weak { color: var(--warn); }
+.app .ctl { grid-column: 2 / 4; font-size: 12px; color: var(--ink-2); }
+.decide { display: grid; gap: 6px; background: var(--surface-2); border-radius: 10px; padding: 10px 11px; }
+.empty { color: var(--muted); font-size: 13px; }
+h5 { margin: 0; font-size: 13px; font-weight: 800; }
+
+/* Raio-X do alvo */
+.sec { display: grid; gap: 8px; }
+.sec h5 { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.up { color: var(--bad); } .dn { color: var(--ok); }
+.fx { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 10px; align-items: start; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 9px 10px; cursor: pointer; }
+.fx:hover { border-color: var(--accent); }
+.fx .t { font-weight: 700; font-size: 13px; }
+.fx .e { font-weight: 800; font-size: 14px; text-align: right; white-space: nowrap; }
+.fx .c, .fx .m, .fx svg { grid-column: 1 / 3; }
+.fx .c { font-size: 12px; color: var(--ink-2); }
+.fx .m { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted); }
+.tag { font-size: 10.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-right: 6px; }
+svg.effbar { width: 100%; height: 12px; display: block; }
+svg.effbar .z { stroke: var(--muted); stroke-width: 1; }
+svg.effbar .ci { stroke: var(--muted); stroke-width: 2; opacity: .55; }
+svg.effbar .b.up { fill: var(--bad); } svg.effbar .b.dn { fill: var(--ok); }
+.lvl { display: inline-flex; align-items: center; gap: 5px; font-weight: 700; color: var(--ink-2); font-size: 12px; }
+.lvl .dots { display: inline-flex; gap: 2px; } .lvl .dots i { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid currentColor; display: inline-block; } .lvl .dots i.on { background: currentColor; }
+.lvl.confirmar { color: var(--warn); }
+.lead { margin: 0; font-size: 13.5px; color: var(--ink-2); } .lead strong { font-size: 15px; }
+svg.curve { width: 100%; height: auto; display: block; }
+svg.curve .cpt { fill: var(--surface); stroke: var(--muted); stroke-width: 2; } svg.curve .cpt.up { fill: var(--bad); stroke: var(--bad); } svg.curve .cpt.dn { fill: var(--ok); stroke: var(--ok); }
+.wins { display: grid; gap: 4px; font-size: 12px; color: var(--ink-2); }
+.wrow { display: grid; grid-template-columns: 150px 1fr 44px; gap: 8px; align-items: center; } .wrow.on { font-weight: 700; color: var(--ink); }
+.wbar { height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; } .wbar i { display: block; height: 100%; border-radius: 4px; } .wbar i.up { background: var(--bad); } .wbar i.dn { background: var(--ok); }
+.rk { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; align-items: center; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.rkmain { border: 0; background: transparent; padding: 0; text-align: left; cursor: pointer; display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; font: inherit; color: inherit; }
+.rkmain .d { font-weight: 800; } .rkmain .m { grid-column: 1 / 3; font-size: 12px; color: var(--muted); }
+.rkmain:hover .d { color: var(--accent); }
+.btn.sm { min-height: 30px; padding: 4px 10px; font-size: 12px; }
+.btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.lnk { border: 0; background: transparent; color: var(--accent); font-weight: 700; padding: 2px 0; cursor: pointer; font-size: inherit; }
+.rkline { font-size: 12.5px; color: var(--ink-2); background: var(--surface-2); border-radius: 10px; padding: 8px 10px; }
+.heat { width: 100%; border-collapse: separate; border-spacing: 3px; font-size: 12px; }
+.heat th { font-size: 10.5px; color: var(--muted); font-weight: 700; text-align: center; vertical-align: bottom; }
+.heat th.l, .heat td.l { text-align: left; } .heat td.l { font-weight: 600; color: var(--ink-2); }
+.heat td.c { text-align: center; border-radius: 6px; padding: 6px 2px; font-variant-numeric: tabular-nums; font-weight: 700; min-width: 52px; }
+.heat td.ns { color: var(--muted); font-weight: 500; box-shadow: inset 0 0 0 1px var(--line); }
+details.calc { font-size: 12.5px; color: var(--ink-2); } details.calc summary { cursor: pointer; font-weight: 700; color: var(--accent); }
+details.calc ul { margin: 6px 0; padding-left: 18px; display: grid; gap: 4px; } details.calc p { margin: 6px 0; }
+.gab { width: 100%; border-collapse: collapse; font-size: 12px; } .gab td, .gab th { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: left; } .gab th { font-size: 11px; color: var(--muted); }
+
+@media (max-width: 980px) { .layout { grid-template-columns: minmax(0, 1fr); } .panel { position: static; } }
+@media (max-width: 560px) { .map { aspect-ratio: 4 / 3.3; } .pv .s { display: none; } h1 { font-size: 19px; } }
+@media (prefers-reduced-motion: reduce) { .pv { transition: none; } }
+</style>
+
+<div class="top">
+  <div>
+    <div class="crumb">Mapa › <span id="crumbLayer">Pragas e doenças</span></div>
+    <h1>Mapa da fazenda</h1>
+  </div>
+  <div class="ctx" aria-label="Contexto">
+    <span><b>Fazenda</b>Lagoa Grande</span><span><b>Safra</b>2026/27</span><span><b>Cultura</b>Mamão</span>
+  </div>
+</div>
+
+<div class="layout">
+  <section class="card mapcard" aria-label="Mapa com a evolução da lavoura, o manejo e o clima">
+    <div class="bar">
+      <div class="barrow"><div class="seg big" role="radiogroup" aria-label="Camada" id="layers"></div></div>
+      <div class="barrow">
+        <span class="lbl" id="subsLbl">Alvo</span><div class="seg" role="radiogroup" aria-label="Alvo ou índice" id="subs"></div>
+        <span class="lbl" id="scaleLbl">Contraste</span><div class="seg" role="radiogroup" aria-label="Contraste" id="scale"></div>
+        <div class="measure" id="measure"></div>
+      </div>
+    </div>
+    <div class="map" id="map"></div>
+    <div class="legend" id="legend" aria-label="Legenda do mapa"></div>
+    <div class="time">
+      <div class="timehead">
+        <div class="now" id="now" aria-live="polite"></div>
+        <div class="ctrls">
+          <button class="btn" id="play" type="button" aria-label="Reproduzir a evolução"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg><span>Reproduzir</span></button>
+          <button class="btn" id="today" type="button">Hoje</button>
+        </div>
+      </div>
+      <div class="toggles" id="toggles" role="group" aria-label="O que mostrar na linha do tempo"></div>
+      <div class="chartbox" id="tlbox">
+        <div class="chartwrap" id="tl" tabindex="0" role="slider" aria-label="Data. Setas mudam um dia; Shift muda uma semana."></div>
+      </div>
+      <div class="keys" id="tlkeys" aria-hidden="true"></div>
+    </div>
+  </section>
+  <aside class="card panel" id="panel" aria-live="polite"></aside>
+</div>
+
+<script>
+(() => {
+'use strict';
+// ================= base sintética · Lagoa Grande · mamão =================
+const START = new Date(2026, 6, 1);   // 01/07/2026
+const DAYS = 86;                      // 25/09/2026, data da última cena de satélite
+const RAINMM = { 18: 22, 19: 9, 37: 14, 38: 31, 39: 6, 52: 18, 66: 11, 67: 25, 79: 16 };
+const nf0 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
+const nf1 = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
+const nf2 = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const dDate = d => { const x = new Date(START); x.setDate(x.getDate() + d); return x; };
+const fmtD = d => { const x = dDate(d); return String(x.getDate()).padStart(2, '0') + '/' + String(x.getMonth() + 1).padStart(2, '0'); };
+const median = arr => { if (!arr.length) return null; const s = [...arr].sort((a, b) => a - b); const m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+const signed2 = v => (Math.abs(v) < .005 ? '' : v > 0 ? '+' : '−') + nf2.format(Math.abs(v));
+const pct = v => (v >= 0 ? '+' : '−') + nf0.format(Math.abs(v * 100)) + ' %';
+const dose = (v) => nf2.format(v).replace(/,00$/, '');
+function rngFor(s) { let h = 2166136261; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } let a = h >>> 0;
+  return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+// ---- clima diário da estação da fazenda (sintético) e previsão dos 7 dias seguintes ----
+const PREV_RAIN = { 90: 14 };   // previsão sintética: chuva em 30/09
+function climaDia(d, r, rv, rainMap) {
+  const t = d / DAYS, rain = rainMap[d] || 0, rainPrev = rainMap[d - 1] || 0;
+  const wave = d >= 44 && d <= 50 ? 3.6 : d >= 74 && d <= 80 ? 3.1 : 0;
+  const tmax = 29.2 + 4.4 * t + wave + (r() - .5) * 1.8 - (rain ? 3.5 : 0) - (rainPrev ? 1.2 : 0);
+  const tmin = tmax - 11.5 + (r() - .5) * 2 + (rain ? 2.5 : 0);
+  const ur = Math.max(24, Math.min(96, 60 - 16 * t - wave * 2.6 + (rain ? 26 : 0) + (rainPrev ? 12 : 0) + (r() - .5) * 8));
+  const molh = rain ? 9 + r() * 5 : rainPrev ? 5 + r() * 4 : ur > 62 ? 2 + r() * 3 : r() * 1.5;
+  const tmed = (tmax + tmin) / 2, es = 0.6108 * Math.exp(17.27 * tmed / (tmed + 237.3));
+  return { tmax, tmin, ur, molh, dpv: es * (1 - ur / 100), chuva: rain, vento: 1.2 + rv() * 2.8, quenteSeco: tmax >= 32 && ur < 50, calor: tmax >= 35, molhado: molh >= 8 && tmed >= 18 && tmed <= 30 };
+}
+const CLIMA = [], CLIMA_PREV = [];
+(() => { const r = rngFor('clima'), rv = rngFor('vento'); for (let d = 0; d <= DAYS; d++) CLIMA.push(climaDia(d, r, rv, RAINMM)); })();
+(() => { const r = rngFor('previsao'), rv = rngFor('vento-prev'), m = Object.assign({}, RAINMM, PREV_RAIN); for (let d = DAYS + 1; d <= DAYS + 7; d++) CLIMA_PREV.push(Object.assign(climaDia(d, r, rv, m), { prev: true })); })();
+const climaAt = d => d <= DAYS ? CLIMA[d] : CLIMA_PREV[d - DAYS - 1];
+
+// ---- pivôs: áreas e NDVI das cenas de 10/09 e 25/09 do protótipo oficial (lagoa_s2.json, sintético) ----
+const PIVO_DATA = [
+  ['P1', 29.92, .58, .56], ['P2', 37.75, .78, .80], ['P3', 70.18, .55, .55], ['P4', 73.18, .77, .78], ['P5', 71.11, .26, .39], ['P6', 62.79, .78, .78],
+  ['P7', 61.39, .38, .38], ['P8', 50.63, .39, .39], ['P9', 74.98, .80, .78], ['P10', 30.15, .58, .55], ['P11', 50.0, .15, .17], ['P12', 48.47, .64, .14],
+  ['P13', 49.31, .15, .16], ['P14', 63.16, .55, .58], ['P15', 36.17, .38, .36], null, ['P17', 33.36, .80, .78], ['P18', 48.93, .80, .80],
+  ['P19', 75.11, .79, .78], ['P20', 77.39, .78, .79], ['P21', 80.82, .55, .58], ['P22', 62.07, .77, .77], ['P23', 63.99, .78, .78], ['P24', 34.37, .78, .80]];
+const STAGE = { P1: 'media', P3: 'media', P10: 'media', P14: 'media', P21: 'media', P5: 'jovem', P7: 'jovem', P8: 'jovem', P15: 'jovem', P11: 'solo', P13: 'solo', P12: 'velha' };
+const STAGE_TXT = { adulta: 'em produção', media: 'em formação', jovem: 'plantio novo', solo: 'sem lavoura', velha: 'lavoura velha erradicada' };
+const PIVOS = PIVO_DATA.map((p, i) => { if (!p) return null; const col = i % 6, row = Math.floor(i / 6);
+  return { id: p[0], ha: p[1], a71: p[2], a86: p[3], stage: STAGE[p[0]] || 'adulta', x: 8.5 + col * 16.6, y: 12.8 + row * 24.8 }; }).filter(Boolean);
+PIVOS.forEach(p => { p.pestOff = ['solo', 'velha'].includes(p.stage); });
+const P = id => PIVOS.find(p => p.id === id);
+
+// ---- pragas e doenças (resposta ligada ao clima) ----
+const ALVOS = [
+  { id: 'acaro', nome: 'Ácaro-rajado', art: 'o ácaro-rajado', fx: { def: .05, n: .004, k: 0, lav: .6 }, med: 'folhas com ácaro', un: '%', curto: '%', nc: 15, cap: 70, x0: [.5, 2.2], wk: [1.45, 1.45], imm: .05,
+    clima: c => 1 + (c.quenteSeco ? .05 : 0) - (c.molhado ? .025 : 0), fav: c => c.quenteSeco, favTxt: 'dia quente e seco (≥ 32 °C e UR < 50 %)', favCurto: 'quente e seco',
+    prods: [ { n: 'Espirodiclofeno 240 SC', c: 'Espirodiclofeno', g: 'IRAC 23', base: .86, res: 18, dose: .3, du: 'L' },
+             { n: 'Abamectina 18 EC', c: 'Abamectina', g: 'IRAC 6', base: .80, res: 10, dose: .5, du: 'L' },
+             { n: 'Fenpiroximato 50 SC', c: 'Fenpiroximato', g: 'IRAC 21A', base: .80, res: 13, dose: 1, du: 'L' },
+             { n: 'Óleo mineral', c: 'Óleo mineral', g: 'ação física', base: .38, res: 3, dose: 1.5, du: 'L' } ] },
+  { id: 'mosca', nome: 'Mosca-branca', art: 'a mosca-branca', fx: { def: 0, n: .006, k: 0, lav: .7 }, med: 'adultos por folha', un: '', curto: '/folha', nc: 5, cap: 40, x0: [.3, 1.2], wk: [1.36, 1.36], imm: .025,
+    clima: c => 1 + (c.quenteSeco ? .04 : 0) - (c.molhado ? .02 : 0), fav: c => c.quenteSeco, favTxt: 'dia quente e seco (≥ 32 °C e UR < 50 %)', favCurto: 'quente e seco',
+    prods: [ { n: 'Espiromesifeno 240 SC', c: 'Espiromesifeno', g: 'IRAC 23', base: .80, res: 16, dose: .5, du: 'L' },
+             { n: 'Acetamiprido 200 SP', c: 'Acetamiprido', g: 'IRAC 4A', base: .74, res: 10, dose: .25, du: 'kg' },
+             { n: 'Piriproxifem 100 EC', c: 'Piriproxifem', g: 'IRAC 7C', base: .62, res: 20, dose: .5, du: 'L' } ] },
+  { id: 'antrac', nome: 'Antracnose', art: 'a antracnose', fx: { def: 0, n: 0, k: .03, lav: 1 }, med: 'frutos com lesão', un: '%', curto: '%', nc: 5, cap: 45, x0: [.3, 1.1], wk: [1.0, 1.0], imm: .01,
+    clima: c => c.molhado ? 1.085 : (c.ur > 65 ? 1.012 : .993), fav: c => c.molhado, favTxt: 'dia com 8 h ou mais de folha molhada (UR ≥ 90 %) entre 18 e 30 °C', favCurto: 'molhamento ≥ 8 h',
+    prods: [ { n: 'Azoxistrobina 250 SC', c: 'Azoxistrobina', g: 'FRAC 11', base: .70, res: 14, dose: .4, du: 'L' },
+             { n: 'Tebuconazol 200 EC', c: 'Tebuconazol', g: 'FRAC 3', base: .66, res: 12, dose: 1, du: 'L' },
+             { n: 'Mancozebe 800 WP', c: 'Mancozebe', g: 'FRAC M3', base: .45, res: 7, dose: 3, du: 'kg' } ] },
+  { id: 'cochon', nome: 'Cochonilha', art: 'a cochonilha', fx: { def: 0, n: .004, k: 0, lav: 1 }, med: 'plantas com colônia', un: '%', curto: '%', nc: 10, cap: 50, x0: [.8, 2.5], wk: [1.12, 1.12], imm: .03,
+    clima: c => 1 + (c.quenteSeco ? .03 : 0), fav: c => c.quenteSeco, favTxt: 'dia quente e seco (≥ 32 °C e UR < 50 %)', favCurto: 'quente e seco',
+    prods: [ { n: 'Buprofezina 250 SC', c: 'Buprofezina', g: 'IRAC 16', base: .74, res: 20, dose: 1, du: 'L' },
+             { n: 'Acetamiprido 200 SP', c: 'Acetamiprido', g: 'IRAC 4A', base: .70, res: 12, dose: .25, du: 'kg' },
+             { n: 'Óleo mineral', c: 'Óleo mineral', g: 'ação física', base: .45, res: 4, dose: 1.5, du: 'L' } ] } ];
+// efeitos plantados na eficácia (gabarito da demonstração): dia quente e seco e chuva até 1 dia depois reduzem a eficácia
+const APP_FX = { qs: .78, chuva: .7 };
+const avOf = (pid, d) => (rngFor('av' + pid + '|' + d)() < .5 ? 'A' : 'B');   // avaliador da vistoria (sem efeito: variável de ruído)
+const EQ = { a600: { n: 'Atomizador · 600 L/ha', c: 'Atomizador 600 L/ha', cov: 1.0, lha: 600 }, a400: { n: 'Atomizador · 400 L/ha', c: 'Atomizador 400 L/ha', cov: .9, lha: 400 }, b100: { n: 'Barra · 100 L/ha', c: 'Barra 100 L/ha', cov: .6, lha: 100 } };
+const PROF = {};
+PIVOS.forEach(p => { const r = rngFor('prof' + p.id); const late = ['P4', 'P9', 'P21', 'P20'].includes(p.id);
+  PROF[p.id] = { press: 0.75 + r() * 0.7, eq: ['P4', 'P6', 'P20'].includes(p.id) ? 'b100' : (['P3', 'P9', 'P14', 'P22'].includes(p.id) ? 'a400' : 'a600'),
+    repete: ['P6', 'P17', 'P21'].includes(p.id), oleo1: ['P2', 'P9', 'P24'].includes(p.id), delay: late ? 6 + Math.floor(r() * 2) : 2 + Math.floor(r() * 3),
+    gatilho: late ? 1.15 : 0.9, off: Math.floor(r() * 3), falha: p.id === 'P17' ? [71, 78] : [] }; });
+const HOT = { acaro: ['P4', 'P6', 'P17', 'P9', 'P21'], mosca: ['P1', 'P2', 'P8'], antrac: ['P19', 'P23', 'P5'], cochon: ['P18', 'P14'] };
+
+function simulatePest(p, a) {
+  const r = rngFor(p.id + a.id), pf = PROF[p.id], hot = HOT[a.id].includes(p.id) ? 1.55 : 1;
+  const fx = a.fx, falta = Math.max(0, .95 - WATER[p.id].suff) / .27, NK = NUT[p.id];   // efeitos plantados: falta de água, N e K recentes, chuva forte
+  let x = (a.x0[0] + r() * (a.x0[1] - a.x0[0])) * pf.press * hot * (p.stage === 'jovem' ? .7 : 1);
+  const obs = [], apps = []; let resid = 0, last = -99, pending = null, lastGroup = null, n = 0, consec = 0; const groupCount = {};
+  for (let d = 0; d <= DAYS; d++) {
+    if (pending && pending.day === d) {
+      let prod;
+      if (pf.oleo1 && n === 0 && a.prods.some(q => q.c === 'Óleo mineral')) prod = a.prods.find(q => q.c === 'Óleo mineral');
+      else if (pf.repete) prod = a.prods.find(q => q.c !== 'Óleo mineral') || a.prods[0];
+      else { const cand = a.prods.filter(q => q.c !== 'Óleo mineral' && q.g !== lastGroup); prod = cand[(n + p.id.length) % cand.length] || a.prods[0]; }
+      const rep = groupCount[prod.g] || 0; consec = prod.g === lastGroup ? consec + 1 : 0;
+      const eq = EQ[pf.eq], resist = consec > 0 ? Math.pow(.7, consec) : Math.pow(.93, rep);
+      const qsDia = CLIMA[d].quenteSeco, chuvaDepois = (RAINMM[d] || 0) + (RAINMM[d + 1] || 0) >= 5;
+      const eff = Math.min(.95, prod.base * eq.cov * resist * (qsDia ? APP_FX.qs : 1) * (chuvaDepois ? APP_FX.chuva : 1) * (0.9 + r() * 0.18));
+      x = x * (1 - eff); resid = Math.round(prod.res * (0.7 + 0.3 * eq.cov));
+      groupCount[prod.g] = rep + 1; lastGroup = prod.g; n++; last = d;
+      apps.push({ day: d, prod, eq: pf.eq, entrada: n, rep: rep + 1, consec, alvo: a.id, qsDia, chuvaDepois }); pending = null;
+    }
+    const wk = a.wk[0] + (a.wk[1] - a.wk[0]) * d / DAYS;
+    let g = Math.pow(wk, 1 / 7) * a.clima(CLIMA[d]) * (1 + fx.def * falta + fx.n * (NK.n14[d] - 6.4) + fx.k * Math.max(0, 1 - NK.k14[d] / 20)); if (resid > 0) { g = 1 + (g - 1) * 0.2; resid--; }
+    x = Math.max(.05, Math.min(a.cap, x * g + a.imm * pf.press * hot * (resid > 0 ? 0.3 : 1)));
+    if ((RAINMM[d] || 0) >= 10) x = Math.max(.05, x * fx.lav);
+    if ((d - 1 - pf.off) % 7 === 0 && d >= 1 + pf.off && !pf.falha.includes(d)) {
+      const v = Math.max(0, x * (0.88 + r() * 0.24)); obs.push({ day: d, v, aval: avOf(p.id, d) });
+      if (v >= a.nc * pf.gatilho && d - last > 9 && !pending) pending = { day: Math.min(DAYS, d + pf.delay) };
+    }
+  }
+  apps.forEach(ap => { const before = [...obs].reverse().find(o => o.day <= ap.day && ap.day - o.day <= 10); const after = obs.find(o => o.day >= ap.day + 5 && o.day <= ap.day + 14);
+    ap.before = before || null; ap.after = after || null; ap.red = before && after && before.v > 0 ? (before.v - after.v) / before.v : null;
+    const back = obs.find(o => o.day > ap.day && o.v >= a.nc); ap.backDay = back ? back.day : null; });
+  return { obs, apps };
+}
+
+// ---- água e adubação ----
+const NEED = { adulta: 5.2, media: 4.6, jovem: 3.0, solo: 0, velha: 4.0 };        // mm/dia (ETc de exemplo, ajustada pelo DPV)
+const SUFF = { P3: .68, P14: .7, P21: .7, P20: .9 };                              // fração da necessidade atendida pela irrigação
+const FERT = {
+  std: { every: 14, items: [['Nitrato de amônio', 20, { N: .32 }], ['Sulfato de potássio', 45, { K2O: .5, S: .17 }]], via: 'Fertirrigação', nome: 'Nitrato de amônio + sulfato de potássio · a cada 14 dias' },
+  ureia: { every: 14, items: [['Ureia', 12, { N: .45 }], ['Cloreto de potássio', 30, { K2O: .6 }]], via: 'Fertirrigação', nome: 'Ureia + cloreto de potássio' },
+  irreg: { every: 31, items: [['Nitrato de amônio', 20, { N: .32 }], ['Sulfato de potássio', 45, { K2O: .5, S: .17 }]], via: 'Fertirrigação', nome: 'Nitrato de amônio + sulfato de potássio · intervalo > 21 dias' },
+  arranque: { every: 10, items: [['Nitrato de amônio', 25, { N: .32 }], ['Ácido bórico', 1, { B: .17 }]], via: 'Fertirrigação de arranque', nome: 'Arranque: nitrato de amônio + ácido bórico' } };
+const PLAN = { P9: 'ureia', P23: 'ureia', P20: 'irreg', P24: 'irreg', P1: 'irreg', P10: 'irreg' };
+const EVENTS = [], WATER = {}, SAT = {}; let evSeq = 0;
+const addEvent = e => { e.id = 'e' + (++evSeq); EVENTS.push(e); return e; };
+const needOn = (p, d) => NEED[p.stage] * Math.max(.75, Math.min(1.35, 1 + .14 * (CLIMA[d].dpv - 1.9)));
+PIVOS.forEach(p => {
+  const r = rngFor('w' + p.id); const suff = SUFF[p.id] || (p.stage === 'jovem' ? 1 : .98);
+  const irr = new Array(DAYS + 1).fill(0); const off = Math.floor(r() * 3);
+  if (NEED[p.stage] > 0) for (let d = off; d <= DAYS; d += 3) {
+    if ((RAINMM[d] || 0) + (RAINMM[d - 1] || 0) >= 10) continue;
+    const rain3 = [0, 1, 2].reduce((s, k) => s + (RAINMM[d - k] || 0), 0); const need3 = [0, 1, 2].reduce((s, k) => s + needOn(p, Math.min(DAYS, d + k)), 0);
+    irr[d] = Math.max(0, Math.round((need3 - rain3) * suff * 2) / 2);
+  }
+  WATER[p.id] = { irr, suff };
+  if (['adulta', 'media', 'jovem'].includes(p.stage)) {
+    const prog = p.stage === 'jovem' ? 'arranque' : (PLAN[p.id] || 'std'); const pr = FERT[prog]; let d = 3 + Math.floor(r() * 6);
+    while (d <= DAYS) {
+      const items = pr.items.map(([n, ds, nut]) => ({ n, dose: ds, du: 'kg', total: ds * p.ha, nut: Object.fromEntries(Object.entries(nut).map(([k, f]) => [k, ds * f])) }));
+      addEvent({ kind: 'adub', day: d, pid: p.id, via: pr.via, prog, progNome: pr.nome, items });
+      d += pr.every + (prog === 'irreg' ? Math.floor(r() * 6) : Math.floor(r() * 2));
+    }
+  }
+});
+// N e K2O aplicados nos 14 dias até cada data (kg/ha), por pivô
+const NUT = {}; PIVOS.forEach(p => { const n = new Array(DAYS + 8).fill(0), k = new Array(DAYS + 8).fill(0);
+  EVENTS.forEach(e => { if (e.kind !== 'adub' || e.pid !== p.id) return; const N = e.items.reduce((s, it) => s + (it.nut.N || 0), 0), K = e.items.reduce((s, it) => s + (it.nut.K2O || 0), 0);
+    for (let d = e.day; d < e.day + 14 && d < n.length; d++) { n[d] += N; k[d] += K; } });
+  NUT[p.id] = { n14: n, k14: k }; });
+const PEST = {}; ALVOS.forEach(a => { PEST[a.id] = {}; PIVOS.forEach(p => { if (!p.pestOff) PEST[a.id][p.id] = simulatePest(p, a); }); });
+addEvent({ kind: 'oper', day: 73, pid: 'P12', via: 'Erradicação da lavoura velha', items: [{ n: 'Glifosato 480', dose: 3, du: 'L', total: 3 * P('P12').ha }], os: 'OS-0509', calda: 'Barra · 100 L/ha' });
+ALVOS.forEach(a => PIVOS.forEach(p => { const s = PEST[a.id][p.id]; if (!s) return; s.apps.forEach(ap => {
+  ap.ev = addEvent({ kind: 'def', day: ap.day, pid: p.id, alvo: a.id, ap, items: [{ n: ap.prod.n, dose: ap.prod.dose, du: ap.prod.du, total: ap.prod.dose * p.ha }], calda: EQ[ap.eq].n, caldaL: EQ[ap.eq].lha * p.ha }); }); }));
+EVENTS.sort((x, y) => x.day - y.day);
+
+// ---- vigor por satélite: cenas a cada 5 dias; NDVI ancorado em 10/09 e 25/09; calor e falta de água pesam ----
+const SCENES = []; for (let d = 1; d <= DAYS; d += 5) SCENES.push(d);
+const SCENE_CLOUD = { 16: 62, 36: 88, 51: 34, 66: 74 };
+const IDX = { NDVI: { cuts: [.30, .45, .60, .72, .82] }, NDRE: { cuts: [.10, .18, .25, .30, .35] } };
+PIVOS.forEach(p => {
+  const r = rngFor('s' + p.id), W = WATER[p.id];
+  const base = d => p.stage === 'adulta' ? .79 : p.stage === 'media' ? .61 : p.stage === 'jovem' ? (p.id === 'P5' ? .14 + .25 * Math.pow(d / DAYS, 1.6) : .27 + .11 * d / DAYS)
+    : p.stage === 'solo' ? .15 : (d < 72 ? .66 : d > 75 ? .14 : .66 - (.52 * (d - 72) / 3));
+  let sw = 40, wEff = 0, pool = 1.1, nEff = 0; const ndvi = [], nut = [];
+  const fertN = {}; EVENTS.forEach(e => { if (e.kind === 'adub' && e.pid === p.id) fertN[e.day] = e.items.reduce((s, it) => s + (it.nut.N || 0), 0); });
+  for (let d = 0; d <= DAYS; d++) {
+    const need = NEED[p.stage] ? needOn(p, d) : 0;
+    sw = Math.max(0, Math.min(60, sw + (RAINMM[d] || 0) + W.irr[d] - need));
+    const stress = need > 0 ? Math.max(0, 1 - sw / 22) : 0;
+    const heat = need > 0 && CLIMA[d].calor ? .018 * (1.15 - W.suff) * 3 : 0;
+    wEff += (-0.11 * stress - heat - wEff) * 0.12;
+    pool = pool * 0.962 + (fertN[d] || 0) * 0.085;
+    const target = need > 0 && p.stage !== 'velha' ? 0.085 * Math.tanh(pool - 0.9) : 0; nEff += (target - nEff) * 0.14;
+    ndvi.push(base(d) + (p.stage === 'solo' || (p.stage === 'velha' && d > 75) ? 0 : wEff + nEff) + (r() - .5) * .006); nut.push(p.stage === 'solo' ? 0 : nEff);
+  }
+  const c71 = p.a71 - ndvi[71], c86 = p.a86 - ndvi[86]; const corr = d => d <= 71 ? c71 : c71 + (c86 - c71) * (d - 71) / 15;
+  const ndviC = ndvi.map((v, d) => Math.max(.05, Math.min(.95, v + corr(d))));
+  const spread = p.stage === 'adulta' ? .045 : p.stage === 'solo' ? .03 : .065;
+  SAT[p.id] = { scenes: SCENES.map(d => {
+    const cloud = d === 71 ? (p.id === 'P24' ? 44.4 : 0) : d === 86 ? 0 : Math.max(0, Math.min(100, (SCENE_CLOUD[d] || 2) + (r() - .5) * 30));
+    const v = ndviC[d] + (r() - .5) * .006, ndre = .508 * v - .036 + 1.1 * nut[d] + (r() - .5) * .004;
+    return { day: d, cloud: Math.round(cloud * 10) / 10, ok: cloud <= 20, NDVI: { med: v, p10: v - spread, p90: v + spread * .8 }, NDRE: { med: ndre, p10: ndre - spread / 2, p90: ndre + spread * .4 } }; }) };
+});
+const sceneAt = (pid, day, idx) => { const s = SAT[pid].scenes.find(q => q.day === day); return s && s.ok ? s[idx].med : null; };
+function vigorEffect(e, idx) {
+  const sc = SAT[e.pid].scenes; const before = [...sc].reverse().find(s => s.ok && s.day <= e.day && e.day - s.day <= 10); const after = sc.find(s => s.ok && s.day >= e.day + 10 && s.day <= e.day + 25);
+  if (!before || !after) return null; const d = after[idx].med - before[idx].med, st = P(e.pid).stage;
+  const peers = PIVOS.filter(q => q.stage === st && q.id !== e.pid).map(q => { const b = sceneAt(q.id, before.day, idx), a = sceneAt(q.id, after.day, idx); return b != null && a != null ? a - b : null; }).filter(v => v != null);
+  const dc = median(peers); return { before, after, d, dc, rel: dc != null ? d - dc : null };
+}
+const climaBetween = (a, b) => { let qs = 0, cal = 0, mol = 0, n = 0, tx = 0, ur = 0; for (let d = a + 1; d <= b; d++) { const c = CLIMA[d]; n++; tx += c.tmax; ur += c.ur; if (c.quenteSeco) qs++; if (c.calor) cal++; if (c.molhado) mol++; } return { qs, cal, mol, tmax: n ? tx / n : null, ur: n ? ur / n : null }; };
+
+// ================= Raio-X do alvo: o que faz subir e descer (motor estatístico, sem IA generativa) =================
+// Resposta: crescimento semanal entre vistorias seguidas sem aplicação contra o alvo (nem resíduo de 10 dias): r = ln((v2 + ε) ÷ (v1 + ε)) × 7 ÷ dias.
+// Camada 1: Spearman por janela. Camada 2: regressão com indicadores (limiar) ajustada pelo nível de partida, estádio e época; intervalo por
+// bootstrap em blocos de semana × talhão e Benjamini-Hochberg. Camada 3: eficácia de Henderson-Tilton com talhões-controle. Camada 4: risco em 7 dias.
+const W3 = [['na semana da vistoria', 0, 7], ['8 a 14 dias antes', 7, 14], ['15 a 28 dias antes', 14, 28]];
+const W2N = [['nos 14 dias antes', 0, 14], ['de 15 a 28 dias antes', 14, 28]];
+const W1 = [['', 0, 0]];
+const plural = (t, s, p) => (t === 1 ? s : p);
+const RXF = [
+  { k: 'qs', t: 'Dias quentes e secos', tipo: 'Clima', wins: W3, dec: 0, cond: (t, w) => t + ' ' + plural(t, 'dia', 'dias') + ' ou mais por semana, ' + w + ' (≥ 32 °C e UR < 50 %)', fmt: v => nf1.format(v) + ' dias quentes e secos por semana' },
+  { k: 'tmax', t: 'Temperatura máxima', tipo: 'Clima', wins: W3, dec: 1, cond: (t, w) => 'média de ' + nf1.format(t) + ' °C ou mais, ' + w, fmt: v => 'máxima média de ' + nf1.format(v) + ' °C' },
+  { k: 'ur', t: 'Umidade do ar', tipo: 'Clima', wins: W3, dec: 0, cond: (t, w) => 'média de ' + nf0.format(t) + ' % ou mais, ' + w, fmt: v => 'UR média de ' + nf0.format(v) + ' %' },
+  { k: 'dpv', t: 'Ar seco (DPV)', tipo: 'Clima', wins: W3, dec: 2, cond: (t, w) => 'DPV médio de ' + nf2.format(t) + ' kPa ou mais, ' + w, fmt: v => 'DPV médio de ' + nf2.format(v) + ' kPa' },
+  { k: 'molh', t: 'Folha molhada', tipo: 'Clima', wins: W3, dec: 0, cond: (t, w) => t + ' ' + plural(t, 'dia', 'dias') + ' ou mais por semana com 8 h ou mais de folha molhada, ' + w, fmt: v => nf1.format(v) + ' dias de folha molhada por semana' },
+  { k: 'chuva', t: 'Chuva', tipo: 'Clima', wins: W3, dec: 0, cond: (t, w) => nf0.format(t) + ' mm ou mais por semana, ' + w, fmt: v => nf0.format(v) + ' mm de chuva por semana' },
+  { k: 'lav', t: 'Chuva forte', tipo: 'Clima', wins: W3, bin: true, cond: (t, w) => '1 dia ou mais com 10 mm ou mais, ' + w, fmt: () => 'chuva forte prevista' },
+  { k: 'vento', t: 'Vento', tipo: 'Clima', wins: W3, dec: 1, cond: (t, w) => 'média de ' + nf1.format(t) + ' m/s ou mais, ' + w, fmt: v => 'vento médio de ' + nf1.format(v) + ' m/s' },
+  { k: 'irr', t: 'Irrigação', tipo: 'Água', wins: W3, dec: 0, cond: (t, w) => nf0.format(t) + ' mm ou mais por semana, ' + w, fmt: v => nf0.format(v) + ' mm de irrigação por semana' },
+  { k: 'def', t: 'Falta de água na irrigação', tipo: 'Água', wins: W1, dec: 0, cond: t => 'irrigação abaixo da necessidade em ' + nf0.format(t) + ' % ou mais', fmt: v => 'irrigação ' + nf0.format(v) + ' % abaixo da necessidade' },
+  { k: 'n14', t: 'Nitrogênio aplicado', tipo: 'Nutrição', wins: W2N, dec: 1, cond: (t, w) => nf1.format(t) + ' kg/ha de N ou mais, ' + w, fmt: v => nf1.format(v) + ' kg/ha de N recente' },
+  { k: 'k14', t: 'Potássio aplicado', tipo: 'Nutrição', wins: W2N, dec: 0, cond: (t, w) => nf0.format(t) + ' kg/ha de K2O ou mais, ' + w, fmt: v => nf0.format(v) + ' kg/ha de K2O recente' },
+  { k: 'ndvi', t: 'Vigor da planta (NDVI)', tipo: 'Planta', wins: W1, dec: 2, cond: t => 'NDVI de ' + nf2.format(t) + ' ou mais na última cena antes da vistoria', fmt: v => 'NDVI ' + nf2.format(v) },
+  { k: 'aval', t: 'Avaliador da vistoria', tipo: 'Amostragem', wins: W1, bin: true, cond: () => 'vistoria feita pelo avaliador B, em vez do A', fmt: () => 'avaliador B' } ];
+const RXK = k => RXF.find(f => f.k === k);
+// Referência agronômica de exemplo (no Safrion vem do protocolo do alvo, validado pelo RT): direção esperada de cada fator.
+const PRIOR = { acaro: { qs: 1, tmax: 1, dpv: 1, ur: -1, lav: -1, chuva: -1, molh: -1, def: 1, n14: 1 }, mosca: { qs: 1, tmax: 1, dpv: 1, lav: -1, chuva: -1, n14: 1 },
+  antrac: { molh: 1, ur: 1, chuva: 1, lav: 1, k14: -1, qs: -1, dpv: -1 }, cochon: { qs: 1, tmax: 1, dpv: 1, n14: 1 } };
+const PRIOR_TXT = { acaro: ['Calor com ar seco (≥ 32 °C e UR < 50 %) acelera a população.', 'Chuva forte derruba a população nas folhas.', 'Falta de água e excesso de nitrogênio favorecem o ácaro.'],
+  mosca: ['Tempo quente e seco favorece.', 'Chuva forte reduz os adultos nas folhas.', 'Excesso de nitrogênio favorece insetos sugadores.'],
+  antrac: ['Folha e fruto molhados por 8 h ou mais entre 18 e 30 °C favorecem a infecção.', 'Umidade alta e chuva espalham os esporos.', 'Potássio adequado reduz a suscetibilidade.'],
+  cochon: ['Tempo quente e seco favorece.', 'Excesso de nitrogênio favorece.'] };
+// Gabarito desta demonstração: efeitos plantados na simulação (1 sobe, −1 desce) e variáveis que só andam junto com um efeito plantado.
+const PLANTED = { acaro: { qs: 1, molh: -1, lav: -1, def: 1, n14: 1 }, mosca: { qs: 1, molh: -1, lav: -1, n14: 1 }, antrac: { molh: 1, ur: 1, k14: -1 }, cochon: { qs: 1, n14: 1 } };
+const PROXY = { acaro: { tmax: 'qs', dpv: 'qs', ur: 'qs', chuva: 'lav', irr: 'def', ndvi: 'def' }, mosca: { tmax: 'qs', dpv: 'qs', ur: 'qs', chuva: 'lav' },
+  antrac: { chuva: 'molh', lav: 'molh', dpv: 'ur', tmax: 'ur', qs: 'ur' }, cochon: { tmax: 'qs', dpv: 'qs', ur: 'qs' } };
+
+const ADUB_BY = {}; EVENTS.forEach(e => { if (e.kind === 'adub') (ADUB_BY[e.pid] = ADUB_BY[e.pid] || []).push(e); });
+const irrAt = (pid, d) => d <= DAYS ? WATER[pid].irr[d] : WATER[pid].irr.slice(DAYS - 5, DAYS + 1).reduce((s, v) => s + v, 0) / 6;
+const WCACHE = new Map();
+function winVals(pid, a, b) {   // dias a+1..b; contagens e somas por semana; nutrientes somados na janela
+  const key = pid + '|' + a + '|' + b; if (WCACHE.has(key)) return WCACHE.get(key);
+  let n = 0, qs = 0, tx = 0, ur = 0, dpv = 0, molh = 0, ch = 0, lav = 0, ve = 0, irr = 0, N = 0, K = 0;
+  for (let d = Math.max(0, a + 1); d <= b; d++) { const c = climaAt(d); if (!c) continue; n++; if (c.quenteSeco) qs++; tx += c.tmax; ur += c.ur; dpv += c.dpv; if (c.molhado) molh++; ch += c.chuva; if (c.chuva >= 10) lav++; ve += c.vento; irr += irrAt(pid, d); }
+  (ADUB_BY[pid] || []).forEach(e => { if (e.day > a && e.day <= b) e.items.forEach(it => { N += it.nut.N || 0; K += it.nut.K2O || 0; }); });
+  const w = v => v * 7 / n, o = n ? { qs: w(qs), tmax: tx / n, ur: ur / n, dpv: dpv / n, molh: w(molh), chuva: w(ch), lav: lav ? 1 : 0, vento: ve / n, irr: w(irr), n14: N, k14: K } : null;
+  WCACHE.set(key, o); return o;
+}
+function fval(row, f, wi) {
+  if (f.k === 'def') return Math.max(0, 1 - WATER[row.pid].suff) * 100;
+  if (f.k === 'ndvi') { const sc = SAT[row.pid].scenes.filter(s => s.ok && s.day <= row.d1); return sc.length ? sc[sc.length - 1].NDVI.med : null; }
+  if (f.k === 'aval') return row.aval === 'B' ? 1 : 0;
+  const [, lo, hi] = f.wins[wi], a = wi === 0 && f.wins === W3 ? row.d1 : row.d2 - hi, o = winVals(row.pid, a, row.d2 - lo);
+  return o ? o[f.k] : null;
+}
+const impute = x => { const v = x.filter(z => z != null), m = v.length ? v.reduce((s, z) => s + z, 0) / v.length : 0; return x.map(z => z == null ? m : z); };
+function ranks(v) { const idx = v.map((x, i) => i).sort((i, j) => v[i] - v[j]), r = new Array(v.length); let i = 0;
+  while (i < idx.length) { let j = i; while (j + 1 < idx.length && v[idx[j + 1]] === v[idx[i]]) j++; for (let k = i; k <= j; k++) r[idx[k]] = (i + j) / 2 + 1; i = j + 1; } return r; }
+function pearson(x, y) { const n = x.length; if (n < 3) return null; let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; } mx /= n; my /= n;
+  let sxy = 0, sx = 0, sy = 0; for (let i = 0; i < n; i++) { const a = x[i] - mx, b = y[i] - my; sxy += a * b; sx += a * a; sy += b * b; } return sx && sy ? sxy / Math.sqrt(sx * sy) : null; }
+const spear = (x, y) => pearson(ranks(x), ranks(y));
+const dot = (a, b) => a.reduce((s, v, i) => s + v * b[i], 0);
+function solve(A, b) { const n = b.length, M = A.map((r, i) => [...r, b[i]]);
+  for (let c = 0; c < n; c++) { let p = c; for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r; if (Math.abs(M[p][c]) < 1e-12) return null; [M[c], M[p]] = [M[p], M[c]];
+    for (let r = 0; r < n; r++) { if (r === c) continue; const f = M[r][c] / M[c][c]; if (f) for (let k = c; k <= n; k++) M[r][k] -= f * M[c][k]; } }
+  return M.map((r, i) => r[n] / r[i]); }
+function wls(X, y, w) { const p = X[0].length, A = Array.from({ length: p }, () => new Array(p).fill(0)), b = new Array(p).fill(0);
+  for (let i = 0; i < X.length; i++) { const wi = w ? w[i] : 1; if (!wi) continue; const xi = X[i]; for (let j = 0; j < p; j++) { const v = wi * xi[j]; b[j] += v * y[i]; for (let k = j; k < p; k++) A[j][k] += v * xi[k]; } }
+  for (let j = 0; j < p; j++) { for (let k = 0; k < j; k++) A[j][k] = A[k][j]; if (j) A[j][j] += .5; }   // ridge leve: estabiliza indicadores raros e puxa para zero (conservador)
+  return solve(A, b); }
+const Phi = z => { const t = 1 / (1 + .2316419 * Math.abs(z)), d = .3989423 * Math.exp(-z * z / 2), p = d * t * (.3193815 + t * (-.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; };
+const roundF = (v, f) => { const p = Math.pow(10, f.dec || 0); return Math.round(v * p) / p; };
+
+function rxRows(a, D) {
+  const eps = .05 * a.nc, rows = [];
+  PIVOS.forEach(p => { const s = PEST[a.id][p.id]; if (!s) return;
+    for (let i = 1; i < s.obs.length; i++) { const o1 = s.obs[i - 1], o2 = s.obs[i]; if (o2.day > D) break; const gap = o2.day - o1.day;
+      if (gap < 5 || gap > 10 || o1.v < .1 * a.nc) continue; if (s.apps.some(ap => ap.day > o1.day - 10 && ap.day <= o2.day)) continue;
+      rows.push({ pid: p.id, stage: p.stage, d1: o1.day, d2: o2.day, v1: o1.v, v2: o2.v, aval: o2.aval, eps, nc: a.nc, r: Math.log((o2.v + eps) / (o1.v + eps)) * 7 / gap, wk: Math.floor((o2.day - 1) / 7) }); } });
+  return rows;
+}
+// controles: nível de partida e estádio. A época só entra com 2 safras ou mais: com uma safra, clima e época andam juntos e o controle apagaria o efeito do clima.
+const ctrlCols = r => [Math.log((r.v1 + r.eps) / r.nc), r.stage === 'media' ? 1 : 0, r.stage === 'jovem' ? 1 : 0];
+function rxResid(rows) {   // crescimento sem o efeito do nível de partida, do estádio e da época (base da correlação parcial)
+  const y = rows.map(r => r.r), Xc = rows.map(r => [1, ...ctrlCols(r)]), bc = wls(Xc, y); return bc ? y.map((v, i) => v - dot(Xc[i], bc)) : y; }
+function rxSelect(rows) {   // camada 1: janela de maior associação parcial de cada variável e grupos de variáveis que andam juntas
+  const y = rxResid(rows), F = [];
+  RXF.forEach(f => { const per = f.wins.map((w, wi) => { const x = impute(rows.map(r => fval(r, f, wi))); return { wi, x, rho: spear(x, y) }; });
+    const best = per.filter(q => q.rho != null).sort((p, q) => Math.abs(q.rho) - Math.abs(p.rho))[0]; if (best) F.push({ f, wi: best.wi, x: best.x, rho: best.rho, rhoW: per.map(q => q.rho), mates: [] }); });
+  F.sort((p, q) => Math.abs(q.rho) - Math.abs(p.rho));
+  F.forEach(g => { if (g.of) return; g.rep = true; F.forEach(h => { if (h === g || h.of || h.rep) return; const c = spear(g.x, h.x); if (c != null && Math.abs(c) >= .7) { h.of = g; h.withRho = c; g.mates.push(h); } }); });
+  return F;
+}
+function stump(x, y, f) {   // limiar que melhor separa o crescimento (mínimo de 8 casos de cada lado)
+  if (f.bin) return x.some(v => v >= 1) ? 1 : null;
+  const n = x.length, s = [...x].sort((a, b) => a - b), cands = new Set(); for (let q = .15; q <= .851; q += .05) cands.add(roundF(s[Math.floor(q * (n - 1))], f));
+  let best = null; cands.forEach(t => { let nh = 0, sh = 0, nl = 0, sl = 0; x.forEach((v, i) => { if (v >= t) { nh++; sh += y[i]; } else { nl++; sl += y[i]; } }); if (nh < 8 || nl < 8) return;
+    const sc = Math.abs(sh / nh - sl / nl) * Math.sqrt(nh * nl / n); if (!best || sc > best.sc) best = { t, sc }; });
+  return best ? best.t : null;
+}
+function stumpScore(x, y, f) { const t = stump(x, y, f); if (t == null) return null; let nh = 0, sh = 0, nl = 0, sl = 0; x.forEach((v, i) => { if (v >= t) { nh++; sh += y[i]; } else { nl++; sl += y[i]; } }); return { t, sc: Math.abs(sh / nh - sl / nl) * Math.sqrt(nh * nl / x.length) }; }
+const designRow = (r, reps, xs) => [1, ...reps.map((q, j) => (xs ? xs[j] : q.xv[r._i]) >= q.t ? 1 : 0), ...ctrlCols(r)];
+function rxFit(rows) {
+  rows.forEach((r, i) => { r._i = i; }); const y = rows.map(r => r.r), yr = rxResid(rows), F = rxSelect(rows);
+  // no grupo de variáveis que andam juntas, representa quem melhor separa o crescimento (limiar com 8 casos ou mais de cada lado)
+  const reps = F.filter(g => g.rep).map(g => { const best = [g, ...g.mates].map(h => ({ h, s: stumpScore(h.x, yr, h.f) })).filter(z => z.s).sort((u, w) => w.s.sc - u.s.sc)[0]; if (!best) return null;
+    const h = best.h, mates = [g, ...g.mates].filter(z => z !== h); mates.forEach(z => { z.of = h; }); return { g: h, f: h.f, wi: h.wi, xv: h.x, rho: h.rho, mates, t: best.s.t }; }).filter(Boolean);
+  const X = rows.map(r => designRow(r, reps)), beta = wls(X, y); if (!beta) return null;
+  const res = y.map((v, i) => v - dot(X[i], beta)), sd = Math.sqrt(res.reduce((s, v) => s + v * v, 0) / Math.max(1, y.length - X[0].length));
+  reps.forEach((q, j) => { q.beta = beta[1 + j]; });
+  return { F, reps, X, y, beta, sd };
+}
+function rxBoot(R, M) {
+  const B = 200, rng = rngFor('boot' + R.a.id + R.D), pids = [...new Set(R.rows.map(r => r.pid))], wks = [...new Set(R.rows.map(r => r.wk))];
+  const pi = Object.fromEntries(pids.map((id, i) => [id, i])), wi = Object.fromEntries(wks.map((w, i) => [w, i])), draws = M.reps.map(() => []);
+  for (let b = 0; b < B; b++) { const cp = new Array(pids.length).fill(0), cw = new Array(wks.length).fill(0);
+    for (let i = 0; i < pids.length; i++) cp[Math.floor(rng() * pids.length)]++; for (let i = 0; i < wks.length; i++) cw[Math.floor(rng() * wks.length)]++;
+    const be = wls(M.X, M.y, R.rows.map(r => cp[pi[r.pid]] * cw[wi[r.wk]])); if (be) M.reps.forEach((q, j) => draws[j].push(be[1 + j])); }
+  M.reps.forEach((q, j) => { const d = draws[j].sort((x, y) => x - y), m = d.length, pc = f => d[Math.min(m - 1, Math.max(0, Math.round(f * (m - 1))))];
+    q.ci95 = [pc(.025), pc(.975)]; q.ci80 = [pc(.1), pc(.9)];
+    const mu = d.reduce((s, v) => s + v, 0) / m, se = Math.sqrt(d.reduce((s, v) => s + (v - mu) ** 2, 0) / Math.max(1, m - 1)) || 1e-9;
+    q.se = se; q.p = Math.min(1, 2 * (1 - Phi(Math.abs(q.beta) / se)) * q.f.wins.length);   // aproximação normal do bootstrap; multiplica pelas janelas testadas
+    const I = q.xv.map(v => v >= q.t ? 1 : 0), hi = R.rows.filter((r, i) => I[i]); q.nHi = hi.length; q.nLo = I.length - hi.length; q.pivHi = new Set(hi.map(r => r.pid)).size; q.wkHi = new Set(hi.map(r => r.wk)).size; });
+  const ord = [...M.reps].sort((x, y) => x.p - y.p); let prev = 1; for (let i = ord.length - 1; i >= 0; i--) { prev = Math.min(prev, ord[i].p * ord.length / (i + 1)); ord[i].q = Math.min(1, prev); }   // Benjamini-Hochberg
+}
+function rxStable(R, M) {   // mesmo sinal na primeira e na segunda metade do período
+  const ds = R.rows.map(r => r.d2).sort((a, b) => a - b), mid = ds[Math.floor(ds.length / 2)], half = h => R.rows.map(r => (h ? r.d2 > mid : r.d2 <= mid) ? 1 : 0);
+  const fits = [wls(M.X, M.y, half(0)), wls(M.X, M.y, half(1))];
+  M.reps.forEach((q, j) => { const ok = [0, 1].every(h => { const w = half(h); let nh = 0, nl = 0; q.xv.forEach((v, i) => { if (!w[i]) return; if (v >= q.t) nh++; else nl++; }); return nh >= 3 && nl >= 3; });
+    q.stable = ok && fits.every(b => b && Math.sign(b[1 + j]) === Math.sign(q.beta)); });
+}
+function rxLevels(R) { const prior = PRIOR[R.a.id] || {};
+  R.M.reps.forEach(q => { const ex = q.ci95[0] > 0 || q.ci95[1] < 0, ex80 = q.ci80[0] > 0 || q.ci80[1] < 0, enough = q.nHi >= 8 && q.nLo >= 8 && q.pivHi >= 3;
+    let lv = !enough ? 'insuf' : ex && q.q < .1 ? (q.stable && (q.f.tipo !== 'Clima' || q.wkHi >= 3) ? 'forte' : 'moderada') : ex80 ? 'fraca' : 'nulo';
+    if (['forte', 'moderada', 'fraca'].includes(lv) && prior[q.f.k] && Math.sign(prior[q.f.k]) !== Math.sign(q.beta)) lv = 'confirmar';
+    q.level = lv; q.eff = Math.exp(q.beta) - 1; q.effCI = q.ci95.map(v => Math.exp(v) - 1); });
+}
+// camada 3: eficácia de Henderson-Tilton contra talhões-controle (sem aplicação contra o alvo na mesma janela, mesmo estádio e nível parecido)
+const nearestObs = (obs, d, tol) => { let b = null; obs.forEach(o => { if (Math.abs(o.day - d) <= tol && (!b || Math.abs(o.day - d) < Math.abs(b.day - d))) b = o; }); return b; };
+function rxHT(a, D) {
+  const eps = .05 * a.nc, out = [];
+  PIVOS.forEach(p => { const s = PEST[a.id][p.id]; if (!s) return; s.apps.forEach(ap => { if (!ap.before || !ap.after || ap.after.day > D) return;
+    const db = ap.before.day, da = ap.after.day, cands = [];
+    PIVOS.forEach(q => { if (q.id === p.id) return; const sq = PEST[a.id][q.id]; if (!sq) return; const cb = nearestObs(sq.obs, db, 3), ca = nearestObs(sq.obs, da, 3);
+      if (!cb || !ca || ca.day <= cb.day || cb.v < .1 * a.nc || sq.apps.some(x => x.day > cb.day - 10 && x.day <= ca.day)) return;
+      cands.push({ ratio: (ca.v + eps) / (cb.v + eps), same: (q.stage === 'jovem') === (p.stage === 'jovem'), near: cb.v >= .3 * ap.before.v }); });
+    let use = cands.filter(c => c.same && c.near); if (use.length < 2) use = cands.filter(c => c.same); if (use.length < 2) use = cands;
+    const ctrl = use.length >= 2 ? median(use.map(c => c.ratio)) : null, tr = (ap.after.v + eps) / (ap.before.v + eps), back = ap.backDay != null && ap.backDay <= D;
+    out.push({ pid: p.id, ap, E: ctrl != null ? 1 - tr / ctrl : null, nCtrl: use.length, raw: ap.red, t: back ? ap.backDay - ap.day : D - ap.day, ev: back }); }); });
+  return out;
+}
+function kmMedian(items) {   // dias até voltar ao NC (Kaplan-Meier; quem segue abaixo do NC entra como censurado)
+  if (!items.length) return null; const ts = [...new Set(items.filter(i => i.ev).map(i => i.t))].sort((a, b) => a - b); let S = 1;
+  for (const t of ts) { const n = items.filter(i => i.t >= t).length, d = items.filter(i => i.ev && i.t === t).length; S *= 1 - d / n; if (S <= .5) return { med: t }; }
+  return { med: null, min: Math.max(...items.map(i => i.t)) };
+}
+function htGroups(list, keyFn, subFn, seed) {
+  const G = {}; list.forEach(h => { const k = keyFn(h); (G[k] = G[k] || { k, sub: subFn ? subFn(h) : '', items: [] }).items.push(h); });
+  return Object.values(G).map(g => { const v = g.items.filter(h => h.E != null).map(h => h.E), rng = rngFor('ht' + seed + g.k), bs = [];
+    if (v.length >= 3) for (let b = 0; b < 200; b++) bs.push(median(v.map(() => v[Math.floor(rng() * v.length)]))); bs.sort((x, y) => x - y);
+    return Object.assign(g, { n: g.items.length, nValid: v.length, E: v.length ? median(v) : null, ci: bs.length ? [bs[5], bs[194]] : null, piv: new Set(g.items.map(h => h.pid)).size, km: kmMedian(g.items), raw: median(g.items.map(h => h.raw).filter(x => x != null)) }); });
+}
+const htLevel = g => g.nValid >= 8 && g.piv >= 3 && g.ci && g.ci[0] > 0 ? 'forte' : g.nValid >= 5 && g.ci && g.ci[0] > 0 ? 'moderada' : g.nValid >= 3 ? 'fraca' : null;
+// camada 4: risco de passar do NC em 7 dias, com a previsão do tempo; só mostra probabilidade se vencer a referência (repetir a última vistoria)
+function predictRow(M, r, xs) { const x = designRow(r, M.reps, xs), gap = r.d2 - r.d1, mu = Math.log(r.v1 + r.eps) + dot(x, M.beta) * gap / 7, sig = Math.max(.05, M.sd * Math.sqrt(gap / 7));
+  return { mu, p: 1 - Phi((Math.log(r.nc + r.eps) - mu) / sig) }; }
+function rxRisk(a, D, R) {
+  const M = R.M, eps = .05 * a.nc, T = D + 7, list = [];
+  PIVOS.forEach(p => { const s = PEST[a.id][p.id]; if (!s) return; let o = null; for (const q of s.obs) { if (q.day <= D) o = q; else break; }
+    const lastApp = s.apps.filter(x => x.day <= D).pop(), recent = lastApp && D - lastApp.day <= 10 ? lastApp : null, base = { pid: p.id };
+    if (!o || D - o.day > 14) return list.push(Object.assign(base, { st: 'sem' }));
+    if (o.v >= a.nc) return list.push(Object.assign(base, { st: 'acima', v: o.v, day: o.day, app: recent }));
+    if (recent) return list.push(Object.assign(base, { st: 'ctl', v: o.v, day: o.day, app: recent }));
+    const r = { pid: p.id, stage: p.stage, d1: o.day, d2: T, v1: o.v, eps, nc: a.nc, aval: 'A' }, xs = M.reps.map(q => { const v = fval(r, q.f, q.wi); return v == null ? -Infinity : v; });
+    const pr = predictRow(M, r, xs), factors = M.reps.map((q, j) => ({ q, v: xs[j], on: xs[j] >= q.t })).filter(z => z.on && ['forte', 'moderada'].includes(z.q.level));
+    list.push(Object.assign(base, { st: 'ok', v: o.v, day: o.day, prob: pr.p, pred: Math.exp(pr.mu) - eps, up: factors.filter(z => z.q.beta > 0).sort((u, w) => w.q.beta - u.q.beta).slice(0, 3), down: factors.filter(z => z.q.beta < 0).sort((u, w) => u.q.beta - w.q.beta).slice(0, 2) })); });
+  const cut = D - 21, tr = R.rows.filter(r => r.d2 <= cut), te = R.rows.filter(r => r.d2 > cut); let gate = { ok: false, n: te.length };
+  if (tr.length >= 24 && te.length >= 10) { const Mt = rxFit(tr.map(r => Object.assign({}, r))); if (Mt) { let bm = 0, bp = 0;
+    te.forEach(r => { const xs = Mt.reps.map(q => { const v = fval(r, q.f, q.wi); return v == null ? -Infinity : v; }), y = r.v2 >= a.nc ? 1 : 0; bm += (predictRow(Mt, r, xs).p - y) ** 2; bp += ((r.v1 >= a.nc ? 1 : 0) - y) ** 2; });
+    gate = { ok: bm < bp, bm: bm / te.length, bp: bp / te.length, n: te.length, ev: te.filter(r => r.v2 >= a.nc).length }; } }
+  return { list, gate, T };
+}
+const RXC = new Map();
+function rxGet(alvoId, D) {
+  const key = alvoId + '|' + D; if (RXC.has(key)) return RXC.get(key);
+  const a = ALVOS.find(x => x.id === alvoId), rows = rxRows(a, D), R = { a, D, rows, n: rows.length, piv: new Set(rows.map(r => r.pid)).size, wks: new Set(rows.map(r => r.wk)).size };
+  R.nObs = PIVOS.reduce((s, p) => s + (PEST[a.id][p.id] ? PEST[a.id][p.id].obs.filter(o => o.day <= D).length : 0), 0);
+  R.ht = rxHT(a, D); R.cold = R.n < 24 || R.piv < 3 || R.wks < 4;
+  if (!R.cold) { const M = rxFit(rows); if (M) { R.M = M; rxBoot(R, M); rxStable(R, M); rxLevels(R); R.risk = rxRisk(a, D, R); } else R.cold = true; }
+  RXC.set(key, R); if (RXC.size > 80) RXC.delete(RXC.keys().next().value); return R;
+}
+function rxHeat(R) {   // mapa de correlações: Spearman de cada variável × janela com o crescimento; intervalo de 90 % por bootstrap em blocos
+  if (R.heat) return R.heat; const y = rxResid(R.rows), rng = rngFor('heat' + R.a.id + R.D), pids = [...new Set(R.rows.map(r => r.pid))], wks = [...new Set(R.rows.map(r => r.wk))], samples = [];
+  for (let b = 0; b < 80; b++) { const cp = {}, cw = {}; pids.forEach(() => { const k = pids[Math.floor(rng() * pids.length)]; cp[k] = (cp[k] || 0) + 1; }); wks.forEach(() => { const k = wks[Math.floor(rng() * wks.length)]; cw[k] = (cw[k] || 0) + 1; });
+    const ix = []; R.rows.forEach((r, i) => { const m = (cp[r.pid] || 0) * (cw[r.wk] || 0); for (let k = 0; k < m; k++) ix.push(i); }); if (ix.length > 10) samples.push(ix); }
+  R.heat = RXF.map(f => ({ f, cells: f.wins.map((w, wi) => { const x = impute(R.rows.map(r => fval(r, f, wi))), rho = spear(x, y);
+    const bs = samples.map(ix => spear(ix.map(i => x[i]), ix.map(i => y[i]))).filter(v => v != null).sort((p, q) => p - q), lo = bs[Math.floor(.05 * (bs.length - 1))], hi = bs[Math.ceil(.95 * (bs.length - 1))];
+    return { w: w[0], rho, sig: rho != null && bs.length > 20 && (lo > 0 || hi < 0) }; }) }));
+  return R.heat;
+}
+
+// ================= estado =================
+const S = { layer: 'pragas', alvo: 'acaro', idx: 'NDVI', scale: 'abs', day: DAYS, sel: null, group: 'prod', sort: { k: 'red', dir: -1 }, playing: null,
+  show: { def: true, adub: true, agua: true, clima: true }, pop: null };
+try { const g = JSON.parse(localStorage.getItem('pdt.v3') || '{}'); ['layer', 'alvo', 'idx'].forEach(k => { if (g[k]) S[k] = g[k]; }); } catch (e) {}
+const save = () => { try { localStorage.setItem('pdt.v3', JSON.stringify({ layer: S.layer, alvo: S.alvo, idx: S.idx })); } catch (e) {} };
+const A = () => ALVOS.find(a => a.id === S.alvo);
+const isPest = () => S.layer === 'pragas';
+
+function pestAt(pid, day) {
+  const sim = PEST[S.alvo][pid]; if (!sim) return null; let o = null; for (const q of sim.obs) { if (q.day <= day) o = q; else break; }
+  if (!o) return { state: 'nodata', age: null }; const age = day - o.day; if (age > 14) return { state: 'nodata', age, v: o.v, day: o.day };
+  const ratio = o.v / A().nc; return { v: o.v, day: o.day, age, ratio, state: ratio >= 1 ? 'bad' : ratio >= .5 ? 'warn' : 'ok' };
+}
+function satAt(pid, day) {
+  const sc = SAT[pid].scenes.filter(s => s.day <= day); if (!sc.length) return { state: 'noimg' };
+  const last = sc[sc.length - 1], valid = [...sc].reverse().find(s => s.ok);
+  if (!last.ok && (!valid || day - valid.day > 15)) return { state: 'cloud', cloud: last.cloud, day: last.day };
+  if (!valid || day - valid.day > 15) return { state: 'noimg' };
+  return { state: 'ok', v: valid[S.idx].med, day: valid.day, age: day - valid.day, cloudLast: last.ok ? null : last };
+}
+function pestGlobal(day) { let sw = 0, sv = 0, acima = 0, sem = 0, n = 0;
+  PIVOS.forEach(p => { if (p.pestOff) return; n++; const q = pestAt(p.id, day); if (!q || q.state === 'nodata') { sem++; return; } sw += p.ha; sv += p.ha * q.v; if (q.state === 'bad') acima++; });
+  return { v: sw ? sv / sw : null, acima, sem, n }; }
+function satGlobal(day, stage) { const vals = []; let sw = 0, sv = 0, sem = 0, n = 0;
+  PIVOS.forEach(p => { if (p.stage === 'solo' || (p.stage === 'velha' && day > 75)) return; if (stage && p.stage !== stage) return; n++; const q = satAt(p.id, day); if (q.state !== 'ok') { sem++; return; } sw += p.ha; sv += p.ha * q.v; vals.push(q.v); });
+  vals.sort((a, b) => a - b); const qt = f => vals.length ? vals[Math.min(vals.length - 1, Math.floor(f * (vals.length - 1)))] : null;
+  return { v: sw ? sv / sw : null, q25: qt(.25), q75: qt(.75), sem, n }; }
+function waterOn(day, pid) { if (pid) return { rain: RAINMM[day] || 0, irr: WATER[pid].irr[day] }; let sw = 0, si = 0;
+  PIVOS.forEach(p => { if (NEED[p.stage] > 0) { sw += p.ha; si += p.ha * WATER[p.id].irr[day]; } }); return { rain: RAINMM[day] || 0, irr: sw ? si / sw : 0 }; }
+
+const fmtV = (v, a) => (a.un === '%' ? nf0.format(v) + ' %' : nf1.format(v) + a.curto);
+const fmtVlong = (v, a) => (a.un === '%' ? nf0.format(v) + ' % de ' + a.med : nf1.format(v) + ' ' + a.med);
+const stateTxt = { bad: 'acima do NC', warn: 'perto do NC', ok: 'abaixo do NC', nodata: 'sem vistoria recente' };
+const stateVar = { bad: 'var(--bad)', warn: 'var(--warn)', ok: 'var(--ok)', nodata: 'var(--nodata)' };
+const fmtRed = r => r >= 0 ? nf0.format(r * 100) + ' %' : 'subiu ' + nf0.format(-r * 100) + ' %';
+const fmtQ = (q, du) => (q >= 100 ? nf0.format(q) : nf1.format(q)) + ' ' + du;
+const CLS_TXT = ['Falha', 'Fraco', 'Atenção', 'Médio', 'Bom', 'Vigor alto'];
+const climaTxt = c => nf0.format(c.tmax) + ' °C máx · ' + nf0.format(c.tmin) + ' °C mín · UR ' + nf0.format(c.ur) + ' % · folha molhada ' + nf0.format(c.molh) + ' h';
+function satClass(v) {
+  let cuts = IDX[S.idx].cuts;
+  if (S.scale === 'rel') { const vals = PIVOS.map(p => { const q = satAt(p.id, S.day); return q.state === 'ok' && p.stage !== 'solo' && !(p.stage === 'velha' && S.day > 75) ? q.v : null; }).filter(x => x != null).sort((a, b) => a - b);
+    if (vals.length > 3) { const lo = vals[Math.floor(.02 * (vals.length - 1))], hi = vals[Math.ceil(.98 * (vals.length - 1))]; cuts = [1, 2, 3, 4, 5].map(i => lo + (hi - lo) * i / 6); } }
+  let c = 0; while (c < 5 && v >= cuts[c]) c++; return { c, cuts };
+}
+const tBin = t => t < 28 ? 1 : t < 31 ? 2 : t < 33 ? 3 : t < 35 ? 4 : 5;
+const uBin = u => u < 40 ? 1 : u < 50 ? 2 : u < 65 ? 3 : u < 80 ? 4 : 5;
+
+// ================= ícones =================
+const ICON = {
+  def: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5C6 4.6 3.5 7.2 3.5 9.9a4.5 4.5 0 0 0 9 0C12.5 7.2 10 4.6 8 1.5z"/></svg>',
+  adub: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 2.5C7 2.6 3.2 5.6 3.2 10.1c0 .9.2 1.8.6 2.6L2.5 14l.9.9 1.4-1.4c.7.4 1.5.5 2.3.5 4.4 0 6.6-4 6.4-11.5zM5.6 12.1c1.2-2.6 3.1-4.6 5.6-6.1-2.1 1.8-3.7 3.8-4.6 6.5z"/></svg>',
+  oper: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3h10v2H3zm1 3h8l-1 8H5z"/></svg>',
+  agua: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 6.5c1.5 0 1.5-1 3-1s1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 3-1v2c-1.5 0-1.5 1-3 1s-1.5-1-3-1-1.5 1-3 1-1.5-1-3-1-1.5 1-3 1zm0 4c1.5 0 1.5-1 3-1s1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 3-1v2c-1.5 0-1.5 1-3 1s-1.5-1-3-1-1.5 1-3 1-1.5-1-3-1-1.5 1-3 1z"/></svg>',
+  clima: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 1.5a2 2 0 0 1 2 2v6.3a3.3 3.3 0 1 1-4 0V3.5a2 2 0 0 1 2-2zm0 9.2a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2zM11 3h3v1.5h-3zm0 3h3v1.5h-3z"/></svg>' };
+const KIND_TXT = { def: 'Defensivo', adub: 'Adubação', oper: 'Operação' };
+
+// ================= barra de camadas =================
+function seg(el, items, current, onPick) {
+  el.innerHTML = '';
+  items.forEach(([id, label]) => { const b = document.createElement('button'); b.type = 'button'; b.setAttribute('role', 'radio'); b.id = el.id + '-' + id; b.textContent = label;
+    b.setAttribute('aria-checked', String(id === current)); b.tabIndex = id === current ? 0 : -1; b.addEventListener('click', () => onPick(id));
+    b.addEventListener('keydown', e => { if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return; e.preventDefault(); const i = items.findIndex(q => q[0] === current);
+      const j = (i + (e.key === 'ArrowRight' ? 1 : items.length - 1)) % items.length; onPick(items[j][0]); const nb = document.getElementById(el.id + '-' + items[j][0]); if (nb) nb.focus(); });
+    el.appendChild(b); });
+}
+function renderBar() {
+  seg(document.getElementById('layers'), [['pragas', 'Pragas e doenças'], ['sat', 'Satélite']], S.layer, id => { S.layer = id; closePop(); save(); renderAll(); });
+  document.getElementById('crumbLayer').textContent = isPest() ? 'Pragas e doenças' : 'Satélite';
+  const subs = document.getElementById('subs'), scale = document.getElementById('scale');
+  document.getElementById('subsLbl').textContent = isPest() ? 'Alvo' : 'Índice';
+  document.getElementById('scaleLbl').hidden = scale.hidden = isPest();
+  if (isPest()) seg(subs, ALVOS.map(a => [a.id, a.nome]), S.alvo, id => { S.alvo = id; RXUI.fnd = null; closePop(); save(); renderAll(); });
+  else { seg(subs, [['NDVI', 'NDVI'], ['NDRE', 'NDRE']], S.idx, id => { S.idx = id; closePop(); save(); renderAll(); });
+    seg(scale, [['abs', 'Absoluto'], ['rel', 'Fazenda']], S.scale, id => { S.scale = id; renderBar(); renderMap(); renderLegend(); }); }
+  renderMeasure();
+}
+function renderMeasure() {
+  const el = document.getElementById('measure');
+  if (isPest()) { const a = A(); el.innerHTML = 'Medida: <b>' + (a.un === '%' ? '% de ' : '') + a.med + '</b> · NC <b>' + fmtV(a.nc, a) + '</b> <span title="Valor de exemplo; no Safrion vem do protocolo publicado">(protocolo)</span>'; }
+  else { const last = SCENES.filter(d => d <= S.day).pop(); el.innerHTML = 'Sentinel-2 · 10 m · cena de <b>' + (last != null ? fmtD(last) : '—') + '</b> · mediana do pivô, só pixels sem nuvem <span title="Série sintética ancorada nas cenas de 10/09 e 25/09 do protótipo">(sintético)</span>'; }
+}
+function renderToggles() {
+  const el = document.getElementById('toggles'); el.innerHTML = '<span>Na linha do tempo:</span>';
+  [['def', 'Defensivos', 'var(--def)', ICON.def], ['adub', 'Adubação', 'var(--adub)', ICON.adub], ['agua', 'Chuva e irrigação', 'var(--irr)', ICON.agua], ['clima', 'Temperatura e umidade', 'var(--t4)', ICON.clima]].forEach(([k, t, c, ic]) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'tg'; b.setAttribute('aria-pressed', String(S.show[k]));
+    b.innerHTML = '<span class="ic" style="color:' + c + ';border-color:' + c + '">' + ic + '</span>' + t;
+    b.addEventListener('click', () => { S.show[k] = !S.show[k]; closePop(); renderToggles(); renderTimeline(); renderPanel(); });
+    el.appendChild(b); });
+}
+
+// ================= mapa =================
+const mapEl = document.getElementById('map'); let mapTip = null;
+function renderMap() {
+  mapEl.innerHTML = ''; const a = A();
+  const lake = document.createElement('div'); lake.className = 'lake'; lake.setAttribute('aria-hidden', 'true'); Object.assign(lake.style, { left: '54%', top: '57%', width: '9.5%', height: '13%' }); mapEl.appendChild(lake);
+  PIVOS.forEach(p => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'pv';
+    const dd = 5.6 + Math.sqrt(p.ha) * 0.8; b.style.left = p.x + '%'; b.style.top = p.y + '%'; b.style.width = dd + '%';
+    let lab = '<span class="id">' + p.id + '</span>', desc = p.id + ', ' + nf1.format(p.ha) + ' ha, ' + STAGE_TXT[p.stage], tip = '<b>' + p.id + ' · ' + nf1.format(p.ha) + ' ha · ' + STAGE_TXT[p.stage] + '</b>';
+    if (isPest()) {
+      if (p.pestOff) { b.classList.add('nocrop'); b.disabled = true; b.innerHTML = lab + '<span class="s">' + STAGE_TXT[p.stage] + '</span>'; b.setAttribute('aria-label', desc); mapEl.appendChild(b); return; }
+      const q = pestAt(p.id, S.day); b.classList.add(q.state);
+      if (q.state !== 'nodata') lab += '<span class="v num">' + fmtV(q.v, a) + '</span><span class="s">' + stateTxt[q.state] + '</span>'; else lab += '<span class="s">' + (q.day != null ? 'vistoria há ' + q.age + ' d' : 'sem vistoria') + '</span>';
+      const txt = q.state === 'nodata' ? 'sem vistoria nos últimos 14 dias' : fmtVlong(q.v, a) + ', ' + stateTxt[q.state] + ', vistoria em ' + fmtD(q.day);
+      desc += ', ' + txt; tip += txt[0].toUpperCase() + txt.slice(1);
+    } else {
+      const q = satAt(p.id, S.day);
+      if (p.stage === 'solo' || (p.stage === 'velha' && S.day > 75)) { b.classList.add('nocrop'); lab += '<span class="s">sem lavoura</span>'; desc += ', sem lavoura'; tip += 'Sem lavoura · índice de solo exposto'; }
+      else if (q.state === 'cloud') { b.classList.add('cloud'); lab += '<span class="s">nuvem ' + nf0.format(q.cloud) + ' %</span>'; desc += ', nuvem em ' + fmtD(q.day); tip += 'Cena de ' + fmtD(q.day) + ' com ' + nf0.format(q.cloud) + ' % de nuvem: sem valor'; }
+      else if (q.state === 'noimg') { b.classList.add('nodata'); lab += '<span class="s">sem imagem</span>'; desc += ', sem imagem válida em 15 dias'; tip += 'Sem imagem válida nos últimos 15 dias'; }
+      else { const { c } = satClass(q.v); b.style.background = 'var(--c' + (c + 1) + ')'; if (c === 2 || c === 3) b.classList.add('dark');
+        lab += '<span class="v num">' + S.idx + ' ' + nf2.format(q.v) + '</span><span class="s">' + CLS_TXT[c].toLowerCase() + '</span>';
+        desc += ', ' + S.idx + ' ' + nf2.format(q.v) + ', ' + CLS_TXT[c].toLowerCase() + ', cena de ' + fmtD(q.day);
+        tip += S.idx + ' ' + nf2.format(q.v) + ' (' + CLS_TXT[c].toLowerCase() + ') · cena de ' + fmtD(q.day) + (q.cloudLast ? '<br>Cena de ' + fmtD(q.cloudLast.day) + ' com nuvem: mantida a anterior' : '') +
+          (WATER[p.id].suff < .8 ? '<br>Irrigação cobre ' + nf0.format(WATER[p.id].suff * 100) + ' % da necessidade' : ''); }
+    }
+    const recent = EVENTS.filter(e => e.pid === p.id && e.day <= S.day && S.day - e.day <= 10 && (isPest() ? (e.kind === 'def' && e.alvo === S.alvo) : e.kind !== 'def'));
+    if (recent.length) { const kinds = [...new Set(recent.map(e => e.kind))];
+      lab += '<span class="badges" aria-hidden="true">' + kinds.map(k => '<span class="badge" style="border-color:var(--' + k + ');color:var(--' + k + ')">' + ICON[k] + '</span>').join('') + '</span>';
+      const last = recent[recent.length - 1]; desc += ', ' + KIND_TXT[last.kind].toLowerCase() + ' em ' + fmtD(last.day); tip += '<br>' + KIND_TXT[last.kind] + ' em ' + fmtD(last.day) + ': ' + last.items.map(i => i.n).join(' + '); }
+    b._tip = tip + '<br><span style="color:var(--muted)">Clique para ver a evolução</span>';
+    b.innerHTML = lab; b.setAttribute('aria-label', desc); b.setAttribute('aria-pressed', String(S.sel === p.id));
+    b.addEventListener('click', () => select(S.sel === p.id ? null : p.id));
+    b.addEventListener('mouseenter', () => showMapTip(b)); b.addEventListener('mouseleave', hideMapTip); b.addEventListener('focus', () => showMapTip(b)); b.addEventListener('blur', hideMapTip);
+    mapEl.appendChild(b);
+  });
+  const demo = document.createElement('div'); demo.className = 'demo'; demo.textContent = 'Demonstração sintética'; mapEl.appendChild(demo);
+}
+function showMapTip(el) { hideMapTip(); mapTip = document.createElement('div'); mapTip.className = 'maptip'; mapTip.innerHTML = el._tip || ''; mapEl.appendChild(mapTip);
+  const mr = mapEl.getBoundingClientRect(), er = el.getBoundingClientRect(); let left = er.left - mr.left + er.width / 2 - mapTip.offsetWidth / 2, top = er.top - mr.top - mapTip.offsetHeight - 8; if (top < 4) top = er.bottom - mr.top + 8;
+  mapTip.style.left = Math.max(4, Math.min(mr.width - mapTip.offsetWidth - 4, left)) + 'px'; mapTip.style.top = top + 'px'; }
+function hideMapTip() { if (mapTip) { mapTip.remove(); mapTip = null; } }
+function renderLegend() {
+  const el = document.getElementById('legend');
+  if (isPest()) { el.innerHTML = '<span><i style="background:var(--bad)"></i>acima do NC</span><span><i style="background:var(--warn)"></i>perto do NC (50 a 99 %)</span><span><i style="background:var(--ok)"></i>abaixo do NC</span><span><i style="background:var(--nodata)"></i>sem vistoria em 14 dias</span><span><i style="background:var(--nocrop)"></i>sem lavoura</span><span><i style="background:var(--surface);border:2px solid var(--def)"></i>defensivo nos últimos 10 dias</span>'; return; }
+  const { cuts } = satClass(.5); const f = v => nf2.format(v);
+  const ranges = [0, 1, 2, 3, 4, 5].map(i => i === 0 ? '< ' + f(cuts[0]) : i === 5 ? '≥ ' + f(cuts[4]) : f(cuts[i - 1]) + ' a ' + f(cuts[i]));
+  el.innerHTML = ranges.map((r, i) => '<span><i style="background:var(--c' + (i + 1) + ')"></i>' + CLS_TXT[i] + ' ' + r + '</span>').join('') +
+    '<span><i class="hatch"></i>nuvem ou sem imagem</span><span><i style="background:var(--nocrop)"></i>sem lavoura</span><span><i style="background:var(--surface);border:2px solid var(--adub)"></i>adubação nos últimos 10 dias</span>' +
+    '<span class="note">' + (S.scale === 'rel' ? 'Contraste da fazenda: compara os pivôs nesta data; não mede gravidade.' : 'Limites absolutos de exemplo; no Safrion são configurados por cultura e estádio.') + '</span>';
+}
+
+// ================= gráfico (fazenda ou talhão) com manejo e clima =================
+function svgEl(tag, attrs, parent) { const e = document.createElementNS('http://www.w3.org/2000/svg', tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function niceMax(v) { const p = Math.pow(10, Math.floor(Math.log10(v))); const n = v / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * p; }
+function chartEvents(pid, kinds, bin) {
+  const list = EVENTS.filter(e => (pid ? e.pid === pid : true) && ((e.kind === 'def' && kinds.includes('def') && (!isPest() || e.alvo === S.alvo)) || ((e.kind === 'adub' || e.kind === 'oper') && kinds.includes('adub'))));
+  const groups = {}; list.forEach(e => { const kind = e.kind === 'def' ? 'def' : 'adub', b = Math.floor(e.day / bin), k = kind + '@' + b; (groups[k] = groups[k] || { bin: b, kind, list: [] }).list.push(e); });
+  return Object.values(groups).map(g => { g.days = [...new Set(g.list.map(e => e.day))].sort((a, b) => a - b); g.day = g.days.length === 1 ? g.days[0] : Math.min(DAYS, g.bin * bin + (bin - 1) / 2);
+    g.icon = g.list.every(e => e.kind === 'oper') ? 'oper' : g.kind; return g; });
+}
+const rangeTxt = days => days.length > 1 ? fmtD(days[0]) + ' a ' + fmtD(days[days.length - 1]) : fmtD(days[0]);
+function buildChart(opts) {
+  const host = opts.host, layer = opts.layer || host; host.innerHTML = ''; if (layer !== host) layer.querySelectorAll(':scope > .evt, :scope > .lanelab, :scope > .pop').forEach(x => x.remove());
+  const W = Math.max(280, host.clientWidth || 600), narrow = W < 520, pid = opts.pid;
+  const laneKinds = []; if (S.show.def) laneKinds.push('def'); if (S.show.adub) laneKinds.push('adub');
+  const plotH = opts.compact ? 120 : (narrow ? 110 : 120);
+  const m = { l: 38, r: opts.compact || narrow ? 12 : 56, t: opts.compact ? 12 : 26 };
+  const waterH = S.show.agua ? 24 : 0, climaH = S.show.clima ? 26 : 0, laneH = 24 * laneKinds.length;
+  const plotB = m.t + plotH, waterT = plotB + 8, climaT = waterT + waterH + (waterH ? 6 : 0), laneT = climaT + climaH + (climaH ? 6 : 0), axisT = laneT + laneH + 4;
+  const H = axisT + 16, pw = W - m.l - m.r, X = d => m.l + (d / DAYS) * pw;
+  let series, yMax, yMin = 0, ref = null, fmtY;
+  if (isPest()) { const a = A(); fmtY = v => a.un === '%' ? nf0.format(v) : nf1.format(v);
+    const g = []; for (let d = 0; d <= DAYS; d++) g.push(pestGlobal(d).v); const own = pid ? PEST[S.alvo][pid].obs : null;
+    yMax = niceMax(Math.max(a.nc * 1.5, ...g.map(v => v || 0), ...(own || []).map(o => o.v)) * 1.08); ref = a.nc; series = { g, own }; }
+  else { fmtY = v => nf2.format(v); const g = [], q25 = [], q75 = [], stage = pid ? P(pid).stage : null;
+    for (let d = 0; d <= DAYS; d++) { const s = satGlobal(d, stage && !['solo', 'velha'].includes(stage) ? stage : null); g.push(s.v); q25.push(s.q25); q75.push(s.q75); }
+    const own = pid ? SAT[pid].scenes : null;
+    const vals = [...g, ...q25, ...q75].filter(v => v != null).concat(own ? own.flatMap(s => [s[S.idx].p10, s[S.idx].p90]) : []);
+    yMin = Math.max(0, Math.floor((Math.min(...vals) - .03) * 20) / 20); yMax = Math.min(1, Math.ceil((Math.max(...vals) + .03) * 20) / 20); series = { g, q25, q75, own }; }
+  const Y = v => m.t + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+  const svg = svgEl('svg', { class: 'chart', viewBox: `0 0 ${W} ${H}`, 'aria-hidden': 'true' });
+  for (let i = 0; i <= 2; i++) { const v = yMin + (yMax - yMin) * i / 2, y = Y(v); svgEl('line', { class: i ? 'grid' : 'ax', x1: m.l, x2: W - m.r, y1: y, y2: y }, svg);
+    const t = svgEl('text', { x: m.l - 6, y: y + 4, 'text-anchor': 'end' }, svg); t.textContent = fmtY(v); }
+  if (ref != null) { svgEl('line', { class: 'ncl', x1: m.l, x2: W - m.r, y1: Y(ref), y2: Y(ref) }, svg);
+    if (!(opts.compact || narrow)) { const t = svgEl('text', { x: W - m.r + 6, y: Y(ref) + 4 }, svg); t.textContent = 'NC ' + fmtV(ref, A()); t.style.fill = 'var(--nc)'; t.style.fontWeight = '700'; } }
+  const bin = Math.max(1, Math.ceil(25 / (pw / DAYS)));
+  const evs = chartEvents(pid, laneKinds, bin);
+  if (pid) evs.forEach(g => svgEl('line', { class: 'evline', x1: X(g.day), x2: X(g.day), y1: m.t, y2: laneT + laneKinds.indexOf(g.kind) * 24 + 12, stroke: 'var(--' + g.kind + ')' }, svg));
+  const pathOf = (arr, gx, gy) => { let s = ''; arr.forEach((v, i) => { const y = gy(v, i); if (y == null) return; s += (s ? 'L' : 'M') + X(gx(v, i)).toFixed(1) + ' ' + Y(y).toFixed(1); }); return s; };
+  if (isPest()) {
+    const dg = pathOf(series.g, (v, i) => i, v => v);
+    if (!pid) { const f = series.g.findIndex(v => v != null); if (f >= 0) svgEl('path', { class: 'mf', d: dg + `L${X(DAYS)} ${Y(0)}L${X(f)} ${Y(0)}Z` }, svg); }
+    svgEl('path', { class: pid ? 'gl' : 'ml', d: dg }, svg);
+    if (pid) { svgEl('path', { class: 'ml', d: pathOf(series.own, o => o.day, o => o.v) }, svg);
+      series.own.forEach(o => { const c = svgEl('circle', { cx: X(o.day), cy: Y(o.v), r: 4, class: 'pt' + (o.v >= ref ? ' bad' : '') }, svg); c.style.opacity = o.day <= S.day ? 1 : .35; }); }
+  } else {
+    let up = '', dn = '';
+    if (pid) { const ok = series.own.filter(s => s.ok); ok.forEach(s => { up += (up ? 'L' : 'M') + X(s.day).toFixed(1) + ' ' + Y(s[S.idx].p90).toFixed(1); }); [...ok].reverse().forEach(s => { dn += 'L' + X(s.day).toFixed(1) + ' ' + Y(s[S.idx].p10).toFixed(1); }); }
+    else { series.q75.forEach((v, d) => { if (v == null) return; up += (up ? 'L' : 'M') + X(d).toFixed(1) + ' ' + Y(v).toFixed(1); }); for (let d = DAYS; d >= 0; d--) { const v = series.q25[d]; if (v != null) dn += 'L' + X(d).toFixed(1) + ' ' + Y(v).toFixed(1); } }
+    if (up) svgEl('path', { class: 'bandf', d: up + dn + 'Z' }, svg);
+    svgEl('path', { class: pid ? 'gl' : 'ml', d: pathOf(series.g, (v, i) => i, v => v) }, svg);
+    if (pid) { const ok = series.own.filter(s => s.ok); svgEl('path', { class: 'ml', d: pathOf(ok, s => s.day, s => s[S.idx].med) }, svg);
+      series.own.forEach(s => { if (s.ok) { const c = svgEl('circle', { cx: X(s.day), cy: Y(s[S.idx].med), r: 3.5, class: 'pt' }, svg); c.style.opacity = s.day <= S.day ? 1 : .35; }
+        else svgEl('circle', { cx: X(s.day), cy: plotB - 5, r: 3.5, class: 'pt cloud' }, svg); }); }
+    SCENES.forEach(d => svgEl('line', { class: 'scn', x1: X(d), x2: X(d), y1: plotB, y2: plotB + 4 }, svg));
+  }
+  svgEl('line', { class: 'ax', x1: m.l, x2: W - m.r, y1: plotB, y2: plotB }, svg);
+  // água (mm): chuva + irrigação empilhadas
+  if (waterH) { const vals = []; for (let d = 0; d <= DAYS; d++) vals.push(waterOn(d, pid)); const maxMm = Math.max(10, ...vals.map(v => v.rain + v.irr));
+    const lab = svgEl('text', { x: m.l - 6, y: waterT + waterH - 3, 'text-anchor': 'end' }, svg); lab.textContent = 'mm';
+    vals.forEach((v, d) => { const hi = v.irr / maxMm * waterH, hr = v.rain / maxMm * waterH; if (hi > 0) svgEl('rect', { class: 'irrb', x: X(d) - 1.5, y: waterT + waterH - hi, width: 3, height: hi, rx: 1 }, svg);
+      if (hr > 0) svgEl('rect', { class: 'rainb', x: X(d) - 1.5, y: waterT + waterH - hi - hr, width: 3, height: hr, rx: 1 }, svg); }); }
+  // clima: Tmáx e UR em faixas de cor; marca de condição favorável ao alvo (pragas) ou calor ≥ 35 °C (satélite)
+  if (climaH) { const cw = Math.max(1.5, pw / DAYS + .4);
+    const l1 = svgEl('text', { x: m.l - 6, y: climaT + 8, 'text-anchor': 'end' }, svg); l1.textContent = '°C';
+    const l2 = svgEl('text', { x: m.l - 6, y: climaT + 18, 'text-anchor': 'end' }, svg); l2.textContent = 'UR';
+    CLIMA.forEach((c, d) => { svgEl('rect', { x: X(d) - cw / 2, y: climaT, width: cw, height: 8, fill: 'var(--t' + tBin(c.tmax) + ')' }, svg);
+      svgEl('rect', { x: X(d) - cw / 2, y: climaT + 10, width: cw, height: 8, fill: 'var(--u' + uBin(c.ur) + ')' }, svg);
+      const fav = isPest() ? A().fav(c) : c.calor; if (fav) svgEl('rect', { class: 'favb', x: X(d) - cw / 2, y: climaT + 21, width: cw, height: 4, rx: 1 }, svg); });
+  }
+  const stepD = opts.compact || narrow ? 14 : 7;
+  for (let d = 1; d <= DAYS; d += stepD) { const t = svgEl('text', { x: X(d), y: axisT + 11, 'text-anchor': 'middle' }, svg); t.textContent = fmtD(d); }
+  const cur = svgEl('g', {}, svg); const hov = svgEl('line', { class: 'hoverline', y1: m.t, y2: axisT, x1: -10, x2: -10, visibility: 'hidden' }, svg);
+  if (pid) svgEl('line', { class: 'cursor', x1: X(S.day), x2: X(S.day), y1: m.t - 4, y2: axisT }, svg);
+  host.appendChild(svg);
+  laneKinds.forEach((k, i) => { const l = document.createElement('div'); l.className = 'lanelab'; l.style.top = (laneT + i * 24 + 12) + 'px'; l.textContent = k === 'def' ? 'Def.' : 'Adub.'; l.setAttribute('aria-hidden', 'true'); layer.appendChild(l); });
+  evs.forEach(g => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'evt ' + g.kind; b.style.left = X(g.day) + 'px'; b.style.top = (laneT + laneKinds.indexOf(g.kind) * 24 + 12) + 'px';
+    b.innerHTML = ICON[g.icon] + (g.list.length > 1 ? '<span class="n">' + g.list.length + '</span>' : ''); if (g.days[0] > S.day) b.style.opacity = .35;
+    const what = g.list.length > 1 ? g.list.length + (g.kind === 'def' ? ' aplicações de defensivo' : ' adubações e operações') : g.list[0].items.map(i => i.n).join(' + ') + (pid ? '' : ' em ' + g.list[0].pid);
+    b.dataset.days = g.days.join(','); b.setAttribute('aria-label', rangeTxt(g.days) + ': ' + what + '. Ver insumos, doses e efeito.'); b.setAttribute('aria-haspopup', 'dialog'); b.setAttribute('aria-expanded', 'false');
+    b.addEventListener('pointerdown', e => e.stopPropagation()); b.addEventListener('click', e => { e.stopPropagation(); openPop(layer, b, g, X(g.day), pid); });
+    layer.appendChild(b);
+  });
+  return { W, H, m, X, Y, cur, hov, top0: m.t, axisT, series };
+}
+
+// ================= janela de insumos, doses e efeito =================
+function eventHTML(e, pid, multi) {
+  const p = P(e.pid), c = CLIMA[e.day]; let h = '<div class="ev">';
+  h += '<div><b>' + (multi ? fmtD(e.day) + ' · ' : '') + (pid ? '' : e.pid + ' · ') + (e.kind === 'def' ? 'Defensivo · ' + ALVOS.find(a => a.id === e.alvo).nome : e.via) + '</b> <span class="k">· ' + nf1.format(p.ha) + ' ha</span></div>';
+  h += '<table>' + e.items.map(it => '<tr><td>' + it.n + '</td><td class="r num">' + dose(it.dose) + ' ' + it.du + '/ha</td><td class="r num">' + fmtQ(it.total, it.du) + '</td></tr>').join('') + '</table>';
+  if (e.kind === 'adub') { const nut = {}; e.items.forEach(it => Object.entries(it.nut).forEach(([k, v]) => nut[k] = (nut[k] || 0) + v)); h += '<div class="k">Nutrientes: ' + Object.entries(nut).map(([k, v]) => k + ' ' + nf1.format(v) + ' kg/ha').join(' · ') + '</div>'; }
+  if (e.kind === 'def') { const ap = e.ap; h += '<div class="k">' + ap.prod.g + ' · ' + ap.entrada + 'ª entrada' + (ap.consec > 0 ? ' · ' + (ap.consec + 1) + 'ª seguida do grupo' : '') + '</div><div class="k">Calda: ' + e.calda + ' · ' + nf0.format(e.caldaL) + ' L no talhão</div>'; }
+  if (e.kind === 'oper') h += '<div class="k">' + e.os + ' · Calda: ' + e.calda + '</div>';
+  h += '<div class="k">Clima no dia: ' + climaTxt(c) + '</div>';
+  if (e.kind === 'def' && (c.ur < 50 || c.tmax > 32)) h += '<div class="k warn">Dia quente e seco: confira se a aplicação foi feita nas horas frescas, com vento e umidade dentro da faixa.</div>';
+  if (e.kind === 'def') { const ap = e.ap, a = ALVOS.find(x => x.id === e.alvo); const known = ap.after && ap.after.day <= S.day && ap.red != null;
+    if (known) { const cl = climaBetween(ap.day, ap.after.day);
+      h += '<div class="eff">Efeito no alvo: <b>' + fmtV(ap.before.v, a) + ' → ' + fmtV(ap.after.v, a) + '</b> (' + (ap.red >= 0 ? '−' + nf0.format(ap.red * 100) + ' %' : 'subiu ' + nf0.format(-ap.red * 100) + ' %') + ') · vistorias ' + fmtD(ap.before.day) + ' e ' + fmtD(ap.after.day) +
+        '<br>Até a vistoria: ' + (a.id === 'antrac' ? cl.mol + ' dia(s) com molhamento ≥ 8 h' : cl.qs + ' dia(s) quentes e secos') + '</div><button type="button" class="go" data-go="' + ap.after.day + '" data-pid="' + e.pid + '" data-layer="pragas">Ir para a vistoria de ' + fmtD(ap.after.day) + ' ›</button>'; }
+    else h += '<div class="eff">Efeito: aguarda a vistoria de 5 a 14 dias depois.</div>'; }
+  if (e.kind === 'adub') { const ef = vigorEffect(e, S.idx); const known = ef && ef.after.day <= S.day;
+    if (known) { const cl = climaBetween(e.day, ef.after.day);
+      h += '<div class="eff">Vigor (' + S.idx + '): <b>' + nf2.format(ef.before[S.idx].med) + ' → ' + nf2.format(ef.after[S.idx].med) + '</b> (' + signed2(ef.d) + ')' + (ef.rel != null ? ' · em relação aos pivôs ' + STAGE_TXT[p.stage] + ': <b>' + signed2(ef.rel) + '</b>' : '') + ' · cenas ' + fmtD(ef.before.day) + ' e ' + fmtD(ef.after.day) +
+        '<br>No período: ' + cl.cal + ' dia(s) ≥ 35 °C · irrigação cobre ' + nf0.format(WATER[e.pid].suff * 100) + ' % da necessidade</div><button type="button" class="go" data-go="' + ef.after.day + '" data-pid="' + e.pid + '" data-layer="sat">Ir para a cena de ' + fmtD(ef.after.day) + ' ›</button>'; }
+    else h += '<div class="eff">Efeito no vigor: aguarda cena sem nuvem de 10 a 25 dias depois.</div>'; }
+  return h + '</div>';
+}
+function openPop(layer, btn, g, x, pid) {
+  closePop(); const pop = document.createElement('div'); pop.className = 'pop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Manejo de ' + rangeTxt(g.days));
+  const max = 6, list = g.list.slice(0, max);
+  const multi = g.days.length > 1;
+  pop.innerHTML = '<button type="button" class="x" aria-label="Fechar">×</button><h4>' + (multi ? rangeTxt(g.days) : dDate(g.day).toLocaleDateString('pt-BR')) + ' · ' + (g.kind === 'def' ? 'Defensivos' : 'Adubação e operações') + ' · ' + g.list.length + '</h4>' +
+    list.map(e => eventHTML(e, pid, multi)).join('') + (g.list.length > max ? '<div class="note">E mais ' + (g.list.length - max) + ' neste intervalo. Clique num talhão do mapa para ver os dele.</div>' : '');
+  layer.appendChild(pop);
+  const hw = layer.clientWidth; let left = Math.max(4, Math.min(hw - pop.offsetWidth - 4, x - pop.offsetWidth / 2));
+  const bt = parseFloat(btn.style.top), br = btn.getBoundingClientRect(); const above = br.top - pop.offsetHeight - 16 > 8;
+  pop.style.left = left + 'px'; pop.style.top = (above ? bt - pop.offsetHeight - 16 : bt + 16) + 'px';
+  btn.setAttribute('aria-expanded', 'true'); S.pop = { el: pop, btn };
+  pop.addEventListener('pointerdown', e => e.stopPropagation());
+  pop.querySelector('.x').addEventListener('click', () => { closePop(); btn.focus(); });
+  pop.querySelectorAll('.go').forEach(b => b.addEventListener('click', () => { const d = +b.dataset.go; closePop(); stop(); S.layer = b.dataset.layer; S.sel = b.dataset.pid; S.day = d; save(); renderAll(); }));
+  pop.querySelector('.x').focus();
+}
+function closePop() { if (S.pop) { S.pop.btn.setAttribute('aria-expanded', 'false'); S.pop.el.remove(); S.pop = null; } }
+document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (S.pop) { const b = S.pop.btn; closePop(); b.focus(); } else if (S.sel) select(null); else if (RXUI.fnd && isPest()) { RXUI.fnd = null; renderPanel(); } });
+document.addEventListener('pointerdown', e => { if (S.pop && !S.pop.el.contains(e.target) && !S.pop.btn.contains(e.target)) closePop(); });
+
+// ================= linha do tempo da fazenda =================
+const tlEl = document.getElementById('tl'), tlBox = document.getElementById('tlbox'); let TL = null;
+function renderTimeline() {
+  TL = buildChart({ host: tlEl, layer: tlBox, pid: null }); drawCursor();
+  let k = isPest() ? '<span><i class="sw" style="border-color:var(--chart-line)"></i>Média da fazenda (ponderada por área)</span><span><i class="sw d" style="border-color:var(--nc)"></i>Nível de controle (NC)</span>'
+    : '<span><i class="sw" style="border-color:var(--chart-line)"></i>' + S.idx + ' médio da fazenda</span><span><i class="sq" style="background:var(--band)"></i>Metade central dos pivôs</span>';
+  if (S.show.agua) k += '<span><i class="sq" style="background:var(--rain)"></i>Chuva</span><span><i class="sq" style="background:var(--irr)"></i>Irrigação (média)</span>';
+  if (S.show.clima) k += '<span><span class="ramp">' + [1, 2, 3, 4, 5].map(i => '<i style="background:var(--t' + i + ')"></i>').join('') + '</span>Temperatura máxima (&lt; 28 a ≥ 35 °C)</span><span><span class="ramp">' + [1, 2, 3, 4, 5].map(i => '<i style="background:var(--u' + i + ')"></i>').join('') + '</span>Umidade do ar (&lt; 40 a ≥ 80 %)</span><span><i class="sq" style="background:var(--fav);height:4px"></i>' + (isPest() ? 'Favorável a ' + A().nome.toLowerCase() + ': ' + A().favCurto : 'Calor ≥ 35 °C') + '</span>';
+  document.getElementById('tlkeys').innerHTML = k;
+}
+function drawCursor() {
+  if (!TL) return; const { X, Y, m, cur, top0, axisT, series } = TL; cur.innerHTML = '';
+  const x = X(S.day); svgEl('line', { class: 'cursor', x1: x, x2: x, y1: top0 - 6, y2: axisT }, cur);
+  const v = series.g[S.day]; if (v != null) svgEl('circle', { cx: x, cy: Y(v), r: 5, class: 'pt' + (isPest() && v >= A().nc ? ' bad' : '') }, cur);
+  const w = 46, kx = Math.max(m.l, Math.min(TL.W - m.r - w, x - w / 2));
+  svgEl('rect', { class: 'knob', x: kx, y: 2, width: w, height: 18, rx: 9 }, cur); const t = svgEl('text', { class: 'knobtxt', x: kx + w / 2, y: 15, 'text-anchor': 'middle' }, cur); t.textContent = fmtD(S.day);
+  tlEl.setAttribute('aria-valuemin', '0'); tlEl.setAttribute('aria-valuemax', String(DAYS)); tlEl.setAttribute('aria-valuenow', String(S.day)); tlEl.setAttribute('aria-valuetext', dDate(S.day).toLocaleDateString('pt-BR'));
+}
+function dayFromEvent(e) { const r = tlEl.getBoundingClientRect(); const { m, W } = TL; const sx = (e.clientX - r.left) * (W / r.width); return Math.round(Math.max(0, Math.min(DAYS, (sx - m.l) / (W - m.l - m.r) * DAYS))); }
+let dragging = false, tipEl = null;
+tlEl.addEventListener('pointerdown', e => { if (!TL) return; dragging = true; tlEl.setPointerCapture(e.pointerId); stop(); closePop(); setDay(dayFromEvent(e)); });
+tlEl.addEventListener('pointermove', e => { if (!TL) return; const d = dayFromEvent(e); if (dragging) setDay(d); showTlTip(d, e); });
+tlEl.addEventListener('pointerup', e => { dragging = false; try { tlEl.releasePointerCapture(e.pointerId); } catch (x) {} });
+tlEl.addEventListener('pointerleave', hideTlTip);
+tlEl.addEventListener('keydown', e => { const step = e.shiftKey ? 7 : 1; let d = S.day;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowUp') d += step; else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') d -= step; else if (e.key === 'Home') d = 0; else if (e.key === 'End') d = DAYS; else return;
+  e.preventDefault(); stop(); setDay(Math.max(0, Math.min(DAYS, d))); });
+function showTlTip(d, e) {
+  const { X, hov } = TL; hov.setAttribute('x1', X(d)); hov.setAttribute('x2', X(d)); hov.setAttribute('visibility', 'visible');
+  if (!tipEl) { tipEl = document.createElement('div'); tipEl.className = 'tip'; tlEl.appendChild(tipEl); }
+  const w = waterOn(d), c = CLIMA[d]; let h = '<b>' + dDate(d).toLocaleDateString('pt-BR') + '</b>';
+  if (isPest()) { const s = pestGlobal(d), a = A(); h += '<div class="row"><span>Média da fazenda</span><span class="num">' + (s.v != null ? fmtV(s.v, a) : '—') + '</span></div><div class="row"><span>Acima do NC</span><span class="num">' + s.acima + ' de ' + s.n + '</span></div>'; }
+  else { const s = satGlobal(d); h += '<div class="row"><span>' + S.idx + ' médio</span><span class="num">' + (s.v != null ? nf2.format(s.v) : '—') + '</span></div>' + (SCENES.includes(d) ? '<div class="row"><span>Cena de satélite</span><span>' + ((SCENE_CLOUD[d] || 0) > 20 ? 'com nuvem' : 'sem nuvem') + '</span></div>' : ''); }
+  h += '<div class="row"><span>Temperatura</span><span class="num">' + nf0.format(c.tmax) + ' / ' + nf0.format(c.tmin) + ' °C</span></div><div class="row"><span>Umidade do ar</span><span class="num">' + nf0.format(c.ur) + ' %</span></div>' +
+    '<div class="row"><span>Folha molhada</span><span class="num">' + nf0.format(c.molh) + ' h</span></div><div class="row"><span>Chuva · irrigação</span><span class="num">' + nf0.format(w.rain) + ' · ' + nf1.format(w.irr) + ' mm</span></div>';
+  tipEl.innerHTML = h; const r = tlEl.getBoundingClientRect(); let left = e.clientX - r.left + 12; if (left + 210 > r.width) left = e.clientX - r.left - 222; tipEl.style.left = Math.max(0, left) + 'px'; tipEl.style.top = '0px';
+}
+function hideTlTip() { if (tipEl) { tipEl.remove(); tipEl = null; } if (TL) TL.hov.setAttribute('visibility', 'hidden'); }
+function renderNow() {
+  const el = document.getElementById('now'), c = CLIMA[S.day]; const dt = '<strong>' + dDate(S.day).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' }) + '</strong>';
+  const cl = ' · ' + nf0.format(c.tmax) + ' °C · UR ' + nf0.format(c.ur) + ' %';
+  if (isPest()) { const a = A(), s = pestGlobal(S.day); el.innerHTML = dt + cl + ' · média da fazenda ' + (s.v != null ? '<strong class="num">' + fmtV(s.v, a) + '</strong> (' + nf1.format(s.v / a.nc) + '× NC)' : '—') + ' · <span class="num">' + s.acima + '</span> de ' + s.n + ' talhões acima do NC'; }
+  else { const s = satGlobal(S.day); el.innerHTML = dt + cl + ' · ' + S.idx + ' médio ' + (s.v != null ? '<strong class="num">' + nf2.format(s.v) + '</strong>' : '—') + ' · ' + (s.n - s.sem) + ' de ' + s.n + ' pivôs com imagem válida'; }
+}
+function setDay(d) { if (d === S.day) return; S.day = d; closePop(); renderMeasure(); renderMap(); renderLegend(); renderTimeline(); renderNow(); renderPanel(); }
+function stop() { if (S.playing) { clearInterval(S.playing); S.playing = null; setPlayBtn(); } }
+function setPlayBtn() { const b = document.getElementById('play'); b.querySelector('span').textContent = S.playing ? 'Pausar' : 'Reproduzir'; b.setAttribute('aria-label', S.playing ? 'Pausar a evolução' : 'Reproduzir a evolução');
+  b.querySelector('svg').innerHTML = S.playing ? '<path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/>' : '<path d="M4 2.5v11l9-5.5z"/>'; }
+document.getElementById('play').addEventListener('click', () => { if (S.playing) { stop(); return; } if (S.day >= DAYS) setDay(0);
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  S.playing = setInterval(() => { if (S.day >= DAYS) { stop(); return; } setDay(Math.min(DAYS, S.day + (reduce ? 7 : 1))); }, reduce ? 600 : 150); setPlayBtn(); });
+document.getElementById('today').addEventListener('click', () => { stop(); setDay(DAYS); });
+
+// ================= painel =================
+const panelEl = document.getElementById('panel');
+function select(pid) { S.sel = pid; closePop(); renderMap(); renderPanel(); }
+function panelHead(html, onBack) { panelEl.innerHTML = ''; const h = document.createElement('div'); h.className = 'ph'; h.innerHTML = html; panelEl.appendChild(h);
+  const b = h.querySelector('.back'); if (b) b.addEventListener('click', onBack || (() => select(null))); const body = document.createElement('div'); body.className = 'pb'; panelEl.appendChild(body); return body; }
+function renderPanel() {
+  if (S.sel) { const p = P(S.sel); if (isPest() && p.pestOff) S.sel = null; else return isPest() ? renderPestPivot(p) : renderSatPivot(p); }
+  return isPest() ? renderRaioX() : renderVigorRanking();
+}
+function chartIn(body, pid, keys) { const box = document.createElement('div'); box.className = 'chartbox'; body.appendChild(box); buildChart({ host: box, pid, compact: true });
+  const k = document.createElement('div'); k.className = 'keys'; k.innerHTML = keys + '<span>Clique num ícone para ver insumos, doses e efeito</span>'; body.appendChild(k); return box; }
+function openIcon(box, kind, day) { const b = [...box.querySelectorAll('.evt.' + kind)].find(x => x.dataset.days.split(',').map(Number).includes(day)); if (b) b.click(); }
+function renderPestPivot(p) {
+  const a = A(), sim = PEST[S.alvo][p.id], q = pestAt(p.id, S.day), pf = PROF[p.id];
+  const body = panelHead('<button class="back" type="button">‹ Todos os talhões</button><h3>' + p.id + ' · ' + a.nome + '</h3><div class="sub">' + nf1.format(p.ha) + ' ha · Mamão Formosa ' + STAGE_TXT[p.stage] + ' · ' + EQ[pf.eq].n + '</div>' +
+    '<div class="state"><span class="chip"><i style="background:' + stateVar[q.state] + '"></i>' + (q.state === 'nodata' ? 'Sem vistoria nos últimos 14 dias' : stateTxt[q.state][0].toUpperCase() + stateTxt[q.state].slice(1) + ' · ' + fmtV(q.v, a) + ' em ' + fmtD(q.day)) + '</span></div>');
+  const RR = rxGet(a.id, S.day), rk = RR.risk && RR.risk.list.find(x => x.pid === p.id);
+  if (rk && rk.st === 'ok') { const dv = document.createElement('div'); dv.className = 'rkline'; const fx = rk.up.map(z => z.q.f.fmt(z.v)).concat(rk.down.map(z => z.q.f.fmt(z.v) + ' (reduz)'));
+    dv.innerHTML = '<strong>Próximos 7 dias:</strong> ' + (RR.risk.gate.ok ? '<strong class="num">' + probTxt(rk.prob) + '</strong> de chance de passar do NC' : 'previsto ' + fmtV(Math.max(0, rk.pred), a)) + (fx.length ? ' · ' + fx.join(' · ') : '') + ' <button type="button" class="lnk">Ver o Raio-X ›</button>';
+    dv.querySelector('.lnk').addEventListener('click', () => { RXUI.tab = 'risco'; RXUI.fnd = null; saveRx(); select(null); }); body.appendChild(dv); }
+  if (q.state === 'bad' && S.day === DAYS) { const dec = document.createElement('div'); dec.className = 'decide';
+    dec.innerHTML = '<div><strong>Próxima ação:</strong> decidir o controle deste talhão.</div><button class="btn primary" type="button">Decidir controle</button><div class="note" hidden>No Safrion, abre o painel de decisão da vistoria, com os produtos registrados e o receituário.</div>';
+    body.appendChild(dec); dec.querySelector('button').addEventListener('click', () => { dec.querySelector('.note').hidden = false; }); }
+  const box = chartIn(body, p.id, '<span><i class="sw" style="border-color:var(--chart-line)"></i>' + p.id + ' (vistorias)</span><span><i class="sw d" style="border-color:var(--global)"></i>Média da fazenda</span><span><i class="sw d" style="border-color:var(--nc)"></i>NC</span>');
+  const apps = sim.apps.filter(ap => ap.day <= S.day);
+  const h = document.createElement('h5'); h.innerHTML = 'Aplicações e efeito <span class="note">· vistoria antes → 5 a 14 dias depois</span>'; body.appendChild(h);
+  if (!apps.length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = 'Nenhuma aplicação para ' + a.nome.toLowerCase() + ' até ' + fmtD(S.day) + '.'; body.appendChild(e); }
+  const list = document.createElement('div'); list.className = 'apps'; body.appendChild(list);
+  [...apps].reverse().forEach(ap => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'app';
+    const known = ap.after && ap.after.day <= S.day && ap.red != null, effTxt = known ? (ap.red >= 0 ? '−' + nf0.format(ap.red * 100) + ' %' : 'subiu ' + nf0.format(-ap.red * 100) + ' %') : 'aguarda vistoria';
+    const ctl = ap.backDay != null && ap.backDay <= S.day ? ap.backDay - ap.day : null;
+    b.innerHTML = '<span class="d num">' + fmtD(ap.day) + '</span><span class="p">' + ap.prod.c + ' <span class="note">· ' + dose(ap.prod.dose) + ' ' + ap.prod.du + '/ha</span></span><span class="e num ' + (known ? (ap.red >= .6 ? 'good' : 'weak') : '') + '">' + effTxt + '</span>' +
+      '<span class="m">' + ap.prod.g + ' · ' + ap.entrada + 'ª entrada' + (ap.consec > 0 ? ' · ' + (ap.consec + 1) + 'ª seguida do grupo' : '') + ' · ' + EQ[ap.eq].c + '</span>' +
+      (known ? '<span class="ctl num">' + fmtV(ap.before.v, a) + ' → ' + fmtV(ap.after.v, a) + ' · ' + (ctl != null ? 'voltou ao NC em ' + ctl + ' dias' : 'segue abaixo do NC') + '</span>' : '');
+    b.setAttribute('aria-label', fmtD(ap.day) + ', ' + ap.prod.n + ', ' + dose(ap.prod.dose) + ' ' + ap.prod.du + ' por hectare, efeito ' + effTxt + '. Abrir insumos, doses e efeito.');
+    b.addEventListener('click', () => openIcon(box, 'def', ap.day)); list.appendChild(b);
+  });
+}
+function renderSatPivot(p) {
+  const q = satAt(p.id, S.day), W = WATER[p.id];
+  let chip; if (p.stage === 'solo' || (p.stage === 'velha' && S.day > 75)) chip = '<span class="chip"><i style="background:var(--nocrop)"></i>Sem lavoura</span>';
+  else if (q.state === 'ok') { const { c } = satClass(q.v); chip = '<span class="chip"><i style="background:var(--c' + (c + 1) + ')"></i>' + S.idx + ' ' + nf2.format(q.v) + ' · ' + CLS_TXT[c].toLowerCase() + ' · cena de ' + fmtD(q.day) + '</span>'; }
+  else chip = '<span class="chip"><i style="background:#9E9E9E"></i>' + (q.state === 'cloud' ? 'Nuvem na cena de ' + fmtD(q.day) : 'Sem imagem válida em 15 dias') + '</span>';
+  const body = panelHead('<button class="back" type="button">‹ Todos os talhões</button><h3>' + p.id + ' · vigor e manejo</h3><div class="sub">' + nf1.format(p.ha) + ' ha · Mamão Formosa ' + STAGE_TXT[p.stage] + (NEED[p.stage] ? ' · irrigação cobre ' + nf0.format(W.suff * 100) + ' % da necessidade' : '') + '</div><div class="state">' + chip + '</div>');
+  const box = chartIn(body, p.id, '<span><i class="sw" style="border-color:var(--chart-line)"></i>' + p.id + ' (mediana da cena)</span><span><i class="sq" style="background:var(--band)"></i>P10 a P90 do pivô</span><span><i class="sw d" style="border-color:var(--global)"></i>Pivôs ' + STAGE_TXT[p.stage] + '</span><span>○ cena com nuvem</span>');
+  const evs = EVENTS.filter(e => e.pid === p.id && e.kind !== 'def' && e.day <= S.day);
+  const h = document.createElement('h5'); h.innerHTML = 'Adubações e resposta do vigor <span class="note">· cena antes → 10 a 25 dias depois</span>'; body.appendChild(h);
+  if (!evs.length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = 'Nenhuma adubação até ' + fmtD(S.day) + '.'; body.appendChild(e); }
+  const list = document.createElement('div'); list.className = 'apps'; body.appendChild(list);
+  [...evs].reverse().forEach(e => {
+    const ef = e.kind === 'adub' ? vigorEffect(e, S.idx) : null, known = ef && ef.after.day <= S.day; const nN = e.kind === 'adub' ? e.items.reduce((s, it) => s + (it.nut.N || 0), 0) : 0;
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'app';
+    b.innerHTML = '<span class="d num">' + fmtD(e.day) + '</span><span class="p">' + e.items.map(i => i.n).join(' + ') + '</span><span class="e num ' + (known && ef.rel != null ? (ef.rel > .005 ? 'good' : 'weak') : '') + '">' + (known ? signed2(ef.rel != null ? ef.rel : ef.d) : (e.kind === 'oper' ? '' : 'aguarda cena')) + '</span>' +
+      '<span class="m">' + e.via + (nN ? ' · N ' + nf1.format(nN) + ' kg/ha' : '') + ' · ' + e.items.map(i => dose(i.dose) + ' ' + i.du + '/ha').join(' + ') + '</span>' +
+      (known ? '<span class="ctl num">' + S.idx + ' ' + nf2.format(ef.before[S.idx].med) + ' → ' + nf2.format(ef.after[S.idx].med) + (ef.rel != null ? ' · ' + signed2(ef.rel) + ' em relação aos pivôs ' + STAGE_TXT[p.stage] : '') + '</span>' : '');
+    b.setAttribute('aria-label', fmtD(e.day) + ', ' + e.items.map(i => i.n).join(' e ') + '. Abrir insumos, doses e efeito.');
+    b.addEventListener('click', () => openIcon(box, 'adub', e.day)); list.appendChild(b);
+  });
+}
+// ---- rankings: o que funcionou ----
+// ---- Raio-X do alvo (painel da camada Pragas e doenças) ----
+const LV = { forte: ['Forte', 3], moderada: ['Moderada', 2], fraca: ['Fraca', 1], confirmar: ['A confirmar', 0] };
+const lvHTML = lv => '<span class="lvl ' + lv + '" title="Nível de evidência"><span class="dots" aria-hidden="true">' + [1, 2, 3].map(i => '<i class="' + (i <= LV[lv][1] ? 'on' : '') + '"></i>').join('') + '</span>' + LV[lv][0] + '</span>';
+const pctS = v => (Math.abs(v) < .005 ? '' : v > 0 ? '+' : '−') + nf0.format(Math.abs(v * 100)) + ' %';
+const pctE = g => nf0.format(g.E * 100) + ' %';
+const fN = (v, f) => (f.dec === 2 ? nf2 : f.dec === 1 ? nf1 : nf0).format(v);
+const probTxt = p => p >= .95 ? 'mais de 95 %' : p < .05 ? 'menos de 5 %' : nf0.format(p * 100) + ' %';
+const kmTxt = km => !km ? '—' : km.med != null ? nf0.format(km.med) + ' dias (mediana)' : 'mais de ' + nf0.format(km.min) + ' dias';
+const MARKS = { confere: 'Confere com o campo', nao: 'Não confere', investigar: 'Investigar' };
+const RXUI = { tab: 'sobe', fnd: null, marks: {}, drafts: {} };
+try { const g = JSON.parse(localStorage.getItem('pdt.rx') || '{}'); if (g.tab) RXUI.tab = g.tab; if (g.marks) RXUI.marks = g.marks; } catch (e) {}
+const saveRx = () => { try { localStorage.setItem('pdt.rx', JSON.stringify({ tab: RXUI.tab, marks: RXUI.marks })); } catch (e) {} };
+const winTxt = q => q.f.wins[q.wi][0] || 'na semana da vistoria';
+const shown = q => !!LV[q.level];
+const lvRank = q => q.level === 'forte' || q.level === 'moderada' ? 2 : q.level === 'fraca' ? 1 : 0;
+function renderRaioX() {
+  const a = A(), R = rxGet(a.id, S.day);
+  if (RXUI.fnd) { const q = R.M && R.M.reps.find(x => x.f.k === RXUI.fnd); if (q) return renderFinding(R, q); RXUI.fnd = null; }
+  const body = panelHead('<h3>Raio-X · ' + a.nome + '</h3><div class="sub">O que faz ' + a.art + ' subir e descer nesta fazenda, medido em ' + R.nObs + ' vistorias até ' + fmtD(S.day) + ' · ' + R.n + ' semanas-talhão sem controle em ' + R.piv + ' talhões</div>');
+  const tb = document.createElement('div'); tb.className = 'seg'; tb.setAttribute('role', 'group'); tb.setAttribute('aria-label', 'Ver no Raio-X');
+  [['sobe', 'Sobe e desce'], ['controle', 'Controle'], ['risco', 'Risco 7 dias'], ['mapa', 'Correlações']].forEach(([k, t]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t;
+    b.setAttribute('aria-pressed', String(RXUI.tab === k)); b.addEventListener('click', () => { RXUI.tab = k; saveRx(); renderPanel(); }); tb.appendChild(b); });
+  body.appendChild(tb);
+  ({ sobe: rxSobe, controle: rxControle, risco: rxRiscoUI, mapa: rxMapa }[RXUI.tab] || rxSobe)(body, R, a);
+}
+function coldBlock(body, R, a) {
+  const d = document.createElement('div'); d.className = 'decide';
+  d.innerHTML = '<div><strong>Ainda há poucos dados para medir nesta fazenda.</strong> São ' + R.n + ' semanas-talhão sem controle até ' + fmtD(S.day) + '; o Raio-X mede a partir de 24, em 3 talhões e 4 semanas. Arraste a barra de tempo para frente.</div>';
+  body.appendChild(d); const h = document.createElement('h5'); h.innerHTML = 'Referência agronômica <span class="note">· não medida nesta fazenda</span>'; body.appendChild(h);
+  insightsList(body, PRIOR_TXT[a.id]); foot(body, 'Referência de exemplo. No Safrion, vem do protocolo do alvo validado pelo RT (AG-05) e aparece até haver dados suficientes.');
+}
+function effBar(beta, ci, L, dir) { const X = v => 150 + Math.max(-1, Math.min(1, v / L)) * 145, xb = X(beta);
+  return '<svg class="effbar" viewBox="0 0 300 12" preserveAspectRatio="none" aria-hidden="true"><line class="z" x1="150" x2="150" y1="0" y2="12"/><line class="ci" x1="' + X(ci[0]).toFixed(1) + '" x2="' + X(ci[1]).toFixed(1) + '" y1="6" y2="6"/><rect class="b ' + dir + '" x="' + Math.min(150, xb).toFixed(1) + '" y="3" width="' + Math.abs(xb - 150).toFixed(1) + '" height="6"/></svg>'; }
+function fxItem(q, L, dir) {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'fx'; const mk = RXUI.marks[S.alvo + '|' + q.f.k];
+  b.innerHTML = '<span class="t"><span class="tag">' + q.f.tipo + '</span>' + q.f.t + '</span><span class="e num ' + dir + '">' + pctS(q.eff) + '</span>' +
+    '<span class="c">' + q.f.cond(q.t, winTxt(q)) + ' → <strong>' + pctS(q.eff) + '</strong> em 7 dias (de ' + pctS(q.effCI[0]) + ' a ' + pctS(q.effCI[1]) + ')</span>' + effBar(q.beta, q.ci95, L, dir) +
+    '<span class="m">' + lvHTML(q.level) + '<span class="num">' + q.nHi + ' casos · ' + q.pivHi + ' talhões</span>' + (q.mates.length ? '<span>anda junto: ' + q.mates.map(h => h.f.t.toLowerCase()).join(', ') + '</span>' : '') + (mk ? '<span>RT: ' + MARKS[mk].toLowerCase() + '</span>' : '') + '</span>';
+  b.setAttribute('aria-label', q.f.t + ': ' + q.f.cond(q.t, winTxt(q)) + ', ' + pctS(q.eff) + ' em 7 dias, evidência ' + LV[q.level][0].toLowerCase() + '. Abrir a evidência.');
+  b.addEventListener('click', () => { RXUI.fnd = q.f.k; renderPanel(); const bk = panelEl.querySelector('.back'); if (bk) bk.focus(); });
+  return b;
+}
+function prodItem(g) {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'fx';
+  b.innerHTML = '<span class="t"><span class="tag">Defensivo</span>' + g.k + '</span><span class="e num dn">−' + pctE(g) + '</span>' +
+    '<span class="c">' + g.sub + ' · eficácia de <strong>' + pctE(g) + '</strong>' + (g.ci ? ' (de ' + nf0.format(g.ci[0] * 100) + ' % a ' + nf0.format(g.ci[1] * 100) + ' %)' : '') + ' contra talhões sem aplicação na mesma janela · segura abaixo do NC por ' + kmTxt(g.km) + '</span>' +
+    '<span class="m">' + lvHTML(htLevel(g)) + '<span class="num">' + g.nValid + ' aplicações · ' + g.piv + ' talhões</span></span>';
+  b.setAttribute('aria-label', g.k + ': eficácia de ' + pctE(g) + '. Abrir o controle por produto.');
+  b.addEventListener('click', () => { RXUI.tab = 'controle'; S.group = 'prod'; saveRx(); renderPanel(); });
+  return b;
+}
+function fxSection(body, title, dir, list, L, emptyTxt, prods) {
+  const sec = document.createElement('section'); sec.className = 'sec'; sec.setAttribute('aria-label', title);
+  sec.innerHTML = '<h5><span class="' + dir + '" aria-hidden="true">' + (dir === 'up' ? '▲' : '▼') + '</span> ' + title + ' <span class="note">· do maior para o menor efeito</span></h5>';
+  list.forEach(q => sec.appendChild(fxItem(q, L, dir))); (prods || []).forEach(g => sec.appendChild(prodItem(g)));
+  if (!list.length && !(prods || []).length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = emptyTxt; sec.appendChild(e); }
+  body.appendChild(sec);
+}
+function rxSobe(body, R, a) {
+  if (R.cold) return coldBlock(body, R, a);
+  const reps = R.M.reps.filter(shown), L = Math.min(Math.log(4), Math.max(.3, ...reps.flatMap(q => q.ci95.map(Math.abs)))), ord = (x, y) => lvRank(y) - lvRank(x) || Math.abs(y.beta) - Math.abs(x.beta);
+  const prods = htGroups(R.ht, h => h.ap.prod.c, h => h.ap.prod.g + ' · ' + dose(h.ap.prod.dose) + ' ' + h.ap.prod.du + '/ha', 'p' + a.id + R.D).filter(g => htLevel(g) && g.E > 0).sort((x, y) => y.E - x.E);
+  fxSection(body, 'Faz subir', 'up', reps.filter(q => q.beta > 0).sort(ord), L, 'Nenhum fator com evidência de alta até ' + fmtD(S.day) + '.');
+  fxSection(body, 'Faz descer', 'dn', reps.filter(q => q.beta < 0).sort(ord), L, 'Nenhum fator com evidência de queda até ' + fmtD(S.day) + '.', prods);
+  const nul = R.M.reps.filter(q => q.level === 'nulo'), ins = R.M.reps.filter(q => q.level === 'insuf');
+  if (nul.length || ins.length) { const p = document.createElement('div'); p.className = 'note';
+    p.innerHTML = (nul.length ? '<strong>Testado, sem efeito claro:</strong> ' + nul.map(q => q.f.t.toLowerCase()).join(', ') + '. ' : '') + (ins.length ? '<strong>Poucos casos para medir:</strong> ' + ins.map(q => q.f.t.toLowerCase()).join(', ') + ' (mínimo de 8 casos e 3 talhões).' : ''); body.appendChild(p); }
+  body.appendChild(calcDetails(R, a));
+  foot(body, 'Efeito = quanto o nível fica maior ou menor ao fim de 7 dias, comparado às semanas sem a condição, com os demais fatores iguais (nível de partida e estádio). Associação nos dados, não prova de causa; só o controle químico é medido contra talhões-controle. Demonstração com dados sintéticos. A decisão é do agrônomo.');
+}
+function gabaritoRows(R, a, only) {
+  const pl = PLANTED[a.id] || {}, px = PROXY[a.id] || {}; let hit = 0, tot = 0, fp = 0, noise = 0;
+  const rows = RXF.filter(f => !only || f.k === only).map(f => { const q = R.M.reps.find(x => x.f.k === f.k), mate = q ? null : R.M.reps.find(x => x.mates.some(m => m.f.k === f.k));
+    const planted = pl[f.k] || 0, proxy = px[f.k]; let found, ok = '';
+    if (q) found = shown(q) ? (q.beta > 0 ? 'sobe' : 'desce') + ' · ' + LV[q.level][0].toLowerCase() : q.level === 'insuf' ? 'poucos casos' : 'sem efeito claro';
+    else if (mate) found = 'anda junto de ' + mate.f.t.toLowerCase(); else found = '—';
+    if (planted) { tot++; let good;
+      if (q) good = shown(q) && q.level !== 'confirmar' && Math.sign(q.beta) === planted;
+      else if (mate) { const m = mate.mates.find(z => z.f.k === f.k), c = spear(mate.xv, m.x); good = shown(mate) && mate.level !== 'confirmar' && Math.sign(mate.beta) * Math.sign(c || 1) === planted; }
+      if (good) hit++; ok = good ? '✓' : '✗ não achou'; }
+    else if (!proxy) { noise++; const bad = q && ['forte', 'moderada'].includes(q.level); if (bad) fp++; ok = bad ? '✗ falso positivo' : '✓'; }
+    else ok = 'não conta';
+    return '<tr><td>' + f.t + '</td><td>' + (planted > 0 ? 'sobe' : planted < 0 ? 'desce' : proxy ? 'junto de ' + RXK(proxy).t.toLowerCase() : 'nenhum') + '</td><td>' + found + '</td><td>' + ok + '</td></tr>'; }).join('');
+  return { rows, hit, tot, fp, noise };
+}
+function calcDetails(R, a) {
+  const d = document.createElement('details'); d.className = 'calc'; const g = gabaritoRows(R, a);
+  d.innerHTML = '<summary>Como foi calculado e gabarito da demonstração</summary><ul>' +
+    '<li>Base: ' + R.n + ' pares de vistorias seguidas (5 a 10 dias) sem aplicação contra o alvo nem resíduo de 10 dias, em ' + R.piv + ' talhões e ' + R.wks + ' semanas.</li>' +
+    '<li>Resposta: crescimento semanal, ln((v2 + ε) ÷ (v1 + ε)) × 7 ÷ dias, com ε = 5 % do NC.</li>' +
+    '<li>Exploração: correlação de Spearman parcial (descontando nível de partida e estádio) em cada janela; variáveis com correlação de 0,7 ou mais entre si formam um grupo, representado por quem melhor separa o crescimento.</li>' +
+    '<li>Efeito: regressão com um limiar por grupo (8 casos ou mais de cada lado), ajustada pelo nível de partida e pelo estádio; intervalo de 95 % por bootstrap em blocos de semana × talhão (200 reamostras); correção de Benjamini-Hochberg.</li>' +
+    '<li>Nível: Forte = intervalo sem cruzar o zero, q &lt; 0,10, mesmo sinal nas duas metades do período e, no clima, 3 semanas ou mais. Moderada = intervalo sem cruzar o zero e q &lt; 0,10. Fraca = intervalo de 80 % sem cruzar o zero. Contra a referência agronômica = A confirmar.</li>' +
+    '<li>Época fora do controle: com 1 safra, clima e época andam juntos. Com 2 safras ou mais, a época entra.</li></ul>' +
+    '<p><strong>Gabarito:</strong> a simulação desta demonstração tem efeitos plantados. Recuperou <strong>' + g.hit + ' de ' + g.tot + '</strong> efeitos plantados · <strong>' + g.fp + '</strong> falso positivo em ' + g.noise + ' variáveis sem efeito. Na eficácia, foram plantados: dia quente e seco (×0,78), chuva até 1 dia depois (×0,70), barra a 100 L/ha (cobertura de 60 %) e aplicação seguida do mesmo grupo (×0,70); compare na aba Controle.</p>' +
+    '<div class="tblwrap"><table class="gab"><thead><tr><th>Variável</th><th>Plantado</th><th>Encontrado</th><th></th></tr></thead><tbody>' + g.rows + '</tbody></table></div>';
+  return d;
+}
+function curveSVG(R, q) {
+  const y = R.rows.map(r => r.r), x = q.xv, n = x.length, f = q.f; let bins;
+  if (f.bin) bins = [{ lab: 'Sem', test: v => v < 1, lo: 0 }, { lab: 'Com', test: v => v >= 1, lo: 1 }];
+  else if (['qs', 'molh'].includes(f.k)) bins = [0, 1, 2, 3, 4].map(i => ({ lab: i === 4 ? '4+' : String(i), test: v => i === 4 ? v >= 3.5 : v >= i - .5 && v < i + .5, lo: i }));
+  else { const s = [...x].sort((u, w) => u - w), ed = [...new Set([.2, .4, .6, .8].map(p => roundF(s[Math.floor(p * (n - 1))], f)))]; bins = [];
+    for (let i = 0; i <= ed.length; i++) { const lo = i ? ed[i - 1] : -Infinity, hi = i < ed.length ? ed[i] : Infinity; bins.push({ lab: i === 0 ? '< ' + fN(hi, f) : i === ed.length ? '≥ ' + fN(lo, f) : fN(lo, f) + '–' + fN(hi, f), test: v => v >= lo && v < hi, lo }); } }
+  const rng = rngFor('cv' + f.k + R.D);
+  bins.forEach(b => { const v = y.filter((_, i) => b.test(x[i])); b.n = v.length; if (v.length < 3) return; b.m = v.reduce((s, z) => s + z, 0) / v.length; const bs = [];
+    for (let k = 0; k < 150; k++) { let t = 0; for (let j = 0; j < v.length; j++) t += v[Math.floor(rng() * v.length)]; bs.push(t / v.length); } bs.sort((u, w) => u - w); b.lo80 = bs[15]; b.hi80 = bs[134]; });
+  const ok = bins.filter(b => b.m != null); if (!ok.length) return '';
+  const W = 360, H = 160, m = { l: 46, r: 8, t: 10, b: 34 }, pw = W - m.l - m.r, ph = H - m.t - m.b;
+  let lo = Math.min(0, ...ok.map(b => b.lo80)), hi = Math.max(0, ...ok.map(b => b.hi80)); const pad = (hi - lo) * .1 || .1; lo -= pad; hi += pad;
+  const Y = v => m.t + ph - (v - lo) / (hi - lo) * ph, bw = pw / bins.length, X = i => m.l + bw * (i + .5), dir = q.beta > 0 ? 'up' : 'dn';
+  let s = '<svg class="curve" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Crescimento semanal médio por faixa de ' + f.t.toLowerCase() + '">';
+  [-.75, -.5, -.25, 0, .25, .5, 1, 2, 3].map(p => Math.log(1 + p)).filter(v => v >= lo && v <= hi).forEach(v => { s += '<line class="' + (v === 0 ? 'ax' : 'grid') + '" x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + Y(v) + '" y2="' + Y(v) + '"/><text x="' + (m.l - 6) + '" y="' + (Y(v) + 4) + '" text-anchor="end">' + pctS(Math.exp(v) - 1) + '</text>'; });
+  const cut = bins.findIndex(b => b.lo >= q.t); if (cut > 0) s += '<line class="ncl" x1="' + (m.l + bw * cut) + '" x2="' + (m.l + bw * cut) + '" y1="' + m.t + '" y2="' + (m.t + ph) + '"/><text x="' + (m.l + bw * cut + 4) + '" y="' + (m.t + 10) + '" style="fill:var(--nc);font-weight:700">limiar</text>';
+  bins.forEach((b, i) => { s += '<text x="' + X(i) + '" y="' + (H - 18) + '" text-anchor="middle">' + b.lab + '</text><text x="' + X(i) + '" y="' + (H - 5) + '" text-anchor="middle" style="font-size:10px">' + b.n + ' casos</text>';
+    if (b.m == null) return; const on = cut >= 0 && i >= cut;
+    s += '<line x1="' + X(i) + '" x2="' + X(i) + '" y1="' + Y(b.lo80) + '" y2="' + Y(b.hi80) + '" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/><circle cx="' + X(i) + '" cy="' + Y(b.m) + '" r="5" class="cpt' + (on ? ' ' + dir : '') + '"/>'; });
+  return s + '</svg>';
+}
+function renderFinding(R, q) {
+  const a = R.a, dir = q.beta > 0 ? 'up' : 'dn', key = a.id + '|' + q.f.k, f = q.f;
+  const body = panelHead('<button class="back" type="button">‹ Raio-X · ' + a.nome + '</button><h3>' + f.t + '</h3><div class="sub">' + f.tipo + ' · ' + a.nome + ' · dados até ' + fmtD(S.day) + '</div><div class="state">' +
+    (shown(q) ? lvHTML(q.level) : '<span class="lvl">' + (q.level === 'insuf' ? 'Poucos casos' : 'Sem efeito claro') + '</span>') + '</div>', () => { RXUI.fnd = null; renderPanel(); });
+  const lead = document.createElement('p'); lead.className = 'lead';
+  lead.innerHTML = f.cond(q.t, winTxt(q)) + ' → <strong class="' + dir + '">' + pctS(q.eff) + '</strong> no nível de ' + a.nome.toLowerCase() + ' ao fim de 7 dias, comparado às semanas sem essa condição, com os outros fatores iguais (de ' + pctS(q.effCI[0]) + ' a ' + pctS(q.effCI[1]) + ').';
+  body.appendChild(lead);
+  if (q.level === 'confirmar') foot(body, 'Contraria a referência agronômica do alvo. Confira no campo antes de usar.');
+  const h1 = document.createElement('h5'); h1.innerHTML = 'Crescimento por semana, por faixa <span class="note">· média e intervalo de 80 %, sem ajuste</span>'; body.appendChild(h1);
+  const cv = document.createElement('div'); cv.innerHTML = curveSVG(R, q); body.appendChild(cv);
+  if (f.wins.length > 1 && q.g.rhoW) { const h2 = document.createElement('h5'); h2.innerHTML = 'Quando pesa <span class="note">· correlação parcial em cada janela</span>'; body.appendChild(h2);
+    const w = document.createElement('div'); w.className = 'wins'; const mx = Math.max(.2, ...q.g.rhoW.map(v => Math.abs(v || 0)));
+    w.innerHTML = f.wins.map((x, i) => { const v = q.g.rhoW[i]; return '<div class="wrow' + (i === q.wi ? ' on' : '') + '"><span>' + x[0] + (i === q.wi ? ' · usada' : '') + '</span><span class="wbar"><i class="' + ((v || 0) > 0 ? 'up' : 'dn') + '" style="width:' + (Math.abs(v || 0) / mx * 100).toFixed(0) + '%"></i></span><span class="num">' + (v == null ? '—' : (v >= 0 ? '+' : '−') + nf2.format(Math.abs(v))) + '</span></div>'; }).join('');
+    body.appendChild(w); }
+  if (q.mates.length) insightsList(body, ['Anda junto com ' + q.mates.map(h => '<strong>' + h.f.t.toLowerCase() + '</strong> (' + nf2.format(spear(q.xv, h.x) || 0) + ')').join(', ') + '. Com estes dados, não dá para separar o efeito de cada uma; o grupo é medido pela variável acima.']);
+  const I = q.xv.map(v => v >= q.t), cases = R.rows.map((r, i) => ({ r, x: q.xv[i], on: I[i] })).filter(z => z.on).sort((u, w) => q.beta > 0 ? w.r.r - u.r.r : u.r.r - w.r.r).slice(0, 8);
+  const h3 = document.createElement('h5'); h3.innerHTML = 'Casos que sustentam <span class="note">· ' + q.nHi + ' semanas-talhão com a condição; abre a linha do tempo do talhão</span>'; body.appendChild(h3);
+  const list = document.createElement('div'); list.className = 'apps'; body.appendChild(list);
+  cases.forEach(z => { const b = document.createElement('button'); b.type = 'button'; b.className = 'app';
+    b.innerHTML = '<span class="d num">' + z.r.pid + '</span><span class="p">' + fmtD(z.r.d1) + ' → ' + fmtD(z.r.d2) + '</span><span class="e num ' + (z.r.r > 0 ? 'up' : 'dn') + '">' + pctS(Math.exp(z.r.r) - 1) + '/sem.</span><span class="m">' + fmtV(z.r.v1, a) + ' → ' + fmtV(z.r.v2, a) + ' · ' + f.fmt(z.x) + '</span>';
+    b.setAttribute('aria-label', z.r.pid + ', de ' + fmtD(z.r.d1) + ' a ' + fmtD(z.r.d2) + ', ' + pctS(Math.exp(z.r.r) - 1) + ' por semana. Abrir a linha do tempo do talhão nesta data.');
+    b.addEventListener('click', () => { stop(); closePop(); S.sel = z.r.pid; S.day = z.r.d2; renderAll(); }); list.appendChild(b); });
+  const mk = document.createElement('div'); mk.className = 'decide'; mk.innerHTML = '<div><strong>Confere com o que você vê no campo?</strong></div>';
+  const sg = document.createElement('div'); sg.className = 'seg'; sg.setAttribute('role', 'group'); sg.setAttribute('aria-label', 'Marcar o achado');
+  Object.entries(MARKS).forEach(([k, t]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; b.setAttribute('aria-pressed', String(RXUI.marks[key] === k));
+    b.addEventListener('click', () => { if (RXUI.marks[key] === k) delete RXUI.marks[key]; else RXUI.marks[key] = k; saveRx(); renderPanel(); }); sg.appendChild(b); });
+  mk.appendChild(sg); const nt = document.createElement('div'); nt.className = 'note'; nt.textContent = 'No Safrion, a marca do RT fica no histórico do achado; achado confirmado pode virar regra do protocolo do alvo (AG-05), com versão e fonte.'; mk.appendChild(nt); body.appendChild(mk);
+  const d = document.createElement('details'); d.className = 'calc'; const g = gabaritoRows(R, a, f.k), prior = (PRIOR[a.id] || {})[f.k];
+  d.innerHTML = '<summary>Como foi calculado</summary><ul><li>Janela: ' + winTxt(q) + ' · limiar: ' + (f.bin ? 'presença' : fN(q.t, f)) + ' · ' + q.nHi + ' casos com a condição e ' + q.nLo + ' sem, em ' + q.pivHi + ' talhões e ' + q.wkHi + ' semanas.</li>' +
+    '<li>Efeito ajustado (log do crescimento semanal): ' + nf2.format(q.beta) + ' · intervalo de 95 %: ' + nf2.format(q.ci95[0]) + ' a ' + nf2.format(q.ci95[1]) + ' · q (Benjamini-Hochberg): ' + nf2.format(q.q) + ' · mesmo sinal nas duas metades do período: ' + (q.stable ? 'sim' : 'não') + '.</li>' +
+    '<li>Referência agronômica: ' + (prior > 0 ? 'espera alta' : prior < 0 ? 'espera queda' : 'sem expectativa registrada') + '.</li></ul>' +
+    '<div class="tblwrap"><table class="gab"><thead><tr><th>Gabarito</th><th>Plantado</th><th>Encontrado</th><th></th></tr></thead><tbody>' + g.rows + '</tbody></table></div>';
+  body.appendChild(d);
+}
+function rxControle(body, R, a) {
+  const H = R.ht, ins = [], E = g => pctE(g);
+  if (!H.length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = 'Ainda não há aplicações com vistoria antes e depois até ' + fmtD(S.day) + '. Arraste a barra de tempo para frente.'; body.appendChild(e); return; }
+  const prod = htGroups(H, h => h.ap.prod.c, null, 'b' + R.D).filter(g => g.E != null && g.nValid >= 2).sort((x, y) => y.E - x.E);
+  if (prod[0]) ins.push('<strong>' + prod[0].k + '</strong> teve a maior eficácia: <strong class="num">' + E(prod[0]) + '</strong> em ' + prod[0].nValid + ' aplicações, comparado a talhões sem aplicação na mesma janela; segura abaixo do NC por ' + kmTxt(prod[0].km) + '.');
+  const cmp = (fn, k1, k2, txt) => { const g = htGroups(H, fn, null, 'c' + k1 + R.D), x = g.find(z => z.k === k1), y = g.find(z => z.k === k2); if (x && y && x.E != null && y.E != null && x.nValid >= 2 && y.nValid >= 2 && y.E - x.E > .08) ins.push(txt(x, y)); };
+  cmp(h => h.ap.qsDia ? 'qs' : 'ok', 'qs', 'ok', (x, y) => 'Aplicar em <strong>dia quente e seco</strong> rendeu <strong class="num">' + E(x) + '</strong> de eficácia; nos demais dias, <strong class="num">' + E(y) + '</strong>. Prefira as horas frescas.');
+  cmp(h => h.ap.chuvaDepois ? 'ch' : 'ok', 'ch', 'ok', (x, y) => 'Com <strong>chuva até 1 dia depois</strong>, a eficácia caiu para <strong class="num">' + E(x) + '</strong>, contra ' + E(y) + ' sem chuva.');
+  cmp(h => h.ap.eq === 'b100' ? 'b' : 'at', 'b', 'at', (x, y) => '<strong>Barra a 100 L/ha</strong>: ' + E(x) + ' de eficácia; <strong>atomizador</strong>: ' + E(y) + '. A cobertura do dossel conta.');
+  cmp(h => h.ap.consec >= 1 ? 'seq' : 'rot', 'seq', 'rot', (x, y) => '<strong>Repetir o mesmo grupo</strong> em seguida: ' + E(x) + ' de eficácia; em rotação: ' + E(y) + '. Sinal de resistência: rotacione o mecanismo de ação.');
+  const per = PIVOS.filter(p => PEST[a.id][p.id]).map(p => { const s = PEST[a.id][p.id], ob = s.obs.filter(o => o.day <= S.day); return { n: s.apps.filter(x => x.day <= S.day).length, v: ob.length ? ob.reduce((t, o) => t + o.v, 0) / ob.length : 0 }; });
+  const rho = spear(per.map(z => z.n), per.map(z => z.v));
+  if (rho != null && rho > .3) ins.push('Talhões com mais aplicações tiveram mais ' + a.nome.toLowerCase() + ' (correlação de ' + nf2.format(rho) + '). Não é a aplicação que aumenta o alvo: aplica-se mais onde ele é maior. Por isso a eficácia compara com talhões sem aplicação.');
+  insightsList(body, ins);
+  groupSeg(body, [['prod', 'Produto'], ['calda', 'Produto e calda'], ['entrada', 'Sequência'], ['clima', 'Condição na aplicação']]);
+  const keyFn = { prod: h => h.ap.prod.c, calda: h => h.ap.prod.c + ' · ' + EQ[h.ap.eq].c, entrada: h => h.ap.prod.c + ' · ' + (h.ap.consec >= 2 ? '3ª seguida ou mais' : h.ap.consec === 1 ? '2ª seguida' : 'em rotação'),
+    clima: h => h.ap.chuvaDepois ? 'Chuva até 1 dia depois' : h.ap.qsDia ? 'Dia quente e seco' : 'Condição normal' }[S.group];
+  const subFn = S.group === 'clima' ? () => 'todas as aplicações do alvo' : h => h.ap.prod.g + ' · ' + dose(h.ap.prod.dose) + ' ' + h.ap.prod.du + '/ha';
+  const rows = htGroups(H, keyFn, subFn, S.group + R.D).map(g => ({ k: g.k, sub: g.sub, n: g.n, nValid: g.nValid, red: g.E, km: g.km, ctl: g.km ? (g.km.med != null ? g.km.med : 1000 + g.km.min) : null }));
+  rankTable(body, rows, [['k', 'Aplicado', ''], ['n', 'Nº', 'r'], ['red', 'Eficácia', 'r'], ['ctl', 'Segura', 'r']],
+    r => '<td><strong>' + r.k + '</strong><br><span class="note">' + r.sub + (r.nValid < 3 ? ' · pouca evidência' : '') + '</span></td><td class="r num">' + r.n + '</td><td class="r num">' + (r.red != null ? nf0.format(r.red * 100) + ' %' : '—') + (r.nValid < r.n ? '<br><span class="note">' + (r.n - r.nValid) + ' sem controle</span>' : '') + '</td><td class="r num">' + (r.km ? (r.km.med != null ? nf0.format(r.km.med) + ' d' : '> ' + nf0.format(r.km.min) + ' d') : '—') + '</td>',
+    'Ainda não há aplicações com vistoria depois para medir. Arraste a barra de tempo para frente.');
+  foot(body, 'Eficácia de Henderson-Tilton: 1 − (depois ÷ antes no talhão tratado) ÷ (depois ÷ antes nos talhões-controle). Controle = talhão sem aplicação contra o alvo na mesma janela, do mesmo estádio e com nível parecido; vistoria até 10 dias antes → 5 a 14 dias depois. Segura = mediana de dias até voltar ao NC (Kaplan-Meier: quem segue abaixo conta até a data da barra). Doses de exemplo. A decisão é do agrônomo.');
+}
+function riskRow(x, valid, a) {
+  const row = document.createElement('div'), fx = x.up.map(z => z.q.f.fmt(z.v)).concat(x.down.map(z => z.q.f.fmt(z.v) + ' (reduz)')); row.className = 'rk';
+  const key = S.alvo + '|' + x.pid + '|' + S.day, draft = RXUI.drafts[key];
+  row.innerHTML = '<button type="button" class="rkmain"><span class="d num">' + x.pid + '</span><span class="p">' + (valid ? '<strong class="num">' + probTxt(x.prob) + '</strong> de chance de passar do NC' : 'Previsto: ' + fmtV(Math.max(0, x.pred), a)) + '</span>' +
+    '<span class="m">Hoje ' + fmtV(x.v, a) + ' (vistoria de ' + fmtD(x.day) + ')' + (fx.length ? ' · ' + fx.join(' · ') : ' · nenhum fator de alta ativo') + '</span></button>' +
+    '<button type="button" class="btn sm"' + (draft ? ' aria-pressed="true"' : '') + '>' + (draft ? 'Rascunho criado · Desfazer' : 'Criar vistoria') + '</button>';
+  row.querySelector('.rkmain').setAttribute('aria-label', x.pid + ', ' + (valid ? probTxt(x.prob) + ' de chance de passar do NC em 7 dias' : 'previsto ' + fmtV(Math.max(0, x.pred), a)) + '. Abrir o talhão.');
+  row.querySelector('.rkmain').addEventListener('click', () => select(x.pid));
+  row.querySelector('.btn').addEventListener('click', () => { if (draft) delete RXUI.drafts[key]; else RXUI.drafts[key] = true; renderPanel(); });
+  return row;
+}
+function rxRiscoUI(body, R, a) {
+  if (R.cold || !R.risk) return coldBlock(body, R, a);
+  const { list, gate, T } = R.risk, ok = list.filter(x => x.st === 'ok').sort((x, y) => y.prob - x.prob), c = [];
+  for (let d = S.day + 1; d <= T; d++) c.push(climaAt(d));
+  const info = document.createElement('div'); info.className = 'decide';
+  info.innerHTML = '<div><strong>' + (T > DAYS ? 'Previsão do tempo' : 'Clima que ocorreu') + ' de ' + fmtD(S.day + 1) + ' a ' + fmtD(T) + ':</strong> ' + c.filter(z => z.quenteSeco).length + ' dia(s) quentes e secos · ' + c.filter(z => z.molhado).length + ' com folha molhada por 8 h ou mais · ' + nf0.format(c.reduce((s, z) => s + z.chuva, 0)) + ' mm de chuva' +
+    ' <span class="note">(' + (T > DAYS ? 'previsão sintética' : 'data passada: usa o clima que de fato ocorreu') + ')</span></div>' +
+    '<div class="note">' + (gate.ok ? 'Previsão conferida nas 3 semanas anteriores: erro (Brier) de ' + nf2.format(gate.bm) + ', contra ' + nf2.format(gate.bp) + ' de repetir a última vistoria, em ' + gate.n + ' casos.' : 'A previsão ainda não supera repetir a última vistoria' + (gate.n ? ' (' + gate.n + ' casos de teste)' : '') + '. Mostramos a ordem e os fatores, sem probabilidade.') + '</div>';
+  body.appendChild(info);
+  const sec = document.createElement('div'); sec.className = 'apps'; body.appendChild(sec); ok.forEach(x => sec.appendChild(riskRow(x, gate.ok, a)));
+  if (!ok.length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = 'Nenhum talhão abaixo do NC sem aplicação recente para prever.'; sec.appendChild(e); }
+  const grp = (st, title, fn) => { const l = list.filter(z => z.st === st); if (!l.length) return; const p = document.createElement('div'); p.className = 'note'; p.innerHTML = '<strong>' + title + ':</strong> ' + l.map(z => '<button type="button" class="lnk" data-p="' + z.pid + '">' + z.pid + '</button>' + fn(z)).join(' · '); body.appendChild(p); };
+  grp('acima', 'Já acima do NC (decidir o controle no talhão)', z => ' ' + fmtV(z.v, a)); grp('ctl', 'Sob efeito de aplicação recente', z => ' desde ' + fmtD(z.app.day)); grp('sem', 'Sem vistoria nos últimos 14 dias', () => '');
+  body.querySelectorAll('.lnk[data-p]').forEach(b => b.addEventListener('click', () => select(b.dataset.p)));
+  foot(body, 'Risco = chance de a próxima vistoria passar do NC até ' + fmtD(T) + ', pelo modelo do Sobe e desce com o clima do período. Os fatores listados têm evidência forte ou moderada. "Criar vistoria" deixa um rascunho na agenda do monitor e nunca cria O.S.; o controle segue o MIP, com o RT.');
+}
+function rxMapa(body, R, a) {
+  if (R.cold) return coldBlock(body, R, a);
+  const Hm = rxHeat(R), lv = r => { const v = Math.abs(r); return v >= .5 ? 5 : v >= .4 ? 4 : v >= .3 ? 3 : v >= .2 ? 2 : 1; };
+  const cell = (f, c, span) => { if (c.rho == null) return '<td class="c ns" colspan="' + span + '">—</td>'; const L = lv(c.rho), sig = c.sig;
+    return '<td class="c' + (sig ? '' : ' ns') + '" colspan="' + span + '"' + (sig ? ' style="background:var(--' + (c.rho > 0 ? 't' : 'u') + L + ');color:' + (L >= 4 ? '#fff' : '#15201A') + '"' : '') + ' title="' + f.t + ', ' + c.w + ': ' + nf2.format(c.rho) + (sig ? '' : ' (intervalo cruza o zero)') + '">' + (c.rho >= 0 ? '+' : '−') + nf2.format(Math.abs(c.rho)) + '</td>'; };
+  let h = '<div class="tblwrap"><table class="heat"><thead><tr><th class="l">Variável</th><th>Semana da vistoria</th><th>8 a 14 dias antes</th><th>15 a 28 dias antes</th></tr></thead><tbody>';
+  Hm.forEach(row => { const f = row.f, cells = f.wins === W3 ? row.cells.map(c => cell(f, c, 1)).join('') : f.wins === W2N ? cell(f, row.cells[0], 2) + cell(f, row.cells[1], 1) : cell(f, row.cells[0], 3);
+    h += '<tr><td class="l"><span class="tag">' + f.tipo + '</span><br>' + f.t + '</td>' + cells + '</tr>'; });
+  const w = document.createElement('div'); w.innerHTML = h + '</tbody></table></div>'; body.appendChild(w);
+  const k = document.createElement('div'); k.className = 'keys'; k.innerHTML = '<span><span class="ramp">' + [2, 3, 4, 5].map(i => '<i style="background:var(--t' + i + ')"></i>').join('') + '</span>sobe junto</span><span><span class="ramp">' + [2, 3, 4, 5].map(i => '<i style="background:var(--u' + i + ')"></i>').join('') + '</span>desce junto</span><span><i class="sq" style="box-shadow:inset 0 0 0 1px var(--line)"></i>intervalo de 90 % cruza o zero</span>'; body.appendChild(k);
+  foot(body, 'Correlação de Spearman parcial entre cada variável e o crescimento semanal sem controle, descontando nível de partida e estádio. Nutrientes: soma nos 14 dias da janela. A tabela não separa variáveis que andam juntas, como calor, ar seco e umidade baixa: o Sobe e desce faz isso.');
+}
+function satClimate(day) {
+  // variação do índice entre cenas válidas consecutivas, por calor no intervalo e irrigação
+  const out = { calorBaixa: [], calorOk: [], semCalor: [] };
+  PIVOS.forEach(p => { if (!['adulta', 'media'].includes(p.stage)) return; const sc = SAT[p.id].scenes.filter(s => s.ok && s.day <= day);
+    for (let i = 1; i < sc.length; i++) { const d = sc[i][S.idx].med - sc[i - 1][S.idx].med, cl = climaBetween(sc[i - 1].day, sc[i].day);
+      if (cl.cal >= 2) (WATER[p.id].suff < .8 ? out.calorBaixa : out.calorOk).push(d); else out.semCalor.push(d); } });
+  return out;
+}
+function renderVigorRanking() {
+  const body = panelHead('<h3>O que melhorou o vigor (' + S.idx + ')</h3><div class="sub">Resposta de cada adubação (cena antes → 10 a 25 dias depois, menos a variação dos pivôs do mesmo estádio) e efeito do clima e da água, até ' + fmtD(S.day) + '.</div>');
+  const evs = EVENTS.filter(e => e.kind === 'adub').map(e => ({ e, ef: vigorEffect(e, S.idx) })).filter(x => x.ef && x.ef.rel != null && x.ef.after.day <= S.day); const ins = [];
+  const byProg = {}; evs.forEach(x => (byProg[x.e.progNome] = byProg[x.e.progNome] || []).push(x));
+  const best = Object.entries(byProg).filter(([, v]) => v.length >= 2).map(([k, v]) => ({ k, n: v.length, rel: median(v.map(x => x.ef.rel)) })).sort((a, b) => b.rel - a.rel)[0];
+  if (best && best.rel >= .01) ins.push('<strong>' + best.k + '</strong> teve a melhor resposta mediana: <strong class="num">' + signed2(best.rel) + '</strong> de ' + S.idx + ' em ' + best.n + ' adubações, comparado aos pivôs do mesmo estádio.');
+  const adultas = PIVOS.filter(p => p.stage === 'adulta'), now = p => { const q = satAt(p.id, S.day); return q.state === 'ok' ? q.v : null; };
+  const reg = adultas.filter(p => PLAN[p.id] !== 'irreg').map(now).filter(v => v != null), irr = adultas.filter(p => PLAN[p.id] === 'irreg').map(now).filter(v => v != null);
+  if (reg.length && irr.length && median(reg) - median(irr) > .008) ins.push('Pivôs em produção adubados a cada 14 dias estão com ' + S.idx + ' mediano <strong class="num">' + nf2.format(median(reg)) + '</strong>; os com intervalo maior que 21 dias (' + adultas.filter(p => PLAN[p.id] === 'irreg').map(p => p.id).join(', ') + '), <strong class="num">' + nf2.format(median(irr)) + '</strong>.');
+  const sc = satClimate(S.day), mb = median(sc.calorBaixa), mo = median(sc.calorOk), ms = median(sc.semCalor);
+  if (sc.calorBaixa.length >= 2 && sc.calorOk.length >= 2 && mo - mb > .005) ins.push('Clima: entre cenas com 2 ou mais dias acima de 35 °C, pivôs com irrigação abaixo de 80 % variaram <strong class="num">' + signed2(mb) + '</strong> de ' + S.idx + '; os com irrigação completa, <strong class="num">' + signed2(mo) + '</strong>. Sem calor, a variação mediana foi <strong class="num">' + signed2(ms) + '</strong>.');
+  insightsList(body, ins);
+  groupSeg(body, [['prod', 'Programa'], ['calda', 'Dose de N'], ['entrada', 'Estádio'], ['clima', 'Calor e água']]);
+  const groups = {};
+  if (S.group === 'clima') { [['Calor ≥ 35 °C · irrigação abaixo de 80 %', sc.calorBaixa], ['Calor ≥ 35 °C · irrigação completa', sc.calorOk], ['Sem calor', sc.semCalor]].forEach(([k, arr]) => { if (arr.length) groups[k] = { k, sub: 'variação entre cenas consecutivas', rel: arr, d: arr }; }); }
+  else evs.forEach(({ e, ef }) => { const nN = e.items.reduce((s, it) => s + (it.nut.N || 0), 0);
+    const k = S.group === 'prod' ? e.progNome : S.group === 'calda' ? 'N ' + nf1.format(nN) + ' kg/ha por aplicação' : 'Pivôs ' + STAGE_TXT[P(e.pid).stage];
+    const G = groups[k] = groups[k] || { k, sub: e.via, rel: [], d: [], pids: new Set() }; G.rel.push(ef.rel); G.d.push(ef.d); G.pids.add(e.pid); });
+  const levelVsStage = pids => { const vals = [...pids].map(id => { const p = P(id), q = satAt(id, S.day); if (q.state !== 'ok') return null; const st = median(PIVOS.filter(x => x.stage === p.stage).map(x => satAt(x.id, S.day)).filter(z => z.state === 'ok').map(z => z.v)); return st != null ? q.v - st : null; }).filter(v => v != null); return median(vals); };
+  const rows = Object.values(groups).map(G => ({ k: G.k, sub: G.sub, n: G.rel.length, red: median(G.rel), ctl: S.group === 'clima' ? median(G.d) : levelVsStage(G.pids || []) }));
+  rankTable(body, rows, [['k', 'Manejo ou condição', ''], ['n', 'Nº', 'r'], ['red', S.group === 'clima' ? 'Variação' : 'Resposta', 'r'], ['ctl', S.group === 'clima' ? 'Bruta' : 'Nível hoje', 'r']],
+    r => '<td><strong>' + r.k + '</strong><br><span class="note">' + r.sub + (r.n < 3 ? ' · pouca evidência' : '') + '</span></td><td class="r num">' + r.n + '</td><td class="r num">' + signed2(r.red) + '</td><td class="r num">' + (r.ctl != null ? signed2(r.ctl) : '—') + '</td>',
+    'Ainda não há adubações com cena sem nuvem depois. Arraste a barra de tempo para frente.');
+  foot(body, 'Resposta = variação do pivô depois da adubação menos a dos pivôs do mesmo estádio no mesmo período, para separar o efeito do clima. Nível hoje = índice dos pivôs do grupo menos a mediana do estádio na data. Use NDRE para nutrição de nitrogênio. Associação, não prova de causa; nuvem, estádio, água e calor também mudam o índice. Doses de exemplo. A decisão é do agrônomo.');
+}
+function insightsList(body, ins) { if (!ins.length) return; const ul = document.createElement('ul'); ul.className = 'insights'; ins.forEach(t => { const li = document.createElement('li'); li.innerHTML = t; ul.appendChild(li); }); body.appendChild(ul); }
+function groupSeg(body, items) { if (!items.some(i => i[0] === S.group)) S.group = items[0][0];
+  const grp = document.createElement('div'); grp.style.cssText = 'display:flex;flex-wrap:wrap;align-items:center;gap:8px'; grp.innerHTML = '<span class="note">Agrupar por</span>';
+  const sg = document.createElement('div'); sg.className = 'seg'; sg.setAttribute('role', 'group'); sg.setAttribute('aria-label', 'Agrupar por');
+  items.forEach(([k, t]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; b.setAttribute('aria-pressed', String(S.group === k)); b.addEventListener('click', () => { S.group = k; renderPanel(); }); sg.appendChild(b); });
+  grp.appendChild(sg); body.appendChild(grp); }
+function rankTable(body, rows, cols, rowHtml, emptyTxt) {
+  if (!rows.length) { const e = document.createElement('div'); e.className = 'empty'; e.textContent = emptyTxt; body.appendChild(e); return; }
+  const k = cols.some(c => c[0] === S.sort.k) ? S.sort.k : 'red', dir = S.sort.dir;
+  rows.sort((x, y) => { const vx = x[k] == null ? -Infinity : x[k], vy = y[k] == null ? -Infinity : y[k]; return typeof vx === 'string' ? dir * vx.localeCompare(vy, 'pt-BR') : dir * (vx - vy); });
+  const wrap = document.createElement('div'); wrap.className = 'tblwrap';
+  wrap.innerHTML = '<table class="tbl"><thead><tr>' + cols.map(([ck, ct, cl]) => '<th class="' + cl + '" aria-sort="' + (k === ck ? (dir > 0 ? 'ascending' : 'descending') : 'none') + '"><button type="button" data-k="' + ck + '">' + ct + (k === ck ? (dir > 0 ? ' ▲' : ' ▼') : ' ⇅') + '</button></th>').join('') + '</tr></thead><tbody>' + rows.map(r => '<tr>' + rowHtml(r) + '</tr>').join('') + '</tbody></table>';
+  body.appendChild(wrap);
+  wrap.querySelectorAll('th button').forEach(b => b.addEventListener('click', () => { const ck = b.dataset.k; S.sort = { k: ck, dir: S.sort.k === ck ? -S.sort.dir : (ck === 'k' ? 1 : -1) }; renderPanel(); }));
+}
+function foot(body, t) { const n = document.createElement('div'); n.className = 'note'; n.textContent = t; body.appendChild(n); }
+
+function renderAll() { renderBar(); renderToggles(); renderMap(); renderLegend(); renderTimeline(); renderNow(); renderPanel(); }
+let rT = null; window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(() => { closePop(); renderTimeline(); renderPanel(); }, 120); });
+renderAll();
+})();
+</script>

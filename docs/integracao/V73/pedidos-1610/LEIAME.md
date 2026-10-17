@@ -4,7 +4,7 @@ Esta pasta guarda as fontes dos três pedidos, copiadas sem alteração dos arqu
 
 - **Base:** `b9898643662715a3f7b17bf7797d44e81e5e4a3d`, ponta de `claude/v44-v69-mapa` em 16/10. É a fonte vigente do protótipo.
 - **Versão publicada citada nos pedidos:** artefato 1792184197-5a81.
-- **Hashes:** `SHA256SUMS`, conferidos contra os anexos originais na cópia.
+- **Hashes:** `SHA256SUMS` (todos os anexos, menos este LEIAME), conferidos contra os anexos originais na cópia.
 
 | Pedido | Arquivo | Anexo original |
 |---|---|---|
@@ -13,13 +13,20 @@ Esta pasta guarda as fontes dos três pedidos, copiadas sem alteração dos arqu
 | Mapa: inventário D1–D30 e 15 oportunidades | `mapa-ux-anexo-analise.md` | `3744923e-anexo-mapa-analise.md` |
 | Resolver em 1 clique | `resolve-1-clique-pedido.md` | `c61a935a-prompt-safrion-resolve-em-1-clique.md` |
 | Insumos × estoque e compras: 21 melhorias | `resolve-1-clique-anexo-insumos.md` | `96275553-anexo-insumos-analise.md` |
+| Raio-X do alvo, protótipo versão 3 (enviado em 17/10) | `raiox-pragas-no-tempo-v3.html` | `264ac1ed-pragas-no-tempo.html` |
+| Excelência, EX-01 a EX-48 (versão de 17/10) | `excelencia-pedido-ex01-48.md` | `975afe29-prompt-safrion-excelencia.md` |
+| Entrada rápida e em lote, ações no ⋯ e revisão por módulo (EX-46, EX-47 e EX-48) | `entrada-acoes-revisao-pedido.md` | `8d9ab32d-prompt-safrion-entrada-acoes-revisao.md` |
+| Varredura: 187 achados | `entrada-acoes-revisao-anexo-achados.md` | `f8cd6349-anexo-varredura-achados.md` |
+| Robô da varredura | `entrada-acoes-revisao-robo-varredura.html` | `7f9033d3-anexo-robo-varredura.html` |
+| Resumo da saída do robô | `entrada-acoes-revisao-robo-resumo.py` | `5811779e-anexo-robo-resumo.py` |
 
 ## Gabarito do Raio-X (12 de 14)
 
 - O enunciado do gabarito está em `raiox-alvo-pedido.md`, linhas 19–25 (efeitos plantados e o resultado de 25/09) e linha 249 (a forma de entregar).
-- **Correção (17/10):** a simulação que produz o resultado de 12 de 14 está no artefato privado do Raio-X (versão 3), e não no `pragas-no-tempo.html`.
-  - O artefato v3 tem SHA-256 `00b5d915221eda4c789ec8f7ee8eeb6e526086815de136ace62e023ef10ed72e`, com 151.928 bytes, lido pelo Claude com a ferramenta Artifact.
-  - Ele não está no repositório: a cópia depende de o proprietário autorizar.
+- **Correção (17/10):** a simulação que produz o resultado de 12 de 14 está no protótipo do Raio-X, versão 3, e não no `pragas-no-tempo.html` de 16/10.
+  - Em 17/10 o proprietário enviou esse protótipo como anexo. A cópia está em `raiox-pragas-no-tempo-v3.html` (SHA-256 `e7872cb0…5e5e`, 151.382 bytes).
+  - O Claude tinha lido o artefato v3 pela ferramenta Artifact (SHA-256 `00b5d915…ed72e`, 151.928 bytes). O conteúdo é o mesmo; muda só o invólucro da publicação.
+  - O invólucro são 10 linhas no início (doctype, `meta` e estilo da moldura) e 3 no fim. Conferido com `diff`, separando nas tags.
 - O `docs/integracao/V71/insumos/pragas-no-tempo.html` já versionado na base é o anexo que o proprietário mandou em 16/10.
   - SHA-256 `8b9e105e7ee7e9f0692c2264b3f41fe45bcb3da1bec3916f23e8a0e72a717f15`, igual ao do anexo `714f7525-pragas-no-tempo.html`.
   - Não contém o Raio-X.
