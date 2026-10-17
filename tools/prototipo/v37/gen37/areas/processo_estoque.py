@@ -240,9 +240,11 @@ function elotKey(c,lbl){ const a=String(lbl||'').split(' · '); const k=(a[1]||'
 function erecs(c){ const mv={}; (c.movs||[]).forEach(m=>{ if(m.tipo==='recebimento-nf'&&m.estRec&&!mv[m.estRec.id]) mv[m.estRec.id]=m.estRec; });
   const out=E2.recs.map(b=>mv[b.id]?Object.assign({},b,mv[b.id],{ok:true,hoje:true}):b);
   Object.keys(mv).forEach(k=>{ if(!E2.recs.some(b=>b.id===k)) out.push(Object.assign({},mv[k],{ok:true,hoje:true})); }); return out; }
-function epedBase(lbl){ const id=elotId(lbl); return E2.pedidos.find(p=>p.id===id)||null; }
-function epeds(c){ const RC=erecs(c); return E2.pedidos.map(p=>{ const x=Object.assign({},p); RC.forEach(r=>{ if(r.hoje&&elotId(r.ped)===p.id) x.a_entregar=Math.max(0,x.a_entregar-(Number(r.conf)||0)); }); return x; }); }
-function efert(lbl){ const p=epedBase(lbl); return !!(p&&E2.sem_validade.indexOf(p.grupo)>=0); }
+function epedBase(lbl){const all=E2.pedidos.concat(cenCompLinhas(cenGet()));const exact=all.find(p=>p.label===lbl);if(exact)return exact;
+  const matches=all.filter(p=>p.id===elotId(lbl));return matches.length===1?matches[0]:null;}
+function epeds(c){const RC=erecs(c);const base=E2.pedidos.map(p=>{const x=Object.assign({},p);RC.forEach(r=>{if(r.hoje&&cenCompCasa(r,p))x.a_entregar=Math.max(0,x.a_entregar-(Number(r.conf)||0));});return x;});
+  return base.concat(cenCompLinhas(c).filter(p=>!base.some(b=>b.id===p.id&&b.item===p.item&&b.un===p.un)).map(p=>Object.assign({},p,{a_entregar:cenCompSaldo(c,p).ae})));}
+function efert(lbl){const p=epedBase(lbl);return !!(p&&E2.sem_validade.indexOf(p.grupo)>=0);}
 // contagens: registros de base + os gravados no cenário (c.estInv)
 function einvs(c){ const S=c.estInv||{}; const out=E2.contagens.map(b=>S[b.id]||b); Object.keys(S).sort().forEach(k=>{ if(!E2.contagens.some(b=>b.id===k)) out.push(S[k]); }); return out; }
 function einvRec(c,id){ const r=einvs(c).find(x=>x.id===id); return r?cenClone(r):null; }
@@ -309,7 +311,7 @@ const EST_ITEM_DIFERENTE='Item diferente do pedido: não confirme como o produto
 function estRecIdentidadeErro(c,d){
   const p=epedBase(d.ped), num=x=>String(x||'').replace(/\D/g,'');
   const notas=E2.recs.concat(erecs(c));
-  const origem=notas.find(r=>r.id===d.id)||notas.find(r=>num(r.nf)&&num(r.nf)===num(d.nf));
+  const origem=notas.find(r=>r.id===d.id)||notas.find(r=>num(r.nf)&&num(r.nf)===num(d.nf)&&(!p||r.item===p.item&&r.un===p.un));
   if(!p) return (d.ped||(origem&&origem.ped))?'Escolha um pedido válido para conferir a nota. Nada foi gravado.':'';
   const nf=origem||d, fornecedor=nf.forn||(origem&&epedBase(origem.ped)||{}).forn;
   const dif=[];
@@ -394,7 +396,7 @@ function evelha(c,rec){ if(!econtou(rec)||Math.abs(rec.cont-rec.sis)<1e-9) retur
 // ---------- validação dos formulários (erro junto ao campo; o preenchido é mantido) ----------
 const ESTV={};
 ESTV.g_rec=(self,fm)=>{ const C=cenGet(); const e={}, d=fm.draft; const n=(k)=>g2num(d[k]); const conf=n('conf'), apto=n('apto'), quar=eblank(d.quar)?0:n('quar'), qnf=n('qtd_nf');
-  const p=epeds(C).find(x=>x.id===elotId(d.ped)); const u=(p&&p.un)||'kg';
+  const pick=epedBase(d.ped);const p=pick&&epeds(C).find(x=>x.id===pick.id&&x.item===pick.item&&x.un===pick.un&&x.linha===pick.linha); const u=(p&&p.un)||'kg';
   if(d.div==='Item diferente do pedido') e.div=EST_ITEM_DIFERENTE;
   const identidade=estRecIdentidadeErro(C,Object.assign({},d,{id:fm.rid||d.id}));
   if(identidade){ e.ped=identidade; delete e.div; }
@@ -433,10 +435,10 @@ const ESAVE={}, ECAMPO={g_rec:'lote',g_ent:'qtd',g_dev:'qtd',g_cnt:'cont'};
 // chave do formulário aberto (ENG-021): nasce no 1º envio e fica no próprio formulário; reenvio e duplo clique do mesmo formulário usam a mesma chave
 function eChave(fm,p){ if(!fm.chave) fm.chave='W-'+p+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); return fm.chave; }
 ESAVE.g_rec=(self,fm)=>{ const d=fm.draft; const identidade=estRecIdentidadeErro(cenGet(),Object.assign({},d,{id:fm.rid||d.id})); if(identidade) return {erro:identidade}; const p=epedBase(d.ped); if(!p) return {erro:'Escolha um pedido válido para conferir a nota.'}; const n=k=>eblank(d[k])?0:g2num(d[k]); const nfv=String(d.nf||'').trim();
-  const id=fm.rid||('r'+(nfv.replace(/\D/g,'')||String(Date.now()).slice(-6))); const base=erecs(cenGet()).find(b=>b.id===id)||{};
-  const rec={id,nf:nfv,data:base.data||'',ped:d.ped,forn:base.forn||p.forn,item:base.item||p.item,un:base.un||p.un,qtd_nf:n('qtd_nf'),conf:n('conf'),apto:n('apto'),quar:n('quar'),lote:String(d.lote||'').trim(),
+  const id=fm.rid||('r'+(nfv.replace(/\D/g,'')||String(Date.now()).slice(-6))+(p.linha==null?'':'-'+p.id+'-L'+p.linha)); const base=erecs(cenGet()).find(b=>b.id===id)||{};
+  const rec={id,nf:nfv,data:base.data||'',linha:p.linha,pedido:p.id,ped:d.ped,forn:base.forn||p.forn,item:base.item||p.item,un:base.un||p.un,qtd_nf:n('qtd_nf'),conf:n('conf'),apto:n('apto'),quar:n('quar'),lote:String(d.lote||'').trim(),
     val:efert(d.ped)?'—':String(d.val||'').trim(),local:d.local,div:d.div||'Sem divergência',obs:String(d.obs||'').trim()};
-  const r=cenMudar(null,c=>estReceber(c,rec,g2perfil(),eChave(fm,'REC'))); r.fl=id; return r; };
+  const r=cenMudar(null,c=>estReceber(c,rec,g2perfil(),eChave(fm,'REC')),{estrito:true}); r.fl=id; return r; };
 ESAVE.g_ent=(self,fm)=>{ const x=eitens(cenGet()).find(y=>y.id===fm.rid); if(!x) return {erro:'Requisição não encontrada.'};
   return cenMudar(null,c=>estEntregar(c,x.rid,x.it.prod,g2num(fm.draft.qtd),fm.draft.quem,g2perfil(),eChave(fm,'ENT'))); };
 ESAVE.g_dev=(self,fm)=>{ const salvo=fm.chave&&(cenGet().recibos||{})[fm.chave]; const erros=salvo?{}:ESTV.g_dev(self,fm); if(Object.keys(erros).length) return {erro:erros.qtd||erros.cond||erros.obs}; const C=cenGet(); const x=eitens(C).find(y=>y.id===fm.rid); if(!x) return {erro:'Requisição não encontrada.'};
@@ -494,7 +496,8 @@ function PREVALS(self,v){
   const IT=eitens(C); const INV=einvs(C);
   // ---- etapa 1: recebimentos ----
   const RC=erecs(C), PD=epeds(C); let npend=0;
-  GR('g_rec').rows=RC.map(x=>{ const ok=!!x.ok; if(!ok) npend++; const p=PD.find(y=>y.id===elotId(x.ped)); const quar=ok?(Number(x.quar)||0):0;
+  GR('g_rec').edit.fields.find(f=>f.k==='ped').opts=PD.map(p=>p.label);
+  GR('g_rec').rows=RC.map(x=>{ const ok=!!x.ok; if(!ok) npend++; const p=epedBase(x.ped); const quar=ok?(Number(x.quar)||0):0;
     const l=C.lotes[x.item+'|'+x.lote]; const vl=x.val&&x.val!=='—'?x.val:'';
     const prev=/previsto/.test(String(x.data||'')); const dt=eiso(x.data); const cf=ok&&x.hoje?eiso(E2.hoje):'';   // data da nota (ou prevista) × data da conferência
     const r={id:x.id,ro:ok,v:{nf:x.nf,data:dt,cfd:cf,vali:eym(vl),ped:x.ped,forn:p?p.forn:'',item:x.item,un:x.un||'kg',qtd_nf:x.qtd_nf,conf:ok?x.conf:'',apto:ok?x.apto:'',quar:ok?x.quar:'',lote:x.lote,val:vl,local:x.local,div:x.div||'Sem divergência',obs:x.obs||''},s:{},p:{}};

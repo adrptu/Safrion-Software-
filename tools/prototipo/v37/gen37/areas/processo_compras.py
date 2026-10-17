@@ -182,7 +182,7 @@ def build():
                 dict(k='prazo',l='Entrega (dias)',t='num',a='r'),dict(k='frete',l='Frete'),dict(k='pag',l='Pagamento'),dict(k='tot',l='Valor (R$)',t='num',a='r',d=2,agg='sum')],
                [],edit=dict(m='origin',leafOnly=False,title='Pedido',fields=[dict(k='nome',l='Pedido ou insumo',t='txt',ro=True)]),tree=True,gid='g_apr',total=True)
     # ---------- etapa 6 · pedidos e entregas ----------
-    g_ent=grid([dict(k='nome',l='Pedido · fornecedor · insumo',w=200),dict(k='qtd',l='Pedido',t='num',a='r'),dict(k='rec',l='Recebido',t='num',a='r',w=120),
+    g_ent=grid([dict(k='nome',l='Pedido · fornecedor · insumo',w=200),dict(k='qtd',l='Pedido',t='num',a='r'),dict(k='rec',l='Recebido',t='num',a='r',w=120),dict(k='quar',l='Em quarentena (agora)',t='num',a='r',w=160),
                 dict(k='ae',l='A entregar',t='num',a='r'),dict(k='val',l='Valor (R$)',t='num',a='r',d=2,agg='sum'),
                 dict(k='prev',l='Previsão',t='date'),dict(k='sit',l='Situação',w=240),dict(k='acao',l='Ação')],
                [],edit=dict(m='form',title='Pedido',leafOnly=False,sub='Reprograme a previsão de entrega; o Estoque passa a esperar a nova data.',
@@ -312,17 +312,18 @@ function calDe(d){ return cal01(d.est+(Number(d.cust)||0)+(Number(d.quarC)||0),d
 // O andamento também fica no registro compartilhado (talhao-os-compras-v1 · proc[safra]), ligado à versão da solicitação: recarregar ou ir
 // à origem e voltar não perde a compra, e o Planejar safra mostra o estado.
 const PROC=['env','nresp','conv','esc','aprov','pcx','dec5']; const PROC_REG=['env','nresp','conv','esc','aprov','pcx'];
-function procLer(id){ const x=solDe(id); if(!x) return null; try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null'); const p=o&&o.proc&&o.proc[id];
-  return (p&&p.key===x.key&&p.sol===x.sol.id)?p:null; }catch(e){ return null; } }
-function procGravar(self,m){ const st=self.state; const id=st.saf; if(!id||!SX||SX.safra!==id) return; const snap={sol:SX.sol.id,key:SX.key,comp:SX.comp||0};
-  PROC_REG.forEach(k=>{ snap[k]=(st[k]===undefined?null:st[k]); }); snap.estado=estadoCompra(self,m,id).t;
-  const js=JSON.stringify(snap); const memo=self._procJs||(self._procJs={}); if(memo[id]===js) return; memo[id]=js;
-  try{ const o=JSON.parse(localStorage.getItem(SOL_KEY)||'null')||{v:1,sols:{}}; o.proc=o.proc||{}; o.proc[id]=snap;
-    const r=o.sols&&o.sols[id]; if(r&&r.id===snap.sol&&snap.estado!=='A cotar') r.estado=snap.estado;
-    localStorage.setItem(SOL_KEY,JSON.stringify(o)); }catch(e){} }
+function procLer(id){ const x=solDe(id); if(!x)return null; const r=cenCompLer(id); procLer.erro=r.erro||''; const p=r.proc;
+  return (p&&p.key===x.key&&p.sol===x.sol.id)?p:null; }
+function procGravar(self,m){ const st=self.state,id=st.saf;if(!id||!SX||SX.safra!==id)return;
+  const snap={sol:SX.sol.id,key:SX.key,comp:SX.comp||0};PROC_REG.forEach(k=>{snap[k]=st[k]===undefined?null:st[k];});snap.estado=estadoCompra(self,m,id).t;
+  const js=JSON.stringify(snap),memo=self._procJs||(self._procJs={});if(memo[id]===js)return;
+  const pend=self._procWrite||(self._procWrite={});if(!pend[id]||pend[id].js!==js)pend[id]={js,chave:'CMP-'+id+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)};
+  const r=cenCompGravar(id,snap,pend[id].chave,cmpPerfil().nome);
+  if(r.erro){const msg='Compra não gravada: '+r.erro+' O rascunho foi mantido; repita após corrigir.';if(st.g2toast!==msg)self.setState({g2toast:msg});return r;}
+  memo[id]=js;return r; }
 function trocaSafra(self,id,extra){ const st=self.state; const patch={saf:id,conf5:false};
   if(st.saf!==id){ const bag=Object.assign({},st.porSaf||{}); if(st.saf){ const cur={}; PROC.forEach(k=>{ cur[k]=st[k]; }); bag[st.saf]=cur; }
-    const nx=bag[id]||procLer(id)||{}; PROC.forEach(k=>{ patch[k]=(nx[k]===undefined?null:nx[k]); }); if(!patch.nresp) patch.nresp=0; patch.porSaf=bag; }
+    const salvo=procLer(id); const nx=bag[id]||salvo||{}; if(procLer.erro)patch.g2toast=procLer.erro; PROC.forEach(k=>{ patch[k]=(nx[k]===undefined?null:nx[k]); }); if(!patch.nresp) patch.nresp=0; patch.porSaf=bag; }
   self.setState(Object.assign(patch,extra||{}));
   if(patch.env&&(patch.nresp||0)<patch.env.ordem.length) tickResp(self); }   // respostas que ainda faltavam continuam chegando
 function hashSync(id,x){ try{ const h=x?('#sol='+encodeURIComponent(x.sol.id)+'&saf='+encodeURIComponent(id)):''; if(decodeURIComponent(location.hash||'')!==decodeURIComponent(h)) history.replaceState(null,'',location.pathname+location.search+h); }catch(e){} }
@@ -428,9 +429,10 @@ function PREVALS(self,v){ cmPre(self);
     (apr?apr.pcs:[]).forEach(p=>{ const x=pcx[p.id]||{}; const prev=x.prev||p.prev; const one=p.itens.length===1;
       const falt=p.itens.map(it=>faltaDe(st,it.nome,null)).filter(Boolean).sort()[0]||null; const av=avFalta(x,p.prev,falt);
       const r={id:p.id,v:{nome:p.id,val:p.valor,prev,obs:x.obs||''},s:{nome:p.id+' '+p.nome},p:{nome:[B(p.id),T(p.nome),BR(),MU(SX.sol.id+' · '+(one?p.itens[0].nome:p.itens.length+' insumos'))]}};
-      if(one){ const it=p.itens[0]; Object.assign(r.v,{qtd:it.ped,rec:0,quar:0,ae:it.ped}); r.p.qtd=[T(qt(it.ped,it.un))]; r.p.rec=[MU('—')]; r.p.quar=[MU('—')]; r.p.ae=[B(qt(it.ped,it.un))]; }
-      else r.kids=p.itens.map(it=>({id:p.id+'_'+it.i,ro:true,dr:'entp_'+p.id,v:{nome:it.nome,qtd:it.ped,rec:0,quar:0,ae:it.ped,val:it.tot},s:{nome:it.nome},
-        p:{qtd:[T(qt(it.ped,it.un))],rec:[MU('—')],quar:[MU('—')],ae:[B(qt(it.ped,it.un))],prev:[T('')],sit:[T('')],acao:[T('')]}}));
+      const entrega=it=>{const e=cenCompSaldo(cenGet(),{id:p.id,linha:it.i,item:it.nome,un:it.un,qtd:it.ped});return {
+        v:{qtd:it.ped,rec:e.rec,quar:e.quar,ae:e.ae,val:it.tot},p:{qtd:[T(qt(it.ped,it.un))],rec:[T(qt(e.rec,it.un))],quar:[e.quar===null?MU('Saldo sem atribuição por linha'):T(qt(e.quar,it.un)),MU('Na conferência: '+qt(e.quarEntrada,it.un))],ae:[B(qt(e.ae,it.un))]}};};
+      if(one){const z=entrega(p.itens[0]);Object.assign(r.v,z.v);Object.assign(r.p,z.p);}
+      else r.kids=p.itens.map(it=>{const z=entrega(it);return {id:p.id+'_'+it.i,ro:true,dr:'entp_'+p.id,v:Object.assign({nome:it.nome},z.v),s:{nome:it.nome},p:Object.assign(z.p,{prev:[T('')],sit:[T('')],acao:[T('')]})};});
       r.p.sit=[x.conf?CH('Confirmado pelo fornecedor','green'):CH('Aguarda confirmação','blue')].concat(av); r.s.sit=(x.conf?'Confirmado':'Emitido')+(av.length?' '+av[0].t:'');
       r.p.acao=x.conf?[LK('Conferir no Estoque','EST.dc.html')]:[{k:'act',t:'Confirmar fornecedor',fn:'pcconf:'+p.id}]; r.s.acao='';
       ent.push(r); });
