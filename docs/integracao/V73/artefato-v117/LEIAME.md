@@ -2,7 +2,7 @@
 
 - **Artefato:** https://claude.ai/artifact/HqspGRcrX1wcayCVMe9emm. Versão 117, ID `1792231571-ff61`, num envio só. É o estado completo.
 - **Origem:** prévia `f87ac32`, montada da composição `b6d4cfa` com o MA-VINCULO (PR #101, `04c88a7`, HEAD `8bdd6c3`).
-  - O #101 ainda está em revisão do Codex e não foi integrado à composição. Isso segue o regime leve do protótipo (AGENTS §3.5) e o pedido do proprietário de pôr no artefato tudo o que estava em andamento.
+  - Depois da publicação, o Codex integrou o #101 na composição em `acf65e1`. O código de `tools/` da composição resultante é igual ao da prévia publicada.
   - A composição `b6d4cfa` traz o PR #104 (PAINEL-FIXO-2), integrado em `d432d8b`.
 - **Branch única:** `claude/prototipo-v44` = `76e9466`, com a mesma árvore de `f87ac32`.
 - **Provas na prévia:**
