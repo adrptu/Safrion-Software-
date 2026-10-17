@@ -1,0 +1,72 @@
+===== 79876 assistant 570f68ac-27bc-46c6-9084-a6dea5549d29 2026-10-17T00:33:51.685Z sha256(linha)= 7f831eb8e944da35fb561faf6275cfe5daca3d6cfe0e2a172e32b5d719ed9be9
+Revisei a nova rodada do PR #67 (skills da equipe). Os quatro problemas que eu tinha apontado foram corrigidos, e publiquei o parecer favorável. Mesmo assim, o merge ainda não acontece, por três motivos:
+
+1. **A trava automática não reconhece o meu parecer.** A plataforma acrescenta uma linha de atribuição a todo comentário meu, e a trava do repositório exige o comentário só com o texto exato. Não vou apagar essa atribuição. Propus ao Codex ajustar a trava para aceitar essa linha, sem afrouxar o resto da conferência. Ele decide e eu reviso.
+2. **A branch do PR está 14 commits atrás da `main`.** O Codex atualiza. Se o conteúdo continuar o mesmo, repito o parecer na hora, sem nova análise.
+3. **A varredura de segredos acusou um arquivo de outra branch do Codex.** Não é credencial: é o nome de uma chave do protótipo dentro de um registro de teste. Mesmo assim, trava a varredura de todos os PRs. A correção é do Codex. Se ele preferir abrir uma exceção na varredura, essa decisão é sua; aviso se chegar a esse ponto.
+
+Seguem em andamento a revisão do PR #88, o confronto do Raio-X, a avaliação do mapa, a validação dos 187 achados e os testes das frentes de manutenção e dos talhões em lote.
+===== 79948 assistant e74f1966-84bc-45c6-bb1e-a20d42daf6b3 2026-10-17T00:39:32.885Z sha256(linha)= 4980f1a584639d4ff6be26da55033f32fca43b31b70b9ab70165f36f365e6227
+Terminei a minha validação dos 187 achados da varredura de entrada de dados e ações, e já está no repositório. O Codex só lê depois de terminar a dele.
+- **Resultado:** 167 confirmados no código, 1 refutado e 19 que já estão dentro de frentes em andamento (18 no "Resolver em 1 clique", 1 no mapa). Proponho adotar 108, adaptar 67 e rejeitar 12.
+- **O mais urgente: liberação em lote de O.S. com defensivo.** "Liberar prontas" e "Liberar selecionadas" liberam em lote O.S. que levam defensivo. Isso quebra a regra de aprovação agronômica individual. Junto disso há campos de medida e de dose que já aparecem preenchidos. Proponho uma "onda 0" com 13 correções pequenas desses casos, antes de qualquer melhoria visual.
+- **Maior ganho com menos trabalho:** 5 correções em peças comuns do protótipo resolvem dezenas de achados de uma vez:
+  - o menu ⋯ só aparece quando a linha também pode ser excluída;
+  - as listas obrigatórias já abrem com a 1ª opção escolhida;
+  - alguns painéis escolhem a lista errada pelo nome do campo;
+  - a mensagem "sem permissão" aparece quando o bloqueio é do estado do registro;
+  - as datas não têm atalhos como Hoje e Ontem.
+- **Achado fora da varredura:** em "Ajustar e liberar saldo" da O.S., testei no navegador uma dose de 9,99 e a tela liberou mesmo assim: o painel não lê o que foi digitado. Há 33 painéis com resultado fixo desse jeito, 12 deles em telas do menu.
+- **Decisões suas que vão aparecer:**
+  - o seu padrão de 15/10 diz "nunca caixas de seleção na tabela", e o pedido novo pede caixa na primeira coluna para o lote. Proponho que o lote abra o painel lateral com a lista já marcada;
+  - onde ficam no menu Gestão, Meu dia, Aprovações e Agenda;
+  - integrações reais com nota fiscal eletrônica, balança e consulta de CNPJ, que geram custo e contrato.
+
+Também ataquei o bloqueio do PR #67. Escrevi um ajuste mínimo na trava automática do repositório para aceitar a linha de atribuição dos meus comentários sem afrouxar o resto da conferência. Ele tem 10 casos de teste, e os testes automáticos do repositório passaram (197 de 197). O Codex decide; como é uma trava de segurança, ele revisa e integra à mão.
+
+Continuam em andamento a revisão do PR #88, o confronto do Raio-X, a avaliação do mapa e os testes das frentes de manutenção e dos talhões em lote.
+===== 80023 assistant 5d76a9f6-5d7f-4bdb-8ef5-d4bace8a0d30 2026-10-17T00:45:50.147Z sha256(linha)= 6a56f47181084b9ab443afad4d5d95b60d90bc24d3c92886de141f0ea2f6f550
+O confronto do Raio-X entre a minha crítica e a do Codex terminou e foi enviado a ele.
+
+**Resultado:** dos 35 pontos comparados, 15 coincidem, 12 se completam e 8 divergem. Cada divergência tem resolução proposta, e o Codex aceita ou recusa.
+
+**Os três problemas que o Codex achou no motor procedem.** Conferi cada um com prova própria:
+- **Dado do futuro na eficácia:** a medição usa leituras de controle feitas depois da data analisada. Nas 21 simulações, isso mudou o resultado em 1.055 casos.
+- **Previsão de 7 dias:** usando só os dados disponíveis no dia da previsão, ela perde de "supor que amanhã fica igual a hoje" no ácaro e na mosca-branca. Ela só ganhava porque usava o clima que de fato aconteceu.
+- **Comparação forçada:** 17 de 56 aplicações só têm medida de eficácia porque o motor aceita qualquer talhão como controle.
+
+Achei mais quatro casos em que dados do futuro entram na conta, e corrigi sete pontos da minha crítica. Volto também a exigir 100 % no gabarito, como o seu pedido manda. Antes eu tinha proposto 80 %.
+
+**A única decisão que é sua aqui:** contratar uma fonte de clima hora a hora e de previsão do tempo com histórico guardado, porque gera custo e contrato. A recomendação dos dois agentes é só pedir com estimativa de custo na mão. Até lá, o risco de 7 e 14 dias fica fora.
+
+**Gemini:** as 6 perguntas para ele tratam só de método e parâmetros. Quem envia é o Codex.
+
+Continuam em andamento o confronto do mapa, a revisão do PR #88 e os testes das frentes de manutenção e de talhões em lote. Segue pendente o seu sim ou não para o ajuste da trava de aprovação.
+===== 80411 assistant 62cc87af-48d7-404f-b28f-7a146c3c2e60 2026-10-17T01:19:58.343Z sha256(linha)= 08143a18f86028bdd7c8e76e453da10649d718d6bf27887caffcdcc771016ae9
+O confronto do mapa terminou e foi enviado ao Codex.
+- **Resultado:** 61 pontos comparados, 23 iguais, 25 que se completam e 13 diferentes. Dez das diferenças se resolvem pelo próprio PRD.
+- **Lista ao lado do mapa:** nenhum de nós dois tinha visto que o PRD exige uma lista alternativa ao mapa. Proponho mostrá-la como uma visão "Ver dados", alternando entre Lista e Mapa, já na primeira fatia.
+- **Retorno do Codex:** respondi os 8 pontos. Aceitei todos, 3 com ajuste: alvo de toque de 48 px no mapa, a opção "Todas" continua, o cartão abre na hora e há correção de contraste para as cores que falhavam.
+- **Ordem:** a frota no mapa vem antes, e depois as duas primeiras fatias do mapa, que mexem só nos arquivos do próprio mapa.
+- **Suas decisões:** paleta para daltonismo, "você está aqui" no mapa e mapa de fundo com custo. Recomendamos não contratar este último agora.
+
+A revisão automática do Codex achou um problema de acessibilidade em Configurações: as opções de quem decide uma alçada ocupam uma parada de Tab cada uma, em vez de uma só. Confirmei. Corrijo depois de integrar o PR #88, porque os dois mexem no mesmo teste.
+
+O teste de conferência do PR #88 espera vaga no navegador, com outras frentes testando. Continua pendente o seu sim ou não para o ajuste da trava de aprovação.
+===== 80502 assistant 6b896600-75d5-495f-a27a-f8c8f01e0aba 2026-10-17T01:23:28.297Z sha256(linha)= 279af4eafee4617b8fed96d55091c054a1d3df6e43a0ce50a5527368f5d2d659
+Revisei a consulta que o Codex fez ao Gemini sobre o Raio-X e mandei a revisão a ele junto com a proposta do primeiro passo do motor.
+
+**A consolidação do Codex está correta.** Não discordei de nenhuma das 9 ressalvas; em 5 delas sugeri um ajuste.
+
+**Achei três problemas de método que mudam o desenho:**
+- **Controle começando em zero:** quando o talhão de comparação começa com zero de praga, a conta da eficácia dá 100 % para qualquer produto, mesmo um que não funcione. Esse caso tem de ser bloqueado por regra, e não ficar como um parâmetro ajustável.
+- **Ajuste artificial do protótipo:** um pequeno valor somado às contagens para evitar divisão por zero esconde casos sem resposta, que acabam parecendo resultados normais.
+- **Aplicações só com praga alta:** no gerador do protótipo, toda aplicação acontece depois de uma leitura alta de praga. Uma nova aplicação, portanto, nunca é neutra para a medida.
+
+**O primeiro passo proposto:** só a base de dados e o gabarito. Cada dado guarda quando aconteceu e quando o sistema ficou sabendo, e só entra na conta o que já se sabia na data analisada. A proposta traz 21 testes que tentam enganar o motor com dados do futuro, e todos precisam reprovar a versão com defeito.
+
+**Decide o Codex:** os quatro pontos em que divergimos ficam com ele. Nada foi implantado.
+
+Continuam em andamento o teste de conferência do PR #88 (esperando vaga no navegador), os ajustes de texto do mapa e os testes de manutenção, talhões em lote e da seta. Segue pendente o seu sim ou não para o ajuste da trava de aprovação.
+===== 80950 user f82aefb8-bf0e-4f4c-b6a1-44b950461700 2026-10-17T01:54:19.352Z sha256(linha)= 8bdc7b2c8f1e189f8fb4bbed156a1a68f34dd0675f68903398c750e8e83292bf
+Aprovo tudo você achar que é melhor para nossa produtividade e qualidade.
