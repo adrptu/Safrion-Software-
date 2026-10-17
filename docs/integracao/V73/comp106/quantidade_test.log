@@ -1,0 +1,17 @@
+OK    1 regra única: Python qtd = JS cenQtd em 7777 casos (775 com empate no 3º decimal; notação exponencial e valores extremos sem erro); 0,5 × 62,25 = 31,13 (meio para cima)
+OK    2 SINT-C03: apontamento cheio de 62,25 ha e de 62,79 ha passa; custódia 0; consumido = total; saldo 0
+OK    3 apontamentos parciais (2 e 3 trechos, inclusive 0,05 ha) conservam o total: soma dos consumos = total, custódia 0, realizado = área
+OK    4 turno do app (cenFecharTurno), inteiro e em 2 trechos: consumo padrão pela mesma regra, custódia 0, saldo 0
+OK    5 sementes da Lagoa (OS-0506 e OS-0507): apontar o saldo restante consome exatamente a custódia (0 em cada item), sem erro
+OK    6 trava de custódia executada: 31,13 contra 31,12 em custódia é recusado na web e no app, sem apontamento nem baixa (sem tolerância nova)
+OK    7 MIP → O.S. (9 emissões nos pivôs da Lagoa, doses da bula; 5 em que o total antigo de 3 casas ficaria abaixo do consumo; 2 sem lote no Estoque, fora): total = regra única; liberar, entregar, iniciar e apontar o saldo zeram a custódia e levam à conferência
+OK    8 fertirrigação → O.S. (28 v2 de 36 tentativas, 1 a 50 kg/ha; 6 com passada em curso): total = regra única, com 2 casas na mensagem; com passada em curso, a O.S. recebe o que falta com 2 casas (= prévia) e v1 + v2 = área do setor; o saldo apontado zera a custódia
+OK    9 "Decidir controle" (agDecIni em 10 vistorias da Lagoa): abre sem produto nem dose e a área que o formulário preenche nunca passa do talhão (com 1 casa, 5 travariam)
+OK    11 borda: a liberação reserva com estoque igual à regra única e recusa com 0,01 a menos; dose > 0 com total 0 é recusada; o aviso de compra do MIP usa o lote da liberação
+OK    12 rodada 4: a trava do ajuste do núcleo libera no limite e recusa 0,01 a menos e total 0; o término guarda 20,275 como 20,28 e recusa 0,004; a v2 com o setor já coberto é recusada com a causa; o MIP trava total 0; a O.S. com total 0 diz "Total 0" e fica com o agrônomo
+OK    13 rodada 5: com total 0, o painel da O.S. aponta o agrônomo (sem Suprimentos nem link do Estoque); "Salvar ajuste" sem liberar recusa total 0; com outra passada programada, a v2 recusada manda adicionar os produtos às próximas passadas
+OK    14 rodada 6: avanço de 0,03 e 0,06 ha seguido da v2 encerrada credita o pivô como o avanço 0 (U1); v2 com passada em curso e outra programada é recusada com a orientação (U2), e pelo término a v2 cobre o setor com a lâmina da passada seguinte e credita; dose ou área 1e999/Infinity vira trava sem lançar, no MIP e no ajuste (U3); textos com 2 casas no IR-03det e na trilha (U4) e dose da v2 com até 3 casas (U5)
+OK    15 guardas de término: cedo e sem hidrômetro recusam sem alterar o estado
+OK    16 calda: cargas fecham a regra única, sem quantidade negativa, nas unidades originais e convertidas; prévia não altera cenário
+OK    10 varredura de todo o gen37: nenhum dose × área fora da regra única (exceções nomeadas: 7 expressões e 2 linhas exatas) e nenhum tot: arredondado por conta própria
+RESULTADO: 16/16

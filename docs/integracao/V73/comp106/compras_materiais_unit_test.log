@@ -1,0 +1,42 @@
+OK    motor JS (jsc/node) executou sem erro
+OK    S1 · três requisições, uma por origem e por etapa: SC-038 serviço da OM-0233 (Pedido emitido), SC-039 reposição (Em cotação), SC-040 avulsa (A cotar)
+OK    S2 · nenhuma requisição de material, peça ou serviço tem safra ou cultura
+OK    S3 · paridade Python × JS: as propostas da semente (SC-039) são as mesmas da regra cmmProps
+OK    S4 · cotação só a homologado do grupo: o serviço convida F08 e F10; F11 (não homologado) fica fora
+OK    S5 · grupos dos itens: filtro em Peças, graxa e óleos em Lubrificantes (grupos de dados2.GRUPOS e de docs/pcm-suprimentos)
+OK    S6 · pedido da semente na série de manutenção PC-2nn (PC-201) e próximo PC-202
+OK    R1 · abaixo do ponto de pedido na semente: só a Graxa EP2 (livre 18 kg < 20 kg), repõe até 40 kg = 22 kg; o filtro MF 4292 (0 un) já está pedido na SC-039
+OK    R2 · NEGATIVO Caio (PCP) não abre reposição: recusa com o motivo e nada muda
+OK    R3 · Rui abre a SC-041 de reposição: 22 kg de Lubrificantes, Almoxarifado da oficina, A cotar, por Rui (almoxarife); a sugestão some
+OK    R4 · repetir não abre outra requisição
+OK    R5 · receber a reposição: +22 kg no saldo da oficina (estoque, sem reserva) e a requisição fica Recebida
+OK    R6 · receber de novo não soma (recibo)
+OK    O1 · OM-0235 (Trator 03) gerada com Falta peça: Filtro de óleo MF 4292
+OK    O2 · "Solicitar compra" da OM cria a SC-041 na fila de Compras: origem OM, ativo a03, 1 un, A cotar, sem safra
+OK    O3 · NEGATIVO Zé (mecânico) não cota: recusa com o motivo, nada muda
+OK    O4 · Ana cota: os 2 homologados de Peças (F08 e F09), propostas na hora
+OK    O5 · referência = menor custo que chega a tempo da janela da OM (24/09): F08, R$ 160,00, 1 dia (F09 é R$ 4,80 mais barata e chega em 29/09)
+OK    O6 · NEGATIVO escolher a F09 (mais barata e atrasada) sem justificativa é recusado
+OK    O7 · pedido PC-202 (a semente já tem a PC-201) para F08, R$ 160,00, previsão 24/09, por Ana (gestora)
+OK    O8 · emitir de novo não cria outro pedido
+OK    O9 · receber a peça da OM (D5, proprietário 16/10): +1 un no saldo e reservado +1 para a OM-0235 (o livre não cresce); SC Recebida e o.sc.rec
+OK    O10 · com a peça no saldo, a OM-0235 não tem mais Falta peça
+OK    O11 · liberar a OM-0235 não reserva o filtro de novo (segue +1, do recebimento) e reserva o óleo (12 L) uma vez
+OK    O12 · o filtro reservado não conta como livre: segue coberto pela SC-039 (livre 0 + 4 pedidos ≥ 2)
+OK    O13 · a ponte da Manutenção (Registrar recebimento) depois de Compras não soma de novo
+OK    P1 · receber pela ponte da Manutenção deixa a SC-041 Recebida em Compras (uma função só) e o saldo +1
+OK    P2 · Compras não recebe de novo (recibo)
+OK    V1 · NEGATIVO serviço não tem recebimento de estoque
+OK    V2 · NEGATIVO Zé não aceita o serviço (PCM ou gestora)
+OK    V3 · Otávio aceita: SC-038 Aceita; o valor do PC-201 (R$ 1.843,00, F10) vira custo de terceiro da OM-0233 e entra no custo pela função única
+OK    V4 · o serviço não mexe em saldo de peça
+OK    V5 · aceitar de novo não lança o custo duas vezes
+OK    A1 · NEGATIVO avulsa vazia: erros por campo (item, quantidade, estimativa, destino, urgência, motivo) e nada é gravado; safra e cultura não são pedidas
+OK    A2 · João (irrigante) abre a SC-041 avulsa para o ativo a11 (Bomba do Pivô 2), urgente, precisa até 24/09, Materiais gerais, sem safra
+OK    A3 · material sem código: recebimento vai direto ao destino (consumo), sem mexer no saldo da oficina
+OK    A4 · serviço avulso num centro de custo (Sede), sem data pela urgência Normal
+OK    L1 · R$ 60.140,00 (> R$ 50.000) é do 2º nível: Ana (gerente da fazenda) emite
+OK    L2 · NEGATIVO acima de R$ 300.000 é da Direção: recusado com o motivo, sem pedido
+OK    E1 · sem c.cmp e sem min/max a leitura usa a semente (reposição e fila não quebram)
+OK    E2 · a primeira escrita cria c.cmp a partir da semente
+RESULTADO: 41/41 ok
