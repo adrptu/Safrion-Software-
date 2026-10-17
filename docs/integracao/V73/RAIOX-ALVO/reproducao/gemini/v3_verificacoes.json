@@ -1,0 +1,1653 @@
+{
+ "artefato": {
+  "arquivo": "v3.html",
+  "bytes": 151382,
+  "sha256": "e7872cb02fc667330354560a6b88b82cd5485ab656b2d7546b2500d645805e5e"
+ },
+ "node": "v22.22.0",
+ "original": {
+  "v2": {
+   "leituras": 1004,
+   "leiturasZero": 0,
+   "menorLeitura": 0.2168,
+   "intervaloEntreVistorias_dias": {
+    "7": 924
+   },
+   "aplicacoes": 68,
+   "aplicacoesSemLeituraGatilhoAntes": 0,
+   "gatilhoComLeituraMaiorOuIgualNC": 43,
+   "gatilhoComLeituraEntre90pctNCeNC": 25
+  },
+  "v3": {
+   "acaro": {
+    "nTeste": 31,
+    "avalNoModelo": true,
+    "betaAval": 0.0164,
+    "linhasComAvaliadorDaOrigemDiferente": 13,
+    "v3_avaliadorDa2aLeitura": {
+     "ok": true,
+     "brierModelo": 0.0588,
+     "brierPersistencia": 0.1613
+    },
+    "avaliadorConhecidoNaOrigem": {
+     "ok": true,
+     "brierModelo": 0.0559
+    }
+   },
+   "mosca": {
+    "nTeste": 44,
+    "avalNoModelo": true,
+    "betaAval": 0.0095,
+    "linhasComAvaliadorDaOrigemDiferente": 16,
+    "v3_avaliadorDa2aLeitura": {
+     "ok": true,
+     "brierModelo": 0.0443,
+     "brierPersistencia": 0.1364
+    },
+    "avaliadorConhecidoNaOrigem": {
+     "ok": true,
+     "brierModelo": 0.0442
+    }
+   },
+   "antrac": {
+    "nTeste": 49,
+    "avalNoModelo": true,
+    "betaAval": -0.0152,
+    "linhasComAvaliadorDaOrigemDiferente": 19,
+    "v3_avaliadorDa2aLeitura": {
+     "ok": true,
+     "brierModelo": 0.003,
+     "brierPersistencia": 0.0204
+    },
+    "avaliadorConhecidoNaOrigem": {
+     "ok": true,
+     "brierModelo": 0.003
+    }
+   },
+   "cochon": {
+    "nTeste": 37,
+    "avalNoModelo": true,
+    "betaAval": -0.0065,
+    "linhasComAvaliadorDaOrigemDiferente": 13,
+    "v3_avaliadorDa2aLeitura": {
+     "ok": true,
+     "brierModelo": 0.0441,
+     "brierPersistencia": 0.2162
+    },
+    "avaliadorConhecidoNaOrigem": {
+     "ok": true,
+     "brierModelo": 0.0432
+    }
+   }
+  },
+  "v1": {
+   "controleZeradoAntes": {
+    "entrada": "T 10 → 5; C 0 → 10",
+    "E": null,
+    "nCtrl": 0
+   },
+   "tratadoZeradoAntes": {
+    "entrada": "T 0 → 2; C 10 → 10",
+    "E": -4,
+    "nCtrl": 2
+   },
+   "controleZeradoDepois": {
+    "entrada": "T 10 → 5; C 10 → 0",
+    "E": -10,
+    "nCtrl": 2
+   },
+   "tratadoZeradoDepois": {
+    "entrada": "T 10 → 0; C 10 → 10",
+    "E": 0.9524,
+    "nCtrl": 2
+   },
+   "controleZeradoAntesEDepois": {
+    "entrada": "T 10 → 5; C 0 → 0",
+    "E": null,
+    "nCtrl": 0
+   },
+   "controleNoPiso10pctNC": {
+    "entrada": "T 10 → 50; C 1 → 10",
+    "E": 0.3129,
+    "nCtrl": 2
+   },
+   "regular": {
+    "entrada": "T 10 → 5; C 10 → 10",
+    "E": 0.4762,
+    "nCtrl": 2
+   }
+  }
+ },
+ "replicas": {
+  "r01:": {
+   "v2": {
+    "leituras": 1016,
+    "leiturasZero": 0,
+    "menorLeitura": 0.3318,
+    "intervaloEntreVistorias_dias": {
+     "7": 936
+    },
+    "aplicacoes": 75,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 48,
+    "gatilhoComLeituraEntre90pctNCeNC": 27
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 47,
+     "avalNoModelo": true,
+     "betaAval": 0.0115,
+     "linhasComAvaliadorDaOrigemDiferente": 25,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0547,
+      "brierPersistencia": 0.1702
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0561
+     }
+    },
+    "mosca": {
+     "nTeste": 41,
+     "avalNoModelo": true,
+     "betaAval": 0.0028,
+     "linhasComAvaliadorDaOrigemDiferente": 21,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0544,
+      "brierPersistencia": 0.0732
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.054
+     }
+    },
+    "antrac": {
+     "nTeste": 45,
+     "avalNoModelo": true,
+     "betaAval": 0.0193,
+     "linhasComAvaliadorDaOrigemDiferente": 22,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0328,
+      "brierPersistencia": 0.0667
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0346
+     }
+    },
+    "cochon": {
+     "nTeste": 37,
+     "avalNoModelo": true,
+     "betaAval": 0.0262,
+     "linhasComAvaliadorDaOrigemDiferente": 18,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.059,
+      "brierPersistencia": 0.2703
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0656
+     }
+    }
+   }
+  },
+  "r02:": {
+   "v2": {
+    "leituras": 1016,
+    "leiturasZero": 0,
+    "menorLeitura": 0.3782,
+    "intervaloEntreVistorias_dias": {
+     "7": 936
+    },
+    "aplicacoes": 69,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 51,
+    "gatilhoComLeituraEntre90pctNCeNC": 18
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 30,
+     "avalNoModelo": true,
+     "betaAval": 0.0147,
+     "linhasComAvaliadorDaOrigemDiferente": 15,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0436,
+      "brierPersistencia": 0.1333
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0403
+     }
+    },
+    "mosca": {
+     "nTeste": 45,
+     "avalNoModelo": true,
+     "betaAval": 0.0054,
+     "linhasComAvaliadorDaOrigemDiferente": 24,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0618,
+      "brierPersistencia": 0.1556
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0617
+     }
+    },
+    "antrac": {
+     "nTeste": 49,
+     "avalNoModelo": true,
+     "betaAval": -0.0217,
+     "linhasComAvaliadorDaOrigemDiferente": 26,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0235,
+      "brierPersistencia": 0.0612
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0252
+     }
+    },
+    "cochon": {
+     "nTeste": 39,
+     "avalNoModelo": true,
+     "betaAval": -0.0094,
+     "linhasComAvaliadorDaOrigemDiferente": 23,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0797,
+      "brierPersistencia": 0.1538
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0793
+     }
+    }
+   }
+  },
+  "r03:": {
+   "v2": {
+    "leituras": 1004,
+    "leiturasZero": 0,
+    "menorLeitura": 0.4183,
+    "intervaloEntreVistorias_dias": {
+     "7": 920,
+     "21": 4
+    },
+    "aplicacoes": 75,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 53,
+    "gatilhoComLeituraEntre90pctNCeNC": 22
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 35,
+     "avalNoModelo": true,
+     "betaAval": 0.0344,
+     "linhasComAvaliadorDaOrigemDiferente": 18,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.1444,
+      "brierPersistencia": 0.1714
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.1421
+     }
+    },
+    "mosca": {
+     "nTeste": 39,
+     "avalNoModelo": true,
+     "betaAval": 0.0437,
+     "linhasComAvaliadorDaOrigemDiferente": 21,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.094,
+      "brierPersistencia": 0.1795
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0824
+     }
+    },
+    "antrac": {
+     "nTeste": 47,
+     "avalNoModelo": true,
+     "betaAval": 0.0003,
+     "linhasComAvaliadorDaOrigemDiferente": 26,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0322,
+      "brierPersistencia": 0.0426
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0322
+     }
+    },
+    "cochon": {
+     "nTeste": 36,
+     "avalNoModelo": true,
+     "betaAval": -0.0019,
+     "linhasComAvaliadorDaOrigemDiferente": 22,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0675,
+      "brierPersistencia": 0.25
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0677
+     }
+    }
+   }
+  },
+  "r04:": {
+   "v2": {
+    "leituras": 1004,
+    "leiturasZero": 0,
+    "menorLeitura": 0.2839,
+    "intervaloEntreVistorias_dias": {
+     "7": 924
+    },
+    "aplicacoes": 69,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 47,
+    "gatilhoComLeituraEntre90pctNCeNC": 22
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 44,
+     "avalNoModelo": true,
+     "betaAval": 0.0492,
+     "linhasComAvaliadorDaOrigemDiferente": 21,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0703,
+      "brierPersistencia": 0.1136
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0697
+     }
+    },
+    "mosca": {
+     "nTeste": 45,
+     "avalNoModelo": true,
+     "betaAval": -0.0114,
+     "linhasComAvaliadorDaOrigemDiferente": 20,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0509,
+      "brierPersistencia": 0.1111
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.05
+     }
+    },
+    "antrac": {
+     "nTeste": 50,
+     "avalNoModelo": true,
+     "betaAval": -0.0144,
+     "linhasComAvaliadorDaOrigemDiferente": 24,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": false,
+      "brierModelo": 0.0287,
+      "brierPersistencia": 0.02
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": false,
+      "brierModelo": 0.0281
+     }
+    },
+    "cochon": {
+     "nTeste": 36,
+     "avalNoModelo": true,
+     "betaAval": 0.0301,
+     "linhasComAvaliadorDaOrigemDiferente": 18,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0587,
+      "brierPersistencia": 0.1667
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0568
+     }
+    }
+   }
+  },
+  "r05:": {
+   "v2": {
+    "leituras": 1008,
+    "leiturasZero": 0,
+    "menorLeitura": 0.2776,
+    "intervaloEntreVistorias_dias": {
+     "7": 928
+    },
+    "aplicacoes": 64,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 44,
+    "gatilhoComLeituraEntre90pctNCeNC": 20
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 43,
+     "avalNoModelo": true,
+     "betaAval": 0.0024,
+     "linhasComAvaliadorDaOrigemDiferente": 26,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0276,
+      "brierPersistencia": 0.1395
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0272
+     }
+    },
+    "mosca": {
+     "nTeste": 43,
+     "avalNoModelo": true,
+     "betaAval": 0.0193,
+     "linhasComAvaliadorDaOrigemDiferente": 23,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0509,
+      "brierPersistencia": 0.093
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0482
+     }
+    },
+    "antrac": {
+     "nTeste": 47,
+     "avalNoModelo": true,
+     "betaAval": 0.0086,
+     "linhasComAvaliadorDaOrigemDiferente": 25,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0394,
+      "brierPersistencia": 0.0638
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0389
+     }
+    },
+    "cochon": {
+     "nTeste": 43,
+     "avalNoModelo": true,
+     "betaAval": 0.0187,
+     "linhasComAvaliadorDaOrigemDiferente": 25,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0766,
+      "brierPersistencia": 0.2326
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0739
+     }
+    }
+   }
+  },
+  "r06:": {
+   "v2": {
+    "leituras": 1004,
+    "leiturasZero": 0,
+    "menorLeitura": 0.2203,
+    "intervaloEntreVistorias_dias": {
+     "7": 924
+    },
+    "aplicacoes": 67,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 44,
+    "gatilhoComLeituraEntre90pctNCeNC": 23
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 34,
+     "avalNoModelo": true,
+     "betaAval": -0.0035,
+     "linhasComAvaliadorDaOrigemDiferente": 15,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": false,
+      "brierModelo": 0.1412,
+      "brierPersistencia": 0.0882
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": false,
+      "brierModelo": 0.1418
+     }
+    },
+    "mosca": {
+     "nTeste": 49,
+     "avalNoModelo": true,
+     "betaAval": -0.0055,
+     "linhasComAvaliadorDaOrigemDiferente": 23,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.082,
+      "brierPersistencia": 0.1633
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0827
+     }
+    },
+    "antrac": {
+     "nTeste": 54,
+     "avalNoModelo": true,
+     "betaAval": -0.0205,
+     "linhasComAvaliadorDaOrigemDiferente": 24,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0608,
+      "brierPersistencia": 0.1111
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0629
+     }
+    },
+    "cochon": {
+     "nTeste": 35,
+     "avalNoModelo": true,
+     "betaAval": 0.0237,
+     "linhasComAvaliadorDaOrigemDiferente": 16,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0327,
+      "brierPersistencia": 0.1429
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0293
+     }
+    }
+   }
+  },
+  "r07:": {
+   "v2": {
+    "leituras": 996,
+    "leiturasZero": 0,
+    "menorLeitura": 0.3185,
+    "intervaloEntreVistorias_dias": {
+     "7": 916
+    },
+    "aplicacoes": 77,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 59,
+    "gatilhoComLeituraEntre90pctNCeNC": 18
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 41,
+     "avalNoModelo": true,
+     "betaAval": -0.0324,
+     "linhasComAvaliadorDaOrigemDiferente": 21,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0558,
+      "brierPersistencia": 0.0976
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0505
+     }
+    },
+    "mosca": {
+     "nTeste": 46,
+     "avalNoModelo": true,
+     "betaAval": -0.0137,
+     "linhasComAvaliadorDaOrigemDiferente": 22,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0598,
+      "brierPersistencia": 0.1087
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.058
+     }
+    },
+    "antrac": {
+     "nTeste": 46,
+     "avalNoModelo": true,
+     "betaAval": 0.0306,
+     "linhasComAvaliadorDaOrigemDiferente": 21,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0465,
+      "brierPersistencia": 0.1087
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0507
+     }
+    },
+    "cochon": {
+     "nTeste": 40,
+     "avalNoModelo": true,
+     "betaAval": -0.0155,
+     "linhasComAvaliadorDaOrigemDiferente": 18,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.1105,
+      "brierPersistencia": 0.3
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.1097
+     }
+    }
+   }
+  },
+  "r08:": {
+   "v2": {
+    "leituras": 1004,
+    "leiturasZero": 0,
+    "menorLeitura": 0.3997,
+    "intervaloEntreVistorias_dias": {
+     "7": 920,
+     "21": 4
+    },
+    "aplicacoes": 71,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 44,
+    "gatilhoComLeituraEntre90pctNCeNC": 27
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 45,
+     "avalNoModelo": true,
+     "betaAval": -0.0042,
+     "linhasComAvaliadorDaOrigemDiferente": 22,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0395,
+      "brierPersistencia": 0.0889
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0393
+     }
+    },
+    "mosca": {
+     "nTeste": 34,
+     "avalNoModelo": true,
+     "betaAval": -0.0166,
+     "linhasComAvaliadorDaOrigemDiferente": 20,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.014,
+      "brierPersistencia": 0.0588
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0128
+     }
+    },
+    "antrac": {
+     "nTeste": 44,
+     "avalNoModelo": true,
+     "betaAval": 0.0028,
+     "linhasComAvaliadorDaOrigemDiferente": 20,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": false,
+      "brierModelo": 0.026,
+      "brierPersistencia": 0.0227
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": false,
+      "brierModelo": 0.0256
+     }
+    },
+    "cochon": {
+     "nTeste": 37,
+     "avalNoModelo": true,
+     "betaAval": 0.0048,
+     "linhasComAvaliadorDaOrigemDiferente": 16,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0825,
+      "brierPersistencia": 0.1622
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0845
+     }
+    }
+   }
+  },
+  "r09:": {
+   "v2": {
+    "leituras": 992,
+    "leiturasZero": 0,
+    "menorLeitura": 0.286,
+    "intervaloEntreVistorias_dias": {
+     "7": 908,
+     "21": 4
+    },
+    "aplicacoes": 66,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 46,
+    "gatilhoComLeituraEntre90pctNCeNC": 20
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 46,
+     "avalNoModelo": true,
+     "betaAval": 0.0331,
+     "linhasComAvaliadorDaOrigemDiferente": 21,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.1238,
+      "brierPersistencia": 0.1739
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.1259
+     }
+    },
+    "mosca": {
+     "nTeste": 43,
+     "avalNoModelo": true,
+     "betaAval": 0.0182,
+     "linhasComAvaliadorDaOrigemDiferente": 21,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.1141,
+      "brierPersistencia": 0.1628
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.1136
+     }
+    },
+    "antrac": {
+     "nTeste": 45,
+     "avalNoModelo": true,
+     "betaAval": -0.0161,
+     "linhasComAvaliadorDaOrigemDiferente": 18,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0307,
+      "brierPersistencia": 0.0889
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0282
+     }
+    },
+    "cochon": {
+     "nTeste": 40,
+     "avalNoModelo": true,
+     "betaAval": 0.0133,
+     "linhasComAvaliadorDaOrigemDiferente": 16,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.103,
+      "brierPersistencia": 0.2
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.1035
+     }
+    }
+   }
+  },
+  "r10:": {
+   "v2": {
+    "leituras": 1008,
+    "leiturasZero": 0,
+    "menorLeitura": 0.2931,
+    "intervaloEntreVistorias_dias": {
+     "7": 924,
+     "21": 4
+    },
+    "aplicacoes": 74,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 41,
+    "gatilhoComLeituraEntre90pctNCeNC": 33
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 40,
+     "avalNoModelo": true,
+     "betaAval": -0.0302,
+     "linhasComAvaliadorDaOrigemDiferente": 24,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0114,
+      "brierPersistencia": 0.025
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0118
+     }
+    },
+    "mosca": {
+     "nTeste": 39,
+     "avalNoModelo": true,
+     "betaAval": 0.031,
+     "linhasComAvaliadorDaOrigemDiferente": 24,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0738,
+      "brierPersistencia": 0.1026
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0717
+     }
+    },
+    "antrac": {
+     "nTeste": 40,
+     "avalNoModelo": true,
+     "betaAval": -0.0008,
+     "linhasComAvaliadorDaOrigemDiferente": 21,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.004,
+      "brierPersistencia": 0.05
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0039
+     }
+    },
+    "cochon": {
+     "nTeste": 35,
+     "avalNoModelo": true,
+     "betaAval": -0.0003,
+     "linhasComAvaliadorDaOrigemDiferente": 19,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.1109,
+      "brierPersistencia": 0.2
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.1108
+     }
+    }
+   }
+  },
+  "r11:": {
+   "v2": {
+    "leituras": 1008,
+    "leiturasZero": 0,
+    "menorLeitura": 0.4119,
+    "intervaloEntreVistorias_dias": {
+     "7": 924,
+     "21": 4
+    },
+    "aplicacoes": 80,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 58,
+    "gatilhoComLeituraEntre90pctNCeNC": 22
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 30,
+     "avalNoModelo": true,
+     "betaAval": -0.0174,
+     "linhasComAvaliadorDaOrigemDiferente": 21,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0646,
+      "brierPersistencia": 0.1
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0655
+     }
+    },
+    "mosca": {
+     "nTeste": 41,
+     "avalNoModelo": true,
+     "betaAval": 0.0003,
+     "linhasComAvaliadorDaOrigemDiferente": 28,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0682,
+      "brierPersistencia": 0.1463
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0682
+     }
+    },
+    "antrac": {
+     "nTeste": 45,
+     "avalNoModelo": true,
+     "betaAval": 0.0328,
+     "linhasComAvaliadorDaOrigemDiferente": 25,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0732,
+      "brierPersistencia": 0.1111
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0721
+     }
+    },
+    "cochon": {
+     "nTeste": 35,
+     "avalNoModelo": true,
+     "betaAval": 0.0106,
+     "linhasComAvaliadorDaOrigemDiferente": 24,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0529,
+      "brierPersistencia": 0.3143
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0519
+     }
+    }
+   }
+  },
+  "r12:": {
+   "v2": {
+    "leituras": 1020,
+    "leiturasZero": 0,
+    "menorLeitura": 0.2988,
+    "intervaloEntreVistorias_dias": {
+     "7": 936,
+     "21": 4
+    },
+    "aplicacoes": 73,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 48,
+    "gatilhoComLeituraEntre90pctNCeNC": 25
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 40,
+     "avalNoModelo": true,
+     "betaAval": -0.0098,
+     "linhasComAvaliadorDaOrigemDiferente": 16,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0693,
+      "brierPersistencia": 0.15
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0694
+     }
+    },
+    "mosca": {
+     "nTeste": 40,
+     "avalNoModelo": true,
+     "betaAval": 0.0069,
+     "linhasComAvaliadorDaOrigemDiferente": 14,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.1207,
+      "brierPersistencia": 0.15
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.1209
+     }
+    },
+    "antrac": {
+     "nTeste": 46,
+     "avalNoModelo": true,
+     "betaAval": -0.0206,
+     "linhasComAvaliadorDaOrigemDiferente": 16,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0519,
+      "brierPersistencia": 0.087
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0476
+     }
+    },
+    "cochon": {
+     "nTeste": 40,
+     "avalNoModelo": true,
+     "betaAval": -0.0047,
+     "linhasComAvaliadorDaOrigemDiferente": 13,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0868,
+      "brierPersistencia": 0.2
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0857
+     }
+    }
+   }
+  },
+  "r13:": {
+   "v2": {
+    "leituras": 996,
+    "leiturasZero": 0,
+    "menorLeitura": 0.3847,
+    "intervaloEntreVistorias_dias": {
+     "7": 912,
+     "21": 4
+    },
+    "aplicacoes": 74,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 48,
+    "gatilhoComLeituraEntre90pctNCeNC": 26
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 34,
+     "avalNoModelo": true,
+     "betaAval": 0.0459,
+     "linhasComAvaliadorDaOrigemDiferente": 16,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0493,
+      "brierPersistencia": 0.0588
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0588
+     }
+    },
+    "mosca": {
+     "nTeste": 34,
+     "avalNoModelo": true,
+     "betaAval": -0.0069,
+     "linhasComAvaliadorDaOrigemDiferente": 16,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0203,
+      "brierPersistencia": 0.0882
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0203
+     }
+    },
+    "antrac": {
+     "nTeste": 39,
+     "avalNoModelo": true,
+     "betaAval": 0.0346,
+     "linhasComAvaliadorDaOrigemDiferente": 23,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0243,
+      "brierPersistencia": 0.0769
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0209
+     }
+    },
+    "cochon": {
+     "nTeste": 38,
+     "avalNoModelo": true,
+     "betaAval": -0.0046,
+     "linhasComAvaliadorDaOrigemDiferente": 19,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0808,
+      "brierPersistencia": 0.2368
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0818
+     }
+    }
+   }
+  },
+  "r14:": {
+   "v2": {
+    "leituras": 1016,
+    "leiturasZero": 0,
+    "menorLeitura": 0.2463,
+    "intervaloEntreVistorias_dias": {
+     "7": 936
+    },
+    "aplicacoes": 72,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 48,
+    "gatilhoComLeituraEntre90pctNCeNC": 24
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 42,
+     "avalNoModelo": true,
+     "betaAval": 0.0042,
+     "linhasComAvaliadorDaOrigemDiferente": 22,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0705,
+      "brierPersistencia": 0.1429
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0704
+     }
+    },
+    "mosca": {
+     "nTeste": 46,
+     "avalNoModelo": true,
+     "betaAval": 0.0042,
+     "linhasComAvaliadorDaOrigemDiferente": 26,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0519,
+      "brierPersistencia": 0.1087
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0522
+     }
+    },
+    "antrac": {
+     "nTeste": 48,
+     "avalNoModelo": true,
+     "betaAval": -0.0142,
+     "linhasComAvaliadorDaOrigemDiferente": 28,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0396,
+      "brierPersistencia": 0.1042
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0405
+     }
+    },
+    "cochon": {
+     "nTeste": 45,
+     "avalNoModelo": true,
+     "betaAval": 0.0101,
+     "linhasComAvaliadorDaOrigemDiferente": 28,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.102,
+      "brierPersistencia": 0.2667
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.1023
+     }
+    }
+   }
+  },
+  "r15:": {
+   "v2": {
+    "leituras": 1016,
+    "leiturasZero": 0,
+    "menorLeitura": 0.3733,
+    "intervaloEntreVistorias_dias": {
+     "7": 936
+    },
+    "aplicacoes": 74,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 51,
+    "gatilhoComLeituraEntre90pctNCeNC": 23
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 35,
+     "avalNoModelo": true,
+     "betaAval": -0.0184,
+     "linhasComAvaliadorDaOrigemDiferente": 23,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": false,
+      "brierModelo": 0.0748,
+      "brierPersistencia": 0.0571
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": false,
+      "brierModelo": 0.0708
+     }
+    },
+    "mosca": {
+     "nTeste": 36,
+     "avalNoModelo": true,
+     "betaAval": -0.0338,
+     "linhasComAvaliadorDaOrigemDiferente": 19,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0544,
+      "brierPersistencia": 0.0556
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0494
+     }
+    },
+    "antrac": {
+     "nTeste": 48,
+     "avalNoModelo": true,
+     "betaAval": 0.012,
+     "linhasComAvaliadorDaOrigemDiferente": 26,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0332,
+      "brierPersistencia": 0.0417
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0336
+     }
+    },
+    "cochon": {
+     "nTeste": 34,
+     "avalNoModelo": true,
+     "betaAval": -0.0301,
+     "linhasComAvaliadorDaOrigemDiferente": 19,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.1306,
+      "brierPersistencia": 0.2941
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.134
+     }
+    }
+   }
+  },
+  "r16:": {
+   "v2": {
+    "leituras": 1016,
+    "leiturasZero": 0,
+    "menorLeitura": 0.3766,
+    "intervaloEntreVistorias_dias": {
+     "7": 932,
+     "21": 4
+    },
+    "aplicacoes": 70,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 52,
+    "gatilhoComLeituraEntre90pctNCeNC": 18
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 32,
+     "avalNoModelo": true,
+     "betaAval": 0.0025,
+     "linhasComAvaliadorDaOrigemDiferente": 15,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0831,
+      "brierPersistencia": 0.1563
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.083
+     }
+    },
+    "mosca": {
+     "nTeste": 43,
+     "avalNoModelo": true,
+     "betaAval": 0.0279,
+     "linhasComAvaliadorDaOrigemDiferente": 18,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0725,
+      "brierPersistencia": 0.1628
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0745
+     }
+    },
+    "antrac": {
+     "nTeste": 48,
+     "avalNoModelo": true,
+     "betaAval": 0.0109,
+     "linhasComAvaliadorDaOrigemDiferente": 24,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0454,
+      "brierPersistencia": 0.0833
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0426
+     }
+    },
+    "cochon": {
+     "nTeste": 36,
+     "avalNoModelo": true,
+     "betaAval": 0.0097,
+     "linhasComAvaliadorDaOrigemDiferente": 17,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0526,
+      "brierPersistencia": 0.1944
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0523
+     }
+    }
+   }
+  },
+  "r17:": {
+   "v2": {
+    "leituras": 1016,
+    "leiturasZero": 0,
+    "menorLeitura": 0.3566,
+    "intervaloEntreVistorias_dias": {
+     "7": 936
+    },
+    "aplicacoes": 74,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 54,
+    "gatilhoComLeituraEntre90pctNCeNC": 20
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 31,
+     "avalNoModelo": true,
+     "betaAval": 0.0384,
+     "linhasComAvaliadorDaOrigemDiferente": 15,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0733,
+      "brierPersistencia": 0.1935
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0756
+     }
+    },
+    "mosca": {
+     "nTeste": 50,
+     "avalNoModelo": true,
+     "betaAval": -0.0047,
+     "linhasComAvaliadorDaOrigemDiferente": 26,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0703,
+      "brierPersistencia": 0.14
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0707
+     }
+    },
+    "antrac": {
+     "nTeste": 49,
+     "avalNoModelo": true,
+     "betaAval": -0.0162,
+     "linhasComAvaliadorDaOrigemDiferente": 26,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0256,
+      "brierPersistencia": 0.102
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0287
+     }
+    },
+    "cochon": {
+     "nTeste": 30,
+     "avalNoModelo": true,
+     "betaAval": 0.018,
+     "linhasComAvaliadorDaOrigemDiferente": 18,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0971,
+      "brierPersistencia": 0.1667
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0995
+     }
+    }
+   }
+  },
+  "r18:": {
+   "v2": {
+    "leituras": 1004,
+    "leiturasZero": 0,
+    "menorLeitura": 0.3147,
+    "intervaloEntreVistorias_dias": {
+     "7": 920,
+     "21": 4
+    },
+    "aplicacoes": 75,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 47,
+    "gatilhoComLeituraEntre90pctNCeNC": 28
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 37,
+     "avalNoModelo": true,
+     "betaAval": -0.021,
+     "linhasComAvaliadorDaOrigemDiferente": 15,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0407,
+      "brierPersistencia": 0.0811
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.042
+     }
+    },
+    "mosca": {
+     "nTeste": 39,
+     "avalNoModelo": true,
+     "betaAval": -0.0214,
+     "linhasComAvaliadorDaOrigemDiferente": 15,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0798,
+      "brierPersistencia": 0.1795
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0836
+     }
+    },
+    "antrac": {
+     "nTeste": 44,
+     "avalNoModelo": true,
+     "betaAval": 0.0003,
+     "linhasComAvaliadorDaOrigemDiferente": 18,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0378,
+      "brierPersistencia": 0.0682
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0378
+     }
+    },
+    "cochon": {
+     "nTeste": 40,
+     "avalNoModelo": true,
+     "betaAval": -0.0021,
+     "linhasComAvaliadorDaOrigemDiferente": 16,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.1018,
+      "brierPersistencia": 0.225
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.1021
+     }
+    }
+   }
+  },
+  "r19:": {
+   "v2": {
+    "leituras": 1028,
+    "leiturasZero": 0,
+    "menorLeitura": 0.4096,
+    "intervaloEntreVistorias_dias": {
+     "7": 948
+    },
+    "aplicacoes": 85,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 52,
+    "gatilhoComLeituraEntre90pctNCeNC": 33
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 35,
+     "avalNoModelo": true,
+     "betaAval": -0.0074,
+     "linhasComAvaliadorDaOrigemDiferente": 16,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0994,
+      "brierPersistencia": 0.1143
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.1001
+     }
+    },
+    "mosca": {
+     "nTeste": 40,
+     "avalNoModelo": true,
+     "betaAval": -0.0115,
+     "linhasComAvaliadorDaOrigemDiferente": 18,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0303,
+      "brierPersistencia": 0.125
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0308
+     }
+    },
+    "antrac": {
+     "nTeste": 49,
+     "avalNoModelo": true,
+     "betaAval": 0.0035,
+     "linhasComAvaliadorDaOrigemDiferente": 22,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": false,
+      "brierModelo": 0.0018,
+      "brierPersistencia": 0
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": false,
+      "brierModelo": 0.0019
+     }
+    },
+    "cochon": {
+     "nTeste": 37,
+     "avalNoModelo": true,
+     "betaAval": 0.0093,
+     "linhasComAvaliadorDaOrigemDiferente": 18,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0628,
+      "brierPersistencia": 0.2432
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0651
+     }
+    }
+   }
+  },
+  "r20:": {
+   "v2": {
+    "leituras": 1012,
+    "leiturasZero": 0,
+    "menorLeitura": 0.1908,
+    "intervaloEntreVistorias_dias": {
+     "7": 928,
+     "21": 4
+    },
+    "aplicacoes": 76,
+    "aplicacoesSemLeituraGatilhoAntes": 0,
+    "gatilhoComLeituraMaiorOuIgualNC": 51,
+    "gatilhoComLeituraEntre90pctNCeNC": 25
+   },
+   "v3": {
+    "acaro": {
+     "nTeste": 36,
+     "avalNoModelo": true,
+     "betaAval": -0.037,
+     "linhasComAvaliadorDaOrigemDiferente": 15,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0548,
+      "brierPersistencia": 0.1667
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0577
+     }
+    },
+    "mosca": {
+     "nTeste": 43,
+     "avalNoModelo": true,
+     "betaAval": 0.0053,
+     "linhasComAvaliadorDaOrigemDiferente": 20,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0413,
+      "brierPersistencia": 0.1628
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0406
+     }
+    },
+    "antrac": {
+     "nTeste": 44,
+     "avalNoModelo": true,
+     "betaAval": -0.0012,
+     "linhasComAvaliadorDaOrigemDiferente": 22,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.0661,
+      "brierPersistencia": 0.1136
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.066
+     }
+    },
+    "cochon": {
+     "nTeste": 39,
+     "avalNoModelo": true,
+     "betaAval": -0.0073,
+     "linhasComAvaliadorDaOrigemDiferente": 17,
+     "v3_avaliadorDa2aLeitura": {
+      "ok": true,
+      "brierModelo": 0.057,
+      "brierPersistencia": 0.2308
+     },
+     "avaliadorConhecidoNaOrigem": {
+      "ok": true,
+      "brierModelo": 0.0556
+     }
+    }
+   }
+  }
+ }
+}

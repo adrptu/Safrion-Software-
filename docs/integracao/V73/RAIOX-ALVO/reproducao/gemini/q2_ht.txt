@@ -1,0 +1,64 @@
+== K1 · contraprova da consolidação (item 2): T_antes 10, T_depois 5, C_antes 0, C_depois 10
+K1: T 10 → 5; C 0 → 10
+  produto: E = 1 · fator do tratado = 0.5 · fator do controle = +Infinito (÷ 0) · razão: E = 1
+  com ε = 0.5 (5 % de NC 10, como o v3): E = 0.975057
+  Leitura: na forma de produto C_antes está no numerador e E = 1 (100 %), sem divisão por zero, como diz a consolidação.
+  Na forma de razão, que é o estimando (fator do tratado ÷ fator do controle), o fator do controle é 10 ÷ 0: divisão por zero.
+
+== K2 · com C_antes = 0, E não depende do tratado (não identificação)
+  T 10 → 0: E produto = 1
+  T 10 → 5: E produto = 1
+  T 10 → 10: E produto = 1
+  T 10 → 50: E produto = 1
+  T 10 → 1000: E produto = 1
+  O tratado sobe 100 vezes (10 → 1000) e E continua 100 %. O resultado não carrega informação sobre o tratado.
+
+== K3 · exemplo do pacote ao Gemini (Q2): tratado 0 → 2, controles 10 → 10 (o zero é T_antes, não C_antes)
+K3: T 0 → 2; C 10 → 10
+  produto: E = −Infinito (÷ 0) · fator do tratado = +Infinito (÷ 0) · fator do controle = 1 · razão: E = −Infinito (÷ 0)
+  com ε = 0.5 (5 % de NC 10, como o v3): E = -4
+
+== K4 · C_depois = 0
+K4a: T 10 → 5; C 10 → 0
+  produto: E = −Infinito (÷ 0) · fator do tratado = 0.5 · fator do controle = 0 · razão: E = −Infinito (÷ 0)
+  com ε = 0.5 (5 % de NC 10, como o v3): E = -10
+K4b: T 10 → 0; C 10 → 0
+  produto: E = NaN (0 ÷ 0) · fator do tratado = 0 · fator do controle = 0 · razão: E = NaN (0 ÷ 0)
+  com ε = 0.5 (5 % de NC 10, como o v3): E = 0
+
+== K5 · controle zerado antes e depois
+K5: T 10 → 5; C 0 → 0
+  produto: E = NaN (0 ÷ 0) · fator do tratado = 0.5 · fator do controle = NaN (0 ÷ 0) · razão: E = NaN (0 ÷ 0)
+  com ε = 0.5 (5 % de NC 10, como o v3): E = 0.47619
+
+== K6 · caso regular do pacote: tratado 10 → 5, controles 10 → 10
+K6: T 10 → 5; C 10 → 10
+  produto: E = 0.5 · fator do tratado = 0.5 · fator do controle = 1 · razão: E = 0.5
+  com ε = 0.5 (5 % de NC 10, como o v3): E = 0.47619
+
+== K7 · tratado zerado depois (resultado legítimo de 100 %, que o ε rebaixa)
+K7: T 10 → 0; C 10 → 10
+  produto: E = 1 · fator do tratado = 0 · fator do controle = 1 · razão: E = 1
+  com ε = 0.5 (5 % de NC 10, como o v3): E = 0.952381
+
+== K8 · a frase "Ca = 0 é divisor" muda de verdade conforme a notação
+  notação da consolidação (Ca = controle depois) com Ca = 0: E = −Infinito (÷ 0) → divisor, verdadeiro
+  notação do PED:121 (Ca = controle antes) com Ca = 0: E = 1 → não é divisor; E = 100 % para qualquer tratado
+
+== K9 · C_antes perto de zero (sem ser zero): o tratado quintuplica e E sai alto
+K9: T 10 → 50; C 0.1 → 10
+  produto: E = 0.95 · fator do tratado = 5 · fator do controle = 100 · razão: E = 0.95
+  Zero exato é regra estrutural; "perto de zero" é precisão e pede piso do protocolo (pendente). O v3 tem piso de 10 % do NC só no controle (ART:628).
+
+== K10 · HT é diferença de diferenças em escala log: ln(1 − E) = [ln T_depois − ln T_antes] − [ln C_depois − ln C_antes]
+  1000 quádruplas positivas sorteadas (xorshift, semente fixa): maior |diferença| = 3.11e-13
+  Logo o HT já pressupõe tendências paralelas na escala log (mesmo fator de mudança sem a aplicação). "Migrar para DiD" não troca de pressuposto.
+
+== K11 · com T_antes = C_antes, HT coincide com Abbott (HT generaliza Abbott a níveis de partida diferentes)
+  T 10 → 4, C 10 → 8: HT = 0.5 · Abbott = 0.5
+  T 3 → 1, C 3 → 6: HT = 0.833333 · Abbott = 0.833333
+  T 7 → 0, C 7 → 5: HT = 1 · Abbott = 1
+  níveis de partida diferentes, T 20 → 10, C 5 → 10: HT = 0.75 · Abbott = 0 (Abbott ignora que o tratado partiu do quádruplo)
+
+== Regra que decorre (especificada no RX-0, EST-3a): T_antes > 0, C_antes > 0 em cada controle e C_depois > 0 no agregado;
+   senão "sem comparação válida" com o motivo (tratado zerado antes · controle zerado antes · controle zerado depois). T_depois = 0 é válido (E = 100 %, "zero observado depois").

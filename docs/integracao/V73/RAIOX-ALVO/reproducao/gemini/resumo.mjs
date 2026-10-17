@@ -1,0 +1,21 @@
+// Resumo legível de v3_verificacoes.json (V1 a V3). Uso: node resumo.mjs v3_verificacoes.json > v3_verificacoes.txt
+import fs from 'node:fs';
+const r = JSON.parse(fs.readFileSync(process.argv[2], 'utf8')), all = [['original', r.original], ...Object.entries(r.replicas)], L = [], log = s => L.push(s);
+log(`v3 ${r.artefato.arquivo} · ${r.artefato.bytes} bytes · sha256 ${r.artefato.sha256} · ${r.node} · ${all.length} sementes (original + ${all.length - 1} réplicas)`);
+log('\n== V1 · rxHT do v3 nos casos de zero da Q2 (semente original; fixture de 3 talhões, NC 10, ε = 0,5; D = 10)');
+Object.entries(r.original.v1).forEach(([k, v]) => log(`  ${k.padEnd(28)} ${v.entrada.padEnd(22)} E = ${v.E == null ? 'nulo ("sem comparação")' : v.E} · controles usados ${v.nCtrl}`));
+const s = { leituras: 0, zeros: 0, min: Infinity, gaps: {}, apps: 0, acima: 0, abaixo: 0, sem: 0 };
+all.forEach(([, v]) => { const g = v.v2; s.leituras += g.leituras; s.zeros += g.leiturasZero; s.min = Math.min(s.min, g.menorLeitura);
+  Object.entries(g.intervaloEntreVistorias_dias).forEach(([d, n]) => { s.gaps[d] = (s.gaps[d] || 0) + n; });
+  s.apps += g.aplicacoes; s.acima += g.gatilhoComLeituraMaiorOuIgualNC; s.abaixo += g.gatilhoComLeituraEntre90pctNCeNC; s.sem += g.aplicacoesSemLeituraGatilhoAntes; });
+const o = r.original.v2;
+log('\n== V2 · fatos do gerador (todas as sementes; entre parênteses, a original)');
+log(`  leituras ${s.leituras} (${o.leituras}); leituras iguais a zero ${s.zeros} (${o.leiturasZero}); menor leitura ${s.min} (${o.menorLeitura})`);
+log(`  intervalo entre vistorias seguidas, em dias: ${JSON.stringify(s.gaps)} (original ${JSON.stringify(o.intervaloEntreVistorias_dias)}); nenhum de 3 dias`);
+log(`  aplicações ${s.apps} (${o.aplicacoes}): sem leitura-gatilho ≥ 0,9 × NC antes ${s.sem} (${o.aplicacoesSemLeituraGatilhoAntes}); gatilho com leitura ≥ NC ${s.acima} (${o.gatilhoComLeituraMaiorOuIgualNC}); gatilho entre 0,9 × NC e NC ${s.abaixo} (${o.gatilhoComLeituraEntre90pctNCeNC})`);
+log('\n== V3 · N5: no teste da previsão (D = 86), avaliador da 2ª leitura (v3) × avaliador conhecido na origem (só essa troca)');
+['acaro', 'mosca', 'antrac', 'cochon'].forEach(a => { let n = 0, noModelo = 0, okV3 = 0, okN5 = 0, mudou = 0, maxd = 0, dif = 0, tot = 0;
+  all.forEach(([, v]) => { const x = v.v3[a]; if (!x || x.frio || x.semGate) return; n++; if (x.avalNoModelo) noModelo++; if (x.v3_avaliadorDa2aLeitura.ok) okV3++; if (x.avaliadorConhecidoNaOrigem.ok) okN5++;
+    const d = Math.abs(x.v3_avaliadorDa2aLeitura.brierModelo - x.avaliadorConhecidoNaOrigem.brierModelo); if (d > 0) mudou++; maxd = Math.max(maxd, d); dif += x.linhasComAvaliadorDaOrigemDiferente; tot += x.nTeste; });
+  log(`  ${a.padEnd(7)} sementes ${n}; avaliador no modelo ${noModelo}/${n}; linhas de teste com avaliador da origem diferente ${dif}/${tot}; Brier do modelo mudou em ${mudou}/${n}, maior |Δ| ${Math.round(maxd * 1e4) / 1e4}; vence a persistência: v3 ${okV3}/${n}, avaliador da origem ${okN5}/${n}`); });
+console.log(L.join('\n'));
