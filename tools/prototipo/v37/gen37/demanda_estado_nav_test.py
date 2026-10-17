@@ -17,7 +17,7 @@ Cada caso repete pela tela a reprodução da revisão (ACHADOS-v1) e falha no 85
        conflito e "Registrar divergência") aparecem nas três telas com o mesmo número; nunca "sem pendência de compra" com a demanda pedindo complemento
 Uso: python3 demanda_estado_nav_test.py   (depois do build e do montar_render; capturas q_ctl4e_*.png em _probe/)"""
 import sys, os, time, subprocess, json
-HERE=os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
+HERE=os.environ.get('GEN') or os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0,HERE)
 from cdp import Chrome
 from journeys import free
 from est_lib import FIND
@@ -91,7 +91,7 @@ try:
     os_painel('OS-0425'); cc=clk('Cancelar sem execução','aside[role=dialog]'); cct=painel(); motivo('talhão replanejado (teste CTL-4)'); cf=clk('Confirmar cancelamento','aside[role=dialog]',w=.8); tc=T()
     n2=safler(['NPK 20-05-20']); foto('k1_saf_cancelada'); m2=mapa('C1')
     os_cancelada('OS-0425'); pc=painel(); lk=J("[...document.querySelectorAll('aside[role=dialog] a')].map(a=>a.innerText.trim()+'>'+a.getAttribute('href')).join(' | ')") or ''; foto('k3_os_cancelada_custodia')
-    est_secao(3); e3=est_row('REQ-040','NPK 20-05-20'); setv('#fx_g_dev_qtd','8000'); clk('Salvar','aside[role=dialog]',w=.8); td=T()
+    est_secao(3); e3=est_row('REQ-040','NPK 20-05-20'); setv('#fx_g_dev_qtd','8000'); setv('#fx_g_dev_cond','Apta · volta ao disponível'); clk('Salvar','aside[role=dialog]',w=.8); td=T()
     n3=safler(['NPK 20-05-20']); os_cancelada('OS-0425'); pc2=painel()
     chk('K1 custódia é suprimento: entregar 8.000 kg de NPK à OS-0425, cancelar a OS-0425 e receber a devolução — Planejar safra NPK "14.800 kg", o total e a primária iguais em todos os passos; Mapa C1 "Falta 14.800 kg" (no 853a6a8: 22.800 kg, +R$ 27.200)',
         e1=='ok' and 'entregues' in te and cc=='ok' and cf=='ok' and 'cancelada' in tc and e3=='ok' and 'devolvidos' in td
@@ -104,7 +104,7 @@ try:
     # ================= K2 · devolver a sobra da OS-0417 (em conferência) =================
     J("localStorage.clear(); sessionStorage.clear(); localStorage.setItem('safrion.perfilDemo','Ana')")
     d0=safler(['MAP 11-52']); mm=memo('MAP 11-52')
-    est_secao(3); e4=est_row('REQ-031','MAP 11-52'); setv('#fx_g_dev_qtd','500'); clk('Salvar','aside[role=dialog]',w=.8); t4=T()
+    est_secao(3); e4=est_row('REQ-031','MAP 11-52'); setv('#fx_g_dev_qtd','500'); setv('#fx_g_dev_cond','Apta · volta ao disponível'); clk('Salvar','aside[role=dialog]',w=.8); t4=T()
     d1=safler(['MAP 11-52']); cm=cmp_ler('MAP 11-52',True); foto('k2_cmp_devolucao')
     chk('K2 devolver a sobra não muda a compra: os 500 kg de MAP com a OS-0417 (em conferência) já contam ("+ 500 kg em custódia sem uso" na memória) — MAP "79.500 kg" antes e depois, total igual, sem "Acima da demanda" no Planejar safra nem na Compra (no 853a6a8: 80.000 → 79.500 e aviso de 500 kg)',
         e4=='ok' and 'devolvidos' in t4 and d0['MAP 11-52'][0]=='79.500 kg' and d1['MAP 11-52'][0]=='79.500 kg' and d1['total']==d0['total'] and d1['prim']==d0['prim']
@@ -194,3 +194,4 @@ finally:
     c.close(); srv.terminate()
 print(f'\nRESULTADO: {len(OK)} ok · {len(FAIL)} falhas'); [print('  -',f) for f in FAIL]
 sys.exit(1 if FAIL else 0)
+

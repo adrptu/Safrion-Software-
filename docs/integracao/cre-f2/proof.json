@@ -1,0 +1,35 @@
+{
+  "base": "b35cd0c91139e98c665b2fe8086212282adf16e4",
+  "source_blobs_checked": 381,
+  "source_mismatches": 0,
+  "neighbor_html_unchanged_sha256": {
+    "MOD-AGR.dc.html": "80e30d28f2cc9d51701a549e5a62d335463e07a0a38cb7d675846898b0a6361c",
+    "MOD-SUP.dc.html": "09b299e8e8fc29bb0650f090512bfa9c84f51a211430db9abb206bb81344588d",
+    "MOD-MAN.dc.html": "a397d76a1e4ade747ed687ec35dc135fef5487a545b278a64c68d47e8d0c3ea9",
+    "MOD-COM.dc.html": "c09fbb8f8d290ab4543718e49f20445039092723737b7cc3717e28ced8303cef",
+    "MOD-CFG.dc.html": "b32d092ec65c27d0c7161e0e9d3a8fd1beb129c8b1e704403f5b3d7f8f1bf644",
+    "MOD-OUT.dc.html": "4475d17f03a8556b91e6a791b0dee8593f75621a3d7d704b6efb10597b48dd7b"
+  },
+  "credit_cards": [
+    [
+      "ficha",
+      "Ficha do grupo"
+    ],
+    [
+      "dossie",
+      "Dossiês"
+    ],
+    [
+      "contratos",
+      "Pedidos e contratos"
+    ],
+    [
+      "liberacoes",
+      "Liberações e garantias"
+    ]
+  ],
+  "generated_card_count": 4,
+  "documents_link_and_back_link_present": true,
+  "syntax": "OK",
+  "browser": "NOT RUN: Codex browser blocked; Claude review required"
+}

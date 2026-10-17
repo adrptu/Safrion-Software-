@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/private/tmp/cre90fix/gen37/credito_ficha_build.py", line 16, in <module>
+    assert '>{{cre_ficha_salvar_rotulo}}</button>' in painel and '>Salvar</button>' not in painel
+AssertionError

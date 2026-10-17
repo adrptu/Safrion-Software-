@@ -1,0 +1,19 @@
+OK ausência inicial não é valor zero
+OK R$850.000,00 mantém unidade e centavos após recarga
+OK centavos e valor grande voltam exatos após salvar e reabrir
+OK zero explícito é declaração, vazio fica pendente
+OK confirmação Carlos preserva declaração original Ana 10/03
+OK atualização mantém declaração e confirmações anteriores
+OK repetir confirmação no mesmo dia não duplica recibo
+OK dado pendente não aceita confirmação
+OK valor sem origem ou responsável é recusado
+OK decimal ambíguo, negativo, não finito e centavo excedente são recusados
+OK datas impossíveis ou futuras são recusadas
+OK conflito de revisão preserva edição mais nova
+OK salvar outro item preserva alterações concorrentes
+OK quota não confirma nem altera versão anterior
+OK armazenamento corrompido não é substituído por vazio
+OK perfil inexistente ou sem papel não grava
+OK schema desconhecido não é apagado
+OK IDs duplicados falham fechados sem apagar dados
+RESULTADO 18/18
