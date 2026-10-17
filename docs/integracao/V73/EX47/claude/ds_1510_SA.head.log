@@ -1,0 +1,11 @@
+OK    S1 TAB-01 Agrupar por à esquerda de Colunas em toda barra (155 páginas)
+OK    S2 TAB-02 contagem "x de y" só quando a grade não tem filtro rápido
+OK    S3 TAB-03 filtro da coluna com o funil (vazado; cheio pelo estado)
+OK    S4 TAB-04 seta de abrir e recolher sem dica (title)
+OK    S5 AVI-01 toda página com aviso traz o tom (G2_TOAST_TOM)
+OK    S6 SEL-03 toda página traz a lista suspensa do DS (g2dsel)
+OK    S8 TAB-01 Expandir tudo antes de Agrupar por e Colunas em toda grade em árvore
+OK    S7 TAB-05/06 opções da grade (menu_linha, sico_so_icone) e uso no Planejar safra (Talhões e cultivos; Operações e recursos)
+OK    A1 AVI-01 tom pelo texto: salvo/incluído verde, "Não…"/"Informe…" âmbar, o resto neutro
+RESULTADO: 9 ok · 0 falhas
+exit=0

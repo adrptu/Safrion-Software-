@@ -1,0 +1,17 @@
+== sonda_rmenu_navegador (esperou 120s) 02:48:41
+   exit=0 02:49:51
+== ds_1510_test (esperou 0s) 02:49:51
+   exit=0 02:53:44
+== saf_tab_test (esperou 0s) 02:53:44
+   exit=0 02:54:18
+== saf_multi_fazenda_test (esperou 0s) 02:54:18
+   exit=0 02:55:23
+== saf_capacidade_simetrica_test (esperou 0s) 02:55:23
+   exit=0 02:56:41
+== cartoes_test (esperou 0s) 02:56:41
+   exit=0 03:05:32
+== cadastros_padrao_test (esperou 0s) 03:05:32
+   exit=0 03:10:33
+== tabelas_saf_test (esperou 0s) 03:10:33
+   exit=0 03:11:39
+FIM

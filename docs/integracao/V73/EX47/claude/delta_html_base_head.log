@@ -1,0 +1,37 @@
+páginas base/HEAD: 156 156 mesmo conjunto: True
+páginas que diferem só pelo g2lib embutido: 147
+páginas com outra diferença: [('SAF.dc.html', 2)]
+SAF.dc.html - 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/></svg></button></div></sc-for><div role="columnheader"></div></div><sc-for list="{{g_cult_S
+SAF.dc.html - lder-count="16"><div role="cell" class="{{t.cls}}" style="{{t.st}}">{{t.t}}</div></sc-for><div role="cell"></div></div></div></div></sc-if><sc-if val
+SAF.dc.html - 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/></svg></button></div></sc-for><div role="columnheader"></div></div><sc-for list="{{g_cult_S
+SAF.dc.html - lder-count="16"><div role="cell" class="{{t.cls}}" style="{{t.st}}">{{t.t}}</div></sc-for><div role="cell"></div></div></div></div></sc-if><sc-if val
+SAF.dc.html - 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/></svg></button></div></sc-for><div role="columnheader"></div></div><sc-for list="{{g_cult_L
+SAF.dc.html - lder-count="16"><div role="cell" class="{{t.cls}}" style="{{t.st}}">{{t.t}}</div></sc-for><div role="cell"></div></div></div></div></sc-if><sc-if val
+SAF.dc.html - 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/></svg></button></div></sc-for><div role="columnheader"></div></div><sc-for list="{{g_cult_N
+SAF.dc.html - lder-count="16"><div role="cell" class="{{t.cls}}" style="{{t.st}}">{{t.t}}</div></sc-for><div role="cell"></div></div></div></div></sc-if><sc-if val
+SAF.dc.html + 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/></svg></button></div></sc-for><div role="columnheader"></div></div><sc-for list="{{g_cult_S
+SAF.dc.html + lder-count="16"><div role="cell" class="{{t.cls}}" style="{{t.st}}">{{t.t}}</div></sc-for><div role="cell"></div></div></div></div></sc-if><sc-if val
+SAF.dc.html + 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/></svg></button></div></sc-for><div role="columnheader"></div></div><sc-for list="{{g_cult_S
+SAF.dc.html + lder-count="16"><div role="cell" class="{{t.cls}}" style="{{t.st}}">{{t.t}}</div></sc-for><div role="cell"></div></div></div></div></sc-if><sc-if val
+SAF.dc.html + 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/></svg></button></div></sc-for><div role="columnheader"></div></div><sc-for list="{{g_cult_S
+SAF.dc.html + lder-count="16"><div role="cell" class="{{t.cls}}" style="{{t.st}}">{{t.t}}</div></sc-for><div role="cell"></div></div></div></div></sc-if><sc-if val
+SAF.dc.html + 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/></svg></button></div></sc-for><div role="columnheader"></div></div><sc-for list="{{g_cult_L
+SAF.dc.html + lder-count="16"><div role="cell" class="{{t.cls}}" style="{{t.st}}">{{t.t}}</div></sc-for><div role="cell"></div></div></div></div></sc-if><sc-if val
+SAF.dc.html + 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/></svg></button></div></sc-for><div role="columnheader"></div></div><sc-for list="{{g_cult_N
+SAF.dc.html + lder-count="16"><div role="cell" class="{{t.cls}}" style="{{t.st}}">{{t.t}}</div></sc-for><div role="cell"></div></div></div></div></sc-if><sc-if val
+  File "<stdin>", line 9
+    out.append(f"{g}: repeat={re.search(r'repeat\(([^,]+),',s[i-0:i+400]).group(1)} · columnheader vazio no cabeçalho={hd.count('<div role=\"columnheader\"></div>')} · célula vazia no fim do total={seg.count('</sc-for><div role=\"cell\"></div></div>')}")
+                                                                                                                                                                                                                                                             ^
+SyntaxError: f-string expression part cannot include a backslash
+base 2f22375d
+  g_cult_S2627: trilhas={{g_cult_S2627_ncols}} · cabeçalho termina com columnheader vazio=True · total termina com célula vazia=True
+  g_cult_S27SF: trilhas={{g_cult_S27SF_ncols}} · cabeçalho termina com columnheader vazio=True · total termina com célula vazia=True
+  g_cult_S2526: trilhas={{g_cult_S2526_ncols}} · cabeçalho termina com columnheader vazio=False · total termina com célula vazia=False
+  g_cult_LG2627: trilhas={{g_cult_LG2627_ncols}} · cabeçalho termina com columnheader vazio=True · total termina com célula vazia=True
+  g_cult_NOVA: trilhas={{g_cult_NOVA_ncols}} · cabeçalho termina com columnheader vazio=True · total termina com célula vazia=True
+HEAD 3010fc9
+  g_cult_S2627: trilhas={{g_cult_S2627_ncols}} · cabeçalho termina com columnheader vazio=True · total termina com célula vazia=True
+  g_cult_S27SF: trilhas={{g_cult_S27SF_ncols}} · cabeçalho termina com columnheader vazio=True · total termina com célula vazia=True
+  g_cult_S2526: trilhas={{g_cult_S2526_ncols}} · cabeçalho termina com columnheader vazio=True · total termina com célula vazia=True
+  g_cult_LG2627: trilhas={{g_cult_LG2627_ncols}} · cabeçalho termina com columnheader vazio=True · total termina com célula vazia=True
+  g_cult_NOVA: trilhas={{g_cult_NOVA_ncols}} · cabeçalho termina com columnheader vazio=True · total termina com célula vazia=True

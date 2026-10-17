@@ -1,0 +1,19 @@
+== rev93_reteste_navegador.4cbfa71 (esperou 375s; portão 1) 03:54:10
+   exit=0 03:55:29
+== rev93_reteste_navegador.contraprova_3010fc9 (esperou 0s; portão 1) 03:55:29
+   exit=1 03:56:49
+== sonda_rmenu_navegador.4cbfa71 (esperou 0s; portão 1) 03:56:49
+   exit=0 03:57:58
+== tabelas_saf_test.4cbfa71 (esperou 0s; portão 1) 03:57:58
+   exit=0 03:58:59
+== saf_tab_test.4cbfa71 (esperou 580s; portão 1) 04:08:44
+   exit=0 04:09:19
+== cartoes_test.4cbfa71 (esperou 0s; portão 1) 04:09:19
+   exit=0 04:18:10
+== ds_1510_test.4cbfa71 (esperou 25s; portão 1) 04:18:36
+   exit=0 04:22:37
+FIM
+== solo_ag02_test.comp_adca8ba (esperou 55s; portão 1) 04:26:19
+   exit=0 04:28:01
+== rev93_reteste_navegador.comp_adca8ba (esperou 0s; portão 1) 04:28:01
+   exit=0 04:29:22
