@@ -1,0 +1,13 @@
+  ok  MA · PM-05: sem erro de JS
+  ok  base programada: próxima em 20/09/2027
+  ok  atalho Criar plano: Distribuidor fica Sem vínculo · Vincular ao PM-11 (#plano=PM-11, 3 sem plano)
+  ok  vincular: leitura negativa recusada no campo
+  ok  vincular: leitura 600 aceita
+  ok  dois planos, mesmo serviço: aviso ao criar e vínculo recusado (sem caixa para marcar)
+  ok  inativar com vencida pede confirmação
+  ok  F5 reabre o plano (#plano=PM-04)
+  ok  PM-04: sem candidatos, sem botão Vincular ativos
+  ok  painel do serviço: Tab preso (True) e Esc fecha
+  ok  editar plano: nome salvo
+  ok  fim: sem erro de JS
+RESULTADO: 12/12 ok

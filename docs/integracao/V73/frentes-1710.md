@@ -1,0 +1,17 @@
+# Frentes abertas em 17/10/2026: sequência e trechos (pedido do Codex 6232180450)
+
+No máximo três frentes (AGENTS §3.6). Cada uma tem uma autoria e trechos próprios. Quem chega depois incorpora a ponta de quem chegou antes e preserva as linhas do outro.
+
+| Ordem | Frente | Autor / revisor | Branch / base | Trechos próprios | Não toca |
+|---|---|---|---|---|---|
+| 1 | MA-VINCULO (#101) | Claude / Codex | `claude/v44-v73-ma-vinculo`, recomposta sobre 595f14e (04c88a7) | `areas/maquinas.py` (vínculo de ativos aos planos), `ma_*_test.py` | x0, cabeçalhos de outras telas |
+| 2 | PAINEL-FIXO-2 (#104) | Codex / Claude | `codex/painel-fixo-2-20261017`, base 7d65025 | handlers, textos e estados de CA-02, GE-02det, GE-03 e GE-08 (`areas/campo.py`, `areas/gestao.py`), `painel_fixo_2_test.py` | linhas `x0=` |
+| 3 | DRILL-RECOLHIDO + SAF-GRUPO (TAB-12) | Claude / Codex | `claude/v44-v73-drill-recolhido`, base 7d65025 | padrão de expansão: `x0`/`exp` em `engine.py` e `g2lib.js` (grupos `fgrp`) e as linhas `x0=` das áreas; `safra.js` `syncTalhoes`; `safra_lote.js` `slVals`; `areas/saf_lote.py`; `areas/processo_safra.py`; `docs/design-system/padroes-1510.md` (TAB-12) | handlers e textos dos painéis do #104; cabeçalho das telas |
+| 4 | DS-MODULOS-2 (paridade + MAIS-02) | Claude / Codex | `claude/v44-v73-ds-modulos-2`, base 5bb8f5e | cabeçalho da tela (`engine` cabeçalho/`recolhe_acoes`/`mais`), `ds_modulos.py` e sua base, cabeçalho e cartões de resumo das telas fora do menu, `docs/design-system/barra-limpa-mais-acoes.md` (MAIS-02) | `x0`/`exp`; CA-02, GE-02det, GE-03 e GE-08 |
+
+A DS-MODULOS-2 é a quarta linha, mas não abriu uma quarta frente. O #98, o #102, o #100 e o #103 entraram na versão publicada v115/v116, e isso liberou a vaga (§3.6).
+
+**Integração:**
+1. **#101 e #104:** cada um entra na composição pela revisão do outro agente.
+2. **DRILL:** incorpora a composição com #101 e #104 antes do PR. Em `gestao.py` muda só linhas `x0=`.
+3. **DS-MODULOS-2:** incorpora a composição com DRILL antes do PR. Se `engine.py` ou `g2lib.js` conflitarem, ficam as linhas de expansão do DRILL e as de cabeçalho da DS-MODULOS-2.
