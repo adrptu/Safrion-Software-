@@ -219,6 +219,11 @@ def _origens():
                        dict(t=f"{nf(dose,2 if dose<10 else 0)} {p['un']}/ha × {nf(c['area'])} ha = {nf(dose*c['area'],1 if p['un']=='L' else 0)} {p['un']}"),
                        dict(t='Abrir em Planejar safra',h='SAF.dc.html')]))
     return out
+def _sup_man_js():
+    import dados_manutencao as DM
+    with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'sup_necessidades.js'), encoding='utf-8') as f:
+        return DM.js_prefixo() + f.read()
+
 def su01():
     fname='SU-01.dc.html'; E._reset_screen(fname)
     dem=D2.demanda('S2627'); org=_origens()
@@ -266,11 +271,7 @@ def su01():
         dict(item=[b('Diesel S10'),mut('Combustível · frota do plantio')],dem=[txt(f"{nf(DIESEL['demanda'])} L")],disp=[txt(f"{nf(DIESEL['tanque']-DIESEL['res'])} L"),mut(f"res. {nf(DIESEL['res'])}")],
              firm=[txt(f"{nf(DIESEL['q'])} L"),mut(DIESEL['ped'])],falta=[ch(f'{nf(dfalta)} L','red')],acao=[lk('Ver contrato','SU-05.dc.html')]),
         o=[dict(t='Programação do plantio (PCP): 35.400 L entre 25/09 e 05/10'),dict(t=f'Falta firme = 35.400 − 9.400 − 15.000 = {nf(dfalta)} L'),dict(t='Contrato Ipiranga CT-2026-03',h='SU-05.dc.html')],lead=2+SEG))
-    rows.append(R('Rolamento 6310',dict(item='Rolamento 6310',data='2026-10-02',dem=4,disp=0,firm=0,cond=0,falta=3,un='un'),
-        dict(item=[b('Rolamento 6310'),mut('Peças · colhedora, preventiva')],dem=[txt('4 un')],disp=[txt('0 un'),mut('res. 1')],firm=[mut('—')],
-             falta=[ch('3 un','red')],acao=[lk('Cotar','SU-04.dc.html')]),
-        o=[dict(t='Plano de manutenção da colhedora (PCM) · OM-0234 · troca em 02/10'),dict(t='Falta firme = 4 − 0 − 0 = 3 un'),dict(t='Cotação COT-113',h='SU-04.dc.html')],lead=7))
-    nfalta+=2; natr+=sum(1 for r in rows[-2:] if _faixa((_dt.date.fromisoformat(r['v']['data'])-_dt.timedelta(days=r['lead'])).isoformat())=='atrasada')
+    nfalta+=1; natr+=int(_faixa((_dt.date.fromisoformat(rows[-1]['v']['data'])-_dt.timedelta(days=rows[-1]['lead'])).isoformat())=='atrasada')
     g=grid([dict(k='item',l='Item · origem',w=210),dict(k='falta',l='Falta firme',t='num',a='r'),dict(k='pedir',l='Pedir até · necessária',t='date'),
             dict(k='dem',l='Demanda',t='num',a='r'),dict(k='disp',l='Disponível',t='num',a='r'),dict(k='firm',l='Receb. firmes',t='num',a='r',w=170),
             dict(k='acao',l='Próxima ação')],
@@ -280,12 +281,12 @@ def su01():
     valor=sum(o['valor'] for o in dem.values())
     pn={'rep':dict(title='Reprogramar proposta de reposição',sub='Muda a data necessária e recalcula o “pedir até”. Nenhuma cotação nova é enviada.',ok='Reprogramar',
         fields=[fs('item','Item','sel',opts=faltas,req=True,**{'def':faltas[0]}),fs('data','Nova data necessária','date',req=True),fs('motivo','Motivo','txt',req=True,help='Ex.: janela de plantio deslocada pela chuva.')])}
-    js(pn,r'''
+    js(pn,_sup_man_js()+r'''
 CHECK.rep=(self,d)=>(d.data<HOJE?{data:'A data não pode ser anterior a hoje (23/09).'}:null);
 RUN.rep=(self,d)=>{ let lead=0; setRows(self,'g_nec',rows=>{ const r=rows.find(x=>x.v.item===d.item); if(r){ r.v.data=d.data; lead=r.lead; } });
   return d.item+' reprogramado para '+dm(d.data)+' · pedir até '+dm(addd(d.data,-lead))+' · nenhuma cotação nova enviada'; };
-function PREVALS(self,v){ RW(self,'g_nec').forEach(r=>{ const V=r.v; (r.kids||[]).forEach(k=>{ k.p.pedir=[M('necessária '+dm(k.v.data))]; });
-  if(!r.lead) return; const pa=addd(V.data,-r.lead); V.pedir=pa;
+function PREVALS(self,v){ cenOuvir(self); supAtualizaNec(self); RW(self,'g_nec').forEach(r=>{ const V=r.v; (r.kids||[]).forEach(k=>{ k.p.pedir=[M('necessária '+dm(k.v.data))]; });
+  if(!r.lead) return; const pa=supPedirAte(V.data,{prazo:r.lead,seguranca:0}); V.pedir=pa;
   r.p.pedir=((V.falta>0.001)?[faixa(pa)]:[M('—')]).concat([BRK,M('necessária '+dm(V.data))]); r.s.pedir=(V.falta>0.001)?pa:''; }); }
 function EXTRAVALS(self,v){ pnVals(self,v); }''')
     painel()
@@ -552,9 +553,9 @@ def su04():
                  estado=[ch('Pronta','green') if nresp==len(conv) else ch(f'Falta {len(conv)-nresp} resposta','yellow')]),
             ro=True,o=[dict(t=f"{c['nome']}: mercadoria R$ {nf(c['merc'])} + frete R$ {nf(c['frete'])} = R$ {nf(c['tot'])} · {c['prazo']} d · {c['cond']}") for c in cot]
                      +[dict(t='Convites enviados em 23/09 10:40 por Ana (gestora) · só a homologados do grupo'),dict(t='Abrir em Compra de insumos',h='CMP.dc.html')]))
-    rows.append(R('COT-113',dict(cot='COT-113 · Rolamento 6310 2RS',itens=1,forn=3,resp=0,melhor=0,estado='rascunho',tipo='Rascunho',esp='Rolamento 6310 2RS · colhedora',qtd=3,ent='2026-10-02',local='Almox. oficina',dest='; '.join(FORN_PECAS)),
-        dict(cot=[b('COT-113 · Rolamento 6310 2RS'),mut('Necessidades · falta firme 3 un')],itens=[txt('1 item'),mut('3 un')],forn=[txt('3 sugeridos')],resp=[mut('—')],melhor=[mut('—')]),
-        o=[dict(t='Origem: falta firme do rolamento 6310 (PCM · OM-0234)',h='SU-01.dc.html')]))
+    rows.append(R('COT-113',dict(cot='COT-113 · necessidade da OM-0234',itens=0,forn=0,resp=0,melhor=0,estado='consulta',tipo='Consulta da origem'),
+        dict(cot=[b('COT-113 · OM-0234'),mut('Conferir necessidade atual da manutenção')]),ro=True,
+        o=[dict(t='Abrir a ordem de manutenção',h='MA.dc.html#om=OM-0234')]))
     rows.append(R('COT-110',dict(cot='COT-110 · Kit filtros + óleo 15W40',itens=1,forn=3,resp=1,melhor=0,estado='aguardando',tipo='Enviada em 21/09 · consulta'),
         dict(cot=[b('COT-110 · Kit filtros + óleo 15W40'),mut('Manutenção · OM-0234')],itens=[txt('1 item'),mut('1 kit')],forn=[txt('3 convidados')],resp=[ch('1/3','yellow')],melhor=[mut('—')],
              estado=[ch('Até 24/09','yellow')]),ro=True,o=[dict(t='Respostas até 24/09; depois disso compara com as recebidas')]))
@@ -572,17 +573,15 @@ def su04():
     gc=grid([dict(k='nome',l='Fornecedor',w=200),dict(k='merc',l='Mercadoria',t='num',a='r',pre='R$ '),dict(k='frete',l='Frete',t='num',a='r',pre='R$ '),
              dict(k='prazo',l='Prazo de entrega',t='num',a='r',u='dias'),dict(k='cond',l='Condição'),dict(k='tot',l='Custo comparável',t='num',a='r',pre='R$ '),dict(k='sit',l='Situação')],
         crow,gid='g_cmp',search=False,total=False,edit=dict(m='origin',title='Proposta',fields=[fs('nome','Fornecedor',ro=True),fs('cond','Condição',ro=True)]))
-    js({},r'''
+    js({},_sup_man_js()+r'''
 const BEST=%s, ALC=%s;
 function PREVALS(self,v){ const sel=self.state.selp;
   RW(self,'g_cmp').forEach((r,i)=>{ r.p.tot=[i===0?B('R$ '+nf(r.v.tot)):T('R$ '+nf(r.v.tot))];
     r.p.sit=(sel===r.id)?[chipc('Selecionada','green')]:(i===0?[chipc('Melhor equalizado','green')]:[M('+R$ '+nf(r.v.tot-RW(self,'g_cmp')[0].v.tot))]); });
-  const c=RF(self,'g_cot','COT-113'); if(c){ const env=!!self.state.env113; c.ro=env; c.v.tipo=env?'Enviada em 23/09 · consulta':'Rascunho'; c.p.estado=env?[chipc('Enviada · respostas até 26/09','green')]:[chipc('Rascunho','gray')];
-    c.p.forn=[T((String(c.v.dest||'').split(';').filter(x=>x.trim()).length)+(env?' convidados':' sugeridos'))]; c.p.itens=[T('1 item'),M(nf(c.v.qtd)+' un')]; } }
+  cenOuvir(self); supAtualizaCot(self); }
 function EXTRAVALS(self,v){
   v.sel_prop=()=>{ if(self.state.selp) return toast(self,BEST.nome+' já foi selecionada · justificativa registrada; nada muda'); self.setState({selp:BEST.id,g2toast:BEST.nome+' selecionada (R$ '+nf(BEST.tot)+' equalizado) · segue para aprovação de contratação: '+ALC}); };
-  v.env113=()=>{ if(self.state.env113) return toast(self,'COT-113 já foi enviada · nada reenviado'); const c=RF(self,'g_cot','COT-113'); const n=String(c.v.dest||'').split(';').filter(x=>x.trim()).length;
-    if(!n) return toast(self,'Escolha ao menos um destinatário: clique na linha da COT-113'); self.setState({env113:true,g2toast:'COT-113 enviada a '+n+' convidados · respostas até 26/09 (simulado · nenhuma mensagem real enviada)'}); }; }''' % (json.dumps(dict(id=best['f'],nome=best['nome'],tot=round(best['tot']))),json.dumps(_alcada(best['tot']))))
+  v.env113=()=>{ const x=supNecMan(manGet(),'OM-0234',null); return toast(self,x.itens.some(i=>i.falta>0)?'Necessidade da OM-0234 conferida. Abra Compras de materiais para cotar; nenhum convite enviado.':(x.pendencias.length?'Conferência pendente da OM-0234; abra a origem.':'Sem falta da OM-0234 para cotar; confira a origem.')); }; }''' % (json.dumps(dict(id=best['f'],nome=best['nome'],tot=round(best['tot']))),json.dumps(_alcada(best['tot']))))
     corpo=(bloco('Cotações em andamento','Confira as respostas de cada cotação; clique no rascunho para revisar destinatários antes de enviar.',g
                  ,
                  acao=mini('env113','Enviar COT-113','Envia o rascunho aos destinatários escolhidos (simulado)','doc'))
@@ -1179,3 +1178,4 @@ function EXTRAVALS(self,v){ pnVals(self,v); const rs=RW(self,'g_inv');
       footer='Diferença vira ajuste com causa, evidência e alçada, nunca correção silenciosa; limite e segregação seguem Configurações › Usuários e alçadas (SU-09 · FO-32). '
              'O contador não vê o saldo do sistema e os movimentos do escopo ficam suspensos entre o corte e o encerramento: movimentação durante a contagem não vira diferença fictícia. Quem conta não aprova o ajuste.')
     dyn_status(fname)
+
