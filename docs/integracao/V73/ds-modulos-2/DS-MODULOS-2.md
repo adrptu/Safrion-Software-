@@ -82,11 +82,13 @@ Medido com o mesmo roteiro nos dois renders (`OS.dc.html?view=cartoes` e `&ag=on
 | Vista | Cartões | Por linha | Largura média | Altura média | Cabeçalho de colunas | Campos rotulados | Com selo de estado |
 |---|---|---|---|---|---|---|---|
 | solta · 1440 px | 10 → 15 | 1 → 4 | 1282 → 313 px | 54 → 121 px | sim → não | 4–4 → 1–4 | 0 → 15 |
-| agrupada por talhão · 1440 px | 11 → 16 | 1 → 1 | 1282 → 313 px | 54 → 124 px | sim → não | 4–4 → 1–4 | 0 → 16 |
-| solta · 390 px | 10 → 15 | 1 → 1 | 268 → 268 px | 77 → 79 px | não → não | 1–2 → 1–2 | 0 → 0 |
-| agrupada por talhão · 390 px | 11 → 16 | 1 → 1 | 268 → 268 px | 77 → 79 px | não → não | 1–2 → 1–2 | 0 → 0 |
+| agrupada por talhão · 1440 px | 11 → 16 | 1 → 1 | 1282 → 313 px | 54 → 121 px | sim → não | 4–4 → 1–4 | 0 → 16 |
+| solta · 390 px | 10 → 15 | 1 → 1 | 268 → 268 px | 77 → 103 px | não → não | 1–2 → 1–3 | 0 → 15 |
+| agrupada por talhão · 390 px | 11 → 16 | 1 → 1 | 268 → 268 px | 77 → 104 px | não → não | 1–2 → 1–3 | 0 → 16 |
 
-Capturas: `capturas/antes|depois/OS_view-cartoes*_{1440,390}_*.png`.
+"Por linha" conta os cartões da 1ª fileira; na agrupada, o 1º grupo (C1) tem um cartão só. A 390 px a lista em Cartões passou a trazer o selo da Fase (antes, nenhum cartão tinha) e o 3º campo. Os ~40 px vazios à esquerda de cada cartão no Agrupar por saíram: só reserva a coluna da seta o cartão que tem itens dentro. Essas duas correções vieram depois de d5ba66a8, após a 1ª rodada de capturas.
+
+Capturas: `capturas/antes|depois/OS_view-cartoes*_{1440,390}_*.png` (topo da tela) e `OS_view-cartoes_ag-onde_390_lista_{antes,depois}.png` (lista rolada até os cartões).
 
 ## O que fica (13 desvios, com o motivo)
 
@@ -110,6 +112,9 @@ Fotos a 1440 × 900 e 390 × 844 em `capturas/antes` (render de 5bb8f5e) e `capt
 |---|---|---|
 | Cabeçalho diferente nas telas fora do menu: fazenda e safra soltas no topo, sem "‹ Módulo", caminho com os módulos antigos (Campo, Planejamento, Gestão e resultados) | 86 telas | Corrigido na casca (`ui37.shell37`) |
 | Cartão do motor como linha larga de tabela, com cabeçalho de colunas e valores espalhados | toda lista em Cartões | Corrigido (VIS-07) |
+| No Agrupar por, cada cartão abria com ~40 px vazios à esquerda (coluna da seta reservada sem itens dentro) | O.S. em Cartões por talhão e toda lista agrupada | Corrigido (`g2cdVals`, `.g2cd-gcab`) |
+| A 390 px o cartão ficava sem o selo da Fase (a grade do celular só tinha as 3 primeiras colunas) | toda lista em Cartões no celular | Corrigido (`g2colsVis`: em Cartões, o título e até 4 colunas) |
+| No agrupado por talhão, o cartão repete o campo Talhão do grupo | O.S. em Cartões por talhão | **Não mudou:** é uma das colunas do padrão; tirar o campo do agrupamento fica para a próxima rodada do VIS-07 |
 | Cartões de resumo com tipografias diferentes (rótulo em caixa alta em Suprimentos, Logística e Colheita, caixa normal em Campo e Gestão; número de 22 a 30 px) | 25 telas | Saíram com a TAB-07; os que ficam estão nas telas da frente do Codex |
 | Botões de ação com texto e borda dentro das células | 31 telas | Corrigido (TAB-05 no motor) |
 | Duas ações à vista no cabeçalho | Estrutura gerencial | Corrigido (MAIS-02) |
@@ -168,6 +173,20 @@ Comandos rodados de `tools/prototipo/v37/gen37/` com `CHROME_BIN=/tmp/cloudchrom
 | node: sup_movimentos, sup_movimentos_ui, sup_necessidades, sup_politicas, sup_politicas_ui (depois dos `*_capture.py`) | 7 · 7 · 15 · 11 · 9 PASS, 0 falhas (rc 0) |
 | node: os_lote_unit.js · os_lote_foco_unit.js | 104 ok · 0 falhas · 8 ok · 0 falhas |
 | textos_soltos_test.py | 267 OK · 1 falha. A falha é a mesma no render da base (`RENDER_DIR=render de 5bb8f5e`: 267 OK · 1 falha): "D CA-01det … o agrônomo ajusta e libera a v3 só para o saldo". O texto da dica em `areas/campo.py` é igual em 5bb8f5e, 87d2deab e ac5cd1d7; o teste é anterior ao d5342d48. Arquivo da frente do Codex; fica para quem mexe no CA-01det |
+
+**Ajuste VIS-07 depois de d5ba66a8** (achados da paridade visual na O.S. agrupada por talhão; `engine.CARTOES_CSS` e `g2lib`: `g2cdVals` e `g2colsVis`/`g2cvCar`). Proteção de regressão: `ds_1610_test.py` C3.
+
+| Teste | Resultado |
+|---|---|
+| ds_1610_test.py (completo) | 15 ok · 0 falhas (antes do C3); só a parte C com o C3: 8 ok · 0 falhas |
+| ds_1610_test.py C3 no render de 5bb8f5e (contraprova) | reprova: coluna vazia de 43 px a 1440 e de 51 px a 390; 0 de 11 cartões com selo a 390 |
+| cartoes_test.py | 70/70 |
+| ds_test.py | OK 72/72 |
+| visoes2_colunas_test.py (o celular em Tabela segue com as 3 primeiras) | 14/14 |
+| tabelas_os_test.py | 40/40 ok |
+| paginas_scan_test.py | 5 ok · 0 falhas (148 páginas) |
+| ds_modulos.py --catraca | catraca ok · 13 desvios |
+| seta_padrao_test.py | 14 ok · 0 falhas (2ª rodada completa). A 1ª deu 13 ok · 1 falha: D1440, giro da seta em `PA.dc.html?view=tabela#plano=SOJA-AT`, tela que esta frente não mexe. No diagnóstico só da PA (`SPT_SO=PA.dc.html`, 2 vezes na candidata e 1 na base) não houve desvio. Registrado como instável de tempo, não escondido |
 
 ## Fronteiras respeitadas
 

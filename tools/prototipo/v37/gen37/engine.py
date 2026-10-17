@@ -1591,6 +1591,9 @@ CARTOES_CSS=(
     # grade de cada cartão: seta · seleção · título · ⋯ na 1ª linha; os campos descem, em duas colunas, com o rótulo
     ".g2cd-g{display:grid;align-items:center;min-width:0;box-sizing:border-box;padding:0 4px 0 6px;grid-template-columns:0px auto minmax(0,1fr) auto!important}"
     ".g2cartoes[data-car=\"1\"] .g2cd-g{grid-template-columns:max(36px,var(--g2seta-alvo)) auto minmax(0,1fr) auto!important}"
+    # o título do grupo (Agrupar por) sempre tem a seta que recolhe; o cartão só reserva a coluna da seta quando algum cartão tem itens dentro
+    # (17/10: agrupada por talhão, cada cartão abria com ~40 px vazios à esquerda)
+    ".g2cd-gcab.g2cd-g{grid-template-columns:max(36px,var(--g2seta-alvo)) auto minmax(0,1fr) auto!important}"
     ".g2cd-lin{min-height:52px}"
     ".g2cd-fs{display:grid;grid-column:3/4;grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;padding:0 8px 10px}"
     ".g2cd-c{grid-column:1;grid-row:1}.g2cd-s{grid-column:2;grid-row:1}.g2cd-tit{grid-column:3;grid-row:1}.g2cd-a{grid-column:4;grid-row:1}"

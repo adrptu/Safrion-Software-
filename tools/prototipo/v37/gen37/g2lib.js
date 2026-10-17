@@ -281,6 +281,9 @@ function g2cvLer(self,sp){ if(typeof window!=='undefined'&&window.__g2cvTodasSem
   const st=g2st(self,sp.id); if(st.cvpf===undefined||st.cvpf===g2pfk()){ if(Array.isArray(st.cv)) return st.cv; if(st.cv===false) return null; } let x=null;
   try{ x=JSON.parse(localStorage.getItem(g2cvChave(sp))||'null'); }catch(e){ x=null; } return Array.isArray(x)?x.filter(k=>sp.cols.some(c=>c.k===k)):null; }
 function g2cvCel(){ try{ return window.matchMedia('(max-width: 640px)').matches; }catch(e){ return false; } }
+// a grade está em Cartões? (o mesmo modo que g2modosFim vai ler depois do EXTRAVALS)
+function g2cvCar(self,sp){ try{ if(!sp.modo) return false; if(sp.modo==='externo') return g2mdExterno(self,sp)==='cartoes';
+  return g2mdTem(sp)&&g2mdLer(self,{id:sp.id,padrao:'tabela',url:'vista'})==='cartoes'; }catch(e){ return false; } }
 function g2colsVis(self,sp){ if(!g2cvTem(sp)) return sp.cols; const esc=g2cvLer(self,sp), pad=g2cvPadrao(sp), k0=sp.cols[0].k;
   let S=new Set(esc||pad); S.add(k0);
   // o padrão vem na ordem do "Abre com"; cada coluna a mais gruda na vizinha da grade que está no padrão (a anterior; senão a seguinte) e, sem
@@ -292,7 +295,9 @@ function g2colsVis(self,sp){ if(!g2cvTem(sp)) return sp.cols; const esc=g2cvLer(
     else { let j=-1; for(let a=i-1;a>=0&&j<0;a--) j=ord.indexOf(gk[a]); at=j+1; }
     ord.splice(at,0,k); });
   if(gk.every(k=>S.has(k))) ord=gk.slice();   // todas à vista: a tabela completa como foi desenhada (ordem da grade)
-  if(!esc&&g2cvCel()) ord=ord.slice(0,3);   // celular: as 3 primeiras do padrão; a escolha explícita vale em qualquer tela
+  // celular: as 3 primeiras do padrão; a escolha explícita vale em qualquer tela. Em Cartões (VIS-07, 17/10/2026), o título e até G2_CD_MAX
+  // colunas, para o cartão do celular trazer o selo de estado (Fase, Situação) e os mesmos campos do cartão da tela grande
+  if(!esc&&g2cvCel()) ord=ord.slice(0,g2cvCar(self,sp)?1+G2_CD_MAX:3);
   return ord.map(k=>sp.cols.find(c=>c.k===k)).filter(Boolean); }
 function g2cvGrava(self,sp,ks){ try{ if(ks) localStorage.setItem(g2cvChave(sp),JSON.stringify(ks)); else localStorage.removeItem(g2cvChave(sp)); }catch(e){}
   g2set(self,sp.id,{cv:ks?ks.slice():false,cvpf:g2pfk()}); }
@@ -482,7 +487,8 @@ function g2cdVals(self,sp,v){ const id=sp.id, rows=v[id+'_rows']||[], cols=v[id+
   const lab=(i)=>String((cols[i]&&cols[i].l)||'').split(' · ')[0], num=(i)=>!!(cols[i]&&cols[i].a==='r'), fcls=(i)=>'g2cd-f'+(num(i)?' g2cd-num':'');
   const larg=ix.map(i=>{ let w=lab(i).length*7.2; dat.forEach(d=>{ if(!g2cdVazio(d[i])) w=Math.max(w,g2cdLarg(d[i])); }); return Math.round(Math.min(240,Math.max(56,w))+18); });
   const fs=(P)=>ix.map(i=>{ const c=P.dat[i], vz=g2cdVazio(c); return {l:lab(i), parts:vz?[]:c.parts, cls:fcls(i)}; });
-  const temCar=rows.some(rw=>rw.has||rw.grp), temAc=P0.some(P=>P.tr.some(c=>c&&c.isDel));
+  // VIS-07 (17/10): só reserva a coluna da seta quando algum cartão tem itens dentro; o título do grupo tem a sua (CARTOES_CSS .g2cd-gcab)
+  const temCar=rows.some(rw=>rw.has&&!rw.grp), temAc=P0.some(P=>P.tr.some(c=>c&&c.isDel));
   v[id+'_cdgtc']='grid-template-columns:'+(temCar?'max(36px,var(--g2seta-alvo,24px))':'0px')+' '+(off?'34px':'0px')+' minmax(160px,1fr) '+(larg.length?larg.map(w=>'minmax(0,'+w+'px)').join(' '):'0px')+' '+(temAc?'48px':'0px')+';';
   v[id+'_cdcar']=temCar?'1':''; v[id+'_cdhd']=ix.map(i=>({l:lab(i), cls:fcls(i)})); v[id+'_cdhdT']=lab(0); v[id+'_cdhdHas']=ix.length>0;
   const base=(rw)=>{ const P=parte(rw), t0=P.dat[0]||{}, ed=/\bg2ed\b/.test(rw.cls||''), fl=/\bg2flash\b/.test(rw.cls||'');

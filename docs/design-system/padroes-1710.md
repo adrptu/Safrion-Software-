@@ -28,11 +28,12 @@ Pedidos do proprietário em 17/10, transformados em padrão pelo método da skil
 - Grade de cartões compactos: vários por fileira no computador (mínimo de 300 px cada), um por fileira no celular.
 - Dentro de cada grupo, a mesma grade; o título do grupo e as somas ficam acima dela.
 - Cada cartão:
-  1. seta à esquerda quando há itens dentro (abre no próprio cartão), seleção quando a lista tem;
+  1. seta à esquerda quando há itens dentro (abre no próprio cartão), seleção quando a lista tem. A coluna da seta só existe quando algum cartão tem itens dentro; o título do grupo tem a sua;
   2. título com o identificador e, ao lado, o **selo de estado** (a 1ª coluna em que todo valor começa por um selo: Fase, Situação);
   3. até 4 campos, cada um com o seu rótulo, em duas colunas;
   4. ⋯ da linha no fim da 1ª linha.
 - Sem cabeçalho de colunas.
+- No celular, o cartão traz o mesmo selo e os mesmos campos do computador. Em Cartões, a grade usa o título e até 4 colunas do padrão; a Tabela segue com as 3 primeiras.
 - Total numa faixa acima dos cartões, com rótulos.
 
 **Peça única:** `CARTOES_CSS` e `_cartoes_html` no `engine.py`; `g2cdVals` no `g2lib.js` (selo e campos). A lista própria das Atividades do plano não muda.

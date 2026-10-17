@@ -103,6 +103,17 @@ def parte_c(c, J, BASE):
     a2 = ids(); txt = J("[...document.querySelectorAll('.pa-tb-l[data-atv]')].map(x=>x.innerText).join('|')") or ''
     chk('C2 TAB-08 Atividades em Tabela: ⇅ do Custo/ha ordena do menor para o maior; o funil de Insumos tira "2 insumos"',
         len(a0) >= 6 and vals == sorted(vals) and len(vals) >= 5 and 0 < len(a2) < len(a0) and '2 insumos' not in txt, [a0, vals, a2])
+    # C3 VIS-07 (17/10/2026, achados da paridade visual da DS-MODULOS-2 na O.S. agrupada por talhão): (a) a 1440 px o cartão sem itens dentro não
+    # reserva a coluna da seta (antes, ~40 px vazios à esquerda de cada cartão); (b) a 390 px o cartão traz o selo da Fase como no computador (antes, a
+    # grade do celular só tinha as 3 primeiras colunas e a Fase ficava de fora). Contraprova: RENDER_DIR no render de 5bb8f5e reprova C3.
+    MED = """(()=>{ const vis=e=>!!e&&e.getClientRects().length>0; const ks=[...document.querySelectorAll('[data-g2cd="g_os"] .g2cd')].filter(vis);
+        const sem=ks.filter(k=>!vis(k.querySelector('.g2cd-nk'))), esq=sem.map(k=>Math.round(k.querySelector('.g2cd-tit').getBoundingClientRect().left-k.getBoundingClientRect().left));
+        return {n:ks.length, esqMax:Math.max(0,...esq), selo:ks.filter(k=>vis(k.querySelector(':scope > .g2cd-lin .g2cd-selo'))).length}; })()"""
+    c.goto(BASE + 'OS.dc.html?view=cartoes&ag=onde', 1.6); m14 = J(MED) or {}
+    c.aparelho(390, 844, 2, True); c.goto(BASE + 'OS.dc.html?view=cartoes&ag=onde', 1.6); m39 = J(MED) or {}
+    c.aparelho(1440, 900, 1)
+    chk('C3 VIS-07 O.S. agrupada por talhão: cartão sem itens dentro sem a coluna vazia da seta (1440 e 390) e com o selo da Fase também a 390 px',
+        m14.get('n', 0) > 0 and m14['esqMax'] <= 24 and m39.get('n', 0) > 0 and m39['esqMax'] <= 24 and m39['selo'] == m39['n'], [m14, m39])
 
 if 'S' in PARTES: parte_s()
 if PARTES & {'B', 'C'}:
