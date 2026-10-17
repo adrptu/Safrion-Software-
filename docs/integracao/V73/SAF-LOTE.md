@@ -83,12 +83,112 @@ Estado / impedimento / próximo passo: executado na branch claude/v44-v73-saf-lo
 
 ## Números: cliques e digitação (AGENTS §3.3)
 
-PREENCHER COM A MEDIÇÃO
+**Executado:** `saf_lote_medida.py`, no navegador a 1440 px, sobre o render da f2f74f8 (árvore limpa). Ele usa cliques reais do mouse (CDP) e conta as teclas.
+
+**Cenário:**
+- Safra 2027/28 nova da Santa Rita.
+- Planejar os 6 talhões livres (T1, T2, T3, T4, P1 e P2) com Soja · 58 W · Soja alta tecnologia · plantio 15/10/2027 e a meta de cada um (64, 62, 63, 60, 66 e 65 sc/ha).
+- T7 e C1 seguem com o perene de outra safra.
+- Criar a safra fica fora da conta, porque é igual nos três caminhos.
+
+**Como conta:**
+- abrir a lista e escolher a opção são 2 cliques;
+- escolher o campo para digitar é 1 clique;
+- cada caractere, Enter, Esc ou Ctrl+V é 1 tecla.
+
+| Caminho | Cliques | Teclas | Cultivos gravados |
+|---|---:|---:|---|
+| **A · antes:** "Planejar ›" em cada talhão, formulário e Salvar | **29** | **64** | 6 |
+| **B · depois:** "Editar talhões…", marcar todas, "Aplicar aos marcados" (cultura, variedade, plantio e plano) e metas na coluna com Enter | **11** | **30** | 6 |
+| **C · depois:** "Editar talhões…", colar o bloco da planilha (6 × 5) na 1ª cultura, Salvar | **3** | **2** | 6 |
+
+- **Conferência:** os três caminhos gravam os mesmos 6 cultivos (talhão, cultura, variedade, plano, plantio, meta e área), e o teste confere isso.
+- **No caminho C,** o bloco já vem pronto da planilha da fazenda. A digitação dele fica fora da conta.
+- **Ganho:** B corta 62 % dos cliques e 53 % das teclas; C corta 90 % dos cliques.
+- **Para comparar:** quando todos os talhões levam os mesmos valores, inclusive a meta, o "Planejar talhões livres…" que já existia faz o mesmo que o caminho B. O ganho novo está em:
+  - valores diferentes por talhão;
+  - corrigir o que já está planejado;
+  - colar da planilha.
+- **Bruto:** `saf-lote/saf_lote_medida.py.log`, nesta pasta.
 
 ## Testes
 
-PREENCHER
+**Candidata:** f2f74f8 (esta frente com a composição `origin/claude/v44-v69-mapa` 47ccc1d, que contém a 05947ad), render montado de árvore limpa.
+- **Comando:** `env CHROME_BIN=/tmp/cloudchrome/chrome CDP_GL=1 SAFRION_DADOS=sintetico timeout 900 python3 -B <teste>`, um Chrome por vez.
+- **Base:** c9ffa08 (render da V73).
+- **Brutos:** `saf-lote/`, nesta pasta.
+
+**Novos (executados):**
+
+| Teste | Resultado | Contraprova na base |
+|---|---|---|
+| `saf_lote_unit_test.py` (node: colar TSV, datas, número pt-BR, o que cada célula aceita, aplicar aos marcados, contador) | 47/47 | sem `safra_lote.js`: não monta |
+| `saf_lote_test.py` (1440 e 390 px: A abrir, B planilha, C aplicar, D colar, E recusas, F salvar, G Esc, conflito, falha e Dividir, H celular, I INP no motor) | 45/45 | reprova em A1 (sem o botão) |
+| `saf_lote_medida.py` (cliques e teclas, três caminhos) | OK: mesmos 6 cultivos; 29/64 → 11/30 → 3/2 | — |
+
+**Regressão (executada na f2f74f8):**
+
+| Teste | Resultado | Observação |
+|---|---|---|
+| `saf_c01_test.py` | 68/68 | cobre o Dividir depois da extração do `dvConferir` |
+| `saf_revisao_test.py` | 40/42 | as 2 falhas são S3.1 (g_cap); classificação abaixo |
+| `ocupacao_test.py` | 65/65 | |
+| `saf_capacidade_simetrica_test.py` | 38/38 | |
+| `saf_cmp_continuidade_test.py` | 31/31 | |
+| `saf_contexto_test.py` | 10/10 | |
+| `saf_fazendas_test.py` | 14/14 | |
+| `saf_multi_fazenda_test.py` | 23/23 | |
+| `saf_impedimentos_test.py` | 5/5 | |
+| `saf_operacoes_test.py` | 87/87 | |
+| `saf_tab_test.py` | 14/14 | |
+| `saf_totais_test.py` | 14/14 | |
+| `tabelas_saf_test.py` | 24/24 | |
+| `acao_unica_test.py` (família SAF, o padrão do teste) | 10/10 | |
+| `ds_1610_test.py` | 14/14 | |
+| `ds_modulos.py --catraca` | catraca ok | |
+| `tab_drill_cab_test.py` | 6/6 | |
+| `cartoes_test.py` | 70/70 | |
+| `paginas_scan_test.py` | 5/5 (148 páginas) | |
+| `tabelas_cad_test.py`, `cadastros_padrao_test.py`, `ds_1510_test.py` e a base do `saf_revisao_test.py` | em execução na entrega deste relatório (bateria `saf_lote_bateria.sh`, saída em `final_b.out`) | não declarado |
+
+**Sem navegador (executados):**
+
+| Teste | Resultado |
+|---|---|
+| `pa_regras_test.py` | 18/18; carrega o `g2lib` no node, e o `g2inp` fica fora sem `document` |
+| `cen_grava_test.py` | 10/10 |
+| `ds_unit_test.py` | 31/31 |
+| `capacidade_unit.py` | 101 OK |
+| `ds_inventario.py --catraca` | catraca ok (o painel não tem `role=table`, cartão próprio nem CSS sobre `.g2`) |
+
+**Oráculos corrigidos no próprio teste novo, antes da entrega (sem mudar o produto):**
+- B1 e B2: a linha abaixo de T3 é T4, e não P1.
+- E2: a Situação lida sem repetir o texto.
+- H7: o item do ⋯ se chama "Editar talhões da Lagoa Grande".
+- H7: a altura do link e do ⋯ da faixa é registrada, não exigida. São peças do motor; ver Limites.
 
 ## Fotos (conferidas)
 
-PREENCHER
+Em `tools/prototipo/v37/gen37/_probe/` (não versionadas), geradas pelo `saf_lote_test.py`:
+- `saf_lote_1440_painel.png`: painel da Santa Rita depois de salvar T1-A com 150 ha. Mostra a linha "T1 · área livre 10 ha" que apareceu, as O.S. que travam com o link e a dica da grade.
+- `saf_lote_390_lista.png`: celular, linhas em bloco com rótulos, travas e barra de salvar fixa.
+- `saf_lote_390_aplicar.png`: celular, faixa "Aplicar aos marcados" aberta com 1 linha marcada.
+- `saf_lote_390_faixa.png`: celular, faixa da Lagoa Grande com "Editar talhões ›".
+
+**O que se viu nas fotos:**
+- sem rolagem de lado;
+- os campos alinhados às colunas a 1440 px;
+- no celular, os rótulos em cima de cada campo.
+- A data aparece como mm/dd/aaaa porque o Chrome de teste roda em inglês; no navegador em português, é dd/mm/aaaa.
+- O aviso "Safra aberta" que cobre parte da tela no celular é o aviso de carga da página, que já existia.
+
+## Limites e próximos passos
+
+- **Recarregar e falha de armazenamento:** não se aplicam (Decisão 1). O que se executou foi a falha no meio da gravação (G4 e G5) e o conflito com outra aba (G2 e G3).
+- **Trava da O.S. no painel do cultivo e no "Aplicar plano":** fica para a próxima onda (Decisão 2).
+- **Alvo de toque das peças do motor na faixa da fazenda a 390 px (medido):**
+  - o link "Editar talhões ›" tem 18 px, como o "Planejar talhões livres ›" ao lado;
+  - o ⋯ da linha tem 32 px.
+  - A correção é do motor (DS-ALVO para link de célula e ⋯ da linha) e vale para todas as tabelas. No painel, todos os alvos têm 44 px (H2).
+- **Custo de desenho (medido numa sonda, fora do teste):** cada tecla na grade leva de 200 a 280 ms, porque redesenha a tela inteira, como no Dividir. Não atrapalhou a digitação nos testes. Se pesar com fazendas muito grandes, a saída é guardar o cálculo da etapa 4 enquanto o painel está aberto.
+- **`docs/STATUS.md`:** não foi alterado por esta frente. A integração da composição atualiza.

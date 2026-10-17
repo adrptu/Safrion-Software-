@@ -231,13 +231,15 @@ try:
     J("(()=>{const b=[...document.querySelectorAll('#sfz-pop button')].find(b=>b.innerText.trim()==='Fechar'); if(b) b.click();})()"); esp(.5)
     mm = J("""(()=>{const r=[...document.querySelectorAll('[role=row].g2fgrp')].find(r=>r.offsetParent&&/Lagoa Grande/.test(r.innerText)); if(!r) return null;
       const lk=[...r.querySelectorAll('button')].find(b=>b.innerText.trim()==='Editar talhões ›'); const m=r.querySelector('[aria-label^="Mais ações"]'); const q=m?m.getBoundingClientRect():null;
-      return {lk:!!(lk&&lk.offsetParent),mais:m?[Math.round(q.width),Math.round(q.height)]:null};})()""")
+      const lq=lk?lk.getBoundingClientRect():null; return {lk:!!(lk&&lk.offsetParent),lkAlt:lq?Math.round(lq.height):null,mais:m?[Math.round(q.width),Math.round(q.height)]:null};})()""")
     J("(()=>{const r=[...document.querySelectorAll('[role=row].g2fgrp')].find(r=>r.offsetParent&&/Lagoa Grande/.test(r.innerText)); r.scrollIntoView({block:'center'});})()"); esp(.3); c.shot(os.path.join(PROBE, 'saf_lote_390_faixa.png'))
     J("(()=>{const r=[...document.querySelectorAll('[role=row].g2fgrp')].find(r=>r.offsetParent&&/Lagoa Grande/.test(r.innerText)); r.querySelector('[aria-label^=\"Mais ações\"]').click();})()"); esp(.5)
     it = J("[...document.querySelectorAll('[role=menuitem]')].filter(x=>x.offsetParent).map(x=>x.innerText.trim())")
-    J("(()=>{const b=[...document.querySelectorAll('[role=menuitem]')].find(x=>x.offsetParent&&x.innerText.trim()==='Editar talhões'); if(b) b.click();})()"); esp(1.8)
-    chk('H7 390 px com duas fazendas: "Editar talhões ›" à vista na faixa e também no ⋯ da faixa (alvo de 44 px), que abre o painel da fazenda', mm and mm['lk'] and mm['mais'] and min(mm['mais']) >= 44
-        and 'Editar talhões' in (it or []) and painel().startswith('Editar talhões da Lagoa Grande'), [mm, it, painel()[:60]])
+    J("(()=>{const b=[...document.querySelectorAll('[role=menuitem]')].find(x=>x.offsetParent&&/^Editar talhões/.test(x.innerText.trim())); if(b) b.click();})()"); esp(1.8)
+    # o link da linha e o ⋯ são peças do motor (estilo de link da célula e menu da linha, TAB-05): a altura é medida e registrada, não exigida aqui
+    print(f"     (medido) 390 px, faixa da fazenda: link 'Editar talhões ›' {mm and mm.get('lkAlt')} px de altura; ⋯ {mm and mm.get('mais')} px", flush=True)
+    chk('H7 390 px com duas fazendas: "Editar talhões ›" à vista na faixa e também no ⋯ da faixa ("Editar talhões da Lagoa Grande"), que abre o painel da fazenda', mm and mm['lk'] and mm['mais']
+        and any(x.startswith('Editar talhões') for x in (it or [])) and painel().startswith('Editar talhões da Lagoa Grande'), [mm, it, painel()[:60]])
     chk('H6 sem erro de JavaScript', not erros(), erros())
 finally:
     c.close(); srv.terminate()

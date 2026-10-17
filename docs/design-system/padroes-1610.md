@@ -313,7 +313,7 @@ O "outro anexo" é o painel "Dividir T1 em parcelas" (grade editável com a soma
 - **Celular:** cada linha vira um bloco com os mesmos campos em duas colunas e o rótulo em cima; alvos de 44 px; barra de salvar fixa; sem rolagem de lado. A faixa "Aplicar" mostra os campos quando há linha marcada.
 - **Peça própria sem tabela:** é uma grade de edição, como o Dividir (sem ordenar nem filtrar, sem `role=table`, sem CSS sobre classe do motor). A lista continua sendo a do motor.
 
-**Dano evitado:** abrir, preencher e salvar um painel por item quando os itens são muitos e os campos são os mesmos (no cenário medido, 29 cliques e 64 teclas viram 12 cliques e 30 teclas, ou 4 cliques e 2 teclas colando a planilha; ver SAF-LOTE.md).
+**Dano evitado:** abrir, preencher e salvar um painel por item quando os itens são muitos e os campos são os mesmos (no cenário medido, 29 cliques e 64 teclas viram 11 cliques e 30 teclas, ou 3 cliques e 2 teclas colando o bloco da planilha; ver SAF-LOTE.md).
 
 **Referência e teste:** Planejar safra › Cultivos e planos › "Editar talhões…" (`safra_lote.js`, `areas/saf_lote.py`). `saf_lote_test.py` (1440 e 390 px) e `saf_lote_unit_test.py` (colar, datas, número e recusas no node). A base c9ffa08 reprova (sem o botão).
 
