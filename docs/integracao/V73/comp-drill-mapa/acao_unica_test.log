@@ -1,0 +1,15 @@
+OK    1 SAF · faixa leva à etapa: 4 cartões-botão, palavra do estado (concluída/etapa atual/pendente), cursor de ação; clicar na etapa 1 vai a ela e na 2 volta; etapa 3 travada sem safra não navega e diz o motivo na dica (recusa do DS); os cartões recebem foco pelo Tab; nenhuma seta ‹ › solta 
+FALHA 2b SAF · a tabela de cultivos estica até a área de ações (≥ 300 px, todas as linhas cabem ou rolam dentro dela) e a área fica no pé do conteúdo (≤ 40 px do fim, altura ≤ 140 px), sem rolagem dupla {'tabela': 133, 'linhas': 3, 'area': 75, 'folga': 0, 'mainRola': False}
+OK    2 SAF · no máximo uma primária e uma rota de avanço em cada estado (sem safra, falta de plano, etapas 3 e 4), sem cópia do mesmo comando; Criar safra secundária 
+Traceback (most recent call last):
+  File "/tmp/claude-0/intdrill/tools/prototipo/v37/gen37/acao_unica_test.py", line 104, in <module>
+    setv('#'+campo,'Teste ação única') if campo else None; time.sleep(.2); J(f"document.getElementById({json.dumps(campo)}).focus()")
+                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/intdrill/tools/prototipo/v37/gen37/acao_unica_test.py", line 44, in J
+    def J(x): return c.js(x)
+                     ^^^^^^^
+  File "/tmp/claude-0/intdrill/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of null (reading 'focus')
+    at <anonymous>:1:30

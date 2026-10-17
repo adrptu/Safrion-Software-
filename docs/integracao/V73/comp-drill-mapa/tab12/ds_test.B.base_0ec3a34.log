@@ -1,0 +1,14 @@
+OK  B0 pré-condição: a janela do teste tem mouse com hover ((hover:hover) e (pointer:fine))
+OK  B1 linha da grade da O.S.: hover verde #F2F8F4
+OK  B2 botão secundário (Criar safra): camada verde (rgba(30,122,76,.07)) e borda #9DBFAA; sem a camada cinza nem escurecer
+OK  B3 opção de visão (Kanban): camada verde, sem cinza
+OK  B4 primária (Criar ordem): só escurece (brightness .92), sem camada clara sobre o texto branco
+OK  B5 linha da grade dos Cadastros (T1): hover verde #F2F8F4, não o cinza #F4F6F3
+OK  B6 linha de grupo da árvore dos Cadastros: hover verde do motor (#F2F8F4), não cinza
+OK  B7 sem erro de execução
+RESULTADO: OK 8/8
+
+real	0m24.390s
+user	0m1.293s
+sys	0m0.383s
+exit=0

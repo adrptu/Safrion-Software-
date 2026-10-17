@@ -257,7 +257,7 @@ def cd01():
              dict(k='nt',l='Talhões',t='num',a='r',ajuda='Talhões ativos da fazenda; os inativos não contam.'),dict(k='sis',l='Sistema',w=130),
              dict(k='calc',l='Polígono',t='num',a='r',un='ha',d=1),dict(k='difp',l='Diferença',t='num',a='r',un='%',d=1),
              dict(k='parc',l='Parcelas na '+SAF_ATUAL['nome'].lower(),t='num',a='r')],
-        grupos,gid='g_tal',tree=True,search=True,total=False,x0={g['id']:True for g in grupos},qf=QF_CAD,
+        grupos,gid='g_tal',tree=True,search=True,total=False,qf=QF_CAD,
         tools=seg('cdv',['Lista','Mapa'],'Visualização da lista'),   # ferramenta da tela, à direita da barra (TAB-01)
         edit=dict(m='form',title='Talhão',newTitle='Cadastrar talhão',sub=SUB_TAL,fields=campos_tal(list(nome.values())+[NOVA_FAZ])))
     acoes_form('g_tal'); acoes_form('g_faz')
@@ -302,7 +302,7 @@ function cadIni(self){ if(self._ini) return; self._ini=1; credMigrar(); const st
   GR('g_faz').rows.forEach(r=>{ if(!fz.some(x=>x.id===r.id)) fz.push({id:r.id,v:Object.assign({},r.v),s:{},p:{}}); });
   tals(GR('g_tal').rows).forEach(r=>{ if(!tl.some(x=>x.id===r.id)) tl.push({id:r.id,v:Object.assign({},r.v),s:{},p:{}}); });
   const gs=arvore(fz,tl);
-  GR('g_faz').rows=fz; GR('g_tal').rows=gs; const x0={}; gs.forEach(g=>{ x0[g.id]=true; }); GR('g_tal').x0=x0; }
+  GR('g_faz').rows=fz; GR('g_tal').rows=gs; }
 function cadSalvar(self){ cadGravar({faz:RW(self,'g_faz').map(linhaPk),tal:tals(RW(self,'g_tal')).map(linhaPk)}); }
 // situação do talhão: um só cálculo para a linha, o filtro "A resolver", o ponto da aba e o estado do cabeçalho
 function talSit(r){ const V=r.v; const det='CD-01det.dc.html#talhao='+encodeURIComponent(r.id);
@@ -450,7 +450,7 @@ function EXTRAVALS(self,v){ simv(self,v); const fz=RW(self,'g_faz'), ts=tals(RW(
   self.g2after=(gid,rows,r,isNew)=>{ if(!r) return;
     if(gid==='g_faz'){ cxLimpa('g_faz',r); r.v.fuso=FUSO_UF[r.v.uf]||FUSO_PAD;   // o fuso vem da UF (campo calculável, saiu do formulário em 16/10/2026)
       const old=self._fazOld; const tr=g2clone(RW(self,'g_tal')); g2set(self,'g_faz',{rows:rows});
-      if(isNew){ tr.push({id:'F_'+r.id,ro:true,v:{t:r.v.nome,fid:r.id},s:{},p:{},kids:[]}); const x=Object.assign({},g2st(self,'g_tal').x||GR('g_tal').x0||{}); x['F_'+r.id]=true; g2set(self,'g_tal',{rows:tr,x:x}); }
+      if(isNew){ tr.push({id:'F_'+r.id,ro:true,v:{t:r.v.nome,fid:r.id},s:{},p:{},kids:[]}); const x=Object.assign({},g2st(self,'g_tal').x||{}); x['F_'+r.id]=true; g2set(self,'g_tal',{rows:tr,x:x}); }
       else if(old&&old!==r.v.nome){ tals(tr).forEach(t=>{ if(t.v.faz===old){ t.v.faz=r.v.nome; t.s.faz=r.v.nome; } }); g2set(self,'g_tal',{rows:tr}); }
       if(isNew&&self._stash){ retoma(self,r.v.nome); self.setState({g2toast:'Fazenda '+r.v.nome+' cadastrada. Continue o talhão.'}); }
       else self.setState({g2toast:isNew?('Fazenda '+r.v.nome+' cadastrada. Próximo passo: incluir os talhões dela.'):(r.v.sit==='Inativa'?(r.v.nome+' inativa: sai do Planejar safra; talhões e O.S. antigas seguem consultáveis.'):('Salvo: '+r.v.nome+'.'))}); }
@@ -458,7 +458,7 @@ function EXTRAVALS(self,v){ simv(self,v); const fz=RW(self,'g_faz'), ts=tals(RW(
       const f=RW(self,'g_faz').find(x=>x.v.nome===r.v.faz); const gk='F_'+(f?f.id:r.v.faz); const cur=rows.find(g=>g.kids&&g.kids.some(k=>k.id===r.id));
       if(!cur||cur.id!==gk){ const i=rows.indexOf(r); if(i>=0) rows.splice(i,1); if(cur) cur.kids.splice(cur.kids.indexOf(r),1);
         let g=rows.find(x=>x.id===gk); if(!g){ g={id:gk,ro:true,v:{t:r.v.faz,fid:f?f.id:''},s:{},p:{},kids:[]}; rows.push(g); } g.kids.push(r); }
-      const x=Object.assign({},g2st(self,'g_tal').x||GR('g_tal').x0||{}); x[gk]=true; g2set(self,'g_tal',{rows:rows,x:x,fl:r.id});
+      const x=Object.assign({},g2st(self,'g_tal').x||{}); x[gk]=true; g2set(self,'g_tal',{rows:rows,x:x,fl:r.id});
       self.setState({g2toast:isNew?(r.v.t+' cadastrado na '+r.v.faz+'. Próximo passo: definir o polígono no detalhe do talhão.'):talToast(r,self._sit0)}); }
     cadSalvar(self); }; }
 ''')
@@ -475,7 +475,7 @@ def _tal_cultivo(c,s):
     return DL.PID_DE.get(c['local'],'') if s['id']==DL.SAFRA['id'] else _tal_de(c['local'])
 def _parc_rows(tal_ids,faz):
     """grupos por talhão × safra (safra com cultivo do talhão ou safra aberta DA FAZENDA do talhão) com as parcelas do Planejar safra, em consulta."""
-    rows=[]; x0={}
+    rows=[]
     for t in tal_ids:
         for s in D2.SAFRAS:
             if s.get('fazenda',faz)!=faz: continue   # safra de outra fazenda (ex.: Safra Mamão da Lagoa Grande) não é do talhão da Santa Rita
@@ -489,8 +489,7 @@ def _parc_rows(tal_ids,faz):
                                            geo0=D.GEO_PARC.get(c['id'],''),geo=''),ro=True))
             gid=f'G_{t}_{s["id"]}'
             rows.append(dict(id=gid,ro=True,grp=True,v=dict(tal=t,sid=s['id'],safra=s['nome'],estado=s['estado']),s={},p={},kids=kids))
-            if not s['ro']: x0[gid]=True
-    return rows,x0
+    return rows
 def _painel_poligono():
     lab=f'font-size: 12px; font-weight: 600; color: {MUTED};'
     seg=f'<div role="group" aria-label="Como definir" style="display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: #EEF1EE;">' \
@@ -520,9 +519,9 @@ def _painel_poligono():
 def cd01det():
     fname='CD-01det.dc.html'; E._reset_screen(fname); PARENT37[fname]='CD-01.dc.html'
     fr=_faz_rows(); tr=_tal_rows(); fazs=[r['v']['nome'] for r in fr]
-    prow,px0=_parc_rows([r['id'] for r in tr if r['v']['faz']=='Santa Rita'],'Santa Rita')
+    prow=_parc_rows([r['id'] for r in tr if r['v']['faz']=='Santa Rita'],'Santa Rita')
     # Lagoa Grande: os pivôs com as parcelas da Safra Mamão (a lista conta 1 parcela no PV01; o detalhe mostra a mesma)
-    lrow,lx0=_parc_rows([r['id'] for r in tr if r['v']['faz']=='Lagoa Grande'],'Lagoa Grande'); prow+=lrow; px0.update(lx0)
+    prow+=_parc_rows([r['id'] for r in tr if r['v']['faz']=='Lagoa Grande'],'Lagoa Grande')
     # ficha do talhão: uma linha (o registro aberto), sem filtro nem ordem (eles valem na lista do CD-01); uma variável por coluna (TABELAS-FOCO):
     # setor de irrigação, versão do polígono e diferença em ha e em % em colunas próprias; município e fuso ficam no cadastro da fazenda, o motivo no painel
     gi=grid([dict(k='faz',l='Fazenda',w=160),dict(k='sis',l='Sistema',w=130),dict(k='setor',l='Setor de irrigação',w=150),dict(k='decl',l='Área cultivável',t='num',a='r',un='ha',d=1),
@@ -537,7 +536,7 @@ def cd01det():
     # e polígono); a área livre é número (negativo = excede), a cor diz se confere
     gp=grid([dict(k='parc',l='Safra › parcela',w=190),dict(k='est',l='Situação',w=180),dict(k='tipo',l='Tipo'),dict(k='cult',l='Cultura'),dict(k='var',l='Cultivar'),
              dict(k='area',l='Área',t='num',a='r',un='ha',d=1),dict(k='livre',l='Livre',t='num',a='r',un='ha',d=1),dict(k='plantio',l='Plantio',t='date')],
-        prow,gid='g_parc',tree=True,search=False,total=False,x0=px0,tools=plan,
+        prow,gid='g_parc',tree=True,search=False,total=False,tools=plan,
         edit=dict(m='origin',title='Parcela',leafOnly=True,
             fields=[txt('parc','Parcela',ro=True),txt('safra','Safra',ro=True),txt('cult','Cultura',ro=True),txt('var','Cultivar',ro=True),num('area','Área','ha',ro=True),
                     dat('plantio','Plantio',ro=True),txt('meta','Meta de produtividade',ro=True),txt('plano','Plano agronômico',ro=True),txt('geo','Polígono',ro=True)]))
@@ -575,10 +574,10 @@ function detIni(self){ if(self._ini) return; self._ini=1; credMigrar(); const st
   if(st&&st.tal){ const t0=GR('g_idt').rows; const tl=st.tal.map(x=>({id:x.id,v:Object.assign({},x.v),s:{},p:{}}));
     t0.forEach(r=>{ if(!tl.some(x=>x.id===r.id)) tl.push({id:r.id,v:Object.assign({},r.v),s:{},p:{}}); }); GR('g_idt').rows=tl; }
   self._vers0=(st&&st.vers)||{}; self._pgeo0=(st&&st.pgeo)||{};
-  const pr=GR('g_parc').rows; const x0=Object.assign({},GR('g_parc').x0||{});
+  const pr=GR('g_parc').rows;
   GR('g_idt').rows.forEach(t=>{ if(pr.some(g=>g.v.tal===t.id)) return;
-    SAFOPEN.filter(s=>s.faz===t.v.faz).forEach(s=>{ const id='G_'+t.id+'_'+s.sid; pr.push({id:id,ro:true,grp:true,v:{tal:t.id,sid:s.sid,safra:s.nome,estado:s.estado},s:{},p:{},kids:[]}); x0[id]=true; }); });
-  GR('g_parc').x0=x0; self._rowt={}; pr.forEach(g=>{ self._rowt[g.id]=g.v.tal; (g.kids||[]).forEach(k=>{ self._rowt[k.id]=g.v.tal; }); });
+    SAFOPEN.filter(s=>s.faz===t.v.faz).forEach(s=>{ const id='G_'+t.id+'_'+s.sid; pr.push({id:id,ro:true,grp:true,v:{tal:t.id,sid:s.sid,safra:s.nome,estado:s.estado},s:{},p:{},kids:[]}); }); });
+  self._rowt={}; pr.forEach(g=>{ self._rowt[g.id]=g.v.tal; (g.kids||[]).forEach(k=>{ self._rowt[k.id]=g.v.tal; }); });
   let m=null; try{ m=/[?&#]talhao=([^&]+)/.exec((location.search||'')+(location.hash||'')); }catch(e){}
   self._t0=m?decodeURIComponent(m[1]):'T1'; }
 function curT(self){ return self.state.det_t||self._t0; }

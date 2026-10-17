@@ -1,0 +1,10 @@
+saf_revisao exit=1 207s RESULTADO: 41 ok · 1 falhas
+FIM
+tabelas_os exit=0 81s RESULTADO: 40/40 ok
+cartoes exit=0 554s RESULTADO: 70/70
+FIM
+ma_unica exit=0 213s RESULTADO: 23/23 ok
+ma_rastreio exit=0 105s RESULTADO: 58/58 ok
+FIM
+rev93_reteste_navegador_tab12 exit=1 80s 
+FIM

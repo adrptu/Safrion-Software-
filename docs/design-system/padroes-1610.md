@@ -3,8 +3,8 @@
 Pedidos do proprietário em 16/10, transformados em padrão pelo método da skill `padrao-safrion` (`.claude/skills/padrao-safrion/SKILL.md`).
 
 - **Valem para todas as telas do mesmo tipo**, no protótipo e no software real.
-- **Teste:** `tools/prototipo/v37/gen37/ds_1610_test.py`; TAB-09 e TAB-10 em `tab_drill_cab_test.py`; TAB-11 em `seta_padrao_test.py`; paridade dos módulos em `ds_modulos.py`.
-- **Contraprova:** a versão publicada antes (a156f83) reprova; para TAB-09 e TAB-10, a 519ed7b; para TAB-11, a c9ffa08.
+- **Teste:** `tools/prototipo/v37/gen37/ds_1610_test.py`; TAB-09 e TAB-10 em `tab_drill_cab_test.py`; TAB-11 em `seta_padrao_test.py`; TAB-12 e TAB-13 em `drill_recolhido_test.py`; paridade dos módulos em `ds_modulos.py`.
+- **Contraprova:** a versão publicada antes (a156f83) reprova; para TAB-09 e TAB-10, a 519ed7b; para TAB-11, a c9ffa08; para TAB-12 e TAB-13, a 7d65025.
 
 ## MET-01 · Método: pedido vira padrão
 
@@ -30,7 +30,7 @@ Pedidos do proprietário em 16/10, transformados em padrão pelo método da skil
 - Toda coluna tem **⇅** (ordenar) e **funil** (filtrar por valores).
 - Na 1ª célula, a **seta de abrir** (TAB-04), com o desenho único da TAB-11:
   - a seta que gira abre os itens ali mesmo;
-  - a mesma seta, parada, abre o detalhe.
+  - ~~a mesma seta, parada, abre o detalhe~~: desde 17/10 a linha folha não tem seta; o detalhe abre pelo clique na linha (TAB-13).
 
 **Celular (até 480 px):** "Agrupar por" e "Colunas" aparecem só com o ícone e o valor; o nome fica no `aria-label`. Assim a barra cabe numa linha com Tabela | Cartões, e a lista mostra pelo menos 5 linhas acima da dobra (AC-PCM-22).
 
@@ -155,7 +155,8 @@ No celular, o cabeçalho das Atividades agora esconde Insumos e Custo/ha junto c
   - fechada aponta para a direita; aberta gira 90° para baixo;
   - o giro leva 120 ms e não anima com `prefers-reduced-motion`;
   - o controle é um botão nativo com `aria-expanded` e o nome "Abrir …" / "Recolher …"; ou o botão inteiro com o nome à vista (seção da Manutenção e da O.S., lote da Qualidade, "Capacidade por mês", `summary`), com a seta antes do nome.
-- **Ir para o detalhe** (TAB-08): a mesma seta para a direita, sem girar; quem navega é a linha ou o link.
+- **Estado na abertura:** recolhida (TAB-12).
+- **Ir para o detalhe:** sem seta desde 17/10 (TAB-13); quem navega é a linha ou o link. (Antes: a mesma seta para a direita, sem girar.)
 - **"Expandir tudo" / "Recolher tudo":** a mesma seta, no estado das linhas (direita com linhas recolhidas; baixo com tudo aberto).
 - **Alvo:** 24 × 24 px no mouse, 44 × 44 px no toque, sem cobrir o controle vizinho. A seta de ir e a linha sem seta guardam a mesma largura, para os nomes alinharem.
 - **Interação:** hover verde (VIS-02: fundo #E4F3E9 e seta #1E7A4C); anel de foco verde de 2 px; Enter e Espaço alternam sem abrir o painel da linha. Alinhada ao centro da linha, na 1ª coluna, antes do nome (TAB-09).
@@ -176,6 +177,60 @@ No celular, o cabeçalho das Atividades agora esconde Insumos e Custo/ha junto c
 **Dano evitado:** dois desenhos para o mesmo gesto (o triângulo preto chama mais atenção que o conteúdo e parece outra função), alvo pequeno no celular e tela nova voltando ao glifo solto.
 
 **Teste:** `seta_padrao_test.py` (148 telas e 9 estados por endereço, a 1440 e 390 px, no estado inicial, com "Expandir tudo" e no outro modo): A sem triângulo de texto; B todo controle de abrir com o componente; C uma seta só (cor, tamanho e traço computados); D giro coerente com o `aria-expanded`; E Enter e Espaço com foco visível; F alvo. O render da c9ffa08 reprova.
+
+## TAB-12 · Drill down recolhido por padrão
+
+> "Por padrão coloque sempre os cartoes e tabelas com drill down recolhido, primeiro usuario tem a visao macro e depois consegue escolher onde precisar detalhar no drill down expandido. Em todas as telas." (17/10/2026)
+
+No mesmo dia, sobre Planejar safra › etapa 2 › "Talhões e cultivos": "quando so tem 1 fazenda nao agrupa por fazenda, só quando tem 2 ou mais. corrija." A tabela agrupa por fazenda sempre, também com uma fazenda só, e a faixa da fazenda segue esta regra.
+
+**Regra:**
+- Toda tabela, árvore, "Agrupar por" e visão Cartões abre com as linhas-pai recolhidas, inclusive a faixa da fazenda.
+- A linha recolhida é a visão macro: nome, contagem, área, somas e situação. O total e a contagem da tabela não mudam com a abertura.
+- Só abre o que a pessoa abriu: a seta (clique, Enter ou Espaço, TAB-11) e "Expandir tudo".
+- **Continuam abrindo sozinhos,** porque são escolha da pessoa:
+  - a busca ou o filtro de coluna que acha algo dentro de um grupo abre o caminho até ele; com o filtro rápido, a faixa da fazenda (o filtro vale nos talhões dela); a seta recolhe esse caminho também;
+  - a célula escolhida na "Capacidade por mês" (Planejar safra › etapa 3) abre o caminho até as ocorrências dela;
+  - o endereço ou a ação que leva a um registro abre o caminho dele: abrir o registro (`g2open`), o lote pelo endereço na Produção, gravar um cultivo, dividir um talhão, "Planejar talhões livres" e "Editar talhões" no Planejar safra, gravar um item numa estrutura dos Cadastros;
+  - erro de gravação no ajuste local do plano abre o grupo e a atividade do campo com erro.
+- **Expansores próprios** seguem a mesma regra: blocos do detalhe do ativo, serviços do plano e Versões da Manutenção; "Capacidade por mês" e ajuste local do plano (grupos e atividades) no Planejar safra; Atividades do plano; lotes do CO-06.
+- **Fora, com motivo:**
+  - raia do Kanban da O.S. com Agrupar por: recolhida, mostra só o total da raia, sem a contagem por fase; a visão macro do Kanban são as 5 fases. Continua aberta;
+  - seções do painel de detalhe de UM registro (O.S. e ordem de manutenção): não são tabela nem cartão; abrem o que faz a ordem andar na fase (`data-secao-registro`). Recolher os blocos da ordem de manutenção custava 2 cliques a cada ordem concluída (Tarefas e Conclusão; AC-PCM-28);
+  - `<details>` de nota e de método (já fechados), menus, listas suspensas e formulários (ex.: "Contestar fatura").
+
+**Peça única:**
+- `g2flat` no `g2lib` decide a abertura de cada linha (`ab`), e a seta, os Cartões e o "Expandir tudo" leem dele;
+- `g2agRows` faz os grupos do "Agrupar por" nascerem recolhidos;
+- `g2caminho` abre o caminho de um registro aberto;
+- o `engine.grid` não tem mais abertura padrão (`x0`).
+
+**Dano evitado:**
+- excesso de informação na abertura: a pessoa rolava e filtrava para achar a visão macro;
+- telas iguais abriam diferente: umas abertas, outras recolhidas, umas só com o grupo da fase atual aberto.
+
+**Teste:** `drill_recolhido_test.py`.
+- **A:** 148 telas e os estados por endereço, a 1440 e 390 px, sem seta aberta nem linha-filha à vista na abertura (tabela, cartões e tela, fora as exceções acima).
+- **B:** amostras por módulo (Planejar safra com 1 e com 2 fazendas, O.S. agrupada, CD-01, Atividades do plano, Manutenção, Estoque e CO-06): 1 clique abre só aquele item, Enter e Espaço também, "Expandir tudo" abre todos e o total não muda.
+- **C:** a busca e o endereço continuam abrindo o caminho.
+- O render da 7d65025 reprova.
+
+## TAB-13 · Seta só onde há o que abrir
+
+> "em C1 observe que OS do drill down tem também drill down, mas na verdade nao tem. o simbolo de drill down so deve aparecer onde de fato terá um detalhamento drill down" (17/10/2026, print da O.S. › Tabela agrupada por Talhão)
+
+**Regra:**
+- A seta à esquerda da linha ou do cartão só aparece quando o item tem o que abrir ali: subgrupo, linhas filhas ou detalhe embutido. Ela gira e abre no lugar (TAB-11) e nasce recolhida (TAB-12).
+- A linha folha não tem seta, nem a "seta de ir" que a TAB-08 e a TAB-11 punham na linha que abre o detalhe. Abrir o detalhe é o clique na linha inteira, com hover verde e foco (SEL-01/02).
+- Na árvore ou no grupo com alguma seta à vista, a folha guarda o lugar da seta com um recuo vazio do mesmo tamanho, sem glifo, e os nomes ficam alinhados. Lista sem nenhuma linha que abra no lugar não reserva esse espaço.
+- Com seleção (TAB-09), a seta de abrir continua antes da caixa; a linha sem seta guarda o lugar.
+- **Substitui:** a seta parada de "ir para o detalhe" da TAB-08 e da TAB-11, e a exigência da TAB-04 de seta em toda linha que abre o detalhe.
+
+**Peça única:** `g2vals` no `g2lib` (célula da seta: `caretOk` só com filhos; `caretNo` guarda o lugar) e `engine.grid` (sem `seta_ir` na linha).
+
+**Dano evitado:** a seta prometia um nível a mais que não existe; a pessoa clicava e não abria nada. A seta perdia o sentido de "aqui tem mais".
+
+**Teste:** `drill_recolhido_test.py` parte D (148 telas e os estados por endereço, a 1440 e 390 px, na abertura e com "Expandir tudo"): nenhuma seta de ir e toda seta aberta tem filho à vista. O B2 do `ds_1610_test.py` passou a exigir a ausência da seta de ir. O render da 7d65025 reprova.
 
 ## PAR-01 · Paridade dos módulos com o Agrícola
 

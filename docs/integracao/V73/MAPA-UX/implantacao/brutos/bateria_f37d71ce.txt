@@ -1,0 +1,1032 @@
+# Bateria do IN-04 no render de f37d71ce (composição ac5cd1d7 + MAPA-UX), 17/10/2026, um navegador por vez (Chrome headless, SwiftShader)
+# Parte 1 (16:05–18:05): o job parou no limite de 2 h durante o seta_padrao_test
+=== mapa_mux_f0_test.py 16:05:34
+OK    F0-1a 1440: "Nova O.S. neste talhão" e "Abrir ordens" (com o T4 escolhido) levam #tal=Santa Rita|T4
+OK    F0-1b a O.S. abre com o talhão já escolhido (Filtrar por talhão = Santa Rita|T4)
+OK    F0-2a 1440: com o contexto na Santa Rita, #talhao=PV05 abre a Lagoa Grande com o P5 escolhido (aria-pressed e painel)
+OK    F0-2b 1440: #talhao=PV99 mostra o aviso visível e acessível (role=status) e não escolhe nenhum talhão
+OK    F0-3 1440: Satélite sem link para o AG-06 na faixa e no painel do P1
+OK    F0-4 1440: Colheita › Situação com o link do módulo (Abrir Previsão e colheita › COLH); Solo leva ao AG-02 pelo painel do T1 e a faixa do Solo não corta os números (a 1440)
+OK    F0-5 1440: as ações de Colheita e produtividade levam o ícone da barra (engine.ICONS[Colheita])
+OK    F0-6 1440: o pivô se chama P5 no marcador, no título do painel e no nome acessível; "Pivô 5" fora do painel
+OK    F0-7 1440: sem erro de JavaScript
+OK    F0-1a 390: "Nova O.S. neste talhão" e "Abrir ordens" (com o T4 escolhido) levam #tal=Santa Rita|T4
+OK    F0-2a 390: com o contexto na Santa Rita, #talhao=PV05 abre a Lagoa Grande com o P5 escolhido (aria-pressed e painel)
+OK    F0-2b 390: #talhao=PV99 mostra o aviso visível e acessível (role=status) e não escolhe nenhum talhão
+OK    F0-3 390: Satélite sem link para o AG-06 na faixa e no painel do P1
+OK    F0-4 390: Colheita › Situação com o link do módulo (Abrir Previsão e colheita › COLH); Solo leva ao AG-02 pelo painel do T1 e a faixa do Solo não corta os números (a 1440)
+OK    F0-5 390: as ações de Colheita e produtividade levam o ícone da barra (engine.ICONS[Colheita])
+OK    F0-6 390: o pivô se chama P5 no marcador, no título do painel e no nome acessível; "Pivô 5" fora do painel
+OK    F0-7 390: sem erro de JavaScript
+MEDIDAS {"destinos_os_1440": {"nova": ["OS.dc.html#tal=Santa%20Rita%7CT4"], "abrir_ordens": ["OS.dc.html#tal=Santa%20Rita%7CT4"]}, "ag06_1440": [], "colheita_sem_icone_1440": [0, 7], "nomes_pivo_1440": ["P5"], "destinos_os_390": {"nova": ["OS.dc.html#tal=Santa%20Rita%7CT4"], "abrir_ordens": ["OS.dc.html#tal=Santa%20Rita%7CT4"]}, "ag06_390": [], "colheita_sem_icone_390": [0, 7], "nomes_pivo_390": ["P5"]}
+
+RESULTADO: 17 ok · 0 falha(s)
+=== fim mapa_mux_f0_test.py rc=0 16:06:45
+=== mapa_mux_f1_test.py 16:06:45
+OK    F1-1a Santa Rita: o mapa é um grupo com nome ("Talhões da Fazenda Santa Rita · 8 talhões") e um botão por talhão
+OK    F1-1b Santa Rita: Tab entra uma vez no mapa (1 parada de Tab; tabindex móvel)
+OK    F1-1c Santa Rita: só com as setas, todos os 8 talhões são alcançados (vizinho na direção)
+OK    F1-1d Santa Rita: Home e End vão ao primeiro e ao último pelo nome (C1 e T7)
+OK    F1-1e Santa Rita: Enter no T4 abre o painel com o foco no título; aria-pressed=true
+OK    F1-1f Santa Rita: Esc fecha o painel e devolve o foco ao T4 (aria-pressed=false)
+OK    F1-1g Santa Rita: o Tab seguinte sai do mapa
+OK    F1-2 Santa Rita: instruções visíveis junto do mapa e no aria-describedby do grupo (setas, Enter, Esc, /)
+OK    F1-3a Santa Rita: nome acessível completo no formato do pedido ("T4, N ha, cultura e estádio, valor, estado, data")
+OK    F1-3b Santa Rita: os 8 talhões têm aria-pressed
+OK    F1-4a Santa Rita: "/" com o foco no mapa abre a busca "Ir para talhão"
+OK    F1-4b Santa Rita: T4 / t4 / Talhão 4 + Enter escolhe o T4 e abre o painel com o foco no título
+OK    F1-5a Santa Rita: "Ver dados" troca para a Lista no mesmo bloco: 8 linhas com valor, estado em texto e data, "8 de 8 talhões"
+OK    F1-5b Santa Rita: ordem pela gravidade da camada (a pior primeiro)
+OK    F1-5c Santa Rita: a linha abre o mesmo painel do mapa (e fica escolhida)
+OK    F1-5d Santa Rita: "Localizar no mapa" volta ao mapa com o talhão escolhido e focado
+OK    F1-5e Santa Rita: o filtro Cultura do topo vale na Lista ("N de 8", com N = linhas)
+OK    F1-1a Lagoa Grande: o mapa é um grupo com nome ("Talhões da Fazenda Lagoa Grande · 23 talhões") e um botão por talhão
+OK    F1-1b Lagoa Grande: Tab entra uma vez no mapa (1 parada de Tab; tabindex móvel)
+OK    F1-1c Lagoa Grande: só com as setas, todos os 23 talhões são alcançados (vizinho na direção)
+OK    F1-1d Lagoa Grande: Home e End vão ao primeiro e ao último pelo nome (PV01 e PV24)
+OK    F1-1e Lagoa Grande: Enter no P5 abre o painel com o foco no título; aria-pressed=true
+OK    F1-1f Lagoa Grande: Esc fecha o painel e devolve o foco ao P5 (aria-pressed=false)
+OK    F1-1g Lagoa Grande: o Tab seguinte sai do mapa
+OK    F1-2 Lagoa Grande: instruções visíveis junto do mapa e no aria-describedby do grupo (setas, Enter, Esc, /)
+OK    F1-3a Lagoa Grande: nome acessível completo no formato do pedido ("P5, N ha, cultura e estádio, valor, estado, data")
+OK    F1-3b Lagoa Grande: os 23 talhões têm aria-pressed
+OK    F1-4a Lagoa Grande: "/" com o foco no mapa abre a busca "Ir para talhão"
+OK    F1-4b Lagoa Grande: P5 / PV05 / Pivô 5 + Enter escolhe o P5 e abre o painel com o foco no título
+OK    F1-4c Lagoa Grande: a busca enquadra o pivô (pedido explícito: a câmera muda na busca)
+OK    F1-4d Lagoa Grande: Enter e Esc no P5 (à vista) não mexem na câmera (sem zoom nem recentralização sozinhos)
+OK    F1-5a Lagoa Grande: "Ver dados" troca para a Lista no mesmo bloco: 23 linhas com valor, estado em texto e data, "23 de 23 talhões"
+OK    F1-5b Lagoa Grande: ordem pela gravidade da camada (a pior primeiro)
+OK    F1-5c Lagoa Grande: a linha abre o mesmo painel do mapa (e fica escolhida)
+OK    F1-5d Lagoa Grande: "Localizar no mapa" volta ao mapa com o talhão escolhido e focado
+OK    F1-6 Todas: a Lista traz as três fazendas (Santa Rita, Lagoa Grande, Boa Vista sem geometria); o mapa diz onde estão as outras
+OK    F1-7a Esc desliga o modo Medir (antes da seleção)
+OK    F1-7b clique no fundo do mapa desmarca (D16): o painel do T2 estava aberto e fecha
+OK    F1-7c Esc não apaga o rascunho de desenho (3 pontos continuam)
+OK    F1-8a o endereço guarda fazenda, camada, talhão e data: #faz=LG&lay=sat&t=PV05&dt=25-09
+OK    F1-8b recarregar #faz=LG&lay=sat&t=PV05&dt=25-09 restaura fazenda, camada, seleção e data
+OK    F1-8c "Abrir talhão ›" leva ao CD-01det do P5; voltar restaura a câmera e a seleção, sem reenquadrar
+OK    F1-10 sem o MapLibre: aviso com "Tentar de novo", a Lista continua (23 linhas) e o mapa volta sem recarregar a página
+OK    F1-12a 1440: sem erro de JavaScript (fora o aviso esperado do CDN bloqueado)
+OK    F1-11a 390 com toque: tocar o T4 escolhe e abre o painel embaixo do mapa, com o título à vista; sem cartão de hover
+OK    F1-11b 390 com toque: tocar um pivô da Lagoa Grande (P15) escolhe e abre o painel dele
+OK    F1-11c 390: o mesmo grupo e os mesmos botões (23, um na ordem de Tab)
+OK    F1-12b 390: sem erro de JavaScript
+MEDIDAS {"grupo_Santa Rita": {"role": "group", "nome": "Talhões da Fazenda Santa Rita · 8 talhões", "desc": "mux-instr", "n": 8, "tab0": 1, "pressed": 8, "botao": 8}, "paradas_tab_Santa Rita": 1, "alcance_setas_Santa Rita": [8, 8], "esc_fecha_Santa Rita": true, "aria_pressed_Santa Rita": 8, "lista_Santa Rita": 8, "grupo_Lagoa Grande": {"role": "group", "nome": "Talhões da Fazenda Lagoa Grande · 23 talhões", "desc": "mux-instr", "n": 23, "tab0": 1, "pressed": 23, "botao": 23}, "paradas_tab_Lagoa Grande": 1, "alcance_setas_Lagoa Grande": [23, 23], "esc_fecha_Lagoa Grande": true, "aria_pressed_Lagoa Grande": 23, "lista_Lagoa Grande": 23, "hash": "#faz=LG&lay=sat&t=PV05&dt=25-09"}
+PORTÃO F1-9 (não executado aqui): leitor de tela real (NVDA/Chrome e VoiceOver/Safari, mais VoiceOver iOS ou TalkBack) antes de fechar D1, D2 e T7
+
+RESULTADO: 48 ok · 0 falha(s)
+=== fim mapa_mux_f1_test.py rc=0 16:08:54
+=== mapa_mux_f2_test.py 16:08:54
+OK    C1a hover no T4 (Pragas e doenças): cartão com nome e área, cultura e estádio, valor, estado em texto, data do dado e "Clique para detalhar"; role=tooltip; sem ação dentro
+OK    C1b o cartão fica dentro da janela e não cobre o talhão
+OK    C1c contorno realçado do talhão em duas cores (escuro e branco, por cima dos pixels) e cursor de mão
+OK    C2a sem espera programada: o cartão do T7 está visível no mesmo turno do pointerover (nenhum timer de abertura)
+OK    C2b tempos do evento ao quadro medidos (indicativo, SwiftShader): amostra com 24 hovers entre vizinhos
+OK    C3 o foco de teclado no T4 mostra o mesmo cartão do hover (mesmo texto)
+OK    C4a Esc dispensa o cartão e o foco fica no talhão (o painel não abre nem fecha nada)
+OK    C4b o ponteiro vai do talhão até o cartão e o cartão continua (hoverable, WCAG 1.4.13)
+OK    C4c sair do talhão e do cartão fecha o cartão
+OK    C1d hover no P5 (mapa real): cartão completo, sem ação, dentro da janela, sem cobrir o pivô; contorno realçado (pv-hov) e cursor de mão
+OK    C5 o cartão abre nas 9 camadas (P1 da Santa Rita), completo, sem ação e dentro da janela
+OK    K1a Satélite 06/09 (Santa Rita): P2 e T7 sob nuvem em hachura, nunca com a cor de um valor
+OK    K1b Irrigação › Balanço hídrico: o T7 estimado fica com a cor do valor e a etiqueta "≈ … estimado", não com a hachura (NC10)
+OK    K1c "não se aplica" (sem pendência) com contorno tracejado #6B776F, nunca só a cor do fundo (D14)
+OK    K1d mapa real: camada de hachura para nuvem e sem leitura (pv-hach)
+OK    K2a rótulos da Santa Rita: até 2 linhas na placa (valor e estado) + o número, placa branca a 90 %, texto opaco, sem opacity nem filtro no caminho; contraste ≥ 13,4:1 sobre qualquer fundo
+OK    K2b rótulos da Lagoa Grande: placa a 90 % com texto #15201A, até 3 linhas (só o número quando o pivô é pequeno na tela), contraste ≥ 13,4:1, sem opacity
+OK    L1a cada classe da legenda mostra contagem e área ("2 · 610 ha"); a soma das contagens é a dos 8 talhões
+OK    L1b passar o mouse em "atenção ou a liberar 4 · 525 ha" realça os 4 talhões dela (anel em duas cores em cada um)
+OK    L1c clicar na classe filtra: botão pressionado, os outros talhões esmaecem no mapa e a Lista mostra só a classe ("N de 8")
+OK    L1d clicar de novo limpa o filtro (8 linhas; botão solto)
+OK    L1e Satélite: no contraste Talhão a escala dos pixels não conta talhões (só sem cultura e nuvem); no Absoluto a soma é 8
+OK    L1f Solo: nos sextos de cada talhão a escala não conta talhões (só sem laudo); no Absoluto a soma é 8
+OK    S1a seleção na Santa Rita: contorno forte em duas cores (escuro 7 px + linha branca) e número em destaque (branco com contorno escuro)
+OK    S1b seleção no mapa real: contorno em duas cores (pv-sel escuro + pv-sel2 branco), rótulo em destaque (aria-pressed) e a câmera não se move
+OK    E1a 1440: sem erro de JavaScript
+OK    M1a 390: tocar o talhão não abre o cartão de hover (só escolhe e abre o painel)
+OK    M1b 390: o cartão do foco cabe inteiro na janela
+OK    E1b 390: sem erro de JavaScript
+MEDIDAS {"cartao_T4": {"on": true, "txt": "T4 · 204 ha Soja 58 W · 30 de 204 ha plantados (DAP 1–2) Nematoide-de-cisto 13 cistos/200 cm³ em controle vistoria de 15/09 · 0,9× o NC OS-0420 · em execução Clique para detalhar", "r": [581, 647, 881, 816.765625], "acoes": 0, "tal": "T4", "modo": "ponteiro", "livre": "1", "role": "tooltip", "vw": 1440, "vh": 900}, "tempo_ms": {"n": 24, "p50": 52.4, "p95": 292.7, "js_p50": 14.8, "js_p95": 34}, "cartao_P5": {"on": true, "txt": "P5 · 71 ha Mamão Formosa Tainung 1 · formação inicial OS-0507 impedida · bomba impedida ou conflito dado de 23/09 (hoje) OS-0507 · em execução Clique para detalhar", "r": [848, 406, 1148, 575.765625], "acoes": 0, "tal": "PV05", "modo": "ponteiro", "livre": "1", "role": "tooltip", "vw": 1440, "vh": 900}, "cartao_camadas": 9, "contraste_rotulo_min": 13.36, "contraste_rotulo_lg_min": 13.36}
+
+RESULTADO: 29 ok · 0 falha(s)
+=== fim mapa_mux_f2_test.py rc=0 16:10:02
+=== mapa_filtros_test.py 16:10:02
+OK    F1 faixa com Fazenda, Safra e Cultura; Safra da fazenda (Lagoa Grande só 2026/27; Santa Rita 3 safras, sem "Todas")
+OK    F2 Safrinha 2027 · Lavoura: só T1 (Milho), T2 (Milho) e P1 (Feijão) com cultivo; os outros "sem cultivo na safra"
+OK    F3 Cultura Milho na Safrinha: T1 e T2 no filtro (previsto R$/ha do plano), os outros "fora do filtro" em Custos; opções de Cultura = as da safra
+OK    F4 Milho segue válido na 2026/27 da Santa Rita (milho em P2 hoje); na Lagoa Grande a Safra é 2026/27 e a Cultura volta a Todas
+OK    A1 "Alvos · Todos"; lista com Todos + 12 alvos; marcar Ácaro-rajado foca nele (os outros rótulos: "sem …")
+OK    A2 2º alvo soma ("2 de N", os dois marcados); Esc fecha com foco no botão; "Todos" volta ao todo
+OK    J sem erro de JS; 390 px sem rolagem lateral
+RESULTADO: 7/7
+=== fim mapa_filtros_test.py rc=0 16:11:21
+=== solo_mapa_calor_test.py 16:13:23
+OK    S1 Laudo e Indicador como seletores (Mais recente + laudos da camada; ≥ 12 indicadores com pH, P e MO); Camada e Contraste segmentados
+OK    S2 rótulo dos 5 pivôs com laudo = P do laudo; faixa: média ponderada 14,1 mg/dm³ e 77 pontos; canvas pintado
+OK    S3 Santa Rita · V % · Talhão: T1, T2 e T4 com manchas (≥ 4 cores) e 90 pontos (30 por talhão)
+OK    S4 painel do T2: áreas por classe somam 298 ha ([9.5, 288.5]); pontos com coordenada; LAU-2063 seleciona o T2 e o T1 fica "fora do laudo escolhido"
+OK    S5 Camada 20–40 cm: só o T4 com laudo
+OK    I1 Pivô 5: "déficit 13,2 mm → 2× 7,8 mm a 90 %" (ficha 7.02 mm a 100 %); painel com ETc, lâmina recomendada e percentímetro
+OK    A1 AG-02: pH, P e MO no padrão; LAU-2061 pH 5,5 e P 18,5 mg/dm³; clicar abre o laudo
+OK    M1 Planos da Manutenção: "Agrupar por" com Grupo de máquina
+OK    J sem erro de JS
+RESULTADO: 9/9
+=== fim solo_mapa_calor_test.py rc=0 16:15:14
+=== colheita_mapa_test.py 16:15:14
+OK    C1 barra do mapa: "Colheita e produtividade" logo depois de "Estádio", com o desenho de Colheita
+OK    C2 rótulo de cada talhão = situação da Previsão e colheita (Lagoa Grande 23 pivôs, Santa Rita 8 talhões; "+N" com mais cultivos)
+OK    C3 faixa da Lagoa Grande = contagem por situação {'Em colheita': 1, 'Programada': 0, 'Prevista': 0, 'Colhida': 1, 'Sem previsão': 9} e A receber 1
+OK    C4 Pivô 19: Previsão "72,9 t · S39 (v1)" e Colhido "36,42 t" iguais aos da COLH, "1 carga na balança"; primário para a COLH do cultivo
+OK    C5 o caminho do painel (seção ou primário) abre a COLH com o painel do Pivô 19
+OK    F1 faixa de filtros na O.S., no Mapa e na Colheita: grupo "Filtros", só o funil com a dica "Filtros", sem "Filtros desta tela"
+OK    F2 390 px: O.S. sem rolagem lateral; sem erro de JS
+RESULTADO: 7 ok · 0 falhas
+=== fim colheita_mapa_test.py rc=0 16:16:29
+=== map_trilha_icones_test.py 16:16:29
+OK    I1 1440: 9 funções na ordem, cada uma com ícone de 16 px e o nome à vista, alvo de 32 px de altura
+OK    I2 barra no alto, em uma linha, acima da faixa da camada e do mapa; o mapa começa na borda esquerda do bloco (sem coluna de ícones)
+OK    I3 Pragas e doenças = inseto, desenho único na barra (sem a lupa antiga)
+OK    I4 hover em Pragas e doenças: a dica (role=tooltip) diz "Mostrar Pragas e doenças no mapa"
+OK    I5 Tab até Satélite: a dica abre com "Mostrar Satélite no mapa"
+OK    I6 o clique troca a camada: Pragas e doenças selecionada (aria-selected e estado ativo tonal da DS) e o mapa com o título da camada
+OK    I3b painel do talhão (Integrado): "Ver pragas e doenças" com o mesmo inseto
+OK    I7 390 px com toque: barra em linha e rolável dentro dela, 9 botões de 44 px de altura com o nome à vista, sem rolagem lateral da página
+OK    I8 sem erro de JS
+RESULTADO: 9 ok · 0 falhas
+=== fim map_trilha_icones_test.py rc=0 16:16:41
+=== mapa_solo_texto_test.py 16:16:41
+OK    S1 barra do mapa: "Solo" entre Satélite e Pragas e doenças; tocar mostra a camada "Solo"
+OK    S2 Lagoa Grande: faixa com 5 laudos 0–20 e 77 pontos pelo oráculo; Pivô 12 "P12 V % 50 %"; os 18 pivôs sem laudo "Sem laudo"
+OK    S3 tocar o Pivô 12: painel com LAU-2071 · 0–20 cm, CTC 8,10 cmolc/dm³ e V 50 %; atalho "Abrir laudo"
+OK    T1 9 camadas: a fonte técnica fica na dica ⓘ ao lado do nome; nenhuma linha solta acima de 60 caracteres no bloco do mapa
+OK    T2 o selo "Demonstração sintética" segue à vista na legenda de toda camada da Lagoa Grande
+OK    T3 o ⓘ da camada (Satélite) abre a dica com a fonte ao passar o mouse; sem a etiqueta "clique no talhão"
+OK    S4 Santa Rita: 4 laudos 0–20 (T1, T2, T4 e C1) pelo oráculo; C1 aguardando validação e sem H+Al: V não calculável
+OK    S5 Santa Rita T3 (sem laudo): painel "Sem laudo" com "Registrar laudo"; o AG-02 abre o formulário com Santa Rita e T3 já escolhidos
+OK    T4 celular 390 px sem rolagem horizontal; sem erro de JS
+RESULTADO: 9 ok · 0 falhas
+=== fim mapa_solo_texto_test.py rc=0 16:17:46
+=== mapa9_test.py 16:17:46
+OK    N1 barra: os nove nomes da DEC-2609-12, na ordem da decisão, com ícone e nome à vista e a dica "Mostrar … no mapa"
+OK    N8a 1440 px: a barra fica no alto do bloco, em uma linha, acima da faixa da camada e do mapa; o mapa começa na borda do bloco (nenhuma coluna de ícones ao lado da lateral dos módulos)
+OK    N2a Ordens de serviço: Mostrar = Fases · Avanço · Atrasos · Impedimentos · Insumos (Fases ao abrir); Fase como lista suspensa nas quatro visões das ordens
+OK    N2b cada visão pinta o mapa: Fases (fase da ordem), Avanço (ha feitos ÷ ha da ordem), Atrasos (prazo), Impedimentos (OS-0420 impedida em vermelho); T7 sem ordem
+OK    N2c Insumos (filtro das Ordens de serviço): faixa Produtos e Faltam, Período no lugar de Fase, legenda do estoque e painel do T4 com a seção Insumos
+OK    N3 Colheita e produtividade: Mostrar = Situação · Carência e destino; "Consultar em" só na carência; Pivô 23 "carência até 26/09" e faixa "Em carência"
+OK    N4 Solo (Santa Rita): 4 talhões sem laudo 0–20 ['T3', 'P1', 'P2', 'T7'] = "Sem laudo" em cinza #C9CFCB; nenhum como zero; painel e legenda dizem "Sem laudo"
+OK    N5 nenhuma função sumiu: as 11 camadas de antes são alcançáveis (9 na barra, Insumos e Carência como filtro); contexto "Insumos" e link #car:PV23 abrem a função nova; Integrado do Pivô 23 com Insumos e Carência e destino e o "Ver …" de cada um
+OK    N7a Solo: ícone só com o desenho, dica e aria-label "Importar laudo de análise de solo", 32 × 32 px no mouse, o último das ferramentas no topo do mapa, à direita (junto de Selecionar área e Medir); ausente nas outras 8 funções
+OK    N7b ativar abre o mesmo "Registrar laudo" do AG-02 (importação do PDF), com Santa Rita e o talhão escolhido no mapa (T3)
+OK    N7c 390 px com toque: o ícone tem 44 × 44 px, segue nas ferramentas do topo do mapa e a página não rola de lado
+OK    N8b 390 px com toque: barra no alto, em uma linha, rolável dentro dela, 9 alvos de 44 px com o nome à vista; trocar para Custos a deixa à vista; página sem rolagem lateral
+OK    N6 sem erro de JS
+RESULTADO: 13 ok · 0 falhas
+=== fim mapa9_test.py rc=0 16:20:57
+=== mapa_faixa_test.py 16:20:57
+OK    F1 Lagoa Grande 1440: mesma altura em todas as camadas 
+OK    F2 Lagoa Grande 1440: uma linha só (≤ 56 px) 
+OK    F3 Lagoa Grande 1440: números do Solo inteiros e o 1º número de toda camada à vista 
+OK    F4 Lagoa Grande 1440: sem rolagem lateral da página 
+OK    F1 Lagoa Grande 1280: mesma altura em todas as camadas 
+OK    F2 Lagoa Grande 1280: uma linha só (≤ 56 px) 
+OK    F4 Lagoa Grande 1280: sem rolagem lateral da página 
+OK    F1 Lagoa Grande 1024: mesma altura em todas as camadas 
+OK    F2 Lagoa Grande 1024: uma linha só (≤ 56 px) 
+OK    F4 Lagoa Grande 1024: sem rolagem lateral da página 
+OK    F1 Lagoa Grande 390: mesma altura em todas as camadas 
+OK    F4 Lagoa Grande 390: sem rolagem lateral da página 
+OK    F1 Santa Rita 1440: mesma altura em todas as camadas 
+OK    F2 Santa Rita 1440: uma linha só (≤ 56 px) 
+OK    F3 Santa Rita 1440: números do Solo inteiros e o 1º número de toda camada à vista 
+OK    F4 Santa Rita 1440: sem rolagem lateral da página 
+OK    F1 Santa Rita 1280: mesma altura em todas as camadas 
+OK    F2 Santa Rita 1280: uma linha só (≤ 56 px) 
+OK    F4 Santa Rita 1280: sem rolagem lateral da página 
+OK    F1 Santa Rita 1024: mesma altura em todas as camadas 
+OK    F2 Santa Rita 1024: uma linha só (≤ 56 px) 
+OK    F4 Santa Rita 1024: sem rolagem lateral da página 
+OK    F1 Santa Rita 390: mesma altura em todas as camadas 
+OK    F4 Santa Rita 390: sem rolagem lateral da página 
+OK    S1 Planejar safra: faixa das fazendas na peça comum, com funil, rótulo e chips 
+RESULTADO: 25/25
+=== fim mapa_faixa_test.py rc=0 16:24:40
+=== mapa_cancel_test.py 16:27:25
+OK    C0 há O.S. elegível (sem realizado, A liberar ou Liberadas, com área) 
+OK    C1 antes: rótulo do P1 no Avanço = conta das abertas do cenário (95/190 ha) 
+OK    C2 "Cancelar sem execução" disponível para um perfil com a alçada AL-04 
+OK    C3 OS-0418 cancelada pelo fluxo real (perfil Proprietário) e gravada no cenário 
+OK    C4 depois: rótulo do P1 = conta das abertas sem a cancelada (95/95 ha; a OS-0418 de 95 ha não entra) 
+OK    C5 após recarregar: o mesmo rótulo (lido do cenário gravado, não de estado em memória) 
+RESULTADO: 6/6
+=== fim mapa_cancel_test.py rc=0 16:28:24
+=== map_aprov_test.py 16:28:24
+OK    1 Aprovações sem O.S.: 4 decisões (inventário, Diesel, orçamento e acesso) · 4 pendentes · 1 vence hoje 
+FALHA 2 O.S.: OS-0418 A liberar com "Liberar bloqueado: sem lote de Ureia 45%", sem "Aguardando agrônomo", "Aprovada pelo agrônomo", AP-2201 nem "Revisar versão" 
+OK    3 Mapa: sem "Decisões pendentes", "A liberar 2", cabeçalho sem "decis" e T4 "OS-0420 impedida" 
+OK    4 Meu dia: "Receber devolução" → EST.dc.html 
+OK    5 Agenda: REQ-031 "Receber devolução" → EST.dc.html 
+
+4 ok · 1 falhas ['2 O.S.: OS-0418 A liberar com "Liberar bloqueado: sem lote de Ureia 45%", sem "Aguardando agrônomo", "Aprovada pelo agrônomo", AP-2201 nem "Revisar versão"']
+=== fim map_aprov_test.py rc=0 16:28:40
+=== map_decisoes_test.py 16:29:00
+OK    1 cabeçalho e indicador: 2 a liberar (OS-0418 e OS-0430), sem "decisões" 
+OK    2 Integrado: T1 amarelo "OS-0430 a liberar" (mesma contagem do cabeçalho) 
+OK    3 Integrado T1: "NESTE TALHÃO" com Satélite, Solo, Pragas e doenças, Ordens de serviço, Insumos, Irrigação, Estádio, Colheita e produtividade, Carência e destino e Custos (um "Ver …" cada), sem O.S. nem recolher · "Ver ordens" troca para Ordens de serviço com o T1 aberto 
+OK    4 T1 (Ordens de serviço): OS-0430 A liberar · primário "Liberar para execução" · "Ajustar antes de liberar" → O.S. da OS-0430 · rodapé "Nova O.S. neste talhão" · sem revisão · nenhum destino repetido 
+OK    5 P1: OS-0418 com Liberar bloqueado pelo Estoque · primário "Ajustar antes de liberar" → O.S. da OS-0418 · OS-0417: "Receber devolução no Estoque" (EST) · sem IN-02det · nenhum destino repetido 
+OK    6 T4: OS-0420 parada só pela máquina · primário "Acompanhar OM-0233" → MA#om=OM-0233 · ordem completa → CA-01x-os0420 · sem IN-02x-os0420 · sem PL-05 · nenhum destino repetido 
+OK    7 T7: sem ordem na camada Ordens de serviço · na camada Irrigação, um só botão "Resolver conflito" (primário) → IR-03det#OS-0423:conflito 
+OK    8 Estoque: devolução da REQ-031 recebida (500 kg → 0 kg) 
+OK    9 mapa (Ordens de serviço) após a devolução: OS-0417 sem "Sobras a receber", sem custódia e sem "Receber sobras" 
+OK    10 O.S.: OS-0430 liberada direto pela tela O.S. 
+OK    11 mapa após a liberação: 1 a liberar no cabeçalho e no indicador 
+OK    12 T1 volta ao verde no Integrado; em Ordens de serviço ("Ver ordens") a OS-0430 está Liberadas, sem "Ajustar antes de liberar", sem repetir destino 
+OK    13 sem rolagem (≤ 900) 
+OK    14 "Acompanhar OM-0233" (MA#om=OM-0233): o painel da OM-0233 viva abre pela âncora 
+OK    15 Mapa: confirmação "Ana (agrônoma) aprova esta versão e Ana (gestora) libera" e liberar a OS-0430 grava CMD-42 (agrônoma) e CMD-06 (gestora), v1 (CTL-3: o Mapa repassa o perfil) 
+OK    15b Mapa com o perfil Caio: "Liberar para execução: decisão de Ana (agrônoma e gestora)." sem o botão nem "Ajustar antes de liberar" 
+OK    15c Mapa: Ana abre a confirmação da OS-0430 e troca para Caio → a confirmação fecha (sem "Caio (PCP) aprova" nem "Confirmar liberação"), fica "decisão de Ana (agrônoma e gestora)"; segue A liberar 
+OK    16 Mapa · OS-0430 com Glifosato 7,5 L/ha: "Liberar bloqueado… dose fora da bula: 1,5–3 L/ha", quem resolve Ana (agrônoma), sem "Liberar para execução" 
+
+18 ok · 0 falhas []
+=== fim map_decisoes_test.py rc=0 16:30:11
+=== map_irrig_filtro_test.py 16:30:11
+OK    1 IN-04 abre sem erro, Santa Rita, sem rolagem 
+OK    2 cabeçalho: OS-0420 e OS-0431 impedidas · 2 a liberar (OS-0418 e OS-0430), sem "decisões" 
+OK    3 barra: Integrado, Satélite, Solo, Pragas e doenças, Ordens de serviço, Irrigação, Estádio, Colheita e produtividade, Custos 
+OK    4 Integrado: T7 vermelho (irrigação em conflito); P2 amarelo (irrigação · conferir medição da passagem parcial), sem número de ordem de água 
+OK    5 camada Irrigação, painel T7: OS-0423 em conflito com a parada da B3, dono Caio (PCP), Resolver conflito → IR-03det#OS-0423:conflito e Abrir ordem → IR-03det#OS-0423 
+OK    6 camada Irrigação, painel P2: primário Conferir medição → IR-03det#OS-0394:conferir; OS-0419 Liberadas e OS-0422 Janela a definir com link ao registro · P1: OS-0418 parada por falta de insumo (link à O.S.) e primário Programar só água → IR-02#programar=P1 
+OK    7 mapa sem exceção de água: nenhum link para IN-02x-os0422 nem "política" 
+OK    8 Boa Vista: estado vazio com Cadastrar talhões → CD-01, sem talhões nem indicadores 
+OK    9 Boa Vista: cabeçalho "Boa Vista sem talhões desenhados" e sem rolagem 
+OK    10 Todas: Santa Rita desenhada (8 talhões) + aviso "Boa Vista sem geometria" 
+OK    11 cenário (camada Ordens de serviço): OS-0424 (T1-B) aparece Em execução com 20/128 ha · saldo 108 ha no T1 (sem recarregar) · P2 sem a OS-0424 e sem as ordens de água OS-0419/OS-0422 
+OK    12 cenário: sobra da OS-0417 recebida → sem custódia, sem selo "Sobras a receber" e sem "Receber sobras" 
+OK    13 Aprovações sem O.S., sem exceção de água nem PA-08: 4 decisões · 1 vence hoje 
+OK    14 Agenda (lida do estado da irrigação): sem "Renovar política"; conflito da OS-0423 com a parada da B3 com Caio e janela da OS-0422 com João 
+FALHA 15 contagens sem água: camada Ordens de serviço "Ordens" = ordens OS da tela O.S. e "Ordens abertas" do Integrado = abertas da tela O.S.; nenhum rótulo nem a tela O.S. com OS-0419/0422/0423 ['Santa Rita', ['OS-0415', 'OS-0417', 'OS-0421', 'OS-0424', 'OS-0425', 'OS-0430', 'OS-0595', 'OS-0596', 'OS-0597', 'OS-0598', 'OS-0599'], ['OS-0417', 'OS-0421', 'OS-0424', 'OS-0425', 'OS-0430', 'OS-0595', 'OS-0596', 'OS-0597', 'OS-0598', 'OS-0599'], 'Ordens 9 A liberar 3 Em execução 2 Em conferência 1', '1.165 ha Ordens abertas 8 Impedidas 2 A liberar 2', ['T1: 1 a liberar · 1 liberada · 1 em execução', 'T2: 1 a liberar · 1 em execução', 'P1: 1 a liberar · 1 em conferência', 'P2: sem ordem', 'T4: OS-0420 · em execução', 'T3: OS-0415 · encerrada', 'T7: sem ordem', 'C1: OS-0425 · liberada']]
+
+14 ok · 1 falhas ['15 contagens sem água: camada Ordens de serviço "Ordens" = ordens OS da tela O.S. e "Ordens abertas" do Integrado = abertas da tela O.S.; nenhum rótulo nem a tela O.S. com OS-0419/0422/0423']
+=== fim map_irrig_filtro_test.py rc=0 16:30:54
+=== mip_correcoes_test.py 16:30:54
+OK    1 Fazenda: AG-01 sem contexto = Lagoa Grande (igual ao Mapa) · Santa Rita escolhida no AG-01 persiste ao recarregar e abre o Mapa na Santa Rita · #VIS-051 leva AG-01 e Mapa para a Lagoa Grande 
+OK    2 AG-01 (Lagoa Grande): VIS-060 "Vistoria atrasada · prevista para 17/09 · 6 dias" com "Programar vistoria", que abre o formulário no Pivô 17 × ácaro-rajado 
+OK    3 AG-01 (Santa Rita): VIS-006 (P1 percevejo, prevista 11/09) atrasada mesmo com a VIS-014 aberta em outro alvo do P1 
+OK    4 1280 × 800: AG-01, AG-03 e AG-04 sem rolagem lateral (Próximo passo à vista) 
+OK    5 Mapa T7 (7 dias) = AG-01: "Ácaro-rajado · perto do NC" com o botão "Seguir monitorando" · sem texto de bastidor na fonte 
+OK    6 VIS-017 concluída com 2 de 16 → AG-01 "Coleta incompleta" com "Completar coleta" (MB-06#VIS-017) → o app abre o ponto 3 e reabre a coleta 
+OK    7 App: 500 em "% folíolos com ácaro" recusado (passa de 100) · tocar no ponto 01 abre "Corrigir o ponto 1" e grava 5 → 6 
+OK    8a Cancelar a OS-0440 (Inseticida B): VIS-013 "O.S. cancelada" → "Decidir controle"; Inseticida B sem trava de nº máximo, rotação citando 08/09 e não a cancelada 
+OK    8b Nova decisão: RA-0143 (DIA-009 · REC-019) e OS-0441; clique duplo não lança erro 
+OK    8c Rastreabilidade: REC-015 "Cancelado · substituído pelo REC-019"; REC-019 com OS-0441; DIA-009 abre a OS-0441; sem DIA-011 duplicado 
+OK    9 Erradicação com 999 ha no Pivô 22 (62,07 ha): trava "Área maior que o talhão (62,07 ha)" e botão bloqueado 
+OK    10 AG-01det#VIS-016: "Sincronizar agora" é botão que sincroniza ali mesmo (6 de 12 pontos) 
+OK    11 Teclado: Enter abre, Esc fecha e devolve o foco à linha VIS-013; Tab e Shift+Tab ficam dentro do painel 
+OK    12 AG-04det: "Saldo de 70 ha travado · TS sem registro", v3 "TS travado · sem registro", primário "Criar v4 com TS registrado", 1 link para a Pasteuria · AG-03det sem "Cada elo" e com 1 link para o REC-014 (o primário do cabeçalho; AÇÃO v3.1) 
+RESULTADO 14/14
+=== fim mip_correcoes_test.py rc=0 16:32:31
+=== carencia_test.py 16:32:31
+OK    motor JS (jsc/node) executou sem erro
+OK    unit 1a duas aplicações ativas em 20/09: a ANTERIOR (abamectina 10/09 → 24/09) determina o prazo, não a mais recente (acetamiprido 19/09 → 22/09)
+OK    unit 1b em 24/09 o prazo está cumprido, mas o rótulo diz "destino a avaliar" (não é conforme)
+OK    unit 1c liberar a colheita OS-C (janela 21–22/09) é impedido no comando, com motivo (até 24/09, OS-A) e dono
+OK    unit 1d osc_liberar recusa com o mesmo motivo; a O.S. continua A liberar
+OK    unit 1e Rever programação: janela a partir de 24/09 → liberar passa; histórico da reprogramação guardado
+OK    unit 2a parcela A: carência em curso pela aplicação apontada em T1-A
+OK    unit 2b parcela B: O.S. planejada e O.S. cancelada sem apontamento não geram carência (planejada só como previsão)
+OK    unit 2c talhão T1: rótulo indica que só T1-A está restrita
+OK    unit 2d apontamento parcial SEM parcela (30 de 60 ha): faixa não identificada → prazo vale para o pivô todo
+OK    unit 3a prazo cumprido (05/09 + 7 = 12/09) e colheita em 22/09: nenhum motivo de carência
+OK    unit 3b sem destino → Não avaliado; UE sem regra carregada → Pendente; mercado indefinido → Pendente
+OK    unit 3c destino que exige laudo, sem laudo → Pendente com dono (Qualidade)
+OK    unit 3d mercado interno: LMR ANVISA vigente de tebuconazol em mamão (1 mg/kg) e Conforme só "no escopo"
+OK    unit 3e nenhuma avaliação tem rótulo "Pode exportar"
+OK    unit 4a lote de 18/09 (antes da aplicação de 24/09) não é contaminado retroativamente
+OK    unit 4b lote de 30/09 colhido dentro da carência (último dia 07/10) → Não conforme com motivo e dono
+OK    unit 4c pós-colheita liga-se só ao lote tratado: tiabendazol no lote de 18/09 (uso pós-colheita a conferir), não no de 30/09
+OK    unit 4d colheita apontada em carência é registrada (não impedida) e marcada para conferência
+OK    unit 4e O.S. de colheita recebe o selo "Colhido em carência · conferir" e dono Ana
+OK    unit 5a mistura com lote colhido em carência continua Não conforme mesmo com laudo "não detectado" (sem diluição)
+OK    unit 5b divisão herda origem e restrição do lote de origem
+OK    unit 5c troca de destino MI-BR → UE reavalia (Conforme no escopo → Pendente) e preserva a avaliação anterior no histórico
+OK    unit 5d laudo da mistura não vale para a divisão de outro lote (escopo da amostra)
+OK    unit 6a apontamento ainda no aparelho já conta: carência até 29/09 + pendência "aguardando sinal"
+OK    unit 6b colheita OS-K impedida pela aplicação não sincronizada
+OK    unit 6c O.S. de defensivo em execução com saldo: dados insuficientes (pode haver aplicação não apontada) e colheita impedida
+OK    unit 6d produto sem uso registrado na cultura e carência não conferida: nunca "cumprida"; lote Pendente
+OK    unit 6e colheita de 05/09 exige histórico desde 22/08, antes do início do registro (01/09): pendente (caderno de campo)
+OK    unit 6f apontamento com data depois da consultada (24/09 > 23/09) é fato registrado: o talhão já mostra a carência (até 08/10)
+OK    unit 7a liberar aplicação: aviso preventivo de conflito com a colheita (OS-CO) até 09/10, sem bloquear
+OK    unit 7b iniciar colheita liberada antes da aplicação também é impedido (comando)
+OK    unit 7c registrar a colheita feita (fato) nunca é impedido: apontamento aceito e marcado para conferência
+OK    unit 8a produto fora do cadastro aplicado: "dados insuficientes" (nunca "sem aplicação") e liberar a colheita impedido com dono
+OK    unit 8b registrar a carência conferida (14 dias): valor inválido recusado; o prazo passa a contar (até 05/10) e a colheita segue impedida pela carência
+OK    unit 8c prazo provisório vencido (7 dias não conferidos): liberar a colheita recusado, motivo "não conferidos na bula"
+OK    unit 8d carência conferida (10 dias → 15/09): liberar passa; a conferência fica registrada com quem e quando
+OK    unit 8e mercado interno: sem laudo Conforme no escopo; laudo 5,0 > LMR 1,0 → Não conforme; 0,4 → Conforme; unidade µg/kg → Pendente; resíduo sem aplicação apontada → Pendente
+OK    unit 8f mistura com laudo próprio abaixo (0,03) de origem acima (0,2 > 0,05 sintético): Não conforme, motivo cita o lote de origem
+OK    unit 8g parte de divisão com laudo próprio abaixo: herda o resultado acima da origem (Não conforme)
+OK    unit 8h mistura sem laudo próprio: Não conforme no destino sintético; no mercado interno (LMR 1,0) o 0,2 da origem não impede
+OK    unit 8i cancelada com apontamento em 20/09: carência até 03/10 + pendência "cancelada com apontamento"; cancelada sem apontamento: nada
+OK    unit 8j colheita OS-H em execução: selo "Carência até 05/10", dono Ana e prazo "suspender novos turnos"; apontamento aceito
+OK    unit 8k duas colheitas (OS-0505 e OC-10505) geram dois lotes distintos (LC-0505-1 e LC-OC10505-1)
+OK    unit 8l aplicação 20/09 + 7 dias: rótulo "carência até 26/09"; colheita em 26/09 impedida, em 27/09 liberada
+OK    unit 8m UE (regra não carregada): liberar impedido com motivo e dono; mercado interno conforme: liberado; apontamento tardio de 20/09 → Não conforme e liberação suspensa
+OK    motor JS (jsc/node) executou o JS do app sem erro
+OK    app A1 app: cartão da colheita OS-K mostra "Carência até 28/09 · colheita impedida" e não oferece Iniciar turno
+OK    app A2 app: iniciar turno da colheita recusado com motivo e dono; a O.S. continua Liberadas
+OK    app A3 app: ordem que não é colheita segue o fluxo normal (Iniciar turno)
+OK    mapa real da Lagoa Grande pronto
+OK    Carência e destino é filtro (Mostrar) de Colheita e produtividade, fora da barra
+OK    link #car:PV23 abre Colheita e produtividade › Carência e destino com o Pivô 23 selecionado; rótulo do pivô "carência até 26/09" = último dia em carência (texto, não só cor)
+OK    painel: prazo determinante, faixa não identificada vale para o pivô, data consultada e atualização
+OK    uma ação primária no estado: Ver restrição → OS-0508
+OK    faixa de números e aviso "prazo cumprido não é conformidade"
+OK    painel sem parágrafo explicativo (nenhum texto com 14 palavras ou mais num elemento)
+OK    consultado em 30/09: prazo cumprido e destino a avaliar (sem selo de conforme/exportar)
+OK    PV06: OS-0504 liberada aparece como previsão (não conta) com a colheita impedida até 07/10 se aplicada em 24/09
+OK    PV06: painel sem parágrafo explicativo (previsão e lotes em frases curtas)
+OK    PV06: lotes colhidos com a avaliação do destino (LC-0510-1 conforme no escopo do mercado interno; LC-0510-2 não conforme no mercado sintético)
+OK    Integrado: linha "Carência e destino" com Ver carência
+OK    Ver carência abre a camada sem perder o talhão
+OK    mapa sem erro de JavaScript
+OK    colheita OS-0440 (Pivô 23, a partir de 25/09): Liberar bloqueado com motivo (OS-0508, carência até 26/09) e quem resolve (colheita a partir de 27/09)
+OK    sem botão Liberar; Rever programação junto ao impedimento; selo "Carência até 26/09"
+OK    o próprio comando recusa a liberação (não é só a cor do mapa)
+OK    mapa: com a colheita impedida, a ação primária do Pivô 23 vira Rever programação → OS-0440
+OK    reprogramar para 26/09 ainda cai na carência: continua impedida
+OK    recuperação: colheita a partir de 27/09 libera o comando e a origem guarda a reprogramação
+OK    OS-0440 liberada depois de reprogramada
+OK    colheita OS-0466 após azoxistrobina (7 dias não conferidos, 05/09): Liberar bloqueado e o formulário "Registrar carência conferida"
+OK    recuperação: carência conferida (10 dias, até 14/09) registrada no cenário e a colheita pode ser liberada
+OK    OS-0504 liberada: aviso preventivo do conflito com a colheita do mamão (até 07/10) sem bloquear o início
+OK    OS-0504 executada: apontamento de 24/09 em 62,79 ha
+OK    colheita apontada em carência no Pivô 19 (app): registrada, com selo "Colhido em carência · conferir" e dono Ana
+OK    PV06 após aplicar a OS-0504: carência até 07/10; o lote LC-0510-1 (colhido em 16/09) não é contaminado retroativamente
+OK    PV19: carência até 05/10 e o lote de 24/09 aparece Não conforme
+OK    mapa e O.S. sem erro de JavaScript
+OK    CO-06 abre o lote do link: Não conforme por colheita em carência, com aplicação, prazo e quem resolve
+OK    LC-0510-1: conforme só no escopo do mercado interno (aplicação posterior não conta)
+OK    liberação comercial do LC-0510-1 registrada só para o mercado interno, no escopo avaliado
+OK    troca de destino reavalia (UE: regra não carregada → Pendente) e preserva a avaliação anterior no histórico
+OK    destino UE: a liberação anterior fica suspensa e o comando de liberar não aparece (impedido com motivo)
+OK    mistura LM-39-01: genealogia com as duas origens, pós-colheita herdado e requisito do comprador separado da lei
+OK    CO-06 sem erro de JavaScript
+OK    link #car vindo da CO-06 abre Colheita e produtividade › Carência e destino na fazenda e com o talhão que já estavam (Santa Rita, T7)
+OK    link #car sem erro de JavaScript
+OK    celular: mapa abre a camada no Pivô 23 (texto presente)
+OK    celular: a avaliação do lote não transborda o contêiner (sem largura fixa) e sem erro
+RESULTADO: 90/90 verificações
+=== fim carencia_test.py rc=0 16:34:43
+=== talmapa_test.py 16:34:43
+OK  1 IN-04 na Lagoa Grande: mapa MapLibre pronto, sem erro de JavaScript · [True, '', '']
+OK  2 selo visível "Demonstração sintética" e, na dica ⓘ da camada, "pivôs, imagem e índices fictícios"; mapa rotulado; sem "imagem real", "Sentinel-2 real" nem "KML do proprietário" · ['A\nProprietário · todos os papéis (teste)\nAna · Gestora e RT\nCaio · PCP\nRui · Almoxarife e expedição\nPaula · Conferência\nZé · Mecânico\nOtávio · Manutenção (PCM)\nJoão · Irrigante (eletricista NR-10)\nIgor · Produção\nDora · Comercial\nMarta · Qualidade\nMapa\nMapa da fazenda\nOS-0507 impedid
+OK  3 23 pivôs no mapa = dados_lagoa_fonte (id, ha, lon, lat) e 23 marcadores · [23, 23]
+OK  4 tmAneis: 23 contornos (círculos), nome "Pivô n", área ≈ ha (< 1 %) · [23, 0.0057961475684788185, [['PV01', 'Pivô 1', 30.09315289957621]]]
+OK  5 tmSobrepoe: quadrado de 200 m no centro do Pivô 5 acusa o Pivô 5; ao norte, fora da grade, nada · [['Pivô 5 (4,0 ha)'], []]
+OK  6 talhão novo desenhado fora dos pivôs: tmValida sem erro, grava LGT01 com a área; nome repetido e sobreposição são recusados; 24 contornos · [{}, {'id': 'LGT01', 'ver': 'v1', 'ha': 2.27, 'nome': 'Talhão sintético 1'}, {'nome': 'Já existe Pivô 1 na Lagoa Grande. Use outro nome.', 'geo': 'O contorno sobrepõe Pivô 5 (4,0 ha): ajuste o desenho para não contar a mesma área duas vezes.'}]
+OK  7 camada Satélite: legenda sintética; pixels (lagoa_s2.json): Pivô 12 com lavoura velha em 10/09 (NDVI > 0,5) e solo exposto em 25/09 (< 0,25); cena rotulada sintética · [{'ok': 1, 'n': 128508, 'a': 0.6358265179677842, 'b': 0.13803717472119248, 'proc': 'Demonstração sintética · imagem e índices gerados, sem dado real'}, 'A\nProprietário · todos os papéis (teste)\nAna · Gestora e RT\nCaio · PCP\nRui · Almoxarife e expedição\nPaula · Conferência\nZé · Mecânico\nOtávio
+OK  8 celular 390 px: mapa pronto, rótulo visível, sem rolagem horizontal, sem erro · [True, '']
+RESULTADO: 8/8
+=== fim talmapa_test.py rc=0 16:35:18
+=== filtros_cultura_test.py 16:36:19
+OK    F1 Colheita, Recebimento e Estoque de produto: Cultura na faixa; "Soja" deixa só linhas de soja (menos que antes); "Todas" volta tudo
+OK    F2 Colheita: o Talhão segue a Cultura (Café → só C1) e "T2" deixa só linhas do T2
+OK    F3 O.S. › Tabela agrupada por Talhão: o total de O.S. distintas à vista ("N O.S. · X ha · a O.S. de vários talhões aparece em cada um e conta uma vez no total")
+OK    F3 O.S.: trocar a fazenda tira o talhão do filtro com aviso, pelo nome ("Pivô 4"), não pelo ID
+OK    F5 Pragas e doenças: Cultura com as culturas que têm vistoria na fazenda; "Feijão" deixa só as vistorias de feijão (lista e chip "Todas"); o Talhão segue a Cultura
+OK    F5 Pragas e doenças: Talhão "Pivô 4" deixa só as vistorias dele; trocar para Santa Rita tira o talhão do filtro com aviso pelo nome
+OK    F5 Pragas e doenças: abrir VIS-011 (soja) pelo link com "Feijão" no filtro tira só a Cultura e mostra a linha
+OK    F6 Cultura e Talhão voltam ao recarregar e ao sair e voltar (Colheita 1440 e 390 px, Recebimento, Estoque de produto)
+OK    F4 390 px: listas da faixa com alvo ≥ 44 px e sem rolagem lateral
+OK    F4 sem erro de JS
+RESULTADO: 10 ok · 0 falhas
+=== fim filtros_cultura_test.py rc=0 16:41:25
+=== componentes_test.py 16:41:25
+OK    1 viewport do aparelho · casca e App de campo com a largura do celular (360 px), sem desenho em 980 px reduzido 
+     (informativo, pendência os_campo.py) OS-0424-app ainda desenha em 360 px no celular
+OK    2 matriz 7 dimensões × SAF, CMP, O.S., PA · título, comando principal e etapa atual visíveis/alcançáveis, barra lateral recolhida (68 px, ao lado, ícones e avatar alcançáveis, sem expandir), nada cortado fora de região rolável, sem rolagem lateral da página, fonte ≥ 10 px, sem escala global 
+     (informativo) área útil, menu e etapa: {'SAF 360x800': (660, [68, 'static'], 'Etapa 1 de 4 · Escolha a'), 'OS 360x800': (567, [68, 'static'], ''), 'SAF 800x360': (210, [68, 'static'], 'Etapa 1 de 4 · Escolha a'), 'OS 800x360': (210, [68, 'static'], ''), 'SAF 768x1024': (874, [68, 'static'], 'Etapa 1 de 4 · Escolha a'), 'OS 768x1024': (874, [68, 'static'], ''), 'SAF 1024x768': (597, [68, 'static'], '1 Escolha a safra · etap'), 'OS 1024x768': (668, [68, 'static'], ''), 'SAF 1280x720': (565, [68, 'static'], '1 Escolha a safra · etap'), 'OS 1280x720': (623, [68, 'static'], ''), 'SAF 1440x900': (745, [68, 'static'], '1 Escolha a safra · etap'), 'OS 1440x900': (803, [68, 'static'], ''), 'SAF zoom200': (300, [68, 'static'], 'Etapa 1 de 4 · Escolha a'), 'OS zoom200': (303, [68, 'static'], '')}
+OK    3 barra lateral · sempre recolhida (68 px, ao lado, conteúdo com o restante) em 360, 768, zoom 200 %, 1024 e 1440, na 1ª visita e com "aberto" guardado; um ícone com nome por módulo, sem botão de expandir nem fundo; ícones e avatar do perfil alcançáveis; o toque no conteúdo não muda a barra e a escolha guardada não muda 
+     erros JS (matriz): []
+
+RESULTADO: 3 ok · 0 falhas (matriz)
+=== fim componentes_test.py rc=0 16:45:47
+=== acao_unica_test.py 16:47:18
+OK    1 SAF · faixa leva à etapa: 4 cartões-botão, palavra do estado (concluída/etapa atual/pendente), cursor de ação; clicar na etapa 1 vai a ela e na 2 volta; etapa 3 travada sem safra não navega e diz o motivo na dica (recusa do DS); os cartões recebem foco pelo Tab; nenhuma seta ‹ › solta 
+OK    2b SAF · a tabela de cultivos estica até a área de ações (≥ 300 px, todas as linhas cabem ou rolam dentro dela) e a área fica no pé do conteúdo (≤ 40 px do fim, altura ≤ 140 px), sem rolagem dupla 
+OK    2 SAF · no máximo uma primária e uma rota de avanço em cada estado (sem safra, falta de plano, etapas 3 e 4), sem cópia do mesmo comando; Criar safra secundária 
+OK    3 SAF · sem "Adicionar cultivo" (0); "Planejar ›" do T3 na tabela "Talhões e cultivos" abre o painel sem trocar de etapa; Esc pede confirmação e "Continuar editando" mantém o texto digitado 
+OK    4 SAF · falta de plano: sem descrição visível na área de ações (15/10), "Aplicar plano em 4 cultivos" é a primária (resolver) e "Dimensionar operações ›" o único avanço, secundário; avançar leva à etapa 3 sem aplicar plano (as linhas dos cultivos iguais antes e depois e ainda "Aplicar plano em 4 cultivos" na volta) 
+OK    5 SAF · safra nova sem cultivos: etapa 2 sem primária e sem avanço, nota "Nenhum cultivo nesta safra…"; T7 e C1 Perene sem Planejar nem Vincular; T1 Livre 152 ha a partir de 21/02/2027 
+OK    6 SAF · filtro sem resultado: 0 linhas, "Limpar…" dentro da lista (secundário) e a área mantém o passo da etapa; no máximo uma primária 
+OK    7 SAF · "Corrigir cultivos" na revisão leva à etapa 2 com o foco no 1º cultivo sem plano e "Aplicar plano" + "Voltar à revisão ›"; depois de aplicar, volta direto à etapa 4 na mesma posição de rolagem (±4 px), com a busca "o" e a pendência recalculada (1280×640) 
+OK    8 SAF · avançar só troca de etapa: Safrinha 2027 na etapa 4 tem "Enviar para cotação" como comando (não avanço); 4→2→4 pela área não envia (nada gravado, "ainda não enviada") e não mostra "Abrir Compra de insumos" 
+OK    9 sem erro de JS (SAF) 
+
+RESULTADO: 10 ok · 0 falhas (saf)
+=== fim acao_unica_test.py rc=0 16:50:50
+=== assinatura_test.py 16:50:50
+OK    A16 navegação: Configurações é o último módulo da barra (antes de Outros acessos), marcado nesta tela; o ícone abre a tela de entrada e o cartão "Assinatura" abre "Assinatura e cobrança"; Mapa segue link único 
+OK    A7a 23/09: selo Ativa; resumo Completo · 2.570,23 ha de 2.600 ha · R$ 5.140,46 (set/2026 fecha em 30/09) · próxima 01/10/2026 
+OK    A11a uma primária (verde cheio) em repouso: Alterar plano ou área 
+OK    A14a as 3 grades (uso, faturas, planos) têm ordenação e filtro por coluna; um campo de busca só, o da 1ª grade, para as 3 
+OK    A14b unidade na célula: "312 ha" no uso, "R$ 2.330,00" nas faturas, total 2.570,23 ha no rodapé 
+OK    A14c filtro rápido por fazenda e ordenação padrão por área decrescente (1ª linha T1 312 ha) 
+OK    A13a CF-05 sem cultura e sem safra (nenhum nome de cultura nem 2026/27) 
+OK    A18a nenhum campo de cartão, conta ou documento no CF-05 
+OK    A8a sem faixa de cobrança no próprio CF-05 
+OK    A4a prévia hoje → depois: R$ 5.140,46 → R$ 3.855,35, −R$ 1.285,11/mês, R$ 18,00/ha·ano, início 01/10/2026, sem fidelidade 
+OK    A5 recusa com o motivo: abaixo da medida (100 ha) e acima de 5.000 ha; nada agendado 
+OK    A4b aceite (clique duplo): um contrato v3 agendado; o 2º clique devolve o mesmo recibo ACE-0001; o botão some (form igual ao agendado) 
+OK    A4c desfazer antes de 01/10 volta ao contrato v2 (com recibo DES-0001: desfazer também registra quem agiu, revisão PLAT achado 4) 
+OK    A10a talhão de 50 ha no CD-01: CF-05 mede 2.620,23 ha, avisa 20,23 ha acima do contratado (sem cobrança-surpresa: prévia R$ 5.200,00) e a primária vira Ampliar área contratada 
+OK    A10b Ampliar abre a prévia com 2.700 ha: R$ 5.200,00 → R$ 5.240,46 
+OK    A10c BO-02 mede ao vivo: Grupo Santa Rita 2.620,23 ha e mensalidades vigentes R$ 6.338,00 
+OK    A7b 01/10: set/2026 fecha com a medida da abertura (2.570,23 ha; 2.450,23 ha no fechamento, B1 inativo) e vence hoje; primária Pagar fatura; out/2026 já no Essencial 
+OK    A4d a fatura de set/2026 fechou no Completo (mudança nunca retroage); memória com a medida do período (abertura × fechamento), mín(medida; contratada), quem aceitou o contrato e "pela área contratada seria" 
+OK    A7c 06/10: Em atraso · 5 dias 
+OK    A8b faixa amarela em OS, EST e CD-01 (sem cenario.js): "vencida há 5 dias (data simulada da cobrança: 06/10)", link de texto Pagar fatura → CF-05#pagar 
+OK    A8c nenhuma faixa no app (MB-01), na plataforma (BO-02), no onboarding (ON-01), no portal do parceiro (PT-01) nem no CF-05 
+OK    A7d 16/10: Inadimplente · 15 dias 
+OK    A8d faixa vermelha na O.S.: suspenso ampliar a área, nada apagado, trabalho de campo segue 
+OK    A9a inadimplente: liberar a OS-0430 (mesmo comando da tela, osc_liberar) segue 
+OK    A9b Incluir talhão recusa antes de abrir, com motivo e caminho 
+OK    A9c editar a área cultivável de um talhão existente salva (corrigir o fato não é ampliar o contrato) 
+OK    A9d Reativar B1 recusado ao salvar (CD-01) 
+OK    A9e Reativar no detalhe (CD-01det) também recusado ao salvar 
+OK    A9f Desenhar talhão novo recusa antes de abrir o desenho 
+OK    A9g importação: a linha "Talhão novo" é recusada com o motivo; com ela em "Não importar", o contorno novo do Pivô 1 é importado 
+OK    A7e o atalho da faixa (CF-05#pagar) abre a fatura aberta 
+OK    A18b nenhum campo de cartão, conta ou documento no painel de pagamento (forma escolhida numa lista) 
+OK    A6/A7f pagar sem forma é recusado; com Pix (clique duplo) paga uma vez: o 2º clique devolve o mesmo recibo PAG-0001; o evento diz quem pagou; volta a Ativa 
+OK    A18c Baixar fatura (CSV): números da cópia (2.570,23 ha · R$ 5.140,46; fechamento 2.450,23 ha; mesmo depois de editar o T4) e cobrança simulada 
+OK    A9h depois de pagar, Incluir talhão volta a abrir o formulário (Cadastrar talhão); faixa some 
+OK    A17a contestada: em 16/10 o selo segue Ativa, a fatura está Em contestação e a primária não é Pagar fatura 
+OK    A17b resolver com crédito: set/2026 volta a A vencer (vence 21/10, sem reescrever o valor) e out/2026 mostra o crédito de R$ 100,00 
+OK    A17c (revisão PLAT, achado 1) fatura já contestada e resolvida: sem "Contestar fatura" no painel; eventos dizem quem contestou e quem resolveu 
+OK    A20 medida 5.170,23 ha: primária Pedir proposta empresarial (não Ampliar, que seria sempre recusado); clique duplo registra um pedido (PRO-0001); a primária fica desabilitada e o BO-02 mostra o pedido 
+OK    A15a 390 px: sem rolagem lateral da página, título e primária alcançáveis, resumo 2 × 2 
+OK    A15b 390 px: painel do plano dentro da tela, com fechar e primária alcançáveis 
+OK    A15c 390 px: erro (100 ha) junto ao campo; aceite com clique duplo registra um contrato 
+OK    A15d 390 px: Pagar fatura → cartão simulado → clique duplo paga uma vez (mesmo recibo) 
+OK    A15e 390 px: faixa vermelha curta (≤ 60 px de altura): fatura vencida, o que está suspenso e o link Pagar fatura; sem rolagem lateral 
+OK    A0 sem erro de JavaScript nas telas visitadas 
+
+RESULTADO: 45 ok · 0 falhas
+=== fim assinatura_test.py rc=0 16:52:44
+=== credito_menu_test.py 16:52:49
+OK  C1 1440: o Crédito na barra abre a tela de entrada com um cartão por visão da GE-08
+OK  C2 1440 Ficha do grupo: só a parte do cartão (Ficha do grupo · Bens e avaliações), com indicadores pertinentes e "‹ Crédito"
+OK  C2D 1440: documentos acessíveis pela ficha
+OK  C2F 1440 Ficha do grupo: retorno preserva foco no cartão de origem
+Traceback (most recent call last):
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/credito_menu_test.py", line 44, in <module>
+    espera("location.href.indexOf(%s)>=0&&[...document.querySelectorAll('main h2,main h3')].some(h=>h.offsetParent&&h.innerText.trim()===%s)&&[...document.querySelectorAll('a')].some(a=>a.offsetParent&&/Crédito/.test(a.innerText)&&/MOD-CRE/.test(a.getAttribute('href')||''))" % (json.dumps(href.split('#')[1]), json.dumps(VISOES[i])))
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/credito_menu_test.py", line 27, in espera
+    if J("(()=>{try{return !!(%s)}catch(e){return false}})()" % cond): return True
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/comp_lib.py", line 50, in js
+    r=self.call('Runtime.evaluate',{'expression':expr,'awaitPromise':True,'returnByValue':True})
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/comp_lib.py", line 47, in call
+    if 'error' in m: raise RuntimeError(f"{method}: {m['error']}")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Runtime.evaluate: {'code': -32000, 'message': 'Inspected target navigated or closed'}
+=== fim credito_menu_test.py rc=1 16:52:59
+=== demanda_estado_nav_test.py 16:52:59
+OK    · K1 custódia é suprimento: entregar 8.000 kg de NPK à OS-0425, cancelar a OS-0425 e receber a devolução — Planejar safra NPK "14.800 kg", o total e a primária iguais em todos os passos; Mapa C1 "Falta 14.800 kg" (no 853a6a8: 22.800 kg, +R$ 27.200)
+OK    · K3 cancelar com material entregue (achado 7): a confirmação diz que os 8.000 kg ficam em custódia, o aviso não diz "nada tinha sido entregue", e o painel da OS-0425 cancelada mostra "Custódia a devolver: 8.000 kg de NPK 20-05-20" com o link "Receber devolução" (Estoque); depois da devolução o aviso some
+OK    · K2 devolver a sobra não muda a compra: os 500 kg de MAP com a OS-0417 (em conferência) já contam ("+ 500 kg em custódia sem uso" na memória) — MAP "79.500 kg" antes e depois, total igual, sem "Acima da demanda" no Planejar safra nem na Compra (no 853a6a8: 80.000 → 79.500 e aviso de 500 kg)
+OK    · K2b a Compra lê a mesma conta viva (integração V56 × CTL-4): depois da devolução, "Estoque apto" 90.500 e "Necessidade" 79.500 na SOL-2026-07, e a memória sem a custódia (antes: 90.000 e "+ 500 kg em custódia" da foto da versão)
+OK    · Q1 NF 4533 inteira em quarentena (achado 2, S2): Planejar safra Semente de soja 58 W "0 kg" com "Qualidade pendente · 15.456 kg", total e primária iguais; a memória diz a falta condicionada e a decisão; a Compra mostra a mesma qualidade pendente sem compra (no 853a6a8: 15.456 kg · Complemento · +R$ 146.832 · "Enviar para cotação")
+OK    · Q1b aceite CTL-4-FIX item 2 (integração V56): a NF em quarentena sai do "A receber" da Compra (0) e a linha não diz "Coberto"; a falta condicionada traz motivo (o da conferência), responsável, prazo e decisão no Planejar safra, na Compra e no Mapa
+OK    · Q2 laudo reprovado com o motivo: aí sim a Semente de soja 58 W vira falta firme de 15.456 kg ("Complemento") e a primária pede o envio; a memória diz "Reprovado: 20.000 kg do lote S58-0926 … laudo LAB-2: germinação 71%"
+OK    · Q2b com o laudo reprovado a Compra mostra a mesma necessidade (15.456) e "Complemento · 15.456 kg", com quem envia (o Planejar safra), em vez de "—" calado
+OK    · Q3 laudo liberado: coberto pelo estoque (32.000 kg aptos), sem qualidade pendente e com o total da semente
+OK    · A7 turno fechado no app sem sinal (achado 4, S3): Safrinha 2027 e Safra 2026/27 com o mesmo Fungicida A, total e primária antes e depois; a memória da OS-0421 usa os 65 L em custódia que a O.S. mostra; com o sinal, a Safrinha segue igual (no 853a6a8: 23,0 → 47,5 L e a Safra 2026/27 pedia 0,5 L)
+OK    · R1 reserva que sobra (achado 5, S3): entregar 64 L à OS-0424 (REQ-039 reservou 65 L) não muda a Safrinha 2027 — Fungicida A, total e primária iguais (no 853a6a8: 22,98 → 23,98 L, +R$ 145)
+OK    · F1 reserva entre fazendas (achado 3, S3): liberar a OS-0501 (Lagoa Grande) com lotes do Almox. defensivos da Santa Rita move a compra entre as fazendas sem contar duas vezes (Glifosato SR 20,0 → 167,9 L e LG 293,3 → 145,4 L; a soma não muda) e entregar não muda nenhuma das duas (no 853a6a8: LG não mudava na liberação e baixava na entrega)
+OK    · D3 SU-03det e MB-05 da mesma fonte (achado 6, S3): na semente "Sem pendência de compra" nas duas; com a devolução bloqueada as duas mostram "Qualidade pendente · 5,5 L" como o Planejar safra; com o laudo reprovado, "Pendência de compra · 5,5 L" no SU-03det e "Conflito de reserva" com "Registrar divergência" no MB-05, o mesmo número do Planejar safra (no 853a6a8: "sem pendência de compra" fixo da semente)
+OK    · E1 sem erro JS nas telas abertas (Planejar safra, Estoque, O.S., Compra, Mapa)
+
+RESULTADO: 14 ok · 0 falhas
+=== fim demanda_estado_nav_test.py rc=0 17:07:24
+=== demanda_unica_nav_test.py 17:07:24
+FALHA · N1 Planejar safra › etapa 4 (2026/27): R$ 428.305,00 · 14 insumos a comprar · SOL-2026-07 em cotação (a mesma conta da Compra) · Valor da necessidade líquida R$ 428.483,50 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação
+OK    · N2 compra em dobro desfeita: Fungicida A "0,0 L · Coberto pelo estoque" (nunca 145,2 L); compra a menos desfeita: MAP "79.500 kg" em 18/10/2026 e Ureia da OS-0418 "1.140 kg" em 24/09/2026 · coluna "Antes de hoje sem O.S." (nunca "Já realizado")
+OK    · N3 memória do Fungicida A: a OS-0421 conta pelo pendente (15 L), a reserva da OS-0424 conta uma vez e o plano entra só na parte sem O.S.
+FALHA · N4 Compra › etapa 2 lê a mesma demanda: total R$ 428.305,00, Ureia 1.140 kg e a memória do MAP igual, linha a linha, à do Planejar safra (com a OS-0420 e a OS-0431) · ('Total\nR$ 428.483,50', 'Ureia 45% 1.140 0 0 1.140 kg 24/09/2026 3,10 R$ 3.534,00 A cotar', ['Estoque apto hoje: 90.000 kg + 500 kg em custódia sem uso nas O.S., a devolver ao Estoque (500 kg · REQ-031 · OS-0417 (em conferência)) = 90.500 kg', '23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 250,00 kg/ha × 70 ha = 17.500,0 kg → saldo 73.000 kg', '24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 250,00 kg/ha × 102 ha = 25.500,0 kg → saldo 47.500 kg', '15/10/2026 · T1-A · Plantio
+FALHA · N5 Mapa › Insumos (Santa Rita, safra toda): 19 produtos · 14 faltam · 3 a receber · 2 estoque cobre; T4 "MAP 11-52 · 17.500 kg" com "Falta 79.500 kg"; T1 Fungicida A "Estoque cobre"; a fonte (dica ⓘ da camada) diz que é a necessidade líquida da Safra 2026/27, a mesma do Planejar safra e da Compra · ('Produtos 20 Faltam 15 A receber 3 Estoque cobre 2', 'T4 · 204 ha · Soja 58 W · 30 de 204 ha plantados (DAP 1–2) · Santa Rita · falta MAP 11-52 · Abrir talhão › · × · INSUMOS · Período · Safra toda (filtro Insumos das Ordens de serviço) · Estoque · compartilhado da fazenda · não é dividido por talhão · Semente de soja 58 W · 3.640 kg · Pedido a receber · PC-090 · 05/10 · a partir de 23/09 · T4 · OS-0420 · Plantio e adubação de base · precisa de 27.45', 'T1 · 312 ha · Pousio · soja prevista em 2
+OK    · N6 Mapa › Insumos (Lagoa Grande): PV13 Glifosato "Falta 293 L" — o estoque da Santa Rita não cobre outra fazenda
+OK    · R1 recusa: cancelar a OS-0418 sem motivo é recusado ("Informe o motivo do cancelamento."), a ordem segue A liberar e a Ureia continua 1.140 kg na demanda
+FALHA · I1 OS-0418 cancelada na tela O.S. → Planejar safra recalcula na hora: Ureia sai da demanda (0 kg; a linha fica só porque a SOL ainda a pede, U1); R$ 424.771,00 · 13 insumos a comprar · ('OS-0418 cancelada sem execução. Nenhum insumo estava reservado. Cancelada por Ana (gestora).', '0 kg', 'Valor da necessidade líquida R$ 424.949,50 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação · 1 insumo acima da demanda')
+FALHA · I2 Mapa › Insumos acompanha: 18 produtos · 13 faltam; P1 sem Ureia · ('Produtos 19 Faltam 14 A receber 3 Estoque cobre 2', 'P1 · 95 ha · Feijão BRS Estilo · DAP 80 · R5 · Santa Rita · sem plano na safra · Abrir talhão › · × · INSUMOS · Período · Safra toda (filtro Insumos das Ordens de serviço) · Estoque · compartilhado da fazenda · não é dividido por talhão · REQ-031 · OS-0417 · MAP 11-52 · em custódia · reservado 5.000')
+OK    · U1 a SOL-2026-07 ainda pede os 1.140 kg de Ureia da OS-0418 cancelada: a linha fica "0 kg · Acima da demanda · 1.140 kg · SOL-2026-07", a faixa conta "1 insumo acima da demanda" e a primária é "Atualizar SOL-2026-07" (nunca comprar a mais em silêncio)
+OK    · U2 atualizar: a SOL-2026-07 perde só a Ureia (toast com 1.140 kg e R$ 3.534,00), a linha some e a primária volta a "Abrir Compra de insumos ›"
+FALHA · U3 a Compra lê a versão nova da SOL-2026-07: total R$ 424.771,00 (o mesmo do Planejar safra) e nenhuma linha de Ureia · ('Total\nR$ 424.949,50', False)
+OK    · U4 repetição: com a SOL já atualizada não há o que atualizar; a primária segue "Abrir Compra de insumos ›"
+FALHA · P1 repetição: recarregar duas vezes dá a mesma conta (R$ 424.771,00) e não duplica a ordem na memória (OS-0421 uma vez pelo pendente) · ('Valor da necessidade líquida R$ 424.949,50 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação', 'Valor da necessidade líquida R$ 424.949,50 · 14 insumos a comprar · solicitação SOL-2026-07 em cotação', ['Estoque apto hoje: 545 L (inclui 65 L reservados)', '23/09/2026 · T1+T2 · OS-0421 · Fungicida 1ª aplicação · 0,50 L/ha × 160 ha − 65 L em custódia = 15,0 L → saldo 530 L', '24/09/2026 · Reserva REQ-039 · OS-0424 (T1-B) · 65,0 L da mesma demanda, contados uma vez'])
+OK    · P2 repetição: a OS-0418 cancelada não oferece cancelar de novo; o comando repetido é recusado e a demanda não muda
+FALHA · P3 restaurar a demonstração volta aos números da semente (R$ 428.305,00 · 14 insumos) · Valor da necessidade líquida R$ 428.483,50 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação
+OK    · V1 entrega comum no Estoque (8.000 kg de NPK da REQ-040 para a OS-0425) não muda a compra: NPK "14.800 kg", estoque apto "0 kg", sem "Acima da demanda"; R$ 428.305,00 e a primária segue "Abrir Compra de insumos ›" (na base: 6.800 kg e "Atualizar SOL-2026-07" cortava R$ 27.200)
+OK    · V2 Mapa › Insumos depois da entrega: C1 continua "Falta 14.800 kg" (o mesmo de antes)
+OK    · C1 Compra › etapa 2 com a OS-0418 cancelada: a Ureia mostra "Acima da demanda · 1.140 kg · o Planejar safra atualiza a SOL-2026-07" e a faixa conta "1 insumo acima da demanda de agora" (o NPK entregue não aparece)
+OK    · R2 Compra › etapa 4 (DEM-08): Ureia sai em Casa do Adubo "Chega primeiro", sem justificativa pendente; escolher a Coop. Vale (mais cara e mais tardia) é recusado sem justificativa
+OK    · C2 a mesma Ureia avisa na etapa 4 (comparação) e na 5 (aprovação): "Acima da demanda · 1.140 kg", sem trava
+OK    · Q1 o perfil Zé (mecânico) não atualiza a SOL: "Atualizar a SOL-2026-07: decisão de Ana (gestora). Nada foi alterado." e o registro não muda
+OK    · Q2 Ana (gestora) atualiza: o envio original fica (23/09/2026 10:40 por Ana (gestora)), a versão nova grava quem e quando ("Ureia 45% −1.140 kg"), o toast avisa que a cotação em andamento recomeça e a Compra mostra "atualizada em … por Ana (gestora)" sem aviso de acima da demanda
+OK    · P1 pedido emitido e depois complemento (MAP 62.500 → 79.500 kg): a versão nova guarda o pedido emitido; com a OS-0418 cancelada a Ureia fica "Acima da demanda · 1.140 kg" com "Pedido já emitido", a primária é "Abrir Compra de insumos ›" (não "Atualizar"), a SOL mantém os 1.140 kg e a Compra avisa "pedido já emitido: o excedente entra no estoque"
+OK    · A1 "Aplicar plano em 4 cultivos" na tela e complemento enviado: a versão da SOL guarda o plano da conta e a Compra não avisa "acima da demanda" (com o plano da semente avisaria os insumos do complemento à toa)
+FALHA · M1 390 px · Planejar safra etapa 4: a página não rola na horizontal; mesma conta (R$ 428.305,00 · 14 insumos), Ureia 1.140 kg e a memória do MAP igual à do desktop · ([390, 390], 'Valor da necessidade líquida R$ 428.483,50 · 15 insumos a comprar · solicitação SOL-2026-07 em cotação', '1.140 kg', ['Estoque apto hoje: 90.000 kg + 500 kg em custódia sem uso nas O.S., a devolver ao Estoque (500 kg · REQ-031 · OS-0417 (em conferência)) = 90.500 kg', '23/09/2026 · T4 · OS-0420 · Plantio e adubação de base · 250,00 kg/ha × 70 ha = 17.500,0 kg → saldo 73.000 kg', '24/09/2026 · T2 · OS-0431 · Plantio e adubação de base · 250,00 kg/ha × 102 ha = 25.500,0 kg → saldo 47
+OK    · M2 390 px · Mapa › Insumos: sem rolagem horizontal; T4 "MAP 11-52 · 17.500 kg" e "Falta 79.500 kg"
+FALHA · M3 390 px · Compra etapa 2: sem rolagem horizontal da página e o mesmo total R$ 428.305,00 · ([390, 390],)
+OK    · E1 sem erro JS nas telas abertas (Planejar safra, Compra, Mapa, O.S.)
+
+RESULTADO: 19 ok · 10 falhas
+  - N1 Planejar safra › etapa 4 (2026/27): R$ 428.305,00 · 14 insumos a comprar · SOL-2026-07 em cotação (a mesma conta da Compra)
+  - N4 Compra › etapa 2 lê a mesma demanda: total R$ 428.305,00, Ureia 1.140 kg e a memória do MAP igual, linha a linha, à do Planejar safra (com a OS-0420 e a OS-0431)
+  - N5 Mapa › Insumos (Santa Rita, safra toda): 19 produtos · 14 faltam · 3 a receber · 2 estoque cobre; T4 "MAP 11-52 · 17.500 kg" com "Falta 79.500 kg"; T1 Fungicida A "Estoque cobre"; a fonte (dica ⓘ da camada) diz que é a necessidade líquida da Safra 2026/27, a mesma do Planejar safra e da Compra
+  - I1 OS-0418 cancelada na tela O.S. → Planejar safra recalcula na hora: Ureia sai da demanda (0 kg; a linha fica só porque a SOL ainda a pede, U1); R$ 424.771,00 · 13 insumos a comprar
+  - I2 Mapa › Insumos acompanha: 18 produtos · 13 faltam; P1 sem Ureia
+  - U3 a Compra lê a versão nova da SOL-2026-07: total R$ 424.771,00 (o mesmo do Planejar safra) e nenhuma linha de Ureia
+  - P1 repetição: recarregar duas vezes dá a mesma conta (R$ 424.771,00) e não duplica a ordem na memória (OS-0421 uma vez pelo pendente)
+  - P3 restaurar a demonstração volta aos números da semente (R$ 428.305,00 · 14 insumos)
+  - M1 390 px · Planejar safra etapa 4: a página não rola na horizontal; mesma conta (R$ 428.305,00 · 14 insumos), Ureia 1.140 kg e a memória do MAP igual à do desktop
+  - M3 390 px · Compra etapa 2: sem rolagem horizontal da página e o mesmo total R$ 428.305,00
+=== fim demanda_unica_nav_test.py rc=1 17:17:49
+=== ds_test.py 17:17:49
+OK  A1 separador abaixo do cabeçalho da página (título + ação do topo à direita) nas 155 páginas a 1440 px
+OK  A2 linha abaixo do título do bloco com conteúdo solto logo abaixo (21 de 129 blocos com título)
+OK  A2c sem linha do título quando o corpo começa por tabela, barra de visões, gráfico, caixa ou cartões, borda no topo ou faixa com fundo (SEP-20261015 b)
+OK  A2b sem linha dupla: a linha do título não fica sobre outra borda larga até 14 px abaixo (revisão DS, achado 5: AG-04det, GE-05, GE-06det)
+OK  A7 barra da tabela (busca, Agrupar por, Colunas) sem linha sobre o cabeçalho da tabela, que já tem fundo (SEP-20261015 c)
+OK  A8 tabela dentro de caixa com borda sem moldura própria (caixa dentro de caixa, SEP-20261015 d)
+OK  A3 a 390 px (8 telas): separador do cabeçalho e dos blocos (com a mesma regra do título), sem linha dupla nem linha de barra de tabela
+OK  A4 painel "Nova safra": linha abaixo do título e do × do topo à direita
+OK  A5 painel do registro (Cadastros): linha abaixo do título
+OK  A6 sem erro de execução nas telas da varredura do separador
+OK  B0 pré-condição: a janela do teste tem mouse com hover ((hover:hover) e (pointer:fine))
+OK  B1 linha da grade da O.S.: hover verde #F2F8F4
+OK  B2 botão secundário (Criar safra): camada verde (rgba(30,122,76,.07)) e borda #9DBFAA; sem a camada cinza nem escurecer
+OK  B3 opção de visão (Kanban): camada verde, sem cinza
+OK  B4 primária (Criar ordem): só escurece (brightness .92), sem camada clara sobre o texto branco
+OK  B5 linha da grade dos Cadastros (T1): hover verde #F2F8F4, não o cinza #F4F6F3
+OK  B6 linha de grupo da árvore dos Cadastros: hover verde do motor (#F2F8F4), não cinza
+OK  B7 sem erro de execução
+OK  C1 tela nova: o título da tela é realçado e o novo contexto é anunciado (aria-live polite)
+OK  C2 clicar num link de outra tela liga a barra fina de carga no topo já no clique
+OK  C3 tela aberta pelo link (ícone Agrícola da barra): foco no título da tela nova, título realçado e anúncio só do estado (sem repetir o título que o foco já lê)
+OK  C2b a barra de carga termina depois que a tela nova monta (sem ini/chega, opacidade 0)
+OK  C2c voltar pelo navegador (a O.S. volta da memória, pageshow persisted): a barra não fica presa (sem ini, opacidade 0) e a marca de navegação sai
+OK  C4 Planejar safra · escolher a safra leva à etapa 2: o bloco da etapa nova é realçado e a etapa é anunciada
+OK  C5 avançar (área de ações) para a etapa 3: realce, anúncio "Etapa 3 de 4" e foco no título do bloco novo
+OK  C6 voltar para a etapa 2: realce e anúncio "Etapa 2 de 4"
+OK  C7 Kanban com exatamente 5 fases antes e depois
+OK  C8 liberar a OS-0430: o cartão passa de A liberar para Liberadas e é realçado; o novo estado é anunciado (o aviso)
+OK  C9 o aviso visível não é lido em dobro (aria-live=off; a região viva anuncia)
+OK  C10 normal: conciliar realça o que mudou e anuncia o resultado
+OK  C11 repetição: o clique duplo grava um só recibo (CON-0001)
+OK  C12 recusa: clicar de novo no botão indisponível não roda o comando; a dica no próprio botão (role=tooltip) diz o porquê e a recusa é anunciada
+OK  C12b a recusa para o clique antes do botão: o ouvinte do próprio botão (onde o comando de uma tela nova estaria) não recebe o clique
+OK  C13 prefers-reduced-motion: sem animação; realce estático curto (#EDF7F0 e anel verde)
+OK  C14 o realce estático sai sozinho (≈600 ms)
+OK  C15 sem a preferência: o realce é a animação g2realce de 0,52 s
+OK  C17 CMP · Enter em "Abrir compra" na linha: a etapa 2 é anunciada e realçada, e o foco vai ao título do novo contexto (h2/h3), não ao BODY
+OK  C17 SAF · Enter em "Continuar" na linha: a etapa 2 é anunciada e realçada, e o foco vai ao título do novo contexto (h2/h3), não ao BODY
+OK  C16 sem erro de execução
+OK  D1 botão indisponível com motivo continua focável (aria-disabled="true", sem disabled) e traz o motivo em data-dica
+OK  D2 hover: a dica abre (role=tooltip) com o porquê; o leitor de tela recebe aria-describedby; a dica nativa (title) sai de cima
+OK  D3 tirar o ponteiro fecha a dica e devolve o title
+OK  D4 foco de teclado: a dica abre e descreve o botão (aria-describedby="g2-dica")
+OK  D5 Esc fecha a dica sem tirar o foco do botão
+OK  D6 Enter no botão indisponível: o comando não roda (1 recibo), a dica mostra o porquê e a recusa é anunciada
+OK  D7 ícone sem texto (ícone "Mapa" da barra recolhida): a dica mostra o nome do módulo e não vira descrição repetida; a dica nativa sai enquanto ela está aberta e volta quando o ponteiro sai
+OK  D8 título igual ao rótulo visível (rótulo cortado no IN-04): sem dica
+OK  D8b ponteiro no rótulo cortado (title igual ao texto): o title sai (sem a dica nativa repetida) e volta quando o ponteiro sai
+OK  D9 selo de estado (coluna A liberar do Kanban): significado e próximo passo (Aprovar e liberar)
+OK  D10 selo da lista (Falta insumo · …): o que falta e quem resolve
+OK  D11 unidade no cabeçalho da coluna (R$/ha): a dica explica a conta no foco do botão de ordenar
+OK  D14 sigla ou unidade na célula vira dica do cabeçalho: DAP (PL-02 Gatilho por extenso) e sc/ha (GE-02 Premissas, "rendimento 62 sc/ha"), aberta no foco do botão de ordenar
+OK  D13 Tab até a linha da OS-0418: a dica do selo "Falta insumo" (o que falta e quem resolve) abre e descreve a linha (aria-describedby)
+OK  D13b o clique do ponteiro na linha não abre a dica do selo (só o foco de teclado)
+OK  D13c Tab até o cartão da OS-0418 no Kanban: a mesma dica do selo, descrevendo o cartão
+OK  D15 selo "Sobras a receber" da OS-0417: a dica é o bloqueio do encerramento (o mesmo texto do painel) e quem resolve (Rui, almoxarife)
+OK  D12 sem erro de execução
+OK  F1 capturas em _probe/ds/ (12: 6 telas × 1440 e 390 px)
+OK  E1 390 px · Planejar safra: etapa 2 realçada e anunciada
+OK  E2 390 px · liberar a OS-0430 pela lista: a ordem passa a Liberadas (painel; chips de fase A liberar −1, Liberadas +1), o que mudou é realçado e o aviso é anunciado
+OK  E3 390 px · toque: conciliar; toque longo no botão indisponível mostra a dica sem acionar o comando
+OK  E4 390 px · tocar fora fecha a dica
+OK  E5 390 px · sem erro de execução e a dica cabe na tela
+OK  G1 1440 px · normal: com evento a conciliar, a primária está disponível e não há motivo de bloqueio
+OK  G2 1440 px · tudo conciliado: o motivo fica visível em texto junto do botão (sem ponteiro, sem foco, sem dica aberta), na cor do texto secundário e dentro da tela
+OK  G2b 1440 px · a dica do botão (foco) abre fora do par botão + motivo: não cobre o motivo visível
+OK  G3 1440 px · recusa: ativar o botão indisponível realça o motivo visível e anuncia "Indisponível: …"
+OK  G1 390 px · normal: com evento a conciliar, a primária está disponível e não há motivo de bloqueio
+OK  G2 390 px · tudo conciliado: o motivo fica visível em texto junto do botão (sem ponteiro, sem foco, sem dica aberta), na cor do texto secundário e dentro da tela
+OK  G2b 390 px · a dica do botão (foco) abre fora do par botão + motivo: não cobre o motivo visível
+OK  G3 390 px · recusa: ativar o botão indisponível realça o motivo visível e anuncia "Indisponível: …"
+OK  G4 sem erro de execução
+RESULTADO: OK 72/72
+=== fim ds_test.py rc=0 17:24:54
+=== est_laudo_lote_nav_test.py 17:24:54
+OK    · L1 motivo é do lote aberto (ajuste 3, contraexemplo do Codex): K26-11 com "Motivo exclusivo K26-11", Manter bloqueado, abrir F26-02 → o motivo vem vazio; trocar de lote direto pela linha também limpa (F26-02 → K26-11 → F26-02); a abertura foca o nº do laudo e o Tab chega ao motivo (no 16fb55e: o F26-02 já trazia o motivo do KCl)
+OK    · L1b a 390×844 o painel do laudo e os controles (nº do laudo, motivo, Liberar, Reprovar, Manter) cabem sem rolagem horizontal, e o motivo continua vazio
+OK    · L2 memória por laudo (ajuste 2): depois de devolver 10 L, reprovar LAB-A (motivo A), devolver mais 10 L e reprovar LAB-B (motivo B), a memória do Planejar safra diz "Reprovado: 20 L do lote F26-02 (devolução da REQ-035) = 10 L no laudo LAB-A: motivo A + 10 L no laudo LAB-B: motivo B" e o lote no Estoque mostra "laudos LAB-A 10 L + LAB-B 10 L" (no 16fb55e: "20 L … laudo LAB-B: motivo B")
+OK    · L2b revisão posterior na reprovação (ajuste 4): Ana registrou as duas devoluções bloqueadas e reprovou — o aviso das duas reprovações diz "Fica revisão posterior pendente (Ana registrou a entrada bloqueada e decidiu)" (a mesma regra da liberação), e a decisão vale
+OK    · L3 pessoas distintas (ajuste 4, negativo): Paula devolve bloqueado e Ana reprova com o laudo — a reprovação vale e não fica marca de revisão posterior
+OK    · M1 falta firme + qualidade pendente (ajuste 1, S3): 30 L reprovados e mais 10 L devolvidos bloqueados — 5,5 L de compra firme e 10 L aguardando laudo nas cinco telas: Planejar safra "5,5 L" Complemento + "Qualidade pendente · 10,0 L" (primária e total iguais); Compra "Qualidade pendente · 10"; Mapa T2 "Falta 5 L" + "Qualidade pendente · 10 L" com motivo (o da devolução) e "o gestor libera ou reprova com o laudo no Estoque"; SU-03det "Pendência de compra · 5,5 L" + "Qualidade pendente · 10,0 L"; MB-05 "Conflito de reserva" + "Qualidade pendente · 10,0 L" (no 16fb55e: Mapa, SU-03det e MB-05 só a falta)
+OK    · E1 sem erro JS nas telas abertas (Estoque, Planejar safra, Compra, Mapa, SU-03det, MB-05)
+
+RESULTADO: 7 ok · 0 falhas
+=== fim est_laudo_lote_nav_test.py rc=0 17:30:43
+=== irr_fluxo_test.py 17:30:43
+OK    1 IR-03det#OS-0423:conflito abre "Resolver conflito" com a parada da B3 e as opções 15:00–17:00 e 21:00–23:00 
+OK    2 aplicar a janela libera pela prontidão (LIB-2292), sem aprovação 
+OK    3 recarregar: a OS-0423 continua Liberadas (estado gravado) com janela 15:00–17:00 
+OK    4 IR-03 lê o mesmo estado: OS-0423 Liberadas, sem conflito 
+OK    5 Mapa Integrado: T7 sem "irrigação em conflito" (amarelo pela mancha do satélite) 
+OK    6 Mapa camada Irrigação: T7 "programada · hoje 15:00" e P2 "conferir medição · OS-0394" 
+OK    7 IR-03det#OS-0394:conferir abre a conferência com 1.206 m³ medidos × 1.254 m³ estimados 
+OK    8 OS-0394 encerrada · hidrômetro prevalece, sem novo crédito (P2 segue 11,2 mm) 
+OK    9 OS-0419 Iniciar → Em execução (início hoje 20:02, EX-5120) 
+OK    10 recarregar: segue Em execução e o primário é Registrar término antecipado (Pausar só agora) 
+OK    11 término não inventa área/telemetria: campos vazios e motivo temporal necessário 
+OK    12 leitura explícita no tempo decorrido → conferência automática (−1,9 %) → Encerradas; P2 agora 1,7 mm 
+OK    13 trilha com início, término (amanhã 10:33) e conferência automática 
+OK    14 IR-01: Pivô 2 com 1,7 mm e próximo passo da OS-0422 (Definir janela) 
+OK    15 painel do setor: aplicação da OS-0419 creditada uma vez (8.480 m³ = 10,6 mm × 90 % = 9,54 mm líquidos) 
+OK    16 Mapa (Balanço hídrico): P2 com déficit 1,7 mm (verde) 
+OK    17 IR-02#programar=PV02: fazenda Lagoa Grande e "Tarefa única OS-0601 já existe" (Abrir OS-0601, sem Programar) 
+OK    18 PV02 continua com uma só ordem 
+OK    19 IR-01 na Lagoa Grande: 23 pivôs; Pivô 2 programado (OS-0601 hoje 21:00), balanço demonstrativo (no painel do setor) 
+OK    22 IR-01 Santa Rita: o primário é o passo mais urgente (Resolver conflito · OS-0423 → IR-03det#OS-0423:conflito) 
+OK    23 painel Definir janela: foco entra no painel, aria-modal e Esc fecha (foco volta à tela) 
+OK    24 link direto inválido (OS-0392 Encerradas:janela) não abre o painel e explica o motivo 
+OK    25 Adicionar produtos na OS-0423 (conflito com a parada da B3) é recusado: a v2 não fura o bloqueio 
+OK    26 Agenda (IN-03) lê o estado: OS-0423 resolvida vira Iniciar irrigação · João, prioridade Normal, sem selo de conflito 
+OK    27 IR-01 Pivô 1: falta insumo · OS-0418 (como na O.S.) e próximo passo Programar só água · João (responsável no painel do setor) 
+OK    28 IR-02#programar=P1: Programar só água cria e libera a ordem de água; OS-0418 segue parada 
+OK    29 v2 em execução: Revisão de saldo pendente; depois da liberação na O.S. a ordem segue a etapa da O.S. (Liberadas · Iniciar execução na O.S.) e a v1 fica creditada só na faixa de 30 ha 
+OK    30 Restaurar demonstração (Estoque) volta a irrigação à semente: OS-0419 Liberadas sem v2 órfã 
+OK    31a área sem tempo compatível permanece Em conferência e não credita antes da validação 
+OK    31 parada em 40 de 80 ha (3.800 m³): o Pivô 2 segue 11,2 mm e a faixa coberta (40 ha) é mostrada à parte 
+OK    32 fazenda acompanha: escolhida na Irrigação abre o Mapa nela; trocada no Mapa, a Irrigação abre na do Mapa 
+OK    33 IR-03: filtro rápido (A liberar) continua ao voltar do registro 
+OK    20 sem rolagem lateral nas grades IR a 1440 px; a 1280 px a página não rola e estado, pendência e próximo passo ficam à vista (Lagoa Grande, 23 pivôs) 
+OK    21 nenhuma tela com erro de execução 
+
+34 ok · 0 falhas []
+=== fim irr_fluxo_test.py rc=0 17:33:20
+=== mip_fluxo_test.py 17:33:20
+OK    1 AG-01 "Pragas e doenças" (Santa Rita): selo "1 acima do NC sem decisão", VIS-013 primeiro com "Decidir controle", primário único "Programar vistoria" 
+OK    2 Fazenda Lagoa Grande: VIS-051…060 no AG-01 (10), VIS-051 em controle pela OS-0504 
+OK    3 AG-01.dc.html#VIS-053 abre o painel da meleira (Pivô 9) e troca a fazenda para Lagoa Grande · próximo passo "Confirmar foco" 
+OK    4 Mapa P1: "Mosca-branca · acima do NC" (+2: VIS-014 em coleta e VIS-006 atrasada, iguais ao AG-01) · primário "Decidir controle" abre a decisão da VIS-013 
+OK    5 Mapa T7 "Seguir monitorando" (botão, não link) registra na VIS-008 e programa VIS-018 (ácaro-rajado), que persiste e aparece no AG-01 como Programada · "Coletar no app" 
+OK    6 Decidir controle (VIS-013): só os 4 registrados para feijão × mosca-branca · Inseticida B com alerta de rotação (IRAC 1B) 
+OK    7 Acaricida D aplicado em 28/09: trava "carência de 14 dias passa da colheita prevista (10/10): aplicar até 26/09" e o botão fica bloqueado 
+OK    8 Emitir: receituário RA-0142 (DIA-009 · REC-015) e OS-0440 em A liberar · painel "Em controle" com "Abrir OS-0440" 
+OK    9 OS.dc.html#OS-0440: A liberar com Ciantraniliprole 100 OD (sem lote: a trava de estoque é a da liberação) e origem VIS-013 · RA-0142 
+OK    10 Mapa P1 depois de emitir: "Mosca-branca · em controle" · primário "Abrir OS-0440" 
+OK    11 VIS-015 abaixo do NC → "Seguir monitorando" registra e programa VIS-019 para 29/09 
+OK    12 Meleira (PV09): Confirmar foco → "Gerar O.S. de erradicação" → OS-0441 em A liberar sem produto 
+OK    13 AG-01det#VIS-051: rota do Pivô 6 com 20 pontos e média válida 18 % (NC 15) · voltar leva a AG-01.dc.html#VIS-051 
+OK    14 App MB-06#VIS-014: "Registrar e ir ao ponto 11" grava o ponto 10 · AG-01 mostra 10 de 14 coletados 
+OK    15 AG-03: DIA-009 Registrada (sem "Bloqueado" por laudo) · AG-04: REC-015 com RA-0142 e OS-0440 
+RESULTADO 15/15
+=== fim mip_fluxo_test.py rc=0 17:34:23
+=== producao_fluxo_test.py 17:34:23
+== os · A-05 / AC-22: ordem nova de colheita na fazenda e safra do cultivo; uma por semana; carência no liberar
+OK  A-05 ordem nova do Pivô 19 (Safra Mamão 2026/27) nasce na Lagoa Grande e na safra 2026/27, A liberar · [['ok', 'ok', 'ok', 'ok'], ['OS-0440', 'Colheita · semana 40', 'Lagoa Grande', '2026/27', 'A liberar']]
+OK  A-05 com o filtro Lagoa Grande · 2026/27 a ordem nova aparece na lista · OS-0440
+OK  AC-22 perene: a ordem se chama "Colheita · semana 40" · ['OS-0440', 'Colheita · semana 40', 'Lagoa Grande', '2026/27', 'A liberar']
+OK  AC-22 segunda ordem de colheita da mesma semana (S40) no Pivô 19 é recusada e aponta a existente · Nova ordem × Escolha safra, cultivo e atividade do plano. A ordem nasce em A liberar; o agrônomo libera e pode ajustar antes. Corrija os campos destacados; o que você preencheu foi mantido. Safra Selecione a safra Safra 2026/27 Safrinha 2027 Safra Mamão 2026/27 Cultivo Selecione o cultivo Pivô 1 · M
+OK  AC-22 colheita na semana 39 do Pivô 19 é recusada: a OS-0505 (Colheita · semana 39) já existe · Nova ordem × Escolha safra, cultivo e atividade do plano. A ordem nasce em A liberar; o agrônomo libera e pode ajustar antes. Corrija os campos destacados; o que você preencheu foi mantido. Safra Selecione a safra Safra 2026/27 Safrinha 2027 Safra Mamão 2026/27 Cultivo Selecione o cultivo Pivô 1 · M
+OK  #nova:lg06:q3:2026-09-28 abre a ordem nova já preenchida (safra, cultivo, atividade, janela) · ['LG2627', 'lg06', 'q3', '2026-09-28']
+OK  a ordem da S40 do Pivô 6 é emitida (A liberar) · OS-0441
+OK  AC-22 liberar (Aprovar e liberar) a S40 do Pivô 6 fica impedido no comando por carência sem dados, com dono Wesley; a ordem continua A liberar · ['NÃO ACHEI: Liberar para execução', 'A liberar', 'OS-0441 · Colheita · semana 40 × A liberar Carência sem dados Pivô 6 · 62,79 ha · janela a partir de 28/09/2026 · — A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO O agrônomo confere atividade e área abaixo e libera; se preci
+== fluxo · AC-01 menu e AC-17 tarefa do proprietário (§8.1), cliques e campos medidos
+OK  AC-01 sem o ícone Produção na barra; no Estoque de produto o ícone Agrícola marcado e "‹ Agrícola" · {'mods': ['Mapa', 'Cadastros', 'Agrícola', 'Manutenção', 'Suprimentos', 'Comercial', 'Crédito', 'Configurações', 'Outros acessos'], 'cur': ['Agrícola'], 'volta': ['MOD-AGR.dc.html', '‹ Agrícola']}
+OK  AC-01 "‹ Agrícola" abre a tela de entrada com Colheita · Recebimento · Beneficiamento · Estoque de produto em sequência (4 cartões), sem erro de JS · [True, [['AG-07.dc.html', 'Agrofit'], ['AG-02.dc.html', 'Análises de solo'], ['PA.dc.html', 'Planos agronômicos'], ['SAF.dc.html', 'Planejar safra'], ['GE-02.dc.html', 'Orçamento'], ['AG-01.dc.html', 'Pragas e doenças'], ['OS.dc.html', 'Ordens de serviço'], ['IR-01.dc.html', 'Irrigação'], ['COLH.dc.
+OK  AC-01 cartão "Colheita" abre COLH com "‹ Agrícola", sem erro de JS · ['ok', True, '/COLH.dc.html', ['MOD-AGR.dc.html', '‹ Agrícola'], '']
+OK  AC-01 cartão "Recebimento" abre CARGA com "‹ Agrícola", sem erro de JS · ['ok', True, '/CARGA.dc.html', ['MOD-AGR.dc.html', '‹ Agrícola'], '']
+OK  AC-01 cartão "Beneficiamento" abre BEN com "‹ Agrícola", sem erro de JS · ['ok', True, '/BEN.dc.html', ['MOD-AGR.dc.html', '‹ Agrícola'], '']
+OK  AC-01 cartão "Estoque de produto" abre PROD com "‹ Agrícola", sem erro de JS · ['ok', True, '/PROD.dc.html', ['MOD-AGR.dc.html', '‹ Agrícola'], '']
+OK  §8.1 sem seleção, a ação primária é "Publicar previsão" do Pivô 19 · ['Publicar previsão do Pivô 19']
+OK  painel do Pivô 19: passe S39 parcial 0,73 t/ha, ciclo 0,48 t/ha, 1 carga a receber, rascunho S40 e S41 · Pivô 19 · Mamão Formosa Tainung 1 Em colheita Lagoa Grande · Safra Mamão 2026/27 · 75,11 ha · meta 50 t/ha/ano × PRÓXIMO PASSO Publicar S40 e S41 · Ana (agrônoma). PREVISÃO VIGENTE 72,9 t · S39 (v1) COLHIDO NO CICLO 36,42 t PRODUTIVIDADE 0,48 t/ha parcial CARGAS A RECEBER 1 CUSTO R$/T sem custo real
+OK  (1) Publicar previsão: v2 do Pivô 19 com S40 72,78 t e S41 87,34 t · Pivô 19 · previsão v2 publicada por Ana (agrônoma): S40 72,78 t · S41 87,34 t. A semana em curso (S39) não muda: orienta a OS-0505.
+OK  (1) a ação primária passa a "Programar colheita S40" · ['Programar colheita S40']
+OK  (1) "Programar colheita S40" abre a ordem nova pré-preenchida (Pivô 19, janela 28/09) · ['lg19', '2026-09-28']
+OK  (1) Emitir: ordem "Colheita · semana 40" do Pivô 19 em A liberar · OS-0440
+OK  (2) Aprovar e liberar a ordem nova (carência do Pivô 19 em dia): Liberadas · ['Liberadas', 'OS-0440 · Colheita · semana 40 × Liberadas Pivô 19 · 75,11 ha · janela a partir de 28/09/2026 · — A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO Confira máquina, equipe e insumos e inicie a execução na janela a partir de 28/09/2026. Iniciar execução Cancelar s
+OK  (3) MB-10 › Colheita › OS-0505: Apontar área 25 ha em 8 h (regra única do apontamento, origem app) · Área apontada: 25 ha em 8 h na OS-0505. A produção só muda com a carga pesada.
+OK  (3) o apontamento do app entrou uma vez na OS-0505 (26/09, Provisório) · [[25, 'Provisório', '26/09']]
+OK  AC-04 apontar 25 ha sem carga não muda a produção (36,42 t) e o passe S39 cai para 0,49 t/ha · Pivô 19 · Mamão Formosa Tainung 1 Em colheita Lagoa Grande · Safra Mamão 2026/27 · 75,11 ha · meta 50 t/ha/ano × PRÓXIMO PASSO Emitir a O.S. da S41 · Ana (agrônoma). PREVISÃO VIGENTE 72,9 t · S39 (v1) COLHIDO NO CICLO 36,42 t PRODUTIVIDADE 0,48 t/ha parcial CARGAS A RECEBER 1 CUSTO R$/T sem custo re
+OK  (4) sem seleção, a primária é "Registrar pesagem" · ['Registrar pesagem']
+OK  (4) com a CG-2108 selecionada, a primária vira "Pesar a CG-2108" · ['Pesar a CG-2108']
+OK  (4) Pesar a CG-2108 (19.250 − 7.200): nasce o L39-133 com 12.050 kg, Liberado; passe 0,65 t/ha · CG-2108 recebida: 12.050 kg líquidos (19.250 − 7.200) no L39-133 (novo) · Galpão de frutas Lagoa Grande · Liberado. Pivô 19: passe S39 0,65 t/ha (parcial).
+OK  (5) L39-133 no estoque: 12.050 kg apto, vence 29/09; ação "Reservar para pedido" com PV-036 e sugestão 10.000 kg · L39-133 · Mamão Formosa · fruta de campo Liberado Galpão de frutas Lagoa Grande · vence 29/09 · recebido 26/09 × PRÓXIMO PASSO Reservar para pedido · Comercial. Qualidade: Íntegro no recebimento. FÍSICO 12.050 kg BLOQUEADO 0 kg APTO 12.050 kg RESERVADO 0 kg DISPONÍVEL 12.050 kg EM PROCESSO 0 kg RESE
+OK  (5) reserva RS-0002: 10.000 kg para o PV-036; L39-133 disponível 2.050 kg; PV-036 coberto · RS-0002: 10.000 kg do L39-133 reservados para o PV-036 (Frutas Real). L39-133 disponível 2.050 kg · PV-036 coberto.
+     medida AC-17: 12 cliques · 5 campos digitados (25 ha, horas, ticket, bruto, tara)
+OK  AC-17 tarefa de ponta a ponta dentro de 30 cliques e 5 campos digitados (12 cliques · 5 campos) · [12, 5]
+== erros · recusa e repetição
+OK  pesagem sem condição é recusada no painel, nada gravado · e são calculados. Ticket da balança Peso bruto kg Tara kg Condição da carga Íntegra Com avaria Fora do padrão Só Íntegra entra liberada; com avaria ou fora do padrão vai para inspeção da Qualidade. Informe a condição da carga: Íntegra, Com avaria ou Fora do padrão. Descartar Cancelar Pesar a CG-2108
+OK  Com avaria: L39-133 nasce Em inspeção (entrada não é liberação) · Em inspeção
+OK  ticket TK-4520 repetido com outro conteúdo = conflito, nada gravado · o kg Tara kg Condição da carga Íntegra Com avaria Fora do padrão Só Íntegra entra liberada; com avaria ou fora do padrão vai para inspeção da Qualidade. Ticket TK-4520 já recebido na CG-2108 (12.050 kg líquidos) com outro conteúdo: conflito, nada gravado. Confira o ticket. Cancelar Registrar pesagem
+OK  a mesma pesagem por outro formulário (mesmo ticket e conteúdo) = a mesma carga, nada somado · ['Ticket TK-4520 já recebido na CG-2108 com o mesmo conteúdo: é a mesma carga, nada foi somado de novo.', 19, 19]
+OK  Liberar lote passa a Liberado e grava quem agiu (perfil Ana, agrônoma; Comercial A3 da revisão e BEN-1 (d): nunca o nome fixo da Qualidade) · L39-133 liberado por Ana (agrônoma): 12.050 kg aptos para reserva e venda.
+OK  reserva acima da falta do pedido é recusada junto ao formulário · r carga › AVALIAÇÃO DO DESTINO DOS PEDIDOS LC-0505-2 Conforme no escopo · Mercado interno · Brasil Ver carência e destino › RESERVAS Nenhuma reserva. MOVIMENTOS MP-1020 26/09 17:36 liberação sem efeito no físico Ana (agrônoma) MP-1019 26/09 17:36 recebimento 12.050 kg CG-2108 Lúcia Cancelar Reservar
+OK  AC-16 sem sinal: a carga fica no aparelho · ['CG-2109', 'Carga CG-2109 registrada (Pivô 19, ~300 caixas): a pesar na balança. A estimativa não soma na produção. Salvo no aparelho; envia quando houver sinal.']
+OK  AC-16 a carga do aparelho não aparece na web · CG-2109
+OK  AC-16 ao voltar o sinal a carga entra uma vez (repetir o envio não duplica) · 1
+OK  AC-12 MB-07: Concluir talhão grava a CNT-0002 do Pivô 6 sem publicar (versão vigente continua a v1) · ['Contagem CNT-0002 do Pivô 6 gravada: 1 planta, peso médio 1,1 kg. Rascunho: S40 111,55 t · S41 0 t. A previsão só muda quando Ana (agrônoma) publicar.', 1]
+OK  AC-12 depois da contagem, a ação do Pivô 6 é "Publicar previsão" · ['Publicar previsão']
+OK  AC-15 no OS.dc.html, encerrar a OS-0505 com a CG-2108 a pesar fica impedido no comando, com dono Lúcia e o caminho para pesar · ['NÃO ACHEI: Conferir e encerrar', 'Em conferência', 'CARGA.dc.html#CG-2108', 'OS-0505 · Colheita · semana 39 × Em conferência Parcial · dia 2 de 3 Carga a pesar Pivô 19 · 75,11 ha · janela 21–24/09 · Sérgio 50 / 75,11 ha · 67 % A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO
+== celular · AC-19 em 390 × 844
+OK  AC-19 COLH: cartões no lugar da tabela, sem rolagem horizontal · [390, 0, 23, 0]
+OK  AC-19 COLH: ação primária visível e presa ao rodapé · ['Publicar previsão do Pivô 19', 788, 832, 844, 'fixed']
+OK  AC-19 CARGA: cartões no lugar da tabela, sem rolagem horizontal · [390, 0, 8, 0]
+OK  AC-19 CARGA: ação primária visível e presa ao rodapé · ['Registrar pesagem', 788, 832, 844, 'fixed']
+OK  AC-19 PROD na semente (Comercial A-17): sem reserva a fazer, sem primária; o cartão do L10-031 diz "Registrar a saca do PV-030 em Contratos e pedidos" · L10-031 · Soja em grão 34.545 sc Físico 38.420 sc · reservado 3.875 sc · Silo 01 Liberado Registrar a saca do PV-030 em Contratos e pedidos · Comercial
+OK  AC-19 PROD: cartões no lugar da tabela, sem rolagem horizontal · [390, 0, 12, 0]
+OK  AC-19 PROD: ação primária visível e presa ao rodapé · ['Reservar L10-031 para pedido', 788, 832, 844, 'fixed']
+OK  AC-19 tocar no cartão abre o painel do lote (master-detail no celular) · L10-031 · Soja em grão Liberado Silo 01 · recebido 05/03 × PRÓXIMO PASSO Reservar para pedido · Comercial. Qualidade: Íntegro no recebimento. FÍSICO 38.420 sc BLOQUEADO 0 sc APTO 38.420 sc RESERVADO 3
+== revisao · regressões da revisão adversarial (A-01..A-18)
+OK  A-02 bruto "19.250" e tara "7.200": 12.050 kg líquidos (não 12,05) · [['Recebida', 12050, 'L39-133'], 'CG-2108 recebida: 12.050 kg líquidos (19.250 − 7.200) no L39-133 (novo) · Galpão de frutas Lagoa Grande · Liberado. Pivô 19: passe S39 0,97 t/ha (parcial).']
+OK  A-03 reservar → cancelar → reservar de novo: uma reserva ativa nova (RS-0003) e PV-036 sem falta (Aguardando crédito) · [['RS-0003'], 'RS-0002: 10.000 kg do L39-133 reservados para o PV-036 (Frutas Real). L39-133 disponível 2.050 kg · PV-036 coberto.', 'RS-0002 cancelada (cliente adiou): 10.000 kg voltam ao disponível do L39-133.', 'RS-0003: 10.000 kg do L39-133 reservados para o PV-036 (Frutas Real). L39-133 disponí
+OK  A-17 a linha do PV-030 diz que a quantidade é o saldo do CT-201 · PV-030 · Coop Grão Sul Soja em grão Padrão 2025/26 Pronta entrega set–out/26 · saldo 4.000 sc do CT-201 (8.000 sc já expedidos) 4.000 sc saca de 50 ou 60 kg? R$ 128,00/sc (saca a conferir) 0 kg 232.500 kg suspensa Saca a conferir Registrar a saca · Comercial
+OK  A-18 Estoque de produto com a coluna Em processo (mamão: 66.250 kg da colheita + 21.270 kg do packing = 87.520 kg em processo) · [['LOTE · PRODUTO ⇅', 'PRODUTO ⇅', 'LOCAL · VALIDADE ⇅', 'FÍSICO ⇅', 'BLOQUEADO ⇅', 'EM PROCESSO ⇅', 'APTO ⇅', 'RESERVADO ⇅', 'DISPONÍVEL ⇅', 'QUALIDADE · PRÓXIMO PASSO ⇅'], 'Mamão Formosa · fruta de campo 10 lotes 87.520 kg 0 kg 87.520 kg 0 kg 0 kg 0 kg']
+OK  A-15 linha do Mamão Formosa: 0,70 t/ha ponderada sobre 137,9 ha colhidos (96,74 t ÷ 137,9 ha) · Mamão Formosa 12 talhões 685,92 ha 96,74 t 0,70 t/ha ponderada sobre 137,9 ha colhidos 1 em colheita · 1 colhida · 10 sem previsão
+OK  A-16 perda "abc": erro junto do campo e nada publicado (sem erro de JS) · ['Número de 0 a 99 (ex.: 5). | Corrija o campo marcado: nada foi publicado.', 1, '']
+OK  A-09 toque duplo em Concluir talhão (MB-07): uma contagem nova (o Pivô 6 não tinha contagem) · [['CNT-0002', 'APP-CNT-lg06-mvcoky5h-wnqsmy']]
+OK  A-01 dia da colheita sem valor padrão, com atalhos (Hoje, Ontem, dias apontados); sem o dia, nada gravado · ['', ['Hoje 26/09', 'Ontem 25/09', '22/09 · apontado', '21/09 · apontado'], 'o padrão Só Íntegra entra liberada; com avaria ou fora do padrão vai para inspeção da Qualidade. Informe o dia da colheita: toque num atalho ou digite dd/mm. Pesar a CG-2108 Cancelar Registrar pesagem']
+OK  A-01 colhida "hoje" (26/09) sem apontamento da OS-0505 nesse dia: lote Em inspeção, não Liberado · [['2026-09-26', 'L39-133'], 'CG-2109 recebida: 12.000 kg líquidos (19.200 − 7.200) no L39-133 (novo) · Galpão de frutas Lagoa Grande · Em inspeção. Pivô 19: passe S39 0,97 t/ha (parcial).']
+OK  A-13 lote pendente do Sérgio: "Sérgio resolve", sem "Liberar" nem "Reservar" no painel · ['L39-133 · Mamão Formosa · fruta de campo Em inspeção Galpão de frutas Lagoa Grande · vence 03/10 · recebido 26/09 × PRÓXIMO PASSO Sérgio resolve: Colhido em 26/09 sem apontamento de área da OS-0505 nesse dia: confirme o dia da colheita ou aponte a área do dia. Liberar fica com a Qualidade depois d
+OK  A-05 2ª carga com avaria depois da liberação vai a lote novo Em inspeção · [['L39-133', 'L39-134'], 'CG-2110 recebida: 7.800 kg líquidos (15.000 − 7.200) no L39-134 (novo) · Galpão de frutas Lagoa Grande · Em inspeção. Pivô 19: passe S39 0,98 t/ha (parcial).']
+OK  A-06 pesagem nova da OS-0505 avisa das cargas do app a pesar e oferece "Pesar a CG-…" · [['CG-2109', 'CG-2110'], 'Registrar pesagem Nova carga Carga que chegou sem registro do app: escolha a O.S. de colheita de origem. × PRÓXIMO PASSO A OS-0505 tem carga do app a pesar: CG-2108 (colhida 22/09, ~590 caixas), CG-2109 (colhida 26/09, ~300 caixas), CG-2110 (colhida 26/09, ~300 caixas). Se 
+OK  A-06 CARGA: Descartar com motivo tira a carga da fila (Descartada, motivo no histórico) · ['Descartada', 'CG-2110 descartada (registrada duas vezes no app): a carga sai da fila de pesagem; nada entra na produção. O registro e o motivo ficam no histórico.']
+OK  A-06 MB-10: Descartar carga a pesar (toque na carga + motivo) também descarta · ['Descartada', 'CG-2109 descartada (não saiu do campo): a carga sai da fila de pesagem; nada entra na produção. O registro e o motivo ficam no histórico.']
+OK  A-11 encerrar com carga no aparelho: "Sérgio reconecta o app", sem "Lúcia pesa" nem link de pesar; a linha da O.S. não manda a Lúcia · ['Encerrar bloqueado: Carga no aparelho aguardando sinal: CG-2109. Quem resolve: Sérgio reconecta o app; a carga entra uma vez e vai para a pesagem. INSUMOS E DOSES Colheita: sem insumos do almoxarifado; caixas e carreta da equipe. APONTAMENTOS DIÁRIOS DATA TURNO REALIZADO ACUMULADO SITUAÇÃO 21/09 D
+OK  A-14 MB-10 na carência: "não colha agora" (sem "turnos suspensos"); gravar pede "Colheita já feita" e só então registra · ['Carência até 28/09: não colha agora · Ana (agrônoma) reprograma a colheita para 29/09 ou depois. Colheita que já aconteceu é registrada normalmente e vai para conferência. Apontar área · OS-0505 Desca', 'Carência: toque em "Colheita já feita" para registrar o que já foi colhido.', 0, 1]
+OK  A-04 OS-0440 Liberadas: "Cancelar sem execução" some depois da carga recebida (colheita com carga é execução) · ['OS-0440', ['×', 'Iniciar execução', 'Cancelar sem execução', 'INSUMOS E DOSES', 'ATIVIDADE Colheita de frutas · Colheita · out/26 · Equipe de colheita (10 pessoas) + trator com carreta', 'SITUAÇÃO ATUAL Liberada. Próximo passo: iniciar na janela a partir de 28/09/2026.', 'ORIGEM 4 registros'], ['×
+OK  revisão: nenhuma página com erro de JS
+== unid · UNID-PROD: unidade de produtividade selecionável (docs/unidades-produtividade §7; AC-c, AC-g, AC-h)
+OK  AC-g seletor "Unidade de produtividade · Mamão Formosa" na barra da tabela, no Padrão, com kg/ha, sc 60 e cx 10 (sem t/ha repetido) · {'v': 'padrao', 'lab': 'Unidade de produtividade · Mamão Formosa', 'opts': ['padrao', 'kg', 'sc60', 'cx10'], 'dis': [], 'w': 202, 'h': 32, 'fs': '12.5px', 'nota': '', 'foco': False}
+OK  AC-g Tab a partir da busca chega ao seletor sem sair da barra (6 Tabs) · [['BUTTON', 'Todas 5', True, False], ['BUTTON', 'Sem previsão 4', True, False], ['BUTTON', 'Colhida 1', True, False], ['BUTTON', 'Em colheita 1', True, False], ['BUTTON', 'Prevista 1', True, False], ['SELECT', 'Padrão da cultura · t/ha kg/ha sc 60 kg/', True, True]]
+OK  AC-g seta para baixo escolhe kg/ha: Pivô 19 "484,89 kg/ha · ciclo parcial" e o total "701,52 kg/ha ponderada"; foco continua no seletor · [{'v': 'kg', 'lab': 'Unidade de produtividade · Mamão Formosa', 'opts': ['padrao', 'kg', 'sc60', 'cx10'], 'dis': [], 'w': 202, 'h': 32, 'fs': '12.5px', 'nota': '', 'foco': True}, '484,89 kg/ha · ciclo parcial', '701,52 kg/ha ponderada sobre 137,9 ha colhidos']
+OK  AC-g Enter não dispara ação: nada gravado no cenário, nenhum painel aberto, filtros e linhas iguais, kg/ha mantido · [{'v': 'kg', 'lab': 'Unidade de produtividade · Mamão Formosa', 'opts': ['padrao', 'kg', 'sc60', 'cx10'], 'dis': [], 'w': 202, 'h': 32, 'fs': '12.5px', 'nota': '', 'foco': True}, {'rows': ['Mamão Formosa', 'Pivô 19 Tainung 1', 'Pivô 6 Tainung 1', 'Pivô 2 UENF/Caliman 01', 'Pivô 4 Tainung 1', 'Pivô 9
+OK  AC-g 390 px: seletor com alvo ≥ 44 × 44 px e fonte de 16 px, sem rolagem horizontal; cartões do Pivô 19 e do Mamão em kg/ha · [{'v': 'kg', 'lab': 'Unidade de produtividade · Mamão Formosa', 'opts': ['padrao', 'kg', 'sc60', 'cx10'], 'dis': [], 'w': 244, 'h': 44, 'fs': '16px', 'nota': '', 'foco': False}, [390, 390], ['MAMÃO FORMOSA · 701,52 KG/HA PONDERADA SOBRE 137,9 HA', 'Pivô 19 · Mamão Formosa 484,89 kg/ha Previsão 72,9 
+     estado antes/depois das 20 trocas: {"rows": ["Mamão Formosa", "Pivô 19 Tainung 1"], "q": ["Por talhão", "Em colheita 1", ""], "fch": 1, "pe": "7", "pan": "Pivô 19 · Mamão Formosa Tainung 1", "so": "PRODUTIVIDADE ▲"}
+OK  AC-c a pesagem da CG-2108 (comando real) gravou o cenário antes da medição · Recebida
+OK  AC-c 20 trocas pelo teclado (10 × seta para baixo e para cima): localStorage, menos a preferência, igual byte a byte · [126915, 126915]
+OK  AC-c R-U11 filtro rápido "Em colheita", filtro por valor (Pivô 19 na lista), ordem, rascunho (perda 7) e foco no seletor iguais depois das trocas · ['ok', [['kg', True, 1], ['kg', True, 1]], {'rows': ['Mamão Formosa', 'Pivô 19 Tainung 1'], 'q': ['Por talhão', 'Em colheita 1', ''], 'fch': 1, 'pe': '7', 'pan': 'Pivô 19 · Mamão Formosa Tainung 1', 'so': 'PRODUTIVIDADE ▲'}, {'rows': ['Mamão Formosa', 'Pivô 19 Tainung 1'], 'q': ['Por talhão', 'Em co
+OK  AC-g ir ao Estoque de produto e voltar: o seletor e as células continuam em kg/ha · [{'v': 'kg', 'lab': 'Unidade de produtividade · Mamão Formosa', 'opts': ['padrao', 'kg', 'sc60', 'cx10'], 'dis': [], 'w': 202, 'h': 32, 'fs': '12.5px', 'nota': '', 'foco': False}, '645,32 kg/ha · ciclo parcial']
+OK  AC-g preferência por perfil × cultura: Caio vê o Padrão (t/ha); voltando à Ana, kg/ha · ['padrao', '0,65 t/ha · ciclo parcial', 'kg', '645,32 kg/ha · ciclo parcial']
+OK  AC-h Pivô 19: o mesmo número em kg/ha na linha, no kv Produtividade, nos passes e no cartão; kv "Unidade de produtividade kg/ha · Padrão da cultura: t/ha" · ['645,32 kg/ha', 'pivô 19 · mamão formosa tainung 1 em colheita lagoa grande · safra mamão 2026/27 · 75,11 ha · meta 50.000 kg/ha/ano × próximo passo publicar s40 e s41 · ana (agrônoma). previsão vigente 72,9 t · s39 (v1) colhido no ciclo 48,47 t produtividade 645,32 kg/ha parcial cargas a receber 0
+OK  AC-h contexto = cultura do painel aberto: "Unidade de produtividade · Soja"; com kg/ha, a Referência do T1-A mostra "meta 3.840 kg/ha"; o Mamão fica na escolha dele · [{'v': 'padrao', 'lab': 'Unidade de produtividade · Soja', 'opts': ['padrao', 'kg', 't'], 'dis': [], 'w': 238, 'h': 32, 'fs': '12.5px', 'nota': '', 'foco': False}, 'meta 3.840 kg/ha —', 'kg', '645,32 kg/ha · ciclo parcial']
+OK  AC-h entre telas: a Soja em kg/ha escolhida no COLH aparece em kg/ha no Planejar safra ("3.840 kg/ha" na Meta do T1-A; seletor "Unidade de produtividade · Soja") · [{'v': 'kg', 'lab': 'Unidade de produtividade · Soja', 'opts': ['padrao', 'kg', 't'], 'dis': [], 'w': 238, 'h': 32, 'fs': '12.5px', 'nota': '', 'foco': False}, '3.840 kg/ha']
+OK  AC-c SAF: 20 trocas pelo teclado não mudam meta nem unidade gravadas de nenhum cultivo, nem o localStorage (menos a preferência); foco no seletor · ['[["c1","T1-A",64,"sc/ha"],["c2","T1-B",62,"sc/ha"],["c3","T2",63,"sc/ha"],["c4","T4",60,"sc/ha"],["c5","T3",62,"sc/ha"],["c6","P1",66,"sc/ha"],["c7","P2",66,"sc/ha"],["c8","T7",45,"t/ha/ano"],["c9","C', {'v': 'kg', 'lab': 'Unidade de produtividade · Soja', 'opts': ['padrao', 'kg', 't'], 'dis': [],
+OK  R-U06 com t/ha escolhido, o painel do T1-A abre "3,84" e "t/ha · Padrão da cultura: sc/ha (60 kg)"; salvar sem mexer mantém {64, sc/ha} · [['3,84', 't/ha · Padrão da cultura: sc/ha (60 kg)'], [64, 'sc/ha']]
+OK  R-U06 Dividir do T1 em t/ha: cada parcela abre na unidade da preferência (3,84 e 3,72 t/ha); salvar sem mexer mantém {64, sc/ha} e {62, sc/ha}, linha a linha · [['3,84', '3,72'], ['t/ha', 't/ha'], [[64, 'sc/ha'], [62, 'sc/ha']]]
+OK  recusa: meta "abc" não é número; nada gravado ({64, sc/ha}) · ['Corrija os campos destacados; o que você preencheu foi mantido. | Use um número (ex.: 12,5).', [64, 'sc/ha']]
+OK  D-U20 com o painel aberto e 3,9 digitado em t/ha, trocar o seletor para kg/ha não muda o campo (3,9 · t/ha); salvar grava {3,9, t/ha}; a tabela mostra "3.900 kg/ha" · [['3,9', 't/ha · Padrão da cultura: sc/ha (60 kg)'], [3.9, 't/ha'], '3.900 kg/ha']
+OK  R-U06 digitar 3,85 com t/ha grava {3,85, t/ha}; no Padrão a tabela mostra "64,17 sc/ha"; 20 trocas depois, o mesmo texto e o mesmo {3,85, t/ha} (sem deriva) · [[3.85, 't/ha'], '64,17 sc/ha', [3.85, 't/ha'], '64,17 sc/ha']
+OK  R-U06 T1-B (62 sc/ha) aberto em kg/ha mostra "3720"; trocar a cultura para Mamão mantém "3720" com "kg/ha/ano"; salvar grava {3720, kg/ha/ano} (não t/ha/ano) · [['3720', 'kg/ha · Padrão da cultura: sc/ha (60 kg)'], ['3720', 'kg/ha/ano · Padrão da cultura: t/ha/ano'], [3720, 'kg/ha/ano'], '3.720 kg/ha/ano']
+OK  AC-g SAF a 390 px: seletor com alvo ≥ 44 px e sem rolagem horizontal · [{'v': 'kg', 'lab': 'Unidade de produtividade · Soja', 'opts': ['padrao', 'kg', 't'], 'dis': [], 'w': 244, 'h': 44, 'fs': '16px', 'nota': '', 'foco': False}, [390, 390]]
+OK  R-U05 café da roça pesado (12.000 L, 6.000 kg, 5 ha): com kg/ha, "kg/ha a apurar · 1.200,00 kg/ha de Café da roça" (o beneficiado continua a apurar) · [{'v': 'padrao', 'lab': 'Unidade de produtividade · Café', 'opts': ['padrao', 'kg', 't', 'sc60'], 'dis': [], 'w': 238, 'h': 32, 'fs': '12.5px', 'nota': '', 'foco': False}, 'kg/ha a apurar · 1.200,00 kg/ha de Café da roça']
+OK  R-U05 recusa: sem o peso do fruto, a célula mostra só "2.400 L/ha de Café da roça" e a nota diz "kg/ha indisponível para Café da roça: falta peso ou conversão medida" · ['kg/ha a apurar · 2.400 L/ha de Café da roça', {'v': 'kg', 'lab': 'Unidade de produtividade · Café', 'opts': ['padrao', 'kg', 't', 'sc60'], 'dis': [], 'w': 238, 'h': 32, 'fs': '12.5px', 'nota': 'kg/ha indisponível para Café da roça: falta peso ou conversão medida', 'foco': False}]
+FALHOU AC-h Mapa: a camada Colheita e produtividade mostra a mesma unidade · camada na barra: falta ligar ao conversor (P5)
+OK  unid: nenhuma página com erro de JS
+RESULTADO: FALHOU 92/93
+=== fim producao_fluxo_test.py rc=1 17:44:11
+=== regras_toque_test.py 17:44:11
+OK    R1 GE-02 390 px: toque curto no ⓘ "Regras desta tela" abre a dica com as regras; tocar de novo fecha
+OK    R2 Mapa 390 px: toque curto no ⓘ da camada abre a dica com a fonte
+OK    R3 alvo do ⓘ ≥ 44 × 44 px no celular (regras e camada)
+OK    R4 1440 px: foco pelo teclado abre e Escape fecha; mouse sobre o ⓘ abre
+OK    R5 sem erro de JS
+RESULTADO: 5 ok · 0 falhas
+=== fim regras_toque_test.py rc=0 17:44:37
+=== solo_rev_test.py 17:44:37
+OK  A1 base: O.S. da Calagem incluída pelo LAU-2063 no T2 em A liberar · OS-0440
+OK  A1 laudo novo do T2 (LAU-2073) com a O.S. em A liberar: o lote oferece Calagem 1,32 t/ha (era 1,20) e grava; uma só calagem ativa · [[['c3|solo:LAU-2073:cal|Calcário dolomítico', 1.32, 1.2, '']], '1 sugestão usada · Calcário dolomítico +35,76 t.', ['c3|solo:LAU-2073:cal|Calcário dolomítico=1.32']]
+OK  A1 a O.S. da calagem antiga mostra "Plano mudou pela análise · 1,32 t/ha (O.S. 1,2)" e o ajuste abre com 1,32 · [['Ajustar antes de liberar'], 'OS-0440 · Adubação a lanço · Calagem × A liberar Falta insumo · Calcário dolomítico Plano mudou pela análise · 1,32 t/ha (O.S. 1,2) T2 · 298 ha · janela a partir de 30/09/2026 · — A liberar Liberadas Em execução Em conferência Encerradas PRÓXIMO PASSO O plano mudou pe
+OK  A1 "Salvar ajuste" grava a dose do laudo novo na mesma O.S. (1,32 t/ha × 298 ha = 393,36 t) e o selo some · ['1,32', ['A liberar', 1.32, 393.36], 'OS-0440 ajustada para v2. A liberação continua impedida.']
+OK  A1 Nova ordem da Calagem do LAU-2073 no T2: recusada ("Já existe … para a calagem deste cultivo … ajuste a dose nela"); uma só O.S. de calagem · [1, 'Nova ordem × Escolha safra, cultivo e atividade do plano. A ordem nasce em A liberar; o agrônomo libera e pode ajustar antes. Corrija os campos destacados; o que você preencheu foi mantido. Safra Selecione a safra Safra 2026/27 Safrinha 2027 Safra Mamão 2026/27 Cultivo Selecione o cultivo T1-A 
+OK  A1 com a O.S. da calagem liberada, o laudo mais novo (LAU-2074) não oferece outra calagem; o AG-02 diz por quê · [0, 'USO NO PLANO Clique na linha para ver o porquê. Usar a sugestão é no Planejar safra. 3 de 3 SAFRA · TALHÃO ⇅ ATIVIDADE · PRODUTO ⇅ PADRÃO → SUGESTÃO ⇅ NO TALHÃO ⇅ ESTADO ⇅ Safra 2026/27 T2 · 298 ha Calagem Calcário dolomítico — → incluir 1,41 t/ha +26,82 t não aplicável: OS-0440 já liberada (ca
+OK  A2 a aba com o rascunho velho (Incluir calagem do LAU-2063) salva depois da outra: recusado ("a análise mudou: LAU-2063 substituído pelo LAU-2073 … Reabra o painel"), nada gravado · ['1 sugestão usada · Calcário dolomítico +393,36 t.', 'Calagem incluída (1,20 t/ha) no T2: não aplicável, a análise mudou: LAU-2063 substituído pelo LAU-2073. Reabra o painel. Nada foi gravado.', ['c3|solo:LAU-2073:cal|Calcário dolomítico=1.32']]
+OK  A3 com o laudo novo do T2 (V 69,91 %, K 30): o lote tem "retirar a inclusão" da Calagem e KCl 180 kg/ha · [['retirar', True, 'Calcário dolomítico', 0], ['dose', False, 'KCl 60%', 180]]
+OK  A3 painel do T2: "Análise sugere retirar a Calagem incluída (V já atinge 60 %) · −357,6 t" e "Análise sugere 180 kg/ha · +53.640 kg no talhão" sob o KCl retirado · Insumos e doses de T2 · Soja 58 W, 298 ha × Plano padrão: Soja alta tecnologia v6 · plantio 18/10/2026. Mude a dose, retire ou inclua insumos só neste talhão. O plano padrão e os outros talhões não mudam. Análise sugere retirar a Calagem incluída (V já atinge 60 %) · −357,6 t · Por quê · Retirar pel
+OK  A3 salvar: a calagem sai ("retirada pelo LAU-2073"), o T2 volta a ter KCl 180 pela análise; demanda: calcário 0 e KCl +17.880 kg sobre o padrão · [['retirada pelo LAU-2073', 180], 0, 17880, '2 sugestões da análise usadas em T2. Plano operacional, recursos e demanda recalculados; o plano padrão e os outros talhões não mudaram.']
+OK  A5 com a OS-0440 em execução: KCl 150 travado ("pela análise · LAU-2061 · OS-0440 em execução: vale a dose da O.S."), sem Restaurar dose · [[True, '150'], ['×', '', '', 'Retirar', 'Retirar', 'Retirar', '+ Incluir insumo nesta atividade', '', '', 'Retirar', 'Retirar', '+ Incluir insumo nesta atividade'], 'KCl 60% pela análise · LAU-2061 · OS-0440 em execução: vale a dose da O.S. 120,00 kg/ha kg/ha R$ 2,40/kg R$ 360,00/ha + Incluir insum
+OK  A6 Mapa (Pivô 12): o passo "Ajustar antes de liberar" da OS-0502 é o link que abre o ajuste na O.S., sem botão que só muda o estado do Mapa · [['OS.dc.html#OS-0502:ajustar'], 0]
+OK  A6 Caio (PCP) na OS-0502 com o plano mudado: nenhum primário, o texto do plano mudado e o bloqueio de estoque com quem resolve (Suprimentos) · [[], 'PRÓXIMO PASSO O plano mudou pela análise (LAU-2071): Calcário dolomítico filler 1.800 kg/ha; a O.S. tem 2.000 kg/ha. O agrônomo ajusta antes de liberar ou libera com a dose da O.S. Liberar bloqueado: saldo insuficiente de Calcário dolomítico filler: 60.000 kg disponíveis para 96.940 kg. Quem r
+OK  A6 Caio com o estoque coberto: o impedimento passa a ser de papel ("decisão de Ana …"), sem primário acionável; "Liberar para execução" indisponível com o motivo · [[], ['Liberar para execução', 'Ajustar antes de liberar'], 'PRÓXIMO PASSO O plano mudou pela análise (LAU-2071): Calcário dolomítico filler 1.800 kg/ha; a O.S. tem 2.000 kg/ha. O agrônomo ajusta antes de liberar ou libera com a dose da O.S. Liberar para execução: decisão de Ana (agrônoma e gestora)
+OK  A6 Ana com o estoque coberto: primário "Ajustar antes de liberar", secundário "Liberar com 2.000 kg/ha" e nenhum bloqueio · [['Ajustar antes de liberar'], 'PRÓXIMO PASSO O plano mudou pela análise (LAU-2071): Calcário dolomítico filler 1.800 kg/ha; a O.S. tem 2.000 kg/ha. O agrônomo ajusta antes de liberar ou libera com a dose da O.S. Pendência com Suprimentos · calcário chega em 30/09 Ajustar antes de liberar Liberar co
+OK  A6 "Liberar com 2.000 kg/ha" libera de fato (R20): CMD-42 grava 2.000 kg/ha e CMD-06 · [['CMD-42|v1 aprovada por Ana (agrônoma) às 17:48 · 48,47 ha · Calcário dolomítico filler 2.000 kg/ha (CMD-42)', 'CMD-06|v1 liberada por Ana (gestora) às 17:48 · REQ-041 reservada no Estoque (CMD-06)'], 'OS-0502 liberada. REQ-041 reservou no Estoque: Calcário dolomítico filler 96.940 kg. v1 aprovada
+OK  A7 digitar 15 e depois 150 (a mesma dose do uso) e salvar: o uso continua ativo, sem "uso desfeito", e a demanda segue +4.800 kg · ['Sem mudanças em T1-A: valem o plano padrão e 1 uso da análise. Plano operacional, recursos e demanda recalculados; o plano padrão e os outros talhões não mudaram.', 'ativo']
+OK  A7 (S4) salvar sem mudança com o uso ativo: "Sem mudanças em T1-A: valem o plano padrão e 1 uso da análise." · Sem mudanças em T1-A: valem o plano padrão e 1 uso da análise. Plano operacional, recursos e demanda recalculados; o plano padrão e os outros talhões não mudaram.
+OK  MY lote com o T1-A em ajuste manual (140): usar a sugestão apaga o ajuste da sessão e vale 150 pela análise (demanda +3.200 → +4.800 kg) · [3200, 4800, 'KCl 60% pela análise · LAU-2061 120,00 kg/ha kg/ha R$ 2,40/kg R$ 360,00/ha Restaurar dose Retirar + Incluir insumo nesta atividade DAP +25 · 09/11/2026 Herbicid']
+OK  A8 AG-02 com o Caio: LAU-2050 aguardando validação sem "Validar laudo" e com "Decisão de Ana (agrônoma): só o agrônomo valida" · [['×', '', '', 'ATRIBUTO ⇅', '', 'VALOR ⇅', '', 'MÉTODO · EXTRATOR ⇅', '', 'QUALIFICADOR · LD ⇅', '', 'ORIGEM ⇅', '', 'Fechar'], 'LAU-2050 · C1 · 0–20 cm Aguardando validação Agrolab · coleta 19/09/2026 × PRÓXIMO PASSO Decisão de Ana (agrônoma): só o agrônomo valida. Confira o extraído com o origina
+OK  A8 com a Ana o primário "Validar laudo" continua · ['Validar laudo']
+OK  nenhum erro de JS
+RESULTADO: OK 22/22
+=== fim solo_rev_test.py rc=0 17:49:55
+=== ma_atrito_test.py 17:49:55
+  ok  (a) Zé conclui a OM-0234 (5 tarefas), web: 12 cliques · 4 teclas · 0 trocas (§8 depois: 12 · 4 · 0)
+  ok  (a) Zé conclui a OM-0233 com teste e declara apto, web: 8 cliques · 4 teclas · 0 trocas (§8 depois: 8 · 4 · 0)
+  ok  (b) SM-0150 → corretiva liberada: 6 cliques · 1 teclas · 0 trocas (§8 depois: 6 · 1 · 0)
+  ok  (b) INSP-104 → OM-0234, resolvendo o conflito: 6 cliques · 0 teclas · 0 trocas (§8 depois: 6 · 0 · 0)
+  ok  (b) NC-0912 → preventiva liberada: 6 cliques · 0 teclas · 0 trocas (§8 depois: 6 · 0 · 0)
+  ok  (c) ver o que vence: 2 cliques · 0 teclas · 0 trocas (§8 depois: 2 · 0 · 0)
+  ok  (c) programar: 3 cliques · 0 teclas · 0 trocas (§8 depois: 3 · 0 · 0)
+  ok  (c) liberar as 3 (acumulado): 11 cliques · 0 teclas · 0 trocas (§8 depois: 12 · 0 · 0)
+  ok  (d) aptos agora: 2 cliques · 0 teclas · 0 trocas (§8 depois: 2 · 0 · 0)
+  ok  (d) custo do mês: 2 cliques · 0 teclas · 0 trocas (§8 depois: 2 · 0 · 0)
+  ok  (d) custo por ativo: 2 cliques · 0 teclas · 0 trocas (§8 depois: 2 · 0 · 0)
+  ok  (d) custo de uma OM (Manutenção · ativo › Ordens): 3 cliques · 0 teclas · 0 trocas (§8 depois: 3 · 0 · 0)
+  ok  (e) abastecimento, web: 8 cliques · 7 teclas · 0 trocas (§8 depois: 9 · 7 · 0)
+
+TABELA (executado no candidato · convenção do §8):
+  (a) Zé conclui a OM-0234 (5 tarefas), web                     12 ·  4 · 0   (§8 depois: 12 · 4 · 0)
+  (a) Zé conclui a OM-0233 com teste e declara apto, web         8 ·  4 · 0   (§8 depois: 8 · 4 · 0)
+  (b) SM-0150 → corretiva liberada                               6 ·  1 · 0   (§8 depois: 6 · 1 · 0)
+  (b) INSP-104 → OM-0234, resolvendo o conflito                  6 ·  0 · 0   (§8 depois: 6 · 0 · 0)
+  (b) NC-0912 → preventiva liberada                              6 ·  0 · 0   (§8 depois: 6 · 0 · 0)
+  (c) ver o que vence                                            2 ·  0 · 0   (§8 depois: 2 · 0 · 0)
+  (c) programar                                                  3 ·  0 · 0   (§8 depois: 3 · 0 · 0)
+  (c) liberar as 3 (acumulado)                                  11 ·  0 · 0   (§8 depois: 12 · 0 · 0)
+  (d) aptos agora                                                2 ·  0 · 0   (§8 depois: 2 · 0 · 0)
+  (d) custo do mês                                               2 ·  0 · 0   (§8 depois: 2 · 0 · 0)
+  (d) custo por ativo                                            2 ·  0 · 0   (§8 depois: 2 · 0 · 0)
+  (d) custo de uma OM (Manutenção · ativo › Ordens)              3 ·  0 · 0   (§8 depois: 3 · 0 · 0)
+  (e) abastecimento, web                                         8 ·  7 · 0   (§8 depois: 9 · 7 · 0)
+  (a) no app e (e) no app: ma_app_fluxo_test.py mede 7 e 6 toques.
+RESULTADO: 13/13 ok
+=== fim ma_atrito_test.py rc=0 17:51:50
+=== saf_capacidade_simetrica_test.py 17:51:51
+OK    · 1440px preparo: Editar S2627 e gravar o período 01/09/2026 a 12/07/2027 pela tela
+OK    · 1440px preparo: Editar S27SF e gravar o período 01/09/2026 a 12/07/2027 pela tela
+OK    · 1440px navegação: S2627 e depois S27SF abertas na etapa 3 pela tela
+OK    · 1440px Tratores jul/27: a mesma ocupação ao alternar S2627 ↔ S27SF (61,7 h de 920,0 h (7 %)), igual ao espelho
+OK    · 1440px Operadores e equipe jul/27: a mesma ocupação ao alternar S2627 ↔ S27SF (93,7 h de 1.620,0 h (6 %)), igual ao espelho
+OK    · 1440px Tratores jul/27 = 61,7 h nas duas vistas (era 140,3 h com a S2627 aberta)
+OK    · 1440px S2627: a colheita da Safrinha de 14 e 15/07 aparece fora da conta na linha do filtro e no aria-label da célula
+OK    · 1440px S27SF: a mesma carga aparece fora da conta como desta safra, depois do fim
+OK    · 1440px veredito da S2627: "2 ocorrências da Safrinha 2027 depois do fim dela (Tratores 78,6 h e Operadores e equipe 157,2 h)", sem verde
+OK    · 1440px veredito da S27SF: "Fora da conta: 2 ocorrências depois do fim da safra"
+OK    · 1440px outra fazenda (Safra Mamão, LG2627) e encerrada (Safra 2025/26) não entram; cada vista soma só a outra aberta da Santa Rita
+OK    · 1440px custo preservado: o custo de operação da S27SF (R$ 180.888,10) inclui as colheitas fora da conta
+OK    · 1440px sem rolagem lateral nas duas vistas, com o filtro ativo
+OK    · 1440px g_cap com os mesmos meses nas duas vistas, os do período gravado (set/26 a jul/27, 11); antes a S27SF ficava em fev/27 – jul/27
+OK    · 1440px aviso do recurso no singular: "Tratores: 1 unidade, jornada" e "Operadores e equipe: 1 pessoa, jornada" (era "1 unidades")
+OK    · 1440px R1 pela tela (Safrinha em ago/27): "nenhuma ocorrência desta safra cai no período dela (01/08/2027 a 31/08/2027)" com as 14 ocorrências antes do início; nunca "fora do calendário"
+OK    · 1440px sem erro de JS
+OK    · 390px preparo: Editar S2627 e gravar o período 01/09/2026 a 12/07/2027 pela tela
+OK    · 390px preparo: Editar S27SF e gravar o período 01/09/2026 a 12/07/2027 pela tela
+OK    · 390px navegação: S2627 e depois S27SF abertas na etapa 3 pela tela
+OK    · 390px Tratores jul/27: a mesma ocupação ao alternar S2627 ↔ S27SF (61,7 h de 920,0 h (7 %)), igual ao espelho
+OK    · 390px Operadores e equipe jul/27: a mesma ocupação ao alternar S2627 ↔ S27SF (93,7 h de 1.620,0 h (6 %)), igual ao espelho
+OK    · 390px Tratores jul/27 = 61,7 h nas duas vistas (era 140,3 h com a S2627 aberta)
+OK    · 390px S2627: a colheita da Safrinha de 14 e 15/07 aparece fora da conta na linha do filtro e no aria-label da célula
+OK    · 390px S27SF: a mesma carga aparece fora da conta como desta safra, depois do fim
+OK    · 390px veredito da S2627: "2 ocorrências da Safrinha 2027 depois do fim dela (Tratores 78,6 h e Operadores e equipe 157,2 h)", sem verde
+OK    · 390px veredito da S27SF: "Fora da conta: 2 ocorrências depois do fim da safra"
+OK    · 390px outra fazenda (Safra Mamão, LG2627) e encerrada (Safra 2025/26) não entram; cada vista soma só a outra aberta da Santa Rita
+OK    · 390px custo preservado: o custo de operação da S27SF (R$ 180.888,10) inclui as colheitas fora da conta
+OK    · 390px sem rolagem lateral nas duas vistas, com o filtro ativo
+OK    · 390px g_cap com os mesmos meses nas duas vistas, os do período gravado (set/26 a jul/27, 11); antes a S27SF ficava em fev/27 – jul/27
+OK    · 390px aviso do recurso no singular: "Tratores: 1 unidade, jornada" e "Operadores e equipe: 1 pessoa, jornada" (era "1 unidades")
+OK    · 390px R1 pela tela (Safrinha em ago/27): "nenhuma ocorrência desta safra cai no período dela (01/08/2027 a 31/08/2027)" com as 14 ocorrências antes do início; nunca "fora do calendário"
+OK    · 390px sem erro de JS
+OK    · PL-05 pelo Meu dia (Reprogramar saldo → Ver capacidade): abre a etapa 3 da Safra 2026/27 com o veredito da capacidade, não o PL-03 de números fixos
+OK    · PL-02 "Ver capacidade" abre a etapa 3 da Safra 2026/27 (era o PL-03)
+OK    · PL-04 "Ver capacidade" abre a etapa 3 da Safra 2026/27 (era o PL-03)
+OK    · nenhuma página do _render leva ao PL-03 (capacidade com números fixos)
+
+RESULTADO: 38 ok · 0 falhas
+=== fim saf_capacidade_simetrica_test.py rc=0 17:53:20
+=== nav_modulos_test.py 17:53:20
+OK    N1 barra: um ícone por módulo (o Mapa primeiro, sem o logotipo repetido) + Outros acessos, sem submenu nem expandir, ≤ 72 px, sem texto visível, nome acessível e dica
+OK    N1 O.S. aberta: o ícone Agrícola marcado (aria-current) e só ele
+OK    N1 hover no ícone Suprimentos: a dica mostra "Suprimentos"
+FALHA N2 6 telas de entrada (Agrícola, Comercial, Suprimentos, Configurações, Manutenção, Crédito): cartões só com ícone e nome curto, na ordem do menu (Agrícola: do fluxo); caminho sem repetir o título · [['Crédito', [['GE-08.dc.html#vis=ficha', 'Ficha do grupo', True], ['GE-08.dc.html#vis=dossie', 'Dossiês', True], ['GE-08.dc.html#vis=contratos', 'Pedidos e contratos', True], ['GE-08.dc.html#vis=liberacoes', 'Liberações e garantias', True]], [['GE-08.dc.html#vis=contratos', 'Contratos', True], ['GE-08.dc.html#vis=liberacoes', 'Liberações', True], ['GE-08.dc.html#vis=dossie', 'Dossiê', True], ['GE-08.dc.html#vis=documentos', 'Documentos', True]], '']]
+OK    N3 cada tela dos módulos tem "‹ Módulo" (≥ 36 px) para a tela de entrada
+OK    N3 um toque no cartão abre a tela e "‹ Agrícola" volta, com o foco no cartão aberto (ponto útil da volta)
+OK    N3 cartões das telas de entrada: link nativo dentro de item de lista
+OK    N2 o Mapa abre direto; a Manutenção abre a sua tela de entrada com um cartão por visão (Painel · Sem ordem · Ordens · Ativos · Planos)
+OK    N4 Outros acessos: app de campo, portal do parceiro, onboarding e backoffice
+OK    N5 nenhuma tela aponta para o índice (Main.dc.html); sem o logotipo "Início (Mapa)": o 1º ícone da barra é o Mapa
+OK    N6 o avatar troca o perfil (seletor por cima do avatar, ≥ 32 px) e a dica diz o perfil
+OK    N7 busca em pílula: sem caixa no campo de dentro (hover e foco); o contorno da pílula dá o retorno
+OK    N8 O.S.: tabela na largura natural (nunca menor que o contêiner) e cada selo de Fase em uma linha
+OK    N9 390 px: sem rolagem lateral da página (telas de entrada e O.S.)
+OK    N9 sem erro de JS
+RESULTADO: 14 ok · 1 falhas
+=== fim nav_modulos_test.py rc=1 17:55:07
+=== paginas_scan_test.py 17:55:07
+OK    S0 a captura de erro funciona (erro provocado é visto)
+OK    S1 148 páginas × 2 tamanhos sem erro de JS (erro, promessa rejeitada e console.error)
+OK    S2 sem rolagem lateral da página
+OK    S3 barra lateral sem submenu nem expandir
+OK    S4 cartões de bloco (480 medidos) com o conteúdo dentro da borda
+RESULTADO: 5 ok · 0 falhas (148 páginas)
+=== fim paginas_scan_test.py rc=0 18:02:03
+=== seta_padrao_test.py 18:02:03
+
+# Parte 2 (18:14–18:28): seta_padrao_test, credito_menu_test (com a espera corrigida em ba3f51f0; o render não muda) e dose_divergente_test.py nav
+=== seta_padrao_test.py 18:14:03
+# 1440 px · 148 telas + 12 estados · 425 controles de abrir/recolher · 1796 setas desenhadas (1383 de ir) · 17 telas com teclado medido
+# 1440 px · desenhos distintos da seta: 1
+     129 telas · rgb(101, 115, 106) | 16x16 | 1.75 | M6 3.5 10.5 8 6 12.5 | 0 0 16 16
+OK    A1440 nenhum triângulo de abrir como texto em botão, link, summary, [aria-expanded] ou começo de linha (telas com desvio: 0)
+OK    B1440 todo controle de abrir/recolher usa o componente da seta (425 controles; telas com desvio: 0)
+OK    C1440 uma seta só: rgb(101, 115, 106), 16×16 px, traço 1.75, o mesmo desenho (1796 setas; desenhos distintos: 1)
+OK    D1440 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 0)
+OK    E1440 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (17 telas; desvios: 0)
+OK    F1440 alvo da seta ≥ 24 px sem cobrir outro controle (telas com desvio: 0)
+OK    G1440 sem erro de JavaScript nem estado que não abriu
+# 390 px · 148 telas + 12 estados · 405 controles de abrir/recolher · 1647 setas desenhadas (1254 de ir) · 12 telas com teclado medido
+# 390 px · desenhos distintos da seta: 1
+     123 telas · rgb(101, 115, 106) | 16x16 | 1.75 | M6 3.5 10.5 8 6 12.5 | 0 0 16 16
+OK    A390 nenhum triângulo de abrir como texto em botão, link, summary, [aria-expanded] ou começo de linha (telas com desvio: 0)
+OK    B390 todo controle de abrir/recolher usa o componente da seta (405 controles; telas com desvio: 0)
+OK    C390 uma seta só: rgb(101, 115, 106), 16×16 px, traço 1.75, o mesmo desenho (1647 setas; desenhos distintos: 1)
+OK    D390 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 0)
+OK    E390 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (12 telas; desvios: 0)
+OK    F390 alvo da seta ≥ 44 px sem cobrir outro controle; botão com nome e seta ≥ 44 px de altura (telas com desvio: 0)
+OK    G390 sem erro de JavaScript nem estado que não abriu
+RESULTADO: 14 ok · 0 falhas
+=== fim seta_padrao_test.py rc=0 18:27:16
+=== credito_menu_test.py 18:27:16
+OK  C1 1440: o Crédito na barra abre a tela de entrada com um cartão por visão da GE-08
+OK  C2 1440 Ficha do grupo: só a parte do cartão (Ficha do grupo · Bens e avaliações), com indicadores pertinentes e "‹ Crédito"
+OK  C2D 1440: documentos acessíveis pela ficha
+OK  C2F 1440 Ficha do grupo: retorno preserva foco no cartão de origem
+OK  C2 1440 Dossiês: só a parte do cartão (Dossiê e consentimento), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 1440 Dossiês: retorno preserva foco no cartão de origem
+OK  C2 1440 Pedidos e contratos: só a parte do cartão (Solicitações e contratos), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 1440 Pedidos e contratos: retorno preserva foco no cartão de origem
+OK  C2 1440 Liberações e garantias: só a parte do cartão (Acompanhamento do CRE-0102), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 1440 Liberações e garantias: retorno preserva foco no cartão de origem
+OK  C3 1440: trocar a visão pelo endereço troca a parte sem recarregar
+OK  C4 1440: GE-08 sem visão no endereço (links de outras telas) mostra as quatro partes
+OK  C5 1440: sem rolagem lateral e sem erro de JS
+OK  C1 390: o Crédito na barra abre a tela de entrada com um cartão por visão da GE-08
+OK  C2 390 Ficha do grupo: só a parte do cartão (Ficha do grupo · Bens e avaliações), com indicadores pertinentes e "‹ Crédito"
+OK  C2D 390: documentos acessíveis pela ficha
+OK  C2F 390 Ficha do grupo: retorno preserva foco no cartão de origem
+OK  C2 390 Dossiês: só a parte do cartão (Dossiê e consentimento), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 390 Dossiês: retorno preserva foco no cartão de origem
+OK  C2 390 Pedidos e contratos: só a parte do cartão (Solicitações e contratos), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 390 Pedidos e contratos: retorno preserva foco no cartão de origem
+OK  C2 390 Liberações e garantias: só a parte do cartão (Acompanhamento do CRE-0102), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 390 Liberações e garantias: retorno preserva foco no cartão de origem
+OK  C3 390: trocar a visão pelo endereço troca a parte sem recarregar
+OK  C4 390: GE-08 sem visão no endereço (links de outras telas) mostra as quatro partes
+OK  C5 390: sem rolagem lateral e sem erro de JS
+RESULTADO: 26/26
+=== fim credito_menu_test.py rc=0 18:27:50
+=== TUDO
+=== dose_divergente_test.py nav 18:27:50
+  OK  preparo: OS-0430 liberada por Ana, insumos entregues e confirmados: Recebimento confirmado: Glifosato 480 320 L, 2,4-D 806 160 L, Óleo mineral 80 L.
+  OK  MB-03: sugestão 20/10/5; informado 20/0/0 fecha o turno e o aviso diz a divergência e quem revisa: ['20', '10', '5'] · Turno fechado: 10 ha em 1 h. A ordem continua em execução. Divergência de consumo/dose: 2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L · revisão técnica de Ana (agrônoma).
+  OK  recibo do turno no app: selo e planejado × informado com unidade, sem "S2": Turno fechado · OS-0430 · dia 1 · 10 ha em 1 h / Enviado · a ordem continua aberta / Divergência de consumo/dose / Consumo: Glifosato 480 20 L / 2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L · revisão técnica de Ana (agrônoma) / Realizado 10 de 160 ha · saldo 1
+  OK  app a 390 px sem rolagem horizontal
+  FALHA lista: selo por produto, quem resolve Ana (agrônoma) e a próxima ação: 
+  OK  Kanban (5 fases, sem coluna nova): cartão com o selo e a pendência: OS-0430 Dessecação pré-plantio T1-A · 160 ha 10/160 ha · 6 % · saldo 150 ha Divergência de consumo/dose · 2,4-D 806, Óleo mineral Ana (agrônoma) · revisar a divergência de dose do dia 1 Marcos · 25/09 (DAP −20)
+  FALHA painel: linha do dia 1 com planejado × informado, Aceitar com motivo e Registrar correção (perfil Ana): 
+  FALHA perfil Rui: sem os botões, a linha diz quem decide; comando direto recusado, nada gravado: Revisar a divergência de consumo/dose do dia 1 da OS-0430: decisão de Ana (agrônoma). Nada foi alterado.
+  FALHA aceitar sem motivo: erro junto ao campo, revisão continua pendente: 
+  FALHA Ana aceita com motivo: selo sai da lista, a linha mostra quem e quando; consumo informado preservado (Glifosato 480 20, 2,4-D 806 0, Óleo mineral 0): 
+  FALHA repetição sem efeito; outra decisão é conflito: Divergência de consumo/dose do dia 1 da OS-0430 aceita por Ana (agrônoma): Calda sem 2,4-D · A divergência do dia 1 da OS-0430 já foi revisada (aceita por Ana (agrônoma) às 18:28): ou
+  OK  turno de 150 ha com Óleo 50 L (75 L planejado) e envio para conferência: execução. Divergência de consumo/dose: Óleo mineral planejado 75 L × informado 50 L · revisão técnica de Ana (agrônoma). · OS-0430 enviada para conferência por Ana (gestora).
+  FALHA Em conferência: selo e encerramento bloqueado com quem resolve; sem "Conferir e encerrar": 
+  OK  Kanban em conferência: selo e pendência com Ana, sem "Sobras a receber": OS-0430 Dessecação pré-plantio T1-A · 160 ha 160/160 ha · 100 % · saldo 0 ha Divergência de consumo/dose · Óleo mineral Ana (agrônoma) · revisar a divergência de dose Marcos · 25/09 (DAP −20)
+  FALHA 390 px: Registrar correção grava a decisão, sem rolagem horizontal: 
+  FALHA Revisão técnica não substitui conferência diária
+7/16 ok · FALHAS: 9
+ - lista: selo por produto, quem resolve Ana (agrônoma) e a próxima ação: 
+ - painel: linha do dia 1 com planejado × informado, Aceitar com motivo e Registrar correção (perfil Ana): 
+ - perfil Rui: sem os botões, a linha diz quem decide; comando direto recusado, nada gravado: Revisar a divergência de consumo/dose do dia 1 da OS-0430: decisão de Ana (agrônoma). Nada foi alterado.
+ - aceitar sem motivo: erro junto ao campo, revisão continua pendente: 
+ - Ana aceita com motivo: selo sai da lista, a linha mostra quem e quando; consumo informado preservado (Glifosato 480 20, 2,4-D 806 0, Óleo mineral 0): 
+ - repetição sem efeito; outra decisão é conflito: Divergência de consumo/dose do dia 1 da OS-0430 aceita por Ana (agrônoma): Calda sem 2,4-D · A divergência do dia 1 da OS-0430 já foi revisada (aceita por Ana (agrônoma) às 18:28): ou
+ - Em conferência: selo e encerramento bloqueado com quem resolve; sem "Conferir e encerrar": 
+ - 390 px: Registrar correção grava a decisão, sem rolagem horizontal: 
+ - Revisão técnica não substitui conferência diária
+Traceback (most recent call last):
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/dose_divergente_test.py", line 85, in <module>
+    FALHAS += dose_divergente_nav.rodar()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/dose_divergente_nav.py", line 114, in rodar
+    conferir_dias(J,OS,[1,2])
+  File "/tmp/claude-0/mapaux/tools/prototipo/v37/gen37/conferencia_diaria_nav_helpers.py", line 14, in conferir_dias
+    assert J(f"(()=>{{const b=document.getElementById({json.dumps(fid+'_open')});if(!b)return false;b.click();return true}})()"),'Dia não oferece conferência'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Dia não oferece conferência
+=== fim dose_divergente_test.py nav rc=1 18:28:24
+=== F37B FIM

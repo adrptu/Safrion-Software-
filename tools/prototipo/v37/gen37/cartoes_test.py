@@ -188,8 +188,9 @@ try:
     kn = J("(()=>{const b=document.querySelector('[data-g2cd=\"g_itm\"] .g2cd-nk'); return b?[b.innerText.trim(), b.getAttribute('aria-expanded')]:null})()")
     J("document.querySelector('[data-g2cd=\"g_itm\"] .g2cd-nk').click()"); time.sleep(.4)
     c6 = ids_car('g_itm'); modo('g_itm', 'tabela'); t6 = ids_tab('g_itm')
-    chk('M2h CD-06 (árvore): os mesmos itens nos dois modos; o cartão do grupo recolhe e abre os filhos dentro dele, como a seta da Tabela',
-        t5 and c5 == t5 and kn and kn[1] == 'true' and len(c6) < len(c5) and c6 == t6, [t5[:6], c5[:6], kn, len(c5), len(c6), t6 == c6])
+    # TAB-12 (17/10/2026): o cartão do grupo nasce recolhido (antes, aberto) e a seta o abre: o clique aumenta a lista (antes recolhia)
+    chk('M2h CD-06 (árvore): os mesmos itens nos dois modos; o cartão do grupo nasce recolhido e a seta abre os filhos dentro dele, como a seta da Tabela',
+        t5 and c5 == t5 and kn and kn[1] == 'false' and len(c6) > len(c5) and c6 == t6, [t5[:6], c5[:6], kn, len(c5), len(c6), t6 == c6])
 
     # M6 · Atividades do plano (PA)
     abrir('PA.dc.html#plano=SOJA-AT', perfil='Ana', limpa=True)

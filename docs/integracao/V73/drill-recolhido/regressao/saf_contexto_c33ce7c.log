@@ -1,0 +1,11 @@
+OK  C1 1440: chip Lagoa Grande → "Nova safra" já vem com a Fazenda Lagoa Grande
+OK  C1b 1440: salvar cria a safra em Lagoa Grande e a faixa mostra a Lagoa Grande (chip ✓)
+OK  C2 1440: sem chip, "Nova safra" vem com o padrão (Santa Rita)
+OK  C3 1440: editar a Safra 2026/27 conserva a fazenda dela (Santa Rita), sem receber o filtro
+OK  C1 390: chip Lagoa Grande → "Nova safra" já vem com a Fazenda Lagoa Grande
+OK  C1b 390: salvar cria a safra em Lagoa Grande e a faixa mostra a Lagoa Grande (chip ✓)
+OK  C2 390: sem chip, "Nova safra" vem com o padrão (Santa Rita)
+OK  C3 390: editar a Safra 2026/27 conserva a fazenda dela (Santa Rita), sem receber o filtro
+OK  U1 abrir a safra (troca de etapa) realça e anuncia uma vez só
+OK  U2 sem erro de JS
+RESULTADO: 10/10

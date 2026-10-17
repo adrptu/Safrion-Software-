@@ -1,0 +1,2 @@
+drill_recolhido exit=0 1189s RESULTADO: 66 ok · 0 falhas
+FIM

@@ -30,7 +30,9 @@ try:
     chk('2 O.S.: OS-0418 A liberar com "Liberar bloqueado: sem lote de Ureia 45%", sem "Aguardando agrônomo", "Aprovada pelo agrônomo", AP-2201 nem "Revisar versão"',
         'Liberar bloqueado: sem lote de Ureia 45%' in po and not any(x in po for x in ('Aguardando agrônomo','Aprovada pelo agrônomo','AP-2201','Revisar versão')), po[:400])
     # 3 · Mapa na abertura: nenhuma decisão pendente; OS-0418 e OS-0430 a liberar pelo agrônomo; o T4 só com a máquina
-    ir('IN-04.dc.html',900); lb=J("(()=>{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('T4:')); return e?e.getAttribute('aria-label'):'';})()")
+    # MUX-F1 (17/10/2026): o nome acessível do talhão passou a ser o completo do pedido ("T4, 120 ha, …"); o talhão se acha por data-talhao e o
+    # rótulo da camada vem de data-rotulo, o mesmo texto que vinha depois de "T4: " (oráculo obsoleto na forma de achar; a asserção não muda)
+    ir('IN-04.dc.html',900); lb=J("(()=>{const e=[...document.querySelectorAll('svg [role=button]')].find(x=>x.getAttribute('data-talhao')==='T4'); return e?e.getAttribute('data-talhao')+': '+e.getAttribute('data-rotulo'):'';})()")
     nm=(J("(document.querySelector('[role=group][aria-label^=\"Indicadores de\"]')||{innerText:''}).innerText") or '').replace('\n',' ')
     chk('3 Mapa: sem "Decisões pendentes", "A liberar 2", cabeçalho sem "decis" e T4 "OS-0420 impedida"', 'Decisões pendentes' not in nm and 'A liberar 2' in nm and 'decis' not in head() and lb=='T4: OS-0420 impedida', [nm,head(),lb])
     # 4-5 · devolução de sobras vai ao Estoque do menu (nunca ao módulo oculto SU-07)

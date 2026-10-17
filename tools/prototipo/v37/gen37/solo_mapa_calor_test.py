@@ -34,7 +34,9 @@ def abre(ctx, lg=True):
     time.sleep(2.0)
 def faixa(): return J("(document.querySelector('[role=group][aria-label^=Indicadores]')||{}).innerText||''").replace('\n', ' ')
 def rot_lg(pid): return J(f"(window.__LGI&&window.__LGI.markers['{pid}'])?window.__LGI.markers['{pid}'].getElement().innerText.replace(/\\s+/g,' ').trim():''")
-def rot_sr(t): return J(f"(()=>{{const e=[...document.querySelectorAll('svg [aria-label]')].find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); return e?e.getAttribute('aria-label').slice({len(t)+2}):'';}})()") or ''
+# MUX-F1 (17/10/2026): o nome acessível do talhão passou a ser o completo do pedido ("T4, 120 ha, …"); o talhão se acha por data-talhao e o
+# rótulo da camada vem de data-rotulo, o mesmo texto que vinha depois de "T4: " (oráculo obsoleto na forma de achar; a asserção não muda)
+def rot_sr(t): return J(f"(()=>{{const e=[...document.querySelectorAll('svg [aria-label]')].find(x=>x.getAttribute('data-talhao')==='{t}'); return e?e.getAttribute('data-rotulo'):'';}})()") or ''
 def painel(): return J("(()=>{const a=[...document.querySelectorAll('main aside')].find(x=>x.getClientRects().length); return a?a.innerText.replace(/\\s+/g,' '):'';})()") or ''
 SOLO = 'Análises de solo'
 try:

@@ -1,0 +1,2 @@
+saf_fazenda_recolhida exit=1 106s RESULTADO: 2 ok · 16 falhas · E1 1440 uma fazenda: a tabela agrupa por fazenda; faixa "Santa Rita" recolhida com área e contagem; nenhum talhão à vista; sem filtro por fazenda; E2 1440 a seta da 
+FIM

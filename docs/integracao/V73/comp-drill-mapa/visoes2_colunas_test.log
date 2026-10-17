@@ -1,0 +1,15 @@
+OK  C1 O.S. abre com exatamente as 6 colunas de "Abre com", na ordem
+OK  C2 botão "Colunas +12" com o número de ocultas no nome acessível
+OK  C3 Situação vira ícone antes da O.S., com o texto no nome acessível
+OK  C4 painel agrupado pela pergunta, na ordem; a identidade (O.S.) fica travada
+OK  C5 marcar mostra: Situação e Quem resolve entram juntas, ao lado da vizinha da grade; o padrão mantém a ordem; o recorte não muda
+OK  C6 desmarcar oculta (Prazo sai) e o botão conta 11 ocultas
+OK  C7 Esc fecha o painel e o foco volta ao botão Colunas
+OK  C8 a escolha volta no próximo acesso
+OK  C9 a escolha é por perfil: Ana abre no padrão
+OK  C10 "Restaurar padrão" volta às 6 colunas e some quando já está no padrão
+OK  C11 "Ocultar coluna" no menu da coluna; o filtro da coluna oculta segue como chip e o recorte não muda
+OK  C12 a identidade (O.S.) não oferece "Ocultar coluna"
+OK  C13 celular abre com as 3 primeiras do padrão
+OK  C14 sem erro de JS
+RESULTADO: 14/14

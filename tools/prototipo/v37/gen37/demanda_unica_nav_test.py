@@ -60,9 +60,11 @@ try:
                 time.sleep(.25)
             time.sleep(.6)
     pan1=lambda: (J("(()=>{const a=document.querySelector('aside[aria-label]'); return a?a.innerText:'';})()") or '').replace('\n',' · ')
+    # MUX-F1 (17/10/2026): o talhão é um botão com data-talhao e o rótulo da camada em data-rotulo (o aria-label agora é o nome completo:
+    # "T4, 204 ha, …"). Oráculo obsoleto na forma de achar; a asserção não muda
     SV="[...document.querySelectorAll('svg [role=button]')]"
-    lab=lambda t: J(f"(()=>{{const e={SV}.find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); return e?e.getAttribute('aria-label'):'';}})()") or ''
-    def tap(t): J(f"(()=>{{const e={SV}.find(x=>(x.getAttribute('aria-label')||'').startsWith('{t}:')); e&&e.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}})()"); time.sleep(.5)
+    lab=lambda t: J(f"(()=>{{const e={SV}.find(x=>x.getAttribute('data-talhao')==='{t}'); return e?e.getAttribute('data-talhao')+': '+e.getAttribute('data-rotulo'):'';}})()") or ''
+    def tap(t): J(f"(()=>{{const e={SV}.find(x=>x.getAttribute('data-talhao')==='{t}'); e&&e.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}})()"); time.sleep(.5)
     pan=lambda t: (J(f"(document.querySelector('aside[aria-label^=\"{t}\"]')||{{}}).innerText||''") or '').replace('\n',' · ')
     nums=lambda: (J("(document.querySelector('[role=group][aria-label^=\"Indicadores de\"]')||{innerText:''}).innerText") or '').replace('\n',' ')
     cen=lambda e: J(f"(()=>{{const c=window.__cen.cenGet(); return ({e});}})()")   # só na tela O.S. (expõe window.__cen)

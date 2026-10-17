@@ -1,0 +1,27 @@
+OK  A1 separador abaixo do cabeçalho da página (título + ação do topo à direita) nas 155 páginas a 1440 px
+OK  A2 linha abaixo do título do bloco com conteúdo solto logo abaixo (20 de 129 blocos com título)
+OK  A2c sem linha do título quando o corpo começa por tabela, barra de visões, gráfico, caixa ou cartões, borda no topo ou faixa com fundo (SEP-20261015 b)
+OK  A2b sem linha dupla: a linha do título não fica sobre outra borda larga até 14 px abaixo (revisão DS, achado 5: AG-04det, GE-05, GE-06det)
+OK  A7 barra da tabela (busca, Agrupar por, Colunas) sem linha sobre o cabeçalho da tabela, que já tem fundo (SEP-20261015 c)
+OK  A8 tabela dentro de caixa com borda sem moldura própria (caixa dentro de caixa, SEP-20261015 d)
+OK  A3 a 390 px (8 telas): separador do cabeçalho e dos blocos (com a mesma regra do título), sem linha dupla nem linha de barra de tabela
+OK  A4 painel "Nova safra": linha abaixo do título e do × do topo à direita
+OK  A5 painel do registro (Cadastros): linha abaixo do título
+OK  A6 sem erro de execução nas telas da varredura do separador
+OK  B0 pré-condição: a janela do teste tem mouse com hover ((hover:hover) e (pointer:fine))
+OK  B1 linha da grade da O.S.: hover verde #F2F8F4
+OK  B2 botão secundário (Criar safra): camada verde (rgba(30,122,76,.07)) e borda #9DBFAA; sem a camada cinza nem escurecer
+OK  B3 opção de visão (Kanban): camada verde, sem cinza
+OK  B4 primária (Criar ordem): só escurece (brightness .92), sem camada clara sobre o texto branco
+Traceback (most recent call last):
+  File "/tmp/claude-0/intdrill/tools/prototipo/v37/gen37/ds_test.py", line 216, in <module>
+    hover(kid); bg = J(f"getComputedStyle({kid}).backgroundColor")
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/intdrill/tools/prototipo/v37/gen37/ds_test.py", line 49, in <lambda>
+    J = lambda x: c.js(x)
+                  ^^^^^^^
+  File "/tmp/claude-0/intdrill/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Failed to execute 'getComputedStyle' on 'Window': parameter 1 is not of type 'Element'.
+    at <anonymous>:1:1

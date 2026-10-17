@@ -32,6 +32,9 @@ window.INSA=(local)=>{ const a=TOP(); const b=a&&[...a.querySelectorAll('button'
 window.PAN=()=>{ const a=TOP(); if(!a) return ''; [...a.querySelectorAll('section[aria-label] > button[aria-expanded="false"]')].forEach(b=>b.click()); return N(a.innerText); };
 window.BTNS=()=>{ const a=TOP(); return a?[...a.querySelectorAll('button,a')].filter(e=>VIS(e)&&e.getAttribute('aria-disabled')!=='true').map(e=>N(e.innerText)):[]; };   /* acionáveis */
 window.OFFS=()=>{ const a=TOP(); return a?[...a.querySelectorAll('button')].filter(e=>VIS(e)&&e.getAttribute('aria-disabled')==='true').map(e=>N(e.innerText)):[]; };   /* sem o papel: indisponíveis com motivo */
+/* TAB-12 (17/10/2026): a faixa da fazenda (Planejar safra › etapa 2) e os grupos e atividades do ajuste local nascem recolhidos; a pessoa abre */
+window.FAIXA=()=>{ const b=[...document.querySelectorAll('[role=row].g2fgrp button.g2car[aria-expanded=false]')].find(VIS); if(!b) return false; b.click(); return true; };
+window.ABRE_LP=()=>{ const a=TOP(); const b=a&&[...a.querySelectorAll('button.g2car[aria-expanded=false]')].find(VIS); if(!b) return false; b.click(); return true; };
 window.TOAST=()=>[...document.querySelectorAll('[role=status]')].map(x=>N(x.innerText)).filter(Boolean).join(' | ');
 window.ALERT=()=>{ const a=TOP(); return a?[...a.querySelectorAll('[role=alert]')].filter(VIS).map(x=>N(x.innerText)).join(' | '):''; };
 window.PRIMS=()=>{ const a=TOP(); return a?[...a.querySelectorAll('button,a')].filter(e=>VIS(e)&&e.getAttribute('aria-disabled')!=='true'&&getComputedStyle(e).backgroundColor==='rgb(30, 122, 76)').map(e=>N(e.innerText)):[]; };
@@ -54,6 +57,9 @@ def ir(pg, limpa=False, perfil=None, espera=1.4):
     t.goto(pg); time.sleep(espera); lib()
 def clk(x, pan=False, w=.6): r = J(f"CLK({json.dumps(x)},{'true' if pan else 'false'})"); time.sleep(w); return r
 def ins(local):
+    for _ in range(4):   # TAB-12: a pessoa abre a faixa da fazenda (uma por vez: cada clique redesenha a tabela)
+        if not J("FAIXA()"): break
+        time.sleep(.4)
     r = J(f"INS({json.dumps(local)})")
     if str(r).startswith('sem linha') and J(f"EXP({json.dumps(local)})"): time.sleep(.5); r = J(f"INS({json.dumps(local)})")
     if r == 'ok':
@@ -63,6 +69,10 @@ def ins(local):
             if r == 'ok': break
             time.sleep(.05)
     if r != 'ok': raise AssertionError('Abrir insumos de '+local+': '+str(r))
+    time.sleep(.3)
+    for _ in range(80):   # TAB-12: grupos e atividades do ajuste local nascem recolhidos; a pessoa abre o que vai ajustar (aqui, tudo)
+        if not J("ABRE_LP()"): break
+        time.sleep(.12)
     limite = time.monotonic() + 3
     while time.monotonic() < limite:
         if J("!!(TOP()&&TOP().querySelector('input[aria-label^=\"Dose local de \"]'))"): return r

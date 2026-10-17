@@ -1523,7 +1523,7 @@ def acao_motivo(botao, dis, motivo):
 # chevron fino (traço de 1,75 px, 16 px) da linha que abre o detalhe, na cor do texto secundário, nunca o triângulo cheio (▸ ▾).
 #  - abrir/recolher ali mesmo: o ícone fica DENTRO do controle nativo que tem aria-expanded (botão só com a seta: seta_abrir; botão com o nome
 #    visível: seta() como 1º filho) e gira 90° com ele (fechado → direita; aberto → baixo; 120 ms, sem animação com prefers-reduced-motion);
-#  - ir para o detalhe (TAB-08): a mesma seta, sem girar (seta_ir), na linha ou no link que navega.
+#  - ir para o detalhe: sem seta desde a TAB-13 (17/10/2026); a linha folha abre pelo clique, com hover verde e foco (seta_ir fica só no openlink antigo, sem uso).
 # A função vem da semântica (botão com aria-expanded e nome "Abrir …"/"Recolher …" × linha/link que abre); o desenho é um só.
 # JS: g2seta(aberta, nome) no g2lib dá o aria-expanded e o nome; o ícone é sempre este (nada de glifo no estado da tela).
 SETA_SVG=('<svg class="g2seta-i" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" '
@@ -1797,7 +1797,7 @@ AG_ICONES={'oque':_ip_ag('<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0
             '0':_ip_ag('<path d="M3 5h18"/><path d="M3 12h18"/><path d="M3 19h18"/>')}   # lucide menu (sem agrupar)
 AG_CTRL={}   # gid: (botão Agrupar por com a trilha, menu), para o mesmo controle fora da Tabela (Kanban da O.S.)
 TAB05_FORA={'CA-02.dc.html','GE-02det.dc.html','GE-03.dc.html','GE-08.dc.html'}   # frente PAINEL-FIXO-2 do Codex (17/10/2026): não mexer
-def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,x0=None,frame=True,tools='',headtools=True,qf=None,vazio=True,ag=None,sico=None,sico_so_icone=False,menu_linha=None,busca_extra='',cartoes=None):
+def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=True,so=None,add=None,bulk='',gid=None,frame=True,tools='',headtools=True,qf=None,vazio=True,ag=None,sico=None,sico_so_icone=False,menu_linha=None,busca_extra='',cartoes=None):
     cols=[_col_un(c) for c in cols]
     # rótulos que ficariam iguais sem a unidade ("Custo (R$/h)" e "Custo (R$/ha)") mantêm a unidade, sem parênteses: "Custo R$/h", "Custo R$/ha"
     # (proprietário, 05/10/2026: "Custo R$/h e R$/ha é melhor e mais intuitivo")
@@ -1820,7 +1820,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
     n=len(cols)+(1 if sel else 0)+(1 if acoes_linha else 0)
     # qf: filtro rápido por uma coluna, k (chave), cut (fica o texto antes do separador), sep (vários valores na célula), todas ('Todas'|'Todos')
     qf=(dict(k=qf) if isinstance(qf,str) else qf) or None
-    spec=dict(id=gid,cols=cols,rows=rows,edit=edit,sel=sel,del_=dele,tree=(tree or (bool(ag) and not ag_gen)),so=so or {},total=total,x0=x0 or {},qf=qf)
+    spec=dict(id=gid,cols=cols,rows=rows,edit=edit,sel=sel,del_=dele,tree=(tree or (bool(ag) and not ag_gen)),so=so or {},total=total,qf=qf)   # TAB-12 (17/10/2026): sem abertura padrão (x0); toda linha com filhos nasce recolhida (g2flat)
     if any(c.get('ess') for c in cols): spec['marcas']={c['k']:dict(ess=c.get('ess'),pq=c.get('pq')) for c in cols if c.get('ess') or c.get('pq')}   # V2-3: g2marca
     if menu_linha: spec['rmenu']=True   # 15/10/2026: ações da linha no ⋯ (com ícone), Excluir por último
     if sico: spec['sico']=sico   # VISOES-2 §3.6: a coluna de situação (k) oculta vira ícone antes da identidade, só nas cores que pedem atenção (cores)
@@ -1901,7 +1901,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
           # TAB-09 (16/10/2026, proprietário: "colone os icones de drill down sempre na esquerda"): a seta vem antes de tudo na linha, inclusive
           # da caixa de seleção (g2lib põe a seta na 1ª célula, c.carT); o recuo da árvore fica na célula do nome, depois da seta
           f'<sc-if value="{_h("c.carT")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.caretOk")}" hint-placeholder-val="{{{{false}}}}">{seta_abrir(_h("c.caretExp"),_h("c.caretLabel"),_h("c.toggle"))}</sc-if><sc-if value="{_h("c.caretNo")}" hint-placeholder-val="{{{{false}}}}">{SETA_VAZIO}</sc-if>'
-          f'<sc-if value="{_h("c.drill")}" hint-placeholder-val="{{{{false}}}}">{seta_ir()}</sc-if></sc-if>'
+          '</sc-if>'   # TAB-13 (17/10/2026): sem a seta de ir; a linha folha abre o detalhe pelo clique na linha
           + _cel_sel +
           f'<sc-if value="{_h("c.isData")}" hint-placeholder-val="{{{{true}}}}"><span class="g2pw" style="{_h("c.pw")}"><sc-for list="{_h("c.parts")}" as="p" hint-placeholder-count="1">{_PARTS}</sc-for></span></sc-if>'
           + _cel_del +
@@ -2192,9 +2192,8 @@ def table(headers,rows,widths=None,sort=0,desc=False,filters=None,total=None,gro
         ed={'m':m,'title':'','fields':fields,'leafOnly':True}
     elif edit is False: ed={'m':'none'}
     else: ed=edit
-    x0={g['id']:True for g in groups}
     so={'k':keys[sort],'d':bool(desc)} if (sort is not None and sort<len(keys) and sort>0) else {}
-    return grid(cols,data,edit=ed,sel=sel,dele=dele,tree=bool(groups),search=search,total=bool(total) and False,so=so,add=add,gid=gid,x0=x0)
+    return grid(cols,data,edit=ed,sel=sel,dele=dele,tree=bool(groups),search=search,total=bool(total) and False,so=so,add=add,gid=gid)
 # ---------- motor final: registro de widgets antigos + grades + navegação ----------
 ENGINE_JS2=ENGINE_JS.replace("this.state = { sel: {}, open: null, sort: {}, msg: {}, added: {} };",
                              "this.state = { sel: {}, open: null, sort: {}, msg: {}, added: {}, g2: {}, nav: {}, g2toast: '' };")
