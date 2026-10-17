@@ -29,7 +29,7 @@ FORA = set(REDIRECIONA) | {'Main.dc.html'}
 PAGS = sorted(os.path.basename(f) for f in glob.glob(os.path.join(R, '*.dc.html')) if os.path.basename(f) not in FORA)
 # estados que só abrem por endereço (painel aberto, plano aberto, visão) ou por um clique (ajuste local do Planejar safra)
 EXTRAS = ['PA.dc.html#plano=SOJA-AT', 'PA.dc.html?view=tabela#plano=SOJA-AT', 'SAF.dc.html#saf=S2627&passo=operacoes',
-          'MA.dc.html#ativo=a01', 'MA.dc.html#om=OM-0233', 'MA.dc.html#plano=PM-01', 'OS.dc.html#OS-0420', 'AG-02.dc.html#LAU-2073',
+          'MA.dc.html#ativo=a01', 'MA.dc.html#om=OM-0233', 'MA.dc.html#plano=PM-01', 'OS.dc.html#OS-0420', 'OS.dc.html?view=kanban&ag=onde', 'AG-02.dc.html#LAU-2073',
           'SAF.dc.html#saf=S2627&passo=cultivos|ajuste']
 SO = [x for x in (os.environ.get('SPT_SO') or '').split(',') if x]   # diagnóstico: só as telas cujo endereço contém um destes trechos (não vale como rodada)
 if SO: PAGS, EXTRAS = [p for p in PAGS if any(x in p for x in SO)], [p for p in EXTRAS if any(x in p for x in SO)]

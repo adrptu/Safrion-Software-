@@ -54,6 +54,7 @@ Texto completo em `docs/design-system/padroes-1610.md` § TAB-11. Resumo:
 | Manutenção: serviços do plano | ▸/▾ de texto | `seta_abrir` |
 | Qualidade (CO-06), lotes | ▸/▾ de texto, preto | `seta()` no botão do lote |
 | Painel da O.S., seções | dois SVG trocados (baixo/direita), 14 px, #15201A | `seta()` no botão da seção |
+| O.S., raia do Kanban com Agrupar por (PR #89, AGR-02) | ▸/▾ de texto no botão que recolhe a raia | `seta()` no botão da raia; nome pelo `g2seta` (patch 02b) |
 | Laudo de solo (AG-02, até 899 px), "Ver original" | marcador nativo do `summary` (triângulo preto) | `seta()` no `summary`, marcador oculto |
 | `engine.openlink` e grupo do `engine.table` (sem uso) | › e ▾ de texto | `seta_ir()` e `seta("g2seta-on")` |
 
@@ -91,13 +92,18 @@ O desenho mudou; o que cada teste verifica não ficou mais fraco. Onde o glifo o
 
 Sem mudança de oráculo: `ds_1610_test.py` B2 (procura `.g2drill,.g2car`), `ds_1510_test.py` (S4 e C), `cartoes_test.py` M2h (`aria-expanded`), `cadastros_padrao_test.py` P5 (`.g2car` e `aria-expanded`), testes que só tiram o glifo do texto (`replace(/^[▸▾]…/)`).
 
-## Pendências no código de autoria do Codex
+## Raia do Kanban (código do Codex, PR #89) e pendências
 
-| Arquivo:linha | O que é | Pedido |
-|---|---|---|
-| `tools/prototipo/v37/gen37/areas/processo_os.py:1308` (`_kanban_raias`) | raia do Kanban com Agrupar por: `<span aria-hidden="true">›</span>` de texto antes do nome da raia (o botão desce no grupo) | trocar o `›` por `E.seta_ir()` (seta de ir da TAB-11, sem girar); o nome e o `aria-label` ficam |
+A pendência inicial (a raia do Kanban com Agrupar por tinha um `›` de texto de "descer") mudou com o PR #89 (AGR-02, raias recolhíveis), que entrou na composição antes da TAB-11 (457ef14): a raia passou a recolher e expandir, com `aria-expanded`, o glifo ▸/▾ e o nome "Abrir/Recolher raia …" (ajuste 03 da revisão).
 
-Nos demais trechos listados (`cenario.js` do OS-LOTE, `areas/gestao.py` GE-08, `credito_docs.js`, `areas/processo_estoque.py`, BEN) não há seta de abrir/recolher de texto: as tabelas deles são do motor e já recebem o componente; o `›` que aparece neles é trilha ou texto corrido ("Estoque › Confira recebimentos", "abrir caso ›"), fora do escopo. O `cenGrupo*` não existe nesta composição.
+Como recolhe, a raia usa a seta que gira, não a de ir. Na junção com a composição entra o patch ensaiado pelo revisor do #89 (`docs/integracao/V72/kanban-raias-rev-claude/patches/02b-tab11-raia-seta-unica-depois-do-03.patch` da frente do #89, 3 arquivos, +8/−7):
+- `areas/processo_os.py` (`osKbRaia` e `_kanban_raias`): `E.seta()` como 1º filho do botão da raia; `expandida` e `lab` pelo `g2seta`; o campo `seta` (glifo) sai;
+- `kanban_raias_unit.js`: o oráculo olha o nome ("Recolher raia …"/"Abrir raia T2 …") e a ausência do campo `seta`, não mais o glifo;
+- `seta_padrao_test.py`: estado novo `OS.dc.html?view=kanban&ag=onde` (Kanban agrupado), para a varredura alcançar a raia.
+
+Contraprova: o render da junção sem o 02b (6023fb3) reprova a raia (log `seta/seta_padrao_test_contraprova_6023fb3_sem02b_kanban.log`).
+
+Pendência aberta no código do Codex: nenhuma. Nos trechos listados (`cenario.js` do OS-LOTE, `areas/gestao.py` GE-08, `credito_docs.js`, `areas/processo_estoque.py`, BEN) não há seta de abrir/recolher de texto: as tabelas deles são do motor e já recebem o componente; o `›` que aparece neles é trilha ou texto corrido ("Estoque › Confira recebimentos", "abrir caso ›"), fora do escopo.
 
 ## Fora do escopo, com motivo
 
