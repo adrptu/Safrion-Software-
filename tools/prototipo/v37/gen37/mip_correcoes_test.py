@@ -31,7 +31,8 @@ try:
         time.sleep(.35)
     T=lambda: J("[...document.querySelectorAll('[role=status]')].map(x=>x.innerText).filter(Boolean).join(' | ')") or ''
     aside=lambda: J("(document.querySelector('aside[role=dialog]')||{innerText:''}).innerText") or ''
-    linhas=lambda: J("[...document.querySelectorAll('[role=row].g2r')].map(r=>r.innerText.replace(/\\s+/g,' ').trim())") or []
+    # TAB-05 no motor (DS-MODULOS-2, 17/10/2026): as ações da linha moram no ⋯ da própria linha; o texto da linha termina com os itens desse ⋯ (como no mip_fluxo_test)
+    linhas=lambda: J("[...document.querySelectorAll('[role=row].g2r')].map(r=>(r.innerText+' '+[...r.querySelectorAll('.g2mais-menu [role=menuitem]')].map(i=>i.textContent.trim()).join(' ')).replace(/\\s+/g,' ').trim())") or []
     faz=lambda: J("(document.querySelector('select[aria-label=\"Filtrar por fazenda\"]')||{}).value||''")
     ir('Main.dc.html',0.8); J("localStorage.removeItem('talhao-os-mip-v1'); localStorage.removeItem('talhao-os-cenario-v1'); sessionStorage.clear()")
     if 'a' in PARTE:
@@ -42,7 +43,7 @@ try:
             [f0,f1,f2,f3,f4]==['Lagoa Grande','Santa Rita','Santa Rita','Lagoa Grande','Lagoa Grande'], [f0,f1,f2,f3,f4])
         # 2 · atraso de ritmo visível na lista e com o próximo passo nomeado
         ir('AG-01.dc.html'); l60=next((x for x in linhas() if x.startswith('VIS-060')),'')
-        J("(()=>{const r=[...document.querySelectorAll('[role=row].g2r')].find(r=>r.innerText.trim().startsWith('VIS-060')); const b=[...r.querySelectorAll('button,a')].find(b=>b.innerText.trim()==='Programar vistoria'); b.click();})()"); time.sleep(.5)
+        J("(()=>{const r=[...document.querySelectorAll('[role=row].g2r')].find(r=>r.innerText.trim().startsWith('VIS-060')); const b=[...r.querySelectorAll('button,a,[role=menuitem]')].find(b=>b.textContent.trim()==='Programar vistoria'); b.click();})()"); time.sleep(.5)
         pv=J("(()=>{const a=document.querySelector('aside[aria-label=\"Programar vistoria\"]'); return a?[a.querySelector('#pv_tal').value,a.querySelector('select[aria-label=\"Alvo\"]').value]:null;})()")
         chk('2 AG-01 (Lagoa Grande): VIS-060 "Vistoria atrasada · prevista para 17/09 · 6 dias" com "Programar vistoria", que abre o formulário no Pivô 17 × ácaro-rajado',
             'Vistoria atrasada' in l60 and '17/09 · 6 dias' in l60 and 'Programar vistoria' in l60 and pv==['PV17','mamao-acaro'], [l60,pv])

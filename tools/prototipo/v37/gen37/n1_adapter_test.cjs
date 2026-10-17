@@ -23,7 +23,7 @@ for(const mode of [{fail:true},{badLegacy:true},{badScenario:true},{noScenario:t
  assert(!x.run("mipMudar(null,s=>{s.vis.V1={id:'V1'};return {msg:'OK'}})").erro);
  const c=JSON.parse(x.disk.get('talhao-os-cenario-v1'));
  assert(c.mip.vis.V1);assert.equal(c.mip.rev,3);assert.equal(c.mip.migradoDe.rev,2);assert.equal(c.unrelated,'preserve');assert.equal(c.rev,5);
- assert.equal(x.disk.get('talhao-os-mip-v1'),legacy);assert.deepEqual(x.writes,['talhao-os-cenario-v1']);n++;
+ assert.equal(x.disk.get('talhao-os-mip-v1'),legacy);assert.deepEqual(x.writes,['talhao-os-cenario-v1','talhao-os-mip-v1:migrado']);n++;
  x.disk.set('talhao-os-mip-v1','{changed legacy');
  assert(x.run('mipGet().vis.V1'));n++;
 }

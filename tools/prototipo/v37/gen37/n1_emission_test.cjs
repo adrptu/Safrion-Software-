@@ -14,7 +14,7 @@ function setup(fail=false){
 let count=0;
 {const x=setup(true),before=JSON.stringify([...x.disk]),r=x.run();assert(r.erro);assert.equal(JSON.stringify([...x.disk]),before);count++;}
 {const x=setup(),before=JSON.stringify([...x.disk]);assert(x.run({chave:''}).erro);assert.equal(JSON.stringify([...x.disk]),before);count++;}
-{const x=setup(),r=x.run();assert(!r.erro,r.erro);const c=JSON.parse(x.disk.get('talhao-os-cenario-v1'));assert(c.ordens[r.os]);assert.equal(c.mip.rec[r.rec].os,r.os);assert.equal(c.mip.vis.V1.dec.ver,1);assert(c.recibos['MIP-V1-v1-test'].resultado);assert.deepEqual(x.writes,['talhao-os-cenario-v1']);count++;
+{const x=setup(),r=x.run();assert(!r.erro,r.erro);const c=JSON.parse(x.disk.get('talhao-os-cenario-v1'));assert(c.ordens[r.os]);assert.equal(c.mip.rec[r.rec].os,r.os);assert.equal(c.mip.vis.V1.dec.ver,1);assert(c.recibos['MIP-V1-v1-test'].resultado);assert.deepEqual(x.writes,['talhao-os-cenario-v1','talhao-os-mip-v1:migrado']);count++;
  const again=x.run();assert(again.repetido);assert.equal(again.os,r.os);assert.equal(JSON.parse(x.disk.get('talhao-os-cenario-v1')).mip.seq.ra,2);count++;
  const before=JSON.stringify([...x.disk]);assert(x.run({dose:'3'}).erro);assert.equal(JSON.stringify([...x.disk]),before);count++;
  assert(x.run({ator:{k:'denied'}}).erro);assert.equal(JSON.stringify([...x.disk]),before);count++;

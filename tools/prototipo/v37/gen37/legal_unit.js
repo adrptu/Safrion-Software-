@@ -15,7 +15,7 @@ for(const d of [1.5,3]){ const c=C(); const r=T(()=>osc_ajustar(c,'OS-0430',160,
 { const c=C(); const r=T(()=>osc_ajustar(c,'OS-0430',160,{'Óleo mineral':2},'',[],[],true,'Ana')); ok('P4 Óleo mineral 2 L/ha (adjuvante) não passa pela regra de agrotóxico', r.ok, r); }
 { const c=C(); const r=T(()=>osc_liberar(c,'OS-0431',false,'','Ana')); ok('P5 OS-0431 (semente e MAP) libera: fertilizante e semente fora da regra', r.ok, r); }
 { cenReset(); mipReset(); const s=mipGet(); const v=s.vis['VIS-054']; const u=mipElig(v)[0];
-  const e=mipEmitir(null,'VIS-054',{kind:'controlar',prod:u.id,dose:String(u.dmin),area:String(mipT(v).area),data:'2026-09-28'}); const c=cenGet();
+  const e=mipEmitir(null,'VIS-054',{ator:'Ana',chave:'TESTE-VIS-054-P6',dver:((v.dec&&v.dec.ver)||0)+1,kind:'controlar',prod:u.id,dose:String(u.dmin),area:String(mipT(v).area),data:'2026-09-28'}); const c=cenGet();
   if(!e.erro){ const o=c.ordens[e.os]; const l=cenLote(c,o.ins[0].p); if(l&&cenDisp(l)<o.ins[0].tot) l.fisico+=o.ins[0].tot; }
   const r=e.erro?{ok:false,msg:e.erro}:T(()=>osc_liberar(c,e.os,false,'','Ana'));
   ok('P6 AG-01 → O.S.: VIS-054 (PV02 mamão × mosca-branca) '+(u&&u.nome)+' '+(u&&u.dmin)+' '+(u&&u.un)+'/ha emite e a O.S. libera', r.ok, [e,r]); }
