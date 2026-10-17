@@ -1,0 +1,11 @@
+{
+ "isolado": {
+  "robo_min": 12.0,
+  "leva_min": 8.2,
+  "dialogos_js": [],
+  "so": [],
+  "quando": "2026-10-17T19:30:33Z",
+  "total_min": 20.3
+ },
+ "chrome": "Chromium 141.0.7390.37"
+}

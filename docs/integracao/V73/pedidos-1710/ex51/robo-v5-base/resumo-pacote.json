@@ -1,0 +1,2274 @@
+{
+"robo": {
+"processo": {
+"det": 38,
+"passo": 19,
+"quem": 9
+},
+"telas": 92,
+"detalhes": 179,
+"refsTotal": 78,
+"refsClic": 35,
+"rotTotal": 70,
+"rotClic": 6,
+"passagens": 206,
+"navega": 155,
+"noLugar": 46,
+"nada": 5,
+"navRegistro": 107,
+"naoLeva": 27,
+"levaIgnora": 19,
+"chegou": 61,
+"voltaOrigem": 12,
+"voltarDet": 77,
+"reabre": 1,
+"passoTotal": 29,
+"passoPessoa": 11,
+"semPasso": 150,
+"escopo": {
+"telas": 28,
+"faz": 9,
+"saf": 5,
+"herda": 0
+}
+},
+"passagens": [
+{
+"de": "AG-01",
+"ctx": "",
+"clique": "Abrir OS-0504",
+"para": "OS#OS-0504",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "AG-01",
+"ctx": "",
+"clique": "Abrir OS-0508",
+"para": "OS#OS-0508",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "AG-01",
+"ctx": "no detalhe",
+"clique": "Ver rota e evidências ›",
+"para": "AG-01det#VIS-055",
+"chegou": true,
+"volta": true,
+"reabre": false,
+"prob": true
+},
+{
+"de": "AG-01",
+"ctx": "no detalhe",
+"clique": "Ver rota e evidências ›",
+"para": "sem efeito em 6 s (conferir)",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "AG-01det",
+"ctx": "",
+"clique": "VIS-011",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "AG-02",
+"ctx": "no detalhe",
+"clique": "Ver no plano",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "AG-04",
+"ctx": "",
+"clique": "Ver demanda gerada",
+"para": "PL-02",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "AG-04",
+"ctx": "",
+"clique": "REC-014",
+"para": "AG-04det",
+"chegou": true,
+"volta": true,
+"reabre": null,
+"prob": false
+},
+{
+"de": "AG-04",
+"ctx": "",
+"clique": "DIA-007",
+"para": "AG-03det",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "AG-04",
+"ctx": "",
+"clique": "Abrir REC-014",
+"para": "AG-04det",
+"chegou": true,
+"volta": true,
+"reabre": null,
+"prob": false
+},
+{
+"de": "AG-04det",
+"ctx": "",
+"clique": "Ficha da abamectina 500 FS ›",
+"para": "AG-07#abamectina-500-fs",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "AG-04det",
+"ctx": "",
+"clique": "Pasteuria nishizawae FS (registrada para cisto) ›",
+"para": "AG-07#pasteuria-nishizawae-fs",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "AG-04det",
+"ctx": "",
+"clique": "NEC-028",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "AG-04det",
+"ctx": "",
+"clique": "OS-0420",
+"para": "OS#OS-0420",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "AG-04det",
+"ctx": "no detalhe",
+"clique": "IAC Boletim 100 · K trocável 0,08 cmolc/dm³ ›",
+"para": "AG-02",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "AG-04det",
+"ctx": "no detalhe",
+"clique": "LAU-2043 · zona 2 · K 0,08 cmolc/dm³ ›",
+"para": "AG-02",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "AG-04det",
+"ctx": "no detalhe",
+"clique": "Abastecimento · 84 L × R$ 5,92 ›",
+"para": "MA#vis=ativos&modo=abastecimentos",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "AG-05",
+"ctx": "",
+"clique": "Simular",
+"para": "PL-02",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "AG-05",
+"ctx": "",
+"clique": "Ver uso",
+"para": "AG-04det",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "BEN",
+"ctx": "no detalhe",
+"clique": "Conferir a NF 7731 das caixas no Estoque ›",
+"para": "EST",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "BEN",
+"ctx": "no detalhe",
+"clique": "Ver no Estoque de produto ›",
+"para": "PROD#L39-117",
+"chegou": true,
+"volta": true,
+"reabre": false,
+"prob": true
+},
+{
+"de": "BEN",
+"ctx": "no detalhe",
+"clique": "Ver no Estoque de produto ›",
+"para": "PROD#L39-118",
+"chegou": true,
+"volta": true,
+"reabre": false,
+"prob": true
+},
+{
+"de": "BEN",
+"ctx": "no detalhe",
+"clique": "Ver no Estoque de produto ›",
+"para": "PROD#L39-119",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "BEN",
+"ctx": "no detalhe",
+"clique": "Ver no Estoque de produto ›",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "BEN",
+"ctx": "no detalhe",
+"clique": "Ver no Estoque de produto ›",
+"para": "PROD#L38-116",
+"chegou": true,
+"volta": true,
+"reabre": false,
+"prob": true
+},
+{
+"de": "BEN",
+"ctx": "no detalhe",
+"clique": "Ver no Estoque de produto ›",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "BEN",
+"ctx": "no detalhe",
+"clique": "Ver no Estoque de produto ›",
+"para": "PROD#L38-118",
+"chegou": true,
+"volta": true,
+"reabre": false,
+"prob": true
+},
+{
+"de": "BEN",
+"ctx": "no detalhe",
+"clique": "Abrir no Estoque ›",
+"para": "EST",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "BO-02",
+"ctx": "no detalhe",
+"clique": "Consulta contratual (CF-05) ›",
+"para": "CF-05",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CA-02",
+"ctx": "",
+"clique": "Liberar OS-0418",
+"para": "OS#OS-0418",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "CA-02",
+"ctx": "no detalhe",
+"clique": "Abrir O.S. ›",
+"para": "OS#OS-0420",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CA-02",
+"ctx": "no detalhe",
+"clique": "Abrir O.S. ›",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "CA-03",
+"ctx": "",
+"clique": "Abrir ocorrência ›",
+"para": "CA-03det",
+"chegou": null,
+"volta": true,
+"reabre": null,
+"prob": false
+},
+{
+"de": "CA-03",
+"ctx": "",
+"clique": "Encaminhar à agronomia ›",
+"para": "AG-03",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "CA-03",
+"ctx": "",
+"clique": "Reprogramar saldo ›",
+"para": "PL-05",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "CA-03det",
+"ctx": "",
+"clique": "OS-0420",
+"para": "CA-01x-os0420",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "CA-03det",
+"ctx": "",
+"clique": "Trator T1",
+"para": "MA#ativo=a01",
+"chegou": false,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "CA-03det",
+"ctx": "",
+"clique": "OM-0233",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "CA-03det",
+"ctx": "",
+"clique": "Trator 02 · MF 7719",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "CARGA",
+"ctx": "",
+"clique": "Abrir ordem de beneficiamento · Igor (responsável de produção)",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "CARGA",
+"ctx": "",
+"clique": "Abrir ordem de beneficiamento · Igor (responsável de produção)",
+"para": "BEN#nova=L39-131",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "CARGA",
+"ctx": "",
+"clique": "Abrir ordem de beneficiamento · Igor (responsável de produção)",
+"para": "BEN#nova=L38-132",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "CARGA",
+"ctx": "no detalhe",
+"clique": "Abrir no estoque ›",
+"para": "PROD#L39-132",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CARGA",
+"ctx": "no detalhe",
+"clique": "Abrir no estoque ›",
+"para": "PROD#L38-132",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CARGA",
+"ctx": "no detalhe",
+"clique": "Abrir no estoque ›",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "CD-01",
+"ctx": "no detalhe",
+"clique": "Documentos para crédito ›",
+"para": "GE-08#vis=documentos",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CD-01",
+"ctx": "no detalhe",
+"clique": "Abrir talhão ›",
+"para": "CD-01det#talhao=PV06",
+"chegou": true,
+"volta": true,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CD-01det",
+"ctx": "",
+"clique": "Planejar T1 na safra ›",
+"para": "SAF",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "CD-01det",
+"ctx": "no detalhe",
+"clique": "Planejar safra › Safra 2026/27 › T1-B ›",
+"para": "SAF",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CD-03",
+"ctx": "no detalhe",
+"clique": "Ver ordens afetadas · OS-0420 e OS-0431 ›",
+"para": "OS",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CD-03",
+"ctx": "no detalhe",
+"clique": "Abrir OM-0233 na Manutenção ›",
+"para": "MA#vis=ordens&om=OM-0233",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CD-03",
+"ctx": "no detalhe",
+"clique": "Plano: PM-03 ›",
+"para": "MA#plano=PM-03",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CD-03",
+"ctx": "no detalhe",
+"clique": "Abrir Trator T1 na Manutenção ›",
+"para": "MA#ativo=a01",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CD-03",
+"ctx": "no detalhe",
+"clique": "Plantadeira 24 linhas · Plantio ›",
+"para": "no lugar: Conjunto · Trator T1 + Plantadeira 24 linhas",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "CD-03",
+"ctx": "no detalhe",
+"clique": "Plano: PM-06 ›",
+"para": "MA#plano=PM-06",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CD-03",
+"ctx": "no detalhe",
+"clique": "Colheita de grãos ›",
+"para": "no lugar: Conjunto · Colhedora Axial-Flow 7250",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "CD-03",
+"ctx": "no detalhe",
+"clique": "Plano: PM-09 ›",
+"para": "MA#plano=PM-09",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CD-04",
+"ctx": "no detalhe",
+"clique": "Acesso ao app: Ativo desde 28/06/2026 · gerenciar em Configurações › Usuários e alçadas ›",
+"para": "CF-01#pessoa=Ana",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CD-04",
+"ctx": "no detalhe",
+"clique": "Acesso ao app: Ativo desde 01/07/2026 · gerenciar em Configurações › Usuários e alçadas ›",
+"para": "CF-01#pessoa=Jo%C3%A3o",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CD-04",
+"ctx": "no detalhe",
+"clique": "Acesso ao app: Ativo desde 01/07/2026 · gerenciar em Configurações › Usuários e alçadas ›",
+"para": "CF-01#pessoa=Dora",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CF-01",
+"ctx": "no detalhe",
+"clique": "Abrir no cadastro",
+"para": "CD-04",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CF-01",
+"ctx": "no detalhe",
+"clique": "OS-0430 · T1-A",
+"para": "OS#OS-0430",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CF-01",
+"ctx": "no detalhe",
+"clique": "OS-0431 · T2",
+"para": "OS#OS-0431",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CF-01",
+"ctx": "no detalhe",
+"clique": "OS-0502 · Pivô 12",
+"para": "OS#OS-0502",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CF-01",
+"ctx": "no detalhe",
+"clique": "OS-0511 · Pivô 15",
+"para": "OS#OS-0511",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CF-01",
+"ctx": "no detalhe",
+"clique": "OS-0590 · Parcela demonstrativa A",
+"para": "OS#OS-0590",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CF-01",
+"ctx": "no detalhe",
+"clique": "OS-0591 · Parcela demonstrativa B",
+"para": "OS#OS-0591",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CF-04",
+"ctx": "no detalhe",
+"clique": "Abrir no domínio",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "CF-04",
+"ctx": "no detalhe",
+"clique": "Abrir no domínio",
+"para": "CF-01#pessoa=Lucas",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CF-04",
+"ctx": "no detalhe",
+"clique": "Abrir no domínio",
+"para": "CF-01#pessoa=Dora",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CF-05",
+"ctx": "no detalhe",
+"clique": "Abrir no cadastro ›",
+"para": "CD-01det#talhao=T1",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CF-05",
+"ctx": "no detalhe",
+"clique": "Abrir no cadastro ›",
+"para": "CD-01det#talhao=PV07",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "CO-06",
+"ctx": "",
+"clique": "Decidir lote",
+"para": "CO-06det",
+"chegou": null,
+"volta": true,
+"reabre": null,
+"prob": false
+},
+{
+"de": "CO-06",
+"ctx": "",
+"clique": "Ver carência no mapa",
+"para": "IN-04",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "EXPED",
+"ctx": "",
+"clique": "PV-037",
+"para": "VEN#PV-037",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "EXPED",
+"ctx": "no detalhe",
+"clique": "Abrir lote ›",
+"para": "PROD#L38-131",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-01",
+"ctx": "",
+"clique": "Comparar cenário",
+"para": "GE-02",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "GE-01",
+"ctx": "",
+"clique": "Abrir origem do desvio",
+"para": "GE-02det",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "GE-01",
+"ctx": "",
+"clique": "Criar ação",
+"para": "GE-07",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "GE-01",
+"ctx": "no detalhe",
+"clique": "Custo = R$ 5,84 mi da previsão V2 · composição documento a documento ›",
+"para": "GE-03",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-01",
+"ctx": "no detalhe",
+"clique": "Premissas da versão V2 (rendimento e preço) ›",
+"para": "GE-02",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-01",
+"ctx": "no detalhe",
+"clique": "Custo = R$ 1,31 mi da previsão V2 · composição documento a documento ›",
+"para": "GE-03",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-01",
+"ctx": "no detalhe",
+"clique": "L27-013 · INSP-88 aberta · Qualidade · prazo 25/09 ›",
+"para": "CO-06det",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-01",
+"ctx": "no detalhe",
+"clique": "CT-198 e PV-028 dependem do lote ›",
+"para": "VE-05",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-02",
+"ctx": "no detalhe",
+"clique": "Composição de custos ›",
+"para": "GE-03",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-02det",
+"ctx": "no detalhe",
+"clique": "OS-0409 · 95 ha do P1 + 25 ha reaplicados após chuva ›",
+"para": "CA-02",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-02det",
+"ctx": "no detalhe",
+"clique": "Requisições da OS-0409 · 264 L retirados ›",
+"para": "SU-07",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-02det",
+"ctx": "no detalhe",
+"clique": "Indicador de custo de pulverização ›",
+"para": "GE-06det",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-03",
+"ctx": "no detalhe",
+"clique": "NF 8842 · recebimento · Defensivo · fungicida ›",
+"para": "SU-06",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-04",
+"ctx": "",
+"clique": "Abrir aprovação",
+"para": "IN-02",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "GE-04",
+"ctx": "",
+"clique": "Abrir pedido",
+"para": "SU-05",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "GE-04",
+"ctx": "",
+"clique": "Ver retiradas",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "GE-04",
+"ctx": "",
+"clique": "Abrir crédito",
+"para": "GE-08",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "GE-04",
+"ctx": "no detalhe",
+"clique": "NF 8790 · parcela 2 de 3 · alçada do Gerente da fazenda (até R$ 300 mil) ›",
+"para": "IN-02",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-04",
+"ctx": "no detalhe",
+"clique": "Pedido PC-088 · Fertisul · 100 t × R$ 2,33/kg = R$ 233.000 ›",
+"para": "SU-05",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-04",
+"ctx": "no detalhe",
+"clique": "Pedido PC-090 · entrega prevista 05/10/2026 ›",
+"para": "SU-05",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-05",
+"ctx": "",
+"clique": "PV-027",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "GE-05",
+"ctx": "",
+"clique": "PV-029",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "GE-05",
+"ctx": "",
+"clique": "RC-14",
+"para": "VE-06",
+"chegou": false,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "GE-05",
+"ctx": "no detalhe",
+"clique": "Pedido PV-027 · entrega 2 de 2 em 20/09 · o pedido original não muda ›",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "GE-05",
+"ctx": "no detalhe",
+"clique": "Caso RC-12 · retorno de 300 kg do lote L26-118 recebido bloqueado · crédito de 300 kg × R$",
+"para": "VE-06",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-05",
+"ctx": "no detalhe",
+"clique": "Caso RC-13 · umidade acima do padrão ›",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "GE-06",
+"ctx": "",
+"clique": "Detalhar",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "GE-06",
+"ctx": "",
+"clique": "Ver ações",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "GE-06",
+"ctx": "",
+"clique": "Ver ordens",
+"para": "CA-01",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "GE-06",
+"ctx": "",
+"clique": "Ver packing",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "GE-06",
+"ctx": "no detalhe",
+"clique": "R$ 5.808 ÷ 120 ha·op (OS-0409) ›",
+"para": "GE-06det",
+"chegou": false,
+"volta": true,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-06",
+"ctx": "no detalhe",
+"clique": "Pivô 2 a 62% da volta · 10,81 mm aplicados ›",
+"para": "IR-03",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-06",
+"ctx": "no detalhe",
+"clique": "Telemetria do pivô ›",
+"para": "IR-01",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-08",
+"ctx": "",
+"clique": "Ver título",
+"para": "GE-04",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "GE-08",
+"ctx": "",
+"clique": "Ver CPR",
+"para": "VE-05",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "GE-08",
+"ctx": "no detalhe",
+"clique": "Liberado R$ 300 mil de R$ 850 mil · 1ª parcela é título em Contas a pagar ›",
+"para": "GE-04",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "GE-08",
+"ctx": "no detalhe",
+"clique": "Dossiê de crédito ›",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "IC",
+"ctx": "no detalhe",
+"clique": "Abrir Compra de insumos",
+"para": "CMP",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "IN-01",
+"ctx": "",
+"clique": "Reprogramar saldo",
+"para": "PL-05",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "IN-01",
+"ctx": "",
+"clique": "Liberar",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "IN-01",
+"ctx": "",
+"clique": "Liberar",
+"para": "OS#OS-0430",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "IN-01",
+"ctx": "",
+"clique": "Receber devolução",
+"para": "EST",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "IN-02",
+"ctx": "",
+"clique": "Decidir",
+"para": "SU-09",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "IN-02",
+"ctx": "",
+"clique": "Decidir",
+"para": "SU-02",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "IN-02",
+"ctx": "",
+"clique": "Decidir",
+"para": "GE-02det",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "IN-02",
+"ctx": "",
+"clique": "Decidir",
+"para": "CF-01",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "IN-02",
+"ctx": "no detalhe",
+"clique": "Abrir a decisão no módulo de origem ›",
+"para": "SU-09",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "IN-02",
+"ctx": "no detalhe",
+"clique": "Abrir a decisão no módulo de origem ›",
+"para": "GE-02det",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "IN-02",
+"ctx": "no detalhe",
+"clique": "Abrir a decisão no módulo de origem ›",
+"para": "CF-01",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "IN-04",
+"ctx": "",
+"clique": "Abrir ordens ›",
+"para": "OS",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "IR-01",
+"ctx": "",
+"clique": "Resolver conflito",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "IR-01",
+"ctx": "",
+"clique": "Programar só água",
+"para": "IR-02#programar=P1",
+"chegou": true,
+"volta": true,
+"reabre": null,
+"prob": false
+},
+{
+"de": "IR-01",
+"ctx": "no detalhe",
+"clique": "OS-0392 · Encerradas · 19/09 14:00–16:00 ›",
+"para": "IR-03det#OS-0392",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "IR-01",
+"ctx": "no detalhe",
+"clique": "OS-0423 · A liberar · hoje 14:00–16:00 ›",
+"para": "IR-03det#OS-0423",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "IR-01",
+"ctx": "no detalhe",
+"clique": "Fontes: Estação Santa Rita · Sonda de umidade · P1 (20 cm) suspeita (salto de 18 p.p.) ›",
+"para": "IR-04",
+"chegou": false,
+"volta": true,
+"reabre": false,
+"prob": true
+},
+{
+"de": "IR-01",
+"ctx": "no detalhe",
+"clique": "OS-0394 · Em conferência · ontem 20:00–22:06 ›",
+"para": "IR-03det#OS-0394",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "IV",
+"ctx": "no detalhe",
+"clique": "Abrir venda ›",
+"para": "VEN#PV-031",
+"chegou": true,
+"volta": false,
+"reabre": true,
+"prob": true
+},
+{
+"de": "MA",
+"ctx": "no detalhe",
+"clique": "Abrir PM-02 ›",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "MA",
+"ctx": "no detalhe",
+"clique": "Mudar condição ›",
+"para": "no lugar: Condição · Plantadeira 24 linhas",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "MB-01",
+"ctx": "",
+"clique": "Ver envios",
+"para": "MB-03x-recibo",
+"chegou": null,
+"volta": true,
+"reabre": null,
+"prob": false
+},
+{
+"de": "MB-01",
+"ctx": "",
+"clique": "Abrir ordem",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "MB-01",
+"ctx": "",
+"clique": "Retirar no almoxarifado",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "MB-01",
+"ctx": "",
+"clique": "Minhas ordens lista e detalhe da O.S.",
+"para": "MB-02",
+"chegou": null,
+"volta": true,
+"reabre": null,
+"prob": false
+},
+{
+"de": "MB-02",
+"ctx": "",
+"clique": "Ver envios",
+"para": "MB-03x-recibo",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "MB-02",
+"ctx": "",
+"clique": "Abrir ordem",
+"para": "MB-02det",
+"chegou": null,
+"volta": true,
+"reabre": null,
+"prob": false
+},
+{
+"de": "MB-02",
+"ctx": "",
+"clique": "Retirar no almoxarifado",
+"para": "MB-05#OS-0424",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "MB-02",
+"ctx": "",
+"clique": "Registrar ocorrência",
+"para": "MB-04",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "MB-03",
+"ctx": "",
+"clique": "Ver envios",
+"para": "MB-03x-recibo",
+"chegou": null,
+"volta": true,
+"reabre": null,
+"prob": false
+},
+{
+"de": "MB-03",
+"ctx": "",
+"clique": "Abrir ordem",
+"para": "sem efeito em 6 s (conferir)",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "MB-03",
+"ctx": "",
+"clique": "Retirar no almoxarifado",
+"para": "MB-05#OS-0424",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "MB-04",
+"ctx": "",
+"clique": "Ver envios",
+"para": "MB-03x-recibo",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "MB-05",
+"ctx": "",
+"clique": "Ver envios",
+"para": "MB-03x-recibo",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "MB-05",
+"ctx": "",
+"clique": "Voltar à fila",
+"para": "MB-01",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "MB-06",
+"ctx": "",
+"clique": "VIS-017 · T2 · Daninhas pré-plantio 26/09",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "MB-07",
+"ctx": "",
+"clique": "Ver envios",
+"para": "MB-03x-recibo",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "MB-07",
+"ctx": "",
+"clique": "Voltar a Hoje no campo",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "MB-08",
+"ctx": "",
+"clique": "Confirmar término da irrigação",
+"para": "MB-08x-recibo",
+"chegou": null,
+"volta": true,
+"reabre": null,
+"prob": false
+},
+{
+"de": "MB-08",
+"ctx": "",
+"clique": "Ver próximo setor",
+"para": "sem efeito em 6 s (conferir)",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "MB-08x-recibo",
+"ctx": "",
+"clique": "Voltar à fila do turno",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "MB-09",
+"ctx": "",
+"clique": "Ver envios",
+"para": "MB-03x-recibo",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "MB-09",
+"ctx": "",
+"clique": "Reportar falha",
+"para": "MB-04#ativo=a03",
+"chegou": false,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "MB-09det",
+"ctx": "",
+"clique": "Ver envios",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "MB-09det",
+"ctx": "",
+"clique": "Abrir Trator T1 ›",
+"para": "MB-09#ativo=a01",
+"chegou": false,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "MB-09det",
+"ctx": "",
+"clique": "Voltar à fila",
+"para": "MB-09#ativo=a01",
+"chegou": false,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "MB-10",
+"ctx": "",
+"clique": "Ver envios",
+"para": "MB-03x-recibo",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "ON-01",
+"ctx": "",
+"clique": "Corrigir prévia",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "OS-0424-app",
+"ctx": "",
+"clique": "Abrir ficha para imprimir",
+"para": "OS-0424-ficha",
+"chegou": null,
+"volta": true,
+"reabre": null,
+"prob": false
+},
+{
+"de": "PA",
+"ctx": "",
+"clique": "Abrir plano Soja alta tecnologia",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "PA",
+"ctx": "",
+"clique": "Abrir plano Soja padrão",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "PA",
+"ctx": "",
+"clique": "Abrir plano Milho safrinha",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "PA",
+"ctx": "",
+"clique": "Abrir plano Feijão pivô",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "PAGR",
+"ctx": "",
+"clique": "Abrir 3 O.S. por causa: Máquina ou equipamento",
+"para": "OS#painel=OS-0420,OS-0431,OS-0507",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "PAGR",
+"ctx": "",
+"clique": "Abrir 2 O.S. por causa: Insumo no Estoque",
+"para": "OS#painel=OS-0418,OS-0502",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "PAGR",
+"ctx": "",
+"clique": "Abrir 2 O.S. por quem resolve: Manutenção",
+"para": "OS#painel=OS-0420,OS-0507",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "PAGR",
+"ctx": "",
+"clique": "Abrir 2 O.S. por quem resolve: Suprimentos",
+"para": "OS#painel=OS-0418,OS-0502",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "PCOM",
+"ctx": "no detalhe",
+"clique": "Abrir venda ›",
+"para": "VEN#PV-030",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "PCOM",
+"ctx": "no detalhe",
+"clique": "Abrir lote ›",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "PCOM",
+"ctx": "no detalhe",
+"clique": "Registrar a saca do PV-030",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "PCOM",
+"ctx": "no detalhe",
+"clique": "Abrir venda ›",
+"para": "VEN#CT-203",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "PCOM",
+"ctx": "no detalhe",
+"clique": "Abrir venda ›",
+"para": "VEN#CRE-0095",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "PCOM",
+"ctx": "no detalhe",
+"clique": "Abrir venda ›",
+"para": "VEN#BT-090",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "PL-04",
+"ctx": "",
+"clique": "",
+"para": "OS#OS-0430",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "PL-04",
+"ctx": "",
+"clique": "",
+"para": "OS#OS-0431",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "PL-04",
+"ctx": "",
+"clique": "",
+"para": "OS#OS-0418",
+"chegou": true,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "PL-04",
+"ctx": "",
+"clique": "",
+"para": "OS#OS-0422",
+"chegou": false,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "PT-01",
+"ctx": "",
+"clique": "Abrir proposta",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "PT-01",
+"ctx": "",
+"clique": "Abrir negócio",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "PT-01",
+"ctx": "",
+"clique": "Ver negócios",
+"para": "PT-05",
+"chegou": null,
+"volta": true,
+"reabre": null,
+"prob": false
+},
+{
+"de": "PT-01",
+"ctx": "",
+"clique": "Responder esclarecimento",
+"para": "PT-02det",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "PT-01",
+"ctx": "no detalhe",
+"clique": "Abrir a proposta ›",
+"para": "PT-02det",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "PT-02",
+"ctx": "",
+"clique": "Abrir proposta",
+"para": "PT-02det",
+"chegou": null,
+"volta": true,
+"reabre": null,
+"prob": false
+},
+{
+"de": "PT-02",
+"ctx": "",
+"clique": "Abrir negócio",
+"para": "PT-05det",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "PT-02",
+"ctx": "no detalhe",
+"clique": "Abrir a proposta ›",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "PT-04",
+"ctx": "",
+"clique": "Abrir dossiê",
+"para": "PT-04det",
+"chegou": null,
+"volta": true,
+"reabre": null,
+"prob": false
+},
+{
+"de": "PT-04",
+"ctx": "no detalhe",
+"clique": "Abrir o dossiê ›",
+"para": "PT-04det",
+"chegou": false,
+"volta": true,
+"reabre": false,
+"prob": true
+},
+{
+"de": "PT-05det",
+"ctx": "",
+"clique": "Abrir divergência",
+"para": "sem efeito em 6 s (conferir)",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "PT-07",
+"ctx": "",
+"clique": "Ver assinatura e fatura",
+"para": "sem efeito em 6 s (conferir)",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "SU-01",
+"ctx": "",
+"clique": "Ver contrato",
+"para": "SU-05det",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "SU-01",
+"ctx": "",
+"clique": "Em cotação",
+"para": "CMP",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "SU-01",
+"ctx": "",
+"clique": "Ver contrato",
+"para": "SU-05",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "SU-01",
+"ctx": "",
+"clique": "Conferir origem",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "SU-01",
+"ctx": "no detalhe",
+"clique": "Na SOL-2026-07 · abrir em Compra de insumos ›",
+"para": "CMP",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "SU-01",
+"ctx": "no detalhe",
+"clique": "Abrir a ordem ›",
+"para": "MA#vis=ordens&om=OM-0234",
+"chegou": true,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "SU-02",
+"ctx": "",
+"clique": "Ver efeito em Necessidades ›",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "SU-05",
+"ctx": "",
+"clique": "Abrir contrato",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+},
+{
+"de": "SU-05",
+"ctx": "",
+"clique": "Receber ›",
+"para": "SU-06",
+"chegou": null,
+"volta": false,
+"reabre": null,
+"prob": true
+},
+{
+"de": "SU-06",
+"ctx": "no detalhe",
+"clique": "Título encaminhado a Contas a pagar ›",
+"para": "GE-04",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "SU-06",
+"ctx": "no detalhe",
+"clique": "Ver o saldo do lote ›",
+"para": "SU-03",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "SU-06",
+"ctx": "no detalhe",
+"clique": "Ver o pedido ›",
+"para": "SU-05",
+"chegou": false,
+"volta": false,
+"reabre": false,
+"prob": true
+},
+{
+"de": "SU-08",
+"ctx": "",
+"clique": "Devolver ›",
+"para": "no lugar",
+"chegou": null,
+"volta": null,
+"reabre": null,
+"prob": false
+}
+],
+"piores": [
+[
+[
+"CF-01",
+"OS"
+],
+6
+],
+[
+[
+"BEN",
+"PROD"
+],
+5
+],
+[
+[
+"CD-03",
+"MA"
+],
+5
+],
+[
+[
+"PAGR",
+"OS"
+],
+4
+],
+[
+[
+"PCOM",
+"VEN"
+],
+4
+],
+[
+[
+"PL-04",
+"OS"
+],
+4
+],
+[
+[
+"CD-04",
+"CF-01"
+],
+3
+],
+[
+[
+"GE-04",
+"SU-05"
+],
+3
+],
+[
+[
+"IR-01",
+"IR-03det"
+],
+3
+],
+[
+[
+"AG-01",
+"OS"
+],
+2
+],
+[
+[
+"AG-04det",
+"AG-07"
+],
+2
+],
+[
+[
+"AG-04det",
+"AG-02"
+],
+2
+],
+[
+[
+"BEN",
+"EST"
+],
+2
+],
+[
+[
+"CA-02",
+"OS"
+],
+2
+],
+[
+[
+"CARGA",
+"BEN"
+],
+2
+],
+[
+[
+"CARGA",
+"PROD"
+],
+2
+],
+[
+[
+"CD-01det",
+"SAF"
+],
+2
+],
+[
+[
+"CF-04",
+"CF-01"
+],
+2
+],
+[
+[
+"CF-05",
+"CD-01det"
+],
+2
+],
+[
+[
+"GE-01",
+"GE-02"
+],
+2
+],
+[
+[
+"GE-01",
+"GE-03"
+],
+2
+],
+[
+[
+"GE-04",
+"IN-02"
+],
+2
+],
+[
+[
+"GE-05",
+"VE-06"
+],
+2
+],
+[
+[
+"GE-08",
+"GE-04"
+],
+2
+],
+[
+[
+"IN-02",
+"SU-09"
+],
+2
+]
+]
+}

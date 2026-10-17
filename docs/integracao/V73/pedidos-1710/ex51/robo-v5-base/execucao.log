@@ -1,0 +1,211 @@
+{"render": "/tmp/claude-0/int90/tools/prototipo/v37/gen37/_render", "sha256_conjunto": "39b88342b9aa985f011dd9fabc9c5482d7a03a0c983b23fb740e8845158dd038", "arquivos": 181, "paginas": 156, "excluir_itens": 50, "excluir_paginas": "46 itens", "excluir_sem_pagina": ["Ferramentas de demonstração", "GE-08 › #vis=", "MB-10 › aba Motorista", "OS › \"Abrir ordem completa ›\""], "sem_aplicativo": ["MA-01", "MA-02", "MA-03", "MA-04", "MA-04det", "MA-05", "Main", "PM"], "telas_robo": 102, "retiradas": ["MA-01", "MA-02", "MA-03", "MA-04", "MA-04det", "MA-05", "Main", "PM"]}
+18:20:25 Chrome principais em execução: 2 (< 4), pode abrir
+18:20:25 Chrome iniciado, PID 4489
+18:20:26 servidor em 127.0.0.1:41865, PID 4582
+18:20:27 servidor em 127.0.0.1:45433, PID 4587
+18:20:27 servidor em 127.0.0.1:36223, PID 4600
+18:20:28 robô (isolado): 102 telas em 3 aba(s)
+18:20:37 robô (isolado): feitas 0 de 102 · 0.2 min
+18:20:46 robô (isolado): feitas 2 de 102 · 0.3 min
+18:20:55 robô (isolado): feitas 3 de 102 · 0.5 min
+18:21:05 robô (isolado): feitas 4 de 102 · 0.6 min
+18:21:23 robô (isolado): feitas 6 de 102 · 0.9 min
+18:21:41 robô (isolado): feitas 7 de 102 · 1.2 min
+18:21:50 robô (isolado): feitas 9 de 102 · 1.4 min
+18:21:59 robô (isolado): feitas 11 de 102 · 1.5 min
+18:22:17 robô (isolado): feitas 12 de 102 · 1.8 min
+18:22:27 robô (isolado): feitas 13 de 102 · 2.0 min
+18:22:36 robô (isolado): feitas 14 de 102 · 2.1 min
+18:22:45 robô (isolado): feitas 15 de 102 · 2.3 min
+18:22:54 robô (isolado): feitas 17 de 102 · 2.4 min
+18:23:03 robô (isolado): feitas 19 de 102 · 2.6 min
+18:23:13 robô (isolado): feitas 20 de 102 · 2.7 min
+18:23:31 robô (isolado): feitas 22 de 102 · 3.1 min
+18:23:41 robô (isolado): feitas 24 de 102 · 3.2 min
+18:23:50 robô (isolado): feitas 25 de 102 · 3.4 min
+18:24:00 robô (isolado): feitas 29 de 102 · 3.5 min
+18:24:09 robô (isolado): feitas 31 de 102 · 3.7 min
+18:24:18 robô (isolado): feitas 34 de 102 · 3.8 min
+18:24:36 robô (isolado): feitas 38 de 102 · 4.1 min
+18:24:46 robô (isolado): feitas 39 de 102 · 4.3 min
+18:24:55 robô (isolado): feitas 40 de 102 · 4.5 min
+18:25:04 robô (isolado): feitas 41 de 102 · 4.6 min
+18:25:13 robô (isolado): feitas 43 de 102 · 4.8 min
+18:25:32 robô (isolado): feitas 46 de 102 · 5.1 min
+18:25:41 robô (isolado): feitas 48 de 102 · 5.2 min
+18:25:50 robô (isolado): feitas 50 de 102 · 5.4 min
+18:26:00 robô (isolado): feitas 51 de 102 · 5.5 min
+18:26:18 robô (isolado): feitas 54 de 102 · 5.8 min
+18:26:27 robô (isolado): feitas 56 de 102 · 6.0 min
+18:26:37 robô (isolado): feitas 58 de 102 · 6.2 min
+18:26:46 robô (isolado): feitas 61 de 102 · 6.3 min
+18:26:55 robô (isolado): feitas 63 de 102 · 6.5 min
+18:27:14 robô (isolado): feitas 65 de 102 · 6.8 min
+18:27:23 robô (isolado): feitas 68 de 102 · 6.9 min
+18:27:32 robô (isolado): feitas 69 de 102 · 7.1 min
+18:27:41 robô (isolado): feitas 71 de 102 · 7.2 min
+18:27:50 robô (isolado): feitas 72 de 102 · 7.4 min
+18:28:00 robô (isolado): feitas 73 de 102 · 7.5 min
+18:28:27 robô (isolado): feitas 77 de 102 · 8.0 min
+18:28:36 robô (isolado): feitas 79 de 102 · 8.1 min
+18:28:45 robô (isolado): feitas 80 de 102 · 8.3 min
+18:28:55 robô (isolado): feitas 81 de 102 · 8.5 min
+18:29:04 robô (isolado): feitas 82 de 102 · 8.6 min
+18:29:13 robô (isolado): feitas 83 de 102 · 8.8 min
+18:29:31 robô (isolado): feitas 85 de 102 · 9.1 min
+18:29:49 robô (isolado): feitas 86 de 102 · 9.4 min
+18:29:58 robô (isolado): feitas 88 de 102 · 9.5 min
+18:30:07 robô (isolado): feitas 90 de 102 · 9.7 min
+18:30:16 robô (isolado): feitas 91 de 102 · 9.8 min
+18:30:25 robô (isolado): feitas 92 de 102 · 10.0 min
+18:30:43 robô (isolado): feitas 94 de 102 · 10.3 min
+18:31:01 robô (isolado): feitas 95 de 102 · 10.6 min
+18:31:19 robô (isolado): feitas 96 de 102 · 10.9 min
+18:31:37 robô (isolado): feitas 97 de 102 · 11.2 min
+18:31:46 robô (isolado): feitas 98 de 102 · 11.3 min
+18:32:04 robô (isolado): feitas 99 de 102 · 11.6 min
+18:32:14 robô (isolado): feitas 100 de 102 · 11.8 min
+18:32:41 robô (isolado): feitas 101 de 102 · 12.2 min
+18:32:59 robô (isolado): feitas 102 de 102 · 12.5 min
+18:32:59 robô (isolado) terminou em 12.5 min
+18:32:59 2ª passada (isolado): 125 passagens que levam um registro
+18:34:53 2ª passada (isolado): 25/125
+18:36:27 2ª passada (isolado): 50/125
+18:38:06 2ª passada (isolado): 75/125
+18:39:53 2ª passada (isolado): 100/125
+18:41:18 2ª passada (isolado): 125/125
+18:41:18 2ª passada (isolado): leva-check.json gravado
+18:41:18 Chrome PID 4489 encerrado
+18:41:18 servidor PID 4582 encerrado
+18:41:18 servidor PID 4587 encerrado
+18:41:18 servidor PID 4600 encerrado
+18:41:18 Chrome principais em execução: 1 (< 4), pode abrir
+18:41:18 Chrome iniciado, PID 22614
+18:41:19 servidor em 127.0.0.1:33199, PID 22705
+18:41:19 robô (pacote): 102 telas em 1 aba(s)
+18:41:22 robô (pacote): feitas 0 de 102 · 0.1 min
+18:43:18 robô (pacote): feitas 2 de 102 · 2.0 min
+18:43:36 robô (pacote): feitas 3 de 102 · 2.3 min
+18:43:42 robô (pacote): feitas 4 de 102 · 2.4 min
+18:43:52 robô (pacote): feitas 5 de 102 · 2.5 min
+18:44:04 robô (pacote): feitas 6 de 102 · 2.7 min
+18:44:10 robô (pacote): feitas 7 de 102 · 2.8 min
+18:44:22 robô (pacote): feitas 8 de 102 · 3.0 min
+18:44:25 robô (pacote): feitas 9 de 102 · 3.1 min
+18:44:53 robô (pacote): feitas 11 de 102 · 3.6 min
+18:44:59 robô (pacote): feitas 12 de 102 · 3.7 min
+18:45:23 robô (pacote): feitas 13 de 102 · 4.1 min
+18:45:35 robô (pacote): feitas 14 de 102 · 4.3 min
+18:45:41 robô (pacote): feitas 15 de 102 · 4.4 min
+18:45:45 robô (pacote): feitas 16 de 102 · 4.4 min
+18:45:51 robô (pacote): feitas 17 de 102 · 4.5 min
+18:45:54 robô (pacote): feitas 18 de 102 · 4.6 min
+18:46:00 robô (pacote): feitas 19 de 102 · 4.7 min
+18:46:09 robô (pacote): feitas 20 de 102 · 4.8 min
+18:46:12 robô (pacote): feitas 21 de 102 · 4.9 min
+18:46:18 robô (pacote): feitas 22 de 102 · 5.0 min
+18:46:21 robô (pacote): feitas 23 de 102 · 5.0 min
+18:46:27 robô (pacote): feitas 24 de 102 · 5.1 min
+18:46:58 robô (pacote): feitas 25 de 102 · 5.7 min
+18:47:01 robô (pacote): feitas 26 de 102 · 5.7 min
+18:47:11 robô (pacote): feitas 27 de 102 · 5.9 min
+18:47:17 robô (pacote): feitas 28 de 102 · 6.0 min
+18:47:23 robô (pacote): feitas 29 de 102 · 6.1 min
+18:47:30 robô (pacote): feitas 32 de 102 · 6.2 min
+18:47:42 robô (pacote): feitas 33 de 102 · 6.4 min
+18:47:51 robô (pacote): feitas 34 de 102 · 6.5 min
+18:48:09 robô (pacote): feitas 36 de 102 · 6.8 min
+18:48:34 robô (pacote): feitas 37 de 102 · 7.2 min
+18:48:52 robô (pacote): feitas 38 de 102 · 7.5 min
+18:49:04 robô (pacote): feitas 39 de 102 · 7.7 min
+18:49:19 robô (pacote): feitas 40 de 102 · 8.0 min
+18:49:22 robô (pacote): feitas 41 de 102 · 8.1 min
+18:49:32 robô (pacote): feitas 42 de 102 · 8.2 min
+18:49:38 robô (pacote): feitas 43 de 102 · 8.3 min
+18:49:51 robô (pacote): feitas 44 de 102 · 8.5 min
+18:49:57 robô (pacote): feitas 45 de 102 · 8.6 min
+18:50:03 robô (pacote): feitas 46 de 102 · 8.7 min
+18:50:09 robô (pacote): feitas 47 de 102 · 8.8 min
+18:50:24 robô (pacote): feitas 48 de 102 · 9.1 min
+18:50:30 robô (pacote): feitas 50 de 102 · 9.2 min
+18:50:36 robô (pacote): feitas 51 de 102 · 9.3 min
+18:50:48 robô (pacote): feitas 52 de 102 · 9.5 min
+18:50:51 robô (pacote): feitas 53 de 102 · 9.5 min
+18:50:54 robô (pacote): feitas 54 de 102 · 9.6 min
+18:50:57 robô (pacote): feitas 55 de 102 · 9.6 min
+18:51:00 robô (pacote): feitas 58 de 102 · 9.7 min
+18:51:06 robô (pacote): feitas 59 de 102 · 9.8 min
+18:51:12 robô (pacote): feitas 61 de 102 · 9.9 min
+18:51:19 robô (pacote): feitas 62 de 102 · 10.0 min
+18:51:22 robô (pacote): feitas 63 de 102 · 10.0 min
+18:51:25 robô (pacote): feitas 64 de 102 · 10.1 min
+18:51:28 robô (pacote): feitas 65 de 102 · 10.1 min
+18:51:31 robô (pacote): feitas 66 de 102 · 10.2 min
+18:51:34 robô (pacote): feitas 67 de 102 · 10.2 min
+18:51:40 robô (pacote): feitas 68 de 102 · 10.3 min
+18:51:49 robô (pacote): feitas 69 de 102 · 10.5 min
+18:51:55 robô (pacote): feitas 70 de 102 · 10.6 min
+18:51:58 robô (pacote): feitas 71 de 102 · 10.6 min
+18:52:10 robô (pacote): feitas 72 de 102 · 10.8 min
+18:52:16 robô (pacote): feitas 73 de 102 · 10.9 min
+18:52:19 robô (pacote): feitas 74 de 102 · 11.0 min
+18:52:25 robô (pacote): feitas 75 de 102 · 11.1 min
+18:52:28 robô (pacote): feitas 77 de 102 · 11.1 min
+18:52:38 robô (pacote): feitas 78 de 102 · 11.3 min
+18:52:56 robô (pacote): feitas 79 de 102 · 11.6 min
+18:53:02 robô (pacote): feitas 82 de 102 · 11.7 min
+18:53:05 robô (pacote): feitas 84 de 102 · 11.8 min
+18:53:27 robô (pacote): feitas 85 de 102 · 12.1 min
+18:53:39 robô (pacote): feitas 86 de 102 · 12.3 min
+18:53:45 robô (pacote): feitas 87 de 102 · 12.4 min
+18:53:48 robô (pacote): feitas 88 de 102 · 12.5 min
+18:53:51 robô (pacote): feitas 89 de 102 · 12.5 min
+18:53:57 robô (pacote): feitas 92 de 102 · 12.6 min
+18:54:06 robô (pacote): feitas 93 de 102 · 12.8 min
+18:54:12 robô (pacote): feitas 95 de 102 · 12.9 min
+18:54:15 robô (pacote): feitas 96 de 102 · 12.9 min
+18:54:27 robô (pacote): feitas 97 de 102 · 13.1 min
+18:54:39 robô (pacote): feitas 98 de 102 · 13.3 min
+18:54:54 robô (pacote): feitas 99 de 102 · 13.6 min
+18:55:00 robô (pacote): feitas 102 de 102 · 13.7 min
+18:55:00 robô (pacote) terminou em 13.7 min
+18:55:00 2ª passada (pacote): 86 passagens que levam um registro
+18:56:55 2ª passada (pacote): 25/86
+18:58:34 2ª passada (pacote): 50/86
+19:00:23 2ª passada (pacote): 75/86
+19:01:00 2ª passada (pacote): leva-check.json gravado
+19:01:00 Chrome PID 22614 encerrado
+19:01:00 servidor PID 22705 encerrado
+19:01:00 Chrome principais em execução: 1 (< 4), pode abrir
+19:01:00 Chrome iniciado, PID 27569
+19:01:00 servidor em 127.0.0.1:45499, PID 27652
+19:03:46 navegacao.json: 156 páginas
+19:06:23 escopo-28.json: herda=1, inconclusivo (padrão igual à escolha)=2, não herda=6, sem seletor=19
+19:06:23 Chrome PID 27569 encerrado
+19:06:23 servidor PID 27652 encerrado
+resumo-isolado.json {"processo": {"det": 40, "passo": 21, "quem": 11}, "telas": 94, "detalhes": 190, "refsTotal": 85, "refsClic": 39, "rotTotal": 84, "rotClic": 6, "passagens": 247, "navega": 233, "noLugar": 11, "nada": 3, "navRegistro": 153, "naoLeva": 35, "levaIgnora": 33, "chegou": 85, "voltaOrigem": 22, "voltarDet": 107, "reabre": 10, "passoTotal": 32, "passoPessoa": 13, "semPasso": 158, "escopo": {"telas": 28, "faz": 9, "saf": 5, "herda": 0}}
+linhas 247 com problema 211 
+resumo-isolado-1a-passada.json {"processo": {"det": 40, "passo": 21, "quem": 11}, "telas": 94, "detalhes": 190, "refsTotal": 85, "refsClic": 39, "rotTotal": 84, "rotClic": 6, "passagens": 247, "navega": 233, "noLugar": 11, "nada": 3, "navRegistro": 153, "naoLeva": 35, "levaIgnora": 39, "chegou": 82, "voltaOrigem": 22, "voltarDet": 107, "reabre": 10, "passoTotal": 32, "passoPessoa": 13, "semPasso": 158, "escopo": {"telas": 28, "faz": 9, "saf": 5, "herda": 0}}
+linhas 247 com problema 211 
+resumo-pacote.json {"processo": {"det": 38, "passo": 19, "quem": 9}, "telas": 92, "detalhes": 179, "refsTotal": 78, "refsClic": 35, "rotTotal": 70, "rotClic": 6, "passagens": 206, "navega": 155, "noLugar": 46, "nada": 5, "navRegistro": 107, "naoLeva": 27, "levaIgnora": 19, "chegou": 61, "voltaOrigem": 12, "voltarDet": 77, "reabre": 1, "passoTotal": 29, "passoPessoa": 11, "semPasso": 150, "escopo": {"telas": 28, "faz": 9, "saf": 5, "herda": 0}}
+linhas 206 com problema 141 
+resumo-pacote-1a-passada.json {"processo": {"det": 38, "passo": 19, "quem": 9}, "telas": 92, "detalhes": 179, "refsTotal": 78, "refsClic": 35, "rotTotal": 70, "rotClic": 6, "passagens": 206, "navega": 155, "noLugar": 46, "nada": 5, "navRegistro": 107, "naoLeva": 27, "levaIgnora": 25, "chegou": 56, "voltaOrigem": 12, "voltarDet": 77, "reabre": 1, "passoTotal": 29, "passoPessoa": 11, "semPasso": 150, "escopo": {"telas": 28, "faz": 9, "saf": 5, "herda": 0}}
+linhas 206 com problema 141 
+| Medida | v108 | agora (isolado) | agora (como no pacote) |
+|---|---|---|---|
+| IDs clicáveis | 17/55 (31 %) | 39/85 (46 %) | 35/78 (45 %) |
+| Cadastros clicáveis | 6/71 (8 %) | 6/84 (7 %) | 6/70 (9 %) |
+| Passagens que chegam no registro (com 2ª passada) | 44/88 (50 %) | 85/153 (56 %) | 61/107 (57 %) |
+| Passagens que chegam no registro (só 1ª passada) | — | 82/153 (54 %) | 56/107 (52 %) |
+| Volta à origem | 16/88 (18 %) | 22/153 (14 %) | 12/107 (11 %) |
+| Voltar do navegador reabre o detalhe | 0/59 (0 %) | 10/107 (9 %) | 1/77 (1 %) |
+| Escopo herdado nas 28 telas principais | 0/28 (0 %) (leitura do código) | 1/28 (4 %) (escopo28) | 1/28 (4 %) (escopo28) |
+| Escopo: pares do robô com a escolha na chegada | — | 0/8 | 0/8 |
+| Telas principais com filtro Fazenda / Safra (estático) | 9/28 · 5/28 | 9/28 · 5/28 | 9/28 · 5/28 |
+| Telas · detalhes · passagens | 94 · 180 · 209 | 94 · 190 · 247 | 92 · 179 · 206 |
+| Passagens: outra tela · no lugar · sem efeito | 152 · 43 · 14 | 233 · 11 · 3 | 155 · 46 · 5 |
+| Que levam registro: não leva · leva e o destino ignora | 23 · 21 | 35 · 33 | 27 · 19 |
+| Detalhes com Próximo passo · dizem quem age | 29/180 (16 %) · 9 | 32/190 (17 %) · 13 | 29/179 (16 %) · 11 |
+ 
+19:06:23 fim em 46.0 min
+saida=0

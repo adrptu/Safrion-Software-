@@ -1,0 +1,22 @@
+{
+ "chrome": "Chromium 141.0.7390.37",
+ "isolado": {
+  "robo_min": 12.5,
+  "leva_min": 8.3,
+  "dialogos_js": [],
+  "so": [],
+  "quando": "2026-10-17T18:41:18Z",
+  "total_min": 20.9
+ },
+ "pacote": {
+  "robo_min": 13.7,
+  "leva_min": 6.0,
+  "dialogos_js": [],
+  "so": [],
+  "quando": "2026-10-17T19:01:00Z",
+  "total_min": 19.7
+ },
+ "nav_min": 2.8,
+ "escopo28_min": 2.4,
+ "nota": "medida completa: isolado 18:20–18:41 UTC, pacote 18:41–19:01, títulos e escopo 19:01–19:06; escopo28 refeito 19:07–19:10 com o controle final"
+}

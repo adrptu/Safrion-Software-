@@ -1,0 +1,228 @@
+{
+ "v108": {
+  "ids": [
+   17,
+   55
+  ],
+  "cad": [
+   6,
+   71
+  ],
+  "chega": [
+   44,
+   88
+  ],
+  "volta": [
+   16,
+   88
+  ],
+  "reabre": [
+   0,
+   59
+  ],
+  "escopo": [
+   0,
+   28
+  ],
+  "telas": 94,
+  "detalhes": 180,
+  "passagens": 209,
+  "navega": 152,
+  "noLugar": 43,
+  "nada": 14,
+  "naoLeva": 23,
+  "levaIgnora": 21,
+  "passo": [
+   29,
+   180
+  ],
+  "passoPessoa": 9
+ },
+ "modos": {
+  "isolado": {
+   "ids": [
+    39,
+    85
+   ],
+   "cad": [
+    6,
+    84
+   ],
+   "chega": [
+    85,
+    153
+   ],
+   "chega1a": [
+    82,
+    153
+   ],
+   "volta": [
+    22,
+    153
+   ],
+   "reabre": [
+    10,
+    107
+   ],
+   "telas": 94,
+   "detalhes": 190,
+   "passagens": 247,
+   "navega": 233,
+   "noLugar": 11,
+   "nada": 3,
+   "naoLeva": 35,
+   "levaIgnora": 33,
+   "passo": [
+    32,
+    190
+   ],
+   "passoPessoa": 13,
+   "escopoResumo": {
+    "telas": 28,
+    "faz": 9,
+    "saf": 5,
+    "herda": 0
+   },
+   "escopoRobo": {
+    "pares": 8,
+    "chegouIgual": 0,
+    "brutos": [
+     {
+      "de": "OS",
+      "para": "EST",
+      "escolheu": {
+       "fazenda": "Lagoa Grande",
+       "safra": "2026/27"
+      },
+      "chegou": {
+       "fazenda": "sem seletor",
+       "safra": "sem seletor"
+      }
+     },
+     {
+      "de": "OS",
+      "para": "MA",
+      "escolheu": {
+       "fazenda": "Lagoa Grande",
+       "safra": "2026/27"
+      },
+      "chegou": {
+       "fazenda": "sem seletor",
+       "safra": "sem seletor"
+      }
+     },
+     {
+      "de": "EST",
+      "para": "CMP",
+      "escolheu": {
+       "fazenda": "Lagoa Grande",
+       "safra": null
+      },
+      "chegou": {
+       "fazenda": "sem seletor",
+       "safra": "sem seletor"
+      }
+     },
+     {
+      "de": "COLH",
+      "para": "VEN",
+      "escolheu": {
+       "fazenda": "Lagoa Grande",
+       "safra": "2026/27"
+      },
+      "chegou": {
+       "fazenda": "sem seletor",
+       "safra": "sem seletor"
+      }
+     },
+     {
+      "de": "PA",
+      "para": "OS",
+      "escolheu": {
+       "fazenda": null,
+       "safra": null
+      },
+      "chegou": {
+       "fazenda": "sem seletor",
+       "safra": "sem seletor"
+      }
+     },
+     {
+      "de": "SAF",
+      "para": "PA",
+      "escolheu": {
+       "fazenda": null,
+       "safra": null
+      },
+      "chegou": {
+       "fazenda": "sem seletor",
+       "safra": "sem seletor"
+      }
+     },
+     {
+      "de": "PAGR",
+      "para": "AG-01",
+      "escolheu": {
+       "fazenda": null,
+       "safra": null
+      },
+      "chegou": {
+       "fazenda": "sem seletor",
+       "safra": "sem seletor"
+      }
+     },
+     {
+      "de": "PSUP",
+      "para": "EST",
+      "escolheu": {
+       "fazenda": null,
+       "safra": null
+      },
+      "chegou": {
+       "fazenda": "sem seletor",
+       "safra": "sem seletor"
+      }
+     }
+    ]
+   }
+  }
+ },
+ "escopo28": {
+  "herda": 0,
+  "telas": 28,
+  "porResultado": {
+   "não herda": [
+    "IN-04",
+    "OS",
+    "EST",
+    "COLH",
+    "AG-01",
+    "AG-02",
+    "IR-01",
+    "CARGA",
+    "PROD"
+   ],
+   "sem seletor": [
+    "MA",
+    "CMP",
+    "VEN",
+    "PA",
+    "SAF",
+    "AG-07",
+    "BEN",
+    "GE-02",
+    "GE-03",
+    "PAGR",
+    "PMAN",
+    "PSUP",
+    "IC",
+    "PCOM",
+    "EXPED",
+    "IV",
+    "GE-08",
+    "MB-05",
+    "CD-01"
+   ]
+  }
+ }
+}

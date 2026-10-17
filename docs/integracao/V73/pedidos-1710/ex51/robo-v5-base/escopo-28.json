@@ -1,0 +1,707 @@
+[
+ {
+  "tela": "IN-04",
+  "origem": "OS",
+  "escolha": {
+   "fazenda": "Boa Vista"
+  },
+  "aplicouNaOrigem": {
+   "fazenda": "Boa Vista",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": "Lagoa Grande",
+   "safra": "2026/27"
+  },
+  "opcoesDestino": {
+   "fazenda": [
+    "Todas",
+    "Lagoa Grande",
+    "Santa Rita",
+    "Boa Vista"
+   ],
+   "safra": [
+    "2026/27"
+   ]
+  },
+  "chegou": {
+   "fazenda": "Lagoa Grande",
+   "safra": "2026/27"
+  },
+  "resultado": "não herda"
+ },
+ {
+  "tela": "OS",
+  "origem": "CARGA",
+  "escolha": {
+   "fazenda": "Lagoa Grande",
+   "safra": "2026/27"
+  },
+  "aplicouNaOrigem": {
+   "fazenda": "Lagoa Grande",
+   "safra": "2026/27"
+  },
+  "padrao": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "opcoesDestino": {
+   "fazenda": [
+    "Todas",
+    "Lagoa Grande",
+    "Santa Rita",
+    "Boa Vista"
+   ],
+   "safra": [
+    "Todas",
+    "2026/27",
+    "Safrinha 2027",
+    "2025/26"
+   ]
+  },
+  "chegou": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "resultado": "não herda"
+ },
+ {
+  "tela": "EST",
+  "origem": "OS",
+  "escolha": {
+   "fazenda": "Lagoa Grande"
+  },
+  "aplicouNaOrigem": {
+   "fazenda": "Lagoa Grande",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": "Santa Rita",
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": [
+    "Todas",
+    "Lagoa Grande",
+    "Santa Rita",
+    "Boa Vista"
+   ],
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": "Santa Rita",
+   "safra": null
+  },
+  "resultado": "não herda"
+ },
+ {
+  "tela": "MA",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "CMP",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "VEN",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "COLH",
+  "origem": "OS",
+  "escolha": {
+   "fazenda": "Lagoa Grande",
+   "safra": "2026/27"
+  },
+  "aplicouNaOrigem": {
+   "fazenda": "Lagoa Grande",
+   "safra": "2026/27"
+  },
+  "padrao": {
+   "fazenda": "Todas",
+   "safra": "Todas"
+  },
+  "opcoesDestino": {
+   "fazenda": [
+    "Todas",
+    "Lagoa Grande",
+    "Santa Rita",
+    "Boa Vista"
+   ],
+   "safra": [
+    "Todas",
+    "2026/27",
+    "Safrinha 2027",
+    "2025/26"
+   ]
+  },
+  "chegou": {
+   "fazenda": "Todas",
+   "safra": "Todas"
+  },
+  "resultado": "não herda"
+ },
+ {
+  "tela": "PA",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "SAF",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "AG-01",
+  "origem": "OS",
+  "escolha": {
+   "fazenda": "Boa Vista"
+  },
+  "aplicouNaOrigem": {
+   "fazenda": "Boa Vista",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": "Lagoa Grande",
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": [
+    "Todas",
+    "Lagoa Grande",
+    "Santa Rita",
+    "Boa Vista"
+   ],
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": "Lagoa Grande",
+   "safra": null
+  },
+  "resultado": "não herda"
+ },
+ {
+  "tela": "AG-02",
+  "origem": "OS",
+  "escolha": {
+   "fazenda": "Lagoa Grande"
+  },
+  "aplicouNaOrigem": {
+   "fazenda": "Lagoa Grande",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": "Todas",
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": [
+    "Todas",
+    "Lagoa Grande",
+    "Santa Rita",
+    "Boa Vista"
+   ],
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": "Todas",
+   "safra": null
+  },
+  "resultado": "não herda"
+ },
+ {
+  "tela": "AG-07",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "IR-01",
+  "origem": "OS",
+  "escolha": {
+   "fazenda": "Lagoa Grande"
+  },
+  "aplicouNaOrigem": {
+   "fazenda": "Lagoa Grande",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": "Santa Rita",
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": [
+    "Todas",
+    "Lagoa Grande",
+    "Santa Rita",
+    "Boa Vista"
+   ],
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": "Santa Rita",
+   "safra": null
+  },
+  "resultado": "não herda"
+ },
+ {
+  "tela": "CARGA",
+  "origem": "OS",
+  "escolha": {
+   "fazenda": "Lagoa Grande",
+   "safra": "2026/27"
+  },
+  "aplicouNaOrigem": {
+   "fazenda": "Lagoa Grande",
+   "safra": "2026/27"
+  },
+  "padrao": {
+   "fazenda": "Todas",
+   "safra": "Todas"
+  },
+  "opcoesDestino": {
+   "fazenda": [
+    "Todas",
+    "Lagoa Grande",
+    "Santa Rita",
+    "Boa Vista"
+   ],
+   "safra": [
+    "Todas",
+    "2026/27",
+    "Safrinha 2027",
+    "2025/26"
+   ]
+  },
+  "chegou": {
+   "fazenda": "Todas",
+   "safra": "Todas"
+  },
+  "resultado": "não herda"
+ },
+ {
+  "tela": "BEN",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "PROD",
+  "origem": "OS",
+  "escolha": {
+   "fazenda": "Lagoa Grande",
+   "safra": "2026/27"
+  },
+  "aplicouNaOrigem": {
+   "fazenda": "Lagoa Grande",
+   "safra": "2026/27"
+  },
+  "padrao": {
+   "fazenda": "Todas",
+   "safra": "Todas"
+  },
+  "opcoesDestino": {
+   "fazenda": [
+    "Todas",
+    "Lagoa Grande",
+    "Santa Rita",
+    "Boa Vista"
+   ],
+   "safra": [
+    "Todas",
+    "2026/27",
+    "Safrinha 2027",
+    "2025/26"
+   ]
+  },
+  "chegou": {
+   "fazenda": "Todas",
+   "safra": "Todas"
+  },
+  "resultado": "não herda"
+ },
+ {
+  "tela": "GE-02",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "GE-03",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "PAGR",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "PMAN",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "PSUP",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "IC",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "PCOM",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "EXPED",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "IV",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "GE-08",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "MB-05",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ },
+ {
+  "tela": "CD-01",
+  "origem": "OS",
+  "escolha": {},
+  "aplicouNaOrigem": {
+   "fazenda": "Santa Rita",
+   "safra": "Todas"
+  },
+  "padrao": {
+   "fazenda": null,
+   "safra": null
+  },
+  "opcoesDestino": {
+   "fazenda": null,
+   "safra": null
+  },
+  "chegou": {
+   "fazenda": null,
+   "safra": null
+  },
+  "resultado": "sem seletor"
+ }
+]

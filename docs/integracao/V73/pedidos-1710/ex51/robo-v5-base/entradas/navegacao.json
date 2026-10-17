@@ -1,0 +1,940 @@
+{
+"rows": [
+{
+"tela": "AG-01",
+"titulo": "Pragas e doenças",
+"h1": "Pragas e doenças",
+"title": "Pragas e doenças"
+},
+{
+"tela": "AG-01det",
+"titulo": "Rota e evidências",
+"h1": "Rota e evidências",
+"title": "Rota e evidências"
+},
+{
+"tela": "AG-02",
+"titulo": "Análises de solo",
+"h1": "Análises de solo",
+"title": "Análises de solo"
+},
+{
+"tela": "AG-03",
+"titulo": "Diagnósticos",
+"h1": "Diagnósticos",
+"title": "Diagnósticos"
+},
+{
+"tela": "AG-03det",
+"titulo": "Diagnóstico · DIA-007 nematoide T4",
+"h1": "Diagnóstico · DIA-007 nematoide T4",
+"title": "Diagnóstico · DIA-007 nematoide T4"
+},
+{
+"tela": "AG-04",
+"titulo": "Recomendações",
+"h1": "Recomendações",
+"title": "Recomendações"
+},
+{
+"tela": "AG-04det",
+"titulo": "Recomendação · REC-014 plantio T4",
+"h1": "Recomendação · REC-014 plantio T4",
+"title": "Recomendação · REC-014 plantio T4"
+},
+{
+"tela": "AG-05",
+"titulo": "Biblioteca e planos técnicos",
+"h1": "Biblioteca e planos técnicos",
+"title": "Biblioteca e planos técnicos"
+},
+{
+"tela": "AG-06",
+"titulo": "Eficácia e histórico",
+"h1": "Eficácia e histórico",
+"title": "Eficácia e histórico"
+},
+{
+"tela": "AG-07",
+"titulo": "Consulta Agrofit",
+"h1": "Consulta Agrofit",
+"title": "Consulta Agrofit"
+},
+{
+"tela": "BEN",
+"titulo": "Beneficiamento",
+"h1": "Beneficiamento",
+"title": "Beneficiamento"
+},
+{
+"tela": "BO-01",
+"titulo": "Planos e preços",
+"h1": "Planos e preços",
+"title": "Planos e preços"
+},
+{
+"tela": "BO-02",
+"titulo": "Assinaturas e cobrança",
+"h1": "Assinaturas e cobrança",
+"title": "Assinaturas e cobrança"
+},
+{
+"tela": "CA-01",
+"titulo": "Ordens de campo",
+"h1": "Ordens de campo",
+"title": "Ordens de campo"
+},
+{
+"tela": "CA-01det",
+"titulo": "OS-0421 · Fungicida 1ª aplicação",
+"h1": "OS-0421 · Fungicida 1ª aplicação",
+"title": "OS-0421 · Fungicida 1ª aplicação"
+},
+{
+"tela": "CA-01x-os0420",
+"titulo": "OS-0420 · Plantio Soja 58 W",
+"h1": "OS-0420 · Plantio Soja 58 W",
+"title": "OS-0420 · Plantio Soja 58 W"
+},
+{
+"tela": "CA-02",
+"titulo": "Apontamentos e conferência",
+"h1": "Apontamentos e conferência",
+"title": "Apontamentos e conferência"
+},
+{
+"tela": "CA-03",
+"titulo": "Ocorrências",
+"h1": "Ocorrências",
+"title": "Ocorrências"
+},
+{
+"tela": "CA-03det",
+"titulo": "OC-114 · Quebra do Trator T1",
+"h1": "OC-114 · Quebra do Trator T1",
+"title": "OC-114 · Quebra do Trator T1"
+},
+{
+"tela": "CA-04",
+"titulo": "Minhas requisições",
+"h1": "Minhas requisições",
+"title": "Minhas requisições"
+},
+{
+"tela": "CARGA",
+"titulo": "Cargas e recebimento",
+"h1": "Cargas e recebimento",
+"title": "Cargas e recebimento"
+},
+{
+"tela": "CD-01",
+"titulo": "Fazendas, áreas e talhões",
+"h1": "Fazendas, áreas e talhões",
+"title": "Fazendas, áreas e talhões"
+},
+{
+"tela": "CD-01det",
+"titulo": "Talhão",
+"h1": "Talhão",
+"title": "Talhão"
+},
+{
+"tela": "CD-02",
+"titulo": "Culturas e cultivares",
+"h1": "Culturas e cultivares",
+"title": "Culturas e cultivares"
+},
+{
+"tela": "CD-03",
+"titulo": "Máquinas, instalações e setores",
+"h1": "Máquinas, instalações e setores",
+"title": "Máquinas, instalações e setores"
+},
+{
+"tela": "CD-04",
+"titulo": "Pessoas e equipes",
+"h1": "Pessoas e equipes",
+"title": "Pessoas e equipes"
+},
+{
+"tela": "CD-05",
+"titulo": "Parceiros e fornecedores",
+"h1": "Parceiros e fornecedores",
+"title": "Parceiros e fornecedores"
+},
+{
+"tela": "CD-06",
+"titulo": "Produtos, unidades e locais",
+"h1": "Produtos, unidades e locais",
+"title": "Produtos, unidades e locais"
+},
+{
+"tela": "CD-07",
+"titulo": "Estrutura gerencial",
+"h1": "Estrutura gerencial",
+"title": "Estrutura gerencial"
+},
+{
+"tela": "CD-08",
+"titulo": "Operações e rendimentos",
+"h1": "Operações e rendimentos",
+"title": "Operações e rendimentos"
+},
+{
+"tela": "CD",
+"titulo": "Cadastros",
+"h1": "Cadastros",
+"title": "Cadastros"
+},
+{
+"tela": "CF-01",
+"titulo": "Usuários e alçadas",
+"h1": "Usuários e alçadas",
+"title": "Usuários e alçadas"
+},
+{
+"tela": "CF-03",
+"titulo": "Integrações",
+"h1": "Integrações",
+"title": "Integrações"
+},
+{
+"tela": "CF-04",
+"titulo": "Auditoria",
+"h1": "Auditoria",
+"title": "Auditoria"
+},
+{
+"tela": "CF-05",
+"titulo": "Assinatura e cobrança",
+"h1": "Assinatura e cobrança",
+"title": "Assinatura e cobrança"
+},
+{
+"tela": "CMP",
+"titulo": "Compras",
+"h1": "Compras",
+"title": "Compras"
+},
+{
+"tela": "CO-01",
+"titulo": "Previsão e maturação",
+"h1": "Previsão e maturação",
+"title": "Previsão e maturação"
+},
+{
+"tela": "CO-02",
+"titulo": "Programação e ordens de colheita",
+"h1": "Programação e ordens de colheita",
+"title": "Programação e ordens de colheita"
+},
+{
+"tela": "CO-02det",
+"titulo": "OC-0510 · Colheita de mamão T7",
+"h1": "OC-0510 · Colheita de mamão T7",
+"title": "OC-0510 · Colheita de mamão T7"
+},
+{
+"tela": "CO-03",
+"titulo": "Cargas, pesagens e romaneios",
+"h1": "Cargas, pesagens e romaneios",
+"title": "Cargas, pesagens e romaneios"
+},
+{
+"tela": "CO-04",
+"titulo": "Recebimento da produção",
+"h1": "Recebimento da produção",
+"title": "Recebimento da produção"
+},
+{
+"tela": "CO-05",
+"titulo": "Beneficiamento",
+"h1": "Beneficiamento",
+"title": "Beneficiamento"
+},
+{
+"tela": "CO-05det",
+"titulo": "OB-0110 · Packing do mamão",
+"h1": "OB-0110 · Packing do mamão",
+"title": "OB-0110 · Packing do mamão"
+},
+{
+"tela": "CO-06",
+"titulo": "Qualidade e rastreabilidade",
+"h1": "Qualidade e rastreabilidade",
+"title": "Qualidade e rastreabilidade"
+},
+{
+"tela": "CO-06det",
+"titulo": "INSP-88 · Lote L27-013 bloqueado",
+"h1": "INSP-88 · Lote L27-013 bloqueado",
+"title": "INSP-88 · Lote L27-013 bloqueado"
+},
+{
+"tela": "CO-07",
+"titulo": "Estoque de produção",
+"h1": "Estoque de produção",
+"title": "Estoque de produção"
+},
+{
+"tela": "COLH",
+"titulo": "Previsão e colheita",
+"h1": "Previsão e colheita",
+"title": "Previsão e colheita"
+},
+{
+"tela": "EST",
+"titulo": "Estoque",
+"h1": "Estoque",
+"title": "Estoque"
+},
+{
+"tela": "EXPED",
+"titulo": "Expedição e entregas",
+"h1": "Expedição e entregas",
+"title": "Expedição e entregas"
+},
+{
+"tela": "GE-01",
+"titulo": "Visão gerencial",
+"h1": "Visão gerencial",
+"title": "Visão gerencial"
+},
+{
+"tela": "GE-02",
+"titulo": "Orçamento e previsões",
+"h1": "Orçamento e previsões",
+"title": "Orçamento e previsões"
+},
+{
+"tela": "GE-02det",
+"titulo": "Comparar · V1 × V2 × real",
+"h1": "Comparar · V1 × V2 × real",
+"title": "Comparar · V1 × V2 × real"
+},
+{
+"tela": "GE-03",
+"titulo": "Custos e fechamento",
+"h1": "Custos e fechamento",
+"title": "Custos e fechamento"
+},
+{
+"tela": "GE-04",
+"titulo": "Contas a pagar e caixa",
+"h1": "Contas a pagar e caixa",
+"title": "Contas a pagar e caixa"
+},
+{
+"tela": "GE-05",
+"titulo": "Contas a receber",
+"h1": "Contas a receber",
+"title": "Contas a receber"
+},
+{
+"tela": "GE-06",
+"titulo": "Indicadores operacionais",
+"h1": "Indicadores operacionais",
+"title": "Indicadores operacionais"
+},
+{
+"tela": "GE-06det",
+"titulo": "Detalhar · custo de pulverização",
+"h1": "Detalhar · custo de pulverização",
+"title": "Detalhar · custo de pulverização"
+},
+{
+"tela": "GE-07",
+"titulo": "Planos de ação",
+"h1": "Planos de ação",
+"title": "Planos de ação"
+},
+{
+"tela": "GE-08",
+"titulo": "Crédito e garantias",
+"h1": "Crédito e garantias",
+"title": "Crédito e garantias"
+},
+{
+"tela": "IC",
+"titulo": "Inteligência de compras",
+"h1": "Inteligência de compras",
+"title": "Inteligência de compras"
+},
+{
+"tela": "IN-01",
+"titulo": "Meu dia",
+"h1": "Meu dia",
+"title": "Meu dia"
+},
+{
+"tela": "IN-02",
+"titulo": "Aprovações",
+"h1": "Aprovações",
+"title": "Aprovações"
+},
+{
+"tela": "IN-03",
+"titulo": "Agenda e pendências",
+"h1": "Agenda e pendências",
+"title": "Agenda e pendências"
+},
+{
+"tela": "IN-04",
+"titulo": "Mapa da fazenda",
+"h1": "Mapa da fazenda",
+"title": "Mapa da fazenda"
+},
+{
+"tela": "IR-01",
+"titulo": "Irrigação",
+"h1": "Irrigação",
+"title": "Irrigação"
+},
+{
+"tela": "IR-02",
+"titulo": "Programação",
+"h1": "Programação",
+"title": "Programação"
+},
+{
+"tela": "IR-03",
+"titulo": "Ordens de irrigação",
+"h1": "Ordens de irrigação",
+"title": "Ordens de irrigação"
+},
+{
+"tela": "IR-03det",
+"titulo": "OS-0419 · Irrigação · Pivô 2",
+"h1": "OS-0419 · Irrigação · Pivô 2",
+"title": "Ordem de irrigação"
+},
+{
+"tela": "IR-04",
+"titulo": "Clima e sensores",
+"h1": "Clima e sensores",
+"title": "Clima e sensores"
+},
+{
+"tela": "IV",
+"titulo": "Inteligência de vendas",
+"h1": "Inteligência de vendas",
+"title": "Inteligência de vendas"
+},
+{
+"tela": "LO-01",
+"titulo": "Programação de transporte",
+"h1": "Programação de transporte",
+"title": "Programação de transporte"
+},
+{
+"tela": "LO-02",
+"titulo": "Expedições e cargas",
+"h1": "Expedições e cargas",
+"title": "Expedições e cargas"
+},
+{
+"tela": "LO-02det",
+"titulo": "Conferir carga",
+"h1": "Conferir carga",
+"title": "Conferir carga"
+},
+{
+"tela": "LO-03",
+"titulo": "Viagens e entregas",
+"h1": "Viagens e entregas",
+"title": "Viagens e entregas"
+},
+{
+"tela": "LO-04",
+"titulo": "Fretes e transportadores",
+"h1": "Fretes e transportadores",
+"title": "Fretes e transportadores"
+},
+{
+"tela": "MA-01",
+"titulo": "Manutenção",
+"h1": "Manutenção",
+"title": "Manutenção"
+},
+{
+"tela": "MA-02",
+"titulo": "Manutenção",
+"h1": "Manutenção",
+"title": "Manutenção"
+},
+{
+"tela": "MA-03",
+"titulo": "Manutenção",
+"h1": "Manutenção",
+"title": "Manutenção"
+},
+{
+"tela": "MA-04",
+"titulo": "Manutenção",
+"h1": "Manutenção",
+"title": "Manutenção"
+},
+{
+"tela": "MA-04det",
+"titulo": "Manutenção",
+"h1": "Manutenção",
+"title": "Manutenção"
+},
+{
+"tela": "MA-05",
+"titulo": "Manutenção",
+"h1": "Manutenção",
+"title": "Manutenção"
+},
+{
+"tela": "MA",
+"titulo": "Manutenção",
+"h1": "Manutenção",
+"title": "Manutenção"
+},
+{
+"tela": "MB-01",
+"titulo": "Hoje no campo",
+"h1": "Hoje no campo",
+"title": "Hoje no campo"
+},
+{
+"tela": "MB-02",
+"titulo": "Minhas ordens",
+"h1": "Minhas ordens",
+"title": "Minhas ordens"
+},
+{
+"tela": "MB-02det",
+"titulo": "OS-0421 · Pulverização",
+"h1": "OS-0421 · Pulverização",
+"title": "Detalhe da ordem"
+},
+{
+"tela": "MB-03",
+"titulo": "Apontamento do turno",
+"h1": "Apontamento do turno",
+"title": "Apontamento do turno"
+},
+{
+"tela": "MB-03x-recibo",
+"titulo": "Envios e recibos",
+"h1": "Envios e recibos",
+"title": "Envios e recibos"
+},
+{
+"tela": "MB-04",
+"titulo": "Registrar ocorrência",
+"h1": "Registrar ocorrência",
+"title": "Registrar ocorrência"
+},
+{
+"tela": "MB-05",
+"titulo": "Almoxarifado móvel",
+"h1": "Almoxarifado móvel",
+"title": "Almoxarifado móvel"
+},
+{
+"tela": "MB-05det",
+"titulo": "Receber devolução",
+"h1": "Receber devolução",
+"title": "Receber devolução"
+},
+{
+"tela": "MB-06",
+"titulo": "Vistoria VIS-014",
+"h1": "Vistoria VIS-014",
+"title": "Vistoria por pontos"
+},
+{
+"tela": "MB-07",
+"titulo": "Contagem de frutos",
+"h1": "Contagem de frutos",
+"title": "Contagem de frutos"
+},
+{
+"tela": "MB-08",
+"titulo": "Irrigação de hoje",
+"h1": "Irrigação de hoje",
+"title": "Irrigação de hoje"
+},
+{
+"tela": "MB-08x-recibo",
+"titulo": "Irrigação · recibo do término",
+"h1": "Irrigação · recibo do término",
+"title": "Irrigação · recibo do término"
+},
+{
+"tela": "MB-09",
+"titulo": "Máquina",
+"h1": "Máquina",
+"title": "Máquina"
+},
+{
+"tela": "MB-09det",
+"titulo": "OM-0233 · Trator T1",
+"h1": "OM-0233 · Trator T1",
+"title": "Ordem de manutenção"
+},
+{
+"tela": "MB-10",
+"titulo": "Cargas e entregas",
+"h1": "Cargas e entregas",
+"title": "Cargas e entregas"
+},
+{
+"tela": "MOD-AGR",
+"titulo": "Agrícola",
+"h1": "Agrícola",
+"title": "Agrícola"
+},
+{
+"tela": "MOD-CFG",
+"titulo": "Configurações",
+"h1": "Configurações",
+"title": "Configurações"
+},
+{
+"tela": "MOD-COM",
+"titulo": "Comercial",
+"h1": "Comercial",
+"title": "Comercial"
+},
+{
+"tela": "MOD-CRE",
+"titulo": "Crédito",
+"h1": "Crédito",
+"title": "Crédito"
+},
+{
+"tela": "MOD-MAN",
+"titulo": "Manutenção",
+"h1": "Manutenção",
+"title": "Manutenção"
+},
+{
+"tela": "MOD-OUT",
+"titulo": "Outros acessos",
+"h1": "Outros acessos",
+"title": "Outros acessos"
+},
+{
+"tela": "MOD-SUP",
+"titulo": "Suprimentos",
+"h1": "Suprimentos",
+"title": "Suprimentos"
+},
+{
+"tela": "Main",
+"titulo": "Safrion",
+"h1": "",
+"title": "Safrion"
+},
+{
+"tela": "ON-01",
+"titulo": "Entrada e implantação guiada",
+"h1": "Entrada e implantação guiada",
+"title": "Entrada e implantação guiada"
+},
+{
+"tela": "ON-01det",
+"titulo": "Importação · prévia e erros",
+"h1": "Importação · prévia e erros",
+"title": "Importação · prévia e erros"
+},
+{
+"tela": "OS-0424-app",
+"titulo": "OS-0424 · Fungicida",
+"h1": "OS-0424 · Fungicida",
+"title": "OS-0424 · ficha de campo"
+},
+{
+"tela": "OS-0424-ficha",
+"titulo": "OS-0424 · Fungicida · T1-B · Soja 62 X",
+"h1": "OS-0424 · Fungicida · T1-B · Soja 62 X",
+"title": "OS-0424 · ficha impressa"
+},
+{
+"tela": "OS",
+"titulo": "Ordem de Serviço",
+"h1": "Ordem de Serviço",
+"title": "Ordem de Serviço"
+},
+{
+"tela": "PA",
+"titulo": "Planos agronômicos",
+"h1": "Planos agronômicos",
+"title": "Planos agronômicos"
+},
+{
+"tela": "PAGR",
+"titulo": "Painel",
+"h1": "Painel",
+"title": "Painel"
+},
+{
+"tela": "PCOM",
+"titulo": "Painel comercial",
+"h1": "Painel comercial",
+"title": "Painel comercial"
+},
+{
+"tela": "PL-01",
+"titulo": "Safras, ciclos e metas",
+"h1": "Safras, ciclos e metas",
+"title": "Safras, ciclos e metas"
+},
+{
+"tela": "PL-02",
+"titulo": "Plano operacional",
+"h1": "Plano operacional",
+"title": "Plano operacional"
+},
+{
+"tela": "PL-02det",
+"titulo": "Plano do talhão T1-A · gatilhos",
+"h1": "Plano do talhão T1-A · gatilhos",
+"title": "Plano do talhão T1-A · gatilhos"
+},
+{
+"tela": "PL-03",
+"titulo": "Capacidade e recursos",
+"h1": "Capacidade e recursos",
+"title": "Capacidade e recursos"
+},
+{
+"tela": "PL-04",
+"titulo": "Programação integrada",
+"h1": "Programação integrada",
+"title": "Programação integrada"
+},
+{
+"tela": "PL-05",
+"titulo": "Impedimentos e reprogramação",
+"h1": "Impedimentos e reprogramação",
+"title": "Impedimentos e reprogramação"
+},
+{
+"tela": "PL-05det",
+"titulo": "Impedimento · OS-0431 ativo bloqueado",
+"h1": "Impedimento · OS-0431 ativo bloqueado",
+"title": "Impedimento · OS-0431 ativo bloqueado"
+},
+{
+"tela": "PL-06",
+"titulo": "Parcelas e escalonamento",
+"h1": "Parcelas e escalonamento",
+"title": "Parcelas e escalonamento"
+},
+{
+"tela": "PM",
+"titulo": "Manutenção",
+"h1": "Manutenção",
+"title": "Manutenção"
+},
+{
+"tela": "PMAN",
+"titulo": "Painel",
+"h1": "Painel",
+"title": "Painel"
+},
+{
+"tela": "PROD",
+"titulo": "Estoque de produto",
+"h1": "Estoque de produto",
+"title": "Estoque de produto"
+},
+{
+"tela": "PSUP",
+"titulo": "Painel",
+"h1": "Painel",
+"title": "Painel"
+},
+{
+"tela": "PT-01",
+"titulo": "Portal do parceiro",
+"h1": "Portal do parceiro",
+"title": "Portal do parceiro"
+},
+{
+"tela": "PT-02",
+"titulo": "Cotações concedidas",
+"h1": "Cotações concedidas",
+"title": "Cotações concedidas"
+},
+{
+"tela": "PT-02det",
+"titulo": "Proposta · SOL-2026-07 · Fertilizantes",
+"h1": "Proposta · SOL-2026-07 · Fertilizantes",
+"title": "Proposta · SOL-2026-07 · Fertilizantes"
+},
+{
+"tela": "PT-03",
+"titulo": "Ofertas",
+"h1": "Ofertas",
+"title": "Ofertas"
+},
+{
+"tela": "PT-04",
+"titulo": "Crédito",
+"h1": "Crédito",
+"title": "Crédito"
+},
+{
+"tela": "PT-04det",
+"titulo": "Dossiê · CRE-0102 custeio",
+"h1": "Dossiê · CRE-0102 custeio",
+"title": "Dossiê · CRE-0102 custeio"
+},
+{
+"tela": "PT-05",
+"titulo": "Negócios e documentos",
+"h1": "Negócios e documentos",
+"title": "Negócios e documentos"
+},
+{
+"tela": "PT-05det",
+"titulo": "Negócio · CT-2026-11 KCl 60%",
+"h1": "Negócio · CT-2026-11 KCl 60%",
+"title": "Negócio · CT-2026-11 KCl 60%"
+},
+{
+"tela": "PT-06",
+"titulo": "Indicadores",
+"h1": "Indicadores",
+"title": "Indicadores"
+},
+{
+"tela": "PT-07",
+"titulo": "Perfil e assinatura",
+"h1": "Perfil e assinatura",
+"title": "Perfil e assinatura"
+},
+{
+"tela": "SAF",
+"titulo": "Planejar safra",
+"h1": "Planejar safra",
+"title": "Planejar safra"
+},
+{
+"tela": "SU-01",
+"titulo": "Necessidades e cobertura",
+"h1": "Necessidades e cobertura",
+"title": "Necessidades e cobertura"
+},
+{
+"tela": "SU-02",
+"titulo": "Políticas de estoque",
+"h1": "Políticas de estoque",
+"title": "Políticas de estoque"
+},
+{
+"tela": "SU-03",
+"titulo": "Saldos e lotes de materiais",
+"h1": "Saldos e lotes de materiais",
+"title": "Saldos e lotes de materiais"
+},
+{
+"tela": "SU-03det",
+"titulo": "Lote F26-02 · reservas",
+"h1": "Lote F26-02 · reservas",
+"title": "Lote F26-02 · reservas"
+},
+{
+"tela": "SU-04",
+"titulo": "Solicitações e cotações",
+"h1": "Solicitações e cotações",
+"title": "Solicitações e cotações"
+},
+{
+"tela": "SU-05",
+"titulo": "Contratos, pedidos e entregas",
+"h1": "Contratos, pedidos e entregas",
+"title": "Contratos, pedidos e entregas"
+},
+{
+"tela": "SU-05det",
+"titulo": "CT-2026-11 · Fertisul · KCl 60%",
+"h1": "CT-2026-11 · Fertisul · KCl 60%",
+"title": "CT-2026-11 · Fertisul · KCl 60%"
+},
+{
+"tela": "SU-06",
+"titulo": "Recebimentos e divergências",
+"h1": "Recebimentos e divergências",
+"title": "Recebimentos e divergências"
+},
+{
+"tela": "SU-07",
+"titulo": "Requisições e entregas",
+"h1": "Requisições e entregas",
+"title": "Requisições e entregas"
+},
+{
+"tela": "SU-07det",
+"titulo": "REQ-031 · OS-0417 · MAP 11-52",
+"h1": "REQ-031 · OS-0417 · MAP 11-52",
+"title": "REQ-031 · OS-0417 · MAP 11-52"
+},
+{
+"tela": "SU-08",
+"titulo": "Transferências e movimentos",
+"h1": "Transferências e movimentos",
+"title": "Transferências e movimentos"
+},
+{
+"tela": "SU-09",
+"titulo": "Inventários e ajustes",
+"h1": "Inventários e ajustes",
+"title": "Inventários e ajustes"
+},
+{
+"tela": "VE-01",
+"titulo": "Demanda e oferta",
+"h1": "Demanda e oferta",
+"title": "Demanda e oferta"
+},
+{
+"tela": "VE-02",
+"titulo": "Mercado e preços",
+"h1": "Mercado e preços",
+"title": "Mercado e preços"
+},
+{
+"tela": "VE-03",
+"titulo": "Ofertas e propostas",
+"h1": "Ofertas e propostas",
+"title": "Ofertas e propostas"
+},
+{
+"tela": "VE-04",
+"titulo": "Pedidos de venda",
+"h1": "Pedidos de venda",
+"title": "Pedidos de venda"
+},
+{
+"tela": "VE-04det",
+"titulo": "Pedido PV-031 · Mamão Formosa A",
+"h1": "Pedido PV-031 · Mamão Formosa A",
+"title": "Pedido PV-031 · Mamão Formosa A"
+},
+{
+"tela": "VE-05",
+"titulo": "Contratos e compromissos",
+"h1": "Contratos e compromissos",
+"title": "Contratos e compromissos"
+},
+{
+"tela": "VE-06",
+"titulo": "Reclamações e devoluções",
+"h1": "Reclamações e devoluções",
+"title": "Reclamações e devoluções"
+},
+{
+"tela": "VEN",
+"titulo": "Contratos e pedidos",
+"h1": "Contratos e pedidos",
+"title": "Contratos e pedidos"
+}
+]
+}
