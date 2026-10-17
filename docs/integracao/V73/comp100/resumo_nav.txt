@@ -1,0 +1,2 @@
+seta_padrao_test rc=0 RESULTADO: 14 ok · 0 falhas
+paginas_scan_test rc=0 RESULTADO: 5 ok · 0 falhas (148 páginas)
