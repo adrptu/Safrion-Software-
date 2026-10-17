@@ -1,0 +1,16 @@
+  ok  MA · OM-0234: sem erro de JS
+  ok  CTL-3 (R-D4): cada tarefa respondida mostra quem e a hora
+  ok  leitura 29.950 h: aviso a confirmar, a ordem segue Em execução
+  ok  corrigir a leitura e aplicar 12 de 16 L: sobra de 4 L
+  ok  custo com o aplicado (690 + 12 × 28 + 5 h × 320)
+  ok  tarefa: Zé responde "Não feito" e edita o motivo; a resposta segue de Zé com a mesma hora; Ana não edita (Ação de Zé, executante)
+  ok  leitura alta: a confirmar, descartada; Trator 02 segue em 2.988 h
+  ok  troca de contador confirmada: 48.100 km, vencimento ajustado para 49.900 km
+  ok  Ativos: leitura do Trator 04 atualizada pelo abastecimento
+  ok  NC-0912 vinculado: sai de Sem ordem e aparece na OM-0236
+  ok  falta de peça: compra, recebimento e liberação
+  ok  F5 reabre a OM (#vis=ordens&om=OM-0228)
+  ok  OM: Tab preso no painel (True); Esc fecha e limpa o endereço (#vis=ordens)
+  ok  1.280 px: grades sem coluna cortada
+  ok  fim: sem erro de JS
+RESULTADO: 15/15 ok
