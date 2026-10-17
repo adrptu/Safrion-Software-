@@ -1,0 +1,10 @@
+FIM saf_lote_unit_test.py rc=0 :: RESULTADO 54/54
+FIM kanban_raias_test.py rc=0 :: RESULTADO 9/9
+FIM saf_lote_test.py rc=0 168s :: RESULTADO: OK 45/45
+FIM saf_c01_test.py rc=0 188s :: RESULTADO: 68 ok · 0 falhas (tudo)
+FIM tabelas_saf_test.py rc=0 62s :: RESULTADO: 24/24 ok
+FIM cartoes_test.py rc=0 532s :: RESULTADO: 70/70
+FIM ds_1510_test.py rc=0 236s :: RESULTADO: 17 ok · 0 falhas
+FIM solo_ag02_test.py rc=0 102s :: RESULTADO: OK 32/32
+FIM paginas_scan_test.py rc=0 398s :: RESULTADO: 5 ok · 0 falhas (148 páginas)
+TUDO

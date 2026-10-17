@@ -1,0 +1,25 @@
+# 1440 px · 148 telas + 10 estados · 389 controles de abrir/recolher · 1716 setas desenhadas (1341 de ir) · 17 telas com teclado medido
+# 1440 px · desenhos distintos da seta: 1
+     127 telas · rgb(101, 115, 106) | 16x16 | 1.75 | M6 3.5 10.5 8 6 12.5 | 0 0 16 16
+  b  (1440, 'PL-04.dc.html', 'inicial', 'summary «Conferir caminho de liberação»')
+  b  (1440, 'PL-04.dc.html', 'modo', 'summary «Conferir caminho de liberação»')
+OK    A1440 nenhum triângulo de abrir como texto em botão, link, summary, [aria-expanded] ou começo de linha (telas com desvio: 0)
+FALHA B1440 todo controle de abrir/recolher usa o componente da seta (389 controles; telas com desvio: 1) · ['PL-04.dc.html']
+OK    C1440 uma seta só: rgb(101, 115, 106), 16×16 px, traço 1.75, o mesmo desenho (1716 setas; desenhos distintos: 1)
+OK    D1440 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 0)
+OK    E1440 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (17 telas; desvios: 0)
+OK    F1440 alvo da seta ≥ 24 px sem cobrir outro controle (telas com desvio: 0)
+OK    G1440 sem erro de JavaScript nem estado que não abriu
+# 390 px · 148 telas + 10 estados · 369 controles de abrir/recolher · 1569 setas desenhadas (1214 de ir) · 12 telas com teclado medido
+# 390 px · desenhos distintos da seta: 1
+     121 telas · rgb(101, 115, 106) | 16x16 | 1.75 | M6 3.5 10.5 8 6 12.5 | 0 0 16 16
+  b  (390, 'PL-04.dc.html', 'inicial', 'summary «Conferir caminho de liberação»')
+  b  (390, 'PL-04.dc.html', 'modo', 'summary «Conferir caminho de liberação»')
+OK    A390 nenhum triângulo de abrir como texto em botão, link, summary, [aria-expanded] ou começo de linha (telas com desvio: 0)
+FALHA B390 todo controle de abrir/recolher usa o componente da seta (369 controles; telas com desvio: 1) · ['PL-04.dc.html']
+OK    C390 uma seta só: rgb(101, 115, 106), 16×16 px, traço 1.75, o mesmo desenho (1569 setas; desenhos distintos: 1)
+OK    D390 giro coerente com o estado (aberta → 90°, fechada e seta de ir → sem giro) (telas com desvio: 0)
+OK    E390 teclado: Enter e Espaço alternam a seta sem abrir painel; anel de foco verde de 2 px (12 telas; desvios: 0)
+OK    F390 alvo da seta ≥ 44 px sem cobrir outro controle; botão com nome e seta ≥ 44 px de altura (telas com desvio: 0)
+OK    G390 sem erro de JavaScript nem estado que não abriu
+RESULTADO: 12 ok · 2 falhas · B1440 todo controle de abrir/recolher usa o componente da seta (389 controles; telas com desvio: 1); B390 todo controle de abrir/recolher usa o componente da seta (369 controles; telas com desvio: 1)

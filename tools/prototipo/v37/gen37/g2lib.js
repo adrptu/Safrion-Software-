@@ -118,6 +118,10 @@ function g2flat(sp,st,rows,mask,added){
       out.push({r,lvl,has:kids.length>0,pf:!!pf});
       if(kids.length && ((r.fgrp?exp[r.id]!==false:exp[r.id]) || (filt && anyKid && !selfOk))) walk(kids,lvl+1,selfOk&&!filt,!!r.fgrp); }); };   // grupo transparente nasce aberto
   walk(rows,0,false,false); return out; }
+// TAB-11 (16/10/2026, proprietário: "mude o estilo do drill down daquele preto para a setinha mais intuitiva e amigável dos debaixo, melhore
+// ela e implemente como nosso padrão em tudo"): seta única de abrir/recolher. O desenho é do HTML (engine.seta/seta_abrir: o chevron fino gira
+// com o aria-expanded do controle); aqui só o estado e o nome acessível, iguais em toda tela. Nenhum triângulo cheio de texto no estado da tela.
+function g2seta(aberta,nome){ aberta=!!aberta; return {exp:String(aberta), lab:(aberta?'Recolher ':'Abrir ')+String(nome==null?'':nome).trim()}; }
 // Selos e chips de estado com significado e próximo passo (DS-DICA-20261009): fonte única das dicas de estado; o texto segue as regras do
 // motor (fases da O.S. do AGENTS §4, PEND-OS-01 e as exceções da aprovação; bloqueios nas mensagens de osEncBloq/osLibErro). Chave = texto
 // do selo antes de " · ". Só vale onde a tela pede (data-dica-de ou parte {de:1}): o mesmo texto noutro contexto pode significar outra coisa.
@@ -475,7 +479,7 @@ function g2cdVals(self,sp,v){ const id=sp.id, rows=v[id+'_rows']||[], cols=v[id+
   const larg=ix.map(i=>{ let w=lab(i).length*7.2; dat.forEach(d=>{ if(!g2cdVazio(d[i])) w=Math.max(w,g2cdLarg(d[i])); }); return Math.round(Math.min(240,Math.max(56,w))+18); });
   const fs=(P)=>ix.map(i=>{ const c=P.dat[i], vz=g2cdVazio(c); return {l:lab(i), parts:vz?[]:c.parts, cls:fcls(i)}; });
   const temCar=rows.some(rw=>rw.has||rw.grp), temAc=P0.some(P=>P.tr.some(c=>c&&c.isDel));
-  v[id+'_cdgtc']='grid-template-columns:'+(temCar?'36px':'0px')+' '+(off?'34px':'0px')+' minmax(160px,1fr) '+(larg.length?larg.map(w=>'minmax(0,'+w+'px)').join(' '):'0px')+' '+(temAc?'48px':'0px')+';';
+  v[id+'_cdgtc']='grid-template-columns:'+(temCar?'max(36px,var(--g2seta-alvo,24px))':'0px')+' '+(off?'34px':'0px')+' minmax(160px,1fr) '+(larg.length?larg.map(w=>'minmax(0,'+w+'px)').join(' '):'0px')+' '+(temAc?'48px':'0px')+';';
   v[id+'_cdcar']=temCar?'1':''; v[id+'_cdhd']=ix.map(i=>({l:lab(i), cls:fcls(i)})); v[id+'_cdhdT']=lab(0); v[id+'_cdhdHas']=ix.length>0;
   const base=(rw)=>{ const P=parte(rw), t0=P.dat[0]||{}, ed=/\bg2ed\b/.test(rw.cls||''), fl=/\bg2flash\b/.test(rw.cls||'');
     const notas=P.tr.filter(c=>c&&c.isData&&!g2cdVazio(c));
@@ -483,16 +487,16 @@ function g2cdVals(self,sp,v){ const id=sp.id, rows=v[id+'_rows']||[], cols=v[id+
   // árvore: a seta à esquerda abre os filhos dentro do cartão (a mesma expansão da seta da Tabela, st.x); "n itens" ao lado do título, salvo
   // quando o título já diz a contagem ("Adjuvantes 2 itens")
   const card=(rw)=>{ const b=base(rw), t0=b.t0, abre=!!(rw.has&&t0.caretExp==='true'), nk=rw.nk||0, nome=g2cdNome(t0), ja=new RegExp('(^|\\s)'+nk+'\\s+[A-Za-zÀ-ÿ]').test(nome), kn=nk+(nk===1?' item':' itens');
-    return Object.assign(b,{cls:'g2cd'+(b.ed?' g2ed':'')+(b.fl?' g2flash':''), fs:fs(b.P), temKids:!!rw.has, kopen:abre, kexp:String(abre), ksym:abre?'▾':'▸',
-      kn, temKn:!!rw.has&&!ja, kal:(abre?'Ocultar ':'Mostrar ')+(ja?'itens':kn)+' de '+nome, ktog:t0.toggle||(()=>{}), klab:'Itens de '+nome, kids:[]}); };
+    return Object.assign(b,{cls:'g2cd'+(b.ed?' g2ed':'')+(b.fl?' g2flash':''), fs:fs(b.P), temKids:!!rw.has, kopen:abre, kexp:g2seta(abre).exp,
+      kn, temKn:!!rw.has&&!ja, kal:g2seta(abre,(ja?'itens':kn)+' de '+nome).lab, ktog:t0.toggle||(()=>{}), klab:'Itens de '+nome, kids:[]}); };
   const kid=(rw,d)=>{ const b=base(rw), t0=b.t0;
     return Object.assign(b,{cls:'g2cd-k g2cd-g'+(b.ed?' g2ed':'')+(b.fl?' g2flash':''), tst:'padding-left:'+(8+d*18)+'px;', fs:fs(b.P),
-      caretOk:!!(t0.hasCaret&&t0.caretOk), caretLabel:t0.caretLabel||'', caretExp:t0.caretExp||'false', caretSym:t0.caretSym||'▸', toggle:t0.toggle||(()=>{})}); };
+      caretOk:!!(t0.hasCaret&&t0.caretOk), caretLabel:t0.caretLabel||'', caretExp:t0.caretExp||'false', toggle:t0.toggle||(()=>{})}); };
   // grupo (Agrupar por): seta que recolhe, nome e contagem; as somas alinhadas às colunas dos cartões
   const head=(rw)=>{ const b=base(rw), t0=b.t0, ext=[];
     for(let i=1;i<b.P.dat.length;i++){ const c=b.P.dat[i]; if(g2cdVazio(c)||!cols[i]) continue; if(cols[i].agg&&ix.indexOf(i)>=0) continue; const lb=!!cols[i].agg; ext.push({l:lb?cols[i].l:'', temL:lb, parts:c.parts}); }
     const fa=ix.map(i=>{ const c=b.P.dat[i]; return {l:lab(i), parts:(cols[i].agg&&!g2cdVazio(c))?c.parts:[], cls:fcls(i)}; });
-    return {temCab:true, id:rw.id, tparts:t0.parts||[], ext, fs:fa, caretOk:!!(t0.hasCaret&&t0.caretOk), caretLabel:t0.caretLabel||'', caretExp:t0.caretExp||'false', caretSym:t0.caretSym||'▸', toggle:t0.toggle||(()=>{}),
+    return {temCab:true, id:rw.id, tparts:t0.parts||[], ext, fs:fa, caretOk:!!(t0.hasCaret&&t0.caretOk), caretLabel:t0.caretLabel||'', caretExp:t0.caretExp||'false', toggle:t0.toggle||(()=>{}),
       lab:'Cartões · '+(rw.gk||g2cdNome(t0)), cards:[]}; };
   const secs=[]; let cur=null, at=null, lv0=0;
   rows.forEach(rw=>{ const L=rw.lvl||0;
@@ -588,7 +592,7 @@ function g2vals(self,sp,v,mask){
     const canOpen=editable && !(ed.leafOnly && has) && !r.fora && !(r.nosel && !r.dr);
     const cells=[]; const exp=(st.x||sp.x0||{}); const casou=ondeCasou(r); const sicoP=sicoKs.map(k=>g2sicoPart(r,sp,k)).filter(Boolean); const acts=[];
     // linha livre (convite para cadastrar, ex.: talhão sem cultivo): sem seleção e sem lixeira
-    if(sp.sel&&(r.livre||r.fora||r.nosel)) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.sel) cells.push({isSel:true,isData:false,isDel:false,cls:'',on:!!(st.sel||{})[r.id],selLabel:'Selecionar '+g2text(r,sp.cols[0]),
+    if(sp.sel&&(r.livre||r.fora||r.nosel)) cells.push({isSel:false,isData:false,isDel:false,st:'',cls:''}); else if(sp.sel) cells.push({isSel:true,isData:false,isDel:false,cls:'g2csel',on:!!(st.sel||{})[r.id],selLabel:'Selecionar '+g2text(r,sp.cols[0]),
       tog:()=>{ const s2=Object.assign({},g2st(self,id).sel||{}); s2[r.id]=!s2[r.id]; g2set(self,id,{sel:s2}); },st:'padding:6px 4px 6px 12px;'});
     cols.forEach((c,ci)=>{
       const empty=(has && ci>0 && !(r.p&&r.p[c.k]) && (!r.v || r.v[c.k]===undefined || r.v[c.k]===''));
@@ -600,9 +604,9 @@ function g2vals(self,sp,v,mask){
       if(sp.rmenu){ const vai=p=>p&&p.k==='act'&&!p.desce&&!p.full&&!/›\s*$/.test(String(p.t||'')); const fica=raw.filter(p=>!vai(p)); if(fica.length<raw.length){ raw.forEach(p=>{ if(vai(p)) acts.push(p); }); raw=fica; } }
       const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':'')+(c.nr?' g2nr':'')+(c.a==='r'?' g2celn':''),parts:(ci===0&&casou?raw.concat([{k:'br'},{k:'mut',t:casou}]):raw).map((p,i,arr)=>g2part(g2semSep(arr,i),v)),pw:'max-width:'+(c.w||340)+'px;',
         st:(c.nr?'padding:0 2px;':'padding:6px 8px;')+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&arv?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:inherit;':'')};
-      // TAB-08/TAB-04 (16/10/2026): a linha que abre o detalhe mostra a seta de descer (›) no começo; com filhos, ▸/▾ abre ali mesmo
+      // TAB-08/TAB-04 (16/10/2026): a linha que abre o detalhe mostra a seta (TAB-11, sem girar) no começo; com filhos, a seta gira e abre ali mesmo
       if(ci===0 && arv){ cell.hasCaret=true; cell.caretOk=has; cell.drill=!has&&canOpen&&!r.fgrp; cell.caretNo=!has&&!cell.drill; const open=(r.fgrp?exp[r.id]!==false:!!exp[r.id])||(g2filtering(st)&&has);
-        cell.caretSym=open?'▾':'▸'; cell.caretExp=String(open); cell.caretLabel=(open?'Recolher ':'Expandir ')+g2text(r,c);
+        const sa=g2seta(open,g2text(r,c)); cell.caretExp=sa.exp; cell.caretLabel=sa.lab;
         cell.toggle=()=>{ const x=Object.assign({},g2st(self,id).x||sp.x0||{}); x[r.id]=r.fgrp?(x[r.id]===false):!x[r.id]; g2set(self,id,{x}); }; }
       else if(ci===0 && canOpen){ cell.hasCaret=true; cell.caretOk=false; cell.caretNo=false; cell.drill=true; }
       else { cell.hasCaret=false; }
@@ -631,12 +635,12 @@ function g2vals(self,sp,v,mask){
   v[id+'_acoes']=acoes;
   if(sp.rmenu&&!acoes) v[id+'_rows'].forEach(r=>r.cells.pop());
   v[id+'_ncols']=cols.length+(sp.sel?1:0)+(acoes?1:0);
-  // TAB-09 (16/10/2026, proprietário: "colone os icones de drill down sempre na esquerda"): com seleção, a seta (▸/▾ ou ›) fica na 1ª célula,
+  // TAB-09 (16/10/2026, proprietário: "colone os icones de drill down sempre na esquerda"): com seleção, a seta (de abrir ou de ir) fica na 1ª célula,
   // antes da caixa; a linha sem seta guarda o lugar (22 px) para as caixas ficarem alinhadas; o recuo do nível continua na célula do nome
   v[id+'_selArw']=false;
   if(sp.sel){ const d0=(rw)=>rw.cells.find(x=>x.isData)||{}; const tem=(c)=>!!(c.hasCaret&&(c.caretOk||c.drill)); v[id+'_selArw']=v[id+'_rows'].some(rw=>tem(d0(rw)));
     if(v[id+'_selArw']) v[id+'_rows'].forEach(rw=>{ const c=d0(rw), s0=rw.cells[0]; if(!s0||s0===c) return; const ok=!!(c.hasCaret&&c.caretOk), dr=!!(c.hasCaret&&c.drill);
-      Object.assign(s0,{carT:true, caretOk:ok, drill:dr, caretNo:!ok&&!dr, caretSym:c.caretSym||'▸', caretExp:c.caretExp||'false', caretLabel:c.caretLabel||'', toggle:c.toggle||(()=>{})}); }); }
+      Object.assign(s0,{carT:true, caretOk:ok, drill:dr, caretNo:!ok&&!dr, caretExp:c.caretExp||'false', caretLabel:c.caretLabel||'', toggle:c.toggle||(()=>{})}); }); }
   v[id+'_count']=flat.filter(x=>x.lvl===0).length; v[id+'_all']=rows.length;
   if(rows.some(r=>r.fgrp)){ const fundo=(r)=>g2match(r,sp,st,mask,added)||(r.kids||[]).some(fundo); v[id+'_count']=g2nivel1(g2qrows(sp,st,rows)).filter(fundo).length; v[id+'_all']=g2nivel1(rows).length; }   // SAF-FAZ-3: conta itens, não fazendas
   if(AG.a){ const ids=new Set(); (AG.base||[]).forEach(r=>{ if(g2match(r,sp,st,mask,added)) ids.add(String(r.id)); }); v[id+'_count']=ids.size; v[id+'_all']=rows0.length; }   // agrupado: itens distintos do recorte, não grupos
@@ -800,7 +804,7 @@ function g2navvals(self,v,nav){ const rec=g2menuRec();
   v.menu_rec=rec; v.menu_aberto=!rec; v.menu_cls=rec?'rec':''; v.menu_tog_lab=rec?'Expandir menu':'Recolher menu';
   v.menu_tog=()=>{ fixa(!rec); self.setState({menuRec:!rec}); };
   (nav||[]).forEach((m,i)=>{ const o=(self.state.nav||{}); const open=(o[i]===undefined)?!!m.open:!!o[i];
-  v['nav'+i+'_open']=open; v['nav'+i+'_sym']=open?'▾':'▸';
+  v['nav'+i+'_open']=open;
   // com a barra recolhida, clicar no grupo abre a barra com esse grupo aberto
   v['nav'+i+'_tog']=()=>{ const n=Object.assign({},self.state.nav||{}); if(rec){ n[i]=true; fixa(false); self.setState({nav:n,menuRec:false}); return; } n[i]=!open; self.setState({nav:n}); }; }); }
 
@@ -1166,7 +1170,7 @@ function g2dicaRegra(o){ if(o.dica!==null&&o.dica!==undefined) return String(o.d
   if(o.de!==null&&o.de!==undefined) return g2dicaDe(o.de);   // data-dica-de="texto do selo": dica de estado do dicionário (G2_DICAS)
   const t=String(o.title||'').trim(), vis=String(o.vis||'').trim(), al=String(o.aria||'').trim();
   if(t&&!g2contem(vis,t)) return t;
-  if(al&&o.comando&&!/[\p{L}\p{N}]/u.test(vis)) return al;   // sem letra nem número visível (×, ‹, ▾, só ícone)
+  if(al&&o.comando&&!/[\p{L}\p{N}]/u.test(vis)) return al;   // sem letra nem número visível (×, ‹, só ícone)
   return ''; }
 function g2dicaTexto(el){ if(!el||el.nodeType!==1||!el.getAttribute) return '';
   if(el.classList&&el.classList.contains('g2car')) return '';   // 15/10/2026 (proprietário): a seta de abrir/recolher é óbvia, sem dica (o nome fica para o leitor de tela)
@@ -1510,5 +1514,22 @@ function g2visaoLiga(self,gid){ if(typeof window==='undefined'||window.__g2visao
     if(e.key===' '||e.key==='F4'||(e.altKey&&(e.key==='ArrowDown'||e.key==='ArrowUp'))){ e.preventDefault(); abre(t); } },true);
   window.addEventListener('resize',()=>fecha(false)); document.addEventListener('scroll',e=>{ if(ab&&!(e.target&&e.target.nodeType===1&&ab.box.contains(e.target))) fecha(false); },true);
   window.g2dselAbre=abre;   // teste e sonda
+})();
+// INP-04 e INP-07 (16/10/2026, proprietário: "todos inputs do usuário no sistema devem ser mais rápido e fácil"; docs/design-system/padroes-1610.md).
+// Vale em toda página, para todo campo, do motor ou da tela:
+// - campo de número (teclado decimal ou numérico) que recebe o foco pelo toque ou pela navegação da tela fica com o conteúdo selecionado: o
+//   número digitado substitui o anterior, sem apagar dígito a dígito. O clique do mouse continua pondo o cursor onde a pessoa clicou, e o Tab já
+//   seleciona por padrão no navegador;
+// - número, data e código (placa, lote, nota, CPF, CNPJ, chassi, série, matrícula, CAR) não passam pelo corretor ortográfico nem pela
+//   maiúscula automática do celular. Enter não muda de comportamento aqui (não envia formulário por conta própria).
+(function g2inp(){ if(typeof document==='undefined'||window.__g2inp) return; window.__g2inp=1;
+  const COD=/(c[óo]digo|placa|\blote\b|chassi|s[ée]rie|\bcpf\b|\bcnpj\b|nota fiscal|\bnf\b|renavam|inscri[çc][ãa]o|matr[íi]cula|\bcar\b)/i;
+  let mouse=false; document.addEventListener('pointerdown',e=>{ mouse=e.pointerType==='mouse'; setTimeout(()=>{ mouse=false; },0); },true);
+  document.addEventListener('focusin',e=>{ const t=e.target; if(!t||t.tagName!=='INPUT') return; const im=String(t.getAttribute('inputmode')||'').toLowerCase();
+    const num=im==='decimal'||im==='numeric'||t.type==='number';
+    let rot=(t.getAttribute('aria-label')||'')+' '+(t.getAttribute('placeholder')||''); try{ if(t.labels&&t.labels[0]) rot+=' '+t.labels[0].textContent; }catch(er){}
+    if(num||t.type==='date'||t.hasAttribute('data-cod')||COD.test(rot)){ if(!t.hasAttribute('spellcheck')) t.setAttribute('spellcheck','false'); if(!t.hasAttribute('autocapitalize')) t.setAttribute('autocapitalize','off'); }
+    if(num&&!mouse&&!t.readOnly&&!t.disabled&&t.type!=='number'){ try{ t.select(); }catch(er){} } },true);
+  window.g2inpCod=COD;   // teste
 })();
 

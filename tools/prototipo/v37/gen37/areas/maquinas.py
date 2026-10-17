@@ -378,7 +378,7 @@ function ma_ativoV(self,v,c,a,pf){ const st=self.state; const i=a.condInfo||{}; 
   const achs=Object.values(c.achados).filter(q=>q.aid===a.id&&q.estado==='Sem ordem');
   const dflt=a.suspeita?'lei':(a.cond!=='Apto'?'sit':(achs.length?'ach':'venc')); const bo=st.blk||{};
   const B=(k,t,sum)=>{ const open=bo[k]===undefined?(k===dflt):!!bo[k]; const tog=()=>self.setState({blk:Object.assign({},self.state.blk||{},{[k]:!open})});
-    v['ab_'+k]=open; v['abk_'+k+'_t']=t; v['abk_'+k+'_s']=sum; v['abk_'+k+'_y']=open?'▾':'▸'; v['abk_'+k+'_o']=String(open); v['abk_'+k+'_g']=tog; return {k,t,sum,open:String(open),sym:open?'▾':'▸',tog}; };
+    v['ab_'+k]=open; v['abk_'+k+'_t']=t; v['abk_'+k+'_s']=sum; v['abk_'+k+'_o']=g2seta(open).exp; v['abk_'+k+'_g']=tog; return {k,t,sum,open:String(open),tog}; };
   const ls=manLinhas(c).filter(l=>l.aid===a.id&&l.s); const oms=Object.values(c.oms).filter(o=>o.aid===a.id);
   v.at_blk=[B('sit','Situação',ma_condTxt(c,a)+(ms.length>1?' · '+ms.length+' motivos':'')+(trs.length?' · tratada pela '+[...new Set(trs.map(o=>o.id))].join(' e '):'')),B('venc','O que vence',ls.length?(ls.filter(manDevida).length+' devido(s) de '+ls.length):'Sem plano'),
     B('ach','Achados',achs.length?(achs.length+' sem ordem'):'nenhum sem ordem'),B('om','Ordens',oms.filter(manAberta).length+' abertas · '+oms.filter(o=>!manAberta(o)).length+' encerradas'),
@@ -494,7 +494,7 @@ function ma_panOm(self,v,c,o,pf){ const st=self.state; const f=st.pf||{}; const 
   v.om_aqui=o.etapa==='Canceladas'&&o.canc?('Cancelada em '+manBr(o.canc.em)+' por '+o.canc.por+' · '+o.canc.motivo):o.etapa; v.om_falta=p0?(p0.t+(p0.dono?' · '+p0.dono:'')+(p0.prazo?' · '+p0.prazo:'')+(sl.length>1?' · +'+(sl.length-1):'')):'nada'; v.om_prox=pr.P?pr.P.t:(o.etapa==='Encerradas'?'—':'—');
   const ab=o.etapa==='A liberar'||o.etapa==='Liberadas'?'jan':(o.etapa==='Em execução'?'tk':(o.etapa==='Em conferência'?(o.trata&&!o.aptidao?'tk':'pc'):'cus')); const bo=st.oblk||{};
   const B=(k,t,sum)=>{ const open=bo[o.id+k]===undefined?(k===ab||(k==='con'&&o.etapa==='Em execução')):!!bo[o.id+k]; const tog=()=>self.setState({oblk:Object.assign({},self.state.oblk||{},{[o.id+k]:!open})});
-    v['ob_'+k]=open; v['obk_'+k+'_t']=t; v['obk_'+k+'_s']=sum; v['obk_'+k+'_y']=open?'▾':'▸'; v['obk_'+k+'_o']=String(open); v['obk_'+k+'_g']=tog; return {k,t,sum,open:String(open),sym:open?'▾':'▸',tog}; };
+    v['ob_'+k]=open; v['obk_'+k+'_t']=t; v['obk_'+k+'_s']=sum; v['obk_'+k+'_o']=g2seta(open).exp; v['obk_'+k+'_g']=tog; return {k,t,sum,open:String(open),tog}; };
   const cf=(o.etapa==='A liberar'||o.etapa==='Liberadas')?manConflito(c,o):null; const nr=o.chk.filter(t=>t.tipo==='Teste'?((t.tent||[]).slice(-1)[0]||{}).r==='Aprovado':!!t.r).length;
   const custoE=manCusto(c,o,'est'), custoF=o.etapa==='Encerradas'?manCustoFinal(c,o):null;
   v.om_blk=[B('jan','Janela e equipe',(o.jan||'—')+' · '+(o.executante||manExecSug(o)||'sem executante')+(cf?' · '+cf.t:'')),B('tk','Tarefas',nr+' de '+o.chk.length+' respondidas'),
@@ -836,7 +836,7 @@ function pmSvV(self,c,p,s,pub){ const xs=self.state.xs||{}; const open=!!xs[s.id
   const np=(s.pecas||[]).length; const nv=p.rasc?p.rasc.v:p.versao+1;
   return {nome:s.nome,chg,hasChg:!!chg,chgst:pmChip(chg==='Novo'?'green':'yellow'),gat:manGatTxt(s)+(Object.keys(s.gat||{}).length>1?' · o que vencer primeiro':''),tol:manTolTxt(s)||'sem tolerância',
     cum:cum.length?('cumpre também '+cum.join(', ')):'',hasCum:!!cum.length,cont:s.tarefas.length+(s.tarefas.length===1?' tarefa':' tarefas')+' · '+np+(np===1?' peça':' peças'),
-    tempo:manN(s.tempo,1)+' h · '+s.esp,open:String(open),isOpen:open,sym:open?'▾':'▸',lab:(open?'Recolher checklist e peças de ':'Mostrar checklist e peças de ')+s.nome,
+    tempo:manN(s.tempo,1)+' h · '+s.esp,open:g2seta(open).exp,isOpen:open,lab:g2seta(open,'checklist e peças de '+s.nome).lab,
     tog:()=>{ const n=Object.assign({},self.state.xs||{}); n[s.id]=!open; self.setState({xs:n}); },edit:()=>pmSvOpen(self,manGet(),p,s.id),
     rst:self.state.flash===s.id?'background:#E4F3E9;':'',podeDel:rasc&&!del,asking:del,notAsking:!del,ask:()=>self.setState({del:s.id}),no:()=>self.setState({del:null}),
     yes:()=>pmEdit(self,p.id,(c2,p2,w2)=>{ const i=w2.findIndex(x=>x.id===s.id); if(i>=0) w2.splice(i,1); w2.forEach(x=>{ x.cumpre=(x.cumpre||[]).filter(id=>id!==s.id); }); return {msg:'Serviço excluído: '+s.nome+'.',st:{del:null}}; }),
@@ -874,7 +874,7 @@ function pmPlanoV(self,v,c,p,pf){ const st=self.state; const e=pmEst(p); v.p_nom
   v.disc_yes=()=>manMudar(self,c2=>{ manExige(c2,g2perfil(),'plano'); c2.planos[p.id].rasc=null; return {msg:'Rascunho descartado · '+p.id+' segue na v'+p.versao+'.',st:{disc:false}}; });
   const pub={}; p.servicos.forEach(s=>{ pub[s.id]=s; }); const w=manWork(p);
   v.svs=w.map(s=>pmSvV(self,c,p,s,pub)); v.sv_vazio=!w.length; v.sv_tem=!!w.length;
-  v.hist_open=!!st.histOpen; v.hist_sym=st.histOpen?'▾':'▸'; v.hist_tog=()=>self.setState({histOpen:!st.histOpen});
+  v.hist_open=!!st.histOpen; v.hist_exp=g2seta(st.histOpen).exp; v.hist_tog=()=>self.setState({histOpen:!st.histOpen});
   v.hist=(p.rasc?[{t:'v'+p.rasc.v,at:'rascunho em edição',st:'Rascunho',stst:pmChip('yellow')}]:(!p.versao?[{t:'v1',at:'rascunho em edição',st:'Rascunho',stst:pmChip('yellow')}]:[]))
     .concat((p.hist||[]).map(h=>({t:'v'+h.v,at:'publicada em '+h.at,st:h.v===p.versao?'Em vigor':'Substituída',stst:pmChip(h.v===p.versao?'green':'gray')})));
   /* primária: Publicar vN (desabilitada com o motivo enquanto faltar serviço, gatilho ou tarefa) · Reativar · nenhuma */
@@ -1041,7 +1041,7 @@ def _fld(rot,inner): return f'<label style="display: flex; flex-direction: colum
 def _blk(pre,k,corpo):
     """bloco recolhível (só o da fase atual vem aberto; os outros mostram uma linha de resumo)"""
     return (f'<section class="ma-bl" aria-label="{H(pre+k+"_t")}"><button type="button" class="ma-blh" aria-expanded="{H(pre+k+"_o")}" onClick="{H(pre+k+"_g")}">'
-            f'<span aria-hidden="true" style="width: 14px;">{H(pre+k+"_y")}</span><span>{H(pre+k+"_t")}</span><span style="font-weight: 600; color: {MUTED}; font-size: 12.5px; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">· {H(pre+k+"_s")}</span></button>'
+            f'{E.seta()}<span>{H(pre+k+"_t")}</span><span style="font-weight: 600; color: {MUTED}; font-size: 12.5px; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">· {H(pre+k+"_s")}</span></button>'
             + IF(pre.replace('_','')+'_'+k if False else ('ob_'+k if pre=='obk_' else 'ab_'+k),f'<div class="ma-bl-c">{corpo}</div>') + '</section>')
 def _btns(lst):
     return FOR(lst,'b',f'<button type="button" disabled="{H("b.dis")}" title="{H("b.why")}" onClick="{H("b.fn")}" style="{H("b.st")}">{H("b.t")}</button>',2)
@@ -1169,7 +1169,7 @@ def _pag_plano():
            f'<span style="font-size: 12px; color: {MUTED}; min-width: 18px;">{H("s.pcun")}</span><button type="button" onClick="{H("s.pcadd")}" style="{_MINI}">Incluir peça</button></div>'
          + IF('s.pcHasErr',f'<span role="alert" style="{ERRS}">{H("s.pcerr")}</span>') + '</div></div>')
     svrow=(f'<div class="pm-sv" style="{H("s.rst")}"><div class="pm-sv-linha">'
-           f'<button type="button" class="g2car" aria-label="{H("s.lab")}" aria-expanded="{H("s.open")}" aria-controls="{H("s.did")}" onClick="{H("s.tog")}">{H("s.sym")}</button>'
+           + E.seta_abrir(H("s.open"),H("s.lab"),H("s.tog"),controla=H("s.did")) +
            f'<span style="display: flex; flex-direction: column; gap: 3px; min-width: 0; align-items: flex-start;"><button type="button" class="pm-nome" onClick="{H("s.edit")}" title="Editar gatilhos, tolerância, tempo e especialidade">{H("s.nome")}</button>'
            + IF('s.hasChg',f'<span style="{H("s.chgst")}">{H("s.chg")}</span>') + '</span>'
            f'<span style="display: flex; flex-direction: column; gap: 2px; min-width: 0;"><b style="font-weight: 700;">{H("s.gat")}</b><span style="font-size: 12px; color: {MUTED};">{H("s.tol")}</span>'
@@ -1199,7 +1199,7 @@ def _pag_plano():
          + IF('ban_i',f'<div style="padding: 8px 14px; border-radius: 12px; background: {GRAYS}; color: {INK}; font-size: 13px; font-weight: 700;">Inativo · não gera vencimentos; as ordens abertas seguem.</div>'))
     svs=(IF('sv_tem',f'<div style="display: flex; flex-direction: column; gap: 8px;">' + FOR('svs','s',svrow,2) + '</div>')
          + IF('sv_vazio',f'<div style="padding: 14px; background: {BG}; border-radius: 12px; font-size: 13px;">Nenhum serviço ainda · use “Incluir serviço”.</div>'))
-    hist=(f'<section class="ma-bl"><button type="button" class="ma-blh" aria-expanded="{H("hist_open")}" onClick="{H("hist_tog")}"><span aria-hidden="true" style="width: 14px;">{H("hist_sym")}</span>Versões</button>'
+    hist=(f'<section class="ma-bl"><button type="button" class="ma-blh" aria-expanded="{H("hist_exp")}" onClick="{H("hist_tog")}">{E.seta()}Versões</button>'
           + IF('hist_open','<div class="ma-bl-c">'+FOR('hist','h',f'<div style="display: grid; grid-template-columns: 48px 200px 110px; gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid {LINE}; font-size: 13px;">'
                 f'<b>{H("h.t")}</b><span style="color: {MUTED};">{H("h.at")}</span><span><span style="{H("h.stst")}">{H("h.st")}</span></span></div>',2)+'</div>') + '</section>')
     inat=IF('p_podeInat',f'<div><button type="button" onClick="{H("p_inat")}" title="Para de gerar vencimentos; nada é apagado" style="{LNK} color: #4B5A51;">⋯ Inativar plano</button></div>')
@@ -1213,7 +1213,7 @@ def _pag_plano():
     return IF('pg_plano',f'<div style="display: flex; flex-direction: column; gap: 12px;">{corpo}</div>')
 
 PM_CSS=('.pm-sv{border:1px solid #E4E9E5;border-radius:12px;background:#fff}'
-        '.pm-sv-linha{display:grid;grid-template-columns:30px minmax(0,1.1fr) minmax(0,1.6fr) 130px 160px 34px;gap:10px;align-items:center;padding:8px 10px;font-size:13px}'
+        '.pm-sv-linha{display:grid;grid-template-columns:max(30px,var(--g2seta-alvo)) minmax(0,1.1fr) minmax(0,1.6fr) 130px 160px 34px;gap:10px;align-items:center;padding:8px 10px;font-size:13px}'
         '.vl-lista{display:flex;flex-direction:column}.vl-l{display:grid;grid-template-columns:minmax(0,230px) minmax(0,1fr);gap:6px 14px;align-items:start;padding:10px 0;border-top:1px solid #E4E9E5}'
         '.vl-ck{display:flex;gap:10px;align-items:flex-start;min-height:40px;cursor:pointer}.vl-ck input{width:20px;height:20px;margin:1px 0 0;accent-color:#1E7A4C;flex-shrink:0}'
         '.vl-ck:has(input:disabled){cursor:default;opacity:.85}.vl-d{display:flex;flex-direction:column;gap:6px;min-width:0}.vl-in{display:flex;gap:8px 14px;flex-wrap:wrap;align-items:center}'
@@ -1222,7 +1222,7 @@ PM_CSS=('.pm-sv{border:1px solid #E4E9E5;border-radius:12px;background:#fff}'
         '@media (max-width:640px){.vl-l{grid-template-columns:minmax(0,1fr)}.vl-ck{min-height:44px}.vl-in input,.vl-at{min-height:44px}.ma-atpl a{display:inline-flex;align-items:center;min-height:44px}'
         '.ma-rod>span[id$="-why"]{flex:1 1 100%!important}#dv_mot{min-height:44px}}'   # no celular o motivo da primária desligada fica numa linha e os dois botões juntos
         '.pm-sv-det{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;padding:10px 14px 14px 50px;border-top:1px solid #E4E9E5}'
-        '@media (max-width:640px){.pm-sv-linha{grid-template-columns:30px minmax(0,1fr) 34px}.pm-sv-linha>:nth-child(3),.pm-sv-linha>:nth-child(4),.pm-sv-linha>:nth-child(5){display:none}.pm-sv-det{grid-template-columns:1fr;padding-left:14px}}'
+        '@media (max-width:640px){.pm-sv-linha{grid-template-columns:max(30px,var(--g2seta-alvo)) minmax(0,1fr) 34px}.pm-sv-linha>:nth-child(3),.pm-sv-linha>:nth-child(4),.pm-sv-linha>:nth-child(5){display:none}.pm-sv-det{grid-template-columns:1fr;padding-left:14px}}'
         '.pm-nome{border:0;background:transparent;padding:0;font-family:inherit;font-size:13.5px;font-weight:800;color:#15201A;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:#C9D3CC;text-underline-offset:3px}'
         '.pm-nome:hover{color:#1E7A4C}.pm-x{width:26px;height:26px;border:0;border-radius:6px;background:transparent;cursor:pointer;color:#8A968E;font-size:16px;line-height:1;flex-shrink:0}'
         '.pm-x:hover{background:#FDE8E6;color:#B42318}')

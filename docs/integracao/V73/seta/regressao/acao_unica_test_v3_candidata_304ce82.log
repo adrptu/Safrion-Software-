@@ -1,0 +1,13 @@
+FALHA 23 seleção ativa (SAF etapa 2, T1-A): 0 duplicatas, uma primária ("Aplicar plano" do lote, na barra da lista); a área fica com a nota e o avanço secundário, sem outra primária de aplicar; busca visível e "Limpar seleção" uma vez [{'estado': 'SAF etapa 2 · seleção ativa', 'dup': 0, 'dupdet': [], 'prims': ['Aplicar plano em 4 cultivos'], 'dialogo': False, 'setas': 0}, ['trocar:‹ Trocar safra', 'atalho:Informar colheita de P1 ›', 'avancar:Dimensionar operações ›', 'resolver:Aplicar plano em 4 cultivos'], [True, 0]]
+Traceback (most recent call last):
+  File "/tmp/claude-0/seta-c90/tools/prototipo/v37/gen37/acao_unica_test.py", line 408, in <module>
+    J("document.querySelector('main input[type=checkbox][aria-label=\"Selecionar T1-A\"]').click()"); time.sleep(.3)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/claude-0/seta-c90/tools/prototipo/v37/gen37/acao_unica_test.py", line 44, in J
+    def J(x): return c.js(x)
+                     ^^^^^^^
+  File "/tmp/claude-0/seta-c90/tools/prototipo/v37/gen37/comp_lib.py", line 51, in js
+    if 'exceptionDetails' in r: raise RuntimeError(str(r['exceptionDetails'].get('exception',{}).get('description') or r['exceptionDetails'].get('text'))[:400])
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: TypeError: Cannot read properties of null (reading 'click')
+    at <anonymous>:1:82

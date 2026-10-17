@@ -26,7 +26,7 @@ class Grade:
 
     def linhas(self, so_folhas=False):
         """células (texto) de cada linha visível; so_folhas: só linhas sem seta de grupo."""
-        f = "&&!r.querySelector('button[aria-label^=\"Expandir\"],button[aria-label^=\"Recolher\"]')" if so_folhas else ''
+        f = "&&!r.querySelector('button.g2car[aria-expanded]')" if so_folhas else ''
         return self.J(f"[...{T(self.i)}.querySelectorAll('[role=row]')].filter(r=>r.offsetParent&&r.querySelector('[role=cell]'){f}).map(r=>[...r.querySelectorAll('[role=cell]')].map(x=>x.innerText.replace(/\\s+/g,' ').replace(/^[▸▾]\\s*/,'').trim()))") or []
 
     def dicts(self, so_folhas=False):

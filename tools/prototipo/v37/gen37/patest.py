@@ -31,7 +31,7 @@ def enter(): c.tecla('Enter', 'Enter', 13, text='\r'); time.sleep(.45)
 def mais(nome): J(f"[...document.querySelectorAll('main button.pa-titulo')].find(b=>b.innerText.trim()==={json.dumps(nome)}).closest('.pa-atividade').querySelector('.pa-mais').click()"); time.sleep(.3)
 def atv(nome): mais(nome); clk('Editar atividade', 'main [role=menu]', w=.45)
 def tem_atv(nome): return J(f"[...document.querySelectorAll('main button.pa-titulo')].some(b=>b.innerText.trim()==={json.dumps(nome)})")
-def mostra(nome): clk('Mostrar insumos de ' + nome, w=.35)
+def mostra(nome): clk('Abrir insumos de ' + nome, w=.35)
 def dose(prod, val):
     clk('Alterar a dose de ' + prod, w=.3); J("document.activeElement.select&&document.activeElement.select()"); digita(val); enter()
 def gats(): return J("[...document.querySelectorAll('main .pa-gatilho')].map(g=>(g.getAttribute('title')||'').split(' · ')[0]).filter(t=>/^DAP /.test(t))")   # o texto inteiro fica na dica e no leitor
@@ -130,7 +130,7 @@ try:
     body = MAIN()
     # 14/10 (proprietário): Cultivos e Versões saíram do detalhe; o cabeçalho diz a versão em vigor
     check('depois de publicar: cabeçalho "Publicado · v7", sem os blocos Cultivos e Versões, sem primária',
-          'Publicado · v7' in body and 'Cultivos que usam este plano' not in body and 'Mostrar as versões' not in body and prims() == [], [body[:300], prims()])
+          'Publicado · v7' in body and 'Cultivos que usam este plano' not in body and 'Mostrar as versões' not in body and 'Abrir as versões' not in body and prims() == [], [body[:300], prims()])
     clk('‹ Biblioteca de planos', '[data-acoes]', .6)
     soja = J("[...document.querySelectorAll('main .g2card')].map(b=>b.innerText.replace(/\\s+/g,' ')).find(t=>t.startsWith('Soja alta'))")
     check('o cartão passa a "Publicado · v7"', 'Publicado · v7' in soja and '8 atividades' in soja and 'Aplicado em' not in soja, soja)

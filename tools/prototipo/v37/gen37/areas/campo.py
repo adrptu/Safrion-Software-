@@ -193,8 +193,7 @@ def _ca01():
                     dict(k='jan',l='Janela',t='txt',req=True,help='Ex.: 24–26/09. A ordem mantém produto, dose e área da versão liberada.'),
                     dict(k='eq',l='Equipe · conjunto',t='sel',opts=EQ_OPTS,req=True,help='Conjunto bloqueado só volta a ser elegível com a manutenção liberada.')]),
         sel=True,gid='g_os',total=False,
-        bulk=imsg('Liberar selecionadas','Resultado por item · OS-0418 recusada: Ureia 45 % sem saldo apto (0 kg) · OS-0431 recusada: Trator T1 bloqueado · OS-0422 recusada: janela a definir (João, irrigante) · OS-0423 recusada: conflito com a parada da B3 (Caio, PCP) · ordens de outras fases foram ignoradas. Com produto, quem libera é o agrônomo (pode ajustar antes); só água, com prontidão operacional.',
-                  'check','Liberar para execução as ordens selecionadas (resultado por item)'))
+        bulk=('<details style="max-width: 100%; white-space: normal;"><summary style="'+BTN_ST(False,True)+'">'+E.seta()+'Conferir caminho de liberação</summary><p>Prévia dos dados da lista ao abrir a tela, sem executar liberação. Confira a prontidão atual na O.S.; com produto, aprove a versão antes de liberar.</p><ul>' + ''.join('<li>'+esc(o['id'])+' · '+esc(o['etapa'])+' · '+esc(' · '.join(t for t,_ in _selos(o)) or 'Conferir prontidão na O.S.')+' · <a href="OS.dc.html#'+esc(o['id'])+'">Abrir O.S. ›</a></li>' for o in ordens if o['etapa']=='A liberar') + '</ul><p>Todas as O.S. a liberar da lista, independentemente da seleção. Nenhuma ordem foi alterada.</p></details>'))
     kan=_kanban(ordens)
     mapa=_mapa()+f'<div style="margin-top: 8px;">{legend([(ACC,"Em execução ou liberada"),(YEL,"Em conferência ou a liberar"),(RED,"Impedida ou em conflito (tracejado)"),("#9AA59E","Encerrada")])}</div>'
     bar,panes=tabs(['Lista','Kanban','Mapa'],[g_os,kan,mapa],active=0,label='Visão das ordens')

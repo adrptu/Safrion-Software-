@@ -33,7 +33,7 @@ def build():
        [dict(id=s['id'],ro=s['ro'],v=dict(nome=s['nome'],ini=s['ini'],fim=s['fim'],periodo=s['periodo'],faz=s['fazenda'],estado=s['estado']),s={},p={}) for s in D2.SAFRAS],
        edit=dict(m='form',title='Safra',newTitle='Nova safra',sub='Altere nome, início, fim e fazendas. Cultivos e planos ficam nas etapas seguintes, por fazenda.',
                  fields=[dict(k='nome',l='Nome da safra',t='txt',req=True,def_='' ),dict(k='ini',l='Início',t='date',req=True),dict(k='fim',l='Fim',t='date',req=True,help='O fim precisa ser depois do início.'),
-                         dict(k='fazs',l='Fazendas',t='multi',opts=OCEN.fazendas(),req=True,**{'def':'Santa Rita'}),dict(k='estado',l='Estado',t='sel',opts=['Rascunho','Em planejamento'],**{'def':'Rascunho'})]),
+                         dict(k='fazs',l='Fazendas',t='multi',opts=OCEN.fazendas(),req=True,**{'def':'Santa Rita'})]),
        add=None,gid='g_saf',total=False,qf=dict(k='faz',l='fazenda',todas='Todas'))   # 14/10 (proprietário: "não dá para escolher ou mudar de fazenda"): chips por fazenda na escolha da safra
     # ---------- etapa 2 · talhões e cultivos (ESPECIFICACAO etapa-2-talhoes) ----------
     # todos os talhões Ativos do CD-01 da fazenda da safra (com o B1 da Boa Vista e os pivôs da Lagoa Grande); a ocupação no tempo sai do
@@ -251,7 +251,7 @@ def build():
     # CTL-4: o mesmo cenário compartilhado (O.S., requisições, lotes) entra na demanda (cenDemEntradas/cenOsDem): emitir, liberar, apontar, cancelar ou devolver muda a conta
     # UNID-PROD (D-U14): o conversor único (producao.js) com o prefixo do estado, o mesmo das telas do estado; a tela não chama cenGet nem cenSave
     EXTRA.append('<style>'+UNP.CSS+'</style>')
-    EXTRAJS[0]=cenario.js_prefixo()+DSO.js_prefixo()+SOLO_UI_JS+UNP.JS+'\nconst D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra_grupo.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'''
+    EXTRAJS[0]=cenario.js_prefixo()+DSO.js_prefixo()+SOLO_UI_JS+UNP.JS+'\nconst D2 = '+json.dumps(d2,ensure_ascii=False)+';\n'+open(os.path.join(ROOT,'cal01.js')).read()+'\n'+open(os.path.join(ROOT,'ocupacao.js')).read()+'\n'+open(os.path.join(ROOT,'safra_grupo.js')).read()+'\n'+open(os.path.join(ROOT,'safra.js')).read()+'\n'+open(os.path.join(ROOT,'safra_lote.js')).read()+'''
 function _safhooks(self){ self.g2after=(gid,rows,r,isNew)=>{ if(gid==='g_saf' && r){ const msg=sgAplicar(self,rows,r,isNew);   /* SAF-FAZ-2: uma sub-safra por fazenda */
       if(isNew && !self.state.saf){ if(!r.v.estado) r.v.estado='Rascunho'; self.setState({saf:r.id,step:2,g2toast:msg||('Safra criada: '+r.v.nome+'. Planeje os talhões livres na tabela.')}); } else if(msg) self.setState({g2toast:msg}); }
     if(String(gid).indexOf('g_cult_')===0) cultAfter(self,gid,rows,r,isNew);
@@ -279,14 +279,15 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
     # SOLO-01 §3.4: "Sugestões pelas análises · N" só com 1 sugestão ou mais (R01, D-29): quem não usa análise não vê nada
     sg_lnk=f'<sc-if value="{H("sg_has")}" hint-placeholder-val="{F()}"><button type="button" id="sg_lnk" class="acoes-lnk" onClick="{H("sg_abrir")}" style="min-height: 28px; white-space: nowrap;">{H("sg_lnk")}</button></sc-if>'
     plt_lnk=f'<sc-if value="{H("plt_tem")}" hint-placeholder-val="{F()}"><button type="button" id="plt-abrir" class="acoes-lnk" aria-haspopup="dialog" onClick="{H("plt_abrir")}" style="min-height: 28px; white-space: nowrap;">Planejar talhões livres…</button></sc-if>'   # SAF-FAZ-3 (C)
-    s2=bloco('Talhões e cultivos',H('k2'),cult_html,desc_hole=True,acao=plt_lnk+sg_lnk)   # sem botão: planeja-se pela linha do talhão (Planejar ›, Dividir, Vincular ciclo ›)
+    from areas import saf_lote as SLT   # EDL-01 (16/10/2026): "Editar talhões…" da fazenda numa grade só (safra_lote.js)
+    s2=bloco('Talhões e cultivos',H('k2'),cult_html,desc_hole=True,acao=plt_lnk+SLT.link()+sg_lnk)   # sem botão: planeja-se pela linha do talhão (Planejar ›, Dividir, Vincular ciclo ›)
     # etapa 3: título com o custo de operação e o link "Resumo da safra"; veredito (role=status) e, fora dele, a linha de capacidade;
     # g_cap recolhida; linha de filtro (só com recurso × mês escolhido); g_op por último (estica e só a área de dados rola)
     custo=(f'<span style="display: inline-flex; align-items: baseline; gap: 6px; flex-wrap: wrap; justify-content: flex-end; font-size: 12.8px; color: {MUTED};">'
            f'<span>Custo de operação <b style="color: {INK};">{H("v3_cop")}</b> · {H("v3_copq")}</span>'
            f'<button type="button" class="acoes-lnk" data-acao="resumo" onClick="{H("rs_abrir")}" style="min-height: 24px;">Resumo da safra</button></span>')
     linha_cap=(f'<div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 0 4px 8px;">'
-               f'<span style="flex-grow: 1;"></span><button type="button" class="acoes-lnk" aria-expanded="{H("v3_capexp")}" onClick="{H("v3_captog")}">{H("v3_capt")}</button></div>')
+               f'<span style="flex-grow: 1;"></span><button type="button" class="acoes-lnk g2seta-nome" aria-expanded="{H("v3_capexp")}" onClick="{H("v3_captog")}">{E.seta()}Capacidade por mês</button></div>')
     filtro=(f'<sc-if value="{H("v3_fil")}" hint-placeholder-val="{F()}"><div role="status" tabIndex="-1" id="saf-cap-filtro" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 0 4px 8px; font-size: 12.8px;">'
             f'<span>Mostrando <b>{H("v3_filn")}</b>: {H("v3_filt")}</span><button type="button" onClick="{H("v3_filx")}" style="{_MINI}">Ver todas</button></div></sc-if>')
     # 15/10/2026 (proprietário: "esses avisos e alertas deixe apenas dentro da tabela de forma visual, não fora dela"): o veredito fica para o
@@ -380,9 +381,9 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
       f'<sc-if value="{H("lp_nerr")}" hint-placeholder-val="{F()}"><div role="alert" style="padding: 8px 12px; border-radius: 10px; background: {REDS}; color: {RED}; font-size: 12.5px; font-weight: 700;">Corrija os campos destacados; o que você digitou foi mantido.</div></sc-if>'
       f'<sc-for list="{H("lp_grupos")}" as="g" hint-placeholder-count="1"><div style="font-size: 11px; font-weight: 800; letter-spacing: .06em; color: {MUTED}; text-transform: uppercase; padding-top: 4px;">{H("g.t")}</div>'
       f'<sc-for list="{H("g.gats")}" as="t" hint-placeholder-count="2"><div style="border: 1px solid {LINE}; border-radius: 12px; overflow: hidden;">'
-      f'<div style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: {BG};"><button type="button" class="g2car" aria-label="{H("t.lab")}" onClick="{H("t.tog")}">{H("t.sym")}</button><b style="font-size: 13.5px;">{H("t.t")}</b><span style="font-size: 12px; color: {MUTED};">· {H("t.dt")}</span></div>'
+      f'<div style="display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: {BG};">{E.seta_abrir(H("t.exp"),H("t.lab"),H("t.tog"))}<b style="font-size: 13.5px;">{H("t.t")}</b><span style="font-size: 12px; color: {MUTED};">· {H("t.dt")}</span></div>'
       f'<sc-if value="{H("t.open")}" hint-placeholder-val="{H("true")}"><div style="padding: 4px 12px 10px;"><sc-for list="{H("t.atvs")}" as="a" hint-placeholder-count="1"><div style="padding: 6px 0;">'
-      f'<div style="display: flex; align-items: center; gap: 8px;"><button type="button" class="g2car" aria-label="{H("a.lab")}" onClick="{H("a.tog")}">{H("a.sym")}</button><span style="font-size: 13px; font-weight: 700;">{H("a.t")}</span><span style="font-size: 12px; color: {MUTED};">· {H("a.op")}</span></div>'
+      f'<div style="display: flex; align-items: center; gap: 8px;">{E.seta_abrir(H("a.exp"),H("a.lab"),H("a.tog"))}<span style="font-size: 13px; font-weight: 700;">{H("a.t")}</span><span style="font-size: 12px; color: {MUTED};">· {H("a.op")}</span></div>'
       f'<sc-if value="{H("a.open")}" hint-placeholder-val="{H("true")}"><div style="padding-left: 30px;"><sc-if value="{H("a.semProd")}" hint-placeholder-val="{F()}"><div style="font-size: 12px; color: {MUTED}; padding: 4px 0;">Sem insumos · só operação</div></sc-if>'
       f'<sc-for list="{H("a.prods")}" as="p" hint-placeholder-count="1">{prod_row}</sc-for>'
       f'<sc-if value="{H("a.podeIncl")}" hint-placeholder-val="{F()}"><div style="padding-top: 6px;"><button type="button" onClick="{H("a.incl")}" style="{_MINI} font-size: 12px;">+ Incluir insumo nesta atividade</button></div></sc-if>'
@@ -429,6 +430,7 @@ const _EVR=EXTRAVALS; EXTRAVALS=function(self,v){ _EVR(self,v); v.rendnova=(rid)
       f'<sc-if value="{H("dv_warn")}" hint-placeholder-val="{F()}"><div role="alert" class="saida" style="display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: {YELS}; color: {YEL}; font-size: 12.5px; font-weight: 700;">Há alterações não salvas.<div style="display: flex; gap: 8px;"><button type="button" onClick="{H("dv_discard")}" style="{_MINI}">Descartar alterações</button><button type="button" onClick="{H("dv_keep")}" style="{_MINIP}">Continuar editando</button></div></div></sc-if>'
       f'<div class="pe-form" style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 6px; border-top: 1px solid {LINE};"><sc-if value="{H("dv_edit")}" hint-placeholder-val="{H("true")}"><button type="button" onClick="{H("dv_close")}" style="{BTN_ST(False,True)}">Cancelar</button><button type="button" onClick="{H("dv_save")}" style="{BTN_ST(True,True)}">Salvar divisão</button></sc-if>'
       f'<sc-if value="{H("dv_ro")}" hint-placeholder-val="{F()}"><button type="button" onClick="{H("dv_discard")}" style="{BTN_ST(False,True)}">Fechar</button></sc-if></div></aside></div></sc-if>')
+    EXTRA.append(SLT.painel())   # EDL-01 · painel "Editar talhões da <fazenda>"
     # ---------- painéis da análise de solo (SOLO-01): Sugestões pelas análises (lote) e Por quê ----------
     from areas.analise_solo import _overlay, _cabeca
     g_sug=grid([dict(k='tal',l='Talhão',w=110),dict(k='item',l='Atividade · produto',w=190),dict(k='pad',l='Padrão',w=130),dict(k='sug',l='Sugestão',w=140),

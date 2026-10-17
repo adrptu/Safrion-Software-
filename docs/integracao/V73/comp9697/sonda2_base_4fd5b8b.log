@@ -1,0 +1,18 @@
+OK    #96 1440: formulário Editar safra abre
+FALHA #96 1440: sem campo Estado (nenhum rótulo "Estado", nenhum seletor Rascunho/Em planejamento) · {"labs": ["Nome da safra", "Início", "Fim", "Fazendas", "Santa Rita", "Boa Vista", "Lagoa Grande", "Estado"], "sels": [["Rascunho", "Em planejamento"]], "nome": true, "lado": false}
+OK    #96 1440: nome continua editável; sem rolagem lateral
+FALHA #96 1440: coluna Estado da safra continua na tabela, com o estado na linha S2627 · {"hs": ["SAFRA", "FAZENDA", "PRÓXIMO PASSO", "ÁREA"], "i": -1}
+FALHA #97 PL-04 1440: controle "Conferir caminho de liberação" presente e fechado · null
+FALHA #97 CA-01 1440: com 1 linha selecionada, aparece o controle de prévia (sem "Liberar selecionadas") · null
+OK    #100 CA-01det 1440: sem o falso "v3 liberada" na tela
+FALHA #100 CA-01det 1440: Enter no botão leva a OS.dc.html#OS-0421:ajustar · "http://127.0.0.1:39077/CA-01det.dc.html"
+OK    #96 390: formulário Editar safra abre
+FALHA #96 390: sem campo Estado (nenhum rótulo "Estado", nenhum seletor Rascunho/Em planejamento) · {"labs": ["Nome da safra", "Início", "Fim", "Fazendas", "Santa Rita", "Boa Vista", "Lagoa Grande", "Estado"], "sels": [["Rascunho", "Em planejamento"]], "nome": true, "lado": false}
+OK    #96 390: nome continua editável; sem rolagem lateral
+FALHA #96 390: coluna Estado da safra continua na tabela, com o estado na linha S2627 · {"hs": ["SAFRA", "FAZENDA", "PRÓXIMO PASSO"], "i": -1}
+FALHA #97 PL-04 390: controle "Conferir caminho de liberação" presente e fechado · null
+FALHA #97 CA-01 390: com 1 linha selecionada, aparece o controle de prévia (sem "Liberar selecionadas") · null
+OK    #100 CA-01det 390: sem o falso "v3 liberada" na tela
+FALHA #100 CA-01det 390: Enter no botão leva a OS.dc.html#OS-0421:ajustar · "http://127.0.0.1:39077/CA-01det.dc.html"
+RESULTADO: 6 OK · 10 falhas
+rc=1

@@ -62,7 +62,7 @@ try:
     F('F08, F09, F10', 'visão Planos (grade, filtro Grupo, "4 ativos sem plano"); filtro "Sem plano" em Ativos', tem('pl', '4 ativos sem plano', 'Todos os grupos', 'PM-10') and tem('at', 'Sem plano'))
     F('F11, F12, F13, F14, F15, F16, F17, F19, F20, F23, F24', 'detalhe do plano e painéis Serviço, Novo/Editar plano e Publicar',
       tem('pm01', 'Incluir serviço', 'Editar plano', 'Versões', 'Inativar plano', 'tarefas') and all(x in MAS for x in ('id="sv_nome"', 'id="np_nome"', 'id="vl-painel"', 'Novo plano')))
-    F('F18', 'expandir por serviço; "Expandir tudo" sai', 'Mostrar checklist e peças de' in MAS and nao('pm01', 'Expandir tudo'))
+    F('F18', 'expandir por serviço; "Expandir tudo" sai', "'checklist e peças de '" in MAS and 'g2seta(' in MAS and nao('pm01', 'Expandir tudo'))
     # MA-VINCULO (16/10): a seção virou "Ativos deste plano" (vincular e desvincular moram nela); continua sem Gerar
     F('F21', 'detalhe do plano › Ativos deste plano (sem Gerar)', tem('pm01', 'ATIVOS DESTE PLANO') and 'GERAR' not in T['pm01'].upper().split('ATIVOS DESTE PLANO')[1].split('VERSÕES')[0])
     F('F22', 'painel Vínculo com marco pré-preenchido (D-41)', 'o marco é a última execução do serviço' in MAS and 'manMarcoSug' in MAS)
