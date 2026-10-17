@@ -600,6 +600,7 @@ function g2vals(self,sp,v,mask){
   // VISOES-2 C3: busca que casa só em coluna oculta diz na linha onde casou (a coluna continua valendo para a busca)
   const ondeCasou=(r)=>{ if(!qn||!g2cvTem(sp)||r.grp) return ''; if(cols.some(c=>g2norm(g2text(r,c)).indexOf(qn)>=0)) return ''; const oc=sp.cols.filter(c=>!visK.has(c.k)&&g2norm(g2text(r,c)).indexOf(qn)>=0).map(c=>c.l); return oc.length?'encontrado em: '+oc.join(', '):''; };
   const sicoKs=sp.sico?(sp.sico.ks||[sp.sico.k]).filter(k=>!visK.has(k)):[];
+  const algumFilho=flat.some(x=>x.has);   // TAB-13: há seta de abrir à vista (a folha guarda o lugar dela)
   v[id+'_rows']=flat.map(({r,lvl,has,pf,ab})=>{
     const canOpen=editable && !(ed.leafOnly && has) && !r.fora && !(r.nosel && !r.dr);
     const cells=[]; const casou=ondeCasou(r); const sicoP=sicoKs.map(k=>g2sicoPart(r,sp,k)).filter(Boolean); const acts=[];
@@ -616,11 +617,12 @@ function g2vals(self,sp,v,mask){
       if(sp.rmenu){ const vai=p=>p&&p.k==='act'&&!p.desce&&!p.full&&!/›\s*$/.test(String(p.t||'')); const fica=raw.filter(p=>!vai(p)); if(fica.length<raw.length){ raw.forEach(p=>{ if(vai(p)) acts.push(p); }); raw=fica; } }
       const cell={isSel:false,isData:true,isDel:false,cls:(ci===0?'g2c0':'')+(c.nr?' g2nr':'')+(c.a==='r'?' g2celn':''),parts:(ci===0&&casou?raw.concat([{k:'br'},{k:'mut',t:casou}]):raw).map((p,i,arr)=>g2part(g2semSep(arr,i),v)),pw:'max-width:'+(c.w||340)+'px;',
         st:(c.nr?'padding:0 2px;':'padding:6px 8px;')+(c.a==='r'?'text-align:right;justify-content:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;':'')+(ci===0&&arv?'padding-left:'+(8+lvl*20)+'px;':'')+(ci===0?'position:sticky;left:0;z-index:1;background:inherit;':'')};
-      // TAB-08/TAB-04 (16/10/2026): a linha que abre o detalhe mostra a seta (TAB-11, sem girar) no começo; com filhos, a seta gira e abre ali mesmo
-      if(ci===0 && arv){ cell.hasCaret=true; cell.caretOk=has; cell.drill=!has&&canOpen&&!r.fgrp; cell.caretNo=!has&&!cell.drill; const open=!!ab;   /* TAB-12: o estado é o do g2flat (o que a linha mostra) */
+      // TAB-13 (17/10/2026, proprietário: "o simbolo de drill down so deve aparecer onde de fato terá um detalhamento drill down"): a seta só na
+      // linha com filhos (gira e abre ali mesmo, TAB-11); a linha folha não tem seta, nem a "seta de ir": abrir o detalhe é o clique na linha
+      // (hover verde e foco, SEL-01/02). Na árvore com algum filho à vista, a folha guarda o lugar da seta (recuo vazio) e os nomes alinham
+      if(ci===0 && arv && (has||algumFilho)){ cell.hasCaret=true; cell.caretOk=has; cell.drill=false; cell.caretNo=!has; const open=!!ab;   /* TAB-12: o estado é o do g2flat (o que a linha mostra) */
         const sa=g2seta(open,g2text(r,c)); cell.caretExp=sa.exp; cell.caretLabel=sa.lab;
         cell.toggle=()=>{ const x=Object.assign({},g2st(self,id).x||{}); x[r.id]=!open; g2set(self,id,{x}); }; }
-      else if(ci===0 && canOpen){ cell.hasCaret=true; cell.caretOk=false; cell.caretNo=false; cell.drill=true; }
       else { cell.hasCaret=false; }
       cell.carT=!!cell.hasCaret&&!sp.sel;   // TAB-09: com seleção, a seta vai para a 1ª célula (abaixo, depois de todas as linhas)
       cells.push(cell); });
@@ -647,12 +649,12 @@ function g2vals(self,sp,v,mask){
   v[id+'_acoes']=acoes;
   if(sp.rmenu&&!acoes) v[id+'_rows'].forEach(r=>r.cells.pop());
   v[id+'_ncols']=cols.length+(sp.sel?1:0)+(acoes?1:0);
-  // TAB-09 (16/10/2026, proprietário: "colone os icones de drill down sempre na esquerda"): com seleção, a seta (de abrir ou de ir) fica na 1ª célula,
+  // TAB-09 (16/10/2026, proprietário: "colone os icones de drill down sempre na esquerda"): com seleção, a seta de abrir (a de ir saiu, TAB-13) fica na 1ª célula,
   // antes da caixa; a linha sem seta guarda o lugar (22 px) para as caixas ficarem alinhadas; o recuo do nível continua na célula do nome
   v[id+'_selArw']=false;
-  if(sp.sel){ const d0=(rw)=>rw.cells.find(x=>x.isData)||{}; const tem=(c)=>!!(c.hasCaret&&(c.caretOk||c.drill)); v[id+'_selArw']=v[id+'_rows'].some(rw=>tem(d0(rw)));
-    if(v[id+'_selArw']) v[id+'_rows'].forEach(rw=>{ const c=d0(rw), s0=rw.cells[0]; if(!s0||s0===c) return; const ok=!!(c.hasCaret&&c.caretOk), dr=!!(c.hasCaret&&c.drill);
-      Object.assign(s0,{carT:true, caretOk:ok, drill:dr, caretNo:!ok&&!dr, caretExp:c.caretExp||'false', caretLabel:c.caretLabel||'', toggle:c.toggle||(()=>{})}); }); }
+  if(sp.sel){ const d0=(rw)=>rw.cells.find(x=>x.isData)||{}; const tem=(c)=>!!(c.hasCaret&&c.caretOk); v[id+'_selArw']=v[id+'_rows'].some(rw=>tem(d0(rw)));   // TAB-13: só a seta de abrir
+    if(v[id+'_selArw']) v[id+'_rows'].forEach(rw=>{ const c=d0(rw), s0=rw.cells[0]; if(!s0||s0===c) return; const ok=!!(c.hasCaret&&c.caretOk);
+      Object.assign(s0,{carT:true, caretOk:ok, drill:false, caretNo:!ok, caretExp:c.caretExp||'false', caretLabel:c.caretLabel||'', toggle:c.toggle||(()=>{})}); }); }
   v[id+'_count']=flat.filter(x=>x.lvl===0).length; v[id+'_all']=rows.length;
   if(rows.some(r=>r.fgrp)){ const fundo=(r)=>g2match(r,sp,st,mask,added)||(r.kids||[]).some(fundo); v[id+'_count']=g2nivel1(g2qrows(sp,st,rows)).filter(fundo).length; v[id+'_all']=g2nivel1(rows).length; }   // SAF-FAZ-3: conta itens, não fazendas
   if(AG.a){ const ids=new Set(); (AG.base||[]).forEach(r=>{ if(g2match(r,sp,st,mask,added)) ids.add(String(r.id)); }); v[id+'_count']=ids.size; v[id+'_all']=rows0.length; }   // agrupado: itens distintos do recorte, não grupos

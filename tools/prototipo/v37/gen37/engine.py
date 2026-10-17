@@ -1498,7 +1498,7 @@ def acao_motivo(botao, dis, motivo):
 # chevron fino (traço de 1,75 px, 16 px) da linha que abre o detalhe, na cor do texto secundário, nunca o triângulo cheio (▸ ▾).
 #  - abrir/recolher ali mesmo: o ícone fica DENTRO do controle nativo que tem aria-expanded (botão só com a seta: seta_abrir; botão com o nome
 #    visível: seta() como 1º filho) e gira 90° com ele (fechado → direita; aberto → baixo; 120 ms, sem animação com prefers-reduced-motion);
-#  - ir para o detalhe (TAB-08): a mesma seta, sem girar (seta_ir), na linha ou no link que navega.
+#  - ir para o detalhe: sem seta desde a TAB-13 (17/10/2026); a linha folha abre pelo clique, com hover verde e foco (seta_ir fica só no openlink antigo, sem uso).
 # A função vem da semântica (botão com aria-expanded e nome "Abrir …"/"Recolher …" × linha/link que abre); o desenho é um só.
 # JS: g2seta(aberta, nome) no g2lib dá o aria-expanded e o nome; o ícone é sempre este (nada de glifo no estado da tela).
 SETA_SVG=('<svg class="g2seta-i" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" '
@@ -1872,7 +1872,7 @@ def grid(cols,rows,edit=None,sel=False,dele=False,tree=False,search=True,total=T
           # TAB-09 (16/10/2026, proprietário: "colone os icones de drill down sempre na esquerda"): a seta vem antes de tudo na linha, inclusive
           # da caixa de seleção (g2lib põe a seta na 1ª célula, c.carT); o recuo da árvore fica na célula do nome, depois da seta
           f'<sc-if value="{_h("c.carT")}" hint-placeholder-val="{{{{false}}}}"><sc-if value="{_h("c.caretOk")}" hint-placeholder-val="{{{{false}}}}">{seta_abrir(_h("c.caretExp"),_h("c.caretLabel"),_h("c.toggle"))}</sc-if><sc-if value="{_h("c.caretNo")}" hint-placeholder-val="{{{{false}}}}">{SETA_VAZIO}</sc-if>'
-          f'<sc-if value="{_h("c.drill")}" hint-placeholder-val="{{{{false}}}}">{seta_ir()}</sc-if></sc-if>'
+          '</sc-if>'   # TAB-13 (17/10/2026): sem a seta de ir; a linha folha abre o detalhe pelo clique na linha
           + _cel_sel +
           f'<sc-if value="{_h("c.isData")}" hint-placeholder-val="{{{{true}}}}"><span class="g2pw" style="{_h("c.pw")}"><sc-for list="{_h("c.parts")}" as="p" hint-placeholder-count="1">{_PARTS}</sc-for></span></sc-if>'
           + _cel_del +
