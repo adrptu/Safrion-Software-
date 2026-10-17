@@ -484,7 +484,9 @@ function g2cdLarg(c){ let w=0, n=0; for(const p of ((c&&c.parts)||[])){ if(!p) c
 // organizado e produtivo"): um cartão por linha, como as Atividades do plano: seta (itens dentro), título, as mesmas colunas em todos os
 // cartões da lista (as G2_CD_MAX primeiras à vista com valor), alinhadas, e o ⋯. Rótulos uma vez, no alto (no celular, dentro do cartão)
 function g2cdVals(self,sp,v){ const id=sp.id, rows=v[id+'_rows']||[], cols=v[id+'_mdcols']||g2colsVis(self,sp), off=sp.sel?1:0, n=cols.length;
-  const parte=(rw)=>{ const cs=rw.cells||[]; return {sels:(off&&cs[0]&&cs[0].isSel)?[cs[0]]:[], dat:cs.slice(off,off+n), tr:cs.slice(off+n)}; };
+  // a faixa da fazenda (g2fgrp) tem uma célula de dados só (as outras saem para o span): o ⋯ vem logo depois dela, não depois de n células
+  const parte=(rw)=>{ const cs=rw.cells||[]; const k=/\bg2fgrp\b/.test(rw.cls||'')?cs.slice(off).findIndex(c=>c&&!c.isData):-1; const fim=k>=0?off+k:off+n;
+    return {sels:(off&&cs[0]&&cs[0].isSel)?[cs[0]]:[], dat:cs.slice(off,fim), tr:cs.slice(fim)}; };
   const P0=rows.map(parte), dat=P0.filter((P,k)=>!rows[k].grp).map(P=>P.dat);
   const ix=[]; for(let i=1;i<n&&ix.length<G2_CD_MAX;i++) if(cols[i]&&dat.some(d=>!g2cdVazio(d[i]))) ix.push(i);
   const lab=(i)=>String((cols[i]&&cols[i].l)||'').split(' · ')[0], num=(i)=>!!(cols[i]&&cols[i].a==='r'), fcls=(i)=>'g2cd-f'+(num(i)?' g2cd-num':'');

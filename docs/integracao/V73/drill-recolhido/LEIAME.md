@@ -92,3 +92,10 @@ O que cada teste verifica continua o mesmo; muda só o que a pessoa faz antes de
 | `tab_drill_cab_test.py` A | mínimo de 500 setas | 150 | TAB-12 e TAB-13 |
 | `ds_1610_test.py` B2 | toda linha que abre o detalhe mostra a seta (TAB-04) | nenhuma linha com a seta de ir | TAB-13 substitui a TAB-04 neste ponto |
 | `tabelas_lib.py` (`Grade.linhas`), `tabelas_cad_test.py` (`grupos`), `tabelas_irr_test.py` (`por_grupo`), `tabelas_est_test.py` (seções) | árvores abertas ao entrar | "Expandir tudo" antes de ler | TAB-12; a abertura de antes era tudo aberto nessas árvores |
+| `saf_revisao_test.py` B15 | ocorrências da operação "Com pendência" à vista ao entrar na etapa 3 | "Expandir tudo" antes de ler | TAB-12 (a etapa 3 abria a operação com pendência) |
+| `tabelas_os_test.py` TF06 | grupos do "Agrupar por" Talhão abertos | "Expandir tudo" antes de ler as O.S. de cada grupo | TAB-12 |
+| `cartoes_test.py` M2h | o cartão do grupo (CD-06) nascia aberto e o clique recolhia (menos itens) | nasce recolhido e o clique abre (mais itens); Tabela e Cartões seguem iguais | TAB-12 |
+| `ma_unica_test.py` AC-PCM-12/13 e 14, `ma_rastreio_test.py` F30 | o bloco da fase da ordem e o da situação do ativo abertos | abre os blocos antes de ler e de agir (Tarefas, Conclusão, Ordens) | TAB-12 nos blocos da Manutenção |
+| `seta_padrao_test.py` E | Tab e Shift+Tab para o anel de foco | se a seta é o último foco da página (árvore recolhida: o Tab sai do documento), Shift+Tab e Tab | harness: em IR-02 a 390 com a Lagoa Grande, a única captação recolhida é o último foco |
+| `drill_recolhido_test.py` C2 (teste novo, ajuste) | a linha do lote à vista | a 390 o painel do lote ocupa a tela (mestre-detalhe): confere a lista por baixo | harness |
+| `rev93_reteste_navegador.py` (reteste do PR #93, fora do repositório) | `abre` esperava 4 linhas na tabela da etapa 2 | cópia `rev93_reteste_navegador_tab12.py` nesta pasta abre a faixa da fazenda; o original fica como está | TAB-12; o original reprova na candidata por isso (ver Testes) |
