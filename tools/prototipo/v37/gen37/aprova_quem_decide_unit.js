@@ -24,7 +24,12 @@ caso('perfil', () => {
   ok('mesma pessoa pelo nome (Ana × "Ana (gestora)")', g2mesma('Ana', 'Ana (gestora)') && !g2mesma('Ana', 'Paula (almoxarife)') && !g2mesma('', ''));
   ok('papel vem do cadastro: objeto forjado {k:"Caio", papeis:{gestor}} não vira gestor; chave "Ana" vale', !g2papel({ k: 'Caio', papeis: { gestor: 'gestora' } }, 'gestor') && g2papel('Ana', 'gestor') && !g2papel({ k: 'Xyz', papeis: { gestor: 'g' } }, 'gestor'));
   const self = { state: {}, setState(o) { Object.assign(this.state, o); } }; const v = {}; g2navvals(self, v, []);
-  ok('menu lateral: seletor com todos os perfis do cadastro (Otávio e João da manutenção; Igor e Marta do beneficiamento; Dora do Comercial), Ana marcada', v.perfil_k === 'Ana' && (v.perfil_opts || []).length === G2_PERFIS.length && ['Otávio', 'João', 'Igor', 'Marta', 'Dora'].every(k => (v.perfil_opts || []).some(o => o.v === k)), [v.perfil_k, (v.perfil_opts || []).map(o => o.v)]);
+  // PERFIL-TODOS-01 (ddf794c2, pedido do proprietário de 14/10): o seletor ganhou o perfil de teste "Proprietário · todos os papéis (teste)", fora do
+  // cadastro. Ele é o único extra: cada perfil do cadastro aparece uma vez, nenhum some e nenhum outro nome entra.
+  const ops = (v.perfil_opts || []).map(o => o.v); const extra = ops.filter(k => !G2_PERFIS.some(p => p.k === k)); const todos = (v.perfil_opts || []).find(o => o.v === 'Proprietário') || {};
+  ok('menu lateral: seletor com todos os perfis do cadastro (Otávio e João da manutenção; Igor e Marta do beneficiamento; Dora do Comercial), Ana marcada; o único extra é "Proprietário · todos os papéis (teste)"',
+    v.perfil_k === 'Ana' && ops.length === G2_PERFIS.length + 1 && G2_PERFIS.every(p => ops.filter(k => k === p.k).length === 1) && extra.length === 1 && extra[0] === 'Proprietário'
+    && todos.t === 'Proprietário · todos os papéis (teste)' && ['Otávio', 'João', 'Igor', 'Marta', 'Dora'].every(k => ops.includes(k)), [v.perfil_k, ops]);
   self.g2perfilFecha = { pa: null }; self.state.pa = { id: 'OS-0430', fn: 'liberar' };   // confirmação aberta pela Ana
   v.perfil_set({ target: { value: 'Caio' } });
   ok('trocar para Caio grava e avisa que não é segurança', __ls['safrion.perfilDemo'] === 'Caio' && g2perfil().k === 'Caio' && /Caio · PCP \(não é segurança de acesso\)/.test(self.state.g2toast || ''), self.state.g2toast);
