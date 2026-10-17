@@ -1,0 +1,27 @@
+OK  C1 1440: o Crédito na barra abre a tela de entrada com um cartão por visão da GE-08
+OK  C2 1440 Ficha do grupo: só a parte do cartão (Ficha do grupo · Bens e avaliações), com indicadores pertinentes e "‹ Crédito"
+OK  C2D 1440: documentos acessíveis pela ficha
+OK  C2F 1440 Ficha do grupo: retorno preserva foco no cartão de origem
+OK  C2 1440 Dossiês: só a parte do cartão (Dossiê e consentimento), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 1440 Dossiês: retorno preserva foco no cartão de origem
+OK  C2 1440 Pedidos e contratos: só a parte do cartão (Solicitações e contratos), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 1440 Pedidos e contratos: retorno preserva foco no cartão de origem
+OK  C2 1440 Liberações e garantias: só a parte do cartão (Acompanhamento do CRE-0102), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 1440 Liberações e garantias: retorno preserva foco no cartão de origem
+OK  C3 1440: trocar a visão pelo endereço troca a parte sem recarregar
+OK  C4 1440: GE-08 sem visão no endereço (links de outras telas) mostra as quatro partes
+OK  C5 1440: sem rolagem lateral e sem erro de JS
+OK  C1 390: o Crédito na barra abre a tela de entrada com um cartão por visão da GE-08
+OK  C2 390 Ficha do grupo: só a parte do cartão (Ficha do grupo · Bens e avaliações), com indicadores pertinentes e "‹ Crédito"
+OK  C2D 390: documentos acessíveis pela ficha
+OK  C2F 390 Ficha do grupo: retorno preserva foco no cartão de origem
+OK  C2 390 Dossiês: só a parte do cartão (Dossiê e consentimento), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 390 Dossiês: retorno preserva foco no cartão de origem
+OK  C2 390 Pedidos e contratos: só a parte do cartão (Solicitações e contratos), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 390 Pedidos e contratos: retorno preserva foco no cartão de origem
+OK  C2 390 Liberações e garantias: só a parte do cartão (Acompanhamento do CRE-0102), com indicadores pertinentes e "‹ Crédito"
+OK  C2F 390 Liberações e garantias: retorno preserva foco no cartão de origem
+OK  C3 390: trocar a visão pelo endereço troca a parte sem recarregar
+OK  C4 390: GE-08 sem visão no endereço (links de outras telas) mostra as quatro partes
+OK  C5 390: sem rolagem lateral e sem erro de JS
+RESULTADO: 26/26

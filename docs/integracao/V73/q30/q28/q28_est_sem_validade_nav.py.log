@@ -1,0 +1,9 @@
+  OK  1440: data anterior fica oculta pelo campo sem validade
+  OK  1440: recebimento válido de NF 7731 (PC-096)
+  OK  1440: soma5 preservando ausência de validade
+  OK  1440: sem erro JS
+  OK  390: data anterior fica oculta pelo campo sem validade
+  OK  390: recebimento válido de NF 7731 (PC-096)
+  OK  390: soma5 preservando ausência de validade
+  OK  390: sem erro JS
+RESULTADO: 8/8 ok
