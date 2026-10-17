@@ -1,0 +1,8 @@
+OK    F1 faixa com Fazenda, Safra e Cultura; Safra da fazenda (Lagoa Grande só 2026/27; Santa Rita 3 safras, sem "Todas")
+OK    F2 Safrinha 2027 · Lavoura: só T1 (Milho), T2 (Milho) e P1 (Feijão) com cultivo; os outros "sem cultivo na safra"
+OK    F3 Cultura Milho na Safrinha: T1 e T2 no filtro (previsto R$/ha do plano), os outros "fora do filtro" em Custos; opções de Cultura = as da safra
+OK    F4 Milho segue válido na 2026/27 da Santa Rita (milho em P2 hoje); na Lagoa Grande a Safra é 2026/27 e a Cultura volta a Todas
+OK    A1 "Alvos · Todos"; lista com Todos + 12 alvos; marcar Ácaro-rajado foca nele (os outros rótulos: "sem …")
+OK    A2 2º alvo soma ("2 de N", os dois marcados); Esc fecha com foco no botão; "Todos" volta ao todo
+OK    J sem erro de JS; 390 px sem rolagem lateral
+RESULTADO: 7/7

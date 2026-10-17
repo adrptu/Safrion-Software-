@@ -1734,7 +1734,10 @@ function safRolagem(){ const m=document.querySelector('main[data-scroll]'); cons
 function safCorrigir(self,ids){ const r=safRolagem(); const m=document.querySelector('main[data-scroll]');
   self.__revPos={top:r?r.scrollTop:0,rolas:m?[...m.querySelectorAll('.g2rola,.rola')].map(x=>x.scrollTop):[],foco:'[data-acoes] [data-acao=corrigir]'};
   g2etapa(self,{step:2,corr:{ids:ids.slice()}});
-  setTimeout(()=>{ try{ const row=document.querySelector('[role=row][data-rid="'+ids[0]+'"]'); if(row){ row.scrollIntoView({block:'center'}); row.focus({preventScroll:true}); } }catch(e){} },120); }
+  // TAB-12 (17/10/2026): a ação que leva a um registro abre o caminho dele: a faixa da fazenda e o talhão do 1º cultivo sem plano nascem
+  // recolhidos, então abre o caminho (g2caminho) antes de pôr o foco na linha (achado da integração DRILL × acao_unica item 7)
+  setTimeout(()=>{ try{ GRIDS.filter(g=>/^g_cult_/.test(g.id)).forEach(sp=>g2caminho(self,sp,ids[0])); }catch(e){}
+    setTimeout(()=>{ try{ const row=document.querySelector('[role=row][data-rid="'+ids[0]+'"]'); if(row){ row.scrollIntoView({block:'center'}); row.focus({preventScroll:true}); } }catch(e){} },90); },120); }
 // atalho para o cultivo que responde pela saída: "Informar colheita" só quando o painel dele tem o campo (sem plano, safra aberta, fora de
 // ciclo vinculado); com plano a colheita sai do plano e o atalho só abre o cultivo ("Ver"); safra encerrada também é "Ver" (revisão SAF, S3.3)
 function lnkSaida(self,S,o,saf){ const fech=!!(S[o.saf]&&S[o.saf].ro); const r=cultsDe(self,o.saf).find(c=>c.id===o.id);

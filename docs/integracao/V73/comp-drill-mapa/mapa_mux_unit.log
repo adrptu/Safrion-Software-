@@ -1,0 +1,30 @@
+OK    U0 bloco <mux-puro> no gerador (inicio.py)
+OK    U1 a ordem de gravidade é a SEV do mapa (fonte única, worstC)
+OK    V1 NO → direita = NE
+OK    V2 NO → baixo = SO
+OK    V3 NO → esquerda e cima: borda, sem vizinho
+OK    V4 SE → cima = NE; SE → esquerda = SO
+OK    V5 tecla que não é seta: nada
+OK    V6 o quase alinhado vence o mais perto e torto
+OK    V7 empate exato: o menor índice (ordem do DOM = ordem do nome)
+OK    V8 Santa Rita: T1→T2, T2→P1, T4↑T1, C1←T7, P2↓C1
+OK    V9 propriedade (2000 casos × 4 setas): o escolhido está sempre no semiplano da direção; só falta vizinho com o semiplano vazio
+OK    O1 nome natural: P2 antes de P10; PV05 depois de PV04
+OK    O2 a pior primeiro (vermelho, amarelo, verde, cinza, não se aplica); empate pelo nome
+OK    O3 satélite: do índice pior ao melhor, depois nuvem (sem leitura), depois sem cultura
+OK    O4 solo: a classe pior (rk 0) primeiro; sem laudo no fim
+OK    O5 a ordem não altera a lista de entrada
+OK    H1 lê #faz=LG&lay=sat&t=PV05&dt=25-09
+OK    H2 escreve o mesmo endereço (ida e volta)
+OK    H3 as 9 camadas e as 4 opções de fazenda vão e voltam
+OK    H4 valores desconhecidos ou fora do formato ficam fora (nada vira estado)
+OK    H5 endereço de outra função (#talhao=PV05, #car:PV23, #desenhar=PV01) não é do mapa
+OK    H6 sem talhão e sem data: só fazenda e camada
+OK    H7 minúsculas e %-codificação
+OK    B1 "P5", "PV05", "p05", "Pivô 5", "pivo 5", " p 5 " → PV05
+OK    B2 "P1" é o P1 (exato vence o começo de P10 e P15)
+OK    B3 inexistente e vazio → nada
+OK    B4 Santa Rita: "T4", "t4" e "Talhão 4" → T4; "c1" → C1
+OK    B5 ambíguo (só "T", que começa T1, T2…) → nada, nunca outro talhão em silêncio
+
+TOTAL ok 28 · falha 0 · fonte: inicio.py
