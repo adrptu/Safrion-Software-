@@ -1,0 +1,34 @@
+OK    #96 1440: formulário Editar safra abre
+OK    #96 1440: sem campo Estado (nenhum rótulo "Estado", nenhum seletor Rascunho/Em planejamento)
+OK    #96 1440: nome continua editável; sem rolagem lateral
+FALHA #96 1440: coluna Estado da safra continua na tabela, com o estado na linha S2627 · {"hs": ["SAFRA", "FAZENDA", "PRÓXIMO PASSO", "ÁREA"], "i": -1}
+OK    #97 PL-04 1440: controle "Conferir caminho de liberação" presente e fechado
+OK    #97 PL-04 1440: abre por teclado (foco no resumo + Enter)
+OK    #97 PL-04 1440: lista por O.S. com link de identidade, sem resultado fixo de liberação
+OK    #97 PL-04 1440: abrir não grava nada no cenário (localStorage igual); sem rolagem lateral
+OK    #97 PL-04 1440: fecha de novo por teclado
+OK    #97 PL-04 1440: "Abrir O.S. ›" abre a própria O.S. (OS-0430)
+OK    #97 CA-01 1440: com 1 linha selecionada, aparece o controle de prévia (sem "Liberar selecionadas")
+OK    #97 CA-01 1440: abre por teclado; itens com link por identidade; declara que ignora a seleção
+OK    #97 CA-01 1440: nada gravado; sem rolagem lateral
+OK    #100 CA-01det 1440: sem o falso "v3 liberada" na tela
+OK    #100 CA-01det 1440: Enter no botão leva a OS.dc.html#OS-0421:ajustar
+FALHA #100 CA-01det 1440: o formulário real de ajuste da OS-0421 abre (lê os campos) · "OS-0421 · Pulverização · Fungicida 1ª aplicação\nAbrir ordem completa ›\n×\nEm execução\nParcial · dia 4 de 7\nT1+T2 · 350 ha · janela 20–26/09 · Marcos\n190 / 350 ha · 54 % · saldo 160 ha\nA liberar\nLiberadas\nEm execução\nEm conferência\nEncerradas\nPRÓXIMO PASSO\nRegistre o apontamento do turno: data e área feita. Os insumos usados são calculados pela dose. Fechar o turno não encerra a ordem.\nPendência com"
+OK    #96 390: formulário Editar safra abre
+OK    #96 390: sem campo Estado (nenhum rótulo "Estado", nenhum seletor Rascunho/Em planejamento)
+OK    #96 390: nome continua editável; sem rolagem lateral
+FALHA #96 390: coluna Estado da safra continua na tabela, com o estado na linha S2627 · {"hs": ["SAFRA", "FAZENDA", "PRÓXIMO PASSO"], "i": -1}
+OK    #97 PL-04 390: controle "Conferir caminho de liberação" presente e fechado
+OK    #97 PL-04 390: abre por teclado (foco no resumo + Enter)
+OK    #97 PL-04 390: lista por O.S. com link de identidade, sem resultado fixo de liberação
+OK    #97 PL-04 390: abrir não grava nada no cenário (localStorage igual); sem rolagem lateral
+OK    #97 PL-04 390: fecha de novo por teclado
+OK    #97 PL-04 390: "Abrir O.S. ›" abre a própria O.S. (OS-0430)
+OK    #97 CA-01 390: com 1 linha selecionada, aparece o controle de prévia (sem "Liberar selecionadas")
+OK    #97 CA-01 390: abre por teclado; itens com link por identidade; declara que ignora a seleção
+OK    #97 CA-01 390: nada gravado; sem rolagem lateral
+OK    #100 CA-01det 390: sem o falso "v3 liberada" na tela
+OK    #100 CA-01det 390: Enter no botão leva a OS.dc.html#OS-0421:ajustar
+FALHA #100 CA-01det 390: o formulário real de ajuste da OS-0421 abre (lê os campos) · "OS-0421 · Pulverização · Fungicida 1ª aplicação\nAbrir ordem completa ›\n×\nEm execução\nParcial · dia 4 de 7\nT1+T2 · 350 ha · janela 20–26/09 · Marcos\n190 / 350 ha · 54 % · saldo 160 ha\nA liberar\nLiberadas\nEm execução\nEm conferência\nEncerradas\nPRÓXIMO PASSO\nRegistre o apontamento do turno: data e área feita. Os insumos usados são calculados pela dose. Fechar o turno não encerra a ordem.\nPendência com"
+RESULTADO: 28 OK · 4 falhas
+rc=1

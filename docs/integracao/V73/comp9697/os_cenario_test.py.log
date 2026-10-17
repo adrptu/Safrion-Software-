@@ -1,0 +1,33 @@
+   ['A liberar', False, 7]
+  OK  A liberar sem revisão: Liberar para execução + Ajustar antes de liberar; área 0 recusada junto ao campo, nada liberado; cenário (v≥2) sem aprov
+   REQ-041 ['Liberadas', 'Glifosato 480 320 G26-14 | 2,4-D 806 160 D26-01 | Óleo mineral 80 O26-05', 320] | OS-0430 liberada. REQ-041 reservou no Estoque: Glifosato 480 320 L, 2,4-D 806 160 L, Óleo mineral 80 L. v1 aprovada por Ana (agrônoma) e liberada por Ana (gestora).
+  OK  liberar: REQ-041 reserva Glifosato 480 320 L (G26-14), 2,4-D 806 160 L e Óleo mineral 80 L; painel mostra a reserva por lote
+  OK  CTL-1: confirmar = aprovar esta versão e liberar; Origem com CMD-42 e CMD-06 separados
+   INSUMOS E DOSES PRODUTO DOSE NA ORDEM USADO SITUAÇÃO Glifosato 480 Herbicidas · padrão do plano v6 2 L/ha 320 L 0 L Entregue · aguardando confirmação no app · previsto para o saldo 320 L · falta para terminar 0 L Reservado 320 L · lote G26-14 › Entregue 320 L (16 × galão 20 L) a Marcos › Aguardando confirmação no app › Consumido › Em custódia 320 L › Devolvido 2,4-D 806 Herbicidas · padrão do plan
+  OK  entregas do Estoque aparecem sem recarregar: 320 L (16 × galão 20 L) a Marcos, aguardando confirmação no app
+   ['26/09 Dia 1 · app 60 ha · 5 h não somado Aguardando sinal'] | OS-0430 Dessecação pré-plantio T1-A — 160,00 ha 25/09/2026 25/09/2026 Em execução Aguardando sinal do app — — — — 0,00 ha 160,00 ha — 0,0 % Marcos
+  OK  turno do app sem sinal: Em execução, "Dia 1 · app · Aguardando sinal" fora do acumulado; consumo ainda no aparelho (custódia 320 L)
+   ['26/09 Dia 1 · app 60 ha · 5 h 60 / 160 ha Provisório'] | OS-0430 Dessecação pré-plantio T1-A — 160,00 ha 25/09/2026 25/09/2026 Em execução — — — — — 60,00 ha 100,00 ha — 37,5 % Marcos
+  OK  sinal de volta: realizado 60 / 160 ha e consumo 120 L (custódia 200 L) juntos, sem duplicar
+  OK  turno 2 (100 ha, 180 L de Glifosato): 160 / 160 ha, sobra 20 L em custódia, botão Enviar para conferência, sem "Insumo esgotado" (CTL-2 · B, P5)
+   PRÓXIMO PASSO Confira apontamentos, consumo e sobras e encerre a ordem. Encerrar bloqueado: sobra em custódia · Glifosato 480 20 L (1 × galão 20 L) com Marcos. Quem resolve: Rui (almoxarife) recebe a devolução no Estoque. Receber devolução no Estoque › INSUMOS E DOSES PRODUTO DOSE NA ORDEM USADO SIT
+  OK  Em conferência: encerrar bloqueado pela sobra de 20 L com Marcos e link "Receber devolução no Estoque" → EST.dc.html
+  OK  devolução recebida no Estoque: o bloqueio da sobra some e fica o da divergência de dose (Glifosato 200 L planejado × 180 L informado), trilha com Devolvido 20 L
+  OK  Após revisão técnica, Paula ainda precisa conferir os dias
+  OK  revisão técnica aceita por Ana (agrônoma) com motivo: bloqueio some e surge Conferir e encerrar
+   ['Encerradas', 'Conferido,Conferido'] Conferido por Paula (conferência) · 17/10/2026, 06:24:36 · Execução e evidências do dia conferidas por Paula | Conferido por Paula (conferência) · 17/10/2026, 06:24:38 · Execução e evidências do dia conferidas por Paula | OS-0430 encerrada por Ana (gestora).
+  OK  encerrar: cenário Encerradas, apontamentos conferidos, painel somente consulta
+  OK  OS-0417: apontamento aguardando sinal bloqueia o encerramento e diz quem resolve
+  OK  OS-0418 A liberar: liberar bloqueado com o motivo do Estoque (sem lote de Ureia 45%) e atalho aos saldos
+   OS-0430 Dessecação pré-plantio T1-A — 160,00 ha 25/09/2026 25/09/2026 A liberar — — Ana (agrônoma) — antes de 25/09 0,00 ha 160,00 ha — 0,0 % Marcos | PRÓXIMO PASSO O agrônomo confere atividade, área, produtos e doses abaixo e libera; se precisar, ajusta antes de liberar. Os insumos são reservados no Estoque. Liberar bloqueado: saldo insuficiente de Glifosato 480: 100 L disponíveis para 320 L. Quem resolve: 
+  OK  cenReset em outra tela volta a OS-0430 a A liberar; com 100 L no G26-14, liberar fica bloqueado pelo saldo
+   [12, 'A liberar', 1200] Demonstração restaurada: O.S., estoque e app voltaram ao início.
+  OK  Restaurar demonstração: 12 requisições (6 da Santa Rita + 5 da Lagoa Grande + REQ-030 do beneficiamento), OS-0430 volta a A liberar, G26-14 com 1.200 L
+   ['Liberadas', 'v2', 150, 'Glifosato 480 270 | 2,4-D 806 150 | Óleo mineral 75'] OS-0430 ajustada para v2 e liberada. REQ-041 reservou no Estoque: Glifosato 480 270 L, 2,4-D 806 150 L, Óleo mineral 75 L. v2 aprovada por Ana (agrônoma) e liberada por Ana (gestora).
+  OK  Ajustar antes de liberar: 150 ha e Glifosato 1,8 L/ha → v2 com histórico na Origem, liberada com a reserva ajustada (270 L)
+  OK  CTL-1: ajustar e liberar grava CMD-42 e CMD-06 da v2 com as doses ajustadas
+  OK  E1 14c: ajuste com Glifosato 7,5 L/ha e Abamectina em soja recusados junto ao campo (nada gravado: v1, sem REQ, sem CMD-42); dentro da bula, Salvar e liberar passa
+  OK  E1 14d: dose fora da bula no cenário → selo "Fora do registro" na lista e no Kanban; painel "Liberar bloqueado", quem resolve = Ana, sem Liberar
+  OK  E1 14e: Nova ordem da Safrinha 2027 (milho no T1-A) aceita a Atrazina sem erro junto ao campo; Nova ordem c1·a7 bloqueia a liberação pela unidade do Inseticida B (L/ha × bula em kg/ha) e oferece o ajuste
+  OK  sem erro de script
+RESULTADO: 22/22 ok

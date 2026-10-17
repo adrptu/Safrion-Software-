@@ -1,0 +1,9 @@
+FIM agro10_estado_test rc=0 :: PASS AGRO-10b: coluna visível; nome editável; estado preservado em 2 estados, inclusive draft residual. Sem DOM/hooks completos.
+FIM agro01_previa_test rc=0 :: PASS campo : prévia por linha, escape, destino, ausência de comando e fila vazia
+FIM saf_fazendas_test.py rc=0 78s :: RESULTADO: 14/14
+FIM saf_multi_fazenda_test.py rc=0 64s :: RESULTADO: 23/23
+FIM tabelas_saf_test.py rc=0 64s :: RESULTADO: 24/24 ok
+FIM tabelas_os_test.py rc=0 72s :: RESULTADO: 40/40 ok
+FIM os_cenario_test.py rc=0 55s :: RESULTADO: 22/22 ok
+FIM paginas_scan_test.py rc=0 394s :: RESULTADO: 5 ok · 0 falhas (148 páginas)
+TUDO
