@@ -1,0 +1,188 @@
+== Totais (render lido; "menu" = tela do menu vigente, "oculta" = ui37.oculto)
+campo_menu: 636
+campo_oculta: 425
+campo_ro_menu: 225
+campo_ro_oculta: 169
+data_menu: 31
+data_oculta: 16
+grades_com_botao_na_linha_menu: 6
+grades_com_botao_na_linha_oculta: 40
+grades_del: 4
+grades_menu: 128
+grades_oculta: 134
+grades_rmenu: 5
+grades_sel_menu: 1
+grades_sel_oculta: 3
+input_date_html_menu: 19
+input_date_html_oculta: 11
+inputmode_html_menu: 201
+inputmode_html_oculta: 153
+num_menu: 142
+num_oculta: 26
+num_sem_unidade_menu: 18
+num_sem_unidade_oculta: 1
+painel_data_calendario_menu: 1
+painel_data_calendario_oculta: 10
+painel_lista_por_rotulo_menu: 11
+painel_lista_por_rotulo_oculta: 30
+sel_menu: 112
+sel_obrig_sem_padrao_menu: 20
+sel_obrig_sem_padrao_oculta: 57
+sel_oculta: 94
+texto_menu: 114
+texto_oculta: 113
+
+== Telas com grade de botões na linha (semente) e ⋯ (rmenu)
+AG-04: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+AG-05: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+AG-06: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+CA-01: botões na linha em 0 grade(s) · rmenu 0 · seleção 1
+CA-02: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+CA-03: botões na linha em 0 grade(s) · rmenu 0 · seleção 1
+CA-04: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+CO-01: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+CO-02: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+CO-03: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+CO-04: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+CO-05: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+CO-06: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+CO-07: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+GE-01: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+GE-04: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+GE-06: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+GE-06det: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+GE-07: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+GE-08: botões na linha em 2 grade(s) · rmenu 0 · seleção 0
+IN-01: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+IN-02: botões na linha em 1 grade(s) · rmenu 0 · seleção 1
+IN-03: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+LO-01: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+LO-02: botões na linha em 2 grade(s) · rmenu 0 · seleção 0
+LO-03: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+LO-04: botões na linha em 2 grade(s) · rmenu 0 · seleção 0
+ON-01: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+PL-02: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+PL-04: botões na linha em 2 grade(s) · rmenu 0 · seleção 0
+PL-05: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+PT-01: botões na linha em 2 grade(s) · rmenu 0 · seleção 0
+PT-02: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+PT-03: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+PT-04: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+PT-05: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+PT-06: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+PT-07: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+SAF: botões na linha em 0 grade(s) · rmenu 5 · seleção 1
+VE-01: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+VE-03: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+VE-04: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+VE-05: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+VE-06: botões na linha em 1 grade(s) · rmenu 0 · seleção 0
+
+== Listas obrigatórias do formulário sem valor e sem opção vazia (o <select> mostra a 1ª opção)
+AG-02:g_agua:Profundidade amostrada
+AG-02:g_agua:Método
+AG-02:g_agua:Fonte ou laboratório
+AG-02:g_ext:Unidade
+AG-04:g_rec:Operação · alvo
+AG-04:g_rec:Talhão
+AG-04:g_rec:Fonte
+AG-06:g_ef:Confiança
+CA-01:g_os:Equipe · conjunto
+CD-02:g_cult:Unidade de produtividade
+CD-03:g_cj:Máquina
+CD-04:g_eq:Líder
+CD-06:g_grp:Natureza de custo
+CD-08:g_op:Processo
+CMP:g_conv:Convite
+CMP:g_conv:Canal
+CMP:g_conv:Prazo de resposta
+CMP:g_cmp:Proposta escolhida
+CO-02:g_oc:Equipe e máquinas
+CO-04:g_rc:Local
+CO-04:g_rc:Condição
+CO-06:g_in:Responsável
+EST:g_ent:Entregar a
+EST:g_cnt:Item · lote
+GE-03:g_lan:Rateio
+GE-04:g_tit:Conta de saída
+GE-05:g_rec:Canal autorizado
+GE-08:g_cre:Credor
+GE-08:g_cre:Garantia
+GE-08:g_doc:Documento
+GE-08:g_ficha:Tipo do valor
+IN-01:g_dia:Responsável
+IN-01:g_dia:Prazo
+LO-01:g_ag:Motivo da reprogramação
+LO-02:g_fi:Nova posição
+LO-02:g_fi:Motivo
+LO-02:g_ex:Veículo · doca
+LO-02det:g_ck:Conferido por
+LO-02det:g_ck:Evidência
+LO-03:g_vg:Transportador
+LO-04:g_ct:Prestador
+LO-04:g_ct:Carga
+LO-04:g_ct:Unidade de cobrança
+LO-04:g_pr:Unidade de cobrança
+ON-01det:g_imp:Sistema de coordenadas
+ON-01det:g_imp:Unidade da coluna “qtde”
+ON-01det:g_imp:Decisão sobre T1 e T2
+PL-01:g_cult:Variedade
+PL-01:g_cult:Plano
+PL-02:g_op:Decisão da pendência
+PL-02:g_op:Responsável
+PL-04:g_ord:Recurso/conjunto
+PL-04:g_ord:Operador
+PL-05:g_imp:Responsável
+PL-05:g_imp:Prazo
+PL-06:g_par:Variedade
+PT-02det:g_cd:Frete
+PT-02det:g_cd:Pagamento
+PT-03:g_pp:Janela de entrega
+PT-03:g_pp:Local de entrega
+PT-06:g_co:Responsável
+PT-07:g_pref:Canal
+SU-02:g_pol:Depósito
+SU-02:g_pol:Classe ABC (valor)
+SU-02:g_pol:Criticidade
+SU-02:g_pol:Método de reposição
+SU-04:g_cot:Local de entrega
+SU-05:g_ctr:Responsável
+SU-05:g_ctr:Condição de pagamento
+SU-05:g_ped:Depósito
+SU-06:g_rec:Inspeção
+SU-06:g_rec:Depósito
+SU-06:g_rec:Divergência
+SU-07:g_req:Recebedor
+SU-09:g_inv:Contador
+SU-09:g_inv:Recontagem
+SU-09:g_inv:Aprovador
+total: 77
+
+== Painéis estáticos: lista escolhida pelo rótulo (engine._opts_for), rótulo · ocorrências · telas
+motivo · 7 · CA-01det,CA-02,GE-03,GE-07,PL-05,PL-05det,PT-03
+responsável · 6 · CA-02,CO-01,CO-06,ON-01,PL-05det
+cliente · 3 · GE-05,VE-03
+cultura · 2 · ON-01
+tabela · 1 · AG-05
+escopo (cultura · região) · 1 · AG-05
+fazenda · 1 · CA-01
+ação do ajuste · 1 · CA-01det
+produto · 1 · CA-01det
+item · 1 · CA-04
+origem da demanda · 1 · CO-02
+máquinas · 1 · CO-02
+lote · 1 · CO-06
+padrão / método · 1 · CO-06
+plano · 1 · GE-02det
+canal · 1 · GE-05
+e-mail do responsável · 1 · ON-01
+talhão/parcela · 1 · PL-02
+insumo · 1 · PL-02
+máquina · 1 · PL-05
+talhão · 1 · PL-06
+variedade a · 1 · PL-06
+variedade b · 1 · PL-06
+condição · 1 · PT-04det
+parcelas de liberação · 1 · PT-04det
+garantia · 1 · PT-04det
+tipo · 1 · PT-05det

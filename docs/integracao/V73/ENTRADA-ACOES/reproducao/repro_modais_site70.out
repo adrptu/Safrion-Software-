@@ -1,0 +1,58 @@
+{
+ "M1_PL02_decidir_pendencia": {
+  "clique": "ok",
+  "lista": {
+   "mostra": "Realizada",
+   "value": "Realizada",
+   "selectedIndex": 0,
+   "opcoes": [
+    "Realizada",
+    "Pendente",
+    "Não aplicável"
+   ],
+   "evidencia_visivel": false
+  },
+  "salvar": "ok",
+  "erros_no_painel": [
+   "Informe decisão da pendência."
+  ],
+  "linha_C1": "C1 Café Catuaí 144 · 38 ha Adubação pós-colheita NEC-019 · ciclo 2025/26 KCl 60% 150 kg/ha 30 dias após a colheita · colheita real 12/08 → 11/09 janela ±10 d Ve"
+ },
+ "M2_CA01det_ajustar_saldo": {
+  "abrir_painel": "ok",
+  "produto_opcoes": [
+   "Fungicida A",
+   "Soja em grão",
+   "Milho em grão",
+   "Mamão Formosa · cx 10 kg",
+   "Café beneficiado",
+   "──────────",
+   "Buscar no cadastro…",
+   "+ Novo (abre o cadastro)"
+  ],
+  "dose_escrita": {
+   "value": "0,45 L",
+   "type": "text",
+   "inputmode": null
+  },
+  "troca_dose": "ok",
+  "confirmar": "ok",
+  "aviso": "v3 liberada no saldo Saldo de 160 ha na v3 · liberada por Ana (agrônoma). Os 190 ha realizados continuam preservados na v2."
+ },
+ "M3_ON01_rever_dados": {
+  "abrir_painel": "ok",
+  "email_opcoes": {
+   "tag": "SELECT",
+   "opcoes": [
+    "otavio@boaesperanca.agro",
+    "Ana",
+    "Marcos",
+    "Rui",
+    "Paula",
+    "──────────",
+    "Buscar no cadastro…",
+    "+ Novo (abre o cadastro)"
+   ]
+  }
+ }
+}
