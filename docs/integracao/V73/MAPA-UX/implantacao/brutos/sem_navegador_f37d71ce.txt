@@ -1,0 +1,129 @@
+# Sem navegador, no commit f37d71ce (composição ac5cd1d7 + MAPA-UX), 17/10/2026
+## node mapa_mux_unit.js
+OK    U0 bloco <mux-puro> no gerador (inicio.py)
+OK    U1 a ordem de gravidade é a SEV do mapa (fonte única, worstC)
+OK    V1 NO → direita = NE
+OK    V2 NO → baixo = SO
+OK    V3 NO → esquerda e cima: borda, sem vizinho
+OK    V4 SE → cima = NE; SE → esquerda = SO
+OK    V5 tecla que não é seta: nada
+OK    V6 o quase alinhado vence o mais perto e torto
+OK    V7 empate exato: o menor índice (ordem do DOM = ordem do nome)
+OK    V8 Santa Rita: T1→T2, T2→P1, T4↑T1, C1←T7, P2↓C1
+OK    V9 propriedade (2000 casos × 4 setas): o escolhido está sempre no semiplano da direção; só falta vizinho com o semiplano vazio
+OK    O1 nome natural: P2 antes de P10; PV05 depois de PV04
+OK    O2 a pior primeiro (vermelho, amarelo, verde, cinza, não se aplica); empate pelo nome
+OK    O3 satélite: do índice pior ao melhor, depois nuvem (sem leitura), depois sem cultura
+OK    O4 solo: a classe pior (rk 0) primeiro; sem laudo no fim
+OK    O5 a ordem não altera a lista de entrada
+OK    H1 lê #faz=LG&lay=sat&t=PV05&dt=25-09
+OK    H2 escreve o mesmo endereço (ida e volta)
+OK    H3 as 9 camadas e as 4 opções de fazenda vão e voltam
+OK    H4 valores desconhecidos ou fora do formato ficam fora (nada vira estado)
+OK    H5 endereço de outra função (#talhao=PV05, #car:PV23, #desenhar=PV01) não é do mapa
+OK    H6 sem talhão e sem data: só fazenda e camada
+OK    H7 minúsculas e %-codificação
+OK    B1 "P5", "PV05", "p05", "Pivô 5", "pivo 5", " p 5 " → PV05
+OK    B2 "P1" é o P1 (exato vence o começo de P10 e P15)
+OK    B3 inexistente e vazio → nada
+OK    B4 Santa Rita: "T4", "t4" e "Talhão 4" → T4; "c1" → C1
+OK    B5 ambíguo (só "T", que começa T1, T2…) → nada, nunca outro talhão em silêncio
+
+TOTAL ok 28 · falha 0 · fonte: inicio.py
+## node mapa_mux_unit.js <inicio.py da base 0b3d0d4> (contraprova)
+FALHA U0 bloco <mux-puro> no gerador (inicio_0b3d0d4.py) · [-1,-1]
+
+TOTAL ok 0 · falha 1
+## node mapa_insfaz_unit.js
+OK    C1 dose 1 × 10 ha: necessidade de 10 de Ureia no T1
+OK    C2 dose 2 com as mesmas O.S. e o mesmo estoque: a necessidade passa a 20 (o cache não segura a dose antiga)
+OK    C3 nada mudou: o cache devolve a mesma conta, sem refazer
+OK    C4 a O.S. mudou: a conta é refeita
+
+TOTAL ok 4 · falha 0 · fonte: areas/inicio.py
+## node mapa_insfaz_unit.js <inicio.py da base 0b3d0d4> (contraprova)
+OK    C1 dose 1 × 10 ha: necessidade de 10 de Ureia no T1
+FALHA C2 dose 2 com as mesmas O.S. e o mesmo estoque: a necessidade passa a 20 (o cache não segura a dose antiga) · 10
+OK    C3 nada mudou: o cache devolve a mesma conta, sem refazer
+OK    C4 a O.S. mudou: a conta é refeita
+
+TOTAL ok 3 · falha 1 · fonte: ../../../../../-home-user-Safrion-Software-/65558514-68d9-57f5-9da3-513cd6735cdc/scratchpad/inicio_0b3d0d4.py
+## node mapa_os_unit.js
+OK   M1 aberta 100 ha com 30 apontados: 30/100 ha · 30 %
+OK   M2 aberta + cancelada de 100 ha: continua 30/100 ha · 30 % (a cancelada não entra)
+OK   M3 faixa de números do Avanço com a cancelada: 30 % (não 15 %)
+OK   M4 só cancelada: sem ordem aberta, rótulo "cancelada" (nunca 0/100 ha nem "não iniciada")
+OK   M5 controle: aberta + encerrada mantém 30 %
+OK   M6 controle: só encerrada segue "encerrada"
+OK   M7 Impedimentos com só cancelada: "cancelada", sem ordem aberta
+TOTAL 7 · OK 7 · FALHAS 0
+## links_ocultos_test.py
+OK    E1 em todo o código de produto, só a O.S. e o Mapa chamam osc_liberar 
+OK    E1b só osc_liberar (processo_os) chama cenLiberar: nenhum atalho libera sem gravar CMD-42/CMD-06 (o Beneficiamento libera pelo benAutorizarLiberar, E1d) 
+OK    E1d em ben.js o nome cenLiberar não aparece e a única passagem para Liberadas fica dentro de benAutorizarLiberar (perfil de produção, benO, CMD-42 e CMD-06); a tela e a semente do BEN não citam cenLiberar 
+OK    E1e o E1d derruba os atalhos de liberação no ben.js (5 mutantes: cenLiberar colado, com outra variável e por apelido; Liberadas por atribuição e por objeto) 
+OK    E1c o efeito sem o registro de quem decide (osc_libEfeito) só é chamado por osc_liberar e pela prévia osLibErro (cópia) 
+OK    E4 nenhuma mensagem de produto aponta "Produção › Cargas e recebimento" (o caminho é "Agrícola › Recebimento", 13/10) 
+OK    E2 nenhuma ordem de manutenção em A liberar no cenário; a de beneficiamento em A liberar só com fam BEN e fora da lista da O.S. (OB-0104 Encerradas) 
+OK    E3 "Nova ordem" só emite atividade agrícola do plano 
+OK    L0 navegação nova: 8 telas de entrada na barra lateral, 37 telas com cartão na entrada e "‹ Módulo" de volta, 4 em Outros acessos; 80 telas seguem ocultas 
+OK    L1 nenhum elo do escopo (PL-04/PL-05/PL-05det, CA-02, CO-06det, GE-07, MB-05det, MB-07..MB-10, SU-03det a partir de telas visíveis) 
+OK    L2 todo o resto da varredura está na lista residual, por par e com motivo 
+OK    L2b a lista residual só tem pares que a varredura ainda acha (par que sumiu sai da lista, para não liberar de antemão um elo futuro) 
+OK    L4a BEN.dc.html publicado: no menu (não oculto), no canvas na página "menu", fora da conta de ocultos e com cartão próprio em Agrícola logo depois de Recebimento 
+OK    L4b BEN.dc.html publicado: volta por "‹ Agrícola"; Cargas aponta o Beneficiamento pelo lote em processo (PR_BEN_H ligado) e o Estoque pela devolução guiada (EST_BEN_H) 
+OK    L4c Cargas e recebimento sem a faixa "Telas de recebimento e beneficiamento"; o Beneficiamento também 
+OK    L3 Mapa · OS-0420: o passo vai para a OM-0233 viva (tela MA, visível e com âncora no registro: MA#om=), não para PL-05 
+TOTAL 16 · falhas 0
+## ds_inventario.py --catraca
+arquivo                             css tabela cartao  exceção
+maquinas.py                           4      0      0  
+agronomia.py                          0      3      0  
+paineis.py                            0      0      3  
+processo_planos.py                    1      1      0  
+producao.py                           1      0      1  
+modulos.py                            0      0      1  
+processo_os.py                        0      1      0  
+TOTAL (sem exceções): css 6 · tabela 5 · cartao 5
+RESULTADO: catraca ok
+## dose_divergente_test.py unit
+REPRO B-R8 {"esperado":{"Glifosato 480":20,"2,4-D 806":10,"Óleo mineral":5},"retorno":{"r":{"msg":"Turno fechado: 10 ha em 1 h. A ordem continua em execução. Divergência de consumo/dose: 2,4-D 806 planejado 10 L × informado 0 L; Óleo mineral planejado 5 L × informado 0 L · revisão técnica de Ana (agrônoma)."}},"realizado":10,"saldo":150,"st":"Provisório","div":[{"p":"2,4-D 806","un":"L","plan":10,"inf":0},{"p":"Óleo mineral","un":"L","plan":5,"inf":0}],"selos":[{"t":"Divergência de consumo/dose · 2,4-D 806, Óleo mineral","c":"red"}]}
+OK    D01a planejado do trecho pela regra única: 20 / 10 / 5 L para 10 ha
+OK    D01b o fato fica como informado: 10 ha realizados, apontamento Provisório, Glifosato 20 L baixado e 2,4-D e Óleo sem baixa (nada forçado à dose)
+OK    D01c o apontamento guarda a divergência por produto, planejado × informado com unidade (2,4-D 806 10 → 0 L; Óleo mineral 5 → 0 L)
+OK    D01d a O.S. ganha o selo vermelho "Divergência de consumo/dose · 2,4-D 806, Óleo mineral"
+OK    D01e revisão técnica pendente do agrônomo (uma, do dia 1)
+OK    D01f o fecho do turno diz o que divergiu e quem revisa, sem "S2"
+OK    D02 controle 20 / 10 / 5: sem divergência, sem selo, sem revisão; mesma mensagem de fecho
+OK    D03 sugestão dose × área não editada: sem divergência nem selo
+OK    D04 20,004 L arredonda para 20,00 (igual ao planejado); 20,01 L diverge (centésimo, sem tolerância)
+OK    D04b 9,995 L = 10,00 L (cenQtd) não diverge do planejado 10 L; 10,005 L = 10,01 L diverge e o texto mostra 10,01 L; 10,0049 L não diverge
+OK    D05a Rui (almoxarife) não revisa: recusado com quem decide, nada muda
+OK    D05b aceitar sem motivo é recusado, nada muda
+OK    D05c dia sem divergência em revisão é recusado
+OK    D05d Ana (agrônoma) aceita com motivo: revisão gravada com autor, selo sai, consumo informado continua como está
+OK    D05e repetir a mesma revisão não grava de novo; outra decisão no mesmo dia é conflito, nada muda
+OK    D06 correção sem texto é recusada; com o texto, gravada como "Correção decidida" por Ana e o selo sai
+OK    D07a enviada para conferência, o selo continua e o encerramento diz a divergência e quem revisa
+OK    D07b encerrar é recusado e nada muda
+OK    D07c O.S./Kanban (osMerge): selo, dono Ana (agrônoma) e próximo passo bloqueado com quem resolve; sem "Sobras a receber"
+OK    D07d revisada, o encerramento passa e o apontamento fica Conferido com a revisão
+OK    D08 sem sinal: divergência gravada no apontamento, sem selo; ao voltar o sinal (dois envios) o selo e a revisão aparecem uma vez
+OK    D09 web: 2,4-D 12 L contra 10 L planejado abre a divergência (superdose) e a mensagem diz quem revisa
+OK    D10 duplicidade retida: sem selo; somada como outro turno por Paula, a divergência do turno abre a revisão
+OK    D11a app (OS-0421, campo do Adjuvante sem edição): selo "Divergência de consumo/dose · Adjuvante espalhante", planejado 2,5 L × informado 0 L, revisão de Ana; a sugestão do Fungicida não diverge
+OK    D11b a baixa não muda: só o Fungicida sai da custódia, sem conferência nem linha 0 do Adjuvante
+OK    D11c web (formulário sem edição): a mesma divergência do Adjuvante e a mensagem diz quem revisa
+OK    D12a recusado o relato de 15 L (CC-301): a divergência do dia 2 vira "2,4-D 806 planejado 10 L × baixado 0 L (informado 15 L, relato CC-301 recusado no Estoque)", selo e revisão seguem
+OK    D12b revisada sobre os 15 L e depois recusado o relato: a revisão anterior vai para o histórico (reaberta, com quem recusou) e a do dia volta a pendente
+OK    D12c a Origem da O.S. guarda a revisão reaberta
+OK    D12d informado igual ao planejado mas acima da custódia: sem divergência; recusado o relato, nada foi baixado e a divergência abre (planejado 10 L × baixado 0 L)
+OK    D12e aceito o relato (baixa os 15 L): a divergência continua a do informado
+OK    D13 produto fora da ordem (Adjuvante 5 L): divergência planejado 0 L × informado 5 L, com unidade
+OK    D14 sugestão retida sem divergência; somada por Paula com o usado de 2,4-D 5 L (planejado 10 L), a divergência abre
+OK    D15 dois turnos de 0,333 ha sem sinal, cada um com o trecho exato (Óleo 0,17 e 0,16 L): nenhuma divergência; base do 2º = 0,333 ha no aparelho
+OK    D16 Em execução: selo, dona Ana (agrônoma) e próxima ação "revisar a divergência de dose do dia 1"
+RESULTADO unit: 35/35
+OK    M1 Início (IN-04): em conferência, sem custódia e com a divergência aberta, o selo é o da divergência; sem "Sobras a receber" nem "Receber sobras"
+OK    M2 Início (IN-04): com sobra em custódia, "Sobras a receber" continua
+RESULTADO unit Início: 2/2
