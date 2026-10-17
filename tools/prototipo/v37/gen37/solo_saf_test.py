@@ -24,11 +24,12 @@ window.CLK=(t,inPan)=>{ const r=inPan?TOP():document; if(!r) return 'SEM PAINEL'
   const e=els.find(x=>N(x.innerText)===t)||els.find(x=>N(x.innerText).startsWith(t))||els.find(x=>(x.getAttribute('aria-label')||'')===t); if(!e) return 'NÃO ACHEI: '+t; e.click(); return 'ok'; };
 window.EXP=(local)=>{ const g=local.split('-')[0]; const F='button.g2car[aria-expanded=false]';   /* TAB-11: o grupo fechado é o da seta com aria-expanded=false (antes o texto "▸ T1 …") */
   const gr=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>x.querySelector(F)&&N(x.innerText).startsWith(g+' ')); if(!gr) return false; const b=gr.querySelector(F); if(b){ b.click(); return true; } return false; };
-window.INS=(local)=>{ let row=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>N(x.innerText).startsWith(local+' ')); if(!row) return 'sem linha '+local;
+/* TAB-11: a linha do cultivo, não a linha-grupo do talhão (com a seta de abrir): antes, o texto da linha-grupo começava pelo glifo ▾/▸ */
+window.INS=(local)=>{ let row=[...document.querySelectorAll('[role=row]')].filter(VIS).find(x=>!x.querySelector('button.g2car')&&N(x.innerText).startsWith(local+' ')); if(!row) return 'sem linha '+local;
   (row.querySelector('.g2pw')||row).click(); return 'ok'; };
 /* SAF-TAB: a ação de insumos pertence ao detalhe do cultivo, não à célula da listagem. */
 window.INSA=(local)=>{ const a=TOP(); const b=a&&[...a.querySelectorAll('button')].filter(VIS).find(b=>['Ajustar insumos e doses de '+local,'Ver insumos e doses de '+local].includes(N(b.innerText))); if(!b) return 'sem ação de insumos '+local; b.click(); return 'ok'; };
-window.LINHA=(local)=>{ const row=[...document.querySelectorAll('[role=row].g2ed')].filter(VIS).find(x=>N(x.innerText).startsWith(local+' ')); if(!row) return 'sem linha '+local; (row.querySelector('.g2pw')||row).click(); return 'ok'; };
+window.LINHA=(local)=>{ const row=[...document.querySelectorAll('[role=row].g2ed')].filter(VIS).find(x=>!x.querySelector('button.g2car')&&N(x.innerText).startsWith(local+' ')); if(!row) return 'sem linha '+local; (row.querySelector('.g2pw')||row).click(); return 'ok'; };
 window.PAN=()=>{ const a=TOP(); return a?N(a.innerText):''; };
 window.TOAST=()=>[...document.querySelectorAll('[role=status]')].map(x=>N(x.innerText)).filter(Boolean).join(' | ');
 window.ALERT=()=>{ const a=TOP(); return a?[...a.querySelectorAll('[role=alert]')].filter(VIS).map(x=>N(x.innerText)).join(' | '):''; };
