@@ -81,10 +81,12 @@ try:
     if 'b' in PARTE:
         # 8 · O.S. cancelada sem execução: não conta no nº máximo nem na rotação; nova decisão reaproveita o DIA-009; clique duplo sem erro
         ir('AG-01.dc.html#VIS-013:decidir'); J("[...document.querySelectorAll('aside input[name=dc_prod]')][2].click()"); time.sleep(.3)
+        setv('aside #dc_dose','1')   # AGRO-02: dose digitada pelo RT (Inseticida B, 1,0 kg/ha)
         clk('Emitir receituário e gerar O.S.','aside'); t0=T()
         # cancelamento sem execução feito na tela O.S. (o núcleo da O.S. é de outra trilha): grava a etapa no cenário e volta ao AG-01 vindo da O.S.
         J("(()=>{const c=JSON.parse(localStorage.getItem('talhao-os-cenario-v1')); c.ordens['OS-0440'].etapa='Canceladas'; localStorage.setItem('talhao-os-cenario-v1',JSON.stringify(c));})()")
         ir('OS.dc.html#OS-0440'); ir('AG-01.dc.html#VIS-013'); a=aside(); clk('Decidir controle','aside'); J("[...document.querySelectorAll('aside input[name=dc_prod]')][2].click()"); time.sleep(.3)
+        setv('aside #dc_dose','1')   # AGRO-02: a nova decisão também começa sem dose
         a2=aside(); dis=J("[...document.querySelectorAll('aside button')].find(b=>b.innerText.trim()==='Emitir receituário e gerar O.S.').disabled")
         J("window.__errs=[]; window.addEventListener('error',e=>window.__errs.push(String(e.message)));")
         J("(()=>{const b=[...document.querySelectorAll('aside button')].find(b=>b.innerText.trim()==='Emitir receituário e gerar O.S.'); b.click(); b.click();})()"); time.sleep(.6)
@@ -129,3 +131,4 @@ finally:
     finally: srv.terminate()
 print('RESULTADO', f'{len(OK)}/{len(OK)+len(FAIL)}')
 sys.exit(1 if FAIL else 0)
+

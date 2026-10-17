@@ -65,11 +65,13 @@ try:
         nomes==['Ciantraniliprole 100 OD','Acaricida D','Inseticida B','Piriproxifem 100 EC'] and any('Inseticida B' in x and 'Rotação' in x for x in chips), [nomes,chips])
     # 7 · trava de carência × colheita (10/10) com a data de aplicação
     J("[...document.querySelectorAll('aside input[name=dc_prod]')][1].click()"); time.sleep(.3)
+    setv('aside #dc_dose','0,4')   # AGRO-02: produto e dose são escolha explícita do RT (o formulário não preenche a dose)
     setv('aside input[aria-label="Data da aplicação"]','2026-09-28'); a=aside(); dis=J("[...document.querySelectorAll('aside button')].find(b=>b.innerText.trim()==='Emitir receituário e gerar O.S.').disabled")
     chk('7 Acaricida D aplicado em 28/09: trava "carência de 14 dias passa da colheita prevista (10/10): aplicar até 26/09" e o botão fica bloqueado',
         'Carência de 14 dias passa da colheita prevista (10/10): aplicar até 26/09.' in a and dis is True, [a[a.find('Carência'):a.find('Carência')+160],dis])
     # 8 · emitir: receituário RA + O.S. em A liberar
     setv('aside input[aria-label="Data da aplicação"]','2026-09-24'); J("[...document.querySelectorAll('aside input[name=dc_prod]')][0].click()"); time.sleep(.3)
+    setv('aside #dc_dose','0,5')   # AGRO-02: trocar de produto limpa a dose; o RT digita a do novo produto
     clk('Emitir receituário e gerar O.S.','aside'); t1=T(); a=aside()
     chk('8 Emitir: receituário RA-0142 (DIA-009 · REC-015) e OS-0440 em A liberar · painel "Em controle" com "Abrir OS-0440"',
         'Receituário RA-0142 emitido (DIA-009 · REC-015) · OS-0440 em A liberar' in t1 and 'Em controle' in a and 'OS-0440 · A liberar' in a
@@ -109,3 +111,4 @@ finally:
     finally: srv.terminate()
 print('RESULTADO', f'{len(OK)}/{len(OK)+len(FAIL)}')
 sys.exit(1 if FAIL else 0)
+
